@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <key>
+    <xpath>//itemBarcode</xpath>
+    <from>itembarcode</from>
+    <table ref="itembarcode" />
+  </key>
+  <table name="itembarcode" id="1">
+    <caption lang="zh-CN">册条码号</caption>
+    <caption lang="zh-CN">册条码</caption>
+    <caption lang="en">Item barcode</caption>
+  </table>
+  <key>
+    <xpath>//readerBarcode</xpath>
+    <from>readerbarcode</from>
+    <table ref="readerbarcode" />
+  </key>
+  <table name="readerbarcode" id="2">
+    <caption lang="zh-CN">读者证条码号</caption>
+    <caption lang="zh-CN">读者证条码</caption>
+    <caption lang="en">Reader barcode</caption>
+  </table>
+  <key>
+    <xpath>//state</xpath>
+    <from>state</from>
+    <table ref="state" />
+  </key>
+  <table name="state" id="3">
+    <convert>
+      <string style="split,upper" />
+    </convert>
+    <convertquery>
+      <string style="upper" />
+    </convertquery>
+    <caption lang="zh-CN">状态</caption>
+    <caption lang="en">State</caption>
+  </table>
+  <key>
+    <xpath>//id</xpath>
+    <from>id</from>
+    <table ref="id" />
+  </key>
+  <table name="id" id="4">
+    <caption lang="zh-CN">ID</caption>
+    <caption lang="en">ID</caption>
+  </table>
+  <key>
+    <xpath>//operTime</xpath>
+    <from>operTime</from>
+    <table ref="operTime" />
+  </key>
+  <table name="operTime" id="5">
+    <convert>
+      <number style="rfc1123time" />
+    </convert>
+    <convertquery>
+      <number style="rfc1123time" />
+    </convertquery>
+    <caption lang="zh-CN">缴款时间</caption>
+    <caption lang="en">AmerceOperTime</caption>
+  </table>
+  <key>
+    <xpath>//settlementOperTime</xpath>
+    <from>settlementOperTime</from>
+    <table ref="settlementOperTime" />
+  </key>
+  <table name="settlementOperTime" id="6">
+    <convert>
+      <number style="rfc1123time" />
+    </convert>
+    <convertquery>
+      <number style="rfc1123time" />
+    </convertquery>
+    <caption lang="zh-CN">结算时间</caption>
+    <caption lang="en">SettlementOperTime</caption>
+  </table>
+  <key>
+    <xpath>//libraryCode</xpath>
+    <from>librarycode</from>
+    <table ref="librarycode" />
+  </key>
+  <table name="librarycode" id="7">
+    <caption lang="zh-CN">馆代码</caption>
+    <caption lang="en">Library Code</caption>
+  </table>
+
+</root>

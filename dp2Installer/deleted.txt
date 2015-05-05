@@ -1,0 +1,444 @@
+﻿
+#if NO
+        public static int InstallService(string fullFileName,
+    bool bInstall,
+    out string strError)
+        {
+            strError = "";
+
+#if NO
+            string[] args = null;
+            if (bInstall == false)
+                args = new string[] { "/u" };
+#endif
+
+            try
+            {
+                using (var ai = new AssemblyInstaller(fullFileName, null))
+                {
+                    if (bInstall)
+                    {
+                        ai.Install(null);
+                        ai.Commit(null);
+                    }
+                    else
+                        ai.Uninstall(null);
+                    return 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (bInstall)
+                    strError = "注册 Windows Service 的过程发生错误: " + ex.Message;
+                else
+                    strError = "注销 Windows Service 的过程发生错误: " + ex.Message;
+                return -1;
+            }
+
+            return 0;
+        }
+#endif
+
+
+        // 兑现修改。
+        // 创建数据目录。创建或者修改 opac.xml文件
+        int DoModify(out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            List<OpacAppInfo> infos = null;
+            nRet = OpacAppInfo.GetOpacInfo(out infos, out strError);
+            if (nRet == -1)
+                return -1;
+
+            for (int i = 0; i < this.listView_instance.Items.Count; i++)
+            {
+                ListViewItem item = this.listView_instance.Items[i];
+                LineInfo line_info = (LineInfo)item.Tag;
+                string strDataDir = ListViewUtil.GetItemText(item, COLUMN_DATADIR);
+                string strSite = ListViewUtil.GetItemText(item, COLUMN_SITE);
+                string strVirtualDir = ListViewUtil.GetItemText(item, COLUMN_VIRTUALDIR);
+
+                if (String.IsNullOrEmpty(strDataDir) == true)
+                {
+                    strError = "第 " + (i + 1).ToString() + " 行的数据目录尚未设置";
+                    return -1;
+                }
+
+                // 探测虚拟目录是否已经创建
+                // infos 中
+
+                // 查找一个虚拟目录是否存在
+                // return:
+                //      -1  不存在
+                //      其他  数组元素的下标
+                nRet = OpacAppInfo.Find(infos,
+                    strSite,
+                    strVirtualDir);
+                if (nRet == -1)
+                {
+                    string strAppDir = Path.Combine(
+                        Environment.ExpandEnvironmentVariables("%SystemDrive%\\inetpub\\wwwroot"),
+                        strVirtualDir.Replace("/", ""));    // 注意去掉非法路径字符
+                    PathUtil.CreateDirIfNeed(strAppDir);
+
+                    // 创建程序目录，并复制进基本内容
+                    nRet = CreateNewAppDir(strAppDir,
+                        strDataDir,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+
+                    // 注册 Web App
+                    // 只能用于 IIS 7 以上版本
+                    nRet = OpacAppInfo.RegisterWebApp(
+                        strSite,
+                        strVirtualDir,
+                        strAppDir,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "创建新的虚拟目录(site="+strSite+";virtual_dir="+strVirtualDir+";physicalPath="+strAppDir+")失败: " + strError;
+                        return -1;
+                    }
+
+                    line_info.PhysicalPath = strAppDir;
+                }
+
+                // 探测数据目录，是否已经存在数据，是不是属于升级情形
+                // return:
+                //      -1  error
+                //      0   数据目录不存在
+                //      1   数据目录存在，但是xml文件不存在
+                //      2   xml文件已经存在
+                nRet = DetectDataDir(strDataDir,
+            out strError);
+                if (nRet == -1)
+                    return -1;
+
+                if (nRet == 2)
+                {
+                    // 进行升级检查
+
+
+                }
+                else
+                {
+                    // 需要进行最新安装，创建数据目录
+                    nRet = CreateNewDataDir(strDataDir,
+    out strError);
+                    if (nRet == -1)
+                        return -1;
+                }
+
+
+                // 兑现修改
+                if (line_info.Changed == true)
+                {
+                    // 保存信息到 opac.xml文件中
+                    // return:
+                    //      -1  error
+                    //      0   succeed
+                    nRet = line_info.SaveToXml(strDataDir,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+
+                    line_info.Changed = false;
+                }
+
+            }
+
+#if NO
+            // 删除注册表中多余的instance信息
+            for (int i = this.listView_instance.Items.Count; ; i++)
+            {
+                // 删除虚拟目录。数据目录不用删除，因为界面操作当时已经删除过了
+
+
+            }
+#endif
+
+            return 0;
+        }
+
+
+		
+        // TODO: 数据目录需要更名的情况，是否延迟到 OK 时候执行？如果立即执行，则需要禁止 Cancel 按钮，表示必须 OK 结束对话框
+        // 检测目录是否已经存在
+        private void textBox_dataDir_Leave(object sender, EventArgs e)
+        {
+            // 已经准备Cancel，就不检查了
+            if (IsMouseOnCancelButton() == true)
+                return;
+
+            // 新建时
+            if (IsNew == true
+                && String.IsNullOrEmpty(this.textBox_dataDir.Text) == false
+                && this.LoadedDataDir != this.textBox_dataDir.Text)
+            {
+                // 注意检查，不能是别的instance的数据目录
+                if (this.VerifyDataDir != null)
+                {
+                    VerifyEventArgs e1 = new VerifyEventArgs();
+                    e1.Value = this.textBox_dataDir.Text;
+                    this.VerifyDataDir(this, e1);
+                    if (String.IsNullOrEmpty(e1.ErrorInfo) == false)
+                    {
+                        MessageBox.Show(this, e1.ErrorInfo);
+                        return;
+                    }
+                }
+
+                string strXmlFilename = PathUtil.MergePath(this.textBox_dataDir.Text, "opac.xml");
+                if (File.Exists(strXmlFilename) == true)
+                {
+                    DialogResult result = MessageBox.Show(this,
+"您指定的数据目录 '" + this.textBox_dataDir.Text + "' 中已经存在 opac.xml 文件。\r\n\r\n是否要直接利用其中的配置信息?",
+"安装 dp2OPAC",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button1);
+                    if (result == System.Windows.Forms.DialogResult.No)
+                    {
+                        this.LoadedDataDir = this.textBox_dataDir.Text; // 防止重复询问
+                        return;
+                    }
+
+                    if (this.LoadXmlFileInfo != null)
+                    {
+                        LoadXmlFileInfoEventArgs e1 = new LoadXmlFileInfoEventArgs();
+                        e1.DataDir = this.textBox_dataDir.Text;
+                        this.LoadXmlFileInfo(this, e1);
+                        if (string.IsNullOrEmpty(e1.ErrorInfo) == false)
+                        {
+                            MessageBox.Show(this, e1.ErrorInfo);
+                            return;
+                        }
+
+                        // refresh
+                        this.LineInfo = (LineInfo)e1.LineInfo;
+                        //Refreshdp2KernelDef();
+                        //RefreshSupervisorUserInfo();
+                        //RefreshLibraryName();
+                        //RefreshUpdateCfgsDir();
+                        RefreshDp2LibraryInfo();
+
+                        this.LoadedDataDir = this.textBox_dataDir.Text; // 防止重复装载
+                        this.m_bDataDirExist = true;    // 防止OK时不合适的检查警告
+                    }
+                }
+
+                return;
+            }
+
+            // 修改时
+            if (IsNew == false
+    && String.IsNullOrEmpty(this.textBox_dataDir.Text) == false
+    && this.LoadedDataDir != this.textBox_dataDir.Text)
+            {
+                // 注意检查，不能是别的instance的数据目录
+                if (this.VerifyDataDir != null)
+                {
+                    VerifyEventArgs e1 = new VerifyEventArgs();
+                    e1.Value = this.textBox_dataDir.Text;
+                    this.VerifyDataDir(this, e1);
+                    if (String.IsNullOrEmpty(e1.ErrorInfo) == false)
+                    {
+                        MessageBox.Show(this, e1.ErrorInfo);
+                        return;
+                    }
+                }
+
+                string strXmlFilename = PathUtil.MergePath(this.textBox_dataDir.Text, "opac.xml");
+                if (File.Exists(strXmlFilename) == true)
+                {
+                    DialogResult result = MessageBox.Show(this,
+"您指定的数据目录 '" + this.textBox_dataDir.Text + "' 中已经存在 opac.xml 文件。\r\n\r\n是否要直接利用其中的配置信息？\r\n\r\n是：直接利用其中的信息，也即将其中的配置信息装入当前对话框\r\n否：利用这个数据目录，但其中xml文件的相关信息即将被当前对话框中的值覆盖\r\n\r\n(提示：无论您选“是”“否”，原有目录 '" + this.LoadedDataDir + "' 都会被闲置)",
+"安装 dp2OPAC",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button1);
+                    if (result == System.Windows.Forms.DialogResult.No)
+                    {
+                        this.LoadedDataDir = this.textBox_dataDir.Text; // 防止重复询问
+                        return;
+                    }
+
+                    if (this.LoadXmlFileInfo != null)
+                    {
+                        LoadXmlFileInfoEventArgs e1 = new LoadXmlFileInfoEventArgs();
+                        e1.DataDir = this.textBox_dataDir.Text;
+                        this.LoadXmlFileInfo(this, e1);
+                        if (string.IsNullOrEmpty(e1.ErrorInfo) == false)
+                        {
+                            MessageBox.Show(this, e1.ErrorInfo);
+                            return;
+                        }
+
+                        // refresh
+                        this.LineInfo = (LineInfo)e1.LineInfo;
+                        //Refreshdp2KernelDef();
+                        //RefreshSupervisorUserInfo();
+                        //RefreshLibraryName();
+                        //RefreshUpdateCfgsDir();
+                        RefreshDp2LibraryInfo();
+
+                        this.LoadedDataDir = this.textBox_dataDir.Text; // 防止重复装载
+                        this.m_bDataDirExist = true;    // 防止OK时不合适的检查警告
+                    }
+                }
+                else if (String.IsNullOrEmpty(this.LoadedDataDir) == false)
+                {
+                    // 修改目录名
+
+                    DialogResult result = MessageBox.Show(this,
+"要将已经存在的数据目录 '" + this.LoadedDataDir + "' 更名为 '" + this.textBox_dataDir.Text + "' 么?\r\n\r\n(如果选择“否”，则安装程序在稍后将新创建一个数据目录，并复制进初始内容)",
+"安装 dp2OPAC",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button1);
+                    if (result == System.Windows.Forms.DialogResult.No)
+                    {
+                        this.m_bDataDirExist = false;
+                        return;
+                    }
+
+                    try
+                    {
+                        // TODO: 需要测试当数据目录中内容尺寸太大，而目标盘无妨容纳时的报错情况
+                        Directory.Move(this.LoadedDataDir, this.textBox_dataDir.Text);
+
+                        this.LoadedDataDir = this.textBox_dataDir.Text; // 防止重复装载
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(this, "将已经存在的数据目录 '" + this.LoadedDataDir + "' 更名为 '" + this.textBox_dataDir.Text + "' 时发生错误: " + ex.Message);
+                    }
+
+                }
+
+                return;
+            }
+
+        }
+
+
+		        // 卸载 dp2kernel
+        // TODO： 可以仿照卸载 dp2library 过程重新编写。到底是先注销 Service，还是先删除数据实例 ?
+        private void MenuItem_dp2kernel_uninstall_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            AppendSectionTitle("卸载 dp2Kernel 开始");
+            AppendString("正在获得可执行文件目录 ...\r\n");
+
+            Application.DoEvents();
+
+            string strExePath = GetPathOfService("dp2KernelService");
+            if (string.IsNullOrEmpty(strExePath) == true)
+            {
+                strError = "dp2kernel 尚未安装和注册为 Windows Service，无法进行注销";
+                goto ERROR1;
+            }
+            strExePath = Unquote(strExePath);
+
+            {
+                AppendString("正在停止 dp2kernel 服务 ...\r\n");
+
+                nRet = StopService("dp2KernelService",
+        out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                AppendString("dp2kernel 服务已经停止\r\n");
+            }
+
+#if NO
+            DialogResult result = MessageBox.Show(this,
+"确实要卸载 dp2Kernel? ",
+"dp2Install",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+            if (result != DialogResult.Yes)
+                return;   // cancelled
+#endif
+#if NO
+            // 删除所有数据目录
+            string strText = "是否完全卸载？\r\n\r\n"
+                + "单击'是'，则把全部实例的数据目录删除，所有的库配置信息丢失，所有的实例信息丢失。以后安装时需要重新安装数据目录和数据库。\r\n\r\n"
+                + "单击'否'，不删除数据目录，仅卸载执行程序，下次安装时可以继续使用已存在的库配置信息。升级安装前的卸载应选此项。";
+            result = MessageBox.Show(this,
+                strText,
+                "卸载 dp2Kernel",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button2);
+            if (result == DialogResult.Yes)
+            {
+#endif
+                DigitalPlatform.rms.InstanceDialog dlg = new DigitalPlatform.rms.InstanceDialog();
+                GuiUtil.AutoSetDefaultFont(dlg);
+                dlg.Text = "彻底卸载所有实例和数据目录";
+                dlg.Comment = "下列实例将被全部卸载。请仔细确认。一旦卸载，全部数据目录、数据库和实例信息将被删除，并且无法恢复。";
+                dlg.UninstallMode = true;
+                dlg.SourceDir = Path.GetDirectoryName(strExePath);
+                dlg.StartPosition = FormStartPosition.CenterScreen;
+                dlg.ShowDialog(this);
+
+                if (dlg.DialogResult == DialogResult.Cancel)
+                {
+                    MessageBox.Show(this,
+                        "已放弃卸载全部实例和数据目录。仅仅卸载了执行程序。");
+                }
+                else
+                {
+                    AppendString("已删除全部数据目录\r\n");
+                }
+#if NO
+            }
+#endif
+
+
+            // 探测 .exe 是否为新版本。新版本中 Installer.Uninstall 动作不会删除数据目录
+
+            AppendString("注销 Windows Service\r\n");
+
+            // 注销 Windows Service
+            nRet = InstallService(strExePath,
+    false,
+    out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            AppendString("删除程序目录\r\n");
+
+            // 删除程序目录
+        REDO_DELETE_PROGRAMDIR:
+            try
+            {
+                PathUtil.DeleteDirectory(Path.GetDirectoryName(strExePath));
+            }
+            catch (Exception ex)
+            {
+                DialogResult temp_result = MessageBox.Show(this,
+"删除程序目录 '" + Path.GetDirectoryName(strExePath) + "' 出错：" + ex.Message + "\r\n\r\n是否重试?\r\n\r\n(Retry: 重试; Cancel: 不重试，继续后续卸载过程)",
+"卸载 dp2Kernel",
+MessageBoxButtons.RetryCancel,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button1);
+                if (temp_result == DialogResult.Retry)
+                    goto REDO_DELETE_PROGRAMDIR;
+            }
+
+
+
+            AppendSectionTitle("卸载 dp2Kernel 结束");
+            this.Refresh_dp2kernel_MenuItems();
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }

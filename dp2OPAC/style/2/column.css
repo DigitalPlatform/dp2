@@ -1,0 +1,273 @@
+﻿TABLE.column
+{
+	width: 100%;
+	font-size: 12px;
+	overflow:scroll;
+	
+	background-color: White;
+	text-align: left;
+	
+	border-style:solid;
+	border-width:1px;
+	border-top-width:0px;
+	border-right-width:1px;
+	border-color:#aaaaaa;
+	border-collapse:separate;
+	
+	/* background-color: #cfd8dd; */
+}
+
+TABLE.column TD
+{
+	padding: 4pt;
+}
+
+/*
+TABLE.column TD.no, TABLE.column TR.contentdown TD.content, TABLE.column TR.contentdown TD.bibliosummary
+{
+	padding: 4pt;
+
+	border-left-width: 0px;
+	border-top-width: 0px;
+	border-right-width: 1px;
+	border-bottom-width: 1px;
+
+	border-style: solid;
+	border-color: #cccccc;
+}
+*/
+
+TABLE.column TR.contentup
+{
+	border-left-width: 0px;
+	border-top-width: 2px;
+	border-right-width: 0px;
+	border-bottom-width: 0px;
+
+	border-style: solid;
+	border-color: #cccccc;
+}
+
+TABLE.column TD.no
+{
+	width: 1%;	
+	white-space:nowrap;
+	vertical-align: top;
+}
+
+TABLE.column TD.path
+{
+    padding: 4px;
+	width: 60%;	
+	text-align: right;
+}
+
+TABLE.column TD.bibliorecpath
+{
+    padding: 4px;
+	width: 40%;	
+	text-align: right;
+}
+
+
+TABLE.column TR.debugline
+{
+	font-size: 12px;
+	/*background-color: yellow;*/
+}
+
+TABLE.column DIV.none
+{
+	width: 100%;
+	background-color: white;
+	color:Gray;
+	text-align:center;
+}
+
+TABLE.column TABLE.edit
+{
+	width: 100%;
+}
+
+TABLE.column TABLE.edit TD
+{
+	margin:0pt;
+	padding: 1pt;
+}
+
+TABLE.column TABLE.edit TD.left
+{
+	width: 1%;
+	white-space: nowrap;
+}
+
+TABLE.column TABLE.edit INPUT.title
+{
+	width: 50%;
+}
+
+TABLE.column TABLE.edit TEXTAREA.content
+{
+	width: 99%;
+	height:80pt;
+}
+
+TABLE.wrapper
+{
+	border-style:solid;
+	border-width:1px;
+	border-top-width:0px;
+	border-bottom-width: 26px;
+	border-color:#aaaaaa;
+	border-collapse:collapse;
+	padding: 5px;
+}
+
+TABLE.column DIV.cmd
+{
+	float: right;
+}
+
+TABLE.column TD.bibliosummary DIV.ditto
+{
+    text-align:center;
+}
+TABLE.column TD.bibliosummary 
+{
+    vertical-align:top;
+}
+
+
+/*
+TABLE.column TD.bibliosummary 
+{
+    font-size: 11px;
+}
+TABLE.column TD 
+{
+    padding: 2px;
+}
+*/
+
+/*
+TABLE.column TD.bibliosummary TD.value
+{
+    border-right-width: 0px;
+    border-bottom-width: 0px;
+}
+*/
+
+TABLE.column TR.contentup TD.path, TABLE.column TR.contentup TD.bibliorecpath
+{
+/* thanks to http://blog.fakedarren.com/2010/01/cross-browser-css-gradients/ */
+ 
+    /* fallback (Opera) */
+    background: #dddddd;
+    /* Mozilla: */
+    background: -moz-linear-gradient(left, #ffffff, #dddddd);
+    /* Chrome, Safari:*/
+    background: -webkit-gradient(linear,
+                left top, right top, from(#ffffff), to(#dddddd));
+    /* MSIE */
+    filter: progid:DXImageTransform.Microsoft.Gradient(
+                StartColorStr='#ffffff', EndColorStr='#dddddd', GradientType=1);
+}
+  
+TABLE.column TR.cmdline DIV.buttons
+{
+      float:left;
+}
+
+TABLE.column TR.cmdline DIV.pager
+{
+      float:right;      
+}
+  
+TABLE.column TR.cmdline DIV.cmdline
+{
+    /*
+    padding: 20px;
+    background-color: Red;
+*/
+    padding:0px;
+    padding-top: 14px;
+    padding-bottom: 14px;
+    
+    border:0px;
+    border-top:1px;
+    border-color: Gray;
+    border-style: dotted;
+}
+  
+TABLE.column TR.cmdline TD
+{
+	padding: 0pt;
+
+	border-width: 0px;
+}
+
+TABLE.column TR.contentup TD.no
+{
+    padding: 0px;
+}
+
+TABLE.column TR.contentup TD.no DIV
+{
+	font-size: 16px;
+	text-align:right;
+	/* margin: 2px; */
+	padding: 5px;
+	color:White;
+	background-color: #999999;
+	vertical-align:top;
+}
+
+TABLE.column TR.contentup SPAN.comment_checkbox
+{
+    float:right;
+}
+
+TABLE.column INPUT.delete, TABLE.column INPUT.openmodifystate
+{
+    margin-left: 20px;
+}
+
+TABLE.column .selected
+{
+    /* background-color: Red; */
+    
+    border-style:solid;
+    border-width:0px;
+	border-left-width:2px;
+	border-color:Red;
+}
+
+TABLE.sidebar
+{
+	font-size: 14px;
+	text-align: left;
+	width: 100%;
+	border-width: none;
+}
+
+TABLE.sidebar TD
+{
+	padding-left:10px;
+	padding-right:10px;
+}
+
+TABLE.sidebar TD.active
+{
+	font-weight:bolder;
+	
+	font-weight:bolder;
+    white-space:nowrap;
+	border-left:1px solid #ffffff;
+	border-right:2px solid #a0a0a0;
+	border-top:2px solid #ffffff;
+	border-bottom:0px solid #a0a0a0;
+	background-color:yellow;
+	padding: 4px;
+	padding-left: 10px;
+	padding-right: 10px;
+}

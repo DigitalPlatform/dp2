@@ -1,0 +1,35 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~关于服务器~~~~~~~~~~~~~~~~~~~~
+
+WriteSqlRecord()
+
+暂不改样式，仍然按谁赋了值认谁算。也许将来会改为样式更好一些，因为用户可能觉得当内容为空时，赋null更方便一些
+
+lTotalLength，strRanges，source.Length三者的关系
+
+如果lTotalLength < 0，调用错误
+如果lTotalLength == 0，而strRanges != ""，调用错误。
+			而source.Length !=0，调用错误
+			且strRanges == ""，source.Length == 0，则认为记录已满，返回的记录状态为1,做写流的事情
+
+如果lTotalLength > 0,
+	如果source.Length == 0，而strRanges != ""，调用错误
+	如果source.Length == 0，且strRanges==""，则对原数据不做任何修改，返回的记录状态为-1，表示数据未做任何改变。
+	如果source.Length > 0，
+		如果strRanges == ""，则认为strRanges = 0-(source.Length-1)
+		检查记录是否已满，如果满，返回的记录状态为1，不满，返回的记录状态为0。
+		写资源
+
+
+
+修改服务器的几个函数
+
+
+WriteFileDbRecord()函数改为WriteFileDbTempRecord()
+
+GetDbInfo()
+SetDbInfo()
+
+CreatDb()
+DeleteDb()
+
+完成

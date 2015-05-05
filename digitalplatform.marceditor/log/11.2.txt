@@ -1,0 +1,69 @@
+~~~~~~~~~~~~~~~~~~~~~关于MarcEditor~~~~~~~~~~~~~~~~~~~~~~
+1.接管一些键，方便操作。
+1). ENTER: 新建字段
+2). Ctrl+m: 调模板
+完成
+
+接管键的方法:
+
+对于.net没有做处理的键，重载DefWndProd函数，处理WM_CHAR消息。
+		protected override void DefWndProc(ref Message m)
+		{
+			switch(m.Msg) 
+			{
+				case API.WM_CHAR:
+				{
+					switch (API.LoWord(m.WParam.ToInt32())) 
+					{
+						case (int)Keys.Enter:
+						{
+							MessageBox.Show(this,"1");
+							return;
+						}
+					}
+				}
+									break;
+			}
+			base.DefWndProc(ref m);
+		}
+		
+如果.net提前做了一些处理应重载ProcessDialogKey()函数
+		protected override bool ProcessDialogKey(
+			Keys keyData)
+		{
+			StreamUtil.WriteText("I:\\debug.txt","走到ProcessDialogKey()里\r\n");
+
+			if ((keyData & Keys.Control) == Keys.Control
+				&& (keyData & (~Keys.Control)) == Keys.M)
+			{
+				MessageBox.Show("调模板");
+				return true;
+			}
+			return false;
+		}	
+发到网上时加样例程序		
+		
+2.调模板时发现I:\\marcdef_shu.xml中的ref引用无效，
+改为http://localhost/cfgs/marcdef_shu_valuelist.xml中获取
+完成
+
+3.废掉原来MarcEditor的右键命令"调模板"及相关函数,
+废掉小edit中的调模板，还原缺省的右键菜单
+完成
+
+~~~~~~~~~~~~~~~~~~~~~关于服务器~~~~~~~~~~~~~~~~~~~~~~
+所谓修改内存结构，实际上就是修改dom，自己没有新建内存新构
+
+1.可以创建目录,在style里加createdir参数，路径表示待创建的目录路径
+完成
+
+2.可以删除目录
+删除目录时，要同时删除所有下级，包括下级对应的物理文件
+
+3.在创建配置事项时，不能目录与文件同名，
+如果文件与文件同名，则是覆盖
+如果目录与目录同名，则是清空目录内容
+完成
+
+4.清空目录，在WriteRes()接口的style风格中加clear
+完成

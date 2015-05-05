@@ -1,0 +1,22 @@
+引用关系：
+DigitalPlatform.ResultSet项目引用了DigitalPlatform.IO项目
+
+
+DigitalPlatform.ResultSet.cs
+
+内容概要
+一.namespace DigitalPlatform.ResultSet
+
+	1.//设计意图:
+	//设计DpResultSetManager类，从ArrayList派生的集合，集合的成员为DpResultSet对象
+	//即DpResultSet对象的容器
+	public class DpResultSetManager:ArrayList
+	
+	2.//设计意图:结果集类	
+	public class DpResultSet:IEnumerable
+	
+	3.public class DpResultSetEnumerator:IEnumerator
+	
+	4.//设计意图:定义检索到记录的类型，作为DpResultSet的成员
+	[Serializable]
+	public class DpRecord:IComparable

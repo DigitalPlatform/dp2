@@ -1,0 +1,185 @@
+
+TABLE.items
+{
+	/* margin-top: 4pt; */
+
+	width: 100%;
+	border-style:solid;
+	border-width:0px;
+	border-color:#aaaaaa;
+	border-collapse:collapse;
+	
+	background-color: White;
+	margin-bottom: 8px;
+	text-align: left;
+}
+
+TABLE.items TD
+{
+	padding: 2px;
+	border-width:0px;
+	border-bottom-width:1px;
+	border-style:solid;
+	border-color:#aaaaaa;
+	border-collapse:collapse;
+}
+
+TABLE.items TR.cmdline TD
+{
+	padding: 2px;
+	border-width:0px;
+	border-style:solid;
+	border-color:#aaaaaa;
+	border-collapse:collapse;
+}
+
+TABLE.items TR.columntitle TD
+{
+	border-bottom-width:2px;
+	
+	padding-top: 10px;
+	padding-bottom: 5px;
+}
+TABLE.items TR.columntitle
+{
+	font-weight:bold;
+	background-color:Transparent;
+	text-align: left;
+	color:#aaaaaa;
+}
+
+
+TABLE.items TD.no
+{
+	background-color:#eeeeee;
+}
+
+TABLE.items TD.state
+{
+	font-weight: bolder;
+	background-color: #eeeeee;
+}
+TABLE.items TD.accessNo
+{
+	background-color:#eeeeee;
+}
+TABLE.items TD.volume
+{
+	background-color:#eeeeee;
+}
+TABLE.items TD.comment
+{
+	background-color:#eeeeee;
+}
+TABLE.items TD.reservations
+{
+	background-color:#eeeeee;
+}
+/* column title's class names are: no barcode state location accessNo volume price borrows reservations */
+
+TABLE.items TR.columntitle TD.price
+{
+	text-align:right;
+}
+
+/* normal content line */
+TABLE.items TR.content
+{
+}
+
+/* active content line */
+TABLE.items TR.active
+{
+	background-color: cornsilk;
+}
+
+
+TABLE.items TD.price, TABLE.items TD.borrowcount
+{
+	text-align: right;
+}
+
+TABLE.items TR.content TD.warning
+{
+	background-color: yellow;
+	font-weight:bold;
+}
+
+TABLE.items TR.content TD.over
+{
+	background-color: red;
+	color:White;
+	font-weight:bold;
+}
+
+TABLE.items TR.cmdline
+{
+}
+
+TABLE.items TR.debugline
+{
+	background-color: yellow;
+}
+
+TABLE.items DIV.none
+{
+	width: 100%;
+	background-color: white;
+	color:Gray;
+	text-align:center;
+}
+
+TABLE.items TR.cmdline DIV.reservation
+{
+	float:left;
+}
+
+TABLE.items TR.cmdline DIV.pager
+{
+	vertical-align:top;
+	float:right;
+/*
+position:relative;
+top:-30px;
+*/
+	padding-top:6px;
+	padding-bottom:6px;
+	border-width: 0px;
+}
+
+
+
+TABLE.items A.current 
+{
+	background-color:#00ff00;
+}
+
+TABLE.wrapper
+{
+	border-style:solid;
+	border-width:1px;
+	border-top-width:0px;
+	border-bottom-width: 26px;
+	border-color:#aaaaaa;
+	border-collapse:collapse;
+	padding: 5px;
+}
+
+
+TABLE.items TR.content.bindingmember
+{
+    color: #bbbbbb;
+	text-decoration:line-through;
+}
+
+TABLE.items TR.content.absolute
+{
+    color: #bbbbbb;
+	text-decoration:line-through;
+}
+
+TABLE.items TR.content.repairing
+{
+    color: #bbbbbb;
+	text-decoration:line-through;
+}

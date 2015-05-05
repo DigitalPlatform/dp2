@@ -1,0 +1,752 @@
+﻿        // TODO: 建议主体移动到ItemDatabase中，可以节省多种类的代码
+        // 获得期信息
+        // parameters:
+        //      strPublishTime  参考ID。特殊情况下，可以使用"@path:"引导的期记录路径(只需要库名和id两个部分)作为检索入口。在@path引导下，路径后面还可以跟随 "$prev"或"$next"表示方向
+        //      strBiblioRecPath    指定书目记录路径
+        //      strResultType   指定需要在strResult参数中返回的数据格式。为"xml" "html"之一。
+        //                      如果为空，则表示strResult参数中不返回任何数据。无论这个参数为什么值，strItemRecPath中都回返回册记录路径(如果命中了的话)
+        //      strItemRecPath  返回册记录路径。可能为逗号间隔的列表，包含多个路径
+        //      strBiblioType   指定需要在strBiblio参数中返回的数据格式。为"xml" "html"之一。
+        //                      如果为空，则表示strBiblio参数中不返回任何数据。
+        // return:
+        // Result.Value -1出错 0没有找到 1找到 >1命中多于1条
+        // 权限:   需要具有getissueinfo权限
+        public LibraryServerResult GetIssueInfo(
+            string strPublishTime,
+            string strBiblioRecPath,
+            string strResultType,
+            out string strResult,
+            out string strIssueRecPath,
+            out byte[] issue_timestamp,
+            string strBiblioType,
+            out string strBiblio,
+            out string strOutputBiblioRecPath)
+        {
+            strResult = "";
+            strBiblio = "";
+            strIssueRecPath = "";
+            issue_timestamp = null;
+            strOutputBiblioRecPath = "";
+
+            LibraryServerResult result = this.PrepareEnvironment(true, true);
+            if (result.Value == -1)
+                return result;
+
+            try
+            {
+                // 权限字符串
+                if (StringUtil.IsInList("getissueinfo", sessioninfo.RightsOrigin) == false
+                    && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "获取期信息被拒绝。不具备order或getissueinfo权限。";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+
+
+                int nRet = 0;
+                long lRet = 0;
+
+                string strXml = "";
+                string strError = "";
+                // string strOutputPath = "";
+
+                if (String.IsNullOrEmpty(strPublishTime) == true)
+                {
+                    strError = "strPublishTime参数不能为空";
+                    goto ERROR1;
+                }
+
+                string strBiblioDbName = "";
+                string strIssueDbName = "";
+                string strParentID = "";
+
+
+                // 命令状态
+                if (strPublishTime[0] == '@')
+                {
+
+                    // TODO: refid
+
+                    // 获得期记录，通过期记录路径
+
+                    string strLead = "@path:";
+                    if (strPublishTime.Length <= strLead.Length)
+                    {
+                        strError = "错误的检索词格式: '" + strPublishTime + "'";
+                        goto ERROR1;
+                    }
+                    string strPart = strPublishTime.Substring(0, strLead.Length);
+
+                    if (strPart != strLead)
+                    {
+                        strError = "不支持的检索词格式: '" + strPublishTime + "'。目前仅支持'@path:'引导的检索词";
+                        goto ERROR1;
+                    }
+
+                    strIssueRecPath = strPublishTime.Substring(strLead.Length);
+
+                    // 继续分离出(方向)命令部分
+                    string strCommand = "";
+                    nRet = strIssueRecPath.IndexOf("$");
+                    if (nRet != -1)
+                    {
+                        strCommand = strIssueRecPath.Substring(nRet + 1);
+                        strIssueRecPath = strIssueRecPath.Substring(0, nRet);
+                    }
+
+                    string strCurrentIssueDbName = ResPath.GetDbName(strIssueRecPath);
+                    // 需要检查一下数据库名是否在允许的期库名之列
+                    if (app.IsIssueDbName(strCurrentIssueDbName) == false)
+                    {
+                        strError = "期记录路径 '" + strIssueRecPath + "' 中的数据库名 '" + strCurrentIssueDbName + "' 不在配置的期库名之列，因此拒绝操作。";
+                        goto ERROR1;
+                    }
+
+                    string strMetaData = "";
+                    string strTempOutputPath = "";
+
+                    RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
+                    if (channel == null)
+                    {
+                        strError = "get channel error";
+                        goto ERROR1;
+                    }
+
+                    string strStyle = "content,data,metadata,timestamp,outputpath";
+
+                    if (String.IsNullOrEmpty(strCommand) == false
+                        && (strCommand == "prev" || strCommand == "next"))
+                    {
+                        strStyle += "," + strCommand;
+                    }
+
+                    /*
+                    lRet = channel.GetRes(strIssueRecPath,
+                        out strXml,
+                        out strMetaData,
+                        out issue_timestamp,
+                        out strTempOutputPath,
+                        out strError);
+                    if (lRet == -1)
+                        goto ERROR1;
+                     * */
+                    lRet = channel.GetRes(strIssueRecPath,
+    strStyle,
+    out strXml,
+    out strMetaData,
+    out issue_timestamp,
+    out strTempOutputPath,
+    out strError);
+                    if (lRet == -1)
+                    {
+                        if (channel.ErrorCode == ChannelErrorCode.NotFound)
+                        {
+                            result.Value = 0;
+                            if (strCommand == "prev")
+                                result.ErrorInfo = "到头";
+                            else if (strCommand == "next")
+                                result.ErrorInfo = "到尾";
+                            else
+                                result.ErrorInfo = "没有找到";
+                            result.ErrorCode = ErrorCode.NotFound;
+                            return result;
+                        }
+                        goto ERROR1;
+                    }
+
+                    strIssueRecPath = strTempOutputPath;
+
+
+                    //
+
+                    if (true)   // 是否有节省运算的办法?
+                    {
+
+                        // 从期记录<parent>元素中取得书目记录的id，然后拼装成书目记录路径放入strOutputBiblioRecPath
+                        XmlDocument dom = new XmlDocument();
+                        try
+                        {
+                            dom.LoadXml(strXml);
+                        }
+                        catch (Exception ex)
+                        {
+                            strError = "记录 " + strIssueRecPath + " 的XML装入DOM时出错: " + ex.Message;
+                            goto ERROR1;
+                        }
+
+                        // 根据期库名, 找到对应的书目库名
+                        // return:
+                        //      -1  出错
+                        //      0   没有找到
+                        //      1   找到
+                        nRet = app.GetBiblioDbNameByIssueDbName(strCurrentIssueDbName,
+                            out strBiblioDbName,
+                            out strError);
+                        if (nRet == -1 || nRet == 0)
+                            goto ERROR1;
+
+                        strParentID = DomUtil.GetElementText(dom.DocumentElement,
+                            "parent");
+                        if (String.IsNullOrEmpty(strParentID) == true)
+                        {
+                            strError = "期记录 " + strIssueRecPath + " 中没有<parent>元素值，因此无法定位其从属的书目记录";
+                            goto ERROR1;
+                        }
+                        strBiblioRecPath = strBiblioDbName + "/" + strParentID;
+                        strOutputBiblioRecPath = strBiblioRecPath;
+                    }
+
+                    //
+
+                    result.ErrorInfo = "";
+                    result.Value = 1;
+                }
+                else
+                {
+                    //
+                    strOutputBiblioRecPath = strBiblioRecPath;
+
+                    strBiblioDbName = ResPath.GetDbName(strBiblioRecPath);
+
+                    // 根据书目库名, 找到对应的期库名
+                    // return:
+                    //      -1  出错
+                    //      0   没有找到(书目库)
+                    //      1   找到
+                    nRet = app.GetIssueDbName(strBiblioDbName,
+                        out strIssueDbName,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    if (nRet == 0)
+                    {
+                        strError = "书目库 '" + strBiblioDbName + "' 没有找到";
+                        goto ERROR1;
+                    }
+                    strParentID = ResPath.GetRecordId(strBiblioRecPath);
+
+                    //
+#if NO
+                    List<string> locateParam = new List<string>();
+                    //locateParam.Add(strIssueDbName);
+                    //locateParam.Add(strParentID);
+                    locateParam.Add(strPublishTime);
+#endif
+                    List<string> locateParam = null;
+
+                    nRet = app.IssueItemDatabase.BuildLocateParam(
+                        strBiblioRecPath,
+                        strPublishTime,
+                        out locateParam,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    List<string> PathList = null;
+
+                    // byte[] timestamp = null;
+                    // 获得册记录
+                    // 本函数可获得超过1条以上的路径
+                    // return:
+                    //      -1  error
+                    //      0   not found
+                    //      1   命中1条
+                    //      >1  命中多于1条
+                    /*
+                    nRet = app.GetIssueRecXml(
+                            sessioninfo.Channels,
+                            strIssueDbName,
+                            strParentID,
+                            strPublishTime,
+                            out strXml,
+                            100,
+                            out PathList,
+                            out issue_timestamp,
+                            out strError);
+                     * */
+
+                    nRet = app.IssueItemDatabase.GetItemRecXml(
+                            sessioninfo.Channels,
+                            locateParam,
+                            out strXml,
+                            100,
+                            out PathList,
+                            out issue_timestamp,
+                            out strError);
+
+                    if (nRet == 0)
+                    {
+                        result.Value = 0;
+                        result.ErrorInfo = "没有找到";
+                        result.ErrorCode = ErrorCode.NotFound;
+                        return result;
+                    }
+
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    /*
+                    Debug.Assert(PathList != null, "");
+                    // 构造路径字符串。逗号间隔
+                    string[] paths = new string[PathList.Count];
+                    PathList.CopyTo(paths);
+
+                    strIssueRecPath = String.Join(",", paths);
+                     * */
+                    strIssueRecPath = StringUtil.MakePathList(PathList);
+
+                    result.ErrorInfo = strError;
+                    result.Value = nRet;    // 可能会多于1条
+                }
+
+                // 若需要同时取得种记录
+                if (String.IsNullOrEmpty(strBiblioType) == false)
+                {
+                    /*
+                    string strBiblioRecID = "";
+
+                    XmlDocument dom = new XmlDocument();
+                    try
+                    {
+                        dom.LoadXml(strXml);
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "册记录XML装载到DOM出错:" + ex.Message;
+                        goto ERROR1;
+                    }
+
+                    strBiblioRecID = DomUtil.GetElementText(dom.DocumentElement, "//parent");
+                    if (String.IsNullOrEmpty(strBiblioRecID) == true)
+                    {
+                        strError = "册记录XML中<parent>元素缺乏或者值为空, 因此无法定位种记录";
+                        goto ERROR1;
+                    }
+
+                    strBiblioRecPath = strBiblioDbName + "/" + strBiblioRecID;
+                     * */
+                    string strBiblioXml = "";
+
+                    if (String.Compare(strBiblioType, "recpath", true) == 0)
+                    {
+                        // 如果仅仅需要获得书目记录recpath，则不需要获得书目记录
+                        goto DOISSUE;
+                    }
+
+                    RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
+                    if (channel == null)
+                    {
+                        strError = "channel == null";
+                        goto ERROR1;
+                    }
+                    string strMetaData = "";
+                    byte[] timestamp = null;
+                    string strTempOutputPath = "";
+                    lRet = channel.GetRes(strBiblioRecPath,
+                        out strBiblioXml,
+                        out strMetaData,
+                        out timestamp,
+                        out strTempOutputPath,
+                        out strError);
+                    if (lRet == -1)
+                    {
+                        strError = "获得种记录 '" + strBiblioRecPath + "' 时出错: " + strError;
+                        goto ERROR1;
+                    }
+
+                    // 如果只需要种记录的XML格式
+                    if (String.Compare(strBiblioType, "xml", true) == 0)
+                    {
+                        strBiblio = strBiblioXml;
+                        goto DOISSUE;
+                    }
+
+
+                    // 需要从内核映射过来文件
+                    string strLocalPath = "";
+
+                    if (String.Compare(strBiblioType, "html", true) == 0)
+                    {
+                        nRet = app.MapKernelScriptFile(
+                            sessioninfo,
+                            strBiblioDbName,
+                            "./cfgs/loan_biblio.fltx",
+                            out strLocalPath,
+                            out strError);
+                    }
+                    else if (String.Compare(strBiblioType, "text", true) == 0)
+                    {
+                        nRet = app.MapKernelScriptFile(
+                            sessioninfo,
+                            strBiblioDbName,
+                            "./cfgs/loan_biblio_text.fltx",
+                            out strLocalPath,
+                            out strError);
+                    }
+                    else
+                    {
+                        strError = "不能识别的strBiblioType类型 '" + strBiblioType + "'";
+                        goto ERROR1;
+                    }
+
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    // 将种记录数据从XML格式转换为HTML格式
+                    string strFilterFileName = strLocalPath;    // app.CfgDir + "\\biblio.fltx";
+                    nRet = app.ConvertBiblioXmlToHtml(
+                            strFilterFileName,
+                            strBiblioXml,
+                            strBiblioRecPath,
+                            out strBiblio,
+                            out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                }
+
+            DOISSUE:
+                // 取得期信息
+                if (String.IsNullOrEmpty(strResultType) == true
+                    || String.Compare(strResultType, "recpath", true) == 0)
+                {
+                    strResult = ""; // 不返回任何结果
+                }
+                else if (String.Compare(strResultType, "xml", true) == 0)
+                {
+                    strResult = strXml;
+                }
+                else if (String.Compare(strResultType, "html", true) == 0)
+                {
+                    // 将期记录数据从XML格式转换为HTML格式
+                    nRet = app.ConvertItemXmlToHtml(
+                        app.CfgDir + "\\issuexml2html.cs",
+                        app.CfgDir + "\\issuexml2html.cs.ref",
+                        strXml,
+                        strIssueRecPath,    // 2009/10/18 new add
+                        out strResult,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                }
+                else if (String.Compare(strResultType, "text", true) == 0)
+                {
+                    // 将期记录数据从XML格式转换为text格式
+                    nRet = app.ConvertItemXmlToHtml(
+                        app.CfgDir + "\\issuexml2text.cs",
+                        app.CfgDir + "\\issuexml2text.cs.ref",
+                        strXml,
+                        strIssueRecPath,    // 2009/10/18 new add
+                        out strResult,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                }
+                else
+                {
+                    strError = "未知的册记录结果类型 '" + strResultType + "'";
+                    goto ERROR1;
+                }
+
+                return result;
+            ERROR1:
+                result.Value = -1;
+                result.ErrorInfo = strError;
+                result.ErrorCode = ErrorCode.SystemError;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                string strErrorText = "dp2Library GetIssueInfo() API出现异常: " + ExceptionUtil.GetDebugText(ex);
+                app.WriteErrorLog(strErrorText);
+
+                result.Value = -1;
+                result.ErrorCode = ErrorCode.SystemError;
+                result.ErrorInfo = strErrorText;
+                return result;
+            }
+        }
+
+
+		/////////////////
+
+		        // 获得日志记录
+        // parameters:
+        //      strFileName 纯文件名,不含路径部分。但要包括".log"部分。
+        //      lIndex  记录序号。从0开始计数。lIndex为-1时调用本函数，表示希望获得整个文件尺寸值，将返回在lHintNext中。
+        //      lHint   记录位置暗示性参数。这是一个只有服务器才能明白含义的值，对于前端来说是不透明的。
+        //              目前的含义是记录起始位置。
+        // 权限：需要getoperlog权限
+        // return:
+        // result.Value
+        //      -1  error
+        //      0   file not found
+        //      1   succeed
+        //      2   超过范围
+        public LibraryServerResult GetOperLog(
+            string strFileName,
+            long lIndex,
+            long lHint,
+            out string strXml,
+            out long lHintNext,
+            long lAttachmentFragmentStart,
+            int nAttachmentFragmentLength,
+            out byte[] attachment_data,
+            out long lAttachmentTotalLength)
+        {
+            strXml = "";
+            lHintNext = -1;
+            attachment_data = null;
+            lAttachmentTotalLength = 0;
+
+            string strError = "";
+
+            LibraryServerResult result = this.PrepareEnvironment(true, true);
+            if (result.Value == -1)
+                return result;
+
+            try
+            {
+                // 权限判断
+
+                // 权限字符串
+                if (StringUtil.IsInList("getoperlog", sessioninfo.RightsOrigin) == false)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "获得日志记录被拒绝。不具备getoperlog权限。";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+
+                string strTempFileName = Path.GetTempFileName();
+                try
+                {
+                    Stream attachment = File.Create(strTempFileName);
+                    try
+                    {
+                        // return:
+                        //      -1  error
+                        //      0   file not found
+                        //      1   succeed
+                        //      2   超过范围
+                        int nRet = app.OperLog.GetOperLog(
+                            sessioninfo.LibraryCodeList,
+                            strFileName,
+                            lIndex,
+                            lHint,
+                            out lHintNext,
+                            out strXml,
+                            ref attachment,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+
+                        result.Value = nRet;
+                        result.ErrorInfo = strError;
+
+                        if (nRet == 1)
+                        {
+                            // 读出attachment片断
+                            // attachment.Seek(0, SeekOrigin.Begin);    // 不必要了
+
+                            lAttachmentTotalLength = attachment.Length;
+
+                            if (lAttachmentFragmentStart > attachment.Length)
+                            {
+                                strError = "lAttachmentFragmentStart参数的值超过附件的尺寸";
+                                goto ERROR1;
+                            }
+
+                            // TODO: 如果不想获取附件内容，应当允许lAttachmentFragmentStart为-1调用
+
+                            attachment.Seek(lAttachmentFragmentStart, SeekOrigin.Begin);
+
+                            // 先规整一下参数值
+                            nAttachmentFragmentLength = (int)Math.Min(attachment.Length - lAttachmentFragmentStart, (long)nAttachmentFragmentLength);
+
+                            // 看看是否超过每次的限制尺寸
+                            nAttachmentFragmentLength = Math.Min(100 * 1024, nAttachmentFragmentLength);
+
+                            attachment_data = new byte[nAttachmentFragmentLength];
+
+                            attachment.Read(attachment_data, 0, nAttachmentFragmentLength);
+                        }
+                    }
+                    finally
+                    {
+                        attachment.Close();
+                    }
+                }
+                finally
+                {
+                    File.Delete(strTempFileName);
+                }
+
+                return result;
+            ERROR1:
+                result.Value = -1;
+                result.ErrorCode = ErrorCode.SystemError;
+                result.ErrorInfo = strError;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                string strErrorText = "dp2Library GetOperLog() API出现异常: " + ExceptionUtil.GetDebugText(ex);
+                app.WriteErrorLog(strErrorText);
+
+                result.Value = -1;
+                result.ErrorCode = ErrorCode.SystemError;
+                result.ErrorInfo = strErrorText;
+                return result;
+            }
+        }
+
+		//
+		        // 合并两个统计数据XML文件到目标文件
+        public static int MergeTwoXmlFiles(string strSourceFilename1,
+            string strSourceFilename2,
+            string strTargetFilename,
+            out string strError)
+        {
+            strError = "";
+
+            XmlDocument dom1 = new XmlDocument();
+            try
+            {
+                // 2008/11/24 new add
+                FileInfo fi = new FileInfo(strSourceFilename1);
+                if (fi.Exists == false || fi.Length == 0)
+                    dom1.LoadXml("<root />");
+                else
+                    dom1.Load(strSourceFilename1);
+            }
+            catch (Exception ex)
+            {
+                strError = "装载XML文件 " + strSourceFilename1 + " 到XMLDOM时发生错误: " + ex.Message;
+                return -1;
+            }
+
+            XmlDocument dom2 = new XmlDocument();
+            try
+            {
+                // 2008/11/24 new add
+                FileInfo fi = new FileInfo(strSourceFilename2);
+                if (fi.Exists == false || fi.Length == 0)
+                    dom2.LoadXml("<root />");
+                else
+                    dom2.Load(strSourceFilename2);
+            }
+            catch (Exception ex)
+            {
+                strError = "装载XML文件 " + strSourceFilename2 + " 到XMLDOM时发生错误: " + ex.Message;
+                return -1;
+            }
+
+            // 确保dom2的根存在
+            if (dom2.DocumentElement == null)
+            {
+                dom2.LoadXml("<root />");
+            }
+
+            XmlNodeList categorys1 = dom1.DocumentElement.SelectNodes("category");
+            for (int i = 0; i < categorys1.Count; i++)
+            {
+                XmlNode category1 = categorys1[i];
+
+                string strCategoryName1 = DomUtil.GetAttr(category1, "name");
+
+                // 看看这个名字在DOM2中是否存在
+                XmlNode category2 = dom2.DocumentElement.SelectSingleNode("category[@name='" + strCategoryName1 + "']");
+                if (category2 == null)
+                {
+                    // 如果不存在，就创建一个
+                    category2 = dom2.CreateElement("category");
+                    dom2.DocumentElement.AppendChild(category2);
+                    DomUtil.SetAttr(category2, "name", strCategoryName1);
+                }
+
+                XmlNodeList items1 = category1.SelectNodes("item");
+                for (int j = 0; j < items1.Count; j++)
+                {
+                    XmlNode item1 = items1[j];
+
+                    string strItemName1 = DomUtil.GetAttr(item1, "name");
+                    string strItemValue1 = DomUtil.GetAttr(item1, "value");
+
+                    // 看看这个名字在DOM2中是否存在
+                    XmlNode item2 = category2.SelectSingleNode("item[@name='" + strItemName1 + "']");
+                    if (item2 == null)
+                    {
+                        // 如果不存在，就创建一个
+                        item2 = dom2.CreateElement("item");
+                        category2.AppendChild(item2);
+                        DomUtil.SetAttr(item2, "name", strItemName1);
+                        DomUtil.SetAttr(item2, "value", strItemValue1);
+                    }
+                    else
+                    {
+                        string strItemValue2 = DomUtil.GetAttr(item2, "value");
+                        // 两个value相加
+                        try
+                        {
+                            double v1 = Convert.ToDouble(strItemValue1);
+                            double v2 = Convert.ToDouble(strItemValue2);
+
+                            DomUtil.SetAttr(item2, "value", (v1 + v2).ToString());
+                        }
+                        catch
+                        {
+                            strError = "值 " + strItemValue1 + " 或值 " + strItemValue2 + " 格式不正确，应当为纯数字";
+                            return -1;
+                        }
+                    }
+                }
+            }
+
+            dom2.Save(strTargetFilename);
+
+            return 0;
+        }
+
+
+		//////////
+
+		                // 递归调用
+                string strTempResults = "";
+                nRet = this.GetItemRecPathList(
+                    channels,
+                    strDbType,
+                    strFrom,
+                    StringUtil.MakePathList(temp_words),
+                    bIgnoreCase,
+                    out strTempResults,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet == 0)
+                    goto END1;
+
+                // 插入当前结果中
+                string[] temp_results = strTempResults.Split(new char[] { ',' });
+
+                if (temp_results.Length != temp_words.Count)
+                {
+                    strError = "GetItemRecPathList() 返回的结果数目和检索词个数不符合";
+                    return -1;
+                }
+
+                Debug.Assert(temp_results.Length == temp_words.Count, "");
+
+                for (int i = 0; i<temp_words.Count; i++)
+                {
+                    string word = temp_words[i];
+                    int nPos = IndexOf(word_list, word, bIgnoreCase);
+                    if (nRet == -1)
+                    {
+                        strError = "很奇怪出现了 temp_word '" + word + "' 在wordlist '" + strWordList + "' 中没有匹配的项";
+                        return -1;
+                    }
+
+                    results[nPos] = temp_results[i];
+                }

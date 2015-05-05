@@ -1,0 +1,86 @@
+/* last-modified: 2011-12-6 */
+
+$(document).ready(function () {
+    if (window.external == null) {
+        alert("window没有联接external");
+        return;
+    }
+    var external = window.external;
+    external.IsInLoop = true;
+    GetSummary();
+    GetImage();
+});
+
+function GetImage() {
+    try {
+        if (window.external == null) {
+            // alert("window没有联接external");
+            return;
+        }
+
+        $("IMG.pending").each(function (index) {
+            var path = this.name;
+            var localpath = window.external.GetObjectFilePath(path, "");
+            if (localpath != null)
+                this.src = localpath;
+            else
+                this.src = "";
+
+        });
+    }
+    catch (e) {
+
+    }
+}
+
+function GetSummary() {
+
+    if (window.external == null) {
+        alert("window没有联接external");
+        return;
+    }
+
+    try {
+        var external = window.external;
+
+        if (external.IsInLoop == false)
+            return;
+
+
+        var oo = $("TD.pending:first");
+        if (oo.length == 0) {
+            return;
+        }
+
+        o = oo[0];
+
+
+        var path = o.innerText;
+
+        o.innerHTML = "<img src='./servermapped/images/ajax-loader.gif'></img>";
+
+        var prefix = "";
+        var nRet = path.indexOf(":");
+        if (nRet != -1) {
+            prefix = path.substring(0, nRet);
+            path = path.substr(nRet + 1);
+        }
+
+        try {
+            if (prefix == "P")
+                o.innerHTML = external.GetPatronSummary(path);
+            else
+                o.innerHTML = /*path + "||" + */"<div class='wide'></div>" + external.GetSummary(prefix == "" ? path : prefix + ":" + path, false);
+        }
+        catch (e) {
+            o.innerHTML = path + "||######" + e;
+        }
+
+        oo.removeClass("pending");
+        window.setTimeout("GetSummary()", 100);
+    }
+    catch (e) {
+
+    }
+
+}

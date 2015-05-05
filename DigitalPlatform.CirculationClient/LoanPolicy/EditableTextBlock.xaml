@@ -1,0 +1,12 @@
+﻿<UserControl x:Class="DigitalPlatform.CirculationClient.EditableTextBlock"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+         d:DesignHeight="30" d:DesignWidth="100">
+    <Grid Name="_grid">
+        <TextBlock Name="textBlockName" Text="{Binding ElementName=root, Path=Text}" VerticalAlignment="Center" />
+        <TextBox Name="textBoxName" Text="{Binding ElementName=root, Path=Text, UpdateSourceTrigger=PropertyChanged}" Visibility="Collapsed" LostFocus="textBoxName_LostFocus" />
+    </Grid>
+</UserControl>

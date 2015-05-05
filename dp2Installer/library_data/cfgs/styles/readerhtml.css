@@ -1,0 +1,483 @@
+BODY 
+{
+	FONT-FAMILY: Microsoft YaHei, Verdana, ËÎÌו;
+	FONT-SIZE: 8pt;
+}
+
+A:link, A:visited, A:active 
+{
+	text-decoration: none;
+	color: #006600;
+}
+
+A:hover
+{
+	text-decoration:underline;
+}
+
+
+TD.regular 
+{
+	font-size: 8pt;
+}
+
+TD.regular A:visited
+{
+	font-weight: bold;
+}
+
+TABLE.layout TD.left, TABLE.layout TD.right
+{
+    vertical-align: top;
+}
+
+TABLE.layout TD.photo, TABLE.layout TD.warning
+{
+    vertical-align: top;
+}
+
+TABLE.layout TD.middle
+{
+    width: 50px;
+}
+
+body.warning
+{
+    background-color: #ffff00;
+}
+
+TABLE.readerinfo
+{
+	border-collapse:collapse;
+}
+
+TABLE.readerinfo TR.blank TD.name
+{
+    height: auto;
+}
+
+TABLE.readerinfo TR.content
+{
+	font-size: 8pt;
+	background-color: white;
+}
+
+
+TABLE.readerinfo TR.content TD.name
+{
+    padding: 4px;
+    padding-right: 10px;
+	font-size: 8pt;
+	
+	background-color: whitesmoke;
+	color: #777777;
+	
+	border: 0px;
+	border-right: 1px;
+	border-color: #999999;
+	border-style: solid;
+	
+	text-align: right;
+	vertical-align: middle;
+	width: 1%;
+	white-space:nowrap;
+}
+
+TABLE.readerinfo TR.content TD.value
+{
+    padding: 4px;
+    padding-left: 10px;
+    
+    text-align: left;
+	vertical-align: middle;
+	width: 99%;
+	/* white-space:nowrap; */
+}
+
+TABLE.readerinfo TR.name TD.value, TABLE.readerinfo TR.barcode TD.value
+{
+	white-space:nowrap;
+}
+
+TABLE.readerinfo TR.barcode TD.value
+{
+	font-weight: bolder;
+	font-size: 12pt;
+}
+
+TABLE.readerinfo TR.name TD.value
+{
+	font-weight: bolder;
+	font-size: 12pt;
+}
+
+TABLE.readerinfo TR.state TD.value
+{
+	font-weight: bolder;
+	font-size: 30pt;
+	color: #ff0000;
+}
+
+TABLE.readerinfo TR.expiredate TD.value
+{
+}
+
+TABLE.readerinfo TR.expireddate TD.value
+{
+	font-weight: bolder;
+	font-size: 30pt;
+	color: #ff0000;
+}
+
+TABLE.readerinfo TR.cmdline
+{
+	font-size: 9pt;
+}
+
+
+/* several tables TD padding */
+TABLE.borrowinfo TD, TABLE.reservation TD, TABLE.overdue TD, TABLE.borrowhistory TD
+{
+    padding: 4px;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+/* several column title line */
+TR.columntitle
+{
+
+	font-weight: bolder;
+	background-color: white;
+	color: #777777;
+}
+
+TR.columntitle TD
+{
+    padding-top: 8px;
+  	white-space:nowrap;
+}
+
+/* borrowinfo */
+
+TABLE.borrowinfo
+{
+    width: 100%;
+	font-size: 8pt;
+	
+	border-color: lightgrey;
+	border-width: 1px; 
+	border-style: solid;
+	border-collapse:collapse;
+
+}
+
+TABLE.borrowinfo TR.columntitle TD
+{
+    white-space: nowrap;
+}
+
+TABLE.borrowinfo TR.borrow_count
+{
+	background-color: whitesmoke;
+	text-align: right;
+}
+
+TABLE.borrowinfo TR.content
+{
+	font-size: 8pt;
+	background-color: white;
+}
+
+TABLE.borrowinfo TR.content.overdue
+{
+	font-size: 8pt;
+	background-color: #ffcccc;
+}
+
+TABLE.borrowinfo TR.content.active
+{
+	font-size: 10pt;
+	background-color: cornsilk;
+}
+
+
+TABLE.borrowinfo TR.content TD.price
+{
+	font-size: 6pt;
+	background-color: #f9f9ff;
+}
+
+TABLE.borrowinfo TR.content.overdue TD.price
+{
+	font-size: 6pt;
+	background-color: #ffcccc;   /* #f4b0b0; */
+}
+
+TABLE.borrowinfo TD.borrowdate
+{
+	font-size: 6pt;
+}
+
+TABLE.borrowinfo TD.renewcomment
+{
+	font-size: 6pt;
+}
+
+TABLE.borrowinfo TR.content.overdue TD.returndate
+{
+	font-weight: bolder;
+	color: #990000;
+}
+
+TABLE.borrowinfo TD.summary
+{
+    width: 200px;
+    min-width: 200px;
+}
+
+/* reservation */
+TABLE.reservation
+{
+    width: 100%;
+
+	font-size: 8pt;
+	border-color: lightgrey;
+	border-width: 1px; 
+	border-style: solid;
+	border-collapse:collapse;
+}
+
+
+TABLE.reservation TR.info
+{
+	font-size: 9pt;
+}
+
+
+
+TABLE.reservation TR.content
+{
+	background-color: white;
+}
+
+TABLE.reservation TR.content.active
+{
+	background-color: #99ff99;
+}
+
+TABLE.reservation .deleted
+{
+    text-decoration: line-through;
+}
+
+TABLE.reservation TD.barcode
+{
+    width: 10%;
+}
+TABLE.reservation TD.state
+{
+    width: 40%;
+}
+TABLE.reservation TD.summary
+{
+    width: 40%;
+}
+TABLE.reservation TD.requestdate
+{
+    width: 5%;
+}
+TABLE.reservation TD.operator
+{
+    width: 5%;
+}
+
+/* overdue */
+TABLE.overdue
+{
+    width: 100%;
+
+	font-size: 8pt;
+	border-color: lightgrey;
+	border-width: 1px; 
+	border-style: solid;
+	border-collapse:collapse;
+}
+
+TABLE.overdue TR.content
+{
+	font-size: 8pt;
+	background-color: yellow;
+}
+
+TABLE.overdue TR.content TD.id
+{
+	font-size: 6pt;
+}
+
+TABLE.overdue TD.reason
+{
+    width: 30%;
+}
+
+TABLE.overdue TD.pauseinfo
+{
+    width: 30%;
+}
+
+TABLE.overdue TD.comment
+{
+    width: 30%;
+}
+
+TABLE.overdue TR.columntitile, TABLE.overdue TD.barcode, TABLE.overdue TD.price, TABLE.overdue TD.borrowdate, TABLE.overdue TD.borrowperiod, TABLE.overdue TD.returndate
+{
+    white-space: nowrap;
+}
+
+/* Borrow History */
+
+TABLE.borrowhistory
+{
+    width: 100%;
+
+	font-size: 8pt;
+	border-color: lightgrey;
+	border-width: 1px; 
+	border-style: solid;
+	border-collapse:collapse;}
+
+TABLE.borrowhistory TR.borrow_count
+{
+	background-color: whitesmoke;
+	text-align: right;
+}
+
+TABLE.borrowhistory TR.content
+{
+	background-color: #eeeeff;
+}
+
+TABLE.borrowhistory TD.index
+{
+	text-align: right;
+}
+
+TABLE.borrowhistory TD.borrower
+{
+	background-color: whitesmoke;
+}
+
+TABLE.borrowhistory TD.summary
+{
+	font-size: 8pt;
+}
+
+TABLE.borrowhistory TD.borrowdate
+{
+	font-size: 6pt;
+}
+
+TABLE.borrowhistory TD.returndate
+{
+	font-size: 6pt;
+}
+
+TABLE.borrowhistory TD.renewcomment
+{
+	font-size: 6pt;
+}
+
+#cardphoto
+{
+    max-width: 120px;
+    height: auto;
+    border: 0px;
+}
+
+.tabletitle
+{
+    margin-top: 20px;
+    
+    font-size: 11pt;
+    font-weight: bolder;
+    color: #777777;
+    background-color: #eeeeee;
+    padding: 4px;
+    padding-top: 8px;
+    max-width: 200px;
+    text-align:center;
+
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+}
+
+.wide
+{
+    width: 200px;
+}
+
+#warningframe
+{
+    /*width: 100%;*/
+}
+
+DIV.warning
+{
+    /* float:left; */
+    margin: 0px;
+    margin-bottom: 4px;
+    text-align: center;
+    width: 60px;
+}
+
+DIV.warning .number
+{
+    font-size: 16pt;
+    font-weight: bolder;
+    width: 100%;
+    color: White;
+}
+
+DIV.warning .text
+{
+    font-size: 8pt;
+    width: 100%;
+}
+
+.amerce .number
+{
+    background-color: #bbbb00;
+}
+
+.amerce .text
+{
+    background-color: #ffff00;
+}
+
+.overdue .number
+{
+    background-color: #990000;
+}
+
+.overdue .text
+{
+    background-color: #ff9999;
+}
+
+.arrive .number
+{
+    background-color: #009900;
+}
+
+.arrive .text
+{
+    background-color: #99ff99;
+}
+
+IMG.biblio
+{
+	float:left;
+	margin-right: 4px;
+	max-width: 70px;
+}

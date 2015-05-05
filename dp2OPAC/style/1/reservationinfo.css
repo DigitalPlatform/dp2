@@ -1,0 +1,65 @@
+
+TABLE.reservationinfo
+{
+	font-size: 12px;
+	text-align: left;
+	background-color: white;
+/*
+	background-image: url(./title.jpg);
+	background-attachment: fixed;
+*/
+	border-style: solid;
+	border-top-width: 18px;
+	border-bottom-width: 18px;
+	border-left-width: 8px;
+	border-right-width: 8px;
+	border-color: whitesmoke;
+	width: 100%;
+}
+
+TABLE.reservationinfo TR.columntitle
+{
+	font-weight: bolder;
+}
+
+TABLE.reservationinfo TR.dark
+{
+	background-color: #f0f0f0
+}
+
+TABLE.reservationinfo TR.light
+{
+
+}
+
+TABLE.reservationinfo TR.cmdline
+{
+	font-size: 12px;
+}
+
+TABLE.reservationinfo TR.cmdline DIV.comment
+{
+	border-style: dotted;
+	border-color: #cccc00;
+	border-width: 2px;
+	padding: 8px;
+	margin: 4px;
+}
+
+TABLE.reservationinfo TR.cmdline INPUT.deletebutton
+{
+	font-size: 12px;
+	padding: 2px;
+}
+
+TABLE.reservationinfo TR.cmdline INPUT.mergebutton
+{
+	font-size: 12px;
+	padding: 2px;
+}
+TABLE.reservationinfo TR.cmdline INPUT.splitbutton
+{
+	font-size: 12px;
+	padding: 2px;
+}
+

@@ -1,0 +1,230 @@
+﻿
+OpacApplication.cs
+
+        // 保存
+        // 其实,进入内存属性的XML片断,可以在this.OpacCfgDom中删除.最后直接合并保存这个dom即可.
+        // parameters:
+        //      bFlush  是否为刷新情形？如果是，则不写入错误日志
+        public void Save(string strFileName,
+            bool bFlush)
+        {
+            this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            try
+            {
+
+                if (this.m_bChanged == false)
+                {
+                    /*
+                    // 调试用
+                    OpacApplication.WriteWindowsLog("没有进行Save()，因为m_bChanged==false", EventLogEntryType.Information);
+                     * */
+
+                    return;
+                }
+
+
+                // 关闭文件跟踪
+                bool bOldState = false;
+                if (this.watcher != null)
+                {
+                    bOldState = watcher.EnableRaisingEvents;
+                    watcher.EnableRaisingEvents = false;
+                }
+
+
+                if (strFileName == null)
+                    strFileName = m_strFileName;
+
+                if (strFileName == null)
+                {
+                    throw (new Exception("m_strFileName为空"));
+                }
+
+                string strBackupFilename = strFileName + ".bak";
+
+                if (FileUtil.IsFileExsitAndNotNull(strFileName) == true)
+                {
+                    this.WriteErrorLog("备份 " + strFileName + " 到 " + strBackupFilename);
+                    File.Copy(strFileName, strBackupFilename, true);
+                }
+
+                if (bFlush == false)
+                {
+                    this.WriteErrorLog("开始 从内存写入 " + strFileName);
+                }
+
+                XmlTextWriter writer = new XmlTextWriter(strFileName,
+                    Encoding.UTF8);
+
+                // 缩进
+                writer.Formatting = Formatting.Indented;
+                writer.Indentation = 4;
+
+                writer.WriteStartDocument();
+
+                writer.WriteStartElement("root");
+                if (this.DebugMode == true)
+                    writer.WriteAttributeString("debugMode", "true");
+
+                // <version>
+                {
+                    XmlNode node = this.OpacCfgDom.DocumentElement.SelectSingleNode("version");
+                    if (node != null)
+                    {
+                        node.WriteTo(writer);
+                    }
+                }
+
+                // 内核参数
+                // 元素<libraryServer>
+                // 属性url/username/password
+                writer.WriteStartElement("libraryServer");
+                writer.WriteAttributeString("url", this.WsUrl);
+                writer.WriteAttributeString("username", this.ManagerUserName);
+                writer.WriteAttributeString("password",
+                    Cryptography.Encrypt(this.ManagerPassword, EncryptKey)
+                    );
+                if (string.IsNullOrEmpty(this.ReportDir) == false)
+                    writer.WriteAttributeString("reportDir", this.ReportDir);
+                writer.WriteEndElement();
+
+
+                // 图书馆业务服务器
+                // 元素<opacServer>
+                // 属性url
+                writer.WriteStartElement("opacServer");
+                writer.WriteAttributeString("url", this.OpacServerUrl);
+                writer.WriteEndElement();
+
+                // mongoDB 服务器
+                // 元素<mongoDB>
+                // 属性connectionString
+                writer.WriteStartElement("mongoDB");
+                writer.WriteAttributeString("connectionString", this.MongoDbConnStr);
+                writer.WriteEndElement();
+
+
+                // 没有进入内存属性的其他XML片断
+                if (this.OpacCfgDom != null)
+                {
+                    // 2009/9/23 new add
+                    // <yczb>
+                    /*
+	<yczb>
+		<sso appID='CBPM_Library' validateWsUrl='http://portal.cbpmc.cbpm/AuthCenter/services/validate' />
+	</yczb>
+                     * */
+                    XmlNode node = this.OpacCfgDom.DocumentElement.SelectSingleNode("//yczb");
+                    if (node != null)
+                    {
+                        node.WriteTo(writer);
+                    }
+
+                    // <monitors>
+                    node = this.OpacCfgDom.DocumentElement.SelectSingleNode("monitors");
+                    if (node != null)
+                    {
+                        node.WriteTo(writer);
+                    }
+
+
+                    // TODO: 暂时没有任何地方用到这个信息
+                    // <libraryInfo>
+                    // 注: <libraryName>元素在此里面
+                    node = this.OpacCfgDom.DocumentElement.SelectSingleNode("libraryInfo");
+                    if (node != null)
+                    {
+                        node.WriteTo(writer);
+                    }
+
+                    // <biblioDbGroup>
+                    node = this.OpacCfgDom.DocumentElement.SelectSingleNode("biblioDbGroup");
+                    if (node != null)
+                    {
+                        node.WriteTo(writer);
+                    }
+
+                    // <arrived>
+                    node = this.OpacCfgDom.DocumentElement.SelectSingleNode("arrived");
+                    if (node != null)
+                    {
+                        node.WriteTo(writer);
+                    }
+
+                    // <browseformats>
+                    node = this.OpacCfgDom.DocumentElement.SelectSingleNode("browseformats");
+                    if (node != null)
+                    {
+                        node.WriteTo(writer);
+                    }
+
+                    // <virtualDatabases>
+                    node = this.OpacCfgDom.DocumentElement.SelectSingleNode("//virtualDatabases");
+                    if (node != null)
+                    {
+                        node.WriteTo(writer);
+                    }
+
+                    // <externalSsoInterface>
+                    node = this.OpacCfgDom.DocumentElement.SelectSingleNode("externalSsoInterface");
+                    if (node != null)
+                    {
+                        node.WriteTo(writer);
+                    }
+
+                    // chat room
+                    string strError = "";
+                    string strXml = "";
+                    this.ChatRooms.GetDef(out strXml, out strError);
+                    if (string.IsNullOrEmpty(strXml) == false)
+                        writer.WriteRaw("\r\n" + strXml + "\r\n");
+
+                    // 2012/5/23
+                    // <dp2sso>
+                    /*
+	<dp2sso>
+		<domain name='dp2bbs' loginUrl='http://dp2003.com/dp2bbs/login.aspx?redirect=%redirect%'  logoutUrl='' />
+	</dp2sso>
+                     * */
+                    node = this.OpacCfgDom.DocumentElement.SelectSingleNode("//dp2sso");
+                    if (node != null)
+                    {
+                        node.WriteTo(writer);
+                    }
+
+
+                    // <searchLog>
+                    node = this.OpacCfgDom.DocumentElement.SelectSingleNode("searchLog");
+                    if (node != null)
+                    {
+                        node.WriteTo(writer);
+                    }
+                }
+
+                writer.WriteEndElement();
+
+                writer.WriteEndDocument();
+
+                writer.Close();
+
+                if (bFlush == false)
+                    this.WriteErrorLog("完成 从内存写入 " + strFileName);
+
+                this.m_bChanged = false;
+
+                if (this.watcher != null)
+                {
+                    watcher.EnableRaisingEvents = bOldState;
+                }
+
+            }
+            finally
+            {
+                this.m_lock.ReleaseWriterLock();
+            }
+
+        }
+
+		从上面代码中删除了 yczb 等配置信息的注释
+
+		~~~

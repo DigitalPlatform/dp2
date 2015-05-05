@@ -1,0 +1,1017 @@
+﻿        protected override void RenderContents(HtmlTextWriter output)
+        {
+            string strError = "";
+            int nRet = 0;
+
+#if NO
+            if (this.XmlFilename == "")
+            {
+                strError = "<span class='comment'>"
+                    + this.GetString("尚未指定日期参数")  // "(尚未指定日期参数)"
+                    + "</span>";
+                goto ERROR1;
+            }
+#endif
+            if (String.IsNullOrEmpty(this.Xml) == true)
+            {
+                /*
+                strError = "<span class='comment'>"
+                    + this.GetString("尚未指定日期参数")  // "(尚未指定日期参数)"
+                    + "</span>"; 
+                goto ERROR1;
+                 * */
+                strError = "<span class='comment'>"
+    + this.DateRange + " " + this.GetString("没有统计信息") 
+    + "</span>";
+                goto ERROR1;
+
+            }
+
+
+            OpacApplication app = (OpacApplication)this.Page.Application["app"];
+            SessionInfo sessioninfo = (SessionInfo)this.Page.Session["sessioninfo"];
+
+            string strTemplateFilename = app.CfgDir + "\\statis_template.xml";
+
+            if (File.Exists(strTemplateFilename) == true)
+            {
+                string strTargetXml = "";
+
+                LoginState loginstate = Global.GetLoginState(this.Page);
+
+                // 利用模板文件过滤统计事项，并将事项按照模板顺序排序
+                nRet = StatisViewControl.FilterXmlFile(
+                    loginstate.ToString().ToLower(), // notlogin public reader librarian
+                    this.Xml,
+                    strTemplateFilename,
+                    false,
+                    out strTargetXml,
+                    out strError);
+                if (nRet == -1)
+                {
+                    goto ERROR1;
+                }
+
+                this.Xml = strTargetXml;
+            }
+
+
+
+            string strDate = "";
+
+            strDate = this.DateRange;
+
+            try
+            {
+                dom = new XmlDocument();
+                dom.LoadXml(this.Xml);
+            }
+            catch (Exception ex)
+            {
+                strError = "XML字符串装入DOM时出错：" + ex.Message;
+                goto ERROR1;
+            }
+
+#if NO
+            if (nRet == 0)
+            {
+                strError = "<span class='comment'>" + strDate
+                    + this.GetString("没有统计信息")
+                    + "</span>";
+                goto ERROR1;
+            }
+#endif
+
+            output.Write("<table class='statis' >");// border='1'
+
+            // 标题行
+            output.Write("<tr class='tabletitle'><td colspan='2'>" + strDate + " "
+                + this.GetString("实时统计信息")
+                + "</td></tr>");
+
+            // 注释行
+            if (this.RangeStatisInfo != null)
+            {
+                string strComment = GetCommentString(this.RangeStatisInfo);
+                output.Write("<tr class='comment'><td colspan='2'>" + strComment + "</td></tr>");
+            }
+
+
+            XmlNodeList categorys = this.dom.DocumentElement.SelectNodes("category");
+            for (int i = 0; i < categorys.Count; i++)
+            {
+                XmlNode category = categorys[i];
+
+                string strCategory = DomUtil.GetAttr(category, "name");
+
+                // 2009/7/31 new add
+                string strCategoryCaption = this.GetStringEx(strCategory);
+                if (String.IsNullOrEmpty(strCategoryCaption) == true)
+                    strCategoryCaption = strCategory;
+
+                output.Write("<tr class='category'><td colspan='2'>");
+                output.Write(strCategoryCaption);
+                output.Write("</td></tr>");
+
+                XmlNodeList items = category.SelectNodes("item");
+
+                for (int j = 0; j < items.Count; j++)
+                {
+                    XmlNode item = items[j];
+
+                    string strItemName = DomUtil.GetAttr(item, "name");
+                    string strItemValue = DomUtil.GetAttr(item, "value");
+
+                    // 2009/7/31 new add
+                    string strItemNameCaption = this.GetStringEx(strItemName);
+                    if (String.IsNullOrEmpty(strItemNameCaption) == true)
+                        strItemNameCaption = strItemName;
+
+
+                    output.Write("<tr class='content'><td class='name'>");
+                    output.Write(strItemNameCaption);
+                    output.Write("</td><td class='value'>");
+                    output.Write(strItemValue);
+                    output.Write("</td></tr>");
+                }
+
+            }
+            output.Write("</table>");
+
+            return;
+        ERROR1:
+            output.Write(strError);
+        }
+
+
+		//////
+
+		        protected override void CreateChildControls()
+        {
+            // 总表格开始
+            AutoIndentLiteral literal = new AutoIndentLiteral();
+            literal.Text = "<%normal%><!-- TitleBarControl 开始-->"
+                + "<%begin%><table id='outerframe' class='body' border='0' cellpadding='0' cellspacing='0'>";
+            this.Controls.Add(literal);
+
+            // 标题图像表格 开始
+            literal = new AutoIndentLiteral();
+            literal.Text = "<%normal%><!-- 标题图像 -->"
+                + "<%begin%><tr><td>"
+                + "<%begin%><table class='title'>"  // 这个<table>本类自己管辖了
+                + "<%begin%><tr class='title'>";
+            this.Controls.Add(literal);
+
+#if AUTO_RELOGIN
+            // 用于重新登录的信息
+            HiddenField relogin = new HiddenField();
+            relogin.ID = "relogin";
+            relogin.Value = "";
+            this.Controls.Add(relogin);
+#endif
+
+            // 获得配置参数
+            OpacApplication app = (OpacApplication)this.Page.Application["app"];
+            /*
+             * 
+	<titleBarControl>
+		<titleLeft lang='zh'>
+			<img src="./style/logo_zh.gif" />
+		</titleLeft>
+        <titleLeft lang='en'>
+			<img src="./style/logo_en.gif" />
+		</titleLeft>
+        ...
+             */
+            string strLeftHtml = "";
+            string strCenterHtml = "";
+            XmlNode parent = app.WebUiDom.DocumentElement.SelectSingleNode("titleBarControl");
+            if (parent != null)
+            {
+                // titleLeft
+                // XmlNode nodeTitleLeft = app.WebUiDom.DocumentElement.SelectSingleNode("titleBarControl/titleLeft");
+                // 从一个元素的下级的多个<strElementName>元素中, 提取语言符合的XmlNode
+                // parameters:
+                //      bReturnFirstNode    如果找不到相关语言的，是否返回第一个<strElementName>
+                XmlNode nodeTitleLeft = DomUtil.GetLangedNode(
+                    this.Lang,
+                    parent,
+                    "titleLeft");
+                if (nodeTitleLeft != null)
+                {
+                    strLeftHtml = nodeTitleLeft.InnerXml;
+                    strLeftHtml = UnmacroString(strLeftHtml);
+                }
+
+
+                // titleCenter
+                // XmlNode nodeTitleCenter = app.WebUiDom.DocumentElement.SelectSingleNode("titleBarControl/titleCenter");
+                XmlNode nodeTitleCenter = DomUtil.GetLangedNode(
+this.Lang,
+parent,
+"titleCenter");
+                if (nodeTitleCenter != null)
+                {
+                    strCenterHtml = nodeTitleCenter.InnerXml;
+                    strCenterHtml = UnmacroString(strCenterHtml);
+                }
+
+
+            }
+
+
+            // 左
+            literal = new AutoIndentLiteral();
+            literal.Text = "<%normal%><td class='left'>" + strLeftHtml + "</td>";
+            this.Controls.Add(literal);
+
+            // 中
+            literal = new AutoIndentLiteral();
+            literal.Text = "<%normal%><td class='center'>";
+            this.Controls.Add(literal);
+
+            LiteralControl debug___info = new LiteralControl();
+            debug___info.ID = "debug___info";
+            this.Controls.Add(debug___info);
+
+            literal = new AutoIndentLiteral();
+            literal.Text = strCenterHtml + "</td>";
+            this.Controls.Add(literal);
+
+
+
+            // 右
+            literal = new AutoIndentLiteral();
+            literal.Text = "<%normal%><td class='right'>";
+            this.Controls.Add(literal);
+
+            // 右上角的命令小表格
+            CreateTopRightTable();
+
+            literal = new AutoIndentLiteral();
+            literal.Text = "<%normal%></td>";
+            this.Controls.Add(literal);
+
+
+            // 标题图像表格 结束
+            literal = new AutoIndentLiteral();
+            literal.Text = "<%end%></tr>"
+                + "<%end%></table>"
+                + "<%end%></td></tr>";
+            this.Controls.Add(literal);
+
+            // 栏目条表格 开始
+            literal = new AutoIndentLiteral();
+            literal.Text = "<%normal%><!-- 栏目条 -->"
+                + "<%begin%><tr><td>"
+                + "<%begin%><table class='columnbar'>"
+                + "<%begin%><tr class='columnbar'>";
+            this.Controls.Add(literal);
+
+
+            // 各个栏目
+            CreateColumns();
+
+            // 栏目条表格 结束
+            literal = new AutoIndentLiteral();
+            literal.Text = "<%end%></tr>"
+                + "<%end%></table>"
+                + "<%end%></td></tr>";
+            this.Controls.Add(literal);
+
+            // 主体内容开始
+            literal = new AutoIndentLiteral();
+            literal.Text = "<%normal%><!-- 主体内容 -->"
+                + "<%begin%><tr class='main'><td class='main'>"
+                + "<%normal%><!-- TitleBarControl 结束 -->";
+            this.Controls.Add(literal);
+
+        }
+
+
+		///
+		    <meta http-equiv="X-UA-Compatible" content="IE=7" />
+			不知道当初这句话为了什么了
+
+
+			江汇泉
+
+你好！
+
+dp2opac已经更新。
+
+有关浏览器的各个版本的兼容性测试是个头疼的课题，希望公司创造条件尽量保持几个主要的IE版本的测试环境。希望有 IE 6/7/8的真实测试环境。
+
+我今天实在没办法，因为两台机器都是IE 9的版本，我只好从网上下载安装了一个IETester来进行IE兼容性的测试。但是这个测试浏览器经常死掉，而实际上真正的IE 5 / IE6等感觉不是像这个IETester那么容易死掉，所以我仅仅是把它当作测试的参考。
+
+例如，我用IE Tester进行IE的几个版本的测试的时候，searchbiblio.aspx这个页面刚开始检索时，检索面板上的DropdownList控件就没法用，不知出现了什么问题。我想这不是什么兼容性问题，而是IE Tester自身的问题。结果我只好在没有选库，没有选检索途径等的情况下进行检索，勉强继续走到后面几步进行测试。
+
+~~~
+
+经过测试和上网找资料，我发现IE 8中Ajax功能不正常的原因是，我们的页面主要是<table>构成的，<td>元素下方的元素的.innerHTML在IE 8里面不能操作，基本上要抛出异常，我们所使用的jquery函数库来操作虽然还没有抛出异常但是功能不正常了。
+
+(.innerHTML的可写是Ajax功能的命根子。如果没有这个能力Ajax就只好抓瞎了)
+
+MSDN里面的文档资料说了有些元素的innerHTML是只读的。
+
+IE 7也有这个问题。但是IE 6没有这个问题。
+
+现在的OPAC页面中要求不采用<table>，那难度会陡然上升，考虑到这个OPAC版本我们很快会开发它的升级版本，所以不想大改它了。
+
+最后我采用的办法是，使用IE 8以后特定的meta元素来指定兼容模式：
+
+<!doctype html>
+<html>
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=7" />
+
+在IE Tester中的IE 8窗口内表现正常了，但是在IE 7窗口内表现不正常。我不知道真实的IE 7里面会怎样，希望找到这样的环境测一下。
+
+据说IE 7作为一个过渡版本在全世界的机器中安装量较小。今后主要是考虑IE 8/9的环境因素。
+
+------------------				 
+谢涛
+2011-11-08
+
+-------------------------------------------------------------
+发件人：JiangHQ
+发送日期：2011-11-08 16:25:00
+收件人：'xietao'
+抄送：'MaLiangcun'; huolw@dp2003.com
+主题：关于IE8兼容性视图问题
+
+谢涛：
+	你好。乐山师院反映问题，经测试，问题存在：
+	在IE 8环境中访问OPAC，如果不在兼容模式下访问，检索中的书目结果无法异
+步装载，只显示为“biblio_html:中文图书/1”之类内容。切换到兼容模式，立马正常
+显示出书目内容。浏览功能不受影响。
+	人webui.xml文件中，禁用AJAX功能：
+	<biblioControl ajax='false'>
+	</biblioControl>
+	则兼容或不兼容模式下都可以显示书目内容。
+	致
+礼
+
+江汇泉
+数字平台（北京）软件有限责任公司
+北京海淀区北三环西路43号青云国际研发中心A座209室
+010-82120902; 010-82129218(Fax)
+jianghq@dp2003.com
+http://www.dp2003.com
+
+
+~~~
+
+
+        // 获得路径的第一级
+        public static string GetParentSelectedPath(string strSelectedPath)
+        {
+            string strSelectedResultsetName = "";
+            string strSelectedOffset = "";
+            ParseSelectedPath(strSelectedPath,
+                out strSelectedResultsetName,
+                out strSelectedOffset);
+
+            return strSelectedResultsetName;
+        }
+
+
+
+		//////////////////
+
+		        // 从rmsws端获取结果集
+        // parameters:
+        //      strStyle    tobibliorecpath 将实体\期\订购\评注 记录路径转换为书目记录路径,并去重
+        int GetResultset(LibraryChannel channel,
+            string strResultsetName,
+            string strResultsetFilename,
+            string strStyle,
+            out int nCount,
+            out string strError)
+        {
+            strError = "";
+            nCount = 0;
+
+            long lStart = 0;
+            long lRet = 0;
+
+            bool bToBiblioRecPath = StringUtil.IsInList("tobibliorecpath", strStyle);
+            DpResultSet item_paths = null;
+            if (bToBiblioRecPath == true)
+                item_paths = new DpResultSet(true); // 临时文件会自动丢弃
+
+            DpResultSet resultset = new DpResultSet(false, false);
+            resultset.Create(strResultsetFilename,
+                strResultsetFilename + ".index");
+
+            bool bDone = false;
+            try
+            {
+
+                for (; ; )
+                {
+                    if (this.m_bClosed == true || this.Stopped == true)
+                    {
+                        strError = "中断";
+                        return -1;
+                    }
+
+                    Thread.Sleep(1);
+
+                    List<string> aPath = null;
+
+                    lRet = channel.GetSearchResult(
+                        null,
+                        strResultsetName,
+                        lStart,
+                        100,
+                        "zh",
+                        out aPath,
+                        out strError);
+                    if (lRet == -1)
+                        return -1;
+
+                    long lHitCount = lRet;
+
+                    for (int j = 0; j < aPath.Count; j++)
+                    {
+                        if ((j % 10) == 9)
+                            this.SetProgressText("从检索结果中获得记录路径 " + (lStart + j + 1).ToString() + " 条");
+
+                        if (bToBiblioRecPath == false)
+                        {
+                            DpRecord record = new DpRecord(aPath[j]);
+                            resultset.Add(record);
+                        }
+                        else
+                        {
+                            DpRecord record = new DpRecord(aPath[j]);
+                            item_paths.Add(record);
+                        }
+                    }
+
+                    if (aPath.Count <= 0  // < 100
+                        )
+                        break;
+
+                    lStart += aPath.Count;
+                    nCount += aPath.Count;
+
+                    if (lStart >= lHitCount)
+                        break;
+                }
+
+                if (bToBiblioRecPath == true)
+                {
+                    Hashtable temp_table = new Hashtable();
+                    for (int j = 0; j < item_paths.Count; j++)
+                    {
+                        // Debug.WriteLine("output " + j.ToString());
+                        DpRecord record = item_paths[j];
+                        string strPath = record.ID;
+
+                        string strItemXml = "";
+                        string strItemMetadata = "";
+                        byte[] item_timestamp = null;
+                        string strItemOutputPath = "";
+                        // TODO: 改进为从结果集直接获取 XML 记录
+                        lRet = this.Channel.GetRes(null,
+                            strPath,
+                            "content,data,outputpath",
+                            out strItemXml,
+                            out strItemMetadata,
+                            out item_timestamp,
+                            out strItemOutputPath,
+                            out strError);
+                        if (lRet == -1)
+                        {
+                            strError = "获取记录 '" + strPath + "' 时发生错误: " + strError;
+                            return -1;
+                        }
+
+                        XmlDocument itemdom = null;
+                        int nRet = OpacApplication.LoadToDom(strItemXml,
+                            out itemdom,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "装载记录 '" + strPath + "' 进入XML DOM时发生错误: " + strError;
+                            return -1;
+                        }
+
+                        string strBiblioDbName = "";
+                        string strDbName = ResPath.GetDbName(strPath);
+                        string strDbType = this.App.GetDbType(strDbName,
+                            out strBiblioDbName);
+                        if (strDbType == null)
+                        {
+                            strError = "数据库 '" + strDbName + "' 的类型无法识别";
+                            return -1;
+                        }
+
+                        string strParentID = DomUtil.GetElementText(itemdom.DocumentElement,
+                            "parent");
+                        string strBiblioRecPath = strBiblioDbName + "/" + strParentID;
+
+                        // 缓冲并局部去重
+                        if (temp_table.Contains(strBiblioRecPath) == false)
+                        {
+                            temp_table.Add(strBiblioRecPath, null);
+                            if (temp_table.Count > 1000)
+                            {
+                                FlushTable(temp_table, resultset);
+                                temp_table.Clear();
+                            }
+                        }
+
+                        if ((j % 10) == 9)
+                            this.SetProgressText("已转换写入书目记录路径 " + (j + 1).ToString() + " 条");
+
+
+                        if ((j % 1000) == 999)
+                            this.AppendResultText("已转换写入书目记录路径 "+(j+1).ToString()+" 条" + "\r\n");
+
+                        /*
+                        DpRecord record_bibliorecpath = new DpRecord(strBiblioRecPath);
+                        resultset.Add(record_bibliorecpath);
+                         * */
+                    }
+
+                    if (temp_table.Count > 0)
+                    {
+                        FlushTable(temp_table, resultset);
+                        temp_table.Clear();
+                    }
+
+                    // 归并后写入结果集文件
+                    resultset.Idle -= new IdleEventHandler(biblio_paths_Idle);
+                    try
+                    {
+                        this.SetProgressText("正在排序");
+                        resultset.QuickSort();
+                        this.SetProgressText("正在去重");
+                        resultset.Sorted = true;    // 2012/5/30
+                        resultset.RemoveDup();
+                    }
+                    catch (InterruptException /*ex*/)
+                    {
+                        strError = "中断";
+                        return -1;
+                    }
+                    finally
+                    {
+                        resultset.Idle += new IdleEventHandler(biblio_paths_Idle);
+                    }
+                }
+
+                this.SetProgressText("输出结果集完成");
+                bDone = true;
+            }
+            finally
+            {
+                if (bDone == true)
+                {
+                    string strTemp1 = "";
+                    string strTemp2 = "";
+                    resultset.Detach(out strTemp1,
+                        out strTemp2);
+                }
+                else
+                {
+                    // 否则文件会被删除
+                    resultset.Close();
+                }
+            }
+
+            return 0;
+        }
+
+
+		//////////////
+
+		        // 调RemoveDup()之前，须先排序
+        // 中途会触发Idle事件
+        public void RemoveDup()
+        {
+            if (this.Sorted == false)
+                throw new Exception("调RemoveDup()之前，须先排序");
+
+            if (this.Count <= 1)
+                return;
+
+            int i, j;
+            long physicalCount = GetPhysicalCount();
+
+            m_nLoopCount = 0;
+
+            long bigOffseti;
+            long bigOffsetj;
+            for (i = 0; i < physicalCount; i++)
+            {
+                bigOffseti = GetBigOffsetBySmall(i);
+                if (bigOffseti < 0)
+                    continue;
+
+                DpRecord recordi = GetRecord(i, true);
+                for (j = i + 1; j < physicalCount; j++)
+                {
+                    if (m_nLoopCount++ % 1000 == 0)
+                    {
+                        Thread.Sleep(1);
+                        if (this.Idle != null)
+                        {
+                            IdleEventArgs e = new IdleEventArgs();
+                            this.Idle(this, e);
+                        }
+                    }
+
+                    bigOffsetj = GetBigOffsetBySmall(j);
+                    if (bigOffsetj < 0)
+                        continue;
+
+                    DpRecord recordj = GetRecord(j, true);
+                    if (recordi == null || recordj == null)
+                    {
+                        throw (new Exception("找记录失败"));
+                    }
+
+                    if (recordi.CompareTo(recordj) == 0)
+                    {
+                        //RemoveAt(j);  //RemoveAt里已设Count--
+                        RemoveAtPhysical(j);
+                        m_count--;
+                        bDirty = true;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
+
+            // 为了以后快速访问，把索引文件中的删除标记的记录压缩掉
+            this.CompressIndex();
+        }
+
+
+		////////////
+
+
+		2013/2/13 11:46:57 *** 处理事项 newbook.xml:0_8
+2013/2/13 11:46:57 检索 testing
+2013/2/13 11:47:11 命中记录 501478 条
+2013/2/13 11:47:11 获得结果集文件 testing -- c:\dev_opac_data/browse/cache/newbook.xml/0_8
+2013/2/13 13:20:57 创建RSS文件 testing -- c:\dev_opac_data/browse/cache/newbook.xml/0_8
+2013/2/13 13:21:14 包含记录 100 条
+2013/2/13 13:21:14 循环结束。共处理 501578 条记录。
+
+
+~~~
+
+2013/2/13 14:24:28 *** 处理事项 newbook.xml:0_8
+2013/2/13 14:24:28 检索 testing
+2013/2/13 14:24:40 命中记录 501478 条
+2013/2/13 14:24:40 获得结果集文件 testing -- c:\dev_opac_data/browse/cache/newbook.xml/0_8
+2013/2/13 15:11:51 开始排序。事项数 186844
+2013/2/13 15:13:15 结束排序。事项数 186844
+2013/2/13 15:13:15 开始去重。事项数 186844
+2013/2/13 15:36:01 结束去重。事项数 185308
+2013/2/13 15:36:01 创建RSS文件 testing -- c:\dev_opac_data/browse/cache/newbook.xml/0_8
+2013/2/13 15:36:09 包含记录 100 条
+2013/2/13 15:36:10 循环结束。共处理 501578 条记录。
+
+
+~~~~
+2013/2/13 15:48:26 *** 处理事项 newbook.xml:0_8
+2013/2/13 15:48:26 检索 testing
+2013/2/13 15:48:42 命中记录 501478 条
+2013/2/13 15:48:42 获得结果集文件 testing -- c:\dev_opac_data/browse/cache/newbook.xml/0_8
+2013/2/13 16:38:15 开始排序。事项数 186844
+2013/2/13 16:39:39 结束排序。事项数 186844
+2013/2/13 16:39:39 开始去重。事项数 186844
+2013/2/13 16:39:43 结束去重。事项数 185308
+2013/2/13 16:39:44 创建RSS文件 testing -- c:\dev_opac_data/browse/cache/newbook.xml/0_8
+2013/2/13 16:39:50 包含记录 100 条
+2013/2/13 16:39:50 循环结束。共处理 501578 条记录。
+
+
+~~~
+
+2013/2/13 18:22:50 *** 处理事项 newbook.xml:0_8
+2013/2/13 18:22:50 检索 testing
+2013/2/13 18:23:03 命中记录 501478 条
+2013/2/13 18:23:03 获得结果集文件 testing -- c:\dev_opac_data/browse/cache/newbook.xml/0_8
+2013/2/13 18:58:08 开始排序。事项数 186844
+2013/2/13 18:59:29 结束排序。事项数 186844
+2013/2/13 18:59:29 开始去重。事项数 186844
+2013/2/13 18:59:34 结束去重。事项数 185308
+2013/2/13 18:59:34 创建RSS文件 testing -- c:\dev_opac_data/browse/cache/newbook.xml/0_8
+2013/2/13 18:59:37 包含记录 100 条
+2013/2/13 18:59:37 循环结束。共处理 501578 条记录。
+
+每次约为2000个事项
+38分钟
+
+~~~
+
+2013/2/13 19:13:35 *** 处理事项 newbook.xml:0_8
+2013/2/13 19:13:35 检索 testing
+2013/2/13 19:13:47 命中记录 501478 条
+2013/2/13 19:13:47 获得结果集文件 testing -- c:\dev_opac_data/browse/cache/newbook.xml/0_8
+2013/2/13 19:52:24 开始排序。事项数 186844
+2013/2/13 19:53:45 结束排序。事项数 186844
+2013/2/13 19:53:45 开始去重。事项数 186844
+2013/2/13 19:53:49 结束去重。事项数 185308
+2013/2/13 19:53:50 创建RSS文件 testing -- c:\dev_opac_data/browse/cache/newbook.xml/0_8
+2013/2/13 19:53:54 包含记录 100 条
+2013/2/13 19:53:54 循环结束。共处理 501578 条记录。
+
+每次200个事项
+30分钟
+
+#if NO
+        // 获得读者信息
+        // 如果 Password 是 token 形态，则采用代理帐户；否则用读者帐户
+        long GetReaderInfo(Stop stop,
+                    string strBarcode,
+                    string strResultTypeList,
+                    out string[] results,
+                    out string strOutputPath,
+                    out byte[] timestamp,
+                    out string strError)
+        {
+
+            LibraryChannel channel = null;
+            SessionInfo session = null;
+
+            if (StringUtil.HasHead(this.Password, "token:") == true)
+            {
+                // 临时的SessionInfo对象
+                session = new SessionInfo(this.App);
+                session.UserID = this.App.ManagerUserName;
+                session.Password = this.App.ManagerPassword;
+                session.IsReader = false;
+
+                channel = session.Channel;
+            }
+            else
+                channel = this.Channel;
+
+            try
+            {
+                long lRet = channel.GetReaderInfo(stop,
+    strBarcode,
+    strResultTypeList,
+    out results,
+    out strOutputPath,
+    out timestamp,
+    out strError);
+
+                return lRet;
+            }
+            finally
+            {
+                if (session != null)
+                    session.CloseSession();
+            }
+        }
+#endif
+
+
+
+  <system.serviceModel>
+    <bindings>
+      <basicHttpBinding>
+        <binding name="ValidatorImplServiceSoapBinding" closeTimeout="00:01:00" openTimeout="00:01:00" receiveTimeout="00:10:00" sendTimeout="00:01:00" allowCookies="false" bypassProxyOnLocal="false" hostNameComparisonMode="StrongWildcard" maxBufferSize="65536" maxBufferPoolSize="524288" maxReceivedMessageSize="65536" messageEncoding="Text" textEncoding="utf-8" transferMode="Buffered" useDefaultWebProxy="true">
+          <readerQuotas maxDepth="32" maxStringContentLength="8192" maxArrayLength="16384" maxBytesPerRead="4096" maxNameTableCharCount="16384"/>
+          <security mode="None">
+            <transport clientCredentialType="None" proxyCredentialType="None" realm=""/>
+            <message clientCredentialType="UserName" algorithmSuite="Default"/>
+          </security>
+        </binding>
+      </basicHttpBinding>
+    </bindings>
+    <client>
+      <endpoint address="http://uap.ncyc.cbpm/eeip_iam/services/validate" binding="basicHttpBinding" bindingConfiguration="ValidatorImplServiceSoapBinding" contract="NanchangSso.Validator" name="ValidatorImplPort"/>
+    </client>
+  </system.serviceModel>
+
+  ~~~
+
+  #if NOOOOOOOOOOOOOO
+    //  原有代码。需要实现为接口方式
+    // return:
+    //      -1  发生错误
+    //      1   成功
+    int DoSsoLogin(string strLibraryCode)
+    {
+        string strError = "";
+        int nRet = 0;
+
+        string strAppID = "";
+        string strWsUrl = "";
+        string strSsoPageUrl = "";
+
+        // return:
+        //      -1  error
+        //      0   succeed
+        nRet = GetYczbCfgParams(out strAppID,
+            out strWsUrl,
+            out strSsoPageUrl,
+            out strError);
+        if (nRet == -1)
+            goto ERROR1;
+
+        string strIdCardNumber = "";
+        HttpCookie cookie = Request.Cookies.Get("iPlanetDirectoryPro");
+        if (cookie == null)
+        {
+            strError = "cookies中没有找到key为iPlanetDirectoryPro的事项";
+            goto ERROR2;
+        }
+
+        string strSsoToken = cookie.Value;
+        if (String.IsNullOrEmpty(strSsoToken) == true)
+        {
+            strError = "cookies中key为iPlanetDirectoryPro的事项其值为空";
+            goto ERROR2;
+        }
+
+        YczbSso.ValidatorImplService ws = new YczbSso.ValidatorImplService();
+        ws.Url = strWsUrl;  // "http://portal.cbpmc.cbpm/AuthCenter/services/validate"
+        string strResult = "";
+
+        try
+        {
+            strResult = ws.validate(strSsoToken,
+                strAppID,   // "CBPM_Library"
+                1);
+        }
+        catch (Exception ex)
+        {
+            strError = "webservice call exception: " + ex.Message;
+            goto ERROR1;
+        }
+
+#if NO
+        EndpointAddress address = new EndpointAddress(strWsUrl);// "http://portal.cbpmc.cbpm/AuthCenter/services/validate"
+        NanchangSso.ValidatorClient ws = new NanchangSso.ValidatorClient(); // (CreateBasicHttpBinding0(), address);
+        string strResult = "";
+
+        try
+        {
+            strResult = ws.validate(strSsoToken,
+                strAppID,   // "CBPM_Library"
+                1);
+        }
+        catch (Exception ex)
+        {
+            strError = "webservice call exception: " + ex.Message;
+            goto ERROR1;
+        }
+#endif
+
+        // strResult = "_returncode=0,_identitynumber=123456789"; // test
+
+        // 将逗号间隔的参数表解析到Hashtable中
+        // parameters:
+        //      strText 字符串。形态如 "名1=值1,名2=值2"
+        Hashtable param_table = StringUtil.ParseParameters(strResult, ',', '=', "url");
+
+        string strReturnCode = (string)param_table["_returncode"];
+        if (String.IsNullOrEmpty(strReturnCode) == true)
+        {
+            strError = "validate返回字符串 '" + strResult + "' 中没有包含_returncode值";
+            goto ERROR1;
+        }
+
+        if (strReturnCode == "0")
+        {
+        }
+        else if (strReturnCode == "1")
+        {
+            strError = "认证失败";
+            goto ERROR2;
+        }
+        else if (strReturnCode == "2")
+        {
+            strError = "应用系统Id不正确";
+            goto ERROR1;
+        }
+
+        strIdCardNumber = (string)param_table["_identitynumber"];
+        if (String.IsNullOrEmpty(strIdCardNumber) == true)
+        {
+            strError = "validate返回字符串 '" + strResult + "' 中没有包含_identitynumber值";
+            goto ERROR1;
+        }
+
+        string strParameters = "location=#opac_sso@" + sessioninfo.ClientIP + ",index=-1,type=reader,simulate=yes,libraryCode=" + LoginControl.GetLibraryCodeParam(strLibraryCode);
+        string strPassword = app.ManagerUserName + "," + app.ManagerPassword;   // simulate登录的需要
+        // 读者身份登录
+        long lRet = sessioninfo.Login(
+                    "ID:" + strIdCardNumber,
+                    strPassword, 
+                    strParameters,
+                    out strError);
+        if (lRet == -1)
+        {
+            strError = "对图书馆读者帐户进行登录时出错：" + strError;
+            goto ERROR1;
+        }
+        if (lRet > 1)
+        {
+            strError = "登录中发现有 " + lRet.ToString() + " 个账户符合条件，登录失败";
+            goto ERROR1;
+        }
+
+        if (sessioninfo.LoginCallStack.Count != 0)
+        {
+            string strUrl = (string)sessioninfo.LoginCallStack.Pop();
+            Redirect(strUrl);
+            return 1;
+        }
+        else
+        {
+            string strRedirect = Request.QueryString["redirect"];
+            if (strRedirect == null || strRedirect == "")
+            {
+                LoginState loginstate = Global.GetLoginState(this.Page);
+
+                if (loginstate == LoginState.Public)
+                    Redirect("searchbiblio.aspx");
+                else if (loginstate == LoginState.Reader)
+                    Redirect("borrowinfo.aspx");	// 实在没有办法，就到主页面
+                else if (loginstate == LoginState.Librarian)
+                    Redirect("searchbiblio.aspx");
+                else
+                    Redirect("searchbiblio.aspx");
+            }
+            else
+                Redirect(strRedirect);
+            return 1;
+        }
+
+    ERROR1:
+        Response.Write("<html><body><p>" + HttpUtility.HtmlEncode(strError) + "</p>"
+            + "</body></html>");
+        Response.End();
+        return -1;
+    ERROR2:
+        Response.Write("<html><body><p>" + HttpUtility.HtmlEncode(strError) + "</p>"
+            + "<p><a href=" + strSsoPageUrl + " >回到统一认证登录页面</a></p>"
+            + "</body></html>");
+        Response.End();
+        return -1;
+    }
+
+#endif
+
+
+~~~
+
+    // return:
+    //      -1  error
+    //      0   succeed
+    int GetYczbCfgParams(out string strAppID,
+        out string strWsUrl,
+        out string strSsoPageUrl,
+        out string strError)
+    {
+        strError = "";
+        strAppID = "";
+        strWsUrl = "";
+        strSsoPageUrl = "";
+
+        XmlNode node = app.OpacCfgDom.DocumentElement.SelectSingleNode("yczb/sso");
+        if (node == null)
+        {
+            strError = "opac.xml中尚未配置<yczb/sso>元素";
+            return -1;
+        }
+
+        strAppID = DomUtil.GetAttr(node, "appID");
+        if (String.IsNullOrEmpty(strAppID) == true)
+        {
+            strError = "opac.xml中<yczb/sso>元素内缺乏appID属性";
+            return -1;
+        }
+        strWsUrl = DomUtil.GetAttr(node, "validateWsUrl");
+        if (String.IsNullOrEmpty(strWsUrl) == true)
+        {
+            strError = "opac.xml中<yczb/sso>元素内缺乏validateWsUrl属性";
+            return -1;
+        }
+
+        strSsoPageUrl = DomUtil.GetAttr(node, "ssoPageUrl");
+        if (String.IsNullOrEmpty(strSsoPageUrl) == true)
+        {
+            strError = "opac.xml中<yczb/sso>元素内缺乏ssoPageUrl属性";
+            return -1;
+        }
+
+        return 0;
+    }
+
+
+	~~~

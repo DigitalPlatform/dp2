@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<root>
+  <project name="出纳流水" host="OperLogStatisForm" url="http://dp2003.com/dp2circulation/projects/出纳流水.projpack"/>
+
+  <project name="流通日志统计(读者)" host="OperLogStatisForm" url="http://dp2003.com/dp2circulation/projects/流通日志统计(读者).projpack"/>
+  <project name="流通日志统计(分类)" host="OperLogStatisForm" url="http://dp2003.com/dp2circulation/projects/流通日志统计(分类).projpack"/>
+  <project name="流通日志统计(工作人员)" host="OperLogStatisForm" url="http://dp2003.com/dp2circulation/projects/流通日志统计(工作人员).projpack"/>
+  <project name="借阅排行" host="OperLogStatisForm" url="http://dp2003.com/dp2circulation/projects/借阅排行.projpack"/>
+  <project name="编目、典藏日志统计(工作人员)" host="OperLogStatisForm" url="http://dp2003.com/dp2circulation/projects/编目、典藏日志统计(工作人员).projpack"/>
+  <project name="借阅排行[分馆]" host="OperLogStatisForm" url="http://dp2003.com/dp2circulation/projects/借阅排行[分馆].projpack"/>
+
+  <project name="借阅情况统计" host="ReaderStatisForm" url="http://dp2003.com/dp2circulation/projects/借阅情况统计.projpack"/>
+  <project name="借阅情况统计(高级)" host="ReaderStatisForm" url="http://dp2003.com/dp2circulation/projects/借阅情况统计(高级).projpack"/>
+  <project name="读者信息打印" host="ReaderStatisForm" url="http://dp2003.com/dp2circulation/projects/读者信息打印.projpack"/>
+  <project name="注销或删除读者记录" host="ReaderStatisForm" url="http://dp2003.com/dp2circulation/projects/注销或删除读者记录.projpack"/>
+
+  <project name="输出标签文本文件" host="ItemStatisForm" url="http://dp2003.com/dp2circulation/projects/输出标签文本文件.projpack"/>
+  <project name="打印标签" host="ItemStatisForm" url="http://dp2003.com/dp2circulation/projects/打印标签.projpack"/>
+  <project name="册在架情况" host="ItemStatisForm" url="http://dp2003.com/dp2circulation/projects/册在架情况.projpack"/>
+  <project name="注销或删除册记录" host="ItemStatisForm" url="http://dp2003.com/dp2circulation/projects/注销或删除册记录.projpack"/>
+  <project name="分类统计(按册记录)" host="ItemStatisForm" url="http://dp2003.com/dp2circulation/projects/分类统计(按册记录).projpack"/>
+  <project category="debugger" name="中央编译局三行索取号升级" host="ItemStatisForm" url="http://dp2003.com/dp2circulation/projects/中央编译局三行索取号升级.projpack"/>
+
+  <project category="debugger" name="上海图书馆打印订购卡片" host="OrderStatisForm" url="http://dp2003.com/dp2circulation/projects/上海图书馆打印订购卡片.projpack"/>
+  
+  <project name="输出HTML新书通报" host="BiblioStatisForm" url="http://dp2003.com/dp2circulation/projects/输出HTML新书通报.projpack"/>
+  <project name="图书总量统计" host="BiblioStatisForm" url="http://dp2003.com/dp2circulation/projects/图书总量统计.projpack"/>
+  <project name="创建架位表" host="BiblioStatisForm" url="http://dp2003.com/dp2circulation/projects/创建架位表.projpack"/>
+  <project name="分类统计(按书目库)" host="BiblioStatisForm" url="http://dp2003.com/dp2circulation/projects/分类统计(按书目库).projpack"/>
+  <project name="为册记录添加索取号" host="BiblioStatisForm" url="http://dp2003.com/dp2circulation/projects/为册记录添加索取号.projpack"/>
+  <project name="输出dt1000书目MARC记录" host="BiblioStatisForm" url="http://dp2003.com/dp2circulation/projects/输出dt1000书目MARC记录.projpack"/>
+  <project name="输出卡片" host="BiblioStatisForm" url="http://dp2003.com/dp2circulation/projects/输出卡片.projpack"/>
+  <project name="搜索MARC记录中的星号" host="BiblioStatisForm" url="http://dp2003.com/dp2circulation/projects/搜索MARC记录中的星号.projpack"/>
+  <project name="搜索XML记录中的星号" host="BiblioStatisForm" url="http://dp2003.com/dp2circulation/projects/搜索XML记录中的星号.projpack"/>
+  <project name="搜索没有下属记录和对象的书目记录" host="BiblioStatisForm" url="http://dp2003.com/dp2circulation/projects/搜索没有下属记录和对象的书目记录.projpack"/>
+  <project name="删除MARC记录中的空字段子字段" host="BiblioStatisForm" url="http://dp2003.com/dp2circulation/projects/删除MARC记录中的空字段子字段.projpack"/>
+  <project name="红泥巴检查997" host="BiblioStatisForm" url="http://dp2003.com/dp2circulation/projects/红泥巴检查997.projpack" category="debugger"/>
+
+  <!--
+  <project name="导入书目和实体信息" host="Iso2709StatisForm" url="http://dp2003.com/dp2circulation/projects/导入书目和实体信息.projpack"/>
+  -->
+  <project name="导入书目" host="Iso2709StatisForm" url="http://dp2003.com/dp2circulation/projects/导入书目.projpack"/>
+  <project name="(上图)创建分类对照词典库" host="Iso2709StatisForm" url="http://dp2003.com/dp2circulation/projects/(上图)创建分类对照词典库.projpack"/>
+
+  <project name="流通凭条打印(LPT打印机)" host="OperHistory" url="http://dp2003.com/dp2circulation/projects/流通凭条打印(LPT打印机).projpack"/>
+  <project name="流通凭条打印(Windows打印机)" host="OperHistory" url="http://dp2003.com/dp2circulation/projects/流通凭条打印(Windows打印机).projpack"/>
+
+  <project name="为每条书目记录增添对象" host="MainForm" url="http://dp2003.com/dp2circulation/projects/为每条书目记录增添对象.projpack" category="debugger"/>
+  <project name="为每条书目记录创建多个册记录" host="MainForm" url="http://dp2003.com/dp2circulation/projects/为每条书目记录创建多个册记录.projpack" category="debugger"/>
+  <project name="为每条书目记录删除下属所有册记录" host="MainForm" url="http://dp2003.com/dp2circulation/projects/为每条书目记录删除下属所有册记录.projpack" category="debugger"/>
+  <project name="创建一批模拟读者记录" host="MainForm" url="http://dp2003.com/dp2circulation/projects/创建一批模拟读者记录.projpack" category="debugger"/>
+  <project name="模拟借书还书" host="MainForm" url="http://dp2003.com/dp2circulation/projects/模拟借书还书.projpack" category="debugger"/>
+  <project name="为每条书目记录创建多个订购记录" host="MainForm" url="http://dp2003.com/dp2circulation/projects/为每条书目记录创建多个订购记录.projpack" category="debugger"/>
+
+  <project name="批添加读者证照片" host="MainForm" url="http://dp2003.com/dp2circulation/projects/批添加读者证照片.projpack" />
+
+</root>

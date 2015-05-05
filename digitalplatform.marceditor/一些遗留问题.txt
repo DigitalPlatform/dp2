@@ -1,0 +1,2 @@
+1.对从web上下载的ValueList做缓冲
+

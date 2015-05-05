@@ -1,0 +1,62 @@
+﻿<UserControl x:Class="DigitalPlatform.CirculationClient.LoanPolicyControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:w="clr-namespace:DigitalPlatform.CirculationClient"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    <Grid Name="_grid" HorizontalAlignment="Left" VerticalAlignment="Top" ShowGridLines="False">
+        <Grid.ContextMenu>
+            <ContextMenu>
+                <MenuItem Command="w:MyCommand.ChangeTitle" CommandTarget="{Binding Path=PlacementTarget,RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                <Separator />
+                <MenuItem Command="w:MyCommand.DeleteTitle" CommandTarget="{Binding Path=PlacementTarget,RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                <Separator />
+                <MenuItem Command="w:MyCommand.InsertColumn" CommandTarget="{Binding Path=PlacementTarget,RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                <MenuItem Command="w:MyCommand.InsertRow" CommandTarget="{Binding Path=PlacementTarget,RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+
+            </ContextMenu> 
+
+        </Grid.ContextMenu>
+
+        <Grid.Background>
+            <LinearGradientBrush EndPoint="1,0.5" StartPoint="0,0.5">
+                <GradientStop Color="#FF525252" Offset="0" />
+                <GradientStop Color="#FF939393" Offset="0.762" />
+            </LinearGradientBrush>
+        </Grid.Background>
+    </Grid>
+    <UserControl.CommandBindings>
+        <CommandBinding Command="ApplicationCommands.Cut"
+                        Executed="EditCmdExecuted"
+                        CanExecute="EditCmdCanExecute" />
+        <CommandBinding Command="ApplicationCommands.Copy"
+                        Executed="EditCmdExecuted"
+                        CanExecute="EditCmdCanExecute" />
+        <CommandBinding Command="ApplicationCommands.Paste"
+                        Executed="EditCmdExecuted"
+                        CanExecute="EditCmdCanExecute" />
+        <CommandBinding Command="ApplicationCommands.SelectAll"
+                        Executed="EditCmdExecuted"
+                        CanExecute="EditCmdCanExecute" />
+        <CommandBinding Command="ApplicationCommands.Delete"
+                        Executed="EditCmdExecuted"
+                        CanExecute="EditCmdCanExecute" />
+        <CommandBinding Command="ApplicationCommands.Properties"
+                        Executed="EditCmdExecuted"
+                        CanExecute="EditCmdCanExecute" />
+        <CommandBinding Command="w:MyCommand.ChangeTitle"
+                        Executed="EditCmdExecuted"
+                        CanExecute="EditCmdCanExecute" />
+        <CommandBinding Command="w:MyCommand.DeleteTitle"
+                        Executed="EditCmdExecuted"
+                        CanExecute="EditCmdCanExecute" />
+        <CommandBinding Command="w:MyCommand.InsertColumn"
+                        Executed="EditCmdExecuted"
+                        CanExecute="EditCmdCanExecute" />
+        <CommandBinding Command="w:MyCommand.InsertRow"
+                        Executed="EditCmdExecuted"
+                        CanExecute="EditCmdCanExecute" />
+    </UserControl.CommandBindings>
+</UserControl>

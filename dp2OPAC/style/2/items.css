@@ -1,0 +1,100 @@
+
+TABLE.items
+{
+	font-size: 12px;
+	width: 100%;
+	border-left-color: lightgrey;
+	border-bottom-color: lightgrey;
+	border-top-color: lightgrey;
+	border-right-color: lightgrey;
+	background-color: lightgrey;
+
+}
+
+
+TABLE.items TR.columntitle
+{
+	font-size: 12px;
+	font-weight: bolder;
+	background-color: whitesmoke;
+}
+
+/* column title's class names are: no barcode state location accessNo volume price borrows reservations */
+
+TABLE.items TR.columntitle TD.price
+{
+	text-align:right;
+}
+
+/* normal content line */
+TABLE.items TR.content
+{
+	font-size: 12px;
+	background-color: white;
+}
+
+/* active content line */
+TABLE.items TR.active
+{
+	background-color: cornsilk;
+}
+
+TABLE.items TR.content TD.state
+{
+	font-weight: bolder;
+	background-color: whitesmoke;
+}
+
+TABLE.items TD.price
+{
+	text-align: right;
+}
+
+TABLE.items TR.content TD.price
+{
+	background-color: whitesmoke;
+}
+
+TABLE.items TR.content TD.borrows
+{
+	background-color: whitesmoke;
+}
+
+TABLE.items TR.content TD.warning
+{
+	background-color: yellow;
+	font-weight:bold;
+}
+
+TABLE.items TR.content TD.over
+{
+	background-color: red;
+	color:White;
+	font-weight:bold;
+}
+
+TABLE.items TR.cmdline
+{
+	font-size: 12px;
+}
+
+TABLE.items TR.debugline
+{
+	font-size: 12px;
+	background-color: yellow;
+}
+
+TABLE.items DIV.none
+{
+	width: 100%;
+	background-color: white;
+	color:Gray;
+	text-align:center;
+}
+
+TABLE.items TR.content.bindingmember
+{
+    color: #bbbbbb;
+	text-decoration:line-through;
+}
+

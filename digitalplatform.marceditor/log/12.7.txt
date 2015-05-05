@@ -1,0 +1,341 @@
+1.解决了通过定长模板修改重复子字段的功能
+完成
+
+2.与谢老师编著者号码表脚本
+完成
+
+3.做MarcEditor测试工作单
+完成
+
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+using System;
+using System.Windows.Forms;
+using System.IO;
+using System.Text;
+
+using dp2rms;
+using DigitalPlatform.Xml;
+using DigitalPlatform.Marc;
+
+using DigitalPlatform.IO;
+using DigitalPlatform.GcatClient;
+using DigitalPlatform;
+
+public class MyHost : Host
+{
+
+	string [] cfgFields = new string [] {
+		"200(a-9)",
+		"701(a-9)",
+		"711(a-9)",
+		"702(a-9)",
+		"712(a-9)"
+
+	};
+
+	/*
+	// 为产生著者号码的用户名和密码
+	string UserName = "";
+	string Password = "";
+	*/
+
+	public override void Main(object sender, HostEventArgs e)
+	{
+		ScriptActionCollection actions = new ScriptActionCollection();
+		actions.NewItem("加拼音", "给.....加拼音", "AddPinyin", false);
+		actions.NewItem("7*1$a <-- 200$f", "将200$f内容加入701/711字段$a", "Copy200fTo7x1a", false);
+		actions.NewItem("7*2$a <-- 200$g", "将200$g内容加入702/712字段$a", "Copy200gTo7x2a", false);
+		actions.NewItem("加入著者号", "根据701/711/702/712$a内容, 创建905$a", "AddAuthorNumber", false);
+
+		ScriptActionMenuDlg dlg = new ScriptActionMenuDlg();
+		dlg.Actions = actions;
+		dlg.StartPosition = FormStartPosition.CenterScreen;
+		dlg.ShowDialog();
+		if (dlg.DialogResult == DialogResult.OK)
+		{
+			this.Invoke(dlg.SelectedAction.ScriptEntry);
+		}
+	}
+
+	void Copy200gTo7x2a()
+	{
+		Copy200gfTo7xxa("g", "702");
+
+	}
+
+
+	void Copy200fTo7x1a()
+	{
+		Copy200gfTo7xxa("f", "701");
+
+	}
+
+	void Copy200gfTo7xxa(string strFromSubfield, string strToField)
+	{
+		Field field_200 = this.DetailForm.MarcEditor.Record.Fields.GetOneField("200",0);
+		SubfieldCollection subfields_200 = field_200.Subfields;
+
+		Subfield subfield_f = subfields_200[strFromSubfield];
+
+		if (subfield_f == null)
+		{
+			MessageBox.Show(this.DetailForm, "200$"+strFromSubfield+"不存在");
+			return;
+		}
+
+		string strContent = subfield_f.Value;
+		
+		// 看看当前活动字段是不是701
+		Field field_701 = null;
+
+		field_701 = this.DetailForm.MarcEditor.FocusedField;
+		if (field_701 != null)
+		{
+			if (field_701.Name != strToField)
+				field_701 = null;
+		}
+		
+
+		if (field_701 == null)
+		{
+			field_701 = this.DetailForm.MarcEditor.Record.Fields.GetOneField(strToField, 0);
+
+			if (field_701 == null)
+			{
+				field_701 = this.DetailForm.MarcEditor.Record.Fields.Add(strToField, "  ", "", true);
+			}
+
+		}
+		
+
+		if (field_701 == null)
+			throw(new Exception("error ..."));
+
+
+		Subfield subfield_701a = field_701.Subfields["a"];
+		if (subfield_701a == null)
+		{
+			subfield_701a = new Subfield();
+			subfield_701a.Name = "a";
+		}
+
+		subfield_701a.Value = strContent;
+		field_701.Subfields["a"] = subfield_701a;
+
+	}
+
+	void AddPinyin()
+	{
+		PinyinStyle style = PinyinStyle.None;	// 在这里修改拼音大小写风格
+
+		for(int i=0;i<DetailForm.MarcEditor.Record.Fields.Count;i++)
+		{
+			Field field = DetailForm.MarcEditor.Record.Fields[i];
+
+			string strFrom = "";
+			string strTo = "";
+			int nRet = GetPinyinCfgLine(field.Name,
+				out strFrom,
+				out strTo);
+			if (nRet != 1)
+				continue;
+
+			string strHanzi = "";
+			string strNextSubfieldName = "";
+
+			string strField = field.Text;
+
+			nRet = MarcUtil.GetSubfield(strField,
+				ItemType.Field,
+				strFrom,
+				0,
+				out strHanzi,
+				out strNextSubfieldName);
+			if (nRet != 1)
+				continue;
+			if (strHanzi.Length <=1)
+				continue;
+
+			strHanzi = strHanzi.Substring(1);
+
+			string strPinyin;
+			string strError = "";
+			nRet = this.DetailForm.HanziTextToPinyin(strHanzi,
+				style,
+				out strPinyin,
+				out strError);
+			if (nRet == -1)
+			{
+				MessageBox.Show(strError);
+				break;
+			}
+
+			nRet = MarcUtil.ReplaceSubfield(
+				ref strField,
+				strTo,
+				0,
+				strTo + strPinyin);
+
+			field.Text = strField;
+
+		}
+
+
+
+	}
+
+	int GetPinyinCfgLine(string strFieldName,
+		out string strFrom,
+		out string strTo)
+	{
+		strFrom = "";
+		strTo = "";
+		for(int i=0;i<cfgFields.Length;i++)
+		{
+			string strLine = cfgFields[i];
+			string strName = strLine.Substring(0,3);
+			if (strName == strFieldName)
+			{
+				string strRight = strLine.Substring(3).Trim();
+
+				if (strRight.Length == 0)
+					return -1;
+				if (strRight[0] == '(')
+					strRight = strRight.Substring(1).Trim();
+				if (strRight.Length == 0)
+					return -1;
+				if (strRight[strRight.Length-1] == ')')
+					strRight = strRight.Substring(0, strRight.Length-1).Trim();
+				if (strRight.Length == 0)
+					return -1;
+
+				int nRet = strRight.IndexOf("-");
+				if (nRet == -1)
+					return -1;
+				strFrom = strRight.Substring(0, nRet).Trim();											strTo = strRight.Substring(nRet+1).Trim();
+				return 1;
+
+			}
+
+		}
+
+
+		return 0;		
+	}
+
+
+	void AddAuthorNumber()
+	{
+		string strAuthor = "";
+
+		strAuthor = this.DetailForm.MarcEditor.Record.Fields.GetFirstSubfield("701", "a");
+
+		if (strAuthor != "")
+			goto BEGIN;
+
+		strAuthor = this.DetailForm.MarcEditor.Record.Fields.GetFirstSubfield("711", "a");
+
+		if (strAuthor != "")
+			goto BEGIN;
+
+		strAuthor = this.DetailForm.MarcEditor.Record.Fields.GetFirstSubfield("702", "a");
+
+		if (strAuthor != "")
+			goto BEGIN;
+
+		strAuthor = this.DetailForm.MarcEditor.Record.Fields.GetFirstSubfield("712", "a");
+
+		if (strAuthor == "")
+		{
+			MessageBox.Show( this.DetailForm, "701/711/702/712中均未发现&a,无法处理");
+			return;
+		}
+
+		BEGIN:
+
+
+		string GcatServerUrl = "http://dp2003.com/dp2libraryws/gcat.asmx";
+
+		DigitalPlatform.GcatClient.Channel channel = new DigitalPlatform.GcatClient.Channel();
+
+
+
+
+		string strNumber = "";
+		string strError = "";
+		string strDebugInfo = "";
+		int nRet = channel.GetNumber(
+			this.DetailForm,
+			GcatServerUrl,
+			strAuthor,
+			true,	// bSelectPinyin
+			true,	// bSelectEntry
+			true,	// bOutputDebugInfo
+			new BeforeLoginEventHandle(channel_BeforeLogin),
+			out strNumber,
+			out strDebugInfo,
+			out strError);
+		if (nRet == -1)
+		{
+			strError = "取 著者 '" + strAuthor + "' 之号码时出错 : " + strError;
+			MessageBox.Show(strError);
+			return;
+		}
+
+
+		this.DetailForm.MarcEditor.Record.Fields.SetFirstSubfield("905", "e", strNumber);
+
+	}
+
+	void channel_BeforeLogin(object sender,
+		BeforeLoginEventArgs e)
+	{
+
+		string strUserName = (string)this.DetailForm.MainForm.ParamTable["author_number_account_username"];
+		string strPassword = (string)this.DetailForm.MainForm.ParamTable["author_number_account_password"];
+
+		if (strUserName == null)
+		{
+			strUserName = "";
+			strPassword = "";
+		}
+
+		// 直接试探
+		if (!(e.UserName == strUserName && e.Failed == true)
+			&& strUserName != "")
+		{
+			e.UserName = strUserName;
+			e.Password = strPassword;
+			return;
+		}
+
+		LoginDlg dlg = new LoginDlg();
+
+		dlg.textBox_comment.Text = "加著者号码功能需要登录";
+		dlg.textBox_serverAddr.Text = e.GcatServerUrl;
+		dlg.textBox_userName.Text = strUserName;
+		dlg.textBox_password.Text = strPassword;
+		dlg.checkBox_savePassword.Checked = true;
+
+		dlg.textBox_serverAddr.Enabled = false;
+		dlg.ShowDialog(null);
+		if (dlg.DialogResult != DialogResult.OK)
+			return;
+
+		strUserName = dlg.textBox_userName.Text;
+		strPassword = dlg.textBox_password.Text;
+
+		e.UserName = strUserName;
+		e.Password = strPassword;
+
+		this.DetailForm.MainForm.ParamTable["author_number_account_username"] = strUserName;
+		this.DetailForm.MainForm.ParamTable["author_number_account_password"] = strPassword;
+	}
+}
+
+
+
+
+
+~~~~~~~~~~~~~~~~~~~~~~

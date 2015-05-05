@@ -1,0 +1,128 @@
+
+TABLE.statis
+{
+	font-size: 14px;
+	/*width: 100%;*/
+	width: 400px;
+	border-left-color: lightgrey;
+	border-bottom-color: lightgrey;
+	border-top-color: lightgrey;
+	border-right-color: lightgrey;
+	background-color: lightgrey;
+
+}
+
+TABLE.statis TR.tabletitle
+{
+	font-size: 16px;
+	font-weight: bolder;
+	background-color: #aaffaa;
+}
+
+
+TABLE.statis TR.columntitle
+{
+/*	font-size: 12px;*/
+	font-weight: bolder;
+	background-color: white;
+}
+
+TABLE.statis TR.category
+{
+	text-align: left;
+	font-weight: bolder;
+/*	background-color: whitesmoke;*/
+	background-color: #ccffcc;
+
+}
+
+TABLE.statis TR.content
+{
+/*	font-size: 12px;*/
+	background-color: white;
+
+}
+
+TABLE.statis TR.content_active
+{
+/*	font-size: 12px;*/
+	background-color: cornsilk;
+}
+
+/* 标题下面的统计范围注释 */
+TABLE.statis TR.comment
+{
+	background-color: #eeffee;
+
+}
+
+TABLE.statis TR.content TD.name
+{
+	width: 80%;
+	text-align: right;
+}
+
+TABLE.statis TR.content TD.value
+{
+	width: 20%;
+	text-align: right;
+}
+
+
+TABLE.statis TR.cmdline
+{
+/*	font-size: 12px;*/
+
+}
+
+TABLE.statis TR.debugline
+{
+/*	font-size: 12px;*/
+	background-color: yellow;
+}
+
+span.calendar_label
+{
+	font-size: 14px;
+	font-weight: bolder;
+
+	color: white;
+}
+
+span.date_range_label
+{
+	font-size: 14px;
+	font-weight: bolder;
+
+	color: white;
+}
+
+div.date_range_comment
+{
+	font-size: 12px;
+
+	color: white;
+
+	border-style: dotted;
+	border-color: #ffffff;
+	border-width: 2px;
+	padding: 8px;
+	margin: 4px;
+}
+
+span.comment
+{
+	font-size: 12px;
+}
+
+/* 输入daterange的textbox */
+input.date_range
+{
+	font-size: 14px;
+}
+
+/* 开始统计 按钮 */
+input.begin_statis
+{
+	font-size: 12px;
+}

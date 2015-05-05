@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="http://dp2003.com/gcat/" elementFormDefault="qualified" targetNamespace="http://dp2003.com/gcat/" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="http://localhost/gcatserver/metadata?xsd=xsd2" namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
+  <xs:element name="GetNumber">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="strID" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strAuthor" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="bSelectPinyin" type="xs:boolean" />
+        <xs:element minOccurs="0" name="bSelectEntry" type="xs:boolean" />
+        <xs:element minOccurs="0" name="bOutputDebugInfo" type="xs:boolean" />
+        <xs:element minOccurs="0" name="questions" nillable="true" type="tns:ArrayOfQuestion" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:complexType name="ArrayOfQuestion">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="Question" nillable="true" type="tns:Question" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfQuestion" nillable="true" type="tns:ArrayOfQuestion" />
+  <xs:complexType name="Question">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="Answer" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Text" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="Question" nillable="true" type="tns:Question" />
+  <xs:element name="GetNumberResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="GetNumberResult" type="xs:int" />
+        <xs:element minOccurs="0" name="questions" nillable="true" type="tns:ArrayOfQuestion" />
+        <xs:element minOccurs="0" name="strNumber" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strDebugInfo" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strError" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetPinyin">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="strID" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strText" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="GetPinyinResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="GetPinyinResult" type="xs:int" />
+        <xs:element minOccurs="0" name="strPinyinXml" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strError" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="SetPinyin">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="strID" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strPinyinXml" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="SetPinyinResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="SetPinyinResult" type="xs:int" />
+        <xs:element minOccurs="0" name="strError" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="SplitHanzi">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="strID" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strText" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="SplitHanziResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="SplitHanziResult" type="xs:int" />
+        <xs:element xmlns:q1="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="tokens" nillable="true" type="q1:ArrayOfstring" />
+        <xs:element minOccurs="0" name="strError" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

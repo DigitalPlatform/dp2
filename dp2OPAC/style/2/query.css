@@ -1,0 +1,132 @@
+
+TABLE.query
+{
+	width:100%;
+	font-size: 12px;
+	border-left-color: lightgrey;
+	border-bottom-color: lightgrey;
+	border-top-color: lightgrey;
+	border-right-color: lightgrey;
+	background-color: lightgrey;
+	overflow:scroll;
+}
+
+
+TABLE.query TR.columntitle
+{
+	font-size: 12px;
+	font-weight: bolder;
+	background-color: white;
+}
+
+TABLE.query TR.content
+{
+	font-size: 12px;
+	background-color: white;
+}
+
+/* 每个 TD 的padding */
+TABLE.query TR TD
+{
+	padding-top: 1px;
+	padding-bottom: 1px;
+	padding-left: 8px;
+	padding-right: 8px;
+}
+
+/* 简单风格时每行左侧的标题 */
+TABLE.query TR.content TD.left
+{
+	text-align: right;
+	padding: 2px;
+	padding-right: 8px;
+}
+
+
+TABLE.query TR.content TD.word
+{
+	/*font-weight: bolder;*/
+	background-color: whitesmoke;
+}
+
+/* 最简方式时检索参数注释 */
+TABLE.query TR.content TD.word DIV.wordcomment
+{
+	border-style: dotted;
+	border-color: #cccc00;
+	border-width: 2px;
+	padding: 2px;
+	margin-top: 4px;
+	margin-bottom: 4px;	
+	text-align: center;
+}
+
+TABLE.query TR.cmdline
+{
+	font-size: 8pt;
+}
+
+TABLE.query TR.content SELECT.logic
+{
+	font-size: 12px;
+	padding: 2px;
+}
+
+/* 检索词输入域 */
+TABLE.query TR.content INPUT.word
+{
+	font-size: 12px;
+	padding: 2px;
+	margin-top: 4px;
+	font-weight: bolder;
+}
+
+
+TABLE.query TR.content SELECT.match
+{
+	font-size: 12px;
+	padding: 2px;
+}
+
+TABLE.query TR.content SELECT.from
+{
+	font-size: 12px;
+	padding: 2px;
+}
+
+TABLE.query TR.content SELECT.dbname
+{
+	font-size: 12px;
+	padding: 2px;
+}
+
+TABLE.query TR.cmdline INPUT.search
+{
+	font-size: 12px;
+	padding: 2px;
+}
+
+TABLE.query TR.panelstyle
+{
+	text-align: right;
+}
+
+TABLE.query TR.panelstyle SELECT.panelstyle
+{
+	font-size: 12px;
+	padding: 2px;
+}
+
+TABLE.query TR.xml
+{
+	font-size: 12px;
+}
+
+TABLE.query TR.resultline
+{
+	background-color: #ffffcc;
+	color: #000000;
+	font-weight: bolder;
+}
+
+

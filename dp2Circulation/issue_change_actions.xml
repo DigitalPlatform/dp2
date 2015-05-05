@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<root>
+  <action element="state" type="" list="issueState">
+    <caption lang="zh">状态</caption>
+  </action>
+  <action element="publishTime" type="" list="">
+    <caption lang="zh">出版时间</caption>
+  </action>
+  <action element="issue" type="" list="">
+    <caption lang="zh">期号</caption>
+  </action>
+  <action element="zong" type="" list="">
+    <caption lang="zh">总期号</caption>
+  </action>
+  <action element="volume" type="" list="">
+    <caption lang="zh">卷号</caption>
+  </action>
+  <action element="comment" type="" list="">
+    <caption lang="zh">注释</caption>
+  </action>
+  <action element="batchNo" type="" list="">
+    <caption lang="zh">批次号</caption>
+  </action>
+
+</root>

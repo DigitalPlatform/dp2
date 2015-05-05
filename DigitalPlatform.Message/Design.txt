@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+    <script>
+<![CDATA[
+
+using System;
+using System.Xml;
+using DigitalPlatform.rms;
+using DigitalPlatform.IO;
+
+public class MyKeysHost : KeysHost
+{
+
+	public void getUsernameBoxTouched()
+	{
+
+		XmlNode node = this.DataDom.SelectSingleNode("//username");
+		if (node == null)
+			return;
+
+		string strName = node.InnerText;
+
+		node = this.DataDom.SelectSingleNode("//box");
+		if (node == null)
+		{
+			this.ResultString = strName + "|";
+			return;
+		}
+
+		string strBox = node.InnerText;
+
+		string strTouched = "0";
+		
+		node = this.DataDom.SelectSingleNode("//touched");
+		if (node != null)
+			strTouched = node.InnerText;
+		
+		this.ResultString = strName + "|" + strBox + "|" + strTouched;
+	}
+
+}
+
+
+]]>
+
+<refs>
+<ref>system.dll</ref>
+<ref>system.xml.dll</ref>
+<ref>%bindir%\digitalplatform.io.dll</ref>
+</refs>
+</script>
+    <key>
+        <xpath>//box</xpath>
+        <from>box</from>
+        <table ref="box" />
+    </key>
+    <table name="box" id="1">
+        <caption lang="zh-cn">信箱</caption>
+        <caption lang="en">Box</caption>
+    </table>
+    <key>
+        <xpath>//username</xpath>
+        <from>username</from>
+        <table ref="username" />
+    </key>
+    <table name="username" id="2">
+        <caption lang="zh-cn">用户名</caption>
+        <caption lang="en">User name</caption>
+    </table>
+    <key>
+        <xpath>//subject</xpath>
+        <from>subject</from>
+        <table ref="subject" />
+    </key>
+    <table name="subject" id="3">
+        <convert>
+            <string style="upper" />
+        </convert>
+        <convertquery>
+            <string style="upper" />
+        </convertquery>
+        <caption lang="zh-cn">主题</caption>
+        <caption lang="en">Subject</caption>
+    </table>
+    <key>
+        <xpath scripting="on">getUsernameBoxTouched</xpath>
+        <from>ubt</from>
+        <table ref="usernameboxtouched" />
+    </key>
+    <table name="usernameboxtouched" id="5">
+        <convert>
+            <string style="upper" />
+        </convert>
+        <convertquery>
+            <string style="upper" />
+        </convertquery>
+        <caption lang="zh-cn">用户名信箱</caption>
+        <caption lang="en">用户名信箱</caption>
+    </table>
+
+</root>
+
+
+
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+    <col title="用户名">
+        <xpath>//username</xpath>
+    </col>
+    <col title="信箱">
+        <xpath>//box</xpath>
+    </col>
+    <col title="发送者">
+        <xpath>//sender</xpath>
+    </col>
+    <col title="接收者">
+        <xpath>//recipient</xpath>
+    </col>
+    <col title="主题">
+        <xpath>//subject</xpath>
+    </col>
+    <col title="日期">
+        <xpath>//date</xpath>
+    </col>
+    <col title="尺寸">
+        <xpath>//size</xpath>
+    </col>
+</root>
+
+~~~~~~~~~~~
+作 MessageControl控件
+
+~~~~~~~~~~~~
+用户名涉及到一个问题：什么才能做用户名？
+
+其实只要值为唯一的字段内容，就可以做登录名。不过，要额外指明途径名
+
+对于流通系统，可以认为 证条码号是用户名
+
+所有登录名，要翻译为这个用户名，才能确保进入唯一的用户名信箱
+
+从词汇上，登录名叫做 loginname 而用户名叫username或userid
+
+可以用一个统一界面来指定登录名，避免用户去记忆复杂的前缀
+
+
+~~~~~~~~
+来自草稿箱的 消息发送后，要记住删除旧记录
+
+或者直接覆盖原记录，不过id号的旧一点会导致收件那边看到的显示顺序有问题。
+所以最好还是删除原来记录。
+
+~~~~~~~~
+草稿箱记录未保存而离开的时候，需要提醒?
+
+索性打开草稿箱记录的操作，在新窗口中进行?
+
+~~~~~~~~~
+记录新进入一个什么"箱", 它的标题后的未读数字应当有反映.
+
+移动到废件箱和永久删除, 按钮和提示方面都应当有所区别.
+
+废件箱中记录打开后应当可以继续利用.
+
+是否在删除操作后, 或者发送保存完成后, 要回到messagelist画面?

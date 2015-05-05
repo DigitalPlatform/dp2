@@ -1,0 +1,22 @@
+<root>
+  <title>借阅排行, 按部门\r%library%\r%daterange%</title>
+  <titleComment>
+  </titleComment>
+  <columns>
+    <column name="读者证条码号" type="String" align="left" sum="no" class="readerbarcode" eval="" />
+    <column name="姓名" type="" align="left" sum="no" class="name" eval="" />
+    <column name="部门" type="" align="left" sum="no" class="department" eval="" />
+    <column name="册条码号" type="String" align="left" sum="no" class="itembarcode" eval="" />
+    <column name="书目摘要" type="" align="left" sum="no" class="biblio" eval="" />
+    <column name="借阅时间" type="" align="left" sum="no" class="borrowtime" eval="" />
+    <column name="借期" type="" align="left" sum="no" class="period" eval="" />
+    <column name="应还时间" type="" align="left" sum="no" class="returningtime" eval="" />
+  </columns>
+  <css>
+  </css>
+  <typeName>141 超期读者清单</typeName>
+  <columnSortStyle>
+  </columnSortStyle>
+  <createFrequency>day</createFrequency>
+  <property fresh="true" />
+</root>

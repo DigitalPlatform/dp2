@@ -1,0 +1,17 @@
+<root>
+  <title>图书在架情况, 按分类，馆藏地\r%location%\r%class%\r%daterange%</title>
+  <titleComment>\r</titleComment>
+  <columns>
+    <column name="类号" type="String" align="left" sum="no" class="classname" eval="" />
+    <column name="外借册" type="" align="right" sum="yes" class="outcount" eval="" />
+    <column name="在架册" type="" align="right" sum="yes" class="incount" eval="" />
+    <column name="总册" type="" align="right" sum="yes" class="count" eval="" />
+    <column name="外借比率" type="" align="right" sum="yes" class="percent" eval="(100.0 * line.GetInt64(1) / line.GetInt64(3)).toFixed(2) + '%'" />
+  </columns>
+  <css>
+  </css>
+  <typeName>302 馆藏地点和分类的图书在架情况</typeName>
+  <columnSortStyle>0:a</columnSortStyle>
+  <createFrequency>month</createFrequency>
+  <property fresh="false" />
+</root>

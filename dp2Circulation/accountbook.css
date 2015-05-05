@@ -1,0 +1,263 @@
+BODY
+{
+	font-family:"Microsoft YaHei", Times, serif;
+}
+
+DIV.pageheader
+{
+	text-align: right;
+	border-bottom-width: 1pt;
+	border-bottom-color: #cccccc;
+	border-bottom-style: solid;
+	margin-bottom: 16pt;
+}
+
+DIV.tabletitle
+{
+	font-size: 16pt;
+	font-weight: bold;
+	text-align: center;
+	margin: 16pt;
+}
+
+TABLE.table
+{
+	width: 100%;
+
+	font-size: 12pt;
+
+	border-style: solid;
+	border-width: 1pt;
+	border-color: #000000;
+
+	border-collapse:collapse;
+	border-left-width: 1pt;
+	border-top-width: 1pt;
+	border-right-width: 1pt;
+	border-bottom-width: 1pt;
+
+	background-color: white;
+}
+
+TABLE.table TD
+{
+	padding: 4pt;
+
+	border-left-width: 0pt;
+	border-top-width: 0pt;
+	border-right-width: 0.5pt;
+	border-bottom-width: 0.5pt;
+
+	border-style: solid;
+	border-color: #999999;
+}
+
+TABLE.table TR.column TD
+{
+	font-weight: bold;
+	white-space: nowrap;
+}
+
+TABLE.table TR.content TD
+{
+
+}
+
+TABLE.table TR.biblio_sum TD
+{
+
+}
+
+
+TABLE.table TD.no
+{
+	white-space: nowrap;
+	text-align: right;
+}
+
+
+TABLE.table TD.barcode
+{
+	white-space: nowrap;
+}
+
+TABLE.table TD.summary
+{
+	width: 30%;
+}
+
+TABLE.table TD.isbnIssn
+{
+
+}
+
+TABLE.table TD.publishTime
+{
+
+}
+
+TABLE.table TD.volume
+{
+
+}
+
+TABLE.table TD.orderClass
+{
+
+}
+
+TABLE.table TD.catalogNo
+{
+
+}
+
+TABLE.table TD.orderTime
+{
+
+}
+
+TABLE.table TD.orderID
+{
+
+}
+
+TABLE.table TD.seller
+{
+
+}
+
+TABLE.table TD.source
+{
+
+}
+
+TABLE.table TD.accessNo
+{
+
+}
+
+TABLE.table TD.state
+{
+
+}
+
+TABLE.table TD.location
+{
+
+}
+
+TABLE.table TD.price
+{
+
+}
+
+TABLE.table TD.bookType
+{
+
+}
+
+TABLE.table TD.registerNo
+{
+
+}
+
+TABLE.table TD.comment
+{
+
+}
+
+TABLE.table TD.mergeComment
+{
+
+}
+
+TABLE.table TD.batchNo
+{
+
+}
+
+TABLE.table TD.refID
+{
+
+}
+
+TABLE.table TD.recpath
+{
+
+}
+
+TABLE.table TD.biblioRecpath
+{
+
+}
+
+TABLE.table TD.biblioPrice
+{
+
+}
+
+
+
+
+
+
+DIV.itemcount
+{
+
+}
+
+DIV.bibliocount
+{
+
+}
+
+DIV.totalprice
+{
+
+}
+
+DIV.batchno
+{
+
+}
+
+DIV.location
+{
+
+}
+
+TABLE.table TD.price
+{
+	text-align: right;
+}
+
+DIV.barcodefilepath
+{
+
+}
+
+DIV.sender
+{
+
+}
+
+DIV.recipient
+{
+
+}
+
+DIV.sepline
+{
+	
+}
+
+DIV.pagefooter
+{
+	text-align: right;
+
+	border-top-width: 1pt;
+	border-top-color: #cccccc;
+	border-top-style: solid;
+	margin-top: 16pt;
+}
+

@@ -1,0 +1,440 @@
+﻿<?xml version="1.0"?>
+<ItemSearchResponse xmlns="http://webservices.amazon.com/AWSECommerceService/2011-08-01">
+  <OperationRequest>
+    <RequestId>4cdb701b-f46d-4346-932f-f6b31ca0ba72</RequestId>
+    <Arguments>
+      <Argument Name="Operation" Value="ItemSearch"></Argument>
+      <Argument Name="Service" Value="AWSECommerceService"></Argument>
+      <Argument Name="Signature" Value="BKyj9jy/5owvhuqlqvOHwvOriLhA3zMHVFa2iiDpods="></Argument>
+      <Argument Name="AssociateTag" Value="digiplatcorp-20"></Argument>
+      <Argument Name="Version" Value="2011-08-01"></Argument>
+      <Argument Name="AWSAccessKeyId" Value="AKIAIFC2XER5NLNJ64CA"></Argument>
+      <Argument Name="Timestamp" Value="2013-03-17T12:55:04Z"></Argument>
+      <Argument Name="Title" Value="China"></Argument>
+      <Argument Name="ResponseGroup" Value="Small"></Argument>
+      <Argument Name="SearchIndex" Value="Books"></Argument>
+    </Arguments>
+    <RequestProcessingTime>0.0726400000000000</RequestProcessingTime>
+  </OperationRequest>
+  <Items>
+    <Request>
+      <IsValid>True</IsValid>
+      <ItemSearchRequest>
+        <ResponseGroup>Small</ResponseGroup>
+        <SearchIndex>Books</SearchIndex>
+        <Title>China</Title>
+      </ItemSearchRequest>
+    </Request>
+    <TotalResults>161423</TotalResults>
+    <TotalPages>16143</TotalPages>
+    <MoreSearchResultsUrl>http://www.amazon.com/gp/redirect.html?camp=2025&amp;creative=386001&amp;location=http%3A%2F%2Fwww.amazon.com%2Fgp%2Fsearch%3Fkeywords%3DChina%26url%3Dsearch-alias%253Dstripbooks&amp;linkCode=xm2&amp;tag=digiplatcorp-20&amp;SubscriptionId=AKIAIFC2XER5NLNJ64CA</MoreSearchResultsUrl>
+    <Item>
+      <ASIN>1932100660</ASIN>
+      <DetailPageURL>http://www.amazon.com/The-China-Study-Comprehensive-Implications/dp/1932100660%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D165953%26creativeASIN%3D1932100660</DetailPageURL>
+      <ItemLinks>
+        <ItemLink>
+          <Description>Technical Details</Description>
+          <URL>http://www.amazon.com/The-China-Study-Comprehensive-Implications/dp/tech-data/1932100660%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D1932100660</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>Add To Baby Registry</Description>
+          <URL>http://www.amazon.com/gp/registry/baby/add-item.html%3Fasin.0%3D1932100660%26SubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D1932100660</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>Add To Wedding Registry</Description>
+          <URL>http://www.amazon.com/gp/registry/wedding/add-item.html%3Fasin.0%3D1932100660%26SubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D1932100660</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>Add To Wishlist</Description>
+          <URL>http://www.amazon.com/gp/registry/wishlist/add-item.html%3Fasin.0%3D1932100660%26SubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D1932100660</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>Tell A Friend</Description>
+          <URL>http://www.amazon.com/gp/pdp/taf/1932100660%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D1932100660</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>All Customer Reviews</Description>
+          <URL>http://www.amazon.com/review/product/1932100660%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D1932100660</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>All Offers</Description>
+          <URL>http://www.amazon.com/gp/offer-listing/1932100660%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D1932100660</URL>
+        </ItemLink>
+      </ItemLinks>
+      <ItemAttributes>
+        <Author>T. Colin Campbell</Author>
+        <Author>Thomas M. Campbell II</Author>
+        <Creator Role="Preface">Howard Lyman</Creator>
+        <Creator Role="Foreword">John Robbins</Creator>
+        <Manufacturer>BenBella Books</Manufacturer>
+        <ProductGroup>Book</ProductGroup>
+        <Title>The China Study: The Most Comprehensive Study of Nutrition Ever Conducted And the Startling Implications for Diet, Weight Loss, And Long-term Health</Title>
+      </ItemAttributes>
+    </Item>
+    <Item>
+      <ASIN>1937856755</ASIN>
+      <DetailPageURL>http://www.amazon.com/The-China-Study-Cookbook-Plant-Based/dp/1937856755%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D165953%26creativeASIN%3D1937856755</DetailPageURL>
+      <ItemLinks>
+        <ItemLink>
+          <Description>Technical Details</Description>
+          <URL>http://www.amazon.com/The-China-Study-Cookbook-Plant-Based/dp/tech-data/1937856755%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D1937856755</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>Add To Baby Registry</Description>
+          <URL>http://www.amazon.com/gp/registry/baby/add-item.html%3Fasin.0%3D1937856755%26SubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D1937856755</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>Add To Wedding Registry</Description>
+          <URL>http://www.amazon.com/gp/registry/wedding/add-item.html%3Fasin.0%3D1937856755%26SubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D1937856755</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>Add To Wishlist</Description>
+          <URL>http://www.amazon.com/gp/registry/wishlist/add-item.html%3Fasin.0%3D1937856755%26SubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D1937856755</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>Tell A Friend</Description>
+          <URL>http://www.amazon.com/gp/pdp/taf/1937856755%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D1937856755</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>All Customer Reviews</Description>
+          <URL>http://www.amazon.com/review/product/1937856755%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D1937856755</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>All Offers</Description>
+          <URL>http://www.amazon.com/gp/offer-listing/1937856755%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D1937856755</URL>
+        </ItemLink>
+      </ItemLinks>
+      <ItemAttributes>
+        <Author>LeAnne Campbell</Author>
+        <Creator Role="Photographer">Steven Campbell Disla</Creator>
+        <Creator Role="Foreword">T. Colin Campbell</Creator>
+        <Manufacturer>BenBella Books</Manufacturer>
+        <ProductGroup>Book</ProductGroup>
+        <Title>The China Study Cookbook: Over 120 Whole Food, Plant-Based Recipes</Title>
+      </ItemAttributes>
+    </Item>
+    <Item>
+      <ASIN>0262019124</ASIN>
+      <DetailPageURL>http://www.amazon.com/Lee-Kuan-Yew-Insights-International/dp/0262019124%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D165953%26creativeASIN%3D0262019124</DetailPageURL>
+      <ItemLinks>
+        <ItemLink>
+          <Description>Technical Details</Description>
+          <URL>http://www.amazon.com/Lee-Kuan-Yew-Insights-International/dp/tech-data/0262019124%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0262019124</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>Add To Baby Registry</Description>
+          <URL>http://www.amazon.com/gp/registry/baby/add-item.html%3Fasin.0%3D0262019124%26SubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0262019124</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>Add To Wedding Registry</Description>
+          <URL>http://www.amazon.com/gp/registry/wedding/add-item.html%3Fasin.0%3D0262019124%26SubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0262019124</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>Add To Wishlist</Description>
+          <URL>http://www.amazon.com/gp/registry/wishlist/add-item.html%3Fasin.0%3D0262019124%26SubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0262019124</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>Tell A Friend</Description>
+          <URL>http://www.amazon.com/gp/pdp/taf/0262019124%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0262019124</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>All Customer Reviews</Description>
+          <URL>http://www.amazon.com/review/product/0262019124%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0262019124</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>All Offers</Description>
+          <URL>http://www.amazon.com/gp/offer-listing/0262019124%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0262019124</URL>
+        </ItemLink>
+      </ItemLinks>
+      <ItemAttributes>
+        <Author>Graham Allison</Author>
+        <Author>Robert D. Blackwill</Author>
+        <Author>Ali Wyne</Author>
+        <Creator Role="Foreword">Henry A. Kissinger</Creator>
+        <Manufacturer>The MIT Press</Manufacturer>
+        <ProductGroup>Book</ProductGroup>
+        <Title>Lee Kuan Yew: The Grand Master's Insights on China, the United States, and the World (Belfer Center Studies in International Security)</Title>
+      </ItemAttributes>
+    </Item>
+    <Item>
+      <ASIN>0199860149</ASIN>
+      <DetailPageURL>http://www.amazon.com/China-Goes-Global-Partial-Power/dp/0199860149%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D165953%26creativeASIN%3D0199860149</DetailPageURL>
+      <ItemLinks>
+        <ItemLink>
+          <Description>Technical Details</Description>
+          <URL>http://www.amazon.com/China-Goes-Global-Partial-Power/dp/tech-data/0199860149%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0199860149</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>Add To Baby Registry</Description>
+          <URL>http://www.amazon.com/gp/registry/baby/add-item.html%3Fasin.0%3D0199860149%26SubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0199860149</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>Add To Wedding Registry</Description>
+          <URL>http://www.amazon.com/gp/registry/wedding/add-item.html%3Fasin.0%3D0199860149%26SubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0199860149</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>Add To Wishlist</Description>
+          <URL>http://www.amazon.com/gp/registry/wishlist/add-item.html%3Fasin.0%3D0199860149%26SubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0199860149</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>Tell A Friend</Description>
+          <URL>http://www.amazon.com/gp/pdp/taf/0199860149%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0199860149</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>All Customer Reviews</Description>
+          <URL>http://www.amazon.com/review/product/0199860149%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0199860149</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>All Offers</Description>
+          <URL>http://www.amazon.com/gp/offer-listing/0199860149%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0199860149</URL>
+        </ItemLink>
+      </ItemLinks>
+      <ItemAttributes>
+        <Author>David Shambaugh</Author>
+        <Manufacturer>Oxford University Press, USA</Manufacturer>
+        <ProductGroup>Book</ProductGroup>
+        <Title>China Goes Global: The Partial Power</Title>
+      </ItemAttributes>
+    </Item>
+    <Item>
+      <ASIN>0756684307</ASIN>
+      <DetailPageURL>http://www.amazon.com/DK-Eyewitness-Travel-Guide-China/dp/0756684307%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D165953%26creativeASIN%3D0756684307</DetailPageURL>
+      <ItemLinks>
+        <ItemLink>
+          <Description>Technical Details</Description>
+          <URL>http://www.amazon.com/DK-Eyewitness-Travel-Guide-China/dp/tech-data/0756684307%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0756684307</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>Add To Baby Registry</Description>
+          <URL>http://www.amazon.com/gp/registry/baby/add-item.html%3Fasin.0%3D0756684307%26SubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0756684307</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>Add To Wedding Registry</Description>
+          <URL>http://www.amazon.com/gp/registry/wedding/add-item.html%3Fasin.0%3D0756684307%26SubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0756684307</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>Add To Wishlist</Description>
+          <URL>http://www.amazon.com/gp/registry/wishlist/add-item.html%3Fasin.0%3D0756684307%26SubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0756684307</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>Tell A Friend</Description>
+          <URL>http://www.amazon.com/gp/pdp/taf/0756684307%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0756684307</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>All Customer Reviews</Description>
+          <URL>http://www.amazon.com/review/product/0756684307%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0756684307</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>All Offers</Description>
+          <URL>http://www.amazon.com/gp/offer-listing/0756684307%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0756684307</URL>
+        </ItemLink>
+      </ItemLinks>
+      <ItemAttributes>
+        <Author>DK Publishing</Author>
+        <Manufacturer>DK Travel</Manufacturer>
+        <ProductGroup>Book</ProductGroup>
+        <Title>DK Eyewitness Travel Guide: China</Title>
+      </ItemAttributes>
+    </Item>
+    <Item>
+      <ASIN>0674055446</ASIN>
+      <DetailPageURL>http://www.amazon.com/Deng-Xiaoping-Transformation-China-Vogel/dp/0674055446%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D165953%26creativeASIN%3D0674055446</DetailPageURL>
+      <ItemLinks>
+        <ItemLink>
+          <Description>Technical Details</Description>
+          <URL>http://www.amazon.com/Deng-Xiaoping-Transformation-China-Vogel/dp/tech-data/0674055446%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0674055446</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>Add To Baby Registry</Description>
+          <URL>http://www.amazon.com/gp/registry/baby/add-item.html%3Fasin.0%3D0674055446%26SubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0674055446</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>Add To Wedding Registry</Description>
+          <URL>http://www.amazon.com/gp/registry/wedding/add-item.html%3Fasin.0%3D0674055446%26SubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0674055446</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>Add To Wishlist</Description>
+          <URL>http://www.amazon.com/gp/registry/wishlist/add-item.html%3Fasin.0%3D0674055446%26SubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0674055446</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>Tell A Friend</Description>
+          <URL>http://www.amazon.com/gp/pdp/taf/0674055446%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0674055446</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>All Customer Reviews</Description>
+          <URL>http://www.amazon.com/review/product/0674055446%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0674055446</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>All Offers</Description>
+          <URL>http://www.amazon.com/gp/offer-listing/0674055446%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0674055446</URL>
+        </ItemLink>
+      </ItemLinks>
+      <ItemAttributes>
+        <Author>Ezra F. Vogel</Author>
+        <Manufacturer>Belknap Press of Harvard University Press</Manufacturer>
+        <ProductGroup>Book</ProductGroup>
+        <Title>Deng Xiaoping and the Transformation of China</Title>
+      </ItemAttributes>
+    </Item>
+    <Item>
+      <ASIN>0425255727</ASIN>
+      <DetailPageURL>http://www.amazon.com/Widows-Tears-Bayles-Wittig-Albert/dp/0425255727%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D165953%26creativeASIN%3D0425255727</DetailPageURL>
+      <ItemLinks>
+        <ItemLink>
+          <Description>Technical Details</Description>
+          <URL>http://www.amazon.com/Widows-Tears-Bayles-Wittig-Albert/dp/tech-data/0425255727%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0425255727</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>Add To Baby Registry</Description>
+          <URL>http://www.amazon.com/gp/registry/baby/add-item.html%3Fasin.0%3D0425255727%26SubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0425255727</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>Add To Wedding Registry</Description>
+          <URL>http://www.amazon.com/gp/registry/wedding/add-item.html%3Fasin.0%3D0425255727%26SubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0425255727</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>Add To Wishlist</Description>
+          <URL>http://www.amazon.com/gp/registry/wishlist/add-item.html%3Fasin.0%3D0425255727%26SubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0425255727</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>Tell A Friend</Description>
+          <URL>http://www.amazon.com/gp/pdp/taf/0425255727%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0425255727</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>All Customer Reviews</Description>
+          <URL>http://www.amazon.com/review/product/0425255727%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0425255727</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>All Offers</Description>
+          <URL>http://www.amazon.com/gp/offer-listing/0425255727%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0425255727</URL>
+        </ItemLink>
+      </ItemLinks>
+      <ItemAttributes>
+        <Author>Susan Wittig Albert</Author>
+        <Manufacturer>Berkley Hardcover</Manufacturer>
+        <ProductGroup>Book</ProductGroup>
+        <Title>Widow's Tears (China Bayles)</Title>
+      </ItemAttributes>
+    </Item>
+    <Item>
+      <ASIN>0743246985</ASIN>
+      <DetailPageURL>http://www.amazon.com/Wild-Swans-Three-Daughters-China/dp/0743246985%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D165953%26creativeASIN%3D0743246985</DetailPageURL>
+      <ItemLinks>
+        <ItemLink>
+          <Description>Technical Details</Description>
+          <URL>http://www.amazon.com/Wild-Swans-Three-Daughters-China/dp/tech-data/0743246985%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0743246985</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>Add To Baby Registry</Description>
+          <URL>http://www.amazon.com/gp/registry/baby/add-item.html%3Fasin.0%3D0743246985%26SubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0743246985</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>Add To Wedding Registry</Description>
+          <URL>http://www.amazon.com/gp/registry/wedding/add-item.html%3Fasin.0%3D0743246985%26SubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0743246985</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>Add To Wishlist</Description>
+          <URL>http://www.amazon.com/gp/registry/wishlist/add-item.html%3Fasin.0%3D0743246985%26SubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0743246985</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>Tell A Friend</Description>
+          <URL>http://www.amazon.com/gp/pdp/taf/0743246985%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0743246985</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>All Customer Reviews</Description>
+          <URL>http://www.amazon.com/review/product/0743246985%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0743246985</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>All Offers</Description>
+          <URL>http://www.amazon.com/gp/offer-listing/0743246985%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0743246985</URL>
+        </ItemLink>
+      </ItemLinks>
+      <ItemAttributes>
+        <Author>Jung Chang</Author>
+        <Manufacturer>Touchstone</Manufacturer>
+        <ProductGroup>Book</ProductGroup>
+        <Title>Wild Swans: Three Daughters of China</Title>
+      </ItemAttributes>
+    </Item>
+    <Item>
+      <ASIN>0143121316</ASIN>
+      <DetailPageURL>http://www.amazon.com/On-China-Henry-Kissinger/dp/0143121316%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D165953%26creativeASIN%3D0143121316</DetailPageURL>
+      <ItemLinks>
+        <ItemLink>
+          <Description>Technical Details</Description>
+          <URL>http://www.amazon.com/On-China-Henry-Kissinger/dp/tech-data/0143121316%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0143121316</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>Add To Baby Registry</Description>
+          <URL>http://www.amazon.com/gp/registry/baby/add-item.html%3Fasin.0%3D0143121316%26SubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0143121316</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>Add To Wedding Registry</Description>
+          <URL>http://www.amazon.com/gp/registry/wedding/add-item.html%3Fasin.0%3D0143121316%26SubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0143121316</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>Add To Wishlist</Description>
+          <URL>http://www.amazon.com/gp/registry/wishlist/add-item.html%3Fasin.0%3D0143121316%26SubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0143121316</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>Tell A Friend</Description>
+          <URL>http://www.amazon.com/gp/pdp/taf/0143121316%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0143121316</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>All Customer Reviews</Description>
+          <URL>http://www.amazon.com/review/product/0143121316%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0143121316</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>All Offers</Description>
+          <URL>http://www.amazon.com/gp/offer-listing/0143121316%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0143121316</URL>
+        </ItemLink>
+      </ItemLinks>
+      <ItemAttributes>
+        <Author>Henry Kissinger</Author>
+        <Manufacturer>Penguin Books</Manufacturer>
+        <ProductGroup>Book</ProductGroup>
+        <Title>On China</Title>
+      </ItemAttributes>
+    </Item>
+    <Item>
+      <ASIN>0143121006</ASIN>
+      <DetailPageURL>http://www.amazon.com/Midnight-Peking-Murder-Englishwoman-Haunted/dp/0143121006%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D165953%26creativeASIN%3D0143121006</DetailPageURL>
+      <ItemLinks>
+        <ItemLink>
+          <Description>Technical Details</Description>
+          <URL>http://www.amazon.com/Midnight-Peking-Murder-Englishwoman-Haunted/dp/tech-data/0143121006%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0143121006</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>Add To Baby Registry</Description>
+          <URL>http://www.amazon.com/gp/registry/baby/add-item.html%3Fasin.0%3D0143121006%26SubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0143121006</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>Add To Wedding Registry</Description>
+          <URL>http://www.amazon.com/gp/registry/wedding/add-item.html%3Fasin.0%3D0143121006%26SubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0143121006</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>Add To Wishlist</Description>
+          <URL>http://www.amazon.com/gp/registry/wishlist/add-item.html%3Fasin.0%3D0143121006%26SubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0143121006</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>Tell A Friend</Description>
+          <URL>http://www.amazon.com/gp/pdp/taf/0143121006%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0143121006</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>All Customer Reviews</Description>
+          <URL>http://www.amazon.com/review/product/0143121006%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0143121006</URL>
+        </ItemLink>
+        <ItemLink>
+          <Description>All Offers</Description>
+          <URL>http://www.amazon.com/gp/offer-listing/0143121006%3FSubscriptionId%3DAKIAIFC2XER5NLNJ64CA%26tag%3Ddigiplatcorp-20%26linkCode%3Dxm2%26camp%3D2025%26creative%3D386001%26creativeASIN%3D0143121006</URL>
+        </ItemLink>
+      </ItemLinks>
+      <ItemAttributes>
+        <Author>Paul French</Author>
+        <Manufacturer>Penguin Books</Manufacturer>
+        <ProductGroup>Book</ProductGroup>
+        <Title>Midnight in Peking: How the Murder of a Young Englishwoman Haunted the Last Days of Old China</Title>
+      </ItemAttributes>
+    </Item>
+  </Items>
+</ItemSearchResponse>

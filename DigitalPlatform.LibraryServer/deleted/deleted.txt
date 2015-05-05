@@ -1,0 +1,82 @@
+﻿
+
+#if NOOOO
+                // 启动TraceDTLP
+
+                // 从断点记忆文件中读出信息
+                // return:
+                //      -1  error
+                //      0   file not found
+                //      1   found
+                nRet = ReadBatchTaskBreakPointFile("跟踪DTLP数据库",
+                    out strBreakPoint,
+                    out strError);
+                if (nRet == -1)
+                {
+                    app.WriteErrorLog("ReadBatchTaskBreakPointFile时出错：" + strError);
+                }
+                // 如果nRet == 0，表示没有断点文件存在，也就不必自动启动这个任务
+
+                // strBreakPoint并未被使用。而是断点文件是否存在，这一信息有价值。
+
+                if (nRet == 1)
+                {
+                    try
+                    {
+
+                        // 从断点文件中取出断点字符串
+                        // 断点字符串格式：序号.偏移量@日志文件名
+                        //  或者：序号@日志文件名
+                        // 获得断点信息的整个过程的代码，是否适宜归入TraceDTLP类？
+                        // 如果成熟，可以归纳作为BatchTask基类的一个特性。
+
+                        TraceDTLP tracedtlp = new TraceDTLP(this, null);
+                        this.BatchTasks.Add(tracedtlp);
+
+                        if (tracedtlp.StartInfo == null)
+                            tracedtlp.StartInfo = new BatchTaskStartInfo();   // 按照缺省值来
+                        tracedtlp.StartInfo.Start = "!breakpoint";  //strBreakPoint;
+                        tracedtlp.ClearProgressFile();   // 清除进度文件内容
+                        tracedtlp.StartWorkerThread();
+                    }
+                    catch (Exception ex)
+                    {
+                        app.WriteErrorLog("启动批处理任务时出错：" + ex.Message);
+                        goto ERROR1;
+                    }
+                }
+
+#endif
+
+
+
+#if NO
+                        bool bLoop = false;
+                        string strLastNumber = "";
+
+                        // return:
+                        //      -1  出错
+                        //      0   没有找到断点信息
+                        //      1   找到了断点信息
+                        nRet = patron_rep.ReadLastNumber(
+                            out bLoop,
+                            out strLastNumber,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            app.WriteErrorLog("ReadLastNumber时出错：" + strError);
+                        }
+
+                        if (patron_rep.StartInfo == null)
+                            patron_rep.StartInfo = new BatchTaskStartInfo();   // 按照缺省值来
+
+                        if (bLoop == true)
+                        {
+                            // 需要从断点启动
+                            if (nRet == 1)
+                                patron_rep.StartInfo.Start = "!breakpoint";  //strBreakPoint;
+
+                            patron_rep.ClearProgressFile();   // 清除进度文件内容
+                            patron_rep.StartWorkerThread();
+                        }
+#endif

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="gb2312"?>
+<root>
+	<item url="./searchbiblio.aspx">
+		<caption lang="zh-CN">书目</caption>
+		<caption lang="en-US">Biblio</caption>
+	</item>
+	<item url="./searchitem.aspx?type=item">
+		<caption lang="zh-CN">册</caption>
+		<caption lang="en-US">Item</caption>
+	</item>
+	<item url="./searchitem.aspx?type=comment">
+		<caption lang="zh-CN">评注</caption>
+		<caption lang="en-US">Review</caption>
+	</item>
+</root>

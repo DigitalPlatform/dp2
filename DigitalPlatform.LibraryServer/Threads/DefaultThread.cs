@@ -1,0 +1,161 @@
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace DigitalPlatform.LibraryServer
+{
+    /// <summary>
+    /// 作管理的基本线程
+    /// 都是一些需要较短时间就可以处理的小任务
+    /// </summary>
+    public class DefaultThread : BatchTask
+    {
+        public DefaultThread(LibraryApplication app, 
+            string strName)
+            : base(app, strName)
+        {
+            this.Loop = true;
+            this.PerTime = 5 * 60 * 1000;	// 5分钟
+        }
+
+        public override string DefaultName
+        {
+            get
+            {
+                return "管理线程";
+            }
+        }
+
+        DateTime m_lastRetryTime = DateTime.Now;
+        int m_nRetryAfterMinutes = 5;   // 每间隔多少分钟以后重试一次
+
+        // 一次操作循环
+        public override void Worker()
+        {
+
+            // 清理 Garden
+            try
+            {
+                // TODO: 当 hashtable 已经满了的时候，需要缩短存活时间
+                if (this.App.Garden.IsFull == true)
+                    this.App.Garden.CleanPersons(new TimeSpan(0, 5, 0), this.App.Statis);    // 5分钟 紧急情况下 REST Session的最长存活时间
+                else
+                    this.App.Garden.CleanPersons(new TimeSpan(0, 20, 0), this.App.Statis);    // 20分钟 REST Session的最长存活时间
+            }
+            catch (Exception ex)
+            {
+                string strErrorText = "DefaultTread中 CleanPersons() 出现异常: " + ExceptionUtil.GetDebugText(ex);
+                this.App.WriteErrorLog(strErrorText);
+            }
+
+            // 代为刷新Statis
+            if (this.App.Statis != null)
+            {
+                try
+                {
+                    this.App.Statis.Flush();
+                }
+                catch (Exception ex)
+                {
+                    string strErrorText = "DefaultTread中 this.App.Statis.Flush() 出现异常: " + ExceptionUtil.GetDebugText(ex);
+                    this.App.WriteErrorLog(strErrorText);
+                }
+            }
+
+            // 及时保存library.xml的变化
+            if (this.App.Changed == true)
+            {
+                this.App.Flush();
+            }
+
+            // 清理Sessions
+            try
+            {
+                // TODO: 当 hashtable 已经满了的时候，需要缩短存活时间
+                if (this.App.SessionTable.IsFull == true)
+                    this.App.SessionTable.CleanSessions(new TimeSpan(0, 5, 0));    // 5分钟 紧急情况下 REST Session的最长存活时间
+                else
+                    this.App.SessionTable.CleanSessions(new TimeSpan(0, 20, 0));    // 20分钟 REST Session的最长存活时间
+            }
+            catch (Exception ex)
+            {
+                string strErrorText = "DefaultTread中 CleanSessions() 出现异常: " + ExceptionUtil.GetDebugText(ex);
+                this.App.WriteErrorLog(strErrorText);
+            }
+
+            int nRet = 0;
+            string strError = "";
+
+            if (this.App.kdbs == null
+                        && (DateTime.Now - this.m_lastRetryTime).TotalMinutes >= m_nRetryAfterMinutes)
+            {
+                try
+                {
+                    nRet = this.App.InitialKdbs(this.RmsChannels,
+            out strError);
+                    if (nRet == -1)
+                    {
+                        this.App.WriteErrorLog("ERR003 初始化kdbs失败: " + strError);
+                    }
+                    else
+                    {
+                        // 检查 dpKernel 版本号
+                        nRet = this.App.CheckKernelVersion(this.RmsChannels,
+                            out strError);
+                        if (nRet == -1)
+                            this.App.WriteErrorLog(strError);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    string strErrorText = "DefaultTread中 InitialKdbs() 出现异常: " + ExceptionUtil.GetDebugText(ex);
+                    this.App.WriteErrorLog(strErrorText);
+                }
+            }
+
+            // 
+            if (this.App.vdbs == null
+                        && (DateTime.Now - this.m_lastRetryTime).TotalMinutes >= m_nRetryAfterMinutes)
+            {
+                try
+                {
+                    nRet = this.App.InitialVdbs(this.RmsChannels,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        this.App.WriteErrorLog("ERR004 初始化vdbs失败: " + strError);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    string strErrorText = "DefaultTread中 InitialVdbs() 出现异常: " + ExceptionUtil.GetDebugText(ex);
+                    this.App.WriteErrorLog(strErrorText);
+                }
+            }
+
+            if (this.App.kdbs == null || this.App.vdbs == null)
+            {
+                m_nRetryAfterMinutes++;
+            }
+
+            // 2012/9/23
+            if (this.App.OperLog != null && this.App.OperLog.Cache != null)
+            {
+                try
+                {
+                    this.App.OperLog.Cache.Shrink(new TimeSpan(0, 1, 0));    // 一分钟
+                }
+                catch (Exception ex)
+                {
+                    string strErrorText = "DefaultTread中 压缩 OperLog.Cache 出现异常: " + ExceptionUtil.GetDebugText(ex);
+                    this.App.WriteErrorLog(strErrorText);
+                }
+            }
+        }
+
+        public void ClearRetryDelay()
+        {
+            this.m_nRetryAfterMinutes = 0;
+        }
+    }
+}

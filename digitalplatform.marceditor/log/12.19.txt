@@ -1,0 +1,52 @@
+1.对于XmlNode的SelectNodes()和SelectSignleNode()
+之所以能够选出节点，是因为XPathNavigator重载了
+IHasXmlNode接口，该接口有一个GetNode()函数
+
+2.给服务器增加了一个接口GetBrowse用来得到一批记录的浏览格式
+		// 获得一批记录的浏览格式
+		// parameter:
+		//		paths	记录路径数组
+		//		strStyle	风格
+		//		aRecord	得到的记录数组，成员为类型为Record
+		// result:
+		//		Result对象,
+		//		value == -1	error
+		//			  >= 1	结果集的总数
+		//			  == 0	0条
+		[WebMethod(EnableSession=true)]
+		public Result GetBrowse(string[] paths,
+			string strStyle,
+			out Record[] records)
+
+
+3.检索点类DpKey明确各成员的名称
+FromName	来源名称，根据语言版本确定，当语言版本为空时，值为"@+id"
+FromValue	来源值，from节点的的值
+SqlNameTable	检索点对应的sql库的表名
+完成
+
+4.修改CreateKeys接口，带上语言版本与风格参数
+		// 功能:根据Xml数据创建检索点
+		// parameter:
+		//		strXml	xml数据
+		//		strRecPath	记录路径
+		//		lStart	起始序号
+		//		lLength	长度
+		//		strLang	语言版本
+		//		strStyle	样式,控制返回值
+		//		keys	返回的检索点数组
+		[WebMethod(EnableSession=true)]
+		public Result CreateKeys(string strXml,
+			string strRecPath,
+			int lStart,
+			int lLength,
+			string strLang,
+			string strStyle,
+			out KeyInfo[] keys)
+完成
+
+4.实现根据@id也可以找到对应的检索点表。
+完成
+
+5.和谢老师做查重功能
+完成一部分

@@ -1,0 +1,60 @@
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.MarcDom", "DigitalPlatform.MarcDom.csproj", "{3F81F705-5265-47EE-9255-CB33E1C135B8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform", "..\DigitalPlatform\DigitalPlatform.csproj", "{BDD43275-EAA0-4670-8BA3-0DB5CD7598DD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.Text", "..\DigitalPlatform.Text\DigitalPlatform.Text.csproj", "{26F96CC3-A4A9-4BC4-A10A-BC7E25581FF6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.Xml", "..\DigitalPlatform.Xml\DigitalPlatform.Xml.csproj", "{E6489E89-1349-4EE7-A00B-AC96B9912587}"
+EndProject
+Global
+	GlobalSection(SourceCodeControl) = preSolution
+		SccNumberOfProjects = 4
+		SccProjectUniqueName0 = DigitalPlatform.MarcDom.csproj
+		SccProjectName0 = \u0022$/AllDigitalPlatformLibs.root/AllDigitalPlatformLibs/DigitalPlatform.MarcDom\u0022,\u0020CBAAAAAA
+		SccLocalPath0 = .
+		SccProvider0 = MSSCCI:Microsoft\u0020Visual\u0020SourceSafe
+		CanCheckoutShared = false
+		SccProjectUniqueName1 = ..\\DigitalPlatform\\DigitalPlatform.csproj
+		SccProjectName1 = \u0022$/AllDigitalPlatformLibs.root/AllDigitalPlatformLibs/DigitalPlatform\u0022,\u0020HAAAAAAA
+		SccLocalPath1 = ..\\DigitalPlatform
+		SccProvider1 = MSSCCI:Microsoft\u0020Visual\u0020SourceSafe
+		CanCheckoutShared = false
+		SccProjectUniqueName2 = ..\\DigitalPlatform.Text\\DigitalPlatform.Text.csproj
+		SccProjectName2 = \u0022$/AllDigitalPlatformLibs.root/AllDigitalPlatformLibs/DigitalPlatform.Text\u0022,\u0020RBAAAAAA
+		SccLocalPath2 = ..\\DigitalPlatform.Text
+		SccProvider2 = MSSCCI:Microsoft\u0020Visual\u0020SourceSafe
+		CanCheckoutShared = false
+		SccProjectUniqueName3 = ..\\DigitalPlatform.Xml\\DigitalPlatform.Xml.csproj
+		SccProjectName3 = \u0022$/AllDigitalPlatformLibs.root/AllDigitalPlatformLibs/DigitalPlatform.Xml\u0022,\u0020WBAAAAAA
+		SccLocalPath3 = ..\\DigitalPlatform.Xml
+		SccProvider3 = MSSCCI:Microsoft\u0020Visual\u0020SourceSafe
+		CanCheckoutShared = false
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3F81F705-5265-47EE-9255-CB33E1C135B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F81F705-5265-47EE-9255-CB33E1C135B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F81F705-5265-47EE-9255-CB33E1C135B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F81F705-5265-47EE-9255-CB33E1C135B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BDD43275-EAA0-4670-8BA3-0DB5CD7598DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BDD43275-EAA0-4670-8BA3-0DB5CD7598DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BDD43275-EAA0-4670-8BA3-0DB5CD7598DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BDD43275-EAA0-4670-8BA3-0DB5CD7598DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{26F96CC3-A4A9-4BC4-A10A-BC7E25581FF6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{26F96CC3-A4A9-4BC4-A10A-BC7E25581FF6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{26F96CC3-A4A9-4BC4-A10A-BC7E25581FF6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{26F96CC3-A4A9-4BC4-A10A-BC7E25581FF6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E6489E89-1349-4EE7-A00B-AC96B9912587}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6489E89-1349-4EE7-A00B-AC96B9912587}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6489E89-1349-4EE7-A00B-AC96B9912587}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6489E89-1349-4EE7-A00B-AC96B9912587}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

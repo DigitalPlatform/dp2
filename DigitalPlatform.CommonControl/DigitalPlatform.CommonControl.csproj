@@ -1,0 +1,439 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{334E1B2B-5373-4C80-A971-BFF213FF304B}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>DigitalPlatform.CommonControl</RootNamespace>
+    <AssemblyName>DigitalPlatform.CommonControl</AssemblyName>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>2.0</OldToolsVersion>
+    <UpgradeBackupLocation />
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Design" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BinaryEditor.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="BinaryEditor.Designer.cs">
+      <DependentUpon>BinaryEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CaptionEditControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="CaptionEditControl.Designer.cs">
+      <DependentUpon>CaptionEditControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CheckedComboBox.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="CheckedComboBox.Designer.cs">
+      <DependentUpon>CheckedComboBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Commander.cs" />
+    <Compile Include="DateControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="DateControl.Designer.cs">
+      <DependentUpon>DateControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DateRangeControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="DateRangeControl.Designer.cs">
+      <DependentUpon>DateRangeControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DcEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="DcEditor.Designer.cs">
+      <DependentUpon>DcEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DcPeriodDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DcPeriodDialog.Designer.cs">
+      <DependentUpon>DcPeriodDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DoubleComboBox.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="DoubleComboBox.Designer.cs">
+      <DependentUpon>DoubleComboBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DoubleTextBox.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="DoubleTextBox.Designer.cs">
+      <DependentUpon>DoubleTextBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="dp2QueryControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="dp2QueryControl.designer.cs">
+      <DependentUpon>dp2QueryControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DpTable.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DpTable.Designer.cs">
+      <DependentUpon>DpTable.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Field856Dialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Field856Dialog.Designer.cs">
+      <DependentUpon>Field856Dialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FloatingMessageForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FloatingMessageForm.designer.cs">
+      <DependentUpon>FloatingMessageForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FromEditControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="FromEditControl.Designer.cs">
+      <DependentUpon>FromEditControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GetDateDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GetDateDlg.Designer.cs">
+      <DependentUpon>GetDateDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GetTimeDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GetTimeDialog.designer.cs">
+      <DependentUpon>GetTimeDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GuiState.cs" />
+    <Compile Include="LocationDistributeControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="LocationDistributeControl.Designer.cs">
+      <DependentUpon>LocationDistributeControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="LocationEditControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="LocationEditControl.Designer.cs">
+      <DependentUpon>LocationEditControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MacroUtil.cs" />
+    <Compile Include="MarcTemplateControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MarcTemplateControl.Designer.cs">
+      <DependentUpon>MarcTemplateControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MessageDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MessageDialog.Designer.cs">
+      <DependentUpon>MessageDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MyTextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="NewPanelControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="NewPanelControl.Designer.cs">
+      <DependentUpon>NewPanelControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="OrderDesignControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="OrderDesignControl.Designer.cs">
+      <DependentUpon>OrderDesignControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="OrderDesignControl2.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="OrderDesignControl2.Designer.cs">
+      <DependentUpon>OrderDesignControl2.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PersonAddressControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="PersonAddressControl.Designer.cs">
+      <DependentUpon>PersonAddressControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="PropertyStringDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PropertyStringDialog.Designer.cs">
+      <DependentUpon>PropertyStringDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SelectListStringDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SelectListStringDialog.Designer.cs">
+      <DependentUpon>SelectListStringDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SpecialSourceSeriesDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SpecialSourceSeriesDialog.Designer.cs">
+      <DependentUpon>SpecialSourceSeriesDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="TabComboBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="TabComboBox.Designer.cs">
+      <DependentUpon>TabComboBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="TableControlBase.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="TableControlBase.Designer.cs">
+      <DependentUpon>TableControlBase.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UniverseNumberTextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="UniverseNumericUpDown.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="W3cDtfControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="W3cDtfControl.Designer.cs">
+      <DependentUpon>W3cDtfControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="W3cDtfDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="W3cDtfDialog.Designer.cs">
+      <DependentUpon>W3cDtfDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WebFileDownloadDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WebFileDownloadDialog.Designer.cs">
+      <DependentUpon>WebFileDownloadDialog.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DigitalPlatform.IO\DigitalPlatform.IO.csproj">
+      <Project>{441CB814-AF78-4503-91EF-DCE5F3269502}</Project>
+      <Name>DigitalPlatform.IO</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Text\DigitalPlatform.Text.csproj">
+      <Project>{26F96CC3-A4A9-4BC4-A10A-BC7E25581FF6}</Project>
+      <Name>DigitalPlatform.Text</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Xml\DigitalPlatform.Xml.csproj">
+      <Project>{E6489E89-1349-4EE7-A00B-AC96B9912587}</Project>
+      <Name>DigitalPlatform.Xml</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform\DigitalPlatform.csproj">
+      <Project>{BDD43275-EAA0-4670-8BA3-0DB5CD7598DD}</Project>
+      <Name>DigitalPlatform</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="CaptionEditControl.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>CaptionEditControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CheckedComboBox.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>CheckedComboBox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DateControl.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>DateControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DateRangeControl.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>DateRangeControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DcEditor.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>DcEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DcPeriodDialog.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>DcPeriodDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DoubleComboBox.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>DoubleComboBox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DoubleTextBox.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>DoubleTextBox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="dp2QueryControl.resx">
+      <DependentUpon>dp2QueryControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Field856Dialog.resx">
+      <DependentUpon>Field856Dialog.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FloatingMessageForm.resx">
+      <DependentUpon>FloatingMessageForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FromEditControl.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>FromEditControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GetDateDlg.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>GetDateDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GetTimeDialog.resx">
+      <DependentUpon>GetTimeDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="LocationDistributeControl.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>LocationDistributeControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="LocationEditControl.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>LocationEditControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MarcTemplateControl.resx">
+      <DependentUpon>MarcTemplateControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MessageDialog.resx">
+      <DependentUpon>MessageDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="OrderDesignControl.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>OrderDesignControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="OrderDesignControl2.resx">
+      <DependentUpon>OrderDesignControl2.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PersonAddressControl.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>PersonAddressControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <SubType>Designer</SubType>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PropertyStringDialog.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>PropertyStringDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SelectListStringDialog.resx">
+      <DependentUpon>SelectListStringDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SpecialSourceSeriesDialog.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>SpecialSourceSeriesDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TabComboBox.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>TabComboBox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TableControlBase.resx">
+      <DependentUpon>TableControlBase.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="W3cDtfControl.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>W3cDtfControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="W3cDtfDialog.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>W3cDtfDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WebFileDownloadDialog.resx">
+      <DependentUpon>WebFileDownloadDialog.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

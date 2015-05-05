@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+<col title= "用户名">
+	<xpath>//record/name</xpath>
+</col>
+</root>
+
+
+

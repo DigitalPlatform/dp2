@@ -1,0 +1,106 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{0413F979-C770-4AB0-886E-4B2BE2FB4F8C}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>DigitalPlatform.EasyMarc</RootNamespace>
+    <AssemblyName>DigitalPlatform.EasyMarc</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Class1.cs" />
+    <Compile Include="EasyMarcControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="EasyMarcControl.Designer.cs">
+      <DependentUpon>EasyMarcControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="NewSubfieldDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="NewSubfieldDialog.Designer.cs">
+      <DependentUpon>NewSubfieldDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="EasyMarcControl.resx">
+      <DependentUpon>EasyMarcControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="NewSubfieldDialog.resx">
+      <DependentUpon>NewSubfieldDialog.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DigitalPlatform.CommonControl\DigitalPlatform.CommonControl.csproj">
+      <Project>{334E1B2B-5373-4C80-A971-BFF213FF304B}</Project>
+      <Name>DigitalPlatform.CommonControl</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\digitalplatform.marceditor\DigitalPlatform.MarcEditor.csproj">
+      <Project>{184700D7-F172-4001-9EE6-440779D286E1}</Project>
+      <Name>DigitalPlatform.MarcEditor</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.MarcFixedFieldControl\DigitalPlatform.MarcFixedFieldControl.csproj">
+      <Project>{2DF76AF2-D0CD-47C5-910C-A81B8BCDCE3E}</Project>
+      <Name>DigitalPlatform.MarcFixedFieldControl</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.MarcQuery\DigitalPlatform.MarcQuery.csproj">
+      <Project>{57FE2FB1-4134-409B-876C-8A1C0776B498}</Project>
+      <Name>DigitalPlatform.MarcQuery</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Text\DigitalPlatform.Text.csproj">
+      <Project>{26F96CC3-A4A9-4BC4-A10A-BC7E25581FF6}</Project>
+      <Name>DigitalPlatform.Text</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Xml\DigitalPlatform.Xml.csproj">
+      <Project>{E6489E89-1349-4EE7-A00B-AC96B9912587}</Project>
+      <Name>DigitalPlatform.Xml</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform\DigitalPlatform.csproj">
+      <Project>{BDD43275-EAA0-4670-8BA3-0DB5CD7598DD}</Project>
+      <Name>DigitalPlatform</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

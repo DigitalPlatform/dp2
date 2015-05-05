@@ -1,0 +1,105 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.MarcEditor", "DigitalPlatform.MarcEditor.csproj", "{184700D7-F172-4001-9EE6-440779D286E1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform", "..\DigitalPlatform\DigitalPlatform.csproj", "{BDD43275-EAA0-4670-8BA3-0DB5CD7598DD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.Drawing", "..\DigitalPlatform.Drawing\DigitalPlatform.Drawing.csproj", "{C2468F93-69AC-4BBA-94AE-678ED5C21542}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.IO", "..\DigitalPlatform.IO\DigitalPlatform.IO.csproj", "{441CB814-AF78-4503-91EF-DCE5F3269502}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.MarcFixedFieldControl", "..\DigitalPlatform.MarcFixedFieldControl\DigitalPlatform.MarcFixedFieldControl.csproj", "{2DF76AF2-D0CD-47C5-910C-A81B8BCDCE3E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.MarcKernel", "..\DigitalPlatform.MarcKernel\DigitalPlatform.MarcKernel.csproj", "{74242530-EF96-457E-852D-5C21A3EA8449}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.Text", "..\DigitalPlatform.Text\DigitalPlatform.Text.csproj", "{26F96CC3-A4A9-4BC4-A10A-BC7E25581FF6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.Xml", "..\DigitalPlatform.Xml\DigitalPlatform.Xml.csproj", "{E6489E89-1349-4EE7-A00B-AC96B9912587}"
+EndProject
+Global
+	GlobalSection(SourceCodeControl) = preSolution
+		SccNumberOfProjects = 8
+		SccProjectUniqueName0 = DigitalPlatform.MarcEditor.csproj
+		SccProjectName0 = \u0022$/AllDigitalPlatformLibs.root/DigitalPlatform.MarcEditor\u0022,\u0020DTBAAAAA
+		SccLocalPath0 = .
+		SccProvider0 = MSSCCI:Microsoft\u0020Visual\u0020SourceSafe
+		CanCheckoutShared = false
+		SccProjectUniqueName1 = ..\\DigitalPlatform\\DigitalPlatform.csproj
+		SccProjectName1 = \u0022$/AllDigitalPlatformLibs.root/AllDigitalPlatformLibs/DigitalPlatform\u0022,\u0020HAAAAAAA
+		SccLocalPath1 = ..\\DigitalPlatform
+		SccProvider1 = MSSCCI:Microsoft\u0020Visual\u0020SourceSafe
+		CanCheckoutShared = false
+		SccProjectUniqueName2 = ..\\DigitalPlatform.Drawing\\DigitalPlatform.Drawing.csproj
+		SccProjectName2 = \u0022$/AllDigitalPlatformLibs.root/DigitalPlatform.Drawing\u0022,\u0020UHBAAAAA
+		SccLocalPath2 = ..\\DigitalPlatform.Drawing
+		SccProvider2 = MSSCCI:Microsoft\u0020Visual\u0020SourceSafe
+		CanCheckoutShared = false
+		SccProjectUniqueName3 = ..\\DigitalPlatform.IO\\DigitalPlatform.IO.csproj
+		SccProjectName3 = \u0022$/AllDigitalPlatformLibs.root/AllDigitalPlatformLibs/DigitalPlatform.IO\u0022,\u0020XAAAAAAA
+		SccLocalPath3 = ..\\DigitalPlatform.IO
+		SccProvider3 = MSSCCI:Microsoft\u0020Visual\u0020SourceSafe
+		CanCheckoutShared = false
+		SccProjectUniqueName4 = ..\\DigitalPlatform.MarcFixedFieldControl\\DigitalPlatform.MarcFixedFieldControl.csproj
+		SccProjectName4 = \u0022$/AllDigitalPlatformLibs.root/DigitalPlatform.MarcFixedFieldControl\u0022,\u0020VTBAAAAA
+		SccLocalPath4 = ..\\DigitalPlatform.MarcFixedFieldControl
+		SccProvider4 = MSSCCI:Microsoft\u0020Visual\u0020SourceSafe
+		CanCheckoutShared = false
+		SccProjectUniqueName5 = ..\\DigitalPlatform.MarcKernel\\DigitalPlatform.MarcKernel.csproj
+		SccProjectName5 = \u0022$/AllDigitalPlatformLibs.root/DigitalPlatform.MarcKernel\u0022,\u0020IYBAAAAA
+		SccLocalPath5 = ..\\DigitalPlatform.MarcKernel
+		SccProvider5 = MSSCCI:Microsoft\u0020Visual\u0020SourceSafe
+		CanCheckoutShared = false
+		SccProjectUniqueName6 = ..\\DigitalPlatform.Text\\DigitalPlatform.Text.csproj
+		SccProjectName6 = \u0022$/AllDigitalPlatformLibs.root/AllDigitalPlatformLibs/DigitalPlatform.Text\u0022,\u0020RBAAAAAA
+		SccLocalPath6 = ..\\DigitalPlatform.Text
+		SccProvider6 = MSSCCI:Microsoft\u0020Visual\u0020SourceSafe
+		CanCheckoutShared = false
+		SccProjectUniqueName7 = ..\\DigitalPlatform.Xml\\DigitalPlatform.Xml.csproj
+		SccProjectName7 = \u0022$/AllDigitalPlatformLibs.root/AllDigitalPlatformLibs/DigitalPlatform.Xml\u0022,\u0020WBAAAAAA
+		SccLocalPath7 = ..\\DigitalPlatform.Xml
+		SccProvider7 = MSSCCI:Microsoft\u0020Visual\u0020SourceSafe
+		CanCheckoutShared = false
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{184700D7-F172-4001-9EE6-440779D286E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{184700D7-F172-4001-9EE6-440779D286E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{184700D7-F172-4001-9EE6-440779D286E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{184700D7-F172-4001-9EE6-440779D286E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BDD43275-EAA0-4670-8BA3-0DB5CD7598DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BDD43275-EAA0-4670-8BA3-0DB5CD7598DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BDD43275-EAA0-4670-8BA3-0DB5CD7598DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BDD43275-EAA0-4670-8BA3-0DB5CD7598DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C2468F93-69AC-4BBA-94AE-678ED5C21542}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2468F93-69AC-4BBA-94AE-678ED5C21542}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C2468F93-69AC-4BBA-94AE-678ED5C21542}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C2468F93-69AC-4BBA-94AE-678ED5C21542}.Release|Any CPU.Build.0 = Release|Any CPU
+		{441CB814-AF78-4503-91EF-DCE5F3269502}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{441CB814-AF78-4503-91EF-DCE5F3269502}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{441CB814-AF78-4503-91EF-DCE5F3269502}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{441CB814-AF78-4503-91EF-DCE5F3269502}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2DF76AF2-D0CD-47C5-910C-A81B8BCDCE3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2DF76AF2-D0CD-47C5-910C-A81B8BCDCE3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2DF76AF2-D0CD-47C5-910C-A81B8BCDCE3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2DF76AF2-D0CD-47C5-910C-A81B8BCDCE3E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{74242530-EF96-457E-852D-5C21A3EA8449}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{74242530-EF96-457E-852D-5C21A3EA8449}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{74242530-EF96-457E-852D-5C21A3EA8449}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{74242530-EF96-457E-852D-5C21A3EA8449}.Release|Any CPU.Build.0 = Release|Any CPU
+		{26F96CC3-A4A9-4BC4-A10A-BC7E25581FF6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{26F96CC3-A4A9-4BC4-A10A-BC7E25581FF6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{26F96CC3-A4A9-4BC4-A10A-BC7E25581FF6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{26F96CC3-A4A9-4BC4-A10A-BC7E25581FF6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E6489E89-1349-4EE7-A00B-AC96B9912587}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6489E89-1349-4EE7-A00B-AC96B9912587}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6489E89-1349-4EE7-A00B-AC96B9912587}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6489E89-1349-4EE7-A00B-AC96B9912587}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

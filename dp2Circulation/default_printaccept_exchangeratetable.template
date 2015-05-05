@@ -1,0 +1,9 @@
+﻿<html>
+<head>
+%link%
+</head>
+<body>
+<div class='tabletitle'>%date% 汇率表</div>
+{table}
+</body>
+</html>

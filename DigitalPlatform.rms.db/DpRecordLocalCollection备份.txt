@@ -1,0 +1,355 @@
+//#define DEBUG_LOCK_LIMIT
+using System;
+using System.Collections;
+using System.Threading;
+
+namespace DigitalPlatform.rms
+{
+	// 设计意图:
+	// DpRecordLockCollection和DpRecordLock用来处理记录锁
+	// DpRecordLockCollection为记录锁集合对象
+	// DpRecordLock为记录锁对象
+	public class DpRecordLockCollection:ArrayList
+	{
+		//定义一个锁成员，用于锁本集合
+		private ReaderWriterLock m_lock = new ReaderWriterLock();
+
+		//申请锁的时间，超过则退出，避免死锁
+		private int m_nTimeOut = 5000;  //5秒
+
+		// 不安全的内部函数，
+		// 从记录中得到一个记录锁对象
+		// parameter:
+		//		strID:记录锁ID
+		// return:
+		//		DpRecordLock对象
+		//		null:找不到
+		private DpRecordLock SearchRecordLock(string strID)
+		{
+			strID = DbPath.GetID10(strID);
+			foreach(DpRecordLock recordLock in this)
+			{
+				if (recordLock.m_strID == strID)
+				{
+					return recordLock;
+				}
+			}
+			return null;
+		}
+
+		public DpRecordLock GetRecordLock(string strID)
+		{
+			//***********集合加读锁，以免其它处对集合进行增删,
+			//原来自己设为做完foreach就把读锁解了，是不行的，因为记录锁对象存在的意思
+			//就是归集合管，当解锁后，其它处再把它从集合中移走，那么这个对象就成了无人管
+			//就没有意义了，锁不住记录了。
+			m_lock.AcquireReaderLock(m_nTimeOut); 
+			//这个函数，抛出异常时，解帐户集合锁
+			try
+			{
+				// 确保ID都是10位数
+				strID = DbPath.GetID10(strID);
+
+				DpRecordLock oRecordLock = null;
+
+				//私有函数，不安全函数
+				oRecordLock = SearchRecordLock(strID);
+
+				//当从集合没有找到锁时,新建一个锁，加到集合里
+				if (oRecordLock == null)
+                {
+#if DEBUG_LOCK_LIMIT
+                    // 测试用
+					if (this.Count > 10)
+						throw(new Exception("记录锁集合里面成员数大于10,不正常"));
+#endif
+
+                    oRecordLock = new DpRecordLock(strID);
+
+					//****************将读锁上升到与锁**********
+					LockCookie lc = m_lock.UpgradeToWriterLock(m_nTimeOut); 
+					try
+					{
+						Add(oRecordLock);
+					}
+					finally
+					{
+						m_lock.DowngradeFromWriterLock(ref lc);
+					}
+					//******************将写锁下降到读锁**********
+				}
+
+				return oRecordLock;
+			}
+			finally
+			{
+				m_lock.ReleaseReaderLock(); 
+				//**************************解读锁
+			}
+
+		}
+
+		// 对记录进行加锁
+		// parameter:
+		//		strID: 记录ID
+		//		strLockType: 锁类型
+		//		nTime: 申请时间
+        // Exception:
+		//		Exception 锁类型错误
+		public void MyLock(string strID,
+			string strLockType,
+			int nTimeOut)
+		{
+			//***********集合加读锁，以免其它处对集合进行增删,
+			//原来自己设为做完foreach就把读锁解了，是不行的，因为记录锁对象存在的意思
+			//就是归集合管，当解锁后，其它处再把它从集合中移走，那么这个对象就成了无人管
+			//就没有意义了，锁不住记录了。
+			m_lock.AcquireReaderLock(m_nTimeOut); 
+			//这个函数，抛出异常时，解帐户集合锁
+			try
+			{
+				// 确保ID都是10位数
+				strID = DbPath.GetID10(strID);
+
+				DpRecordLock oRecordLock = null;
+
+				//私有函数，不安全函数
+				oRecordLock = SearchRecordLock(strID);
+
+				//当从集合没有找到锁时,新建一个锁，加到集合里
+				if (oRecordLock == null)
+				{
+#if DEBUG_LOCK_LIMIT
+					// 测试用
+					if (this.Count > 10)
+						throw(new Exception("记录锁集合里面成员数大于10,不正常"));
+#endif
+					oRecordLock = new DpRecordLock(strID);
+
+					//****************将读锁上升到写锁**********
+					LockCookie lc = m_lock.UpgradeToWriterLock(m_nTimeOut); 
+					try
+					{
+						Add(oRecordLock);
+					}
+					finally
+					{
+						m_lock.DowngradeFromWriterLock(ref lc);
+					}
+					//******************将写锁下降到读锁**********
+				}
+				if (strLockType == "reader")
+				{
+                    oRecordLock.LockForReader(nTimeOut);
+				}
+				else if (strLockType == "writer")
+				{
+                    oRecordLock.LockForWriter(nTimeOut);
+				}
+				else
+				{
+                    throw new Exception("无效的锁类型，只能为'reader'和'writer'");
+				}
+			}
+			finally
+			{
+				m_lock.ReleaseReaderLock(); 
+				//**************************解读锁
+			}
+		}
+
+		// 对记录进行解锁
+		// parameter:
+		//		strID   记录ID
+		//		strLockType 锁类型
+		//	
+		// Exception:
+		//		Exception
+		//          1)或没有找到锁对象;
+		//          2)锁类型错误;
+		public void MyUnLock(string strID,string strLockType)
+		{
+			//***********集合写锁，在找的时候加读锁，在操作的时候将读锁上升到写锁，分析:
+			
+			//在找的时候不涉及到移出对象，为避免影响范围太大，所以加读锁
+			//在对对象执行移出操作时，加写锁，如果记录锁对象的m_nCount成员值等于0，
+			//则从集合中移出对象
+		
+			m_lock.AcquireReaderLock(m_nTimeOut);
+            try
+            {
+                strID = DbPath.GetID10(strID);
+                DpRecordLock oRecordLock = null;
+                //私有函数，不安全函数
+                oRecordLock = GetRecordLock(strID);
+                //当从集合没有找到锁时,肯定对错了，返回-1
+                if (oRecordLock == null)
+                    throw new Exception("未找到'" + strID + "'对应的锁对象。");
+
+                bool bRet = false;
+                Exception ex = null;
+
+
+                //找到锁对象，继续往下走
+                if (strLockType == "reader")
+                {
+                    bRet = oRecordLock.UnLockForReader(out ex);
+                }
+                else if (strLockType == "writer")
+                {
+                    bRet = oRecordLock.UnLockForWriter(out ex);	//oRecordLock.UnLockForReader();
+                    //2005/12/6发现的错误
+                }
+                else
+                {
+                    throw new Exception("未知的锁类型参数'" + strLockType + "'。");
+                }
+
+
+                //对某锁对象m_nCount为0时，从集合中清除
+                if (bRet == true)
+                {
+                    //****************将读锁上升到与写锁**********
+
+                    LockCookie lc = m_lock.UpgradeToWriterLock(m_nTimeOut);
+                    try
+                    {
+                        if (oRecordLock.m_nCount == 0)
+                            this.Remove(oRecordLock);
+                    }
+                    finally
+                    {
+                        m_lock.DowngradeFromWriterLock(ref lc);
+                    }
+                    //******************将写锁下降到读锁**********
+                }
+
+                if (ex != null)
+                    throw ex;
+            }
+            finally
+            {
+                m_lock.ReleaseReaderLock();
+
+                //**************************解读锁
+            }
+		}
+
+		//显示集合中的所有项
+		//返回表格字符串
+		public string Dump()
+		{
+			//*********给集合加读锁
+			m_lock.AcquireReaderLock(m_nTimeOut); 
+			string strResult;
+			try
+			{
+				strResult = "<table border='1'><tr><td>记录锁ID</td></tr>";
+				foreach(DpRecordLock recordLock in this)
+				{
+					strResult += "<tr><td>" + recordLock.m_strID + "</td></tr>";
+				}
+				strResult += "</table>";
+			}
+			finally
+			{
+				m_lock.ReleaseReaderLock();
+				//**************************解读锁
+			}
+			return strResult;
+		}
+	}  // end of class DpRecordLockCollection
+
+
+	//记录锁
+	public class DpRecordLock
+	{
+		// 对记录加锁的次数
+		// 
+		// 加锁时，++
+		// 解锁时，--
+		// 解锁后，如果为0，从集合时删除，
+		public int m_nCount =0;
+
+		//纯粹的记录ID，因为是跟库对象的，所以不用全名
+		public string m_strID;
+
+		//定义一个ReaderWriteLock对象
+		ReaderWriterLock m_rwlock = new ReaderWriterLock();
+
+		//构造函数
+		//strID: 记录ID
+		public DpRecordLock(string strID)
+		{
+			m_strID = strID;
+			this.m_strID = DbPath.GetID10(this.m_strID);
+		}
+
+		//加读锁
+		//nTimeOut: 申请锁的时间
+        public void LockForReader(int nTimeOut)
+		{
+            m_rwlock.AcquireReaderLock(nTimeOut);
+            Interlocked.Increment(ref this.m_nCount);
+			//m_nCount++;
+		}
+
+		// 加写锁
+		//nTimeOut: 申请锁的时间
+        public void LockForWriter(int nTimeOut)
+		{
+            m_rwlock.AcquireWriterLock(nTimeOut);
+            Interlocked.Increment(ref this.m_nCount);
+            //m_nCount++;
+		}
+
+		//解读锁
+        // return:
+        //      true    计数量为0   
+        public bool UnLockForReader(out Exception ex)
+		{
+            ex = null;
+
+            int nCount = Interlocked.Decrement(ref this.m_nCount);
+            try
+            {
+                m_rwlock.ReleaseReaderLock();
+            }
+            catch (Exception ex0)
+            {
+                ex = ex0;
+            }
+
+            if (nCount == 0)
+                return true;
+
+            return false;
+		}
+
+		//解写锁
+        // return:
+        //      true    计数量为0   
+        public bool UnLockForWriter(out Exception ex)
+        {
+            ex = null;
+
+            int nCount = Interlocked.Decrement(ref this.m_nCount);
+
+            try
+            {
+                m_rwlock.ReleaseWriterLock();
+            }
+            catch (Exception ex0)
+            {
+                ex = ex0;
+            }
+
+
+            if (nCount == 0)
+                return true;
+
+            return false;
+        }
+
+	} //end of class DpRecordLock
+}

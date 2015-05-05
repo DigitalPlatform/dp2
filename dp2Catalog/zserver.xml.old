@@ -1,0 +1,536 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<root>
+    <dir name = "中国">
+
+    <server name="社科院" addr="219.141.236.249" port="2100" authmethod="0" groupid="" username="" password="" converteacc="1" detectmarcsyntax="1" firstfull="0" recsperbatch="10">
+      <database name="all" />
+    </server>
+        <server 
+        name = "北图联合编目中心"
+        addr = "202.96.31.29"
+        port = "2100"
+        authmethod = "1"
+        groupid = ""
+        username = ""
+        password = ""
+        converteacc = "1"
+        firstfull = "0"
+        detectmarcsyntax = "1"
+        recsperbatch = "10"
+        >
+            <database  name = "uacn_bib" />
+        </server>
+        <server 
+        name = "上海图书馆"
+        addr = "202.96.221.132"
+        port = "2100"
+        authmethod = "1"
+        groupid = ""
+        username = ""
+        password = ""
+        converteacc = "1"
+        firstfull = "0"
+        detectmarcsyntax = "1"
+        recsperbatch = "10"
+        >
+            <database  name = "uacn_bib"/>
+        </server>
+        <server 
+        name = "深圳市图书馆"
+        addr = "61.144.241.68"
+        port = "2100"
+        authmethod = "0"
+        groupid = ""
+        username = ""
+        password = ""
+        converteacc = "1"
+        firstfull = "0"
+        detectmarcsyntax = "1"
+        recsperbatch = "10"
+        >
+            <database  name = "uacn_bib"/>
+        </server>
+        <server 
+        name = "北京邮电大学"
+        addr = "202.112.99.77"
+        port = "9999"
+        authmethod = "0"
+        groupid = ""
+        username = ""
+        password = ""
+        converteacc = "1"
+        firstfull = "0"
+        detectmarcsyntax = "1"
+        recsperbatch = "10"
+        >
+            <database  name = "default"/>
+        </server>
+        <server 
+        name = "南京大学"
+        addr = "202.119.47.100"
+        port = "210"
+        authmethod = "0"
+        groupid = ""
+        username = ""
+        password = ""
+        converteacc = "1"
+        firstfull = "0"
+        detectmarcsyntax = "1"
+        recsperbatch = "10"
+        >
+            <database  name = "libsys2000"/>
+        </server>
+        <server 
+        name = "华中科技大学"
+        addr = "202.114.9.29"
+        port = "210"
+        authmethod = "0"
+        groupid = ""
+        username = ""
+        password = ""
+        converteacc = "1"
+        firstfull = "0"
+        detectmarcsyntax = "1"
+        recsperbatch = "10"
+        >
+            <database  name = "innopac"/>
+        </server>
+        <server 
+        name = "西安交通大学"
+        addr = "202.117.24.14"
+        port = "210"
+        authmethod = "0"
+        groupid = ""
+        username = ""
+        password = ""
+        converteacc = "1"
+        firstfull = "0"
+        detectmarcsyntax = "1"
+        recsperbatch = "10"
+        >
+            <database  name = "innopac"/>
+        </server>
+        <server 
+        name = "清华大学"
+        addr = "opac.lib.tsinghua.edu.cn"
+        port = "210"
+        authmethod = "0"
+        groupid = ""
+        username = ""
+        password = ""
+        converteacc = "1"
+        firstfull = "0"
+        detectmarcsyntax = "1"
+        recsperbatch = "10"
+        >
+            <database  name = "innopac"/>
+        </server>
+        <server 
+        name = "北京大学"
+        addr = "162.105.138.200"
+        port = "2200"
+        authmethod = "0"
+        groupid = ""
+        username = ""
+        password = ""
+        converteacc = "1"
+        firstfull = "0"
+        detectmarcsyntax = "1"
+        recsperbatch = "10"
+        >
+            <database  name = "unicorn"/>
+        </server>
+        <server 
+        name = "中国人民大学"
+        addr = "202.112.118.10"
+        port = "2200"
+        authmethod = "0"
+        groupid = ""
+        username = ""
+        password = ""
+        converteacc = "1"
+        firstfull = "0"
+        detectmarcsyntax = "1"
+        recsperbatch = "10"
+        >
+            <database  name = "unicorn"/>
+        </server>
+        <server 
+        name = "华东师范大学"
+        addr = "202.120.82.40"
+        port = "210"
+        authmethod = "0"
+        groupid = ""
+        username = ""
+        password = ""
+        converteacc = "1"
+        firstfull = "0"
+        detectmarcsyntax = "1"
+        recsperbatch = "10"
+        >
+            <database  name = "innopac"/>
+        </server>
+        <server 
+        name = "南开大学"
+        addr = "202.113.20.245"
+        port = "2200"
+        authmethod = "0"
+        groupid = ""
+        username = ""
+        password = ""
+        converteacc = "1"
+        firstfull = "0"
+        detectmarcsyntax = "1"
+        recsperbatch = "10"
+        >
+            <database  name = "unicorn"/>
+        </server>
+        <server 
+        name = "香港中文大学(Chinese University of Hong Kong)"
+        addr = "library.cuhk.edu.hk"
+        port = "210"
+        authmethod = "0"
+        groupid = ""
+        username = ""
+        password = ""
+        converteacc = "1"
+        firstfull = "0"
+        detectmarcsyntax = "1"
+        recsperbatch = "10"
+        >
+            <database  name = "innopac"/>
+        </server>
+        <server 
+        name = "台湾大学(National Taiwan University Library)"
+        addr = "tulips.ntu.edu.tw"
+        port = "210"
+        authmethod = "0"
+        groupid = ""
+        username = ""
+        password = ""
+        converteacc = "1"
+        firstfull = "0"
+        detectmarcsyntax = "1"
+        recsperbatch = "10"
+        >
+            <database  name = "innopac"/>
+        </server>
+        <server 
+        name = "NBINET(台湾)"
+        addr = "nbinet.ncl.edu.tw"
+        port = "210"
+        authmethod = "0"
+        groupid = ""
+        username = ""
+        password = ""
+        converteacc = "1"
+        firstfull = "0"
+        detectmarcsyntax = "1"
+        recsperbatch = "10"
+        >
+            <database  name = "innopac"/>
+        </server>
+        <server 
+        name = "台湾中央研究院图书馆"
+        addr = "140.109.14.5"
+        port = "210"
+        authmethod = "0"
+        groupid = ""
+        username = ""
+        password = ""
+        converteacc = "1"
+        firstfull = "0"
+        detectmarcsyntax = "1"
+        recsperbatch = "10"
+        >
+            <database  name = "innopac"/>
+        </server>
+        <server 
+        name = "Hong Kong Baptist University Library"
+        addr = "hkbulib.hkbu.edu.hk"
+        port = "210"
+        authmethod = "0"
+        groupid = ""
+        username = ""
+        password = ""
+        converteacc = "1"
+        firstfull = "0"
+        detectmarcsyntax = "1"
+        recsperbatch = "10"
+        >
+            <database  name = "innopac"/>
+        </server>
+        <server 
+        name = "City University of Hong Kong"
+        addr = "144.214.2.47"
+        port = "210"
+        authmethod = "0"
+        groupid = ""
+        username = ""
+        password = ""
+        converteacc = "1"
+        firstfull = "0"
+        detectmarcsyntax = "1"
+        recsperbatch = "10"
+        >
+            <database  name = "innopac"/>
+        </server>
+        <server 
+        name = "Hong Kong Institute of Education"
+        addr = "library.ied.edu.hk"
+        port = "210"
+        authmethod = "0"
+        groupid = ""
+        username = ""
+        password = ""
+        converteacc = "1"
+        firstfull = "0"
+        detectmarcsyntax = "1"
+        recsperbatch = "10"
+        >
+            <database  name = "innopac"/>
+        </server>
+        <server 
+        name = "Hong Kong Polytechnic University"
+        addr = "158.132.160.8"
+        port = "210"
+        authmethod = "0"
+        groupid = ""
+        username = ""
+        password = ""
+        converteacc = "1"
+        firstfull = "0"
+        detectmarcsyntax = "1"
+        recsperbatch = "10"
+        >
+            <database  name = "innopac"/>
+        </server>
+        <server 
+        name = "Hong Kong University of Science and Technology"
+        addr = "ustlib.ust.hk"
+        port = "210"
+        authmethod = "0"
+        groupid = ""
+        username = ""
+        password = ""
+        converteacc = "1"
+        firstfull = "0"
+        detectmarcsyntax = "1"
+        recsperbatch = "10"
+        >
+            <database  name = "innopac"/>
+        </server>
+        <server 
+        name = "University of Hong Kong"
+        addr = "library.hku.hk"
+        port = "210"
+        authmethod = "0"
+        groupid = ""
+        username = ""
+        password = ""
+        converteacc = "1"
+        firstfull = "0"
+        detectmarcsyntax = "1"
+        recsperbatch = "10"
+        >
+            <database  name = "innopac"/>
+        </server>
+        <server 
+        name = "localhost"
+        addr = "localhost"
+        port = "210"
+        authmethod = "0"
+        groupid = ""
+        username = ""
+        password = ""
+        converteacc = "1"
+        firstfull = "0"
+        detectmarcsyntax = "1"
+        recsperbatch = "10"
+        >
+            <database  name = "book"/>
+        </server>
+        <server 
+        name = "社科院"
+        addr = "219.141.236.249"
+        port = "2100"
+        authmethod = "0"
+        groupid = ""
+        username = ""
+        password = ""
+        converteacc = "1"
+        detectmarcsyntax = "1"
+        firstfull = "0"
+        recsperbatch = "10"
+        >
+            <database  name = "all"/>
+        </server>
+    </dir>
+    <dir  name = "英国">
+        <server 
+        name = "British Library"
+        addr = "z3950.bl.uk"
+        port = "2020"
+        authmethod = "0"
+        groupid = ""
+        username = ""
+        password = ""
+        converteacc = "1"
+        firstfull = "0"
+        detectmarcsyntax = "1"
+        recsperbatch = "10"
+        >
+            <database  name = "sri"/>
+            <database  name = "mar"/>
+        </server>
+        <server 
+        name = "Brunel U. "
+        addr = "library.brunel.ac.uk"
+        port = "2200"
+        authmethod = "0"
+        groupid = ""
+        username = ""
+        password = ""
+        converteacc = "1"
+        firstfull = "0"
+        detectmarcsyntax = "1"
+        recsperbatch = "10"
+        >
+            <database  name = "UNICORN"/>
+        </server>
+    </dir>
+    <dir  name = "美国">
+        <server 
+        name = "Library of Congress"
+        addr = "z3950.loc.gov"
+        port = "7090"
+        authmethod = "0"
+        groupid = ""
+        username = ""
+        password = ""
+        converteacc = "1"
+        firstfull = "0"
+        detectmarcsyntax = "1"
+        recsperbatch = "10"
+        >
+            <database  name = "Voyager"/>
+        </server>
+        <server 
+        name = "Bell Laboratories Library Network"
+        addr = "z3950.bell-labs.com"
+        port = "210"
+        authmethod = "0"
+        groupid = ""
+        username = ""
+        password = ""
+        converteacc = "1"
+        firstfull = "0"
+        detectmarcsyntax = "1"
+        recsperbatch = "10"
+        >
+            <database  name = "books"/>
+            <database  name = "factbooks"/>
+            <database  name = "gils"/>
+            <database  name = "netlib"/>
+            <database  name = "acc1"/>
+            <database  name = "acc2"/>
+            <database  name = "acc3"/>
+        </server>
+        <server 
+        name = "College of William and Mary"
+        addr = "lion.swem.wm.edu"
+        port = "2200"
+        authmethod = "0"
+        groupid = ""
+        username = ""
+        password = ""
+        converteacc = "1"
+        firstfull = "0"
+        detectmarcsyntax = "1"
+        recsperbatch = "10"
+        >
+            <database  name = "UNICORN"/>
+        </server>
+        <server 
+        name = "Emory Library Catalog"
+        addr = "library.cc.emory.edu"
+        port = "2200"
+        authmethod = "0"
+        groupid = ""
+        username = ""
+        password = ""
+        converteacc = "1"
+        firstfull = "0"
+        detectmarcsyntax = "1"
+        recsperbatch = "10"
+        >
+            <database  name = "UNICORN"/>
+        </server>
+    </dir>
+    <dir  name = "加拿大">
+        <server 
+        name = "Acadia U. "
+        addr = "jasper.acadiau.ca"
+        port = "2200"
+        authmethod = "0"
+        groupid = ""
+        username = ""
+        password = ""
+        converteacc = "1"
+        firstfull = "0"
+        detectmarcsyntax = "1"
+        recsperbatch = "10"
+        >
+            <database  name = "UNICORN"/>
+        </server>
+    </dir>
+    <dir  name = "澳大利亚">
+        <server 
+        name = "Australian National University"
+        addr = "library.anu.edu.au"
+        port = "210"
+        authmethod = "0"
+        groupid = ""
+        username = ""
+        password = ""
+        converteacc = "1"
+        firstfull = "0"
+        detectmarcsyntax = "1"
+        recsperbatch = "10"
+        >
+            <database  name = "INNOPAC"/>
+        </server>
+    </dir>
+    <dir  name = "test">
+        <server 
+        name = "University of Southern California"
+        addr = "library.usc.edu"
+        port = "2200"
+        authmethod = "0"
+        groupid = ""
+        username = ""
+        password = ""
+        converteacc = "1"
+        firstfull = "0"
+        detectmarcsyntax = "1"
+        recsperbatch = "10"
+        >
+            <database  name = "unicorn"/>
+        </server>
+        <server 
+        name = "localhost test port"
+        addr = "localhost"
+        port = "210"
+        authmethod = "0"
+        groupid = ""
+        username = ""
+        password = ""
+        converteacc = "1"
+        firstfull = "0"
+        detectmarcsyntax = "1"
+        recsperbatch = "10"
+        >
+            <database  name = "unicorn"/>
+        </server>
+    </dir>
+</root>

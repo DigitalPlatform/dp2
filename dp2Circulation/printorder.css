@@ -1,0 +1,364 @@
+/* 表格边框已正常 2008/9/1 */
+
+
+BODY
+{
+	font-family:"Microsoft YaHei", Times, serif;
+}
+
+DIV.pageheader
+{
+	text-align: right;
+	border-bottom-width: 1pt;
+	border-bottom-color: #000000;
+	border-bottom-style: solid;
+	margin-bottom: 16pt;
+}
+
+DIV.tabletitle
+{
+	font-size: 16pt;
+	font-weight: bold;
+	text-align: center;
+	margin: 16pt;
+}
+
+TABLE.table
+{
+	width: 100%;
+
+	font-size: 12pt;
+
+	border-style: solid;
+	border-width: 1pt;
+	border-color: #000000;
+
+	border-collapse:collapse;
+	border-left-width: 1pt;
+	border-top-width: 1pt;
+	border-right-width: 1pt;
+	border-bottom-width: 1pt;
+
+	background-color: white;
+}
+
+TABLE.table TD
+{
+	padding: 6pt;
+
+	border-left-width: 0pt;
+	border-top-width: 0pt;
+	border-right-width: 0.5pt;
+	border-bottom-width: 0.5pt;
+
+	border-style: solid;
+	border-color: #999999;
+}
+
+TABLE.table TR.column TD
+{
+	font-weight: bold;
+	white-space: nowrap;
+}
+
+TABLE.table TR.content TD
+{
+
+}
+
+TABLE.table TR.content_biblio_sum TD
+{
+}
+
+
+TABLE.table TD.no
+{
+	text-align: right;
+	white-space: nowrap;
+}
+
+
+TABLE.table TD.recpath
+{
+	width: 10%;
+}
+
+TABLE.table TD.summary
+{
+	width: 30%;
+}
+
+TABLE.table TD.state
+{
+
+}
+
+TABLE.table TD.seller
+{
+
+}
+
+TABLE.table TD.source
+{
+
+}
+
+TABLE.table TD.range
+{
+
+}
+
+TABLE.table TD.issueCount
+{
+
+}
+
+TABLE.table TD.copy
+{
+	text-align: right;
+}
+
+TABLE.table TD.price
+{
+	text-align: right;
+}
+
+TABLE.table TD.totalPrice
+{
+	text-align: right;
+}
+
+TABLE.table TD.orderTime
+{
+
+}
+
+TABLE.table TD.orderID
+{
+
+}
+
+TABLE.table TD.distribute
+{
+
+}
+
+TABLE.table TD.comment
+{
+
+}
+
+TABLE.table TD.batchNo
+{
+
+}
+
+TABLE.table TD.biblioRecpath
+{
+
+}
+
+TABLE.table TD.acceptCopy
+{
+    text-align: right;
+}
+
+
+DIV.pagefooter
+{
+	text-align: right;
+
+	border-top-width: 1pt;
+	border-top-color: #000000;
+	border-top-style: solid;
+	margin-top: 16pt;
+}
+
+
+TABLE.classstatis
+{
+	width: 100%;
+
+	font-size: 12pt;
+
+	border-style: solid;
+	border-width: 1pt;
+	border-color: #000000;
+
+	border-collapse:collapse;
+	border-left-width: 1pt;
+	border-top-width: 1pt;
+	border-right-width: 1pt;
+	border-bottom-width: 1pt;
+
+	background-color: white;
+}
+
+TABLE.classstatis TD
+{
+	padding: 4pt;
+
+	border-left-width: 0pt;
+	border-top-width: 0pt;
+	border-right-width: 0.5pt;
+	border-bottom-width: 0.5pt;
+
+	border-style: solid;
+	border-color: #000000;
+}
+
+TABLE.classstatis TR.column TD
+{
+	font-weight: bold;
+}
+
+TABLE.classstatis TR.totalize TD
+{
+	font-weight: bold;
+}
+
+TABLE.classstatis TD
+{
+    text-align:right;
+}
+
+TABLE.classstatis TD.class
+{
+    text-align:left;
+}
+
+TABLE.classstatis TR.nosum TD
+{
+    background-color: #eeeeee;
+}
+
+/* */
+TABLE.publisherstatis
+{
+	width: 100%;
+
+	font-size: 12pt;
+
+	border-style: solid;
+	border-width: 1pt;
+	border-color: #000000;
+
+	border-collapse:collapse;
+	border-left-width: 1pt;
+	border-top-width: 1pt;
+	border-right-width: 1pt;
+	border-bottom-width: 1pt;
+
+	background-color: white;
+}
+
+TABLE.publisherstatis TD
+{
+	padding: 4pt;
+
+	border-left-width: 0pt;
+	border-top-width: 0pt;
+	border-right-width: 0.5pt;
+	border-bottom-width: 0.5pt;
+
+	border-style: solid;
+	border-color: #000000;
+}
+
+TABLE.publisherstatis TR.column TD
+{
+	font-weight: bold;
+}
+
+TABLE.publisherstatis TR.totalize TD
+{
+	font-weight: bold;
+}
+
+TABLE.publisherstatis TD
+{
+    text-align:right;
+}
+
+TABLE.publisherstatis TD.class
+{
+    text-align:left;
+}
+
+TABLE.publisherstatis TR.nosum TD
+{
+    background-color: #eeeeee;
+}
+
+/* */
+TABLE.publisherextendstatis
+{
+	width: 100%;
+
+	font-size: 12pt;
+
+	border-style: solid;
+	border-width: 1pt;
+	border-color: #000000;
+
+	border-collapse:collapse;
+	border-left-width: 1pt;
+	border-top-width: 1pt;
+	border-right-width: 1pt;
+	border-bottom-width: 1pt;
+
+	background-color: white;
+}
+
+TABLE.publisherextendstatis TD
+{
+	padding: 4pt;
+
+	border-left-width: 0pt;
+	border-top-width: 0pt;
+	border-right-width: 0.5pt;
+	border-bottom-width: 0.5pt;
+
+	border-style: solid;
+	border-color: #999999;
+	
+	text-align:right;
+}
+
+TABLE.publisherextendstatis TD.class
+{
+    /* white-space: nowrap; */
+    min-width: 10%;
+}
+
+TABLE.publisherextendstatis TD.bibliocount
+{
+    border-right-style: dotted; 
+}
+
+TABLE.publisherextendstatis TD.columntitle
+{
+    text-align: center; 
+}
+
+TABLE.publisherextendstatis TR.column TD
+{
+	font-weight: bold;
+}
+
+TABLE.publisherextendstatis TR.totalize TD
+{
+	font-weight: bold;
+}
+
+
+
+TABLE.publisherextendstatis TD.class
+{
+    text-align:left;
+}
+
+TABLE.publisherextendstatis TR.nosum TD
+{
+    background-color: #eeeeee;
+}

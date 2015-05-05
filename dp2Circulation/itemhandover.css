@@ -1,0 +1,236 @@
+BODY
+{
+	font-family:"Microsoft YaHei", Times, serif;
+}
+
+DIV.pageheader
+{
+  	font-size: 9pt;
+
+	text-align: right;
+	border-bottom-width: 1pt;
+	border-bottom-color: #000000;
+	border-bottom-style: solid;
+	margin-bottom: 16pt;
+}
+
+DIV.tabletitle
+{
+	font-size: 16pt;
+	font-weight: bold;
+	text-align: center;
+	margin: 16pt;
+}
+
+TABLE.table
+{
+	width: 100%;
+
+	font-size: 9pt;
+
+	border-style: solid;
+	border-width: 1pt;
+	border-color: #000000;
+
+	border-collapse:collapse;
+	border-left-width: 1pt;
+	border-top-width: 1pt;
+	border-right-width: 1pt;
+	border-bottom-width: 1pt;
+
+	background-color: white;
+}
+
+TABLE.table TD
+{
+	padding: 4pt;
+
+	border-left-width: 0pt;
+	border-top-width: 0pt;
+	border-right-width: 0.5pt;
+	border-bottom-width: 0.5pt;
+
+	border-style: solid;
+	border-color: #999999;
+}
+
+TABLE.table TR.column TD
+{
+	font-weight: bold;
+	white-space: nowrap;
+}
+
+TABLE.table TR.content TD
+{
+
+}
+
+TABLE.table TR.content_biblio_sum TD
+{
+
+}
+
+
+TABLE.table TD.no
+{
+	text-align: right;
+	white-space: nowrap;
+}
+
+
+TABLE.table TD.barcode
+{
+	font-size: 7pt;
+	width: 10%;
+}
+
+TABLE.table TD.accessNo
+{
+	font-size: 7pt;
+	width: 5%;
+}
+
+TABLE.table TD.summary
+{
+	width: 50%;
+}
+
+TABLE.table TD.isbnIssn
+{
+
+}
+
+TABLE.table TD
+{
+
+}
+
+TABLE.table TD.state
+{
+
+}
+
+TABLE.table TD.location
+{
+	width: 20%;
+}
+
+TABLE.table TD.price
+{
+	text-align: right;
+}
+
+TABLE.table TD.bookType
+{
+
+}
+
+TABLE.table TD.registerNo
+{
+
+}
+
+TABLE.table TD.comment
+{
+
+}
+
+TABLE.table TD.mergeComment
+{
+
+}
+
+TABLE.table TD.batchNo
+{
+
+}
+
+TABLE.table TD.borrower
+{
+
+}
+
+TABLE.table TD.borrowDate
+{
+
+}
+
+TABLE.table TD.borrowPeriod
+{
+
+}
+
+TABLE.table TD.recpath
+{
+	font-size: 7pt;
+
+}
+TABLE.table TD.biblioRecpath
+{
+	font-size: 7pt;
+
+}
+
+TABLE.table TD.biblioPrice
+{
+
+}
+
+
+DIV.itemcount
+{
+
+}
+
+DIV.bibliocount
+{
+
+}
+
+DIV.totalprice
+{
+
+}
+
+DIV.batchno
+{
+
+}
+
+DIV.location
+{
+
+}
+
+DIV.barcodefilepath
+{
+
+}
+
+DIV.sender
+{
+
+}
+
+DIV.recipient
+{
+
+}
+
+DIV.sepline
+{
+	
+}
+
+DIV.pagefooter
+{
+   	font-size: 9pt;
+
+	text-align: right;
+
+	border-top-width: 1pt;
+	border-top-color: #000000;
+	border-top-style: solid;
+	margin-top: 16pt;
+}
+

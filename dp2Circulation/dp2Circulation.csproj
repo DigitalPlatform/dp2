@@ -1,0 +1,3101 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{D4A13D3E-B9B0-4448-B6C8-CD3BD1DC37F1}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>dp2Circulation</RootNamespace>
+    <AssemblyName>dp2Circulation</AssemblyName>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
+    <IsWebBootstrapper>true</IsWebBootstrapper>
+    <ManifestCertificateThumbprint>01B837CBCFE6879A6170B155F51A685B7889204F</ManifestCertificateThumbprint>
+    <ManifestKeyFile>dp2Circulation_9_TemporaryKey.pfx</ManifestKeyFile>
+    <GenerateManifests>true</GenerateManifests>
+    <SignManifests>true</SignManifests>
+    <ApplicationIcon>nei.ico</ApplicationIcon>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>2.0</OldToolsVersion>
+    <UpgradeBackupLocation />
+    <TargetFrameworkProfile />
+    <PublishUrl>http://localhost/dp2Circulation/v2/</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Web</InstallFrom>
+    <UpdateEnabled>true</UpdateEnabled>
+    <UpdateMode>Background</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <InstallUrl>http://dp2003.com/dp2Circulation/v2/</InstallUrl>
+    <UpdateUrl>http://dp2003.com/dp2Circulation/v2/</UpdateUrl>
+    <TargetCulture>zh-CN</TargetCulture>
+    <ProductName>dp2内务 V2</ProductName>
+    <PublisherName>DigitalPlatform</PublisherName>
+    <SuiteName>dp2 V2</SuiteName>
+    <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
+    <WebPage>publish.htm</WebPage>
+    <ApplicationRevision>294</ApplicationRevision>
+    <ApplicationVersion>2.3.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <PublishWizardCompleted>true</PublishWizardCompleted>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;SN</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <DocumentationFile>bin\Debug\dp2Circulation_codeComment.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;SN</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="ClosedXML">
+      <HintPath>packages\ClosedXML.0.75.0\lib\net40-client\ClosedXML.dll</HintPath>
+    </Reference>
+    <Reference Include="DocumentFormat.OpenXml, Version=2.5.5631.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>packages\DocumentFormat.OpenXml.2.5\lib\DocumentFormat.OpenXml.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework">
+      <HintPath>packages\EntityFramework.6.0.0\lib\net40\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer">
+      <HintPath>packages\EntityFramework.6.0.0\lib\net40\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
+    <Reference Include="Ionic.Zip">
+      <HintPath>.\Ionic.Zip.dll</HintPath>
+    </Reference>
+    <Reference Include="Jurassic, Version=2.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>.\Jurassic.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.SQLite, Version=1.0.92.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>packages\System.Data.SQLite.Core.1.0.92.0\lib\net40\System.Data.SQLite.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Data.SQLite.EF6">
+      <HintPath>packages\System.Data.SQLite.EF6.1.0.92.0\lib\net40\System.Data.SQLite.EF6.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Data.SQLite.Linq">
+      <HintPath>packages\System.Data.SQLite.Linq.1.0.92.0\lib\net40\System.Data.SQLite.Linq.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Remoting" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Speech" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UIAutomationProvider" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="WindowsFormsIntegration" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AccountBook\AccountBookForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AccountBook\AccountBookForm.Designer.cs">
+      <DependentUpon>AccountBookForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="AccountBook\AccountBookHost.cs" />
+    <Compile Include="AccountBook\OutputAcountBookTextFileDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AccountBook\OutputAcountBookTextFileDialog.Designer.cs">
+      <DependentUpon>OutputAcountBookTextFileDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ActivateForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ActivateForm.Designer.cs">
+      <DependentUpon>ActivateForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Charging\ColorSummaryControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Charging\ColorSummaryControl.Designer.cs">
+      <DependentUpon>ColorSummaryControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Charging\FloatingMessageForm.cs" />
+    <Compile Include="Charging\FloatingMessageForm.Designer.cs">
+      <DependentUpon>FloatingMessageForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Charging\IChargingForm.cs" />
+    <Compile Include="Charging\PatronSummaryForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Charging\PatronSummaryForm.Designer.cs">
+      <DependentUpon>PatronSummaryForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Charging\QuickChargingForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Charging\QuickChargingForm.Designer.cs">
+      <DependentUpon>QuickChargingForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Charging\SelectItemDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Charging\SelectItemDialog.Designer.cs">
+      <DependentUpon>SelectItemDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Dictionary\SelectDictionaryItemDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dictionary\SelectDictionaryItemDialog.Designer.cs">
+      <DependentUpon>SelectDictionaryItemDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="EntityForm\GetMergeStyleDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EntityForm\GetMergeStyleDialog.Designer.cs">
+      <DependentUpon>GetMergeStyleDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="EntityForm\MacroTableDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EntityForm\MacroTableDialog.Designer.cs">
+      <DependentUpon>MacroTableDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="EntityForm\MergePicture.cs" />
+    <Compile Include="EntityForm\PartialDeniedDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EntityForm\PartialDeniedDialog.Designer.cs">
+      <DependentUpon>PartialDeniedDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="EntityRegister\AmazonSearch.cs" />
+    <Compile Include="EntityRegister\EntityRegisterControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="EntityRegister\EntityRegisterControl.Designer.cs">
+      <DependentUpon>EntityRegisterControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="EntityRegister\EntityRegisterForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EntityRegister\EntityRegisterForm.Designer.cs">
+      <DependentUpon>EntityRegisterForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="EntityRegister\BiblioRegisterControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="EntityRegister\BiblioRegisterControl.Designer.cs">
+      <DependentUpon>BiblioRegisterControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="EntityRegister\ImageManager.cs" />
+    <Compile Include="EntityRegister\Save\EntitiesControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="EntityRegister\Save\EntitiesControl.Designer.cs">
+      <DependentUpon>EntitiesControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="EntityRegister\EntityRegisterControl1.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="EntityRegister\EntityRegisterControl1.Designer.cs">
+      <DependentUpon>EntityRegisterControl1.cs</DependentUpon>
+    </Compile>
+    <Compile Include="EntityRegister\ScanRegisterBarcodeForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EntityRegister\ScanRegisterBarcodeForm.designer.cs">
+      <DependentUpon>ScanRegisterBarcodeForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Entity\InventoryForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Entity\InventoryForm.Designer.cs">
+      <DependentUpon>InventoryForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Entity\InventoryForm0.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Entity\InventoryForm0.Designer.cs">
+      <DependentUpon>InventoryForm0.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Entity\ItemBarcodeLoader.cs" />
+    <Compile Include="Entity\ItemEditControlBase.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Entity\ItemEditFormBase.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Entity\NewInventoryForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Entity\NewInventoryForm.Designer.cs">
+      <DependentUpon>NewInventoryForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ItemHandOver\ScanBarcodeForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ItemHandOver\ScanBarcodeForm.Designer.cs">
+      <DependentUpon>ScanBarcodeForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ItemHandOver\GetLocationDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ItemHandOver\GetLocationDialog.Designer.cs">
+      <DependentUpon>GetLocationDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Label\LabelDefControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Label\LabelDefControl.Designer.cs">
+      <DependentUpon>LabelDefControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Label\LabelRenderControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Label\LabelRenderControl.Designer.cs">
+      <DependentUpon>LabelRenderControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Label\LabelDesignForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Label\LabelDesignForm.Designer.cs">
+      <DependentUpon>LabelDesignForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Label\LabelLineFormatDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Label\LabelLineFormatDialog.Designer.cs">
+      <DependentUpon>LabelLineFormatDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Label\PaddingDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Label\PaddingDialog.Designer.cs">
+      <DependentUpon>PaddingDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Label\RotateControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Label\RotateControl.Designer.cs">
+      <DependentUpon>RotateControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Label\SelectPaperDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Label\SelectPaperDialog.Designer.cs">
+      <DependentUpon>SelectPaperDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MainForm\FirstRunDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainForm\FirstRunDialog.Designer.cs">
+      <DependentUpon>FirstRunDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ManageDatabase\CalendarDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ManageDatabase\CalendarDialog.Designer.cs">
+      <DependentUpon>CalendarDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ManageDatabase\CenterServerDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ManageDatabase\CenterServerDialog.Designer.cs">
+      <DependentUpon>CenterServerDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ManageDatabase\PageCalendar.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ManageDatabase\PageCenter.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ManageDatabase\PageNewLoanPolicy.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Message\MessageForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Message\MessageForm.Designer.cs">
+      <DependentUpon>MessageForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Monitor\ChannelForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Monitor\ChannelForm.Designer.cs">
+      <DependentUpon>ChannelForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Monitor\StartReplicationDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Monitor\StartReplicationDlg.Designer.cs">
+      <DependentUpon>StartReplicationDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Monitor\StartRebuildKeysDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Monitor\StartRebuildKeysDlg.Designer.cs">
+      <DependentUpon>StartRebuildKeysDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="OperLogStatis\OperLogItemLoader.cs" />
+    <Compile Include="OperLogStatis\OperLogLoader.cs" />
+    <Compile Include="OperLogStatis\OperLogStatisTask1.cs" />
+    <Compile Include="Reader\AddFriendsDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Reader\AddFriendsDialog.Designer.cs">
+      <DependentUpon>AddFriendsDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Reader\AmerceForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Reader\AmerceForm.Designer.cs">
+      <DependentUpon>AmerceForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Amerce\DkywAmerceCardDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Amerce\DkywAmerceCardDialog.Designer.cs">
+      <DependentUpon>DkywAmerceCardDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Amerce\CardPasswordDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Amerce\CardPasswordDialog.Designer.cs">
+      <DependentUpon>CardPasswordDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Amerce\AmerceCardDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Amerce\AmerceCardDialog.Designer.cs">
+      <DependentUpon>AmerceCardDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MainForm\BackgroundForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainForm\BackgroundForm.Designer.cs">
+      <DependentUpon>BackgroundForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BatchTaskForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BatchTaskForm.Designer.cs">
+      <DependentUpon>BatchTaskForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="EntityForm\BiblioSaveToDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EntityForm\BiblioSaveToDlg.Designer.cs">
+      <DependentUpon>BiblioSaveToDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Entity\BookItemBase.cs" />
+    <Compile Include="Entity\ItemControlBase.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Invoice\InvoiceEditControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Invoice\InvoiceEditControl.Designer.cs">
+      <DependentUpon>InvoiceEditControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ItemInfoForm\AddSubjectDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ItemInfoForm\AddSubjectDialog.Designer.cs">
+      <DependentUpon>AddSubjectDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Order\DateSliceDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Order\DateSliceDialog.Designer.cs">
+      <DependentUpon>DateSliceDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Reader\ChangeStateActionControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Reader\ChangeStateActionControl.Designer.cs">
+      <DependentUpon>ChangeStateActionControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Reader\SelectPatronDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Reader\SelectPatronDialog.Designer.cs">
+      <DependentUpon>SelectPatronDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Script\ClientHost.cs" />
+    <Compile Include="Script\EditDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Script\EditDialog.Designer.cs">
+      <DependentUpon>EditDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Script\ItemHost.cs" />
+    <Compile Include="Script\MarcQueryHost.cs" />
+    <Compile Include="Script\PatronHost.cs" />
+    <Compile Include="Script\StatisHostBase.cs" />
+    <Compile Include="Script\StatisHostBase0.cs" />
+    <Compile Include="SearchForms\BiblioLoader.cs" />
+    <Compile Include="SearchForms\BiblioSearchForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SearchForms\BiblioSearchForm.Designer.cs">
+      <DependentUpon>BiblioSearchForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BiblioStatis\BiblioStatis.cs" />
+    <Compile Include="BiblioStatis\BiblioStatisForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BiblioStatis\BiblioStatisForm.Designer.cs">
+      <DependentUpon>BiblioStatisForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BiblioTemplate\TemplateRecordDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Bookshelf\BookshelfForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Bookshelf\BookshelfForm.Designer.cs">
+      <DependentUpon>BookshelfForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Cache\StringCache.cs" />
+    <Compile Include="Card\CardPrintForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Card\CardPrintForm.Designer.cs">
+      <DependentUpon>CardPrintForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Card\PrintCardDocument.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Comment\CommentControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Comment\CommentControl.Designer.cs">
+      <DependentUpon>CommentControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Comment\CommentEditControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Comment\CommentEditControl.Designer.cs">
+      <DependentUpon>CommentEditControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Comment\CommentEditForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Comment\CommentEditForm.Designer.cs">
+      <DependentUpon>CommentEditForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Comment\CommentItem.cs" />
+    <Compile Include="Comment\CommentViewerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Comment\CommentViewerForm.Designer.cs">
+      <DependentUpon>CommentViewerForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Entity\BookItem.cs" />
+    <Compile Include="EntityForm\BrowseSearchResultForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EntityForm\BrowseSearchResultForm.Designer.cs">
+      <DependentUpon>BrowseSearchResultForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CalendarForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CalendarForm.Designer.cs">
+      <DependentUpon>CalendarForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CfgDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CfgDlg.Designer.cs">
+      <DependentUpon>CfgDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="QuickChangeEntity\ChangeEntityActionDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="QuickChangeEntity\ChangeEntityActionDialog.Designer.cs">
+      <DependentUpon>ChangeEntityActionDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ChangePasswordForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ChangePasswordForm.Designer.cs">
+      <DependentUpon>ChangePasswordForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Charging\ChargingForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Charging\ChargingForm.Designer.cs">
+      <DependentUpon>ChargingForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Charging\ChargingInfoDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Charging\ChargingInfoDlg.Designer.cs">
+      <DependentUpon>ChargingInfoDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CheckBorrowInfoForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CheckBorrowInfoForm.Designer.cs">
+      <DependentUpon>CheckBorrowInfoForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ClockForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ClockForm.Designer.cs">
+      <DependentUpon>ClockForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Reader\CompareReaderForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Reader\CompareReaderForm.Designer.cs">
+      <DependentUpon>CompareReaderForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CopyrightDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dup\DupForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Dup\DupForm.Designer.cs">
+      <DependentUpon>DupForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Entity\EditControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Entity\EntityBarcodeFoundDupDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Entity\EntityBarcodeFoundDupDlg.Designer.cs">
+      <DependentUpon>EntityBarcodeFoundDupDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Entity\EntityControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Entity\EntityControl.Designer.cs">
+      <DependentUpon>EntityControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Entity\EntityEditControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Entity\EntityEditControl.Designer.cs">
+      <DependentUpon>EntityEditControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Entity\EntityEditForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Entity\EntityEditForm.Designer.cs">
+      <DependentUpon>EntityEditForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="EntityForm\EntityForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EntityForm\EntityForm.Designer.cs">
+      <DependentUpon>EntityForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Entity\EntityFormOptionDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Entity\EntityFormOptionDlg.Designer.cs">
+      <DependentUpon>EntityFormOptionDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FontSetting\MyForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EntityForm\GetDbNameDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EntityForm\GetDbNameDlg.Designer.cs">
+      <DependentUpon>GetDbNameDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Global.cs" />
+    <Compile Include="SearchForms\BrowseLoader.cs" />
+    <Compile Include="SearchForms\CacheableBiblioLoader.cs" />
+    <Compile Include="SearchForms\ChangeItemActionDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SearchForms\ChangeItemActionDialog.Designer.cs">
+      <DependentUpon>ChangeItemActionDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SearchForms\CommentSearchForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SearchForms\InvoiceSearchForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SearchForms\InvoiceSearchForm.Designer.cs">
+      <DependentUpon>InvoiceSearchForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ISO2709Statis\Iso2709Statis.cs" />
+    <Compile Include="ISO2709Statis\ISO2709StatisForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ISO2709Statis\ISO2709StatisForm.Designer.cs">
+      <DependentUpon>ISO2709StatisForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Issue\BindingControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Issue\BindingControl.Designer.cs">
+      <DependentUpon>BindingControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Issue\BindingControlCells.cs" />
+    <Compile Include="Issue\BindingControlItems.cs" />
+    <Compile Include="Issue\BindingForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Issue\BindingForm.Designer.cs">
+      <DependentUpon>BindingForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Issue\BindingOptionDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Issue\BindingOptionDialog.Designer.cs">
+      <DependentUpon>BindingOptionDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Issue\CellLineDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Issue\CellLineDialog.Designer.cs">
+      <DependentUpon>CellLineDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Issue\IssueControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Issue\IssueControl.Designer.cs">
+      <DependentUpon>IssueControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Issue\IssueDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Issue\IssueDialog.Designer.cs">
+      <DependentUpon>IssueDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Issue\IssueEditControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Issue\IssueEditControl.Designer.cs">
+      <DependentUpon>IssueEditControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Issue\IssueEditForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Issue\IssueEditForm.Designer.cs">
+      <DependentUpon>IssueEditForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Issue\IssueHost.cs" />
+    <Compile Include="Issue\IssueItem.cs" />
+    <Compile Include="Issue\IssueManageControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Issue\IssueManageControl.Designer.cs">
+      <DependentUpon>IssueManageControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Issue\IssueManageForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Issue\IssueManageForm.Designer.cs">
+      <DependentUpon>IssueManageForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Issue\IssuePublishTimeFoundDupDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Issue\IssuePublishTimeFoundDupDlg.Designer.cs">
+      <DependentUpon>IssuePublishTimeFoundDupDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Issue\PrintBindingForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Issue\PrintBindingForm.Designer.cs">
+      <DependentUpon>PrintBindingForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Issue\TestJidaoForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Issue\TestJidaoForm.Designer.cs">
+      <DependentUpon>TestJidaoForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Issue\VolumeInfo.cs" />
+    <Compile Include="ItemHandOver\SelectTargetBiblioDbNameDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ItemHandOver\SelectTargetBiblioDbNameDialog.Designer.cs">
+      <DependentUpon>SelectTargetBiblioDbNameDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ItemHandOver\TwoBiblioDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ItemHandOver\TwoBiblioDialog.Designer.cs">
+      <DependentUpon>TwoBiblioDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ItemStatis\ItemStatis.cs" />
+    <Compile Include="ItemStatis\ItemStatisForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ItemStatis\ItemStatisForm.Designer.cs">
+      <DependentUpon>ItemStatisForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ItemStatis\OrderStatisForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Label\LabelParam.cs" />
+    <Compile Include="Label\LabelPrintForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Label\LabelPrintForm.Designer.cs">
+      <DependentUpon>LabelPrintForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Label\NewPrintController.cs" />
+    <Compile Include="Label\PrintLabelDocument.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ManageDatabase\AccessPointDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ManageDatabase\AccessPointDialog.Designer.cs">
+      <DependentUpon>AccessPointDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ManageDatabase\ArrangementGroupDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ManageDatabase\ArrangementGroupDialog.Designer.cs">
+      <DependentUpon>ArrangementGroupDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ManageDatabase\ArrangementLocationDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ManageDatabase\ArrangementLocationDialog.Designer.cs">
+      <DependentUpon>ArrangementLocationDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ManageDatabase\BiblioDatabaseDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ManageDatabase\BiblioDatabaseDialog.Designer.cs">
+      <DependentUpon>BiblioDatabaseDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ManageDatabase\DefaultProjectDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ManageDatabase\DefaultProjectDialog.Designer.cs">
+      <DependentUpon>DefaultProjectDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ManageDatabase\GetOpacMemberDatabaseNameDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ManageDatabase\GetOpacMemberDatabaseNameDialog.Designer.cs">
+      <DependentUpon>GetOpacMemberDatabaseNameDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ManageDatabase\GetProjectNameDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ManageDatabase\GetProjectNameDialog.Designer.cs">
+      <DependentUpon>GetProjectNameDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ManageDatabase\ImportFromsDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ManageDatabase\ImportFromsDialog.Designer.cs">
+      <DependentUpon>ImportFromsDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ManageDatabase\OpacBrowseFormatDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ManageDatabase\OpacBrowseFormatDialog.Designer.cs">
+      <DependentUpon>OpacBrowseFormatDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ManageDatabase\OpacNormalDatabaseDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ManageDatabase\OpacNormalDatabaseDialog.Designer.cs">
+      <DependentUpon>OpacNormalDatabaseDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ManageDatabase\OpacVirtualDatabaseDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ManageDatabase\OpacVirtualDatabaseDialog.Designer.cs">
+      <DependentUpon>OpacVirtualDatabaseDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ManageDatabase\PageArrangement.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ManageDatabase\PageDup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ManageDatabase\PageLoanPolicy.cs" />
+    <Compile Include="ManageDatabase\PageZhongcihao.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ManageDatabase\ProjectDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ManageDatabase\ProjectDialog.Designer.cs">
+      <DependentUpon>ProjectDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ManageDatabase\ReaderDatabaseDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ManageDatabase\ReaderDatabaseDialog.Designer.cs">
+      <DependentUpon>ReaderDatabaseDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ManageDatabase\RefreshStyleDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ManageDatabase\RefreshStyleDialog.Designer.cs">
+      <DependentUpon>RefreshStyleDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ManageDatabase\SimpleDatabaseDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ManageDatabase\SimpleDatabaseDialog.Designer.cs">
+      <DependentUpon>SimpleDatabaseDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ManageDatabase\TargetDatabaseDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ManageDatabase\TargetDatabaseDialog.Designer.cs">
+      <DependentUpon>TargetDatabaseDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ManageDatabase\ZhongcihaoGroupDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ManageDatabase\ZhongcihaoGroupDialog.Designer.cs">
+      <DependentUpon>ZhongcihaoGroupDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ManageDatabase\ZhongcihaoNstableDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ManageDatabase\ZhongcihaoNstableDialog.Designer.cs">
+      <DependentUpon>ZhongcihaoNstableDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Comment\ModifyCommentDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Comment\ModifyCommentDialog.Designer.cs">
+      <DependentUpon>ModifyCommentDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Monitor\StartDkywReplicationDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Monitor\StartDkywReplicationDlg.Designer.cs">
+      <DependentUpon>StartDkywReplicationDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Monitor\StartPatronReplicationDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Monitor\StartPatronReplicationDlg.Designer.cs">
+      <DependentUpon>StartPatronReplicationDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="OperHistory\OperHistory.cs" />
+    <Compile Include="OperLog\OperLogFindDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="OperLog\OperLogFindDialog.Designer.cs">
+      <DependentUpon>OperLogFindDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="OperLogStatis\GetOperLogFilenameDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="OperLogStatis\GetOperLogFilenameDlg.Designer.cs">
+      <DependentUpon>GetOperLogFilenameDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Order\AcceptForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Order\AcceptForm.Designer.cs">
+      <DependentUpon>AcceptForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Order\GetAcceptTargetDbNameDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Order\GetAcceptTargetDbNameDlg.Designer.cs">
+      <DependentUpon>GetAcceptTargetDbNameDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Order\InputItemBarcodeDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Order\InputItemBarcodeDialog.Designer.cs">
+      <DependentUpon>InputItemBarcodeDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Order\OrderArriveForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Order\OrderArriveForm.Designer.cs">
+      <DependentUpon>OrderArriveForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Order\OrderControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Order\OrderControl.Designer.cs">
+      <DependentUpon>OrderControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Order\OrderDesignForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Order\OrderDesignForm.Designer.cs">
+      <DependentUpon>OrderDesignForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Order\OrderEditControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Order\OrderEditControl.Designer.cs">
+      <DependentUpon>OrderEditControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Order\OrderEditForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Order\OrderEditForm.Designer.cs">
+      <DependentUpon>OrderEditForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Order\OrderFileDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Order\OrderFileDialog.Designer.cs">
+      <DependentUpon>OrderFileDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Order\OrderHost.cs" />
+    <Compile Include="Order\OrderIndexFoundDupDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Order\OrderIndexFoundDupDlg.Designer.cs">
+      <DependentUpon>OrderIndexFoundDupDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Order\OrderItem.cs" />
+    <Compile Include="Order\OrderOutputItemDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Order\OrderOutputItemDialog.Designer.cs">
+      <DependentUpon>OrderOutputItemDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Order\OutputOrder.cs" />
+    <Compile Include="Order\PrintAcceptForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Order\PrintAcceptForm.Designer.cs">
+      <DependentUpon>PrintAcceptForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Order\PrintOrderForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Order\PrintOrderForm.Designer.cs">
+      <DependentUpon>PrintOrderForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Order\PrintClaimForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Order\PrintClaimForm.Designer.cs">
+      <DependentUpon>PrintClaimForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Print\BatchPrintFormBase.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Print\ChargingPrintManageForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Print\ChargingPrintManageForm.Designer.cs">
+      <DependentUpon>ChargingPrintManageForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Print\TextAndHtmlControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Print\TextAndHtmlControl.Designer.cs">
+      <DependentUpon>TextAndHtmlControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="QuickChangeBiblio\ChangeBiblioActionDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="QuickChangeBiblio\ChangeBiblioActionDialog.Designer.cs">
+      <DependentUpon>ChangeBiblioActionDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="QuickChangeBiblio\QuickChangeBiblioForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="QuickChangeBiblio\QuickChangeBiblioForm.Designer.cs">
+      <DependentUpon>QuickChangeBiblioForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ReaderStatis\PrintReaderInfoInputDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ReaderStatis\PrintReaderInfoInputDialog.Designer.cs">
+      <DependentUpon>PrintReaderInfoInputDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Reader\ChangeReaderActionDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Reader\ChangeReaderActionDialog.Designer.cs">
+      <DependentUpon>ChangeReaderActionDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Reader\PlaceIdcardDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Reader\PlaceIdcardDialog.Designer.cs">
+      <DependentUpon>PlaceIdcardDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Reader\ReaderSaveToDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Reader\ReaderSaveToDialog.Designer.cs">
+      <DependentUpon>ReaderSaveToDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Reader\SaveReaderOptionDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Reader\SaveReaderOptionDialog.Designer.cs">
+      <DependentUpon>SaveReaderOptionDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Reader\SetReaderBarcodeNumberDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Reader\SetReaderBarcodeNumberDialog.Designer.cs">
+      <DependentUpon>SetReaderBarcodeNumberDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Script\ColumnFilterHost.cs" />
+    <Compile Include="Script\Commander.cs" />
+    <Compile Include="Script\DetailHost.cs" />
+    <Compile Include="Script\Host.cs" />
+    <Compile Include="Print\HtmlPrintForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Print\HtmlPrintForm.Designer.cs">
+      <DependentUpon>HtmlPrintForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="HtmlViewerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="HtmlViewerForm.Designer.cs">
+      <DependentUpon>HtmlViewerForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="EntityForm\ItemBarcodeDupDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EntityForm\ItemBarcodeDupDlg.Designer.cs">
+      <DependentUpon>ItemBarcodeDupDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ItemHandOver\ItemHandoverForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ItemHandOver\ItemHandoverForm.Designer.cs">
+      <DependentUpon>ItemHandoverForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Print\PrintColumnDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Print\PrintColumnDlg.Designer.cs">
+      <DependentUpon>PrintColumnDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Print\PrintOptionDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Print\PrintOptionDlg.Designer.cs">
+      <DependentUpon>PrintOptionDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ItemHandOver\SearchByBatchnoForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ItemHandOver\SearchByBatchnoForm.Designer.cs">
+      <DependentUpon>SearchByBatchnoForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ItemInfoForm\ItemInfoForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ItemInfoForm\ItemInfoForm.Designer.cs">
+      <DependentUpon>ItemInfoForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SearchForms\IssueSearchForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SearchForms\ItemSearchForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SearchForms\ItemSearchForm.Designer.cs">
+      <DependentUpon>ItemSearchForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MainForm\MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainForm\MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ManageDatabase\ManagerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ManageDatabase\ManagerForm.Designer.cs">
+      <DependentUpon>ManagerForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Reader\ModifyPriceDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Reader\ModifyPriceDlg.Designer.cs">
+      <DependentUpon>ModifyPriceDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="OperLog\OperLogForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="OperLog\OperLogForm.Designer.cs">
+      <DependentUpon>OperLogForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="OperLogStatis\OperLogStatisForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="OperLogStatis\OperLogStatisForm.Designer.cs">
+      <DependentUpon>OperLogStatisForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="OperLogStatis\OperLogStatis.cs" />
+    <Compile Include="PassGateForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PassGateForm.Designer.cs">
+      <DependentUpon>PassGateForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Print\PrintOption.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Content Include="amercehtml.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="bondfingerprintscanfc0.gif" />
+    <Content Include="comment_change_actions.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="deleted.txt" />
+    <Content Include="EntityRegister\servers.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="eula.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="fingerprint-cache-loading.gif">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="issue_change_actions.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="item_change_actions.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="nei.ico" />
+    <Content Include="null_order_32.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="jquery.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="jquery\css\images\ui-bg_diagonals-thick_18_b81900_40x40.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="jquery\css\images\ui-bg_diagonals-thick_20_666666_40x40.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="jquery\css\images\ui-bg_flat_10_000000_40x100.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="jquery\css\images\ui-bg_glass_100_f6f6f6_1x400.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="jquery\css\images\ui-bg_glass_100_fdf5ce_1x400.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="jquery\css\images\ui-bg_glass_65_ffffff_1x400.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="jquery\css\images\ui-bg_gloss-wave_35_f6a828_500x100.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="jquery\css\images\ui-bg_highlight-soft_100_eeeeee_1x100.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="jquery\css\images\ui-bg_highlight-soft_75_ffe45c_1x100.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="jquery\css\images\ui-icons_222222_256x240.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="jquery\css\images\ui-icons_228ef1_256x240.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="jquery\css\images\ui-icons_ef8c08_256x240.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="jquery\css\images\ui-icons_ffd27a_256x240.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="jquery\css\images\ui-icons_ffffff_256x240.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="jquery\css\jquery-ui-1.8.7.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="jquery\js\jquery-1.4.4.min.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="jquery\js\jquery-ui-1.8.7.min.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="no_order_24.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="operloghtml.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="order_change_actions.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="patron_change_actions.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="printslice.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="background.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <EmbeddedResource Include="AccountBook\AccountBookForm.resx">
+      <DependentUpon>AccountBookForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="AccountBook\OutputAcountBookTextFileDialog.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>OutputAcountBookTextFileDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ActivateForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ActivateForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Charging\ColorSummaryControl.resx">
+      <DependentUpon>ColorSummaryControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Charging\FloatingMessageForm.resx">
+      <DependentUpon>FloatingMessageForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Charging\PatronSummaryForm.resx">
+      <DependentUpon>PatronSummaryForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Charging\QuickChargingForm.resx">
+      <DependentUpon>QuickChargingForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Charging\SelectItemDialog.resx">
+      <DependentUpon>SelectItemDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dictionary\SelectDictionaryItemDialog.resx">
+      <DependentUpon>SelectDictionaryItemDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EntityForm\GetMergeStyleDialog.resx">
+      <DependentUpon>GetMergeStyleDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EntityForm\MacroTableDialog.resx">
+      <DependentUpon>MacroTableDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EntityForm\PartialDeniedDialog.resx">
+      <DependentUpon>PartialDeniedDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EntityRegister\EntityRegisterControl.resx">
+      <DependentUpon>EntityRegisterControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EntityRegister\EntityRegisterForm.resx">
+      <DependentUpon>EntityRegisterForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EntityRegister\BiblioRegisterControl.resx">
+      <DependentUpon>BiblioRegisterControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EntityRegister\Save\EntitiesControl.resx">
+      <DependentUpon>EntitiesControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EntityRegister\EntityRegisterControl1.resx">
+      <DependentUpon>EntityRegisterControl1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EntityRegister\ScanRegisterBarcodeForm.resx">
+      <DependentUpon>ScanRegisterBarcodeForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Entity\InventoryForm.resx">
+      <DependentUpon>InventoryForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Entity\InventoryForm0.resx">
+      <DependentUpon>InventoryForm0.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Entity\ItemEditFormBase.resx">
+      <DependentUpon>ItemEditFormBase.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Entity\NewInventoryForm.resx">
+      <DependentUpon>NewInventoryForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ItemHandOver\ScanBarcodeForm.resx">
+      <DependentUpon>ScanBarcodeForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ItemHandOver\GetLocationDialog.resx">
+      <DependentUpon>GetLocationDialog.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Label\LabelDefControl.resx">
+      <DependentUpon>LabelDefControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Label\LabelDesignForm.resx">
+      <DependentUpon>LabelDesignForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Label\LabelLineFormatDialog.resx">
+      <DependentUpon>LabelLineFormatDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Label\paddingDialog.resx">
+      <DependentUpon>PaddingDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Label\RotateControl.resx">
+      <DependentUpon>RotateControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Label\SelectPaperDialog.resx">
+      <DependentUpon>SelectPaperDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainForm\FirstRunDialog.resx">
+      <DependentUpon>FirstRunDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ManageDatabase\CalendarDialog.resx">
+      <DependentUpon>CalendarDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ManageDatabase\CenterServerDialog.resx">
+      <DependentUpon>CenterServerDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Message\MessageForm.resx">
+      <DependentUpon>MessageForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Monitor\ChannelForm.resx">
+      <DependentUpon>ChannelForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Monitor\StartReplicationDlg.resx">
+      <DependentUpon>StartReplicationDlg.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Monitor\StartRebuildKeysDlg.resx">
+      <DependentUpon>StartRebuildKeysDlg.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Reader\AddFriendsDialog.resx">
+      <DependentUpon>AddFriendsDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Reader\AmerceForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>AmerceForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Amerce\DkywAmerceCardDialog.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>DkywAmerceCardDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Amerce\CardPasswordDialog.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>CardPasswordDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Amerce\AmerceCardDialog.resx">
+      <DependentUpon>AmerceCardDialog.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainForm\BackgroundForm.resx">
+      <DependentUpon>BackgroundForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BatchTaskForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>BatchTaskForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EntityForm\BiblioSaveToDlg.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>BiblioSaveToDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Invoice\InvoiceEditControl.resx">
+      <DependentUpon>InvoiceEditControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ItemInfoForm\AddSubjectDialog.resx">
+      <DependentUpon>AddSubjectDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Order\DateSliceDialog.resx">
+      <DependentUpon>DateSliceDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Reader\ChangeStateActionControl.resx">
+      <DependentUpon>ChangeStateActionControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Reader\SelectPatronDialog.resx">
+      <DependentUpon>SelectPatronDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Script\EditDialog.resx">
+      <DependentUpon>EditDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SearchForms\BiblioSearchForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>BiblioSearchForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BiblioStatis\BiblioStatisForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>BiblioStatisForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BiblioTemplate\TemplateRecordDlg.resx">
+      <DependentUpon>TemplateRecordDlg.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Bookshelf\BookshelfForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>BookshelfForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EntityForm\BrowseSearchResultForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>BrowseSearchResultForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CalendarForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>CalendarForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Card\CardPrintForm.resx">
+      <DependentUpon>CardPrintForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CfgDlg.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>CfgDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="QuickChangeEntity\ChangeEntityActionDialog.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ChangeEntityActionDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ChangePasswordForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ChangePasswordForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Charging\ChargingForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ChargingForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Charging\ChargingInfoDlg.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ChargingInfoDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CheckBorrowInfoForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>CheckBorrowInfoForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ClockForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ClockForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Comment\CommentControl.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>CommentControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Comment\CommentEditControl.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>CommentEditControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Comment\CommentEditForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>CommentEditForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Comment\CommentViewerForm.resx">
+      <DependentUpon>CommentViewerForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Reader\CompareReaderForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>CompareReaderForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CopyrightDlg.resx">
+      <DependentUpon>CopyrightDlg.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Dup\DupForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>DupForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Entity\EntityBarcodeFoundDupDlg.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>EntityBarcodeFoundDupDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Entity\EntityControl.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>EntityControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Entity\EntityEditControl.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>EntityEditControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Entity\EntityEditForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>EntityEditForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EntityForm\EntityForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>EntityForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Entity\EntityFormOptionDlg.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>EntityFormOptionDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FontSetting\MyForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>MyForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EntityForm\GetDbNameDlg.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>GetDbNameDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Print\HtmlPrintForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>HtmlPrintForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="HtmlViewerForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>HtmlViewerForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ISO2709Statis\ISO2709StatisForm.resx">
+      <DependentUpon>ISO2709StatisForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Issue\BindingControl.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>BindingControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Issue\BindingForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>BindingForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Issue\BindingOptionDialog.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>BindingOptionDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Issue\CellLineDialog.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>CellLineDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Issue\IssueControl.resx">
+      <DependentUpon>IssueControl.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Issue\IssueDialog.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>IssueDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Issue\IssueEditControl.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>IssueEditControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Issue\IssueEditForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>IssueEditForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Issue\IssueManageControl.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>IssueManageControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Issue\IssueManageForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>IssueManageForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Issue\IssuePublishTimeFoundDupDlg.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>IssuePublishTimeFoundDupDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Issue\PrintBindingForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>PrintBindingForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Issue\TestJidaoForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>TestJidaoForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EntityForm\ItemBarcodeDupDlg.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ItemBarcodeDupDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ItemHandOver\ItemHandoverForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ItemHandoverForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ItemHandOver\SelectTargetBiblioDbNameDialog.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>SelectTargetBiblioDbNameDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ItemHandOver\TwoBiblioDialog.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>TwoBiblioDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ItemStatis\ItemStatisForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ItemStatisForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Label\LabelPrintForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>LabelPrintForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ManageDatabase\AccessPointDialog.resx">
+      <DependentUpon>AccessPointDialog.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ManageDatabase\ArrangementGroupDialog.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ArrangementGroupDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ManageDatabase\ArrangementLocationDialog.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ArrangementLocationDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ManageDatabase\BiblioDatabaseDialog.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>BiblioDatabaseDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ManageDatabase\DefaultProjectDialog.resx">
+      <DependentUpon>DefaultProjectDialog.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ManageDatabase\GetOpacMemberDatabaseNameDialog.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>GetOpacMemberDatabaseNameDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ManageDatabase\GetProjectNameDialog.resx">
+      <DependentUpon>GetProjectNameDialog.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ManageDatabase\ImportFromsDialog.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ImportFromsDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ManageDatabase\OpacBrowseFormatDialog.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>OpacBrowseFormatDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ManageDatabase\OpacNormalDatabaseDialog.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>OpacNormalDatabaseDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ManageDatabase\OpacVirtualDatabaseDialog.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>OpacVirtualDatabaseDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ManageDatabase\ProjectDialog.resx">
+      <DependentUpon>ProjectDialog.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ManageDatabase\ReaderDatabaseDialog.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ReaderDatabaseDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ManageDatabase\RefreshStyleDialog.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>RefreshStyleDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ManageDatabase\SimpleDatabaseDialog.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>SimpleDatabaseDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ManageDatabase\TargetDatabaseDialog.resx">
+      <DependentUpon>TargetDatabaseDialog.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ManageDatabase\ZhongcihaoGroupDialog.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ZhongcihaoGroupDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ManageDatabase\ZhongcihaoNstableDialog.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ZhongcihaoNstableDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Comment\ModifyCommentDialog.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ModifyCommentDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Monitor\StartDkywReplicationDlg.resx">
+      <DependentUpon>StartDkywReplicationDlg.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Monitor\StartPatronReplicationDlg.resx">
+      <DependentUpon>StartPatronReplicationDlg.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="OperLog\OperLogFindDialog.resx">
+      <DependentUpon>OperLogFindDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="OperLogStatis\GetOperLogFilenameDlg.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>GetOperLogFilenameDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Order\AcceptForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>AcceptForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Order\GetAcceptTargetDbNameDlg.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>GetAcceptTargetDbNameDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Order\InputItemBarcodeDialog.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>InputItemBarcodeDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Order\OrderArriveForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>OrderArriveForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Order\OrderControl.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>OrderControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Order\OrderDesignForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>OrderDesignForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Order\OrderEditControl.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>OrderEditControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Order\OrderEditForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>OrderEditForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Order\OrderFileDialog.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>OrderFileDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Order\OrderIndexFoundDupDlg.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>OrderIndexFoundDupDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Order\OrderOutputItemDialog.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>OrderOutputItemDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Order\PrintAcceptForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>PrintAcceptForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Order\PrintClaimForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>PrintClaimForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Order\PrintOrderForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>PrintOrderForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Print\ChargingPrintManageForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ChargingPrintManageForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Print\PrintColumnDlg.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>PrintColumnDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Print\PrintOptionDlg.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>PrintOptionDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ItemHandOver\SearchByBatchnoForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>SearchByBatchnoForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ItemInfoForm\ItemInfoForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ItemInfoForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SearchForms\ChangeItemActionDialog.resx">
+      <DependentUpon>ChangeItemActionDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SearchForms\InvoiceSearchForm.resx">
+      <DependentUpon>InvoiceSearchForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SearchForms\ItemSearchForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ItemSearchForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainForm\MainForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ManageDatabase\ManagerForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ManagerForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Reader\ModifyPriceDlg.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ModifyPriceDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="OperLog\OperLogForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>OperLogForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="OperLogStatis\OperLogStatisForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>OperLogStatisForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PassGateForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>PassGateForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Print\TextAndHtmlControl.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>TextAndHtmlControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="QuickChangeBiblio\ChangeBiblioActionDialog.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ChangeBiblioActionDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="QuickChangeBiblio\QuickChangeBiblioForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>QuickChangeBiblioForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="QuickChangeEntity\QuickChangeEntityForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>QuickChangeEntityForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Reader\ChangeReaderActionDialog.resx">
+      <DependentUpon>ChangeReaderActionDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Reader\PlaceIdcardDialog.resx">
+      <DependentUpon>PlaceIdcardDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Reader\ReaderEditControl.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ReaderEditControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Reader\ReaderInfoForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ReaderInfoForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Reader\ReaderInfoFormOptionDlg.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ReaderInfoFormOptionDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Reader\ReaderManageForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ReaderManageForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Reader\ReaderSearchForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ReaderSearchForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BiblioTemplate\SelectTemplateDlg.resx">
+      <DependentUpon>SelectTemplateDlg.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ReaderStatis\PrintReaderInfoInputDialog.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>PrintReaderInfoInputDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ReaderStatis\ReaderStatisForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ReaderStatisForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ReaderStatis\TimeRangeDlg.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>TimeRangeDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Reader\ReaderSaveToDialog.resx">
+      <DependentUpon>ReaderSaveToDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Reader\SaveReaderOptionDialog.resx">
+      <DependentUpon>SaveReaderOptionDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Reader\SetReaderBarcodeNumberDialog.resx">
+      <DependentUpon>SetReaderBarcodeNumberDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SearchForms\OneActionDialog.resx">
+      <DependentUpon>OneActionDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SettlementForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>SettlementForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Monitor\StartArriveMonitorDlg.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>StartArriveMonitorDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Monitor\StartLogRecoverDlg.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>StartLogRecoverDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Monitor\StartTraceDtlpDlg.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>StartTraceDtlpDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Monitor\StartZhengyuanReplicationDlg.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>StartZhengyuanReplicationDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Statis\ConvertReportFormatDialog.resx">
+      <DependentUpon>ConvertReportFormatDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Statis\CreateWhatsReportDialog.resx">
+      <DependentUpon>CreateWhatsReportDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Statis\FtpUploadDialog.resx">
+      <DependentUpon>FtpUploadDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Statis\LibraryReportConfigForm.resx">
+      <DependentUpon>LibraryReportConfigForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Statis\ReportApplyForm.resx">
+      <DependentUpon>ReportApplyForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Statis\ReportColumnDialog.resx">
+      <DependentUpon>ReportColumnDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Statis\ReportDefForm.resx">
+      <DependentUpon>ReportDefForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Statis\ReportForm.resx">
+      <DependentUpon>ReportForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TestForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>TestForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Testing\TestSearchForm.resx">
+      <DependentUpon>TestSearchForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Charging\UrgentChargingForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>UrgentChargingForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>UserForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UtilityForm.resx">
+      <DependentUpon>UtilityForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Util\CallNumberForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>CallNumberForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="XmlStatis\XmlStatisForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>XmlStatisForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="XmlViewerForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>XmlViewerForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Util\ZhongcihaoForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ZhongcihaoForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <None Include="app.config" />
+    <Content Include="B3901.ttf" />
+    <Content Include="default_getclass.fltx" />
+    <Content Include="default_printorder_classstatis.template" />
+    <Content Include="default_printorder_classstatis_accept.template" />
+    <Content Include="default_printaccept_exchangeratetable.template">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="default_printorder_publisherstatis.template" />
+    <Content Include="default_printorder_publisherstatis_accept.template" />
+    <None Include="dp2Circulation_1_TemporaryKey.pfx" />
+    <None Include="dp2Circulation_2_TemporaryKey.pfx" />
+    <None Include="dp2Circulation_3_TemporaryKey.pfx" />
+    <None Include="dp2Circulation_4_TemporaryKey.pfx" />
+    <None Include="dp2Circulation_5_TemporaryKey.pfx" />
+    <None Include="dp2Circulation_6_TemporaryKey.pfx" />
+    <None Include="dp2Circulation_7_TemporaryKey.pfx" />
+    <None Include="dp2Circulation_8_TemporaryKey.pfx" />
+    <None Include="dp2Circulation_9_TemporaryKey.pfx" />
+    <None Include="dp2Circulation_TemporaryKey.pfx" />
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <Compile Include="QuickChangeEntity\QuickChangeEntityForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="QuickChangeEntity\QuickChangeEntityForm.Designer.cs">
+      <DependentUpon>QuickChangeEntityForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Reader\ReaderEditControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Reader\ReaderEditControl.Designer.cs">
+      <DependentUpon>ReaderEditControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Reader\ReaderInfoForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Reader\ReaderInfoForm.Designer.cs">
+      <DependentUpon>ReaderInfoForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Reader\ReaderInfoFormOptionDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Reader\ReaderInfoFormOptionDlg.Designer.cs">
+      <DependentUpon>ReaderInfoFormOptionDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Reader\ReaderManageForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Reader\ReaderManageForm.Designer.cs">
+      <DependentUpon>ReaderManageForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Reader\ReaderSearchForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Reader\ReaderSearchForm.Designer.cs">
+      <DependentUpon>ReaderSearchForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BiblioTemplate\SelectTemplateDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ReaderStatis\ReaderStatis.cs" />
+    <Compile Include="ReaderStatis\ReaderStatisForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ReaderStatis\ReaderStatisForm.Designer.cs">
+      <DependentUpon>ReaderStatisForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ReaderStatis\TimeRangeDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ReaderStatis\TimeRangeDlg.Designer.cs">
+      <DependentUpon>TimeRangeDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Script\MainFormHost.cs" />
+    <Compile Include="Script\MyScriptForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Script\PrintHost.cs" />
+    <Compile Include="Script\WebExternalHost.cs" />
+    <Compile Include="SearchForms\ItemSearchFormBase.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SearchForms\MdiWindow.cs" />
+    <Compile Include="SearchForms\OneActionDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SearchForms\OneActionDialog.Designer.cs">
+      <DependentUpon>OneActionDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SearchForms\OrderSearchForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SearchForms\SearchFormBase.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SettlementForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SettlementForm.Designer.cs">
+      <DependentUpon>SettlementForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Monitor\StartArriveMonitorDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Monitor\StartArriveMonitorDlg.Designer.cs">
+      <DependentUpon>StartArriveMonitorDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Monitor\StartLogRecoverDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Monitor\StartLogRecoverDlg.Designer.cs">
+      <DependentUpon>StartLogRecoverDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Monitor\StartTraceDtlpDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Monitor\StartTraceDtlpDlg.Designer.cs">
+      <DependentUpon>StartTraceDtlpDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Monitor\StartZhengyuanReplicationDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Monitor\StartZhengyuanReplicationDlg.Designer.cs">
+      <DependentUpon>StartZhengyuanReplicationDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Statis\ConvertReportFormatDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Statis\ConvertReportFormatDialog.Designer.cs">
+      <DependentUpon>ConvertReportFormatDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Statis\CreateWhatsReportDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Statis\CreateWhatsReportDialog.Designer.cs">
+      <DependentUpon>CreateWhatsReportDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Statis\FtpUploadDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Statis\FtpUploadDialog.Designer.cs">
+      <DependentUpon>FtpUploadDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Statis\LibraryReportConfigForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Statis\LibraryReportConfigForm.Designer.cs">
+      <DependentUpon>LibraryReportConfigForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Statis\ReportApplyForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Statis\ReportApplyForm.Designer.cs">
+      <DependentUpon>ReportApplyForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Statis\ReportColumnDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Statis\ReportColumnDialog.Designer.cs">
+      <DependentUpon>ReportColumnDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Statis\ReportConfigBuilder.cs" />
+    <Compile Include="Statis\ReportDefForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Statis\ReportDefForm.Designer.cs">
+      <DependentUpon>ReportDefForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Statis\ReportForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Statis\ReportForm.Designer.cs">
+      <DependentUpon>ReportForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Statis\ReportWriter.cs" />
+    <Compile Include="Statis\SQLiteUtil.cs" />
+    <Compile Include="TestForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TestForm.Designer.cs">
+      <DependentUpon>TestForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Testing\TestSearchForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Testing\TestSearchForm.Designer.cs">
+      <DependentUpon>TestSearchForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Charging\UrgentChargingForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Charging\UrgentChargingForm.Designer.cs">
+      <DependentUpon>UrgentChargingForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Thread\ThreadBase.cs" />
+    <Compile Include="UserForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UserForm.Designer.cs">
+      <DependentUpon>UserForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UtilityForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UtilityForm.Designer.cs">
+      <DependentUpon>UtilityForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Util\CallNumberForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Util\CallNumberForm.Designer.cs">
+      <DependentUpon>CallNumberForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="XmlStatis\XmlStatis.cs" />
+    <Compile Include="XmlStatis\XmlStatisForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="XmlStatis\XmlStatisForm.Designer.cs">
+      <DependentUpon>XmlStatisForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="XmlViewerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="XmlViewerForm.Designer.cs">
+      <DependentUpon>XmlViewerForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Util\ZhongcihaoForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Util\ZhongcihaoForm.Designer.cs">
+      <DependentUpon>ZhongcihaoForm.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="acceptorigin.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="accountbook.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ajax-loader.gif">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="biblio.css" />
+    <Content Include="cab.ico" />
+    <None Include="change.txt" />
+    <Content Include="commenthtml.css" />
+    <Content Include="cutter.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <None Include="Design.txt" />
+    <Content Include="exchangeratetable.css" />
+    <Content Include="getsummary.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="history.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Include="isbn.xml" />
+    <Content Include="itemhandover.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="itemhtml.css" />
+    <Content Include="nonePhoto.png" />
+    <Content Include="orderorigin.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="page_blank_128.png" />
+    <Content Include="pinyin.xml" />
+    <Content Include="printaccept.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="printbinding.css" />
+    <Content Include="printclaim.css" />
+    <Content Include="printorder.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Include="projects.xml" />
+    <Content Include="progress_information.bmp" />
+    <Content Include="RangeMessage.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="readerhtml.css" />
+    <Content Include="report_def\101.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="report_def\102.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="report_def\111.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="report_def\121.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="report_def\122.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="report_def\131.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="report_def\141.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="report_def\201.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="report_def\202.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="report_def\212.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="report_def\213.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="report_def\301.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="report_def\302.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="report_def\411.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="report_def\412.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="report_def\421.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="report_def\422.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="report_def\431.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="report_def\432.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="report_def\441.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="report_def\442.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="report_def\443.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="report_def\451.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="report_def\452.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="report_def\471.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="report_def\472.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="report_def\default.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="settlement.css" />
+    <None Include="TestCutter.xml" />
+    <None Include="Testing\MarcQuery测试用例.txt" />
+    <Content Include="userrightsdef.xml">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x64\SQLite.Interop.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x86\SQLite.Interop.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="yes_order_24.png" />
+    <Content Include="orderhtml.css" />
+    <Content Include="issuehtml.css" />
+    <Content Include="default_printorder_publisherclassstatis.template">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="default_printorder_publisherclassstatis_accept.template">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="unimarc_cfgs\marc_browse.fltx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="usmarc_cfgs\marc_browse.fltx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="unimarc_cfgs\marcdef">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Include="日志文件格式.txt" />
+    <None Include="测试.txt" />
+    <None Include="测试工作单.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DigitalPlatform.AmazonInterface\DigitalPlatform.AmazonInterface.csproj">
+      <Project>{CEF0E01B-7F8F-4F0E-B687-C66659AB1403}</Project>
+      <Name>DigitalPlatform.AmazonInterface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.CirculationClient\DigitalPlatform.CirculationClient.csproj">
+      <Project>{397BB898-88E0-41D6-8D01-09233C7FFC75}</Project>
+      <Name>DigitalPlatform.CirculationClient</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.CommonControl\DigitalPlatform.CommonControl.csproj">
+      <Project>{334E1B2B-5373-4C80-A971-BFF213FF304B}</Project>
+      <Name>DigitalPlatform.CommonControl</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.CommonDialog\DigitalPlatform.CommonDialog.csproj">
+      <Project>{3DCFCA4D-0205-4684-A9A6-1DB8640CD579}</Project>
+      <Name>DigitalPlatform.CommonDialog</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.dp2.Statis\DigitalPlatform.dp2.Statis.csproj">
+      <Project>{060DD22D-8C7A-4D17-AC72-06B45AE65174}</Project>
+      <Name>DigitalPlatform.dp2.Statis</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Drawing\DigitalPlatform.Drawing.csproj">
+      <Project>{C2468F93-69AC-4BBA-94AE-678ED5C21542}</Project>
+      <Name>DigitalPlatform.Drawing</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.EasyMarc\DigitalPlatform.EasyMarc.csproj">
+      <Project>{0413F979-C770-4AB0-886E-4B2BE2FB4F8C}</Project>
+      <Name>DigitalPlatform.EasyMarc</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.GcatClient\DigitalPlatform.GcatClient.csproj">
+      <Project>{FC226C5E-6AED-402B-B604-5DEEC6301AD6}</Project>
+      <Name>DigitalPlatform.GcatClient</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Interfaces\DigitalPlatform.Interfaces.csproj">
+      <Project>{3C4F8133-8652-40B6-B37B-200B25C2B043}</Project>
+      <Name>DigitalPlatform.Interfaces</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.IO\DigitalPlatform.IO.csproj">
+      <Project>{441CB814-AF78-4503-91EF-DCE5F3269502}</Project>
+      <Name>DigitalPlatform.IO</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.LibraryServer.Common\DigitalPlatform.LibraryServer.Common.csproj">
+      <Project>{2F085431-027A-4DDF-9B3D-83219E629FA1}</Project>
+      <Name>DigitalPlatform.LibraryServer.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.MarcDom\DigitalPlatform.MarcDom.csproj">
+      <Project>{3F81F705-5265-47EE-9255-CB33E1C135B8}</Project>
+      <Name>DigitalPlatform.MarcDom</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\digitalplatform.marceditor\DigitalPlatform.MarcEditor.csproj">
+      <Project>{184700D7-F172-4001-9EE6-440779D286E1}</Project>
+      <Name>DigitalPlatform.MarcEditor</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.MarcFixedFieldControl\DigitalPlatform.MarcFixedFieldControl.csproj">
+      <Project>{2DF76AF2-D0CD-47C5-910C-A81B8BCDCE3E}</Project>
+      <Name>DigitalPlatform.MarcFixedFieldControl</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.MarcKernel\DigitalPlatform.MarcKernel.csproj">
+      <Project>{74242530-EF96-457E-852D-5C21A3EA8449}</Project>
+      <Name>DigitalPlatform.MarcKernel</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.MarcQuery\DigitalPlatform.MarcQuery.csproj">
+      <Project>{57FE2FB1-4134-409B-876C-8A1C0776B498}</Project>
+      <Name>DigitalPlatform.MarcQuery</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Range\DigitalPlatform.Range.csproj">
+      <Project>{AA6C5E6A-252B-4E2A-A883-0E4E739F8701}</Project>
+      <Name>DigitalPlatform.Range</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.ResultSet\DigitalPlatform.ResultSet.csproj">
+      <Project>{86E0817D-79A4-4769-B450-C8352D0D1907}</Project>
+      <Name>DigitalPlatform.ResultSet</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Script\DigitalPlatform.Script.csproj">
+      <Project>{5107DE16-DDA1-4606-B3A3-840B24428329}</Project>
+      <Name>DigitalPlatform.Script</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Text\DigitalPlatform.Text.csproj">
+      <Project>{26F96CC3-A4A9-4BC4-A10A-BC7E25581FF6}</Project>
+      <Name>DigitalPlatform.Text</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Xml\DigitalPlatform.Xml.csproj">
+      <Project>{E6489E89-1349-4EE7-A00B-AC96B9912587}</Project>
+      <Name>DigitalPlatform.Xml</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform\DigitalPlatform.csproj">
+      <Project>{BDD43275-EAA0-4670-8BA3-0DB5CD7598DD}</Project>
+      <Name>DigitalPlatform</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DkywInterface\DkywInterface.csproj">
+      <Project>{FA8ED8A6-EA29-4188-A45A-A3A829AE3DB9}</Project>
+      <Name>DkywInterface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PieChart\PieChart.csproj">
+      <Project>{696E929A-6A4A-4C6D-A8B2-C4F25F781940}</Project>
+      <Name>PieChart</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\UpgradeUtil\UpgradeUtil.csproj">
+      <Project>{F4035EC4-076B-47CB-B8F2-D8EEC7AFE56A}</Project>
+      <Name>UpgradeUtil</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\zxing_lib\zxing.csproj">
+      <Project>{6431CF13-7A7B-4602-B96A-47CDA6F0B008}</Project>
+      <Name>zxing</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.0">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4 %28x86 和 x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 2.0</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <PublishFile Include="acceptorigin.css">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="accountbook.css">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="ajax-loader.gif">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="amercehtml.css">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="B3901.ttf">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="background.css">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="biblio.css">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="bondfingerprintscanfc0.gif">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Exclude</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="cab.ico">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Exclude</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="commenthtml.css">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="comment_change_actions.xml">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="default_getclass.fltx">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="default_printaccept_exchangeratetable.template">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="default_printorder_classstatis.template">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="default_printorder_classstatis_accept.template">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="default_printorder_publisherclassstatis.template">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="default_printorder_publisherclassstatis_accept.template">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="default_printorder_publisherstatis.template">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="default_printorder_publisherstatis_accept.template">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="deleted.txt">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Exclude</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="eula.txt">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="exchangeratetable.css">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="fingerprint-cache-loading.gif">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="getsummary.js">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="history.css">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="isbn.xml">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Exclude</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="issuehtml.css">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="issue_change_actions.xml">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="itemhandover.css">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="itemhtml.css">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="item_change_actions.xml">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="Jurassic.xml">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="nonePhoto.png">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="no_order_24.png">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="null_order_32.png">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="operloghtml.css">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="orderhtml.css">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="orderorigin.css">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="order_change_actions.xml">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="page_blank_128.png">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="patron_change_actions.xml">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="printaccept.css">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="printbinding.css">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="printclaim.css">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="printorder.css">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="printslice.css">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="readerhtml.css">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="report_def\default.css">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="settlement.css">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="unimarc_cfgs\marcdef">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="unimarc_cfgs\marc_browse.fltx">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="usmarc_cfgs\marc_browse.fltx">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="yes_order_24.png">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>这台计算机上缺少此项目引用的 NuGet 程序包。启用“NuGet 程序包还原”可下载这些程序包。有关详细信息，请参阅 http://go.microsoft.com/fwlink/?LinkID=322105。缺少的文件是 {0}。</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
+  </Target>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -1,0 +1,923 @@
+﻿
+
+        public override void Install(System.Collections.IDictionary stateSaver)
+        {
+            base.Install(stateSaver);
+
+            string strRootDir = UnQuote(this.Context.Parameters["rootdir"]);
+
+            string strStartFileName = "";
+            string strDataDir = "";
+
+            bool bUpgrade = false;  // 是否为升级安装? 所谓升级安装就是发现数据目录已经存在了
+
+            int nRet = 0;
+            string strError = "";
+            // 检索数据目录是否存在
+            // return:
+            //      -1  出错
+            //      0   不存在
+            //      1   存在
+            //      2   存在，为老的、和虚拟目录合并的方式
+            nRet = this.DetectDataDir(strRootDir,
+                out strStartFileName,
+                out strDataDir,
+                out strError);
+            if (nRet == 1)
+            {
+                // 本次为升级安装
+                bUpgrade = true;
+
+                // TODO: 是不是这里也有必要检查一下library.xml中.asmx类型的url?
+                // 并升级 cfgs 目录？
+                // 如果这里不作，就只好通过删除可执行文件目录中的start.xml并手动输入已存在内容的数据目录来实现升级了
+
+
+                // 覆盖数据目录中的templates子目录
+                // parameters:
+                //      strRootDir  根目录
+                //      strDataDir    数据目录
+                nRet = OverwriteTemplates(strRootDir,
+                    strDataDir,
+                    out strError);
+                if (nRet == -1)
+                {
+                    // 报错，但是不停止安装
+                    MessageBox.Show(ForegroundWindow.Instance,
+                        strError);
+                }
+
+                stateSaver.Add("datadir_newly", "no"); // 表示数据目录是以前存在的
+                goto END1;
+            }
+            else if (nRet == -1)
+            {
+                string strText = "数据目录发生错误，原因如下：\r\n"
+                    + strError + "\r\n\r\n"
+                    + "是否继续安装？\r\n\r\n"
+                 + "单击'是'，新建数据目录，原来所有库配置信息丢失。\r\n"
+                 + "单击'否'，取消本次安装。";
+                DialogResult result = MessageBox.Show(ForegroundWindow.Instance,
+                    strText,
+                    "setup_dp2library",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question,
+                    MessageBoxDefaultButton.Button2);
+                if (result != DialogResult.Yes)
+                {
+                    throw new InstallException("用户取消安装。");
+                }
+
+                // 然后继续
+            }
+            else
+            {
+                Debug.Assert(nRet == 0, "");
+                // 继续
+            }
+
+            string strDefaultDataDir = "c:\\" + "library" + "_data"; // 典型情况下创建简短一点的数据目录名
+
+            // 新建数据目录
+            nRet = this.CreateDataDir(strRootDir,
+                strDefaultDataDir,
+                ref bUpgrade,
+                out strStartFileName,
+                out strDataDir,
+                out strError);
+            if (nRet == -1)
+                throw new InstallException(strError);
+            stateSaver.Add("datadir_newly", "yes"); // 表示数据目录是新创建的。这样安装被取消时可以删除数据目录
+
+        END1:
+
+            // 在虚拟目录中创建install_stamp.txt文件
+            // return:
+            //      -1  error
+            //      0   同名文件已经存在，不再创建
+            //      1   文件成功创建
+            nRet = CreateInstallStampFile(strRootDir,
+                out strError);
+            if (nRet == -1)
+            {
+                // 报错，但是不停止安装
+                MessageBox.Show(ForegroundWindow.Instance,
+                    strError);
+            }
+
+            stateSaver.Add("datadir", strDataDir);
+            stateSaver.Add("startfilename", strStartFileName);  // 可能为空
+
+            stateSaver["upgrade"] = bUpgrade;
+        }
+
+
+		public override void Uninstall(System.Collections.IDictionary savedState)
+        {
+            base.Uninstall(savedState);
+
+            int nRet = 0;
+            string strError = "";
+
+            string strRootDir = UnQuote(this.Context.Parameters["rootdir"]);
+
+            // InstallHelper.DownApplication(strRootDir);
+
+            string strDataDir = (string)savedState["datadir"];
+            //MessageBox.Show("datadir='" + strDataDir + "'");
+
+
+            // 2008/6/2 new add
+            string strText = "是否删除数据目录 '" + strDataDir + "'？\r\n\r\n"
+    + "单击'是'，则把数据目录删除，所有的配置信息丢失，下次安装后需要重新配置。\r\n\r\n"
+    + "单击'否'，不删除数据目录，下次安装后可以继续使用已存在的配置信息。升级安装前的卸载，须使用此选项。";
+            DialogResult result = MessageBox.Show(ForegroundWindow.Instance,
+                strText,
+                "卸载 dp2library",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button2);
+            if (result == DialogResult.Yes)
+            {
+                string strStartFileName = (string)savedState["startfilename"];
+                //MessageBox.Show("startfilename='" + strStartFileName + "'");
+
+                if (String.IsNullOrEmpty(strDataDir) == false)
+                {
+                    string strXmlFilename = PathUtil.MergePath(strDataDir, "library.xml");
+                    // 删除应用服务器在dp2Kernel内核中创建的数据库
+                    // return:
+                    //      -1  出错
+                    //      0   用户放弃删除
+                    //      1   已经删除
+                    nRet = DeleteKernelDatabases(
+                        strXmlFilename,
+                        out strError);
+                    if (nRet == -1)
+                        MessageBox.Show(ForegroundWindow.Instance, strError);
+                }
+
+                if (String.IsNullOrEmpty(strDataDir) == false)
+                {
+                REDO_DELETE_DATADIR:
+                    // 删除数据目录
+                    try
+                    {
+                        Directory.Delete(strDataDir, true);
+                    }
+                    catch (Exception ex)
+                    {
+                        DialogResult temp_result = MessageBox.Show(ForegroundWindow.Instance,
+                            "删除数据目录'" + strDataDir + "'出错：" + ex.Message + "\r\n\r\n是否重试?\r\n\r\n(Retry: 重试; Cancel: 不重试，继续后续卸载过程)",
+                            "Uninstall dp2library",
+                            MessageBoxButtons.RetryCancel,
+                            MessageBoxIcon.Question,
+                            MessageBoxDefaultButton.Button1);
+
+                        if (temp_result == DialogResult.Retry)
+                            goto REDO_DELETE_DATADIR;
+                    }
+                }
+
+
+                if (String.IsNullOrEmpty(strStartFileName) == false)
+                {
+                    // 删除start.xml
+
+                REDO_DELETE_STARTFILE:
+
+                    try
+                    {
+                        File.Delete(strStartFileName);
+                    }
+                    catch (Exception ex)
+                    {
+                        DialogResult temp_result = MessageBox.Show(ForegroundWindow.Instance,
+    "删除'" + strStartFileName + "'文件出错：" + ex.Message + "\r\n\r\n是否重试?\r\n\r\n(Retry: 重试; Cancel: 不重试，继续后续卸载过程)",
+    "Uninstall dp2library",
+    MessageBoxButtons.RetryCancel,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button1);
+
+                        if (temp_result == DialogResult.Retry)
+                            goto REDO_DELETE_STARTFILE;
+                    }
+                }
+
+
+            }
+
+
+            if (false/*dlg.DeleteDataDir == true*/)
+            {
+
+            }
+
+        // END1:
+            InstallHelper.DeleteSetupCfgFile(strRootDir);
+        }
+
+
+		        // 检查数据目录是否存在
+        // parameters:
+        //      strResultStartFileName  返回start.xml文件的全路径
+        //      strResultDataDir    返回数据目录
+        // return:
+        //      -1  出错
+        //      0   不存在
+        //      1   存在
+        public int DetectDataDir(string strRootDir,
+            out string strResultStartFileName,
+            out string strResultDataDir,
+            out string strError)
+        {
+            strError = "";
+
+            strResultStartFileName = "";
+            strResultDataDir = "";
+
+            string strTempStartXmlFileName = PathUtil.MergePath(strRootDir,
+                "start.xml");
+
+            if (File.Exists(strTempStartXmlFileName) == true)
+            {
+                strResultStartFileName = strTempStartXmlFileName;
+
+                // 已存在start.xml文件
+                XmlDocument dom = new XmlDocument();
+                try
+                {
+                    dom.Load(strTempStartXmlFileName);
+                }
+                catch (Exception ex)
+                {
+                    strError = "加载start.xml到dom出错：" + ex.Message;
+                    return -1;
+                }
+
+                string strDataDir = DomUtil.GetAttr(dom.DocumentElement, "datadir");
+                if (strDataDir == "")
+                {
+                    strError = "start.xml文件中根元素未定义'datadir'属性，或'datadir'属性值为空。";
+                    return -1;
+                }
+
+                if (Directory.Exists(strDataDir) == false)
+                {
+                    strError = "start.xml文件中根元素'datadir'属性定义的数据目录在本地不存在。";
+                    return -1;
+                }
+
+                strResultDataDir = strDataDir;
+
+
+                string strRootXmlFileName = PathUtil.MergePath(strDataDir,
+                    "library.xml");
+                if (File.Exists(strRootXmlFileName) == false)
+                {
+                    strError = "start.xml文件中根元素'datadir'属性定义的数据目录中不存在'library.xml'文件，不合法";
+                    return -1;
+                }
+
+                // 在数据目录已经存在的情况下，是否还要补充设一次数据目录的ASP.NET或者..._WPG权限？如果要做，做前需提示一下。
+                return 1;
+            }
+            else
+            {
+                // start.xml不存在
+                return 0;
+            }
+
+            // return 0;
+        }
+
+        // 在虚拟目录中创建install_stamp.txt文件
+        // return:
+        //      -1  error
+        //      0   同名文件已经存在，不再创建
+        //      1   文件成功创建
+        public int CreateInstallStampFile(string strRootDir,
+            out string strError)
+        {
+            strError = "";
+
+            string strFilename = PathUtil.MergePath(strRootDir, "install_stamp.txt");
+
+            if (File.Exists(strFilename) == true)
+                return 0;   // 文件已经存在
+
+            string strID = Guid.NewGuid().ToString();
+
+            try
+            {
+                StreamWriter sw = new StreamWriter(strFilename);
+                sw.Write(strID);
+                sw.Close();
+            }
+            catch (Exception ex)
+            {
+                strError = "创建文件 '" + strFilename + "' 时间发生错误:" + ex.Message;
+                return -1;
+            }
+
+            return 1;   // 文件被创建
+        }
+
+        // 覆盖数据目录中的templates子目录
+        // parameters:
+        //      strRootDir  根目录
+        //      strDataDir    数据目录
+        public int OverwriteTemplates(string strRootDir,
+            string strDataDir,
+            out string strError)
+        {
+            strError = "";
+
+            int nRet = 0;
+
+            string strTemplatesSourceDir = PathUtil.MergePath(strRootDir, "temp\\templates");
+            string strTemplatesTargetDir = PathUtil.MergePath(strDataDir, "templates");
+
+            PathUtil.CreateDirIfNeed(strTemplatesTargetDir);
+
+            nRet = PathUtil.CopyDirectory(strTemplatesSourceDir,
+                strTemplatesTargetDir,
+                false,  // 拷贝前不删除原来的目录
+                out strError);
+            if (nRet == -1)
+            {
+                strError = "拷贝临时模板目录 '" + strTemplatesSourceDir + "' 到数据目录之模板目录 '" + strTemplatesTargetDir + "' 时发生错误：" + strError;
+                // throw new InstallException(strError);
+                return -1;
+            }
+
+            return 0;
+        }
+
+        // 创建数据目录
+        // parameters:
+        //      strRootDir  根目录
+        //      strResultStartFileName  返回的start.xml全路径
+        //      strResultDataDir    返回的数据目录
+        public int CreateDataDir(string strRootDir,
+            string strDefaultDataDir,
+            ref bool bUpgrade,
+            out string strResultStartFileName,
+            out string strResultDataDir,
+            out string strError)
+        {
+            strError = "";
+
+            strResultStartFileName = "";
+            strResultDataDir = "";
+
+            bool bFinished = false;
+            int nRet = 0;
+
+            string strTempDataDir = PathUtil.MergePath(strRootDir, "temp");
+
+            REDO_INPUT:
+            // 获得数据目录
+            DataDirDlg datadir_dlg = new DataDirDlg();
+            InstallHelper.AutoSetDefaultFont(datadir_dlg);
+
+            datadir_dlg.Comment = "请指定一个独立的数据目录, 用于存储dp2library的各种配置信息。";
+            datadir_dlg.MessageBoxTitle = "setup_dp2library";
+            datadir_dlg.DataDir = strDefaultDataDir;
+            datadir_dlg.StartPosition = FormStartPosition.CenterScreen;
+            datadir_dlg.ShowDialog(ForegroundWindow.Instance);
+            if (datadir_dlg.DialogResult != DialogResult.OK)
+            {
+                strError = "用户放弃指定数据目录。安装未完成。";
+                throw new InstallException(strError);
+            }
+
+            string strDataDir = datadir_dlg.DataDir;
+
+            string strExistingLibraryFileName = PathUtil.MergePath(strDataDir,
+    "library.xml");
+
+            if (File.Exists(strExistingLibraryFileName) == true)
+            {
+                // 从以前的 dp2libraryws 数据目录升级
+                string strText = "数据目录 '" + strDataDir + "' 中已经存在以前的图书馆应用服务器(V1)版本遗留下来的数据文件。\r\n\r\n确实要利用这个数据目录来进行升级安装么?\r\n(注意：如果利用以前的数据目录来进行升级安装，则必须先行卸载那个图书馆应用服务器(V1，即dp2libraryws)版本，以避免它和(正在安装的)dp2Library同时运行引起冲突)\r\n\r\n(是)继续进行升级安装 (否)重新指定数据目录 (取消)放弃安装";
+                DialogResult result = MessageBox.Show(
+                    ForegroundWindow.Instance,
+    strText,
+    "setup_dp2library",
+    MessageBoxButtons.YesNoCancel,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button1);
+                if (result == DialogResult.Cancel)
+                {
+                    strError = "用户放弃指定数据目录。安装未完成。";
+                    throw new InstallException(strError);
+                }
+
+                if (result == DialogResult.No)
+                    goto REDO_INPUT;
+
+                XmlDocument dom = new XmlDocument();
+                try
+                {
+                    dom.Load(strExistingLibraryFileName);
+                }
+                catch (Exception ex)
+                {
+                    strError = "装载文件 '" + strExistingLibraryFileName + "' 到XMLDOM时出错: " + ex.Message + "\r\n\r\n说明该配置文件所在的数据目录已经不完整。请重新指定一个正确的数据目录，或者新的数据目录。";
+                    MessageBox.Show(ForegroundWindow.Instance, strError);
+                    goto REDO_INPUT;
+                }
+
+                XmlNode nodeServer = dom.DocumentElement.SelectSingleNode("//root/rmsserver");
+                if (nodeServer == null)
+                {
+                    strError = "library.xml文件不合法，<root>/<rmsserver>元素不存在。";
+                    return -1;
+                }
+
+                // url属性
+                string strUrl = DomUtil.GetAttr(nodeServer, "url");
+                // 如果发现library.xml中有旧式的.asmx kernel地址
+                if (strUrl.IndexOf(".asmx") != -1)
+                {
+                    MessageBox.Show(ForegroundWindow.Instance,
+                        "安装程序发现文件 '"+strExistingLibraryFileName+"' 中使用了旧版本数据库内核的地址 '"+strUrl+"'，需要您在后面的步骤中修改为新版dp2Kernel(内核)的URL地址。");
+
+                    // 需要重新输入
+                    string strNewUrl = InputDlg.GetInput(ForegroundWindow.Instance,
+                        "请指定dp2Kernel(内核)服务器的URL",
+                        "dp2Kernel(内核)服务器的URL:",
+                        "http://localhost:8001/dp2kernel",
+                        InstallHelper.GetDefaultFont());
+                    if (strNewUrl == null)
+                    {
+                        strError = "用户放弃指定dp2Kernel URL。安装未完成。";
+                        throw new InstallException(strError);
+                    }
+                    DomUtil.SetAttr(nodeServer, "url", strNewUrl);
+                    DomUtil.SetElementText(dom.DocumentElement,
+                        "version", "2.00");
+                    dom.Save(strExistingLibraryFileName);
+                }
+
+
+                // 创建start.xml文件
+                string strStartXmlFileName = PathUtil.MergePath(strRootDir, "start.xml");
+                nRet = this.CreateStartXml(strStartXmlFileName,
+                    strDataDir,
+                    out strError);
+                if (nRet == -1)
+                    throw new InstallException(strError);
+
+                // 覆盖数据目录中的cfgs子目录
+
+                // 1) 先备份原来的cfgs子目录
+                string strSourceDir = PathUtil.MergePath(strDataDir, "cfgs");
+                string strTargetDir = PathUtil.MergePath(strDataDir, "v1_cfgs_backup");
+                if (Directory.Exists(strTargetDir) == false)
+                {
+                    MessageBox.Show(ForegroundWindow.Instance,
+    "安装程序将升级位于数据目录 '" + strSourceDir + "' 中的配置文件。原有文件将自动备份在目录 '" + strTargetDir + "' 中。");
+                    nRet = PathUtil.CopyDirectory(strSourceDir,
+    strTargetDir,
+    true,
+    out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "备份目录 '" + strSourceDir + "' 到 '" + strTargetDir + "' 时发生错误：" + strError;
+                        MessageBox.Show(ForegroundWindow.Instance,
+                            strError);
+                    }
+                }
+
+
+                strSourceDir = PathUtil.MergePath(strTempDataDir, "cfgs");
+                strTargetDir = PathUtil.MergePath(strDataDir, "cfgs");
+                nRet = PathUtil.CopyDirectory(strSourceDir,
+    strTargetDir,
+    true,
+    out strError);
+                if (nRet == -1)
+                {
+                    strError = "拷贝目录 '" + strSourceDir + "' 到配置文件目录 '" + strTargetDir + "' 发生错误：" + strError;
+                    throw new InstallException(strError);
+                }
+
+                // 2011/2/23
+                // 覆盖数据目录中的templates子目录
+                // parameters:
+                //      strRootDir  根目录
+                //      strDataDir    数据目录
+                nRet = OverwriteTemplates(strRootDir,
+                    strDataDir,
+                    out strError);
+                if (nRet == -1)
+                {
+                    // 报错，但是不停止安装
+                    MessageBox.Show(ForegroundWindow.Instance,
+                        strError);
+                }
+
+                // 删除临时目录
+                try
+                {
+                    Directory.Delete(strTempDataDir, true);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ForegroundWindow.Instance,
+                        "删除临时目录'" + strTempDataDir + "'出错：" + ex.Message);
+                }
+
+                strResultStartFileName = strStartXmlFileName;
+                strResultDataDir = strDataDir;
+                bUpgrade = true;
+                return 0;
+            }
+
+
+            nRet = PathUtil.CopyDirectory(strTempDataDir,
+                strDataDir,
+                true,
+                out strError);
+            if (nRet == -1)
+            {
+                strError = "拷贝临时目录 '" + strTempDataDir + "' 到数据目录'" + strDataDir + "'发生错误：" + strError;
+                throw new InstallException(strError);
+            }
+
+            try
+            {
+
+                strResultDataDir = strDataDir;
+
+                // 删除临时目录
+                try
+                {
+                    Directory.Delete(strTempDataDir, true);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ForegroundWindow.Instance,
+                        "删除临时目录'" + strTempDataDir + "'出错：" + ex.Message);
+                }
+
+
+                // 调对话框得到数据源配置参数
+
+                InstallLibraryParamDlg param_dlg = new InstallLibraryParamDlg();
+                InstallHelper.AutoSetDefaultFont(param_dlg);
+                param_dlg.StartPosition = FormStartPosition.CenterScreen;
+                param_dlg.ManageUserName = "root";
+                // param_dlg.RootDir = strRootDir;
+
+                // REDOINPUT:
+
+                param_dlg.ShowDialog(ForegroundWindow.Instance);
+                if (param_dlg.DialogResult != DialogResult.OK)
+                {
+                    strError = "用户放弃安装。";
+                    return -1;
+                }
+
+
+
+
+
+
+                // 在内核端创建管理帐户。
+
+                // 创建library.xml文件
+                string strRootFileName = strDataDir + "\\" + "library.xml";
+                nRet = this.ModifyLibraryXml(strRootFileName,
+                    param_dlg.KernelUrl,
+                    param_dlg.ManageUserName,
+                    param_dlg.ManagePassword,
+                    out strError);
+                if (nRet == -1)
+                    throw new InstallException(strError);
+
+
+                // 创建start.xml文件
+                string strStartXmlFileName = PathUtil.MergePath(strRootDir, "start.xml");
+                nRet = this.CreateStartXml(strStartXmlFileName,
+                    strDataDir,
+                    out strError);
+                if (nRet == -1)
+                    throw new InstallException(strError);
+
+                bFinished = true;
+
+                strResultStartFileName = strStartXmlFileName;
+
+                // 2008/6/3 new add
+                // 创建supervisor用户
+                CreateSupervisorDlg supervisor_dlg = new CreateSupervisorDlg();
+                InstallHelper.AutoSetDefaultFont(supervisor_dlg);
+                supervisor_dlg.UserName = "supervisor";
+                supervisor_dlg.StartPosition = FormStartPosition.CenterScreen;
+                supervisor_dlg.ShowDialog(ForegroundWindow.Instance);
+                if (supervisor_dlg.DialogResult != DialogResult.OK)
+                {
+                    MessageBox.Show(ForegroundWindow.Instance,
+                        "虽然您没有放弃创建dp2library层的超级用户，安装程序仍为您创建了一个名为supervisor，密码为supervisor的超级用户。请注意在安装完成后，及时修改这个账户的密码。");
+                    supervisor_dlg.UserName = "supervisor";
+                    supervisor_dlg.Password = "supervisor";
+                }
+
+                nRet = CreateSupervisorParam(strRootFileName,
+                    supervisor_dlg.UserName,
+                    supervisor_dlg.Password,
+                    supervisor_dlg.Rights,
+                    out strError);
+                if (nRet == -1)
+                    throw new InstallException(strError);
+
+                return 0;
+
+            }
+            finally
+            {
+                if (bFinished == false)
+                {
+                    try
+                    {
+                        Directory.Delete(strDataDir, true);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ForegroundWindow.Instance,
+                            "回滚时删除数据目录 '" + strDataDir + "' 出错：" + ex.Message);
+                    }
+                }
+            }
+        }
+
+
+        // 修改library.xml里的几项参数
+        // parameters:
+        //      strFileName library.xml文件名
+        //      strDp2kernelUrl 内核URL. 是否在安装的时候要检验一下这个参数的正确性?
+        //      strManageUserName   管理帐户名
+        //      strManagerPassword  管理帐户密码
+        private int ModifyLibraryXml(
+            string strFileName,
+            string strDp2kernelUrl,
+            string strManageUserName,
+            string strManagePassword,
+            out string strError)
+        {
+            strError = "";
+
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.Load(strFileName);
+            }
+            catch (FileNotFoundException /*ex*/)
+            {
+                // 如果文件不存在
+                dom.LoadXml("<?xml version='1.0' encoding='utf-8'?><root />");
+            }
+            catch (Exception ex)
+            {
+                strError = "加载library.xml到dom出错：" + ex.Message;
+                return -1;
+            }
+
+            XmlNode nodeRoot = dom.DocumentElement.SelectSingleNode("//root");
+            if (nodeRoot == null)
+            {
+                strError = "初始的library.xml文件不合法，<root>元素不存在。";
+                return -1;
+            }
+
+            XmlNode nodeServer = nodeRoot.SelectSingleNode("rmsserver");
+
+            if (nodeServer == null)
+            {
+                nodeServer = dom.CreateElement("rmsserver");
+                nodeRoot.AppendChild(nodeServer);
+            }
+
+            // url属性
+            DomUtil.SetAttr(nodeServer, "url", strDp2kernelUrl);
+
+            DomUtil.SetAttr(nodeServer, "username", strManageUserName);
+            DomUtil.SetAttr(nodeServer, "password",
+                Cryptography.Encrypt(strManagePassword, "dp2circulationpassword"));
+
+            dom.Save(strFileName);
+
+            return 0;
+        }
+
+        // 修改library.xml里的几项参数
+        // parameters:
+        //      strFileName library.xml文件名
+        //      strOpacServerDirectory <opacServer url="???">参数值
+        //      strLibraryName   <libraryName>???</libraryName>参数值
+        private int SecondModifyLibraryXml(
+            string strFileName,
+            string strOpacServerDirectory,
+            string strLibraryName,
+            out string strError)
+        {
+            strError = "";
+
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.Load(strFileName);
+            }
+            catch (FileNotFoundException /*ex*/)
+            {
+                // 如果文件不存在
+                dom.LoadXml("<?xml version='1.0' encoding='utf-8'?><root />");
+            }
+            catch (Exception ex)
+            {
+                strError = "加载library.xml到dom出错：" + ex.Message;
+                return -1;
+            }
+
+            XmlNode nodeRoot = dom.DocumentElement.SelectSingleNode("//root");
+            if (nodeRoot == null)
+            {
+                strError = "初始的library.xml文件不合法，<root>元素不存在。";
+                return -1;
+            }
+
+            // 2009/11/13 changed
+            DomUtil.SetElementText(dom.DocumentElement,
+                "libraryInfo/libraryName",
+                strLibraryName);
+
+            XmlNode nodeServer = nodeRoot.SelectSingleNode("opacServer");
+            if (nodeServer == null)
+            {
+                nodeServer = dom.CreateElement("opacServer");
+                nodeRoot.AppendChild(nodeServer);
+            }
+
+            // url属性
+            DomUtil.SetAttr(nodeServer, "url", strOpacServerDirectory);
+            dom.Save(strFileName);
+            return 0;
+        }
+
+        // 在library.xml里创建超级用户参数
+        // parameters:
+        //      strFileName library.xml文件名
+        //      strRights   如果library.xml文件中本身没有supervisor用户的rights参数，则用此参数
+        private int CreateSupervisorParam(
+            string strFileName,
+            string strSupervisorUserName,
+            string strSupervisorPassword,
+            string strRights,
+            out string strError)
+        {
+            strError = "";
+
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.Load(strFileName);
+            }
+            catch (FileNotFoundException /*ex*/)
+            {
+                // 如果文件不存在
+                // dom.LoadXml("<?xml version='1.0' encoding='utf-8'?><root />");
+                strError = "文件 " + strFileName + " 不存在";
+                return -1;
+            }
+            catch (Exception ex)
+            {
+                strError = "加载library.xml到dom出错：" + ex.Message;
+                return -1;
+            }
+
+            XmlNode nodeRoot = dom.DocumentElement.SelectSingleNode("//root");
+            if (nodeRoot == null)
+            {
+                strError = "library.xml不合法，<root>元素不存在。";
+                return -1;
+            }
+
+            XmlNode nodeAccountsRoot = nodeRoot.SelectSingleNode("accounts");
+
+            if (nodeAccountsRoot == null)
+            {
+                nodeAccountsRoot = dom.CreateElement("accounts");
+                nodeRoot.AppendChild(nodeAccountsRoot);
+            }
+
+            XmlNode nodeAccount = nodeAccountsRoot.SelectSingleNode("account[@name='supervisor']");
+            if (nodeAccount == null)
+            {
+                nodeAccount = dom.CreateElement("account");
+                nodeAccountsRoot.AppendChild(nodeAccount);
+            }
+
+            DomUtil.SetAttr(nodeAccount, "name", strSupervisorUserName);
+
+            // password属性
+            DomUtil.SetAttr(nodeAccount, "password",
+                Cryptography.Encrypt(strSupervisorPassword, "dp2circulationpassword"));
+
+            // rights属性
+            // 只有当原始的library.xml文件中没有supervisor账户的rights属性时，才主动去设置
+            string strOldRights = DomUtil.GetAttr(nodeAccount, "rights");
+            if (String.IsNullOrEmpty(strOldRights) == true)
+            {
+                DomUtil.SetAttr(nodeAccount, "rights", strRights);
+            }
+
+
+            dom.Save(strFileName);
+
+            return 0;
+        }
+
+        // 创建start.xml文件
+        // parameters:
+        //      strFileName start.xml文件名
+        private int CreateStartXml(string strFileName,
+            string strDataDir,
+            out string strError)
+        {
+            strError = "";
+
+            try
+            {
+                string strXml = "<root datadir=''/>";
+
+                XmlDocument dom = new XmlDocument();
+                dom.LoadXml(strXml);
+
+                DomUtil.SetAttr(dom.DocumentElement, "datadir", strDataDir);
+
+                dom.Save(strFileName);
+
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                strError = "创建start.xml文件出错：" + ex.Message;
+                return -1;
+            }
+        }
+
+        static string GetHostUrl()
+        {
+            // throw new Exception("test rollback");
+            // Debug.Assert(false, "");
+            using (RegistryKey digitalplatform = Registry.LocalMachine.CreateSubKey("SOFTWARE\\DigitalPlatform"))
+            {
+                using (RegistryKey dp2library = digitalplatform.CreateSubKey("dp2Library"))
+                {
+                    return (string)dp2library.GetValue("hosturl");
+                }
+            }
+        }
+
+        static void SetHostUrl(string strUrl)
+        {
+            using (RegistryKey digitalplatform = Registry.LocalMachine.CreateSubKey("SOFTWARE\\DigitalPlatform"))
+            {
+                using (RegistryKey dp2library = digitalplatform.CreateSubKey("dp2Library"))
+                {
+                    dp2library.SetValue("hosturl", strUrl, RegistryValueKind.String);
+                }
+            }
+        }
+
+		        static List<string> GetHostList(string[] lines)
+        {
+            List<string> results = new List<string>();
+            if (lines == null)
+                return results;
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                string[] parts = lines[i].Trim().Split(new char[] {':'});
+                if (parts.Length < 3)
+                    continue;
+                string strPort = parts[1].Trim();
+
+                if (String.IsNullOrEmpty(parts[0].Trim()) == false)
+                {
+                    results.Add(parts[0].Trim()
+                        + (strPort == "80" ? "" : strPort));
+                }
+
+                if (String.IsNullOrEmpty(parts[2].Trim()) == false)
+                {
+                    results.Add(parts[2].Trim()
+                        + (strPort == "80" ? "" : strPort));
+                }
+            }
+
+            return results;
+        }

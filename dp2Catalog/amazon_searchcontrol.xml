@@ -1,0 +1,73 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<root>
+  <searchIndexCollection>
+    <searchIndex name="All">
+      <caption lang="zh-CN">全部</caption>
+      <line name="Keywords"></line>
+    </searchIndex>
+    <searchIndex name="Books">
+      <caption lang="zh-CN">图书</caption>
+      <line name="Author"></line>
+      <line name="BrowseNode"></line>
+      <line name="Condition"></line>
+      <line name="Count"></line>
+      <line name="ItemPage"></line>
+      <line name="Keywords"></line>
+      <line name="MaximumPrice"></line>
+      <line name="MinimumPrice"></line>
+      <line name="Power"></line>
+      <line name="Publisher"></line>
+      <line name="Sort"></line>
+      <line name="Title"></line>
+    </searchIndex>
+    <searchIndex name="Music">
+      <caption lang="zh-CN">音乐</caption>
+      <line name="Artist"></line>
+      <line name="BrowseNode"></line>
+      <line name="Condition"></line>
+      <line name="Count"></line>
+      <line name="ItemPage"></line>
+      <line name="Keywords"></line>
+      <line name="MaximumPrice"></line>
+      <line name="MinimumPrice"></line>
+      <line name="MusicLabel"></line>
+      <line name="Power"></line>
+      <line name="Sort"></line>
+      <line name="Title"></line>
+
+    </searchIndex>
+  </searchIndexCollection>
+  <lineTypes>
+    <line name="Artist">
+      <caption lang="zh-CN">艺术家</caption>
+    </line>
+    <line name="Author">
+      <caption lang="zh-CN">作者</caption>
+    </line>
+    <line name="BrowseNode"></line>
+    <line name="Condition"  type="comboBox">
+      <item name="value1">
+        <caption lang="zh-CN">值1</caption>
+      </item>
+      <item name="value2">
+        <caption lang="zh-CN">值2</caption>
+      </item>
+    </line>
+    <line name="Count"></line>
+    <line name="ItemPage"></line>
+    <line name="Keywords" type="textBox">
+      <caption lang="zh-CN">关键词</caption>
+    </line>
+    <line name="MaximumPrice"></line>
+    <line name="MinimumPrice"></line>
+    <line name="MusicLabel"></line>
+    <line name="Power"></line>
+    <line name="Publisher">
+      <caption lang="zh-CN">出版者</caption>
+    </line>
+    <line name="Sort"></line>
+    <line name="Title">
+      <caption lang="zh-CN">题名</caption>
+    </line>
+  </lineTypes>
+</root>

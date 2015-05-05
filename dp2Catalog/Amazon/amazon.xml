@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<root>
+  <endpoints>
+    <endpoint name="CA" host="webservices.amazon.ca">
+      <caption lang="zh-CN">加拿大</caption>
+    </endpoint>
+    <endpoint name="CN" host="webservices.amazon.cn">
+      <caption lang="zh-CN">中国</caption>
+    </endpoint>
+    <endpoint name="DE" host="webservices.amazon.de">
+      <caption lang="zh-CN">德国</caption>
+    </endpoint>
+    <endpoint name="ES" host="webservices.amazon.es">
+      <caption lang="zh-CN">西班牙</caption>
+    </endpoint>
+    <endpoint name="FR" host="webservices.amazon.fr">
+      <caption lang="zh-CN">法国</caption>
+    </endpoint>
+    <endpoint name="IT" host="webservices.amazon.it">
+      <caption lang="zh-CN">意大利</caption>
+    </endpoint>
+    <endpoint name="JP" host="webservices.amazon.co.jp">
+      <caption lang="zh-CN">日本</caption>
+    </endpoint>
+    <endpoint name="UK" host="webservices.amazon.co.uk">
+      <caption lang="zh-CN">英国</caption>
+    </endpoint>
+    <endpoint name="US" host="webservices.amazon.com">
+      <caption lang="zh-CN">美国</caption>
+    </endpoint>
+  </endpoints>
+</root>

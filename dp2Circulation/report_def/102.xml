@@ -1,0 +1,14 @@
+<root>
+  <title>借阅排行, 按选定的部门\r%library%\r%daterange%</title>
+  <titleComment>按册数排序</titleComment>
+  <columns>
+    <column name="部门" align="left" sum="no" class="" eval="" />
+    <column name="册数" align="right" sum="yes" class="" eval="" />
+  </columns>
+  <css>
+  </css>
+  <columnSortStyle>1:d,0:a</columnSortStyle>
+  <typeName>102 选定部门的借阅排行</typeName>
+  <createFrequency>year,month,day</createFrequency>
+  <property fresh="false" />
+</root>

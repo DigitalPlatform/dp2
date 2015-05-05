@@ -1,0 +1,222 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{35346CCE-2815-419B-A277-DEF065BB42C5}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>DigitalPlatform.rms.Install</RootNamespace>
+    <AssemblyName>DigitalPlatform.rms.Install</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Ionic.Zip">
+      <HintPath>.\Ionic.Zip.dll</HintPath>
+    </Reference>
+    <Reference Include="MySql.Data">
+      <HintPath>..\dp2\packages\MySql.Data.6.9.6\lib\net40\MySql.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="Oracle.ManagedDataAccess">
+      <HintPath>..\dp2\packages\Oracle.ManagedDataAccess.12.1.021\lib\net40\Oracle.ManagedDataAccess.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CertificateDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CertificateDialog.designer.cs">
+      <DependentUpon>CertificateDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="InstanceDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="InstanceDialog.designer.cs">
+      <DependentUpon>InstanceDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MsSqlServerDataSourceDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MsSqlServerDataSourceDlg.designer.cs">
+      <DependentUpon>MsSqlServerDataSourceDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MsSqlServerDataSourceWizard.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MsSqlServerDataSourceWizard.Designer.cs">
+      <DependentUpon>MsSqlServerDataSourceWizard.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MySqlDataSourceDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MySqlDataSourceDlg.designer.cs">
+      <DependentUpon>MySqlDataSourceDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="OneInstanceDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="OneInstanceDialog.designer.cs">
+      <DependentUpon>OneInstanceDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="OracleDataSourceDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="OracleDataSourceDlg.designer.cs">
+      <DependentUpon>OracleDataSourceDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="OracleDataSourceWizard.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="OracleDataSourceWizard.Designer.cs">
+      <DependentUpon>OracleDataSourceWizard.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="RootUserDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="RootUserDlg.designer.cs">
+      <DependentUpon>RootUserDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SaLoginDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SaLoginDialog.designer.cs">
+      <DependentUpon>SaLoginDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SqliteDataSourceDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SqliteDataSourceDlg.designer.cs">
+      <DependentUpon>SqliteDataSourceDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SystemLoginDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SystemLoginDialog.Designer.cs">
+      <DependentUpon>SystemLoginDialog.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="CertificateDialog.resx">
+      <DependentUpon>CertificateDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="InstanceDialog.resx">
+      <DependentUpon>InstanceDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MsSqlServerDataSourceDlg.resx">
+      <DependentUpon>MsSqlServerDataSourceDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MsSqlServerDataSourceWizard.resx">
+      <DependentUpon>MsSqlServerDataSourceWizard.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MySqlDataSourceDlg.resx">
+      <DependentUpon>MySqlDataSourceDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="OneInstanceDialog.resx">
+      <DependentUpon>OneInstanceDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="OracleDataSourceDlg.resx">
+      <DependentUpon>OracleDataSourceDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="OracleDataSourceWizard.resx">
+      <DependentUpon>OracleDataSourceWizard.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RootUserDlg.resx">
+      <DependentUpon>RootUserDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SaLoginDialog.resx">
+      <DependentUpon>SaLoginDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SqliteDataSourceDlg.resx">
+      <DependentUpon>SqliteDataSourceDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SystemLoginDialog.resx">
+      <DependentUpon>SystemLoginDialog.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DigitalPlatform.CommonControl\DigitalPlatform.CommonControl.csproj">
+      <Project>{334e1b2b-5373-4c80-a971-bff213ff304b}</Project>
+      <Name>DigitalPlatform.CommonControl</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Install\DigitalPlatform.Install.csproj">
+      <Project>{fbb88810-6d4a-44fe-b220-cac22e4dbdcd}</Project>
+      <Name>DigitalPlatform.Install</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.IO\DigitalPlatform.IO.csproj">
+      <Project>{441cb814-af78-4503-91ef-dce5f3269502}</Project>
+      <Name>DigitalPlatform.IO</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Text\DigitalPlatform.Text.csproj">
+      <Project>{26f96cc3-a4a9-4bc4-a10a-bc7e25581ff6}</Project>
+      <Name>DigitalPlatform.Text</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Xml\DigitalPlatform.Xml.csproj">
+      <Project>{e6489e89-1349-4ee7-a00b-ac96b9912587}</Project>
+      <Name>DigitalPlatform.Xml</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform\DigitalPlatform.csproj">
+      <Project>{bdd43275-eaa0-4670-8ba3-0db5cd7598dd}</Project>
+      <Name>DigitalPlatform</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>这台计算机上缺少此项目引用的 NuGet 程序包。启用“NuGet 程序包还原”可下载这些程序包。有关详细信息，请参阅 http://go.microsoft.com/fwlink/?LinkID=322105。缺少的文件是 {0}。</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
+  </Target>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

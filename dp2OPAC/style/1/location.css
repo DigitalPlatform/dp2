@@ -1,0 +1,104 @@
+﻿
+
+.map
+{
+ float:left;
+ width: 1920px;
+ height: 600px;   
+}
+
+.menu {
+margin-bottom:40px;
+text-align:center;
+}
+
+.menu a {
+color:#D7363A;
+font-size:11px;
+font-weight:bold;
+margin:0 10px;
+}
+
+.preloader {
+background:url(../../craftmap/images/loader.gif) no-repeat center #fff;
+}
+
+.marker {
+display:block;
+text-indent:-9999px;
+width:15px;
+height:23px;
+outline:none;
+background:url(../../craftmap/images/marker.png) no-repeat;
+cursor:pointer;
+}
+
+.popup {
+width:300px;
+position:absolute;
+padding:8px;
+background:#2a2a2a;
+color:#fff;
+font-weight:bold;
+font-size:11px;
+line-height:20px;
+}
+
+.popup h3 {
+margin:0;
+margin-bottom:10px;
+font-family: 'Cabin Condensed', sans-serif;
+font-weight:normal;
+font-size:20px;
+}
+
+.popup .close {
+display:block;
+text-indent:-9999px;
+position:absolute;
+top:4px;
+right:4px;
+width:16px;
+height:16px;
+outline:none;
+background:url(../../craftmap/images/close.gif) no-repeat;
+cursor:pointer;
+}
+
+.relative {
+position:relative;
+}
+
+.controls {
+position:absolute;
+top:20px;
+left:20px;
+z-index:20;
+}
+
+.controls a {
+background:#2a2a2a;
+background:rgba(0, 0, 0, .6);
+display:block;
+float:left;
+clear:both;
+font-size:11px;
+font-weight:bold;
+line-height:28px;
+margin-bottom:4px;
+outline:none;
+padding:0 15px;
+text-decoration:none;
+}
+
+.controls a:hover {
+background:#eee;
+color:#2a2a2a;
+}
+
+.controls .active {
+background:#D7363A;
+color:#fff;
+}
+
+

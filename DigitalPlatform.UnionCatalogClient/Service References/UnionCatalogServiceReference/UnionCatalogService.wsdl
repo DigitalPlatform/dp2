@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/08/addressing/policy" xmlns:wsa10="http://www.w3.org/2005/08/addressing" xmlns:tns="http://dp2003.com/unioncatalog/" xmlns:msc="http://schemas.microsoft.com/ws/2005/12/wsdl/contract" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="UnionCatalogService" targetNamespace="http://dp2003.com/unioncatalog/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsp:Policy wsu:Id="BasicHttpBinding_UnionCatalogService_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <wsoma:OptimizedMimeSerialization xmlns:wsoma="http://schemas.xmlsoap.org/ws/2004/09/policy/optimizedmimeserialization" />
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsdl:types>
+    <xsd:schema targetNamespace="http://dp2003.com/unioncatalog/Imports">
+      <xsd:import schemaLocation="http://localhost/unioncatalog/metadata?xsd=xsd0" namespace="http://dp2003.com/unioncatalog/" />
+      <xsd:import schemaLocation="http://localhost/unioncatalog/metadata?xsd=xsd1" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
+    </xsd:schema>
+  </wsdl:types>
+  <wsdl:message name="UnionCatalogService_UpdateRecord_InputMessage">
+    <wsdl:part name="parameters" element="tns:UpdateRecord" />
+  </wsdl:message>
+  <wsdl:message name="UnionCatalogService_UpdateRecord_OutputMessage">
+    <wsdl:part name="parameters" element="tns:UpdateRecordResponse" />
+  </wsdl:message>
+  <wsdl:portType msc:usingSession="false" name="UnionCatalogService">
+    <wsdl:operation name="UpdateRecord">
+      <wsdl:input wsaw:Action="http://dp2003.com/unioncatalog/UnionCatalogService/UpdateRecord" message="tns:UnionCatalogService_UpdateRecord_InputMessage" />
+      <wsdl:output wsaw:Action="http://dp2003.com/unioncatalog/UnionCatalogService/UpdateRecordResponse" message="tns:UnionCatalogService_UpdateRecord_OutputMessage" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="BasicHttpBinding_UnionCatalogService" type="tns:UnionCatalogService">
+    <wsp:PolicyReference URI="#BasicHttpBinding_UnionCatalogService_policy" />
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="UpdateRecord">
+      <soap:operation soapAction="http://dp2003.com/unioncatalog/UnionCatalogService/UpdateRecord" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="UnionCatalogService">
+    <wsdl:port name="BasicHttpBinding_UnionCatalogService" binding="tns:BasicHttpBinding_UnionCatalogService">
+      <soap:address location="http://localhost/unioncatalog/" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

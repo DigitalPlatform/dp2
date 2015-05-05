@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <col title="出版时间">
+    <xpath>*/publishTime</xpath>
+  </col>
+    <col title="期号">
+        <xpath>*/issue</xpath>
+    </col>
+    <col title="卷号">
+        <xpath>*/volume</xpath>
+    </col>
+  <col title="总期号">
+    <xpath>*/zong</xpath>
+  </col>
+  <col title="书目记录" type="parent_id">
+    <xpath>*/parent</xpath>
+  </col>
+</root>

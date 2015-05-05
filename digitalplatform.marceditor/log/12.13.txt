@@ -1,0 +1,31 @@
+12.13
+
+给江老师提交的新版本及测试文档
+
+
+~~~~~~~~~~~~~~~~~~测试修改部分数据~~~~~~~~~~~~~~~~
+
+元素测试节点
+http://localhost/rmsservice/rmsservice.asmx?留言薄/1/xpath/<locate>/record/title</locate>
+http://localhost/rmsservice/rmsservice.asmx?留言薄/1/xpath/<locate>/record/title</locate><action>AddInteger</action>
+
+http://localhost/rmsservice/rmsservice.asmx?留言薄/1/xpath/<locate>/record/title</locate><action>Push</action>
+
+属性测试节点
+http://localhost/rmsservice/rmsservice.asmx?留言薄/1/xpath/<locate>/record/@test</locate>
+http://localhost/rmsservice/rmsservice.asmx?留言薄/1/xpath/<locate>/record/@test</locate><action>AddInteger</action>
+http://localhost/rmsservice/rmsservice.asmx?留言薄/1/xpath/<locate>/record/@test</locate><action>Push</action>
+
+AddInteger
+AppaneString
+Push
+
+<root>4</root>
+
+GetRes() 的style值 data,content
+WriteRes() 的style值 ignorechecktimestamp
+
+
+AddInteger的两种处理情况:
+AddInteger+: 服务器的记录里用加后的号，返回加前的号
++AddInteger: 服务器的记录里用加后的号，返回加后的号，为了兼容以前的模块，AddInteger相当于+AddInteger

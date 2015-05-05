@@ -1,0 +1,22 @@
+﻿
+    // google.setOnLoadCallback(SetSize);
+
+	function SetGooglePreview() {
+	    $('.isbn').each(function (index) {
+	        var isbn = $(this).text();
+
+	    });
+	}
+
+		function GetSummary() {
+        var o = $(".pending:first");
+        if (o.length == 0) {
+            window.setTimeout("SetGooglePreview()", 10);
+            return;
+        }
+
+
+	<script type="text/javascript" src='http://www.google.com/jsapi'></script>
+    <script type="text/javascript">
+        google.load("books", "0");
+    </script>

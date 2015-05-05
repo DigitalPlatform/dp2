@@ -1,0 +1,80 @@
+﻿        // 将XML检索式变化为简明格式检索式
+        public static int GetQueryString(
+            FromCollection Froms,
+            string strQueryXml,
+            IsbnConvertInfo isbnconvertinfo,
+            out string strQueryString,
+            out string strError)
+        {
+            strError = "";
+            strQueryString = "";
+
+            if (String.IsNullOrEmpty(strQueryXml) == true)
+                return 0;
+
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(strQueryXml);
+            }
+            catch (Exception ex)
+            {
+                strError = "strQueryXml装入XMLDOM时出错: " + ex.Message;
+                return -1;
+            }
+
+            XmlNodeList nodes = dom.DocumentElement.SelectNodes("line");
+
+
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                XmlNode node = nodes[i];
+                string strLogic = DomUtil.GetAttr(node, "logic");
+                string strWord = DomUtil.GetAttr(node, "word");
+                string strFrom = DomUtil.GetAttr(node, "from");
+
+                if (strWord == "")
+                    continue;
+
+                strLogic = GetLogicString(strLogic);    // 2011/8/30
+
+                if (strQueryString != "")
+                    strQueryString += " " + strLogic + " ";
+
+                int nRet = strFrom.IndexOf("-");
+                if (nRet != -1)
+                    strFrom = strFrom.Substring(0, nRet).Trim();
+
+                // 对ISBN检索词进行预处理
+                if (strFrom == "ISBN"
+                    && isbnconvertinfo != null)
+                {
+                    // return:
+                    //      -1  出错
+                    //      0   没有必要转换
+                    //      1   已经转换
+                    nRet = isbnconvertinfo.ConvertISBN(ref strWord,
+                out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "在处理ISBN字符串 '" + strWord + "' 过程中出错: " + strError;
+                        return -1;
+                    }
+                }
+
+                string strValue = Froms.GetValue(strFrom);
+                if (strValue == null)
+                {
+                    strError = "名称 '" + strFrom + "' 在use表中没有找到对应的编号";
+                    return -1;
+                }
+
+                strWord.Replace("\"", "\\\"");
+                strQueryString += "\""
+                    + strWord + "\"" + "/1="
+                    + strValue;
+
+            }
+
+            return 1;
+        }

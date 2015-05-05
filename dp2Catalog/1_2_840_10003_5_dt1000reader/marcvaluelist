@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Description>
+  <ValueList name="unimarc_100?">
+    <Item>
+      <Value>a</Value>
+      <Label xml:lang="zh">现期出版的连续出版物</Label>
+    </Item>
+    <Item>
+      <Value>b</Value>
+      <Label xml:lang="zh">已停刊的连续出版物</Label>
+    </Item>
+    <Item>
+      <Value>c</Value>
+      <Label xml:lang="zh">刊行状态不明的连续出版物</Label>
+    </Item>
+    <Item>
+      <Value>d</Value>
+      <Label xml:lang="zh">一次或一年内出全的专著</Label>
+    </Item>
+    <Item>
+      <Value>e</Value>
+      <Label xml:lang="zh">复制本(如重印本，摹写本，再版本)</Label>
+    </Item>
+    <Item>
+      <Value>f</Value>
+      <Label xml:lang="zh">出版时间不能确定的专著</Label>
+    </Item>
+    <Item>
+      <Value>g</Value>
+      <Label xml:lang="zh">连续出版超过一年的专著</Label>
+    </Item>
+    <Item>
+      <Value>h</Value>
+      <Label xml:lang="zh">既有出版时间又有版权日期的专著</Label>
+    </Item>
+    <Item>
+      <Value>i</Value>
+      <Label xml:lang="zh">既有发行／出版日期，又有生产日期的专著</Label>
+    </Item>
+    <Item>
+      <Value>j</Value>
+      <Label xml:lang="zh"> 具有详细出版日期的专著</Label>
+    </Item>
+  </ValueList>
+
+</Description>

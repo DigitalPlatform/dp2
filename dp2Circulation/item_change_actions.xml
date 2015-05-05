@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<root>
+  <action element="state" type="" list="state">
+    <caption lang="zh">状态</caption>
+  </action>
+  <action element="barcode" type="">
+    <caption lang="zh">册条码号</caption>
+  </action>
+  <action element="publishTime" type="">
+    <caption lang="zh">出版时间</caption>
+  </action>
+  <action element="location" type="" list="location">
+    <caption lang="zh">馆藏地</caption>
+  </action>
+  <action element="seller" type="">
+    <caption lang="zh">渠道</caption>
+  </action>
+  <action element="source" type="">
+    <caption lang="zh">经费来源</caption>
+  </action>
+  <action element="price" type="">
+    <caption lang="zh">价格</caption>
+  </action>
+  <action element="bindingCost" type="">
+    <caption lang="zh">装订费用</caption>
+  </action>
+  <action element="comment" type="">
+    <caption lang="zh">注释</caption>
+  </action>
+  <action element="bookType" type="" list="bookType">
+    <caption lang="zh">图书类型</caption>
+  </action>
+  <action element="registerNo" type="">
+    <caption lang="zh">登录号</caption>
+  </action>
+  <action element="mergeComment" type="">
+    <caption lang="zh">合并注释</caption>
+  </action>
+  <action element="batchNo" type="">
+    <caption lang="zh">批次号</caption>
+  </action>
+  <action element="volume" type="">
+    <caption lang="zh">卷册</caption>
+  </action>
+  <action element="accessNo" type="">
+    <caption lang="zh">索取号</caption>
+  </action>
+  <action element="intact" type="">
+    <caption lang="zh">完好率</caption>
+  </action>
+</root>

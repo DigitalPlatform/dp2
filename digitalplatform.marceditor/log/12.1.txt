@@ -1,0 +1,130 @@
+1.插入符的自动定位
+
+1) 输完字段名后，
+如果当前字段是控制字段，定位到字段内容
+如果不是，定位到字段指示符
+
+2)从指示符定位到定段内容
+
+3) 对于定位字段，输完内容后定位到下一个字段的字段内容
+
+接管OnKeyUp()事件
+完成
+
+
+2.上下左右移动插入符
+接管OnKeyDown事件
+完成
+
+3.实现TextBox的替换与插入状态
+完成
+重要DefWinProc()函数
+
+4.完善粘贴函数
+做Record加一个AddRange()的函数
+包括粘贴覆盖，粘贴前插，粘贴后插，粘贴末尾
+完成
+
+
+
+
+lesson4 "Take Over, Bon's!"
+
+
+
+"Take Over, Bon's!"
+
+1.Hour after hour I kept the gun pointed at the other nine man. 
+From the lifeboat's stern, where I'd sat most of the twenty days of our drifting,I could keep them all covered. 
+If  i had to shoot at such close quarters, I wouldn't miss. 
+They realized that. 
+Nobody jumped at me. 
+But in the way they all glared i could see how they'd come to hate my guts.
+
+2.Especially Barratte, who'd been bos'n's mate; Barrett said in his harsh, craked voice, "You're a fool, Snyder. Y-you can't hold out forever! You're half asleep now!"
+
+3.I didn't answer.
+He was right. 
+How long can a man stay awake?
+I hadn't dare to shut my eyes in maybe seventy-two hours. 
+Very soon now i'd doze off, and the instant that happened they'd jump on the litlle water that was left.
+
+4.The last canteen lay under my legs. 
+There wasn't much in it after twenty days. 
+Maybe a pint. 
+Enough to give each of them  a few drops. 
+Yet I could see in their bloodshot eyes that they'd gladly kill me for those few drops. 
+As a man I didn't count any more. 
+I was no longer third officer of the wrecked Montala. 
+I was just a gun that kept them away from the water they craved. 
+And with their tongue swollen and their cheeks sunken, they were half crazy.
+
+5.The way I judged it, we must be some two hundred miles east of Ascension. 
+Now that the storms were over, the Atlantic swells were long and easy, and the morning sun was hot——so hot it scoched your skin. 
+My own tongue was thick enough to stop my throat. 
+I'd have given the rest of my life for a single gulp of water.
+
+6.But I was the man with the gun——the only authority in the boat——and  I knew this: once the water was gone we'd have nothing to look forward to but death. 
+As long as we could look forward to getting a drink later, there was something to live for. 
+We had to make it last as long as possible. 
+If I'd given in to the curses, we'd have emptied the last canteen days ago. 
+By now we'd all be dead.
+
+7.The men weren't pulling on the oars. 
+They'd stopped that long ago, too weak to go on. 
+The nine of them facing me were a pack of bearded, ragged, half-naked animals, and I probably looked as bad as the rest. 
+Some sprawled over the gunwales, dozing. 
+The rest watched me as Barrett did, ready to spring the instant i relaxed.
+
+8.When they weren't looking at my face they looked at the canteen under my legs.
+
+9.Jeff Barrett was the nearest one. 
+A constant threat. 
+The bos'n's mate was a heavy man, bald , with a scarred and brutal face. 
+He'd been in a hundred fights, and they 'd left their marks on him.
+
+10.Barrett had been able to sleep——in fact , he'd slept through most of the night——and I envied him that. 
+His eyes wouldn't close.
+They kept watching me, narrow and dangerous.
+
+11.Every now and then he jeered at me in that hoarse, broken voice: 
+12."Why don't you quit? You can't hold out!"
+13."Tonight," I said. "We'll ration the rest of the water tonight."
+14."By tonight some of us'll be dead! We want it now!"
+15."Tonight," I said.
+
+16.Couldn't he understand that if we waited until night the few drops wouldn't be sweated out of us so fast? But Barrett was beyond all reasoning. His mind had already cracked with thirst. I saw him begin to rise, a calculating look in his eyes. I aimed the gun at his chest——and he sat down again.
+
+17.I'd grabbed my gun on instinct, twenty days ago, just before running for the life boat. Nothing else would have kept Barrett and the rest away from the water.
+
+18.These fools——couldn't they see I wanted a drink as badly as any of them? But I was in command here——that was the difference. I was the man with the gun, the man who had to think. Each of the others could offord to think only of himself; I had to think of them all.
+
+19.Barrett's eyes kept watching me, waiting. I hate him. I hateed him all the more because he had slept. As the boat rose and fell on the long swells, I could feel sleep creeping over me like paralysis. I bent my head. It filled my brain like a cloud. I was going, going...
+
+20.Barrett stood over me, and I couldn't even lift the gun. In a vague way I could guess what would happen. He'd grab the water first and take his drop. By that time the others would be screaming and tearing at him, and he had to yield the canteen. Well, there was nothing more I could do about it.
+
+21.I whispered, "Take over, bos'n".
+
+22.Then I fell face down in the bottom of the boat. I was asleep before I stopp moving...
+
+23. When a hand shook my shoulder, I could hardly raise my head. Jeff Berrett's hoarse voice said, " Here! Take your share o' the water!"
+
+24.Somehow I proped myself on my arms, dizzy and weak. I looked at the men, and I thought my eyes were going. Their figures were dim, shadowy; but then I realized it was not because of my eyes. It was night. The sea was black; there were stars overhead. I'd slept the day away.
+
+25.So we were in our twenty-first night adrift——the night in which the tramp Croton finally picked us up——but now, as I turned my head to Barrett there was no sigh of any ship. He knelt beside me, holding out the canteen, his other hand with the gun steady on the men.
+
+26. I stared at the canteen as if it were a mirage. Hadn't they finished that pint of water this morning? When I looked up at Barrett's ugly face, it was grim. He must have guessed my thoughts.
+
+27."You said, ' Tke over, bos'n,' didn't you?" he growled. " I've been holding off these apes all day." He lifted the gun in his hand. " when you're boss-man," he added, " in command and responsible for the rest——you——you sure get to see things different, don't you?"
+
+
+
+
+
+
+
+
+
+
+
+

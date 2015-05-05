@@ -1,0 +1,191 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="册s已于s到书" xml:space="preserve">
+    <value>Item {0} is available from {1}.</value>
+  </data>
+  <data name="册条码号" xml:space="preserve">
+    <value>Item Barcode</value>
+    <comment>栏目标题</comment>
+  </data>
+  <data name="删除" xml:space="preserve">
+    <value>Delete</value>
+    <comment>按钮</comment>
+  </data>
+  <data name="删除预约信息成功。请看预约列表" xml:space="preserve">
+    <value>Reservation is deleted. Please check the on hold list for sure.</value>
+  </data>
+  <data name="到达情况" xml:space="preserve">
+    <value>On-shelf Info</value>
+    <comment>栏目标题</comment>
+  </data>
+  <data name="合并" xml:space="preserve">
+    <value>Combine</value>
+    <comment>按钮</comment>
+  </data>
+  <data name="合并预约信息成功。请看预约列表" xml:space="preserve">
+    <value>Reservations are combined. Please check the on hold list for sure.</value>
+  </data>
+  <data name="同一预约请求中的其余s册旋即失效" xml:space="preserve">
+    <value>；Holds to the other item {0} is no longer valid</value>
+  </data>
+  <data name="尚未指定读者证条码号。操作失败" xml:space="preserve">
+    <value>Barcode of library card is not selected. Operation is failed.</value>
+  </data>
+  <data name="尚未选择要删除的预约事项" xml:space="preserve">
+    <value>Reservation item to be deleted has not yet been selected.</value>
+  </data>
+  <data name="尚未选择要合并的预约事项" xml:space="preserve">
+    <value>Reservation items to be combined have not yet been selected.</value>
+  </data>
+  <data name="尚未选择要拆散的预约事项" xml:space="preserve">
+    <value>Reservation items to be separated have not yet been selected.</value>
+  </data>
+  <data name="拆散" xml:space="preserve">
+    <value>Separate</value>
+    <comment>按钮</comment>
+  </data>
+  <data name="拆散预约信息成功。请看预约列表" xml:space="preserve">
+    <value>Reservation information is separated. Please check the on hold list for sure.</value>
+  </data>
+  <data name="摘要" xml:space="preserve">
+    <value>Item Information</value>
+    <comment>栏目标题</comment>
+  </data>
+  <data name="操作者" xml:space="preserve">
+    <value>Operator</value>
+    <comment>栏目标题</comment>
+  </data>
+  <data name="无预约信息" xml:space="preserve">
+    <value>(No items on hold.)</value>
+    <comment>没有信息行时提示</comment>
+  </data>
+  <data name="请求日期" xml:space="preserve">
+    <value>Request Date</value>
+    <comment>栏目标题</comment>
+  </data>
+  <data name="面板底部注释" xml:space="preserve">
+    <value>(Note: to delete the item that is on shelf will be processed as giving up the reservation. Do not delete the item before you want borrow it. System will clear this item in reservation automatically.)</value>
+    <comment>面板底部注释，提醒读者不要在取书前删除行</comment>
+  </data>
+  <data name="预约请求" xml:space="preserve">
+    <value>Reservation Info</value>
+    <comment>面板标题</comment>
+  </data>
+</root>

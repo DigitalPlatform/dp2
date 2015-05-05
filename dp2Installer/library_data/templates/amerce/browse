@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <col title="读者条码">
+    <xpath>//readerBarcode</xpath>
+  </col>
+  <col title="馆代码">
+    <xpath>//libraryCode</xpath>
+  </col>
+  <col title="册条码">
+    <xpath>//itemBarcode</xpath>
+  </col>
+  <col title="状态">
+    <xpath>//state</xpath>
+  </col>
+  <col title="金额">
+    <xpath>//price</xpath>
+  </col>
+  <col title="注释">
+    <xpath>//comment</xpath>
+  </col>
+  <col title="日期">
+    <xpath>//date</xpath>
+  </col>
+</root>

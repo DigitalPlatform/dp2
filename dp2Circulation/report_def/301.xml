@@ -1,0 +1,18 @@
+<root>
+  <title>图书种册, 按分类，馆藏地\r%location%\r%class%\r%daterange%</title>
+  <titleComment>\r</titleComment>
+  <columns>
+    <column name="类号" type="String" align="left" sum="no" class="classname" eval="" />
+    <column name="存量种数" type="" align="right" sum="yes" class="start_bibliocount" eval="" />
+    <column name="增量种数" type="" align="right" sum="yes" class="delta_bibliocount" eval="" />
+    <column name="存量册数" type="" align="right" sum="yes" class="start_itemcount" eval="" />
+    <column name="增量册数" type="" align="right" sum="yes" class="delta_itemcount" eval="" />
+  </columns>
+  <css>
+  </css>
+  <typeName>301 馆藏地点和分类的图书种册</typeName>
+  <columnSortStyle>
+  </columnSortStyle>
+  <createFrequency>month,year</createFrequency>
+  <property fresh="false" />
+</root>

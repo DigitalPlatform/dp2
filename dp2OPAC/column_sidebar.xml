@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="gb2312"?>
+<root>
+  <item url="./column.aspx">
+    <caption lang="zh-CN">书评</caption>
+    <caption lang="en-US">Book Review</caption>
+  </item>
+  <item url="./chat.aspx" class="guestbooktips" title="留言可以写在贴吧哦">
+    <caption lang="zh-CN">贴吧</caption>
+    <caption lang="en-US">Clipboard</caption>
+  </item>
+</root>

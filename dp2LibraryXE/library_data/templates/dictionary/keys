@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <key>
+    <xpath>*/key/@name</xpath>
+    <from>key</from>
+    <table ref="key" />
+  </key>
+  <table name="key" id="1">
+    <caption lang="zh-CN">键</caption>
+    <caption lang="en">Key</caption>
+  </table>
+</root>

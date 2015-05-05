@@ -1,0 +1,71 @@
+
+
+TABLE.message
+{
+	width: 100%;
+	font-size: 12px;
+	border-left-color: lightgrey;
+	border-bottom-color: lightgrey;
+	border-top-color: lightgrey;
+	border-right-color: lightgrey;
+	background-color: lightgrey;
+}
+
+
+TABLE.message TR.columntitle
+{
+	font-size: 12px;
+	font-weight: bolder;
+	background-color: white;
+}
+
+TABLE.message TR
+{
+	font-size: 12px;
+	background-color: white;
+}
+
+
+TABLE.message TD.name
+{
+	font-weight: bolder;
+	background-color: whitesmoke;
+}
+
+
+TABLE.message TR.bottomcmd
+{
+	font-size: 10px;
+
+}
+
+TABLE.message TR.cmdline INPUT.savebutton
+{
+	font-size: 12px;
+	padding: 2px;
+}
+
+TABLE.message TR.cmdline INPUT.sendbutton
+{
+	font-size: 12px;
+	padding: 2px;
+}
+
+TABLE.message TR.cmdline INPUT.replybutton
+{
+	font-size: 12px;
+	padding: 2px;
+}
+
+TABLE.message TR.cmdline INPUT.forwardbutton
+{
+	font-size: 12px;
+	padding: 2px;
+}
+
+TABLE.message TR.cmdline INPUT.deletebutton
+{
+	font-size: 12px;
+	padding: 2px;
+}
+

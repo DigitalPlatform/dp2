@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <version>2.0</version>
+  <datasource userid="sa" password="7E/u3+nbJxg=" servername="localhost" />
+  <keysize>255</keysize>
+  <dbs instancename="rmsservice">
+    <database type="file,account" id="0" localdir="user_cfgs">
+      <property>
+        <logicname>
+          <caption lang="zh-CN">用户</caption>
+          <caption lang="en">account</caption>
+        </logicname>
+        <datasource>userdb</datasource>
+        <seed>1</seed>
+        <sqlserverdb />
+      </property>
+      <dir name="cfgs" localdir="cfgs">
+        <file name="keys" localname="keys.xml" />
+        <file name="browse" localname="browse.xml" />
+        <file name="template" localname="template.xml" />
+      </dir>
+    </database>
+  </dbs>
+</root>

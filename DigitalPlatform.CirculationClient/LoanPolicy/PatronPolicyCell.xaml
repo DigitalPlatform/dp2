@@ -1,0 +1,62 @@
+﻿<UserControl x:Class="DigitalPlatform.CirculationClient.PatronPolicyCell"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" Focusable="True" GotFocus="UserControl_GotFocus" LostFocus="UserControl_LostFocus">
+    <Grid Margin="6">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" MinHeight="8" />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition Height="8" MinHeight="8"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition MinWidth="120" />
+        </Grid.ColumnDefinitions>
+        <Border BorderThickness="0" BorderBrush="#FFB1AAAA" CornerRadius="10" Background="#FFC1C1C1" Grid.ColumnSpan="2" Grid.RowSpan="6" Padding="0"></Border>
+        <Label Name="_comment" Grid.ColumnSpan="2" Content="{Binding CommentText,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" HorizontalContentAlignment="Center" VerticalContentAlignment="Bottom" Visibility="Collapsed" Foreground="#FFBD000A" 
+               Margin="0,0,0,0" FontWeight="Bold" />
+
+        <Label Content="可借总册数" HorizontalAlignment="Stretch" Name="label1"
+               VerticalAlignment="Center" HorizontalContentAlignment="Right" VerticalContentAlignment="Stretch" Grid.Row="1" Margin="4,0,0,0" />
+        <TextBox 
+            Name="textBox_maxBorrowItems" 
+            ToolTip="定义某类读者可借阅的各类图书的总册数&#x0a;例如&#x0a;10"
+            CaretBrush="Red" 
+            HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+            HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"
+            Background="#FF838383" Foreground="White"
+            Padding="4"
+            BorderThickness="0" FontWeight="Bold"
+            Text="{Binding MaxBorrowItems,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            Grid.Row="1" Grid.Column="1" Height="Auto" Margin="4,2,8,2" />
+        <Label Content="可预约册数" Height="Auto" HorizontalAlignment="Stretch" Name="label2" VerticalAlignment="Stretch" Width="Auto" HorizontalContentAlignment="Right" Grid.Row="2" VerticalContentAlignment="Center" Margin="4,0,0,0" />
+        <TextBox 
+            Name="textBox_maxReserveItems" 
+            ToolTip="定义某类读者可预约的各类图书的总册数&#x0a;例如&#x0a;5"
+            CaretBrush="Red" Height="Auto" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="Auto" Background="#FF838383" Foreground="White" Padding="4" BorderThickness="0" FontWeight="Bold"  Text="{Binding MaxReserveItems,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Row="2" Grid.Column="1" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" Margin="4,2,8,2" />
+        <Label Content="以停代金因子"
+               HorizontalAlignment="Stretch"
+               Name="label3" VerticalAlignment="Stretch" 
+               HorizontalContentAlignment="Right" Grid.Row="3"
+               VerticalContentAlignment="Center" Margin="4,0,0,0" />
+        <TextBox 
+            Name="textBox_stopRatio" 
+            ToolTip="定义一个倍率，程序用它乘以超期时间长度可计算出须停借的时间长度&#x0a;形态为一个小数，如 &#x0a;1.0"
+            CaretBrush="Red" Height="Auto" HorizontalAlignment="Stretch" 
+            VerticalAlignment="Stretch" Width="Auto" Background="#FF838383" Foreground="White" Padding="4" BorderThickness="0" FontWeight="Bold" Text="{Binding StopRatio,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Grid.Row="3" Grid.Column="1" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" Margin="4,2,8,2" />
+        <Label Content="工作日历名" 
+               Height="Auto" 
+               HorizontalAlignment="Stretch"
+               Name="label4" VerticalAlignment="Stretch" HorizontalContentAlignment="Right" Grid.Row="4" VerticalContentAlignment="Center" Margin="4,0,0,0" />
+        <ComboBox 
+            Name="comboBox_calendar" 
+            ToolTip="指定适用于某类读者的图书馆工作日历名，程序用它来推算实际还书日期"
+            VerticalAlignment="Stretch" Width="Auto" IsEditable="True" Text="{Binding CalendarName,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+            Height="Auto" HorizontalAlignment="Stretch" ItemsSource="{Binding CalendarList}" DropDownOpened="comboBox_calendar_DropDownOpened" Grid.Row="4" Grid.Column="1" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" Margin="4,2,8,2" Padding="4" />
+    </Grid>
+</UserControl>

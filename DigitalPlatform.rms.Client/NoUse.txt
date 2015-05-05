@@ -1,0 +1,432 @@
+		// 废弃
+		// 获得配置文件
+		// return:
+		//		-1	出错。具体出错原因在this.ErrorCode中。this.ErrorInfo中有出错信息。
+		//		0	成功
+		public long GetResOld(string strPath,
+			WaitHandle eventClose,
+			out string strResult,
+			out byte[] baTimeStamp)
+		{
+
+			REDOGETRES:
+
+			strResult = "";
+			baTimeStamp = null;
+
+			this.strOutParam = "";
+			this.eventFinish.Reset();
+			this.ErrorCode = ChannelErrorCode.None;
+			this.ErrorInfo = "";
+
+			this.strInParam = strPath;
+
+			Thread thread =	new Thread(new ThreadStart(this.GetCfgFileThreadMain));
+			thread.Start();
+
+
+			WaitHandle[] events = null;
+			
+			if (eventClose == null) 
+			{
+				events = new WaitHandle[1];
+				events[0] = this.eventFinish;
+			}
+			else 
+			{
+				events = new WaitHandle[2];
+				events[0] = this.eventFinish;
+				events[1] = eventClose;
+			}
+			int index = 1;
+			while(true) 
+			{
+				Application.DoEvents();
+				index = WaitHandle.WaitAny(events, 100, false);
+				if (index == WaitHandle.WaitTimeout) 
+					continue;
+				break;
+			}
+
+			if (index == 1) 
+			{
+				this.ErrorCode = ChannelErrorCode.RequestCanceledByEventClose;
+				return -1;
+			}
+			if (index == 0)
+			{
+				if (this.ErrorCode == ChannelErrorCode.NotLogin) 
+				{
+					string strError;
+					// return:
+					//		-1	error
+					//		0	login failed
+					//		1	login succeed
+					int nRet = this.UiLogin(strPath,
+						true,
+						out strError);
+					if (nRet == -1 || nRet == 0) 
+					{
+						this.ErrorInfo = strError;
+						return -1;
+					}
+
+					goto REDOGETRES;
+				}
+
+				if (this.ErrorCode != ChannelErrorCode.None)
+					return -1;
+			}
+
+			strResult = this.strOutParam;
+			baTimeStamp = ByteArray.Add(baTimeStamp, this.baOutParam);
+
+			this.strOutParam = "";
+			return 0;
+		}
+
+		// 废弃
+		void GetCfgFileThreadMain()
+		{
+			int nStart = 0;
+			int nLength = -1;
+			byte [] baContent = null;
+			byte [] baTotal = null;
+
+			string id = "";
+			byte [] timestamp = null;
+
+			for(;;) 
+			{
+				Result result = null;
+				
+				try 
+				{
+					string strMetadata;
+					string strStyle = "content,data";
+					string strOutputResPath;
+					result = this.ws.GetRes(strInParam,
+						nStart,
+						nLength,
+						strStyle,
+						out baContent,
+						out strMetadata,
+						out id,
+						out strOutputResPath,
+						out timestamp);
+				}
+				catch (WebException ex) 
+				{
+					if (ex.Status == WebExceptionStatus.Timeout) 
+					{
+						this.ErrorCode = ChannelErrorCode.RequestTimeOut;
+						this.ErrorInfo = "请求超时(当前超时设置为" + Convert.ToString(this.Timeout) + ")";
+						goto FINISH;
+					}
+					if (ex.Status == WebExceptionStatus.RequestCanceled) 
+					{
+						this.ErrorCode = ChannelErrorCode.RequestCanceled;
+						this.ErrorInfo = "用户中断";
+						goto FINISH;
+					}
+
+					this.ErrorCode = ChannelErrorCode.RequestError;	// 一般错误
+					this.ErrorInfo = ex.Message;
+					goto FINISH;
+				}
+
+				catch (Exception ex) 
+				{
+					this.ErrorCode = ChannelErrorCode.RequestError;	// 一般错误
+					this.ErrorInfo = ex.Message;
+					goto FINISH;
+				}
+
+				if (result.Value == -1)
+				{
+					if (result.ErrorCode == ErrorCodeValue.NotLogin)
+						this.ErrorCode = ChannelErrorCode.NotLogin;
+					else
+						this.ErrorCode = ChannelErrorCode.RequestError;	// 一般错误
+					this.ErrorInfo = result.ErrorString;
+					goto FINISH;
+				}
+
+				baTotal = ByteArray.Add(baTotal, baContent);
+
+				nStart += baContent.Length;
+				if (nStart >= result.Value)
+					break;	// 结束
+
+			}
+
+			// 转换成字符串
+			this.strOutParam = StringUtil.ByteArrayToString(baTotal,
+				Encoding.UTF8);	// 将来做自动识别编码方式
+			this.baOutParam = timestamp;
+
+			FINISH:
+
+				this.eventFinish.Set();
+		}
+		
+		
+		
+		~~~~~~~~~~~~~~~~
+			//定义一个DoStopDelegate()
+	public delegate void DoStopDelegate();
+
+	//在子窗口中定义
+	public class Stop
+	{
+		DoStopDelegate m_doStopDelegate = null;
+
+		bool bStop = true;
+		StopManager m_manager = null;
+
+		//把StopManager指向传过来，才能改变父窗口的状态
+		public Stop(StopManager manager)
+		{
+			m_manager = manager;
+		}
+
+		//准备做事情,被循环调，时面了调了Stopmanager的Enable()函数，修改父窗口的状态
+		public void RegisterBegin(DoStopDelegate doStopDelegate)
+		{
+			m_doStopDelegate = doStopDelegate;
+			bStop = false;
+			if (m_manager != null)
+				m_manager.Enable (this,true);  //
+		}
+		//事情做完了，被循环调，里面调了StopManager的Enable()函数，修改按钮状态
+		public void RegisterEnd()
+		{
+			bStop = true;
+			if (m_manager != null)
+				m_manager.Enable (this,false);
+		}
+
+		//查看是否结束,被StopManager调
+		public bool isStop()
+		{
+			return bStop;
+		}
+		//停止,被StopManager调
+		public void DoStop()
+		{
+			if (m_doStopDelegate != null)
+			{
+				m_doStopDelegate();
+			}
+			bStop = true;
+		}
+	}
+
+
+	//在父窗口中定义,初始化按钮
+	public class StopManager
+	{
+		Stop activeStop = null;
+		ToolBarButton m_button = null;
+
+		//初始化一个按钮,在父窗口load时调
+		public void Initial(ToolBarButton button)
+		{
+			m_button = button;
+		}
+
+		//根据当前活动窗口的执行状态，设置按钮的状态,被改变当前子窗口调
+		public void Active(Stop stop)
+		{
+			activeStop = stop;
+			if (activeStop != null)
+			{
+				if (activeStop.isStop() == true)
+					m_button.Enabled = false;
+				else
+					m_button.Enabled = true;
+			}
+		}
+		
+		//做停止，被单击停止按钮调
+		public void DoStop()
+		{
+			if (activeStop != null)
+			{
+				activeStop.DoStop ();
+			}
+		}
+
+		//设状态,供Stop调
+		public void Enable(Stop stop,bool bEnable)
+		{
+			if (activeStop != stop)
+				return;
+			m_button.Enabled = bEnable;
+		}
+
+	}
+
+
+
+~~~~~~~~~~~~~~~~~~~~
+// ?
+		// 在listview加一行,如果此行已存在，则修改其内容
+		public void NewLine(DigitalPlatform.Xml.ElementItem fileitem,
+			bool bIsNewFile)
+		{
+			string strID = fileitem.GetAttrValue("id");
+
+			if (strID == null || strID == "")
+			{
+				Debug.Assert(bIsNewFile == true, "必须是客户端文件才能无id属性");
+			}
+
+			string strState;
+			if (bIsNewFile == false)
+				strState = this.ServerFileState;
+			else
+				strState = this.NewFileState;
+
+			m_bChanged = true;
+
+			// 维护id表
+			if (m_tableFileId.Contains((object)strID) == false)
+				m_tableFileId.Add(strID, (object)true);
+
+			// 把状态字符串正规化
+			/*
+			string strState = fileitem.GetAttrValue("__state");
+			bool bIsNewFile = this.IsNewFileState(strState);
+			if (bIsNewFile == false)
+				strState = this.ServerFileState;
+			else
+				strState = this.NewFileState;
+			*/
+
+
+			ListViewItem item = SearchLine(strID);
+			if (item == null)
+			{
+				item = new ListViewItem(strID, 0);
+				this.Items.Add(item);
+
+				item.SubItems.Add("");
+				item.SubItems.Add("");
+				item.SubItems.Add("");
+				item.SubItems.Add("");
+				item.SubItems.Add("");
+
+			}
+
+
+				/*
+				item.SubItems.Add(strState);   // 状态
+
+				item.SubItems.Add(fileitem.GetAttrValue("__localpath"));// local path
+				item.SubItems.Add(fileitem.GetAttrValue("__size"));    // 尺寸
+				item.SubItems.Add(fileitem.GetAttrValue("__mime"));// mime
+				*/
+				ListViewUtil.ChangeItemText(item,
+					COLUMN_STATE,
+					strState);
+
+			if (bIsNewFile == true) 
+			{
+				ListViewUtil.ChangeItemText(item,
+					COLUMN_MIME,
+					fileitem.GetAttrValue("__mime"));
+				ListViewUtil.ChangeItemText(item,
+					COLUMN_LOCALPATH,
+					fileitem.GetAttrValue("__localpath"));
+				ListViewUtil.ChangeItemText(item,
+					COLUMN_SIZE,
+					fileitem.GetAttrValue("__size"));
+			}
+			else 
+			{
+				// 如果没有挂回调函数
+				if (this.procDownloadOneMetaData == null) 
+				{
+					ListViewUtil.ChangeItemText(item,
+						COLUMN_MIME,
+						"?mime");
+					ListViewUtil.ChangeItemText(item,
+						COLUMN_LOCALPATH,
+						"?localpath");
+					ListViewUtil.ChangeItemText(item,
+						COLUMN_SIZE,
+						"?size");
+					ListViewUtil.ChangeItemText(item,
+						COLUMN_TIMESTAMP,
+						"?timestamp");
+				}
+				else 
+				{
+					string strMetaData = "";
+					string strError = "";
+					byte [] timestamp = null;
+					int nRet = this.procDownloadOneMetaData(
+						strID, 
+						out strMetaData,
+						out timestamp,
+						out strError);
+					if (nRet == -1) 
+					{
+						ListViewUtil.ChangeItemText(item,
+							COLUMN_LOCALPATH,
+							strError);
+						return;
+					}
+
+					if (strMetaData == "")
+					{
+						return;
+					}
+
+					// 取metadata
+					Hashtable values = ParseMedaDataXml(strMetaData,
+						out strError);
+
+					if (values == null)
+					{
+						ListViewUtil.ChangeItemText(item,
+							COLUMN_LOCALPATH,
+							strError);
+						return;
+					}
+
+					string strTimeStamp = ByteArray.GetHexTimeStampString(timestamp);
+
+					ListViewUtil.ChangeItemText(item,
+						COLUMN_MIME,
+						(string)values["mimetype"]);
+					ListViewUtil.ChangeItemText(item,
+						COLUMN_LOCALPATH,
+						(string)values["localpath"]);
+					ListViewUtil.ChangeItemText(item,
+						COLUMN_SIZE,
+						(string)values["size"]);
+					ListViewUtil.ChangeItemText(item,
+						COLUMN_TIMESTAMP,
+						(string)strTimeStamp);
+
+
+				}
+			}
+
+		}
+		
+		
+		~~~~~~~~~~~
+		
+		
+					// 把状态字符串正规化
+			/*
+			string strState = fileitem.GetAttrValue("__state");
+			bool bIsNewFile = this.IsNewFileState(strState);
+			if (bIsNewFile == false)
+				strState = this.ServerFileState;
+			else
+				strState = this.NewFileState;
+			*/

@@ -1,0 +1,2250 @@
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+using System.Xml;
+using System.IO;
+using System.Collections;
+using System.Threading;
+using System.Diagnostics;
+
+using System.Reflection;
+using Microsoft.CSharp;
+// using Microsoft.VisualBasic;
+using System.CodeDom;
+using System.CodeDom.Compiler;
+
+using DigitalPlatform;	// Stop类
+using DigitalPlatform.Xml;
+using DigitalPlatform.IO;
+using DigitalPlatform.Text;
+using DigitalPlatform.Script;
+using DigitalPlatform.Interfaces;
+using System.Web;
+
+namespace DigitalPlatform.LibraryServer
+{
+    /// <summary>
+    /// 本部分是和C#脚本相关的代码
+    /// </summary>
+    public partial class LibraryApplication
+    {
+        public Assembly m_assemblyLibraryHost = null;
+        public string m_strAssemblyLibraryHostError = "";
+
+        public List<MessageInterface> m_externalMessageInterfaces = null;
+
+        // 初始化扩展的消息接口
+        /*
+	<externalMessageInterface>
+ 		<interface type="sms" assemblyName="chchdxmessageinterface"/>
+	</externalMessageInterface>
+         */
+        // parameters:
+        // return:
+        //      -1  出错
+        //      0   当前没有配置任何扩展消息接口
+        //      1   成功初始化
+        public int InitialExternalMessageInterfaces(out string strError)
+        {
+            strError = "";
+
+            this.m_externalMessageInterfaces = null;
+
+            XmlNode root = this.LibraryCfgDom.DocumentElement.SelectSingleNode(
+    "externalMessageInterface");
+            if (root == null)
+            {
+                strError = "在library.xml中没有找到<externalMessageInterface>元素";
+                return 0;
+            }
+
+            this.m_externalMessageInterfaces = new List<MessageInterface>();
+
+            XmlNodeList nodes = root.SelectNodes("interface");
+            foreach (XmlNode node in nodes)
+            {
+                string strType = DomUtil.GetAttr(node, "type");
+                if (String.IsNullOrEmpty(strType) == true)
+                {
+                    strError = "<interface>元素未配置type属性值";
+                    return -1;
+                } 
+                
+                string strAssemblyName = DomUtil.GetAttr(node, "assemblyName");
+                if (String.IsNullOrEmpty(strAssemblyName) == true)
+                {
+                    strError = "<interface>元素未配置assemblyName属性值";
+                    return -1;
+                }
+
+                MessageInterface message_interface = new MessageInterface();
+                message_interface.Type = strType;
+                message_interface.Assembly = Assembly.Load(strAssemblyName);
+                if (message_interface.Assembly == null)
+                {
+                    strError = "名字为 '" + strAssemblyName + "' 的Assembly加载失败...";
+                    return -1;
+                }
+
+                Type hostEntryClassType = ScriptManager.GetDerivedClassType(
+        message_interface.Assembly,
+        "DigitalPlatform.Interfaces.ExternalMessageHost");
+                if (hostEntryClassType == null)
+                {
+                    strError = "名字为 '" + strAssemblyName + "' 的Assembly中未找到 DigitalPlatform.Interfaces.ExternalMessageHost类的派生类，初始化扩展消息接口失败...";
+                    return -1;
+                }
+
+                message_interface.HostObj = (ExternalMessageHost)hostEntryClassType.InvokeMember(null,
+        BindingFlags.DeclaredOnly |
+        BindingFlags.Public | BindingFlags.NonPublic |
+        BindingFlags.Instance | BindingFlags.CreateInstance, null, null,
+        null);
+                if (message_interface.HostObj == null)
+                {
+                    strError = "创建 type 为 '"+strType+"' 的 DigitalPlatform.Interfaces.ExternalMessageHost 类的派生类的对象（构造函数）失败，初始化扩展消息接口失败...";
+                    return -1;
+                }
+
+                message_interface.HostObj.App = this;
+
+                this.m_externalMessageInterfaces.Add(message_interface);
+            }
+
+            return 1;
+        }
+
+        public MessageInterface GetMessageInterface(string strType)
+        {
+            // 2012/3/29
+            if (this.m_externalMessageInterfaces == null)
+                return null;
+
+            foreach (MessageInterface message_interface in this.m_externalMessageInterfaces)
+            {
+                if (message_interface.Type == strType)
+                    return message_interface;
+            }
+
+            return null;
+        }
+
+        // 初始化Assembly对象
+        // return:
+        //		-1	出错
+        //		0	成功
+        public int InitialLibraryHostAssembly(out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            this.m_strAssemblyLibraryHostError = "";
+            this.m_assemblyLibraryHost = null;
+
+            if (this.LibraryCfgDom == null)
+            {
+                this.m_assemblyLibraryHost = null;
+                strError = "LibraryCfgDom为空";
+                return -1;
+            }
+
+            // 找到<script>节点
+            // 必须在根下
+            XmlNode nodeScript = this.LibraryCfgDom.DocumentElement.SelectSingleNode("script");
+
+            // <script>节点不存在
+            if (nodeScript == null)
+            {
+                this.m_assemblyLibraryHost = null;
+                return 0;
+            }
+
+            // <script>节点下级无CDATA节点
+            if (nodeScript.ChildNodes.Count == 0)
+            {
+                this.m_assemblyLibraryHost = null;
+                return 0;
+            }
+
+            XmlNode firstNode = nodeScript.ChildNodes[0];
+
+
+            //第一个儿子节点不是CDATA或者Text节点时
+            if (firstNode.NodeType != XmlNodeType.CDATA
+                && firstNode.NodeType != XmlNodeType.Text)
+            {
+                this.m_assemblyLibraryHost = null;
+                return 0;
+            }
+
+            //~~~~~~~~~~~~~~~~~~
+            // 创建Assembly对象
+            string[] saRef = null;
+            nRet = GetRefs(nodeScript,
+                 out saRef,
+                 out strError);
+            if (nRet == -1)
+                return -1;
+
+            string[] saAddRef = { this.BinDir + "\\" + "digitalplatform.LibraryServer.dll" };
+
+            string[] saTemp = new string[saRef.Length + saAddRef.Length];
+            Array.Copy(saRef, 0, saTemp, 0, saRef.Length);
+            Array.Copy(saAddRef, 0, saTemp, saRef.Length, saAddRef.Length);
+            saRef = saTemp;
+
+            RemoveRefsProjectDirMacro(ref saRef,
+                this.BinDir);
+
+            string strCode = firstNode.Value;
+
+            if (strCode != "")
+            {
+                Assembly assembly = null;
+                string strWarning = "";
+                nRet = CreateAssembly(strCode,
+                    saRef,
+                    out assembly,
+                    out strError,
+                    out strWarning);
+                if (nRet == -1)
+                {
+                    strError = "library.xml中<script>元素内C#脚本编译时出错: \r\n" + strError;
+                    this.m_strAssemblyLibraryHostError = strError;
+                    return -1;
+                }
+
+                this.m_assemblyLibraryHost = assembly;
+            }
+
+
+            return 0;
+        }
+
+        // 从node节点得到refs字符串数组
+        // return:
+        //      -1  出错
+        //      0   成功
+        public static int GetRefs(XmlNode node,
+            out string[] saRef,
+            out string strError)
+        {
+            saRef = null;
+            strError = "";
+
+            // 所有ref节点
+            XmlNodeList nodes = node.SelectNodes("//ref");
+            saRef = new string[nodes.Count];
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                saRef[i] = DomUtil.GetNodeText(nodes[i]);
+            }
+            return 0;
+        }
+
+        // 去除路径中的宏%bindir%
+        static void RemoveRefsProjectDirMacro(ref string[] refs,
+            string strBinDir)
+        {
+            Hashtable macroTable = new Hashtable();
+
+            macroTable.Add("%bindir%", strBinDir);
+
+            for (int i = 0; i < refs.Length; i++)
+            {
+                string strNew = PathUtil.UnMacroPath(macroTable,
+                refs[i],
+                false); // 不要抛出异常，因为可能还有%bindir%宏现在还无法替换
+                refs[i] = strNew;
+            }
+
+        }
+
+        // 创建Assembly
+        // parameters:
+        //		strCode:		脚本代码
+        //		refs:			连接的外部assembly
+        //		strLibPaths:	类库路径, 可以为""或者null,则此参数无效
+        //		strOutputFile:	输出文件名, 可以为""或者null,则此参数无效
+        //		strErrorInfo:	出错信息
+        //		strWarningInfo:	警告信息
+        // result:
+        //		-1  出错
+        //		0   成功
+        public static int CreateAssembly(string strCode,
+            string[] refs,
+            out Assembly assembly,
+            out string strError,
+            out string strWarning)
+        {
+            strError = "";
+            strWarning = "";
+            assembly = null;
+
+            // CompilerParameters对象
+            CompilerParameters compilerParams = new CompilerParameters();
+
+            compilerParams.GenerateInMemory = true;
+            compilerParams.IncludeDebugInformation = false;
+
+            compilerParams.TreatWarningsAsErrors = false;
+            compilerParams.WarningLevel = 4;
+
+            compilerParams.ReferencedAssemblies.AddRange(refs);
+
+
+            //CSharpCodeProvider provider = null;
+            CodeDomProvider codeDomProvider = new CSharpCodeProvider();
+
+            // ICodeCompiler compiler = null; // 2006/10/26 changed
+            CompilerResults results = null;
+            try
+            {
+                //provider = new CSharpCodeProvider();
+                // compiler = codeDomProvider.CreateCompiler(); // 2006/10/26 changed
+
+                results = codeDomProvider.CompileAssemblyFromSource(
+                    compilerParams,
+                    strCode);
+            }
+            catch (Exception ex)
+            {
+                strError = "CreateAssemblyFile() 出错 " + ex.Message;
+                return -1;
+            }
+
+            //return 0;  //测
+
+            int nErrorCount = 0;
+            if (results.Errors.Count != 0)
+            {
+                string strErrorString = "";
+                nErrorCount = getErrorInfo(results.Errors,
+                    out strErrorString);
+
+                strError = "信息条数:" + Convert.ToString(results.Errors.Count) + "\r\n";
+                strError += strErrorString;
+
+                if (nErrorCount == 0 && results.Errors.Count != 0)
+                {
+                    strWarning = strError;
+                    strError = "";
+                }
+            }
+            if (nErrorCount != 0)
+                return -1;
+
+
+            assembly = results.CompiledAssembly;// compilerParams.OutputAssembly;
+
+            return 0;
+        }
+
+        // 构造出错信息字符串
+        // parameter:
+        //		errors:    CompilerResults对象
+        //		strResult: out参数，返回构造的出错字符串
+        // result:
+        //		错误信息的条数
+        public static int getErrorInfo(CompilerErrorCollection errors,
+            out string strResult)
+        {
+            strResult = "";
+            int nCount = 0;
+            if (errors == null)
+            {
+                strResult = "error参数为null";
+                return 0;
+            }
+            foreach (CompilerError oneError in errors)
+            {
+                strResult += "(" + Convert.ToString(oneError.Line) + "," + Convert.ToString(oneError.Column) + ") ";
+                strResult += (oneError.IsWarning) ? "warning " : "error ";
+                strResult += oneError.ErrorNumber;
+                strResult += " : " + oneError.ErrorText + "\r\n";
+
+                if (oneError.IsWarning == false)
+                    nCount++;
+            }
+            return nCount;
+        }
+
+
+        // 执行脚本函数VerifyBarcode
+        // parameters:
+        //      host    如果为空，则函数内部会 new 一个此类型的对象；如果不为空，则直接使用
+        //      strLibraryCodeList  当前操作者管辖的馆代码列表 2014/9/27
+        // return:
+        //      -2  not found script
+        //      -1  出错
+        //      0   成功
+        public int DoVerifyBarcodeScriptFunction(
+            LibraryHost host,
+            string strLibraryCodeList,
+            string strBarcode,
+            out int nResultValue,
+            out string strError)
+        {
+            strError = "";
+            nResultValue = -1;
+
+            if (this.m_strAssemblyLibraryHostError != "")
+            {
+                strError = this.m_strAssemblyLibraryHostError;
+                return -1;
+            }
+
+            if (this.m_assemblyLibraryHost == null)
+            {
+                strError = "未定义<script>脚本代码，无法校验条码号。";
+                return -2;
+            }
+
+            Type hostEntryClassType = ScriptManager.GetDerivedClassType(
+                this.m_assemblyLibraryHost,
+                "DigitalPlatform.LibraryServer.LibraryHost");
+            if (hostEntryClassType == null)
+            {
+                strError = "<script>脚本中未找到DigitalPlatform.LibraryServer.LibraryHost类的派生类，无法校验条码号。";
+                return -2;
+            }
+
+            // 迟绑定技术。从assembly中实时寻找特定名字的函数
+            MethodInfo mi = hostEntryClassType.GetMethod("VerifyBarcode");
+            if (mi == null)
+            {
+                strError = "<script>脚本中DigitalPlatform.LibraryServer.LibraryHost类的派生类中，没有提供int VerifyBarcode(string strBarcode, out string strError)函数，因此无法校验条码号。";
+                return -2;
+            }
+
+            if (host == null)
+            {
+                host = (LibraryHost)hostEntryClassType.InvokeMember(null,
+                    BindingFlags.DeclaredOnly |
+                    BindingFlags.Public | BindingFlags.NonPublic |
+                    BindingFlags.Instance | BindingFlags.CreateInstance, null, null,
+                    null);
+                if (host == null)
+                {
+                    strError = "创建DigitalPlatform.LibraryServer.LibraryHost类的派生类的对象（构造函数）失败。";
+                    return -1;
+                }
+
+                host.App = this;
+            }
+
+            ParameterInfo[] parameters = mi.GetParameters();
+
+            // 执行函数
+            try
+            {
+                if (parameters.Length == 2)
+                {
+                    object[] args = new object[2];
+                    args[0] = strBarcode;
+                    args[1] = strError;
+                    nResultValue = (int)mi.Invoke(host,
+                         BindingFlags.DeclaredOnly |
+                         BindingFlags.Public | BindingFlags.NonPublic |
+                         BindingFlags.Instance | BindingFlags.InvokeMethod,
+                         null,
+                         args,
+                         null);
+
+                    // 取出out参数值
+                    strError = (string)args[1];
+                }
+                else if (parameters.Length == 3)
+                {
+                    object[] args = new object[3];
+                    args[0] = strLibraryCodeList;
+                    args[1] = strBarcode;
+                    args[2] = strError;
+                    nResultValue = (int)mi.Invoke(host,
+                         BindingFlags.DeclaredOnly |
+                         BindingFlags.Public | BindingFlags.NonPublic |
+                         BindingFlags.Instance | BindingFlags.InvokeMethod,
+                         null,
+                         args,
+                         null);
+
+                    // 取出out参数值
+                    strError = (string)args[2];
+                }
+                else
+                {
+                    strError = "脚本函数 VerifyBarcode() 的参数个数不正确，应该为 2 或者 3 个";
+                    return -1;
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = "执行脚本函数'" + "VerifyBarcode" + "'出错：" + ex.Message;
+                return -1;
+            }
+
+            return 0;
+        }
+
+        // 执行脚本函数ItemCanBorrow
+        // parameters:
+        // return:
+        //      -2  not found script
+        //      -1  出错
+        //      0   成功
+        public int DoItemCanBorrowScriptFunction(
+            bool bRenew,
+            Account account,
+            XmlDocument itemdom,
+            out bool bResultValue,
+            out string strMessage,
+            out string strError)
+        {
+            strError = "";
+            strMessage = "";
+            bResultValue = false;
+
+            if (this.m_strAssemblyLibraryHostError != "")
+            {
+                strError = this.m_strAssemblyLibraryHostError;
+                return -1;
+            }
+
+            if (this.m_assemblyLibraryHost == null)
+            {
+                strError = "未定义<script>脚本代码，无法执行脚本函数ItemCanBorrow()。";
+                return -2;
+            }
+
+            Type hostEntryClassType = ScriptManager.GetDerivedClassType(
+                this.m_assemblyLibraryHost,
+                "DigitalPlatform.LibraryServer.LibraryHost");
+            if (hostEntryClassType == null)
+            {
+                strError = "<script>脚本中未找到DigitalPlatform.LibraryServer.LibraryHost类的派生类，无法执行脚本函数ItemCanBorrow()。";
+                return -2;
+            }
+
+            // 迟绑定技术。从assembly中实时寻找特定名字的函数
+            MethodInfo mi = hostEntryClassType.GetMethod("ItemCanBorrow");
+            if (mi == null)
+            {
+                strError = "<script>脚本中DigitalPlatform.LibraryServer.LibraryHost类的派生类中，没有提供public bool ItemCanBorrow(bool bRenew, Account account, XmlDocument itemdom, out string strMessageText)函数，因此无法获得可借状态。";
+                return -2;
+            }
+
+            LibraryHost host = (LibraryHost)hostEntryClassType.InvokeMember(null,
+                BindingFlags.DeclaredOnly |
+                BindingFlags.Public | BindingFlags.NonPublic |
+                BindingFlags.Instance | BindingFlags.CreateInstance, null, null,
+                null);
+            if (host == null)
+            {
+                strError = "创建DigitalPlatform.LibraryServer.LibraryHost类的派生类的对象（构造函数）失败。";
+                return -1;
+            }
+
+            host.App = this;
+
+            // 执行函数
+            try
+            {
+                object[] args = new object[4];
+                args[0] = bRenew;
+                args[1] = account;
+                args[2] = itemdom;
+                args[3] = strMessage;
+                bResultValue = (bool)mi.Invoke(host,
+                     BindingFlags.DeclaredOnly |
+                     BindingFlags.Public | BindingFlags.NonPublic |
+                     BindingFlags.Instance | BindingFlags.InvokeMethod,
+                     null,
+                     args,
+                     null);
+
+                // 取出out参数值
+                strMessage = (string)args[3];
+            }
+            catch (Exception ex)
+            {
+                strError = "执行脚本函数'" + "ItemCanBorrow" + "'出错：" + ex.Message;
+                return -1;
+            }
+
+            return 0;
+        }
+
+        // 执行脚本函数ItemCanReturn
+        // parameters:
+        // return:
+        //      -2  not found script
+        //      -1  出错
+        //      0   成功
+        public int DoItemCanReturnScriptFunction(
+            Account account,
+            XmlDocument itemdom,
+            out bool bResultValue,
+            out string strMessage,
+            out string strError)
+        {
+            strError = "";
+            strMessage = "";
+            bResultValue = false;
+
+            if (this.m_strAssemblyLibraryHostError != "")
+            {
+                strError = this.m_strAssemblyLibraryHostError;
+                return -1;
+            }
+
+            if (this.m_assemblyLibraryHost == null)
+            {
+                strError = "未定义<script>脚本代码，无法执行脚本函数ItemCanReturn()。";
+                return -2;
+            }
+
+            Type hostEntryClassType = ScriptManager.GetDerivedClassType(
+                this.m_assemblyLibraryHost,
+                "DigitalPlatform.LibraryServer.LibraryHost");
+            if (hostEntryClassType == null)
+            {
+                strError = "<script>脚本中未找到DigitalPlatform.LibraryServer.LibraryHost类的派生类，无法执行脚本函数ItemCanReturn()。";
+                return -2;
+            }
+
+            // 迟绑定技术。从assembly中实时寻找特定名字的函数
+            MethodInfo mi = hostEntryClassType.GetMethod("ItemCanReturn");
+            if (mi == null)
+            {
+                strError = "<script>脚本中DigitalPlatform.LibraryServer.LibraryHost类的派生类中，没有提供public bool ItemCanReturn(Account account, XmlDocument itemdom, out string strMessageText)函数，因此无法获得可借状态。";
+                return -2;
+            }
+
+            LibraryHost host = (LibraryHost)hostEntryClassType.InvokeMember(null,
+                BindingFlags.DeclaredOnly |
+                BindingFlags.Public | BindingFlags.NonPublic |
+                BindingFlags.Instance | BindingFlags.CreateInstance, null, null,
+                null);
+            if (host == null)
+            {
+                strError = "创建DigitalPlatform.LibraryServer.LibraryHost类的派生类的对象（构造函数）失败。";
+                return -1;
+            }
+
+            host.App = this;
+
+            // 执行函数
+            try
+            {
+                object[] args = new object[3];
+                args[0] = account;
+                args[1] = itemdom;
+                args[2] = strMessage;
+                bResultValue = (bool)mi.Invoke(host,
+                     BindingFlags.DeclaredOnly |
+                     BindingFlags.Public | BindingFlags.NonPublic |
+                     BindingFlags.Instance | BindingFlags.InvokeMethod,
+                     null,
+                     args,
+                     null);
+
+                // 取出out参数值
+                strMessage = (string)args[2];
+            }
+            catch (Exception ex)
+            {
+                strError = "执行脚本函数'" + "ItemCanReturn" + "'出错：" + ex.Message;
+                return -1;
+            }
+
+            return 0;
+        }
+
+        // 执行脚本函数 NotifyReader
+        // parameters:
+        // return:
+        //      -2  not found script
+        //      -1  出错
+        //      0   成功(这只是表示脚本函数正常执行，而不是表明脚本函数没有返回0以外的值)
+        // nResultValue
+        //      -1  出错
+        //      0   没有必要发送
+        //      1   需要发送
+        public int DoNotifyReaderScriptFunction(
+            XmlDocument readerdom,
+            Calendar calendar,
+            // List<string> notifiedBarcodes,
+            string strBodyType,
+            out int nResultValue,
+            out string strBody,
+            out string strMime,
+            // out List<string> wantNotifyBarcodes,
+            out string strError)
+        {
+            strError = "";
+            strBody = "";
+            nResultValue = -1;
+            // wantNotifyBarcodes = null;
+            strMime = "";
+
+            if (this.m_strAssemblyLibraryHostError != "")
+            {
+                strError = this.m_strAssemblyLibraryHostError;
+                return -1;
+            }
+
+            if (this.m_assemblyLibraryHost == null)
+            {
+                strError = "未定义<script>脚本代码，无法执行脚本函数NotifyReader()。";
+                return -2;
+            }
+
+            Type hostEntryClassType = ScriptManager.GetDerivedClassType(
+                this.m_assemblyLibraryHost,
+                "DigitalPlatform.LibraryServer.LibraryHost");
+            if (hostEntryClassType == null)
+            {
+                strError = "<script>脚本中未找到DigitalPlatform.LibraryServer.LibraryHost类的派生类，无法执行脚本函数NotifyReader()。";
+                return -2;
+            }
+
+            LibraryHost host = (LibraryHost)hostEntryClassType.InvokeMember(null,
+                BindingFlags.DeclaredOnly |
+                BindingFlags.Public | BindingFlags.NonPublic |
+                BindingFlags.Instance | BindingFlags.CreateInstance, null, null,
+                null);
+            if (host == null)
+            {
+                strError = "创建DigitalPlatform.LibraryServer.LibraryHost类的派生类的对象（构造函数）失败。";
+                return -1;
+            }
+
+            host.App = this;
+
+            try
+            {
+                // 早绑定
+                nResultValue = host.NotifyReader(
+                    readerdom,
+                    calendar,
+                    // notifiedBarcodes,
+                    strBodyType,
+                    out strBody,
+                    out strMime,
+                    // out wantNotifyBarcodes,
+                    out strError);
+                // 只要脚本函数被正常执行，nRet就是返回0
+                // nResultValue的值是脚本函数的返回值
+            }
+            catch (Exception ex)
+            {
+                strError = "执行脚本函数 NotifyReader() 时抛出异常：" + ex.Message;
+                return -1;
+            }
+
+            /*
+            // 迟绑定技术。从assembly中实时寻找特定名字的函数
+            MethodInfo mi = hostEntryClassType.GetMethod("NotifyReader");
+            if (mi == null)
+            {
+                strError = "<script>脚本中DigitalPlatform.LibraryServer.LibraryHost类的派生类中，没有提供int NotifyReader()函数，因此进行读者通知。";
+                return -2;
+            }
+
+            // 执行函数
+            try
+            {
+                object[] args = new object[2];
+                args[0] = strBarcode;
+                args[1] = strError;
+                nResultValue = (int)mi.Invoke(host,
+                     BindingFlags.DeclaredOnly |
+                     BindingFlags.Public | BindingFlags.NonPublic |
+                     BindingFlags.Instance | BindingFlags.InvokeMethod,
+                     null,
+                     args,
+                     null);
+
+                // 取出out参数值
+                strError = (string)args[1];
+            }
+            catch (Exception ex)
+            {
+                strError = "执行脚本函数'" + "NotifyReader" + "'出错：" + ex.Message;
+                return -1;
+            }
+             * */
+
+            return 0;
+        }
+
+        // 执行脚本函数GetForegift
+        // 根据已有价格，计算出需要新交的价格
+        // parameters:
+        //  	strAction	为foregift和return之一
+        //      strExistPrice   当前剩余的金额
+        // return:
+        //      -2  not found script
+        //      -1  出错
+        //      0   成功
+        public int DoGetForegiftScriptFunction(
+            string strAction,
+            XmlDocument readerdom,
+            string strExistPrice,
+            out int nResultValue,
+            out string strPrice,
+            out string strError)
+        {
+            strError = "";
+            strPrice = "";
+            nResultValue = 0;
+
+            string strFuncName = "GetForegift";
+
+            if (this.m_strAssemblyLibraryHostError != "")
+            {
+                strError = this.m_strAssemblyLibraryHostError;
+                return -1;
+            }
+
+            if (this.m_assemblyLibraryHost == null)
+            {
+                strError = "未定义<script>脚本代码，无法执行脚本函数" + strFuncName + "()。";
+                return -2;
+            }
+
+            Type hostEntryClassType = ScriptManager.GetDerivedClassType(
+                this.m_assemblyLibraryHost,
+                "DigitalPlatform.LibraryServer.LibraryHost");
+            if (hostEntryClassType == null)
+            {
+                strError = "<script>脚本中未找到DigitalPlatform.LibraryServer.LibraryHost类的派生类，无法执行脚本函数" + strFuncName + "()。";
+                return -2;
+            }
+
+            // 迟绑定技术。从assembly中实时寻找特定名字的函数
+            MethodInfo mi = hostEntryClassType.GetMethod(strFuncName);
+            if (mi == null)
+            {
+                strError = "<script>脚本中DigitalPlatform.LibraryServer.LibraryHost类的派生类中，没有提供public int GetForegift(string strAction, XmlDocument readerdom, string strExistPrice, out string strPrice, out string strError)函数，因此无法获得结果。";
+                return -2;
+            }
+
+            LibraryHost host = (LibraryHost)hostEntryClassType.InvokeMember(null,
+                BindingFlags.DeclaredOnly |
+                BindingFlags.Public | BindingFlags.NonPublic |
+                BindingFlags.Instance | BindingFlags.CreateInstance, null, null,
+                null);
+            if (host == null)
+            {
+                strError = "创建DigitalPlatform.LibraryServer.LibraryHost类的派生类的对象（构造函数）失败。";
+                return -1;
+            }
+
+            host.App = this;
+
+            // 执行函数
+            try
+            {
+                object[] args = new object[5];
+                args[0] = strAction;
+                args[1] = readerdom;
+                args[2] = strExistPrice;
+                args[3] = strPrice;
+                args[4] = strError;
+                nResultValue = (int)mi.Invoke(host,
+                     BindingFlags.DeclaredOnly |
+                     BindingFlags.Public | BindingFlags.NonPublic |
+                     BindingFlags.Instance | BindingFlags.InvokeMethod,
+                     null,
+                     args,
+                     null);
+
+                // 取出out参数值
+                strPrice = (string)args[3];
+                strError = (string)args[4];
+            }
+            catch (Exception ex)
+            {
+                strError = "执行脚本函数'" + strFuncName + "'出错：" + ex.Message;
+                return -1;
+            }
+
+            return 0;
+        }
+
+        // 执行脚本函数GetHire
+        // 根据当前时间、周期，计算出失效期和价格
+        // parameters:
+        // return:
+        //      -2  not found script
+        //      -1  出错
+        //      0   成功
+        public int DoGetHireScriptFunction(
+            XmlDocument readerdom,
+            string strStartDate,
+            string strPeriodName,
+            out int nResultValue,
+            out string strExpireDate,
+            out string strPrice,
+            out string strError)
+        {
+            strError = "";
+            strExpireDate = "";
+            strPrice = "";
+            nResultValue = 0;
+
+            string strFuncName = "GetHire";
+
+            if (this.m_strAssemblyLibraryHostError != "")
+            {
+                strError = this.m_strAssemblyLibraryHostError;
+                return -1;
+            }
+
+            if (this.m_assemblyLibraryHost == null)
+            {
+                strError = "未定义<script>脚本代码，无法执行脚本函数" + strFuncName + "()。";
+                return -2;
+            }
+
+            Type hostEntryClassType = ScriptManager.GetDerivedClassType(
+                this.m_assemblyLibraryHost,
+                "DigitalPlatform.LibraryServer.LibraryHost");
+            if (hostEntryClassType == null)
+            {
+                strError = "<script>脚本中未找到DigitalPlatform.LibraryServer.LibraryHost类的派生类，无法执行脚本函数" + strFuncName + "()。";
+                return -2;
+            }
+
+            // 迟绑定技术。从assembly中实时寻找特定名字的函数
+            MethodInfo mi = hostEntryClassType.GetMethod(strFuncName);
+            if (mi == null)
+            {
+                strError = "<script>脚本中DigitalPlatform.LibraryServer.LibraryHost类的派生类中，没有提供public int GetHire(XmlDocument readerdom, string strStartDate, string strPeriodName, out string strExpireDate, out string strPrice, out string strError)函数，因此无法获得结果。";
+                return -2;
+            }
+
+            LibraryHost host = (LibraryHost)hostEntryClassType.InvokeMember(null,
+                BindingFlags.DeclaredOnly |
+                BindingFlags.Public | BindingFlags.NonPublic |
+                BindingFlags.Instance | BindingFlags.CreateInstance, null, null,
+                null);
+            if (host == null)
+            {
+                strError = "创建DigitalPlatform.LibraryServer.LibraryHost类的派生类的对象（构造函数）失败。";
+                return -1;
+            }
+
+            host.App = this;
+
+            // 执行函数
+            try
+            {
+                object[] args = new object[6];
+                args[0] = readerdom;
+                args[1] = strStartDate;
+                args[2] = strPeriodName;
+                args[3] = strExpireDate;
+                args[4] = strPrice;
+                args[5] = strError;
+                nResultValue = (int)mi.Invoke(host,
+                     BindingFlags.DeclaredOnly |
+                     BindingFlags.Public | BindingFlags.NonPublic |
+                     BindingFlags.Instance | BindingFlags.InvokeMethod,
+                     null,
+                     args,
+                     null);
+
+                // 取出out参数值
+                strExpireDate = (string)args[3];
+                strPrice = (string)args[4];
+                strError = (string)args[5];
+            }
+            catch (Exception ex)
+            {
+                strError = "执行脚本函数'" + strFuncName + "'出错：" + ex.Message;
+                return -1;
+            }
+
+            return 0;
+        }
+
+
+        // 执行脚本函数GetLost
+        // 根据当前读者记录、实体记录、书目记录，计算出丢失后的赔偿金额
+        // parameters:
+        // return:
+        //      -2  not found script
+        //      -1  出错
+        //      0   成功
+        public int DoGetLostScriptFunction(
+            SessionInfo sessioninfo,
+            XmlDocument readerdom,
+            XmlDocument itemdom,
+            string strBiblioRecPath,
+            out int nResultValue,
+            out string strLostPrice,
+            out string strReason,
+            out string strError)
+        {
+            strError = "";
+            strLostPrice = "";
+            strReason = "";
+            nResultValue = 0;
+
+            string strFuncName = "GetLost";
+
+            if (this.m_strAssemblyLibraryHostError != "")
+            {
+                strError = this.m_strAssemblyLibraryHostError;
+                return -1;
+            }
+
+            if (this.m_assemblyLibraryHost == null)
+            {
+                strError = "未定义<script>脚本代码，无法执行脚本函数" + strFuncName + "()。";
+                return -2;
+            }
+
+            Type hostEntryClassType = ScriptManager.GetDerivedClassType(
+                this.m_assemblyLibraryHost,
+                "DigitalPlatform.LibraryServer.LibraryHost");
+            if (hostEntryClassType == null)
+            {
+                strError = "<script>脚本中未找到DigitalPlatform.LibraryServer.LibraryHost类的派生类，无法执行脚本函数" + strFuncName + "()。";
+                return -2;
+            }
+
+            // 迟绑定技术。从assembly中实时寻找特定名字的函数
+            MethodInfo mi = hostEntryClassType.GetMethod(strFuncName);
+            if (mi == null)
+            {
+                strError = "<script>脚本中DigitalPlatform.LibraryServer.LibraryHost类的派生类中，没有提供public int GetLost(XmlDocument readerdom, XmlDocument itemdom, string strPriceCfgString, out string strLostPrice, out string strError)函数，因此无法获得结果。";
+                return -2;
+            }
+
+            LibraryHost host = (LibraryHost)hostEntryClassType.InvokeMember(null,
+                BindingFlags.DeclaredOnly |
+                BindingFlags.Public | BindingFlags.NonPublic |
+                BindingFlags.Instance | BindingFlags.CreateInstance, null, null,
+                null);
+            if (host == null)
+            {
+                strError = "创建DigitalPlatform.LibraryServer.LibraryHost类的派生类的对象（构造函数）失败。";
+                return -1;
+            }
+
+            host.App = this;
+            host.SessionInfo = sessioninfo;
+
+            // 执行函数
+            try
+            {
+                object[] args = new object[6];
+                args[0] = readerdom;
+                args[1] = itemdom;
+                args[2] = strBiblioRecPath;
+                args[3] = strLostPrice;
+                args[4] = strReason;
+                args[5] = strError;
+                nResultValue = (int)mi.Invoke(host,
+                     BindingFlags.DeclaredOnly |
+                     BindingFlags.Public | BindingFlags.NonPublic |
+                     BindingFlags.Instance | BindingFlags.InvokeMethod,
+                     null,
+                     args,
+                     null);
+
+                // 取出out参数值
+                strLostPrice = (string)args[3];
+                strReason = (string)args[4];
+                strError = (string)args[5];
+            }
+            catch (Exception ex)
+            {
+                strError = "执行脚本函数'" + strFuncName + "'出错：" + ex.Message;
+                return -1;
+            }
+
+            return 0;
+        }
+
+        // 执行脚本函数GetBiblioPart
+        // parameters:
+        // return:
+        //      -2  not found script
+        //      -1  出错
+        //      0   成功
+        public int DoGetBiblioPartScriptFunction(
+            XmlDocument bibliodom,
+            string strPartName,
+            out int nResultValue,
+            out string strResultValue,
+            out string strError)
+        {
+            strError = "";
+            strResultValue = "";
+            nResultValue = 0;
+
+            string strFuncName = "GetBiblioPart";
+
+            if (this.m_strAssemblyLibraryHostError != "")
+            {
+                strError = this.m_strAssemblyLibraryHostError;
+                return -1;
+            }
+
+            if (this.m_assemblyLibraryHost == null)
+            {
+                strError = "未定义<script>脚本代码，无法执行脚本函数"+strFuncName+"()。";
+                return -2;
+            }
+
+            Type hostEntryClassType = ScriptManager.GetDerivedClassType(
+                this.m_assemblyLibraryHost,
+                "DigitalPlatform.LibraryServer.LibraryHost");
+            if (hostEntryClassType == null)
+            {
+                strError = "<script>脚本中未找到DigitalPlatform.LibraryServer.LibraryHost类的派生类，无法执行脚本函数"+strFuncName+"()。";
+                return -2;
+            }
+
+            // 迟绑定技术。从assembly中实时寻找特定名字的函数
+            MethodInfo mi = hostEntryClassType.GetMethod("GetBiblioPart");
+            if (mi == null)
+            {
+                strError = "<script>脚本中DigitalPlatform.LibraryServer.LibraryHost类的派生类中，没有提供public int GetBiblioPart(XmlDocument bibliodom, string strPartName, out string strResultValue)函数，因此无法获得结果。";
+                return -2;
+            }
+
+            LibraryHost host = (LibraryHost)hostEntryClassType.InvokeMember(null,
+                BindingFlags.DeclaredOnly |
+                BindingFlags.Public | BindingFlags.NonPublic |
+                BindingFlags.Instance | BindingFlags.CreateInstance, null, null,
+                null);
+            if (host == null)
+            {
+                strError = "创建DigitalPlatform.LibraryServer.LibraryHost类的派生类的对象（构造函数）失败。";
+                return -1;
+            }
+
+            host.App = this;
+
+            // 执行函数
+            try
+            {
+                object[] args = new object[3];
+                args[0] = bibliodom;
+                args[1] = strPartName;
+                args[2] = strResultValue;
+                nResultValue = (int)mi.Invoke(host,
+                     BindingFlags.DeclaredOnly |
+                     BindingFlags.Public | BindingFlags.NonPublic |
+                     BindingFlags.Instance | BindingFlags.InvokeMethod,
+                     null,
+                     args,
+                     null);
+
+                // 取出out参数值
+                strResultValue = (string)args[2];
+            }
+            catch (Exception ex)
+            {
+                strError = "执行脚本函数'" + strFuncName + "'出错：" + ex.Message;
+                return -1;
+            }
+
+            return 0;
+        }
+
+        // 执行脚本函数 VerifyItem
+        // parameters:
+        // return:
+        //      -2  not found script
+        //      -1  出错
+        //      0   成功
+        public int DoVerifyItemFunction(
+            SessionInfo sessioninfo,
+            string strAction,
+            XmlDocument itemdom,
+            out string strError)
+        {
+            strError = "";
+            if (this.m_strAssemblyLibraryHostError != "")
+            {
+                strError = this.m_strAssemblyLibraryHostError;
+                return -1;
+            }
+
+            if (this.m_assemblyLibraryHost == null)
+            {
+                strError = "未定义<script>脚本代码，无法校验册记录。";
+                return -2;
+            }
+
+            Type hostEntryClassType = ScriptManager.GetDerivedClassType(
+                this.m_assemblyLibraryHost,
+                "DigitalPlatform.LibraryServer.LibraryHost");
+            if (hostEntryClassType == null)
+            {
+                strError = "<script>脚本中未找到DigitalPlatform.LibraryServer.LibraryHost类的派生类，无法校验条码号。";
+                return -2;
+            }
+
+#if NO
+            // 迟绑定技术。从assembly中实时寻找特定名字的函数
+            MethodInfo mi = hostEntryClassType.GetMethod("VerifyItem");
+            if (mi == null)
+            {
+                strError = "<script>脚本中DigitalPlatform.LibraryServer.LibraryHost类的派生类中，没有提供int VerifyItem(string strAction, XmlDocument itemdom, out string strError)函数，因此无法校验册记录。";
+                return -2;
+            }
+#endif
+
+            LibraryHost host = (LibraryHost)hostEntryClassType.InvokeMember(null,
+                BindingFlags.DeclaredOnly |
+                BindingFlags.Public | BindingFlags.NonPublic |
+                BindingFlags.Instance | BindingFlags.CreateInstance, null, null,
+                null);
+            if (host == null)
+            {
+                strError = "创建DigitalPlatform.LibraryServer.LibraryHost类的派生类的对象（构造函数）失败。";
+                return -1;
+            }
+
+            host.App = this;
+            host.SessionInfo = sessioninfo;
+
+            // 执行函数
+            try
+            {
+#if NO
+                    object[] args = new object[3];
+                    args[0] = strAction;
+                    args[1] = itemdom;
+                    args[2] = strError;
+                    nResultValue = (int)mi.Invoke(host,
+                         BindingFlags.DeclaredOnly |
+                         BindingFlags.Public | BindingFlags.NonPublic |
+                         BindingFlags.Instance | BindingFlags.InvokeMethod,
+                         null,
+                         args,
+                         null);
+
+                    // 取出out参数值
+                    strError = (string)args[2];
+#endif
+                return host.VerifyItem(strAction,
+                    itemdom,
+                    out strError);
+            }
+            catch (Exception ex)
+            {
+                strError = "执行脚本函数'" + "VerifyItem" + "'出错：" + ex.Message;
+                return -1;
+            }
+        }
+
+    }
+
+    public class LibraryHost
+    {
+        public LibraryApplication App = null;
+
+        public SessionInfo SessionInfo = null;  // 2010/12/16
+
+        public LibraryHost()
+        {
+            //
+            // TODO: Add constructor logic here
+            //
+        }
+
+        // return:
+        //      -1  调用出错
+        //      0   校验正确
+        //      1   校验发现错误
+        public virtual int VerifyItem(string strAction,
+            XmlDocument itemdom,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            string strNewBarcode = DomUtil.GetElementText(itemdom.DocumentElement, "barcode");
+
+            string strLocation = DomUtil.GetElementText(itemdom.DocumentElement, "location");
+            strLocation = StringUtil.GetPureLocationString(strLocation);
+            string strLibraryCode = "";
+            string strRoom = "";
+            // 解析
+            LibraryApplication.ParseCalendarName(strLocation,
+        out strLibraryCode,
+        out strRoom);
+
+            // 2014/1/10
+            // 检查空条码号
+            if ((strAction == "new"
+|| strAction == "change"
+|| strAction == "move")       // delete操作不检查
+&& String.IsNullOrEmpty(strNewBarcode) == true)
+            {
+                XmlElement item = this.App.GetLocationItemElement(
+                    strLibraryCode,
+                    strRoom);
+                if (item != null)
+                {
+                    bool bNullable = DomUtil.GetBooleanParam(item, "itemBarcodeNullable", true);
+                    if (bNullable == false)
+                    {
+                        strError = "册条码号不能为空(根据 <locationTypes> 定义)";
+                        return 1;
+                    }
+                }
+                else
+                {
+                    if (this.App.AcceptBlankItemBarcode == false)
+                    {
+                        strError = "册条码号不能为空(根据 AcceptBlankItemBarcode 定义)";
+                        return 1;
+                    }
+                }
+            }
+
+            if (string.IsNullOrEmpty(strNewBarcode) == false)
+            {
+                // return:
+                //      -1  调用出错
+                //      0   校验正确
+                //      1   校验发现错误
+                nRet = VerifyItemBarcode(strLibraryCode, strNewBarcode, out strError);
+                if (nRet != 0)
+                    return nRet;
+            }
+
+            // 2014/11/28
+            string strPrice = DomUtil.GetElementText(itemdom.DocumentElement, "price");
+            if (string.IsNullOrEmpty(strPrice) == false)
+            {
+                // return:
+                //      -1  调用出错
+                //      0   校验正确
+                //      1   校验发现错误
+                nRet = VerifyItemPrice(strLibraryCode, strPrice, out strError);
+                if (nRet != 0)
+                    return nRet;
+            }
+            return 0;
+        }
+
+        // 按照缺省行为，验证价格字符串
+        // return:
+        //      -1  调用出错
+        //      0   校验正确
+        //      1   校验发现错误
+        public virtual int VerifyItemPrice(string strLibraryCode,
+            string strPrice,
+            out string strError)
+        {
+            strError = "";
+
+            CurrencyItem item = null;
+            // 解析单个金额字符串。例如 CNY10.00 或 -CNY100.00/7
+            int nRet = PriceUtil.ParseSinglePrice(strPrice,
+                out item,
+                out strError);
+            if (nRet == -1)
+                return 1;
+
+            return 0;
+        }
+
+        // 按照缺省行为，验证册记录中的册条码号
+        // return:
+        //      -1  调用出错
+        //      0   校验正确
+        //      1   校验发现错误
+        public int VerifyItemBarcode(
+            string strLibraryCode,
+            string strNewBarcode,
+            out string strError)
+        {
+            strError = "";
+                // 验证条码号
+            if (this.App.VerifyBarcode == true)
+            {
+                // return:
+                //	0	invalid barcode
+                //	1	is valid reader barcode
+                //	2	is valid item barcode
+                int nResultValue = 0;
+
+                // return:
+                //      -2  not found script
+                //      -1  出错
+                //      0   成功
+                int nRet = this.App.DoVerifyBarcodeScriptFunction(
+                    this,
+                    strLibraryCode,
+                    strNewBarcode,
+                    out nResultValue,
+                    out strError);
+                if (nRet == -2 || nRet == -1 || nResultValue != 2)
+                {
+                    if (nRet == -2)
+                    {
+                        strError = "library.xml 中没有配置条码号验证函数，无法进行条码号验证";
+                        return -1;
+                    }
+                    else if (nRet == -1)
+                    {
+                        strError = "验证册条码号的过程中出错"
+                           + (string.IsNullOrEmpty(strError) == true ? "" : ": " + strError);
+                        return -1;
+                    }
+                    else if (nResultValue != 2)
+                    {
+                        strError = "条码号 '" + strNewBarcode + "' 经验证发现不是一个合法的册条码号"
+                           + (string.IsNullOrEmpty(strError) == true ? "" : "(" + strError + ")");
+                    }
+
+                    return 1;
+                }
+            }
+            return 0;
+        }
+
+        // return:
+        //      -1  调用出错
+        //      0   校验正确
+        //      1   校验发现错误
+        public virtual int VerifyOrder(string strAction,
+            XmlDocument itemdom,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            string strOrderTime = DomUtil.GetElementText(itemdom.DocumentElement, "orderTime");
+
+            if (string.IsNullOrEmpty(strOrderTime) == false)
+            {
+                try
+                {
+                    DateTimeUtil.FromRfc1123DateTimeString(strOrderTime);
+                }
+                catch (Exception ex)
+                {
+                    strError = "订购日期字符串 '"+strOrderTime+"' 格式错误: " + ex.Message;
+                    return -1;
+                }
+            }
+
+            string strRange = DomUtil.GetElementText(itemdom.DocumentElement, "range");
+
+            if (string.IsNullOrEmpty(strRange) == false)
+            {
+                // 检查单个出版日期字符串是否合法
+                // return:
+                //      -1  出错
+                //      0   正确
+                nRet = LibraryServerUtil.CheckPublishTimeRange(strRange,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "时间范围字符串 '" + strRange + "' 格式错误: " + strError;
+                    return -1;
+                }
+            }
+
+            return 0;
+        }
+
+        // return:
+        //      -1  调用出错
+        //      0   校验正确
+        //      1   校验发现错误
+        public virtual int VerifyIssue(string strAction,
+            XmlDocument itemdom,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            return 0;
+        }
+
+        // return:
+        //      -1  调用出错
+        //      0   校验正确
+        //      1   校验发现错误
+        public virtual int VerifyComment(string strAction,
+            XmlDocument itemdom,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            return 0;
+        }
+
+
+        /*
+        public void Invoke(string strFuncName)
+        {
+            Type classType = this.GetType();
+
+            // new一个Host派生对象
+            classType.InvokeMember(strFuncName,
+                BindingFlags.DeclaredOnly |
+                BindingFlags.Public | BindingFlags.NonPublic |
+                BindingFlags.Instance | BindingFlags.InvokeMethod,
+                null,
+                this,
+                null);
+
+        }*/
+
+#if NO
+        // 以前的版本，不能实现超期前提醒
+        // retun:
+        //      -1  出错
+        //      0   没有必要发送
+        //      1   需要发送
+        public virtual int NotifyReader(
+            XmlDocument readerdom,
+            Calendar calendar,
+            List<string> notifiedBarcodes,
+            string strBodyType,
+            // out int nResultValue,
+            out string strBody,
+            out string strMime,
+            out List<string> wantNotifyBarcodes,
+            out string strError)
+        {
+            strBody = "";
+            strError = "";
+            wantNotifyBarcodes = new List<string>();
+            strMime = "html";
+            int nRet = 0;
+
+            string strResult = "";
+            int nOverdueCount = 0;
+
+            XmlNodeList nodes = readerdom.DocumentElement.SelectNodes("borrows/borrow");
+
+            if (nodes.Count == 0)
+                return 0;
+
+            string strLink = "<LINK href='" + App.OpacServerUrl + "/readerhtml.css' type='text/css' rel='stylesheet'>";
+            strResult = "<html><head>" + strLink + "</head><body>";
+
+            // 借阅的册
+            strResult += "<br/>借阅信息<br/>";
+            strResult += "<table class='borrowinfo' width='100%' cellspacing='1' cellpadding='4'>";
+            strResult += "<tr class='columntitle'><td nowrap>册条码号</td><td nowrap>续借次</td><td nowrap>借阅日期</td><td nowrap>期限</td><td nowrap>操作者</td><td nowrap>是否超期</td><td nowrap>备注</td></tr>";
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                XmlNode node = nodes[i];
+
+                string strBarcode = DomUtil.GetAttr(node, "barcode");
+                string strNo = DomUtil.GetAttr(node, "no");
+                string strBorrowDate = DomUtil.GetAttr(node, "borrowDate");
+                string strPeriod = DomUtil.GetAttr(node, "borrowPeriod");
+                string strOperator = DomUtil.GetAttr(node, "operator");
+                string strRenewComment = DomUtil.GetAttr(node, "renewComment");
+
+                string strOverDue = "";
+                bool bOverdue = false;
+ 
+                // 检查超期情况。
+                // return:
+                //      -1  数据格式错误
+                //      0   没有发现超期
+                //      1   发现超期   strError中有提示信息
+                //      2   已经在宽限期内，很容易超期 2009/3/13 new add
+                nRet = App.CheckPeriod(
+                    calendar,
+                    strBorrowDate,
+                    strPeriod,
+                    out strError);
+                if (nRet == -1)
+                    strOverDue = strError;
+                else if (nRet == 1)
+                {
+                    strOverDue = strError;	// "已超期";
+                    bOverdue = true;
+                }
+                else
+                    strOverDue = strError;	// 可能也有一些必要的信息，例如非工作日
+
+                string strColor = "bgcolor=#ffffff";
+
+                if (bOverdue == true)
+                {
+                    strColor = "bgcolor=#ff9999";	// 超期
+
+                    nOverdueCount ++;
+
+                    // 看看是不是已经通知过
+                    if (notifiedBarcodes.IndexOf(strBarcode) == -1)
+                    {
+                        wantNotifyBarcodes.Add(strBarcode);
+                    }
+                }
+
+                string strBarcodeLink = "<a href='" + App.OpacServerUrl + "/book.aspx?barcode=" + strBarcode + "&target='_blank'>" + strBarcode + "</a>";
+
+                strResult += "<tr class='content' " + strColor + " nowrap>";
+                strResult += "<td class='barcode' nowrap>" + strBarcodeLink + "</td>";
+                strResult += "<td class='no' nowrap align='right'>" + strNo + "</td>";
+                strResult += "<td class='borrowdate' >" + DateTimeUtil.LocalTime(strBorrowDate) + "</td>";
+                strResult += "<td class='period' nowrap>" + strPeriod + "</td>";
+                strResult += "<td class='operator' nowrap>" + strOperator + "</td>";
+                strResult += "<td class='overdue' >" + strOverDue + "</td>";
+                strResult += "<td class='renewcomment' nowrap>" + strRenewComment.Replace(";", "<br/>") + "</td>";
+                strResult += "</tr>";
+            }
+
+            strResult += "</table>";
+
+            strResult += "<p>";
+            strResult += "有 " + nOverdueCount.ToString()+ " 册图书超期, 请尽快归还。";
+            strResult += "</p>";
+
+            strResult += "</body></html>";
+
+            strBody = strResult;
+
+            if (wantNotifyBarcodes.Count > 0)
+                return 1;
+            else
+                return 0;
+        }
+
+#endif
+        // 超期提醒
+        // 新版本，可以处理超期前提醒
+        // retun:
+        //      -1  出错
+        //      0   没有必要发送
+        //      1   需要发送
+        public virtual int NotifyReader(
+            XmlDocument readerdom,
+            Calendar calendar,
+            // List<string> notifiedBarcodes,
+            string strBodyType,
+            out string strBody,
+            out string strMime,
+            // out List<string> wantNotifyBarcodes,
+            out string strError)
+        {
+
+            if (strBodyType == "sms")
+            {
+                return NotifyReaderSMS(
+                    readerdom,
+                    calendar,
+                    //notifiedBarcodes,
+                    strBodyType,
+                    out strBody,
+                    out strMime,
+                    //out wantNotifyBarcodes,
+                    out strError);
+            }
+
+            strBody = "";
+            strError = "";
+            // wantNotifyBarcodes = new List<string>();
+            strMime = "html";
+            int nRet = 0;
+
+            string strResult = "";
+            // int nNotifyCount = 0;   // 需要通知的事项 nNotifyCount = nOverduCount + nNormalCount
+            int nOverdueCount = 0;  // 超期提醒的事项数
+            int nNormalCount = 0;   // 一般提醒的事项数
+
+            XmlNodeList nodes = readerdom.DocumentElement.SelectNodes("borrows/borrow");
+
+            if (nodes.Count == 0)
+                return 0;
+
+            string strLink = "<LINK href='" + App.OpacServerUrl + "/readerhtml.css' type='text/css' rel='stylesheet'>";
+            strResult = "<html><head>" + strLink + "</head><body>";
+
+            string strName = DomUtil.GetElementText(readerdom.DocumentElement,
+    "name");
+            strResult += "尊敬的 " + strName + " 您好！<br/><br/>您在图书馆借阅的下列图书：";
+
+            // 借阅的册
+            // strResult += "<br/>借阅信息<br/>";
+            strResult += "<table class='borrowinfo' width='100%' cellspacing='1' cellpadding='4'>";
+            strResult += "<tr class='columntitle'>"
+                + "<td nowrap>册条码号</td>"
+                + "<td class='no' nowrap align='right'>续借次</td>"
+                + "<td nowrap>借阅日期</td>"
+                + "<td nowrap>期限</td>"
+                + "<td nowrap>应还日期</td>"
+                //+ "<td nowrap>操作者</td>"
+                + "<td nowrap>超期情况</td>"
+                //+ "<td nowrap>备注</td>"
+                + "</tr>";
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                XmlNode node = nodes[i];
+
+                string strBarcode = DomUtil.GetAttr(node, "barcode");
+                string strNo = DomUtil.GetAttr(node, "no");
+                string strBorrowDate = DomUtil.GetAttr(node, "borrowDate");
+                string strPeriod = DomUtil.GetAttr(node, "borrowPeriod");
+                string strOperator = DomUtil.GetAttr(node, "operator");
+                string strRenewComment = DomUtil.GetAttr(node, "renewComment");
+                string strHistory = DomUtil.GetAttr(node, "notifyHistory");
+
+                string strOverDue = "";
+                bool bOverdue = false;
+                DateTime timeReturning = DateTime.MinValue;
+                {
+
+                    DateTime timeNextWorkingDay;
+                    long lOver = 0;
+                    string strPeriodUnit = "";
+
+                    // 获得还书日期
+                    // return:
+                    //      -1  数据格式错误
+                    //      0   没有发现超期
+                    //      1   发现超期   strError中有提示信息
+                    //      2   已经在宽限期内，很容易超期 
+                    nRet = this.App.GetReturningTime(
+                        calendar,
+                        strBorrowDate,
+                        strPeriod,
+                        out timeReturning,
+                        out timeNextWorkingDay,
+                        out lOver,
+                        out strPeriodUnit,
+                        out strError);
+                    if (nRet == -1)
+                        strOverDue = strError;
+                    else
+                    {
+                        if (nRet == 1)
+                        {
+                            bOverdue = true;
+                            strOverDue = string.Format(this.App.GetString("已超期s"),  // 已超期 {0}
+                                                this.App.GetDisplayTimePeriodStringEx(lOver.ToString() + " " + strPeriodUnit))
+                                ;
+                        }
+                    }
+                }
+
+                string strColor = "bgcolor=#ffffff";
+
+                string strChars = "";
+                // 获得一种 body type 的全部通知字符
+                strChars = ReadersMonitor.GetNotifiedChars(App,
+                    strBodyType,
+                    strHistory);
+
+                if (bOverdue == true)
+                {
+                    strColor = "bgcolor=#ff9999";	// 超期
+
+
+                    // 看看是不是已经通知过
+                    if (string.IsNullOrEmpty(strChars) == false && strChars[0] == 'y')
+                        continue;
+
+                    // 合并设置一种 body type 的全部通知字符
+                    // 把 strChars 中的 'y' 设置到 strHistory 中对应达到位。'n' 不设置
+                    nRet = ReadersMonitor.SetNotifiedChars(App,
+                        strBodyType,
+                        "y",
+                        ref strHistory,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+
+                    ReadersMonitor.SetChar(ref strChars,
+                        0,
+                        'y',
+                        'n');
+
+                    // nNotifyCount++;
+                    nOverdueCount++;
+                }
+                else if (string.IsNullOrEmpty(App.NotifyDef) == false)
+                {
+                    // 检查超期前的通知点
+
+                    List<int> indices = null;
+                    // 检查每个通知点，返回当前时间已经达到或者超过了通知点的那些检查点的下标
+                    // return:
+                    //      -1  数据格式错误
+                    //      0   成功
+                    nRet = App.CheckNotifyPoint(
+                        calendar,
+                        strBorrowDate,
+                        strPeriod,
+                        App.NotifyDef,
+                        out indices,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+
+                    // 偏移量 0 让给了超期通知
+                    for (int k = 0; k < indices.Count; k++)
+                    {
+                        indices[k] = indices[k] + 1;
+                    }
+
+                    // 检查是否至少有一个字符位置为 ch 代表的值
+                    if (CheckChar(strChars, indices, 'n', 'n') == true)
+                    {
+                        // 至少有一个检查点尚未通知
+                        strOverDue = "即将到期";
+                    }
+                    else
+                        continue;
+
+                    foreach (int index in indices)
+                    {
+                        ReadersMonitor.SetChar(ref strChars,
+                            index,
+                            'y',
+                            'n');
+                    }
+
+                    nNormalCount++;
+                    // nNotifyCount++;
+                }
+                else
+                    continue;
+
+                // 合并设置一种 body type 的全部通知字符
+                // 把 strChars 中的 'y' 设置到 strHistory 中对应达到位。'n' 不设置
+                nRet = ReadersMonitor.SetNotifiedChars(App,
+                    strBodyType,
+                    strChars,
+                    ref strHistory,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                DomUtil.SetAttr(node, "notifyHistory", strHistory);
+
+                string strBarcodeLink = "<a href='" + App.OpacServerUrl + "/book.aspx?barcode=" + strBarcode + "&target='_blank'>" + strBarcode + "</a>";
+
+                strResult += "<tr class='content' " + strColor + " nowrap>";
+                strResult += "<td class='barcode' nowrap>" + strBarcodeLink + "</td>";
+                strResult += "<td class='no' nowrap align='right'>" + HttpUtility.HtmlEncode(strNo) + "</td>";
+                strResult += "<td class='borrowdate' >" + HttpUtility.HtmlEncode(DateTimeUtil.LocalTime(strBorrowDate)) + "</td>";
+                strResult += "<td class='period' nowrap>" + HttpUtility.HtmlEncode(App.GetDisplayTimePeriodStringEx(strPeriod)) + "</td>";
+                strResult += "<td class='returningdate' >" + HttpUtility.HtmlEncode(timeReturning.ToString("d")) + "</td>";
+                // strResult += "<td class='operator' nowrap>" + HttpUtility.HtmlEncode(strOperator) + "</td>";
+                strResult += "<td class='overdue' >" + HttpUtility.HtmlEncode(strOverDue) + "</td>";
+                // strResult += "<td class='renewcomment' nowrap>" + strRenewComment.Replace(";", "<br/>") + "</td>";
+                strResult += "</tr>";
+            }
+
+            strResult += "</table>";
+
+            if (nOverdueCount > 0)
+            {
+                strResult += "<p>";
+                strResult += "有 " + nOverdueCount.ToString() + " 册图书已经超期, 请尽快归还。";
+                strResult += "</p>";
+            }
+
+            if (nNormalCount > 0)
+            {
+                strResult += "<p>";
+                strResult += "有 " + nNormalCount.ToString() + " 册图书即将到期, 请注意在期限内归还。";
+                strResult += "</p>";
+            }
+
+            strResult += "</body></html>";
+
+            strBody = strResult;
+
+            if (nOverdueCount + nNormalCount > 0)
+                return 1;
+            else
+                return 0;
+        }
+
+        // 检查是否至少有一个字符位置为 ch 代表的值
+        public static bool CheckChar(string strText,
+            List<int> indices,
+            char ch,
+            char chDefault)
+        {
+            foreach (int index in indices)
+            {
+                if (strText.Length < index + 1)
+                {
+                    // 超过范围的字符被当作 chDefault
+                    if (ch == chDefault)
+                        return true;
+                    continue;
+                }
+                if (strText[index] == ch)
+                    return true;
+            }
+
+            return false;
+        }
+
+        // 在指定的下标位置设置字符
+        public static bool SetChars(ref string strText,
+            List<int> indices,
+            char ch)
+        {
+
+
+            return false;
+        }
+
+        // 短消息通知读者超期的版本。供NotifyReader()的重载版本必要时引用
+        public int NotifyReaderSMS(
+    XmlDocument readerdom,
+    Calendar calendar,
+    // List<string> notifiedBarcodes,
+    string strBodyType,
+    out string strBody,
+    out string strMime,
+    // out List<string> wantNotifyBarcodes,
+    out string strError)
+        {
+            strBody = "";
+            strError = "";
+            // wantNotifyBarcodes = new List<string>();
+            strMime = "text";
+            int nRet = 0;
+
+            string strResult = "";
+            int nOverdueCount = 0;  // 超期提醒的事项数
+            int nNormalCount = 0;   // 一般提醒的事项数
+
+            XmlNodeList nodes = readerdom.DocumentElement.SelectNodes("borrows/borrow");
+
+            if (nodes.Count == 0)
+                return 0;
+
+            string strName = DomUtil.GetElementText(readerdom.DocumentElement,
+                "name");
+            strResult += "您借阅的下列书刊：\n";
+
+            // 借阅的册
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                XmlNode node = nodes[i];
+
+                string strBarcode = DomUtil.GetAttr(node, "barcode");
+                string strConfirmItemRecPath = DomUtil.GetAttr(node, "recPath");
+                // string strNo = DomUtil.GetAttr(node, "no");
+                string strBorrowDate = DomUtil.GetAttr(node, "borrowDate");
+                string strPeriod = DomUtil.GetAttr(node, "borrowPeriod");
+                // string strOperator = DomUtil.GetAttr(node, "operator");
+                // string strRenewComment = DomUtil.GetAttr(node, "renewComment");
+                string strHistory = DomUtil.GetAttr(node, "notifyHistory");
+
+                string strOverDue = "";
+                bool bOverdue = false;  // 是否超期
+                DateTime timeReturning = DateTime.MinValue;
+                {
+
+                    DateTime timeNextWorkingDay;
+                    long lOver = 0;
+                    string strPeriodUnit = "";
+
+                    // 获得还书日期
+                    // return:
+                    //      -1  数据格式错误
+                    //      0   没有发现超期
+                    //      1   发现超期   strError中有提示信息
+                    //      2   已经在宽限期内，很容易超期 
+                    nRet = this.App.GetReturningTime(
+                        calendar,
+                        strBorrowDate,
+                        strPeriod,
+                        out timeReturning,
+                        out timeNextWorkingDay,
+                        out lOver,
+                        out strPeriodUnit,
+                        out strError);
+                    if (nRet == -1)
+                        strOverDue = strError;
+                    else
+                    {
+                        if (nRet == 1)
+                        {
+                            bOverdue = true;
+                            strOverDue = string.Format(this.App.GetString("已超期s"),  // 已超期 {0}
+                                                this.App.GetDisplayTimePeriodStringEx(lOver.ToString() + " " + strPeriodUnit))
+                                ;
+                        }
+                    }
+                }
+
+                string strChars = "";
+                // 获得一种 body type 的全部通知字符
+                strChars = ReadersMonitor.GetNotifiedChars(App,
+                    strBodyType,
+                    strHistory);
+
+                if (bOverdue == true)
+                {
+
+                    // 看看是不是已经通知过
+                    if (string.IsNullOrEmpty(strChars) == false && strChars[0] == 'y')
+                        continue;
+
+                    // 合并设置一种 body type 的全部通知字符
+                    // 把 strChars 中的 'y' 设置到 strHistory 中对应达到位。'n' 不设置
+                    nRet = ReadersMonitor.SetNotifiedChars(App,
+                        strBodyType,
+                        "y",
+                        ref strHistory,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+
+                    ReadersMonitor.SetChar(ref strChars,
+                        0,
+                        'y',
+                        'n');
+
+                    nOverdueCount++;
+                }
+                else if (string.IsNullOrEmpty(App.NotifyDef) == false)
+                {
+                    // 检查超期前的通知点
+
+                    List<int> indices = null;
+                    // 检查每个通知点，返回当前时间已经达到或者超过了通知点的那些检查点的下标
+                    // return:
+                    //      -1  数据格式错误
+                    //      0   成功
+                    nRet = App.CheckNotifyPoint(
+                        calendar,
+                        strBorrowDate,
+                        strPeriod,
+                        App.NotifyDef,
+                        out indices,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+
+                    // 偏移量 0 让给了超期通知
+                    for (int k = 0; k < indices.Count; k++)
+                    {
+                        indices[k] = indices[k] + 1;
+                    }
+
+                    // 检查是否至少有一个字符位置为 ch 代表的值
+                    if (CheckChar(strChars, indices, 'n', 'n') == true)
+                    {
+                        // 至少有一个检查点尚未通知
+                        strOverDue = "即将到期";
+                    }
+                    else
+                        continue;
+
+                    foreach (int index in indices)
+                    {
+                        ReadersMonitor.SetChar(ref strChars,
+                            index,
+                            'y',
+                            'n');
+                    }
+
+                    nNormalCount++;
+                }
+                else
+                    continue;
+
+                // 合并设置一种 body type 的全部通知字符
+                // 把 strChars 中的 'y' 设置到 strHistory 中对应达到位。'n' 不设置
+                nRet = ReadersMonitor.SetNotifiedChars(App,
+                    strBodyType,
+                    strChars,
+                    ref strHistory,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                DomUtil.SetAttr(node, "notifyHistory", strHistory);
+
+                // 获得图书摘要信息
+                string strSummary = "";
+                string strBiblioRecPath = "";
+                nRet = this.App.GetBiblioSummary(strBarcode,
+                    strConfirmItemRecPath,
+                    null,   //  strBiblioRecPathExclude,
+                    10, // 25,
+                    out strBiblioRecPath,
+                    out strSummary,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strSummary = "ERROR: " + strError;
+                }
+
+                // strResult += (i + 1).ToString() + ") " 
+                strResult += strSummary + " ";
+                // strResult += "借阅日期: " + DateTimeUtil.LocalDate(strBorrowDate) + " ";
+                strResult += "应还日期: " + timeReturning.ToString("d") + " ";
+                strResult += strOverDue + "\n";
+            }
+
+            /*
+            if (nOverdueCount > 0)
+                strResult += "=== 共有 " + nOverdueCount.ToString() + " 册图书超期, 请尽快归还。";
+            if (nNormalCount > 0)
+                strResult += "=== 共有 " + nOverdueCount.ToString() + " 册图书即将到期, 请注意在期限内归还。";
+             * */
+
+            strBody = strResult;
+
+            if (nOverdueCount + nNormalCount > 0)
+                return 1;
+            else
+                return 0;
+        }
+#if NO
+        // 短消息通知读者超期的版本。供NotifyReader()的重载版本必要时引用
+        public int NotifyReaderSMS(
+    XmlDocument readerdom,
+    Calendar calendar,
+    List<string> notifiedBarcodes,
+    string strBodyType,
+    out string strBody,
+    out string strMime,
+    out List<string> wantNotifyBarcodes,
+    out string strError)
+        {
+            strBody = "";
+            strError = "";
+            wantNotifyBarcodes = new List<string>();
+            strMime = "text";
+            int nRet = 0;
+
+            string strResult = "";
+            int nOverdueCount = 0;
+
+            XmlNodeList nodes = readerdom.DocumentElement.SelectNodes("borrows/borrow");
+
+            if (nodes.Count == 0)
+                return 0;
+
+            string strName = DomUtil.GetElementText(readerdom.DocumentElement,
+                "name");
+            strResult += strName + "您好！您在图书馆借阅的下列图书：";
+
+            // 借阅的册
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                XmlNode node = nodes[i];
+
+                string strBarcode = DomUtil.GetAttr(node, "barcode");
+                string strConfirmItemRecPath = DomUtil.GetAttr(node, "recPath");
+                // string strNo = DomUtil.GetAttr(node, "no");
+                string strBorrowDate = DomUtil.GetAttr(node, "borrowDate");
+                string strPeriod = DomUtil.GetAttr(node, "borrowPeriod");
+                // string strOperator = DomUtil.GetAttr(node, "operator");
+                // string strRenewComment = DomUtil.GetAttr(node, "renewComment");
+
+                string strOverDue = "";
+                bool bOverdue = false;  // 是否超期
+                DateTime timeReturning = DateTime.MinValue;
+                {
+
+                    DateTime timeNextWorkingDay;
+                    long lOver = 0;
+                    string strPeriodUnit = "";
+
+                    // 获得还书日期
+                    // return:
+                    //      -1  数据格式错误
+                    //      0   没有发现超期
+                    //      1   发现超期   strError中有提示信息
+                    //      2   已经在宽限期内，很容易超期 
+                    nRet = this.App.GetReturningTime(
+                        calendar,
+                        strBorrowDate,
+                        strPeriod,
+                        out timeReturning,
+                        out timeNextWorkingDay,
+                        out lOver,
+                        out strPeriodUnit,
+                        out strError);
+                    if (nRet == -1)
+                        strOverDue = strError;
+                    else
+                    {
+                        if (nRet == 1)
+                        {
+                            bOverdue = true;
+                            strOverDue = string.Format(this.App.GetString("已超期s"),  // 已超期 {0}
+                                                this.App.GetDisplayTimePeriodStringEx(lOver.ToString() + " " + strPeriodUnit))
+                                ;
+                        }
+                    }
+                }
+
+                if (bOverdue == true)
+                {
+                    nOverdueCount++;
+
+                    // 看看是不是已经通知过
+                    if (notifiedBarcodes.IndexOf(strBarcode) == -1)
+                    {
+                        wantNotifyBarcodes.Add(strBarcode);
+                    }
+                    else
+                        continue;
+
+                    // 获得图书摘要信息
+                    string strSummary = "";
+                    string strBiblioRecPath = "";
+                    nRet = this.App.GetBiblioSummary(strBarcode,
+                        strConfirmItemRecPath,
+                        null,   //  strBiblioRecPathExclude,
+                        25,
+                        out strBiblioRecPath,
+                        out strSummary,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strSummary = "ERROR: " + strError;
+                    }
+
+                    strResult += (i+1).ToString() + ") " + strSummary + " ";
+                    strResult += "借阅日期: " + DateTimeUtil.LocalDate(strBorrowDate) + " ";
+                    strResult += "应还日期: " + timeReturning.ToString("d") + " ";
+                    strResult += strOverDue + " ";
+                }
+            }
+
+            strResult += "=== 共有 " + nOverdueCount.ToString() + " 册图书超期, 请尽快归还。";
+
+            strBody = strResult;
+
+            if (wantNotifyBarcodes.Count > 0)
+                return 1;
+            else
+                return 0;
+        }
+#endif
+    }
+
+    // 一个扩展消息接口
+    public class MessageInterface
+    {
+        public string Type = "";
+        public Assembly Assembly = null;
+        public ExternalMessageHost HostObj = null;
+    }
+}

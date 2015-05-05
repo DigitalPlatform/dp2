@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+    <script><![CDATA[
+
+using System;
+using System.Xml;
+using DigitalPlatform.rms;
+using DigitalPlatform.IO;
+
+public class MyKeysHost : KeysHost
+{
+
+	public void getUsernameBoxTouched()
+	{
+
+		XmlNode node = this.DataDom.SelectSingleNode("//username");
+		if (node == null)
+			return;
+
+		string strName = node.InnerText;
+
+		node = this.DataDom.SelectSingleNode("//box");
+		if (node == null)
+		{
+			this.ResultString = strName + "|";
+			return;
+		}
+
+		string strBox = node.InnerText;
+
+		string strTouched = "0";
+		
+		node = this.DataDom.SelectSingleNode("//touched");
+		if (node != null)
+			strTouched = node.InnerText;
+		
+		this.ResultString = strName + "|" + strBox + "|" + strTouched;
+	}
+
+}
+
+
+]]><refs><ref>system.dll</ref><ref>system.xml.dll</ref><ref>%bindir%\digitalplatform.io.dll</ref></refs></script>
+    <key>
+        <xpath>//box</xpath>
+        <from>box</from>
+        <table ref="box" />
+    </key>
+    <table name="box" id="1">
+        <caption lang="zh-CN">信箱</caption>
+        <caption lang="en">Box</caption>
+    </table>
+    <key>
+        <xpath>//username</xpath>
+        <from>username</from>
+        <table ref="username" />
+    </key>
+    <table name="username" id="2">
+        <caption lang="zh-CN">用户名</caption>
+        <caption lang="en">User name</caption>
+    </table>
+    <key>
+        <xpath>//subject</xpath>
+        <from>subject</from>
+        <table ref="subject" />
+    </key>
+    <table name="subject" id="3">
+        <convert>
+            <string style="upper" />
+        </convert>
+        <convertquery>
+            <string style="upper" />
+        </convertquery>
+        <caption lang="zh-CN">主题</caption>
+        <caption lang="en">Subject</caption>
+    </table>
+    <key>
+        <xpath scripting="on">getUsernameBoxTouched</xpath>
+        <from>ubt</from>
+        <table ref="usernameboxtouched" />
+    </key>
+    <table name="usernameboxtouched" id="5">
+        <convert>
+            <string style="upper" />
+        </convert>
+        <convertquery>
+            <string style="upper" />
+        </convertquery>
+        <caption lang="zh-CN">用户名信箱</caption>
+        <caption lang="en">用户名信箱</caption>
+    </table>
+</root>

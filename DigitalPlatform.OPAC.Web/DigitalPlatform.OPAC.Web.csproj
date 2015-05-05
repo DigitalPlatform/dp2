@@ -1,0 +1,199 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{2E4C7CDF-8975-4E23-A075-009285D0313A}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>DigitalPlatform.OPAC.Web</RootNamespace>
+    <AssemblyName>DigitalPlatform.OPAC.Web</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AutoIndentLiteral.cs" />
+    <Compile Include="BiblioControl.cs" />
+    <Compile Include="BiblioQueryControl.cs" />
+    <Compile Include="BiblioSearchControl.cs" />
+    <Compile Include="BorrowHistoryControl.cs" />
+    <Compile Include="BorrowInfoControl.cs" />
+    <Compile Include="BrowseSearchResultControl.cs" />
+    <Compile Include="ColumnControl.cs" />
+    <Compile Include="CommentControl.cs" />
+    <Compile Include="CommentsControl.cs" />
+    <Compile Include="FellBackInfoControl.cs" />
+    <Compile Include="FooterBarControl.cs" />
+    <Compile Include="Indentor\BeginIndentor.cs" />
+    <Compile Include="Indentor\EndIndentor.cs" />
+    <Compile Include="Global.cs" />
+    <Compile Include="Indentor\NormalIndentor.cs" />
+    <Compile Include="ItemControl.cs" />
+    <Compile Include="ItemsControl.cs" />
+    <Compile Include="ItemSearchControl.cs" />
+    <Compile Include="LinkControl.cs" />
+    <Compile Include="LoginControl.cs" />
+    <Compile Include="MarcControl.cs" />
+    <Compile Include="message\MessageControl.cs" />
+    <Compile Include="message\MessageListControl.cs" />
+    <Compile Include="NewOrderBiblioControl.cs" />
+    <Compile Include="PageSwitcherControl.cs" />
+    <Compile Include="PanelControl.cs" />
+    <Compile Include="PersonalInfoControl.cs" />
+    <Compile Include="PreferenceControl.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ReaderInfoBase.cs" />
+    <Compile Include="ReservationInfoControl.cs" />
+    <Compile Include="SearchFilterControl.cs" />
+    <Compile Include="SideBarControl.cs" />
+    <Compile Include="StatisEntryControl.cs" />
+    <Compile Include="StatisViewControl.cs" />
+    <Compile Include="TabControl.cs" />
+    <Compile Include="TitleBarControl.cs" />
+    <Compile Include="TreeControl.cs" />
+    <Compile Include="UploadCoverImageControl.cs" />
+    <Compile Include="UserManageControl.cs" />
+    <Compile Include="ViewResultsetControl.cs" />
+    <Compile Include="WebUtil.cs">
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DigitalPlatform.CirculationClient\DigitalPlatform.CirculationClient.csproj">
+      <Project>{397bb898-88e0-41d6-8d01-09233c7ffc75}</Project>
+      <Name>DigitalPlatform.CirculationClient</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Drawing\DigitalPlatform.Drawing.csproj">
+      <Project>{C2468F93-69AC-4BBA-94AE-678ED5C21542}</Project>
+      <Name>DigitalPlatform.Drawing</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.IO\DigitalPlatform.IO.csproj">
+      <Project>{441cb814-af78-4503-91ef-dce5f3269502}</Project>
+      <Name>DigitalPlatform.IO</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.MarcDom\DigitalPlatform.MarcDom.csproj">
+      <Project>{3F81F705-5265-47EE-9255-CB33E1C135B8}</Project>
+      <Name>DigitalPlatform.MarcDom</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.MarcKernel\DigitalPlatform.MarcKernel.csproj">
+      <Project>{74242530-EF96-457E-852D-5C21A3EA8449}</Project>
+      <Name>DigitalPlatform.MarcKernel</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.OPAC.Server\DigitalPlatform.OPAC.Server.csproj">
+      <Project>{765049EC-C6B2-4051-97B3-B940D38D9FEA}</Project>
+      <Name>DigitalPlatform.OPAC.Server</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.ResultSet\DigitalPlatform.ResultSet.csproj">
+      <Project>{86E0817D-79A4-4769-B450-C8352D0D1907}</Project>
+      <Name>DigitalPlatform.ResultSet</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Text\DigitalPlatform.Text.csproj">
+      <Project>{26F96CC3-A4A9-4BC4-A10A-BC7E25581FF6}</Project>
+      <Name>DigitalPlatform.Text</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Xml\DigitalPlatform.Xml.csproj">
+      <Project>{E6489E89-1349-4EE7-A00B-AC96B9912587}</Project>
+      <Name>DigitalPlatform.Xml</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform\DigitalPlatform.csproj">
+      <Project>{bdd43275-eaa0-4670-8ba3-0db5cd7598dd}</Project>
+      <Name>DigitalPlatform</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="res\BiblioSearchControl.cs.en-US.resx" />
+    <EmbeddedResource Include="res\BiblioSearchControl.cs.zh-CN.resx" />
+    <EmbeddedResource Include="res\BiblioControl.cs.en-US.resx" />
+    <EmbeddedResource Include="res\BiblioControl.cs.zh-CN.resx" />
+    <EmbeddedResource Include="res\BorrowHistoryControl.cs.en-US.resx" />
+    <EmbeddedResource Include="res\BorrowHistoryControl.cs.zh-CN.resx" />
+    <EmbeddedResource Include="res\BorrowInfoControl.cs.en-US.resx" />
+    <EmbeddedResource Include="res\BorrowInfoControl.cs.zh-CN.resx" />
+    <EmbeddedResource Include="res\BrowseSearchResultControl.cs.en-US.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="res\BrowseSearchResultControl.cs.zh-CN.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="res\ColumnControl.cs.en-US.resx" />
+    <EmbeddedResource Include="res\ColumnControl.cs.zh-CN.resx" />
+    <EmbeddedResource Include="res\CommentControl.cs.en-US.resx" />
+    <EmbeddedResource Include="res\CommentControl.cs.zh-CN.resx" />
+    <EmbeddedResource Include="res\CommentsControl.cs.en-US.resx" />
+    <EmbeddedResource Include="res\CommentsControl.cs.zh-CN.resx" />
+    <EmbeddedResource Include="res\FellBackInfoControl.cs.en-US.resx" />
+    <EmbeddedResource Include="res\FellBackInfoControl.cs.zh-CN.resx" />
+    <EmbeddedResource Include="res\FooterBarControl.cs.en-US.resx" />
+    <EmbeddedResource Include="res\FooterBarControl.cs.zh-CN.resx" />
+    <EmbeddedResource Include="res\ItemControl.cs.en-US.resx" />
+    <EmbeddedResource Include="res\ItemControl.cs.zh-CN.resx" />
+    <EmbeddedResource Include="res\ItemsControl.cs.en-US.resx" />
+    <EmbeddedResource Include="res\ItemsControl.cs.zh-CN.resx" />
+    <EmbeddedResource Include="res\ItemSearchControl.cs.en-US.resx" />
+    <EmbeddedResource Include="res\ItemSearchControl.cs.zh-CN.resx" />
+    <EmbeddedResource Include="res\LoginControl.cs.en-US.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="res\LoginControl.cs.zh-CN.resx" />
+    <EmbeddedResource Include="res\MessageControl.cs.en-US.resx" />
+    <EmbeddedResource Include="res\MessageControl.cs.zh-CN.resx" />
+    <EmbeddedResource Include="res\MessageListControl.cs.en-US.resx" />
+    <EmbeddedResource Include="res\MessageListControl.cs.zh-CN.resx" />
+    <EmbeddedResource Include="res\NewOrderBiblioControl.cs.en-US.resx" />
+    <EmbeddedResource Include="res\NewOrderBiblioControl.cs.zh-CN.resx" />
+    <EmbeddedResource Include="res\PersonalInfoControl.cs.en-US.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="res\PersonalInfoControl.cs.zh-CN.resx" />
+    <EmbeddedResource Include="res\PreferenceControl.cs.en-US.resx" />
+    <EmbeddedResource Include="res\PreferenceControl.cs.zh-CN.resx" />
+    <EmbeddedResource Include="res\ReservationInfoControl.cs.en-US.resx" />
+    <EmbeddedResource Include="res\ReservationInfoControl.cs.zh-CN.resx" />
+    <EmbeddedResource Include="res\StatisViewControl.cs.en-US.resx" />
+    <EmbeddedResource Include="res\StatisViewControl.cs.zh-CN.resx" />
+    <EmbeddedResource Include="res\TitleBarControl.cs.en-US.resx" />
+    <EmbeddedResource Include="res\TitleBarControl.cs.zh-CN.resx" />
+    <EmbeddedResource Include="res\SearchFilterControl.cs.en-US.resx" />
+    <EmbeddedResource Include="res\SearchFilterControl.cs.zh-CN.resx" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

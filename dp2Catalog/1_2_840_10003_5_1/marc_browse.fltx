@@ -1,0 +1,133 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<filter>
+<using>
+<![CDATA[
+
+using System;
+using System.IO;
+using System.Text;
+using DigitalPlatform.MarcDom;
+
+using dp2Catalog;
+
+]]>
+</using>
+
+  <ref>system.dll</ref>
+  <ref>system.windows.forms.dll</ref>
+
+		<def>
+		<![CDATA[
+
+string sTitle = "";
+string sAuthor = "";
+string sPublisher = "";
+string sPubDate = "";
+	
+		]]>
+		</def>
+
+	<record>
+
+		<def>
+		<![CDATA[
+		]]>
+		</def>
+
+		<begin>
+		<![CDATA[
+			// MessageBox.Show("record data:" + this.Data);
+		]]>
+		</begin>
+
+		<field name="200">
+			<!-- 	 -->
+			<subfield name="a">
+				if (Root.sTitle != "")
+					Root.sTitle += " ";
+
+				Root.sTitle += this.Content;
+			</subfield>
+
+      <subfield name="b">
+        // 一般标志资料
+        Root.sTitle += " [";
+        Root.sTitle += this.Content;
+        Root.sTitle += "] ";
+      </subfield>
+      <subfield name="c">
+        // 另一著者的正题名
+        Root.sTitle += ". ";
+        Root.sTitle += this.Content;
+      </subfield>
+      <subfield name="d">
+        // 并列正题名
+        Root.sTitle += " = ";
+        Root.sTitle += this.Content;
+      </subfield>
+      <subfield name="e">
+        // 副题名
+        Root.sTitle += " : ";
+        Root.sTitle += this.Content;
+      </subfield>
+
+      <subfield name="f">
+        Root.sAuthor += this.Content;
+      </subfield>
+      <subfield name="g">
+        // 其它责任者说明`
+        Root.sAuthor += " ; ";
+        Root.sAuthor += this.Content;
+      </subfield>
+      <subfield name="h">
+        // 分册号
+        Root.sTitle += " . ";
+        Root.sTitle += this.Content;
+      </subfield>
+      <subfield name="i">
+        // 分册书名
+        if (this.PrevName == "h" || this.PrevName == "H")
+          Root.sTitle += " , ";
+        else
+          Root.sTitle += " . ";
+          
+        Root.sTitle += this.Content;
+      </subfield>
+
+
+		</field>
+
+
+		<field name="210">
+			<subfield name="a">
+				Root.sPublisher += this.Content + " : ";
+			</subfield>
+
+			<subfield name="c">
+				Root.sPublisher += this.Content;
+			</subfield>
+
+			<subfield name="d">
+				Root.sPubDate += this.Content;
+			</subfield>
+
+		</field>
+
+		<end>
+		<![CDATA[
+		]]>
+		</end>
+	</record>
+
+		<end>
+		<![CDATA[
+
+			// 输出结果
+			// sprintf(&_sOutput, "%s\t%s\t%s\t%s", &sTitle, &sAuthor, &sPublisher, &sPubDate)
+
+			Host.ResultString = sTitle + "\t" + sAuthor + "\t" + sPublisher + "\t" + sPubDate;
+		]]>
+		</end>
+</filter>
+
+

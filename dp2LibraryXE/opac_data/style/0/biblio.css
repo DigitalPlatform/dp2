@@ -1,0 +1,241 @@
+
+TABLE.biblio
+{
+	border-style:solid;
+	border-width:0px;
+	border-color:#aaaaaa;
+	border-collapse:collapse;
+	
+	background-color: White;
+	margin-bottom: 8px;
+	/* float: left; */
+	width: 60%;
+	min-width: 250px;
+}
+
+
+
+TABLE.biblio TR.columntitle
+{
+	font-weight: bolder;
+}
+
+TABLE.biblio TR.content
+{
+}
+
+
+TABLE.biblio TR.content TD.name
+{
+	font-weight: bolder;
+	text-align: right;
+	vertical-align:bottom; 
+
+	border-width:0px;
+	border-right-width:1px;
+	border-style:solid;
+	border-color:#aaaaaa;
+	border-collapse:collapse;
+	padding-right: 10px;
+
+	color: #aaaaaa;
+}
+
+TABLE.biblio TR.content TD.value
+{
+	text-align: left;
+	vertical-align:middle;
+
+	padding-left: 10px;
+}
+
+TABLE.biblio TR.bottomcmd
+{
+}
+
+DIV.biblio_wrapper
+{
+	border-style:solid;
+	border-width:1px;
+	border-top-width:0px;
+	border-bottom-width: 26px;
+	border-color:#aaaaaa;
+	border-collapse:collapse;
+	padding: 15px;
+	background-color: White;
+}
+
+DIV.biblio
+{
+	/* float:left; */ /* cause firefox float item roundbar to right*/
+	/*
+	border-style:solid;
+	border-width:1px;
+	border-color:red;
+*/
+}
+
+DIV.gotohongniba
+{
+    width: 120px;
+    padding: 4px;
+    border-width: 1px;
+    border-style: dotted;
+    border-color: #cccccc;
+}
+
+DIV.coverimage
+{
+	float: left;
+	min-width: 200px;
+}
+DIV.clear
+{
+	clear:both;
+}
+
+.hide
+{
+    display:none;
+}
+
+iframe.allpageframe
+{
+    width : 100%;
+    height: 500px;
+    
+    margin: 0px;
+    margin-bottom: 10px;
+}
+
+button.togglepageall
+{
+    border-style:solid;
+    border-width: 1px;
+    border-color: #cccccc;
+    padding:0px;
+    padding-left: 4px;
+    padding-right: 4px;
+    font-family: courier new;
+}
+
+.biblio DIV.locked, DIV.valuable
+{
+	margin: 5px;
+	margin-top: 5px;
+	margin-bottom: 5px;
+	padding: 5px;
+	float: left;
+}
+
+.biblio DIV.locked
+{
+	color:White;
+	background-color: gray;
+	border-style:solid;
+	border-width: 1pt;
+	border-color:#dddddd;
+}
+
+.biblio DIV.locked IMG, .biblio DIV.valuable IMG, .biblio DIV.locked IMG
+{
+	width: 11px;
+	height: 11px;
+}
+
+.biblio DIV.forbidden
+{
+    /*
+	margin: 5px;
+	margin-top: 5px;
+	margin-bottom: 5px;
+*/
+}
+
+DIV.biblio_state
+{
+    margin-bottom: 5px;
+    width: 100%;    
+    /*
+
+    border-style:solid;
+	border-width:1px;
+	border-color:#aaaaaa;
+*/
+	
+	background-color: #eeeeee;
+}
+
+TABLE.edit_biblio
+{
+    margin-top:5px;
+    width: 100%;    
+    /*
+
+    border-style:solid;
+	border-width:1px;
+	border-color:#aaaaaa;
+*/
+	
+	background-color: #eeeeee;
+}
+
+TABLE.edit_biblio TD.left
+{
+    width: 1%;
+    white-space:nowrap;
+	vertical-align: top;
+}
+
+DIV.biblio
+{
+    margin-top: 5px;
+    margin-bottom:5px;
+    
+    width: 100%;
+}
+
+.frame-border
+{
+    border-style:solid;
+	border-width:1px;
+	border-color:#aaaaaa;
+}
+
+TABLE.biblio
+{
+    line-height: 120%;
+}
+
+TABLE.biblio A:hover
+{
+    background-color: Yellow;
+}
+
+TABLE.biblio A
+{
+    border-radius: 3pt;
+
+
+    margin-left: 4px;
+    margin-right: 4px;
+    
+    padding: 3px;
+    padding-left: 10px;
+    padding-right: 10px;
+    line-height: 260%;
+    
+    border-color: #cceeaa;
+    border-width: 2px;
+
+    border-style: dotted;
+
+/*
+    -moz-box-shadow:    inset 1px 1px 3px rgba(0,0,0,0.4);
+    -webkit-box-shadow: inset 1px 1px 3px rgba(0,0,0,0.4);
+    box-shadow:         inset 1px 1px 3px rgba(0,0,0,0.4);
+*/
+	background:-webkit-gradient(linear, left top, left bottom, from(#efefef), to(#ccc));
+    background:-moz-linear-gradient(top,#efefef,#ccc);
+
+}

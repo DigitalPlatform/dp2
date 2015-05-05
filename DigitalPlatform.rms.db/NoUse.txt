@@ -1,0 +1,1302 @@
+user.cs
+
+//#define DEBUG_LOCK
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Threading;
+using System.Xml;
+using System.IO;
+using System.Diagnostics;
+
+using DigitalPlatform.rms;
+using DigitalPlatform.Text;
+using DigitalPlatform.Text.SectionPropertyString;
+using DigitalPlatform.Xml;
+using DigitalPlatform.ResultSet;
+using DigitalPlatform.IO;
+
+namespace DigitalPlatform.rms
+{
+    // 用户集合
+    public class UserCollection : ArrayList
+    {
+        public ReaderWriterLock m_lock = new ReaderWriterLock();
+        public int m_nTimeOut = 5000;
+      
+        public DatabaseCollection m_dbs = null; // 数据库集合
+        public int MaxCount = 50;  //内存中只保存50个用户
+
+        // 初始化用户集合对象
+        // parameters:
+        //      userDbs     帐户库集合
+        //      strError    out参数，返回出错信息
+        // return:
+        //      -1  出错
+        //      0   成功
+        // 线：安全的
+        public int Initial(DatabaseCollection dbs,
+            out string strError)
+        {
+            strError = "";
+
+            //*********对帐户集合加写锁****************
+            m_lock.AcquireWriterLock(m_nTimeOut);
+#if DEBUG_LOCK
+			this.m_accountDbs.m_dbColl.WriteDebugInfo("Initial()，对用户集合加写锁。");
+#endif
+            try
+            {
+                this.m_dbs = dbs;
+                
+                // 清空成员
+                this.Clear();
+
+                return 0;
+            }
+            finally
+            {
+                m_lock.ReleaseWriterLock();  //解写锁
+#if DEBUG_LOCK
+				this.m_accountDbs.m_dbColl.WriteDebugInfo("Initial()，对用户集合解写锁。");
+#endif
+            }
+        }
+
+        // 只从用户集合中查找用户对象
+        // parameters:
+        //      strName     用户名
+        //      user        out参数，返回用户对象
+        //      strError    out参数，返回出错信息
+        // return:
+        //      -1  出错
+        //      0   未找到
+        //      1   找到
+        // 线：安全
+        public int GetUser(string strName,
+            out User user,
+            out string strError)
+        {
+            user = null;
+            strError = "";
+
+            //*********对帐户集合加读锁*****************
+            this.m_lock.AcquireReaderLock(m_nTimeOut); //加读锁
+#if DEBUG_LOCK
+			this.m_accountDbs.m_dbColl.WriteDebugInfo("GetUserByName()，对帐户集合加读锁。");
+#endif
+            try
+            {
+                foreach (User oneUser in this)
+                {
+                    if (oneUser.Name == strName)
+                    {
+                        user = oneUser;
+                        return 1;
+                    }
+                }
+
+                return 0;
+            }
+            finally
+            {
+                //*****对帐户集合解读锁*******
+                this.m_lock.ReleaseReaderLock();
+#if DEBUG_LOCK
+				this.m_accountDbs.m_dbColl.WriteDebugInfo("GetUserByName()，对帐户集合解读锁。");
+#endif
+            }
+        }
+
+        // 为登录模块编的私有函数
+        // 先从用户集合中找，没有再从用户库集合中搜索
+        // parameters:
+        //      strName     用户名
+        //      user        out参数，返回用户对象
+        //      strError    out参数，返回出错信息
+        // return:
+        //      -1  出错
+        //      0   未找到
+        //      1   找到
+        // 线：安全
+        private int GetUserFromMemoryAndDbs(string strName,
+            out User user,
+            out string strError)
+        {
+            user = null;
+            strError = "";
+
+            // 只从用户集合中查找用户对象
+            // parameters:
+            //      strName     用户名
+            //      user        out参数，返回用户对象
+            //      strError    out参数，返回出错信息
+            // return:
+            //      -1  出错
+            //      0   未找到
+            //      1   找到
+            // 线：安全
+            int nRet = this.GetUser(strName,
+                out user,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            if (nRet == 1)
+                return 1;
+
+            //*********对帐户集合加写锁****************
+            m_lock.AcquireWriterLock(m_nTimeOut);
+#if DEBUG_LOCK
+			this.m_accountDbs.m_dbColl.WriteDebugInfo("GetUserByName()，对帐户集合加写锁。");
+#endif
+            try
+            {
+                nRet = this.m_dbs.ShearchUser(strName,
+                    out user,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                if (nRet == 1)
+                {
+                    Debug.Assert(user != null, "此时user不可能为null");
+
+                    this.Add(user);
+                    user.container = this;
+                    return 1;
+                }
+
+                return 0;
+            }
+            finally
+            {
+                m_lock.ReleaseWriterLock();  //解写锁
+#if DEBUG_LOCK
+				this.m_accountDbs.m_dbColl.WriteDebugInfo("GetUserByName()，对帐户集合解写锁。");
+#endif
+            }
+        }
+
+        // 登录
+        // parameters:
+        //      strUserName 用户名
+        //      strPassword 密码
+        //      user        out参数，返回用户对象
+        //      strError    out参数，返回出错信息
+        // return:
+        //		-1	error
+        //		0	用户名不存在，或密码不正确
+        //      1   成功
+        // 线：安全
+        public int Login(string strUserName,
+            string strPassword,
+            out User user,
+            out string strError)
+        {
+            user = null;
+            strError = "";
+
+            // return:
+            //      -1  出错
+            //      0   未找到
+            //      1   找到
+            // 线：安全
+            int nRet = this.GetUserFromMemoryAndDbs(strUserName,
+                out user,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            if (nRet == 1)
+            {
+                Debug.Assert(user != null, "此时user不可能为null。");
+                string strSHA1Password = Cryptography.GetSHA1(strPassword);
+                if (user.SHA1Password == strSHA1Password)
+                {
+                    user.PlusOneUse();
+                    return 1;
+                }
+            }
+
+            return 0;
+        }
+
+        // 更新内存中的帐户对象。
+        // 线：安全
+        // parameters:
+        //      strRecPath  帐户记录路径
+        public int RefreshUserSafety(
+            string strRecPath,
+            out string strError)
+        {
+            strError = "";
+
+            //***************对帐户集合加写锁*****************
+            m_lock.AcquireWriterLock(m_nTimeOut);
+#if DEBUG_LOCK
+			this.m_accountDbs.m_dbColl.WriteDebugInfo("RefreshUser()，对帐户集合加写锁。");
+#endif
+            try
+            {
+                foreach (User user in this)
+                {
+                    if (user.RecPath == strRecPath)
+                    {
+                        int nRet = this.RefreshUser(strRecPath,
+                            user,
+                            out strError);
+                        if (nRet <= -1)
+                            return -1;
+                        return 0;
+                    }
+                }
+                return 0;
+            }
+            finally
+            {
+                //***********对帐户集合解写锁*******************
+                m_lock.ReleaseWriterLock();
+#if DEBUG_LOCK
+				this.m_accountDbs.m_dbColl.WriteDebugInfo("RefreshUser()，对帐户集合解写锁。");
+#endif
+            }
+        }
+
+        // 提取数据库中记录，更新User对象
+        public int RefreshUser(
+            string strRecordPath,
+            User user,
+            out string strError)
+        {
+            strError = "";
+
+            // 创建一个DpPsth实例
+            DbPath path = new DbPath(strRecordPath);
+
+            // 找到指定帐户数据库,因为数据库名有可能不是id，所以用DatabaseCollection.GetDatabase()
+            Database db = this.m_dbs.GetDatabase(path.Name); //this.GetUserDatabaseByID(path.Name);
+            if (db == null)
+            {
+                strError = "未找到名为'" + path.Name + "'帐户库。";
+                return -1;
+            }
+
+            // 从帐户库中找到记录
+            string strXml;
+            int nRet = db.GetXmlDataSafety(path.ID,
+                out strXml,
+                out strError);
+            if (nRet <= -1)
+                return -1;
+
+            //加载到dom
+            XmlDocument dom = new XmlDocument();
+            //dom.PreserveWhitespace = true; //设PreserveWhitespace为true
+            try
+            {
+                dom.LoadXml(strXml);
+            }
+            catch (Exception ex)
+            {
+                strError = "加载路径为'" + strRecordPath + "'的帐户记录到dom时出错,原因:" + ex.Message;
+                return -1;
+            }
+
+            int nOldUseCount = user.UseCount;
+
+            nRet = user.Initial(strRecordPath,
+                dom,
+                db,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            user.m_nUseCount = nOldUseCount;
+
+            return 1;
+        }
+
+        // 保存内存中的帐户对象到数据库
+        // 线：安全
+        public int SaveUserSafety(string strRecPath,
+            out string strError)
+        {
+            strError = "";
+
+            //***************对帐户集合加写锁*****************
+            m_lock.AcquireWriterLock(m_nTimeOut);
+#if DEBUG_LOCK
+			this.m_dbColl.WriteDebugInfo("SaveUserSafety()，对帐户集合加写锁。");
+#endif
+            try
+            {
+                foreach (User user in this)
+                {
+                    if (user.RecPath == strRecPath)
+                    {
+                        int nRet = user.InternalSave(out strError);
+                        if (nRet <= -1)
+                            return nRet;
+                    }
+                }
+                return 0;
+            }
+            finally
+            {
+                //***********对帐户集合解写锁*******************
+                m_lock.ReleaseWriterLock();
+#if DEBUG_LOCK
+				this.m_dbColl.WriteDebugInfo("SaveUserSafety()，对帐户集合解写锁。");
+#endif
+            }
+        }
+
+        // 如果内存用户数超出范围，则移出指定的对象。
+        // parameters:
+        //      user    用 户对象
+        //      strError    out参数，返回出错信息
+        // return:
+        //      -1  出错
+        //      0   成功
+        // 线：安全
+        public int RemoveUserIfOutOfRange(User user,
+            out string strError)
+        {
+            strError = "";
+
+            //***************对帐户集合加写锁*****************
+            m_lock.AcquireWriterLock(m_nTimeOut);
+#if DEBUG_LOCK
+			this.m_dbColl.WriteDebugInfo("RemoveUserIfOutOfRange()，对帐户集合加写锁。");
+#endif
+            try
+            {
+                if (this.Count <= this.MaxCount)
+                    return 0;
+
+                return this.RemoveUser(user,
+                    out strError);
+
+            }
+            finally
+            {
+                //***********对帐户集合解写锁*******************
+                m_lock.ReleaseWriterLock();
+#if DEBUG_LOCK
+				this.m_dbColl.WriteDebugInfo("RemoveUserIfOutOfRange()，对帐户集合解写锁。");
+#endif
+            }
+
+        }
+
+        // 从用户集合中清除一个用户
+        // parameters:
+        //      user    用户对象
+        //      strError    out参数，返回出错信息
+        // return:
+        //      -1  出错
+        //      0   成功
+        // 线：不安全安全
+        public int RemoveUser(User user,
+            out string strError)
+        {
+            strError = "";
+
+            Debug.Assert(user != null, "RemoveUser()调用错误，user参数值不能为null。");
+
+            int nIndex = this.IndexOf(user);
+            if (nIndex == -1)
+            {
+                strError = "RemoveUser()，user竟然不是集合中的成员，异常。";
+                return -1;
+            }
+
+            this.RemoveAt(nIndex);
+
+            return 0;
+        }
+
+        // 系统管理员修改用户密码
+        // parameters:
+        //      user        当前帐户
+        //      strChangedUserName  被修改用户名
+        //      strNewPassword  新密码
+        //      strError    out参数，返回出错信息
+        // return:
+        //      -1  出错
+        //      0   成功
+        public int ChangePassword(User user,
+            string strChangedUserName,
+            string strNewPassword,
+            out string strError)
+        {
+            strError = "";
+
+            User changedUser = null;
+
+            // return:
+            //		-1	出错
+            //		0	未找到帐户
+            //		1	找到了
+            // 线：安全
+            int nRet = this.GetUserFromMemoryAndDbs(strChangedUserName,
+                out changedUser,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            if (nRet == 0)
+            {
+                strError = "没有找到名称为'" + strChangedUserName + "'的用户";
+                return -1;
+            }
+
+            Debug.Assert(changedUser != null, "此时userChanged对象不可能为null,请检查服务器的ChangePassword()函数。");
+
+            DbPath path = new DbPath(changedUser.RecPath);
+
+            Database db = this.m_dbs.GetDatabase(path.Name);
+            if (db == null)
+            {
+                strError = "未找到帐户'" + strChangedUserName + "'从属的数据库，异常。";
+                return -1;
+            }
+            // ???????认不认库的其它语言库名
+            string strDbName = db.GetCaption("zh-cn");
+
+            string strExistRights = "";
+            bool bHasRight = user.HasRights(strDbName,
+                ResType.Database,
+                "changepassword",
+                out strExistRights);
+            if (bHasRight == false)
+            {
+                strError = "您的帐户名为'" + user.Name + "'，对帐户名为'" + strChangedUserName + "'所从属的数据库'" + strDbName + "'没有'修改记录密码(changepassword)'的权限，目前的权限值为'" + strExistRights + "'。";
+                return -6;
+            }
+
+            return changedUser.ChangePassword(strNewPassword,
+                out strError);
+        }
+    }
+
+    // 用户
+    public class User
+    {
+        public UserCollection container = null;
+
+        public string RecPath = "";   // 全路径格式: 库名/记录号
+        public XmlDocument m_dom = new XmlDocument();
+        public Database m_db = null;
+
+        public string Name = "";
+        public string SHA1Password = "";   // 名称是为了强调为SHA1形态
+        public int Count = 0;
+
+        public XmlNode m_nodeServer = null;
+
+        public CfgRights cfgRights = null;
+
+        // 目前用户对象的锁主要用在修改使用数量方面,
+        // 考虑改成Interlocked.Increment和Interlocked.Decrement
+        //public ReaderWriterLock m_lock = new ReaderWriterLock();
+        //public int m_nTimeOut = 5000;
+        internal int m_nUseCount = 0;
+
+        public int UseCount
+        {
+            get
+            {
+                return this.m_nUseCount;
+            }
+        }
+
+        // 初始化用户对象
+        // parameters:
+        //      dom         用户记录dom
+        //      strResPath  记录路径 全路径 库名/记录号
+        //      db          所从属的数据库
+        //      strError    out参数，返回出错信息
+        // return:
+        //      -1  出错
+        //      0   成功
+        // ???初始化修改用户对象的使用数量吗?
+        public int Initial(string strRecPath,
+            XmlDocument dom,
+            Database db,
+            out string strError)
+        {
+            strError = "";
+
+            this.RecPath = strRecPath;
+            this.m_dom = dom;
+            this.m_db = db;
+
+            XmlNode root = this.m_dom.DocumentElement;
+            XmlNode nodeName = root.SelectSingleNode("name");
+            if (nodeName != null)
+                this.Name = DomUtil.GetNodeText(nodeName).Trim();
+
+            XmlNode nodePassword = root.SelectSingleNode("password");
+            if (nodePassword != null)
+                SHA1Password = DomUtil.GetNodeText(nodePassword).Trim();
+
+            XmlNode nodeRightsItem = root.SelectSingleNode("rightsItem");
+            if (nodeRightsItem != null)
+            {
+                strError = "帐户记录为旧版本，根元素下已经不支持<rightsItem>元素。";
+                return -1;
+            }
+
+            // 没有<server>元素是否按出错处理
+            this.m_nodeServer = root.SelectSingleNode("server");
+            if (this.m_nodeServer == null)
+            {
+                strError = "帐户记录未定义<server>元素。";
+                return -1;
+            }
+
+            this.cfgRights = new CfgRights();
+            int nRet = this.cfgRights.Initial(this.m_nodeServer,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            return 0;
+        }
+
+
+        // 得到片断的定义信息
+        // parameters:
+        //      strRights   总权限
+        //      strCategory 种类
+        // return:
+        //      找到种定义的权限，不带种类名称
+        private string GetSectionRights(string strRights,
+            string strCategory)
+        {
+            DigitalPlatform.Text.SectionPropertyString.PropertyCollection propertyColl =
+                new DigitalPlatform.Text.SectionPropertyString.PropertyCollection("this",
+                strRights,
+                DelimiterFormat.Semicolon);
+            Section section = propertyColl[strCategory];
+            if (section == null)
+                return "";
+
+            return section.Value;
+        }
+
+
+        // 检索该帐户是否对指定的配置事项有指定的权限
+        // parameters:
+        //		strPath	配置事项路径
+        //		strRights	以逗号分隔的权限列表
+        // return:
+        //		true	有
+        //		false	无
+        public bool HasRights(string strPath,
+            ResType resType,
+            string strOneRight,
+            out string strExistRights)
+        {
+            strExistRights = "";
+
+            ResultType resultType = new ResultType();
+            string strError = "";
+            int nRet = this.cfgRights.CheckRights(strPath,
+                resType,
+                strOneRight,
+                out strExistRights,
+                out resultType,
+                out strError);
+            if (nRet == -1)
+            {
+                throw new Exception("CheckRights()出错，原因：" + strError);
+            }
+
+            if (resultType == ResultType.Plus)
+                return true;
+
+            return false;
+        }
+
+        // 缺省认为可以修改自己的密码
+        private bool CheckChangePasswordRights()
+        {
+            if (this.m_dom != null)
+            {
+                XmlNode nodePassword = this.m_dom.DocumentElement.SelectSingleNode("password");
+                string strStyle = DomUtil.GetAttr(nodePassword, "style");
+                if (StringUtil.IsInList("changepassworddenied", strStyle, true) == true)
+                    return false;
+            }
+            return true;
+        }
+
+        // 修改自己的密码
+        // parameters:
+        //      strNewPassword   明码
+        // return:
+        //      -1  出错
+        public int ChangePassword(
+            string strNewPassword,
+            out string strError)
+        {
+            strError = "";
+
+            // 检索是否有修改自己密码的权限
+            bool bHasChangePasswordRights = false;
+            bHasChangePasswordRights = this.CheckChangePasswordRights();
+            if (bHasChangePasswordRights == false)
+            {
+                strError = "您的用户名为 '" + this.Name + "'，没有修改自己密码的权限。";
+                return -1;
+            }
+
+            this.SHA1Password = Cryptography.GetSHA1(strNewPassword);
+
+            // 用最新的密码
+            XmlNode root = this.m_dom.DocumentElement;
+            XmlNode nodePassword = root.SelectSingleNode("password");
+            DomUtil.SetNodeText(nodePassword, this.SHA1Password);
+
+            // 立即保存到用户记录里
+            int nRet = this.InternalSave(out strError);
+            return nRet;
+        }
+
+
+        // 保存内存对象到数据库记录
+        public int InternalSave(out string strError)
+        {
+            strError = "";
+            if (this.m_db == null)
+            {
+                strError = "帐户对象m_db==null";
+                return -1;
+            }
+
+            DbPath path = new DbPath(this.RecPath);
+
+            // 将帐户记录的内容读到一个字节数组
+            MemoryStream fs = new MemoryStream();
+            this.m_dom.Save(fs);
+            fs.Seek(0, SeekOrigin.Begin);
+            byte[] baSource = new byte[fs.Length];
+            fs.Read(baSource,
+                0,
+                baSource.Length);
+            fs.Close();
+
+            string strRange = "0-" + Convert.ToString(baSource.Length - 1);
+            byte[] baInputTimestamp = null;
+            byte[] baOutputTimestamp = null;
+            string strOutputID = "";
+            string strOutputValue = "";
+            string strStyle = "ignorechecktimestamp";
+            return this.m_db.WriteXml(null, //oUser
+                path.ID,
+                null,
+                strRange,
+                baSource.Length,
+                baSource,
+                null,
+                "",  //metadata
+                strStyle,
+                baInputTimestamp,
+                out baOutputTimestamp,
+                out strOutputID,
+                out strOutputValue,
+                false,  //bCheckAccount
+                out strError);
+        }
+
+
+        // 增加一次使用数
+        // 在login()时被调
+        public void PlusOneUse()
+        {
+            // out string strError
+            // strError = "";
+
+            Interlocked.Increment(ref this.m_nUseCount);
+
+            /*
+            //*********对用户加写锁***********
+            m_lock.AcquireWriterLock(m_nTimeOut);
+#if DEBUG_LOCK
+			this.container.m_dbColl.WriteDebugInfo("PlusOneUse()，对用户加写锁。");
+#endif
+            try
+            {
+                this.m_nUseCount++;
+                return 0;
+            }
+            finally
+            {
+                //*********对用户解写锁*************
+                m_lock.ReleaseWriterLock();
+#if DEBUG_LOCK
+				this.container.m_dbColl.WriteDebugInfo("PlusOneUse()，对用户解写锁。");
+#endif
+            }
+             */
+        }
+
+        // 减少一次使用数
+        // 在Session失效时被调
+        public void MinusOneUse()
+        {   
+            // out string strError
+            // strError = "";
+
+            Interlocked.Decrement(ref this.m_nUseCount);
+
+            /*
+            //*********对用户加写锁***********
+            m_lock.AcquireWriterLock(m_nTimeOut);
+#if DEBUG_LOCK
+			this.container.m_dbColl.WriteDebugInfo("MinusOneUse()，对用户加写锁。");
+#endif
+            try
+            {
+                this.m_nUseCount--;
+                return 0;
+            }
+            finally
+            {
+                //*********对用户解写锁*************
+                m_lock.ReleaseWriterLock();
+#if DEBUG_LOCK
+				this.container.m_dbColl.WriteDebugInfo("MinusOneUse()，对用户解写锁。");
+#endif
+            }
+             */
+        }
+    }
+}
+
+
+~~~~~~~~~~~~
+
+        // 运算逆波兰表，得到结果集
+        // parameter:
+        //		rpn         逆波兰表
+        //		resultSet  结果集
+        // return:
+        //		0   成功
+        //		-1  出错 原因可能如下:
+        //			1)rpn参数为null
+        //			2)oResultSet参数为null
+        //			3)栈里的某成员出错（node和result都为null）
+        //			4)从栈中pop()或peek()元素时，出现栈空
+        //			5)pop的类型，不是实际存在的类型
+        //			6)通过一个节点，得到结果集，即调DoQuery()函数出错
+        //			7)做运算时，调DpResultSetManager.Merge()函数出错
+        //			8)最后栈里的元素多于1，则逆波兰表出错
+        //			9)最后结果集为空
+        //		-6	无足够的权限
+        public int ProceedRPN(
+            SessionInfo sessioninfo,
+            string strOutputStyle,
+            ArrayList rpn,
+            ref DpResultSet resultSet,
+            ChannelHandle handle,
+            // Delegate_isConnected isConnected,
+            out string strError)
+        {
+            DateTime start_time = DateTime.Now;
+            Debug.WriteLine("Begin ProceedRPN()");
+
+            try
+            {
+                strError = "";
+                //???要搞清楚用不用清空
+                //应该清空，后面的运算使用的结果集是堆栈变量，最后把运算结果拷贝到该结果集
+                //DoQuery处，也应该先清空
+                //doItem处，一进去先清空，但再对数据库循环检索时，千万不清空
+
+                if (resultSet != null)
+                    resultSet.Clear();
+
+                if (rpn == null)
+                {
+                    strError = "rpn不能为null";
+                    return -1;
+                }
+#if NO
+                if (resultSet == null)
+                {
+                    strError = "resultSet不能为null";
+                    return -1;
+                }
+#endif
+
+                if (rpn.Count == 0)
+                    return 0;
+
+                int ret;
+
+                // 声明栈,ReversePolishStack栈是自定义的类
+                // 决定用一个栈做运算，如果遇到遇到操作数，就直接push到栈里
+                // 遇到操作符，如果是双目，从栈里pop两项，进行运算
+                // 注意SUB运算是，用后一次pop的对象减前一次pop的对象
+                //
+                // oReversePolandStack的成员为ReversePolishItem,
+                // ReversePolishItem是一个复杂对象，
+                // 包含m_int(类型),m_node(节点),m_resultSet.
+                // 实际运用中，m_node和m_resultSet只有一项值有效，另一顶是null
+                // m_int用于判断哪个值有效，
+                // 0表示node有效，1表示resultSet有效
+                ReversePolishStack oReversePolandStack =
+                    new ReversePolishStack();
+
+                //做循环
+                for (int i = 0; i < rpn.Count; i++)
+                {
+                    XmlNode node = (XmlNode)rpn[i];
+
+                    if (node.Name != "operator")  //操作数直接push到栈里
+                    {
+                        oReversePolandStack.PushNode(node);
+                    }
+                    else
+                    {
+                        string strOpreator = DomUtil.GetAttr(node, "value");
+
+                        //三个输出用于输入的参数，因为是指针，所以不用out
+                        DpResultSet oTargetLeft = sessioninfo.NewResultSet();   // new DpResultSet();
+                        DpResultSet oTargetMiddle = sessioninfo.NewResultSet();   // new DpResultSet();
+                        DpResultSet oTargetRight = sessioninfo.NewResultSet();   // new DpResultSet();
+
+                        //做一个两个成员的ArrayList，
+                        //成员类型为DpResultSet，
+                        //存放从栈里pop出的（如果是node，需要进行计算）的结果集
+                        List<DpResultSet> oSource = new List<DpResultSet>();
+                        oSource.Add(sessioninfo.NewResultSet());   // new DpResultSet()
+                        oSource.Add(sessioninfo.NewResultSet());   // new DpResultSet()
+                        try
+                        {
+                            for (int j = 0; j < 2; j++)
+                            {
+                                //类型为-1，表示node和resultSet都为null，出现错误
+                                if (oReversePolandStack.PeekType() == -1)
+                                {
+                                    strError = strOpreator + "时,PeekType()等于-1，则表示两项都是null，出错，返回-1<br/>";
+                                    return -1;
+                                }
+
+                                //表示放得是node
+                                if (oReversePolandStack.PeekType() == 0)
+                                {
+                                    XmlNode nodePop;
+                                    nodePop = oReversePolandStack.PopNode();
+                                    if (nodePop == null)
+                                    {
+                                        strError = "nodePop不为又能为null";
+                                        return -1;
+                                    }
+
+                                    DpResultSet temp = oSource[j];
+                                    // return:
+                                    //		-1	出错
+                                    //		-6	无权限
+                                    //		0	成功
+                                    ret = this.DoQuery(
+                                        sessioninfo,
+                                        strOutputStyle,
+                                        nodePop,
+                                        ref temp,
+                                        handle,
+                                        // isConnected,
+                                        out strError);
+                                    if (ret <= -1)
+                                        return ret;
+                                    if (temp != oSource[j])
+                                        oSource[j] = temp;
+                                }
+                                else
+                                {
+                                    oSource[j] = oReversePolandStack.PopResultSet();
+
+                                    if (oSource[j] == null)
+                                    {
+                                        return -1;
+                                    }
+                                }
+                            }
+                        }
+                        catch (StackUnderflowException /*ex*/)
+                        {
+                            // 2008/12/4 new add
+                            string strOutXml = "";
+                            if (node.ParentNode != null)
+                            {
+                                int nRet = DomUtil.GetIndentXml(node.ParentNode.OuterXml,
+                                    out strOutXml,
+                                    out strError);
+                            }
+                            strError = strOpreator + " 是二元操作符，它缺乏操作数。";
+
+                            if (String.IsNullOrEmpty(strOutXml) == false)
+                                strError += "\r\n" + strOutXml;
+
+                            // strError = "StackUnderflowException :" + ex.Message;
+                            return -1;
+                        }
+
+                        string strDebugInfo;
+
+                        //OR,AND,SUB运算都是调的DpResultSetManager.Merge()函数，
+                        //注意参数的使用
+                        if (strOpreator == "OR")
+                        {
+                            bool bOutputKeyCount = StringUtil.IsInList("keycount", strOutputStyle);
+                            bool bOutputKeyID = StringUtil.IsInList("keyid", strOutputStyle);
+
+                            DpResultSet left = oSource[1];
+
+                            DpResultSet right = oSource[0];
+
+                            if (bOutputKeyCount == true || bOutputKeyID == true)
+                            {
+                                if (left.Asc != right.Asc)
+                                {
+                                    right.Asc = left.Asc;
+                                    right.Sorted = false;
+                                }
+
+                                if (EnsureSorted(left, handle, out strError) == -1)
+                                    return -1;
+                                if (EnsureSorted(right, handle, out strError) == -1)
+                                    return -1;
+
+
+                                /*
+                                // new
+                                oTargetMiddle.EnsureCreateIndex();
+                                 */
+                                // 优化
+                                if (left.Count == 0)
+                                    oReversePolandStack.PushResultSet(right);
+                                else if (right.Count == 0)
+                                    oReversePolandStack.PushResultSet(left);
+                                else
+                                {
+                                    ret = DpResultSetManager.Merge("OR",
+                                        left,
+                                        right,
+                                        strOutputStyle,
+                                        null,
+                                        oTargetMiddle,
+                                        null,
+                                        false,
+                                        out strDebugInfo,
+                                        out strError);
+                                    if (ret == -1)
+                                        return -1;
+
+                                    oReversePolandStack.PushResultSet(oTargetMiddle);
+                                }
+                            }
+                            else
+                            {
+                                // 直接相加
+                                if (left.Count == 0)
+                                    oReversePolandStack.PushResultSet(right);
+                                else if (right.Count == 0)
+                                    oReversePolandStack.PushResultSet(left);
+                                else
+                                {
+                                    // return:
+                                    //      -1  出错
+                                    //      0   没有交叉部分
+                                    //      1   有交叉部分
+                                    ret = DpResultSetManager.IsCross(left,
+                                        right,
+                                        out strError);
+                                    if (ret == 0)
+                                    {
+                                        ret = DpResultSetManager.AddResults(ref left,
+                                            right,
+                                            out strError);
+                                        if (ret == -1)
+                                            return -1;
+
+                                        oReversePolandStack.PushResultSet(left);
+                                    }
+                                    else
+                                    {
+                                        if (left.Asc != right.Asc)
+                                        {
+                                            right.Asc = left.Asc;
+                                            right.Sorted = false;
+                                        }
+
+                                        if (EnsureSorted(left, handle, out strError) == -1)
+                                            return -1;
+                                        if (EnsureSorted(right, handle, out strError) == -1)
+                                            return -1;
+
+                                        ret = DpResultSetManager.Merge("OR",
+    left,
+    right,
+    strOutputStyle,
+    null,
+    oTargetMiddle,
+    null,
+    false,
+    out strDebugInfo,
+    out strError);
+                                        if (ret == -1)
+                                            return -1;
+
+                                        oReversePolandStack.PushResultSet(oTargetMiddle);
+                                    }
+                                }
+                            }
+
+                            continue;
+                        }
+
+                        if (strOpreator == "AND")
+                        {
+                            DpResultSet left = oSource[1];
+                            DpResultSet right = oSource[0];
+
+                            if (left.Asc != right.Asc)
+                            {
+                                right.Asc = left.Asc;
+                                right.Sorted = false;
+                            }
+
+                            if (EnsureSorted(left, handle, out strError) == -1)
+                                return -1;
+                            if (EnsureSorted(right, handle, out strError) == -1)
+                                return -1;
+                            /*
+                            // new
+                            oTargetMiddle.EnsureCreateIndex();
+                             */
+
+                            // 优化
+                            if (left.Count == 0)
+                                oReversePolandStack.PushResultSet(left);
+                            else if (right.Count == 0)
+                                oReversePolandStack.PushResultSet(right);
+                            else
+                            {
+                                ret = DpResultSetManager.Merge("AND",
+                                    left,
+                                    right,
+                                    strOutputStyle,
+                                    null,    //oTargetLeft
+                                    oTargetMiddle,
+                                    null,   //oTargetRight
+                                    false,
+                                    out strDebugInfo,
+                                    out strError);
+                                if (ret == -1)
+                                    return -1;
+
+                                oReversePolandStack.PushResultSet(oTargetMiddle);
+                            }
+
+                            continue;
+                        }
+
+                        if (strOpreator == "SUB")
+                        {
+                            //因为使用从栈里pop，所以第0个是后面的，第1个是前面的
+                            DpResultSet left = oSource[1];
+                            DpResultSet right = oSource[0];
+
+                            if (left.Asc != right.Asc)
+                            {
+                                right.Asc = left.Asc;
+                                right.Sorted = false;
+                            }
+
+                            if (EnsureSorted(left, handle, out strError) == -1)
+                                return -1;
+                            if (EnsureSorted(right, handle, out strError) == -1)
+                                return -1;
+
+                            /*
+                            // new
+                            oTargetLeft.EnsureCreateIndex();
+                             */
+
+                            // 优化
+                            if (left.Count == 0)
+                                oReversePolandStack.PushResultSet(left);
+                            else if (right.Count == 0)
+                                oReversePolandStack.PushResultSet(left);
+                            else
+                            {
+                                ret = DpResultSetManager.Merge("SUB",
+                                    left,
+                                    right,
+                                    strOutputStyle,
+                                    oTargetLeft,
+                                    null, //oTargetMiddle
+                                    null, //oTargetRight
+                                    false,
+                                    out strDebugInfo,
+                                    out strError);
+                                if (ret == -1)
+                                {
+                                    return -1;
+                                }
+
+                                oReversePolandStack.PushResultSet(oTargetLeft);
+                            }
+
+                            continue;
+                        }
+                    }
+                }
+                if (oReversePolandStack.Count > 1)
+                {
+                    strError = "逆波兰出错";
+                    return -1;
+                }
+                try
+                {
+                    int nTemp = oReversePolandStack.PeekType();
+                    //如果类型为0,表示存放的是节点
+                    if (nTemp == 0)
+                    {
+                        XmlNode node = oReversePolandStack.PopNode();
+
+                        // return:
+                        //		-1	出错
+                        //		-6	无权限
+                        //		0	成功
+                        ret = this.DoQuery(
+                            sessioninfo,
+                            strOutputStyle,
+                            node,
+                            ref resultSet,
+                            handle,
+                            // isConnected,
+                            out strError);
+                        if (ret <= -1)
+                            return ret;
+                    }
+                    else if (nTemp == 1)
+                    {
+                        // 调DpResultSet的copy函数
+
+                        // TODO: 测算这个Copy所花费的时间。
+                        // resultSet.Copy((DpResultSet)(oReversePolandStack.PopResultSet()));
+                        resultSet = (DpResultSet)(oReversePolandStack.PopResultSet());
+                    }
+                    else
+                    {
+                        strError = "oReversePolandStack的类型不可能为" + Convert.ToString(nTemp);
+                        return -1;
+                    }
+                }
+                catch (StackUnderflowException)
+                {
+                    strError = "peek或pop时，抛出StackUnderflowException异常";
+                    return -1;
+                }
+
+                //最后结果集为null，返回出错
+                if (resultSet == null)
+                {
+                    strError = "运算结束后PopResultSet为null" + Convert.ToString(oReversePolandStack.PeekType());
+                    return -1;
+                }
+
+                return 0;
+            }
+            finally
+            {
+                TimeSpan delta = DateTime.Now - start_time;
+                Debug.WriteLine("End ProceedRPN() 耗时 " + delta.ToString());
+            }
+        }
+
+
+
+		~~~
+		#if NO
+            foreach (XmlNode fileNode in fileList)
+            {
+                // 获取源资源对象
+                string strObjectID = DomUtil.GetAttr(fileNode, "id");
+                string strOriginObjectPath = strOriginRecordPath + "/object/" + strObjectID;
+                byte[] baOriginObjectData = null;
+                string strOriginObjectMetadata = "";
+                string strOriginObjectOutputPath = "";
+                byte[] baOriginObjectOutputTimestamp = null;
+
+                // this.WriteErrorLog("走到CopyRecord(),获取资源，源路径='" + strOriginObjectPath + "'");
+
+                // int nAdditionError = 0;
+                // return:
+                //		-1	一般性错误
+                //		-4	未找到路径指定的资源
+                //		-5	未找到数据库
+                //		-6	没有足够的权限
+                //		-7	路径不合法
+                //		-10	未找到记录xpath对应的节点
+                //		>= 0	成功，返回最大长度
+                nRet = this.API_GetRes(strOriginObjectPath,
+                    0,
+                    -1,
+                    "data,metadata",
+                    user,
+                    -1,
+                    out baOriginObjectData,
+                    out strOriginObjectMetadata,
+                    out strOriginObjectOutputPath,
+                    out baOriginObjectOutputTimestamp,
+                    out nAdditionError,
+                    out strError);
+                if (nRet <= -1)
+                    return (int)nRet;
+
+                // 写目标资源对象
+                string strTargetObjectPath = strTargetRecordOutputPath + "/object/" + strObjectID;
+                long lTargetObjectTotalLength = baOriginObjectData.Length;
+                string strTargetObjectMetadata = strOriginObjectMetadata;
+                string strTargetObjectStyle = "ignorechecktimestamp";
+                string strTargetObjectOutputPath = "";
+                byte[] baTargetObjectOutputTimestamp = null;
+                string strTargetObjectOutputValue = "";
+
+                // this.WriteErrorLog("走到CopyRecord(),写资源，目标路径='" + strTargetObjectPath + "'");
+
+                // return:
+                //		-1	一般性错误
+                //		-2	时间戳不匹配
+                //		-4	未找到路径指定的资源
+                //		-5	未找到数据库
+                //		-6	没有足够的权限
+                //		-7	路径不合法
+                //		-8	已经存在同名同类型的项
+                //		-9	已经存在同名但不同类型的项
+                //		0	成功
+                nRet = this.API_WriteRes(strTargetObjectPath,
+                    "",
+                    lTargetObjectTotalLength,
+                    baOriginObjectData,
+                    null,
+                    strTargetObjectMetadata,
+                    strTargetObjectStyle,
+                    null,
+                    user,
+                    out strTargetObjectOutputPath,
+                    out baTargetObjectOutputTimestamp,
+                    out strTargetObjectOutputValue,
+                    out strError);
+                if (nRet <= -1)
+                    return (int)nRet;
+            }
+#endif

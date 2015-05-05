@@ -1,0 +1,370 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<root>
+  <property name='borrow'>
+    <comment lang='chi'>借书</comment>
+    <comment lang='eng'>borrow</comment>
+  </property>
+  <property name='return'>
+    <comment lang='chi'>还书</comment>
+    <comment lang='eng'>return</comment>
+  </property>
+  <property name='renew'>
+    <comment lang='chi'>续借</comment>
+    <comment lang='eng'>renew</comment>
+  </property>
+  <property name='lost'>
+    <comment lang='chi'>丢失</comment>
+    <comment lang='eng'>lost</comment>
+  </property>
+  <property name='reservation'>
+    <comment lang='chi'>预约</comment>
+    <comment lang='eng'>reservation books</comment>
+  </property>
+  <property name='order'>
+    <comment lang='chi'>采购</comment>
+    <comment lang='eng'>order</comment>
+  </property>
+  <property name='setclock'>
+    <comment lang='chi'>设置系统时钟</comment>
+    <comment lang='eng'>set system clock</comment>
+  </property>
+  <property name='changereaderpassword'>
+    <comment lang='chi'>修改读者密码</comment>
+    <comment lang='eng'>change reader password</comment>
+  </property>
+  <property name='verifyreaderpassword'>
+    <comment lang='chi'>校验读者密码</comment>
+    <comment lang='eng'>verify reader password</comment>
+  </property>
+  <property name='getbibliosummary'>
+    <comment lang='chi'>获得书目摘要</comment>
+    <comment lang='eng'>get biblio summary</comment>
+  </property>
+
+  <property name='searchreader'>
+    <comment lang='chi'>检索读者</comment>
+    <comment lang='eng'>search reader</comment>
+  </property>
+  <property name='getreaderinfo'>
+    <comment lang='chi'>获取读者信息</comment>
+    <comment lang='eng'>get reader info</comment>
+  </property>
+  <property name='setreaderinfo'>
+    <comment lang='chi'>修改读者信息</comment>
+    <comment lang='eng'>set reader info</comment>
+  </property>
+  <property name='movereaderinfo'>
+    <comment lang='chi'>移动读者信息</comment>
+    <comment lang='eng'>move reader info</comment>
+  </property>
+  <property name='changereaderstate'>
+    <comment lang='chi'>仅修改读者信息中的状态和注释</comment>
+    <comment lang='eng'>only change reader state and comment</comment>
+  </property>
+
+  <property name='listbibliodbfroms'>
+    <comment lang='chi'>列出书目库检索途径 -- 即将废止</comment>
+    <comment lang='eng'>list biblio db froms</comment>
+  </property>
+  <property name='listdbfroms'>
+    <comment lang='chi'>列出数据库检索途径</comment>
+    <comment lang='eng'>list database froms</comment>
+  </property>
+  <property name='searchbiblio'>
+    <comment lang='chi'>检索书目库</comment>
+    <comment lang='eng'>search biblio</comment>
+  </property>
+  <property name='getbiblioinfo'>
+    <comment lang='chi'>获得书目信息</comment>
+    <comment lang='eng'>get biblio info</comment>
+  </property>
+  <property name='searchitem'>
+    <comment lang='chi'>检索册</comment>
+    <comment lang='eng'>search item</comment>
+  </property>
+  <property name='getiteminfo'>
+    <comment lang='chi'>获得册信息</comment>
+    <comment lang='eng'>get item info</comment>
+  </property>
+  <property name='setiteminfo'>
+    <comment lang='chi'>修改册</comment>
+    <comment lang='eng'>set item info</comment>
+  </property>  
+  <property name='getoperlog'>
+    <comment lang='chi'>获得操作日志</comment>
+    <comment lang='eng'>get oper log</comment>
+  </property>
+
+  <property name='amerce'>
+    <comment lang='chi'>交费</comment>
+    <comment lang='eng'>amerce</comment>
+  </property>
+  <property name='amercemodifyprice'>
+    <comment lang='chi'>变更费用之价格和注释</comment>
+    <comment lang='eng'>modify amerce price and comment</comment>
+  </property>
+  <property name='amercemodifycomment'>
+    <comment lang='chi'>单独变更费用之注释部分(非追加式)</comment>
+    <comment lang='eng'>only modify amerce comment</comment>
+  </property>
+  <property name='amerceundo'>
+    <comment lang='chi'>撤回交费</comment>
+    <comment lang='eng'>amerce undo</comment>
+  </property>
+  <property name='search'>
+    <comment lang='chi'>检索</comment>
+    <comment lang='eng'>search</comment>
+  </property>
+
+  <property name='getrecord'>
+    <comment lang='chi'>获得记录</comment>
+    <comment lang='eng'>get record</comment>
+  </property>
+  <property name='getcalendar'>
+    <comment lang='chi'>获得日历</comment>
+    <comment lang='eng'>get calendar</comment>
+  </property>
+  <property name='changecalendar'>
+    <comment lang='chi'>修改日历</comment>
+    <comment lang='eng'>change calendar</comment>
+  </property>
+  <property name='newcalendar'>
+    <comment lang='chi'>创建日历</comment>
+    <comment lang='eng'>new calendar</comment>
+  </property>
+  <property name='deletecalendar'>
+    <comment lang='chi'>删除日历</comment>
+    <comment lang='eng'>delete calendar</comment>
+  </property>
+
+  
+  <property name='batchtask'>
+    <comment lang='chi'>批处理任务</comment>
+    <comment lang='eng'>batch task</comment>
+  </property>
+  <property name='clearalldbs'>
+    <comment lang='chi'>清除所有数据库</comment>
+    <comment lang='eng'>clear all dbs</comment>
+  </property>
+  <property name='devolvereaderinfo'>
+    <comment lang='chi'>转移读者信息</comment>
+    <comment lang='eng'>devolve reader info</comment>
+  </property>
+  <property name='getuser'>
+    <comment lang='chi'>获得用户信息</comment>
+    <comment lang='eng'>get user</comment>
+  </property>
+  <property name='changeuser'>
+    <comment lang='chi'>修改用户信息</comment>
+    <comment lang='eng'>set user</comment>
+  </property>
+
+  <property name='newuser'>
+    <comment lang='chi'>创建新用户</comment>
+    <comment lang='eng'>create new user</comment>
+  </property>
+  <property name='deleteuser'>
+    <comment lang='chi'>删除用户</comment>
+    <comment lang='eng'>delete user</comment>
+  </property>
+
+  <property name='changeuserpassword'>
+    <comment lang='chi'>(强制)修改(其他)用户密码</comment>
+    <comment lang='eng'>change user password</comment>
+  </property>
+
+  <property name='simulatereader'>
+    <comment lang='chi'>允许模拟读者登录</comment>
+    <comment lang='eng'>Simulate Reader Login</comment>
+  </property>
+  <property name='simulateworker'>
+    <comment lang='chi'>允许模拟工作人员登录</comment>
+    <comment lang='eng'>Simulate Worker Login</comment>
+  </property>
+
+  <property name='getsystemparameter'>
+    <comment lang='chi'>获得系统参数</comment>
+    <comment lang='eng'>get system parameters</comment>
+  </property>
+
+  <property name='setsystemparameter'>
+    <comment lang='chi'>设置系统参数</comment>
+    <comment lang='eng'>set system parameters</comment>
+  </property>
+
+  <property name='urgentrecover'>
+    <comment lang='chi'>应急恢复</comment>
+    <comment lang='eng'>urgent recover</comment>
+  </property>
+
+  <property name='repairborrowinfo'>
+    <comment lang='chi'>修复借阅信息</comment>
+    <comment lang='eng'>repair borrowinfo</comment>
+  </property>
+
+  <property name='passgate'>
+    <comment lang='chi'>入馆登记</comment>
+    <comment lang='eng'>pass gate</comment>
+  </property>
+  <property name='getres'>
+    <comment lang='chi'>获取资源</comment>
+    <comment lang='eng'>get resource</comment>
+  </property>
+  <property name='writeres'>
+    <comment lang='chi'>修改资源</comment>
+    <comment lang='eng'>write resource</comment>
+  </property>
+  <property name='setbiblioinfo'>
+    <comment lang='chi'>修改书目数据</comment>
+    <comment lang='eng'>set biblio info</comment>
+  </property>
+  <property name='hire'>
+    <comment lang='chi'>创建租金交费请求</comment>
+    <comment lang='eng'>create hire record</comment>
+  </property>
+
+  <property name='foregift'>
+    <comment lang='chi'>创建押金交费请求</comment>
+    <comment lang='eng'>create foregift record</comment>
+  </property>
+  
+  <property name='returnforegift'>
+    <comment lang='chi'>创建押金退费请求</comment>
+    <comment lang='eng'>create foregift returnback record</comment>
+  </property>
+  
+  <property name='settlement'>
+    <comment lang='chi'>(费用)结算</comment>
+    <comment lang='eng'>settlement</comment>
+  </property>
+  <property name='undosettlement'>
+    <comment lang='chi'>撤销(费用)结算</comment>
+    <comment lang='eng'>undo settlement</comment>
+  </property>
+  <property name='deletesettlement'>
+    <comment lang='chi'>删除(费用)的结算记录</comment>
+    <comment lang='eng'>delete settlement record</comment>
+  </property>
+
+  <property name='searchissue'>
+    <comment lang='chi'>检索期信息</comment>
+    <comment lang='eng'>search issue</comment>
+  </property>
+  <property name='getissueinfo'>
+    <comment lang='chi'>获得期信息</comment>
+    <comment lang='eng'>get issue info</comment>
+  </property>
+  <property name='setissueinfo'>
+    <comment lang='chi'>修改期信息</comment>
+    <comment lang='eng'>set issue info</comment>
+  </property>
+
+  <property name='searchorder'>
+    <comment lang='chi'>检索订购信息</comment>
+    <comment lang='eng'>search order</comment>
+  </property>
+  <property name='getorderinfo'>
+    <comment lang='chi'>获得订购信息</comment>
+    <comment lang='eng'>get order info</comment>
+  </property>
+  <property name='setorderinfo'>
+    <comment lang='chi'>修改订购信息</comment>
+    <comment lang='eng'>set order info</comment>
+  </property>
+  <property name='getcommentinfo'>
+    <comment lang='chi'>获得评注信息</comment>
+    <comment lang='eng'>get comment info</comment>
+  </property>
+  <property name='setcommentinfo'>
+    <comment lang='chi'>修改评注信息</comment>
+    <comment lang='eng'>set comment info</comment>
+  </property>
+
+  <property name='searchcomment'>
+    <comment lang='chi'>检索评注信息</comment>
+    <comment lang='eng'>search comment</comment>
+  </property>
+  
+  <property name='denychangemypassword'>
+    <comment lang='chi'>阻止修改自己的密码</comment>
+    <comment lang='eng'>deny change my password</comment>
+  </property>
+  <property name='writeobject'>
+    <comment lang='chi'>写入对象资源</comment>
+    <comment lang='eng'>write object resources</comment>
+  </property>
+  <property name='writerecord'>
+    <comment lang='chi'>直接写入数据库记录</comment>
+    <comment lang='eng'>direct write database records</comment>
+  </property>
+  <property name='writetemplate'>
+    <comment lang='chi'>写入模板</comment>
+    <comment lang='eng'>write template</comment>
+  </property>
+  <property name='managedatabase'>
+    <comment lang='chi'>管理数据库</comment>
+    <comment lang='eng'>manage database</comment>
+  </property>
+  <property name='restore'>
+    <comment lang='chi'>完整还原数据记录</comment>
+    <comment lang='eng'>restore data record</comment>
+  </property>
+  <property name='managecache'>
+    <comment lang='chi'>管理缓存</comment>
+    <comment lang='eng'>Manage Cache</comment>
+  </property>
+  <property name='managecomment'>
+    <comment lang='chi'>管理评注</comment>
+    <comment lang='eng'>Manage Comment</comment>
+  </property>
+  <property name='settailnumber'>
+    <comment lang='chi'>设置种次号尾号</comment>
+    <comment lang='eng'>Set Tail Number</comment>
+  </property>
+  <property name='setutilinfo'>
+    <comment lang='chi'>设置实用库记录信息</comment>
+    <comment lang='eng'>Set Util Info</comment>
+  </property>
+  <property name='getpatrontempid'>
+    <comment lang='chi'>获得读者识别码</comment>
+    <comment lang='eng'>Get Patron Identifier</comment>
+  </property>
+  <property name='getchannelinfo'>
+    <comment lang='chi'>获得通道信息</comment>
+    <comment lang='eng'>Get Channel Information</comment>
+  </property>
+  <property name='managechannel'>
+    <comment lang='chi'>管理服务器通道</comment>
+    <comment lang='eng'>Manage Server Channel</comment>
+  </property>
+  <property name='viewreport'>
+    <comment lang='chi'>观看报表</comment>
+    <comment lang='eng'>View Report</comment>
+  </property>
+  <property name='upload'>
+    <comment lang='chi'>上传文件</comment>
+    <comment lang='eng'>Upload Files</comment>
+  </property>
+
+  <property name='client_uimodifyorderrecord'>
+    <comment lang='chi'>前端允许界面直接修改订购记录</comment>
+    <comment lang='eng'>Client UI Allow Modify Order Record</comment>
+  </property>
+
+  <property name='client_forceverifydata'>
+    <comment lang='chi'>前端保存记录时是否强制校验数据。校验时如果发现数据有错，会拒绝保存</comment>
+    <comment lang='eng'>Client Force Verify Data</comment>
+  </property>
+
+  <property name='client_deletebibliosubrecords'>
+    <comment lang='chi'>前端删除书目记录时是否强制删除下属的实体、期、订购、评注记录。如果不具备此权限，则需要下属记录全部删除以后才能删除书目记录</comment>
+    <comment lang='eng'>Client Delete Biblio Subrecords</comment>
+  </property>
+
+  <property name='client_simulateborrow'>
+    <comment lang='chi'>前端允许进行模拟借还操作</comment>
+    <comment lang='eng'>Client Simulate Borrow</comment>
+  </property>
+
+
+</root>

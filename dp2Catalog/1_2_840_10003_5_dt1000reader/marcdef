@@ -1,0 +1,604 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Description>
+  <Property>
+    <Filename>marcdef_reader.cfg</Filename>
+    <Version>0.1</Version>
+    <DateCreated>2008-3-25</DateCreated>
+    <MARCSyntax>dt1000reader</MARCSyntax>
+    <Style>
+      <Background color="#00ff00" />
+      <Font face="Tahoma,楷体_GB2312" color="#0000ff" size="12" />
+      <!-- 外部参考的xml文件 -->
+      <ValueList name="*" src="valuelist.cfg" />
+    </Style>
+    <Description>本文件用于存放描述性信息</Description>
+  </Property>
+  <Field name="###" length="24" mandatory="yes" repeatable="no">
+    <Property>
+      <Label xml:lang="en">RECORD IDENTIFIER</Label>
+      <Label xml:lang='zh'>头标区</Label>
+      <Help xml:lang='zh'>帮助信息</Help>
+    </Property>
+    <Char name="0/5">
+      <Property>
+        <Label xml:lang="en">?</Label>
+        <Label xml:lang='zh'>记录长度</Label>
+        <Help xml:lang='zh'>
+        </Help>
+        <ValueList name="header_0/5">
+          <Item>
+            <Value>?????</Value>
+            <Label xml:lang='zh'>由软件自动填写</Label>
+          </Item>
+        </ValueList>
+      </Property>
+    </Char>
+    <Char name="5/1">
+      <Property>
+        <Label xml:lang="en">?</Label>
+        <Label xml:lang='zh'>记录状态</Label>
+        <Help xml:lang='zh'>
+        </Help>
+        <ValueList>
+          <Item>
+            <Value>c</Value>
+            <Label xml:lang='zh'>经过修改的记录</Label>
+          </Item>
+          <Item>
+            <Value>d</Value>
+            <Label xml:lang='zh'>被删除的记录</Label>
+          </Item>
+          <Item>
+            <Value>n</Value>
+            <Label xml:lang='zh'>新记录</Label>
+          </Item>
+          <Item>
+            <Value>o</Value>
+            <Label xml:lang='zh'>曾发行较高层记录</Label>
+          </Item>
+          <Item>
+            <Value>p</Value>
+            <Label xml:lang='zh'>曾发行不完整的记录或出版前记录</Label>
+          </Item>
+        </ValueList>
+      </Property>
+    </Char>
+    <Char name="6/1">
+      <Property>
+        <Label xml:lang="en">
+        </Label>
+        <Label xml:lang='zh'>执行代码:记录类型</Label>
+        <Help xml:lang='zh'>
+        </Help>
+        <ValueList name="header_6/1">
+          <Item>
+            <Value>a</Value>
+            <Label xml:lang='zh'>文字资料印刷品</Label>
+          </Item>
+          <Item>
+            <Value>b</Value>
+            <Label xml:lang='zh'>文字资料手稿</Label>
+          </Item>
+          <Item>
+            <Value>c</Value>
+            <Label xml:lang='zh'>乐谱印刷品</Label>
+          </Item>
+          <Item>
+            <Value>d</Value>
+            <Label xml:lang='zh'>乐谱手稿</Label>
+          </Item>
+          <Item>
+            <Value>e</Value>
+            <Label xml:lang='zh'>测绘资料印刷品</Label>
+          </Item>
+          <Item>
+            <Value>f</Value>
+            <Label xml:lang='zh'>测绘资料手稿</Label>
+          </Item>
+          <Item>
+            <Value>g</Value>
+            <Label xml:lang='zh'>放映和视频资料</Label>
+          </Item>
+          <Item>
+            <Value>i</Value>
+            <Label xml:lang='zh'>非音乐性录音资料</Label>
+          </Item>
+          <Item>
+            <Value>j</Value>
+            <Label xml:lang='zh'>音乐性录音资料</Label>
+          </Item>
+          <Item>
+            <Value>k</Value>
+            <Label xml:lang='zh'>二维图形</Label>
+          </Item>
+          <Item>
+            <Value>l</Value>
+            <Label xml:lang='zh'>计算机存贮介质</Label>
+          </Item>
+          <Item>
+            <Value>m</Value>
+            <Label xml:lang='zh'>多媒体</Label>
+          </Item>
+          <Item>
+            <Value>n</Value>
+            <Label xml:lang='zh'>三维制品和教具</Label>
+          </Item>
+          <Item>
+            <Value>u</Value>
+            <Label xml:lang='zh'>拓片</Label>
+          </Item>
+          <Item>
+            <Value>v</Value>
+            <Label xml:lang='zh'>善本书</Label>
+          </Item>
+        </ValueList>
+      </Property>
+    </Char>
+    <Char name="7/1">
+      <Property>
+        <Label xml:lang="en">
+        </Label>
+        <Label xml:lang='zh'>执行代码:书目级别</Label>
+        <Help xml:lang='zh'>
+        </Help>
+        <ValueList name="header_7/1">
+          <Item>
+            <Value>m</Value>
+            <Label xml:lang='zh'>单行本─专著或多卷集。</Label>
+          </Item>
+          <Item>
+            <Value>s</Value>
+            <Label xml:lang='zh'>连续出版物─连续发行并趋向无限期连续发行的出版物。</Label>
+          </Item>
+          <Item>
+            <Value>a</Value>
+            <Label xml:lang='zh'>分析性资料─物理上包含在另一种资料里的一种资料，它是另一种资料的组成部分。</Label>
+          </Item>
+          <Item>
+            <Value>c</Value>
+            <Label xml:lang='zh'>汇编性著作─人为配套的著作集。</Label>
+          </Item>
+        </ValueList>
+      </Property>
+    </Char>
+    <Char name="8/1">
+      <Property>
+        <Label xml:lang="en">
+        </Label>
+        <Label xml:lang='zh'>执行代码:层次等级</Label>
+        <Help xml:lang='zh'>
+        </Help>
+        <ValueList name="header_8/1">
+          <Item>
+            <Value>_</Value>
+            <Label xml:lang='zh'>(空格)层次关系未定</Label>
+          </Item>
+          <Item>
+            <Value>0</Value>
+            <Label xml:lang='zh'>无层次关系</Label>
+          </Item>
+          <Item>
+            <Value>1</Value>
+            <Label xml:lang='zh'>最高层记录</Label>
+          </Item>
+          <Item>
+            <Value>2</Value>
+            <Label xml:lang='zh'>低层次记录(在最高层以下的记录)</Label>
+          </Item>
+        </ValueList>
+      </Property>
+    </Char>
+    <Char name="9/1">
+      <Property>
+        <Label xml:lang="en">
+        </Label>
+        <Label xml:lang='zh'>执行代码:未定义</Label>
+        <Help xml:lang='zh'>
+        </Help>
+        <ValueList name="header_9/1">
+          <Item>
+            <Value>_</Value>
+            <Label xml:lang='zh'>(空格)未定义</Label>
+          </Item>
+        </ValueList>
+      </Property>
+    </Char>
+    <Char name="10/1">
+      <Property>
+        <Label xml:lang="en">
+        </Label>
+        <Label xml:lang='zh'>指示符长度</Label>
+        <Help xml:lang='zh'>
+        </Help>
+        <ValueList name="header_10/1">
+          <Item>
+            <Value>2</Value>
+            <Label xml:lang='zh'>字段指示符的长度</Label>
+          </Item>
+        </ValueList>
+      </Property>
+    </Char>
+    <Char name="11/1">
+      <Property>
+        <Label xml:lang="en">
+        </Label>
+        <Label xml:lang='zh'>子字段标识符长度</Label>
+        <Help xml:lang='zh'>
+        </Help>
+        <ValueList name="header_11/1">
+          <Item>
+            <Value>2</Value>
+            <Label xml:lang='zh'>子字段标识符的长度</Label>
+          </Item>
+        </ValueList>
+      </Property>
+    </Char>
+    <Char name="12/5">
+      <Property>
+        <Label xml:lang="en">
+        </Label>
+        <Label xml:lang='zh'>数据基地址</Label>
+        <Help xml:lang='zh'>
+        </Help>
+        <ValueList name="header_12/5">
+          <Item>
+            <Value>?????</Value>
+            <Label xml:lang='zh'>由软件自动填写</Label>
+          </Item>
+        </ValueList>
+      </Property>
+    </Char>
+    <Char name="17/1">
+      <Property>
+        <Label xml:lang="en">
+        </Label>
+        <Label xml:lang='zh'>记录附加定义:编目等级</Label>
+        <Help xml:lang='zh'>
+        </Help>
+        <ValueList name="header_17/1">
+          <Item>
+            <Value>_</Value>
+            <Label xml:lang='zh'>(空格)完全级。表示该记录建立时依据了原作品。</Label>
+          </Item>
+          <Item>
+            <Value>1</Value>
+            <Label xml:lang='zh'>次级。表示该记录建立时未依据了原作品。</Label>
+          </Item>
+          <Item>
+            <Value>2</Value>
+            <Label xml:lang='zh'>次级2。表示该记录是预编(在版编目)记录。它是利用校对单编目的，一般不太完整，如缺载体形态项。</Label>
+          </Item>
+          <Item>
+            <Value>3</Value>
+            <Label xml:lang='zh'>次级3。表示编目未达到完全级的记录。</Label>
+          </Item>
+        </ValueList>
+      </Property>
+    </Char>
+    <Char name="18/1">
+      <Property>
+        <Label xml:lang="en">
+        </Label>
+        <Label xml:lang='zh'>记录附加定义:著录格式</Label>
+        <Help xml:lang='zh'>
+        </Help>
+        <ValueList name="header_18/1">
+          <Item>
+            <Value>_</Value>
+            <Label xml:lang='zh'>(空格)完全采用ISBD格式</Label>
+          </Item>
+          <Item>
+            <Value>n</Value>
+            <Label xml:lang='zh'>不是采用ISBD格式</Label>
+          </Item>
+          <Item>
+            <Value>i</Value>
+            <Label xml:lang='zh'>部分采用ISBD格式</Label>
+          </Item>
+        </ValueList>
+      </Property>
+    </Char>
+    <Char name="19/1">
+      <Property>
+        <Label xml:lang="en">
+        </Label>
+        <Label xml:lang='zh'>记录附加定义:未定义</Label>
+        <Help xml:lang='zh'>
+        </Help>
+        <ValueList name="header_19/1">
+          <Item>
+            <Value>_</Value>
+            <Label xml:lang='zh'>(空格)未定义</Label>
+          </Item>
+        </ValueList>
+      </Property>
+    </Char>
+    <Char name="20/4">
+      <Property>
+        <Label xml:lang="en">
+        </Label>
+        <Label xml:lang='zh'>地址目次项结构</Label>
+        <Help xml:lang='zh'>
+        </Help>
+        <ValueList name="header_19/1">
+          <Item>
+            <Value>45__</Value>
+            <Label xml:lang='zh'>由软件自动填写</Label>
+          </Item>
+        </ValueList>
+      </Property>
+    </Char>
+  </Field>
+  <!--*******************标识块(Identification Block)*****************-->
+  <Field name="001">
+    <Property>
+      <Label xml:lang="en">Record Identifier</Label>
+      <Label xml:lang='zh'>记录标识号</Label>
+    </Property>
+    <Char name="0/1">
+      <Property>
+        <Label xml:lang="en">
+        </Label>
+        <Label xml:lang='zh'>资料库类型代码</Label>
+        <ValueList ref="marcvaluelist#unimarc_001_0/1" />
+      </Property>
+    </Char>
+    <Char name="1/1">
+      <Property>
+        <Label xml:lang="en">
+        </Label>
+        <Label xml:lang='zh'>语种类型</Label>
+        <ValueList ref="marcvaluelist#unimarc_001_1/1" />
+      </Property>
+    </Char>
+    <Char name="2/4">
+      <Property>
+        <Label xml:lang="en">
+        </Label>
+        <Label xml:lang='zh'>编目年</Label>
+      </Property>
+    </Char>
+    <Char name="6/6">
+      <Property>
+        <Label xml:lang="en">
+        </Label>
+        <Label xml:lang='zh'>编目流水号</Label>
+        <DefaultValue>%IncSeed:种子,001,6%</DefaultValue>
+      </Property>
+    </Char>
+  </Field>
+  <Field name="005">
+    <Property>
+      <Label xml:lang="en">Version Identifier</Label>
+      <Label xml:lang='zh'>记录处理时间标识号</Label>
+    </Property>
+  </Field>
+
+
+  <!-- 号码 -->
+  <Field name="100">
+    <Property>
+      <Label xml:lang="en">Number</Label>
+      <Label xml:lang='zh'>号码</Label>
+    </Property>
+    <Subfield name="a">
+      <Property>
+        <Label xml:lang="en">Barcode</Label>
+        <Label xml:lang='zh'>证条码号</Label>
+      </Property>
+    </Subfield>
+    <Subfield name="b">
+      <Property>
+        <Label xml:lang="en">Card number</Label>
+        <Label xml:lang='zh'>读者证号</Label>
+      </Property>
+    </Subfield>
+  </Field>
+  <!-- 读者类型 -->
+  <Field name="110">
+    <Property>
+      <Label xml:lang="en">Reader Type</Label>
+      <Label xml:lang='zh'>读者类型</Label>
+    </Property>
+    <Subfield name="a">
+      <Property>
+        <Label xml:lang="en">Reader Type</Label>
+        <Label xml:lang='zh'>读者类型</Label>
+      </Property>
+    </Subfield>
+    <Subfield name="d">
+      <Property>
+        <Label xml:lang="en">Expire Date</Label>
+        <Label xml:lang='zh'>借阅证有效期</Label>
+      </Property>
+    </Subfield>
+  </Field>
+  <!--姓名-->
+  <Field name="200">
+    <Property>
+      <Label xml:lang="en">Name</Label>
+      <Label xml:lang='zh'>姓名</Label>
+    </Property>
+    <Subfield name="a" Pinyin="A">
+      <Property>
+        <Label xml:lang="en">Reader Name</Label>
+        <Label xml:lang='zh'>读者姓名</Label>
+      </Property>
+    </Subfield>
+    <Subfield name="b">
+      <Property>
+        <Label xml:lang="en">Gender</Label>
+        <Label xml:lang='zh'>性别</Label>
+      </Property>
+    </Subfield>
+    <Subfield name="A">
+      <Property>
+        <Label xml:lang="en">Name Pinyin</Label>
+        <Label xml:lang='zh'>姓名的汉语拼音</Label>
+      </Property>
+    </Subfield>
+  </Field>
+  <!--单位-->
+  <Field name="300">
+    <Property>
+      <Label xml:lang="en">Department</Label>
+      <Label xml:lang='zh'>单位</Label>
+    </Property>
+    <Subfield name="a">
+      <Property>
+        <Label xml:lang="en">Department Name</Label>
+        <Label xml:lang='zh'>单位名称</Label>
+      </Property>
+    </Subfield>
+    <Subfield name="b">
+      <Property>
+        <Label xml:lang="en">Telephone Number</Label>
+        <Label xml:lang='zh'>联系电话</Label>
+      </Property>
+    </Subfield>
+  </Field>
+  <!--通讯地址-->
+  <Field name="400">
+    <Property>
+      <Label xml:lang="en">Address</Label>
+      <Label xml:lang='zh'>通讯地址</Label>
+    </Property>
+    <Subfield name="a">
+      <Property>
+        <Label xml:lang="en">Zipcode</Label>
+        <Label xml:lang='zh'>邮政编码</Label>
+      </Property>
+    </Subfield>
+    <Subfield name="b">
+      <Property>
+        <Label xml:lang="en">Address</Label>
+        <Label xml:lang='zh'>通讯地址</Label>
+      </Property>
+    </Subfield>
+  </Field>
+  <!--借阅量统计-->
+  <Field name="980">
+    <Property>
+      <Label xml:lang="en">Statis</Label>
+      <Label xml:lang='zh'>借阅量统计</Label>
+    </Property>
+    <Subfield name="a">
+      <Property>
+        <Label xml:lang="en">Year</Label>
+        <Label xml:lang='zh'>年代</Label>
+      </Property>
+    </Subfield>
+    <Subfield name="b">
+      <Property>
+        <Label xml:lang="en">Borrow Titles of This Year</Label>
+        <Label xml:lang='zh'>该年借阅量</Label>
+      </Property>
+    </Subfield>
+  </Field>
+  <!--读者状态-->
+  <Field name="982">
+    <Property>
+      <Label xml:lang="en">Reader States</Label>
+      <Label xml:lang='zh'>读者状态</Label>
+    </Property>
+    <Subfield name="b">
+      <Property>
+        <Label xml:lang="en">Stop Borrow</Label>
+        <Label xml:lang='zh'>停借</Label>
+      </Property>
+    </Subfield>
+    <Subfield name="c">
+      <Property>
+        <Label xml:lang="en">Borrowed Titles</Label>
+        <Label xml:lang='zh'>已借册数</Label>
+      </Property>
+    </Subfield>
+    <Subfield name="z">
+      <Property>
+        <Label xml:lang="en">Comment</Label>
+        <Label xml:lang='zh'>附注信息</Label>
+      </Property>
+    </Subfield>
+  </Field>
+  <!--读者预约信息-->
+  <Field name="984">
+    <Property>
+      <Label xml:lang="en">Reserve Info</Label>
+      <Label xml:lang='zh'>读者预约信息</Label>
+    </Property>
+    <Subfield name="a">
+      <Property>
+        <Label xml:lang="en">Reserve Book Barcode</Label>
+        <Label xml:lang='zh'>预约图书条码</Label>
+      </Property>
+    </Subfield>
+    <Subfield name="b">
+      <Property>
+        <Label xml:lang="en">Reserve Time</Label>
+        <Label xml:lang='zh'>预约时间</Label>
+      </Property>
+    </Subfield>
+    <Subfield name="c">
+      <Property>
+        <Label xml:lang="en">Arrive Time</Label>
+        <Label xml:lang='zh'>到书时间</Label>
+      </Property>
+    </Subfield>
+    <Subfield name="t">
+      <Property>
+        <Label xml:lang="en">Wait Period</Label>
+        <Label xml:lang='zh'>预约保留期限</Label>
+      </Property>
+    </Subfield>
+  </Field>
+
+  <Field name="986">
+    <Property>
+      <Label xml:lang="en">Borrowed Items</Label>
+      <Label xml:lang='zh'>当前借阅状态</Label>
+    </Property>
+    <Group>
+      <Property>
+        <Label xml:lang="en">group</Label>
+        <Label xml:lang='zh'>组</Label>
+      </Property>
+      <Subfield name="a">
+        <Property>
+          <Label xml:lang="en">Book Barcode</Label>
+          <Label xml:lang='zh'>所借图书条码号</Label>
+        </Property>
+      </Subfield>
+      <Subfield name="f">
+        <Property>
+          <Label xml:lang="en">Book Type</Label>
+          <Label xml:lang='zh'>藏书类型标识</Label>
+        </Property>
+      </Subfield>
+      <Subfield name="t">
+        <Property>
+          <Label xml:lang="en">Borrow Date</Label>
+          <Label xml:lang='zh'>借阅日期</Label>
+        </Property>
+      </Subfield>
+      <Subfield name="v">
+        <Property>
+          <Label xml:lang="en">Returning Date</Label>
+          <Label xml:lang='zh'>应还书日期</Label>
+        </Property>
+      </Subfield>
+      <Subfield name="x">
+        <Property>
+          <Label xml:lang="en">Renew Date</Label>
+          <Label xml:lang='zh'>续借日期</Label>
+        </Property>
+      </Subfield>
+      <Subfield name="y">
+        <Property>
+          <Label xml:lang="en">Renew Count</Label>
+          <Label xml:lang='zh'>续借次数</Label>
+        </Property>
+      </Subfield>
+    </Group>
+  </Field>
+  <!-- 988 989 尚未设定 -->
+</Description>

@@ -1,0 +1,124 @@
+BODY {
+	FONT-FAMILY: Microsoft YaHei, Verdana, ËÎÌו;
+	FONT-SIZE: 8pt;
+}
+
+A:link, A:visited, A:active 
+{
+	text-decoration: none;
+	color: #006600;
+}
+
+A:hover
+{
+    font-weight:bold;
+}
+
+TD.regular {
+
+}
+
+TD.regular A:visited
+{
+	font-weight: bold;
+}
+
+
+TABLE.orderinfo
+{
+	font-size: 8pt;
+	
+	border-color: lightgrey;
+	border-width: 0px; 
+	border-style: solid;
+	border-collapse:collapse;
+}
+
+/* TD padding */
+TABLE.orderinfo TD
+{
+    padding: 4px;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+TABLE.orderinfo TR.content
+{
+	font-size: 8pt;
+	background-color: white;
+}
+
+TABLE.orderinfo TD.name
+{
+	text-align: right;
+	background-color: #eeeeee;
+	color: #777777;
+	width: 10%;
+	
+	
+	border: 0px;
+	border-right: 1px;
+	border-color: #999999;
+	border-style: solid;
+	
+	text-align: right;
+	vertical-align: top;
+	white-space:nowrap;
+
+}
+
+/* Operation History */
+
+TABLE.operationhistory
+{
+	font-size: 8pt;
+	
+	border-color: lightgrey;
+	border-width: 0px; 
+	border-style: solid;
+	border-collapse:collapse;
+}
+
+/* TD padding */
+TABLE.operationhistory TD
+{
+    padding: 4px;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+TABLE.operationhistory TR.columntitle
+{
+	color: #ffffff;
+	font-weight: bolder;
+	background-color: #777777;
+}
+
+TABLE.operationhistory TR.odd
+{
+	background-color: #eeeeee;
+}
+
+TABLE.operationhistory TR.content TD.index
+{
+	text-align: right;
+	font-weight: bolder;
+	color: white;
+	background-color: #770000;
+	
+	border-color: #ffffff;
+	border-width: 0px; 
+	border-bottom-width: 1px;
+	border-style: solid;
+}
+
+TABLE.operationhistory TR.content TD.name
+{
+	font-size: 8pt;
+}
+
+TABLE.operationhistory TR.content TD.time
+{
+	font-size: 6pt;
+}
+

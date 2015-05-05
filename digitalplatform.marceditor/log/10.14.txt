@@ -1,0 +1,29 @@
+1.把FixedField控件的等待界面做好
+发现出现小窗口很快，主要是获得ValueList比较慢，
+所以没必须出现等待窗口，在获取ValueList中做相应处理
+为此对MarcFixedFieldControl做了两个事件:
+BeginGetValueList
+EndGetValueList
+
+在准备获得ValueList,把鼠标变成等待状态，但触发BeginGetValueList事件，
+主窗口接管该事件，显示当前来源信息。
+在取完ValueList时，控件触发EndGetValueList事件，主窗口把当前信息删除。
+鼠标变回原状态
+
+完成
+
+2.由于已经解决等待的问题，MarcFixedFieldControl的用OnGotForcs()得到当前行
+就没有问题了，暂时不用改该控件当前活动行的计算方法了。
+完成
+
+3.修改服务器的database.xml配置文件，把<cfgs>元素改为<dir name="cfgs"/>
+引起了一系列的改动
+完成
+
+4. 相应帐户权限的修改
+未完成，星期一做
+
+4.服务器增加下列接口
+1）新建数据库，重名要查名,无名自动生成
+2）删除数据库,同时删除sql，和本地的所有配置信息
+未完成，星期一做

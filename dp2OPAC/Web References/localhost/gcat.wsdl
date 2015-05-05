@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://dp2003.com/dp2libraryws/gcat.asmx" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://dp2003.com/dp2libraryws/gcat.asmx" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://dp2003.com/dp2libraryws/gcat.asmx">
+      <s:element name="Login">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="strUserName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="strPassword" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="LoginResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="LoginResult" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="strError" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="Clear">
+        <s:complexType />
+      </s:element>
+      <s:element name="ClearResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="GetQuestion">
+        <s:complexType />
+      </s:element>
+      <s:element name="GetQuestionResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="GetQuestionResult" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="strQuestion" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="strError" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="Answer">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="strQuestion" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="strAnswer" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AnswerResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="AnswerResult" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="strError" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetNumber">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="strAuthor" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="bSelectPinyin" type="s:boolean" />
+            <s:element minOccurs="1" maxOccurs="1" name="bSelectEntry" type="s:boolean" />
+            <s:element minOccurs="1" maxOccurs="1" name="bOutputDebugInfo" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetNumberResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="GetNumberResult" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="strNumber" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="strDebugInfo" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="strError" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="LoginSoapIn">
+    <wsdl:part name="parameters" element="tns:Login" />
+  </wsdl:message>
+  <wsdl:message name="LoginSoapOut">
+    <wsdl:part name="parameters" element="tns:LoginResponse" />
+  </wsdl:message>
+  <wsdl:message name="ClearSoapIn">
+    <wsdl:part name="parameters" element="tns:Clear" />
+  </wsdl:message>
+  <wsdl:message name="ClearSoapOut">
+    <wsdl:part name="parameters" element="tns:ClearResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetQuestionSoapIn">
+    <wsdl:part name="parameters" element="tns:GetQuestion" />
+  </wsdl:message>
+  <wsdl:message name="GetQuestionSoapOut">
+    <wsdl:part name="parameters" element="tns:GetQuestionResponse" />
+  </wsdl:message>
+  <wsdl:message name="AnswerSoapIn">
+    <wsdl:part name="parameters" element="tns:Answer" />
+  </wsdl:message>
+  <wsdl:message name="AnswerSoapOut">
+    <wsdl:part name="parameters" element="tns:AnswerResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetNumberSoapIn">
+    <wsdl:part name="parameters" element="tns:GetNumber" />
+  </wsdl:message>
+  <wsdl:message name="GetNumberSoapOut">
+    <wsdl:part name="parameters" element="tns:GetNumberResponse" />
+  </wsdl:message>
+  <wsdl:portType name="gcatSoap">
+    <wsdl:operation name="Login">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">登录</wsdl:documentation>
+      <wsdl:input message="tns:LoginSoapIn" />
+      <wsdl:output message="tns:LoginSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="Clear">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">清除</wsdl:documentation>
+      <wsdl:input message="tns:ClearSoapIn" />
+      <wsdl:output message="tns:ClearSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetQuestion">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">获得提问</wsdl:documentation>
+      <wsdl:input message="tns:GetQuestionSoapIn" />
+      <wsdl:output message="tns:GetQuestionSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="Answer">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">回答</wsdl:documentation>
+      <wsdl:input message="tns:AnswerSoapIn" />
+      <wsdl:output message="tns:AnswerSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetNumber">
+      <wsdl:documentation xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">取号</wsdl:documentation>
+      <wsdl:input message="tns:GetNumberSoapIn" />
+      <wsdl:output message="tns:GetNumberSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="gcatSoap" type="tns:gcatSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="Login">
+      <soap:operation soapAction="http://dp2003.com/dp2libraryws/gcat.asmx/Login" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Clear">
+      <soap:operation soapAction="http://dp2003.com/dp2libraryws/gcat.asmx/Clear" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetQuestion">
+      <soap:operation soapAction="http://dp2003.com/dp2libraryws/gcat.asmx/GetQuestion" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Answer">
+      <soap:operation soapAction="http://dp2003.com/dp2libraryws/gcat.asmx/Answer" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetNumber">
+      <soap:operation soapAction="http://dp2003.com/dp2libraryws/gcat.asmx/GetNumber" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="gcatSoap12" type="tns:gcatSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="Login">
+      <soap12:operation soapAction="http://dp2003.com/dp2libraryws/gcat.asmx/Login" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Clear">
+      <soap12:operation soapAction="http://dp2003.com/dp2libraryws/gcat.asmx/Clear" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetQuestion">
+      <soap12:operation soapAction="http://dp2003.com/dp2libraryws/gcat.asmx/GetQuestion" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Answer">
+      <soap12:operation soapAction="http://dp2003.com/dp2libraryws/gcat.asmx/Answer" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetNumber">
+      <soap12:operation soapAction="http://dp2003.com/dp2libraryws/gcat.asmx/GetNumber" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="gcat">
+    <wsdl:port name="gcatSoap" binding="tns:gcatSoap">
+      <soap:address location="http://localhost/dp2libraryws/gcat.asmx" />
+    </wsdl:port>
+    <wsdl:port name="gcatSoap12" binding="tns:gcatSoap12">
+      <soap12:address location="http://localhost/dp2libraryws/gcat.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

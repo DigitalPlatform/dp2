@@ -1,0 +1,709 @@
+	int GetGlobalCfgFile(out string strError)
+		{
+			strError = "";
+
+			if (this.dom != null)
+				return 0;	// 优化
+
+			if (this.textBox_serverUrl.Text == "")
+			{
+				strError = "尚未指定服务器URL";
+				return -1;
+			}
+			channel = Channels.GetChannel(this.ServerUrl);
+			if (channel == null)
+			{
+				strError = "get channel error";
+				return -1;
+			}
+
+			try 
+			{
+
+				string strContent;
+
+				string strCfgFilePath = "cfgs/global";
+
+				stop.Initial(new Delegate_doStop(this.DoStop),
+					"正在下载文件" + strCfgFilePath);
+				stop.BeginLoop();
+
+				byte[] baTimeStamp = null;
+				string strMetaData;
+				string strOutputPath;
+
+				long lRet = channel.GetRes(
+					this.SearchPanel.cfgCache,
+					strCfgFilePath,
+					out strContent,
+					out strMetaData,
+					out baTimeStamp,
+					out strOutputPath,
+					out strError);
+
+				stop.EndLoop();
+				stop.Initial(null, "");
+
+
+				if (lRet == -1) 
+					return -1;
+
+				dom = new XmlDocument();
+
+				try 
+				{
+					dom.LoadXml(strContent);
+				}
+				catch (Exception ex)
+				{
+					dom = null;
+					strError = "装载global配置文件进入dom失败: " + ex.Message;
+					return -1;
+				}
+
+				return 0;
+			}
+			finally 
+			{
+				this.SearchPanel.channel = null;
+			}
+		}
+		
+		
+		
+			public int SearchTailNumberPath(
+			out string strPath,
+			out string strError)
+		{
+			strError = "";
+			strPath = "";
+
+			if (dom == null)
+			{
+				strError = "请先调用GetGlobalCfgFile()函数";
+				return -1;
+			}
+
+			if (this.ClassNumber == "")
+			{
+				strError = "尚未指定分类号";
+				return -1;
+			}
+
+			if (this.GroupName == "")
+			{
+				strError = "尚未指定库群";
+				return -1;
+			}
+
+			if (this.ServerUrl == "")
+			{
+				strError = "尚未指定服务器URL";
+				return -1;
+			}
+
+			channel = Channels.GetChannel(this.ServerUrl);
+			if (channel == null)
+			{
+				strError = "get channel error";
+				return -1;
+			}
+
+			try 
+			{
+				/*
+				// 得到种次号库名
+				XmlNode node = dom.DocumentElement.SelectSingleNode("//dbgroup[@name='"+this.GroupName+"']");
+				if (node == null)
+				{
+					strError = "global配置文件中name为'"+this.GroupName+"'的<dbgroup>元素没有定义...";
+					return -1;
+				}
+
+				string strZhongcihaoDbName = DomUtil.GetAttr(node, "zhongcihaodb");
+				if (strZhongcihaoDbName == "")
+				{
+					strError = "global配置文件中name为'"+this.GroupName+"'的<dbgroup>元素中缺种次号库名定义属性zhongcihaodb";
+					return -1;
+				}
+				*/
+
+				string strZhongcihaoDbName = "";
+
+				try 
+				{
+					strZhongcihaoDbName = this.ZhongcihaoDbName;
+				}
+				catch (Exception ex)
+				{
+					strError = ex.Message;
+					return -1;
+				}
+
+
+
+				string strQueryXml = "<target list='" + strZhongcihaoDbName + ":" + "分类号" + "'><item><word>"
+					+ this.ClassNumber + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang></target>";
+
+				stop.Initial(new Delegate_doStop(this.DoStop),
+					"正在针对库 '"+strZhongcihaoDbName+"' 检索 '" + this.ClassNumber + "'");
+				stop.BeginLoop();
+
+		
+				long lRet = channel.DoSearch(strQueryXml, out strError);
+				if (lRet == -1) 
+				{
+					stop.EndLoop();
+					stop.Initial(null, "");
+					strError = "检索库 "+strZhongcihaoDbName+" 时出错: " + strError;
+					return -1;
+				}
+				if (lRet == 0) 
+				{
+					stop.EndLoop();
+					stop.Initial(null, "");
+					return 0;	// 没有找到
+				}
+
+				if (lRet > 1)
+				{
+					strError = "以分类号'"+this.ClassNumber+"'检索库 "+strZhongcihaoDbName+" 时命中 " + Convert.ToString(lRet) + " 条，无法取得尾号。请修改库 '" +strZhongcihaoDbName + "' 中相应记录，确保同一类目只有一条对应的记录。";
+					return -1;
+				}
+
+				ArrayList aPath = null;
+				lRet = channel.DoGetSearchResult(0,
+					1,
+					"zh",
+					this.stop,
+					out aPath,
+					out strError);
+				if (lRet == -1) 
+				{
+					stop.EndLoop();
+					stop.Initial(null, "");
+					strError = "检索库'"+strZhongcihaoDbName+"'获取检索结果时出错: " + strError;
+					return -1;
+				}
+
+
+				stop.EndLoop();
+				stop.Initial(null, "");
+
+
+				strPath = (string)aPath[0];
+
+				return 1;
+			
+			}
+			finally 
+			{
+				channel = null;
+			}
+
+		}
+
+
+~~~~~~~~~~~~~~~~~
+
+		// 检索获得种次号库中对应类目的尾号。
+		// 此功能比较单纯，所获得的结果并不放入面板界面元素
+		public int SearchTailNumber(out string strTailNumber,
+			out string strError)
+		{
+			strTailNumber = "";
+			strError = "";
+
+			string strPath = "";
+			int nRet = SearchTailNumberPath(
+                out strPath,
+				out strError);
+			if (nRet == -1)
+				return -1;
+			if (nRet == 0)
+				return 0;
+
+			
+			channel = Channels.GetChannel(this.ServerUrl);
+			if (channel == null)
+			{
+				strError = "get channel error";
+				return -1;
+			}
+
+			try 
+			{
+
+				// 取记录
+				string strStyle = "content,data,timestamp";
+
+				string strMetaData;
+				string strOutputPath;
+				string strXml = "";
+				byte [] baTimeStamp = null;
+
+				long lRet = channel.GetRes(strPath,
+					strStyle,
+					out strXml,
+					out strMetaData,
+					out baTimeStamp,
+					out strOutputPath,
+					out strError);
+				if (lRet == -1) 
+				{
+					strError = "检索 '" + strPath + "' 记录体时出错: " + strError;
+					return -1;
+				}
+
+				this.TailNumberTimestamp = baTimeStamp;
+
+		
+				XmlDocument domRecord = new XmlDocument();
+				try 
+				{
+					domRecord.LoadXml(strXml);
+				}
+				catch(Exception ex)
+				{
+					strError = "装载路径为'"+strPath+"'的xml记录时出错: " + ex.Message;
+					return -1;
+				}
+
+				strTailNumber = DomUtil.GetAttr(domRecord.DocumentElement, "v");
+
+				m_strTailNumber = strTailNumber;
+
+				//stop.EndLoop();
+				//stop.Initial(null, "");
+
+
+				return 1;
+			}
+
+			finally 
+			{
+				channel = null;
+			}
+
+		}
+		
+		~~~~~~~~~~~~~~~~~
+		
+			int FillList(bool bSort,
+			out string strError)
+		{
+			strError = "";
+			int nRet = 0;
+
+			this.listView_number.Items.Clear();
+
+			if (dom == null)
+			{
+				strError = "请先调用GetGlobalCfgFile()函数";
+				return -1;
+			}
+
+			if (this.ClassNumber == "")
+			{
+				strError = "尚未指定分类号";
+				return -1;
+			}
+
+			if (this.GroupName == "")
+			{
+				strError = "尚未指定库群";
+				return -1;
+			}
+
+			if (this.ServerUrl == "")
+			{
+				strError = "尚未指定服务器URL";
+				return -1;
+			}
+
+			channel = Channels.GetChannel(this.ServerUrl);
+			if (channel == null)
+			{
+				strError = "get channel error";
+				return -1;
+			}
+
+
+			try 
+			{
+				XmlNodeList nodes = dom.DocumentElement.SelectNodes("//dbgroup[@name='"+this.GroupName+"']/database");
+
+				for(int i=0;i<nodes.Count;i++) 
+				{
+					XmlNode node = nodes[i];
+					string strDbName = DomUtil.GetAttr(node, "name");
+					string strFromName = DomUtil.GetAttr(node, "accessnumber", "leftfrom");
+
+					string strQueryXml = "<target list='" + strDbName + ":" + strFromName + "'><item><word>"
+						+ this.ClassNumber + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang></target>";
+
+					stop.Initial(new Delegate_doStop(this.DoStop),
+						"正在针对库 '"+strDbName+"' 检索 '" + this.ClassNumber + "'");
+					stop.BeginLoop();
+
+		
+					long lRet = channel.DoSearch(strQueryXml, out strError);
+					if (lRet == -1) 
+					{
+						stop.EndLoop();
+						stop.Initial(null, "");
+						strError = "检索库 "+strDbName+" 时出错: " + strError;
+						return -1;
+					}
+					if (lRet == 0) 
+					{
+						stop.EndLoop();
+						stop.Initial(null, "");
+						continue;
+					}
+
+					long nHitCount = lRet;
+					long nStart = 0;
+					long nCount = 10;
+
+					for(;;)
+					{
+						ArrayList aPath = null;
+						lRet = channel.DoGetSearchResult(nStart,
+							nCount,
+							"zh",
+							this.stop,
+							out aPath,
+							out strError);
+						if (lRet == -1) 
+						{
+							stop.EndLoop();
+							stop.Initial(null, "");
+							strError = "检索库'"+strDbName+"'获取检索结果时出错: " + strError;
+							return -1;
+						}
+
+						nStart += aPath.Count;
+
+						/*
+						// 处理
+						for(int j=0;j<aPath.Count;j++)
+						{
+							ListViewItem item = new ListViewItem((string)aPath[j], 0);
+
+							// item.SubItems.Add(nodeinfo.Rights);
+							this.listView_number.Items.Add(item);
+						}
+						*/
+
+						nRet = FillList(
+							node,
+							channel,
+							aPath,
+							out strError);
+						if (nRet == -1)
+							return -1;
+
+						if (nStart >= nHitCount)
+							break;
+
+					}
+
+					stop.EndLoop();
+					stop.Initial(null, "");
+
+				}
+
+				if (bSort == true)
+				{
+					this.listView_number.ListViewItemSorter = new ListViewItemComparer();
+
+					ColorDup();
+
+					if (this.listView_number.Items.Count == 0)
+						this.MaxNumber = "";
+					else 
+						this.MaxNumber = this.listView_number.Items[0].SubItems[1].Text;
+				}
+
+				return 0;
+			}
+			finally 
+			{
+				channel = null;
+			}
+
+		}
+		
+		
+		
+		~~~~~~~~~~~~~~
+		
+			int GetBrowseColumns(out string strError)
+		{
+			strError = "";
+
+			ArrayList aFullPath = new ArrayList();
+			int i=0;
+			for(i=0;i<this.listView_browse.Items.Count;i++)
+			{
+				string strFullPath = this.listView_browse.Items[i].Text;
+
+				aFullPath.Add(ResPath.GetRegularRecordPath(strFullPath));
+			}
+
+			string [] fullpaths = new string [aFullPath.Count];
+			for(i=0;i<fullpaths.Length;i++)
+			{
+				fullpaths[i] = (string)aFullPath[i];
+			}
+
+			ArrayList records = null;
+				// 获取浏览记录
+		// return:
+		//		-1	error
+		//		0	not found
+		//		1	found
+			int nRet = this.SearchPanel.GetBrowseRecord(fullpaths,
+				false,
+				"cols",
+				out records,
+				out strError);
+			if (nRet == -1)
+				return -1;
+
+			for(i=0;i<records.Count;i++)
+			{
+				string [] cols = (string [])records[i];
+
+				ListViewUtil.EnsureColumns(this.listView_browse,
+					3 + cols.Length,
+					200);
+
+				ListViewItem item = this.listView_browse.Items[i];
+
+
+				for(int j=0;j<cols.Length;j++)
+				{
+					ListViewUtil.ChangeItemText(item,
+						j+3,
+						cols[j]);
+					// item.SubItems[j+3].Text = cols[j];
+				}
+			}
+
+			return 0;
+		}
+		
+		
+		~~~~~~~~~~~~~
+		
+		using System;
+using System.Windows.Forms;
+using System.Drawing;
+using System.Runtime.InteropServices;
+class MyForm: Form
+{
+ const string IMAGE_FILE = @"C:\Documents and Settings\serg\My Documents\My Pictures\Flower.jpg";
+ MyListView listView = new MyListView();
+ public MyForm()
+ {
+  listView.Items.AddRange(new ListViewItem[] {
+                new ListViewItem("1"),
+                new ListViewItem("2"),
+                new ListViewItem("3"),
+                new ListViewItem("4"),
+                new ListViewItem("5"),
+                new ListViewItem("6"),
+                new ListViewItem("7")
+               });
+  listView.Dock = DockStyle.Fill;
+  listView.BackgroundImage = IMAGE_FILE;
+  listView.Parent = this;
+ }
+ [STAThread]
+ static void Main() 
+ {
+  Application.Run(new MyForm());
+ }
+}
+class MyListView: ListView
+{
+ const int MAX_BUFFER_SIZE = 1000;
+ public new string BackgroundImage
+ {
+  get
+  {
+   LVBKIMAGE backImage = new LVBKIMAGE();
+   backImage.ulFlags = ListViewBkImageFlags.LVBKIF_SOURCE_URL; 
+   backImage.cchImageMax = MAX_BUFFER_SIZE;
+   IntPtr stringPointer = Marshal.AllocHGlobal(MAX_BUFFER_SIZE);
+   backImage.pszImage = stringPointer;
+   IntPtr pointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(LVBKIMAGE)));
+   Marshal.StructureToPtr(backImage, pointer, true);
+   Message message = Message.Create(Handle, (int)Messages.LVM_GETBKIMAGEW, IntPtr.Zero, pointer);
+   DefWndProc(ref message);
+   string fileName = Marshal.PtrToStringUni(stringPointer);
+   Marshal.FreeHGlobal(stringPointer);
+   Marshal.FreeHGlobal(pointer);
+   return fileName;
+  }
+  set
+  {
+   LVBKIMAGE backImage = new LVBKIMAGE();
+   backImage.ulFlags = ListViewBkImageFlags.LVBKIF_SOURCE_URL;
+   backImage.pszImage = Marshal.StringToHGlobalUni(value);
+   IntPtr pointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(LVBKIMAGE)));
+   Marshal.StructureToPtr(backImage, pointer, false);
+   Message message = Message.Create(Handle, (int)Messages.LVM_SETBKIMAGEW, IntPtr.Zero, pointer);
+   DefWndProc(ref message);
+   Marshal.FreeHGlobal(pointer);
+  }
+ }
+ [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+ public struct LVBKIMAGE 
+ {
+  public ListViewBkImageFlags ulFlags;
+  public IntPtr hbm;
+  public IntPtr pszImage;
+  public int cchImageMax;
+  public int xOffsetPercent;
+  public int yOffsetPercent;
+ }
+ [Flags]
+ public enum ListViewBkImageFlags
+ {
+  LVBKIF_SOURCE_NONE = 0x00000000,
+  LVBKIF_SOURCE_HBITMAP = 0x00000001,
+  LVBKIF_SOURCE_URL = 0x00000002,
+  LVBKIF_SOURCE_MASK = 0x00000003,
+  LVBKIF_STYLE_NORMAL = 0x00000000,
+  LVBKIF_STYLE_TILE = 0x00000010,
+  LVBKIF_STYLE_MASK = 0x00000010,
+  LVBKIF_FLAG_TILEOFFSET = 0x00000100,
+  LVBKIF_TYPE_WATERMARK = 0x10000000
+ }
+ enum Messages{LVM_FIRST = 0x1000, LVM_SETBKIMAGEW = LVM_FIRST + 138, LVM_GETBKIMAGEW = LVM_FIRST + 139}
+} 
+
+
+
+~~~~~~~~~~~~~~~~
+
+mylistview.cs
+using System;
+using System.Collections;
+using System.ComponentModel;
+using System.Drawing;
+using System.Data;
+using System.Windows.Forms;
+using System.Drawing.Drawing2D;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+
+namespace DigitalPlatform.Library
+{
+	/// <summary>
+	/// Summary description for MyListView.
+	/// </summary>
+	public class MyListView : ListView
+	{
+		public MyListView()
+		{
+			//
+			// TODO: Add constructor logic here
+			//
+		}
+
+
+		/*
+		protected override void OnPaintBackground(
+			PaintEventArgs e
+			)
+		{
+			Brush brush0 = null;
+			
+			brush0 = new SolidBrush(Color.Red);
+
+			e.Graphics.FillRectangle(brush0, e.ClipRectangle);
+
+			brush0.Dispose();
+			return;
+		}
+		*/
+		const int MAX_BUFFER_SIZE = 1000;
+
+		public new string BackgroundImage
+		{
+			get
+			{
+				LVBKIMAGE backImage = new LVBKIMAGE();
+				backImage.ulFlags = ListViewBkImageFlags.LVBKIF_SOURCE_URL; 
+				backImage.cchImageMax = MAX_BUFFER_SIZE;
+				IntPtr stringPointer = Marshal.AllocHGlobal(MAX_BUFFER_SIZE);
+				backImage.pszImage = stringPointer;
+				IntPtr pointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(LVBKIMAGE)));
+				Marshal.StructureToPtr(backImage, pointer, true);
+				Message message = Message.Create(Handle, (int)Messages.LVM_GETBKIMAGEW, IntPtr.Zero, pointer);
+				DefWndProc(ref message);
+				string fileName = Marshal.PtrToStringUni(stringPointer);
+				Marshal.FreeHGlobal(stringPointer);
+				Marshal.FreeHGlobal(pointer);
+				return fileName;
+			}
+			set
+			{
+				LVBKIMAGE backImage = new LVBKIMAGE();
+				backImage.ulFlags = ListViewBkImageFlags.LVBKIF_SOURCE_URL;
+				backImage.pszImage = Marshal.StringToHGlobalUni(value);
+				IntPtr pointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(LVBKIMAGE)));
+				Marshal.StructureToPtr(backImage, pointer, false);
+				Message message = Message.Create(Handle, (int)Messages.LVM_SETBKIMAGEW, IntPtr.Zero, pointer);
+				DefWndProc(ref message);
+				Marshal.FreeHGlobal(pointer);
+			}
+		}
+
+
+		public Bitmap BackImage
+		{
+			set
+			{
+				LVBKIMAGE backImage = new LVBKIMAGE();
+				backImage.ulFlags = ListViewBkImageFlags.LVBKIF_SOURCE_URL;
+				backImage.hbm = value.GetHbitmap();
+				IntPtr pointer = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(LVBKIMAGE)));
+				Marshal.StructureToPtr(backImage, pointer, false);
+				Message message = Message.Create(Handle, (int)Messages.LVM_SETBKIMAGEW, IntPtr.Zero, pointer);
+				DefWndProc(ref message);
+				Marshal.FreeHGlobal(pointer);
+			}
+		}
+
+		[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+			public struct LVBKIMAGE 
+		{
+			public ListViewBkImageFlags ulFlags;
+			public IntPtr hbm;
+			public IntPtr pszImage;
+			public int cchImageMax;
+			public int xOffsetPercent;
+			public int yOffsetPercent;
+		}
+		[Flags]
+			public enum ListViewBkImageFlags
+		{
+			LVBKIF_SOURCE_NONE = 0x00000000,
+			LVBKIF_SOURCE_HBITMAP = 0x00000001,
+			LVBKIF_SOURCE_URL = 0x00000002,
+			LVBKIF_SOURCE_MASK = 0x00000003,
+			LVBKIF_STYLE_NORMAL = 0x00000000,
+			LVBKIF_STYLE_TILE = 0x00000010,
+			LVBKIF_STYLE_MASK = 0x00000010,
+			LVBKIF_FLAG_TILEOFFSET = 0x00000100,
+			LVBKIF_TYPE_WATERMARK = 0x10000000
+		}
+		enum Messages{LVM_FIRST = 0x1000, LVM_SETBKIMAGEW = LVM_FIRST + 138, LVM_GETBKIMAGEW = LVM_FIRST + 139}
+
+	}
+}

@@ -1,0 +1,10 @@
+~~~~~~~~~~~~~~~~~关于服务器~~~~~~~~~~~~~~~~~~~
+
+1.把WriteSqlRecord()与WriteFileDbRecord()两个函数改好。
+完成
+
+2.把rmsservice.asmx中的一些函数提到DatabaseCollection类里。
+完成
+
+3.用dp2rms测试一遍
+完成

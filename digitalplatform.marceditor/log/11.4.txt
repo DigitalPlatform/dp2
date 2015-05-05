@@ -1,0 +1,39 @@
+~~~~~~~~~~关于服务器~~~~~~~~~~~~~~~
+1.在新建一个配置事项时，如果中间部分的配置目录不存在，自动创建上
+完成
+通过test rms service测试工具测试
+
+
+2.是不是把webservice.asmx中的一些函数归到database.xml里
+比如WritecfgItem()函数
+
+3.修改GetRes()函数，适应"库名/资源名"的方式。
+完成
+
+4.完善test rms service测试工具,包括下列各项
+1)登录
+2)dir
+3)关于资源
+	GetRes() WriteRes()	DeleteRes()
+4)关于数据库
+	CreateDb() DeleteDb() GetDbInfo() SetDbInfo() InitializeDb()
+5)关于检索
+	Search() GetRecords()
+6)其它接口
+	CreateKeys() CopyRecord() GetProperty()
+完成
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+创建配置事项测试工作单
+准备工作，存在一个测试库
+
+1.创建目录：路径为"测试库/mydir"
+2.创建文件：路径为"测试库/myfile"
+
+3.删除"测试库/mydir"目录
+4.删除"测试库/myfile"文件
+
+5.创建文件，路径为"测试库/mydir/testdir/myfile"，自动创建目录
+6.删除"测试库/mydir/testdir/myfile"文件
+7.删除“测试库/mydir”目录，下级同时删除。
+完成

@@ -1,0 +1,822 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Diagnostics;
+using System.Xml.XPath;
+
+namespace DigitalPlatform.Script
+{
+    // MarcNode容器
+    public class MarcNodeList : List<MarcNode>
+    {
+        // public MarcNode Parent = null;
+
+        #region 构造函数
+
+        public MarcNodeList()
+        {
+        }
+
+        // 用一个元素构造出数组
+        public MarcNodeList(MarcNode node)
+        {
+            // 如果使用null，可以构造出一个空的集合。这是为了方便使用，尽量不要报错
+            // 例如 new MarcNodeList(node.FirstChild) 如果 FirstChild 为空可以构造出一个空的集合，如果后面利用这个集合继续操作也无害
+            if (node == null)
+                return;
+            this.Add(node);
+        }
+
+        #endregion
+
+        // 复制出一个新的集合
+        // 注意，不但数组(框架)被复制，其中每个元素都重新复制
+        public MarcNodeList Copy()
+        {
+            MarcNodeList result = new MarcNodeList();
+            foreach (MarcNode node in this)
+            {
+                result.Add(node.Copy());
+            }
+
+            return result;
+        }
+
+        // 从数组中移走一个对象
+        // 注意，本函数并不修改所移走的对象的Parent成员。也就是说移走的对象并未完全被detach
+        // 返回移出的nodes
+        public MarcNodeList Remove()
+        {
+            MarcNodeList results = new MarcNodeList();
+
+            for (int i = 0; i < this.Count; i++)
+            {
+                MarcNode node = this[i];
+                MarcNode temp = node.Remove();
+                if (temp != null)
+                    results.Add(node);
+            }
+
+            return results;
+        }
+
+        public new void Add(MarcNode node)
+        {
+            base.Add(node);
+        }
+
+
+        // 插入一个适当的顺序位置
+        // 规则是，插入位置的前一个元素比要插入的对象小，后一个元素比要插入的对象大
+        // 所谓“小”和“大”的规则，也就是排序规则，可以自定义
+        public virtual void InsertSequence(MarcNode node, 
+            InsertSequenceStyle style = InsertSequenceStyle.PreferHead,
+            IComparer<MarcNode> comparer = null)
+        {
+            if (comparer == null)
+                comparer = new MarcNodeComparer();
+
+            // 寻找插入位置
+            List<int> values = new List<int>(); // 累积每个比较结果数字
+            int nInsertPos = -1;
+            int i = 0;
+            foreach (MarcNode current in this)
+            {
+                int nBigThanCurrent = 0;   // 相当于node和当前对象相减
+                
+                nBigThanCurrent = comparer.Compare(node, current);
+                if (nBigThanCurrent < 0)
+                {
+                    nInsertPos = i;
+                    break;
+                }
+                if (nBigThanCurrent == 0)
+                {
+                    if ((style & InsertSequenceStyle.PreferHead) != 0)
+                    {
+                        nInsertPos = i;
+                        break;
+                    }
+                }
+
+                // 刚刚遇到过相等的一段，但在当前位置结束了相等 (或者开始变大，或者开始变小)
+                if (nBigThanCurrent != 0 && values.Count > 0 && values[values.Count - 1] == 0)
+                {
+                    if ((style & InsertSequenceStyle.PreferTail) != 0)
+                    {
+                        nInsertPos = i - 1;
+                        break;
+                    }
+                }
+
+                values.Add(nBigThanCurrent);
+                i++;
+            }
+
+            if (nInsertPos == -1)
+            {
+                base.Add(node);
+                return;
+            }
+
+            base.Insert(nInsertPos, node);
+        }
+
+        class MarcNodeComparer : IComparer<MarcNode>
+        {
+            int IComparer<MarcNode>.Compare(MarcNode x, MarcNode y)
+            {
+                // 如果名字字符串中出现了字符 '-'，需要特殊的比较方式
+                if (x.Name.IndexOf("-") != -1 || y.Name.IndexOf("-") != -1)
+                    return CompareFieldName(x.Name, y.Name);
+                return string.Compare(x.Name, y.Name);
+            }
+
+            // 字段名字符串比较大小
+            // "-01"理解为比"001"更小
+            public static int CompareFieldName(string s1, string s2)
+            {
+                s1 = s1.Replace("-", "/");
+                s2 = s2.Replace("-", "/");
+                return string.CompareOrdinal(s1, s2);
+            }
+        }
+
+        /*
+        //
+        // 摘要:
+        //     使用默认比较器对整个 System.Collections.Generic.List<T> 中的元素进行排序。
+        //
+        // 异常:
+        //   System.InvalidOperationException:
+        //     默认比较器 System.Collections.Generic.Comparer<T>.Default 找不到 T 类型的 System.IComparable<T>
+        //     泛型接口或 System.IComparable 接口的实现。
+        public void Sort();
+        //
+        // 摘要:
+        //     使用指定的 System.Comparison<T> 对整个 System.Collections.Generic.List<T> 中的元素进行排序。
+        //
+        // 参数:
+        //   comparison:
+        //     比较元素时要使用的 System.Comparison<T>。
+        //
+        // 异常:
+        //   System.ArgumentNullException:
+        //     comparison 为 null。
+        //
+        //   System.ArgumentException:
+        //     comparison 的实现导致排序时出现错误。例如，将某个项与其自身进行比较时，comparison 可能不返回 0。
+        public void Sort(Comparison<T> comparison);
+        //
+        // 摘要:
+        //     使用指定的比较器对整个 System.Collections.Generic.List<T> 中的元素进行排序。
+        //
+        // 参数:
+        //   comparer:
+        //     比较元素时要使用的 System.Collections.Generic.IComparer<T> 实现，或者为 null，表示使用默认比较器 System.Collections.Generic.Comparer<T>.Default。
+        //
+        // 异常:
+        //   System.InvalidOperationException:
+        //     comparer 为 null，且默认比较器 System.Collections.Generic.Comparer<T>.Default 找不到
+        //     T 类型的 System.IComparable<T> 泛型接口或 System.IComparable 接口的实现。
+        //
+        //   System.ArgumentException:
+        //     comparer 的实现导致排序时出现错误。例如，将某个项与其自身进行比较时，comparer 可能不返回 0。
+        public void Sort(IComparer<T> comparer);
+        //
+        // 摘要:
+        //     使用指定的比较器对 System.Collections.Generic.List<T> 中某个范围内的元素进行排序。
+        //
+        // 参数:
+        //   index:
+        //     要排序的范围的从零开始的起始索引。
+        //
+        //   count:
+        //     要排序的范围的长度。
+        //
+        //   comparer:
+        //     比较元素时要使用的 System.Collections.Generic.IComparer<T> 实现，或者为 null，表示使用默认比较器 System.Collections.Generic.Comparer<T>.Default。
+        //
+        // 异常:
+        //   System.ArgumentOutOfRangeException:
+        //     index 小于 0。- 或 -count 小于 0。
+        //
+        //   System.ArgumentException:
+        //     index 和 count 未指定 System.Collections.Generic.List<T> 中的有效范围。- 或 -comparer
+        //     的实现导致排序时出现错误。例如，将某个项与其自身进行比较时，comparer 可能不返回 0。
+        //
+        //   System.InvalidOperationException:
+        //     comparer 为 null，且默认比较器 System.Collections.Generic.Comparer<T>.Default 找不到
+        //     T 类型的 System.IComparable<T> 泛型接口或 System.IComparable 接口的实现。
+        public void Sort(int index, int count, IComparer<T> comparer);
+         * */
+
+        public new void Sort()
+        {
+            base.Sort(new MarcNodeComparer());
+        }
+
+        #region 获得元素
+
+        // 返回第一个元素
+        public MarcNodeList First()
+        {
+            MarcNodeList results = new MarcNodeList();
+            if (this.Count > 0)
+                results.Add(this[0]);
+
+            return results;
+        }
+
+        // 返回最后一个元素
+        public MarcNodeList Last()
+        {
+            MarcNodeList results = new MarcNodeList();
+            if (this.Count > 0)
+                results.Add(this[this.Count - 1]);
+
+            return results;
+        }
+
+        // 返回某个元素
+        public MarcNodeList GetAt(int index)
+        {
+            MarcNodeList results = new MarcNodeList();
+            if (index < 0 && index >= this.Count)
+                throw new Exception("index值 " + index.ToString() + " 超出许可范围");
+
+            results.Add(this[index]);
+
+            return results;
+        }
+
+        // 返回某些元素
+        // parameters:
+        //      length  要取得的个数。如果为-1，表示从index一直取到末尾
+        public MarcNodeList GetAt(int index, int length)
+        {
+            MarcNodeList results = new MarcNodeList();
+            if (index < 0 && index >= this.Count)
+                throw new Exception("index值 " + index.ToString() + " 超出许可范围");
+
+            if (length == -1)
+                length = this.Count - index;
+
+            if (length != 1)
+            {
+                if (index + length < 0 && index + length >= this.Count)
+                    throw new Exception("index+length值 " + (index + length).ToString() + " 超出许可范围");
+            }
+
+            for (int i = index; i < index + length; i++)
+            {
+                results.Add(this[i]);
+            }
+
+            return results;
+        }
+
+        #endregion
+
+        #region 获得各种值
+
+        // 第一个元素的 Name
+        public string FirstName
+        {
+            get
+            {
+                if (this.Count == 0)
+                    return null;
+
+                return this[0].Name;
+            }
+        }
+
+        // 第一个元素的 Indicator
+        public string FirstIndicator
+        {
+            get
+            {
+                if (this.Count == 0)
+                    return null;
+
+                return this[0].Indicator;
+            }
+        }
+
+        // 第一个元素的Content
+        public string FirstContent
+        {
+            get
+            {
+                if (this.Count == 0)
+                    return null;
+
+                return this[0].Content;
+            }
+        }
+
+        // 第一个元素的 Text
+        public string FirstText
+        {
+            get
+            {
+                if (this.Count == 0)
+                    return null;
+
+                return this[0].Text;
+            }
+        }
+
+        // 所有元素的 Text 连接起来的一个字符串
+        // 这种字符串可以用来一次创建若干对象 (假如都是 字段 或者 子字段 的话)
+        public string AllText
+        {
+            get
+            {
+                if (this.Count == 0)
+                    return null;
+
+                StringBuilder text = new StringBuilder(4096);
+                foreach (MarcNode node in this)
+                {
+                    text.Append(node.Text);
+                }
+                return text.ToString();
+            }
+        }
+
+        // 第一个元素的 Leading
+        public string FirstLeading
+        {
+            get
+            {
+                if (this.Count == 0)
+                    return null;
+                MarcNode node = this[0];
+                if (node is MarcField)
+                    return ((MarcField)node).Leading;
+                return "";
+            }
+        }
+
+        // 获得所有元素的第一个下级元素
+        public MarcNodeList FirstChild
+        {
+            get
+            {
+                MarcNodeList results = new MarcNodeList();
+                foreach (MarcNode node in this)
+                {
+                    MarcNode child = node.FirstChild;
+                    if (child != null)
+                        results.Add(child);
+                }
+
+                return results;
+            }
+        }
+
+        // 获得所有元素的最后一个下级元素
+        public MarcNodeList LastChild
+        {
+            get
+            {
+                MarcNodeList results = new MarcNodeList();
+                foreach (MarcNode node in this)
+                {
+                    MarcNode child = node.LastChild;
+                    if (child != null)
+                        results.Add(child);
+                }
+
+                return results;
+            }
+        }
+
+        #endregion
+
+        #region 成批修改成员
+
+        // 修改集合中的每个元素的Name
+        public string Name
+        {
+            set
+            {
+                foreach (MarcNode node in this)
+                {
+                    node.Name = value;  // TODO: 修改name的长度不合适了是否高报错?
+                }
+            }
+        }
+
+
+
+        // 修改集合中每个元素的Indicator
+        public string Indicator
+        {
+            set
+            {
+                foreach (MarcNode node in this)
+                {
+                    node.Indicator = value;  // TODO: 修改indicator的长度不合适了是否高报错?
+                }
+            }
+        }
+
+        // 修改集合中每个元素的Content
+        public string Content
+        {
+            set
+            {
+                foreach (MarcNode node in this)
+                {
+                    node.Content = value;
+                }
+            }
+        }
+
+        // 修改集合中每个元素的 Text (为同样的值)
+        public string Text
+        {
+            set
+            {
+                foreach (MarcNode node in this)
+                {
+                    node.Text = value;
+                }
+            }
+        }
+
+        // 修改集合中每个元素的Leading
+        // 不是MarcField类型的元素会被忽略
+        public string Leading
+        {
+#if NO
+            get
+            {
+                if (this.Count == 0)
+                    return null;
+                MarcNode node = this[0];
+                if (node is MarcField)
+                    return ((MarcField)node).Leading;
+                return "";
+            }
+#endif
+            set
+            {
+                foreach (MarcNode node in this)
+                {
+                    if (node is MarcField)
+                    {
+                        ((MarcField)node).Leading = value;
+                    }
+                }
+            }
+        }
+
+        // 在当前集合中每个元素的DOM位置后面插入源集合内的元素
+        // 参见 MarcQuery::insertAfter() 函数的注释
+        // 最后返回当前集合
+        public MarcNodeList after(MarcNodeList source_nodes)
+        {
+            MarcQuery.insertAfter(source_nodes, this);
+            return this;
+        }
+
+        // 在当前集合中每个元素的DOM位置后面插入新元素
+        // 参见 MarcQuery::insertAfter() 函数的注释
+        // 最后返回当前集合
+        public MarcNodeList after(string strSourceText)
+        {
+            if (this.Count == 0 || string.IsNullOrEmpty(strSourceText))
+                return this;
+
+            if (this[0].NodeType == NodeType.None)
+                throw new ArgumentException("不允许在 None 对象的后面添加任何对象");
+            if (this[0].NodeType == NodeType.Record)
+                throw new ArgumentException("不允许在 记录 对象的后面添加任何对象");
+
+            MarcNodeList source_nodes = null;
+            string strLeading = "";
+            if (this[0].NodeType == NodeType.Field)
+                source_nodes = MarcQuery.CreateFields(strSourceText);
+            else
+            {
+                source_nodes = MarcQuery.CreateSubfields(strSourceText, out strLeading);
+                // leading要追加到目标集合的最后一个元素的Content末尾
+                if (string.IsNullOrEmpty(strLeading) == false)
+                    this.Last()[0].Content += strLeading;
+            }
+
+            MarcQuery.insertAfter(source_nodes, this);
+            return this;
+        }
+
+        // 把当前集合中的每个元素插入到目标集合的每个元素的DOM位置后面
+        // 参见 MarcQuery::insertAfter() 函数的注释
+        // 最后返回当前集合
+        public MarcNodeList insertAfter(MarcNodeList target_nodes)
+        {
+            MarcQuery.insertAfter(this, target_nodes);
+            return this;
+        }
+
+        // 在当前集合中每个元素的DOM位置 下级末尾 插入源集合内的元素
+        // 参见 MarcQuery::append() 函数的注释
+        // 最后返回当前集合
+        public MarcNodeList append(MarcNodeList source_nodes)
+        {
+            MarcQuery.append(source_nodes, this);
+            return this;
+        }
+
+        // 在当前集合中每个元素的DOM位置 下级末尾 插入新元素
+        // 参见 MarcQuery::append() 函数的注释
+        // 最后返回当前集合
+        public MarcNodeList append(string strSourceText)
+        {
+            if (this.Count == 0 || string.IsNullOrEmpty(strSourceText))
+                return this;
+
+            if (this[0].NodeType == NodeType.None)
+                throw new ArgumentException("不允许在 None 节点的 下级末尾 添加任何节点");
+            if (this[0].NodeType == NodeType.Subfield)
+                throw new ArgumentException("不允许在 子字段 节点的 下级末尾添加任何节点。因为子字段本身就是末级节点，不允许出现下级节点");
+
+            MarcNodeList source_nodes = null;
+            string strLeading = "";
+            if (this[0].NodeType == NodeType.Record)
+                source_nodes = MarcQuery.CreateFields(strSourceText);
+            else if (this[0].NodeType == NodeType.Field)
+            {
+                source_nodes = MarcQuery.CreateSubfields(strSourceText, out strLeading);
+                // leading要追加到目标集合的最后一个元素的Content末尾
+                if (string.IsNullOrEmpty(strLeading) == false)
+                    this.Last()[0].Content += strLeading;
+            }
+            else
+            {
+                throw new Exception("未知的对象类型 '" + this[0].NodeType.ToString() + "'");
+            }
+
+            MarcQuery.append(source_nodes, this);
+            return this;
+        }
+
+
+        // 在当前集合中每个元素的DOM位置 下级开头 插入源集合内的元素
+        // 参见 MarcQuery::prepend() 函数的注释
+        // 最后返回当前集合
+        public MarcNodeList prepend(MarcNodeList source_nodes)
+        {
+            MarcQuery.prepend(source_nodes, this);
+            return this;
+        }
+
+        // 在当前集合中每个元素的DOM位置 下级开头 插入新元素
+        // 参见 MarcQuery::prepend() 函数的注释
+        // 最后返回当前集合
+        public MarcNodeList prepend(string strSourceText)
+        {
+            if (this.Count == 0 || string.IsNullOrEmpty(strSourceText))
+                return this;
+
+            if (this[0].NodeType == NodeType.None)
+                throw new ArgumentException("不允许在 None 节点的 下级开头 添加任何节点");
+            if (this[0].NodeType == NodeType.Subfield)
+                throw new ArgumentException("不允许在 子字段 节点的 下级开头 添加任何节点。因为子字段本身就是末级节点，不允许出现下级节点");
+
+            MarcNodeList source_nodes = null;
+            string strLeading = "";
+            if (this[0].NodeType == NodeType.Record)
+                source_nodes = MarcQuery.CreateFields(strSourceText);
+            else if (this[0].NodeType == NodeType.Field)
+            {
+                source_nodes = MarcQuery.CreateSubfields(strSourceText, out strLeading);
+                // leading要追加到目标集合的最后一个元素的Content末尾
+                if (string.IsNullOrEmpty(strLeading) == false)
+                    this.Last()[0].Content += strLeading;
+            }
+            else
+            {
+                throw new Exception("未知的对象类型 '" + this[0].NodeType.ToString() + "'");
+            }
+
+            MarcQuery.prepend(source_nodes, this);
+            return this;
+        }
+
+        // 把当前集合内的每个元素从DOM位置摘除
+        // 最后返回当前集合
+        // 注：摘除下来的局部的DOM树，也应该可以对它进行SelectNodes()的操作。只是根元素不一定是 MarcRoot 了
+        public MarcNodeList detach()
+        {
+            foreach (MarcNode node in this)
+            {
+                node.detach();
+            }
+
+            return this;
+        }
+
+        #endregion
+
+        #region 筛选
+
+        // 对一批互相没有树重叠关系的对象进行筛选
+        static MarcNodeList SelectNodes(MarcNodeList source,
+            string strXPath,
+            int nMaxCount = -1)
+        {
+            // 准备一个模拟的记录节点
+            MarcRecord record = new MarcRecord();
+
+            // 保存下集合中所有的Parent指针
+            List<MarcNode> parents = new List<MarcNode>();
+            foreach (MarcNode node in source)
+            {
+                // 保存指针
+                parents.Add(node.Parent);
+
+                // 建立父子关系
+                node.Parent = record;
+                record.ChildNodes.Add(node);
+            }
+            Debug.Assert(parents.Count == source.Count, "");
+
+            try
+            {
+                MarcNodeList results = new MarcNodeList();
+
+                MarcNavigator nav = new MarcNavigator(record);  // 出发点在模拟的记录节点上
+
+                XPathNodeIterator ni = nav.Select(strXPath);
+                while (ni.MoveNext() && (nMaxCount == -1 || results.Count < nMaxCount))
+                {
+                    NaviItem item = ((MarcNavigator)ni.Current).Item;
+                    if (item.Type != NaviItemType.Element)
+                    {
+                        throw new Exception("xpath '" + strXPath + "' 命中了非元素类型的节点，这是不允许的");
+                        continue;
+                    }
+                    if (results.IndexOf(item.MarcNode) == -1)   // 不重复的才加入
+                        results.Add(item.MarcNode);
+                }
+                return results;
+            }
+            finally
+            {
+                // 恢复原先的 Parent 指针
+                Debug.Assert(parents.Count == source.Count, "");
+                for (int i = 0; i < source.Count; i++)
+                {
+                    source[i].Parent = parents[i];
+                }
+            }
+        }
+
+        // 观察两个 MarcNode 之间是否有重叠关系
+        static bool IsCross(MarcNode node1, MarcNode node2)
+        {
+            MarcNode current = node1;
+            while (current != null)
+            {
+                if (current == node2)
+                    return true;
+                current = current.Parent;
+            }
+            current = node2;
+            while (current != null)
+            {
+                if (current == node1)
+                    return true;
+                current = current.Parent;
+            }
+
+            return false;
+        }
+
+        // 观察 node 是否和集合中的任何一个节点有重叠关系
+        static bool IsCross(MarcNode node, MarcNodeList list)
+        {
+            foreach (MarcNode current in list)
+            {
+                if (IsCross(current, node) == true)
+                    return true;
+            }
+            return false;
+        }
+
+        // 针对集合中的元素进行 XPath 筛选
+        // 本函数不怕同一批元素之间有重叠关系。所采用的策略是一批一批单独筛选，然后把输出结果合成
+        // parameters:
+        //      nMaxCount    至多选择开头这么多个元素。-1表示不限制
+        public MarcNodeList SelectNodes(string strXPath, int nMaxCount = -1)
+        {
+            // 把当前集合分割为每段内部确保互相不重叠
+            List<MarcNodeList> lists = new List<MarcNodeList>();
+
+            {
+                MarcNodeList segment = new MarcNodeList();  // 当前累积的段落
+                foreach (MarcNode node in this)
+                {
+                    if (segment.Count > 0)
+                    {
+                        if (IsCross(node, segment) == true)
+                        {
+                            // 推走
+                            lists.Add(segment);
+                            segment = new MarcNodeList();
+                        }
+                    }
+                    segment.Add(node);
+                }
+
+                // 最后剩下的
+                if (segment.Count > 0)
+                    lists.Add(segment);
+            }
+
+
+            MarcNodeList results = new MarcNodeList();
+            foreach (MarcNodeList segment in lists)
+            {
+                // 对一批互相没有树重叠关系的对象进行筛选
+                MarcNodeList temp = SelectNodes(segment,
+                    strXPath,
+                    -1);
+                foreach (MarcNode node in temp)
+                {
+                    if (results.IndexOf(node) == -1)
+                        results.Add(node);
+                }
+
+                if (nMaxCount != -1 && results.Count >= nMaxCount)
+                {
+                    if (results.Count > nMaxCount)
+                        return results.GetAt(0, nMaxCount);
+                    break;
+                }
+            }
+            return results;
+        }
+
+        #endregion
+
+        public string Dump(DumpStyle style = DumpStyle.None)
+        {
+            StringBuilder result = new StringBuilder(4096);
+            int i = 0;
+            foreach (MarcNode node in this)
+            {
+                if (result.Length > 0)
+                    result.Append("\r\n");
+                result.Append(
+                    ((style & DumpStyle.LineNumber) != 0 ? (i + 1).ToString() + ") " : "")
+                    + node.Dump());
+                i++;
+            }
+
+            return result.ToString();
+        }
+
+#if NO
+                public string Dump()
+        {
+            string strResult = "";
+            for (int i = 0; i < this.Count; i++)
+            {
+                if (i > 0)
+                    strResult += "\r\n";
+                strResult += this[i].Dump();
+            }
+
+            return strResult;
+        }
+
+#endif
+
+#if NO
+        // 清除集合，并把原先的每个元素的Parent清空。
+        // 主要用于ChildNodes摘除关系
+        internal void ClearAndDetach()
+        {
+            foreach (MarcNode node in this)
+            {
+                node.Parent = null;
+            }
+            base.Clear();
+        }
+#endif
+    }
+
+    // 插入数组操作时的细节特性
+    public enum InsertSequenceStyle
+    {
+        None = 0x00,
+        PreferHead = 0x01,  // 如果名字相等，倾向于插入前方
+        PreferTail = 0x02,  // 如果名字相等，倾向于插入后方
+    }
+}

@@ -1,0 +1,158 @@
+BODY {
+	FONT-FAMILY: Microsoft YaHei, Verdana, ËÎÌו;
+	FONT-SIZE: 8pt;
+}
+
+A:link, A:visited, A:active 
+{
+	text-decoration: none;
+	color: #006600;
+}
+
+A:hover
+{
+    font-weight:bold;
+}
+
+TD.regular {
+
+}
+
+TD.regular A:visited
+{
+	font-weight: bold;
+}
+
+
+TABLE.iteminfo
+{
+	font-size: 8pt;
+	
+	border-color: lightgrey;
+	border-width: 0px; 
+	border-style: solid;
+	border-collapse:collapse;
+}
+
+/* TD padding */
+TABLE.iteminfo TD
+{
+    padding: 4px;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+TABLE.iteminfo TR.content
+{
+	font-size: 8pt;
+	background-color: white;
+}
+
+TABLE.iteminfo TD.name
+{
+	text-align: right;
+	background-color: #eeeeee;
+	color: #777777;
+	width: 10%;
+	
+	
+	border: 0px;
+	border-right: 1px;
+	border-color: #999999;
+	border-style: solid;
+	
+	text-align: right;
+	vertical-align: top;
+	white-space:nowrap;
+
+}
+
+TABLE.iteminfo TD.value.location
+{
+    font-size: 12pt;
+    font-weight: bolder;
+}
+
+/* Borrow History */
+
+TABLE.borrowhistory
+{
+	font-size: 8pt;
+	
+	border-color: lightgrey;
+	border-width: 0px; 
+	border-style: solid;
+	border-collapse:collapse;
+}
+
+/* TD padding */
+TABLE.borrowhistory TD
+{
+    padding: 4px;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+TABLE.borrowhistory TR.borrowcount
+{
+	background-color: whitesmoke;
+	text-align: right;
+}
+
+
+TABLE.borrowhistory TR.columntitle
+{
+	color: #ffffff;
+	font-weight: bolder;
+	background-color: #777777;
+}
+
+TABLE.borrowhistory TR.odd
+{
+	background-color: #eeeeee;
+}
+
+TABLE.borrowhistory TR.content TD.index
+{
+	text-align: right;
+	font-weight: bolder;
+	color: white;
+	background-color: #770000;
+	
+	border-color: #ffffff;
+	border-width: 0px; 
+	border-bottom-width: 1px;
+	border-style: solid;
+}
+
+TABLE.borrowhistory TR.content TD.borrower
+{
+	background-color: whitesmoke;
+}
+
+TABLE.borrowhistory TR.content TD.summary
+{
+	font-size: 8pt;
+}
+
+TABLE.borrowhistory TR.content TD.borrowdate
+{
+	font-size: 6pt;
+}
+
+TABLE.borrowhistory TR.content TD.returndate
+{
+	font-size: 6pt;
+}
+
+TABLE.borrowhistory TR.content TD.renewcomment
+{
+	font-size: 6pt;
+}
+
+IMG.biblio
+{
+	float:left;
+	margin-right: 4px;
+	max-width: 70px;
+}

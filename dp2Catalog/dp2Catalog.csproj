@@ -1,0 +1,1089 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{F801B8E8-D7C9-4FB4-A93F-10C41CDBF44F}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>dp2Catalog</RootNamespace>
+    <AssemblyName>dp2Catalog</AssemblyName>
+    <IsWebBootstrapper>true</IsWebBootstrapper>
+    <ManifestCertificateThumbprint>94C22C2413347575F6A059EE7A9B42B429D742F4</ManifestCertificateThumbprint>
+    <ManifestKeyFile>dp2Catalog_8_TemporaryKey.pfx</ManifestKeyFile>
+    <GenerateManifests>true</GenerateManifests>
+    <SignManifests>true</SignManifests>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
+    <ApplicationIcon>mu.ico</ApplicationIcon>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>2.0</OldToolsVersion>
+    <UpgradeBackupLocation />
+    <TargetFrameworkProfile />
+    <PublishUrl>http://localhost/dp2Catalog/V2/</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Web</InstallFrom>
+    <UpdateEnabled>true</UpdateEnabled>
+    <UpdateMode>Background</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <InstallUrl>http://dp2003.com/dp2Catalog/V2/</InstallUrl>
+    <UpdateUrl>http://dp2003.com/dp2Catalog/V2/</UpdateUrl>
+    <TargetCulture>zh-CN</TargetCulture>
+    <ProductName>dp2编目 V2</ProductName>
+    <PublisherName>DigitalPlatform</PublisherName>
+    <SuiteName>dp2 V2</SuiteName>
+    <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
+    <WebPage>publish.htm</WebPage>
+    <ApplicationRevision>92</ApplicationRevision>
+    <ApplicationVersion>2.2.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <PublishWizardCompleted>true</PublishWizardCompleted>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;THREAD_POOLING,SN</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;THREAD_POOLING</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="ClosedXML">
+      <HintPath>packages\ClosedXML.0.75.0\lib\net40-client\ClosedXML.dll</HintPath>
+    </Reference>
+    <Reference Include="DocumentFormat.OpenXml, Version=2.5.5631.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>packages\DocumentFormat.OpenXml.2.5\lib\DocumentFormat.OpenXml.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AdvertiseForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AdvertiseForm.Designer.cs">
+      <DependentUpon>AdvertiseForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Amazon\AmazonQueryControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Amazon\AmazonQueryControl.Designer.cs">
+      <DependentUpon>AmazonQueryControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Amazon\AmazonSearchForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Amazon\AmazonSearchForm.Designer.cs">
+      <DependentUpon>AmazonSearchForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Amazon\AmazonSearchParametersControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Amazon\AmazonSearchParametersControl.Designer.cs">
+      <DependentUpon>AmazonSearchParametersControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Amazon\AmazonSimpleQueryControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Amazon\AmazonSimpleQueryControl.Designer.cs">
+      <DependentUpon>AmazonSimpleQueryControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BerDebugForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BerDebugForm.Designer.cs">
+      <DependentUpon>BerDebugForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CharsetTable.cs" />
+    <Compile Include="CopyrightDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DC\DcDetailHost.cs" />
+    <Compile Include="DC\DcForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DC\DcForm.Designer.cs">
+      <DependentUpon>DcForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="dp2\BiblioLoader.cs" />
+    <Compile Include="dp2\BiblioViewerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="dp2\BiblioViewerForm.Designer.cs">
+      <DependentUpon>BiblioViewerForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="dp2\BrowseLoader.cs" />
+    <Compile Include="dp2\ChangePasswordForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="dp2\ChangePasswordForm.Designer.cs">
+      <DependentUpon>ChangePasswordForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="dp2\DbSelectListDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="dp2\DbSelectListDialog.Designer.cs">
+      <DependentUpon>DbSelectListDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="dp2\dp2SearchForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="dp2\dp2SearchForm.Designer.cs">
+      <DependentUpon>dp2SearchForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="dp2\dp2ServerInfo.cs" />
+    <Compile Include="dp2\DupForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="dp2\DupForm.Designer.cs">
+      <DependentUpon>DupForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DTLP\DtlpLogForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DTLP\DtlpLogForm.Designer.cs">
+      <DependentUpon>DtlpLogForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DTLP\DtlpSearchForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DTLP\DtlpSearchForm.Designer.cs">
+      <DependentUpon>DtlpSearchForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Global.cs" />
+    <Compile Include="IZSearchForm.cs" />
+    <Compile Include="MainForm\FirstRunDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainForm\FirstRunDialog.designer.cs">
+      <DependentUpon>FirstRunDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Marc8Encoding.cs" />
+    <Compile Include="EaccForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EaccForm.Designer.cs">
+      <DependentUpon>EaccForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FilterHost.cs" />
+    <Compile Include="GetEncodingForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GetEncodingForm.Designer.cs">
+      <DependentUpon>GetEncodingForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ISearchForm.cs" />
+    <Compile Include="MainForm\MainForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainForm\MainForm.Designer.cs">
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MarcDetailForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MarcDetailForm.Designer.cs">
+      <DependentUpon>MarcDetailForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MARC\LinkMarcFile.cs" />
+    <Compile Include="MARC\MarcDetailHost.cs" />
+    <Compile Include="MARC\TwoBiblioDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MARC\TwoBiblioDialog.designer.cs">
+      <DependentUpon>TwoBiblioDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="OAI\OaiSearchForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="OAI\OaiSearchForm.Designer.cs">
+      <DependentUpon>OaiSearchForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="OAI\OaiServerPropertyForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="OAI\OaiServerPropertyForm.Designer.cs">
+      <DependentUpon>OaiServerPropertyForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="OAI\OaiTargeControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="OAI\OaiTargeControl.Designer.cs">
+      <DependentUpon>OaiTargeControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="OperHistory.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="AdvertiseForm.resx">
+      <DependentUpon>AdvertiseForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Amazon\AmazonQueryControl.resx">
+      <DependentUpon>AmazonQueryControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Amazon\AmazonSearchForm.resx">
+      <DependentUpon>AmazonSearchForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Amazon\AmazonSearchParametersControl.resx">
+      <DependentUpon>AmazonSearchParametersControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Amazon\AmazonSimpleQueryControl.resx">
+      <DependentUpon>AmazonSimpleQueryControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BerDebugForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>BerDebugForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CopyrightDlg.resx">
+      <DependentUpon>CopyrightDlg.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DC\DcForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>DcForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="dp2\BiblioViewerForm.resx">
+      <DependentUpon>BiblioViewerForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="dp2\ChangePasswordForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ChangePasswordForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="dp2\DbSelectListDialog.resx">
+      <DependentUpon>DbSelectListDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="dp2\dp2SearchForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>dp2SearchForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="dp2\DupForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>DupForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DTLP\DtlpLogForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>DtlpLogForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DTLP\DtlpSearchForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>DtlpSearchForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EaccForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>EaccForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GetEncodingForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>GetEncodingForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainForm\FirstRunDialog.resx">
+      <DependentUpon>FirstRunDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainForm\MainForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>MainForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MarcDetailForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>MarcDetailForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MARC\TwoBiblioDialog.resx">
+      <DependentUpon>TwoBiblioDialog.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="OAI\OaiSearchForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>OaiSearchForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="OAI\OaiServerPropertyForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>OaiServerPropertyForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="OAI\OaiTargeControl.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>OaiTargeControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RecordSyntaxAndEncodingBindingItemDlg.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>RecordSyntaxAndEncodingBindingItemDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SaveRecordDlg.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>SaveRecordDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Script\ZhongcihaoForm.resx">
+      <DependentUpon>ZhongcihaoForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SelectProtocolDialog.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>SelectProtocolDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SystemCfgForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>SystemCfgForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TestForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>TestForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="XmlDetailForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>XmlDetailForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="XmlViewerForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>XmlViewerForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Z39.50\SelectLogRecordDlg.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>SelectLogRecordDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Z39.50\ZBatchSearchForm.resx">
+      <DependentUpon>ZBatchSearchForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Z39.50\ZDirPopertyForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ZDirPopertyForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Z39.50\ZQueryControl.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ZQueryControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Z39.50\ZSearchForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ZSearchForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Z39.50\ZServerPropertyForm.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ZServerPropertyForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Z39.50\ZTargetControl.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ZTargetControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Content Include="1_2_840_10003_5_10\marc_html.fltx">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="1_2_840_10003_5_1\marc_html.fltx">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Include="app.config" />
+    <None Include="dp2Catalog_1_TemporaryKey.pfx" />
+    <None Include="dp2Catalog_2_TemporaryKey.pfx" />
+    <None Include="dp2Catalog_3_TemporaryKey.pfx" />
+    <None Include="dp2Catalog_4_TemporaryKey.pfx" />
+    <Content Include="1_2_840_10003_5_10\amazon.xslt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="1_2_840_10003_5_1\amazon.xslt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="1_2_840_10003_5_1\dp2catalog_marc_autogen.cs.ref" />
+    <Content Include="1_2_840_10003_5_1\dp2catalog_marc_autogen.cs" />
+    <Content Include="1_2_840_10003_5_10\dp2catalog_marc_autogen.cs.ref" />
+    <Content Include="1_2_840_10003_5_10\dp2catalog_marc_autogen.cs" />
+    <None Include="dp2Catalog_5_TemporaryKey.pfx" />
+    <None Include="dp2Catalog_6_TemporaryKey.pfx" />
+    <None Include="dp2Catalog_7_TemporaryKey.pfx" />
+    <None Include="dp2Catalog_8_TemporaryKey.pfx" />
+    <None Include="dp2Catalog_TemporaryKey.pfx" />
+    <Content Include="1_2_840_10003_5_10\marc_browse.fltx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="1_2_840_10003_5_1\marc_browse.fltx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="1_2_840_10003_5_1\marcdef" />
+    <Content Include="1_2_840_10003_5_10\marcdef" />
+    <Content Include="1_2_840_10003_5_1\marcvaluelist" />
+    <Content Include="1_2_840_10003_5_10\marcvaluelist" />
+    <Content Include="Amazon\amazon.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Amazon\memo.txt" />
+    <Content Include="Amazon\itemsearch_response.xml" />
+    <Content Include="amazon_searchcontrol.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="bibliohtml.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="deleted.txt" />
+    <Content Include="eacc_charsettable" />
+    <Content Include="eacc_charsettable.index" />
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <Compile Include="RecordSyntaxAndEncodingBindingItemDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="RecordSyntaxAndEncodingBindingItemDlg.Designer.cs">
+      <DependentUpon>RecordSyntaxAndEncodingBindingItemDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SaveRecordDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SaveRecordDlg.Designer.cs">
+      <DependentUpon>SaveRecordDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Script\MarcQueryHost.cs" />
+    <Compile Include="Script\ZhongcihaoForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Script\ZhongcihaoForm.designer.cs">
+      <DependentUpon>ZhongcihaoForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SelectProtocolDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SelectProtocolDialog.Designer.cs">
+      <DependentUpon>SelectProtocolDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SystemCfgForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SystemCfgForm.Designer.cs">
+      <DependentUpon>SystemCfgForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="TestForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TestForm.Designer.cs">
+      <DependentUpon>TestForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="VirtualItemCollection.cs" />
+    <Compile Include="XmlDetailForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="XmlDetailForm.Designer.cs">
+      <DependentUpon>XmlDetailForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="XmlViewerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="XmlViewerForm.Designer.cs">
+      <DependentUpon>XmlViewerForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Z39.50\SelectLogRecordDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Z39.50\SelectLogRecordDlg.Designer.cs">
+      <DependentUpon>SelectLogRecordDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Z39.50\ZBatchSearchForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Z39.50\ZBatchSearchForm.Designer.cs">
+      <DependentUpon>ZBatchSearchForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Z39.50\ZConnection.cs" />
+    <Compile Include="Z39.50\ZDirPopertyForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Z39.50\ZDirPopertyForm.Designer.cs">
+      <DependentUpon>ZDirPopertyForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Z39.50\ZQueryControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Z39.50\ZQueryControl.Designer.cs">
+      <DependentUpon>ZQueryControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Z39.50\ZSearchForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Z39.50\ZSearchForm.Designer.cs">
+      <DependentUpon>ZSearchForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Z39.50\ZServerPropertyForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Z39.50\ZServerPropertyForm.Designer.cs">
+      <DependentUpon>ZServerPropertyForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Z39.50\ZTargetControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Z39.50\ZTargetControl.Designer.cs">
+      <DependentUpon>ZTargetControl.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DigitalPlatform.AmazonInterface\DigitalPlatform.AmazonInterface.csproj">
+      <Project>{CEF0E01B-7F8F-4F0E-B687-C66659AB1403}</Project>
+      <Name>DigitalPlatform.AmazonInterface</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.CirculationClient\DigitalPlatform.CirculationClient.csproj">
+      <Project>{397BB898-88E0-41D6-8D01-09233C7FFC75}</Project>
+      <Name>DigitalPlatform.CirculationClient</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.CommonControl\DigitalPlatform.CommonControl.csproj">
+      <Project>{334E1B2B-5373-4C80-A971-BFF213FF304B}</Project>
+      <Name>DigitalPlatform.CommonControl</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.dp2.Statis\DigitalPlatform.dp2.Statis.csproj">
+      <Project>{060DD22D-8C7A-4D17-AC72-06B45AE65174}</Project>
+      <Name>DigitalPlatform.dp2.Statis</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Drawing\DigitalPlatform.Drawing.csproj">
+      <Project>{C2468F93-69AC-4BBA-94AE-678ED5C21542}</Project>
+      <Name>DigitalPlatform.Drawing</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Digitalplatform.DTLP\Digitalplatform.DTLP.csproj">
+      <Project>{91B90948-8475-4D9B-A3C7-6285EFC45E19}</Project>
+      <Name>Digitalplatform.DTLP</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.GcatClient\DigitalPlatform.GcatClient.csproj">
+      <Project>{FC226C5E-6AED-402B-B604-5DEEC6301AD6}</Project>
+      <Name>DigitalPlatform.GcatClient</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.IO\DigitalPlatform.IO.csproj">
+      <Project>{441CB814-AF78-4503-91EF-DCE5F3269502}</Project>
+      <Name>DigitalPlatform.IO</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.MarcDom\DigitalPlatform.MarcDom.csproj">
+      <Project>{3F81F705-5265-47EE-9255-CB33E1C135B8}</Project>
+      <Name>DigitalPlatform.MarcDom</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\digitalplatform.marceditor\DigitalPlatform.MarcEditor.csproj">
+      <Project>{184700D7-F172-4001-9EE6-440779D286E1}</Project>
+      <Name>DigitalPlatform.MarcEditor</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.MarcFixedFieldControl\DigitalPlatform.MarcFixedFieldControl.csproj">
+      <Project>{2DF76AF2-D0CD-47C5-910C-A81B8BCDCE3E}</Project>
+      <Name>DigitalPlatform.MarcFixedFieldControl</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.MarcKernel\DigitalPlatform.MarcKernel.csproj">
+      <Project>{74242530-EF96-457E-852D-5C21A3EA8449}</Project>
+      <Name>DigitalPlatform.MarcKernel</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.MarcQuery\DigitalPlatform.MarcQuery.csproj">
+      <Project>{57FE2FB1-4134-409B-876C-8A1C0776B498}</Project>
+      <Name>DigitalPlatform.MarcQuery</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Script\DigitalPlatform.Script.csproj">
+      <Project>{5107DE16-DDA1-4606-B3A3-840B24428329}</Project>
+      <Name>DigitalPlatform.Script</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Text\DigitalPlatform.Text.csproj">
+      <Project>{26F96CC3-A4A9-4BC4-A10A-BC7E25581FF6}</Project>
+      <Name>DigitalPlatform.Text</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.UnionCatalogClient\DigitalPlatform.UnionCatalogClient.csproj">
+      <Project>{F3D9A4E5-E891-4196-864A-A3DB788424AA}</Project>
+      <Name>DigitalPlatform.UnionCatalogClient</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Xml\DigitalPlatform.Xml.csproj">
+      <Project>{E6489E89-1349-4EE7-A00B-AC96B9912587}</Project>
+      <Name>DigitalPlatform.Xml</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Z3950\DigitalPlatform.Z3950.csproj">
+      <Project>{0E2B8DBD-1E6E-40E9-8AF7-EFD6D30DDEBF}</Project>
+      <Name>DigitalPlatform.Z3950</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform\DigitalPlatform.csproj">
+      <Project>{BDD43275-EAA0-4670-8BA3-0DB5CD7598DD}</Project>
+      <Name>DigitalPlatform</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="asciicodetables.xml" />
+    <Content Include="bib1use.xml" />
+    <Content Include="dc_define.xml" />
+    <Content Include="Design.txt" />
+    <Content Include="debug.txt" />
+    <Content Include="dp2Catalog.ico" />
+    <Content Include="dtlp_dup.xml" />
+    <Content Include="eacc_append.txt" />
+    <Content Include="1_2_840_10003_5_dt1000reader\marcdef" />
+    <Content Include="1_2_840_10003_5_dt1000reader\marcvaluelist" />
+    <Content Include="eula.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="history.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="mu.ico" />
+    <Content Include="NoUse.txt" />
+    <Content Include="operloghtml.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="page_blank_128.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="RangeMessage.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="zserver.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <PublishFile Include="1_2_840_10003_5_10\amazon.xslt">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="1_2_840_10003_5_10\dp2catalog_marc_autogen.cs">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="1_2_840_10003_5_10\dp2catalog_marc_autogen.cs.ref">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="1_2_840_10003_5_10\marcdef">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="1_2_840_10003_5_10\marcvaluelist">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="1_2_840_10003_5_10\marc_browse.fltx">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="1_2_840_10003_5_10\marc_html.fltx">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="1_2_840_10003_5_1\amazon.xslt">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="1_2_840_10003_5_1\dp2catalog_marc_autogen.cs">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="1_2_840_10003_5_1\dp2catalog_marc_autogen.cs.ref">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="1_2_840_10003_5_1\marcdef">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="1_2_840_10003_5_1\marcvaluelist">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="1_2_840_10003_5_1\marc_browse.fltx">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="1_2_840_10003_5_1\marc_html.fltx">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="1_2_840_10003_5_dt1000reader\marcdef">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="1_2_840_10003_5_dt1000reader\marcvaluelist">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="Amazon\itemsearch_response.xml">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Exclude</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="Amazon\memo.txt">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Exclude</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="amazon_searchcontrol.xml">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Exclude</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="asciicodetables.xml">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="bib1use.xml">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="bibliohtml.css">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="dc_define.xml">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="debug.txt">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Exclude</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="deleted.txt">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Exclude</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="Design.txt">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Exclude</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="dp2Catalog.ico">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Exclude</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="dtlp_dup.xml">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Exclude</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="eacc_append.txt">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Exclude</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="eacc_charsettable">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="eacc_charsettable.index">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="eula.txt">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="history.css">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="NoUse.txt">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Exclude</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="operloghtml.css">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="page_blank_128.png">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="zserver.xml">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Exclude</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.0">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4 %28x86 和 x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 2.0</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>这台计算机上缺少此项目引用的 NuGet 程序包。启用“NuGet 程序包还原”可下载这些程序包。有关详细信息，请参阅 http://go.microsoft.com/fwlink/?LinkID=322105。缺少的文件是 {0}。</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
+  </Target>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

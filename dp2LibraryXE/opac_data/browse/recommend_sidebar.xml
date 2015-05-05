@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="gb2312"?>
+<root>
+	<item url="./browse.aspx?sidebar=browse_sidebar.xml&amp;datafile=browse.xml">
+		<caption lang="zh-CN">分类浏览</caption>
+		<caption lang="en-US">Browse Class</caption>
+	</item>
+	<item url="./browse.aspx?sidebar=browse_sidebar.xml&amp;datafile=newbook.xml">
+		<caption lang="zh-CN">新书通报</caption>
+		<caption lang="en-US">New Books</caption>
+	</item>
+	<item url="./browse.aspx?sidebar=recommend_sidebar.xml&amp;datafile=recommend.xml">
+		<caption lang="zh-CN">读者荐购</caption>
+		<caption lang="en-US">Reader Recommend</caption>
+	</item>
+	<item url="./newrecommend.aspx">
+		<caption lang="zh-CN">创建新的荐购书目</caption>
+		<caption lang="en-US">New Recommend</caption>
+	</item>
+</root>

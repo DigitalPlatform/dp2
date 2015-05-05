@@ -1,0 +1,138 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.LibraryServer", "DigitalPlatform.LibraryServer.csproj", "{E153CC55-DA01-4403-A53F-AF801BDDF4BA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform", "..\DigitalPlatform\DigitalPlatform.csproj", "{BDD43275-EAA0-4670-8BA3-0DB5CD7598DD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.Drawing", "..\DigitalPlatform.Drawing\DigitalPlatform.Drawing.csproj", "{C2468F93-69AC-4BBA-94AE-678ED5C21542}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.IO", "..\DigitalPlatform.IO\DigitalPlatform.IO.csproj", "{441CB814-AF78-4503-91EF-DCE5F3269502}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.Library", "..\DigitalPlatform.Library\DigitalPlatform.Library.csproj", "{4C57493B-DE00-4BC0-836C-C736D3176689}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.MarcDom", "..\DigitalPlatform.MarcDom\DigitalPlatform.MarcDom.csproj", "{3F81F705-5265-47EE-9255-CB33E1C135B8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.MarcKernel", "..\DigitalPlatform.MarcKernel\DigitalPlatform.MarcKernel.csproj", "{74242530-EF96-457E-852D-5C21A3EA8449}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.rms.Client", "..\DigitalPlatform.rms.Client\DigitalPlatform.rms.Client.csproj", "{D63FAE14-7CD6-4BD3-90D7-7DBBCDF8EEEF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.Script", "..\DigitalPlatform.Script\DigitalPlatform.Script.csproj", "{5107DE16-DDA1-4606-B3A3-840B24428329}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.Text", "..\DigitalPlatform.Text\DigitalPlatform.Text.csproj", "{26F96CC3-A4A9-4BC4-A10A-BC7E25581FF6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.Xml", "..\DigitalPlatform.Xml\DigitalPlatform.Xml.csproj", "{E6489E89-1349-4EE7-A00B-AC96B9912587}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.Message", "..\DigitalPlatform.Message\DigitalPlatform.Message.csproj", "{D0C73839-5A5E-41BA-B1E5-104EEC488E33}"
+EndProject
+Global
+	GlobalSection(SourceCodeControl) = preSolution
+		SccNumberOfProjects = 13
+		SccLocalPath0 = .
+		CanCheckoutShared = false
+		SccProjectUniqueName1 = ..\\DigitalPlatform\\DigitalPlatform.csproj
+		SccProjectName1 = \u0022$/AllDigitalPlatformLibs.root/AllDigitalPlatformLibs/DigitalPlatform\u0022,\u0020HAAAAAAA
+		SccLocalPath1 = ..\\DigitalPlatform
+		CanCheckoutShared = false
+		SccProjectUniqueName2 = ..\\DigitalPlatform.Drawing\\DigitalPlatform.Drawing.csproj
+		SccProjectName2 = \u0022$/AllDigitalPlatformLibs.root/DigitalPlatform.Drawing\u0022,\u0020UHBAAAAA
+		SccLocalPath2 = ..\\DigitalPlatform.Drawing
+		CanCheckoutShared = false
+		SccProjectUniqueName3 = ..\\DigitalPlatform.IO\\DigitalPlatform.IO.csproj
+		SccProjectName3 = \u0022$/AllDigitalPlatformLibs.root/AllDigitalPlatformLibs/DigitalPlatform.IO\u0022,\u0020XAAAAAAA
+		SccLocalPath3 = ..\\DigitalPlatform.IO
+		CanCheckoutShared = false
+		SccProjectUniqueName4 = ..\\DigitalPlatform.Library\\DigitalPlatform.Library.csproj
+		SccProjectName4 = \u0022$/AllDigitalPlatformLibs.root/DigitalPlatform.Library/DigitalPlatform.Library\u0022,\u0020HXBAAAAA
+		SccLocalPath4 = ..\\DigitalPlatform.Library
+		CanCheckoutShared = false
+		SccProjectUniqueName5 = ..\\DigitalPlatform.MarcDom\\DigitalPlatform.MarcDom.csproj
+		SccProjectName5 = \u0022$/AllDigitalPlatformLibs.root/AllDigitalPlatformLibs/DigitalPlatform.MarcDom\u0022,\u0020CBAAAAAA
+		SccLocalPath5 = ..\\DigitalPlatform.MarcDom
+		CanCheckoutShared = false
+		SccProjectUniqueName6 = ..\\DigitalPlatform.MarcKernel\\DigitalPlatform.MarcKernel.csproj
+		SccProjectName6 = \u0022$/AllDigitalPlatformLibs.root/DigitalPlatform.MarcKernel\u0022,\u0020IYBAAAAA
+		SccLocalPath6 = ..\\DigitalPlatform.MarcKernel
+		CanCheckoutShared = false
+		SccProjectUniqueName7 = ..\\DigitalPlatform.rms.Client\\DigitalPlatform.rms.Client.csproj
+		SccProjectName7 = \u0022$/AllDigitalPlatformLibs.root/AllDigitalPlatformLibs/DigitalPlatform.rms.Client\u0022,\u0020YHAAAAAA
+		SccLocalPath7 = ..\\DigitalPlatform.rms.Client
+		CanCheckoutShared = false
+		SccProjectUniqueName8 = ..\\DigitalPlatform.Script\\DigitalPlatform.Script.csproj
+		SccProjectName8 = \u0022$/AllDigitalPlatformLibs.root/DigitalPlatform.Script\u0022,\u0020ZYBAAAAA
+		SccLocalPath8 = ..\\DigitalPlatform.Script
+		CanCheckoutShared = false
+		SccProjectUniqueName9 = ..\\DigitalPlatform.Text\\DigitalPlatform.Text.csproj
+		SccProjectName9 = \u0022$/AllDigitalPlatformLibs.root/AllDigitalPlatformLibs/DigitalPlatform.Text\u0022,\u0020RBAAAAAA
+		SccLocalPath9 = ..\\DigitalPlatform.Text
+		CanCheckoutShared = false
+		SccProjectUniqueName10 = ..\\DigitalPlatform.Xml\\DigitalPlatform.Xml.csproj
+		SccProjectName10 = \u0022$/AllDigitalPlatformLibs.root/AllDigitalPlatformLibs/DigitalPlatform.Xml\u0022,\u0020WBAAAAAA
+		SccLocalPath10 = ..\\DigitalPlatform.Xml
+		CanCheckoutShared = false
+		SccProjectUniqueName11 = DigitalPlatform.LibraryServer.csproj
+		SccLocalPath11 = .
+		CanCheckoutShared = false
+		SccProjectUniqueName12 = ..\\DigitalPlatform.Message\\DigitalPlatform.Message.csproj
+		SccProjectName12 = \u0022$/AllDigitalPlatformLibs.root/DigitalPlatform.Message.root/DigitalPlatform.Message\u0022,\u0020RHFAAAAA
+		SccLocalPath12 = ..\\DigitalPlatform.Message
+		CanCheckoutShared = false
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E153CC55-DA01-4403-A53F-AF801BDDF4BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E153CC55-DA01-4403-A53F-AF801BDDF4BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E153CC55-DA01-4403-A53F-AF801BDDF4BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E153CC55-DA01-4403-A53F-AF801BDDF4BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BDD43275-EAA0-4670-8BA3-0DB5CD7598DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BDD43275-EAA0-4670-8BA3-0DB5CD7598DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BDD43275-EAA0-4670-8BA3-0DB5CD7598DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BDD43275-EAA0-4670-8BA3-0DB5CD7598DD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C2468F93-69AC-4BBA-94AE-678ED5C21542}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2468F93-69AC-4BBA-94AE-678ED5C21542}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C2468F93-69AC-4BBA-94AE-678ED5C21542}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C2468F93-69AC-4BBA-94AE-678ED5C21542}.Release|Any CPU.Build.0 = Release|Any CPU
+		{441CB814-AF78-4503-91EF-DCE5F3269502}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{441CB814-AF78-4503-91EF-DCE5F3269502}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{441CB814-AF78-4503-91EF-DCE5F3269502}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{441CB814-AF78-4503-91EF-DCE5F3269502}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C57493B-DE00-4BC0-836C-C736D3176689}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C57493B-DE00-4BC0-836C-C736D3176689}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C57493B-DE00-4BC0-836C-C736D3176689}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C57493B-DE00-4BC0-836C-C736D3176689}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3F81F705-5265-47EE-9255-CB33E1C135B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F81F705-5265-47EE-9255-CB33E1C135B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F81F705-5265-47EE-9255-CB33E1C135B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F81F705-5265-47EE-9255-CB33E1C135B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{74242530-EF96-457E-852D-5C21A3EA8449}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{74242530-EF96-457E-852D-5C21A3EA8449}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{74242530-EF96-457E-852D-5C21A3EA8449}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{74242530-EF96-457E-852D-5C21A3EA8449}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D63FAE14-7CD6-4BD3-90D7-7DBBCDF8EEEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D63FAE14-7CD6-4BD3-90D7-7DBBCDF8EEEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D63FAE14-7CD6-4BD3-90D7-7DBBCDF8EEEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D63FAE14-7CD6-4BD3-90D7-7DBBCDF8EEEF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5107DE16-DDA1-4606-B3A3-840B24428329}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5107DE16-DDA1-4606-B3A3-840B24428329}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5107DE16-DDA1-4606-B3A3-840B24428329}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5107DE16-DDA1-4606-B3A3-840B24428329}.Release|Any CPU.Build.0 = Release|Any CPU
+		{26F96CC3-A4A9-4BC4-A10A-BC7E25581FF6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{26F96CC3-A4A9-4BC4-A10A-BC7E25581FF6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{26F96CC3-A4A9-4BC4-A10A-BC7E25581FF6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{26F96CC3-A4A9-4BC4-A10A-BC7E25581FF6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E6489E89-1349-4EE7-A00B-AC96B9912587}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6489E89-1349-4EE7-A00B-AC96B9912587}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6489E89-1349-4EE7-A00B-AC96B9912587}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6489E89-1349-4EE7-A00B-AC96B9912587}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D0C73839-5A5E-41BA-B1E5-104EEC488E33}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0C73839-5A5E-41BA-B1E5-104EEC488E33}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0C73839-5A5E-41BA-B1E5-104EEC488E33}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0C73839-5A5E-41BA-B1E5-104EEC488E33}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

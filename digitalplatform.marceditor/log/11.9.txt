@@ -1,0 +1,85 @@
+~~~~~~~~~~~~~~~~~~~~关于服务器~~~~~~~~~~~~~~~~~
+1.修改写配置文件函数
+
+写文件数据库的文件 与 写配置文件有什么区别？
+1.文件数据库的timestamp用一个.timestamp文件来保存
+  配置文件的timestamp直接通过配置文件自身的属性生成
+  
+其实文件库文件与配置可以采用相同的方式。为了安全起见，
+暂时不改文件数据库的情况
+
+2.把测试工具的WriteRes编完整
+
+~~~~~~~~~~~~~~~~~~~~~关于MarcEditor~~~~~~~~~~~~
+未完成
+1.向上移动时
+保持可见
+2.单击时,保持可见
+3.向下
+完成，原因是一个变量名写错，结果导致了上述三个地方的不正常。
+
+4.编MarcEditor的批处理工具
+完成，参考dp2rms的批处理指令
+
+5.提交完整版本
+完成，放到小尾驴服务器上了
+
+~~~~~~~~~~~~~~~~~~其它~~~~~~~~~~~~~~~~~~~
+1.做一个工具程序，
+  检查虚拟目录的文件是否可以浏览，
+  生成SHA1码。
+
+主界面是一些功能名称，点击每个功能名称，进入到自己的处理界面
+完成
+
+  
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+如果在程序中获得web上的资源？
+
+使用System.Net.WebClient对象，有三种方法从服务器获得资源：
+1.
+public void DownloadFile(
+   string address,
+   string fileName
+)
+
+例子：
+
+WebClient webClient = new WebClient();
+string strTargetFileName = "I:\\test.res";
+string strResourceUrl = "http://localhost/cfgs/test.xml";
+webClient.DownloadFile(strSource,strTempFile);
+
+2.
+public byte[] DownloadData(
+   string address
+)
+
+例子：
+
+WebClient webClient = new WebClient();
+string strResourceUrl = "http://localhost/cfgs/test.xml";
+byte[] baTarget = webClient.DownloadData(strResourceUrl);
+
+3.
+public Stream OpenRead(
+   string address
+)
+
+例子：
+
+WebClient webClient = new WebClient();
+string strResourceUrl = "http://localhost/cfgs/test.xml";
+Stream s = webClient.OpenRead(strResourceUrl);
+....
+s.Close();
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+如果生成SHA1码?
+使用DigitalPlatform.Text库时函数
+string strSHA1 = Cryptography.GetSHA1(TextBox_plianText.Text);
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+

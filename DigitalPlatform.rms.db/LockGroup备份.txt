@@ -1,0 +1,147 @@
+using System;
+using System.Collections;
+using System.Threading;
+
+namespace DigitalPlatform.rms
+{
+	// 用来群加锁的功能
+	public class LockGroup : ArrayList
+	{
+		public LockGroup()
+		{
+		}
+
+		// 加进一个读锁信息
+		// parameter:
+		//		strRecordPath	记录路径
+		public void AddReaderLock(DpRecordLock recordLock,
+			string strDbName)
+		{
+			Lock newLock = new Lock(recordLock,
+				0,
+				strDbName);
+			this.Add(newLock);
+		}
+
+
+		// 加进一个写锁信息
+		public void AddWriterLock(DpRecordLock recordLock,
+			string strDbName)
+		{
+			Lock newLock = new Lock(recordLock,
+				1,
+				strDbName);
+			this.Add(newLock);				
+		}
+
+		// 执行加锁
+		public void DoLock()
+		{
+			this.Sort();
+			
+			// 正序
+			for(int i=0;i<this.Count;i++)
+			{
+				Lock myLock = (Lock)this[i];
+				myLock.DoLock();
+			}
+		}
+
+		// 解锁
+		public void DoUnLock()
+		{
+			this.Sort();
+
+			// 倒序
+			for(int i=this.Count-1 ;i>=0;i--)
+			{
+				Lock myLock = (Lock)this[i];
+				myLock.DoUnLock();
+			}
+
+			this.Clear();
+		}
+
+		public void Close()
+		{
+			// 倒序
+			for(int i=this.Count-1 ;i>=0;i--)
+			{
+				Lock myLock = (Lock)this[i];
+				if (myLock.bLock == true)
+					myLock.DoUnLock();
+			}
+
+		}
+
+	}
+
+	public class Lock : IComparable
+	{
+		public DpRecordLock RecordLock = null;
+		public int Type = -1; //0:reader 1:writer -1:未初始化
+		public bool bLock = false;
+		public string DbName = null;
+
+
+		public Lock(DpRecordLock recordLock,
+			int nType,
+			string strDbName)
+		{
+			this.RecordLock = recordLock;
+			this.Type = nType;
+			this.DbName = strDbName;
+		}
+
+		public void DoLock()
+		{
+			if (this.Type == -1)
+				throw new Exception("调此函数时,Lock的类型不可能为-1");
+
+			if (this.Type == 0)
+			{
+				this.RecordLock.LockForReader();
+				bLock = true;
+			}
+			else
+			{
+				this.RecordLock.LockForWriter();
+				bLock = true;
+			}
+		}
+
+		public void DoUnLock()
+		{
+			if (this.Type == -1)
+				throw new Exception("调此函数时,Lock的类型不可能为-1");
+
+			if (this.Type == 0)
+			{
+				this.RecordLock.UnLockForReader();
+				bLock = false;
+			}
+			else
+			{
+				this.RecordLock.UnLockForWriter();
+				bLock = false;
+			}
+		}
+
+		public int CompareTo(object obj)
+		{
+			Lock oLock = (Lock)obj;
+			int ret;
+
+			string strThisKey = this.DbName + "/" + this.RecordLock.m_strID;
+			string strObjKey = oLock.DbName + "/" + this.RecordLock.m_strID;
+
+			ret = String.Compare(
+				strThisKey,
+				strObjKey);
+			if (ret != 0)
+				return ret;
+
+			return this.Type - oLock.Type;
+		}
+	}
+}

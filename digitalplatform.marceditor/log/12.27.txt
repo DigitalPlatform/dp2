@@ -1,0 +1,142 @@
+1.杀机器上的病毒
+Iexplors.exe,ntdllf.exe,mainsv.exe等
+完成
+
+2.做dp2batch测试手册，做测试
+完成一部分
+
+
+
+
+
+
+
+
+class XmlMenu {
+
+	private var m_parent_mc:MovieClip;
+	private var m_menu_array:Array;
+
+	function XmlMenu(xmlpath_str:String, 
+		parent_mc:MovieClip) 
+	{
+		this.m_parent_mc = parent_mc;
+		this.m_menu_array = new Array();
+		initXML(xmlpath_str);
+	}
+
+	private function initXML(xmlpath_str:String):Void 
+	{
+		var thisObj = this;
+		
+		var menu_array:Array = new Array();
+		
+		var menu_xml:XML = new XML();
+		menu_xml.ignoreWhite = true;
+		menu_xml.load(xmlpath_str);
+		menu_xml.onLoad = function(success:Boolean)
+		{
+			if (success) 
+			{
+				for (var i = 0; i<this.firstChild.childNodes.length; i++) 
+				{
+					var shortcut = this.firstChild.childNodes[i];
+					var submenu_array:Array = new Array();
+					for (var j = 0; j<shortcut.childNodes.length; j++) {
+						submenu_array.push({caption:shortcut.childNodes[j].attributes.name, href:shortcut.childNodes[j].attributes.href});
+					}
+					menu_array.push({caption:shortcut.attributes['name'], href:shortcut.attributes['href'], subnav_array:submenu_array});
+				}
+				thisObj.initMenu(menu_array);
+			}
+		};
+	}
+
+	private function initMenu(nav_array:Array):Void 
+	{
+		var thisObj = this;
+		var thisX:Number = 20;
+		var thisY:Number = 20;
+		for (var menuIndex = 0; menuIndex<nav_array.length; menuIndex++) 
+		{
+			var menuMC:MovieClip = this.m_parent_mc.attachMovie("menu_mc", "menu"+menuIndex+"_mc", menuIndex, {_x:thisX, _y:thisY});
+			menuMC.data = nav_array[menuIndex];
+			this.m_menu_array.push(menuMC);
+			menuMC.label_txt.text = menuMC.data.caption;
+			
+			var subMC:MovieClip = this.m_parent_mc.createEmptyMovieClip("submenu"+menuIndex+"_mc", (menuIndex*20)+100);
+			subMC._x = thisX;
+			subMC._y = menuMC._height;
+			subMC.subMenuVisible = true;
+			
+			hideSubMenu(subMC);
+			subMC.parentMenu = menuMC;
+			subMC._visible = false;
+			var yPos:Number = thisY;
+			var temp_subnav_array:Array = menuMC.data.subnav_array;
+			for (var i = 0; i<temp_subnav_array.length; i++) {
+				var linkMC:MovieClip = subMC.attachMovie("link_mc", "link"+i+"_mc", i, {_x:0, _y:yPos});
+				linkMC.data = temp_subnav_array[i];
+				linkMC.label_txt.text = linkMC.data.caption;
+				linkMC.onRelease = function() {
+					getURL(this.data.href, "_blank");
+				};
+				yPos += linkMC._height;
+			}
+			var thisWidth:Number = subMC._width+1;
+			var thisHeight:Number = subMC._height+1;
+			subMC.beginFill(0x000000, 0);
+			subMC.moveTo(0, 0);
+			subMC.lineTo(thisWidth, 0);
+			subMC.lineTo(thisWidth, thisHeight);
+			subMC.lineTo(0, thisHeight);
+			subMC.lineTo(0, 0);
+			subMC.endFill();
+			menuMC.childMenu = subMC;
+			thisX += menuMC._width;
+		}
+		for (var i in this.m_menu_array) {
+			this.m_menu_array[i].onRollOver = function() {
+				thisObj.showSubMenu(this.childMenu);
+			};
+			this.m_menu_array[i].onRelease = function() {
+				getURL(this.data.href, "_blank");
+			};
+		}
+	}
+
+	private function showSubMenu(target_mc:MovieClip):Void 
+	{
+		var thisObj = this;
+		if (!target_mc.subMenuVisible) {
+			hideAllSubMenus();
+			target_mc._visible = true;
+			target_mc.subMenuVisible = true;
+			target_mc.onMouseMove = function() {
+				var subHit:Boolean = this.hitTest(_xmouse, _ymouse, true);
+				var menuHit:Boolean = this.parentMenu.hitTest(_xmouse, _ymouse, true);
+				if (!((subHit || menuHit) && this.subMenuVisible)) {
+					thisObj.hideSubMenu(this);
+					delete this.onMouseMove;
+				}
+			};
+		}
+	}
+
+	private function hideSubMenu(target_mc:MovieClip):Void 
+	{
+		if (target_mc.subMenuVisible) {
+			target_mc._visible = false;
+			target_mc.subMenuVisible = false;
+		}
+	}
+
+	private function hideAllSubMenus():Void {
+		for (var i in this.m_menu_array) {
+			hideSubMenu(this.m_menu_array[i].childMenu);
+		}
+	}
+	private function toggleSubMenu(target_mc:MovieClip):Void {
+		(target_mc.subMenuVisible) ? hideSubMenu(target_mc) : showSubMenu(target_mc);
+	}
+}

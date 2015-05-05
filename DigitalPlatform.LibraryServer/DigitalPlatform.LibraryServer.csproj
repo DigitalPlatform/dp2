@@ -1,0 +1,275 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{E153CC55-DA01-4403-A53F-AF801BDDF4BA}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>DigitalPlatform.LibraryServer</RootNamespace>
+    <AssemblyName>DigitalPlatform.LibraryServer</AssemblyName>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>2.0</OldToolsVersion>
+    <UpgradeBackupLocation />
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Ionic.Zip">
+      <HintPath>.\Ionic.Zip.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.EnterpriseServices" />
+    <Reference Include="System.Runtime.Caching" />
+    <Reference Include="System.Runtime.Remoting" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AppBatchTask.cs" />
+    <Compile Include="AppBiblio.cs" />
+    <Compile Include="AppCallNumber.cs" />
+    <Compile Include="AppCenter.cs" />
+    <Compile Include="AppChannel.cs" />
+    <Compile Include="AppCirculation.cs" />
+    <Compile Include="AppFileSystem.cs" />
+    <Compile Include="AppLoginCache.cs" />
+    <Compile Include="AppScriptFilter.cs" />
+    <Compile Include="deleted\AppColumn.cs" />
+    <Compile Include="AppDatabase.cs" />
+    <Compile Include="AppDup.cs" />
+    <Compile Include="AppEntity.cs" />
+    <Compile Include="AppIssue.cs" />
+    <Compile Include="AppLogRecover.cs" />
+    <Compile Include="AppQuery.cs" />
+    <Compile Include="AppReader.cs" />
+    <Compile Include="AppReservation.cs" />
+    <Compile Include="AppStatis.cs" />
+    <Compile Include="AppUpgrade.cs" />
+    <Compile Include="AppUser.cs" />
+    <Compile Include="AppUtilDb.cs" />
+    <Compile Include="AppScript.cs" />
+    <Compile Include="AppZhongcihao.cs" />
+    <Compile Include="ArriveMonitor.cs" />
+    <Compile Include="BatchTask.cs" />
+    <Compile Include="BatchTaskCollection.cs" />
+    <Compile Include="deleted\BookControl.cs" />
+    <Compile Include="BrowseColumnCaption.cs" />
+    <Compile Include="deleted\CacheBuilder.cs" />
+    <Compile Include="CfgsMap.cs" />
+    <Compile Include="deleted\ColumnStorage.cs" />
+    <Compile Include="DkywReplication.cs" />
+    <Compile Include="DupResultSet.cs" />
+    <Compile Include="Garden.cs" />
+    <Compile Include="ItemDatabase\CommentItemDatabase.cs" />
+    <Compile Include="ItemDatabase\IssueItemDatabase.cs" />
+    <Compile Include="ItemDatabase\ItemDatabase.cs" />
+    <Compile Include="ItemDatabase\OrderItemDatabase.cs" />
+    <Compile Include="LibraryApplication.cs" />
+    <Compile Include="Clock.cs" />
+    <Compile Include="LibraryReplication.cs" />
+    <Compile Include="MessageMonitor.cs" />
+    <Compile Include="OperLog.cs" />
+    <Compile Include="FilterHost.cs" />
+    <Compile Include="deleted\FooterControl.cs" />
+    <Compile Include="deleted\HeadBarControl.cs" />
+    <Compile Include="ItemConverter.cs" />
+    <Compile Include="KernelDbInfo.cs" />
+    <Compile Include="deleted\MyLibraryControl.cs" />
+    <Compile Include="OperLogFileCache.cs" />
+    <Compile Include="OperLogRecover.cs" />
+    <Compile Include="PatronReplication.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="ReadersMonitor.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="deleted\QuestionCollection.cs" />
+    <Compile Include="ReaderConverter.cs" />
+    <Compile Include="RecordConverter.cs" />
+    <Compile Include="deleted\RightsTableControl.cs" />
+    <Compile Include="SessionInfo.cs" />
+    <Compile Include="Statis.cs" />
+    <Compile Include="deleted\TestControl1.cs" />
+    <Compile Include="deleted\TestControl2.cs" />
+    <Compile Include="AccountTable.cs" />
+    <Compile Include="Threads\DefaultThread.cs" />
+    <Compile Include="Threads\RebuildKeys.cs" />
+    <Compile Include="TraceDTLP.cs" />
+    <Compile Include="UnhandledExceptionModule.cs" />
+    <Compile Include="UserNameTable.cs" />
+    <Compile Include="VirtualDatabase.cs" />
+    <Compile Include="ZhengyuanReplication.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DigitalPlatform.CirculationClient\DigitalPlatform.CirculationClient.csproj">
+      <Project>{397BB898-88E0-41D6-8D01-09233C7FFC75}</Project>
+      <Name>DigitalPlatform.CirculationClient</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Digitalplatform.DTLP\Digitalplatform.DTLP.csproj">
+      <Project>{91B90948-8475-4D9B-A3C7-6285EFC45E19}</Project>
+      <Name>Digitalplatform.DTLP</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Interfaces\DigitalPlatform.Interfaces.csproj">
+      <Project>{3C4F8133-8652-40B6-B37B-200B25C2B043}</Project>
+      <Name>DigitalPlatform.Interfaces</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.IO\DigitalPlatform.IO.csproj">
+      <Project>{441CB814-AF78-4503-91EF-DCE5F3269502}</Project>
+      <Name>DigitalPlatform.IO</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.LibraryServer.Common\DigitalPlatform.LibraryServer.Common.csproj">
+      <Project>{2F085431-027A-4DDF-9B3D-83219E629FA1}</Project>
+      <Name>DigitalPlatform.LibraryServer.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.MarcDom\DigitalPlatform.MarcDom.csproj">
+      <Project>{3F81F705-5265-47EE-9255-CB33E1C135B8}</Project>
+      <Name>DigitalPlatform.MarcDom</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.MarcKernel\DigitalPlatform.MarcKernel.csproj">
+      <Project>{74242530-EF96-457E-852D-5C21A3EA8449}</Project>
+      <Name>DigitalPlatform.MarcKernel</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Message\DigitalPlatform.Message.csproj">
+      <Project>{D0C73839-5A5E-41BA-B1E5-104EEC488E33}</Project>
+      <Name>DigitalPlatform.Message</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Range\DigitalPlatform.Range.csproj">
+      <Project>{AA6C5E6A-252B-4E2A-A883-0E4E739F8701}</Project>
+      <Name>DigitalPlatform.Range</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.ResultSet\DigitalPlatform.ResultSet.csproj">
+      <Project>{86E0817D-79A4-4769-B450-C8352D0D1907}</Project>
+      <Name>DigitalPlatform.ResultSet</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.rms.Client\DigitalPlatform.rms.Client.csproj">
+      <Project>{D63FAE14-7CD6-4BD3-90D7-7DBBCDF8EEEF}</Project>
+      <Name>DigitalPlatform.rms.Client</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.rms\DigitalPlatform.rms.csproj">
+      <Project>{1A7544AB-30D7-4920-928E-26925B86274D}</Project>
+      <Name>DigitalPlatform.rms</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Script\DigitalPlatform.Script.csproj">
+      <Project>{5107DE16-DDA1-4606-B3A3-840B24428329}</Project>
+      <Name>DigitalPlatform.Script</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Text\DigitalPlatform.Text.csproj">
+      <Project>{26F96CC3-A4A9-4BC4-A10A-BC7E25581FF6}</Project>
+      <Name>DigitalPlatform.Text</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Xml\DigitalPlatform.Xml.csproj">
+      <Project>{E6489E89-1349-4EE7-A00B-AC96B9912587}</Project>
+      <Name>DigitalPlatform.Xml</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform\DigitalPlatform.csproj">
+      <Project>{BDD43275-EAA0-4670-8BA3-0DB5CD7598DD}</Project>
+      <Name>DigitalPlatform</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="comment.txt" />
+    <Content Include="deleted\deleted.txt" />
+    <Content Include="unhandled.txt" />
+    <Content Include="validate.xml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="印钞造币公司单点登录.htm" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="res\LibraryApplication.en-US.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="res\LibraryApplication.zh-CN.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <WebReferences Include="Web References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -1,0 +1,165 @@
+﻿body {
+}
+
+
+TABLE.newrecommend
+{
+	font-size: 12px;
+	text-align:left;
+	
+	/* margin-top: 4pt;*/
+	width: 100%;
+	border-style: dashed;
+	border-width: 1pt;
+	border-color: #cccccc;
+
+	border-collapse:collapse;
+
+	background-color:White;
+}
+
+TABLE.newrecommend TD
+{
+	/*padding: 4px;*/
+
+/*
+	border-left-width: 0px;
+	border-top-width: 0px;
+	border-right-width: 1px;
+	border-bottom-width: 1px;
+
+	border-style: solid;
+	border-color: #cccccc;
+*/
+}
+
+TABLE.newrecommend TD.no
+{
+	width: 1%;	
+}
+
+/*
+
+TABLE.newrecommend DIV.order_suggestion
+{
+	text-align:left;
+	font-weight:bolder;	
+}
+
+TABLE.newrecommend DIV.yes
+{
+	color: green;
+}
+
+TABLE.newrecommend DIV.no
+{
+	color: red;
+}
+
+TABLE.newrecommend DIV.title
+{
+	text-align:center;
+	font-size: 14px;
+	font-weight:bolder;	
+}
+
+TABLE.newrecommend DIV.creator
+{
+	text-align:center;	
+	font-size: 14px;	
+}
+
+TABLE.newrecommend TR.debugline
+{
+	font-size: 12px;
+	background-color: yellow;
+}
+
+
+TABLE.newrecommend DIV.none
+{
+	width: 100%;
+	background-color: white;
+	color:Gray;
+	text-align:center;
+}
+
+
+
+
+
+
+TABLE.newrecommend TABLE.edit INPUT
+{
+	font-size: 12px;
+}
+TABLE.newrecommend TABLE.edit TEXTAREA
+{
+	font-size: 12px;
+}
+*/
+
+TABLE.newrecommend TABLE.edit
+{
+	width: 100%;
+}
+
+TABLE.newrecommend TABLE.edit TD.left
+{
+	width: 1%;
+	white-space: nowrap;
+	text-align: right;
+}
+
+TABLE.newrecommend TABLE.edit TD
+{
+	margin:0pt;
+	padding: 4px;
+}
+
+
+TABLE.newrecommend TABLE.edit INPUT.biblio_title
+{
+	width: 50%;
+}
+
+TABLE.newrecommend TABLE.edit INPUT.biblio_author
+{
+	width: 50%;
+}
+
+TABLE.newrecommend TABLE.edit INPUT.biblio_publisher
+{
+	width: 70%;
+}
+
+TABLE.newrecommend TABLE.edit INPUT.biblio_isbn
+{
+	width: 50%;
+}
+
+TABLE.newrecommend TABLE.edit TEXTAREA.biblio_summary
+{
+	width: 100%;
+	height:80pt;
+}
+
+TABLE.newrecommend TABLE.edit INPUT.title
+{
+	width: 50%;
+}
+
+TABLE.newrecommend TABLE.edit TEXTAREA.content
+{
+	width: 99%;
+	height:80pt;
+}
+
+TABLE.newrecommend DIV.comment, TABLE.newrecommend SPAN.comment
+{
+	border-style: dotted;
+	border-color: #cccc00;
+	border-width: 2px;
+	padding: 8px;
+	margin: 4px;
+}

@@ -1,0 +1,181 @@
+
+
+
+		// 递归
+		public int Fill(TreeNode node)
+		{
+			TreeNodeCollection children = null;
+
+			if (node == null) 
+			{
+				children = this.Nodes;
+			}
+			else 
+			{
+				children = node.Nodes;
+			}
+
+			int i;
+
+			children.Clear();
+
+			// 填充根
+			if (node == null) 
+			{
+				for(i=0;i<Servers.Count;i++) 
+				{
+					Server server = (Server)Servers[i];
+					TreeNode nodeNew = new TreeNode(server.Url, RESTYPE_SERVER, RESTYPE_SERVER);
+					SetLoading(nodeNew);
+
+					if (EnabledIndices != null
+						&& IsInList(nodeNew.ImageIndex, EnabledIndices) == false)
+						nodeNew.ForeColor = ControlPaint.LightLight(nodeNew.ForeColor);
+
+					children.Add(nodeNew);
+
+
+				}
+
+				return 0;
+			}
+
+
+			// 根以下的节点类型
+			ResPath respath = new ResPath(node);
+
+			Channel channel = Channels.GetChannel(respath.Url);
+
+			Debug.Assert(channel != null, "Channels.GetChannel() 异常");
+
+			int nStart = 0;
+			int nPerCount = -1;
+			int nCount = 0;
+
+			for(;;) 
+			{
+				ResInfoItem [] items = null;
+			REDODIR:
+				Result result = channel.ws.Dir(respath.Path,
+					nStart,
+					nPerCount,
+					"chi",
+					out items);
+				if (result.Value == -1) 
+				{
+					if (result.ErrorCode == ErrorCodeValue.NotLogin) 
+					{
+
+						string strError;
+						// return:
+						//		-1	error
+						//		0	login failed
+						//		1	login succeed
+						int nRet = channel.UiLogin(respath.Path,
+							true,
+							out strError);
+						if (nRet == -1 || nRet == 0) 
+						{
+							MessageBox.Show(this, strError);
+							return -1;
+						}
+
+						goto REDODIR;
+					}
+
+					MessageBox.Show(this, result.ErrorString);
+					return -1;
+				}
+
+				if (items != null) 
+				{
+					for(i=0;i<items.Length;i++) 
+					{
+						TreeNode nodeNew = new TreeNode(items[i].Name, items[i].Type, items[i].Type);
+
+						if (items[i].HasChildren)
+							SetLoading(nodeNew);
+
+						if (EnabledIndices != null
+							&& IsInList(nodeNew.ImageIndex, EnabledIndices) == false)
+							nodeNew.ForeColor = ControlPaint.LightLight(nodeNew.ForeColor);
+
+						children.Add(nodeNew);
+
+
+					}
+					nCount += items.Length;
+					nStart += items.Length;
+				}
+
+				if (nCount >= result.Value
+					|| items == null)
+					break;
+
+
+
+			}
+
+			return 0;
+		}
+
+
+
+
+~~~~~~~
+
+引用关系:
+
+DigitalPlatform.rms.Client 引用了 下列项目
+1) DigitalPlatform.IO
+2) DigitalPlatform.Range
+3) DigitalPlatform.rms
+4) DigitalPlatform.Text
+5) DigitalPlatform.Xml
+
+内容概要:
+
+一.namespace DigitalPlatform.rms.Client
+
+	下面三项需要跟DigitalPlatform里的定义考虑
+	
+	1.//定义一个DoStopDelegate()
+	public delegate void DoStopDelegate()
+	2.//在子窗口中定义
+	public class Stop
+	3.////在父窗口中定义,初始化按钮
+	public class StopManager
+	
+	4.//服务器列表
+	public class HostList:ArrayList
+	5.//服务器对象
+	public class HostItem
+	
+	6.//查询式对象
+	public class QueryClient
+	
+	7.public class ClientUtil
+		
+		1).//将一条记录及包含的多个资源文件打包
+		//应保证外部把target的位置定好
+		//0:成功
+		//-1:出错
+		public static int DaBag(string strXmlText,
+			ArrayList aFileName,
+			Stream target,
+			out string strInfo)
+			
+		2).//写子文件数据	注.外部保证把位置移好
+		//source: 二进制流
+		//strID: 记录ID
+		//target: 目标流
+		//lFileLengthTotal: 文件总长度
+		//0: 正常得到文件内容 -1:文件名为空
+		public static int WriteFile(Stream source,
+			string strID,
+			Stream target,
+			ref long lFileLengthTotal)
+			
+		3).//将一个包文件分成范围集合
+		public static int SplitFile2FragmentList(string strClientFilePath,
+			FragmentList fragmentList)

@@ -1,0 +1,18 @@
+﻿#filter
+{
+    float:left;
+    width: 20%;
+    background-color: Red;
+}
+
+
+#BrowseSearchResultControl1
+{
+    float:right;
+    width: 80%;
+}
+
+#BiblioSearchControl1
+{
+    clear:both;
+}

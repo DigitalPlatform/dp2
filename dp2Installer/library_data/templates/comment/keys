@@ -1,0 +1,164 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+
+  <key>
+    <xpath>*/title</xpath>
+    <from>title</from>
+    <table ref="title" />
+  </key>
+  <table name="title" id="2">
+    <caption lang="zh-CN">标题</caption>
+    <caption lang="en">title</caption>
+  </table>
+  <key>
+    <xpath>*/creator</xpath>
+    <from>creator</from>
+    <table ref="creator" />
+  </key>
+  <table name="creator" id="3">
+    <caption lang="zh-CN">作者</caption>
+    <caption lang="en">Creator</caption>
+  </table>
+
+  <key>
+    <xpath>*/creator/@displayName</xpath>
+    <from>creatordn</from>
+    <table ref="creatordn" />
+  </key>
+  <table name="creatordn" id="4">
+    <caption lang="zh-CN">作者显示名</caption>
+    <caption lang="en">Creator Screen-name</caption>
+  </table>
+
+  <key>
+    <xpath>*/content</xpath>
+    <from>content</from>
+    <table ref="content" />
+  </key>
+  <table name="content" id="5">
+    <convert>
+      <string style="upper,fulltext" />
+    </convert>
+    <convertquery>
+      <string style="upper" />
+    </convertquery>
+    <caption lang="zh-CN">正文</caption>
+    <caption lang="en">Content</caption>
+  </table>
+
+  <key>
+    <xpath>*/refID</xpath>
+    <from>refID</from>
+    <table ref="refID" />
+  </key>
+  <table name="refID" id="7">
+    <caption lang="zh-CN">参考ID</caption>
+    <caption lang="en">Reference ID</caption>
+  </table>
+
+  <key>
+    <xpath scripting='on'>getLastTime</xpath>
+    <from>lastTime</from>
+    <table ref="lastTime" />
+  </key>
+  <table name="lastTime" id="8">
+    <convert>
+      <number style="rfc1123time" />
+    </convert>
+    <convertquery>
+      <number style="rfc1123time" />
+    </convertquery>
+    <caption lang="zh-CN">最后修改时间</caption>
+    <caption lang="en">Last Modified Time</caption>
+  </table>
+
+  <key>
+    <xpath>*/parent</xpath>
+    <from>parent</from>
+    <table ref="parent" />
+  </key>
+  <table name="parent" id="1">
+    <caption lang="zh-CN">父记录</caption>
+    <caption lang="en">parent</caption>
+  </table>
+
+  <key>
+    <xpath>*/state</xpath>
+    <from>state</from>
+    <table ref="state" />
+  </key>
+  <table name="state" id="9">
+    <convert>
+      <string style="split,upper"/>
+    </convert>
+    <convertquery>
+      <string style="upper" />
+    </convertquery>
+    <caption lang="zh-CN">状态</caption>
+    <caption lang="en">State</caption>
+  </table>
+
+
+  <!-- ******************配置非用字**************************************** -->
+  <stopword>
+    <stopwordTable name="title">
+      <separator>
+        <t>,</t>
+        <t>_</t>
+        <t>.</t>
+        <t>:</t>
+        <t>;</t>
+        <t>!</t>
+        <t>"</t>
+        <t>'</t>
+        <t>-</t>
+        <t>，</t>
+        <t>。</t>
+        <t>‘</t>
+        <t>’</t>
+        <t>“</t>
+        <t>”</t>
+        <t>—</t>
+      </separator>
+      <word>
+        <t>the</t>
+        <t>a</t>
+      </word>
+    </stopwordTable>
+  </stopword>
+    <script>
+  <![CDATA[
+
+using System;
+using System.Xml;
+using DigitalPlatform.rms;
+using DigitalPlatform.IO;
+
+public class MyKeysHost : KeysHost
+{
+
+  public void getLastTime()
+  {
+
+	XmlNode node = this.DataDom.SelectSingleNode("*/operations/operation[@name='lastContentModified']/@time");
+	if (node == null)
+		node = this.DataDom.SelectSingleNode("*/operations/operation[@name='create']/@time");
+
+	if (node == null)
+		this.ResultString = null;
+	else
+		this.ResultString = node.Value;
+
+  }
+
+
+}
+
+]]><refs>
+    <ref>system.dll</ref>
+    <ref>system.xml.dll</ref>
+    <ref>%bindir%\digitalplatform.xml.dll</ref>
+    <ref>%bindir%\digitalplatform.io.dll</ref>
+  </refs>
+</script>
+</root>

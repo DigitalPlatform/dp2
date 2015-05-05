@@ -1,0 +1,1023 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<filter>
+  <using>
+    <![CDATA[
+
+
+// USMARC格式图书 html 格式构造
+// (C)Copyright 2006-2013 数字平台(北京)软件有限责任公司
+// 修改历史:
+// 2013/1/7
+
+using System;
+using System.IO;
+using System.Text;
+using System.Web;
+
+using DigitalPlatform.MarcDom;
+using DigitalPlatform.OPAC.Server;
+
+]]>
+  </using>
+  <ref>system.dll</ref>
+  <ref>system.web.dll</ref>
+  <ref>system.windows.forms.dll</ref>
+  <def>
+    <![CDATA[
+
+		public string s01 = "";	// 
+			string s02 = "";	// 责任者主要款目标目项 100 110 111
+			string s03 = "";	// 题名与责任说明项 245
+			string s033 = "";	// 翻译题名 245
+			string s04 = "";	// 版本项 250
+			string s05 = "";	// 出版发行项 260
+			string s06 = "";	// 载体形态项 300
+      string s07 = "";  //  丛编项 400 410 411 440 490
+      string s08 = "";   //  
+      string s09 = "";   //  
+      string s10 = "";   //  附注项 500
+      string s11 = "";   //  ISBN项 020
+      string s12 = "";   //  ISSN项 022
+      string s13 = "";   //  LC主题附加款目 6XX
+      string s14 = "";   //  责任者附加款目 700 710 711
+      string s15 = "";   //  题名附加款目 245 730 740
+      string s16 = "";   //  丛书附加款目 400 410 411 440 800 810 811 830
+      string s17 = "";   //  美国国会图书分类号 050$a
+      string s18 = "";   //  杜威十进分类号 082$a
+      string s19 = "";   //  其它分类号 090$a，093$a
+      string s25 = "";   //  索取号 905  $d$e...
+      string s26 = "";   //  标签 905  $d$e...
+      string s27 = "";   //  登录号 905 $b
+      string s28 = "";   //  期刊馆藏 905 $y $v
+
+   int serials = 0;   // 是否为期刊 ==1 :头标7位为S
+
+		]]>
+  </def>
+  <record>
+    <def>
+      <![CDATA[
+		]]>
+    </def>
+    <begin>
+      <![CDATA[
+			// MessageBox.Show("record data:" + this.Data);
+		]]>
+    </begin>
+    <!-- 020 ISBN -->
+    <field name="020">
+      <!-- 	国际标准书号(ISBN) -->
+      <subfield name="a">
+        <![CDATA[
+        if (this.Parent.DupCount > 1)
+        Root.s11 += "<br/>"; // 前置"<br/>"
+        Root.s11 += this.Content;
+        ]]>
+      </subfield>
+      <!-- 价格及相关 -->
+      <subfield name="c">
+        Root.s11 += this.Content;
+      </subfield>
+      <!-- 错误的ISBN -->
+      <subfield name="z">
+        <![CDATA[              
+        if (this.DupCount > 1)
+        Root.s11 += "; ";
+        Root.s11 += this.Content;
+        Root.s11 += "(错误)";]]>
+      </subfield>
+    </field>
+    <!-- 	022 ISSN号 国际标准连续出版物 -->
+    <field name="022">
+      <!-- ISSN -->
+      <subfield name="a">
+        <![CDATA[
+        if (this.Parent.DupCount > 1)
+        Root.s12 += "<br/>"; // 前置"<br/>"
+        Root.s12 += this.Content;
+              ]]>
+      </subfield>
+      <!-- 错误的ISSN -->
+      <subfield name="Y">
+        <![CDATA[
+        if (this.DupCount > 1)
+        Root.s12 += "; ";
+        Root.s12 += this.Content;
+        Root.s12 += "(错误)";
+              ]]>
+      </subfield>
+      <!-- 错误的ISSN -->
+      <subfield name="Z">
+        <![CDATA[
+        if (this.DupCount > 1)
+        Root.s12 += "; ";
+        Root.s12 += this.Content;
+        Root.s12 += "(废弃)";
+              ]]>
+      </subfield>
+    </field>
+    <!-- 050 LC分类号（美国国会索书号） -->
+    <field name="050">
+      <!-- LC 分类号 -->
+      <subfield name="a">
+        <![CDATA[
+        if (this.Parent.DupCount > 1)
+        Root.s17 += "<br/>"; // 前置"<br/>"
+        if (this.DupCount > 1)
+        Root.s17 += "; "; // 前置";"
+        Root.s17 += "<a href='./search.aspx?dbname=";
+        Root.s17 += HttpUtility.UrlEncode("英文图书");
+        Root.s17 += "&from=";
+        Root.s17 += HttpUtility.UrlEncode("分类号");
+        Root.s17 += "&matchstyle=left&word=";
+        Root.s17 += HttpUtility.UrlEncode(this.Content);
+        Root.s17 += "'>";
+        Root.s17 += this.Content;
+        Root.s17 += "</a>";
+        ]]>
+      </subfield>
+    </field>
+    <!-- 082 杜威十进制分类号 -->
+    <field name="082">
+      <!-- 杜威十进分类号 -->
+      <subfield name="a">
+        <![CDATA[
+        if (this.Parent.DupCount > 1)
+        Root.s18 += "<br/>"; // 前置"<br/>"
+        if (this.DupCount > 1)
+        Root.s18 += "; "; // 前置";"
+        Root.s18 += "<a href='./search.aspx?dbname=";
+        Root.s18 += HttpUtility.UrlEncode("英文图书");
+        Root.s18 += "&from=";
+        Root.s18 += HttpUtility.UrlEncode("分类号");
+        Root.s18 += "&matchstyle=left&word=";
+        Root.s18 += HttpUtility.UrlEncode(this.Content);
+        Root.s18 += "'>";
+        Root.s18 += this.Content;
+        Root.s18 += "</a>";        ]]>
+      </subfield>
+    </field>
+    <!-- 090，093 其它分类号 -->
+    <field name="090">
+      <!-- 其它分类号 -->
+      <subfield name="a">
+        <![CDATA[
+        if (this.Parent.DupCount > 1)
+        Root.s19 += "<br/>"; // 前置"<br/>"
+        if (this.DupCount > 1)
+        Root.s19 += "; "; // 前置";"
+        Root.s19 += "<a href='./search.aspx?dbname=";
+        Root.s19 += HttpUtility.UrlEncode("英文图书");
+        Root.s19 += "&from=";
+        Root.s19 += HttpUtility.UrlEncode("分类号");
+        Root.s19 += "&matchstyle=left&word=";
+        Root.s19 += HttpUtility.UrlEncode(this.Content);
+        Root.s19 += "'>";
+        Root.s19 += this.Content;
+        Root.s19 += "</a>";        ]]>
+      </subfield>
+    </field>
+    <field name="093">
+      <!-- 其它分类号 -->
+      <subfield name="a">
+        <![CDATA[
+        if (this.Parent.DupCount > 1)
+        Root.s19 += "<br/>"; // 前置"<br/>"
+        if (this.DupCount > 1)
+        Root.s19 += "; "; // 前置";"
+        Root.s19 += "<a href='./search.aspx?dbname=";
+        Root.s19 += HttpUtility.UrlEncode("英文图书");
+        Root.s19 += "&from=";
+        Root.s19 += HttpUtility.UrlEncode("分类号");
+        Root.s19 += "&matchstyle=left&word=";
+        Root.s19 += HttpUtility.UrlEncode(this.Content);
+        Root.s19 += "'>";
+        Root.s19 += this.Content;
+        Root.s19 += "</a>";        
+        ]]>
+      </subfield>
+    </field>
+    <!-- 100,110,111 责任者主要款目 -->
+    <field name="100">
+      <!-- 个人名称 -->
+      <subfield name="a">
+        <![CDATA[
+        	Root.s02 += "<a href='./search.aspx?dbname=";
+        	Root.s02 += HttpUtility.UrlEncode("英文图书");
+        	Root.s02 += "&from=";
+        	Root.s02 += HttpUtility.UrlEncode("责任者");
+        	Root.s02 += "&matchstyle=left&word=";
+        	Root.s02 += HttpUtility.UrlEncode(this.Content);
+        	Root.s02 += "'>";
+        	Root.s02 += this.Content;
+        	Root.s02 += "</a>";
+        	]]>
+      </subfield>
+      <!-- 世次 -->
+      <subfield name="b">
+        Root.s02 += this.Content;
+      </subfield>
+      <!-- 称谓 -->
+      <subfield name="c">
+        <![CDATA[
+        if (this.DupCount > 1)
+        Root.s02 += "; ";
+        Root.s02 += this.Content;
+              
+              ]]>
+      </subfield>
+      <!-- 时间 -->
+      <subfield name="d">
+        Root.s02 += this.Content;
+      </subfield>
+    </field>
+    <field name="110">
+      <!-- 团体名称 -->
+      <subfield name="a">
+        <![CDATA[
+        	Root.s02 += "<a href='./search.aspx?dbname=";
+        	Root.s02 += HttpUtility.UrlEncode("英文图书");
+        	Root.s02 += "&from=";
+        	Root.s02 += HttpUtility.UrlEncode("责任者");
+        	Root.s02 += "&matchstyle=left&word=";
+        	Root.s02 += HttpUtility.UrlEncode(this.Content);
+        	Root.s02 += "'>";
+        	Root.s02 += this.Content;
+        	Root.s02 += "</a>";
+        	]]>
+      </subfield>
+      <!-- 下属单位 -->
+      <subfield name="b">
+        <![CDATA[
+        if (this.DupCount > 1)
+        Root.s02 += "; ";
+        Root.s02 += this.Content;
+              ]]>
+      </subfield>
+      <!-- 会议名称 -->
+      <subfield name="c">
+        Root.s02 += this.Content;
+      </subfield>
+    </field>
+    <field name="111">
+      <!-- 会议名称 -->
+      <subfield name="a">
+        <![CDATA[
+        	Root.s02 += "<a href='./search.aspx?dbname=";
+        	Root.s02 += HttpUtility.UrlEncode("英文图书");
+        	Root.s02 += "&from=";
+        	Root.s02 += HttpUtility.UrlEncode("责任者");
+        	Root.s02 += "&matchstyle=left&word=";
+        	Root.s02 += HttpUtility.UrlEncode(this.Content);
+        	Root.s02 += "'>";
+        	Root.s02 += this.Content;
+        	Root.s02 += "</a>";
+        	]]>
+      </subfield>
+      <!-- 会议地址 -->
+      <subfield name="c">
+        Root.s02 += this.Content;
+      </subfield>
+      <!-- 会议时间 -->
+      <subfield name="d">
+        Root.s02 += this.Content;
+      </subfield>
+      <!-- 会议届次 -->
+      <subfield name="n">
+        Root.s02 += this.Content;
+      </subfield>
+    </field>
+    <!-- 700,710,711 责任者附加款目 -->
+    <field name="700">
+      <!-- 个人名称 -->
+      <subfield name="a">
+        <![CDATA[
+        	if (this.Parent.DupCount > 1)
+        	Root.s14 += "<br/>";
+        	Root.s14 += "<a href='./search.aspx?dbname=";
+        	Root.s14 += HttpUtility.UrlEncode("英文图书");
+        	Root.s14 += "&from=";
+        	Root.s14 += HttpUtility.UrlEncode("责任者");
+        	Root.s14 += "&matchstyle=left&word=";
+        	Root.s14 += HttpUtility.UrlEncode(this.Content);
+        	Root.s14 += "'>";
+        	Root.s14 += this.Content;
+        	Root.s14 += "</a>";
+       		]]>
+      </subfield>
+      <!-- 世次 -->
+      <subfield name="b">
+        Root.s02 += this.Content;
+      </subfield>
+      <!-- 称谓 -->
+      <subfield name="c">
+        Root.s02 += this.Content;
+      </subfield>
+      <!-- 时间 -->
+      <subfield name="d">
+        Root.s02 += this.Content;
+      </subfield>
+    </field>
+    <field name="710">
+      <!-- 团体名称 -->
+      <subfield name="a">
+        <![CDATA[
+        	if (this.Parent.DupCount > 1)
+        	Root.s14 += "<br/>";
+        	Root.s14 += "<a href='./search.aspx?dbname=";
+        	Root.s14 += HttpUtility.UrlEncode("英文图书");
+        	Root.s14 += "&from=";
+        	Root.s14 += HttpUtility.UrlEncode("责任者");
+        	Root.s14 += "&matchstyle=left&word=";
+        	Root.s14 += HttpUtility.UrlEncode(this.Content);
+        	Root.s14 += "'>";
+        	Root.s14 += this.Content;
+        	Root.s14 += "</a>";
+       		]]>
+      </subfield>
+      <!-- 下属单位 -->
+      <subfield name="b">
+        <![CDATA[
+        if (this.DupCount > 1)
+        Root.s02 += "; ";
+        Root.s02 += this.Content;
+              ]]>
+      </subfield>
+      <!-- 会议名称 -->
+      <subfield name="c">
+        Root.s02 += this.Content;
+      </subfield>
+    </field>
+    <field name="711">
+      <!-- 会议名称 -->
+      <subfield name="a">
+        <![CDATA[
+        	if (this.Parent.DupCount > 1)
+        	Root.s14 += "<br/>";
+        	Root.s14 += "<a href='./search.aspx?dbname=";
+        	Root.s14 += HttpUtility.UrlEncode("英文图书");
+        	Root.s14 += "&from=";
+        	Root.s14 += HttpUtility.UrlEncode("责任者");
+        	Root.s14 += "&matchstyle=left&word=";
+        	Root.s14 += HttpUtility.UrlEncode(this.Content);
+        	Root.s14 += "'>";
+        	Root.s14 += this.Content;
+        	Root.s14 += "</a>";
+       		]]>
+      </subfield>
+      <!-- 会议地址 -->
+      <subfield name="c">
+        Root.s02 += this.Content;
+      </subfield>
+      <!-- 会议时间 -->
+      <subfield name="d">
+        Root.s02 += this.Content;
+      </subfield>
+      <!-- 会议届次 -->
+      <subfield name="n">
+        <![CDATA[
+        if (this.DupCount > 1)
+        Root.s02 += "; ";
+        Root.s02 += this.Content;
+              ]]>
+      </subfield>
+    </field>
+    <!--730,740题名附加款目-->
+    <field name="730">
+      <!-- 统一题名 -->
+      <subfield name="*">
+        <![CDATA[
+        if (this.Parent.DupCount > 1)
+        Root.s15 += "<br/>";
+        Root.s15 += this.Content;
+        ]]>
+      </subfield>
+    </field>
+    <field name="740">
+      <!-- 分析题名 -->
+      <subfield name="*">
+        <![CDATA[
+        if (this.Parent.DupCount > 1)
+        Root.s15 += "<br/>";
+        Root.s15 += this.Content;
+        ]]>
+      </subfield>
+    </field>
+    <!-- 245 题名说明 -->
+    <field name="245">
+      <!-- 题名及附加题名 -->
+      <subfield name="a">
+        <![CDATA[
+        Root.s03 += this.Content;
+	      if (Root.s15.Length > 0)
+        {
+        Root.s03 += " ";
+        Root.s03 += Root.s15;
+        Root.s03 += "(题名附加)";
+        }
+              ]]>
+      </subfield>
+      <!-- 并列题名或其它提名信息 -->
+      <subfield name="b">
+        Root.s03 += this.Content;
+      </subfield>
+      <!-- 包含责任说明/转录题名页其余部分 -->
+      <subfield name="c">
+        Root.s03 += this.Content;
+      </subfield>
+      <!-- 分卷册标志 -->
+      <subfield name="n">
+        <![CDATA[
+        if (this.DupCount > 1)
+        Root.s03 += "; ";
+        Root.s03 += this.Content;
+              ]]>
+      </subfield>
+      <!-- 分卷（册）题名 -->
+      <subfield name="p">
+        <![CDATA[
+        if (this.DupCount > 1)
+        Root.s03 += "; ";
+        Root.s03 += this.Content;
+              ]]>
+      </subfield>
+    </field>
+
+    <!-- 242 翻译题名 -->
+    <field name="242">
+      <subfield name="a">
+        <![CDATA[
+        Root.s033 += this.Content;
+              ]]>
+      </subfield>
+    </field>
+
+
+
+    <!-- 250 版本说明 -->
+    <field name="250">
+      <subfield name="*">
+        Root.s04 += this.Content;
+      </subfield>
+    </field>
+    <!-- 260 出版发行 -->
+    <field name="260">
+      <!-- 出版、发行地 -->
+      <subfield name="a">
+        <![CDATA[
+        if (this.Parent.DupCount > 1)
+        Root.s05 += "<br/>";
+        if (this.DupCount > 1)
+        Root.s05 += "; ";
+        Root.s05 += this.Content;
+        ]]>
+      </subfield>
+      <!-- 出版、发行者 -->
+      <subfield name="b">
+        <![CDATA[
+        if (this.DupCount > 1)
+        Root.s05 += "; ";
+        	Root.s05 += "<a href='./search.aspx?dbname=";
+        	Root.s05 += HttpUtility.UrlEncode("英文图书");
+        	Root.s05 += "&from=";
+        	Root.s05 += HttpUtility.UrlEncode("出版发行者");
+        	Root.s05 += "&matchstyle=left&word=";
+        	Root.s05 += HttpUtility.UrlEncode(this.Content);
+        	Root.s05 += "'>";
+        	Root.s05 += this.Content;
+        	Root.s05 += "</a>";
+      ]]>
+      </subfield>
+      <!-- 出版、发行时间 -->
+      <subfield name="c">
+        <![CDATA[
+        if (this.DupCount > 1)
+        Root.s05 += "; ";
+        Root.s05 += this.Content;
+              ]]>
+      </subfield>
+    </field>
+    <!-- 300 载体形态 -->
+    <field name="300">
+      <!-- 篇幅 -->
+      <subfield name="a">
+        <![CDATA[
+        if (this.Parent.DupCount > 1)
+        Root.s06 += "<br/>";
+        if (this.DupCount > 1)
+        Root.s06 += "; ";
+        Root.s06 += this.Content;
+        ]]>
+      </subfield>
+      <!-- 其它形态细节 -->
+      <subfield name="b">
+        Root.s06 += this.Content;
+      </subfield>
+      <!-- 尺寸 -->
+      <subfield name="c">
+        <![CDATA[
+         if (this.DupCount > 1)
+        Root.s06 += "; ";
+        Root.s06 += this.Content;
+             ]]>
+      </subfield>
+      <!-- 附件 -->
+      <subfield name="e">
+        Root.s06 += this.Content;
+      </subfield>
+    </field>
+    <!-- 400 410 411 440 490 丛编 -->
+    <field name="400410411440490">
+      <subfield name="*">
+        <![CDATA[
+        string strTemp = "";
+        if (this.Parent.DupCount > 1)
+        strTemp += "<br/>";
+
+        if (this.DupCount > 1)
+        {
+        strTemp += "(";
+        strTemp += this.Content;
+        strTemp += ")";
+        }
+        else
+          strTemp += this.Content;
+
+        
+        
+        Root.s07 += strTemp;
+        ]]>
+      </subfield>
+    </field>
+    <!-- 5** 处理所有5开头的字段 -->
+    <field name="5\d{2}">
+      <subfield name="*">
+        <![CDATA[
+        if (this.Parent.DupCount > 1)
+        Root.s10 += "<br/>";
+        Root.s10 += this.Content;
+        ]]>
+      </subfield>
+    </field>
+    <!-- 6** LC主题附加款目 -->
+    <field name="6\d{2}">
+      <!-- 款目 -->
+      <subfield name="a">
+        <![CDATA[
+        if (this.Parent.DupCount > 1)
+        Root.s13 += "<br/>";
+        	Root.s13 += "<a href='./search.aspx?dbname=";
+        	Root.s13 += HttpUtility.UrlEncode("英文图书");
+        	Root.s13 += "&from=";
+        	Root.s13 += HttpUtility.UrlEncode("主题词");
+        	Root.s13 += "&matchstyle=left&word=";
+        	Root.s13 += HttpUtility.UrlEncode(this.Content);
+        	Root.s13 += "'>";
+        	Root.s13 += this.Content;
+        	Root.s13 += "</a>";
+        ]]>
+      </subfield>
+      <subfield name="b">
+        Root.s13 += this.Content;
+      </subfield>
+      <subfield name="c">
+        <![CDATA[
+        if (this.DupCount > 1)
+        Root.s13 += "; ";
+        Root.s13 += this.Content;
+              ]]>
+      </subfield>
+      <subfield name="d">
+        Root.s13 += this.Content;
+      </subfield>
+      <subfield name="e">
+        <![CDATA[
+        if (this.DupCount > 1)
+        Root.s13 += "; ";
+        Root.s13 += this.Content;
+              ]]>
+      </subfield>
+      <!-- 形态复分 -->
+      <subfield name="v">
+        <![CDATA[
+         if (this.DupCount > 1)
+        Root.s13 += "; ";
+        Root.s13 += this.Content;
+             ]]>
+      </subfield>
+      <!-- 通用复分 -->
+      <subfield name="x">
+        <![CDATA[
+        if (this.DupCount > 1)
+        Root.s13 += "; ";
+        Root.s13 += this.Content;
+              ]]>
+      </subfield>
+      <!-- 时代复分 -->
+      <subfield name="y">
+        <![CDATA[
+        if (this.DupCount > 1)
+        Root.s13 += "; ";
+        Root.s13 += this.Content;
+              ]]>
+      </subfield>
+      <!-- 地区复分 -->
+      <subfield name="z">
+        <![CDATA[
+        if (this.DupCount > 1)
+        Root.s13 += "; ";
+        Root.s13 += this.Content;
+              ]]>
+      </subfield>
+    </field>
+    <end>
+      <![CDATA[
+		]]>
+    </end>
+    <field name="650">
+      <!-- 款目 -->
+      <subfield name="a">
+        <![CDATA[
+        if (this.Parent.DupCount > 1)
+        Root.s13 += "<br/>";
+        	Root.s13 += "<a href='./search.aspx?dbname=";
+        	Root.s13 += HttpUtility.UrlEncode("英文图书");
+        	Root.s13 += "&from=";
+        	Root.s13 += HttpUtility.UrlEncode("主题词");
+        	Root.s13 += "&matchstyle=left&word=";
+        	Root.s13 += HttpUtility.UrlEncode(this.Content);
+        	Root.s13 += "'>";
+        	Root.s13 += this.Content;
+        	Root.s13 += "</a>";
+        ]]>
+      </subfield>
+      <subfield name="b">
+        Root.s13 += this.Content;
+      </subfield>
+      <subfield name="c">
+        <![CDATA[
+        if (this.DupCount > 1)
+        Root.s13 += "; ";
+        Root.s13 += this.Content;
+              ]]>
+      </subfield>
+      <subfield name="d">
+        Root.s13 += this.Content;
+      </subfield>
+      <subfield name="e">
+        <![CDATA[
+        if (this.DupCount > 1)
+        Root.s13 += "; ";
+        Root.s13 += this.Content;
+              ]]>
+      </subfield>
+      <!-- 形态复分 -->
+      <subfield name="v">
+        <![CDATA[
+         if (this.DupCount > 1)
+        Root.s13 += "; ";
+        Root.s13 += this.Content;
+             ]]>
+      </subfield>
+      <!-- 通用复分 -->
+      <subfield name="x">
+        <![CDATA[
+        if (this.DupCount > 1)
+        Root.s13 += "; ";
+        Root.s13 += this.Content;
+              ]]>
+      </subfield>
+      <!-- 时代复分 -->
+      <subfield name="y">
+        <![CDATA[
+        if (this.DupCount > 1)
+        Root.s13 += "; ";
+        Root.s13 += this.Content;
+              ]]>
+      </subfield>
+      <!-- 地区复分 -->
+      <subfield name="z">
+        <![CDATA[
+        if (this.DupCount > 1)
+        Root.s13 += "; ";
+        Root.s13 += this.Content;
+              ]]>
+      </subfield>
+    </field>
+    <end>
+      <![CDATA[
+		]]>
+    </end>
+
+        <!-- 905 馆藏信息 -->
+        <field name="905">
+            <subfield name="b">
+        // 登录号
+        if (this.DupCount &gt; 1)
+        Root.s27 += "; ";	// 重复时前置" ; "
+        Root.s27 += this.Content;
+      </subfield>
+            <subfield name="c">
+        // 排架区分号
+        Root.s25 += this.Content;
+      </subfield>
+            <subfield name="d">
+        // 分类号
+        if (this.PrevName == "c")
+        Root.s25 += " / ";	// 前面为$c时前置" / "
+        if (this.DupCount &gt; 1)
+        Root.s25 += "; ";	// 重复时前置" ; "
+        Root.s25 += this.Content;
+      </subfield>
+            <subfield name="e">
+        // 书词/种次号
+        if (this.DupCount &gt; 1)
+        Root.s25 += "; ";	// 重复时前置" ; "
+        Root.s25 += " / \r\n";	// 前置" / \r\n"
+        Root.s25 += this.Content;
+      </subfield>
+            <subfield name="s">
+        // 书词/种次号
+        if (this.Content.Length &gt; 0)
+        Root.s25 = "";
+        if (this.DupCount &gt; 1)
+        Root.s25 += "; ";	// 重复时前置" ; "
+        Root.s25 += this.Content;
+      </subfield>
+            <subfield name="v">
+        // 入藏卷期
+        if (Root.serials != 0)	//如果是期刊
+        {
+        if (Root.s28.Length &gt; 0)
+        Root.s28 += "; ";	// 本字段重复时前置" ; "
+        Root.s28 += this.Content;
+        }
+        else	//			# 不为期刊
+        {
+        Root.s25 += " / \r\n";	// 前置" / \r\n"
+        Root.s25 += this.Content;
+        }
+      </subfield>
+            <subfield name="y">
+        // 年代范围
+        if (Root.serials != 0)	//		# 如果为期刊
+        {
+        Root.s28 += " (";	// 使用括号
+        Root.s28 += this.Content;
+        Root.s28 += ") ";
+        }
+        else
+        {
+        Root.s25 += " / \r\n";	// 前置" / \r\n"
+        Root.s25 += this.Content;
+        }
+      </subfield>
+        </field>
+        <end><![CDATA[
+		]]></end>
+  </record>
+  <end>
+    <![CDATA[
+
+    
+			Host.ResultString += "<table class='biblio' width='100%' cellspacing='1' cellpadding='4'>";
+
+/*
+      // 索取号
+      if (s25.Length > 0)
+      {
+          Host.ResultString += "<tr class='content'>";
+			    Host.ResultString += "<td class='name' width='10%' nowrap>索取号</td>";
+			    Host.ResultString += "<td class='value' width='90%'>"+s25+"</td>";
+			    Host.ResultString += "</tr>";
+      }    
+      */
+
+  // 题名与责任说明
+	{
+		Host.ResultString += "<tr class='content'>";
+		Host.ResultString += "<td class='name' width='10%' nowrap>"
+			+S("题名与责任说明")
+			+"</td>";
+		Host.ResultString += "<td class='value' width='90%'>"+s03+"</td>";
+		Host.ResultString += "</tr>";
+	}
+      
+			if (s033.Length > 0)
+			{
+			Host.ResultString += "<tr class='content'>";
+			Host.ResultString += "<td class='name' nowrap width='10%'>翻译题名</td>";
+			Host.ResultString += "<td class='value' width='90%'>"+s033+"</td>";
+			Host.ResultString += "</tr>";
+			}
+      
+            // 责任者
+      if (s02.Length > 0)
+      {
+		Host.ResultString += "<tr class='content'>";
+		Host.ResultString += "<td class='name' width='10%' nowrap>" + SS("责任者") + "</td>";
+		Host.ResultString += "<td class='value' width='90%'>"+s02+"</td>";
+		Host.ResultString += "</tr>";
+      }
+      
+			if (s14.Length > 0)
+			{
+			Host.ResultString += "<tr class='content' >";
+			Host.ResultString += "<td class='name' nowrap width='10%'>责任者附加项</td>";
+			Host.ResultString += "<td class='value' width='90%'>"+s14+"</td>";
+			Host.ResultString += "</tr>";
+			}
+      
+      // 版本
+	if (s04.Length > 0)
+	{
+		Host.ResultString += "<tr class='content'>";
+		Host.ResultString += "<td class='name' width='10%' nowrap>" + SS("版本") + "</td>";
+		Host.ResultString += "<td class='value' width='90%'>"+s04+"</td>";
+		Host.ResultString += "</tr>";
+	}
+      
+      // 出版发行项
+			if (s05.Length > 0)
+	{
+		Host.ResultString += "<tr class='content'>";
+		Host.ResultString += "<td class='name' width='10%' nowrap>" + SS("出版发行") + "</td>";
+		Host.ResultString += "<td class='value' width='90%'>"+s05+"</td>";
+		Host.ResultString += "</tr>";
+	}
+      
+      // 载体形态项
+			if (s06.Length > 0)
+	{
+		Host.ResultString += "<tr class='content'>";
+		Host.ResultString += "<td class='name' width='10%' nowrap>" + SS("载体形态") + "</td>";
+		Host.ResultString += "<td class='value' width='90%'>"+s06+"</td>";
+		Host.ResultString += "</tr>";
+	}
+      
+      // 丛编项
+            if (s07.Length > 0)
+      {
+		Host.ResultString += "<tr class='content'>";
+		Host.ResultString += "<td class='name' width='10%' nowrap>" + SS("丛编") + "</td>";
+		Host.ResultString += "<td class='value' width='90%'>"+s07+"</td>";
+		Host.ResultString += "</tr>";
+      }
+      
+      
+			if (s16.Length > 0)
+			{
+			Host.ResultString += "<tr class='content' >";
+			Host.ResultString += "<td class='name' nowrap width='10%'>丛编附加项</td>";
+			Host.ResultString += "<td class='value' width='90%'>"+s16+"</td>";
+			Host.ResultString += "</tr>";
+			}
+      
+			if (s13.Length > 0)
+			{
+			Host.ResultString += "<tr class='content' >";
+			Host.ResultString += "<td class='name' nowrap width='10%'>主题附加款目</td>";
+			Host.ResultString += "<td class='value' width='90%'>"+s13+"</td>";
+			Host.ResultString += "</tr>";
+			}
+			if (s11.Length > 0)
+			{
+			Host.ResultString += "<tr class='content' >";
+			Host.ResultString += "<td class='name' nowrap width='10%'>ISBN项</td>";
+			Host.ResultString += "<td class='value' width='90%'>"+s11+"</td>";
+			Host.ResultString += "</tr>";
+			}
+			if (s12.Length > 0)
+			{
+			Host.ResultString += "<tr class='content' >";
+			Host.ResultString += "<td class='name' nowrap width='10%'>ISSN项</td>";
+			Host.ResultString += "<td class='value' width='90%'>"+s12+"</td>";
+			Host.ResultString += "</tr>";
+			}
+			if (s17.Length > 0)
+			{
+			Host.ResultString += "<tr class='content' >";
+			Host.ResultString += "<td class='name' nowrap width='10%'>国会图书馆分类号</td>";
+			Host.ResultString += "<td class='value' width='90%'>"+s17+"</td>";
+			Host.ResultString += "</tr>";
+			}
+			if (s18.Length > 0)
+			{
+			Host.ResultString += "<tr class='content' >";
+			Host.ResultString += "<td class='name' nowrap width='10%'>杜威十进制分类号</td>";
+			Host.ResultString += "<td class='value' width='90%'>"+s18+"</td>";
+			Host.ResultString += "</tr>";
+			}
+			if (s19.Length > 0)
+			{
+			Host.ResultString += "<tr class='content' >";
+			Host.ResultString += "<td class='name' nowrap width='10%'>其它分类号</td>";
+			Host.ResultString += "<td class='value' width='90%'>"+s19+"</td>";
+			Host.ResultString += "</tr>";
+			}
+
+			if (s10.Length > 0)
+			{
+			Host.ResultString += "<tr class='content' >";
+			Host.ResultString += "<td class='name' nowrap width='10%'>附注项</td>";
+			Host.ResultString += "<td class='value' width='90%'>"+s10+"</td>";
+			Host.ResultString += "</tr>";
+			}
+
+      // 期刊馆藏
+      if (s28.Length > 0)
+      {
+          Host.ResultString += "<tr class='content'>";
+			    Host.ResultString += "<td class='name' width='10%' nowrap>期刊馆藏</td>";
+			    Host.ResultString += "<td class='value' width='90%'>"+s28+"</td>";
+			    Host.ResultString += "</tr>";
+      }     
+
+			Host.ResultString += "</table>";
+  	  Host.ResultString += "<div class='clear'></div>";
+		  // Host.ResultString += "</body></html>"; 
+
+		]]>
+  </end>
+
+  <stringTable>
+    <s id="题名与责任说明">
+      <t lang="zh-CN">题名与责任说明</t>
+      <t lang="en-US">Title and Statement of Responsibility</t>
+    </s>
+    <s id="责任者">
+      <t lang="zh-CN">责任者</t>
+      <t lang="en-US">Contributor</t>
+    </s>
+    <s id="版本">
+      <t lang="zh-CN">版本</t>
+      <t lang="en-US">Edition</t>
+    </s>
+    <s id="资料特殊细节">
+      <t lang="zh-CN">资料特殊细节</t>
+      <t lang="en-US">Material or Type of Res. Spec.</t>
+    </s>
+    <s id="出版发行">
+      <t lang="zh-CN">出版发行</t>
+      <t lang="en-US">Publication</t>
+    </s>
+    <s id="载体形态">
+      <t lang="zh-CN">载体形态</t>
+      <t lang="en-US">Physical Description</t>
+    </s>
+    <s id="丛编">
+      <t lang="zh-CN">丛编</t>
+      <t lang="en-US">Series</t>
+    </s>
+    <s id="主题分析">
+      <t lang="zh-CN">主题分析</t>
+      <t lang="en-US">Subject</t>
+    </s>
+    <s id="分类号">
+      <t lang="zh-CN">分类号</t>
+      <t lang="en-US">Classification Number</t>
+    </s>
+    <s id="附注">
+      <t lang="zh-CN">附注</t>
+      <t lang="en-US">Notes</t>
+    </s>
+    <s id="相关题名">
+      <t lang="zh-CN">相关题名</t>
+      <t lang="en-US">Related Title</t>
+    </s>
+    <s id="出版频率">
+      <t lang="zh-CN">出版频率</t>
+      <t lang="en-US">Publication Frequency</t>
+    </s>
+    <s id="内容附注">
+      <t lang="zh-CN">内容附注</t>
+      <t lang="en-US">Content Note</t>
+    </s>
+    <s id="连接款目">
+      <t lang="zh-CN">连接款目</t>
+      <t lang="en-US">Linking Entries-General Info.</t>
+    </s>
+    <s id="标识和获得方式">
+      <t lang="zh-CN">标识和获得方式</t>
+      <t lang="en-US">Identifier and Terms of Availability</t>
+    </s>
+    <s id="登录号">
+      <t lang="zh-CN">登录号</t>
+      <t lang="en-US">Accession Number</t>
+    </s>
+    <s id="索取号">
+      <t lang="zh-CN">索取号</t>
+      <t lang="en-US">Call Number</t>
+    </s>
+    <s id="提要文摘">
+      <t lang="zh-CN">提要文摘</t>
+      <t lang="en-US">Summary or Abstract</t>
+    </s>
+    <s id="电子资源">
+      <t lang="zh-CN">电子资源</t>
+      <t lang="en-US">Electronic Resource</t>
+    </s>
+  </stringTable>
+
+
+</filter>

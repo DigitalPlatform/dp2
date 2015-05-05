@@ -1,0 +1,192 @@
+﻿DIV.review
+{
+    width: auto;
+    height: auto;
+    
+    padding-left: 20px;
+    padding-right: 20px;
+    
+    border-style:solid;
+	border-width:0px;
+
+	border-color:red;
+}
+
+DIV.review DIV.order_suggestion
+{
+	text-align:left;
+	font-weight:bolder;	
+}
+
+DIV.review DIV.yes
+{
+	font-size: 18px;
+	clear:both;
+	color: green;
+	/*margin: 25px;*/
+	margin-top: 5px;
+}
+
+DIV.review DIV.no
+{
+	font-size: 18px;
+	clear:both;
+	color: red;
+	/*margin: 25px;*/
+	margin-top: 5px;
+}
+
+DIV.review DIV.title
+{
+	float:none;
+	clear:both;
+	text-align:center;
+	font-size: 14px;
+	font-weight:bolder;
+	
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+DIV.review DIV.creator
+{
+	text-align:center;	
+	font-size: 14px;	
+	
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+DIV.review DIV.operinfo
+{
+	text-align:right;	
+	font-size: 10px;	
+	color:Gray;
+}
+
+DIV.review DIV.historytitle
+{
+    margin-top: 2em;
+}
+
+DIV.review DIV.history, DIV.review DIV.historytitle
+{
+    /*margin-left: 2em;*/
+	text-align:left;	
+	color:Gray;
+}
+
+DIV.review DIV.locked, DIV.review DIV.valuable
+{
+	margin-right: 25px;
+	margin-top: 5px;
+	margin-bottom: 5px;
+	margin-left: 0px;
+	padding: 5px;
+	padding-left: 0px;
+	float: left;
+}
+
+DIV.review DIV.locked
+{
+	color:White;
+	background-color: gray;
+	border-style:solid;
+	border-width: 1pt;
+	border-color:#dddddd;
+}
+
+DIV.review DIV.locked IMG, DIV.review DIV.valuable IMG, DIV.review DIV.locked IMG
+{
+	width: 11px;
+	height: 11px;
+}
+
+
+DIV.review DIV.forbidden
+{
+	/*margin: 25px;*/
+	margin-top: 5px;
+	margin-bottom: 5px;
+}
+
+DIV.review DIV.content P
+{
+	margin: 0px;
+/*
+	border-style:solid;
+	border-width:1px;
+*/
+}
+
+DIV.review DIV.content
+{
+	/*padding: 2.6em 3.5em 1em 3em;*/
+	/*margin: 1em 2em 3em 2em;*/
+	margin-top: 10px;
+	margin-bottom: 20px;
+	text-align:justify;
+	line-height: 1.6em;
+	
+	display:inline-block;
+	height: 100%;
+	/*min-height:80px;*/
+}
+
+DIV.review TABLE.edit
+{
+	width: 100%;
+	background-color: #eeeeee;
+}
+
+DIV.review TABLE.edit TD
+{
+	margin:0px;
+	padding: 8px;
+}
+
+DIV.review TABLE.edit TD.left
+{
+	width: 1%;
+	white-space: nowrap;
+}
+
+DIV.review TABLE.edit INPUT.title
+{
+	width: 50%;
+}
+
+DIV.review TABLE.edit TEXTAREA.content
+{
+	width: 99%;
+	height:80pt;
+}
+
+DIV.review TABLE.edit TR.description TD
+{
+    border:0px;
+    border-top:2px;
+    border-color: White;
+    border-style:outset;
+}
+
+DIV.review DIV.comment
+{
+	border-style: dotted;
+	border-color: #cccc00;
+	border-width: 2px;
+	padding: 8px;
+	margin: 4px;
+}
+
+DIV.review DIV.cmdline
+{
+    padding:0px;
+    padding-top:10px;
+    padding-bottom:14px;
+}
+
+DIV.review INPUT.delete
+{
+    margin-left: 20px;
+}

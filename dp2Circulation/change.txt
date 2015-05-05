@@ -1,0 +1,336 @@
+1.0.0.86版
+
+1) 新增册统计窗和书目统计窗
+
+---
+
+1.0.0.88版
+
+2007/10/18
+
+1) 书目检索窗可以使用__id途径进行记录索引号范围检索了。输入类似“1-10”这样的检索词。注意不支持逗号间隔的分段。这个功能需要最新版的dp2libraryws支持。
+
+2) 书目检索窗新增导出“记录路径文件”功能。
+
+3) 种册窗有一个错误：当利用“删除书目记录”按钮操作后，MARC编辑器和实体列表都会变为disabled状态，但当随后立即用“保存书目记录”按钮保存记录回数据库后，disabled状态不会变回enabled状态。这个错误已经改正。
+
+4) 实体查询窗新增导出“记录路径文件”和“册条码号文件”功能。
+
+5) 菜单“帮助/参数设置”所打开的“参数配置”对话框，增加了一个propertypage“检索”。里面有3个配置事项：书目检索窗最大命中条数、读者查询窗最大命中条数、实体查询窗最大命中条数，分别可以控制3种窗口的检索最大命中条数。
+
+这些参数如果设置为-1，表示不限制。提供这些配置参数以前，原来3种窗口的缺省配置参数为1000,-1,-1。
+
+
+---
+
+1.0.0.89版
+
+2007/10/19
+
+1) 为书目检索窗、读者查询窗、实体查询窗的命中记录列表增加了鼠标左键点击栏目标题后排序的功能。
+
+2) 为种册管理窗中的实体记录信息增加了<volume>元素，表示各册的卷号。为此，dp2libraryws图书馆应用服务器也进行了升级。
+
+---
+
+1.0.0.91版
+
+2007/10/26
+
+1) 为满足“借阅排行”统计方案的一些要求，针对OperLogStatisForm(宿主)进行了修改。
+
+---
+
+1.0.0.94版
+
+2007/11/6
+
+由于这个版本更换了数字签名证书，只能把以前的版本在控制面板中卸载后，才能安装新版本。
+
+重新安装后，若干统计方案在dp2circulation中会丢失。这些统计方案可在下面这个地址找到，并重新导入：
+
+http://dp2003.com/dp2bbs/article.aspx?board=@__2&id=205
+
+1) 批修改册窗中，“文件驱动”page的“条码号文件名”旁增加了一个“...”按钮，用途是查找条码文件名。
+
+2) 批修改册窗中，遇到条码为多条记录所用的情况，现在软件在装载这样的条码的对应记录时会报错。工作人员需要将条码重复使用情况排除后，才能利用批修改册窗对册记录进行修改。
+
+3) 书目查询窗、实体查询窗、读者查询窗中，当正在装入浏览记录的时候关闭窗口，会报错。此错误已经被改正。
+
+---
+
+1.0.0.95
+
+2007/11/12
+
+1) 原来版本读者窗中调入空白工作单后然后保存，API SetReaderInfo()的strOldXml参数不为空，这个错误已经改正。
+
+原来版本和dp2libraryws新版本配套使用会报错。
+
+2) 原来版本读者窗中删除一条读者记录后，重新保存，API SetReaderInfo()的strAction参数值为"new"，不对，应该为"change"。这个错误已经改正。
+
+原来版本和dp2libraryws新版本配套使用会报错。
+
+---
+
+1.0.0.96
+
+2007/11/15
+
+1) 为二次开发的宿主类BiblioStatis增加了成员
+
+        public List<ItemInfo> ItemInfos
+
+---
+
+1.0.0.97
+
+2007/11/21
+
+1) 种册管理窗增加了“对象”tabpage。在这里可以增删改书目记录所属的资源对象。
+
+---
+
+1.0.0.98
+
+2007/11/22
+
+1) 原来的版本，读者查询窗中，无法将重复条码记录中后面的条装入读者窗。现在已经给浏览框中右鼠标键popupmenu增加了一个“根据记录路径装入到读者窗”命令，用这个命令可以把重复条码的记录中后面的条装入读者窗。
+
+2) 原来的版本，读者窗中如果装入了重复条码的其中一条读者记录，用“删除”按钮无法删除。现在依然保留这个效果(一般删除的时候不是用记录路径进行删除，而是用条码进行删除，因此会出现删除不了并报警的情况)，但是增加了一个功能：按住CTRL键的同时点删除按钮，就可以根据该记录的路径来进行删除 -- 就可以删除重复条码的记录了。
+
+不过删除的成功仍然需要一些前提条件：即将被删除的记录没有流通信息，即没有借还信息和违约交费信息才行。
+
+---
+
+1.0.0.102
+
+2007/12/11
+
+1) 种册管理窗中，MARC编辑器的CTRL+A功能，原来版本是从相应书目库的cfgs/dp2_autogen.cs和cfgs/dp2_autogen.cs.ref中获得C#脚本并执行，现在改为从相应书目库的cfgs/dp2circulation_marc_autogen.cs和cfgs/dp2circulation_marc_autogen.cs.ref中获得C#脚本并执行。并且脚本代码因为所涉及的部分类库功能调整而需要修改才能通过编译。
+
+2) 增加流通凭条打印功能。可以打印读者的借、还、违约金情况。
+
+
+~~~
+
+        void menu_createBorrowListReport_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            string strUsedDateRange = this.MainForm.AppInfo.GetString("reportform",
+    "borrowlist_daterange",
+    "2013");
+
+            string strDateRange = InputDlg.GetInput(
+    this,
+    "创建报表",
+    "请指定时间范围: ",
+    strUsedDateRange,
+    this.MainForm.DefaultFont);
+            if (strDateRange == null)
+                return;
+
+            this.MainForm.AppInfo.SetString("reportform",
+                "borrowlist_daterange",
+                strDateRange);
+
+            // 输出文件目录
+            FolderBrowserDialog dlg = new FolderBrowserDialog();
+
+            dlg.Description = "请报表输出的目录:";
+            dlg.RootFolder = Environment.SpecialFolder.MyComputer;
+            dlg.SelectedPath = this.MainForm.AppInfo.GetString("reportform",
+    "borrowlist_output_dir",
+    "");
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            // 检查输出目录是否符合规则
+            // 不能使用根目录
+            string strRoot = Directory.GetDirectoryRoot(dlg.SelectedPath);
+            if (PathUtil.IsEqual(strRoot, dlg.SelectedPath) == true)
+            {
+                strError = "报表输出目录 '" + dlg.SelectedPath + "' 不合法。不能是根目录";
+                goto ERROR1;
+            }
+
+            DirectoryInfo di = new DirectoryInfo(dlg.SelectedPath);
+            FileSystemInfo [] infos = di.GetFileSystemInfos();
+            if (infos.Length > 0)
+            {
+                DialogResult temp_result = MessageBox.Show(this,
+"输出目录  中已经存在内容。\r\n\r\n是否要清除里面的全部子目录和文件?",
+"ReportForm",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+                if (temp_result == System.Windows.Forms.DialogResult.Yes)
+                {
+                    // 清除目录中的全部内容
+                    // 删除对象目录，然后重建
+                    try
+                    {
+                        PathUtil.DeleteDirectory(dlg.SelectedPath);
+                        PathUtil.CreateDirIfNeed(dlg.SelectedPath);
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "清除 输出目录 '" + dlg.SelectedPath + "' 内原有子目录和文件时发生错误： " + ex.Message;
+                        goto ERROR1;
+                    }
+                }
+            }
+
+            this.MainForm.AppInfo.SetString("reportform",
+    "borrowlist_output_dir",
+    dlg.SelectedPath);
+
+            string strOutputDir = dlg.SelectedPath;
+
+            List<string> librarycodes = new List<string>();
+            foreach (ListViewItem item in this.listView_libraryConfig.SelectedItems)
+            {
+                string strLibraryCode = ListViewUtil.GetItemText(item, 0);
+                librarycodes.Add(strLibraryCode);
+            }
+
+            EnableControls(false);
+
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在创建报表 ...");
+            stop.BeginLoop();
+
+            try
+            {
+                this._connectionString = GetOperlogConnectionString();  //  SQLiteUtil.GetConnectionString(this.MainForm.UserDir, "operlog.bin");
+                // 创建报表阶段需要的附加索引
+                nRet = OperLogLine.CreateAdditionalIndex(
+                    this._connectionString,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+
+
+                foreach (string strLibraryCode in librarycodes)
+                {
+                    XmlNode nodeLibrary = this._cfg.GetLibraryNode(strLibraryCode);
+                    if (nodeLibrary == null)
+                    {
+                        strError = "在配置文件中没有找到馆代码为 '" + strLibraryCode + "' 的 <library> 元素";
+                        goto ERROR1;
+                    }
+
+                    string strCfgFile = "";
+                    // 根据配置文件类型，找到配置文件名
+                    nRet = FindCfgFileByType(nodeLibrary,
+                        "131",
+                        out strCfgFile,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                    if (nRet == 0)
+                    {
+                        strError = "当前分馆 '" + strLibraryCode + "' 没有配置 131 类型的配置文件";
+                        goto ERROR1;
+                    }
+
+                    string strColumnSortStyle = GetColumnSortStyle(strCfgFile);
+                    if (string.IsNullOrEmpty(strColumnSortStyle) == true)
+                        strColumnSortStyle = "1:a";
+                    else
+                        strColumnSortStyle = SortColumnCollection.NormalToTable(strColumnSortStyle);
+
+
+                    Hashtable macro_table = new Hashtable();
+                    macro_table["%library%"] = strLibraryCode;
+
+                    Table reader_table = null;
+
+                    // 获得一个分馆内读者记录的证条码号和单位名称
+                    nRet = GetAllReaderDepartments(
+                            strLibraryCode,
+                            ref reader_table,
+                            out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    reader_table.Sort("1:a,-1:a");
+
+                    stop.SetProgressRange(0, reader_table.Count);
+                    for (int i = 0; i < reader_table.Count; i++)
+                    {
+                        Application.DoEvents();
+                        if (stop != null && stop.State != 0)
+                        {
+                            strError = "用户中断...";
+                            goto ERROR1;
+                        }
+
+                        Line line = reader_table[i];
+                        string strReaderBarcode = line.Entry;
+                        string strName = line.GetString(0);
+                        string strDepartment = line.GetString(1);
+
+                        string strDepartmentName = strDepartment.Replace(" ", "_");
+                        if (string.IsNullOrEmpty(strDepartmentName) == true)
+                            strDepartmentName = "其他部门";
+
+                        string strOutputFileName = Path.Combine(strOutputDir,
+                            strLibraryCode + "\\" + strDepartmentName + "\\" + strReaderBarcode + "_" + strName.Replace(" ", "")+ ".xlsx");
+
+                        stop.SetMessage("正在创建报表文件 " + strOutputFileName + " " + (i + 1).ToString() + "/" + reader_table.Count.ToString() + " ...");
+
+                        // 确保目录被创建
+                        // PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strOutputFileName));
+
+                        Table tableList = null;
+                        nRet = CreateReaderReport(
+                            strLibraryCode,
+                            strDateRange,
+                            "131",
+                            strReaderBarcode,
+                            ref tableList,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+
+                        tableList.Sort(strColumnSortStyle);  // "1:a" 按照借书时间排序
+
+                        macro_table["%name%"] = strName;
+                        macro_table["%department%"] = strDepartment;
+                        macro_table["%readerbarcode%"] = strReaderBarcode;
+
+                        macro_table["%linecount%"] = tableList.Count.ToString();
+                        macro_table["%daterange%"] = strDateRange;
+
+                        nRet = OutputExcelReport(
+                            tableList,
+                            strCfgFile,
+                            macro_table,
+                            strOutputFileName,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+
+                        stop.SetProgressValue(i + 1);
+                    }
+                }
+            }
+            finally
+            {
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                stop.HideProgress();
+
+                EnableControls(true);
+            }
+
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }

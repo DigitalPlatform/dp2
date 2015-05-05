@@ -1,0 +1,325 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <ProjectType>Local</ProjectType>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{184700D7-F172-4001-9EE6-440779D286E1}</ProjectGuid>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ApplicationIcon>
+    </ApplicationIcon>
+    <AssemblyKeyContainerName>
+    </AssemblyKeyContainerName>
+    <AssemblyName>DigitalPlatform.MarcEditor</AssemblyName>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+    <DefaultClientScript>JScript</DefaultClientScript>
+    <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
+    <DefaultTargetSchema>IE50</DefaultTargetSchema>
+    <DelaySign>false</DelaySign>
+    <OutputType>Library</OutputType>
+    <RootNamespace>DigitalPlatform.MarcEditor</RootNamespace>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+    <StartupObject>
+    </StartupObject>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <OldToolsVersion>2.0</OldToolsVersion>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>TRACE;DEBUG;BIDI_SUPPORT</DefineConstants>
+    <DocumentationFile>bin\Debug\DigitalPlatform.MarcEditor.XML</DocumentationFile>
+    <DebugSymbols>true</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn>
+    </NoWarn>
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+    <DebugType>full</DebugType>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>TRACE;BIDI_SUPPORT</DefineConstants>
+    <DocumentationFile>
+    </DocumentationFile>
+    <DebugSymbols>false</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn>
+    </NoWarn>
+    <Optimize>true</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+    <DebugType>none</DebugType>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System">
+      <Name>System</Name>
+    </Reference>
+    <Reference Include="System.Data">
+      <Name>System.Data</Name>
+    </Reference>
+    <Reference Include="System.Drawing">
+      <Name>System.Drawing</Name>
+    </Reference>
+    <Reference Include="System.Windows.Forms">
+      <Name>System.Windows.Forms</Name>
+    </Reference>
+    <Reference Include="System.Xml">
+      <Name>System.XML</Name>
+    </Reference>
+    <ProjectReference Include="..\DigitalPlatform.CommonControl\DigitalPlatform.CommonControl.csproj">
+      <Project>{334E1B2B-5373-4C80-A971-BFF213FF304B}</Project>
+      <Name>DigitalPlatform.CommonControl</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Drawing\DigitalPlatform.Drawing.csproj">
+      <Name>DigitalPlatform.Drawing</Name>
+      <Project>{C2468F93-69AC-4BBA-94AE-678ED5C21542}</Project>
+      <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.IO\DigitalPlatform.IO.csproj">
+      <Name>DigitalPlatform.IO</Name>
+      <Project>{441CB814-AF78-4503-91EF-DCE5F3269502}</Project>
+      <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.MarcFixedFieldControl\DigitalPlatform.MarcFixedFieldControl.csproj">
+      <Name>DigitalPlatform.MarcFixedFieldControl</Name>
+      <Project>{2DF76AF2-D0CD-47C5-910C-A81B8BCDCE3E}</Project>
+      <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.MarcKernel\DigitalPlatform.MarcKernel.csproj">
+      <Project>{74242530-EF96-457E-852D-5C21A3EA8449}</Project>
+      <Name>DigitalPlatform.MarcKernel</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.MarcQuery\DigitalPlatform.MarcQuery.csproj">
+      <Project>{57FE2FB1-4134-409B-876C-8A1C0776B498}</Project>
+      <Name>DigitalPlatform.MarcQuery</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Text\DigitalPlatform.Text.csproj">
+      <Project>{26F96CC3-A4A9-4BC4-A10A-BC7E25581FF6}</Project>
+      <Name>DigitalPlatform.Text</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Xml\DigitalPlatform.Xml.csproj">
+      <Project>{E6489E89-1349-4EE7-A00B-AC96B9912587}</Project>
+      <Name>DigitalPlatform.Xml</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform\DigitalPlatform.csproj">
+      <Name>DigitalPlatform</Name>
+      <Project>{BDD43275-EAA0-4670-8BA3-0DB5CD7598DD}</Project>
+      <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DeleteFieldDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DeleteFieldDlg.Designer.cs">
+      <DependentUpon>DeleteFieldDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Field.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FieldCollection.cs" />
+    <Compile Include="FieldNameDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="IndicatorNameDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MarcEditor.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="FixedTemplateDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MyEdit.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="NewFieldDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="NewFieldDlg.Designer.cs">
+      <DependentUpon>NewFieldDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PropertyDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PropertyDlg.Designer.cs">
+      <DependentUpon>PropertyDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Record.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Subfield.cs" />
+    <Compile Include="SubfieldCollection.cs" />
+    <Compile Include="ValueListDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Content Include="log\10.10.txt" />
+    <Content Include="log\10.11.txt" />
+    <Content Include="log\10.12.txt" />
+    <Content Include="log\10.13.txt" />
+    <Content Include="log\10.14.txt" />
+    <Content Include="log\10.17.txt" />
+    <Content Include="log\10.18.txt" />
+    <Content Include="log\10.19.txt" />
+    <Content Include="log\10.20.txt" />
+    <Content Include="log\10.21.txt" />
+    <Content Include="log\10.24.txt" />
+    <Content Include="log\10.25.txt" />
+    <Content Include="log\10.26.txt" />
+    <Content Include="log\10.27.txt" />
+    <Content Include="log\10.28.txt" />
+    <Content Include="log\10.31.txt" />
+    <Content Include="log\10.9.txt" />
+    <Content Include="log\11.1.txt" />
+    <Content Include="log\11.10.txt" />
+    <Content Include="log\11.11.txt" />
+    <Content Include="log\11.14.txt" />
+    <Content Include="log\11.15.txt" />
+    <Content Include="log\11.16.txt" />
+    <Content Include="log\11.17.txt" />
+    <Content Include="log\11.18.txt" />
+    <Content Include="log\11.2.txt" />
+    <Content Include="log\11.21.txt" />
+    <Content Include="log\11.22.txt" />
+    <Content Include="log\11.23.txt" />
+    <Content Include="log\11.24.txt" />
+    <Content Include="log\11.25.txt" />
+    <Content Include="log\11.28.txt" />
+    <Content Include="log\11.29.txt" />
+    <Content Include="log\11.3.txt" />
+    <Content Include="log\11.30.txt" />
+    <Content Include="log\11.4.txt" />
+    <Content Include="log\11.7.txt" />
+    <Content Include="log\11.8.txt" />
+    <Content Include="log\11.9.txt" />
+    <Content Include="log\12.1.txt" />
+    <Content Include="log\12.12.txt" />
+    <Content Include="log\12.13.txt" />
+    <Content Include="log\12.14.txt" />
+    <Content Include="log\12.19.txt" />
+    <Content Include="log\12.2.txt" />
+    <Content Include="log\12.20.txt" />
+    <Content Include="log\12.5.txt" />
+    <Content Include="log\12.6.txt" />
+    <Content Include="log\12.7.txt" />
+    <Content Include="log\12.8.txt" />
+    <Content Include="log\12.9.txt" />
+    <EmbeddedResource Include="DeleteFieldDlg.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>DeleteFieldDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FieldNameDlg.resx">
+      <DependentUpon>FieldNameDlg.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="IndicatorNameDlg.resx">
+      <DependentUpon>IndicatorNameDlg.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MarcEditor.resx">
+      <DependentUpon>MarcEditor.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FixedTemplateDlg.resx">
+      <DependentUpon>FixedTemplateDlg.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MyEdit.resx">
+      <DependentUpon>MyEdit.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="NewFieldDlg.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>NewFieldDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PropertyDlg.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>PropertyDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ValueListDlg.resx">
+      <DependentUpon>ValueListDlg.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="log\ve-279.tmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+</Project>

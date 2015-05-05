@@ -1,0 +1,63 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+    <title>测试</title>
+    <script type="text/javascript">
+        function postTo() {
+            var form = document.getElementById("login1");
+
+            var username = document.getElementById("username1");
+
+            var input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = "username";
+            input.value = encodeURI(username.value);
+            form.appendChild(input);
+
+            // alert(form.outerHTML);
+            form.submit();
+        }
+    </script>
+</head>
+<body>
+        <form action="http://localhost/dp2opac/login.aspx" method="post"
+id="login1" name="login1">
+        <table class="login">
+            <tr>
+                <td colspan="2" class="title">
+                    登录
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    姓&nbsp;名
+                </td>
+                <td>
+                    <input name="username1" id="username1" class="username"
+type="text">
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    密&nbsp;码
+                </td>
+                <td>
+                    <input name="password" class="password" type="password">
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <input type="button" value="姓名登录"
+onclick="postTo()">
+                </td>
+            </tr>
+        </table>
+        <input name="usertype" type="hidden" value="reader" />
+        <input name="action" type="hidden" value="autologin">
+        <!-- input name="library" type="hidden" value="zong" -->
+        <input name="prefix" type="hidden" value="NB:"/>
+        <input name="redirect" type="hidden" value="mymessage.aspx">
+        </form>
+</body>
+</html>

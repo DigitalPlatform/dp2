@@ -1,0 +1,160 @@
+﻿TABLE.sidebar
+{
+	font-size: 14px;
+	text-align: left;
+	border-width: 0px;
+}
+
+TABLE.sidebar TD
+{
+	padding-left:10px;
+	padding-right:10px;
+}
+
+TABLE.sidebar TD.active
+{
+    background-color: Yellow;
+	font-weight:bolder;
+}
+
+TABLE.total DIV.description DIV.text
+{
+	font-size: 13px;
+	background-color: white;
+	
+	margin:10px;
+	padding: 10px;
+	border-style: dashed;
+	border-width: 1pt;
+	border-color:#dddddd;
+}
+
+TABLE.total DIV.commands INPUT
+{
+	margin-left: 10px;
+	font-size: 12px;
+	padding: 2px;
+}
+
+TABLE.total A.rss
+{
+	margin:10px; 
+}
+
+A.rss IMG
+{
+    border-width: 0px;
+}
+
+TABLE.total DIV.commands DIV.errorinfo
+{
+	font-size: 13px;
+	background-color: yellow;
+	
+	margin:10px;
+	padding: 10px;
+	border-style:solid;
+	border-width: 1pt;
+	border-color:#dddddd;
+}
+
+/**/
+
+TD.selected_treenode
+{
+	font-weight:bolder;
+}
+
+DIV#TreeView1
+{
+	background-color: White;
+	font-size: 12px;
+	width:auto;
+	height:180px;
+	overflow:scroll;
+
+	border-style:solid;
+	border-width:1px;
+	border-top-width:0px;
+	border-bottom-width: 26px;
+	border-color:#aaaaaa;
+	border-collapse:collapse;
+	padding: 5px;
+}
+
+.statisentry
+{
+	background-color: White;
+	font-size: 12px;
+	width:150px;
+	height:180px;
+	overflow:scroll;
+
+	border-style:solid;
+	border-width:1px;
+	border-top-width:0px;
+	border-bottom-width: 26px;
+	border-color:#aaaaaa;
+	border-collapse:collapse;
+	padding: 5px;
+}
+
+TABLE.total
+{
+/*	width: 970px;*/
+	width: auto;
+
+	margin-top: 10px;
+	margin-bottom: 10px;
+	margin-left: 10px;
+	margin-right: 10px;
+}
+
+TABLE.total TD.left
+{
+	width: 15%;
+	vertical-align: top;
+}
+
+/*
+TABLE.total DIV.left
+{
+	margin-top: 10px;
+	margin-bottom: 10px;
+	margin-left: 10px;
+	margin-right: 10px;
+}*/
+
+TABLE.total TD.middle
+{
+	width: 16px;
+}
+
+TABLE.total TD.right
+{
+	width: 85%;
+	vertical-align: top;
+}
+
+DIV.category
+{
+    margin-left: 0px;
+}
+
+DIV.item
+{
+    margin-left: 20px;
+}
+
+.checked
+{
+    font-weight: bold;
+    background-color: Yellow;
+}
+
+
+
+#Chart1
+{
+
+}

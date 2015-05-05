@@ -1,0 +1,55 @@
+﻿<root>
+  <category name="*" role="librarian" >
+  </category>
+  <category name="超期通知" role="all" >
+    <item name="dpmail超期通知人数" role="all" />
+    <item name="email超期通知人数" role="all" />
+    <item name="*" role="librarian" />
+  </category>
+  <category name="出纳" role="all" >
+    <item name="读者数" role="all" />
+    <item name="借册" role="all" />
+    <item name="借书遇册条码号重复次数" role="all" />
+    <item name="还册" role="all" />
+    <item name="还超期册" role="all" />
+    <item name="当日内立即还册" role="all" />
+    <item name="还书遇册条码号重复次数" role="all" />
+    <item name="还书遇册条码号重复并无读者证条码号辅助判断次数" role="all" />
+    <item name="预约次" role="all" />
+    <item name="预约到书册" role="all" />
+    <item name="*" role="librarian" />
+  </category>
+  <category name="违约金" role="librarian">
+    <item name="给付次" role="librarian" />
+    <item name="给付元" role="librarian" />
+    <item name="取消次" role="librarian" />
+    <item name="取消元" role="librarian" />
+    <item name="*" role="librarian" />
+  </category>
+  <category name="修改读者信息" role="librarian" >
+    <item name="创建新记录数" role="all" />
+    <item name="修改记录数" role="all" />
+    <item name="删除记录数" role="all" />
+    <item name="*" role="librarian" />
+  </category>
+  <category name="修改读者信息之状态" role="librarian" >
+    <item name="挂失" role="all" />
+    <item name="注销" role="all" />
+    <item name="" role="all" />
+    <item name="*" role="librarian" />
+  </category>
+  <category name="修复借阅信息" role="librarian" >
+    <item name="读者侧次数" role="all" />
+    <item name="实体侧次数" role="all" />
+    <item name="*" role="librarian" />
+  </category>
+  <category name="消息监控" role="all" >
+    <item name="删除过期消息条数" role="all" />
+    <item name="*" role="librarian" />
+  </category>
+  <category name="跟踪DTLP" role="librarian" >
+    <item name="覆盖记录条数" role="librarian" />
+    <item name="删除记录条数" role="librarian" />
+    <item name="*" role="librarian" />
+  </category>
+</root>

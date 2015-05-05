@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+    <col title="分类号">
+        <xpath>/r/@c</xpath>
+    </col>
+    <col title="值">
+        <xpath>/r/@v</xpath>
+    </col>
+</root>

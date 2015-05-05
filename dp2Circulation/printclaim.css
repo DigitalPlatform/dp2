@@ -1,0 +1,129 @@
+
+BODY
+{
+	font-family:"Microsoft YaHei", Times, serif;
+}
+
+DIV.pageheader
+{
+	text-align: right;
+	border-bottom-width: 1pt;
+	border-bottom-color: #000000;
+	border-bottom-style: solid;
+	margin-bottom: 16pt;
+}
+
+DIV.seller
+{
+	font-size: 16pt;
+	font-weight: bold;
+	text-align: center;
+	margin: 16pt;
+}
+
+TABLE.table
+{
+	width: 100%;
+
+	font-size: 12pt;
+
+	border-style: solid;
+	border-width: 1pt;
+	border-color: #000000;
+
+	border-collapse:collapse;
+	border-left-width: 1pt;
+	border-top-width: 1pt;
+	border-right-width: 1pt;
+	border-bottom-width: 1pt;
+
+	background-color: white;
+}
+
+TABLE.table TD
+{
+	padding: 4pt;
+
+	border-left-width: 0pt;
+	border-top-width: 0pt;
+	border-right-width: 0.5pt;
+	border-bottom-width: 0.5pt;
+
+	border-style: solid;
+	border-color: #000000;
+}
+
+TABLE.table TR.column TD
+{
+	font-weight: bold;
+}
+
+TABLE.table TR.column TD.series_info
+{
+	text-align: center;
+}
+
+TABLE.table TR.column TD.missing_info
+{
+	text-align: center;
+}
+
+TABLE.table TR.content TD
+{
+
+}
+
+TABLE.table TR.content_biblio_sum TD
+{
+}
+
+
+TABLE.table TD.publishTime
+{
+
+}
+
+TABLE.table TD.issue
+{
+	text-align: right;
+	width: 10%
+}
+
+TABLE.table TD.orderCount
+{
+	text-align: right;
+}
+
+TABLE.table TD.arrivedCount
+{
+	text-align: right;
+}
+
+TABLE.table TD.missingCount
+{
+	text-align: right;
+}
+
+
+DIV.letter
+{
+	text-align: left;
+
+	border-style: dotted;
+	border-color: #cccc00;
+	border-width: 2px;
+	padding: 8px;
+	margin: 4px;
+}
+
+
+DIV.pagefooter
+{
+	text-align: right;
+
+	border-top-width: 1pt;
+	border-top-color: #000000;
+	border-top-style: solid;
+	margin-top: 16pt;
+}
+

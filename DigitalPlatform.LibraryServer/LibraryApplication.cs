@@ -1,0 +1,12729 @@
+// #define OPTIMIZE_API
+#define LOG_INFO
+
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+using System.Xml;
+using System.IO;
+using System.Collections;
+using System.Reflection;
+using System.Threading;
+using System.Diagnostics;
+using System.Web;
+using System.Drawing;
+using System.Runtime.Serialization;
+
+// using DigitalPlatform.Drawing;
+
+using DigitalPlatform;	// Stop类
+using DigitalPlatform.rms.Client;
+using DigitalPlatform.Xml;
+using DigitalPlatform.IO;
+using DigitalPlatform.Text;
+using DigitalPlatform.Script;
+using DigitalPlatform.MarcDom;
+// using DigitalPlatform.Library;  // LoanFilterDocument
+using DigitalPlatform.Marc;
+using DigitalPlatform.Range;
+
+using DigitalPlatform.Message;
+using DigitalPlatform.rms.Client.rmsws_localhost;
+
+namespace DigitalPlatform.LibraryServer
+{
+    public class StopState
+    {
+        public bool Stopped = false;
+
+        public void Stop()
+        {
+            this.Stopped = true;
+        }
+    }
+
+    /// <summary>
+    /// 存放应用程序全局信息的类
+    /// 建议用partial class改写为几个文件，减小每个文件的尺寸
+    /// </summary>
+    public partial class LibraryApplication : IDisposable
+    {
+        //      2.1 (2012/4/5) 第一个具有版本号的版本。特点是增加了改造了GetIssueInfo() GetOrderInfo() GetCoomentInfo() 修改了第一参数名，去掉了第二参数
+        //      2.11 (2012/5/5) 为ListBiblioDbFroms() API增加了 item order issue 几个类型
+        //      2.12 (2012/5/15) SearchBiblio() API 对“出版时间”检索途径进行了特殊处理
+        //      2.13 (2012/5/16) SearchBiblio() API 通过strFromStyle中包含_time子串来识别时间检索请求
+        //      2.14 (2012/8/26) GetRes() API 的 nStart 参数从int修改为long类型
+        //      2.15 (2012/9/10) 开始进行分馆用户改造
+        //      2.16 (2012/9/19) Login() API增加out strLibraryCode参数
+        //      2.17 (2012/11/8) 为ListBiblioDbFroms() API增加了 amerce invoice 几个类型
+        //      2.18 (2013/2/13) 为了和 dp2Kernel 2.54 配套
+        //      2.19 (2013/12/21) 增加启动 log 信息
+        //      2.20 (2013/12/4) 读者 HTML 格式能接受 html:noborrowhistory 这样的用法 (局部还有错)
+        //      2.21 (2013/12/5) 读者 HTML 格式能接受 html:noborrowhistory 这样的用法
+        //      2.22 (2013/12/8) GetReaderInfo() 的 strBarcode 可以使用 "@barcode:" 引导，表示仅仅在证条码号中查找
+        //      2.23 (2013/12/8) GetSysParameters() 增加 cfgs listFileNamesEx; cfgs/get_res_timestamps
+        //      2.24 (2013/12/15) Borrow() Return() 允许 item 格式返回 xml:noborrowhistory; 读者 格式返回 summary
+        //      2.25 (2013/12/17)  GetReaderInfo() 允许 xml:noborrowhistory
+        //      2.26 (2013/12/30) SearchBiblio() 中, 对 strStyle 发来的 "class,__class" 能正确去重
+        //      2.27 (2014/1/2) SearchBiblbio() 中如果一个 formstyle 没有找到，会返回 ErrorCode.FromNotFound 错误码
+        //      2.28 (2014/1/15) GetBiblioInfos() API 允许前端发来多条 XML 记录，每条记录之间用 <!--> 间隔
+        //      2.29 (2014/3/2) GetCalendar() API 无论 strAction 是 list getcount get , strName 参数都发挥作用。为了 获得全部事项，注意 list / getcount 需要使用空值的 strName。以前版本，在 list / getcount 时候忽略 strName 参数，效果是获得全部试想；而 get 的效果是只能获得一个事项  
+        //      2.30 (2014/3/17) GetBiblioInfo() 和 GetBiblioInfos() API，可以使用 subcount:??? format
+        //      2.31 (2014/4/29) GetOperLogs() 对于 level-2 的 SetEntity SetOrder SetIssue SetComment 记录中，<oldRecord> 增加了 parent_id 属性
+        //      2.32 (2014/9/16) 个人图书馆功能，允许读者之间进行借还操作
+        //      2.33 (2014/9/24) Borrow() Return() API 允许用 @refID: 前缀的册条码号来进行借书还书
+        //      2.34 (2014/10/23) 允许各种功能使用评估模式
+        //      2.35 (2014/11/14) Borrow() API 中续借功能允许 strReaderBarcode 为空
+        //      2.36 (2014/11/15) Login() API 的 mac 参数，允许多个 MAC 地址，用竖线分割
+        //      2.37 (2014/11/17) Foregift() 和 Hire() 两个 API 都增加了两个 out 参数
+        //      2.38 (2014/11/26) ManageDatabase() API 的 refresh 功能，可以自动启动重建检索点的批处理任务
+        //      2.39 (2015/1/21) CopyBiblioInfo() API 增加了 strMergeStyle 和 strOutputBiblio 参数，SetBiblioInfo() API 增加了 onlydeletesubrecord action
+        //      2.40 (2015/1/25) Login() API 可以返回 token 字符串, VerifyReaderPassword() API 可以验证 token 字符串。dp2OPAC 借此实现了保持用户登录状态的功能，和第三方 SSO 跟随 dp2OPAC 登录的功能
+        //      2.41 (2015/1/26) Login() API 增加了对试探密码循环攻击的防范功能，每次禁止相关 IP 使用 Login() API 10 分钟
+        //      2.42 (2015/1/29) GetItemInfo() GetOrderInfo() GetIssueInfo() GetCommentInfo() API 增加了 strItemXml 参数。允许获得记录的检索点信息
+        //      2.43 (2015/1/30) GetItemInfo() API 进一步增加了 strItemDbType 参数，并包含了原先的 GetItemInfo GetOrderInfo GetIssuInfo GetCommentInfo API 的全部功能。至此，GetItemInfo() API 所取代的其他几个 API 逐渐要废止。为了保持兼容性，暂时保留一段时间这几个 API
+        //      2.44 (2015/4/30) GetSystemParameter() API 增加了 category=cfgs name=getDataDir 获得数据目录物理路径 
+        public static string Version = "2.44";
+#if NO
+        int m_nRefCount = 0;
+        public int AddRef()
+        {
+            int v = m_nRefCount;
+            m_nRefCount++;
+
+            return v;
+        }
+
+        public int GetRef()
+        {
+            return m_nRefCount;
+        }
+
+        public int ReleaseRef()
+        {
+            m_nRefCount--;
+
+            return m_nRefCount;
+        }
+#endif
+        public const string qrkey = "dpqrhello";
+
+        /// <summary>
+        /// 是否为评估状态
+        /// </summary>
+        public bool TestMode = false;
+
+        // 存储各种参数信息
+        // 为C#脚本所准备
+        public Hashtable ParamTable = new Hashtable();
+
+        // 防止试探密码攻击的设施
+        public UserNameTable UserNameTable = new UserNameTable();
+
+        // Session集合
+        public SessionTable SessionTable = new SessionTable();
+
+        /// <summary>
+        /// 最多允许访问 dp2Library 的前端机器数量
+        /// </summary>
+        public int MaxClients
+        {
+            get
+            {
+                return this.SessionTable.MaxClients;
+            }
+            set
+            {
+                this.SessionTable.MaxClients = value;
+            }
+        }
+
+        /// <summary>
+        /// 许可类型
+        /// </summary>
+        public string LicenseType
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// 失效的前端 MAC 地址集合
+        /// Key 为 MAC 地址。大写。如果 Key 在 Hashtable 中已经存在，则表示这个 MAC 地址已经失效了
+        /// </summary>
+        public Hashtable ExpireMacTable = new Hashtable();
+
+        /// <summary>
+        /// 跟踪读者入馆状态的类
+        /// </summary>
+        public Garden Garden = new Garden();
+
+        public IssueItemDatabase IssueItemDatabase = null;
+        public OrderItemDatabase OrderItemDatabase = null;
+        public CommentItemDatabase CommentItemDatabase = null;
+
+        public Semaphore PictureLimit = new Semaphore(10, 10);
+
+        public HangupReason HangupReason = HangupReason.None;
+
+        public bool PauseBatchTask = false; // 是否暂停后台任务
+
+        public string DataDir = "";
+
+        public string HostDir = "";
+
+        public string GlobalErrorInfo = ""; // 存放全局出错信息。两级报错机制：当这里有值的时候，优先认这里的；否则，再看Application["errorinfo"]字符串
+        const string EncryptKey = "dp2circulationpassword";
+        // http://localhost/dp2bbs/passwordutil.aspx
+
+        string m_strFileName = "";  // library.xml配置文件全路径
+
+        // string m_strWebuiFileName = ""; // webui.xml配置文件全路径
+
+        public string BinDir = "";	// bin目录
+
+        public string CfgDir = "";  // cfg目录
+
+        public string CfgMapDir = "";  // cfgmap目录
+
+        public string LogDir = "";	// 事件日志目录
+
+        // public string OperLogDir = "";  // 操作日志目录
+
+        public string ZhengyuanDir = "";    // 正元一卡通数据目录
+        public string DkywDir = "";    // 迪科远望一卡通数据目录
+        public string PatronReplicationDir = "";    // 通用 读者信息同步 目录
+
+        public string StatisDir = "";   // 统计文件存放目录
+
+        public string SessionDir = "";  // session临时文件
+
+        public string TempDir = "";  // 各种通用临时文件 2014/12/5
+
+        public string WsUrl = "";	// dp2rms WebService URL
+
+        public string ManagerUserName = "";
+        public string ManagerPassword = "";
+
+        public bool DebugMode = false;
+        public string UID = "";
+
+        public string ArrivedDbName = "";   // 预约到书队列数据库名
+        public string ArrivedReserveTimeSpan = "";  // 通知到书后的保留时间。含时间单位
+        public int OutofReservationThreshold = 10;  // 预约到书多少不取次后，被惩罚禁止预约
+        public bool CanReserveOnshelf = true;   // 是否可以预约在架图书
+        public string NotifyDef = "";       // 提醒通知的定义。"15day,50%,70%"
+
+        DefaultThread defaultManagerThread = null; // 缺省管理后台任务
+
+        // 全部读者库集合(包括不参与流通的读者库)
+        public List<ReaderDbCfg> ReaderDbs = null;
+
+        public List<ItemDbCfg> ItemDbs = null;
+
+        // Application通用锁。可以用来管理GlobalCfgDom等
+        public ReaderWriterLock m_lock = new ReaderWriterLock();
+
+        // 读者记录锁。避免多线程改写同一读者记录造成的故障
+        public RecordLockCollection ReaderLocks = new RecordLockCollection();
+
+        public XmlDocument LibraryCfgDom = null;   // library.xml配置文件内容
+
+        public Clock Clock = new Clock();
+
+        bool m_bChanged = false;
+
+        FileSystemWatcher watcher = null;
+
+        public CfgsMap CfgsMap = null;
+
+        public BatchTaskCollection BatchTasks = new BatchTaskCollection();
+
+        public MessageCenter MessageCenter = null;
+        // public string MessageDbName = "";
+        string m_strMessageDbName = "";
+        public string MessageDbName
+        {
+            get
+            {
+                return m_strMessageDbName;
+            }
+            set
+            {
+                m_strMessageDbName = value;
+                if (this.MessageCenter != null)
+                    this.MessageCenter.MessageDbName = value;
+            }
+        }
+
+
+        public string MessageReserveTimeSpan = "365day";  // 消息在信箱中的保留期限。含时间单位。缺省为一年
+
+        public string OpacServerUrl = "";
+
+        // 将来会废止这个变量
+        public string LibraryServerUrl
+        {
+            get
+            {
+                return this.OpacServerUrl;
+            }
+        }
+
+        public AccountTable AccountTable = new AccountTable();
+
+        public VirtualDatabaseCollection vdbs = null;
+
+        public OperLog OperLog = new OperLog();
+
+        public long m_lSeed = 0;
+
+        public string InvoiceDbName = "";   // 发票库名 2012/11/6
+
+        public string AmerceDbName = "";    // 违约金库名
+
+        public string OverdueStyle = "";    // 超期罚款计算办法 <amerce overdueStyle="..." />
+
+        public KernelDbInfoCollection kdbs = null;
+
+        // 实体记录锁。避免多线程改写同一实体记录, 并且锁定条码号查重过程
+        public RecordLockCollection EntityLocks = new RecordLockCollection();
+
+        // 书目记录锁。避免多线程改写同一书目记录及其下属实体记录
+        public RecordLockCollection BiblioLocks = new RecordLockCollection();
+
+        // 本地结果集锁。避免多线程改写同一结果集
+        public RecordLockCollection ResultsetLocks = new RecordLockCollection();
+
+        public Hashtable StopTable = new Hashtable();
+
+        // 等待处理的缓存文件
+        public List<String> PendingCacheFiles = new List<string>();
+
+        // public CacheBuilder CacheBuilder = null;
+
+        public int SearchMaxResultCount = 5000;
+
+        public Statis Statis = null;
+
+        // public XmlDocument WebUiDom = null;   // webui.xml配置文件内容
+
+        public bool PassgateWriteToOperLog = true;
+
+        // 2013/5/24
+        // 用于出纳操作的辅助性的检索途径
+        public List<string> PatronAdditionalFroms = new List<string>();
+
+
+        // 构造函数
+        public LibraryApplication()
+        {
+        }
+
+        		// Use C# destructor syntax for finalization code.
+		// This destructor will run only if the Dispose method 
+		// does not get called.
+		// It gives your base class the opportunity to finalize.
+		// Do not provide destructors in types derived from this class.
+        ~LibraryApplication()      
+		{
+			// Do not re-create Dispose clean-up code here.
+			// Calling Dispose(false) is optimal in terms of
+			// readability and maintainability.
+			Dispose(false);
+		}
+
+
+		// Implement IDisposable.
+		// Do not make this method virtual.
+		// A derived class should not be able to override this method.
+		public void Dispose()
+		{
+			Dispose(true);
+			// This object will be cleaned up by the Dispose method.
+			// Therefore, you should call GC.SupressFinalize to
+			// take this object off the finalization queue 
+			// and prevent finalization code for this object
+			// from executing a second time.
+			GC.SuppressFinalize(this);
+		}
+
+        bool disposed = false;
+
+		// Dispose(bool disposing) executes in two distinct scenarios.
+		// If disposing equals true, the method has been called directly
+		// or indirectly by a user's code. Managed and unmanaged resources
+		// can be disposed.
+		// If disposing equals false, the method has been called by the 
+		// runtime from inside the finalizer and you should not reference 
+		// other objects. Only unmanaged resources can be disposed.
+		private void Dispose(bool disposing)
+		{
+			// Check to see if Dispose has already been called.
+			if(!this.disposed)
+			{
+				// If disposing equals true, dispose all managed 
+				// and unmanaged resources.
+				if(disposing)
+				{
+					// Dispose managed resources.
+
+                    // 这里有一点问题：可能析构函数调不了Close()
+					// this.Close();
+				}
+
+                this.Close();   // 2007/6/8 移动到这里的
+
+             
+				/*
+				// Call the appropriate methods to clean up 
+				// unmanaged resources here.
+				// If disposing is false, 
+				// only the following code is executed.
+				CloseHandle(handle);
+				handle = IntPtr.Zero;            
+				*/
+			}
+			disposed = true;         
+		}
+
+        public int LoadCfg(
+            bool bReload,
+            string strDataDir,
+            string strHostDir,  // 为了脚本编译时候获得dll目录
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+            LibraryApplication app = this;  // new CirculationApplication();
+
+            try
+            {
+                DateTime start = DateTime.Now;
+
+                this.DataDir = strDataDir;
+                this.HostDir = strHostDir;
+
+                string strFileName = PathUtil.MergePath(strDataDir, "library.xml");
+                string strBinDir = strHostDir;  //  PathUtil.MergePath(strHostDir, "bin");
+                string strCfgDir = PathUtil.MergePath(strDataDir, "cfgs");
+                string strCfgMapDir = PathUtil.MergePath(strDataDir, "cfgsmap");
+                string strLogDir = PathUtil.MergePath(strDataDir, "log");
+                string strOperLogDir = PathUtil.MergePath(strDataDir, "operlog");
+                string strZhengyuanDir = PathUtil.MergePath(strDataDir, "zhengyuan");
+                string strDkywDir = PathUtil.MergePath(strDataDir, "dkyw");
+                string strPatronReplicationDir = PathUtil.MergePath(strDataDir, "patronreplication");
+                string strStatisDir = PathUtil.MergePath(strDataDir, "statis");
+                string strSessionDir = PathUtil.MergePath(strDataDir, "session");
+                string strColumnDir = PathUtil.MergePath(strDataDir, "column");
+                string strTempDir = PathUtil.MergePath(strDataDir, "temp");
+
+                app.m_strFileName = strFileName;
+
+                app.CfgDir = strCfgDir;
+
+                app.CfgMapDir = strCfgMapDir;
+                PathUtil.CreateDirIfNeed(app.CfgMapDir);	// 确保目录创建
+
+
+                // log
+                app.LogDir = strLogDir;	// 日志存储目录
+                PathUtil.CreateDirIfNeed(app.LogDir);	// 确保目录创建
+
+                // zhengyuan 一卡通
+                app.ZhengyuanDir = strZhengyuanDir;
+                PathUtil.CreateDirIfNeed(app.ZhengyuanDir);	// 确保目录创建
+
+                // dkyw 一卡通
+                app.DkywDir = strDkywDir;
+                PathUtil.CreateDirIfNeed(app.DkywDir);	// 确保目录创建
+
+                // patron replication
+                app.PatronReplicationDir = strPatronReplicationDir;
+                PathUtil.CreateDirIfNeed(app.PatronReplicationDir);	// 确保目录创建
+
+
+                // statis 统计文件
+                app.StatisDir = strStatisDir;
+                PathUtil.CreateDirIfNeed(app.StatisDir);	// 确保目录创建
+
+                // session临时文件
+                app.SessionDir = strSessionDir;
+                PathUtil.CreateDirIfNeed(app.SessionDir);	// 确保目录创建
+
+                if (bReload == false)
+                    CleanSessionDir(this.SessionDir);
+
+                // 各种临时文件
+                app.TempDir = strTempDir;
+                PathUtil.CreateDirIfNeed(app.TempDir);	// 确保目录创建
+
+                if (bReload == false)
+                {
+#if NO
+                    try
+                    {
+                        string strTempFileName = Path.GetTempFileName();
+                        File.Delete(strTempFileName);
+                        string strTempDir1 = Path.GetDirectoryName(strTempFileName);
+                        long count = 0;
+                        long size = PathUtil.GetAllFileSize(strTempDir1, ref count);
+                        app.WriteErrorLog("系统临时文件目录 " + Path.GetTempPath() + " 内的全部临时文件尺寸为 " + size.ToString() + "， 文件个数为 " + count.ToString());
+                    }
+                    catch
+                    {
+                    }
+#endif
+
+                    if (PathUtil.ClearDir(app.TempDir) == false)
+                        app.WriteErrorLog("清除临时文件目录 " + app.TempDir + " 时出错");
+                }
+
+                this.InitialLoginCache();
+
+                if (bReload == false)
+                {
+                    if (app.HasAppBeenKilled() == true)
+                    {
+                        app.WriteErrorLog("*** 发现library application先前曾被意外终止 ***");
+                    }
+                }
+
+                this.WriteErrorLog("*********");
+
+                if (bReload == true)
+                    app.WriteErrorLog("library (" + Version + ") application 开始重新装载 " + this.m_strFileName);
+                else
+                    app.WriteErrorLog("library (" + Version + ") application 开始初始化。");
+
+                //
+#if NO
+            if (bReload == false)
+            {
+                app.m_strWebuiFileName = PathUtil.MergePath(strDataDir, "webui.xml");
+                // string strWebUiFileName = PathUtil.MergePath(strDataDir, "webui.xml");
+                nRet = LoadWebuiCfgDom(out strError);
+                if (nRet == -1)
+                {
+                    // strError = "装载配置文件-- '" + strWebUiFileName + "'时发生错误，原因：" + ex.Message;
+                    app.WriteErrorLog(strError);
+                    goto ERROR1;
+                }
+            }
+#endif
+
+#if LOG_INFO
+                app.WriteErrorLog("INFO: 开始装载 " + strFileName + " 到 XMLDOM");
+#endif
+
+                //
+
+                XmlDocument dom = new XmlDocument();
+                try
+                {
+                    dom.Load(strFileName);
+                }
+                catch (FileNotFoundException)
+                {
+                    strError = "file '" + strFileName + "' not found ...";
+                    goto ERROR1;
+                }
+                catch (Exception ex)
+                {
+                    strError = "装载配置文件-- '" + strFileName + "' 时发生错误，错误类型：" + ex.GetType().ToString() + "，原因：" + ex.Message;
+                    app.WriteErrorLog(strError);
+                    // throw ex;
+                    goto ERROR1;
+                }
+
+                app.LibraryCfgDom = dom;
+
+#if LOG_INFO
+                app.WriteErrorLog("INFO: 初始化内存参数");
+#endif
+
+                // *** 进入内存的参数开始
+                // 注意修改了这些参数的结构后，必须相应修改Save()函数的相关片断
+
+                // 2011/1/7
+                bool bValue = false;
+                DomUtil.GetBooleanParam(app.LibraryCfgDom.DocumentElement,
+                    "debugMode",
+                    false,
+                    out bValue,
+                    out strError);
+                this.DebugMode = bValue;
+
+                // 2013/4/10 
+                // uid
+                this.UID = app.LibraryCfgDom.DocumentElement.GetAttribute("uid");
+                if (string.IsNullOrEmpty(this.UID) == true)
+                {
+                    this.UID = Guid.NewGuid().ToString();
+                    this.Changed = true;
+                    WriteErrorLog("自动为 library.xml 添加 uid '" + this.UID + "'");
+                }
+
+                // 内核参数
+                // 元素<rmsserver>
+                // 属性url/username/password
+                XmlNode node = dom.DocumentElement.SelectSingleNode("//rmsserver");
+                if (node != null)
+                {
+                    app.WsUrl = DomUtil.GetAttr(node, "url");
+
+                    if (app.WsUrl.IndexOf(".asmx") != -1)
+                    {
+                        strError = "装载配置文件 '" + strFileName + "' 过程中发生错误: <rmsserver>元素url属性中的 dp2内核 服务器URL '" + app.WsUrl + "' 不正确，应当为非.asmx形态的地址...";
+                        app.WriteErrorLog(strError);
+                        goto ERROR1;
+                    }
+
+                    app.ManagerUserName = DomUtil.GetAttr(node,
+                        "username");
+
+                    try
+                    {
+                        app.ManagerPassword = Cryptography.Decrypt(
+                            DomUtil.GetAttr(node, "password"),
+                            EncryptKey);
+                    }
+                    catch
+                    {
+                        strError = "<rmsserver>元素password属性中的密码设置不正确";
+                        // throw new Exception();
+                        goto ERROR1;
+                    }
+
+                    CfgsMap = new CfgsMap(this.CfgMapDir,
+                        this.WsUrl);
+                    CfgsMap.Clear();
+                }
+
+                // 预约到书
+                // 元素<arrived>
+                // 属性dbname/reserveTimeSpan/outofReservationThreshold/canReserveOnshelf
+                node = dom.DocumentElement.SelectSingleNode("//arrived");
+                if (node != null)
+                {
+                    app.ArrivedDbName = DomUtil.GetAttr(node, "dbname");
+                    app.ArrivedReserveTimeSpan = DomUtil.GetAttr(node, "reserveTimeSpan");
+
+                    int nValue = 0;
+                    nRet = DomUtil.GetIntegerParam(node,
+                        "outofReservationThreshold",
+                        10,
+                        out nValue,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        app.WriteErrorLog("元素<arrived>属性outofReservationThreshold读入时发生错误: " + strError);
+                        goto ERROR1;
+                    }
+
+                    app.OutofReservationThreshold = nValue;
+
+                    /*
+                    string strOutofThreshold = DomUtil.GetAttr(node, "outofReservationThreshold");
+                    if (String.IsNullOrEmpty(strOutofThreshold) == true)
+                        strOutofThreshold = "10";   // 缺省值
+                    try
+                    {
+                        app.OutofReservationThreshold = Convert.ToInt32(strOutofThreshold);
+                    }
+                    catch
+                    {
+                        strError = "<arrived>元素的outofReservationThreshold属性值不合法，应为纯数字。";
+                        app.WriteErrorLog(strError);
+                        goto ERROR1;
+                    }
+                     * */
+
+                    bValue = false;
+                    nRet = DomUtil.GetBooleanParam(node,
+                        "canReserveOnshelf",
+                        true,
+                        out bValue,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        app.WriteErrorLog("元素<arrived>属性canReserveOnshelf读入时发生错误: " + strError);
+                        goto ERROR1;
+                    }
+
+                    this.CanReserveOnshelf = bValue;
+
+                    /*
+                    string strCanReserveOnshelf = DomUtil.GetAttr(node, "canReserveOnshelf");
+                    this.CanReserveOnshelf = ToBoolean(strCanReserveOnshelf,
+                        true);
+                     * */
+
+                }
+
+                // 2013/9/24
+                // 借期提醒通知定义
+                // 元素 <monitors/readersMonitor>
+                // 属性 notifyDef
+                node = dom.DocumentElement.SelectSingleNode("monitors/readersMonitor");
+                if (node != null)
+                {
+                    // 提醒通知的定义
+                    app.NotifyDef = DomUtil.GetAttr(node, "notifyDef");
+                }
+
+
+                // <circulation>
+                node = dom.DocumentElement.SelectSingleNode("circulation");
+                if (node != null)
+                {
+                    string strList = DomUtil.GetAttr(node, "patronAdditionalFroms");
+                    if (string.IsNullOrEmpty(strList) == false)
+                    {
+                        this.PatronAdditionalFroms = StringUtil.SplitList(strList);
+                    }
+
+                    int v = 0;
+                    nRet = DomUtil.GetIntegerParam(node,
+                        "maxPatronHistoryItems",
+                        100,
+                        out v,
+                        out strError);
+                    if (nRet == -1)
+                        app.WriteErrorLog(strError);
+                    this.MaxPatronHistoryItems = v;
+
+                    nRet = DomUtil.GetIntegerParam(node,
+    "maxItemHistoryItems",
+    100,
+    out v,
+    out strError);
+                    if (nRet == -1)
+                        app.WriteErrorLog(strError);
+                    this.MaxItemHistoryItems = v;
+
+                    this.VerifyBarcode = DomUtil.GetBooleanParam(node, "verifyBarcode", false);
+
+                    this.AcceptBlankItemBarcode = DomUtil.GetBooleanParam(node, "acceptBlankItemBarcode", true);
+
+                    this.AcceptBlankReaderBarcode = DomUtil.GetBooleanParam(node, "acceptBlankReaderBarcode", true);
+
+                    this.VerifyBookType = DomUtil.GetBooleanParam(node, "verifyBookType", false);
+                    this.VerifyReaderType = DomUtil.GetBooleanParam(node, "verifyReaderType", false);
+                    this.BorrowCheckOverdue = DomUtil.GetBooleanParam(node, "borrowCheckOverdue", true);
+                }
+
+                // <channel>
+                node = dom.DocumentElement.SelectSingleNode("channel");
+                if (node != null)
+                {
+                    int v = 0;
+                    nRet = DomUtil.GetIntegerParam(node,
+                        "maxChannelsPerIP",
+                        50,
+                        out v,
+                        out strError);
+                    if (nRet == -1)
+                        app.WriteErrorLog(strError);
+                    if (this.SessionTable != null)
+                        this.SessionTable.MaxSessionsPerIp = v;
+
+                    nRet = DomUtil.GetIntegerParam(node,
+    "maxChannelsLocalhost",
+    150,
+    out v,
+    out strError);
+                    if (nRet == -1)
+                        app.WriteErrorLog(strError);
+                    if (this.SessionTable != null)
+                        this.SessionTable.MaxSessionsLocalHost = v;
+                }
+
+                // <cataloging>
+                node = dom.DocumentElement.SelectSingleNode("cataloging");
+                if (node != null)
+                {
+                    // 是否允许删除带有下级记录的书目记录
+                    bValue = true;
+                    nRet = DomUtil.GetBooleanParam(node,
+                        "deleteBiblioSubRecords",
+                        true,
+                        out bValue,
+                        out strError);
+                    if (nRet == -1)
+                        app.WriteErrorLog(strError);
+                    this.DeleteBiblioSubRecords = bValue;
+                }
+
+                // 入馆登记
+                // 元素<passgate>
+                // 属性writeOperLog
+                node = dom.DocumentElement.SelectSingleNode("//passgate");
+                if (node != null)
+                {
+                    string strWriteOperLog = DomUtil.GetAttr(node, "writeOperLog");
+
+                    this.PassgateWriteToOperLog = ToBoolean(strWriteOperLog,
+                        true);
+                }
+
+
+                // 消息
+                // 元素<message>
+                // 属性dbname/reserveTimeSpan
+                node = dom.DocumentElement.SelectSingleNode("//message");
+                if (node != null)
+                {
+                    app.MessageDbName = DomUtil.GetAttr(node, "dbname");
+                    app.MessageReserveTimeSpan = DomUtil.GetAttr(node, "reserveTimeSpan");
+
+                    // 2010/12/31 add
+                    if (String.IsNullOrEmpty(app.MessageReserveTimeSpan) == true)
+                        app.MessageReserveTimeSpan = "365day";
+                }
+
+
+                /*
+                // 图书馆业务服务器
+                // 元素<libraryserver>
+                // 属性url
+                node = dom.DocumentElement.SelectSingleNode("//libraryserver");
+                if (node != null)
+                {
+                    app.LibraryServerUrl = DomUtil.GetAttr(node, "url");
+                }
+                 * */
+
+                // OPAC服务器
+                // 元素<opacServer>
+                // 属性url
+                node = dom.DocumentElement.SelectSingleNode("//opacServer");
+                if (node != null)
+                {
+                    app.OpacServerUrl = DomUtil.GetAttr(node, "url");
+                }
+
+
+                // 违约金
+                // 元素<amerce>
+                // 属性dbname/overdueStyle
+                node = dom.DocumentElement.SelectSingleNode("//amerce");
+                if (node != null)
+                {
+                    app.AmerceDbName = DomUtil.GetAttr(node, "dbname");
+                    app.OverdueStyle = DomUtil.GetAttr(node, "overdueStyle");
+                }
+
+                // 发票
+                // 元素<invoice>
+                // 属性dbname
+                node = dom.DocumentElement.SelectSingleNode("invoice");
+                if (node != null)
+                {
+                    app.InvoiceDbName = DomUtil.GetAttr(node, "dbname");
+                }
+
+                // *** 进入内存的参数结束
+
+                // bin dir
+                app.BinDir = strBinDir;
+
+                nRet = 0;
+
+                {
+
+
+
+                    /*
+                    // 准备工作: 映射数据库名
+                    nRet = this.GetGlobalCfg(session.Channels,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        app.WriteErrorLog(strError);
+                        goto ERROR1;
+                    }*/
+#if LOG_INFO
+                    app.WriteErrorLog("INFO: LoadReaderDbGroupParam");
+#endif
+                    // <readerdbgroup>
+                    app.LoadReaderDbGroupParam(dom);
+
+#if LOG_INFO
+                    app.WriteErrorLog("INFO: LoadItemDbGroupParam");
+#endif
+
+                    // <itemdbgroup> 
+                    nRet = app.LoadItemDbGroupParam(dom,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        app.WriteErrorLog(strError);
+                        goto ERROR1;
+                    }
+
+                    // 临时的SessionInfo对象
+                    SessionInfo session = new SessionInfo(this);
+                    try
+                    {
+#if LOG_INFO
+                        app.WriteErrorLog("INFO: InitialKdbs");
+#endif
+
+                        // 初始化kdbs
+                        nRet = InitialKdbs(session.Channels,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            app.WriteErrorLog("ERR001 首次初始化kdbs失败: " + strError);
+                            // DefaultThread可以重试初始化
+
+                            // session.Close();
+                            // goto ERROR1;
+                        }
+                        else
+                        {
+#if LOG_INFO
+                            app.WriteErrorLog("INFO: CheckKernelVersion");
+#endif
+
+                            // 检查 dpKernel 版本号
+                            nRet = CheckKernelVersion(session.Channels,
+                                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                        }
+
+#if LOG_INFO
+                        app.WriteErrorLog("INFO: InitialVdbs");
+#endif
+
+                        // 2008/6/6 new add 重新初始化虚拟库定义
+                        // 这样，其他地方调用的InitialVdbs()就可以去除了
+                        // TODO: 为了提高运行速度，可以优化为，只有当<virtualDatabases>元素下的内容有改变时，才重新进行这个初始化
+                        this.vdbs = null;
+                        nRet = app.InitialVdbs(session.Channels,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            app.WriteErrorLog("ERR002 首次初始化vdbs失败: " + strError);
+                            // DefaultThread可以重试初始化
+
+                            // session.Close();
+                            // goto ERROR1;
+                        }
+
+                    }
+                    finally
+                    {
+                        session.CloseSession();
+                        session = null;
+
+#if LOG_INFO
+                        app.WriteErrorLog("INFO: 临时 session 使用完毕");
+#endif
+
+                    }
+
+                }
+
+                // 时钟
+                string strClock = DomUtil.GetElementText(dom.DocumentElement, "clock");
+                try
+                {
+                    this.Clock.Delta = Convert.ToInt64(strClock);
+                }
+                catch
+                {
+                }
+
+                // *** 初始化操作日志环境
+                if (bReload == false)   // 2014/4/2
+                {
+                    // this.OperLogDir = strOperLogDir;    // 2006/12/7 new add
+#if LOG_INFO
+                    app.WriteErrorLog("INFO: OperLog.Initial");
+#endif
+
+                    // oper log
+                    nRet = this.OperLog.Initial(this,
+                        strOperLogDir,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        app.WriteErrorLog(strError);
+                        goto ERROR1;
+                    }
+
+
+                }
+
+                // *** 初始化统计对象
+                // if (bReload == false)   // 2014/4/2
+                {
+#if LOG_INFO
+                    app.WriteErrorLog("INFO: Statis.Initial");
+#endif
+
+                    this.Statis = new Statis();
+                    nRet = this.Statis.Initial(this, out strError);
+                    if (nRet == -1)
+                    {
+                        app.WriteErrorLog(strError);
+                        goto ERROR1;
+                    }
+                }
+
+#if LOG_INFO
+                app.WriteErrorLog("INFO: InitialLibraryHostAssembly");
+#endif
+                // 初始化LibraryHostAssembly对象
+                // 必须在ReadersMonitor以前启动。否则其中用到脚本代码时会出错。2007/10/10 changed
+                // return:
+                //		-1	出错
+                //		0	成功
+                nRet = this.InitialLibraryHostAssembly(out strError);
+                if (nRet == -1)
+                {
+                    app.WriteErrorLog(strError);
+                    goto ERROR1;
+                }
+
+#if LOG_INFO
+                app.WriteErrorLog("INFO: InitialExternalMessageInterfaces");
+#endif
+
+                // 初始化扩展消息接口
+                nRet = app.InitialExternalMessageInterfaces(
+                out strError);
+                if (nRet == -1)
+                {
+                    strError = "初始化扩展的消息接口时出错: " + strError;
+                    app.WriteErrorLog(strError);
+                    // goto ERROR1;
+                }
+
+                // 启动批处理任务
+                // TODO: 这一段考虑分离到一个函数中
+                if (bReload == false)
+                {
+                    string strBreakPoint = "";
+
+#if LOG_INFO
+                    app.WriteErrorLog("INFO: DefaultThread");
+#endif
+                    // 启动DefaultThread
+                    try
+                    {
+                        DefaultThread defaultThread = new DefaultThread(this, null);
+                        this.BatchTasks.Add(defaultThread);
+
+                        defaultThread.StartWorkerThread();
+
+                        this.defaultManagerThread = defaultThread;
+                    }
+                    catch (Exception ex)
+                    {
+                        app.WriteErrorLog("启动批处理任务DefaultThread时出错：" + ex.Message);
+                        goto ERROR1;
+                    }
+
+#if LOG_INFO
+                    app.WriteErrorLog("INFO: ArriveMonitor");
+#endif
+                    // 启动ArriveMonitor
+                    try
+                    {
+                        ArriveMonitor arriveMonitor = new ArriveMonitor(this, null);
+                        this.BatchTasks.Add(arriveMonitor);
+
+                        arriveMonitor.StartWorkerThread();
+                    }
+                    catch (Exception ex)
+                    {
+                        app.WriteErrorLog("启动批处理任务ArriveMonitor时出错：" + ex.Message);
+                        goto ERROR1;
+                    }
+
+#if LOG_INFO
+                    app.WriteErrorLog("INFO: ReadersMonitor");
+#endif
+                    // 启动ReadersMonitor
+                    try
+                    {
+                        ReadersMonitor readersMonitor = new ReadersMonitor(this, null);
+                        this.BatchTasks.Add(readersMonitor);
+
+                        readersMonitor.StartWorkerThread();
+                    }
+                    catch (Exception ex)
+                    {
+                        app.WriteErrorLog("启动批处理任务ReadersMonitor时出错：" + ex.Message);
+                        goto ERROR1;
+                    }
+
+#if LOG_INFO
+                    app.WriteErrorLog("INFO: MessageMonitor");
+#endif
+                    // 启动MessageMonitor
+                    try
+                    {
+                        MessageMonitor messageMonitor = new MessageMonitor(this, null);
+                        this.BatchTasks.Add(messageMonitor);
+
+                        // 从断点记忆文件中读出信息
+                        // return:
+                        //      -1  error
+                        //      0   file not found
+                        //      1   found
+                        nRet = ReadBatchTaskBreakPointFile(messageMonitor.DefaultName,
+                            out strBreakPoint,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            app.WriteErrorLog("ReadBatchTaskBreakPointFile时出错：" + strError);
+                        }
+
+
+
+                        if (messageMonitor.StartInfo == null)
+                            messageMonitor.StartInfo = new BatchTaskStartInfo();   // 按照缺省值来
+
+                        // 如果需要从断点启动
+                        if (nRet == 1)
+                            messageMonitor.StartInfo.Start = "!breakpoint";  //strBreakPoint;
+
+                        messageMonitor.ClearProgressFile();   // 清除进度文件内容
+                        messageMonitor.StartWorkerThread();
+                    }
+                    catch (Exception ex)
+                    {
+                        app.WriteErrorLog("启动批处理任务MessageMonitor时出错：" + ex.Message);
+                        goto ERROR1;
+                    }
+
+
+                    // 启动DkywReplication
+                    // <dkyw>
+                    node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//dkyw");
+                    if (node != null)
+                    {
+#if LOG_INFO
+                        app.WriteErrorLog("INFO: DkywReplication");
+#endif
+                        try
+                        {
+                            DkywReplication dkyw = new DkywReplication(this, null);
+                            this.BatchTasks.Add(dkyw);
+
+                            /*
+                            // 从断点记忆文件中读出信息
+                            // return:
+                            //      -1  error
+                            //      0   file not found
+                            //      1   found
+                            nRet = ReadBatchTaskBreakPointFile(dkyw.DefaultName,
+                                out strBreakPoint,
+                                out strError);
+                            if (nRet == -1)
+                            {
+                                app.WriteErrorLog("ReadBatchTaskBreakPointFile时出错：" + strError);
+                            }
+                             * */
+                            bool bLoop = false;
+                            string strLastNumber = "";
+
+                            // return:
+                            //      -1  出错
+                            //      0   没有找到断点信息
+                            //      1   找到了断点信息
+                            nRet = dkyw.ReadLastNumber(
+                                out bLoop,
+                                out strLastNumber,
+                                out strError);
+                            if (nRet == -1)
+                            {
+                                app.WriteErrorLog("ReadLastNumber时出错：" + strError);
+                            }
+
+                            if (dkyw.StartInfo == null)
+                                dkyw.StartInfo = new BatchTaskStartInfo();   // 按照缺省值来
+
+                            if (bLoop == true)
+                            {
+                                // 需要从断点启动
+                                if (nRet == 1)
+                                    dkyw.StartInfo.Start = "!breakpoint";  //strBreakPoint;
+
+                                dkyw.ClearProgressFile();   // 清除进度文件内容
+                                dkyw.StartWorkerThread();
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            app.WriteErrorLog("启动批处理任务DkywReplication时出错：" + ex.Message);
+                            goto ERROR1;
+                        }
+                    }
+
+                    // 启动PatronReplication
+                    // <patronReplication>
+                    // 读者库数据同步 批处理任务
+                    // 从卡中心同步读者数据
+                    node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//patronReplication");
+                    if (node != null)
+                    {
+#if LOG_INFO
+                        app.WriteErrorLog("INFO: PatronReplication");
+#endif
+                        try
+                        {
+                            PatronReplication patron_rep = new PatronReplication(this, null);
+                            this.BatchTasks.Add(patron_rep);
+
+                            patron_rep.StartWorkerThread();
+                        }
+                        catch (Exception ex)
+                        {
+                            app.WriteErrorLog("启动批处理任务PatronReplication时出错：" + ex.Message);
+                            goto ERROR1;
+                        }
+                    }
+
+                    // 启动 LibraryReplication
+
+#if LOG_INFO
+                    app.WriteErrorLog("INFO: LibraryReplication ReadBatchTaskBreakPointFile");
+#endif
+                    // 从断点记忆文件中读出信息
+                    // return:
+                    //      -1  error
+                    //      0   file not found
+                    //      1   found
+                    nRet = ReadBatchTaskBreakPointFile("dp2Library 同步",
+                        out strBreakPoint,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        app.WriteErrorLog("ReadBatchTaskBreakPointFile() 时出错：" + strError);
+                    }
+                    // 如果nRet == 0，表示没有断点文件存在，也就不必自动启动这个任务
+
+                    // strBreakPoint 并未被使用。而是断点文件是否存在，这一信息有价值。
+
+                    if (nRet == 1)
+                    {
+#if LOG_INFO
+                        app.WriteErrorLog("INFO: LibraryReplication");
+#endif
+                        try
+                        {
+
+                            // 从断点文件中取出断点字符串
+                            // 断点字符串格式：序号.偏移量@日志文件名
+                            //  或者：序号@日志文件名
+                            // 获得断点信息的整个过程的代码，是否适宜归入TraceDTLP类？
+                            // 如果成熟，可以归纳作为BatchTask基类的一个特性。
+
+                            LibraryReplication replication = new LibraryReplication(this, null);
+                            this.BatchTasks.Add(replication);
+
+                            if (replication.StartInfo == null)
+                                replication.StartInfo = new BatchTaskStartInfo();   // 按照缺省值来
+                            replication.StartInfo.Start = "date=continue";  // 从断点开始做
+                            replication.ClearProgressFile();   // 清除进度文件内容
+                            replication.StartWorkerThread();
+                        }
+                        catch (Exception ex)
+                        {
+                            app.WriteErrorLog("启动批处理任务时出错：" + ex.Message);
+                            goto ERROR1;
+                        }
+                    }
+
+                    // 启动 RebuildKeys
+
+#if LOG_INFO
+                    app.WriteErrorLog("INFO: RebuildKeys ReadBatchTaskBreakPointFile");
+#endif
+                    // 从断点记忆文件中读出信息
+                    // return:
+                    //      -1  error
+                    //      0   file not found
+                    //      1   found
+                    nRet = ReadBatchTaskBreakPointFile("重建检索点",
+                        out strBreakPoint,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        app.WriteErrorLog("ReadBatchTaskBreakPointFile() 时出错：" + strError);
+                    }
+                    // 如果nRet == 0，表示没有断点文件存在，也就不必自动启动这个任务
+
+                    // strBreakPoint 并未被使用。而是断点文件是否存在，这一信息有价值。
+
+                    if (nRet == 1)
+                    {
+#if LOG_INFO
+                        app.WriteErrorLog("INFO: RebuildKeys");
+#endif
+                        try
+                        {
+
+                            // 从断点文件中取出断点字符串
+                            RebuildKeys replication = new RebuildKeys(this, null);
+                            this.BatchTasks.Add(replication);
+
+                            if (replication.StartInfo == null)
+                                replication.StartInfo = new BatchTaskStartInfo();   // 按照缺省值来
+                            replication.StartInfo.Start = "dbnamelist=continue";  // 从断点开始做
+                            replication.ClearProgressFile();   // 清除进度文件内容
+                            replication.StartWorkerThread();
+                        }
+                        catch (Exception ex)
+                        {
+                            app.WriteErrorLog("启动批处理任务时出错：" + ex.Message);
+                            goto ERROR1;
+                        }
+                    }
+
+                }
+
+
+                // 公共查询最大命中数
+                {
+                    XmlNode nodeTemp = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//virtualDatabases");
+                    if (nodeTemp != null)
+                    {
+                        try
+                        {
+                            string strMaxCount = DomUtil.GetAttr(nodeTemp, "searchMaxResultCount");
+                            if (String.IsNullOrEmpty(strMaxCount) == false)
+                                this.SearchMaxResultCount = Convert.ToInt32(strMaxCount);
+                        }
+                        catch
+                        {
+                        }
+                    }
+                }
+
+#if LOG_INFO
+                app.WriteErrorLog("INFO: 准备下属数据库对象");
+#endif
+                //
+                this.IssueItemDatabase = new IssueItemDatabase(this);
+                this.OrderItemDatabase = new OrderItemDatabase(this);
+                this.CommentItemDatabase = new CommentItemDatabase(this);
+
+#if LOG_INFO
+                app.WriteErrorLog("INFO: MessageCenter");
+#endif
+                // 
+                this.MessageCenter = new MessageCenter();
+                this.MessageCenter.ServerUrl = this.WsUrl;
+                this.MessageCenter.MessageDbName = this.MessageDbName;
+
+                this.MessageCenter.VerifyAccount -= new VerifyAccountEventHandler(MessageCenter_VerifyAccount); // 2008/6/6 new add
+                this.MessageCenter.VerifyAccount += new VerifyAccountEventHandler(MessageCenter_VerifyAccount);
+
+#if NO
+            if (bReload == false)
+            {
+                PathUtil.CreateDirIfNeed(strColumnDir);	// 确保目录创建
+                nRet = LoadCommentColumn(
+                    PathUtil.MergePath(strColumnDir, "comment"),
+                    out strError);
+                if (nRet == -1)
+                {
+                    app.WriteErrorLog("装载栏目存储时出错: " + strError);
+                }
+            }
+#endif
+
+                // 升级library.xml文件版本
+                if (bReload == false)
+                {
+#if LOG_INFO
+                    app.WriteErrorLog("INFO: UpgradeLibraryXml");
+#endif
+                    nRet = this.UpgradeLibraryXml(out strError);
+                    if (nRet == -1)
+                    {
+                        app.WriteErrorLog("升级library.xml时出错：" + strError);
+                    }
+                }
+
+                if (bReload == true)
+                    app.WriteErrorLog("library application结束重新装载 " + this.m_strFileName);
+                else
+                {
+                    TimeSpan delta = DateTime.Now - start;
+                    app.WriteErrorLog("library application成功初始化。初始化操作耗费时间 " + delta.TotalSeconds.ToString() + " 秒");
+
+                    // 写入down机检测文件
+                    app.WriteAppDownDetectFile("library application成功初始化。");
+
+                    if (this.watcher == null)
+                    {
+#if LOG_INFO
+                        app.WriteErrorLog("INFO: BeginWatcher");
+#endif
+
+                        BeginWatcher();
+#if LOG_INFO
+                        app.WriteErrorLog("INFO: End BeginWatcher");
+#endif
+                    }
+
+#if NO
+                if (this.virtual_watcher == null)
+                    BeginVirtualDirWatcher();
+#endif
+                }
+
+                // Application["errorinfo"] = "";  // 清除以前可能残留的错误信息 2007/10/10
+
+                // 2013/4/10
+                if (this.Changed == true)
+                    this.ActivateManagerThread();
+            }
+            catch (Exception ex)
+            {
+                strError = "LoadCfg() 抛出异常: " + ExceptionUtil.GetDebugText(ex);
+                goto ERROR1;
+            }
+
+            return 0;
+            // 2008/10/13 new add
+        ERROR1:
+            if (bReload == false)
+            {
+                if (this.watcher == null)
+                {
+#if LOG_INFO
+                    app.WriteErrorLog("INFO: BeginWatcher");
+#endif
+
+                    BeginWatcher();
+#if LOG_INFO
+                    app.WriteErrorLog("INFO: End BeginWatcher");
+#endif
+                }
+#if NO
+                if (this.virtual_watcher == null)
+                    BeginVirtualDirWatcher();
+#endif
+
+            }
+
+            if (bReload == true)
+                app.WriteErrorLog("library application重新装载 " + this.m_strFileName + " 的过程发生严重错误 ["+strError+"]，服务处于残缺状态，请及时排除故障后重新启动");
+            else
+                app.WriteErrorLog("library application初始化过程发生严重错误 [" + strError + "]，当前此服务处于残缺状态，请及时排除故障后重新启动");
+
+            return -1;
+        }
+
+        void CleanSessionDir(string strSessionDir)
+        {
+            try
+            {
+                DirectoryInfo di = new DirectoryInfo(strSessionDir);
+
+                // 删除所有的下级目录
+                DirectoryInfo[] dirs = di.GetDirectories();
+                foreach (DirectoryInfo childDir in dirs)
+                {
+                    Directory.Delete(childDir.FullName, true);
+                }
+            }
+            catch (Exception ex)
+            {
+                this.WriteErrorLog("删除 session 下级目录时出错: " + ExceptionUtil.GetDebugText(ex));
+            }
+        }
+
+        public string GetTempFileName(string strPrefix)
+        {
+            return Path.Combine(this.TempDir, "~" + strPrefix + "_" + Guid.NewGuid().ToString());
+        }
+
+        public int CheckKernelVersion(RmsChannelCollection Channels,
+    out string strError)
+        {
+            strError = "";
+
+            RmsChannel channel = Channels.GetChannel(this.WsUrl);
+            string strVersion = "";
+            long lRet = channel.GetVersion(out strVersion,
+                out strError);
+            if (lRet == -1)
+            {
+                strError = "获取 dpKernel 版本号过程发生错误：" + strError;
+                return -1;
+            }
+
+            // 检查最低版本号
+            double value = 0;
+            if (double.TryParse(strVersion, out value) == false)
+            {
+                strError = "dp2Kernel版本号 '"+strVersion+"' 格式不正确";
+                return -1;
+            }
+
+            double base_version = 2.57;
+
+            if (value < base_version)
+            {
+                strError = "当前 dp2Library 版本需要和 dp2Kernel " + base_version + " 以上版本配套使用。请立即升级 dp2Kernel 到最新版本。";
+                return -1;
+            }
+
+            return 0;
+        }
+
+#if NO
+        public void ActivateCacheBuilder()
+        {
+            // 启动CacheBuilder
+            try
+            {
+                if (this.CacheBuilder == null)
+                {
+                    this.CacheBuilder = new CacheBuilder(this, null);
+                    this.BatchTasks.Add(this.CacheBuilder);
+                }
+                this.CacheBuilder.StartWorkerThread();
+            }
+            catch (Exception ex)
+            {
+                this.WriteErrorLog("启动批处理任务CacheBuilder时出错：" + ex.Message);
+            }
+
+            this.CacheBuilder.Activate();
+        }
+#endif
+
+        int UpgradeLibraryXml(out string strError)
+        {
+            strError = "";
+            bool bChanged = false;
+
+            // 找到<version>元素
+            XmlNode nodeVersion = this.LibraryCfgDom.DocumentElement.SelectSingleNode("version");
+            if (nodeVersion == null)
+            {
+                nodeVersion = this.LibraryCfgDom.CreateElement("version");
+
+                /*
+                 * 没有必要，因为save()时会重新排列位置
+                // 尽量插入到第一个的位置
+                if (this.LibraryCfgDom.DocumentElement.ChildNodes.Count > 0)
+                    this.LibraryCfgDom.DocumentElement.InsertBefore(nodeVersion,
+                        this.LibraryCfgDom.DocumentElement.ChildNodes[0]);
+                else
+                 * */
+                    this.LibraryCfgDom.DocumentElement.AppendChild(nodeVersion);
+
+                nodeVersion.InnerText = "0.01";    // 从未有过<version>元素的library.xml版本，被认为是0.01版
+                bChanged = true;
+            }
+
+            string strVersion = nodeVersion.InnerText;
+            if (String.IsNullOrEmpty(strVersion) == true)
+                strVersion = "0.01";
+
+            double version = 0.01;
+            try
+            {
+                version = Convert.ToDouble(strVersion);
+            }
+            catch
+            {
+                version = 0.01;
+            }
+
+            // 从0.01版升级
+            if (version == 0.01)
+            {
+                /*
+                 * 从下列片断中抽出<group>元素的zhongcihaodb属性值，去重，然后加入<utilDb>元素内
+    <zhongcihao>
+        <nstable name="nstable">
+            <item prefix="marc" uri="http://dp2003.com/UNIMARC" />
+        </nstable>
+        <group name="中文书目" zhongcihaodb="种次号">
+            <database name="中文图书" leftfrom="索取类号" rightxpath="//marc:record/marc:datafield[@tag='905']/marc:subfield[@code='e']/text()" titlexpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='a']/text()" authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or @code='g']/text()" />
+        </group>
+    </zhongcihao>
+                 */
+                List<string> dbnames = new List<string>();
+                XmlNodeList nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("zhongcihao/group");
+                for (int i = 0; i < nodes.Count; i++)
+                {
+                    string strDbName = DomUtil.GetAttr(nodes[i], "zhongcihaodb");
+                    if (String.IsNullOrEmpty(strDbName) == true)
+                        continue;
+                    if (dbnames.IndexOf(strDbName) != -1)
+                        continue;
+                    dbnames.Add(strDbName);
+                }
+
+                XmlNode nodeUtilDb = this.LibraryCfgDom.DocumentElement.SelectSingleNode("utilDb");
+                if (nodeUtilDb == null)
+                {
+                    nodeUtilDb = this.LibraryCfgDom.CreateElement("utilDb");
+                    this.LibraryCfgDom.DocumentElement.AppendChild(nodeUtilDb);
+                    bChanged = true;
+                }
+
+                for (int i = 0; i < dbnames.Count; i++)
+                {
+                    string strDbName = dbnames[i];
+                    // 看看<utilDb>中是否已经有了
+                    XmlNode nodeExist = this.LibraryCfgDom.DocumentElement.SelectSingleNode("utilDb/database[@name='" + strDbName + "']");
+                    if (nodeExist != null)
+                    {
+                        string strType = DomUtil.GetAttr(nodeExist, "type");
+                        if (strType != "zhongcihao")
+                        {
+                            strError = "<utilDb>下name属性值为'"+strDbName+"'的<database>元素，其type属性值不为'zhongcihao'(而是'"+strType+"')，这和<zhongcihao>元素下的初始定义矛盾。请系统管理员在了解这个库的真实类型后，手动对配置文件进行修改。";
+                            return -1;
+                        }
+                        continue;
+                    }
+
+                    XmlNode nodeDatabase = this.LibraryCfgDom.CreateElement("database");
+                    nodeUtilDb.AppendChild(nodeDatabase);
+
+                    DomUtil.SetAttr(nodeDatabase, "name", strDbName);
+                    DomUtil.SetAttr(nodeDatabase, "type", "zhongcihao");
+
+                    bChanged = true;
+                }
+
+                // 升级完成后，修改版本号
+                nodeVersion.InnerText = "0.02";
+                bChanged = true;
+                WriteErrorLog("自动升级library.xml v0.01到v0.02");
+                version = 0.02;
+            }
+
+            // 2009/3/10
+            // 从0.02版升级
+            if (version == 0.02)
+            {
+                // 将<rightstable>元素名修改为<rightsTable>
+                XmlNode nodeRightsTable = this.LibraryCfgDom.DocumentElement.SelectSingleNode("rightstable");
+                if (nodeRightsTable != null)
+                {
+                    // 创建一个新元素
+                    XmlNode nodeNew = this.LibraryCfgDom.CreateElement("rightsTable");
+                    this.LibraryCfgDom.DocumentElement.InsertAfter(nodeNew, nodeRightsTable);
+
+                    nodeNew.InnerXml = nodeRightsTable.InnerXml;
+
+                    // 删除旧元素
+                    nodeRightsTable.ParentNode.RemoveChild(nodeRightsTable);
+
+                    nodeRightsTable = nodeNew;
+                }
+                else
+                {
+                    nodeRightsTable = this.LibraryCfgDom.CreateElement("rightsTable");
+                    this.LibraryCfgDom.DocumentElement.AppendChild(nodeRightsTable);
+                }
+
+                // 将根下的<readertypes>和<booktypes>移动到<rightsTable>元素下，并且把元素名修改为<readerTypes>和<bookTypes>
+                XmlNode nodeReaderTypes = this.LibraryCfgDom.DocumentElement.SelectSingleNode("readertypes");
+                if (nodeReaderTypes != null)
+                {
+                    // 创建一个新元素
+                    XmlNode nodeNew = this.LibraryCfgDom.CreateElement("readerTypes");
+                    nodeRightsTable.AppendChild(nodeNew);
+
+                    nodeNew.InnerXml = nodeReaderTypes.InnerXml;
+                    nodeReaderTypes.ParentNode.RemoveChild(nodeReaderTypes);
+                }
+
+                XmlNode nodeBookTypes = this.LibraryCfgDom.DocumentElement.SelectSingleNode("booktypes");
+                if (nodeBookTypes != null)
+                {
+                    // 创建一个新元素
+                    XmlNode nodeNew = this.LibraryCfgDom.CreateElement("bookTypes");
+                    nodeRightsTable.AppendChild(nodeNew);
+
+                    nodeNew.InnerXml = nodeBookTypes.InnerXml;
+                    nodeBookTypes.ParentNode.RemoveChild(nodeBookTypes);
+                }
+
+                // 将<locationtypes>元素名修改为<locationTypes>
+                XmlNode nodeLocationTypes = this.LibraryCfgDom.DocumentElement.SelectSingleNode("locationtypes");
+                if (nodeLocationTypes != null)
+                {
+                    // 创建一个新元素
+                    XmlNode nodeNew = this.LibraryCfgDom.CreateElement("locationTypes");
+                    this.LibraryCfgDom.DocumentElement.InsertAfter(nodeNew, nodeLocationTypes);
+
+                    nodeNew.InnerXml = nodeLocationTypes.InnerXml;
+                }
+
+                // 升级完成后，修改版本号
+                nodeVersion.InnerText = "0.03";
+                bChanged = true;
+                WriteErrorLog("自动升级library.xml v0.02到v0.03");
+                version = 0.03;
+            }
+
+#if NO
+            // 从 2.00 版升级
+            // 2013/12/10
+            if (version <= 2.00)
+            {
+                // bool bChanged = false;
+                XmlNodeList nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("accounts/account");
+                foreach (XmlNode node in nodes)
+                {
+                    string strLibraryCode = DomUtil.GetAttr(node, "libraryCode");
+                    if (string.IsNullOrEmpty(strLibraryCode) == true)
+                    {
+                        DomUtil.SetAttr(node, "libraryCode", "<global>");
+                        // bChanged = true;
+                    }
+                }
+
+                // 升级完成后，修改版本号
+                nodeVersion.InnerText = "2.01";
+                bChanged = true;
+                WriteErrorLog("自动升级 library.xml v2.00 到 v2.01");
+                version = 2.01;
+            }
+#endif
+
+            if (bChanged == true)
+            {
+                this.Changed = true;
+                this.ActivateManagerThread();   // 2009/3/10 new add
+            }
+
+            return 0;
+        }
+
+
+
+        // 2008/5/8 new add
+        public int InitialKdbs(
+            RmsChannelCollection Channels,
+            out string strError)
+        {
+            this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            try
+            {
+#if NO
+                this.kdbs = new KernelDbInfoCollection();
+                int nRet = this.kdbs.Initial(Channels,
+                            this.WsUrl,
+                            "zh",
+                            out strError);
+                if (nRet == -1)
+                {
+                    // this.vdbs = null;   // BUG!!!
+                    this.kdbs = null;
+                    return -1;
+                }
+#endif
+                // kdbs 初始化的过程是需要耗费时间的，如果在这中间访问，可能有些信息来不及初始化，找不到
+                // 所以这里先整个初始化好了以后，然后才挂接到 this.kdbs 上
+                // 有另外一个方法是所有使用的地方都 利用 this.m_lock 读锁定，但缺点是太麻烦
+                this.kdbs = null;
+                KernelDbInfoCollection kdbs = new KernelDbInfoCollection();
+                int nRet = kdbs.Initial(Channels,
+                            this.WsUrl,
+                            "zh",
+                            out strError);
+                if (nRet == -1)
+                    return -1;
+
+                this.kdbs = kdbs;
+                return nRet;
+            }
+            finally
+            {
+                this.m_lock.ReleaseWriterLock();
+            }
+        }
+
+        // 激活管理后台任务。一般用于迫使写入cfgdom到xml文件
+        public void ActivateManagerThread()
+        {
+            if (this.defaultManagerThread != null)
+                this.defaultManagerThread.Activate();
+        }
+
+        // 激活管理后台任务。一般用于迫使立即重新初始化kdbs和vdbs
+        public void ActivateManagerThreadForLoad()
+        {
+            if (this.defaultManagerThread != null)
+            {
+                this.defaultManagerThread.ClearRetryDelay();
+                this.defaultManagerThread.Activate();
+            }
+        }
+
+        
+
+#if NO
+        // 2007/7/11 new add
+        int LoadWebuiCfgDom(out string strError)
+        {
+            strError = "";
+
+            if (String.IsNullOrEmpty(this.m_strWebuiFileName) == true)
+            {
+                strError = "m_strWebuiFileName尚未初始化，因此无法装载webui.xml配置文件到DOM";
+                return -1;
+            }
+
+            XmlDocument webuidom = new XmlDocument();
+            try
+            {
+                webuidom.Load(this.m_strWebuiFileName);
+            }
+            catch (FileNotFoundException)
+            {
+                /*
+                strError = "file '" + strWebUiFileName + "' not found ...";
+                return -1;
+                 * */
+                webuidom.LoadXml("<root/>");
+            }
+            catch (Exception ex)
+            {
+                strError = "装载配置文件-- '" + this.m_strWebuiFileName + "'时发生错误，原因：" + ex.Message;
+                // app.WriteErrorLog(strError);
+                return -1;
+            }
+
+            this.WebUiDom = webuidom;
+            return 0;
+        }
+#endif
+
+        public static bool ToBoolean(string strText,
+            bool bDefaultValue)
+        {
+            if (String.IsNullOrEmpty(strText) == true)
+                return bDefaultValue;
+
+            strText = strText.ToLower();
+
+            if (strText == "true" || strText == "on" || strText == "yes")
+                return true;
+
+            return false;
+        }
+
+        void MessageCenter_VerifyAccount(object sender, VerifyAccountEventArgs e)
+        {
+            string strError = "";
+
+            if (e.Name == "public")
+            {
+                e.Exist = false;
+                e.Error = true;
+                e.ErrorInfo = "系统禁止对public用户发消息。";
+                return;
+            }
+
+             // 检查读者账号是否存在
+        // return:
+        //      -1  error
+        //      0   不存在
+        //      1   存在
+        //      >1  多于一个
+            int nRet = VerifyReaderAccount(e.Channels,
+                e.Name,
+                out strError);
+            if (nRet == -1 || nRet > 1)
+            {
+                e.Exist = false;
+                e.Error = true;
+                e.ErrorInfo = strError;
+                return;
+            }
+            if (nRet == 1)
+            {
+                e.Exist = true;
+                return;
+            }
+
+            // 检查工作人员账号
+            Account account = null;
+
+            /*
+            if (e.Name == "public")
+            {
+            }*/
+
+            // 从library.xml文件定义 获得一个帐户的信息
+            // return:
+            //      -1  error
+            //      0   not found
+            //      1   found
+            nRet = this.GetAccount(e.Name,
+                out account,
+                out strError);
+            if (nRet == -1)
+            {
+                e.Exist = false;
+                e.Error = true;
+                e.ErrorInfo = strError;
+                return;
+            }
+            if (nRet == 0)
+            {
+                e.Exist = false;
+                e.Error = false;
+                e.ErrorInfo = "用户名 '" + e.Name + "' 不存在。";
+                return;
+            }
+
+
+            e.Exist = true;
+        }
+
+#if NO
+        void BeginVirtualDirWatcher()
+        {
+            virtual_watcher = new FileSystemWatcher();
+            virtual_watcher.Path = this.HostDir;
+
+            /* Watch for changes in LastAccess and LastWrite times, and 
+               the renaming of files or directories. */
+            virtual_watcher.NotifyFilter = NotifyFilters.Attributes | NotifyFilters.CreationTime | NotifyFilters.DirectoryName | NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.Security;
+
+            virtual_watcher.Filter = "*.*"; // Path.GetFileName(this.m_strFileName);  //"*.*";
+            virtual_watcher.IncludeSubdirectories = true;
+
+            // Add event handlers.
+            virtual_watcher.Changed -= new FileSystemEventHandler(virtual_watcher_Changed);
+            virtual_watcher.Changed += new FileSystemEventHandler(virtual_watcher_Changed);
+
+            // Begin watching.
+            virtual_watcher.EnableRaisingEvents = true;
+
+        }
+
+
+        void virtual_watcher_Changed(object sender, FileSystemEventArgs e)
+        {
+            string strError = "*** 虚拟目录内发生改变: name: " + e.Name.ToString()
+                + "; changetype: " + e.ChangeType.ToString()
+                + "; fullpath: " + e.FullPath.ToString();
+            this.WriteErrorLog(strError);
+        }
+
+#endif
+
+        // 监视library.xml文件变化
+        void BeginWatcher()
+        {
+            watcher = new FileSystemWatcher();
+            watcher.Path = Path.GetDirectoryName(this.m_strFileName);
+
+            /* Watch for changes in LastAccess and LastWrite times, and 
+               the renaming of files or directories. */
+            watcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.Size | NotifyFilters.Attributes;
+
+            watcher.Filter = "*.*"; // Path.GetFileName(this.m_strFileName);  //"*.*";
+            watcher.IncludeSubdirectories = true;
+
+            // Add event handlers.
+            watcher.Changed -= new FileSystemEventHandler(watcher_Changed);
+            watcher.Changed += new FileSystemEventHandler(watcher_Changed);
+
+            // Begin watching.
+            watcher.EnableRaisingEvents = true;
+
+        }
+
+        void EndWather()
+        {
+            if (this.watcher != null)
+            {
+                watcher.EnableRaisingEvents = false;
+                watcher.Changed -= new FileSystemEventHandler(watcher_Changed);
+                this.watcher.Dispose();
+                this.watcher = null;
+            }
+        }
+
+        void watcher_Changed(object sender, FileSystemEventArgs e)
+        {
+            if ((e.ChangeType & WatcherChangeTypes.Changed) != WatcherChangeTypes.Changed)
+                return;
+
+            int nRet = 0;
+
+            // this.WriteErrorLog("file1='"+this.m_strFileName+"' file2='" + e.FullPath + "'");
+            if (PathUtil.IsEqual(this.m_strFileName, e.FullPath) == true)
+            {
+                string strError = "";
+
+                // 稍微延时一下，避免很快地重装、正好和 尚在改写library.xml文件的的进程发生冲突
+                Thread.Sleep(500);
+
+                nRet = this.LoadCfg(
+                    true,
+                    this.DataDir,
+                    this.HostDir,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "reload " + this.m_strFileName + " error: " + strError;
+                    this.WriteErrorLog(strError);
+                    this.GlobalErrorInfo = strError;
+                }
+                else
+                {
+                    this.GlobalErrorInfo = "";
+                }
+            }
+
+            nRet = e.FullPath.IndexOf(".fltx");
+            if (nRet != -1)
+            {
+                this.Filters.ClearFilter(e.FullPath);
+            }
+
+#if NO
+            // 监视webui.xml
+            if (PathUtil.IsEqual(this.m_strWebuiFileName, e.FullPath) == true)
+            {
+                string strError = "";
+                nRet = this.LoadWebuiCfgDom(out strError);
+                if (nRet == -1)
+                {
+                    strError = "reload " + this.m_strWebuiFileName + " error: " + strError;
+                    this.WriteErrorLog(strError);
+                    this.GlobalErrorInfo = strError;
+                }
+                else
+                {
+                    this.GlobalErrorInfo = "";
+                }
+            }
+#endif
+
+        }
+
+        // 读入<readerdbgroup>相关配置
+        // return:
+        //      <readerdbgroup>元素下<database>元素的个数。如果==0，表示配置不正常
+        int LoadReaderDbGroupParam(XmlDocument dom)
+        {
+            this.ReaderDbs = new List<ReaderDbCfg>();
+
+            XmlNodeList nodes = dom.DocumentElement.SelectNodes("//readerdbgroup/database");
+
+            if (nodes.Count == 0)
+                return 0;
+
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                XmlNode node = nodes[i];
+
+                ReaderDbCfg item = new ReaderDbCfg();
+
+                item.DbName = DomUtil.GetAttr(node, "name");
+
+                bool bValue = true;
+                string strError = "";
+                int nRet = DomUtil.GetBooleanParam(node,
+                    "inCirculation",
+                    true,
+                    out bValue,
+                    out strError);
+                if (nRet == -1)
+                {
+                    this.WriteErrorLog("元素<//readerdbgroup/database>属性inCirculation读入时发生错误: " + strError);
+                    bValue = true;
+                }
+
+                item.InCirculation = bValue;
+
+                item.LibraryCode = DomUtil.GetAttr(node, "libraryCode");
+
+                this.ReaderDbs.Add(item);
+            }
+
+            return nodes.Count;
+        }
+
+        // 写入<readerdbgroup>相关配置信息
+        void WriteReaderDbGroupParam(XmlTextWriter writer)
+        {
+            writer.WriteStartElement("readerdbgroup");
+            for (int i = 0; i < this.ReaderDbs.Count; i++)
+            {
+                writer.WriteStartElement("database");
+
+                writer.WriteAttributeString("name", this.ReaderDbs[i].DbName);
+
+                // 2008/6/3 new add
+                writer.WriteAttributeString("inCirculation", this.ReaderDbs[i].InCirculation == true ? "true" : "false");
+
+                // 2012/9/7
+                writer.WriteAttributeString("libraryCode", this.ReaderDbs[i].LibraryCode);
+
+                writer.WriteEndElement();
+            }
+            writer.WriteEndElement();
+        }
+
+
+        // 读入<itemdbgroup>相关配置
+        // return:
+        //      <itemdbgroup>元素下<database>元素的个数。如果==0，表示配置不正常
+        int LoadItemDbGroupParam(XmlDocument dom,
+            out string strError)
+        {
+            strError = "";
+
+            /*
+            if (this.GlobalCfgDom == null)
+            {
+                strError = "LoadItemDbGroupParam()失败, 因为GlobalCfgDom尚未初始化";
+                return -1;
+            }*/
+
+            this.ItemDbs = new List<ItemDbCfg>();
+
+            XmlNodeList nodes = dom.DocumentElement.SelectNodes("//itemdbgroup/database");
+
+            if (nodes.Count == 0)
+                return 0;
+
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                XmlNode node = nodes[i];
+
+                ItemDbCfg item = new ItemDbCfg();
+
+                item.DbName = DomUtil.GetAttr(node, "name");
+
+                item.BiblioDbName = DomUtil.GetAttr(node, "biblioDbName");
+                if (String.IsNullOrEmpty(item.BiblioDbName) == true)
+                {
+                    strError = "<itemdbgroup>中，实体库 '" + item.DbName + "' <database>元素中biblioDbName属性没有配置";
+                    return -1;
+                }
+
+                item.BiblioDbSyntax = DomUtil.GetAttr(node, "syntax");
+
+                item.IssueDbName = DomUtil.GetAttr(node, "issueDbName");
+
+                item.OrderDbName = DomUtil.GetAttr(node, "orderDbName");
+
+                item.CommentDbName = DomUtil.GetAttr(node, "commentDbName");
+
+                item.UnionCatalogStyle = DomUtil.GetAttr(node, "unionCatalogStyle");
+
+                item.Replication = DomUtil.GetAttr(node, "replication");
+
+                {
+                    Hashtable table = StringUtil.ParseParameters(item.Replication);
+                    item.ReplicationServer = (string)table["server"];
+                    item.ReplicationDbName = (string)table["dbname"];
+                }
+
+
+                // 2008/6/4 new add
+                bool bValue = true;
+                int nRet = DomUtil.GetBooleanParam(node,
+                    "inCirculation",
+                    true,
+                    out bValue,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "元素<//itemdbgroup/database>属性inCirculation读入时发生错误: " + strError;
+                    return -1;
+                }
+
+                item.InCirculation = bValue;
+
+                item.Role = DomUtil.GetAttr(node, "role");
+
+                this.ItemDbs.Add(item);
+            }
+
+            return nodes.Count;
+        }
+
+        // 写入<itemdbgroup>相关配置信息
+        void WriteItemDbGroupParam(XmlTextWriter writer)
+        {
+            writer.WriteStartElement("itemdbgroup");
+            for (int i = 0; i < this.ItemDbs.Count; i++)
+            {
+                ItemDbCfg cfg = this.ItemDbs[i];
+
+                writer.WriteStartElement("database");
+
+                writer.WriteAttributeString("name", cfg.DbName);
+
+                writer.WriteAttributeString("biblioDbName", cfg.BiblioDbName);  // 2005/5/25 new add
+
+                // 以下两行缺，成为BUG
+                if (String.IsNullOrEmpty(cfg.IssueDbName) == false)
+                    writer.WriteAttributeString("issueDbName", cfg.IssueDbName);  // 2007/10/22 new add
+                if (String.IsNullOrEmpty(cfg.BiblioDbSyntax) == false)
+                    writer.WriteAttributeString("syntax", cfg.BiblioDbSyntax);   // 2007/10/22 new add
+
+                if (String.IsNullOrEmpty(cfg.OrderDbName) == false)
+                    writer.WriteAttributeString("orderDbName", cfg.OrderDbName);  // 2007/11/27 new add
+
+                if (String.IsNullOrEmpty(cfg.CommentDbName) == false)
+                    writer.WriteAttributeString("commentDbName", cfg.CommentDbName);  // 2008/12/8 new add
+
+                if (String.IsNullOrEmpty(cfg.UnionCatalogStyle) == false)
+                    writer.WriteAttributeString("unionCatalogStyle", cfg.UnionCatalogStyle);  // 2007/12/15 new add
+
+                // 2008/6/4 new add
+                writer.WriteAttributeString("inCirculation", cfg.InCirculation == true ? "true" : "false");
+
+                if (String.IsNullOrEmpty(cfg.Role) == false)
+                    writer.WriteAttributeString("role", cfg.Role);  // 2009/10/23 new add
+
+                if (String.IsNullOrEmpty(cfg.Replication) == false)
+                    writer.WriteAttributeString("replication", cfg.Replication);
+
+                writer.WriteEndElement();
+            }
+            writer.WriteEndElement();
+        }
+
+        /*
+        void SaveReaderDbGrouParam(XmlDocument dom)
+        {
+            XmlNode node = dom.DocumentElement.SelectSingleNode("//readerdbgroup");
+            if (node == null)
+            {
+                node = (XmlNode)dom.CreateElement("readerdbgroup");
+                node = dom.DocumentElement.AppendChild(node);
+            }
+
+            node.InnerXml = ""; // 删除原有全部子元素
+
+            for (int i = 0; i < this.ReaderDbs.Count; i++)
+            {
+                XmlElement newnode = dom.CreateElement("database");
+                node.AppendChild(newnode);
+
+                newnode.SetAttribute("name", this.ReaderDbs[i].DbName);
+            }
+        }
+         */
+
+
+        // 检查全局配置参数是否基本正常
+        public int Verify(out string strError)
+        {
+            strError = "";
+            bool bError = false;
+            if (this.WsUrl == "")
+            {
+                if (strError != "")
+                    strError += ", ";
+
+                strError += "<root>元素中wsurl属性未定义";
+                bError = true;
+            }
+
+            if (this.ManagerUserName == "")
+            {
+                if (strError != "")
+                    strError += ", ";
+                strError += "<root>元素中managerusername属性未定义";
+                bError = true;
+            }
+
+            if (bError == true)
+                return -1;
+
+            return 0;
+        }
+
+
+        public void RestartApplication()
+        {
+            try
+            {
+                // 往bin目录中写一个临时文件
+                using (Stream stream = File.Open(Path.Combine(this.BinDir, "temp.temp"),
+                    FileMode.Create))
+                {
+
+                }
+
+                // stream.Close();
+
+                this.WriteErrorLog("library application 被重新初始化。");
+            }
+            catch (Exception ex)
+            {
+                this.WriteErrorLog("library application 重新初始化时发生错误：" + ExceptionUtil.GetDebugText(ex));
+            }
+        }
+
+        public void WriteErrorLog(string strText)
+        {
+            try
+            {
+                lock (this.LogDir)
+                {
+                    DateTime now = DateTime.Now;
+                    // 每天一个日志文件
+                    string strFilename = PathUtil.MergePath(this.LogDir, "log_" + DateTimeUtil.DateTimeToString8(now) + ".txt");
+                    string strTime = now.ToString();
+                    StreamUtil.WriteText(strFilename,
+                        strTime + " " + strText + "\r\n");
+                }
+            }
+            catch (Exception ex)
+            {
+                // TODO: 要在安装程序中预先创建事件源
+                // 代码可以参考 unhandle.txt (在本project中)
+
+                /*
+                // Create the source, if it does not already exist.
+                if (!EventLog.SourceExists("dp2library"))
+                {
+                    EventLog.CreateEventSource("dp2library", "DigitalPlatform");
+                }*/
+
+                EventLog Log = new EventLog();
+                Log.Source = "dp2library";
+                Log.WriteEntry("因为原本要写入日志文件的操作发生异常， 所以不得不改为写入Windows系统日志(见后一条)。异常信息如下：'" + ExceptionUtil.GetDebugText(ex) + "'", EventLogEntryType.Error);
+                Log.WriteEntry(strText, EventLogEntryType.Error);
+            }
+        }
+
+        // 写入Windows系统日志
+        public static void WriteWindowsLog(string strText)
+        {
+            WriteWindowsLog(strText, EventLogEntryType.Error);
+        }
+
+        // 写入Windows系统日志
+        public static void WriteWindowsLog(string strText,
+            EventLogEntryType type)
+        {
+            EventLog Log = new EventLog();
+            Log.Source = "dp2library";
+            Log.WriteEntry(strText, type);
+        }
+
+        public static void WriteErrorLog(string strFileName,
+            string strText)
+        {
+            try
+            {
+                string strTime = DateTime.Now.ToString();
+                StreamUtil.WriteText(strFileName,
+                    strTime + " " + strText + "\r\n");
+            }
+            catch
+            {
+                WriteWindowsLog(strText, EventLogEntryType.Error);
+            }
+        }
+
+        /*
+        // 写入系统日志
+        public static void WriteWindowsErrorLog(string strText)
+        {
+            // Create the source, if it does not already exist.
+            if (!EventLog.SourceExists("dp2library"))
+            {
+                EventLog.CreateEventSource("dp2library", "DigitalPlatform");
+            }
+
+            EventLog Log = new EventLog();
+            Log.Source = "dp2library";
+            Log.WriteEntry(strText, EventLogEntryType.Error);
+
+        }
+         * */
+
+        public void WriteDebugInfo(string strTitle)
+        {
+            if (this.DebugMode == false)
+                return;
+            StreamUtil.WriteText(this.LogDir + "\\debug.txt", "-- " + DateTime.Now.ToString("u") + " " + strTitle + "\r\n");
+        }
+
+        public void WriteAppDownDetectFile(string strText)
+        {
+            string strTime = DateTime.Now.ToString();
+            StreamUtil.WriteText(this.LogDir + "\\app_down_detect.txt",
+                strTime + " " + strText + "\r\n");
+        }
+
+        public void RemoveAppDownDetectFile()
+        {
+            try
+            {
+                File.Delete(this.LogDir + "\\app_down_detect.txt");
+            }
+            catch
+            {
+            }
+        }
+
+        public bool HasAppBeenKilled()
+        {
+            try
+            {
+                FileInfo fi = new FileInfo(this.LogDir + "\\app_down_detect.txt");
+
+                if (fi.Exists == true)
+                    return true;
+
+                return false;
+            }
+            catch
+            {
+                return true;    // 抛出异常时，宁可信其有
+            }
+        }
+
+        // 异常：不会抛出异常
+        public void Flush()
+        {
+            try
+            {
+                this.Save(null, true);
+            }
+            catch (Exception ex)
+            {
+                this.WriteErrorLog("Flush()中俘获异常 " + ex.Message);
+            }
+        }
+
+        // 保存
+        // 其实,进入内存属性的XML片断,可以在this.LibraryCfgDom中删除.最后直接合并保存这个dom即可.
+        // parameters:
+        //      bFlush  是否为刷新情形？如果是，则不写入错误日志
+        public void Save(string strFileName,
+            bool bFlush)
+        {
+            this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            try
+            {
+
+                if (this.m_bChanged == false)
+                {
+                    /*
+                    // 调试用
+                    LibraryApplication.WriteWindowsLog("没有进行Save()，因为m_bChanged==false", EventLogEntryType.Information);
+                     * */
+
+                    return;
+                }
+
+
+                // 关闭文件跟踪
+                bool bOldState = false;
+                if (this.watcher != null)
+                {
+                    bOldState = watcher.EnableRaisingEvents;
+                    watcher.EnableRaisingEvents = false;
+                }
+
+
+                if (strFileName == null)
+                    strFileName = m_strFileName;
+
+                if (strFileName == null)
+                {
+                    throw (new Exception("m_strFileName为空"));
+                }
+
+                string strBackupFilename = strFileName + ".bak";
+
+                if (FileUtil.IsFileExsitAndNotNull(strFileName) == true)
+                {
+                    this.WriteErrorLog("备份 " + strFileName + " 到 " + strBackupFilename);
+                    File.Copy(strFileName, strBackupFilename, true);
+                }
+
+                if (bFlush == false)
+                {
+                    this.WriteErrorLog("开始 从内存写入 " + strFileName);
+                }
+
+                using (XmlTextWriter writer = new XmlTextWriter(strFileName,
+                    Encoding.UTF8))
+                {
+
+                    // 缩进
+                    writer.Formatting = Formatting.Indented;
+                    writer.Indentation = 4;
+
+                    writer.WriteStartDocument();
+
+                    writer.WriteStartElement("root");
+                    if (this.DebugMode == true)
+                        writer.WriteAttributeString("debugMode", "true");
+
+                    if (string.IsNullOrEmpty(this.UID) == false)
+                        writer.WriteAttributeString("uid", this.UID);
+
+                    // 2008/6/6 nwe add
+                    // <version>
+                    {
+                        XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("version");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+                    }
+
+                    // 内核参数
+                    // 元素<rmsserver>
+                    // 属性url/username/password
+                    writer.WriteStartElement("rmsserver");
+                    writer.WriteAttributeString("url", this.WsUrl);
+                    writer.WriteAttributeString("username", this.ManagerUserName);
+                    writer.WriteAttributeString("password",
+                        Cryptography.Encrypt(this.ManagerPassword, EncryptKey)
+                        );
+                    writer.WriteEndElement();
+
+                    //2013/11/18
+                    // <center>
+                    {
+                        XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("center");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+                    }
+
+                    // 预约到书
+                    // 元素<arrived>
+                    // 属性dbname/reserveTimeSpan/outofReservationThreshold/canReserveOnshelf
+                    writer.WriteStartElement("arrived");
+                    writer.WriteAttributeString("dbname", this.ArrivedDbName);
+                    writer.WriteAttributeString("reserveTimeSpan", this.ArrivedReserveTimeSpan);
+
+                    // 2007/11/5 new add
+                    writer.WriteAttributeString("outofReservationThreshold", this.OutofReservationThreshold.ToString());
+                    writer.WriteAttributeString("canReserveOnshelf", this.CanReserveOnshelf == true ? "true" : "false");
+
+                    writer.WriteEndElement();
+
+                    /*
+                    // <arrived>
+                    node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//arrived");
+                    if (node != null)
+                    {
+                        //writer.WriteRaw(node.OuterXml);
+                        node.WriteTo(writer);
+                    }*/
+
+                    // -----------
+                    // 2007/11/5 new add
+                    // 入馆登记
+                    // 元素<passgate>
+                    // 属性writeOperLog
+                    writer.WriteStartElement("passgate");
+                    writer.WriteAttributeString("writeOperLog", this.PassgateWriteToOperLog == true ? "true" : "false");
+                    writer.WriteEndElement();
+
+
+                    // 消息
+                    // 元素<message>
+                    // 属性dbname/reserveTimeSpan
+                    writer.WriteStartElement("message");
+                    writer.WriteAttributeString("dbname", this.MessageDbName);
+                    writer.WriteAttributeString("reserveTimeSpan", this.MessageReserveTimeSpan);    // 2007/11/5 new add
+                    writer.WriteEndElement();
+
+                    /*
+                    // 图书馆业务服务器
+                    // 元素<libraryserver>
+                    // 属性url
+                    writer.WriteStartElement("libraryserver");
+                    writer.WriteAttributeString("url", this.LibraryServerUrl);
+                    writer.WriteEndElement();
+                     * */
+
+                    // OPAC服务器
+                    // 元素<opacServer>
+                    // 属性url
+                    writer.WriteStartElement("opacServer");
+                    writer.WriteAttributeString("url", this.OpacServerUrl);
+                    writer.WriteEndElement();
+
+                    // 违约金
+                    // 元素<amerce>
+                    // 属性dbname/overdueStyle
+                    writer.WriteStartElement("amerce");
+                    writer.WriteAttributeString("dbname", this.AmerceDbName);
+                    writer.WriteAttributeString("overdueStyle", this.OverdueStyle); // 2007/11/5 new add
+                    writer.WriteEndElement();
+
+                    // 发票
+                    // 元素<invoice>
+                    // 属性dbname
+                    writer.WriteStartElement("invoice");
+                    writer.WriteAttributeString("dbname", this.InvoiceDbName);
+                    writer.WriteEndElement();
+
+                    WriteReaderDbGroupParam(writer);
+
+                    WriteItemDbGroupParam(writer);
+
+                    // 没有进入内存属性的其他XML片断
+                    if (this.LibraryCfgDom != null)
+                    {
+                        // <rightsTable>
+                        XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//rightsTable");    // 0.02以前为rightstable
+                        if (node != null)
+                        {
+                            // writer.WriteRaw(node.OuterXml);
+                            node.WriteTo(writer);
+                        }
+
+                        /*
+                        // <readertypes>
+                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//readertypes");    // 0.02以前为readertypes
+                        if (node != null)
+                        {
+                            //writer.WriteRaw(node.OuterXml);
+                            node.WriteTo(writer);
+                        }
+
+                        // <booktypes>
+                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//booktypes");    // 0.02以前为booktypes
+                        if (node != null)
+                        {
+                            // writer.WriteRaw(node.OuterXml);
+                            node.WriteTo(writer);
+                        }
+                         * */
+
+                        // <locationTypes>
+                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//locationTypes");    // 0.02以前为locationtypes
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // <accounts>
+                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//accounts");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // <browseformats>
+                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//browseformats");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+
+                        // <foregift>
+                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//foregift");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // <virtualDatabases>
+                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//virtualDatabases");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // <valueTables>
+                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//valueTables");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // <calendars>
+                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//calendars");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // <traceDTLP>
+                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//traceDTLP");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // <zhengyuan>
+                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//zhengyuan");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // <dkyw>
+                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//dkyw");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // <patronReplication>
+                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//patronReplication");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // 2009/7/20 new add
+                        // <clientFineInterface>
+                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//clientFineInterface");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // 2009/9/23 new add
+                        // <yczb>
+                        /*
+        <yczb>
+            <sso appID='CBPM_Library' validateWsUrl='http://portal.cbpmc.cbpm/AuthCenter/services/validate' />
+        </yczb>
+                         * */
+                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//yczb");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // <script>
+                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("script");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // <mailTemplates>
+                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("mailTemplates");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // <smtpServer>
+                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("smtpServer");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // <externalMessageInterface>
+                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("externalMessageInterface");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        /* 前面已经有了
+                        // <passgate>
+                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("passgate");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+                         * */
+
+                        // <zhongcihao>
+                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("zhongcihao");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // <callNumber>
+                        // 2009/2/18 new add
+                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("callNumber");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // <monitors>
+                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("monitors");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // <dup>
+                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("dup");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // <utilDb>
+                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("utilDb");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // <libraryInfo>
+                        // 注: <libraryName>元素在此里面
+                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("libraryInfo");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // <circulation>
+                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("circulation");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // <channel>
+                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("channel");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+
+                        // <cataloging>
+                        node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("cataloging");
+                        if (node != null)
+                        {
+                            node.WriteTo(writer);
+                        }
+                    }
+
+                    // 时钟
+                    writer.WriteElementString("clock", Convert.ToString(this.Clock.Delta));
+
+                    writer.WriteEndElement();
+
+                    writer.WriteEndDocument();
+                }
+                // writer.Close();
+
+                if (bFlush == false)
+                    this.WriteErrorLog("完成 从内存写入 " + strFileName);
+
+                this.m_bChanged = false;
+
+                if (this.watcher != null)
+                {
+                    watcher.EnableRaisingEvents = bOldState;
+                }
+
+            }
+            finally
+            {
+                this.m_lock.ReleaseWriterLock();
+            }
+
+        }
+
+        public void StopAll()
+        {
+            // 停止所有长操作
+            lock (this.StopTable)
+            {
+                foreach (string key in this.StopTable.Keys)
+                {
+                    StopState stop = (StopState)this.StopTable[key];
+                    if (stop != null)
+                        stop.Stop();
+                }
+            }
+        }
+
+        public void StopHead(string strHead)
+        {
+            // 停止所有key匹配的长操作
+            lock (this.StopTable)
+            {
+                foreach (string key in this.StopTable.Keys)
+                {
+                    if (StringUtil.HasHead(key, strHead) == false)
+                        continue;
+                    StopState stop = (StopState)this.StopTable[key];
+                    stop.Stop();
+                }
+            }
+        }
+
+        public void Stop(string strName)
+        {
+            // 停止所有key匹配的长操作
+            lock (this.StopTable)
+            {
+                foreach (string key in this.StopTable.Keys)
+                {
+                    if (key != strName)
+                        continue;
+                    StopState stop = (StopState)this.StopTable[key];
+                    stop.Stop();
+                }
+            }
+        }
+        public StopState BeginLoop(string strTitle)
+        {
+            lock (this.StopTable)
+            {
+                StopState stop = (StopState)this.StopTable[strTitle];
+                if (stop == null)
+                {
+                    stop = new StopState();
+                    this.StopTable[strTitle] = stop;
+                }
+
+                stop.Stopped = false;
+
+                return stop;
+            }
+        }
+
+        public StopState EndLoop(string strTitle,
+            bool bRemoveObject)
+        {
+            lock (this.StopTable)
+            {
+                if (this.StopTable.Contains(strTitle) == false)
+                    return null;
+                StopState stop = (StopState)this.StopTable[strTitle];
+                stop.Stopped = true;
+
+                if (bRemoveObject == true)
+                    this.StopTable.Remove(strTitle);
+
+                return stop;
+            }
+        }
+
+        public void Close()
+        {
+            this.EndWather();
+
+            this.HangupReason = LibraryServer.HangupReason.Exit;    // 阻止后继 API 访问
+
+            this.WriteErrorLog("LibraryApplication 开始下降");
+
+            DateTime start = DateTime.Now;
+            try
+            {
+                // 停止所有长操作
+                this.StopAll();
+
+                // 2014/12/3
+                this.Flush();
+
+                if (this.OperLog != null)
+                {
+                    this.OperLog.Close(true);   // 自动进入小文件模式，对象依然有效
+                    // this.OperLog = null; // 对象不要释放，依然起作用
+                }
+
+                if (this.Garden != null)
+                {
+                    // 紧急写入所有统计指标
+                    this.Garden.CleanPersons(new TimeSpan(0, 0, 0), this.Statis);
+                    this.Garden = null;
+                }
+
+                if (this.Statis != null)
+                {
+                    this.Statis.Close();
+                    this.Statis = null;
+                }
+
+                /*
+                if (this.ArriveMonitor != null)
+                    this.ArriveMonitor.Close();
+                 * */
+                if (this.BatchTasks != null)
+                {
+                    this.BatchTasks.Close();
+                    this.BatchTasks = null;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                this.WriteErrorLog("LibraryApplication Close()俘获异常: " + ExceptionUtil.GetDebugText(ex));
+            }
+
+            TimeSpan delta = DateTime.Now - start;
+            this.WriteErrorLog("LibraryApplication 被停止。停止操作耗费时间 " + delta.TotalSeconds.ToString() + " 秒");
+
+            this.RemoveAppDownDetectFile();	// 删除检测文件
+
+            disposed = true;
+        }
+
+
+
+        // 初始化虚拟库集合定义对象
+        public int InitialVdbs(
+            RmsChannelCollection Channels,
+            out string strError)
+        {
+            strError = "";
+
+            if (this.vdbs != null)
+                return 0;   // 优化
+
+            this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            try
+            {
+                XmlNode root = this.LibraryCfgDom.DocumentElement.SelectSingleNode(
+                    "virtualDatabases");
+                if (root == null)
+                {
+                    strError = "尚未配置<virtualDatabases>元素";
+                    return -1;
+                }
+
+                XmlNode biblio_dbs_root = this.LibraryCfgDom.DocumentElement.SelectSingleNode(
+                    "itemdbgroup");
+                /*
+                if (root == null)
+                {
+                    strError = "尚未配置<itemdbgroup>元素";
+                    return -1;
+                }
+                 * */
+
+                this.vdbs = new VirtualDatabaseCollection();
+                int nRet = vdbs.Initial(root,
+                    Channels,
+                    this.WsUrl,
+                    biblio_dbs_root,
+                    out strError);
+                if (nRet == -1)
+                {
+                    this.vdbs = null;   // 2011/1/29
+                    return -1;
+                }
+
+                return 0;
+            }
+            finally
+            {
+                this.m_lock.ReleaseWriterLock();
+            }
+        }
+
+
+        /*
+        // 判断一个数据库名是不是合法的实体库名
+        public bool IsItemDbName(string strItemDbName)
+        {
+            XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//itemdbgroup/database[@name='" + strItemDbName + "']");
+
+            if (node == null)
+                return false;
+
+            return true;
+        }*/
+
+        // 是否在配置的读者库名之列?
+        // 注：参与和不参与流通的读者库都算在列
+        public bool IsReaderDbName(string strReaderDbName)
+        {
+            // 2014/11/6
+            if (string.IsNullOrEmpty(strReaderDbName) == true)
+                return false;
+
+            for (int i = 0; i < this.ReaderDbs.Count; i++)
+            {
+                if (strReaderDbName == this.ReaderDbs[i].DbName)
+                    return true;
+            }
+
+            // 2012/7/10
+            // 可能是其他语言的读者库名
+            if (this.kdbs != null)
+            {
+                for (int i = 0; i < this.ReaderDbs.Count; i++)
+                {
+                    KernelDbInfo db = this.kdbs.FindDb(this.ReaderDbs[i].DbName);
+                    if (db == null)
+                        continue;
+                    foreach (Caption caption in db.Captions)
+                    {
+                        if (strReaderDbName == caption.Value)
+                            return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        // 包装版本
+        public bool IsReaderDbName(string strReaderDbName,
+    out bool IsInCirculation)
+        {
+            string strLibraryCode = "";
+            return IsReaderDbName(strReaderDbName,
+                out IsInCirculation,
+                out strLibraryCode);
+        }
+
+        // 包装版本
+        public bool IsReaderDbName(string strReaderDbName,
+    out string strLibraryCode)
+        {
+            bool IsInCirculation = false;
+            return IsReaderDbName(strReaderDbName,
+                out IsInCirculation,
+                out strLibraryCode);
+        }
+
+        // 是否在配置的读者库名之列?
+        // 另一版本，返回是否参与流通
+        public bool IsReaderDbName(string strReaderDbName,
+            out bool IsInCirculation,
+            out string strLibraryCode)
+        {
+            IsInCirculation = false;
+            strLibraryCode = "";
+
+            for (int i = 0; i < this.ReaderDbs.Count; i++)
+            {
+                if (strReaderDbName == this.ReaderDbs[i].DbName)
+                {
+                    IsInCirculation = this.ReaderDbs[i].InCirculation;
+                    strLibraryCode = this.ReaderDbs[i].LibraryCode;
+
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        // 获得(书目库相关角色)数据库的类型，顺便返回所从属的书目库名
+        public string GetDbType(string strDbName,
+            out string strBiblioDbName)
+        {
+            strBiblioDbName = "";
+
+            if (String.IsNullOrEmpty(strDbName) == true)
+                return null;
+
+            for (int i = 0; i < this.ItemDbs.Count; i++)
+            {
+                ItemDbCfg cfg = this.ItemDbs[i];
+                strBiblioDbName = cfg.BiblioDbName;
+
+                if (strDbName == cfg.DbName)
+                    return "item";
+                if (strDbName == cfg.BiblioDbName)
+                    return "biblio";
+                if (strDbName == cfg.IssueDbName)
+                    return "issue";
+                if (strDbName == cfg.OrderDbName)
+                    return "order";
+                if (strDbName == cfg.CommentDbName)
+                    return "comment";
+            }
+
+            // 2012/7/10
+            // 可能是其他语言的数据库名
+            for (int i = 0; i < this.ItemDbs.Count; i++)
+            {
+                ItemDbCfg cfg = this.ItemDbs[i];
+                strBiblioDbName = cfg.BiblioDbName;
+
+                if (IsOtherLangName(strDbName, cfg.DbName) == true)
+                    return "item";
+                if (IsOtherLangName(strDbName, cfg.BiblioDbName) == true)
+                    return "biblio";
+                if (IsOtherLangName(strDbName, cfg.IssueDbName) == true)
+                    return "issue";
+                if (IsOtherLangName(strDbName, cfg.OrderDbName) == true)
+                    return "order";
+                if (IsOtherLangName(strDbName, cfg.CommentDbName) == true)
+                    return "comment";
+            }
+
+            strBiblioDbName = "";
+            return null;
+        }
+
+        // 获得数据库的类型
+        public string GetDbType(string strDbName)
+        {
+            if (String.IsNullOrEmpty(strDbName) == true)
+                return null;
+
+            for (int i = 0; i < this.ItemDbs.Count; i++)
+            {
+                if (strDbName == this.ItemDbs[i].DbName)
+                    return "item";
+                if (strDbName == this.ItemDbs[i].BiblioDbName)
+                    return "biblio";
+                if (strDbName == this.ItemDbs[i].IssueDbName)
+                    return "issue";
+                if (strDbName == this.ItemDbs[i].OrderDbName)
+                    return "order";
+                if (strDbName == this.ItemDbs[i].CommentDbName)
+                    return "comment";
+            }
+
+            for (int i = 0; i < this.ReaderDbs.Count; i++)
+            {
+                if (strDbName == this.ReaderDbs[i].DbName)
+                    return "reader";
+            }
+
+            XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("utilDb/database[@name='" + strDbName + "']");
+            if (node != null)
+                return "util";
+
+            return null;
+        }
+
+        // 2012/7/6
+        // 检测是否为其他语言的等同库名
+        // parameters:
+        //      strDbName   要检测的数据库名
+        //      strNeutralDbName    已知的中立语言数据库名
+        public bool IsOtherLangName(string strDbName,
+            string strNeutralDbName)
+        {
+            if (this.kdbs == null)
+                return false;
+
+            KernelDbInfo db = this.kdbs.FindDb(strNeutralDbName);
+            if (db == null)
+                return false;
+
+            if (db != null)
+            {
+                foreach (Caption caption in db.Captions)
+                {
+                    if (strDbName == caption.Value)
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
+        // 是否在配置的实体库名之列?
+        public bool IsItemDbName(string strItemDbName)
+        {
+            // 2008/10/16 new add
+            if (String.IsNullOrEmpty(strItemDbName) == true)
+                return false;
+
+            for (int i = 0; i < this.ItemDbs.Count; i++)
+            {
+                if (strItemDbName == this.ItemDbs[i].DbName)
+                    return true;
+
+                // 2012/7/6
+                // 可能是其他语言的库名
+                if (IsOtherLangName(strItemDbName, this.ItemDbs[i].DbName) == true)
+                    return true;
+            }
+
+            return false;
+        }
+
+        // 是否在配置的实体库名之列?
+        // 另一版本，返回是否参与流通
+        public bool IsItemDbName(string strItemDbName,
+            out bool IsInCirculation)
+        {
+            IsInCirculation = false;
+
+            // 2008/10/16 new add
+            if (String.IsNullOrEmpty(strItemDbName) == true)
+                return false;
+
+            for (int i = 0; i < this.ItemDbs.Count; i++)
+            {
+                if (strItemDbName == this.ItemDbs[i].DbName)
+                {
+                    IsInCirculation = this.ItemDbs[i].InCirculation;
+                    return true;
+                }
+
+                // 2012/7/6
+                // 可能是其他语言的库名
+                if (IsOtherLangName(strItemDbName, this.ItemDbs[i].DbName) == true)
+                    return true;
+            }
+
+            return false;
+        }
+
+        // 是否为实用库名
+        // 实用库包括 publisher / zhongcihao / dictionary 类型
+        public bool IsUtilDbName(string strUtilDbName)
+        {
+            XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("utilDb/database[@name='"+strUtilDbName+"']");
+            if (node == null)
+                return false;
+
+            return true;
+        }
+
+        // 是否在配置的书目库名之列?
+        public ItemDbCfg GetBiblioDbCfg(string strBiblioDbName)
+        {
+            // 2008/10/16 new add
+            if (String.IsNullOrEmpty(strBiblioDbName) == true)
+                return null;
+
+
+            for (int i = 0; i < this.ItemDbs.Count; i++)
+            {
+                ItemDbCfg cfg = this.ItemDbs[i];
+                if (strBiblioDbName == this.ItemDbs[i].BiblioDbName)
+                    return cfg;
+            }
+            return null;
+        }
+
+        // 是否具有orderWork角色
+        public bool IsOrderWorkBiblioDb(string strBiblioDbName)
+        {
+            // 2008/10/16 new add
+            if (String.IsNullOrEmpty(strBiblioDbName) == true)
+                return false;
+
+            for (int i = 0; i < this.ItemDbs.Count; i++)
+            {
+                ItemDbCfg cfg = this.ItemDbs[i];
+                if (strBiblioDbName == this.ItemDbs[i].BiblioDbName)
+                    return StringUtil.IsInList("orderWork", cfg.Role);
+            }
+            return false;
+        }
+
+        // 是否在配置的期库名之列?
+        public bool IsIssueDbName(string strIssueDbName)
+        {
+            // 2008/10/16 new add
+            if (String.IsNullOrEmpty(strIssueDbName) == true)
+                return false;
+
+
+            for (int i = 0; i < this.ItemDbs.Count; i++)
+            {
+                if (strIssueDbName == this.ItemDbs[i].IssueDbName)
+                    return true;
+
+                // 2012/7/6
+                // 可能是其他语言的库名
+                if (IsOtherLangName(strIssueDbName, this.ItemDbs[i].IssueDbName) == true)
+                    return true;
+            }
+
+            return false;
+        }
+
+        // 是否在配置的订购库名之列?
+        public bool IsOrderDbName(string strOrderDbName)
+        {
+            // 2008/10/16 new add
+            if (String.IsNullOrEmpty(strOrderDbName) == true)
+                return false;
+
+
+            for (int i = 0; i < this.ItemDbs.Count; i++)
+            {
+                if (strOrderDbName == this.ItemDbs[i].OrderDbName)
+                    return true;
+
+                // 2012/7/6
+                // 可能是其他语言的库名
+                if (IsOtherLangName(strOrderDbName, this.ItemDbs[i].OrderDbName) == true)
+                    return true;
+
+            }
+
+            return false;
+        }
+
+        // 是否在配置的评注库名之列?
+        // 2008/12/8 new add
+        public bool IsCommentDbName(string strCommentDbName)
+        {
+            if (String.IsNullOrEmpty(strCommentDbName) == true)
+                return false;
+
+            for (int i = 0; i < this.ItemDbs.Count; i++)
+            {
+                if (strCommentDbName == this.ItemDbs[i].CommentDbName)
+                    return true;
+
+                // 2012/7/6
+                // 可能是其他语言的库名
+                if (IsOtherLangName(strCommentDbName, this.ItemDbs[i].CommentDbName) == true)
+                    return true;
+            }
+
+            return false;
+        }
+
+        // 2012/7/2
+        // (通过其他语言的书目库名)获得配置文件中所使用的那个书目库名
+        public string GetCfgBiblioDbName(string strBiblioDbName)
+        {
+            XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//itemdbgroup/database[@biblioDbName='" + strBiblioDbName + "']");
+
+            if (node != null)
+                return strBiblioDbName;
+
+            // 然后关注别名
+            if (this.kdbs == null)
+                return null;
+
+            // 2012/7/2
+            KernelDbInfo db = this.kdbs.FindDb(strBiblioDbName);
+            if (db != null)
+            {
+                foreach (Caption caption in db.Captions)
+                {
+                    node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//itemdbgroup/database[@biblioDbName='" + caption.Value + "']");
+                    if (node != null)
+                        return caption.Value;
+                }
+            }
+
+            return null;
+        }
+
+        // 判断一个数据库名是不是合法的书目库名
+        public bool IsBiblioDbName(string strBiblioDbName)
+        {
+            if (GetCfgBiblioDbName(strBiblioDbName) == null)
+                return false;
+            return true;
+        }
+
+#if NO
+        // 判断一个数据库名是不是合法的书目库名
+        public bool IsBiblioDbName(string strBiblioDbName)
+        {
+            XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//itemdbgroup/database[@biblioDbName='" + strBiblioDbName + "']");
+
+            if (node != null)
+                return true;
+
+            // 然后关注别名
+            if (this.kdbs == null)
+                return false;
+
+            // 2012/7/2
+            KernelDbInfo db = this.kdbs.FindDb(strBiblioDbName);
+            foreach (Caption caption in db.Captions)
+            {
+                node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//itemdbgroup/database[@biblioDbName='" + caption.Value + "']");
+                if (node != null)
+                    return true;
+            }
+
+            return false;
+        }
+#endif
+
+        // TODO: 多语言改造
+        // 根据书目下属库名, 找到对应的书目库名
+        // 注意，返回1的时候，strBiblioDbName也有可能为空
+        // return:
+        //      -1  出错
+        //      0   没有找到
+        //      1   找到
+        public int GetBiblioDbNameByChildDbName(string strChildDbName,
+            out string strBiblioDbName,
+            out string strError)
+        {
+            strError = "";
+            strBiblioDbName = "";
+
+            string[] names = new string[] { "name", "orderDbName", "issueDbName", "commentDbName" };
+
+            XmlNode node = null;
+
+            foreach (string strName in names)
+            {
+                node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//itemdbgroup/database[@" + strName + "='" + strChildDbName + "']");
+                if (node != null)
+                    goto FOUND;
+            }
+
+            strError = "没有找到名为 '" + strChildDbName + "' 的种下属库";
+            return 0;
+
+        FOUND:
+            strBiblioDbName = DomUtil.GetAttr(node, "biblioDbName");
+            return 1;
+        }
+
+        // 根据实体库名, 找到对应的书目库名
+        // 注意，返回1的时候，strBiblioDbName也有可能为空
+        // return:
+        //      -1  出错
+        //      0   没有找到
+        //      1   找到
+        public int GetBiblioDbNameByItemDbName(string strItemDbName,
+            out string strBiblioDbName,
+            out string strError)
+        {
+            strError = "";
+            strBiblioDbName = "";
+
+            // 2007/5/25 new changed
+            XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//itemdbgroup/database[@name='" + strItemDbName + "']");
+
+            if (node == null)
+            {
+                // 2012/7/9
+                // 然后关注别名
+                if (this.kdbs != null)
+                {
+                    KernelDbInfo db = this.kdbs.FindDb(strItemDbName);
+                    if (db != null)
+                    {
+                        foreach (Caption caption in db.Captions)
+                        {
+                            node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//itemdbgroup/database[@name='" + caption.Value + "']");
+                            if (node != null)
+                                goto FOUND;
+                        }
+                    }
+                }
+
+                strError = "没有找到名为 '" + strItemDbName + "' 的实体库";
+                return 0;
+            }
+
+            FOUND:
+            strBiblioDbName = DomUtil.GetAttr(node, "biblioDbName");
+            return 1;
+
+            /*
+            if (this.GlobalCfgDom == null)
+            {
+                strError = "GlobalCfgDom尚未初始化";
+                return -1;
+            }
+
+            XmlNodeList nodes = this.GlobalCfgDom.DocumentElement.SelectNodes("//dblink");
+
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                XmlNode node = nodes[i];
+
+                string strBiblioDb = DomUtil.GetAttr(node, "bibliodb");
+
+                string strItemDb = DomUtil.GetAttr(node, "itemdb");
+
+                if (strItemDbName == strItemDb)
+                {
+                    strBiblioDbName = strBiblioDb;
+                    return 1;
+                }
+            }
+
+            return 0;
+             * */
+        }
+
+        // 根据评注库名, 找到对应的书目库名
+        // 注意，返回1的时候，strBiblioDbName也有可能为空
+        // 2009/10/18 new add
+        // return:
+        //      -1  出错
+        //      0   没有找到
+        //      1   找到
+        public int GetBiblioDbNameByCommentDbName(string strCommentDbName,
+            out string strBiblioDbName,
+            out string strError)
+        {
+            strError = "";
+            strBiblioDbName = "";
+
+            XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//itemdbgroup/database[@commentDbName='" + strCommentDbName + "']");
+
+            if (node == null)
+            {
+                // 2012/7/9
+                // 然后关注别名
+                if (this.kdbs != null)
+                {
+                    KernelDbInfo db = this.kdbs.FindDb(strCommentDbName);
+                    if (db != null)
+                    {
+                        foreach (Caption caption in db.Captions)
+                        {
+                            node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//itemdbgroup/database[@commentDbName='" + caption.Value + "']");
+                            if (node != null)
+                                goto FOUND;
+                        }
+                    }
+                }
+
+                strError = "没有找到名为 '" + strCommentDbName + "' 的评注库";
+                return 0;
+            }
+
+            FOUND:
+            strBiblioDbName = DomUtil.GetAttr(node, "biblioDbName");
+            return 1;
+        }
+
+        // 根据订购库名, 找到对应的书目库名
+        // 注意，返回1的时候，strBiblioDbName也有可能为空
+        // 2008/8/28 new add
+        // return:
+        //      -1  出错
+        //      0   没有找到
+        //      1   找到
+        public int GetBiblioDbNameByOrderDbName(string strOrderDbName,
+            out string strBiblioDbName,
+            out string strError)
+        {
+            strError = "";
+            strBiblioDbName = "";
+
+            XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//itemdbgroup/database[@orderDbName='" + strOrderDbName + "']");
+
+            if (node == null)
+            {
+                // 2012/7/9
+                // 然后关注别名
+                if (this.kdbs != null)
+                {
+                    KernelDbInfo db = this.kdbs.FindDb(strOrderDbName);
+                    if (db != null)
+                    {
+                        foreach (Caption caption in db.Captions)
+                        {
+                            node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//itemdbgroup/database[@orderDbName='" + caption.Value + "']");
+                            if (node != null)
+                                goto FOUND;
+                        }
+                    }
+                }
+
+                strError = "没有找到名为 '" + strOrderDbName + "' 的订购库";
+                return 0;
+            }
+
+            FOUND:
+            strBiblioDbName = DomUtil.GetAttr(node, "biblioDbName");
+            return 1;
+        }
+
+        // 根据期库名, 找到对应的书目库名
+        // 注意，返回1的时候，strBiblioDbName也有可能为空
+        // 2009/2/2 new add
+        // return:
+        //      -1  出错
+        //      0   没有找到
+        //      1   找到
+        public int GetBiblioDbNameByIssueDbName(string strIssueDbName,
+            out string strBiblioDbName,
+            out string strError)
+        {
+            strError = "";
+            strBiblioDbName = "";
+
+            XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//itemdbgroup/database[@issueDbName='" + strIssueDbName + "']");
+
+            if (node == null)
+            {
+                // 2012/7/9
+                // 然后关注别名
+                if (this.kdbs != null)
+                {
+                    KernelDbInfo db = this.kdbs.FindDb(strIssueDbName);
+                    if (db != null)
+                    {
+                        foreach (Caption caption in db.Captions)
+                        {
+                            node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//itemdbgroup/database[@issueDbName='" + caption.Value + "']");
+                            if (node != null)
+                                goto FOUND;
+                        }
+                    }
+                }
+
+                strError = "没有找到名为 '" + strIssueDbName + "' 的期库";
+                return 0;
+            }
+
+            FOUND:
+            strBiblioDbName = DomUtil.GetAttr(node, "biblioDbName");
+            return 1;
+        }
+
+        // 获得荐购存储库名列表
+        // 所谓荐购存储库，就是用来存储读者推荐的新书目记录的目标库
+        public List<string> GetOrderRecommendStoreDbNames()
+        {
+            List<string> results = new List<string>();
+            for (int i = 0; i < this.ItemDbs.Count; i++)
+            {
+                ItemDbCfg cfg = this.ItemDbs[i];
+                if (StringUtil.IsInList("orderRecommendStore", cfg.Role) == true)
+                    results.Add(cfg.BiblioDbName);
+            }
+            return results;
+        }
+
+        // 根据书目库名, 找到对应的实体库名
+        // 注：返回1的时候strItemDbName依然可能为空。1只是表示找到了书目库定义，但是不确保有实体库定义
+        // return:
+        //      -1  出错
+        //      0   没有找到
+        //      1   找到(书目库定义，但是不确保实体库存在)
+        public int GetItemDbName(string strBiblioDbName,
+            out string strItemDbName,
+            out string strError)
+        {
+            strError = "";
+            strItemDbName = "";
+
+            // 2007/5/25 new changed
+            XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//itemdbgroup/database[@biblioDbName='" + strBiblioDbName + "']");
+
+            if (node == null)
+            {
+                // 如果没有找到，则找<caption>
+                VirtualDatabase vdb = this.vdbs[strBiblioDbName];
+                if (vdb == null)
+                    return 0;
+
+                strBiblioDbName = vdb.GetName("zh");
+                if (String.IsNullOrEmpty(strBiblioDbName) == true)
+                {
+                    strError = "数据库 "+vdb.GetName(null) +" 居然没有 zh 语言的名字";
+                    return -1;
+                }
+
+                // 再次获得
+                node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//itemdbgroup/database[@biblioDbName='" + strBiblioDbName + "']");
+
+                if (node == null)
+                    return 0;
+            }
+            strItemDbName = DomUtil.GetAttr(node, "name");
+            return 1;
+
+            /*
+            if (this.GlobalCfgDom == null)
+            {
+                strError = "GlobalCfgDom尚未初始化";
+                return -1;
+            }
+
+            XmlNodeList nodes = this.GlobalCfgDom.DocumentElement.SelectNodes("//dblink");
+
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                XmlNode node = nodes[i];
+
+                string strBiblioDb = DomUtil.GetAttr(node, "bibliodb");
+
+                string strItemDb = DomUtil.GetAttr(node, "itemdb");
+
+                if (strBiblioDbName == strBiblioDb)
+                {
+                    strItemDbName = strItemDb;
+                    return 1;
+                }
+            }
+            return 0;
+             * */
+
+        }
+
+        // 根据书目库名, 找到对应的期库名
+        // return:
+        //      -1  出错
+        //      0   没有找到(书目库)
+        //      1   找到
+        public int GetIssueDbName(string strBiblioDbName,
+            out string strIssueDbName,
+            out string strError)
+        {
+            strError = "";
+            strIssueDbName = "";
+
+            // 2007/5/25 new changed
+            XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//itemdbgroup/database[@biblioDbName='" + strBiblioDbName + "']");
+
+            if (node == null)
+            {
+                // 如果没有找到，则找<caption>
+                VirtualDatabase vdb = this.vdbs[strBiblioDbName];
+                if (vdb == null)
+                    return 0;
+
+                strBiblioDbName = vdb.GetName("zh");
+                if (String.IsNullOrEmpty(strBiblioDbName) == true)
+                {
+                    strError = "数据库 " + vdb.GetName(null) + " 居然没有 zh 语言的名字";
+                    return -1;
+                }
+
+                // 再次获得
+                node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//itemdbgroup/database[@biblioDbName='" + strBiblioDbName + "']");
+
+                if (node == null)
+                    return 0;
+            }
+
+            strIssueDbName = DomUtil.GetAttr(node, "issueDbName");
+            return 1;   // 注意有时虽然找到了书目库，但是issueDbName属性缺省或者为空
+        }
+
+        // 根据书目库名, 找到对应的订购库名
+        // return:
+        //      -1  出错
+        //      0   没有找到(书目库)
+        //      1   找到
+        public int GetOrderDbName(string strBiblioDbName,
+            out string strOrderDbName,
+            out string strError)
+        {
+            strError = "";
+            strOrderDbName = "";
+
+            XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//itemdbgroup/database[@biblioDbName='" + strBiblioDbName + "']");
+
+            if (node == null)
+            {
+                // 如果没有找到，则找<caption>
+                VirtualDatabase vdb = this.vdbs[strBiblioDbName];
+                if (vdb == null)
+                    return 0;
+
+                strBiblioDbName = vdb.GetName("zh");
+                if (String.IsNullOrEmpty(strBiblioDbName) == true)
+                {
+                    strError = "数据库 " + vdb.GetName(null) + " 居然没有 zh 语言的名字";
+                    return -1;
+                }
+
+                // 再次获得
+                node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//itemdbgroup/database[@biblioDbName='" + strBiblioDbName + "']");
+
+                if (node == null)
+                    return 0;
+            }
+
+            strOrderDbName = DomUtil.GetAttr(node, "orderDbName");
+            return 1;   // 注意有时虽然找到了书目库，但是orderDbName属性缺省或者为空
+        }
+
+        // 根据书目库名, 找到对应的评注库名
+        // 2008/12/8
+        // return:
+        //      -1  出错
+        //      0   没有找到(书目库)
+        //      1   找到
+        public int GetCommentDbName(string strBiblioDbName,
+            out string strCommentDbName,
+            out string strError)
+        {
+            strError = "";
+            strCommentDbName = "";
+
+            XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//itemdbgroup/database[@biblioDbName='" + strBiblioDbName + "']");
+
+            if (node == null)
+            {
+                // 如果没有找到，则找<caption>
+                VirtualDatabase vdb = this.vdbs[strBiblioDbName];
+                if (vdb == null)
+                    return 0;
+
+                strBiblioDbName = vdb.GetName("zh");
+                if (String.IsNullOrEmpty(strBiblioDbName) == true)
+                {
+                    strError = "数据库 " + vdb.GetName(null) + " 居然没有 zh 语言的名字";
+                    return -1;
+                }
+
+                // 再次获得
+                node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//itemdbgroup/database[@biblioDbName='" + strBiblioDbName + "']");
+
+                if (node == null)
+                    return 0;
+            }
+            strCommentDbName = DomUtil.GetAttr(node, "commentDbName");
+            return 1;   // 注意有时虽然找到了书目库，但是commentDbName属性缺省或者为空
+        }
+
+        // 在未指定语言的情况下获得全部<caption>名
+        public static List<string> GetAllNames(XmlNode parent)
+        {
+            List<string> results = new List<string>();
+
+            XmlNodeList nodes = parent.SelectNodes("caption");
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                results.Add(nodes[i].InnerText);
+            }
+
+            return results;
+        }
+
+        static string m_strKernelBrowseFomatsXml = 
+            "<formats> "
+            + "<format name='browse' type='kernel'>"
+            + "    <caption lang='zh-cn'>浏览</caption>"
+            + "    <caption lang='en'>Browse</caption>"
+            + "</format>"
+            + "<format name='MARC' type='kernel'>"
+            + "    <caption lang='zh-cn'>MARC</caption>"
+            + "    <caption lang='en'>MARC</caption>"
+            + "</format>"
+            + "</formats>";
+
+        // 2011/1/2
+        // 是否为内置格式名
+        // paramters:
+        //      strNeutralName  语言中立的名字。例如 browse / MARC。大小写不敏感
+        public static bool IsKernelFormatName(string strName,
+            string strNeutralName)
+        {
+            if (strName.ToLower() == strNeutralName.ToLower())
+                return true;
+
+            // 先从内置的格式里面找
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(m_strKernelBrowseFomatsXml);
+
+            XmlNodeList format_nodes = dom.DocumentElement.SelectNodes("format");
+            for (int j = 0; j < format_nodes.Count; j++)
+            {
+                XmlNode node = format_nodes[j];
+
+                List<string> captions = GetAllNames(node);
+                if (captions.IndexOf(strName) == -1)
+                    continue;
+
+                if (DomUtil.GetAttr(node, "name").ToLower() == strNeutralName.ToLower())
+                    return true;
+            }
+
+            return false;
+        }
+
+        // 2011/1/2
+        // 获得特定语言的格式名
+        // 包括内置的格式
+        public string GetBrowseFormatName(string strName,
+            string strLang)
+        {
+            // 先从内置的格式里面找
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(m_strKernelBrowseFomatsXml);
+
+            XmlNodeList nodes = dom.DocumentElement.SelectNodes("format");
+            string strFormat = GetBrowseFormatName(
+                nodes,
+                strName,
+                strLang);
+            if (String.IsNullOrEmpty(strFormat) == false)
+                return strFormat;
+
+            XmlNode root = this.LibraryCfgDom.DocumentElement.SelectSingleNode("browseformats");
+            if (root == null)
+            {
+                // string strError = "<browseformats>元素尚未配置...";
+                // TODO: 抛出异常?
+                return null;
+            }
+
+            // 然后从用户定义的格式里面找
+            nodes = root.SelectNodes("database/format");
+            return GetBrowseFormatName(
+                nodes,
+                strName,
+                strLang);
+        }
+
+        // 2011/1/2
+        static string GetBrowseFormatName(
+            XmlNodeList format_nodes,
+            string strName,
+            string strLang)
+        {
+
+            for (int j = 0; j < format_nodes.Count; j++)
+            {
+                XmlNode node = format_nodes[j];
+
+                List<string> captions = GetAllNames(node);
+                if (captions.IndexOf(strName) == -1)
+                    continue;
+
+                string strFormatName = DomUtil.GetCaption(strLang, node);
+                if (String.IsNullOrEmpty(strFormatName) == false)
+                    return strFormatName;
+            }
+
+            return null;    // not found
+        }
+
+#if NO
+        // 获得特定语言的格式名
+        public string GetBrowseFormatName(
+            string strName,
+            string strLang)
+        {
+            XmlNode root = this.LibraryCfgDom.DocumentElement.SelectSingleNode("browseformats");
+            if (root == null)
+            {
+                // string strError = "<browseformats>元素尚未配置...";
+                // TODO: 抛出异常?
+                return null;
+            }
+
+            XmlNodeList dbnodes = root.SelectNodes("database");
+            for (int i = 0; i < dbnodes.Count; i++)
+            {
+                XmlNode nodeDatabase = dbnodes[i];
+
+                string strDbName = DomUtil.GetAttr(nodeDatabase, "name");
+
+
+                XmlNodeList nodes = nodeDatabase.SelectNodes("format");
+                for (int j = 0; j < nodes.Count; j++)
+                {
+                    XmlNode node = nodes[j];
+
+                    List<string> captions = GetAllNames(node);
+                    if (captions.IndexOf(strName) == -1)
+                        continue;
+
+                    string strFormatName = DomUtil.GetCaption(strLang, node);
+                    if (String.IsNullOrEmpty(strFormatName) == false)
+                        return strFormatName;
+                }
+            }
+
+            return null;    // not found
+        }
+#endif
+
+        // 获得一些数据库的全部浏览格式配置信息
+        // parameters:
+        //      dbnames 要列出哪些数据库的浏览格式？如果==null, 则表示列出全部可能的格式名
+        // return:
+        //      -1  出错
+        //      >=0 formatname个数
+        public int GetBrowseFormatNames(
+            string strLang,
+            List<string> dbnames,
+            out List<string> formatnames,
+            out string strError)
+        {
+            strError = "";
+            formatnames = new List<string>();
+
+            XmlNode root = this.LibraryCfgDom.DocumentElement.SelectSingleNode("browseformats");
+            if (root == null)
+            {
+                strError = "<browseformats>元素尚未配置...";
+                return -1;
+            }
+
+            XmlNodeList dbnodes = root.SelectNodes("database");
+            for (int i = 0; i < dbnodes.Count; i++)
+            {
+                XmlNode nodeDatabase = dbnodes[i];
+
+                string strDbName = DomUtil.GetAttr(nodeDatabase, "name");
+
+                // dbnames如果==null, 则表示列出全部可能的格式名
+                if (dbnames != null)
+                {
+                    if (dbnames.IndexOf(strDbName) == -1)
+                        continue;
+                }
+
+                XmlNodeList nodes = nodeDatabase.SelectNodes("format");
+                for (int j = 0; j < nodes.Count; j++)
+                {
+                    XmlNode node = nodes[j];
+
+                    string strFormatName = DomUtil.GetCaption(strLang, node);
+                    if (String.IsNullOrEmpty(strFormatName) == true)
+                        strFormatName = DomUtil.GetAttr(node, "name");
+
+                    /*
+                    if (String.IsNullOrEmpty(strFormatName) == true)
+                    {
+                        strError = "格式配置片断 '" + node.OuterXml + "' 格式不正确...";
+                        return -1;
+                    }*/
+
+                    if (formatnames.IndexOf(strFormatName) == -1)
+                        formatnames.Add(strFormatName);
+                }
+
+            }
+
+            // 2011/1/2
+            // 从内置的格式里面找
+            // TODO: 对一些根本不是MARC格式的数据库，排除"MARC"格式名
+            {
+                XmlDocument dom = new XmlDocument();
+                dom.LoadXml(m_strKernelBrowseFomatsXml);
+
+                XmlNodeList nodes = dom.DocumentElement.SelectNodes("format");
+                for (int j = 0; j < nodes.Count; j++)
+                {
+                    XmlNode node = nodes[j];
+
+                    string strFormatName = DomUtil.GetCaption(strLang, node);
+                    if (String.IsNullOrEmpty(strFormatName) == true)
+                        strFormatName = DomUtil.GetAttr(node, "name");
+
+                    if (formatnames.IndexOf(strFormatName) == -1)
+                        formatnames.Add(strFormatName);
+                }
+            }
+
+            return formatnames.Count;
+        }
+
+        // 获得一个数据库的全部浏览格式配置信息
+        // return:
+        //      -1  出错
+        //      0   没有配置。具体原因在strError中
+        //      >=1 format个数
+        public int GetBrowseFormats(string strDbName,
+            out List<BrowseFormat> formats,
+            out string strError)
+        {
+            strError = "";
+            formats = null;
+
+            XmlNode root = this.LibraryCfgDom.DocumentElement.SelectSingleNode("browseformats");
+            if (root == null)
+            {
+                strError = "<browseformats>元素尚未配置...";
+                return -1;
+            }
+
+            XmlNode node = root.SelectSingleNode("database[@name='" + strDbName + "']");
+            if (node == null)
+            {
+                strError = "针对数据库 '" + strDbName + "' 没有在<browseformats>下配置<database>参数";
+                return 0;
+            }
+
+            formats = new List<BrowseFormat>();
+
+            XmlNodeList nodes = node.SelectNodes("format");
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                node = nodes[i];
+                BrowseFormat format = new BrowseFormat();
+                format.Name = DomUtil.GetAttr(node, "name");
+                format.Type = DomUtil.GetAttr(node, "type");
+                format.ScriptFileName = DomUtil.GetAttr(node, "scriptfile");
+                formats.Add(format);
+            }
+
+            if (nodes.Count == 0)
+            {
+                strError = "数据库 '" + strDbName + "' 在<browseformats>下的<database>元素下，一个<format>元素也未配置。";
+            }
+
+            return nodes.Count;
+        }
+
+        // 获得一个数据库的一个浏览格式配置信息
+        // parameters:
+        //      strDbName   "zh"语言的数据库名。也就是<browseformats>下<database>元素的name属性内的数据库名。
+        //      strFormatName   界面上选定的格式名。注意，不一定是正好属于this.Lang语言的
+        // return:
+        //      0   没有配置
+        //      1   成功
+        public int GetBrowseFormat(string strDbName,
+            string strFormatName,
+            out BrowseFormat format,
+            out string strError)
+        {
+            strError = "";
+            format = null;
+
+            // 先从全部<format>元素下面的全部<caption>中找
+            XmlNode nodeDatabase = this.LibraryCfgDom.DocumentElement.SelectSingleNode(
+                "browseformats/database[@name='" + strDbName + "']");
+
+            if (nodeDatabase == null)
+            {
+                strError = "数据库名 '" + strDbName + "' 在<browseformats>元素下没有找到匹配的<database>元素";
+                return -1;
+            }
+
+            XmlNode nodeFormat = null;
+
+            XmlNodeList nodes = nodeDatabase.SelectNodes("format");
+            for (int j = 0; j < nodes.Count; j++)
+            {
+                XmlNode node = nodes[j];
+
+                List<string> captions = GetAllNames(node);
+                if (captions.IndexOf(strFormatName) != -1)
+                {
+                    nodeFormat = node;
+                    break;
+                }
+            }
+
+            // 再从<format>元素的name属性中找
+            if (nodeFormat == null)
+            {
+                nodeFormat = nodeDatabase.SelectSingleNode(
+                    "format[@name='" + strFormatName + "']");
+                if (nodeFormat == null)
+                {
+                    return 0;
+                }
+            }
+
+            format = new BrowseFormat();
+            format.Name = DomUtil.GetAttr(nodeFormat, "name");
+            format.Type = DomUtil.GetAttr(nodeFormat, "type");
+            format.ScriptFileName = DomUtil.GetAttr(nodeFormat, "scriptfile");
+
+            return 1;
+        }
+
+
+        // 从library.xml文件定义 获得一个帐户的信息
+        // TODO: 多文种提示
+        // return:
+        //      -1  error
+        //      0   not found
+        //      1   found
+        public int GetAccount(string strUserID,
+            out Account account,
+            out string strError)
+        {
+            strError = "";
+            account = null;
+
+            XmlNode root = this.LibraryCfgDom.DocumentElement.SelectSingleNode("accounts");
+            if (root == null)
+            {
+                strError = "<accounts>元素尚未配置...";
+                return -1;
+            }
+
+            XmlNode node = root.SelectSingleNode("account[@name='"+strUserID+"']");
+            if (node == null)
+            {
+                strError = "用户 '"+strUserID+"' 不存在";
+                return 0;
+            }
+
+            account = new Account();
+            account.XmlNode = node;
+            account.LoginName = DomUtil.GetAttr(node, "name");
+            account.UserID = DomUtil.GetAttr(node, "name");
+
+            string strText = "";
+            try
+            {
+                strText =  DomUtil.GetAttr(node, "password");
+                if (String.IsNullOrEmpty(strText) == true)
+                    account.Password = "";
+                else
+                {
+                    // TODO: 应该用 SHA1 方式保存密码
+                    account.Password = Cryptography.Decrypt(
+                                strText,
+                                EncryptKey);
+                }
+            }
+            catch
+            {
+                strError = "用户名为 '" + strUserID + "' 的<account> password参数值错误";
+                return -1;
+            }
+            account.Type = DomUtil.GetAttr(node, "type");
+            account.Rights = DomUtil.GetAttr(node, "rights");
+            account.AccountLibraryCode = DomUtil.GetAttr(node, "libraryCode");
+
+            account.Access = DomUtil.GetAttr(node, "access");
+            account.RmsUserName = DomUtil.GetAttr(node, "rmsUserName");
+
+            try
+            {
+                strText =  DomUtil.GetAttr(node, "rmsPassword");
+                if (String.IsNullOrEmpty(strText) == true)
+                    account.RmsPassword = "";
+                else
+                {
+                    account.RmsPassword = Cryptography.Decrypt(
+                              strText,
+                              EncryptKey);
+                }
+            }
+            catch
+            {
+                strError = "用户名为 '" + strUserID + "' 的<account> rmsPassword参数值错误";
+                return -1;
+            }                
+
+            return 1;
+        }
+
+        // TODO：判断strItemBarcode是否为空
+        // 获得预约到书队列记录
+        // parameters:
+        //      strItemBarcodeParam  册条码号。可以使用 @refID: 前缀
+        // return:
+        //      -1  error
+        //      0   not found
+        //      1   命中1条
+        //      >1  命中多于1条
+        public int GetArrivedQueueRecXml(
+            RmsChannelCollection channels,
+            string strItemBarcodeParam,
+            out string strXml,
+            out byte[] timestamp,
+            out string strOutputPath,
+            out string strError)
+        {
+            strOutputPath = "";
+            strXml = "";
+            strError = "";
+            timestamp = null;
+
+            LibraryApplication app = this;
+
+            // 2014/9/19
+            string strHead = "@refID:";
+
+            string strFrom = "册条码";
+            if (StringUtil.HasHead(strItemBarcodeParam, strHead, true) == true)
+            {
+                strFrom = "参考ID";
+                strItemBarcodeParam = strItemBarcodeParam.Substring(strHead.Length).Trim();
+                if (string.IsNullOrEmpty(strItemBarcodeParam) == true)
+                {
+                    strError = "参数 strItemBarcodeParam 值中参考ID部分不应为空";
+                    return -1;
+                }
+            }
+
+            // 构造检索式
+            // 2007/4/5 改造 加上了 GetXmlStringSimple()
+            string strQueryXml = "<target list='"
+                + StringUtil.GetXmlStringSimple(app.ArrivedDbName + ":" + strFrom)
+                + "'><item><word>"
+                + StringUtil.GetXmlStringSimple(strItemBarcodeParam)
+                + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>1000</maxCount></item><lang>zh</lang></target>";
+
+            RmsChannel channel = channels.GetChannel(app.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
+            long lRet = channel.DoSearch(strQueryXml,
+                "default",
+                "", // strOuputStyle
+                out strError);
+            if (lRet == -1)
+                goto ERROR1;
+
+            if (lRet == 0)
+            {
+                strError = "没有找到";
+                return 0;
+            }
+
+            long lHitCount = lRet;
+
+            List<string> aPath = null;
+            lRet = channel.DoGetSearchResult(
+                "default",
+                0,
+                1,
+                "zh",
+                null,
+                out aPath,
+                out strError);
+            if (lRet == -1)
+                goto ERROR1;
+            if (aPath.Count == 0)
+            {
+                strError = "DoGetSearchResult aPath error";
+                goto ERROR1;
+            }
+
+            string strMetaData = "";
+
+            lRet = channel.GetRes(aPath[0],
+                out strXml,
+                out strMetaData,
+                out timestamp,
+                out strOutputPath,
+                out strError);
+            if (lRet == -1)
+                goto ERROR1;
+
+            return (int)lHitCount;
+        ERROR1:
+            return -1;
+        }
+
+        // 2007/6/27
+        // 获得通用记录
+        // 本函数可获得超过1条以上的路径
+        // return:
+        //      -1  error
+        //      0   not found
+        //      1   命中1条
+        //      >1  命中多于1条
+        public int GetRecXml(
+            RmsChannelCollection channels,
+            string strQueryXml,
+            out string strXml,
+            int nMax,
+            out List<string> aPath,
+            out byte[] timestamp,
+            out string strError)
+        {
+            aPath = null;
+
+            strXml = "";
+            strError = "";
+            timestamp = null;
+
+            LibraryApplication app = this;
+
+            RmsChannel channel = channels.GetChannel(app.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
+            long lRet = channel.DoSearch(strQueryXml,
+                "default",
+                "", // strOuputStyle
+                out strError);
+            if (lRet == -1)
+                goto ERROR1;
+
+            // not found
+            if (lRet == 0)
+            {
+                strError = "没有命中记录";
+                return 0;
+            }
+
+            long lHitCount = lRet;
+
+            // List<string> aPath = null;
+            lRet = channel.DoGetSearchResult(
+                "default",
+                0,
+                Math.Min(nMax, lHitCount),
+                "zh",
+                null,
+                out aPath,
+                out strError);
+            if (lRet == -1)
+                goto ERROR1;
+
+            Debug.Assert(aPath != null, "");
+
+            if (aPath.Count == 0)
+            {
+                strError = "DoGetSearchResult aPath error";
+                goto ERROR1;
+            }
+
+            string strMetaData = "";
+            string strOutputPath = "";
+
+            lRet = channel.GetRes(aPath[0],
+                out strXml,
+                out strMetaData,
+                out timestamp,
+                out strOutputPath,
+                out strError);
+            if (lRet == -1)
+                goto ERROR1;
+
+            return (int)lHitCount;
+        ERROR1:
+            return -1;
+        }
+
+        // 包装后的版本
+        public int GetReaderRecXml(
+    RmsChannelCollection channels,
+    string strBarcode,
+    out string strXml,
+    out string strOutputPath,
+    out string strError)
+        {
+            byte[] timestamp = null;
+
+            return GetReaderRecXml(
+                channels,
+                strBarcode,
+                out strXml,
+                out strOutputPath,
+                out timestamp,
+                out strError);
+        }
+
+        // TODO: 判断strBorrowItemBarcode是否为空
+        // 通过“所借册条码号”获得读者记录
+        // 本函数可获得超过1条以上的路径
+        // return:
+        //      -1  error
+        //      0   not found
+        //      1   命中1条
+        //      >1  命中多于1条
+        public int GetReaderRecXml(
+            RmsChannelCollection channels,
+            string strBorrowItemBarcode,
+            out string strXml,
+            int nMax,
+            out List<string> aPath,
+            out byte[] timestamp,
+            out string strError)
+        {
+            aPath = null;
+
+            strXml = "";
+            strError = "";
+            timestamp = null;
+
+            LibraryApplication app = this;
+
+            // 构造检索式
+            string strQueryXml = "";
+            for (int i = 0; i < app.ReaderDbs.Count; i++)
+            {
+                string strDbName = app.ReaderDbs[i].DbName;
+
+                Debug.Assert(String.IsNullOrEmpty(strDbName) == false, "");
+
+                string strOneDbQuery = "<target list='"
+                    + StringUtil.GetXmlStringSimple(strDbName + ":" + "所借册条码")
+                    + "'><item><word>"
+                    + StringUtil.GetXmlStringSimple(strBorrowItemBarcode)
+                    + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>"+nMax.ToString()+"</maxCount></item><lang>zh</lang></target>";
+
+                if (i > 0)
+                    strQueryXml += "<operator value='OR'/>";
+
+                strQueryXml += strOneDbQuery;
+            }
+
+            if (app.ReaderDbs.Count > 0)
+            {
+                strQueryXml = "<group>" + strQueryXml + "</group>";
+            }
+
+            RmsChannel channel = channels.GetChannel(app.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
+            long lRet = channel.DoSearch(strQueryXml,
+                "default",
+                "", // strOuputStyle
+                out strError);
+            if (lRet == -1)
+                goto ERROR1;
+
+            // not found
+            if (lRet == 0)
+            {
+                strError = "所借册条码号 '" + strBorrowItemBarcode + "' 没有找到";
+                return 0;
+            }
+
+            long lHitCount = lRet;
+
+            // List<string> aPath = null;
+            lRet = channel.DoGetSearchResult(
+                "default",
+                0,
+                Math.Min(nMax, lHitCount),
+                "zh",
+                null,
+                out aPath,
+                out strError);
+            if (lRet == -1)
+                goto ERROR1;
+
+            Debug.Assert(aPath != null, "");
+
+            if (aPath.Count == 0)
+            {
+                strError = "DoGetSearchResult aPath error";
+                goto ERROR1;
+            }
+
+            string strMetaData = "";
+            // byte[] timestamp = null;
+            string strOutputPath = "";
+
+            lRet = channel.GetRes(aPath[0],
+                out strXml,
+                out strMetaData,
+                out timestamp,
+                out strOutputPath,
+                out strError);
+            if (lRet == -1)
+                goto ERROR1;
+
+            return (int)lHitCount;
+        ERROR1:
+            return -1;
+        }
+
+#if SLOWLY
+        // TODO： 判断strBarcode是否为空
+        // 通过读者证条码号获得读者记录
+        // return:
+        //      -1  error
+        //      0   not found
+        //      1   命中1条
+        //      >1  命中多于1条
+        public int GetReaderRecXml(
+            RmsChannelCollection channels,
+            string strBarcode,
+            out string strXml,
+            out string strOutputPath,
+            out byte[] timestamp,
+            out string strError)
+        {
+            strOutputPath = "";
+            timestamp = null;
+            strXml = "";
+            strError = "";
+
+            LibraryApplication app = this;
+
+            int nInCount = 0;   // 参与流通的读者库个数
+
+            // 构造检索式
+            string strQueryXml = "";
+            for (int i = 0; i < app.ReaderDbs.Count; i++)
+            {
+                nInCount++;
+
+                string strDbName = app.ReaderDbs[i].DbName;
+
+                Debug.Assert(String.IsNullOrEmpty(strDbName) == false, "");
+
+                // 2007/4/5 改造 加上了 GetXmlStringSimple()
+                string strOneDbQuery = "<target list='"
+                    + StringUtil.GetXmlStringSimple(strDbName + ":" + "证条码")       // 2007/9/14 new add
+                    + "'><item><word>"
+                    + StringUtil.GetXmlStringSimple(strBarcode)
+                    + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>1000</maxCount></item><lang>zh</lang></target>";
+
+                if (i > 0)
+                {
+                    Debug.Assert(String.IsNullOrEmpty(strQueryXml) == false, "");
+                    strQueryXml += "<operator value='OR'/>";
+                }
+
+                strQueryXml += strOneDbQuery;
+            }
+
+            if (nInCount == 0)
+            {
+                strError = "当前尚没有配置读者库";
+                return -1;
+            }
+
+            if (app.ReaderDbs.Count > 0)
+            {
+                strQueryXml = "<group>" + strQueryXml + "</group>";
+            }
+
+            RmsChannel channel = channels.GetChannel(app.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
+            long lRet = channel.DoSearch(strQueryXml,
+                "default",
+                "", // strOuputStyle
+                out strError);
+            if (lRet == -1)
+                goto ERROR1;
+
+            // not found
+            if (lRet == 0)
+            {
+                strError = "读者证条码号 '" + strBarcode + "' 没有找到";
+                return 0;
+            }
+
+            long lHitCount = lRet;
+
+
+#if OPTIMIZE_API
+            List<RichRecord> records = null;
+            lRet = channel.GetRichRecords(
+                "default",
+                0,
+                1,
+                "path,xml,timestamp",
+                "zh",
+                out records,
+                out strError);
+            if (lRet == -1)
+                goto ERROR1;
+
+            if (records == null)
+            {
+                strError = "records == null";
+                goto ERROR1;
+            }
+
+            if (records.Count < 1)
+            {
+                strError = "records.Count < 1";
+                goto ERROR1;
+            }
+
+            strXml = records[0].Xml;
+            timestamp = records[0].baTimestamp;
+            strOutputPath = records[0].Path;
+#else 
+
+            List<string> aPath = null;
+            lRet = channel.DoGetSearchResult(
+                "default",
+                0,
+                1,
+                "zh",
+                null,
+                out aPath,
+                out strError);
+            if (lRet == -1)
+                goto ERROR1;
+            if (aPath.Count == 0)
+            {
+                strError = "DoGetSearchResult aPath error";
+                goto ERROR1;
+            }
+
+            string strMetaData = "";
+            // byte[] timestamp = null;
+            // string strOutputPath = "";
+
+            lRet = channel.GetRes(aPath[0],
+                out strXml,
+                out strMetaData,
+                out timestamp,
+                out strOutputPath,
+                out strError);
+            if (lRet == -1)
+                goto ERROR1;
+#endif
+
+            return (int)lHitCount;
+        ERROR1:
+            return -1;
+        }
+#endif
+
+        // 2013/5/23
+        // 包装以后的版本
+        public int GetReaderRecXml(
+    RmsChannelCollection channels,
+    string strBarcode,
+    out string strXml,
+    out string strOutputPath,
+    out byte[] timestamp,
+    out string strError)
+        {
+            strOutputPath = "";
+            List<string> recpaths = null;
+            int nRet = GetReaderRecXml(
+            channels,
+            strBarcode,
+            1,
+            "",
+            out recpaths,
+            out strXml,
+            out timestamp,
+            out strError);
+            if (recpaths != null && recpaths.Count > 0)
+                strOutputPath = recpaths[0];
+
+            return nRet;
+        }
+
+        // 2012/1/5 改造为PiggyBack检索
+        // 2013/5/23 改造为可以返回所有命中的 记录路径
+        // TODO： 判断strBarcode是否为空
+        // 通过读者证条码号获得读者记录
+        // return:
+        //      -1  error
+        //      0   not found
+        //      1   命中1条
+        //      >1  命中多于1条
+        public int GetReaderRecXml(
+            RmsChannelCollection channels,
+            string strBarcode,
+            int nMax,
+            string strLibraryCodeList,
+            out List<string> recpaths,
+            out string strXml,
+            // out string strOutputPath,
+            out byte[] timestamp,
+            out string strError)
+        {
+            // strOutputPath = "";
+            timestamp = null;
+            strXml = "";
+            strError = "";
+            int nRet = 0;
+
+            recpaths = new List<string>();
+
+            LibraryApplication app = this;
+
+            List<string> dbnames = new List<string>();
+            // 获得读者库名列表
+            // parameters:
+            //      strReaderDbNames    库名列表字符串。如果为空，则表示全部读者库
+            nRet = GetDbNameList("",
+                strLibraryCodeList,
+                out dbnames,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+
+            // 构造检索式
+            string strQueryXml = "";
+            // int nInCount = 0;   // 参与流通的读者库个数
+            foreach (string strDbName in dbnames)
+            {
+                // string strDbName = app.ReaderDbs[i].DbName;
+
+                if (string.IsNullOrEmpty(strDbName) == true)
+                {
+                    Debug.Assert(false, "");
+                    continue;
+                }
+
+                // 2007/4/5 改造 加上了 GetXmlStringSimple()
+                string strOneDbQuery = "<target list='"
+                    + StringUtil.GetXmlStringSimple(strDbName + ":" + "证条码")  // TODO: 将来统一修改为“证条码号”     // 2007/9/14 new add
+                    + "'><item><word>"
+                    + StringUtil.GetXmlStringSimple(strBarcode)
+                    + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>1000</maxCount></item><lang>zh</lang></target>";
+
+                if (String.IsNullOrEmpty(strQueryXml) == false) // i > 0
+                {
+                    Debug.Assert(String.IsNullOrEmpty(strQueryXml) == false, "");
+                    strQueryXml += "<operator value='OR'/>";
+                }
+
+                strQueryXml += strOneDbQuery;
+
+                // nInCount++;
+            }
+
+            if (string.IsNullOrEmpty(strQueryXml) == true /*nInCount == 0*/)
+            {
+                if (app.ReaderDbs.Count == 0)
+                    strError = "当前尚没有配置读者库";
+                else
+                    strError = "当前没有可以操作的读者库";
+                return -1;
+            }
+
+            if (dbnames.Count > 0/*nInCount > 0*/)
+            {
+                strQueryXml = "<group>" + strQueryXml + "</group>";
+            }
+
+            RmsChannel channel = channels.GetChannel(app.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
+            Record[] records = null;
+            long lRet = channel.DoSearchEx(strQueryXml,
+                "default",
+                "", // strOuputStyle
+                1,
+                "zh",
+                "id,xml,timestamp",
+                out records,
+                out strError);
+            if (lRet == -1)
+                goto ERROR1;
+
+            // not found
+            if (lRet == 0)
+            {
+                strError = "读者证条码号 '" + strBarcode + "' 没有找到";
+                return 0;
+            }
+
+            long lHitCount = lRet;
+
+            if (records == null || records.Length == 0)
+            {
+                strError = "records error";
+                return -1;
+            }
+
+            Debug.Assert(records[0].RecordBody != null, "");
+
+            // strOutputPath = records[0].Path;
+            if (nMax >= 1)
+                recpaths.Add(records[0].Path);
+            strXml = records[0].RecordBody.Xml;
+            timestamp = records[0].RecordBody.Timestamp;
+
+            // 如果命中结果多余一条，则继续获得第一条以后的各条的path
+            if (lHitCount > 1 && nMax > 1)
+            {
+                // List<string> temp = null;
+                lRet = channel.DoGetSearchResult(
+                    "default",
+                    0,
+                    Math.Min(nMax, lHitCount),
+                    "zh",
+                    null,
+                    out recpaths,
+                    out strError);
+                if (lRet == -1)
+                    goto ERROR1;
+
+                Debug.Assert(recpaths != null, "");
+
+                if (recpaths.Count == 0)
+                {
+                    strError = "DoGetSearchResult aPath error";
+                    goto ERROR1;
+                }
+            }
+
+            return (int)lHitCount;
+        ERROR1:
+            return -1;
+        }
+
+        // 包装后版本
+        // TODO: 判断strDisplayName是否为空
+        // 通过读者显示名获得读者记录
+        // return:
+        //      -1  error
+        //      0   not found
+        //      1   命中1条
+        //      >1  命中多于1条
+        public int GetReaderRecXmlByDisplayName(
+            RmsChannelCollection channels,
+            string strDisplayName,
+            out string strXml,
+            out string strOutputPath,
+            out byte[] timestamp,
+            out string strError)
+        {
+            return GetReaderRecXmlByFrom(
+            channels,
+            strDisplayName,
+            "显示名",
+            out strXml,
+            out strOutputPath,
+            out timestamp,
+            out strError);
+        }
+
+        // 包装后的版本
+        public int GetReaderRecXmlByFrom(
+    RmsChannelCollection channels,
+    string strWord,
+    string strFrom,
+    out string strXml,
+    out string strOutputPath,
+    out byte[] timestamp,
+    out string strError)
+        {
+            return GetReaderRecXmlByFrom(
+    channels,
+    null,
+    strWord,
+    strFrom,
+    out strXml,
+    out strOutputPath,
+    out timestamp,
+    out strError);
+        }
+
+#if SLOWLY
+        // TODO: 判断strWord是否为空
+        // 通过特定检索途径获得读者记录
+        // parameters:
+        //      strReaderDbNames    读者库名列表。如果为空，表示采用当前配置的全部读者库
+        // return:
+        //      -1  error
+        //      0   not found
+        //      1   命中1条
+        //      >1  命中多于1条
+        public int GetReaderRecXmlByFrom(
+            RmsChannelCollection channels,
+            string strReaderDbNames,
+            string strWord,
+            string strFrom,
+            out string strXml,
+            out string strOutputPath,
+            out byte[] timestamp,
+            out string strError)
+        {
+            strOutputPath = "";
+            timestamp = null;
+            strXml = "";
+            strError = "";
+
+            LibraryApplication app = this;
+
+            List<string> dbnames = new List<string>();
+            if (string.IsNullOrEmpty(strReaderDbNames) == true)
+            {
+                for (int i = 0; i < app.ReaderDbs.Count; i++)
+                {
+                    string strDbName = app.ReaderDbs[i].DbName;
+
+                    if (string.IsNullOrEmpty(strDbName) == true)
+                    {
+                        Debug.Assert(false, "");
+                        continue;
+                    }
+
+                    dbnames.Add(strDbName);
+                }
+
+                if (dbnames.Count == 0)
+                {
+                    strError = "当前尚没有配置读者库";
+                    return -1;
+                }
+            }
+            else
+            {
+                dbnames = StringUtil.SplitList(strReaderDbNames);
+                StringUtil.RemoveBlank(ref dbnames);
+
+                if (dbnames.Count == 0)
+                {
+                    strError = "参数strReaderDbNames值 '" + strReaderDbNames + "' 中没有包含有效的读者库名";
+                    return -1;
+                }
+            }
+
+            // 构造检索式
+            string strQueryXml = "";
+            for (int i = 0; i < dbnames.Count; i++)
+            {
+                string strDbName = dbnames[i];
+
+                Debug.Assert(String.IsNullOrEmpty(strDbName) == false, "");
+
+                string strOneDbQuery = "<target list='"
+                    + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 new add
+                    + "'><item><word>"
+                    + StringUtil.GetXmlStringSimple(strWord)
+                    + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>1000</maxCount></item><lang>zh</lang></target>";
+
+                if (i > 0)
+                {
+                    Debug.Assert(String.IsNullOrEmpty(strQueryXml) == false, "");
+                    strQueryXml += "<operator value='OR'/>";
+                }
+
+                strQueryXml += strOneDbQuery;
+            }
+
+            if (dbnames.Count > 0)
+            {
+                strQueryXml = "<group>" + strQueryXml + "</group>";
+            }
+
+            RmsChannel channel = channels.GetChannel(app.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
+            long lRet = channel.DoSearch(strQueryXml,
+                "default",
+                "", // strOuputStyle
+                out strError);
+            if (lRet == -1)
+                goto ERROR1;
+
+            // not found
+            if (lRet == 0)
+            {
+                strError = "读者"+strFrom+" '" + strWord + "' 没有找到";
+                return 0;
+            }
+
+            long lHitCount = lRet;
+
+            List<string> aPath = null;
+            lRet = channel.DoGetSearchResult(
+                "default",
+                0,
+                1,
+                "zh",
+                null,
+                out aPath,
+                out strError);
+            if (lRet == -1)
+                goto ERROR1;
+            if (aPath.Count == 0)
+            {
+                strError = "DoGetSearchResult aPath error";
+                goto ERROR1;
+            }
+
+            string strMetaData = "";
+
+            lRet = channel.GetRes(aPath[0],
+                out strXml,
+                out strMetaData,
+                out timestamp,
+                out strOutputPath,
+                out strError);
+            if (lRet == -1)
+                goto ERROR1;
+
+            return (int)lHitCount;
+        ERROR1:
+            return -1;
+        }
+#endif
+
+        // 2013/5/21
+        // 包装后的版本
+        public int GetReaderRecXmlByFrom(
+            RmsChannelCollection channels,
+            string strReaderDbNames,
+            string strWord,
+            string strFrom,
+            out string strXml,
+            out string strOutputPath,
+            out byte[] timestamp,
+            out string strError)
+        {
+            strOutputPath = "";
+            List<string> recpaths = null;
+            int nRet = GetReaderRecXmlByFrom(
+                channels,
+                strReaderDbNames,
+                strWord,
+                strFrom,
+                1,
+                "",
+                out recpaths,
+                out strXml,
+                out timestamp,
+                out strError);
+            if (recpaths != null && recpaths.Count > 0)
+                strOutputPath = recpaths[0];
+
+            return nRet;
+        }
+
+        // 获得读者库名列表
+        // parameters:
+        //      strReaderDbNames    库名列表字符串。如果为空，则表示全部读者库
+        int GetDbNameList(string strReaderDbNames,
+            string strLibraryCodeList,
+            out List<string> dbnames,
+            out string strError)
+        {
+            strError = "";
+
+            dbnames = new List<string>();
+            if (string.IsNullOrEmpty(strReaderDbNames) == true)
+            {
+                for (int i = 0; i < this.ReaderDbs.Count; i++)
+                {
+                    string strDbName = this.ReaderDbs[i].DbName;
+
+                    if (string.IsNullOrEmpty(strDbName) == true)
+                    {
+                        Debug.Assert(false, "");
+                        continue;
+                    }
+
+                    dbnames.Add(strDbName);
+                }
+
+                if (dbnames.Count == 0)
+                {
+                    strError = "当前尚没有配置读者库";
+                    return -1;
+                }
+            }
+            else
+            {
+                dbnames = StringUtil.SplitList(strReaderDbNames);
+                StringUtil.RemoveBlank(ref dbnames);
+
+                if (dbnames.Count == 0)
+                {
+                    strError = "参数 strReaderDbNames 值 '" + strReaderDbNames + "' 中没有包含有效的读者库名";
+                    return -1;
+                }
+            }
+
+            // 过滤
+            if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
+            {
+                List<string> results = new List<string>();
+                foreach (string s in dbnames)
+                {
+                    if (IsCurrentChangeableReaderPath(s + "/?", strLibraryCodeList) == false)
+                        continue;
+                    results.Add(s);
+                }
+                dbnames = results;
+            }
+
+            return 0;
+        }
+
+        // 2012/1/6 改造为PiggyBack检索
+        // TODO: 判断strWord是否为空
+        // 通过特定检索途径获得读者记录
+        // parameters:
+        //      strReaderDbNames    读者库名列表。如果为空，表示采用当前配置的全部读者库
+        //      nMax                希望在 recpaths 中最多返回多少个记录路径
+        //      strLibraryCodeList  馆代码列表，仅返回属于这个列表管辖的读者库的记录和路径。如果为空，表示不过滤
+        //      recpaths        [out]返回命中的记录路径。如果发生重复，这里会返回多于一个路径
+        // return:
+        //      -1  error
+        //      0   not found
+        //      1   命中1条
+        //      >1  命中多于1条
+        public int GetReaderRecXmlByFrom(
+            RmsChannelCollection channels,
+            string strReaderDbNames,
+            string strWord,
+            string strFrom,
+            int nMax,
+            string strLibraryCodeList,
+            out List<string> recpaths,
+            out string strXml,
+            // out string strOutputPath,
+            out byte[] timestamp,
+            out string strError)
+        {
+            // strOutputPath = "";
+            timestamp = null;
+            strXml = "";
+            strError = "";
+            int nRet = 0;
+
+            recpaths = new List<string>();
+
+            LibraryApplication app = this;
+#if NO
+            List<string> dbnames = new List<string>();
+            if (string.IsNullOrEmpty(strReaderDbNames) == true)
+            {
+                for (int i = 0; i < app.ReaderDbs.Count; i++)
+                {
+                    string strDbName = app.ReaderDbs[i].DbName;
+
+                    if (string.IsNullOrEmpty(strDbName) == true)
+                    {
+                        Debug.Assert(false, "");
+                        continue;
+                    }
+
+                    if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false
+                        && IsCurrentChangeableReaderPath(strDbName + "/?",
+                            strLibraryCodeList) == false)
+                        continue;
+
+                    dbnames.Add(strDbName);
+                }
+
+                if (dbnames.Count == 0)
+                {
+                    strError = "当前尚没有配置读者库";
+                    return -1;
+                }
+            }
+            else
+            {
+                dbnames = StringUtil.SplitList(strReaderDbNames);
+                StringUtil.RemoveBlank(ref dbnames);
+
+                if (dbnames.Count == 0)
+                {
+                    strError = "参数strReaderDbNames值 '" + strReaderDbNames + "' 中没有包含有效的读者库名";
+                    return -1;
+                }
+            }
+#endif
+            List<string> dbnames = new List<string>();
+            // 获得读者库名列表
+            // parameters:
+            //      strReaderDbNames    库名列表字符串。如果为空，则表示全部读者库
+            nRet = GetDbNameList(strReaderDbNames,
+                strLibraryCodeList,
+                out dbnames,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            if (dbnames.Count == 0)
+            {
+                if (app.ReaderDbs.Count == 0)
+                    strError = "当前尚没有配置读者库";
+                else
+                    strError = "当前没有可以操作的读者库";
+                return -1;
+            }
+
+            // 构造检索式
+            string strQueryXml = "";
+            for (int i = 0; i < dbnames.Count; i++)
+            {
+                string strDbName = dbnames[i];
+
+                Debug.Assert(String.IsNullOrEmpty(strDbName) == false, "");
+
+                string strOneDbQuery = "<target list='"
+                    + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 new add
+                    + "'><item><word>"
+                    + StringUtil.GetXmlStringSimple(strWord)
+                    + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>1000</maxCount></item><lang>zh</lang></target>";
+
+                if (i > 0)
+                {
+                    Debug.Assert(String.IsNullOrEmpty(strQueryXml) == false, "");
+                    strQueryXml += "<operator value='OR'/>";
+                }
+
+                strQueryXml += strOneDbQuery;
+            }
+
+            if (dbnames.Count > 0)
+            {
+                strQueryXml = "<group>" + strQueryXml + "</group>";
+            }
+
+            RmsChannel channel = channels.GetChannel(app.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
+            Record[] records = null;
+            long lRet = channel.DoSearchEx(strQueryXml,
+                "default",
+                "", // strOuputStyle
+                1,
+                "zh",
+                "id,xml,timestamp",
+                out records,
+                out strError);
+            if (lRet == -1)
+                goto ERROR1;
+
+            // not found
+            if (lRet == 0)
+            {
+                strError = "读者" + strFrom + " '" + strWord + "' 没有找到";
+                return 0;
+            }
+
+            long lHitCount = lRet;
+
+            if (records == null || records.Length == 0)
+            {
+                strError = "records error";
+                return -1;
+            }
+
+            Debug.Assert(records[0].RecordBody != null, "");
+
+            // strOutputPath = records[0].Path;
+            if (nMax >= 1)
+                recpaths.Add(records[0].Path);
+            strXml = records[0].RecordBody.Xml;
+            timestamp = records[0].RecordBody.Timestamp;
+
+            // 如果命中结果多于一条，则继续获得第一条以后的各条的path
+            if (lHitCount > 1 && nMax > 1)
+            {
+                // List<string> temp = null;
+                lRet = channel.DoGetSearchResult(
+                    "default",
+                    0,
+                    Math.Min(nMax, lHitCount),
+                    "zh",
+                    null,
+                    out recpaths,
+                    out strError);
+                if (lRet == -1)
+                    goto ERROR1;
+
+                Debug.Assert(recpaths != null, "");
+
+                if (recpaths.Count == 0)
+                {
+                    strError = "DoGetSearchResult aPath error";
+                    goto ERROR1;
+                }
+            }
+
+            return (int)lHitCount;
+        ERROR1:
+            return -1;
+        }
+
+        /*
+        // 正在使用的 读者证条码号查重结果集名
+        List<string> m_searchReaderDupResultsetNames = new List<string>();
+         * 
+        // 获得一个尚未使用的 读者证条码号查重结果集名
+        string GetSearchReaderDupResultsetName()
+        {
+            lock (this.m_searchReaderDupResultsetNames)
+            {
+                for (int i = 0; ; i++)
+                {
+                    string strResultSetName = "search_reader_dup_" + i.ToString();
+
+                    int index = this.m_searchReaderDupResultsetNames.IndexOf(strResultSetName);
+                    if (index == -1)
+                    {
+                        this.m_searchReaderDupResultsetNames.Add(strResultSetName);
+                        return strResultSetName;
+                    }
+                }
+            }
+        }
+
+        // 释放一个 读者证条码号查重结果集 名
+        void ReleaseSearchReaderDupResultsetName(string strResultSetName)
+        {
+            lock (this.m_searchReaderDupResultsetNames)
+            {
+                this.m_searchReaderDupResultsetNames.Remove(strResultSetName);
+            }
+        }
+         * */
+
+        // 根据读者证条码号对读者库进行查重
+        // 本函数只负责查重, 并不获得记录体
+        // parameters:
+        //      strBarcode  读者证条码号
+        // return:
+        //      -1  error
+        //      其他    命中记录条数(不超过nMax规定的极限)
+        public int SearchReaderRecDup(
+            RmsChannelCollection channels,
+            string strBarcode,
+            int nMax,
+            out List<string> aPath,
+            out string strError)
+        {
+            strError = "";
+            aPath = null;
+
+            Debug.Assert(String.IsNullOrEmpty(strBarcode) == false, "");
+
+            LibraryApplication app = this;
+
+            // 构造检索式
+            // 查重要针对全部读者库进行，而不光是当前用户能管辖的库
+            string strQueryXml = "";
+            int nCount = 0;
+            for (int i = 0; i < app.ReaderDbs.Count; i++)
+            {
+                string strDbName = app.ReaderDbs[i].DbName;
+
+                Debug.Assert(String.IsNullOrEmpty(strDbName) == false, "");
+
+                if (nCount > 0)
+                {
+                    Debug.Assert(String.IsNullOrEmpty(strQueryXml) == false, "");
+                    strQueryXml += "<operator value='OR'/>";
+                }
+
+                // 2007/4/5 改造 加上了 GetXmlStringSimple()
+                string strOneDbQuery = "<target list='"
+                    + StringUtil.GetXmlStringSimple(strDbName + ":" + "证条码")       // 2007/9/14 new add
+                    + "'><item><word>"
+                    + StringUtil.GetXmlStringSimple(strBarcode)
+                    + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>"+nMax.ToString()+"</maxCount></item><lang>zh</lang></target>";
+                nCount++;
+
+                strQueryXml += strOneDbQuery;
+            }
+
+            if (nCount > 0)
+            {
+                strQueryXml = "<group>" + strQueryXml + "</group>";
+            }
+
+            RmsChannel channel = channels.GetChannel(app.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
+            string strResultSetName = "search_reader_dup_001";
+
+            long lRet = channel.DoSearch(strQueryXml,
+                strResultSetName,
+                "", // strOuputStyle
+                out strError);
+            if (lRet == -1)
+                goto ERROR1;
+
+            // not found
+            if (lRet == 0)
+            {
+                strError = "读者证条码号 '" + strBarcode + "' 没有找到";
+                return 0;
+            }
+
+            long lHitCount = lRet;
+
+            lRet = channel.DoGetSearchResult(
+                strResultSetName,
+                0,
+                nMax,
+                "zh",
+                null,
+                out aPath,
+                out strError);
+            if (lRet == -1)
+                goto ERROR1;
+
+
+            if (aPath.Count == 0)
+            {
+                strError = "DoGetSearchResult aPath error 和前面已经命中的条件矛盾";
+                goto ERROR1;
+            }
+
+            return (int)lHitCount;
+        ERROR1:
+            return -1;
+        }
+
+        // TODO: 判断strDisplayName是否为空
+        // 根据显示名对读者库进行查重
+        // 本函数只负责查重, 并不获得记录体
+        // parameters:
+        //      strBarcode  读者证条码号
+        // return:
+        //      -1  error
+        //      其他    命中记录条数(不超过nMax规定的极限)
+        public int SearchReaderDisplayNameDup(
+            RmsChannelCollection channels,
+            string strDisplayName,
+            int nMax,
+            out List<string> aPath,
+            out string strError)
+        {
+            strError = "";
+            aPath = null;
+
+            LibraryApplication app = this;
+
+            Debug.Assert(String.IsNullOrEmpty(strDisplayName) == false, "");
+
+            // 构造检索式
+            // 查重要针对全部读者库进行
+            string strQueryXml = "";
+            int nCount = 0;
+            for (int i = 0; i < app.ReaderDbs.Count; i++)
+            {
+                string strDbName = app.ReaderDbs[i].DbName;
+
+                Debug.Assert(String.IsNullOrEmpty(strDbName) == false, "");
+
+                if (nCount > 0)
+                {
+                    Debug.Assert(String.IsNullOrEmpty(strQueryXml) == false, "");
+                    strQueryXml += "<operator value='OR'/>";
+                }
+
+                string strOneDbQuery = "<target list='"
+        + StringUtil.GetXmlStringSimple(strDbName + ":" + "显示名")
+        + "'><item><word>"
+        + StringUtil.GetXmlStringSimple(strDisplayName)
+        + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>"+nMax.ToString()+"</maxCount></item><lang>zh</lang></target>";
+                nCount++;
+
+                strQueryXml += strOneDbQuery;
+            }
+
+            if (nCount > 0)
+            {
+                strQueryXml = "<group>" + strQueryXml + "</group>";
+            }
+
+            RmsChannel channel = channels.GetChannel(app.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
+            string strResultSetName = "search_reader_dup_001";
+
+            // TODO: 两种检索点的结果不会产生重复吧，需要测试验证
+
+            long lRet = channel.DoSearch(strQueryXml,
+                strResultSetName,
+                "", // strOuputStyle
+                out strError);
+            if (lRet == -1)
+                goto ERROR1;
+
+            // not found
+            if (lRet == 0)
+            {
+                strError = "显示名 '" + strDisplayName + "' 没有找到";
+                return 0;
+            }
+
+            long lHitCount = lRet;
+
+            lRet = channel.DoGetSearchResult(
+                strResultSetName,
+                0,
+                nMax,
+                "zh",
+                null,
+                out aPath,
+                out strError);
+            if (lRet == -1)
+                goto ERROR1;
+
+
+            if (aPath.Count == 0)
+            {
+                strError = "DoGetSearchResult aPath error 和前面已经命中的条件矛盾";
+                goto ERROR1;
+            }
+
+            return (int)lHitCount;
+        ERROR1:
+            return -1;
+        }
+
+
+        // 根据读者证状态对读者库进行检索
+        // parameters:
+        //      strMatchStyle   匹配方式 left exact right middle
+        //      strState  读者证状态
+        //      bOnlyIncirculation  是否仅仅包括参与流通的数据库? true ：仅仅包括； false : 包括全部
+        //      bGetPath    == true 获得path; == false 获得barcode
+        // return:
+        //      -1  error
+        //      其他    命中记录条数(不超过nMax规定的极限)
+        public int SearchReaderState(
+            RmsChannelCollection channels,
+            string strState,
+            string strMatchStyle,
+            bool bOnlyIncirculation,
+            bool bGetPath,
+            int nMax,
+            out List<string> aPathOrBarcode,
+            out string strError)
+        {
+            strError = "";
+            aPathOrBarcode = null;
+
+            LibraryApplication app = this;
+
+            // 构造检索式
+            string strQueryXml = "";
+            int nDbCount = 0;
+            for (int i = 0; i < app.ReaderDbs.Count; i++)
+            {
+                string strDbName = app.ReaderDbs[i].DbName;
+
+                if (bOnlyIncirculation == true)
+                {
+                    if (app.ReaderDbs[i].InCirculation == false)
+                        continue;
+                }
+
+                Debug.Assert(String.IsNullOrEmpty(strDbName) == false, "");
+
+                string strOneDbQuery = "<target list='"
+                    + StringUtil.GetXmlStringSimple(strDbName + ":" + "状态")
+                    + "'><item><word>"
+                    + StringUtil.GetXmlStringSimple(strState)
+                    + "</word><match>"+strMatchStyle+"</match><relation>=</relation><dataType>string</dataType><maxCount>"+nMax.ToString()+"</maxCount></item><lang>zh</lang></target>";
+
+                if (nDbCount > 0)
+                {
+                    Debug.Assert(String.IsNullOrEmpty(strQueryXml) == false, "");
+                    strQueryXml += "<operator value='OR'/>";
+                }
+
+                strQueryXml += strOneDbQuery;
+                nDbCount++;
+            }
+
+            if (nDbCount > 0)
+            {
+                strQueryXml = "<group>" + strQueryXml + "</group>";
+            }
+            else
+            {
+                strError = "目前尚没有参与流通的读者库";
+                return -1;
+            }
+
+            RmsChannel channel = channels.GetChannel(app.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
+            string strResultSetName = "search_reader_state_001";
+
+
+            long lRet = channel.DoSearch(strQueryXml,
+                strResultSetName,
+                "", // strOuputStyle
+                out strError);
+            if (lRet == -1)
+                goto ERROR1;
+
+            // not found
+            if (lRet == 0)
+            {
+                strError = "读者证状态 '" + strState + "' (匹配方式: "+strMatchStyle+") 没有命中";
+                return 0;
+            }
+
+            long lHitCount = lRet;
+
+            if (bGetPath == true)
+            {
+                lRet = channel.DoGetSearchResult(
+                    strResultSetName,
+                    0,
+                    nMax,
+                    "zh",
+                    null,
+                    out aPathOrBarcode,
+                    out strError);
+                if (lRet == -1)
+                    goto ERROR1;
+            }
+            else
+            {
+                // 获取检索命中结果
+                // 获得某一列信息的版本
+                lRet = channel.DoGetSearchResultOneColumn(
+                    strResultSetName,
+                    0,
+                    nMax,
+                    "zh",
+                    null,
+                    0,  // nColumn,
+                    out aPathOrBarcode,
+                    out strError);
+            }
+
+            if (aPathOrBarcode.Count == 0)
+            {
+                strError = "DoGetSearchResult aPath error 和前面已经命中的条件矛盾";
+                goto ERROR1;
+            }
+
+            return (int)lHitCount;
+        ERROR1:
+            return -1;
+        }
+
+#if NO
+        // 获得册记录(包装后的版本)
+        // 本函数为了执行效率方面的原因, 不去获得超过1条以上的路径
+        // return:
+        //      -1  error
+        //      0   not found
+        //      1   命中1条
+        //      >1  命中多于1条(即便在这种情况下, strOutputPath也返回了第一条的路径)
+        public int GetItemRecXml(
+            RmsChannelCollection channels,
+            string strBarcode,
+            out string strXml,
+            out string strOutputPath,
+            out string strError)
+        {
+            byte [] timestamp = null;
+
+            RmsChannel channel = channels.GetChannel(this.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
+            return GetItemRecXml(
+                channel,
+                strBarcode,
+                out strXml,
+                out strOutputPath,
+                out timestamp,
+                out strError);
+        }
+#endif
+
+        public int GetItemRecXml(
+            RmsChannel channel,
+    string strBarcode,
+    out string strXml,
+    out string strOutputPath,
+    out string strError)
+        {
+            byte[] timestamp = null;
+
+            return GetItemRecXml(
+                channel,
+                strBarcode,
+                out strXml,
+                out strOutputPath,
+                out timestamp,
+                out strError);
+        }
+
+
+#if SLOWLY
+        // TODO: 判断strBarcode是否为空
+        // 获得册记录
+        // 本函数为了执行效率方面的原因, 不去获得超过1条以上的路径。所返回的重复条数最大为1000
+        // return:
+        //      -1  error
+        //      0   not found
+        //      1   命中1条
+        //      >1  命中多于1条(即便在这种情况下, strOutputPath也返回了第一条的路径)
+        public int GetItemRecXml(
+            RmsChannelCollection channels,
+            string strBarcode,
+            out string strXml,
+            out string strOutputPath,
+            out byte[] timestamp,
+            out string strError)
+        {
+            strOutputPath = "";
+            strXml = "";
+            strError = "";
+            timestamp = null;
+
+            LibraryApplication app = this;
+
+            // 构造检索式
+            string strQueryXml = "";
+            int nDbCount = 0;
+            for (int i = 0; i < app.ItemDbs.Count; i++)
+            {
+                string strDbName = app.ItemDbs[i].DbName;
+
+                // 2008/10/16 new add
+                if (String.IsNullOrEmpty(strDbName) == true)
+                    continue;
+
+                // 2007/4/5 改造 加上了 GetXmlStringSimple()
+                string strOneDbQuery = "<target list='"
+                    + StringUtil.GetXmlStringSimple(strDbName + ":" + "册条码")       // 2007/9/14 new add
+                    + "'><item><word>"
+                    + StringUtil.GetXmlStringSimple(strBarcode) + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>1000</maxCount></item><lang>zh</lang></target>";
+                // 1000 2011/9/5
+
+                if (nDbCount > 0)
+                {
+                    Debug.Assert(String.IsNullOrEmpty(strQueryXml) == false, "");
+                    strQueryXml += "<operator value='OR'/>";
+                }
+
+                strQueryXml += strOneDbQuery;
+                nDbCount++;
+            }
+
+            if (nDbCount > 0)
+            {
+                strQueryXml = "<group>" + strQueryXml + "</group>";
+            }
+
+            RmsChannel channel = channels.GetChannel(app.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
+            long lRet = channel.DoSearch(strQueryXml,
+                "default",
+                "", // strOuputStyle
+                out strError);
+            if (lRet == -1)
+                goto ERROR1;
+
+            // not found
+            if (lRet == 0)
+            {
+                strError = "册条码号 '" + strBarcode + "' 没有找到";
+                return 0;
+            }
+
+            long lHitCount = lRet;
+
+            List<string> aPath = null;
+            lRet = channel.DoGetSearchResult(
+                "default",
+                0,
+                1,
+                "zh",
+                null,
+                out aPath,
+                out strError);
+            if (lRet == -1)
+                goto ERROR1;
+            if (aPath.Count == 0)
+            {
+                strError = "DoGetSearchResult aPath error";
+                goto ERROR1;
+            }
+
+            string strMetaData = "";
+            // byte[] timestamp = null;
+            // string strOutputPath = "";
+
+            lRet = channel.GetRes(aPath[0],
+                out strXml,
+                out strMetaData,
+                out timestamp,
+                out strOutputPath,
+                out strError);
+            if (lRet == -1)
+                goto ERROR1;
+
+            return (int)lHitCount;
+        ERROR1:
+            return -1;
+        }
+#endif 
+
+        // 2014/9/19 strBarcode 可以包含 @refID: 前缀了
+        // 2012/1/5 改造为PiggyBack检索
+        // TODO: 判断strBarcode是否为空
+        // 获得册记录
+        // 本函数为了执行效率方面的原因, 不去获得超过1条以上的路径。所返回的重复条数最大为1000
+        // return:
+        //      -1  error
+        //      0   not found
+        //      1   命中1条
+        //      >1  命中多于1条(即便在这种情况下, strOutputPath也返回了第一条的路径)
+        public int GetItemRecXml(
+            RmsChannel channel,
+            string strBarcodeParam,
+            out string strXml,
+            out string strOutputPath,
+            out byte[] timestamp,
+            out string strError)
+        {
+            strOutputPath = "";
+            strXml = "";
+            strError = "";
+            timestamp = null;
+
+            LibraryApplication app = this;
+
+            string strBarcode = strBarcodeParam;
+            string strHead = "@refID:";
+
+            string strFrom = "册条码";
+            if (StringUtil.HasHead(strBarcode, strHead, true) == true)
+            {
+                strFrom = "参考ID";
+                strBarcode = strBarcode.Substring(strHead.Length).Trim();
+                if (string.IsNullOrEmpty(strBarcode) == true)
+                {
+                    strError = "字符串 '" + strBarcodeParam + "' 中 参考ID 部分不应为空";
+                    return -1;
+                }
+            }
+
+            // 构造检索式
+            string strQueryXml = "";
+            int nDbCount = 0;
+            for (int i = 0; i < app.ItemDbs.Count; i++)
+            {
+                string strDbName = app.ItemDbs[i].DbName;
+
+                // 2008/10/16 new add
+                if (String.IsNullOrEmpty(strDbName) == true)
+                    continue;
+
+                // 2007/4/5 改造 加上了 GetXmlStringSimple()
+                string strOneDbQuery = "<target list='"
+                    + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)
+                    + "'><item><word>"
+                    + StringUtil.GetXmlStringSimple(strBarcode) + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>1000</maxCount></item><lang>zh</lang></target>";
+                // 1000 2011/9/5
+
+                if (nDbCount > 0)
+                {
+                    Debug.Assert(String.IsNullOrEmpty(strQueryXml) == false, "");
+                    strQueryXml += "<operator value='OR'/>";
+                }
+
+                strQueryXml += strOneDbQuery;
+                nDbCount++;
+            }
+
+            if (nDbCount > 0)
+            {
+                strQueryXml = "<group>" + strQueryXml + "</group>";
+            }
+
+
+            Record[] records = null;
+            long lRet = channel.DoSearchEx(strQueryXml,
+                "default",
+                "", // strOuputStyle
+                1,
+                "zh",
+                "id,xml,timestamp",
+                out records,
+                out strError);
+            if (lRet == -1)
+                goto ERROR1;
+
+            // not found
+            if (lRet == 0)
+            {
+                strError = "册条码号 '" + strBarcode + "' 没有找到";
+                return 0;
+            }
+
+            long lHitCount = lRet;
+
+            if (records == null || records.Length == 0)
+            {
+                strError = "records error";
+                return -1;
+            }
+
+            Debug.Assert(records[0].RecordBody != null, "");
+
+            strOutputPath = records[0].Path;
+            strXml = records[0].RecordBody.Xml;
+            timestamp = records[0].RecordBody.Timestamp;
+
+            return (int)lHitCount;
+        ERROR1:
+            return -1;
+        }
+
+#if SLOWLY
+        // TODO: 判断strBarcode是否为空
+        // 获得册记录
+        // 本函数可获得超过1条以上的路径
+        // parameters:
+        //      strBarcode  册条码号。也可以为 "@refID:值" 形态
+        // return:
+        //      -1  error
+        //      0   not found
+        //      1   命中1条
+        //      >1  命中多于1条
+        public int GetItemRecXml(
+            RmsChannelCollection channels,
+            string strBarcode,
+            out string strXml,
+            int nMax,
+            out List<string> aPath,
+            out byte[] timestamp,
+            out string strError)
+        {
+            aPath = null;
+
+            strXml = "";
+            strError = "";
+            timestamp = null;
+
+            LibraryApplication app = this;
+
+            string strHead = "@refID:";
+
+            string strFrom = "册条码";
+            if (StringUtil.HasHead(strBarcode, strHead) == true)
+            {
+                strFrom = "参考ID";
+                strBarcode = strBarcode.Substring(strHead.Length);
+            }
+
+            // 构造检索式
+            string strQueryXml = "";
+            int nDbCount = 0;
+            for (int i = 0; i < app.ItemDbs.Count; i++)
+            {
+                string strDbName = app.ItemDbs[i].DbName;
+
+                // 2008/10/16 new add
+                if (String.IsNullOrEmpty(strDbName) == true)
+                    continue;
+
+                // 2007/4/5 改造 加上了 GetXmlStringSimple()
+                string strOneDbQuery = "<target list='"
+                    + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 new add
+                    + "'><item><word>"
+                    + StringUtil.GetXmlStringSimple(strBarcode)
+                    + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>"+nMax.ToString()+"</maxCount></item><lang>zh</lang></target>";
+
+                if (nDbCount > 0)
+                {
+                    Debug.Assert(String.IsNullOrEmpty(strQueryXml) == false, "");
+                    strQueryXml += "<operator value='OR'/>";
+                }
+
+                strQueryXml += strOneDbQuery;
+                nDbCount++;
+            }
+
+            if (nDbCount > 0)
+            {
+                strQueryXml = "<group>" + strQueryXml + "</group>";
+            }
+
+            RmsChannel channel = channels.GetChannel(app.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
+            long lRet = channel.DoSearch(strQueryXml,
+                "default",
+                "", // strOuputStyle
+                out strError);
+            if (lRet == -1)
+                goto ERROR1;
+
+            // not found
+            if (lRet == 0)
+            {
+                strError = strFrom + " '" + strBarcode + "' 没有找到";
+                return 0;
+            }
+
+            long lHitCount = lRet;
+
+            // List<string> aPath = null;
+            lRet = channel.DoGetSearchResult(
+                "default",
+                0,
+                Math.Min(nMax, lHitCount),
+                "zh",
+                null,
+                out aPath,
+                out strError);
+            if (lRet == -1)
+                goto ERROR1;
+
+            Debug.Assert(aPath != null, "");
+
+            if (aPath.Count == 0)
+            {
+                strError = "DoGetSearchResult aPath error";
+                goto ERROR1;
+            }
+
+            string strMetaData = "";
+            // byte[] timestamp = null;
+            string strOutputPath = "";
+
+            lRet = channel.GetRes(aPath[0],
+                out strXml,
+                out strMetaData,
+                out timestamp,
+                out strOutputPath,
+                out strError);
+            if (lRet == -1)
+                goto ERROR1;
+
+            return (int)lHitCount;
+        ERROR1:
+            return -1;
+        }
+
+#endif
+
+        // 包装后的版本
+        public int GetItemRecXml(
+    RmsChannelCollection channels,
+    string strBarcode,
+    out string strXml,
+    int nMax,
+    out List<string> aPath,
+    out byte[] timestamp,
+    out string strError)
+        {
+            return GetItemRecXml(channels,
+                strBarcode,
+                "",
+                out strXml,
+                nMax,
+                out aPath,
+                out timestamp,
+                out strError);
+        }
+
+        // 兼容以前的版本，包装后的形态
+        // 获得册记录
+        // 本函数可获得超过1条以上的路径
+        // parameters:
+        //      strBarcode  册条码号。也可以为 "@refID:值" 形态
+        //      strStyle    如果包含 withresmetadata ,表示要在XML记录中返回<dprms:file>元素内的 __xxx 属性 2012/11/19
+        //                  如果包含 noxml， 则表示不返回 XML 记录体
+        // return:
+        //      -1  error
+        //      0   not found
+        //      1   命中1条
+        //      >1  命中多于1条
+        public int GetItemRecXml(
+            RmsChannelCollection channels,
+            string strBarcodeParam,
+            string strStyle,
+            out string strXml,
+            int nMax,
+            out List<string> aPath,
+            out byte[] timestamp,
+            out string strError)
+        {
+            string strBarcode = strBarcodeParam;
+            string strHead = "@refID:";
+
+            string strFrom = "册条码";
+            if (StringUtil.HasHead(strBarcode, strHead, true) == true)
+            {
+                strFrom = "参考ID";
+                strBarcode = strBarcode.Substring(strHead.Length).Trim();
+                if (string.IsNullOrEmpty(strBarcode) == true)
+                {
+                    strError = "字符串 '" + strBarcodeParam + "' 中 参考ID 部分不应为空";
+                    aPath = new List<string>();
+                    timestamp = null;
+                    strXml = "";
+                    return -1;
+                }
+            }
+
+            return GetOneItemRec(
+                channels,
+                "item",
+                strBarcode,
+                strFrom,
+                strStyle + ",xml,timestamp",
+                out strXml,
+                nMax,
+                out aPath,
+                out timestamp,
+                out strError);
+        }
+
+#if NO
+        // 被更通用的版本 GetOneItemRec() 替代 
+        // 2012/11/27改造为可以不获得XML和时间戳
+        // 2012/1/5改造为PiggyBack检索
+        // TODO: 判断strBarcode是否为空
+        // 获得册记录
+        // 本函数可获得超过1条以上的路径
+        // parameters:
+        //      strBarcode  册条码号。也可以为 "@refID:值" 形态
+        //      strStyle    如果包含 withresmetadata ,表示要在XML记录中返回<dprms:file>元素内的 __xxx 属性 2012/11/19
+        //                  如果包含 xml， 则表示返回 XML 记录体
+        //                  如果包含 timestamp, 则表示返回时间戳
+        // return:
+        //      -1  error
+        //      0   not found
+        //      1   命中1条
+        //      >1  命中多于1条
+        public int GetItemRec(
+            RmsChannelCollection channels,
+            string strBarcode,
+            string strStyle,
+            out string strXml,
+            int nMax,
+            out List<string> aPath,
+            out byte[] timestamp,
+            out string strError)
+        {
+            aPath = null;
+
+            strXml = "";
+            strError = "";
+            timestamp = null;
+
+            LibraryApplication app = this;
+
+            string strHead = "@refID:";
+
+            string strFrom = "册条码";
+            if (StringUtil.HasHead(strBarcode, strHead) == true)
+            {
+                strFrom = "参考ID";
+                strBarcode = strBarcode.Substring(strHead.Length);
+            }
+
+            // 构造检索式
+            string strQueryXml = "";
+            int nDbCount = 0;
+            for (int i = 0; i < app.ItemDbs.Count; i++)
+            {
+                string strDbName = app.ItemDbs[i].DbName;
+
+                if (String.IsNullOrEmpty(strDbName) == true)
+                    continue;
+
+                string strOneDbQuery = "<target list='"
+                    + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 new add
+                    + "'><item><word>"
+                    + StringUtil.GetXmlStringSimple(strBarcode)
+                    + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>" + nMax.ToString() + "</maxCount></item><lang>zh</lang></target>";
+
+                if (nDbCount > 0)
+                {
+                    Debug.Assert(String.IsNullOrEmpty(strQueryXml) == false, "");
+                    strQueryXml += "<operator value='OR'/>";
+                }
+
+                strQueryXml += strOneDbQuery;
+                nDbCount++;
+            }
+
+            if (nDbCount > 0)
+            {
+                strQueryXml = "<group>" + strQueryXml + "</group>";
+            }
+
+            RmsChannel channel = channels.GetChannel(app.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
+            /*
+            string strGetStyle = "id,xml,timestamp";
+
+            if (StringUtil.IsInList("withresmetadata", strStyle) == true)
+                strGetStyle += ",withresmetadata";
+            */
+
+            Record[] records = null;
+            long lRet = channel.DoSearchEx(strQueryXml,
+                "default",
+                "", // strOuputStyle
+                1,
+                "zh",
+                strStyle + ",id",    // "id,xml,timestamp",
+                out records,
+                out strError);
+            if (lRet == -1)
+                goto ERROR1;
+
+            // not found
+            if (lRet == 0)
+            {
+                strError = strFrom + " '" + strBarcode + "' 没有找到";
+                return 0;
+            }
+
+            long lHitCount = lRet;
+
+            if (records == null || records.Length == 0)
+            {
+                strError = "records error";
+                return -1;
+            }
+
+#if DEBUG
+            if (StringUtil.IsInList("xml", strStyle) == true
+                || StringUtil.IsInList("timestamp", strStyle) == true)
+            {
+                Debug.Assert(records[0].RecordBody != null, "");
+            }
+#endif
+
+            aPath = new List<string>();
+            aPath.Add(records[0].Path);
+            if (records[0].RecordBody != null)
+            {
+                strXml = records[0].RecordBody.Xml;
+                timestamp = records[0].RecordBody.Timestamp;
+            }
+
+            // 如果命中结果多余一条，则继续获得第一条以后的各条的path
+            if (lHitCount > 1)
+            {
+                // List<string> aPath = null;
+                lRet = channel.DoGetSearchResult(
+                    "default",
+                    0,
+                    Math.Min(nMax, lHitCount),
+                    "zh",
+                    null,
+                    out aPath,
+                    out strError);
+                if (lRet == -1)
+                    goto ERROR1;
+
+                Debug.Assert(aPath != null, "");
+
+                if (aPath.Count == 0)
+                {
+                    strError = "DoGetSearchResult aPath error";
+                    goto ERROR1;
+                }
+            }
+
+            return (int)lHitCount;
+        ERROR1:
+            return -1;
+        }
+#endif
+
+        // 检索一个册记录或者评注\订购\期记录
+        // 本函数可获得超过1条以上的路径
+        // parameters:
+        //      strBarcode  册条码号。也可以为 "@refID:值" 形态
+        //      strStyle    如果包含 withresmetadata ,表示要在XML记录中返回<dprms:file>元素内的 __xxx 属性 2012/11/19
+        //                  如果包含 xml， 则表示返回 XML 记录体
+        //                  如果包含 timestamp, 则表示返回时间戳
+        // return:
+        //      -1  error
+        //      0   not found
+        //      1   命中1条
+        //      >1  命中多于1条
+        public int GetOneItemRec(
+            RmsChannelCollection channels,
+            string strDbType,
+            string strBarcode,
+            string strFrom,
+            string strStyle,
+            out string strXml,
+            int nMax,
+            out List<string> aPath,
+            out byte[] timestamp,
+            out string strError)
+        {
+            aPath = null;
+
+            strXml = "";
+            strError = "";
+            timestamp = null;
+
+            LibraryApplication app = this;
+
+            List<string> dbnames = null;
+            int nRet = app.GetDbNames(
+    strDbType,
+    out dbnames,
+    out strError);
+            if (nRet == -1)
+                return -1;
+
+            // 构造检索式
+            string strQueryXml = "";
+            int nDbCount = 0;
+            for (int i = 0; i < dbnames.Count; i++)
+            {
+                string strDbName = dbnames[i];
+
+                if (String.IsNullOrEmpty(strDbName) == true)
+                    continue;
+
+                string strOneDbQuery = "<target list='"
+                    + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 new add
+                    + "'><item><word>"
+                    + StringUtil.GetXmlStringSimple(strBarcode)
+                    + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>" + nMax.ToString() + "</maxCount></item><lang>zh</lang></target>";
+
+                if (nDbCount > 0)
+                {
+                    Debug.Assert(String.IsNullOrEmpty(strQueryXml) == false, "");
+                    strQueryXml += "<operator value='OR'/>";
+                }
+
+                strQueryXml += strOneDbQuery;
+                nDbCount++;
+            }
+
+            if (nDbCount > 0)
+            {
+                strQueryXml = "<group>" + strQueryXml + "</group>";
+            }
+
+            RmsChannel channel = channels.GetChannel(app.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
+            Record[] records = null;
+            long lRet = channel.DoSearchEx(strQueryXml,
+                "default",
+                "", // strOuputStyle
+                1,
+                "zh",
+                strStyle + ",id",    // "id,xml,timestamp",
+                out records,
+                out strError);
+            if (lRet == -1)
+                goto ERROR1;
+
+            // not found
+            if (lRet == 0)
+            {
+                strError = strFrom + " '" + strBarcode + "' 没有找到";
+                return 0;
+            }
+
+            long lHitCount = lRet;
+
+            if (records == null || records.Length == 0)
+            {
+                strError = "records error";
+                return -1;
+            }
+
+#if DEBUG
+            if (StringUtil.IsInList("xml", strStyle) == true
+                || StringUtil.IsInList("timestamp", strStyle) == true)
+            {
+                Debug.Assert(records[0].RecordBody != null, "");
+            }
+#endif
+
+            aPath = new List<string>();
+            aPath.Add(records[0].Path);
+            if (records[0].RecordBody != null)
+            {
+                strXml = records[0].RecordBody.Xml;
+                timestamp = records[0].RecordBody.Timestamp;
+            }
+
+            // 如果命中结果多余一条，则继续获得第一条以后的各条的path
+            if (lHitCount > 1)  // TODO: && nMax > 1
+            {
+                // List<string> aPath = null;
+                lRet = channel.DoGetSearchResult(
+                    "default",
+                    0,
+                    Math.Min(nMax, lHitCount),
+                    "zh",
+                    null,
+                    out aPath,
+                    out strError);
+                if (lRet == -1)
+                    goto ERROR1;
+
+                Debug.Assert(aPath != null, "");
+
+                if (aPath.Count == 0)
+                {
+                    strError = "DoGetSearchResult aPath error";
+                    goto ERROR1;
+                }
+            }
+
+            return (int)lHitCount;
+        ERROR1:
+            return -1;
+        }
+
+        // 获得数据库类型的中文名称
+        public static string GetDbTypeName(string strDbType)
+        {
+            if (strDbType == "biblio")
+            {
+                return "书目";
+            }
+            else if (strDbType == "reader")
+            {
+                return "读者";
+            }
+            else if (strDbType == "item")
+            {
+                return "实体";
+            }
+            else if (strDbType == "issue")
+            {
+                return "期";
+            }
+            else if (strDbType == "order")
+            {
+                return "订购";
+            }
+            else if (strDbType == "comment")
+            {
+                return "评注";
+            }
+            else if (strDbType == "invoice")
+            {
+                return "发票";
+            }
+            else if (strDbType == "amerce")
+            {
+                return "违约金";
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        // 根据特定数据库类型，列出所有数据库名
+        // 不包括读者库
+        public int GetDbNames(
+            string strDbType,
+            out List<string> dbnames,
+            out string strError)
+        {
+            strError = "";
+            dbnames = new List<string>();
+
+            if (strDbType == "biblio")
+            {
+                for (int i = 0; i < this.ItemDbs.Count; i++)
+                {
+                    // 实体库对应的书目库名
+                    string strBiblioDbName = this.ItemDbs[i].BiblioDbName;
+
+                    if (String.IsNullOrEmpty(strBiblioDbName) == false)
+                        dbnames.Add(strBiblioDbName);
+                }
+            }
+            else if (strDbType == "item")
+            {
+                for (int i = 0; i < this.ItemDbs.Count; i++)
+                {
+                    // 实体库名
+                    string strItemDbName = this.ItemDbs[i].DbName;
+
+                    if (String.IsNullOrEmpty(strItemDbName) == false)
+                        dbnames.Add(strItemDbName);
+                }
+            }
+            else if (strDbType == "issue")
+            {
+                for (int i = 0; i < this.ItemDbs.Count; i++)
+                {
+                    // 期库名
+                    string strIssueDbName = this.ItemDbs[i].IssueDbName;
+
+                    if (String.IsNullOrEmpty(strIssueDbName) == false)
+                        dbnames.Add(strIssueDbName);
+                }
+            }
+            else if (strDbType == "order")
+            {
+                for (int i = 0; i < this.ItemDbs.Count; i++)
+                {
+                    // 订购库名
+                    string strOrderDbName = this.ItemDbs[i].OrderDbName;
+
+                    if (String.IsNullOrEmpty(strOrderDbName) == false)
+                        dbnames.Add(strOrderDbName);
+                }
+            }
+            else if (strDbType == "comment")
+            {
+                for (int i = 0; i < this.ItemDbs.Count; i++)
+                {
+                    // 实体库名
+                    string strCommentDbName = this.ItemDbs[i].CommentDbName;
+
+                    if (String.IsNullOrEmpty(strCommentDbName) == false)
+                        dbnames.Add(strCommentDbName);
+                }
+            }
+            else if (strDbType == "invoice")
+            {
+                if (string.IsNullOrEmpty(this.InvoiceDbName) == false)
+                    dbnames.Add(this.InvoiceDbName);
+            }
+            else if (strDbType == "amerce")
+            {
+                if (string.IsNullOrEmpty(this.AmerceDbName) == false)
+                    dbnames.Add(this.AmerceDbName);
+            }
+            else
+            {
+                strError = "未知的数据库类型 '" + strDbType + "'。应为biblio reader item issue order comment invoice amerce之一";
+                return -1;
+            }
+
+            return 0;
+        }
+
+        // 一次检索多个检索词
+        // "册条码";
+        // "参考ID";
+        // return:
+        //      -1  出错
+        //      0   一个也没有命中
+        //      >0  命中的总个数。注意，这不一定是results中返回的元素个数。results中返回的个数还要受到nMax的限制，不一定等于全部命中个数
+        public int GetItemRec(
+            RmsChannelCollection channels,
+            string strDbType,
+            string strWordList,
+            string strFrom,
+            int nMax,
+            string strStyle,
+            out List<Record> results,
+            out string strError)
+        {
+            strError = "";
+
+            results = new List<Record>();
+
+            LibraryApplication app = this;
+
+            List<string> dbnames = null;
+            int nRet = app.GetDbNames(
+    strDbType,
+    out dbnames,
+    out strError);
+            if (nRet == -1)
+                return -1;
+
+            // 构造检索式
+            string strQueryXml = "";
+            int nDbCount = 0;
+            for (int i = 0; i < dbnames.Count; i++)
+            {
+                string strDbName = dbnames[i];
+
+                if (String.IsNullOrEmpty(strDbName) == true)
+                    continue;
+
+                string strOneDbQuery = "<target list='"
+                    + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 new add
+                    + "'><item><word>"
+                    + StringUtil.GetXmlStringSimple(strWordList)
+                    + "</word><match>exact</match><relation>list</relation><dataType>string</dataType><maxCount>" + nMax.ToString() + "</maxCount></item><lang>zh</lang></target>";
+
+                if (nDbCount > 0)
+                {
+                    Debug.Assert(String.IsNullOrEmpty(strQueryXml) == false, "");
+                    strQueryXml += "<operator value='OR'/>";
+                }
+
+                strQueryXml += strOneDbQuery;
+                nDbCount++;
+            }
+
+            if (nDbCount > 0)
+            {
+                strQueryXml = "<group>" + strQueryXml + "</group>";
+            }
+
+            RmsChannel channel = channels.GetChannel(app.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
+            Record[] records = null;
+            long lRet = channel.DoSearchEx(strQueryXml,
+                "default",
+                strStyle, // strOuputStyle
+                nMax,
+                "zh",
+                strStyle + ",id",    // "id,xml,timestamp",
+                out records,
+                out strError);
+            if (lRet == -1)
+                goto ERROR1;
+
+            // not found
+            if (lRet == 0)
+            {
+                strError = "所有检索词一个也没有命中";
+                return 0;
+            }
+
+            long lHitCount = lRet;
+            if (nMax == -1)
+                nMax = (int)lHitCount;
+            else
+            {
+                if (nMax > lHitCount)
+                    nMax = (int)lHitCount;
+            }
+
+            if (records == null || records.Length == 0)
+            {
+                strError = "records error";
+                return -1;
+            }
+
+            results.AddRange(records);
+
+            if (results.Count == lHitCount)
+                return (int)lHitCount;
+
+            // 如果第一次没有取完，需要继续取得
+            if (nMax > records.Length)
+            {
+                long lStart = records.Length;
+                long lCount = nMax - lStart;
+                for (; ; )
+                {
+                    lRet = channel.DoGetSearchResult(
+                    "default",
+                    lStart,
+                    lCount,
+                    strStyle + ",id",    // "id,xml,timestamp",
+                    "zh",
+                    null,
+                    out records,
+                    out strError);
+                    if (lRet == -1)
+                        goto ERROR1;
+
+                    Debug.Assert(records != null, "");
+
+                    if (records.Length == 0)
+                    {
+                        strError = "DoGetSearchResult records error";
+                        goto ERROR1;
+                    }
+
+                    results.AddRange(records);
+                    lStart += records.Length;
+                    if (lStart >= lHitCount
+                        || lStart >= nMax)
+                        break;
+                    lCount -= records.Length;
+                }
+            }
+
+            return (int)lHitCount;
+        ERROR1:
+            return -1;
+        }
+
+        // 获得评注记录(包装后的版本)
+        // 本函数为了执行效率方面的原因, 不去获得超过1条以上的路径
+        // return:
+        //      -1  error
+        //      0   not found
+        //      1   命中1条
+        //      >1  命中多于1条(即便在这种情况下, strOutputPath也返回了第一条的路径)
+        public int GetCommentRecXml(
+            RmsChannelCollection channels,
+            string strRefID,
+            out string strXml,
+            out string strOutputPath,
+            out string strError)
+        {
+            byte[] timestamp = null;
+
+            return GetCommentRecXml(
+                channels,
+                strRefID,
+                out strXml,
+                out strOutputPath,
+                out timestamp,
+                out strError);
+        }
+
+        // TODO：判断strRedID是否为空
+        // 获得评注记录
+        // 本函数为了执行效率方面的原因, 不去获得超过1条以上的路径
+        // return:
+        //      -1  error
+        //      0   not found
+        //      1   命中1条
+        //      >1  命中多于1条(即便在这种情况下, strOutputPath也返回了第一条的路径)
+        public int GetCommentRecXml(
+            RmsChannelCollection channels,
+            string strRefID,
+            out string strXml,
+            out string strOutputPath,
+            out byte[] timestamp,
+            out string strError)
+        {
+            strOutputPath = "";
+            strXml = "";
+            strError = "";
+            timestamp = null;
+
+            LibraryApplication app = this;
+
+            // 构造检索式
+            string strQueryXml = "";
+            int nDbCount = 0;
+            for (int i = 0; i < app.ItemDbs.Count; i++)
+            {
+                string strDbName = app.ItemDbs[i].CommentDbName;
+
+                if (String.IsNullOrEmpty(strDbName) == true)
+                    continue;
+
+                string strOneDbQuery = "<target list='"
+                    + StringUtil.GetXmlStringSimple(strDbName + ":" + "参考ID") 
+                    + "'><item><word>"
+                    + StringUtil.GetXmlStringSimple(strRefID) + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>1000</maxCount></item><lang>zh</lang></target>";
+
+                if (nDbCount > 0)
+                {
+                    Debug.Assert(String.IsNullOrEmpty(strQueryXml) == false, "");
+                    strQueryXml += "<operator value='OR'/>";
+                }
+
+                strQueryXml += strOneDbQuery;
+                nDbCount++;
+            }
+
+            if (nDbCount > 0)
+            {
+                strQueryXml = "<group>" + strQueryXml + "</group>";
+            }
+
+            RmsChannel channel = channels.GetChannel(app.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
+            long lRet = channel.DoSearch(strQueryXml,
+                "default",
+                "", // strOuputStyle
+                out strError);
+            if (lRet == -1)
+                goto ERROR1;
+
+            // not found
+            if (lRet == 0)
+            {
+                strError = "参考ID '" + strRefID + "' 没有找到";
+                return 0;
+            }
+
+            long lHitCount = lRet;
+
+            List<string> aPath = null;
+            lRet = channel.DoGetSearchResult(
+                "default",
+                0,
+                1,
+                "zh",
+                null,
+                out aPath,
+                out strError);
+            if (lRet == -1)
+                goto ERROR1;
+            if (aPath.Count == 0)
+            {
+                strError = "DoGetSearchResult aPath error";
+                goto ERROR1;
+            }
+
+            string strMetaData = "";
+            lRet = channel.GetRes(aPath[0],
+                out strXml,
+                out strMetaData,
+                out timestamp,
+                out strOutputPath,
+                out strError);
+            if (lRet == -1)
+                goto ERROR1;
+
+            return (int)lHitCount;
+        ERROR1:
+            return -1;
+        }
+
+        // TODO: 判断strBarcode是否为空
+        // 根据册条码号对实体库进行查重
+        // 本函数只负责查重, 并不获得记录体
+        // return:
+        //      -1  error
+        //      其他    命中记录条数(不超过nMax规定的极限)
+        public int SearchItemRecDup(
+            // RmsChannelCollection channels,
+            RmsChannel channel,
+            string strBarcode,
+            int nMax,
+            out List<string> aPath,
+            out string strError)
+        {
+            strError = "";
+            aPath = null;
+
+            LibraryApplication app = this;
+
+            /* 导致内核出问题但是没有strError内容的式子
+<group>
+	<operator value='OR'/>
+	<target list='图书编目实体:册条码'>
+		<item><word>0000001</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item>
+<lang>zh</lang>
+</target>
+</group>             * */
+
+            // 构造检索式
+            string strQueryXml = "";
+            int nDbCount = 0;
+            for (int i = 0; i < app.ItemDbs.Count; i++)
+            {
+                string strDbName = app.ItemDbs[i].DbName;
+
+                // 2008/10/16 new add
+                if (String.IsNullOrEmpty(strDbName) == true)
+                    continue;
+
+
+                // 2007/4/5 改造 加上了 GetXmlStringSimple()
+                string strOneDbQuery = "<target list='"
+                    + StringUtil.GetXmlStringSimple(strDbName + ":" + "册条码")       // 2007/9/14 new add
+                    + "'><item><word>"
+                    + StringUtil.GetXmlStringSimple(strBarcode)
+                    + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>"+nMax.ToString()+"</maxCount></item><lang>zh</lang></target>";
+
+                if (nDbCount > 0)
+                {
+                    Debug.Assert(String.IsNullOrEmpty(strQueryXml) == false, "");
+                    strQueryXml += "<operator value='OR'/>";
+                }
+
+                strQueryXml += strOneDbQuery;
+                nDbCount++;
+            }
+
+            if (nDbCount > 0)
+            {
+                strQueryXml = "<group>" + strQueryXml + "</group>";
+            }
+
+            /*
+            RmsChannel channel = channels.GetChannel(app.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+             * */
+            Debug.Assert(channel != null, "");
+
+            long lRet = channel.DoSearch(strQueryXml,
+                "default",
+                "", // strOuputStyle
+                out strError);
+            if (lRet == -1)
+            {
+                // TODO: 为了跟踪问题的方便，可以在strError中加上strQueryXml内容
+                strError = "SearchItemRecDup() DoSearch() error: " + strError;
+                goto ERROR1;
+            }
+
+            // not found
+            if (lRet == 0)
+            {
+                strError = "册条码号 '" + strBarcode + "' 没有找到";
+                return 0;
+            }
+
+            long lHitCount = lRet;
+
+            lRet = channel.DoGetSearchResult(
+                "default",
+                0,
+                nMax,
+                "zh",
+                null,
+                out aPath,
+                out strError);
+            if (lRet == -1)
+            {
+                strError = "SearchItemRecDup() DoGetSearchResult() error: " + strError;
+                goto ERROR1;
+            }
+
+            if (aPath.Count == 0)
+            {
+                strError = "DoGetSearchResult aPath error 和前面已经命中的条件矛盾";
+                goto ERROR1;
+            }
+
+            return (int)lHitCount;
+        ERROR1:
+            return -1;
+        }
+
+
+
+        // 将登录名切割为前缀和名字值两个部分
+        void SplitLoginName(string strLoginName,
+            out string strPrefix,
+            out string strName)
+        {
+            int nRet = 0;
+
+            strLoginName = strLoginName.Trim();
+
+            List<string> prefixes = new List<string>();
+            prefixes.Add("NB:");
+            prefixes.Add("EM:");
+            prefixes.Add("TP:");
+            prefixes.Add("ID:");    // 2009/9/22 new add
+            prefixes.Add("CN:");    // 2012/11/7
+
+            for (int i = 0; i < prefixes.Count; i++)
+            {
+                nRet = strLoginName.ToUpper().IndexOf(prefixes[i]);
+                if (nRet == 0)
+                {
+                    strPrefix = prefixes[i];
+                    strName = strLoginName.Substring(nRet + prefixes[i].Length).Trim();
+                    return;
+                }
+            }
+
+            strPrefix = "";
+            strName = strLoginName;
+        }
+
+        // 获得读者记录, 并检查密码是否符合。为登录用途
+        // 该函数的特殊性在于，它可以用多种检索入口，而不仅仅是条码号
+        // parameters:
+        //      strQueryWord 登录名
+        //          1) 如果以"NB:"开头，表示利用姓名生日进行检索。姓名和生日之间间隔以'|'。姓名必须完整，生日为8字符形式
+        //          2) 如果以"EM:"开头，表示利用email地址进行检索
+        //          3) 如果以"TP:"开头，表示利用电话号码进行检索
+        //          4) 如果以"ID:"开头，表示利用身份证号进行检索
+        //          5) 如果以"CN:"开头，表示利用证件号码进行检索
+        //          6) 否则用证条码号进行检索
+        //      strPassword 密码。如果为null，表示不进行密码判断。注意，不是""
+        // return:
+        //      -1  error
+        //      0   not found
+        //      1   命中1条
+        //      >1  命中多于1条
+        int GetReaderRecXmlForLogin(
+            RmsChannelCollection channels,
+            string strLibraryCodeList,
+            string strQueryWord,
+            string strPassword,
+            int nIndex,
+            string strClientIP,
+            string strGetToken,
+            out bool bTempPassword,
+            out string strXml,
+            out string strOutputPath,
+            out byte [] output_timestamp,
+            out string strToken,
+            out string strError)
+        {
+            strOutputPath = "";
+            strXml = "";
+            strError = "";
+            output_timestamp = null;
+            bTempPassword = false;
+            strToken = "";
+
+            int nRet = 0;
+            LibraryApplication app = this;
+            string strFrom = "证条码";
+            string strMatch = "exact";
+
+            // 构造检索式
+            string strQueryXml = "";
+
+            // int nRet = 0;
+            strQueryWord = strQueryWord.Trim();
+
+            string strPrefix = "";
+            string strName = "";
+
+            SplitLoginName(strQueryWord, out strPrefix, out strName);
+
+            bool bBarcode = false;
+
+            // 注意如果这里增补新的prefix， 函数 SplitLoginName() 也要同步修改
+            // 没有前缀
+            if (strPrefix == "")
+            {
+                bBarcode = true;
+                strFrom = "证条码";
+                strMatch = "exact";
+            }
+            else if (strPrefix == "NB:")
+            {
+                bBarcode = false;
+                strFrom = "姓名生日";
+                strMatch = "left";
+                strQueryWord = strName;
+            }
+            else if (strPrefix == "EM:")
+            {
+                bBarcode = false;
+                strFrom = "Email";
+                strMatch = "exact";
+                strQueryWord = strName;
+            }
+            else if (strPrefix == "TP:")
+            {
+                bBarcode = false;
+                strFrom = "电话";
+                strMatch = "exact";
+                strQueryWord = strName;
+            }
+            else if (strPrefix == "ID:")
+            {
+                bBarcode = false;
+                strFrom = "身份证号";
+                strMatch = "exact";
+                strQueryWord = strName;
+            }
+            else if (strPrefix == "CN:")
+            {
+                bBarcode = false;
+                strFrom = "证号";
+                strMatch = "exact";
+                strQueryWord = strName;
+            }
+            else
+            {
+                strError = "未知的登录名前缀 '" + strPrefix + "'";
+                return -1;
+            }
+
+            List<string> dbnames = new List<string>();
+            // 获得读者库名列表
+            // parameters:
+            //      strReaderDbNames    库名列表字符串。如果为空，则表示全部读者库
+            nRet = GetDbNameList("",
+                strLibraryCodeList,
+                out dbnames,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            if (dbnames.Count == 0)
+            {
+                if (app.ReaderDbs.Count == 0)
+                    strError = "当前尚没有配置读者库";
+                else
+                    strError = "当前没有可以操作的读者库";
+                return -1;
+            }
+
+            {
+                int i = 0;
+                foreach (string strDbName in dbnames)
+                {
+                    if (string.IsNullOrEmpty(strDbName) == true)
+                        continue;
+
+                    Debug.Assert(String.IsNullOrEmpty(strDbName) == false, "");
+
+                    // 最多100条
+                    // 2007/4/5 改造 加上了 GetXmlStringSimple()
+                    string strOneDbQuery = "<target list='"
+                        + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 new add
+                        + "'><item><word>"
+                        + StringUtil.GetXmlStringSimple(strQueryWord)
+                        + "</word><match>" + strMatch + "</match><relation>=</relation><dataType>string</dataType><maxCount>100</maxCount></item><lang>zh</lang></target>";
+
+                    if (string.IsNullOrEmpty(strQueryXml) == false)
+                    {
+                        Debug.Assert(String.IsNullOrEmpty(strQueryXml) == false, "");
+                        strQueryXml += "<operator value='OR'/>";
+                    }
+
+                    strQueryXml += strOneDbQuery;
+                    i++;
+                }
+
+                if (i > 1)
+                {
+                    strQueryXml = "<group>" + strQueryXml + "</group>";
+                }
+            }
+
+#if NO
+            if (app.ReaderDbs.Count == 0)
+            {
+                strError = "尚未配置读者库";
+                return -1;
+            }
+
+            {
+                for (int i = 0; i < app.ReaderDbs.Count; i++)
+                {
+                    string strDbName = app.ReaderDbs[i].DbName;
+
+                    Debug.Assert(String.IsNullOrEmpty(strDbName) == false, "");
+
+                    // 最多100条
+                    // 2007/4/5 改造 加上了 GetXmlStringSimple()
+                    string strOneDbQuery = "<target list='"
+                        + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 new add
+                        + "'><item><word>"
+                        + StringUtil.GetXmlStringSimple(strQueryWord)
+                        + "</word><match>"+strMatch+"</match><relation>=</relation><dataType>string</dataType><maxCount>100</maxCount></item><lang>zh</lang></target>";
+
+                    if (i > 0)
+                    {
+                        Debug.Assert(String.IsNullOrEmpty(strQueryXml) == false, "");
+                        strQueryXml += "<operator value='OR'/>";
+                    }
+
+                    strQueryXml += strOneDbQuery;
+                }
+
+                if (app.ReaderDbs.Count > 0)
+                {
+                    strQueryXml = "<group>" + strQueryXml + "</group>";
+                }
+            }
+#endif
+
+            if (String.IsNullOrEmpty(strQueryXml) == true)
+            {
+                strError = "尚未配置读者库";
+                return -1;
+            }
+
+            RmsChannel channel = channels.GetChannel(app.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
+            long lRet = channel.DoSearch(strQueryXml,
+                "default",
+                "", // strOuputStyle
+                out strError);
+            if (lRet == -1)
+            {
+                strError = "channel.DoSearch() error : " + strError;
+                goto ERROR1;
+            }
+
+            // not found
+            if (lRet == 0)
+            {
+                strError = "没有找到";
+                return 0;
+            }
+
+            long lHitCount = lRet;
+
+            if (lHitCount > 1 && bBarcode == true)
+            {
+                strError = "系统错误: 证条码号为 '" + strQueryWord + "' 的读者记录多于一个";
+                return -1;
+            }
+
+            lHitCount = Math.Min(lHitCount, 100);
+
+            List<string> aPath = null;
+            lRet = channel.DoGetSearchResult(
+                "default",
+                0,
+                lHitCount,
+                "zh",
+                null,
+                out aPath,
+                out strError);
+            if (lRet == -1)
+                goto ERROR1;
+            if (aPath.Count == 0)
+            {
+                strError = "DoGetSearchResult aPath error";
+                goto ERROR1;
+            }
+
+            /*
+            // 只命中一个
+            if (aPath.Count == 1)
+                goto LOADONE;
+             * */
+
+
+            // 排除掉证状态挂失的那些
+            List<string> aPathNew = new List<string>();
+            List<string> aXml = new List<string>();
+            List<string> aOutputPath = new List<string>();
+            List<byte[]> aTimestamp = new List<byte[]>();
+
+            for (int i = 0; i < aPath.Count; i++)
+            {
+                string strMetaData = "";
+                byte[] timestamp = null;
+
+                lRet = channel.GetRes(aPath[i],
+                    out strXml,
+                    out strMetaData,
+                    out timestamp,
+                    out strOutputPath,
+                    out strError);
+                if (lRet == -1)
+                    goto ERROR1;
+
+                if (strPassword != null)
+                {
+                    XmlDocument readerdom = null;
+                    nRet = LibraryApplication.LoadToDom(strXml,
+                        out readerdom,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "装载读者记录 '" + aPath[i] + "' 进入XML DOM时发生错误: " + strError;
+                        return -1;
+                    }
+
+                    /*
+                    string strState = DomUtil.GetElementText(readerdom.DocumentElement,
+                        "state");
+                     * */
+
+                    if (strPassword != null)    // 2009/9/22 new add
+                    {
+                        // 验证读者密码
+                        // return:
+                        //      -1  error
+                        //      0   密码不正确
+                        //      1   密码正确
+                        nRet = VerifyReaderPassword(
+                            strClientIP,
+                            readerdom,
+                            strPassword,
+                            this.Clock.Now,
+                            out bTempPassword,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
+                        if (nRet == 0)
+                            continue;
+
+                        if (string.IsNullOrEmpty(strGetToken) == false)
+                        {
+                            string strHashedPassword = DomUtil.GetElementInnerText(readerdom.DocumentElement, "password");
+                            nRet = MakeToken(strClientIP,
+                                GetTimeRangeByStyle(strGetToken),
+                                strHashedPassword,
+                                out strToken,
+                                out strError);
+                            if (nRet == -1)
+                                return -1;
+                        }
+                    }
+                }
+
+                aPathNew.Add(aPath[i]);
+                aXml.Add(strXml);
+                aOutputPath.Add(strOutputPath);
+                aTimestamp.Add(timestamp);
+            }
+
+            // 过滤后，却又发现一个都没有了。凑合着给过滤前的第一个?
+            if (aPathNew.Count == 0)
+            {
+                /*
+                aPathNew.Add(aPath[0]);
+                aPath = aPathNew;
+                lHitCount = 1;
+                goto LOADONE;
+                 * */
+                return 0;
+            }
+
+            if (nIndex >= aXml.Count)
+            {
+                strError = "选择索引值 " + nIndex.ToString() + " 越过范围。";
+                return -1;
+            }
+
+            if (aXml.Count == 1 && nIndex == -1)
+                nIndex = 0;
+
+            if (nIndex != -1)
+            {
+                strXml = aXml[nIndex];
+                strOutputPath = aOutputPath[nIndex];
+                output_timestamp = aTimestamp[nIndex];
+            }
+            return aPathNew.Count;
+        ERROR1:
+            return -1;
+            /*
+        LOADONE:
+        {
+                string strMetaData = "";
+                byte[] timestamp = null;
+
+                lRet = channel.GetRes(aPath[0],
+                    out strXml,
+                    out strMetaData,
+                    out timestamp,
+                    out strOutputPath,
+                    out strError);
+                if (lRet == -1)
+                    goto ERROR1;
+
+            }
+            return (int)lHitCount;
+             * */
+        }
+
+
+
+        // 将XML装入DOM
+        public static int LoadToDom(string strXml,
+            out XmlDocument dom,
+            out string strError)
+        {
+            strError = "";
+
+            dom = new XmlDocument();
+
+            try
+            {
+                dom.LoadXml(strXml);
+            }
+            catch (Exception ex)
+            {
+                strError = "XML装入DOM时出错：" + ex.Message;
+                return -1;
+            }
+
+            return 0;
+        }
+
+        /*
+        public int ConvertReaderXmlToHtml(
+            string strXml,
+            OperType opertype,
+            string[] saBorrowedItemBarcode,
+            string strCurrentItemBarcode,
+            out string strResult,
+            out string strError)
+        {
+            return ConvertReaderXmlToHtml(
+                this.CfgDir + "\\readerxml2html.cs",
+                this.CfgDir + "\\readerxml2html.cs.ref",
+                strXml,
+                opertype,
+                saBorrowedItemBarcode,
+                strCurrentItemBarcode,
+                out strResult,
+                out strError);
+        }
+         */
+
+        // parameters:
+        //      strMessageTempate   消息文字模板。其中可以使用 %name% %barcode% %temppassword% %expiretime% %period% 等宏
+        // return:
+        //      -1  出错
+        //      0   因为条件不具备功能没有成功执行
+        //      1   功能成功执行
+        public int ResetPassword(
+            // string strLibraryCodeList,
+            string strParameters,
+            string strMessageTemplate,
+            out string strError)
+        {
+            strError = "";
+
+            MessageInterface external_interface = this.GetMessageInterface("sms");
+
+            if (external_interface == null)
+            {
+                strError = "当前系统尚未配置短消息 (sms) 接口，无法进行重设密码的操作";
+                return -1;
+            }
+
+            Hashtable parameters = StringUtil.ParseParameters(strParameters, ',', '=');
+            string strLoginName = (string)parameters["barcode"];
+            string strNameParam = (string)parameters["name"];
+            string strTelParam = (string)parameters["tel"];
+            string strLibraryCodeList = (string)parameters["librarycode"];  // 控制检索读者记录的范围
+
+            if (string.IsNullOrEmpty(strLoginName) == true)
+            {
+                strError = "缺乏 barcode 参数";
+                return -1;
+            }
+            if (string.IsNullOrEmpty(strNameParam) == true)
+            {
+                strError = "缺乏 name 参数";
+                return -1;
+            }
+            if (string.IsNullOrEmpty(strTelParam) == true)
+            {
+                strError = "缺乏 tel 参数";
+                return -1;
+            }
+
+            // 判断电话号码是否为手机号码
+            if (strTelParam.Length != 11)
+            {
+                strError = "所提供的电话号码应该是 11 位的手机号码";
+                return 0;
+            }
+
+            string strXml = "";
+            string strOutputPath = "";
+
+            byte[] timestamp = null;
+
+            // 临时的SessionInfo对象
+            SessionInfo sessioninfo = new SessionInfo(this);
+            try
+            {
+                bool bTempPassword = false;
+                string strToken = "";
+                // 获得读者记录
+                // return:
+                //      -1  error
+                //      0   not found
+                //      1   命中1条
+                //      >1  命中多于1条
+                int nRet = this.GetReaderRecXmlForLogin(
+                    sessioninfo.Channels,
+                    strLibraryCodeList,
+                    strLoginName,
+                    null,
+                    -1,
+                    sessioninfo.ClientIP,
+                    null,
+                    out bTempPassword,
+                    out strXml,
+                    out strOutputPath,
+                    out timestamp,
+                    out strToken,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "以登录名 '" + strLoginName + "' 检索读者记录出错: " + strError;
+                    return -1;
+                }
+                if (nRet == 0)
+                {
+                    strError = "读者帐户 '" + strLoginName + "' 不存在";
+                    return 0;
+                }
+                if (nRet > 1)
+                {
+                    strError = "登录名 '" + strLoginName + "' 所匹配的帐户多于一个";
+                    return 0;
+                }
+
+                Debug.Assert(nRet == 1);
+
+                string strLibraryCode = "";
+                // 获得读者库的馆代码
+                // return:
+                //      -1  出错
+                //      0   成功
+                nRet = GetLibraryCode(
+                    strOutputPath,
+                    out strLibraryCode,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                XmlDocument readerdom = null;
+                nRet = LibraryApplication.LoadToDom(strXml,
+                    out readerdom,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "装载读者记录进入XML DOM时发生错误: " + strError;
+                    return -1;
+                }
+
+                // 观察 password 元素的 lastResetTime 属性，需在规定的时间长度以外才能再次进行重设
+
+                // 核对 barcode
+                string strBarcode = DomUtil.GetElementText(readerdom.DocumentElement, "barcode");
+                if (strBarcode.Trim() != strLoginName.Trim())
+                {
+                    strError = "证条码号不匹配";
+                    return -1;
+                }
+
+                // 核对 name
+                string strName = DomUtil.GetElementText(readerdom.DocumentElement, "name");
+                if (strName.Trim() != strNameParam.Trim())
+                {
+                    strError = "姓名不匹配";
+                    return 0;
+                }
+
+                // 核对 tel
+                string strTel = DomUtil.GetElementText(readerdom.DocumentElement, "tel");
+                if (string.IsNullOrEmpty(strTel) == true)
+                {
+                    strError = "读者记录中没有登记电话号码，无法进行重设密码的操作";
+                    return 0;
+                }
+
+                string strResultTel = ""; ;
+                string[] tels = strTel.Split(new char[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (string tel in tels)
+                {
+                    string strOneTel = tel.Trim();
+                    if (strOneTel == strTelParam.Trim())
+                    {
+                        strResultTel = strOneTel;
+                        break;
+                    }
+                }
+
+                if (string.IsNullOrEmpty(strResultTel) == true)
+                {
+                    strError = "所提供的电话号码和读者记录中的电话号码不匹配";
+                    return -1;
+                }
+
+                DateTime end;
+                // 观察在 password 元素 tempPasswordExpire 属性中残留的失效期，必须在这个时间以后才能进行本次操作
+                // parameters:
+                //      now 当前时间。本地时间
+                // return:
+                //      -1  出错
+                //      0   已经过了失效期
+                //      1   还在失效期以内
+                nRet = CheckOldExpireTime(readerdom,
+                    this.Clock.Now,
+                    out end,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet == 1)
+                {
+                    strError = "本次重设密码的操作距离上次操作间隔不足一小时，操作被拒绝。请在 "+end.ToShortTimeString()+" 以后再进行操作";
+                    return 0;
+                }
+
+                // 重新设定一个密码
+                Random rnd = new Random();
+                string strReaderTempPassword = rnd.Next(1, 999999).ToString();
+
+                DateTime expire = this.Clock.Now + new TimeSpan(1, 0, 0);   // 本地时间
+                string strExpireTime = DateTimeUtil.Rfc1123DateTimeStringEx(expire);
+
+                if (string.IsNullOrEmpty(strMessageTemplate) == true)
+                    strMessageTemplate = "尊敬的 %name% 您好！\n您的读者帐户(证条码号为 %barcode%)已设临时密码 %temppassword%，若您在 %period% 内用它登录会自动变为正式密码";
+
+                string strBody = strMessageTemplate.Replace("%barcode%", strBarcode)
+                    .Replace("%name%", strName)
+                    .Replace("%temppassword%", strReaderTempPassword)
+                    .Replace("%expiretime%", expire.ToLongTimeString())
+                    .Replace("%period%", "一个小时");
+                // string strBody = "读者(证条码号) " + strBarcode + " 的帐户密码已经被重设为 " + strReaderNewPassword + "";
+
+                // 向手机号码发送短信
+                {
+                    // 发送消息
+                    try
+                    {
+                        // 发送一条消息
+                        // parameters:
+                        //      strPatronBarcode    读者证条码号
+                        //      strPatronXml    读者记录XML字符串。如果需要除证条码号以外的某些字段来确定消息发送地址，可以从XML记录中取
+                        //      strMessageText  消息文字
+                        //      strError    [out]返回错误字符串
+                        // return:
+                        //      -1  发送失败
+                        //      0   没有必要发送
+                        //      >=1   发送成功，返回实际发送的消息条数
+                        nRet = external_interface.HostObj.SendMessage(
+                            strBarcode,
+                            readerdom.DocumentElement.OuterXml,
+                            strBody,
+                            strLibraryCode,
+                            out strError);
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = external_interface.Type + " 类型的外部消息接口Assembly中SendMessage()函数抛出异常: " + ex.Message;
+                        nRet = -1;
+                    }
+                    if (nRet == -1)
+                    {
+                        strError = "向读者 '" + strBarcode + "' 发送" + external_interface.Type + " message时出错: " + strError;
+                        if (this.Statis != null)
+                            this.Statis.IncreaseEntryValue(
+                            strLibraryCode,
+                            "重设密码通知",
+                            external_interface.Type + " message 重设密码通知消息发送错误数",
+                            1);
+                        this.WriteErrorLog(strError);
+                        return -1;
+                    }
+                    else
+                    {
+                        if (this.Statis != null)
+                            this.Statis.IncreaseEntryValue(
+        strLibraryCode,
+        "重设密码通知",
+        external_interface.Type + " message 重设密码通知消息发送数",
+        nRet);  // 短信条数可能多于次数
+                        if (this.Statis != null)
+                            this.Statis.IncreaseEntryValue(strLibraryCode,
+                            "重设密码通知",
+                            external_interface.Type + " message 重设密码通知人数",
+                            1);
+                    }
+                }
+
+                byte[] output_timestamp = null;
+                nRet = ChangeReaderTempPassword(
+        sessioninfo,
+        strOutputPath,
+        readerdom,
+        strReaderTempPassword,
+        strExpireTime,
+        timestamp,
+        out output_timestamp,
+        out strError);
+                if (nRet == -1)
+                    return -1;  // 此时短信已经发出，但临时密码并未修改成功
+
+            }
+            finally
+            {
+                sessioninfo.CloseSession();
+                sessioninfo = null;
+            }
+
+            strError = "临时密码已通过短信方式发送到手机 " + strTelParam + "。请按照手机短信提示进行操作";
+            return 1;
+        }
+
+        // 观察在 password 元素 tempPasswordExpire 属性中残留的失效期，必须在这个时间以后才能进行本次操作
+        // parameters:
+        //      now 当前时间。本地时间
+        //      expire  失效期末端时间。本地时间
+        // return:
+        //      -1  出错
+        //      0   已经过了失效期
+        //      1   还在失效期以内
+        static int CheckOldExpireTime(XmlDocument readerdom,
+            DateTime now,
+            out DateTime expire,
+            out string strError)
+        {
+            strError = "";
+            expire = new DateTime(0);
+
+            XmlNode node = readerdom.DocumentElement.SelectSingleNode("password");
+            if (node == null)
+                return 0;
+
+            string strExpireTime = DomUtil.GetAttr(node,
+"tempPasswordExpire");
+            if (string.IsNullOrEmpty(strExpireTime) == true)
+                return 0;
+
+            try
+            {
+                expire = DateTimeUtil.FromRfc1123DateTimeString(strExpireTime).ToLocalTime();
+
+                if (now > expire)
+                {
+                    // 失效期已经过了
+                    return 0;
+                }
+            }
+            catch (Exception)
+            {
+                strError = "临时密码失效期时间字符串 '" + strExpireTime + "' 格式不正确，应为 RFC1123 格式";
+                return -1;
+            }
+
+            return 1;   // 尚在失效期以内
+        }
+
+        // 检查读者账号是否存在
+        // return:
+        //      -1  error
+        //      0   不存在
+        //      1   存在
+        //      >1  多于一个
+        public int VerifyReaderAccount(
+            RmsChannelCollection channels,
+            string strLoginName,
+            out string strError)
+        {
+            strError = "";
+            string strXml = "";
+            string strOutputPath = "";
+
+            byte[] timestamp = null;
+            bool bTempPassword = false;
+            string strToken = "";
+
+            // 获得读者记录
+            // return:
+            //      -1  error
+            //      0   not found
+            //      1   命中1条
+            //      >1  命中多于1条
+            int nRet = this.GetReaderRecXmlForLogin(
+                channels,
+                "",    // 全部分馆的读者库
+                strLoginName,
+                null,
+                -1,
+                null,
+                null,
+                out bTempPassword,
+                out strXml,
+                out strOutputPath,
+                out timestamp,
+                out strToken,
+                out strError);
+            if (nRet == -1)
+            {
+                strError = "以登录名 '" + strLoginName + "' 检索读者记录出错: " + strError;
+                return -1;
+            }
+            if (nRet == 0)
+            {
+                strError = "帐户 '"+strLoginName+"' 不存在";
+                return 0;
+            }
+            if (nRet > 1)
+            {
+                strError = "登录名 '" + strLoginName + "' 所匹配的帐户多于一个";
+                return nRet;
+            }
+
+            Debug.Assert(nRet == 1);
+
+            return 1;
+        }
+
+        // xxxx|||xxxx 右边部分是 timerange
+        static string GetTimeRangeFromToken(string strToken)
+        {
+            string strLeft = "";
+            string strRight = "";
+            StringUtil.ParseTwoPart(strToken, "|||", out strLeft, out strRight);
+            return strRight;
+        }
+
+        public static string GetTimeRangeByStyle(string strStyle)
+        {
+            if (string.IsNullOrEmpty(strStyle) == true)
+                return DateTimeUtil.DateTimeToString8(DateTime.Now);
+            if (strStyle == "day")
+                return DateTimeUtil.DateTimeToString8(DateTime.Now);
+            if (strStyle == "month")
+            {
+                return DateTimeUtil.DateTimeToString8(DateTime.Now) + "-" + DateTimeUtil.DateTimeToString8(DateTime.Now.AddDays(31));
+            }
+            if (strStyle == "year")
+            {
+                return DateTimeUtil.DateTimeToString8(DateTime.Now) + "-" + DateTimeUtil.DateTimeToString8(DateTime.Now.AddDays(365));
+            }
+
+            // default
+            return DateTimeUtil.DateTimeToString8(DateTime.Now);
+        }
+
+        // 创建 token
+        public static int MakeToken(string strClientIP,
+            string strTimeRange,
+            string strHashedPassword,
+            out string strToken,
+            out string strError)
+        {
+            strError = "";
+            strToken = "";
+
+            if (string.IsNullOrEmpty(strTimeRange) == true)
+                strTimeRange = GetTimeRangeByStyle(null);
+
+            string strHashed = "";
+            string strPlainText = strClientIP + strHashedPassword + strTimeRange;
+            try
+            {
+                strHashed = Cryptography.GetSHA1(strPlainText);
+            }
+            catch
+            {
+                strError = "内部错误";
+                return -1;
+            }
+
+            strToken = strHashed.Replace(",", "").Replace("=","") + "|||" + strTimeRange;
+            return 0;
+        }
+
+        static bool IsInTimeRange(DateTime now,
+            string strTimeRange)
+        {
+            int nRet = strTimeRange.IndexOf("-");
+            if (nRet == -1)
+            {
+                if (strTimeRange == DateTimeUtil.DateTimeToString8(now))
+                    return true;
+                return false;
+            }
+
+            try
+            {
+                string strStart = "";
+                string strEnd = "";
+                StringUtil.ParseTwoPart(strTimeRange, "-", out strStart, out strEnd);
+                DateTime start = DateTimeUtil.Long8ToDateTime(strStart);
+                DateTime end = DateTimeUtil.Long8ToDateTime(strEnd);
+                if (now > start && now < end)
+                    return true;
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        // 验证 TOKEN
+        // Token 的发生规则为： client ip + hashed password + time range 然后 Hash。 Hash 完以后， time range 字符串再放在外面一份
+        // return:
+        //      -1  出错
+        //      0   验证不匹配
+        //      1   验证匹配
+        public static int VerifyToken(
+            string strClientIP,
+            string strToken,
+            string strHashedPassword,
+            out string strError)
+        {
+            strError = "";
+            string strTimeRange = GetTimeRangeFromToken(strToken);
+            if (string.IsNullOrEmpty(strTimeRange) == true)
+                strTimeRange = GetTimeRangeByStyle(null);
+
+            // 看看时间是否失效
+            if (IsInTimeRange(DateTime.Now, strTimeRange) == false)
+            {
+                strError = "token 已经失效";
+                return 0;
+            }
+
+            string strHashed = "";
+            string strPlainText = strClientIP + strHashedPassword + strTimeRange;
+            try
+            {
+                strHashed = Cryptography.GetSHA1(strPlainText);
+            }
+            catch
+            {
+                strError = "内部错误";
+                return -1;
+            }
+            strHashed = strHashed.Replace(",", "").Replace("=", "");
+            strHashed += "|||" + strTimeRange;
+            if (strHashed == strToken)
+                return 1;   // 匹配
+
+            return 0;   // 不匹配
+        }
+
+        // 公共查询读者登录
+        // text-level: 用户提示
+        // parameters:
+        //      strLoginName 登录名
+        //          1) 如果以"NB:"开头，表示利用姓名生日进行检索。姓名和生日之间间隔以'|'。姓名必须完整，生日为8字符形式
+        //          2) 如果以"EM:"开头，表示利用email地址进行检索
+        //          3) 如果以"TP:"开头，表示利用电话号码进行检索
+        //          4) 否则用证条码号进行检索
+        //      strPassword 密码。如果为null，表示不进行密码判断。注意，不是""
+        //              还可以为 token: 形态
+        //      nIndex  如果有多个匹配的读者记录，此参数表示要选择其中哪一个。
+        //              如果为-1，表示首次调用此函数，还不知如何选择。如此时命中多个，函数会返回>1的值
+        //      strGetToken 是否要获得 token ，和有效期。 空 /  day / month / year
+        //      strOutputUserName   返回读者证条码号
+        // return:
+        //      -1  error
+        //      0   登录未成功
+        //      1   登录成功
+        //      >1  有多个账户符合条件。
+        public int LoginForReader(SessionInfo sessioninfo,
+            string strLoginName,
+            string strPassword,
+            string strLocation,
+            string strLibraryCodeList,
+            int nIndex,
+            string strGetToken,
+            out string strOutputUserName,
+            out string strRights,
+            out string strLibraryCode,
+            out string strError)
+        {
+            strError = "";
+            // 读者身份登录
+            string strXml = "";
+            string strOutputPath = "";
+            byte[] timestamp = null;
+            strRights = "";
+            strOutputUserName = "";
+            strLibraryCode = "";
+
+            // 2009/9/22 new add
+            if (String.IsNullOrEmpty(strLoginName) == true)
+            {
+                strError = "参数 strLoginName 不能为空";
+                return -1;
+            }
+
+            if (this.LoginCache != null)
+            {
+                Account temp_account = this.LoginCache.Get(strLoginName) as Account;
+                if (temp_account != null)
+                {
+                    if (strPassword != null)    // 2014/12/20
+                    {
+                        if (temp_account.Password != strPassword)
+                        {
+                            bool bIsToken1 = StringUtil.HasHead(strPassword, "token:");
+                            bool bIsToken2 = StringUtil.HasHead(temp_account.Password, "token:");
+
+                            if (bIsToken1 == bIsToken2)
+                            {
+                                // text-level: 用户提示
+                                strError = this.GetString("帐户不存在或密码不正确");    // "帐户不存在或密码不正确"
+                                return -1;
+                            }
+                            else
+                                goto DO_LOGIN;  // 继续作普通登录
+                        }
+                    }
+
+                    sessioninfo.Account = temp_account;
+
+                    strRights = temp_account.RightsOrigin;
+                    strOutputUserName = temp_account.UserID;
+                    return 1;
+                }
+            }
+
+            DO_LOGIN:
+
+            bool bTempPassword = false;
+            string strToken = "";
+
+            // 获得读者记录, 并检查密码是否符合。为登录用途
+            // 该函数的特殊性在于，它可以用多种检索入口，而不仅仅是条码号
+            // parameters:
+            //      strQueryWord 登录名
+            //          1) 如果以"NB:"开头，表示利用姓名生日进行检索。姓名和生日之间间隔以'|'。姓名必须完整，生日为8字符形式
+            //          2) 如果以"EM:"开头，表示利用email地址进行检索
+            //          3) 如果以"TP:"开头，表示利用电话号码进行检索
+            //          4) 如果以"ID:"开头，表示利用身份证号进行检索
+            //          5) 如果以"CN:"开头，表示利用证件号码进行检索
+            //          6) 否则用证条码号进行检索
+            //      strPassword 密码。如果为null，表示不进行密码判断。注意，不是""
+            // return:
+            //      -1  error
+            //      0   not found
+            //      1   命中1条
+            //      >1  命中多于1条
+            int nRet = this.GetReaderRecXmlForLogin(
+                sessioninfo.Channels,
+                strLibraryCodeList,
+                strLoginName,
+                strPassword,
+                nIndex,
+                sessioninfo.ClientIP,
+                strGetToken,
+                out bTempPassword,
+                out strXml,
+                out strOutputPath,
+                out timestamp,
+                out strToken,
+                out strError);
+            if (nRet == -1)
+            {
+                // text-level: 用户提示
+                strError = string.Format(this.GetString("以登录名s登录时, 检索读者帐户记录出错s"),  // "以登录名 '{0}' 登录时, 检索读者帐户记录出错: {1}";
+                    strLoginName,
+                    strError);
+                    
+                    // "以登录名 '" + strLoginName + "' 登录时, 检索读者帐户记录出错: " + strError;
+                return -1;
+            }
+
+            if (nRet == 0)
+            {
+                // text-level: 用户提示
+                strError = this.GetString("帐户不存在或密码不正确");    // "帐户不存在或密码不正确"
+                return -1;
+            }
+
+            if (nRet > 1)
+            {
+                // 若未加以选择
+                if (nIndex == -1)
+                {
+                    // text-level: 用户提示
+                    strError = string.Format(this.GetString("以登录名s登录时, 因所匹配的帐户多于一个，无法登录"),  // "以登录名 '{0}' 登录时, 因所匹配的帐户多于一个，无法登录。可用证条码号作为登录名重新进行登录。"
+                        strLoginName);
+                        // "以登录名 '" + strLoginName + "' 登录时, 因所匹配的帐户多于一个，无法登录。可用证条码号作为登录名重新进行登录。";
+                    return nRet;
+                }
+            }
+
+            XmlDocument readerdom = null;
+            nRet = LibraryApplication.LoadToDom(strXml,
+                out readerdom,
+                out strError);
+            if (nRet == -1)
+            {
+                strError = "装载读者记录进入XML DOM时发生错误: " + strError;
+                return -1;
+            }
+
+
+            // 获得一个参考帐户
+
+            Account accountref = null;
+            // 从library.xml文件定义 获得一个帐户的信息
+            // return:
+            //      -1  error
+            //      0   not found
+            //      1   found
+            nRet = GetAccount("reader",
+                out accountref,
+                out strError);
+            if (nRet == -1)
+            {
+                // text-level: 用户提示
+                strError = string.Format(this.GetString("获得reader参考帐户时出错s"),    // "获得reader参考帐户时出错: {0}"
+                    strError);
+                    // "获得reader参考帐户时出错: " + strError;
+                return -1;
+            }
+
+            if (nRet == 0)
+                accountref = null;
+
+            Account account = new Account();
+            account.LoginName = strLoginName;
+            account.Password = strPassword; // TODO: 如果本函数用 strPassword == null 来调用，这里的 null 就不是实际的密码字符串了
+            account.Rights = "";    // 是否需要缺省值?
+            account.AccountLibraryCode = "";
+            account.Access = "";
+            if (accountref != null)
+            {
+                account.Rights = accountref.Rights;
+                // account.LibraryCode = accountref.LibraryCode;
+                account.Access = accountref.Access;
+            }
+
+            // 追加读者记录中定义的权限值
+            string strAddRights = DomUtil.GetElementText(readerdom.DocumentElement, "rights");
+            if (string.IsNullOrEmpty(strAddRights) == false)
+                account.Rights += "," + strAddRights;
+
+            // 2015/1/15
+            if (string.IsNullOrEmpty(strToken) == false)
+                account.Rights += ",token:" + strToken;  // 如果保存在缓存中，如何决定何时失效?
+
+            // 追加读者记录中定义的存取定义
+            string strAddAccess = DomUtil.GetElementText(readerdom.DocumentElement, "access");
+            if (string.IsNullOrEmpty(strAddAccess) == false)
+            {
+                // TODO: 可以优化为，如果发现前一个字符串末尾已经有 ';' 就不加 ';' 了。
+                account.Access += ";" + strAddAccess;
+            }
+
+            account.Type = "reader";
+            account.Barcode = DomUtil.GetElementText(readerdom.DocumentElement,
+                "barcode");
+            account.UserID = account.Barcode;
+
+            // 2012/9/8
+            // string strLibraryCode = "";
+            nRet = this.GetLibraryCode(strOutputPath,
+                    out strLibraryCode,
+                    out strError);
+            if (nRet == -1)
+                return -1;
+            account.AccountLibraryCode = strLibraryCode;
+
+            // 2009/9/26 new add
+            if (String.IsNullOrEmpty(account.Barcode) == true)
+            {
+                // text-level: 用户提示
+                strError = string.Format(this.GetString("读者记录中证条码号内容为空，登录失败"),    // "读者记录中证条码号内容为空，登录失败"
+                    strError);
+                return -1;
+            }
+
+            account.Name = DomUtil.GetElementText(readerdom.DocumentElement,
+                "name");
+            // 2010/11/11
+            account.DisplayName = DomUtil.GetElementText(readerdom.DocumentElement,
+"displayName");
+            account.PersonalLibrary = DomUtil.GetElementText(readerdom.DocumentElement,
+"personalLibrary");
+
+
+            // 2007/2/15 new add
+            account.ReaderDom = readerdom;
+            account.ReaderDomLastTime = DateTime.Now;
+
+
+            account.Location = strLocation;
+            account.ReaderDomPath = strOutputPath;
+            account.ReaderDomTimestamp = timestamp;
+
+            sessioninfo.Account = account;
+
+            strRights = account.RightsOrigin;   //  sessioninfo.RightsOrigin;
+
+            strOutputUserName = account.UserID; // 2011/7/29 读者证条码号
+
+            // 把临时密码设置为正式密码
+            if (bTempPassword == true)
+            {
+                byte[] output_timestamp = null;
+                // 修改读者密码
+                nRet = ChangeReaderPassword(
+                    sessioninfo,
+                    strOutputPath,
+                    ref readerdom,
+                    strPassword,    // TODO: 如果 strPassword == null 会怎么样？
+                    timestamp,
+                    out output_timestamp,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                timestamp = output_timestamp;
+
+                account.ReaderDom = readerdom;
+                account.ReaderDomTimestamp = timestamp;
+            }
+
+            if (this.LoginCache != null && string.IsNullOrEmpty(account.LoginName) == false
+                && account.Password != null)    // 防止 null password 进入 cache 引起其他问题 2014/12/20
+            {
+                DateTimeOffset offset = DateTimeOffset.Now.AddMinutes(20);
+                this.LoginCache.Set(account.Barcode, account, offset);
+            }
+
+            return 1;
+        }
+
+        // readerdom发生变化后，刷新相关域
+        public static void RefreshReaderAccount(ref Account account,
+            XmlDocument readerdom)
+        {
+            account.DisplayName = DomUtil.GetElementText(readerdom.DocumentElement,
+"displayName");
+            account.PersonalLibrary = DomUtil.GetElementText(readerdom.DocumentElement,
+"personalLibrary");
+            account.ReaderDomLastTime = DateTime.Now;
+
+        }
+
+        // 清除当前已经登录的读者类型用户的读者记录DOM cache
+        public void ClearLoginReaderDomCache(SessionInfo sessioninfo)
+        {
+            if (sessioninfo == null)
+                return;
+
+            if (sessioninfo.Account == null)
+                return;
+
+            if (sessioninfo.UserType != "reader")
+                return;
+
+            // 内存中内容已经被修改，要先保存DOM到数据库
+            if (sessioninfo.Account.ReaderDomChanged == true)
+            {
+                // 此处的自动保存，和保存按钮矛盾了 -- 一旦刷新，就会自动保存。
+                string strError = "";
+                // 保存修改后的读者记录DOM
+                // return:
+                //      -1  error
+                //      0   没有必要保存(changed标志为false)
+                //      1   成功保存
+                int nRet = SaveLoginReaderDom(sessioninfo,
+                    out strError);
+                // 遇到错误，如何报错?
+            }
+
+            sessioninfo.Account.ReaderDom = null;
+        }
+
+
+        public void SetLoginReaderDomChanged(SessionInfo sessioninfo)
+        {
+            if (sessioninfo == null)
+            {
+                throw new Exception("sessioninfo = null");
+            }
+
+            if (sessioninfo.Account == null)
+            {
+                throw new Exception("sessioninfo.Account = null");
+            }
+
+            if (sessioninfo.Account.Type != "reader")
+            {
+                throw new Exception("sessioninfo.Account.Type != \"reader\"");
+            }
+
+            sessioninfo.Account.ReaderDomChanged = true;
+        }
+
+        // 保存修改后的读者记录DOM
+        // return:
+        //      -2  时间戳冲突
+        //      -1  error
+        //      0   没有必要保存(changed标志为false)
+        //      1   成功保存
+        public int SaveLoginReaderDom(SessionInfo sessioninfo,
+            out string strError)
+        {
+            strError = "";
+            if (sessioninfo == null)
+            {
+                strError = "sessioninfo = null";
+                return -1;
+            }
+
+            if (sessioninfo.Account == null)
+            {
+                strError = "sessioninfo.Account = null";
+                return -1;
+            }
+
+            if (sessioninfo.Account.Type != "reader")
+            {
+                strError = "sessioninfo.Account.Type != \"reader\"";
+                return -1;
+            }
+
+            if (sessioninfo.Account.ReaderDomChanged == false)
+                return 0;
+
+            XmlDocument readerdom = sessioninfo.Account.ReaderDom;
+
+            RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
+#if NO
+            int nRedoCount = 0;
+            REDOSAVE:
+#endif
+            byte[] output_timestamp = null;
+            string strOutputPath = "";
+            string strOutputXml = "";
+
+            long lRet = 0;
+
+                /*
+                // 保存读者记录
+                lRet = channel.DoSaveTextRes(sessioninfo.Account.ReaderDomPath,
+                    readerdom.OuterXml,
+                    false,
+                    "content",
+                    sessioninfo.Account.ReaderDomTimestamp,   // timestamp,
+                    out output_timestamp,
+                    out strOutputPath,
+                    out strError);
+                */
+                string strExistingXml = "";
+                DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue kernel_errorcode = ErrorCodeValue.NoError;
+                LibraryServerResult result = this.SetReaderInfo(sessioninfo,
+                    "change",
+                    sessioninfo.Account.ReaderDomPath,
+                    readerdom.OuterXml,
+                    "", // sessioninfo.Account.ReaderDomOldXml,    // strOldXml
+                    sessioninfo.Account.ReaderDomTimestamp,
+                    out strExistingXml,
+                    out strOutputXml,
+                    out strOutputPath,
+                    out output_timestamp,
+                    out kernel_errorcode);
+                strError = result.ErrorInfo;
+                lRet = result.Value;
+
+
+
+
+            if (lRet == -1)
+            {
+                if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch
+                    || kernel_errorcode == ErrorCodeValue.TimestampMismatch)
+                    return -2;
+
+#if NO
+                // TODO: 重试不应该在这里做，而应该在调主那里做
+                if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch
+                    && nRedoCount < 10)
+                {
+                    // 保存<preference>元素innerxml
+                    string strPreferenceInnerXml = "";
+                    XmlNode preference = readerdom.DocumentElement.SelectSingleNode("preference");
+                    if (preference != null)
+                        strPreferenceInnerXml = preference.InnerXml;
+
+                    // 重新获得读者记录
+                    // return:
+                    //      -2  当前登录的用户不是reader类型
+                    //      -1  出错
+                    //      0   尚未登录
+                    //      1   成功
+                    int nRet = GetLoginReaderDom(sessioninfo,
+                        out readerdom,
+                        out strError);
+                    if (nRet != 1)
+                    {
+                        strError = "保存读者记录时发现时间戳冲突，重新获取读者记录时又出错: " + strError;
+                        return -1;
+                    }
+
+                    // 修改<preference>元素
+                    if (String.IsNullOrEmpty(strPreferenceInnerXml) == false)
+                    {
+                        preference = readerdom.DocumentElement.SelectSingleNode("preference");
+                        if (preference == null)
+                        {
+                            preference = readerdom.CreateElement("preference");
+                            readerdom.DocumentElement.AppendChild(preference);
+                        }
+
+                        preference.InnerXml = strPreferenceInnerXml;
+                    }
+
+                    // 重新保存
+                    nRedoCount++;
+                    goto REDOSAVE;
+                }
+#endif
+
+                return -1;
+            }
+
+            int nRet = LibraryApplication.LoadToDom(strOutputXml,
+                out readerdom,
+                out strError);
+            if (nRet == -1)
+            {
+                strError = "装载读者记录进入XML DOM时发生错误: " + strError;
+                return -1;
+            }
+            sessioninfo.Account.ReaderDom = readerdom;
+            RefreshReaderAccount(ref sessioninfo.Account, readerdom);
+
+            sessioninfo.Account.ReaderDomChanged = false;
+            sessioninfo.Account.ReaderDomTimestamp = output_timestamp;
+
+            return 1;
+            /*
+        ERROR1:
+            return -1;
+             * */
+        }
+
+        // 管理员身份保存修改后的读者记录DOM
+        // return:
+        //      -2  时间戳冲突
+        //      -1  error
+        //      0   没有必要保存(changed标志为false)
+        //      1   成功保存
+        public int SaveOtherReaderDom(SessionInfo sessioninfo,
+            out string strError)
+        {
+            strError = "";
+            if (sessioninfo == null)
+            {
+                strError = "sessioninfo = null";
+                return -1;
+            }
+
+            if (sessioninfo.Account == null)
+            {
+                strError = "sessioninfo.Account = null";
+                return -1;
+            }
+
+            if (sessioninfo.Account.Type == "reader")
+            {
+                strError = "sessioninfo.Account.Type == \"reader\"，而不是工作人员身份";
+                return -1;
+            }
+
+            if (sessioninfo.Account.ReaderDomChanged == false)
+                return 0;
+
+            XmlDocument readerdom = sessioninfo.Account.ReaderDom;
+
+            RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
+#if NO
+            int nRedoCount = 0;
+        REDOSAVE:
+#endif
+            byte[] output_timestamp = null;
+            string strOutputPath = "";
+            string strOutputXml = "";
+
+            long lRet = 0;
+
+
+                /*
+                // 保存读者记录
+                lRet = channel.DoSaveTextRes(sessioninfo.Account.ReaderDomPath,
+                    readerdom.OuterXml,
+                    false,
+                    "content",
+                    sessioninfo.Account.ReaderDomTimestamp,   // timestamp,
+                    out output_timestamp,
+                    out strOutputPath,
+                    out strError);
+                 * */
+                string strExistingXml = "";
+                DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue kernel_errorcode = ErrorCodeValue.NoError;
+                LibraryServerResult result = this.SetReaderInfo(sessioninfo,
+                    "change",
+                    sessioninfo.Account.ReaderDomPath,
+                    readerdom.OuterXml,
+                    "", // sessioninfo.Account.ReaderDomOldXml,    // strOldXml
+                    sessioninfo.Account.ReaderDomTimestamp,
+                    out strExistingXml,
+                    out strOutputXml,
+                    out strOutputPath,
+                    out output_timestamp,
+                    out kernel_errorcode);
+                strError = result.ErrorInfo;
+                lRet = result.Value;
+
+
+            if (lRet == -1)
+            {
+                if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch
+                    || kernel_errorcode == ErrorCodeValue.TimestampMismatch)
+                    return -2;
+#if NO
+                // TODO: 重试不应该在这里做，而应该在调主那里做
+
+                if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch
+                    && nRedoCount < 10)
+                {
+                    // 保存<preference>元素innerxml
+                    string strPreferenceInnerXml = "";
+                    XmlNode preference = readerdom.DocumentElement.SelectSingleNode("preference");
+                    if (preference != null)
+                        strPreferenceInnerXml = preference.InnerXml;
+
+                    // 重新获得读者记录
+                    // return:
+                    //      -2  当前登录的用户不是reader类型
+                    //      -1  出错
+                    //      0   尚未登录
+                    //      1   成功
+                    int nRet = GetLoginReaderDom(sessioninfo,
+                        out readerdom,
+                        out strError);
+                    if (nRet != 1)
+                    {
+                        strError = "保存读者记录时发现时间戳冲突，重新获取读者记录时又出错: " + strError;
+                        return -1;
+                    }
+
+                    // 修改<preference>元素
+                    if (String.IsNullOrEmpty(strPreferenceInnerXml) == false)
+                    {
+                        preference = readerdom.DocumentElement.SelectSingleNode("preference");
+                        if (preference == null)
+                        {
+                            preference = readerdom.CreateElement("preference");
+                            readerdom.DocumentElement.AppendChild(preference);
+                        }
+
+                        preference.InnerXml = strPreferenceInnerXml;
+                    }
+
+                    // 重新保存
+                    nRedoCount++;
+                    goto REDOSAVE;
+                }
+#endif
+
+                return -1;
+            }
+
+            int nRet = LibraryApplication.LoadToDom(strOutputXml,
+    out readerdom,
+    out strError);
+            if (nRet == -1)
+            {
+                strError = "装载读者记录进入XML DOM时发生错误: " + strError;
+                return -1;
+            }
+            sessioninfo.Account.ReaderDom = readerdom;
+            RefreshReaderAccount(ref sessioninfo.Account, readerdom);
+
+            sessioninfo.Account.ReaderDomChanged = false;
+            sessioninfo.Account.ReaderDomTimestamp = output_timestamp;
+
+            return 1;
+            /*
+        ERROR1:
+            return -1;
+             * */
+        }
+
+
+        // 获得当前session中已经登录的读者记录DOM
+        // return:
+        //      -2  当前登录的用户不是reader类型
+        //      -1  出错
+        //      0   尚未登录
+        //      1   成功
+        public int GetLoginReaderDom(SessionInfo sessioninfo,
+            out XmlDocument readerdom,
+            out string strError)
+        {
+            strError = "";
+            readerdom = null;
+
+            if (sessioninfo == null)
+            {
+                strError = "sessioninfo == null";
+                goto ERROR1;
+            }
+
+            if (sessioninfo.Account == null)
+            {
+                strError = "尚未登录";
+                return 0;
+            }
+
+            if (sessioninfo.Account.Type != "reader")
+            {
+                strError = "当前登录的用户不是读者类型";
+                return -2;
+            }
+
+            // 看看缓存的readerdom是否失效
+            TimeSpan delta = DateTime.Now - sessioninfo.Account.ReaderDomLastTime;
+            if (delta.TotalSeconds > 60
+                && sessioninfo.Account.ReaderDomChanged == false)
+            {
+                sessioninfo.Account.ReaderDom = null;
+            }
+
+            if (sessioninfo.Account.ReaderDom == null)
+            {
+                string strBarcode = "";
+
+                strBarcode = sessioninfo.Account.Barcode;
+                if (strBarcode == "")
+                {
+                    strError = "帐户信息中读者证条码号为空，无法定位读者记录。";
+                    goto ERROR1;
+                }
+
+                string strXml = "";
+                string strOutputPath = "";
+                byte[] timestamp = null;
+                // 获得读者记录
+                int nRet = this.GetReaderRecXml(
+                    sessioninfo.Channels,
+                    strBarcode,
+                    out strXml,
+                    out strOutputPath,
+                    out timestamp,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                if (nRet == 0)
+                    goto ERROR1;
+
+                readerdom = new XmlDocument();
+
+                try
+                {
+                    readerdom.LoadXml(strXml);
+                }
+                catch (Exception ex)
+                {
+                    strError = "装载读者XML记录进入DOM时出错: " + ex.Message;
+                    goto ERROR1;
+                }
+
+                sessioninfo.Account.ReaderDomPath = strOutputPath;
+                sessioninfo.Account.ReaderDomTimestamp = timestamp;
+                sessioninfo.Account.ReaderDom = readerdom;
+                sessioninfo.Account.ReaderDomLastTime = DateTime.Now;
+            }
+            else
+            {
+                readerdom = sessioninfo.Account.ReaderDom;  // 沿用cache中的
+            }
+
+            return 1;
+        ERROR1:
+            return -1;
+        }
+
+        // 管理员获得特定证条码号的读者记录DOM
+        // return:
+        //      -2  当前登录的用户不是librarian类型
+        //      -1  出错
+        //      0   尚未登录
+        //      1   成功
+        public int GetOtherReaderDom(SessionInfo sessioninfo,
+            string strReaderBarcode,
+            out XmlDocument readerdom,
+            out string strError)
+        {
+            strError = "";
+            readerdom = null;
+
+            if (sessioninfo == null)
+            {
+                strError = "sessioninfo == null";
+                goto ERROR1;
+            }
+
+            if (sessioninfo.Account == null)
+            {
+                strError = "尚未登录";
+                return 0;
+            }
+
+            if (sessioninfo.Account.Type == "reader")
+            {
+                strError = "当前登录的用户不是工作人员类型";
+                return -2;
+            }
+
+            // 看看缓存的readerdom是否失效
+            TimeSpan delta = DateTime.Now - sessioninfo.Account.ReaderDomLastTime;
+            if (delta.TotalSeconds > 60
+                && sessioninfo.Account.ReaderDomChanged == false)
+            {
+                sessioninfo.Account.ReaderDom = null;
+            }
+
+            if (sessioninfo.Account.ReaderDom == null
+                || sessioninfo.Account.ReaderDomBarcode != strReaderBarcode)
+            {
+                string strBarcode = "";
+
+                strBarcode = strReaderBarcode;
+                if (strBarcode == "")
+                {
+                    strError = "strReaderBarcode参数为空，无法定位读者记录。";
+                    goto ERROR1;
+                }
+
+                string strXml = "";
+                string strOutputPath = "";
+                byte[] timestamp = null;
+                // 获得读者记录
+                int nRet = this.GetReaderRecXml(
+                    sessioninfo.Channels,
+                    strBarcode,
+                    out strXml,
+                    out strOutputPath,
+                    out timestamp,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                if (nRet == 0)
+                    goto ERROR1;
+
+                readerdom = new XmlDocument();
+
+                try
+                {
+                    readerdom.LoadXml(strXml);
+                }
+                catch (Exception ex)
+                {
+                    strError = "装载读者XML记录进入DOM时出错: " + ex.Message;
+                    goto ERROR1;
+                }
+
+                sessioninfo.Account.ReaderDomBarcode = strReaderBarcode;
+                sessioninfo.Account.ReaderDomPath = strOutputPath;
+                sessioninfo.Account.ReaderDomTimestamp = timestamp;
+                sessioninfo.Account.ReaderDom = readerdom;
+                sessioninfo.Account.ReaderDomLastTime = DateTime.Now;
+            }
+            else
+            {
+                Debug.Assert(strReaderBarcode == sessioninfo.Account.ReaderDomBarcode, "");
+                readerdom = sessioninfo.Account.ReaderDom;  // 沿用cache中的
+            }
+
+            return 1;
+        ERROR1:
+            return -1;
+        }
+
+        // 验证读者密码。包括普通密码和临时密码
+        // parameters:
+        //      bTempPassword   [out] 是否为临时密码匹配成功
+        // return:
+        //      -1  error
+        //      0   密码不正确
+        //      1   密码正确
+        public static int VerifyReaderPassword(
+            string strClientIP,
+            XmlDocument readerdom,
+            string strPassword,
+            DateTime now,
+            out bool bTempPassword,
+            out string strError)
+        {
+            bTempPassword = false;
+            int nRet = VerifyReaderNormalPassword(
+                strClientIP,
+                readerdom,
+                strPassword,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            if (nRet == 1)
+                return 1;
+            nRet = VerifyReaderTempPassword(readerdom,
+                strPassword,
+                now,
+                out strError);
+            if (nRet == 1)
+                bTempPassword = true;
+            return nRet;
+        }
+
+        // 验证读者密码。包括普通密码和临时密码，或者 token
+        // return:
+        //      -1  error
+        //      0   密码不正确
+        //      1   密码正确
+        public static int VerifyReaderPassword(
+            string strClientIP,
+            XmlDocument readerdom,
+            string strPassword,
+            DateTime now,
+            out string strError)
+        {
+            int nRet = VerifyReaderNormalPassword(
+                strClientIP,
+                readerdom,
+                strPassword,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            if (nRet == 1)
+                return 1;
+            return VerifyReaderTempPassword(readerdom,
+                strPassword,
+                now,
+                out strError);
+        }
+
+        // 验证读者普通密码或者 token
+        // return:
+        //      -1  error
+        //      0   密码不正确
+        //      1   密码正确
+        public static int VerifyReaderNormalPassword(
+            string strClientIP,
+            XmlDocument readerdom,
+            string strPassword,
+            out string strError)
+        {
+            strError = "";
+            // int nRet = 0;
+
+            // 验证密码
+            string strSha1Text = DomUtil.GetElementText(readerdom.DocumentElement,
+                "password");
+
+            if (StringUtil.HasHead(strPassword, "token:") == true)
+            {
+                string strToken = strPassword.Substring("token:".Length);
+                return VerifyToken(
+                    strClientIP,
+                    strToken,
+                    strSha1Text,
+                    out strError);
+            }
+
+            // 允许读者记录中有明文空密码
+            if (String.IsNullOrEmpty(strSha1Text) == true)
+            {
+                if (strPassword != strSha1Text)
+                {
+                    strError = "密码不正确";
+                    return 0;
+                }
+
+                return 1;
+            }
+
+
+            try
+            {
+                strPassword = Cryptography.GetSHA1(strPassword);
+            }
+            catch
+            {
+                strError = "内部错误";
+                return -1;
+            }
+
+
+            if (strPassword != strSha1Text)
+            {
+                strError = "密码不正确";
+                return 0;
+            }
+
+            return 1;
+        }
+
+        // 验证读者临时密码
+        // parameters:
+        //      now 当前时间。本地时间
+        // return:
+        //      -1  error
+        //      0   密码不正确
+        //      1   密码正确
+        public static int VerifyReaderTempPassword(
+            XmlDocument readerdom,
+            string strPassword,
+            DateTime now,
+            out string strError)
+        {
+            strError = "";
+
+            XmlNode node = readerdom.DocumentElement.SelectSingleNode("password");
+            if (node == null)
+                return 0;
+
+            // 失效期
+            string strExpireTime = DomUtil.GetAttr(node,
+                "tempPasswordExpire");
+            if (string.IsNullOrEmpty(strExpireTime) == true)
+                return 0;   // 不允许不使用失效期
+
+            try
+            {
+                DateTime expire = DateTimeUtil.FromRfc1123DateTimeString(strExpireTime).ToLocalTime();
+
+                if (now > expire)
+                {
+                    // 临时密码已经失效
+                    return 0;
+                }
+            }
+            catch (Exception )
+            {
+                strError = "临时密码失效期时间字符串 '" + strExpireTime + "' 格式不正确，应为 RFC1123 格式";
+                return -1;
+            }
+
+            // 验证密码
+            string strSha1Text = DomUtil.GetAttr(node,
+                "tempPassword");
+
+            // 允许读者记录中有明文空密码
+            if (String.IsNullOrEmpty(strSha1Text) == true)
+            {
+                if (strPassword != strSha1Text)
+                {
+                    strError = "密码不正确";
+                    return 0;
+                }
+
+                return 1;
+            }
+
+            try
+            {
+                strPassword = Cryptography.GetSHA1(strPassword);
+            }
+            catch
+            {
+                strError = "内部错误";
+                return -1;
+            }
+
+            if (strPassword != strSha1Text)
+            {
+                strError = "密码不正确";
+                return 0;
+            }
+
+            return 1;
+        }
+
+        // 修改读者密码
+        // return:
+        //      -1  error
+        //      0   成功
+        public static int ChangeReaderPassword(
+            XmlDocument readerdom,
+            string strNewPassword,
+            ref XmlDocument domOperLog,
+            out string strError)
+        {
+            strError = "";
+
+            try
+            {
+                strNewPassword = Cryptography.GetSHA1(strNewPassword);
+            }
+            catch
+            {
+                strError = "内部错误";
+                return -1;
+            }
+
+            XmlNode node = DomUtil.SetElementText(readerdom.DocumentElement,
+                "password", strNewPassword);
+            // 2013/11/2
+            if (node != null)
+            {
+                // 清理临时密码
+                DomUtil.SetAttr(node, "tempPassword", null);
+                // 但失效期不清除
+            }
+
+            if (domOperLog != null)
+            {
+                Debug.Assert(domOperLog.DocumentElement != null, "");
+
+                // 在日志中保存的是SHA1形态的密码。这样可以防止密码泄露。
+                // 在日志恢复阶段, 把这个密码直接写入读者记录即可, 不需要再加工
+                DomUtil.SetElementText(domOperLog.DocumentElement,
+                    "newPassword", strNewPassword);
+            }
+
+            return 0;
+        }
+
+        // 修改读者临时密码
+        // return:
+        //      -1  error
+        //      0   成功
+        public static int ChangeReaderTempPassword(
+            XmlDocument readerdom,
+            string strTempPassword,
+            string strExpireTime,
+            ref XmlDocument domOperLog,
+            out string strError)
+        {
+            strError = "";
+
+            try
+            {
+                strTempPassword = Cryptography.GetSHA1(strTempPassword);
+            }
+            catch
+            {
+                strError = "内部错误";
+                return -1;
+            }
+
+            XmlNode node = readerdom.DocumentElement.SelectSingleNode("password");
+            if (node == null)
+            {
+                node = readerdom.CreateElement("password");
+                readerdom.DocumentElement.AppendChild(node);
+            }
+
+            DomUtil.SetAttr(node,
+                "tempPassword", strTempPassword);
+            DomUtil.SetAttr(node,
+                "tempPasswordExpire", strExpireTime);
+
+            // 在日志中保存的是SHA1形态的密码。这样可以防止密码泄露。
+            // 在日志恢复阶段, 把这个密码直接写入读者记录即可, 不需要再加工
+            DomUtil.SetElementText(domOperLog.DocumentElement,
+                "tempPassword", strTempPassword);
+            DomUtil.SetElementText(domOperLog.DocumentElement,
+                "tempPasswordExpire", strExpireTime);
+
+            return 0;
+        }
+
+        #region 实用功能
+
+        // 通过册条码号得知从属的种记录路径
+        // parameters:
+        //      strItemBarcode  册条码号
+        //      strReaderBarcodeParam 借阅者证条码号。用于条码号重复的时候附加判断。
+        // return:
+        //      -1  error
+        //      0   册记录没有找到(strError中有说明信息)
+        //      1   找到
+        public int GetBiblioRecPath(
+            SessionInfo sessioninfo,
+            string strItemBarcode,
+            string strReaderBarcode,
+            out string strBiblioRecPath,
+            out string strWarning,
+            out string strError)
+        {
+            strError = "";
+            strWarning = "";
+            strBiblioRecPath = "";
+            int nRet = 0;
+
+            string strOutputItemPath = "";
+            string strItemXml = "";
+            byte[] item_timestamp = null;
+
+            int nResultCount = 0;
+
+            // strItemBarcode命令状态 2006/12/24 new add
+            if (strItemBarcode[0] == '@')
+            {
+                // 获得册记录，通过册记录路径
+
+                string strLead = "@path:";
+                if (strItemBarcode.Length <= strLead.Length)
+                {
+                    strError = "错误的检索词格式: '" + strItemBarcode + "'";
+                    return -1;
+                }
+                string strPart = strItemBarcode.Substring(0, strLead.Length);
+
+                if (strPart != strLead)
+                {
+                    strError = "不支持的检索词格式: '" + strItemBarcode + "'。目前仅支持'@path:'引导的检索词";
+                    return -1;
+                }
+
+                string strItemRecPath = strItemBarcode.Substring(strLead.Length);
+
+                {
+                    string strItemDbName0 = ResPath.GetDbName(strItemRecPath);
+                    // 需要检查一下数据库名是否在允许的实体库名之列
+                    if (this.IsItemDbName(strItemDbName0) == false)
+                    {
+                        strError = "册记录路径 '" + strItemRecPath + "' 中的数据库名 '" + strItemDbName0 + "' 不在配置的实体库名之列，因此拒绝操作。";
+                        return -1;
+                    }
+                }
+
+                string strMetaData = "";
+                // string strTempOutputPath = "";
+
+                RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+                if (channel == null)
+                {
+                    strError = "get channel error";
+                    return -1;
+                }
+
+                long lRet = channel.GetRes(strItemRecPath,
+                    out strItemXml,
+                    out strMetaData,
+                    out item_timestamp,
+                    out strOutputItemPath,
+                    out strError);
+                if (lRet == -1)
+                {
+                    strError = "获取册记录 " + strItemRecPath + " 时发生错误: " + strError;
+                    return -1;
+                }
+            }
+            else // 普通条码号
+            {
+
+                List<string> aPath = null;
+
+                // 获得册记录
+                // return:
+                //      -1  error
+                //      0   not found
+                //      1   命中1条
+                //      >1  命中多于1条
+                nRet = this.GetItemRecXml(
+                    sessioninfo.Channels,
+                    strItemBarcode,
+                    out strItemXml,
+                    100,
+                    out aPath,
+                    out item_timestamp,
+                    out strError);
+                if (nRet == 0)
+                {
+                    strError = "册条码号为 '" + strItemBarcode + "' 的册记录没有找到";
+                    return 0;
+                }
+                if (nRet == -1)
+                    return -1;
+
+                if (aPath.Count > 1)
+                {
+                    // bItemBarcodeDup = true; // 此时已经需要设置状态。虽然后面可以进一步识别出真正的册记录
+
+                    // 构造strDupBarcodeList
+                    /*
+                    string[] pathlist = new string[aPath.Count];
+                    aPath.CopyTo(pathlist);
+                    string strDupPathList = String.Join(",", pathlist);
+                     * */
+                    string strDupPathList = StringUtil.MakePathList(aPath);
+
+                    List<string> aFoundPath = null;
+                    List<byte[]> aTimestamp = null;
+                    List<string> aItemXml = null;
+
+                    if (String.IsNullOrEmpty(strReaderBarcode) == true)
+                    {
+                        // 如果没有给出读者证条码号参数
+                        /*
+                        strError = "册条码号为 '" + strItemBarcode + "' 册记录有 " + aPath.Count.ToString() + " 条，无法定位册记录。";
+
+                        return -1;
+                         * */
+                        strOutputItemPath = aPath[0];
+                        nResultCount = aPath.Count;
+                        strWarning = "册条码号为 '" + strItemBarcode + "' 册记录有 " + aPath.Count.ToString() + " 条(记录路径为 " + strDupPathList + " )，在没有提供附加信息的情况下，无法准确定位册记录。现权且取出其中的第一条(" + aPath[0] + ")。";
+                        goto GET_BIBLIO;
+                    }
+
+                    RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+                    if (channel == null)
+                    {
+                        strError = "get channel error";
+                        return -1;
+                    }
+
+                    // 从若干重复条码号的册记录中，选出其中符合当前读者证条码号的
+                    // return:
+                    //      -1  出错
+                    //      其他    选出的数量
+                    nRet = FindItem(
+                        channel,
+                        strReaderBarcode,
+                        aPath,
+                        true,   // 优化
+                        out aFoundPath,
+                        out aItemXml,
+                        out aTimestamp,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "选择重复条码号的册记录时发生错误: " + strError;
+                        return -1;
+                    }
+
+                    if (nRet == 0)
+                    {
+                        strError = "册条码号 '" + strItemBarcode + "' 检索出的 " + aPath.Count + " 条记录(记录路径为 " + strDupPathList + " )中，没有任何一条其<borrower>元素表明了被读者 '" + strReaderBarcode + "' 借阅。";
+                        return -1;
+                    }
+
+                    if (nRet > 1)
+                    {
+                        /*
+                        string[] pathlist1 = new string[aFoundPath.Count];
+                        aFoundPath.CopyTo(pathlist1);
+                        string strDupPathList1 = String.Join(",", pathlist1);
+                         * */
+                        string strDupPathList1 = StringUtil.MakePathList(aFoundPath);
+
+                        strError = "册条码号为 '" + strItemBarcode + "' 并且<borrower>元素表明为读者 '" + strReaderBarcode + "' 借阅的册记录有 " + aFoundPath.Count.ToString() + " 条(记录路径为 " + strDupPathList1 + " )，无法定位册记录。";
+                        return -1;
+                    }
+
+                    Debug.Assert(nRet == 1, "");
+
+                    strOutputItemPath = aFoundPath[0];
+                    item_timestamp = aTimestamp[0];
+                    strItemXml = aItemXml[0];
+
+                }
+                else
+                {
+                    Debug.Assert(nRet == 1, "");
+                    Debug.Assert(aPath.Count == 1, "");
+                    if (nRet == 1)
+                    {
+                        strOutputItemPath = aPath[0];
+                        nResultCount = 1;
+                        // strItemXml已经有册记录了
+                    }
+                }
+            }
+
+            GET_BIBLIO:
+
+            string strItemDbName = "";  // 实体库名
+            string strBiblioRecID = ""; // 种记录id
+
+            // 如果需要从册记录中获得种记录路径
+
+            /*
+            // 准备工作: 映射数据库名
+            nRet = this.GetGlobalCfg(sessioninfo.Channels,
+                out strError);
+            if (nRet == -1)
+                return -1;
+             * */
+
+            strItemDbName = ResPath.GetDbName(strOutputItemPath);
+            string strBiblioDbName = "";
+
+            // 最好在应用启动时就做了？
+            // 根据实体库名, 找到对应的书目库名
+            // return:
+            //      -1  出错
+            //      0   没有找到
+            //      1   找到
+            nRet = this.GetBiblioDbNameByItemDbName(strItemDbName,
+                out strBiblioDbName,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            if (nRet == 0)
+            {
+                strError = "实体库名 '" + strItemDbName + "' 没有找到对应的书目库名";
+                return -1;
+            }
+
+            // 获得册记录中的<parent>字段
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(strItemXml);
+            }
+            catch (Exception ex)
+            {
+                strError = "册记录XML装载到DOM出错:" + ex.Message;
+                return -1;
+            }
+
+            strBiblioRecID = DomUtil.GetElementText(dom.DocumentElement, "parent"); //
+            if (String.IsNullOrEmpty(strBiblioRecID) == true)
+            {
+                strError = "册记录XML中<parent>元素缺乏或者值为空, 因此无法定位种记录";
+                return -1;
+            }
+
+            strBiblioRecPath = strBiblioDbName + "/" + strBiblioRecID;
+
+            return nResultCount;
+        }
+
+        // 通过评注记录路径得知从属的种记录路径
+        // parameters:
+        // return:
+        //      -1  error
+        //      0   评注记录没有找到(strError中有说明信息)
+        //      1   找到
+        public int GetBiblioRecPathByCommentRecPath(
+            SessionInfo sessioninfo,
+            string strCommentRecPath,
+            out string strBiblioRecPath,
+            out string strError)
+        {
+            strError = "";
+            strBiblioRecPath = "";
+            int nRet = 0;
+
+            string strOutputItemPath = "";
+            string strItemXml = "";
+            byte[] item_timestamp = null;
+
+            {
+                string strCommentDbName0 = ResPath.GetDbName(strCommentRecPath);
+                // 需要检查一下数据库名是否在允许的实体库名之列
+                if (this.IsCommentDbName(strCommentDbName0) == false)
+                {
+                    strError = "评注记录路径 '" + strCommentRecPath + "' 中的数据库名 '" + strCommentDbName0 + "' 不在配置的评注库名之列，因此拒绝操作。";
+                    return -1;
+                }
+            }
+
+            string strMetaData = "";
+            // string strTempOutputPath = "";
+
+            RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
+            long lRet = channel.GetRes(strCommentRecPath,
+                out strItemXml,
+                out strMetaData,
+                out item_timestamp,
+                out strOutputItemPath,
+                out strError);
+            if (lRet == -1)
+            {
+                strError = "获取评注记录 " + strCommentRecPath + " 时发生错误: " + strError;
+                return -1;
+            }
+
+            string strCommentDbName = "";  // 实体库名
+            string strBiblioRecID = ""; // 种记录id
+
+            // 如果需要从评注记录中获得种记录路径
+            strCommentDbName = ResPath.GetDbName(strOutputItemPath);
+            string strBiblioDbName = "";
+
+            // 最好在应用启动时就做了？
+            // 根据实体库名, 找到对应的书目库名
+            // return:
+            //      -1  出错
+            //      0   没有找到
+            //      1   找到
+            nRet = this.GetBiblioDbNameByCommentDbName(strCommentDbName,
+                out strBiblioDbName,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            if (nRet == 0)
+            {
+                strError = "评注库名 '" + strCommentDbName + "' 没有找到对应的书目库名";
+                return -1;
+            }
+
+            // 获得评注记录中的<parent>字段
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(strItemXml);
+            }
+            catch (Exception ex)
+            {
+                strError = "评注记录XML装载到DOM出错:" + ex.Message;
+                return -1;
+            }
+
+            strBiblioRecID = DomUtil.GetElementText(dom.DocumentElement, "parent"); //
+            if (String.IsNullOrEmpty(strBiblioRecID) == true)
+            {
+                strError = "评注记录XML中<parent>元素缺乏或者值为空, 因此无法定位种记录";
+                return -1;
+            }
+
+            strBiblioRecPath = strBiblioDbName + "/" + strBiblioRecID;
+            return 1;
+        }
+
+        // 2011/9/5
+        // 通过册记录路径和parentid得知从属的种记录路径
+        // parameters:
+        // return:
+        //      -1  error
+        //      1   找到
+        public int GetBiblioRecPathByItemRecPath(
+            string strItemRecPath,
+            string strParentID,
+            out string strBiblioRecPath,
+            out string strError)
+        {
+            strError = "";
+            strBiblioRecPath = "";
+            int nRet = 0;
+
+
+            {
+                string strItemDbName0 = ResPath.GetDbName(strItemRecPath);
+                // 需要检查一下数据库名是否在允许的实体库名之列
+                if (this.IsItemDbName(strItemDbName0) == false)
+                {
+                    strError = "册记录路径 '" + strItemRecPath + "' 中的数据库名 '" + strItemDbName0 + "' 不在配置的实体库名之列，因此拒绝操作。";
+                    return -1;
+                }
+            }
+
+            string strItemDbName = "";  // 实体库名
+
+            // 如果需要从册记录中获得种记录路径
+            strItemDbName = ResPath.GetDbName(strItemRecPath);
+            string strBiblioDbName = "";
+
+            // 最好在应用启动时就做了？
+            // 根据实体库名, 找到对应的书目库名
+            // return:
+            //      -1  出错
+            //      0   没有找到
+            //      1   找到
+            nRet = this.GetBiblioDbNameByItemDbName(strItemDbName,
+                out strBiblioDbName,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            if (nRet == 0)
+            {
+                strError = "实体库名 '" + strItemDbName + "' 没有找到对应的书目库名";
+                return -1;
+            }
+
+            strBiblioRecPath = strBiblioDbName + "/" + strParentID;
+            return 1;
+        }
+
+        // 通过册记录路径得知从属的种记录路径
+        // parameters:
+        // return:
+        //      -1  error
+        //      0   册记录没有找到(strError中有说明信息)
+        //      1   找到
+        public int GetBiblioRecPathByItemRecPath(
+            SessionInfo sessioninfo,
+            string strItemRecPath,
+            out string strBiblioRecPath,
+            out string strError)
+        {
+            strError = "";
+            strBiblioRecPath = "";
+            int nRet = 0;
+
+            string strOutputItemPath = "";
+            string strItemXml = "";
+            byte[] item_timestamp = null;
+
+            {
+                string strItemDbName0 = ResPath.GetDbName(strItemRecPath);
+                // 需要检查一下数据库名是否在允许的实体库名之列
+                if (this.IsItemDbName(strItemDbName0) == false)
+                {
+                    strError = "册记录路径 '" + strItemRecPath + "' 中的数据库名 '" + strItemDbName0 + "' 不在配置的实体库名之列，因此拒绝操作。";
+                    return -1;
+                }
+            }
+
+            string strMetaData = "";
+            // string strTempOutputPath = "";
+
+            RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
+            long lRet = channel.GetRes(strItemRecPath,
+                out strItemXml,
+                out strMetaData,
+                out item_timestamp,
+                out strOutputItemPath,
+                out strError);
+            if (lRet == -1)
+            {
+                strError = "获取评注记录 " + strItemRecPath + " 时发生错误: " + strError;
+                return -1;
+            }
+
+            string strItemDbName = "";  // 实体库名
+            string strBiblioRecID = ""; // 种记录id
+
+            // 如果需要从册记录中获得种记录路径
+            strItemDbName = ResPath.GetDbName(strOutputItemPath);
+            string strBiblioDbName = "";
+
+            // 最好在应用启动时就做了？
+            // 根据实体库名, 找到对应的书目库名
+            // return:
+            //      -1  出错
+            //      0   没有找到
+            //      1   找到
+            nRet = this.GetBiblioDbNameByItemDbName(strItemDbName,
+                out strBiblioDbName,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            if (nRet == 0)
+            {
+                strError = "实体库名 '" + strItemDbName + "' 没有找到对应的书目库名";
+                return -1;
+            }
+
+            // 获得册记录中的<parent>字段
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(strItemXml);
+            }
+            catch (Exception ex)
+            {
+                strError = "实体记录XML装载到DOM出错:" + ex.Message;
+                return -1;
+            }
+
+            strBiblioRecID = DomUtil.GetElementText(dom.DocumentElement, "parent"); //
+            if (String.IsNullOrEmpty(strBiblioRecID) == true)
+            {
+                strError = "实体记录XML中<parent>元素缺乏或者值为空, 因此无法定位种记录";
+                return -1;
+            }
+
+            strBiblioRecPath = strBiblioDbName + "/" + strBiblioRecID;
+            return 1;
+        }
+
+        #endregion
+
+        // 包装版本
+                // 检查路径中的库名，是不是实体库名
+        // return:
+        //      -1  error
+        //      0   不是实体库名
+        //      1   是实体库名
+        public int CheckItemRecPath(string strItemRecPath,
+            out string strError)
+        {
+            return CheckRecPath(strItemRecPath,
+                "item",
+                out strError);
+        }
+
+        // 检查路径中的库名，是不是特定类型的数据库名
+        // return:
+        //      -1  error
+        //      0   不是所要求类型的
+        //      1   是要求类型的
+        public int CheckRecPath(string strItemRecPath,
+            string strDbTypeList,
+            out string strError)
+        {
+            strError = "";
+
+            string strTempDbName = ResPath.GetDbName(strItemRecPath);
+
+            // 2008/10/16 new add
+            if (String.IsNullOrEmpty(strTempDbName) == true)
+            {
+                strError = "从路径 '" + strItemRecPath + "' 中无法抽出库名部分...";
+                return -1;
+            }
+
+            for (int i = 0; i < this.ItemDbs.Count; i++)
+            {
+                // item
+                if (strTempDbName == this.ItemDbs[i].DbName)
+                {
+                    if (StringUtil.IsInList("item", strDbTypeList) == true)
+                        return 1;
+                }
+
+                // order
+                if (strTempDbName == this.ItemDbs[i].OrderDbName)
+                {
+                    if (StringUtil.IsInList("order", strDbTypeList) == true)
+                        return 1;
+                }
+
+                // issue
+                if (strTempDbName == this.ItemDbs[i].IssueDbName)
+                {
+                    if (StringUtil.IsInList("issue", strDbTypeList) == true)
+                        return 1;
+                }
+
+                // comment
+                if (strTempDbName == this.ItemDbs[i].CommentDbName)
+                {
+                    if (StringUtil.IsInList("comment", strDbTypeList) == true)
+                        return 1;
+                }
+
+                // biblio
+                if (strTempDbName == this.ItemDbs[i].BiblioDbName)
+                {
+                    if (StringUtil.IsInList("biblio", strDbTypeList) == true)
+                        return 1;
+                }
+            }
+            strError = "路径 '" + strItemRecPath + "' 中包含的数据库名 '" + strTempDbName + "' 不在已定义的类型 "+strDbTypeList+" 库名之列。";
+            return 0;
+        }
+
+        #region APIs
+
+
+
+        // 看看文件名是不是以.cs结尾
+        public static bool IsCsFileName(string strFileName)
+        {
+            strFileName = strFileName.Trim().ToLower();
+            int nRet = strFileName.LastIndexOf(".cs");
+            if (nRet == -1)
+                return false;
+            if (nRet + 3 == strFileName.Length)
+                return true;
+            return false;
+        }
+
+
+
+#if NOOOOOOOOOOOOOO
+
+        // 暂没有用
+        // 在字符串末尾追加一个新的操作者事项
+        // 操作者1:操作类型1<操作时间1>;操作者2:操作类型2<操作时间2>;...
+        // parameters:
+        //      strOpertimeRfc1123 操作时间。必须为RFC1123形态。如果为null，表示自动取当前时间
+        public static int AppendOperatorHistory(ref string strValue,
+            string strOperator,
+            string strOperation,
+            string strOpertimeRfc1123,
+            out string strError)
+        {
+            strError = "";
+
+            if (String.IsNullOrEmpty(strOperator) == true)
+            {
+                strError = "strOperator参数不能为空";
+                return -1;
+            }
+
+            if (String.IsNullOrEmpty(strOperation) == true)
+            {
+                strError = "strOperation参数不能为空";
+                return -1;
+            }
+
+            if (String.IsNullOrEmpty(strValue) == true)
+                strValue = "";
+            else
+                strValue += ";";
+
+            strValue += strOperator;
+            strValue += ":";
+            strValue += strOperation;
+            strValue += "<";
+            if (String.IsNullOrEmpty(strOpertimeRfc1123) == true)
+            {
+                strValue += DateTimeUtil.Rfc1123DateTimeString(? this.Clock().UtcNow /*DateTime.UtcNow*/);
+            }
+            else
+            {
+                strValue += strOpertimeRfc1123;
+            }
+            strValue += ">";
+
+            return 0;
+        }
+#endif
+
+
+        // 修改读者密码
+        // Result.Value -1出错 0旧密码不正确 1旧密码正确,已修改为新密码
+        // 权限: 
+        //		工作人员或者读者，必须有changereaderpassword权限
+        //		如果为读者, 附加限制还只能修改属于自己的密码
+        public LibraryServerResult ChangeReaderPassword(
+            SessionInfo sessioninfo,
+            string strReaderBarcode,
+            string strReaderOldPassword,
+            string strReaderNewPassword)
+        {
+            LibraryServerResult result = new LibraryServerResult();
+
+            // 权限判断
+
+            // 权限字符串
+            if (StringUtil.IsInList("changereaderpassword", sessioninfo.RightsOrigin) == false)
+            {
+                result.Value = -1;
+                result.ErrorInfo = "修改读者密码被拒绝。不具备changereaderpassword权限。";
+                result.ErrorCode = ErrorCode.AccessDenied;
+                return result;
+            }
+
+            // 对读者身份的附加判断
+            if (sessioninfo.UserType == "reader")
+            {
+                if (strReaderBarcode != sessioninfo.Account.Barcode)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "修改读者密码被拒绝。作为读者只能修改自己的密码";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+            }
+
+            string strError = "";
+
+            // 加读者记录锁
+            this.ReaderLocks.LockForWrite(strReaderBarcode);
+
+            try
+            {
+                string strXml = "";
+                string strOutputPath = "";
+                byte[] timestamp = null;
+
+                // 获得读者记录
+                // return:
+                //      -1  error
+                //      0   not found
+                //      1   命中1条
+                //      >1  命中多于1条
+                int nRet = this.GetReaderRecXml(
+                    sessioninfo.Channels,
+                    strReaderBarcode,
+                    out strXml,
+                    out strOutputPath,
+                    out timestamp,
+                    out strError);
+                if (nRet == 0)
+                {
+                    strError = "证条码号为 '" + strReaderBarcode + "' 的读者不存在";
+                    goto ERROR1;
+                }
+                if (nRet == -1)
+                {
+                    strError = "获得证条码号为 '" + strReaderBarcode + "' 的读者记录时出错: " + strError;
+                    goto ERROR1;
+                }
+
+                if (nRet > 1)
+                {
+                    strError = "系统错误: 证条码号为 '" + strReaderBarcode + "' 的读者记录多于一个";
+                    goto ERROR1;
+                }
+
+                string strLibraryCode = "";
+
+                // 看看读者记录所从属的读者库的馆代码，是否被当前用户管辖
+                if (String.IsNullOrEmpty(strOutputPath) == false)
+                {
+                    // 检查当前操作者是否管辖这个读者库
+                    // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内?
+                    if (this.IsCurrentChangeableReaderPath(strOutputPath,
+            sessioninfo.LibraryCodeList,
+            out strLibraryCode) == false)
+                    {
+                        strError = "读者记录路径 '" + strOutputPath + "' 从属的读者库不在当前用户管辖范围内";
+                        goto ERROR1;
+                    }
+                }
+
+                XmlDocument readerdom = null;
+                nRet = LibraryApplication.LoadToDom(strXml,
+                    out readerdom,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "装载读者记录进入XML DOM时发生错误: " + strError;
+                    goto ERROR1;
+                }
+
+                string strExistingBarcode = DomUtil.GetElementText(readerdom.DocumentElement, "barcode");
+
+                // 如果是读者身份, 需要验证旧密码
+                if (sessioninfo.UserType == "reader")
+                {
+                    // 验证读者密码
+                    // return:
+                    //      -1  error
+                    //      0   密码不正确
+                    //      1   密码正确
+                    nRet = LibraryApplication.VerifyReaderPassword(
+                        sessioninfo.ClientIP,
+                        readerdom,
+                        strReaderOldPassword,
+                        this.Clock.Now,
+                        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    if (nRet == 0)
+                    {
+                        result.Value = 0;
+                        result.ErrorInfo = "旧密码不正确。";
+                        return result;
+                    }
+                    else
+                    {
+                        result.Value = 1;
+                    }
+                }
+
+                byte[] output_timestamp = null;
+                nRet = ChangeReaderPassword(
+                    sessioninfo,
+                    strOutputPath,
+                    ref readerdom,
+                    strReaderNewPassword,
+                    timestamp,
+                    out output_timestamp,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                // 清除 LoginCache
+                this.ClearLoginCache(strExistingBarcode);
+
+                result.Value = 1;   // 成功
+            }
+            finally
+            {
+                this.ReaderLocks.UnlockForWrite(strReaderBarcode);
+            }
+
+            return result;
+        ERROR1:
+            result.Value = -1;
+            result.ErrorInfo = strError;
+            result.ErrorCode = ErrorCode.SystemError;
+            return result;
+        }
+
+        // 修改读者密码
+        // parameters:
+        //      readerdom [in,out] 读者记录 XMLDOM，可能会因为时间戳不匹配而被重新装载
+        int ChangeReaderPassword(
+            SessionInfo sessioninfo,
+            string strReaderRecPath,
+            ref XmlDocument readerdom,
+            string strReaderNewPassword,
+            byte [] timestamp,
+            out byte [] output_timestamp,
+            out string strError)
+        {
+            strError = "";
+            output_timestamp = null;
+
+            int nRet = 0;
+
+            string strLibraryCode = "";
+
+            // 获得读者库的馆代码
+            // return:
+            //      -1  出错
+            //      0   成功
+            nRet = GetLibraryCode(
+                strReaderRecPath,
+                out strLibraryCode,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            // 准备日志DOM
+            XmlDocument domOperLog = new XmlDocument();
+            domOperLog.LoadXml("<root />");
+            DomUtil.SetElementText(domOperLog.DocumentElement,
+"libraryCode",
+strLibraryCode);    // 读者所在的馆代码
+            DomUtil.SetElementText(domOperLog.DocumentElement, "operation",
+                "changeReaderPassword");
+
+            RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                goto ERROR1;
+            }
+
+            int nRedoCount = 0;
+            REDO:
+
+            // 修改读者密码
+            // return:
+            //      -1  error
+            //      0   成功
+            nRet = LibraryApplication.ChangeReaderPassword(
+                readerdom,
+                strReaderNewPassword,
+                ref domOperLog,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            // byte[] output_timestamp = null;
+            string strOutputPath = "";
+
+            // 保存读者记录
+            long lRet = channel.DoSaveTextRes(strReaderRecPath,
+                readerdom.OuterXml,
+                false,
+                "content", // "content,ignorechecktimestamp",
+                timestamp,   // timestamp,
+                out output_timestamp,
+                out strOutputPath,
+                out strError);
+            if (lRet == -1)
+            {
+                if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch
+                    && nRedoCount < 10)
+                {
+                    // 重新装载读者记录
+                    string strXml = "";
+                    string strMetaData = "";
+                    timestamp = null;
+
+                    lRet = channel.GetRes(strReaderRecPath,
+                        out strXml,
+                        out strMetaData,
+                        out timestamp,
+                        out strOutputPath,
+                        out strError);
+                    if (lRet == -1)
+                    {
+                        strError = "保存读者记录 '" + strReaderRecPath + "' 时遇到时间戳不匹配，重新装载的时候又遇到出错: " + strError;
+                        goto ERROR1;
+                    }
+
+                    readerdom = new XmlDocument();
+                    try
+                    {
+                        readerdom.LoadXml(strXml);
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "重新装载读者记录进入 XMLDOM 时出错: " +ex.Message;
+                        goto ERROR1;
+                    }
+                    nRedoCount++;
+                    goto REDO;
+                }
+                goto ERROR1;
+            }
+
+            // 写入日志
+            string strReaderBarcode = DomUtil.GetElementText(domOperLog.DocumentElement, "barcode");
+
+            // 读者证条码号
+            DomUtil.SetElementText(domOperLog.DocumentElement,
+                "readerBarcode", strReaderBarcode);
+
+            // 读者记录
+            XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
+                "readerRecord",
+                readerdom.OuterXml);
+            // 读者记录路径
+            DomUtil.SetAttr(node, "recPath", strOutputPath);
+
+            string strOperTime = this.Clock.GetClock();
+            DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
+                sessioninfo.UserID);   // 操作者
+            DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
+                strOperTime);   // 操作时间
+
+            nRet = this.OperLog.WriteOperLog(domOperLog,
+                sessioninfo.ClientAddress,
+                out strError);
+            if (nRet == -1)
+            {
+                strError = "ChangeReaderPassword() API 写入日志时发生错误: " + strError;
+                goto ERROR1;
+            }
+
+            return 0;
+        ERROR1:
+            return -1;
+        }
+
+        // 修改读者临时密码
+        // parameters:
+        //      timeExpire  临时密码失效时间
+        //      readerdom [in,out] 读者记录 XMLDOM，可能会因为时间戳不匹配而被重新装载
+        int ChangeReaderTempPassword(
+            SessionInfo sessioninfo,
+            string strReaderRecPath,
+            XmlDocument readerdom,
+            string strReaderTempPassword,
+            string strExpireTime,
+            byte[] timestamp,
+            out byte[] output_timestamp,
+            out string strError)
+        {
+            strError = "";
+            output_timestamp = null;
+
+            int nRet = 0;
+
+            string strLibraryCode = "";
+
+            // 获得读者库的馆代码
+            // return:
+            //      -1  出错
+            //      0   成功
+            nRet = GetLibraryCode(
+                strReaderRecPath,
+                out strLibraryCode,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            // 准备日志DOM
+            XmlDocument domOperLog = new XmlDocument();
+            domOperLog.LoadXml("<root />");
+            DomUtil.SetElementText(domOperLog.DocumentElement,
+"libraryCode",
+strLibraryCode);    // 读者所在的馆代码
+
+            DomUtil.SetElementText(domOperLog.DocumentElement, "operation",
+                "changeReaderTempPassword");
+
+            RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                goto ERROR1;
+            }
+
+            int nRedoCount = 0;
+        REDO:
+
+            // 修改读者临时密码
+            // return:
+            //      -1  error
+            //      0   成功
+            nRet = LibraryApplication.ChangeReaderTempPassword(
+                readerdom,
+                strReaderTempPassword,
+                strExpireTime,
+                ref domOperLog,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            // byte[] output_timestamp = null;
+            string strOutputPath = "";
+
+            // 保存读者记录
+            long lRet = channel.DoSaveTextRes(strReaderRecPath,
+                readerdom.OuterXml,
+                false,
+                "content", // "content,ignorechecktimestamp",
+                timestamp,   // timestamp,
+                out output_timestamp,
+                out strOutputPath,
+                out strError);
+            if (lRet == -1)
+            {
+                if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch
+    && nRedoCount < 10)
+                {
+                    // 重新装载读者记录
+                    string strXml = "";
+                    string strMetaData = "";
+                    timestamp = null;
+
+                    lRet = channel.GetRes(strReaderRecPath,
+                        out strXml,
+                        out strMetaData,
+                        out timestamp,
+                        out strOutputPath,
+                        out strError);
+                    if (lRet == -1)
+                    {
+                        strError = "保存读者记录 '" + strReaderRecPath + "' 时遇到时间戳不匹配，重新装载的时候又遇到出错: " + strError;
+                        goto ERROR1;
+                    }
+
+                    readerdom = new XmlDocument();
+                    try
+                    {
+                        readerdom.LoadXml(strXml);
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "重新装载读者记录进入 XMLDOM 时出错: " + ex.Message;
+                        goto ERROR1;
+                    }
+                    nRedoCount++;
+                    goto REDO;
+                }
+
+                goto ERROR1;
+            }
+
+            // 写入日志
+            string strReaderBarcode = DomUtil.GetElementText(domOperLog.DocumentElement, "barcode");
+
+            // 读者证条码号
+            DomUtil.SetElementText(domOperLog.DocumentElement,
+                "readerBarcode", strReaderBarcode);
+
+            // 读者记录
+            XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
+                "readerRecord",
+                readerdom.OuterXml);
+
+            // 读者记录路径
+            DomUtil.SetAttr(node, "recPath", strOutputPath);
+
+            string strOperTime = this.Clock.GetClock();
+            DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
+                sessioninfo.UserID);   // 操作者
+            DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
+                strOperTime);   // 操作时间
+
+            nRet = this.OperLog.WriteOperLog(domOperLog,
+                sessioninfo.ClientAddress,
+                out strError);
+            if (nRet == -1)
+            {
+                strError = "ChangeReaderPassword() API 写入日志时发生错误: " + strError;
+                goto ERROR1;
+            }
+
+            // this.LoginCache.Remove(strReaderBarcode);   // 及时失效登录缓存
+            this.ClearLoginCache(strReaderBarcode);   // 及时失效登录缓存
+
+            return 0;
+        ERROR1:
+            return -1;
+        }
+
+        #endregion
+
+        // 展开权限字符串为原始权限定义形态
+        public static string ExpandRightString(string strOriginRight)
+        {
+            string strResult = strOriginRight;
+
+            return strResult;
+        }
+
+        // 包装版本
+        public string GetBarcodesSummary(SessionInfo sessioninfo,
+            string strBarcodes,
+            string strStyle,
+            string strOtherParams)
+        {
+            return GetBarcodesSummary(
+            sessioninfo,
+            strBarcodes,
+            "",
+            strStyle,
+            strOtherParams);
+        }
+
+        // 获得一系列册的摘要字符串
+        // 这是满足本地WebControl的版本
+        // paramters:
+        //      strStyle    风格。逗号间隔的列表。html text
+        //      strOtherParams  暂时没有使用
+        public string GetBarcodesSummary(
+            SessionInfo sessioninfo,
+            string strBarcodes,
+            string strArrivedItemBarcode,
+            string strStyle,
+            string strOtherParams)
+        {
+            string strSummary = "";
+
+            if (strOtherParams == null)
+                strOtherParams = "";
+
+            string strDisableClass = "";
+            if (string.IsNullOrEmpty(strArrivedItemBarcode) == false)
+                strDisableClass = "deleted";
+
+            string strPrevBiblioRecPath = "";
+            string[] barcodes = strBarcodes.Split(new char[] { ',' });
+            for (int j = 0; j < barcodes.Length; j++)
+            {
+                string strBarcode = barcodes[j];
+                if (String.IsNullOrEmpty(strBarcode) == true)
+                    continue;
+
+                // 获得摘要
+                string strOneSummary = "";
+                string strBiblioRecPath = "";
+
+                // 2012/3/28
+                RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+                if (channel == null)
+                {
+                    return "get channel error";
+                }
+
+                LibraryServerResult result = this.GetBiblioSummary(sessioninfo,
+                    channel,
+    strBarcode,
+    null,
+    strPrevBiblioRecPath,   // 前一个path
+    out strBiblioRecPath,
+    out strOneSummary);
+                if (result.Value == -1 || result.Value == 0)
+                    strOneSummary = result.ErrorInfo;
+
+                if (strOneSummary == ""
+                    && strPrevBiblioRecPath == strBiblioRecPath)
+                    strOneSummary = "(同上)";
+
+                if (StringUtil.IsInList("html", strStyle) == true)
+                {
+                    /*
+                    string strBarcodeLink = "<a href='" + this.OpacServerUrl + "/book.aspx?barcode=" + strBarcode +
+                        (bForceLogin == true ? "&forcelogin=userid" : "")
+                        + "' " + strOtherParams + " >" + strBarcode + "</a>";
+                    */
+
+                    string strBarcodeLink = "<a "
+    + (string.IsNullOrEmpty(strDisableClass) == false && strBarcode != strArrivedItemBarcode ? "class='" + strDisableClass + "'" : "")
+    + " href='javascript:void(0);' onclick=\"window.external.OpenForm('ItemInfoForm', this.innerText, true);\"  onmouseover=\"window.external.HoverItemProperty(this.innerText);\">" + strBarcode + "</a>";
+
+
+                    strSummary += strBarcodeLink + " : " + strOneSummary + "<br/>";
+                }
+                else
+                {
+                    strSummary += strBarcode + " : " + strOneSummary + "<br/>";
+                }
+
+                strPrevBiblioRecPath = strBiblioRecPath;
+            }
+
+            return strSummary;
+        }
+
+#if NO
+        // 获得一系列册的摘要字符串
+        // 
+        // paramters:
+        //      strStyle    风格。逗号间隔的列表。如果包含html text表示格式。forcelogin
+        //      strOtherParams  <a>命令中其余的参数。例如" target='_blank' "可以用来打开新窗口
+        public string GetBarcodesSummary(
+            SessionInfo sessioninfo,
+            string strBarcodes,
+            string strArrivedItemBarcode,
+            string strStyle,
+            string strOtherParams)
+        {
+            string strSummary = "";
+
+            if (strOtherParams == null)
+                strOtherParams = "";
+
+            string strDisableClass = "";
+            if (string.IsNullOrEmpty(strArrivedItemBarcode) == false)
+                strDisableClass = "deleted";
+
+            bool bForceLogin = false;
+            if (StringUtil.IsInList("forcelogin", strStyle) == true)
+                bForceLogin = true;
+
+            string strPrevBiblioRecPath = "";
+            string[] barcodes = strBarcodes.Split(new char[] { ',' });
+            for (int j = 0; j < barcodes.Length; j++)
+            {
+                string strBarcode = barcodes[j];
+                if (String.IsNullOrEmpty(strBarcode) == true)
+                    continue;
+
+                // 获得摘要
+                string strOneSummary = "";
+                string strBiblioRecPath = "";
+
+                LibraryServerResult result = this.GetBiblioSummary(sessioninfo,
+    strBarcode,
+    null,
+    strPrevBiblioRecPath,   // 前一个path
+    out strBiblioRecPath,
+    out strOneSummary);
+                if (result.Value == -1 || result.Value == 0)
+                    strOneSummary = result.ErrorInfo;
+
+                if (strOneSummary == ""
+                    && strPrevBiblioRecPath == strBiblioRecPath)
+                    strOneSummary = "(同上)";
+
+                if (StringUtil.IsInList("html", strStyle) == true)
+                {
+                    /*
+                    string strBarcodeLink = "<a href='" + this.OpacServerUrl + "/book.aspx?barcode=" + strBarcode +
+                        (bForceLogin == true ? "&forcelogin=userid" : "")
+                        + "' " + strOtherParams + " >" + strBarcode + "</a>";
+                    */
+
+                    string strBarcodeLink = "<a "
+    + (string.IsNullOrEmpty(strDisableClass) == false && strBarcode != strArrivedItemBarcode ? "class='" + strDisableClass + "'" : "")
+    + " href='" + this.OpacServerUrl + "/book.aspx?barcode=" + strBarcode +
+    (bForceLogin == true ? "&forcelogin=userid" : "")
+    + "' " + strOtherParams + " >" + strBarcode + "</a>";
+
+
+                    strSummary += strBarcodeLink + " : " + strOneSummary + "<br/>";
+                }
+                else
+                {
+                    strSummary += strBarcode + " : " + strOneSummary + "<br/>";
+                }
+
+                strPrevBiblioRecPath = strBiblioRecPath;
+            }
+
+            return strSummary;
+        }
+
+#endif
+
+        static List<XmlNode> MatchTableNodes(XmlNode root,
+            string strName,
+            string strDbName)
+        {
+            List<XmlNode> results = new List<XmlNode>();
+
+            XmlNodeList nodes = root.SelectNodes("table[@name='" + strName + "']");
+            if (nodes.Count == 0)
+                return results;
+
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                string strCurDbName = DomUtil.GetAttr(nodes[i], "dbname");
+                if (String.IsNullOrEmpty(strCurDbName) == true
+                    && String.IsNullOrEmpty(strDbName) == true)
+                {
+                    results.Add(nodes[i]);
+                    continue;
+                }
+
+                if (strCurDbName == strDbName)
+                    results.Add(nodes[i]);
+            }
+
+            return results;
+        }
+
+        // TODO: 需要进行针对分馆用户的改造
+        // 修改值列表
+        // 2008/8/21 new add
+        // parameters:
+        //      strAction   "new" "change" "overwirte" "delete"
+        // return:
+        //      -1  error
+        //      0   not change
+        //      1   changed
+        public int SetValueTable(string strAction,
+            string strName,
+            string strDbName,
+            string strValue,
+            out string strError)
+        {
+            strError = "";
+
+            if (String.IsNullOrEmpty(strName) == true)
+            {
+                strError = "strName参数值不能为空";
+                return -1;
+            }
+            XmlNode root = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//valueTables");
+            if (root == null)
+            {
+                root = this.LibraryCfgDom.CreateElement("valueTables");
+                this.LibraryCfgDom.DocumentElement.AppendChild(root);
+                this.Changed = true;
+            }
+
+            if (strAction == "new")
+            {
+                List<XmlNode> nodes = MatchTableNodes(root,
+                    strName,
+                    strDbName);
+                if (nodes.Count > 0)
+                {
+                    strError = "name为 '"+strName+"' dbname为 '"+strDbName+"' 的值列表事项已经存在";
+                    return -1;
+                }
+
+                XmlNode new_node = root.OwnerDocument.CreateElement("table");
+                root.AppendChild(new_node);
+
+                DomUtil.SetAttr(new_node, "name", strName);
+                DomUtil.SetAttr(new_node, "dbname", strDbName);
+
+                new_node.InnerText = strValue;
+                this.Changed = true;
+                return 1;
+            }
+            else if (strAction == "delete")
+            {
+                List<XmlNode> nodes = MatchTableNodes(root,
+                    strName,
+                    strDbName);
+                if (nodes.Count == 0)
+                {
+                    strError = "name为 '" + strName + "' dbname为 '" + strDbName + "' 的值列表事项不存在";
+                    return 0;
+                }
+
+                for (int i = 0; i < nodes.Count; i++)
+                {
+                    nodes[i].ParentNode.RemoveChild(nodes[i]);
+                }
+
+                this.Changed = true;
+                return 1;
+            }
+            else if (strAction == "change")
+            {
+                List<XmlNode> nodes = MatchTableNodes(root,
+                    strName,
+                    strDbName);
+                if (nodes.Count == 0)
+                {
+                    strError = "name为 '" + strName + "' dbname为 '" + strDbName + "' 的值列表事项不存在";
+                    return 0;
+                }
+
+                XmlNode exist_node = nodes[0];
+                for (int i = 1; i < nodes.Count; i++)
+                {
+                    nodes[i].ParentNode.RemoveChild(nodes[i]);
+                }
+
+                exist_node.InnerText = strValue;
+                this.Changed = true;
+                return 1;
+            }
+            else if (strAction == "overwrite")
+            {
+                List<XmlNode> nodes = MatchTableNodes(root,
+                    strName,
+                    strDbName);
+                if (nodes.Count == 0)
+                {
+                    XmlNode new_node = root.OwnerDocument.CreateElement("table");
+                    root.AppendChild(new_node);
+
+                    DomUtil.SetAttr(new_node, "name", strName);
+                    DomUtil.SetAttr(new_node, "dbname", strDbName);
+
+                    new_node.InnerText = strValue;
+                }
+                else
+                {
+                    XmlNode exist_node = nodes[0];
+                    for (int i = 1; i < nodes.Count; i++)
+                    {
+                        nodes[i].ParentNode.RemoveChild(nodes[i]);
+                    }
+
+                    exist_node.InnerText = strValue;
+                }
+                this.Changed = true;
+                return 1;
+            }
+            else
+            {
+                strError = "未知的strAction值 '" + strAction + "'";
+                return -1;
+            }
+        }
+
+        // 从字符串列表中，过滤出那些属于指定馆代码范围的字符串
+        static string[] FilterValues(string strLibraryCodeList,
+            string strValueList)
+        {
+            if (SessionInfo.IsGlobalUser(strLibraryCodeList) == true)
+            {
+                return strValueList.Trim().Split(new char[] { ',' });
+            }
+
+            List<string> results = new List<string>();
+            List<string> values = StringUtil.FromListString(strValueList);
+            foreach (string s in values)
+            {
+                string strLibraryCode = "";
+                string strPureName = "";
+
+                // 解析日历名
+                ParseCalendarName(s,
+            out strLibraryCode,
+            out strPureName);
+
+                if (string.IsNullOrEmpty(strLibraryCode) == true)
+                    continue;
+
+                if (StringUtil.IsInList(strLibraryCode, strLibraryCodeList) == true)
+                    results.Add(s);
+            }
+
+            if (results.Count == 0)
+                return new string [0];
+
+            string [] array = new string[results.Count];
+            results.CopyTo(array);
+            return array;
+        }
+
+#if NO
+        // 获得值列表
+        // parameters:
+        //      strLibraryCodeList  当前用户管辖的馆代码列表
+        //      strTableName    表名。如果为空，表示任意name参数值均匹配
+        //      strDbName   数据库名。如果为空，表示任意dbname参数值均匹配。
+        public string[] GetValueTable(
+            string strLibraryCodeList,
+            string strTableNameParam,
+            string strDbNameParam)
+        {
+            XmlNode root = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//valueTables");
+            if (root == null)
+                return null;
+
+            if (strTableNameParam == "location")
+            {
+            }
+            else
+            {
+                // 不过滤
+                strLibraryCodeList = "";
+            }
+
+            // 2009/2/15 changed
+            if (String.IsNullOrEmpty(strDbNameParam) == false)
+            {
+                XmlNode default_node = null;
+
+                XmlNodeList nodes = root.SelectNodes("table[@name='" + strTableNameParam + "']");
+                for (int i = 0; i < nodes.Count; i++)
+                {
+                    XmlNode table = nodes[i];
+
+                    // string strName = DomUtil.GetAttr(table, "name");
+                    string strDbName = DomUtil.GetAttr(table, "dbname");
+
+                    if (String.IsNullOrEmpty(strDbName) == true
+                        && default_node == null)    // 认排列在最前面的一个缺省元素
+                    {
+                        default_node = table;
+                        continue;
+                    }
+
+
+                    if (StringUtil.IsInList(strDbNameParam, strDbName) == true)
+                    {
+                        // 命中
+                        // return table.InnerText.Trim().Split(new char[] { ',' });
+                                // 从字符串列表中，过滤出那些属于指定馆代码范围的字符串
+                        return FilterValues(strLibraryCodeList,
+                                table.InnerText);
+                    }
+                }
+
+                // 虽然"dbname"没有命中，但是可以返回缺省的值(dbname属性为空的)
+                if (default_node != null)
+                {
+                    // return default_node.InnerText.Trim().Split(new char[] { ',' });
+                    return FilterValues(strLibraryCodeList,
+        default_node.InnerText);
+                }
+
+                return null;
+            }
+            else
+            {
+                // 没有dbname参数的情形
+                XmlNodeList nodes = root.SelectNodes("table[@name='" + strTableNameParam + "']");
+                if (nodes.Count == 0)
+                    return null;
+                for (int i = 0; i < nodes.Count; i++)
+                {
+                    XmlNode table = nodes[i];
+
+                    // string strName = DomUtil.GetAttr(table, "name");
+                    string strDbName = DomUtil.GetAttr(table, "dbname");
+
+                    // 优先选择一个dbname属性为空的元素
+                    if (String.IsNullOrEmpty(strDbName) == true)
+                    {
+                        // 命中
+                        // return table.InnerText.Trim().Split(new char[] { ',' });
+                        return FilterValues(strLibraryCodeList,
+                            table.InnerText);
+                    }
+                }
+
+                // 否则返回“没有找到”，尽管还有其他dbname属性有值的元素
+                return null;
+            }
+
+
+            /*
+            XmlNodeList nodes = root.SelectNodes("table");
+
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                XmlNode table = nodes[i];
+
+                string strName = DomUtil.GetAttr(table, "name");
+                string strDbName = DomUtil.GetAttr(table, "dbname");
+
+                if (String.IsNullOrEmpty(strTableNameParam) == false)
+                {
+                    if (String.IsNullOrEmpty(strName) == false
+                        && strTableNameParam != strName)
+                        continue;
+                }
+                if (String.IsNullOrEmpty(strDbNameParam) == false)
+                {
+                    if (String.IsNullOrEmpty(strDbName) == false
+                        && strDbNameParam != strDbName)
+                        continue;
+                }
+
+                // 命中
+                string strValue = table.InnerText.Trim();
+                return strValue.Split(new char[] {','});
+            }
+             * */
+
+            // return null;    // not found
+        }
+#endif
+        // 获得一个图书馆代码下的值列表
+        // parameters:
+        //      strLibraryCode  馆代码
+        //      strTableName    表名。如果为空，表示任意name参数值均匹配
+        //      strDbName   数据库名。如果为空，表示任意dbname参数值均匹配。
+        public List<string> GetOneLibraryValueTable(
+            string strLibraryCode,
+            string strTableNameParam,
+            string strDbNameParam)
+        {
+            List<string> results = new List<string>();
+
+            XmlNode root = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//valueTables");
+            if (root == null)
+                return results;
+
+            string strFilter = "";
+
+            if (string.IsNullOrEmpty(strLibraryCode) == false)
+            {
+                XmlNode temp = root.SelectSingleNode("descendant::library[@code='" + strLibraryCode + "']");
+                if (temp == null)
+                    return results;
+                root = temp;
+            }
+            else
+            {
+                // TODO: 如果有一个以上的<library>元素，则需要复制出一个新的DOM，然后把<library>元素全部删除干净
+                strFilter = "[count(ancestor::library) = 0]";
+            }
+
+            // 2009/2/15 changed
+            if (String.IsNullOrEmpty(strDbNameParam) == false)
+            {
+                XmlNode default_node = null;
+
+                XmlNodeList nodes = root.SelectNodes("table[@name='" + strTableNameParam + "']" + strFilter);
+                for (int i = 0; i < nodes.Count; i++)
+                {
+                    XmlNode table = nodes[i];
+
+                    string strDbName = DomUtil.GetAttr(table, "dbname");
+
+                    if (String.IsNullOrEmpty(strDbName) == true
+                        && default_node == null)    // 认排列在最前面的一个缺省元素
+                    {
+                        default_node = table;
+                        continue;
+                    }
+
+                    if (StringUtil.IsInList(strDbNameParam, strDbName) == true)
+                    {
+                        // 命中
+                        return StringUtil.FromListString(table.InnerText.Trim(), ',', false);   // 要返回空字符串成员
+                    }
+                }
+
+                // 虽然"dbname"没有命中，但是可以返回缺省的值(dbname属性为空的)
+                if (default_node != null)
+                {
+                    return StringUtil.FromListString(default_node.InnerText.Trim(), ',', false);   // 要返回空字符串成员
+                }
+
+                return results;
+            }
+            else
+            {
+                // 没有dbname参数的情形
+                XmlNodeList nodes = root.SelectNodes("table[@name='" + strTableNameParam + "']" + strFilter);
+                if (nodes.Count == 0)
+                    return results; // return null;
+                for (int i = 0; i < nodes.Count; i++)
+                {
+                    XmlNode table = nodes[i];
+
+                    // string strName = DomUtil.GetAttr(table, "name");
+                    string strDbName = DomUtil.GetAttr(table, "dbname");
+
+                    // 优先选择一个dbname属性为空的元素
+                    if (String.IsNullOrEmpty(strDbName) == true)
+                    {
+                        // 命中
+                        return StringUtil.FromListString(table.InnerText.Trim(), ',', false);   // 要返回空字符串成员
+                    }
+                }
+
+                // 否则返回“没有找到”，尽管还有其他dbname属性有值的元素
+                return results;
+            }
+        }
+
+        // 2014/9/7
+        // 给值列表加上 {} 部分
+        static List<string> ConvertValueList(string strLibraryCode,
+            List<string> values)
+        {
+            Debug.Assert(values != null, "");
+
+            if (string.IsNullOrEmpty(strLibraryCode) == true)
+                return values;
+
+            List<string> results = new List<string>();
+            foreach (string s in values)
+            {
+                if (s.IndexOf('{') == -1)
+                    results.Add("{" + strLibraryCode + "} " + s);
+                else
+                    results.Add(s); // 如果本来就有 {} 部分，就不再另加了
+            }
+
+            return results;
+        }
+
+        // 获得值列表
+        // parameters:
+        //      strLibraryCodeList  当前用户管辖的馆代码列表
+        //      strTableName    表名。如果为空，表示任意name参数值均匹配
+        //      strDbName   数据库名。如果为空，表示任意dbname参数值均匹配。
+        public string[] GetValueTable(
+            string strLibraryCodeList,
+            string strTableNameParam,
+            string strDbNameParam)
+        {
+            List<string> librarycodes = new List<string>();
+            if (SessionInfo.IsGlobalUser(strLibraryCodeList) == true)
+            {
+#if NO
+                // 获得当前<valueTables>元素下所有<library>元素中的图书馆代码
+                XmlNodeList nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("valueTables/library");
+                foreach (XmlNode node in nodes)
+                {
+                    string strLibraryCode = DomUtil.GetAttr(node, "code");
+                    if (string.IsNullOrEmpty(strLibraryCode) == true)
+                        continue;
+                    librarycodes.Add(strLibraryCode);
+                }
+                librarycodes.Insert(0, "");
+#endif
+                // 获得当前<readerdbgroup>元素下所有<database>元素中的图书馆代码
+                XmlNodeList nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("readerdbgroup/database");
+                foreach (XmlNode node in nodes)
+                {
+                    string strLibraryCode = DomUtil.GetAttr(node, "libraryCode");
+                    if (string.IsNullOrEmpty(strLibraryCode) == true)
+                        continue;
+                    librarycodes.Add(strLibraryCode);
+                }
+                librarycodes.Insert(0, "");
+            }
+            else
+            {
+                librarycodes = StringUtil.FromListString(strLibraryCodeList);
+            }
+
+            List<string> results = new List<string>();
+            foreach (string strLibraryCode in librarycodes)
+            {
+                List<string> temp = GetOneLibraryValueTable(
+                    strLibraryCode,
+                    strTableNameParam,
+                    strDbNameParam);
+
+
+                // 如果没有找到
+                if (temp == null || temp.Count == 0)
+                {
+                    if (strTableNameParam == "location")
+                    {
+                        // 改为从 <locationTypes> 中寻找
+                        temp = GetOneLibraryLocationValueList(strLibraryCode);
+                    }
+                    else if (strTableNameParam == "bookType"
+                        || strTableNameParam == "readerType")
+                    {
+                        // 改为从 <rightsTable>元素下的<readerTypes>或<bookTypes> 中寻找
+                        temp = GetOneLibraryBookReaderTypeValueList(strLibraryCode,
+                            strTableNameParam);
+                    }
+                }
+
+                // 加上 {} 部分
+                if (strTableNameParam != "location"
+                    && temp != null)
+                {
+                    temp = ConvertValueList(strLibraryCode, temp);
+                }
+
+                if (temp == null || temp.Count == 0)
+                    continue;
+
+                results.AddRange(temp);
+            }
+
+            if (results.Count == 0)
+                return new string[0];
+
+            StringUtil.RemoveDupNoSort(ref results);
+
+            string[] array = new string[results.Count];
+            results.CopyTo(array);
+            return array;
+        }
+
+#if NO
+        // 从 <locationTypes> 元素中获得值列表
+        public string[] GetLocationValueList(string strLibraryCodeList)
+        {
+            List<string> librarycodes = new List<string>();
+            if (SessionInfo.IsGlobalUser(strLibraryCodeList) == true)
+            {
+#if NOOO
+                // 获得当前<valueTables>元素下所有<library>元素中的图书馆代码
+                XmlNodeList nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("valueTables/library");
+                foreach (XmlNode node in nodes)
+                {
+                    string strLibraryCode = DomUtil.GetAttr(node, "code");
+                    if (string.IsNullOrEmpty(strLibraryCode) == true)
+                        continue;
+                    librarycodes.Add(strLibraryCode);
+                }
+                librarycodes.Insert(0, "");
+#endif
+                // 获得当前<readerdbgroup>元素下所有<database>元素中的图书馆代码
+                XmlNodeList nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("readerdbgroup/database");
+                foreach (XmlNode node in nodes)
+                {
+                    string strLibraryCode = DomUtil.GetAttr(node, "libraryCode");
+                    if (string.IsNullOrEmpty(strLibraryCode) == true)
+                        continue;
+                    librarycodes.Add(strLibraryCode);
+                }
+                librarycodes.Insert(0, "");
+            }
+            else
+            {
+                librarycodes = StringUtil.FromListString(strLibraryCodeList);
+            }
+
+            List<string> results = new List<string>();
+            foreach (string strLibraryCode in librarycodes)
+            {
+
+                List<string> temp = GetOneLibraryLocationValueList(
+                    strLibraryCode);
+                if (temp == null)
+                    continue;
+                if (temp.Count == 0)
+                    continue;
+                results.AddRange(temp);
+            }
+
+            if (results.Count == 0)
+                return new string[0];
+
+            StringUtil.RemoveDupNoSort(ref results);
+
+            string[] array = new string[results.Count];
+            results.CopyTo(array);
+            return array;
+        }
+#endif
+
+        // 获得一个图书馆代码下的 <locationTypes> 内 <item> 元素
+        // parameters:
+        //      strLibraryCode  馆代码
+        public XmlElement GetLocationItemElement(
+            string strLibraryCode,
+            string strPureName)
+        {
+            List<string> results = new List<string>();
+
+            XmlNode root = this.LibraryCfgDom.DocumentElement.SelectSingleNode("locationTypes");
+            if (root == null)
+                return null;
+
+            string strFilter = "";
+
+            if (string.IsNullOrEmpty(strLibraryCode) == false)
+            {
+                XmlNode temp = root.SelectSingleNode("descendant::library[@code='" + strLibraryCode + "']");
+                if (temp == null)
+                    return null;
+                root = temp;
+            }
+            else
+            {
+                // TODO: 如果有一个以上的<library>元素，则需要复制出一个新的DOM，然后把<library>元素全部删除干净
+                strFilter = "[count(ancestor::library) = 0]";
+            }
+
+            return (XmlElement)root.SelectSingleNode("item[text()='"+strPureName+"']" + strFilter);
+        }
+
+        // 获得一个图书馆代码下的 <locationTypes> 内 <item> 值列表
+        // parameters:
+        //      strLibraryCode  馆代码
+        public List<string> GetOneLibraryLocationValueList(
+            string strLibraryCode)
+        {
+            List<string> results = new List<string>();
+
+            XmlNode root = this.LibraryCfgDom.DocumentElement.SelectSingleNode("locationTypes");
+            if (root == null)
+                return results;
+
+            string strFilter = "";
+
+            if (string.IsNullOrEmpty(strLibraryCode) == false)
+            {
+                XmlNode temp = root.SelectSingleNode("descendant::library[@code='" + strLibraryCode + "']");
+                if (temp == null)
+                    return results;
+                root = temp;
+            }
+            else
+            {
+                // TODO: 如果有一个以上的<library>元素，则需要复制出一个新的DOM，然后把<library>元素全部删除干净
+                strFilter = "[count(ancestor::library) = 0]";
+            }
+
+            XmlNodeList nodes = root.SelectNodes("item" + strFilter);
+            if (nodes.Count == 0)
+                return results; // return null;
+            foreach (XmlElement item in nodes)
+            {
+                string strValue = "";
+                if (string.IsNullOrEmpty(strLibraryCode) == true)
+                    strValue = item.InnerText.Trim();
+                else
+                    strValue = strLibraryCode + "/" + item.InnerText.Trim();
+
+                results.Add(strValue);
+            }
+            return results;
+        }
+
+        // 获得一个图书馆代码下的 <rightsTable>元素下的<readerTypes>或<bookTypes> 值列表
+        // parameters:
+        //      strLibraryCode  馆代码
+        public List<string> GetOneLibraryBookReaderTypeValueList(
+            string strLibraryCode,
+            string strTableName)
+        {
+            List<string> results = new List<string>();
+
+            XmlNode root = this.LibraryCfgDom.DocumentElement.SelectSingleNode("rightsTable");
+            if (root == null)
+                return results;
+
+            string strFilter = "";
+
+            if (string.IsNullOrEmpty(strLibraryCode) == false)
+            {
+                XmlNode temp = root.SelectSingleNode("descendant::library[@code='" + strLibraryCode + "']");
+                if (temp == null)
+                    return results;
+                root = temp;
+            }
+            else
+            {
+                // TODO: 如果有一个以上的<library>元素，则需要复制出一个新的DOM，然后把<library>元素全部删除干净
+                strFilter = "[count(ancestor::library) = 0]";
+            }
+
+            string strTypesElementName = "bookTypes";
+            if (strTableName == "readerType")
+                strTypesElementName = "readerTypes";
+
+            Debug.Assert(strTableName == "bookType" || strTableName == "readerType", "");
+
+            XmlNodeList nodes = root.SelectNodes(strTypesElementName + "/item" + strFilter);
+            if (nodes.Count == 0)
+                return results; // return null;
+            foreach (XmlElement item in nodes)
+            {
+                string strValue = "";
+                strValue = item.InnerText.Trim();
+                if (strValue == "[空]")
+                    strValue = "";
+#if NO
+                if (string.IsNullOrEmpty(strLibraryCode) == true)
+                    strValue = item.InnerText.Trim();
+                else
+                    strValue = strLibraryCode + "/" + item.InnerText.Trim();
+#endif
+                results.Add(strValue);
+            }
+            return results;
+        }
+
+        // 获得library.xml中配置的dtlp帐户信息
+        // return:
+        //      -1  error
+        //      0   not found
+        //      1   found
+        public int GetDtlpAccountInfo(string strPath,
+            out string strUserName,
+            out string strPassword,
+            out string strError)
+        {
+            strError = "";
+            strUserName = "";
+            strPassword = "";
+
+            XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//traceDTLP");
+            if (node == null)
+            {
+                strError = "尚未配置<traceDTLP>";
+                return -1;
+            }
+
+            // 从路径中析出服务器名部分
+            int nRet = strPath.IndexOf("/");
+            if (nRet != -1)
+                strPath = strPath.Substring(0, nRet);
+
+            node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//traceDTLP/origin[@serverAddr='"+strPath+"']");
+            if (node == null)
+            {
+                strError = "不存在地址为 '" + strPath + "' 的DTLP服务器<origin>配置参数...";
+                return 0;
+            }
+
+            strUserName = DomUtil.GetAttr(node, "UserName");
+            strPassword = DomUtil.GetAttr(node, "Password");
+
+            try
+            {
+                strPassword = DecryptPassword(strPassword);
+            }
+            catch
+            {
+                strPassword = "errorpassword";
+            }
+
+            return 1;
+        }
+
+
+        public bool Changed
+        {
+            get
+            {
+                return m_bChanged;
+            }
+            set
+            {
+                m_bChanged = value;
+            }
+        }
+
+        // 映射内核脚本配置文件到本地
+        // return:
+        //      -1  error
+        //      0   成功，为.cs文件
+        //      1   成功，为.fltx文件
+        public int MapKernelScriptFile(
+            SessionInfo sessioninfo,
+            string strBiblioDbName,
+            string strScriptFileName,
+            out string strLocalPath,
+            out string strError)
+        {
+            strError = "";
+            strLocalPath = "";
+            int nRet = 0;
+
+            // 将种记录数据从XML格式转换为HTML格式
+            // 需要从内核映射过来文件
+            // string strScriptFileName = "./cfgs/loan_biblio.fltx";
+            // 将脚本文件名正规化
+            // 因为在定义脚本文件的时候, 有一个当前库名环境,
+            // 如果定义为 ./cfgs/filename 表示在当前库下的cfgs目录下,
+            // 而如果定义为 /cfgs/filename 则表示在同服务器的根下
+            string strRemotePath = LibraryApplication.CanonicalizeScriptFileName(
+                strBiblioDbName,
+                strScriptFileName);
+
+            // TODO: 还可以考虑支持http://这样的配置文件。
+
+            nRet = this.CfgsMap.MapFileToLocal(
+                sessioninfo.Channels,
+                strRemotePath,
+                out strLocalPath,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            if (nRet == 0)
+            {
+                strError = "内核配置文件 " + strRemotePath + "没有找到，因此无法获得书目html格式数据";
+                goto ERROR1;
+            }
+
+            bool bFltx = false;
+            // 如果是一般.cs文件, 还需要获得.cs.ref配置文件
+            if (LibraryApplication.IsCsFileName(
+                strScriptFileName) == true)
+            {
+                string strTempPath = "";
+                nRet = this.CfgsMap.MapFileToLocal(
+                    sessioninfo.Channels,
+                    strRemotePath + ".ref",
+                    out strTempPath,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "内核配置文件 " + strRemotePath + ".ref" + "没有找到，因此无法获得书目html格式数据";
+                    goto ERROR1;
+                }
+
+                bFltx = false;
+            }
+            else
+            {
+                bFltx = true;
+            }
+
+
+            if (bFltx == true)
+                return 1;   // 为.fltx文件
+
+            return 0;
+
+        ERROR1:
+            return -1;
+        }
+
+        // 将脚本文件名正规化
+        // 因为在定义脚本文件的时候, 有一个当前库名环境,
+        // 如果定义为 ./cfgs/filename 表示在当前库下的cfgs目录下,
+        // 而如果定义为 /cfgs/filename 则表示在同服务器的根下
+        public static string CanonicalizeScriptFileName(string strDbName,
+            string strScriptFileNameParam)
+        {
+            int nRet = 0;
+            nRet = strScriptFileNameParam.IndexOf("./");
+            if (nRet == 0)  // != -1   2006/12/24 changed
+            {
+                // 认为是当前库下
+                return strDbName + strScriptFileNameParam.Substring(1);
+            }
+
+            nRet = strScriptFileNameParam.IndexOf("/");
+            if (nRet == 0)  // != -1   2006/12/24 changed
+            {
+                // 认为从根开始
+                return strScriptFileNameParam.Substring(1);
+            }
+
+            return strScriptFileNameParam;  // 保持原样
+        }
+
+        // reutrn:
+        //      -1  error
+        //      0   not found start.xml
+        //      1   found start.xml
+        public static int GetDataDir(string strStartXmlFileName,
+            out string strDataDir,
+            out string strError)
+        {
+            strError = "";
+            strDataDir = "";
+
+            if (File.Exists(strStartXmlFileName) == false)
+            {
+                strError = "文件 " + strStartXmlFileName + " 不存在...";
+                return 0;
+            }
+
+            // 已存在start.xml文件
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.Load(strStartXmlFileName);
+            }
+            catch (Exception ex)
+            {
+                strError = "加载start.xml到dom出错：" + ex.Message;
+                return -1;
+            }
+
+            strDataDir = DomUtil.GetAttr(dom.DocumentElement, "datadir");
+            if (strDataDir == "")
+            {
+                strError = "start.xml文件中根元素未定义'datadir'属性，或'datadir'属性值为空。";
+                return -1;
+            }
+
+            if (Directory.Exists(strDataDir) == false)
+            {
+                strError = "start.xml文件中根元素'datadir'属性定义的数据目录 '" + strDataDir + "' 不存在。";
+                return -1;
+            }
+
+            return 1;
+        }
+
+        // 清除各种缓存
+        public void ClearCache()
+        {
+            this.m_lockXml2HtmlAssemblyTable.AcquireWriterLock(m_nLockTimeout);
+            try
+            {
+                this.Xml2HtmlAssemblyTable.Clear();
+            }
+            finally
+            {
+                this.m_lockXml2HtmlAssemblyTable.ReleaseWriterLock();
+            }
+
+            this.Filters.Clear();
+
+        }
+
+
+
+        // 构造虚拟库的XML检索式
+        public static int BuildVirtualQuery(
+            Hashtable db_dir_results,
+            VirtualDatabase vdb,
+            string strWord,
+            string strVirtualFromName,
+            string strMatchStyle,
+            int nMaxCount,
+            out string strXml,
+            out string strError)
+        {
+            strError = "";
+            strXml = "";
+
+            int nUsed = 0;
+
+            string strLogic = "OR";
+
+            List<string> realdbs = vdb.GetRealDbNames();
+
+            if (realdbs.Count == 0)
+            {
+                strError = "虚拟库 '" + vdb.GetName(null) + "' 下居然没有定义任何物理库";
+                return -1;
+            }
+
+            string strWarning = "";
+
+            for (int i = 0; i < realdbs.Count; i++)
+            {
+
+                // 数据库名
+                string strDbName = realdbs[i];
+
+
+                string strFrom = vdb.GetRealFromName(
+                    db_dir_results,
+                    strDbName,
+                    strVirtualFromName);
+                if (strFrom == null)
+                {
+                    strWarning += "虚拟库 '" + vdb.GetName(null) + " '中针对物理库 '" + strDbName + "' 中对虚拟From '" + strVirtualFromName + "' 未找到对应的物理From名; ";
+                    // strError = "虚拟库 '" + vdb.GetName(null) + " '中针对物理库 '" + strDbName + "' 中对虚拟From '" + strVirtualFromName + "' 未找到对应的物理From名";
+                    // return -1;
+                    continue;
+                }
+
+                // 2007/4/5 改造 加上了 GetXmlStringSimple()
+                string strOneDbQuery = "<target list='"
+                    + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 new add
+                    + "'><item><word>"
+                    + StringUtil.GetXmlStringSimple(strWord)
+                    + "</word><match>" + strMatchStyle + "</match><relation>=</relation><dataType>string</dataType>"
+                    + "<maxCount>" + nMaxCount.ToString() + "</maxCount></item><lang>zh</lang></target>";
+
+                if (i > 0)
+                    strXml += "<operator value='" + strLogic + "'/>";
+
+                strXml += strOneDbQuery;
+
+                nUsed++;
+            }
+
+            if (nUsed > 0)
+            {
+                strXml = "<group>" + strXml + "</group>";
+            }
+
+            // 一个物理库也没有匹配上
+            if (nUsed == 0)
+            {
+                strError = strWarning;
+                return -1;
+            }
+
+            return 0;
+        }
+
+
+        // 根据检索参数创建XML检索式
+        // return:
+        //      -1  出错
+        //      0   不存在所指定的数据库或者检索途径。一个都没有
+        //      1   成功
+        public static int BuildQueryXml(
+            LibraryApplication app,
+            string strDbName,
+            string strWord,
+            string strFrom,
+            string strMatchStyle,
+            string strRelation,
+            string strDataType,
+            int nMaxCount,
+            out string strXml,
+            out string strError)
+        {
+            strError = "";
+            strXml = "";
+
+            if (app == null)
+            {
+                strError = "app == null";
+                return -1;
+            }
+
+            if (app.vdbs == null)
+            {
+                strError = "app.vdbs == null";
+                return -1;
+            }
+
+            if (String.IsNullOrEmpty(strDbName) == true)
+            {
+                strError = "strDbName参数不能为空。";
+                return -1;
+            }
+
+            if (String.IsNullOrEmpty(strMatchStyle) == true)
+                strMatchStyle = "middle";
+
+            if (String.IsNullOrEmpty(strRelation) == true)
+                strRelation = "=";
+
+            if (String.IsNullOrEmpty(strDataType) == true)
+                strDataType = "string";
+
+            //
+            // 数据库是不是虚拟库?
+            VirtualDatabase vdb = app.vdbs[strDbName];  // 需要增加一个索引器
+
+            string strOneDbQuery = "";
+
+            // 如果是虚拟库
+            if (vdb != null && vdb.IsVirtual == true)
+            {
+                int nRet = BuildVirtualQuery(
+                    app.vdbs.db_dir_results,
+                    vdb,
+                    strWord,
+                    strFrom,
+                    strMatchStyle,
+                    nMaxCount,
+                    out strOneDbQuery,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+            }
+            else
+            {
+                /*
+                // 2007/4/5 改造 加上了 GetXmlStringSimple()
+                strOneDbQuery = "<target list='"
+                    + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 new add
+                    + "'><item><word>"
+                    + StringUtil.GetXmlStringSimple(strWord) + "</word><match>" + strMatchStyle + "</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang></target>";
+                 * */
+
+                string strTargetList = "";
+
+                if (String.IsNullOrEmpty(strDbName) == true
+                    || strDbName.ToLower() == "<all>"
+                    || strDbName == "<全部>")
+                {
+                    List<string> found_dup = new List<string>();    // 用于去重
+
+                    if (app.vdbs.Count == 0)
+                    {
+                        strError = "目前library.xml中<virtualDatabases>内尚未配置检索目标";
+                        return 0;
+                    }
+
+
+                    // 所有虚拟库包含的去重后的物理库名 和全部物理名 (整体去重一次)
+                    // 要注意检查特定的from名在物理库中是否存在，如果不存在则排除该库名
+                    for (int j = 0; j < app.vdbs.Count; j++)
+                    {
+                        VirtualDatabase temp_vdb = app.vdbs[j];  // 需要增加一个索引器
+
+                        // 忽略具有notInAll属性的库
+                        if (temp_vdb.NotInAll == true)
+                            continue;
+
+                        List<string> realdbs = new List<string>();
+
+                        // if (temp_vdb.IsVirtual == true)
+                        realdbs = temp_vdb.GetRealDbNames();
+
+                        for (int k = 0; k < realdbs.Count; k++)
+                        {
+                            // 数据库名
+                            string strOneDbName = realdbs[k];
+
+                            if (found_dup.IndexOf(strOneDbName) != -1)
+                                continue;
+
+                            strTargetList += StringUtil.GetXmlStringSimple(strOneDbName + ":" + strFrom) + ";";
+
+                            found_dup.Add(strOneDbName);
+                        }
+                    }
+                }
+                else if (String.IsNullOrEmpty(strDbName) == true
+                    || strDbName.ToLower() == "<all items>"
+                    || strDbName == "<全部实体>"
+                    || strDbName.ToLower() == "<all comments>"
+                    || strDbName == "<全部评注>")
+                {
+                    if (app.ItemDbs.Count == 0)
+                    {
+                        strError = "目前library.xml中<itemdbgroup>内尚未配置数据库";
+                        return -1;
+                    }
+
+                    string strDbType = "";
+                    if (strDbName.ToLower() == "<all items>"
+                    || strDbName == "<全部实体>")
+                        strDbType = "item";
+                    else if (strDbName.ToLower() == "<all comments>"
+                    || strDbName == "<全部评注>")
+                        strDbType = "comment";
+                    else
+                    {
+                        Debug.Assert(false, "");
+                    }
+
+
+                    for (int j = 0; j < app.ItemDbs.Count; j++)
+                    {
+                        ItemDbCfg cfg = app.ItemDbs[j];
+
+                        string strOneDbName = "";
+                        
+                        if (strDbType == "item")
+                            strOneDbName = cfg.DbName;
+                        else if (strDbType == "comment")
+                            strOneDbName = cfg.CommentDbName;
+
+                        if (String.IsNullOrEmpty(strOneDbName) == true)
+                            continue;
+                        strTargetList += StringUtil.GetXmlStringSimple(strOneDbName + ":" + strFrom) + ";";
+                    }
+                }
+                else
+                {
+                    strTargetList = StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom);
+                }
+
+                if (String.IsNullOrEmpty(strTargetList) == true)
+                {
+                    strError = "不具备任何检索目标";
+                    return 0;
+                }
+
+                strOneDbQuery = "<target list='"
+                    + strTargetList
+                    + "'><item><word>"
+                    + StringUtil.GetXmlStringSimple(strWord)
+                    + "</word><match>"
+                    + StringUtil.GetXmlStringSimple(strMatchStyle)
+                    + "</match>"
+                    + "<relation>"
+                    + StringUtil.GetXmlStringSimple(strRelation)
+                    + "</relation>"
+                    + "<dataType>"
+                    + StringUtil.GetXmlStringSimple(strDataType)
+                    + "</dataType>"
+                    + "<maxCount>" + (-1).ToString() + "</maxCount></item><lang>zh</lang></target>";
+
+            }
+
+            strXml = strOneDbQuery;
+
+            return 1;
+        }
+
+#if NOOOOOOOOOOOOOOOOOOOOO
+        // 根据检索参数创建XML检索式
+        public static int BuildQueryXml(
+            LibraryApplication app,
+            string strDbName,
+            string strWord,
+            string strFrom,
+            string strMatchStyle,
+            int nMaxCount,
+            out string strXml,
+            out string strError)
+        {
+            strError = "";
+            strXml = "";
+
+            if (app == null)
+            {
+                strError = "app == null";
+                return -1;
+            }
+
+            if (app.vdbs == null)
+            {
+                strError = "app.vdbs == null";
+                return -1;
+            }
+
+            if (String.IsNullOrEmpty(strDbName) == true)
+            {
+                strError = "strDbName参数不能为空。";
+                return -1;
+            }
+
+            //
+            // 数据库是不是虚拟库?
+            VirtualDatabase vdb = app.vdbs[strDbName];  // 需要增加一个索引器
+
+            if (vdb == null)
+            {
+                strError = "书目库名 '" + strDbName + "' 不存在。";
+                return -1;
+            }
+
+            string strOneDbQuery = "";
+
+            // 如果是虚拟库
+            if (vdb.IsVirtual == true)
+            {
+                int nRet = BuildVirtualQuery(
+                    app.vdbs.db_dir_results,
+                    vdb,
+                    strWord,
+                    strFrom,
+                    strMatchStyle,
+                    nMaxCount,
+                    out strOneDbQuery,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+            }
+            else
+            {
+                // 2007/4/5 改造 加上了 GetXmlStringSimple()
+                strOneDbQuery = "<target list='"
+                    + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 new add
+                    + "'><item><word>"
+                    + StringUtil.GetXmlStringSimple(strWord) + "</word><match>" + strMatchStyle + "</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang></target>";
+            }
+
+            strXml = strOneDbQuery;
+
+            return 0;
+        }
+#endif
+
+        // 加密明文
+        public static string EncryptPassword(string PlainText)
+        {
+            return Cryptography.Encrypt(PlainText, EncryptKey);
+        }
+
+        // 解密加密过的文字
+        public static string DecryptPassword(string EncryptText)
+        {
+            return Cryptography.Decrypt(EncryptText, EncryptKey);
+        }
+
+
+
+
+
+        // 获得当前全部读者库中使用过的馆代码列表
+        public List<string> GetAllLibraryCode()
+        {
+            List<string> results = new List<string>();
+            bool bBlank = false;    // 是否至少出现过一次空的馆代码
+            foreach (ReaderDbCfg item in this.ReaderDbs)
+            {
+                if (string.IsNullOrEmpty(item.LibraryCode) == true)
+                {
+                    bBlank = true;
+                    continue;
+                }
+                results.Add(item.LibraryCode);
+            }
+
+            if (bBlank == true)
+                results.Insert(0, "");
+
+            return results;
+        }
+
+        // 获得配置文件片断中所有下级<library>元素的code属性。并未去重
+        public List<string> GetAllLibraryCode(XmlNode root)
+        {
+            List<string> all_librarycodes = new List<string>();
+            XmlNodeList nodes = root.SelectNodes("descendant::library");
+            foreach (XmlNode node in nodes)
+            {
+                string strCode = DomUtil.GetAttr(node, "code");
+                if (string.IsNullOrEmpty(strCode) == true)
+                    continue;
+
+                all_librarycodes.Add(strCode);
+            }
+            return all_librarycodes;
+        }
+
+                // 获得权限定义表HTML字符串
+        // parameters:
+        //      strSource   可能会包含<readerTypes>和<bookTypes>参数
+        //      strLibraryCodeList  当前用户管辖的分馆代码列表
+        public int GetRightTableHtml(
+            string strSource,
+            string strLibraryCodeList,
+            out string strResult,
+            out string strError)
+        {
+            strError = "";
+            strResult = "";
+
+            XmlDocument cfg_dom = null;
+            if (String.IsNullOrEmpty(strSource) == true)
+                cfg_dom = this.LibraryCfgDom;
+            else
+            {
+                cfg_dom = new XmlDocument();
+                try
+                {
+                    cfg_dom.LoadXml("<rightsTable>" + strSource + "</rightsTable>");
+                }
+                catch (Exception ex)
+                {
+                    strError = "strSource内容(外加根元素后)装入XMLDOM时出现错误: " + ex.Message;
+                    return -1;
+                }
+            }
+
+            List<string> librarycodes = new List<string>();
+            if (SessionInfo.IsGlobalUser(strLibraryCodeList) == true)
+            {
+                // XML代码中的全部馆代码
+                librarycodes = GetAllLibraryCode(cfg_dom.DocumentElement);
+                StringUtil.RemoveDupNoSort(ref librarycodes);   // 去重
+
+                // 读者库中用过的全部馆代码
+                List<string> temp = GetAllLibraryCode();
+                if (temp.Count > 0 && temp[0] == "")
+                    librarycodes.Insert(0, "");
+            }
+            else
+            {
+                librarycodes = StringUtil.FromListString(strLibraryCodeList);
+            }
+
+            return LoanParam.GetRightTableHtml(
+                cfg_dom,
+                // strLibraryCodeList,
+                librarycodes,
+                out strResult,
+                out strError);
+        }
+
+
+
+        // 检查用户使用 WriteRes API 的权限
+        // parameters:
+        //      strLibraryCodeList  当前用户所管辖的馆代码列表
+        //      strLibraryCode  [out]如果是写入读者库，这里返回实际写入的读者库的馆代码。如果不是写入读者库，则返回空
+        // return:
+        //      -1  error
+        //      0   不具备权限
+        //      1   具备权限
+        public int CheckWriteResRights(
+            string strLibraryCodeList,
+            string strRights,
+            string strResPath,
+            out string strLibraryCode,
+            out string strError)
+        {
+            strError = "";
+            strLibraryCode = "";
+
+            string strPath = strResPath;
+
+            // 写入 dp2library 本地文件
+            if (string.IsNullOrEmpty(strPath) == false
+                && strPath[0] == '!')
+            {
+                strPath = strPath.Substring(1);
+
+                string strTargetDir = this.DataDir;
+                string strFilePath = Path.Combine(strTargetDir, strPath);
+
+                string strFirstLevel = StringUtil.GetFirstPartPath(ref strPath);
+                if (string.Compare(strFirstLevel, "upload", true) != 0)
+                {
+                    strError = "第一级目录名必须为 'upload'";
+                    return -1;
+                }
+                if (StringUtil.IsInList("upload", strRights) == false)
+                {
+                    strError = "写入文件 " + strResPath + " 被拒绝。不具备 upload 权限";
+                    return 0;
+                }
+                // 用于限定的根目录
+                string strLimitDir = Path.Combine(strTargetDir, strFirstLevel);
+                if (PathUtil.IsChildOrEqual(strFilePath, strLimitDir) == false)
+                {
+                    strError = "路径 '" + strResPath + "' 越过了限定的范围，无法访问";
+                    return 0;
+                }
+                return 1;
+            }
+
+            string strDbName = StringUtil.GetFirstPartPath(ref strPath);
+
+            // 书目库
+            if (this.IsBiblioDbName(strDbName) == true)
+            {
+                string strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
+
+                // cfgs
+                if (strFirstPart == "cfgs")
+                {
+                    strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
+                    if (strFirstPart == "template")
+                    {
+                        if (StringUtil.IsInList("writetemplate", strRights) == false)
+                        {
+                            strError = "写入模板配置文件 " + strResPath + " 被拒绝。不具备writetemplate权限";
+                            return 0;
+                        }
+                        return 1;   // 如果有了writetemplate权限，就不再需要writeres权限
+                    }
+
+                }
+
+                // 记录ID
+                if (StringUtil.IsPureNumber(strFirstPart) == true
+                    || strFirstPart == "?")
+                {
+                    // 只到记录ID这一层
+                    if (strPath == "")
+                    {
+                        if (StringUtil.IsInList("writerecord", strRights) == false)
+                        {
+                            strError = "直接写入记录 " + strResPath + " 被拒绝。不具备writerecord权限";
+                            return 0;
+                        }
+                        return 1;   // 如果有了writerecord权限，就不再需要writeres权限
+                    }
+
+                    strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
+
+                    // 对象资源
+                    if (strFirstPart == "object")
+                    {
+                        if (StringUtil.IsInList("writeobject", strRights) == false)
+                        {
+                            strError = "写入对象资源 " + strResPath + " 被拒绝。不具备writeobject权限";
+                            return 0;
+                        }
+                        return 1;   // 如果有了writeobject权限，就不再需要writeres权限
+                    }
+                }
+
+                if (StringUtil.IsInList("writeres", strRights) == false)
+                {
+                    strError = "写入资源 " + strResPath + " 被拒绝。不具备writeres权限";
+                    return 0;
+                }
+            }
+
+            // 读者库
+            if (this.IsReaderDbName(strDbName, out strLibraryCode) == true)
+            {
+                // 2012/9/22
+                if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
+                {
+                    if (StringUtil.IsInList(strLibraryCode, strLibraryCodeList) == false)
+                    {
+                        strError = "写入资源 " + strResPath + " 被拒绝。读者库 '"+strDbName+"' 不在当前用户的管辖范围 '"+strLibraryCodeList+"' 内";
+                        return 0;
+                    }
+                }
+
+                string strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
+
+                // cfgs
+                if (strFirstPart == "cfgs")
+                {
+                    strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
+                    if (strFirstPart == "template")
+                    {
+                        if (StringUtil.IsInList("writetemplate", strRights) == false)
+                        {
+                            strError = "写入模板配置文件 " + strResPath + " 被拒绝。不具备writetemplate权限";
+                            return 0;
+                        }
+                        return 1;   // 如果有了writetemplate权限，就不再需要writeres权限
+                    }
+
+                }
+
+                // 记录ID
+                if (StringUtil.IsPureNumber(strFirstPart) == true
+                    || strFirstPart == "?")
+                {
+                    // 只到记录ID这一层
+                    if (strPath == "")
+                    {
+                        /*
+                        if (StringUtil.IsInList("writerecord", strRights) == false)
+                        {
+                            strError = "直接写入记录 " + strResPath + " 被拒绝。不具备writerecord权限。";
+                            return 0;
+                        }
+                        return 1;   // 如果有了writerecord权限，就不再需要writeres权限
+                         * */
+                        strError = "不允许使用WriteRes()写入读者库记录";
+                        return 0;
+                    }
+
+                    strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
+
+                    // 对象资源
+                    if (strFirstPart == "object")
+                    {
+                        if (StringUtil.IsInList("writeobject", strRights) == false)
+                        {
+                            strError = "写入对象资源 " + strResPath + " 被拒绝。不具备writeobject权限";
+                            return 0;
+                        }
+                        return 1;   // 如果有了writeobject权限，就不再需要writeres权限
+                    }
+                }
+
+                if (StringUtil.IsInList("writeres", strRights) == false)
+                {
+                    strError = "写入资源 " + strResPath + " 被拒绝。不具备writeres权限";
+                    return 0;
+                }
+            }
+
+
+            /*
+            if (StringUtil.IsInList("writeres", strRights) == false)
+            {
+                strError = "写入资源 " + strResPath + " 被拒绝。不具备writeres权限。";
+                return 0;
+            }*/
+
+            // 评注库
+            if (this.IsCommentDbName(strDbName) == true)
+            {
+                string strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
+
+                // cfgs
+                if (strFirstPart == "cfgs")
+                {
+                    strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
+                    if (strFirstPart == "template")
+                    {
+                        if (StringUtil.IsInList("writetemplate", strRights) == false)
+                        {
+                            strError = "写入模板配置文件 " + strResPath + " 被拒绝。不具备writetemplate权限";
+                            return 0;
+                        }
+                        return 1;   // 如果有了writetemplate权限，就不再需要writeres权限
+                    }
+
+                }
+
+                // 记录ID
+                if (StringUtil.IsPureNumber(strFirstPart) == true
+                    || strFirstPart == "?")
+                {
+                    // 只到记录ID这一层
+                    if (strPath == "")
+                    {
+                        strError = "不允许使用WriteRes()写入评注库记录";
+                        return 0;
+                    }
+
+                    strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
+
+                    // 对象资源
+                    if (strFirstPart == "object")
+                    {
+                        if (StringUtil.IsInList("writeobject", strRights) == false)
+                        {
+                            strError = "写入对象资源 " + strResPath + " 被拒绝。不具备writeobject权限";
+                            return 0;
+                        }
+                        return 1;   // 如果有了writeobject权限，就不再需要writeres权限
+                    }
+                }
+
+                if (StringUtil.IsInList("writeres", strRights) == false)
+                {
+                    strError = "写入资源 " + strResPath + " 被拒绝。不具备writeres权限";
+                    return 0;
+                }
+            }
+
+            // 实用库 2013/10/30
+            if (this.IsUtilDbName(strDbName) == true)
+            {
+                string strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
+
+                // cfgs
+                if (strFirstPart == "cfgs")
+                {
+                    strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
+                    if (strFirstPart == "template")
+                    {
+                        if (StringUtil.IsInList("writetemplate", strRights) == false)
+                        {
+                            strError = "写入模板配置文件 " + strResPath + " 被拒绝。不具备writetemplate权限";
+                            return 0;
+                        }
+                        return 1;   // 如果有了writetemplate权限，就不再需要writeres权限
+                    }
+
+                }
+
+                // 记录ID
+                if (StringUtil.IsPureNumber(strFirstPart) == true
+                    || strFirstPart == "?")
+                {
+                    // 只到记录ID这一层
+                    if (strPath == "")
+                    {
+                        if (StringUtil.IsInList("writerecord", strRights) == false)
+                        {
+                            strError = "直接写入记录 " + strResPath + " 被拒绝。不具备writerecord权限";
+                            return 0;
+                        }
+                        return 1;   // 如果有了writerecord权限，就不再需要writeres权限
+
+                    }
+
+                    strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
+
+                    // 对象资源
+                    if (strFirstPart == "object")
+                    {
+                        if (StringUtil.IsInList("writeobject", strRights) == false)
+                        {
+                            strError = "写入对象资源 " + strResPath + " 被拒绝。不具备writeobject权限";
+                            return 0;
+                        }
+                        return 1;   // 如果有了writeobject权限，就不再需要writeres权限
+                    }
+                }
+
+                if (StringUtil.IsInList("writeres", strRights) == false)
+                {
+                    strError = "写入资源 " + strResPath + " 被拒绝。不具备writeres权限";
+                    return 0;
+                }
+            }
+
+            strError = "写入资源 " + strResPath + " 被拒绝。不具备特定的权限";
+            return 0;
+        }
+
+        // 检查用户使用 GetRes API 的权限
+        // parameters:
+        //      strLibraryCodeList  当前用户所管辖的馆代码列表
+        //      strLibraryCode  [out]如果是访问读者库，这里返回实际访问的读者库的馆代码。如果不是访问读者库，则返回空
+        //      strFilePath  [out]物理文件路径
+        // return:
+        //      -1  error
+        //      0   不具备权限
+        //      1   具备权限
+        public int CheckGetResRights(
+            string strLibraryCodeList,
+            string strRights,
+            string strResPath,
+            out string strLibraryCode,
+            out string strFilePath,
+            out string strError)
+        {
+            strError = "";
+            strLibraryCode = "";
+            strFilePath = "";
+
+            string strPath = strResPath;
+
+            // 读取 dp2library 本地文件
+            if (string.IsNullOrEmpty(strPath) == false
+                && strPath[0] == '!')
+            {
+                strPath = strPath.Substring(1);
+
+                string strTargetDir = this.DataDir;
+                strFilePath = Path.Combine(strTargetDir, strPath);
+
+                string strFirstLevel = StringUtil.GetFirstPartPath(ref strPath);
+                if (string.Compare(strFirstLevel, "upload", true) != 0)
+                {
+                    strError = "第一级目录名必须为 'upload'";
+                    return -1;
+                }
+                if (StringUtil.IsInList("download", strRights) == false)
+                {
+                    strError = "读取文件 " + strResPath + " 被拒绝。不具备 download 权限";
+                    return 0;
+                }
+                // 用于限定的根目录
+                string strLimitDir = Path.Combine(strTargetDir, strFirstLevel);
+                if (PathUtil.IsChildOrEqual(strFilePath, strLimitDir) == false)
+                {
+                    strError = "路径 '" + strResPath + "' 越过了限定的范围，无法访问";
+                    return 0;
+                }
+                return 1;
+            }
+
+            strError = "获取资源 " + strResPath + " 被拒绝。不具备特定的权限";
+            return 0;
+        }
+
+        public class ReaderDbCfg
+        {
+            public string DbName = "";
+            public bool InCirculation = true;   // 2008/6/3 new add
+
+            public string LibraryCode = "";     // 2012/9/7
+        }
+
+        public enum ResPathType
+        {
+            None = 0,
+            Record = 1,
+            CfgFile = 2,
+            Object = 3,
+        }
+
+        // 判断一个路径是否为对象路径
+        public static ResPathType GetResPathType(string strPath)
+        {
+            string strDbName = StringUtil.GetFirstPartPath(ref strPath);
+
+            string strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
+
+            // cfgs
+            if (strFirstPart == "cfgs")
+            {
+                return ResPathType.CfgFile;
+            }
+
+            // 记录ID
+            if (StringUtil.IsPureNumber(strFirstPart) == true
+                || strFirstPart == "?")
+            {
+                // 只到记录ID这一层
+                if (String.IsNullOrEmpty(strPath) == true)
+                {
+                    return ResPathType.Record;
+                }
+
+                strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
+
+                // 对象资源
+                if (strFirstPart == "object")
+                {
+                    return ResPathType.Object;
+                }
+            }
+
+            return ResPathType.None;
+        }
+
+
+
+    }
+
+    // 系统挂起的理由
+    public enum HangupReason
+    {
+        None = 0,   // 没有挂起
+        LogRecover = 1, // 日志恢复
+        Backup = 2, // 大备份
+        Normal = 3, // 普通维护
+        OperLogError = 4,   // 操作日志错误（例如日志空间满）
+        Exit = 5,  // 系统正在退出
+    }
+
+    // API错误码
+    public enum ErrorCode
+    {
+        NoError = 0,
+        SystemError = 1,    // 系统错误。指application启动时的严重错误。
+        NotFound = 2,   // 没有找到
+        ReaderBarcodeNotFound = 3,  // 读者证条码号不存在
+        ItemBarcodeNotFound = 4,  // 册条码号不存在
+        Overdue = 5,    // 还书过程发现有超期情况（已经按还书处理完毕，并且已经将超期信息记载到读者记录中，但是需要提醒读者及时履行超期违约金等手续）
+        NotLogin = 6,   // 尚未登录
+        DupItemBarcode = 7, // 预约中本次提交的某些册条码号被本读者先前曾预约过
+        InvalidParameter = 8,   // 不合法的参数
+        ReturnReservation = 9,    // 还书操作成功, 因属于被预约图书, 请放入预约保留架
+        BorrowReservationDenied = 10,    // 借书操作失败, 因属于被预约(到书)保留的图书, 非当前预约者不能借阅
+        RenewReservationDenied = 11,    // 续借操作失败, 因属于被预约的图书
+        AccessDenied = 12,  // 存取被拒绝
+        // ChangePartDenied = 13,    // 部分修改被拒绝
+        ItemBarcodeDup = 14,    // 册条码号重复
+        Hangup = 15,    // 系统挂起
+        ReaderBarcodeDup = 16,  // 读者证条码号重复
+        HasCirculationInfo = 17,    // 包含流通信息(不能删除)
+        SourceReaderBarcodeNotFound = 18,  // 源读者证条码号不存在
+        TargetReaderBarcodeNotFound = 19,  // 目标读者证条码号不存在
+        FromNotFound = 20,  // 检索途径(from caption或者style)没有找到
+        ItemDbNotDef = 21,  // 实体库没有定义
+        IdcardNumberDup = 22,   // 身份证号检索点命中读者记录不唯一。因为无法用它借书还书。但是可以用证条码号来进行
+        IdcardNumberNotFound = 23,  // 身份证号不存在
+        PartialDenied = 24,  // 有部分修改被拒绝
+        ChannelReleased = 25,   // 通道先前被释放过，本次操作失败
+        OutofSession = 26,   // 通道达到配额上限
+        InvalidReaderBarcode = 27,  // 读者证条码号不合法
+        InvalidItemBarcode = 28,    // 册条码号不合法
+
+        // 以下为兼容内核错误码而设立的同名错误码
+        AlreadyExist = 100, // 兼容
+        AlreadyExistOtherType = 101,
+        ApplicationStartError = 102,
+        EmptyRecord = 103,
+        // None = 104, 采用了NoError
+        NotFoundSubRes = 105,
+        NotHasEnoughRights = 106,
+        OtherError = 107,
+        PartNotFound = 108,
+        RequestCanceled = 109,
+        RequestCanceledByEventClose = 110,
+        RequestError = 111,
+        RequestTimeOut = 112,
+        TimestampMismatch = 113,
+    }
+
+    // API函数结果
+    public class LibraryServerResult
+    {
+        public long Value = 0;
+        public string ErrorInfo = "";
+        public ErrorCode ErrorCode = ErrorCode.NoError;
+
+        public LibraryServerResult Clone()
+        {
+            LibraryServerResult other = new LibraryServerResult();
+            other.Value = this.Value;
+            other.ErrorCode = this.ErrorCode;
+            other.ErrorInfo = this.ErrorInfo;
+            return other;
+        }
+    }
+
+    // 帐户信息
+    public class Account
+    {
+        public string Location = "";
+
+        public XmlNode XmlNode = null;  // library.xml配置文件中相关小节
+
+        public string LoginName = "";   // 登录名 带有前缀的各种渠道的登录名字
+
+        public string Password = "";
+        public string Type = "";
+
+        string m_strRights = "";
+        public string Rights
+        {
+            get
+            {
+                return this.m_strRights;
+            }
+            set
+            {
+                this.m_strRights = value;
+
+                this.m_rightsOriginList.Text = LibraryApplication.ExpandRightString(value);
+            }
+        }
+
+        QuickList m_rightsOriginList = new QuickList();
+
+        public QuickList RightsOriginList
+        {
+            get
+            {
+                return this.m_rightsOriginList;
+            }
+        }
+
+        public string AccountLibraryCode = ""; // 2007/12/15 new add
+        public string Access = "";  // 存取权限代码 2008/2/28 new add
+
+        public string UserID = "";  // 用户唯一标识。对于读者，这就是证条码号
+
+        public string RmsUserName = "";
+        public string RmsPassword = "";
+
+        public string Barcode = ""; // 证条码号。对于读者型的帐户有意义
+
+        public string Name = "";    // 姓名。对于读者型的帐户有意义
+
+        public string DisplayName = ""; // 显示名。对于读者型的帐户有意义
+
+        public string PersonalLibrary;  // 书斋名。对于读者型的帐户有意义
+
+        public string Token = "";   // 随机创建的标记
+
+        public XmlDocument ReaderDom = null;    // 如果是读者帐户，这里是读者记录DOM
+        public string ReaderDomBarcode = "";   // 缓冲的DOM代表的读者证条码号
+        public byte[] ReaderDomTimestamp = null;    // 读者记录时间戳
+        public string ReaderDomPath = "";   // 读者记录路径
+        public DateTime ReaderDomLastTime = new DateTime((long)0);  // 最近装载的时间
+        public bool ReaderDomChanged = false;
+
+        public Account()
+        {
+            Random random = new Random(unchecked((int)DateTime.Now.Ticks));
+            long number = random.Next(0, 9999);	// 4位数字
+
+            Token = Convert.ToString(DateTime.Now.Ticks) + "__" + Convert.ToString(number);
+        }
+
+        // 最原始的权限定义
+        public string RightsOrigin
+        { 
+            get
+            {
+                return LibraryApplication.ExpandRightString(this.Rights);
+            }
+        }
+    }
+
+    public class BrowseFormat
+    {
+        public string Name = "";
+        public string ScriptFileName = "";
+        public string Type = "";
+
+
+        // 将脚本文件名正规化
+        // 因为在定义脚本文件的时候, 有一个当前库名环境,
+        // 如果定义为 ./cfgs/filename 表示在当前库下的cfgs目录下,
+        // 而如果定义为 /cfgs/filename 则表示在同服务器的根下
+        public static string CanonicalizeScriptFileName(string strDbName,
+            string strScriptFileNameParam)
+        {
+            int nRet = 0;
+            nRet = strScriptFileNameParam.IndexOf("./");
+            if (nRet != -1)
+            {
+                // 认为是当前库下
+                return strDbName + strScriptFileNameParam.Substring(1);
+            }
+
+            nRet = strScriptFileNameParam.IndexOf("/");
+            if (nRet != -1)
+            {
+                // 认为从根开始
+                return strScriptFileNameParam.Substring(1);
+            }
+
+            return strScriptFileNameParam;  // 保持原样
+        }
+    }
+
+
+    // 日历信息
+    [DataContract(Namespace = "http://dp2003.com/dp2library/")]
+    public class CalenderInfo
+    {
+        [DataMember]
+        public string Name = "";    // 日历名。可以是全局的，例如“基本日历”，也可以是两段式“海淀分馆/基本日历”。分馆用户只能修改属于自己分馆的日历，但可以看到全部日历
+        [DataMember]
+        public string Range = "";
+        [DataMember]
+        public string Content = "";
+        [DataMember]
+        public string Comment = "";
+    }
+
+    // 日历对象。用于确定哪些日子是工作日
+    public class Calendar
+    {
+        public string Name = "";
+        RangeList m_range = null;
+
+        public Calendar(string strName,
+            string strData)
+        {
+            this.Name = strName;
+            this.m_range = new RangeList(strData);
+            this.m_range.Sort();
+            this.m_range.Merge();
+        }
+
+
+        // 检测一个时间值是否处于非工作日内？
+        // 如果是，同时返回最近的下一个工作日的时刻（如果不是，则不返回）
+        public bool IsInNonWorkingDay(DateTime time,
+            out DateTime nextWorkingDay)
+        {
+            nextWorkingDay = DateTime.MinValue;
+
+            long lDay = DateTimeUtil.DateTimeToLong8(time);
+
+            bool bFound = false;
+
+            long lNextWorkingDay = 0;
+
+            for (int i = 0; i < this.m_range.Count; i++)
+            {
+                RangeItem item = (RangeItem)this.m_range[i];
+
+                Debug.Assert(item.lLength >= 1, "");
+
+                if (bFound == false)
+                {
+                    if (lDay >= item.lStart
+                        && lDay < item.lStart + item.lLength)
+                    {
+                        // 本item末端时间
+                        long lEndDay = item.lStart + item.lLength - 1;
+
+                        DateTime t = DateTimeUtil.Long8ToDateTime(lEndDay);
+
+                        // 24小时后的时间
+                        TimeSpan delta = new TimeSpan(24, 0, 0);
+                        nextWorkingDay = t + delta;
+                        lNextWorkingDay = DateTimeUtil.DateTimeToLong8(nextWorkingDay);
+                        bFound = true;
+                    }
+                }
+                else // bFound == true
+                {
+                    if (lNextWorkingDay >= item.lStart
+                        && lNextWorkingDay < item.lStart + item.lLength)
+                    {
+                        long lEndDay = item.lStart + item.lLength - 1;
+
+                        // 说明预测的非工作日是在下一段非工作日范围内，那么就还要向后继续找断点
+                        DateTime t = DateTimeUtil.Long8ToDateTime(lEndDay);
+                        TimeSpan delta = new TimeSpan(24, 0, 0);    // 24小时
+                        nextWorkingDay = t + delta;
+                        lNextWorkingDay = DateTimeUtil.DateTimeToLong8(nextWorkingDay);
+                    }
+                    else
+                    {
+                        // 找到断点了，结束
+                        return true;
+                    }
+                }
+            }
+
+            if (bFound == false)
+                return false;
+
+            return true;
+        }
+
+        // 排除非工作日，获得和起点时间相隔一段距离的末端时间值
+        public DateTime GetEndTime(DateTime start,
+            TimeSpan distance)
+        {
+            Debug.Assert(distance.Ticks >= 0, "distance必须为正值");
+
+            // long lDay = DateTimeToLong8(start);
+
+            long nDeltaDays = (long)distance.TotalDays;
+
+            long nDayCount = 0;
+
+            DateTime curDay = start;
+
+            //    DateTime curDay = Long8ToDateTime(lDay);
+            for (; ;)
+            {
+                bool bNon = IsNonWorkingDay(DateTimeUtil.DateTimeToLong8(curDay));
+
+                if (bNon == true)   // BUG !!! 2007/1/15
+                    goto CONTINUE;
+
+                if (nDayCount >= nDeltaDays)
+                    break;
+
+                nDayCount++;
+
+
+            CONTINUE:
+                TimeSpan delta = new TimeSpan(24, 0, 0);    // 24小时
+                curDay = curDay + delta;
+            }
+
+            return curDay;
+        }
+
+        // 是不是 非工作日?
+        public bool IsNonWorkingDay(long lDay)
+        {
+            for (int i = 0; i < this.m_range.Count; i++)
+            {
+                RangeItem item = (RangeItem)this.m_range[i];
+
+                Debug.Assert(item.lLength >= 1, "");
+
+                if (lDay >= item.lStart
+    && lDay < item.lStart + item.lLength)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
+
+    public class ItemDbCfg
+    {
+        public string DbName = "";  // 实体库名
+        public string BiblioDbName = "";    // 书目库名
+        public string BiblioDbSyntax = "";  // 书目库MARC语法
+
+        public string IssueDbName = ""; // 期库
+        public string OrderDbName = ""; // 订购库 2007/11/27 new add
+        public string CommentDbName = "";   // 评注库 2008/12/8 new add
+
+        public string UnionCatalogStyle = "";   // 联合编目特性 905  // 2007/12/15 new add
+
+        public string Replication = "";   // 复制  // 2013/11/19
+        public string ReplicationServer = "";   // 复制-服务器名 用于加速访问
+        public string ReplicationDbName = "";   // 复制-书目库名 用于加速访问
+
+        public bool InCirculation = true;   // 2008/6/4 new add
+
+        public string Role = "";    // 角色 biblioSource/orderWork // 2009/10/23 new add
+    }
+}

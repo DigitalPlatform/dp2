@@ -1,0 +1,143 @@
+﻿
+&ItemPage=1
+
+~~~
+page 114 ISBN itemLookup
+
+
+page 91 Power Search
+
+~~~
+
+China study mao
+
+~~~~~~~~~~
+
+        // 检索
+        // 取出命中结果数，总页数
+        int DoSearch(out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            string strUrl = "";
+            nRet = GetSearchRequestUrl(out strUrl,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            this.listView_browse.Items.Clear();
+
+            try
+            {
+                WebRequest request = HttpWebRequest.Create(strUrl);
+                WebResponse response = request.GetResponse();
+                XmlDocument doc = new XmlDocument();
+                doc.Load(response.GetResponseStream());
+
+                XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
+                nsmgr.AddNamespace("amazon", NAMESPACE);
+
+                XmlNodeList errorMessageNodes = doc.GetElementsByTagName("Message", NAMESPACE);
+                if (errorMessageNodes != null && errorMessageNodes.Count > 0)
+                {
+                    String message = errorMessageNodes.Item(0).InnerText;
+                    strError = "Error: " + message + " (but signature worked)";
+                    return -1;
+                }
+
+                // Items/TotalResults
+                string strTotalResults = DomUtil.GetElementText(doc.DocumentElement,
+                    "amazon:Items/amazon:TotalResults", nsmgr);
+                Int64.TryParse(strTotalResults, out this.m_nTotalResults);
+
+                // Items/TotalPages
+                string strTotalPages = DomUtil.GetElementText(doc.DocumentElement, 
+                    "amazon:Items/amazon:TotalPages", nsmgr);
+                Int64.TryParse(strTotalPages, out this.m_nTotalPages);
+
+                nRet = LoadResults(doc, out strError);
+                if (nRet == -1)
+                    return -1;
+                this.m_nCurrentPageNo = 0;
+                RefreshNextBatchButtons();
+            }
+            catch (Exception e)
+            {
+                // System.Console.WriteLine("Caught Exception: " + e.Message);
+                // System.Console.WriteLine("Stack Trace: " + e.StackTrace);
+                strError = e.Message;
+                return -1;
+            }
+
+            return 0;
+        }
+
+        // 获得下一批浏览结果
+        int DoGetNextBatch(out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            if (this.m_nTotalPages == 0)
+            {
+                strError = "尚未检索过";
+                return -1;
+            }
+
+            if (this.m_nCurrentPageNo >= this.m_nTotalPages - 1)
+            {
+                strError = "结果集已经全部装入";
+                return -1;
+            }
+
+            string strUrl = "";
+            nRet = GetNextRequestUrl(out strUrl,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            try
+            {
+                WebRequest request = HttpWebRequest.Create(strUrl);
+                WebResponse response = request.GetResponse();
+                XmlDocument doc = new XmlDocument();
+                doc.Load(response.GetResponseStream());
+
+                XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
+                nsmgr.AddNamespace("amazon", NAMESPACE);
+
+                XmlNodeList errorMessageNodes = doc.GetElementsByTagName("Message", NAMESPACE);
+                if (errorMessageNodes != null && errorMessageNodes.Count > 0)
+                {
+                    String message = errorMessageNodes.Item(0).InnerText;
+                    strError = "Error: " + message + " (but signature worked)";
+                    return -1;
+                }
+
+                // Items/TotalResults
+                string strTotalResults = DomUtil.GetElementText(doc.DocumentElement,
+                    "amazon:Items/amazon:TotalResults", nsmgr);
+                Int64.TryParse(strTotalResults, out this.m_nTotalResults);
+
+                // Items/TotalPages
+                string strTotalPages = DomUtil.GetElementText(doc.DocumentElement,
+                    "amazon:Items/amazon:TotalPages", nsmgr);
+                Int64.TryParse(strTotalPages, out this.m_nTotalPages);
+
+                nRet = LoadResults(doc, out strError);
+                if (nRet == -1)
+                    return -1;
+                this.m_nCurrentPageNo++;
+                RefreshNextBatchButtons();
+            }
+            catch (Exception e)
+            {
+                // System.Console.WriteLine("Caught Exception: " + e.Message);
+                // System.Console.WriteLine("Stack Trace: " + e.StackTrace);
+                strError = e.Message;
+                return -1;
+            }
+
+            return 0;
+        }

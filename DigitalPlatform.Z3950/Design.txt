@@ -1,0 +1,8 @@
+
+
+从dp1batch中参考socket的编写方法，实现Init请求。暂时
+还用不到逆波兰表。
+
+socket被包装为一个稳定的Channel对象。
+
+因为z39.50是持久连接的，socket会长期保持。

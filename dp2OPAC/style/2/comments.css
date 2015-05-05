@@ -1,0 +1,122 @@
+﻿TABLE.comments
+{
+	width: 100%;
+	border-style: dashed;
+	border-width: 1px;
+	border-color: #cccccc;
+
+	border-collapse:collapse;
+	
+	background-color: White;
+	text-align: left;
+}
+
+TABLE.comments TR
+{
+    border-width: 0pt;
+	border-top-width: 1pt;
+
+	border-style: dashed;
+	border-color: #cccccc;
+}
+
+TABLE.comments DIV.review TABLE.edit TR
+{
+    border-width: 0pt;
+}
+
+TABLE.comments TD
+{
+	padding: 4pt;
+
+/*
+	border-left-width: 0pt;
+	border-top-width: 0pt;
+	border-right-width: 1px;
+	border-bottom-width: 1px;
+
+	border-style: solid;
+	border-color: lightgray;
+*/
+}
+
+TABLE.comments TD.no
+{
+	width: 1%;	
+	white-space:nowrap;
+	vertical-align: top;
+}
+
+TABLE.comments TD.no DIV
+{
+	background-color: #cccccc;
+}
+
+TABLE.comments TR.debugline
+{
+	font-size: 12px;
+	background-color: yellow;
+}
+
+TABLE.comments DIV.none
+{
+	width: 100%;
+	background-color: white;
+	color:Gray;
+	text-align:center;
+}
+
+TABLE.wrapper
+{
+	border-style:solid;
+	border-width:1px;
+	border-top-width:0px;
+	border-bottom-width: 26px;
+	border-color:#aaaaaa;
+	border-collapse:collapse;
+	padding: 5px;
+}
+
+TABLE.comments DIV.cmd
+{
+	float: right;
+}
+
+TABLE.comments DIV.errorinfo
+{
+	font-size: 12px;
+	background-color: yellow;
+}
+
+
+/*
+TABLE.comments DIV.content:before, TABLE.comments DIV.content:after
+{
+	font-size: 5em;
+	position: absolute;
+	color: #cccccc;
+	font-family: "Britannic Bold", "Graulau Web Bold", "Arial Narrow", "Helvetica",
+	 Sans-Serif !important;
+}
+
+TABLE.comments DIV.content:before
+{
+	content: "\201C";
+	margin-left: -0.6em;
+	margin-top: -0.1em;
+}
+
+TABLE.comments DIV.content:after
+{
+	content: "\201D";
+	right: 0;
+	margin-right: 1.0em;
+	margin-top: 0em;
+}
+*/
+
+TABLE.comments TR.active TD.no
+{
+	background-color:#ffcccc;
+}
+

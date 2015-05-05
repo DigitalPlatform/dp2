@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <key>
+    <xpath>//itemBarcode</xpath>
+    <from>itembarcode</from>
+    <table ref="itembarcode" />
+  </key>
+  <table name="itembarcode" id="1">
+    <caption lang="zh-CN">册条码号</caption>
+    <caption lang="zh-CN">册条码</caption>
+    <caption lang="en">Item barcode</caption>
+  </table>
+  <key>
+    <xpath>//readerBarcode</xpath>
+    <from>readerbarcode</from>
+    <table ref="readerbarcode" />
+  </key>
+  <table name="readerbarcode" id="2">
+    <caption lang="zh-CN">读者证条码号</caption>
+    <caption lang="zh-CN">读者证条码</caption>
+    <caption lang="en">Reader barcode</caption>
+  </table>
+  <key>
+    <xpath>//state</xpath>
+    <from>state</from>
+    <table ref="state" />
+  </key>
+  <table name="state" id="3">
+    <convert>
+      <string style="split,upper" />
+    </convert>
+    <convertquery>
+      <string style="upper" />
+    </convertquery>
+    <caption lang="zh-CN">状态</caption>
+    <caption lang="en">State</caption>
+  </table>
+</root>

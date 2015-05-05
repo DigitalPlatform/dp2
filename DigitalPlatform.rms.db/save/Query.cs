@@ -1,0 +1,1103 @@
+using System;
+using System.Xml;
+using System.Collections;
+
+using DigitalPlatform.rms;
+using DigitalPlatform;
+using DigitalPlatform.Xml;
+using DigitalPlatform.IO;
+using DigitalPlatform.ResultSet;
+using DigitalPlatform.Text;
+
+namespace DigitalPlatform.rms
+{
+
+    public class SearchItem
+    {
+        public string TargetTables;  // 检索目标表,以逗号分隔
+        public string Word = "";     // 检索词
+        public string Match = "";    // 匹配方式
+        public string Relation = "";  // 关系符
+        public string DataType = "";  // 数据类型
+
+        public string IdOrder = "";
+        public string KeyOrder = "";
+
+        public string OrderBy = "";       // 排序风格
+        public int MaxCount = -1;      // 限制的最大条数 -1:不限
+    }
+
+    // 专门的逻辑检索类,并不用考虑加锁的问题，
+    // 因为在DatabaseCollection里的DoSearch()函数里做堆栈变量
+    public class Query
+    {
+        DatabaseCollection m_dbColl;  // 1.数据库集合指针
+        User m_oUser;                 // 2.帐户指针
+        public XmlDocument m_dom;     // 3.检索式dom
+
+        // 处理警告的等级
+        //   0:严厉，不宽容警告，直接返回-1
+        //   1:宽容，当各项矛盾时，系统自动做出修改后，进行检索
+        int m_nWarningLevel = 1;
+
+
+        //静态成员m_precedenceTable,string数组，存放操作符与对应的优先级
+        public static string[] m_precedenceTable = {"NOT","2",
+													   "OR","1",
+													   "AND","1",
+													   "SUB","1",
+													   "!","2",
+													   "+","1",
+													   "-","1"};
+        // 构造函数
+        // paramter:
+        //		dbColl  数据库集合指针
+        //		user    帐户对象指针
+        //		dom     检索式DOM
+        public Query(DatabaseCollection dbColl,
+            User user,
+            XmlDocument dom)
+        {
+            m_dbColl = dbColl;
+            m_oUser = user;
+            m_dom = dom;
+
+            //从dom里找到warnging的处理级别信息
+            string strWarningLevel = "";
+            XmlNode nodeWarningLevel = dom.SelectSingleNode("//option");
+            if (nodeWarningLevel != null)
+                strWarningLevel = DomUtil.GetAttr(nodeWarningLevel, "warning");
+
+            if (StringUtil.RegexCompare(@"\d", strWarningLevel) == true)
+                m_nWarningLevel = Convert.ToInt32(strWarningLevel);
+        }
+
+
+        // 得到一个操作符对应的优先级
+        // parameter:
+        //		strOperator 操作符
+        // return: 
+        //		!= -1   该操作符的优先级，
+        //		== -1   没找到,注意在使用的地方，-1代表没找到，不能参于比较
+        public static int GetPrecedence(string strOperator)
+        {
+            //每次过两个数
+            for (int i = 0; i < m_precedenceTable.Length; i += 2)
+            {
+                if (String.Compare(m_precedenceTable[i], strOperator, true) == 0)
+                {
+                    //因为任何时候都是两个一组，所以这个循环是安全的，
+                    //但更严密是，即使m_precedenceTable没有配正确，此函数也不报错，需要做如下判断
+                    if (i + 1 < m_precedenceTable.Length)
+                        return Convert.ToInt32(m_precedenceTable[i + 1]);
+                    else
+                        return -1;
+                }
+            }
+            return -1;
+        }
+
+
+        /*
+         The algorithm in detail
+        Read character. 
+        1.If the character is a number then add it to the output. 
+        如果字符是数字，直接加到output队列
+
+        2.If the character is an operator then do something based on the various situations: 
+        如果字符是运算符，根据下列的情况处理:
+
+            If the operator has a higher precedence than the operator at the top of the stack or the stack is empty, 
+            push the operator onto the stack. 
+            如果运算符的的优先级高于栈顶元素，或者栈为空，则将该运算符push到栈里
+	
+            If the operator's precedence is less than or equal to the precedence of the operator at the top of the stack stack 
+            then pop operators off the stack, 
+            onto the output until the operator at the top of the stack has less precedence than the current operator or there is no more stack to pop.
+            At this point, push the operator onto the stack. 
+            如果运算的优先级低于或者等于栈顶运算符，
+            则从栈顶pop运算符，加到output队列里，
+            直到栈顶元素的优先级小于当前运算符，或者栈变为空时，
+            push当前操作到栈里
+	
+        3.If the character is a left-parenthesis then push it onto the stack. 
+        如果运算符是一个左括号，直接push到栈里
+
+        4.If the character is a right-parenthesis 
+        then pop an operators off the stack,
+        onto the output until the operator read is a left-parenthesis 
+        at which point it is popped off the stack but not added to the output. 
+        如果运算符是一个右括号，则从栈里pop运算符，加到output队列里，
+        直到遇到一个左括号，把左括号pop出栈，但不加到队列里
+
+        If the stack runs out without finding a left-parenthesis 
+        then there are mismatched parenthesis. 
+        如果从栈里没有找到左括号，则括号不匹配，即少左括号
+
+        5.If there are no more characters after the current,
+        pop all the operators off the stack and exit. 
+        If a left-parenthesis is popped then there are mismatched parenthesis. 
+        最后，从栈里pop所有的操作符，加到output队列里。
+        如果遇到一个左括号，则出现括号不匹配错误，即少右括号。
+
+        After doing one or more of the above steps, go back to the start. 
+         */
+
+        // 根据上述算法，将传入父亲节点儿子的正常顺利转换成逆波兰表顺利，
+        // 得到一个ArrayList
+        // 注意过滤掉扩展的节点
+        // parameter:
+        //		node    父亲节点
+        //		output  out参数，返回逆波兰表顺利的ArrayList
+        //				注意有可能是空ArrayList。
+        //		strErrorInfo    out参数，返回处理信息
+        // return:
+        //		-1  出错 例如:括号不匹配;找不到某操作符的优先级
+        //		0   成功
+        public int Infix2RPN(XmlNode node,
+            out ArrayList output,
+            out string strError)
+        {
+            strError = "";
+            output = new ArrayList();
+            if (node == null)
+            {
+                strError = "node不能为null\r\n";
+                return -1;
+            }
+            if (node.ChildNodes.Count == 0)
+            {
+                strError = "node的ChildNodes个数为0\r\n";
+                return 0;
+            }
+
+            //声明的一个栈对象，直接用.net的Stack类
+            Stack stackOperator = new Stack();
+
+            foreach (XmlNode nodeChild in node.ChildNodes)
+            {
+                //用于其它用途的扩展节点，需要跳过
+                if (nodeChild.Name == "lang" || nodeChild.Name == "option")
+                    continue;
+
+                //操作数时，加到output.
+                if (nodeChild.Name != "operator")
+                {
+                    output.Add(nodeChild);
+                }
+                else //操作符时
+                {
+                    string strOperator = DomUtil.GetAttr(nodeChild, "value");
+
+                    //本身有这个节点，但value为空时，按OR算
+                    if (strOperator == "")
+                        strOperator = "OR";
+
+                    //左括号直接push栈里
+                    if (strOperator == "(")
+                    {
+                        stackOperator.Push(nodeChild);
+                        continue;
+                    }
+
+                    //右括号时
+                    if (strOperator == ")")
+                    {
+                        bool bFound = false;
+                        while (stackOperator.Count != 0)
+                        {
+                            //首先从栈里pop出一个操作符
+                            XmlNode nodeTemp = (XmlNode)stackOperator.Pop();
+
+                            string strTemp = DomUtil.GetAttr(node, "value");
+
+                            //如果不等于左括号，加到output里
+                            if (strTemp != "(")
+                            {
+                                output.Add(nodeTemp);
+                            }
+                            else  //等于则跳出循环
+                            {
+                                bFound = true;
+                                break;
+                            }
+                        }
+
+                        //没找到左括号时，返回-1
+                        if (bFound == false)
+                        {
+                            strError = "右括号缺少配对的左括号";
+                            return -1;
+                        }
+                    }
+
+
+                    //如果栈为空，直接push
+                    if (stackOperator.Count == 0)
+                    {
+                        stackOperator.Push(nodeChild);
+                        continue;
+                    }
+
+                    //得到当前操作符的优先级
+                    int nPrecedence;
+                    nPrecedence = Query.GetPrecedence(strOperator);
+
+                    //-1，代表没找到
+                    if (nPrecedence == -1)
+                    {
+                        strError = "没有找到操作符" + strOperator + "的优先级<br/>";
+                        return -1;
+                    }
+
+                    //从栈里peek一个元素（不用pop，否则可能还会加回去）
+                    XmlNode nodeFromStack = (XmlNode)stackOperator.Peek();
+                    string strOperatorFormStack = "";
+                    if (nodeFromStack != null)
+                        strOperatorFormStack = DomUtil.GetAttr(nodeFromStack, "value");
+
+                    //得到栈里元素的优先级
+                    int nPrecedenceFormStack;
+                    nPrecedenceFormStack = Query.GetPrecedence(strOperatorFormStack);
+
+                    if (nPrecedenceFormStack == -1)
+                    {
+                        strError = "没有找到运操作符" + strOperatorFormStack + "的优先级<br/>";
+                        return -1;
+                    }
+
+                    //当前操作符的优先级高于栈顶运算符的优先级，
+                    //则将当前操作符push到栈里
+                    if (nPrecedence > nPrecedenceFormStack)
+                    {
+                        stackOperator.Push(nodeChild);
+                    }
+
+                    //当前低于栈顶时
+                    if (nPrecedence <= nPrecedenceFormStack)
+                    {
+                        //下列代码严密
+                        while (true)
+                        {
+                            //栈空时，将当前操作符push到栈里，跳出循环
+                            if (stackOperator.Count == 0)
+                            {
+                                stackOperator.Push(nodeChild);
+                                break;
+                            }
+
+                            //得到栈顶操作符(使用peek)，及优先级
+                            XmlNode nodeIn = (XmlNode)stackOperator.Peek();
+                            string strOperatorIn = "";
+                            if (nodeIn != null)
+                                strOperatorIn = DomUtil.GetAttr(nodeIn, "value");
+
+                            int nPrecedenceIn;
+                            nPrecedenceIn = Query.GetPrecedence(strOperatorIn);
+
+                            if (nPrecedenceIn == -1)
+                            {
+                                strError = "没有找到运操作符" + strOperatorIn + "的优先级<br/>";
+                                return -1;
+                            }
+
+                            //当前高于栈顶的，则将当前push到栈里，跳出循环
+                            if (nPrecedence > nPrecedenceIn)
+                            {
+                                stackOperator.Push(nodeChild);
+                                break;
+                            }
+
+                            //其它从栈里pop，加到output里
+                            nodeIn = (XmlNode)stackOperator.Pop();
+                            output.Add(nodeIn);
+                        }
+                    }
+                }
+            }
+
+
+            //最后，将栈里剩下的操作符，从栈里pop，加到output里
+            while (stackOperator.Count != 0)
+            {
+                XmlNode nodeTemp = (XmlNode)stackOperator.Pop();
+
+                //操作符为左括号，括号不匹配，出错，返回-1
+                string strOperator = "";
+                if (nodeTemp != null)
+                    strOperator = DomUtil.GetAttr(nodeTemp, "value");
+                if (strOperator == ")")
+                {
+                    strError = "左括号多";
+                    return -1;
+                }
+
+                output.Add(nodeTemp);
+            }
+
+            return 0;
+        }
+
+        // 功能: 检查检索单元match,relation,dataType三项的关系
+        // 如果存在矛盾:
+        // 如果处理警告的级别为0,会给检索单元node加warning信息，不自动更正，返回-1,
+        // 如果级别为非0（应该固定为1），则系统自动更加，并在更正的地方加comment信息，返回0
+        // 不存在矛盾:返回0
+        // parameter:
+        //		nodeItem    检索单元节点
+        // return:
+        //		0   正常（如果有矛盾，但由于处理警告级别为非0，自动更正，也返回0）
+        //		-1  存在矛盾，且警告级别为0
+        public int ProcessRelation(XmlNode nodeItem)
+        {
+            //匹配方式
+            XmlNode nodeMatch = nodeItem.SelectSingleNode("match");
+            string strMatch = "";
+            if (nodeMatch != null)
+                strMatch = DomUtil.GetNodeText(nodeMatch).Trim();
+
+
+            if (strMatch == "")
+            {
+                DomUtil.SetNodeText(nodeMatch, "left");
+                DomUtil.SetAttr(nodeMatch, "comment",
+                    "原为" + strMatch + ",修改为缺省的left");
+            }
+
+            //关系操作符
+            XmlNode nodeRelation = nodeItem.SelectSingleNode("relation");
+            string strRelation = "";
+            if (nodeRelation != null)
+                strRelation = DomUtil.GetNodeText(nodeRelation).Trim();
+            strRelation = QueryUtil.ConvertLetterToOperator(strRelation);
+
+            //数据类型
+            XmlNode nodeDataType = nodeItem.SelectSingleNode("dataType");
+            string strDataType = "";
+            if (nodeDataType != null)
+                strDataType = DomUtil.GetNodeText(nodeDataType).Trim();
+
+            if (strDataType == "number")
+            {
+                if (strMatch == "left" || strMatch == "right")
+                {
+                    //当dataType值为number时，match值为left或right或
+                    //修改可以自动有两种:
+                    //1.将left换成exact;
+                    //2.将dataType设为string,
+                    //我们先按dataType优先，将match改为exact
+
+                    if (m_nWarningLevel == 0)
+                    {
+                        DomUtil.SetAttr(nodeItem,
+                            "warningInfo",
+                            "匹配方式为值‘" + strMatch + "'与数据类型的值'" + strDataType + "'矛盾,且处理警告级别为0，自动不进行自动更正");
+
+                        return -1;
+                    }
+                    else
+                    {
+                        DomUtil.SetNodeText(nodeMatch, "exact");
+                        DomUtil.SetAttr(nodeMatch,
+                            "comment",
+                            "原为" + strMatch + ",由于与数据类型'" + strDataType + "'矛盾，修改为exact");
+                    }
+                }
+            }
+
+            if (strDataType == "string")
+            {
+                //如果dataType值为string,
+                //match值为left或right,且relation值不等于"="
+
+                //出现矛盾，(我们认为match的left或rgith值，只与relation的"="值匹配)
+                //有两种裁决办法：
+                //1.将relation值改为"="号;
+                //2.将match值由left或right改为exact
+                //目前按1进行修改
+
+                if ((strMatch == "left" || strMatch == "right") && strRelation != "=")
+                {
+                    //根据处理警告级别做不同的处理
+                    if (m_nWarningLevel == 0)
+                    {
+                        DomUtil.SetAttr(nodeItem,
+                            "warningInfo",
+                            "关系操作符'" + strRelation + "'与数据类型" + strDataType + "和匹配方式'" + strMatch + "'不匹配");
+                        return -1;
+                    }
+                    else
+                    {
+                        DomUtil.SetNodeText(nodeRelation, "=");
+                        DomUtil.SetAttr(nodeRelation,
+                            "comment",
+                            "原为" + strRelation + ",由于与数据类型'" + strDataType + "和匹配方式'" + strMatch + "'不匹配，修改为'='");
+                    }
+                }
+            }
+            return 0;
+        }
+
+        // 检索单元item的信息，对库进行检索
+        // parameter:
+        //		nodeItem	item节点
+        //		resultSet	传进结果集,????????每次清空，既然每次清空，那还不如返回一个结果集呢
+        //		isConnected	是否连接
+        //		strError	out参数，返回出错信息
+        // return:
+        //		-1	出错
+        //		-6	无足够的权限
+        //		0	成功
+        public int doItem(XmlNode nodeItem,
+            DpResultSet resultSet,
+            Delegate_isConnected isConnected,
+            out string strError)
+        {
+            strError = "";
+            if (nodeItem == null)
+            {
+                strError = "doItem() nodeItem参数为null.";
+                return -1;
+            }
+
+            if (resultSet == null)
+            {
+                strError = "doItem() oResult参数为null.";
+                return -1;
+            }
+
+            //先清空一下
+            resultSet.Clear();
+
+            int nRet;
+
+            //调processRelation对检索单元的成员检查是否存在矛盾
+            //如果返回0，则可能对item的成员进行了修改，所以后面重新提取内容
+            nRet = ProcessRelation(nodeItem);
+            if (nRet == -1)
+            {
+                strError = "doItem()里调processRelation出错";
+                return -1;
+            }
+
+
+            // 根据nodeItem得到检索信息
+            string strTarget;
+            string strWord;
+            string strMatch;
+            string strRelation;
+            string strDataType;
+            string strIdOrder;
+            string strKeyOrder;
+            string strOrderBy;
+            int nMaxCount;
+            nRet = QueryUtil.GetSearchInfo(nodeItem,
+                out strTarget,
+                out strWord,
+                out strMatch,
+                out strRelation,
+                out strDataType,
+                out strIdOrder,
+                out strKeyOrder,
+                out strOrderBy,
+                out nMaxCount,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+
+
+            //将target以;号分成多个库
+            string[] aDatabase = strTarget.Split(new Char[] { ';' });
+            foreach (string strOneDatabase in aDatabase)
+            {
+                if (strOneDatabase == "")
+                    continue;
+
+                string strDbName;
+                string strTableList;
+
+                // 拆分库名与途径
+                nRet = DatabaseUtil.SplitToDbNameAndForm(strOneDatabase,
+                    out strDbName,
+                    out strTableList,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                // 得到库
+                Database db = m_dbColl.GetDatabase(strDbName);
+                if (db == null)
+                {
+                    strError = "未找到'" + strDbName + "'库";
+                    return -1;
+                }
+
+                string strTempRecordPath = db.GetCaption("zh-cn") + "/" + "record";
+                string strExistRights = "";
+                bool bHasRight = this.m_oUser.HasRights(strTempRecordPath,
+                    ResType.Record,
+                    "read",
+                    out strExistRights);
+                if (bHasRight == false)
+                {
+                    strError = "您的帐户名为'" + m_oUser.Name + "'" +
+                        ",对'" + strDbName + "'" +
+                        "数据库中的记录没有'读(read)'权限，目前的权限为'" + strExistRights + "'。";
+                    return -6;
+                }
+
+                SearchItem searchItem = new SearchItem();
+                searchItem.TargetTables = strTableList;
+                searchItem.Word = strWord;
+                searchItem.Match = strMatch;
+                searchItem.Relation = strRelation;
+                searchItem.DataType = strDataType;
+                searchItem.IdOrder = strIdOrder;
+                searchItem.KeyOrder = strKeyOrder;
+                searchItem.OrderBy = strOrderBy;
+                searchItem.MaxCount = nMaxCount;
+
+                // 注: SearchByUnion不清空resultSet，从而使多个库的检索结结果放在一起
+                string strWarningInfo = "";
+                nRet = db.SearchByUnion(searchItem,
+                    isConnected,
+                    resultSet,
+                    this.m_nWarningLevel,
+                    out strError,
+                    out strWarningInfo);
+                if (nRet == -1)
+                    return -1;
+
+                // 多个库的排序去重功能暂不做
+                //resultSet.Sort();  //按具体的风格排序
+                //resultSet.RemoveDup();
+            }
+            return 0;
+        }
+
+
+        // 递归函数，得一个节点的集合，外面doSearch调该函数
+        // parameter:
+        //		nodeRoot	当前根节点
+        //		oResult	结果集
+        // return:
+        //		-1	出错
+        //		-6	无权限
+        //		0	成功
+        public int DoQuery(XmlNode nodeRoot,
+            DpResultSet resultSet,
+            Delegate_isConnected isConnected,
+            out string strError)
+        {
+            strError = "";
+            if (nodeRoot == null)
+            {
+                strError = "DoQuery() nodeRoot参数不能为null。";
+                return -1;
+            }
+            if (resultSet == null)
+            {
+                strError = "DoQuery() resultSet参数不能为null。";
+                return -1;
+            }
+
+            //先清空一下
+            resultSet.Clear();
+
+            //到item时不再继续递归
+            if (nodeRoot.Name == "item")
+            {
+                // return:
+                //		-1	出错
+                //		-6	无足够的权限
+                //		0	成功
+                return doItem(nodeRoot,
+                    resultSet,
+                    isConnected,
+                    out strError);
+            }
+
+            //如果为扩展节点，则不递归
+            if (nodeRoot.Name == "operator"
+                || nodeRoot.Name == "lang")
+            {
+                return 0;
+            }
+
+            //将正常顺利变成逆波兰表序
+            ArrayList rpn;
+            int nRet = Infix2RPN(nodeRoot,
+                out rpn,
+                out strError);
+            if (nRet == -1)
+            {
+                strError = "逆波兰表错误:" + strError;
+                return -1;
+            }
+
+            //属于正常情况
+            if (rpn.Count == 0)
+                return 0;
+
+            // return:
+            //		-1  出错
+            //		-6	无足够的权限
+            //		0   成功
+            nRet = ProceedRPN(rpn,
+                resultSet,
+                isConnected,
+                out strError);
+            if (nRet <= -1)
+                return nRet;
+
+            return 0;
+        }
+
+        // 运算逆波兰表，得到结果集
+        // parameter:
+        //		rpn         逆波兰表
+        //		oResultSet  结果集
+        // return:
+        //		0   成功
+        //		-1  出错 原因可能如下:
+        //			1)rpn参数为null
+        //			2)oResultSet参数为null
+        //			3)栈里的某成员出错（node和result都为null）
+        //			4)从栈中pop()或peek()元素时，出现栈空
+        //			5)pop的类型，不是实际存在的类型
+        //			6)通过一个节点，得到结果集，即调DoQuery()函数出错
+        //			7)做运算时，调DpResultSetManager.Merge()函数出错
+        //			8)最后栈里的元素多于1，则逆波兰表出错
+        //			9)最后结果集为空
+        //		-6	无足够的权限
+        public int ProceedRPN(ArrayList rpn,
+            DpResultSet resultSet,
+            Delegate_isConnected isConnected,
+            out string strError)
+        {
+            strError = "";
+
+            //???要搞清楚用不用清空
+            //应该清空，后面的运算使用的结果集是堆栈变量，最后把运算结果拷贝到该结果集
+            //DoQuery处，也应该先清空
+            //doItem处，一进去先清空，但再对数据库循环检索时，千万不清空
+            resultSet.Clear();
+
+            if (rpn == null)
+            {
+                strError = "rpn不能为null";
+                return -1;
+            }
+            if (resultSet == null)
+            {
+                strError = "resultSet不能为null";
+                return -1;
+            }
+            if (rpn.Count == 0)
+                return 0;
+
+            int ret;
+
+            // 声明栈,ReversePolishStack栈是自定义的类
+            // 决定用一个栈做运算，如果遇到遇到操作数，就直接push到栈里
+            // 遇到操作符，如果是双目，从栈里pop两项，进行运算
+            // 注意SUB运算是，用后一次pop的对象减前一次pop的对象
+            //
+            // oReversePolandStack的成员为ReversePolishItem,
+            // ReversePolishItem是一个复杂对象，
+            // 包含m_int(类型),m_node(节点),m_resultSet.
+            // 实际运用中，m_node和m_resultSet只有一项值有效，另一顶是null
+            // m_int用于判断哪个值有效，
+            // 0表示node有效，1表示resultSet有效
+            ReversePolishStack oReversePolandStack =
+                new ReversePolishStack();
+
+            //做循环
+            for (int i = 0; i < rpn.Count; i++)
+            {
+                XmlNode node = (XmlNode)rpn[i];
+
+                if (node.Name != "operator")  //操作数直接push到栈里
+                {
+                    oReversePolandStack.PushNode(node);
+                }
+                else
+                {
+                    string strOpreator = DomUtil.GetAttr(node, "value");
+
+                    //三个输出用于输入的参数，因为是指针，所以不用out
+                    DpResultSet oTargetLeft = new DpResultSet();
+                    DpResultSet oTargetMiddle = new DpResultSet();
+                    DpResultSet oTargetRight = new DpResultSet();
+
+                    //做一个两个成员的ArrayList，
+                    //成员类型为DpResultSet，
+                    //存放从栈里pop出的（如果是node，需要进行计算）的结果集
+                    ArrayList oSource = new ArrayList();
+                    oSource.Add(new DpResultSet());
+                    oSource.Add(new DpResultSet());
+                    try
+                    {
+                        for (int j = 0; j < 2; j++)
+                        {
+                            //类型为-1，表示node和resultSet都为null，出现错误
+                            if (oReversePolandStack.PeekType() == -1)
+                            {
+                                strError = strOpreator + "时,PeekType()等于-1，则表示两项都是null，出错，返回-1<br/>";
+                                return -1;
+                            }
+
+                            //表示放得是node
+                            if (oReversePolandStack.PeekType() == 0)
+                            {
+                                XmlNode nodePop;
+                                nodePop = oReversePolandStack.PopNode();
+                                if (nodePop == null)
+                                {
+                                    strError = "nodePop不为又能为null";
+                                    return -1;
+                                }
+
+                                // return:
+                                //		-1	出错
+                                //		-6	无权限
+                                //		0	成功
+                                ret = this.DoQuery(nodePop,
+                                    (DpResultSet)oSource[j],
+                                    isConnected,
+                                    out strError);
+                                if (ret <= -1)
+                                    return ret;
+                            }
+                            else
+                            {
+                                oSource[j] = oReversePolandStack.PopResultSet();
+
+                                if (oSource[j] == null)
+                                {
+                                    return -1;
+                                }
+                            }
+                        }
+                    }
+                    catch (StackUnderflowException)
+                    {
+                        return -1;
+                    }
+
+                    string strDebugInfo;
+
+                    //OR,AND,SUB运算都是调的DpResultSetManager.Merge()函数，
+                    //注意参数的使用
+                    if (strOpreator == "OR")
+                    {
+                        DpResultSet left = (DpResultSet)oSource[0];
+                        left.EnsureCreateIndex();   // 确保创建了索引?
+                        // ??????
+                        //left.Sort();
+                        DpResultSet right = (DpResultSet)oSource[1];
+                        right.EnsureCreateIndex();
+                        //right.Sort();
+
+                        /*
+                        // new
+                        oTargetMiddle.EnsureCreateIndex();
+                         */
+
+                        ret = DpResultSetManager.Merge("OR",
+                            left,
+                            right,
+                            null,
+                            oTargetMiddle,
+                            null,
+                            false,
+                            out strDebugInfo,
+                            out strError);
+                        if (ret == -1)
+                            return -1;
+
+                        oReversePolandStack.PushResultSet(oTargetMiddle);
+
+                        continue;
+                    }
+
+                    if (strOpreator == "AND")
+                    {
+                        DpResultSet left = (DpResultSet)oSource[0];
+                        left.EnsureCreateIndex();
+                        DpResultSet right = (DpResultSet)oSource[1];
+                        right.EnsureCreateIndex();
+
+                        /*
+                        // new
+                        oTargetMiddle.EnsureCreateIndex();
+                         */
+
+                        ret = DpResultSetManager.Merge("AND",
+                            left,
+                            right,
+                            null,    //oTargetLeft
+                            oTargetMiddle,
+                            null,   //oTargetRight
+                            false,
+                            out strDebugInfo,
+                            out strError);
+                        if (ret == -1)
+                            return -1;
+
+                        oReversePolandStack.PushResultSet(oTargetMiddle);
+
+                        continue;
+                    }
+
+                    if (strOpreator == "SUB")
+                    {
+                        //因为使用从栈里pop，所以第0个是后面的，第1个是前面的
+                        DpResultSet left = (DpResultSet)oSource[1];
+                        left.EnsureCreateIndex();
+                        DpResultSet right = (DpResultSet)oSource[0];
+                        right.EnsureCreateIndex();
+
+                        /*
+                        // new
+                        oTargetLeft.EnsureCreateIndex();
+                         */
+
+                        ret = DpResultSetManager.Merge("SUB",
+                            left,
+                            right,
+                            oTargetLeft,
+                            oTargetMiddle, //oTargetMiddle
+                            oTargetRight, //oTargetRight
+                            false,
+                            out strDebugInfo,
+                            out strError);
+                        if (ret == -1)
+                        {
+                            return -1;
+                        }
+
+                        oReversePolandStack.PushResultSet(oTargetLeft);
+                        continue;
+                    }
+                }
+            }
+            if (oReversePolandStack.Count > 1)
+            {
+                strError = "逆波兰出错";
+                return -1;
+            }
+            try
+            {
+                int nTemp = oReversePolandStack.PeekType();
+                //如果类型为0,表示存放的是节点
+                if (nTemp == 0)
+                {
+                    XmlNode node = oReversePolandStack.PopNode();
+
+                    // return:
+                    //		-1	出错
+                    //		-6	无权限
+                    //		0	成功
+                    ret = this.DoQuery(node,
+                        resultSet,
+                        isConnected,
+                        out strError);
+                    if (ret <= -1)
+                        return ret;
+                }
+                else if (nTemp == 1)
+                {
+                    //调DpResultSet的copy函数
+                    resultSet.Copy((DpResultSet)(oReversePolandStack.PopResultSet()));
+                }
+                else
+                {
+                    strError = "oReversePolandStack的类型不可能为" + Convert.ToString(nTemp);
+                    return -1;
+                }
+            }
+            catch (StackUnderflowException)
+            {
+                strError = "peek或pop时，抛出StackUnderflowException异常";
+                return -1;
+            }
+
+            //最后结果集为null，返回出错
+            if (resultSet == null)
+            {
+                strError = "运算结束后PopResultSet为null" + Convert.ToString(oReversePolandStack.PeekType());
+                return -1;
+            }
+            return 0;
+        }
+
+
+
+    }  //  end of class Query
+
+
+    // 逆波兰对象类，是ReversePolishStack的成员
+    public class ReversePolishItem
+    {
+        public int m_int;               // 类型 0:node 1:结果集
+        public XmlNode m_node;          // node节点
+        public DpResultSet m_resultSet; // 结果集
+
+        // 构造函数
+        // parameter:
+        //		node        节点
+        //		oResultSet  结果集
+        public ReversePolishItem(XmlNode node,
+            DpResultSet resultSet)
+        {
+            m_node = node;
+            m_resultSet = resultSet;
+
+            if (m_node != null)
+            {
+                m_int = 0; //0表示XmlNode
+            }
+            else if (m_resultSet != null)
+            {
+                m_int = 1; //1表示resultSet
+            }
+            else
+            {
+                m_int = -1;
+            }
+        }
+
+    } //  end of class ReversePolishItem
+
+
+    // 在ProceedRPN函数里，用到的逆波兰栈，注意这个栈只存放值，成员是ReversePolishItem
+    public class ReversePolishStack : ArrayList
+    {
+        // 只创建带节点的ReversePolishItem对象，并push到栈里
+        // parameter:
+        //		node    node节点
+        // return:
+        //      void
+        public void PushNode(XmlNode node)
+        {
+            ReversePolishItem oItem = new ReversePolishItem(node,
+                null);
+            Add(oItem);
+        }
+
+        // 只创建带结果集的ReversePolishItem对象，并push到栈里
+        // parameter:
+        //		oResult 结果集
+        // return:
+        //      void
+        public void PushResultSet(DpResultSet oResult)
+        {
+            ReversePolishItem oItem = new ReversePolishItem(null,
+                oResult);
+            Add(oItem);
+        }
+
+        // 创建同时带节点和结果集的ReversePolishItem对象,并push到栈里
+        // parameter:
+        //		node    节点
+        //		oResult 结果集
+        // return:
+        //      void
+        public void Push(XmlNode node,
+            DpResultSet oResult)
+        {
+            ReversePolishItem oItem = new ReversePolishItem(node,
+                oResult);
+            Add(oItem);
+        }
+
+        // pop一个对象，只返回节点
+        // return:
+        //		node节点
+        public XmlNode PopNode()
+        {
+            //栈为空，抛出StackUnderflowException异常
+            if (this.Count == 0)
+            {
+                StackUnderflowException ex = new StackUnderflowException("Pop前,堆栈已经空");
+                throw (ex);
+            }
+
+            ReversePolishItem oTemp = (ReversePolishItem)this[this.Count - 1];
+            this.RemoveAt(this.Count - 1);
+
+            //可能返回空，调用者错用了类型，应在调用处做判断。
+            return oTemp.m_node;
+        }
+
+        // pop一个对象，只返回结果集
+        // return:
+        //		结果集
+        public DpResultSet PopResultSet()
+        {
+            if (this.Count == 0)
+            {
+                StackUnderflowException ex = new StackUnderflowException("Pop前,堆栈已经空");
+                throw (ex);
+            }
+
+            ReversePolishItem oTemp = (ReversePolishItem)this[this.Count - 1];
+            this.RemoveAt(this.Count - 1);
+
+            //可能返回空，调用者错用了类型，应在调用处做判断。
+            return oTemp.m_resultSet;
+        }
+
+
+        // pop一个对象
+        // return:
+        //		ReversePolishItem对象
+        public ReversePolishItem Pop()
+        {
+            if (this.Count == 0)
+            {
+                StackUnderflowException ex = new StackUnderflowException("Pop前,堆栈已经空");
+                throw (ex);
+            }
+
+            ReversePolishItem oTemp = (ReversePolishItem)this[this.Count - 1];
+            this.RemoveAt(this.Count - 1);
+
+            //可能返回空，调用者错用了类型，应在调用处做判断。
+            return oTemp;
+        }
+
+        // 返回栈顶元素的类型，以便于是pop节点带是pop结果集
+        // return:
+        //		仅返回栈顶对象的的类型
+        public int PeekType()
+        {
+            if (this.Count == 0)
+            {
+                StackUnderflowException ex = new StackUnderflowException("Pop前,堆栈已经空");
+                throw (ex);
+            }
+
+            ReversePolishItem oTemp = (ReversePolishItem)this[this.Count - 1];
+            return oTemp.m_int;
+        }
+
+        // 返回栈顶元素
+        // return:
+        //      返回ReversePolishItem对象
+        public ReversePolishItem Peek()
+        {
+            if (this.Count == 0)
+            {
+                StackUnderflowException ex = new StackUnderflowException("Pop前,堆栈已经空");
+                throw (ex);
+            }
+
+            ReversePolishItem oTemp = (ReversePolishItem)this[this.Count - 1];
+            return oTemp;
+        }
+
+    } //  end of class ReversePolishStack
+}

@@ -1,0 +1,341 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="dpmail超期通知人数" xml:space="preserve">
+    <value>dpmail超期通知人数</value>
+    <comment>统计指标事项名</comment>
+  </data>
+  <data name="email超期通知人数" xml:space="preserve">
+    <value>email超期通知人数</value>
+    <comment>统计指标事项名</comment>
+  </data>
+  <data name="以停代金事项到期" xml:space="preserve">
+    <value>以停代金事项到期</value>
+    <comment>统计指标事项名</comment>
+  </data>
+  <data name="以停代金事项启动" xml:space="preserve">
+    <value>以停代金事项启动</value>
+    <comment>统计指标事项名</comment>
+  </data>
+  <data name="修复借阅信息" xml:space="preserve">
+    <value>修复借阅信息</value>
+    <comment>统计指标目录名</comment>
+  </data>
+  <data name="修改次" xml:space="preserve">
+    <value>修改次</value>
+    <comment>统计指标事项名</comment>
+  </data>
+  <data name="修改记录数" xml:space="preserve">
+    <value>修改记录数</value>
+    <comment>统计指标事项名</comment>
+  </data>
+  <data name="修改读者信息" xml:space="preserve">
+    <value>修改读者信息</value>
+    <comment>统计指标目录名</comment>
+  </data>
+  <data name="修改读者信息之押金" xml:space="preserve">
+    <value>修改读者信息之押金</value>
+    <comment>统计指标目录名</comment>
+  </data>
+  <data name="修改读者信息之状态" xml:space="preserve">
+    <value>修改读者信息之状态</value>
+    <comment>统计指标目录名</comment>
+  </data>
+  <data name="借书遇册条码号重复但根据读者证条码号成功去重次数" xml:space="preserve">
+    <value>借书遇册条码号重复但根据读者证条码号成功去重次数</value>
+    <comment>统计指标事项名</comment>
+  </data>
+  <data name="借书遇册条码号重复并读者证条码号也无法去重次数" xml:space="preserve">
+    <value>借书遇册条码号重复并读者证条码号也无法去重次数</value>
+    <comment>统计指标事项名</comment>
+  </data>
+  <data name="借书遇册条码号重复次数" xml:space="preserve">
+    <value>借书遇册条码号重复次数</value>
+    <comment>统计指标事项名</comment>
+  </data>
+  <data name="借册" xml:space="preserve">
+    <value>借册</value>
+    <comment>统计指标事项名</comment>
+  </data>
+  <data name="入馆人次" xml:space="preserve">
+    <value>入馆人次</value>
+    <comment>统计指标目录名</comment>
+  </data>
+  <data name="全部分馆" xml:space="preserve">
+    <value>全部分馆</value>
+  </data>
+  <data name="出纳" xml:space="preserve">
+    <value>出纳</value>
+    <comment>统计指标目录名</comment>
+  </data>
+  <data name="创建交费请求次" xml:space="preserve">
+    <value>创建交费请求次</value>
+    <comment>统计指标事项名</comment>
+  </data>
+  <data name="创建新记录数" xml:space="preserve">
+    <value>创建新记录数</value>
+    <comment>统计指标事项名</comment>
+  </data>
+  <data name="初始化数据库次数" xml:space="preserve">
+    <value>初始化数据库次数</value>
+    <comment>统计指标事项名</comment>
+  </data>
+  <data name="删除记录数" xml:space="preserve">
+    <value>删除记录数</value>
+    <comment>统计指标事项名</comment>
+  </data>
+  <data name="删除记录条数" xml:space="preserve">
+    <value>删除记录条数</value>
+    <comment>统计指标事项名</comment>
+  </data>
+  <data name="删除过期消息条数" xml:space="preserve">
+    <value>删除过期消息条数</value>
+    <comment>统计指标事项名</comment>
+  </data>
+  <data name="取消元" xml:space="preserve">
+    <value>取消元</value>
+    <comment>统计指标事项名</comment>
+  </data>
+  <data name="取消次" xml:space="preserve">
+    <value>取消次</value>
+    <comment>统计指标事项名</comment>
+  </data>
+  <data name="声明丢失" xml:space="preserve">
+    <value>声明丢失</value>
+    <comment>统计指标事项名</comment>
+  </data>
+  <data name="实体侧次数" xml:space="preserve">
+    <value>实体侧次数</value>
+    <comment>统计指标事项名</comment>
+  </data>
+  <data name="实时统计信息" xml:space="preserve">
+    <value>实时统计信息</value>
+  </data>
+  <data name="实际所含天数" xml:space="preserve">
+    <value>实际所含天数</value>
+  </data>
+  <data name="实际日期范围" xml:space="preserve">
+    <value>实际日期范围</value>
+  </data>
+  <data name="尚未指定日期参数" xml:space="preserve">
+    <value>(尚未指定日期参数)</value>
+  </data>
+  <data name="当日内立即还册" xml:space="preserve">
+    <value>当日内立即还册</value>
+    <comment>统计指标事项名</comment>
+  </data>
+  <data name="所含天数" xml:space="preserve">
+    <value>所含天数</value>
+  </data>
+  <data name="所有门之总量" xml:space="preserve">
+    <value>所有门之总量</value>
+    <comment>统计指标事项名</comment>
+  </data>
+  <data name="押金" xml:space="preserve">
+    <value>押金</value>
+    <comment>统计指标目录名</comment>
+  </data>
+  <data name="日期字符串s格式不正确。应当为468字符" xml:space="preserve">
+    <value>日期字符串 '{0}' 格式不正确。应当为4/6/8字符</value>
+  </data>
+  <data name="日期字符串s格式不正确。横杠左边或者右边的部分，应当为468字符" xml:space="preserve">
+    <value>日期字符串 '{0}' 格式不正确。横杠左边或者右边的部分，应当为4/6/8字符</value>
+  </data>
+  <data name="日期字符串s格式不正确。横杠左边的部分s和右边的部分s字符数应相等" xml:space="preserve">
+    <value>日期字符串 '{0}' 格式不正确。横杠左边的部分 '{1}' 和右边的部分 '{2}' 字符数应相等。</value>
+  </data>
+  <data name="次数" xml:space="preserve">
+    <value>次数</value>
+    <comment>统计指标事项名</comment>
+  </data>
+  <data name="没有统计信息" xml:space="preserve">
+    <value>没有统计信息</value>
+  </data>
+  <data name="消息监控" xml:space="preserve">
+    <value>消息监控</value>
+    <comment>统计指标目录名</comment>
+  </data>
+  <data name="租金" xml:space="preserve">
+    <value>租金</value>
+    <comment>统计指标目录名</comment>
+  </data>
+  <data name="给付元" xml:space="preserve">
+    <value>给付元</value>
+    <comment>统计指标事项名</comment>
+  </data>
+  <data name="给付次" xml:space="preserve">
+    <value>给付次</value>
+    <comment>统计指标事项名</comment>
+  </data>
+  <data name="统计日期范围" xml:space="preserve">
+    <value>统计日期范围</value>
+  </data>
+  <data name="覆盖记录条数" xml:space="preserve">
+    <value>覆盖记录条数</value>
+    <comment>统计指标事项名</comment>
+  </data>
+  <data name="读者侧次数" xml:space="preserve">
+    <value>读者侧次数</value>
+    <comment>统计指标事项名</comment>
+  </data>
+  <data name="读者数" xml:space="preserve">
+    <value>读者数</value>
+    <comment>统计指标事项名</comment>
+  </data>
+  <data name="超期通知" xml:space="preserve">
+    <value>超期通知</value>
+    <comment>统计指标目录名</comment>
+  </data>
+  <data name="跟踪DTLP" xml:space="preserve">
+    <value>跟踪DTLP</value>
+    <comment>统计指标目录名</comment>
+  </data>
+  <data name="还书遇册条码号重复并无读者证条码号辅助判断次数" xml:space="preserve">
+    <value>还书遇册条码号重复并无读者证条码号辅助判断次数</value>
+    <comment>统计指标事项名</comment>
+  </data>
+  <data name="还书遇册条码号重复次数" xml:space="preserve">
+    <value>还书遇册条码号重复次数</value>
+    <comment>统计指标事项名</comment>
+  </data>
+  <data name="还册" xml:space="preserve">
+    <value>还册</value>
+    <comment>统计指标事项名</comment>
+  </data>
+  <data name="还超期册" xml:space="preserve">
+    <value>还超期册</value>
+    <comment>统计指标事项名</comment>
+  </data>
+  <data name="违约金" xml:space="preserve">
+    <value>违约金</value>
+    <comment>统计指标目录名</comment>
+  </data>
+  <data name="违约金之注释" xml:space="preserve">
+    <value>违约金之注释</value>
+    <comment>统计指标目录名</comment>
+  </data>
+  <data name="预约到书册" xml:space="preserve">
+    <value>预约到书册</value>
+    <comment>统计指标事项名</comment>
+  </data>
+  <data name="预约次" xml:space="preserve">
+    <value>预约次</value>
+    <comment>统计指标事项名</comment>
+  </data>
+</root>

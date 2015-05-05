@@ -1,0 +1,131 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{80344E08-5816-438F-BC88-F4BF038648CC}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>DigitalPlatform.LibraryServer.Install</RootNamespace>
+    <AssemblyName>DigitalPlatform.LibraryServer.Install</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration.Install" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CertificateDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CertificateDialog.designer.cs">
+      <DependentUpon>CertificateDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="CreateSupervisorDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CreateSupervisorDlg.designer.cs">
+      <DependentUpon>CreateSupervisorDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="InstallLibraryParamDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="InstallLibraryParamDlg.designer.cs">
+      <DependentUpon>InstallLibraryParamDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="InstanceDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="InstanceDialog.designer.cs">
+      <DependentUpon>InstanceDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="OneInstanceDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="OneInstanceDialog.designer.cs">
+      <DependentUpon>OneInstanceDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="CertificateDialog.resx">
+      <DependentUpon>CertificateDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CreateSupervisorDlg.resx">
+      <DependentUpon>CreateSupervisorDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="InstallLibraryParamDlg.resx">
+      <DependentUpon>InstallLibraryParamDlg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="InstanceDialog.resx">
+      <DependentUpon>InstanceDialog.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="OneInstanceDialog.resx">
+      <DependentUpon>OneInstanceDialog.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DigitalPlatform.Install\DigitalPlatform.Install.csproj">
+      <Project>{FBB88810-6D4A-44FE-B220-CAC22E4DBDCD}</Project>
+      <Name>DigitalPlatform.Install</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.IO\DigitalPlatform.IO.csproj">
+      <Project>{441CB814-AF78-4503-91EF-DCE5F3269502}</Project>
+      <Name>DigitalPlatform.IO</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.rms.Client\DigitalPlatform.rms.Client.csproj">
+      <Project>{D63FAE14-7CD6-4BD3-90D7-7DBBCDF8EEEF}</Project>
+      <Name>DigitalPlatform.rms.Client</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Text\DigitalPlatform.Text.csproj">
+      <Project>{26F96CC3-A4A9-4BC4-A10A-BC7E25581FF6}</Project>
+      <Name>DigitalPlatform.Text</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Xml\DigitalPlatform.Xml.csproj">
+      <Project>{E6489E89-1349-4EE7-A00B-AC96B9912587}</Project>
+      <Name>DigitalPlatform.Xml</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform\DigitalPlatform.csproj">
+      <Project>{BDD43275-EAA0-4670-8BA3-0DB5CD7598DD}</Project>
+      <Name>DigitalPlatform</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -1,0 +1,19 @@
+<root>
+  <title>出纳工作量\r%library%\r%daterange%</title>
+  <titleComment>
+  </titleComment>
+  <columns>
+    <column name="操作者" type="String" align="left" sum="no" class="operator" eval="" />
+    <column name="借书" type="" align="right" sum="yes" class="borrow" eval="" />
+    <column name="续借" type="" align="right" sum="yes" class="renew" eval="" />
+    <column name="还书" type="" align="right" sum="yes" class="return" eval="" />
+    <column name="丢失" type="" align="right" sum="yes" class="lost" eval="" />
+    <column name="操作总量" type="" align="right" sum="yes" class="total" eval="" />
+  </columns>
+  <css>
+  </css>
+  <typeName>442 出纳工作量，按工作人员</typeName>
+  <columnSortStyle>0:a</columnSortStyle>
+  <createFrequency>day,month,year</createFrequency>
+  <property fresh="false" />
+</root>

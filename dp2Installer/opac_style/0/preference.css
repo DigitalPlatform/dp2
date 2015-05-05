@@ -1,0 +1,39 @@
+
+
+TABLE.preference
+{
+	font-size: 12px;
+	text-align: left;
+	background-color: white;
+	border-style: solid;
+	border-top-width: 18px;
+	border-bottom-width: 18px;
+	border-left-width: 8px;
+	border-right-width: 8px;
+	border-color: whitesmoke;
+	width: 100%;
+}
+
+TABLE.preference INPUT.selected
+{
+	border-style: dotted;
+	border-color: #cc0000;
+	border-width: 2px;
+	padding: 8px;
+	margin: 4px;
+
+}
+
+TABLE.preference INPUT.unselected
+{
+	border-style: none;
+	border-color: #cc0000;
+	border-width: 2px;
+	padding: 8px;
+	margin: 4px;
+}
+
+TABLE.preference TD.name
+{
+	width: 5%;
+}

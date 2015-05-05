@@ -1,0 +1,16 @@
+~~~~~~~~~~~~~~~~~~关于服务器~~~~~~~~~~~~~~~~~~~~~~
+
+1.将WriteFileDbRecord()函数编完
+基本完成，锁的地方没处理好
+
+2.将GetRes()放到DatabaseCollection类里。
+完成
+
+3.将Dir()放到DatabaseCollection类里
+完成
+
+4.将GetCols()函数移动database类里
+完成
+
+5.将DeleteRes()函数移动Database类里
+完成

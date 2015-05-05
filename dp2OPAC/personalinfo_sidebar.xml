@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="gb2312"?>
+<root>
+	<item url="./personalinfo.aspx">
+		<caption lang="zh-CN">个人信息</caption>
+		<caption lang="en-US">Personal Info</caption>
+	</item>
+	<item url="./changereaderpassword.aspx">
+		<caption lang="zh-CN">修改密码</caption>
+		<caption lang="en-US">Change Password</caption>
+	</item>
+	<item url="./preference.aspx">
+		<caption lang="zh-CN">个性化设置</caption>
+		<caption lang="en-US">Preference</caption>
+	</item>
+</root>

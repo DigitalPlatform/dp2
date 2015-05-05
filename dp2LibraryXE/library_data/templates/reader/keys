@@ -1,0 +1,261 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <script>
+    <![CDATA[
+
+using System;
+using System.Xml;
+
+using DigitalPlatform.rms;
+using DigitalPlatform.IO;
+
+public class MyKeysHost : KeysHost
+{
+
+	public void getNameAndBirthdate()
+	{
+
+		XmlNode node = this.DataDom.SelectSingleNode("//name");
+		if (node == null)
+			return;
+		string strName = node.InnerText;
+
+		node = this.DataDom.SelectSingleNode("//dateOfBirth");
+		if (node == null)
+			node = this.DataDom.SelectSingleNode("//birthday");
+		if (node == null)
+		{
+			this.ResultString = strName + "|";
+			return;
+		}
+
+		string strBirthdate = node.InnerText;
+
+		try {
+            		strBirthdate = DateTimeUtil.Rfc1123DateTimeStringToLocal(strBirthdate, "yyyyMMdd");
+		}
+		catch {
+			this.ResultString = "ERROR : birthdate '"+strBirthdate+"' format error";
+			return;
+		}
+
+		this.ResultString = strName + "|" + strBirthdate;
+
+	}
+
+}
+
+
+]]><refs>
+      <ref>system.dll</ref>
+      <ref>system.xml.dll</ref>
+      <ref>%bindir%\digitalplatform.io.dll</ref>
+    </refs>
+  </script>
+  <key>
+    <xpath>*/barcode</xpath>
+    <from>barcode</from>
+    <table ref="barcode" />
+  </key>
+  <table name="barcode" id="1">
+    <convert>
+      <string style="upper" />
+    </convert>
+    <convertquery>
+      <string style="upper" />
+    </convertquery>
+    <caption lang="zh-CN">证条码号</caption>
+    <caption lang="zh-CN">证条码</caption>
+    <caption lang="en">Barcode</caption>
+  </table>
+  <key>
+    <xpath>*/name</xpath>
+    <from>name</from>
+    <table ref="name" />
+  </key>
+  <table name="name" id="2">
+    <convert>
+      <string style="upper,simplify" />
+    </convert>
+    <convertquery>
+      <string style="upper,simplify" />
+    </convertquery>
+    <caption lang="zh-CN">姓名</caption>
+    <caption lang="en">Name</caption>
+  </table>
+
+  <key>
+    <xpath>*/namePinyin</xpath>
+    <from>namePinyin</from>
+    <table ref="namePinyin" />
+  </key>
+  <table name="namePinyin" id="14">
+    <convert>
+      <string style="upper,removeblank" />
+    </convert>
+    <convertquery>
+      <string style="upper,removeblank" />
+    </convertquery>
+    <caption lang="zh-CN">姓名拼音</caption>
+    <caption lang="en">Name Pinyin</caption>
+  </table>
+  
+  <key>
+    <xpath>*/department</xpath>
+    <from>department</from>
+    <table ref="department" />
+  </key>
+  <table name="department" id="3">
+    <convert>
+      <string style="upper,simplify" />
+    </convert>
+    <convertquery>
+      <string style="upper,simplify" />
+    </convertquery>
+    <caption lang="zh-CN">单位</caption>
+    <caption lang="en">Department</caption>
+  </table>
+  <key>
+    <xpath>*/idCardNumber</xpath>
+    <from>idCardNumber</from>
+    <table ref="idCardNumber" />
+  </key>
+  <table name="idCardNumber" id="4">
+    <convert>
+      <string style="upper" />
+    </convert>
+    <convertquery>
+      <string style="upper" />
+    </convertquery>
+    <caption lang="zh-CN">身份证号</caption>
+    <caption lang="en">IdCard Number</caption>
+  </table>
+  <key>
+    <xpath scripting="on">getNameAndBirthdate</xpath>
+    <from>namebirthdate</from>
+    <table ref="namebirthdate" />
+  </key>
+  <table name="namebirthdate" id="5">
+    <convert>
+      <string style="upper,simplify" />
+    </convert>
+    <convertquery>
+      <string style="upper,simplify" />
+    </convertquery>
+    <caption lang="zh-CN">姓名生日</caption>
+    <caption lang="en">Name and birthdate</caption>
+  </table>
+  <key>
+    <xpath>*/email</xpath>
+    <from>email</from>
+    <table ref="email" />
+  </key>
+  <table name="email" id="6">
+    <convert>
+      <string style="upper" />
+    </convert>
+    <convertquery>
+      <string style="upper" />
+    </convertquery>
+    <caption lang="zh-CN">Email</caption>
+    <caption lang="en">Email</caption>
+  </table>
+  <key>
+    <xpath>*/tel</xpath>
+    <from>tel</from>
+    <table ref="tel" />
+  </key>
+  <table name="tel" id="7">
+    <caption lang="zh-CN">电话</caption>
+    <caption lang="en">Telephone</caption>
+  </table>
+  <key>
+    <xpath>*/borrows/borrow/@barcode</xpath>
+    <from>borrowitem</from>
+    <table ref="borrowitem" />
+  </key>
+  <table name="borrowitem" id="8">
+    <caption lang="zh-CN">所借册条码号</caption>
+    <caption lang="zh-CN">所借册条码</caption>
+    <caption lang="en">Borrow item barcode</caption>
+  </table>
+  <key>
+    <xpath>*/expireDate</xpath>
+    <from>expireDate</from>
+    <table ref="expireDate" />
+  </key>
+  <table name="expireDate" id="9">
+    <convert>
+      <number style="rfc1123time" />
+    </convert>
+    <convertquery>
+      <number style="rfc1123time" />
+    </convertquery>
+    <caption lang="zh-CN">失效日期</caption>
+    <caption lang="en">expireDate</caption>
+  </table>
+
+  <key>
+    <xpath>*/state</xpath>
+    <from>state</from>
+    <table ref="state" />
+  </key>
+  <table name="state" id="10">
+    <convert>
+      <string style="upper,split" />
+    </convert>
+    <convertquery>
+      <string style="upper" />
+    </convertquery>
+    <caption lang="zh-CN">状态</caption>
+    <caption lang="en">State</caption>
+  </table>
+
+  <key>
+    <xpath>*/displayName</xpath>
+    <from>dname</from>
+    <table ref="dname" />
+  </key>
+  <table name="dname" id="11">
+    <convert>
+      <string style="upper,simplify" />
+    </convert>
+    <convertquery>
+      <string style="upper,simplify" />
+    </convertquery>
+    <caption lang="zh-CN">显示名</caption>
+    <caption lang="en">Display Name</caption>
+  </table>
+
+  <key>
+    <xpath>*/cardNumber</xpath>
+    <from>cardNumber</from>
+    <table ref="cardNumber" />
+  </key>
+  <table name="cardNumber" id="12">
+    <convert>
+      <string style="upper,split" />
+    </convert>
+    <convertquery>
+      <string style="upper" />
+    </convertquery>
+    <caption lang="zh-CN">证号</caption>
+    <caption lang="en">Card Number</caption>
+  </table>
+
+  <key>
+    <xpath>*/fingerprint/@timestamp</xpath>
+    <from>fTimestamp</from>
+    <table ref="fTimestamp" />
+  </key>
+  <table name="fTimestamp" id="13">
+    <convert>
+      <number style="utime" />
+    </convert>
+    <convertquery>
+      <number style="utime" />
+    </convertquery>
+    <caption lang="zh-CN">指纹时间戳</caption>
+    <caption lang="en">Fingerprint Timestamp</caption>
+  </table>
+</root>

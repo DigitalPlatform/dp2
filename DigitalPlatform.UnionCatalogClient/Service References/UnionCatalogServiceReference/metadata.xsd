@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="http://dp2003.com/unioncatalog/" elementFormDefault="qualified" targetNamespace="http://dp2003.com/unioncatalog/" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="UpdateRecord">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="strAuthString" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strAction" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strRecPath" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strFormat" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strRecord" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strTimestamp" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="UpdateRecordResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="UpdateRecordResult" type="xs:int" />
+        <xs:element minOccurs="0" name="strOutputRecPath" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strOutputTimestamp" nillable="true" type="xs:string" />
+        <xs:element minOccurs="0" name="strError" nillable="true" type="xs:string" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
