@@ -1191,7 +1191,7 @@
     <Content Include="comment_change_actions.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="_n_deleted.txt" />
+    <Content Include="_Docs\deleted.txt" />
     <Content Include="EntityRegister\servers.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -2259,7 +2259,7 @@
     <Content Include="cutter.xml">
       <SubType>Designer</SubType>
     </Content>
-    <None Include="_n_Design.txt" />
+    <None Include="_Docs\Design.txt" />
     <Content Include="exchangeratetable.css" />
     <Content Include="getsummary.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -2406,8 +2406,8 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="日志文件格式.txt" />
-    <None Include="_n_测试.txt" />
-    <None Include="_n_测试工作单.txt" />
+    <None Include="_Docs\测试.txt" />
+    <None Include="_Docs\测试工作单.txt" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DigitalPlatform.AmazonInterface\DigitalPlatform.AmazonInterface.csproj">
