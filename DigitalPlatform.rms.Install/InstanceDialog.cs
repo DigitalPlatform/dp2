@@ -809,6 +809,10 @@ out strError);
             if (databases.Count == 0)
                 return 0;
 
+            if (info.SqlServerType == "SQLite")
+                return 0;
+
+
             string strConnectionString = "";
             nRet = GetConnectionString(info,
                 out strConnectionString,

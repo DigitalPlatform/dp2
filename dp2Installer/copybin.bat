@@ -30,6 +30,9 @@ xcopy ..\..\dp2kernel\dp2kernel\bin\debug\*.exe /Y
 xcopy ..\..\dp2kernel\dp2kernel\bin\debug\dp2kernel.exe.config /Y
 xcopy ..\..\dp2kernel\dp2kernel\bin\debug\*.pfx /Y
 
+xcopy ..\..\dp2kernel\dp2kernel\bin\debug\x86 x86 /Y
+xcopy ..\..\dp2kernel\dp2kernel\bin\debug\x64 x64 /Y
+
 del *.vshost.exe /Q
 
 cd ..
