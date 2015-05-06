@@ -73,7 +73,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.UnionCatalo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.Z3950", "DigitalPlatform.Z3950\DigitalPlatform.Z3950.csproj", "{0E2B8DBD-1E6E-40E9-8AF7-EFD6D30DDEBF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Digitalplatform.DTLP", "Digitalplatform.DTLP\Digitalplatform.DTLP.csproj", "{91B90948-8475-4D9B-A3C7-6285EFC45E19}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.DTLP", "Digitalplatform.DTLP\DigitalPlatform.DTLP.csproj", "{91B90948-8475-4D9B-A3C7-6285EFC45E19}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.KernelService", "DigitalPlatform.KernelService\DigitalPlatform.KernelService.csproj", "{1BFEE291-AB8F-41A4-A80B-1FB5F7AB88E8}"
 EndProject

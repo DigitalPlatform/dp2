@@ -589,9 +589,9 @@
       <Project>{C2468F93-69AC-4BBA-94AE-678ED5C21542}</Project>
       <Name>DigitalPlatform.Drawing</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Digitalplatform.DTLP\Digitalplatform.DTLP.csproj">
+    <ProjectReference Include="..\Digitalplatform.DTLP\DigitalPlatform.DTLP.csproj">
       <Project>{91B90948-8475-4D9B-A3C7-6285EFC45E19}</Project>
-      <Name>Digitalplatform.DTLP</Name>
+      <Name>DigitalPlatform.DTLP</Name>
     </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.GcatClient\DigitalPlatform.GcatClient.csproj">
       <Project>{FC226C5E-6AED-402B-B604-5DEEC6301AD6}</Project>
