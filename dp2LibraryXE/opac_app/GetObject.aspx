@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeFile="GetObject.aspx.cs" Inherits="GetObject" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" Inherits="GetObject" Codebehind="GetObject.aspx.cs" %>
 
 <!doctype html>
 <html>

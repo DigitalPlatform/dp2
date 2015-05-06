@@ -70,7 +70,7 @@ ref sessioninfo) == false)
             return;
         }
 
-        LoginState loginstate = Global.GetLoginState(this.Page);
+        LoginState loginstate = GlobalUtil.GetLoginState(this.Page);
         if (loginstate != LoginState.Librarian)
         {
             strError = "只有工作人员身份才能使用本模块";

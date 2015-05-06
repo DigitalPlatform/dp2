@@ -77,6 +77,7 @@ ref sessioninfo) == false)
 
     }
 
+#if NO
     // 当前是否为单点统一认证状态
     bool IsSso()
     {
@@ -86,5 +87,6 @@ ref sessioninfo) == false)
 
         return true;
     }
+#endif
 
 }

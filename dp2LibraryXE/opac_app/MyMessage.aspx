@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeFile="MyMessage.aspx.cs" Inherits="MyMessage" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" Inherits="MyMessage" Codebehind="MyMessage.aspx.cs" %>
 
 <%@ Register Assembly="DigitalPlatform.OPAC.Web" Namespace="DigitalPlatform.OPAC.Web"
     TagPrefix="cc1" %>

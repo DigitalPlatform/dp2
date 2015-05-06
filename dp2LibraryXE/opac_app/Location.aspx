@@ -1,5 +1,5 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeFile="Location.aspx.cs" Inherits="Location" 
-MaintainScrollPositionOnPostBack="true" validateRequest="false"%>
+﻿<%@ Page Language="C#" AutoEventWireup="true" Inherits="Location" 
+MaintainScrollPositionOnPostBack="true" validateRequest="false" Codebehind="Location.aspx.cs" %>
 
 <%@ Register Assembly="DigitalPlatform.OPAC.Web" Namespace="DigitalPlatform.OPAC.Web"
     TagPrefix="cc1" %>

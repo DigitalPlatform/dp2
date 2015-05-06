@@ -1,5 +1,5 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeFile="NewRecommend.aspx.cs" Inherits="NewRecommend" 
-MaintainScrollPositionOnPostBack="true" validateRequest="false" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" Inherits="NewRecommend" 
+MaintainScrollPositionOnPostBack="true" validateRequest="false" Codebehind="NewRecommend.aspx.cs" %>
 
 <%@ Register Assembly="DigitalPlatform.OPAC.Web" Namespace="DigitalPlatform.OPAC.Web"
     TagPrefix="cc1" %>

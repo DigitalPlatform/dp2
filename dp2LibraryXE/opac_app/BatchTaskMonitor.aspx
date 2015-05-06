@@ -1,5 +1,5 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeFile="BatchTaskMonitor.aspx.cs"
-    Inherits="BatchTaskMonitor" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true"
+    Inherits="BatchTaskMonitor" Codebehind="BatchTaskMonitor.aspx.cs" %>
 
 <%@ Register Assembly="DigitalPlatform.OPAC.Web" Namespace="DigitalPlatform.OPAC.Web"
     TagPrefix="cc1" %>

@@ -1,2 +1,2 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeFile="css.aspx.cs" Inherits="css" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" Inherits="css" Codebehind="css.aspx.cs" %>
 

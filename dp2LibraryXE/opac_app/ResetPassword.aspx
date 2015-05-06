@@ -1,5 +1,5 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeFile="ResetPassword.aspx.cs" 
-Inherits="ResetPassword" MaintainScrollPositionOnPostBack="true" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" 
+Inherits="ResetPassword" MaintainScrollPositionOnPostBack="true" Codebehind="ResetPassword.aspx.cs" %>
 
 <%@ Register Assembly="DigitalPlatform.OPAC.Web" Namespace="DigitalPlatform.OPAC.Web"
     TagPrefix="cc1" %>

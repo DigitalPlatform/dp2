@@ -1,5 +1,5 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeFile="ReaderInfo.aspx.cs" Inherits="ReaderInfo"
-MaintainScrollPositionOnPostBack="true" validateRequest="false" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" Inherits="ReaderInfo"
+MaintainScrollPositionOnPostBack="true" validateRequest="false" Codebehind="ReaderInfo.aspx.cs" %>
 
 
 <%@ Register Assembly="DigitalPlatform.OPAC.Web" Namespace="DigitalPlatform.OPAC.Web"

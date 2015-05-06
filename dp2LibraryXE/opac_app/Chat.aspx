@@ -1,5 +1,5 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeFile="Chat.aspx.cs" Inherits="Chat"
-    MaintainScrollPositionOnPostback="true" ValidateRequest="false" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" Inherits="Chat"
+    MaintainScrollPositionOnPostback="true" ValidateRequest="false" Codebehind="Chat.aspx.cs" %>
 
 <%@ Register Assembly="DigitalPlatform.OPAC.Web" Namespace="DigitalPlatform.OPAC.Web"
     TagPrefix="cc1" %>

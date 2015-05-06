@@ -1,5 +1,5 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeFile="Statis.aspx.cs" Inherits="Statis"
-    Culture="auto" meta:resourcekey="PageResource1" UICulture="auto" MaintainScrollPositionOnPostback="true" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" Inherits="Statis"
+    Culture="auto" meta:resourcekey="PageResource1" UICulture="auto" MaintainScrollPositionOnPostback="true" Codebehind="Statis.aspx.cs" %>
 
 <%@ Register Assembly="DigitalPlatform.OPAC.Web" Namespace="DigitalPlatform.OPAC.Web"
     TagPrefix="cc2" %>

@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeFile="ReservationInfo.aspx.cs" Inherits="ReservationInfo" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" Inherits="ReservationInfo" Codebehind="ReservationInfo.aspx.cs" %>
 
 <%@ Register Assembly="DigitalPlatform.OPAC.Web" Namespace="DigitalPlatform.OPAC.Web"
     TagPrefix="cc1" %>

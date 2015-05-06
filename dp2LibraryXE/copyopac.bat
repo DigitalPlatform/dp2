@@ -1,9 +1,9 @@
 md opac_app
 cd opac_app
 
-xcopy \cs4.0\newopac\*.asax /Y
-xcopy \cs4.0\newopac\*.aspx /Y
-xcopy \cs4.0\newopac\*.aspx.cs /Y
+xcopy ..\..\dp2opac\*.asax /Y
+xcopy ..\..\dp2opac\*.aspx /Y
+xcopy ..\..\dp2opac\*.aspx.cs /Y
 
 del about.* /Q
 del search2.* /Q
@@ -17,15 +17,15 @@ del start.xml /Q
 
 md bin
 cd bin
-xcopy \cs4.0\newopac\bin\*.dll /Y
+xcopy ..\..\..\dp2opac\bin\*.dll /Y
 del nanchangsso.dll /Q
-xcopy \cs4.0\newopac\bin\en-US en-US /Y
-xcopy \cs4.0\newopac\bin\zh-CN zh-CN /Y
+xcopy ..\..\..\dp2opac\bin\en-US en-US /Y
+xcopy ..\..\..\dp2opac\bin\zh-CN zh-CN /Y
 cd ..
 
 md app_code
 cd app_code
-xcopy \cs4.0\newopac\app_code\*.* /Y
+xcopy ..\..\..\dp2opac\app_code\*.* /Y
 cd ..
 
 cd ..

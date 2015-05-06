@@ -1,5 +1,5 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeFile="PersonalInfo.aspx.cs" Inherits="PersonalInfo" 
- MaintainScrollPositionOnPostBack="true"%>
+﻿<%@ Page Language="C#" AutoEventWireup="true" Inherits="PersonalInfo" 
+ MaintainScrollPositionOnPostBack="true" Codebehind="PersonalInfo.aspx.cs" %>
 
 <%@ Register Assembly="DigitalPlatform.OPAC.Web" Namespace="DigitalPlatform.OPAC.Web"
     TagPrefix="cc1" %>

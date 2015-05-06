@@ -1,1 +1,1 @@
-﻿<%@ Application Inherits="NewOPAC.Global" Language="C#" %>
+﻿<%@ Application Inherits="dp2OPAC.Global" Language="C#" Codebehind="Global.asax.cs" %>

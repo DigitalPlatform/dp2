@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeFile="BorrowInfo.aspx.cs" Inherits="BorrowInfo" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" Inherits="BorrowInfo" Codebehind="BorrowInfo.aspx.cs" %>
 
 <%@ Register Assembly="DigitalPlatform.OPAC.Web" Namespace="DigitalPlatform.OPAC.Web"
     TagPrefix="cc1" %>

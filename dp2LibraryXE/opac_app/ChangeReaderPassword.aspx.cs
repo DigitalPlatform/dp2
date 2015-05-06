@@ -45,7 +45,7 @@ ref app,
 ref sessioninfo) == false)
             return;
 
-        LoginState loginstate = Global.GetLoginState(this.Page);
+        LoginState loginstate = GlobalUtil.GetLoginState(this.Page);
 
         // 是否登录?
         // if (sessioninfo.UserID == "")

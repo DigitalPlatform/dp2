@@ -1,5 +1,5 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeFile="Message.aspx.cs" Inherits="Message"
-    ValidateRequest="false" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" Inherits="Message"
+    ValidateRequest="false" Codebehind="Message.aspx.cs" %>
 
 <%@ Register Assembly="DigitalPlatform.OPAC.Web" Namespace="DigitalPlatform.OPAC.Web"
     TagPrefix="cc1" %>

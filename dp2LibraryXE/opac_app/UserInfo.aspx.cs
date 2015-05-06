@@ -263,7 +263,7 @@ ref sessioninfo) == false)
             string strSendMessageUrl = "./message.aspx?recipient=" + HttpUtility.UrlEncode(strRecipient);
             this.Button_sendMessage.OnClientClick = "window.open('" + strSendMessageUrl + "','_blank'); return cancelClick();";
 
-            LoginState loginstate = Global.GetLoginState(this.Page);
+            LoginState loginstate = GlobalUtil.GetLoginState(this.Page);
             if (loginstate == LoginState.NotLogin || loginstate == LoginState.Public)
                 this.Button_sendMessage.Enabled = false;
 

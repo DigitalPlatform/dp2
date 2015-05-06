@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeFile="GetSummary.aspx.cs" Inherits="GetSummary" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" Inherits="GetSummary" Codebehind="GetSummary.aspx.cs" %>
 
 <!doctype html>
 <html>

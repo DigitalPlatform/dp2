@@ -67,7 +67,7 @@ ref sessioninfo) == false)
 
         string strStatisColumnVisible = GetStatisColumnVisible();
 
-        LoginState loginstate = Global.GetLoginState(this.Page);
+        LoginState loginstate = GlobalUtil.GetLoginState(this.Page);
 
         if (StringUtil.IsInList("all", strStatisColumnVisible) == true
             || (loginstate == LoginState.Librarian && StringUtil.IsInList("librarian", strStatisColumnVisible) == true)

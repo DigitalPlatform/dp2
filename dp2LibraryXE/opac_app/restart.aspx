@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeFile="restart.aspx.cs" Inherits="restart" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" Inherits="restart" Codebehind="restart.aspx.cs" %>
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 

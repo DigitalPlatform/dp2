@@ -1,5 +1,5 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeFile="ChangeReaderPassword.aspx.cs"
-    Inherits="ChangeReaderPassword" meta:resourcekey="PageResource1" MaintainScrollPositionOnPostBack="true"%>
+﻿<%@ Page Language="C#" AutoEventWireup="true"
+    Inherits="ChangeReaderPassword" meta:resourcekey="PageResource1" MaintainScrollPositionOnPostBack="true" Codebehind="ChangeReaderPassword.aspx.cs" %>
 
 <%@ Register Assembly="DigitalPlatform.OPAC.Web" Namespace="DigitalPlatform.OPAC.Web"
     TagPrefix="cc1" %>

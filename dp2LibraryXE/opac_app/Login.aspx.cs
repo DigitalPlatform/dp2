@@ -154,7 +154,7 @@ ref this.sessioninfo) == false)
                         strRedirect = Request.Form["redirect"];
                     if (strRedirect == null || strRedirect == "")
                     {
-                        LoginState loginstate = Global.GetLoginState(this.Page);
+                        LoginState loginstate = GlobalUtil.GetLoginState(this.Page);
 
                         if (loginstate == LoginState.Public)
                             Redirect("searchbiblio.aspx");
@@ -598,7 +598,7 @@ ref this.sessioninfo) == false)
             string strRedirect = Request.QueryString["redirect"];
             if (strRedirect == null || strRedirect == "")
             {
-                LoginState loginstate = Global.GetLoginState(this.Page);
+                LoginState loginstate = GlobalUtil.GetLoginState(this.Page);
 
                 if (loginstate == LoginState.Public)
                     Redirect("searchbiblio.aspx");
@@ -635,7 +635,7 @@ ref this.sessioninfo) == false)
             string strRedirect = Request.QueryString["redirect"];
             if (strRedirect == null || strRedirect == "")
             {
-                LoginState loginstate = Global.GetLoginState(this.Page);
+                LoginState loginstate = GlobalUtil.GetLoginState(this.Page);
 
                 if (loginstate == LoginState.Public)
                     Redirect("searchbiblio.aspx");
@@ -737,49 +737,6 @@ ref this.sessioninfo) == false)
         return 1;
     }
 
-    // return:
-    //      -1  error
-    //      0   succeed
-    int GetYczbCfgParams(out string strAppID,
-        out string strWsUrl,
-        out string strSsoPageUrl,
-        out string strError)
-    {
-        strError = "";
-        strAppID = "";
-        strWsUrl = "";
-        strSsoPageUrl = "";
-
-        XmlNode node = app.OpacCfgDom.DocumentElement.SelectSingleNode("yczb/sso");
-        if (node == null)
-        {
-            strError = "opac.xml中尚未配置<yczb/sso>元素";
-            return -1;
-        }
-
-        strAppID = DomUtil.GetAttr(node, "appID");
-        if (String.IsNullOrEmpty(strAppID) == true)
-        {
-            strError = "opac.xml中<yczb/sso>元素内缺乏appID属性";
-            return -1;
-        }
-        strWsUrl = DomUtil.GetAttr(node, "validateWsUrl");
-        if (String.IsNullOrEmpty(strWsUrl) == true)
-        {
-            strError = "opac.xml中<yczb/sso>元素内缺乏validateWsUrl属性";
-            return -1;
-        }
-
-        strSsoPageUrl = DomUtil.GetAttr(node, "ssoPageUrl");
-        if (String.IsNullOrEmpty(strSsoPageUrl) == true)
-        {
-            strError = "opac.xml中<yczb/sso>元素内缺乏ssoPageUrl属性";
-            return -1;
-        }
-
-        return 0;
-    }
-
     // 单点登录
     // return:
     //      -1  发生错误
@@ -852,7 +809,7 @@ ref this.sessioninfo) == false)
             string strRedirect = Request.QueryString["redirect"];
             if (strRedirect == null || strRedirect == "")
             {
-                LoginState loginstate = Global.GetLoginState(this.Page);
+                LoginState loginstate = GlobalUtil.GetLoginState(this.Page);
 
                 if (loginstate == LoginState.Public)
                     Redirect("searchbiblio.aspx");
@@ -885,175 +842,6 @@ ref this.sessioninfo) == false)
         return -1;
     }
 
-
-#if NOOOOOOOOOOOOOO
-    //  原有代码。需要实现为接口方式
-    // return:
-    //      -1  发生错误
-    //      1   成功
-    int DoSsoLogin(string strLibraryCode)
-    {
-        string strError = "";
-        int nRet = 0;
-
-        string strAppID = "";
-        string strWsUrl = "";
-        string strSsoPageUrl = "";
-
-        // return:
-        //      -1  error
-        //      0   succeed
-        nRet = GetYczbCfgParams(out strAppID,
-            out strWsUrl,
-            out strSsoPageUrl,
-            out strError);
-        if (nRet == -1)
-            goto ERROR1;
-
-        string strIdCardNumber = "";
-        HttpCookie cookie = Request.Cookies.Get("iPlanetDirectoryPro");
-        if (cookie == null)
-        {
-            strError = "cookies中没有找到key为iPlanetDirectoryPro的事项";
-            goto ERROR2;
-        }
-
-        string strSsoToken = cookie.Value;
-        if (String.IsNullOrEmpty(strSsoToken) == true)
-        {
-            strError = "cookies中key为iPlanetDirectoryPro的事项其值为空";
-            goto ERROR2;
-        }
-
-        YczbSso.ValidatorImplService ws = new YczbSso.ValidatorImplService();
-        ws.Url = strWsUrl;  // "http://portal.cbpmc.cbpm/AuthCenter/services/validate"
-        string strResult = "";
-
-        try
-        {
-            strResult = ws.validate(strSsoToken,
-                strAppID,   // "CBPM_Library"
-                1);
-        }
-        catch (Exception ex)
-        {
-            strError = "webservice call exception: " + ex.Message;
-            goto ERROR1;
-        }
-
-#if NO
-        EndpointAddress address = new EndpointAddress(strWsUrl);// "http://portal.cbpmc.cbpm/AuthCenter/services/validate"
-        NanchangSso.ValidatorClient ws = new NanchangSso.ValidatorClient(); // (CreateBasicHttpBinding0(), address);
-        string strResult = "";
-
-        try
-        {
-            strResult = ws.validate(strSsoToken,
-                strAppID,   // "CBPM_Library"
-                1);
-        }
-        catch (Exception ex)
-        {
-            strError = "webservice call exception: " + ex.Message;
-            goto ERROR1;
-        }
-#endif
-
-        // strResult = "_returncode=0,_identitynumber=123456789"; // test
-
-        // 将逗号间隔的参数表解析到Hashtable中
-        // parameters:
-        //      strText 字符串。形态如 "名1=值1,名2=值2"
-        Hashtable param_table = StringUtil.ParseParameters(strResult, ',', '=', "url");
-
-        string strReturnCode = (string)param_table["_returncode"];
-        if (String.IsNullOrEmpty(strReturnCode) == true)
-        {
-            strError = "validate返回字符串 '" + strResult + "' 中没有包含_returncode值";
-            goto ERROR1;
-        }
-
-        if (strReturnCode == "0")
-        {
-        }
-        else if (strReturnCode == "1")
-        {
-            strError = "认证失败";
-            goto ERROR2;
-        }
-        else if (strReturnCode == "2")
-        {
-            strError = "应用系统Id不正确";
-            goto ERROR1;
-        }
-
-        strIdCardNumber = (string)param_table["_identitynumber"];
-        if (String.IsNullOrEmpty(strIdCardNumber) == true)
-        {
-            strError = "validate返回字符串 '" + strResult + "' 中没有包含_identitynumber值";
-            goto ERROR1;
-        }
-
-        string strParameters = "location=#opac_sso@" + sessioninfo.ClientIP + ",index=-1,type=reader,simulate=yes,libraryCode=" + LoginControl.GetLibraryCodeParam(strLibraryCode);
-        string strPassword = app.ManagerUserName + "," + app.ManagerPassword;   // simulate登录的需要
-        // 读者身份登录
-        long lRet = sessioninfo.Login(
-                    "ID:" + strIdCardNumber,
-                    strPassword, 
-                    strParameters,
-                    out strError);
-        if (lRet == -1)
-        {
-            strError = "对图书馆读者帐户进行登录时出错：" + strError;
-            goto ERROR1;
-        }
-        if (lRet > 1)
-        {
-            strError = "登录中发现有 " + lRet.ToString() + " 个账户符合条件，登录失败";
-            goto ERROR1;
-        }
-
-        if (sessioninfo.LoginCallStack.Count != 0)
-        {
-            string strUrl = (string)sessioninfo.LoginCallStack.Pop();
-            Redirect(strUrl);
-            return 1;
-        }
-        else
-        {
-            string strRedirect = Request.QueryString["redirect"];
-            if (strRedirect == null || strRedirect == "")
-            {
-                LoginState loginstate = Global.GetLoginState(this.Page);
-
-                if (loginstate == LoginState.Public)
-                    Redirect("searchbiblio.aspx");
-                else if (loginstate == LoginState.Reader)
-                    Redirect("borrowinfo.aspx");	// 实在没有办法，就到主页面
-                else if (loginstate == LoginState.Librarian)
-                    Redirect("searchbiblio.aspx");
-                else
-                    Redirect("searchbiblio.aspx");
-            }
-            else
-                Redirect(strRedirect);
-            return 1;
-        }
-
-    ERROR1:
-        Response.Write("<html><body><p>" + HttpUtility.HtmlEncode(strError) + "</p>"
-            + "</body></html>");
-        Response.End();
-        return -1;
-    ERROR2:
-        Response.Write("<html><body><p>" + HttpUtility.HtmlEncode(strError) + "</p>"
-            + "<p><a href=" + strSsoPageUrl + " >回到统一认证登录页面</a></p>"
-            + "</body></html>");
-        Response.End();
-        return -1;
-    }
-
-#endif
 
 #if NO 
     测试用

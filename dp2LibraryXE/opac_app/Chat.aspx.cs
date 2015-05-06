@@ -126,7 +126,7 @@ ref sessioninfo) == false)
          * */
 
 
-        LoginState loginstate = Global.GetLoginState(this.Page);
+        LoginState loginstate = GlobalUtil.GetLoginState(this.Page);
 
         bool bIsManager = false;
 

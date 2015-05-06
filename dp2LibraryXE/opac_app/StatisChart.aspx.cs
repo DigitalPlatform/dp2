@@ -162,7 +162,7 @@ ref sessioninfo) == false)
     {
         string strStatisColumnVisible = GetStatisColumnVisible();
 
-        LoginState loginstate = Global.GetLoginState(this.Page);
+        LoginState loginstate = GlobalUtil.GetLoginState(this.Page);
         string strRole = loginstate.ToString().ToLower(); // notlogin public reader librarian
 
         if (StringUtil.IsInList("all", strStatisColumnVisible) == true
@@ -653,7 +653,7 @@ string strNodePath)
         if (string.IsNullOrEmpty(this.DropDownList_chartType.Text) == false)
             type = (SeriesChartType)Enum.Parse(typeof(SeriesChartType), this.DropDownList_chartType.Text, true);
 
-        LoginState loginstate = Global.GetLoginState(this.Page);
+        LoginState loginstate = GlobalUtil.GetLoginState(this.Page);
         string strRole = loginstate.ToString().ToLower(); // notlogin public reader librarian
 
         string strDataFilename = PathUtil.MergePath(sessioninfo.GetTempDir(), "~statis_chat_data_" + strRole);

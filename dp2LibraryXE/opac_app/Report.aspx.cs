@@ -87,7 +87,7 @@ ref sessioninfo) == false)
             return;
         }
 
-        LoginState loginstate = Global.GetLoginState(this.Page);
+        LoginState loginstate = GlobalUtil.GetLoginState(this.Page);
 
         // 权限是否具备?
         if (loginstate == LoginState.Librarian
