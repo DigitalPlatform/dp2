@@ -7,6 +7,9 @@ _n_*.*
 *.user
 *.sln.docstates
 
+*.doc
+*.docx
+
 _[Dd]ocs/
 
 # Build results
