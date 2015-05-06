@@ -1191,7 +1191,7 @@
     <Content Include="comment_change_actions.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="deleted.txt" />
+    <Content Include="_n_deleted.txt" />
     <Content Include="EntityRegister\servers.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -2019,16 +2019,7 @@
     </Content>
     <Content Include="default_printorder_publisherstatis.template" />
     <Content Include="default_printorder_publisherstatis_accept.template" />
-    <None Include="dp2Circulation_1_TemporaryKey.pfx" />
-    <None Include="dp2Circulation_2_TemporaryKey.pfx" />
-    <None Include="dp2Circulation_3_TemporaryKey.pfx" />
-    <None Include="dp2Circulation_4_TemporaryKey.pfx" />
-    <None Include="dp2Circulation_5_TemporaryKey.pfx" />
-    <None Include="dp2Circulation_6_TemporaryKey.pfx" />
-    <None Include="dp2Circulation_7_TemporaryKey.pfx" />
-    <None Include="dp2Circulation_8_TemporaryKey.pfx" />
     <None Include="dp2Circulation_9_TemporaryKey.pfx" />
-    <None Include="dp2Circulation_TemporaryKey.pfx" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -2268,7 +2259,7 @@
     <Content Include="cutter.xml">
       <SubType>Designer</SubType>
     </Content>
-    <None Include="Design.txt" />
+    <None Include="_n_Design.txt" />
     <Content Include="exchangeratetable.css" />
     <Content Include="getsummary.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -2415,8 +2406,8 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="日志文件格式.txt" />
-    <None Include="测试.txt" />
-    <None Include="测试工作单.txt" />
+    <None Include="_n_测试.txt" />
+    <None Include="_n_测试工作单.txt" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DigitalPlatform.AmazonInterface\DigitalPlatform.AmazonInterface.csproj">
