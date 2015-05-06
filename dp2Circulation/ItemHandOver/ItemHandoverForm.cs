@@ -2431,7 +2431,7 @@ MessageBoxDefaultButton.Button2);
                     if (nRet == -1)
                         return -1;
 
-                    string strResult = Global.MacroString(macro_table,
+                    string strResult = StringUtil.MacroString(macro_table,
                         strContent);
                     StreamUtil.WriteText(strFileName,
                         strResult);
@@ -2593,7 +2593,7 @@ MessageBoxDefaultButton.Button2);
 
             if (String.IsNullOrEmpty(strPageHeaderText) == false)
             {
-                strPageHeaderText = Global.MacroString(macro_table,
+                strPageHeaderText = StringUtil.MacroString(macro_table,
                     strPageHeaderText);
 
                 StreamUtil.WriteText(strFileName,
@@ -2611,7 +2611,7 @@ MessageBoxDefaultButton.Button2);
             if (String.IsNullOrEmpty(strTableTitleText) == false)
             {
 
-                strTableTitleText = Global.MacroString(macro_table,
+                strTableTitleText = StringUtil.MacroString(macro_table,
                     strTableTitleText);
 
                 StreamUtil.WriteText(strFileName,
@@ -2905,7 +2905,7 @@ MessageBoxDefaultButton.Button2);
                  * */
 
 
-                strPageFooterText = Global.MacroString(macro_table,
+                strPageFooterText = StringUtil.MacroString(macro_table,
                     strPageFooterText);
 
                 StreamUtil.WriteText(strFileName,

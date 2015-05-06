@@ -1830,7 +1830,7 @@ this.splitContainer_inAndOutof,
                         return -1;
                 }
 
-                    string strResult = Global.MacroString(macro_table,
+                string strResult = StringUtil.MacroString(macro_table,
                         strContent);
                     StreamUtil.WriteText(strFileName,
                         strResult);
@@ -1970,7 +1970,7 @@ this.splitContainer_inAndOutof,
 
             if (String.IsNullOrEmpty(strPageHeaderText) == false)
             {
-                strPageHeaderText = Global.MacroString(macro_table,
+                strPageHeaderText = StringUtil.MacroString(macro_table,
                     strPageHeaderText);
 
                 StreamUtil.WriteText(strFileName,
@@ -1983,7 +1983,7 @@ this.splitContainer_inAndOutof,
             if (String.IsNullOrEmpty(strTableTitleText) == false)
             {
 
-                strTableTitleText = Global.MacroString(macro_table,
+                strTableTitleText = StringUtil.MacroString(macro_table,
                     strTableTitleText);
 
                 StreamUtil.WriteText(strFileName,
@@ -2049,7 +2049,7 @@ this.splitContainer_inAndOutof,
                  * */
 
 
-                strPageFooterText = Global.MacroString(macro_table,
+                strPageFooterText = StringUtil.MacroString(macro_table,
                     strPageFooterText);
 
                 StreamUtil.WriteText(strFileName,

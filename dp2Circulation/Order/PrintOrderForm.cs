@@ -2873,7 +2873,7 @@ namespace dp2Circulation
                 }
             }
 
-            strTableTitle = Global.MacroString(macro_table,
+            strTableTitle = StringUtil.MacroString(macro_table,
     strTableTitle); 
 
             Debug.Assert(String.IsNullOrEmpty(strStatisTemplateFilePath) == false, "");
@@ -2897,7 +2897,7 @@ namespace dp2Circulation
                 if (nRet == -1)
                     return -1;
 
-                strResult = Global.MacroString(macro_table,
+                strResult = StringUtil.MacroString(macro_table,
                     strContent);
             }
 
@@ -3520,7 +3520,7 @@ strAcceptOutputPrice);
                     if (nRet == -1)
                         return -1;
 
-                    strResult = Global.MacroString(macro_table,
+                    strResult = StringUtil.MacroString(macro_table,
                         strContent);
                 }
 
@@ -3528,7 +3528,7 @@ strAcceptOutputPrice);
                     sheet = doc.NewSheet(strSheetName);
 
                 strTableTitle = "%date% %seller% 出版社分类号统计表";
-                strTableTitle = Global.MacroString(macro_table,
+                strTableTitle = StringUtil.MacroString(macro_table,
                     strTableTitle);
 
                 // 创建嵌套表格
@@ -4381,7 +4381,7 @@ nLineIndex++,
 
             if (String.IsNullOrEmpty(strPageHeaderText) == false)
             {
-                strPageHeaderText = Global.MacroString(macro_table,
+                strPageHeaderText = StringUtil.MacroString(macro_table,
                     strPageHeaderText);
 
                 /*
@@ -4397,7 +4397,7 @@ nLineIndex++,
             if (String.IsNullOrEmpty(strTableTitleText) == false)
             {
 
-                strTableTitleText = Global.MacroString(macro_table,
+                strTableTitleText = StringUtil.MacroString(macro_table,
                     strTableTitleText);
 
                 doc.WriteExcelTitle(0,
@@ -4479,7 +4479,7 @@ nLineIndex++,
 
             if (String.IsNullOrEmpty(strPageHeaderText) == false)
             {
-                strPageHeaderText = Global.MacroString(macro_table,
+                strPageHeaderText = StringUtil.MacroString(macro_table,
                     strPageHeaderText);
 
                 StreamUtil.WriteText(strFileName,
@@ -4497,7 +4497,7 @@ nLineIndex++,
             if (String.IsNullOrEmpty(strTableTitleText) == false)
             {
 
-                strTableTitleText = Global.MacroString(macro_table,
+                strTableTitleText = StringUtil.MacroString(macro_table,
                     strTableTitleText);
 
                 StreamUtil.WriteText(strFileName,
@@ -5061,7 +5061,7 @@ nLineIndex++,
                  * */
 
 
-                strPageFooterText = Global.MacroString(macro_table,
+                strPageFooterText = StringUtil.MacroString(macro_table,
                     strPageFooterText);
 
                 StreamUtil.WriteText(strFileName,
@@ -7435,7 +7435,7 @@ MessageBoxDefaultButton.Button2);
 
             if (String.IsNullOrEmpty(strPageHeaderText) == false)
             {
-                strPageHeaderText = Global.MacroString(macro_table,
+                strPageHeaderText = StringUtil.MacroString(macro_table,
                     strPageHeaderText);
 
                 StreamUtil.WriteText(strFileName,
@@ -7453,7 +7453,7 @@ MessageBoxDefaultButton.Button2);
             if (String.IsNullOrEmpty(strTableTitleText) == false)
             {
 
-                strTableTitleText = Global.MacroString(macro_table,
+                strTableTitleText = StringUtil.MacroString(macro_table,
                     strTableTitleText);
 
                 StreamUtil.WriteText(strFileName,
@@ -7858,7 +7858,7 @@ MessageBoxDefaultButton.Button2);
                  * */
 
 
-                strPageFooterText = Global.MacroString(macro_table,
+                strPageFooterText = StringUtil.MacroString(macro_table,
                     strPageFooterText);
 
                 StreamUtil.WriteText(strFileName,
@@ -10127,7 +10127,7 @@ false);
 
             if (String.IsNullOrEmpty(strPageHeaderText) == false)
             {
-                strPageHeaderText = Global.MacroString(macro_table,
+                strPageHeaderText = StringUtil.MacroString(macro_table,
                     strPageHeaderText);
             }
 
@@ -10138,7 +10138,7 @@ false);
             if (String.IsNullOrEmpty(strTableTitleText) == false)
             {
 
-                strTableTitleText = Global.MacroString(macro_table,
+                strTableTitleText = StringUtil.MacroString(macro_table,
                     strTableTitleText);
 
                 doc.WriteExcelTitle(0,
@@ -10172,7 +10172,7 @@ false);
 
             if (String.IsNullOrEmpty(strPageHeaderText) == false)
             {
-                strPageHeaderText = Global.MacroString(macro_table,
+                strPageHeaderText = StringUtil.MacroString(macro_table,
                     strPageHeaderText);
 
                 StreamUtil.WriteText(strFileName,
@@ -10185,7 +10185,7 @@ false);
             if (String.IsNullOrEmpty(strTableTitleText) == false)
             {
 
-                strTableTitleText = Global.MacroString(macro_table,
+                strTableTitleText = StringUtil.MacroString(macro_table,
                     strTableTitleText);
 
                 StreamUtil.WriteText(strFileName,
@@ -10204,7 +10204,7 @@ string strFileName)
 
             if (String.IsNullOrEmpty(strPageFooterText) == false)
             {
-                strPageFooterText = Global.MacroString(macro_table,
+                strPageFooterText = StringUtil.MacroString(macro_table,
                     strPageFooterText);
 
                 StreamUtil.WriteText(strFileName,

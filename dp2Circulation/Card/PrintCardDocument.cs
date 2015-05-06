@@ -1488,7 +1488,7 @@ out string strError)
 
                     if (macro_table != null)
                     {
-                        strText = Global.MacroString(macro_table,
+                        strText = StringUtil.MacroString(macro_table,
         strText);
                     }
 

@@ -287,10 +287,10 @@ namespace dp2Circulation
             strError = "";
 
             string strTitle = DomUtil.GetElementText(_cfgDom.DocumentElement, "title").Replace("\\r", "\r");
-            strTitle = Global.MacroString(macro_table, strTitle);
+            strTitle = StringUtil.MacroString(macro_table, strTitle);
 
             string strComment = DomUtil.GetElementText(_cfgDom.DocumentElement, "titleComment").Replace("\\r", "\r");
-            strComment = Global.MacroString(macro_table, strComment);
+            strComment = StringUtil.MacroString(macro_table, strComment);
 
 
             string strCreateTime = DateTime.Now.ToString();

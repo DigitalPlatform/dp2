@@ -2847,7 +2847,7 @@ namespace dp2Circulation
                     if (nRet == -1)
                         return -1;
 
-                    string strResult = Global.MacroString(macro_table,
+                    string strResult = StringUtil.MacroString(macro_table,
                         strContent);
                     StreamUtil.WriteText(strFileName,
                         strResult);
@@ -2977,7 +2977,7 @@ namespace dp2Circulation
 
             if (String.IsNullOrEmpty(strPageHeaderText) == false)
             {
-                strPageHeaderText = Global.MacroString(macro_table,
+                strPageHeaderText = StringUtil.MacroString(macro_table,
                     strPageHeaderText);
 
                 StreamUtil.WriteText(strFileName,
@@ -2995,7 +2995,7 @@ namespace dp2Circulation
             if (String.IsNullOrEmpty(strTableTitleText) == false)
             {
 
-                strTableTitleText = Global.MacroString(macro_table,
+                strTableTitleText = StringUtil.MacroString(macro_table,
                     strTableTitleText);
 
                 StreamUtil.WriteText(strFileName,
@@ -3385,7 +3385,7 @@ namespace dp2Circulation
                  * */
 
 
-                strPageFooterText = Global.MacroString(macro_table,
+                strPageFooterText = StringUtil.MacroString(macro_table,
                     strPageFooterText);
 
                 StreamUtil.WriteText(strFileName,
@@ -6280,7 +6280,7 @@ out strError);
                     if (nRet == -1)
                         return -1;
 
-                    string strResult = Global.MacroString(macro_table,
+                    string strResult = StringUtil.MacroString(macro_table,
                         strContent);
                     StreamUtil.WriteText(strFileName,
                         strResult);
@@ -6393,7 +6393,7 @@ out strError);
 
             if (String.IsNullOrEmpty(strPageHeaderText) == false)
             {
-                strPageHeaderText = Global.MacroString(macro_table,
+                strPageHeaderText = StringUtil.MacroString(macro_table,
                     strPageHeaderText);
 
                 StreamUtil.WriteText(strFileName,
@@ -6411,7 +6411,7 @@ out strError);
             if (String.IsNullOrEmpty(strTableTitleText) == false)
             {
 
-                strTableTitleText = Global.MacroString(macro_table,
+                strTableTitleText = StringUtil.MacroString(macro_table,
                     strTableTitleText);
 
                 StreamUtil.WriteText(strFileName,
@@ -6811,7 +6811,7 @@ out strError);
                  * */
 
 
-                strPageFooterText = Global.MacroString(macro_table,
+                strPageFooterText = StringUtil.MacroString(macro_table,
                     strPageFooterText);
 
                 StreamUtil.WriteText(strFileName,
@@ -7590,7 +7590,7 @@ ORIGIN_COLUMN_ACCEPTSUBCOPY);
             if (String.IsNullOrEmpty(strTableTitleText) == false)
             {
 
-                strTableTitleText = Global.MacroString(macro_table,
+                strTableTitleText = StringUtil.MacroString(macro_table,
                     strTableTitleText);
 
                 doc.WriteExcelTitle(0,
@@ -7704,7 +7704,7 @@ ORIGIN_COLUMN_ACCEPTSUBCOPY);
                 if (nRet == -1)
                     return -1;
 
-                strResult = Global.MacroString(macro_table,
+                strResult = StringUtil.MacroString(macro_table,
                     strContent);
             }
 

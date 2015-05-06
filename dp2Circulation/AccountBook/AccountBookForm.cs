@@ -4063,7 +4063,7 @@ null,
                     if (nRet == -1)
                         return -1;
 
-                    string strResult = Global.MacroString(macro_table,
+                    string strResult = StringUtil.MacroString(macro_table,
                         strContent);
                     string[] lines = strResult.Split(new string[] {"\r\n"},
                         StringSplitOptions.None);
@@ -4472,7 +4472,7 @@ null,
             if (String.IsNullOrEmpty(strTableTitleText) == false)
             {
 
-                strTableTitleText = Global.MacroString(macro_table,
+                strTableTitleText = StringUtil.MacroString(macro_table,
                     strTableTitleText);
 
                 WriteParagraph(writer, strTableTitleText);
@@ -4669,7 +4669,7 @@ null,
                     if (nRet == -1)
                         return -1;
 
-                    string strResult = Global.MacroString(macro_table,
+                    string strResult = StringUtil.MacroString(macro_table,
                         strContent);
 
                     if (sw != null)
@@ -4872,7 +4872,7 @@ strTotalPrice);
             if (String.IsNullOrEmpty(strTableTitleText) == false)
             {
 
-                strTableTitleText = Global.MacroString(macro_table,
+                strTableTitleText = StringUtil.MacroString(macro_table,
                     strTableTitleText);
 
                 if (sw != null)
@@ -5322,7 +5322,7 @@ strTotalPrice);
                     if (nRet == -1)
                         return -1;
 
-                    string strResult = Global.MacroString(macro_table,
+                    string strResult = StringUtil.MacroString(macro_table,
                         strContent);
                     StreamUtil.WriteText(strFileName,
                         strResult);
@@ -5543,7 +5543,7 @@ strTotalPrice);
 
             if (String.IsNullOrEmpty(strPageHeaderText) == false)
             {
-                strPageHeaderText = Global.MacroString(macro_table,
+                strPageHeaderText = StringUtil.MacroString(macro_table,
                     strPageHeaderText);
 
                 StreamUtil.WriteText(strFileName,
@@ -5561,7 +5561,7 @@ strTotalPrice);
             if (String.IsNullOrEmpty(strTableTitleText) == false)
             {
 
-                strTableTitleText = Global.MacroString(macro_table,
+                strTableTitleText = StringUtil.MacroString(macro_table,
                     strTableTitleText);
 
                 StreamUtil.WriteText(strFileName,
@@ -6053,7 +6053,7 @@ strTotalPrice);
                  * */
 
 
-                strPageFooterText = Global.MacroString(macro_table,
+                strPageFooterText = StringUtil.MacroString(macro_table,
                     strPageFooterText);
 
                 StreamUtil.WriteText(strFileName,

@@ -2880,7 +2880,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                     if (nRet == -1)
                         return -1;
 
-                    string strResult = Global.MacroString(macro_table,
+                    string strResult = StringUtil.MacroString(macro_table,
                         strContent);
                     StreamUtil.WriteText(strFilename,
                         strResult);
@@ -2898,7 +2898,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                     string strText = strAddressLine + "尊敬的 %seller%:<br/>我馆在贵处订购的以下"+this.TypeName+" %seriescount% 种，有 "
                         + (this.TypeName == "期刊" ? "%issuecount% 期 " : "")
                         +"共 %missingitemcount% 册至今未到。望尽快补齐为盼。谢谢。<br/><br/>%libraryname%<br/>%date%";
-                    strText = Global.MacroString(macro_table,
+                    strText = StringUtil.MacroString(macro_table,
                         strText);
 
                     StreamUtil.WriteText(strFilename,

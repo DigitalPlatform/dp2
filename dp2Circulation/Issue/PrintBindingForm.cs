@@ -2310,7 +2310,7 @@ namespace dp2Circulation
                     if (nRet == -1)
                         return -1;
 
-                    string strResult = Global.MacroString(macro_table,
+                    string strResult = StringUtil.MacroString(macro_table,
                         strContent);
                     StreamUtil.WriteText(strFilename,
                         strResult);
@@ -2323,7 +2323,7 @@ namespace dp2Circulation
 
                     if (String.IsNullOrEmpty(strTableTitle) == false)
                     {
-                        strTableTitle = Global.MacroString(macro_table,
+                        strTableTitle = StringUtil.MacroString(macro_table,
                             strTableTitle);
                     }
 
@@ -2516,7 +2516,7 @@ namespace dp2Circulation
 
             if (String.IsNullOrEmpty(strPageHeaderText) == false)
             {
-                strPageHeaderText = Global.MacroString(macro_table,
+                strPageHeaderText = StringUtil.MacroString(macro_table,
                     strPageHeaderText);
 
                 StreamUtil.WriteText(strFileName,
@@ -2543,7 +2543,7 @@ namespace dp2Circulation
 
             if (String.IsNullOrEmpty(strPageFooterText) == false)
             {
-                strPageFooterText = Global.MacroString(macro_table,
+                strPageFooterText = StringUtil.MacroString(macro_table,
                     strPageFooterText);
 
                 StreamUtil.WriteText(strFileName,
