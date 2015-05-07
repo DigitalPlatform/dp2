@@ -19,7 +19,9 @@ md bin
 cd bin
 xcopy ..\..\..\dp2opac\bin\*.dll /Y
 del nanchangsso.dll /Q
+md en-US
 xcopy ..\..\..\dp2opac\bin\en-US en-US /Y
+md zh-CN
 xcopy ..\..\..\dp2opac\bin\zh-CN zh-CN /Y
 cd ..
 

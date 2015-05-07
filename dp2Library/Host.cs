@@ -245,6 +245,7 @@ namespace dp2Library
         }
 #endif
 
+#if SN
         static string GetMaxClients(string strSerialCode)
         {
             string strExtParams = SerialCodeForm.GetExtParams(strSerialCode);
@@ -316,6 +317,7 @@ namespace dp2Library
             strDebugInfo = debuginfo.ToString();
             return false;
         }
+#endif
 
         void ThreadMain()
         {
@@ -341,6 +343,7 @@ namespace dp2Library
                 int nMaxClients = 0;
                 string strLicenseType = "";
 
+#if SN
                 //string strLocalString = OneInstanceDialog.GetEnvironmentString(strSerialNumber, strInstanceName);
                 //string strSha1 = Cryptography.GetSHA1(StringUtil.SortParams(strLocalString) + "_reply");
                 if (String.IsNullOrEmpty(strSerialNumber) == true)
@@ -373,6 +376,10 @@ namespace dp2Library
 
                     strLicenseType = GetLicenseType(strSerialNumber);
                 }
+#else
+                nMaxClients = 100;
+                strLicenseType = "server";
+#endif
 
                 ServiceHost host = new ServiceHost(typeof(LibraryService));
                 this.m_hosts.Add(host);
