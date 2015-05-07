@@ -209,6 +209,9 @@ namespace DigitalPlatform.LibraryServer
         public bool DebugMode = false;
         public string UID = "";
 
+        // 预约到书队列库的检索途径信息 2015/5/7
+        public BiblioDbFromInfo[] ArrivedDbFroms = null;
+
         public string ArrivedDbName = "";   // 预约到书队列数据库名
         public string ArrivedReserveTimeSpan = "";  // 通知到书后的保留时间。含时间单位
         public int OutofReservationThreshold = 10;  // 预约到书多少不取次后，被惩罚禁止预约
@@ -1712,7 +1715,10 @@ namespace DigitalPlatform.LibraryServer
 
 
 
-        // 2008/5/8 new add
+        // 2008/5/8
+        // return:
+        //      -1  出错
+        //      0   成功
         public int InitialKdbs(
             RmsChannelCollection Channels,
             out string strError)
@@ -1733,11 +1739,15 @@ namespace DigitalPlatform.LibraryServer
                     return -1;
                 }
 #endif
+
                 // kdbs 初始化的过程是需要耗费时间的，如果在这中间访问，可能有些信息来不及初始化，找不到
                 // 所以这里先整个初始化好了以后，然后才挂接到 this.kdbs 上
                 // 有另外一个方法是所有使用的地方都 利用 this.m_lock 读锁定，但缺点是太麻烦
                 this.kdbs = null;
                 KernelDbInfoCollection kdbs = new KernelDbInfoCollection();
+                // return:
+                //      -1  出错
+                //      0   成功
                 int nRet = kdbs.Initial(Channels,
                             this.WsUrl,
                             "zh",
@@ -1746,7 +1756,22 @@ namespace DigitalPlatform.LibraryServer
                     return -1;
 
                 this.kdbs = kdbs;
-                return nRet;
+
+                // 2015/5/7
+                BiblioDbFromInfo[] infos = null;
+                // 列出某类数据库的检索途径信息
+                // return:
+                //      -1  出错
+                //      0   没有定义
+                //      1   成功
+                nRet = this.ListDbFroms("arrived",
+                    "zh",
+                    "",
+                    out infos,
+                    out strError);
+                this.ArrivedDbFroms = infos;
+
+                return 0;
             }
             finally
             {
@@ -4333,19 +4358,23 @@ namespace DigitalPlatform.LibraryServer
             timestamp = null;
 
             LibraryApplication app = this;
-
-            // 2014/9/19
-            string strHead = "@refID:";
-
             string strFrom = "册条码";
-            if (StringUtil.HasHead(strItemBarcodeParam, strHead, true) == true)
+
+            // 注：旧的，也就是 2015/5/7 以前的 预约到书队列库里面并没有 参考ID 检索点，所以直接用带着 @refID 前缀的字符串进行检索即可。
+            // 等队列库普遍刷新检索点以后，改为使用下面一段代码
+            if (this.ArrivedDbKeysContainsRefIDKey() == true)
             {
-                strFrom = "参考ID";
-                strItemBarcodeParam = strItemBarcodeParam.Substring(strHead.Length).Trim();
-                if (string.IsNullOrEmpty(strItemBarcodeParam) == true)
+                string strHead = "@refID:";
+
+                if (StringUtil.HasHead(strItemBarcodeParam, strHead, true) == true)
                 {
-                    strError = "参数 strItemBarcodeParam 值中参考ID部分不应为空";
-                    return -1;
+                    strFrom = "册参考ID";
+                    strItemBarcodeParam = strItemBarcodeParam.Substring(strHead.Length).Trim();
+                    if (string.IsNullOrEmpty(strItemBarcodeParam) == true)
+                    {
+                        strError = "参数 strItemBarcodeParam 值中参考ID部分不应为空";
+                        return -1;
+                    }
                 }
             }
 
@@ -6726,13 +6755,263 @@ namespace DigitalPlatform.LibraryServer
                 if (string.IsNullOrEmpty(this.AmerceDbName) == false)
                     dbnames.Add(this.AmerceDbName);
             }
+            else if (strDbType == "arrived")
+            {
+                if (string.IsNullOrEmpty(this.ArrivedDbName) == false)
+                    dbnames.Add(this.ArrivedDbName);
+            }
             else
             {
-                strError = "未知的数据库类型 '" + strDbType + "'。应为biblio reader item issue order comment invoice amerce之一";
+                strError = "未知的数据库类型 '" + strDbType + "'。应为biblio reader item issue order comment invoice amerce arrived之一";
                 return -1;
             }
 
             return 0;
+        }
+
+        // 检查确保 kdbs != null
+        public string EnsureKdbs(bool bThrowException = true)
+        {
+            if (this.kdbs == null)
+            {
+                this.ActivateManagerThreadForLoad();
+                string strError = "app.kdbs == null。故障原因请检查dp2Library日志，或稍后重试操作";
+                if (bThrowException == true)
+                    throw new Exception(strError);
+
+                return strError;
+            }
+
+            return null;    // 没有出错
+        }
+
+        // 列出某类数据库的检索途径信息
+        // parameters:
+        //          strLibraryCodeList  当前用户管辖的馆代码列表。这决定了能列出哪些读者库的检索途径。如果调用时 strDbType 不是 "reader"，本参数设为空即可 
+        // return:
+        //      -1  出错
+        //      0   没有定义
+        //      1   成功
+        public int ListDbFroms(string strDbType,
+            string strLang,
+            string strLibraryCodeList,
+            out BiblioDbFromInfo[] infos,
+            out string strError)
+        {
+            infos = null;
+            strError = "";
+
+            strError = EnsureKdbs(false);
+            if (strError != null)
+                goto ERROR1;
+
+            if (string.IsNullOrEmpty(strDbType) == true)
+                strDbType = "biblio";
+
+            // long lRet = 0;
+
+            List<string> dbnames = null;
+            if (strDbType == "reader")
+            {
+                dbnames = this.GetCurrentReaderDbNameList(strLibraryCodeList);    // sessioninfo.LibraryCodeList
+            }
+            else
+            {
+                int nRet = this.GetDbNames(
+                    strDbType,
+                    out dbnames,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+            }
+
+#if NO
+                List<string> dbnames = new List<string>();
+
+                string strDbTypeName = "";
+
+                if (strDbType == "biblio")
+                {
+                    strDbTypeName = "书目";
+                    for (int i = 0; i < app.ItemDbs.Count; i++)
+                    {
+                        // 实体库对应的书目库名
+                        string strBiblioDbName = app.ItemDbs[i].BiblioDbName;
+
+                        if (String.IsNullOrEmpty(strBiblioDbName) == false)
+                            dbnames.Add(strBiblioDbName);
+                    }
+                }
+                else if (strDbType == "reader")
+                {
+                    strDbTypeName = "读者";
+                    dbnames = app.GetCurrentReaderDbNameList(sessioninfo.LibraryCodeList);
+                }
+                else if (strDbType == "item")   // 2012/5/5
+                {
+                    strDbTypeName = "实体";
+                    for (int i = 0; i < app.ItemDbs.Count; i++)
+                    {
+                        // 实体库名
+                        string strItemDbName = app.ItemDbs[i].DbName;
+
+                        if (String.IsNullOrEmpty(strItemDbName) == false)
+                            dbnames.Add(strItemDbName);
+                    }
+                }
+                else if (strDbType == "issue")   // 2012/5/5
+                {
+                    strDbTypeName = "期";
+                    for (int i = 0; i < app.ItemDbs.Count; i++)
+                    {
+                        // 期库名
+                        string strIssueDbName = app.ItemDbs[i].IssueDbName;
+
+                        if (String.IsNullOrEmpty(strIssueDbName) == false)
+                            dbnames.Add(strIssueDbName);
+                    }
+                }
+                else if (strDbType == "order")   // 2012/5/5
+                {
+                    strDbTypeName = "订购";
+                    for (int i = 0; i < app.ItemDbs.Count; i++)
+                    {
+                        // 订购库名
+                        string strOrderDbName = app.ItemDbs[i].OrderDbName;
+
+                        if (String.IsNullOrEmpty(strOrderDbName) == false)
+                            dbnames.Add(strOrderDbName);
+                    }
+                }
+                else if (strDbType == "comment")   // 2012/5/5
+                {
+                    strDbTypeName = "评注";
+                    for (int i = 0; i < app.ItemDbs.Count; i++)
+                    {
+                        // 实体库名
+                        string strCommentDbName = app.ItemDbs[i].CommentDbName;
+
+                        if (String.IsNullOrEmpty(strCommentDbName) == false)
+                            dbnames.Add(strCommentDbName);
+                    }
+                }
+                else if (strDbType == "invoice")
+                {
+                    strDbTypeName = "发票";
+                    if (string.IsNullOrEmpty(app.InvoiceDbName) == false)
+                        dbnames.Add(app.InvoiceDbName);
+                }
+                else if (strDbType == "amerce")
+                {
+                    strDbTypeName = "违约金";
+                    if (string.IsNullOrEmpty(app.AmerceDbName) == false)
+                        dbnames.Add(app.AmerceDbName);
+                }
+                else
+                {
+                    strError = "未知的数据库类型 '"+strDbType+"'。应为biblio reader item issue order comment invoice amerce之一";
+                    goto ERROR1;
+                }
+#endif
+
+            StringUtil.RemoveDupNoSort(ref dbnames);
+
+            if (dbnames.Count == 0)
+            {
+                strError = "当前系统中没有定义此类数据库，所以无法获知其检索途径信息";
+                return 0;
+            }
+
+            // 可以当时现列出，并不存储?
+            // 不存储的缺点是，等到发出检索式的时候，就不知道哪个库有哪些style值了。
+            // 后退一步：caption可以现列出，但是style值需要预先初始化和存储起来，供检索时构造检索式用
+            List<From> froms = new List<From>();
+
+            for (int i = 0; i < dbnames.Count; i++)
+            {
+                string strDbName = dbnames[i];
+
+                if (String.IsNullOrEmpty(strDbName) == true)
+                {
+                    Debug.Assert(false, "");
+                    continue;
+                }
+
+                /*
+                // 2011/12/17
+                if (app.kdbs == null)
+                {
+                    app.ActivateManagerThreadForLoad();
+                    strError = "app.kdbs == null。故障原因请检查dp2Library日志";
+                    goto ERROR1;
+                }
+                 * */
+
+                KernelDbInfo db = this.kdbs.FindDb(strDbName);
+
+                if (db == null)
+                {
+                    strError = "kdbs中没有关于" + LibraryApplication.GetDbTypeName(strDbType) + "数据库 '" + strDbName + "' 的信息";
+                    goto ERROR1;
+                }
+
+                // 把所有库的from累加起来
+                froms.AddRange(db.Froms);
+            }
+
+            // 根据style值去重
+            if (dbnames.Count > 1)
+            {
+                if (strDbType != "biblio")
+                    KernelDbInfoCollection.RemoveDupByCaption(ref froms,
+                        strLang);
+                else
+                    KernelDbInfoCollection.RemoveDupByStyle(ref froms);
+            }
+
+            List<BiblioDbFromInfo> info_list = new List<BiblioDbFromInfo>();
+
+            int nIndexOfID = -1;    // __id途径所在的下标
+
+            for (int i = 0; i < froms.Count; i++)
+            {
+                From from = froms[i];
+
+                Caption caption = from.GetCaption(strLang);
+                if (caption == null)
+                {
+                    caption = from.GetCaption(null);
+                    if (caption == null)
+                    {
+                        strError = "有一个from事项的captions不正常";
+                        goto ERROR1;
+                    }
+                }
+
+                if (caption.Value == "__id")
+                    nIndexOfID = i;
+
+                BiblioDbFromInfo info = new BiblioDbFromInfo();
+                info.Caption = caption.Value;
+                info.Style = from.Styles;
+
+                info_list.Add(info);
+            }
+
+            // 如果曾经出现过 __id caption
+            if (nIndexOfID != -1)
+            {
+                BiblioDbFromInfo temp = info_list[nIndexOfID];
+                info_list.RemoveAt(nIndexOfID);
+                info_list.Add(temp);
+            }
+
+            infos = new BiblioDbFromInfo[info_list.Count];
+            info_list.CopyTo(infos);
+
+            return infos.Length;
+        ERROR1:
+            return -1;
         }
 
         // 一次检索多个检索词
@@ -12726,4 +13005,15 @@ strLibraryCode);    // 读者所在的馆代码
 
         public string Role = "";    // 角色 biblioSource/orderWork // 2009/10/23 new add
     }
+
+    // API ListBiblioDbFroms()所使用的结构
+    [DataContract(Namespace = "http://dp2003.com/dp2library/")]
+    public class BiblioDbFromInfo
+    {
+        [DataMember]
+        public string Caption = ""; // 字面标签
+        [DataMember]
+        public string Style = "";   // 角色
+    }
+
 }

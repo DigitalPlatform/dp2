@@ -35,4 +35,14 @@
     <caption lang="zh-CN">状态</caption>
     <caption lang="en">State</caption>
   </table>
+  <!-- 2015/5/7 增加 参考ID -->
+  <key>
+    <xpath>//refID</xpath>
+    <from>refID</from>
+    <table ref="refID" />
+  </key>
+  <table name="refID" id="7" type="item_refid">
+    <caption lang="zh-CN">册参考ID</caption>
+    <caption lang="en">Item Reference ID</caption>
+  </table>
 </root>

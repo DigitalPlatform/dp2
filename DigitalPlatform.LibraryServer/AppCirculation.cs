@@ -1365,7 +1365,7 @@ namespace DigitalPlatform.LibraryServer
                     //      1   发现该册被保留)， 不能借阅
                     //      2   发现该册预约， 不能续借
                     //      3   发现该册被保留， 不能借阅。而且本函数修改了册记录(<location>元素发生了变化)，需要本函数返回后，把册记录保存。
-                    nRet = DoBorrowRreservationCheck(
+                    nRet = DoBorrowReservationCheck(
                         sessioninfo,
                         bRenew,
                         ref readerdom,
@@ -12231,7 +12231,7 @@ out string strError)
         //      1   发现该册被保留， 不能借阅
         //      2   发现该册预约， 不能续借
         //      3   发现该册被保留， 不能借阅。而且本函数修改了册记录(<location>元素发生了变化)，需要本函数返回后，把册记录保存。
-        int DoBorrowRreservationCheck(
+        int DoBorrowReservationCheck(
             SessionInfo sessioninfo,
             bool bRenew,
             ref XmlDocument readerdom,
@@ -12415,10 +12415,11 @@ out string strError)
                         DomUtil.SetElementText(itemdom.DocumentElement, "location", strLocation);
 
                         // 修改预约通知记录
-                        XmlNode nodeItemBarcode = notifydom.DocumentElement.SelectSingleNode("itemBarcode");
-                        if (nodeItemBarcode != null)
+                        //XmlNode nodeItemBarcode = notifydom.DocumentElement.SelectSingleNode("itemBarcode");
+                        //if (nodeItemBarcode != null)
                         {
-                            DomUtil.SetAttr(nodeItemBarcode, "onShelf", "false");
+                            // DomUtil.SetAttr(nodeItemBarcode, "onShelf", "false");
+                            DomUtil.SetElementText(notifydom.DocumentElement, "onShelf", "false");  // 2015/5/7
 
                             byte[] output_timestamp = null;
                             string strTempOutputPath = "";
@@ -13270,6 +13271,7 @@ strBookPrice);    // 图书价格
         // 清除读者和册记录中的已到预约事项，并提取下一个预约读者证条码号
         // 本函数还负责清除册记录中以前残留的state=arrived的<request>元素
         // parameters:
+        //      strItemBarcode  册条码号。支持 "@refID:" 前缀用法
         //      bMaskLocationReservation    不要给册记录<location>打上#reservation标记
         //      strReservationReaderBarcode 返回下一个预约读者的证条码号
         public int ClearArrivedInfo(

@@ -1116,7 +1116,7 @@ namespace DigitalPlatform.LibraryServer
         // 出于对读者库加锁方面的便利考虑, 单独做了此函数
         // 注：本函数可能要删除部分通知记录
         // parameters:
-        //      strItemBarcodeParam  册条码号。可以使用 @refID: 前缀
+        //      strItemBarcodeParam  册条码号。可以使用 "@refID:" 前缀
         // return:
         //      -1  error
         //      0   没有找到<request>元素
@@ -1173,7 +1173,6 @@ namespace DigitalPlatform.LibraryServer
                     strError = "装载读者记录进入XML DOM时发生错误: " + strError;
                     return -1;
                 }
-
 
                 byte[] timestamp = null;
                 byte[] output_timestamp = null;
@@ -1347,6 +1346,7 @@ namespace DigitalPlatform.LibraryServer
             nRet = AddNotifyRecordToQueue(
                 channels,
                 strItemBarcodeParam,
+                "", // 暂时不使用此参数
                 bOnShelf,
                 strLibraryCode,
                 strReservationReaderBarcode,
@@ -1365,17 +1365,34 @@ namespace DigitalPlatform.LibraryServer
             return 1;
         }
 
+        // 探测当前的到书队列库是否具备 参考ID 这个检索点
+        bool ArrivedDbKeysContainsRefIDKey()
+        {
+            if (this.ArrivedDbFroms == null || this.ArrivedDbFroms.Length == 0)
+                return false;
+            foreach (BiblioDbFromInfo info in this.ArrivedDbFroms)
+            {
+                if (StringUtil.IsInList("item_refid", info.Style) == true)
+                    return true;
+            }
+
+            return false;
+        }
+
         // text-level: 内部处理
         // 在 预约到书 库中，追加一条新的记录
         // 并作email通知
         // 注：本函数可能要删除部分通知记录
         // parameters:
+        //      strItemBarcode  册条码号。必须是册条码号。如果册条码号为空，参考ID需要使用 strRefID 参数
+        //      strRefID        参考ID
         //      bOnShelf    要通知的册是否在架。在架指并没有人借阅过，本来就在书架上。
         //      strLibraryCode  读者所在的馆代码
         //      strReaderXml    预约了图书的读者的XML记录。用于消息通知接口
         int AddNotifyRecordToQueue(
             RmsChannelCollection channels,
             string strItemBarcode,
+            string strRefID,
             bool bOnShelf,
             string strLibraryCode,
             string strReaderBarcode,
@@ -1470,12 +1487,46 @@ namespace DigitalPlatform.LibraryServer
             XmlDocument dom = new XmlDocument();
             dom.LoadXml("<root />");
 
+            // TODO: 以后增加 <refID> 元素，存储册记录的参考ID
+
+#if NO
             XmlNode nodeItemBarcode = DomUtil.SetElementText(dom.DocumentElement, "itemBarcode", strItemBarcode);
 
             // 在<itemBarcode>元素中增加一个onShelf属性，表示属于在架情况
             Debug.Assert(nodeItemBarcode != null, "");
             if (bOnShelf == true)
                 DomUtil.SetAttr(nodeItemBarcode, "onShelf", "true");
+#endif
+            // 兼容 strItemBarcode 中含有前缀的用法
+            string strHead = "@refID:";
+            if (StringUtil.HasHead(strItemBarcode, strHead, true) == true)
+            {
+                strRefID = strItemBarcode.Substring(strHead.Length);
+                strItemBarcode = "";
+            }
+
+            if (this.ArrivedDbKeysContainsRefIDKey() == true)
+            {
+                DomUtil.SetElementText(dom.DocumentElement, "itemBarcode", strItemBarcode);
+                DomUtil.SetElementText(dom.DocumentElement, "refID", strRefID);
+            }
+            else
+            {
+                if (string.IsNullOrEmpty(strItemBarcode) == true)
+                {
+                    if (string.IsNullOrEmpty(strRefID) == true)
+                    {
+                        strError = "AddNotifyRecordToQueue() 函数当 strItemBarcode 参数为空的时候，必须让 strRefID 参数不为空";
+                        return -1;
+                    }
+                    // 旧的用法。避免检索时候查不到
+                    DomUtil.SetElementText(dom.DocumentElement, "itemBarcode", "@refID:" + strRefID);
+                }
+            }
+
+            // 改为存储在元素中 2015/5/7
+            if (bOnShelf == true)
+                DomUtil.SetElementText(dom.DocumentElement, "onShelf", "true");
 
             // 2012/10/26
             DomUtil.SetElementText(dom.DocumentElement, "libraryCode", strLibraryCode);
@@ -1885,15 +1936,20 @@ namespace DigitalPlatform.LibraryServer
 
             string strNotifyDate = DomUtil.GetElementText(queue_rec_dom.DocumentElement,
                 "notifyDate");
-            XmlNode nodeItemBarcode = null;
+            // XmlNode nodeItemBarcode = null;
             string strItemBarcode = DomUtil.GetElementText(queue_rec_dom.DocumentElement,
-                "itemBarcode", out nodeItemBarcode);
+                "itemBarcode"/*, out nodeItemBarcode*/);
+
+            // 2015/5/7
+            string strRefID = DomUtil.GetElementText(queue_rec_dom.DocumentElement,
+    "refID");
 
             string strReaderBarcode = DomUtil.GetElementText(queue_rec_dom.DocumentElement,
                 "readerBarcode");
 
-            // <itemBarcode>元素是否有onShelf属性。
             bool bOnShelf = false;
+#if NO
+            // <itemBarcode>元素是否有onShelf属性。
             if (nodeItemBarcode != null)
             {
                 string strOnShelf = DomUtil.GetAttr(nodeItemBarcode, "onShelf");
@@ -1902,7 +1958,20 @@ namespace DigitalPlatform.LibraryServer
                     || strOnShelf.ToLower() == "on")
                     bOnShelf = true;
             }
+#endif
+            // 2015/5/7
+            // <onShelf> 元素
+            {
+                string strOnShelf = DomUtil.GetElementText(queue_rec_dom.DocumentElement, "onShelf");
+                if (DomUtil.IsBooleanTrue(strOnShelf, false) == true)
+                    bOnShelf = true;
+            }
 
+            // 2015/5/7
+            if (string.IsNullOrEmpty(strItemBarcode) == true && string.IsNullOrEmpty(strRefID) == false)
+            {
+                strItemBarcode = "@refID:" + strRefID;
+            }
 
             // 要通知下一位预约者
 

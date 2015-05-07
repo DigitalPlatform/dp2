@@ -13,6 +13,9 @@ namespace DigitalPlatform.LibraryServer
     // 内核数据库信息数组
     public class KernelDbInfoCollection : List<KernelDbInfo>
     {
+        // return:
+        //      -1  出错
+        //      0   成功
         public int Initial(RmsChannelCollection Channels,
             string strServerUrl,
             string strLang,

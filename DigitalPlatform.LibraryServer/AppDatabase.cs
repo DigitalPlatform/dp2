@@ -4162,7 +4162,7 @@ namespace DigitalPlatform.LibraryServer
                         return -1;
                     }
 
-                    // 看看同名的arrived数据库是否已经存在?
+                    // 看看同名的 arrived 数据库是否已经存在?
                     if (bRecreate == false)
                     {
                         if (this.ArrivedDbName == strName)

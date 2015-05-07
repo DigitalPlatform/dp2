@@ -189,7 +189,7 @@
             this.MenuItem_updateDateDir.Name = "MenuItem_updateDateDir";
             this.MenuItem_updateDateDir.Size = new System.Drawing.Size(320, 22);
             this.MenuItem_updateDateDir.Text = "从安装包更新数据目录中的配置文件";
-            this.MenuItem_updateDateDir.Click += new System.EventHandler(this.MenuItem_updateDateDir_Click);
+            this.MenuItem_updateDateDir.Click += new System.EventHandler(this.MenuItem_updateDataDir_Click);
             // 
             // toolStripSeparator5
             // 

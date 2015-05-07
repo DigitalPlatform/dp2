@@ -283,7 +283,6 @@ FormWindowState.Normal);
             try
             {
                 // 首次运行自动安装数据目录
-                
                 {
                     nRet = SetupKernelDataDir(
                         true,
@@ -330,7 +329,6 @@ FormWindowState.Normal);
                     WriteLibraryEventLog("dp2Library XE 启动 dp2Library 时出错: " + strError, EventLogEntryType.Error);
                     MessageBox.Show(this, strError);
                 }
-
 
                 bool bInstalled = this.AppInfo.GetBoolean("OPAC", "installed", false);
                 if (bInstalled == true)
@@ -2280,7 +2278,6 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
             }
 
             _versionManager.AutoSave();
-
             return 0;
         }
 
@@ -2892,7 +2889,8 @@ this.Font);
             }
         }
 
-        private void MenuItem_updateDateDir_Click(object sender, EventArgs e)
+        // 从安装包更新数据目录中的配置文件
+        private void MenuItem_updateDataDir_Click(object sender, EventArgs e)
         {
             string strError = "";
             // 从 library_data.zip 中展开部分目录内容
