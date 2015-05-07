@@ -6,12 +6,14 @@ dp2 图书馆集成系统是 数字平台(北京)软件有限责任公司于 200
 
 这套系统包含下列模块：
 
-dp2Kernel - 数据库内核(标准版)
-dp2Library - 图书馆应用服务器(标准版)
-dp2Circulation - 内务前端
-dp2Catalog - 编目前端
+* dp2Kernel - 数据库内核(标准版)
+* dp2Library - 图书馆应用服务器(标准版)
+* dp2LibraryXE - 图书馆应用服务器(单机版和小型版)
+* dp2OPAC - 读者公共查询
+* dp2Circulation - 内务前端
+* dp2Catalog - 编目前端
 
-dp2LibraryXE - 图书馆应用服务器(单机版和小型版)
 
-dp2OPAC - 读者公共查询
+
+
 
