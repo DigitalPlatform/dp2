@@ -9,7 +9,7 @@
 
 # dp2-specific files
 
-!digitalplatform.pfx
+!*/digitalplatform.pfx
 
 *.doc
 *.docx
