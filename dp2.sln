@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dp2Catalog", "dp2Catalog\dp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dp2Library", "dp2Library\dp2Library.csproj", "{4DD877F6-796A-4F9C-BFF3-9D36590576CF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dp2Kernel", "dp2Kernel\dp2Kernel\dp2Kernel.csproj", "{017D8E01-B8D1-4671-BB2C-EECBC854FCEC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dp2Kernel", "dp2Kernel\dp2Kernel.csproj", "{017D8E01-B8D1-4671-BB2C-EECBC854FCEC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dp2Installer", "dp2Installer\dp2Installer.csproj", "{7D2AF716-8094-4DB9-8A09-0A4C001A4B28}"
 EndProject

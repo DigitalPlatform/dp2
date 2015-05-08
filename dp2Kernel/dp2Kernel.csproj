@@ -29,7 +29,7 @@
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
     <NuGetPackageImportStamp>81777ef4</NuGetPackageImportStamp>
   </PropertyGroup>
@@ -57,10 +57,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="EntityFramework">
-      <HintPath>..\..\packages\EntityFramework.6.1.2\lib\net40\EntityFramework.dll</HintPath>
+      <HintPath>..\packages\EntityFramework.6.1.2\lib\net40\EntityFramework.dll</HintPath>
     </Reference>
     <Reference Include="EntityFramework.SqlServer">
-      <HintPath>..\..\packages\EntityFramework.6.1.2\lib\net40\EntityFramework.SqlServer.dll</HintPath>
+      <HintPath>..\packages\EntityFramework.6.1.2\lib\net40\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -68,13 +68,13 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Data.SQLite, Version=1.0.96.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\System.Data.SQLite.Core.1.0.96.0\lib\net40\System.Data.SQLite.dll</HintPath>
+      <HintPath>..\packages\System.Data.SQLite.Core.1.0.96.0\lib\net40\System.Data.SQLite.dll</HintPath>
     </Reference>
     <Reference Include="System.Data.SQLite.EF6">
-      <HintPath>..\..\packages\System.Data.SQLite.EF6.1.0.96.0\lib\net40\System.Data.SQLite.EF6.dll</HintPath>
+      <HintPath>..\packages\System.Data.SQLite.EF6.1.0.96.0\lib\net40\System.Data.SQLite.EF6.dll</HintPath>
     </Reference>
     <Reference Include="System.Data.SQLite.Linq">
-      <HintPath>..\..\packages\System.Data.SQLite.Linq.1.0.96.0\lib\net40\System.Data.SQLite.Linq.dll</HintPath>
+      <HintPath>..\packages\System.Data.SQLite.Linq.1.0.96.0\lib\net40\System.Data.SQLite.Linq.dll</HintPath>
     </Reference>
     <Reference Include="System.Drawing" />
     <Reference Include="System.IdentityModel" />
@@ -131,39 +131,39 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\DigitalPlatform.Install\DigitalPlatform.Install.csproj">
+    <ProjectReference Include="..\DigitalPlatform.Install\DigitalPlatform.Install.csproj">
       <Project>{FBB88810-6D4A-44FE-B220-CAC22E4DBDCD}</Project>
       <Name>DigitalPlatform.Install</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\DigitalPlatform.IO\DigitalPlatform.IO.csproj">
+    <ProjectReference Include="..\DigitalPlatform.IO\DigitalPlatform.IO.csproj">
       <Project>{441CB814-AF78-4503-91EF-DCE5F3269502}</Project>
       <Name>DigitalPlatform.IO</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\DigitalPlatform.KernelService\DigitalPlatform.KernelService.csproj">
+    <ProjectReference Include="..\DigitalPlatform.KernelService\DigitalPlatform.KernelService.csproj">
       <Project>{1BFEE291-AB8F-41A4-A80B-1FB5F7AB88E8}</Project>
       <Name>DigitalPlatform.KernelService</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\DigitalPlatform.ResultSet\DigitalPlatform.ResultSet.csproj">
+    <ProjectReference Include="..\DigitalPlatform.ResultSet\DigitalPlatform.ResultSet.csproj">
       <Project>{86E0817D-79A4-4769-B450-C8352D0D1907}</Project>
       <Name>DigitalPlatform.ResultSet</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\DigitalPlatform.rms.db\DigitalPlatform.rms.db.csproj">
+    <ProjectReference Include="..\DigitalPlatform.rms.db\DigitalPlatform.rms.db.csproj">
       <Project>{985702E3-5CE7-40F1-A588-A58A7A50C57A}</Project>
       <Name>DigitalPlatform.rms.db</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\DigitalPlatform.rms\DigitalPlatform.rms.csproj">
+    <ProjectReference Include="..\DigitalPlatform.rms\DigitalPlatform.rms.csproj">
       <Project>{1A7544AB-30D7-4920-928E-26925B86274D}</Project>
       <Name>DigitalPlatform.rms</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\DigitalPlatform.Text\DigitalPlatform.Text.csproj">
+    <ProjectReference Include="..\DigitalPlatform.Text\DigitalPlatform.Text.csproj">
       <Project>{26F96CC3-A4A9-4BC4-A10A-BC7E25581FF6}</Project>
       <Name>DigitalPlatform.Text</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\DigitalPlatform.Xml\DigitalPlatform.Xml.csproj">
+    <ProjectReference Include="..\DigitalPlatform.Xml\DigitalPlatform.Xml.csproj">
       <Project>{E6489E89-1349-4EE7-A00B-AC96B9912587}</Project>
       <Name>DigitalPlatform.Xml</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\DigitalPlatform\DigitalPlatform.csproj">
+    <ProjectReference Include="..\DigitalPlatform\DigitalPlatform.csproj">
       <Project>{BDD43275-EAA0-4670-8BA3-0DB5CD7598DD}</Project>
       <Name>DigitalPlatform</Name>
     </ProjectReference>
@@ -182,9 +182,9 @@
       <ErrorText>这台计算机上缺少此项目引用的 NuGet 程序包。启用“NuGet 程序包还原”可下载这些程序包。有关详细信息，请参阅 http://go.microsoft.com/fwlink/?LinkID=322105。缺少的文件是 {0}。</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
-    <Error Condition="!Exists('..\..\packages\System.Data.SQLite.Core.1.0.96.0\build\net40\System.Data.SQLite.Core.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\System.Data.SQLite.Core.1.0.96.0\build\net40\System.Data.SQLite.Core.targets'))" />
+    <Error Condition="!Exists('..\packages\System.Data.SQLite.Core.1.0.96.0\build\net40\System.Data.SQLite.Core.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\System.Data.SQLite.Core.1.0.96.0\build\net40\System.Data.SQLite.Core.targets'))" />
   </Target>
-  <Import Project="..\..\packages\System.Data.SQLite.Core.1.0.96.0\build\net40\System.Data.SQLite.Core.targets" Condition="Exists('..\..\packages\System.Data.SQLite.Core.1.0.96.0\build\net40\System.Data.SQLite.Core.targets')" />
+  <Import Project="..\packages\System.Data.SQLite.Core.1.0.96.0\build\net40\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.96.0\build\net40\System.Data.SQLite.Core.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

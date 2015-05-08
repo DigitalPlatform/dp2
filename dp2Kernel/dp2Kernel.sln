@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dp2Kernel", "dp2Kernel\dp2Kernel.csproj", "{017D8E01-B8D1-4671-BB2C-EECBC854FCEC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dp2Kernel", "dp2Kernel.csproj", "{017D8E01-B8D1-4671-BB2C-EECBC854FCEC}"
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Setup_dp2Kernel", "..\Setup_dp2Kernel\Setup_dp2Kernel.vdproj", "{65C9EC4F-8E29-4F4D-AF6E-7040F7E8FA09}"
 EndProject
