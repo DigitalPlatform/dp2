@@ -21,6 +21,8 @@ opac_data.zip
 opac_style.zip
 
 _[Dd]ocs/
+kernel_app/
+library_app/
 
 # Build results
 [Dd]ebug/
