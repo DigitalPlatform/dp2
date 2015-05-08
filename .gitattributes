@@ -4,7 +4,7 @@
 * text=auto
 
 # new
-*.txt text eol=crlf
+*.txt eol=crlf
 
 ###############################################################################
 # Set default behavior for command prompt diff.
