@@ -9250,7 +9250,10 @@ out strError);
             {
                 string strDefaultFontString = this.DefaultFontString;
                 if (String.IsNullOrEmpty(strDefaultFontString) == true)
-                    return null;
+                {
+                    return GuiUtil.GetDefaultFont();    // 2015/5/8
+                    // return null;
+                }
 
                 // Create the FontConverter.
                 System.ComponentModel.TypeConverter converter =

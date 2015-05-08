@@ -105,7 +105,7 @@ namespace DigitalPlatform.CirculationClient
             this.checkBox_savePasswordShort.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.checkBox_savePasswordShort.AutoSize = true;
             this.checkBox_savePasswordShort.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.checkBox_savePasswordShort.Location = new System.Drawing.Point(120, 215);
+            this.checkBox_savePasswordShort.Location = new System.Drawing.Point(120, 290);
             this.checkBox_savePasswordShort.Name = "checkBox_savePasswordShort";
             this.checkBox_savePasswordShort.Size = new System.Drawing.Size(111, 16);
             this.checkBox_savePasswordShort.TabIndex = 7;
@@ -120,7 +120,7 @@ namespace DigitalPlatform.CirculationClient
             this.textBox_password.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBox_password.ForeColor = System.Drawing.SystemColors.ControlText;
             this.textBox_password.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textBox_password.Location = new System.Drawing.Point(120, 191);
+            this.textBox_password.Location = new System.Drawing.Point(120, 266);
             this.textBox_password.Name = "textBox_password";
             this.textBox_password.PasswordChar = '*';
             this.textBox_password.Size = new System.Drawing.Size(156, 21);
@@ -135,7 +135,7 @@ namespace DigitalPlatform.CirculationClient
             this.textBox_userName.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBox_userName.ForeColor = System.Drawing.SystemColors.ControlText;
             this.textBox_userName.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textBox_userName.Location = new System.Drawing.Point(120, 146);
+            this.textBox_userName.Location = new System.Drawing.Point(120, 221);
             this.textBox_userName.Name = "textBox_userName";
             this.textBox_userName.Size = new System.Drawing.Size(156, 21);
             this.textBox_userName.TabIndex = 3;
@@ -149,9 +149,9 @@ namespace DigitalPlatform.CirculationClient
             this.textBox_serverAddr.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBox_serverAddr.ForeColor = System.Drawing.SystemColors.ControlText;
             this.textBox_serverAddr.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textBox_serverAddr.Location = new System.Drawing.Point(12, 89);
+            this.textBox_serverAddr.Location = new System.Drawing.Point(12, 164);
             this.textBox_serverAddr.Name = "textBox_serverAddr";
-            this.textBox_serverAddr.Size = new System.Drawing.Size(419, 21);
+            this.textBox_serverAddr.Size = new System.Drawing.Size(414, 21);
             this.textBox_serverAddr.TabIndex = 2;
             this.textBox_serverAddr.Click += new System.EventHandler(this.controls_Click);
             // 
@@ -160,7 +160,7 @@ namespace DigitalPlatform.CirculationClient
             this.button_cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.button_cancel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button_cancel.Location = new System.Drawing.Point(353, 265);
+            this.button_cancel.Location = new System.Drawing.Point(348, 340);
             this.button_cancel.Name = "button_cancel";
             this.button_cancel.Size = new System.Drawing.Size(78, 24);
             this.button_cancel.TabIndex = 11;
@@ -171,7 +171,7 @@ namespace DigitalPlatform.CirculationClient
             // 
             this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(10, 193);
+            this.label3.Location = new System.Drawing.Point(10, 268);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(53, 12);
             this.label3.TabIndex = 5;
@@ -181,7 +181,7 @@ namespace DigitalPlatform.CirculationClient
             // 
             this.label_userName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label_userName.AutoSize = true;
-            this.label_userName.Location = new System.Drawing.Point(10, 148);
+            this.label_userName.Location = new System.Drawing.Point(10, 223);
             this.label_userName.Name = "label_userName";
             this.label_userName.Size = new System.Drawing.Size(65, 12);
             this.label_userName.TabIndex = 2;
@@ -191,7 +191,7 @@ namespace DigitalPlatform.CirculationClient
             // 
             this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(10, 74);
+            this.label1.Location = new System.Drawing.Point(10, 149);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(149, 12);
             this.label1.TabIndex = 1;
@@ -201,7 +201,7 @@ namespace DigitalPlatform.CirculationClient
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_OK.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button_OK.Location = new System.Drawing.Point(353, 235);
+            this.button_OK.Location = new System.Drawing.Point(348, 310);
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(78, 24);
             this.button_OK.TabIndex = 10;
@@ -222,7 +222,7 @@ namespace DigitalPlatform.CirculationClient
             this.textBox_comment.Name = "textBox_comment";
             this.textBox_comment.ReadOnly = true;
             this.textBox_comment.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_comment.Size = new System.Drawing.Size(419, 51);
+            this.textBox_comment.Size = new System.Drawing.Size(414, 126);
             this.textBox_comment.TabIndex = 0;
             this.textBox_comment.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
@@ -233,7 +233,7 @@ namespace DigitalPlatform.CirculationClient
             this.textBox_location.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.textBox_location.ForeColor = System.Drawing.SystemColors.ControlText;
             this.textBox_location.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textBox_location.Location = new System.Drawing.Point(120, 237);
+            this.textBox_location.Location = new System.Drawing.Point(120, 312);
             this.textBox_location.Name = "textBox_location";
             this.textBox_location.Size = new System.Drawing.Size(156, 21);
             this.textBox_location.TabIndex = 9;
@@ -243,7 +243,7 @@ namespace DigitalPlatform.CirculationClient
             // 
             this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(10, 239);
+            this.label4.Location = new System.Drawing.Point(10, 314);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(77, 12);
             this.label4.TabIndex = 8;
@@ -254,7 +254,7 @@ namespace DigitalPlatform.CirculationClient
             this.checkBox_isReader.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.checkBox_isReader.AutoSize = true;
             this.checkBox_isReader.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.checkBox_isReader.Location = new System.Drawing.Point(120, 169);
+            this.checkBox_isReader.Location = new System.Drawing.Point(120, 244);
             this.checkBox_isReader.Name = "checkBox_isReader";
             this.checkBox_isReader.Size = new System.Drawing.Size(63, 16);
             this.checkBox_isReader.TabIndex = 4;
@@ -268,7 +268,7 @@ namespace DigitalPlatform.CirculationClient
             this.checkBox_savePasswordLong.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.checkBox_savePasswordLong.AutoSize = true;
             this.checkBox_savePasswordLong.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.checkBox_savePasswordLong.Location = new System.Drawing.Point(12, 273);
+            this.checkBox_savePasswordLong.Location = new System.Drawing.Point(12, 348);
             this.checkBox_savePasswordLong.Name = "checkBox_savePasswordLong";
             this.checkBox_savePasswordLong.Size = new System.Drawing.Size(111, 16);
             this.checkBox_savePasswordLong.TabIndex = 12;
@@ -288,10 +288,10 @@ namespace DigitalPlatform.CirculationClient
             this.toolStripButton_server_setXeServer,
             this.toolStripSeparator1,
             this.toolStripButton_server_setHongnibaServer});
-            this.toolStrip_server.Location = new System.Drawing.Point(12, 109);
+            this.toolStrip_server.Location = new System.Drawing.Point(12, 184);
             this.toolStrip_server.Name = "toolStrip_server";
             this.toolStrip_server.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            this.toolStrip_server.Size = new System.Drawing.Size(419, 25);
+            this.toolStrip_server.Size = new System.Drawing.Size(414, 25);
             this.toolStrip_server.TabIndex = 26;
             this.toolStrip_server.Text = "toolStrip1";
             // 
@@ -329,7 +329,7 @@ namespace DigitalPlatform.CirculationClient
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlDark;
-            this.ClientSize = new System.Drawing.Size(443, 301);
+            this.ClientSize = new System.Drawing.Size(438, 376);
             this.Controls.Add(this.checkBox_savePasswordLong);
             this.Controls.Add(this.checkBox_isReader);
             this.Controls.Add(this.textBox_location);
