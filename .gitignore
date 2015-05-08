@@ -9,7 +9,6 @@
 
 # dp2-specific files
 
-!*/digitalplatform.pfx
 
 *.doc
 *.docx
@@ -174,6 +173,7 @@ ClientBin/
 *.dbmdl
 *.dbproj.schemaview
 *.pfx
+!*/digitalplatform.pfx
 *.publishsettings
 node_modules/
 
