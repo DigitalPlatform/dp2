@@ -69,6 +69,13 @@ namespace dp2Catalog
 
         public string DataDir = "";
 
+        /// <summary>
+        /// 用户目录
+        /// </summary>
+        public string UserDir = "";
+
+        public string UserTempDir = "";
+
         //保存界面信息
         public ApplicationInfo AppInfo = new ApplicationInfo("dp2catalog.xml");
 
@@ -122,6 +129,32 @@ namespace dp2Catalog
                 DataDir = Environment.CurrentDirectory;
             }
 
+            {
+                // 2015/5/8
+                this.UserDir = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                    "dp2Catalog_v2");
+                PathUtil.CreateDirIfNeed(this.UserDir);
+
+                this.UserTempDir = Path.Combine(this.UserDir, "temp");
+                PathUtil.CreateDirIfNeed(this.UserTempDir);
+
+                string strOldFileName = Path.Combine(this.DataDir, "zserver.xml");
+                string strNewFileName = Path.Combine(this.UserDir, "zserver.xml");
+                if (File.Exists(strNewFileName) == false)
+                {
+                    try
+                    {
+                        File.Copy(strOldFileName, strNewFileName, true);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(this, "复制 zserver.xml 文件时出错: " + ex.Message);
+                    }
+                }
+
+            }
+
             // 设置窗口尺寸状态
             if (AppInfo != null)
             {
@@ -134,7 +167,7 @@ namespace dp2Catalog
                 GuiUtil.SetControlFont(this, this.DefaultFont);
 
                 AppInfo.LoadFormStates(this,
-                    "mainformstate", 
+                    "mainformstate",
                     FormWindowState.Maximized);
             }
 
@@ -218,7 +251,7 @@ namespace dp2Catalog
                     + "\\servers.bin";
             }
 
-            this.Servers.ServerChanged +=new dp2ServerChangedEventHandle(Servers_ServerChanged);
+            this.Servers.ServerChanged += new dp2ServerChangedEventHandle(Servers_ServerChanged);
 
 
             if (IsFirstRun == true && this.Servers.Count == 0)
@@ -269,16 +302,15 @@ namespace dp2Catalog
                 }
 
                 // 检测zserver.xml是否已经存在？
-                string strServerXmlPath = this.DataDir + "\\zserver.xml";
+                string strServerXmlPath = Path.Combine(this.UserDir, "zserver.xml");
                 if (FileUtil.FileExist(strServerXmlPath) == false)
                 {
                     // 下载数据文件zserver.xml
-                    nRet = DownloadDataFile("zserver.xml",
+                    nRet = DownloadUserFile("zserver.xml",
                         out strError);
                     if (nRet == -1)
                         MessageBox.Show(this, strError);
                 }
-
             }
 
             nRet = this.LoadIsbnSplitter(true, out strError);
@@ -1764,6 +1796,28 @@ namespace dp2Catalog
             return 0;
         }
 
+        // 2015/5/8
+        // 下载用户文件
+        public int DownloadUserFile(string strFileName,
+            out string strError)
+        {
+            strError = "";
+
+            string strUrl = "http://dp2003.com/dp2Catalog/" + strFileName;
+            string strLocalFileName = Path.Combine(this.UserDir, strFileName);
+            string strTempFileName = Path.Combine(this.UserDir, "~temp_download_webfile");
+
+            int nRet = WebFileDownloadDialog.DownloadWebFile(
+                this,
+                strUrl,
+                strLocalFileName,
+                strTempFileName,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            strError = "下载" + strFileName + "文件成功 :\r\n" + strUrl + " --> " + strLocalFileName;
+            return 0;
+        }
 
 
         public int LoadQuickSjhm(bool bAutoDownload,
@@ -2328,7 +2382,10 @@ out string strError)
             {
                 string strDefaultFontString = this.DefaultFontString;
                 if (String.IsNullOrEmpty(strDefaultFontString) == true)
-                    return null;
+                {
+                    return GuiUtil.GetDefaultFont();    // 2015/5/8
+                    // return null;
+                }
 
                 // Create the FontConverter.
                 System.ComponentModel.TypeConverter converter =

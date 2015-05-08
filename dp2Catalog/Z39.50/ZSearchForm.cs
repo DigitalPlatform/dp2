@@ -133,7 +133,7 @@ namespace dp2Catalog
 
             int nRet = 0;
             string strError = "";
-            nRet = this.zTargetControl1.Load(m_mainForm.DataDir + "\\zserver.xml",
+            nRet = this.zTargetControl1.Load(Path.Combine(m_mainForm.UserDir, "zserver.xml"),
                 out strError);
             if (nRet == -1)
                 MessageBox.Show(this, strError);
