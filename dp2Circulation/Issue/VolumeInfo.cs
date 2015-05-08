@@ -301,6 +301,13 @@ namespace dp2Circulation
                 }
             }
 
+            // 2015/5/8 如果 strText 内容为“绿笔采风”之类的，就无法分析出部件
+            if (infos.Count == 0 && notdef_segments.Count > 0)
+            {
+                strError += "卷期范围字符串中出现了无法识别的序列: " + StringUtil.MakePathList(notdef_segments, "=");
+                return -1;
+            }
+
             return 0;
         }
 

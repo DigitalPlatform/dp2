@@ -1103,6 +1103,16 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                 return true;
             }
 
+            // 2015/5/8
+            if (strText.ToUpper().EndsWith("ISBN") == true)
+            {
+                strText = strText.Substring(0, strText.Length - "ISBN".Length).Trim();
+                if (string.IsNullOrEmpty(strText) == true)
+                    return false;
+                strTextParam = strText;
+                return true;
+            }
+
             string strError = "";
             // return:
             //      -1  出错

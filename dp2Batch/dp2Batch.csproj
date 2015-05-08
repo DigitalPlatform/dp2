@@ -326,14 +326,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="dp2Batch_1_TemporaryKey.pfx" />
-    <None Include="dp2Batch_2_TemporaryKey.pfx" />
-    <None Include="dp2Batch_3_TemporaryKey.pfx" />
-    <None Include="dp2Batch_4_TemporaryKey.pfx" />
-    <None Include="dp2Batch_5_TemporaryKey.pfx" />
-    <None Include="dp2Batch_6_TemporaryKey.pfx" />
     <None Include="dp2Batch_7_TemporaryKey.pfx" />
-    <None Include="dp2Batch_TemporaryKey.pfx" />
     <None Include="Properties\app.manifest" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

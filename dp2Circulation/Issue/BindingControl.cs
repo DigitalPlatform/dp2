@@ -2714,7 +2714,7 @@ namespace dp2Circulation
                     nRet = VolumeInfo.BuildVolumeInfos(strVolume,
                         out infos,
                         out strError);
-                    if (nRet == -1)
+                    if (nRet == -1 || infos.Count == 0) // 2015/5/8
                     {
                         parent_item.Comment += "\r\n解析卷期字符串的时候发生错误: " + strError;
                         parent_items.Remove(parent_item);
@@ -2724,6 +2724,7 @@ namespace dp2Circulation
                         i--;
                         continue;
                     }
+
 
                     bool bFailed = false;
                     string strFailMessage = "";
@@ -7934,7 +7935,7 @@ issue.Volume);
                 ItemBindingItem parent_item = this.ParentItems[i];
 
                 IssueBindingItem issue = parent_item.Container; // 假装属于这个期
-                Debug.Assert(issue != null, "");
+                Debug.Assert(issue != null, "合订册的 Container 不应该为空。正确的处理方式是把这样的册放入自由期管辖范围");
 
                 // 找到行号
                 int nStartLineNo = this.Issues.IndexOf(issue);

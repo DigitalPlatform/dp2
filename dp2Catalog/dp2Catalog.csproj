@@ -418,10 +418,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="app.config" />
-    <None Include="dp2Catalog_1_TemporaryKey.pfx" />
-    <None Include="dp2Catalog_2_TemporaryKey.pfx" />
-    <None Include="dp2Catalog_3_TemporaryKey.pfx" />
-    <None Include="dp2Catalog_4_TemporaryKey.pfx" />
     <Content Include="1_2_840_10003_5_10\amazon.xslt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -433,9 +429,6 @@
     <Content Include="1_2_840_10003_5_1\dp2catalog_marc_autogen.cs" />
     <Content Include="1_2_840_10003_5_10\dp2catalog_marc_autogen.cs.ref" />
     <Content Include="1_2_840_10003_5_10\dp2catalog_marc_autogen.cs" />
-    <None Include="dp2Catalog_5_TemporaryKey.pfx" />
-    <None Include="dp2Catalog_6_TemporaryKey.pfx" />
-    <None Include="dp2Catalog_7_TemporaryKey.pfx" />
     <None Include="dp2Catalog_8_TemporaryKey.pfx" />
     <None Include="dp2Catalog_TemporaryKey.pfx" />
     <Content Include="1_2_840_10003_5_10\marc_browse.fltx">

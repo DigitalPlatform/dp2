@@ -153,7 +153,6 @@
     <Compile Include="CategoryPropertyDlg.Designer.cs">
       <DependentUpon>CategoryPropertyDlg.cs</DependentUpon>
     </Compile>
-    <Compile Include="Class2.cs" />
     <Compile Include="CreateCoverImageDialog.cs">
       <SubType>Form</SubType>
     </Compile>
