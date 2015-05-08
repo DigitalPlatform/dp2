@@ -8,6 +8,9 @@
 *.sln.docstates
 
 # dp2-specific files
+
+!digitalplatform.pfx
+
 *.doc
 *.docx
 kernel_app.zip
