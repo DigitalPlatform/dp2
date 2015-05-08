@@ -473,7 +473,7 @@ MessageBoxDefaultButton.Button1);
             string strFileName = Path.Combine(this.MainForm.DataDir, "eula.txt");
             using (StreamReader sr = new StreamReader(strFileName, true))
             {
-                this.textBox_license.Text = sr.ReadToEnd();
+                this.textBox_license.Text = sr.ReadToEnd().Replace("\r\n","\n").Replace("\n","\r\n");   // 两个 Replace() 会将只有 LF 结尾的行处理为 CR LF
             }
         }
 
