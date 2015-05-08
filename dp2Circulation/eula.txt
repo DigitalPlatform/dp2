@@ -2,8 +2,6 @@
 dp2Circulation 软件最终用户许可协议
 ===
 
-test
-
 一旦安装和使用 dp2Circulation 软件，即表明您接受本最终用户许可协议（EULA）的所有条款。如果您代表公司接受这些条款，您还必须保证您的公司接受本  EULA 的所有条款。 
 
 数字平台(北京)软件有限责任公司（以下称“数字平台公司”）在任何时候都保留更新和变更的权利，而且不予以通知，本 EULA 及其中包含的所有文档供您参阅。在http://dp2003.com/dp2circulation/eula.txt 提供本 EULA 的最新版本。在本 EULA 经过任何更新和改动之后您继续使用 dp2Circulation，即表示您接受新的 EULA。
