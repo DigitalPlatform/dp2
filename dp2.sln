@@ -114,6 +114,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{FE3BE2
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZipUtil", "ZipUtil\ZipUtil.csproj", "{47E73ADC-0C75-4018-A42F-C8CA68679F25}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BD72314A-D69F-4D70-B12F-64DDB6AB672E}"
+	ProjectSection(SolutionItems) = preProject
+		Ionic.Zip.dll = Ionic.Zip.dll
+		ZipUtil.exe = ZipUtil.exe
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -660,6 +668,16 @@ Global
 		{4C57493B-DE00-4BC0-836C-C736D3176689}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{4C57493B-DE00-4BC0-836C-C736D3176689}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{4C57493B-DE00-4BC0-836C-C736D3176689}.Release|x86.ActiveCfg = Release|Any CPU
+		{47E73ADC-0C75-4018-A42F-C8CA68679F25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47E73ADC-0C75-4018-A42F-C8CA68679F25}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47E73ADC-0C75-4018-A42F-C8CA68679F25}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{47E73ADC-0C75-4018-A42F-C8CA68679F25}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{47E73ADC-0C75-4018-A42F-C8CA68679F25}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{47E73ADC-0C75-4018-A42F-C8CA68679F25}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47E73ADC-0C75-4018-A42F-C8CA68679F25}.Release|Any CPU.Build.0 = Release|Any CPU
+		{47E73ADC-0C75-4018-A42F-C8CA68679F25}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{47E73ADC-0C75-4018-A42F-C8CA68679F25}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{47E73ADC-0C75-4018-A42F-C8CA68679F25}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
