@@ -32,3 +32,5 @@ cd ..
 
 cd ..
 
+..\ziputil opac_app opac_app.zip -t
+..\ziputil opac_data opac_data.zip -t

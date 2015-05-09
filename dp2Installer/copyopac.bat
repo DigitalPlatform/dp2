@@ -45,3 +45,8 @@ xcopy ..\..\dp2opac\style\0 0 /Y
 cd ..
 
 
+..\ziputil opac_app opac_app.zip -t
+
+..\ziputil opac_data opac_data.zip -t
+
+..\ziputil opac_style opac_style.zip -t
