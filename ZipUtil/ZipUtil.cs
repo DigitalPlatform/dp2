@@ -31,7 +31,6 @@ namespace ZipUtil
                     filenames.Add(s);
             }
 
-
             if (filenames.Count != 2)
             {
                 Console.WriteLine("文件名和目录名参数不正确。\r\nUsage: ZipUtil directory zipfilename [-t]");
@@ -110,7 +109,8 @@ namespace ZipUtil
         //      -1  出错
         //      0   两个文件内容完全相同
         //      1   两个文件内容不同
-        static int CompareZipFile(string strFileName1,
+        static int CompareZipFile(
+            string strFileName1,
             string strFileName2,
             out string strError)
         {
@@ -120,6 +120,8 @@ namespace ZipUtil
                 using (ZipFile zip1 = ZipFile.Read(strFileName1))
                 using (ZipFile zip2 = ZipFile.Read(strFileName2))
                 {
+                    if (zip1.Count != zip2.Count)
+                        return 1;
                     for (int i = 0; i < zip1.Count; i++)
                     {
                         ZipEntry e1 = zip1[i];
@@ -143,7 +145,6 @@ namespace ZipUtil
                             return 1;
                     }
                 }
-
             }
             catch (Exception ex)
             {
@@ -183,31 +184,29 @@ namespace ZipUtil
         //      -1  出错
         //      0   两个文件内容完全相同
         //      1   两个文件内容不同
-        static int CompareFile(string strFileName1,
-            string strFileName2, 
+        static int CompareFile(
+            string strFileName1,
+            string strFileName2,
             out string strError)
         {
             strError = "";
             try
             {
                 using (FileStream stream1 = File.OpenRead(strFileName1))
+                using (FileStream stream2 = File.OpenRead(strFileName2))
                 {
-                    using (FileStream stream2 = File.OpenRead(strFileName2))
+                    if (stream1.Length != stream2.Length)
+                        return 1;
+
+                    while (true)
                     {
-                        if (stream1.Length != stream2.Length)
+                        int nRet = stream1.ReadByte();
+                        if (nRet == -1)
+                            return 0;
+
+                        if (nRet != stream2.ReadByte())
                             return 1;
-
-                        while (true)
-                        {
-                            int nRet = stream1.ReadByte();
-                            if (nRet == -1)
-                                return 0;
-
-                            if (nRet != stream2.ReadByte())
-                                return 1;
-                        }
                     }
-
                 }
             }
             catch (Exception ex)

@@ -770,16 +770,27 @@ FormWindowState.Normal);
             string strTempPath = Path.Combine(strTempDir, Path.GetFileName(e.FileName));
             string strTargetPath = Path.Combine(strTargetDir, e.FileName);
 
-            string strOldValue = e.FileName;
-            e.FileName = Path.GetFileName(e.FileName);
-            e.Extract(strTempDir, ExtractExistingFileAction.OverwriteSilently);
-            e.FileName = strOldValue;
+            // string strOldValue = e.FileName;
+            
+            // e.FileName = Path.GetFileName(e.FileName);
+            
+            // e.Extract(strTempDir, ExtractExistingFileAction.OverwriteSilently);
+            // e.FileName = strOldValue;
+
+            // 2015/5/9
+            using (FileStream stream = new FileStream(strTempPath, FileMode.Create))
+            {
+                e.Extract(stream);
+            }
 
             int nErrorCount = 0;
             for (; ; )
             {
                 try
                 {
+                    // 确保目标目录已经创建
+                    PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strTargetPath));
+
                     File.Copy(strTempPath, strTargetPath, true);
                 }
                 catch(Exception ex)
@@ -933,53 +944,53 @@ MessageBoxDefaultButton.Button2);
             if (bAuto == false || strOldTimestamp != strNewTimestamp)
             {
 #endif
-                List<OpacAppInfo> infos = null;
-                // 查找 dp2OPAC 路径
-                // return:
-                //      -1  出错
-                //      其他  返回找到的路径个数
-                nRet = OpacAppInfo.GetOpacInfo(out infos,
-                    out strError);
-                if (nRet == -1)
-                    return -1;
+            List<OpacAppInfo> infos = null;
+            // 查找 dp2OPAC 路径
+            // return:
+            //      -1  出错
+            //      其他  返回找到的路径个数
+            nRet = OpacAppInfo.GetOpacInfo(out infos,
+                out strError);
+            if (nRet == -1)
+                return -1;
 
-                if (infos.Count == 0)
-                    return 0;
+            if (infos.Count == 0)
+                return 0;
 
-                foreach (OpacAppInfo info in infos)
+            foreach (OpacAppInfo info in infos)
+            {
+                if (string.IsNullOrEmpty(info.PhysicalPath) == true)
+                    continue;
+
+                AppendString("更新实例 '" + info.IisPath + "' 的 style 目录 ...\r\n");
+
+                // 从 opac_style.zip 中展开部分目录内容
+                string strTargetPath = Path.Combine(info.PhysicalPath, "style");
+                if (Directory.Exists(strTargetPath) == true)
                 {
-                    if (string.IsNullOrEmpty(info.PhysicalPath) == true)
-                        continue;
-
-                    AppendString("更新实例 '" + info.IisPath + "' 的 style 目录 ...\r\n");
-
-                    // 从 opac_style.zip 中展开部分目录内容
-                    string strTargetPath = Path.Combine(info.PhysicalPath, "style");
-                    if (Directory.Exists(strTargetPath) == true)
-                    {
-                        nRet = dp2OPAC_extractDir(
-                            bAuto,
-                            strZipFileName,
-                            strTargetPath,
-                            false,
-                            out strError);
-                        if (nRet == -1)
-                            return -1;
-                    }
-
-                    strTargetPath = Path.Combine(info.DataDir, "style");
-                    if (Directory.Exists(strTargetPath) == true)
-                    {
-                        nRet = dp2OPAC_extractDir(
-                            bAuto,
-                            strZipFileName,
-                            strTargetPath,
-                            true,   // 需要避开 .css.macro 文件的 .css 文件
-                            out strError);
-                        if (nRet == -1)
-                            return -1;
-                    }
+                    nRet = dp2OPAC_extractDir(
+                        bAuto,
+                        strZipFileName,
+                        strTargetPath,
+                        false,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
                 }
+
+                strTargetPath = Path.Combine(info.DataDir, "style");
+                if (Directory.Exists(strTargetPath) == true)
+                {
+                    nRet = dp2OPAC_extractDir(
+                        bAuto,
+                        strZipFileName,
+                        strTargetPath,
+                        true,   // 需要避开 .css.macro 文件的 .css 文件
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                }
+            }
 #if NO
                 _versionManager.SetFileVersion(Path.GetFileName(strZipFileName), strNewTimestamp);
                 _versionManager.AutoSave();
@@ -1091,6 +1102,11 @@ MessageBoxDefaultButton.Button2);
 
                                 if ((e.Attributes & FileAttributes.Directory) == 0)
                                 {
+                                    if (e.LastModified != File.GetLastWriteTime(strFullPath))
+                                    {
+                                        // 时间有可能不一致，可能是夏令时之类的问题
+                                        File.SetLastWriteTime(strFullPath, e.LastModified);
+                                    }
                                     Debug.Assert(e.LastModified == File.GetLastWriteTime(strFullPath));
                                     _versionManager.SetFileVersion(strFullPath, e.LastModified.ToString());
                                 }
@@ -1286,6 +1302,11 @@ MessageBoxDefaultButton.Button2);
                             e.Extract(strLibraryDataDir, ExtractExistingFileAction.OverwriteSilently);
                             if ((e.Attributes & FileAttributes.Directory) == 0)
                             {
+                                if (e.LastModified != File.GetLastWriteTime(strFullPath))
+                                {
+                                    // 时间有可能不一致，可能是夏令时之类的问题
+                                    File.SetLastWriteTime(strFullPath, e.LastModified);
+                                }
                                 Debug.Assert(e.LastModified == File.GetLastWriteTime(strFullPath));
                                 _versionManager.SetFileVersion(strFullPath, e.LastModified.ToString());
                             }
