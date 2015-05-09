@@ -2262,9 +2262,9 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
                                     WriteLibraryEventLog(strText, EventLogEntryType.Information);
 #endif
                                      * */
+                                    // 时间有可能不一致，可能是夏令时之类的问题
                                     File.SetLastWriteTime(strFullPath, e.LastModified);
                                 }
-                                // 时间有可能不一致，可能是夏令时之类的问题
                                 Debug.Assert(e.LastModified == File.GetLastWriteTime(strFullPath));
                                 _versionManager.SetFileVersion(strFullPath, e.LastModified.ToString());
                             }

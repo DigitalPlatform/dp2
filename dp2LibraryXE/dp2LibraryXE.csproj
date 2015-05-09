@@ -169,6 +169,7 @@
     <Content Include="digitalplatform.pfx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="copydata.bat" />
     <None Include="copyopac.bat" />
     <None Include="dp2LibraryXE_1_TemporaryKey.pfx" />
     <None Include="dp2LibraryXE_2_TemporaryKey.pfx" />
