@@ -127,6 +127,9 @@
     <Content Include="kernel_app.zip">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="copykernel.bat" />
+    <None Include="copylibrary.bat" />
+    <None Include="copyopac.bat" />
     <None Include="dp2Installer_TemporaryKey.pfx" />
     <Content Include="opac_app.zip">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
