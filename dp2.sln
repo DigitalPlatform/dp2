@@ -12,8 +12,18 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dp2Kernel", "dp2Kernel\dp2Kernel.csproj", "{017D8E01-B8D1-4671-BB2C-EECBC854FCEC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dp2Installer", "dp2Installer\dp2Installer.csproj", "{7D2AF716-8094-4DB9-8A09-0A4C001A4B28}"
+	ProjectSection(ProjectDependencies) = postProject
+		{017D8E01-B8D1-4671-BB2C-EECBC854FCEC} = {017D8E01-B8D1-4671-BB2C-EECBC854FCEC}
+		{D91C6B98-886B-4181-9361-5214FFC992A9} = {D91C6B98-886B-4181-9361-5214FFC992A9}
+		{47E73ADC-0C75-4018-A42F-C8CA68679F25} = {47E73ADC-0C75-4018-A42F-C8CA68679F25}
+		{4DD877F6-796A-4F9C-BFF3-9D36590576CF} = {4DD877F6-796A-4F9C-BFF3-9D36590576CF}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dp2LibraryXE", "dp2LibraryXE\dp2LibraryXE.csproj", "{102C775A-B4B1-4A3A-842C-13A68DCCB77D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D91C6B98-886B-4181-9361-5214FFC992A9} = {D91C6B98-886B-4181-9361-5214FFC992A9}
+		{47E73ADC-0C75-4018-A42F-C8CA68679F25} = {47E73ADC-0C75-4018-A42F-C8CA68679F25}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform", "DigitalPlatform\DigitalPlatform.csproj", "{BDD43275-EAA0-4670-8BA3-0DB5CD7598DD}"
 EndProject
@@ -117,10 +127,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZipUtil", "ZipUtil\ZipUtil.csproj", "{47E73ADC-0C75-4018-A42F-C8CA68679F25}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BD72314A-D69F-4D70-B12F-64DDB6AB672E}"
-	ProjectSection(SolutionItems) = preProject
-		Ionic.Zip.dll = Ionic.Zip.dll
-		ZipUtil.exe = ZipUtil.exe
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

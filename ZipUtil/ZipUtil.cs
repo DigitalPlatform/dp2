@@ -1,25 +1,34 @@
-﻿using Ionic.Zip;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 
+using Ionic.Zip;
+
 namespace ZipUtil
 {
+    /// <summary>
+    /// 压缩一个目录为 .zip 文件的命令行工具。模仿 Windows 发送到 ... 压缩(Zipped)文件夹 功能
+    /// 有两种用法：
+    /// ZipUtil directory zipfilename
+    ///    这种用法压缩目录成为一个 .zip 文件
+    /// ZipUtil directory zipfilename -t
+    ///    这种用法要先检测目录中的文件相对于已经存在的 .zip 文件内容是否有变化，如果没有变化就不进行重新压缩了。这种特性，对于 dp2Installer 项目使用批处理命令创建和更新 .zip 文件非常有用，因为如果内容实质上没有变化但 .zip 文件也重新压缩的话，会让 dp2Installer 频繁进行不必要的升级提示。dp2Installer 是根据 .zip 文件的修改时间和尺寸来感知变化的
+    /// </summary>
     class ZipUtil
     {
         static void Main(string[] args)
         {
             if (args.Length == 0)
             {
-                Console.WriteLine("Usage: ZipUtil directory zipfilename [-t]\r\n参数 -t 表示压缩前探测目录内文件(和压缩文件中相比)是否有变化，如果没有变化则不压缩了");
+                Console.WriteLine("用法: ZipUtil 目录名 zip文件名 [-t]\r\n注：参数 -t 表示压缩前探测目录内文件(和压缩文件中相比)是否有变化，如果没有变化则不压缩了");
                 return;
             }
 
             // 解析参数
             List<string> filenames = new List<string>();    // 存储文件名或者目录名
-            List<string> options = new List<string>();  // 存储参数
+            List<string> options = new List<string>();  // 存储 -?? 参数
 
             foreach (string s in args)
             {
@@ -33,7 +42,7 @@ namespace ZipUtil
 
             if (filenames.Count != 2)
             {
-                Console.WriteLine("文件名和目录名参数不正确。\r\nUsage: ZipUtil directory zipfilename [-t]");
+                Console.WriteLine("文件名和目录名参数不正确。\r\n用法: ZipUtil 目录名 zip文件名 [-t]");
                 return;
             }
 
@@ -98,10 +107,10 @@ namespace ZipUtil
                 nCount = nRet;
             }
 
-            Console.WriteLine("compress " + nCount.ToString() + " files to " + strZipFileName);
+            Console.WriteLine("压缩了 " + nCount.ToString() + " 个文件到 " + strZipFileName);
             return;
         ERROR1:
-            Console.WriteLine("error: " + strError);
+            Console.WriteLine("出错: " + strError);
         }
 
         // 逐(内含)文件比较两个压缩文件的异同
@@ -168,6 +177,10 @@ namespace ZipUtil
                 e2.Extract(stream2);
                 if (stream1.Length != stream2.Length)
                     return 1;
+
+                // 准备从流中读出
+                stream1.Position = 0;
+                stream2.Position = 0;
                 while (true)
                 {
                     int nRet = stream1.ReadByte();
@@ -198,6 +211,9 @@ namespace ZipUtil
                     if (stream1.Length != stream2.Length)
                         return 1;
 
+                    // 准备从流中读出
+                    stream1.Position = 0;
+                    stream2.Position = 0;
                     while (true)
                     {
                         int nRet = stream1.ReadByte();
