@@ -1,0 +1,254 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<root>
+  <category name='*'>
+    <comment lang='chi'>全部类目</comment>
+    <comment lang='eng'>All Category</comment>
+  </category>
+  <!-- this -->
+  <category name='this'>
+    <comment lang='chi'>本对象</comment>
+    <comment lang='eng'>Myself</comment>
+
+    <property name='list'>
+      <comment lang='chi'>列出事项名</comment>
+      <comment lang='eng'>List item name</comment>
+    </property>
+    <property name='read'>
+      <comment lang='chi'>读</comment>
+      <comment lang='eng'>Read</comment>
+    </property>
+    <property name='overwirte'>
+      <comment lang='chi'>覆盖</comment>
+      <comment lang='eng'>overwrite</comment>
+    </property>
+    <property name='delete'>
+      <comment lang='chi'>删除</comment>
+      <comment lang='eng'>delete</comment>
+    </property>
+    <property name='create'>
+      <comment lang='chi'>创建</comment>
+      <comment lang='eng'>create</comment>
+    </property>
+    <property name='clear'>
+      <comment lang='chi'>清除</comment>
+      <comment lang='eng'>clear</comment>
+    </property>
+    <property name='changepassword'>
+      <comment lang='chi'>修改密码</comment>
+      <comment lang='eng'>changepassword</comment>
+    </property>
+    <property name='write'>
+      <comment lang='chi'>写(相当于:create,overwrite,delete)</comment>
+      <comment lang='eng'>Write(equals to:create,overwrite,delete)</comment>
+    </property>
+    <property name='management'>
+      <comment lang='chi'>管理(相当于全部权限)</comment>
+      <comment lang='eng'>Management(equals to all rights)</comment>
+    </property>
+  </category>
+
+  <!-- children_database -->
+  <category name='children_database'>
+    <comment lang='chi'>下级数据库</comment>
+    <comment lang='eng'>children databases</comment>
+
+    <property name='list'>
+      <comment lang='chi'>列出事项名</comment>
+      <comment lang='eng'>List item name</comment>
+    </property>
+    <property name='read'>
+      <comment lang='chi'>读结构</comment>
+      <comment lang='eng'>Read structure</comment>
+    </property>
+    <property name='overwirte'>
+      <comment lang='chi'>覆盖结构</comment>
+      <comment lang='eng'>Overwrite structure</comment>
+    </property>
+    <property name='delete'>
+      <comment lang='chi'>删除结构</comment>
+      <comment lang='eng'>Delete structure</comment>
+    </property>
+    <property name='create'>
+      <comment lang='chi'>创建结构</comment>
+      <comment lang='eng'>Create structure</comment>
+    </property>
+    <property name='clear'>
+      <comment lang='chi'>初始化数据库</comment>
+      <comment lang='eng'>Clear structure and all records</comment>
+    </property>
+    <property name='changepassword'>
+      <comment lang='chi'>修改密码</comment>
+      <comment lang='eng'>changepassword</comment>
+    </property>    
+    <property name='write'>
+      <comment lang='chi'>写(相当于:create,overwrite,delete)</comment>
+      <comment lang='eng'>Write(equals to:create,overwrite,delete)</comment>
+    </property>
+    <property name='management'>
+      <comment lang='chi'>管理(相当于全部权限)</comment>
+      <comment lang='eng'>Management(equals to all rights)</comment>
+    </property>
+  </category>
+
+  <!-- children_directory -->
+  <category name='children_directory'>
+    <comment lang='chi'>下级目录</comment>
+    <comment lang='eng'>children directory</comment>
+
+    <property name='list'>
+      <comment lang='chi'>列出事项名</comment>
+      <comment lang='eng'>List item name</comment>
+    </property>
+
+    <property name='delete'>
+      <comment lang='chi'>删除结构</comment>
+      <comment lang='eng'>Delete structure</comment>
+    </property>
+    <property name='create'>
+      <comment lang='chi'>创建结构</comment>
+      <comment lang='eng'>Create structure</comment>
+    </property>
+    <property name='clear'>
+      <comment lang='chi'>清空目录</comment>
+      <comment lang='eng'>Clear directory</comment>
+    </property>
+    <property name='management'>
+      <comment lang='chi'>管理(相当于全部权限)</comment>
+      <comment lang='eng'>Management(equals to all rights)</comment>
+    </property>
+  </category>
+
+  <!-- children_record -->
+  <category name='children_record'>
+    <comment lang='chi'>下级记录</comment>
+    <comment lang='eng'>children record</comment>
+
+    <property name='list'>
+      <comment lang='chi'>列出事项名</comment>
+      <comment lang='eng'>List item name</comment>
+    </property>
+    <property name='read'>
+      <comment lang='chi'>读</comment>
+      <comment lang='eng'>Read</comment>
+    </property>
+    <property name='overwirte'>
+      <comment lang='chi'>覆盖</comment>
+      <comment lang='eng'>overwrite</comment>
+    </property>
+    <property name='delete'>
+      <comment lang='chi'>删除</comment>
+      <comment lang='eng'>delete</comment>
+    </property>
+    <property name='create'>
+      <comment lang='chi'>创建</comment>
+      <comment lang='eng'>create</comment>
+    </property>
+    <property name='write'>
+      <comment lang='chi'>写(相当于:create,overwrite,delete)</comment>
+      <comment lang='eng'>Write(equals to:create,overwrite,delete)</comment>
+    </property>
+    <property name='management'>
+      <comment lang='chi'>管理(相当于全部权限)</comment>
+      <comment lang='eng'>Management(equals to all rights)</comment>
+    </property>
+  </category>  
+
+  <!-- children_leaf -->
+  <category name='children_leaf'>
+    <comment lang='chi'>下级叶节点对象</comment>
+    <comment lang='eng'>children leaf object</comment>
+
+    <property name='list'>
+      <comment lang='chi'>列出事项名</comment>
+      <comment lang='eng'>List item name</comment>
+    </property>
+    <property name='read'>
+      <comment lang='chi'>读</comment>
+      <comment lang='eng'>Read</comment>
+    </property>
+    <property name='overwirte'>
+      <comment lang='chi'>覆盖</comment>
+      <comment lang='eng'>overwrite</comment>
+    </property>
+    <property name='delete'>
+      <comment lang='chi'>删除</comment>
+      <comment lang='eng'>delete</comment>
+    </property>
+    <property name='create'>
+      <comment lang='chi'>创建</comment>
+      <comment lang='eng'>create</comment>
+    </property>
+    <property name='write'>
+      <comment lang='chi'>写(相当于:create,overwrite,delete)</comment>
+      <comment lang='eng'>Write(equals to:create,overwrite,delete)</comment>
+    </property>
+    <property name='management'>
+      <comment lang='chi'>管理(相当于全部权限)</comment>
+      <comment lang='eng'>Management(equals to all rights)</comment>
+    </property>
+  </category>
+
+  <!-- descendant_directory -->
+  <category name='descendant_directory'>
+    <comment lang='chi'>后代目录</comment>
+    <comment lang='eng'>Descendant directory</comment>
+
+    <property name='list'>
+      <comment lang='chi'>列出事项名</comment>
+      <comment lang='eng'>List item name</comment>
+    </property>
+
+    <property name='delete'>
+      <comment lang='chi'>删除结构</comment>
+      <comment lang='eng'>Delete structure</comment>
+    </property>
+    <property name='create'>
+      <comment lang='chi'>创建结构</comment>
+      <comment lang='eng'>Create structure</comment>
+    </property>
+    <property name='clear'>
+      <comment lang='chi'>清空目录</comment>
+      <comment lang='eng'>Clear directory</comment>
+    </property>
+    <property name='management'>
+      <comment lang='chi'>管理(相当于全部权限)</comment>
+      <comment lang='eng'>Management(equals to all rights)</comment>
+    </property>
+  </category>
+
+  <!-- descendant_leaf -->
+  <category name='descendant_leaf'>
+    <comment lang='chi'>后代叶节点对象</comment>
+    <comment lang='eng'>Descendant leaf object</comment>
+
+    <property name='list'>
+      <comment lang='chi'>列出事项名</comment>
+      <comment lang='eng'>List item name</comment>
+    </property>
+    <property name='read'>
+      <comment lang='chi'>读</comment>
+      <comment lang='eng'>Read</comment>
+    </property>
+    <property name='overwirte'>
+      <comment lang='chi'>覆盖</comment>
+      <comment lang='eng'>overwrite</comment>
+    </property>
+    <property name='delete'>
+      <comment lang='chi'>删除</comment>
+      <comment lang='eng'>delete</comment>
+    </property>
+    <property name='create'>
+      <comment lang='chi'>创建</comment>
+      <comment lang='eng'>create</comment>
+    </property>
+    <property name='write'>
+      <comment lang='chi'>写(相当于:create,overwrite,delete)</comment>
+      <comment lang='eng'>Write(equals to:create,overwrite,delete)</comment>
+    </property>
+    <property name='management'>
+      <comment lang='chi'>管理(相当于全部权限)</comment>
+      <comment lang='eng'>Management(equals to all rights)</comment>
+    </property>
+  </category>
+
+</root>

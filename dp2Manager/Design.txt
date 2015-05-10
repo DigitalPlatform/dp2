@@ -1,0 +1,194 @@
+
+树的最顶上还要增加一个虚根，以便点它可以列出全部库名
+
+~~~~~~~~
+数据库类型，界面提示一下可用值
+
+~~~~~~~
+快速编辑，提示一下格式要求
+
+
+~~~~~~
+数据库下, 创建新对象的菜单. 追加即可.因为对象无所谓顺序. 本级和下级各一个命令.
+
+~~~~~~~
+底座restree中显示的资源, 是否要把除了服务器和数据库节点以下的都作为灰色?
+
+
+~~~~~~~
+http://scottwater.com/blog/
+html源代码中有一行:
+<link rel="alternate" type="application/rss+xml" title="Scott Watermasysk (RSS 2.0)" href="http://scottwater.com/blog/rss.aspx"  />
+
+~~~~~~~
+删除一般配置文件对象时, 界面选择可随同删除所有帐户中定义的权限对象.
+
+~~~~~~~
+新创建文件对象时, 可以给出初始文本内容?
+
+~~~~~~~
+移植restree编辑文件对象的功能.
+
+~~~~~~~
+底座restree的popup菜单应当重新作,为dp2manager服务. 
+
+可以派生一个新的控件?
+
+
+~~~~~~~~
+创建新对象的时候, 界面至少要查重名字.
+
+
+~~~~~~~~~~
+需要开发一种把目录名、配置文件名及内容序列化进入内存或者文件的功能。
+
+这样依据一个现成数据库创建新数据库， 或者在数据库之间复制目录或者文件，
+就有了物质基础。
+
+~~~~~~~~~
+channelcollection line 3240 问任延华
+此函数被NewServerSideObject()调用
+
+~~~~~~~~~
+配置文件要有mime特性.
+
+~~~~~~~~~
+数据库对象删除的时候，要有messagebox警告。
+
+keys和stopword更要特殊警告。
+
+这两个文件缺乏后，数据库内核仍应表现正常。
+
+~~~~~~~~~
+增加时间戳一栏
+
+~~~~~~~~~
+定义几种非常方便的操作模式， 为一个数据库一次性设定权限。
+
+分为：
+1) 数据记录权限设置方式；
+2) 下属配置目录和文件的权限设置方式。
+
+~~~~~~~~
+快速 对话框中， 也可列出一个username listview，方便二次选择
+
+这样radiobox的含义可能改变?
+
+~~~~~~~~
+正在保存的时候,出现等待对话框或者沙漏符号。
+
+~~~~~~~~~
+新创建数据库的时候，如何为尚未创建的对象准备权限。
+
+~~~~~~~~
+新创建数据库，注意最后保存设立好的权限。
+
+~~~~~~~~
+删除一个数据库时，要从相应帐户库中删除数据库权限节点。
+
+~~~~~~~~
+初始化用户记录缓冲
+			Debug.Assert(this.m_tableUserRec.Count != 0, "必须先初始化uerrec缓冲");
+(已经解决)
+~~~~~
+菜单上单独存在的删除数据库功能,还应加入删除全部对应帐户权限对象的功能.
+
+~~~~~~~
+如果产生日志序列?
+
+插入新对象。
+创建新目录。
+删除目录。
+删除对象。
+
+修改对象内容。
+
+修改对象内容，可以去重，只取时间上的最后一次。
+
+
+~~~~~~~~~~
+stopword和keys内容的修改, 要和界面上专用edit中一致.或者不让在treeview处修改.
+
+~~~~~~~~~
+在权限对话框上全选。
+
+在用户权限上双击。
+
+~~~~~~~~
+权限对话框中checked的事项最好变色。
+
+~~~~~~~~
+数据库编辑时，如果修改过，不保存而退出，需要警告。
+
+~~~~~~~
+帐户权限对话框，修改后，关闭窗口要警告保存。
+
+~~~~~~~~
+帐户dialog中, 还需要一个方便一次性设置许多数据库权限的对话框,
+就像数据库dialog中那样.
+
+~~~~~~~~
+工具条上作停止按钮。
+
+
+~~~~~~~
+关联功能, 作整目录下载到本地的模块.
+
+
+~~~~~~~~
+新建帐户功能
+复用已有对话框
+
+1) 为已经存在的数据库设置本帐户针对他们的权限
+2) 设置密码和一般信息
+
+删除帐户功能
+
+当一般信息修改后，xml源代码应该跟随修改。
+
+
+~~~~~~~
+UserDom内容变化后，如何通知界面改变? 是否不要立即改变，而是
+tab切过来再试探性改变?
+
+~~~~~~~~
+"用户"库一般应排除在权限设置之外
+
+
+~~~~~~~~~
+
+ <style name='高级用户' comment="对数据库记录可读、可写">
+    <rights type="server">this:list;descendant_directory:list;descendant_leaf:list,read,write</rights>
+    <rights type="database">this:list;descendant_directory:list;descendant_leaf:list,read,write</rights>
+    <rights type="database" style="userdatabase"></rights>
+    <rights type="directory">this:list;descendant_directory:list;descendant_leaf:list,read,write</rights>
+    <rights type="file">this:list,read,write</rights>
+  </style>
+  <style name='系统管理员' comment="对数据库有配置管理权">
+    <rights type="server">this:management;children_database:management;descendant_directory:management;descendant_leaf:management</rights>
+    <rights type="database">this:management;descendant_directory:management;descendant_leaf:management</rights>
+    <rights type="directory">this:management;descendant_directory:management;descendant_leaf:management</rights>
+    <rights type="file">this:management</rights>
+  </style>
+  <style name='清除' comment="清除所有权限">
+    <rights type="server"></rights>
+    <rights type="database"></rights>
+    <rights type="directory"></rights>
+    <rights type="file"></rights>
+  </style>
+  
+  
+  新增一个服务器节点后，登录后最好自动展开
+  
+  
+  ~~~~~~~~~~~
+  删除账户功能。
+  
+  
+  ~~~~~~~~
+ 快速设置权限的时候，“普通用户”对数据库配置结构的读权限似乎不具备。
+ 
+ 这在参考一个库来创建新库时，读取库配置时会报错。
+ 
+ ~~~~~~~~~~
+ dlg.Show()要找到正确的父子关系。许多报警的地方。

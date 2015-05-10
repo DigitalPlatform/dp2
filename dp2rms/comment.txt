@@ -1,0 +1,89 @@
+		string GetStateString(int nState)
+		{
+			if (nState == -1)
+				return "未知";
+			if (nState == 0)
+				return "已上载";
+			if (nState == 1)
+				return "尚未上载";
+
+			Debug.Assert(false, "出现未定义的状态值");
+			return "";
+		}
+
+		int GetStateInt(string strState)
+		{
+			if (strState == "未知")
+				return -1;
+			if (strState == "已上载")
+				return 0;
+			if (strState == "尚未上载")
+				return 1;
+
+			Debug.Assert(false, "出现未定义的状态字符串");
+			return -1;
+
+		}
+		
+		
+		~~~~~~~~~~~~~~~~~~
+		http://www.codeproject.com/cs/miscctrl/mdiclientcontroller.asp
+		
+		// Win32 Constants
+private const int WM_PAINT       = 0x000F;
+private const int WM_ERASEBKGND  = 0x0014;
+private const int WM_PRINTCLIENT = 0x0318;
+
+
+// Win32 Structures
+[StructLayout(LayoutKind.Sequential, Pack = 4)]
+private struct PAINTSTRUCT
+{
+    public IntPtr hdc;
+    public int fErase;
+    public RECT rcPaint;
+    public int fRestore;
+    public int fIncUpdate;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst=32)] 
+    public byte[] rgbReserved;
+}
+
+[StructLayout(LayoutKind.Sequential)]
+private struct RECT
+{
+    public int left;
+    public int top;
+    public int right;
+    public int bottom;
+}
+
+// Win32 Functions
+[DllImport("user32.dll")]
+private static extern IntPtr BeginPaint(IntPtr hWnd, 
+                                ref PAINTSTRUCT paintStruct);
+
+[DllImport("user32.dll")]
+private static extern bool EndPaint(IntPtr hWnd, ref PAINTSTRUCT paintStruct);
+
+
+
+~~~~~~~~~~~~~~~~~
+
+http://www.techieone.com/detail-6267088.html
+
+[StructLayout(LayoutKind.Sequential)]
+internal struct CREATESTRUCTW
+{
+public IntPtr lpCreateParams;
+public IntPtr hInstance;
+public IntPtr hMenu;
+public IntPtr hwndParent;
+public int cy;
+public int cx;
+public int y;
+public int x;
+public Int32 style;
+public string lpszName;
+public string lpszClass;
+public UInt32 dwExStyle;
+}
