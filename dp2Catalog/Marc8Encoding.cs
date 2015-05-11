@@ -594,7 +594,7 @@ ESCs (ASCII 1B(hex) 73(hex)) for ASCII default character set
             {
                 nRet = MarcUtil.ForceCvt2709ToFieldArray(ref encoding,  //2007/7/16
                     baRecord,
-                    aField,
+                    out aField,
                     out strError);
             }
             else
@@ -603,7 +603,7 @@ ESCs (ASCII 1B(hex) 73(hex)) for ASCII default character set
                 nRet = MarcUtil.Cvt2709ToFieldArray(
                     encoding,   // 2007/7/16
                     baRecord,
-                    aField,
+                    out aField,
                     out strError);
             }
 

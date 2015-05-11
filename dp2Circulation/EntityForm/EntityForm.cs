@@ -5921,8 +5921,6 @@ true);
             dbname_dlg.ShowDialog(this);
             this.MainForm.AppInfo.UnlinkFormState(dbname_dlg);
 
-
-
             if (dbname_dlg.DialogResult != DialogResult.OK)
                 return 0;
 
@@ -5960,7 +5958,7 @@ true);
 
             // MessageBox.Show(this, strContent);
 
-            SelectTemplateDlg select_temp_dlg = new SelectTemplateDlg();
+            SelectRecordTemplateDlg select_temp_dlg = new SelectRecordTemplateDlg();
             MainForm.SetControlFont(select_temp_dlg, this.Font, false);
 
             select_temp_dlg.Text = "请选择新书目记录模板 -- 来自书目库 '" + strBiblioDbName + "'";
@@ -5975,7 +5973,7 @@ true);
             select_temp_dlg.SelectedName = strSelectedTemplateName;
             select_temp_dlg.AutoClose = (bShift == true ? false : bNotAskTemplateName);
             select_temp_dlg.NotAsk = bNotAskTemplateName;
-            select_temp_dlg.EnableNotAsk = true;
+            select_temp_dlg.EnableNotAsk = true;    // 2015/5/11
 
             nRet = select_temp_dlg.Initial(
                 true, // true 表示也允许删除  // false,
@@ -6917,7 +6915,7 @@ MessageBoxDefaultButton.Button2);
                 goto ERROR1;
             }
 
-            SelectTemplateDlg tempdlg = new SelectTemplateDlg();
+            SelectRecordTemplateDlg tempdlg = new SelectRecordTemplateDlg();
             MainForm.SetControlFont(tempdlg, this.Font, false);
             nRet = tempdlg.Initial(
                 true,   // 允许修改
@@ -6997,7 +6995,7 @@ MessageBoxDefaultButton.Button2);
         //      -1  出错
         //      0   没有必要保存
         //      1   成功保存
-        int SaveTemplateChange(SelectTemplateDlg tempdlg,
+        int SaveTemplateChange(SelectRecordTemplateDlg tempdlg,
             string strBiblioDbName,
             byte[] baTimestamp,
             out string strError)

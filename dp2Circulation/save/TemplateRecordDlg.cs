@@ -7,7 +7,7 @@ using System.Windows.Forms;
 namespace dp2Circulation
 {
 	/// <summary>
-	/// Summary description for TemplateRecordDlg.
+	/// !!! 本类已经废止。被 DigitalPlatform.CirculationClient.TempateRecordDlg 替代
 	/// </summary>
 	internal class TemplateRecordDlg : System.Windows.Forms.Form
 	{

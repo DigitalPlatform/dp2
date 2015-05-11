@@ -13,6 +13,7 @@ using DigitalPlatform.GUI;
 namespace dp2Circulation
 {
 	/// <summary>
+    /// !!! 本类已经废止。被 DigitalPlatform.CirculationClient.SelectRecordTemplateDlg 代替
     /// 选择新记录模板名的对话框
     /// 本对话框根据一个xml模板文件，列出其中 &lt;template&gt; 元素的 name属性值，让用户选择，
 	/// 最后对话框将选择的元素以及其下全部元素创建一个新的xml文档(字符串形式).

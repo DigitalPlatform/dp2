@@ -1266,7 +1266,7 @@ MessageBoxDefaultButton.Button2);
                     goto ERROR1;
                 }
 
-                SelectTemplateDlg tempdlg = new SelectTemplateDlg();
+                SelectRecordTemplateDlg tempdlg = new SelectRecordTemplateDlg();
                 MainForm.SetControlFont(tempdlg, this.Font, false);
                 nRet = tempdlg.Initial(
                     true,
@@ -1499,7 +1499,7 @@ MessageBoxDefaultButton.Button2);
 
                 // MessageBox.Show(this, strContent);
 
-                SelectTemplateDlg select_temp_dlg = new SelectTemplateDlg();
+                SelectRecordTemplateDlg select_temp_dlg = new SelectRecordTemplateDlg();
                 MainForm.SetControlFont(select_temp_dlg, this.Font, false);
 
                 select_temp_dlg.Text = "请选择新读者记录模板 -- 来自库 '" + strReaderDbName + "'";

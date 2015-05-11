@@ -193,5 +193,17 @@ namespace DigitalPlatform.CirculationClient
                 this.textBox_comment.Text = value;
             }
         }
+
+        public string Comment
+        {
+            get
+            {
+                return this.textBox_comment.Text;
+            }
+            set
+            {
+                this.textBox_comment.Text = value;
+            }
+        }
 	}
 }

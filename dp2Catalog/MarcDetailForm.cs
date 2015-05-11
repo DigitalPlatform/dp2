@@ -6411,6 +6411,7 @@ e);
                 string strError = "";
                 int nRet = 0;
 
+                // 按住 Shift 使用本功能，可重新出现对话框
                 bool bShift = (Control.ModifierKeys == Keys.Shift);
 
                 /*
@@ -6584,8 +6585,10 @@ e);
                 temp_dlg.SelectedName = strSelectedTemplateName;
                 temp_dlg.AutoClose = (bShift == true ? false : bNotAskTemplateName);
                 temp_dlg.NotAsk = bNotAskTemplateName;
+                temp_dlg.EnableNotAsk = true;    // 2015/5/11
 
-                nRet = temp_dlg.Initial(false,
+                nRet = temp_dlg.Initial(
+                    false,  // true 表示也允许删除
                     strCode,
                     out strError);
                 if (nRet == -1)

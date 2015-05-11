@@ -229,8 +229,8 @@ namespace DigitalPlatform.CirculationClient
 				Debug.Assert(true, "你一定忘记了先用Initial()");
 			}
 
-            if (this.SaveMode == false)
-                this.checkBox_notAsk.Enabled = true;
+            //if (this.SaveMode == false)
+            //    this.checkBox_notAsk.Enabled = true;
 
             if (this.AutoClose == true)
                 API.PostMessage(this.Handle, WM_AUTO_CLOSE, 0, 0);
@@ -253,6 +253,23 @@ namespace DigitalPlatform.CirculationClient
 
 			}
 		}
+
+        // 2015/5/11
+        /// <summary>
+        /// 是否允许 “下次不再出现 ...” checkbox。缺省为 false
+        /// 这是一个独立的状态，和 SaveMode 无关
+        /// </summary>
+        public bool EnableNotAsk
+        {
+            get
+            {
+                return this.checkBox_notAsk.Enabled;
+            }
+            set
+            {
+                this.checkBox_notAsk.Enabled = value;
+            }
+        }
 
 		public int Initial(
             bool bSaveMode,
@@ -530,7 +547,7 @@ namespace DigitalPlatform.CirculationClient
 
 			//
 			menuItem = new MenuItem("修改(&M)");
-			menuItem.Click += new System.EventHandler(this.menu_Modify);
+			menuItem.Click += new System.EventHandler(this.menu_modify);
 			if (bSelected == false || this.SaveMode == false) 
 			{
 				menuItem.Enabled = false;
@@ -552,6 +569,7 @@ namespace DigitalPlatform.CirculationClient
 			
 		}
 
+#if NO
 		// 修改名字和注释
 		void menu_Modify(object sender, System.EventArgs e)
 		{
@@ -561,6 +579,7 @@ namespace DigitalPlatform.CirculationClient
 				return;
 			}
 			TemplateRecordDlg dlg = new TemplateRecordDlg();
+            MainForm.SetControlFont(dlg, this.Font, false);
 
 			string strOldName = ListViewUtil.GetItemText(listView1.SelectedItems[0], 0);
 
@@ -583,8 +602,55 @@ namespace DigitalPlatform.CirculationClient
 			}
 
 			FillList(false);
-
 		}
+#endif
+        // 修改名字和注释
+        void menu_modify(object sender, System.EventArgs e)
+        {
+            string strError = "";
+
+            if (listView1.SelectedItems.Count == 0)
+            {
+                strError = "尚未选择拟修改的模板记录事项...";
+                goto ERROR1;
+            }
+
+            ListViewItem item = listView1.SelectedItems[0];
+
+            TemplateRecordDlg dlg = new TemplateRecordDlg();
+            GuiUtil.SetControlFont(dlg, this.Font, false);
+
+            string strOldName = ListViewUtil.GetItemText(item, 0);
+
+            dlg.TemplateName = ListViewUtil.GetItemText(item, 0);
+            dlg.Comment = ListViewUtil.GetItemText(item, 1);
+
+        REDO_INPUT:
+            dlg.ShowDialog(this);
+            if (dlg.DialogResult != DialogResult.OK)
+                return;
+
+            // 查重 2014/6/21
+            ListViewItem dup = ListViewUtil.FindItem(this.listView1, dlg.TemplateName, 0);
+            if (dup != null && dup != item)
+            {
+                strError = "模板名 '" + dlg.TemplateName + "' 已经被使用了，不允许重复出现。请重新输入模板名";
+                MessageBox.Show(this, strError);
+                goto REDO_INPUT;
+            }
+
+            int nRet = ChangeRecordProperty(strOldName,
+                dlg.TemplateName,
+                dlg.Comment,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            FillList(false);
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
 	
 		void menu_deleteRecord(object sender, System.EventArgs e)
 		{
