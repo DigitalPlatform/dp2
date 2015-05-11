@@ -1,4 +1,4 @@
-		void DoExportBackupFile(string strOutputFileName)
+ï»¿		void DoExportBackupFile(string strOutputFileName)
 		{
 			string strError = "";
 
@@ -7,7 +7,7 @@
 
 			if (textBox_dbPath.Text == "")
 			{
-				MessageBox.Show(this, "ÉĞÎ´Ñ¡ÔñÔ´¿â...");
+				MessageBox.Show(this, "å°šæœªé€‰æ‹©æºåº“...");
 				return;
 			}
 
@@ -19,13 +19,13 @@
 
 			if (strOutputFileName != null && strOutputFileName != "") 
 			{
-				// Ì½²âÎÄ¼şÊÇ·ñ´æÔÚ
+				// æ¢æµ‹æ–‡ä»¶æ˜¯å¦å­˜åœ¨
 				FileInfo fi = new FileInfo(strOutputFileName);
 				bAppend = true;
 				if (fi.Exists == true && fi.Length > 0)
 				{
 					DialogResult result = MessageBox.Show(this,
-						"ÎÄ¼ş '" + strOutputFileName + "' ÒÑ´æÔÚ£¬ÊÇ·ñ×·¼Ó?\r\n\r\n--------------------\r\n×¢£º(ÊÇ)×·¼Ó  (·ñ)¸²¸Ç  (È¡Ïû)ÍË³ö³ÌĞò",
+						"æ–‡ä»¶ '" + strOutputFileName + "' å·²å­˜åœ¨ï¼Œæ˜¯å¦è¿½åŠ ?\r\n\r\n--------------------\r\næ³¨ï¼š(æ˜¯)è¿½åŠ   (å¦)è¦†ç›–  (å–æ¶ˆ)é€€å‡ºç¨‹åº",
 						"dp2batch",
 						MessageBoxButtons.YesNoCancel,
 						MessageBoxIcon.Question,
@@ -40,16 +40,16 @@
 					}
 					if (result == DialogResult.Cancel) 
 					{
-						strError = "·ÅÆú´¦Àí...";
+						strError = "æ”¾å¼ƒå¤„ç†...";
 						goto ERROR1;
 					}
 				}
 
-				// ´ò¿ªÎÄ¼ş
+				// æ‰“å¼€æ–‡ä»¶
 
 				outputfile = File.Open(
 					strOutputFileName,
-					FileMode.OpenOrCreate,	// Ô­À´ÊÇOpen£¬ºóÀ´ĞŞ¸ÄÎªOpenOrCreate¡£ÕâÑù¶ÔÁÙÊ±ÎÄ¼ş±»ÏµÍ³¹ÜÀíÔ±ÊÖ¶¯ÒâÍâÉ¾³ı(µ«ÊÇxmlÎÄ¼şÖĞÈÔÈ»¼ÇÔØÁËÈÎÎñ)µÄÇé¿öÄÜ¹»ÊÊÓ¦¡£·ñÔò»áÅ×³öFileNotFoundExceptionÒì³£
+					FileMode.OpenOrCreate,	// åŸæ¥æ˜¯Openï¼Œåæ¥ä¿®æ”¹ä¸ºOpenOrCreateã€‚è¿™æ ·å¯¹ä¸´æ—¶æ–‡ä»¶è¢«ç³»ç»Ÿç®¡ç†å‘˜æ‰‹åŠ¨æ„å¤–åˆ é™¤(ä½†æ˜¯xmlæ–‡ä»¶ä¸­ä»ç„¶è®°è½½äº†ä»»åŠ¡)çš„æƒ…å†µèƒ½å¤Ÿé€‚åº”ã€‚å¦åˆ™ä¼šæŠ›å‡ºFileNotFoundExceptionå¼‚å¸¸
 					FileAccess.Write,
 					FileShare.ReadWrite);
 			}
@@ -60,7 +60,7 @@
 				if (outputfile != null) 
 				{
 					if (bAppend == true)
-						outputfile.Seek(0, SeekOrigin.End);	// ¾ßÓĞ×·¼ÓµÄÄÜÁ¦
+						outputfile.Seek(0, SeekOrigin.End);	// å…·æœ‰è¿½åŠ çš„èƒ½åŠ›
 					else 
 						outputfile.SetLength(0);
 				}
@@ -72,7 +72,7 @@
 				bool bAsc = GetDirection(out nStart,
 					out nEnd);
 
-				// ÉèÖÃ½ø¶ÈÌõ·¶Î§
+				// è®¾ç½®è¿›åº¦æ¡èŒƒå›´
 				Int64 nMax = nEnd - nStart;
 				if (nMax < 0)
 					nMax *= -1;
@@ -87,26 +87,26 @@
 				progressBar_main.Value = 0;
 
 
-				bool bFirst = true;	// ÊÇ·ñÎªµÚÒ»´ÎÈ¡¼ÇÂ¼
+				bool bFirst = true;	// æ˜¯å¦ä¸ºç¬¬ä¸€æ¬¡å–è®°å½•
 
 				string strID = this.textBox_startNo.Text;
 
 
 				stop.Initial(new Delegate_doStop(this.DoStop),
-					"ÕıÔÚµ¼³öÊı¾İ");
+					"æ­£åœ¨å¯¼å‡ºæ•°æ®");
 				stop.BeginLoop();
 
 				EnableControls(false);
 
 
-				// Ñ­»·
+				// å¾ªç¯
 				for(;;) 
 				{
-					Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+					Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
 					if (stop.State != 0)
 					{
-						strError = "ÓÃ»§ÖĞ¶Ï";
+						strError = "ç”¨æˆ·ä¸­æ–­";
 						goto ERROR1;
 					}
 
@@ -114,7 +114,7 @@
 					if (outputfile != null)
 						strStyle = "data,content,timestamp,outputpath";
 					else
-						strStyle = "timestamp,outputpath";	// ÓÅ»¯
+						strStyle = "timestamp,outputpath";	// ä¼˜åŒ–
 
 					if (bFirst == true)
 						strStyle += "";
@@ -135,10 +135,10 @@
 
 					bool bFoundRecord = false;
 
-					// »ñµÃ×ÊÔ´
+					// è·å¾—èµ„æº
 					// return:
-					//		-1	³ö´í¡£¾ßÌå³ö´íÔ­ÒòÔÚthis.ErrorCodeÖĞ¡£this.ErrorInfoÖĞÓĞ³ö´íĞÅÏ¢¡£
-					//		0	³É¹¦
+					//		-1	å‡ºé”™ã€‚å…·ä½“å‡ºé”™åŸå› åœ¨this.ErrorCodeä¸­ã€‚this.ErrorInfoä¸­æœ‰å‡ºé”™ä¿¡æ¯ã€‚
+					//		0	æˆåŠŸ
 					long lRet = channel.GetRes(strPath,
 						strStyle,
 						out strXmlBody,
@@ -154,7 +154,7 @@
 						{
 							if (checkBox_forceLoop.Checked == true && bFirst == true)
 							{
-								AutoCloseMessageBox.Show(this, "¼ÇÂ¼ " + strID + " ²»´æÔÚ¡£\r\n\r\n°´ È·ÈÏ ¼ÌĞø¡£");
+								AutoCloseMessageBox.Show(this, "è®°å½• " + strID + " ä¸å­˜åœ¨ã€‚\r\n\r\næŒ‰ ç¡®è®¤ ç»§ç»­ã€‚");
 
 								bFirst = false;
 								goto CONTINUE;
@@ -163,14 +163,14 @@
 							{
 								if (bFirst == true)
 								{
-									strError = "¼ÇÂ¼ " + strID + " ²»´æÔÚ¡£´¦Àí½áÊø¡£";
+									strError = "è®°å½• " + strID + " ä¸å­˜åœ¨ã€‚å¤„ç†ç»“æŸã€‚";
 								}
 								else 
 								{
 									if (bAsc == true)
-										strError = "¼ÇÂ¼ " + strID + " ÊÇ×îÄ©Ò»Ìõ¼ÇÂ¼¡£´¦Àí½áÊø¡£";
+										strError = "è®°å½• " + strID + " æ˜¯æœ€æœ«ä¸€æ¡è®°å½•ã€‚å¤„ç†ç»“æŸã€‚";
 									else
-										strError = "¼ÇÂ¼ " + strID + " ÊÇ×îÇ°Ò»Ìõ¼ÇÂ¼¡£´¦Àí½áÊø¡£";
+										strError = "è®°å½• " + strID + " æ˜¯æœ€å‰ä¸€æ¡è®°å½•ã€‚å¤„ç†ç»“æŸã€‚";
 								}							
 							}
 
@@ -179,7 +179,7 @@
 						{
 							bFirst = false;
 							bFoundRecord = false;
-							// °Ñid½âÎö³öÀ´
+							// æŠŠidè§£æå‡ºæ¥
 							strID = ResPath.GetRecordId(strOutputPath);
 							goto CONTINUE;
 
@@ -192,12 +192,12 @@
 
 					bFoundRecord = true;
 
-					// °Ñid½âÎö³öÀ´
+					// æŠŠidè§£æå‡ºæ¥
 					strID = ResPath.GetRecordId(strOutputPath);
 
 				CONTINUE:
 
-					// ÊÇ·ñ³¬¹ıÑ­»··¶Î§
+					// æ˜¯å¦è¶…è¿‡å¾ªç¯èŒƒå›´
 					try 
 					{
 						nCur = Convert.ToInt64(strID);
@@ -216,7 +216,7 @@
 					if (bFoundRecord == true 
 						&& outputfile != null) 
 					{
-						// Ğ´´ÅÅÌ
+						// å†™ç£ç›˜
 						int nRet = WriteRecordToBackupFile(
 							outputfile,
 							strDbName,
@@ -227,17 +227,17 @@
 							out strError);
 						if (nRet == -1) 
 						{
-							// Ñ¯ÎÊÊÇ·ñ¼ÌĞø
+							// è¯¢é—®æ˜¯å¦ç»§ç»­
 							goto ERROR1;
 						}
 					}
 
-					// É¾³ı
+					// åˆ é™¤
 					if (checkBox_export_delete.Checked == true)
 					{
 
 						byte [] baOutputTimeStamp1 = null;
-						strPath = strOutputPath;	// µÃµ½Êµ¼ÊµÄÂ·¾¶
+						strPath = strOutputPath;	// å¾—åˆ°å®é™…çš„è·¯å¾„
 						lRet = channel.DoDeleteRecord(
 							strPath,
 							baOutputTimeStamp,
@@ -245,10 +245,10 @@
 							out strError);
 						if (lRet == -1) 
 						{
-							// Ñ¯ÎÊÊÇ·ñ¼ÌĞø
+							// è¯¢é—®æ˜¯å¦ç»§ç»­
 							goto ERROR1;
 						}
-						stop.SetMessage("ÒÑÉ¾³ı¼ÇÂ¼" + strPath);
+						stop.SetMessage("å·²åˆ é™¤è®°å½•" + strPath);
 					}
 
 
@@ -263,7 +263,7 @@
 					}
 
 
-					// ¶ÔÒÑ¾­×÷¹ıµÄ½øĞĞÅĞ¶Ï
+					// å¯¹å·²ç»ä½œè¿‡çš„è¿›è¡Œåˆ¤æ–­
 					if (bAsc == true && nCur >= nEnd)
 						break;
 					if (bAsc == false && nCur <= nEnd)
@@ -292,9 +292,9 @@
 			END1:
 				channel = null;
 			if (checkBox_export_delete.Checked == true)
-				MessageBox.Show(this, "Êı¾İµ¼³öºÍÉ¾³ıÍê³É¡£");
+				MessageBox.Show(this, "æ•°æ®å¯¼å‡ºå’Œåˆ é™¤å®Œæˆã€‚");
 			else
-				MessageBox.Show(this, "Êı¾İµ¼³öÍê³É¡£");
+				MessageBox.Show(this, "æ•°æ®å¯¼å‡ºå®Œæˆã€‚");
 			return;
 
 			ERROR1:
@@ -322,7 +322,7 @@
 
 			if (textBox_dbPath.Text == "")
 			{
-				MessageBox.Show(this, "ÉĞÎ´Ñ¡ÔñÔ´¿â...");
+				MessageBox.Show(this, "å°šæœªé€‰æ‹©æºåº“...");
 				return;
 			}
 
@@ -334,24 +334,24 @@
 
 			if (strOutputFileName != null && strOutputFileName != "") 
 			{
-				// Ì½²âÎÄ¼şÊÇ·ñ´æÔÚ
+				// æ¢æµ‹æ–‡ä»¶æ˜¯å¦å­˜åœ¨
 				FileInfo fi = new FileInfo(strOutputFileName);
 				if (fi.Exists == true && fi.Length > 0)
 				{
 					DialogResult result = MessageBox.Show(this,
-						"ÎÄ¼ş '" + strOutputFileName + "' ÒÑ´æÔÚ£¬ÊÇ·ñ¸²¸Ç?\r\n\r\n--------------------\r\n×¢£º(ÊÇ)¸²¸Ç  (·ñ)ÍË³ö³ÌĞò",
+						"æ–‡ä»¶ '" + strOutputFileName + "' å·²å­˜åœ¨ï¼Œæ˜¯å¦è¦†ç›–?\r\n\r\n--------------------\r\næ³¨ï¼š(æ˜¯)è¦†ç›–  (å¦)é€€å‡ºç¨‹åº",
 						"dp2batch",
 						MessageBoxButtons.YesNo,
 						MessageBoxIcon.Question,
 						MessageBoxDefaultButton.Button2);
 					if (result != DialogResult.Yes) 
 					{
-						strError = "·ÅÆú´¦Àí...";
+						strError = "æ”¾å¼ƒå¤„ç†...";
 						goto ERROR1;
 					}
 				}
 
-				// ´ò¿ªÎÄ¼ş
+				// æ‰“å¼€æ–‡ä»¶
 				outputfile = File.Create(
 					strOutputFileName);
 
@@ -371,7 +371,7 @@
 				bool bAsc = GetDirection(out nStart,
 					out nEnd);
 
-				// ÉèÖÃ½ø¶ÈÌõ·¶Î§
+				// è®¾ç½®è¿›åº¦æ¡èŒƒå›´
 				Int64 nMax = nEnd - nStart;
 				if (nMax < 0)
 					nMax *= -1;
@@ -386,13 +386,13 @@
 				progressBar_main.Value = 0;
 
 
-				bool bFirst = true;	// ÊÇ·ñÎªµÚÒ»´ÎÈ¡¼ÇÂ¼
+				bool bFirst = true;	// æ˜¯å¦ä¸ºç¬¬ä¸€æ¬¡å–è®°å½•
 
 				string strID = this.textBox_startNo.Text;
 
 
 				stop.Initial(new Delegate_doStop(this.DoStop),
-					"ÕıÔÚµ¼³öÊı¾İ");
+					"æ­£åœ¨å¯¼å‡ºæ•°æ®");
 				stop.BeginLoop();
 
 				EnableControls(false);
@@ -407,14 +407,14 @@
 
 				}
 
-				// Ñ­»·
+				// å¾ªç¯
 				for(;;) 
 				{
-					Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+					Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
 					if (stop.State != 0)
 					{
-						strError = "ÓÃ»§ÖĞ¶Ï";
+						strError = "ç”¨æˆ·ä¸­æ–­";
 						goto ERROR1;
 					}
 
@@ -422,7 +422,7 @@
 					if (outputfile != null)
 						strStyle = "data,content,timestamp,outputpath";
 					else
-						strStyle = "timestamp,outputpath";	// ÓÅ»¯
+						strStyle = "timestamp,outputpath";	// ä¼˜åŒ–
 
 					if (bFirst == true)
 						strStyle += "";
@@ -443,10 +443,10 @@
 
 					bool bFoundRecord = false;
 
-					// »ñµÃ×ÊÔ´
+					// è·å¾—èµ„æº
 					// return:
-					//		-1	³ö´í¡£¾ßÌå³ö´íÔ­ÒòÔÚthis.ErrorCodeÖĞ¡£this.ErrorInfoÖĞÓĞ³ö´íĞÅÏ¢¡£
-					//		0	³É¹¦
+					//		-1	å‡ºé”™ã€‚å…·ä½“å‡ºé”™åŸå› åœ¨this.ErrorCodeä¸­ã€‚this.ErrorInfoä¸­æœ‰å‡ºé”™ä¿¡æ¯ã€‚
+					//		0	æˆåŠŸ
 					long lRet = channel.GetRes(strPath,
 						strStyle,
 						out strXmlBody,
@@ -462,7 +462,7 @@
 						{
 							if (checkBox_forceLoop.Checked == true && bFirst == true)
 							{
-								AutoCloseMessageBox.Show(this, "¼ÇÂ¼ " + strID + " ²»´æÔÚ¡£\r\n\r\n°´ È·ÈÏ ¼ÌĞø¡£");
+								AutoCloseMessageBox.Show(this, "è®°å½• " + strID + " ä¸å­˜åœ¨ã€‚\r\n\r\næŒ‰ ç¡®è®¤ ç»§ç»­ã€‚");
 
 								bFirst = false;
 								goto CONTINUE;
@@ -471,14 +471,14 @@
 							{
 								if (bFirst == true)
 								{
-									strError = "¼ÇÂ¼ " + strID + " ²»´æÔÚ¡£´¦Àí½áÊø¡£";
+									strError = "è®°å½• " + strID + " ä¸å­˜åœ¨ã€‚å¤„ç†ç»“æŸã€‚";
 								}
 								else 
 								{
 									if (bAsc == true)
-										strError = "¼ÇÂ¼ " + strID + " ÊÇ×îÄ©Ò»Ìõ¼ÇÂ¼¡£´¦Àí½áÊø¡£";
+										strError = "è®°å½• " + strID + " æ˜¯æœ€æœ«ä¸€æ¡è®°å½•ã€‚å¤„ç†ç»“æŸã€‚";
 									else
-										strError = "¼ÇÂ¼ " + strID + " ÊÇ×îÇ°Ò»Ìõ¼ÇÂ¼¡£´¦Àí½áÊø¡£";
+										strError = "è®°å½• " + strID + " æ˜¯æœ€å‰ä¸€æ¡è®°å½•ã€‚å¤„ç†ç»“æŸã€‚";
 								}
 							}
 
@@ -487,7 +487,7 @@
 						{
 							bFirst = false;
 							bFoundRecord = false;
-							// °Ñid½âÎö³öÀ´
+							// æŠŠidè§£æå‡ºæ¥
 							strID = ResPath.GetRecordId(strOutputPath);
 							goto CONTINUE;
 
@@ -500,13 +500,13 @@
 
 					bFoundRecord = true;
 
-					// °Ñid½âÎö³öÀ´
+					// æŠŠidè§£æå‡ºæ¥
 					strID = ResPath.GetRecordId(strOutputPath);
 
 				CONTINUE:
 					stop.SetMessage(strID);
 
-					// ÊÇ·ñ³¬¹ıÑ­»··¶Î§
+					// æ˜¯å¦è¶…è¿‡å¾ªç¯èŒƒå›´
 					try 
 					{
 						nCur = Convert.ToInt64(strID);
@@ -525,7 +525,7 @@
 					if (bFoundRecord == true 
 						&& writer != null) 
 					{
-						// Ğ´´ÅÅÌ
+						// å†™ç£ç›˜
 						XmlDocument dom = new XmlDocument();
 
 						try 
@@ -539,7 +539,7 @@
 
 
 							// DomUtil.SetAttr(dom.DocumentElement, "xmlns:dprms", "http://d-platform.com/dprms/");
-							// ¸ø¸ùÔªËØÉèÖÃ¼¸¸ö²ÎÊı
+							// ç»™æ ¹å…ƒç´ è®¾ç½®å‡ ä¸ªå‚æ•°
 							DomUtil.SetAttr(dom.DocumentElement, "path", "http://d-platform.com/dprms/", respathtemp.FullPath);
 							DomUtil.SetAttr(dom.DocumentElement, "timestamp", "http://d-platform.com/dprms/", ByteArray.GetHexTimeStampString(baOutputTimeStamp));
 
@@ -549,7 +549,7 @@
 						catch (Exception ex)
 						{
 							strError = ex.Message;
-							// Ñ¯ÎÊÊÇ·ñ¼ÌĞø
+							// è¯¢é—®æ˜¯å¦ç»§ç»­
 							goto ERROR1;
 						}
 
@@ -557,18 +557,18 @@
 						/*
 						if (nRet == -1) 
 						{
-							// Ñ¯ÎÊÊÇ·ñ¼ÌĞø
+							// è¯¢é—®æ˜¯å¦ç»§ç»­
 							goto ERROR1;
 						}
 						*/
 					}
 
-					// É¾³ı
+					// åˆ é™¤
 					if (checkBox_export_delete.Checked == true)
 					{
 
 						byte [] baOutputTimeStamp1 = null;
-						strPath = strOutputPath;	// µÃµ½Êµ¼ÊµÄÂ·¾¶
+						strPath = strOutputPath;	// å¾—åˆ°å®é™…çš„è·¯å¾„
 
 						lRet = channel.DoDeleteRecord(
 							strPath,
@@ -577,7 +577,7 @@
 							out strError);
 						if (lRet == -1) 
 						{
-							// Ñ¯ÎÊÊÇ·ñ¼ÌĞø
+							// è¯¢é—®æ˜¯å¦ç»§ç»­
 							goto ERROR1;
 						}
 					}
@@ -594,7 +594,7 @@
 					}
 
 
-					// ¶ÔÒÑ¾­×÷¹ıµÄ½øĞĞÅĞ¶Ï
+					// å¯¹å·²ç»ä½œè¿‡çš„è¿›è¡Œåˆ¤æ–­
 					if (bAsc == true && nCur >= nEnd)
 						break;
 					if (bAsc == false && nCur <= nEnd)
@@ -632,9 +632,9 @@
 			END1:
 				channel = null;
 			if (checkBox_export_delete.Checked == true)
-				MessageBox.Show(this, "Êı¾İµ¼³öºÍÉ¾³ıÍê³É¡£");
+				MessageBox.Show(this, "æ•°æ®å¯¼å‡ºå’Œåˆ é™¤å®Œæˆã€‚");
 			else
-				MessageBox.Show(this, "Êı¾İµ¼³öÍê³É¡£");
+				MessageBox.Show(this, "æ•°æ®å¯¼å‡ºå®Œæˆã€‚");
 			return;
 
 			ERROR1:
@@ -657,14 +657,14 @@
 
 		~~~
 
-				// Ç¿ÖÆ½«ISO2709¸ñÊ½¼ÇÂ¼×ª»»Îª×Ö¶ÎÊı×é
-		// ±¾º¯Êı²ÉÓÃµÄËã·¨ÊÇ½«Ä¿´ÎÇøµÄµØÖ·ºÍ³¤¶ÈºöÂÔ£¬Ö»È¡3×Ö·ûµÄ×Ö¶ÎÃû
-		// aResultµÄÃ¿¸öÔªËØÎªbyte[]ĞÍ£¬ÄÚÈİÊÇÒ»¸ö×Ö¶Î¡£µÚÒ»¸öÔªËØÊÇÍ·±êÇø£¬Ò»¶¨ÊÇ24bytes
+				// å¼ºåˆ¶å°†ISO2709æ ¼å¼è®°å½•è½¬æ¢ä¸ºå­—æ®µæ•°ç»„
+		// æœ¬å‡½æ•°é‡‡ç”¨çš„ç®—æ³•æ˜¯å°†ç›®æ¬¡åŒºçš„åœ°å€å’Œé•¿åº¦å¿½ç•¥ï¼Œåªå–3å­—ç¬¦çš„å­—æ®µå
+		// aResultçš„æ¯ä¸ªå…ƒç´ ä¸ºbyte[]å‹ï¼Œå†…å®¹æ˜¯ä¸€ä¸ªå­—æ®µã€‚ç¬¬ä¸€ä¸ªå…ƒç´ æ˜¯å¤´æ ‡åŒºï¼Œä¸€å®šæ˜¯24bytes
 		// return:
-		//	-1	Ò»°ãĞÔ´íÎó
-		//	-2	MARC¸ñÊ½´íÎó
+		//	-1	ä¸€èˆ¬æ€§é”™è¯¯
+		//	-2	MARCæ ¼å¼é”™è¯¯
 		public static int ForceCvt2709ToFieldArray(
-            ref Encoding encoding,  // 2007/7/11 new add º¯ÊıÄÚ¿ÉÄÜ·¢Éú±ä»¯
+            ref Encoding encoding,  // 2007/7/11 new add å‡½æ•°å†…å¯èƒ½å‘ç”Ÿå˜åŒ–
             byte[] s,
             List<byte[]> aResult,
 			out string strErrorInfo)
@@ -679,7 +679,7 @@
             {
                 string strRecord = encoding.GetString(s);
 
-                // ±ä»»³ÉUTF-8±àÂë·½Ê½´¦Àí
+                // å˜æ¢æˆUTF-8ç¼–ç æ–¹å¼å¤„ç†
                 s = Encoding.UTF8.GetBytes(strRecord);
                 encoding = Encoding.UTF8;
             }
@@ -691,14 +691,14 @@
             }
             catch (ArgumentException)
             {
-                // ²»×ã 24 ×Ö·ûµÄ£¬¸øÓë¿íÈİ
+                // ä¸è¶³ 24 å­—ç¬¦çš„ï¼Œç»™ä¸å®½å®¹
                 header = new MarcHeaderStruct(Encoding.ASCII, Encoding.ASCII.GetBytes("012345678901234567890123"));
             }
-			header.ForceUNIMARCHeader();	// Ç¿ÖÆ½«Ä³Ğ©Î»ÖÃÉèÖÃÎªÈ±Ê¡Öµ
+			header.ForceUNIMARCHeader();	// å¼ºåˆ¶å°†æŸäº›ä½ç½®è®¾ç½®ä¸ºç¼ºçœå€¼
 
 #if NO
 		{
-			// Êä³öÍ·±êÇø
+			// è¾“å‡ºå¤´æ ‡åŒº
 			byte[] tarray = null;
 			tarray = new byte[24];
 			Array.Copy(s, 0, tarray, 0, 24);
@@ -718,7 +718,7 @@
 
 			//startposoffld=5;
 	
-			// ¿ªÊ¼´¦ÀíÄ¿´ÎÇø
+			// å¼€å§‹å¤„ç†ç›®æ¬¡åŒº
 			// dirp = (char *)sopp;
 			// t = 24;
 			offs = 24;
@@ -754,13 +754,13 @@
 				}
 
 
-				// ½«×Ö¶ÎÃû×°ÈëÄ¿±ê
+				// å°†å­—æ®µåè£…å…¥ç›®æ ‡
 				baField = new MyByteList();
 				baField.AddRange(s, offs, 3);
 
 				aResult.Add(baField.GetByteArray());
 				baField = null;
-				// µÃµ½×Ö¶ÎÄÚÈİ¿ªÊ¼µØÖ·
+				// å¾—åˆ°å­—æ®µå†…å®¹å¼€å§‹åœ°å€
 				offs += 3;
 				offs += 4;
 				offs += 5;
@@ -778,7 +778,7 @@
 
 			int nFieldNumber = 1;
 			baField = new MyByteList();
-			// ¼ÓÈë¶ÔÓ¦µÄ×Ö¶ÎÄÚÈİ
+			// åŠ å…¥å¯¹åº”çš„å­—æ®µå†…å®¹
 			for(;offs<somaxlen;offs++) 
 			{
                 byte c = s[offs];
@@ -797,7 +797,7 @@
 						}
 					}
 
-					// ¼ÓÈëÒ»¸ö×Ö¶ÎÄÚÈİ
+					// åŠ å…¥ä¸€ä¸ªå­—æ®µå†…å®¹
 					while(nFieldNumber >= aResult.Count) 
 					{
 						byte[] baTemp0 = new byte[3];
@@ -833,21 +833,21 @@
 
 			return 0;
 			//		ERROR1:
-			//			return -1;	// Ò»°ãĞÔ´íÎó
+			//			return -1;	// ä¸€èˆ¬æ€§é”™è¯¯
 			//		ERROR2:
-			//			return -2;	// MARC¸ñÊ½´íÎó
+			//			return -2;	// MARCæ ¼å¼é”™è¯¯
 		}
 
 		~~~
 
-				// Ç¿ÖÆ½«ISO2709¸ñÊ½¼ÇÂ¼×ª»»Îª×Ö¶ÎÊı×é
-		// ±¾º¯Êı²ÉÓÃµÄËã·¨ÊÇ½«Ä¿´ÎÇøµÄµØÖ·ºÍ³¤¶ÈºöÂÔ£¬Ö»È¡3×Ö·ûµÄ×Ö¶ÎÃû
-		// aResultµÄÃ¿¸öÔªËØÎªbyte[]ĞÍ£¬ÄÚÈİÊÇÒ»¸ö×Ö¶Î¡£µÚÒ»¸öÔªËØÊÇÍ·±êÇø£¬Ò»¶¨ÊÇ24bytes
+				// å¼ºåˆ¶å°†ISO2709æ ¼å¼è®°å½•è½¬æ¢ä¸ºå­—æ®µæ•°ç»„
+		// æœ¬å‡½æ•°é‡‡ç”¨çš„ç®—æ³•æ˜¯å°†ç›®æ¬¡åŒºçš„åœ°å€å’Œé•¿åº¦å¿½ç•¥ï¼Œåªå–3å­—ç¬¦çš„å­—æ®µå
+		// aResultçš„æ¯ä¸ªå…ƒç´ ä¸ºbyte[]å‹ï¼Œå†…å®¹æ˜¯ä¸€ä¸ªå­—æ®µã€‚ç¬¬ä¸€ä¸ªå…ƒç´ æ˜¯å¤´æ ‡åŒºï¼Œä¸€å®šæ˜¯24bytes
 		// return:
-		//	-1	Ò»°ãĞÔ´íÎó
-		//	-2	MARC¸ñÊ½´íÎó
+		//	-1	ä¸€èˆ¬æ€§é”™è¯¯
+		//	-2	MARCæ ¼å¼é”™è¯¯
 		public static int ForceCvt2709ToFieldArray(
-            ref Encoding encoding,  // 2007/7/11 new add º¯ÊıÄÚ¿ÉÄÜ·¢Éú±ä»¯
+            ref Encoding encoding,  // 2007/7/11 new add å‡½æ•°å†…å¯èƒ½å‘ç”Ÿå˜åŒ–
             byte[] s,
             List<byte[]> aResult,
 			out string strErrorInfo)
@@ -862,7 +862,7 @@
             {
                 string strRecord = encoding.GetString(s);
 
-                // ±ä»»³ÉUTF-8±àÂë·½Ê½´¦Àí
+                // å˜æ¢æˆUTF-8ç¼–ç æ–¹å¼å¤„ç†
                 s = Encoding.UTF8.GetBytes(strRecord);
                 encoding = Encoding.UTF8;
             }
@@ -874,14 +874,14 @@
             }
             catch (ArgumentException)
             {
-                // ²»×ã 24 ×Ö·ûµÄ£¬¸øÓë¿íÈİ
+                // ä¸è¶³ 24 å­—ç¬¦çš„ï¼Œç»™ä¸å®½å®¹
                 header = new MarcHeaderStruct(Encoding.ASCII, Encoding.ASCII.GetBytes("012345678901234567890123"));
             }
-			header.ForceUNIMARCHeader();	// Ç¿ÖÆ½«Ä³Ğ©Î»ÖÃÉèÖÃÎªÈ±Ê¡Öµ
+			header.ForceUNIMARCHeader();	// å¼ºåˆ¶å°†æŸäº›ä½ç½®è®¾ç½®ä¸ºç¼ºçœå€¼
 
 #if NO
 		{
-			// Êä³öÍ·±êÇø
+			// è¾“å‡ºå¤´æ ‡åŒº
 			byte[] tarray = null;
 			tarray = new byte[24];
 			Array.Copy(s, 0, tarray, 0, 24);
@@ -897,7 +897,7 @@
 	
 			somaxlen = s.Length;
 
-			// ¿ªÊ¼´¦ÀíÄ¿´ÎÇø
+			// å¼€å§‹å¤„ç†ç›®æ¬¡åŒº
 			offs = 24;
 			MyByteList baField = null;
 			bool bFound = false;
@@ -931,13 +931,13 @@
 				}
 
 
-				// ½«×Ö¶ÎÃû×°ÈëÄ¿±ê
+				// å°†å­—æ®µåè£…å…¥ç›®æ ‡
 				baField = new MyByteList();
 				baField.AddRange(s, offs, 3);
 
 				aResult.Add(baField.GetByteArray());
 				baField = null;
-				// µÃµ½×Ö¶ÎÄÚÈİ¿ªÊ¼µØÖ·
+				// å¾—åˆ°å­—æ®µå†…å®¹å¼€å§‹åœ°å€
 				offs += 3;
 				offs += 4;
 				offs += 5;
@@ -955,7 +955,7 @@
 
 			int nFieldNumber = 1;
 			baField = new MyByteList();
-			// ¼ÓÈë¶ÔÓ¦µÄ×Ö¶ÎÄÚÈİ
+			// åŠ å…¥å¯¹åº”çš„å­—æ®µå†…å®¹
 			for(;offs<somaxlen;offs++) 
 			{
                 byte c = s[offs];
@@ -972,7 +972,7 @@
 						}
 					}
 
-					// ¼ÓÈëÒ»¸ö×Ö¶ÎÄÚÈİ
+					// åŠ å…¥ä¸€ä¸ªå­—æ®µå†…å®¹
 					while(nFieldNumber >= aResult.Count) 
 					{
 						byte[] baTemp0 = new byte[3];
@@ -1006,20 +1006,20 @@
 
 			return 0;
 			//		ERROR1:
-			//			return -1;	// Ò»°ãĞÔ´íÎó
+			//			return -1;	// ä¸€èˆ¬æ€§é”™è¯¯
 			//		ERROR2:
-			//			return -2;	// MARC¸ñÊ½´íÎó
+			//			return -2;	// MARCæ ¼å¼é”™è¯¯
 		}
 
 
-				// Ç¿ÖÆ½«ISO2709¸ñÊ½¼ÇÂ¼×ª»»Îª×Ö¶ÎÊı×é
-		// ±¾º¯Êı²ÉÓÃµÄËã·¨ÊÇ½«Ä¿´ÎÇøµÄµØÖ·ºÍ³¤¶ÈºöÂÔ£¬Ö»È¡3×Ö·ûµÄ×Ö¶ÎÃû
-		// aResultµÄÃ¿¸öÔªËØÎªbyte[]ĞÍ£¬ÄÚÈİÊÇÒ»¸ö×Ö¶Î¡£µÚÒ»¸öÔªËØÊÇÍ·±êÇø£¬Ò»¶¨ÊÇ24bytes
+				// å¼ºåˆ¶å°†ISO2709æ ¼å¼è®°å½•è½¬æ¢ä¸ºå­—æ®µæ•°ç»„
+		// æœ¬å‡½æ•°é‡‡ç”¨çš„ç®—æ³•æ˜¯å°†ç›®æ¬¡åŒºçš„åœ°å€å’Œé•¿åº¦å¿½ç•¥ï¼Œåªå–3å­—ç¬¦çš„å­—æ®µå
+		// aResultçš„æ¯ä¸ªå…ƒç´ ä¸ºbyte[]å‹ï¼Œå†…å®¹æ˜¯ä¸€ä¸ªå­—æ®µã€‚ç¬¬ä¸€ä¸ªå…ƒç´ æ˜¯å¤´æ ‡åŒºï¼Œä¸€å®šæ˜¯24bytes
 		// return:
-		//	-1	Ò»°ãĞÔ´íÎó
-		//	-2	MARC¸ñÊ½´íÎó
+		//	-1	ä¸€èˆ¬æ€§é”™è¯¯
+		//	-2	MARCæ ¼å¼é”™è¯¯
 		public static int ForceCvt2709ToFieldArray(
-            ref Encoding encoding,  // 2007/7/11 new add º¯ÊıÄÚ¿ÉÄÜ·¢Éú±ä»¯
+            ref Encoding encoding,  // 2007/7/11 new add å‡½æ•°å†…å¯èƒ½å‘ç”Ÿå˜åŒ–
             byte[] s,
             out List<byte[]> aResult1,
 			out string strErrorInfo)
@@ -1037,7 +1037,7 @@
             {
                 string strRecord = encoding.GetString(s);
 
-                // ±ä»»³ÉUTF-8±àÂë·½Ê½´¦Àí
+                // å˜æ¢æˆUTF-8ç¼–ç æ–¹å¼å¤„ç†
                 s = Encoding.UTF8.GetBytes(strRecord);
                 encoding = Encoding.UTF8;
             }
@@ -1049,10 +1049,10 @@
             }
             catch (ArgumentException)
             {
-                // ²»×ã 24 ×Ö·ûµÄ£¬¸øÓë¿íÈİ
+                // ä¸è¶³ 24 å­—ç¬¦çš„ï¼Œç»™ä¸å®½å®¹
                 header = new MarcHeaderStruct(Encoding.ASCII, Encoding.ASCII.GetBytes("012345678901234567890123"));
             }
-			header.ForceUNIMARCHeader();	// Ç¿ÖÆ½«Ä³Ğ©Î»ÖÃÉèÖÃÎªÈ±Ê¡Öµ
+			header.ForceUNIMARCHeader();	// å¼ºåˆ¶å°†æŸäº›ä½ç½®è®¾ç½®ä¸ºç¼ºçœå€¼
 
             results.Add(header.GetByteList());
 
@@ -1062,7 +1062,7 @@
 	
 			somaxlen = s.Length;
 
-			// ¿ªÊ¼´¦ÀíÄ¿´ÎÇø
+			// å¼€å§‹å¤„ç†ç›®æ¬¡åŒº
 			offs = 24;
 			MyByteList baField = null;
 			bool bFound = false;
@@ -1096,13 +1096,13 @@
 				}
 
 
-				// ½«×Ö¶ÎÃû×°ÈëÄ¿±ê
+				// å°†å­—æ®µåè£…å…¥ç›®æ ‡
 				baField = new MyByteList();
 				baField.AddRange(s, offs, 3);
 
 				results.Add(baField);
 				baField = null;
-				// µÃµ½×Ö¶ÎÄÚÈİ¿ªÊ¼µØÖ·
+				// å¾—åˆ°å­—æ®µå†…å®¹å¼€å§‹åœ°å€
 				offs += 3;
 				offs += 4;
 				offs += 5;
@@ -1120,7 +1120,7 @@
 
 			int nFieldNumber = 1;
 			baField = new MyByteList();
-			// ¼ÓÈë¶ÔÓ¦µÄ×Ö¶ÎÄÚÈİ
+			// åŠ å…¥å¯¹åº”çš„å­—æ®µå†…å®¹
 			for(;offs<somaxlen;offs++) 
 			{
                 byte c = s[offs];
@@ -1137,7 +1137,7 @@
 						}
 					}
 
-					// ¼ÓÈëÒ»¸ö×Ö¶ÎÄÚÈİ
+					// åŠ å…¥ä¸€ä¸ªå­—æ®µå†…å®¹
 					while(nFieldNumber >= results.Count) 
 					{
                         MyByteList temp = new MyByteList();
@@ -1180,7 +1180,7 @@
 
 			return 0;
 			//		ERROR1:
-			//			return -1;	// Ò»°ãĞÔ´íÎó
+			//			return -1;	// ä¸€èˆ¬æ€§é”™è¯¯
 			//		ERROR2:
-			//			return -2;	// MARC¸ñÊ½´íÎó
+			//			return -2;	// MARCæ ¼å¼é”™è¯¯
 		}

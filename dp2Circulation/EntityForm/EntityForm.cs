@@ -5860,6 +5860,7 @@ true);
         {
             int nRet = 0;
 
+            // 按住 Shift 使用本功能，可重新出现对话框
             bool bShift = (Control.ModifierKeys == Keys.Shift);
 
             if (this.BiblioChanged == true
@@ -5974,9 +5975,10 @@ true);
             select_temp_dlg.SelectedName = strSelectedTemplateName;
             select_temp_dlg.AutoClose = (bShift == true ? false : bNotAskTemplateName);
             select_temp_dlg.NotAsk = bNotAskTemplateName;
+            select_temp_dlg.EnableNotAsk = true;
 
             nRet = select_temp_dlg.Initial(
-                true, // 也允许删除  // false,
+                true, // true 表示也允许删除  // false,
                 strContent,
                 out strError);
             if (nRet == -1)
@@ -6918,8 +6920,9 @@ MessageBoxDefaultButton.Button2);
             SelectTemplateDlg tempdlg = new SelectTemplateDlg();
             MainForm.SetControlFont(tempdlg, this.Font, false);
             nRet = tempdlg.Initial(
-                true,
-                strContent, out strError);
+                true,   // 允许修改
+                strContent, 
+                out strError);
             if (nRet == -1)
                 goto ERROR1;
 

@@ -233,8 +233,10 @@ namespace dp2Circulation
 				Debug.Assert(true, "你一定忘记了先用Initial()");
 			}
 
+#if NO
             if (this.SaveMode == false)
                 this.checkBox_notAsk.Enabled = true;
+#endif
 
             if (this.AutoClose == true)
                 API.PostMessage(this.Handle, WM_AUTO_CLOSE, 0, 0);
@@ -277,6 +279,23 @@ namespace dp2Circulation
 			}
              * */
 		}
+
+        // 2015/5/11
+        /// <summary>
+        /// 是否允许 “下次不再出现 ...” checkbox。缺省为 false
+        /// 这是一个独立的状态，和 SaveMode 无关
+        /// </summary>
+        public bool EnableNotAsk
+        {
+            get
+            {
+                return this.checkBox_notAsk.Enabled;
+            }
+            set
+            {
+                this.checkBox_notAsk.Enabled = value;
+            }
+        }
 
 		public int Initial(
             bool bSaveMode,

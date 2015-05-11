@@ -1,56 +1,56 @@
+ï»¿
 
-
-VerifyRange()ÖÐ£¬¶ÔÓÚÊý¾Ý¿âÖÐÊµ¼ÊÖ»ÓÐ1,2Ìõ£¬¶øÃæ°åºÅÂëÎª3,4µÄ±¨´í£¬
-ÈÃ²Ù×÷ÕßÖªµÀÖ¸¶¨µÄ·¶Î§ÖÐ²»´æÔÚ¼ÇÂ¼¡£
-
-
-~~~~~~~~~~~~
-µ¼ÈëµÄÄ¿±ê¿â£¬ÓÒ±ßµÄ°´Å¥Æ½Ê±ÊÇÓÃÀ´Ñ¡Ôñ¸²¸ÇÐÍ²ÎÊý£¬Èç¹û¼ÓÉÏCTRL°´ÏÂ£¬ÔòÓ¦ÊÇ
-Ñ¡ÔñÉèÖÃ¸²¸ÇºÍ×·¼ÓÈ«Ãæ²ÎÊý¡£»¹¿ÉÒÔ¶Ô¼´½«µ¼ÈëµÄÊý¾Ý½øÐÐÍ³¼Æ£¬¿´¿´Êý¾ÝÖÐÁÐ³öÁË
-ÄÇÐ©Ô´¿â£¬ÒÔ±ã°ïÖúÉèÖÃ¡£
+VerifyRange()ä¸­ï¼Œå¯¹äºŽæ•°æ®åº“ä¸­å®žé™…åªæœ‰1,2æ¡ï¼Œè€Œé¢æ¿å·ç ä¸º3,4çš„æŠ¥é”™ï¼Œ
+è®©æ“ä½œè€…çŸ¥é“æŒ‡å®šçš„èŒƒå›´ä¸­ä¸å­˜åœ¨è®°å½•ã€‚
 
 
 ~~~~~~~~~~~~
-ÎÞÂÛµ¼Èë»¹ÊÇµ¼³ö£¬ÖÐ¶ÏµÄÊ±ºò¾ùÒªÏÔÊ¾ÖÐ¶ÏÎ»ÖÃ¡¢ÒÑ¾­´¦ÀíµÄ¼ÇÂ¼¸öÊý£¬ÒÔ±ãÏÂ´ÎÌø¹ý
-Ò»¶¨·¶Î§ºó¼ÌÐø¡£
+å¯¼å…¥çš„ç›®æ ‡åº“ï¼Œå³è¾¹çš„æŒ‰é’®å¹³æ—¶æ˜¯ç”¨æ¥é€‰æ‹©è¦†ç›–åž‹å‚æ•°ï¼Œå¦‚æžœåŠ ä¸ŠCTRLæŒ‰ä¸‹ï¼Œåˆ™åº”æ˜¯
+é€‰æ‹©è®¾ç½®è¦†ç›–å’Œè¿½åŠ å…¨é¢å‚æ•°ã€‚è¿˜å¯ä»¥å¯¹å³å°†å¯¼å…¥çš„æ•°æ®è¿›è¡Œç»Ÿè®¡ï¼Œçœ‹çœ‹æ•°æ®ä¸­åˆ—å‡ºäº†
+é‚£äº›æºåº“ï¼Œä»¥ä¾¿å¸®åŠ©è®¾ç½®ã€‚
+
+
+~~~~~~~~~~~~
+æ— è®ºå¯¼å…¥è¿˜æ˜¯å¯¼å‡ºï¼Œä¸­æ–­çš„æ—¶å€™å‡è¦æ˜¾ç¤ºä¸­æ–­ä½ç½®ã€å·²ç»å¤„ç†çš„è®°å½•ä¸ªæ•°ï¼Œä»¥ä¾¿ä¸‹æ¬¡è·³è¿‡
+ä¸€å®šèŒƒå›´åŽç»§ç»­ã€‚
 
 ~~~~~~~~~~~~~
 
-µ¼ÈëXML¼ÇÂ¼£¬Èç¹ûÒ»Ìõ¼ÇÂ¼ÒòÎªÄ³ÖÖÔ­Òòµ¼ÈëÊ§°Ü£¬Èç¹ûÐèÒªretry£¬ÖØÐÂ¶¨Î»ÊäÈëÁ÷
-µÄÎ»ÖÃÊÇÒ»¸öÀ§ÄÑ¡£¶øbackupÎÄ¼þÖØÐÂ¶¨Î»Ã»ÓÐÀ§ÄÑ¡£
+å¯¼å…¥XMLè®°å½•ï¼Œå¦‚æžœä¸€æ¡è®°å½•å› ä¸ºæŸç§åŽŸå› å¯¼å…¥å¤±è´¥ï¼Œå¦‚æžœéœ€è¦retryï¼Œé‡æ–°å®šä½è¾“å…¥æµ
+çš„ä½ç½®æ˜¯ä¸€ä¸ªå›°éš¾ã€‚è€Œbackupæ–‡ä»¶é‡æ–°å®šä½æ²¡æœ‰å›°éš¾ã€‚
 
 
 ~~~~~~~~~~~~~
-µ¼Èë¹ý³ÌÈç¹ûÖÐ¶Ï£¬»á±»µ±×÷³ö´íÌáÊ¾¡£Ó¦ÌáÊ¾¸ü×¼È·ºÍÏêÏ¸Ò»µã¡£
+å¯¼å…¥è¿‡ç¨‹å¦‚æžœä¸­æ–­ï¼Œä¼šè¢«å½“ä½œå‡ºé”™æç¤ºã€‚åº”æç¤ºæ›´å‡†ç¡®å’Œè¯¦ç»†ä¸€ç‚¹ã€‚
 
 
 ~~~~~~~~~~~~
 
-BatchÖÐ,Ô­À´µÄMarcRecord¿ÉÓÃÀ´´æ»ØÊý¾Ý¿â
+Batchä¸­,åŽŸæ¥çš„MarcRecordå¯ç”¨æ¥å­˜å›žæ•°æ®åº“
 
-ÎÊÌâÊÇ, ÕâËÆºõÒ²¿ÉÓÃÀ´±íÊ¾¶Ô¼´½«Êä³ö¼ÇÂ¼µÄÁÙÊ±ÐÞ¸Ä.
+é—®é¢˜æ˜¯, è¿™ä¼¼ä¹Žä¹Ÿå¯ç”¨æ¥è¡¨ç¤ºå¯¹å³å°†è¾“å‡ºè®°å½•çš„ä¸´æ—¶ä¿®æ”¹.
 
-Èç¹ûÒªÁ½¸öÓÃÍ¾Í¬Ê±Âú×ã, ÔòÐèÒªÉèÖÃÁ½¸ö²»Í¬µÄ×Ö·û´®ÊôÐÔ: MarcRecord ¿ÉÓÃÀ´´æ»ØÊý¾Ý¿â;
+å¦‚æžœè¦ä¸¤ä¸ªç”¨é€”åŒæ—¶æ»¡è¶³, åˆ™éœ€è¦è®¾ç½®ä¸¤ä¸ªä¸åŒçš„å­—ç¬¦ä¸²å±žæ€§: MarcRecord å¯ç”¨æ¥å­˜å›žæ•°æ®åº“;
 
-OutputMarcRecord¿ÉÓÃÀ´ÐÞ¸ÄÊä³öµ½ÎÄ¼þµÄÄÚÈÝ. ¿¼ÂÇµ½»¹¿ÉÁÙÊ±ºöÂÔ²¿·Ö¼ÇÂ¼,
-ËùÒÔOutputMarcRecord¿ÉÒÔÐÎ³ÉÒ»¸ö½á¹¹,ÀïÃæº¬ÓÐbool±äÁ¿,¿ØÖÆÊÇ·ñÊä³ö
+OutputMarcRecordå¯ç”¨æ¥ä¿®æ”¹è¾“å‡ºåˆ°æ–‡ä»¶çš„å†…å®¹. è€ƒè™‘åˆ°è¿˜å¯ä¸´æ—¶å¿½ç•¥éƒ¨åˆ†è®°å½•,
+æ‰€ä»¥OutputMarcRecordå¯ä»¥å½¢æˆä¸€ä¸ªç»“æž„,é‡Œé¢å«æœ‰boolå˜é‡,æŽ§åˆ¶æ˜¯å¦è¾“å‡º
 
-ÆäÊµ eventargsÒ²¿ÉÒÔ¼æÕâ¸öÔðÈÎ.
+å…¶å®ž eventargsä¹Ÿå¯ä»¥å…¼è¿™ä¸ªè´£ä»».
 
 ~~~~~~~~~~~~
-ÔÚBatchÖÐ°üº¬Ò»¸öSearchPannel,±ãÓÚ¶þ´Î¿ª·¢
+åœ¨Batchä¸­åŒ…å«ä¸€ä¸ªSearchPannel,ä¾¿äºŽäºŒæ¬¡å¼€å‘
 
-¿ÉÒÔÓÃËüÀ´±£´æMARC»òXML¼ÇÂ¼, ¶ø²»±Ø°ÑËÞÖ÷³ÌÐò¸ãµÃÌ«¸´ÔÓ
+å¯ä»¥ç”¨å®ƒæ¥ä¿å­˜MARCæˆ–XMLè®°å½•, è€Œä¸å¿…æŠŠå®¿ä¸»ç¨‹åºæžå¾—å¤ªå¤æ‚
 
 
 ~~~~~~~~~~
-ÎªÁËÌá¸ßÐ§ÂÊ, ½¨ÒéÔÚBatch¶ÔÏóÖÐ½¨Á¢Ò»¸öProperty,ÊµÊ±´ÓXML¼ÇÂ¼ÖÐ×ª³öMARC¼ÇÂ¼(¿ÉÒÔÂÔ¼ÓCache)
+ä¸ºäº†æé«˜æ•ˆçŽ‡, å»ºè®®åœ¨Batchå¯¹è±¡ä¸­å»ºç«‹ä¸€ä¸ªProperty,å®žæ—¶ä»ŽXMLè®°å½•ä¸­è½¬å‡ºMARCè®°å½•(å¯ä»¥ç•¥åŠ Cache)
 
-(ËùÎ½ÂÔ¼ÓCache, ÊÇÖ¸ÒªºÍXML»¥¶¯,Õâ¸ö¸ÄÁË,ÄÇ¸ö»¹ÄÜ·´Ó³ÐÞ¸ÄÇé¿ö)
+(æ‰€è°“ç•¥åŠ Cache, æ˜¯æŒ‡è¦å’ŒXMLäº’åŠ¨,è¿™ä¸ªæ”¹äº†,é‚£ä¸ªè¿˜èƒ½åæ˜ ä¿®æ”¹æƒ…å†µ)
 
-ÕâÑù, ¼´±ãMARC¿âµ±Ê±²»ÊÇÔÚ×ª³öISO2709, Ò²¿ÉÒÔ´ÓMARC½Ç¶È´¦ÀíÊý¾Ý.
+è¿™æ ·, å³ä¾¿MARCåº“å½“æ—¶ä¸æ˜¯åœ¨è½¬å‡ºISO2709, ä¹Ÿå¯ä»¥ä»ŽMARCè§’åº¦å¤„ç†æ•°æ®.
 
-¾ÍÀàËÆXmlDom, »òÕßXsltÇéÐÎ. Ò²ÀàËÆfilterÇéÐÎ.
+å°±ç±»ä¼¼XmlDom, æˆ–è€…Xsltæƒ…å½¢. ä¹Ÿç±»ä¼¼filteræƒ…å½¢.
 
 ~~~~~~~~~~~~
 using System;
@@ -76,7 +76,7 @@ public class MyBatch : Batch
 			dupdlg.Initial(this.SearchPanel,
 				this.SearchPanel.ServerUrl,
 				false);
-			dupdlg.ProjectName = "²É¹º²éÖØ";
+			dupdlg.ProjectName = "é‡‡è´­æŸ¥é‡";
 			dupdlg.Show();
 
 		}
@@ -113,67 +113,67 @@ public class MyBatch : Batch
 
 
 ~~~~~~~~~~
-Òª½øÒ»²½½«DoXmlItemUpload°þÀë³öÒ»¸öÐ¡º¯Êý£¬ÔÚÕâ¸öÐ¡º¯ÊýÖÐ£¬Ä¿±ê¿âÎÊÌâÒÑ¾­½â¾öÇå³þ
+è¦è¿›ä¸€æ­¥å°†DoXmlItemUploadå‰¥ç¦»å‡ºä¸€ä¸ªå°å‡½æ•°ï¼Œåœ¨è¿™ä¸ªå°å‡½æ•°ä¸­ï¼Œç›®æ ‡åº“é—®é¢˜å·²ç»è§£å†³æ¸…æ¥š
 
-ÕâÑù£¬±ãÓÚÔÚbatchObjÖÐÉèÖÃÄ¿±ê¿âÃûµÈ²ÎÊý£¬¶øÕâÐ©²ÎÊýÓÖÊÇÌáÊ¾²éÖØ·½°¸ÃûËù±ØÐèµÄ¡£
+è¿™æ ·ï¼Œä¾¿äºŽåœ¨batchObjä¸­è®¾ç½®ç›®æ ‡åº“åç­‰å‚æ•°ï¼Œè€Œè¿™äº›å‚æ•°åˆæ˜¯æç¤ºæŸ¥é‡æ–¹æ¡ˆåæ‰€å¿…éœ€çš„ã€‚
 
-Èç¹ûÒòÎªNotLoginµÈÖØ¸´WriteRes£¬OnMiddle²»Ó¦±»ÖØ¸´µ÷ÓÃ¡£
+å¦‚æžœå› ä¸ºNotLoginç­‰é‡å¤WriteResï¼ŒOnMiddleä¸åº”è¢«é‡å¤è°ƒç”¨ã€‚
 
-
-~~~~~~~~~
-dupdlgÖÐÓÅ»¯»ñÈ¡browse¹ý³Ì£¬ÖÁÉÙ¿ÉÒÔÊ¡È¥Ã»ÓÐÐÇºÅµÄ²¿·ÖÐÐ¡£
 
 ~~~~~~~~~
-Åú²éÖØÖÐ£¬¿´ä¯ÀÀÐÅÏ¢µÄÊ±¼äËÆºõÌ«ÍíÁËÒ»µã£¬ËÆºõÓ¦ÌáÇ°µ½Ä³ÐÐ·ÖÊý¸Õ¸Õ¹ýãÐÖµµÄÊ±¿Ì¡£
+dupdlgä¸­ä¼˜åŒ–èŽ·å–browseè¿‡ç¨‹ï¼Œè‡³å°‘å¯ä»¥çœåŽ»æ²¡æœ‰æ˜Ÿå·çš„éƒ¨åˆ†è¡Œã€‚
 
-Åú²éÖØ¿ÉÒÔÁíÍâ¿ªÒ»¸öIE´°¿Ú£¬²»¶ÏÏÔÊ¾²é³öµÄÖØ¸´µÄ¼ÇÂ¼µÄä¯ÀÀÐÅÏ¢¡£ä¯ÀÀÐÅÏ¢ÕâÀïÖÕÓÚÓÃÉÏÁË¡£
+~~~~~~~~~
+æ‰¹æŸ¥é‡ä¸­ï¼Œçœ‹æµè§ˆä¿¡æ¯çš„æ—¶é—´ä¼¼ä¹Žå¤ªæ™šäº†ä¸€ç‚¹ï¼Œä¼¼ä¹Žåº”æå‰åˆ°æŸè¡Œåˆ†æ•°åˆšåˆšè¿‡é˜ˆå€¼çš„æ—¶åˆ»ã€‚
+
+æ‰¹æŸ¥é‡å¯ä»¥å¦å¤–å¼€ä¸€ä¸ªIEçª—å£ï¼Œä¸æ–­æ˜¾ç¤ºæŸ¥å‡ºçš„é‡å¤çš„è®°å½•çš„æµè§ˆä¿¡æ¯ã€‚æµè§ˆä¿¡æ¯è¿™é‡Œç»ˆäºŽç”¨ä¸Šäº†ã€‚
 
 ~~~~~~~~
-×ªÈë¹ý³ÌÖÐ£¬OnMiddleËÆºõ¿ÉÒÔ¸ÄÃûÎªInputing£¬Íâ¼ÓÒ»¸öInputed£¬¾ÍÍêÃÀÁË¡£InputedÖÐ
-¿ÉÒÔ¸ù¾ÝÒÑ¾­Ð´ÈëµÄÈ·ÇÐ¼ÇÂ¼id£¬×öÒ»Ð©±ØÒªµÄÊÂÇé¡£
+è½¬å…¥è¿‡ç¨‹ä¸­ï¼ŒOnMiddleä¼¼ä¹Žå¯ä»¥æ”¹åä¸ºInputingï¼Œå¤–åŠ ä¸€ä¸ªInputedï¼Œå°±å®Œç¾Žäº†ã€‚Inputedä¸­
+å¯ä»¥æ ¹æ®å·²ç»å†™å…¥çš„ç¡®åˆ‡è®°å½•idï¼Œåšä¸€äº›å¿…è¦çš„äº‹æƒ…ã€‚
 
-ÕâÑù£¬¿ÉÒÔ³¹µ×ºÍ×ª³öµÄOutputº¯Êý·Ö¿ª¡£ ÕâÑù¿ÉÄÜÔÊÐíÐ´³ö×ªÈë¡¢×ª³ö¾ùÍ¨ÓÃµÄ¡¢ÓïÒâÇåÎú
-µÄ·½°¸À´¡£
+è¿™æ ·ï¼Œå¯ä»¥å½»åº•å’Œè½¬å‡ºçš„Outputå‡½æ•°åˆ†å¼€ã€‚ è¿™æ ·å¯èƒ½å…è®¸å†™å‡ºè½¬å…¥ã€è½¬å‡ºå‡é€šç”¨çš„ã€è¯­æ„æ¸…æ™°
+çš„æ–¹æ¡ˆæ¥ã€‚
 
 
 ~~~~~~~
-mapdlgÃ¿ÁÐµÄtips.
+mapdlgæ¯åˆ—çš„tips.
 
-µ¹ÖÃ·½Ê½µÄ¿âÈ«Â·¾¶.
-
-
-~~~~~~~~
-¶ÔÕÕ±í¶àÐÐeditÉÏ, ¿ÉÒÔ³öÏÖÒ»¸ötips,½âÊÍ¸ñÊ½ºÍÓÃ·¨
+å€’ç½®æ–¹å¼çš„åº“å…¨è·¯å¾„.
 
 
 ~~~~~~~~
-		// ½«Xml×ª»»ÎªMARC
-		// ¿É¹©C#½Å±¾µ÷ÓÃ
+å¯¹ç…§è¡¨å¤šè¡Œeditä¸Š, å¯ä»¥å‡ºçŽ°ä¸€ä¸ªtips,è§£é‡Šæ ¼å¼å’Œç”¨æ³•
+
+
+~~~~~~~~
+		// å°†Xmlè½¬æ¢ä¸ºMARC
+		// å¯ä¾›C#è„šæœ¬è°ƒç”¨
 		public int GetMarc(string strXmlBody,
 			out string strMarc,
 			out string strError)
 			
 			~~~~~~~~~
-			¼ì²éÅÉÉúÀàÓÐÎÞOnMiddle()º¯Êý£¬Èç¹ûÓÐ£¬Ôò¾¯¸æÆäÒÑ¾­Ê§Ð§
+			æ£€æŸ¥æ´¾ç”Ÿç±»æœ‰æ— OnMiddle()å‡½æ•°ï¼Œå¦‚æžœæœ‰ï¼Œåˆ™è­¦å‘Šå…¶å·²ç»å¤±æ•ˆ
 			
 			
 			~~~~~~~~~
-			ËÞÖ÷µÄ×îºóMessageBox¾ÓÈ»ÔÚOnEnd()µ÷ÓÃÇ°³öÏÖÁË. ÐèÒªµ÷»»
+			å®¿ä¸»çš„æœ€åŽMessageBoxå±…ç„¶åœ¨OnEnd()è°ƒç”¨å‰å‡ºçŽ°äº†. éœ€è¦è°ƒæ¢
 			
 			
 			~~~~~~~~
-			fltx×÷ÁË!
+			fltxä½œäº†!
 			
 			~~~~~~~~
-			ÈçºÎÒýÓÃstatic.dllµÄÎÊÌâ
+			å¦‚ä½•å¼•ç”¨static.dllçš„é—®é¢˜
 			
-			1) °²×°ÈçºÎ×°Èë
+			1) å®‰è£…å¦‚ä½•è£…å…¥
 			
-			2) ÈçºÎÔÚreferences.xmlÖÐÒýÓÃ
+			2) å¦‚ä½•åœ¨references.xmlä¸­å¼•ç”¨
 			
 			
 			~~~~~~~~~
-			×Ô¶¯Ì½²âË÷ÒýºÅ·¶Î§¹¦ÄÜ?
+			è‡ªåŠ¨æŽ¢æµ‹ç´¢å¼•å·èŒƒå›´åŠŸèƒ½?
 
 
 			~~~
