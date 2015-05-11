@@ -653,3 +653,534 @@
 			
 		}
 
+
+
+		~~~
+
+				// 强制将ISO2709格式记录转换为字段数组
+		// 本函数采用的算法是将目次区的地址和长度忽略，只取3字符的字段名
+		// aResult的每个元素为byte[]型，内容是一个字段。第一个元素是头标区，一定是24bytes
+		// return:
+		//	-1	一般性错误
+		//	-2	MARC格式错误
+		public static int ForceCvt2709ToFieldArray(
+            ref Encoding encoding,  // 2007/7/11 new add 函数内可能发生变化
+            byte[] s,
+            List<byte[]> aResult,
+			out string strErrorInfo)
+		{
+			strErrorInfo = "";
+
+            bool bUcs2 = false;
+            if (encoding.Equals(Encoding.Unicode) == true)
+                bUcs2 = true;
+
+            if (bUcs2 == true)
+            {
+                string strRecord = encoding.GetString(s);
+
+                // 变换成UTF-8编码方式处理
+                s = Encoding.UTF8.GetBytes(strRecord);
+                encoding = Encoding.UTF8;
+            }
+
+            MarcHeaderStruct header = null;
+            try
+            {
+                header = new MarcHeaderStruct(encoding, s);
+            }
+            catch (ArgumentException)
+            {
+                // 不足 24 字符的，给与宽容
+                header = new MarcHeaderStruct(Encoding.ASCII, Encoding.ASCII.GetBytes("012345678901234567890123"));
+            }
+			header.ForceUNIMARCHeader();	// 强制将某些位置设置为缺省值
+
+#if NO
+		{
+			// 输出头标区
+			byte[] tarray = null;
+			tarray = new byte[24];
+			Array.Copy(s, 0, tarray, 0, 24);
+			aResult.Add(tarray);
+		}
+#endif
+            // 2013/11/23
+            aResult.Add(header.GetBytes());
+
+			int somaxlen;
+			int offs;
+			int i,j;
+	
+			somaxlen = s.Length;
+
+			//lenoffld = 4;
+
+			//startposoffld=5;
+	
+			// 开始处理目次区
+			// dirp = (char *)sopp;
+			// t = 24;
+			offs = 24;
+			MyByteList baField = null;
+			bool bFound = false;
+			for(i=0;;i++) 
+			{
+				bFound = false;
+				for(j=offs;j<offs+3+4+5;j++) 
+				{
+					if (j>= somaxlen)
+						break;
+					if (s[j] == FLDEND) 
+					{
+						bFound = true;
+						break;
+					}
+				}
+
+				if (j>=somaxlen) 
+				{
+					offs = j;
+					break;
+				}
+
+				if (bFound == true) 
+				{
+					if (j<=offs+3) 
+					{
+						offs = j+1;
+						break;
+					}
+				}
+
+
+				// 将字段名装入目标
+				baField = new MyByteList();
+				baField.AddRange(s, offs, 3);
+
+				aResult.Add(baField.GetByteArray());
+				baField = null;
+				// 得到字段内容开始地址
+				offs += 3;
+				offs += 4;
+				offs += 5;
+
+				if (bFound == true) 
+				{
+					offs = j+1;
+					break;
+				}
+
+			}
+
+			if (offs>=somaxlen) 
+				return 0;
+
+			int nFieldNumber = 1;
+			baField = new MyByteList();
+			// 加入对应的字段内容
+			for(;offs<somaxlen;offs++) 
+			{
+                byte c = s[offs];
+
+				if (offs>=somaxlen 
+					|| s[offs] == FLDEND 
+					|| s[offs] == RECEND) 
+				{
+
+					if (offs < somaxlen && s[offs] == RECEND) 
+					{
+						if (baField.Count == 0)
+						{
+							baField = null;
+							break;
+						}
+					}
+
+					// 加入一个字段内容
+					while(nFieldNumber >= aResult.Count) 
+					{
+						byte[] baTemp0 = new byte[3];
+						baTemp0[0] = (byte)'?';
+						baTemp0[1] = (byte)'?';
+						baTemp0[2] = (byte)'?';
+						aResult.Add(baTemp0);
+					}
+
+					MyByteList baTemp = new MyByteList();
+					baTemp.AddRange((byte[])aResult[nFieldNumber]);
+					baTemp.AddRange(baField);
+
+					aResult[nFieldNumber] = baTemp.GetByteArray();
+					nFieldNumber ++;
+
+					if (offs>=somaxlen) 
+					{
+						baField = null;
+						break;
+					}
+
+
+					baField = new MyByteList();
+				}
+				else 
+				{
+					baField.Add(s[offs]);
+				}
+
+			}
+
+
+			return 0;
+			//		ERROR1:
+			//			return -1;	// 一般性错误
+			//		ERROR2:
+			//			return -2;	// MARC格式错误
+		}
+
+		~~~
+
+				// 强制将ISO2709格式记录转换为字段数组
+		// 本函数采用的算法是将目次区的地址和长度忽略，只取3字符的字段名
+		// aResult的每个元素为byte[]型，内容是一个字段。第一个元素是头标区，一定是24bytes
+		// return:
+		//	-1	一般性错误
+		//	-2	MARC格式错误
+		public static int ForceCvt2709ToFieldArray(
+            ref Encoding encoding,  // 2007/7/11 new add 函数内可能发生变化
+            byte[] s,
+            List<byte[]> aResult,
+			out string strErrorInfo)
+		{
+			strErrorInfo = "";
+
+            bool bUcs2 = false;
+            if (encoding.Equals(Encoding.Unicode) == true)
+                bUcs2 = true;
+
+            if (bUcs2 == true)
+            {
+                string strRecord = encoding.GetString(s);
+
+                // 变换成UTF-8编码方式处理
+                s = Encoding.UTF8.GetBytes(strRecord);
+                encoding = Encoding.UTF8;
+            }
+
+            MarcHeaderStruct header = null;
+            try
+            {
+                header = new MarcHeaderStruct(encoding, s);
+            }
+            catch (ArgumentException)
+            {
+                // 不足 24 字符的，给与宽容
+                header = new MarcHeaderStruct(Encoding.ASCII, Encoding.ASCII.GetBytes("012345678901234567890123"));
+            }
+			header.ForceUNIMARCHeader();	// 强制将某些位置设置为缺省值
+
+#if NO
+		{
+			// 输出头标区
+			byte[] tarray = null;
+			tarray = new byte[24];
+			Array.Copy(s, 0, tarray, 0, 24);
+			aResult.Add(tarray);
+		}
+#endif
+            // 2013/11/23
+            aResult.Add(header.GetBytes());
+
+			int somaxlen;
+			int offs;
+			int i,j;
+	
+			somaxlen = s.Length;
+
+			// 开始处理目次区
+			offs = 24;
+			MyByteList baField = null;
+			bool bFound = false;
+			for(i=0;;i++) 
+			{
+				bFound = false;
+				for(j=offs;j<offs+3+4+5;j++) 
+				{
+					if (j>= somaxlen)
+						break;
+					if (s[j] == FLDEND) 
+					{
+						bFound = true;
+						break;
+					}
+				}
+
+				if (j>=somaxlen) 
+				{
+					offs = j;
+					break;
+				}
+
+				if (bFound == true) 
+				{
+					if (j<=offs+3) 
+					{
+						offs = j+1;
+						break;
+					}
+				}
+
+
+				// 将字段名装入目标
+				baField = new MyByteList();
+				baField.AddRange(s, offs, 3);
+
+				aResult.Add(baField.GetByteArray());
+				baField = null;
+				// 得到字段内容开始地址
+				offs += 3;
+				offs += 4;
+				offs += 5;
+
+				if (bFound == true) 
+				{
+					offs = j+1;
+					break;
+				}
+
+			}
+
+			if (offs>=somaxlen) 
+				return 0;
+
+			int nFieldNumber = 1;
+			baField = new MyByteList();
+			// 加入对应的字段内容
+			for(;offs<somaxlen;offs++) 
+			{
+                byte c = s[offs];
+
+				if (c == FLDEND || c == RECEND) 
+				{
+
+					if (c == RECEND) 
+					{
+						if (baField.Count == 0)
+						{
+							baField = null;
+							break;
+						}
+					}
+
+					// 加入一个字段内容
+					while(nFieldNumber >= aResult.Count) 
+					{
+						byte[] baTemp0 = new byte[3];
+						baTemp0[0] = (byte)'?';
+						baTemp0[1] = (byte)'?';
+						baTemp0[2] = (byte)'?';
+						aResult.Add(baTemp0);
+					}
+
+					MyByteList baTemp = new MyByteList();
+					baTemp.AddRange((byte[])aResult[nFieldNumber]);
+					baTemp.AddRange(baField);
+
+					aResult[nFieldNumber] = baTemp.GetByteArray();
+
+					nFieldNumber ++;
+
+					if (offs>=somaxlen) 
+					{
+						baField = null;
+						break;
+					}
+
+					baField = new MyByteList();
+				}
+				else 
+				{
+					baField.Add(c);
+				}
+			}
+
+			return 0;
+			//		ERROR1:
+			//			return -1;	// 一般性错误
+			//		ERROR2:
+			//			return -2;	// MARC格式错误
+		}
+
+
+				// 强制将ISO2709格式记录转换为字段数组
+		// 本函数采用的算法是将目次区的地址和长度忽略，只取3字符的字段名
+		// aResult的每个元素为byte[]型，内容是一个字段。第一个元素是头标区，一定是24bytes
+		// return:
+		//	-1	一般性错误
+		//	-2	MARC格式错误
+		public static int ForceCvt2709ToFieldArray(
+            ref Encoding encoding,  // 2007/7/11 new add 函数内可能发生变化
+            byte[] s,
+            out List<byte[]> aResult1,
+			out string strErrorInfo)
+		{
+			strErrorInfo = "";
+            aResult1 = new List<byte[]>();
+
+            List<MyByteList> results = new List<MyByteList>();
+
+            bool bUcs2 = false;
+            if (encoding.Equals(Encoding.Unicode) == true)
+                bUcs2 = true;
+
+            if (bUcs2 == true)
+            {
+                string strRecord = encoding.GetString(s);
+
+                // 变换成UTF-8编码方式处理
+                s = Encoding.UTF8.GetBytes(strRecord);
+                encoding = Encoding.UTF8;
+            }
+
+            MarcHeaderStruct header = null;
+            try
+            {
+                header = new MarcHeaderStruct(encoding, s);
+            }
+            catch (ArgumentException)
+            {
+                // 不足 24 字符的，给与宽容
+                header = new MarcHeaderStruct(Encoding.ASCII, Encoding.ASCII.GetBytes("012345678901234567890123"));
+            }
+			header.ForceUNIMARCHeader();	// 强制将某些位置设置为缺省值
+
+            results.Add(header.GetByteList());
+
+			int somaxlen;
+			int offs;
+			int i,j;
+	
+			somaxlen = s.Length;
+
+			// 开始处理目次区
+			offs = 24;
+			MyByteList baField = null;
+			bool bFound = false;
+			for(i=0;;i++) 
+			{
+				bFound = false;
+				for(j=offs;j<offs+3+4+5;j++) 
+				{
+					if (j>= somaxlen)
+						break;
+					if (s[j] == FLDEND) 
+					{
+						bFound = true;
+						break;
+					}
+				}
+
+				if (j>=somaxlen) 
+				{
+					offs = j;
+					break;
+				}
+
+				if (bFound == true) 
+				{
+					if (j<=offs+3) 
+					{
+						offs = j+1;
+						break;
+					}
+				}
+
+
+				// 将字段名装入目标
+				baField = new MyByteList();
+				baField.AddRange(s, offs, 3);
+
+				results.Add(baField);
+				baField = null;
+				// 得到字段内容开始地址
+				offs += 3;
+				offs += 4;
+				offs += 5;
+
+				if (bFound == true) 
+				{
+					offs = j+1;
+					break;
+				}
+
+			}
+
+			if (offs>=somaxlen) 
+				return 0;
+
+			int nFieldNumber = 1;
+			baField = new MyByteList();
+			// 加入对应的字段内容
+			for(;offs<somaxlen;offs++) 
+			{
+                byte c = s[offs];
+
+				if (c == FLDEND || c == RECEND) 
+				{
+
+					if (c == RECEND) 
+					{
+						if (baField.Count == 0)
+						{
+							baField = null;
+							break;
+						}
+					}
+
+					// 加入一个字段内容
+					while(nFieldNumber >= results.Count) 
+					{
+                        MyByteList temp = new MyByteList();
+                        temp.Add((byte)'?');
+                        temp.Add((byte)'?');
+                        temp.Add((byte)'?');
+
+						results.Add(temp);
+					}
+
+#if NO
+					MyByteList baTemp = new MyByteList();
+					baTemp.AddRange((byte[])aResult[nFieldNumber]);
+					baTemp.AddRange(baField);
+#endif
+
+					results[nFieldNumber].AddRange(baField);
+
+					nFieldNumber ++;
+
+					if (offs>=somaxlen) 
+					{
+						baField = null;
+						break;
+					}
+
+					baField = new MyByteList();
+				}
+				else 
+				{
+					baField.Add(c);
+				}
+			}
+
+            aResult1 = new List<byte[]>();
+            foreach (MyByteList list in results)
+            {
+                aResult1.Add(list.GetByteArray());
+            }
+
+			return 0;
+			//		ERROR1:
+			//			return -1;	// 一般性错误
+			//		ERROR2:
+			//			return -2;	// MARC格式错误
+		}

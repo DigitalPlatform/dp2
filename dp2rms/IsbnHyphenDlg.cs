@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -23,7 +23,7 @@ namespace dp2rms
 
             if (String.IsNullOrEmpty(this.textBox_isbn.Text) == true)
             {
-                strError = "ÉĞÎ´ÊäÈë´ı¼Ó¹¤µÄISBNºÅ";
+                strError = "å°šæœªè¾“å…¥å¾…åŠ å·¥çš„ISBNå·";
                 goto ERROR1;
             }
 

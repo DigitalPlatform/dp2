@@ -7,11 +7,8 @@ using System.Windows.Forms;
 using System.IO;
 using System.Xml;
 using System.Diagnostics;
-
 using System.Runtime.Serialization;
-
 using System.Runtime.Serialization.Formatters.Binary;
-
 
 using DigitalPlatform.GUI;
 using DigitalPlatform.IO;
@@ -40,7 +37,6 @@ namespace DigitalPlatform.Script
 
         public string DataDir = ""; // 数据目录
 
-
 		string strRecentPackageFilePath = "";
 
 		private System.Windows.Forms.TreeView treeView1;
@@ -58,14 +54,7 @@ namespace DigitalPlatform.Script
 
 		public ProjectManageDlg()
 		{
-			//
-			// Required for Windows Form Designer support
-			//
 			InitializeComponent();
-
-			//
-			// TODO: Add any constructor code after InitializeComponent call
-			//
 		}
 
 		/// <summary>
@@ -459,7 +448,7 @@ namespace DigitalPlatform.Script
 			}
 
 
-			ScriptDlg dlg = new ScriptDlg();
+			OneProjectDialog dlg = new OneProjectDialog();
             GuiUtil.AutoSetDefaultFont(dlg);
 
             dlg.HostName = this.HostName;
@@ -642,7 +631,7 @@ namespace DigitalPlatform.Script
 				"new project",
 				ref nPrefixNumber);
 
-			ScriptDlg dlg = new ScriptDlg();
+			OneProjectDialog dlg = new OneProjectDialog();
             GuiUtil.AutoSetDefaultFont(dlg);
 
             dlg.HostName = this.HostName;
@@ -747,7 +736,6 @@ namespace DigitalPlatform.Script
 
 				}
 			}
-
 		}
 
 		// 删除方案
@@ -807,7 +795,6 @@ namespace DigitalPlatform.Script
 				}
 				return ;
 			}
-
 
 			string strProjectNamePath = node.FullPath;
 
@@ -946,12 +933,9 @@ namespace DigitalPlatform.Script
 
 		private void button_Cancel_Click(object sender, System.EventArgs e)
 		{
-
 			this.Close();
 			this.DialogResult = DialogResult.Cancel;
 		}
-
-
 
 		private void treeView1_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
 		{
@@ -1159,8 +1143,22 @@ namespace DigitalPlatform.Script
             menuItem.Click += new System.EventHandler(this.button_updateProjectsFromDisk_Click);
             contextMenu.MenuItems.Add(menuItem);
 
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("安装 Visual Studio Code");
+            menuItem.Click += new System.EventHandler(this.button_installVisualStudioCode_Click);
+            contextMenu.MenuItems.Add(menuItem);
+
 			contextMenu.Show(treeView1, new Point(e.X, e.Y) );		
 		}
+
+        void button_installVisualStudioCode_Click(object sender, System.EventArgs e)
+        {
+            System.Diagnostics.Process.Start("iexplore", "https://code.visualstudio.com//");
+        }
+
 
         // 从磁盘目录安装方案
         void menu_installProjectsFromDisk_Click(object sender, System.EventArgs e)

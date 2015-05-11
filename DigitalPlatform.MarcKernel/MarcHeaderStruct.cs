@@ -332,6 +332,76 @@ namespace DigitalPlatform.Marc
 			return baResult;
 		}
 
+        // 2015/5/10
+        public MyByteList GetByteList()
+        {
+            MyByteList list = new MyByteList(24);
+
+            list.AddRange(reclen);	// 5
+            list.AddRange(status);	// 1
+            list.AddRange(type);	// 1
+            list.AddRange(level);	// 1
+            list.AddRange(control);	// 1
+            list.AddRange(reserve);	// 1
+            list.AddRange(indicount);	// 1
+            list.AddRange(subfldcodecount);	// 1
+            list.AddRange(baseaddr);	// 5
+            list.AddRange(res1);	// 3
+            list.AddRange(lenoffld);	// 1
+            list.AddRange(startposoffld);	// 1
+            list.AddRange(impdef);	// 1
+            list.AddRange(res2);	// 1
+
+            Debug.Assert(list.Count == 24, "头标区内容必须为24字符");
+            if (list.Count != 24)
+                throw (new Exception("MarcHeader.GetBytes() error"));
+
+            // 2014/5/9
+            // 防范头标区出现 0 字符
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i] == 0)
+                    list[i] = (byte)'*';
+            }
+
+            return list;
+        }
+#if NO
+        // 2015/5/10 优化
+        public byte[] GetBytes()
+        {
+            MyByteList list = new MyByteList(24);
+
+            list.AddRange(reclen);	// 5
+            list.AddRange(status);	// 1
+            list.AddRange(type);	// 1
+            list.AddRange(level);	// 1
+            list.AddRange(control);	// 1
+            list.AddRange(reserve);	// 1
+            list.AddRange(indicount);	// 1
+            list.AddRange(subfldcodecount);	// 1
+            list.AddRange(baseaddr);	// 5
+            list.AddRange(res1);	// 3
+            list.AddRange(lenoffld);	// 1
+            list.AddRange(startposoffld);	// 1
+            list.AddRange(impdef);	// 1
+            list.AddRange(res2);	// 1
+
+            Debug.Assert(list.Count == 24, "头标区内容必须为24字符");
+            if (list.Count != 24)
+                throw (new Exception("MarcHeader.GetBytes() error"));
+
+            // 2014/5/9
+            // 防范头标区出现 0 字符
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i] == 0)
+                    list[i] = (byte)'*';
+            }
+
+            return list.GetByteArray();
+        }
+#endif
 	}
 
 }

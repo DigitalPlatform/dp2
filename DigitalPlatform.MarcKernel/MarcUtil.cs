@@ -14,28 +14,28 @@ using System.Web;
 
 namespace DigitalPlatform.Marc
 {
-	public enum ItemType 
-	{
-		Filter = 0,
-		Record = 1,
-		Field = 2,
-		Subfield = 3,
-		Group = 4,
-		Char = 5,
-	}
+    public enum ItemType
+    {
+        Filter = 0,
+        Record = 1,
+        Field = 2,
+        Subfield = 3,
+        Group = 4,
+        Char = 5,
+    }
 
-	/// <summary>
-	/// 一些有关MARC的实用函数
-	/// </summary>
-	public class MarcUtil
-	{
+    /// <summary>
+    /// 一些有关MARC的实用函数
+    /// </summary>
+    public class MarcUtil
+    {
 
-		public const char FLDEND  = (char)30;	// 字段结束符
-		public const char RECEND  = (char)29;	// 记录结束符
-		public const char SUBFLD  = (char)31;	// 子字段指示符
+        public const char FLDEND = (char)30;	// 字段结束符
+        public const char RECEND = (char)29;	// 记录结束符
+        public const char SUBFLD = (char)31;	// 子字段指示符
 
-		public const int FLDNAME_LEN =        3;       // 字段名长度
-		public const int MAX_MARCREC_LEN =    100000;   // MARC记录的最大长度
+        public const int FLDNAME_LEN = 3;       // 字段名长度
+        public const int MAX_MARCREC_LEN = 100000;   // MARC记录的最大长度
 
         // 包装后的版本
         public static string GetHtmlOfMarc(string strMARC, bool bSubfieldReturn)
@@ -69,7 +69,7 @@ namespace DigitalPlatform.Marc
                 result.Append(MarcDiff.ReplaceLeadingTab(line));
             }
 
-            strResult.Append( "\r\n<td class='content' colspan='3'>" + result + "</td>" );
+            strResult.Append("\r\n<td class='content' colspan='3'>" + result + "</td>");
 
             strResult.Append("\r\n</tr>");
 
@@ -103,7 +103,7 @@ namespace DigitalPlatform.Marc
             strResult.Append("\r\n<tr class='" + strLineClass + "'>");
 
             strResult.Append("\r\n<td class='content' colspan='3'>"    //  
-                + strImageFragment 
+                + strImageFragment
                 + "</td>");
 
             strResult.Append("\r\n</tr>");
@@ -201,7 +201,7 @@ namespace DigitalPlatform.Marc
                     + "<td class='indicator'>" + strIndicatior + "</td>"
                     + "<td class='content'>" + strContent + "</td></tr>");
 
-                if ( i == 0)
+                if (i == 0)
                     strResult.Append(GetImageHtml(strCoverImageFragment));
             }
 
@@ -313,19 +313,19 @@ namespace DigitalPlatform.Marc
         }
 
         // 把byte[]类型的MARC记录转换为机内格式
-		// return:
-		//		-2	MARC格式错
-		//		-1	一般错误
-		//		0	正常
-		public static int ConvertByteArrayToMarcRecord(byte [] baRecord,
-			Encoding encoding,
-			bool bForce,
-			out string strMarc,
-			out string strError)
-		{
-			strError = "";
-			strMarc = "";
-			int nRet = 0;
+        // return:
+        //		-2	MARC格式错
+        //		-1	一般错误
+        //		0	正常
+        public static int ConvertByteArrayToMarcRecord(byte[] baRecord,
+            Encoding encoding,
+            bool bForce,
+            out string strMarc,
+            out string strError)
+        {
+            strError = "";
+            strMarc = "";
+            int nRet = 0;
 
             bool bUcs2 = false;
 
@@ -333,14 +333,14 @@ namespace DigitalPlatform.Marc
                 bUcs2 = true;
 
             List<byte[]> aField = new List<byte[]>();
-			if (bForce == true
-                || bUcs2 == true) 
-			{
-				nRet = MarcUtil.ForceCvt2709ToFieldArray(
+            if (bForce == true
+                || bUcs2 == true)
+            {
+                nRet = MarcUtil.ForceCvt2709ToFieldArray(
                     ref encoding,
                     baRecord,
-					aField,
-					out strError);
+                    out aField,
+                    out strError);
 
                 Debug.Assert(nRet != -2, "");
 
@@ -351,345 +351,350 @@ namespace DigitalPlatform.Marc
                     Debug.Assert(encoding.Equals(Encoding.UTF8), "");
                 }
                  * */
-			}
-			else 
-			{
-				//???
-				nRet = MarcUtil.Cvt2709ToFieldArray(
+            }
+            else
+            {
+                //???
+                nRet = MarcUtil.Cvt2709ToFieldArray(
                     encoding,
                     baRecord,
-					aField,
-					out strError);
-			}
+                    out aField,
+                    out strError);
+            }
 
-			if (nRet == -1)
-				return -1;
+            if (nRet == -1)
+                return -1;
 
-			if (nRet == -2)  //marc出错
-				return -2;
+            if (nRet == -2)  //marc出错
+                return -2;
 
-			string[] saField = null;
-			GetMarcRecordString(aField,
-				encoding,
-				out saField);
+            string[] saField = null;
+            GetMarcRecordString(aField,
+                encoding,
+                out saField);
 
-			if (saField.Length > 0)
-			{
-				string strHeader = saField[0];
+            if (saField.Length > 0)
+            {
+                string strHeader = saField[0];
 
-				if (strHeader.Length > 24)
-					strHeader = strHeader.Substring(0, 24);
-				else
-					strHeader = saField[0].PadRight(24, '*');
+                if (strHeader.Length > 24)
+                    strHeader = strHeader.Substring(0, 24);
+                else
+                    strHeader = saField[0].PadRight(24, '*');
 
-                StringBuilder text = new StringBuilder(4986);
-				text.Append(strHeader);
-				for(int i=1;i<saField.Length;i++)
-				{
-					text.Append( saField[i] + new string(FLDEND, 1));
-				}
+                StringBuilder text = new StringBuilder(1024);
+                text.Append(strHeader);
+                for (int i = 1; i < saField.Length; i++)
+                {
+                    text.Append(saField[i] + new string(FLDEND, 1));
+                }
 
                 strMarc = text.ToString().Replace("\r", "*").Replace("\n", "*");    // 2012/3/16
-				return 0;
-			}
+                return 0;
+            }
 
-			return 0;
-		}
+            return 0;
+        }
 
 
-		// 将ISO2709格式记录转换为字段数组
-		// aResult的每个元素为byte[]型，内容是一个字段。第一个元素是头标区，一定是24bytes
-		// return:
-		//	-1	一般性错误
-		//	-2	MARC格式错误
-		public static int Cvt2709ToFieldArray(
+        // 将ISO2709格式记录转换为字段数组
+        // aResult的每个元素为byte[]型，内容是一个字段。第一个元素是头标区，一定是24bytes
+        // return:
+        //	-1	一般性错误
+        //	-2	MARC格式错误
+        public static int Cvt2709ToFieldArray(
             Encoding encoding,  // 2007/7/11 new add
             byte[] s,
-            List<byte[]> aResult,
-			out string strErrorInfo)
-		{
-			strErrorInfo = "";
-			// const char *sopp;
-			int maxbytes = 2000000;	// 约2000K，防止攻击
+            out List<byte[]> aResult,   // out
+            out string strErrorInfo)
+        {
+            strErrorInfo = "";
+            aResult = new List<byte[]>();
 
-			// const byte RECEND = 29;
-			// const byte FLDEND = 30;
-			// const byte SUBFLD = 31;
+            // const char *sopp;
+            int maxbytes = 2000000;	// 约2000K，防止攻击
+
+            // const byte RECEND = 29;
+            // const byte FLDEND = 30;
+            // const byte SUBFLD = 31;
 
             if (encoding.Equals(Encoding.Unicode) == true)
                 throw new Exception("UCS2编码方式应当使用 ForceCvt2709ToFieldArray()，而不是 Cvt2709ToFieldArray()");
 
-			MarcHeaderStruct header = new MarcHeaderStruct(encoding, s);
+            MarcHeaderStruct header = new MarcHeaderStruct(encoding, s);
 
-		{
-			// 输出头标区
-			byte[] tarray = null;
-			tarray = new byte[24];
-			Array.Copy(s, 0, tarray, 0, 24);
-
-            // 2014/5/9
-            // 防范头标区出现 0 字符
-            for (int j = 0; j < tarray.Length; j++)
             {
-                if (tarray[j] == 0)
-                    tarray[j] = (byte)'*';
+                // 输出头标区
+                byte[] tarray = null;
+                tarray = new byte[24];
+                Array.Copy(s, 0, tarray, 0, 24);
+
+                // 2014/5/9
+                // 防范头标区出现 0 字符
+                for (int j = 0; j < tarray.Length; j++)
+                {
+                    if (tarray[j] == 0)
+                        tarray[j] = (byte)'*';
+                }
+
+                aResult.Add(tarray);
             }
 
-            aResult.Add(tarray);
-		}
-
-			int somaxlen;
-			int reclen,baseaddr,lenoffld,startposoffld;
-			int len, startpos;
-			// char *dirp;
-			int offs = 0;
+            int somaxlen;
+            int reclen, baseaddr, lenoffld, startposoffld;
+            int len, startpos;
+            // char *dirp;
+            int offs = 0;
             int t = 0;
-			int i;
-			// char temp[30];
-	
-			somaxlen = s.Length;
-			try 
-			{
-				reclen = header.RecLength;
-			}
-			catch (FormatException ex) 
-			{
-				strErrorInfo = "头标区开始5字符 '" +header.RecLengthString+"' 不是纯数字 :" + ex.Message;
-				// throw(new MarcException(strErrorInfo));
-				goto ERROR2;
-			}
-			if (reclen > somaxlen) 
-			{
-				strErrorInfo = "头标区头5字符表示的记录长度"
-					+ Convert.ToString(reclen) 
-					+ "大于源缓冲区整个内容的长度"
-					+ Convert.ToString(somaxlen);
-				goto ERROR2;
-			}
-			if (reclen < 24) 
-			{
-				strErrorInfo = "头标区头5字符表示的记录长度"
-					+ Convert.ToString(reclen) 
-					+ "小于24";
-				goto ERROR2;
-			}
+            int i;
+            // char temp[30];
 
-			if (s[reclen-1] != RECEND) 
-			{
-				strErrorInfo = "头标区声称的结束位置不是MARC记录结束符";
-				goto ERROR2;  // 结束符不正确
-			}
+            somaxlen = s.Length;
+            try
+            {
+                reclen = header.RecLength;
+            }
+            catch (FormatException ex)
+            {
+                strErrorInfo = "头标区开始5字符 '" + header.RecLengthString + "' 不是纯数字 :" + ex.Message;
+                // throw(new MarcException(strErrorInfo));
+                goto ERROR2;
+            }
+            if (reclen > somaxlen)
+            {
+                strErrorInfo = "头标区头5字符表示的记录长度"
+                    + Convert.ToString(reclen)
+                    + "大于源缓冲区整个内容的长度"
+                    + Convert.ToString(somaxlen);
+                goto ERROR2;
+            }
+            if (reclen < 24)
+            {
+                strErrorInfo = "头标区头5字符表示的记录长度"
+                    + Convert.ToString(reclen)
+                    + "小于24";
+                goto ERROR2;
+            }
 
-			for(i=0;i<reclen-1;i++) 
-			{
-				if (s[i] == RECEND) 
-				{
-					strErrorInfo = "记录内容中不能有记录结束符";
-					goto ERROR2;
-				}
-			}
-	
-			try 
-			{
-				baseaddr = header.BaseAddress;
-			}
-			catch (FormatException ex) 
-			{
-				strErrorInfo = "头标区数据基地址5字符 '" +header.BaseAddressString+ " '不是纯数字 :" + ex.Message;
-				//throw(new MarcException(strErrorInfo));
-				goto ERROR2;
-			}
+            if (s[reclen - 1] != RECEND)
+            {
+                strErrorInfo = "头标区声称的结束位置不是MARC记录结束符";
+                goto ERROR2;  // 结束符不正确
+            }
 
-			if (baseaddr>somaxlen) 
-			{
-				strErrorInfo = "数据基地址值 " 
-					+ Convert.ToString(baseaddr) 
-					+ " 已经超出源缓冲区整个内容的长度 " 
-					+ Convert.ToString(somaxlen);
-				goto ERROR2;
-			}
-			if (baseaddr<=24) 
-			{
-				strErrorInfo = "数据基地址值 " 
-					+ Convert.ToString(baseaddr) 
-					+ " 小于24";
-				goto ERROR2;  // 数据基地址太小
-			}
-			if (s[baseaddr-1] != FLDEND) 
-			{
-				strErrorInfo = "没有在目次区尾部位置" + Convert.ToString(baseaddr) + "找到FLDEND符号";
-				goto ERROR2;  // 
-			}
-	
-			try 
-			{
-				lenoffld = header.WidthOfFieldLength;
-			}
-			catch (FormatException ex) 
-			{
-				strErrorInfo = "头标区目次区字段长度1字符 '" +header.WidthOfFieldLengthString+ " '不是纯数字 :" + ex.Message;
-				//throw(new MarcException(strErrorInfo));
-				goto ERROR2;
-			}
+            for (i = 0; i < reclen - 1; i++)
+            {
+                if (s[i] == RECEND)
+                {
+                    strErrorInfo = "记录内容中不能有记录结束符";
+                    goto ERROR2;
+                }
+            }
 
-			try
-			{
-				startposoffld = header.WidthOfStartPositionOfField;
-			}
-			catch (FormatException ex) 
-			{
-				strErrorInfo = "头标区目次区字段起始位置1字符 '" + header.WidthOfStartPositionOfFieldString + " '不是纯数字 :" + ex.Message;
-				// throw(new MarcException(strErrorInfo));
-				goto ERROR2;
-			}
+            try
+            {
+                baseaddr = header.BaseAddress;
+            }
+            catch (FormatException ex)
+            {
+                strErrorInfo = "头标区数据基地址5字符 '" + header.BaseAddressString + " '不是纯数字 :" + ex.Message;
+                //throw(new MarcException(strErrorInfo));
+                goto ERROR2;
+            }
+
+            if (baseaddr > somaxlen)
+            {
+                strErrorInfo = "数据基地址值 "
+                    + Convert.ToString(baseaddr)
+                    + " 已经超出源缓冲区整个内容的长度 "
+                    + Convert.ToString(somaxlen);
+                goto ERROR2;
+            }
+            if (baseaddr <= 24)
+            {
+                strErrorInfo = "数据基地址值 "
+                    + Convert.ToString(baseaddr)
+                    + " 小于24";
+                goto ERROR2;  // 数据基地址太小
+            }
+            if (s[baseaddr - 1] != FLDEND)
+            {
+                strErrorInfo = "没有在目次区尾部位置" + Convert.ToString(baseaddr) + "找到FLDEND符号";
+                goto ERROR2;  // 
+            }
+
+            try
+            {
+                lenoffld = header.WidthOfFieldLength;
+            }
+            catch (FormatException ex)
+            {
+                strErrorInfo = "头标区目次区字段长度1字符 '" + header.WidthOfFieldLengthString + " '不是纯数字 :" + ex.Message;
+                //throw(new MarcException(strErrorInfo));
+                goto ERROR2;
+            }
+
+            try
+            {
+                startposoffld = header.WidthOfStartPositionOfField;
+            }
+            catch (FormatException ex)
+            {
+                strErrorInfo = "头标区目次区字段起始位置1字符 '" + header.WidthOfStartPositionOfFieldString + " '不是纯数字 :" + ex.Message;
+                // throw(new MarcException(strErrorInfo));
+                goto ERROR2;
+            }
 
 
-			if (lenoffld<=0 || lenoffld>30) 
-			{
-				strErrorInfo = "目次区中字段长度值占用字符数 "
-					+ Convert.ToString(lenoffld)
-					+ " 不正确，应在1和29之间...";
-				goto ERROR2;
-			}
+            if (lenoffld <= 0 || lenoffld > 30)
+            {
+                strErrorInfo = "目次区中字段长度值占用字符数 "
+                    + Convert.ToString(lenoffld)
+                    + " 不正确，应在1和29之间...";
+                goto ERROR2;
+            }
 
-			if (lenoffld != 4) 
-			{	// 2001/5/15 new add
-				strErrorInfo = "目次区中字段长度值占用字符数 "
-					+ Convert.ToString(lenoffld)
-					+ " 不正确，应为4...";
-				goto ERROR2;
-			}
+            if (lenoffld != 4)
+            {	// 2001/5/15 new add
+                strErrorInfo = "目次区中字段长度值占用字符数 "
+                    + Convert.ToString(lenoffld)
+                    + " 不正确，应为4...";
+                goto ERROR2;
+            }
 
-			lenoffld = 4;
-			if (startposoffld<=0 || startposoffld>30) 
-			{
-				strErrorInfo = "目次区中字段起始位置值占用字符数 "
-					+ Convert.ToString(startposoffld)
-					+ " 不正确，应在1到29之间...";
-				goto ERROR2;
-			}
+            lenoffld = 4;
+            if (startposoffld <= 0 || startposoffld > 30)
+            {
+                strErrorInfo = "目次区中字段起始位置值占用字符数 "
+                    + Convert.ToString(startposoffld)
+                    + " 不正确，应在1到29之间...";
+                goto ERROR2;
+            }
 
-			startposoffld=5;
-	
-			// 开始处理目次区
-			// dirp = (char *)sopp;
-			t = 24;
-			offs = 24;
-			TempByteArray baField = null;
-			for(i=0;;i++) 
-			{
-				if (s[offs] == FLDEND)
-					break;  // 目次区结束
-		
-				// 将字段名装入目标
-				if (offs+3 >= baseaddr)
-					break;
-				if (t+3 >= maxbytes)
-					break;
-				/*
-				baTarget.SetSize(t+3, CHUNK_SIZE);
-				memcpy((char *)baTarget.GetData()+t,
-					dirp+offs,
-					3);
-				t+=3;
-				*/
-				baField = new TempByteArray();
-				baField.AddRange(s, offs, 3);
-				t += 3;
+            startposoffld = 5;
 
-		
-				// 得到字段长度
-				offs +=3;
-				if (offs+lenoffld>=baseaddr)
-					break;
-				len = MarcHeaderStruct.IntValue(s, offs, lenoffld);
-		
-				// 得到字段内容开始地址
-				offs+=lenoffld;
-				if (offs+startposoffld >= baseaddr)
-					break;
-				startpos = MarcHeaderStruct.IntValue(s, offs, startposoffld);
-		
-				offs += startposoffld;
-				if (offs>=baseaddr)
-					break;
-		
-				// 将字段内容装入目标
-				if (t+len>=maxbytes)
-					break;
-				if (s[baseaddr+startpos-1] != FLDEND) 
-				{
-					// errnoiso2709 = ERROR_BADFLDCONTENT;
-					strErrorInfo = "缺乏字段结束符";
-					goto ERROR2;
-				}
+            // 开始处理目次区
+            // dirp = (char *)sopp;
+            t = 24;
+            offs = 24;
+            MyByteList baField = null;
+            for (i = 0; ; i++)
+            {
+                if (s[offs] == FLDEND)
+                    break;  // 目次区结束
 
-				if (s[baseaddr+startpos+len-1] != FLDEND) 
-				{
-					//errnoiso2709 = ERROR_BADFLDCONTENT;
-					strErrorInfo = "缺乏字段结束符";
-					goto ERROR2;
-				}
-		
-				/*
-				baTarget.SetSize(t+len, CHUNK_SIZE);
-				memcpy((char *)baTarget.GetData()+t,
-					sopp+baseaddr+startpos,
-					len);
-				t += len;
-				*/
-				baField.AddRange(s, baseaddr+startpos, len == 0 ? len : len - 1);
-				t += len;
+                // 将字段名装入目标
+                if (offs + 3 >= baseaddr)
+                    break;
+                if (t + 3 >= maxbytes)
+                    break;
+                /*
+                baTarget.SetSize(t+3, CHUNK_SIZE);
+                memcpy((char *)baTarget.GetData()+t,
+                    dirp+offs,
+                    3);
+                t+=3;
+                */
+                baField = new MyByteList();
+                baField.AddRange(s, offs, 3);
+                t += 3;
 
-				aResult.Add(baField.GetByteArray());
-				baField = null;
-			}
-	
-			if (t+1>=maxbytes) 
-			{
-				// errnoiso2709 = ERROR_TARGETBUFFEROVERFLOW;
-				strErrorInfo = "记录太大";
-				goto ERROR2;  // 目标空间不够
-			}
 
-			/*
-			baField.Add((char)RECEND);
-			t ++;
-			*/
+                // 得到字段长度
+                offs += 3;
+                if (offs + lenoffld >= baseaddr)
+                    break;
+                len = MarcHeaderStruct.IntValue(s, offs, lenoffld);
 
-			/*
-			baTarget.SetSize(t+1, CHUNK_SIZE);
-			*((char *)baTarget.GetData() + t++) = RECEND;
-			if (t+1>=maxbytes) 
-			{
-				errnoiso2709 = ERROR_TARGETBUFFEROVERFLOW;
-				goto ERROR1;  // 目标空间不够
-			}
-			*/
+                // 得到字段内容开始地址
+                offs += lenoffld;
+                if (offs + startposoffld >= baseaddr)
+                    break;
+                startpos = MarcHeaderStruct.IntValue(s, offs, startposoffld);
+
+                offs += startposoffld;
+                if (offs >= baseaddr)
+                    break;
+
+                // 将字段内容装入目标
+                if (t + len >= maxbytes)
+                    break;
+                if (s[baseaddr + startpos - 1] != FLDEND)
+                {
+                    // errnoiso2709 = ERROR_BADFLDCONTENT;
+                    strErrorInfo = "缺乏字段结束符";
+                    goto ERROR2;
+                }
+
+                if (s[baseaddr + startpos + len - 1] != FLDEND)
+                {
+                    //errnoiso2709 = ERROR_BADFLDCONTENT;
+                    strErrorInfo = "缺乏字段结束符";
+                    goto ERROR2;
+                }
+
+                /*
+                baTarget.SetSize(t+len, CHUNK_SIZE);
+                memcpy((char *)baTarget.GetData()+t,
+                    sopp+baseaddr+startpos,
+                    len);
+                t += len;
+                */
+                baField.AddRange(s, baseaddr + startpos, len == 0 ? len : len - 1);
+                t += len;
+
+                aResult.Add(baField.GetByteArray());
+                baField = null;
+            }
+
+            if (t + 1 >= maxbytes)
+            {
+                // errnoiso2709 = ERROR_TARGETBUFFEROVERFLOW;
+                strErrorInfo = "记录太大";
+                goto ERROR2;  // 目标空间不够
+            }
+
+            /*
+            baField.Add((char)RECEND);
+            t ++;
+            */
+
+            /*
+            baTarget.SetSize(t+1, CHUNK_SIZE);
+            *((char *)baTarget.GetData() + t++) = RECEND;
+            if (t+1>=maxbytes) 
+            {
+                errnoiso2709 = ERROR_TARGETBUFFEROVERFLOW;
+                goto ERROR1;  // 目标空间不够
+            }
+            */
 
             Debug.Assert(t != -2, "");
-			return t;
-			//ERROR1:
-			//	return -1;	// 一般性错误
+            return t;
+        //ERROR1:
+        //	return -1;	// 一般性错误
         ERROR2:
             // 调试用
             Debug.Assert(false, "");
-				return -2;	// MARC格式错误
-		}
+            return -2;	// MARC格式错误
+        }
 
-		// 强制将ISO2709格式记录转换为字段数组
-		// 本函数采用的算法是将目次区的地址和长度忽略，只取3字符的字段名
-		// aResult的每个元素为byte[]型，内容是一个字段。第一个元素是头标区，一定是24bytes
-		// return:
-		//	-1	一般性错误
-		//	-2	MARC格式错误
-		public static int ForceCvt2709ToFieldArray(
+        // 强制将ISO2709格式记录转换为字段数组
+        // 本函数采用的算法是将目次区的地址和长度忽略，只取3字符的字段名
+        // aResult的每个元素为byte[]型，内容是一个字段。第一个元素是头标区，一定是24bytes
+        // return:
+        //	-1	一般性错误
+        //	-2	MARC格式错误
+        public static int ForceCvt2709ToFieldArray(
             ref Encoding encoding,  // 2007/7/11 new add 函数内可能发生变化
             byte[] s,
-            List<byte[]> aResult,
-			out string strErrorInfo)
-		{
-			strErrorInfo = "";
+            out List<byte[]> aResult,
+            out string strErrorInfo)
+        {
+            strErrorInfo = "";
+            aResult = new List<byte[]>();
+
+            List<MyByteList> results = new List<MyByteList>();
 
             bool bUcs2 = false;
             if (encoding.Equals(Encoding.Unicode) == true)
@@ -714,209 +719,179 @@ namespace DigitalPlatform.Marc
                 // 不足 24 字符的，给与宽容
                 header = new MarcHeaderStruct(Encoding.ASCII, Encoding.ASCII.GetBytes("012345678901234567890123"));
             }
-			header.ForceUNIMARCHeader();	// 强制将某些位置设置为缺省值
+            header.ForceUNIMARCHeader();	// 强制将某些位置设置为缺省值
 
-#if NO
-		{
-			// 输出头标区
-			byte[] tarray = null;
-			tarray = new byte[24];
-			Array.Copy(s, 0, tarray, 0, 24);
-			aResult.Add(tarray);
-		}
-#endif
-            // 2013/11/23
-            aResult.Add(header.GetBytes());
+            results.Add(header.GetByteList());
 
-			int somaxlen;
-			int offs;
-			int i,j;
-	
-			somaxlen = s.Length;
+            int somaxlen;
+            int offs;
+            int i, j;
 
-			//lenoffld = 4;
+            somaxlen = s.Length;
 
-			//startposoffld=5;
-	
-			// 开始处理目次区
-			// dirp = (char *)sopp;
-			// t = 24;
-			offs = 24;
-			TempByteArray baField = null;
-			bool bFound = false;
-			for(i=0;;i++) 
-			{
-				bFound = false;
-				for(j=offs;j<offs+3+4+5;j++) 
-				{
-					if (j>= somaxlen)
-						break;
-					if (s[j] == FLDEND) 
-					{
-						bFound = true;
-						break;
-					}
-				}
+            // 开始处理目次区
+            offs = 24;
+            MyByteList baField = null;
+            bool bFound = false;
+            for (i = 0; ; i++)
+            {
+                bFound = false;
+                for (j = offs; j < offs + 3 + 4 + 5; j++)
+                {
+                    if (j >= somaxlen)
+                        break;
+                    if (s[j] == FLDEND)
+                    {
+                        bFound = true;
+                        break;
+                    }
+                }
 
-				if (j>=somaxlen) 
-				{
-					offs = j;
-					break;
-				}
+                if (j >= somaxlen)
+                {
+                    offs = j;
+                    break;
+                }
 
-				if (bFound == true) 
-				{
-					if (j<=offs+3) 
-					{
-						offs = j+1;
-						break;
-					}
-				}
+                if (bFound == true)
+                {
+                    if (j <= offs + 3)
+                    {
+                        offs = j + 1;
+                        break;
+                    }
+                }
 
 
-				// 将字段名装入目标
-				baField = new TempByteArray();
-				baField.AddRange(s, offs, 3);
+                // 将字段名装入目标
+                baField = new MyByteList();
+                baField.AddRange(s, offs, 3);
 
-				aResult.Add(baField.GetByteArray());
-				baField = null;
-				// 得到字段内容开始地址
-				offs += 3;
-				offs += 4;
-				offs += 5;
+                results.Add(baField);
+                baField = null;
+                // 得到字段内容开始地址
+                offs += 3;
+                offs += 4;
+                offs += 5;
 
-				if (bFound == true) 
-				{
-					offs = j+1;
-					break;
-				}
+                if (bFound == true)
+                {
+                    offs = j + 1;
+                    break;
+                }
 
-			}
+            }
 
-			if (offs>=somaxlen) 
-				return 0;
+            if (offs >= somaxlen)
+                return 0;
 
-			int nFieldNumber = 1;
-			baField = new TempByteArray();
-			// 加入对应的字段内容
-			for(;;offs++) 
-			{
+            int nFieldNumber = 1;
+            baField = null;
+            // 加入对应的字段内容
+            for (; offs < somaxlen; offs++)
+            {
+                byte c = s[offs];
+                if (c == RECEND)
+                    break;
+                if (c == FLDEND)
+                {
+                    nFieldNumber++;
+                    baField = null;
+                }
+                else
+                {
+                    if (baField == null)
+                    {
+                        // 确保下标不越界
+                        while (nFieldNumber >= results.Count)
+                        {
+                            MyByteList temp = new MyByteList();
+                            temp.Add((byte)'?');
+                            temp.Add((byte)'?');
+                            temp.Add((byte)'?');
+                            results.Add(temp);
+                        }
+                        baField = results[nFieldNumber];
+                    }
 
-				if (offs>=somaxlen 
-					|| s[offs] == FLDEND 
-					|| s[offs] == RECEND) 
-				{
+                    baField.Add(c);
+                }
+            }
 
-					if (offs < somaxlen && s[offs] == RECEND) 
-					{
-						if (baField.Count == 0)
-						{
-							baField = null;
-							break;
-						}
-					}
+            aResult = new List<byte[]>();
+            foreach (MyByteList list in results)
+            {
+                aResult.Add(list.GetByteArray());
+            }
 
-					// 加入一个字段内容
-					while(nFieldNumber >= aResult.Count) 
-					{
-						byte[] baTemp0 = new byte[3];
-						baTemp0[0] = (byte)'?';
-						baTemp0[1] = (byte)'?';
-						baTemp0[2] = (byte)'?';
-						aResult.Add(baTemp0);
-					}
-
-					TempByteArray baTemp = new TempByteArray();
-					baTemp.AddRange((byte[])aResult[nFieldNumber]);
-					baTemp.AddRange(baField);
-
-					aResult[nFieldNumber] = baTemp.GetByteArray();
-					nFieldNumber ++;
-
-					if (offs>=somaxlen) 
-					{
-						baField = null;
-						break;
-					}
-
-
-					baField = new TempByteArray();
-				}
-				else 
-				{
-					baField.Add(s[offs]);
-				}
-
-			}
+            return 0;
+            //		ERROR1:
+            //			return -1;	// 一般性错误
+            //		ERROR2:
+            //			return -2;	// MARC格式错误
+        }
 
 
-			return 0;
-			//		ERROR1:
-			//			return -1;	// 一般性错误
-			//		ERROR2:
-			//			return -2;	// MARC格式错误
-		}
-
-
-		// aSourceField:	MARC字段数组。注意ArrayList每个元素要求为byte[]类型
+        // 把 [byte []] 变换为 string []
+        // aSourceField:	MARC字段数组。注意ArrayList每个元素要求为byte[]类型
         static int GetMarcRecordString(List<byte[]> aSourceField,
-			Encoding encoding,
-			out string [] saTarget)
-		{
-			saTarget = new string[aSourceField.Count];
-			for(int j=0;j<aSourceField.Count;j++) 
-			{
+            Encoding encoding,
+            out string[] saTarget)
+        {
+            saTarget = new string[aSourceField.Count];
+            for (int j = 0; j < aSourceField.Count; j++)
+            {
                 saTarget[j] = encoding.GetString((byte[])aSourceField[j]);
-			}
+            }
 
-			return 0;
-		}
+            return 0;
+        }
 
-		// 从ISO2709文件中读入一条MARC记录
-		// return:
-		//	-2	MARC格式错
-		//	-1	出错
-		//	0	正确
-		//	1	结束(当前返回的记录有效)
-		//	2	结束(当前返回的记录无效)
-		public static int ReadMarcRecord(Stream s, 
-			Encoding encoding,
-			bool bRemoveEndCrLf,
-			bool bForce,
-			out string strMARC,
-			out string strError)
-		{
-			strMARC = "";
-			strError = "";
+        // 从ISO2709文件中读入一条MARC记录
+        // return:
+        //	-2	MARC格式错
+        //	-1	出错
+        //	0	正确
+        //	1	结束(当前返回的记录有效)
+        //	2	结束(当前返回的记录无效)
+        public static int ReadMarcRecord(Stream s,
+            Encoding encoding,
+            bool bRemoveEndCrLf,
+            bool bForce,
+            out string strMARC,
+            out string strError)
+        {
+            strMARC = "";
+            strError = "";
 
-			byte [] baRecord = null;
+            byte[] baRecord = null;
             // return:
             // -1	出错
             //	0	正确
             //	1	结束(当前返回的记录有效)
             //	2	结束(当前返回的记录无效)
-            int nRet = ReadMarcRecord(s, 
+            int nRet = ReadMarcRecord(s,
                 encoding,
                 bRemoveEndCrLf,
                 out baRecord,
                 out strError);
-			if (nRet != 0 && nRet != 1)
-				return nRet;
+            if (nRet != 0 && nRet != 1)
+                return nRet;
 
-		// return:
-		//		-2	MARC格式错
-		//		-1	一般错误
-		//		0	正常
-			int nRet1 = ConvertByteArrayToMarcRecord(baRecord,
-				encoding,
+            // return:
+            //		-2	MARC格式错
+            //		-1	一般错误
+            //		0	正常
+            int nRet1 = ConvertByteArrayToMarcRecord(baRecord,
+                encoding,
                 bForce,
                 out strMARC,
                 out strError);
-			if (nRet1 == 0)
-				return nRet;
+            if (nRet1 == 0)
+                return nRet;
 
-			return nRet1;
-		}
+            return nRet1;
+        }
 
         // 从ISO2709文件中读入一条MARC记录
         // 要返回 byte []
@@ -995,28 +970,28 @@ namespace DigitalPlatform.Marc
             return baRecord;
         }
 
-		// 从ISO2709文件中读入一条MARC记录
+        // 从ISO2709文件中读入一条MARC记录
         // 增加了对UCS2编码方式的支持
         // parameters:
         //      encoding    编码方式。如果为null，表示为ansi类编码方式
         // return:
-		// -1	出错
-		//	0	正确
-		//	1	结束(当前返回的记录有效)
-		//	2	结束(当前返回的记录无效)
-		public static int ReadMarcRecord(Stream s,
+        // -1	出错
+        //	0	正确
+        //	1	结束(当前返回的记录有效)
+        //	2	结束(当前返回的记录无效)
+        public static int ReadMarcRecord(Stream s,
             Encoding encoding,
-			bool bRemoveEndCrLf,
-			out byte[] baRecord,
+            bool bRemoveEndCrLf,
+            out byte[] baRecord,
             out string strError)
-		{
+        {
             strError = "";
 
             // 2007/7/23 new add
             int nMaxBytes = 100000;
 
-			int nRet = -1;
-			int i = 0;
+            int nRet = -1;
+            int i = 0;
             List<byte> baTemp = new List<byte>();
 
             bool bUcs2 = false;
@@ -1028,15 +1003,15 @@ namespace DigitalPlatform.Marc
                 nMaxBytes = 2 * nMaxBytes;
             }
 
-            for (i = 0; i < nMaxBytes; i++) 
-			{
-				nRet = s.ReadByte();
-				if (nRet == -1) 
-				{
-					nRet = 1;
-					break;
-				}
-				baTemp.Add((byte)nRet);
+            for (i = 0; i < nMaxBytes; i++)
+            {
+                nRet = s.ReadByte();
+                if (nRet == -1)
+                {
+                    nRet = 1;
+                    break;
+                }
+                baTemp.Add((byte)nRet);
 
 
                 if (bUcs2 == false)
@@ -1049,9 +1024,8 @@ namespace DigitalPlatform.Marc
                 }
                 else
                 {
-                    // 2007/7/11 new add
+                    // 2007/7/11 add
                     // 如果为UCS2
-
 
                     // 如果缓冲区为偶数bytes
                     if ((i % 2) == 1)
@@ -1061,7 +1035,7 @@ namespace DigitalPlatform.Marc
 
                         if (
                             (b1 == 29 && b2 == 0)
-                            || (b1 ==0 && b2 == 29)
+                            || (b1 == 0 && b2 == 29)
                             )
                         {
                             nRet = 0;
@@ -1072,19 +1046,18 @@ namespace DigitalPlatform.Marc
 
             }
 
-            if (i >= nMaxBytes) 
-			{
+            if (i >= nMaxBytes)
+            {
                 strError = "ISO2709记录尺寸(根据记录结束符测得)超过 " + nMaxBytes.ToString() + ", 被认为是不合法的记录";
-				nRet = -1;	// 记录太大，或者文件不是ISO2709格式
-			}
-
+                nRet = -1;	// 记录太大，或者文件不是ISO2709格式
+            }
 
             //       int i = 0;
 
-			if (bRemoveEndCrLf) 
-			{
+            if (bRemoveEndCrLf)
+            {
 
-				// 看看开头的byte
+                // 看看开头的byte
                 if (bUcs2 == true)
                 {
                     for (i = 0; i < baTemp.Count / 2; i++)
@@ -1092,7 +1065,7 @@ namespace DigitalPlatform.Marc
                         byte b1 = (byte)baTemp[i * 2];
                         byte b2 = (byte)baTemp[i * 2 + 1];
 
-                        if ( (b2 == 0 && (b1 == 0x0d || b1 == 0x0a))
+                        if ((b2 == 0 && (b1 == 0x0d || b1 == 0x0a))
                             || ((b1 == 0) && (b2 == 0x0d || b2 == 0x0a))
                             || (b1 == 0xff && b2 == 0xfe)
                             || (b1 == 0xfe && b2 == 0xff)
@@ -1105,7 +1078,7 @@ namespace DigitalPlatform.Marc
                         }
                     }
                     if (i > 0)
-                        baTemp.RemoveRange(0, i*2); // 删除开头连续的CR LF
+                        baTemp.RemoveRange(0, i * 2); // 删除开头连续的CR LF
 
                 }
                 else
@@ -1125,61 +1098,63 @@ namespace DigitalPlatform.Marc
                     if (i > 0)
                         baTemp.RemoveRange(0, i); // 删除开头连续的CR LF
                 }
-			}
+            }
 
-			baRecord = new byte[baTemp.Count];
+            baRecord = new byte[baTemp.Count];
+            baTemp.CopyTo(baRecord);    // 2015/5/10
+#if NO
 			for(i=0;i<baTemp.Count;i++) 
 			{
 				baRecord[i] = (byte)baTemp[i];
 			}
+#endif
 
-			if (baRecord.Length == 0)
-				return 2;
+            if (baRecord.Length == 0)
+                return 2;
+
+            return nRet;
+        }
 
 
-			return nRet;
-		}
+        // 将MARC记录转换为字段(字符串)数组。
+        public static int ConvertMarcToFieldArray(string strMARC,
+            out string[] saField,
+            out string strError)
+        {
+            strError = "";
+            saField = null;
 
+            string[] aDataField = null;
 
-		// 将MARC记录转换为字段(字符串)数组。
-		public static int ConvertMarcToFieldArray(string strMARC,
-			out string [] saField,
-			out string strError)
-		{
-			strError = "";
-			saField = null;
+            string strLeader = "";
 
-			string[] aDataField = null;
+            if (strMARC.Length < 24)
+            {
+                strLeader = strMARC.PadRight(24, '*');
+                saField = new string[1];
+                saField[0] = strLeader;
+                return 0;
+            }
+            else
+            {
+                strLeader = strMARC.Substring(0, 24);
+            }
 
-			string strLeader = "";
+            aDataField = strMARC.Substring(24).Split(new char[] { (char)FLDEND });
 
-			if (strMARC.Length < 24) 
-			{
-				strLeader = strMARC.PadRight(24, '*');
-				saField = new string [1];
-				saField[0] = strLeader;
-				return 0;
-			}
-			else 
-			{
-				strLeader = strMARC.Substring(0, 24);
-			}
-
-			aDataField = strMARC.Substring(24).Split(new char[]{(char)FLDEND});
-
-			int i;
+            int i;
             List<string> temp = new List<string>(500);
 
-			for(i=1;i<aDataField.Length;i++)
-			{
-				string strField = aDataField[i-1];
-				if (strField.Length == 0)
-					continue;
-				if (strField.Length < 3)
-					strField = strField.PadRight(3, '*');
+            for (i = 1; i < aDataField.Length; i++)
+            {
+                string strField = aDataField[i - 1];
+                if (strField.Length == 0)
+                    continue;
+                if (strField.Length < 3)
+                    strField = strField.PadRight(3, '*');
 
-				temp.Add(strField);
-			}
+                temp.Add(strField);
+            }
 
             // 2012/11/3 修改
             temp.Insert(0, strLeader);
@@ -1195,8 +1170,8 @@ namespace DigitalPlatform.Marc
 			}
 #endif
 
-			return 0;
-		}
+            return 0;
+        }
 
 #if NO
 		// strField:	最好是纯粹的字段内容，即不包括字段名和指示符部分
@@ -1230,13 +1205,13 @@ namespace DigitalPlatform.Marc
 #endif
 
 
-		public static string GetMarcURI(string strMarcSyntax)
-		{
-			if (strMarcSyntax == "usmarc")
-				return Ns.usmarcxml;
+        public static string GetMarcURI(string strMarcSyntax)
+        {
+            if (strMarcSyntax == "usmarc")
+                return Ns.usmarcxml;
 
-			return DpNs.unimarcxml;
-		}
+            return DpNs.unimarcxml;
+        }
 
 #if NO
         // TODO: 保留domMarc中除了MARC相关结构以外的其它内容
@@ -1462,6 +1437,8 @@ namespace DigitalPlatform.Marc
             return 0;
         }
 
+#if NO
+        // 因为使用了 XmlDocument 而速度较慢
 		// 将MARC记录转换为xml格式
         // parameters:
         //      strMarcSyntax   MARC格式．为 unimarc/usmarc之一，缺省为unimarc
@@ -1522,6 +1499,51 @@ namespace DigitalPlatform.Marc
 			return 0;
 		}
 
+#endif
+        // 将MARC记录转换为xml格式
+        // 2015/5/10 改进了函数性能，采用 StringWriter 获取字符串结果
+        // parameters:
+        //      strMarcSyntax   MARC格式．为 unimarc/usmarc之一，缺省为unimarc
+        public static int Marc2Xml(string strMARC,
+            string strMarcSyntax,
+            out string strXml,
+            out string strError)
+        {
+            strError = "";
+            strXml = "";
+
+            // MARC控件中内容更新一些. 需要刷新到xml控件中
+            using (StringWriter s = new StringWriter())
+            using (MarcXmlWriter writer = new MarcXmlWriter(s))
+            {
+                if (strMarcSyntax == "unimarc")
+                {
+                    writer.MarcNameSpaceUri = DpNs.unimarcxml;
+                    writer.MarcPrefix = strMarcSyntax;
+                }
+                else if (strMarcSyntax == "usmarc")
+                {
+                    writer.MarcNameSpaceUri = Ns.usmarcxml;
+                    writer.MarcPrefix = strMarcSyntax;
+                }
+                else
+                {
+                    writer.MarcNameSpaceUri = DpNs.unimarcxml;
+                    writer.MarcPrefix = "unimarc";
+                }
+
+                int nRet = writer.WriteRecord(strMARC,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
+                writer.Flush();
+
+                strXml = s.ToString();
+                return 0;
+            }
+        }
+
         // 包装以后的版本
         public static int Xml2Marc(string strXml,
             bool bWarning,
@@ -1549,24 +1571,24 @@ namespace DigitalPlatform.Marc
             OutputFragmentXml = 0x02,
         }
 
-		// 将MARCXML格式的xml记录转换为marc机内格式字符串
+        // 将MARCXML格式的xml记录转换为marc机内格式字符串
         // 注意，如果strXml内容为空，本函数会报错。最好在进入函数前进行判断。
-		// parameters:
-		//		bWarning	        ==true, 警告后继续转换,不严格对待错误; = false, 非常严格对待错误,遇到错误后不继续转换
-		//		strMarcSyntax	    指示marc语法,如果==""，则自动识别
-		//		strOutMarcSyntax	[out] 返回记录的 MARC 格式。如果 strMarcSyntax == ""，返回找到marc语法，否则返回与输入参数strMarcSyntax相同的值
+        // parameters:
+        //		bWarning	        ==true, 警告后继续转换,不严格对待错误; = false, 非常严格对待错误,遇到错误后不继续转换
+        //		strMarcSyntax	    指示marc语法,如果==""，则自动识别
+        //		strOutMarcSyntax	[out] 返回记录的 MARC 格式。如果 strMarcSyntax == ""，返回找到marc语法，否则返回与输入参数strMarcSyntax相同的值
         //      strFragmentXml      [out] 返回删除 <leader> <controlfield> <datafield> 以后的 XML 代码。注意，包含 <record> 元素
-		public static int Xml2Marc(string strXml,
-			Xml2MarcStyle style,
-			string strMarcSyntax,
-			out string strOutMarcSyntax,
-			out string strMARC,
+        public static int Xml2Marc(string strXml,
+            Xml2MarcStyle style,
+            string strMarcSyntax,
+            out string strOutMarcSyntax,
+            out string strMARC,
             out string strFragmentXml,
-			out string strError)
-		{
+            out string strError)
+        {
             strMARC = "";
-			strError = "";
-			strOutMarcSyntax = "";
+            strError = "";
+            strOutMarcSyntax = "";
             strFragmentXml = "";
 
             // 2013/9/25
@@ -1578,31 +1600,31 @@ namespace DigitalPlatform.Marc
             bool bWarning = (style & Xml2MarcStyle.Warning) != 0;
             bool bOutputFragmentXml = (style & Xml2MarcStyle.OutputFragmentXml) != 0;
 
-			XmlDocument dom = new XmlDocument();
+            XmlDocument dom = new XmlDocument();
             dom.PreserveWhitespace = true;  // 在意空白符号
-			try 
-			{
-				dom.LoadXml(strXml);
-			}
-			catch (Exception ex)
-			{
+            try
+            {
+                dom.LoadXml(strXml);
+            }
+            catch (Exception ex)
+            {
                 strError = "Xml2Marc() strXml 加载 XML 到 DOM 时出错: " + ex.Message;
-				return -1;
-			}
+                return -1;
+            }
 
-			// 取MARC根
-			XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
-			nsmgr.AddNamespace("unimarc", Ns.unimarcxml);
-			nsmgr.AddNamespace("usmarc", Ns.usmarcxml);
+            // 取MARC根
+            XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
+            nsmgr.AddNamespace("unimarc", Ns.unimarcxml);
+            nsmgr.AddNamespace("usmarc", Ns.usmarcxml);
 
-			XmlNode root = null;
-			if (string.IsNullOrEmpty(strMarcSyntax) == true)
-			{
+            XmlNode root = null;
+            if (string.IsNullOrEmpty(strMarcSyntax) == true)
+            {
                 // '//'保证了无论MARC的根在何处，都可以正常取出。
-				root = dom.DocumentElement.SelectSingleNode("//unimarc:record", nsmgr);
-				if (root == null) 
-				{
-					root = dom.DocumentElement.SelectSingleNode("//usmarc:record", nsmgr);
+                root = dom.DocumentElement.SelectSingleNode("//unimarc:record", nsmgr);
+                if (root == null)
+                {
+                    root = dom.DocumentElement.SelectSingleNode("//usmarc:record", nsmgr);
 
                     if (root == null)
                     {
@@ -1612,15 +1634,15 @@ namespace DigitalPlatform.Marc
                         return 0;
                     }
 
-					strMarcSyntax = "usmarc";
-				}
-				else 
-				{
-					strMarcSyntax = "unimarc";
-				}
-			}
-			else 
-			{
+                    strMarcSyntax = "usmarc";
+                }
+                else
+                {
+                    strMarcSyntax = "unimarc";
+                }
+            }
+            else
+            {
                 // 2012/1/8
                 if (strMarcSyntax != null)
                     strMarcSyntax = strMarcSyntax.ToLower();
@@ -1628,147 +1650,147 @@ namespace DigitalPlatform.Marc
                 if (strMarcSyntax != "unimarc"
                     && strMarcSyntax != "usmarc")
                 {
-                    strError = "无法识别 MARC格式 '"+strMarcSyntax+"' 。目前仅支持 unimarc 和 usmarc 两种格式";
+                    strError = "无法识别 MARC格式 '" + strMarcSyntax + "' 。目前仅支持 unimarc 和 usmarc 两种格式";
                     return -1;
                 }
 
-				root = dom.DocumentElement.SelectSingleNode("//"+strMarcSyntax+":record", nsmgr);
-				if (root == null) 
-				{
+                root = dom.DocumentElement.SelectSingleNode("//" + strMarcSyntax + ":record", nsmgr);
+                if (root == null)
+                {
                     // TODO: 是否要去除所有 MARC 相关元素
                     if (bOutputFragmentXml)
                         strFragmentXml = dom.DocumentElement.OuterXml;
                     return 0;
-				}
-			}
+                }
+            }
 
             StringBuilder strMarc = new StringBuilder(4096);
 
-			strOutMarcSyntax = strMarcSyntax;
+            strOutMarcSyntax = strMarcSyntax;
 
-			XmlNode leader = root.SelectSingleNode(strMarcSyntax+":leader", nsmgr);
-			if (leader == null)
-			{
-				strError += "缺<"+strMarcSyntax+":leader>元素\r\n";
-				if (bWarning == false)
-					return -1;
-				else
-					strMarc.Append( "012345678901234567890123" );
-			}
-			else // 正常情况
-			{
-				// string strLeader = DomUtil.GetNodeText(leader);
+            XmlNode leader = root.SelectSingleNode(strMarcSyntax + ":leader", nsmgr);
+            if (leader == null)
+            {
+                strError += "缺<" + strMarcSyntax + ":leader>元素\r\n";
+                if (bWarning == false)
+                    return -1;
+                else
+                    strMarc.Append("012345678901234567890123");
+            }
+            else // 正常情况
+            {
+                // string strLeader = DomUtil.GetNodeText(leader);
                 // GetNodeText()会自动Trim()，会导致头标区内容末尾丢失字符
                 string strLeader = leader.InnerText;
-				if (strLeader.Length != 24)
-				{
-					strError += "<"+strMarcSyntax+":leader>元素内容应为24字符\r\n";
-					if (bWarning == false)
-						return -1;
-					else 
-					{
-						if (strLeader.Length < 24)
-							strLeader = strLeader.PadRight(24,' ');
-						else
-							strLeader = strLeader.Substring(0, 24);
-					}
+                if (strLeader.Length != 24)
+                {
+                    strError += "<" + strMarcSyntax + ":leader>元素内容应为24字符\r\n";
+                    if (bWarning == false)
+                        return -1;
+                    else
+                    {
+                        if (strLeader.Length < 24)
+                            strLeader = strLeader.PadRight(24, ' ');
+                        else
+                            strLeader = strLeader.Substring(0, 24);
+                    }
 
-				}
+                }
 
-				strMarc.Append(strLeader);
+                strMarc.Append(strLeader);
 
                 // 从 DOM 中删除 leader 元素
                 if (bOutputFragmentXml)
                     leader.ParentNode.RemoveChild(leader);
-			}
+            }
 
-			int i=0;
+            int i = 0;
 
-			// 固定长字段
-			XmlNodeList controlfields = root.SelectNodes(strMarcSyntax+":controlfield", nsmgr);
-			for(i=0;i<controlfields.Count;i++)
-			{
-				XmlNode field = controlfields[i];
-				string strTag = DomUtil.GetAttr(field, "tag");
-				if (strTag.Length != 3)
-				{
-					strError += "<"+strMarcSyntax+":controlfield>元素的tag属性值'"+strTag+"'应当为3字符\r\n";
-					if (bWarning == false)
-						return -1;
-					else 
-					{
-						if (strTag.Length < 3)
-							strTag = strTag.PadRight(3,'*');
-						else
-							strTag = strTag.Substring(0, 3);
-					}
-				}
+            // 固定长字段
+            XmlNodeList controlfields = root.SelectNodes(strMarcSyntax + ":controlfield", nsmgr);
+            for (i = 0; i < controlfields.Count; i++)
+            {
+                XmlNode field = controlfields[i];
+                string strTag = DomUtil.GetAttr(field, "tag");
+                if (strTag.Length != 3)
+                {
+                    strError += "<" + strMarcSyntax + ":controlfield>元素的tag属性值'" + strTag + "'应当为3字符\r\n";
+                    if (bWarning == false)
+                        return -1;
+                    else
+                    {
+                        if (strTag.Length < 3)
+                            strTag = strTag.PadRight(3, '*');
+                        else
+                            strTag = strTag.Substring(0, 3);
+                    }
+                }
 
-				string strContent = DomUtil.GetNodeText(field);
+                string strContent = DomUtil.GetNodeText(field);
 
-				strMarc.Append(strTag + strContent + new string(MarcUtil.FLDEND,1));
+                strMarc.Append(strTag + strContent + new string(MarcUtil.FLDEND, 1));
 
                 // 从 DOM 中删除
                 if (bOutputFragmentXml)
                     field.ParentNode.RemoveChild(field);
-			}
+            }
 
-			// 可变长字段
-			XmlNodeList datafields = root.SelectNodes(strMarcSyntax+":datafield", nsmgr);
-			for(i=0;i<datafields.Count;i++)
-			{
-				XmlNode field = datafields[i];
-				string strTag = DomUtil.GetAttr(field, "tag");
-				if (strTag.Length != 3)
-				{
-					strError += "<"+strMarcSyntax+":datafield>元素的tag属性值'"+strTag+"'应当为3字符\r\n";
-					if (bWarning == false)
-						return -1;
-					else 
-					{
-						if (strTag.Length < 3)
-							strTag = strTag.PadRight(3,'*');
-						else
-							strTag = strTag.Substring(0, 3);
-					}
-				}
+            // 可变长字段
+            XmlNodeList datafields = root.SelectNodes(strMarcSyntax + ":datafield", nsmgr);
+            for (i = 0; i < datafields.Count; i++)
+            {
+                XmlNode field = datafields[i];
+                string strTag = DomUtil.GetAttr(field, "tag");
+                if (strTag.Length != 3)
+                {
+                    strError += "<" + strMarcSyntax + ":datafield>元素的tag属性值'" + strTag + "'应当为3字符\r\n";
+                    if (bWarning == false)
+                        return -1;
+                    else
+                    {
+                        if (strTag.Length < 3)
+                            strTag = strTag.PadRight(3, '*');
+                        else
+                            strTag = strTag.Substring(0, 3);
+                    }
+                }
 
-				string strInd1 = DomUtil.GetAttr(field, "ind1");
-				if (strInd1.Length != 1)
-				{
-					strError += "<"+strMarcSyntax+":datalfield>元素的ind1属性值'"+strInd1+"'应当为1字符\r\n";
-					if (bWarning == false)
-						return -1;
-					else 
-					{
-						if (strInd1.Length < 1)
-							strInd1 = '*'.ToString();
-						else
-							strInd1 = strInd1[0].ToString();
-					}
-				}
+                string strInd1 = DomUtil.GetAttr(field, "ind1");
+                if (strInd1.Length != 1)
+                {
+                    strError += "<" + strMarcSyntax + ":datalfield>元素的ind1属性值'" + strInd1 + "'应当为1字符\r\n";
+                    if (bWarning == false)
+                        return -1;
+                    else
+                    {
+                        if (strInd1.Length < 1)
+                            strInd1 = '*'.ToString();
+                        else
+                            strInd1 = strInd1[0].ToString();
+                    }
+                }
 
-				string strInd2 = DomUtil.GetAttr(field, "ind2");
-				if (strInd2.Length != 1)
-				{
-					strError += "<"+strMarcSyntax+":datalfield>元素的indi2属性值'"+strInd2+"'应当为1字符\r\n";
-					if (bWarning == false)
-						return -1;
-					else 
-					{
-						if (strInd2.Length < 1)
-							strInd2 = '*'.ToString();
-						else
-							strInd2 = strInd2[0].ToString();
-					}
-				}
+                string strInd2 = DomUtil.GetAttr(field, "ind2");
+                if (strInd2.Length != 1)
+                {
+                    strError += "<" + strMarcSyntax + ":datalfield>元素的indi2属性值'" + strInd2 + "'应当为1字符\r\n";
+                    if (bWarning == false)
+                        return -1;
+                    else
+                    {
+                        if (strInd2.Length < 1)
+                            strInd2 = '*'.ToString();
+                        else
+                            strInd2 = strInd2[0].ToString();
+                    }
+                }
 
-				// string strContent = DomUtil.GetNodeText(field);
-				XmlNodeList subfields = field.SelectNodes(strMarcSyntax+":subfield", nsmgr);
+                // string strContent = DomUtil.GetNodeText(field);
+                XmlNodeList subfields = field.SelectNodes(strMarcSyntax + ":subfield", nsmgr);
                 StringBuilder strContent = new StringBuilder(4096);
-				for(int j=0;j<subfields.Count;j++)
-				{
-					XmlNode subfield = subfields[j];
+                for (int j = 0; j < subfields.Count; j++)
+                {
+                    XmlNode subfield = subfields[j];
 
                     XmlAttribute attr = subfield.Attributes["code"];
 #if NO
@@ -1818,19 +1840,19 @@ namespace DigitalPlatform.Marc
                     strContent.Append(new string(MarcUtil.SUBFLD, 1) + strCode + strSubfieldContent);
                 }
 
-				strMarc.Append(strTag + strInd1 + strInd2 + strContent + new string(MarcUtil.FLDEND,1));
+                strMarc.Append(strTag + strInd1 + strInd2 + strContent + new string(MarcUtil.FLDEND, 1));
 
             CONTINUE:
                 // 从 DOM 中删除
                 if (bOutputFragmentXml)
                     field.ParentNode.RemoveChild(field);
-			}
+            }
 
             strMARC = strMarc.ToString();
             if (bOutputFragmentXml)
                 strFragmentXml = dom.DocumentElement.OuterXml;
-			return 0;
-		}
+            return 0;
+        }
 
         // 将marcxchange格式转化为机内使用的marcxml格式
         public static int MarcXChangeToXml(string strSource,
@@ -1842,15 +1864,15 @@ namespace DigitalPlatform.Marc
 
             XmlDocument dom = new XmlDocument();
             dom.PreserveWhitespace = true;  // 在意空白符号
-			try 
-			{
+            try
+            {
                 dom.LoadXml(strSource);
-			}
-			catch (Exception ex)
-			{
-				strError = "源加载到XMLDOM时出错: " + ex.Message;
-				return -1;
-			}
+            }
+            catch (Exception ex)
+            {
+                strError = "源加载到XMLDOM时出错: " + ex.Message;
+                return -1;
+            }
 
             XmlDocument target_dom = new XmlDocument();
             string strMarcNs = "";
@@ -1858,10 +1880,10 @@ namespace DigitalPlatform.Marc
 
             string strMarcXUri = "info:lc/xmlns/marcxchange-v1";
 
-			// 取MARC根
-			XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
-			nsmgr.AddNamespace("unimarc", Ns.unimarcxml);
-			nsmgr.AddNamespace("usmarc", Ns.usmarcxml);
+            // 取MARC根
+            XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
+            nsmgr.AddNamespace("unimarc", Ns.unimarcxml);
+            nsmgr.AddNamespace("usmarc", Ns.usmarcxml);
             nsmgr.AddNamespace("marcxchange", strMarcXUri);
 
             XmlNode root = null;
@@ -1882,7 +1904,7 @@ namespace DigitalPlatform.Marc
                 strMarcNs = Ns.unimarcxml;
                 strPrefix = "unimarc";
                 target_dom.AppendChild(target_dom.CreateElement(strPrefix + ":record", strMarcNs));
-                
+
             }
             else if (strFormat == "marc21")
             {
@@ -2082,43 +2104,43 @@ namespace DigitalPlatform.Marc
 
             return 0;
         }
-	
-		// 从marcdef配置文件中得到marc格式字符串
-		// 用Stream的原因，是为了提高执行速度
-		// return:
-		//		-1	出错
-		//		0	没有找到
-		//		1	找到
-		public static int GetMarcSyntaxFromCfgFile(Stream s,
-			out string strMarcSyntax,
-			out string strError)
-		{
-			strError = "";
-			strMarcSyntax = "";
-			try 
-			{
-				XmlTextReader reader = new XmlTextReader(s);
 
-				while (reader.Read()) 
-				{
-					if (reader.NodeType == XmlNodeType.Element) 
-					{
-						if (reader.Name == "MARCSyntax")
-						{
-							strMarcSyntax = reader.ReadString().ToLower();
-							return 1;
-						}
-					}       
-				}           
+        // 从marcdef配置文件中得到marc格式字符串
+        // 用Stream的原因，是为了提高执行速度
+        // return:
+        //		-1	出错
+        //		0	没有找到
+        //		1	找到
+        public static int GetMarcSyntaxFromCfgFile(Stream s,
+            out string strMarcSyntax,
+            out string strError)
+        {
+            strError = "";
+            strMarcSyntax = "";
+            try
+            {
+                XmlTextReader reader = new XmlTextReader(s);
 
-				return 0;
-			}
-			catch (Exception ex)
-			{
-				strError = ex.Message;
-				return -1;
-			}
-		}
+                while (reader.Read())
+                {
+                    if (reader.NodeType == XmlNodeType.Element)
+                    {
+                        if (reader.Name == "MARCSyntax")
+                        {
+                            strMarcSyntax = reader.ReadString().ToLower();
+                            return 1;
+                        }
+                    }
+                }
+
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                strError = ex.Message;
+                return -1;
+            }
+        }
 
         #region 处理MARC记录各种内部结构的静态函数
 
@@ -2158,7 +2180,6 @@ namespace DigitalPlatform.Marc
 
             string strField = "";
             string strNextFieldName = "";
-
 
             // return:
             //		-1	出错
@@ -2259,53 +2280,53 @@ namespace DigitalPlatform.Marc
                 strField);
         }
 
-		// 以字段/子字段名从记录中得到第一个子字段内容。
-		// parameters:
-		//		strMARC	机内格式MARC记录
-		//		strFieldName	字段名。内容为字符
-		//		strSubfieldName	子字段名。内容为1字符
-		// return:
-		//		""	空字符串。表示没有找到指定的字段或子字段。
-		//		其他	子字段内容。注意，这是子字段纯内容，其中并不包含子字段名。
-		static public string GetFirstSubfield(string strMARC,
-			string strFieldName,
-			string strSubfieldName)
-		{
-			string strField = "";
-			string strNextFieldName = "";
+        // 以字段/子字段名从记录中得到第一个子字段内容。
+        // parameters:
+        //		strMARC	机内格式MARC记录
+        //		strFieldName	字段名。内容为字符
+        //		strSubfieldName	子字段名。内容为1字符
+        // return:
+        //		""	空字符串。表示没有找到指定的字段或子字段。
+        //		其他	子字段内容。注意，这是子字段纯内容，其中并不包含子字段名。
+        static public string GetFirstSubfield(string strMARC,
+            string strFieldName,
+            string strSubfieldName)
+        {
+            string strField = "";
+            string strNextFieldName = "";
 
 
-			// return:
-			//		-1	error
-			//		0	not found
-			//		1	found
-			int nRet = GetField(strMARC,
-				strFieldName,
-				0,
-				out strField,
-				out strNextFieldName);
+            // return:
+            //		-1	error
+            //		0	not found
+            //		1	found
+            int nRet = GetField(strMARC,
+                strFieldName,
+                0,
+                out strField,
+                out strNextFieldName);
 
-			if (nRet != 1)
-				return "";
+            if (nRet != 1)
+                return "";
 
-			string strSubfield = "";
-			string strNextSubfieldName = "";
+            string strSubfield = "";
+            string strNextSubfieldName = "";
 
-			// return:
-			//		-1	error
-			//		0	not found
-			//		1	found
-			nRet = GetSubfield(strField,
-				ItemType.Field,
-				strSubfieldName,
-				0,
-				out strSubfield,
-				out strNextSubfieldName);
-			if (strSubfield.Length < 1)
-				return "";
+            // return:
+            //		-1	error
+            //		0	not found
+            //		1	found
+            nRet = GetSubfield(strField,
+                ItemType.Field,
+                strSubfieldName,
+                0,
+                out strSubfield,
+                out strNextSubfieldName);
+            if (strSubfield.Length < 1)
+                return "";
 
-			return strSubfield.Substring(1);
-		}
+            return strSubfield.Substring(1);
+        }
 
         // 看一个字段名是否是控制字段。所谓控制字段没有指示符概念
         // parameters:
@@ -2315,13 +2336,14 @@ namespace DigitalPlatform.Marc
         //		false	不是控制字段
         public static bool IsControlFieldName(string strFieldName)
         {
+#if NO
             if (String.Compare(strFieldName, "hdr", true) == 0)
                 return true;
 
             if (String.Compare(strFieldName, "###", true) == 0)
                 return true;
 
-            if (
+                        if (
                 (
                 String.Compare(strFieldName, "001") >= 0
                 && String.Compare(strFieldName, "009") <= 0
@@ -2330,7 +2352,14 @@ namespace DigitalPlatform.Marc
                 || String.Compare(strFieldName, "-01") == 0
                 )
                 return true;
+#endif
+            if (strFieldName == null || strFieldName.Length < 3)
+                throw new ArgumentException("strFieldName 参数值应当是 3 字符的字符串");
 
+            if (strFieldName[0] == '0' && strFieldName[1] == '0')
+                return true;
+            if (strFieldName == "hdr" || strFieldName == "###" || strFieldName == "-01")
+                return true;
             return false;
         }
 
@@ -2421,7 +2450,7 @@ namespace DigitalPlatform.Marc
                         continue;
                     strSubfield = strSubfield.Substring(1); // 去掉子字段名
                     if (string.IsNullOrEmpty(strSubfield) == true)
-                        continue; 
+                        continue;
                     results.Add(strSubfield);
                 }
             }
@@ -2429,587 +2458,587 @@ namespace DigitalPlatform.Marc
         }
 
 
-		// 单元测试!
+        // 单元测试!
 
-		// 从记录中得到一个字段
-		// parameters:
-		//		strMARC		机内格式MARC记录
-		//		strFieldName	字段名。如果本参数==null，表示想获取任意字段中的第nIndex个
-		//		nIndex		同名字段中的第几个。从0开始计算(任意字段中，序号0个则表示头标区)
-		//		strField	[out]输出字段。包括字段名、必要的字段指示符、字段内容。不包含字段结束符。
-		//					注意头标区当作一个字段返回，此时strField中不包含字段名，其中一开始就是头标区内容
-		//		strNextFieldName	[out]顺便返回所找到的字段其下一个字段的名字
-		// return:
-		//		-1	出错
-		//		0	所指定的字段没有找到
-		//		1	找到。找到的字段返回在strField参数中
-		public static int GetField(string strMARC,
-			string strFieldName,
-			int nIndex,
-			out string strField,
-			out string strNextFieldName)
-		{
-			//			LPTSTR p;
-			int nFoundCount = 0;
-			int nChars = 0;
-			string strCurFldName;
-
-
-			strField = null;
-			strNextFieldName = null;
+        // 从记录中得到一个字段
+        // parameters:
+        //		strMARC		机内格式MARC记录
+        //		strFieldName	字段名。如果本参数==null，表示想获取任意字段中的第nIndex个
+        //		nIndex		同名字段中的第几个。从0开始计算(任意字段中，序号0个则表示头标区)
+        //		strField	[out]输出字段。包括字段名、必要的字段指示符、字段内容。不包含字段结束符。
+        //					注意头标区当作一个字段返回，此时strField中不包含字段名，其中一开始就是头标区内容
+        //		strNextFieldName	[out]顺便返回所找到的字段其下一个字段的名字
+        // return:
+        //		-1	出错
+        //		0	所指定的字段没有找到
+        //		1	找到。找到的字段返回在strField参数中
+        public static int GetField(string strMARC,
+            string strFieldName,
+            int nIndex,
+            out string strField,
+            out string strNextFieldName)
+        {
+            //			LPTSTR p;
+            int nFoundCount = 0;
+            int nChars = 0;
+            string strCurFldName;
 
 
-			if (strMARC == null) 
-			{
-				Debug.Assert(false, "strMARC参数不能为null");
-				return -1;
-			}
+            strField = null;
+            strNextFieldName = null;
 
 
-			if (strMARC.Length < 24)
-				return -1;
+            if (strMARC == null)
+            {
+                Debug.Assert(false, "strMARC参数不能为null");
+                return -1;
+            }
 
-			if (strFieldName != null) 
-			{
-				if (strFieldName.Length != 3) 
-				{
-					Debug.Assert(false, "字段名长度必须为3");	// 字段名必须为3字符
-					return -1;
-				}
-			}
-			else 
-			{
-				// 表示不关心字段名，依靠nIndex来定位字段
-			}
 
-			strField = "";
+            if (strMARC.Length < 24)
+                return -1;
 
-			char ch;
+            if (strFieldName != null)
+            {
+                if (strFieldName.Length != 3)
+                {
+                    Debug.Assert(false, "字段名长度必须为3");	// 字段名必须为3字符
+                    return -1;
+                }
+            }
+            else
+            {
+                // 表示不关心字段名，依靠nIndex来定位字段
+            }
 
-			// 循环，找特定的字段
+            strField = "";
 
-			// p = (LPTSTR)pszMARC;
-			for(int i=0; i<strMARC.Length;) 
-			{
-				ch = strMARC[i];
+            char ch;
 
-				if (ch == RECEND)
-					break;
+            // 循环，找特定的字段
 
-				// 设置m_strItemName
-				if (i == 0) 
-				{
+            // p = (LPTSTR)pszMARC;
+            for (int i = 0; i < strMARC.Length; )
+            {
+                ch = strMARC[i];
 
-					if ( (nIndex == 0 && strFieldName == null)	// 头标区
-						|| 
-						(strFieldName != null 
-						&& String.Compare("hdr",strFieldName, true) == 0) // 有字段名要求，并且要求头标区
-						)
-					{
-						strField = strMARC.Substring(0, 24);
+                if (ch == RECEND)
+                    break;
 
-						// 取strNextFieldName
-						strNextFieldName = GetNextFldName(strMARC,
-							24);
-						return 1;	// found
-					}
-					nChars = 24;
+                // 设置m_strItemName
+                if (i == 0)
+                {
 
-					if (strFieldName == null
-						|| (strFieldName != null 
-						&& "hdr" == strFieldName)
-						)
-					{
-						nFoundCount ++;
-					}
+                    if ((nIndex == 0 && strFieldName == null)	// 头标区
+                        ||
+                        (strFieldName != null
+                        && String.Compare("hdr", strFieldName, true) == 0) // 有字段名要求，并且要求头标区
+                        )
+                    {
+                        strField = strMARC.Substring(0, 24);
 
-				}
-				else 
-				{
-					nChars = DetectFldLens(strMARC, i);
-					if (nChars < 3+1) 
-					{
-						strCurFldName = "???";	// ???
-						goto SKIP;
-					}
-					Debug.Assert(nChars>=3+1, "");
-					strCurFldName = strMARC.Substring(i, 3);
-					if (strFieldName == null
-						|| (strFieldName != null 
-						&& strCurFldName == strFieldName)
-						)
-					{
-						if (nIndex == nFoundCount) 
-						{
-							strField = strMARC.Substring(i, nChars-1);	// 不包含字段结束符
+                        // 取strNextFieldName
+                        strNextFieldName = GetNextFldName(strMARC,
+                            24);
+                        return 1;	// found
+                    }
+                    nChars = 24;
 
-							// 取strNextFieldName
-							strNextFieldName = GetNextFldName(strMARC,
-								i + nChars);
+                    if (strFieldName == null
+                        || (strFieldName != null
+                        && "hdr" == strFieldName)
+                        )
+                    {
+                        nFoundCount++;
+                    }
 
-							/*
-							if (i+nChars < strMARC.Length
-								&& strMARC[i+nChars] != RECEND
-								&& DetectFldLens(strMARC, i+nChars) >= 3 ) 
-							{
-								strNextFieldName = strMARC.Substring(i+nChars, 3);
-								for(int j=0;j<strNextFieldName.Length;j++) 
-								{
-									char ch0 = strNextFieldName[j];
-									if (ch0 == RECEND
-										|| ch0 == SUBFLD 
-										|| ch0 == FLDEND)
-										strNextFieldName = strNextFieldName.Insert(j, "?").Remove(j+1, 1);
+                }
+                else
+                {
+                    nChars = DetectFldLens(strMARC, i);
+                    if (nChars < 3 + 1)
+                    {
+                        strCurFldName = "???";	// ???
+                        goto SKIP;
+                    }
+                    Debug.Assert(nChars >= 3 + 1, "");
+                    strCurFldName = strMARC.Substring(i, 3);
+                    if (strFieldName == null
+                        || (strFieldName != null
+                        && strCurFldName == strFieldName)
+                        )
+                    {
+                        if (nIndex == nFoundCount)
+                        {
+                            strField = strMARC.Substring(i, nChars - 1);	// 不包含字段结束符
 
-								}
-							}
-							else
-								strNextFieldName = "";
-							*/
+                            // 取strNextFieldName
+                            strNextFieldName = GetNextFldName(strMARC,
+                                i + nChars);
 
-							return 1;	// found
-						}
-						nFoundCount ++;
-					}
-				}
+                            /*
+                            if (i+nChars < strMARC.Length
+                                && strMARC[i+nChars] != RECEND
+                                && DetectFldLens(strMARC, i+nChars) >= 3 ) 
+                            {
+                                strNextFieldName = strMARC.Substring(i+nChars, 3);
+                                for(int j=0;j<strNextFieldName.Length;j++) 
+                                {
+                                    char ch0 = strNextFieldName[j];
+                                    if (ch0 == RECEND
+                                        || ch0 == SUBFLD 
+                                        || ch0 == FLDEND)
+                                        strNextFieldName = strNextFieldName.Insert(j, "?").Remove(j+1, 1);
 
-			SKIP:
-				i += nChars;
-			}
-			return 0;	// not found
-		}
+                                }
+                            }
+                            else
+                                strNextFieldName = "";
+                            */
 
-		// nStart需正好为字段名字符位置
-		// 本函数为函数GetField()服务
-		static string GetNextFldName(string strMARC,
-			int nStart)
-		{
-			string strNextFieldName = "";
+                            return 1;	// found
+                        }
+                        nFoundCount++;
+                    }
+                }
 
-			if (nStart < strMARC.Length
-				&& strMARC[nStart] != RECEND
-				&& DetectFldLens(strMARC, nStart) >= 3 ) 
-			{
-				strNextFieldName = strMARC.Substring(nStart, 3);
-				for(int j=0;j<strNextFieldName.Length;j++) 
-				{
-					char ch0 = strNextFieldName[j];
-					if (ch0 == RECEND
-						|| ch0 == SUBFLD 
-						|| ch0 == FLDEND)
-						strNextFieldName = strNextFieldName.Insert(j, "?").Remove(j+1, 1);
+            SKIP:
+                i += nChars;
+            }
+            return 0;	// not found
+        }
 
-				}
-			}
-			else
-				strNextFieldName = "";
+        // nStart需正好为字段名字符位置
+        // 本函数为函数GetField()服务
+        static string GetNextFldName(string strMARC,
+            int nStart)
+        {
+            string strNextFieldName = "";
 
-			return strNextFieldName;
-		}
+            if (nStart < strMARC.Length
+                && strMARC[nStart] != RECEND
+                && DetectFldLens(strMARC, nStart) >= 3)
+            {
+                strNextFieldName = strMARC.Substring(nStart, 3);
+                for (int j = 0; j < strNextFieldName.Length; j++)
+                {
+                    char ch0 = strNextFieldName[j];
+                    if (ch0 == RECEND
+                        || ch0 == SUBFLD
+                        || ch0 == FLDEND)
+                        strNextFieldName = strNextFieldName.Insert(j, "?").Remove(j + 1, 1);
 
-		// 根据字段开始位置探测整个字段长度
-		// 返回字段的长度
-		// 这是包含记录结束符号在内的长度
-		public static int DetectFldLens(string strText,
-			int nStart)
-		{
-			Debug.Assert(strText != null, "strText参数不能为null");
-			int nChars = 0;
-			// LPTSTR p = (LPTSTR)pFldStart;
-			for(;nStart<strText.Length;nStart++) 
-			{
-				if (strText[nStart] == FLDEND) 
-				{
-					nChars ++;
-					break;
-				}
-				nChars ++;
-			}
+                }
+            }
+            else
+                strNextFieldName = "";
 
-			return nChars;
-		}
+            return strNextFieldName;
+        }
 
-		// 根据子字段开始位置探测整个子字段长度
+        // 根据字段开始位置探测整个字段长度
+        // 返回字段的长度
+        // 这是包含记录结束符号在内的长度
+        public static int DetectFldLens(string strText,
+            int nStart)
+        {
+            Debug.Assert(strText != null, "strText参数不能为null");
+            int nChars = 0;
+            // LPTSTR p = (LPTSTR)pFldStart;
+            for (; nStart < strText.Length; nStart++)
+            {
+                if (strText[nStart] == FLDEND)
+                {
+                    nChars++;
+                    break;
+                }
+                nChars++;
+            }
+
+            return nChars;
+        }
+
+        // 根据子字段开始位置探测整个子字段长度
         // nStart位置是这个子字段的子字段符号位置
-		// 返回子字段的长度(字符数，不是byte数)
-		public static int DetectSubFldLens(string strField,
-			int nStart)
-		{
-			Debug.Assert(strField != null, "strField参数不能为null");
-			Debug.Assert(strField[nStart] == SUBFLD, "nStart位置必须是一个子字段符号");
-			Debug.Assert(nStart < strField.Length, "nStart不能越过strField长度");
-			int nChars = 0;
-			nStart ++;
-			nChars ++;
-			for(;nStart < strField.Length; nStart++) 
-			{
-				if (strField[nStart] == SUBFLD) 
-				{
-					break;
-				}
-				nChars ++;
-			}
+        // 返回子字段的长度(字符数，不是byte数)
+        public static int DetectSubFldLens(string strField,
+            int nStart)
+        {
+            Debug.Assert(strField != null, "strField参数不能为null");
+            Debug.Assert(strField[nStart] == SUBFLD, "nStart位置必须是一个子字段符号");
+            Debug.Assert(nStart < strField.Length, "nStart不能越过strField长度");
+            int nChars = 0;
+            nStart++;
+            nChars++;
+            for (; nStart < strField.Length; nStart++)
+            {
+                if (strField[nStart] == SUBFLD)
+                {
+                    break;
+                }
+                nChars++;
+            }
 
-			return nChars;
-		}
-
-
-		// 得到一个嵌套记录中的字段
-		// parameters:
-		//		strMARC		字段中嵌套的MARC记录。其实，这本是一个MARC字段，其中用$1隔开各个嵌套字段。例如UNIMARC的410字段就是这样。
-		//		strFieldName	字段名。如果本参数==null，表示想获取任意字段中的第nIndex个
-		//		nIndex		同名字段中的第几个。从0开始计算(任意字段中，序号0个不表示头标区了，因为MARC嵌套记录中无法定义头标区)
-		//		strField	[out]输出字段。包括字段名、必要的字段指示符、字段内容。不包含字段结束符。
-		//					注意头标区当作一个字段返回，此时strField中不包含字段名，其中一开始就是头标区内容
-		//		strNextFieldName	[out]顺便返回所找到的字段其下一个字段的名字
-		// return:
-		//		-1	出错
-		//		0	所指定的字段没有找到
-		//		1	找到。找到的字段返回在strField参数中
-		public static int GetNestedField(string strMARC,
-			string strFieldName,
-			int nIndex,
-			out string strField,
-			out string strNextFieldName)
-		{
-			// LPTSTR p;
-			int nFoundCount = 0;
-			int nChars = 0;
-			string strFldName = "";
-
-			strField = "";
-			strNextFieldName = "";
-
-			if (strMARC == null) 
-			{
-				Debug.Assert(false, "strMARC参数不能为null");
-				return -1;
-			}
-
-			if (strMARC.Length < 5)
-				return -1;
-
-			if (strFieldName != null) 
-			{
-				if (strFieldName.Length != 3) 
-				{
-					Debug.Assert(false, "字段名长度必须为3");	// 字段名必须为3字符
-					return -1;
-				}
-			}
-			else 
-			{
-				// 表示不关心字段名，依靠nIndex来定位字段
-			}
-
-			strField = "";
-
-			// 循环，找特定的字段
-			//p = (LPTSTR)pszMARC + 5;
-			int nStart = 5;
-
-			// 找到第一个'$1'符号
-			for(;nStart<strMARC.Length;)
-				// *p&&*p!=FLDEND;) 
-			{
-				if (strMARC[nStart] == FLDEND)
-					break;
-				if (strMARC[nStart] == SUBFLD
-					&& strMARC[nStart+1] == '1' )
-					goto FOUND;
-				nStart ++;
-			}
-			return 0;
-
-			FOUND:
-
-				for(int i=nStart;i<strMARC.Length;) 
-				{
-					if (strMARC[i] == FLDEND)
-						break;
-
-					nChars = DetectNestedFldLens(strMARC, i);
-					if (nChars < 2+3+1) 
-					{
-						strFldName = "???";
-						goto SKIP;
-					}
-					Debug.Assert(nChars>=2+3+1, "error");
-					strFldName = strMARC.Substring(i + 2, 3);
-
-					if (strFieldName == null
-						|| (strFieldName != null
-						&& strFldName == strFieldName) )
-					{
-						if (nIndex == nFoundCount) 
-						{
-							strField = strMARC.Substring(i + 2, nChars - 2);
-
-							if (i+nChars < strMARC.Length
-								&& strMARC[i+nChars] != RECEND
-								&& DetectFldLens(strMARC, i+nChars) >= 2+3)
-								strNextFieldName = strMARC.Substring(i+nChars+2, 3);
-							else
-								strNextFieldName = "";
-
-							return 1;	// found
-						}
-						nFoundCount ++;
-					}
-
-				SKIP:
-					i += nChars;
-				}
-			return 0;	// not found
-		}
-
-		// 嵌套字段：根据字段开始位置探测整个字段长度
-		// 返回字段的长度(字符数，不是byte数)
-		static int DetectNestedFldLens(string strMARC, int nStart)
-		{
-			Debug.Assert(strMARC != null , "strMARC参数不能为null");
-
-			if (nStart >= strMARC.Length) 
-			{
-				Debug.Assert(false, "nStart参数值超出strMARC内容长度范围");
-				return 0;
-			}
-
-			if (strMARC[nStart] != SUBFLD || strMARC[nStart+1] != '1') 
-			{
-				Debug.Assert(false, "必须用$1开头的位置调用本函数");
-			}
-
-			int i = nStart + 1;
-			for(;i<strMARC.Length;i++)
-			{
-				if (strMARC[i] == SUBFLD
-					&& strMARC[i + 1] == '1')
-					break;
-			}
-
-			return i-nStart;
-		}
+            return nChars;
+        }
 
 
-		// 从字段中得到子字段组
-		// parameters:
-		//		strField	字段。其中包括字段名、必要的指示符，字段内容。也就是调用GetField()函数所得到的字段。
-		//		nIndex	子字段组序号。从0开始计数。
-		//		strGroup	[out]得到的子字段组。其中包括若干子字段内容。
-		// return:
-		//		-1	出错
-		//		0	所指定的子字段组没有找到
-		//		1	找到。找到的子字段组返回在strGroup参数中
-		public static int GetGroup(string strField,
-			int nIndex,
-			out string strGroup)
-		{
-			Debug.Assert(strField != null ,"strField参数不能为null");
+        // 得到一个嵌套记录中的字段
+        // parameters:
+        //		strMARC		字段中嵌套的MARC记录。其实，这本是一个MARC字段，其中用$1隔开各个嵌套字段。例如UNIMARC的410字段就是这样。
+        //		strFieldName	字段名。如果本参数==null，表示想获取任意字段中的第nIndex个
+        //		nIndex		同名字段中的第几个。从0开始计算(任意字段中，序号0个不表示头标区了，因为MARC嵌套记录中无法定义头标区)
+        //		strField	[out]输出字段。包括字段名、必要的字段指示符、字段内容。不包含字段结束符。
+        //					注意头标区当作一个字段返回，此时strField中不包含字段名，其中一开始就是头标区内容
+        //		strNextFieldName	[out]顺便返回所找到的字段其下一个字段的名字
+        // return:
+        //		-1	出错
+        //		0	所指定的字段没有找到
+        //		1	找到。找到的字段返回在strField参数中
+        public static int GetNestedField(string strMARC,
+            string strFieldName,
+            int nIndex,
+            out string strField,
+            out string strNextFieldName)
+        {
+            // LPTSTR p;
+            int nFoundCount = 0;
+            int nChars = 0;
+            string strFldName = "";
 
-			Debug.Assert(nIndex>=0, "nIndex参数必须>=0");
+            strField = "";
+            strNextFieldName = "";
 
-			strGroup = "";
+            if (strMARC == null)
+            {
+                Debug.Assert(false, "strMARC参数不能为null");
+                return -1;
+            }
 
-			int nLen = strField.Length;
-			if (nLen <= 5) 
-			{
-				return 0;
-			}
+            if (strMARC.Length < 5)
+                return -1;
 
-			// LPCTSTR lpStart,lpStartSave;
-			// LPTSTR pp;
-			//int l;
-			string strZzd = "a";
+            if (strFieldName != null)
+            {
+                if (strFieldName.Length != 3)
+                {
+                    Debug.Assert(false, "字段名长度必须为3");	// 字段名必须为3字符
+                    return -1;
+                }
+            }
+            else
+            {
+                // 表示不关心字段名，依靠nIndex来定位字段
+            }
 
-			// char zzd[3];
+            strField = "";
 
-			/*
-			zzd[0]=SUBFLD;
-			zzd[1]='a';
-			zzd[2]=0;
-			*/
-			strZzd = strZzd.Insert(0, new String(SUBFLD, 1));
-	
-			// lpStart = pszField;
+            // 循环，找特定的字段
+            //p = (LPTSTR)pszMARC + 5;
+            int nStart = 5;
 
-			// 找到起点
-			int nStart = 5;
-			int nPos;
-			for(int i=0;;i++) 
-			{
-				nPos = strField.IndexOf(strZzd, nStart);
-				if (nPos == -1)
-					return 0;
+            // 找到第一个'$1'符号
+            for (; nStart < strMARC.Length; )
+            // *p&&*p!=FLDEND;) 
+            {
+                if (strMARC[nStart] == FLDEND)
+                    break;
+                if (strMARC[nStart] == SUBFLD
+                    && strMARC[nStart + 1] == '1')
+                    goto FOUND;
+                nStart++;
+            }
+            return 0;
 
-				/*
-				pp = _tcsstr(lpStart,zzd);
-				if (pp==NULL) 
-				{
-					return 0; // not found
-				}
-				*/
+        FOUND:
 
-				if (i>=nIndex) 
-				{
-					nStart = nPos;
-					break;
-				}
-				nStart = nPos + 1;
-				// lpStart = pp + 1;
-			}
+            for (int i = nStart; i < strMARC.Length; )
+            {
+                if (strMARC[i] == FLDEND)
+                    break;
 
-			//lpStart = pp;
-			//lpStartSave = pp;
-			//lpStart ++;
-			int nStartSave = nStart;
-			nStart ++;
+                nChars = DetectNestedFldLens(strMARC, i);
+                if (nChars < 2 + 3 + 1)
+                {
+                    strFldName = "???";
+                    goto SKIP;
+                }
+                Debug.Assert(nChars >= 2 + 3 + 1, "error");
+                strFldName = strMARC.Substring(i + 2, 3);
 
-			nPos = strField.IndexOf(strZzd, nStart);
-			if (nPos == -1) 
-			{
-				// 后方没有子字段了
-				strGroup = strField.Substring(nStartSave);
-				return 1;
-			}
-			else 
-			{
-				strGroup = strField.Substring(nStartSave, nPos - nStartSave);
-				return 1;
-			}
-			/*
-			pp = _tcsstr(lpStart,zzd);
-			if (pp == NULL) 
-			{	// 后方没有子字段了
-				l = _tcslen(lpStartSave);
-				MemCpyToString(lpStartSave, l, strGroup);
-				return strGroup.GetLength();
-			}
-			else 
-			{
-				l = pp - lpStartSave;	// 注意，是字符数
-				MemCpyToString(lpStartSave, l, strGroup);
-				return strGroup.GetLength();
-			}
-			*/
+                if (strFieldName == null
+                    || (strFieldName != null
+                    && strFldName == strFieldName))
+                {
+                    if (nIndex == nFoundCount)
+                    {
+                        strField = strMARC.Substring(i + 2, nChars - 2);
 
-			//	ASSERT(0);
-			//   return 0;
-		}
+                        if (i + nChars < strMARC.Length
+                            && strMARC[i + nChars] != RECEND
+                            && DetectFldLens(strMARC, i + nChars) >= 2 + 3)
+                            strNextFieldName = strMARC.Substring(i + nChars + 2, 3);
+                        else
+                            strNextFieldName = "";
 
-		// 从字段或子字段组中得到一个子字段
-		// parameters:
-		//		strText		字段内容，或者子字段组内容。
-		//		textType	表示strText中包含的是字段内容还是组内容。若为ItemType.Field，表示strText参数中为字段；若为ItemType.Group，表示strText参数中为子字段组。
-		//		strSubfieldName	子字段名，内容为1位字符。如果==null，表示任意子字段
-		//					形式为'a'这样的。
-		//		nIndex			想要获得同名子字段中的第几个。从0开始计算。
-		//		strSubfield		[out]输出子字段。子字段名(1字符)、子字段内容。
-		//		strNextSubfieldName	[out]下一个子字段的名字，内容一个字符
-		// return:
-		//		-1	出错
-		//		0	所指定的子字段没有找到
-		//		1	找到。找到的子字段返回在strSubfield参数中
-		public static int GetSubfield(string strText,
-			ItemType textType,
-			string strSubfieldName,
-			int nIndex,
-			out string strSubfield,
-			out string strNextSubfieldName)
-		{
+                        return 1;	// found
+                    }
+                    nFoundCount++;
+                }
 
-			Debug.Assert(textType == ItemType.Field 
-				|| textType == ItemType.Group,
-				"textType只能为 ItemType.Field/ItemType.Group之一");
-			// LPCTSTR p;
-			// int nTextLen;
-			int nFoundCount = 0;
-			int i;
+            SKIP:
+                i += nChars;
+            }
+            return 0;	// not found
+        }
 
-			strSubfield = "";
-			strNextSubfieldName = "";
+        // 嵌套字段：根据字段开始位置探测整个字段长度
+        // 返回字段的长度(字符数，不是byte数)
+        static int DetectNestedFldLens(string strMARC, int nStart)
+        {
+            Debug.Assert(strMARC != null, "strMARC参数不能为null");
 
-			Debug.Assert(strText != null, "strText参数不能为null");
-			//nFieldLen = strText.Length;
+            if (nStart >= strMARC.Length)
+            {
+                Debug.Assert(false, "nStart参数值超出strMARC内容长度范围");
+                return 0;
+            }
 
-			if (textType == ItemType.Field)
-			{
-				if (strText.Length < 3)
-					return -1;	// 字段内容长度不足3字符
+            if (strMARC[nStart] != SUBFLD || strMARC[nStart + 1] != '1')
+            {
+                Debug.Assert(false, "必须用$1开头的位置调用本函数");
+            }
 
-				if (strText.Length == 3) 
-					return 0;	// 不存在任何子字段内容
-			}
-			if (textType == ItemType.Group)
-			{
-				if (strText.Length < 2)
-					return -1;	// 字段内容长度不足3字符
+            int i = nStart + 1;
+            for (; i < strMARC.Length; i++)
+            {
+                if (strMARC[i] == SUBFLD
+                    && strMARC[i + 1] == '1')
+                    break;
+            }
 
-				if (strText.Length == 1) 
-					return 0;	// 不存在任何子字段内容
-			}
+            return i - nStart;
+        }
 
 
-			if (strSubfieldName != null) 
-			{
-				if (strSubfieldName.Length != 1) 
-				{
-					Debug.Assert(false, "strSubfieldName参数的值若不是null，则必须为1字符");
-					return -1;
-				}
-			}
+        // 从字段中得到子字段组
+        // parameters:
+        //		strField	字段。其中包括字段名、必要的指示符，字段内容。也就是调用GetField()函数所得到的字段。
+        //		nIndex	子字段组序号。从0开始计数。
+        //		strGroup	[out]得到的子字段组。其中包括若干子字段内容。
+        // return:
+        //		-1	出错
+        //		0	所指定的子字段组没有找到
+        //		1	找到。找到的子字段组返回在strGroup参数中
+        public static int GetGroup(string strField,
+            int nIndex,
+            out string strGroup)
+        {
+            Debug.Assert(strField != null, "strField参数不能为null");
 
-			// p = pszField + 3;
-			// 找到第一个子字段符号
-			for(i=0;i<strText.Length;i++) 
-			{
-				if (strText[i] == SUBFLD)
-					goto FOUND;
-			}
-			return 0;
+            Debug.Assert(nIndex >= 0, "nIndex参数必须>=0");
 
-			FOUND:
-				// 匹配
-				for(;i<strText.Length;i++) 
-				{
-					if (strText[i] == SUBFLD) 
-					{
-						if (i + 1 >= strText.Length)
-							return 0;	// not found
+            strGroup = "";
 
-						if ( strSubfieldName == null
-							|| 
-							(strSubfieldName != null
-							&& strText[i + 1] == strSubfieldName[0]) 
-							)
-						{
-							if ( nFoundCount == nIndex) 
-							{
-								int nChars = DetectSubFldLens(strText, i);
-								strSubfield = strText.Substring(i+1, nChars-1);
+            int nLen = strField.Length;
+            if (nLen <= 5)
+            {
+                return 0;
+            }
 
-								// 取下一个子字段名
-								if (i + nChars < strText.Length
-									&& strText[i + nChars] == SUBFLD
-									&& DetectFldLens(strText, i+nChars) >= 2)
-								{
-									strNextSubfieldName = strText.Substring(i+nChars+1, 1);
-								}
-								else
-									strNextSubfieldName = "";
+            // LPCTSTR lpStart,lpStartSave;
+            // LPTSTR pp;
+            //int l;
+            string strZzd = "a";
 
-								return 1;
-							}
+            // char zzd[3];
 
-							nFoundCount ++;
-						}
+            /*
+            zzd[0]=SUBFLD;
+            zzd[1]='a';
+            zzd[2]=0;
+            */
+            strZzd = strZzd.Insert(0, new String(SUBFLD, 1));
 
-					}
+            // lpStart = pszField;
 
-				}
+            // 找到起点
+            int nStart = 5;
+            int nPos;
+            for (int i = 0; ; i++)
+            {
+                nPos = strField.IndexOf(strZzd, nStart);
+                if (nPos == -1)
+                    return 0;
 
-			return 0;
-		}
+                /*
+                pp = _tcsstr(lpStart,zzd);
+                if (pp==NULL) 
+                {
+                    return 0; // not found
+                }
+                */
+
+                if (i >= nIndex)
+                {
+                    nStart = nPos;
+                    break;
+                }
+                nStart = nPos + 1;
+                // lpStart = pp + 1;
+            }
+
+            //lpStart = pp;
+            //lpStartSave = pp;
+            //lpStart ++;
+            int nStartSave = nStart;
+            nStart++;
+
+            nPos = strField.IndexOf(strZzd, nStart);
+            if (nPos == -1)
+            {
+                // 后方没有子字段了
+                strGroup = strField.Substring(nStartSave);
+                return 1;
+            }
+            else
+            {
+                strGroup = strField.Substring(nStartSave, nPos - nStartSave);
+                return 1;
+            }
+            /*
+            pp = _tcsstr(lpStart,zzd);
+            if (pp == NULL) 
+            {	// 后方没有子字段了
+                l = _tcslen(lpStartSave);
+                MemCpyToString(lpStartSave, l, strGroup);
+                return strGroup.GetLength();
+            }
+            else 
+            {
+                l = pp - lpStartSave;	// 注意，是字符数
+                MemCpyToString(lpStartSave, l, strGroup);
+                return strGroup.GetLength();
+            }
+            */
+
+            //	ASSERT(0);
+            //   return 0;
+        }
+
+        // 从字段或子字段组中得到一个子字段
+        // parameters:
+        //		strText		字段内容，或者子字段组内容。
+        //		textType	表示strText中包含的是字段内容还是组内容。若为ItemType.Field，表示strText参数中为字段；若为ItemType.Group，表示strText参数中为子字段组。
+        //		strSubfieldName	子字段名，内容为1位字符。如果==null，表示任意子字段
+        //					形式为'a'这样的。
+        //		nIndex			想要获得同名子字段中的第几个。从0开始计算。
+        //		strSubfield		[out]输出子字段。子字段名(1字符)、子字段内容。
+        //		strNextSubfieldName	[out]下一个子字段的名字，内容一个字符
+        // return:
+        //		-1	出错
+        //		0	所指定的子字段没有找到
+        //		1	找到。找到的子字段返回在strSubfield参数中
+        public static int GetSubfield(string strText,
+            ItemType textType,
+            string strSubfieldName,
+            int nIndex,
+            out string strSubfield,
+            out string strNextSubfieldName)
+        {
+
+            Debug.Assert(textType == ItemType.Field
+                || textType == ItemType.Group,
+                "textType只能为 ItemType.Field/ItemType.Group之一");
+            // LPCTSTR p;
+            // int nTextLen;
+            int nFoundCount = 0;
+            int i;
+
+            strSubfield = "";
+            strNextSubfieldName = "";
+
+            Debug.Assert(strText != null, "strText参数不能为null");
+            //nFieldLen = strText.Length;
+
+            if (textType == ItemType.Field)
+            {
+                if (strText.Length < 3)
+                    return -1;	// 字段内容长度不足3字符
+
+                if (strText.Length == 3)
+                    return 0;	// 不存在任何子字段内容
+            }
+            if (textType == ItemType.Group)
+            {
+                if (strText.Length < 2)
+                    return -1;	// 字段内容长度不足3字符
+
+                if (strText.Length == 1)
+                    return 0;	// 不存在任何子字段内容
+            }
+
+
+            if (strSubfieldName != null)
+            {
+                if (strSubfieldName.Length != 1)
+                {
+                    Debug.Assert(false, "strSubfieldName参数的值若不是null，则必须为1字符");
+                    return -1;
+                }
+            }
+
+            // p = pszField + 3;
+            // 找到第一个子字段符号
+            for (i = 0; i < strText.Length; i++)
+            {
+                if (strText[i] == SUBFLD)
+                    goto FOUND;
+            }
+            return 0;
+
+        FOUND:
+            // 匹配
+            for (; i < strText.Length; i++)
+            {
+                if (strText[i] == SUBFLD)
+                {
+                    if (i + 1 >= strText.Length)
+                        return 0;	// not found
+
+                    if (strSubfieldName == null
+                        ||
+                        (strSubfieldName != null
+                        && strText[i + 1] == strSubfieldName[0])
+                        )
+                    {
+                        if (nFoundCount == nIndex)
+                        {
+                            int nChars = DetectSubFldLens(strText, i);
+                            strSubfield = strText.Substring(i + 1, nChars - 1);
+
+                            // 取下一个子字段名
+                            if (i + nChars < strText.Length
+                                && strText[i + nChars] == SUBFLD
+                                && DetectFldLens(strText, i + nChars) >= 2)
+                            {
+                                strNextSubfieldName = strText.Substring(i + nChars + 1, 1);
+                            }
+                            else
+                                strNextSubfieldName = "";
+
+                            return 1;
+                        }
+
+                        nFoundCount++;
+                    }
+
+                }
+
+            }
+
+            return 0;
+        }
 
         // 根据偏移位置获得所在的子字段名
         public static char SubfieldNameByOffs(string strText,
@@ -3051,143 +3080,142 @@ namespace DigitalPlatform.Marc
         }
 
 
-		// 替换记录中的字段内容。
-		// 先在记录中找同名字段(第nIndex个)，如果找到，则替换；如果没有找到，
-		// 则在顺序位置插入一个新字段。
-		// parameters:
-		//		strMARC		[in][out]MARC记录。
-		//		strFieldName	要替换的字段的名。如果为null或者""，则表示所有字段中序号为nIndex中的那个被替换
-		//		nIndex		要替换的字段的所在序号。如果为-1，将始终为在记录中追加新字段内容。
-		//		strField	要替换成的新字段内容。包括字段名、必要的字段指示符、字段内容。这意味着，不但可以替换一个字段的内容，也可以替换它的字段名和指示符部分。
-		// return:
-		//		-1	出错
-		//		0	没有找到指定的字段，因此将strField内容插入到适当位置了。
-		//		1	找到了指定的字段，并且也成功用strField替换掉了。
-		public static int ReplaceField(
-			ref string strMARC,
-			string strFieldName,
-			int nIndex,
-			string strField)
-		{
-			int nInsertOffs = 24;
-			int nStartOffs = 24;
-			int nLen = 0;
-			int nChars = 0;
-			string strFldName;
-			int nFoundCount = 0;
-			bool bFound = false;
+        // 替换记录中的字段内容。
+        // 先在记录中找同名字段(第nIndex个)，如果找到，则替换；如果没有找到，
+        // 则在顺序位置插入一个新字段。
+        // parameters:
+        //		strMARC		[in][out]MARC记录。
+        //		strFieldName	要替换的字段的名。如果为null或者""，则表示所有字段中序号为nIndex中的那个被替换
+        //		nIndex		要替换的字段的所在序号。如果为-1，将始终为在记录中追加新字段内容。
+        //		strField	要替换成的新字段内容。包括字段名、必要的字段指示符、字段内容。这意味着，不但可以替换一个字段的内容，也可以替换它的字段名和指示符部分。
+        // return:
+        //		-1	出错
+        //		0	没有找到指定的字段，因此将strField内容插入到适当位置了。
+        //		1	找到了指定的字段，并且也成功用strField替换掉了。
+        public static int ReplaceField(
+            ref string strMARC,
+            string strFieldName,
+            int nIndex,
+            string strField)
+        {
+            int nInsertOffs = 24;
+            int nStartOffs = 24;
+            int nLen = 0;
+            int nChars = 0;
+            string strFldName;
+            int nFoundCount = 0;
+            bool bFound = false;
 
-			if (strMARC.Length < 24)
-				return -1;
+            if (strMARC.Length < 24)
+                return -1;
 
-			// Debug.Assert(strFieldName != null, "");
+            // Debug.Assert(strFieldName != null, "");
 
-			/*
-			if (strFieldName.Length != 3) 
-			{
-				Debug.Assert(false, "strFieldName参数内容必须为3字符");
-				return -1;
-			}
-			*/
-			if (strFieldName != null) 
-			{
-				if (strFieldName.Length != 3) 
-				{
-					Debug.Assert(false, "字段名长度必须为3");	// 字段名必须为3字符
-					return -1;
-				}
-			}
-			else 
-			{
-				// 表示不关心字段名，依靠nIndex来定位字段
-			}
+            /*
+            if (strFieldName.Length != 3) 
+            {
+                Debug.Assert(false, "strFieldName参数内容必须为3字符");
+                return -1;
+            }
+            */
+            if (strFieldName != null)
+            {
+                if (strFieldName.Length != 3)
+                {
+                    Debug.Assert(false, "字段名长度必须为3");	// 字段名必须为3字符
+                    return -1;
+                }
+            }
+            else
+            {
+                // 表示不关心字段名，依靠nIndex来定位字段
+            }
 
-			bool bIsHeader = false;
+            bool bIsHeader = false;
 
-			if (strFieldName == null || strFieldName == "") 
-			{
-				if (nIndex == 0)
-					bIsHeader = true;
-			}
-			else 
-			{
-				if (strFieldName == "hdr")
-					bIsHeader = true;
-			}
+            if (strFieldName == null || strFieldName == "")
+            {
+                if (nIndex == 0)
+                    bIsHeader = true;
+            }
+            else
+            {
+                if (strFieldName == "hdr")
+                    bIsHeader = true;
+            }
 
-			// 检查strField参数正确性
-			if (bIsHeader == true) 
-			{
-				if (strField == null
-					|| strField == "")
-				{
-					Debug.Assert(false,"头标区内容只能替换，不能删除");
-					return -1;
-				}
+            // 检查strField参数正确性
+            if (bIsHeader == true)
+            {
+                if (strField == null
+                    || strField == "")
+                {
+                    Debug.Assert(false, "头标区内容只能替换，不能删除");
+                    return -1;
+                }
 
-				if (strField.Length != 24) 
-				{
-					Debug.Assert(false,"strField中用来替换头标区的内容，必须为24字符");
-					return -1;
-				}
-			}
-
-
-			// 看看给出的字段内容最后是否有字段结束符，如果没有，则追加一个。
-			// 头标区内容不作此处理
-			if (strField != null && strField.Length > 0
-				&& bIsHeader == false) 
-			{
-				if (strField[strField.Length - 1] != FLDEND)
-					strField += FLDEND;
-			}
-
-			bool bInsertOffsOK = false;
-
-			// 循环，找特定的字段
-			//p = (LPTSTR)(LPCTSTR)strMARC;
-			for(int i=0; i<strMARC.Length;) 
-			{
-				if (strMARC[i] == RECEND)
-					break;
+                if (strField.Length != 24)
+                {
+                    Debug.Assert(false, "strField中用来替换头标区的内容，必须为24字符");
+                    return -1;
+                }
+            }
 
 
-				if (i== 0) 
-				{
-					if ( (nIndex == 0 && strFieldName == null)	// 头标区
-						|| 
-						(strFieldName != null 
-						&& String.Compare("hdr",strFieldName, true) == 0) // 有字段名要求，并且要求头标区
-						)
-					{
-						if (String.IsNullOrEmpty(strField) == true)
-						{
-							Debug.Assert(false,"头标区内容只能替换，不能删除");
-							return -1;
-						}
+            // 看看给出的字段内容最后是否有字段结束符，如果没有，则追加一个。
+            // 头标区内容不作此处理
+            if (strField != null && strField.Length > 0
+                && bIsHeader == false)
+            {
+                if (strField[strField.Length - 1] != FLDEND)
+                    strField += FLDEND;
+            }
 
-						if (strField.Length != 24) 
-						{
-							Debug.Assert(false,"strField中用来替换头标区的内容，必须为24字符");
-							return -1;
-						}
+            bool bInsertOffsOK = false;
 
-						strMARC = strMARC.Remove(0, 24);	// 删除原来内容
-
-						strMARC = strMARC.Insert(0, strField);	// 插入新的内容
-
-						return 1;	// found
-					}
-
-					nChars = 24;
-					strFldName = "hdr";
+            // 循环，找特定的字段
+            //p = (LPTSTR)(LPCTSTR)strMARC;
+            for (int i = 0; i < strMARC.Length; )
+            {
+                if (strMARC[i] == RECEND)
+                    break;
 
 
-					if (strFieldName == null
-						|| (strFieldName != null 
-						&& "hdr" == strFieldName)
-						)
-					{
+                if (i == 0)
+                {
+                    if ((nIndex == 0 && strFieldName == null)	// 头标区
+                        ||
+                        (strFieldName != null
+                        && String.Compare("hdr", strFieldName, true) == 0) // 有字段名要求，并且要求头标区
+                        )
+                    {
+                        if (String.IsNullOrEmpty(strField) == true)
+                        {
+                            Debug.Assert(false, "头标区内容只能替换，不能删除");
+                            return -1;
+                        }
+
+                        if (strField.Length != 24)
+                        {
+                            Debug.Assert(false, "strField中用来替换头标区的内容，必须为24字符");
+                            return -1;
+                        }
+
+                        strMARC = strMARC.Remove(0, 24);	// 删除原来内容
+
+                        strMARC = strMARC.Insert(0, strField);	// 插入新的内容
+
+                        return 1;	// found
+                    }
+
+                    nChars = 24;
+                    strFldName = "hdr";
+
+                    if (strFieldName == null
+                        || (strFieldName != null
+                        && "hdr" == strFieldName)
+                        )
+                    {
                         // 2012/7/28
                         if (nIndex != nFoundCount)
                         {
@@ -3195,62 +3223,61 @@ namespace DigitalPlatform.Marc
                             goto CONTINUE;
                         }
 
-						nFoundCount ++;
-					}
+                        nFoundCount++;
+                    }
+                }
+                else
+                {
+                    nChars = DetectFldLens(strMARC, i);
+                    if (nChars < 3 + 1)
+                    {
+                        strFldName = "???";
+                        goto SKIP;
+                    }
+                    Debug.Assert(nChars >= 3 + 1, "探测到字段长度不能小于3+1");
+                    strFldName = strMARC.Substring(i, 3);
+                    // MemCpyToString(p, 3, strFldName);
+                }
 
-				}
-				else 
-				{
-					nChars = DetectFldLens(strMARC, i);
-					if (nChars < 3+1) 
-					{
-						strFldName = "???";
-						goto SKIP;
-					}
-					Debug.Assert(nChars>=3+1, "探测到字段长度不能小于3+1");
-					strFldName = strMARC.Substring(i, 3);
-					// MemCpyToString(p, 3, strFldName);
-				}
+            SKIP:
 
-			SKIP:
+                if (strFieldName == null
+                    || (strFieldName != null
+                    && strFldName == strFieldName)
+                    )
+                {
+                    if (nIndex == nFoundCount)
+                    {
+                        nStartOffs = i;
+                        nLen = nChars;
+                        bFound = true;
+                        goto FOUND;
+                    }
+                    nFoundCount++;
+                }
 
-				if (strFieldName == null
-					|| (strFieldName != null 
-					&& strFldName == strFieldName)
-					)
-				{
-					if (nIndex == nFoundCount) 
-					{
-						nStartOffs = i;
-						nLen = nChars;
-						bFound = true;
-						goto FOUND;
-					}
-					nFoundCount ++;
-				}
+                // 想办法留存将来要用的插入位置
+                if (strFieldName != null && strFieldName != ""
+                    && strFldName != "hdr"
+                    && bInsertOffsOK == false)
+                {
+                    if (String.Compare(strFldName, strFieldName, false) > 0)
+                    {
+                        nInsertOffs = Math.Max(i, 24);
+                        bInsertOffsOK = true;	// 以后不再设置
+                    }
+                    else
+                    {
+                        nInsertOffs = Math.Max(i + nChars, 24);
+                    }
+                }
 
-				// 想办法留存将来要用的插入位置
-				if (strFieldName != null && strFieldName != ""
-					&& strFldName != "hdr"
-					&& bInsertOffsOK == false) 
-				{
-					if (String.Compare(strFldName,strFieldName, false) > 0) 
-					{
-						nInsertOffs = Math.Max(i, 24);
-						bInsertOffsOK = true;	// 以后不再设置
-					}
-					else 
-					{
-						nInsertOffs = Math.Max(i+nChars, 24);
-					}
-				}
+            CONTINUE:
+                i += nChars;
+            }
 
-                CONTINUE:
-				i += nChars;
-			}
-
-			nStartOffs = nInsertOffs;
-			nLen = 0;
+            nStartOffs = nInsertOffs;
+            nLen = 0;
 
             if (String.IsNullOrEmpty(strField) == true)	// 实际为删除要求
                 return 0;
@@ -3268,94 +3295,91 @@ namespace DigitalPlatform.Marc
             return 0;
         }
 
-
         // BUG: 如果初始的strField为“100”，当加入子字段a后，strField中忘记加入字段指示符
-		// 替换字段中的子字段。
-		// parameters:
-		//		strField	[in,out]待替换的字段
-		//		strSubfieldName	要替换的子字段的名，内容为1字符。如果==null，表示任意子字段
-		//					形式为'a'这样的。
-		//		nIndex		要替换的子字段所在序号。如果为-1，将始终为在字段中追加新子字段内容。
-		//		strSubfield	要替换成的新子字段。注意，其中第一字符为子字段名，后面为子字段内容
-		// return:
-		//		-1	出错
-		//		0	指定的子字段没有找到，因此将strSubfieldzhogn的内容插入到适当地方了。
-		//		1	找到了指定的字段，并且也成功用strSubfield内容替换掉了。
-		public static int ReplaceSubfield(
-			ref string strField,
-			string strSubfieldName,
-			int nIndex,
-			string strSubfield)
-		{
-			if (strField.Length <= 1)
-				return -1;
+        // 替换字段中的子字段。
+        // parameters:
+        //		strField	[in,out]待替换的字段
+        //		strSubfieldName	要替换的子字段的名，内容为1字符。如果==null，表示任意子字段
+        //					形式为'a'这样的。
+        //		nIndex		要替换的子字段所在序号。如果为-1，将始终为在字段中追加新子字段内容。
+        //		strSubfield	要替换成的新子字段。注意，其中第一字符为子字段名，后面为子字段内容
+        // return:
+        //		-1	出错
+        //		0	指定的子字段没有找到，因此将strSubfieldzhogn的内容插入到适当地方了。
+        //		1	找到了指定的字段，并且也成功用strSubfield内容替换掉了。
+        public static int ReplaceSubfield(
+            ref string strField,
+            string strSubfieldName,
+            int nIndex,
+            string strSubfield)
+        {
+            if (strField.Length <= 1)
+                return -1;
 
-			if (strSubfieldName != null) 
-			{
-				if (strSubfieldName.Length != 1) 
-				{
-					Debug.Assert(false, "strSubfieldName参数的值若不是null，则必须为1字符");
-					return -1;
-				}
-			}
+            if (strSubfieldName != null)
+            {
+                if (strSubfieldName.Length != 1)
+                {
+                    Debug.Assert(false, "strSubfieldName参数的值若不是null，则必须为1字符");
+                    return -1;
+                }
+            }
 
-			if (nIndex < 0)
-				goto APPEND;	// 追加新子字段
+            if (nIndex < 0)
+                goto APPEND;	// 追加新子字段
 
-			int i = 0;
-			int nFoundCount = 0;
+            int i = 0;
+            int nFoundCount = 0;
 
-			// 找到第一个子字段符号
-			for(i=0;i<strField.Length;i++) 
-			{
-				if (strField[i] == SUBFLD)
-					goto FOUNDHEAD;
-			}
-			goto APPEND;
-			FOUNDHEAD:
-				// 匹配
-				for(;i<strField.Length;i++) 
-				{
-					if (strField[i] == SUBFLD) 
-					{
-						if (i + 1 >= strField.Length)
-							goto APPEND;	// not found
+            // 找到第一个子字段符号
+            for (i = 0; i < strField.Length; i++)
+            {
+                if (strField[i] == SUBFLD)
+                    goto FOUNDHEAD;
+            }
+            goto APPEND;
+        FOUNDHEAD:
+            // 匹配
+            for (; i < strField.Length; i++)
+            {
+                if (strField[i] == SUBFLD)
+                {
+                    if (i + 1 >= strField.Length)
+                        goto APPEND;	// not found
 
-						if ( strSubfieldName == null
-							|| 
-							(strSubfieldName != null
-							&& strField[i + 1] == strSubfieldName[0]) 
-							)
-						{
-							if ( nFoundCount == nIndex) 
-							{
-								int nChars = DetectSubFldLens(strField, i);
+                    if (strSubfieldName == null
+                        ||
+                        (strSubfieldName != null
+                        && strField[i + 1] == strSubfieldName[0])
+                        )
+                    {
+                        if (nFoundCount == nIndex)
+                        {
+                            int nChars = DetectSubFldLens(strField, i);
 
-								// 去除原来的内容
-								strField = strField.Remove(i, nChars);
-								if (strSubfield != null
-									&& strSubfield != "") 
-								{
-									// 插入新内容
-									strField = strField.Insert(i, new string(SUBFLD,1) + strSubfield);
-								}
-								return 1;
-							}
+                            // 去除原来的内容
+                            strField = strField.Remove(i, nChars);
+                            if (strSubfield != null
+                                && strSubfield != "")
+                            {
+                                // 插入新内容
+                                strField = strField.Insert(i, new string(SUBFLD, 1) + strSubfield);
+                            }
+                            return 1;
+                        }
 
-							nFoundCount ++;
-						}
+                        nFoundCount++;
+                    }
 
-					}
+                }
 
-				} // end
+            } // end
 
+            APPEND:
+            strField += new string(SUBFLD, 1) + strSubfield;
 
-
-			APPEND:
-				strField +=  new string(SUBFLD,1) + strSubfield;
-
-			return 0;	// inserted
-		}
+            return 0;	// inserted
+        }
 
         // 2011/1/10
         // 删除一个子字段
@@ -3472,7 +3496,7 @@ namespace DigitalPlatform.Marc
                         nStart = i;
                         break;
                     }
-                    nCount ++;
+                    nCount++;
                 }
             }
 
@@ -3696,7 +3720,6 @@ namespace DigitalPlatform.Marc
                     string strSubfieldName = strSubfield.Substring(0, 1);
                     string strContent = strSubfield.Substring(1);
 
-
                     string strCmd = StringUtil.GetLeadingCommand(strContent);
                     if (string.IsNullOrEmpty(strCmd) == false
                         && StringUtil.HasHead(strCmd, "cr:") == true)
@@ -3793,7 +3816,7 @@ namespace DigitalPlatform.Marc
                     if (strField.Length >= 5)
                     {
                         strIndicator = strField.Substring(3, 2);
-                        strContent = strField.Substring(3+2);
+                        strContent = strField.Substring(3 + 2);
                     }
                     else
                         strIndicator = strField.Substring(3, 1);
@@ -3940,288 +3963,288 @@ namespace DigitalPlatform.Marc
             return 1;
         }
 
-		#endregion
+        #endregion
 
 
-		#region 处理MARC记录转换为ISO209任务的静态函数
+        #region 处理MARC记录转换为ISO209任务的静态函数
 
-		// 根据MARC格式类型和输出的编码方式要求，修改MARC记录的头标区或100字段。
-		// parameters:
+        // 根据MARC格式类型和输出的编码方式要求，修改MARC记录的头标区或100字段。
+        // parameters:
         //		strMarcSyntax   "unimarc" "usmarc"
-		public static int ModifyOutputMARC(
-			string strMARC,
-			string strMarcSyntax,
-			Encoding encoding,
-			out string strResult)
-		{
+        public static int ModifyOutputMARC(
+            string strMARC,
+            string strMarcSyntax,
+            Encoding encoding,
+            out string strResult)
+        {
 
-			strResult = strMARC;
+            strResult = strMARC;
 
-			if (String.Compare(strMarcSyntax, "unimarc", true) == 0) // UNIMARC
-			{ 
-				/*
-				In UNIMARC the information about enconding sets are stored in field 100, 
-		position 26-29 & 30-33. The
-		code for Unicode is "50" in positions 26-27 and the position 28-33 will 
-		contain blanks.
-				*/
-				// 将100字段中28开始的位置按照UTF-8编码特性强行置值。
-				string strField;
-				bool bChanged = false;
-				int nRet;
-				string strPart;
-				string strNextFieldName;
+            if (String.Compare(strMarcSyntax, "unimarc", true) == 0) // UNIMARC
+            {
+                /*
+                In UNIMARC the information about enconding sets are stored in field 100, 
+        position 26-29 & 30-33. The
+        code for Unicode is "50" in positions 26-27 and the position 28-33 will 
+        contain blanks.
+                */
+                // 将100字段中28开始的位置按照UTF-8编码特性强行置值。
+                string strField;
+                bool bChanged = false;
+                int nRet;
+                string strPart;
+                string strNextFieldName;
 
-				// 得到原来的100字段内容。
-				nRet = GetField(strMARC,
-					"100",
-					0,
-					out strField,
-					out strNextFieldName);
-				if (nRet != 1) 
-				{	// 100字段不存在
-					strField = "100  ";
-				}
-				// 确保字段长度(包括字段名和字段指示符)为3+2+2+36字符。
-				int nOldLength = strField.Length;
-				strField = strField.PadRight(3+2+2+36, ' ');
-				//nRet = EnsureFieldSize(strField,
-				//	3+2+2+36);
-				if (strField.Length != nOldLength)
-					bChanged = true;
+                // 得到原来的100字段内容。
+                nRet = GetField(strMARC,
+                    "100",
+                    0,
+                    out strField,
+                    out strNextFieldName);
+                if (nRet != 1)
+                {	// 100字段不存在
+                    strField = "100  ";
+                }
+                // 确保字段长度(包括字段名和字段指示符)为3+2+2+36字符。
+                int nOldLength = strField.Length;
+                strField = strField.PadRight(3 + 2 + 2 + 36, ' ');
+                //nRet = EnsureFieldSize(strField,
+                //	3+2+2+36);
+                if (strField.Length != nOldLength)
+                    bChanged = true;
 
-				strPart = strField.Substring( 3+2+2+26, 8);
-				// 看看26-29是否已经符合要求
-				if (encoding == Encoding.UTF8) 
-				{
-					//MemCpyToString((LPCTSTR)strField + 3+2+2+26,
-					//	8,
-					//	strPart);
-					if (strPart == "50      ") 
-					{ // 已经符合要求
-					}
-					else 
-					{
-						strField = strField.Remove(3+2+2+26, 8);
-						strField = strField.Insert(3+2+2+26, "50      ");
-						bChanged = true;
-					}
-				}
-				else 
-				{
-					if (strPart == "50      ") 
-					{ // 需要改变
-						strField = strField.Remove(3+2+2+26, 8);
-						strField = strField.Insert(3+2+2+26, "0120    ");
-						bChanged = true;
-					}
-					else 
-					{	// 不需要改变
-					}
-				}
+                strPart = strField.Substring(3 + 2 + 2 + 26, 8);
+                // 看看26-29是否已经符合要求
+                if (encoding == Encoding.UTF8)
+                {
+                    //MemCpyToString((LPCTSTR)strField + 3+2+2+26,
+                    //	8,
+                    //	strPart);
+                    if (strPart == "50      ")
+                    { // 已经符合要求
+                    }
+                    else
+                    {
+                        strField = strField.Remove(3 + 2 + 2 + 26, 8);
+                        strField = strField.Insert(3 + 2 + 2 + 26, "50      ");
+                        bChanged = true;
+                    }
+                }
+                else
+                {
+                    if (strPart == "50      ")
+                    { // 需要改变
+                        strField = strField.Remove(3 + 2 + 2 + 26, 8);
+                        strField = strField.Insert(3 + 2 + 2 + 26, "0120    ");
+                        bChanged = true;
+                    }
+                    else
+                    {	// 不需要改变
+                    }
+                }
 
-				if (bChanged == true) 
-				{
-					ReplaceField(ref strResult,
-						"100",
-						0,
-						strField);
-				}
+                if (bChanged == true)
+                {
+                    ReplaceField(ref strResult,
+                        "100",
+                        0,
+                        strField);
+                }
 
-			}
+            }
 
-			// 修改头标区
-			if (String.Compare(strMarcSyntax, "unimarc", true) == 0) 
-			{ // UNIMARC
-				strResult = StringUtil.SetAt(strResult, 9, ' ');
-			}
-			else if (true/*nMARCType == 1*/) 
-			{ // USMARC。所有非UNIMARC的都仿USMARC处理，因为不必使用100字段
-				if (encoding == Encoding.UTF8)
-					strResult = StringUtil.SetAt(strResult, 9, 'a');	// UTF-8(UCS-2也仿此)
-				else
-					strResult = StringUtil.SetAt(strResult, 9, ' ');	// # DBCS或者MARC-8 // 2007/8/8 change '#' to ' '
-			}
+            // 修改头标区
+            if (String.Compare(strMarcSyntax, "unimarc", true) == 0)
+            { // UNIMARC
+                strResult = StringUtil.SetAt(strResult, 9, ' ');
+            }
+            else if (true/*nMARCType == 1*/)
+            { // USMARC。所有非UNIMARC的都仿USMARC处理，因为不必使用100字段
+                if (encoding == Encoding.UTF8)
+                    strResult = StringUtil.SetAt(strResult, 9, 'a');	// UTF-8(UCS-2也仿此)
+                else
+                    strResult = StringUtil.SetAt(strResult, 9, ' ');	// # DBCS或者MARC-8 // 2007/8/8 change '#' to ' '
+            }
 
-			return 0;
-		}
-
-
-		// 将机内格式记录构造为ISO2709格式记录。
-		// parameters:
-		//		baMARC		[in]机内格式记录。已经通过适当Encoding对象转换为ByteArray了
-		//		baResult	[out]ISO2709格式记录。
-		// return:
-		//		-1	error
-		//		0	succeed
-		public static int BuildISO2709Record(byte [] baMARC,
-			out byte[] baResult)
-		{
-			int nLen;
-			byte[] baMuci = null;	// 目次区
-			byte[] baBody = null;	// 数据区
-			byte[] baFldName = null;
-			string strFldLen;
-			string strFldStart;
-			byte[] baFldContent = null;
-			int nStartPos;
-			int nFldLen;
-			int nFldStart;
-			bool bEnd = false;
-			int nPos;
-			int nRecLen = 0;
-
-			baResult = null;
-
-			if (baMARC == null)
-				return -1;
-			if (baMARC.Length < 24)
-				return -1;
-
-			MarcHeaderStruct header = new MarcHeaderStruct(baMARC);
-
-			/*
-			ISO2709ANSIHEADER header;
-			memcpy(&header,
-				(LPCSTR)advstrMARC,
-				sizeof(header));
-			*/
-
-			nLen = baMARC.Length;
-
-			for(nStartPos=24,nFldStart=0;;) 
-			{
-				nPos = ByteArray.IndexOf(baMARC, (byte)FLDEND, nStartPos);
-				// nPos = FindCharInStringA((LPCSTR)advstrMARC, FLDEND, nStartPos);
-				if (nPos == -1) 
-				{
-					nFldLen = nLen - nStartPos;
-					bEnd = true;
-				}
-				else 
-				{
-					nFldLen = nPos - nStartPos + 1;
-				}
-				if (nFldLen < 3) 
-				{
-					goto SKIP;
-				}
-				// strFldName = advstrMARC.MidA(nStartPos, 3);
-				baFldName = new byte[3];
-				Array.Copy(baMARC,
-					nStartPos,
-					baFldName, 0, 
-					3);
-
-				// advstrFldContent = advstrMARC.MidA(nStartPos + 3, nFldLen - 3);
-				baFldContent = new byte[nFldLen - 3];
-				Array.Copy(baMARC,
-					nStartPos + 3,
-					baFldContent, 0,
-					nFldLen - 3);
-
-				//advstrFldLen.Format("%04d", nFldLen - 3);
-				strFldLen = Convert.ToString(nFldLen - 3);
-				strFldLen = strFldLen.PadLeft(4, '0');
-
-				// advstrFldStart.Format("%05d", nFldStart);
-				strFldStart = Convert.ToString(nFldStart);
-				strFldStart = strFldStart.PadLeft(5, '0');
-
-				nFldStart += nFldLen - 3;
-
-				// advstrMuci += (LPCSTR)advstrFldName;
-				baMuci = ByteArray.Add(baMuci, baFldName);
-				// advstrMuci += (LPCSTR)advstrFldLen;
-				baMuci = ByteArray.Add(baMuci, Encoding.UTF8.GetBytes(strFldLen));
-				// advstrMuci += (LPCSTR)advstrFldStart;
-				baMuci = ByteArray.Add(baMuci, Encoding.UTF8.GetBytes(strFldStart));
-
-				baBody = ByteArray.Add(baBody, baFldContent);
-			SKIP:
-				if (bEnd)
-					break;
-				nStartPos = nPos + 1;
-			}
+            return 0;
+        }
 
 
-			nRecLen = baMuci.Length + 1
-				+ baBody.Length + 1 + 24;
+        // 将机内格式记录构造为ISO2709格式记录。
+        // parameters:
+        //		baMARC		[in]机内格式记录。已经通过适当Encoding对象转换为ByteArray了
+        //		baResult	[out]ISO2709格式记录。
+        // return:
+        //		-1	error
+        //		0	succeed
+        public static int BuildISO2709Record(byte[] baMARC,
+            out byte[] baResult)
+        {
+            int nLen;
+            byte[] baMuci = null;	// 目次区
+            byte[] baBody = null;	// 数据区
+            byte[] baFldName = null;
+            string strFldLen;
+            string strFldStart;
+            byte[] baFldContent = null;
+            int nStartPos;
+            int nFldLen;
+            int nFldStart;
+            bool bEnd = false;
+            int nPos;
+            int nRecLen = 0;
 
-			/*
-			advstrText.Format(
-				"%05d",
-				nRecLen);
+            baResult = null;
 
-			memcpy(header.reclen,
-				(LPCSTR)advstrText,
-				advstrText.GetLengthA());
-			*/
-			header.RecLength = nRecLen;
+            if (baMARC == null)
+                return -1;
+            if (baMARC.Length < 24)
+                return -1;
+
+            MarcHeaderStruct header = new MarcHeaderStruct(baMARC);
+
+            /*
+            ISO2709ANSIHEADER header;
+            memcpy(&header,
+                (LPCSTR)advstrMARC,
+                sizeof(header));
+            */
+
+            nLen = baMARC.Length;
+
+            for (nStartPos = 24, nFldStart = 0; ; )
+            {
+                nPos = ByteArray.IndexOf(baMARC, (byte)FLDEND, nStartPos);
+                // nPos = FindCharInStringA((LPCSTR)advstrMARC, FLDEND, nStartPos);
+                if (nPos == -1)
+                {
+                    nFldLen = nLen - nStartPos;
+                    bEnd = true;
+                }
+                else
+                {
+                    nFldLen = nPos - nStartPos + 1;
+                }
+                if (nFldLen < 3)
+                {
+                    goto SKIP;
+                }
+                // strFldName = advstrMARC.MidA(nStartPos, 3);
+                baFldName = new byte[3];
+                Array.Copy(baMARC,
+                    nStartPos,
+                    baFldName, 0,
+                    3);
+
+                // advstrFldContent = advstrMARC.MidA(nStartPos + 3, nFldLen - 3);
+                baFldContent = new byte[nFldLen - 3];
+                Array.Copy(baMARC,
+                    nStartPos + 3,
+                    baFldContent, 0,
+                    nFldLen - 3);
+
+                //advstrFldLen.Format("%04d", nFldLen - 3);
+                strFldLen = Convert.ToString(nFldLen - 3);
+                strFldLen = strFldLen.PadLeft(4, '0');
+
+                // advstrFldStart.Format("%05d", nFldStart);
+                strFldStart = Convert.ToString(nFldStart);
+                strFldStart = strFldStart.PadLeft(5, '0');
+
+                nFldStart += nFldLen - 3;
+
+                // advstrMuci += (LPCSTR)advstrFldName;
+                baMuci = ByteArray.Add(baMuci, baFldName);
+                // advstrMuci += (LPCSTR)advstrFldLen;
+                baMuci = ByteArray.Add(baMuci, Encoding.UTF8.GetBytes(strFldLen));
+                // advstrMuci += (LPCSTR)advstrFldStart;
+                baMuci = ByteArray.Add(baMuci, Encoding.UTF8.GetBytes(strFldStart));
+
+                baBody = ByteArray.Add(baBody, baFldContent);
+            SKIP:
+                if (bEnd)
+                    break;
+                nStartPos = nPos + 1;
+            }
 
 
-			/*
-			advstrText.Format(
-				"%05d",
-				sizeof(header) + advstrMuci.GetLengthA() + 1);
-			memcpy(header.baseaddr,
-				(LPCSTR)advstrText,
-				advstrText.GetLengthA());
-			*/
-			header.BaseAddress = 24 + baMuci.Length + 1;
+            nRecLen = baMuci.Length + 1
+                + baBody.Length + 1 + 24;
 
-			// ForceUNIMARCHeader(&header);
+            /*
+            advstrText.Format(
+                "%05d",
+                nRecLen);
 
-			/*
-			In USMARC format, leader postion 09, one character indicate the character coding scheme:
-
-			09 - Character coding scheme
-			Identifies the character coding scheme used in the record. 
-			# - MARC-8
-			a - UCS/Unicode
-			(http://lcweb.loc.gov/marc/bibliographic/ecbdldrd.html)
-			*/
+            memcpy(header.reclen,
+                (LPCSTR)advstrText,
+                advstrText.GetLengthA());
+            */
+            header.RecLength = nRecLen;
 
 
+            /*
+            advstrText.Format(
+                "%05d",
+                sizeof(header) + advstrMuci.GetLengthA() + 1);
+            memcpy(header.baseaddr,
+                (LPCSTR)advstrText,
+                advstrText.GetLengthA());
+            */
+            header.BaseAddress = 24 + baMuci.Length + 1;
 
-			//baTarget.SetSize(nRecLen);
+            // ForceUNIMARCHeader(&header);
 
-			/*
-			memcpy(baTarget.GetData(), 
-				(char *)&header,
-				sizeof(header));
-			*/
-			baResult = ByteArray.Add(baResult, header.GetBytes());
+            /*
+            In USMARC format, leader postion 09, one character indicate the character coding scheme:
+
+            09 - Character coding scheme
+            Identifies the character coding scheme used in the record. 
+            # - MARC-8
+            a - UCS/Unicode
+            (http://lcweb.loc.gov/marc/bibliographic/ecbdldrd.html)
+            */
 
 
-			/*
-			memcpy((char *)baTarget.GetData() + sizeof(header), 
-				(LPCSTR)advstrMuci,
-				advstrMuci.GetLengthA());
-			*/
-			baResult = ByteArray.Add(baResult, baMuci);
 
-			/*
-			*((char *)baTarget.GetData() + sizeof(header) + advstrMuci.GetLengthA())
-				= FLDEND;
-			*/
-			baResult = ByteArray.Add(baResult, (byte)FLDEND);
+            //baTarget.SetSize(nRecLen);
 
-			/*
-			memcpy((char *)baTarget.GetData() + sizeof(header)+ advstrMuci.GetLengthA() + 1, 
-				(LPCSTR)advstrBody,
-				advstrBody.GetLengthA());
-			*/
-			baResult = ByteArray.Add(baResult, baBody);
+            /*
+            memcpy(baTarget.GetData(), 
+                (char *)&header,
+                sizeof(header));
+            */
+            baResult = ByteArray.Add(baResult, header.GetBytes());
 
-			/*
-			*((char *)baTarget.GetData() + nRecLen - 1)
-				= RECEND;
-			*/
-			baResult = ByteArray.Add(baResult, (byte)RECEND);
 
-			return 0;
-		}
+            /*
+            memcpy((char *)baTarget.GetData() + sizeof(header), 
+                (LPCSTR)advstrMuci,
+                advstrMuci.GetLengthA());
+            */
+            baResult = ByteArray.Add(baResult, baMuci);
+
+            /*
+            *((char *)baTarget.GetData() + sizeof(header) + advstrMuci.GetLengthA())
+                = FLDEND;
+            */
+            baResult = ByteArray.Add(baResult, (byte)FLDEND);
+
+            /*
+            memcpy((char *)baTarget.GetData() + sizeof(header)+ advstrMuci.GetLengthA() + 1, 
+                (LPCSTR)advstrBody,
+                advstrBody.GetLengthA());
+            */
+            baResult = ByteArray.Add(baResult, baBody);
+
+            /*
+            *((char *)baTarget.GetData() + nRecLen - 1)
+                = RECEND;
+            */
+            baResult = ByteArray.Add(baResult, (byte)RECEND);
+
+            return 0;
+        }
 
         // 探测记录的MARC格式 unimarc / usmarc / dt1000reader
         // return:
@@ -4266,24 +4289,24 @@ namespace DigitalPlatform.Marc
                 return 1;
             }
 
-/*
-            看头标区的方法不可靠
-            // 看看头标区09位？
+            /*
+                        看头标区的方法不可靠
+                        // 看看头标区09位？
 
-In USMARC format, leader postion 09, one character indicate the character coding scheme:
+            In USMARC format, leader postion 09, one character indicate the character coding scheme:
 
-09 - Character coding scheme
-Identifies the character coding scheme used in the record. 
-# - MARC-8
-a - UCS/Unicode
-(http://lcweb.loc.gov/marc/bibliographic/ecbdldrd.html)
-            if (strMARC.Length >= 24 
-                && (strMARC[9] == ' ' || strMARC[9] == 'a' ))
-            {
-                strMarcSyntax = "usmarc";
-                return 1;
-            }
-*/
+            09 - Character coding scheme
+            Identifies the character coding scheme used in the record. 
+            # - MARC-8
+            a - UCS/Unicode
+            (http://lcweb.loc.gov/marc/bibliographic/ecbdldrd.html)
+                        if (strMARC.Length >= 24 
+                            && (strMARC[9] == ' ' || strMARC[9] == 'a' ))
+                        {
+                            strMarcSyntax = "usmarc";
+                            return 1;
+                        }
+            */
 
             // 看看是不是有200字段
             // return:
@@ -4389,7 +4412,7 @@ a - UCS/Unicode
             {
                 char ch = strText[i];
                 if (ch == ' ')
-                    nCount ++;
+                    nCount++;
                 else
                     break;
             }
@@ -4449,29 +4472,29 @@ a - UCS/Unicode
         }
 
 
-		// 将MARC机内格式转换为ISO2709格式
-		// parameters:
+        // 将MARC机内格式转换为ISO2709格式
+        // parameters:
         //      strSourceMARC   [in]机内格式MARC记录。
         //      strMarcSyntax   [in]为"unimarc"或"usmarc"
-		//      targetEncoding  [in]输出ISO2709的编码方式。为UTF8、codepage-936等等
-		//      baResult    [out]输出的ISO2709记录。编码方式受targetEncoding参数控制。注意，缓冲区末尾不包含0字符。
+        //      targetEncoding  [in]输出ISO2709的编码方式。为UTF8、codepage-936等等
+        //      baResult    [out]输出的ISO2709记录。编码方式受targetEncoding参数控制。注意，缓冲区末尾不包含0字符。
         // return:
         //      -1  出错
         //      0   成功
-		public static int CvtJineiToISO2709(
-			string strSourceMARC,
-			string strMarcSyntax,
-			Encoding targetEncoding,
-			out byte []baResult,
-			out string strError)
-		{
-			baResult = null;
+        public static int CvtJineiToISO2709(
+            string strSourceMARC,
+            string strMarcSyntax,
+            Encoding targetEncoding,
+            out byte[] baResult,
+            out string strError)
+        {
+            baResult = null;
 
-			if (strSourceMARC.Length < 24) 
-			{
-				strError = "机内格式记录长度小于24字符";
-				return -1;
-			}
+            if (strSourceMARC.Length < 24)
+            {
+                strError = "机内格式记录长度小于24字符";
+                return -1;
+            }
 
             // 2013/11/23
             // 疑问：MARC 机内格式字符串最后一个字符到底允许不允许为 MARC 结束符?
@@ -4492,26 +4515,27 @@ a - UCS/Unicode
                 strSourceMARC = strSourceMARC.Replace(RECEND, '*');
             }
 
-			string strMARC;
-			ModifyOutputMARC(strSourceMARC,
-				strMarcSyntax,
-				targetEncoding,
-				out strMARC);
+            string strMARC;
+            ModifyOutputMARC(strSourceMARC,
+                strMarcSyntax,
+                targetEncoding,
+                out strMARC);
 
-			// 先转换字符集
-			byte[] baMARC = targetEncoding.GetBytes(strMARC);
+            // 先转换字符集
+            byte[] baMARC = targetEncoding.GetBytes(strMARC);
 
-			BuildISO2709Record(baMARC,
-				out baResult);
+            BuildISO2709Record(baMARC,
+                out baResult);
 
-			strError = "";
-			return 0;
-		}
+            strError = "";
+            return 0;
+        }
 
-		#endregion
-	}
+        #endregion
+    }
 
 
+#if NO
 	/// <summary>
 	/// byte数组，可以动态扩展
 	/// </summary>
@@ -4552,6 +4576,48 @@ a - UCS/Unicode
 		}
 	}
 
+#endif
+    /// <summary>
+    /// byte数组，可以动态扩展
+    /// </summary>
+    public class MyByteList : List<byte>
+    {
+        public MyByteList()
+            : base()
+        {
+        }
+
+        public MyByteList(int capacity)
+            : base(capacity)
+        {
+        }
+
+        public void AddRange(byte[] baSource)
+        {
+            base.AddRange(baSource);
+        }
+
+        public int AddRange(byte[] baSource,
+            int nStart,
+            int nLength)
+        {
+            int nCount = 0;
+            for (int i = nStart; i < baSource.Length && i < nStart + nLength; i++)
+            {
+                this.Add(baSource[i]);
+                nCount++;
+            }
+
+            return nCount;
+        }
+
+        public byte[] GetByteArray()
+        {
+            byte[] result = new byte[this.Count];
+            base.CopyTo(result);
+            return result;
+        }
+    }
 
 }
 

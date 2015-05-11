@@ -10386,7 +10386,7 @@ out strError);
             try
             {
                 Connection connection = GetConnection(
-    this.m_strConnString,
+    this.m_strLongConnString,   // this.m_strConnString,
     this.container.SqlServerType == SqlServerType.SQLite && bFastMode == true ? ConnectionStyle.Global : ConnectionStyle.None);
                 connection.Open();
                 try
@@ -10400,6 +10400,9 @@ out strError);
                         {
                             var bulkCopy = new SqlBulkCopy(connection.SqlConnection);
                             bulkCopy.DestinationTableName = this.m_strSqlDbName + ".." + table.TableName;
+                            bulkCopy.BulkCopyTimeout = m_nLongTimeout;  // 缺省为 30 (秒)
+                            bulkCopy.BatchSize = 10000;  // 缺省为 0 ，表示全部在一批
+                            // 42 万条书目记录，如果作为一批，需要 4 分钟；如果每 5000 条一批，需要 8 分钟
                             int nRet = table.OpenForRead(table.FileName, out strError);
                             if (nRet == -1)
                                 return -1;

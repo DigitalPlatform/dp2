@@ -5,11 +5,14 @@ using System.Collections;
 using System.Xml;
 using System.Diagnostics;
 
-using DigitalPlatform.Xml;
+using DigitalPlatform.Xml;  // DpNs
 
 namespace DigitalPlatform.Marc
 {
-	public class MarcXmlWriter 
+    /// <summary>
+    /// 用于讲 MARC 机内格式字符串转换为 XML 格式的类
+    /// </summary>
+	public class MarcXmlWriter : IDisposable
 	{
 		public bool WriteMarcPrefix = true;  //是否写前缀
 		public bool WriteXsi = false;         //是否写xsi
@@ -20,6 +23,14 @@ namespace DigitalPlatform.Marc
 		public Formatting m_Formatting = Formatting.None; //格式
 		public int m_Indentation  = 2;  //缩进量
 
+        public void Dispose()
+        {
+            if (this.writer != null)
+            {
+                this.writer.Close();
+                this.writer = null;
+            }
+        }
 
 		public MarcXmlWriter()
 		{
@@ -31,6 +42,12 @@ namespace DigitalPlatform.Marc
 			writer = new XmlTextWriter(w, encoding);
 		}
 
+        // 2015/5/10
+        public MarcXmlWriter(TextWriter w)// : base(w, encoding)
+        {
+            writer = new XmlTextWriter(w);
+        }
+
 		public MarcXmlWriter(string filename,
 			Encoding encoding)// : base(filename, encoding)
 		{
@@ -41,11 +58,10 @@ namespace DigitalPlatform.Marc
 		public void Test()
 		{
 			writer.BaseStream.Seek(999*1024*1024, SeekOrigin.Current);
-
 		}
 		*/
 
-		//关闭write
+		// 关闭write
 		public void Close()
 		{
 			if (writer != null)
@@ -90,9 +106,9 @@ namespace DigitalPlatform.Marc
 			}
 		}
 
-		//写开头，包括:
-		//<? xml version='1.0' encoding='utf-8'?>
-		//collection根元素，及根据情况判断是否带命名空间
+		// 写开头，包括:
+		// <? xml version='1.0' encoding='utf-8'?>
+		// collection 根元素，及根据情况判断是否带命名空间
 		public int WriteBegin()
 		{
 			writer.WriteStartDocument();
@@ -105,7 +121,6 @@ namespace DigitalPlatform.Marc
 
             // dprms名字空间 2010/11/15
             writer.WriteAttributeString("xmlns", "dprms", null, DpNs.dprms);
-
 
 			if (WriteXsi == true) 
 			{
@@ -124,13 +139,14 @@ namespace DigitalPlatform.Marc
 			return 0;
 		}
 
-		//关闭collection
+		// 关闭collection
 		public int WriteEnd()
 		{
 			writer.WriteEndElement();
 			return 0;
 		}
 
+        // 将 MARC 机内格式字符串写入。也就是执行转换的意思。调用后， XML 结果需要从 TextWriter 中取出
 		public int WriteRecord(
 			string strMARC,
 			out string strError)
@@ -156,15 +172,13 @@ namespace DigitalPlatform.Marc
 			out string strError)
 		{
 			string strFieldName = null;
-			int nRet;
+			// int nRet;
 
 			strError = "";
 
-			long lStart = writer.BaseStream.Position;
-			Debug.Assert(writer.BaseStream.CanSeek == true, "writer.BaseStream.CanSeek != true");
+			// long lStart = writer.BaseStream.Position;
+			// Debug.Assert(writer.BaseStream.CanSeek == true, "writer.BaseStream.CanSeek != true");
 
-			//try 
-			//{
 			//根据WriteMarcPrefix的值，确定是否对元素record加命名空间
 			if (WriteMarcPrefix == false)
 				writer.WriteStartElement("record");
@@ -189,7 +203,7 @@ namespace DigitalPlatform.Marc
 				// 头标区
 				if (i == 0) 
 				{
-					//多截少添
+					// 多截少添
 					if (strLine.Length > 24)
 						strLine = strLine.Substring(0,24);
 					else 
@@ -210,7 +224,7 @@ namespace DigitalPlatform.Marc
 
 				Debug.Assert(strLine != null, "");
 
-				//不合法的字段,不算数
+				// 不合法的字段,不算数
 				if (strLine.Length < 3)
 					continue;
 
@@ -220,17 +234,19 @@ namespace DigitalPlatform.Marc
 				else
 					strContent = "";
 
-				// control field  001-009没有子字段
+				// control field  001-009 没有子字段
+                /*
 				if ( (String.Compare(strFieldName, "001") >= 0
 					&& String.Compare(strFieldName, "009") <= 0 )
 					|| String.Compare(strFieldName, "-01") == 0)
+                 * */
+                if (MarcUtil.IsControlFieldName(strFieldName) == true)
 				{
 					if (WriteMarcPrefix == false)
 						writer.WriteStartElement("controlfield");
 					else
 						writer.WriteStartElement(MarcPrefix,
 							"controlfield", MarcNameSpaceUri);
-
 
 					writer.WriteAttributeString("tag", strFieldName);
 
@@ -270,16 +286,7 @@ namespace DigitalPlatform.Marc
 				writer.WriteAttributeString("ind1", strInd1);
 				writer.WriteAttributeString("ind2", strInd2);
 
-				//得到子字段数组
-                /*
-				string[] aSubfield = null;
-				nRet = MarcUtil.GetSubfield(strContent,
-					out aSubfield);
-				if (nRet == -1)  //GetSubfield()出错
-				{
-					continue;
-				}
-                 * */
+				// 得到子字段数组
 
                 string[] aSubfield = strContent.Split(new char[] { (char)31 });
                 if (aSubfield == null)
@@ -288,8 +295,7 @@ namespace DigitalPlatform.Marc
                     continue;
                 }
 
-
-				//循环写子字段
+				// 循环写子字段
 				for(int j=0;j<aSubfield.Length;j++) 
 				{
                     string strValue = aSubfield[j];
@@ -329,27 +335,6 @@ namespace DigitalPlatform.Marc
 
 			writer.WriteEndElement();
 			return 0;
-
-			
-			/*
-			}
-
-			catch (Exception ex)
-			{
-				//writer.BaseStream.Seek(lStart, SeekOrigin.Begin);
-				writer.BaseStream.SetLength(lStart);
-				writer.BaseStream.Seek(0, SeekOrigin.End);
-
-				strError = ex.Message;
-				return -1;
-			}
-			*/
-			
-
-
 		}
-
 	}
-
-
 }

@@ -11,9 +11,9 @@ using DigitalPlatform.GUI;
 namespace DigitalPlatform.Script
 {
 	/// <summary>
-	/// Summary description for ScriptDlg.
+	/// 管理一个 Project 的对话框
 	/// </summary>
-	public class ScriptDlg : System.Windows.Forms.Form
+	public class OneProjectDialog : System.Windows.Forms.Form
 	{
         public string HostName = "";
 		public ScriptManager scriptManager = null;
@@ -44,12 +44,13 @@ namespace DigitalPlatform.Script
 		private System.Windows.Forms.Button button_changeProjectName;
 		private System.Windows.Forms.CheckBox checkBox_displayTempFile;
         private Button button_openProjectFolder;
+        private Button button_openInCode;
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
 		private System.ComponentModel.Container components = null;
 
-		public ScriptDlg()
+		public OneProjectDialog()
 		{
 			//
 			// Required for Windows Form Designer support
@@ -83,7 +84,7 @@ namespace DigitalPlatform.Script
 		/// </summary>
 		private void InitializeComponent()
 		{
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ScriptDlg));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(OneProjectDialog));
             this.label1 = new System.Windows.Forms.Label();
             this.textBox_projectName = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
@@ -103,6 +104,7 @@ namespace DigitalPlatform.Script
             this.button_changeProjectName = new System.Windows.Forms.Button();
             this.checkBox_displayTempFile = new System.Windows.Forms.CheckBox();
             this.button_openProjectFolder = new System.Windows.Forms.Button();
+            this.button_openInCode = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // label1
@@ -116,8 +118,8 @@ namespace DigitalPlatform.Script
             // 
             // textBox_projectName
             // 
-            this.textBox_projectName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_projectName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_projectName.Location = new System.Drawing.Point(121, 9);
             this.textBox_projectName.Name = "textBox_projectName";
             this.textBox_projectName.ReadOnly = true;
@@ -130,7 +132,7 @@ namespace DigitalPlatform.Script
             this.label2.Location = new System.Drawing.Point(9, 124);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(59, 12);
-            this.label2.TabIndex = 9;
+            this.label2.TabIndex = 10;
             this.label2.Text = "构成文件:";
             // 
             // button_Cancel
@@ -140,7 +142,7 @@ namespace DigitalPlatform.Script
             this.button_Cancel.Location = new System.Drawing.Point(408, 322);
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(74, 22);
-            this.button_Cancel.TabIndex = 16;
+            this.button_Cancel.TabIndex = 17;
             this.button_Cancel.Text = "取消";
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
@@ -151,14 +153,14 @@ namespace DigitalPlatform.Script
             this.button_OK.Location = new System.Drawing.Point(328, 322);
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(75, 22);
-            this.button_OK.TabIndex = 15;
+            this.button_OK.TabIndex = 16;
             this.button_OK.Text = "确定";
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
             // textBox_projectPathOfName
             // 
-            this.textBox_projectPathOfName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_projectPathOfName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_projectPathOfName.Location = new System.Drawing.Point(121, 33);
             this.textBox_projectPathOfName.Name = "textBox_projectPathOfName";
             this.textBox_projectPathOfName.ReadOnly = true;
@@ -176,9 +178,9 @@ namespace DigitalPlatform.Script
             // 
             // listView_files
             // 
-            this.listView_files.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.listView_files.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.listView_files.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader_fileName,
             this.columnHeader_comment});
@@ -187,7 +189,7 @@ namespace DigitalPlatform.Script
             this.listView_files.Location = new System.Drawing.Point(9, 138);
             this.listView_files.Name = "listView_files";
             this.listView_files.Size = new System.Drawing.Size(394, 179);
-            this.listView_files.TabIndex = 10;
+            this.listView_files.TabIndex = 11;
             this.listView_files.UseCompatibleStateImageBehavior = false;
             this.listView_files.View = System.Windows.Forms.View.Details;
             this.listView_files.SelectedIndexChanged += new System.EventHandler(this.listView_files_SelectedIndexChanged);
@@ -206,8 +208,8 @@ namespace DigitalPlatform.Script
             // 
             // textBox_projectLocate
             // 
-            this.textBox_projectLocate.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_projectLocate.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_projectLocate.Location = new System.Drawing.Point(121, 58);
             this.textBox_projectLocate.Name = "textBox_projectLocate";
             this.textBox_projectLocate.ReadOnly = true;
@@ -230,7 +232,7 @@ namespace DigitalPlatform.Script
             this.button_editFile.Location = new System.Drawing.Point(408, 138);
             this.button_editFile.Name = "button_editFile";
             this.button_editFile.Size = new System.Drawing.Size(74, 21);
-            this.button_editFile.TabIndex = 11;
+            this.button_editFile.TabIndex = 12;
             this.button_editFile.Text = "编辑(&E)";
             this.button_editFile.Click += new System.EventHandler(this.button_editFile_Click);
             // 
@@ -240,7 +242,7 @@ namespace DigitalPlatform.Script
             this.button_newFile.Location = new System.Drawing.Point(408, 164);
             this.button_newFile.Name = "button_newFile";
             this.button_newFile.Size = new System.Drawing.Size(74, 22);
-            this.button_newFile.TabIndex = 12;
+            this.button_newFile.TabIndex = 13;
             this.button_newFile.Text = "新增(&N)";
             this.button_newFile.Click += new System.EventHandler(this.button_newFile_Click);
             // 
@@ -250,7 +252,7 @@ namespace DigitalPlatform.Script
             this.button_deleteFile.Location = new System.Drawing.Point(408, 205);
             this.button_deleteFile.Name = "button_deleteFile";
             this.button_deleteFile.Size = new System.Drawing.Size(74, 22);
-            this.button_deleteFile.TabIndex = 13;
+            this.button_deleteFile.TabIndex = 14;
             this.button_deleteFile.Text = "删除(&D)";
             this.button_deleteFile.Click += new System.EventHandler(this.button_deleteFile_Click);
             // 
@@ -260,7 +262,7 @@ namespace DigitalPlatform.Script
             this.button_changeProjectLocation.Location = new System.Drawing.Point(408, 82);
             this.button_changeProjectLocation.Name = "button_changeProjectLocation";
             this.button_changeProjectLocation.Size = new System.Drawing.Size(74, 21);
-            this.button_changeProjectLocation.TabIndex = 8;
+            this.button_changeProjectLocation.TabIndex = 9;
             this.button_changeProjectLocation.Text = "改名(&R)";
             this.button_changeProjectLocation.Click += new System.EventHandler(this.button_changeProjectLocation_Click);
             // 
@@ -281,7 +283,7 @@ namespace DigitalPlatform.Script
             this.checkBox_displayTempFile.Location = new System.Drawing.Point(9, 328);
             this.checkBox_displayTempFile.Name = "checkBox_displayTempFile";
             this.checkBox_displayTempFile.Size = new System.Drawing.Size(114, 16);
-            this.checkBox_displayTempFile.TabIndex = 14;
+            this.checkBox_displayTempFile.TabIndex = 15;
             this.checkBox_displayTempFile.Text = "显示临时文件(&T)";
             this.checkBox_displayTempFile.CheckedChanged += new System.EventHandler(this.checkBox_displayTempFile_CheckedChanged);
             // 
@@ -291,17 +293,28 @@ namespace DigitalPlatform.Script
             this.button_openProjectFolder.Location = new System.Drawing.Point(270, 82);
             this.button_openProjectFolder.Name = "button_openProjectFolder";
             this.button_openProjectFolder.Size = new System.Drawing.Size(133, 21);
-            this.button_openProjectFolder.TabIndex = 7;
+            this.button_openProjectFolder.TabIndex = 8;
             this.button_openProjectFolder.Text = "打开文件夹(&F)...";
             this.button_openProjectFolder.Click += new System.EventHandler(this.button_openProjectFolder_Click);
             // 
-            // ScriptDlg
+            // button_openInCode
+            // 
+            this.button_openInCode.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_openInCode.Location = new System.Drawing.Point(121, 82);
+            this.button_openInCode.Name = "button_openInCode";
+            this.button_openInCode.Size = new System.Drawing.Size(143, 21);
+            this.button_openInCode.TabIndex = 7;
+            this.button_openInCode.Text = "在 Code 中打开(&C)...";
+            this.button_openInCode.Click += new System.EventHandler(this.button_openInCode_Click);
+            // 
+            // OneProjectDialog
             // 
             this.AcceptButton = this.button_OK;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
             this.ClientSize = new System.Drawing.Size(492, 353);
+            this.Controls.Add(this.button_openInCode);
             this.Controls.Add(this.button_openProjectFolder);
             this.Controls.Add(this.checkBox_displayTempFile);
             this.Controls.Add(this.button_changeProjectName);
@@ -320,7 +333,7 @@ namespace DigitalPlatform.Script
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Name = "ScriptDlg";
+            this.Name = "OneProjectDialog";
             this.ShowInTaskbar = false;
             this.Text = "脚本代码管理";
             this.Closing += new System.ComponentModel.CancelEventHandler(this.ScriptDlg_Closing);
@@ -948,12 +961,26 @@ namespace DigitalPlatform.Script
             {
                 this.button_openProjectFolder.Enabled = false;
                 this.button_changeProjectLocation.Enabled = false;
+                this.button_openInCode.Enabled = false;
             }
             else
             {
                 this.button_openProjectFolder.Enabled = true;
                 this.button_changeProjectLocation.Enabled = true;
+                this.button_openInCode.Enabled = true;
             }
+        }
+
+        // 在 Visual Studio Code 中打开
+        private void button_openInCode_Click(object sender, EventArgs e)
+        {
+            ProcessStartInfo startInfo = new ProcessStartInfo("code");
+            startInfo.Arguments = ".";
+            startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            startInfo.CreateNoWindow = true;
+            // startInfo.UseShellExecute = false;
+            startInfo.WorkingDirectory = this.textBox_projectLocate.Text;
+            Process p = Process.Start(startInfo);
         }
 	}
 }

@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Reflection;
 
 namespace dp2rms
@@ -22,7 +22,7 @@ namespace dp2rms
 		{
 			Type classType = this.GetType();
 
-			// newÒ»¸öHostÅÉÉú¶ÔÏó
+			// newä¸€ä¸ªHostæ´¾ç”Ÿå¯¹è±¡
 			classType.InvokeMember(strFuncName, 
 				BindingFlags.DeclaredOnly | 
 				BindingFlags.Public | BindingFlags.NonPublic | 
@@ -43,6 +43,6 @@ namespace dp2rms
 
 	public class HostEventArgs : EventArgs
 	{
-		public int i = 0;	// ²âÊÔÓÃ
+		public int i = 0;	// æµ‹è¯•ç”¨
 	}
 }

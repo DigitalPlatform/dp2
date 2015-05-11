@@ -174,3 +174,15 @@ mapdlg每列的tips.
 			
 			~~~~~~~~~
 			自动探测索引号范围功能?
+
+
+			~~~
+			
+ForceCvt2709ToFieldArray
+
+8.1 %
+
+WriteRecord()
+String.Compare 2.1%
+
+ReadMarcRecord 4.9%

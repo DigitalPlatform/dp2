@@ -286,7 +286,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PreBuildEvent>CD $(ProjectDir)
+    <PreBuildEvent>echo 准备安装包 .zip 文件 ...
+CD $(ProjectDir)
 CALL copykernel.bat
 CALL copylibrary.bat
 CALL copyopac.bat</PreBuildEvent>
