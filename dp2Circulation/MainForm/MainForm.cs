@@ -1230,8 +1230,18 @@ namespace dp2Circulation
                             this,
                             false);
                     }
-                }
+                    else
+                    {
+                        // 2015/5/15
+                        string strServerUrl =
+AppInfo.GetString("config",
+"circulation_server_url",
+"http://localhost:8001/dp2library");
 
+                        if (string.Compare(strServerUrl, CirculationLoginDlg.dp2LibraryXEServerUrl, true) == 0)
+                            AutoStartDp2libraryXE();
+                    }
+                }
 
                 nRet = PrepareSearch();
                 if (nRet == 1)
@@ -7165,44 +7175,7 @@ namespace dp2Circulation
 
             // 如果是即将访问 dp2libraryXE 单机版，这里要启动它
             if (string.Compare(dlg.ServerUrl, CirculationLoginDlg.dp2LibraryXEServerUrl, true) == 0)
-            {
-                string strShortcutFilePath = PathUtil.GetShortcutFilePath("DigitalPlatform/dp2 V2/dp2Library XE");
-                if (File.Exists(strShortcutFilePath) == false)
-                {
-                    // 安装和启动
-                    DialogResult result = MessageBox.Show(this,
-"dp2libraryXE 在本机尚未安装。\r\ndp2Circulation (内务)即将访问 dp2LibraryXE 单机版服务器，需要安装它才能正常使用。\r\n\r\n是否立即从 dp2003.com 下载安装?",
-"dp2Circulation",
-MessageBoxButtons.YesNo,
-MessageBoxIcon.Question,
-MessageBoxDefaultButton.Button1);
-                    if (result == System.Windows.Forms.DialogResult.Yes)
-                        FirstRunDialog.StartDp2libraryXe(
-                            this,
-                            "dp2Circulation",
-                            this.Font,
-                            false);
-                }
-                else
-                {
-                    if (FirstRunDialog.HasDp2libraryXeStarted() == false)
-                    {
-                        FirstRunDialog.StartDp2libraryXe(
-                            this,
-                            "dp2Circulation",
-                            this.Font,
-                            true);
-                    }
-                }
-
-                // 如果当前窗口没有在最前面
-                {
-                    if (this.WindowState == FormWindowState.Minimized)
-                        this.WindowState = FormWindowState.Normal;
-                    this.Activate();
-                    API.SetForegroundWindow(this.Handle);
-                }
-            }
+                AutoStartDp2libraryXE();
 
             AppInfo.SetString(
                 "default_account",
@@ -7242,6 +7215,46 @@ MessageBoxDefaultButton.Button1);
 
 
             return dlg;
+        }
+
+        void AutoStartDp2libraryXE()
+        {
+            string strShortcutFilePath = PathUtil.GetShortcutFilePath("DigitalPlatform/dp2 V2/dp2Library XE");
+            if (File.Exists(strShortcutFilePath) == false)
+            {
+                // 安装和启动
+                DialogResult result = MessageBox.Show(this,
+"dp2libraryXE 在本机尚未安装。\r\ndp2Circulation (内务)即将访问 dp2LibraryXE 单机版服务器，需要安装它才能正常使用。\r\n\r\n是否立即从 dp2003.com 下载安装?",
+"dp2Circulation",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button1);
+                if (result == System.Windows.Forms.DialogResult.Yes)
+                    FirstRunDialog.StartDp2libraryXe(
+                        this,
+                        "dp2Circulation",
+                        this.Font,
+                        false);
+            }
+            else
+            {
+                if (FirstRunDialog.HasDp2libraryXeStarted() == false)
+                {
+                    FirstRunDialog.StartDp2libraryXe(
+                        this,
+                        "dp2Circulation",
+                        this.Font,
+                        true);
+                }
+            }
+
+            // 如果当前窗口没有在最前面
+            {
+                if (this.WindowState == FormWindowState.Minimized)
+                    this.WindowState = FormWindowState.Normal;
+                this.Activate();
+                API.SetForegroundWindow(this.Handle);
+            }
         }
 
 
