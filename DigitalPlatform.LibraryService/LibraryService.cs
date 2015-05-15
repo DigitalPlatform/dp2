@@ -8676,6 +8676,16 @@ namespace dp2Library
             }
         }
 
+        static string MakeFileName(DirectoryInfo info)
+        {
+            return info.Name + "|" + info.LastWriteTime.ToString("u") + "|dir"; 
+        }
+
+        static string MakeFileName(FileInfo info)
+        {
+            return info.Name + "|" + info.LastWriteTime.ToString("u") + "|" + info.Length.ToString();
+        }
+
         // 获得系统参数
         // parameters:
         //      strCategory 参数所在目录
@@ -8710,6 +8720,59 @@ namespace dp2Library
                 }
 
                 int nRet = 1;
+
+                if (strCategory == "listUploadFileNames")
+                {
+                    try
+                    {
+                        string strDirectory = Path.Combine(app.DataDir, "upload/" + strName);
+
+                        strDirectory = strDirectory.Replace("\\", "/");
+                        if (strDirectory[strDirectory.Length - 1] != '/')
+                            strDirectory += "/";
+
+                        // 文件名之间的分隔符为 ||，文件名中，和最后修改时间用 | 间隔
+                        List<string> filenames = new List<string>();
+                        DirectoryInfo di = new DirectoryInfo(strDirectory);
+
+                        // 列出所有目录名
+                        DirectoryInfo[] subs = di.GetDirectories();
+                        for (int i = 0; i < subs.Length; i++)
+                        {
+                            DirectoryInfo sub = subs[i];
+                            filenames.Add(MakeFileName(sub));
+                            // filenames.AddRange(GetFilenames(sub.FullName, true, true));
+                        }
+
+                        // 列出所有文件名
+                        FileInfo[] fis = di.GetFiles();
+                        foreach (FileInfo fi in fis)
+                        {
+                            filenames.Add(MakeFileName(fi));
+                        }
+
+                        StringBuilder text = new StringBuilder(4096);
+                        string strHead = strDirectory;
+                        foreach (string strFilename in filenames)
+                        {
+                            if (text.Length > 0)
+                                text.Append("||");
+
+                            text.Append(strFilename);
+
+                            // 只取出相对部分
+                            // text.Append(strFilename.Substring(strHead.Length));
+                        }
+
+                        strValue = text.ToString();
+                        goto END1;
+                    }
+                    catch (DirectoryNotFoundException ex)
+                    {
+                        strError = "目录 '" + strName + "' 不存在";
+                        goto ERROR1;
+                    }
+                }
 
                 if (strCategory == "cfgs")
                 {
@@ -11665,35 +11728,7 @@ namespace dp2Library
                 bool bWriteOperLog = true;
                 string strError = "";
                 string strLibraryCode = ""; // 实际写入操作的读者库馆代码
-                {
 
-                    // 检查用户使用 WriteRes API 的权限
-                    // return:
-                    //      -1  error
-                    //      0   不具备权限
-                    //      1   具备权限
-                    int nRet = app.CheckWriteResRights(
-                        sessioninfo.LibraryCodeList,
-                        sessioninfo.RightsOrigin,
-                        strResPath,
-                        out strLibraryCode,
-                        out strError);
-
-                    if (nRet == 0)
-                    {
-                        result.Value = -1;
-                        result.ErrorInfo = strError;
-                        result.ErrorCode = ErrorCode.AccessDenied;
-                        return result;
-                    }
-                    if (nRet == -1)
-                    {
-                        result.Value = -1;
-                        result.ErrorInfo = strError;
-                        result.ErrorCode = ErrorCode.SystemError;
-                        return result;
-                    }
-                }
 
                 if (string.IsNullOrEmpty(strResPath) == false
                     && strResPath[0] == '!')
@@ -11736,6 +11771,35 @@ namespace dp2Library
                 }
                 else
                 {
+                    {
+
+                        // 检查用户使用 WriteRes API 的权限
+                        // return:
+                        //      -1  error
+                        //      0   不具备权限
+                        //      1   具备权限
+                        int nRet = app.CheckWriteResRights(
+                            sessioninfo.LibraryCodeList,
+                            sessioninfo.RightsOrigin,
+                            strResPath,
+                            out strLibraryCode,
+                            out strError);
+
+                        if (nRet == 0)
+                        {
+                            result.Value = -1;
+                            result.ErrorInfo = strError;
+                            result.ErrorCode = ErrorCode.AccessDenied;
+                            return result;
+                        }
+                        if (nRet == -1)
+                        {
+                            result.Value = -1;
+                            result.ErrorInfo = strError;
+                            result.ErrorCode = ErrorCode.SystemError;
+                            return result;
+                        }
+                    }
 
                     RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
                     if (channel == null)

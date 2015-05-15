@@ -136,6 +136,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DigitalPlatform.XmlEditor",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dp2ZServer", "dp2ZServer\dp2ZServer.csproj", "{A8A1E277-92A5-4849-BA42-92063E2183C5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dp2LibraryConsole", "dp2LibraryConsole\dp2LibraryConsole.csproj", "{2270037A-353D-45B9-B51E-9C52E1A72F87}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -734,6 +736,16 @@ Global
 		{A8A1E277-92A5-4849-BA42-92063E2183C5}.Release|Mixed Platforms.Build.0 = Release|x86
 		{A8A1E277-92A5-4849-BA42-92063E2183C5}.Release|x86.ActiveCfg = Release|x86
 		{A8A1E277-92A5-4849-BA42-92063E2183C5}.Release|x86.Build.0 = Release|x86
+		{2270037A-353D-45B9-B51E-9C52E1A72F87}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2270037A-353D-45B9-B51E-9C52E1A72F87}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2270037A-353D-45B9-B51E-9C52E1A72F87}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{2270037A-353D-45B9-B51E-9C52E1A72F87}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{2270037A-353D-45B9-B51E-9C52E1A72F87}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2270037A-353D-45B9-B51E-9C52E1A72F87}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2270037A-353D-45B9-B51E-9C52E1A72F87}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2270037A-353D-45B9-B51E-9C52E1A72F87}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{2270037A-353D-45B9-B51E-9C52E1A72F87}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{2270037A-353D-45B9-B51E-9C52E1A72F87}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

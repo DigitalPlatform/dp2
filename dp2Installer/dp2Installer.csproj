@@ -15,7 +15,7 @@
     </TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
     <IsWebBootstrapper>true</IsWebBootstrapper>
-    <PublishUrl>http://localhost/dp2Installer/v1/</PublishUrl>
+    <PublishUrl>c:\publish\dp2installer\v1\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Web</InstallFrom>
     <UpdateEnabled>true</UpdateEnabled>
@@ -32,8 +32,8 @@
     <SuiteName>dp2 V2</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>30</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <ApplicationRevision>3</ApplicationRevision>
+    <ApplicationVersion>1.1.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
@@ -213,6 +213,16 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <PublishFile Include="deleted.txt">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Exclude</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
     <PublishFile Include="kernel_app.zip">
       <Visible>False</Visible>
       <Group>
@@ -252,6 +262,16 @@
       <PublishState>DataFile</PublishState>
       <IncludeHash>True</IncludeHash>
       <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="MySql.Data">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>Assembly</FileType>
     </PublishFile>
     <PublishFile Include="opac_app.zip">
       <Visible>False</Visible>

@@ -84,7 +84,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.42 (2015/1/29) GetItemInfo() GetOrderInfo() GetIssueInfo() GetCommentInfo() API 增加了 strItemXml 参数。允许获得记录的检索点信息
         //      2.43 (2015/1/30) GetItemInfo() API 进一步增加了 strItemDbType 参数，并包含了原先的 GetItemInfo GetOrderInfo GetIssuInfo GetCommentInfo API 的全部功能。至此，GetItemInfo() API 所取代的其他几个 API 逐渐要废止。为了保持兼容性，暂时保留一段时间这几个 API
         //      2.44 (2015/4/30) GetSystemParameter() API 增加了 category=cfgs name=getDataDir 获得数据目录物理路径 
-        public static string Version = "2.44";
+        //      2.45 (2015/5/15) 文件上传和 WriteRes() API 都得到了充实，支持 dp2libraryconsole 前端进行文件上传和管理操作了 
+        public static string Version = "2.45";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()

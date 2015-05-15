@@ -33,7 +33,7 @@
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
     <NuGetPackageImportStamp>5e1a1771</NuGetPackageImportStamp>
-    <PublishUrl>http://localhost/dp2Circulation/v2/</PublishUrl>
+    <PublishUrl>c:\publish\dp2circulation\v2\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Web</InstallFrom>
     <UpdateEnabled>true</UpdateEnabled>
@@ -51,8 +51,8 @@
     <SuiteName>dp2 V2</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>294</ApplicationRevision>
-    <ApplicationVersion>2.3.0.%2a</ApplicationVersion>
+    <ApplicationRevision>6</ApplicationRevision>
+    <ApplicationVersion>2.4.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
@@ -2004,7 +2004,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <None Include="app.config" />
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
     <Content Include="B3901.ttf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -2377,6 +2379,12 @@
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="x64\SQLite.Interop.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x86\SQLite.Interop.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="yes_order_24.png" />
     <Content Include="orderhtml.css" />
     <Content Include="issuehtml.css" />
@@ -2728,6 +2736,16 @@
       <IncludeHash>True</IncludeHash>
       <FileType>File</FileType>
     </PublishFile>
+    <PublishFile Include="DocumentFormat.OpenXml">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>Assembly</FileType>
+    </PublishFile>
     <PublishFile Include="eula.txt">
       <Visible>False</Visible>
       <Group>
@@ -3076,6 +3094,13 @@
     <Error Condition="!Exists('..\packages\System.Data.SQLite.Core.1.0.96.0\build\net40\System.Data.SQLite.Core.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\System.Data.SQLite.Core.1.0.96.0\build\net40\System.Data.SQLite.Core.targets'))" />
   </Target>
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.96.0\build\net40\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.96.0\build\net40\System.Data.SQLite.Core.targets')" />
+  <PropertyGroup>
+    <PreBuildEvent>CD $(ProjectDir)
+MD x86
+xcopy $(TargetDir)x86 x86 /Y
+MD x64
+xcopy $(TargetDir)x64 x64 /Y</PreBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

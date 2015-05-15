@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("DigitalPlatform 数字平台(北京)软件有限责任公司")]
 [assembly: AssemblyProduct("dp2Circulation -- dp2图书馆集成系统的内务前端")]
-[assembly: AssemblyCopyright("Copyright © 2006-2012 DigitalPlatform 数字平台(北京)软件有限责任公司")]
+[assembly: AssemblyCopyright("Copyright © 2006-2015 DigitalPlatform 数字平台(北京)软件有限责任公司")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -29,5 +29,5 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("2.2.*")]  // "1.0.0.0"
-[assembly: AssemblyFileVersion("2.2.0.0")]
+[assembly: AssemblyVersion("2.4.*")]  // "1.0.0.0"
+[assembly: AssemblyFileVersion("2.4.0.0")]

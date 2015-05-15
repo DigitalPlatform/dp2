@@ -18,7 +18,7 @@
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
     <NuGetPackageImportStamp>03de4fc3</NuGetPackageImportStamp>
-    <PublishUrl>http://localhost/dp2LibraryXE/v1/</PublishUrl>
+    <PublishUrl>c:\publish\dp2libraryxe\v1\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Web</InstallFrom>
     <UpdateEnabled>true</UpdateEnabled>
@@ -36,8 +36,8 @@
     <SuiteName>dp2 V2</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>107</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <ApplicationRevision>1</ApplicationRevision>
+    <ApplicationVersion>1.1.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
@@ -137,6 +137,12 @@
     <Compile Include="LibraryHost.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Content Include="x64\SQLite.Interop.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x86\SQLite.Interop.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <EmbeddedResource Include="FirstRunDialog.resx">
       <DependentUpon>FirstRunDialog.cs</DependentUpon>
     </EmbeddedResource>
@@ -342,7 +348,12 @@
   <PropertyGroup>
     <PreBuildEvent>CD $(ProjectDir)
 CALL copyopac.bat
-CALL copydata.bat</PreBuildEvent>
+CALL copydata.bat
+
+MD x86
+xcopy $(TargetDir)x86 x86 /Y
+MD x64
+xcopy $(TargetDir)x64 x64 /Y</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

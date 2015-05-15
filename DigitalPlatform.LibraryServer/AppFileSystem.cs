@@ -67,7 +67,9 @@ namespace DigitalPlatform.LibraryServer
             return false;
         }
 
-        // 上传本地文件
+        // 上传本地文件，或者删除服务器端文件
+        // parameters:
+        //      strStyle    当包含 delete 的时候，表示要删除 strFilePath 所指的文件
         // return:
         //      -2  时间戳不匹配
         //      -1  一般性错误
@@ -95,21 +97,47 @@ namespace DigitalPlatform.LibraryServer
                 strError = "lTotalLength 参数值不能为负数";
                 return -1;
             }
-            if (baSource == null)
-            {
-                strError = "baSource 参数值不能为 null";
-                return -1;
-            }
+
 
             if (strStyle == null)
                 strStyle = "";
 
             bool bDelete = StringUtil.IsInList("delete", strStyle) == true;
 
-            // 确保文件的路径所经过的所有子目录已经创建
-            PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strFilePath));
+            if (bDelete == false && baSource == null)
+            {
+                strError = "baSource 参数值不能为 null";
+                return -1;
+            }
+
+            if (bDelete == true && Directory.Exists(strFilePath) == true)
+            {
+                // 删除一个目录
+                PathUtil.DeleteDirectory(strFilePath);
+                return 0;
+            }
 
             string strNewFilePath = GetNewFileName(strFilePath);
+
+            if (bDelete == true && File.Exists(strFilePath) == true)
+            {
+                // 删除一个文件
+                if (File.Exists(strFilePath) == true)
+                    File.Delete(strFilePath);
+
+                if (File.Exists(strNewFilePath) == true)
+                    File.Delete(strNewFilePath);
+
+                string strRangeFileName = GetRangeFileName(strFilePath);
+
+                if (File.Exists(strRangeFileName) == true)
+                    File.Delete(strRangeFileName);
+
+                return 0; 
+            }
+
+            // 确保文件的路径所经过的所有子目录已经创建
+            PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strFilePath));
 
             //*************************************************
             // 检查时间戳,当目标文件存在时
@@ -147,6 +175,7 @@ namespace DigitalPlatform.LibraryServer
                 baOutputTimestamp = FileUtil.GetFileTimestamp(strFilePath);
             }
 
+#if NO
             // 删除文件
             if (bDelete == true)
             {
@@ -163,6 +192,7 @@ namespace DigitalPlatform.LibraryServer
 
                 return 0;
             }
+#endif
 
             //**************************************************
             long lCurrentLength = 0;

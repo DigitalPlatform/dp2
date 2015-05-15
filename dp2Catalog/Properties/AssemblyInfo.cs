@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("dp2Catalog")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("digitalplatform")]
+[assembly: AssemblyCompany("DigitalPlatform")]
 [assembly: AssemblyProduct("dp2Catalog")]
-[assembly: AssemblyCopyright("Copyright © digitalplatform 数字平台(北京)软件有限责任公司 2006-2015")]
+[assembly: AssemblyCopyright("Copyright © 2006-2015 DigitalPlatform 数字平台(北京)软件有限责任公司")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -29,5 +29,5 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("2.3.*")]
-[assembly: AssemblyFileVersion("2.3.0.0")]
+[assembly: AssemblyVersion("2.4.*")]
+[assembly: AssemblyFileVersion("2.4.0.0")]
