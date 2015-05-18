@@ -160,10 +160,14 @@
     <Compile Include="DigitalPlatform.IO.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="FileSystemLoader.cs" />
+    <Compile Include="FileUtil.cs" />
     <Compile Include="FileVersionManager.cs" />
     <Compile Include="ItemFileBase.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="PathUtil.cs" />
+    <Compile Include="StreamUtil.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

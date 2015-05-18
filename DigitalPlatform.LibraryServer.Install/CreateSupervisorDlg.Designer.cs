@@ -44,8 +44,8 @@ namespace DigitalPlatform.LibraryServer
             // 
             // textBox_rights
             // 
-            this.textBox_rights.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_rights.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_rights.Location = new System.Drawing.Point(104, 166);
             this.textBox_rights.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_rights.Multiline = true;
@@ -54,7 +54,6 @@ namespace DigitalPlatform.LibraryServer
             this.textBox_rights.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.textBox_rights.Size = new System.Drawing.Size(212, 77);
             this.textBox_rights.TabIndex = 32;
-            this.textBox_rights.Text = resources.GetString("textBox_rights.Text");
             // 
             // label5
             // 
@@ -82,9 +81,9 @@ namespace DigitalPlatform.LibraryServer
             // 
             // label1
             // 
-            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.label1.Location = new System.Drawing.Point(11, 10);
             this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label1.Name = "label1";
@@ -107,8 +106,8 @@ namespace DigitalPlatform.LibraryServer
             // 
             // textBox_confirmSupervisorPassword
             // 
-            this.textBox_confirmSupervisorPassword.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_confirmSupervisorPassword.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_confirmSupervisorPassword.Location = new System.Drawing.Point(104, 132);
             this.textBox_confirmSupervisorPassword.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_confirmSupervisorPassword.Name = "textBox_confirmSupervisorPassword";
@@ -129,8 +128,8 @@ namespace DigitalPlatform.LibraryServer
             // 
             // textBox_supervisorPassword
             // 
-            this.textBox_supervisorPassword.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_supervisorPassword.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_supervisorPassword.Location = new System.Drawing.Point(104, 107);
             this.textBox_supervisorPassword.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_supervisorPassword.Name = "textBox_supervisorPassword";
@@ -151,8 +150,8 @@ namespace DigitalPlatform.LibraryServer
             // 
             // textBox_supervisorUserName
             // 
-            this.textBox_supervisorUserName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_supervisorUserName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_supervisorUserName.Location = new System.Drawing.Point(104, 70);
             this.textBox_supervisorUserName.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_supervisorUserName.Name = "textBox_supervisorUserName";

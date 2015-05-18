@@ -8542,6 +8542,210 @@ namespace dp2Library
             return results;
         }
 
+        // 列出文件目录，转移当前目录，删除文件和目录
+        // parameters:
+        //      strAction   可用值 list/cd/delete
+        public LibraryServerResult ListFile(
+            string strAction,
+            string strCategory,
+            string strFileName,
+            long lStart,
+            long lLength,
+            out List<FileItemInfo> infos)
+        {
+            string strError = "";
+            int nRet = 0;
+            infos = new List<FileItemInfo>();
+
+            LibraryServerResult result = this.PrepareEnvironment("ListFile", true, true);
+            if (result.Value == -1)
+                return result;
+
+            try 
+            {
+                {
+                    string strLibraryCode = ""; // 实际写入操作的读者库馆代码
+                    string strTemp = "";
+
+                    if (strAction == "delete")
+                    {
+                        // 检查用户使用 WriteRes API 的权限
+                        // return:
+                        //      -1  error
+                        //      0   不具备权限
+                        //      1   具备权限
+                        nRet = app.CheckWriteResRights(
+                            sessioninfo.LibraryCodeList,
+                            sessioninfo.RightsOrigin,
+                            strCategory,
+                            out strLibraryCode,
+                            out strError);
+                    }
+                    else
+                    {
+                        nRet = app.CheckGetResRights(
+                            sessioninfo.LibraryCodeList,
+                            sessioninfo.RightsOrigin,
+                            strCategory,
+                            out strLibraryCode,
+                            out strTemp,
+                            out strError);
+                    }
+
+                    if (nRet == 0)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = strError;
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
+                    }
+                    if (nRet == -1)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = strError;
+                        result.ErrorCode = ErrorCode.SystemError;
+                        return result;
+                    }
+                }
+
+                if (string.IsNullOrEmpty(strCategory) == false && strCategory[0] == '!')
+                {
+                    string strRoot = Path.Combine(app.DataDir, "upload");
+
+                    string strCurrentDirectory = Path.Combine(app.DataDir, strCategory.Substring(1));
+
+
+                    if (strAction == "delete")
+                    {
+                        // 删除文件或者目录
+                        // return:
+                        //      -1  出错
+                        //      其他  实际删除的文件和目录个数
+                        nRet = LibraryApplication.DeleteFile(
+                            strRoot,
+                            strCurrentDirectory,
+                            strFileName,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        result.Value = nRet;
+                        return result;
+                    }
+
+                    if (strAction == "cd")
+                    {
+                        string strResult = "";
+
+                        nRet = LibraryApplication.ChangeDirectory(
+                            strRoot,
+                            strCurrentDirectory,
+                            strFileName,
+                            out strResult,  // 注意返回的是物理路径
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+                        if (nRet == 0)
+                        {
+                            result.ErrorCode = ErrorCode.NotFound;
+                            result.ErrorInfo = strError;
+                            result.Value = -1;
+                            return result;
+                        }
+                        infos = new List<FileItemInfo>();
+                        FileItemInfo info = new FileItemInfo();
+                        infos.Add(info);
+                        info.Name = strResult.Substring(strRoot.Length).Replace("\\", "/");    // 这里需要逻辑路径
+                        result.Value = 1;
+                        return result;
+#if NO
+                        string strResult = "";
+                        try
+                        {
+                            FileSystemLoader.ChangeDirectory(strCurrentDirectory.Substring(strRoot.Length), strFileName, out strResult);
+                        }
+                        catch (Exception ex)
+                        {
+                            result.ErrorCode = ErrorCode.SystemError;
+                            result.ErrorInfo = ex.Message;
+                            result.Value = -1;
+                            return result;
+                        }
+
+                        // 检测物理目录是否存在
+                        string strPhysical = Path.Combine(strRoot, PathUtil.RemoveRootSlash(strResult));    // 返还为物理路径
+                        if (Directory.Exists(strPhysical) == false)
+                        {
+                            result.ErrorCode = ErrorCode.NotFound;
+                            result.ErrorInfo = "目录 '"+strResult+"' 不存在";
+                            result.Value = -1;
+                            return result;
+                        }
+
+                        infos = new List<FileItemInfo>();
+                        FileItemInfo info = new FileItemInfo();
+                        infos.Add(info);
+                        info.Name = strResult;
+                        result.Value = 1;
+                        return result;
+#endif
+                    }
+
+                    if (strAction == "list")
+                    {
+                        // parameters:
+                        //      strCurrentDirectory 当前路径。物理路径
+                        // return:
+                        //      -1  出错
+                        //      其他  列出的事项总数。注意，不是 lLength 所指出的本次返回数
+                        nRet = LibraryApplication.ListFile(
+                            strRoot,
+                            strCurrentDirectory,
+                            strFileName,
+                            lStart,
+                            lLength,
+                            out infos,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            result.ErrorCode = ErrorCode.SystemError;
+                            result.Value = -1;
+                        }
+                        else
+                            result.Value = nRet;
+
+                        result.ErrorInfo = strError;
+                        return result;
+                    }
+
+                    strError = "未知的 strAction '"+strAction+"'";
+                    goto ERROR1;
+                }
+                else
+                {
+                    result.ErrorCode = ErrorCode.SystemError;
+                    result.Value = -1;
+                    result.ErrorInfo = "暂不支持 strCategory '"+strCategory+"'";
+
+                    return result;
+                }
+            }
+            catch (Exception ex)
+            {
+                string strErrorText = "dp2Library ListFile() API出现异常: " + ExceptionUtil.GetDebugText(ex);
+                app.WriteErrorLog(strErrorText);
+
+                result.Value = -1;
+                result.ErrorCode = ErrorCode.SystemError;
+                result.ErrorInfo = strErrorText;
+                return result;
+            }
+        ERROR1:
+            result.ErrorInfo = strError;
+            result.Value = -1;
+            result.ErrorCode = ErrorCode.SystemError;
+            return result;
+        }
+
         // 获得系统配置文件
         // parameters:
         //      strCategory 文件分类。目前只能使用 cfgs
@@ -11729,6 +11933,35 @@ namespace dp2Library
                 string strError = "";
                 string strLibraryCode = ""; // 实际写入操作的读者库馆代码
 
+                {
+
+                    // 检查用户使用 WriteRes API 的权限
+                    // return:
+                    //      -1  error
+                    //      0   不具备权限
+                    //      1   具备权限
+                    int nRet = app.CheckWriteResRights(
+                        sessioninfo.LibraryCodeList,
+                        sessioninfo.RightsOrigin,
+                        strResPath,
+                        out strLibraryCode,
+                        out strError);
+
+                    if (nRet == 0)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = strError;
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
+                    }
+                    if (nRet == -1)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = strError;
+                        result.ErrorCode = ErrorCode.SystemError;
+                        return result;
+                    }
+                }
 
                 if (string.IsNullOrEmpty(strResPath) == false
                     && strResPath[0] == '!')
@@ -11740,7 +11973,9 @@ namespace dp2Library
                     //      -2  时间戳不匹配
                     //      -1  一般性错误
                     //      0   成功
+                    //      其他  成功删除的文件和目录个数
                     int nRet = app.WriteFile(
+                        Path.Combine(app.DataDir, "upload"),
                         strFilePath,
                         strRanges,
                         lTotalLength,
@@ -11761,7 +11996,7 @@ namespace dp2Library
 
                     }
                     else
-                        result.Value = 0;
+                        result.Value = nRet;
 
                     result.ErrorInfo = strError;
 
@@ -11771,35 +12006,6 @@ namespace dp2Library
                 }
                 else
                 {
-                    {
-
-                        // 检查用户使用 WriteRes API 的权限
-                        // return:
-                        //      -1  error
-                        //      0   不具备权限
-                        //      1   具备权限
-                        int nRet = app.CheckWriteResRights(
-                            sessioninfo.LibraryCodeList,
-                            sessioninfo.RightsOrigin,
-                            strResPath,
-                            out strLibraryCode,
-                            out strError);
-
-                        if (nRet == 0)
-                        {
-                            result.Value = -1;
-                            result.ErrorInfo = strError;
-                            result.ErrorCode = ErrorCode.AccessDenied;
-                            return result;
-                        }
-                        if (nRet == -1)
-                        {
-                            result.Value = -1;
-                            result.ErrorInfo = strError;
-                            result.ErrorCode = ErrorCode.SystemError;
-                            return result;
-                        }
-                    }
 
                     RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
                     if (channel == null)

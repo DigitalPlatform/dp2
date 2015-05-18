@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -37,6 +38,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -63,6 +65,10 @@
       <Project>{aa6c5e6a-252b-4e2a-a883-0e4e739f8701}</Project>
       <Name>DigitalPlatform.Range</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.Text\DigitalPlatform.Text.csproj">
+      <Project>{26f96cc3-a4a9-4bc4-a10a-bc7e25581ff6}</Project>
+      <Name>DigitalPlatform.Text</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.Xml\DigitalPlatform.Xml.csproj">
       <Project>{e6489e89-1349-4ee7-a00b-ac96b9912587}</Project>
       <Name>DigitalPlatform.Xml</Name>
@@ -71,6 +77,10 @@
       <Project>{bdd43275-eaa0-4670-8ba3-0db5cd7598dd}</Project>
       <Name>DigitalPlatform</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="deleted.txt" />
+    <Content Include="design.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

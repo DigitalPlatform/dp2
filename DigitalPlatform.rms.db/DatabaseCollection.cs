@@ -6178,6 +6178,9 @@ ChannelIdleEventArgs e);
         public string[] Names;    // 新增 所有语言下的名字。每个元素的格式 语言代码:内容
     }
 
+    /// <summary>
+    /// SQL 服务器类型
+    /// </summary>
     public enum SqlServerType
     {
         None = 0,
@@ -6185,6 +6188,9 @@ ChannelIdleEventArgs e);
         SQLite = 2,
         MySql = 3,
         Oracle = 4,
+#if NO
+        LocalDB = 5,    // MS SQL Server LocalDB, 2015/5/17
+#endif
     }
 }
 

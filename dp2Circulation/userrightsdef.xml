@@ -345,7 +345,10 @@
     <comment lang='chi'>上传文件</comment>
     <comment lang='eng'>Upload Files</comment>
   </property>
-
+  <property name='download'>
+    <comment lang='chi'>下载文件</comment>
+    <comment lang='eng'>Download Files</comment>
+  </property>
   <property name='client_uimodifyorderrecord'>
     <comment lang='chi'>前端允许界面直接修改订购记录</comment>
     <comment lang='eng'>Client UI Allow Modify Order Record</comment>

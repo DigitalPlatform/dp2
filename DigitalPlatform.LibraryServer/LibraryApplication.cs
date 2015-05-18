@@ -85,6 +85,7 @@ namespace DigitalPlatform.LibraryServer
         //      2.43 (2015/1/30) GetItemInfo() API 进一步增加了 strItemDbType 参数，并包含了原先的 GetItemInfo GetOrderInfo GetIssuInfo GetCommentInfo API 的全部功能。至此，GetItemInfo() API 所取代的其他几个 API 逐渐要废止。为了保持兼容性，暂时保留一段时间这几个 API
         //      2.44 (2015/4/30) GetSystemParameter() API 增加了 category=cfgs name=getDataDir 获得数据目录物理路径 
         //      2.45 (2015/5/15) 文件上传和 WriteRes() API 都得到了充实，支持 dp2libraryconsole 前端进行文件上传和管理操作了 
+        //      2.46 (2015/5/18) 增加 API ListFile()
         public static string Version = "2.45";
 #if NO
         int m_nRefCount = 0;
@@ -12565,6 +12566,7 @@ strLibraryCode);    // 读者所在的馆代码
                 string strTargetDir = this.DataDir;
                 strFilePath = Path.Combine(strTargetDir, strPath);
 
+                // 注意： strPath 中的斜杠应该是 '/'
                 string strFirstLevel = StringUtil.GetFirstPartPath(ref strPath);
                 if (string.Compare(strFirstLevel, "upload", true) != 0)
                 {
@@ -13017,4 +13019,15 @@ strLibraryCode);    // 读者所在的馆代码
         public string Style = "";   // 角色
     }
 
+    // API ListFile()所使用的结构
+    [DataContract(Namespace = "http://dp2003.com/dp2library/")]
+    public class FileItemInfo
+    {
+        [DataMember]
+        public string Name = ""; // 文件(或目录)名
+        [DataMember]
+        public string CreateTime = "";   // 创建时间。本地时间 "u" 字符串
+        [DataMember]
+        public long Size = 0;   // 尺寸。-1 表示这是目录对象
+    }
 }

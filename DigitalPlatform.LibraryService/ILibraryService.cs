@@ -777,5 +777,14 @@ namespace dp2Library
     long lLength,
     out byte[] baContent,
     out string strFileTime);
+
+        [OperationContract(IsInitiating = true, IsTerminating = false)]
+        LibraryServerResult ListFile(
+            string strAction,
+            string strCategory,
+            string strFileName,
+            long lStart,
+            long lLength,
+            out List<FileItemInfo> infos);
     }
 }

@@ -117,9 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="textBox_rights.Text" xml:space="preserve">
-    <value>borrow,return,renew,lost,reservation,setclock,changereaderpassword,verifyreaderpassword,getbibliosummary,searchitem,getiteminfo,searchreader,getreaderinfo,setreaderinfo,listbibliodbfroms,searchbiblio,getbiblioinfo,getentities,setentities,searchitemdup,getoperlog,amerce,amercemodifyprice,amerceundo,search,getrecord,getcalendar,changecalendar,newcalendar,deletecalendar,batchtask,clearalldbs,devolvereaderinfo,getuser,changeuser,newuser,deleteuser,changeuserpassword,getsystemparameter,repairborrowinfo,passgate,getres,writeres,setbiblioinfo,hire,settlement,undosettlement,getissues,setissues,getorders,setorders,writeobject,writetemplate,managedatabase,setsystemparameter,restore,searchorder,searchissue,getorderinfo,getcommentinfo,setcommentinfo,setiteminfo,changereaderstate,order,amercemodifycomment,urgentrecover,foregift,returnforegift,deletesettlement,getissueinfo,setissueinfo,setorderinfo,searchcomment,managecache,managecomment,settailnumber,setutilinfo</value>
-  </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>

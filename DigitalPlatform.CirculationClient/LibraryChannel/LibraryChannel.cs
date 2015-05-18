@@ -668,6 +668,44 @@ out strError);
         }
          * */
 
+        /// <summary>
+        /// 登录。
+        /// 本方法由 dp2Library API Login() 浅包装而成。
+        /// 请参考关于 dp2Library API Login() 的详细说明。
+        /// 登录成功后，会自动设置好 Rights UserName LibraryCodeList 这几个成员
+        /// </summary>
+        /// <param name="strUserName">用户名</param>
+        /// <param name="strPassword">密码</param>
+        /// <param name="strParameters">登录参数。这是一个逗号间隔的列表字符串</param>
+        /// <param name="strError">返回出错信息</param>
+        /// <returns>
+        /// <para>-1:   出错</para>
+        /// <para>0:    登录未成功</para>
+        /// <para>1:    登录成功</para>
+        /// </returns>
+        public long IdleLogin(string strUserName,
+    string strPassword,
+    string strParameters,
+    out string strError)
+        {
+            string strRights = "";
+            string strOutputUserName = "";
+            string strLibraryCode = "";
+
+            long lRet = this.IdleLogin(
+                strUserName,
+                strPassword,
+                strParameters,
+                out strOutputUserName,
+                out strRights,
+                out strLibraryCode,
+                out strError);
+            this.Rights = strRights;
+            this.UserName = strOutputUserName;    // 2011/7/29
+            this.LibraryCodeList = strLibraryCode;
+            return lRet;
+        }
+
         // 尽量用这个版本
         // return:
         //      -1  error
@@ -711,6 +749,106 @@ out strError);
             return lRet;
         }
 
+        // 异步的版本，里面用到 DoIdle
+        // return:
+        //      -1  error
+        //      0   登录未成功
+        //      1   登录成功
+        /// <summary>
+        /// 登录。
+        /// 请参考关于 dp2Library API Login() 的详细说明。
+        /// 这是比较底层的版本。不会设置 Rights UserName LibraryCodeList 这几个成员。请慎用
+        /// </summary>
+        /// <param name="strUserName">用户名</param>
+        /// <param name="strPassword">密码</param>
+        /// <param name="strParameters">登录参数。这是一个逗号间隔的列表字符串</param>
+        /// <param name="strOutputUserName">返回实际登录的用户名</param>
+        /// <param name="strRights">返回用户的权限字符串</param>
+        /// <param name="strLibraryCode">返回用户所管辖的图书馆代码列表</param>
+        /// <param name="strError">返回出错信息</param>
+        /// <returns>
+        /// <para>-1:   出错</para>
+        /// <para>0:    登录未成功</para>
+        /// <para>1:    登录成功</para>
+        /// </returns>
+        public long IdleLogin(string strUserName,
+            string strPassword,
+            string strParameters,
+            out string strOutputUserName,
+            out string strRights,
+            out string strLibraryCode,
+            out string strError)
+        {
+            strError = "";
+            strRights = "";
+            strOutputUserName = "";
+            strLibraryCode = "";
+
+        REDO:
+            try
+            {
+                IAsyncResult soapresult = this.ws.BeginLogin(
+                    strUserName,
+                    strPassword,
+                    strParameters,
+                    null,
+                    null);
+
+                for (; ; )
+                {
+                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+
+                    if (soapresult.IsCompleted)
+                        break;
+                }
+                if (this.m_ws == null)
+                {
+                    strError = "用户中断";
+                    this.ErrorCode = localhost.ErrorCode.RequestCanceled;
+                    return -1;
+                }
+
+                LibraryServerResult result = this.ws.EndLogin(
+                    out strOutputUserName,
+                    out strRights,
+                    out strLibraryCode,
+                    soapresult);
+                strError = result.ErrorInfo;
+                this.ErrorCode = result.ErrorCode;
+                this.ClearRedoCount();
+                return result.Value;
+            }
+            catch (Exception ex)
+            {
+                int nRet = ConvertWebError(ex, out strError);
+                if (nRet == 0)
+                    return -1;
+                goto REDO;
+            }
+
+#if NO
+            try
+            {
+                LibraryServerResult result = ws.Login(out strOutputUserName,
+                    out strRights,
+                    out strLibraryCode,
+                    strUserName,
+                    strPassword,
+                    strParameters
+                    );
+
+                strError = result.ErrorInfo;
+                return result.Value;
+            }
+            catch (Exception ex)
+            {
+                strError = ex.Message;
+                return -1;
+            }
+#endif
+        }
+
+        // 不是异步的版本。不调用 DoIdle()
         // 一般不要用这个版本
         // return:
         //      -1  error
@@ -836,7 +974,6 @@ out strError);
             }
 
             System.Threading.Thread.Sleep(1);	// 避免CPU资源过度耗费
-
         }
 
         // return:
@@ -4687,6 +4824,67 @@ out strError);
             }
         }
 
+        public long ListFile(
+            DigitalPlatform.Stop stop,
+            string strAction,
+            string strCategory,
+            string strFileName,
+            long lStart,
+            long lLength,
+            out FileItemInfo [] infos,
+            out string strError)
+        {
+            strError = "";
+            infos = null;
+
+        REDO:
+            try
+            {
+                IAsyncResult soapresult = this.ws.BeginListFile(
+                    strAction,
+                    strCategory,
+                    strFileName,
+                    lStart,
+                    lLength,
+                    null,
+                    null);
+
+                for (; ; )
+                {
+                    DoIdle(); // 出让控制权，避免CPU资源耗费过度
+
+                    if (soapresult.IsCompleted)
+                        break;
+                }
+                if (this.m_ws == null)
+                {
+                    strError = "用户中断";
+                    this.ErrorCode = localhost.ErrorCode.RequestCanceled;
+                    return -1;
+                }
+
+                LibraryServerResult result = this.ws.EndListFile(
+                    out infos,
+                    soapresult);
+                if (result.Value == -1 && result.ErrorCode == ErrorCode.NotLogin)
+                {
+                    if (DoNotLogin(ref strError) == 1)
+                        goto REDO;
+                    return -1;
+                }
+                strError = result.ErrorInfo;
+                this.ErrorCode = result.ErrorCode;
+                this.ClearRedoCount();
+                return result.Value;
+            }
+            catch (Exception ex)
+            {
+                int nRet = ConvertWebError(ex, out strError);
+                if (nRet == 0)
+                    return -1;
+                goto REDO;
+            }
+        }
 
         // 获得系统配置文件
         // parameters:

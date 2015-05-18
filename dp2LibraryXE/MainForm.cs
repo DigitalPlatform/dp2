@@ -1072,6 +1072,20 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
                 return -1;
             }
 
+            // 删除本实例创建过的全部 SQL 数据库
+            // parameters:
+            // return:
+            //      -1  出错
+            //      0   databases.xml 文件不存在; 或 databases.xml 中没有任何 SQL 数据库信息
+            //      1   成功删除
+            int nRet = DigitalPlatform.rms.InstanceDialog.DeleteAllSqlDatabase(strDirectory,
+                out strError);
+            if (nRet == -1)
+            {
+                strError = "删除数据目录 '" + strDirectory + "' 中的全部 SQL 数据库过程出错: " + strError;
+                return -1;
+            }
+
             try
             {
                 PathUtil.RemoveReadOnlyAttr(strDirectory);
@@ -1130,6 +1144,18 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
 
             }
 
+
+            SelectSqlServerDialog dlg = new SelectSqlServerDialog();
+            MainForm.SetControlFont(dlg, this.Font);
+            dlg.StartPosition = FormStartPosition.CenterScreen;
+            dlg.ShowDialog(this);
+
+            if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+            {
+                strError = "放弃重新安装 dp2Kernel 数据目录";
+                return 0;
+            }
+
             dp2Kernel_stop();
 
             // 删除以前的目录
@@ -1154,7 +1180,9 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
             // return:
             //      -1  error
             //      0   succeed
-            nRet = dp2Kernel_createXml(this.KernelDataDir,
+            nRet = dp2Kernel_createXml(
+                dlg.SelectedType, // "localdb",
+                this.KernelDataDir,
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -1222,10 +1250,14 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
         }
 
         // 创建/修改 databases.xml 文件
+        // parameters:
+        //      strSqlServerType    sqlite/localdb，两者之一
         // return:
         //      -1  error
         //      0   succeed
-        public int dp2Kernel_createXml(string strDataDir,
+        public int dp2Kernel_createXml(
+            string strSqlServerType,
+            string strDataDir,
             out string strError)
         {
             strError = "";
@@ -1254,22 +1286,52 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
                 return -1;
             }
 
-            DomUtil.SetAttr(nodeDatasource, "mode", null);
+            if (strSqlServerType == "sqlite")
+            {
+                DomUtil.SetAttr(nodeDatasource, "mode", null);
 
-            /*
-             * 
-    <datasource userid="" password="7E/u3+nbJxg=" servername="~sqlite" servertype="SQLite" />             * 
-             * */
+                /*
+                 * 
+        <datasource userid="" password="7E/u3+nbJxg=" servername="~sqlite" servertype="SQLite" />             * 
+                 * */
 
-            DomUtil.SetAttr(nodeDatasource,
-                "servertype",
-                "SQLite");
-            DomUtil.SetAttr(nodeDatasource,
-                "servername",
-                "~sqlite");
-            DomUtil.SetAttr(nodeDatasource,
-                 "userid",
-                 "");
+                DomUtil.SetAttr(nodeDatasource,
+                    "servertype",
+                    "SQLite");
+                DomUtil.SetAttr(nodeDatasource,
+                    "servername",
+                    "~sqlite");
+                DomUtil.SetAttr(nodeDatasource,
+                     "userid",
+                     "");
+            }
+            else if (strSqlServerType == "localdb")
+            {
+                DomUtil.SetAttr(nodeDatasource, "mode", "SSPI");
+
+                /*
+                 * 
+        <datasource userid="" password="7E/u3+nbJxg=" servername="~sqlite" servertype="SQLite" />             * 
+                 * */
+
+                DomUtil.SetAttr(nodeDatasource,
+                    "servertype",
+                    "MS SQL Server");
+                DomUtil.SetAttr(nodeDatasource,
+                    "servername",
+                    "(LocalDB)\\MSSQLLocalDB");
+                DomUtil.SetAttr(nodeDatasource,
+                     "userid",
+                     null);
+                DomUtil.SetAttr(nodeDatasource,
+                     "password",
+                     null);
+            }
+            else
+            {
+                strError = "未知的 SQL 服务器类型 '"+strSqlServerType+"'";
+                return -1;
+            }
 #if NO
             string strPassword = Cryptography.Encrypt(this.DatabaseLoginPassword, "dp2003");
             DomUtil.SetAttr(nodeDatasource,
@@ -3622,7 +3684,7 @@ Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
                     this.AppInfo.Save();
 
                     MessageBox.Show(this, strError);
-                    Process.Start("http://www.microsoft.com/en-us/download/details.aspx?id=34679");
+                    Process.Start("http://www.microsoft.com/zh-cn/download/details.aspx?id=34679");
                     return;
                 }
             }

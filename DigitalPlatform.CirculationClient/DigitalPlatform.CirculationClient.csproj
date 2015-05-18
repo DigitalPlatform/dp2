@@ -251,6 +251,9 @@
     <None Include="Service References\localhost\DigitalPlatform.CirculationClient.localhost.ErrorCodeValue.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
     </None>
+    <None Include="Service References\localhost\DigitalPlatform.CirculationClient.localhost.FileItemInfo.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
     <None Include="Service References\localhost\DigitalPlatform.CirculationClient.localhost.LibraryServerResult.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
     </None>

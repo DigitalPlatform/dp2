@@ -794,5 +794,13 @@ SessionMode = SessionMode.NotAllowed)]
     out byte[] baContent,
     out string strFileTime);
 
+        [OperationContract]
+        LibraryServerResult ListFile(
+            string strAction,
+            string strCategory,
+            string strFileName,
+            long lStart,
+            long lLength,
+            out List<FileItemInfo> infos);
     }
 }

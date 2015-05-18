@@ -74,7 +74,9 @@ namespace DigitalPlatform.LibraryServer
         //      -2  时间戳不匹配
         //      -1  一般性错误
         //      0   成功
+        //      其他  成功删除的文件和目录个数
         public int WriteFile(
+            string strRootPath,
             string strFilePath,
             string strRanges,
             long lTotalLength,
@@ -104,12 +106,51 @@ namespace DigitalPlatform.LibraryServer
 
             bool bDelete = StringUtil.IsInList("delete", strStyle) == true;
 
-            if (bDelete == false && baSource == null)
+            if (bDelete == true)
             {
-                strError = "baSource 参数值不能为 null";
-                return -1;
-            }
+                int nDeleteCount = 0;
+                string strDirectory = Path.GetDirectoryName(strFilePath);
+                string strPattern = Path.GetFileName(strFilePath);
 
+                DirectoryInfo di = new DirectoryInfo(strDirectory);
+                FileSystemInfo[] sis = di.GetFileSystemInfos(strPattern);
+                foreach (FileSystemInfo si in sis)
+                {
+                    // 安全性检查：不允许文件和目录越出指定的根目录
+                    if (PathUtil.IsChildOrEqual(si.FullName, strRootPath) == false)
+                        continue;
+
+                    if (si is DirectoryInfo)
+                    {
+                        // 删除一个目录
+                        PathUtil.DeleteDirectory(si.FullName);
+                        nDeleteCount++;
+                        continue;
+                    }
+
+                    if (si is FileInfo)
+                    {
+                        // 删除一个文件
+                        if (File.Exists(si.FullName) == true)
+                            File.Delete(si.FullName);
+
+                        string strNewFilePath1 = GetNewFileName(si.FullName);
+
+                        if (File.Exists(strNewFilePath1) == true)
+                            File.Delete(strNewFilePath1);
+
+                        string strRangeFileName = GetRangeFileName(si.FullName);
+
+                        if (File.Exists(strRangeFileName) == true)
+                            File.Delete(strRangeFileName);
+
+                        nDeleteCount++;
+                    }
+                }
+
+                return nDeleteCount;
+            }
+#if NO
             if (bDelete == true && Directory.Exists(strFilePath) == true)
             {
                 // 删除一个目录
@@ -135,6 +176,15 @@ namespace DigitalPlatform.LibraryServer
 
                 return 0; 
             }
+#endif
+
+            if (bDelete == false && baSource == null)
+            {
+                strError = "baSource 参数值不能为 null";
+                return -1;
+            }
+
+            string strNewFilePath = GetNewFileName(strFilePath);
 
             // 确保文件的路径所经过的所有子目录已经创建
             PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strFilePath));
@@ -587,6 +637,186 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
             return lTotalLength;
+        }
+
+        // 转入新的目录
+        // parameters:
+        //      strRoot 根目录，物理路径
+        //      strCurrentDirectory 当前路径，物理
+        //      strPath 匹配模式
+        //      strResultDirectory  返回的结果路径，注意这是物理路径
+        // return:
+        //      -1  出错
+        //      0   要转去的物理目录不存在
+        //      1   成功
+        public static int ChangeDirectory(
+            string strRoot,
+            string strCurrentDirectory,
+            string strPattern,
+            out string strResultDirectory,
+            out string strError)
+        {
+            strError = "";
+
+            strResultDirectory = "";
+
+            string strLogicResult = "";
+            try
+            {
+                // 用逻辑路径来进行调用。这样的用意是避免越过根
+                FileSystemLoader.ChangeDirectory(strCurrentDirectory.Substring(strRoot.Length),
+                    strPattern,
+                    out strLogicResult);
+            }
+            catch (Exception ex)
+            {
+                strError = ex.Message;
+                return -1;
+            }
+
+            // 检测物理目录是否存在
+            strResultDirectory = Path.Combine(strRoot, PathUtil.RemoveRootSlash(strLogicResult));
+
+            // 检查文件或目录必须在根以下。防止漏洞
+            if (PathUtil.IsChildOrEqual(strResultDirectory, strRoot) == false)
+            {
+                strError = "目录 '" + strLogicResult + "' 不存在";
+                return 0;
+            }
+
+            if (Directory.Exists(strResultDirectory) == false)
+            {
+                strError = "目录 '" + strLogicResult + "' 不存在";
+                return 0;
+            }
+
+            return 1;
+        }
+
+        // 返回的 FileItemInfo.Name 中是逻辑全路径
+        // parameters:
+        //      strCurrentDirectory 当前路径。物理路径
+        // return:
+        //      -1  出错
+        //      其他  列出的事项总数。注意，不是 lLength 所指出的本次返回数
+        public static int ListFile(
+            string strRootPath,
+            string strCurrentDirectory,
+            string strPattern,
+            long lStart,
+            long lLength,
+            out List<FileItemInfo> infos,
+            out string strError)
+        {
+            strError = "";
+            infos = new List<FileItemInfo>();
+
+            int MAX_ITEMS = 100;    // 一次 API 最多返回的事项数量
+
+            try
+            {
+                FileSystemLoader loader = new FileSystemLoader(strCurrentDirectory, strPattern);
+
+                int i = 0;
+                int count = 0;
+                foreach (FileSystemInfo si in loader)
+                {
+                    // 检查文件或目录必须在根以下。防止漏洞
+                    if (PathUtil.IsChildOrEqual(si.FullName, strRootPath) == false)
+                        continue;
+
+                    if (i < lStart)
+                        goto CONTINUE;
+                    if (lLength != -1 && count > lLength)
+                        goto CONTINUE;
+
+                    if (count >= MAX_ITEMS)
+                        goto CONTINUE;
+
+                    FileItemInfo info = new FileItemInfo();
+                    infos.Add(info);
+                    info.Name = si.FullName.Substring(strRootPath.Length);
+                    info.CreateTime = si.CreationTime.ToString("u");
+
+                    if (si is DirectoryInfo)
+                    {
+                        info.Size = -1; // 表示这是目录
+                    }
+
+                    if (si is FileInfo)
+                    {
+                        FileInfo fi = si as FileInfo;
+                        info.Size = fi.Length;
+                    }
+
+                    count++;
+
+                CONTINUE:
+                    i++;
+                }
+
+                return i;
+            }
+            catch (DirectoryNotFoundException)
+            {
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                strError = ex.Message;
+                return -1;
+            }
+        }
+
+        // 删除文件或者目录
+        // parameters:
+        //      strCurrentDirectory 当前路径，注意这是物理路径
+        // return:
+        //      -1  出错
+        //      其他  实际删除的文件和目录个数
+        public static int DeleteFile(
+    string strRootPath,
+    string strCurrentDirectory,
+    string strPattern,
+    out string strError)
+        {
+            strError = "";
+
+            try
+            {
+                FileSystemLoader loader = new FileSystemLoader(strCurrentDirectory, strPattern);
+                loader.ListStyle = ListStyle.None;
+                int count = 0;
+                foreach (FileSystemInfo si in loader)
+                {
+                    // 检查文件或目录必须在根以下。防止漏洞
+                    if (PathUtil.IsChildOrEqual(si.FullName, strRootPath) == false)
+                        continue;
+
+                    if (si is DirectoryInfo)
+                    {
+                        PathUtil.DeleteDirectory(si.FullName);
+                    }
+
+                    if (si is FileInfo)
+                    {
+                        File.Delete(si.FullName);
+                    }
+
+                    count++;
+                }
+
+                return count;
+            }
+            catch (DirectoryNotFoundException)
+            {
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                strError = ex.Message;
+                return -1;
+            }
         }
     }
 }

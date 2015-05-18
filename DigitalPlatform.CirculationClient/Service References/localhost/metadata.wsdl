@@ -70,6 +70,12 @@
   <wsdl:message name="dp2libraryREST_GetFile_OutputMessage">
     <wsdl:part name="parameters" element="tns:GetFileResponse" />
   </wsdl:message>
+  <wsdl:message name="dp2libraryREST_ListFile_InputMessage">
+    <wsdl:part name="parameters" element="tns:ListFile" />
+  </wsdl:message>
+  <wsdl:message name="dp2libraryREST_ListFile_OutputMessage">
+    <wsdl:part name="parameters" element="tns:ListFileResponse" />
+  </wsdl:message>
   <wsdl:message name="dp2libraryREST_GetVersion_InputMessage">
     <wsdl:part name="parameters" element="tns:GetVersion" />
   </wsdl:message>
@@ -617,6 +623,10 @@
     <wsdl:operation name="GetFile">
       <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetFile" message="tns:dp2libraryREST_GetFile_InputMessage" />
       <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetFileResponse" message="tns:dp2libraryREST_GetFile_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="ListFile">
+      <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/ListFile" message="tns:dp2libraryREST_ListFile_InputMessage" />
+      <wsdl:output wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/ListFileResponse" message="tns:dp2libraryREST_ListFile_OutputMessage" />
     </wsdl:operation>
     <wsdl:operation name="GetVersion">
       <wsdl:input wsaw:Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetVersion" message="tns:dp2libraryREST_GetVersion_InputMessage" />

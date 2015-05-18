@@ -164,7 +164,8 @@ namespace DigitalPlatform.rms
                 goto ERROR1;
             }
 
-            if (this._sqlServerInfo.IntegratedSecurityOnlyMode == false)
+            if (this._sqlServerInfo.IntegratedSecurityOnlyMode == false
+                && this._sqlServerInfo.IsLocalDB() == false)
             {
                 if (string.IsNullOrEmpty(this.textBox_loginName.Text) == true)
                 {
@@ -195,11 +196,11 @@ namespace DigitalPlatform.rms
                     goto ERROR1;
                 }
 
-
                 this.DebugInfo += DateTime.Now.ToString() + " 已创建登录名: " + this.textBox_loginName.Text + "\r\n";
             }
 
-            if (_sqlServerInfo.IntegratedSecurityOnlyMode == true)
+            if (_sqlServerInfo.IntegratedSecurityOnlyMode == true
+                || this._sqlServerInfo.IsLocalDB() == true)
             {
                 nRet = AddSystemDbCreatorRole(this._sqlServerInfo,
         out strError);
@@ -266,15 +267,15 @@ namespace DigitalPlatform.rms
                 this._sqlServerInfo = info;
                 this.button_copySqlServerInfo.Enabled = true;
 
-                if (info.IntegratedSecurityOnlyMode == false)
+                if (info.IntegratedSecurityOnlyMode == false
+                    && info.IsLocalDB() == false)
                 {
                     if (string.IsNullOrEmpty(this.textBox_loginName.Text) == true)
                         this.textBox_loginName.Text = this.textBox_instanceName.Text;
                     if (string.IsNullOrEmpty(this.textBox_loginName.Text) == true)
                         this.textBox_loginName.Text = "dp2kernel";  // 缺省的名字
                 }
-
-                if (info.IntegratedSecurityOnlyMode == true)
+                else // if (info.IntegratedSecurityOnlyMode == true)
                 {
                     this.textBox_loginName.Text = "";
                     this.textBox_loginPassword.Text = "";
@@ -307,6 +308,14 @@ namespace DigitalPlatform.rms
                     + "SSPI: " + this.SSPI.ToString() + "\r\n"
                     + "SQL Server 版本: " + this.Version + "\r\n"
                     + "IntegratedSecurityOnlyMode: " + this.IntegratedSecurityOnlyMode.ToString();
+            }
+
+            // 当前是否为 MS SQL Server LocalDB?
+            public bool IsLocalDB()
+            {
+                if (this.ServerName.ToLower().IndexOf("(localdb)") == -1)
+                    return false;
+                return true;
             }
         }
 

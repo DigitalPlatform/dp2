@@ -13,16 +13,17 @@ namespace dp2LibraryConsole
 
         static void Main(string[] args)
         {
-            Instance instance = new Instance();
-
-            while (true)
+            using (Instance instance = new Instance())
             {
-                instance.DisplayPrompt();
+                while (true)
+                {
+                    instance.DisplayPrompt();
 
-                string line = Console.ReadLine();
+                    string line = Console.ReadLine();
 
-                if (instance.ProcessCommand(line) == true)
-                    return;
+                    if (instance.ProcessCommand(line) == true)
+                        return;
+                }
             }
         }
 

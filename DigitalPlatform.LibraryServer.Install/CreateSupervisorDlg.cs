@@ -8,8 +8,16 @@ using System.Windows.Forms;
 
 namespace DigitalPlatform.LibraryServer
 {
+    /// <summary>
+    /// 用于创建 supervisor 用户的对话框
+    /// </summary>
     public partial class CreateSupervisorDlg : Form
     {
+        /// <summary>
+        /// 缺省的 supervisor 用户权限值
+        /// </summary>
+        public static string DefaultRights = "borrow,return,renew,lost,reservation,order,setclock,changereaderpassword,verifyreaderpassword,getbibliosummary,searchreader,getreaderinfo,setreaderinfo,movereaderinfo,changereaderstate,listbibliodbfroms,listdbfroms,searchbiblio,getbiblioinfo,searchitem,getiteminfo,setiteminfo,getoperlog,amerce,amercemodifyprice,amercemodifycomment,amerceundo,search,getrecord,getcalendar,changecalendar,newcalendar,deletecalendar,batchtask,clearalldbs,devolvereaderinfo,getuser,changeuser,newuser,deleteuser,changeuserpassword,getsystemparameter,setsystemparameter,urgentrecover,repairborrowinfo,passgate,getres,writeres,setbiblioinfo,hire,foregift,returnforegift,settlement,undosettlement,deletesettlement,searchissue,getissueinfo,setissueinfo,searchorder,getorderinfo,setorderinfo,getcommentinfo,setcommentinfo,searchcomment,writeobject,writerecord,writetemplate,managedatabase,restore,managecache,managecomment,settailnumber,setutilinfo,getpatrontempid,getchannelinfo,managechannel,viewreport,upload,download";
+
         public CreateSupervisorDlg()
         {
             InitializeComponent();
@@ -17,7 +25,8 @@ namespace DigitalPlatform.LibraryServer
 
         private void CreateSupervisorDlg_Load(object sender, EventArgs e)
         {
-
+            if (string.IsNullOrEmpty(this.textBox_rights.Text) == true)
+                this.textBox_rights.Text = DefaultRights;
         }
 
         private void button_createSupervisor_Click(object sender, EventArgs e)

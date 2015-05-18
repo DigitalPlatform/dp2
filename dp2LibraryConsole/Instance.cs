@@ -1,14 +1,19 @@
-﻿using DigitalPlatform;
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.IO;
-using DigitalPlatform.Range;
-using DigitalPlatform.Xml;
-using Ionic.Zip;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+
+using Ionic.Zip;
+
+using DigitalPlatform;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.IO;
+using DigitalPlatform.Range;
+using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
+using DigitalPlatform.CirculationClient.localhost;
+using System.Diagnostics;
 
 namespace dp2LibraryConsole
 {
@@ -36,6 +41,9 @@ namespace dp2LibraryConsole
         /// </summary>
         public string Lang = "zh";
 
+        /// <summary>
+        /// 构造函数
+        /// </summary>
         public Instance()
         {
             if (string.IsNullOrEmpty(this.UserDir) == true)
@@ -50,18 +58,25 @@ namespace dp2LibraryConsole
 
             this._currentLocalDir = Directory.GetCurrentDirectory();
 
+#if NO
             this.Channel.Url = this.LibraryServerUrl;
 
             this.Channel.BeforeLogin -= new DigitalPlatform.CirculationClient.BeforeLoginEventHandle(Channel_BeforeLogin);
             this.Channel.BeforeLogin += new DigitalPlatform.CirculationClient.BeforeLoginEventHandle(Channel_BeforeLogin);
+#endif
+            this.PrepareChannel();
         }
 
         // 显示命令行提示符
         public void DisplayPrompt()
         {
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
+
             Console.WriteLine();
             string strLocal = "本地 " + this._currentLocalDir;
-            Console.Write(new string('-', strLocal.Length) + "\r\n" + strLocal + "\r\n远程 " + this._currentDir + "\r\n>");
+            Console.Write(new string('*', strLocal.Length) + "\r\n远程 " + this._currentDir + "\r\n" + strLocal + "\r\n> ");
+            
+            Console.ResetColor();
         }
 
         // return:
@@ -76,6 +91,8 @@ namespace dp2LibraryConsole
             int nRet = 0;
 
             List<string> parameters = ParseParameters(line);
+            if (parameters.Count == 0)
+                return false;
 
             if (parameters[0] == "login")
             {
@@ -101,43 +118,48 @@ namespace dp2LibraryConsole
                 nRet = Login(strHost, strUserName, strPassword, out strError);
                 if (nRet == -1)
                 {
-                    Console.WriteLine("Login error: " + strError);
+                    Console.WriteLine("登录失败: " + strError);
                     return false;
                 }
 
-                Console.WriteLine("Login succeed");
+                Console.WriteLine("登录成功");
                 return false;
             }
 
             if (parameters[0] == "dir")
             {
-                string strDir = this._currentLocalDir;
+                // 测试 ..
+                // *.*
+                // ..\
+                // ..\*.*
+                // \
+                // \*.*
+
+                string strDir = "";
                 if (parameters.Count > 1)
                     strDir = parameters[1];
 
+                FileSystemLoader loader = new FileSystemLoader(this._currentLocalDir, strDir);
+
                 int file_count = 0;
                 int dir_count = 0;
-
-                DirectoryInfo di = new DirectoryInfo(strDir);
-
-                Console.WriteLine();
-                Console.WriteLine("本地 " + di.FullName + " 的目录:");
-                Console.WriteLine();
-
-                DirectoryInfo[] dis = di.GetDirectories();
-                foreach (DirectoryInfo info in dis)
+                foreach (FileSystemInfo si in loader)
                 {
-                    AlignWrite(info.LastWriteTime.ToString("u") + " <dir>      ");
-                    Console.WriteLine(info.Name + "/");
-                    dir_count++;
-                }
+                    // TODO: 是否先得到 FullName ，再根据起点目录截断显示后部
+                    if (si is DirectoryInfo)
+                    {
+                        AlignWrite(si.LastWriteTime.ToString("u") + " <dir>      ");
+                        Console.WriteLine(si.Name + "/");
+                        dir_count++;
+                    }
 
-                FileInfo[] fis = di.GetFiles();
-                foreach (FileInfo info in fis)
-                {
-                    AlignWrite(info.LastWriteTime.ToString("u") + info.Length.ToString().PadLeft(10, ' ') + "  ");
-                    Console.WriteLine(info.Name);
-                    file_count++;
+                    if (si is FileInfo)
+                    {
+                        FileInfo info = si as FileInfo;
+                        AlignWrite(info.LastWriteTime.ToString("u") + info.Length.ToString().PadLeft(10, ' ') + "  ");
+                        Console.WriteLine(info.Name);
+                        file_count++;
+                    }
                 }
 
                 Console.WriteLine();
@@ -160,17 +182,20 @@ namespace dp2LibraryConsole
                 {
                     string strDir = "";
 
-                    if (parameters[1] == "..")
-                        strDir = Path.GetDirectoryName(this._currentLocalDir);
-                    else if (parameters[1] == ".")
+                    string strParam = GetCdParmeter(parameters);
+
+                    if (strParam == ".")
                     {
                         // 当前路径不变
                         return false;
                     }
                     else
                     {
-                        strDir = Path.Combine(this._currentLocalDir, parameters[1]);
+#if NO
+                        strDir = Path.Combine(this._currentLocalDir, strParam);
                         // 上一句执行完，有可能是这样 strDir = '\publish\dp2libraryxe'，没有盘符
+#endif
+                        FileSystemLoader.ChangeDirectory(this._currentLocalDir, strParam, out strDir);
                     }
 
                     // 要检验一下目录是否存在
@@ -188,29 +213,30 @@ namespace dp2LibraryConsole
 
             if (parameters[0] == "rdir")
             {
-                List<string> filenames = null;
+                List<FileItemInfo> filenames = null;
 
-                string strDir = this._currentDir;
+                string strDir = "";
                 if (parameters.Count > 1)
                     strDir = parameters[1];
 
-                Console.WriteLine();
-                Console.WriteLine("远程 " + this._currentDir + " 的目录:");
-                Console.WriteLine();
-
-                nRet = Dir(this._currentDir,
-            out filenames,
-            out strError);
+                nRet = RemoteList(
+                    GetRemoteCurrentDir(),  // "!upload/" + this._currentDir,
+                    strDir,
+                    out filenames,
+                    out strError);
                 if (nRet == -1)
                 {
                     Console.WriteLine("Dir error: " + strError);
                     return false;
                 }
 
+                string strDisplayDirectory = "";
+
                 int file_count = 0;
                 int dir_count = 0;
-                foreach (string filename in filenames)
+                foreach (FileItemInfo info in filenames)
                 {
+#if NO
                     string strName = "";
                     string strTime = "";
                     string strSize = "";
@@ -219,17 +245,41 @@ namespace dp2LibraryConsole
             out strName,
             out strTime,
             out strSize);
+#endif
+                    string strCurrent = Path.GetDirectoryName(info.Name);
+                    if (strCurrent != strDisplayDirectory)
+                    {
+                        Console.WriteLine();
+                        Console.WriteLine("远程 " + strCurrent + " 的目录:");
+                        Console.WriteLine();
 
-                    if (strSize == "dir")
+                        strDisplayDirectory = strCurrent;
+                    }
+
+                    string strName = "";
+
+                    if (strDisplayDirectory != null)
+                    {
+                        strName = info.Name.Substring(strDisplayDirectory.Length);
+                        if (String.IsNullOrEmpty(strName) == false && strName[0] == '\\')
+                            strName = strName.Substring(1);
+                    }
+                    else
+                        strName = info.Name;
+
+                    // TODO: 如何显示文件名是个问题。建议，处在当前目录的，只显示纯文件名；越过当前目录的，显示全路径
+                    // 也可以一段一段显示。某一段的事项都是处于同一目录，就在前导显示一句目录名，后面就显示纯文件名
+                    // 两种风格都可以实现了看看
+                    if (info.Size == -1)
                     {
                         dir_count++;
-                        AlignWrite(strTime + " <dir>      ");
+                        AlignWrite(info.CreateTime + " <dir>      ");
                         Console.WriteLine(strName);
                     }
                     else
                     {
                         file_count++;
-                        AlignWrite(strTime + strSize.PadLeft(10, ' ') + "  ");
+                        AlignWrite(info.CreateTime + info.Size.ToString().PadLeft(10, ' ') + "  ");
                         Console.WriteLine(strName);
                     }
                 }
@@ -250,6 +300,44 @@ namespace dp2LibraryConsole
                     Console.WriteLine(this._currentDir);    // 显示当前路径
                     return false;
                 }
+
+#if NO
+                string strDir = "";
+                if (parameters.Count > 1)
+                    strDir = parameters[1];
+#endif
+
+                string strDir = GetCdParmeter(parameters);
+
+                string strResultDirectory = "";
+
+                // 进行远程 CD 命令
+                // parameters:
+                //      strCurrentDirectory 当前路径
+                //      strPath 试图转去的路径
+                //      strResultDirectory  返回成功转过去的结果路径。需把这个路径设为最新的当前路径
+                nRet = RemoteChangeDir(
+                    GetRemoteCurrentDir(),  // "!upload" + this._currentDir,
+                    strDir,
+                    out strResultDirectory,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                // 检查这个远程目录是否存在
+
+                this._currentDir = strResultDirectory;
+
+                Debug.Assert(string.IsNullOrEmpty(this._currentDir) == true || this._currentDir.IndexOf("\\") == -1, 
+                    "this._currentDir 中不允许使用字符 '\\'");
+#if DEBUG
+                if (string.IsNullOrEmpty(this._currentDir) == false)
+                {
+                    Debug.Assert(this._currentDir[0] == '\\' || this._currentDir[0] == '/', "远程逻辑路径如果为非空，则第一字符应该是斜杠。但现在是 '" + this._currentDir + "'");
+                }
+#endif
+
+#if NO
                 if (parameters.Count > 1)
                 {
                     string strDir = "";
@@ -286,23 +374,116 @@ namespace dp2LibraryConsole
 
                     this._currentDir = strDir;
                 }
+#endif
+
                 return false;
             }
 
             if (parameters[0] == "upload")
             {
-                if (parameters.Count != 3)
+                if (parameters.Count < 2)
                 {
-                    Console.WriteLine("upload 命令用法: upload 源目录 目标目录");
+                    Console.WriteLine("upload 命令用法: upload 源文件或目录 [目标文件或目录]");
+                    // 如果目标目录省略，则表示和源目录同名
                     return false;
                 }
 
-                string strSource = parameters[1];
-                string strTarget = parameters[2];
+                string strSource = parameters[1];   // strSource 可能为 "*.*" 这样的模式
+                string strTarget = "";  // strTarget 可能空缺
+                
+                if (parameters.Count > 2)
+                    strTarget = parameters[2];
 
-                string strSourcePath = GetLocalFullDirectory(strSource);
+                nRet = DoUpload(strSource,
+            strTarget,
+            out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                return false;
+            }
 
-                if (Directory.Exists(strSourcePath) == true)
+            if (parameters[0] == "rdel" || parameters[0] == "rdelete")
+            {
+                if (parameters.Count != 2)
+                {
+                    Console.WriteLine("rdel 命令用法: rdel 远程目录");
+                    return false;
+                }
+
+                string strDir = "";
+                if (parameters.Count > 1)
+                    strDir = parameters[1];
+
+                // 删除一个远程文件或者目录
+                nRet = RemoteDelete(
+                    GetRemoteCurrentDir(),
+                    strDir,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                Console.WriteLine("已删除远程文件 " + nRet.ToString() + " 个");
+                return false;
+            }
+
+            Console.WriteLine("unknown command '" + line + "'");
+            return false;
+        ERROR1:
+            Console.WriteLine(strError);
+            return false;
+        }
+
+        string GetRemoteCurrentDir()
+        {
+#if DEBUG
+            if (string.IsNullOrEmpty(this._currentDir) == false)
+            {
+                Debug.Assert(this._currentDir[0] == '\\' || this._currentDir[0] == '/', "远程逻辑路径如果为非空，则第一字符应该是斜杠。但现在是 '" + this._currentDir + "'");
+            }
+#endif
+            return "!upload" + this._currentDir.Replace("\\", "/"); // 调用文件相关 API 的时候，逻辑路径要求斜杠字符为 '/'
+        }
+
+
+        // 获得 cd 命令第二个以及以后的参数
+        // 能够把 cd program files 解析出 'program files'
+        static string GetCdParmeter(List<string> parameters)
+        {
+            string strResult = "";
+            for (int i = 1; i < parameters.Count; i++)
+            {
+                if (i > 1)
+                    strResult += " ";
+                strResult += parameters[i];
+            }
+
+            return strResult;
+        }
+
+        // 进行文件或目录上载
+        // return:
+        //      -1  出错
+        //      0   正常
+        int DoUpload(string strSource,
+            string strTargetParam,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            FileSystemLoader loader = new FileSystemLoader(this._currentLocalDir, strSource);
+            loader.ListStyle = ListStyle.None;  // 对单一无匹配模式的目录对象不展开其下级
+
+            foreach (FileSystemInfo si in loader)
+            {
+                // string strSourcePath = GetLocalFullDirectory(strSource);
+                string strSourcePath = si.FullName;
+
+                string strTarget = strTargetParam;
+                if (string.IsNullOrEmpty(strTargetParam) == true)
+                    strTarget = si.Name;
+
+                if (si is DirectoryInfo)
                 {
                     string strServerFilePath = "!upload/" + GetFullDirectory(strTarget) + "/reports.zip";
                     string strZipFileName = Path.GetTempFileName();
@@ -336,15 +517,15 @@ namespace dp2LibraryConsole
                             goto ERROR1;
 
                         Console.WriteLine();
-                        Console.WriteLine("本地目录 " + GetLocalFullDirectory(strSource) + " 成功上传到远程 " + GetFullDirectory(strTarget));
-                        return false;
+                        Console.WriteLine("本地目录 " + si.FullName + " 成功上传到远程 " + GetFullDirectory(strTarget));
+                        continue;
                     }
                     finally
                     {
                         File.Delete(strZipFileName);
                     }
                 }
-                else if (File.Exists(strSourcePath) == true)
+                else if (si is FileInfo)
                 {
                     string strServerFilePath = "!upload/" + GetFullDirectory(strTarget);
                     // return:
@@ -363,39 +544,13 @@ namespace dp2LibraryConsole
                         goto ERROR1;
 
                     Console.WriteLine();
-                    Console.WriteLine("本地文件 " + GetLocalFullDirectory(strSource) + " 成功上传到远程 " + GetFullDirectory(strTarget));
-                    return false;
+                    Console.WriteLine("本地文件 " + si.FullName + " 成功上传到远程 " + GetFullDirectory(strTarget));
+                    continue;
                 }
             }
-
-            if (parameters[0] == "rdel" || parameters[0] == "rdelete")
-            {
-                if (parameters.Count != 2)
-                {
-                    Console.WriteLine("rdel 命令用法: rdel 远程目录");
-                    return false;
-                }
-
-                string strRemoteFilePath = GetFullDirectory(parameters[1]); // 远程逻辑路径
-                string strRemote = "!upload/" + strRemoteFilePath;  // 远程物理路径
-                // 删除一个远程文件或者目录
-                nRet = DeleteRemoteFile(
-                    null,
-                    this.Channel,
-                    strRemote,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-
-                Console.WriteLine("已删除远程文件 " + strRemoteFilePath);
-                return false;
-            }
-
-            Console.WriteLine("unknown command '" + line + "'");
-            return false;
-            ERROR1:
-                Console.WriteLine(strError);
-                return false;
+            return 0;
+        ERROR1:
+            return -1;
         }
 
         // 解析从 dp2library 返回的文件名字符串
@@ -438,47 +593,7 @@ namespace dp2LibraryConsole
             Console.Write(strText.PadLeft(30, ' '));
         }
 
-        // reutrn:
-        //      -1  出错
-        //      0   不存在
-        //      1   存在
-        int RemoteDirExists(string strDir)
-        {
-            if (string.IsNullOrEmpty(strDir) == true)
-                return 1;
 
-            string strUpLevel = Path.GetDirectoryName(strDir);
-
-            string strPureName = Path.GetFileName(strDir);
-            List<string> filenames = null;
-            string strError = "";
-            int nRet = Dir(strUpLevel,
-out filenames,
-out strError);
-            if (nRet == -1)
-            {
-                Console.WriteLine("Dir error: " + strError);
-                return -1;
-            }
-
-            // strPureName = MakeDirectory(strPureName);
-
-            foreach (string filename in filenames)
-            {
-                string strName = "";
-                string strTime = "";
-                string strSize = "";
-
-                ParseFileName(filename,
-        out strName,
-        out strTime,
-        out strSize);
-                if (strSize == "dir" && strName.ToLower() == strPureName.ToLower())
-                    return 1;
-            }
-
-            return 0;
-        }
 
         static bool IsDirectoryPath(string strPath)
         {
@@ -505,10 +620,26 @@ out strError);
 
         static List<string> ParseParameters(string line)
         {
-            string[] parameters = line.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-            List<string> result = new List<string>(parameters);
+            // string[] parameters = line.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            // List<string> result = new List<string>(parameters);
 
-            return result;
+            List<string> result0 = StringUtil.SplitString(line,
+                " ",
+                new string[] { "''" },
+                StringSplitOptions.RemoveEmptyEntries);
+
+            List<string> result1 = new List<string>();
+            foreach (string s in result0)
+            {
+                result1.Add(UnQuote(s));
+            }
+
+            return result1;
+        }
+
+        static string UnQuote(string strText)
+        {
+            return strText.Replace("'", "");
         }
 
         // 获得输入的用户名和密码
@@ -531,20 +662,66 @@ out strError);
             strUserName = Console.ReadLine();
 
             Console.Write("Password:");
+            Console.BackgroundColor = Console.ForegroundColor;
+            // Console.ForegroundColor = ConsoleColor.Black;
             strPassword = Console.ReadLine();
+            Console.ResetColor();
             return false;
         }
 
+        // Implement IDisposable.
+        // Do not make this method virtual.
+        // A derived class should not be able to override this method.
         public void Dispose()
         {
-            if (this.Channel != null)
-                this.Channel.Close();
+            Dispose(true);
+            // This object will be cleaned up by the Dispose method.
+            // Therefore, you should call GC.SupressFinalize to
+            // take this object off the finalization queue 
+            // and prevent finalization code for this object
+            // from executing a second time.
+            GC.SuppressFinalize(this);
+        }
 
-            if (this.AppInfo != null)
+        bool disposed = false;
+
+        // Dispose(bool disposing) executes in two distinct scenarios.
+        // If disposing equals true, the method has been called directly
+        // or indirectly by a user's code. Managed and unmanaged resources
+        // can be disposed.
+        // If disposing equals false, the method has been called by the 
+        // runtime from inside the finalizer and you should not reference 
+        // other objects. Only unmanaged resources can be disposed.
+        private void Dispose(bool disposing)
+        {
+            // Check to see if Dispose has already been called.
+            if (!this.disposed)
             {
-                AppInfo.Save();
-                AppInfo = null;	// 避免后面再用这个对象
+                // If disposing equals true, dispose all managed 
+                // and unmanaged resources.
+                if (disposing)
+                {
+                    // Dispose managed resources.
+                    if (this.Channel != null)
+                        this.Channel.Close();
+
+                    if (this.AppInfo != null)
+                    {
+                        AppInfo.Save();
+                        AppInfo = null;	// 避免后面再用这个对象
+                    }
+                }
+
+                /*
+                // Call the appropriate methods to clean up 
+                // unmanaged resources here.
+                // If disposing is false, 
+                // only the following code is executed.
+                CloseHandle(handle);
+                handle = IntPtr.Zero;            
+                */
             }
+            disposed = true;
         }
 
         string LibraryServerUrl
@@ -578,6 +755,62 @@ value);
         /// </summary>
         public string UserDir = "";
 
+        void DestoryChannel()
+        {
+            if (this.Channel != null)
+            {
+                this.Channel.BeforeLogin -= new DigitalPlatform.CirculationClient.BeforeLoginEventHandle(Channel_BeforeLogin);
+                this.Channel.Idle -= Channel_Idle;
+
+                this.Channel.Close();
+                this.Channel = null;
+            }
+        }
+
+        void PrepareChannel()
+        {
+            this.DestoryChannel();
+
+            this.Channel = new LibraryChannel();
+            this.Channel.Url = this.LibraryServerUrl;
+
+            this.Channel.BeforeLogin += new DigitalPlatform.CirculationClient.BeforeLoginEventHandle(Channel_BeforeLogin);
+            this.Channel.Idle += Channel_Idle;
+        }
+
+        void EnableCharAnimation(bool bEnable)
+        {
+            if (bEnable == true)
+            {
+                _index = 0;
+                Console.Write(" ");
+            }
+            else
+            {
+                _index = -1;
+                Console.Write("\b ");
+            }
+        }
+
+        int _index = -1; // -1 表示不进行字符动画
+        char[] movingChars = new char[] {'/','-','\\','|' };
+
+        void Channel_Idle(object sender, IdleEventArgs e)
+        {
+            e.bDoEvents = false;
+
+            if (_index != -1)
+            {
+                Console.Write("\b");
+                Console.Write(new string(movingChars[_index], 1));
+                _index++;
+                if (_index > 3)
+                    _index = 0;
+
+                System.Threading.Thread.Sleep(500);	// 确保动画显示效果
+            }
+        }
+
         // parameters:
         //      strUrl  服务器 URL。如果为空，则表示沿用 this.LibraryServerUrl 当前的值
         // return:
@@ -591,16 +824,30 @@ value);
             strError = "";
 
             if (string.IsNullOrEmpty(strUrl) == false
-                || strUrl == ".")
+                && strUrl != ".")
                 this.LibraryServerUrl = strUrl;
             this._userName = strUserName;
             this._password = strPassword;
 
-            this.Channel.Close();
-            this.Channel = new LibraryChannel();
-            this.Channel.Url = this.LibraryServerUrl;
-            this.Channel.BeforeLogin -= new DigitalPlatform.CirculationClient.BeforeLoginEventHandle(Channel_BeforeLogin);
-            this.Channel.BeforeLogin += new DigitalPlatform.CirculationClient.BeforeLoginEventHandle(Channel_BeforeLogin);
+            // 
+            this.PrepareChannel();
+
+            this._currentDir = "";  // 远程当前目录复位
+
+            EnableCharAnimation(true);
+            try
+            {
+                long lRet = this.Channel.IdleLogin(this._userName,
+                    this._password,
+                    "location=console",
+                    out strError);
+                if (lRet == -1 || lRet == 0)
+                    return -1;
+            }
+            finally
+            {
+                EnableCharAnimation(false);
+            }
 
             return 0;
         }
@@ -627,6 +874,7 @@ value);
             e.Cancel = true;
         }
 
+#if NO
         public int Dir(string strCurrentDir, 
             out List<string> filenames,
             out string strError)
@@ -654,6 +902,130 @@ value);
             filenames.AddRange(values);
             return 0;
         }
+
+#endif
+        // 进行远程 CD 命令
+        // parameters:
+        //      strCurrentDirectory 当前路径
+        //      strPath 试图转去的路径
+        //      strResultDirectory  返回成功转过去的结果路径。需把这个路径设为最新的当前路径
+        public int RemoteChangeDir(
+            string strCurrentDirectory,
+            string strPattern,
+            out string strResultDirectory,
+            out string strError)
+        {
+            strError = "";
+            strResultDirectory = "";
+
+            FileItemInfo[] infos = null;
+
+            long lRet = this.Channel.ListFile(null,
+    "cd",
+    strCurrentDirectory,
+    strPattern,
+    0,
+    -1,
+    out infos,
+    out strError);
+            if (lRet == -1)
+                return -1;
+
+            if (infos != null && infos.Length > 0)
+                strResultDirectory = infos[0].Name;
+
+            return 0;
+        }
+
+        public int RemoteList(
+            string strCurrentDirectory,
+            string strPattern,
+            out List<FileItemInfo> fileNames,
+            out string strError)
+        {
+            strError = "";
+
+            fileNames = new List<FileItemInfo>();
+
+            if (string.IsNullOrEmpty(this._userName) == true)
+            {
+                strError = "尚未登录";
+                return -1;
+            }
+
+            EnableCharAnimation(true);
+
+            try
+            {
+
+                FileItemInfo[] infos = null;
+
+                long lStart = 0;
+                for (; ; )
+                {
+                    long lRet = this.Channel.ListFile(null,
+                        "list",
+                        strCurrentDirectory,
+                        strPattern,
+                        lStart,
+                        -1,
+                        out infos,
+                        out strError);
+                    if (lRet == -1)
+                        return -1;
+
+                    Debug.Assert(infos != null, "");
+
+                    fileNames.AddRange(infos);
+
+                    lStart += infos.Length;
+                    if (lStart >= lRet)
+                        break;
+                }
+            }
+            finally
+            {
+                this.EnableCharAnimation(false);
+            }
+
+            return 0;
+        }
+
+        public int RemoteDelete(
+    string strCurrentDirectory,
+    string strPattern,
+    out string strError)
+        {
+            strError = "";
+
+            if (string.IsNullOrEmpty(this._userName) == true)
+            {
+                strError = "尚未登录";
+                return -1;
+            }
+
+            EnableCharAnimation(true);
+
+            try
+            {
+
+                FileItemInfo[] infos = null;
+
+                return (int)this.Channel.ListFile(null,
+                    "delete",
+                    strCurrentDirectory,
+                    strPattern,
+                    0,
+                    -1,
+                    out infos,
+                    out strError);
+            }
+            finally
+            {
+                EnableCharAnimation(false);
+            }
+        }
+
 
         // 把子目录中的文件压缩到一个 .zip 文件中
         // parameters:
@@ -790,7 +1162,7 @@ value);
             else
             {
                 string strRange = "";
-                strRange = "0-" + Convert.ToString(fi.Length - 1);
+                strRange = "0-" + (fi.Length - 1).ToString();
 
                 // 按照100K作为一个chunk
                 // TODO: 实现滑动窗口，根据速率来决定chunk尺寸
@@ -894,7 +1266,11 @@ value);
             return -1;
         }
 
+#if NO
         // 删除一个远程文件或者目录
+        // return:
+        //      -1  出错
+        //      其他  删除的文件或者目录个数
         static int DeleteRemoteFile(
             Stop stop,
             LibraryChannel channel,
@@ -921,7 +1297,9 @@ value);
             if (lRet == -1)
                 return -1;
 
-            return 0;
+            return (int)lRet;
         }
+
+#endif
     }
 }

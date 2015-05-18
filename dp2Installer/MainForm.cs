@@ -1235,7 +1235,6 @@ MessageBoxDefaultButton.Button2);
 
                         e.FileName = strPart;
 
-
                         // 测试strPath1是否为strPath2的下级目录或文件
                         //	strPath1正好等于strPath2的情况也返回true
                         if (PathUtil.IsChildOrEqual(strFullPath, strTemplatesDir) == true

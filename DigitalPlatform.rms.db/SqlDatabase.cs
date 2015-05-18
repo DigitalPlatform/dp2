@@ -420,6 +420,21 @@ namespace DigitalPlatform.rms
                 return 0;
             }
 
+#if NO
+            // 2015/5/17
+            if (servertype == SqlServerType.LocalDB)
+            {
+                if (string.IsNullOrEmpty(this.m_strObjectDir) == true)
+                {
+                    strError = "数据库 '" + this.GetCaption("zh-CN") + "' 没有定义 m_strObjectDir 值";
+                    return -1;
+                }
+                //  "Data Source=(localdb)\v11.0;Integrated Security=true;AttachDbFileName=C:\MyData\Database1.mdf".
+                strConnection = "Data Source=(localdb)\v12.0;Integrated Security=true;AttachDbFileName=" + Path.Combine(this.m_strObjectDir, "localdb_database.mdf");
+                return 0;
+            }
+#endif
+
             if (servertype == SqlServerType.MySql)
             {
                 if (String.IsNullOrEmpty(strMode) == true)
@@ -607,7 +622,6 @@ namespace DigitalPlatform.rms
             strConnection += "Max Pool Size=1000;";
              * */
             strConnection += "Asynchronous Processing=true;";
-
             return 0;
         }
 
@@ -616,6 +630,48 @@ namespace DigitalPlatform.rms
         public override string GetSourceName()
         {
             return this.m_strSqlDbName;
+        }
+
+        // 删除一个目录内的所有文件和目录
+        // parameters:
+        //      strExcludeFileName  想要保留的文件名，全路径
+        static bool ClearDir(string strDir,
+            string strExcludeFileName)
+        {
+            //try
+            //{
+                DirectoryInfo di = new DirectoryInfo(strDir);
+                if (di.Exists == false)
+                    return true;
+
+                // 删除所有的下级目录
+                DirectoryInfo[] dirs = di.GetDirectories();
+                foreach (DirectoryInfo childDir in dirs)
+                {
+                    if (PathUtil.IsChildOrEqual(strExcludeFileName, childDir.FullName) == true)
+                    {
+                        ClearDir(childDir.FullName, strExcludeFileName);    // 递归
+                    }
+                    else
+                        Directory.Delete(childDir.FullName, true);
+                }
+
+                // 删除所有文件
+                FileInfo[] fis = di.GetFiles();
+                foreach (FileInfo fi in fis)
+                {
+                    if (fi.FullName.ToLower() != strExcludeFileName.ToLower())
+                        File.Delete(fi.FullName);
+                }
+
+                return true;
+#if NO
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+#endif
         }
 
         // 初始化数据库，注意虚函数不能为private
@@ -638,7 +694,6 @@ namespace DigitalPlatform.rms
 
             try
             {
-
                 if (this.RebuildIDs != null && this.RebuildIDs.Count > 0)
                 {
                     this.RebuildIDs.Delete();
@@ -652,7 +707,52 @@ namespace DigitalPlatform.rms
                     try //连接
                     {
                         string strCommand = "";
-                        // 1.建库
+
+                        // 2015/5/17 LocalDB 要求先删除 SQL 数据库以后才能删除对象目录，因为数据库文件在这个目录中
+                        // 1.删除 SQL 数据库
+                        if (this.IsLocalDB() == true)
+                        {
+                            strCommand = "use master " + "\n"
+                                + " if exists (select * from dbo.sysdatabases where name = N'" + this.m_strSqlDbName + "')" + "\n"
+                                + " drop database " + this.m_strSqlDbName + "\n";
+                            strCommand += " use master " + "\n";
+                            using (SqlCommand command = new SqlCommand(strCommand,
+                                connection))
+                            {
+                                try
+                                {
+                                    command.ExecuteNonQuery();
+                                }
+                                catch (Exception ex)
+                                {
+#if NO
+                                    strError = "删除 SQL 库出错.\r\n"
+                                        + ex.Message + "\r\n"
+                                        + "SQL命令:\r\n"
+                                        + strCommand;
+                                    return -1;
+#endif
+                                }
+                            }
+                        }
+
+                        // 2. 删除对象目录，然后重建
+                        try
+                        {
+                            if (string.IsNullOrEmpty(this.m_strObjectDir) == false)
+                            {
+                                PathUtil.DeleteDirectory(this.m_strObjectDir);
+                                PathUtil.CreateDirIfNeed(this.m_strObjectDir);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            strError = "清除 数据库 '" + this.GetCaption("zh") + "' 的 原有对象目录 '" + this.m_strObjectDir + "' 时发生错误： " + ex.Message;
+                            return -1;
+                        }
+
+
+                        // 3.建库
                         strCommand = this.GetCreateDbCmdString(this.container.SqlServerType);
                         using (SqlCommand command = new SqlCommand(strCommand,
                             connection))
@@ -671,7 +771,7 @@ namespace DigitalPlatform.rms
                                 return -1;
                             }
 
-                            // 2.建表
+                            // 4.建表
                             int nRet = this.GetCreateTablesString(
                                 this.container.SqlServerType,
                                 out strCommand,
@@ -692,7 +792,7 @@ namespace DigitalPlatform.rms
                                 return -1;
                             }
 
-                            // 3.建索引
+                            // 5.建索引
                             nRet = this.GetCreateIndexString(
                                 "keys,records",
                                 this.container.SqlServerType,
@@ -716,7 +816,7 @@ namespace DigitalPlatform.rms
                             }
                         } // end of using command
 
-                        // 4.设库记录种子为0
+                        // 6.设库记录种子为0
                         this.SetTailNo(0);
                         this.m_bTailNoVerified = true;  // 2011/2/26
                         this.container.Changed = true;   //内容改变
@@ -726,13 +826,21 @@ namespace DigitalPlatform.rms
                         connection.Close();
                     }
 
+#if NO
                     // 删除对象目录，然后重建
                     try
                     {
                         if (string.IsNullOrEmpty(this.m_strObjectDir) == false)
                         {
-                            PathUtil.DeleteDirectory(this.m_strObjectDir);
-                            PathUtil.CreateDirIfNeed(this.m_strObjectDir);
+                            if (this.IsLocalDB() == true)
+                            {
+                                ClearDir(this.m_strObjectDir, GetDatabaseFileName());
+                            }
+                            else
+                            {
+                                PathUtil.DeleteDirectory(this.m_strObjectDir);
+                                PathUtil.CreateDirIfNeed(this.m_strObjectDir);
+                            }
                         }
                     }
                     catch (Exception ex)
@@ -740,6 +848,7 @@ namespace DigitalPlatform.rms
                         strError = "清除 数据库 '" + this.GetCaption("zh") + "' 的 原有对象目录 '" + this.m_strObjectDir + "' 时发生错误： " + ex.Message;
                         return -1;
                     }
+#endif
                 }
                 else if (this.container.SqlServerType == SqlServerType.SQLite)
                 {
@@ -1652,6 +1761,18 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
+        // 当前是否为 MS SQL Server LocalDB?
+        bool IsLocalDB()
+        {
+            if (this.container.SqlServerName.ToLower().IndexOf("(localdb)") == -1)
+                return false;
+            return true;
+        }
+
+        string GetDatabaseFileName()
+        {
+            return Path.Combine(this.m_strObjectDir, "database.mdf");
+        }
 
         // 得到建库命令字符串
         public string GetCreateDbCmdString(SqlServerType server_type)
@@ -1662,6 +1783,16 @@ namespace DigitalPlatform.rms
                     + " if exists (select * from dbo.sysdatabases where name = N'" + this.m_strSqlDbName + "')" + "\n"
                     + " drop database " + this.m_strSqlDbName + "\n"
                     + " CREATE database " + this.m_strSqlDbName + "\n";
+
+                // 2015/5/17
+                if (this.IsLocalDB() == true)
+                {
+                    string strDatabaseFileName = GetDatabaseFileName();
+                    strCommand += " ON ( name = '" + this.m_strSqlDbName + "', filename = '" + strDatabaseFileName + "')\n";
+
+                    // 确保子目录已经创建
+                    PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strDatabaseFileName));
+                }
 
                 strCommand += " use master " + "\n";
 
@@ -2768,7 +2899,6 @@ namespace DigitalPlatform.rms
                 {
                     connection.Close();
                 }
-
 
                 // 删除配置目录
                 string strCfgsDir = DatabaseUtil.GetLocalDir(this.container.NodeDbs,

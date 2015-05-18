@@ -112,7 +112,7 @@
             this.MenuItem_help});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(487, 25);
+            this.menuStrip1.Size = new System.Drawing.Size(578, 25);
             this.menuStrip1.TabIndex = 0;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -554,17 +554,17 @@
             this.statusStrip_main.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel_main,
             this.toolStripProgressBar_main});
-            this.statusStrip_main.Location = new System.Drawing.Point(0, 242);
+            this.statusStrip_main.Location = new System.Drawing.Point(0, 341);
             this.statusStrip_main.Name = "statusStrip_main";
             this.statusStrip_main.RenderMode = System.Windows.Forms.ToolStripRenderMode.ManagerRenderMode;
-            this.statusStrip_main.Size = new System.Drawing.Size(487, 22);
+            this.statusStrip_main.Size = new System.Drawing.Size(578, 22);
             this.statusStrip_main.TabIndex = 3;
             this.statusStrip_main.Text = "statusStrip1";
             // 
             // toolStripStatusLabel_main
             // 
             this.toolStripStatusLabel_main.Name = "toolStripStatusLabel_main";
-            this.toolStripStatusLabel_main.Size = new System.Drawing.Size(370, 17);
+            this.toolStripStatusLabel_main.Size = new System.Drawing.Size(461, 17);
             this.toolStripStatusLabel_main.Spring = true;
             // 
             // toolStripProgressBar_main
@@ -582,7 +582,7 @@
             this.toolStripDropDownButton_stopAll});
             this.toolStrip1.Location = new System.Drawing.Point(0, 25);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(487, 25);
+            this.toolStrip1.Size = new System.Drawing.Size(578, 25);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -619,14 +619,14 @@
             this.webBrowser1.Location = new System.Drawing.Point(0, 50);
             this.webBrowser1.MinimumSize = new System.Drawing.Size(20, 20);
             this.webBrowser1.Name = "webBrowser1";
-            this.webBrowser1.Size = new System.Drawing.Size(487, 192);
+            this.webBrowser1.Size = new System.Drawing.Size(578, 291);
             this.webBrowser1.TabIndex = 4;
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(487, 264);
+            this.ClientSize = new System.Drawing.Size(578, 363);
             this.Controls.Add(this.webBrowser1);
             this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.statusStrip_main);

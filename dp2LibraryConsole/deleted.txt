@@ -1,0 +1,346 @@
+﻿            if (parameters[0] == "dir")
+            {
+                // 测试 ..
+                // *.*
+                // ..\
+                // ..\*.*
+                // \
+                // \*.*
+
+                string strDir = "*.*"; // this._currentLocalDir;
+                if (parameters.Count > 1)
+                    strDir = parameters[1];
+
+                string strFullPath = Path.Combine(this._currentLocalDir, strDir);
+                try
+                {
+                    strFullPath = Path.GetFullPath(strFullPath);  // 甩掉末尾的 \..
+                }
+                catch (Exception ex)
+                {
+
+                }
+
+                string strDirectory = Path.GetDirectoryName(strFullPath); // c:\ --> null
+                if (strDirectory == null)
+                    strDirectory = strFullPath;
+                else
+                {
+                    try
+                    {
+                        strDirectory = Path.GetFullPath(strDirectory);  // 甩掉末尾的 \..
+                    }
+                    catch (Exception ex)
+                    {
+
+                    }
+                }
+                string strPattern = Path.GetFileName(strFullPath);
+                if (string.IsNullOrEmpty(strPattern) == true)
+                    strPattern = "*.*";
+
+                int file_count = 0;
+                int dir_count = 0;
+                
+                DirectoryInfo di = new DirectoryInfo(GetLocalFullDirectory(strDirectory));
+                FileSystemInfo[] sis = di.GetFileSystemInfos(strPattern);
+
+                foreach (FileSystemInfo si in sis)
+                {
+                    // TODO: 是否先得到 FullName ，再根据起点目录截断显示后部
+                    if (si is DirectoryInfo)
+                    {
+                        AlignWrite(si.LastWriteTime.ToString("u") + " <dir>      ");
+                        Console.WriteLine(si.Name + "/");
+                        dir_count++;
+                    }
+
+                    if (si is FileInfo)
+                    {
+                        FileInfo info = si as FileInfo;
+                        AlignWrite(info.LastWriteTime.ToString("u") + info.Length.ToString().PadLeft(10, ' ') + "  ");
+                        Console.WriteLine(info.Name);
+                        file_count++;
+                    }
+                }
+
+#if NO
+                Console.WriteLine();
+                Console.WriteLine("本地 " + di.FullName + " 的目录:");
+                Console.WriteLine();
+
+
+                DirectoryInfo[] dis = di.GetDirectories();
+                foreach (DirectoryInfo info in dis)
+                {
+                    AlignWrite(info.LastWriteTime.ToString("u") + " <dir>      ");
+                    Console.WriteLine(info.Name + "/");
+                    dir_count++;
+                }
+
+                FileInfo[] fis = di.GetFiles();
+                foreach (FileInfo info in fis)
+                {
+                    AlignWrite(info.LastWriteTime.ToString("u") + info.Length.ToString().PadLeft(10, ' ') + "  ");
+                    Console.WriteLine(info.Name);
+                    file_count++;
+                }
+
+#endif
+
+                Console.WriteLine();
+
+                if (dir_count > 0)
+                    AlignWriteLine(dir_count.ToString() + " direcotries");
+                if (file_count > 0 || dir_count == 0)
+                    AlignWriteLine(file_count.ToString() + " files");
+                return false;
+            }
+
+
+			~~~~~~~~~~~~~
+
+			        // 进行文件或目录上载
+        // return:
+        //      -1  出错
+        //      0   正常
+        int DoUpload(string strSource,
+            string strTargetParam,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            DirectoryInfo di = new DirectoryInfo(this._currentLocalDir);
+            FileSystemInfo[] sis = di.GetFileSystemInfos(strSource);
+            foreach (FileSystemInfo si in sis)
+            {
+                // string strSourcePath = GetLocalFullDirectory(strSource);
+                string strSourcePath = si.FullName;
+
+                string strTarget = strTargetParam;
+                if (string.IsNullOrEmpty(strTargetParam) == true)
+                    strTarget = si.Name;
+
+                if (si is DirectoryInfo)
+                {
+                    string strServerFilePath = "!upload/" + GetFullDirectory(strTarget) + "/reports.zip";
+                    string strZipFileName = Path.GetTempFileName();
+                    try
+                    {
+                        // return:
+                        //      -1  出错
+                        //      0   没有发现需要上传的文件
+                        //      1   成功压缩创建了 .zip 文件
+                        nRet = CompressDirecotry(
+                    strSourcePath,
+                    strZipFileName,
+                    Encoding.UTF8,
+                    out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+
+                        // return:
+                        //		-1	出错
+                        //		0   上传文件成功
+                        nRet = UploadFile(
+                    null,
+                    this.Channel,
+                    strZipFileName,
+                    strServerFilePath,
+                                "extractzip",
+                    null,
+                    true,
+                    out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+
+                        Console.WriteLine();
+                        Console.WriteLine("本地目录 " + si.FullName + " 成功上传到远程 " + GetFullDirectory(strTarget));
+                        continue;
+                    }
+                    finally
+                    {
+                        File.Delete(strZipFileName);
+                    }
+                }
+                else if (si is FileInfo)
+                {
+                    string strServerFilePath = "!upload/" + GetFullDirectory(strTarget);
+                    // return:
+                    //		-1	出错
+                    //		0   上传文件成功
+                    nRet = UploadFile(
+                null,
+                this.Channel,
+                strSourcePath,
+                strServerFilePath,
+                            "",
+                null,
+                true,
+                out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    Console.WriteLine();
+                    Console.WriteLine("本地文件 " + si.FullName + " 成功上传到远程 " + GetFullDirectory(strTarget));
+                    continue;
+                }
+            }
+            return 0;
+        ERROR1:
+            return -1;
+        }
+
+
+		~~~
+
+		            if (parameters[0] == "cd")
+            {
+                if (parameters.Count == 1)
+                {
+                    Console.WriteLine(this._currentLocalDir);    // 显示当前路径
+                    return false;
+                }
+                if (parameters.Count > 1)
+                {
+                    string strDir = "";
+
+                    string strParam = GetCdParmeter(parameters);
+
+                    if (strParam == "..")
+                        strDir = Path.GetDirectoryName(this._currentLocalDir);
+                    else if (strParam == ".")
+                    {
+                        // 当前路径不变
+                        return false;
+                    }
+                    else
+                    {
+                        strDir = Path.Combine(this._currentLocalDir, strParam);
+                        // 上一句执行完，有可能是这样 strDir = '\publish\dp2libraryxe'，没有盘符
+                    }
+
+                    // 要检验一下目录是否存在
+                    if (Directory.Exists(strDir) == false)
+                    {
+                        Console.WriteLine("本地目录 '" + strDir + "' 不存在");
+                        return false;
+                    }
+
+                    strDir = (new DirectoryInfo(strDir)).FullName;
+                    this._currentLocalDir = strDir;
+                }
+                return false;
+            }
+
+
+			~~~
+
+			        // reutrn:
+        //      -1  出错
+        //      0   不存在
+        //      1   存在
+        int RemoteDirExists(string strDir)
+        {
+            if (string.IsNullOrEmpty(strDir) == true)
+                return 1;
+
+            string strUpLevel = Path.GetDirectoryName(strDir);
+
+            string strPureName = Path.GetFileName(strDir);
+            List<string> filenames = null;
+            string strError = "";
+            int nRet = Dir(strUpLevel,
+out filenames,
+out strError);
+            if (nRet == -1)
+            {
+                Console.WriteLine("Dir error: " + strError);
+                return -1;
+            }
+
+            // strPureName = MakeDirectory(strPureName);
+
+            foreach (string filename in filenames)
+            {
+                string strName = "";
+                string strTime = "";
+                string strSize = "";
+
+                ParseFileName(filename,
+        out strName,
+        out strTime,
+        out strSize);
+                if (strSize == "dir" && strName.ToLower() == strPureName.ToLower())
+                    return 1;
+            }
+
+            return 0;
+        }
+
+		~~~
+
+		        // 删除一个远程文件或者目录
+        // return:
+        //      -1  出错
+        //      其他  删除的文件或者目录个数
+        static int DeleteRemoteFile(
+            Stop stop,
+            LibraryChannel channel,
+            string strServerFilePath,
+            out string strError)
+        {
+            strError = "";
+
+            string strOutputResPath = "";
+            byte[] baOutputTimestamp = null;
+                    // 写入资源
+            long lRet = channel.WriteRes(
+                stop,
+                strServerFilePath,
+                "",
+                0,
+                null,
+                "",
+                "delete",
+                null,
+                out strOutputResPath,
+                out baOutputTimestamp,
+                out strError);
+            if (lRet == -1)
+                return -1;
+
+            return (int)lRet;
+        }
+
+
+		~~~
+
+		            if (parameters[0] == "rdel" || parameters[0] == "rdelete")
+            {
+                if (parameters.Count != 2)
+                {
+                    Console.WriteLine("rdel 命令用法: rdel 远程目录");
+                    return false;
+                }
+
+                string strRemoteFilePath = GetFullDirectory(parameters[1]); // 远程逻辑路径
+                string strRemote = "!upload/" + strRemoteFilePath;  // 远程物理路径
+                // 删除一个远程文件或者目录
+                nRet = DeleteRemoteFile(
+                    null,
+                    this.Channel,
+                    strRemote,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                if (nRet == 1)
+                    Console.WriteLine("已删除远程文件 " + strRemoteFilePath);
+                else
+                    Console.WriteLine("已删除匹配模式 " + strRemoteFilePath + " 的远程文件共 " + nRet + " 个");
+                return false;
+            }
+
+			~~~
