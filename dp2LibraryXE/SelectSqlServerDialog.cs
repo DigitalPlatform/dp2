@@ -61,12 +61,12 @@ namespace dp2LibraryXE
         private void button_installLocalDB_Click(object sender, EventArgs e)
         {
             // https://www.microsoft.com/en-us/download/details.aspx?id=29062
-            // Microsoft® SQL Server® 2012 Express
+            // Microsoft® SQL Server® 2012 Express (v11)
 
             // https://www.microsoft.com/en-us/download/details.aspx?id=42299
-            // Microsoft® SQL Server® 2014 Express
+            // Microsoft® SQL Server® 2014 Express (v12)
 
-            Process.Start("IExplore.exe", "https://www.microsoft.com/zh-cn/download/details.aspx?id=29062");
+            Process.Start("IExplore.exe", "https://www.microsoft.com/zh-cn/download/details.aspx?id=42299");
         }
 
         public string SelectedType

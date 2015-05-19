@@ -86,7 +86,7 @@ namespace DigitalPlatform.LibraryServer
         //      2.44 (2015/4/30) GetSystemParameter() API 增加了 category=cfgs name=getDataDir 获得数据目录物理路径 
         //      2.45 (2015/5/15) 文件上传和 WriteRes() API 都得到了充实，支持 dp2libraryconsole 前端进行文件上传和管理操作了 
         //      2.46 (2015/5/18) 增加 API ListFile()
-        public static string Version = "2.45";
+        public static string Version = "2.46";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()

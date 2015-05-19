@@ -30,6 +30,9 @@ using DigitalPlatform.CirculationClient.localhost;
 
 using dp2LibraryXE.Properties;
 using DigitalPlatform.CommonControl;
+using System.Reflection;
+using Microsoft.Win32;
+using DigitalPlatform.Install;
 
 namespace dp2LibraryXE
 {
@@ -483,19 +486,23 @@ this.Font);
                     this.Text = "dp2Library XE 单机";
             }
 
-                string strContent = @"
+            Assembly myAssembly = Assembly.GetAssembly(this.GetType());
+
+            string strContent = @"
 dp2Library XE
 ---
-dp2 图书馆集成系统 图书馆应用服务器 " 
-                    + (this.IsServer == false ? "单机版" : "小型版") +
+dp2 图书馆集成系统 图书馆应用服务器 "
+                + (this.IsServer == false ? "单机版" : "小型版") +
 @"
 ---
 (C) 版权所有 2014-2015 数字平台(北京)软件有限责任公司
 http://dp2003.com" + (this.IsServer == false ? "" : @"
 ---
 最大通道数： " + this.MaxClients.ToString())
-         + @"
-本机 MAC 地址: " + StringUtil.MakePathList(SerialCodeForm.GetMacAddress()) + "\r\n\r\n";
+     + @"
+本机 MAC 地址: " + StringUtil.MakePathList(SerialCodeForm.GetMacAddress()) + "\r\n---\r\n"
+            + "版本和环境:\r\n本机 .NET Framework 版本: " + myAssembly.ImageRuntimeVersion
+            + "\r\n本软件: " + myAssembly.FullName + "\r\n\r\n";
 
                 WriteTextToConsole(strContent);
         }
@@ -1249,6 +1256,81 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
             return 0;
         }
 
+        int CreateLocalDBInstance(string strInstanceName,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            string strExePath = FindExePath("sqllocaldb.exe");
+            if (string.IsNullOrEmpty(strExePath) == true)
+            {
+                strError = "无法找到 sqllocaldb.exe 的全路径";
+                return -1;
+            }
+
+            List<string> lines = new List<string>();
+            lines.Add("create " + strInstanceName);
+            // parameters:
+            //      lines   若干行参数。每行执行一次
+            //      bOutputCmdLine  在输出中是否包含命令行? 如果为 false，表示不包含命令行，只有命令结果文字
+            // return:
+            //      -1  出错
+            //      0   成功。strError 里面有运行输出的信息
+            nRet = InstallHelper.RunCmd(
+                strExePath,
+                lines,
+                false,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            return 0;
+        }
+
+        private static int CompareByValue(string x, string y)
+        {
+            double v1 = 0;
+            double v2 = 0;
+            double.TryParse(x, out v1);
+            double.TryParse(y, out v2);
+            if (v1 == v2)
+                return 0;
+            if (v1 > v2)
+                return 1;
+            return -1;
+        }
+
+        // http://csharptest.net/526/how-to-search-the-environments-path-for-an-exe-or-dll/
+        /// <summary>
+        /// Expands environment variables and, if unqualified, locates the exe in the working directory
+        /// or the evironment's path.
+        /// </summary>
+        /// <param name="exe">The name of the executable file</param>
+        /// <returns>The fully-qualified path to the file</returns>
+        /// <exception cref="System.IO.FileNotFoundException">Raised when the exe was not found</exception>
+        public static string FindExePath(string exe)
+        {
+            exe = Environment.ExpandEnvironmentVariables(exe);
+            if (!File.Exists(exe))
+            {
+                if (Path.GetDirectoryName(exe) == String.Empty)
+                {
+                    foreach (string test in (Environment.GetEnvironmentVariable("PATH") ?? "").Split(';'))
+                    {
+                        string path = test.Trim();
+                        if (!String.IsNullOrEmpty(path) && File.Exists(path = Path.Combine(path, exe)))
+                            return Path.GetFullPath(path);
+                    }
+                }
+                // throw new FileNotFoundException(new FileNotFoundException().Message, exe);
+                return null;
+            }
+            return Path.GetFullPath(exe);
+        }
+
+
+
         // 创建/修改 databases.xml 文件
         // parameters:
         //      strSqlServerType    sqlite/localdb，两者之一
@@ -1307,6 +1389,14 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
             }
             else if (strSqlServerType == "localdb")
             {
+                int nRet = CreateLocalDBInstance("dp2libraryxe",
+            out strError);
+                if (nRet == -1)
+                {
+                    strError = "创建 SQL LocalDB 的实例 'dp2libraryxe' 时出错: " + strError + "\r\n\r\n因此无法创建 databases.xml 配置文件";
+                    return -1;
+                }
+
                 DomUtil.SetAttr(nodeDatasource, "mode", "SSPI");
 
                 /*
@@ -1319,7 +1409,7 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
                     "MS SQL Server");
                 DomUtil.SetAttr(nodeDatasource,
                     "servername",
-                    "(LocalDB)\\MSSQLLocalDB");
+                    "(LocalDB)\\dp2libraryxe"); // 缺省为 MSSQLLocalDB 或 v11.0
                 DomUtil.SetAttr(nodeDatasource,
                      "userid",
                      null);
@@ -3135,6 +3225,31 @@ this.Font);
             return 1;
         }
 
+        // 比较两个时间戳的先后
+        static int CompareTimestamp(string strTimestamp1, string strTimestamp2)
+        {
+            DateTime time1 = new DateTime(0);
+            DateTime time2 = new DateTime(0);
+            if (string.IsNullOrEmpty(strTimestamp1) == false)
+            {
+                if (DateTime.TryParse(strTimestamp1, out time1) == false)
+                    goto BAD_TIMESTRING;
+            }
+            if (string.IsNullOrEmpty(strTimestamp2) == false)
+            {
+                if (DateTime.TryParse(strTimestamp2, out time2) == false)
+                    goto BAD_TIMESTRING;
+            }
+
+            if (time1 == time2)
+                return 0;
+            if (time1 > time2)
+                return 1;
+            return -1;
+        BAD_TIMESTRING:
+            return string.Compare(strTimestamp1, strTimestamp2);
+        }
+
         // 刷新应用程序目录
         // parameters:
         //      bForce  true 强制升级  false 自动升级，如果 .zip 文件时间戳没有变化就不升级
@@ -3150,10 +3265,14 @@ this.Font);
             int nRet = _versionManager.GetFileVersion(Path.GetFileName(strZipFileName), out strOldTimestamp);
             string strNewTimestamp = File.GetLastWriteTime(strZipFileName).ToString();
 
-            if (bForce == true || strOldTimestamp != strNewTimestamp)
+            if (bForce == true || CompareTimestamp(strOldTimestamp, strNewTimestamp) < 0)
             {
                 if (bForce == false)
                     AppendSectionTitle("自动升级 dp2OPAC");
+
+                if (string.IsNullOrEmpty(strOldTimestamp) == false)
+                    AppendString("已安装时间戳 " + strOldTimestamp + "\r\n");
+                AppendString("将安装时间戳 " + strNewTimestamp + "\r\n");
 
                 // 要求在 opac_data.zip 内准备要安装的数据文件(初次安装而不是升级安装)
                 try
@@ -4080,6 +4199,27 @@ Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
         ERROR1:
             AppendString(strError + "\r\n");
             MessageBox.Show(this, strError);
+        }
+
+        private void MenuItem_getSqllocaldbexePath_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            string strPath = "";
+
+#if NO
+            // 获得 sqllocaldb.exe 的全路径
+            // return:
+            //      -1  出错
+            //      0   没有找到
+            //      1   找到
+            int nRet = GetSqlLocalDBExePath(out strPath,
+                out strError);
+            if (nRet == 1)
+                MessageBox.Show(this, strPath);
+            else
+                MessageBox.Show(this, strError);
+#endif
+            MessageBox.Show(this, FindExePath("sqllocaldb.exe"));
         }
     }
 

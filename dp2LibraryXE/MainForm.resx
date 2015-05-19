@@ -127,11 +127,10 @@
   <data name="toolButton_stop.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAABYAAAAWCAYAAADEtGw7AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
-        YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAMFJREFUSEvtlNEN
-        gDAIRPnoRu7UndzJnbBUzyC2FTT+2YSoCT6uVwrRv7wOzETcCu//lzzAlpyZTSylWEqpRqiAQA/gPDFL
-        ZNqCyvseKOCCH9ABUMMl36VcEuvWoVIp1MCQ6pNabJv3hQLmW+y4Vd1VC5gtUorFwdaCBlTseAf+RPHA
-        Y1EbU2z6tdUN2obbw5NG3w7wfBF6beZSi9tTW24Ax/YBdam1cA1pAUNQwDFketPt0RDSQwUA+3QNnj9J
-        HFgBmEW7p/GnYFMAAAAASUVORK5CYII=
+        YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAACoSURBVEhL7ZLJDYAwDAT9SEf0lJ7oiZ4CS7zIWCRx4MtI
+        K4GPwQ/kJ8wqUp6i7Xko2HIuxWU76imlMzoe4yZcl5osNXI8a/gBXetzSTtCG8yH5Bi8Lu0ImdDVt2sp
+        JZQRIx5e3bzWw/orsVk+Q1z9m9hjeu/F5OEd0jlx4G9AKB2KQZWPxeFrCQax0JJTSGlYDChvhcIpKcEC
+        YiU27Ov4PBT4aPtnhMgOmEW7p2eKzQEAAAAASUVORK5CYII=
 </value>
   </data>
   <metadata name="statusStrip_main.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">

@@ -430,7 +430,7 @@ namespace DigitalPlatform.rms
                     return -1;
                 }
                 //  "Data Source=(localdb)\v11.0;Integrated Security=true;AttachDbFileName=C:\MyData\Database1.mdf".
-                strConnection = "Data Source=(localdb)\v12.0;Integrated Security=true;AttachDbFileName=" + Path.Combine(this.m_strObjectDir, "localdb_database.mdf");
+                strConnection = "Data Source=(localdb)\v11.0;Integrated Security=true;AttachDbFileName=" + Path.Combine(this.m_strObjectDir, "localdb_database.mdf");
                 return 0;
             }
 #endif

@@ -92,7 +92,6 @@ namespace DigitalPlatform.IO
             }
 
             strTimeStamp = file_node.GetAttribute("timestamp");
-
             return 1;
         }
 

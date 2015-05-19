@@ -34,6 +34,7 @@
             this.MenuItem_exit = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_management1 = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_installDp2Opac = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_updateDp2Opac = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_setupKernelDataDir = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_setupLibraryDataDir = new System.Windows.Forms.ToolStripMenuItem();
@@ -69,7 +70,7 @@
             this.toolStripStatusLabel_main = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripProgressBar_main = new System.Windows.Forms.ToolStripProgressBar();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
-            this.MenuItem_updateDp2Opac = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_getSqllocaldbexePath = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
@@ -122,7 +123,8 @@
             this.MenuItem_registerWebApp,
             this.toolStripSeparator6,
             this.MenuItem_test,
-            this.MenuItem_openDp2OPACHomePage});
+            this.MenuItem_openDp2OPACHomePage,
+            this.MenuItem_getSqllocaldbexePath});
             this.MenuItem_management1.Name = "MenuItem_management1";
             this.MenuItem_management1.Size = new System.Drawing.Size(64, 21);
             this.MenuItem_management1.Text = "维护(&M)";
@@ -133,6 +135,13 @@
             this.MenuItem_installDp2Opac.Size = new System.Drawing.Size(320, 22);
             this.MenuItem_installDp2Opac.Text = "安装 dp2OPAC";
             this.MenuItem_installDp2Opac.Click += new System.EventHandler(this.MenuItem_installDp2Opac_Click);
+            // 
+            // MenuItem_updateDp2Opac
+            // 
+            this.MenuItem_updateDp2Opac.Name = "MenuItem_updateDp2Opac";
+            this.MenuItem_updateDp2Opac.Size = new System.Drawing.Size(320, 22);
+            this.MenuItem_updateDp2Opac.Text = "升级 dp2OPAC";
+            this.MenuItem_updateDp2Opac.Click += new System.EventHandler(this.MenuItem_updateDp2Opac_Click);
             // 
             // toolStripSeparator7
             // 
@@ -400,12 +409,12 @@
             this.webBrowser1.Size = new System.Drawing.Size(372, 229);
             this.webBrowser1.TabIndex = 7;
             // 
-            // MenuItem_updateDp2Opac
+            // MenuItem_getSqllocaldbexePath
             // 
-            this.MenuItem_updateDp2Opac.Name = "MenuItem_updateDp2Opac";
-            this.MenuItem_updateDp2Opac.Size = new System.Drawing.Size(320, 22);
-            this.MenuItem_updateDp2Opac.Text = "升级 dp2OPAC";
-            this.MenuItem_updateDp2Opac.Click += new System.EventHandler(this.MenuItem_updateDp2Opac_Click);
+            this.MenuItem_getSqllocaldbexePath.Name = "MenuItem_getSqllocaldbexePath";
+            this.MenuItem_getSqllocaldbexePath.Size = new System.Drawing.Size(320, 22);
+            this.MenuItem_getSqllocaldbexePath.Text = "get sqllocaldb.exe path";
+            this.MenuItem_getSqllocaldbexePath.Click += new System.EventHandler(this.MenuItem_getSqllocaldbexePath_Click);
             // 
             // MainForm
             // 
@@ -479,6 +488,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_openDp2OPACHomePage;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_updateDp2Opac;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_getSqllocaldbexePath;
     }
 }
 
