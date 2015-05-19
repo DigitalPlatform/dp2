@@ -1,5 +1,7 @@
-﻿using System;
+﻿using DigitalPlatform;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
@@ -15,6 +17,10 @@ namespace dp2LibraryConsole
         {
             using (Instance instance = new Instance())
             {
+
+                _handler += new CtrlEventHandler(instance.Handler);
+                API.SetConsoleCtrlHandler(_handler, true);
+
                 while (true)
                 {
                     instance.DisplayPrompt();
@@ -27,7 +33,8 @@ namespace dp2LibraryConsole
             }
         }
 
+        static CtrlEventHandler _handler;
+
+
     }
-
-
 }

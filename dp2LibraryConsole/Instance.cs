@@ -34,12 +34,36 @@ namespace dp2LibraryConsole
         /// <summary>
         /// 停止控制
         /// </summary>
-        public DigitalPlatform.Stop Stop = null;
+        public DigitalPlatform.Stop Progress = null;
 
         /// <summary>
         /// 界面语言代码
         /// </summary>
         public string Lang = "zh";
+
+        public bool Handler(CtrlType sig)
+        {
+            switch (sig)
+            {
+                case CtrlType.CTRL_C_EVENT:
+                    // 中断长操作，但不退出程序
+                    this.Stop();
+                    return true;
+                case CtrlType.CTRL_LOGOFF_EVENT:
+                case CtrlType.CTRL_SHUTDOWN_EVENT:
+                case CtrlType.CTRL_CLOSE_EVENT:
+                    {
+                        // Debug.WriteLine("close ...");
+                        Console.WriteLine(" 正在退出 ...");
+                        Close();
+                    }
+                    return true;
+                default:
+                    break;
+            }
+
+            return false;
+        }
 
         /// <summary>
         /// 构造函数
@@ -65,6 +89,25 @@ namespace dp2LibraryConsole
             this.Channel.BeforeLogin += new DigitalPlatform.CirculationClient.BeforeLoginEventHandle(Channel_BeforeLogin);
 #endif
             this.PrepareChannel();
+        }
+
+        // 中断长操作
+        public void Stop()
+        {
+            if (this.Channel != null)
+                this.Channel.Abort();
+        }
+
+        // 关闭资源
+        public void Close()
+        {
+            this.DestoryChannel();
+
+            if (this.AppInfo != null)
+            {
+                AppInfo.Save();
+                AppInfo = null;	// 避免后面再用这个对象
+            }
         }
 
         // 显示命令行提示符
@@ -634,6 +677,18 @@ namespace dp2LibraryConsole
                 result1.Add(UnQuote(s));
             }
 
+            // 对第一个元素修正一下。从左面开始，如果出现第一个标点符号，就认为这里应该断开
+            if (result1.Count > 0)
+            {
+                string strText = result1[0];
+                int index = strText.IndexOfAny(new char[] {'.','/','\\' });
+                if (index != -1)
+                {
+                    result1[0] = strText.Substring(0, index);
+                    result1.Insert(1, strText.Substring(index));
+                }
+            }
+
             return result1;
         }
 
@@ -702,8 +757,14 @@ namespace dp2LibraryConsole
                 if (disposing)
                 {
                     // Dispose managed resources.
+#if NO
                     if (this.Channel != null)
+                    {
                         this.Channel.Close();
+                        this.Channel = null;
+                    }
+#endif
+                    this.DestoryChannel();
 
                     if (this.AppInfo != null)
                     {
@@ -1119,6 +1180,21 @@ value);
             this._message = strText;
         }
 
+        static string GetSizeString(long size)
+        {
+            long unit = 1024 * 1024 * 1024;
+            if (size >= unit)
+                return ((double)size / (double)unit).ToString("f1") + "G";
+            unit = 1024 * 1024;
+            if (size >= unit)
+                return ((double)size / (double)unit).ToString("f1") + "M";
+            unit = 1024;
+            if (size >= unit)
+                return ((double)size / (double)unit).ToString("f1") + "K";
+
+            return size.ToString();
+        }
+
         // 上传文件到到 dp2lbrary 服务器
         // parameters:
         //      timestamp   时间戳。如果为 null，函数会自动根据文件信息得到一个时间戳
@@ -1183,6 +1259,13 @@ value);
             int nCursorLeft = Console.CursorLeft;
             int nCursorTop = Console.CursorTop;
 
+            ProgressEstimate _estimate = new ProgressEstimate();
+
+            _estimate.SetRange(0, fi.Length);
+            _estimate.StartEstimate();
+
+            string strTotalSize = GetSizeString(fi.Length);
+
             try
             {
                 for (int j = 0; j < ranges.Length; j++)
@@ -1193,20 +1276,27 @@ value);
                         goto ERROR1;
                     }
 
+                    RangeList rl = new RangeList(ranges[j]);
+                    long uploaded = ((RangeItem)rl[0]).lStart;
+
+                    string strPercent = "";
+                    if (rl.Count >= 1)
+                    {
+                        double ratio = (double)uploaded / (double)fi.Length;
+                        strPercent = String.Format("{0,3:N}", ratio * (double)100) + "%";
+                    }
+
+                    string strUploadedSize = GetSizeString(uploaded);
+
+
                     string strWaiting = "";
                     if (j == ranges.Length - 1)
                     {
                         strWaiting = " please wait ...";
                         channel.Timeout = new TimeSpan(0, 40, 0);   // 40 分钟
                     }
-
-                    string strPercent = "";
-                    RangeList rl = new RangeList(ranges[j]);
-                    if (rl.Count >= 1)
-                    {
-                        double ratio = (double)((RangeItem)rl[0]).lStart / (double)fi.Length;
-                        strPercent = String.Format("{0,3:N}", ratio * (double)100) + "%";
-                    }
+                    else if (j > 0)
+                        strWaiting = "剩余时间 " + ProgressEstimate.Format(_estimate.Estimate(uploaded)) + " 已经过时间 " + ProgressEstimate.Format(_estimate.delta_passed);
 
 #if NO
                     if (stop != null)
@@ -1219,6 +1309,7 @@ value);
                         "uploading "
                         // + ranges[j] + "/"  + Convert.ToString(fi.Length)
                         + " " + strPercent + " " 
+                        + strUploadedSize + "/" + strTotalSize + " "
                         // + strClientFilePath
                         + strWarning + strWaiting);
                     int nRedoCount = 0;
