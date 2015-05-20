@@ -252,6 +252,7 @@ namespace DigitalPlatform.LibraryServer
                     if (nRet == -1)
                     {
                         AppendResultText("DoOneRecord() error : " + strError + "。\r\n");
+                        // 循环并不停止
                     }
 
                 CONTINUE:
@@ -321,11 +322,15 @@ namespace DigitalPlatform.LibraryServer
                 "readerType");
 
             Calendar calendar = null;
+            // return:
+            //      -1  出错
+            //      0   没有找到日历
+            //      1   找到日历
             nRet = this.App.GetReaderCalendar(strReaderType,
                 strLibraryCode,
                 out calendar,
                 out strError);
-            if (nRet == -1)
+            if (nRet == -1 || nRet == 0)
             {
                 strError = "获得读者类型 '"+strReaderType+"' 的相关日历过程失败: " + strError;
                 return -1;
