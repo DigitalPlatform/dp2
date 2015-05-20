@@ -194,7 +194,6 @@ namespace DigitalPlatform.LibraryServer
             this.m_lock.AcquireReaderLock(m_nLockTimeout);
             try
             {
-
                 strError = "";
                 userinfos = null;
 
@@ -208,7 +207,6 @@ namespace DigitalPlatform.LibraryServer
                 {
                     strXPath = "//accounts/account[@name='" + strUserName + "']";
                 }
-
 
                 List<UserInfo> userList = new List<UserInfo>();
 
@@ -379,9 +377,17 @@ namespace DigitalPlatform.LibraryServer
                 // 设置密码
                 if (userinfo.SetPassword == true)
                 {
+#if NO
+                    // 以前的做法
                     string strPassword = Cryptography.Encrypt(userinfo.Password,
                         EncryptKey);
                     DomUtil.SetAttr(nodeAccount, "password", strPassword);
+#endif
+                    string strHashed = "";
+                    nRet = LibraryServerUtil.SetUserPassword(userinfo.Password, out strHashed, out strError);
+                    if (nRet == -1)
+                        return -1;
+                    DomUtil.SetAttr(nodeAccount, "password", strHashed);
                 }
 
                 this.Changed = true;
@@ -395,6 +401,7 @@ namespace DigitalPlatform.LibraryServer
                 this.m_lock.ReleaseWriterLock();
             }
 
+            // 写入日志
             {
                 XmlDocument domOperLog = PrepareOperlogDom("new", strOperator);
                 XmlNode node = domOperLog.CreateElement("account");
@@ -469,6 +476,7 @@ namespace DigitalPlatform.LibraryServer
             out string strError)
         {
             strError = "";
+            int nRet = 0;
 
             if (String.IsNullOrEmpty(strUserName) == true)
             {
@@ -503,6 +511,8 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 // 验证旧密码
+#if NO
+                // 以前的做法
                 string strExistPassword = DomUtil.GetAttr(node, "password");
                 if (String.IsNullOrEmpty(strExistPassword) == false)
                 {
@@ -523,11 +533,29 @@ namespace DigitalPlatform.LibraryServer
                     strError = "所提供的旧密码经验证不匹配";
                     return -1;
                 }
+#endif
+                string strExistPassword = DomUtil.GetAttr(node, "password");
+                nRet = LibraryServerUtil.MatchUserPassword(strOldPassword, strExistPassword, out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet == 0)
+                {
+                    strError = "所提供的旧密码经验证不匹配";
+                    return -1;
+                }
 
                 // 设置新密码
+#if NO
+                // 以前的做法
                 strNewPassword = Cryptography.Encrypt(strNewPassword,
                         EncryptKey);
                 DomUtil.SetAttr(node, "password", strNewPassword);
+#endif
+                string strHashed = "";
+                nRet = LibraryServerUtil.SetUserPassword(strNewPassword, out strHashed, out strError);
+                if (nRet == -1)
+                    return -1;
+                DomUtil.SetAttr(node, "password", strHashed);
 
                 this.Changed = true;
 
@@ -609,6 +637,7 @@ namespace DigitalPlatform.LibraryServer
             out string strError)
         {
             strError = "";
+            int nRet = 0;
 
             if (String.IsNullOrEmpty(strUserName) == true)
             {
@@ -674,9 +703,17 @@ namespace DigitalPlatform.LibraryServer
                 // 强制修改密码。无需验证旧密码
                 if (userinfo.SetPassword == true)
                 {
+#if NO
+                    // 以前的做法
                     string strPassword = Cryptography.Encrypt(userinfo.Password,
                         EncryptKey);
                     DomUtil.SetAttr(nodeAccount, "password", strPassword);
+#endif 
+                    string strHashed = "";
+                    nRet = LibraryServerUtil.SetUserPassword(userinfo.Password, out strHashed, out strError);
+                    if (nRet == -1)
+                        return -1;
+                    DomUtil.SetAttr(nodeAccount, "password", strHashed);
                 }
 
                 this.Changed = true;
@@ -690,6 +727,7 @@ namespace DigitalPlatform.LibraryServer
                 this.m_lock.ReleaseWriterLock();
             }
 
+            // 写入日志
             {
                 XmlDocument domOperLog = PrepareOperlogDom("change", strOperator);
 
@@ -709,7 +747,7 @@ namespace DigitalPlatform.LibraryServer
                 DomUtil.SetElementOuterXml(node, nodeAccount.OuterXml);
 
                 // 写入日志
-                int nRet = this.OperLog.WriteOperLog(domOperLog,
+                nRet = this.OperLog.WriteOperLog(domOperLog,
                     strClientAddress,
                     out strError);
                 if (nRet == -1)
@@ -768,6 +806,7 @@ namespace DigitalPlatform.LibraryServer
             out string strError)
         {
             strError = "";
+            int nRet = 0;
 
             if (String.IsNullOrEmpty(strUserName) == true)
             {
@@ -805,8 +844,15 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 // 强制修改密码。无需验证旧密码
+#if NO
+                // 以前的做法
                 strHashedPassword = Cryptography.Encrypt(strNewPassword,
                     EncryptKey);
+                DomUtil.SetAttr(nodeAccount, "password", strHashedPassword);
+#endif
+                nRet = LibraryServerUtil.SetUserPassword(strNewPassword, out strHashedPassword, out strError);
+                if (nRet == -1)
+                    return -1;
                 DomUtil.SetAttr(nodeAccount, "password", strHashedPassword);
 
                 this.Changed = true;
@@ -825,7 +871,7 @@ namespace DigitalPlatform.LibraryServer
                 node.InnerText = strHashedPassword;
 
                 // 写入日志
-                int nRet = this.OperLog.WriteOperLog(domOperLog,
+                nRet = this.OperLog.WriteOperLog(domOperLog,
                     strClientAddress,
                     out strError);
                 if (nRet == -1)

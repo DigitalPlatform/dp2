@@ -33,6 +33,7 @@ using DigitalPlatform.CommonControl;
 using System.Reflection;
 using Microsoft.Win32;
 using DigitalPlatform.Install;
+using DigitalPlatform.LibraryServer;
 
 namespace dp2LibraryXE
 {
@@ -2058,10 +2059,6 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
             else
                 owner = this;
 
-
-
-
-
             CirculationLoginDlg dlg = SetDefaultAccount(
                 e.LibraryServerUrl,
                 null,
@@ -2073,7 +2070,6 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
                 e.Cancel = true;
                 return;
             }
-
 
             e.UserName = dlg.UserName;
             e.Password = dlg.Password;
@@ -2105,7 +2101,6 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
                 e.LibraryServerUrl = dlg.ServerUrl;
                 // _expireVersionChecked = false;
             }
-
         }
 
         public string SupervisorUserName
@@ -2446,6 +2441,7 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
             out string strError)
         {
             strError = "";
+            int nRet = 0;
 
             string strFilename = PathUtil.MergePath(strDataDir, "library.xml");
             XmlDocument dom = new XmlDocument();
@@ -2491,7 +2487,7 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
                 nodeAccounts = dom.CreateElement("accounts");
                 dom.DocumentElement.AppendChild(nodeAccounts);
             }
-            XmlNode nodeSupervisor = nodeAccounts.SelectSingleNode("account[@type='']");
+            XmlElement nodeSupervisor = nodeAccounts.SelectSingleNode("account[@type='']") as XmlElement;
             if (nodeSupervisor == null)
             {
                 nodeSupervisor = dom.CreateElement("account");
@@ -2502,9 +2498,32 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
                 DomUtil.SetAttr(nodeSupervisor, "name", strSupervisorUserName);
             if (strSupervisorPassword != null)
             {
+#if NO
                 DomUtil.SetAttr(nodeSupervisor, "password",
                     Cryptography.Encrypt(strSupervisorPassword, "dp2circulationpassword")
                     );
+#endif
+
+                double version = LibraryServerUtil.GetLibraryXmlVersion(dom);
+
+                if (version <= 2.0)
+                {
+                    nodeSupervisor.SetAttribute("password",
+                        Cryptography.Encrypt(strSupervisorPassword, "dp2circulationpassword")
+                        );
+                }
+                else
+                {
+                    // 新的密码存储策略
+                    string strHashed = "";
+                    nRet = LibraryServerUtil.SetUserPassword(strSupervisorPassword, out strHashed, out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "SetUserPassword() error: " + strError;
+                        return -1;
+                    }
+                    nodeSupervisor.SetAttribute("password", strHashed);
+                }
             }
             if (strSupervisorRights != null)
                 DomUtil.SetAttr(nodeSupervisor, "rights", strSupervisorRights);
@@ -4084,7 +4103,7 @@ Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
 
                 try
                 {
-                    BiblioDbFromInfo[] infos = null;
+                    DigitalPlatform.CirculationClient.localhost.BiblioDbFromInfo[] infos = null;
                     string strError = "";
                     long lRet = Channel.ListDbFroms(Stop,
                         "biblio",

@@ -359,6 +359,8 @@ namespace DigitalPlatform.LibraryServer
                     if (nRet != 1)
                         return nRet;
                 }
+#if NO
+                // 以前的做法
                 else if (strPassword != account.Password)
                 {
                     if (bPublicError == true)
@@ -366,6 +368,24 @@ namespace DigitalPlatform.LibraryServer
                     else
                         strError = this.App.GetString("密码不正确");
                     return 0;
+                }
+#endif
+                else
+                {
+                    nRet = LibraryServerUtil.MatchUserPassword(strPassword, account.Password, out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "MatchUserPassword() error: " + strError;
+                        return -1;
+                    }
+                    if (nRet == 0)
+                    {
+                        if (bPublicError == true)
+                            strError = this.App.GetString("帐户不存在或密码不正确");
+                        else
+                            strError = this.App.GetString("密码不正确");
+                        return 0;
+                    }
                 }
             }
 
@@ -403,7 +423,6 @@ namespace DigitalPlatform.LibraryServer
 
             return 1;
         }
-
 
         /*
 		// 获得缺省帐户信息

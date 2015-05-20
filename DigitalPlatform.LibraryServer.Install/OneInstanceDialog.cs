@@ -182,7 +182,7 @@ namespace DigitalPlatform.LibraryServer
                 //      0   数据目录不存在
                 //      1   数据目录存在，但是xml文件不存在
                 //      2   xml文件已经存在
-                int nRet = InstanceDialog.DetectDataDir(this.textBox_dataDir.Text,
+                int nRet = LibraryInstallHelper.DetectDataDir(this.textBox_dataDir.Text,
             out strError);
                 if (nRet == -1)
                 {

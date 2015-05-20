@@ -4050,7 +4050,7 @@ MessageBoxDefaultButton.Button1);
             // return:
             //      -1  出错
             //      0   成功
-            nRet = InstallHelper.MaskDefaultDatabaseCreated(_info.DataDir, out strError);
+            nRet = LibraryInstallHelper.MaskDefaultDatabaseCreated(_info.DataDir, out strError);
             if (nRet == -1)
             {
                 strError = "标记初始书目库已经创建的过程出错: " + strError;
@@ -4157,7 +4157,7 @@ MessageBoxDefaultButton.Button1);
         //      -1  出错
         //      0   实例没有找到
         //      1   成功
-            int nRet = InstallHelper.GetLibraryInstanceInfo(
+            int nRet = LibraryInstallHelper.GetLibraryInstanceInfo(
                 strInstanceName,
                 out _info,
                 out strError);
@@ -4207,7 +4207,8 @@ DigitalPlatform.CirculationClient.BeforeLoginEventArgs e)
             {
                 e.UserName = _info.SupervisorUserName;   //  "supervisor";
 
-                e.Password = _info.SupervisorPassword;
+                // e.Password = _info.SupervisorPassword;
+                e.Password = "";    // 一般来说第一次登录会失败了
 
                 string strLocation = "manager";
                 e.Parameters = "location=" + strLocation;
@@ -4235,7 +4236,6 @@ DigitalPlatform.CirculationClient.BeforeLoginEventArgs e)
                 e.Cancel = true;
                 return;
             }
-
 
             e.UserName = dlg.UserName;
             e.Password = dlg.Password;

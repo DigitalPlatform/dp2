@@ -18,6 +18,7 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
 using DigitalPlatform.rms.Client;
+using DigitalPlatform.CirculationClient;
 
 namespace DigitalPlatform.LibraryServer
 {
@@ -630,7 +631,7 @@ namespace DigitalPlatform.LibraryServer
                     //      -1  出错
                     //      0   放弃验证
                     //      1   成功
-                    nRet = InstallHelper.LibrarySupervisorLogin(this,
+                    nRet = LibraryInstallHelper.LibrarySupervisorLogin(this,
                         strInstanceName,
                         "删除实例 '" + strInstanceName + "' 前，需要验证您的 dp2library 管理员身份",
                         out strError);
@@ -656,7 +657,7 @@ namespace DigitalPlatform.LibraryServer
                         //      -1  出错
                         //      0   用户放弃删除
                         //      1   已经删除
-                        nRet = DeleteKernelDatabases(
+                        nRet = LibraryInstallHelper.DeleteKernelDatabases(
                             this,
                             strInstanceName,
                             strFilename,
@@ -983,7 +984,7 @@ namespace DigitalPlatform.LibraryServer
                 //      0   数据目录不存在
                 //      1   数据目录存在，但是xml文件不存在
                 //      2   xml文件已经存在
-                nRet = DetectDataDir(strDataDir,
+                nRet = LibraryInstallHelper.DetectDataDir(strDataDir,
             out strError);
                 if (nRet == -1)
                     return -1;
@@ -1322,28 +1323,7 @@ namespace DigitalPlatform.LibraryServer
 
 
 
-        // 探测数据目录，是否已经存在数据，是不是属于升级情形
-        // return:
-        //      -1  error
-        //      0   数据目录不存在
-        //      1   数据目录存在，但是xml文件不存在
-        //      2   xml文件已经存在
-        public static int DetectDataDir(string strDataDir,
-            out string strError)
-        {
-            strError = "";
 
-            DirectoryInfo di = new DirectoryInfo(strDataDir);
-            if (di.Exists == false)
-                return 0;
-
-            string strExistingLibraryFileName = PathUtil.MergePath(strDataDir,
-                "library.xml");
-            if (File.Exists(strExistingLibraryFileName) == true)
-                return 2;
-
-            return 1;
-        }
 
         // 创建数据目录，并复制进基本内容
         int CreateNewDataDir(string strDataDir,
@@ -1677,7 +1657,7 @@ namespace DigitalPlatform.LibraryServer
                 //      -1  出错
                 //      0   放弃验证
                 //      1   成功
-                nRet = InstallHelper.LibrarySupervisorLogin(this,
+                nRet = LibraryInstallHelper.LibrarySupervisorLogin(this,
                     strInstanceName,
                     "删除实例 '"+strInstanceName+"' 前，需要验证您的 dp2library 管理员身份",
                     out strError);
@@ -1714,7 +1694,7 @@ namespace DigitalPlatform.LibraryServer
                     //      -1  出错
                     //      0   用户放弃删除
                     //      1   已经删除
-                    nRet = DeleteKernelDatabases(
+                    nRet = LibraryInstallHelper.DeleteKernelDatabases(
                         this,
                         strInstanceName,
                         strFilename,
@@ -1772,279 +1752,6 @@ namespace DigitalPlatform.LibraryServer
             }
 
             if (string.IsNullOrEmpty(strTotalError) == false)
-                return -1;
-
-            return 1;
-        }
-
-        // 删除所有用到的内核数据库
-        // 专门开发给安装程序卸载时候使用
-        public static int DeleteAllDatabase(
-            RmsChannel channel,
-            XmlDocument cfg_dom,
-            out string strError)
-        {
-            strError = "";
-
-            string strTempError = "";
-
-            long lRet = 0;
-
-            // 大书目库
-            XmlNodeList nodes = cfg_dom.DocumentElement.SelectNodes("itemdbgroup/database");
-            for (int i = 0; i < nodes.Count; i++)
-            {
-                XmlNode node = nodes[i];
-
-                // 实体库
-                string strEntityDbName = DomUtil.GetAttr(node, "name");
-
-                if (String.IsNullOrEmpty(strEntityDbName) == false)
-                {
-                    lRet = channel.DoDeleteDB(strEntityDbName,
-                        out strTempError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
-                    {
-                        strError += "删除实体库 '" + strEntityDbName + "' 内数据时候发生错误：" + strTempError + "; ";
-                    }
-                }
-
-                // 订购库
-                string strOrderDbName = DomUtil.GetAttr(node, "orderDbName");
-
-                if (String.IsNullOrEmpty(strOrderDbName) == false)
-                {
-                    lRet = channel.DoDeleteDB(strOrderDbName,
-                        out strTempError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
-                    {
-                        strError += "删除订购库 '" + strOrderDbName + "' 内数据时候发生错误：" + strTempError + "; ";
-                    }
-                }
-
-                // 期库
-                string strIssueDbName = DomUtil.GetAttr(node, "issueDbName");
-
-                if (String.IsNullOrEmpty(strIssueDbName) == false)
-                {
-                    lRet = channel.DoDeleteDB(strIssueDbName,
-                        out strTempError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
-                    {
-                        strError += "删除期库 '" + strIssueDbName + "' 内数据时候发生错误：" + strTempError + "; ";
-                    }
-                }
-
-                // 2011/2/21
-                // 评注库
-                string strCommentDbName = DomUtil.GetAttr(node, "commentDbName");
-
-                if (String.IsNullOrEmpty(strCommentDbName) == false)
-                {
-                    lRet = channel.DoDeleteDB(strCommentDbName,
-                        out strTempError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
-                    {
-                        strError += "删除评注库 '" + strCommentDbName + "' 内数据时候发生错误：" + strTempError + "; ";
-                    }
-                }
-
-                // 小书目库
-                string strBiblioDbName = DomUtil.GetAttr(node, "biblioDbName");
-
-                if (String.IsNullOrEmpty(strBiblioDbName) == false)
-                {
-                    lRet = channel.DoDeleteDB(strBiblioDbName,
-                        out strTempError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
-                    {
-                        strError += "删除小书目库 '" + strBiblioDbName + "' 内数据时候发生错误：" + strTempError + "; ";
-                    }
-                }
-
-            }
-
-
-            // 读者库
-            nodes = cfg_dom.DocumentElement.SelectNodes("readerdbgroup/database");
-            for (int i = 0; i < nodes.Count; i++)
-            {
-                XmlNode node = nodes[i];
-                string strDbName = DomUtil.GetAttr(node, "name");
-
-                if (String.IsNullOrEmpty(strDbName) == false)
-                {
-                    lRet = channel.DoDeleteDB(strDbName,
-                        out strTempError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
-                    {
-                        strError += "删除读者库 '" + strDbName + "' 内数据时候发生错误：" + strTempError + "; ";
-                    }
-                }
-            }
-
-
-            // 预约到书队列库
-            XmlNode arrived_node = cfg_dom.DocumentElement.SelectSingleNode("arrived");
-            if (arrived_node != null)
-            {
-                string strArrivedDbName = DomUtil.GetAttr(arrived_node, "dbname");
-                if (String.IsNullOrEmpty(strArrivedDbName) == false)
-                {
-                    lRet = channel.DoDeleteDB(strArrivedDbName,
-                        out strTempError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
-                    {
-                        strError += "删除预约到书库 '" + strArrivedDbName + "' 内数据时候发生错误：" + strTempError + "; ";
-                    }
-
-                }
-            }
-
-            // 违约金库
-            XmlNode amerce_node = cfg_dom.DocumentElement.SelectSingleNode("amerce");
-            if (amerce_node != null)
-            {
-                string strAmerceDbName = DomUtil.GetAttr(amerce_node, "dbname");
-                if (String.IsNullOrEmpty(strAmerceDbName) == false)
-                {
-                    lRet = channel.DoDeleteDB(strAmerceDbName,
-                        out strTempError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
-                    {
-                        strError += "删除违约金库 '" + strAmerceDbName + "' 内数据时候发生错误：" + strTempError + "; ";
-                    }
-                }
-            }
-
-            // 消息库
-            XmlNode message_node = cfg_dom.DocumentElement.SelectSingleNode("message");
-            if (message_node != null)
-            {
-                string strMessageDbName = DomUtil.GetAttr(message_node, "dbname");
-                if (String.IsNullOrEmpty(strMessageDbName) == false)
-                {
-                    lRet = channel.DoDeleteDB(strMessageDbName,
-                        out strTempError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
-                    {
-                        strError += "删除消息库 '" + strMessageDbName + "' 内数据时候发生错误：" + strTempError + "; ";
-                    }
-                }
-            }
-
-            // 实用库
-            nodes = cfg_dom.DocumentElement.SelectNodes("utilDb/database");
-            for (int i = 0; i < nodes.Count; i++)
-            {
-                XmlNode node = nodes[i];
-                string strDbName = DomUtil.GetAttr(node, "name");
-                string strType = DomUtil.GetAttr(node, "type");
-                if (String.IsNullOrEmpty(strDbName) == false)
-                {
-                    lRet = channel.DoDeleteDB(strDbName,
-                        out strTempError);
-                    if (lRet == -1 && channel.ErrorCode != ChannelErrorCode.NotFound)
-                    {
-                        strError += "删除类型为 " + strType + " 的实用库 '" + strDbName + "' 内数据时发生错误：" + strTempError + "; ";
-                    }
-                }
-            }
-
-
-            if (String.IsNullOrEmpty(strError) == false)
-                return -1;
-
-            return 0;
-        }
-
-        // 删除应用服务器在dp2Kernel内核中创建的数据库
-        // return:
-        //      -1  出错
-        //      0   用户放弃删除
-        //      1   已经删除
-        static int DeleteKernelDatabases(
-            IWin32Window owner,
-            string strInstanceName,
-            string strXmlFilename,
-            out string strError)
-        {
-            strError = "";
-            int nRet = 0;
-
-            DialogResult result = MessageBox.Show(owner == null ? ForegroundWindow.Instance : owner,
-                "是否要删除应用服务器实例 '"+strInstanceName+"' 在数据库内核中创建过的全部数据库?\r\n\r\n(注：如果现在不删除，将来也可以用内核管理(dp2manager)工具进行删除)",
-                "安装 dp2Library",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question,
-                MessageBoxDefaultButton.Button1);
-            if (result == DialogResult.No)
-                return 0;
-
-            XmlDocument dom = new XmlDocument();
-            try
-            {
-                dom.Load(strXmlFilename);
-            }
-            catch (Exception ex)
-            {
-                strError = "XML文件 '" + strXmlFilename + "' 装载到DOM时发生错误: " + ex.Message;
-                return -1;
-            }
-
-            XmlNode rmsserver_node = dom.DocumentElement.SelectSingleNode("rmsserver");
-            if (rmsserver_node == null)
-            {
-                strError = "<rmsserver>元素没有找到";
-                return -1;
-            }
-            string strKernelUrl = DomUtil.GetAttr(rmsserver_node, "url");
-            if (String.IsNullOrEmpty(strKernelUrl) == true)
-            {
-                strError = "<rmsserver>元素的url属性为空";
-                return -1;
-            }
-
-            RmsChannelCollection channels = new RmsChannelCollection();
-
-            RmsChannel channel = channels.GetChannel(strKernelUrl);
-            if (channel == null)
-            {
-                strError = "channel == null";
-                return -1;
-            }
-
-            string strUserName = DomUtil.GetAttr(rmsserver_node, "username");
-            string strPassword = DomUtil.GetAttr(rmsserver_node, "password");
-
-            string EncryptKey = "dp2circulationpassword";
-            try
-            {
-                strPassword = Cryptography.Decrypt(
-                    strPassword,
-                    EncryptKey);
-            }
-            catch
-            {
-                strError = "<rmsserver>元素password属性中的密码设置不正确";
-                return -1;
-            }
-
-
-            nRet = channel.Login(strUserName,
-                strPassword,
-                out strError);
-            if (nRet == -1)
-            {
-                strError = "以用户名 '" + strUserName + "' 和密码登录内核时失败: " + strError;
-                return -1;
-            }
-
-            nRet = DeleteAllDatabase(
-                channel,
-                dom,
-                out strError);
-            if (nRet == -1)
                 return -1;
 
             return 1;
@@ -2109,6 +1816,7 @@ namespace DigitalPlatform.LibraryServer
         }
 
 #endif
+
 
 
     }
@@ -2219,10 +1927,12 @@ namespace DigitalPlatform.LibraryServer
             }
 
             // supervisor
-            XmlNode nodeSupervisor = dom.DocumentElement.SelectSingleNode("accounts/account[@type='']");
+            XmlElement nodeSupervisor = dom.DocumentElement.SelectSingleNode("accounts/account[@type='']") as XmlElement;
             if (nodeSupervisor != null)
             {
                 this.SupervisorUserName = DomUtil.GetAttr(nodeSupervisor, "name");
+#if NO
+                // library.xml 2.00 以前的做法
                 this.SupervisorPassword = DomUtil.GetAttr(nodeSupervisor, "password");
                 try
                 {
@@ -2233,6 +1943,10 @@ namespace DigitalPlatform.LibraryServer
                     strError = "<account password='???' /> 中的密码不正确";
                     return -1;
                 }
+#endif
+                // 新的做法
+                this.SupervisorPassword = null; // 表示得不到以前的密码，同时也不打算修改
+
                 this.SupervisorRights = DomUtil.GetAttr(nodeSupervisor, "rights");
             }
 
@@ -2242,6 +1956,7 @@ namespace DigitalPlatform.LibraryServer
             return 1;
         }
 
+
         // return:
         //      -1  error
         //      0   succeed
@@ -2249,6 +1964,7 @@ namespace DigitalPlatform.LibraryServer
             out string strError)
         {
             strError = "";
+            int nRet = 0;
 
             string strFilename = PathUtil.MergePath(strDataDir, "library.xml");
             XmlDocument dom = new XmlDocument();
@@ -2276,7 +1992,6 @@ namespace DigitalPlatform.LibraryServer
                 dom.DocumentElement.AppendChild(nodeRmsServer);
             }
 
-
             DomUtil.SetAttr(nodeRmsServer,
                 "url",
                 this.KernelUrl);
@@ -2296,7 +2011,7 @@ namespace DigitalPlatform.LibraryServer
                 nodeAccounts = dom.CreateElement("accounts");
                 dom.DocumentElement.AppendChild(nodeAccounts);
             }
-            XmlNode nodeSupervisor = nodeAccounts.SelectSingleNode("account[@type='']");
+            XmlElement nodeSupervisor = nodeAccounts.SelectSingleNode("account[@type='']") as XmlElement;
             if (nodeSupervisor == null)
             {
                 nodeSupervisor = dom.CreateElement("account");
@@ -2304,12 +2019,29 @@ namespace DigitalPlatform.LibraryServer
             }
 
             if (this.SupervisorUserName != null)
-                DomUtil.SetAttr(nodeSupervisor, "name", this.SupervisorUserName);
+                nodeSupervisor.SetAttribute("name", this.SupervisorUserName);
             if (this.SupervisorPassword != null)
             {
-                DomUtil.SetAttr(nodeSupervisor, "password",
-                    Cryptography.Encrypt(this.SupervisorPassword, "dp2circulationpassword")
-                    );
+                double version = LibraryServerUtil.GetLibraryXmlVersion(dom);
+
+                if (version <= 2.0)
+                {
+                    nodeSupervisor.SetAttribute("password",
+                        Cryptography.Encrypt(this.SupervisorPassword, "dp2circulationpassword")
+                        );
+                }
+                else
+                {
+                    // 新的密码存储策略
+                    string strHashed = "";
+                    nRet = LibraryServerUtil.SetUserPassword(this.SupervisorPassword, out strHashed, out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "SetUserPassword() error: " + strError;
+                        return -1;
+                    }
+                    nodeSupervisor.SetAttribute("password", strHashed);
+                }
             }
             if (this.SupervisorRights != null)
                 DomUtil.SetAttr(nodeSupervisor, "rights", this.SupervisorRights);
@@ -2325,9 +2057,5 @@ namespace DigitalPlatform.LibraryServer
 
             return 0;
         }
-
-
     }
-
-
 }

@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-    <version>2.00</version>
+    <version>2.01</version>
     <rmsserver url="net.pipe://localhost/dp2kernel/XE" username="root" password="sKPNlfoEw1s=" />
     <arrived dbname="" reserveTimeSpan="2day" canReserveOnshelf="true" />
     <message dbname="" />
@@ -181,10 +181,10 @@
     </locationTypes>
 
     <accounts>
-        <account name="supervisor" password="sKPNlfoEw1s=" rights="borrow,return,renew,lost,reservation,order,setclock,changereaderpassword,verifyreaderpassword,getbibliosummary,searchreader,getreaderinfo,setreaderinfo,movereaderinfo,changereaderstate,listbibliodbfroms,listdbfroms,searchbiblio,getbiblioinfo,searchitem,getiteminfo,setiteminfo,getoperlog,amerce,amercemodifyprice,amercemodifycomment,amerceundo,search,getrecord,getcalendar,changecalendar,newcalendar,deletecalendar,batchtask,clearalldbs,devolvereaderinfo,getuser,changeuser,newuser,deleteuser,changeuserpassword,getsystemparameter,setsystemparameter,urgentrecover,repairborrowinfo,passgate,getres,writeres,setbiblioinfo,hire,foregift,returnforegift,settlement,undosettlement,deletesettlement,searchissue,getissueinfo,setissueinfo,searchorder,getorderinfo,setorderinfo,getcommentinfo,setcommentinfo,searchcomment,writeobject,writerecord,writetemplate,managedatabase,restore,managecache,managecomment,settailnumber,setutilinfo,getpatrontempid,getchannelinfo,managechannel,viewreport,upload,download" type="" />
+        <account name="supervisor"  rights="borrow,return,renew,lost,reservation,order,setclock,changereaderpassword,verifyreaderpassword,getbibliosummary,searchreader,getreaderinfo,setreaderinfo,movereaderinfo,changereaderstate,listbibliodbfroms,listdbfroms,searchbiblio,getbiblioinfo,searchitem,getiteminfo,setiteminfo,getoperlog,amerce,amercemodifyprice,amercemodifycomment,amerceundo,search,getrecord,getcalendar,changecalendar,newcalendar,deletecalendar,batchtask,clearalldbs,devolvereaderinfo,getuser,changeuser,newuser,deleteuser,changeuserpassword,getsystemparameter,setsystemparameter,urgentrecover,repairborrowinfo,passgate,getres,writeres,setbiblioinfo,hire,foregift,returnforegift,settlement,undosettlement,deletesettlement,searchissue,getissueinfo,setissueinfo,searchorder,getorderinfo,setorderinfo,getcommentinfo,setcommentinfo,searchcomment,writeobject,writerecord,writetemplate,managedatabase,restore,managecache,managecomment,settailnumber,setutilinfo,getpatrontempid,getchannelinfo,managechannel,viewreport,upload,download" type="" />
         <account name="reader" type="reader" rights="getreaderinfo,getbibliosummary,renew,reservation,search,getbiblioinfo,getiteminfo,getcommentinfo,setcommentinfo,setreaderinfo,changereaderpassword,getsystemparameter,listdbfroms,getres" />
         <account name="public" type="reader" rights="denychangemypassword,search,getbiblioinfo,getiteminfo,getcommentinfo,getbibliosummary" />
-        <account name="图书馆" password="" rights="" type="" />
+        <account name="图书馆" rights="" type="" />
         <account name="opac" rights="denychangemypassword,getsystemparameter,getres,search,getbiblioinfo,setbiblioinfo,getreaderinfo,writeobject,getbibliosummary,listdbfroms,simulatereader,simulateworker" />
     </accounts>
     <browseformats>

@@ -1681,6 +1681,8 @@ namespace DigitalPlatform.LibraryServer
                 version = 0.03;
             }
 
+
+
 #if NO
             // 从 2.00 版升级
             // 2013/12/10
@@ -1706,6 +1708,27 @@ namespace DigitalPlatform.LibraryServer
             }
 #endif
 
+            // 2015/5/20
+            // 从2.00版升级
+            if (version <= 2.00)
+            {
+                // 升级 library.xml 中的用户账户相关信息
+                // 文件格式 0.03-->0.04
+                // accounts/account 中 password 存储方式改变
+                int nRet = LibraryServerUtil.UpgradeLibraryXmlUserInfo(
+                    EncryptKey,
+                    ref this.LibraryCfgDom,
+                    out strError);
+                if (nRet == -1)
+                    WriteErrorLog("自动升级 library.xml v2.00(或以下)到v2.01 时出错: " + strError + "。为了修复这个问题，请系统管理员重设所有工作人员账户的密码");
+
+                // 升级完成后，修改版本号
+                nodeVersion.InnerText = "2.01";
+                bChanged = true;
+                WriteErrorLog("自动升级 library.xml v2.00(或以下)到v2.01");
+                version = 2.01;
+            }
+
             if (bChanged == true)
             {
                 this.Changed = true;
@@ -1714,8 +1737,6 @@ namespace DigitalPlatform.LibraryServer
 
             return 0;
         }
-
-
 
         // 2008/5/8
         // return:
@@ -4278,7 +4299,7 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
-            XmlNode node = root.SelectSingleNode("account[@name='"+strUserID+"']");
+            XmlElement node = root.SelectSingleNode("account[@name='"+strUserID+"']") as XmlElement;
             if (node == null)
             {
                 strError = "用户 '"+strUserID+"' 不存在";
@@ -4287,21 +4308,25 @@ namespace DigitalPlatform.LibraryServer
 
             account = new Account();
             account.XmlNode = node;
-            account.LoginName = DomUtil.GetAttr(node, "name");
-            account.UserID = DomUtil.GetAttr(node, "name");
+            account.LoginName = node.GetAttribute("name");
+            account.UserID = node.GetAttribute("name");
 
             string strText = "";
             try
             {
-                strText =  DomUtil.GetAttr(node, "password");
+                strText =  node.GetAttribute("password");
                 if (String.IsNullOrEmpty(strText) == true)
                     account.Password = "";
                 else
                 {
-                    // TODO: 应该用 SHA1 方式保存密码
+#if NO
+                    // 以前的做法，取出密码明文
                     account.Password = Cryptography.Decrypt(
                                 strText,
                                 EncryptKey);
+#endif
+                    // 现在的做法，取出密码的 hashed 字符串
+                    account.Password = strText;
                 }
             }
             catch
@@ -9356,7 +9381,6 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
-
             if (strPassword != strSha1Text)
             {
                 strError = "密码不正确";
@@ -12730,7 +12754,7 @@ strLibraryCode);    // 读者所在的馆代码
     {
         public string Location = "";
 
-        public XmlNode XmlNode = null;  // library.xml配置文件中相关小节
+        public XmlElement XmlNode = null;  // library.xml 配置文件中相关小节
 
         public string LoginName = "";   // 登录名 带有前缀的各种渠道的登录名字
 
