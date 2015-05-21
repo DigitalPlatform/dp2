@@ -121,6 +121,7 @@ namespace dp2Catalog
             this.toolStrip_panelFixed = new System.Windows.Forms.ToolStrip();
             this.toolStripButton_close = new System.Windows.Forms.ToolStripButton();
             this.splitter_fixed = new System.Windows.Forms.Splitter();
+            this.MenuItem_openUserFolder = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip_main.SuspendLayout();
             this.toolStrip_main.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
@@ -471,28 +472,28 @@ namespace dp2Catalog
             // MenuItem_tileHorizontal
             // 
             this.MenuItem_tileHorizontal.Name = "MenuItem_tileHorizontal";
-            this.MenuItem_tileHorizontal.Size = new System.Drawing.Size(152, 22);
+            this.MenuItem_tileHorizontal.Size = new System.Drawing.Size(147, 22);
             this.MenuItem_tileHorizontal.Text = "平铺[水平](&T)";
             this.MenuItem_tileHorizontal.Click += new System.EventHandler(this.MenuItem_mdi_arrange_Click);
             // 
             // MenuItem_tileVertical
             // 
             this.MenuItem_tileVertical.Name = "MenuItem_tileVertical";
-            this.MenuItem_tileVertical.Size = new System.Drawing.Size(152, 22);
+            this.MenuItem_tileVertical.Size = new System.Drawing.Size(147, 22);
             this.MenuItem_tileVertical.Text = "平铺[垂直](&I)";
             this.MenuItem_tileVertical.Click += new System.EventHandler(this.MenuItem_mdi_arrange_Click);
             // 
             // MenuItem_cascade
             // 
             this.MenuItem_cascade.Name = "MenuItem_cascade";
-            this.MenuItem_cascade.Size = new System.Drawing.Size(152, 22);
+            this.MenuItem_cascade.Size = new System.Drawing.Size(147, 22);
             this.MenuItem_cascade.Text = "层叠(&C)";
             this.MenuItem_cascade.Click += new System.EventHandler(this.MenuItem_mdi_arrange_Click);
             // 
             // MenuItem_arrangeIcons
             // 
             this.MenuItem_arrangeIcons.Name = "MenuItem_arrangeIcons";
-            this.MenuItem_arrangeIcons.Size = new System.Drawing.Size(152, 22);
+            this.MenuItem_arrangeIcons.Size = new System.Drawing.Size(147, 22);
             this.MenuItem_arrangeIcons.Text = "排列图标(&A)";
             this.MenuItem_arrangeIcons.Click += new System.EventHandler(this.MenuItem_mdi_arrange_Click);
             // 
@@ -501,6 +502,7 @@ namespace dp2Catalog
             this.MenuItem_help.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MenuItem_cfg,
             this.toolStripSeparator6,
+            this.MenuItem_openUserFolder,
             this.MenuItem_openDataFolder,
             this.MenuItem_openProgramFolder,
             this.toolStripSeparator19,
@@ -935,6 +937,13 @@ namespace dp2Catalog
             this.splitter_fixed.TabIndex = 7;
             this.splitter_fixed.TabStop = false;
             // 
+            // MenuItem_openUserFolder
+            // 
+            this.MenuItem_openUserFolder.Name = "MenuItem_openUserFolder";
+            this.MenuItem_openUserFolder.Size = new System.Drawing.Size(177, 22);
+            this.MenuItem_openUserFolder.Text = "打开用户文件夹(&U)";
+            this.MenuItem_openUserFolder.Click += new System.EventHandler(this.MenuItem_openUserFolder_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -1069,6 +1078,7 @@ namespace dp2Catalog
         private System.Windows.Forms.WebBrowser webBrowser_history;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_resetSerialCode;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_openAdvertiseForm;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_openUserFolder;
     }
 }
 

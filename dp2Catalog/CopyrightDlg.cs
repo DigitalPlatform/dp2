@@ -81,7 +81,7 @@ namespace dp2Catalog
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(457, 42);
             this.label1.TabIndex = 0;
-            this.label1.Text = "dp2编目前端 dp2Catalog V2.3";
+            this.label1.Text = "dp2编目前端 dp2Catalog V2.4";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // label_copyright

@@ -528,7 +528,7 @@ namespace dp2LibraryConsole
 
                 if (si is DirectoryInfo)
                 {
-                    string strServerFilePath = "!upload/" + GetFullDirectory(strTarget) + "/reports.zip";
+                    string strServerFilePath = "!upload/" + GetFullDirectory(strTarget) + "/~" + Guid.NewGuid().ToString();
                     string strZipFileName = Path.GetTempFileName();
                     try
                     {
@@ -1090,13 +1090,13 @@ value);
 
         // 把子目录中的文件压缩到一个 .zip 文件中
         // parameters:
-        //      strReportDir    最后不要带有符号 '/'
+        //      strDataDir    要压缩的数据目录的全路径。最后不要带有符号 '/'
         // return:
         //      -1  出错
         //      0   没有发现需要上传的文件
         //      1   成功压缩创建了 .zip 文件
         int CompressDirecotry(
-            string strReportDir,
+            string strDataDir,
             string strZipFileName,
             Encoding encoding,
             out string strError)
@@ -1105,7 +1105,7 @@ value);
 
             List<string> filenames = null;
 
-            filenames = GetFileNames(strReportDir);
+            filenames = GetFileNames(strDataDir);
 
             if (filenames.Count == 0)
                 return 0;
@@ -1117,7 +1117,7 @@ value);
             {
                 foreach (string filename in filenames)
                 {
-                    string strShortFileName = filename.Substring(strReportDir.Length + 1);
+                    string strShortFileName = filename.Substring(strDataDir.Length + 1);
                     ProgressMessage(nCursorLeft, nCursorTop, "compressing " + strShortFileName);
 
                     string directoryPathInArchive = Path.GetDirectoryName(strShortFileName);

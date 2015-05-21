@@ -145,7 +145,19 @@ namespace dp2Catalog
                 {
                     try
                     {
-                        File.Copy(strOldFileName, strNewFileName, true);
+                        if (File.Exists(strOldFileName) == true)
+                        {
+                            // 升级到 2.4 的情况。原来数据目录中的 zserver.xml 文件移动过来
+                            File.Copy(strOldFileName, strNewFileName, true);
+                            File.Delete(strOldFileName);    // 删除源文件，以免用户不清楚哪个文件起作用
+                        }
+                        else
+                        {
+                            // 刚安装好的时候，用户目录中还没有文件，于是从 default_zserver.xml 中复制过来
+                            string strDefaultFileName = Path.Combine(this.DataDir, "default_zserver.xml");
+                            Debug.Assert(File.Exists(strDefaultFileName) == true, "");
+                            File.Copy(strDefaultFileName, strNewFileName, true);
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -302,6 +314,7 @@ namespace dp2Catalog
                 }
 
                 // 检测zserver.xml是否已经存在？
+                // 一般情况下是用不到这个方式的
                 string strServerXmlPath = Path.Combine(this.UserDir, "zserver.xml");
                 if (FileUtil.FileExist(strServerXmlPath) == false)
                 {
@@ -4206,6 +4219,18 @@ out string strError)
             form.MdiParent = this;
             form.MainForm = this;
             form.Show();
+        }
+
+        private void MenuItem_openUserFolder_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(this.UserDir);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ex.Message);
+            }
         }
 
     }
