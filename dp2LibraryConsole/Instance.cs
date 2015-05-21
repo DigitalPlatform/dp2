@@ -1166,13 +1166,25 @@ value);
         // 曾经显示过的动态 message
         string _message = "";
 
+        // 计算一个字符串的“西文字符宽度”。汉字相当于两个西文字符宽度
+        static int GetCharWidth(string strText)
+        {
+            int result = 0;
+            foreach (char c in strText)
+            {
+                result += StringUtil.IsHanzi(c) == true ? 2 : 1;
+            }
+
+            return result;
+        }
+
         void ProgressMessage(int nCursorLeft, int nCursorTop, string strText)
         {
             // 擦除上次显示的内容
             if (string.IsNullOrEmpty(this._message) == false)
             {
                 Console.SetCursorPosition(nCursorLeft, nCursorTop);
-                Console.Write(new string(' ', this._message.Length));
+                Console.Write(new string(' ', GetCharWidth(this._message)));
             }
             // 显示本次文字
             Console.SetCursorPosition(nCursorLeft, nCursorTop);

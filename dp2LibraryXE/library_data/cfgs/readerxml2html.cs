@@ -171,11 +171,15 @@ public class MyConverter : ReaderConverter
         
         // 获得日历
         Calendar calendar = null;
+        // return:
+        //      -1  出错
+        //      0   没有找到日历
+        //      1   找到日历
         nRet = this.App.GetReaderCalendar(strReaderType,
             this.LibraryCode,
             out calendar,
             out strError);
-        if (nRet == -1)
+        if (nRet == -1 || nRet == 0)
         {
             strResult.Append(strError);
             calendar = null;

@@ -62,10 +62,10 @@ namespace dp2LibraryXE
 
         private void SelectSqlServerDialog_Load(object sender, EventArgs e)
         {
-            Refresh();
+            RefreshButtons();
         }
 
-        void Refresh()
+        void RefreshButtons()
         {
             if (IsLocalDBInstalled() == false)
                 this.radioButton_localdb.Enabled = false;
@@ -118,7 +118,7 @@ namespace dp2LibraryXE
 
         private void button_refresh_Click(object sender, EventArgs e)
         {
-            Refresh();
+            RefreshButtons();
         }
     }
 }

@@ -145,7 +145,6 @@ public class MyConverter : ReaderConverter
                 strResult.Append( "<tr class='content createdate'><td class='name'>发证日期</td><td class='value'>" + LocalDate(DomUtil.GetElementText(dom.DocumentElement, "createDate")) + "</td></tr>");
         */
 
-
         // 失效日期
         string strExpireDateValueClass = "expiredate";
         if (bExpired == true)
@@ -171,11 +170,15 @@ public class MyConverter : ReaderConverter
         
         // 获得日历
         Calendar calendar = null;
+        // return:
+        //      -1  出错
+        //      0   没有找到日历
+        //      1   找到日历
         nRet = this.App.GetReaderCalendar(strReaderType,
             this.LibraryCode,
             out calendar,
             out strError);
-        if (nRet == -1)
+        if (nRet == -1 || nRet == 0)
         {
             strResult.Append(strError);
             calendar = null;

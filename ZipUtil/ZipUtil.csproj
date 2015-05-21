@@ -32,8 +32,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Ionic.Zip">
-      <HintPath>.\Ionic.Zip.dll</HintPath>
+    <Reference Include="Ionic.Zip, Version=1.9.1.8, Culture=neutral, PublicKeyToken=edbe51ad942a3f5c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Ionic.Zip.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -55,8 +56,8 @@
   <PropertyGroup>
     <PostBuildEvent>echo copy ziputil.exe to dp2 directory
 copy $(TargetPath) $(SolutionDir)
-echo copy ionic.zip.dll to dp2 directory
-copy $(TargetDir)Ionic.zip.dll $(SolutionDir)</PostBuildEvent>
+rem echo copy ionic.zip.dll to dp2 directory
+rem copy $(TargetDir)Ionic.zip.dll $(SolutionDir)</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
