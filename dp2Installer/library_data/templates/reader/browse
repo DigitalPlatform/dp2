@@ -9,6 +9,9 @@
   <col title="状态">
     <xpath>*/state</xpath>
   </col>
+  <col title="读者类别">
+    <xpath>*/readerType</xpath>
+  </col>
   <col title="单位">
     <xpath>*/department</xpath>
   </col>

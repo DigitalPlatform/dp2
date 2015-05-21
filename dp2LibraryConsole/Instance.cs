@@ -529,7 +529,7 @@ namespace dp2LibraryConsole
                 if (si is DirectoryInfo)
                 {
                     string strServerFilePath = "!upload/" + GetFullDirectory(strTarget) + "/~" + Guid.NewGuid().ToString();
-                    string strZipFileName = Path.GetTempFileName();
+                    string strZipFileName = Path.GetTempFileName(); // TODO: 建议在当前目录创建临时文件，便于观察是否有删除遗漏，和处理
                     try
                     {
                         // return:

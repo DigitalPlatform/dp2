@@ -28,6 +28,7 @@ namespace dp2LibraryXE
         // HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Updates\Microsoft .NET Framework 4 Extended\KB2544514
         static bool IsKB2544514Installed()
         {
+#if NO
             try
             {
                 using (RegistryKey service = Registry.LocalMachine.CreateSubKey("SOFTWARE\\Wow6432Node\\Microsoft\\Updates\\Microsoft .NET Framework 4 Extended\\KB2544514"))
@@ -39,11 +40,23 @@ namespace dp2LibraryXE
             {
                 return false;
             }
+#endif
+            try
+            {
+                using (RegistryKey baseKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32).OpenSubKey(@"SOFTWARE\Microsoft\Updates\Microsoft .NET Framework 4 Extended\KB2544514"))
+                {
+                    return (string)baseKey.GetValue("ThisVersionInstalled") == "Y";
+                }
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         private void button_OK_Click(object sender, EventArgs e)
         {
-            if (IsKB2544514Installed() == false)
+            if (this.radioButton_localdb.Checked == true && IsKB2544514Installed() == false)
             {
                 MessageBox.Show(this, "MS SQL LocalDB 要求必须先安装 .NET Framework 4 Runtime Update 2。请先安装它(KB2544514)");
                 Process.Start("IExplore.exe", "https://support.microsoft.com/en-us/kb/2544514");
