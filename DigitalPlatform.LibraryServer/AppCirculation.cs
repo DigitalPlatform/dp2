@@ -1071,6 +1071,8 @@ namespace DigitalPlatform.LibraryServer
                         }
                     }
 
+
+
                     XmlDocument itemdom = null;
                     nRet = LibraryApplication.LoadToDom(strItemXml,
                         out itemdom,
@@ -1228,20 +1230,21 @@ namespace DigitalPlatform.LibraryServer
                         }
                     }
 
+
+
+
                     string strReaderType = DomUtil.GetElementText(readerdom.DocumentElement,
                         "readerType");
 
                     Calendar calendar = null;
-                    // return:
-                    //      -1  出错
-                    //      0   没有找到日历
-                    //      1   找到日历
                     nRet = GetReaderCalendar(strReaderType,
                         strLibraryCode,
                         out calendar,
                         out strError);
-                    if (nRet == -1 || nRet == 0)
+                    if (nRet == -1)
                         goto ERROR1;
+
+
 
                     /*
                     string strBookType = DomUtil.GetElementText(itemdom.DocumentElement,
@@ -1333,6 +1336,8 @@ namespace DigitalPlatform.LibraryServer
 
                         goto ERROR1;
                     }
+
+
 
                     XmlDocument domOperLog = new XmlDocument();
                     domOperLog.LoadXml("<root />");
@@ -4287,15 +4292,11 @@ namespace DigitalPlatform.LibraryServer
 
                     // 获得相关日历
                     Calendar calendar = null;
-                    // return:
-                    //      -1  出错
-                    //      0   没有找到日历
-                    //      1   找到日历
                     nRet = GetReaderCalendar(strReaderType,
                         strLibraryCode,
                         out calendar,
                         out strError);
-                    if (nRet == -1 || nRet == 0)
+                    if (nRet == -1)
                         goto ERROR1;
 
                     string strOperTime = this.Clock.GetClock();
@@ -5297,10 +5298,6 @@ namespace DigitalPlatform.LibraryServer
         #endregion
 
         // 包装版本,为了兼容脚本使用
-        // return:
-        //      -1  出错
-        //      0   没有找到日历
-        //      1   找到日历
         public int GetReaderCalendar(string strReaderType,
     out Calendar calendar,
     out string strError)
@@ -5336,12 +5333,9 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 获得和一个特定读者类型相关联的日历
-        // parameters:
-        //      strReaderType   读者类型。可以为空，表示匹配任何读者类型都可以
         // return:
-        //      -1  出错
-        //      0   没有找到日历
-        //      1   找到日历
+        //      -1  error
+        //      0   succeed
         public int GetReaderCalendar(string strReaderType,
             string strLibraryCode,
             out Calendar calendar,
@@ -5372,23 +5366,10 @@ namespace DigitalPlatform.LibraryServer
                 strError = "获得 馆代码 '"+strLibraryCode+"' 中 读者类型 '" + strReaderType + "' 的 工作日历名 参数时发生错误: " + strError;
                 return -1;
             }
-
-            if (string.IsNullOrEmpty(strReaderType) == true)
+            if (nRet < 3)
             {
-                // 只根据馆代码找一个日历，对分数要求不高
-                if (nRet < 1 || string.IsNullOrEmpty(strCalendarName) == true)
-                {
-                    strError = "馆代码 '" + strLibraryCode + "' 中 任意读者类型 的 工作日历名 参数无法获得";
-                    return 0;
-                }
-            }
-            else
-            {
-                if (nRet < 3)
-                {
-                    strError = "馆代码 '" + strLibraryCode + "' 中 读者类型 '" + strReaderType + "' 的 工作日历名 参数无法获得: " + strError;
-                    return 0;
-                }
+                strError = "馆代码 '" + strLibraryCode + "' 中 读者类型 '" + strReaderType + "' 的 工作日历名 参数无法获得: " + strError;
+                return -1;
             }
 
             // 特殊地，"./基本日历"，指当前馆代码的基本日历，假如当前馆代码为“海淀分馆”，则应该用“海淀分馆/基本日历”去寻找
@@ -5402,7 +5383,7 @@ namespace DigitalPlatform.LibraryServer
             if (nodes.Count == 0)
             {
                 strError = "名为 '" + strCalendarName + "' 的日历配置不存在";
-                return 0;
+                return -1;
             }
 
             string strName = DomUtil.GetAttr(nodes[0], "name");
@@ -5414,11 +5395,11 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "日历 '" + strCalendarName + "' 的数据构造 Calendar 对象时出错: " + ex.Message;
+                strError = "日历 '" + strCalendarName + "' 的数据构造Calerdar对象时出错: " + ex.Message;
                 return -1;
             }
 
-            return 1;
+            return 0;
         }
 
         // (为管理目的)获得日历
@@ -7833,8 +7814,6 @@ out string strError)
 
         // 获得预约保留末端时间
         // 中间要排除所有非工作日
-        // parameters:
-        //      calendar    日历对象。可以为 null
         public static int GetOverTime(
             Calendar calendar,
             DateTime timeStart,
@@ -7899,7 +7878,9 @@ out string strError)
                     out strError);
                 if (nRet == -1)
                     return -1;
+
             }
+
 
             return 0;
         }
@@ -12302,6 +12283,7 @@ out string strError)
             // 续借处理
             if (bRenew == true)
             {
+
                 if (nodesReservationRequest.Count > 0)
                 {
                     string strList = "";

@@ -18,38 +18,8 @@ namespace dp2LibraryXE
             InitializeComponent();
         }
 
-        // 
-        // 这篇文章是关于 .NET Framework 4 Runtime Update 2 的
-        // https://support.microsoft.com/en-us/kb/2544514
-        //
-        //
-        // 这篇文章介绍了如何从注册表检查各种 Update：
-        // https://msdn.microsoft.com/en-us/library/hh925567(v=vs.110).aspx
-        // HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Updates\Microsoft .NET Framework 4 Extended\KB2544514
-        static bool IsKB2544514Installed()
-        {
-            try
-            {
-                using (RegistryKey service = Registry.LocalMachine.CreateSubKey("SOFTWARE\\Wow6432Node\\Microsoft\\Updates\\Microsoft .NET Framework 4 Extended\\KB2544514"))
-                {
-                    return (string)service.GetValue("ThisVersionInstalled") == "Y";
-                }
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
         private void button_OK_Click(object sender, EventArgs e)
         {
-            if (IsKB2544514Installed() == false)
-            {
-                MessageBox.Show(this, "MS SQL LocalDB 要求必须先安装 .NET Framework 4 Runtime Update 2。请先安装它(KB2544514)");
-                Process.Start("IExplore.exe", "https://support.microsoft.com/en-us/kb/2544514");
-                return;
-            }
-
             this.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.Close();
         }

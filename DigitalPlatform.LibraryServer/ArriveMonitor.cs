@@ -10,7 +10,6 @@ using DigitalPlatform.rms.Client;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Text;
-using System.Collections;
 
 
 namespace DigitalPlatform.LibraryServer
@@ -312,8 +311,7 @@ namespace DigitalPlatform.LibraryServer
 
             RmsChannel channel = this.RmsChannels.GetChannel(this.App.WsUrl);
 
-            this._calendarTable.Clear();
-
+            this.m_calendar = null;
             int nRecCount = 0;
             for (; ; nRecCount ++)
             {
@@ -548,65 +546,9 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
-        // 获得读者类型
-        // return:
-        //      -1  出错
-        //      0   没有找到读者记录
-        //      1   找到
-        int GetReaderType(string strReaderBarcode,
-            out string strReaderType,
-            out string strError)
-        {
-            strError = "";
-            strReaderType = "";
+        Calendar m_calendar = null;
+        string m_strCalendarLibraryCode = null;
 
-            if (string.IsNullOrEmpty(strReaderBarcode) == true)
-            {
-                strError = "strReaderBarcode 不能为空";
-                return -1;
-            }
-
-            // 读入读者记录
-            string strReaderXml = "";
-            string strOutputReaderRecPath = "";
-            byte[] reader_timestamp = null;
-
-            int nRet = this.App.GetReaderRecXml(
-                this.RmsChannels,
-                strReaderBarcode,
-                out strReaderXml,
-                out strOutputReaderRecPath,
-                out reader_timestamp,
-                out strError);
-            if (nRet == 0)
-            {
-                strError = "读者证条码号 '" + strReaderBarcode + "' 不存在";
-                return 0;
-            }
-            if (nRet == -1)
-            {
-                strError = "读入读者记录时发生错误: " + strError;
-                return -1;
-            }
-
-            XmlDocument readerdom = null;
-            nRet = LibraryApplication.LoadToDom(strReaderXml,
-                out readerdom,
-                out strError);
-            if (nRet == -1)
-            {
-                strError = "装载读者记录进入XML DOM时发生错误: " + strError;
-                return -1;
-            }
-
-            strReaderType = DomUtil.GetElementText(readerdom.DocumentElement, "readerType");
-            return 1;
-        }
-
-        // string m_strCalendarLibraryCode = null;
-
-        // 日历对象的 cache。 馆代码 + | + 读者类型 --> 日历对象
-        Hashtable _calendarTable = new Hashtable();
 
         // 处理一条记录
         // parameters:
@@ -620,6 +562,7 @@ namespace DigitalPlatform.LibraryServer
         {
             strError = "";
             int nRet = 0;
+
 
             XmlDocument dom = new XmlDocument();
             try
@@ -642,67 +585,18 @@ namespace DigitalPlatform.LibraryServer
             // TODO: 读者的馆代码
             string strLibraryCode = DomUtil.GetElementText(dom.DocumentElement,
     "libraryCode");
-            string strReaderBarcode = DomUtil.GetElementText(dom.DocumentElement,
-    "readerBarcode");
 
-            // 2015/5/20
-            // 通过读者证条码号获得读者类型
-            string strReaderType = "";
-            // 获得读者类型
-            // return:
-            //      -1  出错
-            //      0   没有找到读者记录
-            //      1   找到
-            nRet = GetReaderType(strReaderBarcode,
-        out strReaderType,
-        out strError);
-            if (nRet == -1)
-                strReaderType = "";
-
-            string strKey = strLibraryCode + "|" + strReaderType;
-            Calendar calendar = (Calendar)_calendarTable[strKey];
-            if (calendar == null)
-            {
-                // return:
-                //      -1  出错
-                //      0   没有找到日历
-                //      1   找到日历
-                nRet = this.App.GetReaderCalendar(strReaderType,
-                    strLibraryCode,
-                    out calendar,
-                    out strError);
-                if (nRet == -1)
-                    return -1;
-                if (nRet == 0)
-                    calendar = null;
-
-                if (calendar != null && _calendarTable.Count < 10000)
-                    _calendarTable[strKey] = calendar;
-            }
-#if NO
             if (this.m_calendar == null
-                || this.m_strCalendarLibraryCode != strLibraryCode
-                )
+                || this.m_strCalendarLibraryCode != strLibraryCode)
             {
-                // return:
-                //      -1  出错
-                //      0   没有找到日历
-                //      1   找到日历
                 nRet = this.App.GetReaderCalendar(null,
                     strLibraryCode,
                     out m_calendar,
                     out strError);
                 if (nRet == -1)
                     return -1;
-                if (nRet == 1)
-                    this.m_strCalendarLibraryCode = strLibraryCode;
-                else
-                {
-                    m_calendar = null;
-                    this.m_strCalendarLibraryCode = "";
-                }
+                this.m_strCalendarLibraryCode = strLibraryCode;
             }
-#endif
 
             // 判断是否超过保留期限
             // return:
@@ -710,7 +604,7 @@ namespace DigitalPlatform.LibraryServer
             //      0   没有超过
             //      1   已经超过
             nRet = CheckeOutOfReservation(
-                    calendar,
+                    m_calendar,
                     dom,
                     out strError);
             if (nRet == -1)
@@ -720,6 +614,8 @@ namespace DigitalPlatform.LibraryServer
             {
                 string strItemBarcode = DomUtil.GetElementText(dom.DocumentElement,
                     "itemBarcode");
+                string strReaderBarcode = DomUtil.GetElementText(dom.DocumentElement,
+                    "readerBarcode");
 
                 // 通知当前读者，他超过了取书的保留期限
                 string strNotifyDate = DomUtil.GetElementText(dom.DocumentElement,

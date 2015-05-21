@@ -493,12 +493,6 @@ namespace DigitalPlatform.LibraryServer
                     // 只通知第一个在架的册
                     string strItemBarcode = OnShelfItemBarcodes[0];
 
-                    if (string.IsNullOrEmpty(strItemBarcode) == true)
-                    {
-                        strError = "内部错误：OnShelfItemBarcodes 的第一个元素为空。数组情况 '"+StringUtil.MakePathList(OnShelfItemBarcodes)+"'";
-                        goto ERROR1;
-                    }
-
                     List<string> DeletedNotifyRecPaths = null;  // 被删除的通知记录。不用。
                     // 通知预约到书的操作
                     // 出于对读者库加锁方面的便利考虑, 单独做了此函数
@@ -1269,7 +1263,7 @@ namespace DigitalPlatform.LibraryServer
                         //      0   没有修改
                         //      1   进行过修改
                         nRet = DoItemReturnReservationCheck(
-                            bOnShelf,   // 当册现在还在架上的时候，册记录的 <location> 就没有 #reservation。这样在借书环节检查册是否被预约的时候，就不能只看 <location> 了
+                            bOnShelf,
                             ref itemdom,
                             out strTempReservationReaderBarcode,
                             out strError);
@@ -1308,7 +1302,9 @@ namespace DigitalPlatform.LibraryServer
                         strError = "写回册记录'" + strBarcode + "' (记录路径'" + strOutputItemRecPath + "')时发生错误: " + strError;
                         return -1;
                     }
+
                 } // end of for
+
 
                 // 读者记录中为对应的<request>元素打上状态记号
                 DomUtil.SetAttr(readerRequestNode, "state", "arrived");
@@ -1523,13 +1519,9 @@ namespace DigitalPlatform.LibraryServer
                         strError = "AddNotifyRecordToQueue() 函数当 strItemBarcode 参数为空的时候，必须让 strRefID 参数不为空";
                         return -1;
                     }
-
-                    Debug.Assert(string.IsNullOrEmpty(strRefID) == false, "");
                     // 旧的用法。避免检索时候查不到
                     DomUtil.SetElementText(dom.DocumentElement, "itemBarcode", "@refID:" + strRefID);
                 }
-                else
-                    DomUtil.SetElementText(dom.DocumentElement, "itemBarcode", strItemBarcode); // 2015/5/20 添加，修正 BUG
             }
 
             // 改为存储在元素中 2015/5/7
@@ -1859,6 +1851,8 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
+
+
 #if NO
         // text-level: 内部处理
         // 获得和读者通知有关的信息
@@ -2022,8 +2016,9 @@ namespace DigitalPlatform.LibraryServer
             }
             else
             {
-                // outof 的记录何时删除？
+                // outof的记录何时删除？
                 // 册记录中的馆藏地点 #reservation何时消除？一个是现在就消除，一个是盘点模块扫描条码时消除。
+
 
                 // 把记录状态修改为 outofreservation
                 DomUtil.SetElementText(queue_rec_dom.DocumentElement,

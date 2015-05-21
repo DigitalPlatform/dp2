@@ -2427,15 +2427,11 @@ strLibraryCode);    // 读者所在的馆代码
 
 
             Calendar calendar = null;
-            // return:
-            //      -1  出错
-            //      0   没有找到日历
-            //      1   找到日历
             nRet = this.GetReaderCalendar(strReaderType,
                 strLibraryCode,
                 out calendar,
                 out strError);
-            if (nRet == -1 || nRet == 0)
+            if (nRet == -1)
             {
                 strWarning += strError;
                 calendar = null;
@@ -3369,15 +3365,11 @@ out strError);
 
                     // 获得日历
                     DigitalPlatform.LibraryServer.Calendar calendar = null;
-                    // return:
-                    //      -1  出错
-                    //      0   没有找到日历
-                    //      1   找到日历
                     nRet = this.GetReaderCalendar(strReaderType,
                         strLibraryCode,
                         out calendar,
                         out strError);
-                    if (nRet == -1 || nRet == 0)
+                    if (nRet == -1)
                     {
                         calendar = null;
                     }
