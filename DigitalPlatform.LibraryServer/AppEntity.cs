@@ -1848,11 +1848,15 @@ namespace DigitalPlatform.LibraryServer
 
                 if (String.IsNullOrEmpty(strBorrowerReaderType) == false)
                 {
+                    // return:
+                    //      -1  出错
+                    //      0   没有找到日历
+                    //      1   找到日历
                     nRet = this.GetReaderCalendar(strBorrowerReaderType,
                         strBorrowerLibraryCode,
                         out calendar,
                         out strError);
-                    if (nRet == -1)
+                    if (nRet == -1 || nRet == 0)
                     {
                         calendar = null;
                     }

@@ -1753,7 +1753,6 @@ namespace DigitalPlatform.LibraryServer
                 {
                     strColor = "bgcolor=#ff9999";	// 超期
 
-
                     // 看看是不是已经通知过
                     if (string.IsNullOrEmpty(strChars) == false && strChars[0] == 'y')
                         continue;
