@@ -54,6 +54,7 @@
             this.entityRegisterControl1.MainForm = null;
             this.entityRegisterControl1.Margin = new System.Windows.Forms.Padding(0, 0, 0, 20);
             this.entityRegisterControl1.Name = "entityRegisterControl1";
+            this.entityRegisterControl1.Progress = null;
             this.entityRegisterControl1.ServersDom = null;
             this.entityRegisterControl1.Size = new System.Drawing.Size(0, 0);
             this.entityRegisterControl1.TabIndex = 0;
@@ -109,6 +110,7 @@
             // 
             this.entityEditControl_quickRegisterDefault.AccessNo = "";
             this.entityEditControl_quickRegisterDefault.AutoScroll = true;
+            this.entityEditControl_quickRegisterDefault.BackColor = System.Drawing.Color.Transparent;
             this.entityEditControl_quickRegisterDefault.Barcode = "";
             this.entityEditControl_quickRegisterDefault.BatchNo = "";
             this.entityEditControl_quickRegisterDefault.Binding = "";
@@ -123,6 +125,7 @@
             this.entityEditControl_quickRegisterDefault.DisplayMode = "full";
             this.entityEditControl_quickRegisterDefault.Dock = System.Windows.Forms.DockStyle.Fill;
             this.entityEditControl_quickRegisterDefault.ErrorInfo = "";
+            this.entityEditControl_quickRegisterDefault.ForeColor = System.Drawing.SystemColors.WindowText;
             this.entityEditControl_quickRegisterDefault.Initializing = true;
             this.entityEditControl_quickRegisterDefault.Intact = "";
             this.entityEditControl_quickRegisterDefault.Location = new System.Drawing.Point(0, 0);

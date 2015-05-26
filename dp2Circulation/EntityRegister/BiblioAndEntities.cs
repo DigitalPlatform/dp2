@@ -91,10 +91,20 @@ namespace dp2Circulation
         {
             strError = "";
 
-            if (this.BiblioChanged == true)
+            if (this.BiblioChanged == true
+                || this.EntitiesChanged == true)
             {
+                string strParts = "";
+                if (this.BiblioChanged)
+                    strParts += "书目记录";
+                if (this.EntitiesChanged)
+                {
+                    if (string.IsNullOrEmpty(strParts) == false)
+                        strParts += "和";
+                    strParts += "册记录";
+                }
                 DialogResult result = MessageBox.Show(this.Owner,
-"当前书目记录修改后尚未保存。如果此时装入新记录内容，先前的修改将会丢失。\r\n\r\n是否装入新记录?",
+"当前"+strParts+"修改后尚未保存。如果此时装入新记录内容，先前的修改将会丢失。\r\n\r\n是否装入新记录?",
 "BiblioRegisterWizard",
 MessageBoxButtons.YesNo,
 MessageBoxIcon.Question,
@@ -120,18 +130,9 @@ MessageBoxDefaultButton.Button2);
             this.ClearEntityEditControls("normal");
 
 #endif
-            if (this.EntitiesChanged == true)
-            {
-                DialogResult result = MessageBox.Show(this.Owner,
-"当前有册记录修改后尚未保存。如果此时装入新记录内容，先前的修改将会丢失。\r\n\r\n是否装入新记录?",
-"BiblioRegisterControl",
-MessageBoxButtons.YesNo,
-MessageBoxIcon.Question,
-MessageBoxDefaultButton.Button2);
-                if (result == DialogResult.No)
-                    return 0;
-            }
+
             this.ClearEntityEditControls();
+            this.EntitiesChanged = false;
 
             this.OldMARC = info.OldXml;
             this.Timestamp = info.Timestamp;
@@ -144,7 +145,7 @@ MessageBoxDefaultButton.Button2);
 
             this.MarcSyntax = info.MarcSyntax;
 
-            this.easyMarcControl1.SetMarc(info.OldXml);
+            this.SetMarc(info.OldXml);
             Debug.Assert(this.BiblioChanged == false, "");
 
             // 设置封面图像
@@ -240,7 +241,7 @@ MessageBoxDefaultButton.Button2);
             return false;
         }
 
-        bool m_bEntitiesChanged = false;
+        bool _bEntitiesChanged = false;
 
         /// <summary>
         /// 册记录内容是否发生过修改
@@ -249,13 +250,13 @@ MessageBoxDefaultButton.Button2);
         {
             get
             {
-                return this.m_bEntitiesChanged;
+                return this._bEntitiesChanged;
             }
             set
             {
-                if (this.m_bEntitiesChanged != value)
+                if (this._bEntitiesChanged != value)
                 {
-                    this.m_bEntitiesChanged = value;
+                    this._bEntitiesChanged = value;
                 }
             }
         }
@@ -297,6 +298,8 @@ MessageBoxDefaultButton.Button2);
             control.Font = this.Owner.Font;
             control.BackColor = Color.Transparent;
             control.Margin = new Padding(8, 8, 8, 8);
+            // control.TableMargin = new Padding(100);
+            control.TablePadding = new Padding(64,12,24,12);
 
             // control.ErrorInfo = "测试文字 asdfasdf a asd fa daf a df af asdf asdf adf asdf asdf asf asdf asdf ---- ";
 
@@ -366,6 +369,21 @@ MessageBoxDefaultButton.Button2);
             return 0;
         }
 
+        // 将加号滚入视野可见范围
+        public bool ScrollPlusIntoView()
+        {
+            foreach (Control control in this.flowLayoutPanel1.Controls)
+            {
+                if (control is Label)
+                {
+                    this.flowLayoutPanel1.ScrollControlIntoView(control);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         // 将册记录编辑控件加入末尾。注意末尾可能有 Label 控件，要插入在它前面
         void AddEditControl(EntityEditControl edit)
         {
@@ -414,11 +432,13 @@ MessageBoxDefaultButton.Button2);
 
                     using (Brush brushState = new SolidBrush(state_color))
                     {
+                        int x0 = 0;
+                        int y0 = 0;
                         int nWidth = 80;
                         Point[] points = new Point[3];
-                        points[0] = new Point(0, 0);
-                        points[1] = new Point(0, nWidth);
-                        points[2] = new Point(nWidth, 0);
+                        points[0] = new Point(x0, y0);
+                        points[1] = new Point(x0, nWidth);
+                        points[2] = new Point(nWidth, y0);
                         e.Graphics.FillPolygon(brushState, points);
                     }
                 }
@@ -447,7 +467,7 @@ MessageBoxDefaultButton.Button2);
 
         void control_ContentChanged(object sender, DigitalPlatform.ContentChangedEventArgs e)
         {
-            this.m_bEntitiesChanged = true;
+            this._bEntitiesChanged = true;
         }
 
         void control_AppendMenu(object sender, AppendMenuEventArgs e)
@@ -782,9 +802,19 @@ MessageBoxDefaultButton.Button2);
             return strMacroName;
         }
 
+        public List<string> HideFieldNames = new List<string>();
+
         public void SetMarc(string strMarc)
         {
             this.easyMarcControl1.SetMarc(strMarc);
+
+            if (this.HideFieldNames.Count > 0)
+            {
+                // 将指定字段名的字段改变隐藏状态
+                // parameters:
+                //      field_names 要施加影响的字段名。如果为 null 表示全部
+                this.easyMarcControl1.HideFields(this.HideFieldNames, true);
+            }
         }
 
         public string GetMarc()
@@ -1139,7 +1169,7 @@ MessageBoxDefaultButton.Button2);
 
         public void AddPlus()
         {
-            Label label = new Label();
+            Label label_plus = new Label();
             string strFontName = "";
             Font ref_font = GuiUtil.GetDefaultFont();
             if (ref_font != null)
@@ -1147,29 +1177,35 @@ MessageBoxDefaultButton.Button2);
             else
                 strFontName = this.Owner.Font.Name;
 
-            label.Font = new Font(strFontName, this.Owner.Font.Size * 8, FontStyle.Bold);  // 12
-            label.ForeColor = this.flowLayoutPanel1.ForeColor;  // SystemColors.GrayText;
+            label_plus.Font = new Font(strFontName, this.Owner.Font.Size * 8, FontStyle.Bold);  // 12
+            label_plus.ForeColor = this.flowLayoutPanel1.ForeColor;  // SystemColors.GrayText;
 
-            label.AutoSize = true;
-            label.Margin = new Padding(8, 8, 8, 8);
-            this.flowLayoutPanel1.Controls.Add(label);
-            label.Text = "+";
-            label.MouseClick += label_MouseClick;
-            label.MouseUp += label_MouseUp;
-            label.BackColor = ControlPaint.Dark(this.flowLayoutPanel1.BackColor);
-            label.TextAlign = ContentAlignment.MiddleCenter;
+            label_plus.AutoSize = true;
+            label_plus.Margin = new Padding(8, 8, 8, 8);
+
+            this.flowLayoutPanel1.Controls.Add(label_plus);
+
+            label_plus.Text = "+";
+            label_plus.MouseClick += label_plus_MouseClick;
+            label_plus.MouseUp += label_plus_MouseUp;
+            label_plus.BackColor = ControlPaint.Dark(this.flowLayoutPanel1.BackColor);
+            label_plus.TextAlign = ContentAlignment.MiddleCenter;
         }
 
-        void label_MouseClick(object sender, MouseEventArgs e)
+        void label_plus_MouseClick(object sender, MouseEventArgs e)
         {
             if (e.Button != MouseButtons.Left)
                 return;
             string strError = "";
             int nRet = AddNewEntity("", out strError);
             if (nRet == -1)
-                MessageBox.Show(this.Owner, strError);        }
+                MessageBox.Show(this.Owner, strError);
 
-        void label_MouseUp(object sender, MouseEventArgs e)
+            // 把加号滚入视野可见范围，这样便于连续点击它
+            this.ScrollPlusIntoView();
+        }
+
+        void label_plus_MouseUp(object sender, MouseEventArgs e)
         {
             if (e.Button != MouseButtons.Right)
                 return;

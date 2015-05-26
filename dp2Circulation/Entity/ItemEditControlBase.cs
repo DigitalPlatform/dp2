@@ -326,39 +326,140 @@ namespace dp2Circulation
 
             for (int i = 0; i < this.tableLayoutPanel_main.RowStyles.Count; i++)
             {
-                Control control = this.tableLayoutPanel_main.GetControlFromPosition(2, i);
-                if (control == null)
-                    continue;
-                if (bAdd)
+                // 第一列
+                Label label_control = this.tableLayoutPanel_main.GetControlFromPosition(0, i) as Label;
+                if (label_control != null)
                 {
-                    control.Enter += control_Enter;
-                    control.Leave += control_Leave;
-                    if (control is DateControl)
-                        (control as DateControl).DateTextChanged += control_TextChanged;
-                    else if (control is DateTimePicker)
-                        (control as DateTimePicker).ValueChanged += control_TextChanged;
+                    if (bAdd)
+                    {
+                        label_control.Click += label_control_Click;
+                    }
                     else
-                        control.TextChanged += control_TextChanged;
-
-                    if (control is ComboBox)
-                        control.SizeChanged += control_SizeChanged;
+                    {
+                        label_control.Click -= label_control_Click;
+                    }
                 }
-                else
-                {
-                    control.Enter -= control_Enter;
-                    control.Leave -= control_Leave;
-                    if (control is DateControl)
-                        (control as DateControl).DateTextChanged -= control_TextChanged;
-                    else if (control is DateTimePicker)
-                        (control as DateTimePicker).ValueChanged -= control_TextChanged;
-                    else
-                        control.TextChanged -= control_TextChanged;
 
-                    if (control is ComboBox)
-                        control.SizeChanged += control_SizeChanged;
+                // 第二列
+                Label color_control = this.tableLayoutPanel_main.GetControlFromPosition(1, i) as Label;
+                if (color_control != null)
+                {
+                    if (bAdd)
+                    {
+                        color_control.Click += color_control_Click;
+                    }
+                    else
+                    {
+                        color_control.Click -= color_control_Click;
+                    }
+                }
+
+                // 第三列
+                Control edit_control = this.tableLayoutPanel_main.GetControlFromPosition(2, i);
+                if (edit_control != null)
+                {
+                    if (bAdd)
+                    {
+                        edit_control.Enter += control_Enter;
+                        edit_control.Leave += control_Leave;
+                        if (edit_control is DateControl)
+                            (edit_control as DateControl).DateTextChanged += control_TextChanged;
+                        else if (edit_control is DateTimePicker)
+                            (edit_control as DateTimePicker).ValueChanged += control_TextChanged;
+                        else
+                            edit_control.TextChanged += control_TextChanged;
+
+                        if (edit_control is ComboBox)
+                            edit_control.SizeChanged += control_SizeChanged;
+
+                        edit_control.PreviewKeyDown += edit_control_PreviewKeyDown;
+                        edit_control.KeyDown += edit_control_KeyDown;
+                    }
+                    else
+                    {
+                        edit_control.Enter -= control_Enter;
+                        edit_control.Leave -= control_Leave;
+                        if (edit_control is DateControl)
+                            (edit_control as DateControl).DateTextChanged -= control_TextChanged;
+                        else if (edit_control is DateTimePicker)
+                            (edit_control as DateTimePicker).ValueChanged -= control_TextChanged;
+                        else
+                            edit_control.TextChanged -= control_TextChanged;
+
+                        if (edit_control is ComboBox)
+                            edit_control.SizeChanged += control_SizeChanged;
+
+                        edit_control.PreviewKeyDown -= edit_control_PreviewKeyDown;
+                        edit_control.KeyDown -= edit_control_KeyDown;
+
+                    }
                 }
             }
 
+        }
+
+        void edit_control_KeyDown(object sender, KeyEventArgs e)
+        {
+            switch (e.KeyCode)
+            {
+                case Keys.Down:
+                    if (this.SelectNextControl((sender as Control), true, true, true, false) == false)
+                        SendKeys.Send("{TAB}");
+                    e.Handled = true;
+                    break;
+                case Keys.Up:
+                    //
+                    // 摘要: 
+                    //     激活下一个控件。
+                    //
+                    // 参数: 
+                    //   ctl:
+                    //     从其上开始搜索的 System.Windows.Forms.Control。
+                    //
+                    //   forward:
+                    //     如果为 true 则在 Tab 键顺序中前移；如果为 false 则在 Tab 键顺序中后移。
+                    //
+                    //   tabStopOnly:
+                    //     true 表示忽略 System.Windows.Forms.Control.TabStop 属性设置为 false 的控件；false 表示不忽略。
+                    //
+                    //   nested:
+                    //     true 表示包括嵌套子控件（子控件的子级）；false 表示不包括。
+                    //
+                    //   wrap:
+                    //     true 表示在到达最后一个控件之后从 Tab 键顺序中第一个控件开始继续搜索；false 表示不继续搜索。
+                    //
+                    // 返回结果: 
+                    //     如果控件已激活，则为 true；否则为 false。
+                    if (this.SelectNextControl((sender as Control), false, true, true, false) == false)
+                        SendKeys.Send("+{TAB}");
+                    e.Handled = true;
+                    break;
+            }
+        }
+
+        void edit_control_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+        {
+
+        }
+
+        void color_control_Click(object sender, EventArgs e)
+        {
+            FocusLine(sender as Control);
+        }
+
+        void label_control_Click(object sender, EventArgs e)
+        {
+            FocusLine(sender as Control);
+        }
+
+        // 将输入焦点切换到一个控件所在行的 edit 控件上
+        void FocusLine(Control control)
+        {
+            // 找到同一行的 edit control
+            int nRow = this.tableLayoutPanel_main.GetCellPosition(control).Row;
+            Control edit_control = this.tableLayoutPanel_main.GetControlFromPosition(2, nRow);
+            if (edit_control != null)
+                edit_control.Focus();
         }
 
         // 解决 Flat 风格 ComboBox 在改变大小的时候残留显示的问题

@@ -869,7 +869,7 @@ namespace DigitalPlatform.MarcDom
 		//		-1	error
 		//		0	not match
 		//		1	match
-		static int MatchName(string strName,
+		public static int MatchName(string strName,
 			string strMatchCase)
 		{
 			if (strMatchCase == "")	// 如果strMatchCase为空，表示无论什么名字都匹配

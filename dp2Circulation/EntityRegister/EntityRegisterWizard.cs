@@ -81,6 +81,8 @@ namespace dp2Circulation
                 // this.ShowMessage(strError, "red");
                 MessageBox.Show(this, strError);
             }
+
+            _biblio.ScrollPlusIntoView();
         }
 
         void _biblio_DeleteItem(object sender, DeleteItemEventArgs e)
@@ -106,15 +108,21 @@ namespace dp2Circulation
             get
             {
                 List<object> controls = new List<object>();
+                controls.Add(this.tabControl_main);
                 controls.Add(this.comboBox_from);
+                controls.Add(this.textBox_queryWord);
                 controls.Add(this.splitContainer_biblioAndItems);
+                controls.Add(this.textBox_settings_importantFields);
                 return GuiState.GetUiState(controls);
             }
             set
             {
                 List<object> controls = new List<object>();
+                controls.Add(this.tabControl_main);
                 controls.Add(this.comboBox_from);
+                controls.Add(this.textBox_queryWord);
                 controls.Add(this.splitContainer_biblioAndItems);
+                controls.Add(this.textBox_settings_importantFields);
                 GuiState.SetUiState(controls, value);
             }
         }
@@ -150,13 +158,24 @@ namespace dp2Circulation
             SetControlsColor();
 
             this.UiState = this.MainForm.AppInfo.GetString("entityRegisterWizard", "uistate", "");
+            // 缺省值 检索途径
             if (string.IsNullOrEmpty(this.comboBox_from.Text) == true
                 && this.comboBox_from.Items.Count > 0)
                 this.comboBox_from.Text = this.comboBox_from.Items[0] as string;
+            // 缺省值 书目重要字段
+            if (string.IsNullOrEmpty(this.textBox_settings_importantFields.Text) == true)
+                this.textBox_settings_importantFields.Text = "010,200,210,215,686,69*,7**".Replace(",", "\r\n");
         }
 
         void SetControlsColor()
         {
+            this.button_settings_entityDefault.BackColor = this.BackColor;
+            this.button_settings_entityDefault.ForeColor = this.ForeColor;
+
+            this.textBox_settings_importantFields.BackColor = this.BackColor;
+            this.textBox_settings_importantFields.ForeColor = this.ForeColor;
+
+
             this.textBox_queryWord.BackColor = this.BackColor;
             this.textBox_queryWord.ForeColor = this.ForeColor;
 
@@ -326,20 +345,20 @@ namespace dp2Circulation
 
         void ShowMessage(string strMessage, 
             string strColor = "",
-            bool bClickable = false)
+            bool bClickClose = false)
         {
-            Color color = Color.Green;
+            Color color = Color.FromArgb(80,80,80);
 
-            if (strColor == "red")
-                color = Color.Red;
-            else if (strColor == "yellow")
+            if (strColor == "red")          // 出错
+                color = Color.DarkRed;
+            else if (strColor == "yellow")  // 成功，提醒
                 color = Color.DarkGoldenrod;
-            else if (strColor == "green")
+            else if (strColor == "green")   // 成功
                 color = Color.Green;
-            else
-                color = Color.Green;
+            else if (strColor == "progress")    // 处理过程
+                color = Color.FromArgb(80, 80, 80);
 
-            this._floatingMessage.SetMessage(strMessage, color, bClickable);
+            this._floatingMessage.SetMessage(strMessage, color, bClickClose);
         }
 
         void ClearMessage()
@@ -377,7 +396,7 @@ namespace dp2Circulation
                 int nHitCount = 0;
 
                 //line.SetBiblioSearchState("searching");
-                this.ShowMessage("正在检索 " + strQueryWord + " ...", "green", false);
+                this.ShowMessage("正在检索 " + strQueryWord + " ...", "progress", false);
 
                 XmlNodeList servers = _base.ServersDom.DocumentElement.SelectNodes("server");
                 foreach (XmlElement server in servers)
@@ -497,7 +516,8 @@ namespace dp2Circulation
         {
             strError = "";
 
-            this.ShowMessage("正在针对 " + account.ServerName + " \r\n检索 " + strQueryWord + " ...", "green", false);
+            this.ShowMessage("正在针对 " + account.ServerName + " \r\n检索 " + strQueryWord + " ...",
+                "progress", false);
 
             AmazonSearch search = new AmazonSearch();
             // search.MainForm = this.MainForm;
@@ -855,7 +875,8 @@ out string strError)
 
                 //if (line != null)
                 //    line.BiblioSummary = "正在获取服务器 " + account.ServerName + " 的配置信息 ...";
-                this.ShowMessage("正在获取服务器 " + account.ServerName + " 的配置信息 ...", "green", false);
+                this.ShowMessage("正在获取服务器 " + account.ServerName + " 的配置信息 ...", 
+                    "progress", false);
 
                 // 准备服务器信息
                 nRet = _base.GetServerInfo(
@@ -866,7 +887,8 @@ out string strError)
                 if (nRet == -1)
                     goto ERROR1;    // 可以不报错 ?
 
-                this.ShowMessage("正在针对 " + account.ServerName + " \r\n检索 " + strQueryWord + " ...", "green", false);
+                this.ShowMessage("正在针对 " + account.ServerName + " \r\n检索 " + strQueryWord + " ...",
+                    "progress", false);
 
                 string strQueryXml = "";
                 long lRet = _channel.SearchBiblio(Progress,
@@ -941,7 +963,7 @@ out string strError)
                         loader.Channel = _channel;
                         loader.Stop = this.Progress;
                         loader.Format = "xml";
-                        loader.GetBiblioInfoStyle = GetBiblioInfoStyle.None;
+                        loader.GetBiblioInfoStyle = GetBiblioInfoStyle.Timestamp;
                         loader.RecPaths = biblio_recpaths;
 
                         try
@@ -1096,6 +1118,14 @@ out string strError)
             row.Tag = info;
             this.dpTable_browseLines.Rows.Add(row);
 
+            // 当插入第一行的时候，顺便选中它
+            if (this.dpTable_browseLines.Rows.Count == 1)
+            {
+                this.dpTable_browseLines.Focus();
+                row.Selected = true;
+                this.dpTable_browseLines.FocusedItem = row;
+            }
+
             PrepareCoverImage(row);
         }
 
@@ -1217,6 +1247,7 @@ out string strError)
             if (nRet == -1)
                 goto ERROR1;
 
+            this.easyMarcControl1.SelectFirstItem();
             return;
         ERROR1:
             if (string.IsNullOrEmpty(strError) == false)
@@ -1726,7 +1757,7 @@ int nCount)
 
             bool bBiblioSaved = false;
 
-            this.ShowMessage("正在保存书目和册记录", "green", false);
+            this.ShowMessage("正在保存书目和册记录", "progress", false);
 
             this.Progress.OnStop += new StopEventHandler(this.DoStop);
             this.Progress.BeginLoop();
@@ -1829,7 +1860,7 @@ int nCount)
 
                     if (entities.Length > 0)
                     {
-                        this.ShowMessage("正在保存 "+entities.Length+" 个册记录", "green", false);
+                        this.ShowMessage("正在保存 " + entities.Length + " 个册记录", "progress", false);
                         // 分批进行保存
                         // return:
                         //      -2  部分成功，部分失败
@@ -2103,8 +2134,7 @@ int nCount)
 
         private void toolStripButton_start_Click(object sender, EventArgs e)
         {
-            this.tabControl_main.SelectedIndex = 0;
-
+            this.tabControl_main.SelectedTab = this.tabPage_searchBiblio;
         }
 
         private void toolStripButton_prev_Click(object sender, EventArgs e)
@@ -2242,6 +2272,55 @@ int nCount)
             {
                 this.splitContainer_biblioAndItems.Orientation = Orientation.Horizontal;
                 this.splitContainer_biblioAndItems.SplitterDistance = this.splitContainer_biblioAndItems.Height / 2;
+            }
+        }
+
+        private void textBox_settings_importantFields_TextChanged(object sender, EventArgs e)
+        {
+            if (this._biblio != null)
+            {
+                this._biblio.HideFieldNames = StringUtil.SplitList(this.textBox_settings_importantFields.Text.Replace("\r\n", ","));
+                this._biblio.HideFieldNames.Insert(0, "rvs");
+            }
+        }
+
+        private void textBox_queryWord_Enter(object sender, EventArgs e)
+        {
+            this.AcceptButton = this.button_search;
+        }
+
+        private void textBox_queryWord_Leave(object sender, EventArgs e)
+        {
+            this.AcceptButton = null;
+        }
+
+        /// <summary>
+        /// 处理对话框键
+        /// </summary>
+        /// <param name="keyData">System.Windows.Forms.Keys 值之一，它表示要处理的键。</param>
+        /// <returns>如果控件处理并使用击键，则为 true；否则为 false，以允许进一步处理</returns>
+        protected override bool ProcessDialogKey(
+    Keys keyData)
+        {
+            if (keyData == Keys.Enter && this.dpTable_browseLines.Focused)
+            {
+            }
+
+            if (keyData == Keys.Escape)
+            {
+
+            }
+
+            return base.ProcessDialogKey(keyData);
+        }
+
+        private void dpTable_browseLines_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyValue == (int)Keys.Enter
+                && this.dpTable_browseLines.Focused)
+            {
+                this.dpTable_browseLines_DoubleClick(this, e);
+                return;
             }
         }
 

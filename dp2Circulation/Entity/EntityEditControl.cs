@@ -650,6 +650,30 @@ namespace dp2Circulation
             // table.RowStyles[nRow] = new RowStyle(); // ÁÙÊ±µÄ
         }
 
+        public Padding TablePadding
+        {
+            get
+            {
+                return this.tableLayoutPanel_main.Padding;
+            }
+            set
+            {
+                this.tableLayoutPanel_main.Padding = value;
+            }
+        }
+
+        public Padding TableMargin
+        {
+            get
+            {
+                return this.tableLayoutPanel_main.Margin;
+            }
+            set
+            {
+                this.tableLayoutPanel_main.Margin = value;
+            }
+        }
+
         void SetDisplayMode(string strMode)
         {
             if (strMode == "simple_register")

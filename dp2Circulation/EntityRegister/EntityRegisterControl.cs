@@ -1928,7 +1928,7 @@ MessageBoxDefaultButton.Button1);
                         loader.Channel = _channel;
                         loader.Stop = this.Progress;
                         loader.Format = "xml";
-                        loader.GetBiblioInfoStyle = GetBiblioInfoStyle.None;
+                        loader.GetBiblioInfoStyle = GetBiblioInfoStyle.Timestamp;
                         loader.RecPaths = biblio_recpaths;
 
                         try

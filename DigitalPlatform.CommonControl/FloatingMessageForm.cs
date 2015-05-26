@@ -47,6 +47,8 @@ namespace DigitalPlatform.CommonControl
         /// </summary>
         public FloatingMessageForm(Form parent, bool bClickable = false)
         {
+            _saveOpacity = this.Opacity;
+
             this._parent = parent;
             this.Clickable = bClickable;
 
@@ -259,13 +261,34 @@ backRect,
             }
         }
 
+        double _saveOpacity = 0.7;
+
+        public new double Opacity
+        {
+            get
+            {
+                return base.Opacity;
+            }
+            set
+            {
+                base.Opacity = value;
+                _saveOpacity = value;
+            }
+        }
+
         // 设置消息文字和颜色，可否点击
         // 一次性设置，比较方便
-        public void SetMessage(string strText, Color rectColor, bool bClickable)
+        public void SetMessage(string strText, Color rectColor, bool bClickClose)
         {
             base.Text = strText;
             this._rectColor = rectColor;
-            this.Closeable = bClickable;
+            this.Closeable = bClickClose;
+
+            if (bClickClose)
+                base.Opacity = 1.0;
+            else
+                base.Opacity = _saveOpacity;    // 恢复原来的不透明度
+
             this.Invalidate();
         }
 

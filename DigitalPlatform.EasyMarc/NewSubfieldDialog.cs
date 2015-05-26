@@ -34,6 +34,9 @@ namespace DigitalPlatform.EasyMarc
             int nRet = LoadNameList(out strError);
             if (nRet == -1)
                 MessageBox.Show(this, strError);
+
+            if (string.IsNullOrEmpty(this.textBox_name.Text) == false)
+                HilightListItems(this.textBox_name.Text);
         }
 
         int LoadNameList(out string strError)
@@ -287,74 +290,7 @@ namespace DigitalPlatform.EasyMarc
 
             try
             {
-                // bool bScrolled = false;
-                int nStart = -1;
-                int nEnd = -1;
-                for (int i = 0; i < this.listView_nameList.Items.Count; i++)
-                {
-                    string strText = this.listView_nameList.Items[i].Text;
-
-                    bool bHilight = false;
-
-                    if (this.textBox_name.Text.Length == 0)
-                    {
-                        bHilight = false;
-                        goto CHANGE_COLOR;
-                    }
-                    else
-                    {
-                        if (this.textBox_name.Text.Length < NameStringLength)
-                        {
-                            string strPart = strText.Substring(0, this.textBox_name.Text.Length);
-
-                            if (this.textBox_name.Text == strPart)
-                            {
-                                bHilight = true;
-                                goto CHANGE_COLOR;
-                            }
-                        }
-
-                        if (this.textBox_name.Text == strText)
-                        {
-                            bHilight = true;
-                            goto CHANGE_COLOR;
-                        }
-                    }
-
-                CHANGE_COLOR:
-                    if (bHilight == false)
-                    {
-                        if (this.listView_nameList.Items[i].BackColor != SystemColors.Window)
-                            this.listView_nameList.Items[i].BackColor = SystemColors.Window;
-                        /*
-                        if (this.listView_fieldNameList.Items[i].Selected != false)
-                            this.listView_fieldNameList.Items[i].Selected = false;
-                         * */
-                    }
-                    else
-                    {
-                        this.listView_nameList.Items[i].BackColor = SystemColors.Info;
-
-                        // this.listView_fieldNameList.Items[i].Selected = true;
-                        /*
-                        if (bScrolled == false)
-                        {
-                            this.listView_fieldNameList.EnsureVisible(i);
-                            bScrolled = true;
-                        }
-                         * */
-
-                        if (nStart == -1)
-                            nStart = i;
-                        nEnd = i;
-                    }
-                }
-
-                if (nEnd != -1)
-                    this.listView_nameList.EnsureVisible(nEnd);
-                if (nStart != -1)
-                    this.listView_nameList.EnsureVisible(nStart);
-
+                HilightListItems(this.textBox_name.Text);
             }
             finally
             {
@@ -363,5 +299,78 @@ namespace DigitalPlatform.EasyMarc
 
         }
 
+        // 加亮名字相关的行
+        void HilightListItems(string strName)
+        {
+            // bool bScrolled = false;
+            int nStart = -1;
+            int nEnd = -1;
+            for (int i = 0; i < this.listView_nameList.Items.Count; i++)
+            {
+                string strText = this.listView_nameList.Items[i].Text;
+
+                bool bHilight = false;
+
+                if (string.IsNullOrEmpty(strName) == true)
+                {
+                    bHilight = false;
+                    goto CHANGE_COLOR;
+                }
+                else
+                {
+                    if (strName.Length < NameStringLength)
+                    {
+                        string strPart = strText.Substring(0, strName.Length);
+
+                        if (strName == strPart)
+                        {
+                            bHilight = true;
+                            goto CHANGE_COLOR;
+                        }
+                    }
+
+                    if (strName == strText)
+                    {
+                        bHilight = true;
+                        goto CHANGE_COLOR;
+                    }
+                }
+
+            CHANGE_COLOR:
+                if (bHilight == false)
+                {
+                    if (this.listView_nameList.Items[i].BackColor != SystemColors.Window)
+                        this.listView_nameList.Items[i].BackColor = SystemColors.Window;
+                    /*
+                    if (this.listView_fieldNameList.Items[i].Selected != false)
+                        this.listView_fieldNameList.Items[i].Selected = false;
+                     * */
+                }
+                else
+                {
+                    this.listView_nameList.Items[i].BackColor = this.HilightColor;
+
+                    // this.listView_fieldNameList.Items[i].Selected = true;
+                    /*
+                    if (bScrolled == false)
+                    {
+                        this.listView_fieldNameList.EnsureVisible(i);
+                        bScrolled = true;
+                    }
+                     * */
+
+                    if (nStart == -1)
+                        nStart = i;
+                    nEnd = i;
+                }
+            }
+
+            if (nEnd != -1)
+                this.listView_nameList.EnsureVisible(nEnd);
+            if (nStart != -1)
+                this.listView_nameList.EnsureVisible(nStart);
+        }
+
+        public Color HilightColor = Color.Red;
     }
 }

@@ -14,6 +14,8 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using System.Drawing.Drawing2D;
+using System.Text.RegularExpressions;
+using DigitalPlatform.GUI;
 
 namespace DigitalPlatform.EasyMarc
 {
@@ -483,6 +485,22 @@ namespace DigitalPlatform.EasyMarc
             }
         }
 
+        // TODO: SelectItem(string strFieldName, string strSubfieldName)
+
+        // focus 到第一个可见的字段
+        public void SelectFirstItem()
+        {
+            foreach(EasyLine element in this.Items)
+            {
+                if (element.textBox_content.Visible == true)
+                {
+                    element.textBox_content.Focus();
+                    element.textBox_content.Select(0, 0);
+                    return;
+                }
+            }
+        }
+
         public List<string> HideFieldNames = new List<string>();
 
         internal int GetHideFieldCount()
@@ -509,13 +527,23 @@ namespace DigitalPlatform.EasyMarc
             this.DisableUpdate();
             try
             {
+                // 2015/5/26
+                bool bReverse = false;  // 是否反转逻辑。反转后，field_names 里面的表示不在集合里面的才做要求的操作
+                if (field_names != null && field_names.Count > 0 && field_names[0] == "rvs")
+                    bReverse = true;
+
                 foreach (EasyLine line in this.Items)
                 {
                     if (line is FieldLine)
                     {
                         FieldLine field = line as FieldLine;
-                        if (field_names != null && field_names.IndexOf(field.Name) == -1)
-                            continue;
+                        if (field_names != null)
+                        {
+                            //if (field_names.IndexOf(field.Name) == -1)
+                            //    continue;
+                            if (MatchFieldName(field.Name, field_names) == bReverse)
+                                continue;
+                        }
                         if (field.Visible == bHide)
                             ToggleHide(field);
                     }
@@ -526,6 +554,104 @@ namespace DigitalPlatform.EasyMarc
                 this.EnableUpdate();
             }
         }
+
+        // 匹配字段名列表
+        // parameters:
+        //      field_names 字段名列表。每个字段名可以包含通配符 *。还可以用 @ 引导正则表达式
+        static bool MatchFieldName(string strFieldName, List<string> field_names)
+        {
+            foreach (string name in field_names)
+            {
+                if (name == "rvs")
+                    continue;
+                // 匹配字段名/子字段名
+                // pamameters:
+                //		strName	名字
+                //		strMatchCase	要匹配的要求
+                // return:
+                //		-1	error
+                //		0	not match
+                //		1	match
+                int nRet = MatchName(strFieldName, name);
+                if (nRet == 1)
+                    return true;
+            }
+
+            return false;
+        }
+        		// 匹配字段名/子字段名
+		// pamameters:
+		//		strName	名字
+		//		strMatchCase	要匹配的要求
+		// return:
+		//		-1	error
+		//		0	not match
+		//		1	match
+		public static int MatchName(string strName,
+			string strMatchCase)
+		{
+			if (strMatchCase == "")	// 如果strMatchCase为空，表示无论什么名字都匹配
+				return 1;
+
+			// Regular expression
+			if (strMatchCase.Length >= 1 
+				&& strMatchCase[0] == '@') 
+			{
+				if (StringUtil.RegexCompare(strMatchCase.Substring(1),
+					RegexOptions.None,
+					strName) == true)
+					return 1;
+				return 0;
+			}
+			else // 原来的*模式
+			{
+				if (CmpName(strName, strMatchCase) == 0)
+					return 1;
+				return 0;
+			}
+		}
+
+        // 2013/1/7
+        // t的长度可以是s的整倍数
+        public static int CmpName(string s, string t)
+        {
+            if (s.Length == t.Length)
+                return CmpOneName(s, t);
+
+            if ((t.Length % s.Length) != 0)
+            {
+                throw new Exception("t '"+t+"'的长度 "+t.Length.ToString()+" 应当为s '"+s+"' 的长度 "+s.Length.ToString()+"  的整倍数");
+            }
+            int nCount = t.Length / s.Length;
+            for (int i = 0; i < nCount; i++)
+            {
+                int nRet = CmpOneName(s, t.Substring(i * s.Length, s.Length));
+                if (nRet == 0)
+                    return 0;
+            }
+
+            return 1;
+        }
+
+        // 含通配符的比较
+        public static int CmpOneName(string s,
+            string t)
+        {
+            int len = Math.Min(s.Length, t.Length);
+            for (int i = 0; i < len; i++)
+            {
+                if (s[i] == '*' || t[i] == '*')
+                    continue;
+                if (s[i] != t[i])
+                    return (s[i] - t[i]);
+            }
+            if (s.Length > t.Length)
+                return 1;
+            if (s.Length < t.Length)
+                return -1;
+            return 0;
+        }
+
 
 #if NO
         public void VisibleAllFields()
@@ -668,6 +794,8 @@ namespace DigitalPlatform.EasyMarc
 
         internal void InvalidateLine(EasyLine item)
         {
+            return; // 将来有导致行背景颜色改变的操作再使用这个函数
+
             Point p = this.tableLayoutPanel_content.PointToScreen(new Point(0, 0));
 
             Rectangle rect = item.label_color.RectangleToScreen(item.label_color.ClientRectangle);
@@ -946,12 +1074,16 @@ namespace DigitalPlatform.EasyMarc
 
             // 询问字段名
             NewSubfieldDialog dlg = new NewSubfieldDialog();
-            dlg.Font = this.Font;
+            GuiUtil.SetControlFont(dlg, this.Font);
+            // dlg.Font = this.Font;
 
             dlg.Text = "新字段";
             dlg.AutoComplete = true;
 
-            dlg.NameString = this.DefaultFieldName;
+            if (ref_line != null)
+                dlg.NameString = ref_line.Name;
+            else
+                dlg.NameString = this.DefaultFieldName;
             dlg.MarcDefDom = this.MarcDefDom;
             dlg.Lang = this.Lang;
 
@@ -1033,18 +1165,21 @@ namespace DigitalPlatform.EasyMarc
                     after_line = this.Items[index];
             }
 
-            // 如果插入位置后面一个字段是隐藏状态，则会出现故障，需要先修改为显示状态，插入后再隐藏
-            if (after_line is FieldLine && after_line.Visible == false)
+            if (after_line != null)
             {
-                this.ToggleHide(after_line as FieldLine);
-                bHideChanged = true;
-            }
-            // 如果本字段是收缩状态，则会出现故障，需要先修改为展开状态，插入后再收缩
-            if (after_line.ExpandState == ExpandState.Collapsed)
-            {
-                this.ToggleExpand(after_line);
-                Debug.Assert(after_line.ExpandState == ExpandState.Expanded, "");
-                bExpanded = true;
+                // 如果插入位置后面一个字段是隐藏状态，则会出现故障，需要先修改为显示状态，插入后再隐藏
+                if (after_line is FieldLine && after_line.Visible == false)
+                {
+                    this.ToggleHide(after_line as FieldLine);
+                    bHideChanged = true;
+                }
+                // 如果本字段是收缩状态，则会出现故障，需要先修改为展开状态，插入后再收缩
+                if (after_line.ExpandState == ExpandState.Collapsed)
+                {
+                    this.ToggleExpand(after_line);
+                    Debug.Assert(after_line.ExpandState == ExpandState.Expanded, "");
+                    bExpanded = true;
+                }
             }
 
             InsertNewLine(index++,
@@ -1624,6 +1759,9 @@ namespace DigitalPlatform.EasyMarc
                         rect.Offset(-p.X, -p.Y);
                         // rect.Height = (int)this.Font.GetHeight() + 8;
 
+                        if (e.ClipRectangle.IntersectsWith(rect) == false)
+                            continue;
+
                         if (item is FieldLine)
                         {
 
@@ -2104,6 +2242,9 @@ namespace DigitalPlatform.EasyMarc
             this.textBox_content.Enter -= new EventHandler(control_Enter);
             this.textBox_content.Enter += new EventHandler(control_Enter);
 
+            this.textBox_content.KeyDown -= textBox_content_KeyDown;
+            this.textBox_content.KeyDown += textBox_content_KeyDown;
+
             // this.splitter.Paint += new PaintEventHandler(splitter_Paint);
 
             this.splitter.MouseDown -= new MouseEventHandler(splitter_MouseDown);
@@ -2119,6 +2260,50 @@ namespace DigitalPlatform.EasyMarc
             this.label_caption.MouseWheel -= new MouseEventHandler(textBox_comment_MouseWheel);
             this.label_caption.MouseWheel += new MouseEventHandler(textBox_comment_MouseWheel);
 #endif
+        }
+
+        void textBox_content_KeyDown(object sender, KeyEventArgs e)
+        {
+            switch (e.KeyCode)
+            {
+                case Keys.Down:
+                case Keys.Enter:
+                    if (this.Container.SelectNextControl((sender as Control), true, true, true, false) == false)
+                    {
+                        // SendKeys.Send("{TAB}");
+                    }
+                    e.Handled = true;
+                    break;
+                case Keys.Up:
+                    //
+                    // 摘要: 
+                    //     激活下一个控件。
+                    //
+                    // 参数: 
+                    //   ctl:
+                    //     从其上开始搜索的 System.Windows.Forms.Control。
+                    //
+                    //   forward:
+                    //     如果为 true 则在 Tab 键顺序中前移；如果为 false 则在 Tab 键顺序中后移。
+                    //
+                    //   tabStopOnly:
+                    //     true 表示忽略 System.Windows.Forms.Control.TabStop 属性设置为 false 的控件；false 表示不忽略。
+                    //
+                    //   nested:
+                    //     true 表示包括嵌套子控件（子控件的子级）；false 表示不包括。
+                    //
+                    //   wrap:
+                    //     true 表示在到达最后一个控件之后从 Tab 键顺序中第一个控件开始继续搜索；false 表示不继续搜索。
+                    //
+                    // 返回结果: 
+                    //     如果控件已激活，则为 true；否则为 false。
+                    if (this.Container.SelectNextControl((sender as Control), false, true, true, false) == false)
+                    {
+                        // SendKeys.Send("+{TAB}");
+                    }
+                    e.Handled = true;
+                    break;
+            }
         }
 
         void splitter_MouseUp(object sender, MouseEventArgs e)
@@ -2377,6 +2562,7 @@ namespace DigitalPlatform.EasyMarc
             if (field != null)
             {
                 // 置于可见范围
+                field.EnsureVisible();
             }
         }
 
@@ -2391,6 +2577,7 @@ namespace DigitalPlatform.EasyMarc
             if (subfield != null)
             {
                 // 置于可见范围
+                subfield.EnsureVisible();
             }
         }
 
