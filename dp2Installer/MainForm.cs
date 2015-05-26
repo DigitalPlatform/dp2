@@ -2987,6 +2987,23 @@ MessageBoxDefaultButton.Button1);
             AddMenuItem(MenuItem_dp2library_openDataDir, "dp2Library");
         }
 
+        // 获得 dpkernel 或 dp2library 的程序存储目录
+        // 在 64 位操作系统下，获得 Program files (x86)
+        // 在 32 位操作系统下，获得 Program Files
+        // 目前 dp2kernel 和 dp2library 在 64 位操作系统下还都是 32 位的模块
+        public static string GetProductDirectory(
+            string strProduct,
+            string strCompany = "digitalplatform")
+        {
+            string strProgramDir = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86);
+            if (string.IsNullOrEmpty(strProgramDir) == true)
+                strProgramDir = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);                
+                
+            Debug.Assert(string.IsNullOrEmpty(strProgramDir) == false, "");
+
+            return Path.Combine(strProgramDir, strCompany + "\\" + strProduct);
+        }
+
         // 首次安装 dp2kernel
         private void MenuItem_dp2kernel_install_Click(object sender, EventArgs e)
         {
@@ -3011,10 +3028,8 @@ MessageBoxDefaultButton.Button1);
                 }
                 // strExePath = Unquote(strExePath);
 
-                // program files/digitalplatform/dp2kernel
-                string strProgramDir = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
-        "digitalplatform\\dp2kernel");
+                // program files (x86)/digitalplatform/dp2kernel
+                string strProgramDir = GetProductDirectory("dp2kernel");
 
                 PathUtil.CreateDirIfNeed(strProgramDir);
 
@@ -3133,9 +3148,8 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
             }
 
-            string strProgramDir = Path.Combine(
-Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
-"digitalplatform\\dp2kernel");
+            string strProgramDir = GetProductDirectory("dp2kernel");
+
             strExePath = Path.Combine(strProgramDir, "dp2kernel.exe");
 
             if (File.Exists(strExePath) == false)
@@ -3318,10 +3332,8 @@ out string strError)
                 }
                 // strExePath = Unquote(strExePath);
 
-                // program files/digitalplatform/dp2library
-                string strProgramDir = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
-        "digitalplatform\\dp2library");
+                // program files (x86)/digitalplatform/dp2library
+                string strProgramDir = GetProductDirectory("dp2library");
 
                 PathUtil.CreateDirIfNeed(strProgramDir);
 
@@ -3539,9 +3551,7 @@ out string strError)
                 goto ERROR1;
             }
 
-            string strProgramDir = Path.Combine(
-Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
-"digitalplatform\\dp2library");
+            string strProgramDir = GetProductDirectory("dp2library");
             strExePath = Path.Combine(strProgramDir, "dp2library.exe");
 
             if (File.Exists(strExePath) == false)
