@@ -362,7 +362,6 @@ namespace dp2Circulation
             this.textBox_barcode.Size = new System.Drawing.Size(144, 14);
             this.textBox_barcode.TabIndex = 2;
             this.textBox_barcode.ReadOnlyChanged += new System.EventHandler(this.textBox_barcode_ReadOnlyChanged);
-            this.textBox_barcode.TextChanged += new System.EventHandler(this.textBox_barcode_TextChanged);
             this.textBox_barcode.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
             this.textBox_barcode.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
             // 
@@ -376,7 +375,6 @@ namespace dp2Circulation
             this.textBox_price.Name = "textBox_price";
             this.textBox_price.Size = new System.Drawing.Size(144, 14);
             this.textBox_price.TabIndex = 20;
-            this.textBox_price.TextChanged += new System.EventHandler(this.textBox_price_TextChanged);
             this.textBox_price.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
             this.textBox_price.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
             // 
@@ -392,7 +390,6 @@ namespace dp2Circulation
             this.textBox_comment.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.textBox_comment.Size = new System.Drawing.Size(247, 80);
             this.textBox_comment.TabIndex = 36;
-            this.textBox_comment.TextChanged += new System.EventHandler(this.textBox_comment_TextChanged);
             this.textBox_comment.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
             this.textBox_comment.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
             // 
@@ -407,7 +404,6 @@ namespace dp2Circulation
             this.textBox_borrower.Name = "textBox_borrower";
             this.textBox_borrower.Size = new System.Drawing.Size(158, 14);
             this.textBox_borrower.TabIndex = 45;
-            this.textBox_borrower.TextChanged += new System.EventHandler(this.textBox_borrower_TextChanged);
             this.textBox_borrower.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
             this.textBox_borrower.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
             // 
@@ -422,7 +418,6 @@ namespace dp2Circulation
             this.textBox_borrowDate.Name = "textBox_borrowDate";
             this.textBox_borrowDate.Size = new System.Drawing.Size(158, 14);
             this.textBox_borrowDate.TabIndex = 48;
-            this.textBox_borrowDate.TextChanged += new System.EventHandler(this.textBox_borrowDate_TextChanged);
             this.textBox_borrowDate.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
             this.textBox_borrowDate.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
             // 
@@ -436,7 +431,6 @@ namespace dp2Circulation
             this.textBox_borrowPeriod.Name = "textBox_borrowPeriod";
             this.textBox_borrowPeriod.Size = new System.Drawing.Size(90, 14);
             this.textBox_borrowPeriod.TabIndex = 51;
-            this.textBox_borrowPeriod.TextChanged += new System.EventHandler(this.textBox_borrowPeriod_TextChanged);
             this.textBox_borrowPeriod.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
             this.textBox_borrowPeriod.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
             // 
@@ -450,7 +444,6 @@ namespace dp2Circulation
             this.textBox_recPath.Name = "textBox_recPath";
             this.textBox_recPath.Size = new System.Drawing.Size(144, 14);
             this.textBox_recPath.TabIndex = 63;
-            this.textBox_recPath.TextChanged += new System.EventHandler(this.textBox_recPath_TextChanged);
             this.textBox_recPath.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
             this.textBox_recPath.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
             // 
@@ -465,7 +458,6 @@ namespace dp2Circulation
             this.textBox_registerNo.Name = "textBox_registerNo";
             this.textBox_registerNo.Size = new System.Drawing.Size(144, 14);
             this.textBox_registerNo.TabIndex = 33;
-            this.textBox_registerNo.TextChanged += new System.EventHandler(this.textBox_registerNo_TextChanged);
             this.textBox_registerNo.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
             this.textBox_registerNo.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
             // 
@@ -492,7 +484,6 @@ namespace dp2Circulation
             this.textBox_mergeComment.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.textBox_mergeComment.Size = new System.Drawing.Size(247, 64);
             this.textBox_mergeComment.TabIndex = 39;
-            this.textBox_mergeComment.TextChanged += new System.EventHandler(this.textBox_mergeComment_TextChanged);
             this.textBox_mergeComment.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
             this.textBox_mergeComment.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
             // 
@@ -528,7 +519,6 @@ namespace dp2Circulation
             this.textBox_batchNo.Name = "textBox_batchNo";
             this.textBox_batchNo.Size = new System.Drawing.Size(90, 14);
             this.textBox_batchNo.TabIndex = 42;
-            this.textBox_batchNo.TextChanged += new System.EventHandler(this.textBox_batchNo_TextChanged);
             this.textBox_batchNo.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
             this.textBox_batchNo.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
             // 
@@ -545,7 +535,6 @@ namespace dp2Circulation
             this.comboBox_location.TabIndex = 11;
             this.comboBox_location.DropDown += new System.EventHandler(this.comboBox_location_DropDown);
             this.comboBox_location.TextUpdate += new System.EventHandler(this.comboBox_location_TextUpdate);
-            this.comboBox_location.SizeChanged += new System.EventHandler(this.comboBoxSizeChanged);
             this.comboBox_location.TextChanged += new System.EventHandler(this.comboBox_location_TextChanged);
             this.comboBox_location.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
             this.comboBox_location.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
@@ -563,8 +552,6 @@ namespace dp2Circulation
             this.comboBox_bookType.TabIndex = 30;
             this.comboBox_bookType.DropDown += new System.EventHandler(this.comboBox_bookType_DropDown);
             this.comboBox_bookType.SelectedIndexChanged += new System.EventHandler(this.comboBox_bookType_SelectedIndexChanged);
-            this.comboBox_bookType.SizeChanged += new System.EventHandler(this.comboBoxSizeChanged);
-            this.comboBox_bookType.TextChanged += new System.EventHandler(this.comboBox_bookType_TextChanged);
             this.comboBox_bookType.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
             this.comboBox_bookType.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
             // 
@@ -702,10 +689,9 @@ namespace dp2Circulation
             // 
             this.label14.AutoSize = true;
             this.label14.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label14.Location = new System.Drawing.Point(14, 198);
-            this.label14.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label14.Location = new System.Drawing.Point(15, 198);
             this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(67, 18);
+            this.label14.Size = new System.Drawing.Size(65, 18);
             this.label14.TabIndex = 25;
             this.label14.Text = "¾íÆÚ";
             this.label14.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -720,7 +706,6 @@ namespace dp2Circulation
             this.textBox_volume.Name = "textBox_volume";
             this.textBox_volume.Size = new System.Drawing.Size(144, 14);
             this.textBox_volume.TabIndex = 27;
-            this.textBox_volume.TextChanged += new System.EventHandler(this.textBox_volume_TextChanged);
             this.textBox_volume.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
             this.textBox_volume.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
             // 
@@ -744,7 +729,6 @@ namespace dp2Circulation
             this.textBox_publishTime.Name = "textBox_publishTime";
             this.textBox_publishTime.Size = new System.Drawing.Size(144, 14);
             this.textBox_publishTime.TabIndex = 8;
-            this.textBox_publishTime.TextChanged += new System.EventHandler(this.textBox_publishTime_TextChanged);
             this.textBox_publishTime.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
             this.textBox_publishTime.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
             // 
@@ -783,8 +767,6 @@ namespace dp2Circulation
             this.comboBox_seller.TabIndex = 14;
             this.comboBox_seller.DropDown += new System.EventHandler(this.comboBox_seller_DropDown);
             this.comboBox_seller.SelectedIndexChanged += new System.EventHandler(this.comboBox_seller_SelectedIndexChanged);
-            this.comboBox_seller.SizeChanged += new System.EventHandler(this.comboBoxSizeChanged);
-            this.comboBox_seller.TextChanged += new System.EventHandler(this.comboBox_seller_TextChanged);
             this.comboBox_seller.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
             this.comboBox_seller.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
             // 
@@ -833,8 +815,6 @@ namespace dp2Circulation
             this.comboBox_source.TabIndex = 17;
             this.comboBox_source.DropDown += new System.EventHandler(this.comboBox_source_DropDown);
             this.comboBox_source.SelectedIndexChanged += new System.EventHandler(this.comboBox_source_SelectedIndexChanged);
-            this.comboBox_source.SizeChanged += new System.EventHandler(this.comboBoxSizeChanged);
-            this.comboBox_source.TextChanged += new System.EventHandler(this.comboBox_source_TextChanged);
             this.comboBox_source.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
             this.comboBox_source.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
             // 
@@ -879,7 +859,6 @@ namespace dp2Circulation
             this.textBox_refID.Name = "textBox_refID";
             this.textBox_refID.Size = new System.Drawing.Size(247, 14);
             this.textBox_refID.TabIndex = 66;
-            this.textBox_refID.TextChanged += new System.EventHandler(this.textBox_refID_TextChanged);
             this.textBox_refID.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
             this.textBox_refID.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
             // 
@@ -887,10 +866,9 @@ namespace dp2Circulation
             // 
             this.label19.AutoSize = true;
             this.label19.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label19.Location = new System.Drawing.Point(14, 169);
-            this.label19.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label19.Location = new System.Drawing.Point(15, 169);
             this.label19.Name = "label19";
-            this.label19.Size = new System.Drawing.Size(67, 29);
+            this.label19.Size = new System.Drawing.Size(65, 29);
             this.label19.TabIndex = 22;
             this.label19.Text = "Ë÷È¡ºÅ";
             this.label19.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -915,7 +893,6 @@ namespace dp2Circulation
             this.textBox_accessNo.Name = "textBox_accessNo";
             this.textBox_accessNo.Size = new System.Drawing.Size(230, 14);
             this.textBox_accessNo.TabIndex = 23;
-            this.textBox_accessNo.TextChanged += new System.EventHandler(this.textBox_accessNo_TextChanged);
             this.textBox_accessNo.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
             this.textBox_accessNo.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
             // 
@@ -962,7 +939,6 @@ namespace dp2Circulation
             this.textBox_intact.Name = "textBox_intact";
             this.textBox_intact.Size = new System.Drawing.Size(90, 14);
             this.textBox_intact.TabIndex = 54;
-            this.textBox_intact.TextChanged += new System.EventHandler(this.textBox_intact_TextChanged);
             this.textBox_intact.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
             this.textBox_intact.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
             // 
@@ -1000,7 +976,6 @@ namespace dp2Circulation
             this.textBox_binding.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.textBox_binding.Size = new System.Drawing.Size(247, 64);
             this.textBox_binding.TabIndex = 57;
-            this.textBox_binding.TextChanged += new System.EventHandler(this.textBox_binding_TextChanged);
             this.textBox_binding.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
             this.textBox_binding.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
             // 
@@ -1017,7 +992,7 @@ namespace dp2Circulation
             this.checkedComboBox_state.Size = new System.Drawing.Size(247, 26);
             this.checkedComboBox_state.TabIndex = 5;
             this.checkedComboBox_state.DropDown += new System.EventHandler(this.comboBox_state_DropDown);
-            this.checkedComboBox_state.TextChanged += new System.EventHandler(this.comboBox_state_TextChanged);
+            this.checkedComboBox_state.TextChanged += new System.EventHandler(this.checkedComboBox_state_TextChanged);
             this.checkedComboBox_state.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
             this.checkedComboBox_state.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
             // 
@@ -1055,7 +1030,6 @@ namespace dp2Circulation
             this.textBox_operations.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.textBox_operations.Size = new System.Drawing.Size(247, 64);
             this.textBox_operations.TabIndex = 60;
-            this.textBox_operations.TextChanged += new System.EventHandler(this.textBox_operations_TextChanged);
             this.textBox_operations.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
             this.textBox_operations.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
             // 
@@ -1090,7 +1064,6 @@ namespace dp2Circulation
             this.textBox_bindingCost.Name = "textBox_bindingCost";
             this.textBox_bindingCost.Size = new System.Drawing.Size(90, 14);
             this.textBox_bindingCost.TabIndex = 69;
-            this.textBox_bindingCost.TextChanged += new System.EventHandler(this.textBox_bindingCost_TextChanged);
             // 
             // EntityEditControl
             // 

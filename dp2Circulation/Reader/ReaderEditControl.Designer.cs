@@ -255,7 +255,6 @@ namespace dp2Circulation
             this.textBox_barcode.Name = "textBox_barcode";
             this.textBox_barcode.Size = new System.Drawing.Size(152, 19);
             this.textBox_barcode.TabIndex = 2;
-            this.textBox_barcode.TextChanged += new System.EventHandler(this.textBox_barcode_TextChanged);
             // 
             // label2
             // 
@@ -280,8 +279,6 @@ namespace dp2Circulation
             this.comboBox_readerType.TabIndex = 8;
             this.comboBox_readerType.DropDown += new System.EventHandler(this.comboBox_readerType_DropDown);
             this.comboBox_readerType.SelectedIndexChanged += new System.EventHandler(this.comboBox_readerType_SelectedIndexChanged);
-            this.comboBox_readerType.SizeChanged += new System.EventHandler(this.comboBox_readerType_SizeChanged);
-            this.comboBox_readerType.TextChanged += new System.EventHandler(this.comboBox_readerType_TextChanged);
             // 
             // label3
             // 
@@ -325,7 +322,6 @@ namespace dp2Circulation
             this.textBox_name.Name = "textBox_name";
             this.textBox_name.Size = new System.Drawing.Size(100, 19);
             this.textBox_name.TabIndex = 33;
-            this.textBox_name.TextChanged += new System.EventHandler(this.textBox_name_TextChanged);
             // 
             // label6
             // 
@@ -350,8 +346,6 @@ namespace dp2Circulation
             this.comboBox_gender.Name = "comboBox_gender";
             this.comboBox_gender.Size = new System.Drawing.Size(105, 20);
             this.comboBox_gender.TabIndex = 36;
-            this.comboBox_gender.SizeChanged += new System.EventHandler(this.comboBox_gender_SizeChanged);
-            this.comboBox_gender.TextChanged += new System.EventHandler(this.comboBox_gender_TextChanged);
             // 
             // label7
             // 
@@ -385,7 +379,6 @@ namespace dp2Circulation
             this.textBox_idCardNumber.Name = "textBox_idCardNumber";
             this.textBox_idCardNumber.Size = new System.Drawing.Size(152, 14);
             this.textBox_idCardNumber.TabIndex = 42;
-            this.textBox_idCardNumber.TextChanged += new System.EventHandler(this.textBox_idCardNumber_TextChanged);
             // 
             // label9
             // 
@@ -408,7 +401,6 @@ namespace dp2Circulation
             this.textBox_department.Name = "textBox_department";
             this.textBox_department.Size = new System.Drawing.Size(152, 14);
             this.textBox_department.TabIndex = 45;
-            this.textBox_department.TextChanged += new System.EventHandler(this.textBox_department_TextChanged);
             // 
             // label10
             // 
@@ -431,7 +423,6 @@ namespace dp2Circulation
             this.textBox_address.Name = "textBox_address";
             this.textBox_address.Size = new System.Drawing.Size(152, 14);
             this.textBox_address.TabIndex = 48;
-            this.textBox_address.TextChanged += new System.EventHandler(this.textBox_address_TextChanged);
             // 
             // label11
             // 
@@ -453,7 +444,6 @@ namespace dp2Circulation
             this.textBox_tel.Name = "textBox_tel";
             this.textBox_tel.Size = new System.Drawing.Size(152, 14);
             this.textBox_tel.TabIndex = 52;
-            this.textBox_tel.TextChanged += new System.EventHandler(this.textBox_tel_TextChanged);
             // 
             // label12
             // 
@@ -476,7 +466,6 @@ namespace dp2Circulation
             this.textBox_email.Name = "textBox_email";
             this.textBox_email.Size = new System.Drawing.Size(152, 14);
             this.textBox_email.TabIndex = 55;
-            this.textBox_email.TextChanged += new System.EventHandler(this.textBox_email_TextChanged);
             // 
             // label1
             // 
@@ -569,8 +558,6 @@ namespace dp2Circulation
             this.comboBox_state.TabIndex = 17;
             this.comboBox_state.DropDown += new System.EventHandler(this.comboBox_state_DropDown);
             this.comboBox_state.SelectedIndexChanged += new System.EventHandler(this.comboBox_state_SelectedIndexChanged);
-            this.comboBox_state.SizeChanged += new System.EventHandler(this.comboBox_state_SizeChanged);
-            this.comboBox_state.TextChanged += new System.EventHandler(this.comboBox_state_TextChanged);
             // 
             // label_barcode_color
             // 
@@ -725,7 +712,6 @@ namespace dp2Circulation
             this.dateControl_dateOfBirth.Size = new System.Drawing.Size(105, 22);
             this.dateControl_dateOfBirth.TabIndex = 39;
             this.dateControl_dateOfBirth.Value = new System.DateTime(((long)(0)));
-            this.dateControl_dateOfBirth.DateTextChanged += new System.EventHandler(this.dateControl_dateOfBirth_DateTextChanged);
             // 
             // dateControl_expireDate
             // 
@@ -740,7 +726,6 @@ namespace dp2Circulation
             this.dateControl_expireDate.Size = new System.Drawing.Size(105, 22);
             this.dateControl_expireDate.TabIndex = 14;
             this.dateControl_expireDate.Value = new System.DateTime(((long)(0)));
-            this.dateControl_expireDate.DateTextChanged += new System.EventHandler(this.dateControl_expireDate_DateTextChanged);
             // 
             // label15
             // 
@@ -766,7 +751,6 @@ namespace dp2Circulation
             this.textBox_comment.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.textBox_comment.Size = new System.Drawing.Size(154, 80);
             this.textBox_comment.TabIndex = 20;
-            this.textBox_comment.TextChanged += new System.EventHandler(this.textBox_comment_TextChanged);
             // 
             // label_comment_color
             // 
@@ -813,8 +797,6 @@ namespace dp2Circulation
             this.comboBox_hirePeriod.TabIndex = 23;
             this.comboBox_hirePeriod.DropDown += new System.EventHandler(this.comboBox_hirePeriod_DropDown);
             this.comboBox_hirePeriod.SelectedIndexChanged += new System.EventHandler(this.comboBox_hirePeriod_SelectedIndexChanged);
-            this.comboBox_hirePeriod.SizeChanged += new System.EventHandler(this.comboBox_hirePeriod_SizeChanged);
-            this.comboBox_hirePeriod.TextChanged += new System.EventHandler(this.comboBox_hirePeriod_TextChanged);
             // 
             // label_hirePeriod_color
             // 
@@ -848,7 +830,6 @@ namespace dp2Circulation
             this.dateControl_hireExpireDate.Size = new System.Drawing.Size(105, 22);
             this.dateControl_hireExpireDate.TabIndex = 26;
             this.dateControl_hireExpireDate.Value = new System.DateTime(((long)(0)));
-            this.dateControl_hireExpireDate.DateTextChanged += new System.EventHandler(this.dateControl_hireExpireDate_DateTextChanged);
             // 
             // label18
             // 
@@ -882,7 +863,6 @@ namespace dp2Circulation
             this.textBox_cardNumber.Name = "textBox_cardNumber";
             this.textBox_cardNumber.Size = new System.Drawing.Size(152, 14);
             this.textBox_cardNumber.TabIndex = 5;
-            this.textBox_cardNumber.TextChanged += new System.EventHandler(this.textBox_cardNumber_TextChanged);
             // 
             // textBox_foregift
             // 
@@ -893,7 +873,6 @@ namespace dp2Circulation
             this.textBox_foregift.Name = "textBox_foregift";
             this.textBox_foregift.Size = new System.Drawing.Size(134, 14);
             this.textBox_foregift.TabIndex = 29;
-            this.textBox_foregift.TextChanged += new System.EventHandler(this.textBox_foregift_TextChanged);
             // 
             // label19
             // 
@@ -937,7 +916,6 @@ namespace dp2Circulation
             this.textBox_post.Name = "textBox_post";
             this.textBox_post.Size = new System.Drawing.Size(152, 14);
             this.textBox_post.TabIndex = 59;
-            this.textBox_post.TextChanged += new System.EventHandler(this.textBox_post_TextChanged);
             // 
             // label_post_color
             // 
@@ -973,7 +951,6 @@ namespace dp2Circulation
             this.dateControl_createDate.Size = new System.Drawing.Size(105, 22);
             this.dateControl_createDate.TabIndex = 62;
             this.dateControl_createDate.Value = new System.DateTime(((long)(0)));
-            this.dateControl_createDate.DateTextChanged += new System.EventHandler(this.dateControl_createDate_DateTextChanged);
             // 
             // label21
             // 
@@ -1005,7 +982,6 @@ namespace dp2Circulation
             this.textBox_namePinyin.Name = "textBox_namePinyin";
             this.textBox_namePinyin.Size = new System.Drawing.Size(100, 19);
             this.textBox_namePinyin.TabIndex = 65;
-            this.textBox_namePinyin.TextChanged += new System.EventHandler(this.textBox_namePinyin_TextChanged);
             // 
             // button_createNamePinyin
             // 
@@ -1076,7 +1052,6 @@ namespace dp2Circulation
             this.textBox_rights.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.textBox_rights.Size = new System.Drawing.Size(152, 80);
             this.textBox_rights.TabIndex = 71;
-            this.textBox_rights.TextChanged += new System.EventHandler(this.textBox_rights_TextChanged);
             // 
             // textBox_personalLibrary
             // 
@@ -1088,7 +1063,6 @@ namespace dp2Circulation
             this.textBox_personalLibrary.Name = "textBox_personalLibrary";
             this.textBox_personalLibrary.Size = new System.Drawing.Size(152, 14);
             this.textBox_personalLibrary.TabIndex = 72;
-            this.textBox_personalLibrary.TextChanged += new System.EventHandler(this.textBox_personalLibrary_TextChanged);
             // 
             // button_editRights
             // 
@@ -1117,7 +1091,6 @@ namespace dp2Circulation
             this.textBox_friends.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.textBox_friends.Size = new System.Drawing.Size(152, 80);
             this.textBox_friends.TabIndex = 74;
-            this.textBox_friends.TextChanged += new System.EventHandler(this.textBox_friends_TextChanged);
             // 
             // label_friends_color
             // 
@@ -1153,7 +1126,6 @@ namespace dp2Circulation
             this.textBox_access.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.textBox_access.Size = new System.Drawing.Size(152, 40);
             this.textBox_access.TabIndex = 77;
-            this.textBox_access.TextChanged += new System.EventHandler(this.textBox_access_TextChanged);
             // 
             // label_access_color
             // 

@@ -96,7 +96,7 @@ namespace dp2Circulation
             OpenScanBarcodeForm();
 
             {
-                _floatingMessage = new FloatingMessageForm();
+                _floatingMessage = new FloatingMessageForm(this);
                 _floatingMessage.Font = new System.Drawing.Font(this.Font.FontFamily, this.Font.Size * 2, FontStyle.Bold);
                 _floatingMessage.Opacity = 0.7;
                 _floatingMessage.Show(this);
@@ -107,11 +107,11 @@ namespace dp2Circulation
         {
             string strFileName = Path.Combine(this.MainForm.DataDir, "servers.xml");
             if (File.Exists(strFileName) == false
-                || EntityRegisterControl.GetServersCfgFileVersion(strFileName) < (double)0.01)
+                || MainForm.GetServersCfgFileVersion(strFileName) < (double)0.01)
             {
                 string strError = "";
                 // 创建 servers.xml 配置文件
-                int nRet = this.entityRegisterControl1.BuildServersCfgFile(strFileName,
+                int nRet = this.MainForm.BuildServersCfgFile(strFileName,
                     out strError);
                 if (nRet == -1)
                 {
@@ -413,7 +413,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             // 创建 servers.xml 配置文件
-            int nRet = this.entityRegisterControl1.BuildServersCfgFile(strCfgFileName,
+            int nRet = this.MainForm.BuildServersCfgFile(strCfgFileName,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;

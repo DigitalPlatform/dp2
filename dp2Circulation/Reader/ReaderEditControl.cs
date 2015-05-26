@@ -551,6 +551,9 @@ namespace dp2Circulation
         {
             InitializeComponent();
 
+            base.tableLayoutPanel_main = this.tableLayoutPanel_main;
+
+            AddEvents(true);
             /*
             Debug.Assert(false, "");
             this.dateTimePicker_birthday.Value = DateTimePicker.MinimumDateTime;    // new DateTime(0);
@@ -627,7 +630,7 @@ namespace dp2Circulation
             return time.ToLocalTime();
         }
 
-
+#if NO
         internal override void ResetColor()
         {
             Color color = this.tableLayoutPanel_main.BackColor;
@@ -671,7 +674,7 @@ namespace dp2Circulation
 
             this.label_recPath_color.BackColor = color;
         }
-
+#endif
         // parameters:
         //      time    是本地时间
         /// <summary>
@@ -1396,6 +1399,7 @@ namespace dp2Circulation
                 this.label_recPath_color.BackColor = this.ColorDifference;
         }
 
+#if NO
         private void textBox_barcode_TextChanged(object sender, EventArgs e)
         {
             if (m_bInInitial == false)
@@ -1613,7 +1617,7 @@ namespace dp2Circulation
                 this.Changed = true;
             }
         }
-
+#endif
 
         private void textBox_recPath_TextChanged(object sender, EventArgs e)
         {
@@ -1622,11 +1626,13 @@ namespace dp2Circulation
             this.comboBox_state.Items.Clear();
             this.comboBox_hirePeriod.Items.Clear();
 
+#if NO
             if (m_bInInitial == false)
             {
                 this.label_recPath_color.BackColor = this.ColorChanged;
                 this.Changed = true;
             }
+#endif
         }
 
         private void ReaderEditControl_Load(object sender, EventArgs e)
@@ -1769,6 +1775,7 @@ namespace dp2Circulation
 
         }
 
+#if NO
         private void comboBox_readerType_SizeChanged(object sender, EventArgs e)
         {
             this.comboBox_readerType.Invalidate();
@@ -1788,6 +1795,7 @@ namespace dp2Circulation
         {
             this.comboBox_gender.Invalidate();
         }
+#endif
 
 #if NO
         delegate void Delegate_filterValue(ComboBox combobox);

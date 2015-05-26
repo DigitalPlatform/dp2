@@ -94,7 +94,7 @@ namespace DigitalPlatform.CommonControl
 
             if (this.DateTextChanged != null)
             {
-                this.DateTextChanged(sender, e);
+                this.DateTextChanged(this, e);  // 205/5/25 ÒÔÇ°Îª sender
             }
 
             // this.OnTextChanged(e);

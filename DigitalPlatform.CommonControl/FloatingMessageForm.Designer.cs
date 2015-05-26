@@ -40,7 +40,6 @@
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.FloatingMessageForm_FormClosed);
             this.Load += new System.EventHandler(this.FloatingMessageForm_Load);
             this.ResumeLayout(false);
-
         }
 
         #endregion

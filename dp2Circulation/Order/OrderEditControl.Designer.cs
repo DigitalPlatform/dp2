@@ -250,7 +250,6 @@ namespace dp2Circulation
             this.textBox_index.Name = "textBox_index";
             this.textBox_index.Size = new System.Drawing.Size(144, 14);
             this.textBox_index.TabIndex = 2;
-            this.textBox_index.TextChanged += new System.EventHandler(this.valueTextChanged);
             // 
             // textBox_range
             // 
@@ -263,7 +262,6 @@ namespace dp2Circulation
             this.textBox_range.Name = "textBox_range";
             this.textBox_range.Size = new System.Drawing.Size(189, 14);
             this.textBox_range.TabIndex = 11;
-            this.textBox_range.TextChanged += new System.EventHandler(this.valueTextChanged);
             // 
             // textBox_price
             // 
@@ -276,7 +274,6 @@ namespace dp2Circulation
             this.textBox_price.Name = "textBox_price";
             this.textBox_price.Size = new System.Drawing.Size(144, 14);
             this.textBox_price.TabIndex = 17;
-            this.textBox_price.TextChanged += new System.EventHandler(this.valueTextChanged);
             // 
             // label13
             // 
@@ -299,7 +296,6 @@ namespace dp2Circulation
             this.textBox_batchNo.Name = "textBox_batchNo";
             this.textBox_batchNo.Size = new System.Drawing.Size(82, 14);
             this.textBox_batchNo.TabIndex = 26;
-            this.textBox_batchNo.TextChanged += new System.EventHandler(this.valueTextChanged);
             // 
             // comboBox_state
             // 
@@ -314,7 +310,6 @@ namespace dp2Circulation
             this.comboBox_state.TabIndex = 5;
             this.comboBox_state.DropDown += new System.EventHandler(this.comboBox_state_DropDown);
             this.comboBox_state.SelectedIndexChanged += new System.EventHandler(this.comboBox_state_SelectedIndexChanged);
-            this.comboBox_state.TextChanged += new System.EventHandler(this.valueTextChanged);
             // 
             // label_index_color
             // 
@@ -399,7 +394,6 @@ namespace dp2Circulation
             this.textBox_copy.Name = "textBox_copy";
             this.textBox_copy.Size = new System.Drawing.Size(144, 14);
             this.textBox_copy.TabIndex = 40;
-            this.textBox_copy.TextChanged += new System.EventHandler(this.valueTextChanged);
             // 
             // label_copy_color
             // 
@@ -435,7 +429,6 @@ namespace dp2Circulation
             this.comboBox_seller.TabIndex = 44;
             this.comboBox_seller.DropDown += new System.EventHandler(this.comboBox_seller_DropDown);
             this.comboBox_seller.SelectedIndexChanged += new System.EventHandler(this.comboBox_seller_SelectedIndexChanged);
-            this.comboBox_seller.TextChanged += new System.EventHandler(this.valueTextChanged);
             // 
             // label7
             // 
@@ -469,7 +462,6 @@ namespace dp2Circulation
             this.textBox_totalPrice.Name = "textBox_totalPrice";
             this.textBox_totalPrice.Size = new System.Drawing.Size(144, 14);
             this.textBox_totalPrice.TabIndex = 47;
-            this.textBox_totalPrice.TextChanged += new System.EventHandler(this.valueTextChanged);
             // 
             // label8
             // 
@@ -503,7 +495,6 @@ namespace dp2Circulation
             this.textBox_distribute.Name = "textBox_distribute";
             this.textBox_distribute.Size = new System.Drawing.Size(189, 14);
             this.textBox_distribute.TabIndex = 50;
-            this.textBox_distribute.TextChanged += new System.EventHandler(this.valueTextChanged);
             // 
             // label9
             // 
@@ -558,7 +549,6 @@ namespace dp2Circulation
             this.textBox_orderID.Name = "textBox_orderID";
             this.textBox_orderID.Size = new System.Drawing.Size(144, 14);
             this.textBox_orderID.TabIndex = 56;
-            this.textBox_orderID.TextChanged += new System.EventHandler(this.valueTextChanged);
             // 
             // textBox_comment
             // 
@@ -572,7 +562,6 @@ namespace dp2Circulation
             this.textBox_comment.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.textBox_comment.Size = new System.Drawing.Size(189, 80);
             this.textBox_comment.TabIndex = 20;
-            this.textBox_comment.TextChanged += new System.EventHandler(this.valueTextChanged);
             // 
             // label6
             // 
@@ -629,7 +618,6 @@ namespace dp2Circulation
             this.comboBox_source.TabIndex = 59;
             this.comboBox_source.DropDown += new System.EventHandler(this.comboBox_source_DropDown);
             this.comboBox_source.SelectedIndexChanged += new System.EventHandler(this.comboBox_source_SelectedIndexChanged);
-            this.comboBox_source.TextChanged += new System.EventHandler(this.valueTextChanged);
             // 
             // label15
             // 
@@ -663,7 +651,6 @@ namespace dp2Circulation
             this.textBox_issueCount.Name = "textBox_issueCount";
             this.textBox_issueCount.Size = new System.Drawing.Size(144, 14);
             this.textBox_issueCount.TabIndex = 62;
-            this.textBox_issueCount.TextChanged += new System.EventHandler(this.valueTextChanged);
             // 
             // label16
             // 
@@ -696,7 +683,6 @@ namespace dp2Circulation
             this.textBox_catalogNo.Name = "textBox_catalogNo";
             this.textBox_catalogNo.Size = new System.Drawing.Size(82, 14);
             this.textBox_catalogNo.TabIndex = 65;
-            this.textBox_catalogNo.TextChanged += new System.EventHandler(this.valueTextChanged);
             // 
             // label17
             // 
@@ -732,7 +718,6 @@ namespace dp2Circulation
             this.comboBox_class.TabIndex = 68;
             this.comboBox_class.DropDown += new System.EventHandler(this.comboBox_class_DropDown);
             this.comboBox_class.SelectedIndexChanged += new System.EventHandler(this.comboBox_class_SelectedIndexChanged);
-            this.comboBox_class.TextChanged += new System.EventHandler(this.valueTextChanged);
             // 
             // label10
             // 
@@ -765,7 +750,6 @@ namespace dp2Circulation
             this.textBox_recPath.Name = "textBox_recPath";
             this.textBox_recPath.Size = new System.Drawing.Size(144, 14);
             this.textBox_recPath.TabIndex = 38;
-            this.textBox_recPath.TextChanged += new System.EventHandler(this.valueTextChanged);
             // 
             // label18
             // 
@@ -804,7 +788,6 @@ namespace dp2Circulation
             this.textBox_sellerAddress.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.textBox_sellerAddress.Size = new System.Drawing.Size(189, 113);
             this.textBox_sellerAddress.TabIndex = 71;
-            this.textBox_sellerAddress.TextChanged += new System.EventHandler(this.valueTextChanged);
             // 
             // label19
             // 
@@ -827,7 +810,6 @@ namespace dp2Circulation
             this.textBox_refID.Name = "textBox_refID";
             this.textBox_refID.Size = new System.Drawing.Size(189, 14);
             this.textBox_refID.TabIndex = 74;
-            this.textBox_refID.TextChanged += new System.EventHandler(this.textBox_refID_TextChanged);
             // 
             // label_refID_color
             // 
@@ -852,7 +834,6 @@ namespace dp2Circulation
             this.textBox_operations.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.textBox_operations.Size = new System.Drawing.Size(189, 64);
             this.textBox_operations.TabIndex = 75;
-            this.textBox_operations.TextChanged += new System.EventHandler(this.textBox_operations_TextChanged);
             // 
             // label_operations_color
             // 

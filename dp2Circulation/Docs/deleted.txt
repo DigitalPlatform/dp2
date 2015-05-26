@@ -6529,3 +6529,141 @@ function GetSummary() {
 
 #endif
 
+
+#if NO
+        private void ChangeTabColor(Object sender, DrawItemEventArgs e)
+        {
+            TabControl tab = sender as TabControl;
+            Font TabFont;
+            Brush BackBrush;// = new SolidBrush(Color.Green); //Set background color
+            Brush ForeBrush = new SolidBrush(Color.Black);//Set foreground color
+            Brush borderBrush = new SolidBrush(Color.Black);//Set foreground color
+
+            if (e.Index == tab.SelectedIndex)
+            {
+                TabFont = new Font(e.Font, FontStyle.Bold);
+                BackBrush = new SolidBrush(Color.MediumSeaGreen); //Set background color
+                //ForeBrush = new SolidBrush(Color.Black);//Set foreground color
+            }
+            else
+            {
+                TabFont = e.Font;
+                BackBrush = new SolidBrush(Color.LightSteelBlue); //Set background color
+                //ForeBrush = new SolidBrush(Color.Yellow);//Set foreground color
+            }
+
+            string TabName = tab.TabPages[e.Index].Text;
+            StringFormat sf = new StringFormat();
+            sf.Alignment = StringAlignment.Center;
+
+            Rectangle r = e.Bounds;
+
+            r = new Rectangle(r.X, r.Y + 5, r.Width, r.Height - 3);
+
+            if (e.Index == tab.SelectedIndex)
+            {
+                Pen rectPen = new Pen(borderBrush, 1.0f);
+                r.Y -= 2;
+                r.X += 3;
+                r.Height -= 9;
+                r.Width -= 8;
+                e.Graphics.FillRectangle(BackBrush, r);
+                e.Graphics.DrawString(TabName, TabFont, ForeBrush, r, sf);
+                e.Graphics.DrawRectangle(rectPen, r);
+            }
+            else
+            {
+                Pen rectPen = new Pen(borderBrush, 1.0f);
+                r.Y -= 2;
+                r.Height -= 4;
+                r.Width -= 2;
+                e.Graphics.FillRectangle(BackBrush, r);
+                e.Graphics.DrawString(TabName, TabFont, ForeBrush, r, sf);
+                e.Graphics.DrawRectangle(rectPen, r);
+            }
+            //Dispose objects
+            sf.Dispose();
+
+            if (e.Index == tab.SelectedIndex)
+            {
+                TabFont.Dispose();
+                BackBrush.Dispose();
+            }
+            else
+            {
+                BackBrush.Dispose();
+                ForeBrush.Dispose();
+            }
+        }
+
+#endif
+#if NO
+        private void DrawTabControlTabs(TabControl tabControl, DrawItemEventArgs e, ImageList images)
+        {
+            // Get the bounding end of tab strip rectangles.
+            Rectangle tabstripEndRect = tabControl.GetTabRect(tabControl.TabPages.Count - 1);
+            RectangleF tabstripEndRectF = new RectangleF(tabstripEndRect.X + tabstripEndRect.Width, tabstripEndRect.Y - 5,
+            tabControl.Width - (tabstripEndRect.X + tabstripEndRect.Width), tabstripEndRect.Height + 5);
+
+            // First, do the end of the tab strip.
+            // If we have an image use it.
+            if (tabControl.Parent.BackgroundImage != null)
+            {
+                RectangleF src = new RectangleF(tabstripEndRectF.X + tabControl.Left, tabstripEndRectF.Y + tabControl.Top, tabstripEndRectF.Width, tabstripEndRectF.Height);
+                e.Graphics.DrawImage(tabControl.Parent.BackgroundImage, tabstripEndRectF, src, GraphicsUnit.Pixel);
+            }
+            // If we have no image, use the background color.
+            else
+            {
+                using (Brush backBrush = new SolidBrush(tabControl.Parent.BackColor))
+                {
+                    e.Graphics.FillRectangle(backBrush, tabstripEndRectF);
+                }
+            }
+
+            // Set up the page and the various pieces.
+            TabPage page = tabControl.TabPages[e.Index];
+            Brush BackBrush = new SolidBrush(page.BackColor);
+            Brush ForeBrush = new SolidBrush(page.ForeColor);
+            string TabName = page.Text;
+
+            // Set up the offset for an icon, the bounding rectangle and image size and then fill the background.
+            int iconOffset = 0;
+            Rectangle tabBackgroundRect = e.Bounds;
+            e.Graphics.FillRectangle(BackBrush, tabBackgroundRect);
+
+            // If we have images, process them.
+            if (images != null)
+            {
+                // Get sice and image.
+                Size size = images.ImageSize;
+                Image icon = null;
+                if (page.ImageIndex > -1)
+                    icon = images.Images[page.ImageIndex];
+                else if (page.ImageKey != "")
+                    icon = images.Images[page.ImageKey];
+
+                // If there is an image, use it.
+                if (icon != null)
+                {
+                    Point startPoint = new Point(tabBackgroundRect.X + 2 + ((tabBackgroundRect.Height - size.Height) / 2),
+                    tabBackgroundRect.Y + 2 + ((tabBackgroundRect.Height - size.Height) / 2));
+                    e.Graphics.DrawImage(icon, new Rectangle(startPoint, size));
+                    iconOffset = size.Width + 4;
+                }
+            }
+
+            // Draw out the label.
+            Rectangle labelRect = new Rectangle(tabBackgroundRect.X + iconOffset, tabBackgroundRect.Y + 3,
+            tabBackgroundRect.Width - iconOffset, tabBackgroundRect.Height - 3);
+            StringFormat sf = new StringFormat();
+            sf.Alignment = StringAlignment.Center;
+            e.Graphics.DrawString(TabName, e.Font, ForeBrush, labelRect, sf);
+
+            //Dispose objects
+            sf.Dispose();
+            BackBrush.Dispose();
+            ForeBrush.Dispose();
+        }
+
+#endif

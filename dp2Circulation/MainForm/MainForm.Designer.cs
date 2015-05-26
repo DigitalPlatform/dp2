@@ -112,6 +112,7 @@ namespace dp2Circulation
             this.MenuItem_clearCfgCache = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_clearSummaryCache = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_clearDatabaseInfoCatch = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_reLogin = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_logout = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator29 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_initFingerprintCache = new System.Windows.Forms.ToolStripMenuItem();
@@ -193,7 +194,7 @@ namespace dp2Circulation
             this.toolStripButton_close = new System.Windows.Forms.ToolStripButton();
             this.splitter_fixed = new System.Windows.Forms.Splitter();
             this.timer_operHistory = new System.Windows.Forms.Timer(this.components);
-            this.MenuItem_reLogin = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_openEntityRegisterWizard = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip_main.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
             this.toolStrip_main.SuspendLayout();
@@ -263,6 +264,7 @@ namespace dp2Circulation
             this.MenuItem_functionWindows.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MenuItem_openQuickChargingForm,
             this.MenuItem_openChargingForm,
+            this.MenuItem_openEntityRegisterWizard,
             this.MenuItem_openEntityRegisterForm,
             this.toolStripSeparator3,
             this.MenuItem_openReaderSearchForm,
@@ -847,6 +849,13 @@ namespace dp2Circulation
             this.MenuItem_clearDatabaseInfoCatch.Size = new System.Drawing.Size(216, 22);
             this.MenuItem_clearDatabaseInfoCatch.Text = "刷新数据库信息缓存(&D)";
             this.MenuItem_clearDatabaseInfoCatch.Click += new System.EventHandler(this.MenuItem_clearDatabaseInfoCatch_Click);
+            // 
+            // MenuItem_reLogin
+            // 
+            this.MenuItem_reLogin.Name = "MenuItem_reLogin";
+            this.MenuItem_reLogin.Size = new System.Drawing.Size(221, 22);
+            this.MenuItem_reLogin.Text = "重新登录(&L) ...";
+            this.MenuItem_reLogin.Click += new System.EventHandler(this.MenuItem_reLogin_Click);
             // 
             // MenuItem_logout
             // 
@@ -1558,12 +1567,12 @@ namespace dp2Circulation
             this.splitter_fixed.TabIndex = 6;
             this.splitter_fixed.TabStop = false;
             // 
-            // MenuItem_reLogin
+            // MenuItem_openEntityRegisterWizard
             // 
-            this.MenuItem_reLogin.Name = "MenuItem_reLogin";
-            this.MenuItem_reLogin.Size = new System.Drawing.Size(221, 22);
-            this.MenuItem_reLogin.Text = "重新登录(&L) ...";
-            this.MenuItem_reLogin.Click += new System.EventHandler(this.MenuItem_reLogin_Click);
+            this.MenuItem_openEntityRegisterWizard.Name = "MenuItem_openEntityRegisterWizard";
+            this.MenuItem_openEntityRegisterWizard.Size = new System.Drawing.Size(154, 22);
+            this.MenuItem_openEntityRegisterWizard.Text = "册登记向导(&T)";
+            this.MenuItem_openEntityRegisterWizard.Click += new System.EventHandler(this.MenuItem_openEntityRegisterWizard_Click);
             // 
             // MainForm
             // 
@@ -1768,6 +1777,7 @@ namespace dp2Circulation
         private System.Windows.Forms.ToolStripMenuItem MenuItem_resetSerialCode;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_openEntityRegisterForm;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_reLogin;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_openEntityRegisterWizard;
     }
 }
 

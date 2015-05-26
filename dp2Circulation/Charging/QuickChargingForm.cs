@@ -122,7 +122,7 @@ namespace dp2Circulation
             this._taskList.BeginThread();
 
             {
-                _floatingMessage = new FloatingMessageForm();
+                _floatingMessage = new FloatingMessageForm(this);
                 _floatingMessage.Font = new System.Drawing.Font(this.Font.FontFamily, this.Font.Size * 2, FontStyle.Bold);
                 // _floatingMessage.TopMost = true;
                 // _floatingMessage.Text = "正在处理，请不要让读者离开 ...";

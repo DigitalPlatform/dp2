@@ -31,7 +31,7 @@ namespace DigitalPlatform.rms
             InitializeComponent();
 
             {
-                _floatingMessage = new FloatingMessageForm();
+                _floatingMessage = new FloatingMessageForm(this);
                 _floatingMessage.AutoHide = false;
                 _floatingMessage.Font = new System.Drawing.Font(this.Font.FontFamily, this.Font.Size * 2, FontStyle.Bold);
                 _floatingMessage.Opacity = 0.7;

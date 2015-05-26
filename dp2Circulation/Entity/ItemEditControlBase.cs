@@ -5,7 +5,10 @@ using System.Text;
 using System.Windows.Forms;
 using System.Xml;
 using System.Drawing;
+using System.Diagnostics;
+
 using DigitalPlatform;
+using DigitalPlatform.CommonControl;
 
 namespace dp2Circulation
 {
@@ -14,6 +17,8 @@ namespace dp2Circulation
     /// </summary>
     public class ItemEditControlBase : UserControl
     {
+        internal TableLayoutPanel tableLayoutPanel_main = null;
+
         ItemDisplayState _createState = ItemDisplayState.Normal;
         // 创建状态
         public virtual ItemDisplayState CreateState 
@@ -115,9 +120,26 @@ namespace dp2Circulation
 
         #endregion
 
-        internal virtual void ResetColor()
+        internal 
+            // virtual 
+            void ResetColor()
         {
-            throw new Exception("尚未实现 ResetColor()");
+            // throw new Exception("尚未实现 ResetColor()");
+
+            for (int i = 0; i < this.tableLayoutPanel_main.RowStyles.Count; i++)
+            {
+                Label color = this.tableLayoutPanel_main.GetControlFromPosition(2, i) as Label;
+                if (color == null)
+                    continue;
+                EditLineState state = color.Tag as EditLineState;
+                if (state != null)
+                {
+                    if (state.Changed == true)
+                        state.Changed = false;
+                }
+                color.BackColor = this.tableLayoutPanel_main.BackColor;
+            }
+
         }
 
 #if NO
@@ -296,6 +318,156 @@ namespace dp2Circulation
 
             return 0;
         }
+
+        // 添加、删除各种事件
+        internal void AddEvents(bool bAdd)
+        {
+            Debug.Assert(this.tableLayoutPanel_main != null, "");
+
+            for (int i = 0; i < this.tableLayoutPanel_main.RowStyles.Count; i++)
+            {
+                Control control = this.tableLayoutPanel_main.GetControlFromPosition(2, i);
+                if (control == null)
+                    continue;
+                if (bAdd)
+                {
+                    control.Enter += control_Enter;
+                    control.Leave += control_Leave;
+                    if (control is DateControl)
+                        (control as DateControl).DateTextChanged += control_TextChanged;
+                    else if (control is DateTimePicker)
+                        (control as DateTimePicker).ValueChanged += control_TextChanged;
+                    else
+                        control.TextChanged += control_TextChanged;
+
+                    if (control is ComboBox)
+                        control.SizeChanged += control_SizeChanged;
+                }
+                else
+                {
+                    control.Enter -= control_Enter;
+                    control.Leave -= control_Leave;
+                    if (control is DateControl)
+                        (control as DateControl).DateTextChanged -= control_TextChanged;
+                    else if (control is DateTimePicker)
+                        (control as DateTimePicker).ValueChanged -= control_TextChanged;
+                    else
+                        control.TextChanged -= control_TextChanged;
+
+                    if (control is ComboBox)
+                        control.SizeChanged += control_SizeChanged;
+                }
+            }
+
+        }
+
+        // 解决 Flat 风格 ComboBox 在改变大小的时候残留显示的问题
+        void control_SizeChanged(object sender, EventArgs e)
+        {
+            (sender as Control).Invalidate();
+        }
+
+        void control_Leave(object sender, EventArgs e)
+        {
+            Control control = sender as Control;
+            EditLineState state = GetLineState(control);
+
+            if (state == null)
+                state = new EditLineState();
+
+            if (state.Active == true)
+            {
+                state.Active = false;
+                SetLineState(control, state);
+            }
+        }
+
+        void control_Enter(object sender, EventArgs e)
+        {
+            Control control = sender as Control;
+            EditLineState state = GetLineState(control);
+
+            if (state == null)
+                state = new EditLineState();
+
+            if (state.Active == false)
+            {
+                state.Active = true;
+                SetLineState(control, state);
+            }
+        }
+
+        void control_TextChanged(object sender, EventArgs e)
+        {
+            if (m_bInInitial == true)
+                return;
+
+            // this.label_barcode_color.BackColor = this.ColorChanged;
+            Control control = sender as Control;
+            EditLineState state = GetLineState(control);
+
+            if (state == null)
+                state = new EditLineState();
+
+            if (state.Changed == false)
+            {
+                state.Changed = true;
+                SetLineState(control, state);
+            }
+            this.Changed = true;
+
+        }
+
+
+        /// <summary>
+        /// 编辑器行的状态
+        /// </summary>
+        public class EditLineState
+        {
+            /// <summary>
+            /// 是否发生过修改
+            /// </summary>
+            public bool Changed = false;
+            /// <summary>
+            /// 是否处在输入焦点状态
+            /// </summary>
+            public bool Active = false;
+        }
+
+        void SetLineState(Control control, EditLineState newState)
+        {
+            SetLineDisplayState(this.tableLayoutPanel_main.GetCellPosition(control).Row, newState);
+        }
+
+        // 设置一行的显示状态
+        void SetLineDisplayState(int nRowNumber, EditLineState newState)
+        {
+            Label color = this.tableLayoutPanel_main.GetControlFromPosition(1, nRowNumber) as Label;
+            if (color == null)
+                throw new ArgumentException("行 " + nRowNumber.ToString() + " 的 Color Label 对象不存在", "nRowNumber");
+
+            color.Tag = newState;
+            if (newState.Active == true)
+                color.BackColor = SystemColors.Highlight;
+            else if (newState.Changed == true)
+                color.BackColor = this.ColorChanged;
+            else
+                color.BackColor = this.tableLayoutPanel_main.BackColor;
+        }
+
+        EditLineState GetLineState(Control control)
+        {
+            return GetLineState(this.tableLayoutPanel_main.GetCellPosition(control).Row);
+        }
+
+        EditLineState GetLineState(int nRowNumber)
+        {
+            Label color = this.tableLayoutPanel_main.GetControlFromPosition(1, nRowNumber) as Label;
+            if (color == null)
+                throw new ArgumentException("行 " + nRowNumber.ToString() + " 的 Color Label 对象不存在", "nRowNumber");
+            return color.Tag as EditLineState;
+        }
+
 
         internal void OnPaintContent(object sender, PaintEventArgs e)
         {

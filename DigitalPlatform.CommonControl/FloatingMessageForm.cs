@@ -15,6 +15,11 @@ namespace DigitalPlatform.CommonControl
     /// </summary>
     public partial class FloatingMessageForm : Form
     {
+        // 是否允许感知 Click 清除文字
+        public bool Closeable = false;
+
+        public event EventHandler Clicked = null;
+
         Color _rectColor = Color.Purple;
 
         /// <summary>
@@ -36,11 +41,15 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
+        Form _parent = null;
         /// <summary>
         /// 构造函数
         /// </summary>
-        public FloatingMessageForm()
+        public FloatingMessageForm(Form parent, bool bClickable = false)
         {
+            this._parent = parent;
+            this.Clickable = bClickable;
+
             InitializeComponent();
 
             // this.TopMost = true;
@@ -63,9 +72,40 @@ namespace DigitalPlatform.CommonControl
             get
             {
                 CreateParams cp = base.CreateParams;
-                cp.ExStyle |= 0x80000   // WS_EX_LAYERED
-                    | 0x20; // WS_EX_TRANSPARENT
+
+                if (this.Clickable == false)
+                    cp.ExStyle |= 0x80000 |  // WS_EX_LAYERED
+                        0x20; // WS_EX_TRANSPARENT
+                else
+                    cp.ExStyle |= 0x80000;  // WS_EX_LAYERED
+
                 return cp;
+            }
+        }
+
+        bool _clickable = false;
+        public bool Clickable
+        {
+            get
+            {
+#if NO
+                int windowLong = API.GetWindowLong(this.Handle, API.GWL_EXSTYLE);
+                if ((windowLong & 0x20) == 0)
+                    return true;
+                return false;
+#endif
+                return _clickable;
+            }
+            set
+            {
+                this._clickable = value;
+
+                int windowLong = API.GetWindowLong(this.Handle, API.GWL_EXSTYLE);
+                if (value)
+                    windowLong &= ~0x20;
+                else
+                    windowLong |= 0x20;
+                API.SetWindowLong(this.Handle, API.GWL_EXSTYLE, windowLong);
             }
         }
 
@@ -114,11 +154,24 @@ size.Height);
 
 
             Pen pen = new Pen(Color.Gray);
-            RoundRectangle(e.Graphics,
-            pen,
-            new SolidBrush(this.RectColor),
-            backRect,
-            backRect.Height / 3);   // / 4 6
+            if (this.Closeable == false)
+            {
+                // 圆角表示不可点击
+                RoundRectangle(e.Graphics,
+                pen,
+                new SolidBrush(this.RectColor),
+                backRect,
+                backRect.Height / 3);   // / 4 6
+            }
+            else
+            {
+                // 方角表示可点击消失
+                RoundRectangle(e.Graphics,
+pen,
+new SolidBrush(this.RectColor),
+backRect,
+0);
+            }
 
             e.Graphics.DrawString(
                 this.Text,
@@ -161,13 +214,17 @@ size.Height);
         {
             GraphicsPath path = new GraphicsPath();
             path.AddLine(x + radius, y, x + width - (radius * 2), y);
-            path.AddArc(x + width - (radius * 2), y, radius * 2, radius * 2, 270, 90);
+            if (radius != 0)
+                path.AddArc(x + width - (radius * 2), y, radius * 2, radius * 2, 270, 90);
             path.AddLine(x + width, y + radius, x + width, y + height - (radius * 2));
-            path.AddArc(x + width - (radius * 2), y + height - (radius * 2), radius * 2, radius * 2, 0, 90); // Corner
+            if (radius != 0)
+                path.AddArc(x + width - (radius * 2), y + height - (radius * 2), radius * 2, radius * 2, 0, 90); // Corner
             path.AddLine(x + width - (radius * 2), y + height, x + radius, y + height);
-            path.AddArc(x, y + height - (radius * 2), radius * 2, radius * 2, 90, 90);
+            if (radius != 0)
+                path.AddArc(x, y + height - (radius * 2), radius * 2, radius * 2, 90, 90);
             path.AddLine(x, y + height - (radius * 2), x, y + radius);
-            path.AddArc(x, y, radius * 2, radius * 2, 180, 90);
+            if (radius != 0)
+                path.AddArc(x, y, radius * 2, radius * 2, 180, 90);
             path.CloseFigure();
             if (brush != null)
                 graphics.FillPath(brush, path);
@@ -202,25 +259,35 @@ size.Height);
             }
         }
 
+        // 设置消息文字和颜色，可否点击
+        // 一次性设置，比较方便
+        public void SetMessage(string strText, Color rectColor, bool bClickable)
+        {
+            base.Text = strText;
+            this._rectColor = rectColor;
+            this.Closeable = bClickable;
+            this.Invalidate();
+        }
+
         bool _isSameFont = false;
         private void FloatingMessageForm_Load(object sender, EventArgs e)
         {
             if (this.Font.FontFamily.Equals(this.Owner.Font.FontFamily) == true)
                 _isSameFont = true;
 
-            this.Owner.Activated += new System.EventHandler(this.Parent_Activated);
-            this.Owner.Deactivate += new System.EventHandler(this.Parent_Deactivate);
-            this.Owner.Move += new System.EventHandler(this.QuickChargingForm_Move);
-            this.Owner.SizeChanged += new System.EventHandler(this.QuickChargingForm_SizeChanged);
-            this.Owner.Load += Owner_Load;
-            this.Owner.FontChanged += Owner_FontChanged;
+            this._parent.Activated += new System.EventHandler(this.Parent_Activated);
+            this._parent.Deactivate += new System.EventHandler(this.Parent_Deactivate);
+            this._parent.Move += new System.EventHandler(this.QuickChargingForm_Move);
+            this._parent.SizeChanged += new System.EventHandler(this.QuickChargingForm_SizeChanged);
+            this._parent.Load += Owner_Load;
+            this._parent.FontChanged += Owner_FontChanged;
         }
 
         void Owner_FontChanged(object sender, EventArgs e)
         {
             // 和父窗口设置成同一字体
-            if (this._isSameFont == true && this.Owner != null)
-                this.Font = new Font(this.Owner.Font.FontFamily, this.Font.Size, this.Font.Style);
+            if (this._isSameFont == true && this._parent != null)
+                this.Font = new Font(this._parent.Font.FontFamily, this.Font.Size, this.Font.Style);
         }
 
         // 2015/4/30
@@ -231,12 +298,12 @@ size.Height);
 
         private void FloatingMessageForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            this.Owner.Activated -= new System.EventHandler(this.Parent_Activated);
-            this.Owner.Deactivate -= new System.EventHandler(this.Parent_Deactivate);
-            this.Owner.Move -= new System.EventHandler(this.QuickChargingForm_Move);
-            this.Owner.SizeChanged -= new System.EventHandler(this.QuickChargingForm_SizeChanged);
-            this.Owner.Load -= Owner_Load;
-            this.Owner.FontChanged -= Owner_FontChanged;
+            this._parent.Activated -= new System.EventHandler(this.Parent_Activated);
+            this._parent.Deactivate -= new System.EventHandler(this.Parent_Deactivate);
+            this._parent.Move -= new System.EventHandler(this.QuickChargingForm_Move);
+            this._parent.SizeChanged -= new System.EventHandler(this.QuickChargingForm_SizeChanged);
+            this._parent.Load -= Owner_Load;
+            this._parent.FontChanged -= Owner_FontChanged;
         }
 
         public bool AutoHide = true;
@@ -284,17 +351,44 @@ size.Height);
         /// </summary>
         public void OnResizeOrMove()
         {
-            if (this.Owner == null)
+            if (this._parent == null)
                 return;
 
-            Rectangle rect = this.Owner.ClientRectangle;  //  new Rectangle(0, 0, this.ClientSize.Width, this.ClientSize.Height);
+            Rectangle rect = this._parent.ClientRectangle;  //  new Rectangle(0, 0, this.ClientSize.Width, this.ClientSize.Height);
 
-            Rectangle screen_rect = this.Owner.RectangleToScreen(rect);
+            Rectangle screen_rect = this._parent.RectangleToScreen(rect);
 
             this.Location = new Point(screen_rect.X,
                 screen_rect.Y);
 
             this.Size = new Size(screen_rect.Width, screen_rect.Height);
         }
+
+        protected override void WndProc(ref Message m)
+        {
+            if (m.Msg == API.WM_NCLBUTTONDOWN)
+            {
+                if (this.Closeable == true)
+                {
+                    // 清除文字显示
+                    if (string.IsNullOrEmpty(base.Text) == false)
+                    {
+                        base.Text = "";
+                        this.Invalidate();
+                    }
+                }
+                if (this.Clicked != null)
+                    this.Clicked(this, new EventArgs());
+            } 
+            else if (m.Msg == API.WM_NCHITTEST
+                && (this.Closeable == true || this.Clicked != null))
+            {
+                base.WndProc(ref m);
+                m.Result = new IntPtr(2);   // simulate client
+            }
+            else
+                base.WndProc(ref m);
+        }
+
     }
 }

@@ -22,12 +22,20 @@ namespace DigitalPlatform.EasyMarc
     /// </summary>
     public partial class EasyMarcControl : UserControl
     {
-
-
-
         [Browsable(true)]
         [EditorBrowsable(EditorBrowsableState.Always)]
-        public new event EventHandler TextChanged;
+        public new event EventHandler TextChanged
+        {
+            // http://stackoverflow.com/questions/9370448/add-attribute-to-base-event
+            add
+            {
+                base.TextChanged += value;
+            }
+            remove
+            {
+                base.TextChanged -= value;
+            }
+        }
 
         Font _fixedFont = null;
 
@@ -276,9 +284,9 @@ namespace DigitalPlatform.EasyMarc
             this.Changed = true;
 
             EventArgs e = new EventArgs();
-            // this.OnTextChanged(e);
-            if (this.TextChanged != null)
-                this.TextChanged(this, e);
+            this.OnTextChanged(e);
+            //if (this.TextChanged != null)
+            //    this.TextChanged(this, e);
         }
 
         // 找到一个子字段所从属的字段行
@@ -1568,10 +1576,21 @@ namespace DigitalPlatform.EasyMarc
             this.tableLayoutPanel_content.Width = this.Width - SystemInformation.VerticalScrollBarWidth;
         }
 
+        // 字段背景颜色
+        public Color FieldBackColor = Color.FromArgb(230, 230, 230);
+        // 子字段背景颜色
+        public Color SubfieldBackColor = Color.FromArgb(240, 240, 240);
+        // 扩展区背景颜色1
+        public Color ExpandBackColor1 = Color.FromArgb(230, 230, 230);
+        // 扩展区背景颜色2
+        public Color ExpandBackColor2 = Color.FromArgb(255, 255, 255);
+
         private void tableLayoutPanel_content_Paint(object sender, PaintEventArgs e)
         {
-            Brush brush = new SolidBrush(Color.FromArgb(230, 230, 230));
-            Brush brushSubfield = new SolidBrush(Color.FromArgb(240, 240, 240));
+            // 字段背景颜色
+            Brush brush = new SolidBrush(this.FieldBackColor); // Color.FromArgb(230, 230, 230)
+            // 子字段背景颜色
+            Brush brushSubfield = new SolidBrush(this.SubfieldBackColor); // Color.FromArgb(240, 240, 240)
 
             LinearGradientBrush brushGradient = null;
 #if NO
@@ -1580,7 +1599,7 @@ namespace DigitalPlatform.EasyMarc
 #endif
             int nLineLength = 0;
 
-            using (Pen pen = new Pen(Color.FromArgb(225,225,225)))
+            using (Pen pen = new Pen(Color.FromArgb(225, 225, 225)))
             {
 
                 Point p = this.tableLayoutPanel_content.PointToScreen(new Point(0, 0));
@@ -1590,19 +1609,20 @@ namespace DigitalPlatform.EasyMarc
                 {
                     EasyLine item = this.Items[i];
 
-
                     if (item.Visible == true)
                     {
-                    if (nLineLength == 0)
-                        nLineLength = item.textBox_content.Location.X - item.textBox_content.Margin.Left;
-
-
+#if NO
+                        // textbox 有时候是隐藏状态 X 为 0
+                        if (nLineLength == 0)
+                            nLineLength = item.textBox_content.Location.X - item.textBox_content.Margin.Left;
+#endif
+                        if (nLineLength == 0)
+                            nLineLength = item.splitter.Location.X;
 
                         Rectangle rect = item.label_color.RectangleToScreen(item.label_color.ClientRectangle);
                         rect.Width = nLineLength;   //  this.tableLayoutPanel_content.DisplayRectangle.Width;
                         rect.Offset(-p.X, -p.Y);
                         // rect.Height = (int)this.Font.GetHeight() + 8;
-
 
                         if (item is FieldLine)
                         {
@@ -1613,8 +1633,8 @@ namespace DigitalPlatform.EasyMarc
                                     brushGradient = new LinearGradientBrush(
                 new PointF(0, 0),
                 new PointF(nLineLength, 0),
-                Color.FromArgb(230, 230, 230),
-                Color.FromArgb(255, 255, 255)
+                this.ExpandBackColor1,  // Color.FromArgb(230, 230, 230)
+                this.ExpandBackColor2  // Color.FromArgb(255, 255, 255)
                 );
                                 e.Graphics.FillRectangle(brushGradient, rect);
                             }
@@ -1909,11 +1929,8 @@ namespace DigitalPlatform.EasyMarc
             }
         }
 
-
-
         public EasyLine(EasyMarcControl container)
         {
-
             this.Container = container;
             // int nTopBlank = (int)this.Container.Font.GetHeight() + 2;
 
@@ -1932,6 +1949,10 @@ namespace DigitalPlatform.EasyMarc
             label_caption.Margin = new Padding(4, 2, 4, 0);
             // label_caption.BackColor = SystemColors.Control;
 
+            label_caption.BackColor = Color.Transparent;
+            // label_caption.ForeColor = this.Container.ForeColor;
+
+
             splitter = new TransparentSplitter();
             // splitter.Dock = DockStyle.Fill;
             splitter.Size = new Size(8, 23);
@@ -1948,6 +1969,10 @@ namespace DigitalPlatform.EasyMarc
             // textBox_price.Multiline = true;
             textBox_content.Margin = new Padding(8, 4, 0, 0);
             // textBox_content.BackColor = Color.Red;
+
+            if (this.Container.BackColor != Color.Transparent)
+                textBox_content.BackColor = this.Container.BackColor;
+            textBox_content.ForeColor = this.Container.ForeColor;
         }
 
         // 从tablelayoutpanel中移除本Item涉及的控件

@@ -63,7 +63,7 @@
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 123F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 341F));
             this.tableLayoutPanel1.Controls.Add(this.easyMarcControl1, 2, 1);
             this.tableLayoutPanel1.Controls.Add(this.label_summary, 3, 1);
             this.tableLayoutPanel1.Controls.Add(this.pictureBox1, 0, 1);
@@ -81,7 +81,7 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 100F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 8F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(266, 141);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(573, 141);
             this.tableLayoutPanel1.TabIndex = 0;
             // 
             // easyMarcControl1
@@ -193,7 +193,7 @@
             this.dpTable_browseLines.InactiveHightlightForeColor = System.Drawing.SystemColors.InactiveCaptionText;
             this.dpTable_browseLines.Location = new System.Drawing.Point(235, 23);
             this.dpTable_browseLines.Name = "dpTable_browseLines";
-            this.dpTable_browseLines.Size = new System.Drawing.Size(117, 94);
+            this.dpTable_browseLines.Size = new System.Drawing.Size(335, 94);
             this.dpTable_browseLines.TabIndex = 6;
             this.dpTable_browseLines.Text = "dpTable1";
             this.dpTable_browseLines.SelectionChanged += new System.EventHandler(this.dpTable_browseLines_SelectionChanged);
@@ -271,7 +271,7 @@
             this.Controls.Add(this.tableLayoutPanel1);
             this.ForeColor = System.Drawing.SystemColors.WindowText;
             this.Name = "BiblioRegisterControl";
-            this.Size = new System.Drawing.Size(266, 141);
+            this.Size = new System.Drawing.Size(573, 141);
             this.SizeChanged += new System.EventHandler(this.BiblioRegisterControl_SizeChanged);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();

@@ -41,6 +41,10 @@ namespace DigitalPlatform
         [DllImport("Kernel32")]
         public static extern bool SetConsoleCtrlHandler(CtrlEventHandler handler, bool add);
 
+
+        public const int WM_NCLBUTTONDOWN = 0x00a1;
+        public const int WM_NCHITTEST = 0x0084;
+
         public const int WM_DEVICECHANGE = 0x0219; //see msdn site
         public const int DBT_DEVNODES_CHANGED = 0x0007;
         public const int DBT_DEVICEARRIVAL = 0x8000;

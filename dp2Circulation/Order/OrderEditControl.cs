@@ -51,6 +51,10 @@ namespace dp2Circulation
         public OrderEditControl()
         {
             InitializeComponent();
+
+            base.tableLayoutPanel_main = this.tableLayoutPanel_main;
+
+            AddEvents(true);
         }
 
         #region 数据成员
@@ -725,6 +729,7 @@ namespace dp2Circulation
             this.comboBox_source.Focus();
         }
 
+#if NO
         internal override void ResetColor()
         {
             Color color = this.tableLayoutPanel_main.BackColor;
@@ -750,13 +755,14 @@ namespace dp2Circulation
             this.label_refID_color.BackColor = color;
             this.label_operations_color.BackColor = color;
         }
-
+#endif
         /*
         private void textBox_index_TextChanged(object sender, EventArgs e)
         {
             valueTextChanged(sender, e);
         }*/
 
+#if NO
         private void valueTextChanged(object sender, EventArgs e)
         {
             this.Changed = true;
@@ -807,6 +813,7 @@ namespace dp2Circulation
 
             label.BackColor = this.ColorChanged;
         }
+#endif
 
 #if NO
         /// <summary>
@@ -1176,6 +1183,7 @@ namespace dp2Circulation
             comboBox_state_DropDown(sender, e);
         }
 
+#if NO
         private void textBox_refID_TextChanged(object sender, EventArgs e)
         {
             if (m_bInInitial == false)
@@ -1193,6 +1201,7 @@ namespace dp2Circulation
                 this.Changed = true;
             }
         }
+#endif
 
 #if NO
         delegate void Delegate_filterValue(Control control);
@@ -1250,7 +1259,8 @@ namespace dp2Circulation
             else
                 this.dateTimePicker_orderTime.CustomFormat = "yyyy-MM-dd HH:mm:ss";
 
-            valueTextChanged(sender, e);
+            // valueTextChanged(sender, e);
         }
+
     }
 }

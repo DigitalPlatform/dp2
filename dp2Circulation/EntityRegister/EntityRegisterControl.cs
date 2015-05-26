@@ -32,6 +32,7 @@ namespace dp2Circulation
     /// </summary>
     public partial class EntityRegisterControl : TableControlBase
     {
+        EntityRegisterBase _base = new EntityRegisterBase();
 
         // 长操作时的动画
         public Image LoaderImage = null;
@@ -39,19 +40,6 @@ namespace dp2Circulation
         public ColorSummaryControl ColorControl = null;
 
         public event DisplayErrorEventHandler DisplayError = null;
-
-        XmlDocument _servers_dom = null;
-        public XmlDocument ServersDom
-        {
-            get
-            {
-                return this._servers_dom;
-            }
-            set
-            {
-                this._servers_dom = value;
-            }
-        }
 
         FillThread _fillThread = null;
 
@@ -62,11 +50,13 @@ namespace dp2Circulation
         {
             get
             {
-                return this._mainForm;
+                // return this._mainForm;
+                return this._base.MainForm;
             }
             set
             {
-                this._mainForm = value;
+                // this._mainForm = value;
+                this._base.MainForm = value;
                 if (value != null && this._imageManager != null)
                 {
                     this._imageManager.TempFileDir = value.UserTempDir;
@@ -75,10 +65,9 @@ namespace dp2Circulation
         }
 
 
+
         // public LibraryChannel Channel = null;
-        LibraryChannelPool _channelPool = new LibraryChannelPool();
-        public Stop Progress = null;
-        public string Lang = "zh";
+
 
         List<LineTask> _loadEntityTasks = new List<LineTask>();
 
@@ -110,10 +99,10 @@ namespace dp2Circulation
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
 #endif
-            this._channelPool.BeforeLogin += new BeforeLoginEventHandle(_channelPool_BeforeLogin);
+            // this._channelPool.BeforeLogin += new BeforeLoginEventHandle(_channelPool_BeforeLogin);
 
             this._imageManager = new ImageManager();
-            this._imageManager.ChannelPool = this._channelPool;
+            this._imageManager.ChannelPool = this._base._channelPool;
             this._imageManager.GetObjectComplete += new GetObjectCompleteEventHandler(_imageManager_GetObjectComplete);
             this._imageManager.BeginThread();
         }
@@ -300,14 +289,7 @@ namespace dp2Circulation
             }
         }
 
-        internal string GetServerType(string strServerName)
-        {
-            AccountInfo account = this.GetAccountInfo(strServerName);
-            if (account == null)
-                return "";
 
-            return account.ServerType;
-        }
 
         public void MarcEditor_GetConfigDom(object sender, GetConfigDomEventArgs e)
         {
@@ -325,7 +307,7 @@ namespace dp2Circulation
             string strServerName = "";
             StringUtil.ParseTwoPart(e.Path, "@", out strPath, out strServerName);
 
-            string strServerType = GetServerType(strServerName);
+            string strServerType = _base.GetServerType(strServerName);
             if (strServerType == "amazon" || strServerName == "!unknown")
             {
                 // TODO: 如何知道 MARC 记录是什么具体的 MARC 格式?
@@ -352,7 +334,7 @@ namespace dp2Circulation
                 return;
             }
 
-            AccountInfo account = this.GetAccountInfo(strServerName);
+            AccountInfo account = _base.GetAccountInfo(strServerName);
             if (account == null)
             {
                 e.ErrorInfo = "e.Path 中 '"+e.Path+"' 服务器名 '"+strServerName+"' 没有配置";
@@ -435,7 +417,7 @@ namespace dp2Circulation
             string strServerName = "";
             StringUtil.ParseTwoPart(e.RecPath, "@", out strPath, out strServerName);
 
-            AccountInfo account = this.GetAccountInfo(strServerName);
+            AccountInfo account = _base.GetAccountInfo(strServerName);
             if (account == null)
             {
                 strError = "e.RecPath 中 '" + e.RecPath + "' 服务器名 '" + strServerName + "' 没有配置";
@@ -444,9 +426,9 @@ namespace dp2Circulation
             string strServerUrl = account.ServerUrl;
             string strUserName = account.UserName;
 
-            if (IsDot(strServerUrl) == true)
+            if (EntityRegisterBase.IsDot(strServerUrl) == true)
                 strServerUrl = this.MainForm.LibraryServerDir1;
-            if (IsDot(strUserName) == true)
+            if (EntityRegisterBase.IsDot(strUserName) == true)
                 strUserName = this.MainForm.DefaultUserName;
 
             EventFilter filter = new EventFilter();
@@ -511,7 +493,7 @@ namespace dp2Circulation
 
             m_nInGetCfgFile++;
 
-            LibraryChannel channel = this.GetChannel(strServerUrl, strUserName);
+            LibraryChannel channel = _base.GetChannel(strServerUrl, strUserName);
 
 
             try
@@ -543,7 +525,7 @@ namespace dp2Circulation
             }
             finally
             {
-                this.ReturnChannel(channel);
+                _base.ReturnChannel(channel);
 
                 Progress.EndLoop();
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
@@ -917,7 +899,6 @@ out string strError)
             return false;
         }
 
-
         // 根据书目记录的路径，匹配适当的目标
         // parameters:
         //      bAllowCopyTo    是否允许书目记录复制到其他库？这发生在原始库不让 overwrite 的时候
@@ -941,7 +922,7 @@ out string strError)
                 && string.IsNullOrEmpty(strEditBiblioRecPath) == false)
             {
                 // 验证 edit 中的书目库名，是否是可以写入的 ?
-                XmlElement server = (XmlElement)this._servers_dom.DocumentElement.SelectSingleNode("server[@name='" + strEditServerName + "']");
+                XmlElement server = (XmlElement)this.ServersDom.DocumentElement.SelectSingleNode("server[@name='" + strEditServerName + "']");
                 if (server != null)
                 {
                     if (IsWritable(server, strEditBiblioRecPath) == true)
@@ -958,7 +939,7 @@ out string strError)
 
             // 此后都是寻找可以追加写入的
             // 获得第一个可以写入的服务器名
-            XmlNodeList servers = this._servers_dom.DocumentElement.SelectNodes("server");
+            XmlNodeList servers = this.ServersDom.DocumentElement.SelectNodes("server");
             foreach (XmlElement server in servers)
             {
                 XmlNodeList databases = server.SelectNodes("database");
@@ -1067,8 +1048,8 @@ out string strError)
             {
                 string strCancelSaveBiblio = "";
 
-                            this._currentAccount = this.GetAccountInfo(line._biblioRegister.ServerName);
-            if (this._currentAccount == null)
+                AccountInfo _currentAccount = _base.GetAccountInfo(line._biblioRegister.ServerName);
+            if (_currentAccount == null)
             {
                 strError = "服务器名 '" + line._biblioRegister.ServerName + "' 没有配置";
                 goto ERROR1;
@@ -1077,7 +1058,7 @@ out string strError)
                 // line.SetBiblioSearchState("searching");
                 if (line._biblioRegister.BiblioChanged == true
                     || Global.IsAppendRecPath(line._biblioRegister.BiblioRecPath) == true
-                    || this._currentAccount.IsLocalServer == false)
+                    || _currentAccount.IsLocalServer == false)
                 {
                     // TODO: 确定目标 dp2library 服务器 目标书目库
                     string strServerName = "";
@@ -1088,7 +1069,7 @@ out string strError)
                     //      0   没有找到
                     //      1   找到
                     nRet = GetTargetInfo(line,
-                        this._currentAccount.IsLocalServer == false? true : false,
+                        _currentAccount.IsLocalServer == false? true : false,
                         out strServerName,
                         out strBiblioRecPath);
 #if NO
@@ -1104,7 +1085,7 @@ out string strError)
                     {
                         strError = "来自服务器 '" + line._biblioRegister.ServerName + "' 的书目记录 '" + line._biblioRegister.BiblioRecPath + "' 没有找到匹配的保存目标";
                         bool bAppend = Global.IsAppendRecPath(line._biblioRegister.BiblioRecPath);
-                        if (bAppend == true || this._currentAccount.IsLocalServer == false)
+                        if (bAppend == true || _currentAccount.IsLocalServer == false)
                             goto ERROR1;
 
                         // 虽然书目记录无法保存，但继续寻求保存册记录
@@ -1243,14 +1224,14 @@ int nCount)
             string strWarning = "";
 
             // 确定目标服务器 目标书目库
-            this._currentAccount = this.GetAccountInfo(line._biblioRegister.ServerName);
-            if (this._currentAccount == null)
+            AccountInfo _currentAccount = _base.GetAccountInfo(line._biblioRegister.ServerName);
+            if (_currentAccount == null)
             {
                 strError = "' 服务器名 '" + line._biblioRegister.ServerName + "' 没有配置";
                 return -1;
             }
 
-            _channel = this.GetChannel(this._currentAccount.ServerUrl, this._currentAccount.UserName);
+            _channel = _base.GetChannel(_currentAccount.ServerUrl, _currentAccount.UserName);
             try
             {
 
@@ -1294,7 +1275,7 @@ int nCount)
             }
             finally
             {
-                this.ReturnChannel(_channel);
+                _base.ReturnChannel(_channel);
                 _channel = null;
                 _currentAccount = null;
             }
@@ -1378,13 +1359,13 @@ int nCount)
             baNewTimestamp = null;
             strOutputPath = "";
 
-            this._currentAccount = this.GetAccountInfo(strServerName);
+            AccountInfo _currentAccount = _base.GetAccountInfo(strServerName);
             if (_currentAccount == null)
             {
                 strError = "服务器名 '" + strServerName + "' 没有配置";
                 return -1;
             }
-            _channel = this.GetChannel(this._currentAccount.ServerUrl, this._currentAccount.UserName);
+            _channel = _base.GetChannel(_currentAccount.ServerUrl, _currentAccount.UserName);
 
             try
             {
@@ -1421,9 +1402,9 @@ int nCount)
             }
             finally
             {
-                this.ReturnChannel(_channel);
+                _base.ReturnChannel(_channel);
                 this._channel = null;
-                this._currentAccount = null;
+                // _currentAccount = null;
             }
         }
 
@@ -1431,237 +1412,14 @@ int nCount)
 
         #region 检索书目
 
-        string GetServerName(string strServerName)
-        {
-            if (IsDot(strServerName) == true)
-            {
-                XmlElement server = (XmlElement)this._servers_dom.DocumentElement.SelectSingleNode("server[@url='.'] | server[@url='']");
-                if (server == null)
-                    return "";
-                return server.GetAttribute("name");
-            }
-            return strServerName;
-        }
-
-        // parameters:
-        //      strServerName   服务器名。可以为 .
-        AccountInfo GetAccountInfo(string strServerName)
-        {
-            if (IsDot(strServerName) == true)
-            {
-                strServerName = GetServerName(strServerName);
-                if (string.IsNullOrEmpty(strServerName) == true)
-                    return null;
-            }
-            XmlNode server = this._servers_dom.DocumentElement.SelectSingleNode("server[@name='"+strServerName+"']");
-            if (server == null)
-                return null;
-
-            return GetAccountInfo(server as XmlElement);
-        }
-
-        AccountInfo GetAccountInfo(XmlElement server)
-        {
-            AccountInfo account = new AccountInfo();
-            account.ServerName = server.GetAttribute("name");
-            account.ServerType = server.GetAttribute("type");
-            account.ServerUrl = server.GetAttribute("url");
-            account.UserName = server.GetAttribute("userName");
-            account.Password = server.GetAttribute("password");
-            account.IsReader = server.GetAttribute("isReader");
-
-            return account;
-        }
-
-        Hashtable _serverInfoTable = new Hashtable();
-
-        // 准备服务器信息
-        int GetServerInfo(
-            RegisterLine line,
-            LibraryChannel channel,
-            AccountInfo account,
-            out ServerInfo info,
-            out string strError)
-        {
-            strError = "";
-            info = null;
-
-            info = this._serverInfoTable[account.ServerUrl] as ServerInfo;
-            if (info == null)
-            {
-                if (line != null)
-                    line.BiblioSummary = "正在获取服务器 " + account.ServerName + " 的配置信息 ...";
-
-                info = new ServerInfo();
-                info.AccountInfo = account;
-                int nRet = info.GetAllDatabaseInfo(channel,
-                    Progress,
-                    out strError);
-                if (nRet == -1)
-                    return -1;
-                nRet = info.InitialBiblioDbProperties(out strError);
-                if (nRet == -1)
-                    return -1;
-                this._serverInfoTable[account.ServerUrl] = info;
-            }
-            return 0;
-        }
-
-        /// <summary>
-        /// dp2Library 服务器信息
-        /// </summary>
-        class ServerInfo
-        {
-            public AccountInfo AccountInfo = null;
-
-            /// <summary>
-            /// 表示当前全部数据库信息的 XmlDocument 对象
-            /// </summary>
-            public XmlDocument AllDatabaseDom = null;
-
-            /// <summary>
-            /// 书目库属性集合
-            /// </summary>
-            public List<BiblioDbProperty> BiblioDbProperties = null;
-
-            public int GetAllDatabaseInfo(LibraryChannel channel,
-                Stop stop,
-                out string strError)
-            {
-                strError = "";
-                string strValue = "";
-                long lRet = 0;
-
-                this.AllDatabaseDom = null;
-
-                lRet = channel.ManageDatabase(
-    stop,
-    "getinfo",
-    "",
-    "",
-    out strValue,
-    out strError);
-                if (lRet == -1)
-                {
-                    if (channel.ErrorCode == ErrorCode.AccessDenied)
-                    {
-                    }
-
-                    strError = "针对服务器 " + this.AccountInfo.ServerName + " 获得全部数据库定义过程发生错误：" + strError;
-                    return -1;
-                }
-
-                XmlDocument dom = new XmlDocument();
-                try
-                {
-                    dom.LoadXml(strValue);
-                }
-                catch (Exception ex)
-                {
-                    strError = "XML装入DOM时出错: " + ex.Message;
-                    return -1;
-                }
-
-                this.AllDatabaseDom = dom;
-                return 0;
-            }
-
-            public int InitialBiblioDbProperties(
-                out string strError)
-            {
-                strError = "";
-                int nRet = 0;
-
-                    this.BiblioDbProperties = new List<BiblioDbProperty>();
-                    if (this.AllDatabaseDom == null)
-                        return 0;
-
-                    XmlNodeList nodes = this.AllDatabaseDom.DocumentElement.SelectNodes("database[@type='biblio']");
-                    foreach (XmlNode node in nodes)
-                    {
-
-                        string strName = DomUtil.GetAttr(node, "name");
-                        string strType = DomUtil.GetAttr(node, "type");
-                        // string strRole = DomUtil.GetAttr(node, "role");
-                        // string strLibraryCode = DomUtil.GetAttr(node, "libraryCode");
-
-                        BiblioDbProperty property = new BiblioDbProperty();
-                        this.BiblioDbProperties.Add(property);
-                        property.DbName = DomUtil.GetAttr(node, "name");
-                        property.ItemDbName = DomUtil.GetAttr(node, "entityDbName");
-                        property.Syntax = DomUtil.GetAttr(node, "syntax");
-                        property.IssueDbName = DomUtil.GetAttr(node, "issueDbName");
-                        property.OrderDbName = DomUtil.GetAttr(node, "orderDbName");
-                        property.CommentDbName = DomUtil.GetAttr(node, "commentDbName");
-                        property.Role = DomUtil.GetAttr(node, "role");
-
-                        bool bValue = true;
-                        nRet = DomUtil.GetBooleanParam(node,
-                            "inCirculation",
-                            true,
-                            out bValue,
-                            out strError);
-                        property.InCirculation = bValue;
-                    }
-
-               return 0;
-            }
-
-            // 获得具有实体库的全部书目库名列表
-            // parameters:
-            //      strServerName   服务器名。可以为 .
-            public string GetBiblioDbNames()
-            {
-                    List<string> results = new List<string>();
-                    if (this.BiblioDbProperties != null)
-                    {
-                        foreach (BiblioDbProperty prop in this.BiblioDbProperties)
-                        {
-                            if (string.IsNullOrEmpty(prop.DbName) == false &&
-                                string.IsNullOrEmpty(prop.ItemDbName) == false)
-                            {
-                                results.Add(prop.DbName);
-                            }
-                        }
-                    }
-
-                    return StringUtil.MakePathList(results);
-            }
-        }
-
-        class AccountInfo
-        {
-            public string ServerName = "";
-            public string ServerType = "";
-            public string ServerUrl = "";
-            public string UserName = "";
-            public string Password = "";
-            public string IsReader = "";    // yes / no / 空 / . 。空和点表示依从当前帐户配置
-
-            public bool IsLocalServer
-            {
-                get
-                {
-                    if (string.IsNullOrEmpty(this.ServerUrl) == true)
-                        return true;
-                    if (this.ServerUrl == ".")
-                        return true;
-                    return false;
-                }
-            }
-        }
-
-        AccountInfo _currentAccount = null;
-        LibraryChannel _channel = null;
-
         void SearchLine(RegisterLine line)
         {
             string strError = "";
             int nRet = 0;
 
-            if (this._servers_dom == null)
+            if (this.ServersDom == null)
             {
-                strError = "_server_dom 为空";
+                strError = "ServersDom 为空";
                 goto ERROR1;
             }
 
@@ -1677,10 +1435,12 @@ int nCount)
                 line.SetBiblioSearchState("searching");
                 line.BiblioSummary = "正在检索 " + line.BiblioBarcode + " ...";
 
-                XmlNodeList servers = this._servers_dom.DocumentElement.SelectNodes("server");
+                XmlNodeList servers = this.ServersDom.DocumentElement.SelectNodes("server");
                 foreach (XmlElement server in servers)
                 {
-                    AccountInfo account = GetAccountInfo(server);
+                    AccountInfo account = EntityRegisterBase.GetAccountInfo(server);
+                    Debug.Assert(account != null, "");
+                    _base.CurrentAccount = account;
 #if NO
                 string strName = server.GetAttribute("name");
                 string strType = server.GetAttribute("type");
@@ -1788,7 +1548,7 @@ int nCount)
             strBiblioDbName = "";
 
             List<XmlElement> database_nodes = new List<XmlElement>();
-            XmlNodeList databases = this._servers_dom.DocumentElement.SelectNodes("server/database");
+            XmlNodeList databases = this.ServersDom.DocumentElement.SelectNodes("server/database");
             foreach (XmlElement database in databases)
             {
                 string strValue = database.GetAttribute("isTarget");
@@ -1887,89 +1647,6 @@ int nCount)
 #endif
         }
 
-        static bool IsDot(string strText)
-        {
-            if (string.IsNullOrEmpty(strText) == true
-|| strText == ".")
-                return true;
-            return false;
-        }
-
-        void _channelPool_BeforeLogin(object sender, BeforeLoginEventArgs e)
-        {
-            if (e.FirstTry == true)
-            {
-                if (IsDot(_currentAccount.ServerUrl) == true)
-                    e.LibraryServerUrl = this.MainForm.LibraryServerUrl;
-                else
-                    e.LibraryServerUrl = _currentAccount.ServerUrl;
-
-                bool bIsReader = false;
-
-                if (IsDot(_currentAccount.UserName) == true)
-                {
-                    e.UserName = this.MainForm.AppInfo.GetString(
-                    "default_account",
-                    "username",
-                    "");
-
-                    e.Password = this.MainForm.AppInfo.GetString(
-"default_account",
-"password",
-"");
-                    e.Password = this.MainForm.DecryptPasssword(e.Password);
-
-                    bIsReader =
-this.MainForm.AppInfo.GetBoolean(
-"default_account",
-"isreader",
-false);
-                }
-                else
-                {
-                    e.UserName = _currentAccount.UserName;
-
-                    e.Password = _currentAccount.Password;
-
-                    bIsReader = string.IsNullOrEmpty(_currentAccount.IsReader) == true ? false : DomUtil.IsBooleanTrue(_currentAccount.IsReader);
-                }
-
-#if NO
-                if (IsDot(_currentAccount.IsReader) == true)
-                    bIsReader =
-        this.MainForm.AppInfo.GetBoolean(
-        "default_account",
-        "isreader",
-        false);
-                else
-                    bIsReader = DomUtil.IsBooleanTrue(_currentAccount.IsReader);
-#endif
-
-                string strLocation = this.MainForm.AppInfo.GetString(
-                "default_account",
-                "location",
-                "");
-                e.Parameters = "location=" + strLocation;
-                if (bIsReader == true)
-                    e.Parameters += ",type=reader";
-
-                // 2014/9/13
-                e.Parameters += ",mac=" + StringUtil.MakePathList(SerialCodeForm.GetMacAddress(), "|");
-
-#if SN
-                // 从序列号中获得 expire= 参数值
-                string strExpire = this.MainForm.GetExpireParam();
-                if (string.IsNullOrEmpty(strExpire) == false)
-                    e.Parameters += ",expire=" + strExpire;
-#endif
-
-                if (String.IsNullOrEmpty(e.UserName) == false)
-                    return; // 立即返回, 以便作第一次 不出现 对话框的自动登录
-            }
-
-            // TODO: 可以出现对话框，但要注意跨线程的问题
-            e.Cancel = true;
-        }
 
         // return:
         //      -1  出错
@@ -1980,7 +1657,7 @@ false);
         {
             strError = "";
 
-            this._currentAccount = account;
+            // ??? this._currentAccount = account;
 
             line.BiblioSummary = "正在针对 " + account.ServerName + " \r\n检索 " + line.BiblioBarcode + " ...";
 
@@ -2089,7 +1766,7 @@ MessageBoxDefaultButton.Button1);
             RegisterBiblioInfo info = new RegisterBiblioInfo();
             info.OldXml = strMARC;
             info.Timestamp = null;
-            info.RecPath = strASIN + "@" + this._currentAccount.ServerName;
+            info.RecPath = strASIN + "@" + _base.CurrentAccount.ServerName;
             info.MarcSyntax = "unimarc";
             line.AddBiblioBrowseLine(
                 -1,
@@ -2100,21 +1777,6 @@ MessageBoxDefaultButton.Button1);
             return 0;
         }
 
-        LibraryChannel GetChannel(string strServerUrl,
-            string strUserName)
-        {
-            if (IsDot(strServerUrl) == true)
-                strServerUrl = this.MainForm.LibraryServerDir1;
-            if (IsDot(strUserName) == true)
-                strUserName = this.MainForm.DefaultUserName;
-
-            return  this._channelPool.GetChannel(strServerUrl, strUserName);
-        }
-
-        void ReturnChannel(LibraryChannel channel)
-        {
-            this._channelPool.ReturnChannel(channel);
-        }
 
         // 针对 dp2library 服务器进行检索
         // parameters:
@@ -2129,9 +1791,9 @@ MessageBoxDefaultButton.Button1);
             strError = "";
             int nRet = 0;
 
-            _currentAccount = account;
+            // ??? _currentAccount = account;
 
-            _channel = this.GetChannel(account.ServerUrl, account.UserName);
+            _channel = _base.GetChannel(account.ServerUrl, account.UserName);
             _channel.Timeout = new TimeSpan(0, 0, 5);   // 超时值为 5 秒
             try
             {
@@ -2181,9 +1843,13 @@ MessageBoxDefaultButton.Button1);
                 }
 
                 ServerInfo server_info = null;
+
+                if (line != null)
+                    line.BiblioSummary = "正在获取服务器 " + account.ServerName + " 的配置信息 ...";
+
                 // 准备服务器信息
-                nRet = GetServerInfo(
-                    line,
+                nRet = _base.GetServerInfo(
+                    // line,
                     _channel,
                     account,
                     out server_info,
@@ -2200,7 +1866,7 @@ MessageBoxDefaultButton.Button1);
                     1000,
                     strFromStyle,
                     strMatchStyle,
-                    this.Lang,
+                    _base.Lang,
                     null,   // strResultSetName
                     "",    // strSearchStyle
                     "", // strOutputStyle
@@ -2237,7 +1903,7 @@ MessageBoxDefaultButton.Button1);
                         lStart,
                         lCount,
                         strStyle, // bOutputKeyCount == true ? "keycount" : "id,cols",
-                        this.Lang,
+                        _base.Lang,
                         out searchresults,
                         out strError);
                     if (lRet == -1)
@@ -2337,7 +2003,7 @@ MessageBoxDefaultButton.Button1);
             }
             finally
             {
-                this.ReturnChannel(_channel);
+                _base.ReturnChannel(_channel);
                 _channel = null;
             }
 
@@ -2354,6 +2020,32 @@ MessageBoxDefaultButton.Button1);
 
 
         #endregion // 检索书目
+
+        LibraryChannel _channel = null;
+
+        public XmlDocument ServersDom
+        {
+            get
+            {
+                return this._base.ServersDom;
+            }
+            set
+            {
+                this._base.ServersDom = value;
+            }
+        }
+
+        public Stop Progress
+        {
+            get
+            {
+                return _base.Progress;
+            }
+            set
+            {
+                _base.Progress = value;
+            }
+        }
 
         public override bool Changed
         {
@@ -2513,23 +2205,23 @@ MessageBoxDefaultButton.Button1);
                 return 0;
             }
 
-            this._currentAccount = this.GetAccountInfo(line._biblioRegister.ServerName);
-            if (this._currentAccount == null)
+            AccountInfo _currentAccount = _base.GetAccountInfo(line._biblioRegister.ServerName);
+            if (_currentAccount == null)
             {
                 strError = "服务器名 '" + line._biblioRegister.ServerName + "' 没有配置";
                 return -1;
             }
 
             // 如果不是本地服务器，则不需要装入册记录
-            if (this._currentAccount.IsLocalServer == false)
+            if (_currentAccount.IsLocalServer == false)
             {
-                this._currentAccount = null;
+                _base.CurrentAccount = null;
                 // 册信息部分显示为空
                 line._biblioRegister.TrySetBlank("none");
                 return 0;
             }
 
-            _channel = this.GetChannel(this._currentAccount.ServerUrl, this._currentAccount.UserName);
+            _channel = _base.GetChannel(_currentAccount.ServerUrl, _currentAccount.UserName);
 
             this.Progress.OnStop += new StopEventHandler(this.DoStop);
             //this.Progress.Initial("正在装入书目记录 '" + strBiblioRecPath + "' 下属的册记录 ...");
@@ -2615,7 +2307,7 @@ MessageBoxDefaultButton.Button1);
                 this.Progress.OnStop -= new StopEventHandler(this.DoStop);
                 // this.Progress.Initial("");
 
-                this.ReturnChannel(_channel);
+                _base.ReturnChannel(_channel);
                 _channel = null;
                 _currentAccount = null;
             }
@@ -2697,121 +2389,7 @@ MessageBoxDefaultButton.Button1);
 #endif
         }
 
-        static string _baseCfg = @"
-<root>
-  <server name='红泥巴.数字平台中心' type='dp2library' url='http://123.103.13.236/dp2library' userName='public'/>
-  <server name='亚马逊中国' type='amazon' url='webservices.amazon.cn'/>
-</root>";
 
-        // 创建 servers.xml 配置文件
-        public int BuildServersCfgFile(string strCfgFileName,
-            out string strError)
-        {
-            strError = "";
-
-            XmlDocument dom = new XmlDocument();
-            dom.LoadXml(_baseCfg);
-
-            // 版本号
-            // 0.01 2014/12/10
-            dom.DocumentElement.SetAttribute("version", "0.01");
-
-            // 添加当前服务器
-            {
-                XmlElement server = dom.CreateElement("server");
-                dom.DocumentElement.AppendChild(server);
-                server.SetAttribute("name", "当前服务器");
-                server.SetAttribute("type", "dp2library");
-                server.SetAttribute("url", ".");
-                server.SetAttribute("userName", ".");
-
-                int nCount = 0;
-                // 添加 database 元素
-                foreach (BiblioDbProperty prop in this.MainForm.BiblioDbProperties)
-                {
-                    // USMARC 格式的，和期刊库，都跳过
-                    if (prop.Syntax != "unimarc"
-                        || string.IsNullOrEmpty(prop.IssueDbName) == false)
-                        continue;
-
-                    // 临时库
-                    if (StringUtil.IsInList("catalogWork", prop.Role) == true)
-                    {
-                        XmlElement database = dom.CreateElement("database");
-                        server.AppendChild(database);
-
-                        database.SetAttribute("name", prop.DbName);
-                        database.SetAttribute("isTarget", "yes");
-                        database.SetAttribute("access", "append,overwrite");
-
-                        database.SetAttribute("entityAccess", "append,overwrite");
-                        nCount++;
-                    }
-
-                    // 中央库
-                    if (StringUtil.IsInList("catalogTarget", prop.Role) == true)
-                    {
-                        XmlElement database = dom.CreateElement("database");
-                        server.AppendChild(database);
-
-                        database.SetAttribute("name", prop.DbName);
-                        database.SetAttribute("isTarget", "yes");
-                        database.SetAttribute("access", "append,overwrite");
-
-                        database.SetAttribute("entityAccess", "append,overwrite");
-                        nCount++;
-                    }
-                }
-
-                if (nCount == 0)
-                {
-                    strError = "当前尚未定义角色为 catalogWork 或 catalogTarget 的图书书目库。创建服务器配置文件失败";
-                    return -1;
-                }
-            }
-
-            string strHnbUrl = "";
-            {
-                XmlElement server = dom.DocumentElement.SelectSingleNode("server[@name='红泥巴.数字平台中心']") as XmlElement;
-                if (server != null)
-                    strHnbUrl = server.GetAttribute("url");
-                // 当前服务器是红泥巴服务器，要删除多余的事项
-                if (string.Compare(this.MainForm.LibraryServerUrl, strHnbUrl, true) == 0)
-                {
-                    server.ParentNode.RemoveChild(server);
-                }
-            }
-
-            dom.Save(strCfgFileName);
-            return 0;
-        }
-
-        // 获得配置文件的版本号
-        public static double GetServersCfgFileVersion(string strCfgFileName)
-        {
-            if (File.Exists(strCfgFileName) == false)
-                return 0;
-
-            XmlDocument dom = new XmlDocument();
-            try
-            {
-                dom.Load(strCfgFileName);
-            }
-            catch (Exception ex)
-            {
-                return 0;
-            }
-
-            if (dom.DocumentElement == null)
-                return 0;
-
-            double version = 0;
-            string strVersion = dom.DocumentElement.GetAttribute("version");
-            if (double.TryParse(strVersion, out version) == false)
-                return 0;
-
-            return version;
-        }
 
     }
 

@@ -51,6 +51,10 @@ namespace dp2Circulation
         public CommentEditControl()
         {
             InitializeComponent();
+
+            base.tableLayoutPanel_main = this.tableLayoutPanel_main;
+
+            AddEvents(true);
         }
 
         #region 数据成员
@@ -593,6 +597,7 @@ namespace dp2Circulation
             this.textBox_creator.Focus();
         }
 
+#if NO
         internal override void ResetColor()
         {
             Color color = this.tableLayoutPanel_main.BackColor;
@@ -611,6 +616,7 @@ namespace dp2Circulation
             this.label_refID_color.BackColor = color;
             this.label_operations_color.BackColor = color;
         }
+#endif
 
 #if NO
         delegate void Delegate_filterValue(Control control);
@@ -659,6 +665,7 @@ namespace dp2Circulation
                 control.Text = strText;
         }
 
+#if NO
         private void valueTextChanged(object sender, EventArgs e)
         {
             this.Changed = true;
@@ -725,6 +732,7 @@ namespace dp2Circulation
 
             label.BackColor = this.ColorChanged;
         }
+#endif
 
 #if NO
         /// <summary>

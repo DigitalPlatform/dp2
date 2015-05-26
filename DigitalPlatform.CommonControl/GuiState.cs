@@ -373,6 +373,7 @@ namespace DigitalPlatform.CommonControl
             return listview.GetType().ToString() + ":" + ListViewUtil.GetColumnWidthListString(listview);
         }
 
+#if NO
         static void SetSplitContainerState(SplitContainer splitContainer, string strText)
         {
             string strState = "";
@@ -391,6 +392,54 @@ namespace DigitalPlatform.CommonControl
         {
             return splitContainer.GetType().ToString() + ":" + GuiUtil.GetSplitterState(splitContainer).ToString();
         }
+#endif
+
+        // 2015/5/25 增加存储方向的能力
+        static void SetSplitContainerState(SplitContainer splitContainer, string strText)
+        {
+            string strState = "";
+            if (IsType(strText, splitContainer, out strState) == false)
+                return;
+
+            if (string.IsNullOrEmpty(strState) == false)
+            {
+                Hashtable table = StringUtil.ParseParameters(strState);
+
+                string strRatio = (string)table["ratio"];
+                string strOrientation = (string)table["orientation"];
+
+                if (string.IsNullOrEmpty(strOrientation) == false)
+                {
+                    if (strOrientation == "v")
+                        splitContainer.Orientation = Orientation.Vertical;
+                    else
+                        splitContainer.Orientation = Orientation.Horizontal;
+                }
+
+                if (string.IsNullOrEmpty(strRatio) == true)
+                {
+                    float f = 0.5F;
+                    float.TryParse(strState, out f);    // 兼容最早的用法，状态字符串仅仅是一个数字
+                    GuiUtil.SetSplitterState(splitContainer, f);
+                }
+                else
+                {
+                    float f = 0.5F;
+                    float.TryParse(strRatio, out f);
+                    GuiUtil.SetSplitterState(splitContainer, f);
+                }
+
+            }
+        }
+
+        static string GetSplitContainerState(SplitContainer splitContainer)
+        {
+            Hashtable table = new Hashtable();
+            table["ratio"] = GuiUtil.GetSplitterState(splitContainer).ToString();
+            table["orientation"] = splitContainer.Orientation == Orientation.Vertical ? "v" : "h";
+            return splitContainer.GetType().ToString() + ":" + StringUtil.BuildParameterString(table);
+        }
+
 
         static void SetToolStripButtonState(ToolStripButton button, string strText)
         {

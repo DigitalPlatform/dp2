@@ -70,7 +70,7 @@ namespace dp2Circulation
             this.MainForm.FillBiblioFromList(this.comboBox_from);
 
             {
-                _floatingMessage = new FloatingMessageForm();
+                _floatingMessage = new FloatingMessageForm(this);
                 _floatingMessage.Font = new System.Drawing.Font(this.Font.FontFamily, this.Font.Size * 2, FontStyle.Bold);
                 _floatingMessage.Opacity = 0.7;
                 _floatingMessage.Show(this);

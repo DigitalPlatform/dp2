@@ -115,7 +115,7 @@ namespace DigitalPlatform.OPAC
 
             // API.PostMessage(this.Handle, WM_CHECK_DATADIR, 0, 0);
             {
-                _floatingMessage = new FloatingMessageForm();
+                _floatingMessage = new FloatingMessageForm(this);
                 _floatingMessage.Font = new System.Drawing.Font(this.Font.FontFamily, this.Font.Size * 2, FontStyle.Bold);
                 _floatingMessage.Opacity = 0.7;
                 _floatingMessage.Show(this);

@@ -39,6 +39,7 @@ using DigitalPlatform.GcatClient;
 using DigitalPlatform.Marc;
 using DigitalPlatform.LibraryServer;
 using DigitalPlatform.MarcDom;
+using System.Security.Permissions;
 
 namespace dp2Circulation
 {
@@ -602,6 +603,14 @@ namespace dp2Circulation
 
             this.m_strPinyinGcatID = this.AppInfo.GetString("entity_form", "gcat_pinyin_api_id", "");
             this.m_bSavePinyinGcatID = this.AppInfo.GetBoolean("entity_form", "gcat_pinyin_api_saveid", false);
+
+#if NO
+            // 2015/5/24
+            MouseLButtonMessageFilter filter = new MouseLButtonMessageFilter();
+            filter.MainForm = this;
+            Application.AddMessageFilter(filter);
+#endif
+
         }
 
         string m_strPrevMessageText = "";
@@ -12914,6 +12923,11 @@ Keys keyData)
             OpenWindow<EntityRegisterForm>();
         }
 
+        private void MenuItem_openEntityRegisterWizard_Click(object sender, EventArgs e)
+        {
+            OpenWindow<EntityRegisterWizard>();
+        }
+
         private void MenuItem_reLogin_Click(object sender, EventArgs e)
         {
             StartPrepareNames(true, false);
@@ -12924,6 +12938,176 @@ Keys keyData)
         {
             return Path.Combine(this.UserTempDir, "~" + strPrefix + Guid.NewGuid().ToString());
         }
+
+        #region servers.xml
+
+        static string _baseCfg = @"
+<root>
+  <server name='红泥巴.数字平台中心' type='dp2library' url='http://123.103.13.236/dp2library' userName='public'/>
+  <server name='亚马逊中国' type='amazon' url='webservices.amazon.cn'/>
+</root>";
+
+        // 创建 servers.xml 配置文件
+        public int BuildServersCfgFile(string strCfgFileName,
+            out string strError)
+        {
+            strError = "";
+
+            XmlDocument dom = new XmlDocument();
+            dom.LoadXml(_baseCfg);
+
+            // 版本号
+            // 0.01 2014/12/10
+            dom.DocumentElement.SetAttribute("version", "0.01");
+
+            // 添加当前服务器
+            {
+                XmlElement server = dom.CreateElement("server");
+                dom.DocumentElement.AppendChild(server);
+                server.SetAttribute("name", "当前服务器");
+                server.SetAttribute("type", "dp2library");
+                server.SetAttribute("url", ".");
+                server.SetAttribute("userName", ".");
+
+                int nCount = 0;
+                // 添加 database 元素
+                foreach (BiblioDbProperty prop in this.BiblioDbProperties)
+                {
+                    // USMARC 格式的，和期刊库，都跳过
+                    if (prop.Syntax != "unimarc"
+                        || string.IsNullOrEmpty(prop.IssueDbName) == false)
+                        continue;
+
+                    // 临时库
+                    if (StringUtil.IsInList("catalogWork", prop.Role) == true)
+                    {
+                        XmlElement database = dom.CreateElement("database");
+                        server.AppendChild(database);
+
+                        database.SetAttribute("name", prop.DbName);
+                        database.SetAttribute("isTarget", "yes");
+                        database.SetAttribute("access", "append,overwrite");
+
+                        database.SetAttribute("entityAccess", "append,overwrite");
+                        nCount++;
+                    }
+
+                    // 中央库
+                    if (StringUtil.IsInList("catalogTarget", prop.Role) == true)
+                    {
+                        XmlElement database = dom.CreateElement("database");
+                        server.AppendChild(database);
+
+                        database.SetAttribute("name", prop.DbName);
+                        database.SetAttribute("isTarget", "yes");
+                        database.SetAttribute("access", "append,overwrite");
+
+                        database.SetAttribute("entityAccess", "append,overwrite");
+                        nCount++;
+                    }
+                }
+
+                if (nCount == 0)
+                {
+                    strError = "当前尚未定义角色为 catalogWork 或 catalogTarget 的图书书目库。创建服务器配置文件失败";
+                    return -1;
+                }
+            }
+
+            string strHnbUrl = "";
+            {
+                XmlElement server = dom.DocumentElement.SelectSingleNode("server[@name='红泥巴.数字平台中心']") as XmlElement;
+                if (server != null)
+                    strHnbUrl = server.GetAttribute("url");
+                // 当前服务器是红泥巴服务器，要删除多余的事项
+                if (string.Compare(this.LibraryServerUrl, strHnbUrl, true) == 0)
+                {
+                    server.ParentNode.RemoveChild(server);
+                }
+            }
+
+            dom.Save(strCfgFileName);
+            return 0;
+        }
+
+        // 获得配置文件的版本号
+        public static double GetServersCfgFileVersion(string strCfgFileName)
+        {
+            if (File.Exists(strCfgFileName) == false)
+                return 0;
+
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.Load(strCfgFileName);
+            }
+            catch (Exception ex)
+            {
+                return 0;
+            }
+
+            if (dom.DocumentElement == null)
+                return 0;
+
+            double version = 0;
+            string strVersion = dom.DocumentElement.GetAttribute("version");
+            if (double.TryParse(strVersion, out version) == false)
+                return 0;
+
+            return version;
+        }
+
+        #endregion // servers.xml
+
+        #region 消息过滤
+
+#if NO
+        public event MessageFilterEventHandler MessageFilter = null;
+
+        // Creates a  message filter.
+        [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.UnmanagedCode)]
+        public class MouseLButtonMessageFilter : IMessageFilter
+        {
+            public MainForm MainForm = null;
+            public bool PreFilterMessage(ref Message m)
+            {
+                // Blocks all the messages relating to the left mouse button. 
+                if (m.Msg >= 513 && m.Msg <= 515)
+                {
+                    if (this.MainForm.MessageFilter != null)
+                    {
+                        MessageFilterEventArgs e = new MessageFilterEventArgs();
+                        e.Message = m;
+                        this.MainForm.MessageFilter(this, e);
+                        m = e.Message;
+                        return e.ReturnValue;
+                    }
+                }
+                return false;
+            }
+        }
+
+#endif
+
+        #endregion
+
+    }
+
+    /// <summary>
+    /// 消息过滤事件
+    /// </summary>
+    /// <param name="sender">发送者</param>
+    /// <param name="e">事件参数</param>
+    public delegate void MessageFilterEventHandler(object sender,
+    MessageFilterEventArgs e);
+
+    /// <summary>
+    /// 消息过滤事件的参数
+    /// </summary>
+    public class MessageFilterEventArgs : EventArgs
+    {
+        public Message Message;  // [in][out]
+        public bool ReturnValue = false;    // true 表示要吞掉这个消息， false 表示不干扰这个消息
     }
 
     [Flags]

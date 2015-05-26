@@ -217,6 +217,10 @@ namespace dp2Circulation
         public IssueEditControl()
         {
             InitializeComponent();
+
+            base.tableLayoutPanel_main = this.tableLayoutPanel_main;
+
+            AddEvents(true);
         }
 
         private void tableLayoutPanel_main_SizeChanged(object sender, EventArgs e)
@@ -521,6 +525,7 @@ namespace dp2Circulation
             this.textBox_issue.Focus();
         }
 
+#if NO
         internal override void ResetColor()
         {
             Color color = this.tableLayoutPanel_main.BackColor;
@@ -536,7 +541,9 @@ namespace dp2Circulation
             this.label_refID_color.BackColor = color;
             this.label_operations_color.BackColor = color;
         }
+#endif
 
+#if NO
         private void textBox_publishTime_TextChanged(object sender, EventArgs e)
         {
             if (m_bInInitial == false)
@@ -633,6 +640,7 @@ namespace dp2Circulation
                 this.Changed = true;
             }
         }
+#endif
 
 #if NO
         /// <summary>
@@ -898,6 +906,7 @@ namespace dp2Circulation
 
         }
 
+#if NO
         private void textBox_operations_TextChanged(object sender, EventArgs e)
         {
             if (m_bInInitial == false)
@@ -906,6 +915,7 @@ namespace dp2Circulation
                 this.Changed = true;
             }
         }
+#endif
 
 #if NO
         delegate void Delegate_filterValue(Control control);

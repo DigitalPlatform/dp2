@@ -498,6 +498,9 @@ strServerUrl);
                 {
                     webClient.CancelAsync();
                     nTimeCount = -1;
+                    this.m_strError = "超时";
+                    this.m_bError = true;
+                    break;  // 2015/5/22
                 }
                 // Application.DoEvents();
                 if (eventComplete.WaitOne(100) == true)

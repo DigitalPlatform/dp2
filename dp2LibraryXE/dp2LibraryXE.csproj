@@ -368,14 +368,19 @@
   </Target>
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.96.0\build\net40\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.96.0\build\net40\System.Data.SQLite.Core.targets')" />
   <PropertyGroup>
-    <PreBuildEvent>CD $(ProjectDir)
+    <PreBuildEvent>CD /D $(ProjectDir)
 CALL copyopac.bat
 CALL copydata.bat
 
+CALL copyinterop.bat</PreBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PostBuildEvent>ECHO copy sqlite.interop.dll to x86 and x64 from bin\debug directory
+CD /D $(ProjectDir)
 MD x86
 xcopy $(TargetDir)x86 x86 /Y
 MD x64
-xcopy $(TargetDir)x64 x64 /Y</PreBuildEvent>
+xcopy $(TargetDir)x64 x64 /Y</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

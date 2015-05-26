@@ -210,6 +210,8 @@
       <DependentUpon>PartialDeniedDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="EntityRegister\AmazonSearch.cs" />
+    <Compile Include="EntityRegister\BiblioAndEntities.cs" />
+    <Compile Include="EntityRegister\EntityRegisterBase.cs" />
     <Compile Include="EntityRegister\EntityRegisterControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -227,6 +229,12 @@
     </Compile>
     <Compile Include="EntityRegister\BiblioRegisterControl.Designer.cs">
       <DependentUpon>BiblioRegisterControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="EntityRegister\EntityRegisterWizard.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EntityRegister\EntityRegisterWizard.Designer.cs">
+      <DependentUpon>EntityRegisterWizard.cs</DependentUpon>
     </Compile>
     <Compile Include="EntityRegister\ImageManager.cs" />
     <Compile Include="EntityRegister\Save\EntitiesControl.cs">
@@ -1334,6 +1342,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="EntityRegister\BiblioRegisterControl.resx">
       <DependentUpon>BiblioRegisterControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EntityRegister\EntityRegisterWizard.resx">
+      <DependentUpon>EntityRegisterWizard.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="EntityRegister\Save\EntitiesControl.resx">
       <DependentUpon>EntitiesControl.cs</DependentUpon>
@@ -3083,8 +3094,12 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>ECHO copy sqlite.interop.dll to x86 and x64 from bin\debug directory
+CD /D $(ProjectDir)
+MD x86
+xcopy $(TargetDir)x86 x86 /Y
+MD x64
+xcopy $(TargetDir)x64 x64 /Y</PostBuildEvent>
   </PropertyGroup>
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
@@ -3096,11 +3111,8 @@
   </Target>
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.96.0\build\net40\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.96.0\build\net40\System.Data.SQLite.Core.targets')" />
   <PropertyGroup>
-    <PreBuildEvent>CD $(ProjectDir)
-MD x86
-xcopy $(TargetDir)x86 x86 /Y
-MD x64
-xcopy $(TargetDir)x64 x64 /Y</PreBuildEvent>
+    <PreBuildEvent>CD /D $(ProjectDir)
+CALL copyinterop.bat</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

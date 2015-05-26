@@ -22,11 +22,20 @@ namespace DigitalPlatform.CommonControl
         [Category("New Event")]
         public event EventHandler DropDown = null;
 
-        //[Category("New Event")]
-        //public new event EventHandler TextChanged = null;
         [Browsable(true)]
         [EditorBrowsable(EditorBrowsableState.Always)]
-        public new event EventHandler TextChanged = null;
+        public new event EventHandler TextChanged
+        {
+            // http://stackoverflow.com/questions/9370448/add-attribute-to-base-event
+            add
+            {
+                base.TextChanged += value;
+            }
+            remove
+            {
+                base.TextChanged -= value;
+            }
+        }
 #if NO
         public new event EventHandler TextChanged
         {
@@ -250,10 +259,12 @@ namespace DigitalPlatform.CommonControl
 
         private void textBox_text_TextChanged(object sender, EventArgs e)
         {
-            // this.OnTextChanged(e);
+            this.OnTextChanged(e);
 
+#if NO
             if (this.TextChanged != null)
                 this.TextChanged(this, e);
+#endif
         }
 
         public void SelectAll()

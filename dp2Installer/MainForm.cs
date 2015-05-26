@@ -8,7 +8,6 @@ using System.Text;
 using System.Windows.Forms;
 using System.ServiceProcess;
 using System.Management;
-using Ionic.Zip;
 using System.IO;
 using System.Web;
 using System.Deployment.Application;
@@ -17,8 +16,10 @@ using System.Threading;
 using System.DirectoryServices;
 using System.Configuration.Install;
 using System.Runtime.InteropServices;
+using System.Xml;
 
 using Microsoft.Win32;
+using Ionic.Zip;
 
 using DigitalPlatform;
 using DigitalPlatform.IO;
@@ -29,7 +30,6 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.rms;
 using DigitalPlatform.OPAC;
 using DigitalPlatform.CirculationClient;
-using System.Xml;
 using DigitalPlatform.Xml;
 using DigitalPlatform.CommonControl;
 
@@ -71,7 +71,7 @@ namespace dp2Installer
             InitializeComponent();
 
             {
-                _floatingMessage = new FloatingMessageForm();
+                _floatingMessage = new FloatingMessageForm(this);
                 _floatingMessage.AutoHide = false;
                 _floatingMessage.Font = new System.Drawing.Font(this.Font.FontFamily, this.Font.Size * 2, FontStyle.Bold);
                 _floatingMessage.Opacity = 0.7;
@@ -161,8 +161,6 @@ FormWindowState.Normal);
 
             this.TempDir = Path.Combine(this.UserDir, "temp");
             PathUtil.CreateDirIfNeed(this.TempDir);
-
-
 
             _versionManager.Load(Path.Combine(this.UserDir, "file_version.xml"));
 
@@ -321,8 +319,6 @@ FormWindowState.Normal);
 
         #endregion
 
-
-
         private void button_uninstall_dp2library_Click(object sender, EventArgs e)
         {
             System.ServiceProcess.ServiceInstaller installer = new System.ServiceProcess.ServiceInstaller();
@@ -430,7 +426,7 @@ FormWindowState.Normal);
             string strError = "";
             int nRet = 0;
 
-            this._floatingMessage.Text = "正在升级 dp2library ...";
+            this._floatingMessage.Text = "正在升级 dp2library - 图书馆应用服务器 ...";
 
             try
             {
@@ -1529,7 +1525,7 @@ MessageBoxDefaultButton.Button2);
             string strError = "";
             int nRet = 0;
 
-            this._floatingMessage.Text = "正在升级 dp2kernel ...";
+            this._floatingMessage.Text = "正在升级 dp2kernel - 数据库内核 ...";
 
             try
             {
@@ -1595,56 +1591,68 @@ MessageBoxDefaultButton.Button2);
         {
             string strError = "";
 
-            string strZipFileName = Path.Combine(this.DataDir, "opac_app.zip");
+            this._floatingMessage.Text = "正在升级 dp2OPAC - 读者公共查询 ...";
 
-            List<OpacAppInfo> infos = null;
-            // 查找 dp2OPAC 路径
-            // return:
-            //      -1  出错
-            //      其他  返回找到的路径个数
-            int nRet = OpacAppInfo.GetOpacInfo(out infos,
-                out strError);
-            if (nRet == -1)
-                goto ERROR1;
-
-            if (infos.Count == 0)
+            try
             {
-                strError = "在本机的 IIS 中没有找到任何名为 dp2OPAC 的虚拟目录";
-                goto ERROR1;
-            }
 
-            AppendSectionTitle("升级 dp2OPAC 开始");
+                string strZipFileName = Path.Combine(this.DataDir, "opac_app.zip");
 
-            foreach (OpacAppInfo info in infos)
-            {
-                if (string.IsNullOrEmpty(info.PhysicalPath) == true)
-                    continue;
-
-                AppendString("*** 更新 IIS 虚拟目录 " + info.IisPath + " 对应的物理目录 " + info.PhysicalPath + " 中的可执行文件 ...\r\n");
-
-                List<string> excludes = new List<string>() { "web.config" };
-                // 更新可执行目录
+                List<OpacAppInfo> infos = null;
+                // 查找 dp2OPAC 路径
                 // return:
                 //      -1  出错
-                //      0   没有必要刷新
-                //      1   已经刷新
-                nRet = RefreshBinFiles(
-                    false,
-    strZipFileName,
-    info.PhysicalPath,
-    excludes,
-    out strError);
+                //      其他  返回找到的路径个数
+                int nRet = OpacAppInfo.GetOpacInfo(out infos,
+                    out strError);
                 if (nRet == -1)
                     goto ERROR1;
+
+                if (infos.Count == 0)
+                {
+                    strError = "在本机的 IIS 中没有找到任何名为 dp2OPAC 的虚拟目录";
+                    goto ERROR1;
+                }
+
+
+                AppendSectionTitle("升级 dp2OPAC 开始");
+
+                foreach (OpacAppInfo info in infos)
+                {
+                    if (string.IsNullOrEmpty(info.PhysicalPath) == true)
+                        continue;
+
+                    AppendString("*** 更新 IIS 虚拟目录 " + info.IisPath + " 对应的物理目录 " + info.PhysicalPath + " 中的可执行文件 ...\r\n");
+
+                    List<string> excludes = new List<string>() { "web.config" };
+                    // 更新可执行目录
+                    // return:
+                    //      -1  出错
+                    //      0   没有必要刷新
+                    //      1   已经刷新
+                    nRet = RefreshBinFiles(
+                        false,
+        strZipFileName,
+        info.PhysicalPath,
+        excludes,
+        out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+                }
+
+                nRet = UpdateOpacStyles(
+                    true,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                AppendSectionTitle("升级 dp2OPAC 结束");
+            }
+            finally
+            {
+                this._floatingMessage.Text = "";
             }
 
-            nRet = UpdateOpacStyles(
-                true,
-                out strError);
-            if (nRet == -1)
-                goto ERROR1;
-
-            AppendSectionTitle("升级 dp2OPAC 结束");
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -2985,7 +2993,7 @@ MessageBoxDefaultButton.Button1);
             string strError = "";
             int nRet = 0;
 
-            this._floatingMessage.Text = "正在安装 dp2kernel ...";
+            this._floatingMessage.Text = "正在安装 dp2kernel - 数据库内核 ...";
 
             try
             {
@@ -3292,7 +3300,7 @@ out string strError)
             string strError = "";
             int nRet = 0;
 
-            this._floatingMessage.Text = "正在安装 dp2library ...";
+            this._floatingMessage.Text = "正在安装 dp2library - 图书馆应用服务器 ...";
             try
             {
 
@@ -3596,7 +3604,7 @@ Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86),
             string strError = "";
             int nRet = 0;
 
-            this._floatingMessage.Text = "正在卸载 dp2kernel ...";
+            this._floatingMessage.Text = "正在卸载 dp2kernel - 数据库内核 ...";
 
             try
             {
@@ -3722,7 +3730,7 @@ MessageBoxDefaultButton.Button2);
                 goto ERROR1;
             }
 
-            this._floatingMessage.Text = "正在安装 dp2OPAC ...";
+            this._floatingMessage.Text = "正在安装 dp2OPAC - 读者公共查询...";
 
             try
             {
@@ -4375,7 +4383,7 @@ DigitalPlatform.CirculationClient.BeforeLoginEventArgs e)
             string strError = "";
             int nRet = 0;
 
-            this._floatingMessage.Text = "正在卸载 dp2library ...";
+            this._floatingMessage.Text = "正在卸载 dp2library - 图书馆应用服务器 ...";
             try
             {
                 AppendSectionTitle("卸载 dp2library 开始");

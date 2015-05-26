@@ -424,7 +424,11 @@ namespace dp2Circulation
         {
             InitializeComponent();
 
+            base.tableLayoutPanel_main = this.tableLayoutPanel_main;
+            AddEvents(true);
+
             SetMouseWheelSimulateEvent();
+
         }
 
         /*public*/ void SetMouseWheelSimulateEvent()
@@ -600,7 +604,7 @@ namespace dp2Circulation
             }
         }
 
-        // 创建 ErrorIndo 标签
+        // 创建 ErrorInfo 标签
         void CreateErrorInfoLabel()
         {
             if (this.label_errorInfo != null)
@@ -653,7 +657,6 @@ namespace dp2Circulation
                 this.tableLayoutPanel_main.AutoScroll = false;
                 this.tableLayoutPanel_main.AutoSize = true;
                 this.tableLayoutPanel_main.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-
 
                 // this.label_barcode.Font = new Font(this.Font.Name, this.Font.Size * 2, FontStyle.Bold);
 
@@ -766,6 +769,30 @@ namespace dp2Circulation
             }
         }
 
+        public void SetAllEditColor(Color backColor, Color foreColor)
+        {
+            for (int i = 0; i < this.tableLayoutPanel_main.RowStyles.Count; i++)
+            {
+                Control control = this.tableLayoutPanel_main.GetControlFromPosition(2, i);
+                if (control != null)
+                {
+                    if (control is TextBox)
+                    {
+                        TextBox textbox = control as TextBox;
+                        if (backColor != Color.Transparent)
+                            textbox.BackColor = backColor;
+                        textbox.ForeColor = foreColor;
+                    }
+                    else
+                    {
+                        control.BackColor = backColor;
+                        control.ForeColor = foreColor;
+                    }
+                }
+            }
+
+        }
+
         /// <summary>
         /// 成员控件的背景色
         /// </summary>
@@ -844,20 +871,42 @@ namespace dp2Circulation
         /// 背景色
         /// </summary>
         [Category("Appearance")]
-        [DescriptionAttribute("Back Color")]
+        [DescriptionAttribute("Background Color")]
         [DefaultValue(typeof(Color), "WhiteSmoke")]
         public new Color BackColor
         {
             get
             {
-                return this.tableLayoutPanel_main.BackColor;
+                return base.BackColor;
+                // return this.tableLayoutPanel_main.BackColor;
             }
             set
             {
-                this.tableLayoutPanel_main.BackColor = value;
+                this.tableLayoutPanel_main.BackColor = Color.Transparent;
+                base.BackColor = value;
             }
         }
 
+        /// <summary>
+        /// 前景色
+        /// </summary>
+        [Category("Appearance")]
+        [DescriptionAttribute("Foreground Color")]
+        [DefaultValue(typeof(Color), "SystemColors.ControlText")]
+        public new Color ForeColor
+        {
+            get
+            {
+                return this.tableLayoutPanel_main.ForeColor;
+            }
+            set
+            {
+                this.tableLayoutPanel_main.ForeColor = value;
+
+                this.MemberForeColor = value;
+                this.SetAllEditColor(this.BackColor, this.ForeColor);
+            }
+        }
 #if NO
         /// <summary>
         /// 内容是否发生过修改
@@ -1185,6 +1234,7 @@ namespace dp2Circulation
             this.comboBox_seller.Focus();
         }
 
+#if NO
         internal override void ResetColor()
         {
             Color color = this.tableLayoutPanel_main.BackColor;
@@ -1215,28 +1265,44 @@ namespace dp2Circulation
             this.label_recPath_color.BackColor = color;
             this.label_refID_color.BackColor = color;
         }
+#endif
 
+#if NO
         private void textBox_barcode_TextChanged(object sender, EventArgs e)
         {
             if (m_bInInitial == false)
             {
-                this.label_barcode_color.BackColor = this.ColorChanged;
+                // this.label_barcode_color.BackColor = this.ColorChanged;
+                Control control = sender as Control;
+                EditLineState state = GetLineState(control);
+
+                if (state == null)
+                    state = new EditLineState();
+
+                if (state.Changed == false)
+                {
+                    state.Changed = true;
+                    SetLineDisplayState(control, state);
+                }
                 this.Changed = true;
             }
         }
+#endif
 
-
-        private void comboBox_state_TextChanged(object sender, EventArgs e)
+        private void checkedComboBox_state_TextChanged(object sender, EventArgs e)
         {
+#if NO
             if (m_bInInitial == false)
             {
                 this.label_state_color.BackColor = this.ColorChanged;
                 this.Changed = true;
             }
+#endif
 
             Global.FilterValueList(this, (Control)sender);
         }
 
+#if NO
         private void textBox_publishTime_TextChanged(object sender, EventArgs e)
         {
             if (m_bInInitial == false)
@@ -1245,6 +1311,8 @@ namespace dp2Circulation
                 this.Changed = true;
             }
         }
+#endif
+
 
         string _previousLocation = "";
 
@@ -1255,11 +1323,13 @@ namespace dp2Circulation
             this.checkedComboBox_state.Items.Clear();
             this.comboBox_bookType.Items.Clear();
 
+#if NO
             if (m_bInInitial == false)
             {
                 this.label_location_color.BackColor = this.ColorChanged;
                 this.Changed = true;
             }
+#endif
 
             // 比较新旧两个值
             if (this.LocationStringChanged != null)
@@ -1273,6 +1343,7 @@ namespace dp2Circulation
             _previousLocation = this.comboBox_location.Text;
         }
 
+#if NO
         private void comboBox_seller_TextChanged(object sender, EventArgs e)
         {
             if (m_bInInitial == false)
@@ -1444,6 +1515,7 @@ namespace dp2Circulation
                 this.Changed = true;
             }
         }
+#endif
 
 #if NO
         /// <summary>
@@ -1973,12 +2045,14 @@ namespace dp2Circulation
             }
         }
 
+#if NO
         private void comboBoxSizeChanged(object sender, EventArgs e)
         {
             if (!(sender is ComboBox))
                 return;
             ((ComboBox)sender).Invalidate();
         }
+#endif
 
         /// <summary>
         /// 承载成员控件的 TableLayoutPanel 对象
@@ -2068,6 +2142,7 @@ namespace dp2Circulation
                 contextMenu.Show(sender as Control, new Point(e.X, e.Y));		
             }
         }
+
 
 #if NO
         class MyTextBox : TextBox
