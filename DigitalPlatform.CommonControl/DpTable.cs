@@ -658,6 +658,9 @@ namespace DigitalPlatform.CommonControl
         {
             base.OnPaint(pe);
 
+            pe.Graphics.SmoothingMode = SmoothingMode.HighQuality;
+            pe.Graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+
             // pe.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             // pe.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
 
@@ -700,7 +703,7 @@ namespace DigitalPlatform.CommonControl
                     pe.Graphics.FillRectangle(brush,
                         xOffset - this.m_documentMargin.Left + 4,
                         yOffset + this.m_lContentHeight - this.ColumnHeight + this.m_documentMargin.Bottom,
-                        this.m_lContentWidth + this.m_documentMargin.Horizontal - 1,
+                        this.m_lContentWidth + this.m_documentMargin.Horizontal -1,
                         4);
                 }
             }

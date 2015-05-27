@@ -18,6 +18,7 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.Marc;
 using DigitalPlatform.Text;
 using System.Diagnostics;
+using dp2Secure;
 
 namespace DigitalPlatform.AmazonInterface
 {
@@ -117,11 +118,7 @@ namespace DigitalPlatform.AmazonInterface
             return 0;
         }
 
-        private const string MY_AWS_ACCESS_KEY_ID = "AKIAIFC2XER5NLNJ64CA";
-        private const string MY_AWS_SECRET_KEY = "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";
         // private const string DESTINATION = "webservices.amazon.cn";  // "ecs.amazonaws.com";
-        private const string ASSOCIATEKEY = "digiplatcorp-20";
-
 
         // 准备用于检索的 URL
         int GetOneLineSearchRequestUrl(
@@ -153,9 +150,9 @@ namespace DigitalPlatform.AmazonInterface
             if (nRet == -1)
                 return -1;
 
-            SignedRequestHelper helper = new SignedRequestHelper(
-MY_AWS_ACCESS_KEY_ID,
-MY_AWS_SECRET_KEY,
+            AmazonSignedRequestHelper helper = new AmazonSignedRequestHelper(
+//MY_AWS_ACCESS_KEY_ID,
+//MY_AWS_SECRET_KEY,
 strServerUrl);
 
             IDictionary<string, string> parameters = new Dictionary<string, String>();
@@ -171,7 +168,9 @@ strServerUrl);
             else
                 parameters["ResponseGroup"] = "Small";
 
+#if TTT
             parameters["AssociateTag"] = ASSOCIATEKEY;
+#endif
 
             m_searchParameters = parameters;
             // m_strCurrentSearchedServer = this.CurrentServer;
@@ -189,9 +188,9 @@ strServerUrl);
             strError = "";
             strUrl = "";
 
-            SignedRequestHelper helper = new SignedRequestHelper(
-MY_AWS_ACCESS_KEY_ID,
-MY_AWS_SECRET_KEY,
+            AmazonSignedRequestHelper helper = new AmazonSignedRequestHelper(
+//MY_AWS_ACCESS_KEY_ID,
+//MY_AWS_SECRET_KEY,
 strServerUrl);
 
             if (this.m_nCurrentPageNo == -1)

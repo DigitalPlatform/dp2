@@ -22,6 +22,7 @@ using System.Collections;
 using System.Xml.Xsl;
 using DigitalPlatform.Marc;
 using DigitalPlatform.CirculationClient;
+using dp2Secure;
 
 namespace dp2Catalog
 {
@@ -704,9 +705,9 @@ MessageBoxDefaultButton.Button1);
                 if (nRet == -1)
                     return -1;
 
-            SignedRequestHelper helper = new SignedRequestHelper(
-MY_AWS_ACCESS_KEY_ID,
-MY_AWS_SECRET_KEY,
+                AmazonSignedRequestHelper helper = new AmazonSignedRequestHelper(
+//MY_AWS_ACCESS_KEY_ID,
+//MY_AWS_SECRET_KEY,
 this.CurrentServer);
 
             // IDictionary<string, string> r1 = this.amazonQueryControl1.ParameterTable;   // new Dictionary<string, String>();
@@ -724,7 +725,9 @@ this.CurrentServer);
             else
                 parameters["ResponseGroup"] = "Small";
 
+#if TTT
             parameters["AssociateTag"] = ASSOCIATEKEY;
+#endif
 
             m_searchParameters = parameters;
             m_strCurrentSearchedServer = this.CurrentServer;
@@ -746,9 +749,9 @@ this.CurrentServer);
                 return -1;
             }
 
-            SignedRequestHelper helper = new SignedRequestHelper(
-MY_AWS_ACCESS_KEY_ID,
-MY_AWS_SECRET_KEY,
+            AmazonSignedRequestHelper helper = new AmazonSignedRequestHelper(
+//MY_AWS_ACCESS_KEY_ID,
+//MY_AWS_SECRET_KEY,
 this.m_strCurrentSearchedServer);    //  this.CurrentServer
 
             if (this.m_nCurrentPageNo == -1)
@@ -774,9 +777,9 @@ this.m_strCurrentSearchedServer);    //  this.CurrentServer
             strError = "";
             strUrl = "";
 
-            SignedRequestHelper helper = new SignedRequestHelper(
-MY_AWS_ACCESS_KEY_ID,
-MY_AWS_SECRET_KEY,
+            AmazonSignedRequestHelper helper = new AmazonSignedRequestHelper(
+//MY_AWS_ACCESS_KEY_ID,
+//MY_AWS_SECRET_KEY,
 this.CurrentServer);
 
             if (items == null || items.Count == 0)
@@ -804,7 +807,10 @@ this.CurrentServer);
                 parameters["ResponseGroup"] = "Large";
             else
                 parameters["ResponseGroup"] = "Small";
+
+#if TTT
             parameters["AssociateTag"] = ASSOCIATEKEY;
+#endif
 
             strUrl = helper.Sign(parameters);
             return 0;
@@ -896,10 +902,7 @@ value);
             }
         }
 
-        private const string MY_AWS_ACCESS_KEY_ID = "AKIAIFC2XER5NLNJ64CA";
-        private const string MY_AWS_SECRET_KEY = "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";
         // private const string DESTINATION = "webservices.amazon.cn";  // "ecs.amazonaws.com";
-        private const string ASSOCIATEKEY = "digiplatcorp-20";
 
         // 简单检索
         private void button_searchSimple_Click(object sender, EventArgs e)
@@ -1124,9 +1127,9 @@ MessageBoxDefaultButton.Button1);
             if (nRet == -1)
                 return -1;
 
-            SignedRequestHelper helper = new SignedRequestHelper(
-MY_AWS_ACCESS_KEY_ID,
-MY_AWS_SECRET_KEY,
+            AmazonSignedRequestHelper helper = new AmazonSignedRequestHelper(
+//MY_AWS_ACCESS_KEY_ID,
+//MY_AWS_SECRET_KEY,
 this.CurrentServer);
 
             IDictionary<string, string> parameters = new Dictionary<string, String>();
@@ -1142,7 +1145,9 @@ this.CurrentServer);
             else
                 parameters["ResponseGroup"] = "Small";
 
+#if TTT
             parameters["AssociateTag"] = ASSOCIATEKEY;
+#endif
 
             m_searchParameters = parameters;
             m_strCurrentSearchedServer = this.CurrentServer;

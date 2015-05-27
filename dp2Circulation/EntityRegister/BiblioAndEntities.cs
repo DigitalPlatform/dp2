@@ -105,7 +105,7 @@ namespace dp2Circulation
                 }
                 DialogResult result = MessageBox.Show(this.Owner,
 "当前"+strParts+"修改后尚未保存。如果此时装入新记录内容，先前的修改将会丢失。\r\n\r\n是否装入新记录?",
-"BiblioRegisterWizard",
+"册登记",
 MessageBoxButtons.YesNo,
 MessageBoxIcon.Question,
 MessageBoxDefaultButton.Button2);
@@ -193,20 +193,35 @@ MessageBoxDefaultButton.Button2);
                     }
 
                     controls.Add(edit);
-                    edit.PaintContent -= new PaintEventHandler(control_PaintContent);
-                    edit.ContentChanged -= new DigitalPlatform.ContentChangedEventHandler(control_ContentChanged);
+
+                    // AddEditEvents(edit, false);
                 }
                 else
                     controls.Add(control);
             }
 
             if (strStyle != "normal")
+            {
+                // 卸载事件
+                foreach (Control control in this.flowLayoutPanel1.Controls)
+                {
+                    if (control is Label)
+                        AddPlusEvents(control as Label, false);
+                    else if (control is EntityEditControl)
+                        AddEditEvents(control as EntityEditControl, false);
+                }
                 this.flowLayoutPanel1.Controls.Clear();
+            }
             else
             {
                 foreach (Control control in controls)
                 {
                     this.flowLayoutPanel1.Controls.Remove(control);
+                    // 卸载事件
+                    if (control is Label)
+                        AddPlusEvents(control as Label, false);
+                    else if (control is EntityEditControl)
+                        AddEditEvents(control as EntityEditControl, false);
                 }
             }
 
@@ -324,10 +339,8 @@ MessageBoxDefaultButton.Button2);
                 this.EntitiesChanged = true;    // 让外界能感知到含有新册事项
             }
 
-            control.PaintContent += new PaintEventHandler(control_PaintContent);
-            control.ContentChanged += new DigitalPlatform.ContentChangedEventHandler(control_ContentChanged);
-            control.GetValueTable += new DigitalPlatform.GetValueTableEventHandler(control_GetValueTable);
-            control.AppendMenu += new ApendMenuEventHandler(control_AppendMenu);
+            AddEditEvents(control, true);
+
 
             // ClearBlank();
 
@@ -367,6 +380,42 @@ MessageBoxDefaultButton.Button2);
             // this.BeginInvoke(new Action<Control>(EnsureVisible), control);
 
             return 0;
+        }
+
+        void AddEditEvents(EntityEditControl edit, bool bAdd)
+        {
+            if (bAdd)
+            {
+                edit.PaintContent += new PaintEventHandler(edit_PaintContent);
+                edit.ContentChanged += new DigitalPlatform.ContentChangedEventHandler(edit_ContentChanged);
+                edit.GetValueTable += new DigitalPlatform.GetValueTableEventHandler(edit_GetValueTable);
+                edit.AppendMenu += new ApendMenuEventHandler(edit_AppendMenu);
+                edit.MouseClick += edit_MouseClick;
+            }
+            else
+            {
+                edit.PaintContent -= new PaintEventHandler(edit_PaintContent);
+                edit.ContentChanged -= new DigitalPlatform.ContentChangedEventHandler(edit_ContentChanged);
+                edit.GetValueTable -= new DigitalPlatform.GetValueTableEventHandler(edit_GetValueTable);
+                edit.AppendMenu -= new ApendMenuEventHandler(edit_AppendMenu);
+                edit.MouseClick -= edit_MouseClick;
+            }
+        }
+
+        void edit_MouseDown(object sender, MouseEventArgs e)
+        {
+
+        }
+
+        void edit_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Left)
+                return;
+
+            Control control = sender as Control;
+
+            if (GuiUtil.PtInRect(e.X, e.Y, GetEditCloseButtonRect(control)) == true)
+                menu_deleteItem_Click(sender, new EventArgs());
         }
 
         // 将加号滚入视野可见范围
@@ -413,8 +462,10 @@ MessageBoxDefaultButton.Button2);
             // 注：edit 控件加入到末尾，不会改变前面已有的 edit 控件显示的序号
         }
 
-        void control_PaintContent(object sender, PaintEventArgs e)
+        void edit_PaintContent(object sender, PaintEventArgs e)
         {
+            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+
             EntityEditControl control = sender as EntityEditControl;
 
             int index = this.flowLayoutPanel1.Controls.IndexOf(control);
@@ -424,12 +475,14 @@ MessageBoxDefaultButton.Button2);
                 if (control.CreateState == ItemDisplayState.New
                     || control.CreateState == ItemDisplayState.Deleted)
                 {
+                    // 几种状态的颜色
                     Color state_color = Color.Transparent;
                     if (control.CreateState == ItemDisplayState.New)
                         state_color = Color.FromArgb(0, 200, 0);
                     else if (control.CreateState == ItemDisplayState.Deleted)
                         state_color = Color.FromArgb(200, 200, 200);
 
+                    // 绘制左上角的三角形
                     using (Brush brushState = new SolidBrush(state_color))
                     {
                         int x0 = 0;
@@ -443,6 +496,7 @@ MessageBoxDefaultButton.Button2);
                     }
                 }
 
+                // 绘制序号
                 using (Font font = new Font(this.Owner.Font.Name, control.Height / 4, FontStyle.Bold, GraphicsUnit.Pixel))
                 {
                     SizeF size = e.Graphics.MeasureString(strText, font);
@@ -454,23 +508,33 @@ MessageBoxDefaultButton.Button2);
 
                     e.Graphics.DrawString(strText, font, brush, start, format);
                 }
+            }
 
-
+            // 绘制关闭按钮
+            {
+                ControlPaint.DrawCaptionButton(e.Graphics, GetEditCloseButtonRect(control), CaptionButton.Close, ButtonState.Flat);
             }
         }
 
-        void control_GetValueTable(object sender, DigitalPlatform.GetValueTableEventArgs e)
+        static Rectangle GetEditCloseButtonRect(Control control)
+        {
+            Size size = new Size(24, 12); // SystemInformation.CaptionButtonSize;
+            // return new Rectangle(control.ClientSize.Width - size.Width, 0, size.Width, size.Height);
+            return new Rectangle(0, 0, size.Width, size.Height);    // 左上角
+        }
+
+        void edit_GetValueTable(object sender, DigitalPlatform.GetValueTableEventArgs e)
         {
             if (this.GetValueTable != null)
                 this.GetValueTable(this, e);    // sender wei
         }
 
-        void control_ContentChanged(object sender, DigitalPlatform.ContentChangedEventArgs e)
+        void edit_ContentChanged(object sender, DigitalPlatform.ContentChangedEventArgs e)
         {
             this._bEntitiesChanged = true;
         }
 
-        void control_AppendMenu(object sender, AppendMenuEventArgs e)
+        void edit_AppendMenu(object sender, AppendMenuEventArgs e)
         {
 
             MenuItem menuItem = null;
@@ -487,13 +551,22 @@ MessageBoxDefaultButton.Button2);
 
         void menu_deleteItem_Click(object sender, EventArgs e)
         {
-            MenuItem menuItem = sender as MenuItem;
+            EntityEditControl control = null;
 
-            EntityEditControl control = menuItem.Tag as EntityEditControl;
+            if (sender is MenuItem)
+            {
+                MenuItem menuItem = sender as MenuItem;
+
+                control = menuItem.Tag as EntityEditControl;
+            }
+            else if (sender is EntityEditControl)
+                control = sender as EntityEditControl;
+            else
+                throw new ArgumentException("sender 必须为 MenuItem 或 EntityEditControl 类型", "sender");
 
             DialogResult result = MessageBox.Show(this.Owner,
 "确实要删除册记录?",
-"BiblioRegisterWizard",
+"册登记",
 MessageBoxButtons.YesNo,
 MessageBoxIcon.Question,
 MessageBoxDefaultButton.Button2);
@@ -529,7 +602,25 @@ MessageBoxDefaultButton.Button2);
             }
 
             int index = this.flowLayoutPanel1.Controls.IndexOf(edit);
+            if (index == -1)
+            {
+                Debug.Assert(false, "");
+                return;
+            }
             this.flowLayoutPanel1.Controls.Remove(edit);
+            AddEditEvents(edit, false);
+
+            // 把删除后顶替被删除对象位置的 Control，滚入可见范围
+            if (index < this.flowLayoutPanel1.Controls.Count)
+            {
+                Control ref_control = this.flowLayoutPanel1.Controls[index];
+                this.flowLayoutPanel1.ScrollControlIntoView(ref_control);
+            }
+            else if (this.flowLayoutPanel1.Controls.Count > 0)
+            {
+                Control ref_control = this.flowLayoutPanel1.Controls[this.flowLayoutPanel1.Controls.Count - 1];
+                this.flowLayoutPanel1.ScrollControlIntoView(ref_control);
+            }
 
             InvalidateEditControls(index);
         }
@@ -1102,6 +1193,7 @@ MessageBoxDefaultButton.Button2);
             return edit.RefID;
         }
 
+#if NO
         // 
         /// <summary>
         /// (如果必要，将)册信息部分显示为空
@@ -1166,6 +1258,7 @@ MessageBoxDefaultButton.Button2);
                 this.AdjustFlowLayoutHeight();
             }
         }
+#endif
 
         public void AddPlus()
         {
@@ -1180,16 +1273,61 @@ MessageBoxDefaultButton.Button2);
             label_plus.Font = new Font(strFontName, this.Owner.Font.Size * 8, FontStyle.Bold);  // 12
             label_plus.ForeColor = this.flowLayoutPanel1.ForeColor;  // SystemColors.GrayText;
 
-            label_plus.AutoSize = true;
+            // label_plus.AutoSize = true;
+            // label_plus.Text = "+";
+            label_plus.Size = new Size(100, 100);
+            label_plus.AutoSize = false;
             label_plus.Margin = new Padding(8, 8, 8, 8);
 
             this.flowLayoutPanel1.Controls.Add(label_plus);
 
-            label_plus.Text = "+";
-            label_plus.MouseClick += label_plus_MouseClick;
-            label_plus.MouseUp += label_plus_MouseUp;
             label_plus.BackColor = ControlPaint.Dark(this.flowLayoutPanel1.BackColor);
             label_plus.TextAlign = ContentAlignment.MiddleCenter;
+
+            AddPlusEvents(label_plus, true);
+        }
+
+        void AddPlusEvents(Label label_plus, bool bAdd)
+        {
+            if (bAdd)
+            {
+                label_plus.MouseClick += label_plus_MouseClick;
+                label_plus.MouseUp += label_plus_MouseUp;
+                label_plus.Paint += label_plus_Paint;
+            }
+            else
+            {
+                label_plus.MouseClick -= label_plus_MouseClick;
+                label_plus.MouseUp -= label_plus_MouseUp;
+                label_plus.Paint += label_plus_Paint;
+            }
+        }
+
+        void label_plus_Paint(object sender, PaintEventArgs e)
+        {
+            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+            // e.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+            Label label = sender as Label;
+            int x_unit = label.Width / 3;
+            int y_unit = label.Height / 3;
+
+            Color darker_color = ControlPaint.Dark(label.ForeColor);
+            // 绘制一个十字形状
+            using (Brush brush = new SolidBrush(label.ForeColor)) 
+            {
+                Rectangle rect = new Rectangle(x_unit, y_unit + y_unit/2 - y_unit / 8, x_unit, y_unit / 4);
+                e.Graphics.FillRectangle(brush, rect);
+                rect = new Rectangle(x_unit + x_unit/2 - x_unit / 8, y_unit, x_unit / 4, y_unit);
+                e.Graphics.FillRectangle(brush, rect);
+            }
+
+            // 绘制一个圆圈
+            using (Pen pen = new Pen(darker_color, x_unit / 8))
+            {
+                Rectangle rect = new Rectangle(x_unit / 2, y_unit / 2, label.Width - x_unit, label.Height - y_unit);
+                e.Graphics.DrawArc(pen, rect, 0, 360);
+            }
+
         }
 
         void label_plus_MouseClick(object sender, MouseEventArgs e)

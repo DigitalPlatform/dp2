@@ -9,6 +9,7 @@ using System.Diagnostics;
 
 using DigitalPlatform;
 using DigitalPlatform.CommonControl;
+using System.ComponentModel;
 
 namespace dp2Circulation
 {
@@ -119,6 +120,7 @@ namespace dp2Circulation
         }
 
         #endregion
+
 
         internal 
             // virtual 
@@ -324,6 +326,17 @@ namespace dp2Circulation
         {
             Debug.Assert(this.tableLayoutPanel_main != null, "");
 
+            if (bAdd)
+            {
+                this.tableLayoutPanel_main.MouseClick += tableLayoutPanel_main_MouseClick;
+                this.tableLayoutPanel_main.MouseDown += tableLayoutPanel_main_MouseDown;
+            }
+            else
+            {
+                this.tableLayoutPanel_main.MouseClick -= tableLayoutPanel_main_MouseClick;
+                this.tableLayoutPanel_main.MouseDown -= tableLayoutPanel_main_MouseDown;
+            }
+
             for (int i = 0; i < this.tableLayoutPanel_main.RowStyles.Count; i++)
             {
                 // 第一列
@@ -396,6 +409,16 @@ namespace dp2Circulation
                 }
             }
 
+        }
+
+        void tableLayoutPanel_main_MouseDown(object sender, MouseEventArgs e)
+        {
+            this.OnMouseDown(e);
+        }
+
+        void tableLayoutPanel_main_MouseClick(object sender, MouseEventArgs e)
+        {
+            this.OnMouseClick(e);
         }
 
         void edit_control_KeyDown(object sender, KeyEventArgs e)

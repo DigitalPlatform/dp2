@@ -84,6 +84,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>packages\DocumentFormat.OpenXml.2.5\lib\DocumentFormat.OpenXml.dll</HintPath>
     </Reference>
+    <Reference Include="dp2Secure">
+      <HintPath>..\dp2Secure.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -429,10 +432,18 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="1_2_840_10003_5_1\dp2catalog_marc_autogen.cs.ref" />
-    <Content Include="1_2_840_10003_5_1\dp2catalog_marc_autogen.cs" />
-    <Content Include="1_2_840_10003_5_10\dp2catalog_marc_autogen.cs.ref" />
-    <Content Include="1_2_840_10003_5_10\dp2catalog_marc_autogen.cs" />
+    <Content Include="1_2_840_10003_5_1\dp2catalog_marc_autogen.cs.ref">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="1_2_840_10003_5_1\dp2catalog_marc_autogen.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="1_2_840_10003_5_10\dp2catalog_marc_autogen.cs.ref">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="1_2_840_10003_5_10\dp2catalog_marc_autogen.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="dp2Catalog_8_TemporaryKey.pfx" />
     <None Include="dp2Catalog_TemporaryKey.pfx" />
     <Content Include="1_2_840_10003_5_10\marc_browse.fltx">
@@ -442,16 +453,23 @@
     <Content Include="1_2_840_10003_5_1\marc_browse.fltx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="1_2_840_10003_5_1\marcdef" />
-    <Content Include="1_2_840_10003_5_10\marcdef" />
-    <Content Include="1_2_840_10003_5_1\marcvaluelist" />
-    <Content Include="1_2_840_10003_5_10\marcvaluelist" />
+    <Content Include="1_2_840_10003_5_1\marcdef">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="1_2_840_10003_5_10\marcdef">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="1_2_840_10003_5_1\marcvaluelist">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="1_2_840_10003_5_10\marcvaluelist">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Amazon\amazon.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>
     <Content Include="Amazon\memo.txt" />
-    <Content Include="Amazon\itemsearch_response.xml" />
     <Content Include="amazon_searchcontrol.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -660,8 +678,12 @@
     <Content Include="dp2Catalog.ico" />
     <Content Include="dtlp_dup.xml" />
     <Content Include="eacc_append.txt" />
-    <Content Include="1_2_840_10003_5_dt1000reader\marcdef" />
-    <Content Include="1_2_840_10003_5_dt1000reader\marcvaluelist" />
+    <Content Include="1_2_840_10003_5_dt1000reader\marcdef">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="1_2_840_10003_5_dt1000reader\marcvaluelist">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="eula.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
