@@ -1903,6 +1903,7 @@ DomUtil.GetElementInnerXml(dom.DocumentElement, "deletedCommentRecords"));
         /// 构造 HTML 片断字符串
         /// </summary>
         /// <param name="strCaption">标题</param>
+        /// <param name="strCaptionClass"></param>
         /// <param name="strValue">内容。本方法对这个字符串不进行 HtmlEncode </param>
         /// <param name="strValueClass">额外添加的 class 名字</param>
         /// <returns>HTML 片断</returns>

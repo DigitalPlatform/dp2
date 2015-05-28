@@ -940,7 +940,6 @@ namespace dp2Circulation
                 strError = "e1 null";
                 return -1;
             }
-            
 
             if (string.IsNullOrEmpty(e1.ErrorInfo) == false)
             {

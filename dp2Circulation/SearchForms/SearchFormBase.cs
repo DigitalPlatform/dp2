@@ -641,6 +641,7 @@ out strError);
         /// 刷新浏览行
         /// </summary>
         /// <param name="items_param">要刷新的 ListViewItem 集合</param>
+        /// <param name="bBeginLoop">是否要调用 stop.BeginLoop() </param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>-1: 出错; 0: 成功</returns>
         public int RefreshListViewLines(List<ListViewItem> items_param,

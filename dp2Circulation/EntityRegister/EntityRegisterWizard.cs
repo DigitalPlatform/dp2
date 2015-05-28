@@ -29,8 +29,10 @@ namespace dp2Circulation
     /// <summary>
     /// 册登记向导窗口。适合初学者使用的册登记窗口
     /// </summary>
-    public partial class EntityRegisterWizard : MyForm
+    public partial class EntityRegisterWizard : MyForm, IBiblioItemsWindow
     {
+        GenerateData _genData = null;
+
         FloatingMessageForm _floatingMessage = null;
 
         EntityRegisterBase _base = new EntityRegisterBase();
@@ -55,7 +57,12 @@ namespace dp2Circulation
             _biblio.DeleteItem += _biblio_DeleteItem;
             _biblio.LoadEntities += _biblio_LoadEntities;
             _biblio.GetDefaultItem += _biblio_GetDefaultItem;
+            _biblio.GenerateData += _biblio_GenerateData;
+        }
 
+        void _biblio_GenerateData(object sender, GenerateDataEventArgs e)
+        {
+            this._genData.AutoGenerate(sender, e, this.BiblioRecPath);
         }
 
         void _biblio_GetDefaultItem(object sender, GetDefaultItemEventArgs e)
@@ -65,6 +72,12 @@ namespace dp2Circulation
 "entityform_optiondlg",
 "quickRegister_default",
 "<root />");
+#if NO
+            string strQuickDefault = this.MainForm.AppInfo.GetString(
+    "entityform_optiondlg",
+    "quickRegister_default",
+    "<root />");
+#endif
         }
 
         void _biblio_LoadEntities(object sender, EventArgs e)
@@ -130,14 +143,15 @@ namespace dp2Circulation
 
         private void EntityRegisterWizard_Load(object sender, EventArgs e)
         {
+            _biblio.MainForm = this.MainForm;
+            _base.MainForm = this.MainForm;
+
             this._originTitle = this.Text;
 
             SetTitle();
             SetButtonState();
 
             LoadServerXml();
-
-            _base.MainForm = this.MainForm;
 
             {
                 _floatingMessage = new FloatingMessageForm(this, true);
@@ -165,6 +179,11 @@ namespace dp2Circulation
             // 缺省值 书目重要字段
             if (string.IsNullOrEmpty(this.textBox_settings_importantFields.Text) == true)
                 this.textBox_settings_importantFields.Text = "010,200,210,215,686,69*,7**".Replace(",", "\r\n");
+
+            this._genData = new GenerateData(this, this);
+            this._genData.ScriptFileName = "dp2circulation_marc_autogen_2.cs";
+            this._genData.DetailHostType = typeof(BiblioItemsHost);
+
         }
 
         void SetControlsColor()
@@ -213,6 +232,11 @@ namespace dp2Circulation
 
         private void EntityRegisterWizard_FormClosed(object sender, FormClosedEventArgs e)
         {
+            if (this._genData != null)
+            {
+                this._genData.Close();
+            }
+
             if (this.MainForm != null)
             {
                 this.MainForm.AppInfo.SetString("entityRegisterWizard", "uistate", this.UiState);
@@ -224,6 +248,49 @@ namespace dp2Circulation
             if (_floatingMessage != null)
                 _floatingMessage.Close();
         }
+
+        #region IBiblioItemsWindow 接口要求
+
+        public string GetMarc()
+        {
+            if (this._biblio != null)
+                return this._biblio.GetMarc();
+            return null;
+        }
+
+        public void SetMarc(string strMARC)
+        {
+            if (this._biblio != null)
+                this._biblio.SetMarc(strMARC);
+        }
+
+        public string MarcSyntax
+        {
+            get
+            {
+                if (this._biblio != null)
+                    return this._biblio.MarcSyntax;
+                return null;
+            }
+        }
+
+        public string BiblioRecPath
+        {
+            get
+            {
+                return this._biblio.BiblioRecPath;
+            }
+        }
+
+        public Form Form
+        {
+            get
+            {
+                return this;
+            }
+        }
+
+        #endregion
 
         void LoadServerXml()
         {
@@ -1225,6 +1292,24 @@ out string strError)
 
         #endregion
 
+        int SetBiblio(RegisterBiblioInfo info, out string strError)
+        {
+            int nRet = this._biblio.SetBiblio(info, out strError);
+            if (nRet == -1)
+                return -1;
+            {
+                if (this._genData != null
+    && this.MainForm.PanelFixedVisible == true
+    && this._biblio != null)
+                    this._genData.AutoGenerate(this.easyMarcControl1,
+                        new GenerateDataEventArgs(),
+                        this._biblio.BiblioRecPath,
+                        true);
+            }
+
+            return 0;
+        }
+
         private void dpTable_browseLines_DoubleClick(object sender, EventArgs e)
         {
             string strError = "";
@@ -1243,7 +1328,7 @@ out string strError)
                 goto ERROR1;
             }
 
-            int nRet = _biblio.SetBiblio(info, out strError);
+            int nRet = SetBiblio(info, out strError);
             if (nRet == -1)
                 goto ERROR1;
 
@@ -2178,7 +2263,7 @@ int nCount)
             // 如果当前不在书目 page，要自动切换到位
             this.tabControl_main.SelectedTab = this.tabPage_biblioAndItems;
 
-            int nRet = _biblio.SetBiblio(info, out strError);
+            int nRet = SetBiblio(info, out strError);
             if (nRet == -1)
                 goto ERROR1;
 
@@ -2321,6 +2406,76 @@ int nCount)
             {
                 this.dpTable_browseLines_DoubleClick(this, e);
                 return;
+            }
+        }
+
+        private void button_settings_entityDefault_Click(object sender, EventArgs e)
+        {
+            EntityFormOptionDlg dlg = new EntityFormOptionDlg();
+            MainForm.SetControlFont(dlg, this.Font, false);
+            dlg.MainForm = this.MainForm;
+            dlg.DisplayStyle = "quick_entity";
+            dlg.StartPosition = FormStartPosition.CenterScreen;
+            dlg.ShowDialog(this);
+        }
+
+        private void easyMarcControl1_Enter(object sender, EventArgs e)
+        {
+            if (this._genData != null
+                && this.MainForm.PanelFixedVisible == true
+                && this._biblio != null)
+                this._genData.AutoGenerate(this.easyMarcControl1,
+                    new GenerateDataEventArgs(),
+                    this._biblio.BiblioRecPath,
+                    true);
+        }
+
+        private void easyMarcControl1_Leave(object sender, EventArgs e)
+        {
+
+        }
+
+        private void flowLayoutPanel1_Enter(object sender, EventArgs e)
+        {
+#if NO
+            // 找到拥有输入焦点的那个 EntityEditControl
+            foreach(Control control in this.flowLayoutPanel1.Controls)
+            {
+                if (control.ContainsFocus == true
+                    && control is EntityEditControl)
+                {
+                    if (this._genData != null
+                        && this.MainForm.PanelFixedVisible == true
+                        && this._biblio != null)
+                    {
+                        GenerateDataEventArgs e1 = new GenerateDataEventArgs();
+                        e1.FocusedControl = control;
+                        this._genData.AutoGenerate(_biblio, // control,
+                            e1,
+                            this._biblio.BiblioRecPath,
+                            true);
+                    }
+                    return;
+
+                }
+            }
+#endif
+            if (_biblio != null)
+            {
+                EntityEditControl edit = _biblio.GetFocusedEditControl();
+                if (edit != null)
+                {
+                    if (this._genData != null
+        && this.MainForm.PanelFixedVisible == true)
+                    {
+                        GenerateDataEventArgs e1 = new GenerateDataEventArgs();
+                        e1.FocusedControl = edit;
+                        this._genData.AutoGenerate(_biblio, // control,
+                            e1,
+                            this._biblio.BiblioRecPath,
+                            true);
+                    }
+                }
             }
         }
 

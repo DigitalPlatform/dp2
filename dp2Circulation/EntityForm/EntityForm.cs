@@ -37,6 +37,8 @@ namespace dp2Circulation
     /// </summary>
     public partial class EntityForm : MyForm
     {
+        GenerateData _genData = null;
+
         // 模板界面的内容版本号
         int _templateVersion = 0;
 
@@ -52,8 +54,6 @@ namespace dp2Circulation
         XmlDocument domXmlFragment = null;
 
         VerifyViewerForm m_verifyViewer = null;
-
-        GenerateDataForm m_genDataViewer = null;
 
         List<PendingLoadRequest> m_listPendingLoadRequest = new List<PendingLoadRequest>();
 
@@ -234,9 +234,10 @@ namespace dp2Circulation
 
                 // 显示Ctrl+A菜单
                 if (this.MainForm.PanelFixedVisible == true)
-                    this.AutoGenerate(this.m_marcEditor,
+                    this._genData.AutoGenerate(this.m_marcEditor,
                         new GenerateDataEventArgs(),
-                    true);
+                        this.BiblioRecPath,
+                        true);
             }
         }
 
@@ -455,6 +456,10 @@ namespace dp2Circulation
             {
                 MainForm.SetControlFont(this, this.MainForm.DefaultFont);
             }
+
+            // 2015/5/27
+            this._genData = new GenerateData(this, null);
+            this._genData.SynchronizeMarcEvent += _genData_SynchronizeMarcEvent;
 
             // m_scriptDomain = AppDomain.CreateDomain("script");
 #if NO
@@ -809,6 +814,11 @@ true);
 
         }
 
+        void _genData_SynchronizeMarcEvent(object sender, EventArgs e)
+        {
+            this.SynchronizeMarc();
+        }
+
         /// <summary>
         /// 重载 MyForm 类型的 OnMyFormLoad() 函数
         /// </summary>
@@ -817,8 +827,8 @@ true);
             base.OnMyFormLoad();
 
             // 2013/6/23 移动到这里
-            this.Channel.AfterLogin -= new AfterLoginEventHandle(Channel_AfterLogin);
-            this.Channel.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
+            this.Channel.AfterLogin -= new AfterLoginEventHandle(__Channel_AfterLogin);
+            this.Channel.AfterLogin += new AfterLoginEventHandle(__Channel_AfterLogin);
         }
 
         // 添加自由词，前半部分工作
@@ -1131,7 +1141,7 @@ true);
 
         void entityControl1_GenerateData(object sender, GenerateDataEventArgs e)
         {
-            this.AutoGenerate(sender, e);
+            this._genData.AutoGenerate(sender, e, this.BiblioRecPath);
         }
 
         /*
@@ -1807,7 +1817,8 @@ true);
             {
                 AfterCreateItemsArgs e1 = new AfterCreateItemsArgs();
                 e1.Case = "accept";
-                form.HostObject.AfterCreateItems(this, e1);
+                // form.HostObject.AfterCreateItems(this, e1);
+                form.HostObject.Invoke("AfterCreateItems", this, e1);
                 if (string.IsNullOrEmpty(e.ErrorInfo) == false)
                 {
                     MessageBox.Show(this, "验收中创建册记录的延续工作(AfterCreateItems)失败: " + strError + "\r\n\r\n但保存操作已经成功");
@@ -2484,17 +2495,14 @@ true);
             if (this.m_commentViewer != null)
                 this.m_commentViewer.Close();
 
-            if (this.m_genDataViewer != null)
-            {
-                m_genDataViewer.TriggerAction -= new TriggerActionEventHandler(m_genDataViewer_TriggerAction);
-                m_genDataViewer.SetMenu -= new RefreshMenuEventHandler(m_genDataViewer_SetMenu);
-                this.m_genDataViewer.Close();
-                this.m_genDataViewer = null;
-            }
-
             if (this.browseWindow != null)
                 this.browseWindow.Close();
 
+            if (this._genData != null)
+            {
+                this._genData.SynchronizeMarcEvent -= _genData_SynchronizeMarcEvent;
+                this._genData.Close();
+            }
 
             // 保存检索途径
             this.MainForm.AppInfo.SetString(
@@ -2581,7 +2589,7 @@ true);
         }
 
 
-        void Channel_AfterLogin(object sender, AfterLoginEventArgs e)
+        void __Channel_AfterLogin(object sender, AfterLoginEventArgs e)
         {
             this.commentControl1.SetLibraryCodeFilter(this.Channel.LibraryCodeList);
         }
@@ -2934,8 +2942,7 @@ true);
                     {
                         // 2012/7/25 移动到这里
                         // 因为 LoadBiblioRecord() 会导致填充AutoGen菜单
-                        if (this.m_genDataViewer != null)
-                            this.m_genDataViewer.Clear();
+                        this._genData.ClearViewer();
 
                         if (this.m_commentViewer != null)
                             this.m_commentViewer.Clear();
@@ -4880,8 +4887,9 @@ true);
                 case WM_FILL_MARCEDITOR_SCRIPT_MENU:
                     // 显示Ctrl+A菜单
                     if (this.MainForm.PanelFixedVisible == true)
-                        this.AutoGenerate(this.m_marcEditor,
+                        this._genData.AutoGenerate(this.m_marcEditor,
                             new GenerateDataEventArgs(),
+                            this.BiblioRecPath,
                             true);
                     return;
                 case WM_VERIFY_DATA:
@@ -5775,8 +5783,8 @@ true);
             if (this.m_verifyViewer != null)
                 this.m_verifyViewer.Clear();
 
-            if (this.m_genDataViewer != null)
-                this.m_genDataViewer.Clear();
+            if (this._genData != null)
+                this._genData.ClearViewer();
 
             if (this.m_commentViewer != null)
                 this.m_commentViewer.Clear();
@@ -6300,14 +6308,15 @@ true);
                     //      -1  error
                     //      0   没有重新初始化Assembly，而是直接用以前Cache的Assembly
                     //      1   重新(或者首次)初始化了Assembly
-                    nRet = InitialAutogenAssembly(strTargetBiblioRecPath,
+                    nRet = this._genData.InitialAutogenAssembly(strTargetBiblioRecPath,
                         out strError);
                     if (nRet == -1)
                         return -1;
-                    if (this.m_detailHostObj != null)
+                    if (this._genData.DetailHostObj != null)
                     {
                         BeforeSaveRecordEventArgs e = new BeforeSaveRecordEventArgs();
-                        this.m_detailHostObj.BeforeSaveRecord(this.m_marcEditor, e);
+                        // this._genData.DetailHostObj.BeforeSaveRecord(this.m_marcEditor, e);
+                        this._genData.DetailHostObj.Invoke("BeforeSaveRecord", this.m_marcEditor, e);
                         if (string.IsNullOrEmpty(e.ErrorInfo) == false)
                         {
                             MessageBox.Show(this, "保存前的准备工作失败: " + e.ErrorInfo + "\r\n\r\n但保存操作仍将继续");
@@ -6389,7 +6398,7 @@ true);
         /// <summary>
         /// 获得脚本对象
         /// </summary>
-        public DetailHost HostObject
+        public IDetailHost HostObject
         {
             get
             {
@@ -6399,13 +6408,13 @@ true);
                 //      -1  error
                 //      0   没有重新初始化Assembly，而是直接用以前Cache的Assembly
                 //      1   重新(或者首次)初始化了Assembly
-                int nRet = InitialAutogenAssembly(null,
+                int nRet = this._genData.InitialAutogenAssembly(this.BiblioRecPath, // null,
                     out strError);
                 /*
                 if (nRet == -1)
                     throw new Exception(strError);
                  * */
-                return this.m_detailHostObj;
+                return this._genData.DetailHostObj;
             }
         }
 
@@ -6505,14 +6514,15 @@ MessageBoxDefaultButton.Button2);
                 //      -1  error
                 //      0   没有重新初始化Assembly，而是直接用以前Cache的Assembly
                 //      1   重新(或者首次)初始化了Assembly
-                nRet = InitialAutogenAssembly(strTargetPath,
+                nRet = this._genData.InitialAutogenAssembly(strTargetPath,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
-                if (this.m_detailHostObj != null)
+                if (this._genData.DetailHostObj != null)
                 {
                     BeforeSaveRecordEventArgs e = new BeforeSaveRecordEventArgs();
-                    this.m_detailHostObj.BeforeSaveRecord(this.m_marcEditor, e);
+                    // this._genData.DetailHostObj.BeforeSaveRecord(this.m_marcEditor, e);
+                    this._genData.DetailHostObj.Invoke("BeforeSaveRecord", this.m_marcEditor, e);
                     if (string.IsNullOrEmpty(e.ErrorInfo) == false)
                     {
                         MessageBox.Show(this, "保存前的准备工作失败: " + e.ErrorInfo + "\r\n\r\n但保存操作仍将继续");
@@ -7044,217 +7054,6 @@ MessageBoxDefaultButton.Button2);
             return -1;
         }
 
-        // 包装版本
-                // 获得配置文件
-        // parameters:
-        //      
-        // return:
-        //      -1  error
-        //      0   not found
-        //      1   found
-        int GetCfgFileContent(string strBiblioDbName,
-            string strCfgFileName,
-            out string strContent,
-            out byte[] baOutputTimestamp,
-            out string strError)
-        {
-            return GetCfgFileContent(strBiblioDbName + "/cfgs/" + strCfgFileName,
-            out strContent,
-            out baOutputTimestamp,
-            out strError);
-        }
-
-        int m_nInGetCfgFile = 0;    // 防止GetCfgFile()函数重入 2008/3/6 new add
-
-        // 获得配置文件
-        // parameters:
-        //      
-        // return:
-        //      -1  error
-        //      0   not found
-        //      1   found
-        int GetCfgFileContent(string strCfgFilePath,
-            out string strContent,
-            out byte [] baOutputTimestamp,
-            out string strError)
-        {
-            baOutputTimestamp = null;
-            strError = "";
-            strContent = "";
-
-            if (m_nInGetCfgFile > 0)
-            {
-                strError = "GetCfgFile() 重入了";
-                return -1;
-            }
-
-
-            Progress.OnStop += new StopEventHandler(this.DoStop);
-            Progress.Initial("正在下载配置文件 ...");
-            Progress.BeginLoop();
-
-            m_nInGetCfgFile++;
-            
-            try
-            {
-                Progress.SetMessage("正在下载配置文件 " + strCfgFilePath + " ...");
-                string strMetaData = "";
-                string strOutputPath = "";
-
-                string strStyle = "content,data,metadata,timestamp,outputpath";
-
-                long lRet = Channel.GetRes(Progress,
-                    MainForm.cfgCache,
-                    strCfgFilePath,
-                    strStyle,
-                    null,
-                    out strContent,
-                    out strMetaData,
-                    out baOutputTimestamp,
-                    out strOutputPath,
-                    out strError);
-                if (lRet == -1)
-                {
-                    if (Channel.ErrorCode == ErrorCode.NotFound)
-                        return 0;
-
-                    goto ERROR1;
-                }
-            }
-            finally
-            {
-                Progress.EndLoop();
-                Progress.OnStop -= new StopEventHandler(this.DoStop);
-                Progress.Initial("");
-
-                m_nInGetCfgFile--;
-            }
-
-            return 1;
-        ERROR1:
-            return -1;
-        }
-
-        // 获得配置文件
-        // parameters:
-        //      
-        // return:
-        //      -1  error
-        //      0   not found
-        //      1   found
-        int GetCfgFile(string strBiblioDbName,
-            string strCfgFileName,
-            out string strOutputFilename,
-            out byte[] baOutputTimestamp,
-            out string strError)
-        {
-            baOutputTimestamp = null;
-            strError = "";
-            strOutputFilename = "";
-
-            if (m_nInGetCfgFile > 0)
-            {
-                strError = "GetCfgFile() 重入了";
-                return -1;
-            }
-
-            Progress.OnStop += new StopEventHandler(this.DoStop);
-            Progress.Initial("正在下载配置文件 ...");
-            Progress.BeginLoop();
-
-            m_nInGetCfgFile++;
-
-            try
-            {
-                string strPath = strBiblioDbName + "/cfgs/" + strCfgFileName;
-
-                Progress.SetMessage("正在下载配置文件 " + strPath + " ...");
-                string strMetaData = "";
-                string strOutputPath = "";
-
-                string strStyle = "content,data,metadata,timestamp,outputpath";
-
-                long lRet = Channel.GetResLocalFile(Progress,
-                    MainForm.cfgCache,
-                    strPath,
-                    strStyle,
-                    out strOutputFilename,
-                    out strMetaData,
-                    out baOutputTimestamp,
-                    out strOutputPath,
-                    out strError);
-                if (lRet == -1)
-                {
-                    if (Channel.ErrorCode == ErrorCode.NotFound)
-                        return 0;
-
-                    goto ERROR1;
-                }
-
-            }
-            finally
-            {
-                Progress.EndLoop();
-                Progress.OnStop -= new StopEventHandler(this.DoStop);
-                Progress.Initial("");
-
-                m_nInGetCfgFile--;
-            }
-
-            return 1;
-        ERROR1:
-            return -1;
-        }
-
-
-        // 保存配置文件
-        int SaveCfgFile(string strBiblioDbName,
-            string strCfgFileName,
-            string strContent,
-            byte [] baTimestamp,
-            out string strError)
-        {
-            strError = "";
-
-            Progress.OnStop += new StopEventHandler(this.DoStop);
-            Progress.Initial("正在保存配置文件 ...");
-            Progress.BeginLoop();
-
-            try
-            {
-                string strPath = strBiblioDbName + "/cfgs/" + strCfgFileName;
-
-                Progress.SetMessage("正在保存配置文件 " + strPath + " ...");
-
-                byte [] output_timestamp = null;
-                string strOutputPath = "";
-
-                long lRet = Channel.WriteRes(
-                    Progress,
-                    strPath,
-                    strContent,
-                    true,
-                    "",	// style
-                    baTimestamp,
-                    out output_timestamp,
-                    out strOutputPath,
-                    out strError);
-                if (lRet == -1)
-                    goto ERROR1;
-
-            }
-            finally
-            {
-                Progress.EndLoop();
-                Progress.OnStop -= new StopEventHandler(this.DoStop);
-                Progress.Initial("");
-            }
-
-            return 1;
-        ERROR1:
-            return -1;
-        }
-
         // 保存XML格式的书目记录到数据库
         // parameters:
         //      bResave 是否为删除后重新保存的模式。在这种模式下，使用 strAction == "new"
@@ -7697,7 +7496,7 @@ MessageBoxDefaultButton.Button1);
 
         private void MarcEditor_GenerateData(object sender, GenerateDataEventArgs e)
         {
-            this.AutoGenerate(sender, e);
+            this._genData.AutoGenerate(sender, e, this.BiblioRecPath);
         }
 
         private void MarcEditor_VerifyData(object sender, GenerateDataEventArgs e)
@@ -7845,8 +7644,6 @@ MessageBoxDefaultButton.Button1);
             }
             else
             {
-
-
                 VerifyFilterDocument filter = null;
 
                 nRet = this.PrepareMarcFilter(
@@ -7869,7 +7666,6 @@ MessageBoxDefaultButton.Button1);
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
-
                 }
                 catch (Exception ex)
                 {
@@ -8120,712 +7916,6 @@ MessageBoxDefaultButton.Button1);
             return -1;
         }
 
-        #region 最新的创建数据脚本功能
-
-        Assembly m_autogenDataAssembly = null;
-        string m_strAutogenDataCfgFilename = "";    // 自动创建数据的.cs文件路径，全路径，包括库名部分
-        object m_autogenSender = null;
-        DetailHost m_detailHostObj = null;
-
-        // 是否为新的风格
-        bool AutoGenNewStyle
-        {
-            get
-            {
-                if (this.m_detailHostObj == null)
-                    return false;
-
-                if (this.m_detailHostObj.GetType().GetMethod("CreateMenu") != null)
-                    return true;
-                return false;
-            }
-        }
-
-        // 初始化 dp2circulation_marc_autogen.cs 的 Assembly，并new DetailHost对象
-        // return:
-        //      -1  error
-        //      0   没有重新初始化Assembly，而是直接用以前Cache的Assembly
-        //      1   重新(或者首次)初始化了Assembly
-        /*public*/ int InitialAutogenAssembly(
-            string strBiblioRecPath,
-            out string strError)
-        {
-            strError = "";
-            int nRet = 0;
-
-            // 2014/7/14
-            if (string.IsNullOrEmpty(strBiblioRecPath) == true)
-                strBiblioRecPath = this.BiblioRecPath;
-
-            // 库名部分路径
-            string strBiblioDbName = Global.GetDbName(strBiblioRecPath);
-
-            if (string.IsNullOrEmpty(strBiblioDbName) == true)
-                return 0;
-
-            string strAutogenDataCfgFilename = strBiblioDbName + "/cfgs/" + "dp2circulation_marc_autogen.cs";
-
-            bool bAssemblyReloaded = false;
-
-            // 如果必要，重新准备Assembly
-            if (m_autogenDataAssembly == null
-                || m_strAutogenDataCfgFilename != strAutogenDataCfgFilename)
-            {
-                this.m_autogenDataAssembly = this.MainForm.AssemblyCache.FindObject(strAutogenDataCfgFilename);
-                this.m_detailHostObj = null;
-
-                // 如果Cache中没有现成的Assembly
-                if (this.m_autogenDataAssembly == null)
-                {
-                    string strCode = "";
-                    string strRef = "";
-
-                    byte[] baCfgOutputTimestamp = null;
-                    // return:
-                    //      -1  error
-                    //      0   not found
-                    //      1   found
-                    nRet = GetCfgFileContent(strAutogenDataCfgFilename,
-                        out strCode,
-                        out baCfgOutputTimestamp,
-                        out strError);
-                    if (nRet == -1 || nRet == 0)
-                        goto ERROR1;
-
-                    string strCfgFilePath = strBiblioDbName + "/cfgs/" + "dp2circulation_marc_autogen.cs.ref";
-                    nRet = GetCfgFileContent(strCfgFilePath,
-                        out strRef,
-                        out baCfgOutputTimestamp,
-                        out strError);
-                    if (nRet == -1 || nRet == 0)
-                        goto ERROR1;
-
-                    try
-                    {
-                        // 准备Assembly
-                        Assembly assembly = null;
-                        nRet = GetCsScriptAssembly(
-                            strCode,
-                            strRef,
-                            out assembly,
-                            out strError);
-                        if (nRet == -1)
-                        {
-                            strError = "编译脚本文件 '" + strAutogenDataCfgFilename + "' 时出错：" + strError;
-                            goto ERROR1;
-                        }
-                        // 记忆到缓存
-                        this.MainForm.AssemblyCache.SetObject(strAutogenDataCfgFilename, assembly);
-
-                        this.m_autogenDataAssembly = assembly;
-
-                        bAssemblyReloaded = true;
-                    }
-                    catch (Exception ex)
-                    {
-                        strError = "准备脚本代码过程中发生异常: \r\n" + ExceptionUtil.GetDebugText(ex);
-                        goto ERROR1;
-                    }
-                }
-
-                bAssemblyReloaded = true;
-
-                m_strAutogenDataCfgFilename = strAutogenDataCfgFilename;
-
-                // 至此，Assembly已经纯备好了
-                Debug.Assert(this.m_autogenDataAssembly != null, "");
-            }
-
-            Debug.Assert(this.m_autogenDataAssembly != null, "");
-
-            // 准备 host 对象
-            if (this.m_detailHostObj == null
-                || bAssemblyReloaded == true)
-            {
-                try
-                {
-                    DetailHost host = null;
-                    nRet = NewHostObject(
-                        out host,
-                        out strError);
-                    if (nRet == -1)
-                    {
-                        strError = "执行脚本文件 '" + m_strAutogenDataCfgFilename + "' 时出错：" + strError;
-                        goto ERROR1;
-                    }
-                    this.m_detailHostObj = host;
-
-                }
-                catch (Exception ex)
-                {
-                    strError = "准备脚本代码过程中发生异常: \r\n" + ExceptionUtil.GetDebugText(ex);
-                    goto ERROR1;
-                }
-            }
-
-            Debug.Assert(this.m_detailHostObj != null, "");
-
-            if (bAssemblyReloaded == true)
-                return 1;
-            return 0;
-        ERROR1:
-            return -1;
-        }
-
-        int m_nInFillMenu = 0;
-
-        // 自动加工数据
-        // parameters:
-        //      sender    从何处启动? MarcEditor EntityEditForm BindingForm
-        /*public*/ void AutoGenerate(object sender,
-            GenerateDataEventArgs e,
-            bool bOnlyFillMenu = false)
-        {
-            int nRet = 0;
-            string strError = "";
-            bool bAssemblyReloaded = false;
-
-            // 防止重入
-            if (bOnlyFillMenu == true && this.m_nInFillMenu > 0)
-                return;
-
-            this.m_nInFillMenu++;
-            try
-            {
-
-                // 初始化 dp2circulation_marc_autogen.cs 的 Assembly，并new DetailHost对象
-                // return:
-                //      -1  error
-                //      0   没有重新初始化Assembly，而是直接用以前Cache的Assembly
-                //      1   重新(或者首次)初始化了Assembly
-                nRet = InitialAutogenAssembly(null,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-                if (nRet == 0)
-                {
-                    if (this.m_detailHostObj == null)
-                        return; // 库名不具备，无法初始化
-                }
-                if (nRet == 1)
-                    bAssemblyReloaded = true;
-
-                Debug.Assert(this.m_detailHostObj != null, "");
-
-                if (this.AutoGenNewStyle == true)
-                {
-                    bool bDisplayWindow = this.MainForm.PanelFixedVisible == false ? true : false;
-                    if (bDisplayWindow == true)
-                    {
-                        if (String.IsNullOrEmpty(e.ScriptEntry) != true
-                            && e.ScriptEntry != "Main")
-                            bDisplayWindow = false;
-                    }
-
-                    if (sender is EntityEditForm
-                        && (String.IsNullOrEmpty(e.ScriptEntry) == true
-                            || e.ScriptEntry == "Main"))
-                    {
-                        bDisplayWindow = true;
-                    }
-                    else if (sender is BindingForm
-    && (String.IsNullOrEmpty(e.ScriptEntry) == true
-        || e.ScriptEntry == "Main"))
-                    {
-                        bDisplayWindow = true;
-                    }
-
-                    DisplayAutoGenMenuWindow(bDisplayWindow);   // 可能会改变 .ActionTable以及 .Count
-                    if (bOnlyFillMenu == false)
-                    {
-                        if (this.MainForm.PanelFixedVisible == true)
-                            MainForm.ActivateGenerateDataPage();
-                    }
-
-                    if (this.m_genDataViewer != null)
-                    {
-                        this.m_genDataViewer.sender = sender;
-                        this.m_genDataViewer.e = e;
-                    }
-
-                    // 清除残留菜单事项
-                    if (m_autogenSender != sender
-                        || bAssemblyReloaded == true)
-                    {
-                        if (this.m_genDataViewer != null
-                            && this.m_genDataViewer.Count > 0)
-                            this.m_genDataViewer.Clear();
-                    }
-                }
-                else // 旧的风格
-                {
-                    if (this.m_genDataViewer != null)
-                    {
-                        this.m_genDataViewer.Close();
-                        this.m_genDataViewer = null;
-                    }
-
-                    if (this.Focused == true || this.m_marcEditor.Focused)
-                        this.MainForm.CurrentGenerateDataControl = null;
-
-                    // 如果意图仅仅为填充菜单
-                    if (bOnlyFillMenu == true)
-                        return;
-                }
-
-                try
-                {
-                    // 旧的风格
-                    if (this.AutoGenNewStyle == false)
-                    {
-                        this.m_detailHostObj.Invoke(String.IsNullOrEmpty(e.ScriptEntry) == true ? "Main" : e.ScriptEntry,
-    sender,
-    e);
-                        this.SetSaveAllButtonState(true);
-                        return;
-                    }
-
-                    // 初始化菜单
-                    try
-                    {
-                        if (this.m_genDataViewer != null)
-                        {
-                            // 出现菜单界面
-                            if (this.m_genDataViewer.Count == 0)
-                            {
-                                dynamic o = this.m_detailHostObj;
-                                o.CreateMenu(sender, e);
-
-                                this.m_genDataViewer.Actions = this.m_detailHostObj.ScriptActions;
-                            }
-
-                            // 根据当前插入符位置刷新加亮事项
-                            this.m_genDataViewer.RefreshState();
-                        }
-
-                        if (String.IsNullOrEmpty(e.ScriptEntry) == false)
-                        {
-                            this.m_detailHostObj.Invoke(e.ScriptEntry,
-                                sender,
-                                e);
-                        }
-                        else
-                        {
-                            if (this.MainForm.PanelFixedVisible == true
-                                && bOnlyFillMenu == false
-                                && this.MainForm.CurrentGenerateDataControl != null)
-                            {
-                                TableLayoutPanel table = (TableLayoutPanel)this.MainForm.CurrentGenerateDataControl;
-                                for (int i = 0; i < table.Controls.Count; i++)
-                                {
-                                    Control control = table.Controls[i];
-                                    if (control is DpTable)
-                                    {
-                                        control.Focus();
-                                        break;
-                                    }
-                                }
-
-                            }
-                        }
-                    }
-                    catch (Exception /*ex*/)
-                    {
-                        /*
-                        // 被迫改用旧的风格
-                        this.m_detailHostObj.Invoke(String.IsNullOrEmpty(e.ScriptEntry) == true ? "Main" : e.ScriptEntry,
-        sender,
-        e);
-                        this.SetSaveAllButtonState(true);
-                        return;
-                         * */
-                        throw;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    strError = "执行脚本文件 '" + m_strAutogenDataCfgFilename + "' 过程中发生异常: \r\n" + ExceptionUtil.GetDebugText(ex);
-                    goto ERROR1;
-                }
-
-                this.m_autogenSender = sender;  // 记忆最近一次的调用发起者
-
-                if (bOnlyFillMenu == false
-                    && this.m_genDataViewer != null)
-                    this.m_genDataViewer.TryAutoRun();
-                return;
-            ERROR1:
-                MessageBox.Show(this, strError);
-            }
-            finally
-            {
-                this.m_nInFillMenu--;
-            }
-        }
-
-        void DisplayAutoGenMenuWindow(bool bOpenWindow)
-        {
-            // string strError = "";
-
-
-            // 优化，避免无谓地进行服务器调用
-            if (bOpenWindow == false)
-            {
-                if (this.MainForm.PanelFixedVisible == false
-                    && (m_genDataViewer == null || m_genDataViewer.Visible == false))
-                    return;
-            }
-
-
-            if (this.m_genDataViewer == null
-                || (bOpenWindow == true && this.m_genDataViewer.Visible == false))
-            {
-                m_genDataViewer = new GenerateDataForm();
-
-                m_genDataViewer.AutoRun = this.MainForm.AppInfo.GetBoolean("detailform", "gen_auto_run", false);
-                // MainForm.SetControlFont(m_genDataViewer, this.Font, false);
-
-                {	// 恢复列宽度
-
-                    string strWidths = this.MainForm.AppInfo.GetString(
-                                   "gen_data_dlg",
-                                    "column_width",
-                                   "");
-                    if (String.IsNullOrEmpty(strWidths) == false)
-                    {
-                        DpTable.SetColumnHeaderWidth(m_genDataViewer.ActionTable,
-                            strWidths,
-                            true);
-                    }
-                }
-
-                // m_genDataViewer.MainForm = this.MainForm;  // 必须是第一句
-                m_genDataViewer.Text = "创建数据";
-
-                m_genDataViewer.DoDockEvent -= new DoDockEventHandler(m_genDataViewer_DoDockEvent);
-                m_genDataViewer.DoDockEvent += new DoDockEventHandler(m_genDataViewer_DoDockEvent);
-
-                m_genDataViewer.SetMenu -= new RefreshMenuEventHandler(m_genDataViewer_SetMenu);
-                m_genDataViewer.SetMenu += new RefreshMenuEventHandler(m_genDataViewer_SetMenu);
-
-                m_genDataViewer.TriggerAction -= new TriggerActionEventHandler(m_genDataViewer_TriggerAction);
-                m_genDataViewer.TriggerAction += new TriggerActionEventHandler(m_genDataViewer_TriggerAction);
-
-                m_genDataViewer.MyFormClosed -= new EventHandler(m_genDataViewer_MyFormClosed);
-                m_genDataViewer.MyFormClosed += new EventHandler(m_genDataViewer_MyFormClosed);
-
-                m_genDataViewer.FormClosed -= new FormClosedEventHandler(m_genDataViewer_FormClosed);
-                m_genDataViewer.FormClosed += new FormClosedEventHandler(m_genDataViewer_FormClosed);
-
-
-            }
-
-            if (bOpenWindow == true)
-            {
-                if (m_genDataViewer.Visible == false)
-                {
-                    this.MainForm.AppInfo.LinkFormState(m_genDataViewer, "autogen_viewer_state");
-                    m_genDataViewer.Show(this);
-                    m_genDataViewer.Activate();
-
-                    this.MainForm.CurrentGenerateDataControl = null;
-                }
-                else
-                {
-                    if (m_genDataViewer.WindowState == FormWindowState.Minimized)
-                        m_genDataViewer.WindowState = FormWindowState.Normal;
-                    m_genDataViewer.Activate();
-                }
-            }
-            else
-            {
-                if (m_genDataViewer.Visible == true)
-                {
-
-                }
-                else
-                {
-                    if (this.MainForm.CurrentGenerateDataControl != m_genDataViewer.Table)
-                        m_genDataViewer.DoDock(false); // 不会自动显示FixedPanel
-                }
-            }
-
-            if (this.m_genDataViewer != null)
-                this.m_genDataViewer.CloseWhenComplete = bOpenWindow;
-
-            return;
-            /*
-        ERROR1:
-            MessageBox.Show(this, "DisplayAutoGenMenu() 出错: " + strError);
-             * */
-        }
-
-        void m_genDataViewer_DoDockEvent(object sender, DoDockEventArgs e)
-        {
-            if (this.MainForm.CurrentGenerateDataControl != m_genDataViewer.Table)
-                this.MainForm.CurrentGenerateDataControl = m_genDataViewer.Table;
-
-            if (e.ShowFixedPanel == true
-                && this.MainForm.PanelFixedVisible == false)
-                this.MainForm.PanelFixedVisible = true;
-
-            /*
-            this.MainForm.AppInfo.SetBoolean("detailform", "gen_auto_run", m_genDataViewer.AutoRun);
-
-            {	// 保存列宽度
-                string strWidths = DpTable.GetColumnWidthListString(m_genDataViewer.ActionTable);
-                this.MainForm.AppInfo.SetString(
-                    "gen_data_dlg",
-                    "column_width",
-                    strWidths);
-            }
-             * */
-
-            m_genDataViewer.Docked = true;
-            m_genDataViewer.Visible = false;
-        }
-
-        void m_genDataViewer_SetMenu(object sender, RefreshMenuEventArgs e)
-        {
-            if (e.Actions == null || this.m_detailHostObj == null)
-                return;
-
-            Type classType = m_detailHostObj.GetType();
-            
-            foreach (ScriptAction action in e.Actions)
-            {
-                string strFuncName = action.ScriptEntry + "_setMenu";
-                if (string.IsNullOrEmpty(strFuncName) == true)
-                    continue;
-
-                DigitalPlatform.Script.SetMenuEventArgs e1 = new DigitalPlatform.Script.SetMenuEventArgs();
-                e1.Action = action;
-                e1.sender = e.sender;
-                e1.e = e.e;
-
-                classType = m_detailHostObj.GetType();
-                while (classType != null)
-                {
-                    try
-                    {
-                        // 有两个参数的成员函数
-                        classType.InvokeMember(strFuncName,
-                            BindingFlags.DeclaredOnly |
-                            BindingFlags.Public | BindingFlags.NonPublic |
-                            BindingFlags.Instance | BindingFlags.InvokeMethod
-                            ,
-                            null,
-                            this.m_detailHostObj,
-                            new object[] { sender, e1 });
-                        break;
-                    }
-                    catch (System.MissingMethodException/*ex*/)
-                    {
-                        classType = classType.BaseType;
-                        if (classType == null)
-                            break;
-                    }
-                }
-            }
-        }
-
-        void m_genDataViewer_TriggerAction(object sender, TriggerActionArgs e)
-        {
-            if (this.m_detailHostObj != null)
-            {
-                if (this.IsDisposed == true)
-                {
-                    if (this.m_genDataViewer != null)
-                    {
-                        this.m_genDataViewer.Clear();
-                        this.m_genDataViewer.Close();
-                        this.m_genDataViewer = null;
-                        return;
-                    }
-                }
-                if (String.IsNullOrEmpty(e.EntryName) == false)
-                {
-                    this.SynchronizeMarc();
-
-                    this.m_detailHostObj.Invoke(e.EntryName,
-                        e.sender,
-                        e.e);
-
-                    if (this.tabControl_biblioInfo.SelectedTab == this.tabPage_template)
-                        this.SynchronizeMarc();
-                }
-
-                if (this.m_genDataViewer != null)
-                    this.m_genDataViewer.RefreshState();
-
-
-            }
-        }
-
-        void m_genDataViewer_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            if (m_genDataViewer != null)
-            {
-                this.MainForm.AppInfo.SetBoolean("detailform", "gen_auto_run", m_genDataViewer.AutoRun);
-
-                {	// 保存列宽度
-                    string strWidths = DpTable.GetColumnWidthListString(m_genDataViewer.ActionTable);
-                    this.MainForm.AppInfo.SetString(
-                        "gen_data_dlg",
-                        "column_width",
-                        strWidths);
-                }
-
-                this.MainForm.AppInfo.UnlinkFormState(m_genDataViewer);
-                this.m_genDataViewer = null;
-            }
-        }
-
-        void m_genDataViewer_MyFormClosed(object sender, EventArgs e)
-        {
-            if (m_genDataViewer != null)
-            {
-                this.MainForm.AppInfo.SetBoolean("detailform", "gen_auto_run", m_genDataViewer.AutoRun);
-
-                {	// 保存列宽度
-                    string strWidths = DpTable.GetColumnWidthListString(m_genDataViewer.ActionTable);
-                    this.MainForm.AppInfo.SetString(
-                        "gen_data_dlg",
-                        "column_width",
-                        strWidths);
-                }
-
-                this.MainForm.AppInfo.UnlinkFormState(m_genDataViewer);
-                this.m_genDataViewer = null;
-            }
-        }
-        int NewHostObject(
-            out DetailHost hostObj,
-            out string strError)
-        {
-            strError = "";
-            hostObj = null;
-
-            Type entryClassType = ScriptManager.GetDerivedClassType(
-    this.m_autogenDataAssembly,
-    "dp2Circulation.DetailHost");
-            if (entryClassType == null)
-            {
-                // 寻找Host派生类Type
-                entryClassType = ScriptManager.GetDerivedClassType(
-                    this.m_autogenDataAssembly,
-                    "dp2Circulation.Host");
-                if (entryClassType != null)
-                {
-                    strError = "您的脚本代码是从 dp2Circulation.Host 类继承的，这种方式目前已不再支持，需要修改(升级)为从 dp2Circulation.DetailHost 继承";
-                    return -1;
-                }
-
-                strError = "dp2Circulation.DetailHost的派生类都没有找到";
-                return -1;
-            }
-
-            // new一个DetailHost派生对象
-            hostObj = (DetailHost)entryClassType.InvokeMember(null,
-                BindingFlags.DeclaredOnly |
-                BindingFlags.Public | BindingFlags.NonPublic |
-                BindingFlags.Instance | BindingFlags.CreateInstance, null, null,
-                null);
-
-            if (hostObj == null)
-            {
-                strError = "new DetailHost的派生类对象时失败";
-                return -1;
-            }
-
-            // 为DetailHost派生类设置参数
-            hostObj.DetailForm = this;
-            hostObj.Assembly = this.m_autogenDataAssembly;
-
-            return 0;
-        }
-
-        int GetCsScriptAssembly(
-            string strCode,
-            string strRef,
-            out Assembly assembly,
-            out string strError)
-        {
-            strError = "";
-            assembly = null;
-
-            string[] saRef = null;
-            int nRet;
-
-            nRet = ScriptManager.GetRefsFromXml(strRef,
-                out saRef,
-                out strError);
-            if (nRet == -1)
-                return -1;
-
-            ScriptManager.RemoveRefsBinDirMacro(ref saRef);
-
-            string[] saAddRef = {
-                                    // 2011/3/4 增加
-                                    "system.dll",
-                                    "system.xml.dll",
-                                    "system.windows.forms.dll",
-                                    "system.drawing.dll",
-                                    "System.Runtime.Serialization.dll",
-
-									Environment.CurrentDirectory + "\\digitalplatform.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Text.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
-									//Environment.CurrentDirectory + "\\digitalplatform.xmleditor.dll",
-									//Environment.CurrentDirectory + "\\digitalplatform.rms.dll",
-									//Environment.CurrentDirectory + "\\digitalplatform.rms.client.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marceditor.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marcfixedfieldcontrol.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marckernel.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.gcatclient.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.script.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.commoncontrol.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.amazoninterface.dll",
-									//Environment.CurrentDirectory + "\\digitalplatform.library.dll",
-									// Environment.CurrentDirectory + "\\Interop.SHDocVw.dll",
-									Environment.CurrentDirectory + "\\dp2circulation.exe"
-								};
-
-            if (saAddRef != null)
-            {
-                string[] saTemp = new string[saRef.Length + saAddRef.Length];
-                Array.Copy(saRef, 0, saTemp, 0, saRef.Length);
-                Array.Copy(saAddRef, 0, saTemp, saRef.Length, saAddRef.Length);
-                saRef = saTemp;
-            }
-
-            string strErrorInfo = "";
-            string strWarningInfo = "";
-            nRet = ScriptManager.CreateAssembly_1(strCode,
-                saRef,
-                null,   // strLibPaths,
-                out assembly,
-                out strErrorInfo,
-                out strWarningInfo);
-            if (nRet == -1)
-            {
-                strError = "脚本编译发现错误或警告:\r\n" + strErrorInfo;
-                return -1;
-            }
-            /*
-            if (m_scriptDomain != null)
-                m_scriptDomain.Load(assembly.GetName());
-             * */
-
-            return 0;
-        }
-
-
-        #endregion
 
 #if NO
         // 自动加工数据
@@ -10307,8 +9397,9 @@ merge_dlg.UiState);
 
             // API.PostMessage(this.Handle, WM_FILL_MARCEDITOR_SCRIPT_MENU, 0, 0);
             if (this.MainForm.PanelFixedVisible == true)
-                this.AutoGenerate(this.m_marcEditor,
+                this._genData.AutoGenerate(this.m_marcEditor,
                     new GenerateDataEventArgs(),
+                    this.BiblioRecPath,
                     true);
 
             Debug.WriteLine("MarcEditor Enter");
@@ -11605,7 +10696,9 @@ value);
                 GenerateDataEventArgs e1 = new GenerateDataEventArgs();
                 e1.FocusedControl = this.entityControl1.ListView;
                 e1.ScriptEntry = "";    // 启动Ctrl+A菜单
-                this.AutoGenerate(this.entityControl1, e1,
+                this._genData.AutoGenerate(this.entityControl1,
+                    e1,
+                    this.BiblioRecPath,
                     true);
             }
         }
@@ -11624,8 +10717,7 @@ value);
 
         private void MarcEditor_SelectedFieldChanged(object sender, EventArgs e)
         {
-            if (this.m_genDataViewer != null)
-                this.m_genDataViewer.RefreshState();
+            this._genData.RefreshViewerState();
         }
 
         private void binaryResControl1_Enter(object sender, EventArgs e)
@@ -11636,14 +10728,16 @@ value);
                 GenerateDataEventArgs e1 = new GenerateDataEventArgs();
                 e1.FocusedControl = this.binaryResControl1.ListView;
                 e1.ScriptEntry = "";    // 启动Ctrl+A菜单
-                this.AutoGenerate(this.binaryResControl1, e1,
+                this._genData.AutoGenerate(this.binaryResControl1, 
+                    e1,
+                    this.BiblioRecPath,
                     true);
             }
         }
 
         private void MarcEditor_GetTemplateDef(object sender, GetTemplateDefEventArgs e)
         {
-            if (this.m_detailHostObj == null)
+            if (this._genData.DetailHostObj == null)
             {
                 int nRet = 0;
                 string strError = "";
@@ -11653,7 +10747,7 @@ value);
                 //      -1  error
                 //      0   没有重新初始化Assembly，而是直接用以前Cache的Assembly
                 //      1   重新(或者首次)初始化了Assembly
-                nRet = InitialAutogenAssembly(null,
+                nRet = this._genData.InitialAutogenAssembly(this.BiblioRecPath, // null,
                     out strError);
                 if (nRet == -1)
                 {
@@ -11662,19 +10756,19 @@ value);
                 }
                 if (nRet == 0)
                 {
-                    if (this.m_detailHostObj == null)
+                    if (this._genData.DetailHostObj == null)
                     {
                         e.Canceled = true;
                         return; // 库名不具备，无法初始化
                     }
                 }
-                Debug.Assert(this.m_detailHostObj != null, "");
+                Debug.Assert(this._genData.DetailHostObj != null, "");
             }
 
-            Debug.Assert(this.m_detailHostObj != null, "");
+            Debug.Assert(this._genData.DetailHostObj != null, "");
 
             // 如果脚本里面没有相应的回调函数
-            if (this.m_detailHostObj.GetType().GetMethod("GetTemplateDef",
+            if (this._genData.DetailHostObj.GetType().GetMethod("GetTemplateDef",
                 BindingFlags.DeclaredOnly |
                             BindingFlags.Public | BindingFlags.NonPublic |
                             BindingFlags.Instance | BindingFlags.InvokeMethod
@@ -11697,7 +10791,7 @@ value);
             }
              * */
             // 有两个参数的成员函数
-            Type classType = m_detailHostObj.GetType();
+            Type classType = _genData.DetailHostObj.GetType();
             try
             {
                 classType.InvokeMember("GetTemplateDef",
@@ -11706,7 +10800,7 @@ value);
                     BindingFlags.Instance | BindingFlags.InvokeMethod
                     ,
                     null,
-                    this.m_detailHostObj,
+                    this._genData.DetailHostObj,
                     new object[] { sender, e });
             }
             catch (Exception ex)

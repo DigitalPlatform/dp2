@@ -2229,6 +2229,7 @@ namespace DigitalPlatform.Script
 			return nCount;
 		}
 
+        // 获得从指定类或者接口派生的类
 		public static Type GetDerivedClassType(Assembly assembly,
 			string strBaseTypeFullName)
 		{
@@ -2236,17 +2237,23 @@ namespace DigitalPlatform.Script
                 return null;
 
 			Type[] types = assembly.GetTypes();
-			// string strText = "";
-
-			for(int i=0;i<types.Length;i++) 
+			foreach(Type type in types) 
 			{
-				if (types[i].IsClass == false)
+				if (type.IsClass == false)
 					continue;
-				if (IsDeriverdFrom(types[i],
-					strBaseTypeFullName) == true)
-					return types[i];
-			}
 
+                // 2015/5/28
+                Type[] interfaces = type.GetInterfaces();
+                foreach(Type inter in interfaces)
+                {
+                    if (inter.FullName == strBaseTypeFullName)
+                        return type;
+                }
+
+				if (IsDerivedFrom(type,
+					strBaseTypeFullName) == true)
+					return type;
+			}
 
 			return null;
 		}
@@ -2294,7 +2301,7 @@ namespace DigitalPlatform.Script
 
 
 		// 观察type的基类中是否有类名为strBaseTypeFullName的类。
-		public static bool IsDeriverdFrom(Type type,
+		public static bool IsDerivedFrom(Type type,
 			string strBaseTypeFullName)
 		{
 			Type curType = type;

@@ -953,6 +953,7 @@ namespace dp2Circulation
         /// </summary>
         /// <param name="document">PrintDocument 对象</param>
         /// <param name="strPaperName">纸张名字</param>
+        /// <param name="bLandscape">是否为横向</param>
         /// <param name="bCheck">是否检查纸张包含在打印机的纸张列表中</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>0: 成功选定: 1: 没有选定，因为名字不可用。建议后面出现打印机对话框选定</returns>

@@ -385,6 +385,8 @@ backRect,
                 screen_rect.Y);
 
             this.Size = new Size(screen_rect.Width, screen_rect.Height);
+
+            this.Invalidate();
         }
 
         protected override void WndProc(ref Message m)

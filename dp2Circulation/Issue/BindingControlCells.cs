@@ -296,7 +296,7 @@ namespace dp2Circulation
 
             if (GuiUtil.PtInRect((int)p_x,
                 (int)p_y,
-                this.Container.Container.m_rectGrab) == true)
+                this.Container.Container.RectGrab) == true)
             {
                 result.AreaPortion = AreaPortion.Grab;
                 result.X = p_x;
@@ -307,7 +307,7 @@ namespace dp2Circulation
 
             int nCenterX = this.Container.Container.m_nCellWidth / 2;
             int nCenterY = this.Container.Container.m_nCellHeight / 2;
-            int nWidth = this.Container.Container.m_rectGrab.Width;
+            int nWidth = this.Container.Container.RectGrab.Width;
             Rectangle rectCheckBox = new Rectangle(
                 nCenterX - nWidth / 2,
                 nCenterY - nWidth / 2,
@@ -1071,7 +1071,7 @@ namespace dp2Circulation
             if (this.m_bHover == true)
             {
                 // 把手
-                Rectangle rect1 = this.Container.Container.m_rectGrab;
+                Rectangle rect1 = this.Container.Container.RectGrab;
                 rect1.Offset((int)start_x, (int)start_y);
                 ControlPaint.DrawContainerGrabHandle(
         e.Graphics,
@@ -1083,7 +1083,7 @@ namespace dp2Circulation
                 {
                     long nCenterX = start_x + this.Width / 2;
                     long nCenterY = start_y + this.Height / 2;
-                    int nWidth = this.Container.Container.m_rectGrab.Width;
+                    int nWidth = this.Container.Container.RectGrab.Width;
                     Rectangle rectCheckBox = new Rectangle(
                         (int)nCenterX - nWidth/2,
                         (int)nCenterY - nWidth/2,
@@ -2507,7 +2507,7 @@ e);
             }
 
             // 移动把手，不要旋转。因为旋转会带来点击的不一致
-            Rectangle rect1 = this.Container.Container.m_rectGrab;
+            Rectangle rect1 = this.Container.Container.RectGrab;
             rect1.Offset((int)start_x, (int)start_y);
             if (this.m_bHover == true)
             {

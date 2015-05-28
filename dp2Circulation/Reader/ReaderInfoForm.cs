@@ -1146,6 +1146,7 @@ MessageBoxDefaultButton.Button2);
             return -1;
         }
 
+#if NO
         int m_nInGetCfgFile = 0;    // ∑¿÷πGetCfgFile()∫Ø ˝÷ÿ»Î
 
 
@@ -1217,6 +1218,8 @@ MessageBoxDefaultButton.Button2);
         ERROR1:
             return -1;
         }
+
+#endif
 
         // 
         /// <summary>

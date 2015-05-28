@@ -39,8 +39,12 @@
             this.comboBox_from = new System.Windows.Forms.ComboBox();
             this.textBox_queryWord = new System.Windows.Forms.TextBox();
             this.button_search = new System.Windows.Forms.Button();
+            this.dpTable_browseLines = new DigitalPlatform.CommonControl.DpTable();
+            this.dpColumn_no = new DigitalPlatform.CommonControl.DpColumn();
+            this.dpColumn_recPath = new DigitalPlatform.CommonControl.DpColumn();
             this.tabPage_biblioAndItems = new System.Windows.Forms.TabPage();
             this.splitContainer_biblioAndItems = new System.Windows.Forms.SplitContainer();
+            this.easyMarcControl1 = new DigitalPlatform.EasyMarc.EasyMarcControl();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.imageList_progress = new System.Windows.Forms.ImageList(this.components);
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
@@ -50,10 +54,6 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_save = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_new = new System.Windows.Forms.ToolStripButton();
-            this.dpTable_browseLines = new DigitalPlatform.CommonControl.DpTable();
-            this.dpColumn_no = new DigitalPlatform.CommonControl.DpColumn();
-            this.dpColumn_recPath = new DigitalPlatform.CommonControl.DpColumn();
-            this.easyMarcControl1 = new DigitalPlatform.EasyMarc.EasyMarcControl();
             this.tabControl_main.SuspendLayout();
             this.tabPage_settings.SuspendLayout();
             this.tabPage_searchBiblio.SuspendLayout();
@@ -122,6 +122,7 @@
             this.button_settings_entityDefault.TabIndex = 0;
             this.button_settings_entityDefault.Text = "册记录缺省值";
             this.button_settings_entityDefault.UseVisualStyleBackColor = true;
+            this.button_settings_entityDefault.Click += new System.EventHandler(this.button_settings_entityDefault_Click);
             // 
             // tabPage_searchBiblio
             // 
@@ -177,6 +178,58 @@
             this.button_search.UseVisualStyleBackColor = true;
             this.button_search.Click += new System.EventHandler(this.button_search_Click);
             // 
+            // dpTable_browseLines
+            // 
+            this.dpTable_browseLines.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.dpTable_browseLines.AutoDocCenter = true;
+            this.dpTable_browseLines.BackColor = System.Drawing.Color.DimGray;
+            this.dpTable_browseLines.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.dpTable_browseLines.Columns.Add(this.dpColumn_no);
+            this.dpTable_browseLines.Columns.Add(this.dpColumn_recPath);
+            this.dpTable_browseLines.ColumnsBackColor = System.Drawing.Color.Gray;
+            this.dpTable_browseLines.ColumnsForeColor = System.Drawing.Color.White;
+            this.dpTable_browseLines.DocumentBorderColor = System.Drawing.Color.DarkGray;
+            this.dpTable_browseLines.DocumentMargin = new System.Windows.Forms.Padding(8);
+            this.dpTable_browseLines.DocumentOrgX = ((long)(0));
+            this.dpTable_browseLines.DocumentOrgY = ((long)(0));
+            this.dpTable_browseLines.DocumentShadowColor = System.Drawing.Color.Black;
+            this.dpTable_browseLines.FocusedItem = null;
+            this.dpTable_browseLines.FullRowSelect = true;
+            this.dpTable_browseLines.HighlightBackColor = System.Drawing.SystemColors.Highlight;
+            this.dpTable_browseLines.HightlightForeColor = System.Drawing.SystemColors.HighlightText;
+            this.dpTable_browseLines.HoverBackColor = System.Drawing.SystemColors.HotTrack;
+            this.dpTable_browseLines.InactiveHighlightBackColor = System.Drawing.SystemColors.InactiveCaption;
+            this.dpTable_browseLines.InactiveHightlightForeColor = System.Drawing.SystemColors.InactiveCaptionText;
+            this.dpTable_browseLines.Location = new System.Drawing.Point(3, 33);
+            this.dpTable_browseLines.Name = "dpTable_browseLines";
+            this.dpTable_browseLines.Padding = new System.Windows.Forms.Padding(12);
+            this.dpTable_browseLines.Size = new System.Drawing.Size(460, 177);
+            this.dpTable_browseLines.TabIndex = 8;
+            this.dpTable_browseLines.Text = "dpTable1";
+            this.dpTable_browseLines.DoubleClick += new System.EventHandler(this.dpTable_browseLines_DoubleClick);
+            this.dpTable_browseLines.KeyDown += new System.Windows.Forms.KeyEventHandler(this.dpTable_browseLines_KeyDown);
+            // 
+            // dpColumn_no
+            // 
+            this.dpColumn_no.Alignment = System.Drawing.StringAlignment.Near;
+            this.dpColumn_no.BackColor = System.Drawing.Color.Transparent;
+            this.dpColumn_no.Font = null;
+            this.dpColumn_no.ForeColor = System.Drawing.Color.Transparent;
+            this.dpColumn_no.LineAlignment = System.Drawing.StringAlignment.Near;
+            this.dpColumn_no.Text = "序号";
+            this.dpColumn_no.Width = 50;
+            // 
+            // dpColumn_recPath
+            // 
+            this.dpColumn_recPath.Alignment = System.Drawing.StringAlignment.Near;
+            this.dpColumn_recPath.BackColor = System.Drawing.Color.Transparent;
+            this.dpColumn_recPath.Font = null;
+            this.dpColumn_recPath.ForeColor = System.Drawing.Color.Transparent;
+            this.dpColumn_recPath.LineAlignment = System.Drawing.StringAlignment.Near;
+            this.dpColumn_recPath.Text = "记录路径";
+            // 
             // tabPage_biblioAndItems
             // 
             this.tabPage_biblioAndItems.BackColor = System.Drawing.Color.DimGray;
@@ -209,6 +262,22 @@
             this.splitContainer_biblioAndItems.TabIndex = 0;
             this.splitContainer_biblioAndItems.DoubleClick += new System.EventHandler(this.splitContainer_biblioAndItems_DoubleClick);
             // 
+            // easyMarcControl1
+            // 
+            this.easyMarcControl1.AutoScroll = true;
+            this.easyMarcControl1.CaptionWidth = 116;
+            this.easyMarcControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.easyMarcControl1.HideIndicator = true;
+            this.easyMarcControl1.IncludeNumber = false;
+            this.easyMarcControl1.Location = new System.Drawing.Point(0, 0);
+            this.easyMarcControl1.MarcDefDom = null;
+            this.easyMarcControl1.Name = "easyMarcControl1";
+            this.easyMarcControl1.Size = new System.Drawing.Size(231, 207);
+            this.easyMarcControl1.TabIndex = 0;
+            this.easyMarcControl1.GetConfigDom += new DigitalPlatform.Marc.GetConfigDomEventHandle(this.easyMarcControl1_GetConfigDom);
+            this.easyMarcControl1.Enter += new System.EventHandler(this.easyMarcControl1_Enter);
+            this.easyMarcControl1.Leave += new System.EventHandler(this.easyMarcControl1_Leave);
+            // 
             // flowLayoutPanel1
             // 
             this.flowLayoutPanel1.AutoScroll = true;
@@ -219,6 +288,7 @@
             this.flowLayoutPanel1.Size = new System.Drawing.Size(221, 207);
             this.flowLayoutPanel1.TabIndex = 0;
             this.flowLayoutPanel1.SizeChanged += new System.EventHandler(this.flowLayoutPanel1_SizeChanged);
+            this.flowLayoutPanel1.Enter += new System.EventHandler(this.flowLayoutPanel1_Enter);
             // 
             // imageList_progress
             // 
@@ -308,72 +378,6 @@
             this.toolStripButton_new.Text = "新建";
             this.toolStripButton_new.ToolTipText = "新建书目记录";
             this.toolStripButton_new.Click += new System.EventHandler(this.toolStripButton_new_Click);
-            // 
-            // dpTable_browseLines
-            // 
-            this.dpTable_browseLines.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.dpTable_browseLines.AutoDocCenter = true;
-            this.dpTable_browseLines.BackColor = System.Drawing.Color.DimGray;
-            this.dpTable_browseLines.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.dpTable_browseLines.Columns.Add(this.dpColumn_no);
-            this.dpTable_browseLines.Columns.Add(this.dpColumn_recPath);
-            this.dpTable_browseLines.ColumnsBackColor = System.Drawing.Color.Gray;
-            this.dpTable_browseLines.ColumnsForeColor = System.Drawing.Color.White;
-            this.dpTable_browseLines.DocumentBorderColor = System.Drawing.Color.DarkGray;
-            this.dpTable_browseLines.DocumentMargin = new System.Windows.Forms.Padding(8);
-            this.dpTable_browseLines.DocumentOrgX = ((long)(0));
-            this.dpTable_browseLines.DocumentOrgY = ((long)(0));
-            this.dpTable_browseLines.DocumentShadowColor = System.Drawing.Color.Black;
-            this.dpTable_browseLines.FocusedItem = null;
-            this.dpTable_browseLines.FullRowSelect = true;
-            this.dpTable_browseLines.HighlightBackColor = System.Drawing.SystemColors.Highlight;
-            this.dpTable_browseLines.HightlightForeColor = System.Drawing.SystemColors.HighlightText;
-            this.dpTable_browseLines.HoverBackColor = System.Drawing.SystemColors.HotTrack;
-            this.dpTable_browseLines.InactiveHighlightBackColor = System.Drawing.SystemColors.InactiveCaption;
-            this.dpTable_browseLines.InactiveHightlightForeColor = System.Drawing.SystemColors.InactiveCaptionText;
-            this.dpTable_browseLines.Location = new System.Drawing.Point(3, 33);
-            this.dpTable_browseLines.Name = "dpTable_browseLines";
-            this.dpTable_browseLines.Padding = new System.Windows.Forms.Padding(12);
-            this.dpTable_browseLines.Size = new System.Drawing.Size(460, 177);
-            this.dpTable_browseLines.TabIndex = 8;
-            this.dpTable_browseLines.Text = "dpTable1";
-            this.dpTable_browseLines.DoubleClick += new System.EventHandler(this.dpTable_browseLines_DoubleClick);
-            this.dpTable_browseLines.KeyDown += new System.Windows.Forms.KeyEventHandler(this.dpTable_browseLines_KeyDown);
-            // 
-            // dpColumn_no
-            // 
-            this.dpColumn_no.Alignment = System.Drawing.StringAlignment.Near;
-            this.dpColumn_no.BackColor = System.Drawing.Color.Transparent;
-            this.dpColumn_no.Font = null;
-            this.dpColumn_no.ForeColor = System.Drawing.Color.Transparent;
-            this.dpColumn_no.LineAlignment = System.Drawing.StringAlignment.Near;
-            this.dpColumn_no.Text = "序号";
-            this.dpColumn_no.Width = 50;
-            // 
-            // dpColumn_recPath
-            // 
-            this.dpColumn_recPath.Alignment = System.Drawing.StringAlignment.Near;
-            this.dpColumn_recPath.BackColor = System.Drawing.Color.Transparent;
-            this.dpColumn_recPath.Font = null;
-            this.dpColumn_recPath.ForeColor = System.Drawing.Color.Transparent;
-            this.dpColumn_recPath.LineAlignment = System.Drawing.StringAlignment.Near;
-            this.dpColumn_recPath.Text = "记录路径";
-            // 
-            // easyMarcControl1
-            // 
-            this.easyMarcControl1.AutoScroll = true;
-            this.easyMarcControl1.CaptionWidth = 116;
-            this.easyMarcControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.easyMarcControl1.HideIndicator = true;
-            this.easyMarcControl1.IncludeNumber = false;
-            this.easyMarcControl1.Location = new System.Drawing.Point(0, 0);
-            this.easyMarcControl1.MarcDefDom = null;
-            this.easyMarcControl1.Name = "easyMarcControl1";
-            this.easyMarcControl1.Size = new System.Drawing.Size(231, 207);
-            this.easyMarcControl1.TabIndex = 0;
-            this.easyMarcControl1.GetConfigDom += new DigitalPlatform.Marc.GetConfigDomEventHandle(this.easyMarcControl1_GetConfigDom);
             // 
             // EntityRegisterWizard
             // 

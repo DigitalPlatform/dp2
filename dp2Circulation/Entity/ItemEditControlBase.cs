@@ -18,7 +18,7 @@ namespace dp2Circulation
     /// </summary>
     public class ItemEditControlBase : UserControl
     {
-        internal TableLayoutPanel tableLayoutPanel_main = null;
+        internal TableLayoutPanel _tableLayoutPanel_main = null;
 
         ItemDisplayState _createState = ItemDisplayState.Normal;
         // 创建状态
@@ -128,9 +128,9 @@ namespace dp2Circulation
         {
             // throw new Exception("尚未实现 ResetColor()");
 
-            for (int i = 0; i < this.tableLayoutPanel_main.RowStyles.Count; i++)
+            for (int i = 0; i < this._tableLayoutPanel_main.RowStyles.Count; i++)
             {
-                Label color = this.tableLayoutPanel_main.GetControlFromPosition(2, i) as Label;
+                Label color = this._tableLayoutPanel_main.GetControlFromPosition(2, i) as Label;
                 if (color == null)
                     continue;
                 EditLineState state = color.Tag as EditLineState;
@@ -139,7 +139,7 @@ namespace dp2Circulation
                     if (state.Changed == true)
                         state.Changed = false;
                 }
-                color.BackColor = this.tableLayoutPanel_main.BackColor;
+                color.BackColor = this._tableLayoutPanel_main.BackColor;
             }
 
         }
@@ -324,23 +324,23 @@ namespace dp2Circulation
         // 添加、删除各种事件
         internal void AddEvents(bool bAdd)
         {
-            Debug.Assert(this.tableLayoutPanel_main != null, "");
+            Debug.Assert(this._tableLayoutPanel_main != null, "");
 
             if (bAdd)
             {
-                this.tableLayoutPanel_main.MouseClick += tableLayoutPanel_main_MouseClick;
-                this.tableLayoutPanel_main.MouseDown += tableLayoutPanel_main_MouseDown;
+                this._tableLayoutPanel_main.MouseClick += tableLayoutPanel_main_MouseClick;
+                this._tableLayoutPanel_main.MouseDown += tableLayoutPanel_main_MouseDown;
             }
             else
             {
-                this.tableLayoutPanel_main.MouseClick -= tableLayoutPanel_main_MouseClick;
-                this.tableLayoutPanel_main.MouseDown -= tableLayoutPanel_main_MouseDown;
+                this._tableLayoutPanel_main.MouseClick -= tableLayoutPanel_main_MouseClick;
+                this._tableLayoutPanel_main.MouseDown -= tableLayoutPanel_main_MouseDown;
             }
 
-            for (int i = 0; i < this.tableLayoutPanel_main.RowStyles.Count; i++)
+            for (int i = 0; i < this._tableLayoutPanel_main.RowStyles.Count; i++)
             {
                 // 第一列
-                Label label_control = this.tableLayoutPanel_main.GetControlFromPosition(0, i) as Label;
+                Label label_control = this._tableLayoutPanel_main.GetControlFromPosition(0, i) as Label;
                 if (label_control != null)
                 {
                     if (bAdd)
@@ -354,7 +354,7 @@ namespace dp2Circulation
                 }
 
                 // 第二列
-                Label color_control = this.tableLayoutPanel_main.GetControlFromPosition(1, i) as Label;
+                Label color_control = this._tableLayoutPanel_main.GetControlFromPosition(1, i) as Label;
                 if (color_control != null)
                 {
                     if (bAdd)
@@ -368,7 +368,7 @@ namespace dp2Circulation
                 }
 
                 // 第三列
-                Control edit_control = this.tableLayoutPanel_main.GetControlFromPosition(2, i);
+                Control edit_control = this._tableLayoutPanel_main.GetControlFromPosition(2, i);
                 if (edit_control != null)
                 {
                     if (bAdd)
@@ -479,8 +479,8 @@ namespace dp2Circulation
         void FocusLine(Control control)
         {
             // 找到同一行的 edit control
-            int nRow = this.tableLayoutPanel_main.GetCellPosition(control).Row;
-            Control edit_control = this.tableLayoutPanel_main.GetControlFromPosition(2, nRow);
+            int nRow = this._tableLayoutPanel_main.GetCellPosition(control).Row;
+            Control edit_control = this._tableLayoutPanel_main.GetControlFromPosition(2, nRow);
             if (edit_control != null)
                 edit_control.Focus();
         }
@@ -560,13 +560,13 @@ namespace dp2Circulation
 
         void SetLineState(Control control, EditLineState newState)
         {
-            SetLineDisplayState(this.tableLayoutPanel_main.GetCellPosition(control).Row, newState);
+            SetLineDisplayState(this._tableLayoutPanel_main.GetCellPosition(control).Row, newState);
         }
 
         // 设置一行的显示状态
         void SetLineDisplayState(int nRowNumber, EditLineState newState)
         {
-            Label color = this.tableLayoutPanel_main.GetControlFromPosition(1, nRowNumber) as Label;
+            Label color = this._tableLayoutPanel_main.GetControlFromPosition(1, nRowNumber) as Label;
             if (color == null)
                 throw new ArgumentException("行 " + nRowNumber.ToString() + " 的 Color Label 对象不存在", "nRowNumber");
 
@@ -576,17 +576,17 @@ namespace dp2Circulation
             else if (newState.Changed == true)
                 color.BackColor = this.ColorChanged;
             else
-                color.BackColor = this.tableLayoutPanel_main.BackColor;
+                color.BackColor = this._tableLayoutPanel_main.BackColor;
         }
 
         EditLineState GetLineState(Control control)
         {
-            return GetLineState(this.tableLayoutPanel_main.GetCellPosition(control).Row);
+            return GetLineState(this._tableLayoutPanel_main.GetCellPosition(control).Row);
         }
 
         EditLineState GetLineState(int nRowNumber)
         {
-            Label color = this.tableLayoutPanel_main.GetControlFromPosition(1, nRowNumber) as Label;
+            Label color = this._tableLayoutPanel_main.GetControlFromPosition(1, nRowNumber) as Label;
             if (color == null)
                 throw new ArgumentException("行 " + nRowNumber.ToString() + " 的 Color Label 对象不存在", "nRowNumber");
             return color.Tag as EditLineState;
@@ -596,26 +596,26 @@ namespace dp2Circulation
         internal void OnPaintContent(object sender, PaintEventArgs e)
         {
             if (this.PaintContent != null)
-                this.PaintContent(sender, e);
+                this.PaintContent(this, e);  // sender
 
         }
 
         internal void OnControlKeyDown(object sender, ControlKeyEventArgs e)
         {
             if (this.ControlKeyDown != null)
-                this.ControlKeyDown(sender, e);
+                this.ControlKeyDown(this, e);   // sender
         }
 
         internal void OnControlKeyPress(object sender, ControlKeyPressEventArgs e)
         {
             if (this.ControlKeyPress != null)
-                this.ControlKeyPress(sender, e);
+                this.ControlKeyPress(this, e);  // sender
         }
 
         internal void OnGetValueTable(object sender, GetValueTableEventArgs e)
         {
             if (this.GetValueTable != null)
-                this.GetValueTable(sender, e);
+                this.GetValueTable(this, e);  // sender
         }
 
                 // 比较自己和refControl的数据差异，用特殊颜色显示差异字段

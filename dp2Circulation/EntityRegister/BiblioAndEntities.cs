@@ -1,4 +1,6 @@
-﻿using System;
+﻿#pragma warning disable 1591
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -25,6 +27,8 @@ namespace dp2Circulation
     /// </summary>
     public class BiblioAndEntities
     {
+        public MainForm MainForm = null;
+
         public Form Owner = null;
         public EasyMarcControl easyMarcControl1 = null;     // MarcControl
         public FlowLayoutPanel flowLayoutPanel1 = null;     // ItemsContainer
@@ -35,7 +39,7 @@ namespace dp2Circulation
         public string ServerName = "";
         public string BiblioRecPath = "";
 
-        string MarcSyntax = "";
+        public string MarcSyntax = "";
 
         /// <summary>
         /// 获得值列表
@@ -51,6 +55,13 @@ namespace dp2Circulation
         /// 触发前，要求 BiblioRecPath 有当前书目记录的路径
         /// </summary>
         public event EventHandler LoadEntities = null;
+
+        // Ctrl+A自动创建数据
+        /// <summary>
+        /// 自动创建数据
+        /// </summary>
+        public event GenerateDataEventHandler GenerateData = null;
+
 
         public BiblioAndEntities(
             Form owner,
@@ -391,6 +402,10 @@ MessageBoxDefaultButton.Button2);
                 edit.GetValueTable += new DigitalPlatform.GetValueTableEventHandler(edit_GetValueTable);
                 edit.AppendMenu += new ApendMenuEventHandler(edit_AppendMenu);
                 edit.MouseClick += edit_MouseClick;
+                edit.GetAccessNoButton.Click += GetAccessNoButton_Click;
+                edit.LocationStringChanged += edit_LocationStringChanged;
+                edit.ControlKeyDown += edit_ControlKeyDown;
+                edit.Enter += edit_Enter;
             }
             else
             {
@@ -399,6 +414,349 @@ MessageBoxDefaultButton.Button2);
                 edit.GetValueTable -= new DigitalPlatform.GetValueTableEventHandler(edit_GetValueTable);
                 edit.AppendMenu -= new ApendMenuEventHandler(edit_AppendMenu);
                 edit.MouseClick -= edit_MouseClick;
+                edit.GetAccessNoButton.Click -= GetAccessNoButton_Click;
+                edit.LocationStringChanged -= edit_LocationStringChanged;
+                edit.ControlKeyDown -= edit_ControlKeyDown;
+                edit.Enter += edit_Enter;
+            }
+        }
+
+        void edit_Enter(object sender, EventArgs e)
+        {
+
+        }
+
+        void edit_ControlKeyDown(object sender, ControlKeyEventArgs e)
+        {
+            EntityEditControl edit = sender as EntityEditControl;
+            Debug.Assert(edit != null, "");
+
+            string strAction = "copy";
+
+            bool bUp = false;
+
+            Debug.WriteLine("keycode=" + e.e.KeyCode.ToString());
+
+            if (e.e.KeyCode == Keys.A && e.e.Control == true)
+            {
+                if (this.GenerateData != null)
+                {
+                    GenerateDataEventArgs e1 = new GenerateDataEventArgs();
+                    if (e.Name == "AccessNo")
+                        e1.ScriptEntry = "CreateCallNumber";
+                    e1.FocusedControl = sender; // sender为 EntityEditControl
+                    this.GenerateData(this, e1);
+                }
+                e.e.SuppressKeyPress = true;    // 避免 Ctrl+A 键引起 textbox 文本的无谓改变
+                return;
+            }
+            else if (e.e.KeyCode == Keys.PageDown && e.e.Control == true)
+            {
+                return;
+            }
+            else if (e.e.KeyCode == Keys.PageUp && e.e.Control == true)
+            {
+                return;
+            }
+            else if (e.e.KeyCode == Keys.OemOpenBrackets && e.e.Control == true)
+            {
+                bUp = true; // 从上面拷贝
+            }
+            else if (e.e.KeyCode == Keys.OemCloseBrackets && e.e.Control == true)
+            {
+                bUp = false;    // 从下面拷贝
+            }
+            else if (e.e.KeyCode == Keys.OemMinus && e.e.Control == true)
+            {
+                bUp = true; // 从上面减量
+                strAction = "minus";
+            }
+            else if (e.e.KeyCode == Keys.Oemplus && e.e.Control == true)
+            {
+                bUp = true;    // 从上面增量
+                strAction = "plus";
+            }
+            else if (e.e.KeyCode == Keys.D0 && e.e.Control == true)
+            {
+                bUp = false; // 从下面减量
+                strAction = "minus";
+            }
+            else if (e.e.KeyCode == Keys.D9 && e.e.Control == true)
+            {
+                bUp = false;    // 从下面增量
+                strAction = "plus";
+            }
+            else
+                return;
+
+            EntityEditControl next = GetPrevOrNextEdit(edit, bUp);
+            if (next == null)
+                return; 
+            switch (e.Name)
+            {
+                case "PublishTime":
+                    edit.PublishTime =
+                        DoAction(strAction, next.PublishTime);
+                    break;
+                case "Seller":
+                    edit.Seller =
+                        DoAction(strAction, next.Seller);
+                    break;
+                case "Source":
+                    edit.Source =
+                        DoAction(strAction, next.Source);
+                    break;
+                case "Intact":
+                    edit.Intact =
+                        DoAction(strAction, next.Intact);
+                    break;
+                case "Binding":
+                    edit.Binding =
+                        DoAction(strAction, next.Binding);
+                    break;
+                case "Operations":
+                    edit.Operations =
+                        DoAction(strAction, next.Operations);
+                    break;
+                case "Price":
+                    edit.Price =
+                        DoAction(strAction, next.Price);
+                    break;
+                case "Barcode":
+                    edit.Barcode =
+                        DoAction(strAction, next.Barcode);
+                    break;
+                case "State":
+                    edit.State =
+                        DoAction(strAction, next.State);
+                    break;
+                case "Location":
+                    edit.LocationString =
+                        DoAction(strAction, next.LocationString);
+                    break;
+                case "Comment":
+                    edit.Comment =
+                        DoAction(strAction, next.Comment);
+                    break;
+                case "Borrower":
+                    Console.Beep();
+                    break;
+                case "BorrowDate":
+                    Console.Beep();
+                    break;
+                case "BorrowPeriod":
+                    Console.Beep();
+                    break;
+                case "RecPath":
+                    Console.Beep();
+                    break;
+                case "BookType":
+                    edit.BookType =
+                        DoAction(strAction, next.BookType);
+                    break;
+                case "RegisterNo":
+                    edit.RegisterNo =
+                        DoAction(strAction, next.RegisterNo);
+                    break;
+                case "MergeComment":
+                    edit.MergeComment =
+                        DoAction(strAction, next.MergeComment);
+                    break;
+                case "BatchNo":
+                    edit.BatchNo =
+                        DoAction(strAction, next.BatchNo);
+                    break;
+                case "Volume":
+                    edit.Volume =
+                        DoAction(strAction, next.Volume);
+                    break;
+                case "AccessNo":
+                    edit.AccessNo =
+                        DoAction(strAction, next.AccessNo);
+                    break;
+                case "RefID":
+                    Console.Beep();
+                    break;
+                default:
+                    Debug.Assert(false, "未知的栏目名称 '" + e.Name + "'");
+                    return;
+            }
+        }
+
+        static string DoAction(
+    string strAction,
+    string strValue)
+        {
+            string strError = "";
+            string strResult = "";
+            int nNumber = 0;
+            int nRet = 0;
+
+            if (strAction == "minus")
+            {
+                nNumber = -1;
+
+                // 给一个被字符引导的数字增加一个数量。
+                // 例如 B019 + 1 变成 B020
+                nRet = StringUtil.IncreaseLeadNumber(strValue,
+                    nNumber,
+                    out strResult,
+                    out strError);
+                if (nRet == -1)
+                    strResult = strError;
+                return strResult;
+            }
+            else if (strAction == "plus")
+            {
+                nNumber = 1;
+
+                // 给一个被字符引导的数字增加一个数量。
+                // 例如 B019 + 1 变成 B020
+                nRet = StringUtil.IncreaseLeadNumber(strValue,
+                    nNumber,
+                    out strResult,
+                    out strError);
+                if (nRet == -1)
+                    strResult = strError;
+                return strResult;
+            }
+            else if (strAction == "copy")
+                return strValue;
+            else
+                return "未知的strAction值 '" + strAction + "'";
+        }
+
+        EntityEditControl GetPrevOrNextEdit(
+    EntityEditControl current,
+    bool bPrev)
+        {
+            int nIndex = this.flowLayoutPanel1.Controls.IndexOf(current);
+            if (nIndex == -1)
+            {
+                // 居然在容器中没有找到
+                Debug.Assert(false, "");
+                return null;
+            }
+
+            if (bPrev == true)
+                nIndex--;
+            else
+                nIndex++;
+
+            if (nIndex <= -1)
+                return null;
+
+            if (nIndex >= this.flowLayoutPanel1.Controls.Count)
+                return null;
+
+            Control control = this.flowLayoutPanel1.Controls[nIndex];
+            if (!(control is EntityEditControl))
+                return null;
+
+            return control as EntityEditControl;
+        }
+
+        /// <summary>
+        /// 构造索取号信息集合
+        /// </summary>
+        /// <returns>CallNumberItem事项集合</returns>
+        public List<CallNumberItem> GetCallNumberItems()
+        {
+            List<CallNumberItem> results = new List<CallNumberItem>();
+            foreach (Control control in this.flowLayoutPanel1.Controls)
+            {
+                if (!(control is EntityEditControl))
+                    continue;
+
+                EntityEditControl edit = control as EntityEditControl;
+
+                CallNumberItem item = new CallNumberItem();
+                item.RecPath = edit.RecPath;
+                item.CallNumber = edit.AccessNo;
+                item.Location = edit.LocationString;
+                item.Barcode = edit.Barcode;
+
+                results.Add(item);
+            }
+
+            return results;
+        }
+
+        void edit_LocationStringChanged(object sender, TextChangeEventArgs e)
+        {
+            string strError = "";
+
+            EntityEditControl edit = sender as EntityEditControl;
+
+            if (edit.Initializing == false
+                && string.IsNullOrEmpty(edit.AccessNo) == false)
+            {
+                ArrangementInfo old_info = null;
+                // 获得关于一个特定馆藏地点的索取号配置信息
+                int nRet = this.MainForm.GetArrangementInfo(e.OldText,
+                    out old_info,
+                    out strError);
+                if (nRet == 0)
+                    return;
+                if (nRet == -1)
+                    goto ERROR1;
+
+                ArrangementInfo new_info = null;
+                // 获得关于一个特定馆藏地点的索取号配置信息
+                nRet = this.MainForm.GetArrangementInfo(e.NewText,
+                   out new_info,
+                   out strError);
+                if (nRet == 0)
+                    return;
+                if (nRet == -1)
+                    goto ERROR1;
+
+                if (old_info.ArrangeGroupName != new_info.ArrangeGroupName)
+                {
+                    // TODO: 可直接重新创建索取号
+                    DialogResult result = MessageBox.Show(this.Owner,
+    "您修改了馆藏地点，因而变动了记录所从属的排架体系，现有的索取号已不再适合变动后的排架体系。\r\n\r\n是否要把窗口中索取号字段内容清空，以便您稍后重新创建索取号?",
+    "册登记",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button1);
+                    if (result == DialogResult.No)
+                        return;
+                    edit.AccessNo = "";
+                }
+            }
+            return;
+        ERROR1:
+            MessageBox.Show(this.Owner, strError);
+        }
+
+        public EntityEditControl GetFocusedEditControl()
+        {
+            if (this.flowLayoutPanel1.ContainsFocus == false)
+                return null;
+
+            // 找到拥有输入焦点的那个 EntityEditControl
+            foreach (Control control in this.flowLayoutPanel1.Controls)
+            {
+                if (control.ContainsFocus == true
+                    && control is EntityEditControl)
+                    return (control as EntityEditControl);
+            }
+
+            return null;
+        }
+
+        void GetAccessNoButton_Click(object sender, EventArgs e)
+        {
+            if (this.GenerateData != null)
+            {
+                GenerateDataEventArgs e1 = new GenerateDataEventArgs();
+                if (Control.ModifierKeys == Keys.Control)
+                    e1.ScriptEntry = "ManageCallNumber";
+                else
+                    e1.ScriptEntry = "CreateCallNumber";
+                e1.FocusedControl = GetFocusedEditControl(); // sender为最原始的子控件
+                this.GenerateData(this, e1);
             }
         }
 
@@ -872,6 +1230,13 @@ MessageBoxDefaultButton.Button2);
             if (string.IsNullOrEmpty(this.MarcSyntax) == true)
                 return strMacroName;
 
+            if (strMacroName == "@accessNo")
+            {
+                // 创建索取号
+
+            }
+
+            // UNIMARC 情形
             if (this.MarcSyntax == "unimarc")
             {
                 string strMARC = GetMarc();
@@ -1379,7 +1744,7 @@ MessageBoxDefaultButton.Button2);
         }
 
         // 新添加一个实体事项
-        public int AddNewEntity(string strText,
+        public int AddNewEntity(string strItemBarcode,
             out string strError)
         {
             strError = "";
@@ -1395,6 +1760,7 @@ MessageBoxDefaultButton.Button2);
                     strError = e.ErrorInfo;
                     return -1;
                 }
+                strQuickDefault = e.Xml;
             }
             // 根据缺省值，构造最初的 XML
             XmlDocument dom = new XmlDocument();
@@ -1408,7 +1774,7 @@ MessageBoxDefaultButton.Button2);
                 return -1;
             }
 
-            DomUtil.SetElementText(dom.DocumentElement, "barcode", strText);
+            DomUtil.SetElementText(dom.DocumentElement, "barcode", strItemBarcode);
             DomUtil.SetElementText(dom.DocumentElement, "refID", Guid.NewGuid().ToString());
 
             // 兑现 @price 宏，如果有书目记录的话
@@ -1458,3 +1824,4 @@ MessageBoxDefaultButton.Button2);
         public string ErrorInfo = "";   // [out]
     }
 }
+#pragma warning restore 1591

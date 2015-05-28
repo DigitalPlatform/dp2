@@ -424,7 +424,7 @@ namespace dp2Circulation
         {
             InitializeComponent();
 
-            base.tableLayoutPanel_main = this.tableLayoutPanel_main;
+            base._tableLayoutPanel_main = this.tableLayoutPanel_main;
             AddEvents(true);
 
             SetMouseWheelSimulateEvent();

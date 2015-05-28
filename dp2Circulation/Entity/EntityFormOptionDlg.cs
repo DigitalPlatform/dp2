@@ -7,6 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 
 using DigitalPlatform;
+using DigitalPlatform.Text;
 
 namespace dp2Circulation
 {
@@ -17,9 +18,16 @@ namespace dp2Circulation
         /// </summary>
         public MainForm MainForm = null;
 
+        public string DisplayStyle = "all"; // 要只显示哪些 page? 目前可用 all / quick_entity
+
         public EntityFormOptionDlg()
         {
             InitializeComponent();
+
+            this.tabPage_quickEntityRegisterDefault.Tag = "quick_entity";
+            this.tabPage_quickIssueRegisterDefault.Tag = "quick_issue";
+            this.tabPage_normalEntityRegisterDefault.Tag = "normal_entity";
+            this.tabPage_normalIssueRegisterDefault.Tag = "normal_issue";
         }
 
         private void EntityFormOptionDlg_Load(object sender, EventArgs e)
@@ -153,7 +161,7 @@ namespace dp2Circulation
                 "verify_item_barcode",
                 false);
 
-
+            this.HidePages();
         }
 
         void entityEditControl_GetValueTable(object sender, GetValueTableEventArgs e)
@@ -325,6 +333,23 @@ this.checkBox_normalRegister_simple.Checked);
         private void checkBox_normalRegister_simple_CheckedChanged(object sender, EventArgs e)
         {
             this.entityEditControl_normalRegisterDefault.DisplayMode = this.checkBox_normalRegister_simple.Checked == true ? "simple" : "full";
+        }
+
+        void HidePages()
+        {
+            if (StringUtil.IsInList("all", this.DisplayStyle) == true)
+                return;
+
+            for(int i=0;i<this.tabControl_main.TabPages.Count; i++)
+            {
+                TabPage page = this.tabControl_main.TabPages[i];
+                string strPageName = page.Tag as string;
+                if (StringUtil.IsInList(strPageName, this.DisplayStyle) == false)
+                {
+                    this.tabControl_main.TabPages.Remove(page);
+                    i--;
+                }
+            }
         }
 
     }

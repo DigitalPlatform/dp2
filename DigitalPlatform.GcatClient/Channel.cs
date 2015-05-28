@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using System.Threading;
 
 using DigitalPlatform.GcatClient.gcat_ws;
+using DigitalPlatform.GUI;
 
 
 
@@ -412,7 +413,8 @@ namespace DigitalPlatform.GcatClient
 				}
 
 				QuestionDlg dlg = new QuestionDlg();
-				dlg.StartPosition = FormStartPosition.CenterScreen;
+                GuiUtil.AutoSetDefaultFont(dlg);    // 2015/5/28
+                dlg.StartPosition = FormStartPosition.CenterScreen;
 				dlg.label_messageTitle.Text = strTitle;
 				dlg.textBox_question.Text = strQuestion.Replace("\n","\r\n");
 				dlg.ShowDialog(parent);
@@ -524,6 +526,7 @@ namespace DigitalPlatform.GcatClient
                 }
 
                 QuestionDlg dlg = new QuestionDlg();
+                GuiUtil.AutoSetDefaultFont(dlg);    // 2015/5/28
                 dlg.StartPosition = FormStartPosition.CenterScreen;
                 dlg.label_messageTitle.Text = strTitle;
                 dlg.textBox_question.Text = strQuestion.Replace("\n", "\r\n");

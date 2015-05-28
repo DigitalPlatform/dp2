@@ -255,6 +255,7 @@
     <Compile Include="EntityRegister\ScanRegisterBarcodeForm.designer.cs">
       <DependentUpon>ScanRegisterBarcodeForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Entity\GenerateData.cs" />
     <Compile Include="Entity\InventoryForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -470,6 +471,7 @@
     <Compile Include="Reader\SelectPatronDialog.Designer.cs">
       <DependentUpon>SelectPatronDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="Script\BiblioItemsHost.cs" />
     <Compile Include="Script\ClientHost.cs" />
     <Compile Include="Script\EditDialog.cs">
       <SubType>Form</SubType>
@@ -477,6 +479,7 @@
     <Compile Include="Script\EditDialog.Designer.cs">
       <DependentUpon>EditDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="Script\IDetailHost.cs" />
     <Compile Include="Script\ItemHost.cs" />
     <Compile Include="Script\MarcQueryHost.cs" />
     <Compile Include="Script\PatronHost.cs" />

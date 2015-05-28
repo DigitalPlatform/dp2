@@ -3163,10 +3163,12 @@ AppInfo.GetString("config",
             return -1;  // 出错，不希望继续以后的操作
         }
 
+        // 0 表示2.1以下。2.1和以上时才具有的获取版本号功能
         /// <summary>
         /// 当前连接的 dp2Library 版本号
         /// </summary>
-        public double Version = 0;  // 0 表示2.1以下。2.1和以上时才具有的获取版本号功能
+        [System.ComponentModel.DefaultValue(0)]
+        public double Version {get;set;}
 
         // return:
         //      -1  error
@@ -6984,6 +6986,7 @@ AppInfo.GetString("config",
         /// <param name="Channel">通讯通道</param>
         /// <param name="strLibraryCode">馆代码</param>
         /// <param name="strBarcode">要校验的条码号</param>
+        /// <param name="procEnableControls">EnableControl()函数地址</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>
         /// <para>-2  服务器没有配置校验方法，无法校验</para>

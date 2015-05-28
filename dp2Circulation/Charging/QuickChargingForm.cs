@@ -484,6 +484,7 @@ dlg.UiState);
         /// 形式校验条码号
         /// </summary>
         /// <param name="strBarcode">要校验的条码号</param>
+        /// <param name="strLibraryCodeList">馆代码列表</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>
         /// <para>-2  服务器没有配置校验方法，无法校验</para>
@@ -795,8 +796,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                 this.m_webExternalHost_readerInfo.StopPrevious();
             this.webBrowser_reader.Stop();
         }
-        /// 信息对话框的不透明度
-        /// </summary>
+        // 信息对话框的不透明度
         public double InfoDlgOpacity
         {
             get
@@ -1470,8 +1470,7 @@ false);
             }
         }
 
-        /// 读者信息中不显示借阅历史
-        /// </summary>
+        // 读者信息中不显示借阅历史
         public bool NoBorrowHistory
         {
             get

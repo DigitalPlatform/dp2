@@ -401,11 +401,25 @@ namespace dp2Circulation
         internal Padding CellMargin = new Padding(6);
         internal Padding CellPadding = new Padding(8);
 
-        internal Padding LeftTextMargin = new Padding(6);
+        // internal Padding LeftTextMargin = new Padding(6);
+        [System.ComponentModel.DefaultValue(typeof(Rectangle), "6")]
+        internal Padding LeftTextMargin {get;set;}
+
         internal Padding LeftTextPadding = new Padding(0);
 
+        internal Rectangle RectGrab
+        {
+            get
+            {
+                return m_rectGrab;
+            }
+            set
+            {
+                m_rectGrab = value;
+            }
+        }
 
-        internal Rectangle m_rectGrab = new Rectangle(4, 4, 16, 16); // dr g h ndle矩形(在Cell坐标内)
+        Rectangle m_rectGrab = new Rectangle(4, 4, 16, 16); // dr g h ndle矩形(在Cell坐标内)
 
         #endregion
 

@@ -50,7 +50,7 @@ namespace dp2Circulation
         /// <summary>
         /// 当前窗口所从属的框架窗口
         /// </summary>
-        public MainForm MainForm
+        public virtual MainForm MainForm
         {
             get
             {
@@ -540,6 +540,7 @@ namespace dp2Circulation
         /// 形式校验条码号
         /// </summary>
         /// <param name="strBarcode">要校验的条码号</param>
+        /// <param name="strLibraryCodeList">馆代码列表</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>
         /// <para>-2  服务器没有配置校验方法，无法校验</para>
@@ -615,5 +616,221 @@ namespace dp2Circulation
         {
 
         }
+
+
+        #region 配置文件相关
+
+        // 包装版本
+        // 获得配置文件
+        // parameters:
+        //      
+        // return:
+        //      -1  error
+        //      0   not found
+        //      1   found
+        public int GetCfgFileContent(string strBiblioDbName,
+            string strCfgFileName,
+            out string strContent,
+            out byte[] baOutputTimestamp,
+            out string strError)
+        {
+            return GetCfgFileContent(strBiblioDbName + "/cfgs/" + strCfgFileName,
+            out strContent,
+            out baOutputTimestamp,
+            out strError);
+        }
+
+        int m_nInGetCfgFile = 0;    // 防止GetCfgFile()函数重入 2008/3/6 new add
+
+        // 获得配置文件
+        // parameters:
+        //      
+        // return:
+        //      -1  error
+        //      0   not found
+        //      1   found
+        public int GetCfgFileContent(string strCfgFilePath,
+            out string strContent,
+            out byte[] baOutputTimestamp,
+            out string strError)
+        {
+            baOutputTimestamp = null;
+            strError = "";
+            strContent = "";
+
+            if (m_nInGetCfgFile > 0)
+            {
+                strError = "GetCfgFile() 重入了";
+                return -1;
+            }
+
+
+            Progress.OnStop += new StopEventHandler(this.DoStop);
+            Progress.Initial("正在下载配置文件 ...");
+            Progress.BeginLoop();
+
+            m_nInGetCfgFile++;
+
+            try
+            {
+                Progress.SetMessage("正在下载配置文件 " + strCfgFilePath + " ...");
+                string strMetaData = "";
+                string strOutputPath = "";
+
+                string strStyle = "content,data,metadata,timestamp,outputpath";
+
+                long lRet = Channel.GetRes(Progress,
+                    MainForm.cfgCache,
+                    strCfgFilePath,
+                    strStyle,
+                    null,
+                    out strContent,
+                    out strMetaData,
+                    out baOutputTimestamp,
+                    out strOutputPath,
+                    out strError);
+                if (lRet == -1)
+                {
+                    if (Channel.ErrorCode == ErrorCode.NotFound)
+                        return 0;
+
+                    goto ERROR1;
+                }
+            }
+            finally
+            {
+                Progress.EndLoop();
+                Progress.OnStop -= new StopEventHandler(this.DoStop);
+                Progress.Initial("");
+
+                m_nInGetCfgFile--;
+            }
+
+            return 1;
+        ERROR1:
+            return -1;
+        }
+
+        // 获得配置文件
+        // parameters:
+        //      
+        // return:
+        //      -1  error
+        //      0   not found
+        //      1   found
+        public int GetCfgFile(string strBiblioDbName,
+            string strCfgFileName,
+            out string strOutputFilename,
+            out byte[] baOutputTimestamp,
+            out string strError)
+        {
+            baOutputTimestamp = null;
+            strError = "";
+            strOutputFilename = "";
+
+            if (m_nInGetCfgFile > 0)
+            {
+                strError = "GetCfgFile() 重入了";
+                return -1;
+            }
+
+            Progress.OnStop += new StopEventHandler(this.DoStop);
+            Progress.Initial("正在下载配置文件 ...");
+            Progress.BeginLoop();
+
+            m_nInGetCfgFile++;
+
+            try
+            {
+                string strPath = strBiblioDbName + "/cfgs/" + strCfgFileName;
+
+                Progress.SetMessage("正在下载配置文件 " + strPath + " ...");
+                string strMetaData = "";
+                string strOutputPath = "";
+
+                string strStyle = "content,data,metadata,timestamp,outputpath";
+
+                long lRet = Channel.GetResLocalFile(Progress,
+                    MainForm.cfgCache,
+                    strPath,
+                    strStyle,
+                    out strOutputFilename,
+                    out strMetaData,
+                    out baOutputTimestamp,
+                    out strOutputPath,
+                    out strError);
+                if (lRet == -1)
+                {
+                    if (Channel.ErrorCode == ErrorCode.NotFound)
+                        return 0;
+
+                    goto ERROR1;
+                }
+
+            }
+            finally
+            {
+                Progress.EndLoop();
+                Progress.OnStop -= new StopEventHandler(this.DoStop);
+                Progress.Initial("");
+
+                m_nInGetCfgFile--;
+            }
+
+            return 1;
+        ERROR1:
+            return -1;
+        }
+
+
+        // 保存配置文件
+        public int SaveCfgFile(string strBiblioDbName,
+            string strCfgFileName,
+            string strContent,
+            byte[] baTimestamp,
+            out string strError)
+        {
+            strError = "";
+
+            Progress.OnStop += new StopEventHandler(this.DoStop);
+            Progress.Initial("正在保存配置文件 ...");
+            Progress.BeginLoop();
+
+            try
+            {
+                string strPath = strBiblioDbName + "/cfgs/" + strCfgFileName;
+
+                Progress.SetMessage("正在保存配置文件 " + strPath + " ...");
+
+                byte[] output_timestamp = null;
+                string strOutputPath = "";
+
+                long lRet = Channel.WriteRes(
+                    Progress,
+                    strPath,
+                    strContent,
+                    true,
+                    "",	// style
+                    baTimestamp,
+                    out output_timestamp,
+                    out strOutputPath,
+                    out strError);
+                if (lRet == -1)
+                    goto ERROR1;
+
+            }
+            finally
+            {
+                Progress.EndLoop();
+                Progress.OnStop -= new StopEventHandler(this.DoStop);
+                Progress.Initial("");
+            }
+
+            return 1;
+        ERROR1:
+            return -1;
+        }
+
+        #endregion
     }
 }

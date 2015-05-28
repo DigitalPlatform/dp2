@@ -2543,6 +2543,10 @@ namespace DigitalPlatform.Text
 			string[] aList,
 			bool bIgnoreCase)
 		{
+            // 2015/5/27
+            if (string.IsNullOrEmpty(strSub) == true)
+                return false;
+
             string[] sub_parts = strSub.Split(new char[] { ',' });
 
             // 2012/2/2 增加了处理strSub中包含多个值的能力

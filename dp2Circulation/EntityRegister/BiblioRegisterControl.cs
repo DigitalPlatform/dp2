@@ -18,6 +18,8 @@ using DigitalPlatform.Script;
 using System.IO;
 using DigitalPlatform;
 
+#pragma warning disable 1591
+
 namespace dp2Circulation
 {
     /// <summary>
@@ -2110,3 +2112,5 @@ MessageBoxDefaultButton.Button2);
         public string ErrorInfo = "";   // [out]
     }
 }
+
+#pragma warning restore 1591

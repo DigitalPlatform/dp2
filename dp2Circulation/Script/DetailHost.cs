@@ -26,55 +26,62 @@ namespace dp2Circulation
     /// 详细窗二次开发宿主类
     /// 替代了以前的 Host 类
     /// </summary>
-    public class DetailHost
+    public class DetailHost : IDetailHost
     {
+        ScriptActionCollection _scriptActions = new ScriptActionCollection();
+        IBiblioItemsWindow _detailWindow = null;
+
+        #region IDetailHost 接口要求
+
+        public Form Form
+        {
+            get
+            {
+                return (this.DetailForm as Form);
+            }
+            set
+            {
+                this.DetailForm = (value as EntityForm);
+            }
+        }
+
         /// <summary>
         /// 种册窗
         /// </summary>
-        public EntityForm DetailForm = null;
+        public IBiblioItemsWindow DetailWindow
+        {
+            get
+            {
+                return this._detailWindow;
+            }
+            set
+            {
+                this._detailWindow = value;
+            }
+        }
 
         /// <summary>
         /// 脚本编译后的 Assembly
         /// </summary>
-        public Assembly Assembly = null;
-
-        /// <summary>
-        /// GCAT 通讯通道
-        /// </summary>
-        DigitalPlatform.GcatClient.Channel GcatChannel = null;
+        public Assembly Assembly
+        {
+            get;
+            set;
+        }
 
         /// <summary>
         /// Ctrl+A 功能名称的集合
         /// </summary>
-        public ScriptActionCollection ScriptActions = new ScriptActionCollection();
-
-        /// <summary>
-        /// 构造函数
-        /// </summary>
-        public DetailHost()
+        public ScriptActionCollection ScriptActions
         {
-            //
-            // TODO: Add constructor logic here
-            //
-        }
-
-        /// <summary>
-        /// 调用一个 Ctrl+A 功能
-        /// </summary>
-        /// <param name="strFuncName">功能名</param>
-        public void Invoke(string strFuncName)
-        {
-            Type classType = this.GetType();
-
-            // 调用成员函数
-            classType.InvokeMember(strFuncName,
-                BindingFlags.DeclaredOnly |
-                BindingFlags.Public | BindingFlags.NonPublic |
-                BindingFlags.Instance | BindingFlags.InvokeMethod
-                ,
-                null,
-                this,
-                null);
+            get
+            {
+                return _scriptActions;
+            }
+            set
+            {
+                _scriptActions = value;
+            }
         }
 
         /// <summary>
@@ -85,7 +92,8 @@ namespace dp2Circulation
         /// <param name="e">Ctrl+A 事件参数</param>
         public void Invoke(string strFuncName,
             object sender,
-            GenerateDataEventArgs e)
+            // GenerateDataEventArgs e
+            EventArgs e)
         {
             Type classType = this.GetType();
 
@@ -139,6 +147,83 @@ namespace dp2Circulation
             throw new Exception("函数 void " + strFuncName + "(object sender, GenerateDataEventArgs e) 或 void " + strFuncName + "() 没有找到");
         }
 
+        public virtual void CreateMenu(object sender, GenerateDataEventArgs e)
+        {
+            ScriptActionCollection actions = new ScriptActionCollection();
+
+            if (sender is MarcEditor || sender == null)
+            {
+#if TESTING
+            actions.NewItem("调试用", "调试用", "Test", false);
+#endif
+
+#if NO
+                // 规整ISBN为13
+                actions.NewItem("规整为ISBN-13", "对010$a中ISBN进行规整", "HyphenISBN_13", false);
+
+                // 规整ISBN为10
+                actions.NewItem("规整为ISBN-10", "对010$a中ISBN进行规整", "HyphenISBN_10", false);
+#endif
+            }
+
+            if (sender is BinaryResControl || sender is MarcEditor)
+            {
+                // 856字段
+                actions.NewItem("创建维护856字段", "创建维护856字段", "Manage856", false);
+            }
+
+            if (sender is EntityEditForm || sender is EntityControl || sender is BindingForm)
+            {
+                // 创建索取号
+                actions.NewItem("创建索取号", "为册记录创建索取号", "CreateCallNumber", false);
+
+                // 管理索取号
+                actions.NewItem("管理索取号", "为册记录管理索取号", "ManageCallNumber", false);
+            }
+
+            this.ScriptActions = actions;
+        }
+
+        // 设置菜单加亮状态 -- 856字段
+        void Manage856_setMenu(object sender, SetMenuEventArgs e)
+        {
+            Field curfield = this.DetailForm.MarcEditor.FocusedField;
+            if (curfield != null && curfield.Name == "856")
+                e.Action.Active = true;
+            else
+                e.Action.Active = false;
+        }
+
+        // 设置菜单加亮状态 -- 创建索取号
+        void CreateCallNumber_setMenu(object sender, SetMenuEventArgs e)
+        {
+            e.Action.Active = false;
+            if (e.sender is EntityEditForm)
+                e.Action.Active = true;
+        }
+
+        #endregion
+
+        /// <summary>
+        /// 种册窗
+        /// </summary>
+        public EntityForm DetailForm = null;
+
+        /// <summary>
+        /// GCAT 通讯通道
+        /// </summary>
+        DigitalPlatform.GcatClient.Channel GcatChannel = null;
+
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        public DetailHost()
+        {
+            //
+            // TODO: Add constructor logic here
+            //
+        }
+
         /// <summary>
         /// 入口函数
         /// </summary>
@@ -148,6 +233,152 @@ namespace dp2Circulation
         {
 
         }
+
+        /// <summary>
+        /// 调用一个 Ctrl+A 功能
+        /// </summary>
+        /// <param name="strFuncName">功能名</param>
+        public void Invoke(string strFuncName)
+        {
+            Type classType = this.GetType();
+
+            // 调用成员函数
+            classType.InvokeMember(strFuncName,
+                BindingFlags.DeclaredOnly |
+                BindingFlags.Public | BindingFlags.NonPublic |
+                BindingFlags.Instance | BindingFlags.InvokeMethod
+                ,
+                null,
+                this,
+                null);
+        }
+
+        // 数据保存前的处理工作
+        /// <summary>
+        /// 数据保存前的处理工作
+        /// </summary>
+        /// <param name="sender">事件触发者</param>
+        /// <param name="e">事件参数</param>
+        public virtual void BeforeSaveRecord(object sender,
+            BeforeSaveRecordEventArgs e)
+        {
+            if (sender == null)
+                return;
+
+            int nRet = 0;
+            string strError = "";
+            bool bChanged = false;
+
+            try
+            {
+                // 对MARC记录进行处理
+                if (sender is MarcEditor)
+                {
+                    // 编目批次号
+                    string strBatchNo = this.GetFirstSubfield("998", "a");
+                    if (string.IsNullOrEmpty(strBatchNo) == true)
+                    {
+                        string strValue = "";
+                        // 检查本地 %catalog_batchno% 宏是否存在
+                        // 从marceditor_macrotable.xml文件中解析宏
+                        // return:
+                        //      -1  error
+                        //      0   not found
+                        //      1   found
+                        nRet = MacroUtil.GetFromLocalMacroTable(
+                            PathUtil.MergePath(this.DetailForm.MainForm.DataDir, "marceditor_macrotable.xml"),
+                "catalog_batchno",
+                false,
+                out strValue,
+                out strError);
+                        if (nRet == -1)
+                        {
+                            e.ErrorInfo = strError;
+                            return;
+                        }
+                        if (nRet == 1 && string.IsNullOrEmpty(strValue) == false)
+                        {
+                            this.SetFirstSubfield("998", "a", strValue);
+                            bChanged = true;
+                        }
+                    }
+
+                    // 记录创建时间
+                    string strCreateTime = this.GetFirstSubfield("998", "u");
+                    if (string.IsNullOrEmpty(strCreateTime) == true)
+                    {
+                        DateTime now = DateTime.Now;
+                        strCreateTime = now.ToString("u");
+                        this.SetFirstSubfield("998", "u", strCreateTime);
+                        bChanged = true;
+                    }
+
+                    // 记录创建者
+                    string strCreator = this.GetFirstSubfield("998", "z");
+                    if (string.IsNullOrEmpty(strCreator) == true)
+                    {
+                        strCreator = this.DetailForm.Channel.UserName;
+                        this.SetFirstSubfield("998", "z", strCreator);
+                        bChanged = true;
+                    }
+
+                    e.Changed = bChanged;
+                }
+            }
+            catch (Exception ex)
+            {
+                e.ErrorInfo = ex.Message;
+            }
+        }
+
+        // 验收创建册记录后的处理工作
+        /// <summary>
+        /// 验收创建册记录后的处理工作
+        /// </summary>
+        /// <param name="sender">事件触发者</param>
+        /// <param name="e">事件参数</param>
+        public virtual void AfterCreateItems(object sender,
+            AfterCreateItemsArgs e)
+        {
+            if (sender == null)
+                return;
+#if NO
+            string strError = "";
+            string strHtml = "";
+            // 汇总已经推荐过本书目的评注信息，HTML格式
+            int nRet = this.DetailForm.CommentControl.GetOrderSuggestionHtml(
+                out strHtml,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            if (string.IsNullOrEmpty(strHtml) == true)
+                return;
+
+            strHtml = "<html><head>"
+                +"<style media='screen' type='text/css'>"
+                +"body, input, select { FONT-FAMILY: Microsoft YaHei, Verdana, 宋体; }"
+                +"body { padding: 20px;	background-color: #White; }"
+                + "table { width: 100%; font-size: 12pt; border-style: solid; border-width: 1pt; border-color: #000000;	border-collapse:collapse; border-width: 1pt; } "
+                + "table td { padding : 8px; border-style: dotted; border-width: 1pt; border-color: #555555; } "
+                + "table tr.column td { color: White; background-color: #999999; font-weight: bolder; } "
+                + "</style>"
+                +"</head>"
+                +"<body>" + strHtml + "</body></html>";
+
+            HtmlViewerForm dlg = new HtmlViewerForm();
+            dlg.Text = "荐购者信息";
+            dlg.HtmlString = strHtml;
+            this.DetailForm.MainForm.AppInfo.LinkFormState(dlg, "AfterCreateItems_dialog_state");
+            dlg.ShowDialog(this.DetailForm);
+            this.DetailForm.MainForm.AppInfo.UnlinkFormState(dlg);
+
+            return;
+        ERROR1:
+            MessageBox.Show(this.DetailForm, strError);
+#endif
+        }
+
 
         // parameters:
         //      strIndicator    字段指示符。如果用null调用，则表示不对指示符进行筛选
@@ -3577,7 +3808,6 @@ chi	中文	如果是中文，则为空。
                     Debug.Assert(false, "");
                 }
 
-
                 string strQufenhao = "";
 
                 if (info.QufenhaoType == "zhongcihao"
@@ -3711,131 +3941,7 @@ chi	中文	如果是中文，则为空。
             return -1;
         }
 
-        // 数据保存前的处理工作
-        /// <summary>
-        /// 数据保存前的处理工作
-        /// </summary>
-        /// <param name="sender">事件触发者</param>
-        /// <param name="e">事件参数</param>
-        public virtual void BeforeSaveRecord(object sender,
-            BeforeSaveRecordEventArgs e)
-        {
-            if (sender == null)
-                return;
 
-            int nRet = 0;
-            string strError = "";
-            bool bChanged = false;
-
-            try
-            {
-                // 对MARC记录进行处理
-                if (sender is MarcEditor)
-                {
-                    // 编目批次号
-                    string strBatchNo = this.GetFirstSubfield("998", "a");
-                    if (string.IsNullOrEmpty(strBatchNo) == true)
-                    {
-                        string strValue = "";
-                        // 检查本地 %catalog_batchno% 宏是否存在
-                        // 从marceditor_macrotable.xml文件中解析宏
-                        // return:
-                        //      -1  error
-                        //      0   not found
-                        //      1   found
-                        nRet = MacroUtil.GetFromLocalMacroTable(
-                            PathUtil.MergePath(this.DetailForm.MainForm.DataDir, "marceditor_macrotable.xml"),
-                "catalog_batchno",
-                false,
-                out strValue,
-                out strError);
-                        if (nRet == -1)
-                        {
-                            e.ErrorInfo = strError;
-                            return;
-                        }
-                        if (nRet == 1 && string.IsNullOrEmpty(strValue) == false)
-                        {
-                            this.SetFirstSubfield("998", "a", strValue);
-                            bChanged = true;
-                        }
-                    }
-
-                    // 记录创建时间
-                    string strCreateTime = this.GetFirstSubfield("998", "u");
-                    if (string.IsNullOrEmpty(strCreateTime) == true)
-                    {
-                        DateTime now = DateTime.Now;
-                        strCreateTime = now.ToString("u");
-                        this.SetFirstSubfield("998", "u", strCreateTime);
-                        bChanged = true;
-                    }
-
-                    // 记录创建者
-                    string strCreator = this.GetFirstSubfield("998", "z");
-                    if (string.IsNullOrEmpty(strCreator) == true)
-                    {
-                        strCreator = this.DetailForm.Channel.UserName;
-                        this.SetFirstSubfield("998", "z", strCreator);
-                        bChanged = true;
-                    }
-
-                    e.Changed = bChanged;
-                }
-            }
-            catch (Exception ex)
-            {
-                e.ErrorInfo = ex.Message;
-            }
-        }
-
-        // 验收创建册记录后的处理工作
-        /// <summary>
-        /// 验收创建册记录后的处理工作
-        /// </summary>
-        /// <param name="sender">事件触发者</param>
-        /// <param name="e">事件参数</param>
-        public virtual void AfterCreateItems(object sender,
-            AfterCreateItemsArgs e)
-        {
-            if (sender == null)
-                return;
-#if NO
-            string strError = "";
-            string strHtml = "";
-            // 汇总已经推荐过本书目的评注信息，HTML格式
-            int nRet = this.DetailForm.CommentControl.GetOrderSuggestionHtml(
-                out strHtml,
-                out strError);
-            if (nRet == -1)
-                goto ERROR1;
-
-            if (string.IsNullOrEmpty(strHtml) == true)
-                return;
-
-            strHtml = "<html><head>"
-                +"<style media='screen' type='text/css'>"
-                +"body, input, select { FONT-FAMILY: Microsoft YaHei, Verdana, 宋体; }"
-                +"body { padding: 20px;	background-color: #White; }"
-                + "table { width: 100%; font-size: 12pt; border-style: solid; border-width: 1pt; border-color: #000000;	border-collapse:collapse; border-width: 1pt; } "
-                + "table td { padding : 8px; border-style: dotted; border-width: 1pt; border-color: #555555; } "
-                + "table tr.column td { color: White; background-color: #999999; font-weight: bolder; } "
-                + "</style>"
-                +"</head>"
-                +"<body>" + strHtml + "</body></html>";
-
-            HtmlViewerForm dlg = new HtmlViewerForm();
-            dlg.Text = "荐购者信息";
-            dlg.HtmlString = strHtml;
-            this.DetailForm.MainForm.AppInfo.LinkFormState(dlg, "AfterCreateItems_dialog_state");
-            dlg.ShowDialog(this.DetailForm);
-            this.DetailForm.MainForm.AppInfo.UnlinkFormState(dlg);
-
-            return;
-        ERROR1:
-            MessageBox.Show(this.DetailForm, strError);
-#endif
-        }
 
         // 创建索取号
         /// <summary>

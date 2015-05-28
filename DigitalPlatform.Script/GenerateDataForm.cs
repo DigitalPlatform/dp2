@@ -192,7 +192,6 @@ namespace DigitalPlatform.Script
                     // 说明
                     item.Add(new DpCell(action.Comment));
 
-
                     // 入口函数
                     cell = new DpCell(action.ScriptEntry);
                     cell.ForeColor = SystemColors.GrayText;
@@ -221,8 +220,28 @@ namespace DigitalPlatform.Script
             this.ActionTable.EndUpdate();
         }
 
-        int _processing = 0;    // 是否正在处理中
+        public void DisplayError(string strError)
+        {
+            this.ActionTable.Rows.Clear();
 
+            DpRow item = new DpRow();
+            DpCell cell = new DpCell("");
+            item.Add(cell);
+
+            // 快捷键
+            cell = new DpCell();
+            item.Add(cell);
+
+            // 说明
+            cell = new DpCell(strError);
+            // cell.Font = new Font(this.ActionTable.Font.FontFamily, this.ActionTable.Font.SizeInPoints * 2, FontStyle.Bold, GraphicsUnit.Point);
+            item.Add(cell);
+
+            item.Tag = new ScriptAction();
+            this.ActionTable.Rows.Add(item);
+        }
+
+        int _processing = 0;    // 是否正在处理中
 
         void EnableControls(bool bEnable)
         {
@@ -323,6 +342,9 @@ namespace DigitalPlatform.Script
             }
 
             this.SelectedAction = (ScriptAction)this.ActionTable.SelectedRows[0].Tag;
+            if (this.SelectedAction == null)
+                return; // 一般是因为双击了错误信息行
+
             Debug.Assert(this.SelectedAction != null, "");
 
             this.SelectedIndex = this.Actions.IndexOf(this.SelectedAction);
@@ -409,7 +431,7 @@ namespace DigitalPlatform.Script
                     continue;
                 }
 
-                if (this.Actions.IndexOf(action) == -1)
+                if (this.Actions == null || this.Actions.IndexOf(action) == -1)
                 {
                     row.Selected = false;
                     continue;

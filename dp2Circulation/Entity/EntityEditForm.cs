@@ -1096,9 +1096,10 @@ namespace dp2Circulation
                 if (this.GenerateData != null)
                 {
                     GenerateDataEventArgs e1 = new GenerateDataEventArgs();
-                    e1.FocusedControl = sender; // sender为最原始的子控件
+                    e1.FocusedControl = sender; // sender为 EntityEditControl
                     this.GenerateData(this, e1);
                 }
+                e.e.SuppressKeyPress = true;    // 2015/5/28
                 return;
             }
             else if (e.e.KeyCode == Keys.PageDown && e.e.Control == true)

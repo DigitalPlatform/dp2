@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Windows.Forms;
 
 using DigitalPlatform.GcatClient.gcat_new_ws;
+using DigitalPlatform.GUI;
 
 namespace DigitalPlatform.GcatClient
 {
@@ -393,6 +394,7 @@ out string strError)
                 string strQuestion = questions[questions.Length - 1].Text;
 
                 QuestionDlg dlg = new QuestionDlg();
+                GuiUtil.AutoSetDefaultFont(dlg);    // 2015/5/28
                 dlg.StartPosition = FormStartPosition.CenterScreen;
                 dlg.label_messageTitle.Text = strTitle;
                 dlg.textBox_question.Text = strQuestion.Replace("\n", "\r\n");
@@ -475,6 +477,7 @@ out string strError)
                 string strQuestion = questions[questions.Length - 1].Text;
 
                 QuestionDlg dlg = new QuestionDlg();
+                GuiUtil.AutoSetDefaultFont(dlg);    // 2015/5/28
                 dlg.StartPosition = FormStartPosition.CenterScreen;
                 dlg.label_messageTitle.Text = strTitle;
                 dlg.textBox_question.Text = strQuestion.Replace("\n", "\r\n");

@@ -123,6 +123,7 @@ namespace dp2Circulation
         /// 初始化
         /// </summary>
         /// <param name="mainform">框架窗口</param>
+        /// <param name="webBrowser">浏览器控件</param>
         /// <param name="bDisplayMessage">是否显示消息。缺省为 false</param>
         public void Initial(MainForm mainform,
             WebBrowser webBrowser,
