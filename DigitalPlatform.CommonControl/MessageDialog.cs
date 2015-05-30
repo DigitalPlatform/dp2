@@ -394,9 +394,19 @@ namespace DigitalPlatform.CommonControl
             string strCheckBoxText,
             ref bool bCheckBox)
         {
+            return Show(owner, "", strText,
+                strCheckBoxText, ref bCheckBox);
+        }
+
+        public static DialogResult Show(IWin32Window owner,
+            string strTitle,
+            string strText,
+            string strCheckBoxText,
+            ref bool bCheckBox)
+        {
             MessageDialog dlg = new MessageDialog();
             GuiUtil.AutoSetDefaultFont(dlg); 
-            dlg.Text = "";
+            dlg.Text = strTitle;
             if (strCheckBoxText == null)
                 dlg.CheckBoxVisible = false;
             else

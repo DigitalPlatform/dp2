@@ -116,12 +116,21 @@ namespace DigitalPlatform.CommonControl
 
         //
 
-        static void SetTextBoxState(TextBox textbox, string strText)
+        static void SetTextBoxState(TextBox textbox, string strText, object default_value)
         {
+            if (string.IsNullOrEmpty(strText) == true
+    && default_value != null)
+            {
+                if (default_value is string)
+                    textbox.Text = (default_value as string);
+                else
+                    throw new ArgumentException("TextBox 的缺省值应当为 string 类型", "default_value");
+                return;
+            }
+
             string strState = "";
             if (IsType(strText, textbox, out strState) == false)
                 return;
-
             textbox.Text = StringUtil.UnescapeString(strState);
         }
 
@@ -173,9 +182,20 @@ namespace DigitalPlatform.CommonControl
 
 
 
-        static void SetCheckBoxState(CheckBox checkbox, string strText)
+        static void SetCheckBoxState(CheckBox checkbox, string strText, object default_value)
         {
             string strState = "";
+            if (string.IsNullOrEmpty(strText) == true
+                && default_value != null)
+            {
+                if (default_value is bool)
+                    checkbox.Checked = (bool)default_value;
+                else if (default_value is string)
+                    DomUtil.IsBooleanTrue(default_value as string);
+                else
+                    throw new ArgumentException("CheckBox 的缺省值应当为 bool 或 string 类型", "default_value");
+                return;
+            }
             if (IsType(strText, checkbox, out strState) == false)
                 return;
             if (string.IsNullOrEmpty(strState) == false)
@@ -484,11 +504,25 @@ namespace DigitalPlatform.CommonControl
             string[] sections = strStates.Split(new char [] {';'});
 
             int i = 0;
-            foreach (object control in controls)
+            foreach (object obj in controls)
             {
+#if NO
                 if (i >= sections.Length)
                     break;
-                string strState = sections[i];
+#endif
+                string strState = "";
+                if (i < sections.Length)
+                    strState = sections[i];
+
+                object control = obj;
+
+                object default_value = null;
+                if (obj is ControlWrapper)
+                {
+                    ControlWrapper wrapper = obj as ControlWrapper;
+                    control = wrapper.Control as object;
+                    default_value = wrapper.DefaultValue;
+                }
 
                 if (control is ListView)
                 {
@@ -524,7 +558,7 @@ namespace DigitalPlatform.CommonControl
                 }
                 else if (control is CheckBox)
                 {
-                    SetCheckBoxState(control as CheckBox, strState);
+                    SetCheckBoxState(control as CheckBox, strState, default_value);
                 }
                 else if (control is CheckedListBox)
                 {
@@ -532,7 +566,7 @@ namespace DigitalPlatform.CommonControl
                 }
                 else if (control is TextBox)
                 {
-                    SetTextBoxState(control as TextBox, strState);
+                    SetTextBoxState(control as TextBox, strState, default_value);
                 }
                 else if (control is SavePassword)
                 {
@@ -558,10 +592,22 @@ namespace DigitalPlatform.CommonControl
         {
             StringBuilder text = new StringBuilder(4096);
 
-            foreach (object control in controls)
+            foreach (object obj in controls)
             {
                 if (text.Length > 0)
                     text.Append(";");
+
+                object control = obj;
+
+                // 注：本来集合中没有必要添加 ControlWrapper 对象，但可能出于和 SetUiState() 对称的角度，会复制同样的代码使用 ControlWrapper，等于缺省值部分这里无用罢了
+                //object default_value = null;
+                if (obj is ControlWrapper)
+                {
+                    ControlWrapper wrapper = obj as ControlWrapper;
+                    control = wrapper.Control as object;
+                    //default_value = wrapper.DefaultValue;
+                }
+
 
                 if (control is ListView)
                 {
@@ -679,6 +725,19 @@ GetTextBoxState(control as TextBox)
         {
             this.PasswordTextBox = textbox;
             this.SaveOrNotCheckBox = checkbox;
+        }
+    }
+
+    // 包装 Control 和 缺省值
+    public class ControlWrapper
+    {
+        public Control Control = null;
+        public object DefaultValue = null;
+
+        public ControlWrapper(Control control, object default_value)
+        {
+            this.Control = control;
+            this.DefaultValue = default_value;
         }
     }
 }

@@ -44,14 +44,14 @@ namespace dp2Circulation
             this.label10 = new System.Windows.Forms.Label();
             this.textBox_barcode = new System.Windows.Forms.TextBox();
             this.textBox_price = new System.Windows.Forms.TextBox();
-            this.textBox_comment = new System.Windows.Forms.TextBox();
+            this.textBox_comment = new DigitalPlatform.CommonControl.AutoHeightTextBox();
             this.textBox_borrower = new System.Windows.Forms.TextBox();
             this.textBox_borrowDate = new System.Windows.Forms.TextBox();
             this.textBox_borrowPeriod = new System.Windows.Forms.TextBox();
             this.textBox_recPath = new System.Windows.Forms.TextBox();
             this.textBox_registerNo = new System.Windows.Forms.TextBox();
             this.label11 = new System.Windows.Forms.Label();
-            this.textBox_mergeComment = new System.Windows.Forms.TextBox();
+            this.textBox_mergeComment = new DigitalPlatform.CommonControl.AutoHeightTextBox();
             this.label12 = new System.Windows.Forms.Label();
             this.label13 = new System.Windows.Forms.Label();
             this.textBox_batchNo = new System.Windows.Forms.TextBox();
@@ -94,11 +94,11 @@ namespace dp2Circulation
             this.textBox_intact = new System.Windows.Forms.TextBox();
             this.label21 = new System.Windows.Forms.Label();
             this.label_binding_color = new System.Windows.Forms.Label();
-            this.textBox_binding = new System.Windows.Forms.TextBox();
+            this.textBox_binding = new DigitalPlatform.CommonControl.AutoHeightTextBox();
             this.checkedComboBox_state = new DigitalPlatform.CommonControl.CheckedComboBox();
             this.label22 = new System.Windows.Forms.Label();
             this.label_operations_color = new System.Windows.Forms.Label();
-            this.textBox_operations = new System.Windows.Forms.TextBox();
+            this.textBox_operations = new DigitalPlatform.CommonControl.AutoHeightTextBox();
             this.label23 = new System.Windows.Forms.Label();
             this.label_bindingCost_color = new System.Windows.Forms.Label();
             this.textBox_bindingCost = new System.Windows.Forms.TextBox();
@@ -301,7 +301,7 @@ namespace dp2Circulation
             this.label6.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label6.Location = new System.Drawing.Point(15, 258);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(65, 84);
+            this.label6.Size = new System.Drawing.Size(65, 20);
             this.label6.TabIndex = 34;
             this.label6.Text = "附注";
             this.label6.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -310,7 +310,7 @@ namespace dp2Circulation
             // 
             this.label7.AutoSize = true;
             this.label7.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label7.Location = new System.Drawing.Point(15, 428);
+            this.label7.Location = new System.Drawing.Point(15, 316);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(65, 18);
             this.label7.TabIndex = 43;
@@ -321,7 +321,7 @@ namespace dp2Circulation
             // 
             this.label8.AutoSize = true;
             this.label8.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label8.Location = new System.Drawing.Point(15, 446);
+            this.label8.Location = new System.Drawing.Point(15, 334);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(65, 18);
             this.label8.TabIndex = 46;
@@ -332,7 +332,7 @@ namespace dp2Circulation
             // 
             this.label9.AutoSize = true;
             this.label9.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label9.Location = new System.Drawing.Point(15, 464);
+            this.label9.Location = new System.Drawing.Point(15, 352);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(65, 18);
             this.label9.TabIndex = 49;
@@ -343,7 +343,7 @@ namespace dp2Circulation
             // 
             this.label10.AutoSize = true;
             this.label10.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label10.Location = new System.Drawing.Point(15, 656);
+            this.label10.Location = new System.Drawing.Point(15, 448);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(65, 18);
             this.label10.TabIndex = 61;
@@ -369,6 +369,7 @@ namespace dp2Circulation
             // 
             this.textBox_price.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.textBox_price.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textBox_price.ImeMode = System.Windows.Forms.ImeMode.Disable;
             this.textBox_price.Location = new System.Drawing.Point(92, 153);
             this.textBox_price.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_price.MinimumSize = new System.Drawing.Size(90, 0);
@@ -384,11 +385,11 @@ namespace dp2Circulation
             this.textBox_comment.Dock = System.Windows.Forms.DockStyle.Fill;
             this.textBox_comment.Location = new System.Drawing.Point(92, 260);
             this.textBox_comment.Margin = new System.Windows.Forms.Padding(2);
-            this.textBox_comment.MinimumSize = new System.Drawing.Size(120, 80);
+            this.textBox_comment.MinimumSize = new System.Drawing.Size(120, 0);
             this.textBox_comment.Multiline = true;
             this.textBox_comment.Name = "textBox_comment";
             this.textBox_comment.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_comment.Size = new System.Drawing.Size(247, 80);
+            this.textBox_comment.Size = new System.Drawing.Size(247, 16);
             this.textBox_comment.TabIndex = 36;
             this.textBox_comment.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
             this.textBox_comment.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
@@ -398,7 +399,7 @@ namespace dp2Circulation
             this.textBox_borrower.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.textBox_borrower.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox_borrower.ImeMode = System.Windows.Forms.ImeMode.Disable;
-            this.textBox_borrower.Location = new System.Drawing.Point(92, 430);
+            this.textBox_borrower.Location = new System.Drawing.Point(92, 318);
             this.textBox_borrower.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_borrower.MinimumSize = new System.Drawing.Size(120, 0);
             this.textBox_borrower.Name = "textBox_borrower";
@@ -412,7 +413,7 @@ namespace dp2Circulation
             this.textBox_borrowDate.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.textBox_borrowDate.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox_borrowDate.ImeMode = System.Windows.Forms.ImeMode.Disable;
-            this.textBox_borrowDate.Location = new System.Drawing.Point(92, 448);
+            this.textBox_borrowDate.Location = new System.Drawing.Point(92, 336);
             this.textBox_borrowDate.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_borrowDate.MinimumSize = new System.Drawing.Size(120, 0);
             this.textBox_borrowDate.Name = "textBox_borrowDate";
@@ -425,7 +426,7 @@ namespace dp2Circulation
             // 
             this.textBox_borrowPeriod.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.textBox_borrowPeriod.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBox_borrowPeriod.Location = new System.Drawing.Point(92, 466);
+            this.textBox_borrowPeriod.Location = new System.Drawing.Point(92, 354);
             this.textBox_borrowPeriod.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_borrowPeriod.MinimumSize = new System.Drawing.Size(90, 0);
             this.textBox_borrowPeriod.Name = "textBox_borrowPeriod";
@@ -438,7 +439,7 @@ namespace dp2Circulation
             // 
             this.textBox_recPath.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.textBox_recPath.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBox_recPath.Location = new System.Drawing.Point(92, 658);
+            this.textBox_recPath.Location = new System.Drawing.Point(92, 450);
             this.textBox_recPath.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_recPath.MinimumSize = new System.Drawing.Size(120, 0);
             this.textBox_recPath.Name = "textBox_recPath";
@@ -476,13 +477,13 @@ namespace dp2Circulation
             // 
             this.textBox_mergeComment.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox_mergeComment.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBox_mergeComment.Location = new System.Drawing.Point(92, 344);
+            this.textBox_mergeComment.Location = new System.Drawing.Point(92, 280);
             this.textBox_mergeComment.Margin = new System.Windows.Forms.Padding(2);
-            this.textBox_mergeComment.MinimumSize = new System.Drawing.Size(120, 64);
+            this.textBox_mergeComment.MinimumSize = new System.Drawing.Size(120, 0);
             this.textBox_mergeComment.Multiline = true;
             this.textBox_mergeComment.Name = "textBox_mergeComment";
             this.textBox_mergeComment.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_mergeComment.Size = new System.Drawing.Size(247, 64);
+            this.textBox_mergeComment.Size = new System.Drawing.Size(247, 16);
             this.textBox_mergeComment.TabIndex = 39;
             this.textBox_mergeComment.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
             this.textBox_mergeComment.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
@@ -491,9 +492,9 @@ namespace dp2Circulation
             // 
             this.label12.AutoSize = true;
             this.label12.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label12.Location = new System.Drawing.Point(15, 342);
+            this.label12.Location = new System.Drawing.Point(15, 278);
             this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(65, 68);
+            this.label12.Size = new System.Drawing.Size(65, 20);
             this.label12.TabIndex = 37;
             this.label12.Text = "合并注释";
             this.label12.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -502,7 +503,7 @@ namespace dp2Circulation
             // 
             this.label13.AutoSize = true;
             this.label13.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label13.Location = new System.Drawing.Point(15, 410);
+            this.label13.Location = new System.Drawing.Point(15, 298);
             this.label13.Name = "label13";
             this.label13.Size = new System.Drawing.Size(65, 18);
             this.label13.TabIndex = 40;
@@ -513,7 +514,7 @@ namespace dp2Circulation
             // 
             this.textBox_batchNo.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.textBox_batchNo.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBox_batchNo.Location = new System.Drawing.Point(92, 412);
+            this.textBox_batchNo.Location = new System.Drawing.Point(92, 300);
             this.textBox_batchNo.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_batchNo.MinimumSize = new System.Drawing.Size(90, 0);
             this.textBox_batchNo.Name = "textBox_batchNo";
@@ -622,24 +623,24 @@ namespace dp2Circulation
             this.label_comment_color.Location = new System.Drawing.Point(85, 258);
             this.label_comment_color.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label_comment_color.Name = "label_comment_color";
-            this.label_comment_color.Size = new System.Drawing.Size(3, 84);
+            this.label_comment_color.Size = new System.Drawing.Size(3, 20);
             this.label_comment_color.TabIndex = 35;
             // 
             // label_mergeComment_color
             // 
             this.label_mergeComment_color.AutoSize = true;
             this.label_mergeComment_color.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_mergeComment_color.Location = new System.Drawing.Point(85, 342);
+            this.label_mergeComment_color.Location = new System.Drawing.Point(85, 278);
             this.label_mergeComment_color.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label_mergeComment_color.Name = "label_mergeComment_color";
-            this.label_mergeComment_color.Size = new System.Drawing.Size(3, 68);
+            this.label_mergeComment_color.Size = new System.Drawing.Size(3, 20);
             this.label_mergeComment_color.TabIndex = 38;
             // 
             // label_batchNo_color
             // 
             this.label_batchNo_color.AutoSize = true;
             this.label_batchNo_color.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_batchNo_color.Location = new System.Drawing.Point(85, 410);
+            this.label_batchNo_color.Location = new System.Drawing.Point(85, 298);
             this.label_batchNo_color.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label_batchNo_color.Name = "label_batchNo_color";
             this.label_batchNo_color.Size = new System.Drawing.Size(3, 18);
@@ -649,7 +650,7 @@ namespace dp2Circulation
             // 
             this.label_borrower_color.AutoSize = true;
             this.label_borrower_color.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_borrower_color.Location = new System.Drawing.Point(85, 428);
+            this.label_borrower_color.Location = new System.Drawing.Point(85, 316);
             this.label_borrower_color.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label_borrower_color.Name = "label_borrower_color";
             this.label_borrower_color.Size = new System.Drawing.Size(3, 18);
@@ -659,7 +660,7 @@ namespace dp2Circulation
             // 
             this.label_borrowDate_color.AutoSize = true;
             this.label_borrowDate_color.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_borrowDate_color.Location = new System.Drawing.Point(85, 446);
+            this.label_borrowDate_color.Location = new System.Drawing.Point(85, 334);
             this.label_borrowDate_color.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label_borrowDate_color.Name = "label_borrowDate_color";
             this.label_borrowDate_color.Size = new System.Drawing.Size(3, 18);
@@ -669,7 +670,7 @@ namespace dp2Circulation
             // 
             this.label_borrowPeriod_color.AutoSize = true;
             this.label_borrowPeriod_color.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_borrowPeriod_color.Location = new System.Drawing.Point(85, 464);
+            this.label_borrowPeriod_color.Location = new System.Drawing.Point(85, 352);
             this.label_borrowPeriod_color.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label_borrowPeriod_color.Name = "label_borrowPeriod_color";
             this.label_borrowPeriod_color.Size = new System.Drawing.Size(3, 18);
@@ -679,7 +680,7 @@ namespace dp2Circulation
             // 
             this.label_recPath_color.AutoSize = true;
             this.label_recPath_color.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_recPath_color.Location = new System.Drawing.Point(85, 656);
+            this.label_recPath_color.Location = new System.Drawing.Point(85, 448);
             this.label_recPath_color.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label_recPath_color.Name = "label_recPath_color";
             this.label_recPath_color.Size = new System.Drawing.Size(3, 18);
@@ -832,7 +833,7 @@ namespace dp2Circulation
             // 
             this.label18.AutoSize = true;
             this.label18.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label18.Location = new System.Drawing.Point(15, 674);
+            this.label18.Location = new System.Drawing.Point(15, 466);
             this.label18.Name = "label18";
             this.label18.Size = new System.Drawing.Size(65, 18);
             this.label18.TabIndex = 64;
@@ -843,7 +844,7 @@ namespace dp2Circulation
             // 
             this.label_refID_color.AutoSize = true;
             this.label_refID_color.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_refID_color.Location = new System.Drawing.Point(85, 674);
+            this.label_refID_color.Location = new System.Drawing.Point(85, 466);
             this.label_refID_color.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label_refID_color.Name = "label_refID_color";
             this.label_refID_color.Size = new System.Drawing.Size(3, 18);
@@ -853,7 +854,7 @@ namespace dp2Circulation
             // 
             this.textBox_refID.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox_refID.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBox_refID.Location = new System.Drawing.Point(92, 676);
+            this.textBox_refID.Location = new System.Drawing.Point(92, 468);
             this.textBox_refID.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_refID.MinimumSize = new System.Drawing.Size(120, 0);
             this.textBox_refID.Name = "textBox_refID";
@@ -912,7 +913,7 @@ namespace dp2Circulation
             // 
             this.label20.AutoSize = true;
             this.label20.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label20.Location = new System.Drawing.Point(15, 482);
+            this.label20.Location = new System.Drawing.Point(15, 370);
             this.label20.Name = "label20";
             this.label20.Size = new System.Drawing.Size(65, 18);
             this.label20.TabIndex = 52;
@@ -923,7 +924,7 @@ namespace dp2Circulation
             // 
             this.label_intact_color.AutoSize = true;
             this.label_intact_color.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_intact_color.Location = new System.Drawing.Point(85, 482);
+            this.label_intact_color.Location = new System.Drawing.Point(85, 370);
             this.label_intact_color.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label_intact_color.Name = "label_intact_color";
             this.label_intact_color.Size = new System.Drawing.Size(3, 18);
@@ -933,7 +934,7 @@ namespace dp2Circulation
             // 
             this.textBox_intact.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.textBox_intact.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBox_intact.Location = new System.Drawing.Point(92, 484);
+            this.textBox_intact.Location = new System.Drawing.Point(92, 372);
             this.textBox_intact.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_intact.MinimumSize = new System.Drawing.Size(90, 0);
             this.textBox_intact.Name = "textBox_intact";
@@ -946,9 +947,9 @@ namespace dp2Circulation
             // 
             this.label21.AutoSize = true;
             this.label21.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label21.Location = new System.Drawing.Point(15, 520);
+            this.label21.Location = new System.Drawing.Point(15, 408);
             this.label21.Name = "label21";
-            this.label21.Size = new System.Drawing.Size(65, 68);
+            this.label21.Size = new System.Drawing.Size(65, 20);
             this.label21.TabIndex = 55;
             this.label21.Text = "装订";
             this.label21.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -957,24 +958,24 @@ namespace dp2Circulation
             // 
             this.label_binding_color.AutoSize = true;
             this.label_binding_color.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_binding_color.Location = new System.Drawing.Point(85, 520);
+            this.label_binding_color.Location = new System.Drawing.Point(85, 408);
             this.label_binding_color.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label_binding_color.Name = "label_binding_color";
-            this.label_binding_color.Size = new System.Drawing.Size(3, 68);
+            this.label_binding_color.Size = new System.Drawing.Size(3, 20);
             this.label_binding_color.TabIndex = 56;
             // 
             // textBox_binding
             // 
             this.textBox_binding.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox_binding.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBox_binding.Location = new System.Drawing.Point(92, 522);
+            this.textBox_binding.Location = new System.Drawing.Point(92, 410);
             this.textBox_binding.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_binding.MaxLength = 0;
-            this.textBox_binding.MinimumSize = new System.Drawing.Size(120, 32);
+            this.textBox_binding.MinimumSize = new System.Drawing.Size(120, 0);
             this.textBox_binding.Multiline = true;
             this.textBox_binding.Name = "textBox_binding";
             this.textBox_binding.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_binding.Size = new System.Drawing.Size(247, 64);
+            this.textBox_binding.Size = new System.Drawing.Size(247, 16);
             this.textBox_binding.TabIndex = 57;
             this.textBox_binding.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
             this.textBox_binding.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
@@ -1000,9 +1001,9 @@ namespace dp2Circulation
             // 
             this.label22.AutoSize = true;
             this.label22.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label22.Location = new System.Drawing.Point(15, 588);
+            this.label22.Location = new System.Drawing.Point(15, 428);
             this.label22.Name = "label22";
-            this.label22.Size = new System.Drawing.Size(65, 68);
+            this.label22.Size = new System.Drawing.Size(65, 20);
             this.label22.TabIndex = 58;
             this.label22.Text = "操作";
             this.label22.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -1011,24 +1012,24 @@ namespace dp2Circulation
             // 
             this.label_operations_color.AutoSize = true;
             this.label_operations_color.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_operations_color.Location = new System.Drawing.Point(85, 588);
+            this.label_operations_color.Location = new System.Drawing.Point(85, 428);
             this.label_operations_color.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label_operations_color.Name = "label_operations_color";
-            this.label_operations_color.Size = new System.Drawing.Size(3, 68);
+            this.label_operations_color.Size = new System.Drawing.Size(3, 20);
             this.label_operations_color.TabIndex = 59;
             // 
             // textBox_operations
             // 
             this.textBox_operations.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textBox_operations.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBox_operations.Location = new System.Drawing.Point(92, 590);
+            this.textBox_operations.Location = new System.Drawing.Point(92, 430);
             this.textBox_operations.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_operations.MaxLength = 0;
-            this.textBox_operations.MinimumSize = new System.Drawing.Size(120, 32);
+            this.textBox_operations.MinimumSize = new System.Drawing.Size(120, 0);
             this.textBox_operations.Multiline = true;
             this.textBox_operations.Name = "textBox_operations";
             this.textBox_operations.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_operations.Size = new System.Drawing.Size(247, 64);
+            this.textBox_operations.Size = new System.Drawing.Size(247, 16);
             this.textBox_operations.TabIndex = 60;
             this.textBox_operations.KeyDown += new System.Windows.Forms.KeyEventHandler(this.DoKeyDown);
             this.textBox_operations.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DoKeyPress);
@@ -1037,7 +1038,7 @@ namespace dp2Circulation
             // 
             this.label23.AutoSize = true;
             this.label23.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label23.Location = new System.Drawing.Point(15, 500);
+            this.label23.Location = new System.Drawing.Point(15, 388);
             this.label23.Name = "label23";
             this.label23.Size = new System.Drawing.Size(65, 20);
             this.label23.TabIndex = 67;
@@ -1048,7 +1049,7 @@ namespace dp2Circulation
             // 
             this.label_bindingCost_color.AutoSize = true;
             this.label_bindingCost_color.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label_bindingCost_color.Location = new System.Drawing.Point(85, 500);
+            this.label_bindingCost_color.Location = new System.Drawing.Point(85, 388);
             this.label_bindingCost_color.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label_bindingCost_color.Name = "label_bindingCost_color";
             this.label_bindingCost_color.Size = new System.Drawing.Size(3, 20);
@@ -1058,7 +1059,7 @@ namespace dp2Circulation
             // 
             this.textBox_bindingCost.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.textBox_bindingCost.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textBox_bindingCost.Location = new System.Drawing.Point(92, 503);
+            this.textBox_bindingCost.Location = new System.Drawing.Point(92, 391);
             this.textBox_bindingCost.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_bindingCost.MinimumSize = new System.Drawing.Size(90, 0);
             this.textBox_bindingCost.Name = "textBox_bindingCost";
@@ -1099,14 +1100,12 @@ namespace dp2Circulation
         private System.Windows.Forms.Label label10;
         private System.Windows.Forms.TextBox textBox_barcode;
         private System.Windows.Forms.TextBox textBox_price;
-        private System.Windows.Forms.TextBox textBox_comment;
         private System.Windows.Forms.TextBox textBox_borrower;
         private System.Windows.Forms.TextBox textBox_borrowDate;
         private System.Windows.Forms.TextBox textBox_borrowPeriod;
         private System.Windows.Forms.TextBox textBox_recPath;
         private System.Windows.Forms.TextBox textBox_registerNo;
         private System.Windows.Forms.Label label11;
-        private System.Windows.Forms.TextBox textBox_mergeComment;
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.TextBox textBox_batchNo;
@@ -1151,14 +1150,16 @@ namespace dp2Circulation
         private System.Windows.Forms.TextBox textBox_intact;
         private System.Windows.Forms.Label label21;
         private System.Windows.Forms.Label label_binding_color;
-        private System.Windows.Forms.TextBox textBox_binding;
         private DigitalPlatform.CommonControl.CheckedComboBox checkedComboBox_state;
         private System.Windows.Forms.Label label22;
         private System.Windows.Forms.Label label_operations_color;
-        private System.Windows.Forms.TextBox textBox_operations;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_main;
         private System.Windows.Forms.Label label23;
         private System.Windows.Forms.Label label_bindingCost_color;
         private System.Windows.Forms.TextBox textBox_bindingCost;
+        private DigitalPlatform.CommonControl.AutoHeightTextBox textBox_mergeComment;
+        private DigitalPlatform.CommonControl.AutoHeightTextBox textBox_comment;
+        private DigitalPlatform.CommonControl.AutoHeightTextBox textBox_binding;
+        private DigitalPlatform.CommonControl.AutoHeightTextBox textBox_operations;
     }
 }

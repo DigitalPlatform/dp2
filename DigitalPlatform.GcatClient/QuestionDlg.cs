@@ -145,7 +145,7 @@ namespace DigitalPlatform.GcatClient
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "QuestionDlg";
             this.ShowInTaskbar = false;
-            this.Text = "请回答提问";
+            this.Text = "创建著者号 - 请回答提问";
             this.Load += new System.EventHandler(this.QuestionDlg_Load);
             this.ResumeLayout(false);
             this.PerformLayout();

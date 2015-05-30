@@ -121,6 +121,22 @@ namespace dp2Circulation
 
         #endregion
 
+        // 获得行的宽度。不包括最后按钮一栏
+        internal int GetLineContentPixelWidth()
+        {
+            for (int i = 0; i < this._tableLayoutPanel_main.RowStyles.Count; i++)
+            {
+                Control control = this._tableLayoutPanel_main.GetControlFromPosition(2, i);
+                if (control == null)
+                    continue;
+                Label label = this._tableLayoutPanel_main.GetControlFromPosition(0, i) as Label;
+                if (label == null)
+                    continue;
+                return control.Location.X + control.Width - label.Location.X;
+            }
+
+            return 0;
+        }
 
         internal 
             // virtual 
@@ -130,7 +146,7 @@ namespace dp2Circulation
 
             for (int i = 0; i < this._tableLayoutPanel_main.RowStyles.Count; i++)
             {
-                Label color = this._tableLayoutPanel_main.GetControlFromPosition(2, i) as Label;
+                Label color = this._tableLayoutPanel_main.GetControlFromPosition(1, i) as Label;
                 if (color == null)
                     continue;
                 EditLineState state = color.Tag as EditLineState;
@@ -138,8 +154,10 @@ namespace dp2Circulation
                 {
                     if (state.Changed == true)
                         state.Changed = false;
+                    SetLineState(color, state);
                 }
-                color.BackColor = this._tableLayoutPanel_main.BackColor;
+                else
+                    color.BackColor = this._tableLayoutPanel_main.BackColor;
             }
 
         }
@@ -493,31 +511,37 @@ namespace dp2Circulation
 
         void control_Leave(object sender, EventArgs e)
         {
-            Control control = sender as Control;
-            EditLineState state = GetLineState(control);
-
-            if (state == null)
-                state = new EditLineState();
-
-            if (state.Active == true)
+            //if (this.m_nInSuspend == 0)
             {
-                state.Active = false;
-                SetLineState(control, state);
+                Control control = sender as Control;
+                EditLineState state = GetLineState(control);
+
+                if (state == null)
+                    state = new EditLineState();
+
+                if (state.Active == true)
+                {
+                    state.Active = false;
+                    SetLineState(control, state);
+                }
             }
         }
 
         void control_Enter(object sender, EventArgs e)
         {
-            Control control = sender as Control;
-            EditLineState state = GetLineState(control);
-
-            if (state == null)
-                state = new EditLineState();
-
-            if (state.Active == false)
+            //if (this.m_nInSuspend == 0)
             {
-                state.Active = true;
-                SetLineState(control, state);
+                Control control = sender as Control;
+                EditLineState state = GetLineState(control);
+
+                if (state == null)
+                    state = new EditLineState();
+
+                if (state.Active == false)
+                {
+                    state.Active = true;
+                    SetLineState(control, state);
+                }
             }
         }
 
@@ -592,12 +616,10 @@ namespace dp2Circulation
             return color.Tag as EditLineState;
         }
 
-
         internal void OnPaintContent(object sender, PaintEventArgs e)
         {
             if (this.PaintContent != null)
                 this.PaintContent(this, e);  // sender
-
         }
 
         internal void OnControlKeyDown(object sender, ControlKeyEventArgs e)
@@ -645,6 +667,33 @@ namespace dp2Circulation
         public virtual void SetReadOnly(string strStyle)
         {
             throw new Exception("尚未实现 SetReadonly()");
+        }
+
+        int m_nInSuspend = 0;
+
+        public void DisableUpdate()
+        {
+            if (this.m_nInSuspend == 0
+                && this._tableLayoutPanel_main != null)
+            {
+                this._tableLayoutPanel_main.SuspendLayout();
+            }
+
+            this.m_nInSuspend++;
+        }
+
+        // parameters:
+        //      bOldVisible 如果为true, 表示真的要结束
+        public void EnableUpdate()
+        {
+            this.m_nInSuspend--;
+
+            if (this.m_nInSuspend == 0
+                && this._tableLayoutPanel_main != null)
+            {
+                this._tableLayoutPanel_main.ResumeLayout(false);
+                this._tableLayoutPanel_main.PerformLayout();
+            }
         }
 
     }

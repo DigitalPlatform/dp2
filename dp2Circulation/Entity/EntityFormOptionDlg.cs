@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -14,11 +14,11 @@ namespace dp2Circulation
     internal partial class EntityFormOptionDlg : Form
     {
         /// <summary>
-        /// ¿ò¼Ü´°¿Ú
+        /// æ¡†æ¶çª—å£
         /// </summary>
         public MainForm MainForm = null;
 
-        public string DisplayStyle = "all"; // ÒªÖ»ÏÔÊ¾ÄÄĞ© page? Ä¿Ç°¿ÉÓÃ all / quick_entity
+        public string DisplayStyle = "all"; // è¦åªæ˜¾ç¤ºå“ªäº› page? ç›®å‰å¯ç”¨ all / quick_entity
 
         public EntityFormOptionDlg()
         {
@@ -39,7 +39,7 @@ namespace dp2Circulation
 
             string strError = "";
 
-            // ²áÒ»°ãµÇ¼Ç
+            // å†Œä¸€èˆ¬ç™»è®°
             {
                 string strNormalDefault = this.MainForm.AppInfo.GetString(
                     "entityform_optiondlg",
@@ -61,7 +61,7 @@ namespace dp2Circulation
     false);
             }
 
-            // ²á¿ìËÙµÇ¼Ç
+            // å†Œå¿«é€Ÿç™»è®°
             {
                 string strQuickDefault = this.MainForm.AppInfo.GetString(
                     "entityform_optiondlg",
@@ -80,7 +80,7 @@ namespace dp2Circulation
 
             }
 
-            // ÆÚÒ»°ãµÇ¼Ç
+            // æœŸä¸€èˆ¬ç™»è®°
             {
                 string strIssueNormalDefault = this.MainForm.AppInfo.GetString(
                     "entityform_optiondlg",
@@ -98,7 +98,7 @@ namespace dp2Circulation
                 this.issueEditControl_normalRegisterDefault.GetValueTable += new GetValueTableEventHandler(entityEditControl_GetValueTable);
             }
 
-            // ÆÚ¿ìËÙµÇ¼Ç
+            // æœŸå¿«é€Ÿç™»è®°
             {
                 string strIssueQuickDefault = this.MainForm.AppInfo.GetString(
                     "entityform_optiondlg",
@@ -117,7 +117,7 @@ namespace dp2Circulation
             }
 
 
-            // ¶©¹ºÒ»°ãµÇ¼Ç
+            // è®¢è´­ä¸€èˆ¬ç™»è®°
             {
                 string strOrderNormalDefault = this.MainForm.AppInfo.GetString(
                     "entityform_optiondlg",
@@ -136,7 +136,7 @@ namespace dp2Circulation
             }
 
             // 2012/12/26
-            // ÆÀ×¢Ò»°ãµÇ¼Ç
+            // è¯„æ³¨ä¸€èˆ¬ç™»è®°
             {
                 string strCommentNormalDefault = this.MainForm.AppInfo.GetString(
                     "entityform_optiondlg",
@@ -155,7 +155,7 @@ namespace dp2Circulation
             }
 
 
-            // Ğ£ÑéÌõÂë
+            // æ ¡éªŒæ¡ç 
             this.checkBox_verifyItemBarcode.Checked = this.MainForm.AppInfo.GetBoolean(
                 "entity_form",
                 "verify_item_barcode",
@@ -194,7 +194,7 @@ namespace dp2Circulation
         {
             string strError = "";
 
-            // ²áÒ»°ãµÇ¼Ç
+            // å†Œä¸€èˆ¬ç™»è®°
             {
                 string strNormalDefault = "";
                 this.entityEditControl_normalRegisterDefault.ParentId = "?";
@@ -218,7 +218,7 @@ namespace dp2Circulation
 this.checkBox_normalRegister_simple.Checked);
             }
 
-            // ²á¿ìËÙµÇ¼Ç
+            // å†Œå¿«é€Ÿç™»è®°
             {
                 string strQuickDefault = "";
 
@@ -238,7 +238,7 @@ this.checkBox_normalRegister_simple.Checked);
                 }
             }
 
-            // ÆÚÒ»°ãµÇ¼Ç
+            // æœŸä¸€èˆ¬ç™»è®°
             {
                 string strIssueNormalDefault = "";
                 this.issueEditControl_normalRegisterDefault.ParentId = "?";
@@ -257,7 +257,7 @@ this.checkBox_normalRegister_simple.Checked);
                 }
             }
 
-            // ÆÚ¿ìËÙµÇ¼Ç
+            // æœŸå¿«é€Ÿç™»è®°
             {
                 string strIssueQuickDefault = "";
 
@@ -277,7 +277,7 @@ this.checkBox_normalRegister_simple.Checked);
                 }
             }
 
-            // ¶©¹ºÒ»°ãµÇ¼Ç
+            // è®¢è´­ä¸€èˆ¬ç™»è®°
             {
                 string strOrderNormalDefault = "";
                 this.orderEditControl_normalRegisterDefault.ParentId = "?";
@@ -296,7 +296,7 @@ this.checkBox_normalRegister_simple.Checked);
                 }
             }
 
-            // ÆÀ×¢Ò»°ãµÇ¼Ç
+            // è¯„æ³¨ä¸€èˆ¬ç™»è®°
             {
                 string strCommentNormalDefault = "";
                 this.commentEditControl1.ParentId = "?";

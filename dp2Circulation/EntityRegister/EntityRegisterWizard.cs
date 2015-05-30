@@ -56,8 +56,25 @@ namespace dp2Circulation
             _biblio.GetValueTable += _biblio_GetValueTable;
             _biblio.DeleteItem += _biblio_DeleteItem;
             _biblio.LoadEntities += _biblio_LoadEntities;
-            _biblio.GetDefaultItem += _biblio_GetDefaultItem;
+            _biblio.GetEntityDefault += _biblio_GetEntityDefault;
             _biblio.GenerateData += _biblio_GenerateData;
+            _biblio.VerifyBarcode += _biblio_VerifyBarcode;
+        }
+
+        void _biblio_VerifyBarcode(object sender, VerifyBarcodeEventArgs e)
+        {
+            string strError = "";
+            e.Result = this.VerifyBarcode(
+                this.Channel.LibraryCodeList,
+                e.Barcode,
+                out strError);
+            e.ErrorInfo = strError;
+        }
+
+        public override void EnableControls(bool bEnable)
+        {
+            this.tabControl_main.Enabled = bEnable;
+            this.toolStrip1.Enabled = bEnable;
         }
 
         void _biblio_GenerateData(object sender, GenerateDataEventArgs e)
@@ -65,7 +82,7 @@ namespace dp2Circulation
             this._genData.AutoGenerate(sender, e, this.BiblioRecPath);
         }
 
-        void _biblio_GetDefaultItem(object sender, GetDefaultItemEventArgs e)
+        void _biblio_GetEntityDefault(object sender, GetDefaultItemEventArgs e)
         {
             // 获得册登记缺省值。快速册登记
             e.Xml = this.MainForm.AppInfo.GetString(
@@ -126,6 +143,13 @@ namespace dp2Circulation
                 controls.Add(this.textBox_queryWord);
                 controls.Add(this.splitContainer_biblioAndItems);
                 controls.Add(this.textBox_settings_importantFields);
+                // 此处的缺省值会被忽略
+                controls.Add(new ControlWrapper(this.checkBox_settings_needBookType, true));
+                controls.Add(new ControlWrapper(this.checkBox_settings_needLocation, true));
+                controls.Add(new ControlWrapper(this.checkBox_settings_needAccessNo, true));
+                controls.Add(new ControlWrapper(this.checkBox_settings_needPrice, true));
+                controls.Add(new ControlWrapper(this.checkBox_settings_needItemBarcode, false));
+                controls.Add(new ControlWrapper(this.checkBox_settings_needBatchNo, false));
                 return GuiState.GetUiState(controls);
             }
             set
@@ -135,7 +159,13 @@ namespace dp2Circulation
                 controls.Add(this.comboBox_from);
                 controls.Add(this.textBox_queryWord);
                 controls.Add(this.splitContainer_biblioAndItems);
-                controls.Add(this.textBox_settings_importantFields);
+                controls.Add(new ControlWrapper(this.textBox_settings_importantFields, "010,200,210,215,686,69*,7**".Replace(",", "\r\n")));
+                controls.Add(new ControlWrapper(this.checkBox_settings_needBookType, true));
+                controls.Add(new ControlWrapper(this.checkBox_settings_needLocation, true));
+                controls.Add(new ControlWrapper(this.checkBox_settings_needAccessNo, true));
+                controls.Add(new ControlWrapper(this.checkBox_settings_needPrice, true));
+                controls.Add(new ControlWrapper(this.checkBox_settings_needItemBarcode, false));
+                controls.Add(new ControlWrapper(this.checkBox_settings_needBatchNo, false));
                 GuiState.SetUiState(controls, value);
             }
         }
@@ -171,19 +201,34 @@ namespace dp2Circulation
 
             SetControlsColor();
 
-            this.UiState = this.MainForm.AppInfo.GetString("entityRegisterWizard", "uistate", "");
-            // 缺省值 检索途径
-            if (string.IsNullOrEmpty(this.comboBox_from.Text) == true
-                && this.comboBox_from.Items.Count > 0)
-                this.comboBox_from.Text = this.comboBox_from.Items[0] as string;
-            // 缺省值 书目重要字段
-            if (string.IsNullOrEmpty(this.textBox_settings_importantFields.Text) == true)
-                this.textBox_settings_importantFields.Text = "010,200,210,215,686,69*,7**".Replace(",", "\r\n");
+            {
+                this.UiState = this.MainForm.AppInfo.GetString("entityRegisterWizard", "uistate", "");
+                // 缺省值 检索途径
+                if (string.IsNullOrEmpty(this.comboBox_from.Text) == true
+                    && this.comboBox_from.Items.Count > 0)
+                    this.comboBox_from.Text = this.comboBox_from.Items[0] as string;
+#if NO
+                // 缺省值 书目重要字段
+                if (string.IsNullOrEmpty(this.textBox_settings_importantFields.Text) == true)
+                    this.textBox_settings_importantFields.Text = "010,200,210,215,686,69*,7**".Replace(",", "\r\n");
+#endif
+            }
 
             this._genData = new GenerateData(this, this);
             this._genData.ScriptFileName = "dp2circulation_marc_autogen_2.cs";
             this._genData.DetailHostType = typeof(BiblioItemsHost);
 
+            // 刚打开窗口，设定输入焦点
+            this.BeginInvoke(new Action(SetStartFocus));
+        }
+
+        void SetStartFocus()
+        {
+            if (this.tabControl_main.SelectedTab == this.tabPage_searchBiblio)
+            {
+                this.textBox_queryWord.SelectAll();
+                this.textBox_queryWord.Focus();
+            }
         }
 
         void SetControlsColor()
@@ -1313,9 +1358,16 @@ out string strError)
         private void dpTable_browseLines_DoubleClick(object sender, EventArgs e)
         {
             string strError = "";
+            int nRet = 0;
+
+            if (this.dpTable_browseLines.Rows.Count == 0)
+            {
+                strError = "请先进行检索，并选定命中结果中要编辑的一行";
+                goto ERROR1;
+            }
             if (this.dpTable_browseLines.SelectedRows.Count == 0)
             {
-                strError = "请选择要装入的一行";
+                strError = "请选择要编辑的一行";
                 goto ERROR1;
             }
 
@@ -1328,7 +1380,16 @@ out string strError)
                 goto ERROR1;
             }
 
-            int nRet = SetBiblio(info, out strError);
+            // return:
+            //      false   后续操作可以进行
+            //      true    出现错误，需要人工干预，或者操作者选择了取消，后续操作不能进行
+            if (WarningSaveChange() == true)
+                return;
+
+            // 清除窗口内容
+            _biblio.Clear();
+
+            nRet = SetBiblio(info, out strError);
             if (nRet == -1)
                 goto ERROR1;
 
@@ -1337,6 +1398,38 @@ out string strError)
         ERROR1:
             if (string.IsNullOrEmpty(strError) == false)
                 MessageBox.Show(this, strError);
+        }
+
+        // return:
+        //      false   后续操作可以进行
+        //      true    出现错误，需要人工干预，或者操作者选择了取消，后续操作不能进行
+        bool WarningSaveChange()
+        {
+            // 提示保存修改
+            string strText = _biblio.GetChangedWarningText();
+            if (string.IsNullOrEmpty(strText) == false)
+            {
+                DialogResult result = MessageBox.Show(this.Owner,
+                    strText + "。\r\n\r\n是否保存这些修改?\r\n\r\n是：保存修改; \r\n否: 不保存修改(修改将丢失); \r\n取消: 取消'重新开始'操作)",
+"册登记",
+MessageBoxButtons.YesNoCancel,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button1);
+                if (result == DialogResult.Cancel)
+                    return true;
+                if (result == System.Windows.Forms.DialogResult.Yes)
+                {
+                    // return:
+                    //      -1      保存过程出错
+                    //      0       没有必要保存(例如没有发生过修改)
+                    //      1       保存成功
+                    int nRet = SaveBiblioAndItems();
+                    if (nRet == -1)
+                        return true;
+                }
+            }
+
+            return false;
         }
 
         private void easyMarcControl1_GetConfigDom(object sender, GetConfigDomEventArgs e)
@@ -1835,10 +1928,85 @@ int nCount)
         #region 保存书目记录
 
         // 保存书目记录和下属的册记录
-        void SaveBiblioAndItems()
+        // return:
+        //      -1      保存过程出错
+        //      0       没有必要保存(例如没有发生过修改)
+        //      1       保存成功
+        int SaveBiblioAndItems()
         {
             string strError = "";
             int nRet = 0;
+
+            if (_biblio.BiblioChanged)
+            {
+                List<string> errors = null;
+                // return:
+                //      -1  检查过程出错。错误信息在 strError 中。和返回 1 的区别是，这里是某些因素导致无法检查了，而不是因为册记录格式有错
+                //      0   正确
+                //      1   有错。错误信息在 errors 中
+                nRet = _biblio.VerifyBiblio(
+                    "",
+                    out errors,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                if (nRet == 1)
+                {
+                    bool bTemp = false;
+                    MessageDialog.Show(this,
+                        "书目记录格式不正确",
+                        StringUtil.MakePathList(errors, "\r\n"),
+                        null,
+                        ref bTemp);
+                    strError = "书目记录没有被保存。请修改相关字段后重新提交保存";
+                    goto ERROR1;
+                }
+
+            }
+
+            {
+                List<string> verify_styles = new List<string>();
+
+                if (this.checkBox_settings_needBookType.Checked == true)
+                    verify_styles.Add("need_booktype");
+                if (this.checkBox_settings_needLocation.Checked == true)
+                    verify_styles.Add("need_location");
+                if (this.checkBox_settings_needAccessNo.Checked == true)
+                    verify_styles.Add("need_accessno");
+                if (this.checkBox_settings_needPrice.Checked == true)
+                    verify_styles.Add("need_price");
+                if (this.checkBox_settings_needItemBarcode.Checked == true)
+                    verify_styles.Add("need_barcode");
+                if (this.checkBox_settings_needBatchNo.Checked == true)
+                    verify_styles.Add("need_batchno");
+
+                List<string> errors = null;
+
+                // 检查册记录的格式是否正确
+                // parameters:
+                //      errors  返回册记录出错信息。每个元素返回一个错误信息，顺次对应于每个有错的册记录。文字中有说明，是那个册记录出错
+                // return:
+                //      -1  检查过程出错。错误信息在 strError 中。和返回 1 的区别是，这里是某些因素导致无法检查了，而不是因为册记录格式有错
+                //      0   正确
+                //      1   有错。错误信息在 errors 中
+                nRet = _biblio.VerifyEntities(
+                    StringUtil.MakePathList(verify_styles),
+                    out errors,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                if (nRet == 1)
+                {
+                    bool bTemp = false;
+                    MessageDialog.Show(this,
+                        "册记录格式不正确",
+                        StringUtil.MakePathList(errors, "\r\n"),
+                        null,
+                        ref bTemp);
+                    strError = "记录没有被保存。请修改相关记录后重新提交保存";
+                    goto ERROR1;
+                }
+            }
 
             bool bBiblioSaved = false;
 
@@ -1964,7 +2132,7 @@ int nCount)
                         // line._biblioRegister.BarColor = "G";   // 绿色
                         if (bBiblioSaved == false)
                             this.ShowMessage("没有可保存的信息", "yellow", true);
-                        return;
+                        return 0;
                     }
                 }
 
@@ -1977,7 +2145,7 @@ int nCount)
                 {
                     this.ShowMessage("保存成功", "green", true);
                 }
-                return;
+                return 1;
             }
             finally
             {
@@ -1987,6 +2155,7 @@ int nCount)
             }
         ERROR1:
             this.ShowMessage(strError, "red", true);
+            return -1;
         }
 
         // 获得书目记录的XML格式
@@ -2219,7 +2388,48 @@ int nCount)
 
         private void toolStripButton_start_Click(object sender, EventArgs e)
         {
+#if NO
+            // 提示保存修改
+            string strText = _biblio.GetChangedWarningText();
+            if (string.IsNullOrEmpty(strText) == false)
+            {
+                DialogResult result = MessageBox.Show(this.Owner,
+                    strText + "。\r\n\r\n是否保存这些修改?\r\n\r\n是：保存修改; \r\n否: 不保存修改(修改将丢失); \r\n取消: 取消'重新开始'操作)",
+"册登记",
+MessageBoxButtons.YesNoCancel,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button1);
+                if (result == DialogResult.Cancel)
+                    return;
+                if (result == System.Windows.Forms.DialogResult.Yes)
+                {
+                    // return:
+                    //      -1      保存过程出错
+                    //      0       没有必要保存(例如没有发生过修改)
+                    //      1       保存成功
+                    int nRet = SaveBiblioAndItems();
+                    if (nRet == -1)
+                        return;
+                }
+            }
+#endif
+            this.ClearMessage();
+
+            // return:
+            //      false   后续操作可以进行
+            //      true    出现错误，需要人工干预，或者操作者选择了取消，后续操作不能进行
+            if (WarningSaveChange() == true)
+                return;
+
+            // 清除窗口内容
+            _biblio.Clear();
+
+            this.textBox_queryWord.Text = "";
+            this.dpTable_browseLines.Rows.Clear();
+
             this.tabControl_main.SelectedTab = this.tabPage_searchBiblio;
+
+            this.textBox_queryWord.Focus();
         }
 
         private void toolStripButton_prev_Click(object sender, EventArgs e)
@@ -2235,12 +2445,20 @@ int nCount)
         {
             if (this.tabControl_main.SelectedIndex < this.tabControl_main.TabPages.Count - 1)
             {
+                if (this.tabControl_main.SelectedTab == this.tabPage_searchBiblio)
+                {
+                    dpTable_browseLines_DoubleClick(sender, e);
+                    return;
+                }
+
                 this.tabControl_main.SelectedIndex++;
             }
         }
 
         private void toolStripButton_save_Click(object sender, EventArgs e)
         {
+            this.ClearMessage();
+
             SaveBiblioAndItems();
         }
 
@@ -2248,6 +2466,8 @@ int nCount)
         private void toolStripButton_new_Click(object sender, EventArgs e)
         {
             string strError = "";
+
+            this.ClearMessage();
 
             RegisterBiblioInfo info = null;
             if (this.tabControl_main.SelectedTab == this.tabPage_searchBiblio)
@@ -2262,6 +2482,15 @@ int nCount)
      "");
             // 如果当前不在书目 page，要自动切换到位
             this.tabControl_main.SelectedTab = this.tabPage_biblioAndItems;
+
+            // return:
+            //      false   后续操作可以进行
+            //      true    出现错误，需要人工干预，或者操作者选择了取消，后续操作不能进行
+            if (WarningSaveChange() == true)
+                return;
+
+            // 清除窗口内容
+            _biblio.Clear();
 
             int nRet = SetBiblio(info, out strError);
             if (nRet == -1)

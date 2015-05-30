@@ -32,6 +32,13 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EntityRegisterWizard));
             this.tabControl_main = new System.Windows.Forms.TabControl();
             this.tabPage_settings = new System.Windows.Forms.TabPage();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.checkBox_settings_needBatchNo = new System.Windows.Forms.CheckBox();
+            this.checkBox_settings_needPrice = new System.Windows.Forms.CheckBox();
+            this.checkBox_settings_needBookType = new System.Windows.Forms.CheckBox();
+            this.checkBox_settings_needLocation = new System.Windows.Forms.CheckBox();
+            this.checkBox_settings_needItemBarcode = new System.Windows.Forms.CheckBox();
+            this.checkBox_settings_needAccessNo = new System.Windows.Forms.CheckBox();
             this.textBox_settings_importantFields = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.button_settings_entityDefault = new System.Windows.Forms.Button();
@@ -52,10 +59,11 @@
             this.toolStripButton_next = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_prev = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripButton_save = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_new = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton_save = new System.Windows.Forms.ToolStripButton();
             this.tabControl_main.SuspendLayout();
             this.tabPage_settings.SuspendLayout();
+            this.groupBox1.SuspendLayout();
             this.tabPage_searchBiblio.SuspendLayout();
             this.tabPage_biblioAndItems.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_biblioAndItems)).BeginInit();
@@ -85,6 +93,7 @@
             // 
             this.tabPage_settings.AutoScroll = true;
             this.tabPage_settings.BackColor = System.Drawing.Color.DimGray;
+            this.tabPage_settings.Controls.Add(this.groupBox1);
             this.tabPage_settings.Controls.Add(this.textBox_settings_importantFields);
             this.tabPage_settings.Controls.Add(this.label1);
             this.tabPage_settings.Controls.Add(this.button_settings_entityDefault);
@@ -93,6 +102,81 @@
             this.tabPage_settings.Size = new System.Drawing.Size(466, 213);
             this.tabPage_settings.TabIndex = 2;
             this.tabPage_settings.Text = "参数设定";
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.checkBox_settings_needBatchNo);
+            this.groupBox1.Controls.Add(this.checkBox_settings_needPrice);
+            this.groupBox1.Controls.Add(this.checkBox_settings_needBookType);
+            this.groupBox1.Controls.Add(this.checkBox_settings_needLocation);
+            this.groupBox1.Controls.Add(this.checkBox_settings_needItemBarcode);
+            this.groupBox1.Controls.Add(this.checkBox_settings_needAccessNo);
+            this.groupBox1.Location = new System.Drawing.Point(227, 16);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(230, 184);
+            this.groupBox1.TabIndex = 3;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "册记录格式检查";
+            // 
+            // checkBox_settings_needBatchNo
+            // 
+            this.checkBox_settings_needBatchNo.AutoSize = true;
+            this.checkBox_settings_needBatchNo.Location = new System.Drawing.Point(28, 141);
+            this.checkBox_settings_needBatchNo.Name = "checkBox_settings_needBatchNo";
+            this.checkBox_settings_needBatchNo.Size = new System.Drawing.Size(126, 16);
+            this.checkBox_settings_needBatchNo.TabIndex = 5;
+            this.checkBox_settings_needBatchNo.Text = "必须具备批次号(&B)";
+            this.checkBox_settings_needBatchNo.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_settings_needPrice
+            // 
+            this.checkBox_settings_needPrice.AutoSize = true;
+            this.checkBox_settings_needPrice.Location = new System.Drawing.Point(28, 97);
+            this.checkBox_settings_needPrice.Name = "checkBox_settings_needPrice";
+            this.checkBox_settings_needPrice.Size = new System.Drawing.Size(114, 16);
+            this.checkBox_settings_needPrice.TabIndex = 3;
+            this.checkBox_settings_needPrice.Text = "必须具备价格(&P)";
+            this.checkBox_settings_needPrice.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_settings_needBookType
+            // 
+            this.checkBox_settings_needBookType.AutoSize = true;
+            this.checkBox_settings_needBookType.Location = new System.Drawing.Point(28, 31);
+            this.checkBox_settings_needBookType.Name = "checkBox_settings_needBookType";
+            this.checkBox_settings_needBookType.Size = new System.Drawing.Size(126, 16);
+            this.checkBox_settings_needBookType.TabIndex = 0;
+            this.checkBox_settings_needBookType.Text = "必须具备册类型(&T)";
+            this.checkBox_settings_needBookType.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_settings_needLocation
+            // 
+            this.checkBox_settings_needLocation.AutoSize = true;
+            this.checkBox_settings_needLocation.Location = new System.Drawing.Point(28, 53);
+            this.checkBox_settings_needLocation.Name = "checkBox_settings_needLocation";
+            this.checkBox_settings_needLocation.Size = new System.Drawing.Size(126, 16);
+            this.checkBox_settings_needLocation.TabIndex = 1;
+            this.checkBox_settings_needLocation.Text = "必须具备馆藏地(&L)";
+            this.checkBox_settings_needLocation.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_settings_needItemBarcode
+            // 
+            this.checkBox_settings_needItemBarcode.AutoSize = true;
+            this.checkBox_settings_needItemBarcode.Location = new System.Drawing.Point(28, 119);
+            this.checkBox_settings_needItemBarcode.Name = "checkBox_settings_needItemBarcode";
+            this.checkBox_settings_needItemBarcode.Size = new System.Drawing.Size(138, 16);
+            this.checkBox_settings_needItemBarcode.TabIndex = 4;
+            this.checkBox_settings_needItemBarcode.Text = "必须具备册条码号(&B)";
+            this.checkBox_settings_needItemBarcode.UseVisualStyleBackColor = true;
+            // 
+            // checkBox_settings_needAccessNo
+            // 
+            this.checkBox_settings_needAccessNo.AutoSize = true;
+            this.checkBox_settings_needAccessNo.Location = new System.Drawing.Point(28, 75);
+            this.checkBox_settings_needAccessNo.Name = "checkBox_settings_needAccessNo";
+            this.checkBox_settings_needAccessNo.Size = new System.Drawing.Size(126, 16);
+            this.checkBox_settings_needAccessNo.TabIndex = 2;
+            this.checkBox_settings_needAccessNo.Text = "必须具备索取号(&A)";
+            this.checkBox_settings_needAccessNo.UseVisualStyleBackColor = true;
             // 
             // textBox_settings_importantFields
             // 
@@ -310,8 +394,8 @@
             this.toolStripButton_next,
             this.toolStripButton_prev,
             this.toolStripSeparator1,
-            this.toolStripButton_save,
-            this.toolStripButton_new});
+            this.toolStripButton_new,
+            this.toolStripButton_save});
             this.toolStrip1.Location = new System.Drawing.Point(0, 244);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(473, 25);
@@ -358,16 +442,6 @@
             this.toolStripSeparator1.Name = "toolStripSeparator1";
             this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
             // 
-            // toolStripButton_save
-            // 
-            this.toolStripButton_save.ForeColor = System.Drawing.Color.White;
-            this.toolStripButton_save.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_save.Image")));
-            this.toolStripButton_save.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton_save.Name = "toolStripButton_save";
-            this.toolStripButton_save.Size = new System.Drawing.Size(52, 22);
-            this.toolStripButton_save.Text = "保存";
-            this.toolStripButton_save.Click += new System.EventHandler(this.toolStripButton_save_Click);
-            // 
             // toolStripButton_new
             // 
             this.toolStripButton_new.ForeColor = System.Drawing.Color.White;
@@ -378,6 +452,16 @@
             this.toolStripButton_new.Text = "新建";
             this.toolStripButton_new.ToolTipText = "新建书目记录";
             this.toolStripButton_new.Click += new System.EventHandler(this.toolStripButton_new_Click);
+            // 
+            // toolStripButton_save
+            // 
+            this.toolStripButton_save.ForeColor = System.Drawing.Color.White;
+            this.toolStripButton_save.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_save.Image")));
+            this.toolStripButton_save.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_save.Name = "toolStripButton_save";
+            this.toolStripButton_save.Size = new System.Drawing.Size(52, 22);
+            this.toolStripButton_save.Text = "保存";
+            this.toolStripButton_save.Click += new System.EventHandler(this.toolStripButton_save_Click);
             // 
             // EntityRegisterWizard
             // 
@@ -399,6 +483,8 @@
             this.tabControl_main.ResumeLayout(false);
             this.tabPage_settings.ResumeLayout(false);
             this.tabPage_settings.PerformLayout();
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
             this.tabPage_searchBiblio.ResumeLayout(false);
             this.tabPage_searchBiblio.PerformLayout();
             this.tabPage_biblioAndItems.ResumeLayout(false);
@@ -439,5 +525,12 @@
         private System.Windows.Forms.Button button_settings_entityDefault;
         private System.Windows.Forms.TextBox textBox_settings_importantFields;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.CheckBox checkBox_settings_needAccessNo;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.CheckBox checkBox_settings_needItemBarcode;
+        private System.Windows.Forms.CheckBox checkBox_settings_needLocation;
+        private System.Windows.Forms.CheckBox checkBox_settings_needBookType;
+        private System.Windows.Forms.CheckBox checkBox_settings_needPrice;
+        private System.Windows.Forms.CheckBox checkBox_settings_needBatchNo;
     }
 }

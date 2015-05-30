@@ -1,4 +1,4 @@
-#define SINGLE_CHANNEL
+ï»¿#define SINGLE_CHANNEL
 // #define USE_LOCK
 
 using System;
@@ -18,39 +18,38 @@ using DigitalPlatform.CommonControl;
 using System.Web;
 using System.IO;
 
-
 namespace dp2Circulation
 {
     /// <summary>
-    /// ÓÃÓÚºÍä¯ÀÀÆ÷¿Ø¼ş½Ó¿ÚµÄËŞÖ÷Àà
+    /// ç”¨äºå’Œæµè§ˆå™¨æ§ä»¶æ¥å£çš„å®¿ä¸»ç±»
     /// </summary>
     [PermissionSet(SecurityAction.Demand, Name = "FullTrust")]
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
     public class WebExternalHost : ThreadBase, IDisposable
     {
         /// <summary>
-        /// Êä³öµ÷ÊÔĞÅÏ¢µÄÊÂ¼ş
+        /// è¾“å‡ºè°ƒè¯•ä¿¡æ¯çš„äº‹ä»¶
         /// </summary>
         public event OutputDebugInfoEventHandler OutputDebugInfo = null;
 
         /// <summary>
-        /// ¹ØÁªµÄ WebBrowser
+        /// å…³è”çš„ WebBrowser
         /// </summary>
         public WebBrowser WebBrowser = null;
         /// <summary>
-        /// £¿£¿£¿
+        /// ï¼Ÿï¼Ÿï¼Ÿ
         /// </summary>
         public bool DisplayMessage = true; 
 
         /// <summary>
-        /// »ñµÃ×ÊÔ´µÄ±¾µØÎÄ¼şÂ·¾¶
+        /// è·å¾—èµ„æºçš„æœ¬åœ°æ–‡ä»¶è·¯å¾„
         /// </summary>
         public event GetLocalFilePathEventHandler GetLocalPath = null;
 
         /// <summary>
-        /// ä¯ÀÀÆ÷¿Ø¼şÊÇ·ñÊôÓÚ Hover Window
+        /// æµè§ˆå™¨æ§ä»¶æ˜¯å¦å±äº Hover Window
         /// </summary>
-        public bool IsBelongToHoverWindow = false; // ×Ô¼ºÊÇ·ñ¾ÍÊôÓÚhover window
+        public bool IsBelongToHoverWindow = false; // è‡ªå·±æ˜¯å¦å°±å±äºhover window
 
         bool m_bLoop = false;
 
@@ -58,11 +57,11 @@ namespace dp2Circulation
 
 #if USE_LOCK
         internal ReaderWriterLock m_lock = new ReaderWriterLock();
-        internal static int m_nLockTimeout = 5000;	// 5000=5Ãë
+        internal static int m_nLockTimeout = 5000;	// 5000=5ç§’
 #endif
 
         /// <summary>
-        /// Í¨Ñ¶Í¨µÀÊÇ·ñÕıÔÚÊ¹ÓÃÖĞ
+        /// é€šè®¯é€šé“æ˜¯å¦æ­£åœ¨ä½¿ç”¨ä¸­
         /// </summary>
         public bool ChannelInUse
         {
@@ -75,7 +74,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// µ±Ç°ÊÇ·ñÕıÔÚÑ­»·ÖĞ
+        /// å½“å‰æ˜¯å¦æ­£åœ¨å¾ªç¯ä¸­
         /// </summary>
         public bool IsInLoop
         {
@@ -90,7 +89,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ¿ò¼Ü´°¿Ú
+        /// æ¡†æ¶çª—å£
         /// </summary>
         public MainForm MainForm = null;
 
@@ -98,7 +97,7 @@ namespace dp2Circulation
 
 #if SINGLE_CHANNEL
         /// <summary>
-        /// Í¨Ñ¶Í¨µÀ
+        /// é€šè®¯é€šé“
         /// </summary>
         public LibraryChannel Channel = new LibraryChannel();
 #else
@@ -106,12 +105,12 @@ namespace dp2Circulation
 #endif
 
         /// <summary>
-        /// ÓïÑÔ´úÂë
+        /// è¯­è¨€ä»£ç 
         /// </summary>
         public string Lang = "zh";
 
         /// <summary>
-        /// ÊÍ·Å×ÊÔ´
+        /// é‡Šæ”¾èµ„æº
         /// </summary>
         public void Dispose()
         {
@@ -120,11 +119,11 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ³õÊ¼»¯
+        /// åˆå§‹åŒ–
         /// </summary>
-        /// <param name="mainform">¿ò¼Ü´°¿Ú</param>
-        /// <param name="webBrowser">ä¯ÀÀÆ÷¿Ø¼ş</param>
-        /// <param name="bDisplayMessage">ÊÇ·ñÏÔÊ¾ÏûÏ¢¡£È±Ê¡Îª false</param>
+        /// <param name="mainform">æ¡†æ¶çª—å£</param>
+        /// <param name="webBrowser">æµè§ˆå™¨æ§ä»¶</param>
+        /// <param name="bDisplayMessage">æ˜¯å¦æ˜¾ç¤ºæ¶ˆæ¯ã€‚ç¼ºçœä¸º false</param>
         public void Initial(MainForm mainform,
             WebBrowser webBrowser,
             bool bDisplayMessage = false)
@@ -151,7 +150,7 @@ namespace dp2Circulation
             if (bDisplayMessage == true)
             {
                 stop = new DigitalPlatform.Stop();
-                stop.Register(MainForm.stopManager, true);	// ºÍÈİÆ÷¹ØÁª
+                stop.Register(MainForm.stopManager, true);	// å’Œå®¹å™¨å…³è”
             }
 
             // this.BeginThread();
@@ -163,7 +162,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ´İ»Ù±¾¶ÔÏó
+        /// æ‘§æ¯æœ¬å¯¹è±¡
         /// </summary>
         public void Destroy()
         {
@@ -183,9 +182,9 @@ namespace dp2Circulation
             CloseAllChannels();
             this.Channels = null;
 #endif
-            if (stop != null) // ÍÑÀë¹ØÁª
+            if (stop != null) // è„±ç¦»å…³è”
             {
-                stop.Unregister();	// ºÍÈİÆ÷¹ØÁª
+                stop.Unregister();	// å’Œå®¹å™¨å…³è”
                 stop = null;
             }
 
@@ -194,7 +193,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// Í£Ö¹Í¨Ñ¶
+        /// åœæ­¢é€šè®¯
         /// </summary>
         public void Stop()
         {
@@ -217,38 +216,38 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// µ±Ç°ÊÇ·ñ¿ÉÒÔµ÷ÓÃĞÂµÄÃüÁîÁË
+        /// å½“å‰æ˜¯å¦å¯ä»¥è°ƒç”¨æ–°çš„å‘½ä»¤äº†
         /// </summary>
-        /// <param name="commander">Commander¶ÔÏó</param>
-        /// <param name="msg">ÏûÏ¢</param>
-        /// <returns>ÊÇ·ñ¿ÉÒÔµ÷ÓÃĞÂµÄÃüÁî</returns>
+        /// <param name="commander">Commanderå¯¹è±¡</param>
+        /// <param name="msg">æ¶ˆæ¯</param>
+        /// <returns>æ˜¯å¦å¯ä»¥è°ƒç”¨æ–°çš„å‘½ä»¤</returns>
         public bool CanCallNew(Commander commander,
             int msg)
         {
             if (this.IsInLoop == true)
             {
-                // »º±øÖ®¼Æ
+                // ç¼“å…µä¹‹è®¡
                 this.IsInLoop = false;
                 commander.AddMessage(msg);
-                return false;   // »¹²»ÄÜÆô¶¯
+                return false;   // è¿˜ä¸èƒ½å¯åŠ¨
             }
 
-            Debug.Assert(this.IsInLoop == false, "Æô¶¯Ç°·¢ÏÖÉÏÒ»´ÎÑ­»·ÉĞÎ´Í£Ö¹");
+            Debug.Assert(this.IsInLoop == false, "å¯åŠ¨å‰å‘ç°ä¸Šä¸€æ¬¡å¾ªç¯å°šæœªåœæ­¢");
 
             if (this.ChannelInUse == true)
             {
-                // »º±øÖ®¼Æ
+                // ç¼“å…µä¹‹è®¡
                 this.Stop();
                 commander.AddMessage(msg);
-                return false;   // »¹²»ÄÜÆô¶¯
+                return false;   // è¿˜ä¸èƒ½å¯åŠ¨
             }
 
-            Debug.Assert(this.ChannelInUse == false, "Æô¶¯Ç°·¢ÏÖÍ¨µÀ»¹Î´ÊÍ·Å");
-            return true;    // ¿ÉÒÔÆô¶¯
+            Debug.Assert(this.ChannelInUse == false, "å¯åŠ¨å‰å‘ç°é€šé“è¿˜æœªé‡Šæ”¾");
+            return true;    // å¯ä»¥å¯åŠ¨
         }
 
         /// <summary>
-        /// Í£Ö¹Ç°Ò»¸öÃüÁî
+        /// åœæ­¢å‰ä¸€ä¸ªå‘½ä»¤
         /// </summary>
         public void StopPrevious()
         {
@@ -296,7 +295,7 @@ namespace dp2Circulation
                 i--;
             }
 
-            // TODO: ÈçºÎ¶ÔÍ¨µÀ½øĞĞ»ØÊÕÀûÓÃ£¿ÊÇ·ñÉèÁ¢Ò»¸öÊ±¼ä²î¶îµÄ³ÉÔ±£¬ÔÚÒ»¶¨Ê±¼äºóÖØÓÃ?
+            // TODO: å¦‚ä½•å¯¹é€šé“è¿›è¡Œå›æ”¶åˆ©ç”¨ï¼Ÿæ˜¯å¦è®¾ç«‹ä¸€ä¸ªæ—¶é—´å·®é¢çš„æˆå‘˜ï¼Œåœ¨ä¸€å®šæ—¶é—´åé‡ç”¨?
         }
 
         LibraryChannel GetChannelByID(string strID)
@@ -340,7 +339,7 @@ namespace dp2Circulation
 #endif
 
         /// <summary>
-        /// ¿ªÊ¼Ñ­»·
+        /// å¼€å§‹å¾ªç¯
         /// </summary>
         public void BeginLoop()
         {
@@ -348,7 +347,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ½áÊøÑ­»·
+        /// ç»“æŸå¾ªç¯
         /// </summary>
         public void EndLoop()
         {
@@ -358,9 +357,9 @@ namespace dp2Circulation
         int m_nInHoverProperty = 0;
 
         /// <summary>
-        /// ÏÔÊ¾²áÊôĞÔ
+        /// æ˜¾ç¤ºå†Œå±æ€§
         /// </summary>
-        /// <param name="strItemBarcode">²áÌõÂëºÅ</param>
+        /// <param name="strItemBarcode">å†Œæ¡ç å·</param>
         public void HoverItemProperty(string strItemBarcode)
         {
             this.m_nInHoverProperty++;
@@ -379,7 +378,7 @@ namespace dp2Circulation
                     return;
 
                 if (this.MainForm.GetItemPropertyTitle() == strItemBarcode)
-                    return; // ÓÅ»¯
+                    return; // ä¼˜åŒ–
 
                 if (string.IsNullOrEmpty(strItemBarcode) == true)
                 {
@@ -394,7 +393,7 @@ namespace dp2Circulation
                 if (stop != null)
                 {
                     stop.OnStop += new StopEventHandler(this.DoStop);
-                    stop.SetMessage("ÕıÔÚ»ñÈ¡²áĞÅÏ¢ '" + strItemBarcode + "' ...");
+                    stop.SetMessage("æ­£åœ¨è·å–å†Œä¿¡æ¯ '" + strItemBarcode + "' ...");
                     stop.BeginLoop();
                 }
 
@@ -405,11 +404,11 @@ namespace dp2Circulation
                     this.m_inSearch++;
 
 #if SINGLE_CHANNEL
-                    // ÒòÎª±¾¶ÔÏóÖ»ÓĞÒ»¸öChannelÍ¨µÀ£¬ËùÒÔÒªËø¶¨Ê¹ÓÃ
+                    // å› ä¸ºæœ¬å¯¹è±¡åªæœ‰ä¸€ä¸ªChannelé€šé“ï¼Œæ‰€ä»¥è¦é”å®šä½¿ç”¨
                     if (this.m_inSearch > 1)
                     {
                         /*
-                        strError = "Channel±»Õ¼ÓÃ";
+                        strError = "Channelè¢«å ç”¨";
                         goto ERROR1;
                          * */
                         this.m_inSearch--;
@@ -443,7 +442,7 @@ namespace dp2Circulation
                             out strError);
                         if (lRet == 0)
                         {
-                            strError = "²áÌõÂëºÅ '" + strItemBarcode + "' Ã»ÓĞÕÒµ½";
+                            strError = "å†Œæ¡ç å· '" + strItemBarcode + "' æ²¡æœ‰æ‰¾åˆ°";
                             goto ERROR1;
                         }
                         if (lRet == -1)
@@ -470,7 +469,7 @@ namespace dp2Circulation
                     }
                     catch
                     {
-                        // return "GetObjectFilePath()Òì³£: " + ex.Message;
+                        // return "GetObjectFilePath()å¼‚å¸¸: " + ex.Message;
                         throw;
                     }
                     finally
@@ -503,11 +502,11 @@ namespace dp2Circulation
 
         // 
         /// <summary>
-        /// ´ò¿ª MDI ×Ó´°¿Ú
+        /// æ‰“å¼€ MDI å­çª—å£
         /// </summary>
-        /// <param name="strFormName">´°¿ÚÃû³Æ¡£ItemInfoForm / EntityForm / ReaderInfoForm</param>
-        /// <param name="strParameter">²ÎÊı×Ö·û´®</param>
-        /// <param name="bOpenNew">ÊÇ·ñ´ò¿ªĞÂµÄ´°¿Ú</param>
+        /// <param name="strFormName">çª—å£åç§°ã€‚ItemInfoForm / EntityForm / ReaderInfoForm</param>
+        /// <param name="strParameter">å‚æ•°å­—ç¬¦ä¸²</param>
+        /// <param name="bOpenNew">æ˜¯å¦æ‰“å¼€æ–°çš„çª—å£</param>
         public void OpenForm(string strFormName, 
             string strParameter,
             bool bOpenNew)
@@ -527,7 +526,7 @@ namespace dp2Circulation
                     form.MdiParent = this.MainForm;
                     form.Show();
                 }
-                form.LoadRecord(strParameter);  // ÓÃ²áÌõÂëºÅ×°ÔØ
+                form.LoadRecord(strParameter);  // ç”¨å†Œæ¡ç å·è£…è½½
                 return;
             }
 
@@ -546,7 +545,7 @@ namespace dp2Circulation
                     form.MdiParent = this.MainForm;
                     form.Show();
                 }
-                form.LoadItemByBarcode(strParameter, false);  // ÓÃ²áÌõÂëºÅ×°ÔØ
+                form.LoadItemByBarcode(strParameter, false);  // ç”¨å†Œæ¡ç å·è£…è½½
                 return;
             }
 
@@ -619,13 +618,13 @@ namespace dp2Circulation
         }
 
         //
-        // TODO: »ñµÃ¶ÁÕß¼ÇÂ¼XMLÊ±£¬¾¡Á¿ÓÃCache¡£CacheµÄ¶ÁÕß¼ÇÂ¼ÖĞ<dprms:file>Ò»°ã²»»áÓĞ±ä¶¯
+        // TODO: è·å¾—è¯»è€…è®°å½•XMLæ—¶ï¼Œå°½é‡ç”¨Cacheã€‚Cacheçš„è¯»è€…è®°å½•ä¸­<dprms:file>ä¸€èˆ¬ä¸ä¼šæœ‰å˜åŠ¨
         /// <summary>
-        ///  »ñµÃ¶ÔÏó±¾µØÎÄ¼şÂ·¾¶
+        ///  è·å¾—å¯¹è±¡æœ¬åœ°æ–‡ä»¶è·¯å¾„
         /// </summary>
-        /// <param name="strPatronBarcode">¶ÁÕßÖ¤ÌõÂëºÅ£¬»òÕßÃüÁî×Ö·û´®</param>
-        /// <param name="strUsage">ÓÃÍ¾</param>
-        /// <returns>±¾µØÎÄ¼şÂ·¾¶</returns>
+        /// <param name="strPatronBarcode">è¯»è€…è¯æ¡ç å·ï¼Œæˆ–è€…å‘½ä»¤å­—ç¬¦ä¸²</param>
+        /// <param name="strUsage">ç”¨é€”</param>
+        /// <returns>æœ¬åœ°æ–‡ä»¶è·¯å¾„</returns>
         public string GetObjectFilePath(string strPatronBarcode,
             string strUsage)
         {
@@ -634,7 +633,7 @@ namespace dp2Circulation
 
             /*
             if (this.IsInLoop == false)
-                throw new Exception("ÒÑ¾­²»ÔÚÑ­»·ÖĞ");
+                throw new Exception("å·²ç»ä¸åœ¨å¾ªç¯ä¸­");
              * */
             long lRet = 0;
 
@@ -644,7 +643,7 @@ namespace dp2Circulation
             if (string.IsNullOrEmpty(strPatronBarcode) == true)
                 return strNoneFilePath;
 
-            // »ñµÃ±¾µØÍ¼Ïñ×ÊÔ´
+            // è·å¾—æœ¬åœ°å›¾åƒèµ„æº
             if (strPatronBarcode == "?")
             {
                 // return this.MainForm.DataDir + "/~current_unsaved_patron_photo.png";
@@ -684,7 +683,7 @@ namespace dp2Circulation
             if (stop != null)
             {
                 stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.SetMessage("ÕıÔÚ»ñÈ¡¶ÁÕßÕÕÆ¬ '" + strPatronBarcode + "' ...");
+                stop.SetMessage("æ­£åœ¨è·å–è¯»è€…ç…§ç‰‡ '" + strPatronBarcode + "' ...");
                 stop.BeginLoop();
             }
 
@@ -693,10 +692,10 @@ namespace dp2Circulation
                 // Application.DoEvents();
 
 #if SINGLE_CHANNEL
-                // ÒòÎª±¾¶ÔÏóÖ»ÓĞÒ»¸öChannelÍ¨µÀ£¬ËùÒÔÒªËø¶¨Ê¹ÓÃ
+                // å› ä¸ºæœ¬å¯¹è±¡åªæœ‰ä¸€ä¸ªChannelé€šé“ï¼Œæ‰€ä»¥è¦é”å®šä½¿ç”¨
                 if (this.m_inSearch > 0)
                 {
-                    return "Channel±»Õ¼ÓÃ";
+                    return "Channelè¢«å ç”¨";
                 }
                 //// LibraryChannel channel = this.Channel;
 #else
@@ -709,22 +708,22 @@ namespace dp2Circulation
                     string strResPath = "";
                     if (StringUtil.HasHead(strPatronBarcode, "object-path:") == true)
                     {
-                        // ¿ÉÒÔÖ±½Ó»ñµÃÍ¼Ïñ¶ÔÏó
+                        // å¯ä»¥ç›´æ¥è·å¾—å›¾åƒå¯¹è±¡
                         strResPath = strPatronBarcode.Substring("object-path:".Length);
                         if (string.IsNullOrEmpty(strResPath) == true)
                             return strNoneFilePath;
                     }
                     else
                     {
-                        // ĞèÒªÏÈÈ¡µÃ¶ÁÕß¼ÇÂ¼È»ºóÔÙ»ñµÃÍ¼Ïñ¶ÔÏó
+                        // éœ€è¦å…ˆå–å¾—è¯»è€…è®°å½•ç„¶åå†è·å¾—å›¾åƒå¯¹è±¡
                         string strXml = "";
                         string strOutputPath = "";
 
-                        // »ñµÃ»º´æÖĞµÄ¶ÁÕß¼ÇÂ¼XML
+                        // è·å¾—ç¼“å­˜ä¸­çš„è¯»è€…è®°å½•XML
                         // return:
-                        //      -1  ³ö´í
-                        //      0   Ã»ÓĞÕÒµ½
-                        //      1   ÕÒµ½
+                        //      -1  å‡ºé”™
+                        //      0   æ²¡æœ‰æ‰¾åˆ°
+                        //      1   æ‰¾åˆ°
                         int nRet = this.MainForm.GetCachedReaderXml(strPatronBarcode,
                             "",
         out strXml,
@@ -756,7 +755,7 @@ namespace dp2Circulation
                             }
                             else if (lRet > 1)
                             {
-                                strError = "¶ÁÕßÖ¤ÌõÂëºÅ " + strPatronBarcode + " ÓĞÖØ¸´¼ÇÂ¼ " + lRet.ToString() + "Ìõ";
+                                strError = "è¯»è€…è¯æ¡ç å· " + strPatronBarcode + " æœ‰é‡å¤è®°å½• " + lRet.ToString() + "æ¡";
                                 throw new Exception(strError);
                                 // return strError;
                             }
@@ -764,7 +763,7 @@ namespace dp2Circulation
                             Debug.Assert(results.Length > 0, "");
                             strXml = results[0];
 
-                            // ¼ÓÈëµ½»º´æ
+                            // åŠ å…¥åˆ°ç¼“å­˜
                             this.MainForm.SetReaderXmlCache(strPatronBarcode,
                                 "",
                                 strXml,
@@ -778,7 +777,7 @@ namespace dp2Circulation
                         }
                         catch (Exception ex)
                         {
-                            strError = "¶ÁÕß¼ÇÂ¼XML×°ÈëDOMÊ±³ö´í: " + ex.Message;
+                            strError = "è¯»è€…è®°å½•XMLè£…å…¥DOMæ—¶å‡ºé”™: " + ex.Message;
                             throw new Exception(strError);
                             // return strError;
                         }
@@ -810,7 +809,7 @@ namespace dp2Circulation
                     // string strTempFilePath = this.MainForm.DataDir + "/~temp_obj";
 
                     string strTempFilePath = GetTempFileName();
-                    // TODO: ÊÇ·ñ¿ÉÒÔ½¨Á¢±¾µØ cache »úÖÆ
+                    // TODO: æ˜¯å¦å¯ä»¥å»ºç«‹æœ¬åœ° cache æœºåˆ¶
 
                     byte[] baOutputTimeStamp = null;
 
@@ -829,7 +828,7 @@ namespace dp2Circulation
                         out strError);
                     if (lRet == -1)
                     {
-                        strError = "ÏÂÔØ×ÊÔ´ÎÄ¼şÊ§°Ü£¬Ô­Òò: " + strError;
+                        strError = "ä¸‹è½½èµ„æºæ–‡ä»¶å¤±è´¥ï¼ŒåŸå› : " + strError;
                         throw new Exception(strError);
                         // return strError;
                     }
@@ -838,7 +837,7 @@ namespace dp2Circulation
                 }
                 catch/*(Exception ex)*/
                 {
-                    // return "GetObjectFilePath()Òì³£: " + ex.Message;
+                    // return "GetObjectFilePath()å¼‚å¸¸: " + ex.Message;
                     throw;
                 }
                 finally
@@ -877,14 +876,14 @@ namespace dp2Circulation
 
         // 
         /// <summary>
-        /// »ñµÃ¶ÁÕßÕªÒª
+        /// è·å¾—è¯»è€…æ‘˜è¦
         /// </summary>
-        /// <param name="strPatronBarcode">¶ÁÕßÖ¤ÌõÂëºÅ£¬»òÕßÃüÁî×Ö·û´®</param>
-        /// <returns>¶ÁÕßÕªÒª</returns>
+        /// <param name="strPatronBarcode">è¯»è€…è¯æ¡ç å·ï¼Œæˆ–è€…å‘½ä»¤å­—ç¬¦ä¸²</param>
+        /// <returns>è¯»è€…æ‘˜è¦</returns>
         public string GetPatronSummary(string strPatronBarcode)
         {
             if (this.IsInLoop == false)
-                throw new Exception("ÒÑ¾­²»ÔÚÑ­»·ÖĞ");
+                throw new Exception("å·²ç»ä¸åœ¨å¾ªç¯ä¸­");
 
             if (this.DisplayMessage == true && stop == null)
             {
@@ -905,13 +904,13 @@ namespace dp2Circulation
 
             int nRet = strPatronBarcode.IndexOf("|");
             if (nRet != -1)
-                return "Ö¤ÌõÂëºÅ×Ö·û´® '"+strPatronBarcode+"' ÖĞ²»Ó¦¸ÃÓĞÊúÏß×Ö·û";
+                return "è¯æ¡ç å·å­—ç¬¦ä¸² '"+strPatronBarcode+"' ä¸­ä¸åº”è¯¥æœ‰ç«–çº¿å­—ç¬¦";
 
 
-            // ¿´¿´cacheÖĞÊÇ·ñÒÑ¾­ÓĞÁË
+            // çœ‹çœ‹cacheä¸­æ˜¯å¦å·²ç»æœ‰äº†
             StringCacheItem item = null;
             item = this.MainForm.SummaryCache.SearchItem(
-                "P:" + strPatronBarcode);   // Ç°×ºÊÇÎªÁËºÍ²áÌõÂëºÅÇø±ğ
+                "P:" + strPatronBarcode);   // å‰ç¼€æ˜¯ä¸ºäº†å’Œå†Œæ¡ç å·åŒºåˆ«
             if (item != null)
             {
                 // Application.DoEvents();
@@ -943,7 +942,7 @@ namespace dp2Circulation
             if (stop != null)
             {
                 stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.SetMessage("ÕıÔÚ»ñÈ¡¶ÁÕßÕªÒª '" + strPatronBarcode + "' ...");
+                stop.SetMessage("æ­£åœ¨è·å–è¯»è€…æ‘˜è¦ '" + strPatronBarcode + "' ...");
                 stop.BeginLoop();
             }
 
@@ -952,10 +951,10 @@ namespace dp2Circulation
                     // Application.DoEvents();
 
 #if SINGLE_CHANNEL
-                    // ÒòÎª±¾¶ÔÏóÖ»ÓĞÒ»¸öChannelÍ¨µÀ£¬ËùÒÔÒªËø¶¨Ê¹ÓÃ
+                    // å› ä¸ºæœ¬å¯¹è±¡åªæœ‰ä¸€ä¸ªChannelé€šé“ï¼Œæ‰€ä»¥è¦é”å®šä½¿ç”¨
                     if (this.m_inSearch > 0)
                     {
-                        return "Channel±»Õ¼ÓÃ";
+                        return "Channelè¢«å ç”¨";
                     }
                     //// LibraryChannel channel = this.Channel;
 #else
@@ -979,7 +978,7 @@ namespace dp2Circulation
                         }
                         else if (lRet > 1)
                         {
-                            strSummary = "¶ÁÕßÖ¤ÌõÂëºÅ " + strPatronBarcode + " ÓĞÖØ¸´¼ÇÂ¼ " + lRet.ToString() + "Ìõ";
+                            strSummary = "è¯»è€…è¯æ¡ç å· " + strPatronBarcode + " æœ‰é‡å¤è®°å½• " + lRet.ToString() + "æ¡";
                             return strSummary;
                         }
 
@@ -997,24 +996,24 @@ namespace dp2Circulation
                         }
                         catch (Exception ex)
                         {
-                            strSummary = "¶ÁÕß¼ÇÂ¼XML×°ÈëDOMÊ±³ö´í: " + ex.Message;
+                            strSummary = "è¯»è€…è®°å½•XMLè£…å…¥DOMæ—¶å‡ºé”™: " + ex.Message;
                             return strSummary;
                         }
 
-                        // ¶ÁÕßĞÕÃû
+                        // è¯»è€…å§“å
                         strSummary = DomUtil.GetElementText(dom.DocumentElement,
                             "name");
                     }
                     catch (Exception ex)
                     {
-                        return "GetPatronSummary()Òì³£: " + ex.Message;
+                        return "GetPatronSummary()å¼‚å¸¸: " + ex.Message;
                     }
                     finally
                     {
                         this.m_inSearch--;
                     }
 
-                    // Èç¹ûcacheÖĞÃ»ÓĞ£¬Ôò¼ÓÈëcache
+                    // å¦‚æœcacheä¸­æ²¡æœ‰ï¼Œåˆ™åŠ å…¥cache
                     item = this.MainForm.SummaryCache.EnsureItem(
                         "P:" + strPatronBarcode);
                     item.Content = strSummary;
@@ -1049,22 +1048,22 @@ namespace dp2Circulation
             this.AddCall(call);
         }
 
-        // ÒÔÇ°µÄ°æ±¾£º»ñµÃÊéÄ¿ÕªÒª
-        // TODO: ÊÇ·ñ¿ÉÒÔ±»ÓĞÒâÖĞ¶Ï?
+        // ä»¥å‰çš„ç‰ˆæœ¬ï¼šè·å¾—ä¹¦ç›®æ‘˜è¦
+        // TODO: æ˜¯å¦å¯ä»¥è¢«æœ‰æ„ä¸­æ–­?
         /// <summary>
-        /// »ñµÃÊéÄ¿ÕªÒª
+        /// è·å¾—ä¹¦ç›®æ‘˜è¦
         /// </summary>
-        /// <param name="strItemBarcodeUnionPath">²áÌõÂëºÅ£¬»òÕßÃüÁî×Ö·û´®¡£xxxxx  B:xxxxx  BC:xxxxx °üº¬·âÃæ</param>
-        /// <param name="bCutting">ÊÇ·ñ½Ø¶Ï¹ı³¤µÄ½á¹û×Ö·û´®</param>
-        /// <returns>ÊéÄ¿ÕªÒª</returns>
+        /// <param name="strItemBarcodeUnionPath">å†Œæ¡ç å·ï¼Œæˆ–è€…å‘½ä»¤å­—ç¬¦ä¸²ã€‚xxxxx  B:xxxxx  BC:xxxxx åŒ…å«å°é¢</param>
+        /// <param name="bCutting">æ˜¯å¦æˆªæ–­è¿‡é•¿çš„ç»“æœå­—ç¬¦ä¸²</param>
+        /// <returns>ä¹¦ç›®æ‘˜è¦</returns>
         public string GetSummary(String strItemBarcodeUnionPath,
             bool bCutting = true)
         {
             if (string.IsNullOrEmpty(strItemBarcodeUnionPath) == true)
-                return "strItemBarcodeUnionPathÎª¿Õ";
+                return "strItemBarcodeUnionPathä¸ºç©º";
 
             if (this.IsInLoop == false)
-                throw new Exception("ÒÑ¾­²»ÔÚÑ­»·ÖĞ");
+                throw new Exception("å·²ç»ä¸åœ¨å¾ªç¯ä¸­");
             // Debug.WriteLine("id=" + strIdString);
 
             if (this.DisplayMessage == true && stop == null)
@@ -1092,7 +1091,7 @@ namespace dp2Circulation
 
             // test Thread.Sleep(1000);
 
-            // ¿´¿´cacheÖĞÊÇ·ñÒÑ¾­ÓĞÁË
+            // çœ‹çœ‹cacheä¸­æ˜¯å¦å·²ç»æœ‰äº†
             StringCacheItem item = null;
 
             item = this.MainForm.SummaryCache.SearchItem(strItemBarcodeUnionPath);
@@ -1100,7 +1099,7 @@ namespace dp2Circulation
             {
                 // Application.DoEvents();
                 strSummary = item.Content;
-                goto END1;  // »¹Òª½Ø¶Ï
+                goto END1;  // è¿˜è¦æˆªæ–­
             }
 
             int nRet = strItemBarcodeUnionPath.IndexOf("|");
@@ -1118,7 +1117,7 @@ namespace dp2Circulation
                     strConfirmItemRecPath = strConfirmItemRecPath.Substring(0, nRet);
             }
 
-            // ´¦Àí B:xxxxxx ĞÎÌ¬ 2014/12/27 
+            // å¤„ç† B:xxxxxx å½¢æ€ 2014/12/27 
             bool bContainCover = false;
             {
                 string strPrefix = "";
@@ -1142,7 +1141,7 @@ namespace dp2Circulation
             if (stop != null)
             {
                 stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.SetMessage("ÕıÔÚ»ñÈ¡ÊéÄ¿ÕªÒª '" + strItemBarcode + "' ...");
+                stop.SetMessage("æ­£åœ¨è·å–ä¹¦ç›®æ‘˜è¦ '" + strItemBarcode + "' ...");
                 stop.BeginLoop();
             }
 
@@ -1151,10 +1150,10 @@ namespace dp2Circulation
                 // Application.DoEvents();
 
 #if SINGLE_CHANNEL
-                // ÒòÎª±¾¶ÔÏóÖ»ÓĞÒ»¸öChannelÍ¨µÀ£¬ËùÒÔÒªËø¶¨Ê¹ÓÃ
+                // å› ä¸ºæœ¬å¯¹è±¡åªæœ‰ä¸€ä¸ªChannelé€šé“ï¼Œæ‰€ä»¥è¦é”å®šä½¿ç”¨
                 if (this.m_inSearch > 0)
                 {
-                    return "Channel±»Õ¼ÓÃ";
+                    return "Channelè¢«å ç”¨";
                 }
                 //// LibraryChannel channel = this.Channel;
 #else
@@ -1182,14 +1181,14 @@ namespace dp2Circulation
                 }
                 catch (Exception ex)
                 {
-                    return "GetBiblioSummary()Òì³£: " + ex.Message;
+                    return "GetBiblioSummary()å¼‚å¸¸: " + ex.Message;
                 }
                 finally
                 {
                     this.m_inSearch--;
                 }
 
-                // Èç¹ûcacheÖĞÃ»ÓĞ£¬Ôò¼ÓÈëcache
+                // å¦‚æœcacheä¸­æ²¡æœ‰ï¼Œåˆ™åŠ å…¥cache
                 item = this.MainForm.SummaryCache.EnsureItem(strItemBarcodeUnionPath);
                 item.Content = strSummary;
             }
@@ -1236,7 +1235,7 @@ namespace dp2Circulation
                     if (text != null)
                     {
                         string strInnerText = text.Value;
-                        // ½Ø¶Ï
+                        // æˆªæ–­
                         if (strInnerText.Length > 25)
                             strInnerText = strInnerText.Substring(0, 25) + "...";
 
@@ -1256,7 +1255,7 @@ namespace dp2Circulation
                 }
                 else
                 {
-                    // ½Ø¶Ï
+                    // æˆªæ–­
                     if (strSummary.Length > 25)
                         strSummary = strSummary.Substring(0, 25) + "...";
 
@@ -1272,7 +1271,7 @@ namespace dp2Circulation
 
         bool _doEvents = true;
         internal ReaderWriterLock m_lock = new ReaderWriterLock();
-        internal static int m_nLockTimeout = 5000;	// 5000=5Ãë
+        internal static int m_nLockTimeout = 5000;	// 5000=5ç§’
 
         List<AsyncCall> m_calls = new List<AsyncCall>();
 
@@ -1317,7 +1316,7 @@ namespace dp2Circulation
 
         List<AsyncCall> _doingCalls = new List<AsyncCall>();
 
-        // ¹¤×÷Ïß³ÌÃ¿Ò»ÂÖÑ­»·µÄÊµÖÊĞÔ¹¤×÷
+        // å·¥ä½œçº¿ç¨‹æ¯ä¸€è½®å¾ªç¯çš„å®è´¨æ€§å·¥ä½œ
         public override void Worker()
         {
             this.m_lock.AcquireWriterLock(m_nLockTimeout);
@@ -1354,7 +1353,7 @@ namespace dp2Circulation
                     if (this.IsInLoop == false)
                         return;
 
-                    this._doEvents = false; // Ö»Òªµ÷ÓÃ¹ıÒ»´ÎÒì²½¹¦ÄÜ£¬´Ó´Ë¾Í²»³öÈÃ¿ØÖÆÈ¨
+                    this._doEvents = false; // åªè¦è°ƒç”¨è¿‡ä¸€æ¬¡å¼‚æ­¥åŠŸèƒ½ï¼Œä»æ­¤å°±ä¸å‡ºè®©æ§åˆ¶æƒ
 
                     //Debug.WriteLine("Call " + call.FuncType);
                     if (call.FuncType == "AsyncGetObjectFilePath")
@@ -1368,7 +1367,7 @@ namespace dp2Circulation
                         {
                             strResult = ex.Message;
                             // 2014/9/9
-                            DoOutputDebugInfo("Òì³££º" + ex.Message);
+                            DoOutputDebugInfo("å¼‚å¸¸ï¼š" + ex.Message);
                             goto CONTINUE;
                         }
 
@@ -1407,8 +1406,8 @@ namespace dp2Circulation
                     throw;
                  * */
                 // 2014/9/9
-                // ÒªÔÚÒ»¸ö¿ØÖÆÌ¨Êä³öÕâĞ©Òì³£ĞÅÏ¢£¬°ïÖúÕï¶Ï
-                DoOutputDebugInfo("Òì³££º" + ex.Message);
+                // è¦åœ¨ä¸€ä¸ªæ§åˆ¶å°è¾“å‡ºè¿™äº›å¼‚å¸¸ä¿¡æ¯ï¼Œå¸®åŠ©è¯Šæ–­
+                DoOutputDebugInfo("å¼‚å¸¸ï¼š" + ex.Message);
             }
         }
 
@@ -1425,11 +1424,11 @@ namespace dp2Circulation
         #endregion
 
         /// <summary>
-        /// ÉèÖÃ HTML Ò³ÄÚÈİ
-        /// ×Ô¶¯Í£Ö¹ÏÈÇ°µÄÒì²½´¦Àí
+        /// è®¾ç½® HTML é¡µå†…å®¹
+        /// è‡ªåŠ¨åœæ­¢å…ˆå‰çš„å¼‚æ­¥å¤„ç†
         /// </summary>
-        /// <param name="strHtml">HTML ×Ö·û´®</param>
-        /// <param name="strTempFileType">ÁÙÊ±ÎÄ¼şÇ°×º</param>
+        /// <param name="strHtml">HTML å­—ç¬¦ä¸²</param>
+        /// <param name="strTempFileType">ä¸´æ—¶æ–‡ä»¶å‰ç¼€</param>
         public void SetHtmlString(string strHtml,
             string strTempFileType)
         {
@@ -1445,11 +1444,11 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÉèÖÃ ÎÄ±¾ Ò³ÄÚÈİ
-        /// ×Ô¶¯Í£Ö¹ÏÈÇ°µÄÒì²½´¦Àí
+        /// è®¾ç½® æ–‡æœ¬ é¡µå†…å®¹
+        /// è‡ªåŠ¨åœæ­¢å…ˆå‰çš„å¼‚æ­¥å¤„ç†
         /// </summary>
-        /// <param name="strText">HTML ×Ö·û´®</param>
-        /// <param name="strTempFileType">ÁÙÊ±ÎÄ¼şÇ°×º</param>
+        /// <param name="strText">HTML å­—ç¬¦ä¸²</param>
+        /// <param name="strTempFileType">ä¸´æ—¶æ–‡ä»¶å‰ç¼€</param>
         public void SetTextString(string strText,
             string strTempFileType = "")
         {
@@ -1459,7 +1458,7 @@ namespace dp2Circulation
             if (string.IsNullOrEmpty(strTempFileType) == true)
                 strTempFileType = "temp_text";
 
-            // TODO: ´ó×Ö¾ÓÖĞÏÔÊ¾
+            // TODO: å¤§å­—å±…ä¸­æ˜¾ç¤º
             string strHtml = @"<html>
 <head>
 <style type='text/css'>
@@ -1491,8 +1490,8 @@ text-align: center;
         }
 
         /// <summary>
-        /// Çå¿Õ HTML Ò³
-        /// ×Ô¶¯Í£Ö¹ÏÈÇ°µÄÒì²½´¦Àí
+        /// æ¸…ç©º HTML é¡µ
+        /// è‡ªåŠ¨åœæ­¢å…ˆå‰çš„å¼‚æ­¥å¤„ç†
         /// </summary>
         public void ClearHtmlPage()
         {
@@ -1503,52 +1502,52 @@ text-align: center;
 
     class AsyncCall
     {
-        public string FuncType = "";    // ¹¦ÄÜÀàĞÍ
-        // object ContextObject = null;    // ÉÏÏÂÎÄ¶ÔÏó
+        public string FuncType = "";    // åŠŸèƒ½ç±»å‹
+        // object ContextObject = null;    // ä¸Šä¸‹æ–‡å¯¹è±¡
 
         public object[] InputParameters = null;
     }
 
     // 
     /// <summary>
-    /// »ñµÃ×ÊÔ´(ÏÂÔØµ½±¾µØÁÙÊ±ÎÄ¼ş)µÄ±¾µØÂ·¾¶ÊÂ¼ş
+    /// è·å¾—èµ„æº(ä¸‹è½½åˆ°æœ¬åœ°ä¸´æ—¶æ–‡ä»¶)çš„æœ¬åœ°è·¯å¾„äº‹ä»¶
     /// </summary>
-    /// <param name="sender">·¢ËÍÕß</param>
-    /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+    /// <param name="sender">å‘é€è€…</param>
+    /// <param name="e">äº‹ä»¶å‚æ•°</param>
     public delegate void GetLocalFilePathEventHandler(object sender,
 GetLocalFilePathEventArgs e);
 
     /// <summary>
-    /// »ñµÃ×ÊÔ´(ÏÂÔØµ½±¾µØÁÙÊ±ÎÄ¼ş)µÄ±¾µØÂ·¾¶ÊÂ¼şµÄ²ÎÊı
+    /// è·å¾—èµ„æº(ä¸‹è½½åˆ°æœ¬åœ°ä¸´æ—¶æ–‡ä»¶)çš„æœ¬åœ°è·¯å¾„äº‹ä»¶çš„å‚æ•°
     /// </summary>
     public class GetLocalFilePathEventArgs : EventArgs
     {
         /// <summary>
-        /// Ãû³Æ
+        /// åç§°
         /// </summary>
         public string Name = "";
         /// <summary>
-        /// ·µ»Ø±¾µØÎÄ¼şÂ·¾¶
+        /// è¿”å›æœ¬åœ°æ–‡ä»¶è·¯å¾„
         /// </summary>
-        public string LocalFilePath = "";   // ×ÊÔ´±¾µØÂ·¾¶¡£Èç¹û·µ»Ønull£¬±íÊ¾Ã»ÓĞÕâ¸ö×ÊÔ´£¬»òÕß¶ÔÏóÒÑ¾­ÉÏÔØ
+        public string LocalFilePath = "";   // èµ„æºæœ¬åœ°è·¯å¾„ã€‚å¦‚æœè¿”å›nullï¼Œè¡¨ç¤ºæ²¡æœ‰è¿™ä¸ªèµ„æºï¼Œæˆ–è€…å¯¹è±¡å·²ç»ä¸Šè½½
     }
 
     /// <summary>
-    /// Êä³öµ÷ÊÔĞÅÏ¢ÊÂ¼ş
+    /// è¾“å‡ºè°ƒè¯•ä¿¡æ¯äº‹ä»¶
     /// </summary>
-    /// <param name="sender">·¢ËÍÕß</param>
-    /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+    /// <param name="sender">å‘é€è€…</param>
+    /// <param name="e">äº‹ä»¶å‚æ•°</param>
     public delegate void OutputDebugInfoEventHandler(object sender,
 OutputDebugInfoEventArgs e);
 
     /// <summary>
-    /// Êä³öµ÷ÊÔĞÅÏ¢ÊÂ¼şµÄ²ÎÊı
+    /// è¾“å‡ºè°ƒè¯•ä¿¡æ¯äº‹ä»¶çš„å‚æ•°
     /// </summary>
     public class OutputDebugInfoEventArgs : EventArgs
     {
         /// <summary>
-        /// µ÷ÊÔĞÅÏ¢ÎÄ±¾ÄÚÈİ
-        /// ½¨ÒéÃ¿´ÎÏÔÊ¾ÎªĞÂµÄÒ»ĞĞ
+        /// è°ƒè¯•ä¿¡æ¯æ–‡æœ¬å†…å®¹
+        /// å»ºè®®æ¯æ¬¡æ˜¾ç¤ºä¸ºæ–°çš„ä¸€è¡Œ
         /// </summary>
         public string Text = "";
     }

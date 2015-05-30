@@ -109,7 +109,6 @@ namespace DigitalPlatform.EasyMarc
 
         bool m_bHideSelection = true;
 
-
         [Category("Appearance")]
         [DescriptionAttribute("HideSelection")]
         [DefaultValue(true)]
@@ -155,6 +154,9 @@ namespace DigitalPlatform.EasyMarc
         }
 
         bool _hideIndicator = true;
+        /// <summary>
+        /// 是否要隐藏字段指示符?
+        /// </summary>
         public bool HideIndicator
         {
             get
@@ -193,7 +195,9 @@ namespace DigitalPlatform.EasyMarc
             }
         }
 #endif
-
+        /// <summary>
+        /// 获得当前已经选定的事项列表
+        /// </summary>
         public List<EasyLine> SelectedItems
         {
             get
@@ -211,6 +215,9 @@ namespace DigitalPlatform.EasyMarc
             }
         }
 
+        /// <summary>
+        /// 获得当前已经选定的事项的下标的列表
+        /// </summary>
         public List<int> SelectedIndices
         {
             get
@@ -228,6 +235,9 @@ namespace DigitalPlatform.EasyMarc
             }
         }
 
+        /// <summary>
+        /// 全选所有事项
+        /// </summary>
         public void SelectAll()
         {
             for (int i = 0; i < this.Items.Count; i++)
@@ -240,6 +250,21 @@ namespace DigitalPlatform.EasyMarc
             this.Invalidate();
         }
 
+#if NO
+        internal void AsyncSetAutoScrollPosition(Point p)
+        {
+            this.BeginInvoke(new Action<Point>(_setAutoScrollPosition), p);
+        }
+
+        void _setAutoScrollPosition(Point p)
+        {
+            this.SetAutoScrollPosition(p);
+        }
+#endif
+
+        /// <summary>
+        /// 获得本控件内部使用的 TableLayoutPanel 对象
+        /// </summary>
         public TableLayoutPanel TableLayoutPanel
         {
             get
@@ -247,9 +272,16 @@ namespace DigitalPlatform.EasyMarc
                 return this.tableLayoutPanel_content;
             }
         }
-
+        
+        /// <summary>
+        /// 确保一个事项处在可见范围
+        /// </summary>
+        /// <param name="item">EasyItem 对象</param>
         public void EnsureVisible(EasyLine item)
         {
+            if (item.Visible == true)
+                this.ScrollControlIntoView(item.label_caption);
+#if NO
             int[] row_heights = this.tableLayoutPanel_content.GetRowHeights();
             int nYOffs = 0; // row_heights[0];
             int i = 0;  // 1
@@ -270,6 +302,7 @@ namespace DigitalPlatform.EasyMarc
                 // 刚好进入下部
                 this.AutoScrollPosition = new Point(this.AutoScrollOffset.X, nYOffs - this.ClientSize.Height + row_heights[i]);
             }
+#endif
         }
 
         public ImageList ImageListIcons
@@ -325,6 +358,62 @@ namespace DigitalPlatform.EasyMarc
             return results;
         }
 
+        // parameters:
+        //      strStyle    要删除哪些空元素? visible/hidden
+        public void DeleteBlankElements(string strStyle)
+        {
+            bool bVisible = StringUtil.IsInList("visible", strStyle);
+            bool bHidden = StringUtil.IsInList("hidden", strStyle);
+
+            if (StringUtil.IsInList("all", strStyle) == true)
+                bVisible = bHidden = true;
+
+            List<EasyLine> selected_lines = new List<EasyLine>();
+            FieldLine current_field = null;
+            foreach (EasyLine line in this.Items)
+            {
+                if (line is FieldLine)
+                    current_field = line as FieldLine;
+                else if (line is SubfieldLine
+                    && current_field != null)
+                {
+                    if ((current_field.Visible == true && bVisible == true)
+                        || (current_field.Visible == false && bHidden == true))
+                    {
+                        SubfieldLine subfield = line as SubfieldLine;
+                        if (string.IsNullOrEmpty(subfield.Content) == true)
+                            selected_lines.Add(line);
+                    }
+                }
+            }
+            DeleteElements(selected_lines);
+            // 再观察哪些字段，一个子字段也没有了?
+            selected_lines = new List<EasyLine>();
+            foreach (EasyLine line in this.Items)
+            {
+                if (line is FieldLine)
+                {
+                    if ((line.Visible == true && bVisible == true)
+    || (line.Visible == false && bHidden == true))
+                    {
+                        FieldLine field = line as FieldLine;
+                        if (field.IsControlField == true)
+                        {
+                            if (string.IsNullOrEmpty(field.Content) == true)
+                                selected_lines.Add(line);
+                        }
+                        else
+                        {
+                            List<EasyLine> subfields = GetSubfieldLines(field);
+                            if (subfields.Count == 0)
+                                selected_lines.Add(line);
+                        }
+                    }
+                }
+            }
+            DeleteElements(selected_lines);
+        }
+
         // 删除若干行
         // 如果其中包含字段行，则要把字段下属的子字段行一并删除
         public void DeleteElements(List<EasyLine> selected_lines)
@@ -332,6 +421,7 @@ namespace DigitalPlatform.EasyMarc
             this.DisableUpdate();
             try
             {
+                // TODO: 先将要删除的行对象记忆下来，然后挪动 Focus，然后再删除
                 bool bChanged = false;
                 List<EasyLine> deleted_subfields = new List<EasyLine>();
                 // 先删除里面的 Field 行
@@ -376,10 +466,14 @@ namespace DigitalPlatform.EasyMarc
 
         EasyLine LastClickItem = null;   // 最近一次click选择过的Item对象
 
+        /// <summary>
+        /// 选定一个事项
+        /// </summary>
+        /// <param name="element">事项</param>
+        /// <param name="bClearOld">是否清除以前的选择</param>
         public void SelectItem(EasyLine element,
             bool bClearOld)
         {
-
             if (bClearOld == true)
             {
                 for (int i = 0; i < this.Items.Count; i++)
@@ -396,13 +490,6 @@ namespace DigitalPlatform.EasyMarc
                         this.InvalidateLine(cur_element);
                     }
                 }
-
-                // 2014/9/30
-                if (element.textBox_content.Visible == true)
-                {
-                    element.textBox_content.Focus();
-                    element.textBox_content.Select(0, 0);
-                }
             }
 
             // 选中当前行
@@ -413,9 +500,30 @@ namespace DigitalPlatform.EasyMarc
                 this.InvalidateLine(element);
             }
 
+            if (element.textBox_content.Visible == true)
+            {
+                SetEditFocus(element.textBox_content);
+                element.textBox_content.Select(0, 0);
+            }
+            else
+            {
+                // 2015/5/30
+                // 如果当前 item 是字段名行，需要将 Focus 设置到其后的第一个子字段行的 TextBox 上
+                if (element is FieldLine && element.Visible == true)
+                {
+                    List<EasyLine> subfields = GetSubfieldLines(element as FieldLine);
+                    if (subfields.Count > 0)
+                        SetEditFocus(subfields[0].textBox_content);
+                }
+            }
+
             this.LastClickItem = element;
         }
 
+        /// <summary>
+        /// 将一个事项的选定状态来回切换
+        /// </summary>
+        /// <param name="element"></param>
         public void ToggleSelectItem(EasyLine element)
         {
             // 选中当前行
@@ -429,6 +537,10 @@ namespace DigitalPlatform.EasyMarc
             this.LastClickItem = element;
         }
 
+        /// <summary>
+        /// 选择一个范围的事项。本方法是从 上次选定过的事项 一直选定到 element 所指示的事项
+        /// </summary>
+        /// <param name="element">起点事项</param>
         public void RangeSelectItem(EasyLine element)
         {
             EasyLine start = this.LastClickItem;
@@ -488,21 +600,35 @@ namespace DigitalPlatform.EasyMarc
         // TODO: SelectItem(string strFieldName, string strSubfieldName)
 
         // focus 到第一个可见的字段
+        /// <summary>
+        /// 将当前第一个可见的字段设定为 Focued 状态
+        /// </summary>
         public void SelectFirstItem()
         {
             foreach(EasyLine element in this.Items)
             {
                 if (element.textBox_content.Visible == true)
                 {
-                    element.textBox_content.Focus();
+                    SetEditFocus(element.textBox_content);
                     element.textBox_content.Select(0, 0);
                     return;
                 }
             }
         }
 
+        static bool SetEditFocus(TextBox textbox)
+        {
+            if (textbox.Visible == true && textbox.ContainsFocus == false)
+            {
+                textbox.Focus();
+                return true;
+            }
+            return false;
+        }
+
         public List<string> HideFieldNames = new List<string>();
 
+        // 获得当前已经隐藏的字段个数
         internal int GetHideFieldCount()
         {
             int nCount = 0;
@@ -579,19 +705,20 @@ namespace DigitalPlatform.EasyMarc
 
             return false;
         }
-        		// 匹配字段名/子字段名
-		// pamameters:
-		//		strName	名字
-		//		strMatchCase	要匹配的要求
-		// return:
-		//		-1	error
-		//		0	not match
-		//		1	match
-		public static int MatchName(string strName,
-			string strMatchCase)
-		{
-			if (strMatchCase == "")	// 如果strMatchCase为空，表示无论什么名字都匹配
-				return 1;
+
+        // 匹配字段名/子字段名
+        // pamameters:
+        //		strName	名字
+        //		strMatchCase	要匹配的要求
+        // return:
+        //		-1	error
+        //		0	not match
+        //		1	match
+        public static int MatchName(string strName,
+            string strMatchCase)
+        {
+            if (strMatchCase == "")	// 如果strMatchCase为空，表示无论什么名字都匹配
+                return 1;
 
 			// Regular expression
 			if (strMatchCase.Length >= 1 
@@ -611,7 +738,6 @@ namespace DigitalPlatform.EasyMarc
 			}
 		}
 
-        // 2013/1/7
         // t的长度可以是s的整倍数
         public static int CmpName(string s, string t)
         {
@@ -685,7 +811,6 @@ namespace DigitalPlatform.EasyMarc
 
                 field.Visible = bNewValue;
 
-
                 int nStart = this.Items.IndexOf(field);
                 if (nStart == -1)
                     return;
@@ -717,7 +842,6 @@ namespace DigitalPlatform.EasyMarc
             this.DisableUpdate();
             try
             {
-
                 if (line.ExpandState == EasyMarc.ExpandState.Expanded)
                     line.ExpandState = EasyMarc.ExpandState.Collapsed;
                 else
@@ -767,6 +891,9 @@ namespace DigitalPlatform.EasyMarc
             }
         }
 
+        /// <summary>
+        /// 获取或设置左边标题区的像素宽度
+        /// </summary>
         public int CaptionWidth
         {
             get
@@ -783,6 +910,10 @@ namespace DigitalPlatform.EasyMarc
             }
         }
 
+        /// <summary>
+        /// 增减左边标题区的像素宽度
+        /// </summary>
+        /// <param name="nDelta">要增减的宽度</param>
         public void ChangeCaptionWidth(int nDelta)
         {
             int nOldWidth = (int)this.tableLayoutPanel_content.ColumnStyles[1].Width;
@@ -808,7 +939,6 @@ namespace DigitalPlatform.EasyMarc
             // this.tableLayoutPanel_content.Invalidate();
         }
 
-
         public void RemoveItem(EasyLine line, bool bFireEvent)
         {
             int index = this.Items.IndexOf(line);
@@ -825,6 +955,9 @@ namespace DigitalPlatform.EasyMarc
                 this.FireTextChanged();
         }
 
+        /// <summary>
+        /// 清除全部行
+        /// </summary>
         public void Clear()
         {
             this.DisableUpdate();
@@ -835,7 +968,7 @@ namespace DigitalPlatform.EasyMarc
                 {
                     for (int j = 0; j < this.tableLayoutPanel_content.ColumnStyles.Count; j++)
                     {
-                        Control control = this.tableLayoutPanel_content.GetControlFromPosition(j, i);
+                        Control control = this.tableLayoutPanel_content.GetAnyControlAt(j, i);
                         if (control != null)
                             this.tableLayoutPanel_content.Controls.Remove(control);
                     }
@@ -852,6 +985,7 @@ namespace DigitalPlatform.EasyMarc
 
                 this.Items.Clear();
                 this.tableLayoutPanel_content.RowCount = 2;    // 为什么是2？
+
                 for (; ; )
                 {
                     if (this.tableLayoutPanel_content.RowStyles.Count <= 2)
@@ -1046,7 +1180,6 @@ namespace DigitalPlatform.EasyMarc
             return subfield_line;
         }
 
-
         #endregion
 
         #region 插入字段功能
@@ -1143,8 +1276,10 @@ namespace DigitalPlatform.EasyMarc
             }
 
             EasyLine after_line = null;
+#if FIX
             bool bExpanded = false;
             bool bHideChanged = false;
+#endif
             if (dlg.InsertBefore == true)
             {
                 after_line = ref_line;
@@ -1165,6 +1300,7 @@ namespace DigitalPlatform.EasyMarc
                     after_line = this.Items[index];
             }
 
+#if FIX
             if (after_line != null)
             {
                 // 如果插入位置后面一个字段是隐藏状态，则会出现故障，需要先修改为显示状态，插入后再隐藏
@@ -1181,6 +1317,7 @@ namespace DigitalPlatform.EasyMarc
                     bExpanded = true;
                 }
             }
+#endif
 
             InsertNewLine(index++,
     field_line,
@@ -1200,6 +1337,7 @@ namespace DigitalPlatform.EasyMarc
                 bChanged = true;
             }
 
+#if FIX
             // 把参考行恢复到以前的状态
             if (after_line != null && bExpanded == true)
             {
@@ -1210,6 +1348,7 @@ namespace DigitalPlatform.EasyMarc
             {
                 this.ToggleHide(after_line as FieldLine);
             }
+#endif
             if (bChanged == true)
                 this.FireTextChanged();
 
@@ -1221,8 +1360,8 @@ namespace DigitalPlatform.EasyMarc
         // 从缺省值字符串中分离出字段指示符和纯粹字段内容部分
         // 函数调用前，strText中可能含有指示符，也可能没有
         static void SplitDefaultValue(string strText,
-                        out string strIndicator,
-                        out string strContent)
+            out string strIndicator,
+            out string strContent)
         {
             strIndicator = "  ";
             strContent = "";
@@ -1606,7 +1745,7 @@ namespace DigitalPlatform.EasyMarc
         //		strFieldName	字段名
         // return:
         //		如果找不到则返回原始字段名或者子字段名；找到返回具体的标签信息
-        internal string GetCaption(string strFieldName,
+        public string GetCaption(string strFieldName,
             string strSubfieldName,
             bool bIncludeNumber)
         {
@@ -1709,6 +1848,32 @@ namespace DigitalPlatform.EasyMarc
         private void EasyMarcControl_SizeChanged(object sender, EventArgs e)
         {
             this.tableLayoutPanel_content.Width = this.Width - SystemInformation.VerticalScrollBarWidth;
+            ResetAllTextBoxHeight();
+        }
+
+        // 重新调整所有 TextBox 的高度
+        void ResetAllTextBoxHeight()
+        {
+            // 如果没有这一句，在不断宽/窄变换 tablelayoutpanel 宽度的时候，内容区下面的空白区域会逐渐变大
+            this.tableLayoutPanel_content.Height = 0;
+
+            this.DisableUpdate();   // 防止闪动
+            try
+            {
+                foreach(EasyLine item in this.Items)
+                {
+                    if (item.textBox_content.Visible == true)
+                    {
+                        item.textBox_content.SetHeight();
+                    }
+                }
+            }
+            finally
+            {
+                this.EnableUpdate();
+            }
+
+            // TODO: 重新设置 tablelayout 的高度
         }
 
         // 字段背景颜色
@@ -1802,14 +1967,12 @@ namespace DigitalPlatform.EasyMarc
             this.tableLayoutPanel_content.Focus();
             this.m_bFocused = true;
             this.RefreshLineColor();
-
         }
 
         private void EasyMarcControl_Leave(object sender, EventArgs e)
         {
             this.m_bFocused = false;
             this.RefreshLineColor();
-
         }
 
     }
@@ -1923,7 +2086,6 @@ namespace DigitalPlatform.EasyMarc
                                     this.textBox_content.Text = this.textBox_content.Text.Remove(this.textBox_content.SelectionStart, 1 + (this.textBox_content.Text.Length - this.textBox_content.MaxLength));
                                     this.textBox_content.SelectionStart = nOldSelectionStart;
                                 }
-
                             }
                             else
                             {
@@ -1987,7 +2149,7 @@ namespace DigitalPlatform.EasyMarc
         public SubfieldLine(EasyMarcControl container)
             : base(container)
         {
-            this.label_caption.TextAlign = ContentAlignment.MiddleRight;
+            this.label_caption.TextAlign = ContentAlignment.TopRight;
             // this.label_caption.BackColor = SystemColors.Window;
             this.label_caption.ForeColor = SystemColors.GrayText;
         }
@@ -2028,7 +2190,7 @@ namespace DigitalPlatform.EasyMarc
 
         public Splitter splitter = null;
 
-        public TextBox textBox_content = null;
+        public AutoHeightTextBox textBox_content = null;
 
         ItemState m_state = ItemState.Normal;
 
@@ -2067,6 +2229,17 @@ namespace DigitalPlatform.EasyMarc
             }
         }
 
+        public int Height
+        {
+            get
+            {
+                int nHeight = this.label_caption.Height;
+                if (nHeight < this.textBox_content.Height)
+                    nHeight = this.textBox_content.Height;
+                return nHeight;
+            }
+        }
+
         public EasyLine(EasyMarcControl container)
         {
             this.Container = container;
@@ -2085,11 +2258,12 @@ namespace DigitalPlatform.EasyMarc
             label_caption.Size = new Size(6, 23);
             label_caption.AutoSize = true;
             label_caption.Margin = new Padding(4, 2, 4, 0);
+            label_caption.TextAlign = ContentAlignment.TopLeft;
+
             // label_caption.BackColor = SystemColors.Control;
 
             label_caption.BackColor = Color.Transparent;
             // label_caption.ForeColor = this.Container.ForeColor;
-
 
             splitter = new TransparentSplitter();
             // splitter.Dock = DockStyle.Fill;
@@ -2099,12 +2273,13 @@ namespace DigitalPlatform.EasyMarc
             splitter.BackColor = Color.Transparent;
 
             // 字段/子字段内容
-            this.textBox_content = new TextBox();
+            this.textBox_content = new AutoHeightTextBox();
+            textBox_content.Multiline = true;
+            textBox_content.WordWrap = true;
             textBox_content.BorderStyle = BorderStyle.None;
             textBox_content.Dock = DockStyle.Fill;
             textBox_content.MinimumSize = new Size(20, 21); // 23
             textBox_content.Size = new Size(20, 21); // 23
-            // textBox_price.Multiline = true;
             textBox_content.Margin = new Padding(8, 4, 0, 0);
             // textBox_content.BackColor = Color.Red;
 
@@ -2132,6 +2307,7 @@ namespace DigitalPlatform.EasyMarc
 
                 Debug.Assert(this.Container.Items.Count == table.RowCount - 2, "");
 
+                List<Control> hidden_controls = new List<Control>();
                 // 然后压缩后方的
                 int nEnd = Math.Min(table.RowCount - 1 - 1, this.Container.Items.Count - 1);
                 for (int i = nRow; i < nEnd; i++)
@@ -2140,10 +2316,18 @@ namespace DigitalPlatform.EasyMarc
                     {
                         Debug.Assert(i + EasyMarcControl.RESERVE_LINES + 1 < table.RowStyles.Count, "");
 
-                        Control control = table.GetControlFromPosition(j, i + EasyMarcControl.RESERVE_LINES + 1);
+                        // Control control = table.GetControlFromPosition(j, i + EasyMarcControl.RESERVE_LINES + 1);
+                        Control control = table.GetAnyControlAt(j, i + EasyMarcControl.RESERVE_LINES + 1);
                         if (control != null)
                         {
                             table.Controls.Remove(control);
+                            if (control.Visible == false)
+                            {
+                                control.Visible = true;
+                                hidden_controls.Add(control);
+                            }
+                            // Add 对于插入 Visible = false 的 Control 有问题。
+                            // 为了避免问题，对这样的 Control 先显示，插入，最后再恢复为隐藏状态
                             table.Controls.Add(control, j, i + EasyMarcControl.RESERVE_LINES);
                         }
                     }
@@ -2152,11 +2336,17 @@ namespace DigitalPlatform.EasyMarc
 
                 table.RowCount--;
                 table.RowStyles.RemoveAt(nRow);
+
+                foreach(Control control in hidden_controls)
+                {
+                    control.Visible = false;
+                }
             }
             finally
             {
                 this.Container.EnableUpdate();
             }
+
         }
 
         // 插入本Line到某行。调用前，table.RowCount已经增量
@@ -2169,8 +2359,8 @@ namespace DigitalPlatform.EasyMarc
 
             try
             {
-
                 Debug.Assert(table.RowCount == this.Container.Items.Count + 3, "");
+                List<Control> hidden_controls = new List<Control>();
 
                 // 先移动后方的
                 int nEnd = Math.Min(table.RowCount - 1 - 1, this.Container.Items.Count - 1);
@@ -2182,30 +2372,20 @@ namespace DigitalPlatform.EasyMarc
                     {
                         Debug.Assert(i + EasyMarcControl.RESERVE_LINES + 1 < table.RowStyles.Count, "");
 
-                        Control control = table.GetControlFromPosition(j, i + EasyMarcControl.RESERVE_LINES);
+                        Control control = table.GetAnyControlAt(j, i + EasyMarcControl.RESERVE_LINES);
                         if (control != null)
                         {
                             table.Controls.Remove(control);
+                            if (control.Visible == false)
+                            {
+                                control.Visible = true;
+                                hidden_controls.Add(control);
+                            }
+                            // Add 对于插入 Visible = false 的 Control 有问题。
+                            // 为了避免问题，对这样的 Control 先显示，插入，最后再恢复为隐藏状态
                             table.Controls.Add(control, j, i + EasyMarcControl.RESERVE_LINES + 1);
                         }
                     }
-
-#if NO
-                    // color
-                    Label label = line.label_color;
-                    table.Controls.Remove(label);
-                    table.Controls.Add(label, 0, i + EasyMarcControl.RESERVE_LINES + 1);
-
-                    // fieldname
-                    Label fieldName = line.label_caption;
-                    table.Controls.Remove(fieldName);
-                    table.Controls.Add(fieldName, 1, i + 1 + 1);
-
-                    // subfield content
-                    TextBox subfieldContent = line.textBox_content;
-                    table.Controls.Remove(subfieldContent);
-                    table.Controls.Add(subfieldContent, 2, i + 1 + 1);
-#endif
                 }
 
                 table.Controls.Add(this.label_color, 0, nRow + EasyMarcControl.RESERVE_LINES);
@@ -2213,6 +2393,11 @@ namespace DigitalPlatform.EasyMarc
                 if (this.splitter != null)
                     table.Controls.Add(this.splitter, 2, nRow + EasyMarcControl.RESERVE_LINES);
                 table.Controls.Add(this.textBox_content, 3, nRow + EasyMarcControl.RESERVE_LINES);
+
+                foreach (Control control in hidden_controls)
+                {
+                    control.Visible = false;
+                }
             }
             finally
             {
@@ -2355,7 +2540,8 @@ namespace DigitalPlatform.EasyMarc
         void label_color_MouseClick(object sender, MouseEventArgs e)
         {
             this.Container.m_bFocused = true;
-            this.Container.TableLayoutPanel.Focus();
+            if (this.Container.TableLayoutPanel.ContainsFocus == false)
+                this.Container.TableLayoutPanel.Focus();
 
             if (e.Button == MouseButtons.Left)
             {
@@ -2393,7 +2579,8 @@ namespace DigitalPlatform.EasyMarc
         void label_caption_MouseClick(object sender, MouseEventArgs e)
         {
             this.Container.m_bFocused = true;
-            this.Container.TableLayoutPanel.Focus();
+            if (this.Container.TableLayoutPanel.ContainsFocus == false)
+                this.Container.TableLayoutPanel.Focus();
 
             if (e.Button == MouseButtons.Left)
             {
@@ -2460,6 +2647,11 @@ namespace DigitalPlatform.EasyMarc
             menuItem = new MenuItem("删除(&D)");
             menuItem.Click += new System.EventHandler(this.menu_deleteElements_Click);
             contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("删除全部空事项(&B)");
+            menuItem.Click += new System.EventHandler(this.menu_deleteAllBlankElements_Click);
+            contextMenu.MenuItems.Add(menuItem);
+
 
             // ---
             menuItem = new MenuItem("-");
@@ -2536,7 +2728,6 @@ namespace DigitalPlatform.EasyMarc
         void menu_expandAll_Click(object sender, EventArgs e)
         {
             this.Container.ExpandAll(true);
-
         }
 
         // 显示字段指示符
@@ -2579,6 +2770,17 @@ namespace DigitalPlatform.EasyMarc
                 // 置于可见范围
                 subfield.EnsureVisible();
             }
+        }
+
+        // 删除全部空元素
+        void menu_deleteAllBlankElements_Click(object sender, EventArgs e)
+        {
+            Point save = this.Container.AutoScrollPosition;
+
+            this.Container.DeleteBlankElements("visible");
+
+            this.Container.Update();
+            this.Container.SetAutoScrollPosition(new Point(-save.X, -save.Y));
         }
 
         // 删除当前元素
@@ -2633,15 +2835,26 @@ namespace DigitalPlatform.EasyMarc
             if (nNotDeleteCount > 0)
                 MessageBox.Show(this.Container, "有 " + nNotDeleteCount.ToString() + " 项已订购状态的事项未能删除");
 #endif
+            Point save = this.Container.AutoScrollPosition;
+
+#if NO
             this.Container.DisableUpdate();
             try
             {
+#endif
                 this.Container.DeleteElements(selected_lines);
+#if NO
             }
             finally
             {
                 this.Container.EnableUpdate();
             }
+#endif
+
+            // TODO: 在删除前要找一个参考对象，删除完成后，要 EnsureVisible 这个参考对象
+            // 也可以简单在删除前保存 y offset, 删除完成后恢复
+            this.Container.Update();
+            this.Container.SetAutoScrollPosition(new Point(-save.X, -save.Y));
         }
 
 
@@ -2775,9 +2988,8 @@ namespace DigitalPlatform.EasyMarc
         {
             this.Container.EnsureVisible(this);
         }
-
-
     }
+
     // 支持透明背景色的 Splitter
     public class TransparentSplitter : Splitter
     {
@@ -2786,5 +2998,43 @@ namespace DigitalPlatform.EasyMarc
         {
             this.SetStyle(ControlStyles.SupportsTransparentBackColor, true);
         }
+    }
+
+    public static class ScrollableControlExtention
+    {
+        public static void SetAutoScrollPosition(this ScrollableControl control, Point p)
+        {
+            if (p.Y + control.ClientSize.Height > control.DisplayRectangle.Height)
+                p.Y = control.DisplayRectangle.Height - control.ClientSize.Height;
+            if (p.X + control.ClientSize.Width > control.DisplayRectangle.Width)
+                p.X = control.DisplayRectangle.Width - control.ClientSize.Width;
+            control.AutoScrollPosition = new Point(p.X, p.Y);
+        }
+    }
+
+    /// <summary>
+    /// TableLayoutPanel 扩展方法
+    /// </summary>
+    public static class TableLayoutPanelExtention
+    {
+        // http://stackoverflow.com/questions/7142138/tablelayoutpanel-getcontrolfromposition-does-not-get-non-visible-controls-how-d
+        // TableLayoutPanel GetControlFromPosition does not get non-visible controls. How do you access a non-visible control at a specified position?
+        public static Control GetAnyControlAt(this TableLayoutPanel panel, int column, int row)
+        {
+            {
+                Control control = panel.GetControlFromPosition(column, row);
+                if (control != null)
+                    return control;
+            }
+
+            foreach (Control control in panel.Controls)
+            {
+                var cellPosition = panel.GetCellPosition(control);
+                if (cellPosition.Column == column && cellPosition.Row == row)
+                    return control;
+            }
+            return null;
+        }
+
     }
 }

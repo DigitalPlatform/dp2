@@ -565,9 +565,9 @@ namespace dp2Circulation
             set
             {
                 if (this.label_errorInfo == null)
-                    CreateErrorInfoLabel();
-
-                this.label_errorInfo.Text = value;
+                    CreateErrorInfoLabel(value);
+                else
+                    this.label_errorInfo.Text = value;
 
                 if (string.IsNullOrEmpty(value) == true)
                     this.label_errorInfo.Visible = false;
@@ -599,24 +599,67 @@ namespace dp2Circulation
             get
             {
                 if (this.label_errorInfo == null)
-                    CreateErrorInfoLabel(); 
+                    CreateErrorInfoLabel(null); 
                 return this.label_errorInfo;
             }
         }
 
+#if NO
+        void SetLabelText(Label label, 
+            int nWidth,
+            string strText)
+        {
+            label.Text = strText;
+
+            Graphics g = Graphics.FromHwnd(this.Handle);
+
+            StringFormat sf = new StringFormat();
+            sf.Trimming = StringTrimming.None;
+            SizeF size = g.MeasureString(strText + "\r\n",   //给最后加一个'\r\n'以保证算出最后空行的高度
+                label.Font,
+                nWidth,
+                sf);
+
+            int nTempHeight = (int)size.Height;
+            if (nTempHeight <= 0)
+                nTempHeight = 20;
+
+            label.ClientSize = new Size(nWidth, nTempHeight);
+        }
+#endif
+
         // 创建 ErrorInfo 标签
-        void CreateErrorInfoLabel()
+        // parameters:
+        //      strText 文字。如果为 null，表示不设置初始文本
+        void CreateErrorInfoLabel(string strText)
         {
             if (this.label_errorInfo != null)
                 return;
 
-            this.label_errorInfo = new Label();
-            this.label_errorInfo.AutoSize = true;
-            this.label_errorInfo.MaximumSize = new Size(this.tableLayoutPanel_main.ClientSize.Width, 2000);
-            this.label_errorInfo.Dock = DockStyle.Fill;
-            this.label_errorInfo.ForeColor = Color.DarkRed;
+            int nWidth = this.GetLineContentPixelWidth();
 
-            InsertRowStyle(this.tableLayoutPanel_main, 0);
+            this.label_errorInfo = new GrowLabel();
+            this.label_errorInfo.Font = this.tableLayoutPanel_main.Font;
+            // this.label_errorInfo.AutoSize = true;
+            //this.label_errorInfo.MaximumSize = new Size(this.tableLayoutPanel_main.ClientSize.Width, 2000);
+            //this.label_errorInfo.Dock = DockStyle.Fill;
+            this.label_errorInfo.Size = new Size(nWidth, 20);
+            //this.label_errorInfo.ForeColor = Color.DarkRed;
+            this.label_errorInfo.BackColor = Color.DarkRed;
+            this.label_errorInfo.ForeColor = Color.White;
+            this.label_errorInfo.Padding = new Padding(8);
+
+            this.DisableUpdate();
+            try
+            {
+                InsertRowStyle(this.tableLayoutPanel_main, 0);
+                if (strText != null)
+                    this.label_errorInfo.Text = strText;
+            }
+            finally
+            {
+                this.EnableUpdate();
+            }
 
             this.tableLayoutPanel_main.RowStyles[0] = new RowStyle(SizeType.AutoSize);
 
@@ -630,10 +673,26 @@ namespace dp2Circulation
             int nEnd = table.RowStyles.Count - 1;
 
             table.RowCount++;
+
+            // 2015/5/30
+                List<int> column_indices = new List<int>();
+            {
+                for (int j = 0; j < table.ColumnStyles.Count; j++)
+                {
+                    column_indices.Add(j);
+                }
+                // 先移动 textbox 列。如果遇到 Focued 的 Control，会触发 Leave 事件，会导致修改 Label 颜色。这样需要能找到同行的 Label
+                if (column_indices.IndexOf(2) != -1)
+                {
+                    column_indices.Remove(2);
+                    column_indices.Insert(0, 2);
+                }
+            }
+
             // 先移动后方的控件
             for (int i = nEnd; i >= nRow; i--)
             {
-                for (int j = 0; j < table.ColumnStyles.Count; j++)
+                foreach (int j in column_indices)
                 {
                     Control control = table.GetControlFromPosition(j, i);
                     if (control != null)
@@ -642,7 +701,6 @@ namespace dp2Circulation
                         table.Controls.Add(control, j, i + 1);
                     }
                 }
-
             }
 
             table.RowStyles.Insert(nRow, new RowStyle());
@@ -676,121 +734,129 @@ namespace dp2Circulation
 
         void SetDisplayMode(string strMode)
         {
-            if (strMode == "simple_register")
+            this.DisableUpdate();
+            try
             {
-                this.tableLayoutPanel_main.AutoScroll = false;
-                this.tableLayoutPanel_main.AutoSize = true;
-                this.tableLayoutPanel_main.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-
-                // this.label_barcode.Font = new Font(this.Font.Name, this.Font.Size * 2, FontStyle.Bold);
-
-                this.textBox_barcode.Font = new Font(/*this.Font.Name*/"Courier New", this.Font.Size * 2, FontStyle.Bold);
-                this.textBox_barcode.Dock = DockStyle.Fill;
-
-                this.textBox_refID.ReadOnly = true;
-
-                this.tableLayoutPanel_main.Margin = new Padding(0, 0, 0, 0);
-                this.tableLayoutPanel_main.Padding = new Padding(4);
-
-                this.tableLayoutPanel_main.BackColor = SystemColors.Window;
-
-                this.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            }
-
-            if (strMode == "simple")
-            {
-                this.tableLayoutPanel_main.AutoScroll = true;
-                this.tableLayoutPanel_main.AutoSize = true;
-                this.tableLayoutPanel_main.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            }
-
-            List<Control> controls = new List<Control>();
-
-            if (strMode == "simple" || strMode == "simple_register")
-            {
-                controls.Add(this.textBox_barcode);
-                controls.Add(this.comboBox_location);
-                controls.Add(this.textBox_price);
-                controls.Add(this.textBox_accessNo);
-                controls.Add(this.textBox_volume);
-                controls.Add(this.comboBox_bookType);
-                controls.Add(this.textBox_batchNo);
-                controls.Add(this.textBox_refID);
-            }
-
-            // 把所有 label 修改为右对齐
-            if (strMode == "simple_register")
-            {
-                for (int i = 0; i < this.tableLayoutPanel_main.RowStyles.Count; i++)
+                if (strMode == "simple_register")
                 {
-                    Control control = this.tableLayoutPanel_main.GetControlFromPosition(0, i);
-                    if (control != null)
-                    {
-                        Label label = control as Label;
-                        label.TextAlign = ContentAlignment.MiddleRight;
-                        label.ForeColor = SystemColors.GrayText;
-                    }
+                    this.tableLayoutPanel_main.AutoScroll = false;
+                    this.tableLayoutPanel_main.AutoSize = true;
+                    this.tableLayoutPanel_main.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+
+                    // this.label_barcode.Font = new Font(this.Font.Name, this.Font.Size * 2, FontStyle.Bold);
+
+                    this.textBox_barcode.Font = new Font(/*this.Font.Name*/"Courier New", this.Font.Size * 2, FontStyle.Bold);
+                    this.textBox_barcode.Dock = DockStyle.Fill;
+
+                    this.textBox_refID.ReadOnly = true;
+
+                    this.tableLayoutPanel_main.Margin = new Padding(0, 0, 0, 0);
+                    this.tableLayoutPanel_main.Padding = new Padding(4);
+
+                    this.tableLayoutPanel_main.BackColor = SystemColors.Window;
+
+                    this.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
                 }
-            }
 
-            for (int i = 0; i < this.tableLayoutPanel_main.RowStyles.Count; i++)
-            {
-                Control control = this.tableLayoutPanel_main.GetControlFromPosition(2, i);
-                if (control == null)
-                    continue;
-
+                if (strMode == "simple")
                 {
-                    Control temp = this.tableLayoutPanel_main.GetControlFromPosition(0, i);
-                    if (temp != null)
-                    {
-                        Label label = temp as Label;
+                    this.tableLayoutPanel_main.AutoScroll = true;
+                    this.tableLayoutPanel_main.AutoSize = true;
+                    this.tableLayoutPanel_main.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+                }
 
-                        if (label != this.label_barcode)
+                List<Control> controls = new List<Control>();
+
+                if (strMode == "simple" || strMode == "simple_register")
+                {
+                    controls.Add(this.textBox_barcode);
+                    controls.Add(this.comboBox_location);
+                    controls.Add(this.textBox_price);
+                    controls.Add(this.textBox_accessNo);
+                    controls.Add(this.textBox_volume);
+                    controls.Add(this.comboBox_bookType);
+                    controls.Add(this.textBox_batchNo);
+                    controls.Add(this.textBox_refID);
+                }
+
+                // 把所有 label 修改为右对齐
+                if (strMode == "simple_register")
+                {
+                    for (int i = 0; i < this.tableLayoutPanel_main.RowStyles.Count; i++)
+                    {
+                        Label label = this.tableLayoutPanel_main.GetControlFromPosition(0, i) as Label;
+                        if (label != null)
                         {
-                            label.MouseUp -= new System.Windows.Forms.MouseEventHandler(this.tableLayoutPanel_main_MouseUp);
-                            label.MouseUp += new System.Windows.Forms.MouseEventHandler(this.tableLayoutPanel_main_MouseUp);
+                            label.TextAlign = ContentAlignment.MiddleRight;
+                            label.ForeColor = SystemColors.GrayText;
                         }
                     }
                 }
 
-                if (strMode == "full")
+                for (int i = 0; i < this.tableLayoutPanel_main.RowStyles.Count; i++)
                 {
-                    // 显示
-                    if (control.Visible == false)
-                        SetLineVisible(control, true);
-                    continue;
+                    Control control = this.tableLayoutPanel_main.GetControlFromPosition(2, i);
+                    if (control == null)
+                        continue;
+
+                    {
+                        Control label = this.tableLayoutPanel_main.GetControlFromPosition(0, i) as Label;
+                        if (label != null)
+                        {
+                            if (label != this.label_barcode)
+                            {
+                                label.MouseUp -= new System.Windows.Forms.MouseEventHandler(this.tableLayoutPanel_main_MouseUp);
+                                label.MouseUp += new System.Windows.Forms.MouseEventHandler(this.tableLayoutPanel_main_MouseUp);
+                            }
+                        }
+                    }
+
+                    if (strMode == "full")
+                    {
+                        // 显示
+                        if (control.Visible == false)
+                            SetLineVisible(control, true);
+                        continue;
+                    }
+
+                    if (controls.IndexOf(control) == -1)
+                    {
+                        // 隐藏
+                        if (this.Visible == false || control.Visible == true)
+                        {
+                            SetLineVisible(control, false);
+                            this.tableLayoutPanel_main.RowStyles[i] = new RowStyle(SizeType.Absolute, 0);
+                        }
+                    }
+                    else
+                    {
+                        // 显示
+                        if (this.Visible == false || control.Visible == false)
+                        {
+                            SetLineVisible(control, true);
+                            this.tableLayoutPanel_main.RowStyles[i] = new RowStyle(SizeType.AutoSize);
+                        }
+                    }
                 }
 
-                if (controls.IndexOf(control) == -1)
-                {
-                    // 隐藏
-                    if (this.Visible == false || control.Visible == true)
-                    {
-                        SetLineVisible(control, false);
-                        this.tableLayoutPanel_main.RowStyles[i] = new RowStyle(SizeType.Absolute, 0);
-                    }
-                }
-                else
-                {
-                    // 显示
-                    if (this.Visible == false || control.Visible == false)
-                    {
-                        SetLineVisible(control, true);
-                        this.tableLayoutPanel_main.RowStyles[i] = new RowStyle(SizeType.AutoSize);
-                    }
-                }
             }
-
-            // 修正卷滚范围。不然的话，如果把焦点放在 ConboBox 上滚动滚轮，内容区域会跑到上面去下不来
-            if (strMode == "simple_register")
+            finally
             {
-                this.button_getAccessNo.Visible = false;
-
-                this.tableLayoutPanel_main.PerformLayout();
-
-                int nHeight = this.textBox_refID.Location.Y + this.textBox_refID.Height;
-                this.tableLayoutPanel_main.AutoScrollMinSize = new Size(this.tableLayoutPanel_main.AutoScrollMinSize.Width, nHeight);
+                this.EnableUpdate();
             }
+
+                // 修正卷滚范围。不然的话，如果把焦点放在 ConboBox 上滚动滚轮，内容区域会跑到上面去下不来
+                if (strMode == "simple_register")
+                {
+                    this.button_getAccessNo.Visible = false;
+
+                    this.tableLayoutPanel_main.PerformLayout();
+
+                    int nHeight = this.textBox_refID.Location.Y + this.textBox_refID.Height;
+                    this.tableLayoutPanel_main.AutoScrollMinSize = new Size(this.tableLayoutPanel_main.AutoScrollMinSize.Width, nHeight);
+                }
+
+
         }
 
         public void SetAllEditColor(Color backColor, Color foreColor)
@@ -2134,9 +2200,8 @@ namespace dp2Circulation
         {
             if (this.label_errorInfo != null)
             {
-                this.label_errorInfo.MaximumSize = new Size(this.tableLayoutPanel_main.ClientSize.Width, 2000);
+                // this.label_errorInfo.MaximumSize = new Size(this.tableLayoutPanel_main.ClientSize.Width, 2000);
             }
-
         }
 
         private void tableLayoutPanel_main_MouseUp(object sender, MouseEventArgs e)

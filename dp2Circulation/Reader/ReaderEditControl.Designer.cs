@@ -75,7 +75,7 @@ namespace dp2Circulation
             this.dateControl_dateOfBirth = new DigitalPlatform.CommonControl.DateControl();
             this.dateControl_expireDate = new DigitalPlatform.CommonControl.DateControl();
             this.label15 = new System.Windows.Forms.Label();
-            this.textBox_comment = new System.Windows.Forms.TextBox();
+            this.textBox_comment = new DigitalPlatform.CommonControl.AutoHeightTextBox();
             this.label_comment_color = new System.Windows.Forms.Label();
             this.label16 = new System.Windows.Forms.Label();
             this.label17 = new System.Windows.Forms.Label();
@@ -102,13 +102,13 @@ namespace dp2Circulation
             this.label23 = new System.Windows.Forms.Label();
             this.label_rights_color = new System.Windows.Forms.Label();
             this.label_personalLibrary_color = new System.Windows.Forms.Label();
-            this.textBox_rights = new System.Windows.Forms.TextBox();
+            this.textBox_rights = new DigitalPlatform.CommonControl.AutoHeightTextBox();
             this.textBox_personalLibrary = new System.Windows.Forms.TextBox();
             this.button_editRights = new System.Windows.Forms.Button();
-            this.textBox_friends = new System.Windows.Forms.TextBox();
+            this.textBox_friends = new DigitalPlatform.CommonControl.AutoHeightTextBox();
             this.label_friends_color = new System.Windows.Forms.Label();
             this.label24 = new System.Windows.Forms.Label();
-            this.textBox_access = new System.Windows.Forms.TextBox();
+            this.textBox_access = new DigitalPlatform.CommonControl.AutoHeightTextBox();
             this.label_access_color = new System.Windows.Forms.Label();
             this.label25 = new System.Windows.Forms.Label();
             this.tableLayoutPanel_main.SuspendLayout();

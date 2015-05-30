@@ -68,6 +68,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AutoHeightTextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="BinaryEditor.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -164,6 +167,9 @@
     </Compile>
     <Compile Include="GetTimeDialog.designer.cs">
       <DependentUpon>GetTimeDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GrowLabel.cs">
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="GuiState.cs" />
     <Compile Include="LocationDistributeControl.cs">

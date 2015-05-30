@@ -48,7 +48,7 @@
             this.tableLayoutPanel_content.RowCount = 2;
             this.tableLayoutPanel_content.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_content.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_content.Size = new System.Drawing.Size(233, 244);
+            this.tableLayoutPanel_content.Size = new System.Drawing.Size(212, 173);
             this.tableLayoutPanel_content.TabIndex = 1;
             this.tableLayoutPanel_content.Paint += new System.Windows.Forms.PaintEventHandler(this.tableLayoutPanel_content_Paint);
             // 
@@ -66,7 +66,7 @@
             this.AutoScroll = true;
             this.Controls.Add(this.tableLayoutPanel_content);
             this.Name = "EasyMarcControl";
-            this.Size = new System.Drawing.Size(69, 27);
+            this.Size = new System.Drawing.Size(35, 10);
             this.SizeChanged += new System.EventHandler(this.EasyMarcControl_SizeChanged);
             this.Enter += new System.EventHandler(this.EasyMarcControl_Enter);
             this.Leave += new System.EventHandler(this.EasyMarcControl_Leave);

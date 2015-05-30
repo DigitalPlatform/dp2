@@ -136,6 +136,10 @@ namespace dp2Circulation
                 "quickchargingform",
                 "eanble_hanzi",
                 false);
+            this.toolStripButton_upperInput.Checked = this.MainForm.AppInfo.GetBoolean(
+                "quickchargingform",
+                "upper_input",
+                true);
         }
 
         void m_webExternalHost_readerInfo_OutputDebugInfo(object sender, OutputDebugInfoEventArgs e)
@@ -200,6 +204,10 @@ namespace dp2Circulation
                     "quickchargingform",
                     "eanble_hanzi",
                     this.toolStripButton_enableHanzi.Checked);
+                this.MainForm.AppInfo.SetBoolean(
+                    "quickchargingform",
+                    "upper_input",
+                    this.toolStripButton_upperInput.Checked);
             }
         }
 
@@ -219,7 +227,7 @@ namespace dp2Circulation
             if (keyData == Keys.Enter) 
             {
                 // MessageBox.Show(this, "test");
-                AsyncDoAction(this.FuncState, this.textBox_input.Text);
+                AsyncDoAction(this.FuncState, GetUpperCase(this.textBox_input.Text));
                 return true;
             }
 
@@ -2721,21 +2729,28 @@ e.Height);
             this.MainForm.OperHistory.Print();
         }
 
+#if NO
         private void toolStripButton_enableHanzi_Click(object sender, EventArgs e)
         {
             if (this.toolStripButton_enableHanzi.Checked == false)
                 this.toolStripButton_enableHanzi.Checked = true;
             else
                 this.toolStripButton_enableHanzi.Checked = false;
-
         }
+#endif
 
         private void toolStripButton_enableHanzi_CheckedChanged(object sender, EventArgs e)
         {
             if (this.toolStripButton_enableHanzi.Checked == true)
+            {
+                this.toolStripButton_enableHanzi.Text = "中";
                 this.textBox_input.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            }
             else
+            {
+                this.toolStripButton_enableHanzi.Text = "英";
                 this.textBox_input.ImeMode = System.Windows.Forms.ImeMode.Disable;
+            }
         }
 
         internal void TriggerBorrowComplete(BorrowCompleteEventArgs e)
@@ -2772,9 +2787,25 @@ e.Height);
             }
 
             this.textBox_input.Text = strItemBarcode;
-            AsyncDoAction(this.FuncState, this.textBox_input.Text);
+            AsyncDoAction(this.FuncState, GetUpperCase(this.textBox_input.Text));
         }
 
+        string GetUpperCase(string strText)
+        {
+            if (string.IsNullOrEmpty(strText) == true)
+                return strText;
+            if (this.toolStripButton_upperInput.Checked == true)
+                return strText.ToUpper();
+            return strText;
+        }
+
+        private void toolStripButton_upperInput_CheckedChanged(object sender, EventArgs e)
+        {
+            if (this.toolStripButton_upperInput.Checked == true)
+                this.toolStripButton_upperInput.Text = "A";
+            else
+                this.toolStripButton_upperInput.Text = "a";
+        }
 
     }
 
@@ -3128,6 +3159,10 @@ e.Height);
                         if (lRet == 1 && results != null && results.Length >= 1)
                             strReaderXml = results[0];
                     }
+                }
+                else
+                {
+                    // 检查用户输入的 barcode 是否和读者记录里面的 barcode 吻合
                 }
 
                 task.ReaderXml = strReaderXml;

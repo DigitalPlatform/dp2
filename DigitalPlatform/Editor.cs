@@ -23,6 +23,10 @@ namespace DigitalPlatform
 
         public bool ShowErrorBox = true;    // [in]是否要显示出错MessageBox
         public string ErrorInfo = "";   // [out]出错信息
+
+        // 2015/5/29
+        // 附加的参数对象。具体类型由每个功能规定
+        public object Parameter = null;
     }
 
 

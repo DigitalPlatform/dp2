@@ -860,7 +860,6 @@ namespace DigitalPlatform.Text
                 }
             }
 
-
             string strPrice = "";
             string strMultiper = "";
 

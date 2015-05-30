@@ -45,10 +45,7 @@ namespace dp2Batch
 		Batch batchObj = null;
 		int m_nRecordCount = 0;
 
-
 		ScriptManager scriptManager = new ScriptManager();
-
-
 
 		Hashtable m_tableMarcSyntax = new Hashtable();	// 数据库全路径和MARC格式的对照表
 		string CurMarcSyntax = "";	// 当前MARC格式
@@ -58,7 +55,7 @@ namespace dp2Batch
 
 		public CfgCache cfgCache = new CfgCache();
 
-
+        // 不知道为什么要使用事件？难道在 this 里面直接调用函数不是更简单么?
 		public event CheckTargetDbEventHandler CheckTargetDb = null;
 
 		public DigitalPlatform.StopManager	stopManager = new DigitalPlatform.StopManager();
@@ -143,14 +140,8 @@ namespace dp2Batch
 
 		public MainForm()
 		{
-			//
-			// Required for Windows Form Designer support
-			//
 			InitializeComponent();
 
-			//
-			// TODO: Add any constructor code after InitializeComponent call
-			//
 		}
 
 		/// <summary>
@@ -789,8 +780,6 @@ namespace dp2Batch
                 DataDir = Environment.CurrentDirectory;
             }
 
-
-
 			// 从文件中装载创建一个ServerCollection对象
 			// parameters:
 			//		bIgnorFileNotFound	是否不抛出FileNotFoundException异常。
@@ -816,7 +805,6 @@ namespace dp2Batch
 			}
 
             this.Servers.ServerChanged += new ServerChangedEventHandle(Servers_ServerChanged);
-
 
 			string strError = "";
             int nRet = cfgCache.Load(this.DataDir
@@ -1182,7 +1170,6 @@ this.checkBox_import_fastMode.Checked);
 				string strProjectName = "";
 				string strLocate = "";	// 方案文件目录
 
-
 				if (dlg.NoneProject == false)
 				{
 					// string strWarning = "";
@@ -1358,7 +1345,7 @@ this.checkBox_import_fastMode.Checked);
             else if (String.Compare(fi.Extension, ".iso", true) == 0
                 || String.Compare(fi.Extension, ".mrc", true) == 0)
             {
-
+                this.m_tableMarcSyntax.Clear(); // 2015/5/29
                 this.CheckTargetDb += new CheckTargetDbEventHandler(CheckTargetDbCallBack);
 
                 try

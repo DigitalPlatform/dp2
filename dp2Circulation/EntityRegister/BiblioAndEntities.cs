@@ -48,7 +48,10 @@ namespace dp2Circulation
 
         public event DeleteItemEventHandler DeleteItem = null;
 
-        public event GetDefaultItemEventHandler GetDefaultItem = null;
+        /// <summary>
+        /// 获得册记录缺省值
+        /// </summary>
+        public event GetDefaultItemEventHandler GetEntityDefault = null;
 
         /// <summary>
         /// 通知需要装载下属的册记录
@@ -62,6 +65,10 @@ namespace dp2Circulation
         /// </summary>
         public event GenerateDataEventHandler GenerateData = null;
 
+        /// <summary>
+        /// 校验条码号
+        /// </summary>
+        public event VerifyBarcodeHandler VerifyBarcode = null;
 
         public BiblioAndEntities(
             Form owner,
@@ -89,6 +96,36 @@ namespace dp2Circulation
                     this.easyMarcControl1.Changed = value;
                 }
             }
+        }
+
+        /// <summary>
+        /// 清除当前的书目和册信息
+        /// </summary>
+        public void Clear()
+        {
+            this.easyMarcControl1.Clear();
+            this.ClearEntityEditControls();
+            this.BiblioChanged = false;
+            this.EntitiesChanged = false;
+        }
+
+        public string GetChangedWarningText()
+        {
+            if (this.BiblioChanged == true
+    || this.EntitiesChanged == true)
+            {
+                string strParts = "";
+                if (this.BiblioChanged)
+                    strParts += "书目记录";
+                if (this.EntitiesChanged)
+                {
+                    if (string.IsNullOrEmpty(strParts) == false)
+                        strParts += "和";
+                    strParts += "册记录";
+                }
+                return "当前" + strParts + "修改后尚未保存";
+            }
+            return null;
         }
 
         // 从列表中选择一条书目记录装入编辑模板
@@ -1217,11 +1254,59 @@ MessageBoxDefaultButton.Button2);
                 }
             }
 
+            // 第一遍宏兑现后，第二遍专门兑现 @accessNo 宏
+            string strAccessNo = DomUtil.GetElementText(dom.DocumentElement, "accessNo");
+            if (string.IsNullOrEmpty(strAccessNo) == false)
+                strAccessNo = strAccessNo.Trim();
+            if (strAccessNo == "@accessNo")
+            {
+                // 获得索取号
+                if (this.GenerateData != null)
+                {
+                    GetCallNumberParameter parameter = new GetCallNumberParameter();
+                    parameter.ExistingAccessNo = "";
+                    parameter.Location = DomUtil.GetElementText(dom.DocumentElement, "location");
+                    parameter.RecPath = ""; // TODO: 可以通过书目库名，获得对应的实体库名，从而模拟出记录路径
+                    GenerateDataEventArgs e1 = new GenerateDataEventArgs();
+                    e1.ScriptEntry = "CreateCallNumber";
+                    e1.FocusedControl = null;
+                    e1.Parameter = parameter;
+                    this.GenerateData(this, e1);
+
+                    if (string.IsNullOrEmpty(e1.ErrorInfo) == false)
+                    {
+                        // TODO: edit 控件索取号右边要有个提示区就好了。或者 tips
+
+                    }
+                    else
+                    {
+                        parameter = e1.Parameter as GetCallNumberParameter;
+                        DomUtil.SetElementText(dom.DocumentElement, "accessNo", parameter.ResultAccessNo);
+                        bChanged = true;
+                    }
+                }
+            }
+
             if (bChanged == true)
                 return 1;
 
             return 0;
         }
+
+#if NO
+        // 从当前书目记录中获得价格字符串
+        // TODO: 是否需要对来自 MARC21 的 $??? 字符串进行处理，变成 USD??? 另外 020$c 也不全是价格，可能还有单纯的注释
+        string GetBiblioPriceString()
+        {
+            MarcRecord record = new MarcRecord(this.GetMarc());
+            if (this.MarcSyntax == "unimarc")
+                return record.select("field[@name='010']/subfield[@name='d']").FirstContent;
+            else if (this.MarcSyntax == "usmarc")
+                return record.select("field[@name='020']/subfield[@name='c']").FirstContent;
+            else
+                return "";  // 暂时无法处理其他 MARC 格式
+        }
+#endif
 
         // 兑现 @... 宏值。
         // 如果无法解释宏，则原样返回宏名
@@ -1230,32 +1315,307 @@ MessageBoxDefaultButton.Button2);
             if (string.IsNullOrEmpty(this.MarcSyntax) == true)
                 return strMacroName;
 
+#if NO
             if (strMacroName == "@accessNo")
             {
-                // 创建索取号
-
+                return strMacroName;    // 不处理
             }
-
-            // UNIMARC 情形
-            if (this.MarcSyntax == "unimarc")
+#endif
+            string strMARC = GetMarc();
+            if (string.IsNullOrEmpty(strMARC) == false)
             {
-                string strMARC = GetMarc();
-                if (string.IsNullOrEmpty(strMARC) == true)
-                    return strMacroName;
-
                 MarcRecord record = new MarcRecord(strMARC);
 
-                if (strMacroName == "@price")
+                string strValue = null;
+                // UNIMARC 情形
+                if (this.MarcSyntax == "unimarc")
                 {
-                    return record.select("field[@name='010']/subfield[@name='d']").FirstContent;
+                    if (strMacroName == "@price")
+                        strValue = record.select("field[@name='010']/subfield[@name='d']").FirstContent;
                 }
-            }
+                else if (this.MarcSyntax == "usmarc")
+                {
+                    if (strMacroName == "@price")
+                        strValue = record.select("field[@name='020']/subfield[@name='c']").FirstContent;
+                }
 
-            if (this.MarcSyntax == "usmarc")
-            {
+                if (string.IsNullOrEmpty(strValue) == false)
+                    return strValue;
             }
 
             return strMacroName;
+        }
+
+        // 是否至少有一个内容非空?
+        static bool AtLeastOneNotEmpty(MarcNodeList nodes)
+        {
+            foreach (MarcNode subfield in nodes)
+            {
+                if (string.IsNullOrEmpty(subfield.Content) == false)
+                    return true;
+            }
+
+            return false;
+        }
+
+        // 检查书目记录的格式是否正确
+        //      errors  返回册记录出错信息。每个元素返回一个错误信息，顺次对应于每个有错的字段或者子字段
+        // return:
+        //      -1  检查过程出错。错误信息在 strError 中。和返回 1 的区别是，这里是某些因素导致无法检查了，而不是因为册记录格式有错
+        //      0   正确
+        //      1   有错。错误信息在 errors 中
+        public int VerifyBiblio(
+            string strStyle,
+            out List<string> errors,
+            out string strError)
+        {
+            strError = "";
+            errors = new List<string>();
+            int nRet = 0;
+
+            MarcRecord record = new MarcRecord(this.GetMarc());
+
+            if (this.MarcSyntax == "unimarc")
+            {
+                string strTitle = record.select("field[@name='200']/subfield[@name='a']").FirstContent;
+                if (string.IsNullOrEmpty(strTitle) == true)
+                    errors.Add("缺乏书名 (200$a)");
+
+                MarcNodeList nodes = record.select("field[starts-with(@name, '7')]/subfield[@name='a']");
+                if (AtLeastOneNotEmpty(nodes) == false)
+                    errors.Add("缺乏作者 (7XX$a)");
+
+                nodes = record.select("field[starts-with(@name, '69') or @name='686']/subfield[@name='a']");
+                if (AtLeastOneNotEmpty(nodes) == false)
+                    errors.Add("缺乏分类号 (69X$a 或 686$a)");
+
+
+                if (errors.Count > 0)
+                    return 1;   // 先报错。等这里报错的问题都修正了，才会报空子字段的错
+            }
+            else if (this.MarcSyntax == "usmarc")
+            {
+
+                if (errors.Count > 0)
+                    return 1;
+            }
+            else
+            {
+                // 暂时无法处理其他 MARC 格式
+            }
+
+            {
+                MarcNodeList nodes = record.select("field/subfield");
+                foreach (MarcSubfield subfield in nodes)
+                {
+                    // TODO: easyMarcControl 中要有从字段名子字段名查到提示文字的功能
+                    if (string.IsNullOrEmpty(subfield.Content) == true)
+                    {
+                        string strFieldName = subfield.Parent.Name;
+                        string strSubfieldName = subfield.Name;
+                        errors.Add("字段 '"
+                            + this.easyMarcControl1.GetCaption(strFieldName, null, false)
+                            + "' 中出现了空子字段 '" 
+                            + this.easyMarcControl1.GetCaption(strFieldName, strSubfieldName, false)
+                            + "'。需要把它删除");
+                    }
+                }
+            }
+
+            if (errors.Count > 0)
+                return 1; 
+            return 0;
+        }
+
+        // 检查册记录的格式是否正确
+        // parameters:
+        //      errors  返回册记录出错信息。每个元素返回一个错误信息，顺次对应于每个有错的册记录。文字中有说明，是那个册记录出错
+        // return:
+        //      -1  检查过程出错。错误信息在 strError 中。和返回 1 的区别是，这里是某些因素导致无法检查了，而不是因为册记录格式有错
+        //      0   正确
+        //      1   有错。错误信息在 errors 中
+        public int VerifyEntities(
+            string strStyle,
+            out List<string> errors,
+            out string strError)
+        {
+            strError = "";
+            errors = new List<string>();
+            int nRet = 0;
+
+            bool bNeedBookType = (StringUtil.IsInList("need_booktype", strStyle) == true);
+            bool bNeedLocation = (StringUtil.IsInList("need_location", strStyle) == true);
+            bool bNeedAccessNo = (StringUtil.IsInList("need_accessno", strStyle) == true);
+            bool bNeedPrice = (StringUtil.IsInList("need_price", strStyle) == true);
+            bool bNeedBarcode = (StringUtil.IsInList("need_barcode", strStyle) == true);
+            bool bNeedBatchNo = (StringUtil.IsInList("need_batchno", strStyle) == true);
+
+            // 是否验证全部册记录？如果为 false，仅验证修改过的册记录
+            bool bVerifyAll = (StringUtil.IsInList("verify_all", strStyle) == true);
+
+            int i = 0;
+            foreach(Control control in this.flowLayoutPanel1.Controls)
+            {
+                if (!(control is EntityEditControl))
+                    continue;
+
+                EntityEditControl edit = control as EntityEditControl;
+
+                if (bVerifyAll == false && edit.Changed == false)
+                    continue;
+
+                string strName = "册记录 " + (i + 1);
+                List<string> conditions = new List<string>();
+
+                if (bNeedBookType == true)
+                {
+                    if (string.IsNullOrEmpty(edit.BookType) == true)
+                        conditions.Add("尚未输入册类型");
+                }
+
+                if (bNeedLocation == true)
+                {
+                    if (string.IsNullOrEmpty(edit.LocationString) == true)
+                        conditions.Add("尚未输入馆藏地");
+                    else if (edit.LocationString.IndexOf("*") != -1)
+                    {
+                        conditions.Add("馆藏地点字符串中不允许出现字符 '*'");
+                    }
+                }
+
+                if (bNeedAccessNo == true)
+                {
+                    if (string.IsNullOrEmpty(edit.AccessNo) == true)
+                        conditions.Add("尚未创建索取号");
+                    else if (edit.AccessNo == "@accessNo")
+                        conditions.Add("尚未创建索取号 (宏 @accessNo 尚未兑现)");
+                }
+
+
+                if (bNeedPrice == true)
+                {
+                    if (string.IsNullOrEmpty(edit.Price) == true)
+                        conditions.Add("尚未输入册价格");
+                    else if (edit.AccessNo == "@price")
+                        conditions.Add("尚未输入册价格 (宏 @price 尚未兑现)");
+                    else if (edit.Price.IndexOf("@") != -1)
+                    {
+                        conditions.Add("价格字符串中不允许出现字符 '@'");
+                    }
+                    else
+                    {
+                        CurrencyItem item = null;
+                        // 解析单个金额字符串。例如 CNY10.00 或 -CNY100.00/7
+                        nRet = PriceUtil.ParseSinglePrice(edit.Price,
+                            out item,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            conditions.Add("册价格 '" + edit.Price + "' 格式不合法: " + strError);
+                        }
+                        else
+                        {
+                            // 进一步严格检查汉字。后缀
+                            List<string> temp_errors = new List<string>();
+                            if (StringUtil.ContainHanzi(item.Prefix) == true)
+                                temp_errors.Add("前缀(货币类型)部分不应包含汉字");
+                            if (string.IsNullOrEmpty(item.Postfix) == false)
+                                temp_errors.Add("不允许使用后缀。价格字符串应为 CNY12.0 或 CNY6.0*2 或 CNY24.0/2 这样的形态");
+#if NO
+                            if (StringUtil.ContainHanzi(item.Postfix) == true)
+                                temp_errors.Add("后缀部分不应包含汉字");
+#endif
+                            if (temp_errors.Count > 0)
+                                conditions.Add("册价格 '" + edit.Price + "' 格式不合法: " + StringUtil.MakePathList(temp_errors, "; "));
+                        }
+                    }
+                }
+
+                if (bNeedBarcode == true)
+                {
+                    if (string.IsNullOrEmpty(edit.Barcode) == true)
+                        conditions.Add("尚未输入册条码号");
+
+                    // 检查册价格字符串格式是否正确
+                    // 形式校验条码号
+                    // return:
+                    //      -2  服务器没有配置校验方法，无法校验
+                    //      -1  error
+                    //      0   不是合法的条码号
+                    //      1   是合法的读者证条码号
+                    //      2   是合法的册条码号
+                    nRet = this.DoVerifyBarcode(
+                        edit.Barcode,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "验证册条码号格式时出错: " + strError;
+                        return -1;
+                    }
+
+                    // 输入的条码格式不合法
+                    if (nRet == 0)
+                    {
+                        conditions.Add("条码号 " + edit.Barcode + " 格式不正确(" + strError + ")");
+                    }
+
+                    // 实际输入的是读者证条码号
+                    if (nRet == 1)
+                    {
+                        conditions.Add("条码号 " + edit.Barcode + " 是读者证条码号。请输入册条码号");
+                    }
+                }
+
+                if (bNeedBatchNo == true)
+                {
+                    if (string.IsNullOrEmpty(edit.BatchNo) == true)
+                        conditions.Add("尚未输入批次号");
+                }
+
+                if (conditions.Count > 0)
+                {
+                    errors.Add(strName + ": " + StringUtil.MakePathList(conditions));
+                    edit.ErrorInfo = StringUtil.MakePathList(conditions);
+                }
+                else
+                {
+                    edit.ErrorInfo = "";
+                }
+
+                i++;
+            }
+
+            if (errors.Count > 0)
+                return 1;
+            return 0;
+        }
+
+        /// <summary>
+        /// 形式校验条码号
+        /// </summary>
+        /// <param name="strBarcode">册条码号</param>
+        /// <param name="strError">返回出错信息</param>
+        /// <returns>
+        /// <para>      -2  服务器没有配置校验方法，无法校验</para>
+        /// <para>      -1  出错</para>
+        /// <para>      0   不是合法的条码号</para>
+        /// <para>      1   是合法的读者证条码号</para>
+        /// <para>      2   是合法的册条码号</para>
+        /// </returns>
+        public int DoVerifyBarcode(string strBarcode,
+            out string strError)
+        {
+            if (this.VerifyBarcode == null)
+            {
+                strError = "尚未挂接 VerifyBarcode事件";
+                return -1;
+            }
+
+            VerifyBarcodeEventArgs e = new VerifyBarcodeEventArgs();
+            e.Barcode = strBarcode;
+            this.VerifyBarcode(this, e);
+            strError = e.ErrorInfo;
+            return e.Result;
         }
 
         public List<string> HideFieldNames = new List<string>();
@@ -1751,10 +2111,10 @@ MessageBoxDefaultButton.Button2);
             int nRet = 0;
 
             string strQuickDefault = "<root />";
-            if (this.GetDefaultItem != null)
+            if (this.GetEntityDefault != null)
             {
                 GetDefaultItemEventArgs e = new GetDefaultItemEventArgs();
-                this.GetDefaultItem(this, e);
+                this.GetEntityDefault(this, e);
                 if (string.IsNullOrEmpty(e.ErrorInfo) == false)
                 {
                     strError = e.ErrorInfo;

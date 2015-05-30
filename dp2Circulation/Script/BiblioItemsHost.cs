@@ -232,6 +232,30 @@ namespace dp2Circulation
                 strError = "sender为null";
                 goto ERROR1;
             }
+
+            // 不对界面进行处理，只是返回结果字符串
+            if (sender is BiblioAndEntities && e.Parameter is GetCallNumberParameter)
+            {
+                BiblioAndEntities biblio = sender as BiblioAndEntities;
+                List<CallNumberItem> callnumber_items = biblio.GetCallNumberItems();
+                GetCallNumberParameter parameter = e.Parameter as GetCallNumberParameter;
+
+                string strResult = "";
+                nRet = CreateOneCallNumber(
+                    this.Form,
+                    callnumber_items,
+                    parameter.ExistingAccessNo,
+                    parameter.Location,
+                    parameter.RecPath,
+                    out strResult,
+                    out strError);
+                if (nRet == -1)
+                    e.ErrorInfo = strError;
+                else
+                    parameter.ResultAccessNo = strResult;
+                return;
+            }
+
             if (sender is BiblioAndEntities)
             {
                 BiblioAndEntities biblio = sender as BiblioAndEntities;
@@ -2236,4 +2260,12 @@ namespace dp2Circulation
 
     }
 
+    public class GetCallNumberParameter
+    {
+        public string ExistingAccessNo = "";    // [in]
+        public string Location = "";
+        public string RecPath = "";
+
+        public string ResultAccessNo = "";  // [out]
+    }
 }
