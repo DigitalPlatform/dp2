@@ -13,7 +13,7 @@ namespace DigitalPlatform.Marc
 	/// <summary>
 	/// 定长模板对话框
 	/// </summary>
-	internal class FixedTemplateDlg : System.Windows.Forms.Form
+	public class FixedTemplateDlg : System.Windows.Forms.Form
 	{
         public const int WM_FIRST_SETFOCUS = API.WM_USER + 201;
 

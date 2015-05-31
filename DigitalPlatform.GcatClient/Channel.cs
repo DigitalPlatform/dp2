@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Net;
 using System.Diagnostics;
 using System.Windows.Forms;
@@ -6,8 +6,6 @@ using System.Threading;
 
 using DigitalPlatform.GcatClient.gcat_ws;
 using DigitalPlatform.GUI;
-
-
 
 namespace DigitalPlatform.GcatClient
 {
@@ -28,7 +26,7 @@ namespace DigitalPlatform.GcatClient
 	{
 		public string Url = "";
 
-		gcat m_ws = null;	// ÓµÓĞ
+		gcat m_ws = null;	// æ‹¥æœ‰
 
 		public string UserName = "";
 		public string Password = "";
@@ -50,13 +48,13 @@ namespace DigitalPlatform.GcatClient
 				if (m_ws == null) 
 				{
 					m_ws = new gcat();
-					// m_ws.Timeout = 1*60*1000;	// 5·ÖÖÓ //1000;
+					// m_ws.Timeout = 1*60*1000;	// 5åˆ†é’Ÿ //1000;
 					// m_ws.RequestSoapContext.Security.Timestamp.TtlInSeconds = 3600*10;
 
 				}
 				// m_ws.RequestSoapContext.Security.Timestamp.TtlInSeconds = 3600*10;
 
-				Debug.Assert(this.Url != "", "UrlÖµ´ËÊ±Ó¦µ±²»µÈÓÚ¿Õ");
+				Debug.Assert(this.Url != "", "Urlå€¼æ­¤æ—¶åº”å½“ä¸ç­‰äºç©º");
 
 				m_ws.Url = this.Url;
 				m_ws.CookieContainer = this.Cookies;
@@ -87,12 +85,12 @@ namespace DigitalPlatform.GcatClient
 			return nRet;
 		}
 
-        // Òì²½°æ±¾£¬¿ÉÒÔÖĞ¶Ï
+        // å¼‚æ­¥ç‰ˆæœ¬ï¼Œå¯ä»¥ä¸­æ–­
         // return:
-        //		-3	ĞèÒª»Ø´ğÎÊÌâ
-        //      -2  ÉĞÎ´µÇÂ¼(info.UserIDÎª¿Õ)
-        //      -1  ³ö´í
-        //      0   ³É¹¦
+        //		-3	éœ€è¦å›ç­”é—®é¢˜
+        //      -2  å°šæœªç™»å½•(info.UserIDä¸ºç©º)
+        //      -1  å‡ºé”™
+        //      0   æˆåŠŸ
         public int GetNumber(
             DigitalPlatform.Stop stop,
             string strAuthor,
@@ -121,13 +119,13 @@ namespace DigitalPlatform.GcatClient
 
                 while (true)
                 {
-                    Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                    Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                     if (stop != null)
                     {
                         if (stop.State != 0)
                         {
-                            strError = "ÓÃ»§ÖĞ¶Ï1";
+                            strError = "ç”¨æˆ·ä¸­æ–­1";
                             return -1;
                         }
                     }
@@ -152,7 +150,7 @@ namespace DigitalPlatform.GcatClient
             }
 
             if (e.Cancelled == true)
-                strError = "ÓÃ»§ÖĞ¶Ï2";
+                strError = "ç”¨æˆ·ä¸­æ–­2";
             else
                 strError = e.strError;
 
@@ -175,9 +173,9 @@ namespace DigitalPlatform.GcatClient
         }
 
 		// return:
-		//		-2	ÉĞÎ´µÇÂ¼
-		//		-1	³ö´í
-		//		0	³É¹¦
+		//		-2	å°šæœªç™»å½•
+		//		-1	å‡ºé”™
+		//		0	æˆåŠŸ
 		public int GetNumber(string strAuthor,
 			bool bSelectPinyin,
 			bool bSelectEntry,
@@ -205,12 +203,12 @@ namespace DigitalPlatform.GcatClient
 				this.BeforeLogin(this, newargs);
 				if (newargs.Cancel == true)
 				{
-					strError = "ÓÃ»§·ÅÆú";
+					strError = "ç”¨æˆ·æ”¾å¼ƒ";
 					return -1;
 				}
 				if (newargs.UserName == "")
 				{
-					strError = "UserName²»ÄÜÎª¿Õ";
+					strError = "UserNameä¸èƒ½ä¸ºç©º";
 					return -1;
 				}
 
@@ -239,7 +237,7 @@ namespace DigitalPlatform.GcatClient
 			return nRet;
 		}
 
-        // ´¦ÀíµÇÂ¼ÊÂÒË
+        // å¤„ç†ç™»å½•äº‹å®œ
         // 2007/6/29 new add
         int DoNotLogin(ref string strError)
         {
@@ -251,12 +249,12 @@ namespace DigitalPlatform.GcatClient
                 this.BeforeLogin(this, newargs);
                 if (newargs.Cancel == true)
                 {
-                    strError = "ÓÃ»§·ÅÆú";
+                    strError = "ç”¨æˆ·æ”¾å¼ƒ";
                     return -1;
                 }
                 if (newargs.UserName == "")
                 {
-                    strError = "UserName²»ÄÜÎª¿Õ";
+                    strError = "UserNameä¸èƒ½ä¸ºç©º";
                     return -1;
                 }
 
@@ -272,7 +270,7 @@ namespace DigitalPlatform.GcatClient
 
                 }
 
-                return 1;   // µÇÂ¼³É¹¦,¿ÉÒÔÖØ×öAPI¹¦ÄÜÁË
+                return 1;   // ç™»å½•æˆåŠŸ,å¯ä»¥é‡åšAPIåŠŸèƒ½äº†
             }
 
             return -1;
@@ -292,11 +290,11 @@ namespace DigitalPlatform.GcatClient
 
                 if (ex.Status == WebExceptionStatus.Timeout)
                 {
-                    return "ÇëÇó³¬Ê±(µ±Ç°³¬Ê±ÉèÖÃÎª" + Convert.ToString(this.ws.Timeout) + ")";
+                    return "è¯·æ±‚è¶…æ—¶(å½“å‰è¶…æ—¶è®¾ç½®ä¸º" + Convert.ToString(this.ws.Timeout) + ")";
                 }
                 if (ex.Status == WebExceptionStatus.RequestCanceled)
                 {
-                    return "ÓÃ»§ÖĞ¶Ï";
+                    return "ç”¨æˆ·ä¸­æ–­";
                 }
 
                 return ex.Message;
@@ -332,7 +330,7 @@ namespace DigitalPlatform.GcatClient
 		}
 
 
-		// ¹©½Å±¾µ÷ÓÃ
+		// ä¾›è„šæœ¬è°ƒç”¨
         // return:
         //      -1  error
         //      0   canceled
@@ -374,10 +372,10 @@ namespace DigitalPlatform.GcatClient
 			for(;;) 
 			{
                 // return:
-                //		-3	ĞèÒª»Ø´ğÎÊÌâ
-                //      -2  ÉĞÎ´µÇÂ¼(info.UserIDÎª¿Õ)
-                //      -1  ³ö´í
-                //      0   ³É¹¦
+                //		-3	éœ€è¦å›ç­”é—®é¢˜
+                //      -2  å°šæœªç™»å½•(info.UserIDä¸ºç©º)
+                //      -1  å‡ºé”™
+                //      0   æˆåŠŸ
 				nRet = channel.GetNumber(strAuthor,
 					bSelectPinyin,
 					bSelectEntry,
@@ -421,7 +419,7 @@ namespace DigitalPlatform.GcatClient
 
 				if (dlg.DialogResult != DialogResult.OK)
 				{
-                    return 0;   // ±íÊ¾±»·ÅÆú(·ÅÆú»Ø´ğÎÊÌâ)
+                    return 0;   // è¡¨ç¤ºè¢«æ”¾å¼ƒ(æ”¾å¼ƒå›ç­”é—®é¢˜)
                     /*
 					nRet = 0;
 					break;
@@ -479,7 +477,6 @@ namespace DigitalPlatform.GcatClient
             channel.BeforeLogin -= e;
             channel.BeforeLogin += e;
 
-
             channel.Url = strUrl;
 
             strNumber = "";
@@ -498,7 +495,7 @@ namespace DigitalPlatform.GcatClient
 
             for (; ; )
             {
-                // Õâ¸öº¯Êı¾ßÓĞcatch Í¨Ñ¶ÖĞ exeptionµÄÄÜÁ¦
+                // è¿™ä¸ªå‡½æ•°å…·æœ‰catch é€šè®¯ä¸­ exeptionçš„èƒ½åŠ›
                 nRet = channel.GetNumber(
                     stop,
                     strAuthor,

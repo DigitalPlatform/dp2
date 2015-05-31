@@ -402,7 +402,6 @@ namespace dp2Circulation
         internal Padding CellPadding = new Padding(8);
 
         // internal Padding LeftTextMargin = new Padding(6);
-        [System.ComponentModel.DefaultValue(typeof(Rectangle), "6")]
         internal Padding LeftTextMargin {get;set;}
 
         internal Padding LeftTextPadding = new Padding(0);
@@ -425,6 +424,8 @@ namespace dp2Circulation
 
         public BindingControl()
         {
+            this.LeftTextMargin = new Padding(6);
+
             this.DoubleBuffered = true;
 
             this.TextLineNames = this.DefaultTextLineNames;

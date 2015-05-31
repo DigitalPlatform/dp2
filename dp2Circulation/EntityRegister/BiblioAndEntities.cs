@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Drawing;
-
+using System.Xml;
 
 using DigitalPlatform.EasyMarc;
 using DigitalPlatform.CommonControl;
@@ -16,7 +16,6 @@ using DigitalPlatform.Script;
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.Marc;
-using System.Xml;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
 
@@ -1366,11 +1365,11 @@ MessageBoxDefaultButton.Button2);
         //      1   有错。错误信息在 errors 中
         public int VerifyBiblio(
             string strStyle,
-            out List<string> errors,
+            out List<BiblioError> errors,
             out string strError)
         {
             strError = "";
-            errors = new List<string>();
+            errors = new List<BiblioError>();
             int nRet = 0;
 
             MarcRecord record = new MarcRecord(this.GetMarc());
@@ -1379,16 +1378,15 @@ MessageBoxDefaultButton.Button2);
             {
                 string strTitle = record.select("field[@name='200']/subfield[@name='a']").FirstContent;
                 if (string.IsNullOrEmpty(strTitle) == true)
-                    errors.Add("缺乏书名 (200$a)");
+                    errors.Add(new BiblioError("缺乏书名 (200$a)"));
 
                 MarcNodeList nodes = record.select("field[starts-with(@name, '7')]/subfield[@name='a']");
                 if (AtLeastOneNotEmpty(nodes) == false)
-                    errors.Add("缺乏作者 (7XX$a)");
+                    errors.Add(new BiblioError("缺乏作者 (7XX$a)"));
 
                 nodes = record.select("field[starts-with(@name, '69') or @name='686']/subfield[@name='a']");
                 if (AtLeastOneNotEmpty(nodes) == false)
-                    errors.Add("缺乏分类号 (69X$a 或 686$a)");
-
+                    errors.Add(new BiblioError("缺乏分类号 (69X$a 或 686$a)"));
 
                 if (errors.Count > 0)
                     return 1;   // 先报错。等这里报错的问题都修正了，才会报空子字段的错
@@ -1408,16 +1406,16 @@ MessageBoxDefaultButton.Button2);
                 MarcNodeList nodes = record.select("field/subfield");
                 foreach (MarcSubfield subfield in nodes)
                 {
-                    // TODO: easyMarcControl 中要有从字段名子字段名查到提示文字的功能
                     if (string.IsNullOrEmpty(subfield.Content) == true)
                     {
                         string strFieldName = subfield.Parent.Name;
                         string strSubfieldName = subfield.Name;
-                        errors.Add("字段 '"
+                        errors.Add(new BiblioError(strFieldName, strSubfieldName,
+                            "字段 '"
                             + this.easyMarcControl1.GetCaption(strFieldName, null, false)
                             + "' 中出现了空子字段 '" 
                             + this.easyMarcControl1.GetCaption(strFieldName, strSubfieldName, false)
-                            + "'。需要把它删除");
+                            + "'。需要把它删除"));
                     }
                 }
             }
@@ -2165,6 +2163,63 @@ MessageBoxDefaultButton.Button2);
                 out strError);
         }
 
+    }
+
+
+    public class BiblioError
+    {
+        public string FieldName = "";
+        public int FieldDupIndex = 0;   // (记录内)同名字段下标
+        public string SubfieldName = "";
+        public int SubfieldDupIndex = 0;    // (所在字段内)同名子字段下标
+        public string ErrorInfo = "";
+
+        public BiblioError(string strErrorInfo)
+        {
+            this.ErrorInfo = strErrorInfo;
+        }
+
+        public BiblioError(string strFieldName,
+            string strSubfieldName,
+            string strErrorInfo)
+        {
+            this.FieldName = strFieldName;
+            this.SubfieldName = strSubfieldName;
+            this.ErrorInfo = strErrorInfo;
+        }
+
+        public string ToString()
+        {
+            return this.ErrorInfo;
+        }
+
+        public static string GetListString(List<BiblioError> list, string strSep)
+        {
+            StringBuilder result = new StringBuilder();
+            foreach(BiblioError error in list)
+            {
+                result.Append(error.ToString() + strSep);
+            }
+
+            return result.ToString();
+        }
+
+        // 返回 errors 中的涉及到的字段超过 name_list 的范围的部分列表
+        public static List<string> GetOutOfRangeFieldNames(List<BiblioError> errors, List<string> name_list)
+        {
+            List<string> results = new List<string>();
+            foreach (BiblioError error in errors)
+            {
+                if (string.IsNullOrEmpty(error.FieldName) == true)
+                    continue;
+
+                // TODO: error.FieldName 内容，可以扩展为允许 xxx,xxx 这样的形态
+                if (EasyMarcControl.MatchFieldName(error.FieldName, name_list) == false)
+                    results.Add(error.FieldName);
+            }
+            StringUtil.RemoveDup(ref results);  // 对结果集合中的名字去重
+            return results;
+        }
     }
 
     /// <summary>

@@ -90,6 +90,7 @@
       <DependentUpon>CheckedComboBox.cs</DependentUpon>
     </Compile>
     <Compile Include="Commander.cs" />
+    <Compile Include="ControlExtentions.cs" />
     <Compile Include="DateControl.cs">
       <SubType>UserControl</SubType>
     </Compile>

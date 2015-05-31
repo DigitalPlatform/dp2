@@ -400,6 +400,11 @@ namespace dp2Circulation
                 this.toolStripButton_save.Enabled = true;
             else
                 this.toolStripButton_save.Enabled = false;
+
+            if (this.tabControl_main.SelectedTab == this.tabPage_biblioAndItems)
+                this.toolStripButton_delete.Enabled = true;
+            else
+                this.toolStripButton_delete.Enabled = false;
         }
 
         private void tabControl_main_SelectedIndexChanged(object sender, EventArgs e)
@@ -543,6 +548,10 @@ namespace dp2Circulation
                     }
                 }
 
+                if (string.IsNullOrEmpty(strTotalError) == false)
+                    this.ShowMessage(strError, "red", true);
+                else if (nHitCount == 0)
+                    this.ShowMessage("没有命中", "yellow", true);
 #if NO
                 // line.SetBiblioSearchState(nHitCount.ToString());
 
@@ -628,6 +637,29 @@ namespace dp2Circulation
         {
             strError = "";
 
+            if (strFrom == "书名" || strFrom == "题名")
+                strFrom = "title";
+            else if (strFrom == "作者" || strFrom == "著者" || strFrom == "责任者")
+                strFrom = "author";
+            else if (strFrom == "出版社" || strFrom == "出版者")
+                strFrom = "publisher";
+            else if (strFrom == "出版日期")
+                strFrom = "pubdate";
+            else if (strFrom == "主题词")
+                strFrom = "subject";
+            else if (strFrom == "关键词")
+                strFrom = "keywords";
+            else if (strFrom == "语言")
+                strFrom = "language";
+            else if (strFrom == "装订")
+                strFrom = "binding";
+
+/* 还可以使用:
+            "ISBN",
+            "EISBN",
+            "ASIN"
+*/
+
             this.ShowMessage("正在针对 " + account.ServerName + " \r\n检索 " + strQueryWord + " ...",
                 "progress", false);
 
@@ -646,7 +678,7 @@ namespace dp2Circulation
                 int nRet = search.Search(
                     account.ServerUrl,
                     strQueryWord.Replace("-", ""),
-                    "ISBN",
+                    strFrom,    // "ISBN",
                     "[default]",
                     true,
                     out strError);
@@ -934,14 +966,23 @@ out string strError)
             strError = "";
             int nRet = 0;
 
-            _channel = _base.GetChannel(account.ServerUrl, account.UserName);
-            _channel.Timeout = new TimeSpan(0, 0, 5);   // 超时值为 5 秒
-            _channel.Idle += _channel_Idle;
-            try
+            string strFromStyle = "";
+
+            if (string.IsNullOrEmpty(strFrom) == true)
+                strFrom = "ISBN";
+            if (strFrom == "书名" || strFrom == "题名")
+                strFromStyle = "title";
+            else if (strFrom == "作者" || strFrom == "著者" || strFrom == "责任者")
+                strFromStyle = "contributor";
+            else if (strFrom == "出版社" || strFrom == "出版者")
+                strFromStyle = "publisher";
+            else if (strFrom == "出版日期")
+                strFromStyle = "publishtime";
+            else if (strFrom == "主题词")
+                strFromStyle = "subject";
+
+            if (string.IsNullOrEmpty(strFromStyle) == true)
             {
-                if (string.IsNullOrEmpty(strFrom) == true)
-                    strFrom = "ISBN";
-                string strFromStyle = "";
                 try
                 {
                     strFromStyle = this.MainForm.GetBiblioFromStyle(strFrom);
@@ -954,10 +995,16 @@ out string strError)
 
                 if (String.IsNullOrEmpty(strFromStyle) == true)
                 {
-                    strError = "GetFromStyle()没有找到 '" + strFrom + "' 对应的style字符串";
+                    strError = "GetFromStyle()没有找到 '" + strFrom + "' 对应的 style 字符串";
                     goto ERROR1;
                 }
+            }
 
+            _channel = _base.GetChannel(account.ServerUrl, account.UserName);
+            _channel.Timeout = new TimeSpan(0, 0, 5);   // 超时值为 5 秒
+            _channel.Idle += _channel_Idle;
+            try
+            {
                 string strMatchStyle = "left";  // BiblioSearchForm.GetCurrentMatchStyle(this.comboBox_matchStyle.Text);
                 if (string.IsNullOrEmpty(strQueryWord) == true)
                 {
@@ -1070,7 +1117,7 @@ out string strError)
                     }
 
                     {
-                        // 获得书目摘要
+                        // 获得书目记录
                         BiblioLoader loader = new BiblioLoader();
                         loader.Channel = _channel;
                         loader.Stop = this.Progress;
@@ -1241,6 +1288,41 @@ out string strError)
             PrepareCoverImage(row);
         }
 
+        // 替换浏览列内容
+        public void ChangeBiblioBrowseLine(
+            DpRow row,
+            string strBrowseText,
+            RegisterBiblioInfo info)
+        {
+            if (this.dpTable_browseLines.InvokeRequired)
+            {
+                // 事件是在多线程上下文中触发的，需要 Invoke 显示信息
+                this.BeginInvoke(new Action<DpRow, string, RegisterBiblioInfo>(ChangeBiblioBrowseLine),
+                    row,
+                    strBrowseText,
+                    info);
+                return;
+            }
+
+            List<string> columns = StringUtil.SplitList(strBrowseText, '\t');
+
+
+            // 0: index
+            // 1: recpath
+
+            int index = 2;
+            foreach (string s in columns)
+            {
+                if (index >= row.Count)
+                    break;
+                row[index].Text = s;
+                index++;
+            }
+
+            row.Tag = info;
+            // PrepareCoverImage(row);
+        }
+
         // 创建浏览栏目标题
         void CreateBrowseColumns()
         {
@@ -1281,6 +1363,52 @@ out string strError)
             }
 
             this.dpTable_browseLines.Rows.Clear();
+
+        }
+
+        // 更新浏览行中缓冲的书目信息
+        void RefreshBrowseLineBiblio(string strRecPath,
+            RegisterBiblioInfo new_info)
+        {
+            Debug.Assert(strRecPath == new_info.RecPath, "");
+
+            foreach (DpRow row in this.dpTable_browseLines.Rows)
+            {
+                RegisterBiblioInfo info = row.Tag as RegisterBiblioInfo;
+                if (info == null)
+                    continue;
+                if (info.RecPath == strRecPath)
+                {
+#if NO
+                    info.OldXml = "";
+                    info.NewXml = "";
+                    info.Timestamp = null;
+                    // 仅保留 RecPath 供重新装载用
+#endif
+                    RegisterBiblioInfo dup = new RegisterBiblioInfo(new_info);
+                    //dup.CoverImageFileName = info.CoverImageFileName;
+                    //dup.CoverImageRquested = info.CoverImageRquested;
+                    // row.Tag = dup;
+
+                    // 刷新浏览列
+                    string strError = "";
+                    string strBrowseText = "";
+                    int nRet = BuildMarcBrowseText(
+                        dup.MarcSyntax,
+                        dup.OldXml,
+                        out strBrowseText,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strBrowseText = "MARC记录转换到浏览格式时出错: " + strError;
+                    }
+                    // 替换浏览列内容
+                    ChangeBiblioBrowseLine(
+                        row,
+                        strBrowseText,
+                        dup);
+                }
+            }
 
         }
 
@@ -1360,6 +1488,8 @@ out string strError)
             string strError = "";
             int nRet = 0;
 
+            this.ClearMessage();
+
             if (this.dpTable_browseLines.Rows.Count == 0)
             {
                 strError = "请先进行检索，并选定命中结果中要编辑的一行";
@@ -1371,14 +1501,20 @@ out string strError)
                 goto ERROR1;
             }
 
-            this.tabControl_main.SelectedTab = this.tabPage_biblioAndItems;
-
             RegisterBiblioInfo info = this.dpTable_browseLines.SelectedRows[0].Tag as RegisterBiblioInfo;
             if (info == null)
             {
                 strError = "这是提示信息行";
                 goto ERROR1;
             }
+
+            if (string.IsNullOrEmpty(info.OldXml) == true && string.IsNullOrEmpty(info.NewXml) == true)
+            {
+                strError = "此记录已经被更新，请重新检索";
+                goto ERROR1;
+            }
+
+            this.tabControl_main.SelectedTab = this.tabPage_biblioAndItems;
 
             // return:
             //      false   后续操作可以进行
@@ -1397,7 +1533,10 @@ out string strError)
             return;
         ERROR1:
             if (string.IsNullOrEmpty(strError) == false)
-                MessageBox.Show(this, strError);
+            {
+                // MessageBox.Show(this, strError);
+                this.ShowMessage(strError, "red", true);
+            }
         }
 
         // return:
@@ -1939,7 +2078,7 @@ int nCount)
 
             if (_biblio.BiblioChanged)
             {
-                List<string> errors = null;
+                List<BiblioError> errors = null;
                 // return:
                 //      -1  检查过程出错。错误信息在 strError 中。和返回 1 的区别是，这里是某些因素导致无法检查了，而不是因为册记录格式有错
                 //      0   正确
@@ -1952,12 +2091,22 @@ int nCount)
                     goto ERROR1;
                 if (nRet == 1)
                 {
+                    // 观察报错的字段是否有隐藏状态的。如果有，则需要把它们显示出来，以便操作者观察修改
+                    {
+                        List<string> important_fieldnames = StringUtil.SplitList(this.textBox_settings_importantFields.Text.Replace("\r\n", ","));
+                        List<string> hidden_fieldnames = BiblioError.GetOutOfRangeFieldNames(errors, important_fieldnames);
+                        if (hidden_fieldnames.Count > 0)
+                            this.easyMarcControl1.HideFields(hidden_fieldnames, false); // null, false 可显示全部隐藏字段
+                    }
+
                     bool bTemp = false;
+                    // TODO: 如果保持窗口修改后的尺寸位置?
                     MessageDialog.Show(this,
                         "书目记录格式不正确",
-                        StringUtil.MakePathList(errors, "\r\n"),
+                        BiblioError.GetListString(errors, "\r\n"),
                         null,
                         ref bTemp);
+
                     strError = "书目记录没有被保存。请修改相关字段后重新提交保存";
                     goto ERROR1;
                 }
@@ -2093,6 +2242,19 @@ int nCount)
                     this._biblio.BiblioChanged = false;
 
                     bBiblioSaved = true;
+
+                    // 刷新浏览列表中的书目信息
+                    {
+                        RegisterBiblioInfo info = new RegisterBiblioInfo(
+                            _biblio.BiblioRecPath + "@" + _biblio.ServerName,
+                            _biblio.GetMarc(),  // OldXml 成员被挪用了，实际上存放的是 MARC 字符串
+                            "",
+                            _biblio.Timestamp,
+                            _biblio.MarcSyntax);
+                        this.RefreshBrowseLineBiblio(info.RecPath,
+                            info);
+                    }
+
                     this.ShowMessage("书目记录 " + strOutputPath + " 保存成功", "green", true);
                 }
 
@@ -2310,7 +2472,7 @@ int nCount)
             return false;
         }
 
-        // 根据书目记录的路径，匹配适当的目标
+        // 为保存书目记录的需要，根据书目记录的路径，匹配适当的目标
         // parameters:
         //      bAllowCopyTo    是否允许书目记录复制到其他库？这发生在原始库不让 overwrite 的时候
         // return:
@@ -2375,6 +2537,181 @@ int nCount)
             return 0;
         }
 
+
+        #endregion
+
+        #region 删除书目记录
+
+        // return:
+        //      -1  出错
+        //      0   不允许删除
+        //      1   允许删除
+        int BiblioCanDelete(
+    out string strServerName,
+    out string strBiblioRecPath)
+        {
+            strServerName = "";
+            strBiblioRecPath = "";
+
+            // _currentAccount.IsLocalServer == true ?
+
+            // string strEditServerUrl = "";
+            string strEditServerName = this._biblio.ServerName;
+            string strEditBiblioRecPath = this._biblio.BiblioRecPath;
+
+            if (string.IsNullOrEmpty(strEditServerName) == false
+                && string.IsNullOrEmpty(strEditBiblioRecPath) == false)
+            {
+                // 验证 edit 中的书目库名，是否是可以写入的 ?
+                XmlElement server = (XmlElement)_base.ServersDom.DocumentElement.SelectSingleNode("server[@name='" + strEditServerName + "']");
+                if (server != null)
+                {
+                    if (IsWritable(server, strEditBiblioRecPath) == true)
+                    {
+                        strServerName = strEditServerName;
+                        strBiblioRecPath = strEditBiblioRecPath;
+                        return 1;
+                    }
+
+                    return 0;
+                }
+                return 0;
+            }
+
+            return 0;
+        }
+
+        // 从数据库中删除书目记录
+        int DeleteBiblioRecord()
+        {
+            string strError = "";
+            int nRet = 0;
+
+            Progress.OnStop += new StopEventHandler(this.DoStop);
+            this.ShowMessage("正在删除书目记录 ...", "progress", false);
+            Progress.BeginLoop();
+
+            try
+            {
+                AccountInfo _currentAccount = _base.GetAccountInfo(this._biblio.ServerName);
+                if (_currentAccount == null)
+                {
+                    strError = "服务器名 '" + this._biblio.ServerName + "' 没有配置";
+                    goto ERROR1;
+                }
+
+                // TODO: 确定目标 dp2library 服务器 目标书目库
+                string strServerName = "";
+                string strBiblioRecPath = "";
+
+                // return:
+                //      -1  出错
+                //      0   不允许删除
+                //      1   允许删除
+                nRet = BiblioCanDelete(
+                    out strServerName,
+                    out strBiblioRecPath);
+                if (nRet == -1)
+                    goto ERROR1;
+                if (nRet == 0)
+                {
+                    strError = "来自服务器 '" + this._biblio.ServerName + "' 的书目记录 '" + this._biblio.BiblioRecPath + "' 不允许删除";
+                    goto ERROR1;
+                }
+
+                byte[] baNewTimestamp = null;
+                nRet = DeleteBiblioRecordFromDatabase(
+                    strServerName,
+                    strBiblioRecPath,
+                    this._biblio.Timestamp,
+                    out baNewTimestamp,
+                    out strError);
+                if (nRet == -1)
+                {
+                    // 删除失败时也不要忘记了更新时间戳
+                    // 这样如果遇到时间戳不匹配，下次重试删除即可?
+                    if (baNewTimestamp != null)
+                        _biblio.Timestamp = baNewTimestamp;
+                    goto ERROR1;
+                }
+
+                _biblio.BiblioChanged = false;
+                _biblio.EntitiesChanged = false;
+                this.ShowMessage("书目记录 " + strBiblioRecPath + "@" + strServerName + " 删除成功", "green", true);
+            }
+            finally
+            {
+                Progress.EndLoop();
+                Progress.OnStop -= new StopEventHandler(this.DoStop);
+                Progress.Initial("");
+            }
+
+            return 1;
+        ERROR1:
+            this.ShowMessage(strError, "red", true);
+            // MessageBox.Show(this, strError);
+            return -1;
+        }
+
+        int DeleteBiblioRecordFromDatabase(
+    string strServerName,
+    string strPath,
+    // string strXml,
+    byte[] baTimestamp,
+    out byte[] baNewTimestamp,
+    out string strError)
+        {
+            strError = "";
+            baNewTimestamp = null;
+
+            AccountInfo _currentAccount = _base.GetAccountInfo(strServerName);
+            if (_currentAccount == null)
+            {
+                strError = "服务器名 '" + strServerName + "' 没有配置";
+                return -1;
+            }
+            _channel = _base.GetChannel(_currentAccount.ServerUrl, _currentAccount.UserName);
+
+            try
+            {
+                string strAction = "delete";
+
+                if (Global.IsAppendRecPath(strPath) == true)
+                {
+                    strError = "路径 '"+strPath+"' 不能用于删除操作";
+                    return -1;
+                }
+
+                string strOutputPath = "";
+            REDO:
+                long lRet = _channel.SetBiblioInfo(
+                    Progress,
+                    strAction,
+                    strPath,
+                    "xml",
+                    "", // strXml,
+                    baTimestamp,
+                    "",
+                    out strOutputPath,
+                    out baNewTimestamp,
+                    out strError);
+                if (lRet == -1)
+                {
+                    strError = "删除书目记录 '" + strPath + "' 时出错: " + strError;
+                    goto ERROR1;
+                }
+
+                return 1;
+            ERROR1:
+                return -1;
+            }
+            finally
+            {
+                _base.ReturnChannel(_channel);
+                this._channel = null;
+                // _currentAccount = null;
+            }
+        }
 
         #endregion
 
@@ -2539,7 +2876,7 @@ MessageBoxDefaultButton.Button1);
                 strISBN = strValue;
             if (strFrom == "书名" || strFrom == "题名")
                 strTitle = strValue;
-            if (strFrom == "作者" || strFrom == "著者")
+            if (strFrom == "作者" || strFrom == "著者" || strFrom == "责任者")
                 strAuthor = strValue;
             if (strFrom == "出版者" || strFrom == "出版社")
                 strPublisher = strValue;
@@ -2570,8 +2907,11 @@ MessageBoxDefaultButton.Button1);
                     record.select("field[@name='010']/subfield[@name='a']")[0].Content = strISBN;
 #endif
             }
-            info.OldXml = record.Text;
 
+            // record.Header.ForceUNIMARCHeader();
+            record.Header[0, 24] = "?????nam0 22?????3i 45  ";
+
+            info.OldXml = record.Text;
             return info;
         }
 
@@ -2706,6 +3046,26 @@ MessageBoxDefaultButton.Button1);
                     }
                 }
             }
+        }
+
+        // 删除书目记录
+        private void toolStripButton_delete_Click(object sender, EventArgs e)
+        {
+            this.ClearMessage();
+
+            DialogResult result = MessageBox.Show(this.Owner,
+    "确实要删除当前书目记录?\r\n\r\n删除书目记录会一并删除其下属的册记录和期、订购、评注记录。删除后记录将无法复原，请小心确认操作\r\n\r\n是：删除; \r\n否: 放弃删除",
+"册登记",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+            if (result == DialogResult.No)
+            {
+                this.ShowMessage("已放弃删除", "yellow", true);
+                return;
+            }
+
+            this.DeleteBiblioRecord();
         }
 
 #if NO

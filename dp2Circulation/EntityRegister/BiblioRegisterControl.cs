@@ -2071,6 +2071,34 @@ MessageBoxDefaultButton.Button2);
         public string CoverImageFileName = "";
 
         public bool CoverImageRquested = false; // 如果为 true ,表示已经请求了异步获取图像，不要重复请求
+
+        public RegisterBiblioInfo()
+        {
+        }
+
+        public RegisterBiblioInfo(string strRecPath,
+            string strOldXml,
+            string strNewXml,
+            byte[] timestamp,
+            string strMarcSyntax)
+        {
+            this.RecPath = strRecPath;
+            this.OldXml = strOldXml;
+            this.NewXml = strNewXml;
+            this.Timestamp = timestamp;
+            this.MarcSyntax = strMarcSyntax;
+        }
+
+        // 拷贝构造
+        public RegisterBiblioInfo(RegisterBiblioInfo ref_obj)
+        {
+            this.RecPath = ref_obj.RecPath;
+            this.OldXml = ref_obj.OldXml;
+            this.NewXml = ref_obj.NewXml;
+            this.Timestamp = ref_obj.Timestamp;
+            this.MarcSyntax = ref_obj.MarcSyntax;
+        }
+
     }
 
     

@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
@@ -98,7 +98,7 @@ namespace DigitalPlatform.GcatClient
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(53, 12);
             this.label1.TabIndex = 0;
-            this.label1.Text = "´ğ°¸(&A):";
+            this.label1.Text = "ç­”æ¡ˆ(&A):";
             // 
             // textBox_result
             // 
@@ -116,7 +116,7 @@ namespace DigitalPlatform.GcatClient
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(74, 22);
             this.button_OK.TabIndex = 2;
-            this.button_OK.Text = "È·¶¨";
+            this.button_OK.Text = "ç¡®å®š";
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
             // button_Cancel
@@ -127,7 +127,7 @@ namespace DigitalPlatform.GcatClient
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(75, 22);
             this.button_Cancel.TabIndex = 3;
-            this.button_Cancel.Text = "È¡Ïû";
+            this.button_Cancel.Text = "å–æ¶ˆ";
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
             // QuestionDlg
@@ -145,7 +145,7 @@ namespace DigitalPlatform.GcatClient
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "QuestionDlg";
             this.ShowInTaskbar = false;
-            this.Text = "´´½¨ÖøÕßºÅ - Çë»Ø´ğÌáÎÊ";
+            this.Text = "åˆ›å»ºè‘—è€…å· - è¯·å›ç­”æé—®";
             this.Load += new System.EventHandler(this.QuestionDlg_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -157,7 +157,7 @@ namespace DigitalPlatform.GcatClient
 		{
 			if (textBox_result.Text == "")
 			{
-				MessageBox.Show(this, "ÉĞÎ´ÊäÈë´ğ°¸");
+				MessageBox.Show(this, "å°šæœªè¾“å…¥ç­”æ¡ˆ");
 				return;
 			}
 		

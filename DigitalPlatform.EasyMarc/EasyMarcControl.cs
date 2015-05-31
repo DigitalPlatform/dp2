@@ -684,7 +684,7 @@ namespace DigitalPlatform.EasyMarc
         // 匹配字段名列表
         // parameters:
         //      field_names 字段名列表。每个字段名可以包含通配符 *。还可以用 @ 引导正则表达式
-        static bool MatchFieldName(string strFieldName, List<string> field_names)
+        public static bool MatchFieldName(string strFieldName, List<string> field_names)
         {
             foreach (string name in field_names)
             {
@@ -1975,6 +1975,396 @@ namespace DigitalPlatform.EasyMarc
             this.RefreshLineColor();
         }
 
+        #region 定长模板
+
+        /// <summary>
+        /// 获取一个特定模板的XML定义
+        /// </summary>
+        public event GetTemplateDefEventHandler GetTemplateDef = null;  // 外部接口，获取一个特定模板的XML定义
+
+        // 通过模板取固定字段的值
+        // parameter:
+        //		strFieldName	字段名称
+        //		strSubFieldName	子字段名称 如果为空表示获得字段的定长模板
+        // return:
+        //		-1	出错
+        //		0	没找到 可能是模板文件不存在，或者对应的配置事项不存在
+        //		1	找到
+        private int GetValueFromTemplate(string strFieldName,
+            string strSubFieldName,
+            string strValue,
+            out string strOutputValue,
+            out string strError)
+        {
+            Debug.Assert(strFieldName != null, "GetValueFromTemplate()，strFieldName 参数不能为 null");
+            Debug.Assert(strSubFieldName != null, "GetValueFromTemplate()，strSubFieldName 参数不能为 null");
+            Debug.Assert(strValue != null, "GetValueFromTemplate()，strValue 参数不能为 null");
+
+            strError = "";
+            strOutputValue = strValue;
+
+            // 检查MarcDefDom是否存在
+            if (this.MarcDefDom == null)
+            {
+                strError = this.m_strMarcDomError;
+                return 0;   // 2008/3/19恢复。 原来为什么要注释掉?
+            }
+
+            XmlNode nodeDef = null;
+            string strTitle = "";
+
+            // 首先尝试从外部接口获得模板定义
+            if (this.GetTemplateDef != null)
+            {
+                GetTemplateDefEventArgs e = new GetTemplateDefEventArgs();
+                e.FieldName = strFieldName;
+                e.SubfieldName = strSubFieldName;
+                e.Value = strValue;
+
+                this.GetTemplateDef(this, e);
+                if (string.IsNullOrEmpty(e.ErrorInfo) == false)
+                {
+                    strError = "在通过外部接口获取字段名为 '" + strFieldName + "' 子字段名为 '" + strSubFieldName + "' 的模板定义XML时出错: \r\n" + e.ErrorInfo;
+                    return -1;
+                }
+                if (e.Canceled == false)
+                {
+                    nodeDef = e.DefNode;
+                    strTitle = e.Title;
+                    goto FOUND;
+                }
+
+                // e.Canceled == true 表示希望MarcEditor来自己获得定义
+            }
+
+            // *** MarcEditor来自己获得定义
+            // 根据字段名找到配置文件中的该字段的定义
+            XmlNodeList nodes = null;
+            if (strSubFieldName == "")
+                nodes = this.MarcDefDom.DocumentElement.SelectNodes("Field[@name='" + strFieldName + "']");
+            else
+                nodes = this.MarcDefDom.DocumentElement.SelectNodes("Field[@name='" + strFieldName + "']/Subfield[@name='" + strSubFieldName + "']");
+
+            if (nodes.Count == 0)
+            {
+                strError = "MARC定义文件中没有找到字段名为 '" + strFieldName + "' 子字段名为 '" + strSubFieldName + "' 的字段/子字段 定义";
+                return 0;
+            }
+
+            if (nodes.Count > 1)
+            {
+                List<string> lines = new List<string>();
+                int i = 0;
+                foreach (XmlNode node in nodes)
+                {
+                    string strType = DomUtil.GetAttr(node, "type");
+                    lines.Add((i + 1).ToString() + ") " + strType);
+                    i++;
+                }
+
+                SelectListStringDialog select_def_dlg = new SelectListStringDialog();
+                GuiUtil.AutoSetDefaultFont(select_def_dlg);
+
+                select_def_dlg.Text = "请选择模板定义";
+                select_def_dlg.Values = lines;
+                select_def_dlg.Comment = "MARC定义文件中发现 字段名为 '" + strFieldName + "' 子字段名为 '" + strSubFieldName + "' 的模板定义有 " + nodes.Count.ToString() + " 处。\r\n\r\n请选择其中一个";
+                select_def_dlg.StartPosition = FormStartPosition.CenterScreen;
+                select_def_dlg.ShowDialog(this);
+                if (select_def_dlg.DialogResult == DialogResult.Cancel)
+                {
+                    strError = "放弃选择模板定义";
+                    return 0;
+                }
+                Debug.Assert(select_def_dlg.SelectedIndex != -1, "");
+                nodeDef = nodes[select_def_dlg.SelectedIndex];
+#if NO
+                strTitle = "定长模板 : " + strFieldName
+                    + (string.IsNullOrEmpty(strSubFieldName) == false ? new String(Record.KERNEL_SUBFLD, 1) + strSubFieldName : "")
+                    + " -- " + select_def_dlg.SelectedValue;
+#endif
+                strTitle = strFieldName
+                    + (string.IsNullOrEmpty(strSubFieldName) == false ? "$" + strSubFieldName : "")
+                    + " " + GetCaption(strFieldName, strSubFieldName, false) + " -- " + select_def_dlg.SelectedValue;
+            }
+            else
+            {
+                nodeDef = nodes[0];
+            }
+        FOUND:
+            FixedTemplateDlg dlg = new FixedTemplateDlg();
+            // GuiUtil.AutoSetDefaultFont(dlg);
+            if (string.IsNullOrEmpty(strTitle) == false)
+                dlg.Text = "定长模板 : " + strTitle;
+            else
+            {
+#if NO
+            dlg.Text = "定长模板 : " + strFieldName
+                + (string.IsNullOrEmpty(strSubFieldName) == false ? new String(Record.KERNEL_SUBFLD, 1) + strSubFieldName : "");
+        
+#endif
+                dlg.Text = "定长模板 : "
+                    + strFieldName
+                    + (string.IsNullOrEmpty(strSubFieldName) == false ? "$" + strSubFieldName : "")
+                    + " " + GetCaption(strFieldName, strSubFieldName, false);
+            }
+
+            dlg.TemplateControl.GetConfigDom += this.GetConfigDom;
+            dlg.GetTemplateDef += new GetTemplateDefEventHandler(dlg_GetTemplateDef);
+            dlg.TemplateControl.ParseMacro += new ParseMacroEventHandler(TemplateControl_ParseMacro);
+
+            dlg.TemplateControl.MarcDefDom = this.MarcDefDom;
+            dlg.TemplateControl.Lang = this.Lang;
+            dlg.StartPosition = FormStartPosition.CenterScreen;
+
+            int nRet = dlg.Initial(nodeDef,
+                this.Lang,
+                strValue,
+                out strError);
+            if (nRet == 0)
+                return 0;
+            if (nRet == -1)
+                return -1;
+
+            dlg.ShowDialog(this);
+#if NO
+            dlg.TemplateControl.ParseMacro -= new ParseMacroEventHandler(TemplateControl_ParseMacro);
+            dlg.TemplateControl.GetConfigDom -= this.GetConfigDom;
+#endif
+
+            if (dlg.DialogResult == DialogResult.OK)
+            {
+                strOutputValue = dlg.TemplateControl.Value;
+            }
+
+            return 1;
+        }
+
+        void dlg_GetTemplateDef(object sender, GetTemplateDefEventArgs e)
+        {
+            if (this.GetTemplateDef != null)
+                this.GetTemplateDef(sender, e);
+        }
+
+        public void HeaderGetValueFromTemplate()
+        {
+            string strError;
+            int nRet = 0;
+
+            string strOutputValue;
+            // 获取字段的定长模板
+            nRet = this.GetValueFromTemplate("###",
+                "",
+                this._header,
+                out strOutputValue,
+                out strError);
+            if (nRet == -1)
+            {
+                MessageBox.Show(this, strError);
+                return;
+            }
+
+            if (nRet == 0)
+                return;
+
+            if (this._header != strOutputValue)
+            {
+                this._header = strOutputValue;
+                this.Changed = true;
+            }
+        }
+
+        /// <summary>
+        /// 打开当前按位置的定长模板对话框
+        /// </summary>
+        public void GetValueFromTemplate(EasyLine line)
+        {
+            string strError;
+            int nRet = 0;
+
+            string strFieldName = "";
+            string strFieldValue = "";
+
+            string strSubfieldName = "";
+            string strSubfieldValue = "";
+
+            if (line is FieldLine)
+            {
+                strFieldName = line.Name;
+                strFieldValue = line.Content;   // TODO: 如果遇到不是控制字段的，是否要合成字段内容?
+            }
+            else
+            {
+                FieldLine field = this.GetFieldLine(line as SubfieldLine);
+                strFieldName = field.Name;
+                strSubfieldName = line.Name;
+                strSubfieldValue = line.Content;
+            }
+
+            // int nSubfieldDupIndex = 0;
+
+            string strOutputValue;
+            if (strSubfieldName == "")
+            {
+                // 获取字段的定长模板
+                nRet = this.GetValueFromTemplate(strFieldName,
+                    "",
+                    strFieldValue,
+                    out strOutputValue,
+                    out strError);
+                if (nRet == -1)
+                {
+                    MessageBox.Show(this, strError);
+                    return;
+                }
+
+                if (nRet == 0)
+                    return;
+
+                // 此处应使用Value
+                if (strFieldValue != strOutputValue)
+                    line.Content = strOutputValue;
+
+                // 不让小edit全选上
+                line.textBox_content.SelectionLength = 0;
+            }
+            else
+            {
+                int nOldSelectionStart = line.textBox_content.SelectionStart;
+
+                nRet = this.GetValueFromTemplate(strFieldName,
+                    strSubfieldName,
+                    strSubfieldValue,
+                    out strOutputValue,
+                    out strError);
+                if (nRet == -1)
+                {
+                    MessageBox.Show(this, strError);
+                    return;
+                }
+
+                // 不是定长子字段的情况
+                if (nRet == 0)
+                    return;
+
+                if (strSubfieldValue != strOutputValue)
+                {
+                    line.Content = strOutputValue;
+                }
+
+                // 不让小edit全选上
+                if (nOldSelectionStart < line.textBox_content.Text.Length)
+                    line.textBox_content.SelectionStart = nOldSelectionStart;
+                else
+                    line.textBox_content.SelectionLength = 0;
+            }
+        }
+
+        // 探测当前位置是否存在定长模板定义
+        // parameters:
+        //      strCurName  返回当前所在位置的字段、子字段名
+        internal bool HasTemplateOrValueListDef(
+            EasyLine line,
+            string strDefName,
+            out string strCurName)
+        {
+            strCurName = "";
+
+            string strFieldName = "";
+            string strSubfieldName = "";
+
+            if (line is FieldLine)
+            {
+                strFieldName = line.Name;
+                strCurName = strFieldName;
+            }
+            else
+            {
+                FieldLine field = this.GetFieldLine(line as SubfieldLine);
+                strFieldName = field.Name;
+                strSubfieldName = line.Name;
+
+                strCurName = strFieldName + new String(Record.KERNEL_SUBFLD, 1) + strSubfieldName;
+            }
+
+            string strError;
+            return HasTemplateOrValueListDef(
+                strDefName,
+                strFieldName,
+                strSubfieldName,
+                out strError);
+        }
+
+        private bool HasTemplateOrValueListDef(
+    string strDefName,
+    string strFieldName,
+    string strSubFieldName,
+    out string strError)
+        {
+            Debug.Assert(strFieldName != null, "strFieldName参数不能为null");
+            Debug.Assert(strSubFieldName != null, "strSubFieldName参数不能为null");
+
+            strError = "";
+
+            // 检查MarcDefDom是否存在
+            if (this.MarcDefDom == null)
+            {
+                strError = m_strMarcDomError;
+                return false;
+            }
+
+            // 根据字段名找到配置文件中的该字段的定义
+            XmlNode node = null;
+
+            if (string.IsNullOrEmpty(strSubFieldName) == true || strSubFieldName == "#indicator")
+            {
+                // 只找到字段
+                node = this.MarcDefDom.DocumentElement.SelectSingleNode("Field[@name='" + strFieldName + "']");
+            }
+            else
+            {
+                // 找到子字段
+                node = this.MarcDefDom.DocumentElement.SelectSingleNode("Field[@name='" + strFieldName + "']/Subfield[@name='" + strSubFieldName + "']");
+            }
+
+            if (node == null)
+                return false;   // not found def
+
+            XmlNodeList nodes = null;
+
+            if (strDefName == "template")
+            {
+                // 下级有至少一个<Char>定义
+                nodes = node.SelectNodes("Char");
+            }
+            else if (strDefName == "valuelist")
+            {
+                // 下级有<ValueList>定义
+                nodes = node.SelectNodes("Property/ValueList");
+            }
+            else
+            {
+                throw new Exception("strDefName 值应当为 'template' 和 'valuelist' 之一。");
+            }
+
+            if (nodes.Count >= 1)
+                return true;
+
+            return false;
+        }
+
+        #endregion
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            // Debug.WriteLine("keyData=" + keyData.ToString());
+            if (keyData == (Keys.M | Keys.Control))
+            {
+                if (this.SelectedItems.Count > 0)
+                    this.GetValueFromTemplate(this.SelectedItems[0]);
+                return true;
+            }
+            return false;
+        }
     }
 
     // 字段行
@@ -2430,6 +2820,9 @@ namespace DigitalPlatform.EasyMarc
             this.textBox_content.KeyDown -= textBox_content_KeyDown;
             this.textBox_content.KeyDown += textBox_content_KeyDown;
 
+            this.textBox_content.KeyPress -= textBox_content_KeyPress;
+            this.textBox_content.KeyPress += textBox_content_KeyPress;
+
             // this.splitter.Paint += new PaintEventHandler(splitter_Paint);
 
             this.splitter.MouseDown -= new MouseEventHandler(splitter_MouseDown);
@@ -2444,6 +2837,25 @@ namespace DigitalPlatform.EasyMarc
 
             this.label_caption.MouseWheel -= new MouseEventHandler(textBox_comment_MouseWheel);
             this.label_caption.MouseWheel += new MouseEventHandler(textBox_comment_MouseWheel);
+#endif
+        }
+
+        void textBox_content_KeyPress(object sender, KeyPressEventArgs e)
+        {
+#if NO
+            switch (e.KeyChar)
+            {
+                case 'M':
+                case 'm':
+                    {
+                        if (Control.ModifierKeys == Keys.Control)
+                        {
+                            this.Container.GetValueFromTemplate(this);
+                            e.Handled = true;
+                        }
+                    }
+                    break;
+            }
 #endif
         }
 
@@ -2642,6 +3054,25 @@ namespace DigitalPlatform.EasyMarc
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
+            // 定长模板
+            string strCurName = "";
+            bool bEnable = this.Container.HasTemplateOrValueListDef(
+                this,
+                "template",
+                out strCurName);
+
+            menuItem = new MenuItem("模板编辑 ["+strCurName+"] (&T)");
+            menuItem.Click += new System.EventHandler(this.menu_templateDialog_Click);
+            menuItem.Enabled = bEnable;
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("模板编辑 [头标区] (&H)");
+            menuItem.Click += new System.EventHandler(this.menu_headerTemplateDialog_Click);
+            contextMenu.MenuItems.Add(menuItem);
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
 
             //
             menuItem = new MenuItem("删除(&D)");
@@ -2701,13 +3132,23 @@ namespace DigitalPlatform.EasyMarc
             menuItem.Checked = this.Container.IncludeNumber;
             contextMenu.MenuItems.Add(menuItem);
 
-
             /*
             menuItem = new MenuItem("test");
             menuItem.Click += new System.EventHandler(this.menu_test_Click);
             contextMenu.MenuItems.Add(menuItem);
              * */
             contextMenu.Show(this.label_color, new Point(e.X, e.Y));
+        }
+
+        // 打开定长模板对话框
+        void menu_templateDialog_Click(object sender, EventArgs e)
+        {
+            this.Container.GetValueFromTemplate(this);
+        }
+
+        void menu_headerTemplateDialog_Click(object sender, EventArgs e)
+        {
+            this.Container.HeaderGetValueFromTemplate();
         }
 
         void menu_hideField_Click(object sender, EventArgs e)
@@ -3000,41 +3441,4 @@ namespace DigitalPlatform.EasyMarc
         }
     }
 
-    public static class ScrollableControlExtention
-    {
-        public static void SetAutoScrollPosition(this ScrollableControl control, Point p)
-        {
-            if (p.Y + control.ClientSize.Height > control.DisplayRectangle.Height)
-                p.Y = control.DisplayRectangle.Height - control.ClientSize.Height;
-            if (p.X + control.ClientSize.Width > control.DisplayRectangle.Width)
-                p.X = control.DisplayRectangle.Width - control.ClientSize.Width;
-            control.AutoScrollPosition = new Point(p.X, p.Y);
-        }
-    }
-
-    /// <summary>
-    /// TableLayoutPanel 扩展方法
-    /// </summary>
-    public static class TableLayoutPanelExtention
-    {
-        // http://stackoverflow.com/questions/7142138/tablelayoutpanel-getcontrolfromposition-does-not-get-non-visible-controls-how-d
-        // TableLayoutPanel GetControlFromPosition does not get non-visible controls. How do you access a non-visible control at a specified position?
-        public static Control GetAnyControlAt(this TableLayoutPanel panel, int column, int row)
-        {
-            {
-                Control control = panel.GetControlFromPosition(column, row);
-                if (control != null)
-                    return control;
-            }
-
-            foreach (Control control in panel.Controls)
-            {
-                var cellPosition = panel.GetCellPosition(control);
-                if (cellPosition.Column == column && cellPosition.Row == row)
-                    return control;
-            }
-            return null;
-        }
-
-    }
 }

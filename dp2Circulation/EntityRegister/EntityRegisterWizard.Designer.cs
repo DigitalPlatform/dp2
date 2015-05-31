@@ -61,6 +61,8 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_new = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_save = new System.Windows.Forms.ToolStripButton();
+            this.toolStripButton_delete = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.tabControl_main.SuspendLayout();
             this.tabPage_settings.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -349,7 +351,7 @@
             // easyMarcControl1
             // 
             this.easyMarcControl1.AutoScroll = true;
-            this.easyMarcControl1.CaptionWidth = 116;
+            this.easyMarcControl1.CaptionWidth = 106;
             this.easyMarcControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.easyMarcControl1.HideIndicator = true;
             this.easyMarcControl1.IncludeNumber = false;
@@ -395,7 +397,9 @@
             this.toolStripButton_prev,
             this.toolStripSeparator1,
             this.toolStripButton_new,
-            this.toolStripButton_save});
+            this.toolStripButton_save,
+            this.toolStripSeparator2,
+            this.toolStripButton_delete});
             this.toolStrip1.Location = new System.Drawing.Point(0, 244);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(473, 25);
@@ -462,6 +466,21 @@
             this.toolStripButton_save.Size = new System.Drawing.Size(52, 22);
             this.toolStripButton_save.Text = "保存";
             this.toolStripButton_save.Click += new System.EventHandler(this.toolStripButton_save_Click);
+            // 
+            // toolStripButton_delete
+            // 
+            this.toolStripButton_delete.ForeColor = System.Drawing.Color.White;
+            this.toolStripButton_delete.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_delete.Image")));
+            this.toolStripButton_delete.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton_delete.Name = "toolStripButton_delete";
+            this.toolStripButton_delete.Size = new System.Drawing.Size(52, 22);
+            this.toolStripButton_delete.Text = "删除";
+            this.toolStripButton_delete.Click += new System.EventHandler(this.toolStripButton_delete_Click);
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 25);
             // 
             // EntityRegisterWizard
             // 
@@ -532,5 +551,7 @@
         private System.Windows.Forms.CheckBox checkBox_settings_needBookType;
         private System.Windows.Forms.CheckBox checkBox_settings_needPrice;
         private System.Windows.Forms.CheckBox checkBox_settings_needBatchNo;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
+        private System.Windows.Forms.ToolStripButton toolStripButton_delete;
     }
 }

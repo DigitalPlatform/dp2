@@ -7239,6 +7239,31 @@ strNewMARC);
         /// 时间戳
         /// </summary>
         public byte[] Timestamp = null;
+
+        public BiblioInfo()
+        {
+        }
+
+        public BiblioInfo(string strRecPath,
+            string strOldXml,
+            string strNewXml,
+            byte[] timestamp)
+        {
+            this.RecPath = strRecPath;
+            this.OldXml = strOldXml;
+            this.NewXml = strNewXml;
+            this.Timestamp = timestamp;
+        }
+
+        // 拷贝构造
+        public BiblioInfo(BiblioInfo ref_obj)
+        {
+            this.RecPath = ref_obj.RecPath;
+            this.OldXml = ref_obj.OldXml;
+            this.NewXml = ref_obj.NewXml;
+            this.Timestamp = ref_obj.Timestamp;
+        }
+
     }
 
     /// <summary>

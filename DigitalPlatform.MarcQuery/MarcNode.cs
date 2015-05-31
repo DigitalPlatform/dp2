@@ -2371,6 +2371,195 @@ namespace DigitalPlatform.Marc
         /// </summary>
         public static int FixedLength = 24;
 
+        #region 各种功能位
+
+        // 记录长度
+        public string reclen
+        {
+            get
+            {
+                return this[0, 5];
+            }
+            set
+            {
+                this[0, 5] = value;
+            }
+        }
+
+        public string status
+        {
+            get
+            {
+                return this[5, 1];
+            }
+            set
+            {
+                this[5, 1] = value;
+            }
+        }
+
+        public string type
+        {
+            get
+            {
+                return this[6, 1];
+            }
+            set
+            {
+                this[6, 1] = value;
+            }
+        }
+
+        public string level
+        {
+            get
+            {
+                return this[7, 1];
+            }
+            set
+            {
+                this[7, 1] = value;
+            }
+        }
+
+        public string control
+        {
+            get
+            {
+                return this[8, 1];
+            }
+            set
+            {
+                this[8, 1] = value;
+            }
+        }
+
+        public string reserve
+        {
+            get
+            {
+                return this[9, 1];
+            }
+            set
+            {
+                this[9, 1] = value;
+            }
+        }
+
+        // 字段指示符长度
+        public string indicount
+        {
+            get
+            {
+                return this[10, 1];
+            }
+            set
+            {
+                this[10, 1] = value;
+            }
+        }
+
+        // 子字段标识符长度
+        public string subfldcodecount
+        {
+            get
+            {
+                return this[11, 1];
+            }
+            set
+            {
+                this[11, 1] = value;
+            }
+        }
+
+        // 数据基地址
+        public string baseaddr
+        {
+            get
+            {
+                return this[12, 5];
+            }
+            set
+            {
+                this[12, 5] = value;
+            }
+        }
+
+        public string res1
+        {
+            get
+            {
+                return this[17, 3];
+            }
+            set
+            {
+                this[17, 3] = value;
+            }
+        }
+
+        // 目次区中字段长度部分
+        public string lenoffld
+        {
+            get
+            {
+                return this[20, 1];
+            }
+            set
+            {
+                this[20, 1] = value;
+            }
+        }
+
+        // 目次区中字段起始位置部分
+        public string startposoffld
+        {
+            get
+            {
+                return this[21, 1];
+            }
+            set
+            {
+                this[21, 1] = value;
+            }
+        }
+
+        // 实现者定义部分
+        public string impdef
+        {
+            get
+            {
+                return this[22, 1];
+            }
+            set
+            {
+                this[22, 1] = value;
+            }
+        }
+
+        public string res2
+        {
+            get
+            {
+                return this[23, 1];
+            }
+            set
+            {
+                this[23, 1] = value;
+            }
+        }
+
+        #endregion
+
+        // 2015/5/31
+        // 按照UNIMARC惯例强制填充ISO2709头标区
+        public void ForceUNIMARCHeader()
+        {
+            indicount = "2";
+            subfldcodecount = "2";
+            lenoffld = "4";   // 目次区中字段长度部分
+            startposoffld = "5"; // 目次区中字段起始位置部分
+        }
+
         /// <summary>
         /// 获取或设置头标区中任意一段长度的子字符串
         /// </summary>
@@ -2440,4 +2629,6 @@ namespace DigitalPlatform.Marc
 
         // TODO: 设置头标区为UNIMARC或者MARC21缺省值的功能。和文献类型等参数有关，可能需要一个可变参数的函数
     }
+
+
 }

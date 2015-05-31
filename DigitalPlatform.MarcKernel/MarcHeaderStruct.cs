@@ -35,7 +35,6 @@ namespace DigitalPlatform.Marc
 			return 0;
 		}
 
-
 		public static string StringValue(byte[] baValue)
 		{
 			Encoding encoding = Encoding.UTF8;

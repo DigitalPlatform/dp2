@@ -515,12 +515,11 @@ namespace DigitalPlatform.Marc
             this.MarcEditor.DocumentOrgY += numberOfPixelsToMove;
         }
 
-
         #region 右键菜单
 
         // parameters:
         //      nActiveCol  当前活动的列
-        public void PopupMenu(Control control, 
+        public void PopupMenu(Control control,
             Point p)
         {
             ContextMenu contextMenu = new ContextMenu();
@@ -574,74 +573,73 @@ namespace DigitalPlatform.Marc
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
-                // 撤消
-                menuItem = new MenuItem("撤消(&U)");
-                menuItem.Click += new System.EventHandler(this.Menu_Undo);
-                contextMenu.MenuItems.Add(menuItem);
-                if (this.CanUndo == true)
-                    menuItem.Enabled = true;
-                else
-                    menuItem.Enabled = false;
+            // 撤消
+            menuItem = new MenuItem("撤消(&U)");
+            menuItem.Click += new System.EventHandler(this.Menu_Undo);
+            contextMenu.MenuItems.Add(menuItem);
+            if (this.CanUndo == true)
+                menuItem.Enabled = true;
+            else
+                menuItem.Enabled = false;
 
-                //--------------
-                menuItem = new MenuItem("-");
-                contextMenu.MenuItems.Add(menuItem);
+            //--------------
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
 
-                // 剪切
-                menuItem = new MenuItem("剪切(&I)");
-                menuItem.Click += new System.EventHandler(this.Menu_Cut);
-                contextMenu.MenuItems.Add(menuItem);
-                if (this.SelectionLength > 0)
-                    menuItem.Enabled = true;
-                else
-                    menuItem.Enabled = false;
+            // 剪切
+            menuItem = new MenuItem("剪切(&I)");
+            menuItem.Click += new System.EventHandler(this.Menu_Cut);
+            contextMenu.MenuItems.Add(menuItem);
+            if (this.SelectionLength > 0)
+                menuItem.Enabled = true;
+            else
+                menuItem.Enabled = false;
 
-                // 复制
-                menuItem = new MenuItem("复制(&C)");
-                menuItem.Click += new System.EventHandler(this.Menu_Copy);
-                contextMenu.MenuItems.Add(menuItem);
-                if (this.SelectionLength > 0)
-                    menuItem.Enabled = true;
-                else
-                    menuItem.Enabled = false;
+            // 复制
+            menuItem = new MenuItem("复制(&C)");
+            menuItem.Click += new System.EventHandler(this.Menu_Copy);
+            contextMenu.MenuItems.Add(menuItem);
+            if (this.SelectionLength > 0)
+                menuItem.Enabled = true;
+            else
+                menuItem.Enabled = false;
 
-                // 粘贴
-                menuItem = new MenuItem("粘贴(&P)");
-                menuItem.Click += new System.EventHandler(this.Menu_Paste);
-                contextMenu.MenuItems.Add(menuItem);
-                if (Clipboard.GetDataObject().GetDataPresent(DataFormats.Text) == true)
-                    menuItem.Enabled = true;
-                else
-                    menuItem.Enabled = false;
+            // 粘贴
+            menuItem = new MenuItem("粘贴(&P)");
+            menuItem.Click += new System.EventHandler(this.Menu_Paste);
+            contextMenu.MenuItems.Add(menuItem);
+            if (Clipboard.GetDataObject().GetDataPresent(DataFormats.Text) == true)
+                menuItem.Enabled = true;
+            else
+                menuItem.Enabled = false;
 
-                // 删除
-                menuItem = new MenuItem("删除(&D)");
-                menuItem.Click += new System.EventHandler(this.Menu_Delete);
-                contextMenu.MenuItems.Add(menuItem);
-                if (this.SelectionLength > 0)
-                    menuItem.Enabled = true;
-                else
-                    menuItem.Enabled = false;
+            // 删除
+            menuItem = new MenuItem("删除(&D)");
+            menuItem.Click += new System.EventHandler(this.Menu_Delete);
+            contextMenu.MenuItems.Add(menuItem);
+            if (this.SelectionLength > 0)
+                menuItem.Enabled = true;
+            else
+                menuItem.Enabled = false;
 
-                //--------------
-                menuItem = new MenuItem("-");
-                contextMenu.MenuItems.Add(menuItem);
+            //--------------
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
 
-                // 全选
-                menuItem = new MenuItem("全选(&A)");
-                menuItem.Click += new System.EventHandler(this.Menu_SelectAll);
-                contextMenu.MenuItems.Add(menuItem);
-                if (this.Text != "")
-                    menuItem.Enabled = true;
-                else
-                    menuItem.Enabled = false;
+            // 全选
+            menuItem = new MenuItem("全选(&A)");
+            menuItem.Click += new System.EventHandler(this.Menu_SelectAll);
+            contextMenu.MenuItems.Add(menuItem);
+            if (this.Text != "")
+                menuItem.Enabled = true;
+            else
+                menuItem.Enabled = false;
 
-                //--------------
-                menuItem = new MenuItem("-");
-                contextMenu.MenuItems.Add(menuItem);
+            //--------------
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
 
-
-                // 定长模板
+            // 定长模板
             string strCurName = "";
             bool bEnable = this.MarcEditor.HasTemplateOrValueListDef(
                 "template",
@@ -655,7 +653,6 @@ namespace DigitalPlatform.Marc
                 menuItem.Enabled = true;
             else
                 menuItem.Enabled = false;
-
 
             // 值列表
             bEnable = this.MarcEditor.HasTemplateOrValueListDef(

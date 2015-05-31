@@ -3167,8 +3167,7 @@ AppInfo.GetString("config",
         /// <summary>
         /// 当前连接的 dp2Library 版本号
         /// </summary>
-        [System.ComponentModel.DefaultValue(0)]
-        public double Version {get;set;}
+        public double Version {get;set;}    // = 0
 
         // return:
         //      -1  error

@@ -12,6 +12,7 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
+using DigitalPlatform.CommonControl;
 
 using DigitalPlatform.CirculationClient.localhost;
 
@@ -29,18 +30,6 @@ namespace dp2Circulation
         const int COLUMN_CHANGED =      4;
         const int COLUMN_ACCESSCODE =   5;
         const int COLUMN_COMMENT =      6;
-
-#if NO
-        public LibraryChannel Channel = new LibraryChannel();
-        public string Lang = "zh";
-
-        /// <summary>
-        /// 框架窗口
-        /// </summary>
-        public MainForm MainForm = null;
-
-        DigitalPlatform.Stop stop = null;
-#endif
 
         const int WM_PREPARE = API.WM_USER + 200;
 
@@ -80,37 +69,12 @@ namespace dp2Circulation
                 MainForm.SetControlFont(this, this.MainForm.DefaultFont);
             }
 
-#if NO
-            MainForm.AppInfo.LoadMdiChildFormStates(this,
-    "mdi_form_state");
-            this.Channel.Url = this.MainForm.LibraryServerUrl;
-
-            this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
-            this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
-
-            stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// 和容器关联
-#endif
-
             EnableControls(false);
             API.PostMessage(this.Handle, WM_PREPARE, 0, 0);
         }
 
         private void UserForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-#if NO
-            if (stop != null)
-            {
-                if (stop.State == 0)    // 0 表示正在处理
-                {
-                    MessageBox.Show(this, "请在关闭窗口前停止正在进行的长时操作。");
-                    e.Cancel = true;
-                    return;
-                }
-
-            }
-#endif
-
             int nChangedCount = GetChangedCount();
 
             if (nChangedCount > 0)
@@ -132,28 +96,11 @@ namespace dp2Circulation
 
         private void UserForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-#if NO
-            if (stop != null) // 脱离关联
-            {
-                stop.Unregister();	// 和容器关联
-                stop = null;
-            }
-#endif
-
-            /*
-            MainForm.AppInfo.SaveMdiChildFormStates(this,
-   "mdi_form_state");
-             * */
             SaveSize();
         }
 
-        /*public*/ void SaveSize()
+        void SaveSize()
         {
-#if NO
-            MainForm.AppInfo.SaveMdiChildFormStates(this,
-                "mdi_form_state");
-#endif
-
             // 保存splitContainer_main的状态
             this.MainForm.SaveSplitterPos(
                 this.splitContainer_main,
@@ -167,21 +114,18 @@ namespace dp2Circulation
                 strWidths);
         }
 
-        /*public*/ void LoadSize()
+        void LoadSize()
         {
-#if NO
-            // 设置窗口尺寸状态
-            MainForm.AppInfo.LoadMdiChildFormStates(this,
-                "mdi_form_state");
-#endif
-
             try
             {
                 // 获得splitContainer_main的状态
-                this.MainForm.LoadSplitterPos(
-    this.splitContainer_main,
-    "userform_state",
-    "splitContainer_main_ratio");
+                if (this.MainForm != null)
+                {
+                    this.MainForm.LoadSplitterPos(
+                    this.splitContainer_main,
+                    "userform_state",
+                    "splitContainer_main_ratio");
+                }
             }
             catch
             {
@@ -213,19 +157,6 @@ namespace dp2Circulation
             return nResult;
         }
 
-#if NO
-        void Channel_BeforeLogin(object sender, BeforeLoginEventArgs e)
-        {
-            this.MainForm.Channel_BeforeLogin(this, e);
-        }
-
-        void DoStop(object sender, StopEventArgs e)
-        {
-            if (this.Channel != null)
-                this.Channel.Abort();
-        }
-#endif
-
         /// <summary>
         /// 缺省窗口过程
         /// </summary>
@@ -244,7 +175,6 @@ namespace dp2Circulation
                         return;
                     }
                 // break;
-
             }
             base.DefWndProc(ref m);
         }
@@ -358,7 +288,6 @@ namespace dp2Circulation
 
                     Debug.Assert(users != null, "");
 
-
                     for (int i = 0; i < users.Length; i++)
                     {
                         UserInfo info = users[i];
@@ -386,7 +315,6 @@ namespace dp2Circulation
                     if (nStart >= lRet)
                         break;
                 }
-
             }
             finally
             {
@@ -538,6 +466,8 @@ namespace dp2Circulation
             this.checkBox_changePassword_CheckedChanged(this, null);
 
             this.EditChanged = item_info.Changed;
+
+            // ResetTextBoxHeight();
         }
 
         void ClearUserEdit()
@@ -558,6 +488,8 @@ namespace dp2Circulation
             // 每次都要人为On这个checkbox，才能修改密码
             this.checkBox_changePassword.Checked = false;
             this.checkBox_changePassword_CheckedChanged(this, null);
+
+            // ResetTextBoxHeight();
         }
 
         private void listView_users_SelectedIndexChanged(object sender, EventArgs e)
@@ -823,7 +755,7 @@ namespace dp2Circulation
             else
                 info.SetPassword = false;
 
-                    // 保存用户信息
+            // 保存用户信息
             nRet = SaveUserInfo(
                 info,
                 out strError);
@@ -1131,5 +1063,28 @@ namespace dp2Circulation
             this.EditChanged = true;
         }
 
+        private void tableLayoutPanel_userEdit_SizeChanged(object sender, EventArgs e)
+        {
+        }
+
+#if NO
+        int _inReset = 0;
+
+        void ResetTextBoxHeight()
+        {
+            // 防止重入
+            if (_inReset > 0)
+                return;
+            _inReset++;
+            try
+            {
+                this.tableLayoutPanel_userEdit.ResetAllTextBoxHeight();
+            }
+            finally
+            {
+                _inReset--;
+            }
+        }
+#endif
     }
 }
