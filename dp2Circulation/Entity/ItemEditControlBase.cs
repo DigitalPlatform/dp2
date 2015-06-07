@@ -18,6 +18,10 @@ namespace dp2Circulation
     /// </summary>
     public class ItemEditControlBase : UserControl
     {
+        [Browsable(true)]
+        [EditorBrowsable(EditorBrowsableState.Always)]
+        public event EventHandler SelectionChanged = null;
+
         internal TableLayoutPanel _tableLayoutPanel_main = null;
 
         ItemDisplayState _createState = ItemDisplayState.Normal;
@@ -76,6 +80,13 @@ namespace dp2Circulation
         /// </summary>
         public event ControlKeyEventHandler ControlKeyDown = null;
 
+        public ItemEditControlBase()
+        {
+            this.DoubleBuffered = true;
+
+            this.Enter += new System.EventHandler(this.ItemEditControlBase_Enter);
+            this.Leave += new System.EventHandler(this.ItemEditControlBase_Leave);
+        }
 
         /// <summary>
         /// 是否正在执行初始化
@@ -89,6 +100,27 @@ namespace dp2Circulation
             set
             {
                 this.m_bInInitial = value;
+            }
+        }
+
+        bool m_bHideSelection = true;
+
+        [Category("Appearance")]
+        [DescriptionAttribute("HideSelection")]
+        [DefaultValue(true)]
+        public bool HideSelection
+        {
+            get
+            {
+                return this.m_bHideSelection;
+            }
+            set
+            {
+                if (this.m_bHideSelection != value)
+                {
+                    this.m_bHideSelection = value;
+                    this.RefreshLineColor(); // 迫使颜色改变
+                }
             }
         }
 
@@ -138,6 +170,7 @@ namespace dp2Circulation
             return 0;
         }
 
+        // 将所有 changed color 清除
         internal 
             // virtual 
             void ResetColor()
@@ -429,6 +462,130 @@ namespace dp2Circulation
 
         }
 
+        public void OnSelectionChanged(EventArgs e)
+        {
+            if (this.SelectionChanged != null)
+                this.SelectionChanged(this, e);
+        }
+
+        // 获得当前具有输入焦点的一行
+        public virtual EditLine GetFocuedLine()
+        {
+            for (int i = 0; i < this._tableLayoutPanel_main.RowStyles.Count; i++)
+            {
+                // 第三列
+                Control edit_control = this._tableLayoutPanel_main.GetControlFromPosition(2, i);
+                if (edit_control != null
+                    && edit_control.Visible == true
+                    && edit_control.Enabled == true
+                    // && edit_control.Focused == true
+                    )
+                {
+                    EditLineState state = GetLineState(i);
+                    if (state != null && state.Active == true)
+                    {
+                        EditLine line = new EditLine(this, i);
+                        return line;
+                    }
+                }
+            }
+            return null;
+        }
+
+        // 得到下一个可以输入内容的行对象
+        // parameters:
+        //      ref_line    参考的对象。从它后面一个开始获取。如果为 null，表示获取第一个可编辑的对象
+        public virtual EditLine GetNextEditableLine(EditLine ref_line)
+        {
+            bool bOn = false;
+            if (ref_line == null)
+                bOn = true;
+            for (int i = 0; i < this._tableLayoutPanel_main.RowStyles.Count; i++)
+            {
+                // 第一列
+                Label label_control = this._tableLayoutPanel_main.GetControlFromPosition(0, i) as Label;
+                if (label_control == null)
+                    continue;
+
+                if (ref_line != null && label_control == ref_line._labelCaption)
+                {
+                    bOn = true;
+                    continue;
+                }
+
+                if (bOn == true)
+                {
+                    // 第三列
+                    Control edit_control = this._tableLayoutPanel_main.GetControlFromPosition(2, i);
+                    if (edit_control != null 
+                        && edit_control.Visible == true
+                        && edit_control.Enabled == true)
+                    {
+                        if (edit_control is TextBox)
+                        {
+                            if ((edit_control as TextBox).ReadOnly == true)
+                                continue;
+                        }
+                        EditLine line = new EditLine(this, i);
+                        return line;
+                    }
+                }
+            }
+            return null;
+        }
+
+        // 清除全部行的 Active 状态
+        public bool ClearActiveState(EditLine exclude = null)
+        {
+            bool bSelectionChanged = false;
+
+            for (int i = 0; i < this._tableLayoutPanel_main.RowStyles.Count; i++)
+            {
+                // 第一列
+                Label label_control = this._tableLayoutPanel_main.GetControlFromPosition(0, i) as Label;
+                if (label_control == null)
+                    continue;
+                if (exclude != null)
+                {
+                    if (label_control == exclude._labelCaption)
+                        continue;   // 跳过要排除的一行
+                }
+#if NO
+                // 第二列
+                label_control = this._tableLayoutPanel_main.GetControlFromPosition(1, i) as Label;
+                if (label_control == null)
+                    continue;
+#endif
+
+                EditLineState state = GetLineState(i);
+                if (state != null && state.Active == true)
+                {
+                    state.Active = false;
+                    SetLineState(i, state);
+
+                    bSelectionChanged = true;
+                }
+            }
+            if (bSelectionChanged)
+                this.OnSelectionChanged(new EventArgs());
+
+            return bSelectionChanged;
+        }
+
+        // 设置一行的状态
+        public void SetLineState(EditLine line, EditLineState new_state)
+        {
+            bool bNotified = false;
+            // 需要把其他事项的 Active 状态全部设置为 false
+            if (new_state.Active == true)
+            {
+                bNotified = ClearActiveState(line);
+            }
+            SetLineState(line.EditControl, new_state);
+            if (bNotified == false)
+                OnSelectionChanged(new EventArgs());
+        }
+
         void tableLayoutPanel_main_MouseDown(object sender, MouseEventArgs e)
         {
             this.OnMouseDown(e);
@@ -519,11 +676,16 @@ namespace dp2Circulation
                 if (state == null)
                     state = new EditLineState();
 
+                bool bSelectionChanged = state.Active == true;
+
                 if (state.Active == true)
                 {
                     state.Active = false;
                     SetLineState(control, state);
                 }
+
+                if (bSelectionChanged)
+                    this.OnSelectionChanged(new EventArgs());
             }
         }
 
@@ -532,16 +694,25 @@ namespace dp2Circulation
             //if (this.m_nInSuspend == 0)
             {
                 Control control = sender as Control;
+
+                ClearActiveState();
+
                 EditLineState state = GetLineState(control);
 
                 if (state == null)
                     state = new EditLineState();
 
-                if (state.Active == false)
+                bool bSelectionChanged = state.Active == false;
+
+                // if (state.Active == false)
                 {
                     state.Active = true;
                     SetLineState(control, state);
                 }
+
+                if (bSelectionChanged)
+                    this.OnSelectionChanged(new EventArgs());
+
             }
         }
 
@@ -563,9 +734,7 @@ namespace dp2Circulation
                 SetLineState(control, state);
             }
             this.Changed = true;
-
         }
-
 
         /// <summary>
         /// 编辑器行的状态
@@ -584,23 +753,138 @@ namespace dp2Circulation
 
         void SetLineState(Control control, EditLineState newState)
         {
-            SetLineDisplayState(this._tableLayoutPanel_main.GetCellPosition(control).Row, newState);
+            SetLineState(this._tableLayoutPanel_main.GetCellPosition(control).Row, newState);
         }
 
         // 设置一行的显示状态
-        void SetLineDisplayState(int nRowNumber, EditLineState newState)
+        void SetLineState(int nRowNumber, EditLineState newState)
         {
             Label color = this._tableLayoutPanel_main.GetControlFromPosition(1, nRowNumber) as Label;
             if (color == null)
                 throw new ArgumentException("行 " + nRowNumber.ToString() + " 的 Color Label 对象不存在", "nRowNumber");
+            
+            Control edit = this._tableLayoutPanel_main.GetControlFromPosition(2, nRowNumber);
 
             color.Tag = newState;
+            ResetColor(color, edit);
+        }
+
+        // 正在编辑的 edit 的背景颜色
+        public Color FocusedEditBackColor = Color.FromArgb(200, 200, 255);
+
+        internal Color _editBackColor = SystemColors.Window;
+        internal Color _editForeColor = SystemColors.WindowText;
+
+        public void SetAllEditColor(Color backColor, Color foreColor)
+        {
+            _editBackColor = backColor;
+            _editForeColor = foreColor;
+
+            for (int i = 0; i < this._tableLayoutPanel_main.RowStyles.Count; i++)
+            {
+                Control control = this._tableLayoutPanel_main.GetControlFromPosition(2, i);
+                if (control != null)
+                {
+                    if (control is TextBox)
+                    {
+                        TextBox textbox = control as TextBox;
+                        // readonly 的 TextBox 要显示为不同的颜色
+                        if (textbox.ReadOnly == true)
+                        {
+                            if (this.BackColor != Color.Transparent)
+                                textbox.BackColor = this.BackColor;
+                        }
+                        else
+                        {
+                            if (backColor != Color.Transparent)
+                                textbox.BackColor = backColor;
+                        }
+                        textbox.ForeColor = foreColor;
+                    }
+                    else
+                    {
+                        control.BackColor = backColor;
+                        control.ForeColor = foreColor;
+                    }
+                }
+            }
+
+        }
+
+
+        void ResetColor(Label color, Control edit)
+        {
+            EditLineState newState = color.Tag as EditLineState;
+            if (newState == null)
+            {
+                color.BackColor = this._tableLayoutPanel_main.BackColor;
+                return;
+            }
+
             if (newState.Active == true)
-                color.BackColor = SystemColors.Highlight;
-            else if (newState.Changed == true)
+            {
+                if (this.ContainsFocus == true)
+                {
+                    color.BackColor = SystemColors.Highlight;
+                    Color focus_color = this.FocusedEditBackColor;
+                    if (edit != null && edit.BackColor != focus_color)
+                    {
+                        edit.BackColor = focus_color;
+                    }
+                    return;
+                }
+                else
+                {
+                    if (this.m_bHideSelection == false)
+                    {
+                        color.BackColor = ControlPaint.Dark(SystemColors.Highlight);
+                        Color focus_color = ControlPaint.Light(this.FocusedEditBackColor);
+                        if (edit != null && edit.BackColor != focus_color)
+                        {
+                            edit.BackColor = focus_color;
+                        }
+                        return;
+                    }
+                }
+            }
+
+#if NO
+            // 恢复原来的颜色
+            if (edit != null && edit.Tag != null)
+            {
+                Color back_color = (Color)edit.Tag;
+                if (edit.BackColor != back_color)
+                    edit.BackColor = back_color;
+            }
+#endif
+            if (edit is TextBox)
+            {
+                TextBox textbox = edit as TextBox;
+                if (textbox.ReadOnly == true && this.BackColor != Color.Transparent)
+                    textbox.BackColor = this.BackColor;
+                else
+                    edit.BackColor = _editBackColor;
+            }
+            else
+                edit.BackColor = _editBackColor;
+
+            if (newState.Changed == true)
                 color.BackColor = this.ColorChanged;
             else
                 color.BackColor = this._tableLayoutPanel_main.BackColor;
+        }
+
+        // 刷新所有行的颜色
+        void RefreshLineColor()
+        {
+            for (int i = 0; i < this._tableLayoutPanel_main.RowStyles.Count; i++)
+            {
+                Label label = this._tableLayoutPanel_main.GetControlFromPosition(1, i) as Label;
+                if (label == null)
+                    continue;
+                Control edit = this._tableLayoutPanel_main.GetControlFromPosition(2, i);
+                ResetColor(label, edit);
+            }
         }
 
         EditLineState GetLineState(Control control)
@@ -696,6 +980,144 @@ namespace dp2Circulation
             }
         }
 
+#if NO
+        private void InitializeComponent()
+        {
+            this.SuspendLayout();
+            // 
+            // ItemEditControlBase
+            // 
+            this.Name = "ItemEditControlBase";
+            this.Enter += new System.EventHandler(this.ItemEditControlBase_Enter);
+            this.Leave += new System.EventHandler(this.ItemEditControlBase_Leave);
+            this.ResumeLayout(false);
+
+        }
+#endif
+
+        internal bool m_bFocused = false;
+
+        private void ItemEditControlBase_Enter(object sender, EventArgs e)
+        {
+            if (this._tableLayoutPanel_main != null)
+                this._tableLayoutPanel_main.Focus();
+            this.m_bFocused = true;
+            this.RefreshLineColor();
+        }
+
+        private void ItemEditControlBase_Leave(object sender, EventArgs e)
+        {
+            this.m_bFocused = false;
+            this.RefreshLineColor();
+        }
+
+    }
+
+    public class EditLine
+    {
+        internal ItemEditControlBase _container = null;
+        internal Control _editBox = null;
+        internal Label _labelCaption = null;
+        internal Label _labelColor = null;
+
+#if NO
+        public EditLine(ItemEditControlBase container, Control textbox, Label labelCaption, Label labelColor)
+        {
+            this._container = container;
+            this._editBox = textbox;
+            this._labelCaption = labelCaption;
+            this._labelColor = labelColor;
+        }
+#endif
+        public EditLine(ItemEditControlBase container, int nRow)
+        {
+            this._container = container;
+
+            // 第一列
+            this._labelCaption = container._tableLayoutPanel_main.GetControlFromPosition(0, nRow) as Label;
+
+            // 第二列
+            this._labelColor = container._tableLayoutPanel_main.GetControlFromPosition(1, nRow) as Label;
+
+            // 第三列
+            this._editBox = container._tableLayoutPanel_main.GetControlFromPosition(2, nRow);
+        }
+
+        public virtual string Content
+        {
+            get
+            {
+                if (this._editBox == null)
+                    return null;
+                return this._editBox.Text;
+            }
+            set
+            {
+                if (this._editBox.Text != value)
+                    this._editBox.Text = value;
+            }
+        }
+
+        public virtual string Caption
+        {
+            get
+            {
+                if (this._labelCaption == null)
+                    return null;
+                return this._labelCaption.Text;
+            }
+            set
+            {
+                this._labelCaption.Text = value;
+            }
+        }
+
+        public virtual Control EditControl
+        {
+            get
+            {
+                return this._editBox;
+            }
+        }
+
+        public ItemEditControlBase Container
+        {
+            get
+            {
+                return this._container;
+            }
+        }
+
+        // 获取或设置行的焦点状态
+        public bool ActiveState
+        {
+            get
+            {
+                if (this._labelColor == null || this._labelColor.Tag == null)
+                    return false;
+                dp2Circulation.ItemEditControlBase.EditLineState state = this._labelColor.Tag as dp2Circulation.ItemEditControlBase.EditLineState;
+                return state.Active;
+            }
+            set
+            {
+                if (this._labelColor == null)
+                    return;
+                if (this._labelColor.Tag == null)
+                    this._labelColor.Tag = new dp2Circulation.ItemEditControlBase.EditLineState();
+                
+                dp2Circulation.ItemEditControlBase.EditLineState state = this._labelColor.Tag as dp2Circulation.ItemEditControlBase.EditLineState;
+                if (state.Active == value)
+                    return;
+
+                bool bSelectionChanged = state.Active != value;
+
+                state.Active = value;   // true ??
+                this.Container.SetLineState(this, state);
+
+                if (bSelectionChanged)
+                    this._container.OnSelectionChanged(new EventArgs());
+            }
+        }
     }
 
     /// <summary>

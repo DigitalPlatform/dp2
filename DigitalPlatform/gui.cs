@@ -192,12 +192,12 @@ namespace DigitalPlatform.GUI
             Control item)
         {
             Font subfont = item.Font;
-            float ratio = subfont.SizeInPoints / font.SizeInPoints;
+            double ratio = (double)subfont.SizeInPoints / (double)font.SizeInPoints;
             if (subfont.Name != font.Name
                 || subfont.SizeInPoints != font.SizeInPoints)
             {
                 // item.Font = new Font(font, subfont.Style);
-                item.Font = new Font(font.FontFamily, ratio * font.SizeInPoints, subfont.Style, GraphicsUnit.Point);
+                item.Font = new Font(font.FontFamily, (float)((double)font.SizeInPoints * ratio), subfont.Style, GraphicsUnit.Point);
             }
         }
 

@@ -53,7 +53,7 @@ namespace DigitalPlatform.CirculationClient
 			InitializeComponent();
 
             // http://stackoverflow.com/questions/1918247/how-to-disable-the-line-under-tool-strip-in-winform-c
-            this.toolStrip_server.Renderer = new MyRenderer(this.toolStrip_server);
+            this.toolStrip_server.Renderer = new TransparentToolStripRenderer(this.toolStrip_server);
 		}
 
 		/// <summary>
@@ -687,28 +687,4 @@ Keys keyData)
         }
 	}
 
-    class MyRenderer : ToolStripSystemRenderer
-    {
-        public ToolStrip ToolStrip = null;
-
-        public MyRenderer(ToolStrip toolstrip)
-        {
-            this.ToolStrip = toolstrip;
-        }
-
-        protected override void OnRenderToolStripBackground(ToolStripRenderEventArgs e)
-        {
-            using (Brush brush = new SolidBrush(this.ToolStrip == null ? e.BackColor : this.ToolStrip.BackColor))  // SystemColors.ControlDark
-            {
-                e.Graphics.FillRectangle(brush, e.AffectedBounds);
-            }
-            // base.OnRenderToolStripBackground(e);
-        }
-
-        // 去掉下面那根线
-        protected override void OnRenderToolStripBorder(ToolStripRenderEventArgs e)
-        {
-            //base.OnRenderToolStripBorder(e);
-        }
-    }
 }

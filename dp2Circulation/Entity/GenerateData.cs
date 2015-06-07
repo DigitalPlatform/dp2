@@ -315,7 +315,8 @@ namespace dp2Circulation
                     DisplayAutoGenMenuWindow(bDisplayWindow);   // 可能会改变 .ActionTable以及 .Count
                     if (bOnlyFillMenu == false)
                     {
-                        if (this.MainForm.PanelFixedVisible == true)
+                        if (this.MainForm.PanelFixedVisible == true
+                            && e.Parameter == null) // 2015/6/5
                             MainForm.ActivateGenerateDataPage();
                     }
 
@@ -498,8 +499,6 @@ namespace dp2Circulation
 
                 m_genDataViewer.FormClosed -= new FormClosedEventHandler(m_genDataViewer_FormClosed);
                 m_genDataViewer.FormClosed += new FormClosedEventHandler(m_genDataViewer_FormClosed);
-
-
             }
 
             if (bOpenWindow == true)

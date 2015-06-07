@@ -29,6 +29,21 @@ namespace dp2Circulation
     /// </summary>
     public class Global
     {
+        public static Control FindFocusedControl(Control control)
+        {
+            var container = control as IContainerControl;
+            while (container != null)
+            {
+                control = container.ActiveControl;
+                container = control as IContainerControl;
+            }
+            return control;
+        }
+
+        /// <summary>
+        /// Activate 一个 Form。包括了处理最小化时候恢复显示的功能
+        /// </summary>
+        /// <param name="form">Form</param>
         public static void Activate(Form form)
         {
             if (form != null)
@@ -38,6 +53,7 @@ namespace dp2Circulation
                 form.Activate();
             }
         }
+
         /// <summary>
         /// 判断一个字体字符串是否为虚拟的条码字体
         /// </summary>
@@ -104,7 +120,6 @@ namespace dp2Circulation
             return font;
         }
 
-
         /// <summary>
         /// 设置一个文本编辑器某行的内容
         /// </summary>
@@ -138,6 +153,7 @@ namespace dp2Circulation
 
             textbox.Text = strText;
         }
+        
         // 设置或者刷新一个操作记载
         internal static int SetOperation(
             ref XmlDocument dom,
@@ -423,7 +439,6 @@ namespace dp2Circulation
                 __FilterValue((Control)control);
             else
                 owner.BeginInvoke(d, new object[] { control });
-
         }
 
         // 不安全版本

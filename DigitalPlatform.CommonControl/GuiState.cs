@@ -180,8 +180,6 @@ namespace DigitalPlatform.CommonControl
                 + text.ToString();
         }
 
-
-
         static void SetCheckBoxState(CheckBox checkbox, string strText, object default_value)
         {
             string strState = "";
@@ -191,7 +189,7 @@ namespace DigitalPlatform.CommonControl
                 if (default_value is bool)
                     checkbox.Checked = (bool)default_value;
                 else if (default_value is string)
-                    DomUtil.IsBooleanTrue(default_value as string);
+                    checkbox.Checked = DomUtil.IsBooleanTrue(default_value as string);
                 else
                     throw new ArgumentException("CheckBox 的缺省值应当为 bool 或 string 类型", "default_value");
                 return;
@@ -266,13 +264,28 @@ namespace DigitalPlatform.CommonControl
                 + StringUtil.BuildParameterString(table);
         }
 
-        static void SetComboBoxTextState(ComboBoxText container, string strText)
+        static void SetComboBoxTextState(ComboBoxText container,
+            string strText,
+            object default_value)
         {
             string strState = "";
-            if (IsType(strText, container, out strState) == false)
-                return;
 
             ComboBox combobox = container.ComboBox;
+
+            if (string.IsNullOrEmpty(strText) == true
+    && default_value != null)
+            {
+                if (default_value is int)
+                    combobox.SelectedIndex = (int)default_value;
+                else if (default_value is string)
+                    combobox.Text = (string)default_value;
+                else
+                    throw new ArgumentException("ComboBoxText 的缺省值应当为 int 或 string 类型", "default_value");
+                return;
+            }
+
+            if (IsType(strText, container, out strState) == false)
+                return;
 
             if (string.IsNullOrEmpty(strState) == false)
             {
@@ -309,9 +322,23 @@ namespace DigitalPlatform.CommonControl
                 + StringUtil.BuildParameterString(table);
         }
 
-        static void SetComboBoxState(ComboBox combobox, string strText)
+        static void SetComboBoxState(ComboBox combobox,
+            string strText,
+            object default_value)
         {
             string strState = "";
+            if (string.IsNullOrEmpty(strText) == true
+&& default_value != null)
+            {
+                if (default_value is int)
+                    combobox.SelectedIndex = (int)default_value;
+                else if (default_value is string)
+                    combobox.Text = (string)default_value;
+                else
+                    throw new ArgumentException("ComboBox 的缺省值应当为 int 或 string 类型", "default_value");
+                return;
+            }
+
             if (IsType(strText, combobox, out strState) == false)
                 return;
 
@@ -546,11 +573,11 @@ namespace DigitalPlatform.CommonControl
                 }
                 else if (control is ComboBox)
                 {
-                    SetComboBoxState(control as ComboBox, strState);
+                    SetComboBoxState(control as ComboBox, strState, default_value);
                 }
                 else if (control is ComboBoxText)
                 {
-                    SetComboBoxTextState(control as ComboBoxText, strState);
+                    SetComboBoxTextState(control as ComboBoxText, strState, default_value);
                 }
                 else if (control is TabControl)
                 {

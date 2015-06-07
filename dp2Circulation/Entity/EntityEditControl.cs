@@ -859,30 +859,6 @@ namespace dp2Circulation
 
         }
 
-        public void SetAllEditColor(Color backColor, Color foreColor)
-        {
-            for (int i = 0; i < this.tableLayoutPanel_main.RowStyles.Count; i++)
-            {
-                Control control = this.tableLayoutPanel_main.GetControlFromPosition(2, i);
-                if (control != null)
-                {
-                    if (control is TextBox)
-                    {
-                        TextBox textbox = control as TextBox;
-                        if (backColor != Color.Transparent)
-                            textbox.BackColor = backColor;
-                        textbox.ForeColor = foreColor;
-                    }
-                    else
-                    {
-                        control.BackColor = backColor;
-                        control.ForeColor = foreColor;
-                    }
-                }
-            }
-
-        }
-
         /// <summary>
         /// 成员控件的背景色
         /// </summary>
@@ -1754,6 +1730,39 @@ namespace dp2Circulation
             this.textBox_barcode.ReadOnly = false;
         }
 
+        // 获得一个行的下拉列表值
+        public List<string> GetLineValueList(EditLine line)
+        {
+            List<string> results = new List<string>();
+            if (line.EditControl == this.comboBox_location)
+            {
+                comboBox_location_DropDown(this.comboBox_location, new EventArgs());
+                foreach (string s in comboBox_location.Items)
+                {
+                    results.Add(s);
+                }
+                return results;
+            }
+            if (line.EditControl == this.checkedComboBox_state)
+            {
+                comboBox_state_DropDown(this.checkedComboBox_state, new EventArgs());
+                foreach (string s in checkedComboBox_state.Items)
+                {
+                    results.Add(s);
+                }
+                return results;
+            }
+            if (line.EditControl == this.comboBox_bookType)
+            {
+                comboBox_bookType_DropDown(this.comboBox_bookType, new EventArgs());
+                foreach (string s in comboBox_bookType.Items)
+                {
+                    results.Add(s);
+                }
+                return results;
+            }
+            return null;    // 表示根本没有下拉列表
+        }
 
         int m_nInDropDown = 0;
 

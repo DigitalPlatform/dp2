@@ -564,6 +564,7 @@ strServerUrl);
         public delegate int Delegate_appendBrowseLine(string strRecPath,
             string strRecord,
             object param,
+            bool bAutoSetFocus,
             out string strError);
 
         // return:
@@ -571,6 +572,7 @@ strServerUrl);
         //      >=0 命中的记录数
         public int LoadBrowseLines(Delegate_appendBrowseLine appendBrowseLineProc,
             object param,
+            bool bAutoSetFocus,
             out string strError)
         {
             strError = "";
@@ -630,6 +632,7 @@ strServerUrl);
                 // _userFullElementSet,
                 appendBrowseLineProc,
                 param,
+                bAutoSetFocus,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -756,6 +759,7 @@ strServerUrl);
             // bool bDisplayInfo,
             Delegate_appendBrowseLine appendBrowseLineProc,
             object param,
+            bool bAutoSetFocus,
             out string strError)
         {
             strError = "";
@@ -804,7 +808,7 @@ strServerUrl);
                     out strError);
                 if (nRet == -1)
                     return -1;
-                nRet = appendBrowseLineProc("", element.OuterXml, param, out strError);
+                nRet = appendBrowseLineProc("", element.OuterXml, param, bAutoSetFocus, out strError);
                 if (nRet == -1)
                     return -1;
                 if (nRet == 1)

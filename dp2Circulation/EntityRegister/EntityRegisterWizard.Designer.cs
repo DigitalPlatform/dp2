@@ -32,6 +32,9 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EntityRegisterWizard));
             this.tabControl_main = new System.Windows.Forms.TabControl();
             this.tabPage_settings = new System.Windows.Forms.TabPage();
+            this.label2 = new System.Windows.Forms.Label();
+            this.comboBox_settings_colorStyle = new System.Windows.Forms.ComboBox();
+            this.checkBox_settings_keyboardWizard = new System.Windows.Forms.CheckBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.checkBox_settings_needBatchNo = new System.Windows.Forms.CheckBox();
             this.checkBox_settings_needPrice = new System.Windows.Forms.CheckBox();
@@ -61,8 +64,8 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_new = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_save = new System.Windows.Forms.ToolStripButton();
-            this.toolStripButton_delete = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripButton_delete = new System.Windows.Forms.ToolStripButton();
             this.tabControl_main.SuspendLayout();
             this.tabPage_settings.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -86,7 +89,7 @@
             this.tabControl_main.Location = new System.Drawing.Point(0, 2);
             this.tabControl_main.Name = "tabControl_main";
             this.tabControl_main.SelectedIndex = 0;
-            this.tabControl_main.Size = new System.Drawing.Size(474, 239);
+            this.tabControl_main.Size = new System.Drawing.Size(474, 277);
             this.tabControl_main.TabIndex = 0;
             this.tabControl_main.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.tabControl_main_DrawItem);
             this.tabControl_main.SelectedIndexChanged += new System.EventHandler(this.tabControl_main_SelectedIndexChanged);
@@ -95,15 +98,50 @@
             // 
             this.tabPage_settings.AutoScroll = true;
             this.tabPage_settings.BackColor = System.Drawing.Color.DimGray;
+            this.tabPage_settings.Controls.Add(this.label2);
+            this.tabPage_settings.Controls.Add(this.comboBox_settings_colorStyle);
+            this.tabPage_settings.Controls.Add(this.checkBox_settings_keyboardWizard);
             this.tabPage_settings.Controls.Add(this.groupBox1);
             this.tabPage_settings.Controls.Add(this.textBox_settings_importantFields);
             this.tabPage_settings.Controls.Add(this.label1);
             this.tabPage_settings.Controls.Add(this.button_settings_entityDefault);
             this.tabPage_settings.Location = new System.Drawing.Point(4, 22);
             this.tabPage_settings.Name = "tabPage_settings";
-            this.tabPage_settings.Size = new System.Drawing.Size(466, 213);
+            this.tabPage_settings.Size = new System.Drawing.Size(466, 251);
             this.tabPage_settings.TabIndex = 2;
             this.tabPage_settings.Text = "参数设定";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(227, 218);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(77, 12);
+            this.label2.TabIndex = 6;
+            this.label2.Text = "颜色风格(&C):";
+            // 
+            // comboBox_settings_colorStyle
+            // 
+            this.comboBox_settings_colorStyle.FormattingEnabled = true;
+            this.comboBox_settings_colorStyle.Items.AddRange(new object[] {
+            "dark",
+            "light"});
+            this.comboBox_settings_colorStyle.Location = new System.Drawing.Point(322, 215);
+            this.comboBox_settings_colorStyle.Name = "comboBox_settings_colorStyle";
+            this.comboBox_settings_colorStyle.Size = new System.Drawing.Size(135, 20);
+            this.comboBox_settings_colorStyle.TabIndex = 5;
+            this.comboBox_settings_colorStyle.SelectedIndexChanged += new System.EventHandler(this.comboBox_settings_colorStyle_SelectedIndexChanged);
+            // 
+            // checkBox_settings_keyboardWizard
+            // 
+            this.checkBox_settings_keyboardWizard.AutoSize = true;
+            this.checkBox_settings_keyboardWizard.Location = new System.Drawing.Point(9, 16);
+            this.checkBox_settings_keyboardWizard.Name = "checkBox_settings_keyboardWizard";
+            this.checkBox_settings_keyboardWizard.Size = new System.Drawing.Size(114, 16);
+            this.checkBox_settings_keyboardWizard.TabIndex = 4;
+            this.checkBox_settings_keyboardWizard.Text = "打开输入面板(&K)";
+            this.checkBox_settings_keyboardWizard.UseVisualStyleBackColor = true;
+            this.checkBox_settings_keyboardWizard.CheckedChanged += new System.EventHandler(this.checkBox_settings_keyboardWizard_CheckedChanged);
             // 
             // groupBox1
             // 
@@ -183,7 +221,7 @@
             // textBox_settings_importantFields
             // 
             this.textBox_settings_importantFields.HideSelection = false;
-            this.textBox_settings_importantFields.Location = new System.Drawing.Point(11, 74);
+            this.textBox_settings_importantFields.Location = new System.Drawing.Point(9, 106);
             this.textBox_settings_importantFields.Multiline = true;
             this.textBox_settings_importantFields.Name = "textBox_settings_importantFields";
             this.textBox_settings_importantFields.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
@@ -194,7 +232,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(9, 59);
+            this.label1.Location = new System.Drawing.Point(7, 91);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(197, 12);
             this.label1.TabIndex = 1;
@@ -202,7 +240,7 @@
             // 
             // button_settings_entityDefault
             // 
-            this.button_settings_entityDefault.Location = new System.Drawing.Point(9, 16);
+            this.button_settings_entityDefault.Location = new System.Drawing.Point(9, 47);
             this.button_settings_entityDefault.Name = "button_settings_entityDefault";
             this.button_settings_entityDefault.Size = new System.Drawing.Size(168, 23);
             this.button_settings_entityDefault.TabIndex = 0;
@@ -221,7 +259,7 @@
             this.tabPage_searchBiblio.Location = new System.Drawing.Point(4, 22);
             this.tabPage_searchBiblio.Name = "tabPage_searchBiblio";
             this.tabPage_searchBiblio.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_searchBiblio.Size = new System.Drawing.Size(466, 213);
+            this.tabPage_searchBiblio.Size = new System.Drawing.Size(466, 251);
             this.tabPage_searchBiblio.TabIndex = 0;
             this.tabPage_searchBiblio.Text = "检索书目";
             // 
@@ -291,10 +329,11 @@
             this.dpTable_browseLines.Location = new System.Drawing.Point(3, 33);
             this.dpTable_browseLines.Name = "dpTable_browseLines";
             this.dpTable_browseLines.Padding = new System.Windows.Forms.Padding(12);
-            this.dpTable_browseLines.Size = new System.Drawing.Size(460, 177);
+            this.dpTable_browseLines.Size = new System.Drawing.Size(460, 215);
             this.dpTable_browseLines.TabIndex = 8;
             this.dpTable_browseLines.Text = "dpTable1";
             this.dpTable_browseLines.DoubleClick += new System.EventHandler(this.dpTable_browseLines_DoubleClick);
+            this.dpTable_browseLines.Enter += new System.EventHandler(this.dpTable_browseLines_Enter);
             this.dpTable_browseLines.KeyDown += new System.Windows.Forms.KeyEventHandler(this.dpTable_browseLines_KeyDown);
             // 
             // dpColumn_no
@@ -324,7 +363,7 @@
             this.tabPage_biblioAndItems.Location = new System.Drawing.Point(4, 22);
             this.tabPage_biblioAndItems.Name = "tabPage_biblioAndItems";
             this.tabPage_biblioAndItems.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_biblioAndItems.Size = new System.Drawing.Size(466, 213);
+            this.tabPage_biblioAndItems.Size = new System.Drawing.Size(466, 251);
             this.tabPage_biblioAndItems.TabIndex = 1;
             this.tabPage_biblioAndItems.Text = "种和册";
             // 
@@ -342,7 +381,7 @@
             // splitContainer_biblioAndItems.Panel2
             // 
             this.splitContainer_biblioAndItems.Panel2.Controls.Add(this.flowLayoutPanel1);
-            this.splitContainer_biblioAndItems.Size = new System.Drawing.Size(460, 207);
+            this.splitContainer_biblioAndItems.Size = new System.Drawing.Size(460, 245);
             this.splitContainer_biblioAndItems.SplitterDistance = 231;
             this.splitContainer_biblioAndItems.SplitterWidth = 8;
             this.splitContainer_biblioAndItems.TabIndex = 0;
@@ -354,12 +393,14 @@
             this.easyMarcControl1.CaptionWidth = 106;
             this.easyMarcControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.easyMarcControl1.HideIndicator = true;
+            this.easyMarcControl1.HideSelection = false;
             this.easyMarcControl1.IncludeNumber = false;
             this.easyMarcControl1.Location = new System.Drawing.Point(0, 0);
             this.easyMarcControl1.MarcDefDom = null;
             this.easyMarcControl1.Name = "easyMarcControl1";
-            this.easyMarcControl1.Size = new System.Drawing.Size(231, 207);
+            this.easyMarcControl1.Size = new System.Drawing.Size(231, 245);
             this.easyMarcControl1.TabIndex = 0;
+            this.easyMarcControl1.SelectionChanged += new System.EventHandler(this.easyMarcControl1_SelectionChanged);
             this.easyMarcControl1.GetConfigDom += new DigitalPlatform.Marc.GetConfigDomEventHandle(this.easyMarcControl1_GetConfigDom);
             this.easyMarcControl1.Enter += new System.EventHandler(this.easyMarcControl1_Enter);
             this.easyMarcControl1.Leave += new System.EventHandler(this.easyMarcControl1_Leave);
@@ -371,10 +412,11 @@
             this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(221, 207);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(221, 245);
             this.flowLayoutPanel1.TabIndex = 0;
             this.flowLayoutPanel1.SizeChanged += new System.EventHandler(this.flowLayoutPanel1_SizeChanged);
             this.flowLayoutPanel1.Enter += new System.EventHandler(this.flowLayoutPanel1_Enter);
+            this.flowLayoutPanel1.Leave += new System.EventHandler(this.flowLayoutPanel1_Leave);
             // 
             // imageList_progress
             // 
@@ -400,7 +442,7 @@
             this.toolStripButton_save,
             this.toolStripSeparator2,
             this.toolStripButton_delete});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 244);
+            this.toolStrip1.Location = new System.Drawing.Point(0, 282);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(473, 25);
             this.toolStrip1.TabIndex = 9;
@@ -467,6 +509,11 @@
             this.toolStripButton_save.Text = "保存";
             this.toolStripButton_save.Click += new System.EventHandler(this.toolStripButton_save_Click);
             // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 25);
+            // 
             // toolStripButton_delete
             // 
             this.toolStripButton_delete.ForeColor = System.Drawing.Color.White;
@@ -477,17 +524,12 @@
             this.toolStripButton_delete.Text = "删除";
             this.toolStripButton_delete.Click += new System.EventHandler(this.toolStripButton_delete_Click);
             // 
-            // toolStripSeparator2
-            // 
-            this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 25);
-            // 
             // EntityRegisterWizard
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.DimGray;
-            this.ClientSize = new System.Drawing.Size(473, 269);
+            this.ClientSize = new System.Drawing.Size(473, 307);
             this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.tabControl_main);
             this.DoubleBuffered = true;
@@ -496,9 +538,15 @@
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.Text = "册登记向导";
+            this.Activated += new System.EventHandler(this.EntityRegisterWizard_Activated);
+            this.Deactivate += new System.EventHandler(this.EntityRegisterWizard_Deactivate);
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.EntityRegisterWizard_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.EntityRegisterWizard_FormClosed);
             this.Load += new System.EventHandler(this.EntityRegisterWizard_Load);
+            this.Enter += new System.EventHandler(this.EntityRegisterWizard_Enter);
+            this.Leave += new System.EventHandler(this.EntityRegisterWizard_Leave);
+            this.Move += new System.EventHandler(this.EntityRegisterWizard_Move);
+            this.Resize += new System.EventHandler(this.EntityRegisterWizard_Resize);
             this.tabControl_main.ResumeLayout(false);
             this.tabPage_settings.ResumeLayout(false);
             this.tabPage_settings.PerformLayout();
@@ -553,5 +601,8 @@
         private System.Windows.Forms.CheckBox checkBox_settings_needBatchNo;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripButton toolStripButton_delete;
+        private System.Windows.Forms.CheckBox checkBox_settings_keyboardWizard;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.ComboBox comboBox_settings_colorStyle;
     }
 }

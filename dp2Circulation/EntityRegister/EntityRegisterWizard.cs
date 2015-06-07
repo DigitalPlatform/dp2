@@ -1,12 +1,4 @@
-﻿using DigitalPlatform;
-using DigitalPlatform.AmazonInterface;
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.CirculationClient.localhost;
-using DigitalPlatform.CommonControl;
-using DigitalPlatform.Marc;
-using DigitalPlatform.Script;
-using DigitalPlatform.Text;
-using DigitalPlatform.Xml;
+﻿
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -23,6 +15,18 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using System.Xml;
+
+using DigitalPlatform;
+using DigitalPlatform.AmazonInterface;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.CommonControl;
+using DigitalPlatform.EasyMarc;
+using DigitalPlatform.GUI;
+using DigitalPlatform.Marc;
+using DigitalPlatform.Script;
+using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
 
 namespace dp2Circulation
 {
@@ -59,6 +63,44 @@ namespace dp2Circulation
             _biblio.GetEntityDefault += _biblio_GetEntityDefault;
             _biblio.GenerateData += _biblio_GenerateData;
             _biblio.VerifyBarcode += _biblio_VerifyBarcode;
+            _biblio.EntitySelectionChanged += _biblio_EntitySelectionChanged;
+        }
+
+        // 册记录编辑控件中，选择发生了变化。sender 为发出消息的 EntityEditControl，或者加号按钮 PlusButton
+        void _biblio_EntitySelectionChanged(object sender, EventArgs e)
+        {
+            if (this._keyboardForm == null
+|| this._inWizardControl > 0)
+                return;
+            else
+                this.BeginInvoke(new Action<object, EventArgs>(OnEntitySelectionChanged), sender, e);
+        }
+
+        void OnEntitySelectionChanged(object sender, EventArgs e)
+        {
+            if (this._keyboardForm == null
+    || this._inWizardControl > 0)
+                return;
+
+            if (sender is PlusButton)
+            {
+                this._keyboardForm.SetCurrentEntityLine(null, null);
+                SetKeyboardFormStep(KeyboardForm.Step.EditEntity, "dont_hilight");
+                return;
+            }
+
+            EntityEditControl control = sender as EntityEditControl;   // this._biblio.GetFocusedEditControl();
+            if (control != null)
+            {
+                EditLine line = GetFocuedEntityLine(control);
+                this._keyboardForm.SetCurrentEntityLine(control, line);
+                SetKeyboardFormStep(KeyboardForm.Step.EditEntity, "dont_hilight");
+                return;
+            }
+
+            this._keyboardForm.SetCurrentEntityLine(null, null);
+            SetKeyboardFormStep(KeyboardForm.Step.EditEntity, "dont_hilight");
+
         }
 
         void _biblio_VerifyBarcode(object sender, VerifyBarcodeEventArgs e)
@@ -150,6 +192,9 @@ namespace dp2Circulation
                 controls.Add(new ControlWrapper(this.checkBox_settings_needPrice, true));
                 controls.Add(new ControlWrapper(this.checkBox_settings_needItemBarcode, false));
                 controls.Add(new ControlWrapper(this.checkBox_settings_needBatchNo, false));
+                controls.Add(new ControlWrapper(this.checkBox_settings_keyboardWizard, false));
+
+                controls.Add(new ControlWrapper(this.comboBox_settings_colorStyle, 0));
                 return GuiState.GetUiState(controls);
             }
             set
@@ -166,6 +211,9 @@ namespace dp2Circulation
                 controls.Add(new ControlWrapper(this.checkBox_settings_needPrice, true));
                 controls.Add(new ControlWrapper(this.checkBox_settings_needItemBarcode, false));
                 controls.Add(new ControlWrapper(this.checkBox_settings_needBatchNo, false));
+                controls.Add(new ControlWrapper(this.checkBox_settings_keyboardWizard, false));
+
+                controls.Add(new ControlWrapper(this.comboBox_settings_colorStyle, 0));
                 GuiState.SetUiState(controls, value);
             }
         }
@@ -196,10 +244,10 @@ namespace dp2Circulation
             }
 
             this.MainForm.Move += new EventHandler(MainForm_Move);
+            this.MainForm.Activated += MainForm_Activated;
+            this.MainForm.Deactivate += MainForm_Deactivate;
 
             // this.MainForm.MessageFilter += MainForm_MessageFilter;
-
-            SetControlsColor();
 
             {
                 this.UiState = this.MainForm.AppInfo.GetString("entityRegisterWizard", "uistate", "");
@@ -214,12 +262,28 @@ namespace dp2Circulation
 #endif
             }
 
+            SetControlsColor(this._colorStyle);
+
             this._genData = new GenerateData(this, this);
             this._genData.ScriptFileName = "dp2circulation_marc_autogen_2.cs";
             this._genData.DetailHostType = typeof(BiblioItemsHost);
 
             // 刚打开窗口，设定输入焦点
             this.BeginInvoke(new Action(SetStartFocus));
+        }
+
+        void MainForm_Deactivate(object sender, EventArgs e)
+        {
+            Debug.WriteLine("MainForm_Deactivate");
+            if (this._keyboardForm != null)
+                this._keyboardForm.SetPanelState("transparent");
+        }
+
+        void MainForm_Activated(object sender, EventArgs e)
+        {
+            Debug.WriteLine("MainForm_Activated");
+            if (this._keyboardForm != null)
+                this._keyboardForm.SetPanelState("display");
         }
 
         void SetStartFocus()
@@ -231,24 +295,97 @@ namespace dp2Circulation
             }
         }
 
-        void SetControlsColor()
+        string _colorStyle = "dark";
+        public string ColorStyle
         {
-            this.button_settings_entityDefault.BackColor = this.BackColor;
-            this.button_settings_entityDefault.ForeColor = this.ForeColor;
-
-            this.textBox_settings_importantFields.BackColor = this.BackColor;
-            this.textBox_settings_importantFields.ForeColor = this.ForeColor;
-
-
-            this.textBox_queryWord.BackColor = this.BackColor;
-            this.textBox_queryWord.ForeColor = this.ForeColor;
-
-            this.comboBox_from.BackColor = this.BackColor;
-            this.comboBox_from.ForeColor = this.ForeColor;
-
-            this.button_search.BackColor = this.BackColor;
-            this.button_search.ForeColor = this.ForeColor;
+            get
+            {
+                return _colorStyle;
+            }
+            set
+            {
+                if (_colorStyle != value)
+                {
+                    _colorStyle = value;
+                    SetControlsColor(value);
+                }
+            }
         }
+
+        void SetControlsColor(string strStyle)
+        {
+            if (strStyle == "dark")
+            {
+                this.BackColor = Color.DimGray;
+                this.ForeColor = Color.White;
+
+                this.toolStrip1.BackColor = Color.FromArgb(70, 70, 70); // 50
+            }
+            else if (strStyle == "light")
+            {
+                this.BackColor = SystemColors.Window;
+                this.ForeColor = SystemColors.WindowText;
+
+                this.toolStrip1.BackColor = this.BackColor;
+            }
+
+            foreach (TabPage page in this.tabControl_main.TabPages)
+            {
+                page.BackColor = this.BackColor;
+                page.ForeColor = this.ForeColor;
+            }
+
+            this.toolStrip1.ForeColor = this.ForeColor;
+            foreach(ToolStripItem item in this.toolStrip1.Items)
+            {
+                item.BackColor = this.toolStrip1.BackColor;
+                item.ForeColor = this.ForeColor;
+            }
+
+            {
+                this.button_settings_entityDefault.BackColor = this.BackColor;
+                this.button_settings_entityDefault.ForeColor = this.ForeColor;
+
+                this.textBox_settings_importantFields.BackColor = this.BackColor;
+                this.textBox_settings_importantFields.ForeColor = this.ForeColor;
+
+                this.comboBox_settings_colorStyle.BackColor = this.BackColor;
+                this.comboBox_settings_colorStyle.ForeColor = this.ForeColor;
+
+                this.textBox_queryWord.BackColor = this.BackColor;
+                this.textBox_queryWord.ForeColor = this.ForeColor;
+
+                this.comboBox_from.BackColor = this.BackColor;
+                this.comboBox_from.ForeColor = this.ForeColor;
+
+                this.button_search.BackColor = this.BackColor;
+                this.button_search.ForeColor = this.ForeColor;
+
+                this.flowLayoutPanel1.BackColor = this.BackColor;
+                this.flowLayoutPanel1.ForeColor = this.ForeColor;
+
+                this.dpTable_browseLines.BackColor = this.BackColor;
+                this.dpTable_browseLines.ForeColor = this.ForeColor;
+
+                this.dpTable_browseLines.ColumnsBackColor = this.BackColor;
+                this.dpTable_browseLines.ColumnsForeColor = this.ForeColor;
+            }
+
+            {
+                this.easyMarcControl1.BackColor = this.BackColor;
+                this.easyMarcControl1.ForeColor = this.ForeColor;
+                this.easyMarcControl1.SetColorStyle(strStyle);
+            }
+
+            this.splitContainer_biblioAndItems.BackColor = this.BackColor;
+
+            _biblio.SetEntityColorStyle(strStyle);
+
+            if (this._keyboardForm != null)
+                this._keyboardForm.SetColorStyle(strStyle);
+        }
+
+
 #if NO
         void _floatingMessage_Clicked(object sender, EventArgs e)
         {
@@ -272,11 +409,41 @@ namespace dp2Circulation
 
         private void EntityRegisterWizard_FormClosing(object sender, FormClosingEventArgs e)
         {
+            // 提示保存修改
+            string strText = _biblio.GetChangedWarningText();
+            if (string.IsNullOrEmpty(strText) == false)
+            {
+                DialogResult result = MessageBox.Show(this.Owner,
+                    strText + "。\r\n\r\n是否保存这些修改?\r\n\r\n是：保存修改; \r\n否: 不保存修改(修改将丢失); \r\n取消: 取消'关闭窗口'操作)",
+"册登记",
+MessageBoxButtons.YesNoCancel,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button1);
+                if (result == DialogResult.Cancel)
+                {
+                    e.Cancel = true;
+                    return;
+                }
+                if (result == System.Windows.Forms.DialogResult.Yes)
+                {
+                    // return:
+                    //      -1      保存过程出错
+                    //      0       没有必要保存(例如没有发生过修改)
+                    //      1       保存成功
+                    int nRet = SaveBiblioAndItems();
+                    if (nRet == -1)
+                    {
+                        e.Cancel = true;
+                        return;
+                    }
+                }
+            }
 
         }
 
         private void EntityRegisterWizard_FormClosed(object sender, FormClosedEventArgs e)
         {
+
             if (this._genData != null)
             {
                 this._genData.Close();
@@ -288,7 +455,12 @@ namespace dp2Circulation
 
                 // this.MainForm.MessageFilter -= MainForm_MessageFilter;
                 this.MainForm.Move -= new EventHandler(MainForm_Move);
+                this.MainForm.Activated -= MainForm_Activated;
+                this.MainForm.Deactivate -= MainForm_Deactivate;
+
             }
+
+            CloseKeyboardForm();
 
             if (_floatingMessage != null)
                 _floatingMessage.Close();
@@ -411,6 +583,16 @@ namespace dp2Circulation
         {
             SetTitle();
             SetButtonState();
+
+            if (this.tabControl_main.SelectedTab == tabPage_settings)
+            {
+                if (this._keyboardForm == null
+    || this._inWizardControl > 0)
+                { 
+                }
+                else
+                    SetKeyboardFormStep(KeyboardForm.Step.None, "dont_hilight");
+            }
         }
 
         private void tabControl_main_DrawItem(object sender, DrawItemEventArgs e)
@@ -457,7 +639,8 @@ namespace dp2Circulation
         // 检索
         private void button_search_Click(object sender, EventArgs e)
         {
-            DoSearch(this.textBox_queryWord.Text, this.comboBox_from.Text);
+            DoSearch(this.textBox_queryWord.Text,
+                this.comboBox_from.Text);
         }
 
         void ShowMessage(string strMessage, 
@@ -483,7 +666,23 @@ namespace dp2Circulation
             this._floatingMessage.Text = "";
         }
 
-        void DoSearch(string strQueryWord, string strFrom)
+        public string QueryWord
+        {
+            get
+            {
+                return this.textBox_queryWord.Text;
+            }
+            set
+            {
+                this.textBox_queryWord.Text = value;
+            }
+        }
+
+        // parameters:
+        //      bAutoFocus  是否要自动设置控件输入焦点?
+        public void DoSearch(string strQueryWord, 
+            string strFrom,
+            bool bAutoSetFocus = true)
         {
             string strError = "";
             int nRet = 0;
@@ -504,6 +703,9 @@ namespace dp2Circulation
 
             this.ClearList();
             this.ClearMessage();
+
+            if (bAutoSetFocus == false)
+                _inWizardControl++;
 
             this.Progress.OnStop += new StopEventHandler(this.DoStop);
             // this.Progress.Initial("进行一轮任务处理...");
@@ -528,6 +730,7 @@ namespace dp2Circulation
                             strQueryWord,
                             strFrom,
                             account,
+                            bAutoSetFocus,
                             out strError);
                         if (nRet == -1)
                             strTotalError += strError + "\r\n";
@@ -540,6 +743,7 @@ namespace dp2Circulation
                             strQueryWord,
                             strFrom,
                             account,
+                            bAutoSetFocus,
                             out strError);
                         if (nRet == -1)
                             strTotalError += strError + "\r\n";
@@ -593,6 +797,9 @@ namespace dp2Circulation
                 this.Progress.EndLoop();
                 this.Progress.OnStop -= new StopEventHandler(this.DoStop);
                 // this.Progress.Initial("");
+
+                if (bAutoSetFocus == false)
+                    _inWizardControl--;
             }
 
 #if NO
@@ -611,15 +818,6 @@ namespace dp2Circulation
 #endif
             return;
         ERROR1:
-#if NO
-            line.SetDisplayMode("summary");
-            line.SetBiblioSearchState("error");
-            line.BiblioSummary = strError;
-            DisplayFloatErrorText(strError);
-
-            line._biblioRegister.BarColor = "R";   // 红色，需引起注意
-            this.SetColorList();
-#endif
             this.ShowMessage(strError, "red", true);
             MessageBox.Show(this, strError);
         }
@@ -633,6 +831,7 @@ namespace dp2Circulation
             string strQueryWord,
             string strFrom,
             AccountInfo account,
+            bool bAutoSetFocus,
             out string strError)
         {
             strError = "";
@@ -722,6 +921,7 @@ MessageBoxDefaultButton.Button1);
 
                 nRet = search.LoadBrowseLines(appendBrowseLine,
                     null,   // line,
+                    bAutoSetFocus,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -734,7 +934,7 @@ MessageBoxDefaultButton.Button1);
 
         ERROR1:
             strError = "针对服务器 '" + account.ServerName + "' 检索出错: " + strError;
-            AddBiblioBrowseLine(strError, TYPE_ERROR);
+            AddBiblioBrowseLine(strError, TYPE_ERROR, bAutoSetFocus);
             return -1;
         }
 
@@ -745,9 +945,10 @@ MessageBoxDefaultButton.Button1);
 
         // 针对亚马逊服务器检索，装入一个浏览行的回调函数
         int appendBrowseLine(string strRecPath,
-    string strRecord,
-    object param,
-    out string strError)
+            string strRecord,
+            object param,
+            bool bAutoSetFocus,
+            out string strError)
         {
             strError = "";
 
@@ -788,7 +989,8 @@ MessageBoxDefaultButton.Button1);
                 -1,
                 info.RecPath,
                 StringUtil.MakePathList(cols, "\t"),
-                info);
+                info,
+                bAutoSetFocus);
 
             return 0;
         }
@@ -961,6 +1163,7 @@ out string strError)
             string strQueryWord,
             string strFrom,
             AccountInfo account,
+            bool bAutoSetFocus,
             out string strError)
         {
             strError = "";
@@ -1169,7 +1372,8 @@ out string strError)
                                     -1,
                                     info.RecPath,
                                     strBrowseText,
-                                    info);
+                                    info,
+                                    bAutoSetFocus);
                                 i++;
                             }
                         }
@@ -1178,7 +1382,6 @@ out string strError)
                             strError = ex.Message;
                             goto ERROR1;
                         }
-
 
                         // lIndex += biblio_recpaths.Count;
                         biblio_recpaths.Clear();
@@ -1191,9 +1394,7 @@ out string strError)
                         break;
                 }
 
-
                 return (int)lHitCount;
-
             }
             finally
             {
@@ -1204,7 +1405,7 @@ out string strError)
             }
 
         ERROR1:
-            AddBiblioBrowseLine(strError, TYPE_ERROR);
+            AddBiblioBrowseLine(strError, TYPE_ERROR, bAutoSetFocus);
             return -1;
         }
 
@@ -1221,14 +1422,16 @@ out string strError)
         public const int TYPE_INFO = 3;
 
         public void AddBiblioBrowseLine(string strText,
-    int nType)
+    int nType,
+            bool bAutoSetFocus)
         {
             // this._biblioRegister.AddBiblioBrowseLine(strText, nType);
             this.AddBiblioBrowseLine(
     nType,
     strText,
     "",
-    null);
+    null,
+    bAutoSetFocus);
         }
 
         // 加入一个浏览行
@@ -1236,16 +1439,18 @@ out string strError)
             int nType,
             string strBiblioRecPath,
             string strBrowseText,
-            RegisterBiblioInfo info)
+            RegisterBiblioInfo info,
+            bool bAutoSetFocus)
         {
             if (this.dpTable_browseLines.InvokeRequired)
             {
                 // 事件是在多线程上下文中触发的，需要 Invoke 显示信息
-                this.BeginInvoke(new Action<int, string, string, RegisterBiblioInfo>(AddBiblioBrowseLine),
+                this.BeginInvoke(new Action<int, string, string, RegisterBiblioInfo, bool>(AddBiblioBrowseLine),
                     nType,
                     strBiblioRecPath,
                     strBrowseText,
-                    info);
+                    info,
+                    bAutoSetFocus);
                 return;
             }
 
@@ -1280,7 +1485,8 @@ out string strError)
             // 当插入第一行的时候，顺便选中它
             if (this.dpTable_browseLines.Rows.Count == 1)
             {
-                this.dpTable_browseLines.Focus();
+                if (bAutoSetFocus)
+                    this.dpTable_browseLines.Focus();
                 row.Selected = true;
                 this.dpTable_browseLines.FocusedItem = row;
             }
@@ -1336,6 +1542,56 @@ out string strError)
                 column.Text = s;
                 column.Width = 120;
                 this.dpTable_browseLines.Columns.Add(column);
+            }
+        }
+
+        // 获得检索命中列表中的事项数。其中可能包含错误信息行
+        public int ResultListCount
+        {
+            get
+            {
+                return this.dpTable_browseLines.Rows.Count;
+            }
+        }
+
+        // 获得检索命中结果数。不包含错误信息行
+        public int SearchResultCount
+        {
+            get
+            {
+                int count = 0;
+                foreach(DpRow row in this.dpTable_browseLines.Rows)
+                {
+                    DpCell cell = row[0];
+                    if (cell.Tag != null)
+                    {
+                        int nType = (int)(cell.Tag);
+                        if (nType == TYPE_ERROR || nType == TYPE_INFO)
+                            continue;
+                    }
+                    count++;
+                }
+                return count;
+            }
+        }
+
+        // 获得检索结果列表中的错误信息数
+        public int SearchResultErrorCount
+        {
+            get
+            {
+                int count = 0;
+                foreach (DpRow row in this.dpTable_browseLines.Rows)
+                {
+                    DpCell cell = row[0];
+                    if (cell.Tag != null)
+                    {
+                        int nType = (int)(cell.Tag);
+                        if (nType == TYPE_ERROR)
+                            count++;
+                    }
+                }
+                return count;
             }
         }
 
@@ -1465,9 +1721,11 @@ out string strError)
 
         #endregion
 
-        int SetBiblio(RegisterBiblioInfo info, out string strError)
+        int SetBiblio(RegisterBiblioInfo info, 
+            bool bAutoSetFocus,
+            out string strError)
         {
-            int nRet = this._biblio.SetBiblio(info, out strError);
+            int nRet = this._biblio.SetBiblio(info, bAutoSetFocus, out strError);
             if (nRet == -1)
                 return -1;
             {
@@ -1484,6 +1742,42 @@ out string strError)
         }
 
         private void dpTable_browseLines_DoubleClick(object sender, EventArgs e)
+        {
+            EditSelectedBrowseLine();
+        }
+
+        // 选定一个浏览行
+        // parameters:
+        //      bClearBefore    是否在选择前清除以前的选择标记
+        //      index   从 0 开始计数的，行下标
+        public bool SelectBrowseLine(bool bClearBefore,
+            int index)
+        {
+            if (index < 0)
+                throw new ArgumentException("index 值不能小于 0", "index");
+            if (index >= this.dpTable_browseLines.Rows.Count)
+                return false;
+            if (bClearBefore)
+            {
+                foreach (DpRow row in this.dpTable_browseLines.Rows)
+                {
+                    if (row.Selected == true)
+                        row.Selected = false;
+                }
+            }
+
+            {
+                DpRow row = this.dpTable_browseLines.Rows[index];
+                row.Selected = true;
+                this.dpTable_browseLines.FocusedItem = row;
+            }
+            return true;
+        }
+
+        // 将当前选定的浏览行装入编辑器
+        // parameters:
+        //      bAutoSetFocus   是否自动设定键盘输入焦点？如果为 true，表示这是用户主动操作，而不是向导引导的流程。此种情况下需要在操作中主动影响向导窗口的当前页面
+        public void EditSelectedBrowseLine(bool bAutoSetFocus = true)
         {
             string strError = "";
             int nRet = 0;
@@ -1514,7 +1808,15 @@ out string strError)
                 goto ERROR1;
             }
 
+            // 此语句 .SelectedTab = ... 要自动 Focus 到新 page 的第一个子控件上
+            // http://stackoverflow.com/questions/4044711/select-tab-page-in-tabcontrol-without-stealing-focus
+            if (bAutoSetFocus == false)
+                this.tabControl_main.Enabled = false;
+
             this.tabControl_main.SelectedTab = this.tabPage_biblioAndItems;
+
+            if (bAutoSetFocus == false)
+                this.tabControl_main.Enabled = true;
 
             // return:
             //      false   后续操作可以进行
@@ -1525,11 +1827,23 @@ out string strError)
             // 清除窗口内容
             _biblio.Clear();
 
-            nRet = SetBiblio(info, out strError);
+            nRet = SetBiblio(info, bAutoSetFocus, out strError);
             if (nRet == -1)
                 goto ERROR1;
 
-            this.easyMarcControl1.SelectFirstItem();
+            if (bAutoSetFocus)
+            {
+                this.easyMarcControl1.SelectFirstItem();
+#if NO
+                // TODO: 是否需要一个特殊的 step 参数，定位到 MarcEdit 但不向后找空字段
+                KeyboardForm.Step result_step = SetKeyboardFormStep(dp2Circulation.KeyboardForm.Step.EditBiblio);
+                if (result_step == KeyboardForm.Step.EditEntity)
+                {
+                    // 要将输入焦点切换到册记录区域。如果当前一个册也没有，则要切换 focus 到加号上面
+                    this.GetEntityPlusButton().Focus();
+                }
+#endif
+            }
             return;
         ERROR1:
             if (string.IsNullOrEmpty(strError) == false)
@@ -1537,6 +1851,19 @@ out string strError)
                 // MessageBox.Show(this, strError);
                 this.ShowMessage(strError, "red", true);
             }
+        }
+
+        KeyboardForm.Step SetKeyboardFormStep(
+            KeyboardForm.Step step,
+            string strStyle = "")
+        {
+            if (this._keyboardForm != null)
+            {
+                this._keyboardForm.SetStep(step, strStyle);
+                return this._keyboardForm.GetStep();
+            }
+
+            return dp2Circulation.KeyboardForm.Step.None;
         }
 
         // return:
@@ -1878,11 +2205,14 @@ MessageBoxDefaultButton.Button1);
                             continue;
                         }
 
+                        EntityEditControl edit_control = null;
                         // 添加一个新的册对象
                         nRet = this._biblio.NewEntity(entity.OldRecPath,
                             entity.OldTimestamp,
                             entity.OldRecord,
                             false,  // 不必滚入视野
+                            false,  // 不改变 Focus
+                            out edit_control,
                             out strError);
                         if (nRet == -1)
                             return -1;
@@ -2060,6 +2390,34 @@ int nCount)
                 result[i] = source[i + nStart];
             }
             return result;
+        }
+
+        public EntityEditControl AddNewEntity(string strBarcode,
+            bool bAutoSetFocus = true)
+        {
+            string strError = "";
+            EntityEditControl control = null;
+            int nRet = this._biblio.AddNewEntity(strBarcode, 
+                bAutoSetFocus,
+                out control,
+                out strError);
+            if (nRet == -1)
+                this.ShowMessage(strError, "red", true);
+            return control;
+        }
+
+        public PlusButton GetEntityPlusButton()
+        {
+            if (this._biblio == null)
+                return null;
+            return this._biblio.GetPlusButton();
+        }
+
+        public void EnsurePlusButtonVisible()
+        {
+            PlusButton button = GetEntityPlusButton();
+            if (button != null)
+                this.flowLayoutPanel1.ScrollControlIntoView(button);
         }
 
         #endregion
@@ -2725,6 +3083,19 @@ int nCount)
 
         private void toolStripButton_start_Click(object sender, EventArgs e)
         {
+            // return:
+            //      -1      保存过程出错
+            //      0       成功
+            ReStart();
+        }
+
+        // parameters:
+        //      bAutoSave   是否在操作前自动保存修改?
+        // return:
+        //      -1      保存过程出错
+        //      0       成功
+        public int ReStart(bool bAutoSave = true)
+        {
 #if NO
             // 提示保存修改
             string strText = _biblio.GetChangedWarningText();
@@ -2752,11 +3123,26 @@ MessageBoxDefaultButton.Button1);
 #endif
             this.ClearMessage();
 
+            if (bAutoSave)
+            {
+                string strText = _biblio.GetChangedWarningText();
+                if (string.IsNullOrEmpty(strText) == false)
+                {
+                    // return:
+                    //      -1      保存过程出错
+                    //      0       没有必要保存(例如没有发生过修改)
+                    //      1       保存成功
+                    int nRet = SaveBiblioAndItems();
+                    if (nRet == -1)
+                        return -1;
+                }
+            }
+
             // return:
             //      false   后续操作可以进行
             //      true    出现错误，需要人工干预，或者操作者选择了取消，后续操作不能进行
             if (WarningSaveChange() == true)
-                return;
+                return -1;
 
             // 清除窗口内容
             _biblio.Clear();
@@ -2767,6 +3153,36 @@ MessageBoxDefaultButton.Button1);
             this.tabControl_main.SelectedTab = this.tabPage_searchBiblio;
 
             this.textBox_queryWord.Focus();
+            return 0;
+        }
+
+        // 获得一个控件的边框参数。屏幕坐标
+        public Rectangle GetRect(string strName)
+        {
+            Control control = null;
+            switch (strName)
+            {
+                case "QueryWord":
+                    control = this.textBox_queryWord;
+                    break;
+                case "ResultList":
+                    control = this.dpTable_browseLines;
+                    break;
+                case "MarcEdit":
+                    control = this.easyMarcControl1;
+                    break;
+                case "Entities":
+                    control = this.flowLayoutPanel1;
+                    break;
+                case "FirstEntity":
+                    control = this.flowLayoutPanel1;
+                    break;
+            }
+            if (control != null)
+                // return control.RectangleToScreen(new Rectangle(new Point(0,0), control.Size));
+                return control.Parent.RectangleToScreen(control.Bounds);
+            return
+                new Rectangle(0, 0, 0, 0);
         }
 
         private void toolStripButton_prev_Click(object sender, EventArgs e)
@@ -2799,8 +3215,17 @@ MessageBoxDefaultButton.Button1);
             SaveBiblioAndItems();
         }
 
-        // 装入一条空白书目记录
+                // 装入一条空白书目记录
         private void toolStripButton_new_Click(object sender, EventArgs e)
+        {
+            NewBiblio();
+        }
+
+        // 装入一条空白书目记录
+        // return:
+        //      -1      出错
+        //      0       成功
+        public int NewBiblio(bool bAutoSetFocus = true)
         {
             string strError = "";
 
@@ -2817,26 +3242,66 @@ MessageBoxDefaultButton.Button1);
      "",
      "",
      "");
+            if (bAutoSetFocus == false)
+                this.tabControl_main.Enabled = false;
+
             // 如果当前不在书目 page，要自动切换到位
             this.tabControl_main.SelectedTab = this.tabPage_biblioAndItems;
+
+            if (bAutoSetFocus == false)
+                this.tabControl_main.Enabled = true;
 
             // return:
             //      false   后续操作可以进行
             //      true    出现错误，需要人工干预，或者操作者选择了取消，后续操作不能进行
             if (WarningSaveChange() == true)
-                return;
+                return -1;
 
             // 清除窗口内容
             _biblio.Clear();
 
-            int nRet = SetBiblio(info, out strError);
+            int nRet = SetBiblio(info, bAutoSetFocus, out strError);
             if (nRet == -1)
                 goto ERROR1;
 
-            return;
+            return 0;
         ERROR1:
-            if (string.IsNullOrEmpty(strError) == false)
-                MessageBox.Show(this, strError);
+            if (bAutoSetFocus)
+            {
+                if (string.IsNullOrEmpty(strError) == false)
+                    MessageBox.Show(this, strError);
+            }
+            else
+            {
+                this.ShowMessage(strError, "ref", true);
+            }
+            return -1;
+        }
+
+        public EasyLine GetNextBiblioLine(EasyLine ref_line)
+        {
+            return this.easyMarcControl1.GetNextEditableLine(ref_line);
+        }
+
+        public EasyLine GetPrevBiblioLine(EasyLine ref_line)
+        {
+            return this.easyMarcControl1.GetPrevEditableLine(ref_line);
+        }
+
+        public static EditLine GetNextEntityLine(EntityEditControl control, EditLine ref_line)
+        {
+            return control.GetNextEditableLine(ref_line);
+        }
+
+        public static EditLine GetFocuedEntityLine(EntityEditControl control)
+        {
+            return control.GetFocuedLine();
+        }
+
+        // 将一个册记录控件或下级控件滚入视野
+        public void EnsureEntityVisible(Control control)
+        {
+            this.flowLayoutPanel1.ScrollControlIntoView(control);
         }
 
         // 构造一条空白书目记录
@@ -2941,6 +3406,11 @@ MessageBoxDefaultButton.Button1);
         private void textBox_queryWord_Enter(object sender, EventArgs e)
         {
             this.AcceptButton = this.button_search;
+
+            if (_inWizardControl == 0)
+            {
+                SetKeyboardFormStep(KeyboardForm.Step.PrepareSearchBiblio, "dont_clear,dont_hilight");
+            }
         }
 
         private void textBox_queryWord_Leave(object sender, EventArgs e)
@@ -2997,6 +3467,12 @@ MessageBoxDefaultButton.Button1);
                     new GenerateDataEventArgs(),
                     this._biblio.BiblioRecPath,
                     true);
+
+            if (this._keyboardForm == null
+    || this._inWizardControl > 0)
+                return;
+            else
+                this.BeginInvoke(new Action<object, EventArgs>(OnMarcSelectionChanged), sender, e);
         }
 
         private void easyMarcControl1_Leave(object sender, EventArgs e)
@@ -3048,6 +3524,11 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
+        private void flowLayoutPanel1_Leave(object sender, EventArgs e)
+        {
+
+        }
+
         // 删除书目记录
         private void toolStripButton_delete_Click(object sender, EventArgs e)
         {
@@ -3066,6 +3547,252 @@ MessageBoxDefaultButton.Button2);
             }
 
             this.DeleteBiblioRecord();
+        }
+
+        #region 键盘输入面板
+
+        KeyboardForm _keyboardForm = null;
+
+        private void checkBox_settings_keyboardWizard_CheckedChanged(object sender, EventArgs e)
+        {
+            if (this.checkBox_settings_keyboardWizard.Checked == true)
+            {
+                OpenKeyboardForm(this.FloatingKeyboardForm);
+            }
+            else
+            {
+                CloseKeyboardForm();
+            }
+        }
+
+        bool FloatingKeyboardForm
+        {
+            get
+            {
+                if (this.MainForm != null && this.MainForm.AppInfo != null)
+                    return this.MainForm.AppInfo.GetBoolean("entityRegisterWizard", "keyboardFormFloating", true);
+                return true;            
+            }
+            set
+            {
+                if (this.MainForm != null && this.MainForm.AppInfo != null)
+                    this.MainForm.AppInfo.SetBoolean("entityRegisterWizard", "keyboardFormFloating", value);
+            }
+        }
+        // parameters:
+        //      bFloatingWindow 是否打开为浮动的对话框？ false 表示停靠在固定面板区
+        void OpenKeyboardForm(bool bFloatingWindow)
+        {
+            if (this._keyboardForm == null
+                || (bFloatingWindow == true && this._keyboardForm.Visible == false))
+            {
+                CloseKeyboardForm();
+
+                this._keyboardForm = new KeyboardForm();
+                this._keyboardForm.FormClosed += _keyboardForm_FormClosed;
+                this._keyboardForm.DoDockEvent += _keyboardForm_DoDockEvent;
+                GuiUtil.AutoSetDefaultFont(this._keyboardForm);
+                this._keyboardForm.Text = "向导";
+                this._keyboardForm.BaseForm = this;
+
+                // this._keyboardForm.Show(this.MainForm);
+            }
+            // this.easyMarcControl1.HideSelection = false;    // 当 EasyMarcControl 不拥有输入焦点时也能看到蓝色选定字段的标记
+
+            if (bFloatingWindow == true)
+            {
+                if (_keyboardForm.Visible == false)
+                {
+                    this.MainForm.AppInfo.LinkFormState(_keyboardForm, "keyboardform_state");
+
+                    _keyboardForm.Show(this.MainForm);
+                    _keyboardForm.Activate();
+
+                    if (this._keyboardForm != null)
+                        this._keyboardForm.SetColorStyle(this.ColorStyle);
+
+                    this.MainForm.CurrentAcceptControl = null;
+                }
+                else
+                {
+                    if (_keyboardForm.WindowState == FormWindowState.Minimized)
+                        _keyboardForm.WindowState = FormWindowState.Normal;
+                    _keyboardForm.Activate();
+                }
+            }
+            else
+            {
+                if (_keyboardForm.Visible == true)
+                {
+
+                }
+                else
+                {
+                    if (this.MainForm.CurrentAcceptControl != _keyboardForm.Table)
+                    {
+                        _keyboardForm.DoDock(true); // false 不会自动显示FixedPanel
+                        _keyboardForm.Initialize(); // 没有 .Show() 的就用 .Initialize()
+                    }
+                }
+            }
+
+            this.checkBox_settings_keyboardWizard.Checked = true;
+        }
+
+        void _keyboardForm_DoDockEvent(object sender, DoDockEventArgs e)
+        {
+            if (this._keyboardForm.Docked == false)
+            {
+                if (this.MainForm.CurrentAcceptControl != this._keyboardForm.Table)
+                    this.MainForm.CurrentAcceptControl = this._keyboardForm.Table;
+
+                if (e.ShowFixedPanel == true)
+                {
+                    if (this.MainForm.PanelFixedVisible == false)
+                        this.MainForm.PanelFixedVisible = true;
+                    // 把 acceptpage 翻出来
+                    this.MainForm.ActivateAcceptPage();
+                }
+
+                this._keyboardForm.Docked = true;
+                this._keyboardForm.Visible = false;
+
+                this.FloatingKeyboardForm = false;
+
+                if (this._keyboardForm != null)
+                    this._keyboardForm.SetColorStyle(this.ColorStyle);
+            }
+            else
+            {
+                this.OpenKeyboardForm(true);
+                this.FloatingKeyboardForm = true;
+            }
+
+
+        }
+
+        void _keyboardForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+#if NO
+            if (this._keyboardForm != null)
+                this.MainForm.AppInfo.UnlinkFormState(_keyboardForm);
+#endif
+
+            this.checkBox_settings_keyboardWizard.Checked = false;
+        }
+
+        void CloseKeyboardForm()
+        {
+            if (this._keyboardForm != null)
+            {
+                if (this.MainForm.CurrentAcceptControl == _keyboardForm.Table)
+                    this.MainForm.CurrentAcceptControl = null;
+
+                this._keyboardForm.Close();
+                this._keyboardForm = null;
+            }
+            // this.easyMarcControl1.HideSelection = true;
+        }
+
+        #endregion
+
+        private void EntityRegisterWizard_Move(object sender, EventArgs e)
+        {
+            if (this._keyboardForm != null)
+                this._keyboardForm.UpdateRectTarget();
+        }
+
+        private void EntityRegisterWizard_Resize(object sender, EventArgs e)
+        {
+            if (this._keyboardForm != null)
+                this._keyboardForm.UpdateRectTarget();
+        }
+
+        private void EntityRegisterWizard_Enter(object sender, EventArgs e)
+        {
+            Debug.WriteLine("EntityRegisterWizard_Enter");
+#if NO
+            if (this._keyboardForm != null)
+                this._keyboardForm.SetPanelState("form");
+#endif
+        }
+
+        private void EntityRegisterWizard_Leave(object sender, EventArgs e)
+        {
+            Debug.WriteLine("EntityRegisterWizard_Leave");
+#if NO
+            if (this._keyboardForm != null)
+                this._keyboardForm.SetPanelState("transparent");
+#endif
+        }
+
+        private void EntityRegisterWizard_Activated(object sender, EventArgs e)
+        {
+            Debug.WriteLine("EntityRegisterWizard_Activated");
+
+        }
+
+        private void EntityRegisterWizard_Deactivate(object sender, EventArgs e)
+        {
+            Debug.WriteLine("EntityRegisterWizard_Deactivate");
+
+        }
+
+        int _inWizardControl = 0;
+
+        // 阻止动作连带传递到 KeyboardForm
+        public void DisableWizardControl()
+        {
+            _inWizardControl++;
+        }
+
+        // 允许动作连带传递到 KeyboardForm
+        public void EnableWizardControl()
+        {
+            _inWizardControl--;
+        }
+
+        private void dpTable_browseLines_Enter(object sender, EventArgs e)
+        {
+            if (_inWizardControl == 0)
+            {
+                if (this.dpTable_browseLines.Rows.Count > 0)
+                    SetKeyboardFormStep(KeyboardForm.Step.SelectSearchResult);
+            }
+        }
+
+        // 本函数也有可能被本类 easyMarcControl1_Enter 调用
+        private void easyMarcControl1_SelectionChanged(object sender, EventArgs e)
+        {
+            if (this._keyboardForm == null
+    || this._inWizardControl > 0)
+                return;
+            else
+                this.BeginInvoke(new Action<object, EventArgs>(OnMarcSelectionChanged), sender, e);
+        }
+
+        void OnMarcSelectionChanged(object sender, EventArgs e)
+        {
+            if (this._keyboardForm == null
+                || this._inWizardControl > 0)
+                return;
+            // TODO: 为了提高运行速度，下面功能可以用 BeginInvoke 实现
+            List<EasyLine> lines = this.easyMarcControl1.SelectedItems;
+            if (lines.Count == 1)
+            {
+                this._keyboardForm.SetCurrentBiblioLine(lines[0]);
+                SetKeyboardFormStep(KeyboardForm.Step.EditBiblio, "dont_hilight");
+            }
+            else
+            {
+                this._keyboardForm.SetCurrentBiblioLine(null);
+                SetKeyboardFormStep(KeyboardForm.Step.EditBiblio, "dont_hilight");
+            }
+        }
+
+        private void comboBox_settings_colorStyle_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            this.ColorStyle = this.comboBox_settings_colorStyle.Text;
         }
 
 #if NO

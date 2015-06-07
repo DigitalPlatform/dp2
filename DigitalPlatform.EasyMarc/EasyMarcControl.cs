@@ -26,6 +26,10 @@ namespace DigitalPlatform.EasyMarc
     {
         [Browsable(true)]
         [EditorBrowsable(EditorBrowsableState.Always)]
+        public event EventHandler SelectionChanged = null;
+
+        [Browsable(true)]
+        [EditorBrowsable(EditorBrowsableState.Always)]
         public new event EventHandler TextChanged
         {
             // http://stackoverflow.com/questions/9370448/add-attribute-to-base-event
@@ -140,10 +144,8 @@ namespace DigitalPlatform.EasyMarc
         // 将全部行的状态恢复为普通状态
         void ResetLineState()
         {
-            for (int i = 0; i < this.Items.Count; i++)
+            foreach (EasyLine item in this.Items)
             {
-                EasyLine item = this.Items[i];
-
                 if ((item.State & ItemState.ReadOnly) != 0)
                     item.State = ItemState.Normal | ItemState.ReadOnly;
                 else
@@ -204,9 +206,8 @@ namespace DigitalPlatform.EasyMarc
             {
                 List<EasyLine> results = new List<EasyLine>();
 
-                for (int i = 0; i < this.Items.Count; i++)
+                foreach(EasyLine cur_element in this.Items)
                 {
-                    EasyLine cur_element = this.Items[i];
                     if ((cur_element.State & ItemState.Selected) != 0)
                         results.Add(cur_element);
                 }
@@ -224,11 +225,12 @@ namespace DigitalPlatform.EasyMarc
             {
                 List<int> results = new List<int>();
 
-                for (int i = 0; i < this.Items.Count; i++)
+                int i = 0;
+                foreach (EasyLine cur_element in this.Items)
                 {
-                    EasyLine cur_element = this.Items[i];
                     if ((cur_element.State & ItemState.Selected) != 0)
                         results.Add(i);
+                    i++;
                 }
 
                 return results;
@@ -240,16 +242,92 @@ namespace DigitalPlatform.EasyMarc
         /// </summary>
         public void SelectAll()
         {
-            for (int i = 0; i < this.Items.Count; i++)
+            bool bSelectionChanged = false;
+            foreach (EasyLine cur_element in this.Items)
             {
-                EasyLine cur_element = this.Items[i];
                 if ((cur_element.State & ItemState.Selected) == 0)
+                {
                     cur_element.State |= ItemState.Selected;
+                    bSelectionChanged = true;
+                }
             }
 
             this.Invalidate();
+
+            if (bSelectionChanged)
+                OnSelectionChanged(new EventArgs());
         }
 
+        // 得到上一个可以输入内容的字段或子字段对象
+        // parameters:
+        //      ref_line    参考的对象。从它前面一个开始获取。如果为 null，表示获取最后一个可编辑的对象
+        public EasyLine GetPrevEditableLine(EasyLine ref_line)
+        {
+            EasyLine line = null;
+            foreach (EasyLine item in this.Items)
+            {
+                if (ref_line != null && ref_line == item)
+                    break;
+
+                {
+                    if (item.Visible == false)
+                        continue;
+                    if (item.ExpandState == EasyMarc.ExpandState.Collapsed)
+                        continue;
+                    if (item.textBox_content.Visible == false)
+                        continue;
+                    // results.Add(item);
+                    line = item;
+                }
+            }
+
+            return line;
+        }
+
+        // 得到下一个可以输入内容的字段或子字段对象
+        // parameters:
+        //      ref_line    参考的对象。从它后面一个开始获取。如果为 null，表示获取第一个可编辑的对象
+        public EasyLine GetNextEditableLine(EasyLine ref_line)
+        {
+            bool bOn = false;
+            if (ref_line == null)
+                bOn = true;
+            foreach(EasyLine item in this.Items)
+            {
+                if (bOn == false && ref_line == item)
+                {
+                    bOn = true;
+                    continue;
+                }
+
+                if (bOn)
+                {
+                    if (item.Visible == false)
+                        continue;
+                    if (item.ExpandState == EasyMarc.ExpandState.Collapsed)
+                        continue;
+                    if (item.textBox_content.Visible == false)
+                        continue;
+                    return item;
+                }
+            }
+
+            return null;
+        }
+
+        // 获得一个不是 transparent color 的背景色
+        internal Color GetRealBackColor(Color default_color)
+        {
+            Control control = this;
+            while (control != null)
+            {
+                if (control.BackColor != Color.Transparent)
+                    return control.BackColor;
+                control = control.Parent;
+            }
+
+            return default_color;
+        }
 #if NO
         internal void AsyncSetAutoScrollPosition(Point p)
         {
@@ -325,7 +403,7 @@ namespace DigitalPlatform.EasyMarc
         }
 
         // 找到一个子字段所从属的字段行
-        FieldLine GetFieldLine(SubfieldLine subfield)
+        public FieldLine GetFieldLine(SubfieldLine subfield)
         {
             int nStart = this.Items.IndexOf(subfield);
             if (nStart == -1)
@@ -472,8 +550,11 @@ namespace DigitalPlatform.EasyMarc
         /// <param name="element">事项</param>
         /// <param name="bClearOld">是否清除以前的选择</param>
         public void SelectItem(EasyLine element,
-            bool bClearOld)
+            bool bClearOld,
+            bool bSetFocus = true)
         {
+            bool bSelectionChanged = false;
+
             if (bClearOld == true)
             {
                 for (int i = 0; i < this.Items.Count; i++)
@@ -486,38 +567,54 @@ namespace DigitalPlatform.EasyMarc
                     if ((cur_element.State & ItemState.Selected) != 0)
                     {
                         cur_element.State -= ItemState.Selected;
-
+                        bSelectionChanged = true;
                         this.InvalidateLine(cur_element);
                     }
                 }
             }
 
+            if (element == null)
+                return;
+
             // 选中当前行
             if ((element.State & ItemState.Selected) == 0)
             {
                 element.State |= ItemState.Selected;
-
+                bSelectionChanged = true;
                 this.InvalidateLine(element);
             }
 
-            if (element.textBox_content.Visible == true)
+            if (bSetFocus == true)
             {
-                SetEditFocus(element.textBox_content);
-                element.textBox_content.Select(0, 0);
-            }
-            else
-            {
-                // 2015/5/30
-                // 如果当前 item 是字段名行，需要将 Focus 设置到其后的第一个子字段行的 TextBox 上
-                if (element is FieldLine && element.Visible == true)
+                if (element.textBox_content.Visible == true)
                 {
-                    List<EasyLine> subfields = GetSubfieldLines(element as FieldLine);
-                    if (subfields.Count > 0)
-                        SetEditFocus(subfields[0].textBox_content);
+
+                    SetEditFocus(element.textBox_content);
+                    element.textBox_content.Select(0, 0);
+                }
+                else
+                {
+                    // 2015/5/30
+                    // 如果当前 item 是字段名行，需要将 Focus 设置到其后的第一个子字段行的 TextBox 上
+                    if (element is FieldLine && element.Visible == true)
+                    {
+                        List<EasyLine> subfields = GetSubfieldLines(element as FieldLine);
+                        if (subfields.Count > 0)
+                            SetEditFocus(subfields[0].textBox_content);
+                    }
                 }
             }
 
             this.LastClickItem = element;
+
+            if (bSelectionChanged)
+                OnSelectionChanged(new EventArgs());
+        }
+
+        public void OnSelectionChanged(EventArgs e)
+        {
+            if (this.SelectionChanged != null)
+                this.SelectionChanged(this, e);
         }
 
         /// <summary>
@@ -535,6 +632,8 @@ namespace DigitalPlatform.EasyMarc
             this.InvalidateLine(element);
 
             this.LastClickItem = element;
+
+            OnSelectionChanged(new EventArgs());
         }
 
         /// <summary>
@@ -559,6 +658,7 @@ namespace DigitalPlatform.EasyMarc
                 nEnd = nTemp;
             }
 
+            bool bSelectionChanged = false;
             for (int i = nStart; i <= nEnd; i++)
             {
                 EasyLine cur_element = this.Items[i];
@@ -566,7 +666,7 @@ namespace DigitalPlatform.EasyMarc
                 if ((cur_element.State & ItemState.Selected) == 0)
                 {
                     cur_element.State |= ItemState.Selected;
-
+                    bSelectionChanged = true;
                     this.InvalidateLine(cur_element);
                 }
             }
@@ -579,7 +679,7 @@ namespace DigitalPlatform.EasyMarc
                 if ((cur_element.State & ItemState.Selected) != 0)
                 {
                     cur_element.State -= ItemState.Selected;
-
+                    bSelectionChanged = true;
                     this.InvalidateLine(cur_element);
                 }
             }
@@ -591,10 +691,13 @@ namespace DigitalPlatform.EasyMarc
                 if ((cur_element.State & ItemState.Selected) != 0)
                 {
                     cur_element.State -= ItemState.Selected;
-
+                    bSelectionChanged = true;
                     this.InvalidateLine(cur_element);
                 }
             }
+
+            if (bSelectionChanged)
+                OnSelectionChanged(new EventArgs());
         }
 
         // TODO: SelectItem(string strFieldName, string strSubfieldName)
@@ -1884,6 +1987,62 @@ namespace DigitalPlatform.EasyMarc
         public Color ExpandBackColor1 = Color.FromArgb(230, 230, 230);
         // 扩展区背景颜色2
         public Color ExpandBackColor2 = Color.FromArgb(255, 255, 255);
+        // 左边颜色块的背景色，横线颜色
+        public Color LeftBackColor = Color.FromArgb(225, 225, 225);
+        // 子字段名的前景颜色
+        public Color SubfieldCaptionForeColor = SystemColors.GrayText;
+        // 字段名的前景颜色
+        public Color FieldCaptionForeColor = Color.DarkGreen;
+        // 正在编辑的 edit 的背景颜色
+        public Color FocusedEditBackColor = Color.FromArgb(200, 200, 255);
+
+        public void SetColorStyle(string strStyle)
+        {
+            if (strStyle == "dark")
+            {
+                // 字段背景颜色
+                this.FieldBackColor = Color.FromArgb(0, 0, 0);
+                // 子字段背景颜色
+                this.SubfieldBackColor = Color.FromArgb(50, 50, 50);
+                // 扩展区背景颜色1
+                this.ExpandBackColor1 = Color.FromArgb(60, 60, 60);
+                // 扩展区背景颜色2
+                this.ExpandBackColor2 = Color.FromArgb(100, 100, 100);
+
+                this.LeftBackColor = Color.FromArgb(80, 80, 80);
+
+                this.SubfieldCaptionForeColor = Color.FromArgb(200, 200, 180);
+
+                this.FieldCaptionForeColor = Color.FromArgb(200, 200, 200);
+
+                this.FocusedEditBackColor = ControlPaint.Dark(this.BackColor);
+
+                this.RefreshLineColor();
+                this.Invalidate();
+            }
+            if (strStyle == "light")
+            {
+                // 字段背景颜色
+                FieldBackColor = Color.FromArgb(230, 230, 230);
+                // 子字段背景颜色
+                SubfieldBackColor = Color.FromArgb(240, 240, 240);
+                // 扩展区背景颜色1
+                ExpandBackColor1 = Color.FromArgb(230, 230, 230);
+                // 扩展区背景颜色2
+                ExpandBackColor2 = Color.FromArgb(255, 255, 255);
+                // 左边颜色块的背景色，横线颜色
+                LeftBackColor = Color.FromArgb(225, 225, 225);
+                // 子字段名的前景颜色
+                SubfieldCaptionForeColor = SystemColors.GrayText;
+                // 字段名的前景颜色
+                FieldCaptionForeColor = Color.DarkGreen;
+                // 正在编辑的 edit 的背景颜色
+                FocusedEditBackColor = Color.FromArgb(200, 200, 255);
+
+                this.RefreshLineColor();
+                this.Invalidate();
+            }
+        }
 
         private void tableLayoutPanel_content_Paint(object sender, PaintEventArgs e)
         {
@@ -1899,7 +2058,7 @@ namespace DigitalPlatform.EasyMarc
 #endif
             int nLineLength = 0;
 
-            using (Pen pen = new Pen(Color.FromArgb(225, 225, 225)))
+            using (Pen pen = new Pen(this.LeftBackColor)) // Color.FromArgb(225, 225, 225)
             {
 
                 Point p = this.tableLayoutPanel_content.PointToScreen(new Point(0, 0));
@@ -1929,7 +2088,6 @@ namespace DigitalPlatform.EasyMarc
 
                         if (item is FieldLine)
                         {
-
                             if (item.ExpandState != ExpandState.None)
                             {
                                 if (brushGradient == null)
@@ -1944,14 +2102,29 @@ namespace DigitalPlatform.EasyMarc
                             else
                                 e.Graphics.FillRectangle(brush, rect);
 
-                            Point pt1 = new Point(rect.X, rect.Y);
-                            Point pt2 = new Point(rect.X + rect.Width, rect.Y);
+                            {
+                                Point pt1 = new Point(rect.X, rect.Y);
+                                Point pt2 = new Point(rect.X + rect.Width, rect.Y);
 
-                            e.Graphics.DrawLine(pen, pt1, pt2);
+                                e.Graphics.DrawLine(pen, pt1, pt2);
+                            }
+
+
 
                         }
                         else
+                        {
+                            // 子字段
                             e.Graphics.FillRectangle(brushSubfield, rect);
+
+                            // 编辑区的横线
+                            {
+                                Point pt1 = new Point(rect.Right + 10, rect.Y);
+                                Point pt2 = new Point(this.ClientSize.Width, rect.Y);
+
+                                e.Graphics.DrawLine(pen, pt1, pt2);
+                            }
+                        }
 
                     }
                     // y += height;
@@ -2375,7 +2548,7 @@ namespace DigitalPlatform.EasyMarc
             // this.textBox_content.ReadOnly = true;
 
             this.label_caption.Font = new Font(this.Container.Font, FontStyle.Bold);
-            this.label_caption.ForeColor = Color.DarkGreen;
+            this.label_caption.ForeColor = this.Container.FieldCaptionForeColor;    // Color.DarkGreen;
 
             this.textBox_content.KeyPress -= new KeyPressEventHandler(textBox_content_KeyPress);
             this.textBox_content.KeyPress += new KeyPressEventHandler(textBox_content_KeyPress);
@@ -2541,7 +2714,7 @@ namespace DigitalPlatform.EasyMarc
         {
             this.label_caption.TextAlign = ContentAlignment.TopRight;
             // this.label_caption.BackColor = SystemColors.Window;
-            this.label_caption.ForeColor = SystemColors.GrayText;
+            this.label_caption.ForeColor = container.SubfieldCaptionForeColor;    // SystemColors.GrayText;
         }
     }
 
@@ -2643,11 +2816,13 @@ namespace DigitalPlatform.EasyMarc
             label_color.ImageList = this.Container.ImageListIcons;
             label_color.ImageIndex = -1;
 
+            label_color.BackColor = this.Container.LeftBackColor;
+
             label_caption = new Label();
             label_caption.Dock = DockStyle.Fill;
             label_caption.Size = new Size(6, 23);
             label_caption.AutoSize = true;
-            label_caption.Margin = new Padding(4, 2, 4, 0);
+            label_caption.Margin = new Padding(4, 6, 4, 4); // new Padding(4, 2, 4, 0)
             label_caption.TextAlign = ContentAlignment.TopLeft;
 
             // label_caption.BackColor = SystemColors.Control;
@@ -2670,11 +2845,14 @@ namespace DigitalPlatform.EasyMarc
             textBox_content.Dock = DockStyle.Fill;
             textBox_content.MinimumSize = new Size(20, 21); // 23
             textBox_content.Size = new Size(20, 21); // 23
-            textBox_content.Margin = new Padding(8, 4, 0, 0);
+            textBox_content.Margin = new Padding(8, 6, 0, 2);   // new Padding(8, 4, 0, 0)
             // textBox_content.BackColor = Color.Red;
 
             if (this.Container.BackColor != Color.Transparent)
                 textBox_content.BackColor = this.Container.BackColor;
+            else
+                textBox_content.Tag = textBox_content.BackColor;
+
             textBox_content.ForeColor = this.Container.ForeColor;
         }
 
@@ -2870,6 +3048,7 @@ namespace DigitalPlatform.EasyMarc
                         // SendKeys.Send("{TAB}");
                     }
                     e.Handled = true;
+                    e.SuppressKeyPress = true;
                     break;
                 case Keys.Up:
                     //
@@ -2899,6 +3078,7 @@ namespace DigitalPlatform.EasyMarc
                         // SendKeys.Send("+{TAB}");
                     }
                     e.Handled = true;
+                    e.SuppressKeyPress = true;
                     break;
             }
         }
@@ -3340,10 +3520,26 @@ namespace DigitalPlatform.EasyMarc
                 }
                 else
                 {
-                    this.label_color.BackColor = SystemColors.Highlight;
-                    return;
+                    if (this.Container.m_bFocused == false)
+                    {
+                        this.label_color.BackColor = ControlPaint.Dark(SystemColors.Highlight);
+                        this.textBox_content.BackColor = ControlPaint.Light(this.Container.FocusedEditBackColor);
+                        return;
+                    }
+                    else
+                    {
+                        this.label_color.BackColor = SystemColors.Highlight;
+                        this.textBox_content.BackColor = this.Container.FocusedEditBackColor;
+                        return;
+                    }
                 }
             }
+
+            if (this.textBox_content.Tag != null)
+                this.textBox_content.BackColor = (Color)this.textBox_content.Tag;
+            else
+                this.textBox_content.BackColor = this.Container.GetRealBackColor(Color.Black);
+
             if ((this.m_state & ItemState.New) != 0)
             {
                 this.label_color.BackColor = Color.Yellow;
@@ -3360,7 +3556,7 @@ namespace DigitalPlatform.EasyMarc
                 return;
             }
 
-            this.label_color.BackColor = SystemColors.Window;
+            this.label_color.BackColor = this.Container.LeftBackColor;  //  SystemColors.Window;
         }
 
 

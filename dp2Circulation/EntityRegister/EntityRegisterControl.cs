@@ -1716,6 +1716,7 @@ MessageBoxDefaultButton.Button1);
 
             nRet = search.LoadBrowseLines(appendBrowseLine,
                 line,
+                false,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -1731,6 +1732,7 @@ MessageBoxDefaultButton.Button1);
         int appendBrowseLine(string strRecPath,
     string strRecord,
     object param,
+            bool bAutoSetFocus,
     out string strError)
         {
             strError = "";

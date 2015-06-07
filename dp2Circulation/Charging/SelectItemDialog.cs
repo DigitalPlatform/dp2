@@ -60,7 +60,7 @@ namespace dp2Circulation
         {
             InitializeComponent();
 
-            this.statusStrip1.Renderer = new MyRenderer();
+            this.statusStrip1.Renderer = new TransparentToolStripRenderer(this.statusStrip1);
 
             this.SupressSizeSetting = true;  // 不需要基类 MyForm 的尺寸设定功能
         }
@@ -1052,7 +1052,8 @@ namespace dp2Circulation
 
     }
 
-
+#if NO
+    // TODO: 最好用 TransparentToolStripRenderer 代替
     class MyRenderer : ToolStripSystemRenderer
     {
         protected override void OnRenderToolStripBackground(ToolStripRenderEventArgs e)
@@ -1070,4 +1071,5 @@ namespace dp2Circulation
             // base.OnRenderToolStripBorder(e);
         }
     }
+#endif
 }

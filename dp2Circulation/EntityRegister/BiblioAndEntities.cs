@@ -47,6 +47,8 @@ namespace dp2Circulation
 
         public event DeleteItemEventHandler DeleteItem = null;
 
+        public event EventHandler EntitySelectionChanged = null;
+
         /// <summary>
         /// 获得册记录缺省值
         /// </summary>
@@ -134,6 +136,7 @@ namespace dp2Circulation
         //      1   成功装入
         public int SetBiblio(
             RegisterBiblioInfo info,
+            bool bAutoSetFocus,
             out string strError)
         {
             strError = "";
@@ -252,8 +255,8 @@ MessageBoxDefaultButton.Button2);
                 // 卸载事件
                 foreach (Control control in this.flowLayoutPanel1.Controls)
                 {
-                    if (control is Label)
-                        AddPlusEvents(control as Label, false);
+                    if (control is PlusButton)
+                        AddPlusEvents(control as PlusButton, false);
                     else if (control is EntityEditControl)
                         AddEditEvents(control as EntityEditControl, false);
                 }
@@ -265,8 +268,8 @@ MessageBoxDefaultButton.Button2);
                 {
                     this.flowLayoutPanel1.Controls.Remove(control);
                     // 卸载事件
-                    if (control is Label)
-                        AddPlusEvents(control as Label, false);
+                    if (control is PlusButton)
+                        AddPlusEvents(control as PlusButton, false);
                     else if (control is EntityEditControl)
                         AddEditEvents(control as EntityEditControl, false);
                 }
@@ -323,6 +326,20 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
+        void SetControlColor(EntityEditControl control)
+        {
+            control.BackColor = _entityBackColor;
+            control.MemberForeColor = _entityCaptionForeColor;
+            control.SetAllEditColor(_entityEditBackColor, _entityEditForeColor);
+            control.FocusedEditBackColor = _focusedEditBackColor;
+        }
+
+        void SetControlColor(PlusButton control)
+        {
+            control.BackColor = _entityBackColor;
+            control.ForeColor = this.flowLayoutPanel1.ForeColor;  // SystemColors.GrayText;
+        }
+
         // 添加一个新的册对象
         // parameters:
         //      strRecPath  记录路径
@@ -330,10 +347,11 @@ MessageBoxDefaultButton.Button2);
             byte[] timestamp,
             string strXml,
             bool ScrollIntoView,
+            bool bAutoSetFocus,
+            out EntityEditControl control,
             out string strError)
         {
             strError = "";
-
 #if NO
             if (this.easyMarcControl1.InvokeRequired)
             {
@@ -352,8 +370,9 @@ MessageBoxDefaultButton.Button2);
             }
 #endif
 
-            EntityEditControl control = new EntityEditControl();
+            control = new EntityEditControl();
             control.DisplayMode = "simple_register";
+            control.HideSelection = false;
             control.Width = 120;
             control.AutoScroll = false;
             control.AutoSize = true;
@@ -388,13 +407,10 @@ MessageBoxDefaultButton.Button2);
 
             AddEditEvents(control, true);
 
-
             // ClearBlank();
 
-            control.BackColor = ControlPaint.Dark(this.flowLayoutPanel1.BackColor);
-            // control.MemberBackColor = this.flowLayoutPanel1.ForeColor;
-            control.MemberForeColor = ControlPaint.LightLight(this.flowLayoutPanel1.BackColor);
-            control.SetAllEditColor(this.flowLayoutPanel1.BackColor, this.flowLayoutPanel1.ForeColor);
+            // control.BackColor = ControlPaint.Dark(this.flowLayoutPanel1.BackColor);
+            SetControlColor(control);
 #if NO
             control.BackColor = this.flowLayoutPanel1.BackColor;
             control.ForeColor = this.flowLayoutPanel1.ForeColor;
@@ -408,25 +424,68 @@ MessageBoxDefaultButton.Button2);
 
             this.AdjustFlowLayoutHeight();
 
-            if (ScrollIntoView)
-            {
-                this.flowLayoutPanel1.ScrollControlIntoView(control);
-#if NO
-                if (this.EnsureVisible != null)
-                {
-                    EnsureVisibleEventArgs e1 = new EnsureVisibleEventArgs();
-                    e1.Control = control;
-                    e1.Rect = new Rectangle(control.Location, control.Size);
-                    e1.Rect.X += this.flowLayoutPanel1.Location.X;
-                    e1.Rect.Y += this.flowLayoutPanel1.Location.Y;
-                    this.EnsureVisible(this, e1);
-                }
-#endif
-            }
+            if (bAutoSetFocus == true)
+                control.Focus();    // 这一句让 Edit Control 部分可见，但不是全部可见
 
-            // this.BeginInvoke(new Action<Control>(EnsureVisible), control);
+            if (ScrollIntoView)
+                this.flowLayoutPanel1.ScrollControlIntoView(control);
 
             return 0;
+        }
+
+        // 册记录编辑器 背景色
+        Color _entityBackColor = SystemColors.Control;
+        // 册记录编辑器 左边标题区的前景颜色
+        Color _entityCaptionForeColor = SystemColors.ControlText;
+        // 册记录编辑器 编辑控件的背景色
+        Color _entityEditBackColor = SystemColors.Window;
+        // 册记录编辑器 编辑控件的前景色
+        Color _entityEditForeColor = SystemColors.WindowText;
+
+        Color _focusedEditBackColor = Color.FromArgb(200, 200, 255);
+
+        public void SetEntityColorStyle(string strStyle)
+        {
+            if (strStyle == "dark")
+            {
+                // 册记录编辑器 背景色
+                _entityBackColor = Color.FromArgb(50, 50, 50); // ControlPaint.Light(this.flowLayoutPanel1.BackColor);
+                // 册记录编辑器 左边标题区的前景颜色
+                _entityCaptionForeColor = Color.FromArgb(200, 200, 180);
+                // 册记录编辑器 编辑控件的背景色
+                _entityEditBackColor = this.flowLayoutPanel1.BackColor;
+                // 册记录编辑器 编辑控件的前景色
+                _entityEditForeColor = this.flowLayoutPanel1.ForeColor;
+
+                _focusedEditBackColor = ControlPaint.Dark(this.flowLayoutPanel1.BackColor);
+            }
+            else if (strStyle == "light")
+            {
+                // 册记录编辑器 背景色
+                _entityBackColor = SystemColors.Control;
+                // 册记录编辑器 左边标题区的前景颜色
+                _entityCaptionForeColor = SystemColors.ControlText;
+                // 册记录编辑器 编辑控件的背景色
+                _entityEditBackColor = SystemColors.Window;
+                // 册记录编辑器 编辑控件的前景色
+                _entityEditForeColor = SystemColors.WindowText;
+
+                _focusedEditBackColor = Color.FromArgb(200, 200, 255);
+            }
+
+            // 把当前已经创建的 EntityEditControl 和 PlusButton 重设颜色
+            foreach(Control control in this.flowLayoutPanel1.Controls)
+            {
+                if (control is EntityEditControl)
+                {
+                    SetControlColor(control as EntityEditControl);
+                }
+
+                if (control is PlusButton)
+                {
+                    SetControlColor(control as PlusButton);
+                }
+            }
         }
 
         void AddEditEvents(EntityEditControl edit, bool bAdd)
@@ -442,6 +501,7 @@ MessageBoxDefaultButton.Button2);
                 edit.LocationStringChanged += edit_LocationStringChanged;
                 edit.ControlKeyDown += edit_ControlKeyDown;
                 edit.Enter += edit_Enter;
+                edit.SelectionChanged += edit_SelectionChanged;
             }
             else
             {
@@ -453,8 +513,15 @@ MessageBoxDefaultButton.Button2);
                 edit.GetAccessNoButton.Click -= GetAccessNoButton_Click;
                 edit.LocationStringChanged -= edit_LocationStringChanged;
                 edit.ControlKeyDown -= edit_ControlKeyDown;
-                edit.Enter += edit_Enter;
+                edit.Enter -= edit_Enter;
+                edit.SelectionChanged -= edit_SelectionChanged;
             }
+        }
+
+        void edit_SelectionChanged(object sender, EventArgs e)
+        {
+            if (this.EntitySelectionChanged != null)
+                this.EntitySelectionChanged(sender, e);
         }
 
         void edit_Enter(object sender, EventArgs e)
@@ -692,6 +759,16 @@ MessageBoxDefaultButton.Button2);
             return control as EntityEditControl;
         }
 
+        public PlusButton GetPlusButton()
+        {
+            foreach(Control control in this.flowLayoutPanel1.Controls)
+            {
+                if (control is PlusButton)
+                    return control as PlusButton;
+            }
+            return null;
+        }
+
         /// <summary>
         /// 构造索取号信息集合
         /// </summary>
@@ -817,7 +894,7 @@ MessageBoxDefaultButton.Button2);
         {
             foreach (Control control in this.flowLayoutPanel1.Controls)
             {
-                if (control is Label)
+                if (control is Button)
                 {
                     this.flowLayoutPanel1.ScrollControlIntoView(control);
                     return true;
@@ -827,19 +904,19 @@ MessageBoxDefaultButton.Button2);
             return false;
         }
 
-        // 将册记录编辑控件加入末尾。注意末尾可能有 Label 控件，要插入在它前面
+        // 将册记录编辑控件加入末尾。注意末尾可能有 Button 控件，要插入在它前面
         void AddEditControl(EntityEditControl edit)
         {
-            List<Control> labels = new List<Control>();
-            // 先将 Label 标识出来
+            List<Control> buttons = new List<Control>();
+            // 先将 Button 标识出来
             foreach (Control control in this.flowLayoutPanel1.Controls)
             {
-                if (control is Label)
-                    labels.Add(control);
+                if (control is Button)
+                    buttons.Add(control);
             }
 
-            // 移走 Label
-            foreach(Control control in labels)
+            // 移走 Button
+            foreach(Control control in buttons)
             {
                 this.flowLayoutPanel1.Controls.Remove(control);
             }
@@ -847,13 +924,20 @@ MessageBoxDefaultButton.Button2);
             // 追加 edit
             this.flowLayoutPanel1.Controls.Add(edit);
 
-            // 将 label 加到末尾
-            foreach(Control control in labels)
+            // 将 Button 加到末尾
+            foreach(Control control in buttons)
             {
                 this.flowLayoutPanel1.Controls.Add(control);
             }
 
             // 注：edit 控件加入到末尾，不会改变前面已有的 edit 控件显示的序号
+
+            // 重新设置 TabIndex
+            int i = 0;
+            foreach (Control control in this.flowLayoutPanel1.Controls)
+            {
+                control.TabIndex = i++;
+            }
         }
 
         void edit_PaintContent(object sender, PaintEventArgs e)
@@ -1983,6 +2067,7 @@ MessageBoxDefaultButton.Button2);
         }
 #endif
 
+#if NO
         public void AddPlus()
         {
             Label label_plus = new Label();
@@ -2009,34 +2094,97 @@ MessageBoxDefaultButton.Button2);
 
             AddPlusEvents(label_plus, true);
         }
+#endif
+        public void AddPlus()
+        {
+            PlusButton button_plus = new PlusButton();
+#if NO
+            string strFontName = "";
+            Font ref_font = GuiUtil.GetDefaultFont();
+            if (ref_font != null)
+                strFontName = ref_font.Name;
+            else
+                strFontName = this.Owner.Font.Name;
 
-        void AddPlusEvents(Label label_plus, bool bAdd)
+            button_plus.Font = new Font(strFontName, this.Owner.Font.Size * 8, FontStyle.Bold);  // 12
+#endif
+
+#if NO
+            button_plus.ForeColor = this.flowLayoutPanel1.ForeColor;  // SystemColors.GrayText;
+            button_plus.BackColor = _entityBackColor;
+#endif
+            SetControlColor(button_plus);
+
+            // label_plus.AutoSize = true;
+            // label_plus.Text = "+";
+            button_plus.Size = new Size(100, 100);
+            button_plus.AutoSize = false;
+            button_plus.Margin = new Padding(8, 8, 8, 8);
+            button_plus.FlatStyle = FlatStyle.Flat;
+
+            this.flowLayoutPanel1.Controls.Add(button_plus);
+
+            // button_plus.TextAlign = ContentAlignment.MiddleCenter;
+
+            AddPlusEvents(button_plus, true);
+        }
+
+        void AddPlusEvents(PlusButton button_plus, bool bAdd)
         {
             if (bAdd)
             {
-                label_plus.MouseClick += label_plus_MouseClick;
-                label_plus.MouseUp += label_plus_MouseUp;
-                label_plus.Paint += label_plus_Paint;
+                button_plus.Click += button_plus_Click;
+                button_plus.MouseUp += button_plus_MouseUp;
+                //button_plus.Paint += button_plus_Paint;
+                button_plus.Enter += button_plus_Enter;
             }
             else
             {
-                label_plus.MouseClick -= label_plus_MouseClick;
-                label_plus.MouseUp -= label_plus_MouseUp;
-                label_plus.Paint += label_plus_Paint;
+                button_plus.Click -= button_plus_Click;
+                button_plus.MouseUp -= button_plus_MouseUp;
+                //button_plus.Paint += button_plus_Paint;
+                button_plus.Enter -= button_plus_Enter;
             }
         }
 
-        void label_plus_Paint(object sender, PaintEventArgs e)
+        void button_plus_Enter(object sender, EventArgs e)
+        {
+            if (this.EntitySelectionChanged != null)
+                this.EntitySelectionChanged(sender, new EventArgs());
+        }
+
+        void button_plus_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = AddNewEntity("", true, out strError);
+            if (nRet == -1)
+                MessageBox.Show(this.Owner, strError);
+
+            // 把加号滚入视野可见范围，这样便于连续点击它
+            this.ScrollPlusIntoView();
+        }
+
+#if NO
+        void button_plus_Paint(object sender, PaintEventArgs e)
         {
             e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             // e.Graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-            Label label = sender as Label;
-            int x_unit = label.Width / 3;
-            int y_unit = label.Height / 3;
+            Button button = sender as Button;
 
-            Color darker_color = ControlPaint.Dark(label.ForeColor);
+            if (button.Focused == true)
+            {
+                using (Brush brush = new SolidBrush(SystemColors.Highlight))
+                {
+                    e.Graphics.FillRectangle(brush, button.ClientRectangle);
+                }
+            }
+
+            int x_unit = button.Width / 3;
+            int y_unit = button.Height / 3;
+
+            Color darker_color = ControlPaint.Dark(button.ForeColor);
             // 绘制一个十字形状
-            using (Brush brush = new SolidBrush(label.ForeColor)) 
+            using (Brush brush = new SolidBrush(button.ForeColor)) 
             {
                 Rectangle rect = new Rectangle(x_unit, y_unit + y_unit/2 - y_unit / 8, x_unit, y_unit / 4);
                 e.Graphics.FillRectangle(brush, rect);
@@ -2047,26 +2195,12 @@ MessageBoxDefaultButton.Button2);
             // 绘制一个圆圈
             using (Pen pen = new Pen(darker_color, x_unit / 8))
             {
-                Rectangle rect = new Rectangle(x_unit / 2, y_unit / 2, label.Width - x_unit, label.Height - y_unit);
+                Rectangle rect = new Rectangle(x_unit / 2, y_unit / 2, button.Width - x_unit, button.Height - y_unit);
                 e.Graphics.DrawArc(pen, rect, 0, 360);
             }
-
         }
-
-        void label_plus_MouseClick(object sender, MouseEventArgs e)
-        {
-            if (e.Button != MouseButtons.Left)
-                return;
-            string strError = "";
-            int nRet = AddNewEntity("", out strError);
-            if (nRet == -1)
-                MessageBox.Show(this.Owner, strError);
-
-            // 把加号滚入视野可见范围，这样便于连续点击它
-            this.ScrollPlusIntoView();
-        }
-
-        void label_plus_MouseUp(object sender, MouseEventArgs e)
+#endif
+        void button_plus_MouseUp(object sender, MouseEventArgs e)
         {
             if (e.Button != MouseButtons.Right)
                 return;
@@ -2092,7 +2226,9 @@ MessageBoxDefaultButton.Button2);
             int n = (int)menu.Tag;
             for (int i = 0; i < n; i++)
             {
-                int nRet = AddNewEntity("", out strError);
+                int nRet = AddNewEntity("", 
+                    i == n - 1 ? true : false,
+                    out strError);
                 if (nRet == -1)
                     goto ERROR1;
             }
@@ -2101,11 +2237,22 @@ MessageBoxDefaultButton.Button2);
             MessageBox.Show(this.Owner, strError);
         }
 
+        public int AddNewEntity(string strItemBarcode,
+            bool bAutoSetFocus,
+            out string strError)
+        {
+            EntityEditControl control = null;
+            return AddNewEntity(strItemBarcode, bAutoSetFocus, out control, out strError);
+        }
+
         // 新添加一个实体事项
         public int AddNewEntity(string strItemBarcode,
+            bool bAutoSetFocus,
+            out EntityEditControl control,
             out string strError)
         {
             strError = "";
+            control = null;
             int nRet = 0;
 
             string strQuickDefault = "<root />";
@@ -2145,6 +2292,8 @@ MessageBoxDefaultButton.Button2);
                 return -1;
             // 添加一个新的册对象
             nRet = NewEntity(dom.DocumentElement.OuterXml,
+                bAutoSetFocus,
+                out control,
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -2154,12 +2303,16 @@ MessageBoxDefaultButton.Button2);
 
         // 添加一个新的册对象
         public int NewEntity(string strXml,
+            bool bAutoSetFocus,
+            out EntityEditControl control,
             out string strError)
         {
             return this.NewEntity("",
                 null,
                 strXml,
                 true,
+                bAutoSetFocus,
+                out control,
                 out strError);
         }
 
@@ -2188,7 +2341,7 @@ MessageBoxDefaultButton.Button2);
             this.ErrorInfo = strErrorInfo;
         }
 
-        public string ToString()
+        public override string ToString()
         {
             return this.ErrorInfo;
         }

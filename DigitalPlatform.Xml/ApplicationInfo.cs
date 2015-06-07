@@ -3,18 +3,17 @@ using System.Collections;
 using System.Windows.Forms;
 using System.Drawing;
 using System.Diagnostics;
-
 using System.IO;
 using System.Text;
-
 using System.Xml;
 using System.Text.RegularExpressions;
-
 using System.Deployment.Application;
-
 
 namespace DigitalPlatform.Xml
 {
+    /// <summary>
+    /// 用 XML 文件保存程序的各种配置信息
+    /// </summary>
 	public class ApplicationInfo
 	{
 		public XmlDocument dom = new XmlDocument();
@@ -500,6 +499,7 @@ namespace DigitalPlatform.Xml
              * */
 
 		}
+
 		// 保存Mdi Child form尺寸位置状态到ApplicationInfo中
 		// parameters:
 		//		form	Form对象
@@ -622,15 +622,14 @@ namespace DigitalPlatform.Xml
 			if (titleTable == null)
 				titleTable = new Hashtable();
 
-			titleTable.Add(form, strCfgTitle);
+			// titleTable.Add(form, strCfgTitle);
+            titleTable[form] = strCfgTitle; // 重复加入不会抛出异常
 
-            form.Load -= new System.EventHandler(this.FormLoad);
 			form.Load += new System.EventHandler(this.FormLoad);
-
-            form.Closed -= new System.EventHandler(this.FormClosed);
             form.Closed += new System.EventHandler(this.FormClosed);
 		}
 
+        // 原来外部主动调用一次本函数的做法没有必要了。正确的做法是，调用 LinkFormState() 即可，对话框关闭时会自动保存好尺寸
 		public void UnlinkFormState(Form form)
 		{
 			if (titleTable == null)
@@ -639,8 +638,11 @@ namespace DigitalPlatform.Xml
 			titleTable.Remove(form);
 			// If the Hashtable does not contain an element with the specified key,
 			// the Hashtable remains unchanged. No exception is thrown.
-		}
 
+            // 2015/6/5
+            form.Load -= new System.EventHandler(this.FormLoad);
+            form.Closed -= new System.EventHandler(this.FormClosed);
+		}
 
 		private void FormLoad(object sender, System.EventArgs e)
 		{
@@ -663,6 +665,9 @@ namespace DigitalPlatform.Xml
 			Debug.Assert(titleTable != null, "titleTable应当已经被LinkFromState()初始化");
 
 			string strCfgTitle = (string)titleTable[sender];
+            if (string.IsNullOrEmpty(strCfgTitle) == true)
+                return;
+
 			Debug.Assert(strCfgTitle != null , "strCfgTitle不能为null");
 
 			this.SaveFormStates((Form)sender, strCfgTitle);

@@ -1892,7 +1892,7 @@ AppInfo.GetString("config",
             this.AppInfo.LinkFormState(dlg,
                 "cfgdlg_state");
             dlg.ShowDialog(this);
-            this.AppInfo.UnlinkFormState(dlg);
+            // this.AppInfo.UnlinkFormState(dlg);
             this.AppInfo.SetString(
                     "main_form",
                     "cfgdlg_uiState",
@@ -12545,6 +12545,7 @@ Keys keyData)
                 if (this.tabControl_panelFixed.SelectedTab == this.tabPage_accept
                     && this._acceptForm != null)
                     this._acceptForm.DoEnterKey();
+
                 // return true;
             }
 
@@ -13060,6 +13061,39 @@ Keys keyData)
         }
 
         #endregion // servers.xml
+
+        private void MainForm_Resize(object sender, EventArgs e)
+        {
+
+        }
+
+        private void MainForm_Activated(object sender, EventArgs e)
+        {
+#if NO
+            foreach (Form form in this.OwnedForms)
+            {
+                if (form is LineLayerForm)
+                {
+                    if (form.TopMost == false)
+                    form.TopMost = true;
+                }
+            }
+#endif
+        }
+
+        private void MainForm_Deactivate(object sender, EventArgs e)
+        {
+#if NO
+            foreach (Form form in this.OwnedForms)
+            {
+                if (form is LineLayerForm)
+                {
+                    if (form.TopMost == true)
+                        form.TopMost = false;
+                }
+            }
+#endif
+        }
 
         #region ÏûÏ¢¹ýÂË
 

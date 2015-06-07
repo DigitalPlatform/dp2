@@ -304,6 +304,8 @@ backRect,
             this._parent.SizeChanged += new System.EventHandler(this.QuickChargingForm_SizeChanged);
             this._parent.Load += Owner_Load;
             this._parent.FontChanged += Owner_FontChanged;
+
+            OnResizeOrMove();   // 2015/6/4
         }
 
         void Owner_FontChanged(object sender, EventArgs e)

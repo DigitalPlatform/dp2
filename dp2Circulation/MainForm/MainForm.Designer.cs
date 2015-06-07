@@ -39,6 +39,7 @@ namespace dp2Circulation
             this.MenuItem_functionWindows = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openQuickChargingForm = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openChargingForm = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_openEntityRegisterWizard = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openEntityRegisterForm = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_openReaderSearchForm = new System.Windows.Forms.ToolStripMenuItem();
@@ -194,7 +195,6 @@ namespace dp2Circulation
             this.toolStripButton_close = new System.Windows.Forms.ToolStripButton();
             this.splitter_fixed = new System.Windows.Forms.Splitter();
             this.timer_operHistory = new System.Windows.Forms.Timer(this.components);
-            this.MenuItem_openEntityRegisterWizard = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip_main.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
             this.toolStrip_main.SuspendLayout();
@@ -302,6 +302,13 @@ namespace dp2Circulation
             this.MenuItem_openChargingForm.Size = new System.Drawing.Size(154, 22);
             this.MenuItem_openChargingForm.Text = "出纳窗(&C)";
             this.MenuItem_openChargingForm.Click += new System.EventHandler(this.MenuItem_openChargingForm_Click);
+            // 
+            // MenuItem_openEntityRegisterWizard
+            // 
+            this.MenuItem_openEntityRegisterWizard.Name = "MenuItem_openEntityRegisterWizard";
+            this.MenuItem_openEntityRegisterWizard.Size = new System.Drawing.Size(154, 22);
+            this.MenuItem_openEntityRegisterWizard.Text = "册登记向导(&T)";
+            this.MenuItem_openEntityRegisterWizard.Click += new System.EventHandler(this.MenuItem_openEntityRegisterWizard_Click);
             // 
             // MenuItem_openEntityRegisterForm
             // 
@@ -1567,13 +1574,6 @@ namespace dp2Circulation
             this.splitter_fixed.TabIndex = 6;
             this.splitter_fixed.TabStop = false;
             // 
-            // MenuItem_openEntityRegisterWizard
-            // 
-            this.MenuItem_openEntityRegisterWizard.Name = "MenuItem_openEntityRegisterWizard";
-            this.MenuItem_openEntityRegisterWizard.Size = new System.Drawing.Size(154, 22);
-            this.MenuItem_openEntityRegisterWizard.Text = "册登记向导(&T)";
-            this.MenuItem_openEntityRegisterWizard.Click += new System.EventHandler(this.MenuItem_openEntityRegisterWizard_Click);
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -1589,10 +1589,13 @@ namespace dp2Circulation
             this.MainMenuStrip = this.menuStrip_main;
             this.Name = "MainForm";
             this.Text = "dp2circulation V2 -- 内务";
+            this.Activated += new System.EventHandler(this.MainForm_Activated);
+            this.Deactivate += new System.EventHandler(this.MainForm_Deactivate);
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.MdiChildActivate += new System.EventHandler(this.MainForm_MdiChildActivate);
+            this.Resize += new System.EventHandler(this.MainForm_Resize);
             this.menuStrip_main.ResumeLayout(false);
             this.menuStrip_main.PerformLayout();
             this.statusStrip_main.ResumeLayout(false);
