@@ -793,6 +793,8 @@ namespace DigitalPlatform.EasyMarc
             {
                 if (name == "rvs")
                     continue;
+                if (string.IsNullOrEmpty(name) == true)
+                    continue;
                 // 匹配字段名/子字段名
                 // pamameters:
                 //		strName	名字

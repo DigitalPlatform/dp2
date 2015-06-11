@@ -48,6 +48,9 @@ namespace dp2Circulation
         {
             InitializeComponent();
 
+            // 当册记录区在右边竖放的时候，尽量避免出现水平卷滚条
+            this.flowLayoutPanel1.Padding = new Padding(0, 0, SystemInformation.VerticalScrollBarWidth + 2, 0);
+
             this.dpTable_browseLines.ImageList = this.imageList_progress;
             CreateBrowseColumns();
 
@@ -59,7 +62,7 @@ namespace dp2Circulation
                 easyMarcControl1, 
                 flowLayoutPanel1);
             _biblio.GetValueTable += _biblio_GetValueTable;
-            _biblio.DeleteItem += _biblio_DeleteItem;
+            _biblio.DeleteEntity += _biblio_DeleteEntity;
             _biblio.LoadEntities += _biblio_LoadEntities;
             _biblio.GetEntityDefault += _biblio_GetEntityDefault;
             _biblio.GenerateData += _biblio_GenerateData;
@@ -173,9 +176,9 @@ namespace dp2Circulation
             _biblio.ScrollPlusIntoView();
         }
 
-        void _biblio_DeleteItem(object sender, DeleteItemEventArgs e)
+        void _biblio_DeleteEntity(object sender, DeleteItemEventArgs e)
         {
-            DeleteItem(e.Control);
+            DeleteEntity(e.Control);
         }
 
         void _biblio_GetValueTable(object sender, GetValueTableEventArgs e)
@@ -576,13 +579,15 @@ MessageBoxDefaultButton.Button1);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, "文件 '" + strFileName + "' 装入XMLDOM 时出错: " + ex.Message);
+                MessageBox.Show(this, "文件 '" + strFileName + "' 装入 XMLDOM 时出错: " + ex.Message);
                 return;
             }
 
             // TODO: 是否在文件不存在的情况下，给出缺省的几个 server ?
 
             _base.ServersDom = dom;
+
+            this.ShowMessage("配置文件 " + strFileName + " 创建成功", "green", true);
         }
 
         string _originTitle = "";
@@ -690,6 +695,9 @@ MessageBoxDefaultButton.Button1);
             string strColor = "",
             bool bClickClose = false)
         {
+            if (this._floatingMessage == null)
+                return;
+
             Color color = Color.FromArgb(80,80,80);
 
             if (strColor == "red")          // 出错
@@ -2036,6 +2044,8 @@ out strError);
             bool bAutoSetFocus,
             out string strError)
         {
+            OnImportantFieldsChanged(info.MarcSyntax);
+
             int nRet = this._biblio.SetBiblio(info, bAutoSetFocus, out strError);
             if (nRet == -1)
                 return -1;
@@ -2558,7 +2568,7 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
-        void DeleteItem(EntityEditControl edit)
+        void DeleteEntity(EntityEditControl edit)
         {
             string strError = "";
             int nRet = 0;
@@ -2788,6 +2798,12 @@ int nCount)
             }
 
             {
+                // 补全册记录信息
+                nRet = _biblio.CompleteEntities(
+    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
                 List<string> verify_styles = new List<string>();
 
                 if (this.checkBox_settings_needBookType.Checked == true)
@@ -3738,12 +3754,15 @@ MessageBoxDefaultButton.Button1);
         }
 #endif
 
-        void OnImportantFieldsChanged()
+        void OnImportantFieldsChanged(string strMarcSyntax = null)
         {
             if (this._biblio != null)
             {
+                if (strMarcSyntax == null)
+                    strMarcSyntax = this._biblio.MarcSyntax;
+
                 List<string> important_fieldnames = null;
-                if (_biblio.MarcSyntax == "unimarc")
+                if (strMarcSyntax == "unimarc")
                     important_fieldnames = StringUtil.SplitList(this.UnimarcBiblioImportantFields);
                 else
                     important_fieldnames = StringUtil.SplitList(this.Marc21BiblioImportantFields);
@@ -4436,7 +4455,11 @@ out strError);
         private void button_setting_reCreateServersXml_Click(object sender, EventArgs e)
         {
             string strError = "";
-            string strFileName = Path.Combine(this.MainForm.ServerCfgDir, "servers.xml");
+            // string strFileName = Path.Combine(this.MainForm.ServerCfgDir, "servers.xml");
+            // 当前登录的主要服务器不同，则需要的 xml 配置文件是不同的。应当存储在各自的目录中
+            string strFileName = Path.Combine(this.MainForm.ServerCfgDir, ReportForm.GetValidPathString(this.MainForm.GetCurrentUserName()) + "\\servers.xml");
+            PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strFileName));
+
             // 创建 servers.xml 配置文件
             int nRet = this.MainForm.BuildServersCfgFile(strFileName,
                 out strError);

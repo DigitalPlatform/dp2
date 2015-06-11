@@ -49,7 +49,7 @@ namespace dp2Circulation
         /// </summary>
         public event GetValueTableEventHandler GetValueTable = null;
 
-        public event DeleteItemEventHandler DeleteItem = null;
+        public event DeleteItemEventHandler DeleteEntity = null;
 
         public event EventHandler EntitySelectionChanged = null;
 
@@ -1175,11 +1175,11 @@ MessageBoxDefaultButton.Button2);
 
             if (string.IsNullOrEmpty(control.RecPath) == false)
             {
-                if (this.DeleteItem != null)
+                if (this.DeleteEntity != null)
                 {
                     DeleteItemEventArgs e1 = new DeleteItemEventArgs();
                     e1.Control = control;
-                    this.DeleteItem(this, e1);
+                    this.DeleteEntity(this, e1);
                     if (string.IsNullOrEmpty(e1.ErrorInfo) == false)
                     {
                         MessageBox.Show(this.Owner, e1.ErrorInfo);
@@ -1187,9 +1187,11 @@ MessageBoxDefaultButton.Button2);
                     }
                 }
             }
-
-            // this.flowLayoutPanel1.Controls.Remove(control);
-            RemoveEditControl(control);
+            else
+            {
+                // this.flowLayoutPanel1.Controls.Remove(control);
+                RemoveEditControl(control);
+            }
         }
 
         // 删除一个册记录控件
@@ -1631,6 +1633,71 @@ MessageBoxDefaultButton.Button2);
             return 0;
         }
 
+        // 补全册记录字段
+        public int CompleteEntities(out string strError)
+        {
+            strError = "";
+
+            int i = 0;
+            foreach (Control control in this.flowLayoutPanel1.Controls)
+            {
+                if (!(control is EntityEditControl))
+                    continue;
+
+                EntityEditControl edit = control as EntityEditControl;
+
+                if (edit.Changed == false)
+                {
+                    i++;
+                    continue;
+                }
+                string strName = "册记录 " + (i + 1);
+
+                string strPrice = edit.Price.Trim();
+                if (strPrice == "@price")
+                {
+                    // 兑现宏
+                    string strResult = DoGetMacroValue(strPrice);
+                    if (strResult != strPrice)
+                        edit.Price = strResult;
+                }
+
+                string strAccessNo = edit.AccessNo.Trim();
+                if (string.IsNullOrEmpty(strAccessNo) == true
+                    || strAccessNo == "@accessNo")
+                {
+                    // 获得索取号
+                    if (this.GenerateData != null)
+                    {
+                        GetCallNumberParameter parameter = new GetCallNumberParameter();
+                        parameter.ExistingAccessNo = "";
+                        parameter.Location = edit.LocationString;
+                        parameter.RecPath = ""; // TODO: 可以通过书目库名，获得对应的实体库名，从而模拟出记录路径
+                        GenerateDataEventArgs e1 = new GenerateDataEventArgs();
+                        e1.ScriptEntry = "CreateCallNumber";
+                        e1.FocusedControl = null;
+                        e1.Parameter = parameter;
+                        this.GenerateData(this, e1);
+
+                        if (string.IsNullOrEmpty(e1.ErrorInfo) == false)
+                        {
+                            // TODO: edit 控件索取号右边要有个提示区就好了。或者 tips
+
+                        }
+                        else
+                        {
+                            parameter = e1.Parameter as GetCallNumberParameter;
+                            edit.AccessNo = parameter.ResultAccessNo;
+                        }
+                    }
+                }
+
+                i++;
+            }
+
+            return 0;
+        }
+
         // 检查册记录的格式是否正确
         // parameters:
         //      errors  返回册记录出错信息。每个元素返回一个错误信息，顺次对应于每个有错的册记录。文字中有说明，是那个册记录出错
@@ -1666,8 +1733,10 @@ MessageBoxDefaultButton.Button2);
                 EntityEditControl edit = control as EntityEditControl;
 
                 if (bVerifyAll == false && edit.Changed == false)
+                {
+                    i++;
                     continue;
-
+                }
                 string strName = "册记录 " + (i + 1);
                 List<string> conditions = new List<string>();
 

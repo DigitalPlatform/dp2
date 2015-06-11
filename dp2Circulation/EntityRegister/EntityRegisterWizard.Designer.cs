@@ -69,7 +69,6 @@
             this.dpColumn_recPath = new DigitalPlatform.CommonControl.DpColumn();
             this.tabPage_biblioAndItems = new System.Windows.Forms.TabPage();
             this.splitContainer_biblioAndItems = new System.Windows.Forms.SplitContainer();
-            this.easyMarcControl1 = new DigitalPlatform.EasyMarc.EasyMarcControl();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.imageList_progress = new System.Windows.Forms.ImageList(this.components);
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
@@ -81,6 +80,7 @@
             this.toolStripButton_save = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_delete = new System.Windows.Forms.ToolStripButton();
+            this.easyMarcControl1 = new DigitalPlatform.EasyMarc.EasyMarcControl();
             this.tabControl_main.SuspendLayout();
             this.tabPage_settings.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -130,7 +130,7 @@
             // 
             this.button_settings_bilbioDefault.Location = new System.Drawing.Point(9, 79);
             this.button_settings_bilbioDefault.Name = "button_settings_bilbioDefault";
-            this.button_settings_bilbioDefault.Size = new System.Drawing.Size(168, 23);
+            this.button_settings_bilbioDefault.Size = new System.Drawing.Size(241, 23);
             this.button_settings_bilbioDefault.TabIndex = 8;
             this.button_settings_bilbioDefault.Text = "书目记录缺省值";
             this.button_settings_bilbioDefault.UseVisualStyleBackColor = true;
@@ -138,7 +138,7 @@
             // 
             // button_settings_reCreateServersXml
             // 
-            this.button_settings_reCreateServersXml.Location = new System.Drawing.Point(7, 252);
+            this.button_settings_reCreateServersXml.Location = new System.Drawing.Point(9, 128);
             this.button_settings_reCreateServersXml.Name = "button_settings_reCreateServersXml";
             this.button_settings_reCreateServersXml.Size = new System.Drawing.Size(241, 23);
             this.button_settings_reCreateServersXml.TabIndex = 7;
@@ -149,7 +149,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(227, 218);
+            this.label2.Location = new System.Drawing.Point(281, 218);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(77, 12);
             this.label2.TabIndex = 6;
@@ -161,7 +161,7 @@
             this.comboBox_settings_colorStyle.Items.AddRange(new object[] {
             "dark",
             "light"});
-            this.comboBox_settings_colorStyle.Location = new System.Drawing.Point(322, 215);
+            this.comboBox_settings_colorStyle.Location = new System.Drawing.Point(376, 215);
             this.comboBox_settings_colorStyle.Name = "comboBox_settings_colorStyle";
             this.comboBox_settings_colorStyle.Size = new System.Drawing.Size(135, 20);
             this.comboBox_settings_colorStyle.TabIndex = 5;
@@ -186,7 +186,7 @@
             this.groupBox1.Controls.Add(this.checkBox_settings_needLocation);
             this.groupBox1.Controls.Add(this.checkBox_settings_needItemBarcode);
             this.groupBox1.Controls.Add(this.checkBox_settings_needAccessNo);
-            this.groupBox1.Location = new System.Drawing.Point(227, 16);
+            this.groupBox1.Location = new System.Drawing.Point(281, 16);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(230, 184);
             this.groupBox1.TabIndex = 3;
@@ -257,7 +257,7 @@
             // 
             this.button_settings_entityDefault.Location = new System.Drawing.Point(9, 47);
             this.button_settings_entityDefault.Name = "button_settings_entityDefault";
-            this.button_settings_entityDefault.Size = new System.Drawing.Size(168, 23);
+            this.button_settings_entityDefault.Size = new System.Drawing.Size(241, 23);
             this.button_settings_entityDefault.TabIndex = 0;
             this.button_settings_entityDefault.Text = "册记录缺省值";
             this.button_settings_entityDefault.UseVisualStyleBackColor = true;
@@ -403,24 +403,6 @@
             this.splitContainer_biblioAndItems.TabIndex = 0;
             this.splitContainer_biblioAndItems.DoubleClick += new System.EventHandler(this.splitContainer_biblioAndItems_DoubleClick);
             // 
-            // easyMarcControl1
-            // 
-            this.easyMarcControl1.AutoScroll = true;
-            this.easyMarcControl1.CaptionWidth = 106;
-            this.easyMarcControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.easyMarcControl1.HideIndicator = true;
-            this.easyMarcControl1.HideSelection = false;
-            this.easyMarcControl1.IncludeNumber = false;
-            this.easyMarcControl1.Location = new System.Drawing.Point(0, 0);
-            this.easyMarcControl1.MarcDefDom = null;
-            this.easyMarcControl1.Name = "easyMarcControl1";
-            this.easyMarcControl1.Size = new System.Drawing.Size(231, 245);
-            this.easyMarcControl1.TabIndex = 0;
-            this.easyMarcControl1.SelectionChanged += new System.EventHandler(this.easyMarcControl1_SelectionChanged);
-            this.easyMarcControl1.GetConfigDom += new DigitalPlatform.Marc.GetConfigDomEventHandle(this.easyMarcControl1_GetConfigDom);
-            this.easyMarcControl1.Enter += new System.EventHandler(this.easyMarcControl1_Enter);
-            this.easyMarcControl1.Leave += new System.EventHandler(this.easyMarcControl1_Leave);
-            // 
             // flowLayoutPanel1
             // 
             this.flowLayoutPanel1.AutoScroll = true;
@@ -539,6 +521,24 @@
             this.toolStripButton_delete.Size = new System.Drawing.Size(52, 22);
             this.toolStripButton_delete.Text = "删除";
             this.toolStripButton_delete.Click += new System.EventHandler(this.toolStripButton_delete_Click);
+            // 
+            // easyMarcControl1
+            // 
+            this.easyMarcControl1.AutoScroll = true;
+            this.easyMarcControl1.CaptionWidth = 106;
+            this.easyMarcControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.easyMarcControl1.HideIndicator = true;
+            this.easyMarcControl1.HideSelection = false;
+            this.easyMarcControl1.IncludeNumber = false;
+            this.easyMarcControl1.Location = new System.Drawing.Point(0, 0);
+            this.easyMarcControl1.MarcDefDom = null;
+            this.easyMarcControl1.Name = "easyMarcControl1";
+            this.easyMarcControl1.Size = new System.Drawing.Size(231, 245);
+            this.easyMarcControl1.TabIndex = 0;
+            this.easyMarcControl1.SelectionChanged += new System.EventHandler(this.easyMarcControl1_SelectionChanged);
+            this.easyMarcControl1.GetConfigDom += new DigitalPlatform.Marc.GetConfigDomEventHandle(this.easyMarcControl1_GetConfigDom);
+            this.easyMarcControl1.Enter += new System.EventHandler(this.easyMarcControl1_Enter);
+            this.easyMarcControl1.Leave += new System.EventHandler(this.easyMarcControl1_Leave);
             // 
             // EntityRegisterWizard
             // 

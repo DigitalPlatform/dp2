@@ -402,12 +402,15 @@ namespace dp2Circulation
         {
             string strError = "";
 
-            string strCfgFileName = Path.Combine(this.MainForm.DataDir, "servers.xml");
+            // string strCfgFileName = Path.Combine(this.MainForm.DataDir, "servers.xml");
+            // 当前登录的主要服务器不同，则需要的 xml 配置文件是不同的。应当存储在各自的目录中
+            string strFileName = Path.Combine(this.MainForm.ServerCfgDir, ReportForm.GetValidPathString(this.MainForm.GetCurrentUserName()) + "\\servers.xml");
+            PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strFileName));
 
-            if (File.Exists(strCfgFileName) == true)
+            if (File.Exists(strFileName) == true)
             {
                 DialogResult result = MessageBox.Show(this,
-"当前已经存在配置文件 '"+strCfgFileName+"'。若重新创建配置文件，以前的内容将被覆盖。\r\n\r\n确实要重新创建配置文件? ",
+"当前已经存在配置文件 '" + strFileName + "'。若重新创建配置文件，以前的内容将被覆盖。\r\n\r\n确实要重新创建配置文件? ",
 "EntityRegisterForm",
 MessageBoxButtons.YesNo,
 MessageBoxIcon.Question,
@@ -417,7 +420,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             // 创建 servers.xml 配置文件
-            int nRet = this.MainForm.BuildServersCfgFile(strCfgFileName,
+            int nRet = this.MainForm.BuildServersCfgFile(strFileName,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;

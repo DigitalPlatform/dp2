@@ -2546,7 +2546,7 @@ namespace dp2Circulation
                     }
 
 
-                    strError = "MARC记录中 700/710/720/701/711/702/712中均未发现包含汉字的 $a 子字段内容，无法获得著者字符串";
+                    strError = "MARC记录中 700/710/720/701/711/702/712/200 中均未发现包含汉字的 $a 子字段内容，无法获得著者字符串";
                     return 0;
                 FOUND:
                     Debug.Assert(results.Count > 0, "");
@@ -2575,7 +2575,7 @@ namespace dp2Circulation
                 // TODO: 找到有汉字的
                 // 最后找 245$a level 1.0F
 
-                strError = "MARC记录中 701/711/702/712中均未发现&a 无法获得著者字符串";
+                strError = "MARC记录中 100/110/111/700/710/711 中均未发现 $a， 无法获得著者字符串";
                 fLevel = 0;
                 return 0;   // not found
             }
@@ -2649,7 +2649,7 @@ namespace dp2Circulation
                         goto FOUND;
                     }
 
-                    strError = "MARC记录中 700/710/720/701/711/702/712中均未发现包含汉字的 $a 子字段内容，无法获得著者字符串";
+                    strError = "MARC记录中 700/710/720/701/711/702/712/200 中均未发现包含汉字的 $a 子字段内容，无法获得著者字符串";
                     fLevel = 0;
                     return 0;
                 FOUND:
@@ -2669,14 +2669,14 @@ namespace dp2Circulation
                 }
                 else
                 {
-                    strError = "未知的MARC格式 '" + strMarcSyntax + "'";
+                    strError = "未知的 MARC格式 '" + strMarcSyntax + "'";
                     return -1;
                 }
 
                 if (String.IsNullOrEmpty(strAuthor) == false)
                     return 1;   // found
 
-                strError = "MARC记录中 701/711/702/712中均未发现&a 无法获得著者字符串";
+                strError = "MARC 记录中 100/110/111/700/710/711 中均未发现 $a 无法获得著者字符串";
                 fLevel = 0;
                 return 0;   // not found
             }
@@ -2742,7 +2742,7 @@ namespace dp2Circulation
                         goto FOUND;
                     }
 
-                    strError = "MARC记录中 700/710/720/701/711/702/712中均未发现不含汉字的 $a 子字段内容，无法获得西文著者字符串";
+                    strError = "MARC记录中 700/710/720/701/711/702/712/200 中均未发现不含汉字的 $a 子字段内容，无法获得西文著者字符串";
                     fLevel = 0;
                     return 0;
                 FOUND:
@@ -2771,7 +2771,7 @@ namespace dp2Circulation
 
                 // TODO: 245$a 中找到的英文的题名字符串，要强一些，level 1.1
 
-                strError = "MARC记录中无法获得著者字符串";
+                strError = "MARC 记录中 100/110/111/700/710/711 中均未发现 $a， 无法获得著者字符串";
                 fLevel = 0;
                 return 0;   // not found
             }

@@ -1033,7 +1033,7 @@ namespace dp2Circulation
                     {
                         goto FOUND;
                     }
-                    results = GetSubfields("field[@name='701']/subfield[@name='a']"); // "710", "a"
+                    results = GetSubfields("field[@name='710']/subfield[@name='a']"); // "710", "a"
                     results = ContainHanzi(results);
                     if (results.Count > 0)
                     {
@@ -1083,7 +1083,7 @@ namespace dp2Circulation
                         goto FOUND;
                     }
 
-                    strError = "MARC记录中 700/710/720/701/711/702/712中均未发现包含汉字的 $a 子字段内容，无法获得著者字符串";
+                    strError = "MARC记录中 700/710/720/701/711/702/712/200 中均未发现包含汉字的 $a 子字段内容，无法获得著者字符串";
                     return 0;
                 FOUND:
                     Debug.Assert(results.Count > 0, "");
@@ -1114,7 +1114,7 @@ namespace dp2Circulation
                 // TODO: 找到有汉字的
                 // 最后找 245$a level 1.0F
 
-                strError = "MARC记录中 701/711/702/712中均未发现 $a 无法获得著者字符串";
+                strError = "MARC记录中 100/110/111/700/710/711 中均未发现 $a， 无法获得著者字符串";
                 fLevel = 0;
                 return 0;   // not found
             }
@@ -1130,7 +1130,7 @@ namespace dp2Circulation
                     {
                         goto FOUND;
                     }
-                    results = GetSubfields("field[@name='701']/subfield[@name='a']"); // "710", "a"
+                    results = GetSubfields("field[@name='710']/subfield[@name='a']"); // "710", "a"
                     results = ContainHanzi(results);
                     if (results.Count > 0)
                     {
@@ -1180,7 +1180,7 @@ namespace dp2Circulation
                         goto FOUND;
                     }
 
-                    strError = "MARC记录中 700/710/720/701/711/702/712中均未发现包含汉字的 $a 子字段内容，无法获得著者字符串";
+                    strError = "MARC记录中 700/710/720/701/711/702/712/200 中均未发现包含汉字的 $a 子字段内容，无法获得著者字符串";
                     fLevel = 0;
                     return 0;
                 FOUND:
@@ -1209,7 +1209,7 @@ namespace dp2Circulation
                 if (String.IsNullOrEmpty(strAuthor) == false)
                     return 1;   // found
 
-                strError = "MARC记录中 701/711/702/712中均未发现 $a 无法获得著者字符串";
+                strError = "MARC记录中 100/110/111/700/710/711 中均未发现 $a， 无法获得著者字符串";
                 fLevel = 0;
                 return 0;   // not found
             }
@@ -1220,19 +1220,19 @@ namespace dp2Circulation
                     List<string> results = null;
                     // 700、710、720
                     results = GetSubfields("field[@name='700' and @indicator1!='A']/subfield[@name='a']");    // "700", "a", "@[^A]."
-                    results = ContainHanzi(results);
+                    results = NotContainHanzi(results);
                     if (results.Count > 0)
                     {
                         goto FOUND;
                     }
-                    results = GetSubfields("field[@name='701']/subfield[@name='a']"); // "710", "a"
-                    results = ContainHanzi(results);
+                    results = GetSubfields("field[@name='710']/subfield[@name='a']"); // "710", "a"
+                    results = NotContainHanzi(results);
                     if (results.Count > 0)
                     {
                         goto FOUND;
                     }
                     results = GetSubfields("field[@name='720']/subfield[@name='a']");   // "720", "a"
-                    results = ContainHanzi(results);
+                    results = NotContainHanzi(results);
                     if (results.Count > 0)
                     {
                         goto FOUND;
@@ -1240,42 +1240,42 @@ namespace dp2Circulation
 
                     // 701/711/702/712
                     results = GetSubfields("field[@name='701' and @indicator1!='A']/subfield[@name='a']");   // "701", "a", "@[^A]."
-                    results = ContainHanzi(results);
+                    results = NotContainHanzi(results);
                     if (results.Count > 0)
                     {
                         goto FOUND;
                     }
 
                     results = GetSubfields("field[@name='711']/subfield[@name='a']");   // "711", "a"
-                    results = ContainHanzi(results);
+                    results = NotContainHanzi(results);
                     if (results.Count > 0)
                     {
                         goto FOUND;
                     }
 
                     results = GetSubfields("field[@name='702' and @indicator1!='A']/subfield[@name='a']");   // "702", "a", "@[^A]."
-                    results = ContainHanzi(results);
+                    results = NotContainHanzi(results);
                     if (results.Count > 0)
                     {
                         goto FOUND;
                     }
 
                     results = GetSubfields("field[@name='712']/subfield[@name='a']");   // "712", "a"
-                    results = ContainHanzi(results);
+                    results = NotContainHanzi(results);
                     if (results.Count > 0)
                     {
                         goto FOUND;
                     }
 
                     results = GetSubfields("field[@name='200']/subfield[@name='a']");   // "200", "a"
-                    results = ContainHanzi(results);
+                    results = NotContainHanzi(results);
                     if (results.Count > 0)
                     {
                         fLevel = 1.0F;   // unimarc 格式中找到题名字符串，英文，作为卡特表用途，要弱一些
                         goto FOUND;
                     }
 
-                    strError = "MARC记录中 700/710/720/701/711/702/712中均未发现不含汉字的 $a 子字段内容，无法获得西文著者字符串";
+                    strError = "MARC记录中 700/710/720/701/711/702/712/200 中均未发现不含汉字的 $a 子字段内容，无法获得西文著者字符串";
                     fLevel = 0;
                     return 0;
                 FOUND:
@@ -1306,7 +1306,7 @@ namespace dp2Circulation
 
                 // TODO: 245$a 中找到的英文的题名字符串，要强一些，level 1.1
 
-                strError = "MARC记录中无法获得著者字符串";
+                strError = "MARC 记录中 100/110/111/700/710/711 中均未发现 $a， 无法获得著者字符串";
                 fLevel = 0;
                 return 0;   // not found
             }

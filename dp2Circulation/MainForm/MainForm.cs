@@ -12946,18 +12946,19 @@ Keys keyData)
 
         // HnbUrl.HnbUrl
 
-#if NO
         static string _baseCfg = @"
 <root>
   <server name='红泥巴.数字平台中心' type='dp2library' url='http://123.103.13.236/dp2library' userName='public'/>
   <server name='亚马逊中国' type='amazon' url='webservices.amazon.cn'/>
 </root>";
-#endif
+
+#if NO
                 static string _baseCfg = @"
 <root>
   <server name='红泥巴.数字平台中心' type='dp2library' url='net.pipe://localhost/dp2library/xe' userName='public'/>
   <server name='亚马逊中国' type='amazon' url='webservices.amazon.cn'/>
 </root>";
+#endif
 
         // 创建 servers.xml 配置文件
         public int BuildServersCfgFile(string strCfgFileName,
@@ -12968,7 +12969,6 @@ Keys keyData)
 
             try
             {
-
                 XmlDocument dom = new XmlDocument();
                 dom.LoadXml(_baseCfg);
 

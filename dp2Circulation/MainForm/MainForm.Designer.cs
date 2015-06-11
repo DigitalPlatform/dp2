@@ -315,6 +315,7 @@ namespace dp2Circulation
             this.MenuItem_openEntityRegisterForm.Name = "MenuItem_openEntityRegisterForm";
             this.MenuItem_openEntityRegisterForm.Size = new System.Drawing.Size(154, 22);
             this.MenuItem_openEntityRegisterForm.Text = "²áµÇ¼Ç´°(&E)";
+            this.MenuItem_openEntityRegisterForm.Visible = false;
             this.MenuItem_openEntityRegisterForm.Click += new System.EventHandler(this.MenuItem_openEntityRegisterForm_Click);
             // 
             // toolStripSeparator3
