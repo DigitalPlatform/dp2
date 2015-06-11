@@ -10,6 +10,7 @@ using DigitalPlatform.CommonControl;
 using System.Xml;
 using DigitalPlatform.Xml;
 using System.IO;
+using DigitalPlatform.IO;
 
 
 namespace dp2Circulation
@@ -105,7 +106,10 @@ namespace dp2Circulation
 
         void LoadServerXml()
         {
-            string strFileName = Path.Combine(this.MainForm.DataDir, "servers.xml");
+            // 当前登录的主要服务器不同，则需要的 xml 配置文件是不同的。应当存储在各自的目录中
+            string strFileName = Path.Combine(this.MainForm.ServerCfgDir, ReportForm.GetValidPathString(this.MainForm.GetCurrentUserName()) + "\\servers.xml");
+            PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strFileName));
+
             if (File.Exists(strFileName) == false
                 || MainForm.GetServersCfgFileVersion(strFileName) < (double)0.01)
             {

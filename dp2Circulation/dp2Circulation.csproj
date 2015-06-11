@@ -236,7 +236,9 @@
     <Compile Include="EntityRegister\EntityRegisterWizard.Designer.cs">
       <DependentUpon>EntityRegisterWizard.cs</DependentUpon>
     </Compile>
-    <Compile Include="EntityRegister\ImageManager.cs" />
+    <Compile Include="EntityRegister\ImageManager.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="EntityRegister\KeyboardForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -248,6 +250,12 @@
     </Compile>
     <Compile Include="EntityRegister\LineLayerForm.Designer.cs">
       <DependentUpon>LineLayerForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="EntityRegister\MarcDefaultDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EntityRegister\MarcDefaultDialog.Designer.cs">
+      <DependentUpon>MarcDefaultDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="EntityRegister\PlusButton.cs">
       <SubType>Component</SubType>
@@ -1217,6 +1225,9 @@
     <Content Include="ajax-loader2.GIF">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="ajax-loader3.GIF">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="amercehtml.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -1372,6 +1383,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="EntityRegister\LineLayerForm.resx">
       <DependentUpon>LineLayerForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EntityRegister\MarcDefaultDialog.resx">
+      <DependentUpon>MarcDefaultDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="EntityRegister\Save\EntitiesControl.resx">
       <DependentUpon>EntitiesControl.cs</DependentUpon>

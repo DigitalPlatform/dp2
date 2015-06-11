@@ -143,7 +143,6 @@ ref sessioninfo) == false)
             return;
         }
 
-
         return;
     ERROR1:
         Response.Write(HttpUtility.HtmlEncode(strError));

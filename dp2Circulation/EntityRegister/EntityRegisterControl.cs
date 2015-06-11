@@ -427,7 +427,7 @@ namespace dp2Circulation
             string strUserName = account.UserName;
 
             if (EntityRegisterBase.IsDot(strServerUrl) == true)
-                strServerUrl = this.MainForm.LibraryServerDir1;
+                strServerUrl = this.MainForm.LibraryServerUrl;
             if (EntityRegisterBase.IsDot(strUserName) == true)
                 strUserName = this.MainForm.DefaultUserName;
 

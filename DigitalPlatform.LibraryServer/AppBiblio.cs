@@ -3120,6 +3120,15 @@ nsmgr);
             // 检查参数
             strAction = strAction.ToLower();
 
+            bool bSimulate = false;
+
+            // 2015/6/8
+            if (StringUtil.HasHead(strAction, "simulate_") == true)
+            {
+                strAction = strAction.Substring("simulate_".Length);
+                bSimulate = true;
+            }
+
             if (strAction != "new"
                 && strAction != "change"
                 && strAction != "delete"
@@ -3281,9 +3290,7 @@ nsmgr);
                 }
             }
 
-
             // TODO: 需要额外的检查，看看所保存的数据MARC格式是不是这个数据库要求的格式？
-
 
             RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
             if (channel == null)
@@ -3291,7 +3298,6 @@ nsmgr);
                 strError = "channel == null";
                 goto ERROR1;
             }
-
 
             // 准备日志DOM
             XmlDocument domOperLog = new XmlDocument();
@@ -3332,7 +3338,7 @@ nsmgr);
                     if (channel.ErrorCode == ChannelErrorCode.NotFound)
                     {
                         // 2013/3/12
-                        if (strAction == "change")
+                        if (strAction == "change" && bSimulate == false)    // 模拟操作情况下，不在乎以前这个位置的记录是否存在
                         {
                             strError = "原有记录 '" + strBiblioRecPath + "' 不存在, 因此 setbiblioinfo " + strAction + " 操作被拒绝 (此时如果要保存新记录，请使用 new 子功能)";
                             result.Value = -1;
@@ -3354,7 +3360,6 @@ nsmgr);
                     strError = "根据路径 '" + strBiblioRecPath + "' 读入原有记录时，发现返回的路径 '" + strOutputPath + "' 和前者不一致";
                     goto ERROR1;
                 }
-
 
                 XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
                         "oldRecord", strExistingXml);
@@ -3484,32 +3489,40 @@ out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
-                lRet = channel.DoSaveTextRes(strBiblioRecPath,
-                    strBiblio,
-                    false,
-                    "content", // ,ignorechecktimestamp
-                    baTimestamp,
-                    out baOutputTimestamp,
-                    out strOutputBiblioRecPath,
-                    out strError);
-                if (lRet == -1)
-                    goto ERROR1;
-
-                if (this.TestMode == true || sessioninfo.TestMode)
+                if (bSimulate)
                 {
-                    string strID = ResPath.GetRecordId(strOutputBiblioRecPath);
-                    if (StringUtil.IsPureNumber(strID) == true)
+                    // 模拟创建新记录的操作
+                    baOutputTimestamp = null;
+                    strOutputBiblioRecPath = strBiblioRecPath;  // 路径中 ID 依然为问号，没有被处理
+                }
+                else
+                {
+                    lRet = channel.DoSaveTextRes(strBiblioRecPath,
+                        strBiblio,
+                        false,
+                        "content", // ,ignorechecktimestamp
+                        baTimestamp,
+                        out baOutputTimestamp,
+                        out strOutputBiblioRecPath,
+                        out strError);
+                    if (lRet == -1)
+                        goto ERROR1;
+
+                    if (this.TestMode == true || sessioninfo.TestMode)
                     {
-                        long v = 0;
-                        long.TryParse(strID, out v);
-                        if (v > 1000)
+                        string strID = ResPath.GetRecordId(strOutputBiblioRecPath);
+                        if (StringUtil.IsPureNumber(strID) == true)
                         {
-                            strError = "评估模式下只能修改 ID 小于等于 1000 的书目记录。本记录 " + strOutputBiblioRecPath + " 虽然创建成功，但以后无法对其进行修改 ";
-                            goto ERROR1;
+                            long v = 0;
+                            long.TryParse(strID, out v);
+                            if (v > 1000)
+                            {
+                                strError = "评估模式下只能修改 ID 小于等于 1000 的书目记录。本记录 " + strOutputBiblioRecPath + " 虽然创建成功，但以后无法对其进行修改 ";
+                                goto ERROR1;
+                            }
                         }
                     }
                 }
-
             }
             else if (strAction == "change")
             {
@@ -3566,40 +3579,57 @@ out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
-                // 需要判断路径是否为具备最末一级索引号的形式？
-
-                this.BiblioLocks.LockForWrite(strBiblioRecPath);
-
-                try
+                if (bSimulate)
                 {
-                    lRet = channel.DoSaveTextRes(strBiblioRecPath,
-                        strBiblio,
-                        false,
-                        "content", // ,ignorechecktimestamp
-                        baTimestamp,
-                        out baOutputTimestamp,
-                        out strOutputBiblioRecPath,
-                        out strError);
-                    if (lRet == -1)
-                    {
-                        if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
-                        {
-                            result.Value = -1;
-                            result.ErrorInfo = strError;
-                            result.ErrorCode = ErrorCode.TimestampMismatch;
-                            return result;
-                        }
-                        goto ERROR1;
-                    }
+                    // 模拟修改记录的操作
+                    baOutputTimestamp = null;
+                    strOutputBiblioRecPath = strBiblioRecPath;
                 }
-                finally
+                else
                 {
-                    this.BiblioLocks.UnlockForWrite(strBiblioRecPath);
+                    // 需要判断路径是否为具备最末一级索引号的形式？
+
+                    this.BiblioLocks.LockForWrite(strBiblioRecPath);
+
+                    try
+                    {
+                        lRet = channel.DoSaveTextRes(strBiblioRecPath,
+                            strBiblio,
+                            false,
+                            "content", // ,ignorechecktimestamp
+                            baTimestamp,
+                            out baOutputTimestamp,
+                            out strOutputBiblioRecPath,
+                            out strError);
+                        if (lRet == -1)
+                        {
+                            if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
+                            {
+                                result.Value = -1;
+                                result.ErrorInfo = strError;
+                                result.ErrorCode = ErrorCode.TimestampMismatch;
+                                return result;
+                            }
+                            goto ERROR1;
+                        }
+                    }
+                    finally
+                    {
+                        this.BiblioLocks.UnlockForWrite(strBiblioRecPath);
+                    }
                 }
             }
             else if (strAction == "delete"
                 || strAction == "onlydeletesubrecord")
             {
+                // 注：这里的模拟删除不是太容易模拟。
+                // 因为真正删除的时候，是根据实际存在的下属记录的类型来检查权限的。也许模拟删除可以根据假定每种下属记录都存在的情况来检查权限。但这样往往是比实际情况要偏严的。如果有其他参数，能指出调用者关注哪些下属记录的类型就好了
+                if (bSimulate == true)
+                {
+                    strError = "尚未实现对 '"+strAction+"' 的模拟操作";
+                    goto ERROR1;
+                }
+
                 // 只有order权限的情况
                 if (StringUtil.IsInList("setbiblioinfo", sessioninfo.RightsOrigin) == false
                     && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == true)
@@ -3675,7 +3705,6 @@ out strError);
 
                     }
                 }
-
 
                 // 这个删除不是那么简单，需要同时删除下属的实体记录
                 // 要对种和实体都进行锁定
@@ -3778,7 +3807,6 @@ out strError);
 
                         // bFoundOrders = true;
                     }
-
 
                     //
                     // 探测书目记录有没有下属的期记录
@@ -4129,26 +4157,33 @@ out strError);
                     }
                 }
 
-                // 不需要同时删除下属的实体记录
-                this.BiblioLocks.LockForWrite(strBiblioRecPath);
-                try
+                if (bSimulate)
                 {
                     baOutputTimestamp = null;
-
-                    // 删除书目记录
-                    lRet = channel.DoDeleteRes(strBiblioRecPath,
-                        baTimestamp,
-                        out baOutputTimestamp,
-                        out strError);
-                    if (lRet == -1)
-                    {
-                        // 只删除书目记录，但是如果书目记录却不存在，要报错
-                        goto ERROR1;
-                    }
                 }
-                finally
+                else
                 {
-                    this.BiblioLocks.UnlockForWrite(strBiblioRecPath);
+                    // 不需要同时删除下属的实体记录
+                    this.BiblioLocks.LockForWrite(strBiblioRecPath);
+                    try
+                    {
+                        baOutputTimestamp = null;
+
+                        // 删除书目记录
+                        lRet = channel.DoDeleteRes(strBiblioRecPath,
+                            baTimestamp,
+                            out baOutputTimestamp,
+                            out strError);
+                        if (lRet == -1)
+                        {
+                            // 只删除书目记录，但是如果书目记录却不存在，要报错
+                            goto ERROR1;
+                        }
+                    }
+                    finally
+                    {
+                        this.BiblioLocks.UnlockForWrite(strBiblioRecPath);
+                    }
                 }
             }
             else
@@ -4157,26 +4192,29 @@ out strError);
                 goto ERROR1;
             }
 
-            if (string.IsNullOrEmpty(strOutputBiblioRecPath) == false)
+            if (bSimulate == false)
             {
-                XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
-                    "record", strBiblio);
-                DomUtil.SetAttr(node, "recPath", strOutputBiblioRecPath);
-            }
+                if (string.IsNullOrEmpty(strOutputBiblioRecPath) == false)
+                {
+                    XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
+                        "record", strBiblio);
+                    DomUtil.SetAttr(node, "recPath", strOutputBiblioRecPath);
+                }
 
-            DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
-                sessioninfo.UserID);
-            DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
-                strOperTime);
+                DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
+                    sessioninfo.UserID);
+                DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
+                    strOperTime);
 
-            // 写入日志
-            nRet = this.OperLog.WriteOperLog(domOperLog,
-                sessioninfo.ClientAddress,
-                out strError);
-            if (nRet == -1)
-            {
-                strError = "SetBiblioInfo() API 写入日志时发生错误: " + strError;
-                goto ERROR1;
+                // 写入日志
+                nRet = this.OperLog.WriteOperLog(domOperLog,
+                    sessioninfo.ClientAddress,
+                    out strError);
+                if (nRet == -1)
+                {
+                    strError = "SetBiblioInfo() API 写入日志时发生错误: " + strError;
+                    goto ERROR1;
+                }
             }
 
             result.Value = 0;

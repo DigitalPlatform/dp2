@@ -17,6 +17,21 @@
             {
                 components.Dispose();
             }
+            // 205/6/7
+            if (this._imageManager != null)
+            {
+                this._imageManager.StopThread(true);
+                try
+                {
+                    this._imageManager.ClearList();
+                }
+                catch
+                {
+
+                }
+                this._imageManager.DeleteTempFiles();
+                this._imageManager = null;
+            }
             base.Dispose(disposing);
         }
 
@@ -32,6 +47,8 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EntityRegisterWizard));
             this.tabControl_main = new System.Windows.Forms.TabControl();
             this.tabPage_settings = new System.Windows.Forms.TabPage();
+            this.button_settings_bilbioDefault = new System.Windows.Forms.Button();
+            this.button_settings_reCreateServersXml = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.comboBox_settings_colorStyle = new System.Windows.Forms.ComboBox();
             this.checkBox_settings_keyboardWizard = new System.Windows.Forms.CheckBox();
@@ -42,8 +59,6 @@
             this.checkBox_settings_needLocation = new System.Windows.Forms.CheckBox();
             this.checkBox_settings_needItemBarcode = new System.Windows.Forms.CheckBox();
             this.checkBox_settings_needAccessNo = new System.Windows.Forms.CheckBox();
-            this.textBox_settings_importantFields = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
             this.button_settings_entityDefault = new System.Windows.Forms.Button();
             this.tabPage_searchBiblio = new System.Windows.Forms.TabPage();
             this.comboBox_from = new System.Windows.Forms.ComboBox();
@@ -98,18 +113,38 @@
             // 
             this.tabPage_settings.AutoScroll = true;
             this.tabPage_settings.BackColor = System.Drawing.Color.DimGray;
+            this.tabPage_settings.Controls.Add(this.button_settings_bilbioDefault);
+            this.tabPage_settings.Controls.Add(this.button_settings_reCreateServersXml);
             this.tabPage_settings.Controls.Add(this.label2);
             this.tabPage_settings.Controls.Add(this.comboBox_settings_colorStyle);
             this.tabPage_settings.Controls.Add(this.checkBox_settings_keyboardWizard);
             this.tabPage_settings.Controls.Add(this.groupBox1);
-            this.tabPage_settings.Controls.Add(this.textBox_settings_importantFields);
-            this.tabPage_settings.Controls.Add(this.label1);
             this.tabPage_settings.Controls.Add(this.button_settings_entityDefault);
             this.tabPage_settings.Location = new System.Drawing.Point(4, 22);
             this.tabPage_settings.Name = "tabPage_settings";
             this.tabPage_settings.Size = new System.Drawing.Size(466, 251);
             this.tabPage_settings.TabIndex = 2;
             this.tabPage_settings.Text = "参数设定";
+            // 
+            // button_settings_bilbioDefault
+            // 
+            this.button_settings_bilbioDefault.Location = new System.Drawing.Point(9, 79);
+            this.button_settings_bilbioDefault.Name = "button_settings_bilbioDefault";
+            this.button_settings_bilbioDefault.Size = new System.Drawing.Size(168, 23);
+            this.button_settings_bilbioDefault.TabIndex = 8;
+            this.button_settings_bilbioDefault.Text = "书目记录缺省值";
+            this.button_settings_bilbioDefault.UseVisualStyleBackColor = true;
+            this.button_settings_bilbioDefault.Click += new System.EventHandler(this.button_settings_bilbioDefault_Click);
+            // 
+            // button_settings_reCreateServersXml
+            // 
+            this.button_settings_reCreateServersXml.Location = new System.Drawing.Point(7, 252);
+            this.button_settings_reCreateServersXml.Name = "button_settings_reCreateServersXml";
+            this.button_settings_reCreateServersXml.Size = new System.Drawing.Size(241, 23);
+            this.button_settings_reCreateServersXml.TabIndex = 7;
+            this.button_settings_reCreateServersXml.Text = "重新创建 servers.xml 配置文件";
+            this.button_settings_reCreateServersXml.UseVisualStyleBackColor = true;
+            this.button_settings_reCreateServersXml.Click += new System.EventHandler(this.button_setting_reCreateServersXml_Click);
             // 
             // label2
             // 
@@ -218,26 +253,6 @@
             this.checkBox_settings_needAccessNo.Text = "必须具备索取号(&A)";
             this.checkBox_settings_needAccessNo.UseVisualStyleBackColor = true;
             // 
-            // textBox_settings_importantFields
-            // 
-            this.textBox_settings_importantFields.HideSelection = false;
-            this.textBox_settings_importantFields.Location = new System.Drawing.Point(9, 106);
-            this.textBox_settings_importantFields.Multiline = true;
-            this.textBox_settings_importantFields.Name = "textBox_settings_importantFields";
-            this.textBox_settings_importantFields.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_settings_importantFields.Size = new System.Drawing.Size(166, 126);
-            this.textBox_settings_importantFields.TabIndex = 2;
-            this.textBox_settings_importantFields.TextChanged += new System.EventHandler(this.textBox_settings_importantFields_TextChanged);
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(7, 91);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(197, 12);
-            this.label1.TabIndex = 1;
-            this.label1.Text = "书目重要字段[每行一个字段名](&I):";
-            // 
             // button_settings_entityDefault
             // 
             this.button_settings_entityDefault.Location = new System.Drawing.Point(9, 47);
@@ -332,6 +347,7 @@
             this.dpTable_browseLines.Size = new System.Drawing.Size(460, 215);
             this.dpTable_browseLines.TabIndex = 8;
             this.dpTable_browseLines.Text = "dpTable1";
+            this.dpTable_browseLines.PaintRegion += new DigitalPlatform.CommonControl.PaintRegionEventHandler(this.dpTable_browseLines_PaintRegion);
             this.dpTable_browseLines.DoubleClick += new System.EventHandler(this.dpTable_browseLines_DoubleClick);
             this.dpTable_browseLines.Enter += new System.EventHandler(this.dpTable_browseLines_Enter);
             this.dpTable_browseLines.KeyDown += new System.Windows.Forms.KeyEventHandler(this.dpTable_browseLines_KeyDown);
@@ -590,8 +606,6 @@
         private System.Windows.Forms.ToolStripButton toolStripButton_new;
         private System.Windows.Forms.TabPage tabPage_settings;
         private System.Windows.Forms.Button button_settings_entityDefault;
-        private System.Windows.Forms.TextBox textBox_settings_importantFields;
-        private System.Windows.Forms.Label label1;
         private System.Windows.Forms.CheckBox checkBox_settings_needAccessNo;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.CheckBox checkBox_settings_needItemBarcode;
@@ -604,5 +618,7 @@
         private System.Windows.Forms.CheckBox checkBox_settings_keyboardWizard;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ComboBox comboBox_settings_colorStyle;
+        private System.Windows.Forms.Button button_settings_reCreateServersXml;
+        private System.Windows.Forms.Button button_settings_bilbioDefault;
     }
 }

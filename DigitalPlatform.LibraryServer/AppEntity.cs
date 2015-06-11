@@ -1994,6 +1994,7 @@ namespace DigitalPlatform.LibraryServer
                 bool bNoCheckDup = false;   // 是否为不查重?
                 bool bNoEventLog = false;   // 是否为不记入事件日志?
                 bool bNoOperations = false; // 是否为不要覆盖<operations>内容
+                bool bSimulate = StringUtil.IsInList("simulate", info.Style);     // 是否为模拟操作? 2015/6/9
 
                 string strStyle = info.Style;
 
@@ -2251,7 +2252,7 @@ namespace DigitalPlatform.LibraryServer
                     continue;
                 }
 
-                // 把要保存的新记录装载到DOM
+                // 把要保存的新记录装载到 DOM
                 XmlDocument domNewRec = new XmlDocument();
                 try
                 {
@@ -2349,7 +2350,8 @@ namespace DigitalPlatform.LibraryServer
                         if ((info.Action == "new"
                                 || info.Action == "change"
                                 || info.Action == "move")       // delete操作不校验记录
-                            && bNoCheckDup == false)
+                            && bNoCheckDup == false
+                            && bSimulate == false)
                         {
                             nRet = this.DoVerifyItemFunction(
                                 sessioninfo,
@@ -2373,7 +2375,8 @@ namespace DigitalPlatform.LibraryServer
                                 || info.Action == "change"
                                 || info.Action == "move")       // delete操作不查重
                             && String.IsNullOrEmpty(strNewBarcode) == false
-                            && bNoCheckDup == false)    // 2008/10/6 new add
+                            && bNoCheckDup == false    // 2008/10/6 new add
+                            && bSimulate == false)
                         {
 #if NO
                             // 验证条码号
@@ -2519,7 +2522,6 @@ namespace DigitalPlatform.LibraryServer
                         }
                         else
                         {
-
                             string strID = ResPath.GetRecordId(info.NewRecPath);
                             if (String.IsNullOrEmpty(strID) == true)
                             {
@@ -2584,178 +2586,209 @@ namespace DigitalPlatform.LibraryServer
                             strNewXml = info.NewRecord;
                         }
 
-                        string strLibraryCode = "";
-
-                        // 注意：即便是全局用户，也要用函数 CheckItemLibraryCode() 获得馆代码
-
-                        // 分馆用户只能保存馆藏地点为自己管辖范围的册记录
-                        // 检查一个册记录的馆藏地点是否符合馆代码列表要求
-                        // return:
-                        //      -1  检查过程出错
-                        //      0   符合要求
-                        //      1   不符合要求
-                        nRet = CheckItemLibraryCode(strNewXml,
-                            sessioninfo.LibraryCodeList,
-                            out strLibraryCode,
-                            out strError);
-                        if (nRet == -1)
+                        if (bSimulate)
                         {
-                            EntityInfo error = new EntityInfo(info);
-                            error.ErrorInfo = "检查分馆代码时出错: " + strError;
-                            error.ErrorCode = ErrorCodeValue.CommonError;
-                            ErrorInfos.Add(error);
                             domOperLog = null;  // 表示不必写入日志
-                            continue;
-                        } 
-                        if (sessioninfo.GlobalUser == false)
-                        {
-                            if (nRet != 0)
-                            {
-                                EntityInfo error = new EntityInfo(info);
-                                /*
-                                if (nRet == -1)
-                                    error.ErrorInfo = "检查分馆代码时出错: " + strError;
-                                else */
-                                    error.ErrorInfo = "即将创建的册记录内容中的馆藏地点不符合要求: " + strError;
-                                error.ErrorCode = ErrorCodeValue.CommonError;
-                                ErrorInfos.Add(error);
-                                domOperLog = null;  // 表示不必写入日志
-                                continue;
-                            }
                         }
-
-                        // 2014/7/3
-                        if (this.VerifyBookType == true)
+                        else
                         {
-                            string strEntityDbName = ResPath.GetDbName(info.NewRecPath);
-                            if (String.IsNullOrEmpty(strEntityDbName) == true)
-                            {
-                                strError = "从路径 '" + info.NewRecPath + "' 中获得数据库名时失败";
-                                goto ERROR1;
-                            }
+                            string strLibraryCode = "";
 
-                            XmlDocument domTemp = new XmlDocument();
-                            domTemp.LoadXml(strNewXml);
+                            // 注意：即便是全局用户，也要用函数 CheckItemLibraryCode() 获得馆代码
 
-                            // 检查一个册记录的读者类型是否符合值列表要求
-                            // parameters:
+                            // 分馆用户只能保存馆藏地点为自己管辖范围的册记录
+                            // 检查一个册记录的馆藏地点是否符合馆代码列表要求
                             // return:
                             //      -1  检查过程出错
                             //      0   符合要求
                             //      1   不符合要求
-                            nRet = CheckItemBookType(domTemp,
-                                strEntityDbName,
+                            nRet = CheckItemLibraryCode(strNewXml,
+                                sessioninfo.LibraryCodeList,
+                                out strLibraryCode,
                                 out strError);
-                            if (nRet == -1 || nRet == 1)
+                            if (nRet == -1)
                             {
                                 EntityInfo error = new EntityInfo(info);
-                                error.ErrorInfo = "即将创建的册记录内容中的图书类型不符合要求: " + strError;
+                                error.ErrorInfo = "检查分馆代码时出错: " + strError;
                                 error.ErrorCode = ErrorCodeValue.CommonError;
                                 ErrorInfos.Add(error);
                                 domOperLog = null;  // 表示不必写入日志
                                 continue;
                             }
-                        }
+                            if (sessioninfo.GlobalUser == false)
+                            {
+                                if (nRet != 0)
+                                {
+                                    EntityInfo error = new EntityInfo(info);
+                                    /*
+                                    if (nRet == -1)
+                                        error.ErrorInfo = "检查分馆代码时出错: " + strError;
+                                    else */
+                                    error.ErrorInfo = "即将创建的册记录内容中的馆藏地点不符合要求: " + strError;
+                                    error.ErrorCode = ErrorCodeValue.CommonError;
+                                    ErrorInfos.Add(error);
+                                    domOperLog = null;  // 表示不必写入日志
+                                    continue;
+                                }
+                            }
+
+                            // 2014/7/3
+                            if (this.VerifyBookType == true)
+                            {
+                                string strEntityDbName = ResPath.GetDbName(info.NewRecPath);
+                                if (String.IsNullOrEmpty(strEntityDbName) == true)
+                                {
+                                    strError = "从路径 '" + info.NewRecPath + "' 中获得数据库名时失败";
+                                    goto ERROR1;
+                                }
+
+                                XmlDocument domTemp = new XmlDocument();
+                                domTemp.LoadXml(strNewXml);
+
+                                // 检查一个册记录的读者类型是否符合值列表要求
+                                // parameters:
+                                // return:
+                                //      -1  检查过程出错
+                                //      0   符合要求
+                                //      1   不符合要求
+                                nRet = CheckItemBookType(domTemp,
+                                    strEntityDbName,
+                                    out strError);
+                                if (nRet == -1 || nRet == 1)
+                                {
+                                    EntityInfo error = new EntityInfo(info);
+                                    error.ErrorInfo = "即将创建的册记录内容中的图书类型不符合要求: " + strError;
+                                    error.ErrorCode = ErrorCodeValue.CommonError;
+                                    ErrorInfos.Add(error);
+                                    domOperLog = null;  // 表示不必写入日志
+                                    continue;
+                                }
+                            }
 
 
-                        lRet = channel.DoSaveTextRes(info.NewRecPath,
-                            strNewXml,
-                            false,   // include preamble?
-                            "content",
-                            info.OldTimestamp,
-                            out output_timestamp,
-                            out strOutputPath,
-                            out strError);
-                        if (lRet == -1)
-                        {
-                            EntityInfo error = new EntityInfo(info);
-                            error.NewTimestamp = output_timestamp;
-                            error.ErrorInfo = "保存新记录的操作发生错误:" + strError;
-                            error.ErrorCode = channel.OriginErrorCode;
-                            ErrorInfos.Add(error);
+                            lRet = channel.DoSaveTextRes(info.NewRecPath,
+                                strNewXml,
+                                false,   // include preamble?
+                                "content",
+                                info.OldTimestamp,
+                                out output_timestamp,
+                                out strOutputPath,
+                                out strError);
+                            if (lRet == -1)
+                            {
+                                EntityInfo error = new EntityInfo(info);
+                                error.NewTimestamp = output_timestamp;
+                                error.ErrorInfo = "保存新记录的操作发生错误:" + strError;
+                                error.ErrorCode = channel.OriginErrorCode;
+                                ErrorInfos.Add(error);
 
-                            domOperLog = null;  // 表示不必写入日志
-                        }
-                        else // 成功
-                        {
-                            DomUtil.SetElementText(domOperLog.DocumentElement,
-"libraryCode",
-strLibraryCode);    // 册所在的馆代码
+                                domOperLog = null;  // 表示不必写入日志
+                            }
+                            else // 成功
+                            {
+                                DomUtil.SetElementText(domOperLog.DocumentElement,
+    "libraryCode",
+    strLibraryCode);    // 册所在的馆代码
 
-                            DomUtil.SetElementText(domOperLog.DocumentElement, "action", "new");
-                            if (String.IsNullOrEmpty(strStyle) == false)
-                                DomUtil.SetElementText(domOperLog.DocumentElement, "style", strStyle);
+                                DomUtil.SetElementText(domOperLog.DocumentElement, "action", "new");
+                                if (String.IsNullOrEmpty(strStyle) == false)
+                                    DomUtil.SetElementText(domOperLog.DocumentElement, "style", strStyle);
 
-                            // 不创建<oldRecord>元素
+                                // 不创建<oldRecord>元素
 
-                            XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement, 
-                                "record", strNewXml);
-                            DomUtil.SetAttr(node, "recPath", strOutputPath);
+                                XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
+                                    "record", strNewXml);
+                                DomUtil.SetAttr(node, "recPath", strOutputPath);
 
-                            // 新记录保存成功，需要返回信息元素。因为需要返回新的时间戳和实际保存的记录路径
+                                // 新记录保存成功，需要返回信息元素。因为需要返回新的时间戳和实际保存的记录路径
 
-                            EntityInfo error = new EntityInfo(info);
-                            error.NewRecPath = strOutputPath;
+                                EntityInfo error = new EntityInfo(info);
+                                error.NewRecPath = strOutputPath;
 
-                            error.NewRecord = strNewXml;    // 所真正保存的记录，可能稍有变化, 因此需要返回给前端
-                            error.NewTimestamp = output_timestamp;
+                                error.NewRecord = strNewXml;    // 所真正保存的记录，可能稍有变化, 因此需要返回给前端
+                                error.NewTimestamp = output_timestamp;
 
-                            error.ErrorInfo = "保存新记录的操作成功。NewTimeStamp中返回了新的时间戳, RecPath中返回了实际存入的记录路径。";
-                            error.ErrorCode = ErrorCodeValue.NoError;
-                            ErrorInfos.Add(error);
+                                error.ErrorInfo = "保存新记录的操作成功。NewTimeStamp中返回了新的时间戳, RecPath中返回了实际存入的记录路径。";
+                                error.ErrorCode = ErrorCodeValue.NoError;
+                                ErrorInfos.Add(error);
+                            }
                         }
                     }
                     else if (info.Action == "change")
                     {
-                        // 执行SetEntities API中的"change"操作
-                        nRet = DoEntityOperChange(
-                            bForce,
-                            strStyle,
-                            sessioninfo,
-                            channel,
-                            info,
-                            ref domOperLog,
-                            ref ErrorInfos);
-                        if (nRet == -1)
+                        if (bSimulate == true)
                         {
-                            // 失败
+                            // 检查权限?
                             domOperLog = null;  // 表示不必写入日志
+                        }
+                        else
+                        {
+                            // 执行SetEntities API中的"change"操作
+                            nRet = DoEntityOperChange(
+                                bForce,
+                                strStyle,
+                                sessioninfo,
+                                channel,
+                                info,
+                                ref domOperLog,
+                                ref ErrorInfos);
+                            if (nRet == -1)
+                            {
+                                // 失败
+                                domOperLog = null;  // 表示不必写入日志
+                            }
                         }
                     }
                     else if (info.Action == "move")
                     {
-                        // 执行SetEntities API中的"move"操作
-                        nRet = DoEntityOperMove(
-                            strStyle,
-                            sessioninfo,
-                            channel,
-                            info,
-                            ref domOperLog,
-                            ref ErrorInfos);
-                        if (nRet == -1)
+                        if (bSimulate == true)
                         {
-                            // 失败
+                            // 检查权限?
                             domOperLog = null;  // 表示不必写入日志
+                        }
+                        else
+                        {
+                            // 执行SetEntities API中的"move"操作
+                            nRet = DoEntityOperMove(
+                                strStyle,
+                                sessioninfo,
+                                channel,
+                                info,
+                                ref domOperLog,
+                                ref ErrorInfos);
+                            if (nRet == -1)
+                            {
+                                // 失败
+                                domOperLog = null;  // 表示不必写入日志
+                            }
                         }
                     }
                     else if (info.Action == "delete")
                     {
-                        // 删除册记录的操作
-                        nRet = DoEntityOperDelete(
-                            sessioninfo,
-                            bForce,
-                            strStyle,
-                            channel,
-                            info,
-                            strOldBarcode,
-                            strNewBarcode,
-                            domOldRec,
-                            ref domOperLog,
-                            ref ErrorInfos);
-                        if (nRet == -1)
+                        if (bSimulate == true)
                         {
-                            // 失败
+                            // 检查权限?
                             domOperLog = null;  // 表示不必写入日志
+                        }
+                        else
+                        {
+                            // 删除册记录的操作
+                            nRet = DoEntityOperDelete(
+                                sessioninfo,
+                                bForce,
+                                strStyle,
+                                channel,
+                                info,
+                                strOldBarcode,
+                                strNewBarcode,
+                                domOldRec,
+                                ref domOperLog,
+                                ref ErrorInfos);
+                            if (nRet == -1)
+                            {
+                                // 失败
+                                domOperLog = null;  // 表示不必写入日志
+                            }
                         }
                     }
                     else
@@ -2802,7 +2835,6 @@ strLibraryCode);    // 册所在的馆代码
             }
 
             result.Value = ErrorInfos.Count;  // 返回信息的数量
-
             return result;
         ERROR1:
             // 这里的报错，是比较严重的错误。如果是数组中部分的请求发生的错误，则不在这里报错，而是通过返回错误信息数组的方式来表现
@@ -3741,8 +3773,6 @@ strLibraryCode);    // 册所在的馆代码
                             out strError);
                 if (nRet == -1)
                     goto ERROR1;
-
-
 
                 // 检查旧记录是否属于管辖范围
                 if (sessioninfo.GlobalUser == false)

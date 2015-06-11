@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Windows.Forms;
 
@@ -110,6 +112,57 @@ namespace DigitalPlatform.CirculationClient
             {
                 this.textBox_comment.Text = value;
             }
+        }
+
+        public static bool IsSameUrl(string strUrl1, string strUrl2)
+        {
+            Uri uri1 = new Uri(strUrl1);
+            Uri uri2 = new Uri(strUrl2);
+
+            bool bRet =  uri1.Equals(uri2);
+            if (bRet == true)
+                return true;
+
+            // 进一步比较 host 是否实际一致
+            if (IsSameHost(uri1.Host, uri2.Host) == true)
+            {
+                if (uri1.Scheme == uri2.Scheme
+                    && uri1.Port == uri2.Port
+                    && uri1.PathAndQuery == uri2.PathAndQuery)
+                    return true;
+            }
+
+            return false;
+        }
+
+        public static bool IsSameHost(string strHost1, string strHost2)
+        {
+            if (strHost1 == strHost2)
+                return true;
+
+#if NO
+            IPAddress[] address_list1 = Array.FindAll(
+    Dns.GetHostEntry(strHost1).AddressList,
+    a => a.AddressFamily == AddressFamily.InterNetwork);
+
+            IPAddress[] address_list2 = Array.FindAll(
+Dns.GetHostEntry(strHost2).AddressList,
+a => a.AddressFamily == AddressFamily.InterNetwork);
+#endif
+            IPAddress[] address_list1 = Dns.GetHostAddresses(strHost1); 
+            IPAddress[] address_list2 = Dns.GetHostAddresses(strHost2);
+
+
+            foreach(IPAddress address1 in address_list1)
+            {
+                foreach(IPAddress address2 in address_list2)
+                {
+                    if (IPAddress.Equals(address1, address2) == true)
+                        return true;
+                }
+            }
+
+            return false;
         }
 
         public static string HnbUrl = "http://123.103.13.236/dp2library";   // "http://hnbclub.cn/dp2library";

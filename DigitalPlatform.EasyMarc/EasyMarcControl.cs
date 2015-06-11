@@ -132,12 +132,12 @@ namespace DigitalPlatform.EasyMarc
             }
         }
 
-        void RefreshLineColor()
+        void RefreshLineColor(bool bSetAll = false)
         {
             for (int i = 0; i < this.Items.Count; i++)
             {
                 EasyLine item = this.Items[i];
-                item.SetLineColor();
+                item.SetLineColor(bSetAll);
             }
         }
 
@@ -2017,7 +2017,7 @@ namespace DigitalPlatform.EasyMarc
 
                 this.FocusedEditBackColor = ControlPaint.Dark(this.BackColor);
 
-                this.RefreshLineColor();
+                this.RefreshLineColor(true);
                 this.Invalidate();
             }
             if (strStyle == "light")
@@ -2039,7 +2039,7 @@ namespace DigitalPlatform.EasyMarc
                 // 正在编辑的 edit 的背景颜色
                 FocusedEditBackColor = Color.FromArgb(200, 200, 255);
 
-                this.RefreshLineColor();
+                this.RefreshLineColor(true);
                 this.Invalidate();
             }
         }
@@ -2557,6 +2557,16 @@ namespace DigitalPlatform.EasyMarc
             this.textBox_content.KeyDown += new KeyEventHandler(textBox_content_KeyDown);
         }
 
+        public override void SetLineColor(bool bSetAll = false)
+        {
+            base.SetLineColor(bSetAll);
+
+            if (bSetAll == true)
+            {
+                this.label_caption.ForeColor = Container.FieldCaptionForeColor;
+            }
+        }
+
 
         bool _isControlField = false;
         public bool IsControlField
@@ -2716,6 +2726,16 @@ namespace DigitalPlatform.EasyMarc
             // this.label_caption.BackColor = SystemColors.Window;
             this.label_caption.ForeColor = container.SubfieldCaptionForeColor;    // SystemColors.GrayText;
         }
+
+        public override void SetLineColor(bool bSetAll = false)
+        {
+            base.SetLineColor(bSetAll);
+
+            if (bSetAll == true)
+            {
+                this.label_caption.ForeColor = Container.SubfieldCaptionForeColor;
+            }
+        }
     }
 
 #if NO
@@ -2803,6 +2823,7 @@ namespace DigitalPlatform.EasyMarc
             }
         }
 
+        // TODO: 首次设置颜色也尽量调用 SetLineColor() 实现，这样可以共享代码，减少多处修改带来的麻烦
         public EasyLine(EasyMarcControl container)
         {
             this.Container = container;
@@ -3508,8 +3529,18 @@ namespace DigitalPlatform.EasyMarc
         }
 
         // 设置事项左端label的颜色
-        internal void SetLineColor()
+        // parameters:
+        //      bSetAll 是否要重设全部颜色？= false 表示仅重设和焦点变化有关的颜色; = true 表示要重设全部颜色，包括和焦点变化无关的那些颜色
+        public virtual void SetLineColor(bool bSetAll = false)
         {
+            if (bSetAll == true)
+            {
+                if (this.Container.BackColor != Color.Transparent)
+                    textBox_content.BackColor = this.Container.BackColor;
+
+                textBox_content.ForeColor = this.Container.ForeColor;
+            }
+
             if ((this.m_state & ItemState.Selected) != 0)
             {
                 // 没有焦点，又需要隐藏selection情形

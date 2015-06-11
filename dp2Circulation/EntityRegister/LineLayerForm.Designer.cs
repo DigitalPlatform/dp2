@@ -41,10 +41,8 @@
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.Text = "LineLayerForm";
-            this.Activated += new System.EventHandler(this.LineLayerForm_Activated);
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.LineLayerForm_Paint);
             this.ResumeLayout(false);
-
         }
 
         #endregion

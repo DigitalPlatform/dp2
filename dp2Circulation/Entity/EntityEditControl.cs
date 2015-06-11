@@ -795,7 +795,8 @@ namespace dp2Circulation
 
                 for (int i = 0; i < this.tableLayoutPanel_main.RowStyles.Count; i++)
                 {
-                    Control control = this.tableLayoutPanel_main.GetControlFromPosition(2, i);
+                    //
+                    Control control = this.tableLayoutPanel_main.GetAnyControlAt(2, i);
                     if (control == null)
                         continue;
 
@@ -811,30 +812,35 @@ namespace dp2Circulation
                         }
                     }
 
+#if NO
                     if (strMode == "full")
                     {
                         // ÏÔÊ¾
                         if (control.Visible == false)
+                        {
                             SetLineVisible(control, true);
+                            this.tableLayoutPanel_main.RowStyles[i] = new RowStyle(SizeType.AutoSize);
+                        }
                         continue;
                     }
+#endif
 
-                    if (controls.IndexOf(control) == -1)
+                    if (strMode == "full" || controls.IndexOf(control) != -1)
+                     {
+                        // ÏÔÊ¾
+                        if (this.Visible == false || control.Visible == false)
+                        {
+                            SetLineVisible(control, true);
+                            this.tableLayoutPanel_main.RowStyles[i] = new RowStyle(SizeType.AutoSize);
+                        }
+                    }
+                    else
                     {
                         // Òþ²Ø
                         if (this.Visible == false || control.Visible == true)
                         {
                             SetLineVisible(control, false);
                             this.tableLayoutPanel_main.RowStyles[i] = new RowStyle(SizeType.Absolute, 0);
-                        }
-                    }
-                    else
-                    {
-                        // ÏÔÊ¾
-                        if (this.Visible == false || control.Visible == false)
-                        {
-                            SetLineVisible(control, true);
-                            this.tableLayoutPanel_main.RowStyles[i] = new RowStyle(SizeType.AutoSize);
                         }
                     }
                 }

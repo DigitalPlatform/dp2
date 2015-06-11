@@ -124,6 +124,9 @@ namespace DigitalPlatform.CommonControl
         {
             base.OnPaint(e);
 
+            // e.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+            // e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            e.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
 #if NO
             Brush brush = new SolidBrush(Color.FromArgb(100, 0,0,255));
             e.Graphics.FillEllipse(brush, 30, 30, 100, 100);
@@ -153,7 +156,6 @@ size.Height);
                 textRect.Height);
             float delta = Math.Min(this.Size.Width, this.Size.Height) / 20;
             backRect = RectangleF.Inflate(textRect, delta, delta);
-
 
             Pen pen = new Pen(Color.Gray);
             if (this.Closeable == false)

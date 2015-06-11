@@ -236,7 +236,7 @@ namespace DigitalPlatform.OPAC.Server
 
         // 获得一个通道
         // 分为两种方式，一种是使用自己携带的通道，一种是从通道池中分配
-        public LibraryChannel GetChannel(bool bPool)
+        public LibraryChannel GetChannel(bool bPool, string strParam = "")
         {
             if (bPool == false)
                 return this.Channel;
@@ -244,10 +244,16 @@ namespace DigitalPlatform.OPAC.Server
             LibraryChannel channel = this.App.ChannelPool.GetChannel(this.App.WsUrl, this.UserID);
             channel.Password = this.Password;
 
-            string strParameters = "location=#opac@" + this.ClientIP;
-            if (m_bIsReader == true)
-                strParameters += ",type=reader,libraryCode=";    // TODO: 可以用一个参数设定馆代码限制范围
-            channel.Param = strParameters;  // Tag
+            // 2015/6/11
+            if (string.IsNullOrEmpty(strParam) == true)
+            {
+                string strParameters = "location=#opac@" + this.ClientIP;
+                if (m_bIsReader == true)
+                    strParameters += ",type=reader,libraryCode=";    // TODO: 可以用一个参数设定馆代码限制范围
+                channel.Param = strParameters;  // Tag
+            }
+            else
+                channel.Param = strParam;
 
             return channel;
         }

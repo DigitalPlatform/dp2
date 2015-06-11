@@ -647,7 +647,7 @@ namespace dp2Circulation
             }
             else if (step == Step.SearchingBiblio)
             {
-                string strGifFileName = Path.Combine(this.BaseForm.MainForm.DataDir, "ajax-loader2.gif");
+                string strGifFileName = Path.Combine(this.BaseForm.MainForm.DataDir, "ajax-loader3.gif");
                 strHtml = strHead
                     + "<h2 align='center'><img src='"+strGifFileName+"' /></h2>"
                     + "<h2 align='center'>正在检索书目，请等待 ...</h2>"

@@ -12944,9 +12944,18 @@ Keys keyData)
 
         #region servers.xml
 
+        // HnbUrl.HnbUrl
+
+#if NO
         static string _baseCfg = @"
 <root>
   <server name='红泥巴.数字平台中心' type='dp2library' url='http://123.103.13.236/dp2library' userName='public'/>
+  <server name='亚马逊中国' type='amazon' url='webservices.amazon.cn'/>
+</root>";
+#endif
+                static string _baseCfg = @"
+<root>
+  <server name='红泥巴.数字平台中心' type='dp2library' url='net.pipe://localhost/dp2library/xe' userName='public'/>
   <server name='亚马逊中国' type='amazon' url='webservices.amazon.cn'/>
 </root>";
 
@@ -12955,48 +12964,80 @@ Keys keyData)
             out string strError)
         {
             strError = "";
+            int nRet = 0;
 
-            XmlDocument dom = new XmlDocument();
-            dom.LoadXml(_baseCfg);
-
-            // 版本号
-            // 0.01 2014/12/10
-            dom.DocumentElement.SetAttribute("version", "0.01");
-
-            // 添加当前服务器
+            try
             {
-                XmlElement server = dom.CreateElement("server");
-                dom.DocumentElement.AppendChild(server);
-                server.SetAttribute("name", "当前服务器");
-                server.SetAttribute("type", "dp2library");
-                server.SetAttribute("url", ".");
-                server.SetAttribute("userName", ".");
 
-                int nCount = 0;
-                // 添加 database 元素
-                foreach (BiblioDbProperty prop in this.BiblioDbProperties)
+                XmlDocument dom = new XmlDocument();
+                dom.LoadXml(_baseCfg);
+
+                // 版本号
+                // 0.01 2014/12/10
+                dom.DocumentElement.SetAttribute("version", "0.01");
+
+                // 添加当前服务器
                 {
-                    // USMARC 格式的，和期刊库，都跳过
-                    if (prop.Syntax != "unimarc"
-                        || string.IsNullOrEmpty(prop.IssueDbName) == false)
-                        continue;
+                    XmlElement server = dom.CreateElement("server");
+                    dom.DocumentElement.AppendChild(server);
+                    server.SetAttribute("name", "当前服务器");
+                    server.SetAttribute("type", "dp2library");
+                    server.SetAttribute("url", ".");
+                    server.SetAttribute("userName", ".");
 
-                    // 临时库
-                    if (StringUtil.IsInList("catalogWork", prop.Role) == true)
+                    int nCount = 0;
+                    // 添加 database 元素
+                    foreach (BiblioDbProperty prop in this.BiblioDbProperties)
                     {
-                        XmlElement database = dom.CreateElement("database");
-                        server.AppendChild(database);
+                        // USMARC 格式的，和期刊库，都跳过
+                        if (prop.Syntax != "unimarc"
+                            || string.IsNullOrEmpty(prop.IssueDbName) == false)
+                            continue;
 
-                        database.SetAttribute("name", prop.DbName);
-                        database.SetAttribute("isTarget", "yes");
-                        database.SetAttribute("access", "append,overwrite");
+                        // TODO: 临时库和中央库要有一个属性表示区别。将来在确定目标的算法中可能有用
 
-                        database.SetAttribute("entityAccess", "append,overwrite");
-                        nCount++;
-                    }
+                        // 临时库或中央库
+                        if (StringUtil.IsInList("catalogWork", prop.Role) == true
+                            || StringUtil.IsInList("catalogTarget", prop.Role) == true)
+                        {
+                            XmlElement database = dom.CreateElement("database");
+                            server.AppendChild(database);
 
+                            string strBiblioAccess = "";
+                            string strEntityAccess = "";
+
+                            this.PrepareSearch(true);
+                            try
+                            {
+                                nRet = EntityRegisterWizard.DetectAccess(this.Channel,
+                    this.Stop,
+                    prop.DbName,
+                    prop.Syntax,
+                    out strBiblioAccess,
+                    out strEntityAccess,
+                    out strError);
+                                if (nRet == -1)
+                                {
+                                    strError = "在探测书目库 " + prop.DbName + " 读写权限的过程中出错: " + strError;
+                                    return -1;
+                                }
+                            }
+                            finally
+                            {
+                                this.EndSearch();
+                            }
+
+                            database.SetAttribute("name", prop.DbName);
+                            database.SetAttribute("isTarget", "yes");
+                            database.SetAttribute("access", strBiblioAccess);  // "append,overwrite"
+
+                            database.SetAttribute("entityAccess", strEntityAccess);    // "append,overwrite"
+                            nCount++;
+                        }
+
+#if NO
                     // 中央库
-                    if (StringUtil.IsInList("catalogTarget", prop.Role) == true)
+                    if ()
                     {
                         XmlElement database = dom.CreateElement("database");
                         server.AppendChild(database);
@@ -13008,29 +13049,38 @@ Keys keyData)
                         database.SetAttribute("entityAccess", "append,overwrite");
                         nCount++;
                     }
+#endif
+                    }
+
+                    if (nCount == 0)
+                    {
+                        strError = "当前服务器 (" + this.LibraryServerUrl + ") 尚未定义角色为 catalogWork 或 catalogTarget 的图书书目库。创建服务器配置文件失败";
+                        return -1;
+                    }
                 }
 
-                if (nCount == 0)
+                string strHnbUrl = "";
                 {
-                    strError = "当前尚未定义角色为 catalogWork 或 catalogTarget 的图书书目库。创建服务器配置文件失败";
-                    return -1;
+                    XmlElement server = dom.DocumentElement.SelectSingleNode("server[@name='红泥巴.数字平台中心']") as XmlElement;
+                    if (server != null)
+                        strHnbUrl = server.GetAttribute("url");
+                    // 当前服务器是红泥巴服务器，要删除多余的事项
+                    // TODO: 判断两个 URL 是否相等的时候，需要用 DNS 得到 IP 进行比较
+                    if (ServerDlg.IsSameUrl(this.LibraryServerUrl, strHnbUrl) == true)
+                    // if (string.Compare(this.LibraryServerUrl, strHnbUrl, true) == 0)
+                    {
+                        server.ParentNode.RemoveChild(server);
+                    }
                 }
-            }
 
-            string strHnbUrl = "";
+                dom.Save(strCfgFileName);
+                return 0;
+            }
+            catch (Exception ex)
             {
-                XmlElement server = dom.DocumentElement.SelectSingleNode("server[@name='红泥巴.数字平台中心']") as XmlElement;
-                if (server != null)
-                    strHnbUrl = server.GetAttribute("url");
-                // 当前服务器是红泥巴服务器，要删除多余的事项
-                if (string.Compare(this.LibraryServerUrl, strHnbUrl, true) == 0)
-                {
-                    server.ParentNode.RemoveChild(server);
-                }
+                strError = ex.Message;
+                return -1;
             }
-
-            dom.Save(strCfgFileName);
-            return 0;
         }
 
         // 获得配置文件的版本号
@@ -13058,6 +13108,18 @@ Keys keyData)
                 return 0;
 
             return version;
+        }
+
+        // 获得当前用户的用户名
+        public string GetCurrentUserName()
+        {
+            if (this.Channel != null && string.IsNullOrEmpty(this.Channel.UserName) == false)
+                return this.Channel.UserName;
+            // TODO: 或者迫使登录一次
+            return AppInfo.GetString(
+                    "default_account",
+                    "username",
+                    "");
         }
 
         #endregion // servers.xml
@@ -13127,6 +13189,19 @@ Keys keyData)
 
         #endregion
 
+        /// <summary>
+        /// 获得当前 dp2library 服务器相关的本地配置目录路径。这是在用户目录中用 URL 映射出来的子目录名
+        /// </summary>
+        public string ServerCfgDir
+        {
+            get
+            {
+                string strServerUrl = ReportForm.GetValidPathString(this.LibraryServerUrl.Replace("/","_"));
+                string strDirectory = Path.Combine(this.UserDir, "servers\\" + strServerUrl);
+                PathUtil.CreateDirIfNeed(strDirectory);
+                return strDirectory;
+            }
+        }
     }
 
     /// <summary>

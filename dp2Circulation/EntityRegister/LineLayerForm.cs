@@ -299,13 +299,7 @@ namespace dp2Circulation
 
             base.Invalidate();
         }
-        
 
-        private void LineLayerForm_Activated(object sender, EventArgs e)
-        {
-            int i = 0;
-            i++;
-        }
     }
 
     public enum PanelState

@@ -162,7 +162,7 @@ false);
     string strUserName)
         {
             if (EntityRegisterBase.IsDot(strServerUrl) == true)
-                strServerUrl = this.MainForm.LibraryServerDir1;
+                strServerUrl = this.MainForm.LibraryServerUrl;
             if (EntityRegisterBase.IsDot(strUserName) == true)
                 strUserName = this.MainForm.DefaultUserName;
 
@@ -189,7 +189,7 @@ false);
 
         // parameters:
         //      strServerName   服务器名。可以为 .
-        public AccountInfo GetAccountInfo(string strServerName)
+        public AccountInfo GetAccountInfo(string strServerName, bool bSetCurrentAccount = true)
         {
             if (IsDot(strServerName) == true)
             {
@@ -201,9 +201,13 @@ false);
             if (server == null)
                 return null;
 
-            // return GetAccountInfo(server as XmlElement);
-            _currentAccount = GetAccountInfo(server as XmlElement);
-            return _currentAccount;
+            if (bSetCurrentAccount == false)
+                return GetAccountInfo(server as XmlElement);
+            else
+            {
+                _currentAccount = GetAccountInfo(server as XmlElement);
+                return _currentAccount;
+            }
         }
 
         public static AccountInfo GetAccountInfo(XmlElement server)
@@ -218,7 +222,6 @@ false);
 
             return account;
         }
-
 
         Hashtable _serverInfoTable = new Hashtable();
 

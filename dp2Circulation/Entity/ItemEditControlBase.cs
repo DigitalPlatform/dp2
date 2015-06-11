@@ -82,10 +82,12 @@ namespace dp2Circulation
 
         public ItemEditControlBase()
         {
+#if NO
             this.DoubleBuffered = true;
 
             this.Enter += new System.EventHandler(this.ItemEditControlBase_Enter);
             this.Leave += new System.EventHandler(this.ItemEditControlBase_Leave);
+#endif
         }
 
         /// <summary>
@@ -600,10 +602,12 @@ namespace dp2Circulation
         {
             switch (e.KeyCode)
             {
+                case Keys.Enter:
                 case Keys.Down:
                     if (this.SelectNextControl((sender as Control), true, true, true, false) == false)
                         SendKeys.Send("{TAB}");
                     e.Handled = true;
+                    e.SuppressKeyPress = true;
                     break;
                 case Keys.Up:
                     //
@@ -631,6 +635,7 @@ namespace dp2Circulation
                     if (this.SelectNextControl((sender as Control), false, true, true, false) == false)
                         SendKeys.Send("+{TAB}");
                     e.Handled = true;
+                    e.SuppressKeyPress = true;
                     break;
             }
         }
@@ -657,7 +662,9 @@ namespace dp2Circulation
             int nRow = this._tableLayoutPanel_main.GetCellPosition(control).Row;
             Control edit_control = this._tableLayoutPanel_main.GetControlFromPosition(2, nRow);
             if (edit_control != null)
+            {
                 edit_control.Focus();
+            }
         }
 
         // 解决 Flat 风格 ComboBox 在改变大小的时候残留显示的问题
@@ -811,7 +818,6 @@ namespace dp2Circulation
 
         }
 
-
         void ResetColor(Label color, Control edit)
         {
             EditLineState newState = color.Tag as EditLineState;
@@ -857,16 +863,19 @@ namespace dp2Circulation
                     edit.BackColor = back_color;
             }
 #endif
-            if (edit is TextBox)
+            if (edit != null)
             {
-                TextBox textbox = edit as TextBox;
-                if (textbox.ReadOnly == true && this.BackColor != Color.Transparent)
-                    textbox.BackColor = this.BackColor;
+                if (edit is TextBox)
+                {
+                    TextBox textbox = edit as TextBox;
+                    if (textbox.ReadOnly == true && this.BackColor != Color.Transparent)
+                        textbox.BackColor = this.BackColor;
+                    else
+                        edit.BackColor = _editBackColor;
+                }
                 else
                     edit.BackColor = _editBackColor;
             }
-            else
-                edit.BackColor = _editBackColor;
 
             if (newState.Changed == true)
                 color.BackColor = this.ColorChanged;
@@ -995,8 +1004,9 @@ namespace dp2Circulation
         }
 #endif
 
+#if NO
         internal bool m_bFocused = false;
-
+        // 会引起焦点和选择的问题！
         private void ItemEditControlBase_Enter(object sender, EventArgs e)
         {
             if (this._tableLayoutPanel_main != null)
@@ -1005,11 +1015,13 @@ namespace dp2Circulation
             this.RefreshLineColor();
         }
 
+        // 会引起焦点和选择的问题！
         private void ItemEditControlBase_Leave(object sender, EventArgs e)
         {
             this.m_bFocused = false;
             this.RefreshLineColor();
         }
+#endif
 
     }
 

@@ -19,14 +19,16 @@ namespace DigitalPlatform.CommonControl
         {
             base.OnFontChanged(e);
 
-            _lineCount = 0; // 迫使后面重新初始化 Height
+            if (this.Visible == true)
+                _lineCount = 0; // 迫使后面重新初始化 Height
         }
 
         protected override void OnSizeChanged(EventArgs e)
         {
             base.OnSizeChanged(e);
 
-            SetHeight();
+            if (this.Visible == true)
+                SetHeight();
         }
 
         protected override void OnTextChanged(EventArgs e)

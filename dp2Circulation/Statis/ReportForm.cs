@@ -2895,9 +2895,9 @@ MessageBoxDefaultButton.Button1);
         }
 
         // 附加的一些文件名非法字符。比如 XP 下 Path.GetInvalidPathChars() 不知何故会遗漏 '*'
-        static string spec_invalid_chars = "*?";
+        static string spec_invalid_chars = "*?:";
 
-        public static string GetValidPathString(string strText)
+        public static string GetValidPathString(string strText, string strReplaceChar = "_")
         {
             if (string.IsNullOrEmpty(strText) == true)
                 return "";
@@ -2914,14 +2914,12 @@ MessageBoxDefaultButton.Button1);
                     continue;
                 if (IndexOf(invalid_chars, c) != -1
                     || spec_invalid_chars.IndexOf(c) != -1)
-                    result.Append("_");
+                    result.Append(strReplaceChar);
                 else
                     result.Append(c);
             }
 
             return result.ToString();
-
-            // return strText.Replace(invalid_chars, "_").Replace("\t", "");
         }
 
         static int IndexOf(char[] chars, char c)

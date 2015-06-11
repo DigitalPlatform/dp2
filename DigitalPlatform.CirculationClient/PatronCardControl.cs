@@ -214,6 +214,7 @@ namespace DigitalPlatform.CirculationClient
             long y,
             PatronCardStyle style)
         {
+            g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
 
             // 证条码号
             StringFormat format = new StringFormat();   //  (StringFormat)StringFormat.GenericTypographic.Clone();

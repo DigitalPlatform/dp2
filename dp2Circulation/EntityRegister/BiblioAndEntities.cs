@@ -18,6 +18,7 @@ using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.Marc;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
+using System.Drawing.Drawing2D;
 
 namespace dp2Circulation
 {
@@ -39,6 +40,9 @@ namespace dp2Circulation
         public string BiblioRecPath = "";
 
         public string MarcSyntax = "";
+
+        // 存储书目和<dprms:file>以外的其它XML片断
+        XmlDocument domXmlFragment = null;
 
         /// <summary>
         /// 获得值列表
@@ -129,6 +133,98 @@ namespace dp2Circulation
             return null;
         }
 
+        // 获得书目记录的XML格式
+        // parameters:
+        //      strBiblioDbName 书目库名。用来辅助决定要创建的XML记录的marcsyntax。如果此参数==null，表示会从this.BiblioRecPath中去取书目库名
+        //      bIncludeFileID  是否要根据当前rescontrol内容合成<dprms:file>元素?
+        public int GetBiblioXml(
+            out string strXml,
+            out string strError)
+        {
+            strError = "";
+            strXml = "";
+
+            string strMarcSyntax = this.MarcSyntax;
+
+            // 在当前没有定义MARC语法的情况下，默认unimarc
+            if (String.IsNullOrEmpty(strMarcSyntax) == true)
+                strMarcSyntax = "unimarc";
+
+            string strMARC = this.GetMarc();
+            XmlDocument domMarc = null;
+            int nRet = MarcUtil.Marc2Xml(strMARC,
+                strMarcSyntax,
+                out domMarc,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            // 因为domMarc是根据MARC记录合成的，所以里面没有残留的<dprms:file>元素，也就没有(创建新的id前)清除的需要
+
+            Debug.Assert(domMarc != null, "");
+
+            // 合成其它XML片断
+            if (domXmlFragment != null
+                && string.IsNullOrEmpty(domXmlFragment.DocumentElement.InnerXml) == false)
+            {
+                XmlDocumentFragment fragment = domMarc.CreateDocumentFragment();
+                try
+                {
+                    fragment.InnerXml = domXmlFragment.DocumentElement.InnerXml;
+                }
+                catch (Exception ex)
+                {
+                    strError = "fragment XML装入XmlDocumentFragment时出错: " + ex.Message;
+                    return -1;
+                }
+
+                domMarc.DocumentElement.AppendChild(fragment);
+            }
+
+            strXml = domMarc.OuterXml;
+            return 0;
+        }
+
+        // 装载书目以外的其它XML片断
+        int LoadXmlFragment(string strXml,
+            out string strError)
+        {
+            strError = "";
+
+            this.domXmlFragment = null;
+
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(strXml);
+            }
+            catch (Exception ex)
+            {
+                strError = "LoadXmlFragment() XML装入DOM时出错: " + ex.Message;
+                return -1;
+            }
+
+            XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
+            nsmgr.AddNamespace("dprms", DpNs.dprms);
+            nsmgr.AddNamespace("unimarc", DpNs.unimarcxml);
+            nsmgr.AddNamespace("usmarc", Ns.usmarcxml);
+
+            // XmlNodeList nodes = dom.DocumentElement.SelectNodes("//unimarc:leader | //unimarc:controlfield | //unimarc:datafield | //usmarc:leader | //usmarc:controlfield | //usmarc:datafield | //dprms:file", nsmgr);
+            // 留下 dprms:file
+            XmlNodeList nodes = dom.DocumentElement.SelectNodes("//unimarc:leader | //unimarc:controlfield | //unimarc:datafield | //usmarc:leader | //usmarc:controlfield | //usmarc:datafield", nsmgr);
+            foreach (XmlNode node in nodes)
+            {
+                node.ParentNode.RemoveChild(node);
+            }
+
+            this.domXmlFragment = new XmlDocument();
+            this.domXmlFragment.LoadXml("<root />");
+            this.domXmlFragment.DocumentElement.InnerXml = dom.DocumentElement.InnerXml;
+
+            return 0;
+        }
+
+
         // 从列表中选择一条书目记录装入编辑模板
         // return:
         //      -1  出错
@@ -181,10 +277,32 @@ MessageBoxDefaultButton.Button2);
 
 #endif
 
+            string strMARC = "";
+            string strMarcSyntax = "";
+            // 将XML格式转换为MARC格式
+            // 自动从数据记录中获得MARC语法
+            int nRet = MarcUtil.Xml2Marc(info.OldXml,
+                true,
+                null,
+                out strMarcSyntax,
+                out strMARC,
+                out strError);
+            if (nRet == -1)
+            {
+                strError = "XML转换到MARC记录时出错: " + strError;
+                goto ERROR1;
+            }
+
+            // 装载书目以外的其它XML片断
+            nRet = LoadXmlFragment(info.OldXml,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
             this.ClearEntityEditControls();
             this.EntitiesChanged = false;
 
-            this.OldMARC = info.OldXml;
+            this.OldMARC = strMARC;
             this.Timestamp = info.Timestamp;
 
             string strPath = "";
@@ -193,9 +311,9 @@ MessageBoxDefaultButton.Button2);
             this.ServerName = strServerName;
             this.BiblioRecPath = strPath;
 
-            this.MarcSyntax = info.MarcSyntax;
+            this.MarcSyntax = strMarcSyntax;    // info.MarcSyntax;
 
-            this.SetMarc(info.OldXml);
+            this.SetMarc(strMARC); // info.OldXml
             Debug.Assert(this.BiblioChanged == false, "");
 
             // 设置封面图像
@@ -942,7 +1060,11 @@ MessageBoxDefaultButton.Button2);
 
         void edit_PaintContent(object sender, PaintEventArgs e)
         {
-            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            //e.Graphics.InterpolationMode = InterpolationMode.High;
+            //e.Graphics.CompositingQuality = CompositingQuality.HighQuality;
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            e.Graphics.TextRenderingHint =
+        System.Drawing.Text.TextRenderingHint.AntiAlias;
 
             EntityEditControl control = sender as EntityEditControl;
 

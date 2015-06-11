@@ -56,7 +56,7 @@ namespace DigitalPlatform
                         // 超时
                         eventActive.Reset();
                         Worker();
-                        eventActive.Reset();
+                        // eventActive.Reset(); // 这一句会造成 Worker 中的 Activate 无效
 
                     }
                     else if (index == 0)
@@ -68,7 +68,7 @@ namespace DigitalPlatform
                         // 得到激活信号
                         eventActive.Reset();
                         Worker();
-                        eventActive.Reset();
+                        // eventActive.Reset(); // 这一句会造成 Worker 中的 Activate 无效
                     }
                 }
 

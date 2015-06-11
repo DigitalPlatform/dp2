@@ -1941,26 +1941,37 @@ MessageBoxDefaultButton.Button1);
 
             bool bControl = Control.ModifierKeys == Keys.Control;
 
-            string strZipFileName = Path.Combine(this.TempDir, "eventlog.zip");
-
-            EventLog log = new EventLog("DigitalPlatform", ".", "*");
-
-            // "最近31天" "最近十年" "最近七天"
-
-            nRet = PackageEventLog(log,
-                strZipFileName,
-                bControl ? "最近十年" : "最近31天",
-                out strError);
-            if (nRet == -1)
-                goto ERROR1;
-
+            this._floatingMessage.Text = "正在打包事件日志信息 ...";
             try
             {
-                System.Diagnostics.Process.Start(this.TempDir);
+                string strZipFileName = Path.Combine(this.TempDir, "eventlog.zip");
+
+                List<EventLog> logs = new List<EventLog>();
+
+                logs.Add(new EventLog("DigitalPlatform", ".", "*"));
+                logs.Add(new EventLog("Application"));
+
+                // "最近31天" "最近十年" "最近七天"
+
+                nRet = PackageEventLog(logs,
+                    strZipFileName,
+                    bControl ? "最近十年" : "最近31天",
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                try
+                {
+                    System.Diagnostics.Process.Start(this.TempDir);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(this, ex.Message);
+                }
             }
-            catch (Exception ex)
+            finally
             {
-                MessageBox.Show(this, ex.Message);
+                this._floatingMessage.Text = "";
             }
             return;
         ERROR1:
@@ -2015,12 +2026,55 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
-        int PackageEventLog(EventLog log,
+        int MakeWindowsLogFile(EventLog log,
+            string strEventLogFilename,
+            out string strError)
+        {
+            strError = "";
+            int nLines = 0;
+            try
+            {
+                if (stop != null)
+                    stop.SetMessage("正在准备 Windows 事件日志 "+log.LogDisplayName+"...");
+
+                using (StreamWriter sw = new StreamWriter(strEventLogFilename, false, Encoding.UTF8))
+                {
+                    foreach (EventLogEntry entry in log.Entries)
+                    {
+                        Application.DoEvents();
+                        if (stop != null && stop.State != 0)
+                        {
+                            strError = "用户中断";
+                            return -1;
+                        }
+
+                        string strText = "*\r\n"
+                            + entry.Source + " \t"
+                            + entry.EntryType.ToString() + " \t"
+                            + entry.TimeGenerated.ToString() + "\r\n"
+                            + entry.Message + "\r\n\r\n";
+
+                        sw.Write(strText);
+                        nLines++;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = "输出 Windows 日志 "+log.LogDisplayName+"的信息时出现异常: " + ex.Message;
+                return -1;
+            }
+
+            return nLines;
+        }
+
+        int PackageEventLog(List<EventLog> logs,
             string strZipFileName,
             string strRangeName,
             out string strError)
         {
             strError = "";
+            int nRet = 0;
 
             this.BeginLoop("正在打包事件日志 ...");
             Application.DoEvents();
@@ -2040,47 +2094,24 @@ MessageBoxDefaultButton.Button1);
 
                 List<string> filenames = new List<string>();
 
-                // 创建 eventlog_digitalplatform.txt 文件
-                string strEventLogFilename = Path.Combine(strTempDir, "eventlog_digitalplatform.txt");
-
-                int nLines = 0;
-                try
+                foreach (EventLog log in logs)
                 {
-                    if (stop != null)
-                        stop.SetMessage("正在准备 DigitalPlatform 事件日志 ...");
+                    // 创建 eventlog_digitalplatform.txt 文件
+                    string strEventLogFilename = Path.Combine(strTempDir, "eventlog_"+log.LogDisplayName+".txt");
 
-                    using (StreamWriter sw = new StreamWriter(strEventLogFilename, false, Encoding.UTF8))
-                    {
-                        foreach (EventLogEntry entry in log.Entries)
-                        {
-                            Application.DoEvents();
-                            if (stop != null && stop.State != 0)
-                            {
-                                strError = "用户中断";
-                                return -1;
-                            }
+                    //
+                    //
+                    nRet = MakeWindowsLogFile(log,
+                        strEventLogFilename,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
 
-                            string strText = "*\r\n"
-                                + entry.Source + " \t"
-                                + entry.EntryType.ToString() + " \t"
-                                + entry.TimeGenerated.ToString() + "\r\n"
-                                + entry.Message + "\r\n\r\n";
-
-                            sw.Write(strText);
-                            nLines++;
-                        }
-                    }
+                    if (nRet > 0)
+                        filenames.Add(strEventLogFilename);
+                    else
+                        File.Delete(strEventLogFilename);
                 }
-                catch (Exception ex)
-                {
-                    strError = "输出日志信息时出现异常: " + ex.Message;
-                    return -1;
-                }
-
-                if (nLines > 0)
-                    filenames.Add(strEventLogFilename);
-                else
-                    File.Delete(strEventLogFilename);
 
                 // 创建一个描述了安装的各个实例和环境情况的文件
                 string strDescriptionFilename = Path.Combine(strTempDir, "description.txt");
@@ -2240,89 +2271,93 @@ MessageBoxDefaultButton.Button1);
                 // return:
                 //      -1  出错
                 //      其他  返回找到的路径个数
-                int nRet = OpacAppInfo.GetOpacInfo(out infos,
+                nRet = OpacAppInfo.GetOpacInfo(out infos,
                     out strError);
                 if (nRet == -1)
-                    return -1;
-
-                List<OpacAppInfo> infos1 = new List<OpacAppInfo>();
-                foreach (OpacAppInfo info in infos)
                 {
-                    if (string.IsNullOrEmpty(info.PhysicalPath) == true)
-                        continue;
-                    if (string.IsNullOrEmpty(info.DataDir) == true)
-                        continue;
-                    infos1.Add(info);
+                    // 可能是 IIS 没有安装
                 }
-
-                int index = 0;
-                foreach (OpacAppInfo info in infos1)
+                else
                 {
-                    string strInstanceName = (index + 1).ToString();
-                    string strDataDir = info.DataDir;
-
-                    if (infos1.Count == 1)
-                        strInstanceName = "";
-                    else
+                    List<OpacAppInfo> infos1 = new List<OpacAppInfo>();
+                    foreach (OpacAppInfo info in infos)
                     {
-                        if (string.IsNullOrEmpty(strInstanceName) == false)
-                            strInstanceName += "_";
+                        if (string.IsNullOrEmpty(info.PhysicalPath) == true)
+                            continue;
+                        if (string.IsNullOrEmpty(info.DataDir) == true)
+                            continue;
+                        infos1.Add(info);
                     }
 
-                    string strInstanceDir = strOpacTempDir;
-                    if (string.IsNullOrEmpty(strInstanceName) == false
-                        && infos1.Count != 1)
+                    int index = 0;
+                    foreach (OpacAppInfo info in infos1)
                     {
-                        strInstanceDir = Path.Combine(strOpacTempDir, "instance_" + strInstanceName);
-                        PathUtil.CreateDirIfNeed(strInstanceDir);
-                    }
+                        string strInstanceName = (index + 1).ToString();
+                        string strDataDir = info.DataDir;
 
-                    // 复制 opac.xml
-                    {
-                        string strFilePath = Path.Combine(strDataDir, "opac.xml");
-                        string strTargetFilePath = Path.Combine(strInstanceDir, "opac.xml");
-                        if (File.Exists(strFilePath) == true)
+                        if (infos1.Count == 1)
+                            strInstanceName = "";
+                        else
                         {
+                            if (string.IsNullOrEmpty(strInstanceName) == false)
+                                strInstanceName += "_";
+                        }
+
+                        string strInstanceDir = strOpacTempDir;
+                        if (string.IsNullOrEmpty(strInstanceName) == false
+                            && infos1.Count != 1)
+                        {
+                            strInstanceDir = Path.Combine(strOpacTempDir, "instance_" + strInstanceName);
+                            PathUtil.CreateDirIfNeed(strInstanceDir);
+                        }
+
+                        // 复制 opac.xml
+                        {
+                            string strFilePath = Path.Combine(strDataDir, "opac.xml");
+                            string strTargetFilePath = Path.Combine(strInstanceDir, "opac.xml");
+                            if (File.Exists(strFilePath) == true)
+                            {
+                                File.Copy(strFilePath, strTargetFilePath);
+                                filenames.Add(strTargetFilePath);
+                            }
+                        }
+
+                        // 复制 webui.xml
+                        {
+                            string strFilePath = Path.Combine(strDataDir, "webui.xml");
+                            string strTargetFilePath = Path.Combine(strInstanceDir, "webui.xml");
+                            if (File.Exists(strFilePath) == true)
+                            {
+                                File.Copy(strFilePath,
+                                    strTargetFilePath);
+                                filenames.Add(strTargetFilePath);
+                            }
+                        }
+
+                        foreach (string date in dates)
+                        {
+                            Application.DoEvents();
+
+                            if (stop != null && stop.State != 0)
+                            {
+                                strError = "用户中断";
+                                return -1;
+                            }
+
+                            string strFilePath = Path.Combine(strDataDir, "log/log_" + date + ".txt");
+                            if (File.Exists(strFilePath) == false)
+                                continue;
+
+                            string strTargetFilePath = Path.Combine(strOpacTempDir, strInstanceName + "log_" + date + ".txt");
+                            if (stop != null)
+                                stop.SetMessage("正在复制文件 " + strFilePath);
+
                             File.Copy(strFilePath, strTargetFilePath);
                             filenames.Add(strTargetFilePath);
                         }
+
+                        index++;
                     }
-
-                    // 复制 webui.xml
-                    {
-                        string strFilePath = Path.Combine(strDataDir, "webui.xml");
-                        string strTargetFilePath = Path.Combine(strInstanceDir, "webui.xml");
-                        if (File.Exists(strFilePath) == true)
-                        {
-                            File.Copy(strFilePath,
-                                strTargetFilePath);
-                            filenames.Add(strTargetFilePath);
-                        }
-                    }
-
-                    foreach (string date in dates)
-                    {
-                        Application.DoEvents();
-
-                        if (stop != null && stop.State != 0)
-                        {
-                            strError = "用户中断";
-                            return -1;
-                        }
-
-                        string strFilePath = Path.Combine(strDataDir, "log/log_" + date + ".txt");
-                        if (File.Exists(strFilePath) == false)
-                            continue;
-
-                        string strTargetFilePath = Path.Combine(strOpacTempDir, strInstanceName + "log_" + date + ".txt");
-                        if (stop != null)
-                            stop.SetMessage("正在复制文件 " + strFilePath);
-
-                        File.Copy(strFilePath, strTargetFilePath);
-                        filenames.Add(strTargetFilePath);
-                    }
-
-                    index++;
                 }
 
                 if (filenames.Count == 0)
@@ -2839,8 +2874,6 @@ MessageBoxDefaultButton.Button1);
                     }
                 }
             }
-
-
             return text.ToString();
         }
 

@@ -660,9 +660,11 @@ namespace DigitalPlatform.CommonControl
 
             pe.Graphics.SmoothingMode = SmoothingMode.HighQuality;
             pe.Graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-
-            // pe.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-            // pe.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+            pe.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality; 
+#if NO
+            pe.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            pe.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+#endif
 
             long xOffset = m_lWindowOrgX + this.Padding.Left + this.m_nHorzDelta;
             long yOffset = m_lWindowOrgY + this.Padding.Top
@@ -1898,8 +1900,11 @@ Color.FromArgb(100, this.m_hoverBackColor)
                         m_lWindowOrgX = 0;
                 }
 
+                long lDelta = m_lWindowOrgX - lWindowOrgX_old;
+
                 // AfterDocumentChanged(ScrollBarMember.Horz);
-                SetScrollBars(ScrollBarMember.Horz);
+                if (lDelta != 0)    // 2015/6/10
+                    SetScrollBars(ScrollBarMember.Horz);
 
                 if (this.BackgroundImage != null)
                 {
@@ -1909,8 +1914,6 @@ Color.FromArgb(100, this.m_hoverBackColor)
                     }
                     return;
                 }
-
-                long lDelta = m_lWindowOrgX - lWindowOrgX_old;
 
                 if (lDelta != 0)
                 {
@@ -1980,9 +1983,11 @@ Color.FromArgb(100, this.m_hoverBackColor)
                         m_lWindowOrgY = 0;
                 }
 
+                long lDelta = m_lWindowOrgY - lWindowOrgY_old;
 
                 // AfterDocumentChanged(ScrollBarMember.Vert);
-                SetScrollBars(ScrollBarMember.Vert);
+                if (lDelta != 0)    // 2015/6/10
+                    SetScrollBars(ScrollBarMember.Vert);
 
                 if (this.BackgroundImage != null)
                 {
@@ -1993,7 +1998,6 @@ Color.FromArgb(100, this.m_hoverBackColor)
                     return;
                 }
 
-                long lDelta = m_lWindowOrgY - lWindowOrgY_old;
                 if (lDelta != 0)
                 {
                     // 如果卷滚的距离超过32位整数范围
@@ -4850,11 +4854,21 @@ nHeight - cell_padding.Vertical);
         {
             // 重新初始化行的高度
             int nOldTextHeight = this.TextHeight;
+
+            // 2015/6/10
+            // m_lContentHeight 在 this.GetTextHeight() 调用过程中可能被改变
+            long lOldContentHeight = this.Control.m_lContentHeight;
             this.TextHeight = this.GetTextHeight();
+            bool bContentHeightChanged = lOldContentHeight != this.Control.m_lContentHeight;
+
             if (nOldTextHeight != this.TextHeight)
             {
-                this.Control.m_lContentHeight += this.TextHeight - nOldTextHeight;   // 优化
-                this.Control.SetScrollBars(ScrollBarMember.Vert);
+                // 如果 this.GetTextHeight() 调用中总高度没有发生过改变，这里才主动增加总高度
+                if (bContentHeightChanged == false)
+                {
+                    this.Control.m_lContentHeight += this.TextHeight - nOldTextHeight;   // 优化
+                    this.Control.SetScrollBars(ScrollBarMember.Vert);
+                }
 
                 // 2013/12/12
                 this.Control.InvalidateLineAndBlow(this, true);

@@ -456,7 +456,6 @@ MessageBoxDefaultButton.Button1);
                 this.button_search.Enabled = true;
             }
 
-
             return _search.HitCount;
         ERROR1:
             strError = "针对服务器 '" + this.ServerUrl + "' 检索出错: " + strError;

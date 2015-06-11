@@ -118,7 +118,7 @@
             this.label_welcome.Name = "label_welcome";
             this.label_welcome.Size = new System.Drawing.Size(435, 201);
             this.label_welcome.TabIndex = 0;
-            this.label_welcome.Text = "欢迎使用\r\ndp2 单机版/小型版图书馆服务器 (dp2Library XE)\r\n这是一个图书馆业务服务器软件\r\n\r\n(C)2006-2014 版权所有 数字平台(北京)" +
+            this.label_welcome.Text = "欢迎使用\r\ndp2 单机版/小型版图书馆服务器 (dp2Library XE)\r\n这是一个图书馆业务服务器软件\r\n\r\n(C)2006-2015 版权所有 数字平台(北京)" +
     "软件有限责任公司";
             this.label_welcome.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 

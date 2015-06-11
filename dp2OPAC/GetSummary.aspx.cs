@@ -83,8 +83,7 @@ ref sessioninfo) == false)
 
             LibraryChannel channel = null;
 #if CHANNEL_POOL
-            channel = sessioninfo.GetChannel(true);
-
+            channel = sessioninfo.GetChannel(true, sessioninfo.Parameters);
 #else
             channel = sessioninfo.GetChannel(false);
 #endif

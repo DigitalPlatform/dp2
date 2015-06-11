@@ -27,6 +27,7 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.Script;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
+using DigitalPlatform.IO;
 
 namespace dp2Circulation
 {
@@ -64,6 +65,21 @@ namespace dp2Circulation
             _biblio.GenerateData += _biblio_GenerateData;
             _biblio.VerifyBarcode += _biblio_VerifyBarcode;
             _biblio.EntitySelectionChanged += _biblio_EntitySelectionChanged;
+
+            this._imageManager = new ImageManager();
+            this._imageManager.ChannelPool = this._base._channelPool;
+            this._imageManager.GetObjectComplete += new GetObjectCompleteEventHandler(_imageManager_GetObjectComplete);
+            this._imageManager.BeginThread();
+
+        }
+
+        void _imageManager_GetObjectComplete(object sender, GetObjectCompleteEventArgs e)
+        {
+            EventFilter filter = e.TraceObject.Tag as EventFilter;
+            this.AsyncGetImageComplete(filter.Row,
+                filter.BiblioRecPath,
+                e.TraceObject != null ? e.TraceObject.FileName : null,
+                e.ErrorInfo);
         }
 
         // 册记录编辑控件中，选择发生了变化。sender 为发出消息的 EntityEditControl，或者加号按钮 PlusButton
@@ -184,7 +200,7 @@ namespace dp2Circulation
                 controls.Add(this.comboBox_from);
                 controls.Add(this.textBox_queryWord);
                 controls.Add(this.splitContainer_biblioAndItems);
-                controls.Add(this.textBox_settings_importantFields);
+                //controls.Add(this.textBox_settings_importantFields);
                 // 此处的缺省值会被忽略
                 controls.Add(new ControlWrapper(this.checkBox_settings_needBookType, true));
                 controls.Add(new ControlWrapper(this.checkBox_settings_needLocation, true));
@@ -193,8 +209,8 @@ namespace dp2Circulation
                 controls.Add(new ControlWrapper(this.checkBox_settings_needItemBarcode, false));
                 controls.Add(new ControlWrapper(this.checkBox_settings_needBatchNo, false));
                 controls.Add(new ControlWrapper(this.checkBox_settings_keyboardWizard, false));
-
                 controls.Add(new ControlWrapper(this.comboBox_settings_colorStyle, 0));
+                controls.Add(this.dpTable_browseLines);
                 return GuiState.GetUiState(controls);
             }
             set
@@ -204,7 +220,7 @@ namespace dp2Circulation
                 controls.Add(this.comboBox_from);
                 controls.Add(this.textBox_queryWord);
                 controls.Add(this.splitContainer_biblioAndItems);
-                controls.Add(new ControlWrapper(this.textBox_settings_importantFields, "010,200,210,215,686,69*,7**".Replace(",", "\r\n")));
+                //controls.Add(new ControlWrapper(this.textBox_settings_importantFields, "010,200,210,215,686,69*,7**".Replace(",", "\r\n")));
                 controls.Add(new ControlWrapper(this.checkBox_settings_needBookType, true));
                 controls.Add(new ControlWrapper(this.checkBox_settings_needLocation, true));
                 controls.Add(new ControlWrapper(this.checkBox_settings_needAccessNo, true));
@@ -212,8 +228,8 @@ namespace dp2Circulation
                 controls.Add(new ControlWrapper(this.checkBox_settings_needItemBarcode, false));
                 controls.Add(new ControlWrapper(this.checkBox_settings_needBatchNo, false));
                 controls.Add(new ControlWrapper(this.checkBox_settings_keyboardWizard, false));
-
                 controls.Add(new ControlWrapper(this.comboBox_settings_colorStyle, 0));
+                controls.Add(this.dpTable_browseLines);
                 GuiState.SetUiState(controls, value);
             }
         }
@@ -223,6 +239,9 @@ namespace dp2Circulation
         {
             _biblio.MainForm = this.MainForm;
             _base.MainForm = this.MainForm;
+
+            if (this._imageManager != null)
+                this._imageManager.TempFileDir = this.MainForm.UserTempDir;
 
             this._originTitle = this.Text;
 
@@ -336,7 +355,7 @@ namespace dp2Circulation
             }
 
             this.toolStrip1.ForeColor = this.ForeColor;
-            foreach(ToolStripItem item in this.toolStrip1.Items)
+            foreach (ToolStripItem item in this.toolStrip1.Items)
             {
                 item.BackColor = this.toolStrip1.BackColor;
                 item.ForeColor = this.ForeColor;
@@ -346,14 +365,21 @@ namespace dp2Circulation
                 this.button_settings_entityDefault.BackColor = this.BackColor;
                 this.button_settings_entityDefault.ForeColor = this.ForeColor;
 
-                this.textBox_settings_importantFields.BackColor = this.BackColor;
-                this.textBox_settings_importantFields.ForeColor = this.ForeColor;
+                this.button_settings_bilbioDefault.BackColor = this.BackColor;
+                this.button_settings_bilbioDefault.ForeColor = this.ForeColor;
+
+                //this.textBox_settings_importantFields.BackColor = this.BackColor;
+                //this.textBox_settings_importantFields.ForeColor = this.ForeColor;
 
                 this.comboBox_settings_colorStyle.BackColor = this.BackColor;
                 this.comboBox_settings_colorStyle.ForeColor = this.ForeColor;
 
                 this.textBox_queryWord.BackColor = this.BackColor;
                 this.textBox_queryWord.ForeColor = this.ForeColor;
+
+                this.button_settings_reCreateServersXml.BackColor = this.BackColor;
+                this.button_settings_reCreateServersXml.ForeColor = this.ForeColor;
+
 
                 this.comboBox_from.BackColor = this.BackColor;
                 this.comboBox_from.ForeColor = this.ForeColor;
@@ -364,11 +390,23 @@ namespace dp2Circulation
                 this.flowLayoutPanel1.BackColor = this.BackColor;
                 this.flowLayoutPanel1.ForeColor = this.ForeColor;
 
+            }
+
+            {
                 this.dpTable_browseLines.BackColor = this.BackColor;
                 this.dpTable_browseLines.ForeColor = this.ForeColor;
 
                 this.dpTable_browseLines.ColumnsBackColor = this.BackColor;
                 this.dpTable_browseLines.ColumnsForeColor = this.ForeColor;
+
+                if (strStyle == "dark")
+                {
+                    this.dpTable_browseLines.DocumentShadowColor = Color.Black;
+                }
+                else if (strStyle == "light")
+                {
+                    this.dpTable_browseLines.DocumentShadowColor = Color.DarkGray;
+                }
             }
 
             {
@@ -511,7 +549,12 @@ MessageBoxDefaultButton.Button1);
 
         void LoadServerXml()
         {
-            string strFileName = Path.Combine(this.MainForm.DataDir, "servers.xml");
+            // TODO: 目录名和当前用户相关
+            // 当前登录的主要服务器不同，则需要的 xml 配置文件是不同的。应当存储在各自的目录中
+            string strFileName = Path.Combine(this.MainForm.ServerCfgDir, ReportForm.GetValidPathString(this.MainForm.GetCurrentUserName()) + "\\servers.xml");
+
+            PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strFileName));
+
             if (File.Exists(strFileName) == false
                 || MainForm.GetServersCfgFileVersion(strFileName) < (double)0.01)
             {
@@ -866,7 +909,7 @@ MessageBoxDefaultButton.Button1);
             // search.MainForm = this.MainForm;
             search.TempFileDir = this.MainForm.UserTempDir;
 
-            search.Timeout = 20 * 1000;
+            search.Timeout = 5 * 1000;
             search.Idle += search_Idle;
             try
             {
@@ -980,8 +1023,16 @@ MessageBoxDefaultButton.Button1);
             if (nRet == -1)
                 return -1;
 
+            string strXml = "";
+            nRet = MarcUtil.Marc2Xml(strMARC,
+    "unimarc",
+    out strXml,
+    out strError);
+            if (nRet == -1)
+                return -1;
+
             RegisterBiblioInfo info = new RegisterBiblioInfo();
-            info.OldXml = strMARC;
+            info.OldXml = strXml;   //  strMARC;
             info.Timestamp = null;
             info.RecPath = strASIN + "@" + _base.CurrentAccount.ServerName;
             info.MarcSyntax = "unimarc";
@@ -1173,6 +1224,7 @@ out string strError)
 
             if (string.IsNullOrEmpty(strFrom) == true)
                 strFrom = "ISBN";
+
             if (strFrom == "书名" || strFrom == "题名")
                 strFromStyle = "title";
             else if (strFrom == "作者" || strFrom == "著者" || strFrom == "责任者")
@@ -1335,8 +1387,10 @@ out string strError)
                             {
                                 string strXml = item.Content;
 
-                                string strMARC = "";
                                 string strMarcSyntax = "";
+                                string strBrowseText = "";
+#if NO
+                                string strMARC = "";
                                 // 将XML格式转换为MARC格式
                                 // 自动从数据记录中获得MARC语法
                                 nRet = MarcUtil.Xml2Marc(strXml,    // info.OldXml,
@@ -1351,7 +1405,6 @@ out string strError)
                                     goto ERROR1;
                                 }
 
-                                string strBrowseText = "";
                                 nRet = BuildMarcBrowseText(
                                     strMarcSyntax,
                                     strMARC,
@@ -1362,9 +1415,16 @@ out string strError)
                                     strError = "MARC记录转换到浏览格式时出错: " + strError;
                                     goto ERROR1;
                                 }
+#endif
+                                nRet = BuildBrowseText(strXml,
+            out strBrowseText,
+            out strMarcSyntax,
+            out strError);
+                                if (nRet == -1)
+                                    goto ERROR1;
 
                                 RegisterBiblioInfo info = new RegisterBiblioInfo();
-                                info.OldXml = strMARC;
+                                info.OldXml = strXml;   // strMARC;
                                 info.Timestamp = item.Timestamp;
                                 info.RecPath = item.RecPath + "@" + account.ServerName;
                                 info.MarcSyntax = strMarcSyntax;
@@ -1457,6 +1517,7 @@ out string strError)
             List<string> columns = StringUtil.SplitList(strBrowseText, '\t');
             DpRow row = new DpRow();
 
+            // 序号
             DpCell cell = new DpCell();
             cell.Text = (this.dpTable_browseLines.Rows.Count + 1).ToString();
             {
@@ -1468,8 +1529,14 @@ out string strError)
             }
             row.Add(cell);
 
+            // 记录路径
             cell = new DpCell();
             cell.Text = strBiblioRecPath;
+            row.Add(cell);
+
+            // 封面
+            cell = new DpCell();
+            cell.Text = "";
             row.Add(cell);
 
             foreach (string s in columns)
@@ -1516,7 +1583,7 @@ out string strError)
             // 0: index
             // 1: recpath
 
-            int index = 2;
+            int index = COLUMN_IMAGE + 1;
             foreach (string s in columns)
             {
                 if (index >= row.Count)
@@ -1535,7 +1602,7 @@ out string strError)
             if (this.dpTable_browseLines.Columns.Count > 2)
                 return;
 
-            List<string> columns = new List<string>() { "书名", "作者", "出版者", "出版日期" };
+            List<string> columns = new List<string>() { "封面", "书名", "作者", "出版者", "出版日期" };
             foreach (string s in columns)
             {
                 DpColumn column = new DpColumn();
@@ -1544,6 +1611,10 @@ out string strError)
                 this.dpTable_browseLines.Columns.Add(column);
             }
         }
+
+        const int COLUMN_NO = 0;
+        const int COLUMN_RECPATH = 1;
+        const int COLUMN_IMAGE = 2;
 
         // 获得检索命中列表中的事项数。其中可能包含错误信息行
         public int ResultListCount
@@ -1597,6 +1668,9 @@ out string strError)
 
         public void ClearList()
         {
+            if (this._imageManager != null)
+                this._imageManager.ClearList();
+
             if (this.dpTable_browseLines == null)
                 return;
 
@@ -1619,7 +1693,46 @@ out string strError)
             }
 
             this.dpTable_browseLines.Rows.Clear();
+        }
 
+        int BuildBrowseText(string strXml,
+            out string strBrowseText,
+            out string strMarcSyntax,
+            out string strError)
+        {
+            strError = "";
+            strBrowseText = "";
+            strMarcSyntax = "";
+
+            int nRet = 0;
+
+            string strMARC = "";
+            // 将XML格式转换为MARC格式
+            // 自动从数据记录中获得MARC语法
+            nRet = MarcUtil.Xml2Marc(strXml,    // info.OldXml,
+                true,
+                null,
+                out strMarcSyntax,
+                out strMARC,
+                out strError);
+            if (nRet == -1)
+            {
+                strError = "XML 转换到 MARC 记录时出错: " + strError;
+                return -1;
+            }
+
+            nRet = BuildMarcBrowseText(
+                strMarcSyntax,
+                strMARC,
+                out strBrowseText,
+                out strError);
+            if (nRet == -1)
+            {
+                strError = "MARC 记录转换到浏览格式时出错: " + strError;
+                return -1;
+            }
+
+            return 0;
         }
 
         // 更新浏览行中缓冲的书目信息
@@ -1646,8 +1759,23 @@ out string strError)
                     //dup.CoverImageRquested = info.CoverImageRquested;
                     // row.Tag = dup;
 
-                    // 刷新浏览列
+                    // XML 转换为 MARC，为了构造浏览格式的需要
                     string strError = "";
+                    string strBrowseText = "";
+                    string strMarcSyntax = "";
+
+                    int nRet = BuildBrowseText(dup.OldXml,
+out strBrowseText,
+out strMarcSyntax,
+out strError);
+                    if (nRet == -1)
+                        strBrowseText = strError;
+
+                    dup.MarcSyntax = strMarcSyntax;
+
+
+#if NO
+                    // 刷新浏览列
                     string strBrowseText = "";
                     int nRet = BuildMarcBrowseText(
                         dup.MarcSyntax,
@@ -1658,6 +1786,7 @@ out string strError)
                     {
                         strBrowseText = "MARC记录转换到浏览格式时出错: " + strError;
                     }
+#endif
                     // 替换浏览列内容
                     ChangeBiblioBrowseLine(
                         row,
@@ -1669,10 +1798,13 @@ out string strError)
         }
 
         public event AsyncGetImageEventHandler AsyncGetImage = null;
-        bool CoverImageRequested = false; // 如果为 true ,表示已经请求了异步获取图像，不要重复请求
+        // bool CoverImageRequested = false; // 如果为 true ,表示已经请求了异步获取图像，不要重复请求
 
         // 准备特定浏览行的封面图像
-        void PrepareCoverImage(DpRow row)
+        // parameters:
+        //      bRetry  是否为重试？如果为 true，表示即便 info.CoverImageRquested == true 也要重做
+        void PrepareCoverImage(DpRow row, 
+            bool bRetry = false)
         {
             Debug.Assert(row != null, "");
 
@@ -1683,40 +1815,219 @@ out string strError)
             if (string.IsNullOrEmpty(info.CoverImageFileName) == false)
                 return;
 
-            string strMARC = info.OldXml;
-            if (string.IsNullOrEmpty(strMARC) == true)
+            if (string.IsNullOrEmpty(info.OldXml) == true)
                 return;
 
-            string strUrl = ScriptUtil.GetCoverImageUrl(strMARC);
-            if (string.IsNullOrEmpty(strUrl) == true)
-                return;
+            string strUrl = "";
+            {
+                string strError = "";
+                string strMARC = "";
+                string strMarcSyntax = "";
+                // 将XML格式转换为MARC格式
+                // 自动从数据记录中获得MARC语法
+                int nRet = MarcUtil.Xml2Marc(info.OldXml,
+                    true,
+                    null,
+                    out strMarcSyntax,
+                    out strMARC,
+                    out strError);
+                if (nRet == -1)
+                {
+                    Debug.Assert(false, "");
+                    return;
+                }
 
+                if (string.IsNullOrEmpty(strMARC) == true)
+                    return;
+
+                strUrl = ScriptUtil.GetCoverImageUrl(strMARC);
+                if (string.IsNullOrEmpty(strUrl) == true)
+                    return;
+            }
+
+#if NO
             if (StringUtil.HasHead(strUrl, "http:") == true)
                 return;
+#endif
 
-            if (info != null && info.CoverImageRquested == true)
+            if (info != null
+                && bRetry == false
+                && info.CoverImageRquested == true)
                 return;
 
             // 通过 dp2library 协议获得图像文件
-            if (this.AsyncGetImage != null)
+            // if (this.AsyncGetImage != null)
             {
                 AsyncGetImageEventArgs e = new AsyncGetImageEventArgs();
                 e.RecPath = row[1].Text;
                 e.ObjectPath = strUrl;
                 e.FileName = "";
                 e.Row = row;
-                this.AsyncGetImage(this, e);
+                this.AsyncGetImageFile(this, e);
                 // 修改状态，表示已经发出请求
-                if (row != null)
+                if (row != null && info != null)
                 {
-                    if (info != null)
-                        info.CoverImageRquested = true;
-                }
-                else
-                {
-                    this.CoverImageRequested = true;
+                    info.CoverImageRquested = true;
                 }
             }
+        }
+
+#if NO
+        public override MainForm MainForm
+        {
+            get
+            {
+                return base.MainForm;
+            }
+            set
+            {
+                base.MainForm = value;
+                if (value != null && this._imageManager != null)
+                {
+                    this._imageManager.TempFileDir = value.UserTempDir;
+                }
+            }
+        }
+#endif
+
+        internal ImageManager _imageManager = null;
+
+        internal void AsyncGetImageFile(object sender,
+    AsyncGetImageEventArgs e)
+        {
+            string strError = "";
+            if (String.IsNullOrEmpty(e.RecPath) == true)
+            {
+                strError = "e.RecPath 为空，无法获得图像文件";
+                goto ERROR1;
+            }
+
+            if (StringUtil.HasHead(e.ObjectPath, "http:") == true)
+            {
+                EventFilter filter = new EventFilter();
+                // filter.BiblioRegister = biblioRegister;
+                filter.Row = e.Row;
+                filter.BiblioRecPath = e.RecPath;
+
+                this._imageManager.AsyncGetObjectFile(
+                    "",
+                    "",
+                    e.ObjectPath,
+                    e.FileName,
+                    filter);
+            }
+            else
+            {
+                string strPath = "";
+                string strServerName = "";
+                StringUtil.ParseTwoPart(e.RecPath, "@", out strPath, out strServerName);
+
+                AccountInfo account = _base.GetAccountInfo(strServerName, false);
+                if (account == null)
+                {
+                    strError = "e.RecPath 中 '" + e.RecPath + "' 服务器名 '" + strServerName + "' 没有配置";
+                    goto ERROR1;
+                }
+                string strServerUrl = account.ServerUrl;
+                string strUserName = account.UserName;
+
+                if (EntityRegisterBase.IsDot(strServerUrl) == true)
+                    strServerUrl = this.MainForm.LibraryServerUrl;
+                if (EntityRegisterBase.IsDot(strUserName) == true)
+                    strUserName = this.MainForm.DefaultUserName;
+
+                EventFilter filter = new EventFilter();
+                // filter.BiblioRegister = biblioRegister;
+                filter.Row = e.Row;
+                filter.BiblioRecPath = e.RecPath;
+
+
+                // string strObjectPath = strPath + "/object/" + e.ObjectPath;
+                string strObjectPath = ScriptUtil.MakeObjectUrl(strPath, e.ObjectPath);
+                this._imageManager.AsyncGetObjectFile(strServerUrl,
+                    strUserName,
+                    strObjectPath,
+                    e.FileName,
+                    filter);
+            }
+
+            return;
+        ERROR1:
+            this.AsyncGetImageComplete(e.Row,
+                "",
+                null,
+                strError);
+        }
+
+        // 设置图像文件
+        public void AsyncGetImageComplete(DpRow row,
+            string strBiblioRecPath,
+            string strFileName,
+            string strErrorInfo)
+        {
+            if (this.dpTable_browseLines.InvokeRequired)
+            {
+                this.Invoke(new Action<DpRow, string, string, string>(AsyncGetImageComplete),
+                    row, strBiblioRecPath, strFileName, strErrorInfo);
+                return;
+            }
+
+            // row[COLUMN_IMAGE].Text = strFileName;
+
+            if (string.IsNullOrEmpty(strErrorInfo) == false)
+                row[COLUMN_IMAGE].Text = "!" + strErrorInfo;
+            else
+                SetImage(row[COLUMN_IMAGE], strFileName);
+
+#if NO
+            // 已经选定了书目记录的情况
+            if (row == null)
+            {
+                if (string.IsNullOrEmpty(strErrorInfo) == false)
+                {
+                    // 如何报错?
+                    // row 为空
+                    // this.pictureBox1.Image = null;
+                    return;
+                }
+
+                // 给相关浏览行设定
+                row = FindRowByRecPath(this.BiblioRecPath + "@" + this.ServerName);
+                if (row != null)
+                {
+                    RegisterBiblioInfo info = row.Tag as RegisterBiblioInfo;
+                    if (info != null)
+                        info.CoverImageFileName = strFileName;
+                }
+
+                if (strBiblioRecPath == this.BiblioRecPath
+                    && this.DisplayMode == "detail")
+                {
+                    this.ImageFileName = strFileName;
+                    this.pictureBox1.LoadAsync(strFileName);
+                }
+                return;
+            }
+
+            {
+                RegisterBiblioInfo info = row.Tag as RegisterBiblioInfo;
+                if (info != null)
+                    info.CoverImageFileName = strFileName;
+
+                if (this.DisplayMode == "select"
+                    && this.dpTable_browseLines.SelectedRows.Count == 1
+                    && this.dpTable_browseLines.SelectedRows[0] == row)
+                    this.pictureBox1.LoadAsync(strFileName);
+            }
+#endif
+        }
+
+        // 事件筛选
+        class EventFilter
+        {
+            // public BiblioRegisterControl BiblioRegister = null;
+            public DpRow Row = null;    // 浏览行对象
+            public string BiblioRecPath = "";   // 书目记录路径
         }
 
         #endregion
@@ -2451,7 +2762,12 @@ int nCount)
                 {
                     // 观察报错的字段是否有隐藏状态的。如果有，则需要把它们显示出来，以便操作者观察修改
                     {
-                        List<string> important_fieldnames = StringUtil.SplitList(this.textBox_settings_importantFields.Text.Replace("\r\n", ","));
+                        List<string> important_fieldnames = null; //  StringUtil.SplitList(this.textBox_settings_importantFields.Text.Replace("\r\n", ","));
+                        if (_biblio.MarcSyntax == "unimarc")
+                            important_fieldnames = StringUtil.SplitList(this.UnimarcBiblioImportantFields);
+                        else
+                            important_fieldnames = StringUtil.SplitList(this.Marc21BiblioImportantFields);
+
                         List<string> hidden_fieldnames = BiblioError.GetOutOfRangeFieldNames(errors, important_fieldnames);
                         if (hidden_fieldnames.Count > 0)
                             this.easyMarcControl1.HideFields(hidden_fieldnames, false); // null, false 可显示全部隐藏字段
@@ -2516,6 +2832,7 @@ int nCount)
             }
 
             bool bBiblioSaved = false;
+            bool bEntitySaved = false;
 
             this.ShowMessage("正在保存书目和册记录", "progress", false);
 
@@ -2524,6 +2841,7 @@ int nCount)
             try
             {
                 string strCancelSaveBiblio = "";
+                string strWarning = "";
 
                 AccountInfo _currentAccount = _base.GetAccountInfo(this._biblio.ServerName);
                 if (_currentAccount == null)
@@ -2574,15 +2892,18 @@ int nCount)
                     // 虽然无法兑现修改后保存,但是否可以依然保存实体记录?
 
                     string strXml = "";
-                    nRet = GetBiblioXml(
+                    nRet = this._biblio.GetBiblioXml(
                         out strXml,
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
 
-                    string strWarning = "";
                     string strOutputPath = "";
                     byte[] baNewTimestamp = null;
+                    // return:
+                    //      -1  出错
+                    //      0   有警告，在 strWarning 中。一般是因为部分保存成功
+                    //      1   成功
                     nRet = SaveXmlBiblioRecordToDatabase(
                         strServerName,
                         strBiblioRecPath,
@@ -2594,18 +2915,33 @@ int nCount)
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
+                    if (nRet == 0)
+                    {
+                        // strWarning 中为警告信息
+                        // TODO: 出现对照窗口，允许进一步修改
+                    }
                     this._biblio.ServerName = strServerName;
                     this._biblio.BiblioRecPath = strOutputPath;
                     this._biblio.Timestamp = baNewTimestamp;
-                    this._biblio.BiblioChanged = false;
+
+                    if (string.IsNullOrEmpty(strWarning) == true)
+                        this._biblio.BiblioChanged = false;
 
                     bBiblioSaved = true;
 
                     // 刷新浏览列表中的书目信息
                     {
+                        strXml = "";
+                        if (string.IsNullOrEmpty(strWarning) == true)
+                        {
+                            nRet = this._biblio.GetBiblioXml(out strXml, out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+                        }
+
                         RegisterBiblioInfo info = new RegisterBiblioInfo(
                             _biblio.BiblioRecPath + "@" + _biblio.ServerName,
-                            _biblio.GetMarc(),  // OldXml 成员被挪用了，实际上存放的是 MARC 字符串
+                            strXml,
                             "",
                             _biblio.Timestamp,
                             _biblio.MarcSyntax);
@@ -2645,21 +2981,36 @@ int nCount)
                         if (nRet == -1 || nRet == -2)
                             goto ERROR1;
                         this._biblio.EntitiesChanged = false;
+                        bEntitySaved = true;
                     }
                     else
                     {
                         this._biblio.EntitiesChanged = false;
                         // line._biblioRegister.BarColor = "G";   // 绿色
-                        if (bBiblioSaved == false)
-                            this.ShowMessage("没有可保存的信息", "yellow", true);
-                        return 0;
+
                     }
                 }
 
+
                 if (string.IsNullOrEmpty(strCancelSaveBiblio) == false)
                 {
-                    this.ShowMessage("书目记录无法保存，但册记录保存成功\r\n(" + strCancelSaveBiblio + ")",
-                        "red", true);
+                    if (bEntitySaved == false)
+                        strError = "书目记录无法保存\r\n(" + strCancelSaveBiblio + ")";
+                    else
+                        strError = "书目记录无法保存，但册记录保存成功\r\n(" + strCancelSaveBiblio + ")";
+                    goto ERROR1;
+                }
+                else if (string.IsNullOrEmpty(strWarning) == false)
+                {
+                    if (bEntitySaved == false)
+                        this.ShowMessage(strWarning, "yellow", true);
+                    else
+                        this.ShowMessage(strWarning + "，但册记录保存成功", "yellow", true);
+                }
+                else if (bBiblioSaved == false && bEntitySaved == false)
+                {
+                    this.ShowMessage("没有可保存的信息", "yellow", true);
+                    return 0;
                 }
                 else
                 {
@@ -2678,68 +3029,12 @@ int nCount)
             return -1;
         }
 
-        // 获得书目记录的XML格式
-        // parameters:
-        int GetBiblioXml(
-            out string strXml,
-            out string strError)
-        {
-            strError = "";
-            strXml = "";
-
-            string strBiblioDbName = Global.GetDbName(this._biblio.BiblioRecPath);
-
-            string strMarcSyntax = "";
-
-            // TODO: 如何获得远程其他 dp2library 服务器的书目库的 syntax?
-            // 获得库名，根据库名得到marc syntax
-            if (String.IsNullOrEmpty(strBiblioDbName) == false)
-                strMarcSyntax = MainForm.GetBiblioSyntax(strBiblioDbName);
-
-            // 在当前没有定义MARC语法的情况下，默认unimarc
-            if (String.IsNullOrEmpty(strMarcSyntax) == true)
-                strMarcSyntax = "unimarc";
-
-            // 2008/5/16 changed
-            string strMARC = this._biblio.GetMarc();
-            XmlDocument domMarc = null;
-            int nRet = MarcUtil.Marc2Xml(strMARC,
-                strMarcSyntax,
-                out domMarc,
-                out strError);
-            if (nRet == -1)
-                return -1;
-
-            // 因为domMarc是根据MARC记录合成的，所以里面没有残留的<dprms:file>元素，也就没有(创建新的id前)清除的需要
-
-            Debug.Assert(domMarc != null, "");
-
-#if NO
-            // 合成其它XML片断
-            if (domXmlFragment != null
-                && string.IsNullOrEmpty(domXmlFragment.DocumentElement.InnerXml) == false)
-            {
-                XmlDocumentFragment fragment = domMarc.CreateDocumentFragment();
-                try
-                {
-                    fragment.InnerXml = domXmlFragment.DocumentElement.InnerXml;
-                }
-                catch (Exception ex)
-                {
-                    strError = "fragment XML装入XmlDocumentFragment时出错: " + ex.Message;
-                    return -1;
-                }
-
-                domMarc.DocumentElement.AppendChild(fragment);
-            }
-#endif
-
-            strXml = domMarc.OuterXml;
-            return 0;
-        }
-
         // 保存XML格式的书目记录到数据库
         // parameters:
+        // return:
+        //      -1  出错
+        //      0   有警告，在 strWarning 中。一般是因为部分保存成功
+        //      1   成功
         int SaveXmlBiblioRecordToDatabase(
             string strServerName,
             string strPath,
@@ -2790,6 +3085,7 @@ int nCount)
                 if (_channel.ErrorCode == ErrorCode.PartialDenied)
                 {
                     strWarning = "书目记录 '" + strPath + "' 保存成功，但所提交的字段部分被拒绝 (" + strError + ")。请留意刷新窗口，检查实际保存的效果";
+                    return 0;
                 }
 
                 return 1;
@@ -2822,7 +3118,9 @@ int nCount)
                     bool bAppend = Global.IsAppendRecPath(strEditBiblioRecPath);
                     if (bAppend == true && StringUtil.IsInList("append", strAccess) == true)
                         return true;
-                    if (bAppend == false && StringUtil.IsInList("overwrite", strAccess) == true)
+                    if (bAppend == false 
+                        && (StringUtil.IsInList("overwrite", strAccess) == true || StringUtil.IsInList("partial_overwrite", strAccess) == true)
+                        )
                         return true;
                 }
             }
@@ -3228,20 +3526,43 @@ MessageBoxDefaultButton.Button1);
         public int NewBiblio(bool bAutoSetFocus = true)
         {
             string strError = "";
+            int nRet = 0;
 
             this.ClearMessage();
+
+            string strRecord = "";
+            strRecord = this.UnimarcBiblioDefault;
+            if (string.IsNullOrEmpty(strRecord) == false)
+            {
+                if (StringUtil.HasHead(strRecord, "hdr") == true
+                    || StringUtil.HasHead(strRecord, "###") == true)
+                {
+                    strRecord = strRecord.Substring(3);
+                    // 去掉第一个回车
+                    nRet = strRecord.IndexOf("\r\n");
+                    if (nRet != -1)
+                        strRecord = strRecord.Remove(nRet, 2);
+                }
+                else
+                {
+                    // 加上头标区
+                    strRecord = "?????nam0 22?????3i 45  " + strRecord;
+                }
+                strRecord = strRecord.Replace("$", new string((char)31, 1))
+                    .Replace("\r\n", new string((char)30, 1));
+            }
 
             RegisterBiblioInfo info = null;
             if (this.tabControl_main.SelectedTab == this.tabPage_searchBiblio)
                 info = BuildBlankBiblioInfo(
-                     "",
+                     strRecord,
                      this.comboBox_from.Text,
                      this.textBox_queryWord.Text);
             else
                 info = BuildBlankBiblioInfo(
-     "",
-     "",
-     "");
+                    strRecord,
+                    "",
+                    "");
             if (bAutoSetFocus == false)
                 this.tabControl_main.Enabled = false;
 
@@ -3260,7 +3581,7 @@ MessageBoxDefaultButton.Button1);
             // 清除窗口内容
             _biblio.Clear();
 
-            int nRet = SetBiblio(info, bAutoSetFocus, out strError);
+            nRet = SetBiblio(info, bAutoSetFocus, out strError);
             if (nRet == -1)
                 goto ERROR1;
 
@@ -3351,16 +3672,20 @@ MessageBoxDefaultButton.Button1);
             if (string.IsNullOrEmpty(strRecord) == true)
             {
                 record.add(new MarcField('$', "010  $a" + strISBN + "$dCNY??"));
-                record.add(new MarcField('$', "2001 $a"+strTitle+"$f"));
+                record.add(new MarcField('$', "2001 $a"+strTitle+"$f"+strAuthor));
                 record.add(new MarcField('$', "210  $a$c"+strPublisher+"$d"));
                 record.add(new MarcField('$', "215  $a$d??cm"));
                 record.add(new MarcField('$', "690  $a"));
                 record.add(new MarcField('$', "701  $a" + strAuthor));
+
+                // record.Header.ForceUNIMARCHeader();
+                record.Header[0, 24] = "?????nam0 22?????3i 45  ";
             }
             else
             {
                 record.setFirstSubfield("010", "a", strISBN);
                 record.setFirstSubfield("200", "a", strTitle);
+                record.setFirstSubfield("200", "f", strAuthor);
                 record.setFirstSubfield("210", "c", strPublisher);
                 record.setFirstSubfield("701", "a", strAuthor);
 #if NO
@@ -3373,10 +3698,18 @@ MessageBoxDefaultButton.Button1);
 #endif
             }
 
-            // record.Header.ForceUNIMARCHeader();
-            record.Header[0, 24] = "?????nam0 22?????3i 45  ";
+            // info.OldXml = record.Text;
 
-            info.OldXml = record.Text;
+            string strError = "";
+            string strXml = "";
+            int nRet = MarcUtil.Marc2Xml(record.Text,
+                info.MarcSyntax,
+                out strXml,
+                out strError);
+            if (nRet == -1)
+                throw new Exception(strError);
+
+            info.OldXml = strXml;
             return info;
         }
 
@@ -3394,12 +3727,33 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
+#if NO
         private void textBox_settings_importantFields_TextChanged(object sender, EventArgs e)
         {
             if (this._biblio != null)
             {
                 this._biblio.HideFieldNames = StringUtil.SplitList(this.textBox_settings_importantFields.Text.Replace("\r\n", ","));
                 this._biblio.HideFieldNames.Insert(0, "rvs");
+            }
+        }
+#endif
+
+        void OnImportantFieldsChanged()
+        {
+            if (this._biblio != null)
+            {
+                List<string> important_fieldnames = null;
+                if (_biblio.MarcSyntax == "unimarc")
+                    important_fieldnames = StringUtil.SplitList(this.UnimarcBiblioImportantFields);
+                else
+                    important_fieldnames = StringUtil.SplitList(this.Marc21BiblioImportantFields);
+
+                important_fieldnames.Insert(0, "rvs");
+
+                this._biblio.HideFieldNames = important_fieldnames;
+
+                //this._biblio.HideFieldNames = StringUtil.SplitList(this.textBox_settings_importantFields.Text.Replace("\r\n", ","));
+                //this._biblio.HideFieldNames.Insert(0, "rvs");
             }
         }
 
@@ -3795,6 +4149,399 @@ MessageBoxDefaultButton.Button2);
             this.ColorStyle = this.comboBox_settings_colorStyle.Text;
         }
 
+        private void dpTable_browseLines_PaintRegion(object sender, PaintRegionArgs e)
+        {
+            if (e.Action == "query")
+            {
+                // 测算图像高度
+                DpCell cell = e.Item as DpCell;
+                // DpRow row = cell.Container;
+                ImageCellInfo cell_info = (ImageCellInfo)cell.Tag;
+                // string strFileName = (string)cell.Tag;
+                if (cell_info == null || string.IsNullOrEmpty(cell_info.FileName) == true)
+                    e.Height = 0;
+                else
+                {
+                    try
+                    {
+                        using (Stream s = File.Open(cell_info.FileName, FileMode.Open))
+                        {
+                            Image image = Image.FromStream(s);
+                            e.Height = image.Height;
+                            image.Dispose();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // throw new Exception("read image error:" + ex.Message);
+                        if (cell_info.RetryCount < 5)
+                        {
+                            cell_info.RetryCount++;
+                            DpRow row = cell.Container;
+                            PrepareCoverImage(row, true);
+                        }
+                        else
+                        {
+
+                            e.Height = 0;
+                            cell.OwnerDraw = false;
+                            cell.Text = "read image error";
+                        }
+                        return;
+                    }
+
+                    if (this.dpTable_browseLines.MaxTextHeight < e.Height)
+                        this.dpTable_browseLines.MaxTextHeight = e.Height;
+                }
+                return;
+            }
+
+            {
+                Debug.Assert(e.Action == "paint", "");
+
+                DpCell cell = e.Item as DpCell;
+
+                ImageCellInfo cell_info = (ImageCellInfo)cell.Tag;
+                // string strFileName = (string)cell.Tag;
+                if (cell_info != null && string.IsNullOrEmpty(cell_info.FileName) == false)
+                {
+                    try
+                    {
+                        using (Stream s = File.Open(cell_info.FileName, FileMode.Open))
+                        {
+                            Image image = Image.FromStream(s);
+
+                            // 绘制图像
+                            e.pe.Graphics.DrawImage(image,
+                                (float)e.X,
+                                (float)e.Y);
+
+                            image.Dispose();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // throw new Exception("read image error:" + ex.Message);
+                        if (cell_info.RetryCount < 5)
+                        {
+                            cell_info.RetryCount++;
+                            DpRow row = cell.Container;
+                            PrepareCoverImage(row, true);
+                        }
+                        else
+                        {
+                            cell.OwnerDraw = false;
+                            cell.Text = "read image error";
+                        }
+                    }
+                }
+                else
+                {
+                    // 绘制文字“正在加载”
+                }
+
+            }
+        }
+
+        class ImageCellInfo
+        {
+            public string FileName = "";
+            public int RetryCount = 0;
+        }
+
+        void SetImage(DpCell cell, string strFileName)
+        {
+            if (this.dpTable_browseLines.InvokeRequired)
+            {
+                this.Invoke(new Action<DpCell, string>(SetImage), cell, strFileName);
+                return;
+            }
+            cell.OwnerDraw = true;
+            ImageCellInfo info = new ImageCellInfo();
+            info.FileName = strFileName;
+            cell.Tag = info;
+            cell.Text = ""; // 迫使刷新
+        }
+
+        // 探测当前用户对一个书目库的访问权限
+        public static int DetectAccess(LibraryChannel channel,
+            Stop stop,
+            string strBiblioDbName,
+            string strMarcSyntax,
+            out string strBiblioAccess,
+            out string strEntityAccess,
+            out string strError)
+        {
+            strError = "";
+            strBiblioAccess = "";
+            strEntityAccess = "";
+
+            // 样本记录
+            MarcRecord record = new MarcRecord();
+            record.add(new MarcField('$', "001???????"));
+            record.add(new MarcField('$', "200$a书名$f作者"));
+            record.add(new MarcField('$', "701$a作者"));
+
+            string strXml = "";
+            int nRet = MarcUtil.Marc2Xml(record.Text,
+                strMarcSyntax,
+                out strXml,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            List<string> biblio_access_list = new List<string>();
+            List<string> entity_access_list = new List<string>();
+
+            // 模拟书目追加写入
+            string strAction = "simulate_new";
+            string strPath = strBiblioDbName + "/?";
+            string strOutputPath = "";
+            byte[] baNewTimestamp = null;
+            long lRet = channel.SetBiblioInfo(
+    stop,
+    strAction,
+    strPath,
+    "xml",
+    strXml,
+    null,   // baTimestamp,
+    "",
+    out strOutputPath,
+    out baNewTimestamp,
+    out strError);
+            if (lRet == -1)
+            {
+                // 注意检查部分允许写入的报错
+            }
+            else
+                biblio_access_list.Add("append");
+
+            // 模拟书目覆盖写入
+            strAction = "simulate_change";
+            strPath = strBiblioDbName + "/0";
+            lRet = channel.SetBiblioInfo(
+stop,
+strAction,
+strPath,
+"xml",
+strXml,
+null,   // baTimestamp,
+"",
+out strOutputPath,
+out baNewTimestamp,
+out strError);
+            if (lRet == -1)
+            {
+            }
+            else
+            {
+                // 注意检查部分允许写入的报错
+                if (channel.ErrorCode == ErrorCode.PartialDenied)
+                    biblio_access_list.Add("partial_overwrite");
+                else
+                    biblio_access_list.Add("overwrite");
+            }
+
+            strBiblioAccess = StringUtil.MakePathList(biblio_access_list);
+
+            // 模拟实体追加写入
+            EntityInfo info = new EntityInfo();
+            {
+                XmlDocument item_dom = new XmlDocument();
+                item_dom.LoadXml("<root />");
+
+                info.Style = "simulate";
+                info.RefID = Guid.NewGuid().ToString();
+
+                DomUtil.SetElementText(item_dom.DocumentElement,
+                    "parent", "0");
+
+                info.OldRecPath = "";
+                info.OldRecord = "";
+                info.OldTimestamp = null;
+
+                info.Action = "new";
+                info.NewRecPath = "";
+
+                info.NewRecord = item_dom.DocumentElement.OuterXml;
+                info.NewTimestamp = null;
+            }
+
+            EntityInfo[] entities = new EntityInfo[1];
+            entities[0] = info;
+
+            EntityInfo[] errorinfos = null;
+
+            lRet = channel.SetEntities(
+     stop,
+     strPath,
+     entities,
+     out errorinfos,
+     out strError);
+            if (lRet == -1 || string.IsNullOrEmpty(GetErrorInfo(errorinfos)) == false)
+            {
+
+            }
+            else
+            {
+                entity_access_list.Add("append");
+            }
+
+            // 模拟实体覆盖写入
+            entities[0].Action = "change";
+            lRet = channel.SetEntities(
+stop,
+strPath,
+entities,
+out errorinfos,
+out strError);
+            if (lRet == -1 || string.IsNullOrEmpty(GetErrorInfo(errorinfos)) == false)
+            {
+
+            }
+            else
+            {
+                entity_access_list.Add("overwrite");
+            }
+
+            strEntityAccess = StringUtil.MakePathList(entity_access_list);
+
+            return 0;
+        }
+
+        static string GetErrorInfo(EntityInfo[] errorinfos)
+        {
+            if (errorinfos == null)
+                return "";
+
+            string strError = "";
+            for (int i = 0; i < errorinfos.Length; i++)
+            {
+                if (String.IsNullOrEmpty(errorinfos[i].RefID) == true)
+                {
+                    strError = "服务器返回的EntityInfo结构中RefID为空";
+                    return strError;
+                }
+
+                // 正常信息处理
+                if (errorinfos[i].ErrorCode == ErrorCodeValue.NoError)
+                    continue;
+
+                strError += errorinfos[i].RefID + "在提交保存过程中发生错误 -- " + errorinfos[i].ErrorInfo + "\r\n";
+            }
+
+            return strError;
+        }
+
+        private void button_setting_reCreateServersXml_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            string strFileName = Path.Combine(this.MainForm.ServerCfgDir, "servers.xml");
+            // 创建 servers.xml 配置文件
+            int nRet = this.MainForm.BuildServersCfgFile(strFileName,
+                out strError);
+            if (nRet == -1)
+            {
+                MessageBox.Show(this, strError);
+                return;
+            }
+
+            // 重新加载
+            LoadServerXml();
+        }
+
+        public string UnimarcBiblioDefault
+        {
+            get
+            {
+                return this.MainForm.AppInfo.GetString("entityRegisterWizard", 
+                    "unimarcBiblioDefault",
+                    "010  $a$dCNY??\r\n2001 $a$f\r\n210  $a$c$d\r\n215  $a??页$d??cm\r\n690  $a\r\n701  $a");
+            }
+            set
+            {
+                this.MainForm.AppInfo.SetString("entityRegisterWizard",
+                    "unimarcBiblioDefault",
+                    value);
+            }
+        }
+
+        public string Marc21BiblioDefault
+        {
+            get
+            {
+                return this.MainForm.AppInfo.GetString("entityRegisterWizard",
+                    "marc21BiblioDefault",
+                    "010  $a$d\r\n200  $a$f\r\n210\r\n215\r\n690\r\n701  $a");
+            }
+            set
+            {
+                this.MainForm.AppInfo.SetString("entityRegisterWizard",
+                    "marc21BiblioDefault",
+                    value);
+            }
+        }
+
+        public string UnimarcBiblioImportantFields
+        {
+            get
+            {
+                return this.MainForm.AppInfo.GetString("entityRegisterWizard",
+                    "unimarcImportantFields",
+                    "010,200,210,215,686,69*,7**");
+            }
+            set
+            {
+                this.MainForm.AppInfo.SetString("entityRegisterWizard",
+                    "unimarcImportantFields",
+                    value);
+                OnImportantFieldsChanged();
+            }
+        }
+
+        public string Marc21BiblioImportantFields
+        {
+            get
+            {
+                return this.MainForm.AppInfo.GetString("entityRegisterWizard",
+                    "marc21ImportantFields",
+                    "010,200,210,215,686,69*,7**");
+            }
+            set
+            {
+                this.MainForm.AppInfo.SetString("entityRegisterWizard",
+                    "marc21ImportantFields",
+                    value);
+                OnImportantFieldsChanged();
+            }
+        }
+
+
+        private void button_settings_bilbioDefault_Click(object sender, EventArgs e)
+        {
+            //controls.Add(new ControlWrapper(this.textBox_settings_importantFields, "010,200,210,215,686,69*,7**".Replace(",", "\r\n")));
+
+            MarcDefaultDialog dlg = new MarcDefaultDialog();
+            // GuiUtil.AutoSetDefaultFont(dlg);
+
+            dlg.UnimarcDefault = this.UnimarcBiblioDefault;
+            dlg.UnimarcImportantFields = this.UnimarcBiblioImportantFields.Replace(",","\r\n");
+            dlg.Marc21Default = this.Marc21BiblioDefault;
+            dlg.Marc21ImportantFields = this.Marc21BiblioImportantFields.Replace(",", "\r\n");
+
+            dlg.StartPosition = FormStartPosition.CenterScreen;
+            this.MainForm.AppInfo.LinkFormState(dlg, "entityRegisterWizard_biblioDefault");
+            dlg.ShowDialog(this);
+
+            if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                return;
+
+            this.UnimarcBiblioDefault = dlg.UnimarcDefault;
+            this.UnimarcBiblioImportantFields = dlg.UnimarcImportantFields.Replace("\r\n", ",");
+            this.Marc21BiblioDefault = dlg.Marc21Default;
+            this.Marc21BiblioImportantFields = dlg.Marc21ImportantFields.Replace("\r\n", ",");
+
+        }
 #if NO
         void RegisterMouseClick(Control parent)
         {
