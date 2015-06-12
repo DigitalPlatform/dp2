@@ -134,7 +134,7 @@ namespace DigitalPlatform.dp2.Statis
                     return 0;
                 }
 
-                List<CellData> cells = new List<CellData>();
+                // List<CellData> cells = new List<CellData>();
 
                 nColIndex = 1;
                 foreach (ListViewItem.ListViewSubItem subitem in item.SubItems)

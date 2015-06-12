@@ -612,13 +612,11 @@ namespace DigitalPlatform.OPAC.Web
                 strResult += "</tr>";
 
                 right.Text = strResult;
-
             }
 
             // 把多余的行隐藏起来
             for (int i = nodes.Count; ; i++)
             {
-
                 PlaceHolder line = (PlaceHolder)borrowinfo.FindControl("borrowinfo_line" + Convert.ToString(i));
                 if (line == null)
                     break;

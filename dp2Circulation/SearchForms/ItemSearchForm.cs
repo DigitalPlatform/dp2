@@ -2217,6 +2217,13 @@ this.dp2QueryControl1.GetSaveString());
                     if (nPathItemCount == 0)
                         subMenuItem.Enabled = false;
                     menuItemExport.MenuItems.Add(subMenuItem);
+
+                    menuItemExport.MenuItems.Add(subMenuItem); subMenuItem = new MenuItem("输出到 Excel 文件，将借者记录 [" + (nPathItemCount == -1 ? "?" : nPathItemCount.ToString()) + "] (&R)...");
+                    subMenuItem.Click += new System.EventHandler(this.menu_exportToReaderExcelFile_Click);
+                    if (nPathItemCount == 0)
+                        subMenuItem.Enabled = false;
+                    menuItemExport.MenuItems.Add(subMenuItem);
+
                 }
             }
 
@@ -2614,8 +2621,8 @@ this.dp2QueryControl1.GetSaveString());
             return 0;
         }
 
-        // 装入读者查询窗口
-        void menu_exportToReaderSearchForm_Click(object sender, EventArgs e)
+        // 输出读者详情到 Excel 文件。读者所借阅的各册图书
+        void menu_exportToReaderExcelFile_Click(object sender, EventArgs e)
         {
             string strError = "";
             int nRet = 0;
@@ -2628,7 +2635,6 @@ this.dp2QueryControl1.GetSaveString());
                 strError = "尚未选定要装入读者查询窗的行";
                 goto ERROR1;
             }
-
 
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
@@ -2646,7 +2652,88 @@ this.dp2QueryControl1.GetSaveString());
                     goto ERROR1;
 
                 if (nWarningLineCount > 0)
-                    strText = "有 " + nWarningLineCount.ToString() + " 行因为相关库浏览格式没有定义 type 为 borrower 的而被忽略";
+                    strText = "有 " + nWarningLineCount.ToString() + " 行因为相关库浏览格式没有定义 type 为 borrower 的栏而被忽略";
+                if (nDupCount > 0)
+                {
+                    if (string.IsNullOrEmpty(strText) == false)
+                        strText += "\r\n\r\n";
+                    strText += "读者记录有 " + nDupCount.ToString() + " 项重复被忽略";
+                }
+
+                if (reader_barcodes.Count == 0)
+                {
+                    strError = "没有找到相关的读者记录";
+                    goto ERROR1;
+                }
+
+                ReaderSearchForm form = new ReaderSearchForm();
+                form.MdiParent = this.MainForm;
+                form.Show();
+
+                // return:
+                //      -1  出错
+                //      0   用户中断
+                //      1   成功
+                nRet = form.CreateReaderDetailExcelFile(reader_barcodes,
+                    true,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+            }
+            finally
+            {
+
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                stop.HideProgress();
+                stop.Style = StopStyle.None;
+            }
+
+            if (string.IsNullOrEmpty(strText) == false)
+                MessageBox.Show(this, strText);
+
+            return;
+        ERROR1:
+            if (string.IsNullOrEmpty(strText) == false)
+                MessageBox.Show(this, strText);
+
+            MessageBox.Show(this, strError);
+        }
+
+        // 装入读者查询窗口
+        void menu_exportToReaderSearchForm_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+            int nWarningLineCount = 0;
+            int nDupCount = 0;
+            string strText = "";
+
+            if (this.listView_records.SelectedItems.Count == 0)
+            {
+                strError = "尚未选定要装入读者查询窗的行";
+                goto ERROR1;
+            }
+
+            stop.Style = StopStyle.EnableHalfStop;
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在装入记录到读者查询窗 ...");
+            stop.BeginLoop();
+
+            try
+            {
+                List<string> reader_barcodes = new List<string>();
+                nRet = GetSelectedReaderBarcodes(out reader_barcodes,
+            ref nWarningLineCount,
+            ref nDupCount,
+            out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                if (nWarningLineCount > 0)
+                    strText = "有 " + nWarningLineCount.ToString() + " 行因为相关库浏览格式没有定义 type 为 borrower 的栏而被忽略";
                 if (nDupCount > 0)
                 {
                     if (string.IsNullOrEmpty(strText) == false)

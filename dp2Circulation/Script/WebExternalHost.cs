@@ -637,7 +637,7 @@ namespace dp2Circulation
              * */
             long lRet = 0;
 
-            string strNoneFilePath = this.MainForm.DataDir + "/nonephoto.png";
+            string strNoneFilePath = Path.Combine(this.MainForm.DataDir, "nonephoto.png");
 
             // 2012/1/6
             if (string.IsNullOrEmpty(strPatronBarcode) == true)

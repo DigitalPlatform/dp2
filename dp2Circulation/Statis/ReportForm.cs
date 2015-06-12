@@ -9,6 +9,10 @@ using System.Windows.Forms;
 using System.Xml;
 using System.IO;
 using System.Web;
+using System.Collections;
+using System.Diagnostics;
+using System.Threading;
+using System.Globalization;
 
 using Ionic.Zip;
 using System.Data.SQLite;
@@ -17,9 +21,7 @@ using DigitalPlatform;
 using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 
-using System.Collections;
 using DigitalPlatform.dp2.Statis;
-using System.Diagnostics;
 using DigitalPlatform.Text;
 using DigitalPlatform.GUI;
 using DigitalPlatform.CirculationClient;
@@ -27,8 +29,6 @@ using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.Range;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Script;
-using System.Threading;
-using System.Globalization;
 
 namespace dp2Circulation
 {

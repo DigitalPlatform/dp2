@@ -3047,11 +3047,11 @@ AppInfo.GetString("config",
         /// 结束检索
         /// </summary>
         /// <returns>返回 0</returns>
-        public int EndSearch()
+        public int EndSearch(bool bActivateStop = true)
         {
             if (Stop != null) // 脱离关联
             {
-                Stop.Unregister();	// 和容器关联
+                Stop.Unregister(bActivateStop);	// 和容器关联
                 Stop = null;
             }
 
@@ -7586,7 +7586,7 @@ out strError);
                 }
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
 
-                this.EndSearch();   // BUG !!! 2012/3/28前少这一句
+                this.EndSearch(bDisplayProgress);   // BUG !!! 2012/3/28前少这一句
             }
 
             return 0;

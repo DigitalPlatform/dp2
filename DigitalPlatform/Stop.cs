@@ -121,9 +121,9 @@ namespace DigitalPlatform
                 manager.Active(this);
         }
 
-        public void Unregister()
+        public void Unregister(bool bActive = true)
         {
-            m_manager.Remove(this);
+            m_manager.Remove(this, false);
             m_manager = null;
         }
 
@@ -1252,7 +1252,7 @@ namespace DigitalPlatform
 
         // 移走一个Stop对象
         // locks: 集合写锁
-        public void Remove(Stop stop)
+        public void Remove(Stop stop, bool bChangeState = true)
         {
             WriteDebugInfo("collection write lock 3\r\n");
             this.m_collectionlock.AcquireWriterLock(Stop.m_nLockTimeout);
@@ -1260,6 +1260,7 @@ namespace DigitalPlatform
             {
                 stops.Remove(stop);
 
+                if (bChangeState == true)
                 ChangeState(null,
                     StateParts.All,
                     false); // false表示不加集合锁

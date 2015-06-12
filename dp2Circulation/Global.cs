@@ -21,6 +21,7 @@ using DigitalPlatform.Marc;
 
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CirculationClient.localhost;
+using System.Web;
 
 namespace dp2Circulation
 {
@@ -2414,7 +2415,7 @@ namespace dp2Circulation
             StopWebBrowser(webBrowser);
 
             strHtml = strHtml.Replace("%datadir%", strDataDir);
-            strHtml = strHtml.Replace("%mappeddir%", PathUtil.MergePath(strDataDir, "servermapped"));
+            strHtml = strHtml.Replace("%mappeddir%",  PathUtil.MergePath(strDataDir, "servermapped"));
 
             string strTempFilename = strDataDir + "\\temp_"+strTempFileType+".html";
             using (StreamWriter sw = new StreamWriter(strTempFilename, false, Encoding.UTF8))

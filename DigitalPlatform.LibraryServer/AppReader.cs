@@ -2514,51 +2514,52 @@ strLibraryCode);    // 读者所在的馆代码
                     DomUtil.SetAttr(node, "summary", strSummary);
                 }
 
-                string strOverdue = "";
-                long lOver = 0;
-                string strPeriodUnit = "";
-                // 检查超期情况。
-                // return:
-                //      -1  数据格式错误
-                //      0   没有发现超期
-                //      1   发现超期   strError中有提示信息
-                //      2   已经在宽限期内，很容易超期 2009/3/13 new add
-                nRet = this.CheckPeriod(
-                    calendar,
-                    strBorrowDate,
-                    strPeriod,
-                    out lOver,
-                    out strPeriodUnit,
-                    out strError);
-                if (nRet == -1)
                 {
-                    DomUtil.SetAttr(node, "isOverdue", "error");
-                    strOverdue = strError;
-                }
-                else if (nRet == 1)
-                {
-                    DomUtil.SetAttr(node, "isOverdue", "yes");
-                    strOverdue = strError;	// "已超期";
-                }
-                else
-                {
-                    DomUtil.SetAttr(node, "isOverdue", "no");
-                    strOverdue = strError;	// 可能也有一些必要的信息，例如非工作日
+                    string strOverdue = "";
+                    long lOver = 0;
+                    string strPeriodUnit = "";
+                    // 检查超期情况。
+                    // return:
+                    //      -1  数据格式错误
+                    //      0   没有发现超期
+                    //      1   发现超期   strError中有提示信息
+                    //      2   已经在宽限期内，很容易超期 2009/3/13 new add
+                    nRet = this.CheckPeriod(
+                        calendar,
+                        strBorrowDate,
+                        strPeriod,
+                        out lOver,
+                        out strPeriodUnit,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        DomUtil.SetAttr(node, "isOverdue", "error");
+                        strOverdue = strError;
+                    }
+                    else if (nRet == 1)
+                    {
+                        DomUtil.SetAttr(node, "isOverdue", "yes");
+                        strOverdue = strError;	// "已超期";
+                    }
+                    else
+                    {
+                        DomUtil.SetAttr(node, "isOverdue", "no");
+                        strOverdue = strError;	// 可能也有一些必要的信息，例如非工作日
+                    }
+
+                    DomUtil.SetAttr(node, "overdueInfo", strOverdue);
                 }
 
-                DomUtil.SetAttr(node, "overdueInfo", strOverdue);
-
-
                 {
-                    string strOverDue = "";
+                    string strOverdue = "";
+                    long lOver = 0;
+                    string strPeriodUnit = "";
                     // bool bOverdue = false;  // 是否超期
 
                     DateTime timeReturning = DateTime.MinValue;
                     string strTips = "";
 
                     DateTime timeNextWorkingDay;
-                    lOver = 0;
-                    strPeriodUnit = "";
 
                     // 获得还书日期
                     // return:
@@ -2576,14 +2577,14 @@ strLibraryCode);    // 读者所在的馆代码
                         out strPeriodUnit,
                         out strError);
                     if (nRet == -1)
-                        strOverDue = strError;
+                        strOverdue = strError;
                     else
                     {
                         strTips = strError;
                         if (nRet == 1)
                         {
                             // bOverdue = true;
-                            strOverDue = " ("
+                            strOverdue = " ("
                                 + string.Format(this.GetString("已超期s"),  // 已超期 {0}
                                                 this.GetDisplayTimePeriodStringEx(lOver.ToString() + " " + strPeriodUnit))
                                 + ")";
@@ -2659,7 +2660,6 @@ strLibraryCode);    // 读者所在的馆代码
                 string strPrice = DomUtil.GetAttr(node, "price");
                 string strOverduePeriod = DomUtil.GetAttr(node, "overduePeriod");
 
-
                 // 以停代金
                 string strPauseError = "";
                 string strPauseInfo = "";
@@ -2723,8 +2723,6 @@ strLibraryCode);    // 读者所在的馆代码
                             strReaderType,
                             strPauseCfgString);
                     }
-
-
                 }
 
                 if (String.IsNullOrEmpty(strPauseInfo) == false)
@@ -2740,8 +2738,6 @@ strLibraryCode);    // 读者所在的馆代码
                 {
                     DomUtil.SetAttr(node, "priceString", strPauseError);
                 }
-
-
             }
 
             if (StringUtil.IsInList("pauseBorrowing", this.OverdueStyle) == true)

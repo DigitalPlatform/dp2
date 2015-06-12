@@ -51,7 +51,7 @@ namespace DigitalPlatform.CommonControl
                 else if (this.BorderStyle == System.Windows.Forms.BorderStyle.FixedSingle)
                     nBorderWidth = SystemInformation.BorderSize.Height * 2;
 
-                int nNewHeight = (this.Font.Height + 2) * numberOfLines + nBorderWidth;
+                int nNewHeight = (this.Font.Height + 1) * numberOfLines + nBorderWidth;
                 if (this.Height != nNewHeight)
                     this.Height = nNewHeight;
 

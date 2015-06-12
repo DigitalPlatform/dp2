@@ -240,9 +240,15 @@ namespace dp2Kernel
                 strError = "忘记调用PrepareEnvironment()了 1...";
                 return null;
             }
-            if (sessioninfo == null)
+            if (this.sessioninfo == null)
             {
                 strError = "忘记调用PrepareEnvironment()了 2...";
+                return null;
+            }
+            // 2015/6/11
+            if (app.Users == null)
+            {
+                strError = "app.Users == null";
                 return null;
             }
             // 不管UserName对应的用户对象是否在内存, 都可以找到或创建
