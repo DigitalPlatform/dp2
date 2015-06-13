@@ -1949,6 +1949,21 @@ namespace DigitalPlatform.LibraryServer
                 return result;
             }
 
+            // 个人书斋名
+            string strPersonalLibrary = "";
+            if (sessioninfo.UserType == "reader"
+                && sessioninfo.Account != null)
+            {
+                strPersonalLibrary = sessioninfo.Account.PersonalLibrary;
+                if (string.IsNullOrEmpty(strPersonalLibrary) == true)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "保存册信息 操作被拒绝。读者身份不具备个人书斋权限";
+                    result.ErrorCode = ErrorCode.AccessDenied;
+                    return result;
+                }
+            }
+
             int nRet = 0;
             long lRet = 0;
             string strError = "";
@@ -2279,6 +2294,7 @@ namespace DigitalPlatform.LibraryServer
                 string strNewBarcode = "";
 
                 // 对册条码号加锁?
+                // TODO: 以后可以统一改为对 refid 加锁
                 string strLockBarcode = "";
 
                 try
@@ -2603,7 +2619,8 @@ namespace DigitalPlatform.LibraryServer
                             //      0   符合要求
                             //      1   不符合要求
                             nRet = CheckItemLibraryCode(strNewXml,
-                                sessioninfo.LibraryCodeList,
+                                sessioninfo,
+                                // sessioninfo.LibraryCodeList,
                                 out strLibraryCode,
                                 out strError);
                             if (nRet == -1)
@@ -2615,7 +2632,8 @@ namespace DigitalPlatform.LibraryServer
                                 domOperLog = null;  // 表示不必写入日志
                                 continue;
                             }
-                            if (sessioninfo.GlobalUser == false)
+                            if (sessioninfo.GlobalUser == false
+                                || sessioninfo.UserType == "reader")
                             {
                                 if (nRet != 0)
                                 {
@@ -2862,6 +2880,41 @@ namespace DigitalPlatform.LibraryServer
                 out strError);
         }
 
+        // 不但检查工作人员身份，也检查读者身份
+        // return:
+        //      -1  检查过程出错
+        //      0   符合要求
+        //      1   不符合要求
+        int CheckItemLibraryCode(string strXml,
+            SessionInfo sessioninfo,
+            out string strLibraryCode,
+            out string strError)
+        {
+            strLibraryCode = "";
+
+            string strLibraryCodeList = "";
+            if (sessioninfo.UserType == "reader")
+            {
+                string strPersonalLibrary = "";
+                if (sessioninfo.Account != null)
+                    strPersonalLibrary = sessioninfo.Account.PersonalLibrary;
+                if (string.IsNullOrEmpty(strPersonalLibrary) == true)
+                {
+                    strError = "读者身份且不具备个人书斋定义";
+                    return 1;
+                }
+
+                if (sessioninfo.GlobalUser == false)
+                    strLibraryCodeList = sessioninfo.LibraryCodeList + "/" + strPersonalLibrary;
+                else
+                    strLibraryCodeList = strPersonalLibrary;
+            }
+            else
+                strLibraryCodeList = sessioninfo.LibraryCodeList;
+
+            return CheckItemLibraryCode(strXml, strLibraryCodeList, out strLibraryCode, out strError);
+        }
+
         // 检查一个册记录的馆藏地点是否符合馆代码列表要求
         // parameters:
         //      strLibraryCodeList  当前用户管辖的馆代码列表
@@ -2916,6 +2969,38 @@ namespace DigitalPlatform.LibraryServer
                 out strError);
         }
 
+        // 不但检查工作人员身份，也检查读者身份
+        // return:
+        //      -1  检查过程出错
+        //      0   符合要求
+        //      1   不符合要求
+        int CheckItemLibraryCode(XmlDocument dom,
+            SessionInfo sessioninfo,
+            out string strLibraryCode,
+            out string strError)
+        {
+            strLibraryCode = "";
+
+            string strLibraryCodeList = "";
+            if (sessioninfo.UserType == "reader")
+            {
+                string strPersonalLibrary = "";
+                if (sessioninfo.Account != null)
+                    strPersonalLibrary = sessioninfo.Account.PersonalLibrary;
+                if (string.IsNullOrEmpty(strPersonalLibrary) == true)
+                {
+                    strError = "读者身份且不具备个人书斋定义";
+                    return 1;
+                }
+
+                strLibraryCodeList = sessioninfo.LibraryCodeList + "/" + strPersonalLibrary;
+            }
+            else
+                strLibraryCodeList = sessioninfo.LibraryCodeList;
+
+            return CheckItemLibraryCode(dom, strLibraryCodeList, out strLibraryCode, out strError);
+        }
+
         // 检查一个册记录的馆藏地点是否符合馆代码列表要求
         // parameters:
         //      strLibraryCodeList  当前用户管辖的馆代码列表
@@ -2932,10 +3017,8 @@ namespace DigitalPlatform.LibraryServer
             strError = "";
             strLibraryCode = "";
 
-
             string strLocation = DomUtil.GetElementText(dom.DocumentElement,
                 "location");
-
 #if NO
             // 去掉 #xxx, 部分
             if (strLocation.IndexOf("#") != -1)
@@ -2958,9 +3041,17 @@ namespace DigitalPlatform.LibraryServer
 #endif
             strLocation = StringUtil.GetPureLocationString(strLocation);
 
+            // 先试探一下，馆藏地点字符串是否和 strLibraryCodeList 完全一致。
+            // 这种检测主要是为了处理 strLibraryCodeList 传来 "西城分馆/集贤斋" 这样的个人书斋全路径的情况
+            if (strLocation == strLibraryCodeList)
+            {
+                // 在管辖范围内
+                return 0;
+            }
+
             string strPureName = "";
 
-            // 解析日历名
+            // 将馆藏地点字符串分解为 馆代码+地点名 两个部分
             ParseCalendarName(strLocation,
         out strLibraryCode,
         out strPureName);
@@ -2972,13 +3063,11 @@ namespace DigitalPlatform.LibraryServer
             if (string.IsNullOrEmpty(strLibraryCode) == true)
                 goto NOTMATCH;
 
-
             if (StringUtil.IsInList(strLibraryCode, strLibraryCodeList) == true)
             {
                 // 在管辖范围内
                 return 0;
             }
-
         NOTMATCH:
             strError = "馆藏地点 '" + strLocation + "' 不在 '" + strLibraryCodeList + "' 管辖范围内";
             return 1;
@@ -3518,7 +3607,8 @@ namespace DigitalPlatform.LibraryServer
             //      0   符合要求
             //      1   不符合要求
             nRet = CheckItemLibraryCode(domExist,
-                        sessioninfo.LibraryCodeList,
+                sessioninfo,
+                        // sessioninfo.LibraryCodeList,
                         out strLibraryCode,
                         out strError);
             if (nRet == -1)
@@ -3768,14 +3858,16 @@ namespace DigitalPlatform.LibraryServer
                 //      0   符合要求
                 //      1   不符合要求
                 nRet = CheckItemLibraryCode(domExist,
-                            sessioninfo.LibraryCodeList,
+                    sessioninfo,
+                            // sessioninfo.LibraryCodeList,
                             out strSourceLibraryCode,
                             out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
                 // 检查旧记录是否属于管辖范围
-                if (sessioninfo.GlobalUser == false)
+                if (sessioninfo.GlobalUser == false
+                    || sessioninfo.UserType == "reader")
                 {
                     if (nRet != 0)
                     {
@@ -4047,7 +4139,8 @@ namespace DigitalPlatform.LibraryServer
             //      0   符合要求
             //      1   不符合要求
             nRet = CheckItemLibraryCode(strNewXml,
-                        sessioninfo.LibraryCodeList,
+                sessioninfo,
+                        // sessioninfo.LibraryCodeList,
                         out strTargetLibraryCode,
                         out strError);
             if (nRet == -1)
@@ -4080,7 +4173,8 @@ namespace DigitalPlatform.LibraryServer
             }
 
             // 检查新记录是否属于管辖范围
-            if (sessioninfo.GlobalUser == false)
+            if (sessioninfo.GlobalUser == false
+                || sessioninfo.UserType == "reader")
             {
                 if (nRet != 0)
                 {
@@ -4512,7 +4606,8 @@ namespace DigitalPlatform.LibraryServer
             //      0   符合要求
             //      1   不符合要求
             nRet = CheckItemLibraryCode(domSourceExist,
-                        sessioninfo.LibraryCodeList,
+                sessioninfo,
+                        // sessioninfo.LibraryCodeList,
                         out strSourceLibraryCode,
                         out strError);
             if (nRet == -1)
@@ -4520,7 +4615,8 @@ namespace DigitalPlatform.LibraryServer
 
 
             // 检查旧记录是否属于管辖范围
-            if (sessioninfo.GlobalUser == false)
+            if (sessioninfo.GlobalUser == false
+                || sessioninfo.UserType == "reader")
             {
                 if (nRet != 0)
                 {
@@ -4630,7 +4726,8 @@ namespace DigitalPlatform.LibraryServer
             //      0   符合要求
             //      1   不符合要求
             nRet = CheckItemLibraryCode(strNewXml,
-                        sessioninfo.LibraryCodeList,
+                sessioninfo,
+                        // sessioninfo.LibraryCodeList,
                         out strTargetLibraryCode,
                         out strError);
             if (nRet == -1)
@@ -4664,7 +4761,8 @@ namespace DigitalPlatform.LibraryServer
 
 
             // 检查新记录是否属于管辖范围
-            if (sessioninfo.GlobalUser == false)
+            if (sessioninfo.GlobalUser == false
+                || sessioninfo.UserType == "reader")
             {
                 if (nRet != 0)
                 {

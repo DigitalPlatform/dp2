@@ -230,6 +230,24 @@
         uZZeQuLZklBqdn3gGMBcZ9Gp5r8L1B+TS/Tf7MeMdAAAAABJRU5ErkJggg==
 </value>
   </data>
+  <data name="MenuItem_openArrivedSearchForm.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6
+        JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAACXBIWXMAAAr7AAAK+wHLnx2QAAACrUlE
+        QVQ4T6WO60uTYRjG3/+kz0F9iMjEMnClhZonEMdi1WxoHoZzMzE3DTwhKttCN0MqZROdluiMSkQdw8OG
+        ZjrJaZ42Z21NrWnbxJ2eq/d1JH7wQ+ED1/PcXPf1/O6bAnAmnWr+j44LaftaWNFnDzf22OZrOtevngw1
+        dC6zZL3rqzKtJVys+ERbJwClrfPDtCDtWGEa+OkDGTS5iWpwc1emnoqVa5dGjF8PyYoTGJ07gFRpQE1z
+        FziCeiZOUaLnpp4JswNi5dwRoMewgzeGLVg2feRJ82Tw3eQm8QQAxx6waA+joFEP8HIgvcKKAIoVxhHj
+        FwcEsvEjwG8/YPvhRUOnBdzyXjjcQcYmfgJi3wWEchOGhJW4FZfC+BQllE2Om1dcyK0dYgx0j7nQqrPC
+        YvPhoaQLC+t7UPbb4aHBzBZ59aMwGGcRE58RAQiaDPNr39x4IO0FMytMa8N5gPLWGWSJX0OmXcSOJ0jo
+        Htn2AI+eDUBUVoXovxsUNIysbrn2wSnTIMRY9Fl1hGCy7CI9XwEj/dZoNjCxTLB3CNx/qkaQUBBXxDNR
+        isqr++BwewPglLTBSxNc9JQF6yH69N+RmF0HyYtpzCy5sOHyYdtDwC5Woe1tKeKS0iIA+qP1Fw3ILGrB
+        Z2sAY2Yvhqe30T6wgDu8asg1U9DpF9H90Qy51oSM/CacszlwXVAWAbBFSqdr3w++9CVS+dWIulsIFlsC
+        jliNOHY5uCIV0nLqkMCtQFRyIWLSBEjo6MeNLD45AmQJW/whunS6Axg37+D9hBUtHcMorX2FS7dzwcmr
+        QGWTGhrdFAb1ZswuO6HWmZDOb4xskCmQe+6VqIJsYTNJ5FWTJF4ViU4pwuXEx7h4k4fzsVxcYGWTqGQB
+        uZZeQuLZklBqdn3gGMBcZ9Gp5r8L1B+TS/Tf7MeMdAAAAABJRU5ErkJggg==
+</value>
+  </data>
   <data name="MenuItem_openReaderInfoForm.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAAAwAAAAQCAYAAAAiYZ4HAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
@@ -515,6 +533,9 @@
         LQGTcwfxbBHOXr6Fk2kCHE+5hmOsvIiZsvOv09F/hcH4BYWJJhyGVEhUAAAAAElFTkSuQmCC
 </value>
   </data>
+  <metadata name="toolStrip_panelFixed.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>610, 17</value>
+  </metadata>
   <metadata name="contextMenuStrip_fixedPanel.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 56</value>
   </metadata>

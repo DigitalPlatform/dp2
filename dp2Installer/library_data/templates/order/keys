@@ -2,7 +2,7 @@
 <root>
 
   <key>
-    <xpath>//seller</xpath>
+    <xpath>*/seller</xpath>
     <from>seller</from>
     <table ref="seller" />
   </key>
@@ -12,7 +12,7 @@
   </table>
   
   <key>
-    <xpath>//batchNo</xpath>
+    <xpath>*/batchNo</xpath>
     <from>batchno</from>
     <table ref="batchno" />
   </key>
@@ -22,7 +22,7 @@
   </table>
   
   <key>
-    <xpath>//distribute</xpath>
+    <xpath>*/distribute</xpath>
     <from>itemrefid</from>
     <table ref="itemrefid" />
   </key>
@@ -38,7 +38,7 @@
   </table>
   
   <key>
-    <xpath>//orderTime</xpath>
+    <xpath>*/orderTime</xpath>
     <from>orderTime</from>
     <table ref="orderTime" />
   </key>
@@ -54,7 +54,7 @@
   </table>
 
   <key>
-    <xpath>//refID</xpath>
+    <xpath>*/refID</xpath>
     <from>refID</from>
     <table ref="refID" />
   </key>
@@ -64,7 +64,7 @@
   </table>
 
   <key>
-    <xpath>//orderID</xpath>
+    <xpath>*/orderID</xpath>
     <from>orderid</from>
     <table ref="orderid" />
   </key>

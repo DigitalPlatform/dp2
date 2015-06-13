@@ -10,6 +10,7 @@ using System.Threading;
 using System.Diagnostics;
 using DigitalPlatform.GUI;
 using System.Xml;
+using System.Drawing;
 
 namespace dp2Circulation
 {
@@ -519,8 +520,8 @@ namespace dp2Circulation
             try
             {
                 // string strHtml = "";
-
                 this.ClearItems();
+                this.ErrorInfo = "";
 
                 long lPerCount = 100; // 每批获得多少个
                 long lStart = 0;
@@ -2220,6 +2221,63 @@ namespace dp2Circulation
             return -1;
              * */
 #endif
+        }
+
+        public virtual string ErrorInfo
+        {
+            get
+            {
+                return this.Text;
+            }
+            set
+            {
+                this.Text = value;
+                if (this.m_listView != null)
+                {
+                    if (string.IsNullOrEmpty(value) == true)
+                        this.m_listView.Visible = true;
+                    else
+                        this.m_listView.Visible = false;
+                }
+            }
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            base.OnPaint(e);
+
+            // 绘制错误信息字符串
+            e.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+#if NO
+            Brush brush = new SolidBrush(Color.FromArgb(100, 0,0,255));
+            e.Graphics.FillEllipse(brush, 30, 30, 100, 100);
+#endif
+            if (string.IsNullOrEmpty(this.Text) == true)
+                return;
+
+            StringFormat format = new StringFormat();   //  (StringFormat)StringFormat.GenericTypographic.Clone();
+            format.FormatFlags |= StringFormatFlags.FitBlackBox;
+            format.Alignment = StringAlignment.Center;
+            format.FormatFlags |= StringFormatFlags.FitBlackBox;
+            SizeF size = e.Graphics.MeasureString(this.Text,
+                this.Font,
+                this.Size.Width,
+                format);
+
+            RectangleF textRect = new RectangleF(
+(this.Size.Width - size.Width) / 2,
+(this.Size.Height - size.Height) / 2,
+size.Width,
+size.Height);
+            using (Brush brush = new SolidBrush(this.ForeColor))
+            {
+                e.Graphics.DrawString(
+                    this.Text,
+                    this.Font,
+                    brush,
+                    textRect,
+                    format);
+            }
         }
     }
 

@@ -30,7 +30,7 @@
   <col title="借阅期限">
     <xpath>*/borrowPeriod</xpath>
   </col>
-  <col title="参考ID">
+  <col title="参考ID" type="item_refid">
     <xpath>*/refID</xpath>
   </col>
   <col title="流通次数">

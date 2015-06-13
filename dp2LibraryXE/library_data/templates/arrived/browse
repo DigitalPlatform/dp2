@@ -1,15 +1,21 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-    <col title="册条码号">
-        <xpath>//itemBarcode</xpath>
+    <col title="册条码号"  type="item_barcode">
+        <xpath>*/itemBarcode</xpath>
     </col>
-    <col title="状态">
-        <xpath>//state</xpath>
+    <col title="馆藏地点" type="item_location">
+        <xpath>*/location</xpath>
     </col>
-    <col title="读者证条码号">
-        <xpath>//readerBarcode</xpath>
+    <col title="状态" type="state">
+        <xpath>*/state</xpath>
+    </col>
+    <col title="读者证条码号" type="reader_barcode">
+        <xpath>*/readerBarcode</xpath>
     </col>
     <col title="通知取书日期" convert="rfc1123tolocaltimeu">
-        <xpath>//notifyDate</xpath>
+        <xpath>*/notifyDate</xpath>
     </col>
+  <col title="册参考ID" type="item_refid">
+    <xpath>*/refID</xpath>
+  </col>
 </root>

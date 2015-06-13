@@ -508,6 +508,9 @@
     <Compile Include="Script\PatronHost.cs" />
     <Compile Include="Script\StatisHostBase.cs" />
     <Compile Include="Script\StatisHostBase0.cs" />
+    <Compile Include="SearchForms\ArriveSearchForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="SearchForms\BiblioLoader.cs" />
     <Compile Include="SearchForms\BiblioSearchForm.cs">
       <SubType>Form</SubType>

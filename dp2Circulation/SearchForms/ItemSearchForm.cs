@@ -40,7 +40,6 @@ namespace dp2Circulation
         List<ItemQueryParam> m_queries = new List<ItemQueryParam>();
         int m_nQueryIndex = -1;
 
-
         /// <summary>
         /// 最近一次导出到条码号文件时使用过的文件名
         /// </summary>
@@ -174,6 +173,8 @@ namespace dp2Circulation
                 strDefaulFrom = "书商";
             else if (this.DbType == "issue")
                 strDefaulFrom = "期号";
+            else if (this.DbType == "arrive")
+                strDefaulFrom = "册条码号";
             else
                 throw new Exception("未知的DbType '" + this.DbType + "'");
 
@@ -193,25 +194,28 @@ namespace dp2Circulation
                 "match_style",
                 "精确一致");
 
-            bool bHideMatchStyle = this.MainForm.AppInfo.GetBoolean(
-                this.DbType + "_search_form",
-                "hide_matchstyle_and_dbname",
-                true);
-            if (bHideMatchStyle == true)
+            if (this.DbType != "arrive")
             {
-                this.label_matchStyle.Visible = false;
-                this.comboBox_matchStyle.Visible = false;
-                this.comboBox_matchStyle.Text = "精确一致"; // 隐藏后，采用缺省值
+                bool bHideMatchStyle = this.MainForm.AppInfo.GetBoolean(
+                    this.DbType + "_search_form",
+                    "hide_matchstyle_and_dbname",
+                    true);
+                if (bHideMatchStyle == true)
+                {
+                    this.label_matchStyle.Visible = false;
+                    this.comboBox_matchStyle.Visible = false;
+                    this.comboBox_matchStyle.Text = "精确一致"; // 隐藏后，采用缺省值
 
-                this.label_entityDbName.Visible = false;
-                this.comboBox_entityDbName.Visible = false;
-                this.comboBox_entityDbName.Text = "<全部>"; // 隐藏后，采用缺省值
+                    this.label_entityDbName.Visible = false;
+                    this.comboBox_entityDbName.Visible = false;
+                    this.comboBox_entityDbName.Text = "<全部>"; // 隐藏后，采用缺省值
 
-                string strName = this.DbTypeCaption;
-                if (this.DbType == "item")
-                    strName = "实体";
+                    string strName = this.DbTypeCaption;
+                    if (this.DbType == "item")
+                        strName = "实体";
 
-                this.label_message.Text = "当前检索所采用的匹配方式为 '精确一致'，针对全部"+strName+"库";
+                    this.label_message.Text = "当前检索所采用的匹配方式为 '精确一致'，针对全部" + strName + "库";
+                }
             }
 
 #if NO
@@ -328,6 +332,7 @@ this.DbType + "_search_form",
                 "状态",
                 "__id"
                                     };
+
         List<string> GetFromList()
         {
             List<string> results = new List<string>();
@@ -344,6 +349,8 @@ this.DbType + "_search_form",
                     infos = this.MainForm.OrderDbFromInfos;
                 else if (this.DbType == "issue")
                     infos = this.MainForm.IssueDbFromInfos;
+                else if (this.DbType == "arrive")
+                    infos = this.MainForm.ArrivedDbFromInfos;
                 else
                     throw new Exception("未知的DbType '" + this.DbType + "'");
 
@@ -367,6 +374,8 @@ this.DbType + "_search_form",
                 return new List<string>(order_froms);
             else if (this.DbType == "issue")
                 return new List<string>(issue_froms);
+            else if (this.DbType == "arrive")
+                return new List<string>(arrive_froms);
             else
                 throw new Exception("未知的DbType '" + this.DbType + "'");
         }
@@ -805,6 +814,7 @@ this.dp2QueryControl1.GetSaveString());
             bool bClearList = true)
         {
             string strError = "";
+            int nRet = 0;
 
             if (bOutputKeyCount == true
                 && bOutputKeyID == true)
@@ -939,9 +949,37 @@ this.dp2QueryControl1.GetSaveString());
                         strOutputStyle,
                         out strError);
                 }
+                else if (this.DbType == "arrive")
+                {
+#if NO
+                    string strArrivedDbName = "";
+                    // return:
+                    //      -1  出错
+                    //      0   没有配置
+                    //      1   找到
+                    nRet = GetArrivedDbName(false, out strArrivedDbName, out strError);
+                    if (nRet == -1 || nRet == 0)
+                        goto ERROR1;
+#endif
+                    if (string.IsNullOrEmpty(this.MainForm.ArrivedDbName) == true)
+                    {
+                        strError = "当前服务器尚未配置预约到书库名";
+                        goto ERROR1;
+                    }
+
+                    string strQueryXml = "<target list='" + this.MainForm.ArrivedDbName + ":" + this.comboBox_from.Text + "'><item><word>"
+        + StringUtil.GetXmlStringSimple(this.textBox_queryWord.Text)
+        + "</word><match>" + strMatchStyle + "</match><relation>=</relation><dataType>string</dataType><maxCount>"
+                    + this.MaxSearchResultCount + "</maxCount></item><lang>" + this.Lang + "</lang></target>";
+                    // strOutputStyle ?
+                    lRet = Channel.Search(stop,
+                        strQueryXml,
+                        "",
+                        strOutputStyle,
+                        out strError);
+                }
                 else
                     throw new Exception("未知的DbType '" + this.DbType + "'");
-
 
                 if (lRet == -1)
                     goto ERROR1;
@@ -952,7 +990,7 @@ this.dp2QueryControl1.GetSaveString());
                 //      -1  出错
                 //      0   用户中断
                 //      1   正常完成
-                int nRet = FillBrowseList(
+                nRet = FillBrowseList(
                     query,
                     lHitCount,
                     bOutputKeyCount,
@@ -980,6 +1018,99 @@ this.dp2QueryControl1.GetSaveString());
             MessageBox.Show(this, strError);
         return -1;
         }
+
+        #region 预约到书库相关
+
+        static string[] arrive_froms = {
+                "册条码号",
+                "读者证条码号",
+                "册参考ID",
+                "状态",
+                "__id"};
+
+#if NO
+        /// <summary>
+        /// 获得预约到书库的库名
+        /// 注意使用此属性的时候，会 BeginLoop，如果外层曾经 BeginLoop，会打乱 Stop 的状态。以后这里可以改进为使用 Pooling Channel 就好了
+        /// </summary>
+        string ArrivedDbName
+        {
+            get
+            {
+
+                string strError = "";
+                string strArrivedDbName = "";
+                // return:
+                //      -1  出错
+                //      0   没有配置
+                //      1   找到
+                int nRet = GetArrivedDbName(true, out strArrivedDbName, out strError);
+                if (nRet == -1 || nRet == 0)
+                    throw new Exception(strError);
+
+                return strArrivedDbName;
+            }
+        }
+
+        string _arrivedDbName = "";
+
+        // return:
+        //      -1  出错
+        //      0   没有配置
+        //      1   找到
+        int GetArrivedDbName(
+            bool bBeginLoop,
+            out string strDbName,
+            out string strError)
+        {
+            strError = "";
+            strDbName = "";
+
+            if (string.IsNullOrEmpty(this._arrivedDbName) == false)
+            {
+                strDbName = this._arrivedDbName;
+                return 1;
+            }
+
+            if (bBeginLoop == true)
+            {
+                stop.OnStop += new StopEventHandler(this.DoStop);
+                stop.SetMessage("正在获取预约到书库名 ...");
+                stop.BeginLoop();
+            }
+
+            try
+            {
+                long lRet = Channel.GetSystemParameter(
+                    stop,
+                    "arrived",
+                    "dbname",
+                    out strDbName,
+                    out strError);
+                if (lRet == -1)
+                    return -1;
+                if (lRet == 0
+                    || string.IsNullOrEmpty(strDbName) == true)
+                {
+                    strError = "预约到书库名没有配置";
+                    return 0;   // not found
+                }
+                this._arrivedDbName = strDbName;
+                return 1;
+            }
+            finally
+            {
+                if (bBeginLoop)
+                {
+                    stop.EndLoop();
+                    stop.OnStop -= new StopEventHandler(this.DoStop);
+                    stop.Initial("");
+                }
+            }
+        }
+#endif
+
+        #endregion
 
         // return:
         //      -1  出错
@@ -1155,7 +1286,7 @@ this.dp2QueryControl1.GetSaveString());
                         int nRet = _fillBiblioSummaryColumn(items,
                             0,
                             false,
-                            false,
+                            true,   // false,  // bAutoSearch
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
@@ -6167,6 +6298,13 @@ out strError);
                 return;
 
             this.comboBox_entityDbName.Items.Add("<全部>");
+
+            if (this.DbType == "arrive"
+                && string.IsNullOrEmpty(this.MainForm.ArrivedDbName) == false)
+            {
+                this.comboBox_entityDbName.Items.Add(this.MainForm.ArrivedDbName);
+                return;
+            }
 
             if (this.DbType != "issue")
                 this.comboBox_entityDbName.Items.Add("<全部图书>");

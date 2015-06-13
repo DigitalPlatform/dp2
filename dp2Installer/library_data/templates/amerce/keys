@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <key>
-    <xpath>//itemBarcode</xpath>
+    <xpath>*/itemBarcode</xpath>
     <from>itembarcode</from>
     <table ref="itembarcode" />
   </key>
@@ -11,7 +11,7 @@
     <caption lang="en">Item barcode</caption>
   </table>
   <key>
-    <xpath>//readerBarcode</xpath>
+    <xpath>*/readerBarcode</xpath>
     <from>readerbarcode</from>
     <table ref="readerbarcode" />
   </key>
@@ -21,7 +21,7 @@
     <caption lang="en">Reader barcode</caption>
   </table>
   <key>
-    <xpath>//state</xpath>
+    <xpath>*/state</xpath>
     <from>state</from>
     <table ref="state" />
   </key>
@@ -36,7 +36,7 @@
     <caption lang="en">State</caption>
   </table>
   <key>
-    <xpath>//id</xpath>
+    <xpath>*/id</xpath>
     <from>id</from>
     <table ref="id" />
   </key>
@@ -45,7 +45,7 @@
     <caption lang="en">ID</caption>
   </table>
   <key>
-    <xpath>//operTime</xpath>
+    <xpath>*/operTime</xpath>
     <from>operTime</from>
     <table ref="operTime" />
   </key>
@@ -60,7 +60,7 @@
     <caption lang="en">AmerceOperTime</caption>
   </table>
   <key>
-    <xpath>//settlementOperTime</xpath>
+    <xpath>*/settlementOperTime</xpath>
     <from>settlementOperTime</from>
     <table ref="settlementOperTime" />
   </key>
@@ -75,7 +75,7 @@
     <caption lang="en">SettlementOperTime</caption>
   </table>
   <key>
-    <xpath>//libraryCode</xpath>
+    <xpath>*/libraryCode</xpath>
     <from>librarycode</from>
     <table ref="librarycode" />
   </key>

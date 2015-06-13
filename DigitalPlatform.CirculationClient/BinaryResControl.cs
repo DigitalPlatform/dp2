@@ -151,6 +151,8 @@ namespace DigitalPlatform.CirculationClient
         {
             strError = "";
 
+            this.ErrorInfo = "";
+
             // 2007/12/2 new add
             if (String.IsNullOrEmpty(strXml) == true)
             {
@@ -255,6 +257,10 @@ namespace DigitalPlatform.CirculationClient
                         out strError);
                     if (nRet == -1)
                     {
+                        if (Channel.ErrorCode == localhost.ErrorCode.AccessDenied)
+                        {
+                            return -1;
+                        }
                         // item.SubItems.Add(strError);
                         ListViewUtil.ChangeItemText(item, COLUMN_STATE, strError);
                         item.ImageIndex = 1;    // error!
@@ -312,7 +318,6 @@ namespace DigitalPlatform.CirculationClient
                 this.Enabled = bOldEnabled;
             }
         }
-
 
         static LineState GetLineState(ListViewItem item)
         {
@@ -500,12 +505,10 @@ namespace DigitalPlatform.CirculationClient
                     out timestamp,
                     out strOutputPath,
                     out strError);
-
                 if (lRet == -1)
                 {
                     strError = "下载对象 " + strResPath + " 元数据失败，原因: " + strError;
                     return -1;
-
                 }
 
                 return 0;
@@ -1141,14 +1144,12 @@ namespace DigitalPlatform.CirculationClient
                     out baOutputTimeStamp,
                     out strOutputPath,
                     out strError);
-
                 // EnableControlsInLoading(false);
                 if (lRet == -1)
                 {
                     strError = "下载资源文件失败，原因: " + strError;
                     goto ERROR1;
                 }
-
             }
             finally
             {
@@ -1156,9 +1157,7 @@ namespace DigitalPlatform.CirculationClient
                 Stop.OnStop -= new StopEventHandler(this.DoStop);
                 Stop.Initial("");
             }
-
             return;
-
         ERROR1:
             MessageBox.Show(this, strError);
         }
@@ -1545,6 +1544,63 @@ namespace DigitalPlatform.CirculationClient
             {
                 // Ctrl+A
                 menu_generateData_Click(sender, null);
+            }
+        }
+
+        public string ErrorInfo
+        {
+            get
+            {
+                return this.Text;
+            }
+            set
+            {
+                this.Text = value;
+                if (this.ListView != null)
+                {
+                    if (string.IsNullOrEmpty(value) == true)
+                        this.ListView.Visible = true;
+                    else
+                        this.ListView.Visible = false;
+                }
+            }
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            base.OnPaint(e);
+
+            // 绘制错误信息字符串
+            e.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+#if NO
+            Brush brush = new SolidBrush(Color.FromArgb(100, 0,0,255));
+            e.Graphics.FillEllipse(brush, 30, 30, 100, 100);
+#endif
+            if (string.IsNullOrEmpty(this.Text) == true)
+                return;
+
+            StringFormat format = new StringFormat();   //  (StringFormat)StringFormat.GenericTypographic.Clone();
+            format.FormatFlags |= StringFormatFlags.FitBlackBox;
+            format.Alignment = StringAlignment.Center;
+            format.FormatFlags |= StringFormatFlags.FitBlackBox;
+            SizeF size = e.Graphics.MeasureString(this.Text,
+                this.Font,
+                this.Size.Width,
+                format);
+
+            RectangleF textRect = new RectangleF(
+(this.Size.Width - size.Width) / 2,
+(this.Size.Height - size.Height) / 2,
+size.Width,
+size.Height);
+            using (Brush brush = new SolidBrush(this.ForeColor))
+            {
+                e.Graphics.DrawString(
+                    this.Text,
+                    this.Font,
+                    brush,
+                    textRect,
+                    format);
             }
         }
 

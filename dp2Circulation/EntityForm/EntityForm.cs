@@ -3071,14 +3071,21 @@ true);
                                     out strError);
                                 if (nRet == -1)
                                 {
-                                    // MessageBox.Show(this, strError);
-                                    if (String.IsNullOrEmpty(strTotalError) == false)
-                                        strTotalError += "\r\n";
-                                    strTotalError += strError;
+                                    if (this.entityControl1.Channel.ErrorCode == ErrorCode.AccessDenied)
+                                    {
+                                        // 在 ListView 背景上显示报错信息，不要用 MessageBox 报错
+                                        this.entityControl1.ErrorInfo = strError;
+                                    }
+                                    else
+                                    {
+                                        // MessageBox.Show(this, strError);
+                                        if (String.IsNullOrEmpty(strTotalError) == false)
+                                            strTotalError += "\r\n";
+                                        strTotalError += strError;
 
-
-                                    bError = true;
-                                    // return -1;
+                                        bError = true;
+                                        // return -1;
+                                    }
                                 }
 
                                 if (nRet == 1)
@@ -3101,13 +3108,21 @@ true);
                                     out strError);
                                 if (nRet == -1)
                                 {
-                                    // MessageBox.Show(this, strError);
-                                    if (String.IsNullOrEmpty(strTotalError) == false)
-                                        strTotalError += "\r\n";
-                                    strTotalError += strError;
+                                    if (this.issueControl1.Channel.ErrorCode == ErrorCode.AccessDenied)
+                                    {
+                                        // 在 ListView 背景上显示报错信息，不要用 MessageBox 报错
+                                        this.issueControl1.ErrorInfo = strError;
+                                    }
+                                    else
+                                    {
+                                        // MessageBox.Show(this, strError);
+                                        if (String.IsNullOrEmpty(strTotalError) == false)
+                                            strTotalError += "\r\n";
+                                        strTotalError += strError;
 
-                                    bError = true;
-                                    // return -1;
+                                        bError = true;
+                                        // return -1;
+                                    }
                                 }
 
                                 if (nRet == 1)
@@ -3133,13 +3148,21 @@ true);
                                     out strError);
                                 if (nRet == -1)
                                 {
-                                    // MessageBox.Show(this, strError);
-                                    if (String.IsNullOrEmpty(strTotalError) == false)
-                                        strTotalError += "\r\n";
-                                    strTotalError += strError;
+                                    if (this.orderControl1.Channel.ErrorCode == ErrorCode.AccessDenied)
+                                    {
+                                        // 在 ListView 背景上显示报错信息，不要用 MessageBox 报错
+                                        this.orderControl1.ErrorInfo = strError;
+                                    }
+                                    else
+                                    {
+                                        // MessageBox.Show(this, strError);
+                                        if (String.IsNullOrEmpty(strTotalError) == false)
+                                            strTotalError += "\r\n";
+                                        strTotalError += strError;
 
-                                    bError = true;
-                                    // return -1;
+                                        bError = true;
+                                        // return -1;
+                                    }
                                 }
 
 
@@ -3161,11 +3184,19 @@ true);
                                     out strError);
                                 if (nRet == -1)
                                 {
-                                    if (String.IsNullOrEmpty(strTotalError) == false)
-                                        strTotalError += "\r\n";
-                                    strTotalError += strError;
+                                    if (this.commentControl1.Channel.ErrorCode == ErrorCode.AccessDenied)
+                                    {
+                                        // 在 ListView 背景上显示报错信息，不要用 MessageBox 报错
+                                        this.commentControl1.ErrorInfo = strError;
+                                    }
+                                    else
+                                    {
+                                        if (String.IsNullOrEmpty(strTotalError) == false)
+                                            strTotalError += "\r\n";
+                                        strTotalError += strError;
 
-                                    bError = true;
+                                        bError = true;
+                                    }
                                 }
 
 
@@ -3184,18 +3215,25 @@ true);
                                     out strError);
                                 if (nRet == -1)
                                 {
-                                    // MessageBox.Show(this, strError);
-                                    if (String.IsNullOrEmpty(strTotalError) == false)
-                                        strTotalError += "\r\n";
-                                    strTotalError += strError;
+                                    if (this.binaryResControl1.Channel.ErrorCode == ErrorCode.AccessDenied)
+                                    {
+                                        // 在 ListView 背景上显示报错信息，不要用 MessageBox 报错
+                                        this.binaryResControl1.ErrorInfo = strError;
+                                    }
+                                    else
+                                    {
+                                        // MessageBox.Show(this, strError);
+                                        if (String.IsNullOrEmpty(strTotalError) == false)
+                                            strTotalError += "\r\n";
+                                        strTotalError += strError;
 
-                                    bError = true;
-                                    // return -1;
+                                        bError = true;
+                                        // return -1;
+                                    }
                                 }
 
                                 if (nRet == 1)
                                     bSubrecordExist = true;
-
                             }
 
                             // 装载书目和<dprms:file>以外的其它XML片断
@@ -3239,7 +3277,6 @@ true);
 
                             if (this.DeletedMode == false)
                                 this.BiblioRecPath = "";    // 避免残余记录覆盖了不该覆盖的记录
-
                         }
 
                         // 2008/11/2 new add
@@ -3266,7 +3303,6 @@ true);
                         }
 
                         DoViewComment(false);
-
                         return 1;
                     }
                     finally

@@ -124,6 +124,9 @@ namespace DigitalPlatform.CommonControl
         {
             base.OnPaint(e);
 
+            if (string.IsNullOrEmpty(this.Text) == true)
+                return;
+
             // e.Graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
             // e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             e.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
@@ -131,8 +134,6 @@ namespace DigitalPlatform.CommonControl
             Brush brush = new SolidBrush(Color.FromArgb(100, 0,0,255));
             e.Graphics.FillEllipse(brush, 30, 30, 100, 100);
 #endif
-            if (string.IsNullOrEmpty(this.Text) == true)
-                return;
 
             StringFormat format = new StringFormat();   //  (StringFormat)StringFormat.GenericTypographic.Clone();
             format.FormatFlags |= StringFormatFlags.FitBlackBox;
@@ -157,32 +158,37 @@ size.Height);
             float delta = Math.Min(this.Size.Width, this.Size.Height) / 20;
             backRect = RectangleF.Inflate(textRect, delta, delta);
 
-            Pen pen = new Pen(Color.Gray);
-            if (this.Closeable == false)
+            using (Pen pen = new Pen(Color.Gray))
             {
-                // 圆角表示不可点击
-                RoundRectangle(e.Graphics,
-                pen,
-                new SolidBrush(this.RectColor),
-                backRect,
-                backRect.Height / 3);   // / 4 6
-            }
-            else
-            {
-                // 方角表示可点击消失
-                RoundRectangle(e.Graphics,
-pen,
-new SolidBrush(this.RectColor),
-backRect,
-0);
+                if (this.Closeable == false)
+                {
+                    // 圆角表示不可点击
+                    RoundRectangle(e.Graphics,
+                    pen,
+                    new SolidBrush(this.RectColor),
+                    backRect,
+                    backRect.Height / 3);   // / 4 6
+                }
+                else
+                {
+                    // 方角表示可点击消失
+                    RoundRectangle(e.Graphics,
+    pen,
+    new SolidBrush(this.RectColor),
+    backRect,
+    0);
+                }
             }
 
-            e.Graphics.DrawString(
-                this.Text,
-                this.Font,
-                new SolidBrush(Color.FromArgb(254,254,254)),
-                textRect,
-                format);
+            using (Brush brush = new SolidBrush(Color.FromArgb(254, 254, 254)))
+            {
+                e.Graphics.DrawString(
+                    this.Text,
+                    this.Font,
+                    brush,
+                    textRect,
+                    format);
+            }
         }
 
         // paramters:

@@ -448,7 +448,6 @@ namespace dp2Circulation
                 return nRet;
 
             RefreshOrderSuggestionPie();
-
             return nRet;
         }
 
@@ -2878,6 +2877,26 @@ namespace dp2Circulation
         {
             this.comboBox_libraryCodeFilter.Invalidate();
         }
+
+        public override string ErrorInfo
+        {
+            get
+            {
+                return base.ErrorInfo;
+            }
+            set
+            {
+                base.ErrorInfo = value;
+                if (this.splitContainer_main != null)
+                {
+                    if (string.IsNullOrEmpty(value) == true)
+                        this.splitContainer_main.Visible = true;
+                    else
+                        this.splitContainer_main.Visible = false;
+                }
+            }
+        }
+
     }
 
     /// <summary>

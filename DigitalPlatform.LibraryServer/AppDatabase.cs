@@ -2801,6 +2801,22 @@ namespace DigitalPlatform.LibraryServer
                 goto ERROR1;
             }
 
+            // 2015/6/13
+            if (keyschanged_dbnames.Count > 0)
+            {
+                nRet = InitialKdbs(
+                    Channels,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                // 重新初始化虚拟库定义
+                this.vdbs = null;
+                nRet = this.InitialVdbs(Channels,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+            }
+
             if (bAutoRebuildKeys == true
                 && keyschanged_dbnames.Count > 0)
             {

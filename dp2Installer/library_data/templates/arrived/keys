@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <key>
-    <xpath>//itemBarcode</xpath>
+    <xpath>*/itemBarcode</xpath>
     <from>itembarcode</from>
     <table ref="itembarcode" />
   </key>
@@ -11,7 +11,7 @@
     <caption lang="en">Item barcode</caption>
   </table>
   <key>
-    <xpath>//readerBarcode</xpath>
+    <xpath>*/readerBarcode</xpath>
     <from>readerbarcode</from>
     <table ref="readerbarcode" />
   </key>
@@ -21,7 +21,7 @@
     <caption lang="en">Reader barcode</caption>
   </table>
   <key>
-    <xpath>//state</xpath>
+    <xpath>*/state</xpath>
     <from>state</from>
     <table ref="state" />
   </key>
@@ -35,9 +35,27 @@
     <caption lang="zh-CN">状态</caption>
     <caption lang="en">State</caption>
   </table>
+
+  <!-- 2015/6/13 增加 馆藏地点 -->
+  <key>
+    <xpath>*/location</xpath>
+    <from>location</from>
+    <table ref="location" />
+  </key>
+  <table name="location" id="6">
+    <convert>
+      <string style="split,upper"/>
+    </convert>
+    <convertquery>
+      <string style="upper" />
+    </convertquery>
+    <caption lang="zh-CN">馆藏地点</caption>
+    <caption lang="en">Location</caption>
+  </table>
+
   <!-- 2015/5/7 增加 参考ID -->
   <key>
-    <xpath>//refID</xpath>
+    <xpath>*/refID</xpath>
     <from>refID</from>
     <table ref="refID" />
   </key>
@@ -45,4 +63,5 @@
     <caption lang="zh-CN">册参考ID</caption>
     <caption lang="en">Item Reference ID</caption>
   </table>
+
 </root>

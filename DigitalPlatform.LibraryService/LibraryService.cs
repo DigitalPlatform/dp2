@@ -9666,6 +9666,21 @@ namespace dp2Library
                     goto END1;
                 }
 
+                // 2015/6/13
+                if (strCategory == "arrived")
+                {
+                    switch (strName)
+                    {
+                        case "dbname":
+                            strValue = app.ArrivedDbName;
+                            break;
+                        default:
+                            strError = "category '" + strCategory + "' 中未知的 name '" + strName + "'";
+                            goto NOTFOUND;
+                    }
+                    goto END1;
+                }
+
                 if (strCategory == "biblio")
                 {
                     switch (strName)

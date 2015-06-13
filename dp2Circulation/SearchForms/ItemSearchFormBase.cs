@@ -12,6 +12,7 @@ using System.Collections;
 using DigitalPlatform.Xml;
 using System.IO;
 using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.Text;
 
 namespace dp2Circulation
 {
@@ -49,6 +50,8 @@ namespace dp2Circulation
                     return "订购";
                 else if (this.DbType == "issue")
                     return "期";
+                else if (this.DbType == "arrive")
+                    return "预约到书";
                 else
                     throw new Exception("未知的DbType '" + this.DbType + "'");
             }
@@ -512,7 +515,9 @@ namespace dp2Circulation
             Debug.Assert(this.DbType == "item"
                 || this.DbType == "order"
                 || this.DbType == "issue"
-                || this.DbType == "comment", "");
+                || this.DbType == "comment"
+                || this.DbType == "arrive",
+                "");
 
             List<string> biblio_recpaths = new List<string>();  // 尺寸可能比 items 数组小，没有包含里面不具有 parent id 列的事项
             List<int> colindex_list = new List<int>();  // 存储每个 item 对应的 parent id colindex。数组大小等于 items 数组大小
@@ -688,6 +693,7 @@ namespace dp2Circulation
             strBiblioRecPath = "";
             int nRet = 0;
 
+            // 这是事项记录路径
             string strRecPath = ListViewUtil.GetItemText(item, 0);
 
             if (string.IsNullOrEmpty(strRecPath) == true)
@@ -724,18 +730,74 @@ namespace dp2Circulation
                         return 0;   // 这个实体库没有 parent id 列
                     }
 
-                    string strItemRecPath = "";
+                    // TODO: 这里关于浏览列 type 的判断应该通盘考虑，设计为通用功能，减少对特定库类型的判断依赖
+
+                    string strQueryString = "";
                     if (this.DbType == "item")
                     {
                         Debug.Assert(this.DbType == "item", "");
 
+                        strQueryString = "@path:" + strRecPath;
+                    }
+                    else if (this.DbType == "arrive")
+                    {
+                        int nRefIDCol = temp.FindColumnByType("item_refid");
+                        if (nRefIDCol == -1)
+                        {
+                            strError = "预约到书库 " + strItemDbName + " 的浏览格式没有配置 item_refid 列";
+                            return 0;
+                        }
+
+                        strQueryString = ListViewUtil.GetItemText(item, nRefIDCol + 2);
+
+                        if (string.IsNullOrEmpty(strQueryString) == false)
+                        {
+                            strQueryString = "@refID:" + strQueryString;
+                        }
+                        else
+                        {
+                            int nItemBarcodeCol = temp.FindColumnByType("item_barcode");
+                            if (nRefIDCol == -1)
+                            {
+                                strError = "预约到书库 " + strItemDbName + " 的浏览格式没有配置 item_barcode 列";
+                                return 0;
+                            }
+                            strQueryString = ListViewUtil.GetItemText(item, nItemBarcodeCol + 2);
+                            if (string.IsNullOrEmpty(strQueryString) == true)
+                            {
+                                strError = "册条码号栏为空，无法获得书目记录路径";
+                                return 0;
+                            }
+                        }
+                    }
+
+                    string strItemRecPath = "";
+                    if (string.IsNullOrEmpty(strQueryString) == false)
+                    {
+                        Debug.Assert(this.DbType == "item" || this.DbType == "arrive", "");
+
                         nRet = SearchTwoRecPathByBarcode(
                             this.stop,
                             this.Channel,
-                            "@path:" + strRecPath,
-                out strItemRecPath,
-                out strBiblioRecPath,
-                out strError);
+                            strQueryString,    // "@path:" + strRecPath,
+                            out strItemRecPath,
+                            out strBiblioRecPath,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "获得书目记录路径时出错: " + strError;
+                            return -1;
+                        }
+                        else if (nRet == 0)
+                        {
+                            strError = "检索词 '" + strQueryString + "' 没有找到记录";
+                            return -1;
+                        }
+                        else if (nRet > 1) // 命中发生重复
+                        {
+                            strError = "检索词 '" + strQueryString + "' 命中 " + nRet.ToString() + " 条记录，这是一个严重错误";
+                            return -1;
+                        }
                     }
                     else
                     {
@@ -743,10 +805,9 @@ namespace dp2Circulation
                             this.stop,
                             this.Channel,
                             this.DbType,
-
                             strRecPath,
-out strBiblioRecPath,
-out strError);
+                            out strBiblioRecPath,
+                            out strError);
                     }
                     if (nRet == -1)
                     {

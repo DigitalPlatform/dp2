@@ -246,6 +246,11 @@ namespace dp2Circulation
         public BiblioDbFromInfo[] AmerceDbFromInfos = null;   // 违约金库检索路径信息 2012/11/8
 
         /// <summary>
+        /// 预约到书库检索路径信息集合
+        /// </summary>
+        public BiblioDbFromInfo[] ArrivedDbFromInfos = null;   // 预约到书库检索路径信息 2015/6/13
+
+        /// <summary>
         /// 书目库属性集合
         /// </summary>
         public List<BiblioDbProperty> BiblioDbProperties = null;
@@ -1303,6 +1308,10 @@ AppInfo.GetString("config",
                             goto END1;
                          * */
                         nRet = InitialReaderDbProperties(false);
+                        if (nRet == -1)
+                            goto END1;
+
+                        nRet = InitialArrivedDbProperties(false);
                         if (nRet == -1)
                             goto END1;
 
@@ -3453,6 +3462,24 @@ AppInfo.GetString("config",
 
                 }
 
+                if (this.Version >= 2.47)
+                {
+                    // 获得预约到书库的检索途径
+                    infos = null;
+                    lRet = Channel.ListDbFroms(Stop,
+        "arrived",
+        this.Lang,
+        out infos,
+        out strError);
+                    if (lRet == -1)
+                    {
+                        strError = "针对服务器 " + Channel.Url + " 列出预约到书库检索途径过程发生错误：" + strError;
+                        goto ERROR1;
+                    }
+
+                    this.ArrivedDbFromInfos = infos;
+                }
+
                 // 需要检查一下Caption是否有重复(但是style不同)的，如果有，需要修改Caption名
                 this.CanonicalizeBiblioFromValues();
 
@@ -4066,6 +4093,15 @@ AppInfo.GetString("config",
                         normal.DbName = strDbName;
                         this.NormalDbProperties.Add(normal);
                     }
+                }
+
+                // 2015/6/13
+                if (string.IsNullOrEmpty(this.ArrivedDbName) == false)
+                {
+                    NormalDbProperty normal = null;
+                    normal = new NormalDbProperty();
+                    normal.DbName = this.ArrivedDbName;
+                    this.NormalDbProperties.Add(normal);
                 }
 
                 if (this.Version >= 2.23)
@@ -4817,6 +4853,78 @@ AppInfo.GetString("config",
 #endif
         }
 
+        string _arrivedDbName = "";
+
+        public string ArrivedDbName
+        {
+            get
+            {
+                return this._arrivedDbName;
+            }
+        }
+
+        // 初始化预约到书库的相关属性
+        public int InitialArrivedDbProperties(bool bPrepareSearch = true)
+        {
+        REDO:
+            if (bPrepareSearch == true)
+            {
+                if (PrepareSearch() == 0)
+                    return -1;
+            }
+
+            string strError = "";
+            int nRet = 0;
+
+            Stop.OnStop += new StopEventHandler(this.DoStop);
+            Stop.Initial("正在初始化预约到书库属性列表 ...");
+            Stop.BeginLoop();
+
+            try
+            {
+                this._arrivedDbName = "";
+
+                if (this.Version < 2.47)
+                    return 0;
+
+                string strValue = "";
+                long lRet = Channel.GetSystemParameter(Stop,
+                    "arrived",
+                    "dbname",
+                    out strValue,
+                    out strError);
+                if (lRet == -1)
+                {
+                    strError = "针对服务器 " + Channel.Url + " 获得预约到书库名过程发生错误：" + strError;
+                    goto ERROR1;
+                }
+
+                this._arrivedDbName = strValue;
+            }
+            finally
+            {
+                Stop.EndLoop();
+                Stop.OnStop -= new StopEventHandler(this.DoStop);
+                Stop.Initial("");
+
+                if (bPrepareSearch == true)
+                    EndSearch();
+            }
+            return 0;
+        ERROR1:
+            DialogResult result = MessageBox.Show(this,
+                strError + "\r\n\r\n是否重试?",
+                "dp2Circulation",
+                MessageBoxButtons.YesNoCancel,
+                MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button1);
+            if (result == System.Windows.Forms.DialogResult.Yes)
+                goto REDO;
+            if (result == DialogResult.No)
+                return 1;   // 出错，但希望继续后面的操作
+
+            return -1;  // 出错，不希望继续以后的操作
+        }
 
 #if NO
         // 
@@ -13201,6 +13309,16 @@ Keys keyData)
                 PathUtil.CreateDirIfNeed(strDirectory);
                 return strDirectory;
             }
+        }
+
+        private void MenuItem_openArrivedSearchForm_Click(object sender, EventArgs e)
+        {
+            if (this.Version < 2.47)
+            {
+                MessageBox.Show(this, "dp2library 版本 2.47 和以上才能使用 预约到书查询窗");
+                return;
+            }
+            OpenWindow<ArrivedSearchForm>();
         }
     }
 

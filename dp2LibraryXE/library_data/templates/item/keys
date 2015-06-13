@@ -170,7 +170,7 @@ public class MyKeysHost : KeysHost
   </script>
 
   <key>
-    <xpath>//barcode</xpath>
+    <xpath>*/barcode</xpath>
     <from>barcode</from>
     <table ref="barcode" />
   </key>
@@ -180,7 +180,7 @@ public class MyKeysHost : KeysHost
     <caption lang="en">barcode</caption>
   </table>
   <key>
-    <xpath>//batchNo</xpath>
+    <xpath>*/batchNo</xpath>
     <from>batchno</from>
     <table ref="batchno" />
   </key>
@@ -189,7 +189,7 @@ public class MyKeysHost : KeysHost
     <caption lang="en">Batch No</caption>
   </table>
   <key>
-    <xpath>//registerNo</xpath>
+    <xpath>*/registerNo</xpath>
     <from>registerno</from>
     <table ref="registerno" />
   </key>
@@ -215,7 +215,7 @@ public class MyKeysHost : KeysHost
   </table>
 
   <key>
-    <xpath>//location</xpath>
+    <xpath>*/location</xpath>
     <from>location</from>
     <table ref="location" />
   </key>
@@ -231,7 +231,7 @@ public class MyKeysHost : KeysHost
   </table>
 
   <key>
-    <xpath>//refID</xpath>
+    <xpath>*/refID</xpath>
     <from>refID</from>
     <table ref="refID" />
   </key>
