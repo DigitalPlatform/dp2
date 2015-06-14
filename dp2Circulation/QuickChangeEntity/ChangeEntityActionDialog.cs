@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -14,18 +14,18 @@ using DigitalPlatform.CommonControl;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ¿ìËÙĞŞ¸Ä²á ¶¯×÷²ÎÊı ¶Ô»°¿ò
-    /// ±» QuickChangeEntityForm ËùÊ¹ÓÃ
+    /// å¿«é€Ÿä¿®æ”¹å†Œ åŠ¨ä½œå‚æ•° å¯¹è¯æ¡†
+    /// è¢« QuickChangeEntityForm æ‰€ä½¿ç”¨
     /// </summary>
     internal partial class ChangeEntityActionDialog : Form
     {
         /// <summary>
-        /// ¿ò¼Ü´°¿Ú
+        /// æ¡†æ¶çª—å£
         /// </summary>
         public MainForm MainForm = null;
 
         /// <summary>
-        /// »ñµÃÖµÁĞ±í
+        /// è·å¾—å€¼åˆ—è¡¨
         /// </summary>
         public event GetValueTableEventHandler GetValueTable = null;
 
@@ -38,13 +38,13 @@ namespace dp2Circulation
 
         private void ChangeParamDlg_Load(object sender, EventArgs e)
         {
-            // Ìî³ä¼¸¸öcombobox
+            // å¡«å……å‡ ä¸ªcombobox
 
-            // ×°ÔØÖµ
+            // è£…è½½å€¼
             this.comboBox_state.Text = this.MainForm.AppInfo.GetString(
                 "change_param",
                 "state",
-                "<²»¸Ä±ä>");
+                "<ä¸æ”¹å˜>");
             this.checkedComboBox_stateAdd.Text = this.MainForm.AppInfo.GetString(
     "change_param",
     "state_add",
@@ -57,29 +57,29 @@ namespace dp2Circulation
             this.comboBox_location.Text = this.MainForm.AppInfo.GetString(
     "change_param",
     "location",
-    "<²»¸Ä±ä>");
+    "<ä¸æ”¹å˜>");
 
             this.comboBox_bookType.Text = this.MainForm.AppInfo.GetString(
     "change_param",
     "bookType",
-    "<²»¸Ä±ä>");
+    "<ä¸æ”¹å˜>");
 
             this.comboBox_batchNo.Text = this.MainForm.AppInfo.GetString(
 "change_param",
 "batchNo",
-"<²»¸Ä±ä>");
+"<ä¸æ”¹å˜>");
 
             this.comboBox_focusAction.Text = this.MainForm.AppInfo.GetString(
     "change_param",
     "focusAction",
-    "²áÌõÂëºÅ£¬²¢È«Ñ¡");
+    "å†Œæ¡ç å·ï¼Œå¹¶å…¨é€‰");
 
             this.comboBox_state_TextChanged(null, null);
         }
 
         private void button_OK_Click(object sender, EventArgs e)
         {
-            // ±£´æÖµ
+            // ä¿å­˜å€¼
             this.MainForm.AppInfo.SetString(
                 "change_param",
                 "state",
@@ -129,7 +129,7 @@ namespace dp2Circulation
 
         void FillDropDown(ComboBox combobox)
         {
-            // ·ÀÖ¹ÖØÈë
+            // é˜²æ­¢é‡å…¥
             if (this.m_nInDropDown > 0)
                 return;
 
@@ -152,15 +152,15 @@ namespace dp2Circulation
                         e1.TableName = "state";
                     else
                     {
-                        Debug.Assert(false, "²»Ö§³ÖµÄcombobox");
+                        Debug.Assert(false, "ä¸æ”¯æŒçš„combobox");
                     }
 
                     this.GetValueTable(this, e1);
 
-                    combobox.Items.Add("<²»¸Ä±ä>");
+                    combobox.Items.Add("<ä¸æ”¹å˜>");
                     if (combobox == this.comboBox_state)
                     {
-                        combobox.Items.Add("<Ôö¡¢¼õ>");
+                        combobox.Items.Add("<å¢ã€å‡>");
                     }
 
                     if (e1.values != null)
@@ -171,17 +171,17 @@ namespace dp2Circulation
                         string strPureName = "";
 
                         string strLocationString = this.comboBox_location.Text;
-                        if (strLocationString == "<²»¸Ä±ä>")
+                        if (strLocationString == "<ä¸æ”¹å˜>")
                             strLocationString = "";
 
                         Global.ParseCalendarName(strLocationString,
                     out strLibraryCode,
                     out strPureName);
 
-                        if (combobox != this.comboBox_location  // ¹İ²ØµØµÄÁĞ±í²»Òª±»¹ıÂË
+                        if (combobox != this.comboBox_location  // é¦†è—åœ°çš„åˆ—è¡¨ä¸è¦è¢«è¿‡æ»¤
                             && String.IsNullOrEmpty(strLocationString) == false)
                         {
-                            // ¹ıÂË³ö·ûºÏ¹İ´úÂëµÄÄÇĞ©Öµ×Ö·û´®
+                            // è¿‡æ»¤å‡ºç¬¦åˆé¦†ä»£ç çš„é‚£äº›å€¼å­—ç¬¦ä¸²
                             results = Global.FilterValuesWithLibraryCode(strLibraryCode,
                                 StringUtil.FromStringArray(e1.values));
                         }
@@ -246,7 +246,7 @@ namespace dp2Circulation
 
         void FillItemStateDropDown(CheckedComboBox combobox)
         {
-            // ·ÀÖ¹ÖØÈë
+            // é˜²æ­¢é‡å…¥
             if (this.m_nInDropDown > 0)
                 return;
 
@@ -273,7 +273,7 @@ namespace dp2Circulation
                         string strPureName = "";
 
                         string strLocationString = this.comboBox_location.Text;
-                        if (strLocationString == "<²»¸Ä±ä>")
+                        if (strLocationString == "<ä¸æ”¹å˜>")
                             strLocationString = "";
 
                         Global.ParseCalendarName(strLocationString,
@@ -282,7 +282,7 @@ namespace dp2Circulation
 
                         if (String.IsNullOrEmpty(strLocationString) == false)
                         {
-                            // ¹ıÂË³ö·ûºÏ¹İ´úÂëµÄÄÇĞ©Öµ×Ö·û´®
+                            // è¿‡æ»¤å‡ºç¬¦åˆé¦†ä»£ç çš„é‚£äº›å€¼å­—ç¬¦ä¸²
                             results = Global.FilterValuesWithLibraryCode(strLibraryCode,
                                 StringUtil.FromStringArray(e1.values));
                         }
@@ -319,7 +319,7 @@ namespace dp2Circulation
         {
             string strText = this.comboBox_state.Text;
 
-            if (strText == "<Ôö¡¢¼õ>")
+            if (strText == "<å¢ã€å‡>")
             {
                 this.checkedComboBox_stateAdd.Enabled = true;
                 this.checkedComboBox_stateRemove.Enabled = true;
@@ -333,7 +333,7 @@ namespace dp2Circulation
                 this.checkedComboBox_stateRemove.Enabled = false;
             }
 
-            if (strText == "<²»¸Ä±ä>")
+            if (strText == "<ä¸æ”¹å˜>")
                 this.label_state.BackColor = this.BackColor;
             else
                 this.label_state.BackColor = Color.Green;
@@ -374,7 +374,7 @@ namespace dp2Circulation
 
             string strText = this.comboBox_location.Text;
 
-            if (strText == "<²»¸Ä±ä>")
+            if (strText == "<ä¸æ”¹å˜>")
                 this.label_location.BackColor = this.BackColor;
             else
                 this.label_location.BackColor = Color.Green;
@@ -384,7 +384,7 @@ namespace dp2Circulation
         {
             string strText = this.comboBox_bookType.Text;
 
-            if (strText == "<²»¸Ä±ä>")
+            if (strText == "<ä¸æ”¹å˜>")
                 this.label_bookType.BackColor = this.BackColor;
             else
                 this.label_bookType.BackColor = Color.Green;
@@ -395,7 +395,7 @@ namespace dp2Circulation
         {
             string strText = this.comboBox_batchNo.Text;
 
-            if (strText == "<²»¸Ä±ä>")
+            if (strText == "<ä¸æ”¹å˜>")
                 this.label_batchNo.BackColor = this.BackColor;
             else
                 this.label_batchNo.BackColor = Color.Green;
@@ -404,7 +404,7 @@ namespace dp2Circulation
 #if NO
         delegate void Delegate_filterValue(Control control);
 
-        // ¹ıÂËµô {} °üÎ§µÄ²¿·Ö
+        // è¿‡æ»¤æ‰ {} åŒ…å›´çš„éƒ¨åˆ†
         void FileterValue(Control control)
         {
             string strText = Global.GetPureSeletedValue(control.Text);
@@ -412,8 +412,8 @@ namespace dp2Circulation
                 control.Text = strText;
         }
 
-        // ¹ıÂËµô {} °üÎ§µÄ²¿·Ö
-        // »¹ÓĞÁĞ±íÖµÈ¥ÖØµÄ¹¦ÄÜ
+        // è¿‡æ»¤æ‰ {} åŒ…å›´çš„éƒ¨åˆ†
+        // è¿˜æœ‰åˆ—è¡¨å€¼å»é‡çš„åŠŸèƒ½
         void FileterValueList(Control control)
         {
             List<string> results = StringUtil.FromListString(Global.GetPureSeletedValue(control.Text));

@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -27,7 +27,7 @@ namespace dp2Circulation
             this.Close();
         }
 
-        // °´ÁĞÅäÖÃ½Ø¶Ï³¤ÎÄ×Ö
+        // æŒ‰åˆ—é…ç½®æˆªæ–­é•¿æ–‡å­—
         public bool Truncate
         {
             get
@@ -40,7 +40,7 @@ namespace dp2Circulation
             }
         }
 
-        // Êä³öÍ³¼Æ²¿·Ö
+        // è¾“å‡ºç»Ÿè®¡éƒ¨åˆ†
         public bool OutputStatisPart
         {
             get

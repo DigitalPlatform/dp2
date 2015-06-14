@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Windows.Forms;
@@ -19,8 +19,8 @@ using DigitalPlatform.IO;  // EntityInfo
 
 /*
  * TODO:
- * 1) ĞèÒªÔö¼ÓSource³ÉÔ± -- ±íÊ¾¾­·ÑÀ´Ô´µÄ×Ö¶Î¡£·şÎñÆ÷¶ËÒ²ÒªÔö¼ÓÏàÓ¦¶¨Òå¡£
- * 2) Ôö¼ÓIssueCount³ÉÔ±
+ * 1) éœ€è¦å¢åŠ Sourceæˆå‘˜ -- è¡¨ç¤ºç»è´¹æ¥æºçš„å­—æ®µã€‚æœåŠ¡å™¨ç«¯ä¹Ÿè¦å¢åŠ ç›¸åº”å®šä¹‰ã€‚
+ * 2) å¢åŠ IssueCountæˆå‘˜
  * 
  * */
 
@@ -28,7 +28,7 @@ using DigitalPlatform.IO;  // EntityInfo
 namespace dp2Circulation
 {
     /// <summary>
-    /// ¶©¹ºĞÅÏ¢
+    /// è®¢è´­ä¿¡æ¯
     /// </summary>
     [Serializable()]
     public class OrderItem : BookItemBase
@@ -37,93 +37,93 @@ namespace dp2Circulation
         public ItemDisplayState ItemDisplayState = ItemDisplayState.Normal;
 #endif
 
-        // ÁĞindex¡£×¢ÒâÒª±£³ÖºÍOrderControlÖĞµÄÁĞºÅÒ»ÖÂ
+        // åˆ—indexã€‚æ³¨æ„è¦ä¿æŒå’ŒOrderControlä¸­çš„åˆ—å·ä¸€è‡´
         /// <summary>
-        /// ListView À¸Ä¿ÏÂ±ê£º±àºÅ
+        /// ListView æ ç›®ä¸‹æ ‡ï¼šç¼–å·
         /// </summary>
         public const int COLUMN_INDEX = 0;
         /// <summary>
-        /// ListView À¸Ä¿ÏÂ±ê£º´íÎóĞÅÏ¢
+        /// ListView æ ç›®ä¸‹æ ‡ï¼šé”™è¯¯ä¿¡æ¯
         /// </summary>
         public const int COLUMN_ERRORINFO = 1;
         /// <summary>
-        /// ListView À¸Ä¿ÏÂ±ê£º¼ÇÂ¼×´Ì¬
+        /// ListView æ ç›®ä¸‹æ ‡ï¼šè®°å½•çŠ¶æ€
         /// </summary>
         public const int COLUMN_STATE = 2;
         /// <summary>
-        /// ListView À¸Ä¿ÏÂ±ê£ºÊéÄ¿ºÅ
+        /// ListView æ ç›®ä¸‹æ ‡ï¼šä¹¦ç›®å·
         /// </summary>
         public const int COLUMN_CATALOGNO = 3;
         /// <summary>
-        /// ListView À¸Ä¿ÏÂ±ê£ºÇşµÀ
+        /// ListView æ ç›®ä¸‹æ ‡ï¼šæ¸ é“
         /// </summary>
         public const int COLUMN_SELLER = 4;
         /// <summary>
-        /// ListView À¸Ä¿ÏÂ±ê£º¾­·ÑÀ´Ô´
+        /// ListView æ ç›®ä¸‹æ ‡ï¼šç»è´¹æ¥æº
         /// </summary>
         public const int COLUMN_SOURCE = 5;
         /// <summary>
-        /// ListView À¸Ä¿ÏÂ±ê£º¶©¹ºÊ±¼ä·¶Î§
+        /// ListView æ ç›®ä¸‹æ ‡ï¼šè®¢è´­æ—¶é—´èŒƒå›´
         /// </summary>
         public const int COLUMN_RANGE = 6;
         /// <summary>
-        /// ListView À¸Ä¿ÏÂ±ê£ºÆÚÊı
+        /// ListView æ ç›®ä¸‹æ ‡ï¼šæœŸæ•°
         /// </summary>
         public const int COLUMN_ISSUECOUNT = 7;
         /// <summary>
-        /// ListView À¸Ä¿ÏÂ±ê£º¸´±¾Êı
+        /// ListView æ ç›®ä¸‹æ ‡ï¼šå¤æœ¬æ•°
         /// </summary>
         public const int COLUMN_COPY = 8;
         /// <summary>
-        /// ListView À¸Ä¿ÏÂ±ê£º¼Û¸ñ
+        /// ListView æ ç›®ä¸‹æ ‡ï¼šä»·æ ¼
         /// </summary>
         public const int COLUMN_PRICE = 9;
         /// <summary>
-        /// ListView À¸Ä¿ÏÂ±ê£º×Ü¼Û¸ñ
+        /// ListView æ ç›®ä¸‹æ ‡ï¼šæ€»ä»·æ ¼
         /// </summary>
         public const int COLUMN_TOTALPRICE = 10;
         /// <summary>
-        /// ListView À¸Ä¿ÏÂ±ê£º¶©¹ºÊ±¼ä
+        /// ListView æ ç›®ä¸‹æ ‡ï¼šè®¢è´­æ—¶é—´
         /// </summary>
         public const int COLUMN_ORDERTIME = 11;
         /// <summary>
-        /// ListView À¸Ä¿ÏÂ±ê£º¶©µ¥ ID
+        /// ListView æ ç›®ä¸‹æ ‡ï¼šè®¢å• ID
         /// </summary>
         public const int COLUMN_ORDERID = 12;
         /// <summary>
-        /// ListView À¸Ä¿ÏÂ±ê£º¹İ²Ø·ÖÅäÈ¥Ïò
+        /// ListView æ ç›®ä¸‹æ ‡ï¼šé¦†è—åˆ†é…å»å‘
         /// </summary>
         public const int COLUMN_DISTRIBUTE = 13;
         /// <summary>
-        /// ListView À¸Ä¿ÏÂ±ê£ºÀàÄ¿
+        /// ListView æ ç›®ä¸‹æ ‡ï¼šç±»ç›®
         /// </summary>
         public const int COLUMN_CLASS = 14;
         /// <summary>
-        /// ListView À¸Ä¿ÏÂ±ê£º×¢ÊÍ
+        /// ListView æ ç›®ä¸‹æ ‡ï¼šæ³¨é‡Š
         /// </summary>
         public const int COLUMN_COMMENT = 15;
         /// <summary>
-        /// ListView À¸Ä¿ÏÂ±ê£ºÅú´ÎºÅ
+        /// ListView æ ç›®ä¸‹æ ‡ï¼šæ‰¹æ¬¡å·
         /// </summary>
         public const int COLUMN_BATCHNO = 16;
         /// <summary>
-        /// ListView À¸Ä¿ÏÂ±ê£ºÇşµÀµØÖ·
+        /// ListView æ ç›®ä¸‹æ ‡ï¼šæ¸ é“åœ°å€
         /// </summary>
         public const int COLUMN_SELLERADDRESS = 17;
         /// <summary>
-        /// ListView À¸Ä¿ÏÂ±ê£º²Î¿¼ ID
+        /// ListView æ ç›®ä¸‹æ ‡ï¼šå‚è€ƒ ID
         /// </summary>
         public const int COLUMN_REFID = 18;
         /// <summary>
-        /// ListView À¸Ä¿ÏÂ±ê£º²Ù×÷ÀúÊ·ĞÅÏ¢
+        /// ListView æ ç›®ä¸‹æ ‡ï¼šæ“ä½œå†å²ä¿¡æ¯
         /// </summary>
         public const int COLUMN_OPERATIONS = 19;
         /// <summary>
-        /// ListView À¸Ä¿ÏÂ±ê£º¶©¹º¼ÇÂ¼Â·¾¶
+        /// ListView æ ç›®ä¸‹æ ‡ï¼šè®¢è´­è®°å½•è·¯å¾„
         /// </summary>
         public const int COLUMN_RECPATH = 20;
 
-        #region Êı¾İ³ÉÔ±
+        #region æ•°æ®æˆå‘˜
 
 #if NO
         public string RefID
@@ -142,7 +142,7 @@ namespace dp2Circulation
         }
 
                 /// <summary>
-        /// ´ÓÊôµÄÊéÄ¿¼ÇÂ¼id
+        /// ä»å±çš„ä¹¦ç›®è®°å½•id
         /// </summary>
         public string Parent
         {
@@ -162,7 +162,7 @@ namespace dp2Circulation
 #endif
 
         /// <summary>
-        /// ²Ù×÷
+        /// æ“ä½œ
         /// </summary>
         public string Operations
         {
@@ -173,7 +173,7 @@ namespace dp2Circulation
             }
             set
             {
-                // ×¢Òâ£¬¿ÉÄÜÅ×³öÒì³£
+                // æ³¨æ„ï¼Œå¯èƒ½æŠ›å‡ºå¼‚å¸¸
                 DomUtil.SetElementInnerXml(this.RecordDom.DocumentElement,
                     "operations",
                     value);
@@ -182,7 +182,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ±àºÅ
+        /// ç¼–å·
         /// </summary>
         public string Index
         {
@@ -201,7 +201,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ×´Ì¬
+        /// çŠ¶æ€
         /// </summary>
         public string State
         {
@@ -220,7 +220,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÊéÄ¿ºÅ
+        /// ä¹¦ç›®å·
         /// </summary>
         public string CatalogNo
         {
@@ -239,7 +239,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÇşµÀ(ÊéÉÌ)
+        /// æ¸ é“(ä¹¦å•†)
         /// </summary>
         public string Seller
         {
@@ -258,7 +258,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ¾­·ÑÀ´Ô´
+        /// ç»è´¹æ¥æº
         /// </summary>
         public string Source
         {
@@ -277,7 +277,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// Ê±¼ä·¶Î§
+        /// æ—¶é—´èŒƒå›´
         /// </summary>
         public string Range
         {
@@ -296,7 +296,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// °üº¬ÆÚÊı
+        /// åŒ…å«æœŸæ•°
         /// </summary>
         public string IssueCount
         {
@@ -315,7 +315,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ¸´±¾Êı
+        /// å¤æœ¬æ•°
         /// </summary>
         public string Copy
         {
@@ -334,7 +334,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ²á¼Û¸ñ
+        /// å†Œä»·æ ¼
         /// </summary>
         public string Price
         {
@@ -350,7 +350,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ×Ü¼Û¸ñ
+        /// æ€»ä»·æ ¼
         /// </summary>
         public string TotalPrice
         {
@@ -369,7 +369,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ¶©¹ºÊ±¼ä RFC1123¸ñÊ½
+        /// è®¢è´­æ—¶é—´ RFC1123æ ¼å¼
         /// </summary>
         public string OrderTime
         {
@@ -388,7 +388,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ¶©µ¥ºÅ
+        /// è®¢å•å·
         /// </summary>
         public string OrderID
         {
@@ -408,7 +408,7 @@ namespace dp2Circulation
 
 
         /// <summary>
-        /// ¹İ²Ø·ÖÅä
+        /// é¦†è—åˆ†é…
         /// </summary>
         public string Distribute
         {
@@ -427,7 +427,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// Àà±ğ
+        /// ç±»åˆ«
         /// </summary>
         public string Class
         {
@@ -446,7 +446,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ×¢ÊÍ
+        /// æ³¨é‡Š
         /// </summary>
         public string Comment
         {
@@ -465,7 +465,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// Åú´ÎºÅ
+        /// æ‰¹æ¬¡å·
         /// </summary>
         public string BatchNo
         {
@@ -484,7 +484,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÇşµÀµØÖ·
+        /// æ¸ é“åœ°å€
         /// </summary>
         public string SellerAddress
         {
@@ -495,7 +495,7 @@ namespace dp2Circulation
             }
             set
             {
-                // ×¢Òâ£¬¿ÉÄÜÅ×³öÒì³£
+                // æ³¨æ„ï¼Œå¯èƒ½æŠ›å‡ºå¼‚å¸¸
                 DomUtil.SetElementInnerXml(this.RecordDom.DocumentElement,
                     "sellerAddress",
                     value);
@@ -506,26 +506,26 @@ namespace dp2Circulation
 
 #if NO
         /// <summary>
-        /// ¶©¹º¼ÇÂ¼Â·¾¶
+        /// è®¢è´­è®°å½•è·¯å¾„
         /// </summary>
         public string RecPath = "";
 
         /// <summary>
-        /// ÊÇ·ñ±»ĞŞ¸Ä
+        /// æ˜¯å¦è¢«ä¿®æ”¹
         /// </summary>
         bool m_bChanged = false;
 
         public string OldRecord = "";
 
-        public string CurrentRecord = "";   // ÔÚSerialize¹ı³ÌÖĞÓÃÀ´´¢´æRecordDomÄÚÈİ
+        public string CurrentRecord = "";   // åœ¨Serializeè¿‡ç¨‹ä¸­ç”¨æ¥å‚¨å­˜RecordDomå†…å®¹
 
         /// <summary>
-        /// ¼ÇÂ¼µÄdom
+        /// è®°å½•çš„dom
         /// </summary>
         [NonSerialized()]
         public XmlDocument RecordDom = new XmlDocument();
 
-        // »Ö¸´ÄÇĞ©²»ÄÜĞòÁĞ»¯µÄ³ÉÔ±Öµ
+        // æ¢å¤é‚£äº›ä¸èƒ½åºåˆ—åŒ–çš„æˆå‘˜å€¼
         public void RestoreNonSerialized()
         {
             this.RecordDom = new XmlDocument();
@@ -533,7 +533,7 @@ namespace dp2Circulation
             if (String.IsNullOrEmpty(this.CurrentRecord) == false)
             {
                 this.RecordDom.LoadXml(this.CurrentRecord);
-                this.CurrentRecord = "";    // Íê³ÉÁËÈÎÎñ
+                this.CurrentRecord = "";    // å®Œæˆäº†ä»»åŠ¡
             }
             else
                 this.RecordDom.LoadXml("<root />");
@@ -541,7 +541,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// Ê±¼ä´Á
+        /// æ—¶é—´æˆ³
         /// </summary>
         public byte[] Timestamp = null;
 
@@ -561,7 +561,7 @@ namespace dp2Circulation
         public EntityInfo Error = null;
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public OrderItem()
         {
@@ -579,7 +579,7 @@ namespace dp2Circulation
             newObject.OldRecord = this.OldRecord;
 
 
-            // ·ÅÈë×îĞÂÏÊµÄÄÚÈİ
+            // æ”¾å…¥æœ€æ–°é²œçš„å†…å®¹
             newObject.CurrentRecord = this.RecordDom.OuterXml;
 
 
@@ -593,7 +593,7 @@ namespace dp2Circulation
             return newObject;
         }
 
-        // ÉèÖÃÊı¾İ
+        // è®¾ç½®æ•°æ®
         public int SetData(string strRecPath,
             string strXml,
             byte[] baTimeStamp,
@@ -602,14 +602,14 @@ namespace dp2Circulation
             strError = "";
 
             Debug.Assert(this.RecordDom != null);
-            // ¿ÉÄÜÅ×³öÒì³£
+            // å¯èƒ½æŠ›å‡ºå¼‚å¸¸
             try
             {
                 this.RecordDom.LoadXml(strXml);
             }
             catch (Exception ex)
             {
-                strError = "XMLÊı¾İ×°ÔØµ½DOMÊ±³ö´í: " + ex.Message;
+                strError = "XMLæ•°æ®è£…è½½åˆ°DOMæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
@@ -621,7 +621,7 @@ namespace dp2Circulation
             return 0;
         }
 
-        // ÖØĞÂÉèÖÃÊı¾İ
+        // é‡æ–°è®¾ç½®æ•°æ®
         public int ResetData(
             string strRecPath,
             string strNewXml,
@@ -640,7 +640,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = "xml×°ÔØµ½DOMÊ±³ö´í: " + ex.Message;
+                strError = "xmlè£…è½½åˆ°DOMæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
@@ -655,7 +655,7 @@ namespace dp2Circulation
 
 
         /// <summary>
-        /// ´´½¨ºÃÊÊºÏÓÚ±£´æµÄ¼ÇÂ¼ĞÅÏ¢
+        /// åˆ›å»ºå¥½é€‚åˆäºä¿å­˜çš„è®°å½•ä¿¡æ¯
         /// </summary>
         /// <param name="strXml"></param>
         /// <param name="strError"></param>
@@ -670,7 +670,7 @@ namespace dp2Circulation
 
             if (this.Parent == "")
             {
-                strError = "Parent³ÉÔ±ÉĞÎ´¶¨Òå";
+                strError = "Parentæˆå‘˜å°šæœªå®šä¹‰";
                 return -1;
             }
 
@@ -680,7 +680,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÄÚÈİÊÇ·ñ·¢Éú¹ıĞŞ¸Ä
+        /// å†…å®¹æ˜¯å¦å‘ç”Ÿè¿‡ä¿®æ”¹
         /// </summary>
         public bool Changed
         {
@@ -705,7 +705,7 @@ namespace dp2Circulation
 
 
         /// <summary>
-        /// ½«±¾ÊÂÏî¼ÓÈëµ½listviewÖĞ
+        /// å°†æœ¬äº‹é¡¹åŠ å…¥åˆ°listviewä¸­
         /// </summary>
         /// <param name="list"></param>
         /// <returns></returns>
@@ -810,7 +810,7 @@ namespace dp2Circulation
 
             this.ListViewItem = item;
 
-            this.ListViewItem.Tag = this;   // ½«OrderItem¶ÔÏóÒıÓÃ±£´æÔÚListViewItemÊÂÏîÖĞ
+            this.ListViewItem.Tag = this;   // å°†OrderItemå¯¹è±¡å¼•ç”¨ä¿å­˜åœ¨ListViewItemäº‹é¡¹ä¸­
 
             return item;
         }
@@ -820,9 +820,9 @@ namespace dp2Circulation
 
         // 2013/6/20
         /// <summary>
-        /// ½«ÄÚ´æÖµ¸üĞÂµ½ÏÔÊ¾µÄÀ¸Ä¿
+        /// å°†å†…å­˜å€¼æ›´æ–°åˆ°æ˜¾ç¤ºçš„æ ç›®
         /// </summary>
-        /// <param name="item">ListViewItemÊÂÏî£¬ListViewÖĞµÄÒ»ĞĞ</param>
+        /// <param name="item">ListViewItemäº‹é¡¹ï¼ŒListViewä¸­çš„ä¸€è¡Œ</param>
         public override void SetItemColumns(ListViewItem item)
         {
             ListViewUtil.ChangeItemText(item,
@@ -868,7 +868,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strOrderTime = "¶©¹ºÊ±¼ä×Ö·û´® '"+this.OrderTime+"' ¸ñÊ½²»ºÏ·¨";
+                strOrderTime = "è®¢è´­æ—¶é—´å­—ç¬¦ä¸² '"+this.OrderTime+"' æ ¼å¼ä¸åˆæ³•";
             }
             ListViewUtil.ChangeItemText(item,
 COLUMN_ORDERTIME,
@@ -912,24 +912,24 @@ strOrderTime);
             list.Items.Remove(this.ListViewItem);
         }
 
-        // Ë¢ĞÂ±³¾°ÑÕÉ«ºÍÍ¼±ê
+        // åˆ·æ–°èƒŒæ™¯é¢œè‰²å’Œå›¾æ ‡
         void SetItemBackColor(ListViewItem item)
         {
             if ((this.ItemDisplayState == ItemDisplayState.Normal)
                 && this.Changed == true)
             {
-                Debug.Assert(false, "ItemDisplayState.Normal×´Ì¬ºÍChanged == trueÃ¬¶ÜÁË");
+                Debug.Assert(false, "ItemDisplayState.NormalçŠ¶æ€å’ŒChanged == trueçŸ›ç›¾äº†");
             }
             else if ((this.ItemDisplayState == ItemDisplayState.Changed)
                 && this.Changed == false) // 2009/3/5
             {
-                Debug.Assert(false, "ItemDisplayState.Changed×´Ì¬ºÍChanged == falseÃ¬¶ÜÁË");
+                Debug.Assert(false, "ItemDisplayState.ChangedçŠ¶æ€å’ŒChanged == falseçŸ›ç›¾äº†");
             }
 
             if (String.IsNullOrEmpty(this.ErrorInfo) == false)
             {
-                // ³ö´íµÄÊÂÏî
-                item.BackColor = Color.FromArgb(255, 0, 0); // ´¿ºìÉ«
+                // å‡ºé”™çš„äº‹é¡¹
+                item.BackColor = Color.FromArgb(255, 0, 0); // çº¯çº¢è‰²
                 item.ForeColor = Color.White;
             }
             else if (this.ItemDisplayState == ItemDisplayState.Normal)
@@ -939,23 +939,23 @@ strOrderTime);
             }
             else if (this.ItemDisplayState == ItemDisplayState.Changed)
             {
-                // ĞŞ¸Ä¹ıµÄ¾ÉÊÂÏî
-                item.BackColor = Color.FromArgb(100, 255, 100); // Ç³ÂÌÉ«
+                // ä¿®æ”¹è¿‡çš„æ—§äº‹é¡¹
+                item.BackColor = Color.FromArgb(100, 255, 100); // æµ…ç»¿è‰²
                 item.ForeColor = SystemColors.WindowText;
             }
             else if (this.ItemDisplayState == ItemDisplayState.New)
             {
-                // ĞÂÊÂÏî
-                item.BackColor = Color.FromArgb(255, 255, 100); // Ç³»ÆÉ«
+                // æ–°äº‹é¡¹
+                item.BackColor = Color.FromArgb(255, 255, 100); // æµ…é»„è‰²
                 item.ForeColor = SystemColors.WindowText;
             }
             else if (this.ItemDisplayState == ItemDisplayState.Deleted)
             {
-                // É¾³ıµÄÊÂÏî
-                item.BackColor = Color.FromArgb(255, 150, 150); // Ç³ºìÉ«
+                // åˆ é™¤çš„äº‹é¡¹
+                item.BackColor = Color.FromArgb(255, 150, 150); // æµ…çº¢è‰²
                 item.ForeColor = SystemColors.WindowText;
             }
-            else // ÆäËûÊÂÏî
+            else // å…¶ä»–äº‹é¡¹
             {
                 item.BackColor = SystemColors.Window;
                 item.ForeColor = SystemColors.WindowText;
@@ -966,7 +966,7 @@ strOrderTime);
         }
 
         /// <summary>
-        /// Ë¢ĞÂÊÂÏîÑÕÉ«
+        /// åˆ·æ–°äº‹é¡¹é¢œè‰²
         /// </summary>
         public void RefreshItemColor()
         {
@@ -976,7 +976,7 @@ strOrderTime);
             }
         }
 
-        // Ë¢ĞÂ¸÷ÁĞÄÚÈİºÍÍ¼±ê¡¢±³¾°ÑÕÉ«
+        // åˆ·æ–°å„åˆ—å†…å®¹å’Œå›¾æ ‡ã€èƒŒæ™¯é¢œè‰²
         public void RefreshListView()
         {
             if (this.ListViewItem == null)
@@ -1057,7 +1057,7 @@ strOrderTime);
         }
 
         // parameters:
-        //      bClearOtherHilight  ÊÇ·ñÇå³ıÆäÓà´æÔÚµÄ¸ßÁÁ±ê¼Ç£¿
+        //      bClearOtherHilight  æ˜¯å¦æ¸…é™¤å…¶ä½™å­˜åœ¨çš„é«˜äº®æ ‡è®°ï¼Ÿ
         public void HilightListViewItem(bool bClearOtherHilight)
         {
             if (this.ListViewItem == null)
@@ -1092,34 +1092,34 @@ strOrderTime);
     }
 
     /// <summary>
-    /// ¶©¹ºĞÅÏ¢µÄ¼¯ºÏÈİÆ÷
+    /// è®¢è´­ä¿¡æ¯çš„é›†åˆå®¹å™¨
     /// </summary>
     [Serializable()]
     public class OrderItemCollection : BookItemCollectionBase
     {
 
 #if NO
-        // ¼ì²éÈ«²¿ÊÂÏîµÄParentÖµÊÇ·ñÊÊºÏ±£´æ
+        // æ£€æŸ¥å…¨éƒ¨äº‹é¡¹çš„Parentå€¼æ˜¯å¦é€‚åˆä¿å­˜
         // return:
-        //      -1  ÓĞ´íÎó£¬²»ÊÊºÏ±£´æ
-        //      0   Ã»ÓĞ´íÎó
+        //      -1  æœ‰é”™è¯¯ï¼Œä¸é€‚åˆä¿å­˜
+        //      0   æ²¡æœ‰é”™è¯¯
         public int CheckParentIDForSave(out string strError)
         {
             strError = "";
-            // ¼ì²éÃ¿¸öÊÂÏîµÄParentID
+            // æ£€æŸ¥æ¯ä¸ªäº‹é¡¹çš„ParentID
             List<string> ids = this.GetParentIDs();
             for (int i = 0; i < ids.Count; i++)
             {
                 string strID = ids[i];
                 if (String.IsNullOrEmpty(strID) == true)
                 {
-                    strError = "¶©¹ºÊÂÏîÖĞ³öÏÖÁË¿ÕµÄParentIDÖµ";
+                    strError = "è®¢è´­äº‹é¡¹ä¸­å‡ºç°äº†ç©ºçš„ParentIDå€¼";
                     return -1;
                 }
 
                 if (strID == "?")
                 {
-                    strError = "¶©¹ºÊÂÏîÖĞ³öÏÖÁË'?'Ê½µÄParentIDÖµ";
+                    strError = "è®¢è´­äº‹é¡¹ä¸­å‡ºç°äº†'?'å¼çš„ParentIDå€¼";
                     return -1;
                 }
             }
@@ -1143,13 +1143,13 @@ strOrderTime);
             return results;
         }
 
-        // ÉèÖÃÈ«²¿orderitemÊÂÏîµÄParentÓò
+        // è®¾ç½®å…¨éƒ¨orderitemäº‹é¡¹çš„ParentåŸŸ
         public void SetParentID(string strParentID)
         {
             for (int i = 0; i < this.Count; i++)
             {
                 OrderItem item = this[i];
-                if (item.Parent != strParentID) // ±ÜÃâÁ¬´øÎŞÎ½µØĞŞ¸Äitem.Changed 2009/3/6
+                if (item.Parent != strParentID) // é¿å…è¿å¸¦æ— è°“åœ°ä¿®æ”¹item.Changed 2009/3/6
                     item.Parent = strParentID;
             }
         }
@@ -1157,17 +1157,17 @@ strOrderTime);
 #endif
 
         /// <summary>
-        /// ÒÔ±àºÅ¶¨Î»Ò»¸öÊÂÏî
+        /// ä»¥ç¼–å·å®šä½ä¸€ä¸ªäº‹é¡¹
         /// </summary>
-        /// <param name="strIndex">±àºÅ</param>
-        /// <param name="excludeItems">ÅĞ¶ÏÖĞĞèÒªÅÅ³ıµÄÊÂÏî</param>
-        /// <returns>ÕÒµ½µÄÊÂÏî¡£null ±íÊ¾Ã»ÓĞÕÒµ½</returns>
+        /// <param name="strIndex">ç¼–å·</param>
+        /// <param name="excludeItems">åˆ¤æ–­ä¸­éœ€è¦æ’é™¤çš„äº‹é¡¹</param>
+        /// <returns>æ‰¾åˆ°çš„äº‹é¡¹ã€‚null è¡¨ç¤ºæ²¡æœ‰æ‰¾åˆ°</returns>
         public OrderItem GetItemByIndex(string strIndex,
             List<OrderItem> excludeItems)
         {
             foreach (OrderItem item in this)
             {
-                // ĞèÒªÅÅ³ıµÄÊÂÏî
+                // éœ€è¦æ’é™¤çš„äº‹é¡¹
                 if (excludeItems != null)
                 {
                     if (excludeItems.IndexOf(item) != -1)
@@ -1183,7 +1183,7 @@ strOrderTime);
 
 #if NO
         /// <summary>
-        /// ÒÔ¼ÇÂ¼Â·¾¶¶¨Î»Ò»¸öÊÂÏî
+        /// ä»¥è®°å½•è·¯å¾„å®šä½ä¸€ä¸ªäº‹é¡¹
         /// </summary>
         /// <param name="strRecPath"></param>
         /// <returns></returns>
@@ -1200,7 +1200,7 @@ strOrderTime);
         }
 
         /// <summary>
-        /// ÒÔRefID¶¨Î»Ò»¸öÊÂÏî
+        /// ä»¥RefIDå®šä½ä¸€ä¸ªäº‹é¡¹
         /// </summary>
         /// <param name="strRefID"></param>
         /// <returns></returns>
@@ -1211,7 +1211,7 @@ strOrderTime);
             {
                 OrderItem item = this[i];
 
-                // ĞèÒªÅÅ³ıµÄÊÂÏî
+                // éœ€è¦æ’é™¤çš„äº‹é¡¹
                 if (excludeItems != null)
                 {
                     if (excludeItems.IndexOf(item) != -1)
@@ -1227,7 +1227,7 @@ strOrderTime);
 
         bool m_bChanged = false;
         /// <summary>
-        /// ÄÚÈİÊÇ·ñ·¢Éú¹ıĞŞ¸Ä
+        /// å†…å®¹æ˜¯å¦å‘ç”Ÿè¿‡ä¿®æ”¹
         /// </summary>
         public bool Changed
         {
@@ -1249,7 +1249,7 @@ strOrderTime);
             set
             {
                 // 2012/3/20
-                // trueºÍfalse²»¶Ô³Æ
+                // trueå’Œfalseä¸å¯¹ç§°
                 if (value == false)
                 {
                     for (int i = 0; i < this.Count; i++)
@@ -1267,7 +1267,7 @@ strOrderTime);
             }
         }
 
-        // ±ê¼ÇÉ¾³ı
+        // æ ‡è®°åˆ é™¤
         public void MaskDeleteItem(
             bool bRemoveFromList,
             OrderItem orderitem)
@@ -1282,7 +1282,7 @@ strOrderTime);
             orderitem.ItemDisplayState = ItemDisplayState.Deleted;
             orderitem.Changed = true;
 
-            // ´ÓlistviewÖĞÏûÊ§?
+            // ä»listviewä¸­æ¶ˆå¤±?
             if (bRemoveFromList == true)
                 orderitem.DeleteFromListView();
             else
@@ -1291,29 +1291,29 @@ strOrderTime);
             }
         }
 
-        // Undo±ê¼ÇÉ¾³ı
+        // Undoæ ‡è®°åˆ é™¤
         // return:
-        //      false   Ã»ÓĞ±ØÒªUndo
-        //      true    ÒÑ¾­Undo
+        //      false   æ²¡æœ‰å¿…è¦Undo
+        //      true    å·²ç»Undo
         public bool UndoMaskDeleteItem(OrderItem orderitem)
         {
             if (orderitem.ItemDisplayState != ItemDisplayState.Deleted)
-                return false;   // ÒªUndoµÄÊÂÏî¸ù±¾¾Í²»ÊÇDeleted×´Ì¬£¬ËùÒÔÌ¸²»ÉÏUndo
+                return false;   // è¦Undoçš„äº‹é¡¹æ ¹æœ¬å°±ä¸æ˜¯DeletedçŠ¶æ€ï¼Œæ‰€ä»¥è°ˆä¸ä¸ŠUndo
 
-            // ÒòÎª²»ÖªµÀÉÏ´Î±ê¼ÇÉ¾³ıÇ°Êı¾İÊÇ·ñ¸Ä¹ı£¬Òò´ËÈ«µ±¸Ä¹ı
+            // å› ä¸ºä¸çŸ¥é“ä¸Šæ¬¡æ ‡è®°åˆ é™¤å‰æ•°æ®æ˜¯å¦æ”¹è¿‡ï¼Œå› æ­¤å…¨å½“æ”¹è¿‡
             orderitem.ItemDisplayState = ItemDisplayState.Changed;
             orderitem.Changed = true;
 
-            // Ë¢ĞÂ
+            // åˆ·æ–°
             orderitem.RefreshListView();
             return true;
         }
 
-        // ´Ó¼¯ºÏÖĞºÍÊÓ¾õÉÏÍ¬Ê±É¾³ı
+        // ä»é›†åˆä¸­å’Œè§†è§‰ä¸ŠåŒæ—¶åˆ é™¤
         public void PhysicalDeleteItem(
             OrderItem orderitem)
         {
-            // ´ÓlistviewÖĞÏûÊ§
+            // ä»listviewä¸­æ¶ˆå¤±
             orderitem.DeleteFromListView();
 
             this.Remove(orderitem);
@@ -1345,7 +1345,7 @@ strOrderTime);
             base.Clear();
         }
 
-        // °ÑÊÂÏîÖØĞÂÈ«²¿¼ÓÈëlistview
+        // æŠŠäº‹é¡¹é‡æ–°å…¨éƒ¨åŠ å…¥listview
         public void AddToListView(ListView list)
         {
             for (int i = 0; i < this.Count; i++)
@@ -1358,11 +1358,11 @@ strOrderTime);
 #endif
 
         /// <summary>
-        /// ½«¼¯ºÏÖĞµÄÈ«²¿ÊÂÏîĞÅÏ¢Êä³öÎªÒ»¸öÍêÕûµÄ XML ¸ñÊ½×Ö·û´®
+        /// å°†é›†åˆä¸­çš„å…¨éƒ¨äº‹é¡¹ä¿¡æ¯è¾“å‡ºä¸ºä¸€ä¸ªå®Œæ•´çš„ XML æ ¼å¼å­—ç¬¦ä¸²
         /// </summary>
-        /// <param name="strXml">XML ×Ö·û´®</param>
-        /// <param name="strError">³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í¡£´íÎóĞÅÏ¢ÔÚ strError ÖĞ; 0: ³É¹¦</returns>
+        /// <param name="strXml">XML å­—ç¬¦ä¸²</param>
+        /// <param name="strError">å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™ã€‚é”™è¯¯ä¿¡æ¯åœ¨ strError ä¸­; 0: æˆåŠŸ</returns>
         public int BuildXml(
 out string strXml,
 out string strError)
@@ -1386,16 +1386,16 @@ out string strError)
         }
 
         // parameters:
-        //       changed_refids  ÀÛ¼ÓĞŞ¸Ä¹ıµÄ refid ¶ÔÕÕ±í¡£ Ô­À´µÄ --> ĞÂµÄ
+        //       changed_refids  ç´¯åŠ ä¿®æ”¹è¿‡çš„ refid å¯¹ç…§è¡¨ã€‚ åŸæ¥çš„ --> æ–°çš„
         /// <summary>
-        /// ¸ù¾İÒ»¸ö XML ×Ö·û´®ÄÚÈİ£¬¹¹½¨³ö¼¯ºÏÄÚµÄÈô¸ÉÊÂÏî
+        /// æ ¹æ®ä¸€ä¸ª XML å­—ç¬¦ä¸²å†…å®¹ï¼Œæ„å»ºå‡ºé›†åˆå†…çš„è‹¥å¹²äº‹é¡¹
         /// </summary>
-        /// <param name="nodeOrderCollection">XmlNode¶ÔÏó£¬±¾·½·¨½«Ê¹ÓÃÆäÏÂÊôµÄ dprms:order ÔªËØÀ´¹¹ÔìÊÂÏî</param>
-        /// <param name="list">ListView ¶ÔÏó¡£¹¹ÔìºÃµÄÊÂÏî»áÏÔÊ¾µ½ÆäÖĞ</param>
-        /// <param name="bRefreshRefID">¹¹ÔìÊÂÏîµÄ¹ı³ÌÖĞ£¬ÊÇ·ñÒªË¢ĞÂÃ¿¸öÊÂÏîµÄ RefID ³ÉÔ±Öµ</param>
-        /// <param name="changed_refids">ÀÛ¼ÓĞŞ¸Ä¹ıµÄ refid ¶ÔÕÕ±í¡£ Ô­À´µÄ --> ĞÂµÄ</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í¡£´íÎóĞÅÏ¢ÔÚ strError ÖĞ; 0: ³É¹¦</returns>
+        /// <param name="nodeOrderCollection">XmlNodeå¯¹è±¡ï¼Œæœ¬æ–¹æ³•å°†ä½¿ç”¨å…¶ä¸‹å±çš„ dprms:order å…ƒç´ æ¥æ„é€ äº‹é¡¹</param>
+        /// <param name="list">ListView å¯¹è±¡ã€‚æ„é€ å¥½çš„äº‹é¡¹ä¼šæ˜¾ç¤ºåˆ°å…¶ä¸­</param>
+        /// <param name="bRefreshRefID">æ„é€ äº‹é¡¹çš„è¿‡ç¨‹ä¸­ï¼Œæ˜¯å¦è¦åˆ·æ–°æ¯ä¸ªäº‹é¡¹çš„ RefID æˆå‘˜å€¼</param>
+        /// <param name="changed_refids">ç´¯åŠ ä¿®æ”¹è¿‡çš„ refid å¯¹ç…§è¡¨ã€‚ åŸæ¥çš„ --> æ–°çš„</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™ã€‚é”™è¯¯ä¿¡æ¯åœ¨ strError ä¸­; 0: æˆåŠŸ</returns>
         public int ImportFromXml(XmlNode nodeOrderCollection,
             ListView list,
             bool bRefreshRefID,

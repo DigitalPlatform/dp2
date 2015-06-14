@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -19,8 +19,8 @@ using DigitalPlatform.CommonControl;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ÆÚĞÅÏ¢
-    /// Ö÷ÒªÓÃÓÚ IssueControl ÖĞ£¬±íÊ¾Ò»¸öÆÚ¼ÇÂ¼
+    /// æœŸä¿¡æ¯
+    /// ä¸»è¦ç”¨äº IssueControl ä¸­ï¼Œè¡¨ç¤ºä¸€ä¸ªæœŸè®°å½•
     /// </summary>
     [Serializable()]
     public class IssueItem : BookItemBase
@@ -30,58 +30,58 @@ namespace dp2Circulation
 
 #endif
 
-        // ÁĞindex¡£×¢ÒâÒª±£³ÖºÍIssueControlÖĞµÄÁĞºÅÒ»ÖÂ
+        // åˆ—indexã€‚æ³¨æ„è¦ä¿æŒå’ŒIssueControlä¸­çš„åˆ—å·ä¸€è‡´
 
         /// <summary>
-        /// ListView À¸Ä¿ÏÂ±ê£º³ö°æÈÕÆÚ
+        /// ListView æ ç›®ä¸‹æ ‡ï¼šå‡ºç‰ˆæ—¥æœŸ
         /// </summary>
         public const int COLUMN_PUBLISHTIME = 0;
         /// <summary>
-        /// ListView À¸Ä¿ÏÂ±ê£º´íÎóĞÅÏ¢
+        /// ListView æ ç›®ä¸‹æ ‡ï¼šé”™è¯¯ä¿¡æ¯
         /// </summary>
         public const int COLUMN_ERRORINFO = 1;
         /// <summary>
-        /// ListView À¸Ä¿ÏÂ±ê£º¼ÇÂ¼×´Ì¬
+        /// ListView æ ç›®ä¸‹æ ‡ï¼šè®°å½•çŠ¶æ€
         /// </summary>
         public const int COLUMN_STATE = 2;
         /// <summary>
-        /// ListView À¸Ä¿ÏÂ±ê£ºÆÚºÅ
+        /// ListView æ ç›®ä¸‹æ ‡ï¼šæœŸå·
         /// </summary>
         public const int COLUMN_ISSUE = 3;
         /// <summary>
-        /// ListView À¸Ä¿ÏÂ±ê£º×ÜÆÚºÅ
+        /// ListView æ ç›®ä¸‹æ ‡ï¼šæ€»æœŸå·
         /// </summary>
         public const int COLUMN_ZONG = 4;
         /// <summary>
-        /// ListView À¸Ä¿ÏÂ±ê£º¾íºÅ
+        /// ListView æ ç›®ä¸‹æ ‡ï¼šå·å·
         /// </summary>
         public const int COLUMN_VOLUME = 5;
         /// <summary>
-        /// ListView À¸Ä¿ÏÂ±ê£º¶©¹ºĞÅÏ¢
+        /// ListView æ ç›®ä¸‹æ ‡ï¼šè®¢è´­ä¿¡æ¯
         /// </summary>
         public const int COLUMN_ORDERINFO = 6;
         /// <summary>
-        /// ListView À¸Ä¿ÏÂ±ê£º×¢ÊÍ
+        /// ListView æ ç›®ä¸‹æ ‡ï¼šæ³¨é‡Š
         /// </summary>
         public const int COLUMN_COMMENT = 7;
         /// <summary>
-        /// ListView À¸Ä¿ÏÂ±ê£ºÅú´ÎºÅ
+        /// ListView æ ç›®ä¸‹æ ‡ï¼šæ‰¹æ¬¡å·
         /// </summary>
         public const int COLUMN_BATCHNO = 8;
         /// <summary>
-        /// ListView À¸Ä¿ÏÂ±ê£º²Î¿¼ ID
+        /// ListView æ ç›®ä¸‹æ ‡ï¼šå‚è€ƒ ID
         /// </summary>
         public const int COLUMN_REFID = 9;
         /// <summary>
-        /// ListView À¸Ä¿ÏÂ±ê£º²Ù×÷ÀúÊ·ĞÅÏ¢
+        /// ListView æ ç›®ä¸‹æ ‡ï¼šæ“ä½œå†å²ä¿¡æ¯
         /// </summary>
         public const int COLUMN_OPERATIONS = 10;
         /// <summary>
-        /// ListView À¸Ä¿ÏÂ±ê£ºÆÚ¼ÇÂ¼Â·¾¶
+        /// ListView æ ç›®ä¸‹æ ‡ï¼šæœŸè®°å½•è·¯å¾„
         /// </summary>
         public const int COLUMN_RECPATH = 11;
 
-        #region Êı¾İ³ÉÔ±
+        #region æ•°æ®æˆå‘˜
 
 
 #if NO
@@ -101,7 +101,7 @@ namespace dp2Circulation
         }
 
                 /// <summary>
-        /// ´ÓÊôµÄÊéÄ¿¼ÇÂ¼id
+        /// ä»å±çš„ä¹¦ç›®è®°å½•id
         /// </summary>
         public string Parent
         {
@@ -121,7 +121,7 @@ namespace dp2Circulation
 #endif
 
         /// <summary>
-        /// ²Ù×÷
+        /// æ“ä½œ
         /// </summary>
         public string Operations
         {
@@ -132,7 +132,7 @@ namespace dp2Circulation
             }
             set
             {
-                // ×¢Òâ£¬¿ÉÄÜÅ×³öÒì³£
+                // æ³¨æ„ï¼Œå¯èƒ½æŠ›å‡ºå¼‚å¸¸
                 DomUtil.SetElementInnerXml(this.RecordDom.DocumentElement,
                     "operations",
                     value);
@@ -142,7 +142,7 @@ namespace dp2Circulation
 
 
         /// <summary>
-        /// ³ö°æÊ±¼ä
+        /// å‡ºç‰ˆæ—¶é—´
         /// </summary>
         public string PublishTime
         {
@@ -160,7 +160,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÆÚ×´Ì¬
+        /// æœŸçŠ¶æ€
         /// </summary>
         public string State
         {
@@ -180,7 +180,7 @@ namespace dp2Circulation
 
 
         /// <summary>
-        /// ¶©¹ºĞÅÏ¢
+        /// è®¢è´­ä¿¡æ¯
         /// </summary>
         public string OrderInfo
         {
@@ -206,11 +206,11 @@ namespace dp2Circulation
                     this.RecordDom.DocumentElement.AppendChild(node);
                 }
 
-                // ×¢Òâ£¬¿ÉÄÜÅ×³öÒì³£
+                // æ³¨æ„ï¼Œå¯èƒ½æŠ›å‡ºå¼‚å¸¸
                 node.InnerXml = value;
                  * */
 
-                // ×¢Òâ£¬¿ÉÄÜÅ×³öÒì³£
+                // æ³¨æ„ï¼Œå¯èƒ½æŠ›å‡ºå¼‚å¸¸
                 DomUtil.SetElementInnerXml(this.RecordDom.DocumentElement, 
                     "orderInfo",
                     value);
@@ -219,7 +219,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ×¢ÊÍ
+        /// æ³¨é‡Š
         /// </summary>
         public string Comment
         {
@@ -237,7 +237,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// Åú´ÎºÅ
+        /// æ‰¹æ¬¡å·
         /// </summary>
         public string BatchNo
         {
@@ -255,7 +255,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ¾íºÅ
+        /// å·å·
         /// </summary>
         public string Volume
         {
@@ -273,7 +273,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ×ÜÆÚºÅ
+        /// æ€»æœŸå·
         /// </summary>
         public string Zong
         {
@@ -291,7 +291,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÆÚºÅ
+        /// æœŸå·
         /// </summary>
         public string Issue
         {
@@ -312,26 +312,26 @@ namespace dp2Circulation
 
 #if NO
         /// <summary>
-        ///  ÆÚ¼ÇÂ¼Â·¾¶
+        ///  æœŸè®°å½•è·¯å¾„
         /// </summary>
         public string RecPath = "";
 
         /// <summary>
-        /// ÊÇ·ñ±»ĞŞ¸Ä
+        /// æ˜¯å¦è¢«ä¿®æ”¹
         /// </summary>
         bool m_bChanged = false;
 
         public string OldRecord = "";
 
-        public string CurrentRecord = "";   // ÔÚSerialize¹ı³ÌÖĞÓÃÀ´´¢´æRecordDomÄÚÈİ
+        public string CurrentRecord = "";   // åœ¨Serializeè¿‡ç¨‹ä¸­ç”¨æ¥å‚¨å­˜RecordDomå†…å®¹
 
         /// <summary>
-        /// ¼ÇÂ¼µÄdom
+        /// è®°å½•çš„dom
         /// </summary>
         [NonSerialized()]
         public XmlDocument RecordDom = new XmlDocument();
 
-        // »Ö¸´ÄÇĞ©²»ÄÜĞòÁĞ»¯µÄ³ÉÔ±Öµ
+        // æ¢å¤é‚£äº›ä¸èƒ½åºåˆ—åŒ–çš„æˆå‘˜å€¼
         public void RestoreNonSerialized()
         {
             this.RecordDom = new XmlDocument();
@@ -339,7 +339,7 @@ namespace dp2Circulation
             if (String.IsNullOrEmpty(this.CurrentRecord) == false)
             {
                 this.RecordDom.LoadXml(this.CurrentRecord);
-                this.CurrentRecord = "";    // Íê³ÉÁËÈÎÎñ
+                this.CurrentRecord = "";    // å®Œæˆäº†ä»»åŠ¡
             }
             else
                 this.RecordDom.LoadXml("<root />");
@@ -347,7 +347,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// Ê±¼ä´Á
+        /// æ—¶é—´æˆ³
         /// </summary>
         public byte[] Timestamp = null;
 
@@ -367,7 +367,7 @@ namespace dp2Circulation
         public EntityInfo Error = null;
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public IssueItem()
         {
@@ -386,7 +386,7 @@ namespace dp2Circulation
             newObject.OldRecord = this.OldRecord;
 
 
-            // ·ÅÈë×îĞÂÏÊµÄÄÚÈİ
+            // æ”¾å…¥æœ€æ–°é²œçš„å†…å®¹
             newObject.CurrentRecord = this.RecordDom.OuterXml;
 
 
@@ -400,7 +400,7 @@ namespace dp2Circulation
             return newObject;
         }
 
-        // ÉèÖÃÊı¾İ
+        // è®¾ç½®æ•°æ®
         public int SetData(string strRecPath,
             string strXml,
             byte[] baTimeStamp,
@@ -409,14 +409,14 @@ namespace dp2Circulation
             strError = "";
 
             Debug.Assert(this.RecordDom != null);
-            // ¿ÉÄÜÅ×³öÒì³£
+            // å¯èƒ½æŠ›å‡ºå¼‚å¸¸
             try
             {
                 this.RecordDom.LoadXml(strXml);
             }
             catch (Exception ex)
             {
-                strError = "XMLÊı¾İ×°ÔØµ½DOMÊ±³ö´í: " + ex.Message;
+                strError = "XMLæ•°æ®è£…è½½åˆ°DOMæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
@@ -428,7 +428,7 @@ namespace dp2Circulation
             return 0;
         }
 
-        // ÖØĞÂÉèÖÃÊı¾İ
+        // é‡æ–°è®¾ç½®æ•°æ®
         public int ResetData(
             string strRecPath,
             string strNewXml,
@@ -447,7 +447,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = "xml×°ÔØµ½DOMÊ±³ö´í: " + ex.Message;
+                strError = "xmlè£…è½½åˆ°DOMæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
@@ -465,15 +465,15 @@ namespace dp2Circulation
         // 2013/6/18
         // 
         // return:
-        //      -1  ³ö´í
-        //      0   Ã»ÓĞ·¢ÉúÌæ»»ĞŞ¸Ä
-        //      >0  ¹²ĞŞ¸ÄÁË¶àÉÙ¸ö<refID>ÔªËØÄÚÈİ
+        //      -1  å‡ºé”™
+        //      0   æ²¡æœ‰å‘ç”Ÿæ›¿æ¢ä¿®æ”¹
+        //      >0  å…±ä¿®æ”¹äº†å¤šå°‘ä¸ª<refID>å…ƒç´ å†…å®¹
         /// <summary>
-        /// ¸ü»» orderInfo ÔªËØÀïµÄ refID ÔªËØÖĞµÄ ²Î¿¼ ID ×Ö·û´®
+        /// æ›´æ¢ orderInfo å…ƒç´ é‡Œçš„ refID å…ƒç´ ä¸­çš„ å‚è€ƒ ID å­—ç¬¦ä¸²
         /// </summary>
-        /// <param name="order_refid_change_table">²Î¿¼ ID ¶ÔÕÕ±í</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1  ³ö´í; 0   Ã»ÓĞ·¢ÉúÌæ»»ĞŞ¸Ä; >0  ¹²ĞŞ¸ÄÁË¶àÉÙ¸ö refID ÔªËØÄÚÈİ</returns>
+        /// <param name="order_refid_change_table">å‚è€ƒ ID å¯¹ç…§è¡¨</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1  å‡ºé”™; 0   æ²¡æœ‰å‘ç”Ÿæ›¿æ¢ä¿®æ”¹; >0  å…±ä¿®æ”¹äº†å¤šå°‘ä¸ª refID å…ƒç´ å†…å®¹</returns>
         public int ReplaceOrderInfoRefID(Hashtable order_refid_change_table,
             out string strError)
         {
@@ -522,15 +522,15 @@ namespace dp2Circulation
 
         // 
         // return:
-        //      -1  ³ö´í
-        //      0   Ã»ÓĞ·¢ÉúÌæ»»ĞŞ¸Ä
-        //      >0  ¹²ĞŞ¸ÄÁË¶àÉÙ¸ö<distribute>ÔªËØÄÚÈİ
+        //      -1  å‡ºé”™
+        //      0   æ²¡æœ‰å‘ç”Ÿæ›¿æ¢ä¿®æ”¹
+        //      >0  å…±ä¿®æ”¹äº†å¤šå°‘ä¸ª<distribute>å…ƒç´ å†…å®¹
         /// <summary>
-        /// ¸ü»» orderInfo ÔªËØÀïµÄ distribute ÔªËØÖĞµÄ refid ×Ö·û´®
+        /// æ›´æ¢ orderInfo å…ƒç´ é‡Œçš„ distribute å…ƒç´ ä¸­çš„ refid å­—ç¬¦ä¸²
         /// </summary>
-        /// <param name="item_refid_change_table">²Î¿¼ ID ¶ÔÕÕ±í</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1  ³ö´í; 0   Ã»ÓĞ·¢ÉúÌæ»»ĞŞ¸Ä; >0  ¹²ĞŞ¸ÄÁË¶àÉÙ¸ö distribute ÔªËØÄÚÈİ</returns>
+        /// <param name="item_refid_change_table">å‚è€ƒ ID å¯¹ç…§è¡¨</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1  å‡ºé”™; 0   æ²¡æœ‰å‘ç”Ÿæ›¿æ¢ä¿®æ”¹; >0  å…±ä¿®æ”¹äº†å¤šå°‘ä¸ª distribute å…ƒç´ å†…å®¹</returns>
         public int ReplaceOrderInfoItemRefID(Hashtable item_refid_change_table,
             out string strError)
         {
@@ -596,7 +596,7 @@ namespace dp2Circulation
 
 #if NO
         /// <summary>
-        /// ´´½¨ºÃÊÊºÏÓÚ±£´æµÄ¼ÇÂ¼ĞÅÏ¢
+        /// åˆ›å»ºå¥½é€‚åˆäºä¿å­˜çš„è®°å½•ä¿¡æ¯
         /// </summary>
         /// <param name="strXml"></param>
         /// <param name="strError"></param>
@@ -610,7 +610,7 @@ namespace dp2Circulation
 
             if (this.Parent == "")
             {
-                strError = "Parent³ÉÔ±ÉĞÎ´¶¨Òå";
+                strError = "Parentæˆå‘˜å°šæœªå®šä¹‰";
                 return -1;
             }
 
@@ -619,7 +619,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÄÚÈİÊÇ·ñ·¢Éú¹ıĞŞ¸Ä
+        /// å†…å®¹æ˜¯å¦å‘ç”Ÿè¿‡ä¿®æ”¹
         /// </summary>
         public bool Changed
         {
@@ -643,7 +643,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ½«±¾ÊÂÏî¼ÓÈëµ½listviewÖĞ
+        /// å°†æœ¬äº‹é¡¹åŠ å…¥åˆ°listviewä¸­
         /// </summary>
         /// <param name="list"></param>
         /// <returns></returns>
@@ -707,7 +707,7 @@ namespace dp2Circulation
 
             this.ListViewItem = item;
 
-            this.ListViewItem.Tag = this;   // ½«IssueItem¶ÔÏóÒıÓÃ±£´æÔÚListViewItemÊÂÏîÖĞ
+            this.ListViewItem.Tag = this;   // å°†IssueItemå¯¹è±¡å¼•ç”¨ä¿å­˜åœ¨ListViewItemäº‹é¡¹ä¸­
 
             return item;
         }
@@ -715,9 +715,9 @@ namespace dp2Circulation
 
         // 2013/6/20
         /// <summary>
-        /// ½«ÄÚ´æÖµ¸üĞÂµ½ÏÔÊ¾µÄÀ¸Ä¿
+        /// å°†å†…å­˜å€¼æ›´æ–°åˆ°æ˜¾ç¤ºçš„æ ç›®
         /// </summary>
-        /// <param name="item">ListViewItemÊÂÏî£¬ListViewÖĞµÄÒ»ĞĞ</param>
+        /// <param name="item">ListViewItemäº‹é¡¹ï¼ŒListViewä¸­çš„ä¸€è¡Œ</param>
         public override void SetItemColumns(ListViewItem item)
         {
             ListViewUtil.ChangeItemText(item,
@@ -766,24 +766,24 @@ namespace dp2Circulation
             list.Items.Remove(this.ListViewItem);
         }
 
-        // Ë¢ĞÂ±³¾°ÑÕÉ«ºÍÍ¼±ê
+        // åˆ·æ–°èƒŒæ™¯é¢œè‰²å’Œå›¾æ ‡
         void SetItemBackColor(ListViewItem item)
         {
             if ((this.ItemDisplayState == ItemDisplayState.Normal)
                 && this.Changed == true)
             {
-                Debug.Assert(false, "ItemDisplayState.Normal×´Ì¬ºÍChanged == trueÃ¬¶ÜÁË");
+                Debug.Assert(false, "ItemDisplayState.NormalçŠ¶æ€å’ŒChanged == trueçŸ›ç›¾äº†");
             }
             else if ((this.ItemDisplayState == ItemDisplayState.Changed)
                 && this.Changed == false) // 2009/3/5
             {
-                Debug.Assert(false, "ItemDisplayState.Changed×´Ì¬ºÍChanged == falseÃ¬¶ÜÁË");
+                Debug.Assert(false, "ItemDisplayState.ChangedçŠ¶æ€å’ŒChanged == falseçŸ›ç›¾äº†");
             }
 
             if (String.IsNullOrEmpty(this.ErrorInfo) == false)
             {
-                // ³ö´íµÄÊÂÏî
-                item.BackColor = Color.FromArgb(255, 0, 0); // ´¿ºìÉ«
+                // å‡ºé”™çš„äº‹é¡¹
+                item.BackColor = Color.FromArgb(255, 0, 0); // çº¯çº¢è‰²
                 item.ForeColor = Color.White;
             }
             else if (this.ItemDisplayState == ItemDisplayState.Normal)
@@ -793,23 +793,23 @@ namespace dp2Circulation
             }
             else if (this.ItemDisplayState == ItemDisplayState.Changed)
             {
-                // ĞŞ¸Ä¹ıµÄ¾ÉÊÂÏî
-                item.BackColor = Color.FromArgb(100, 255, 100); // Ç³ÂÌÉ«
+                // ä¿®æ”¹è¿‡çš„æ—§äº‹é¡¹
+                item.BackColor = Color.FromArgb(100, 255, 100); // æµ…ç»¿è‰²
                 item.ForeColor = SystemColors.WindowText;
             }
             else if (this.ItemDisplayState == ItemDisplayState.New)
             {
-                // ĞÂÊÂÏî
-                item.BackColor = Color.FromArgb(255, 255, 100); // Ç³»ÆÉ«
+                // æ–°äº‹é¡¹
+                item.BackColor = Color.FromArgb(255, 255, 100); // æµ…é»„è‰²
                 item.ForeColor = SystemColors.WindowText;
             }
             else if (this.ItemDisplayState == ItemDisplayState.Deleted)
             {
-                // É¾³ıµÄÊÂÏî
-                item.BackColor = Color.FromArgb(255, 150, 150); // Ç³ºìÉ«
+                // åˆ é™¤çš„äº‹é¡¹
+                item.BackColor = Color.FromArgb(255, 150, 150); // æµ…çº¢è‰²
                 item.ForeColor = SystemColors.WindowText;
             }
-            else // ÆäËûÊÂÏî
+            else // å…¶ä»–äº‹é¡¹
             {
                 item.BackColor = SystemColors.Window;
                 item.ForeColor = SystemColors.WindowText;
@@ -820,7 +820,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// Ë¢ĞÂÊÂÏîÑÕÉ«
+        /// åˆ·æ–°äº‹é¡¹é¢œè‰²
         /// </summary>
         public void RefreshItemColor()
         {
@@ -831,7 +831,7 @@ namespace dp2Circulation
         }
 
 
-        // Ë¢ĞÂ¸÷ÁĞÄÚÈİºÍÍ¼±ê¡¢±³¾°ÑÕÉ«
+        // åˆ·æ–°å„åˆ—å†…å®¹å’Œå›¾æ ‡ã€èƒŒæ™¯é¢œè‰²
         public void RefreshListView()
         {
             if (this.ListViewItem == null)
@@ -885,7 +885,7 @@ namespace dp2Circulation
         }
 
         // parameters:
-        //      bClearOtherHilight  ÊÇ·ñÇå³ıÆäÓà´æÔÚµÄ¸ßÁÁ±ê¼Ç£¿
+        //      bClearOtherHilight  æ˜¯å¦æ¸…é™¤å…¶ä½™å­˜åœ¨çš„é«˜äº®æ ‡è®°ï¼Ÿ
         public void HilightListViewItem(bool bClearOtherHilight)
         {
             if (this.ListViewItem == null)
@@ -920,33 +920,33 @@ namespace dp2Circulation
     }
 
     /// <summary>
-    /// ²áĞÅÏ¢µÄ¼¯ºÏÈİÆ÷
+    /// å†Œä¿¡æ¯çš„é›†åˆå®¹å™¨
     /// </summary>
     [Serializable()]
     public class IssueItemCollection : BookItemCollectionBase
     {
 #if NO
-        // ¼ì²éÈ«²¿ÊÂÏîµÄParentÖµÊÇ·ñÊÊºÏ±£´æ
+        // æ£€æŸ¥å…¨éƒ¨äº‹é¡¹çš„Parentå€¼æ˜¯å¦é€‚åˆä¿å­˜
         // return:
-        //      -1  ÓĞ´íÎó£¬²»ÊÊºÏ±£´æ
-        //      0   Ã»ÓĞ´íÎó
+        //      -1  æœ‰é”™è¯¯ï¼Œä¸é€‚åˆä¿å­˜
+        //      0   æ²¡æœ‰é”™è¯¯
         public int CheckParentIDForSave(out string strError)
         {
             strError = "";
-            // ¼ì²éÃ¿¸öÊÂÏîµÄParentID
+            // æ£€æŸ¥æ¯ä¸ªäº‹é¡¹çš„ParentID
             List<string> ids = this.GetParentIDs();
             for (int i = 0; i < ids.Count; i++)
             {
                 string strID = ids[i];
                 if (String.IsNullOrEmpty(strID) == true)
                 {
-                    strError = "²áÊÂÏîÖĞ³öÏÖÁË¿ÕµÄParentIDÖµ";
+                    strError = "å†Œäº‹é¡¹ä¸­å‡ºç°äº†ç©ºçš„ParentIDå€¼";
                     return -1;
                 }
 
                 if (strID == "?")
                 {
-                    strError = "²áÊÂÏîÖĞ³öÏÖÁË'?'Ê½µÄParentIDÖµ";
+                    strError = "å†Œäº‹é¡¹ä¸­å‡ºç°äº†'?'å¼çš„ParentIDå€¼";
                     return -1;
                 }
             }
@@ -971,13 +971,13 @@ namespace dp2Circulation
         }
 
 
-        // ÉèÖÃÈ«²¿isueitemÊÂÏîµÄParentÓò
+        // è®¾ç½®å…¨éƒ¨isueitemäº‹é¡¹çš„ParentåŸŸ
         public void SetParentID(string strParentID)
         {
             for (int i = 0; i < this.Count; i++)
             {
                 IssueItem item = this[i];
-                if (item.Parent != strParentID) // ±ÜÃâÁ¬´øÎŞÎ½µØĞŞ¸Äitem.Changed 2009/3/6
+                if (item.Parent != strParentID) // é¿å…è¿å¸¦æ— è°“åœ°ä¿®æ”¹item.Changed 2009/3/6
                     item.Parent = strParentID;
             }
         }
@@ -985,17 +985,17 @@ namespace dp2Circulation
 #endif
 
         /// <summary>
-        /// ÒÔ³ö°æÊ±¼ä¶¨Î»Ò»¸öÊÂÏî
+        /// ä»¥å‡ºç‰ˆæ—¶é—´å®šä½ä¸€ä¸ªäº‹é¡¹
         /// </summary>
-        /// <param name="strPublishTime">³ö°æÊ±¼ä</param>
-        /// <param name="excludeItems">ÅĞ¶ÏÖĞĞèÒªÅÅ³ıµÄÊÂÏî</param>
-        /// <returns>ÕÒµ½µÄÊÂÏî¡£null ±íÊ¾Ã»ÓĞÕÒµ½</returns>
+        /// <param name="strPublishTime">å‡ºç‰ˆæ—¶é—´</param>
+        /// <param name="excludeItems">åˆ¤æ–­ä¸­éœ€è¦æ’é™¤çš„äº‹é¡¹</param>
+        /// <returns>æ‰¾åˆ°çš„äº‹é¡¹ã€‚null è¡¨ç¤ºæ²¡æœ‰æ‰¾åˆ°</returns>
         public IssueItem GetItemByPublishTime(string strPublishTime,
             List<IssueItem> excludeItems)
         {
             foreach (IssueItem item in this)
             {
-                // ĞèÒªÅÅ³ıµÄÊÂÏî
+                // éœ€è¦æ’é™¤çš„äº‹é¡¹
                 if (excludeItems != null)
                 {
                     if (excludeItems.IndexOf(item) != -1)
@@ -1011,7 +1011,7 @@ namespace dp2Circulation
 
 #if NO
         /// <summary>
-        /// ÒÔ¼ÇÂ¼Â·¾¶¶¨Î»Ò»¸öÊÂÏî
+        /// ä»¥è®°å½•è·¯å¾„å®šä½ä¸€ä¸ªäº‹é¡¹
         /// </summary>
         /// <param name="strRegisterNo"></param>
         /// <returns></returns>
@@ -1028,7 +1028,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÒÔRefID¶¨Î»Ò»¸öÊÂÏî
+        /// ä»¥RefIDå®šä½ä¸€ä¸ªäº‹é¡¹
         /// </summary>
         /// <param name="strRefID"></param>
         /// <returns></returns>
@@ -1039,7 +1039,7 @@ namespace dp2Circulation
             {
                 IssueItem item = this[i];
 
-                // ĞèÒªÅÅ³ıµÄÊÂÏî
+                // éœ€è¦æ’é™¤çš„äº‹é¡¹
                 if (excludeItems != null)
                 {
                     if (excludeItems.IndexOf(item) != -1)
@@ -1055,7 +1055,7 @@ namespace dp2Circulation
 
         bool m_bChanged = false;
         /// <summary>
-        /// ÄÚÈİÊÇ·ñ·¢Éú¹ıĞŞ¸Ä
+        /// å†…å®¹æ˜¯å¦å‘ç”Ÿè¿‡ä¿®æ”¹
         /// </summary>
         public bool Changed
         {
@@ -1077,7 +1077,7 @@ namespace dp2Circulation
             set
             {
                 // 2012/3/20
-                // trueºÍfalse²»¶Ô³Æ
+                // trueå’Œfalseä¸å¯¹ç§°
                 if (value == false)
                 {
                     for (int i = 0; i < this.Count; i++)
@@ -1096,7 +1096,7 @@ namespace dp2Circulation
             }
         }
 
-        // ±ê¼ÇÉ¾³ı
+        // æ ‡è®°åˆ é™¤
         public void MaskDeleteItem(
             bool bRemoveFromList,
             IssueItem issueitem)
@@ -1111,7 +1111,7 @@ namespace dp2Circulation
             issueitem.ItemDisplayState = ItemDisplayState.Deleted;
             issueitem.Changed = true;
 
-            // ´ÓlistviewÖĞÏûÊ§?
+            // ä»listviewä¸­æ¶ˆå¤±?
             if (bRemoveFromList == true)
                 issueitem.DeleteFromListView();
             else
@@ -1120,29 +1120,29 @@ namespace dp2Circulation
             }
         }
 
-        // Undo±ê¼ÇÉ¾³ı
+        // Undoæ ‡è®°åˆ é™¤
         // return:
-        //      false   Ã»ÓĞ±ØÒªUndo
-        //      true    ÒÑ¾­Undo
+        //      false   æ²¡æœ‰å¿…è¦Undo
+        //      true    å·²ç»Undo
         public bool UndoMaskDeleteItem(IssueItem issueitem)
         {
             if (issueitem.ItemDisplayState != ItemDisplayState.Deleted)
-                return false;   // ÒªUndoµÄÊÂÏî¸ù±¾¾Í²»ÊÇDeleted×´Ì¬£¬ËùÒÔÌ¸²»ÉÏUndo
+                return false;   // è¦Undoçš„äº‹é¡¹æ ¹æœ¬å°±ä¸æ˜¯DeletedçŠ¶æ€ï¼Œæ‰€ä»¥è°ˆä¸ä¸ŠUndo
 
-            // ÒòÎª²»ÖªµÀÉÏ´Î±ê¼ÇÉ¾³ıÇ°Êı¾İÊÇ·ñ¸Ä¹ı£¬Òò´ËÈ«µ±¸Ä¹ı
+            // å› ä¸ºä¸çŸ¥é“ä¸Šæ¬¡æ ‡è®°åˆ é™¤å‰æ•°æ®æ˜¯å¦æ”¹è¿‡ï¼Œå› æ­¤å…¨å½“æ”¹è¿‡
             issueitem.ItemDisplayState = ItemDisplayState.Changed;
             issueitem.Changed = true;
 
-            // Ë¢ĞÂ
+            // åˆ·æ–°
             issueitem.RefreshListView();
             return true;
         }
 
-        // ´Ó¼¯ºÏÖĞºÍÊÓ¾õÉÏÍ¬Ê±É¾³ı
+        // ä»é›†åˆä¸­å’Œè§†è§‰ä¸ŠåŒæ—¶åˆ é™¤
         public void PhysicalDeleteItem(
             IssueItem issueitem)
         {
-            // ´ÓlistviewÖĞÏûÊ§
+            // ä»listviewä¸­æ¶ˆå¤±
             issueitem.DeleteFromListView();
 
             this.Remove(issueitem);
@@ -1173,7 +1173,7 @@ namespace dp2Circulation
             base.Clear();
         }
 
-        // °ÑÊÂÏîÖØĞÂÈ«²¿¼ÓÈëlistview
+        // æŠŠäº‹é¡¹é‡æ–°å…¨éƒ¨åŠ å…¥listview
         public void AddToListView(ListView list)
         {
             for (int i = 0; i < this.Count; i++)
@@ -1185,11 +1185,11 @@ namespace dp2Circulation
 #endif
 
         /// <summary>
-        /// ½«¼¯ºÏÖĞµÄÈ«²¿ÊÂÏîĞÅÏ¢Êä³öÎªÒ»¸öÍêÕûµÄ XML ¸ñÊ½×Ö·û´®
+        /// å°†é›†åˆä¸­çš„å…¨éƒ¨äº‹é¡¹ä¿¡æ¯è¾“å‡ºä¸ºä¸€ä¸ªå®Œæ•´çš„ XML æ ¼å¼å­—ç¬¦ä¸²
         /// </summary>
-        /// <param name="strXml">XML ×Ö·û´®</param>
-        /// <param name="strError">³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í¡£´íÎóĞÅÏ¢ÔÚ strError ÖĞ; 0: ³É¹¦</returns>
+        /// <param name="strXml">XML å­—ç¬¦ä¸²</param>
+        /// <param name="strError">å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™ã€‚é”™è¯¯ä¿¡æ¯åœ¨ strError ä¸­; 0: æˆåŠŸ</returns>
         public int BuildXml(
 out string strXml,
 out string strError)
@@ -1213,18 +1213,18 @@ out string strError)
         }
 
         // parameters:
-        //      order_refid_change_table   ¶©¹º¼ÇÂ¼µÄ refid ±äÇ¨Çé¿ö
-        //      item_refid_change_table ·¢Éú¹ıĞŞ¸ÄµÄ²árefid¶ÔÕÕ±í¡£keyÎª¾ÉÖµ£¬valueÎªĞÂÖµ
+        //      order_refid_change_table   è®¢è´­è®°å½•çš„ refid å˜è¿æƒ…å†µ
+        //      item_refid_change_table å‘ç”Ÿè¿‡ä¿®æ”¹çš„å†Œrefidå¯¹ç…§è¡¨ã€‚keyä¸ºæ—§å€¼ï¼Œvalueä¸ºæ–°å€¼
         /// <summary>
-        /// ¸ù¾İÒ»¸ö XML ×Ö·û´®ÄÚÈİ£¬¹¹½¨³ö¼¯ºÏÄÚµÄÈô¸ÉÊÂÏî
+        /// æ ¹æ®ä¸€ä¸ª XML å­—ç¬¦ä¸²å†…å®¹ï¼Œæ„å»ºå‡ºé›†åˆå†…çš„è‹¥å¹²äº‹é¡¹
         /// </summary>
-        /// <param name="nodeIssueCollection">XmlNode¶ÔÏó£¬±¾·½·¨½«Ê¹ÓÃÆäÏÂÊôµÄ dprms:issue ÔªËØÀ´¹¹ÔìÊÂÏî</param>
-        /// <param name="list">ListView ¶ÔÏó¡£¹¹ÔìºÃµÄÊÂÏî»áÏÔÊ¾µ½ÆäÖĞ</param>
-        /// <param name="order_refid_change_table">¶©¹º¼ÇÂ¼µÄ refid ±äÇ¨Çé¿ö</param>
-        /// <param name="bRefreshRefID">¹¹ÔìÊÂÏîµÄ¹ı³ÌÖĞ£¬ÊÇ·ñÒªË¢ĞÂÃ¿¸öÊÂÏîµÄ RefID ³ÉÔ±Öµ</param>
-        /// <param name="item_refid_change_table">·¢Éú¹ıĞŞ¸ÄµÄ²árefid¶ÔÕÕ±í¡£keyÎª¾ÉÖµ£¬valueÎªĞÂÖµ</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í¡£´íÎóĞÅÏ¢ÔÚ strError ÖĞ; 0: ³É¹¦</returns>
+        /// <param name="nodeIssueCollection">XmlNodeå¯¹è±¡ï¼Œæœ¬æ–¹æ³•å°†ä½¿ç”¨å…¶ä¸‹å±çš„ dprms:issue å…ƒç´ æ¥æ„é€ äº‹é¡¹</param>
+        /// <param name="list">ListView å¯¹è±¡ã€‚æ„é€ å¥½çš„äº‹é¡¹ä¼šæ˜¾ç¤ºåˆ°å…¶ä¸­</param>
+        /// <param name="order_refid_change_table">è®¢è´­è®°å½•çš„ refid å˜è¿æƒ…å†µ</param>
+        /// <param name="bRefreshRefID">æ„é€ äº‹é¡¹çš„è¿‡ç¨‹ä¸­ï¼Œæ˜¯å¦è¦åˆ·æ–°æ¯ä¸ªäº‹é¡¹çš„ RefID æˆå‘˜å€¼</param>
+        /// <param name="item_refid_change_table">å‘ç”Ÿè¿‡ä¿®æ”¹çš„å†Œrefidå¯¹ç…§è¡¨ã€‚keyä¸ºæ—§å€¼ï¼Œvalueä¸ºæ–°å€¼</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™ã€‚é”™è¯¯ä¿¡æ¯åœ¨ strError ä¸­; 0: æˆåŠŸ</returns>
         public int ImportFromXml(XmlNode nodeIssueCollection,
             ListView list,
             Hashtable order_refid_change_table,
@@ -1260,7 +1260,7 @@ out string strError)
                 if (item_refid_change_table != null
                     && item_refid_change_table.Count > 0)
                 {
-                    // ¸ü»»<orderInfo>ÀïµÄ<distribute>ÖĞµÄrefid×Ö·û´®
+                    // æ›´æ¢<orderInfo>é‡Œçš„<distribute>ä¸­çš„refidå­—ç¬¦ä¸²
                     nRet = issue_item.ReplaceOrderInfoItemRefID(item_refid_change_table,
                         out strError);
                     if (nRet == -1)
@@ -1270,7 +1270,7 @@ out string strError)
                 if (order_refid_change_table != null
                     && order_refid_change_table.Count > 0)
                 {
-                    // ¸ü»»<orderInfo>ÀïµÄ<refID>ÖĞµÄrefid×Ö·û´®
+                    // æ›´æ¢<orderInfo>é‡Œçš„<refID>ä¸­çš„refidå­—ç¬¦ä¸²
                     nRet = issue_item.ReplaceOrderInfoRefID(order_refid_change_table,
                         out strError);
                     if (nRet == -1)

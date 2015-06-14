@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Windows.Forms;
@@ -16,43 +16,43 @@ using DigitalPlatform.Script;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CirculationClient.localhost;
 
-// 2013/3/16 Ìí¼Ó XML ×¢ÊÍ
+// 2013/3/16 æ·»åŠ  XML æ³¨é‡Š
 
 namespace dp2Circulation
 {
     /// <summary>
-    /// BiblioStatisForm (ÊéÄ¿Í³¼Æ´°) Í³¼Æ·½°¸µÄËŞÖ÷Àà
+    /// BiblioStatisForm (ä¹¦ç›®ç»Ÿè®¡çª—) ç»Ÿè®¡æ–¹æ¡ˆçš„å®¿ä¸»ç±»
     /// </summary>
     public class BiblioStatis : StatisHostBase
     {
         /// <summary>
-        /// ±¾¶ÔÏóËù¹ØÁªµÄ BiblioStatisForm (ÊéÄ¿Í³¼Æ´°)
+        /// æœ¬å¯¹è±¡æ‰€å…³è”çš„ BiblioStatisForm (ä¹¦ç›®ç»Ÿè®¡çª—)
         /// </summary>
-        public BiblioStatisForm BiblioStatisForm = null;	// ÒıÓÃ
+        public BiblioStatisForm BiblioStatisForm = null;	// å¼•ç”¨
 
         /// <summary>
-        /// µ±Ç°ÊéÄ¿¿âµÄ Êı¾İ¸ñÊ½
+        /// å½“å‰ä¹¦ç›®åº“çš„ æ•°æ®æ ¼å¼
         /// </summary>
         public string CurrentDbSyntax = "";
 
         /// <summary>
-        /// µ±Ç°ÊéÄ¿¼ÇÂ¼Â·¾¶
+        /// å½“å‰ä¹¦ç›®è®°å½•è·¯å¾„
         /// </summary>
         public string CurrentRecPath = "";    // 
 
         /// <summary>
-        /// µ±Ç°ÊéÄ¿¼ÇÂ¼ÔÚÕûÅúÖĞµÄÏÂ±ê¡£´Ó 0 ¿ªÊ¼¼ÆÊı¡£Èç¹ûÎª -1£¬±íÊ¾ÉĞÎ´¿ªÊ¼´¦Àí
+        /// å½“å‰ä¹¦ç›®è®°å½•åœ¨æ•´æ‰¹ä¸­çš„ä¸‹æ ‡ã€‚ä» 0 å¼€å§‹è®¡æ•°ã€‚å¦‚æœä¸º -1ï¼Œè¡¨ç¤ºå°šæœªå¼€å§‹å¤„ç†
         /// </summary>
         public long CurrentRecordIndex = -1; // 
 
         /// <summary>
-        /// µ±Ç°ÕıÔÚ´¦ÀíµÄÊéÄ¿ XML ¼ÇÂ¼£¬XmlDocument ÀàĞÍ
+        /// å½“å‰æ­£åœ¨å¤„ç†çš„ä¹¦ç›® XML è®°å½•ï¼ŒXmlDocument ç±»å‹
         /// </summary>
-        public XmlDocument BiblioDom = null;    // Xml×°ÈëXmlDocument
+        public XmlDocument BiblioDom = null;    // Xmlè£…å…¥XmlDocument
 
         string m_strXml = "";
         /// <summary>
-        /// µ±Ç°ÕıÔÚ´¦ÀíµÄÊéÄ¿ XML ¼ÇÂ¼£¬×Ö·û´®ÀàĞÍ
+        /// å½“å‰æ­£åœ¨å¤„ç†çš„ä¹¦ç›® XML è®°å½•ï¼Œå­—ç¬¦ä¸²ç±»å‹
         /// </summary>
         public string Xml
         {
@@ -67,17 +67,17 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// µ±Ç°ÊéÄ¿¼ÇÂ¼µÄÊ±¼ä´Á
+        /// å½“å‰ä¹¦ç›®è®°å½•çš„æ—¶é—´æˆ³
         /// </summary>
         public byte[] Timestamp = null;
 
         /// <summary>
-        /// µ±Ç°ÊéÄ¿¼ÇÂ¼µÄ MARC »úÄÚ¸ñÊ½×Ö·û´®
+        /// å½“å‰ä¹¦ç›®è®°å½•çš„ MARC æœºå†…æ ¼å¼å­—ç¬¦ä¸²
         /// </summary>
         public string MarcRecord = "";
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public BiblioStatis()
         {
@@ -87,13 +87,13 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ½«Ò»Ìõ MARC ¼ÇÂ¼±£´æµ½µ±Ç°ÕıÔÚ´¦ÀíµÄÊéÄ¿¼ÇÂ¼µÄÊı¾İ¿âÔ­Ê¼Î»ÖÃ
-        /// ËùÎ½µ±Ç°Î»ÖÃÓÉ this.CurrentRecPath ¾ö¶¨
-        /// Ìá½»±£´æËù²ÉÓÃµÄÊ±¼ä´ÁÊÇ this.Timestamp
+        /// å°†ä¸€æ¡ MARC è®°å½•ä¿å­˜åˆ°å½“å‰æ­£åœ¨å¤„ç†çš„ä¹¦ç›®è®°å½•çš„æ•°æ®åº“åŸå§‹ä½ç½®
+        /// æ‰€è°“å½“å‰ä½ç½®ç”± this.CurrentRecPath å†³å®š
+        /// æäº¤ä¿å­˜æ‰€é‡‡ç”¨çš„æ—¶é—´æˆ³æ˜¯ this.Timestamp
         /// </summary>
-        /// <param name="strMARC">MARC»úÄÚ¸ñÊ½×Ö·û´®</param>
-        /// <param name="strError">³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í£¬´íÎóĞÅÏ¢ÔÚ strError ÖĞ; 0: ³É¹¦</returns>
+        /// <param name="strMARC">MARCæœºå†…æ ¼å¼å­—ç¬¦ä¸²</param>
+        /// <param name="strError">å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™ï¼Œé”™è¯¯ä¿¡æ¯åœ¨ strError ä¸­; 0: æˆåŠŸ</returns>
         public int SaveMarcRecord(string strMARC,
             out string strError)
         {
@@ -123,12 +123,12 @@ namespace dp2Circulation
         }
 
 
-        // Ã¿Ò»¼ÇÂ¼£¬ÔÚ´¥·¢MARCFilterÖ®Ç°
+        // æ¯ä¸€è®°å½•ï¼Œåœ¨è§¦å‘MARCFilterä¹‹å‰
         /// <summary>
-        /// ´¦ÀíÒ»Ìõ¼ÇÂ¼Ö®Ç°¡£ÔÚÍ³¼Æ·½°¸Ö´ĞĞÖĞ£¬µÚÈı½×¶Î£¬Õë¶ÔÃ¿Ìõ¼ÇÂ¼±»µ÷ÓÃÒ»´Î£¬ÔÚ OnRecord() Ö®Ç°´¥·¢
+        /// å¤„ç†ä¸€æ¡è®°å½•ä¹‹å‰ã€‚åœ¨ç»Ÿè®¡æ–¹æ¡ˆæ‰§è¡Œä¸­ï¼Œç¬¬ä¸‰é˜¶æ®µï¼Œé’ˆå¯¹æ¯æ¡è®°å½•è¢«è°ƒç”¨ä¸€æ¬¡ï¼Œåœ¨ OnRecord() ä¹‹å‰è§¦å‘
         /// </summary>
-        /// <param name="sender">ÊÂ¼ş´¥·¢Õß</param>
-        /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+        /// <param name="sender">äº‹ä»¶è§¦å‘è€…</param>
+        /// <param name="e">äº‹ä»¶å‚æ•°</param>
         public virtual void PreFilter(object sender, StatisEventArgs e)
         {
 
@@ -139,17 +139,17 @@ namespace dp2Circulation
             return Path.Combine(this.BiblioStatisForm.MainForm.DataDir, "~biblio_statis");
         }
 
-        // Í¨ÓÃ°æ±¾
+        // é€šç”¨ç‰ˆæœ¬
         List<ItemInfo> GetItemInfos(string strDbType,
             string strHowToGetItemRecord,
             ref List<ItemInfo> item_infos)
         {
-            // ÓÅ»¯ËÙ¶È
+            // ä¼˜åŒ–é€Ÿåº¦
             if (item_infos != null)
                 return item_infos;
 
-            // Èç¹ûµ±Ç°ÊéÄ¿¿âÏÂÃ»ÓĞ°üº¬ÊµÌå¿â£¬µ÷ÓÃ»áÅ×³öÒì³£¡£ÌØÊâ´¦Àí
-            // TODO: ÊÇ·ñĞèÒªÓÃhashtableÓÅ»¯ËÙ¶È?
+            // å¦‚æœå½“å‰ä¹¦ç›®åº“ä¸‹æ²¡æœ‰åŒ…å«å®ä½“åº“ï¼Œè°ƒç”¨ä¼šæŠ›å‡ºå¼‚å¸¸ã€‚ç‰¹æ®Šå¤„ç†
+            // TODO: æ˜¯å¦éœ€è¦ç”¨hashtableä¼˜åŒ–é€Ÿåº¦?
             string strBiblioDBName = Global.GetDbName(this.CurrentRecPath);
             string strItemDbName = "";
             
@@ -163,15 +163,15 @@ namespace dp2Circulation
                 strItemDbName = this.BiblioStatisForm.MainForm.GetCommentDbName(strBiblioDBName);
             else
             {
-                throw new Exception("Î´ÖªµÄ strDbType '"+strDbType+"'");
+                throw new Exception("æœªçŸ¥çš„ strDbType '"+strDbType+"'");
             }
 
             if (String.IsNullOrEmpty(strItemDbName) == true)
-                return new List<ItemInfo>();    // ·µ»ØÒ»¸ö¿ÕµÄÊı×é
+                return new List<ItemInfo>();    // è¿”å›ä¸€ä¸ªç©ºçš„æ•°ç»„
 
             item_infos = new List<ItemInfo>();
 
-            long lPerCount = 100; // Ã¿Åú»ñµÃ¶àÉÙ¸ö
+            long lPerCount = 100; // æ¯æ‰¹è·å¾—å¤šå°‘ä¸ª
             long lStart = 0;
             long lResultCount = 0;
             long lCount = -1;
@@ -271,14 +271,14 @@ namespace dp2Circulation
             return item_infos;
         }
 
-        #region ÊµÌå¿â
+        #region å®ä½“åº“
         List<ItemInfo> m_itemInfos = null;
 
         /// <summary>
-        /// ÈçºÎ»ñµÃµ±Ç°ÊéÄ¿¼ÇÂ¼ÏÂÊôµÄ ²á ¼ÇÂ¼ ?
-        /// all/delay/first  Ò»´ÎĞÔÈ«²¿»ñµÃ/ÑÓ³Ù»ñµÃ/Ê×´Î»ñµÃµÚÒ»Ìõ
+        /// å¦‚ä½•è·å¾—å½“å‰ä¹¦ç›®è®°å½•ä¸‹å±çš„ å†Œ è®°å½• ?
+        /// all/delay/first  ä¸€æ¬¡æ€§å…¨éƒ¨è·å¾—/å»¶è¿Ÿè·å¾—/é¦–æ¬¡è·å¾—ç¬¬ä¸€æ¡
         /// </summary>
-        public string HowToGetItemRecord = "all";   // all/delay/first  Ò»´ÎĞÔÈ«²¿»ñµÃ/ÑÓ³Ù»ñµÃ/Ê×´Î»ñµÃµÚÒ»Ìõ
+        public string HowToGetItemRecord = "all";   // all/delay/first  ä¸€æ¬¡æ€§å…¨éƒ¨è·å¾—/å»¶è¿Ÿè·å¾—/é¦–æ¬¡è·å¾—ç¬¬ä¸€æ¡
 
         internal void ClearItemDoms()
         {
@@ -286,7 +286,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// »ñµÃµ±Ç°ÊéÄ¿¼ÇÂ¼ÏÂÊôµÄ ²á¼ÇÂ¼ĞÅÏ¢¼¯ºÏ
+        /// è·å¾—å½“å‰ä¹¦ç›®è®°å½•ä¸‹å±çš„ å†Œè®°å½•ä¿¡æ¯é›†åˆ
         /// </summary>
         public List<ItemInfo> ItemInfos
         {
@@ -298,17 +298,17 @@ namespace dp2Circulation
             }
         }
 
-        // ±£´æĞŞ¸Ä¹ıµÄ²áĞÅÏ¢¡£
-        // µ÷ÓÃ±¾º¯ÊıÇ°£¬ÒªĞŞ¸ÄDom³ÉÔ±
+        // ä¿å­˜ä¿®æ”¹è¿‡çš„å†Œä¿¡æ¯ã€‚
+        // è°ƒç”¨æœ¬å‡½æ•°å‰ï¼Œè¦ä¿®æ”¹Domæˆå‘˜
         // return:
         //      -1  error
         //      0   succeed
         /// <summary>
-        /// ±£´æµ±Ç°ÊéÄ¿¼ÇÂ¼ÏÂÊôµÄ ²á¼ÇÂ¼ĞÅÏ¢
+        /// ä¿å­˜å½“å‰ä¹¦ç›®è®°å½•ä¸‹å±çš„ å†Œè®°å½•ä¿¡æ¯
         /// </summary>
-        /// <param name="iteminfos">Òª±£´æµÄ²á¼ÇÂ¼ĞÅÏ¢¼¯ºÏ</param>
-        /// <param name="strError">³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í¡£´íÎóĞÅÏ¢ÔÚ strError ÖĞ£» 0: ³É¹¦</returns>
+        /// <param name="iteminfos">è¦ä¿å­˜çš„å†Œè®°å½•ä¿¡æ¯é›†åˆ</param>
+        /// <param name="strError">å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™ã€‚é”™è¯¯ä¿¡æ¯åœ¨ strError ä¸­ï¼› 0: æˆåŠŸ</returns>
         public int SaveItemInfo(List<ItemInfo> iteminfos,
             out string strError)
         {
@@ -319,14 +319,14 @@ namespace dp2Circulation
 
         #endregion
 
-        #region ¶©¹º¿â
+        #region è®¢è´­åº“
         List<ItemInfo> m_orderInfos = null;
 
         /// <summary>
-        /// ÈçºÎ»ñµÃµ±Ç°¼ÇÂ¼ÏÂÊôµÄ ¶©¹º ¼ÇÂ¼ ?
-        /// all/delay/first  Ò»´ÎĞÔÈ«²¿»ñµÃ/ÑÓ³Ù»ñµÃ/Ê×´Î»ñµÃµÚÒ»Ìõ
+        /// å¦‚ä½•è·å¾—å½“å‰è®°å½•ä¸‹å±çš„ è®¢è´­ è®°å½• ?
+        /// all/delay/first  ä¸€æ¬¡æ€§å…¨éƒ¨è·å¾—/å»¶è¿Ÿè·å¾—/é¦–æ¬¡è·å¾—ç¬¬ä¸€æ¡
         /// </summary>
-        public string HowToGetOrderRecord = "all";   // all/delay/first  Ò»´ÎĞÔÈ«²¿»ñµÃ/ÑÓ³Ù»ñµÃ/Ê×´Î»ñµÃµÚÒ»Ìõ
+        public string HowToGetOrderRecord = "all";   // all/delay/first  ä¸€æ¬¡æ€§å…¨éƒ¨è·å¾—/å»¶è¿Ÿè·å¾—/é¦–æ¬¡è·å¾—ç¬¬ä¸€æ¡
 
         internal void ClearOrderDoms()
         {
@@ -334,7 +334,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// »ñµÃ»ñµÃµ±Ç°ÊéÄ¿¼ÇÂ¼ÏÂÊôµÄ ¶©¹º¼ÇÂ¼ĞÅÏ¢¼¯ºÏ
+        /// è·å¾—è·å¾—å½“å‰ä¹¦ç›®è®°å½•ä¸‹å±çš„ è®¢è´­è®°å½•ä¿¡æ¯é›†åˆ
         /// </summary>
         public List<ItemInfo> OrderInfos
         {
@@ -346,17 +346,17 @@ namespace dp2Circulation
             }
         }
 
-        // ±£´æĞŞ¸Ä¹ıµÄ¶©¹ºĞÅÏ¢¡£
-        // µ÷ÓÃ±¾º¯ÊıÇ°£¬ÒªĞŞ¸ÄDom³ÉÔ±
+        // ä¿å­˜ä¿®æ”¹è¿‡çš„è®¢è´­ä¿¡æ¯ã€‚
+        // è°ƒç”¨æœ¬å‡½æ•°å‰ï¼Œè¦ä¿®æ”¹Domæˆå‘˜
         // return:
         //      -1  error
         //      0   succeed
         /// <summary>
-        /// ±£´æµ±Ç°ÊéÄ¿¼ÇÂ¼ÏÂÊôµÄ ¶©¹º¼ÇÂ¼ĞÅÏ¢
+        /// ä¿å­˜å½“å‰ä¹¦ç›®è®°å½•ä¸‹å±çš„ è®¢è´­è®°å½•ä¿¡æ¯
         /// </summary>
-        /// <param name="orderinfos">Òª±£´æµÄ¶©¹º¼ÇÂ¼ĞÅÏ¢¼¯ºÏ</param>
-        /// <param name="strError">³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í¡£´íÎóĞÅÏ¢ÔÚ strError ÖĞ£» 0: ³É¹¦</returns>
+        /// <param name="orderinfos">è¦ä¿å­˜çš„è®¢è´­è®°å½•ä¿¡æ¯é›†åˆ</param>
+        /// <param name="strError">å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™ã€‚é”™è¯¯ä¿¡æ¯åœ¨ strError ä¸­ï¼› 0: æˆåŠŸ</returns>
         public int SaveOrderInfo(List<ItemInfo> orderinfos,
             out string strError)
         {
@@ -367,14 +367,14 @@ namespace dp2Circulation
 
         #endregion
 
-        #region ÆÚ¿â
+        #region æœŸåº“
         List<ItemInfo> m_issueInfos = null;
 
         /// <summary>
-        /// ÈçºÎ»ñµÃµ±Ç°ÊéÄ¿¼ÇÂ¼ÏÂÊôµÄ ÆÚ ¼ÇÂ¼ ?
-        /// all/delay/first  Ò»´ÎĞÔÈ«²¿»ñµÃ/ÑÓ³Ù»ñµÃ/Ê×´Î»ñµÃµÚÒ»Ìõ
+        /// å¦‚ä½•è·å¾—å½“å‰ä¹¦ç›®è®°å½•ä¸‹å±çš„ æœŸ è®°å½• ?
+        /// all/delay/first  ä¸€æ¬¡æ€§å…¨éƒ¨è·å¾—/å»¶è¿Ÿè·å¾—/é¦–æ¬¡è·å¾—ç¬¬ä¸€æ¡
         /// </summary>
-        public string HowToGetIssueRecord = "all";   // all/delay/first  Ò»´ÎĞÔÈ«²¿»ñµÃ/ÑÓ³Ù»ñµÃ/Ê×´Î»ñµÃµÚÒ»Ìõ
+        public string HowToGetIssueRecord = "all";   // all/delay/first  ä¸€æ¬¡æ€§å…¨éƒ¨è·å¾—/å»¶è¿Ÿè·å¾—/é¦–æ¬¡è·å¾—ç¬¬ä¸€æ¡
 
         internal void ClearIssueDoms()
         {
@@ -382,7 +382,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// »ñµÃµ±Ç°ÊéÄ¿¼ÇÂ¼ÏÂÊôµÄ ÆÚ¼ÇÂ¼ĞÅÏ¢¼¯ºÏ
+        /// è·å¾—å½“å‰ä¹¦ç›®è®°å½•ä¸‹å±çš„ æœŸè®°å½•ä¿¡æ¯é›†åˆ
         /// </summary>
         public List<ItemInfo> IssueInfos
         {
@@ -394,17 +394,17 @@ namespace dp2Circulation
             }
         }
 
-        // ±£´æĞŞ¸Ä¹ıµÄÆÚĞÅÏ¢¡£
-        // µ÷ÓÃ±¾º¯ÊıÇ°£¬ÒªĞŞ¸ÄDom³ÉÔ±
+        // ä¿å­˜ä¿®æ”¹è¿‡çš„æœŸä¿¡æ¯ã€‚
+        // è°ƒç”¨æœ¬å‡½æ•°å‰ï¼Œè¦ä¿®æ”¹Domæˆå‘˜
         // return:
         //      -1  error
         //      0   succeed
         /// <summary>
-        /// ±£´æµ±Ç°ÊéÄ¿¼ÇÂ¼ÏÂÊôµÄ ÆÚ¼ÇÂ¼ĞÅÏ¢
+        /// ä¿å­˜å½“å‰ä¹¦ç›®è®°å½•ä¸‹å±çš„ æœŸè®°å½•ä¿¡æ¯
         /// </summary>
-        /// <param name="issueinfos">Òª±£´æµÄÆÚ¼ÇÂ¼ĞÅÏ¢¼¯ºÏ</param>
-        /// <param name="strError">³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í¡£´íÎóĞÅÏ¢ÔÚ strError ÖĞ£» 0: ³É¹¦</returns>
+        /// <param name="issueinfos">è¦ä¿å­˜çš„æœŸè®°å½•ä¿¡æ¯é›†åˆ</param>
+        /// <param name="strError">å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™ã€‚é”™è¯¯ä¿¡æ¯åœ¨ strError ä¸­ï¼› 0: æˆåŠŸ</returns>
         public int SaveIssueInfo(List<ItemInfo> issueinfos,
             out string strError)
         {
@@ -414,14 +414,14 @@ namespace dp2Circulation
         }
         #endregion
 
-        #region ÆÀ×¢¿â
+        #region è¯„æ³¨åº“
         List<ItemInfo> m_commentInfos = null;
 
         /// <summary>
-        /// ÈçºÎ»ñµÃµ±Ç°¼ÇÂ¼ÏÂÊôµÄ ÆÀ×¢ ¼ÇÂ¼ ?
-        /// all/delay/first  Ò»´ÎĞÔÈ«²¿»ñµÃ/ÑÓ³Ù»ñµÃ/Ê×´Î»ñµÃµÚÒ»Ìõ
+        /// å¦‚ä½•è·å¾—å½“å‰è®°å½•ä¸‹å±çš„ è¯„æ³¨ è®°å½• ?
+        /// all/delay/first  ä¸€æ¬¡æ€§å…¨éƒ¨è·å¾—/å»¶è¿Ÿè·å¾—/é¦–æ¬¡è·å¾—ç¬¬ä¸€æ¡
         /// </summary>
-        public string HowToGetCommentRecord = "all";   // all/delay/first  Ò»´ÎĞÔÈ«²¿»ñµÃ/ÑÓ³Ù»ñµÃ/Ê×´Î»ñµÃµÚÒ»Ìõ
+        public string HowToGetCommentRecord = "all";   // all/delay/first  ä¸€æ¬¡æ€§å…¨éƒ¨è·å¾—/å»¶è¿Ÿè·å¾—/é¦–æ¬¡è·å¾—ç¬¬ä¸€æ¡
 
         internal void ClearCommentDoms()
         {
@@ -429,7 +429,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// »ñµÃ»ñµÃµ±Ç°ÊéÄ¿¼ÇÂ¼ÏÂÊôµÄ ÆÀ×¢¼ÇÂ¼ĞÅÏ¢¼¯ºÏ
+        /// è·å¾—è·å¾—å½“å‰ä¹¦ç›®è®°å½•ä¸‹å±çš„ è¯„æ³¨è®°å½•ä¿¡æ¯é›†åˆ
         /// </summary>
         public List<ItemInfo> CommentInfos
         {
@@ -441,17 +441,17 @@ namespace dp2Circulation
             }
         }
 
-        // ±£´æĞŞ¸Ä¹ıµÄÆÀ×¢ĞÅÏ¢¡£
-        // µ÷ÓÃ±¾º¯ÊıÇ°£¬ÒªĞŞ¸ÄDom³ÉÔ±
+        // ä¿å­˜ä¿®æ”¹è¿‡çš„è¯„æ³¨ä¿¡æ¯ã€‚
+        // è°ƒç”¨æœ¬å‡½æ•°å‰ï¼Œè¦ä¿®æ”¹Domæˆå‘˜
         // return:
         //      -1  error
         //      0   succeed
         /// <summary>
-        /// ±£´æµ±Ç°ÊéÄ¿¼ÇÂ¼ÏÂÊôµÄ ÆÀ×¢¼ÇÂ¼ĞÅÏ¢
+        /// ä¿å­˜å½“å‰ä¹¦ç›®è®°å½•ä¸‹å±çš„ è¯„æ³¨è®°å½•ä¿¡æ¯
         /// </summary>
-        /// <param name="commentinfos">Òª±£´æµÄÆÀ×¢¼ÇÂ¼ĞÅÏ¢¼¯ºÏ</param>
-        /// <param name="strError">³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í¡£´íÎóĞÅÏ¢ÔÚ strError ÖĞ£» 0: ³É¹¦</returns>
+        /// <param name="commentinfos">è¦ä¿å­˜çš„è¯„æ³¨è®°å½•ä¿¡æ¯é›†åˆ</param>
+        /// <param name="strError">å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™ã€‚é”™è¯¯ä¿¡æ¯åœ¨ strError ä¸­ï¼› 0: æˆåŠŸ</returns>
         public int SaveCommentInfo(List<ItemInfo> commentinfos,
             out string strError)
         {
@@ -462,19 +462,19 @@ namespace dp2Circulation
 
         #endregion
 
-        // (¸÷ÖÖÊı¾İ¿âÀàĞÍÍ¨ÓÃ°æ±¾)
-        // ±£´æĞŞ¸Ä¹ıµÄ²áĞÅÏ¢¡£
-        // µ÷ÓÃ±¾º¯ÊıÇ°£¬ÒªĞŞ¸ÄDom³ÉÔ±
+        // (å„ç§æ•°æ®åº“ç±»å‹é€šç”¨ç‰ˆæœ¬)
+        // ä¿å­˜ä¿®æ”¹è¿‡çš„å†Œä¿¡æ¯ã€‚
+        // è°ƒç”¨æœ¬å‡½æ•°å‰ï¼Œè¦ä¿®æ”¹Domæˆå‘˜
         // return:
         //      -1  error
         //      0   succeed
         /// <summary>
-        /// ±£´æµ±Ç°ÊéÄ¿¼ÇÂ¼ÏÂÊôµÄ ²á/¶©¹º/ÆÚ/ÆÀ×¢¼ÇÂ¼ĞÅÏ¢
+        /// ä¿å­˜å½“å‰ä¹¦ç›®è®°å½•ä¸‹å±çš„ å†Œ/è®¢è´­/æœŸ/è¯„æ³¨è®°å½•ä¿¡æ¯
         /// </summary>
-        /// <param name="strDbType">ÏÂÊôÊı¾İ¿âÀàĞÍ¡£Îª item/order/issue/comment Ö®Ò»</param>
-        /// <param name="iteminfos">Òª±£´æµÄÆÀ×¢¼ÇÂ¼ĞÅÏ¢¼¯ºÏ</param>
-        /// <param name="strError">³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í¡£´íÎóĞÅÏ¢ÔÚ strError ÖĞ£» 0: ³É¹¦</returns>
+        /// <param name="strDbType">ä¸‹å±æ•°æ®åº“ç±»å‹ã€‚ä¸º item/order/issue/comment ä¹‹ä¸€</param>
+        /// <param name="iteminfos">è¦ä¿å­˜çš„è¯„æ³¨è®°å½•ä¿¡æ¯é›†åˆ</param>
+        /// <param name="strError">å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™ã€‚é”™è¯¯ä¿¡æ¯åœ¨ strError ä¸­ï¼› 0: æˆåŠŸ</returns>
         public int SaveItemInfo(
             string strDbType,
             List<ItemInfo> iteminfos,
@@ -514,7 +514,7 @@ namespace dp2Circulation
                 entityArray.Add(info);
             }
 
-            // ¸´ÖÆµ½Ä¿±ê
+            // å¤åˆ¶åˆ°ç›®æ ‡
             EntityInfo[] entities = null;
             entities = new EntityInfo[entityArray.Count];
             for (int i = 0; i < entityArray.Count; i++)
@@ -556,13 +556,13 @@ namespace dp2Circulation
                      out strError);
             else
             {
-                strError = "Î´ÖªµÄ strDbType '" + strDbType + "'";
+                strError = "æœªçŸ¥çš„ strDbType '" + strDbType + "'";
                 return -1;
             }
             if (lRet == -1)
                 return -1;
 
-            // string strWarning = ""; // ¾¯¸æĞÅÏ¢
+            // string strWarning = ""; // è­¦å‘Šä¿¡æ¯
 
             if (errorinfos == null)
                 return 0;
@@ -572,15 +572,15 @@ namespace dp2Circulation
             {
                 if (String.IsNullOrEmpty(errorinfos[i].RefID) == true)
                 {
-                    strError = "·şÎñÆ÷·µ»ØµÄEntityInfo½á¹¹ÖĞRefIDÎª¿Õ";
+                    strError = "æœåŠ¡å™¨è¿”å›çš„EntityInfoç»“æ„ä¸­RefIDä¸ºç©º";
                     return -1;
                 }
 
-                // Õı³£ĞÅÏ¢´¦Àí
+                // æ­£å¸¸ä¿¡æ¯å¤„ç†
                 if (errorinfos[i].ErrorCode == ErrorCodeValue.NoError)
                     continue;
 
-                strError += errorinfos[i].RefID + "ÔÚÌá½»±£´æ¹ı³ÌÖĞ·¢Éú´íÎó -- " + errorinfos[i].ErrorInfo + "\r\n";
+                strError += errorinfos[i].RefID + "åœ¨æäº¤ä¿å­˜è¿‡ç¨‹ä¸­å‘ç”Ÿé”™è¯¯ -- " + errorinfos[i].ErrorInfo + "\r\n";
             }
 
             if (String.IsNullOrEmpty(strError) == false)
@@ -609,34 +609,34 @@ namespace dp2Circulation
     }
 
     /// <summary>
-    /// ²á/¶©¹º/ÆÚ/ÆÀ×¢ĞÅÏ¢
+    /// å†Œ/è®¢è´­/æœŸ/è¯„æ³¨ä¿¡æ¯
     /// </summary>
     public class ItemInfo
     {
         /// <summary>
-        /// Êı¾İ¿âÀàĞÍ¡£Îª item/order/issue/comment Ö®Ò» 
+        /// æ•°æ®åº“ç±»å‹ã€‚ä¸º item/order/issue/comment ä¹‹ä¸€ 
         /// </summary>
         public string DbType = "item";
 
         /// <summary>
-        /// ¼ÇÂ¼Â·¾¶
+        /// è®°å½•è·¯å¾„
         /// </summary>
         public string RecPath = "";
 
         /// <summary>
-        /// Ê±¼ä´Á
+        /// æ—¶é—´æˆ³
         /// </summary>
         public byte[] Timestamp = null;
 
         /// <summary>
-        /// ËŞÖ÷¶ÔÏó
+        /// å®¿ä¸»å¯¹è±¡
         /// </summary>
         public BiblioStatis Container = null;
 
         XmlDocument m_dom = null;
 
         /// <summary>
-        /// »ñÈ¡£º¼ÇÂ¼ÄÚÈİµÄ XmlDocument ĞÎÌ¬
+        /// è·å–ï¼šè®°å½•å†…å®¹çš„ XmlDocument å½¢æ€
         /// </summary>
         public XmlDocument Dom
         {
@@ -655,7 +655,7 @@ namespace dp2Circulation
         string m_strOldRecord = "";
 
         /// <summary>
-        /// »ñÈ¡£º¾É¼ÇÂ¼
+        /// è·å–ï¼šæ—§è®°å½•
         /// </summary>
         public string OldRecord
         {
@@ -665,7 +665,7 @@ namespace dp2Circulation
                     return m_strOldRecord;
 
                 if (string.IsNullOrEmpty(this.RecPath) == true)
-                    throw new Exception("ItemInfoµÄRecPathÎª¿Õ£¬ÎŞ·¨»ñµÃOldRecord");
+                    throw new Exception("ItemInfoçš„RecPathä¸ºç©ºï¼Œæ— æ³•è·å¾—OldRecord");
 
                 string strBarcodeOrRecPath = "@path:" + this.RecPath;
                 string strItemXml = "";
@@ -726,7 +726,7 @@ namespace dp2Circulation
          out strError);
                 else
                 {
-                    throw new Exception("ÎŞ·¨Ê¶±ğµÄ DbType '" + this.DbType + "'");
+                    throw new Exception("æ— æ³•è¯†åˆ«çš„ DbType '" + this.DbType + "'");
                 }
 
                 if (lRet == -1 || lRet == 0)
@@ -751,14 +751,14 @@ namespace dp2Circulation
         }
          * */
         /// <summary>
-        /// ²Î¿¼ ID
+        /// å‚è€ƒ ID
         /// </summary>
         public string RefID = "";
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
-        /// <param name="strDbType">Êı¾İ¿âÀàĞÍ¡£ÖµÎª item order issue comment Ö®Ò»</param>
+        /// <param name="strDbType">æ•°æ®åº“ç±»å‹ã€‚å€¼ä¸º item order issue comment ä¹‹ä¸€</param>
         public ItemInfo(string strDbType)
         {
             Debug.Assert(strDbType == "item"

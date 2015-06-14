@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -25,7 +25,7 @@ namespace dp2Circulation
 
 #if NO
     /// <summary>
-    /// ¶ÁÕßÈ¨ÏŞ ÊôĞÔÒ³
+    /// è¯»è€…æƒé™ å±æ€§é¡µ
     /// </summary>
     public partial class ManagerForm
     {
@@ -34,8 +34,8 @@ namespace dp2Circulation
         int m_nRightsTableTypesVersion = 0;
 
 #if NO
-        // types±à¼­½çÃæ --> DOMÖĞµÄ<readerTypes>ºÍ<bookTypes>²¿·Ö
-        // µ÷ÓÃÇ°domÖĞÓ¦µ±ÒÑ¾­×°ÈëÁËÈ¨ÏŞXML´úÂë
+        // typesç¼–è¾‘ç•Œé¢ --> DOMä¸­çš„<readerTypes>å’Œ<bookTypes>éƒ¨åˆ†
+        // è°ƒç”¨å‰domä¸­åº”å½“å·²ç»è£…å…¥äº†æƒé™XMLä»£ç 
         void TypesToRightsXml(ref XmlDocument dom)
         {
             string strReaderTypesXml = BuildTypesXml(this.textBox_loanPolicy_readerTypes);
@@ -67,7 +67,7 @@ namespace dp2Circulation
 
         /*public*/ void FinishLibraryCodeTextbox()
         {
-                            // °Ñµ±Ç°textboxÖĞµÄÊÕÎ²
+                            // æŠŠå½“å‰textboxä¸­çš„æ”¶å°¾
                 if (m_currentLibraryCodeItem != null)
                 {
                     LibraryCodeInfo info = (LibraryCodeInfo)m_currentLibraryCodeItem.Tag;
@@ -91,18 +91,18 @@ namespace dp2Circulation
 
         }
 
-        // types±à¼­½çÃæ --> DOMÖĞµÄ<readerTypes>ºÍ<bookTypes>²¿·Ö
-        // µ÷ÓÃÇ°domÖĞÓ¦µ±ÒÑ¾­×°ÈëÁËÈ¨ÏŞXML´úÂë
+        // typesç¼–è¾‘ç•Œé¢ --> DOMä¸­çš„<readerTypes>å’Œ<bookTypes>éƒ¨åˆ†
+        // è°ƒç”¨å‰domä¸­åº”å½“å·²ç»è£…å…¥äº†æƒé™XMLä»£ç 
         bool TypesToRightsXml(ref XmlDocument dom)
         {
-            // ½áÊøÒ»ÏÂµ±Ç°textbox
+            // ç»“æŸä¸€ä¸‹å½“å‰textbox
             FinishLibraryCodeTextbox();
 
             bool bChanged = false;
 
             XmlNode root = dom.DocumentElement;
 
-            // ¶ÔÃ¿¸ö¹İ´úÂëÑ­»·
+            // å¯¹æ¯ä¸ªé¦†ä»£ç å¾ªç¯
             foreach (ListViewItem item in this.listView_loanPolicy_libraryCodes.Items)
             {
                 // string strLibraryCode = item.Text;
@@ -168,7 +168,7 @@ namespace dp2Circulation
         }
 
 #if NO
-        // DOMÖĞµÄ<readerTypes>ºÍ<bookTypes>²¿·Ö --> types±à¼­½çÃæ
+        // DOMä¸­çš„<readerTypes>å’Œ<bookTypes>éƒ¨åˆ† --> typesç¼–è¾‘ç•Œé¢
         void RightsXmlToTypes(XmlDocument dom,
             string strLibraryCode)
         {
@@ -228,7 +228,7 @@ namespace dp2Circulation
         }
 #endif
 
-        // DOMÖĞµÄ<readerTypes>ºÍ<bookTypes>²¿·Ö --> types±à¼­½çÃæ
+        // DOMä¸­çš„<readerTypes>å’Œ<bookTypes>éƒ¨åˆ† --> typesç¼–è¾‘ç•Œé¢
         LibraryCodeInfo GetLibraryCodeInfo(XmlDocument dom,
             string strLibraryCode)
         {
@@ -284,7 +284,7 @@ namespace dp2Circulation
         }
 
 
-        // ÔÚlistviewÖĞÁĞ³ö¹İ´úÂë
+        // åœ¨listviewä¸­åˆ—å‡ºé¦†ä»£ç 
         void ListLibraryCodes(XmlDocument dom)
         {
             List<string> librarycodes = new List<string>();
@@ -295,7 +295,7 @@ namespace dp2Circulation
                 librarycodes.Add(strCode);
             }
 
-            // ¿´¿´ÊÇ·ñ»¹ÓĞ²»ÊôÓÚÈÎºÎ<library>ÔªËØµÄ
+            // çœ‹çœ‹æ˜¯å¦è¿˜æœ‰ä¸å±äºä»»ä½•<library>å…ƒç´ çš„
             nodes = dom.DocumentElement.SelectNodes("//param[count(ancestor::library) = 0]");
             if (nodes.Count > 0)
             {
@@ -308,7 +308,7 @@ namespace dp2Circulation
             this.listView_loanPolicy_libraryCodes.Items.Clear();
             foreach (string strLibraryCode in librarycodes)
             {
-                ListViewItem item = new ListViewItem(string.IsNullOrEmpty(strLibraryCode) == true ? "<È±Ê¡>" : strLibraryCode);
+                ListViewItem item = new ListViewItem(string.IsNullOrEmpty(strLibraryCode) == true ? "<ç¼ºçœ>" : strLibraryCode);
                 LibraryCodeInfo info = GetLibraryCodeInfo(dom,
                     strLibraryCode);
                 item.Tag = info;
@@ -319,7 +319,7 @@ namespace dp2Circulation
             this.textBox_loanPolicy_readerTypes.Text = "";
             this.textBox_loanPolicy_bookTypes.Text = "";
 
-            // Ñ¡¶¨µÚÒ»ĞĞ
+            // é€‰å®šç¬¬ä¸€è¡Œ
             if (this.listView_loanPolicy_libraryCodes.Items.Count > 0)
                 this.listView_loanPolicy_libraryCodes.Items[0].Selected = true;
         }
@@ -336,9 +336,9 @@ namespace dp2Circulation
 
             if (this.LoanPolicyDefChanged == true)
             {
-                // ¾¯¸æÉĞÎ´±£´æ
+                // è­¦å‘Šå°šæœªä¿å­˜
                 DialogResult result = MessageBox.Show(this,
-                    "µ±Ç°´°¿ÚÄÚ¶ÁÕßÁ÷Í¨È¨ÏŞ¶¨Òå±»ĞŞ¸ÄºóÉĞÎ´±£´æ¡£Èô´ËÊ±Ë¢ĞÂ´°¿ÚÄÚÈİ£¬ÏÖÓĞÎ´±£´æĞÅÏ¢½«¶ªÊ§¡£\r\n\r\nÈ·ÊµÒªË¢ĞÂ? ",
+                    "å½“å‰çª—å£å†…è¯»è€…æµé€šæƒé™å®šä¹‰è¢«ä¿®æ”¹åå°šæœªä¿å­˜ã€‚è‹¥æ­¤æ—¶åˆ·æ–°çª—å£å†…å®¹ï¼Œç°æœ‰æœªä¿å­˜ä¿¡æ¯å°†ä¸¢å¤±ã€‚\r\n\r\nç¡®å®è¦åˆ·æ–°? ",
                     "ManagerForm",
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question,
@@ -353,9 +353,9 @@ namespace dp2Circulation
             // 2008/10/12
             if (this.LoanPolicyDefChanged == true)
             {
-                // ¾¯¸æÉĞÎ´±£´æ
+                // è­¦å‘Šå°šæœªä¿å­˜
                 DialogResult result = MessageBox.Show(this,
-                    "µ±Ç°´°¿ÚÄÚÓĞ¶ÁÕßÁ÷Í¨È¨ÏŞ¶¨Òå±»ĞŞ¸ÄºóÉĞÎ´±£´æ¡£Èô´ËÊ±ÖØĞÂ×°ÔØ¶ÁÕßÁ÷Í¨È¨ÏŞ¶¨Òå£¬ÏÖÓĞÎ´±£´æĞÅÏ¢½«¶ªÊ§¡£\r\n\r\nÈ·ÊµÒªÖØĞÂ×°ÔØ? ",
+                    "å½“å‰çª—å£å†…æœ‰è¯»è€…æµé€šæƒé™å®šä¹‰è¢«ä¿®æ”¹åå°šæœªä¿å­˜ã€‚è‹¥æ­¤æ—¶é‡æ–°è£…è½½è¯»è€…æµé€šæƒé™å®šä¹‰ï¼Œç°æœ‰æœªä¿å­˜ä¿¡æ¯å°†ä¸¢å¤±ã€‚\r\n\r\nç¡®å®è¦é‡æ–°è£…è½½? ",
                     "ManagerForm",
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question,
@@ -369,7 +369,7 @@ namespace dp2Circulation
             //string strReaderTypesXml = "";
             //string strBookTypesXml = "";
 
-            // »ñµÃÁ÷Í¨¶ÁÕßÈ¨ÏŞÏà¹Ø¶¨Òå
+            // è·å¾—æµé€šè¯»è€…æƒé™ç›¸å…³å®šä¹‰
             int nRet = GetRightsTableInfo(out strRightsTableXml,
                 out strRightsTableHtml,
                 //out strReaderTypesXml,
@@ -387,7 +387,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = "strRightsTableXml×°ÈëXMLDOMÊ±·¢Éú´íÎó£º" + ex.Message;
+                strError = "strRightsTableXmlè£…å…¥XMLDOMæ—¶å‘ç”Ÿé”™è¯¯ï¼š" + ex.Message;
                 return -1;
             }
 
@@ -421,13 +421,13 @@ namespace dp2Circulation
             }
              * */
 
-            // ÔÚlistviewÖĞÁĞ³ö¹İ´úÂë
+            // åœ¨listviewä¸­åˆ—å‡ºé¦†ä»£ç 
             ListLibraryCodes(dom);
 
             // RightsXmlToTypes(dom);
 
             /*
-            // TODO: ÎªÁËÈÃXMLÔ´´úÂë²»ÖÁÓÚÈÃÈËÎó»á(ÏëÒªÈ¥±à¼­<readerTypes>ºÍ<bookTypes>)£¬ÊÇ·ñÒª°ÑÕâÁ½¸öÔªËØÈ¥µô?
+            // TODO: ä¸ºäº†è®©XMLæºä»£ç ä¸è‡³äºè®©äººè¯¯ä¼š(æƒ³è¦å»ç¼–è¾‘<readerTypes>å’Œ<bookTypes>)ï¼Œæ˜¯å¦è¦æŠŠè¿™ä¸¤ä¸ªå…ƒç´ å»æ‰?
             {
                 XmlNodeList nodes = dom.DocumentElement.SelectNodes("readerTypes | bookTypes");
                 for (int i = 0; i < nodes.Count; i++)
@@ -457,7 +457,7 @@ namespace dp2Circulation
             return 1;
         }
 
-        // »ñµÃÁ÷Í¨¶ÁÕßÈ¨ÏŞÏà¹Ø¶¨Òå
+        // è·å¾—æµé€šè¯»è€…æƒé™ç›¸å…³å®šä¹‰
         int GetRightsTableInfo(out string strRightsTableXml,
             out string strRightsTableHtml,
             //out string strReaderTypesXml,
@@ -473,7 +473,7 @@ namespace dp2Circulation
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ»ñÈ¡¶ÁÕßÁ÷Í¨È¨ÏŞ¶¨Òå ...");
+            stop.Initial("æ­£åœ¨è·å–è¯»è€…æµé€šæƒé™å®šä¹‰ ...");
             stop.BeginLoop();
 
             this.Update();
@@ -534,9 +534,9 @@ namespace dp2Circulation
             return -1;
         }
 
-        // ±£´æÁ÷Í¨¶ÁÕßÈ¨ÏŞÏà¹Ø¶¨Òå
+        // ä¿å­˜æµé€šè¯»è€…æƒé™ç›¸å…³å®šä¹‰
         // parameters:
-        //      strRightsTableXml   Á÷Í¨¶ÁÕßÈ¨ÏŞ¶¨ÒåXML¡£×¢Òâ£¬Ã»ÓĞ¸ùÔªËØ
+        //      strRightsTableXml   æµé€šè¯»è€…æƒé™å®šä¹‰XMLã€‚æ³¨æ„ï¼Œæ²¡æœ‰æ ¹å…ƒç´ 
         int SetRightsTableDef(string strRightsTableXml,
             //string strReaderTypesXml,
             //string strBookTypesXml,
@@ -547,7 +547,7 @@ namespace dp2Circulation
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ±£´æ¶ÁÕßÁ÷Í¨È¨ÏŞ¶¨Òå ...");
+            stop.Initial("æ­£åœ¨ä¿å­˜è¯»è€…æµé€šæƒé™å®šä¹‰ ...");
             stop.BeginLoop();
 
             this.Update();
@@ -621,7 +621,7 @@ namespace dp2Circulation
             SynchronizeRightsTableAndHtml();
         }
 
-        // Í¬²½¶ÁÕßÈ¨ÏŞXML¶¨ÒåºÍ¶ÁÕß/Í¼ÊéÀàĞÍ±à¼­½çÃæ
+        // åŒæ­¥è¯»è€…æƒé™XMLå®šä¹‰å’Œè¯»è€…/å›¾ä¹¦ç±»å‹ç¼–è¾‘ç•Œé¢
         int SynchronizeRightsTableAndTypes()
         {
             string strError = "";
@@ -636,12 +636,12 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = "¶ÁÕßÈ¨ÏŞXML´úÂë¸ñÊ½ÓĞÎó: " + ex.Message;
+                strError = "è¯»è€…æƒé™XMLä»£ç æ ¼å¼æœ‰è¯¯: " + ex.Message;
                 goto ERROR1;
             }
 
 
-            // XML´úÂë¸üĞÂ
+            // XMLä»£ç æ›´æ–°
             if (this.m_nRightsTableXmlVersion > this.m_nRightsTableTypesVersion)
             {
                 // RightsXmlToTypes(dom);
@@ -650,14 +650,14 @@ namespace dp2Circulation
                 return 0;
             }
 
-            // types±à¼­½çÃæ¸üĞÂ
+            // typesç¼–è¾‘ç•Œé¢æ›´æ–°
             if (this.m_nRightsTableXmlVersion < this.m_nRightsTableTypesVersion)
             {
-                // types±à¼­½çÃæ --> DOMÖĞµÄ<readerTypes>ºÍ<bookTypes>²¿·Ö
-                // µ÷ÓÃÇ°domÖĞÓ¦µ±ÒÑ¾­×°ÈëÁËÈ¨ÏŞXML´úÂë
+                // typesç¼–è¾‘ç•Œé¢ --> DOMä¸­çš„<readerTypes>å’Œ<bookTypes>éƒ¨åˆ†
+                // è°ƒç”¨å‰domä¸­åº”å½“å·²ç»è£…å…¥äº†æƒé™XMLä»£ç 
                 TypesToRightsXml(ref dom);
 
-                // Ë¢ĞÂXMLÎÄ±¾¿ò
+                // åˆ·æ–°XMLæ–‡æœ¬æ¡†
                 string strXml = "";
                 int nRet = DomUtil.GetIndentXml(dom.DocumentElement.OuterXml,
                     out strXml,
@@ -682,7 +682,7 @@ namespace dp2Circulation
             return -1;
         }
 
-        // Í¬²½¶ÁÕßÈ¨ÏŞXML¶¨ÒåºÍÁ÷Í¨È¨ÏŞ±íHTMLÏÔÊ¾
+        // åŒæ­¥è¯»è€…æƒé™XMLå®šä¹‰å’Œæµé€šæƒé™è¡¨HTMLæ˜¾ç¤º
         int SynchronizeRightsTableAndHtml()
         {
             string strError = "";
@@ -709,7 +709,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = "XML×Ö·û´®×°ÈëXMLDOMÊ±·¢Éú´íÎó: " + ex.Message;
+                strError = "XMLå­—ç¬¦ä¸²è£…å…¥XMLDOMæ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                 goto ERROR1;
             }
 
@@ -722,7 +722,7 @@ namespace dp2Circulation
             }
 
 #if NO
-            // ÔÚ·¢³öÈ¥µÄXMLÖĞÔö¼Ó<readerTypes>ºÍ<bookTypes>²ÎÊı
+            // åœ¨å‘å‡ºå»çš„XMLä¸­å¢åŠ <readerTypes>å’Œ<bookTypes>å‚æ•°
             string strReaderTypesXml = BuildTypesXml(this.textBox_loanPolicy_readerTypes);
             string strBookTypesXml = BuildTypesXml(this.textBox_loanPolicy_bookTypes);
 
@@ -736,14 +736,14 @@ namespace dp2Circulation
                 node_booktypes.InnerXml = strBookTypesXml;
 
 #endif
-            // ÒòÎªSynchronizeRightsTableAndHtml() ×ÜÊÇÔÚÉÔºóµ÷ÓÃ£¬ËùÒÔ²»ÓÃ²ÙĞÄtypes xml¸üĞÂµÄÎÊÌâ
+            // å› ä¸ºSynchronizeRightsTableAndHtml() æ€»æ˜¯åœ¨ç¨åè°ƒç”¨ï¼Œæ‰€ä»¥ä¸ç”¨æ“å¿ƒtypes xmlæ›´æ–°çš„é—®é¢˜
 
             strRightsTableXml = dom.DocumentElement.InnerXml;
 
             // EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ»ñÈ¡¶ÁÕßÁ÷Í¨È¨ÏŞ¶¨ÒåHTML ...");
+            stop.Initial("æ­£åœ¨è·å–è¯»è€…æµé€šæƒé™å®šä¹‰HTML ...");
             stop.BeginLoop();
 
             this.Update();
@@ -785,7 +785,7 @@ namespace dp2Circulation
 
 
 
-        // ´Ó<rightsTable>µÄÈ¨ÏŞ¶¨Òå´úÂëÖĞ(¶ø²»ÊÇ´Ó<readerTypes>ºÍ<bookTypes>ÔªËØÏÂ)»ñµÃ¶ÁÕßºÍÍ¼ÊéÀàĞÍÁĞ±í
+        // ä»<rightsTable>çš„æƒé™å®šä¹‰ä»£ç ä¸­(è€Œä¸æ˜¯ä»<readerTypes>å’Œ<bookTypes>å…ƒç´ ä¸‹)è·å¾—è¯»è€…å’Œå›¾ä¹¦ç±»å‹åˆ—è¡¨
         int GetReaderAndBookTypes(out List<string> readertypes,
             out List<string> booktypes,
             out string strError)
@@ -803,11 +803,11 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = "¶ÁÕßÈ¨ÏŞXML´úÂë×°ÈëDOMÊ±³ö´í: " + ex.Message;
+                strError = "è¯»è€…æƒé™XMLä»£ç è£…å…¥DOMæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
-            // Ñ¡³öËùÓĞ<type>ÔªËØ
+            // é€‰å‡ºæ‰€æœ‰<type>å…ƒç´ 
             XmlNodeList nodes = dom.DocumentElement.SelectNodes("//type");
 
             for (int i = 0; i < nodes.Count; i++)
@@ -848,7 +848,7 @@ namespace dp2Circulation
             return results;
         }
 
-        // ¸ù¾İÎÄ±¾ĞĞ´´½¨types XML Æ¬¶Ï
+        // æ ¹æ®æ–‡æœ¬è¡Œåˆ›å»ºtypes XML ç‰‡æ–­
         static string BuildTypesXml(string strText)
         {
             if (String.IsNullOrEmpty(strText) == true)
@@ -901,24 +901,24 @@ namespace dp2Circulation
     internal class LibraryCodeInfo
     {
         /// <summary>
-        /// Í¼Êé¹İ´úÂë
+        /// å›¾ä¹¦é¦†ä»£ç 
         /// </summary>
         public string LibraryCode = "";
 
         /// <summary>
-        /// ¶ÁÕßÀàĞÍÁĞ±í
+        /// è¯»è€…ç±»å‹åˆ—è¡¨
         /// </summary>
         public string ReaderTypeList = "";
 
         /// <summary>
-        /// Í¼ÊéÀàĞÍÁĞ±í
+        /// å›¾ä¹¦ç±»å‹åˆ—è¡¨
         /// </summary>
         public string BookTypeList = "";
 
         /// <summary>
-        /// ÄÚÈİÊÇ·ñ·¢Éú¹ıĞŞ¸Ä
+        /// å†…å®¹æ˜¯å¦å‘ç”Ÿè¿‡ä¿®æ”¹
         /// </summary>
-        public bool Changed = false;    // readertype »ò booktypes ÄÚÈİ·¢ÉúÁË±ä»¯
+        public bool Changed = false;    // readertype æˆ– booktypes å†…å®¹å‘ç”Ÿäº†å˜åŒ–
     }
 
 #endif

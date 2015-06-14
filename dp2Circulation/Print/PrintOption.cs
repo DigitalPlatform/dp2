@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
@@ -9,63 +9,63 @@ using DigitalPlatform.IO;
 namespace dp2Circulation
 {
 
-    // Ò»¸öÁĞ
+    // ä¸€ä¸ªåˆ—
     internal class Column
     {
         public string Caption = "";
         public string Name = "";
         public int WidthChars = -1; // 2014/11/30
         public int MaxChars = -1;
-        public string Evalue = "";  // ½Å±¾´úÂë
+        public string Evalue = "";  // è„šæœ¬ä»£ç 
     }
 
     // 2008/11/23
     /// <summary>
-    /// Ä£°åÒ³²ÎÊı
+    /// æ¨¡æ¿é¡µå‚æ•°
     /// </summary>
     internal class TemplatePageParam
     {
         /// <summary>
-        /// ±êÌâ
+        /// æ ‡é¢˜
         /// </summary>
         public string Caption = "";
         /// <summary>
-        /// ÎÄ¼şÂ·¾¶
+        /// æ–‡ä»¶è·¯å¾„
         /// </summary>
         public string FilePath = "";
     }
 
 
-    // ´òÓ¡²ÎÊı
-    // TODO: ĞèÒªÔö¼ÓÔ¤¶¨ÒåÈ±Ê¡À¸Ä¿µÄ¹¦ÄÜ
+    // æ‰“å°å‚æ•°
+    // TODO: éœ€è¦å¢åŠ é¢„å®šä¹‰ç¼ºçœæ ç›®çš„åŠŸèƒ½
     internal class PrintOption
     {
-        public string DataDir = ""; // Êı¾İÄ¿Â¼¡£µ±ÓĞÄ£°åÎÄ¼ş¶¨ÒåµÄÊ±ºò£¬±ØĞëÉèÖÃ´Ë³ÉÔ±
+        public string DataDir = ""; // æ•°æ®ç›®å½•ã€‚å½“æœ‰æ¨¡æ¿æ–‡ä»¶å®šä¹‰çš„æ—¶å€™ï¼Œå¿…é¡»è®¾ç½®æ­¤æˆå‘˜
 
-        public string PageHeader = "";  // "%pageno%/%pagecount%";  // Ò³Ã¼ÎÄ×Ö
+        public string PageHeader = "";  // "%pageno%/%pagecount%";  // é¡µçœ‰æ–‡å­—
         public string PageHeaderDefault = "";
 
-        public string PageFooter = "";  // Ò³½ÅÎÄ×Ö
+        public string PageFooter = "";  // é¡µè„šæ–‡å­—
         public string PageFooterDefault = "";
 
-        public string TableTitle = "";  // "²áÒÆ½»Çåµ¥";  // ±í¸ñ±êÌâ
+        public string TableTitle = "";  // "å†Œç§»äº¤æ¸…å•";  // è¡¨æ ¼æ ‡é¢˜
         public string TableTitleDefault = "";
 
-        public int LinesPerPage = 10;   // Ã¿Ò³¶àÉÙĞĞÄÚÈİ
+        public int LinesPerPage = 10;   // æ¯é¡µå¤šå°‘è¡Œå†…å®¹
         public int LinesPerPageDefault = 10;
 
-        public List<Column> Columns = new List<Column>();   // À¸Ä¿ÁĞ±í¡£¶¨ÒåÁËĞèÒª´òÓ¡³öÄÄĞ©À¸Ä¿¡£
+        public List<Column> Columns = new List<Column>();   // æ ç›®åˆ—è¡¨ã€‚å®šä¹‰äº†éœ€è¦æ‰“å°å‡ºå“ªäº›æ ç›®ã€‚
 
-        public List<TemplatePageParam> TemplatePages = new List<TemplatePageParam>();   // ¶¨ÖÆµÄÒ³Ãæ
+        public List<TemplatePageParam> TemplatePages = new List<TemplatePageParam>();   // å®šåˆ¶çš„é¡µé¢
 
-        // ´ÓApplication¶ÔÏóÖĞ×°ÔØÊı¾İ
+        // ä»Applicationå¯¹è±¡ä¸­è£…è½½æ•°æ®
         public virtual void LoadData(ApplicationInfo ai,
             string strPath)
         {
             this.PageHeader = ai.GetString(strPath,
                 "PageHeader", this.PageHeaderDefault);
 
-                // "%date% ²áÒÆ½»Çåµ¥ - %barcodefilename% - (¹² %pagecount% Ò³)");
+                // "%date% å†Œç§»äº¤æ¸…å• - %barcodefilename% - (å…± %pagecount% é¡µ)");
             this.PageFooter = ai.GetString(strPath,
                 "PageFooter", this.PageFooterDefault);
             // "%pageno%/%pagecount%");
@@ -73,7 +73,7 @@ namespace dp2Circulation
             this.TableTitle = ai.GetString(strPath,
                 "TableTitle", this.TableTitleDefault);
             
-            // "%date% ²áÒÆ½»Çåµ¥");
+            // "%date% å†Œç§»äº¤æ¸…å•");
 
             this.LinesPerPage = ai.GetInt(strPath,
                 "LinesPerPage", this.LinesPerPageDefault);
@@ -81,7 +81,7 @@ namespace dp2Circulation
             // 20);
 
             int nCount = ai.GetInt(strPath, "ColumnsCount", 0);
-            if (nCount != 0) // Ö»ÓĞµ±Íâ²¿´æ´¢ÖĞÓĞÅäÖÃĞÅÏ¢Ê±£¬²ÅÇå³ı¹¹Ôìº¯Êı´´½¨µÄÈ±Ê¡ĞÅÏ¢
+            if (nCount != 0) // åªæœ‰å½“å¤–éƒ¨å­˜å‚¨ä¸­æœ‰é…ç½®ä¿¡æ¯æ—¶ï¼Œæ‰æ¸…é™¤æ„é€ å‡½æ•°åˆ›å»ºçš„ç¼ºçœä¿¡æ¯
             {
                 Columns.Clear();
                 for (int i = 0; i < nCount; i++)
@@ -120,7 +120,7 @@ namespace dp2Circulation
             }
 
             nCount = ai.GetInt(strPath, "TemplatePagesCount", 0);
-            if (nCount != 0) // Ö»ÓĞµ±Íâ²¿´æ´¢ÖĞÓĞÅäÖÃĞÅÏ¢Ê±£¬²ÅÇå³ı¹¹Ôìº¯Êı´´½¨µÄÈ±Ê¡ĞÅÏ¢
+            if (nCount != 0) // åªæœ‰å½“å¤–éƒ¨å­˜å‚¨ä¸­æœ‰é…ç½®ä¿¡æ¯æ—¶ï¼Œæ‰æ¸…é™¤æ„é€ å‡½æ•°åˆ›å»ºçš„ç¼ºçœä¿¡æ¯
             {
                 this.TemplatePages.Clear();
                 for (int i = 0; i < nCount; i++)
@@ -137,7 +137,7 @@ namespace dp2Circulation
 
                     param.FilePath = UnMacroPath(param.FilePath);
 
-                    Debug.Assert(param.FilePath.IndexOf("%") == -1, "È¥³ıºêÒÔºóµÄÂ·¾¶×Ö·û´®ÀïÃæ²»ÄÜÓĞ%·ûºÅ");
+                    Debug.Assert(param.FilePath.IndexOf("%") == -1, "å»é™¤å®ä»¥åçš„è·¯å¾„å­—ç¬¦ä¸²é‡Œé¢ä¸èƒ½æœ‰%ç¬¦å·");
 
                     this.TemplatePages.Add(param);
                 }
@@ -199,7 +199,7 @@ namespace dp2Circulation
 
                 Debug.Assert(String.IsNullOrEmpty(this.DataDir) == false, "");
 
-                // ±ä»»Îª´øÓĞºêµÄÍ¨ÓÃĞÍÌ¬
+                // å˜æ¢ä¸ºå¸¦æœ‰å®çš„é€šç”¨å‹æ€
                 string strFilePath = this.TemplatePages[i].FilePath;
                 strFilePath = MacroPath(strFilePath);
 
@@ -215,7 +215,7 @@ namespace dp2Circulation
             if (String.IsNullOrEmpty(this.DataDir) == true)
                 return strPath;
 
-            // ²âÊÔstrPath1ÊÇ·ñÎªstrPath2µÄÏÂ¼¶Ä¿Â¼»òÎÄ¼ş
+            // æµ‹è¯•strPath1æ˜¯å¦ä¸ºstrPath2çš„ä¸‹çº§ç›®å½•æˆ–æ–‡ä»¶
             if (PathUtil.IsChildOrEqual(strPath, this.DataDir) == true)
             {
                 string strPart = strPath.Substring(this.DataDir.Length);
@@ -233,9 +233,9 @@ namespace dp2Circulation
             return strPath.Replace("%datadir%", this.DataDir);
         }
 
-        // »ñµÃÄ£°åÒ³ÎÄ¼ş
+        // è·å¾—æ¨¡æ¿é¡µæ–‡ä»¶
         // parameters:
-        //      strCaption  Ä£°åÃû³Æ¡£´óĞ¡Ğ´²»Ãô¸Ğ
+        //      strCaption  æ¨¡æ¿åç§°ã€‚å¤§å°å†™ä¸æ•æ„Ÿ
         public string GetTemplatePageFilePath(string strCaption)
         {
             if (this.TemplatePages == null)
@@ -246,7 +246,7 @@ namespace dp2Circulation
                 TemplatePageParam param = this.TemplatePages[i];
                 if (param.Caption.ToLower() == strCaption.ToLower())
                 {
-                    Debug.Assert(param.FilePath.IndexOf("%") == -1, "È¥³ıºêÒÔºóµÄÂ·¾¶×Ö·û´®ÀïÃæ²»ÄÜÓĞ%·ûºÅ");
+                    Debug.Assert(param.FilePath.IndexOf("%") == -1, "å»é™¤å®ä»¥åçš„è·¯å¾„å­—ç¬¦ä¸²é‡Œé¢ä¸èƒ½æœ‰%ç¬¦å·");
 
                     return param.FilePath;
                 }
@@ -255,7 +255,7 @@ namespace dp2Circulation
             return null;    // not found
         }
 
-        // ÊÇ·ñÖÁÉÙ°üº¬Ò»¸ö½Å±¾¶¨Òå£¿
+        // æ˜¯å¦è‡³å°‘åŒ…å«ä¸€ä¸ªè„šæœ¬å®šä¹‰ï¼Ÿ
         public bool HasEvalue()
         {
             foreach (Column column in this.Columns)

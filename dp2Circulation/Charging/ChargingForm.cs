@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -23,14 +23,14 @@ using DigitalPlatform.CommonControl;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ³öÄÉ²Ù×÷´°¿Ú
+    /// å‡ºçº³æ“ä½œçª—å£
     /// </summary>
     public partial class ChargingForm : MyForm, IProtectFocus, IChargingForm
     {
         /// <summary>
-        /// IProtectFocus ½Ó¿ÚÒªÇóµÄº¯Êı
+        /// IProtectFocus æ¥å£è¦æ±‚çš„å‡½æ•°
         /// </summary>
-        /// <param name="pfAllow">ÊÇ·ñÔÊĞí</param>
+        /// <param name="pfAllow">æ˜¯å¦å…è®¸</param>
         public void AllowFocusChange(ref bool pfAllow)
         {
             pfAllow = false;
@@ -51,7 +51,7 @@ namespace dp2Circulation
         public string Lang = "zh";
 
         /// <summary>
-        /// ¿ò¼Ü´°¿Ú
+        /// æ¡†æ¶çª—å£
         /// </summary>
         public MainForm MainForm = null;
 
@@ -65,7 +65,7 @@ namespace dp2Circulation
 
         DisplayState m_displaystate = DisplayState.TEXT;
 
-        // Í¬Ò»¸ö¶ÁÕßÁ¬Ğø½èÔÄ³É¹¦ºóËùÀÛ»ıµÄ²áÌõÂëºÅ¼¯ºÏ
+        // åŒä¸€ä¸ªè¯»è€…è¿ç»­å€Ÿé˜…æˆåŠŸåæ‰€ç´¯ç§¯çš„å†Œæ¡ç å·é›†åˆ
         List<string> oneReaderItemBarcodes = new List<string>();
 
         // bool m_bVerifyReaderPassword = false;
@@ -76,30 +76,30 @@ namespace dp2Circulation
         // const int WM_LOADSIZE = API.WM_USER + 201;
         const int WM_ENABLE_EDIT = API.WM_USER + 202;
 
-        // ÏûÏ¢WM_SWITCH_FOCUSµÄwparam²ÎÊıÖµ
+        // æ¶ˆæ¯WM_SWITCH_FOCUSçš„wparamå‚æ•°å€¼
         /// <summary>
-        /// ½¹µãÎ»ÖÃÏÂ±ê£º¶ÁÕßÖ¤ÌõÂëºÅÊäÈëÓò
+        /// ç„¦ç‚¹ä½ç½®ä¸‹æ ‡ï¼šè¯»è€…è¯æ¡ç å·è¾“å…¥åŸŸ
         /// </summary>
         public const int READER_BARCODE = 0;
         /// <summary>
-        /// ½¹µãÎ»ÖÃÏÂ±ê£º¶ÁÕßÖ¤ÃÜÂëÊäÈëÓò
+        /// ç„¦ç‚¹ä½ç½®ä¸‹æ ‡ï¼šè¯»è€…è¯å¯†ç è¾“å…¥åŸŸ
         /// </summary>
         public const int READER_PASSWORD = 1;
         /// <summary>
-        /// ½¹µãÎ»ÖÃÏÂ±ê£º²áÌõÂëºÅÊäÈëÓò
+        /// ç„¦ç‚¹ä½ç½®ä¸‹æ ‡ï¼šå†Œæ¡ç å·è¾“å…¥åŸŸ
         /// </summary>
         public const int ITEM_BARCODE = 2;
 
-        // string FastInputText = "";  // CharingInfoDlg·µ»ØµÄ¿ì½İÊäÈëÄÚÈİ
+        // string FastInputText = "";  // CharingInfoDlgè¿”å›çš„å¿«æ·è¾“å…¥å†…å®¹
 
         Hashtable m_textTable = new Hashtable();
         int m_nTextNumber = 0;
 
-        // ¼ÇÔØÁ¬ĞøÊäÈëµÄ²áÌõÂëºÅ
+        // è®°è½½è¿ç»­è¾“å…¥çš„å†Œæ¡ç å·
         List<BarcodeAndTime> m_itemBarcodes = new List<BarcodeAndTime>();
 
         /// <summary>
-        /// µ±Ç°»î¶¯µÄ¶ÁÕßÖ¤ÌõÂëºÅ
+        /// å½“å‰æ´»åŠ¨çš„è¯»è€…è¯æ¡ç å·
         /// </summary>
         public string ActiveReaderBarcode
         {
@@ -131,7 +131,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// µ±Ç°»î¶¯µÄ²áÌõÂëºÅ
+        /// å½“å‰æ´»åŠ¨çš„å†Œæ¡ç å·
         /// </summary>
         public string ActiveItemBarcode
         {
@@ -158,7 +158,7 @@ namespace dp2Circulation
 
         // 
         /// <summary>
-        /// ÏÔÊ¾¶ÁÕßĞÅÏ¢µÄ¸ñÊ½¡£Îª text html Ö®Ò»
+        /// æ˜¾ç¤ºè¯»è€…ä¿¡æ¯çš„æ ¼å¼ã€‚ä¸º text html ä¹‹ä¸€
         /// </summary>
         public string PatronRenderFormat
         {
@@ -175,7 +175,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÏÔÊ¾ÊéÄ¿¡¢²áĞÅÏ¢µÄ¸ñÊ½¡£Îª text html Ö®Ò»
+        /// æ˜¾ç¤ºä¹¦ç›®ã€å†Œä¿¡æ¯çš„æ ¼å¼ã€‚ä¸º text html ä¹‹ä¸€
         /// </summary>
         public string RenderFormat
         {
@@ -188,7 +188,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÏÔÊ¾×´Ì¬
+        /// æ˜¾ç¤ºçŠ¶æ€
         /// </summary>
         public DisplayState DisplayState
         {
@@ -243,7 +243,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÊÇ·ñÒªÇ¿ÖÆ²Ù×÷[ÔİÎ´Ê¹ÓÃ]
+        /// æ˜¯å¦è¦å¼ºåˆ¶æ“ä½œ[æš‚æœªä½¿ç”¨]
         /// </summary>
         public bool Force
         {
@@ -271,7 +271,7 @@ namespace dp2Circulation
         // 
         // 2008/9/26
         /// <summary>
-        /// ÊÇ·ñ×Ô¶¯Çå³ıÊäÈë¿òÖĞÄÚÈİ
+        /// æ˜¯å¦è‡ªåŠ¨æ¸…é™¤è¾“å…¥æ¡†ä¸­å†…å®¹
         /// </summary>
         public bool AutoClearTextbox
         {
@@ -292,7 +292,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÊÇ·ñ ²»ÏÔÊ¾ÊéÄ¿ºÍ²áĞÅÏ¢
+        /// æ˜¯å¦ ä¸æ˜¾ç¤ºä¹¦ç›®å’Œå†Œä¿¡æ¯
         /// </summary>
         public bool NoBiblioAndItemInfo
         {
@@ -307,7 +307,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÊÇ·ñ ²»ÏÔÊ¾ÂÌÉ«ÌáÊ¾¶Ô»°¿ò
+        /// æ˜¯å¦ ä¸æ˜¾ç¤ºç»¿è‰²æç¤ºå¯¹è¯æ¡†
         /// </summary>
         public bool GreenDisable
         {
@@ -322,7 +322,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÊÇ·ñ×Ô¶¯Ğ£ÑéÊäÈëµÄÌõÂëºÅ
+        /// æ˜¯å¦è‡ªåŠ¨æ ¡éªŒè¾“å…¥çš„æ¡ç å·
         /// </summary>
         public bool NeedVerifyBarcode
         {
@@ -336,7 +336,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ĞÅÏ¢¶Ô»°¿òµÄ²»Í¸Ã÷¶È
+        /// ä¿¡æ¯å¯¹è¯æ¡†çš„ä¸é€æ˜åº¦
         /// </summary>
         public double InfoDlgOpacity
         {
@@ -377,47 +377,47 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ¸Ä±ä²¼¾Ö·½Ê½
+        /// æ”¹å˜å¸ƒå±€æ–¹å¼
         /// </summary>
-        /// <param name="bNoBiblioAndItemInfo">ÊÇ·ñ ²»ÒªÏÔÊ¾ÊéÄ¿ºÍ²áĞÅÏ¢²¿·Ö</param>
+        /// <param name="bNoBiblioAndItemInfo">æ˜¯å¦ ä¸è¦æ˜¾ç¤ºä¹¦ç›®å’Œå†Œä¿¡æ¯éƒ¨åˆ†</param>
         public void ChangeLayout(bool bNoBiblioAndItemInfo)
         {
             if (bNoBiblioAndItemInfo == true)
             {
-                // °Ñoperation±í¸ñ¿Ø¼ş£¬´ÓbiblioanditemÒÆ¶¯µ½readerinfo±í¸ñ¿Ø¼şÄÚ
+                // æŠŠoperationè¡¨æ ¼æ§ä»¶ï¼Œä»biblioanditemç§»åŠ¨åˆ°readerinfoè¡¨æ ¼æ§ä»¶å†…
                 this.tableLayoutPanel_readerInfo.Controls.Add(this.tableLayoutPanel_operation,
                     0, 4);
                 this.tableLayoutPanel_biblioAndItem.Controls.Remove(this.tableLayoutPanel_operation);
-                // °Ñreaderinfo±í¸ñ¿Ø¼ş(´ÓmainµÄpanel1)ÌáÉıµ½×î¸ß²ã
-                this.panel_main.Controls.Add(this.tableLayoutPanel_readerInfo); // Dock±¾À´¾ÍÊÇFill
+                // æŠŠreaderinfoè¡¨æ ¼æ§ä»¶(ä»mainçš„panel1)æå‡åˆ°æœ€é«˜å±‚
+                this.panel_main.Controls.Add(this.tableLayoutPanel_readerInfo); // Dockæœ¬æ¥å°±æ˜¯Fill
 
                 this.splitContainer_main.Panel1.Controls.Remove(this.tableLayoutPanel_readerInfo);
 
                 /*
-                // °ÑreaderinfoµÄDock·½Ê½ĞŞ¸ÄÎªFill
+                // æŠŠreaderinfoçš„Dockæ–¹å¼ä¿®æ”¹ä¸ºFill
                 this.tableLayoutPanel_readerInfo.Dock = DockStyle.Fill;
                  * */
 
-                // Òş²ØsplitContainer_main
+                // éšè—splitContainer_main
                 this.splitContainer_main.Visible = false;
             }
             else
             {
-                // °Ñoperation±í¸ñ¿Ø¼ş£¬´Óreaderinfo±í¸ñ¿Ø¼şÄÚÒÆ¶¯µ½biblioanditem
+                // æŠŠoperationè¡¨æ ¼æ§ä»¶ï¼Œä»readerinfoè¡¨æ ¼æ§ä»¶å†…ç§»åŠ¨åˆ°biblioanditem
                 this.tableLayoutPanel_biblioAndItem.Controls.Add(this.tableLayoutPanel_operation,
                     0, 3);
                 this.tableLayoutPanel_readerInfo.Controls.Remove(this.tableLayoutPanel_operation);
 
-                // °Ñreaderinfo±í¸ñ¿Ø¼ş´Ó×î¸ß²ãÒÆ¶¯µ½mainµÄpanel1
+                // æŠŠreaderinfoè¡¨æ ¼æ§ä»¶ä»æœ€é«˜å±‚ç§»åŠ¨åˆ°mainçš„panel1
                 this.splitContainer_main.Panel1.Controls.Add(this.tableLayoutPanel_readerInfo);
                 this.panel_main.Controls.Remove(this.tableLayoutPanel_readerInfo);
 
                 /*
-                // °ÑreaderinfoµÄDock·½Ê½ĞŞ¸ÄÎªFill
+                // æŠŠreaderinfoçš„Dockæ–¹å¼ä¿®æ”¹ä¸ºFill
                 this.tableLayoutPanel_readerInfo.Dock = DockStyle.Fill;
                  * */
 
-                // ÏÔÊ¾splitContainer_main
+                // æ˜¾ç¤ºsplitContainer_main
                 this.splitContainer_main.Visible = true;
             }
         }
@@ -432,18 +432,18 @@ namespace dp2Circulation
             if (this.NoBiblioAndItemInfo == true)
             {
                 /*
-                // °Ñoperation±í¸ñ¿Ø¼ş£¬´ÓbiblioanditemÒÆ¶¯µ½readerinfo±í¸ñ¿Ø¼şÄÚ
+                // æŠŠoperationè¡¨æ ¼æ§ä»¶ï¼Œä»biblioanditemç§»åŠ¨åˆ°readerinfoè¡¨æ ¼æ§ä»¶å†…
                 this.tableLayoutPanel_readerInfo.Controls.Add(this.tableLayoutPanel_operation,
                     0, 4);
                 this.tableLayoutPanel_biblioAndItem.Controls.Remove(this.tableLayoutPanel_operation);
-                // °Ñreaderinfo±í¸ñ¿Ø¼ş(´ÓmainµÄpanel1)ÌáÉıµ½×î¸ß²ã
+                // æŠŠreaderinfoè¡¨æ ¼æ§ä»¶(ä»mainçš„panel1)æå‡åˆ°æœ€é«˜å±‚
                 this.Controls.Add(this.tableLayoutPanel_readerInfo);
                 this.splitContainer_main.Panel1.Controls.Remove(this.tableLayoutPanel_readerInfo);
 
-                // °ÑreaderinfoµÄDock·½Ê½ĞŞ¸ÄÎªFill
+                // æŠŠreaderinfoçš„Dockæ–¹å¼ä¿®æ”¹ä¸ºFill
                 this.tableLayoutPanel_readerInfo.Dock = DockStyle.Fill;
 
-                // Òş²ØsplitContainer_main
+                // éšè—splitContainer_main
                 this.splitContainer_main.Visible = false;
                  * */
                 ChangeLayout(true);
@@ -454,7 +454,7 @@ namespace dp2Circulation
 
             // LoadSize();
 
-            this.FuncState = this.FuncState;    // Ê¹"²Ù×÷"°´Å¥ÎÄ×ÖÏÔÊ¾ÕıÈ·
+            this.FuncState = this.FuncState;    // ä½¿"æ“ä½œ"æŒ‰é’®æ–‡å­—æ˜¾ç¤ºæ­£ç¡®
 
             string strDisplayFormat =
                 this.MainForm.AppInfo.GetString(
@@ -478,7 +478,7 @@ namespace dp2Circulation
             this.webBrowser_biblio.ObjectForScripting = this.m_webExternalHost_biblioInfo;
 
 #if NO
-            // this.VerifyReaderPassword = this.VerifyReaderPassword;  // Ê¹"Ğ£Ñé¶ÁÕßÃÜÂë"°´Å¥ÎÄ×Ö×´Ì¬ÏÔÊ¾ÕıÈ·
+            // this.VerifyReaderPassword = this.VerifyReaderPassword;  // ä½¿"æ ¡éªŒè¯»è€…å¯†ç "æŒ‰é’®æ–‡å­—çŠ¶æ€æ˜¾ç¤ºæ­£ç¡®
             this.VerifyReaderPassword = this.MainForm.AppInfo.GetBoolean(
                 "charging_form",
                 "verify_reader_password",
@@ -503,7 +503,7 @@ namespace dp2Circulation
             this.SwitchFocus(READER_BARCODE, null);
 
 #if NO
-            // ´°¿Ú´ò¿ªÊ±³õÊ¼»¯
+            // çª—å£æ‰“å¼€æ—¶åˆå§‹åŒ–
             this.m_bSuppressScriptErrors = !this.MainForm.DisplayScriptErrorDialog;
 #endif
 
@@ -513,9 +513,9 @@ namespace dp2Circulation
             this.commander.IsBusy -= new IsBusyEventHandler(commander_IsBusy);
             this.commander.IsBusy += new IsBusyEventHandler(commander_IsBusy);
 
-            SetReaderRenderString("(¿Õ)");
-            SetBiblioRenderString("(¿Õ)");
-            SetItemRenderString("(¿Õ)");
+            SetReaderRenderString("(ç©º)");
+            SetBiblioRenderString("(ç©º)");
+            SetItemRenderString("(ç©º)");
         }
 
         void AppInfo_SaveMdiSize(object sender, EventArgs e)
@@ -524,25 +524,25 @@ namespace dp2Circulation
                 return;
 
             /*
-            // ±£´æsplitContainer_mainµÄ×´Ì¬
+            // ä¿å­˜splitContainer_mainçš„çŠ¶æ€
             MainForm.AppInfo.SetInt(
                 "chargingform_state",
                 "splitContainer_main",
                 this.splitContainer_main.SplitterDistance);
-            // ±£´æsplitContainer_biblioAndItemµÄ×´Ì¬
+            // ä¿å­˜splitContainer_biblioAndItemçš„çŠ¶æ€
             MainForm.AppInfo.SetInt(
                 "chargingform_state",
                 "splitContainer_biblioAndItem",
                 this.splitContainer_biblioAndItem.SplitterDistance);
              * */
 
-            // ·Ö¸îÌõÎ»ÖÃ
-            // ±£´æsplitContainer_mainµÄ×´Ì¬
+            // åˆ†å‰²æ¡ä½ç½®
+            // ä¿å­˜splitContainer_mainçš„çŠ¶æ€
             this.MainForm.SaveSplitterPos(
                 this.splitContainer_main,
                 "chargingform_state",
                 "splitContainer_main");
-            // ±£´æsplitContainer_biblioAndItemµÄ×´Ì¬
+            // ä¿å­˜splitContainer_biblioAndItemçš„çŠ¶æ€
             this.MainForm.SaveSplitterPos(
                 this.splitContainer_biblioAndItem,
                 "chargingform_state",
@@ -558,7 +558,7 @@ namespace dp2Circulation
             try
             {
                 /*
-                // »ñµÃsplitContainer_mainµÄ×´Ì¬
+                // è·å¾—splitContainer_mainçš„çŠ¶æ€
                 int nValue = MainForm.AppInfo.GetInt(
                 "chargingform_state",
                 "splitContainer_main",
@@ -566,7 +566,7 @@ namespace dp2Circulation
                 if (nValue != -1)
                     this.splitContainer_main.SplitterDistance = nValue;
 
-                // »ñµÃsplitContainer_biblioAndItemµÄ×´Ì¬
+                // è·å¾—splitContainer_biblioAndItemçš„çŠ¶æ€
                 nValue = MainForm.AppInfo.GetInt(
                 "chargingform_state",
                 "splitContainer_biblioAndItem",
@@ -575,13 +575,13 @@ namespace dp2Circulation
                     this.splitContainer_biblioAndItem.SplitterDistance = nValue;
                  * */
 
-                // »ñµÃsplitContainer_mainµÄ×´Ì¬
+                // è·å¾—splitContainer_mainçš„çŠ¶æ€
                 this.MainForm.LoadSplitterPos(
                     this.splitContainer_main,
                     "chargingform_state",
                     "splitContainer_main");
 
-                // »ñµÃsplitContainer_biblioAndItemµÄ×´Ì¬
+                // è·å¾—splitContainer_biblioAndItemçš„çŠ¶æ€
                 this.MainForm.LoadSplitterPos(
                     this.splitContainer_biblioAndItem,
                     "chargingform_state",
@@ -620,7 +620,7 @@ namespace dp2Circulation
             }
 
             if (this.Channel != null)
-                this.Channel.Close();   // TODO: ×îºÃÏŞÖÆÒ»¸öÊ±¼ä£¬³¬¹ıÕâ¸öÊ±¼äÔòAbort()
+                this.Channel.Close();   // TODO: æœ€å¥½é™åˆ¶ä¸€ä¸ªæ—¶é—´ï¼Œè¶…è¿‡è¿™ä¸ªæ—¶é—´åˆ™Abort()
 
             if (this.MainForm != null && this.MainForm.AppInfo != null)
             {
@@ -632,7 +632,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// Í¬Ò»¸ö¶ÁÕßÁ¬Ğø½èÔÄ³É¹¦ºóËùÀÛ»ıµÄ²áÌõÂëºÅ¼¯ºÏ
+        /// åŒä¸€ä¸ªè¯»è€…è¿ç»­å€Ÿé˜…æˆåŠŸåæ‰€ç´¯ç§¯çš„å†Œæ¡ç å·é›†åˆ
         /// </summary>
         public string[] OneReaderItemBarcodes
         {
@@ -649,9 +649,9 @@ namespace dp2Circulation
             }
         }
 
-        // ´øÓĞ½¹µãÇĞ»»¹¦ÄÜµÄ
+        // å¸¦æœ‰ç„¦ç‚¹åˆ‡æ¢åŠŸèƒ½çš„
         /// <summary>
-        /// ¹¦ÄÜÀàĞÍ¡£ÉèÖÃÊ±´øÓĞ½¹µãÇĞ»»¹¦ÄÜ
+        /// åŠŸèƒ½ç±»å‹ã€‚è®¾ç½®æ—¶å¸¦æœ‰ç„¦ç‚¹åˆ‡æ¢åŠŸèƒ½
         /// </summary>
         public FuncState SmartFuncState
         {
@@ -666,13 +666,13 @@ namespace dp2Circulation
 
                 this.FuncState = value;
 
-                // Çå³ıwebbrowser
-                SetReaderRenderString("(¿Õ)");
+                // æ¸…é™¤webbrowser
+                SetReaderRenderString("(ç©º)");
 
-                SetBiblioRenderString("(¿Õ)");
-                SetItemRenderString("(¿Õ)");
+                SetBiblioRenderString("(ç©º)");
+                SetItemRenderString("(ç©º)");
 
-                // ÇĞ»»Îª²»Í¬µÄ¹¦ÄÜµÄÊ±ºò£¬¶¨Î»½¹µã
+                // åˆ‡æ¢ä¸ºä¸åŒçš„åŠŸèƒ½çš„æ—¶å€™ï¼Œå®šä½ç„¦ç‚¹
                 if (old_funcstate != this.m_funcstate)
                 {
                     if (this.m_funcstate != FuncState.Return)
@@ -691,7 +691,7 @@ namespace dp2Circulation
                         this.SwitchFocus(ITEM_BARCODE, null);
                     }
                 }
-                else // ÖØ¸´ÉèÖÃÎªÍ¬Ñù¹¦ÄÜ£¬µ±×÷Çå³ı¹¦ÄÜ
+                else // é‡å¤è®¾ç½®ä¸ºåŒæ ·åŠŸèƒ½ï¼Œå½“ä½œæ¸…é™¤åŠŸèƒ½
                 {
                         this.textBox_readerBarcode.Text = "";
                         this.textBox_itemBarcode.Text = "";
@@ -716,10 +716,10 @@ namespace dp2Circulation
             }
         }
 
-        // ÖÇÄÜÉèÖÃ¹¦ÄÜÃû¡£
+        // æ™ºèƒ½è®¾ç½®åŠŸèƒ½åã€‚
         // parameters:
-        //      bClearInfoWindow    ÇĞ»»ÖĞÊÇ·ñÇå³ıĞÅÏ¢´°ÄÚÈİ
-        //      bDupAsClear ÊÇ·ñ°ÑÖØ¸´µÄÉèÖÃ¶¯×÷µ±×÷Çå³ıÊäÈëÓòÄÚÈİÀ´Àí½â
+        //      bClearInfoWindow    åˆ‡æ¢ä¸­æ˜¯å¦æ¸…é™¤ä¿¡æ¯çª—å†…å®¹
+        //      bDupAsClear æ˜¯å¦æŠŠé‡å¤çš„è®¾ç½®åŠ¨ä½œå½“ä½œæ¸…é™¤è¾“å…¥åŸŸå†…å®¹æ¥ç†è§£
         void SmartSetFuncState(FuncState value,
             bool bClearInfoWindow,
             bool bDupAsClear)
@@ -736,16 +736,16 @@ namespace dp2Circulation
 
             this.FuncState = value;
 
-            // Çå³ıwebbrowser
+            // æ¸…é™¤webbrowser
             if (bClearInfoWindow == true)
             {
-                SetReaderRenderString("(¿Õ)");
+                SetReaderRenderString("(ç©º)");
 
-                SetBiblioRenderString("(¿Õ)");
-                SetItemRenderString("(¿Õ)");
+                SetBiblioRenderString("(ç©º)");
+                SetItemRenderString("(ç©º)");
             }
 
-            // ÇĞ»»Îª²»Í¬µÄ¹¦ÄÜµÄÊ±ºò£¬¶¨Î»½¹µã
+            // åˆ‡æ¢ä¸ºä¸åŒçš„åŠŸèƒ½çš„æ—¶å€™ï¼Œå®šä½ç„¦ç‚¹
             if (old_funcstate != this.m_funcstate)
             {
                 // 2008/9/26 
@@ -772,7 +772,7 @@ namespace dp2Circulation
                     this.SwitchFocus(ITEM_BARCODE, null);
                 }
             }
-            else // ÖØ¸´ÉèÖÃÎªÍ¬Ñù¹¦ÄÜ£¬µ±×÷Çå³ı¹¦ÄÜ
+            else // é‡å¤è®¾ç½®ä¸ºåŒæ ·åŠŸèƒ½ï¼Œå½“ä½œæ¸…é™¤åŠŸèƒ½
             {
                 // 2008/9/26 
                 if (this.AutoClearTextbox == true)
@@ -812,7 +812,7 @@ namespace dp2Circulation
             }
             set
             {
-                // Çå³ı¼ÇÒäµÄ²áÌõÂëºÅ
+                // æ¸…é™¤è®°å¿†çš„å†Œæ¡ç å·
                 this.m_itemBarcodes.Clear();
 
                 this.m_funcstate = value;
@@ -833,14 +833,14 @@ namespace dp2Circulation
 
                 if (m_funcstate == FuncState.Borrow)
                 {
-                    this.button_itemAction.Text = "½è";
+                    this.button_itemAction.Text = "å€Ÿ";
                     this.toolStripMenuItem_borrow.Checked = true;
                     // this.textBox_readerBarcode.Enabled = true;
                     EnableEdit(READER_BARCODE, true);
                 }
                 if (m_funcstate == FuncState.Return)
                 {
-                    this.button_itemAction.Text = "»¹";
+                    this.button_itemAction.Text = "è¿˜";
                     this.toolStripMenuItem_return.Checked = true;
                     this.textBox_readerBarcode.Text = "";
                     // this.textBox_readerBarcode.Enabled = false;
@@ -848,21 +848,21 @@ namespace dp2Circulation
                 }
                 if (m_funcstate == FuncState.VerifyReturn)
                 {
-                    this.button_itemAction.Text = "ÑéÖ¤»¹";
+                    this.button_itemAction.Text = "éªŒè¯è¿˜";
                     this.toolStripMenuItem_verifyReturn.Checked = true;
                     // this.textBox_readerBarcode.Enabled = true;
                     EnableEdit(READER_BARCODE, true);
                 }
                 if (m_funcstate == FuncState.VerifyRenew)
                 {
-                    this.button_itemAction.Text = "Ğø½è";
+                    this.button_itemAction.Text = "ç»­å€Ÿ";
                     this.toolStripMenuItem_renew.Checked = true;
                     // this.textBox_readerBarcode.Enabled = true;
                     EnableEdit(READER_BARCODE, true);
                 }
                 if (m_funcstate == FuncState.Lost)
                 {
-                    this.button_itemAction.Text = "¶ªÊ§";
+                    this.button_itemAction.Text = "ä¸¢å¤±";
                     this.toolStripMenuItem_lost.Checked = true;
                     // this.textBox_readerBarcode.Enabled = true;
                     EnableEdit(READER_BARCODE, true);
@@ -871,20 +871,20 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public ChargingForm()
         {
             InitializeComponent();
 
-            // ÈÃä¯ÀÀÆ÷¿Ø¼ş¾ß±¸¿ÉÒÔ·Ö±æÊ×´Î·ÇÍ£Ö¹µÄÄÜÁ¦
+            // è®©æµè§ˆå™¨æ§ä»¶å…·å¤‡å¯ä»¥åˆ†è¾¨é¦–æ¬¡éåœæ­¢çš„èƒ½åŠ›
             Global.PrepareStop(this.webBrowser_biblio);
             Global.PrepareStop(this.webBrowser_item);
             Global.PrepareStop(this.webBrowser_reader);
         }
 
         /// <summary>
-        /// µ±Ç°¶ÁÕßÖ¤ÌõÂëºÅ
+        /// å½“å‰è¯»è€…è¯æ¡ç å·
         /// </summary>
         public string CurrentReaderBarcode
         {
@@ -896,25 +896,25 @@ namespace dp2Circulation
             {
                 m_strCurrentBarcode = value;
 
-                // ËÑË÷³ö¼ÇÂ¼£¬ÏÔÊ¾ÔÚ´°¿ÚÖĞ
+                // æœç´¢å‡ºè®°å½•ï¼Œæ˜¾ç¤ºåœ¨çª—å£ä¸­
                 string strError = "";
                 // return:
                 //      -1  error
-                //      0   Ã»ÓĞÕÒµ½
-                //      1   ³É¹¦
-                //      2   ·ÅÆú
+                //      0   æ²¡æœ‰æ‰¾åˆ°
+                //      1   æˆåŠŸ
+                //      2   æ”¾å¼ƒ
                 int nRet = LoadReaderRecord(ref m_strCurrentBarcode,
                     out strError);
                 if (nRet == -1)
                 {
                     SetReaderRenderString(
-                        "×°ÔØ¶ÁÕß¼ÇÂ¼·¢Éú´íÎó: " + strError);
+                        "è£…è½½è¯»è€…è®°å½•å‘ç”Ÿé”™è¯¯: " + strError);
                 }
             }
         }
 
         /// <summary>
-        /// ÖØĞÂ×°ÔØ¶ÁÕß¼ÇÂ¼
+        /// é‡æ–°è£…è½½è¯»è€…è®°å½•
         /// </summary>
         public void Reload()
         {
@@ -927,19 +927,19 @@ namespace dp2Circulation
                 return;
 
 
-            // ËÑË÷³ö¼ÇÂ¼£¬ÏÔÊ¾ÔÚ´°¿ÚÖĞ
+            // æœç´¢å‡ºè®°å½•ï¼Œæ˜¾ç¤ºåœ¨çª—å£ä¸­
             string strError = "";
             // return:
             //      -1  error
-            //      0   Ã»ÓĞÕÒµ½
-            //      1   ³É¹¦
-            //      2   ·ÅÆú
+            //      0   æ²¡æœ‰æ‰¾åˆ°
+            //      1   æˆåŠŸ
+            //      2   æ”¾å¼ƒ
             int nRet = LoadReaderRecord(ref strBarcode,
                 out strError);
             if (nRet == -1)
             {
                 SetReaderRenderString(
-                    "×°ÔØ¶ÁÕß¼ÇÂ¼·¢Éú´íÎó: " + strError);
+                    "è£…è½½è¯»è€…è®°å½•å‘ç”Ÿé”™è¯¯: " + strError);
             }
 
             if (strBarcode != this.textBox_readerBarcode.Text)
@@ -957,7 +957,7 @@ namespace dp2Circulation
             {
                 m_webExternalHost_readerInfo.StopPrevious();
 
-                if (strText == "(¿Õ)")
+                if (strText == "(ç©º)")
                 {
                     Global.ClearHtmlPage(this.webBrowser_reader,
                         this.MainForm.DataDir);
@@ -987,7 +987,7 @@ namespace dp2Circulation
                 // 2011/12/6
                 this.m_webExternalHost_itemInfo.StopPrevious();
 
-                if (strText == "(¿Õ)")
+                if (strText == "(ç©º)")
                 {
                     Global.ClearHtmlPage(this.webBrowser_item,
                         this.MainForm.DataDir);
@@ -1017,7 +1017,7 @@ namespace dp2Circulation
                 this.m_webExternalHost_biblioInfo.StopPrevious();
                 this.webBrowser_biblio.Stop();
 
-                if (strText == "(¿Õ)")
+                if (strText == "(ç©º)")
                 {
                     Global.ClearHtmlPage(this.webBrowser_biblio,
                         this.MainForm.DataDir);
@@ -1037,7 +1037,7 @@ namespace dp2Circulation
             }
         }
 
-        // ½«×Ö·û´®ÖĞµÄºê %datadir% Ìæ»»ÎªÊµ¼ÊµÄÖµ
+        // å°†å­—ç¬¦ä¸²ä¸­çš„å® %datadir% æ›¿æ¢ä¸ºå®é™…çš„å€¼
         string ReplaceMacro(string strText)
         {
             strText = strText.Replace("%mappeddir%", PathUtil.MergePath(this.MainForm.DataDir, "servermapped"));
@@ -1045,7 +1045,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÊÇ·ñ ÀÊ¶Á¶ÁÕßĞÕÃû£¬µ±×°ÔØ¶ÁÕß¼ÇÂ¼µÄÊ±ºò¡£È±Ê¡Îª false
+        /// æ˜¯å¦ æœ—è¯»è¯»è€…å§“åï¼Œå½“è£…è½½è¯»è€…è®°å½•çš„æ—¶å€™ã€‚ç¼ºçœä¸º false
         /// </summary>
         public bool VoiceName
         {
@@ -1058,8 +1058,8 @@ namespace dp2Circulation
             }
         }
 
-        // »ñµÃ¿ÉÒÔ·¢ËÍ¸ø·şÎñÆ÷µÄÖ¤ÌõÂëºÅ×Ö·û´®
-        // È¥µôÇ°ÃæµÄ ~
+        // è·å¾—å¯ä»¥å‘é€ç»™æœåŠ¡å™¨çš„è¯æ¡ç å·å­—ç¬¦ä¸²
+        // å»æ‰å‰é¢çš„ ~
         static string GetRequestPatronBarcode(string strText)
         {
             if (string.IsNullOrEmpty(strText) == true)
@@ -1070,17 +1070,17 @@ namespace dp2Circulation
             return strText;
         }
 
-        // ×°Èë¶ÁÕß¼ÇÂ¼
+        // è£…å…¥è¯»è€…è®°å½•
         // return:
         //      -1  error
-        //      0   Ã»ÓĞÕÒµ½
-        //      1   ³É¹¦
-        //      2   ·ÅÆú
+        //      0   æ²¡æœ‰æ‰¾åˆ°
+        //      1   æˆåŠŸ
+        //      2   æ”¾å¼ƒ
         int LoadReaderRecord(ref string strBarcode,
             out string strError)
         {
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ³õÊ¼»¯ä¯ÀÀÆ÷×é¼ş ...");
+            stop.Initial("æ­£åœ¨åˆå§‹åŒ–æµè§ˆå™¨ç»„ä»¶ ...");
             stop.BeginLoop();
 
             this.Update();
@@ -1091,17 +1091,17 @@ namespace dp2Circulation
             try
             {
 
-                SetReaderRenderString("(¿Õ)");
+                SetReaderRenderString("(ç©º)");
 
-                SetBiblioRenderString("(¿Õ)");
-                SetItemRenderString("(¿Õ)");
+                SetBiblioRenderString("(ç©º)");
+                SetItemRenderString("(ç©º)");
 
                 string strStyle = this.PatronRenderFormat;
 
                 if (this.VoiceName == true)
                     strStyle += ",summary";
 
-                stop.SetMessage("ÕıÔÚ×°Èë¶ÁÕß¼ÇÂ¼ " + strBarcode + " ...");
+                stop.SetMessage("æ­£åœ¨è£…å…¥è¯»è€…è®°å½• " + strBarcode + " ...");
 
                 string[] results = null;
                 byte [] baTimestamp = null;
@@ -1117,9 +1117,9 @@ namespace dp2Circulation
                 if (lRet == 0)
                 {
                     if (StringUtil.IsIdcardNumber(strBarcode) == true)
-                        SetReaderRenderString("Ö¤ÌõÂëºÅ(»òÉí·İÖ¤ºÅ)Îª '" + strBarcode + "' µÄ¶ÁÕß¼ÇÂ¼Ã»ÓĞÕÒµ½ ...");
+                        SetReaderRenderString("è¯æ¡ç å·(æˆ–èº«ä»½è¯å·)ä¸º '" + strBarcode + "' çš„è¯»è€…è®°å½•æ²¡æœ‰æ‰¾åˆ° ...");
                     else
-                        SetReaderRenderString("Ö¤ÌõÂëºÅÎª '" + strBarcode + "' µÄ¶ÁÕß¼ÇÂ¼Ã»ÓĞÕÒµ½ ...");
+                        SetReaderRenderString("è¯æ¡ç å·ä¸º '" + strBarcode + "' çš„è¯»è€…è®°å½•æ²¡æœ‰æ‰¾åˆ° ...");
                     return 0;   // not found
                 }
                 if (lRet == -1)
@@ -1127,7 +1127,7 @@ namespace dp2Circulation
 
                 if (results == null || results.Length == 0)
                 {
-                    strError = "·µ»ØµÄresults²»Õı³£¡£";
+                    strError = "è¿”å›çš„resultsä¸æ­£å¸¸ã€‚";
                     goto ERROR1;
                 }
                 string strResult = "";
@@ -1137,7 +1137,7 @@ namespace dp2Circulation
                 if (lRet > 1)
                 {
                     /*
-                    strError = "¶ÁÕßÖ¤ÌõÂëºÅ '" + strBarcode + "' ÃüÖĞ " + lRet.ToString() + " Ìõ¶ÁÕß¼ÇÂ¼¡£ÕâÊÇÒ»¸öÑÏÖØ´íÎó£¬ÇëÏµÍ³¹ÜÀíÔ±¾¡¿ìÅÅ³ı¡£\r\n\r\n(µ±Ç°´°¿ÚÖĞÏÔÊ¾µÄÊÇÆäÖĞµÄµÚÒ»¸ö¼ÇÂ¼)";
+                    strError = "è¯»è€…è¯æ¡ç å· '" + strBarcode + "' å‘½ä¸­ " + lRet.ToString() + " æ¡è¯»è€…è®°å½•ã€‚è¿™æ˜¯ä¸€ä¸ªä¸¥é‡é”™è¯¯ï¼Œè¯·ç³»ç»Ÿç®¡ç†å‘˜å°½å¿«æ’é™¤ã€‚\r\n\r\n(å½“å‰çª—å£ä¸­æ˜¾ç¤ºçš„æ˜¯å…¶ä¸­çš„ç¬¬ä¸€ä¸ªè®°å½•)";
                     goto ERROR1;
                      * */
                     SelectPatronDialog dlg = new SelectPatronDialog();
@@ -1152,11 +1152,11 @@ namespace dp2Circulation
                         this.Channel,
                         this.stop,
                         StringUtil.SplitList(strRecPath),
-                        "ÇëÑ¡ÔñÒ»¸ö¶ÁÕß¼ÇÂ¼",
+                        "è¯·é€‰æ‹©ä¸€ä¸ªè¯»è€…è®°å½•",
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
-                    // TODO: ±£´æ´°¿ÚÄÚµÄ³ß´ç×´Ì¬
+                    // TODO: ä¿å­˜çª—å£å†…çš„å°ºå¯¸çŠ¶æ€
                     this.MainForm.AppInfo.LinkFormState(dlg, "ChargingForm_SelectPatronDialog_state");
                     dlg.ShowDialog(this);
                     this.MainForm.AppInfo.UnlinkFormState(dlg);
@@ -1192,17 +1192,17 @@ namespace dp2Circulation
             return -1;
         }
 
-        // ×°Èë²á¼ÇÂ¼
+        // è£…å…¥å†Œè®°å½•
         // parameters:
-        //      strBarcode  ²áÌõÂëºÅ¡£¿ÉÒÔÎª"@path:"Òıµ¼£¬±íÊ¾Ê¹ÓÃ¼ÇÂ¼Â·¾¶
+        //      strBarcode  å†Œæ¡ç å·ã€‚å¯ä»¥ä¸º"@path:"å¼•å¯¼ï¼Œè¡¨ç¤ºä½¿ç”¨è®°å½•è·¯å¾„
         int LoadItemAndBiblioRecord(string strBarcode,
             out string strError)
         {
-            SetBiblioRenderString("(¿Õ)");
-            SetItemRenderString("(¿Õ)");
+            SetBiblioRenderString("(ç©º)");
+            SetItemRenderString("(ç©º)");
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ×°Èë²á¼ÇÂ¼ " + strBarcode + " ...");
+            stop.Initial("æ­£åœ¨è£…å…¥å†Œè®°å½• " + strBarcode + " ...");
             stop.BeginLoop();
 
             try
@@ -1241,10 +1241,10 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ´Óä¯ÀÀÆ÷¿Ø¼şÖĞ»ñµÃ HTML ×Ö·û´®
+        /// ä»æµè§ˆå™¨æ§ä»¶ä¸­è·å¾— HTML å­—ç¬¦ä¸²
         /// </summary>
-        /// <param name="webBrowser">ä¯ÀÀÆ÷¿Ø¼ş</param>
-        /// <returns>HTML ×Ö·û´®</returns>
+        /// <param name="webBrowser">æµè§ˆå™¨æ§ä»¶</param>
+        /// <returns>HTML å­—ç¬¦ä¸²</returns>
         public static string GetHtmlString(WebBrowser webBrowser)
         {
             HtmlDocument doc = webBrowser.Document;
@@ -1313,8 +1313,8 @@ namespace dp2Circulation
             this.commander.AddMessage(WM_LOAD_READER);
         }
 
-        // ÊÇ·ñÎªĞÕÃû
-        // °üº¬Ò»¸öÒÔÉÏºº×Ö£¬»òÕß ~ ¿ªÍ·µÄÈÎÒâÎÄ×Ö
+        // æ˜¯å¦ä¸ºå§“å
+        // åŒ…å«ä¸€ä¸ªä»¥ä¸Šæ±‰å­—ï¼Œæˆ–è€… ~ å¼€å¤´çš„ä»»æ„æ–‡å­—
         static bool IsName(string strText)
         {
             if (StringUtil.ContainHanzi(strText) == true)
@@ -1324,7 +1324,7 @@ namespace dp2Circulation
             return false;
         }
         /// <summary>
-        /// ×°ÔØ¶ÁÕß¼ÇÂ¼
+        /// è£…è½½è¯»è€…è®°å½•
         /// </summary>
         public void DoLoadReader()
         {
@@ -1343,7 +1343,7 @@ namespace dp2Circulation
 
             if (this.textBox_readerBarcode.Text == "")
             {
-                strError = "ÉĞÎ´ÊäÈë¶ÁÕßÖ¤ÌõÂëºÅ";
+                strError = "å°šæœªè¾“å…¥è¯»è€…è¯æ¡ç å·";
                 goto ERROR1;
             }
 
@@ -1352,7 +1352,7 @@ namespace dp2Circulation
 
             this.ActiveReaderBarcode = this.textBox_readerBarcode.Text;
 
-            // Çå³ı¼ÇÒäµÄ²áÌõÂëºÅ
+            // æ¸…é™¤è®°å¿†çš„å†Œæ¡ç å·
             Debug.Assert(this.m_itemBarcodes != null, "this.m_itemBarcodes == null");
             this.m_itemBarcodes.Clear();
 
@@ -1360,13 +1360,13 @@ namespace dp2Circulation
                 && StringUtil.IsIdcardNumber(this.textBox_readerBarcode.Text) == false
                 && IsName(this.textBox_readerBarcode.Text) == false)
             {
-                // ĞÎÊ½Ğ£ÑéÌõÂëºÅ
+                // å½¢å¼æ ¡éªŒæ¡ç å·
                 // return:
-                //      -2  ·şÎñÆ÷Ã»ÓĞÅäÖÃĞ£Ñé·½·¨£¬ÎŞ·¨Ğ£Ñé
+                //      -2  æœåŠ¡å™¨æ²¡æœ‰é…ç½®æ ¡éªŒæ–¹æ³•ï¼Œæ— æ³•æ ¡éªŒ
                 //      -1  error
-                //      0   ²»ÊÇºÏ·¨µÄÌõÂëºÅ
-                //      1   ÊÇºÏ·¨µÄ¶ÁÕßÖ¤ÌõÂëºÅ
-                //      2   ÊÇºÏ·¨µÄ²áÌõÂëºÅ
+                //      0   ä¸æ˜¯åˆæ³•çš„æ¡ç å·
+                //      1   æ˜¯åˆæ³•çš„è¯»è€…è¯æ¡ç å·
+                //      2   æ˜¯åˆæ³•çš„å†Œæ¡ç å·
                 nRet = VerifyBarcode(
                     this.Channel.LibraryCodeList,
                     this.textBox_readerBarcode.Text,
@@ -1374,37 +1374,37 @@ namespace dp2Circulation
                 if (nRet == -1)
                     goto ERROR1;
 
-                // ÊäÈëµÄÌõÂë¸ñÊ½²»ºÏ·¨
+                // è¾“å…¥çš„æ¡ç æ ¼å¼ä¸åˆæ³•
                 if (nRet == 0)
                 {
                     string strFastInputText = ChargingInfoDlg.Show(
                         this.CharingInfoHost,
-                        "ÄúÊäÈëµÄÌõÂë " + this.textBox_readerBarcode.Text + " ¸ñÊ½²»ÕıÈ·(" + strError + ")¡£ÇëÖØĞÂÊäÈë¡£",
+                        "æ‚¨è¾“å…¥çš„æ¡ç  " + this.textBox_readerBarcode.Text + " æ ¼å¼ä¸æ­£ç¡®(" + strError + ")ã€‚è¯·é‡æ–°è¾“å…¥ã€‚",
                         InfoColor.Red,
-                        "×°ÔØ¶ÁÕß¼ÇÂ¼",
+                        "è£…è½½è¯»è€…è®°å½•",
                         this.InfoDlgOpacity,
                         this.MainForm.DefaultFont);
                     this.SwitchFocus(READER_BARCODE, strFastInputText);
                     return;
                 }
 
-                // Êµ¼ÊÊäÈëµÄÊÇ²áÌõÂëºÅ
+                // å®é™…è¾“å…¥çš„æ˜¯å†Œæ¡ç å·
                 if (nRet == 2)
                 {
                     string strFastInputText = ChargingInfoDlg.Show(
                         this.CharingInfoHost,
-                        "ÄúÊäÈëµÄÌõÂëºÅ " + this.textBox_readerBarcode.Text + " ÊÇ²áÌõÂëºÅ¡£ÇëÊäÈë¶ÁÕßÖ¤ÌõÂëºÅ¡£",
+                        "æ‚¨è¾“å…¥çš„æ¡ç å· " + this.textBox_readerBarcode.Text + " æ˜¯å†Œæ¡ç å·ã€‚è¯·è¾“å…¥è¯»è€…è¯æ¡ç å·ã€‚",
                         InfoColor.Red,
-                        "×°ÔØ¶ÁÕß¼ÇÂ¼",
+                        "è£…è½½è¯»è€…è®°å½•",
                         this.InfoDlgOpacity,
                         this.MainForm.DefaultFont);
                     this.SwitchFocus(READER_BARCODE, strFastInputText);
                     return;
                 }
 
-                // ¶ÔÓÚ·şÎñÆ÷Ã»ÓĞÅäÖÃĞ£Ñé¹¦ÄÜ£¬µ«ÊÇÇ°¶Ë·¢³öÁËĞ£ÑéÒªÇóµÄÇé¿ö£¬¾¯¸æÒ»ÏÂ
+                // å¯¹äºæœåŠ¡å™¨æ²¡æœ‰é…ç½®æ ¡éªŒåŠŸèƒ½ï¼Œä½†æ˜¯å‰ç«¯å‘å‡ºäº†æ ¡éªŒè¦æ±‚çš„æƒ…å†µï¼Œè­¦å‘Šä¸€ä¸‹
                 if (nRet == -2)
-                    MessageBox.Show(this, "¾¯¸æ£ºÇ°¶Ë¿ªÆôÁËĞ£ÑéÌõÂë¹¦ÄÜ£¬µ«ÊÇ·şÎñÆ÷¶ËÈ±·¦ÏàÓ¦µÄ½Å±¾º¯Êı£¬ÎŞ·¨Ğ£ÑéÌõÂë¡£\r\n\r\nÈôÒª±ÜÃâ³öÏÖ´Ë¾¯¸æ¶Ô»°¿ò£¬Çë¹Ø±ÕÇ°¶ËĞ£Ñé¹¦ÄÜ");
+                    MessageBox.Show(this, "è­¦å‘Šï¼šå‰ç«¯å¼€å¯äº†æ ¡éªŒæ¡ç åŠŸèƒ½ï¼Œä½†æ˜¯æœåŠ¡å™¨ç«¯ç¼ºä¹ç›¸åº”çš„è„šæœ¬å‡½æ•°ï¼Œæ— æ³•æ ¡éªŒæ¡ç ã€‚\r\n\r\nè‹¥è¦é¿å…å‡ºç°æ­¤è­¦å‘Šå¯¹è¯æ¡†ï¼Œè¯·å…³é—­å‰ç«¯æ ¡éªŒåŠŸèƒ½");
             }
 
             // this.oneReaderItemBarcodes.Clear();
@@ -1412,12 +1412,12 @@ namespace dp2Circulation
 
             this.m_strCurrentBarcode = this.textBox_readerBarcode.Text;
 
-            // ËÑË÷³ö¼ÇÂ¼£¬ÏÔÊ¾ÔÚ´°¿ÚÖĞ
+            // æœç´¢å‡ºè®°å½•ï¼Œæ˜¾ç¤ºåœ¨çª—å£ä¸­
             // return:
             //      -1  error
-            //      0   Ã»ÓĞÕÒµ½
-            //      1   ³É¹¦
-            //      2   ·ÅÆú
+            //      0   æ²¡æœ‰æ‰¾åˆ°
+            //      1   æˆåŠŸ
+            //      2   æ”¾å¼ƒ
             nRet = LoadReaderRecord(ref m_strCurrentBarcode,
                 out strError);
             if (this.m_strCurrentBarcode != this.textBox_readerBarcode.Text)
@@ -1432,14 +1432,14 @@ namespace dp2Circulation
                     this.CharingInfoHost,
                     strError,
                     InfoColor.Red,
-                    "×°ÔØ¶ÁÕß¼ÇÂ¼",
+                    "è£…è½½è¯»è€…è®°å½•",
                     this.InfoDlgOpacity,
                     this.MainForm.DefaultFont);
                 /*
                 SetReaderRenderString(this.webBrowser_reader,
-                    "×°ÔØ¶ÁÕß¼ÇÂ¼·¢Éú´íÎó: " + strError);
+                    "è£…è½½è¯»è€…è®°å½•å‘ç”Ÿé”™è¯¯: " + strError);
                  * */
-                // ÊäÈë½¹µãÈÔÈ»»Øµ½¶ÁÕßÖ¤ÌõÂëºÅÊäÈëÓò
+                // è¾“å…¥ç„¦ç‚¹ä»ç„¶å›åˆ°è¯»è€…è¯æ¡ç å·è¾“å…¥åŸŸ
                 /*
                 this.textBox_readerBarcode.SelectAll();
                 this.textBox_readerBarcode.Focus();
@@ -1449,18 +1449,18 @@ namespace dp2Circulation
             else if (nRet == 0)
             {
                 if (this.Channel.ErrorCode == ErrorCode.IdcardNumberNotFound)
-                    strError = "¶ÁÕßÉí·İÖ¤ºÅ(»òÖ¤ÌõÂëºÅ) " + this.textBox_readerBarcode.Text + " ²»´æÔÚ¡£\r\n\r\nÈç¹ûÊÇÊ¹ÓÃÉí·İÖ¤µÚÒ»´Î½èÊé£¬ÇëÏÈÓÃÉí·İÖ¤¿ìËÙ´´½¨¶ÁÕß¼ÇÂ¼";
+                    strError = "è¯»è€…èº«ä»½è¯å·(æˆ–è¯æ¡ç å·) " + this.textBox_readerBarcode.Text + " ä¸å­˜åœ¨ã€‚\r\n\r\nå¦‚æœæ˜¯ä½¿ç”¨èº«ä»½è¯ç¬¬ä¸€æ¬¡å€Ÿä¹¦ï¼Œè¯·å…ˆç”¨èº«ä»½è¯å¿«é€Ÿåˆ›å»ºè¯»è€…è®°å½•";
                 else
-                    strError = "¶ÁÕßÖ¤ÌõÂëºÅ " + this.textBox_readerBarcode.Text + " ²»´æÔÚ¡£";
+                    strError = "è¯»è€…è¯æ¡ç å· " + this.textBox_readerBarcode.Text + " ä¸å­˜åœ¨ã€‚";
                 string strFastInputText = ChargingInfoDlg.Show(
                         this.CharingInfoHost,
                         strError,
                         InfoColor.Red,
-                        "×°ÔØ¶ÁÕß¼ÇÂ¼",
+                        "è£…è½½è¯»è€…è®°å½•",
                         this.InfoDlgOpacity,
                         this.MainForm.DefaultFont);
 
-                // ÊäÈë½¹µãÈÔÈ»»Øµ½¶ÁÕßÖ¤ÌõÂëºÅÊäÈëÓò
+                // è¾“å…¥ç„¦ç‚¹ä»ç„¶å›åˆ°è¯»è€…è¯æ¡ç å·è¾“å…¥åŸŸ
                 /*
                 this.textBox_readerBarcode.SelectAll();
                 this.textBox_readerBarcode.Focus();
@@ -1469,13 +1469,13 @@ namespace dp2Circulation
             }
             else if (nRet == 2)
             {
-                // ·ÅÆú×°Èë 
+                // æ”¾å¼ƒè£…å…¥ 
                 return;
             }
             else
             {
                 Debug.Assert(nRet == 1, "");
-                // ×ªÒÆÊäÈë½¹µã
+                // è½¬ç§»è¾“å…¥ç„¦ç‚¹
                 /*
                 if (this.textBox_readerPassword.Enabled == true)
                 {
@@ -1500,7 +1500,7 @@ namespace dp2Circulation
 
                 Debug.Assert(this.MainForm.OperHistory != null, "this.MainForm.OperHistory == null");
 
-                // ´¥·¢²Ù×÷ÀúÊ·¶¯×÷
+                // è§¦å‘æ“ä½œå†å²åŠ¨ä½œ
                 this.MainForm.OperHistory.ReaderBarcodeScaned(
                     this.textBox_readerBarcode.Text);
             }
@@ -1516,19 +1516,19 @@ namespace dp2Circulation
 
         // 
         /// <summary>
-        /// ´òÓ¡½è»¹Æ¾Ìõ
+        /// æ‰“å°å€Ÿè¿˜å‡­æ¡
         /// </summary>
         public void Print()
         {
-            // ´¥·¢ÀúÊ·¶¯×÷
+            // è§¦å‘å†å²åŠ¨ä½œ
             this.MainForm.OperHistory.Print();
         }
 
         /*
-        // ²âÊÔ´òÓ¡½è»¹Æ¾Ìõ
+        // æµ‹è¯•æ‰“å°å€Ÿè¿˜å‡­æ¡
         public void TestPrint()
         {
-            // ´¥·¢ÀúÊ·¶¯×÷
+            // è§¦å‘å†å²åŠ¨ä½œ
             this.MainForm.OperHistory.TestPrint();
         }*/
 
@@ -1542,22 +1542,22 @@ namespace dp2Circulation
         void SwitchFocus(int target,
             string strFastInput)
         {
-            // Ìá·ÀhashtableÔ½À´Ô½´ó
+            // æé˜²hashtableè¶Šæ¥è¶Šå¤§
             if (this.m_textTable.Count > 5)
             {
                 Debug.Assert(false, "");
                 this.m_textTable.Clear();
             }
 
-            int nNumber = -1;   // -1±íÊ¾²»ĞèÒª´«µİ×Ö·û´®²ÎÊı
+            int nNumber = -1;   // -1è¡¨ç¤ºä¸éœ€è¦ä¼ é€’å­—ç¬¦ä¸²å‚æ•°
 
-            // Èç¹ûĞèÒª´«µİ×Ö·û´®²ÎÊı
+            // å¦‚æœéœ€è¦ä¼ é€’å­—ç¬¦ä¸²å‚æ•°
             if (String.IsNullOrEmpty(strFastInput) == false)
             {
                 string strNumber = this.m_nTextNumber.ToString();
                 nNumber = this.m_nTextNumber;
                 this.m_nTextNumber++;
-                if (this.m_nTextNumber == -1)   // ±Ü¿ª-1
+                if (this.m_nTextNumber == -1)   // é¿å¼€-1
                     this.m_nTextNumber++;
 
                 this.m_textTable[strNumber] = strFastInput;
@@ -1568,9 +1568,9 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// È±Ê¡´°¿Ú¹ı³Ì
+        /// ç¼ºçœçª—å£è¿‡ç¨‹
         /// </summary>
-        /// <param name="m">ÏûÏ¢</param>
+        /// <param name="m">æ¶ˆæ¯</param>
         protected override void DefWndProc(ref Message m)
         {
             switch (m.Msg)
@@ -1757,12 +1757,12 @@ namespace dp2Circulation
 
         //
         /// <summary>
-        ///  Çå³ıÊéÄ¿ºÍÊµÌåÁ½¸öä¯ÀÀÆ÷¿Ø¼şÖĞµÄÄÚÈİ
+        ///  æ¸…é™¤ä¹¦ç›®å’Œå®ä½“ä¸¤ä¸ªæµè§ˆå™¨æ§ä»¶ä¸­çš„å†…å®¹
         /// </summary>
         public void ClearItemAndBiblioControl()
         {
-            SetBiblioRenderString("(¿Õ)");
-            SetItemRenderString("(¿Õ)");
+            SetBiblioRenderString("(ç©º)");
+            SetItemRenderString("(ç©º)");
         }
 
 #if NOOOOOOOOOOO
@@ -1772,7 +1772,7 @@ namespace dp2Circulation
             {
                 /*
                 if (this.m_webExternalHost.IsInLoop == false)
-                    return; // Èç¹û²»ÔÚÑ­»·ÖĞ£¬Ôò¼ÌĞøÓÃÕâ¸ö¶ÔÏó
+                    return; // å¦‚æœä¸åœ¨å¾ªç¯ä¸­ï¼Œåˆ™ç»§ç»­ç”¨è¿™ä¸ªå¯¹è±¡
                  * */
 
                 this.m_webExternalHost.Destroy();
@@ -1811,8 +1811,8 @@ namespace dp2Circulation
 
         // return:
         //      -1  error
-        //      0   ·ÅÆú
-        //      1   ³É¹¦
+        //      0   æ”¾å¼ƒ
+        //      1   æˆåŠŸ
         internal int SelectOneItem(
             FuncState func,
             string strText,
@@ -1832,7 +1832,7 @@ namespace dp2Circulation
                 args[3] = strError;
                 int result = (int)this.Invoke(d, args);
 
-                // È¡³öout²ÎÊıÖµ
+                // å–å‡ºoutå‚æ•°å€¼
                 strItemBarcode = (string)args[2];
                 strError = (string)args[3];
                 return result;
@@ -1845,23 +1845,23 @@ namespace dp2Circulation
                 || func == dp2Circulation.FuncState.ContinueBorrow)
             {
                 dlg.FunctionType = "borrow";
-                dlg.Text = "ÇëÑ¡ÔñÒª½èÔÄµÄ²á";
+                dlg.Text = "è¯·é€‰æ‹©è¦å€Ÿé˜…çš„å†Œ";
             }
             else if (func == dp2Circulation.FuncState.VerifyRenew)
             {
                 dlg.FunctionType = "renew";
-                dlg.Text = "ÇëÑ¡ÔñÒªĞø½èµÄ²á";
+                dlg.Text = "è¯·é€‰æ‹©è¦ç»­å€Ÿçš„å†Œ";
             }
             else if (func == dp2Circulation.FuncState.Return || func == dp2Circulation.FuncState.Lost)
             {
                 dlg.FunctionType = "return";
-                dlg.Text = "ÇëÑ¡ÔñÒª»¹»ØµÄ²á";
+                dlg.Text = "è¯·é€‰æ‹©è¦è¿˜å›çš„å†Œ";
             }
             else if (func == dp2Circulation.FuncState.VerifyReturn || func == dp2Circulation.FuncState.VerifyLost)
             {
                 dlg.FunctionType = "return";
                 dlg.VerifyBorrower = this.textBox_readerBarcode.Text;
-                dlg.Text = "ÇëÑ¡ÔñÒª(ÑéÖ¤)»¹»ØµÄ²á";
+                dlg.Text = "è¯·é€‰æ‹©è¦(éªŒè¯)è¿˜å›çš„å†Œ";
             }
 
             dlg.AutoOperSingleItem = this.AutoOperSingleItem;
@@ -1875,7 +1875,7 @@ namespace dp2Circulation
         "SelectItemDialog_uiState",
         "");
 
-            // TODO: ±£´æ´°¿ÚÄÚµÄ³ß´ç×´Ì¬
+            // TODO: ä¿å­˜çª—å£å†…çš„å°ºå¯¸çŠ¶æ€
             this.MainForm.AppInfo.LinkFormState(dlg, "ChargingForm_SelectItemDialog_state");
             dlg.ShowDialog(this);
             this.MainForm.AppInfo.UnlinkFormState(dlg);
@@ -1895,9 +1895,9 @@ dlg.UiState);
 
 
         /// <summary>
-        /// Ö´ĞĞ¶¯×÷°´Å¥´ú±íµÄ¶¯×÷
+        /// æ‰§è¡ŒåŠ¨ä½œæŒ‰é’®ä»£è¡¨çš„åŠ¨ä½œ
         /// </summary>
-        /// <returns>-1: ³ö´í; 0: ¹¦ÄÜÃ»ÓĞÖ´ĞĞ; 1: ¹¦ÄÜÒÑ¾­Ö´ĞĞ</returns>
+        /// <returns>-1: å‡ºé”™; 0: åŠŸèƒ½æ²¡æœ‰æ‰§è¡Œ; 1: åŠŸèƒ½å·²ç»æ‰§è¡Œ</returns>
         public int DoItemAction()
         {
             string strError = "";
@@ -1906,10 +1906,10 @@ dlg.UiState);
             DateTime start_time = DateTime.Now;
 
 #if NO
-            // Èç¹û²áÌõÂëºÅÎª¿Õ£¬ÔÚÕâÀï»Ø³µ¿ÉÒÔ±»µ±×÷ÇĞ»»µ½¶ÁÕßÖ¤ÌõÂëºÅÊäÈëÓò£¿
+            // å¦‚æœå†Œæ¡ç å·ä¸ºç©ºï¼Œåœ¨è¿™é‡Œå›è½¦å¯ä»¥è¢«å½“ä½œåˆ‡æ¢åˆ°è¯»è€…è¯æ¡ç å·è¾“å…¥åŸŸï¼Ÿ
             if (this.textBox_itemBarcode.Text == "")
             {
-                MessageBox.Show(this, "ÉĞÎ´ÊäÈë²áÌõÂëºÅ");
+                MessageBox.Show(this, "å°šæœªè¾“å…¥å†Œæ¡ç å·");
                 this.SwitchFocus(ITEM_BARCODE, null);
                 return -1;
             }
@@ -1925,25 +1925,25 @@ dlg.UiState);
             if (this.DoubleItemInputAsEnd == true)
             {
 
-                // È¡³öÉÏ´ÎÊäÈëµÄ×îºóÒ»¸öÌõÂë£¬ºÍÄ¿Ç°ÊäÈëµÄÌõÂë±È½Ï£¬¿´ÊÇ·ñÒ»Ñù¡£
+                // å–å‡ºä¸Šæ¬¡è¾“å…¥çš„æœ€åä¸€ä¸ªæ¡ç ï¼Œå’Œç›®å‰è¾“å…¥çš„æ¡ç æ¯”è¾ƒï¼Œçœ‹æ˜¯å¦ä¸€æ ·ã€‚
                 if (this.m_itemBarcodes.Count > 0)
                 {
                     string strLastItemBarcode = this.m_itemBarcodes[m_itemBarcodes.Count - 1].Barcode;
                     TimeSpan delta = DateTime.Now - this.m_itemBarcodes[m_itemBarcodes.Count - 1].Time;
                     // MessageBox.Show(this, delta.TotalMilliseconds.ToString());
                     if (strLastItemBarcode == this.textBox_itemBarcode.Text
-                        && delta.TotalMilliseconds < 5000) // 5ÃëÒÔÄÚ
+                        && delta.TotalMilliseconds < 5000) // 5ç§’ä»¥å†…
                     {
-                        // Çå³ı²áÌõÂëºÅÊäÈëÓò
+                        // æ¸…é™¤å†Œæ¡ç å·è¾“å…¥åŸŸ
                         this.textBox_itemBarcode.Text = "";
 
-                        // Èç¹ûµ±Ç°ÔÚ¡°»¹¡±×´Ì¬£¬ĞèÒªĞŞ¸ÄÎª¡°ÑéÖ¤»¹¡±£¬±ÜÃâ¶ÁÕßÖ¤ÌõÂëºÅÊäÈëÓòÎªdiable¶øÎŞ·¨ÇĞ»»½¹µã¹ıÈ¥
+                        // å¦‚æœå½“å‰åœ¨â€œè¿˜â€çŠ¶æ€ï¼Œéœ€è¦ä¿®æ”¹ä¸ºâ€œéªŒè¯è¿˜â€ï¼Œé¿å…è¯»è€…è¯æ¡ç å·è¾“å…¥åŸŸä¸ºdiableè€Œæ— æ³•åˆ‡æ¢ç„¦ç‚¹è¿‡å»
                         if (this.FuncState == FuncState.Return)
                             this.FuncState = FuncState.VerifyReturn;
 
 
-                        // Çå³ı¶ÁÕßÖ¤ÌõÂëºÅÊäÈëÓò
-                        this.textBox_readerBarcode.Text = "ÇëÊäÈëÏÂÒ»¸ö¶ÁÕßµÄÖ¤ÌõÂëºÅ...";
+                        // æ¸…é™¤è¯»è€…è¯æ¡ç å·è¾“å…¥åŸŸ
+                        this.textBox_readerBarcode.Text = "è¯·è¾“å…¥ä¸‹ä¸€ä¸ªè¯»è€…çš„è¯æ¡ç å·...";
                         this.SwitchFocus(READER_BARCODE, null);
                         return 0;
                     }
@@ -1954,7 +1954,7 @@ dlg.UiState);
 
 
                 this.m_itemBarcodes.Add(barcodetime);
-                // ½ö½ö±£³ÖÒ»¸öÌõÂë¾Í¿ÉÒÔÁË
+                // ä»…ä»…ä¿æŒä¸€ä¸ªæ¡ç å°±å¯ä»¥äº†
                 while (this.m_itemBarcodes.Count > 1)
                     this.m_itemBarcodes.RemoveAt(0);
             }
@@ -1969,24 +1969,24 @@ dlg.UiState);
                 string strItemBarcode = "";
                 // return:
                 //      -1  error
-                //      0   ·ÅÆú
-                //      1   ³É¹¦
+                //      0   æ”¾å¼ƒ
+                //      1   æˆåŠŸ
                 nRet = SelectOneItem(this.FuncState,
                     strTemp.ToLower() == "?b" ? "" : strTemp,
                     out strItemBarcode,
                     out strError);
                 if (nRet == -1)
                 {
-                    strError = "Ñ¡Ôñ²á¼ÇÂ¼µÄ¹ı³ÌÖĞ³ö´í: " + strError;
+                    strError = "é€‰æ‹©å†Œè®°å½•çš„è¿‡ç¨‹ä¸­å‡ºé”™: " + strError;
                     goto ERROR1;
                 }
                 if (nRet == 0)
                 {
                     strFastInputText = ChargingInfoDlg.Show(
                         this.CharingInfoHost,
-                        "ÒÑÈ¡ÏûÑ¡Ôñ²á¼ÇÂ¼¡£×¢Òâ²Ù×÷²¢Î´Ö´ĞĞ",
+                        "å·²å–æ¶ˆé€‰æ‹©å†Œè®°å½•ã€‚æ³¨æ„æ“ä½œå¹¶æœªæ‰§è¡Œ",
                         InfoColor.Red,
-                        "É¨Èë²áÌõÂë",
+                        "æ‰«å…¥å†Œæ¡ç ",
                         this.InfoDlgOpacity,
                         this.MainForm.DefaultFont);
                     this.SwitchFocus(ITEM_BARCODE, strFastInputText);
@@ -2001,13 +2001,13 @@ dlg.UiState);
 
             if (this.NeedVerifyBarcode == true)
             {
-                // ĞÎÊ½Ğ£ÑéÌõÂëºÅ
+                // å½¢å¼æ ¡éªŒæ¡ç å·
                 // return:
-                //      -2  ·şÎñÆ÷Ã»ÓĞÅäÖÃĞ£Ñé·½·¨£¬ÎŞ·¨Ğ£Ñé
+                //      -2  æœåŠ¡å™¨æ²¡æœ‰é…ç½®æ ¡éªŒæ–¹æ³•ï¼Œæ— æ³•æ ¡éªŒ
                 //      -1  error
-                //      0   ²»ÊÇºÏ·¨µÄÌõÂëºÅ
-                //      1   ÊÇºÏ·¨µÄ¶ÁÕßÖ¤ÌõÂëºÅ
-                //      2   ÊÇºÏ·¨µÄ²áÌõÂëºÅ
+                //      0   ä¸æ˜¯åˆæ³•çš„æ¡ç å·
+                //      1   æ˜¯åˆæ³•çš„è¯»è€…è¯æ¡ç å·
+                //      2   æ˜¯åˆæ³•çš„å†Œæ¡ç å·
                 nRet = VerifyBarcode(
                     this.Channel.LibraryCodeList,
                     this.textBox_itemBarcode.Text,
@@ -2015,21 +2015,21 @@ dlg.UiState);
                 if (nRet == -1)
                     goto ERROR1;
 
-                // ÊäÈëµÄÌõÂë¸ñÊ½²»ºÏ·¨
+                // è¾“å…¥çš„æ¡ç æ ¼å¼ä¸åˆæ³•
                 if (nRet == 0)
                 {
                     strFastInputText = ChargingInfoDlg.Show(
                         this.CharingInfoHost,
-                        "ÄúÊäÈëµÄÌõÂë " + this.textBox_itemBarcode.Text + " ¸ñÊ½²»ÕıÈ·(" + strError + ")¡£ÇëÖØĞÂÊäÈë¡£",
+                        "æ‚¨è¾“å…¥çš„æ¡ç  " + this.textBox_itemBarcode.Text + " æ ¼å¼ä¸æ­£ç¡®(" + strError + ")ã€‚è¯·é‡æ–°è¾“å…¥ã€‚",
                         InfoColor.Red,
-                        "É¨Èë²áÌõÂë",
+                        "æ‰«å…¥å†Œæ¡ç ",
                         this.InfoDlgOpacity,
                         this.MainForm.DefaultFont);
                     this.SwitchFocus(ITEM_BARCODE, strFastInputText);
                     return -1;
                 }
 
-                // ·¢ÏÖÊµ¼ÊÊäÈëµÄÊÇ¶ÁÕßÖ¤ÌõÂëºÅ
+                // å‘ç°å®é™…è¾“å…¥çš„æ˜¯è¯»è€…è¯æ¡ç å·
                 if (nRet == 1)
                 {
                     // 2008/1/2 
@@ -2038,14 +2038,14 @@ dlg.UiState);
                         string strItemBarcode = this.textBox_itemBarcode.Text;
                         this.textBox_itemBarcode.Text = "";
 
-                        // Èç¹ûµ±Ç°ÔÚ¡°»¹¡±»òÕß¡°ÑéÖ¤»¹¡±×´Ì¬£¬ĞèÒªĞŞ¸ÄÎª¡°½è¡±?
+                        // å¦‚æœå½“å‰åœ¨â€œè¿˜â€æˆ–è€…â€œéªŒè¯è¿˜â€çŠ¶æ€ï¼Œéœ€è¦ä¿®æ”¹ä¸ºâ€œå€Ÿâ€?
                         if (this.FuncState == FuncState.Return
                             || this.FuncState == FuncState.VerifyReturn)
                             this.FuncState = FuncState.Borrow;
                         else
                             this.FuncState = FuncState.VerifyReturn;
 
-                        // Ö±½Ó¿çÔ½¶øÈ¥Ö´ĞĞ½èÔÄ¹¦ÄÜ
+                        // ç›´æ¥è·¨è¶Šè€Œå»æ‰§è¡Œå€Ÿé˜…åŠŸèƒ½
                         this.textBox_readerBarcode.Text = strItemBarcode;
                         this.button_loadReader_Click(null, null);
 
@@ -2053,21 +2053,21 @@ dlg.UiState);
                         return 0;
                     }
 
-                    // ¿Ì°åÊ½£¬ÒªÇó±ØĞëÀàĞÍÆ¥Åä
+                    // åˆ»æ¿å¼ï¼Œè¦æ±‚å¿…é¡»ç±»å‹åŒ¹é…
                     strFastInputText = ChargingInfoDlg.Show(
                         this.CharingInfoHost,
-                        "ÄúÊäÈëµÄÌõÂëºÅ " + this.textBox_itemBarcode.Text + " ÊÇ¶ÁÕßÖ¤ÌõÂëºÅ¡£ÇëÊäÈë²áÌõÂëºÅ¡£",
+                        "æ‚¨è¾“å…¥çš„æ¡ç å· " + this.textBox_itemBarcode.Text + " æ˜¯è¯»è€…è¯æ¡ç å·ã€‚è¯·è¾“å…¥å†Œæ¡ç å·ã€‚",
                         InfoColor.Red,
-                        "É¨Èë²áÌõÂë",
+                        "æ‰«å…¥å†Œæ¡ç ",
                         this.InfoDlgOpacity,
                         this.MainForm.DefaultFont);
                     this.SwitchFocus(ITEM_BARCODE, strFastInputText);
                     return -1;
                 }
 
-                // ¶ÔÓÚ·şÎñÆ÷Ã»ÓĞÅäÖÃĞ£Ñé¹¦ÄÜ£¬µ«ÊÇÇ°¶Ë·¢³öÁËĞ£ÑéÒªÇóµÄÇé¿ö£¬¾¯¸æÒ»ÏÂ
+                // å¯¹äºæœåŠ¡å™¨æ²¡æœ‰é…ç½®æ ¡éªŒåŠŸèƒ½ï¼Œä½†æ˜¯å‰ç«¯å‘å‡ºäº†æ ¡éªŒè¦æ±‚çš„æƒ…å†µï¼Œè­¦å‘Šä¸€ä¸‹
                 if (nRet == -2)
-                    MessageBox.Show(this, "¾¯¸æ£ºÇ°¶Ë¿ªÆôÁËĞ£ÑéÌõÂë¹¦ÄÜ£¬µ«ÊÇ·şÎñÆ÷¶ËÈ±·¦ÏàÓ¦µÄ½Å±¾º¯Êı£¬ÎŞ·¨Ğ£ÑéÌõÂë¡£\r\n\r\nÈôÒª±ÜÃâ³öÏÖ´Ë¾¯¸æ¶Ô»°¿ò£¬Çë¹Ø±ÕÇ°¶ËĞ£Ñé¹¦ÄÜ");
+                    MessageBox.Show(this, "è­¦å‘Šï¼šå‰ç«¯å¼€å¯äº†æ ¡éªŒæ¡ç åŠŸèƒ½ï¼Œä½†æ˜¯æœåŠ¡å™¨ç«¯ç¼ºä¹ç›¸åº”çš„è„šæœ¬å‡½æ•°ï¼Œæ— æ³•æ ¡éªŒæ¡ç ã€‚\r\n\r\nè‹¥è¦é¿å…å‡ºç°æ­¤è­¦å‘Šå¯¹è¯æ¡†ï¼Œè¯·å…³é—­å‰ç«¯æ ¡éªŒåŠŸèƒ½");
             }
 
             EnableControls(false);
@@ -2077,12 +2077,12 @@ dlg.UiState);
 
                 if (this.NoBiblioAndItemInfo == false)
                 {
-                    // ½èÔÄ²Ù×÷Ç°×°Èë²á¼ÇÂ¼
+                    // å€Ÿé˜…æ“ä½œå‰è£…å…¥å†Œè®°å½•
                     nRet = LoadItemAndBiblioRecord(this.textBox_itemBarcode.Text,
                         out strError);
                     if (nRet == 0)
                     {
-                        strError = "²áÌõÂëºÅ '" + this.textBox_itemBarcode.Text + "' Ã»ÓĞÕÒµ½";
+                        strError = "å†Œæ¡ç å· '" + this.textBox_itemBarcode.Text + "' æ²¡æœ‰æ‰¾åˆ°";
                         goto ERROR1;
                     }
 
@@ -2093,7 +2093,7 @@ dlg.UiState);
 
                 long lRet = 0;
 
-                // ½è/Ğø½è
+                // å€Ÿ/ç»­å€Ÿ
                 if (this.FuncState == FuncState.Borrow
                     || this.FuncState == FuncState.VerifyRenew)
                 {
@@ -2101,27 +2101,27 @@ dlg.UiState);
 
                     if (this.FuncState == FuncState.Borrow)
                     {
-                        strOperName = "½èÔÄ";
+                        strOperName = "å€Ÿé˜…";
                     }
                     else if (this.FuncState == FuncState.VerifyRenew)
                     {
-                        strOperName = "Ğø½è";
+                        strOperName = "ç»­å€Ÿ";
                     }
 
 
                     stop.OnStop += new StopEventHandler(this.DoStop);
-                    stop.Initial("ÕıÔÚ½øĞĞ" + strOperName + "²Ù×÷: " + this.textBox_readerBarcode.Text
+                    stop.Initial("æ­£åœ¨è¿›è¡Œ" + strOperName + "æ“ä½œ: " + this.textBox_readerBarcode.Text
                     + " " + strOperName + " " + this.textBox_itemBarcode.Text + " ...");
                     stop.BeginLoop();
 
                     // ??
-                    // SetReaderRenderString("(¿Õ)");
+                    // SetReaderRenderString("(ç©º)");
 
                     if (this.NoBiblioAndItemInfo == false)
                     {
-                        // Çå³ıÊéÄ¿ºÍÊµÌåĞÅÏ¢
-                        SetBiblioRenderString("(¿Õ)");
-                        SetItemRenderString("(¿Õ)");
+                        // æ¸…é™¤ä¹¦ç›®å’Œå®ä½“ä¿¡æ¯
+                        SetBiblioRenderString("(ç©º)");
+                        SetItemRenderString("(ç©º)");
                     }
 
                     try
@@ -2144,9 +2144,9 @@ dlg.UiState);
 
                         BorrowInfo borrow_info = null;
 
-                        // item·µ»ØµÄ¸ñÊ½
+                        // itemè¿”å›çš„æ ¼å¼
                         string strItemReturnFormats = "";
-                        // 2008/5/9 ÓĞ±ØÒª²Å·µ»ØitemĞÅÏ¢
+                        // 2008/5/9 æœ‰å¿…è¦æ‰è¿”å›itemä¿¡æ¯
                         if (this.NoBiblioAndItemInfo == false)
                             strItemReturnFormats = this.RenderFormat;
                         if (this.MainForm.ChargingNeedReturnItemXml == true)
@@ -2156,7 +2156,7 @@ dlg.UiState);
                             strItemReturnFormats += "xml";
                         }
 
-                        // biblio·µ»ØµÄ¸ñÊ½
+                        // biblioè¿”å›çš„æ ¼å¼
                         string strBiblioReturnFormats = "";
                         if (this.NoBiblioAndItemInfo == false)
                             strBiblioReturnFormats = this.RenderFormat;
@@ -2193,11 +2193,11 @@ dlg.UiState);
                         if (reader_records != null && reader_records.Length > 0)
                             strReaderRecord = reader_records[0];
 
-                        // Ë¢ĞÂ¶ÁÕßĞÅÏ¢
+                        // åˆ·æ–°è¯»è€…ä¿¡æ¯
                         if (String.IsNullOrEmpty(strReaderRecord) == false)
                             SetReaderRenderString(ReplaceMacro(strReaderRecord));
 
-                        // ÏÔÊ¾ÊéÄ¿ºÍÊµÌåĞÅÏ¢
+                        // æ˜¾ç¤ºä¹¦ç›®å’Œå®ä½“ä¿¡æ¯
                         if (this.NoBiblioAndItemInfo == false)
                         {
                             string strItemRecord = "";
@@ -2221,14 +2221,14 @@ dlg.UiState);
 
                             if (item_records.Length > 0)
                             {
-                                // xml×ÜÊÇÔÚ×îºóÒ»¸ö
+                                // xmlæ€»æ˜¯åœ¨æœ€åä¸€ä¸ª
                                 strItemXml = item_records[item_records.Length - 1];
                             }
                         }
 
                         if (lRet == -1)
                         {
-                            // Çå³ı¼ÇÒäµÄ²áÌõÂëºÅ
+                            // æ¸…é™¤è®°å¿†çš„å†Œæ¡ç å·
                             this.m_itemBarcodes.Clear();
 
                             if (Channel.ErrorCode == DigitalPlatform.CirculationClient.localhost.ErrorCode.ItemBarcodeDup)
@@ -2243,13 +2243,13 @@ dlg.UiState);
                                     nRet = dupdlg.Initial(
                                         this.MainForm,
                                         aDupPath,
-                                        "Òò²áÌõÂëºÅ·¢ÉúÖØ¸´£¬" + strOperName + "²Ù×÷±»¾Ü¾ø¡£\r\n\r\n¿É¸ù¾İÏÂÃæÁĞ³öµÄÏêÏ¸ĞÅÏ¢£¬Ñ¡ÔñÊÊµ±µÄ²á¼ÇÂ¼£¬ÖØÊÔ²Ù×÷¡£\r\n\r\nÔ­Ê¼³ö´íĞÅÏ¢:\r\n" + strError,
+                                        "å› å†Œæ¡ç å·å‘ç”Ÿé‡å¤ï¼Œ" + strOperName + "æ“ä½œè¢«æ‹’ç»ã€‚\r\n\r\nå¯æ ¹æ®ä¸‹é¢åˆ—å‡ºçš„è¯¦ç»†ä¿¡æ¯ï¼Œé€‰æ‹©é€‚å½“çš„å†Œè®°å½•ï¼Œé‡è¯•æ“ä½œã€‚\r\n\r\nåŸå§‹å‡ºé”™ä¿¡æ¯:\r\n" + strError,
                                         this.MainForm.Channel,
                                         this.MainForm.Stop,
                                         out strErrorNew);
                                     if (nRet == -1)
                                     {
-                                        // ³õÊ¼»¯¶Ô»°¿òÊ§°Ü
+                                        // åˆå§‹åŒ–å¯¹è¯æ¡†å¤±è´¥
                                         MessageBox.Show(this, strErrorNew);
                                         goto ERROR1;
                                     }
@@ -2275,17 +2275,17 @@ dlg.UiState);
                         }
 
                         /*
-                         * ÊôÓÚ¶àÓàµÄ²Ù×÷? 2008/5/9 È¥³ı
+                         * å±äºå¤šä½™çš„æ“ä½œ? 2008/5/9 å»é™¤
                         if (String.IsNullOrEmpty(strConfirmItemRecPath) == false
                             && this.NoBiblioAndItemInfo == false)
                         {
-                            // ½èÔÄ²Ù×÷ºó×°Èë×¼È·µÄ²á¼ÇÂ¼
+                            // å€Ÿé˜…æ“ä½œåè£…å…¥å‡†ç¡®çš„å†Œè®°å½•
                             string strError_1 = "";
                             int nRet_1 = LoadItemAndBiblioRecord("@path:" + strConfirmItemRecPath,
                                 out strError_1);
                             if (nRet == -1)
                             {
-                                strError_1 = "²á¼ÇÂ¼ '" + strConfirmItemRecPath + "' Ã»ÓĞÕÒµ½";
+                                strError_1 = "å†Œè®°å½• '" + strConfirmItemRecPath + "' æ²¡æœ‰æ‰¾åˆ°";
                                 MessageBox.Show(this, strError);
                             }
                         }
@@ -2299,7 +2299,7 @@ dlg.UiState);
                         {
                             /*
                             // 2012/1/5
-                            // ¼ÓÈë»º´æ
+                            // åŠ å…¥ç¼“å­˜
                             this.MainForm.SetReaderXmlCache(strOutputReaderBarcode,
                                 "",
                                 reader_records[1]);
@@ -2327,12 +2327,12 @@ dlg.UiState);
                         stop.Initial("");
                     }
 
-                    // ÀÛ»ıÍ¬Ò»¶ÁÕß½èÔÄ³É¹¦µÄ²áÌõÂëºÅ
+                    // ç´¯ç§¯åŒä¸€è¯»è€…å€Ÿé˜…æˆåŠŸçš„å†Œæ¡ç å·
                     this.oneReaderItemBarcodes.Add(this.textBox_itemBarcode.Text);
 
                     if (lRet == 1)
                     {
-                        // ÓĞÖØ¸´²áÌõÂëºÅ
+                        // æœ‰é‡å¤å†Œæ¡ç å·
                         strFastInputText = ChargingInfoDlg.Show(
                         this.CharingInfoHost,
                             strError.Replace("\r\n", "\r\n\r\n"),
@@ -2347,7 +2347,7 @@ dlg.UiState);
                         {
                             strFastInputText = ChargingInfoDlg.Show(
                         this.CharingInfoHost,
-                                strOperName + "³É¹¦",
+                                strOperName + "æˆåŠŸ",
                                 InfoColor.Green,
                                 strOperName,    // "caption",
                             this.InfoDlgOpacity,
@@ -2360,7 +2360,7 @@ dlg.UiState);
                     || this.FuncState == FuncState.Lost)
                 {
                     string strAction = "";
-                    string strLocation = "";    // »¹»ØµÄ²áµÄ¹İ²ØµØµã
+                    string strLocation = "";    // è¿˜å›çš„å†Œçš„é¦†è—åœ°ç‚¹
 
                     if (this.FuncState == FuncState.Return)
                         strAction = "return";
@@ -2375,32 +2375,32 @@ dlg.UiState);
 
                     if (this.FuncState == FuncState.Return)
                     {
-                        strOperName = "»¹Êé";
+                        strOperName = "è¿˜ä¹¦";
                     }
                     else if (this.FuncState == FuncState.VerifyReturn)
                     {
-                        strOperName = "ÑéÖ¤»¹Êé";
+                        strOperName = "éªŒè¯è¿˜ä¹¦";
                     }
                     else
                     {
-                        strOperName = "¶ªÊ§";
+                        strOperName = "ä¸¢å¤±";
                     }
 
-                    // »¹Êé
+                    // è¿˜ä¹¦
                     stop.OnStop += new StopEventHandler(this.DoStop);
-                    stop.Initial("ÕıÔÚ½øĞĞ " + strOperName + " ²Ù×÷: " + this.textBox_readerBarcode.Text
-                    + " »¹ " + this.textBox_itemBarcode.Text + " ...");
+                    stop.Initial("æ­£åœ¨è¿›è¡Œ " + strOperName + " æ“ä½œ: " + this.textBox_readerBarcode.Text
+                    + " è¿˜ " + this.textBox_itemBarcode.Text + " ...");
                     stop.BeginLoop();
 
 
                     // ??
-                    // SetReaderRenderString("(¿Õ)");
+                    // SetReaderRenderString("(ç©º)");
 
                     if (this.NoBiblioAndItemInfo == false)
                     {
-                        // Çå³ıÊéÄ¿ºÍÊµÌåĞÅÏ¢
-                        SetBiblioRenderString("(¿Õ)");
-                        SetItemRenderString("(¿Õ)");
+                        // æ¸…é™¤ä¹¦ç›®å’Œå®ä½“ä¿¡æ¯
+                        SetBiblioRenderString("(ç©º)");
+                        SetItemRenderString("(ç©º)");
                     }
 
 
@@ -2418,7 +2418,7 @@ dlg.UiState);
 
                         ReturnInfo return_info = null;
 
-                        // item·µ»ØµÄ¸ñÊ½ 2008/5/9
+                        // itemè¿”å›çš„æ ¼å¼ 2008/5/9
                         string strItemReturnFormats = "";
                         if (this.NoBiblioAndItemInfo == false)
                             strItemReturnFormats = this.RenderFormat;
@@ -2430,7 +2430,7 @@ dlg.UiState);
                         }
 
 
-                        // biblio·µ»ØµÄ¸ñÊ½
+                        // biblioè¿”å›çš„æ ¼å¼
                         string strBiblioReturnFormats = "";
                         if (this.NoBiblioAndItemInfo == false)
                             strBiblioReturnFormats = this.RenderFormat;
@@ -2464,7 +2464,7 @@ dlg.UiState);
                             out strError);
                         if (lRet == -1)
                         {
-                            // Çå³ı¼ÇÒäµÄ²áÌõÂëºÅ
+                            // æ¸…é™¤è®°å¿†çš„å†Œæ¡ç å·
                             this.m_itemBarcodes.Clear();
 
                             if (Channel.ErrorCode == DigitalPlatform.CirculationClient.localhost.ErrorCode.ItemBarcodeDup)
@@ -2479,13 +2479,13 @@ dlg.UiState);
                                     nRet = dupdlg.Initial(
                                         this.MainForm,
                                         aDupPath,
-                                        "Òò²áÌõÂëºÅ·¢ÉúÖØ¸´£¬»¹»Ø²Ù×÷±»¾Ü¾ø¡£\r\n\r\n¿É¸ù¾İÏÂÃæÁĞ³öµÄÏêÏ¸ĞÅÏ¢£¬Ñ¡ÔñÊÊµ±µÄ²á¼ÇÂ¼£¬ÖØÊÔ²Ù×÷¡£\r\n\r\nÔ­Ê¼³ö´íĞÅÏ¢:\r\n" + strError,
+                                        "å› å†Œæ¡ç å·å‘ç”Ÿé‡å¤ï¼Œè¿˜å›æ“ä½œè¢«æ‹’ç»ã€‚\r\n\r\nå¯æ ¹æ®ä¸‹é¢åˆ—å‡ºçš„è¯¦ç»†ä¿¡æ¯ï¼Œé€‰æ‹©é€‚å½“çš„å†Œè®°å½•ï¼Œé‡è¯•æ“ä½œã€‚\r\n\r\nåŸå§‹å‡ºé”™ä¿¡æ¯:\r\n" + strError,
                                         this.MainForm.Channel,
                                         this.MainForm.Stop,
                                         out strErrorNew);
                                     if (nRet == -1)
                                     {
-                                        // ³õÊ¼»¯¶Ô»°¿òÊ§°Ü
+                                        // åˆå§‹åŒ–å¯¹è¯æ¡†å¤±è´¥
                                         MessageBox.Show(this, strErrorNew);
                                         goto ERROR1;
                                     }
@@ -2515,7 +2515,7 @@ dlg.UiState);
                             strLocation = StringUtil.GetPureLocation(return_info.Location);
                         }
 
-                        // È·¶¨»¹ÊéµÄ¶ÁÕßÖ¤ÌõÂëºÅ
+                        // ç¡®å®šè¿˜ä¹¦çš„è¯»è€…è¯æ¡ç å·
                         this.ActiveReaderBarcode = strOutputReaderBarcode;
 
                         if (reader_records != null && reader_records.Length > 0)
@@ -2526,7 +2526,7 @@ dlg.UiState);
                         {
                             /*
                             // 2012/1/5
-                            // ¼ÓÈë»º´æ
+                            // åŠ å…¥ç¼“å­˜
                             this.MainForm.SetReaderXmlCache(strOutputReaderBarcode,
                                 "",
                                 reader_records[1]);
@@ -2534,10 +2534,10 @@ dlg.UiState);
                             strReaderSummary = Global.GetReaderSummary(reader_records[1]);
                         }
 
-                        // Ë¢ĞÂ¶ÁÕßĞÅÏ¢
+                        // åˆ·æ–°è¯»è€…ä¿¡æ¯
                         SetReaderRenderString(ReplaceMacro(strReaderRecord));
 
-                        // ÏÔÊ¾ÊéÄ¿ºÍÊµÌåĞÅÏ¢
+                        // æ˜¾ç¤ºä¹¦ç›®å’Œå®ä½“ä¿¡æ¯
                         if (this.NoBiblioAndItemInfo == false)
                         {
                             string strItemRecord = "";
@@ -2554,7 +2554,7 @@ dlg.UiState);
 
                             /*
                             {
-                                // ÒÔÇ°µÄ·½·¨£¬Òª¶àÓÃÒ»´ÎAPI
+                                // ä»¥å‰çš„æ–¹æ³•ï¼Œè¦å¤šç”¨ä¸€æ¬¡API
 
                                 string strError_1 = "";
                                 int nRet_1 = 0;
@@ -2587,7 +2587,7 @@ dlg.UiState);
                         {
                             if (item_records.Length > 0)
                             {
-                                // xml×ÜÊÇÔÚ×îºóÒ»¸ö
+                                // xmlæ€»æ˜¯åœ¨æœ€åä¸€ä¸ª
                                 strItemXml = item_records[item_records.Length - 1];
                             }
                         }
@@ -2616,7 +2616,7 @@ dlg.UiState);
 
                     if (lRet == 1)
                     {
-                        // ³¬ÆÚÇé¿ö/·ÅÈëÔ¤Ô¼¼Ü/ÓĞÖØ¸´²áÌõÂëºÅ
+                        // è¶…æœŸæƒ…å†µ/æ”¾å…¥é¢„çº¦æ¶/æœ‰é‡å¤å†Œæ¡ç å·
                         strFastInputText = ChargingInfoDlg.Show(
                         this.CharingInfoHost,
                             strError.Replace("\r\n", "\r\n\r\n"),
@@ -2629,9 +2629,9 @@ dlg.UiState);
                     {
                         if (this.GreenDisable == false)
                         {
-                            string strText = "»¹Êé³É¹¦";
+                            string strText = "è¿˜ä¹¦æˆåŠŸ";
                             if (string.IsNullOrEmpty(strLocation) == false)
-                                strText += "\r\n\r\n¹İ²ØµØ: " + strLocation;
+                                strText += "\r\n\r\né¦†è—åœ°: " + strLocation;
                             strFastInputText = ChargingInfoDlg.Show(
                                 this.CharingInfoHost,
                                 strText,
@@ -2641,12 +2641,12 @@ dlg.UiState);
                         this.MainForm.DefaultFont);
                         }
                     }
-                } // endif if »¹Êé
+                } // endif if è¿˜ä¹¦
                 else
                 {
                     strFastInputText = ChargingInfoDlg.Show(
                         this.CharingInfoHost,
-                        "Ôİ²»Ö§³Ö",
+                        "æš‚ä¸æ”¯æŒ",
                         InfoColor.Red,
                         "caption",  // 
                         this.InfoDlgOpacity,
@@ -2659,7 +2659,7 @@ dlg.UiState);
                 EnableControls(true);
             }
 
-            // ½¹µã»Øµ½²áÌõÂëºÅÊäÈëÓò
+            // ç„¦ç‚¹å›åˆ°å†Œæ¡ç å·è¾“å…¥åŸŸ
             this.SwitchFocus(ITEM_BARCODE, strFastInputText);
             return 1;
         ERROR1:
@@ -2672,7 +2672,7 @@ dlg.UiState);
                 this.MainForm.DefaultFont);
             EnableControls(true);
 
-            // ½¹µã»Øµ½²áÌõÂëºÅtextbox
+            // ç„¦ç‚¹å›åˆ°å†Œæ¡ç å·textbox
             /*
             this.textBox_itemBarcode.SelectAll();
             this.textBox_itemBarcode.Focus();
@@ -2687,12 +2687,12 @@ dlg.UiState);
         public const int ITEM_BARCODE = 2;
          * */
         /// <summary>
-        /// ÏÔÊ¾¿ìËÙ²Ù×÷¶Ô»°¿ò
+        /// æ˜¾ç¤ºå¿«é€Ÿæ“ä½œå¯¹è¯æ¡†
         /// </summary>
-        /// <param name="color">ĞÅÏ¢ÑÕÉ«</param>
-        /// <param name="strCaption">¶Ô»°¿ò±êÌâÎÄ×Ö</param>
-        /// <param name="strMessage">ÏûÏ¢ÄÚÈİÎÄ×Ö</param>
-        /// <param name="nTarget">¶Ô»°¿ò¹Ø±ÕºóÒªÇĞ»»È¥µÄÎ»ÖÃ¡£Îª READER_BARCODE READER_PASSWORD ITEM_BARCODE Ö®Ò»</param>
+        /// <param name="color">ä¿¡æ¯é¢œè‰²</param>
+        /// <param name="strCaption">å¯¹è¯æ¡†æ ‡é¢˜æ–‡å­—</param>
+        /// <param name="strMessage">æ¶ˆæ¯å†…å®¹æ–‡å­—</param>
+        /// <param name="nTarget">å¯¹è¯æ¡†å…³é—­åè¦åˆ‡æ¢å»çš„ä½ç½®ã€‚ä¸º READER_BARCODE READER_PASSWORD ITEM_BARCODE ä¹‹ä¸€</param>
         public void FastMessageBox(InfoColor color,
             string strCaption,
             string strMessage,
@@ -2709,7 +2709,7 @@ dlg.UiState);
             this.SwitchFocus(nTarget, strFastInputText);
         }
 
-        // °´Å¥ÉÏµÄÓÒÊó±êpopupmenu: ½è
+        // æŒ‰é’®ä¸Šçš„å³é¼ æ ‡popupmenu: å€Ÿ
         private void toolStripMenuItem_borrow_Click(object sender, EventArgs e)
         {
             // this.FuncState = FuncState.Borrow;
@@ -2743,9 +2743,9 @@ dlg.UiState);
         }
 
         /// <summary>
-        /// ÔÊĞí»òÕß½ûÖ¹½çÃæ¿Ø¼ş¡£ÔÚ³¤²Ù×÷Ç°£¬Ò»°ãĞèÒª½ûÖ¹½çÃæ¿Ø¼ş£»²Ù×÷Íê³ÉºóÔÙÔÊĞí
+        /// å…è®¸æˆ–è€…ç¦æ­¢ç•Œé¢æ§ä»¶ã€‚åœ¨é•¿æ“ä½œå‰ï¼Œä¸€èˆ¬éœ€è¦ç¦æ­¢ç•Œé¢æ§ä»¶ï¼›æ“ä½œå®Œæˆåå†å…è®¸
         /// </summary>
-        /// <param name="bEnable">ÊÇ·ñÔÊĞí½çÃæ¿Ø¼ş¡£true ÎªÔÊĞí£¬ false Îª½ûÖ¹</param>
+        /// <param name="bEnable">æ˜¯å¦å…è®¸ç•Œé¢æ§ä»¶ã€‚true ä¸ºå…è®¸ï¼Œ false ä¸ºç¦æ­¢</param>
         public override void EnableControls(bool bEnable)
         {
             this.textBox_itemBarcode.Enabled = bEnable;
@@ -2779,7 +2779,7 @@ dlg.UiState);
         }
 
         /// <summary>
-        /// ²áÌõÂëÊäÈëÓòÄÚÈİ
+        /// å†Œæ¡ç è¾“å…¥åŸŸå†…å®¹
         /// </summary>
         public string ItemBarcode
         {
@@ -2794,7 +2794,7 @@ dlg.UiState);
         }
 
         /// <summary>
-        /// ¶ÁÕßÖ¤ÌõÂëºÅÊäÈëÓòÄÚÈİ
+        /// è¯»è€…è¯æ¡ç å·è¾“å…¥åŸŸå†…å®¹
         /// </summary>
         public string ReaderBarcode
         {
@@ -2813,7 +2813,7 @@ dlg.UiState);
             string strError = "";
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚĞ£Ñé¶ÁÕßÃÜÂë ...");
+            stop.Initial("æ­£åœ¨æ ¡éªŒè¯»è€…å¯†ç  ...");
             stop.BeginLoop();
 
             this.Update();
@@ -2849,20 +2849,20 @@ dlg.UiState);
             this.textBox_itemBarcode.SelectAll();
             this.textBox_itemBarcode.Focus();
              * */
-            // Ğ£ÑéÕıÈ·
+            // æ ¡éªŒæ­£ç¡®
             this.SwitchFocus(ITEM_BARCODE, null);
             return;
         ERROR1:
-            // Ğ£Ñé·¢ÏÖ/·¢Éú´íÎó
+            // æ ¡éªŒå‘ç°/å‘ç”Ÿé”™è¯¯
             string strFastInputText = ChargingInfoDlg.Show(
                         this.CharingInfoHost,
                 strError,
                 InfoColor.Red,
-                "ÑéÖ¤¶ÁÕßÖ¤ÃÜÂë",
+                "éªŒè¯è¯»è€…è¯å¯†ç ",
                 this.InfoDlgOpacity,
                 true,
                         this.MainForm.DefaultFont);
-            // ½¹µãÖØĞÂ¶¨Î»µ½ÃÜÂëÊäÈëÓò
+            // ç„¦ç‚¹é‡æ–°å®šä½åˆ°å¯†ç è¾“å…¥åŸŸ
             /*
             this.textBox_readerPassword.Focus();
             this.textBox_readerPassword.SelectAll();
@@ -2871,7 +2871,7 @@ dlg.UiState);
         }
 
 #if NO
-        // ½çÃæÉÏ ÊÇ·ñĞèÒª Ğ£Ñé¶ÁÕßÃÜÂë
+        // ç•Œé¢ä¸Š æ˜¯å¦éœ€è¦ æ ¡éªŒè¯»è€…å¯†ç 
         bool VerifyReaderPassword
         {
             get
@@ -2915,7 +2915,7 @@ dlg.UiState);
         }
 
         /// <summary>
-        /// ×Ô¶¯²Ù×÷Î¨Ò»ÊÂÏî
+        /// è‡ªåŠ¨æ“ä½œå”¯ä¸€äº‹é¡¹
         /// </summary>
         public bool AutoOperSingleItem
         {
@@ -2929,7 +2929,7 @@ dlg.UiState);
         }
 
         /// <summary>
-        /// ÊÇ·ñÆôÓÃ ISBN ½èÊé»¹Êé¹¦ÄÜ
+        /// æ˜¯å¦å¯ç”¨ ISBN å€Ÿä¹¦è¿˜ä¹¦åŠŸèƒ½
         /// </summary>
         public bool UseIsbnBorrow
         {
@@ -2944,7 +2944,7 @@ dlg.UiState);
 
 
         /// <summary>
-        /// ¶ÁÕßĞÅÏ¢ÖĞ²»ÏÔÊ¾½èÔÄÀúÊ·
+        /// è¯»è€…ä¿¡æ¯ä¸­ä¸æ˜¾ç¤ºå€Ÿé˜…å†å²
         /// </summary>
         public bool NoBorrowHistory
         {
@@ -3008,15 +3008,15 @@ dlg.UiState);
 
 
 
-        // ĞŞ¸Ä´°¿Ú±êÌâ
+        // ä¿®æ”¹çª—å£æ ‡é¢˜
         void UpdateWindowTitle()
         {
-            this.Text = "³öÄÉ " + this.textBox_readerBarcode.Text + " " + this.textBox_itemBarcode.Text;
+            this.Text = "å‡ºçº³ " + this.textBox_readerBarcode.Text + " " + this.textBox_itemBarcode.Text;
         }
 
         private void textBox_readerBarcode_TextChanged(object sender, EventArgs e)
         {
-            // Çå³ı¼ÇÒäµÄ²áÌõÂëºÅ
+            // æ¸…é™¤è®°å¿†çš„å†Œæ¡ç å·
             this.m_itemBarcodes.Clear();
 
             this.UpdateWindowTitle();
@@ -3038,7 +3038,7 @@ dlg.UiState);
         ChargingInfoHost m_chargingInfoHost = null;
 
         /// <summary>
-        /// »ñµÃ ChargingInfoHost ¶ÔÏó
+        /// è·å¾— ChargingInfoHost å¯¹è±¡
         /// </summary>
         internal ChargingInfoHost CharingInfoHost
         {
@@ -3086,7 +3086,7 @@ dlg.UiState);
         }
 
         /// <summary>
-        /// ÊÇ·ñÒª×Ô¶¯°ÑÊäÈëµÄĞ¡Ğ´×Ö·û×ª»»Îª´óĞ´
+        /// æ˜¯å¦è¦è‡ªåŠ¨æŠŠè¾“å…¥çš„å°å†™å­—ç¬¦è½¬æ¢ä¸ºå¤§å†™
         /// </summary>
         public bool AutoToUpper
         {
@@ -3099,13 +3099,13 @@ dlg.UiState);
             }
         }
 
-        #region ¶ÁÕßÖ¤ÌõÂëºÅ¿ìËÙµ¼º½²Ëµ¥¹¦ÄÜ
+        #region è¯»è€…è¯æ¡ç å·å¿«é€Ÿå¯¼èˆªèœå•åŠŸèƒ½
 
         private void ToolStripMenuItem_naviToAmerceForm_Click(object sender, EventArgs e)
         {
             if (String.IsNullOrEmpty(this.ActiveReaderBarcode) == true)
             {
-                MessageBox.Show(this, "µ±Ç°»¹Ã»ÓĞ»î¶¯µÄ¶ÁÕßÖ¤ÌõÂëºÅ");
+                MessageBox.Show(this, "å½“å‰è¿˜æ²¡æœ‰æ´»åŠ¨çš„è¯»è€…è¯æ¡ç å·");
                 return;
             }
 
@@ -3119,7 +3119,7 @@ dlg.UiState);
         {
             if (String.IsNullOrEmpty(this.ActiveReaderBarcode) == true)
             {
-                MessageBox.Show(this, "µ±Ç°»¹Ã»ÓĞ»î¶¯µÄ¶ÁÕßÖ¤ÌõÂëºÅ");
+                MessageBox.Show(this, "å½“å‰è¿˜æ²¡æœ‰æ´»åŠ¨çš„è¯»è€…è¯æ¡ç å·");
                 return;
             }
 
@@ -3134,7 +3134,7 @@ dlg.UiState);
         {
             if (String.IsNullOrEmpty(this.ActiveReaderBarcode) == true)
             {
-                MessageBox.Show(this, "µ±Ç°»¹Ã»ÓĞ»î¶¯µÄ¶ÁÕßÖ¤ÌõÂëºÅ");
+                MessageBox.Show(this, "å½“å‰è¿˜æ²¡æœ‰æ´»åŠ¨çš„è¯»è€…è¯æ¡ç å·");
                 return;
             }
 
@@ -3148,7 +3148,7 @@ dlg.UiState);
         {
             if (String.IsNullOrEmpty(this.ActiveReaderBarcode) == true)
             {
-                MessageBox.Show(this, "µ±Ç°»¹Ã»ÓĞ»î¶¯µÄ¶ÁÕßÖ¤ÌõÂëºÅ");
+                MessageBox.Show(this, "å½“å‰è¿˜æ²¡æœ‰æ´»åŠ¨çš„è¯»è€…è¯æ¡ç å·");
                 return;
             }
 
@@ -3162,7 +3162,7 @@ dlg.UiState);
         {
             if (String.IsNullOrEmpty(this.ActiveReaderBarcode) == true)
             {
-                MessageBox.Show(this, "µ±Ç°»¹Ã»ÓĞ»î¶¯µÄ¶ÁÕßÖ¤ÌõÂëºÅ");
+                MessageBox.Show(this, "å½“å‰è¿˜æ²¡æœ‰æ´»åŠ¨çš„è¯»è€…è¯æ¡ç å·");
                 return;
             }
 
@@ -3174,14 +3174,14 @@ dlg.UiState);
 
         #endregion
 
-        #region ²áÌõÂëºÅ¿ìËÙµ¼º½²Ëµ¥¹¦ÄÜ
+        #region å†Œæ¡ç å·å¿«é€Ÿå¯¼èˆªèœå•åŠŸèƒ½
 
 
         private void ToolStripMenuItem_openEntityForm_Click(object sender, EventArgs e)
         {
             if (String.IsNullOrEmpty(this.ActiveItemBarcode) == true)
             {
-                MessageBox.Show(this, "µ±Ç°»¹Ã»ÓĞ»î¶¯µÄ²áÌõÂëºÅ");
+                MessageBox.Show(this, "å½“å‰è¿˜æ²¡æœ‰æ´»åŠ¨çš„å†Œæ¡ç å·");
                 return;
             }
 
@@ -3195,7 +3195,7 @@ dlg.UiState);
         {
             if (String.IsNullOrEmpty(this.ActiveItemBarcode) == true)
             {
-                MessageBox.Show(this, "µ±Ç°»¹Ã»ÓĞ»î¶¯µÄ²áÌõÂëºÅ");
+                MessageBox.Show(this, "å½“å‰è¿˜æ²¡æœ‰æ´»åŠ¨çš„å†Œæ¡ç å·");
                 return;
             }
 
@@ -3233,19 +3233,19 @@ dlg.UiState);
             string[] lines = strWhole.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
             if (lines.Length < 1)
             {
-                strError = "Á¬Ò»ĞĞÒ²²»´æÔÚ";
+                strError = "è¿ä¸€è¡Œä¹Ÿä¸å­˜åœ¨";
                 goto ERROR1;
             }
 
             if (lines.Length > 1)
             {
-                strError = "³öÄÉ´°Ö»ÔÊĞíÍÏÈëÒ»¸ö¼ÇÂ¼";
+                strError = "å‡ºçº³çª—åªå…è®¸æ‹–å…¥ä¸€ä¸ªè®°å½•";
                 goto ERROR1;
             }
 
             string strFirstLine = lines[0].Trim();
 
-            // È¡µÃrecpath
+            // å–å¾—recpath
             string strRecPath = "";
             int nRet = strFirstLine.IndexOf("\t");
             if (nRet == -1)
@@ -3253,7 +3253,7 @@ dlg.UiState);
             else
                 strRecPath = strFirstLine.Substring(0, nRet).Trim();
 
-            // ÅĞ¶ÏËüÊÇ²»ÊÇ¶ÁÕß¼ÇÂ¼Â·¾¶
+            // åˆ¤æ–­å®ƒæ˜¯ä¸æ˜¯è¯»è€…è®°å½•è·¯å¾„
             string strDbName = Global.GetDbName(strRecPath);
 
             if (this.MainForm.IsReaderDbName(strDbName) == true)
@@ -3273,7 +3273,7 @@ dlg.UiState);
             }
             else
             {
-                strError = "¼ÇÂ¼Â·¾¶ '" + strRecPath + "' ÖĞµÄÊı¾İ¿âÃû²»ÊÇ¶ÁÕß¿âÃû...";
+                strError = "è®°å½•è·¯å¾„ '" + strRecPath + "' ä¸­çš„æ•°æ®åº“åä¸æ˜¯è¯»è€…åº“å...";
                 goto ERROR1;
             }
 
@@ -3284,15 +3284,15 @@ dlg.UiState);
 
         private void textBox_itemBarcode_TextChanged(object sender, EventArgs e)
         {
-            // ĞŞ¸Ä´°¿Ú±êÌâ
+            // ä¿®æ”¹çª—å£æ ‡é¢˜
             this.UpdateWindowTitle();
         }
 
         /// <summary>
-        /// ´¦Àí¶Ô»°¿ò¼ü
+        /// å¤„ç†å¯¹è¯æ¡†é”®
         /// </summary>
-        /// <param name="keyData">System.Windows.Forms.Keys ÖµÖ®Ò»£¬Ëü±íÊ¾Òª´¦ÀíµÄ¼ü¡£</param>
-        /// <returns>Èç¹û¿Ø¼ş´¦Àí²¢Ê¹ÓÃ»÷¼ü£¬ÔòÎª true£»·ñÔòÎª false£¬ÒÔÔÊĞí½øÒ»²½´¦Àí</returns>
+        /// <param name="keyData">System.Windows.Forms.Keys å€¼ä¹‹ä¸€ï¼Œå®ƒè¡¨ç¤ºè¦å¤„ç†çš„é”®ã€‚</param>
+        /// <returns>å¦‚æœæ§ä»¶å¤„ç†å¹¶ä½¿ç”¨å‡»é”®ï¼Œåˆ™ä¸º trueï¼›å¦åˆ™ä¸º falseï¼Œä»¥å…è®¸è¿›ä¸€æ­¥å¤„ç†</returns>
         protected override bool ProcessDialogKey(
 Keys keyData)
         {
@@ -3346,7 +3346,7 @@ Keys keyData)
 #endif
 
         /// <summary>
-        /// ÊÇ·ñÒªÔÚ¹Ø±ÕĞÅÏ¢¶Ô»°¿òµÄÊ±ºò×Ô¶¯Í£Ö¹Ìî³ä
+        /// æ˜¯å¦è¦åœ¨å…³é—­ä¿¡æ¯å¯¹è¯æ¡†çš„æ—¶å€™è‡ªåŠ¨åœæ­¢å¡«å……
         /// </summary>
         public bool StopFillingWhenCloseInfoDlg
         {
@@ -3360,7 +3360,7 @@ Keys keyData)
         }
 
         /// <summary>
-        /// Ö¤ÌõÂëºÅÊäÈë¿òÊÇ·ñÔÊĞíÊäÈëºº×Ö
+        /// è¯æ¡ç å·è¾“å…¥æ¡†æ˜¯å¦å…è®¸è¾“å…¥æ±‰å­—
         /// </summary>
         public bool PatronBarcodeAllowHanzi
         {
@@ -3377,51 +3377,51 @@ Keys keyData)
     }
 
     /// <summary>
-    /// ¹¦ÄÜÀàĞÍ
+    /// åŠŸèƒ½ç±»å‹
     /// </summary>
     public enum FuncState
     {
         /// <summary>
-        /// ×Ô¶¯¡£¼È¿ÉÒÔ½èÊé£¬Ò²¿ÉÒÔ»¹Êé
+        /// è‡ªåŠ¨ã€‚æ—¢å¯ä»¥å€Ÿä¹¦ï¼Œä¹Ÿå¯ä»¥è¿˜ä¹¦
         /// </summary>
-        Auto = 0,   // ¼È¿ÉÒÔ½èÊé£¬Ò²¿ÉÒÔ»¹Êé
+        Auto = 0,   // æ—¢å¯ä»¥å€Ÿä¹¦ï¼Œä¹Ÿå¯ä»¥è¿˜ä¹¦
         /// <summary>
-        /// ½èÊé
+        /// å€Ÿä¹¦
         /// </summary>
-        Borrow = 1, // ½èÊé
+        Borrow = 1, // å€Ÿä¹¦
         /// <summary>
-        /// »¹Êé(²»ÑéÖ¤)
+        /// è¿˜ä¹¦(ä¸éªŒè¯)
         /// </summary>
-        Return = 2, // »¹Êé(²»ÑéÖ¤)
+        Return = 2, // è¿˜ä¹¦(ä¸éªŒè¯)
         /// <summary>
-        /// »¹Êé(ÒªÑéÖ¤)
+        /// è¿˜ä¹¦(è¦éªŒè¯)
         /// </summary>
-        VerifyReturn = 3, // »¹Êé(ÒªÑéÖ¤)
+        VerifyReturn = 3, // è¿˜ä¹¦(è¦éªŒè¯)
         /// <summary>
-        /// Ğø½è(²»ÑéÖ¤)
+        /// ç»­å€Ÿ(ä¸éªŒè¯)
         /// </summary>
-        Renew = 4,  // Ğø½è
+        Renew = 4,  // ç»­å€Ÿ
         /// <summary>
-        /// Ğø½è(ÒªÑéÖ¤)
+        /// ç»­å€Ÿ(è¦éªŒè¯)
         /// </summary>
-        VerifyRenew = 5,  // Ğø½è
+        VerifyRenew = 5,  // ç»­å€Ÿ
         /// <summary>
-        /// ¶ªÊ§ÉùÃ÷
+        /// ä¸¢å¤±å£°æ˜
         /// </summary>
-        Lost = 6,   // ¶ªÊ§
+        Lost = 6,   // ä¸¢å¤±
 
         /// <summary>
-        /// ÑéÖ¤¶ªÊ§
+        /// éªŒè¯ä¸¢å¤±
         /// </summary>
-        VerifyLost = 7, // ÑéÖ¤¶ªÊ§
+        VerifyLost = 7, // éªŒè¯ä¸¢å¤±
         /// <summary>
-        /// ×°ÔØ¶ÁÕßĞÅÏ¢
+        /// è£…è½½è¯»è€…ä¿¡æ¯
         /// </summary>
-        LoadPatronInfo = 8, // ×°ÔØ¶ÁÕßĞÅÏ¢
+        LoadPatronInfo = 8, // è£…è½½è¯»è€…ä¿¡æ¯
         /// <summary>
-        /// Í¬Ò»¶ÁÕß¼ÌĞø½è
+        /// åŒä¸€è¯»è€…ç»§ç»­å€Ÿ
         /// </summary>
-        ContinueBorrow = 9, // Í¬Ò»¶ÁÕß¼ÌĞø½èÊé
+        ContinueBorrow = 9, // åŒä¸€è¯»è€…ç»§ç»­å€Ÿä¹¦
     }
 
     /*public*/ class BarcodeAndTime
@@ -3431,22 +3431,22 @@ Keys keyData)
     }
 
     /// <summary>
-    /// ÏÔÊ¾×´Ì¬
+    /// æ˜¾ç¤ºçŠ¶æ€
     /// </summary>
     public enum DisplayState
     {
         /// <summary>
-        /// HTML ¸ñÊ½
+        /// HTML æ ¼å¼
         /// </summary>
-        HTML = 0, // html¸ñÊ½
+        HTML = 0, // htmlæ ¼å¼
         /// <summary>
-        /// ´¿ÎÄ±¾¸ñÊ½
+        /// çº¯æ–‡æœ¬æ ¼å¼
         /// </summary>
-        TEXT = 1,   // ´¿ÎÄ±¾¸ñÊ½
+        TEXT = 1,   // çº¯æ–‡æœ¬æ ¼å¼
     }
 
     /// <summary>
-    /// ³öÄÉĞÅÏ¢µÄËŞÖ÷
+    /// å‡ºçº³ä¿¡æ¯çš„å®¿ä¸»
     /// </summary>
     internal class ChargingInfoHost
     {
@@ -3455,21 +3455,21 @@ Keys keyData)
         /// </summary>
         public ApplicationInfo ap = null;
         /// <summary>
-        /// ËŞÖ÷´°¿Ú
+        /// å®¿ä¸»çª—å£
         /// </summary>
         public IWin32Window window = null;
 
         // 
         /// <summary>
-        /// Í£Ö¹»ñÈ¡ÕªÒªµÄ¶¯×÷
+        /// åœæ­¢è·å–æ‘˜è¦çš„åŠ¨ä½œ
         /// </summary>
         public event EventHandler StopGettingSummary = null;
 
         /// <summary>
-        /// ÏìÓ¦Í£Ö¹»ñÈ¡ÕªÒªµÄ¶¯×÷
+        /// å“åº”åœæ­¢è·å–æ‘˜è¦çš„åŠ¨ä½œ
         /// </summary>
-        /// <param name="sender">·¢ËÍÕß</param>
-        /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+        /// <param name="sender">å‘é€è€…</param>
+        /// <param name="e">äº‹ä»¶å‚æ•°</param>
         public void OnStopGettingSummary(object sender, EventArgs e)
         {
             if (this.StopGettingSummary != null)

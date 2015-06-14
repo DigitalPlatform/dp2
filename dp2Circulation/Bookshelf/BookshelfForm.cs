@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -20,7 +20,6 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Marc;
 using DigitalPlatform.MarcDom;
-
 using DigitalPlatform.dp2.Statis;
 
 using DigitalPlatform.CirculationClient.localhost;
@@ -33,7 +32,7 @@ namespace dp2Circulation
         public string Lang = "zh";
 
         /// <summary>
-        /// ¿ò¼Ü´°¿Ú
+        /// æ¡†æ¶çª—å£
         /// </summary>
         public MainForm MainForm = null;
 
@@ -60,7 +59,7 @@ namespace dp2Circulation
             this.Channel.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
 
             stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// ºÍÈİÆ÷¹ØÁª
+            stop.Register(MainForm.stopManager, true);	// å’Œå®¹å™¨å…³è”
 
         }
 
@@ -69,9 +68,9 @@ namespace dp2Circulation
         {
             if (stop != null)
             {
-                if (stop.State == 0)    // 0 ±íÊ¾ÕıÔÚ´¦Àí
+                if (stop.State == 0)    // 0 è¡¨ç¤ºæ­£åœ¨å¤„ç†
                 {
-                    MessageBox.Show(this, "ÇëÔÚ¹Ø±Õ´°¿ÚÇ°Í£Ö¹ÕıÔÚ½øĞĞµÄ³¤Ê±²Ù×÷¡£");
+                    MessageBox.Show(this, "è¯·åœ¨å…³é—­çª—å£å‰åœæ­¢æ­£åœ¨è¿›è¡Œçš„é•¿æ—¶æ“ä½œã€‚");
                     e.Cancel = true;
                     return;
                 }
@@ -81,9 +80,9 @@ namespace dp2Circulation
 
         private void BookshelfForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            if (stop != null) // ÍÑÀë¹ØÁª
+            if (stop != null) // è„±ç¦»å…³è”
             {
-                stop.Unregister();	// ºÍÈİÆ÷¹ØÁª
+                stop.Unregister();	// å’Œå®¹å™¨å…³è”
                 stop = null;
             }
         }

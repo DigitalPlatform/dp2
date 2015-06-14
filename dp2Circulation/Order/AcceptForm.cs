@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -25,32 +25,32 @@ using DigitalPlatform.CirculationClient.localhost;
 namespace dp2Circulation
 {
     /// <summary>
-    /// Í¼Êé/ÆÚ¿¯(²É¹º)ÑéÊÕ´°¿Ú
+    /// å›¾ä¹¦/æœŸåˆŠ(é‡‡è´­)éªŒæ”¶çª—å£
     /// </summary>
     public partial class AcceptForm : Form
     {
         /// <summary>
-        /// »ñÈ¡Åú´ÎºÅkey+countÖµÁĞ±í
+        /// è·å–æ‰¹æ¬¡å·key+countå€¼åˆ—è¡¨
         /// </summary>
         public event GetKeyCountListEventHandler GetBatchNoTable = null;
 
         OrderDbInfos db_infos = new OrderDbInfos();
 
-        long m_lLoaded = 0; // ±¾´ÎÒÑ¾­×°Èëä¯ÀÀ¿òµÄÌõÊı
-        long m_lHitCount = 0;   // ¼ìË÷ÃüÖĞ½á¹ûÌõÊı
+        long m_lLoaded = 0; // æœ¬æ¬¡å·²ç»è£…å…¥æµè§ˆæ¡†çš„æ¡æ•°
+        long m_lHitCount = 0;   // æ£€ç´¢å‘½ä¸­ç»“æœæ¡æ•°
 
         /// <summary>
-        /// Í¨Ñ¶Í¨µÀ
+        /// é€šè®¯é€šé“
         /// </summary>
         public LibraryChannel Channel = new LibraryChannel();
 
         /// <summary>
-        /// µ±Ç°½çÃæÓïÑÔ
+        /// å½“å‰ç•Œé¢è¯­è¨€
         /// </summary>
         public string Lang = "zh";
 
         /// <summary>
-        /// ¿ò¼Ü´°¿Ú
+        /// æ¡†æ¶çª—å£
         /// </summary>
         public MainForm MainForm = null;
 
@@ -62,7 +62,7 @@ namespace dp2Circulation
         int m_nMdiClientHeight = 0;
         int m_nAcceptWindowHeight = 0;
 
-        // ä¯ÀÀÁĞ±í£¬µÄÀ¸Ä¿¶¨Òå
+        // æµè§ˆåˆ—è¡¨ï¼Œçš„æ ç›®å®šä¹‰
         const int COLUMN_RECPATH = 0;
         const int COLUMN_ROLE = 1;
         const int COLUMN_TARGETRECPATH = 2;
@@ -75,22 +75,22 @@ namespace dp2Circulation
 #endif
         const int WM_RESTORE_SELECTION = API.WM_USER + 202;
 
-        // ListViewItem imageindexÖµ
+        // ListViewItem imageindexå€¼
         const int TYPE_SOURCE = 0;
         const int TYPE_TARGET = 1;
         const int TYPE_SOURCE_AND_TARGET = 2;
-        const int TYPE_SOURCEBIBLIO = 3;   // À´×ÔÍâÔ´ÊéÄ¿¿â 2009/11/5
-        const int TYPE_NOT_ORDER = 4;   // À´×ÔºÍ²É¹ºÎŞ¹ØµÄÊı¾İ¿â 2009/11/5 changed
+        const int TYPE_SOURCEBIBLIO = 3;   // æ¥è‡ªå¤–æºä¹¦ç›®åº“ 2009/11/5
+        const int TYPE_NOT_ORDER = 4;   // æ¥è‡ªå’Œé‡‡è´­æ— å…³çš„æ•°æ®åº“ 2009/11/5 changed
 
         /*
         /// <summary>
-        /// ×°ÔØ½áÊøĞÅºÅ
+        /// è£…è½½ç»“æŸä¿¡å·
         /// </summary>
         public AutoResetEvent EventFinish = new AutoResetEvent(false);
          * */
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public AcceptForm()
         {
@@ -98,7 +98,7 @@ namespace dp2Circulation
 
             ListViewProperty prop = new ListViewProperty();
             this.listView_accept_records.Tag = prop;
-            // µÚÒ»ÁĞÌØÊâ£¬¼ÇÂ¼Â·¾¶
+            // ç¬¬ä¸€åˆ—ç‰¹æ®Šï¼Œè®°å½•è·¯å¾„
             prop.SetSortStyle(0, ColumnSortStyle.RecPath);
             prop.GetColumnTitles -= new GetColumnTitlesEventHandler(prop_GetColumnTitles);
             prop.GetColumnTitles += new GetColumnTitlesEventHandler(prop_GetColumnTitles);
@@ -110,8 +110,8 @@ namespace dp2Circulation
             if (e.DbName == "<blank>")
             {
                 e.ColumnTitles = new ColumnPropertyCollection();
-                e.ColumnTitles.Add("¼ìË÷µã");
-                e.ColumnTitles.Add("ÊıÁ¿");
+                e.ColumnTitles.Add("æ£€ç´¢ç‚¹");
+                e.ColumnTitles.Add("æ•°é‡");
                 return;
             }
 
@@ -146,7 +146,7 @@ namespace dp2Circulation
             this.Channel.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
 
             stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// ºÍÈİÆ÷¹ØÁª
+            stop.Register(MainForm.stopManager, true);	// å’Œå®¹å™¨å…³è”
 
             bool bRet = InitialSizeParam();
             Debug.Assert(bRet == true, "");
@@ -156,7 +156,7 @@ namespace dp2Circulation
                 "accept_window_height",
                 0);
             if (nAcceptWindowHeight <= 0 || nAcceptWindowHeight >= m_nMdiClientHeight)
-                nAcceptWindowHeight = (int)((float)m_nMdiClientHeight * 0.3f);  // ³õÊ¼»¯Îª1/3 ¿Í»§Çø¸ß¶È
+                nAcceptWindowHeight = (int)((float)m_nMdiClientHeight * 0.3f);  // åˆå§‹åŒ–ä¸º1/3 å®¢æˆ·åŒºé«˜åº¦
 
             this.m_nAcceptWindowHeight = nAcceptWindowHeight;
 
@@ -187,12 +187,12 @@ namespace dp2Circulation
             this.comboBox_prepare_type.Text = this.MainForm.AppInfo.GetString(
                 "accept_form",
                 "item_type",
-                "Í¼Êé");
+                "å›¾ä¹¦");
 
             this.comboBox_prepare_priceDefault.Text = this.MainForm.AppInfo.GetString(
     "accept_form",
     "price_default",
-    "ÑéÊÕ¼Û");
+    "éªŒæ”¶ä»·");
 
 
             this.checkBox_prepare_inputItemBarcode.Checked = this.MainForm.AppInfo.GetBoolean(
@@ -221,7 +221,7 @@ namespace dp2Circulation
             this.comboBox_accept_matchStyle.Text = this.MainForm.AppInfo.GetString(
                 "accept_form",
                 "match_style",
-                "¾«È·Ò»ÖÂ");
+                "ç²¾ç¡®ä¸€è‡´");
 
             SetTabPageEnabled(this.tabPage_accept, false);
             SetTabPageEnabled(this.tabPage_finish, false);
@@ -233,7 +233,7 @@ namespace dp2Circulation
                 "ui_state",
                 "");
             if (string.IsNullOrEmpty(this.comboBox_accept_matchStyle.Text) == true)
-                this.comboBox_accept_matchStyle.Text = "¾«È·Ò»ÖÂ";
+                this.comboBox_accept_matchStyle.Text = "ç²¾ç¡®ä¸€è‡´";
 
             SetWindowTitle();
 
@@ -262,7 +262,7 @@ namespace dp2Circulation
         {
             Global.GetBatchNoTable(e,
                 this,
-                this.comboBox_prepare_type.Text,    // ºÍ³ö°æÎïÀàĞÍÓĞ¹Ø
+                this.comboBox_prepare_type.Text,    // å’Œå‡ºç‰ˆç‰©ç±»å‹æœ‰å…³
                 "item",
                 this.stop,
                 this.Channel);
@@ -271,7 +271,7 @@ namespace dp2Circulation
         bool InitialSizeParam()
         {
             /*
-            // 2008/12/10 Èç¹ûÃ»ÓĞÕâÒ»¾ä£¬Ôò1024X768Ğ¡×ÖÌåÇé¿öÏÂ»áÅ×³öÒì³£
+            // 2008/12/10 å¦‚æœæ²¡æœ‰è¿™ä¸€å¥ï¼Œåˆ™1024X768å°å­—ä½“æƒ…å†µä¸‹ä¼šæŠ›å‡ºå¼‚å¸¸
             if (this.MdiParent == null)
                 return;
 
@@ -296,27 +296,27 @@ namespace dp2Circulation
         {
             if (stop != null)
             {
-                if (stop.State == 0)    // 0 ±íÊ¾ÕıÔÚ´¦Àí
+                if (stop.State == 0)    // 0 è¡¨ç¤ºæ­£åœ¨å¤„ç†
                 {
-                    MessageBox.Show(this, "ÇëÔÚ¹Ø±Õ´°¿ÚÇ°Í£Ö¹ÕıÔÚ½øĞĞµÄ³¤Ê±²Ù×÷¡£");
+                    MessageBox.Show(this, "è¯·åœ¨å…³é—­çª—å£å‰åœæ­¢æ­£åœ¨è¿›è¡Œçš„é•¿æ—¶æ“ä½œã€‚");
                     e.Cancel = true;
                     return;
                 }
             }
 
-            // ¹Ø±Õ ¹ØÁªµÄEntityForm
+            // å…³é—­ å…³è”çš„EntityForm
             bool bRet = CloseDetailWindow();
 
-            // Èç¹ûÃ»ÓĞ¹Ø±Õ³É¹¦
+            // å¦‚æœæ²¡æœ‰å…³é—­æˆåŠŸ
             if (bRet == false)
                 e.Cancel = true;
         }
 
         private void AcceptForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            if (stop != null) // ÍÑÀë¹ØÁª
+            if (stop != null) // è„±ç¦»å…³è”
             {
-                stop.Unregister();	// ºÍÈİÆ÷¹ØÁª
+                stop.Unregister();	// å’Œå®¹å™¨å…³è”
                 stop = null;
             }
 
@@ -381,7 +381,7 @@ this.checkBox_prepare_createCallNumber.Checked);
         }
 
         /// <summary>
-        /// »ñÈ¡»òÉèÖÃ¿Ø¼ş³ß´ç×´Ì¬
+        /// è·å–æˆ–è®¾ç½®æ§ä»¶å°ºå¯¸çŠ¶æ€
         /// </summary>
         public string UiState
         {
@@ -436,9 +436,9 @@ this.checkBox_prepare_createCallNumber.Checked);
         }
 
         /// <summary>
-        /// ÔÊĞí»òÕß½ûÖ¹½çÃæ¿Ø¼ş¡£ÔÚ³¤²Ù×÷Ç°£¬Ò»°ãĞèÒª½ûÖ¹½çÃæ¿Ø¼ş£»²Ù×÷Íê³ÉºóÔÙÔÊĞí
+        /// å…è®¸æˆ–è€…ç¦æ­¢ç•Œé¢æ§ä»¶ã€‚åœ¨é•¿æ“ä½œå‰ï¼Œä¸€èˆ¬éœ€è¦ç¦æ­¢ç•Œé¢æ§ä»¶ï¼›æ“ä½œå®Œæˆåå†å…è®¸
         /// </summary>
-        /// <param name="bEnable">ÊÇ·ñÔÊĞí½çÃæ¿Ø¼ş¡£true ÎªÔÊĞí£¬ false Îª½ûÖ¹</param>
+        /// <param name="bEnable">æ˜¯å¦å…è®¸ç•Œé¢æ§ä»¶ã€‚true ä¸ºå…è®¸ï¼Œ false ä¸ºç¦æ­¢</param>
         public void EnableControls(bool bEnable)
         {
 
@@ -483,7 +483,7 @@ this.checkBox_prepare_createCallNumber.Checked);
         {
             // string strError = "";
 
-            this.button_next.Text = "ÏÂÒ»»·½Ú(&N)";
+            this.button_next.Text = "ä¸‹ä¸€ç¯èŠ‚(&N)";
 
             if (this.tabComboBox_prepare_batchNo.Text == ""
     || this.comboBox_prepare_type.Text == "")
@@ -512,18 +512,18 @@ this.checkBox_prepare_createCallNumber.Checked);
             }
             else if (this.tabControl_main.SelectedTab == this.tabPage_finish)
             {
-                this.button_next.Text = "¹Ø±Õ(&X)";
+                this.button_next.Text = "å…³é—­(&X)";
             }
             else
             {
-                Debug.Assert(false, "Î´ÖªµÄtabpage×´Ì¬");
+                Debug.Assert(false, "æœªçŸ¥çš„tabpageçŠ¶æ€");
             }
 
         }
 
         private void textBox_accept_isbn_Enter(object sender, EventArgs e)
         {
-            // °Ñ¡°¼ìË÷°´Å¥¡±ÉèÎªÈ±Ê¡°´Å¥
+            // æŠŠâ€œæ£€ç´¢æŒ‰é’®â€è®¾ä¸ºç¼ºçœæŒ‰é’®
             Button oldButton = (Button)this.AcceptButton;
 
             this.AcceptButton = this.button_accept_searchISBN;
@@ -539,7 +539,7 @@ this.checkBox_prepare_createCallNumber.Checked);
 
         private void textBox_accept_isbn_Leave(object sender, EventArgs e)
         {
-            // °Ñ¡°ÏÂÒ»»·½Ú¡±ÉèÎªÈ±Ê¡°´Å¥
+            // æŠŠâ€œä¸‹ä¸€ç¯èŠ‚â€è®¾ä¸ºç¼ºçœæŒ‰é’®
             Button oldButton = (Button)this.AcceptButton;
 
             this.AcceptButton = this.button_next;
@@ -555,12 +555,12 @@ this.checkBox_prepare_createCallNumber.Checked);
 
         // 
         /// <summary>
-        /// ÔÚ ListView ×îÇ°Ãæ²åÈëÒ»ĞĞ
+        /// åœ¨ ListView æœ€å‰é¢æ’å…¥ä¸€è¡Œ
         /// </summary>
-        /// <param name="list">ListView ¶ÔÏó</param>
-        /// <param name="strID">IDÁĞÄÚÈİ</param>
-        /// <param name="others">ÆäËûÁĞÄÚÈİ</param>
-        /// <returns>ĞÂ²åÈëµÄ ListViewItem ¶ÔÏó</returns>
+        /// <param name="list">ListView å¯¹è±¡</param>
+        /// <param name="strID">IDåˆ—å†…å®¹</param>
+        /// <param name="others">å…¶ä»–åˆ—å†…å®¹</param>
+        /// <returns>æ–°æ’å…¥çš„ ListViewItem å¯¹è±¡</returns>
         public static ListViewItem InsertNewLine(
             ListView list,
             string strID,
@@ -571,7 +571,7 @@ this.checkBox_prepare_createCallNumber.Checked);
 
             ListViewItem item = new ListViewItem(strID, 0);
 
-            // item.SubItems.Add("");  // ½ÇÉ«
+            // item.SubItems.Add("");  // è§’è‰²
             list.Items.Insert(0, item);
 
             if (others != null)
@@ -589,12 +589,12 @@ this.checkBox_prepare_createCallNumber.Checked);
 
         // 
         /// <summary>
-        /// ÔÚ ListView ×îºó×·¼ÓÒ»ĞĞ
+        /// åœ¨ ListView æœ€åè¿½åŠ ä¸€è¡Œ
         /// </summary>
-        /// <param name="list">ListView ¶ÔÏó</param>
-        /// <param name="strID">IDÁĞÄÚÈİ</param>
-        /// <param name="others">ÆäËûÁĞÄÚÈİ</param>
-        /// <returns>ĞÂ²åÈëµÄ ListViewItem ¶ÔÏó</returns>
+        /// <param name="list">ListView å¯¹è±¡</param>
+        /// <param name="strID">IDåˆ—å†…å®¹</param>
+        /// <param name="others">å…¶ä»–åˆ—å†…å®¹</param>
+        /// <returns>æ–°æ’å…¥çš„ ListViewItem å¯¹è±¡</returns>
         public static ListViewItem AppendNewLine(
             ListView list,
             string strID,
@@ -604,7 +604,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                 ListViewUtil.EnsureColumns(list, others.Length + RESERVE_COLUMN_COUNT);
 
             ListViewItem item = new ListViewItem(strID, 0);
-            // item.SubItems.Add("");  // ½ÇÉ«
+            // item.SubItems.Add("");  // è§’è‰²
 
             list.Items.Add(item);
 
@@ -626,28 +626,28 @@ this.checkBox_prepare_createCallNumber.Checked);
             string strText = this.comboBox_accept_matchStyle.Text;
 
             // 2009/8/6
-            if (strText == "¿ÕÖµ")
+            if (strText == "ç©ºå€¼")
                 return "null";
 
             if (String.IsNullOrEmpty(strText) == true)
-                return "exact"; // È±Ê¡Ê±ÈÏÎªÊÇ ¾«È·Ò»ÖÂ
+                return "exact"; // ç¼ºçœæ—¶è®¤ä¸ºæ˜¯ ç²¾ç¡®ä¸€è‡´
 
-            if (strText == "Ç°·½Ò»ÖÂ")
+            if (strText == "å‰æ–¹ä¸€è‡´")
                 return "left";
-            if (strText == "ÖĞ¼äÒ»ÖÂ")
+            if (strText == "ä¸­é—´ä¸€è‡´")
                 return "middle";
-            if (strText == "ºó·½Ò»ÖÂ")
+            if (strText == "åæ–¹ä¸€è‡´")
                 return "right";
-            if (strText == "¾«È·Ò»ÖÂ")
+            if (strText == "ç²¾ç¡®ä¸€è‡´")
                 return "exact";
 
-            return strText; // Ö±½Ó·µ»ØÔ­ÎÄ
+            return strText; // ç›´æ¥è¿”å›åŸæ–‡
         }
 
         // return:
         //      -1  error
-        //      0   Î´ÃüÖĞ
-        //      >0  ÃüÖĞ¼ÇÂ¼ÌõÊı
+        //      0   æœªå‘½ä¸­
+        //      >0  å‘½ä¸­è®°å½•æ¡æ•°
         int DoSearch(out string strError)
         {
             strError = "";
@@ -655,8 +655,8 @@ this.checkBox_prepare_createCallNumber.Checked);
 
             bool bQuickLoad = false;
 
-            // ĞŞ¸Ä´°¿Ú±êÌâ
-            this.Text = "ÕıÔÚÑéÊÕ " + this.textBox_accept_queryWord.Text;
+            // ä¿®æ”¹çª—å£æ ‡é¢˜
+            this.Text = "æ­£åœ¨éªŒæ”¶ " + this.textBox_accept_queryWord.Text;
 
             this.listView_accept_records.Items.Clear();
             ListViewUtil.ClearSortColumns(this.listView_accept_records);
@@ -666,7 +666,7 @@ this.checkBox_prepare_createCallNumber.Checked);
 
             stop.HideProgress();
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ¼ìË÷ "+this.textBox_accept_queryWord.Text+" ...");
+            stop.Initial("æ­£åœ¨æ£€ç´¢ "+this.textBox_accept_queryWord.Text+" ...");
             stop.BeginLoop();
 
             this.EnableControls(false);
@@ -674,7 +674,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             {
                 if (this.comboBox_accept_from.Text == "")
                 {
-                    strError = "ÉĞÎ´Ñ¡¶¨¼ìË÷Í¾¾¶";
+                    strError = "å°šæœªé€‰å®šæ£€ç´¢é€”å¾„";
                     return -1;
                 }
 
@@ -692,22 +692,22 @@ this.checkBox_prepare_createCallNumber.Checked);
 
                 if (String.IsNullOrEmpty(strFromStyle) == true)
                 {
-                    strError = "GetFromStyle()Ã»ÓĞÕÒµ½ '" + this.comboBox_accept_from.Text + "' ¶ÔÓ¦µÄstyle×Ö·û´®";
+                    strError = "GetFromStyle()æ²¡æœ‰æ‰¾åˆ° '" + this.comboBox_accept_from.Text + "' å¯¹åº”çš„styleå­—ç¬¦ä¸²";
                     return -1;
                 }
 
                 /*
                 string strFromStyle = "isbn";
 
-                if (this.comboBox_prepare_type.Text == "Í¼Êé")
+                if (this.comboBox_prepare_type.Text == "å›¾ä¹¦")
                     strFromStyle = "isbn";
                 else
                 {
-                    Debug.Assert(this.comboBox_prepare_type.Text == "Á¬Ğø³ö°æÎï", "");
+                    Debug.Assert(this.comboBox_prepare_type.Text == "è¿ç»­å‡ºç‰ˆç‰©", "");
                     strFromStyle = "issn";
                 }*/
 
-                // ×¢£º"null"Ö»ÄÜÔÚÇ°¶Ë¶ÌÔİ´æÔÚ£¬¶øÄÚºËÊÇ²»ÈÏÕâ¸öËùÎ½µÄmatchstyleµÄ
+                // æ³¨ï¼š"null"åªèƒ½åœ¨å‰ç«¯çŸ­æš‚å­˜åœ¨ï¼Œè€Œå†…æ ¸æ˜¯ä¸è®¤è¿™ä¸ªæ‰€è°“çš„matchstyleçš„
                 string strMatchStyle = GetCurrentMatchStyle();
 
                 if (this.textBox_accept_queryWord.Text == "")
@@ -716,12 +716,12 @@ this.checkBox_prepare_createCallNumber.Checked);
                     {
                         this.textBox_accept_queryWord.Text = "";
 
-                        // ×¨ÃÅ¼ìË÷¿ÕÖµ
+                        // ä¸“é—¨æ£€ç´¢ç©ºå€¼
                         strMatchStyle = "exact";
                     }
                     else
                     {
-                        // ÎªÁËÔÚ¼ìË÷´ÊÎª¿ÕµÄÊ±ºò£¬¼ìË÷³öÈ«²¿µÄ¼ÇÂ¼
+                        // ä¸ºäº†åœ¨æ£€ç´¢è¯ä¸ºç©ºçš„æ—¶å€™ï¼Œæ£€ç´¢å‡ºå…¨éƒ¨çš„è®°å½•
                         strMatchStyle = "left";
                     }
                 }
@@ -730,14 +730,14 @@ this.checkBox_prepare_createCallNumber.Checked);
                     // 2009/11/5
                     if (strMatchStyle == "null")
                     {
-                        strError = "¼ìË÷¿ÕÖµµÄÊ±ºò£¬Çë±£³Ö¼ìË÷´ÊÎª¿Õ";
+                        strError = "æ£€ç´¢ç©ºå€¼çš„æ—¶å€™ï¼Œè¯·ä¿æŒæ£€ç´¢è¯ä¸ºç©º";
                         return -1;
                     }
                 }
 
                 string strQueryXml = "";
                 long lRet = Channel.SearchBiblio(stop,
-                    GetDbNameListString(),  // "<È«²¿>",
+                    GetDbNameListString(),  // "<å…¨éƒ¨>",
                     this.textBox_accept_queryWord.Text,
                     1000,   // this.MaxSearchResultCount,  // 1000
                     strFromStyle,
@@ -752,7 +752,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                     goto ERROR1;
                 if (lRet == 0)
                 {
-                    strError = "Î´ÃüÖĞ";
+                    strError = "æœªå‘½ä¸­";
                     return 0;
                 }
 
@@ -760,7 +760,7 @@ this.checkBox_prepare_createCallNumber.Checked);
 
                 this.m_lHitCount = lHitCount;
 
-                // ÏÔÊ¾Ç°°ë³Ì
+                // æ˜¾ç¤ºå‰åŠç¨‹
                 stop.SetProgressRange(0, lHitCount * 2);
 
                 long lStart = 0;
@@ -769,21 +769,21 @@ this.checkBox_prepare_createCallNumber.Checked);
 
                 bool bPushFillingBrowse = true; //  this.PushFillingBrowse;
 
-                // ×°Èëä¯ÀÀ¸ñÊ½
+                // è£…å…¥æµè§ˆæ ¼å¼
                 for (; ; )
                 {
-                    Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                    Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                     if (stop != null)
                     {
                         if (stop.State != 0)
                         {
-                            strError = "ÓÃ»§ÖĞ¶Ï";
+                            strError = "ç”¨æˆ·ä¸­æ–­";
                             return -1;
                         }
                     }
 
-                    stop.SetMessage("ÕıÔÚ×°Èëä¯ÀÀĞÅÏ¢ " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (ÃüÖĞ " + lHitCount.ToString() + " Ìõ¼ÇÂ¼) ...");
+                    stop.SetMessage("æ­£åœ¨è£…å…¥æµè§ˆä¿¡æ¯ " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (å‘½ä¸­ " + lHitCount.ToString() + " æ¡è®°å½•) ...");
 
                     string strStyle = "id,cols";
 
@@ -804,11 +804,11 @@ this.checkBox_prepare_createCallNumber.Checked);
 
                     if (lRet == 0)
                     {
-                        strError = "Î´ÃüÖĞ";
+                        strError = "æœªå‘½ä¸­";
                         return 0;
                     }
 
-                    // ´¦Àíä¯ÀÀ½á¹û
+                    // å¤„ç†æµè§ˆç»“æœ
                     for (int i = 0; i < searchresults.Length; i++)
                     {
                         ListViewItem item = null;
@@ -840,17 +840,17 @@ this.checkBox_prepare_createCallNumber.Checked);
                         }
 
                         // 
-                        // ¸ù¾İ¼ÇÂ¼Â·¾¶£¬»ñµÃListViewItemÊÂÏîµÄimageindexÏÂ±ê
+                        // æ ¹æ®è®°å½•è·¯å¾„ï¼Œè·å¾—ListViewItemäº‹é¡¹çš„imageindexä¸‹æ ‡
                         // return:
-                        //      -2  ¸ù±¾²»ÊÇÊéÄ¿¿â
-                        //      -1  ²»ÊÇ²É¹ºÔ´»òÄ¿±êµÄÆäËüÊéÄ¿¿â
-                        //      0   Ô´
-                        //      1   Ä¿±ê
-                        //      2   Í¬Ê±ÎªÔ´ºÍÄ¿±ê
-                        //      3   ÍâÔ´
+                        //      -2  æ ¹æœ¬ä¸æ˜¯ä¹¦ç›®åº“
+                        //      -1  ä¸æ˜¯é‡‡è´­æºæˆ–ç›®æ ‡çš„å…¶å®ƒä¹¦ç›®åº“
+                        //      0   æº
+                        //      1   ç›®æ ‡
+                        //      2   åŒæ—¶ä¸ºæºå’Œç›®æ ‡
+                        //      3   å¤–æº
                         int image_index = this.db_infos.GetItemType(searchresults[i].Path,
                             this.comboBox_prepare_type.Text);
-                        Debug.Assert(image_index != -2, "¾ÓÈ»¼ìË÷µ½·ÇÊéÄ¿¿âµÄ¼ÇÂ¼?");
+                        Debug.Assert(image_index != -2, "å±…ç„¶æ£€ç´¢åˆ°éä¹¦ç›®åº“çš„è®°å½•?");
                         item.ImageIndex = image_index;
 
                         SetItemColor(item); //
@@ -865,7 +865,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                     stop.SetProgressValue(lStart);
                 }
 
-                // this.label_message.Text = "¼ìË÷¹²ÃüÖĞ " + lHitCount.ToString() + " ÌõÊéÄ¿¼ÇÂ¼";
+                // this.label_message.Text = "æ£€ç´¢å…±å‘½ä¸­ " + lHitCount.ToString() + " æ¡ä¹¦ç›®è®°å½•";
             }
             finally
             {
@@ -891,20 +891,20 @@ this.checkBox_prepare_createCallNumber.Checked);
 
             string strRecPath = ListViewUtil.GetItemText(item,
                 COLUMN_RECPATH);
-            // ¸ù¾İ¼ÇÂ¼Â·¾¶£¬»ñµÃListViewItemÊÂÏîµÄimageindexÏÂ±ê
+            // æ ¹æ®è®°å½•è·¯å¾„ï¼Œè·å¾—ListViewItemäº‹é¡¹çš„imageindexä¸‹æ ‡
             // return:
-            //      -2  ¸ù±¾²»ÊÇÊéÄ¿¿â
-            //      -1  ²»ÊÇ²É¹ºÔ´»òÄ¿±êµÄÆäËüÊéÄ¿¿â
-            //      0   Ô´
-            //      1   Ä¿±ê
-            //      2   Í¬Ê±ÎªÔ´ºÍÄ¿±ê
-            //      3   ÍâÔ´
+            //      -2  æ ¹æœ¬ä¸æ˜¯ä¹¦ç›®åº“
+            //      -1  ä¸æ˜¯é‡‡è´­æºæˆ–ç›®æ ‡çš„å…¶å®ƒä¹¦ç›®åº“
+            //      0   æº
+            //      1   ç›®æ ‡
+            //      2   åŒæ—¶ä¸ºæºå’Œç›®æ ‡
+            //      3   å¤–æº
             int image_index = this.db_infos.GetItemType(strRecPath,
                             this.comboBox_prepare_type.Text);
-            // ÊÇÇ±ÔÚµÄÔ´
+            // æ˜¯æ½œåœ¨çš„æº
             if (image_index == 0 || image_index == 2)
             {
-                // »ñµÃ998$t
+                // è·å¾—998$t
                 string strTargetRecPath = "";
                 long lRet = Channel.GetBiblioInfo(
                     stop,
@@ -916,17 +916,17 @@ this.checkBox_prepare_createCallNumber.Checked);
                 ListViewUtil.ChangeItemText(item, COLUMN_TARGETRECPATH, strTargetRecPath);
             }
 
-            // ÊÇÇ±ÔÚµÄÔ´
+            // æ˜¯æ½œåœ¨çš„æº
             if (image_index == 0 || image_index == 2)
             {
-                // ¼ì²éÊÇ·ñ¾ß±¸²É¹ºĞÅÏ¢
-                // ×°Èë¶©¹º¼ÇÂ¼£¬¼ì²éÊÇ·ñÓĞ¶©¹ºĞÅÏ¢
+                // æ£€æŸ¥æ˜¯å¦å…·å¤‡é‡‡è´­ä¿¡æ¯
+                // è£…å…¥è®¢è´­è®°å½•ï¼Œæ£€æŸ¥æ˜¯å¦æœ‰è®¢è´­ä¿¡æ¯
                 // parameters:
-                //      strSellerList   ÊéÉÌÃû³ÆÁĞ±í¡£¶ººÅ·Ö¸îµÄ×Ö·û´®¡£Èç¹ûÎªnull£¬±íÊ¾²»¶ÔÊéÉÌÃû³Æ½øĞĞ¹ıÂË
+                //      strSellerList   ä¹¦å•†åç§°åˆ—è¡¨ã€‚é€—å·åˆ†å‰²çš„å­—ç¬¦ä¸²ã€‚å¦‚æœä¸ºnullï¼Œè¡¨ç¤ºä¸å¯¹ä¹¦å•†åç§°è¿›è¡Œè¿‡æ»¤
                 // return:
-                //      -1  ³ö´í
-                //      0   Ã»ÓĞ(·ûºÏÒªÇóµÄ)¶©¹ºĞÅÏ¢
-                //      >0  ÓĞÕâÃ´¶àÌõ·ûºÏÒªÇóµÄ¶©¹ºĞÅÏ¢
+                //      -1  å‡ºé”™
+                //      0   æ²¡æœ‰(ç¬¦åˆè¦æ±‚çš„)è®¢è´­ä¿¡æ¯
+                //      >0  æœ‰è¿™ä¹ˆå¤šæ¡ç¬¦åˆè¦æ±‚çš„è®¢è´­ä¿¡æ¯
                 nRet = LoadOrderRecords(strRecPath,
                     null,   // strSellerList,
                     out strError);
@@ -943,14 +943,14 @@ this.checkBox_prepare_createCallNumber.Checked);
             return 0;
         }
 
-        // ¹ıÂËËùÓĞÇ±ÔÚÔ´¼ÇÂ¼£¬Èç¹ûÃ»ÓĞ²É¹ºĞÅÏ¢£¬»òÕß²É¹ºĞÅÏ¢ºÍÌØ¶¨ÇşµÀ²»ÎÇºÏ£¬ÔòĞĞ±äÎª»ÒÉ«
+        // è¿‡æ»¤æ‰€æœ‰æ½œåœ¨æºè®°å½•ï¼Œå¦‚æœæ²¡æœ‰é‡‡è´­ä¿¡æ¯ï¼Œæˆ–è€…é‡‡è´­ä¿¡æ¯å’Œç‰¹å®šæ¸ é“ä¸å»åˆï¼Œåˆ™è¡Œå˜ä¸ºç°è‰²
         int FilterOrderInfo(out string strError)
         {
             strError = "";
             int nRet = 0;
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ¹ıÂË¼ÇÂ¼ ...");
+            stop.Initial("æ­£åœ¨è¿‡æ»¤è®°å½• ...");
             stop.BeginLoop();
 
             this.EnableControls(false);
@@ -958,11 +958,11 @@ this.checkBox_prepare_createCallNumber.Checked);
 
             try
             {
-                // ÏÔÊ¾ºó°ë³Ì
+                // æ˜¾ç¤ºååŠç¨‹
                 stop.SetProgressRange(0, this.listView_accept_records.Items.Count * 2);
                 for (int i = 0; i < this.listView_accept_records.Items.Count; i++)
                 {
-                    Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                    Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                     if (stop != null)
                     {
@@ -976,27 +976,27 @@ this.checkBox_prepare_createCallNumber.Checked);
                     /*
                     string strRecPath = ListViewUtil.GetItemText(item,
                         COLUMN_RECPATH);
-                    // ¸ù¾İ¼ÇÂ¼Â·¾¶£¬»ñµÃListViewItemÊÂÏîµÄimageindexÏÂ±ê
+                    // æ ¹æ®è®°å½•è·¯å¾„ï¼Œè·å¾—ListViewItemäº‹é¡¹çš„imageindexä¸‹æ ‡
                     // return:
-                    //      -2  ¸ù±¾²»ÊÇÊéÄ¿¿â
-                    //      -1  ²»ÊÇ²É¹ºÔ´»òÄ¿±êµÄÆäËüÊéÄ¿¿â
-                    //      0   Ô´
-                    //      1   Ä¿±ê
-                    //      2   Í¬Ê±ÎªÔ´ºÍÄ¿±ê
-                    //      3   ÍâÔ´
+                    //      -2  æ ¹æœ¬ä¸æ˜¯ä¹¦ç›®åº“
+                    //      -1  ä¸æ˜¯é‡‡è´­æºæˆ–ç›®æ ‡çš„å…¶å®ƒä¹¦ç›®åº“
+                    //      0   æº
+                    //      1   ç›®æ ‡
+                    //      2   åŒæ—¶ä¸ºæºå’Œç›®æ ‡
+                    //      3   å¤–æº
                     int image_index = this.db_infos.GetItemType(strRecPath,
                                     this.comboBox_prepare_type.Text);
-                    // ÊÇÇ±ÔÚµÄÔ´
+                    // æ˜¯æ½œåœ¨çš„æº
                     if (image_index == 0 || image_index == 2)
                     {
-                        // ¼ì²éÊÇ·ñ¾ß±¸²É¹ºĞÅÏ¢
-                        // ×°Èë¶©¹º¼ÇÂ¼£¬¼ì²éÊÇ·ñÓĞ¶©¹ºĞÅÏ¢
+                        // æ£€æŸ¥æ˜¯å¦å…·å¤‡é‡‡è´­ä¿¡æ¯
+                        // è£…å…¥è®¢è´­è®°å½•ï¼Œæ£€æŸ¥æ˜¯å¦æœ‰è®¢è´­ä¿¡æ¯
                         // parameters:
-                        //      strSellerList   ÊéÉÌÃû³ÆÁĞ±í¡£¶ººÅ·Ö¸îµÄ×Ö·û´®¡£Èç¹ûÎªnull£¬±íÊ¾²»¶ÔÊéÉÌÃû³Æ½øĞĞ¹ıÂË
+                        //      strSellerList   ä¹¦å•†åç§°åˆ—è¡¨ã€‚é€—å·åˆ†å‰²çš„å­—ç¬¦ä¸²ã€‚å¦‚æœä¸ºnullï¼Œè¡¨ç¤ºä¸å¯¹ä¹¦å•†åç§°è¿›è¡Œè¿‡æ»¤
                         // return:
-                        //      -1  ³ö´í
-                        //      0   Ã»ÓĞ(·ûºÏÒªÇóµÄ)¶©¹ºĞÅÏ¢
-                        //      >0  ÓĞÕâÃ´¶àÌõ·ûºÏÒªÇóµÄ¶©¹ºĞÅÏ¢
+                        //      -1  å‡ºé”™
+                        //      0   æ²¡æœ‰(ç¬¦åˆè¦æ±‚çš„)è®¢è´­ä¿¡æ¯
+                        //      >0  æœ‰è¿™ä¹ˆå¤šæ¡ç¬¦åˆè¦æ±‚çš„è®¢è´­ä¿¡æ¯
                         nRet = LoadOrderRecords(strRecPath,
                             null,   // strSellerList,
                             out strError);
@@ -1011,10 +1011,10 @@ this.checkBox_prepare_createCallNumber.Checked);
                     }
 
 
-                    // ÊÇÇ±ÔÚµÄÔ´
+                    // æ˜¯æ½œåœ¨çš„æº
                     if (image_index == 0 || image_index == 2)
                     {
-                        // »ñµÃ998$t
+                        // è·å¾—998$t
                         string strTargetRecPath = "";
                         long lRet = Channel.GetBiblioInfo(
                             stop,
@@ -1051,27 +1051,27 @@ this.checkBox_prepare_createCallNumber.Checked);
             return 1;
         }
 
-        // ×°Èë¶©¹º¼ÇÂ¼£¬¼ì²éÊÇ·ñÓĞ¶©¹ºĞÅÏ¢
+        // è£…å…¥è®¢è´­è®°å½•ï¼Œæ£€æŸ¥æ˜¯å¦æœ‰è®¢è´­ä¿¡æ¯
         // parameters:
-        //      strSellerList   ÊéÉÌÃû³ÆÁĞ±í¡£¶ººÅ·Ö¸îµÄ×Ö·û´®¡£Èç¹ûÎªnull£¬±íÊ¾²»¶ÔÊéÉÌÃû³Æ½øĞĞ¹ıÂË
+        //      strSellerList   ä¹¦å•†åç§°åˆ—è¡¨ã€‚é€—å·åˆ†å‰²çš„å­—ç¬¦ä¸²ã€‚å¦‚æœä¸ºnullï¼Œè¡¨ç¤ºä¸å¯¹ä¹¦å•†åç§°è¿›è¡Œè¿‡æ»¤
         // return:
-        //      -1  ³ö´í
-        //      0   Ã»ÓĞ(·ûºÏÒªÇóµÄ)¶©¹ºĞÅÏ¢
-        //      >0  ÓĞÕâÃ´¶àÌõ·ûºÏÒªÇóµÄ¶©¹ºĞÅÏ¢
+        //      -1  å‡ºé”™
+        //      0   æ²¡æœ‰(ç¬¦åˆè¦æ±‚çš„)è®¢è´­ä¿¡æ¯
+        //      >0  æœ‰è¿™ä¹ˆå¤šæ¡ç¬¦åˆè¦æ±‚çš„è®¢è´­ä¿¡æ¯
         /*public*/ int LoadOrderRecords(string strBiblioRecPath,
             string strSellerList,
             out string strError)
         {
             int nCount = 0;
 
-            stop.SetMessage("ÕıÔÚ×°ÈëÊéÄ¿¼ÇÂ¼ '" + strBiblioRecPath + "' ÏÂÊôµÄ¶©¹ºĞÅÏ¢ ...");
+            stop.SetMessage("æ­£åœ¨è£…å…¥ä¹¦ç›®è®°å½• '" + strBiblioRecPath + "' ä¸‹å±çš„è®¢è´­ä¿¡æ¯ ...");
 
             // string strHtml = "";
             long lStart = 0;
             long lResultCount = 0;
             long lCount = -1;
 
-            // 2012/5/9 ¸ÄĞ´ÎªÑ­»··½Ê½
+            // 2012/5/9 æ”¹å†™ä¸ºå¾ªç¯æ–¹å¼
             for (; ; )
             {
 
@@ -1096,7 +1096,7 @@ this.checkBox_prepare_createCallNumber.Checked);
 
                 Debug.Assert(orders != null, "");
 
-                // ÓÅ»¯£ºÈç¹û²»ĞèÒª¹ıÂËÊéÉÌÃû£¬¾Í²»±Ø×°ÈëXML¼ÇÂ¼µ½DOMÖĞ½øĞĞÆÊÎöÁË
+                // ä¼˜åŒ–ï¼šå¦‚æœä¸éœ€è¦è¿‡æ»¤ä¹¦å•†åï¼Œå°±ä¸å¿…è£…å…¥XMLè®°å½•åˆ°DOMä¸­è¿›è¡Œå‰–æäº†
                 if (strSellerList == null)
                     return orders.Length;
 
@@ -1104,11 +1104,11 @@ this.checkBox_prepare_createCallNumber.Checked);
                 {
                     if (orders[i].ErrorCode != ErrorCodeValue.NoError)
                     {
-                        strError = "Â·¾¶Îª '" + orders[i].OldRecPath + "' µÄ¶©¹º¼ÇÂ¼×°ÔØÖĞ·¢Éú´íÎó: " + orders[i].ErrorInfo;  // NewRecPath
+                        strError = "è·¯å¾„ä¸º '" + orders[i].OldRecPath + "' çš„è®¢è´­è®°å½•è£…è½½ä¸­å‘ç”Ÿé”™è¯¯: " + orders[i].ErrorInfo;  // NewRecPath
                         return -1;
                     }
 
-                    // ÆÊÎöÒ»¸ö¶©¹ºxml¼ÇÂ¼£¬È¡³öÓĞ¹ØĞÅÏ¢·ÅÈëlistviewÖĞ
+                    // å‰–æä¸€ä¸ªè®¢è´­xmlè®°å½•ï¼Œå–å‡ºæœ‰å…³ä¿¡æ¯æ”¾å…¥listviewä¸­
                     OrderItem orderitem = new OrderItem();
 
                     int nRet = orderitem.SetData(orders[i].OldRecPath, // NewRecPath
@@ -1129,7 +1129,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                             continue;
                     }
 
-                    // TODO: ÒÑ¾­ÊıÁ¿µ½ÆëµÄ£¬ÊÇ·ñ²»¼ÆÈë¶©¹ºĞÅÏ¢£¿
+                    // TODO: å·²ç»æ•°é‡åˆ°é½çš„ï¼Œæ˜¯å¦ä¸è®¡å…¥è®¢è´­ä¿¡æ¯ï¼Ÿ
 
                     nCount++;
                     /*
@@ -1152,9 +1152,9 @@ this.checkBox_prepare_createCallNumber.Checked);
             string strError = "";
 
             if (this.textBox_accept_queryWord.Text == ""
-                && this.comboBox_accept_matchStyle.Text != "¿ÕÖµ")
+                && this.comboBox_accept_matchStyle.Text != "ç©ºå€¼")
             {
-                strError = "ÉĞÎ´ÊäÈë¼ìË÷´Ê";
+                strError = "å°šæœªè¾“å…¥æ£€ç´¢è¯";
                 goto ERROR1;
             }
 
@@ -1163,16 +1163,16 @@ this.checkBox_prepare_createCallNumber.Checked);
             {
                 if (m_detailWindow.IsLoading == true)
                 {
-                    strError = "µ±Ç°ÖÖ²á´°ÕıÔÚ×°ÔØ¼ÇÂ¼£¬ÇëÉÔºòÔÙÖØÊÔ¼ìË÷";
+                    strError = "å½“å‰ç§å†Œçª—æ­£åœ¨è£…è½½è®°å½•ï¼Œè¯·ç¨å€™å†é‡è¯•æ£€ç´¢";
                     goto ERROR1;
                 }
             }
 
-            // ÆÈÊ¹detailWindow±£´æ
-            // TODO: ½«À´ÊÇ·ñÔÊĞíÓÃ»§checkbox¾ö¶¨ÊÇ·ñ¡°×Ô¶¯±£´æ¡±?
+            // è¿«ä½¿detailWindowä¿å­˜
+            // TODO: å°†æ¥æ˜¯å¦å…è®¸ç”¨æˆ·checkboxå†³å®šæ˜¯å¦â€œè‡ªåŠ¨ä¿å­˜â€?
             SaveDetailWindowChanges();
 
-            // µ±Ç°detailWindowÄÚÈİÇå¿Õ
+            // å½“å‰detailWindowå†…å®¹æ¸…ç©º
             ClearDetailWindow(true);
 
             ClearSourceTarget();    // 2009/6/2
@@ -1181,7 +1181,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             if (nRet == -1)
                 goto ERROR1;
             if (nRet == 0)
-                MessageBox.Show(this, "¼ìË÷´Ê '" + this.textBox_accept_queryWord.Text + "' Î´ÃüÖĞÈÎºÎ¼ÇÂ¼");
+                MessageBox.Show(this, "æ£€ç´¢è¯ '" + this.textBox_accept_queryWord.Text + "' æœªå‘½ä¸­ä»»ä½•è®°å½•");
 
             nRet = FilterOrderInfo(out strError);
             if (nRet == -1)
@@ -1193,7 +1193,7 @@ this.checkBox_prepare_createCallNumber.Checked);
         }
 
         /*
-        // ½»»»´¹Ö±/Ë®Æ½²¼¾Ö·ç¸ñ
+        // äº¤æ¢å‚ç›´/æ°´å¹³å¸ƒå±€é£æ ¼
         private void splitContainer_accept_multiRecords_DoubleClick(object sender, EventArgs e)
         {
             if (this.splitContainer_accept_multiRecords.Orientation == Orientation.Horizontal)
@@ -1204,7 +1204,7 @@ this.checkBox_prepare_createCallNumber.Checked);
 
         bool CloseDetailWindow()
         {
-            // ¹Ø±Õ ¹ØÁªµÄEntityForm
+            // å…³é—­ å…³è”çš„EntityForm
             if (m_detailWindow != null)
             {
                 if (m_detailWindow.IsDisposed == false)
@@ -1213,11 +1213,11 @@ this.checkBox_prepare_createCallNumber.Checked);
 
                     // 2009/2/3
                     if (m_detailWindow.IsDisposed == false)
-                        return false;   // Ã»ÓĞ¹Ø±Õ³É¹¦¡£±È·½Ëµ¾¯¸æÁËÉĞÎ´±£´æ£¿ÓÃ»§Ñ¡ÔñCancel
+                        return false;   // æ²¡æœ‰å…³é—­æˆåŠŸã€‚æ¯”æ–¹è¯´è­¦å‘Šäº†å°šæœªä¿å­˜ï¼Ÿç”¨æˆ·é€‰æ‹©Cancel
 
 
-                    // TODO: Òª¿´¿´ÊÇ·ñÕæ¹Ø±ÕÁË?
-                    // Í¨¹ıHashcode»òÕß¶ÔÏóÖ¸ÕëÀ´¹Û²ì?
+                    // TODO: è¦çœ‹çœ‹æ˜¯å¦çœŸå…³é—­äº†?
+                    // é€šè¿‡Hashcodeæˆ–è€…å¯¹è±¡æŒ‡é’ˆæ¥è§‚å¯Ÿ?
 
                     m_detailWindow = null;
                 }
@@ -1229,9 +1229,9 @@ this.checkBox_prepare_createCallNumber.Checked);
         }
 
         /// <summary>
-        /// È±Ê¡´°¿Ú¹ı³Ì
+        /// ç¼ºçœçª—å£è¿‡ç¨‹
         /// </summary>
-        /// <param name="m">ÏûÏ¢</param>
+        /// <param name="m">æ¶ˆæ¯</param>
         protected override void DefWndProc(ref Message m)
         {
             switch (m.Msg)
@@ -1249,7 +1249,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                     {
                         /*
                         if (this.listView_accept_records.Enabled == false)
-                            return; // ¶ªÊ§
+                            return; // ä¸¢å¤±
                          * */
                         
                         int index = m.LParam.ToInt32();
@@ -1261,7 +1261,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                         }
 
                         /*
-                        // ±£´æ½¹µã×´Ì¬
+                        // ä¿å­˜ç„¦ç‚¹çŠ¶æ€
                         bool bFouced = this.listView_accept_records.Focused;
 
                         this.listView_accept_records.Enabled = false;
@@ -1281,7 +1281,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                         if (this.m_detailWindow != null)
                             this.m_detailWindow.TargetRecPath = this.GetTargetRecPath();
 
-                        // »Ö¸´½¹µã×´Ì¬
+                        // æ¢å¤ç„¦ç‚¹çŠ¶æ€
                         if (bFouced == true)
                             this.listView_accept_records.Focus();
                          * */
@@ -1291,7 +1291,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             base.DefWndProc(ref m);
         }
 
-        // Çå¿Õµ±Ç°ÏêÏ¸´°ÄÚÈİ
+        // æ¸…ç©ºå½“å‰è¯¦ç»†çª—å†…å®¹
         // 2009/2/3
         bool ClearDetailWindow(bool bWarningNotSave)
         {
@@ -1313,7 +1313,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             return true;
         }
 
-        // Ç¿ÖÆµ±Ç°ÏêÏ¸´°ÄÚ±£´æ·¢Éú¹ıµÄĞŞ¸Ä
+        // å¼ºåˆ¶å½“å‰è¯¦ç»†çª—å†…ä¿å­˜å‘ç”Ÿè¿‡çš„ä¿®æ”¹
         // 2009/2/3
         void SaveDetailWindowChanges()
         {
@@ -1329,7 +1329,7 @@ this.checkBox_prepare_createCallNumber.Checked);
 
             if (this.m_detailWindow.Changed == true)
             {
-                this.EnableControls(false); // ·ÀÖ¹·´¸´°´¼ìË÷°´Å¥
+                this.EnableControls(false); // é˜²æ­¢åå¤æŒ‰æ£€ç´¢æŒ‰é’®
                 try
                 {
                     this.m_detailWindow.DoSaveAll();
@@ -1342,7 +1342,7 @@ this.checkBox_prepare_createCallNumber.Checked);
 
         }
 
-        // ¸ù¾İÏêÏ¸´°ÄÚµÄÊéÄ¿¼ÇÂ¼Â·¾¶£¬»Ö¸´¶ÔlistviewÄÚ¶ÔÓ¦ÊÂÏîµÄÑ¡Ôñ
+        // æ ¹æ®è¯¦ç»†çª—å†…çš„ä¹¦ç›®è®°å½•è·¯å¾„ï¼Œæ¢å¤å¯¹listviewå†…å¯¹åº”äº‹é¡¹çš„é€‰æ‹©
         void RestoreSelection()
         {
             if (this.m_detailWindow == null)
@@ -1401,7 +1401,7 @@ this.checkBox_prepare_createCallNumber.Checked);
 
             OpenDetailWindow();
 
-            // ÏêÏ¸´°ÄÚ±¾À´¾ÍÊÇÕâÌõ¼ÇÂ¼£¬²»ÓÃ·´¸´×°ÔØ
+            // è¯¦ç»†çª—å†…æœ¬æ¥å°±æ˜¯è¿™æ¡è®°å½•ï¼Œä¸ç”¨åå¤è£…è½½
             if (m_detailWindow.BiblioRecPath == strPath)
                 return true;
 
@@ -1418,9 +1418,9 @@ this.checkBox_prepare_createCallNumber.Checked);
             /*
 
             // return:
-            //      -1  ³ö´í¡£ÒÑ¾­ÓÃMessageBox±¨´í
-            //      0   Ã»ÓĞ×°ÔØ
-            //      1   ³É¹¦×°ÔØ
+            //      -1  å‡ºé”™ã€‚å·²ç»ç”¨MessageBoxæŠ¥é”™
+            //      0   æ²¡æœ‰è£…è½½
+            //      1   æˆåŠŸè£…è½½
             int nRet = m_detailWindow.LoadRecord(strPath,
                 "",
                 true);
@@ -1431,23 +1431,23 @@ this.checkBox_prepare_createCallNumber.Checked);
             return true;
              * */
 
-            // TODO: ²»¹ÜÊÇ·ñÑéÊÕ£¬Ô¤ÏÈÉèºÃEntityFormÄÚµÄAcceptBatchNo?
+            // TODO: ä¸ç®¡æ˜¯å¦éªŒæ”¶ï¼Œé¢„å…ˆè®¾å¥½EntityFormå†…çš„AcceptBatchNo?
         }
 
-        // ÓÃ»§ÔÚlist recordsÖĞµãÑ¡ÁË¼ÇÂ¼
+        // ç”¨æˆ·åœ¨list recordsä¸­ç‚¹é€‰äº†è®°å½•
         private void listView_accept_records_SelectedIndexChanged(object sender, EventArgs e)
         {
 
             List<int> protect_column_numbers = new List<int>();
-            protect_column_numbers.Add(COLUMN_ROLE);  // ±£»¤¡°½ÇÉ«¡±ÁĞ
-            protect_column_numbers.Add(COLUMN_TARGETRECPATH);  // ±£»¤¡°Ä¿±êÂ·¾¶¡±ÁĞ
+            protect_column_numbers.Add(COLUMN_ROLE);  // ä¿æŠ¤â€œè§’è‰²â€åˆ—
+            protect_column_numbers.Add(COLUMN_TARGETRECPATH);  // ä¿æŠ¤â€œç›®æ ‡è·¯å¾„â€åˆ—
             ListViewUtil.OnSeletedIndexChanged(this.listView_accept_records, 0, protect_column_numbers);
 
             if (this.SingleClickLoadDetail == false)
                 return;
 
             if (this.listView_accept_records.SelectedItems.Count == 0
-                || this.listView_accept_records.SelectedItems.Count > 1)    // 2009/2/3 ¶àÑ¡Ê±Ò²Òª½ûÖ¹½øÈëÏêÏ¸´°
+                || this.listView_accept_records.SelectedItems.Count > 1)    // 2009/2/3 å¤šé€‰æ—¶ä¹Ÿè¦ç¦æ­¢è¿›å…¥è¯¦ç»†çª—
             {
                 /*
                 EntityForm detail_window = this.DetailWindow;
@@ -1465,9 +1465,9 @@ this.checkBox_prepare_createCallNumber.Checked);
             OpenDetailWindow();
 
             // return:
-            //      -1  ³ö´í¡£ÒÑ¾­ÓÃMessageBox±¨´í
-            //      0   Ã»ÓĞ×°ÔØ
-            //      1   ³É¹¦×°ÔØ
+            //      -1  å‡ºé”™ã€‚å·²ç»ç”¨MessageBoxæŠ¥é”™
+            //      0   æ²¡æœ‰è£…è½½
+            //      1   æˆåŠŸè£…è½½
             m_detailWindow.LoadRecord(strPath,
                 "");
              * */
@@ -1486,7 +1486,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             }
 
 
-            // TODO: ´ò¿ªÒ»¸öEntityForm£¬È»ºó¶¨Î»ÔÚÔ¤¶¨µÄÎ»ÖÃ¡£ºÍµ±Ç°´°¿ÚÊÇĞÖµÜ¹ØÏµ
+            // TODO: æ‰“å¼€ä¸€ä¸ªEntityFormï¼Œç„¶åå®šä½åœ¨é¢„å®šçš„ä½ç½®ã€‚å’Œå½“å‰çª—å£æ˜¯å…„å¼Ÿå…³ç³»
             if (m_detailWindow == null)
             {
                 bool bExistOldEntityForm = false;
@@ -1515,10 +1515,10 @@ this.checkBox_prepare_createCallNumber.Checked);
                 if (true)
                 {
                     /*
-                     * 2011/4/14 ÓÊ¼ş
-                     *2.2£©ÏÈ´ò¿ª¡°ÑéÊÕ¡±¹¦ÄÜ´°£¬È»ºó´ò¿ªÒ»¸öÆäËû´°¿Ú£¬Èç¡°ÖÖ²á
-´°¡±£¬°ÑÖÖ²á´°×î´ó»¯£¬Ö®ºóÔÙ¹Ø±Õ£¬ÔÚ¡°ÑéÊÕ¡±¹¦ÄÜ´°¡°ÑéÊÕ¡±½×¶ÎÊäÈëISBNºÅ¼ì
-Ë÷£¬Ë«»÷¶©¹º¼ÇÂ¼ä¯ÀÀµÄĞÅÏ¢´ò¿ªÏêÏ¸´°£¬×Ó´°¿ÚÃ»ÓĞÆÌÂú¡££¨½ØÍ¼¼û¸½¼ş2.jpg£©
+                     * 2011/4/14 é‚®ä»¶
+                     *2.2ï¼‰å…ˆæ‰“å¼€â€œéªŒæ”¶â€åŠŸèƒ½çª—ï¼Œç„¶åæ‰“å¼€ä¸€ä¸ªå…¶ä»–çª—å£ï¼Œå¦‚â€œç§å†Œ
+çª—â€ï¼ŒæŠŠç§å†Œçª—æœ€å¤§åŒ–ï¼Œä¹‹åå†å…³é—­ï¼Œåœ¨â€œéªŒæ”¶â€åŠŸèƒ½çª—â€œéªŒæ”¶â€é˜¶æ®µè¾“å…¥ISBNå·æ£€
+ç´¢ï¼ŒåŒå‡»è®¢è´­è®°å½•æµè§ˆçš„ä¿¡æ¯æ‰“å¼€è¯¦ç»†çª—ï¼Œå­çª—å£æ²¡æœ‰é“ºæ»¡ã€‚ï¼ˆæˆªå›¾è§é™„ä»¶2.jpgï¼‰
                      * */
 #if ACCEPT_MODE
                     m_detailWindow.WindowState = FormWindowState.Normal;
@@ -1540,12 +1540,12 @@ this.checkBox_prepare_createCallNumber.Checked);
                 if (bExistOldEntityForm == true)
                 {
                     /*
-                     * 2011/4/14 ÓÊ¼ş
-                    2.1£©¶Ô¶©¹ºĞÅÏ¢½øĞĞÑéÊÕ²Ù×÷ÖĞ£¬ÏÈ´ò¿ªÒ»¸öÆäËû´°¿Ú£¬Èç¡°ÖÖ²á
-´°¡±£¬È»ºó´ò¿ª¡°ÑéÊÕ¡±¹¦ÄÜ´°£¨Åú´¦Àí-ÑéÊÕ£©£¬¼¤»î´ò¿ªµÄ¡°ÖÖ²á´°¡±£¬Ê¹¡°ÖÖ²á
-´°¡±³ÉÎªµ±Ç°´°¿Ú£¬²¢½«Ëü×î´ó»¯£¬Ê¹ÓÃ¹¤¾ß²Ëµ¥¡°´°¿Ú-ÑéÊÕ¡±ÇĞ»»»Ø¡°ÑéÊÕ¡±¹¦ÄÜ
-´°£¬ÔÚ¡°ÑéÊÕ¡±½×¶ÎÊäÈëISBNºÅ¼ìË÷£¬Ë«»÷¶©¹º¼ÇÂ¼ä¯ÀÀµÄĞÅÏ¢´ò¿ªÏêÏ¸´°£¬ÕâÊ±ÏÂÃæ
-µÄÖÖ²á´°Ò²·­ÁËÉÏÀ´¡££¨½ØÍ¼¼û¸½¼ş1.jpg£©¡£ 
+                     * 2011/4/14 é‚®ä»¶
+                    2.1ï¼‰å¯¹è®¢è´­ä¿¡æ¯è¿›è¡ŒéªŒæ”¶æ“ä½œä¸­ï¼Œå…ˆæ‰“å¼€ä¸€ä¸ªå…¶ä»–çª—å£ï¼Œå¦‚â€œç§å†Œ
+çª—â€ï¼Œç„¶åæ‰“å¼€â€œéªŒæ”¶â€åŠŸèƒ½çª—ï¼ˆæ‰¹å¤„ç†-éªŒæ”¶ï¼‰ï¼Œæ¿€æ´»æ‰“å¼€çš„â€œç§å†Œçª—â€ï¼Œä½¿â€œç§å†Œ
+çª—â€æˆä¸ºå½“å‰çª—å£ï¼Œå¹¶å°†å®ƒæœ€å¤§åŒ–ï¼Œä½¿ç”¨å·¥å…·èœå•â€œçª—å£-éªŒæ”¶â€åˆ‡æ¢å›â€œéªŒæ”¶â€åŠŸèƒ½
+çª—ï¼Œåœ¨â€œéªŒæ”¶â€é˜¶æ®µè¾“å…¥ISBNå·æ£€ç´¢ï¼ŒåŒå‡»è®¢è´­è®°å½•æµè§ˆçš„ä¿¡æ¯æ‰“å¼€è¯¦ç»†çª—ï¼Œè¿™æ—¶ä¸‹é¢
+çš„ç§å†Œçª—ä¹Ÿç¿»äº†ä¸Šæ¥ã€‚ï¼ˆæˆªå›¾è§é™„ä»¶1.jpgï¼‰ã€‚ 
                      * */
                     this.Activate();
                     m_detailWindow.Activate();
@@ -1559,12 +1559,12 @@ this.checkBox_prepare_createCallNumber.Checked);
 
         }
 
-        // ¼ì²éÔ´¼ÇÂ¼µÄ998$t£¬¿´¿´µ±Ç°ÁĞ±íÖĞÊÇ·ñÒÑ¾­ÓĞÕâÌõ¼ÇÂ¼£¬Èç¹ûÃ»ÓĞ£¬ÔòĞèÒª×°Èë
+        // æ£€æŸ¥æºè®°å½•çš„998$tï¼Œçœ‹çœ‹å½“å‰åˆ—è¡¨ä¸­æ˜¯å¦å·²ç»æœ‰è¿™æ¡è®°å½•ï¼Œå¦‚æœæ²¡æœ‰ï¼Œåˆ™éœ€è¦è£…å…¥
         // return:
-        //      -1  ³ö´í(µ«ÊÇÊÂÏî¿ÉÄÜÒÑ¾­¼ÓÈë)
-        //      0   Ô´¼ÇÂ¼Ã»ÓĞ998$t
-        //      1   ±¾º¯Êıµ÷ÓÃÇ°Ä¿±ê¼ÇÂ¼ÒÑ¾­ÔÚÁĞ±íÖĞ´æÔÚ
-        //      2   ĞÂ×°ÈëÁËÄ¿±ê¼ÇÂ¼
+        //      -1  å‡ºé”™(ä½†æ˜¯äº‹é¡¹å¯èƒ½å·²ç»åŠ å…¥)
+        //      0   æºè®°å½•æ²¡æœ‰998$t
+        //      1   æœ¬å‡½æ•°è°ƒç”¨å‰ç›®æ ‡è®°å½•å·²ç»åœ¨åˆ—è¡¨ä¸­å­˜åœ¨
+        //      2   æ–°è£…å…¥äº†ç›®æ ‡è®°å½•
         int AutoLoadTarget(string strSourceRecPath,
             out string strTargetRecPath,
             out string strError)
@@ -1577,7 +1577,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                 strSourceRecPath, COLUMN_RECPATH);
             if (source_item == null)
             {
-                strError = "µ±Ç°ÁĞ±íÖĞ¾ÓÈ»Ã»ÓĞÂ·¾¶Îª '" + strSourceRecPath + "' µÄÊÂÏî";
+                strError = "å½“å‰åˆ—è¡¨ä¸­å±…ç„¶æ²¡æœ‰è·¯å¾„ä¸º '" + strSourceRecPath + "' çš„äº‹é¡¹";
                 return -1;
             }
 
@@ -1593,7 +1593,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                 return 1;
             else
             {
-                // ²åÈëÒ»ĞĞ£¬ÔÚÔ´¼ÇÂ¼ĞĞÒÔºó
+                // æ’å…¥ä¸€è¡Œï¼Œåœ¨æºè®°å½•è¡Œä»¥å
                 target_item = new ListViewItem();
                 ListViewUtil.ChangeItemText(target_item, COLUMN_RECPATH, strTargetRecPath);
                 int index = this.listView_accept_records.Items.IndexOf(source_item);
@@ -1604,7 +1604,7 @@ this.checkBox_prepare_createCallNumber.Checked);
 
                 this.EnableControls(false);
                 stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("ÕıÔÚ×°ÔØ¼ÇÂ¼ '" + strTargetRecPath + "' ...");
+                stop.Initial("æ­£åœ¨è£…è½½è®°å½• '" + strTargetRecPath + "' ...");
                 stop.BeginLoop();
 
                 try
@@ -1628,14 +1628,14 @@ this.checkBox_prepare_createCallNumber.Checked);
             }
         }
 
-        // ×Ô¶¯×¼±¸Ä¿±ê¼ÇÂ¼
+        // è‡ªåŠ¨å‡†å¤‡ç›®æ ‡è®°å½•
         // parameters:
-        //      strBiblioSourceRecPath  [out]µ±Ç°ÁĞ±íÖĞ²Ù×÷ÕßÉè¶¨µÄÍâÔ´ÊéÄ¿¼ÇÂ¼Â·¾¶
+        //      strBiblioSourceRecPath  [out]å½“å‰åˆ—è¡¨ä¸­æ“ä½œè€…è®¾å®šçš„å¤–æºä¹¦ç›®è®°å½•è·¯å¾„
         // return:
         //      -1  error
-        //      0   º¯Êıµ÷ÓÃÇ°ÒÑ¾­Ñ¡¶¨ÁËÄ¿±êÊÂÏî£¬²»±Ø×Ô¶¯×¼±¸Ä¿±ê
-        //      1   ×¼±¸ºÃÁËÄ¿±êÊÂÏî
-        //      2   ÎŞ·¨×¼±¸Ä¿±êÊÂÏî£¬Ìõ¼ş²»¾ß±¸
+        //      0   å‡½æ•°è°ƒç”¨å‰å·²ç»é€‰å®šäº†ç›®æ ‡äº‹é¡¹ï¼Œä¸å¿…è‡ªåŠ¨å‡†å¤‡ç›®æ ‡
+        //      1   å‡†å¤‡å¥½äº†ç›®æ ‡äº‹é¡¹
+        //      2   æ— æ³•å‡†å¤‡ç›®æ ‡äº‹é¡¹ï¼Œæ¡ä»¶ä¸å…·å¤‡
         int AutoPrepareAccept(
             string strSourceRecPath,
             out string strTargetRecPath,
@@ -1649,7 +1649,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             int nRet = 0;
 
             bool bSeriesMode = false;
-            if (this.comboBox_prepare_type.Text == "Á¬Ğø³ö°æÎï")
+            if (this.comboBox_prepare_type.Text == "è¿ç»­å‡ºç‰ˆç‰©")
                 bSeriesMode = true;
             else
                 bSeriesMode = false;
@@ -1658,23 +1658,23 @@ this.checkBox_prepare_createCallNumber.Checked);
             if (bSeriesMode == true
                 && String.IsNullOrEmpty(strBiblioSourceRecPath) == false)
             {
-                strError = "¶ÔÓÚÁ¬Ğø³ö°æÎï£¬²»Ö§³Ö ÍâÔ´½ÇÉ«";
+                strError = "å¯¹äºè¿ç»­å‡ºç‰ˆç‰©ï¼Œä¸æ”¯æŒ å¤–æºè§’è‰²";
                 return -1;
             }
 
             if (String.IsNullOrEmpty(strSourceRecPath) == true)
             {
-                strError = "strSourceRecPath²ÎÊıÖµ²»ÄÜÎª¿Õ";
+                strError = "strSourceRecPathå‚æ•°å€¼ä¸èƒ½ä¸ºç©º";
                 return -1;
             }
 
             string str998TargetRecPath = "";
-            // ¼ì²éÔ´¼ÇÂ¼µÄ998$t£¬¿´¿´µ±Ç°ÁĞ±íÖĞÊÇ·ñÒÑ¾­ÓĞÕâÌõ¼ÇÂ¼£¬Èç¹ûÃ»ÓĞ£¬ÔòĞèÒª×°Èë
+            // æ£€æŸ¥æºè®°å½•çš„998$tï¼Œçœ‹çœ‹å½“å‰åˆ—è¡¨ä¸­æ˜¯å¦å·²ç»æœ‰è¿™æ¡è®°å½•ï¼Œå¦‚æœæ²¡æœ‰ï¼Œåˆ™éœ€è¦è£…å…¥
             // return:
-            //      -1  ³ö´í(µ«ÊÇÊÂÏî¿ÉÄÜÒÑ¾­¼ÓÈë)
-            //      0   Ô´¼ÇÂ¼Ã»ÓĞ998$t
-            //      1   ±¾º¯Êıµ÷ÓÃÇ°Ä¿±ê¼ÇÂ¼ÒÑ¾­ÔÚÁĞ±íÖĞ´æÔÚ
-            //      2   ĞÂ×°ÈëÁËÄ¿±ê¼ÇÂ¼
+            //      -1  å‡ºé”™(ä½†æ˜¯äº‹é¡¹å¯èƒ½å·²ç»åŠ å…¥)
+            //      0   æºè®°å½•æ²¡æœ‰998$t
+            //      1   æœ¬å‡½æ•°è°ƒç”¨å‰ç›®æ ‡è®°å½•å·²ç»åœ¨åˆ—è¡¨ä¸­å­˜åœ¨
+            //      2   æ–°è£…å…¥äº†ç›®æ ‡è®°å½•
             nRet = AutoLoadTarget(strSourceRecPath,
                 out str998TargetRecPath,
                 out strError);
@@ -1684,8 +1684,8 @@ this.checkBox_prepare_createCallNumber.Checked);
             strTargetRecPath = GetTargetRecPath();
             if (String.IsNullOrEmpty(strTargetRecPath) == false)
             {
-                // µ±Ç°²Ù×÷ÕßÒÑ¾­Ñ¡¶¨ÁËÄ¿±êÊÂÏî£¬¾Í²»ÊôÓÚ±¾º¯ÊıÒª²ÙĞÄµÄÇéĞÎÁË
-                strError = "µ±Ç°ÒÑ¾­Ñ¡¶¨ÁËÄ¿±êÊÂÏî";
+                // å½“å‰æ“ä½œè€…å·²ç»é€‰å®šäº†ç›®æ ‡äº‹é¡¹ï¼Œå°±ä¸å±äºæœ¬å‡½æ•°è¦æ“å¿ƒçš„æƒ…å½¢äº†
+                strError = "å½“å‰å·²ç»é€‰å®šäº†ç›®æ ‡äº‹é¡¹";
                 return 0;
             }
 
@@ -1693,26 +1693,26 @@ this.checkBox_prepare_createCallNumber.Checked);
             OrderDbInfo source_dbinfo = this.db_infos.LocateByBiblioDbName(strSourceDbName);
             if (source_dbinfo == null)
             {
-                strError = "ÔÚthis.db_infosÖĞ¾¹È»Ã»ÓĞÕÒµ½Ãû×ÖÎª " + strSourceDbName + " µÄÊéÄ¿¿â¶ÔÏó";
+                strError = "åœ¨this.db_infosä¸­ç«Ÿç„¶æ²¡æœ‰æ‰¾åˆ°åå­—ä¸º " + strSourceDbName + " çš„ä¹¦ç›®åº“å¯¹è±¡";
                 return -1;
             }
 
 #if DEBUG
             if (String.IsNullOrEmpty(source_dbinfo.IssueDbName) == false)
             {
-                Debug.Assert(this.comboBox_prepare_type.Text == "Á¬Ğø³ö°æÎï", "");
+                Debug.Assert(this.comboBox_prepare_type.Text == "è¿ç»­å‡ºç‰ˆç‰©", "");
             }
             else
             {
-                Debug.Assert(this.comboBox_prepare_type.Text == "Í¼Êé", "");
+                Debug.Assert(this.comboBox_prepare_type.Text == "å›¾ä¹¦", "");
             }
 #endif
 
-            // Ô´¼ÇÂ¼À´×Ô ²É¹º¹¤×÷¿â
+            // æºè®°å½•æ¥è‡ª é‡‡è´­å·¥ä½œåº“
             if (source_dbinfo.IsOrderWork == true)
             {
-                // ¼´±ãÔ´¼ÇÂ¼µÄ998$tÓĞÖ¸Ïò£¬Ò²×Ô¶¯²ÉÓÃÔ´¼ÇÂ¼×÷ÎªÄ¿±ê
-                strError = "Ô´¼ÇÂ¼ºÍÄ¿±ê¼ÇÂ¼ÊÇÍ¬Ò»¸ö: " + strSourceRecPath + "¡£Ô´¼ÇÂ¼À´×Ô²É¹º¹¤×÷¿â";
+                // å³ä¾¿æºè®°å½•çš„998$tæœ‰æŒ‡å‘ï¼Œä¹Ÿè‡ªåŠ¨é‡‡ç”¨æºè®°å½•ä½œä¸ºç›®æ ‡
+                strError = "æºè®°å½•å’Œç›®æ ‡è®°å½•æ˜¯åŒä¸€ä¸ª: " + strSourceRecPath + "ã€‚æºè®°å½•æ¥è‡ªé‡‡è´­å·¥ä½œåº“";
                 strTargetRecPath = strSourceRecPath;
                 nRet = SetTarget(strTargetRecPath, out strError);
                 if (nRet == -1)
@@ -1720,21 +1720,21 @@ this.checkBox_prepare_createCallNumber.Checked);
                 return 1;
             }
 
-            // Ô´¼ÇÂ¼²¢²»ÊÇÀ´×Ô²É¹º¹¤×÷¿â£¬ÄÇÃ´¾ÍÒª¾¡Á¿ÒÀÔ´¼ÇÂ¼ÖĞµÄ998$t¶¨Òå
+            // æºè®°å½•å¹¶ä¸æ˜¯æ¥è‡ªé‡‡è´­å·¥ä½œåº“ï¼Œé‚£ä¹ˆå°±è¦å°½é‡ä¾æºè®°å½•ä¸­çš„998$tå®šä¹‰
             if (String.IsNullOrEmpty(str998TargetRecPath) == false)
             {
                 strTargetRecPath = str998TargetRecPath;
                 nRet = SetTarget(strTargetRecPath, out strError);
                 if (nRet == -1)
                     return -1;
-                strError = "Ô´¼ÇÂ¼ '" + strSourceRecPath + "' ÖĞµÄ998$tÖ¸Ïò '" + str998TargetRecPath + "'£¬ÄÇÃ´¾Í°ÑºóÕß×÷ÎªÄ¿±ê¼ÇÂ¼ÁË";
+                strError = "æºè®°å½• '" + strSourceRecPath + "' ä¸­çš„998$tæŒ‡å‘ '" + str998TargetRecPath + "'ï¼Œé‚£ä¹ˆå°±æŠŠåè€…ä½œä¸ºç›®æ ‡è®°å½•äº†";
                 return 1;
             }
 
-            // ¿´¿´Ô´¿âÊÇ²»ÊÇÍ¬Ê±Ò²ÊÇÄ¿±ê¿â£¿Èç¹ûÊÇ£¬Ö±½Ó°ÑÔ´¼ÇÂ¼×÷ÎªÄ¿±ê¼ÇÂ¼
+            // çœ‹çœ‹æºåº“æ˜¯ä¸æ˜¯åŒæ—¶ä¹Ÿæ˜¯ç›®æ ‡åº“ï¼Ÿå¦‚æœæ˜¯ï¼Œç›´æ¥æŠŠæºè®°å½•ä½œä¸ºç›®æ ‡è®°å½•
             if (source_dbinfo.IsSourceAndTarget == true)
             {
-                strError = "Ô´¼ÇÂ¼µÄËùÔÚ¿âÍ¬Ê±¾ß±¸Ô´ºÍÄ¿±êµÄ½ÇÉ«£¬Òò´ËÔ´¼ÇÂ¼ºÍÄ¿±ê¼ÇÂ¼ÊÇÍ¬Ò»¸ö: " + strSourceRecPath;
+                strError = "æºè®°å½•çš„æ‰€åœ¨åº“åŒæ—¶å…·å¤‡æºå’Œç›®æ ‡çš„è§’è‰²ï¼Œå› æ­¤æºè®°å½•å’Œç›®æ ‡è®°å½•æ˜¯åŒä¸€ä¸ª: " + strSourceRecPath;
                 strTargetRecPath = strSourceRecPath;
                 nRet = SetTarget(strTargetRecPath, out strError);
                 if (nRet == -1)
@@ -1742,9 +1742,9 @@ this.checkBox_prepare_createCallNumber.Checked);
                 return 1;
             }
 
-            int nSourceItemCount = 0;   // Ô´½ÇÉ«ÊÂÏîÊıÄ¿¡£²»°üÀ¨Ë«½ÇÉ«ÊÂÏîÊıÄ¿
-            int nTargetItemCount = 0;   // Ä¿±ê½ÇÉ«ÊÂÏîÊıÄ¿¡£²»°üÀ¨Ë«½ÇÉ«ÊÂÏîÊıÄ¿
-            int nSourceAndTargetItemCount = 0;    // Í¬Ê±¾ß±¸Á½¸ö½ÇÉ«µÄÊÂÏîÊıÄ¿
+            int nSourceItemCount = 0;   // æºè§’è‰²äº‹é¡¹æ•°ç›®ã€‚ä¸åŒ…æ‹¬åŒè§’è‰²äº‹é¡¹æ•°ç›®
+            int nTargetItemCount = 0;   // ç›®æ ‡è§’è‰²äº‹é¡¹æ•°ç›®ã€‚ä¸åŒ…æ‹¬åŒè§’è‰²äº‹é¡¹æ•°ç›®
+            int nSourceAndTargetItemCount = 0;    // åŒæ—¶å…·å¤‡ä¸¤ä¸ªè§’è‰²çš„äº‹é¡¹æ•°ç›®
             for (int i = 0; i < this.listView_accept_records.Items.Count; i++)
             {
                 ListViewItem item = this.listView_accept_records.Items[i];
@@ -1757,22 +1757,22 @@ this.checkBox_prepare_createCallNumber.Checked);
                     nSourceAndTargetItemCount++;
             }
 
-            // µ±Ç°ÁĞ±íÄÚ¸ù±¾Ã»ÓĞÇ±ÔÚÄ¿±ê¼ÇÂ¼
+            // å½“å‰åˆ—è¡¨å†…æ ¹æœ¬æ²¡æœ‰æ½œåœ¨ç›®æ ‡è®°å½•
             if (nTargetItemCount + nSourceAndTargetItemCount == 0)
             {
-                // ĞèÒªÕÒµ½Ò»¸öÄ¿±ê¿â£¬¹¹ÔìĞÂ¼ÇÂ¼Â·¾¶
-                // Èç¹ûÇ±ÔÚµÄÄ¿±ê¿âºÜ¶à£¬ÔòĞèÒªÓÃ»§Ñ¡Ôñ
+                // éœ€è¦æ‰¾åˆ°ä¸€ä¸ªç›®æ ‡åº“ï¼Œæ„é€ æ–°è®°å½•è·¯å¾„
+                // å¦‚æœæ½œåœ¨çš„ç›®æ ‡åº“å¾ˆå¤šï¼Œåˆ™éœ€è¦ç”¨æˆ·é€‰æ‹©
                 List<string> target_dbnames = this.db_infos.GetTargetDbNames();
                 if (target_dbnames.Count == 0)
                 {
-                    strError = "µ±Ç°·şÎñÆ÷ÖĞÃ»ÓĞÅäÖÃÊÊºÏ×÷ÎªÑéÊÕÄ¿±ê¿â(Ò²¾ÍÊÇ°üº¬ÊµÌå¿â)µÄÊéÄ¿¿â£¬ÎŞ·¨½øĞĞÑéÊÕ";
+                    strError = "å½“å‰æœåŠ¡å™¨ä¸­æ²¡æœ‰é…ç½®é€‚åˆä½œä¸ºéªŒæ”¶ç›®æ ‡åº“(ä¹Ÿå°±æ˜¯åŒ…å«å®ä½“åº“)çš„ä¹¦ç›®åº“ï¼Œæ— æ³•è¿›è¡ŒéªŒæ”¶";
                     return 2;
                 }
 
                 if (target_dbnames.Count == 1)
                 {
                     strTargetRecPath = target_dbnames[0] + "/?";
-                    strError = "½«ÔÚ "+target_dbnames[0]+" ÖĞ´´½¨Ò»¸öĞÂµÄÄ¿±ê¼ÇÂ¼";
+                    strError = "å°†åœ¨ "+target_dbnames[0]+" ä¸­åˆ›å»ºä¸€ä¸ªæ–°çš„ç›®æ ‡è®°å½•";
                     return 1;
                 }
 
@@ -1782,24 +1782,24 @@ this.checkBox_prepare_createCallNumber.Checked);
                 MainForm.SetControlFont(dlg, this.Font, false);
 
                 dlg.SeriesMode = bSeriesMode;
-                dlg.Text = "ÇëÑ¡¶¨Ò»¸öÄ¿±êÊéÄ¿¿â£¬ÑéÊÕÊ±½«ÔÚÆäÖĞ´´½¨Ò»ÌõĞÂµÄÊéÄ¿¼ÇÂ¼";
+                dlg.Text = "è¯·é€‰å®šä¸€ä¸ªç›®æ ‡ä¹¦ç›®åº“ï¼ŒéªŒæ”¶æ—¶å°†åœ¨å…¶ä¸­åˆ›å»ºä¸€æ¡æ–°çš„ä¹¦ç›®è®°å½•";
                 dlg.MainForm = this.MainForm;
                 dlg.MarcSyntax = source_dbinfo.Syntax;
                 dlg.StartPosition = FormStartPosition.CenterScreen;
                 dlg.ShowDialog(this);
                 if (dlg.DialogResult == DialogResult.Cancel)
                 {
-                    strError = "ÓÃ»§·ÅÆúÑ¡ÔñÄ¿±ê¿â";
+                    strError = "ç”¨æˆ·æ”¾å¼ƒé€‰æ‹©ç›®æ ‡åº“";
                     return -1;
                 }
 
                 strTargetRecPath = dlg.DbName + "/?";
 
-                strError = "½«ÔÚ "+dlg.DbName+" ÖĞ´´½¨Ò»¸öĞÂµÄÄ¿±ê¼ÇÂ¼";
+                strError = "å°†åœ¨ "+dlg.DbName+" ä¸­åˆ›å»ºä¸€ä¸ªæ–°çš„ç›®æ ‡è®°å½•";
                 return 1;
             }
 
-            // Èç¹ûµ±Ç°½öÓĞÒ»¸öÇ±ÔÚÄ¿±êÊÂÏî
+            // å¦‚æœå½“å‰ä»…æœ‰ä¸€ä¸ªæ½œåœ¨ç›®æ ‡äº‹é¡¹
             if (nTargetItemCount + nSourceAndTargetItemCount == 1)
             {
                 for (int i = 0; i < this.listView_accept_records.Items.Count; i++)
@@ -1813,31 +1813,31 @@ this.checkBox_prepare_createCallNumber.Checked);
                         nRet = SetTarget(item, "set", out strError);
                         if (nRet == -1)
                             return -1;
-                        strError = "Î¨Ò»µÄÇ±ÔÚÄ¿±ê¼ÇÂ¼ '" + strTargetRecPath + "' ±»×Ô¶¯×÷ÎªÄ¿±ê¼ÇÂ¼ÁË";
+                        strError = "å”¯ä¸€çš„æ½œåœ¨ç›®æ ‡è®°å½• '" + strTargetRecPath + "' è¢«è‡ªåŠ¨ä½œä¸ºç›®æ ‡è®°å½•äº†";
                         return 1;
                     }
                 }
 
-                strError = "TYPE_TARGET»òTYPE_SOURCE_AND_TARGETµÄÊÂÏî¾ÓÈ»Ã»ÓĞÕÒµ½...";
+                strError = "TYPE_TARGETæˆ–TYPE_SOURCE_AND_TARGETçš„äº‹é¡¹å±…ç„¶æ²¡æœ‰æ‰¾åˆ°...";
                 return -1;
             }
 
             if (nTargetItemCount + nSourceAndTargetItemCount > 1)
             {
-                strError = "ÇëÏÈÔÚÃüÖĞ¼ÇÂ¼ÁĞ±íÖĞÉè¶¨ºÃÄ¿±ê¼ÇÂ¼£¬È»ºóÔÙ½øĞĞÑéÊÕ";
+                strError = "è¯·å…ˆåœ¨å‘½ä¸­è®°å½•åˆ—è¡¨ä¸­è®¾å®šå¥½ç›®æ ‡è®°å½•ï¼Œç„¶åå†è¿›è¡ŒéªŒæ”¶";
                 return 2;
             }
 
-            strError = "ÇëÏÈÔÚÃüÖĞ¼ÇÂ¼ÁĞ±íÖĞÉè¶¨ºÃÄ¿±ê¼ÇÂ¼£¬È»ºóÔÙ½øĞĞÑéÊÕ --";
+            strError = "è¯·å…ˆåœ¨å‘½ä¸­è®°å½•åˆ—è¡¨ä¸­è®¾å®šå¥½ç›®æ ‡è®°å½•ï¼Œç„¶åå†è¿›è¡ŒéªŒæ”¶ --";
             return 2;
         }
 
-        // TODO: ±àĞ´Ò»¸öº¯Êı£¬ÔÚÃ»ÓĞÃ÷È·Éè¶¨Ä¿±ê¼ÇÂ¼£¬µ«ÊÇµ±Ç°Ìõ¼ş¿ÉÒÔÍÆµ¼³öÄ¿±ê¼ÇÂ¼µÄÊ±ºò£¬
-        // ¸ø³öÄ¿±ê¼ÇÂ¼Â·¾¶¡£
-        // Ìõ¼ş£º1) µ±Ç°Ö»ÓĞÒ»¸öÇ±ÔÚÄ¿±ê¼ÇÂ¼ 2) µ±Ç°Ã»ÓĞÇ±ÔÚÄ¿±ê¼ÇÂ¼£¬µ«ÊÇ¿ÉÒÔ³äµ±Ä¿±ê¿âµÄ¿âÖ»ÓĞÒ»¸ö¡£Èç¹ûÔ´ºÍÄ¿±ê¿âÖØºÏ£¬ÓÅÏÈÓÃÔ´¼ÇÂ¼×÷ÎªÄ¿±ê¼ÇÂ¼£»·ñÔòÓÃ¡°Ä¿±ê¿â/?¡±×÷ÎªÄ¿±ê¼ÇÂ¼Â·¾¶
-        //  3) µ±Ç°Ã»ÓĞÇ±ÔÚÄ¿±ê¼ÇÂ¼£¬²¢ÇÒ¿ÉÒÔ³äµ±Ä¿±ê¿âµÄÓĞ¶à¸ö¡£ÕâÊ±ºòĞèÒª³öÏÖ¶Ô»°¿ò£¬ÈÃ²Ù×÷ÕßÑ¡ÔñÒ»¸öÄ¿±ê¿â¡£¶Ô»°¿òĞèÒª±£³ÖÏÈÇ°Ñ¡¹ıµÄ×´Ì¬£¬ÒÔ±ã²Ù×÷ÕßÌá¸ß²Ù×÷ËÙ¶È
-        //  4) µ±Ç°Ã»ÓĞÇ±ÔÚÄ¿±ê¼ÇÂ¼£¬²¢ÇÒÃ»ÓĞÈÎºÎ¿â¿ÉÒÔ³äµ±Ä¿±ê¿â¡£±¨´í£¬·ÅÆú²Ù×÷¡£
-        // Ó¦µ±¿ÉÒÔÔÊĞí´ÓÆäËû´°¿ÚÍÏÈëÒ»¸ö¼ÇÂ¼Â·¾¶µ½µ±Ç°ÁĞ±íÖĞ¡£ÕâÑù£¬¾ÍÎªÉè¶¨Ô´»òÕßÄ¿±ê¿âÌá¹©ÁË¸ü¶àµÄÌõ¼ş¡£¿ÉÒÔ±ÜÃâµ¥´¿Í¨¹ıISBN¼ìË÷µÄ¾ÖÏŞĞÔ¡£
+        // TODO: ç¼–å†™ä¸€ä¸ªå‡½æ•°ï¼Œåœ¨æ²¡æœ‰æ˜ç¡®è®¾å®šç›®æ ‡è®°å½•ï¼Œä½†æ˜¯å½“å‰æ¡ä»¶å¯ä»¥æ¨å¯¼å‡ºç›®æ ‡è®°å½•çš„æ—¶å€™ï¼Œ
+        // ç»™å‡ºç›®æ ‡è®°å½•è·¯å¾„ã€‚
+        // æ¡ä»¶ï¼š1) å½“å‰åªæœ‰ä¸€ä¸ªæ½œåœ¨ç›®æ ‡è®°å½• 2) å½“å‰æ²¡æœ‰æ½œåœ¨ç›®æ ‡è®°å½•ï¼Œä½†æ˜¯å¯ä»¥å……å½“ç›®æ ‡åº“çš„åº“åªæœ‰ä¸€ä¸ªã€‚å¦‚æœæºå’Œç›®æ ‡åº“é‡åˆï¼Œä¼˜å…ˆç”¨æºè®°å½•ä½œä¸ºç›®æ ‡è®°å½•ï¼›å¦åˆ™ç”¨â€œç›®æ ‡åº“/?â€ä½œä¸ºç›®æ ‡è®°å½•è·¯å¾„
+        //  3) å½“å‰æ²¡æœ‰æ½œåœ¨ç›®æ ‡è®°å½•ï¼Œå¹¶ä¸”å¯ä»¥å……å½“ç›®æ ‡åº“çš„æœ‰å¤šä¸ªã€‚è¿™æ—¶å€™éœ€è¦å‡ºç°å¯¹è¯æ¡†ï¼Œè®©æ“ä½œè€…é€‰æ‹©ä¸€ä¸ªç›®æ ‡åº“ã€‚å¯¹è¯æ¡†éœ€è¦ä¿æŒå…ˆå‰é€‰è¿‡çš„çŠ¶æ€ï¼Œä»¥ä¾¿æ“ä½œè€…æé«˜æ“ä½œé€Ÿåº¦
+        //  4) å½“å‰æ²¡æœ‰æ½œåœ¨ç›®æ ‡è®°å½•ï¼Œå¹¶ä¸”æ²¡æœ‰ä»»ä½•åº“å¯ä»¥å……å½“ç›®æ ‡åº“ã€‚æŠ¥é”™ï¼Œæ”¾å¼ƒæ“ä½œã€‚
+        // åº”å½“å¯ä»¥å…è®¸ä»å…¶ä»–çª—å£æ‹–å…¥ä¸€ä¸ªè®°å½•è·¯å¾„åˆ°å½“å‰åˆ—è¡¨ä¸­ã€‚è¿™æ ·ï¼Œå°±ä¸ºè®¾å®šæºæˆ–è€…ç›®æ ‡åº“æä¾›äº†æ›´å¤šçš„æ¡ä»¶ã€‚å¯ä»¥é¿å…å•çº¯é€šè¿‡ISBNæ£€ç´¢çš„å±€é™æ€§ã€‚
         void m_detailWindow_PrepareAccept(object sender, 
             PrepareAcceptEventArgs e)
         {
@@ -1846,16 +1846,16 @@ this.checkBox_prepare_createCallNumber.Checked);
             string strWarning = "";
             int nRet = 0;
 
-            // ÑéÊÕÅú´ÎºÅ
+            // éªŒæ”¶æ‰¹æ¬¡å·
             e.AcceptBatchNo = this.tabComboBox_prepare_batchNo.Text;
 
-            // ÊÇ·ñĞèÒªÔÚÑéÊÕÄ©¶Î³öÏÖÊäÈë²áÌõÂëºÅµÄ½çÃæ
+            // æ˜¯å¦éœ€è¦åœ¨éªŒæ”¶æœ«æ®µå‡ºç°è¾“å…¥å†Œæ¡ç å·çš„ç•Œé¢
             e.InputItemsBarcode = this.checkBox_prepare_inputItemBarcode.Checked;
 
             // 2010/12/5
             e.PriceDefault = this.comboBox_prepare_priceDefault.Text;
 
-            // ÎªĞÂ´´½¨µÄ²á¼ÇÂ¼ÉèÖÃ¡°¼Ó¹¤ÖĞ¡±×´Ì¬
+            // ä¸ºæ–°åˆ›å»ºçš„å†Œè®°å½•è®¾ç½®â€œåŠ å·¥ä¸­â€çŠ¶æ€
             e.SetProcessingState = this.checkBox_prepare_setProcessingState.Checked;
 
             // 2012/5/7
@@ -1863,17 +1863,17 @@ this.checkBox_prepare_createCallNumber.Checked);
 
 
             Debug.Assert(String.IsNullOrEmpty(e.SourceRecPath) == false, "");
-            // e.SourceRecPath ÖĞÊÇÖÖ²á´°ÄÚµ±Ç°¼ÇÂ¼£¬ÓĞÇ¿ÁÒµÄÇãÏò°ÑËü×÷ÎªÔ´£¬µ«ÊÇºÍµ±Ç°AcceprtFormµÄä¯ÀÀÁĞ±íÖĞ¿ÉÄÜÒÑ¾­Éè¶¨µÄÔ´²»ÊÇÍ¬Ò»¸ö
+            // e.SourceRecPath ä¸­æ˜¯ç§å†Œçª—å†…å½“å‰è®°å½•ï¼Œæœ‰å¼ºçƒˆçš„å€¾å‘æŠŠå®ƒä½œä¸ºæºï¼Œä½†æ˜¯å’Œå½“å‰AcceprtFormçš„æµè§ˆåˆ—è¡¨ä¸­å¯èƒ½å·²ç»è®¾å®šçš„æºä¸æ˜¯åŒä¸€ä¸ª
 
             string strTargetRecPath = "";
-            string strBiblioSourceRecPath = ""; // µ±Ç°ÁĞ±íÖĞ²Ù×÷ÕßÉè¶¨µÄÍâÔ´ÊéÄ¿¼ÇÂ¼Â·¾¶
+            string strBiblioSourceRecPath = ""; // å½“å‰åˆ—è¡¨ä¸­æ“ä½œè€…è®¾å®šçš„å¤–æºä¹¦ç›®è®°å½•è·¯å¾„
 
-            // ×Ô¶¯×¼±¸Ä¿±ê¼ÇÂ¼
+            // è‡ªåŠ¨å‡†å¤‡ç›®æ ‡è®°å½•
             // return:
             //      -1  error
-            //      0   º¯Êıµ÷ÓÃÇ°ÒÑ¾­Ñ¡¶¨ÁËÄ¿±êÊÂÏî£¬²»±Ø×Ô¶¯×¼±¸Ä¿±ê
-            //      1   ×¼±¸ºÃÁËÄ¿±êÊÂÏî
-            //      2   ÎŞ·¨×¼±¸Ä¿±êÊÂÏî£¬Ìõ¼ş²»¾ß±¸
+            //      0   å‡½æ•°è°ƒç”¨å‰å·²ç»é€‰å®šäº†ç›®æ ‡äº‹é¡¹ï¼Œä¸å¿…è‡ªåŠ¨å‡†å¤‡ç›®æ ‡
+            //      1   å‡†å¤‡å¥½äº†ç›®æ ‡äº‹é¡¹
+            //      2   æ— æ³•å‡†å¤‡ç›®æ ‡äº‹é¡¹ï¼Œæ¡ä»¶ä¸å…·å¤‡
             nRet = AutoPrepareAccept(
                 e.SourceRecPath,
                 out strTargetRecPath,
@@ -1888,7 +1888,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             }
 
             // 2009/2/16
-            // ¿´¿´AcceptFormÖĞÒÑ¾­Éè¶¨µÄÔ´ÊÇ·ñºÍe.SourceRecPathÖĞµÄÒ»ÖÂ
+            // çœ‹çœ‹AcceptFormä¸­å·²ç»è®¾å®šçš„æºæ˜¯å¦å’Œe.SourceRecPathä¸­çš„ä¸€è‡´
             string strExistSourceRecPath = GetSourceRecPath();
             if (String.IsNullOrEmpty(strExistSourceRecPath) == false)
             {
@@ -1900,20 +1900,20 @@ this.checkBox_prepare_createCallNumber.Checked);
                         COLUMN_RECPATH);
                     if (old_source_item == null)
                     {
-                        strError = "ÁĞ±íÖĞ¾ÓÈ»Ã»ÓĞÕÒµ½Â·¾¶Îª '" + strExistSourceRecPath + "' µÄÊÂÏî";
+                        strError = "åˆ—è¡¨ä¸­å±…ç„¶æ²¡æœ‰æ‰¾åˆ°è·¯å¾„ä¸º '" + strExistSourceRecPath + "' çš„äº‹é¡¹";
                         goto ERROR1;
                     }
-                    // ¿´¿´×î³õµÄÔ´ÊÂÏîÊÇ·ñÒÑ¾­ÎªĞ±Ìå
+                    // çœ‹çœ‹æœ€åˆçš„æºäº‹é¡¹æ˜¯å¦å·²ç»ä¸ºæ–œä½“
                     RecordInfo old_source_info = GetRecordInfo(old_source_item);
                     if (old_source_info.TitleMatch == false)
                     {
-                        // ¾¯¸ætitle²»Ò»ÖÂÏÖÏó
-                        strWarning = "Ô´¼ÇÂ¼ " + e.SourceRecPath + " µÄÌâÃûºÍÄ¿±ê¼ÇÂ¼ " + strTargetRecPath + " µÄÌâÃû²»ÎÇºÏ";
+                        // è­¦å‘Štitleä¸ä¸€è‡´ç°è±¡
+                        strWarning = "æºè®°å½• " + e.SourceRecPath + " çš„é¢˜åå’Œç›®æ ‡è®°å½• " + strTargetRecPath + " çš„é¢˜åä¸å»åˆ";
                     }
                     */
 
-                    strWarning = "µ±Ç°ÖÖ²á´°ÄÚµÄ¼ÇÂ¼ " + e.SourceRecPath + " ²¢²»ÊÇÑéÊÕ´°ÄÚÒÑÉè¶¨ÎªÔ´½ÇÉ«µÄ¼ÇÂ¼ " + strExistSourceRecPath + "¡£\r\n\r\nÈ·ÊµÒª¸ÄÉèÇ°ÕßÎªÔ´½ÇÉ«²¢¼ÌĞø½øĞĞÑéÊÕ?";
-                    // TODO: ¾¯¸æ×îºÃÔÚÕâÀï½øĞĞ£¬ÒòÎªÒª¾ö¶¨ºóÃæÊÇ·ñÊµÊ©SetSource()²Ù×÷
+                    strWarning = "å½“å‰ç§å†Œçª—å†…çš„è®°å½• " + e.SourceRecPath + " å¹¶ä¸æ˜¯éªŒæ”¶çª—å†…å·²è®¾å®šä¸ºæºè§’è‰²çš„è®°å½• " + strExistSourceRecPath + "ã€‚\r\n\r\nç¡®å®è¦æ”¹è®¾å‰è€…ä¸ºæºè§’è‰²å¹¶ç»§ç»­è¿›è¡ŒéªŒæ”¶?";
+                    // TODO: è­¦å‘Šæœ€å¥½åœ¨è¿™é‡Œè¿›è¡Œï¼Œå› ä¸ºè¦å†³å®šåé¢æ˜¯å¦å®æ–½SetSource()æ“ä½œ
                     DialogResult result = MessageBox.Show(this,
                         strWarning,
                         "AcceptForm",
@@ -1929,18 +1929,18 @@ this.checkBox_prepare_createCallNumber.Checked);
             }
 
 
-            // °ÑÔ´ÉèÖÃÎª e.SourceRecPath
+            // æŠŠæºè®¾ç½®ä¸º e.SourceRecPath
             ListViewItem source_item = ListViewUtil.FindItem(this.listView_accept_records,
                 e.SourceRecPath,
                 COLUMN_RECPATH);
             if (source_item == null)
             {
-                strError = "ÁĞ±íÖĞ¾ÓÈ»Ã»ÓĞÕÒµ½Â·¾¶Îª '" + e.SourceRecPath + "' µÄÊÂÏî";
+                strError = "åˆ—è¡¨ä¸­å±…ç„¶æ²¡æœ‰æ‰¾åˆ°è·¯å¾„ä¸º '" + e.SourceRecPath + "' çš„äº‹é¡¹";
                 goto ERROR1;
             }
 
             // 2009/10/23
-            // ¼ì²éµ±Ç°ĞĞÊÇ·ñºÏÊÊÉèÖÃÎªÔ´½ÇÉ«
+            // æ£€æŸ¥å½“å‰è¡Œæ˜¯å¦åˆé€‚è®¾ç½®ä¸ºæºè§’è‰²
             nRet = WarningSetSource(source_item);
             if (nRet == 0)
             {
@@ -1948,22 +1948,22 @@ this.checkBox_prepare_createCallNumber.Checked);
                 return;
             }
 
-            // 2009/2/16 ÒÆ¶¯µ½ÕâÀï
+            // 2009/2/16 ç§»åŠ¨åˆ°è¿™é‡Œ
             nRet = SetSource(source_item,
                 "set",
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
 
-            // ÉèÖÃÔ´Ö®ºó£¬¿´¿´Ô´ÊÂÏîÊÇ·ñÒÑ¾­ÎªĞ±Ìå
+            // è®¾ç½®æºä¹‹åï¼Œçœ‹çœ‹æºäº‹é¡¹æ˜¯å¦å·²ç»ä¸ºæ–œä½“
             RecordInfo source_info = GetRecordInfo(source_item);
             if (source_info.TitleMatch == false)
             {
-                // ¾¯¸ætitle²»Ò»ÖÂÏÖÏó
-                strWarning = "Ô´¼ÇÂ¼ '" + e.SourceRecPath + "' µÄÌâÃûºÍÄ¿±ê¼ÇÂ¼ '" + strTargetRecPath + "' µÄÌâÃû²»ÎÇºÏ";
-                // TODO: ¾¯¸æ×îºÃÔÚÕâÀï½øĞĞ£¬ÒòÎªÒª¾ö¶¨ºóÃæÊÇ·ñÊµÊ©SetSource()²Ù×÷
+                // è­¦å‘Štitleä¸ä¸€è‡´ç°è±¡
+                strWarning = "æºè®°å½• '" + e.SourceRecPath + "' çš„é¢˜åå’Œç›®æ ‡è®°å½• '" + strTargetRecPath + "' çš„é¢˜åä¸å»åˆ";
+                // TODO: è­¦å‘Šæœ€å¥½åœ¨è¿™é‡Œè¿›è¡Œï¼Œå› ä¸ºè¦å†³å®šåé¢æ˜¯å¦å®æ–½SetSource()æ“ä½œ
                 DialogResult result = MessageBox.Show(this,
-                    strWarning + "\r\n\r\n¼ÌĞøÑéÊÕ? ",
+                    strWarning + "\r\n\r\nç»§ç»­éªŒæ”¶? ",
                     "AcceptForm",
                     MessageBoxButtons.OKCancel,
                     MessageBoxIcon.Question,
@@ -1981,13 +1981,13 @@ this.checkBox_prepare_createCallNumber.Checked);
                 COLUMN_RECPATH);
             if (target_item != null)    // 2008/12/3
             {
-                // ¿´¿´Ä¿±êÊÂÏîÊÇ·ñÒÑ¾­ÎªĞ±Ìå
+                // çœ‹çœ‹ç›®æ ‡äº‹é¡¹æ˜¯å¦å·²ç»ä¸ºæ–œä½“
                 RecordInfo target_info = GetRecordInfo(target_item);
                 if (target_info.TitleMatch == false)
                 {
-                    strWarning = "Ä¿±ê¼ÇÂ¼ '" + strTargetRecPath + "' µÄÌâÃûºÍÔ´¼ÇÂ¼ '" + e.SourceRecPath + "' µÄÌâÃû²»ÎÇºÏ";
+                    strWarning = "ç›®æ ‡è®°å½• '" + strTargetRecPath + "' çš„é¢˜åå’Œæºè®°å½• '" + e.SourceRecPath + "' çš„é¢˜åä¸å»åˆ";
                     DialogResult result = MessageBox.Show(this,
-                        strWarning + "\r\n\r\n¼ÌĞøÑéÊÕ? ",
+                        strWarning + "\r\n\r\nç»§ç»­éªŒæ”¶? ",
                         "AcceptForm",
                         MessageBoxButtons.OKCancel,
                         MessageBoxIcon.Question,
@@ -2010,13 +2010,13 @@ this.checkBox_prepare_createCallNumber.Checked);
                     COLUMN_RECPATH);
                 if (biblioSource_item != null)
                 {
-                    // ¿´¿´ÍâÔ´ÊÂÏîÊÇ·ñÒÑ¾­ÎªĞ±Ìå
+                    // çœ‹çœ‹å¤–æºäº‹é¡¹æ˜¯å¦å·²ç»ä¸ºæ–œä½“
                     RecordInfo biblioSource_info = GetRecordInfo(biblioSource_item);
                     if (biblioSource_info.TitleMatch == false)
                     {
-                        strWarning = "ÍâÔ´¼ÇÂ¼ '" + strBiblioSourceRecPath + "' µÄÌâÃûºÍÔ´¼ÇÂ¼ '" + e.SourceRecPath + "' µÄÌâÃû²»ÎÇºÏ";
+                        strWarning = "å¤–æºè®°å½• '" + strBiblioSourceRecPath + "' çš„é¢˜åå’Œæºè®°å½• '" + e.SourceRecPath + "' çš„é¢˜åä¸å»åˆ";
                         DialogResult result = MessageBox.Show(this,
-                            strWarning + "\r\n\r\n¼ÌĞøÑéÊÕ? ",
+                            strWarning + "\r\n\r\nç»§ç»­éªŒæ”¶? ",
                             "AcceptForm",
                             MessageBoxButtons.OKCancel,
                             MessageBoxIcon.Question,
@@ -2035,7 +2035,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             if (String.IsNullOrEmpty(e.BiblioSourceRecPath) == false)
             {
                 string strXml = "";
-                // »ñµÃÒ»¸öÊéÄ¿¼ÇÂ¼
+                // è·å¾—ä¸€ä¸ªä¹¦ç›®è®°å½•
                 // return:
                 //      -1  error
                 //      0   not found
@@ -2045,7 +2045,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                     out strError);
                 if (nRet == 0 || nRet == -1)
                 {
-                    strError = "ÑéÊÕ²Ù×÷±»¾Ü¾ø¡£»ñÈ¡ÍâÔ´¼ÇÂ¼ '" + e.BiblioSourceRecPath + "' Ê±³ö´í: " + strError;
+                    strError = "éªŒæ”¶æ“ä½œè¢«æ‹’ç»ã€‚è·å–å¤–æºè®°å½• '" + e.BiblioSourceRecPath + "' æ—¶å‡ºé”™: " + strError;
                     goto ERROR1;
                 }
                 e.BiblioSourceRecord = strXml;
@@ -2053,26 +2053,26 @@ this.checkBox_prepare_createCallNumber.Checked);
             }
 
             bool bSeriesMode = false;
-            if (this.comboBox_prepare_type.Text == "Á¬Ğø³ö°æÎï")
+            if (this.comboBox_prepare_type.Text == "è¿ç»­å‡ºç‰ˆç‰©")
                 bSeriesMode = true;
 
-            // ÆÚ¿¯Çé¿öÏÂ£¬Ô´½ÇÉ«ºÍÄ¿±ê½ÇÉ«±ØĞëÎªÍ¬Ò»Ìõ£¬ÕâÊÇÒ»¸ö¶îÍâµÄÒªÇó¡£2009/2/17
+            // æœŸåˆŠæƒ…å†µä¸‹ï¼Œæºè§’è‰²å’Œç›®æ ‡è§’è‰²å¿…é¡»ä¸ºåŒä¸€æ¡ï¼Œè¿™æ˜¯ä¸€ä¸ªé¢å¤–çš„è¦æ±‚ã€‚2009/2/17
             if (bSeriesMode == true)
             {
                 if (e.TargetRecPath != e.SourceRecPath)
                 {
-                    strError = "ÑéÊÕ²Ù×÷±»¾Ü¾ø¡£³ö°æÎïÀàĞÍÎªÆÚ¿¯Ê±£¬Ô´¼ÇÂ¼ºÍÄ¿±ê¼ÇÂ¼±ØĞëÎªÍ¬Ò»Ìõ¡£(¿ÉÊÇÏÖÔÚÔ´¼ÇÂ¼Îª "+e.SourceRecPath+"£¬Ä¿±ê¼ÇÂ¼Îª "+e.TargetRecPath+")";
+                    strError = "éªŒæ”¶æ“ä½œè¢«æ‹’ç»ã€‚å‡ºç‰ˆç‰©ç±»å‹ä¸ºæœŸåˆŠæ—¶ï¼Œæºè®°å½•å’Œç›®æ ‡è®°å½•å¿…é¡»ä¸ºåŒä¸€æ¡ã€‚(å¯æ˜¯ç°åœ¨æºè®°å½•ä¸º "+e.SourceRecPath+"ï¼Œç›®æ ‡è®°å½•ä¸º "+e.TargetRecPath+")";
                     goto ERROR1;
                 }
             }
 
             string str998TargetRecPath = "";
-            // ¼ì²éÔ´¼ÇÂ¼µÄ998$t£¬¿´¿´µ±Ç°ÁĞ±íÖĞÊÇ·ñÒÑ¾­ÓĞÕâÌõ¼ÇÂ¼£¬Èç¹ûÃ»ÓĞ£¬ÔòĞèÒª×°Èë
+            // æ£€æŸ¥æºè®°å½•çš„998$tï¼Œçœ‹çœ‹å½“å‰åˆ—è¡¨ä¸­æ˜¯å¦å·²ç»æœ‰è¿™æ¡è®°å½•ï¼Œå¦‚æœæ²¡æœ‰ï¼Œåˆ™éœ€è¦è£…å…¥
             // return:
-            //      -1  ³ö´í(µ«ÊÇÊÂÏî¿ÉÄÜÒÑ¾­¼ÓÈë)
-            //      0   Ô´¼ÇÂ¼Ã»ÓĞ998$t
-            //      1   ±¾º¯Êıµ÷ÓÃÇ°Ä¿±ê¼ÇÂ¼ÒÑ¾­ÔÚÁĞ±íÖĞ´æÔÚ
-            //      2   ĞÂ×°ÈëÁËÄ¿±ê¼ÇÂ¼
+            //      -1  å‡ºé”™(ä½†æ˜¯äº‹é¡¹å¯èƒ½å·²ç»åŠ å…¥)
+            //      0   æºè®°å½•æ²¡æœ‰998$t
+            //      1   æœ¬å‡½æ•°è°ƒç”¨å‰ç›®æ ‡è®°å½•å·²ç»åœ¨åˆ—è¡¨ä¸­å­˜åœ¨
+            //      2   æ–°è£…å…¥äº†ç›®æ ‡è®°å½•
             nRet = AutoLoadTarget(e.SourceRecPath,
                 out str998TargetRecPath,
                 out strError);
@@ -2083,24 +2083,24 @@ this.checkBox_prepare_createCallNumber.Checked);
             OrderDbInfo source_dbinfo = this.db_infos.LocateByBiblioDbName(strSourceDbName);
             if (source_dbinfo == null)
             {
-                strError = "ÔÚthis.db_infosÖĞ¾¹È»Ã»ÓĞÕÒµ½Ãû×ÖÎª " + strSourceDbName + " µÄÊéÄ¿¿â¶ÔÏó";
+                strError = "åœ¨this.db_infosä¸­ç«Ÿç„¶æ²¡æœ‰æ‰¾åˆ°åå­—ä¸º " + strSourceDbName + " çš„ä¹¦ç›®åº“å¯¹è±¡";
                 goto ERROR1;
             }
 
-            // ¼ì²é ²É¹º¹¤×÷¿â Çé¿ö
+            // æ£€æŸ¥ é‡‡è´­å·¥ä½œåº“ æƒ…å†µ
             if (bSeriesMode == false)
             {
 
 
-                // Ô´¼ÇÂ¼À´×Ô²É¹º¹¤×÷¿â£¬Ä¿±ê¼ÇÂ¼ºÍÔ´¼ÇÂ¼²»ÊÇÍ¬Ò»Ìõ
+                // æºè®°å½•æ¥è‡ªé‡‡è´­å·¥ä½œåº“ï¼Œç›®æ ‡è®°å½•å’Œæºè®°å½•ä¸æ˜¯åŒä¸€æ¡
                 if (source_dbinfo.IsOrderWork == true
                     && e.SourceRecPath != e.TargetRecPath)
                 {
-                    // ²¢ÇÒ£¬Ä¿±ê¼ÇÂ¼²»ÊÇÔ´¼ÇÂ¼998$tÖ¸ÏòµÄÄÇÌõ
+                    // å¹¶ä¸”ï¼Œç›®æ ‡è®°å½•ä¸æ˜¯æºè®°å½•998$tæŒ‡å‘çš„é‚£æ¡
                     if (String.IsNullOrEmpty(str998TargetRecPath) == false
                         && e.TargetRecPath != str998TargetRecPath)
                     {
-                        strWarning = "ÊéÄ¿¿â '" + strSourceDbName + "' µÄ½ÇÉ«Îª²É¹º¹¤×÷¿â£¬Ò»°ãÇé¿öÏÂ´Ë¿âÖĞµÄÔ´¼ÇÂ¼(" + e.SourceRecPath + ")Ò²Ó¦Í¬Ê±×÷ÎªÄ¿±ê¼ÇÂ¼¡£\r\n\r\nÊÇ·ñÕæµÄÒª½«(ÄúÉè¶¨µÄ)¼ÇÂ¼ '" + e.TargetRecPath + "' ×÷ÎªÄ¿±ê£¬Ö±½ÓÔÚÆäÖĞ´´½¨²áĞÅÏ¢?\r\n\r\n------\r\nÊÇ(Yes): ½«¼ÇÂ¼ '" + e.TargetRecPath + "' ×÷ÎªÄ¿±ê£¬²¢ÔÚÑéÊÕ²Ù×÷ÖĞ½«Ô´¼ÇÂ¼ÖĞµÄ998$t(Ä¿Ç°ÄÚÈİÎª '" + str998TargetRecPath + "')¸ÄÉèÎªÖ¸ÏòÄúÑ¡¶¨µÄÕâ¸öÄ¿±ê(" + e.TargetRecPath + ")£»\r\n·ñ(No): ·ÅÆúÑéÊÕ";
+                        strWarning = "ä¹¦ç›®åº“ '" + strSourceDbName + "' çš„è§’è‰²ä¸ºé‡‡è´­å·¥ä½œåº“ï¼Œä¸€èˆ¬æƒ…å†µä¸‹æ­¤åº“ä¸­çš„æºè®°å½•(" + e.SourceRecPath + ")ä¹Ÿåº”åŒæ—¶ä½œä¸ºç›®æ ‡è®°å½•ã€‚\r\n\r\næ˜¯å¦çœŸçš„è¦å°†(æ‚¨è®¾å®šçš„)è®°å½• '" + e.TargetRecPath + "' ä½œä¸ºç›®æ ‡ï¼Œç›´æ¥åœ¨å…¶ä¸­åˆ›å»ºå†Œä¿¡æ¯?\r\n\r\n------\r\næ˜¯(Yes): å°†è®°å½• '" + e.TargetRecPath + "' ä½œä¸ºç›®æ ‡ï¼Œå¹¶åœ¨éªŒæ”¶æ“ä½œä¸­å°†æºè®°å½•ä¸­çš„998$t(ç›®å‰å†…å®¹ä¸º '" + str998TargetRecPath + "')æ”¹è®¾ä¸ºæŒ‡å‘æ‚¨é€‰å®šçš„è¿™ä¸ªç›®æ ‡(" + e.TargetRecPath + ")ï¼›\r\nå¦(No): æ”¾å¼ƒéªŒæ”¶";
                         DialogResult result = MessageBox.Show(this,
                             strWarning,
                             "AcceptForm",
@@ -2114,11 +2114,11 @@ this.checkBox_prepare_createCallNumber.Checked);
                         }
                     }
 
-                    // Ä¿±ê¼ÇÂ¼ÕıºÃÊÇÔ´¼ÇÂ¼998$tÖ¸ÏòµÄÄÇÌõ
+                    // ç›®æ ‡è®°å½•æ­£å¥½æ˜¯æºè®°å½•998$tæŒ‡å‘çš„é‚£æ¡
                     else if (String.IsNullOrEmpty(str998TargetRecPath) == false
                         && e.TargetRecPath == str998TargetRecPath)
                     {
-                        strWarning = "ÊéÄ¿¿â '" + strSourceDbName + "' µÄ½ÇÉ«Îª²É¹º¹¤×÷¿â£¬Ò»°ãÇé¿öÏÂ´Ë¿âÖĞµÄÔ´¼ÇÂ¼(" + e.SourceRecPath + ")Ò²Ó¦Í¬Ê±×÷ÎªÄ¿±ê¼ÇÂ¼¡£´ıµ½ºóÆÚµÄ×ªÒÆ²Ù×÷£¬×ÔÈ»»á½«ÕâÌõ¹¤×÷¿â¼ÇÂ¼×ªÒÆµ½×îÖÕµÄÄ¿±ê¼ÇÂ¼ '" + str998TargetRecPath + "'£¬¶ø²»±ØÏÖÔÚ²ÙĞÄ¡£\r\n\r\nÊÇ·ñÕæµÄÒª½«(ÄúÉè¶¨µÄ)¼ÇÂ¼ '" + e.TargetRecPath + "' ×÷ÎªÄ¿±ê£¬Ö±½ÓÔÚÆäÖĞ´´½¨²áĞÅÏ¢?\r\n\r\n------\r\nÊÇ(Yes): ½«¼ÇÂ¼ '" + e.TargetRecPath + "' ×÷ÎªÄ¿±ê£»\r\n·ñ(No): ·ÅÆúÑéÊÕ";
+                        strWarning = "ä¹¦ç›®åº“ '" + strSourceDbName + "' çš„è§’è‰²ä¸ºé‡‡è´­å·¥ä½œåº“ï¼Œä¸€èˆ¬æƒ…å†µä¸‹æ­¤åº“ä¸­çš„æºè®°å½•(" + e.SourceRecPath + ")ä¹Ÿåº”åŒæ—¶ä½œä¸ºç›®æ ‡è®°å½•ã€‚å¾…åˆ°åæœŸçš„è½¬ç§»æ“ä½œï¼Œè‡ªç„¶ä¼šå°†è¿™æ¡å·¥ä½œåº“è®°å½•è½¬ç§»åˆ°æœ€ç»ˆçš„ç›®æ ‡è®°å½• '" + str998TargetRecPath + "'ï¼Œè€Œä¸å¿…ç°åœ¨æ“å¿ƒã€‚\r\n\r\næ˜¯å¦çœŸçš„è¦å°†(æ‚¨è®¾å®šçš„)è®°å½• '" + e.TargetRecPath + "' ä½œä¸ºç›®æ ‡ï¼Œç›´æ¥åœ¨å…¶ä¸­åˆ›å»ºå†Œä¿¡æ¯?\r\n\r\n------\r\næ˜¯(Yes): å°†è®°å½• '" + e.TargetRecPath + "' ä½œä¸ºç›®æ ‡ï¼›\r\nå¦(No): æ”¾å¼ƒéªŒæ”¶";
                         DialogResult result = MessageBox.Show(this,
                             strWarning,
                             "AcceptForm",
@@ -2134,14 +2134,14 @@ this.checkBox_prepare_createCallNumber.Checked);
                     }
                     else
                     {
-                        // Ô´¼ÇÂ¼Ã»ÓĞ998$t¡£´ËÊ±Èç¹û¼±ÓÚ¸øËüÑ°ÕÒÒ»¸ö×îÖÕµÄÄ¿±ê¼ÇÂ¼£¬¿ÉÄÜÊÇÒòÎªÔÚ¶©¹ºÒÔºó£¬ÖĞÑë¿âĞÂÔöÁËÄ³Ğ©ÊéÄ¿¼ÇÂ¼£¬ÕıºÃÊÇÄ¿Ç°¶©¹ºµÄÕâÒ»ÖÖ
+                        // æºè®°å½•æ²¡æœ‰998$tã€‚æ­¤æ—¶å¦‚æœæ€¥äºç»™å®ƒå¯»æ‰¾ä¸€ä¸ªæœ€ç»ˆçš„ç›®æ ‡è®°å½•ï¼Œå¯èƒ½æ˜¯å› ä¸ºåœ¨è®¢è´­ä»¥åï¼Œä¸­å¤®åº“æ–°å¢äº†æŸäº›ä¹¦ç›®è®°å½•ï¼Œæ­£å¥½æ˜¯ç›®å‰è®¢è´­çš„è¿™ä¸€ç§
 
                         // TODO: 
-                        // ĞèÒª¼ì²ée.SourceRecPath¼ÇÂ¼ÖĞµÄ998$t£¬Èç¹û±¾À´¾ÍÖ¸Ïòe.TargetRecPath£¬ÄÇÃ´MessageBoxµÄÌáÊ¾¾Í¼òÂÔ£»
-                        // ¶øÈç¹ûÖ¸Ïò²»ÊÇe.TargetRecPathµÄ¼ÇÂ¼£¬ÔòÔÚ(yes)Ñ¡ÔñÇé¿öÏÂ£¬Òª²¹³äÌáÊ¾£¬ÈçÏÂ£º
-                        // £¬²¢(¼´½«ÔÚÑéÊÕ¹ı³ÌÖĞ)ÖØÉèÔ´¼ÇÂ¼("+e.SourceRecPath+")ÖĞµÄÄ¿±êĞÅÏ¢(998$t)
+                        // éœ€è¦æ£€æŸ¥e.SourceRecPathè®°å½•ä¸­çš„998$tï¼Œå¦‚æœæœ¬æ¥å°±æŒ‡å‘e.TargetRecPathï¼Œé‚£ä¹ˆMessageBoxçš„æç¤ºå°±ç®€ç•¥ï¼›
+                        // è€Œå¦‚æœæŒ‡å‘ä¸æ˜¯e.TargetRecPathçš„è®°å½•ï¼Œåˆ™åœ¨(yes)é€‰æ‹©æƒ…å†µä¸‹ï¼Œè¦è¡¥å……æç¤ºï¼Œå¦‚ä¸‹ï¼š
+                        // ï¼Œå¹¶(å³å°†åœ¨éªŒæ”¶è¿‡ç¨‹ä¸­)é‡è®¾æºè®°å½•("+e.SourceRecPath+")ä¸­çš„ç›®æ ‡ä¿¡æ¯(998$t)
 
-                        strWarning = "ÊéÄ¿¿â '" + strSourceDbName + "' µÄ½ÇÉ«Îª²É¹º¹¤×÷¿â£¬Ò»°ãÇé¿öÏÂ´Ë¿âÖĞµÄÔ´¼ÇÂ¼(" + e.SourceRecPath + ")Ò²Ó¦Í¬Ê±×÷ÎªÄ¿±ê¼ÇÂ¼¡£\r\n\r\nÊÇ·ñÕæµÄÒª½«(ÄúÉè¶¨µÄ)¼ÇÂ¼ '" + e.TargetRecPath + "' ×÷ÎªÄ¿±ê£¬Ö±½ÓÔÚÆäÖĞ´´½¨²áĞÅÏ¢?\r\n\r\n------\r\nÊÇ(Yes): ½«¼ÇÂ¼ '" + e.TargetRecPath + "' ×÷ÎªÄ¿±ê\r\n·ñ(No): ¸ÄÎª½«¼ÇÂ¼ '" + e.SourceRecPath + "' ×÷ÎªÄ¿±ê\r\nÈ¡Ïû(Cancel): ·ÅÆúÑéÊÕ";
+                        strWarning = "ä¹¦ç›®åº“ '" + strSourceDbName + "' çš„è§’è‰²ä¸ºé‡‡è´­å·¥ä½œåº“ï¼Œä¸€èˆ¬æƒ…å†µä¸‹æ­¤åº“ä¸­çš„æºè®°å½•(" + e.SourceRecPath + ")ä¹Ÿåº”åŒæ—¶ä½œä¸ºç›®æ ‡è®°å½•ã€‚\r\n\r\næ˜¯å¦çœŸçš„è¦å°†(æ‚¨è®¾å®šçš„)è®°å½• '" + e.TargetRecPath + "' ä½œä¸ºç›®æ ‡ï¼Œç›´æ¥åœ¨å…¶ä¸­åˆ›å»ºå†Œä¿¡æ¯?\r\n\r\n------\r\næ˜¯(Yes): å°†è®°å½• '" + e.TargetRecPath + "' ä½œä¸ºç›®æ ‡\r\nå¦(No): æ”¹ä¸ºå°†è®°å½• '" + e.SourceRecPath + "' ä½œä¸ºç›®æ ‡\r\nå–æ¶ˆ(Cancel): æ”¾å¼ƒéªŒæ”¶";
                         DialogResult result = MessageBox.Show(this,
                             strWarning,
                             "AcceptForm",
@@ -2154,7 +2154,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                             return;
                         }
 
-                        // »Ö¸´source×÷Îªtarget
+                        // æ¢å¤sourceä½œä¸ºtarget
                         if (result == DialogResult.No)
                         {
                             e.TargetRecPath = e.SourceRecPath;
@@ -2169,16 +2169,16 @@ this.checkBox_prepare_createCallNumber.Checked);
                 }
             }
 
-            // ¼ì²é ·Ç²É¹º¹¤×÷¿â Çé¿ö
-            // Ô´¼ÇÂ¼À´×Ô ·Ç²É¹º¹¤×÷¿â£¬Ä¿±ê¼ÇÂ¼ºÍÔ´¼ÇÂ¼²»ÊÇÍ¬Ò»Ìõ
+            // æ£€æŸ¥ éé‡‡è´­å·¥ä½œåº“ æƒ…å†µ
+            // æºè®°å½•æ¥è‡ª éé‡‡è´­å·¥ä½œåº“ï¼Œç›®æ ‡è®°å½•å’Œæºè®°å½•ä¸æ˜¯åŒä¸€æ¡
             if (source_dbinfo.IsOrderWork == false
                 && e.SourceRecPath != e.TargetRecPath)
             {
-                // ²¢ÇÒ£¬Ä¿±ê¼ÇÂ¼²»ÊÇÔ´¼ÇÂ¼998$tÖ¸ÏòµÄÄÇÌõ
+                // å¹¶ä¸”ï¼Œç›®æ ‡è®°å½•ä¸æ˜¯æºè®°å½•998$tæŒ‡å‘çš„é‚£æ¡
                 if (String.IsNullOrEmpty(str998TargetRecPath) == false
                     && e.TargetRecPath != str998TargetRecPath)
                 {
-                    strWarning = "Ô´¼ÇÂ¼ '" + e.SourceRecPath + "' ÖĞ998$tÖ¸ÏòµÄÄ¿±ê¼ÇÂ¼Îª '" + str998TargetRecPath + "'£¬¶øÄúÉè¶¨ÁËÒ»¸ö²»Í¬µÄÄ¿±ê¼ÇÂ¼ '" + e.TargetRecPath + "'¡£\r\n\r\nÊÇ·ñÕæµÄÒª½«(ÄúÉè¶¨µÄ)¼ÇÂ¼ '" + e.TargetRecPath + "' ×÷ÎªÄ¿±ê£¬Ö±½ÓÔÚÆäÖĞ´´½¨²áĞÅÏ¢?\r\n\r\n------\r\nÊÇ(Yes): ½«¼ÇÂ¼ '" + e.TargetRecPath + "' ×÷ÎªÄ¿±ê£¬²¢ÔÚÑéÊÕ²Ù×÷ÖĞ½«Ô´¼ÇÂ¼ÖĞµÄ998$t(Ä¿Ç°ÄÚÈİÎª '" + str998TargetRecPath + "')¸ÄÉèÎªÖ¸ÏòÄúÑ¡¶¨µÄÕâ¸öÄ¿±ê(" + e.TargetRecPath + ")£»\r\n·ñ(No): ·ÅÆúÑéÊÕ";
+                    strWarning = "æºè®°å½• '" + e.SourceRecPath + "' ä¸­998$tæŒ‡å‘çš„ç›®æ ‡è®°å½•ä¸º '" + str998TargetRecPath + "'ï¼Œè€Œæ‚¨è®¾å®šäº†ä¸€ä¸ªä¸åŒçš„ç›®æ ‡è®°å½• '" + e.TargetRecPath + "'ã€‚\r\n\r\næ˜¯å¦çœŸçš„è¦å°†(æ‚¨è®¾å®šçš„)è®°å½• '" + e.TargetRecPath + "' ä½œä¸ºç›®æ ‡ï¼Œç›´æ¥åœ¨å…¶ä¸­åˆ›å»ºå†Œä¿¡æ¯?\r\n\r\n------\r\næ˜¯(Yes): å°†è®°å½• '" + e.TargetRecPath + "' ä½œä¸ºç›®æ ‡ï¼Œå¹¶åœ¨éªŒæ”¶æ“ä½œä¸­å°†æºè®°å½•ä¸­çš„998$t(ç›®å‰å†…å®¹ä¸º '" + str998TargetRecPath + "')æ”¹è®¾ä¸ºæŒ‡å‘æ‚¨é€‰å®šçš„è¿™ä¸ªç›®æ ‡(" + e.TargetRecPath + ")ï¼›\r\nå¦(No): æ”¾å¼ƒéªŒæ”¶";
                     DialogResult result = MessageBox.Show(this,
                         strWarning,
                         "AcceptForm",
@@ -2203,7 +2203,7 @@ this.checkBox_prepare_createCallNumber.Checked);
         }
 
         /// <summary>
-        /// µ±Ç°´°¿ÚËù¹ØÁªµÄÖÖ²á´°
+        /// å½“å‰çª—å£æ‰€å…³è”çš„ç§å†Œçª—
         /// </summary>
         public EntityForm DetailWindow
         {
@@ -2224,7 +2224,7 @@ this.checkBox_prepare_createCallNumber.Checked);
         }
 
         /// <summary>
-        /// ÏìÓ¦ MdiClient ³ß´ç±ä»¯
+        /// å“åº” MdiClient å°ºå¯¸å˜åŒ–
         /// </summary>
         public void OnMdiClientSizeChanged()
         {
@@ -2319,27 +2319,27 @@ this.checkBox_prepare_createCallNumber.Checked);
                     COLUMN_RECPATH);
             }
 
-            // ¸ù¾İ¼ÇÂ¼Â·¾¶£¬»ñµÃListViewItemÊÂÏîµÄimageindexÏÂ±ê
+            // æ ¹æ®è®°å½•è·¯å¾„ï¼Œè·å¾—ListViewItemäº‹é¡¹çš„imageindexä¸‹æ ‡
             // return:
-            //      -2  ¸ù±¾²»ÊÇÊéÄ¿¿â
-            //      -1  ²»ÊÇ²É¹ºÔ´»òÄ¿±êµÄÆäËüÊéÄ¿¿â
-            //      0   Ô´
-            //      1   Ä¿±ê
-            //      2   Í¬Ê±ÎªÔ´ºÍÄ¿±ê
-            //      3   ÍâÔ´
+            //      -2  æ ¹æœ¬ä¸æ˜¯ä¹¦ç›®åº“
+            //      -1  ä¸æ˜¯é‡‡è´­æºæˆ–ç›®æ ‡çš„å…¶å®ƒä¹¦ç›®åº“
+            //      0   æº
+            //      1   ç›®æ ‡
+            //      2   åŒæ—¶ä¸ºæºå’Œç›®æ ‡
+            //      3   å¤–æº
             int image_index = this.db_infos.GetItemType(strRecPath,
                             this.comboBox_prepare_type.Text);
 
             string strText = "";
             bool bEnable = true;
 
-            if (StringUtil.IsInList("Ô´", strRole) == true)
-                strText = "È¥³ı½ÇÉ«¡°Ô´¡±(&S)";
+            if (StringUtil.IsInList("æº", strRole) == true)
+                strText = "å»é™¤è§’è‰²â€œæºâ€(&S)";
             else
             {
                 if (image_index != 0 && image_index != 2)
                     bEnable = false;
-                strText = "ÉèÖÃ½ÇÉ«¡°Ô´¡±(&S)";
+                strText = "è®¾ç½®è§’è‰²â€œæºâ€(&S)";
             }
 
             menuItem = new MenuItem(strText);
@@ -2350,13 +2350,13 @@ this.checkBox_prepare_createCallNumber.Checked);
             contextMenu.MenuItems.Add(menuItem);
 
             bEnable = true;
-            if (StringUtil.IsInList("Ä¿±ê", strRole) == true)
-                strText = "È¥³ı½ÇÉ«¡°Ä¿±ê¡±(&T)";
+            if (StringUtil.IsInList("ç›®æ ‡", strRole) == true)
+                strText = "å»é™¤è§’è‰²â€œç›®æ ‡â€(&T)";
             else
             {
                 if (image_index != 1 && image_index != 2)
                     bEnable = false;
-                strText = "ÉèÖÃ½ÇÉ«¡°Ä¿±ê¡±(&T)";
+                strText = "è®¾ç½®è§’è‰²â€œç›®æ ‡â€(&T)";
             }
 
             menuItem = new MenuItem(strText);
@@ -2367,20 +2367,20 @@ this.checkBox_prepare_createCallNumber.Checked);
             contextMenu.MenuItems.Add(menuItem);
 
             bEnable = true;
-            if (StringUtil.IsInList("ÍâÔ´", strRole) == true)
-                strText = "È¥³ı½ÇÉ«¡°ÍâÔ´¡±(&T)";
+            if (StringUtil.IsInList("å¤–æº", strRole) == true)
+                strText = "å»é™¤è§’è‰²â€œå¤–æºâ€(&T)";
             else
             {
                 if (image_index != 3)
                     bEnable = false;
-                strText = "ÉèÖÃ½ÇÉ«¡°ÍâÔ´¡±(&T)";
+                strText = "è®¾ç½®è§’è‰²â€œå¤–æºâ€(&T)";
             }
 
             menuItem = new MenuItem(strText);
             menuItem.Click += new System.EventHandler(this.menu_toggleBiblioSource_Click);
             if (this.listView_accept_records.SelectedItems.Count == 0
                 || bEnable == false
-                || this.comboBox_prepare_type.Text == "Á¬Ğø³ö°æÎï")
+                || this.comboBox_prepare_type.Text == "è¿ç»­å‡ºç‰ˆç‰©")
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
@@ -2388,7 +2388,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("Ë¢ĞÂËùÑ¡ÔñµÄ " + this.listView_accept_records.SelectedItems.Count.ToString() + " ¸öÊÂÏî(&R)");
+            menuItem = new MenuItem("åˆ·æ–°æ‰€é€‰æ‹©çš„ " + this.listView_accept_records.SelectedItems.Count.ToString() + " ä¸ªäº‹é¡¹(&R)");
             menuItem.Click += new System.EventHandler(this.menu_refreshSelectedItems_Click);
             if (this.listView_accept_records.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
@@ -2400,15 +2400,15 @@ this.checkBox_prepare_createCallNumber.Checked);
             contextMenu.MenuItems.Add(menuItem);
 
             /*
-            // cut ¼ôÇĞ
-            menuItem = new MenuItem("¼ôÇĞ(&T)");
+            // cut å‰ªåˆ‡
+            menuItem = new MenuItem("å‰ªåˆ‡(&T)");
             menuItem.Click += new System.EventHandler(this.menu_cutEntity_Click);
             if (this.listView_items.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            // copy ¸´ÖÆ
-            menuItem = new MenuItem("¸´ÖÆ(&C)");
+            // copy å¤åˆ¶
+            menuItem = new MenuItem("å¤åˆ¶(&C)");
             menuItem.Click += new System.EventHandler(this.menu_copyEntity_Click);
             if (this.listView_items.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
@@ -2423,8 +2423,8 @@ this.checkBox_prepare_createCallNumber.Checked);
             else
                 bHasClipboardObject = true;
 
-            // paste Õ³Ìù
-            menuItem = new MenuItem("Õ³Ìù(&P)");
+            // paste ç²˜è´´
+            menuItem = new MenuItem("ç²˜è´´(&P)");
             menuItem.Click += new System.EventHandler(this.menu_pasteEntity_Click);
             if (bHasClipboardObject == false)
                 menuItem.Enabled = false;
@@ -2432,7 +2432,7 @@ this.checkBox_prepare_createCallNumber.Checked);
              * 
              * */
 
-            menuItem = new MenuItem("ÒÆ³ıËùÑ¡ÔñµÄ "+this.listView_accept_records.SelectedItems.Count.ToString()+" ¸öÊÂÏî(&R)");
+            menuItem = new MenuItem("ç§»é™¤æ‰€é€‰æ‹©çš„ "+this.listView_accept_records.SelectedItems.Count.ToString()+" ä¸ªäº‹é¡¹(&R)");
             menuItem.Click += new System.EventHandler(this.menu_removeSelectedItems_Click);
             if (this.listView_accept_records.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
@@ -2442,7 +2442,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("¹Ø±ÕÖÖ²á´°(&C)");
+            menuItem = new MenuItem("å…³é—­ç§å†Œçª—(&C)");
             menuItem.Click += new System.EventHandler(this.menu_closeDetailWindow_Click);
             if (this.m_detailWindow == null)
                 menuItem.Enabled = false;
@@ -2452,19 +2452,19 @@ this.checkBox_prepare_createCallNumber.Checked);
             contextMenu.Show(this.listView_accept_records, new Point(e.X, e.Y));
         }
 
-        // Ë¢ĞÂËùÑ¡ÔñµÄÊÂÏî
+        // åˆ·æ–°æ‰€é€‰æ‹©çš„äº‹é¡¹
         void menu_refreshSelectedItems_Click(object sender, EventArgs e)
         {
             this.EnableControls(false);
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚË¢ĞÂ...");
+            stop.Initial("æ­£åœ¨åˆ·æ–°...");
             stop.BeginLoop();
 
             try
             {
                 foreach (ListViewItem item in this.listView_accept_records.SelectedItems)
                 {
-                    Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                    Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                     if (stop != null)
                     {
@@ -2492,7 +2492,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             }
         }
 
-        // µ÷ÓÃÇ°£¬¼ÇÂ¼Â·¾¶ÁĞÒÑ¾­ÓĞÖµ
+        // è°ƒç”¨å‰ï¼Œè®°å½•è·¯å¾„åˆ—å·²ç»æœ‰å€¼
         /*public*/ int RefreshBrowseLine(ListViewItem item,
             out string strError)
         {
@@ -2535,7 +2535,7 @@ this.checkBox_prepare_createCallNumber.Checked);
 
         void menu_closeDetailWindow_Click(object sender, EventArgs e)
         {
-            // ¹Ø±Õ ¹ØÁªµÄEntityForm
+            // å…³é—­ å…³è”çš„EntityForm
             CloseDetailWindow();
         }
 
@@ -2551,7 +2551,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                     ListViewItem item = this.listView_accept_records.SelectedItems[i];
                     string strRecPath = ListViewUtil.GetItemText(item, COLUMN_RECPATH);
 
-                    // ¿´¿´ÊÇ·ñÎªÍâÔ´½ÇÉ«
+                    // çœ‹çœ‹æ˜¯å¦ä¸ºå¤–æºè§’è‰²
                     if (this.label_biblioSource.Tag != null)
                     {
                         if (strRecPath == (string)this.label_biblioSource.Tag)
@@ -2561,7 +2561,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                         }
 
                     }
-                    // ¿´¿´ÊÇ·ñÎªÔ´½ÇÉ«
+                    // çœ‹çœ‹æ˜¯å¦ä¸ºæºè§’è‰²
                     if (this.label_source.Tag != null)
                     {
                         if (strRecPath == (string)this.label_source.Tag)
@@ -2570,7 +2570,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                             Debug.Assert(this.label_source.Tag == null, "");
                         }
                     }
-                    // ¿´¿´ÊÇ·ñÎªÄ¿±ê½ÇÉ«
+                    // çœ‹çœ‹æ˜¯å¦ä¸ºç›®æ ‡è§’è‰²
                     if (this.label_target.Tag != null)
                     {
                         if (strRecPath == (string)this.label_target.Tag)
@@ -2580,7 +2580,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                         }
                     }
 
-                    // ¿´¿´ÊÇ·ñÒÑ¾­×°ÈëÏÂ·½µÄÖÖ²á´°
+                    // çœ‹çœ‹æ˜¯å¦å·²ç»è£…å…¥ä¸‹æ–¹çš„ç§å†Œçª—
                     if (this.m_detailWindow != null && m_detailWindow.BiblioRecPath == strRecPath)
                     {
 #if NO
@@ -2601,14 +2601,14 @@ this.checkBox_prepare_createCallNumber.Checked);
             }
         }
 
-        // TODO: ÉèÖÃµÄÊ±ºòĞèÒª¼ì²éÒ»ÏÂ£¬¿´¿´½ÇÉ«ÊÇ·ñ·ûºÏÊı¾İ¿âµÄ¶¨Òå¡£
-        // ÀıÈç£¬Ã»ÓĞ°üº¬¶©¹º¿âµÄÊéÄ¿¿â£¬²»ÄÜ×÷ÎªÔ´£»Ã»ÓĞ°üº¬ÊµÌå¿âµÄÊéÄ¿¿â£¬²»ÄÜ×÷ÎªÄ¿±ê
+        // TODO: è®¾ç½®çš„æ—¶å€™éœ€è¦æ£€æŸ¥ä¸€ä¸‹ï¼Œçœ‹çœ‹è§’è‰²æ˜¯å¦ç¬¦åˆæ•°æ®åº“çš„å®šä¹‰ã€‚
+        // ä¾‹å¦‚ï¼Œæ²¡æœ‰åŒ…å«è®¢è´­åº“çš„ä¹¦ç›®åº“ï¼Œä¸èƒ½ä½œä¸ºæºï¼›æ²¡æœ‰åŒ…å«å®ä½“åº“çš„ä¹¦ç›®åº“ï¼Œä¸èƒ½ä½œä¸ºç›®æ ‡
         void menu_toggleSource_Click(object sender, EventArgs e)
         {
             string strError = "";
             if (this.listView_accept_records.SelectedItems.Count == 0)
             {
-                strError = "ÉĞÎ´Ñ¡¶¨ÒªÇĞ»»½ÇÉ«¡°Ô´¡±µÄÊÂÏî";
+                strError = "å°šæœªé€‰å®šè¦åˆ‡æ¢è§’è‰²â€œæºâ€çš„äº‹é¡¹";
                 goto ERROR1;
             }
 
@@ -2621,14 +2621,14 @@ this.checkBox_prepare_createCallNumber.Checked);
             RecordInfo info = GetRecordInfo(item);
             string strRole = ListViewUtil.GetItemText(item,
                 COLUMN_ROLE);
-            // ¼´½«ÉèÖÃ¡°Ô´¡±
-            if (StringUtil.IsInList("Ô´",strRole) == false)
+            // å³å°†è®¾ç½®â€œæºâ€
+            if (StringUtil.IsInList("æº",strRole) == false)
             {
-                // ¿´¿´ÊÇ·ñÓĞ¶©¹ºĞÅÏ¢
+                // çœ‹çœ‹æ˜¯å¦æœ‰è®¢è´­ä¿¡æ¯
                 if (info.HasOrderInfo == false)
                 {
                     DialogResult result = MessageBox.Show(this,
-                        "µ±Ç°¼ÇÂ¼ÖĞÎ´°üº¬ÏàÓ¦µÄ¶©¹ºĞÅÏ¢£¬Ò»°ãÇé¿öÏÂ²»ÊÊºÏ×÷Îª¡°Ô´¡±¼ÇÂ¼¡£\r\n\r\nÊµ¼ÊÒªÇ¿ĞĞÉèÖÃÎª¡°Ô´¡±£¿",
+                        "å½“å‰è®°å½•ä¸­æœªåŒ…å«ç›¸åº”çš„è®¢è´­ä¿¡æ¯ï¼Œä¸€èˆ¬æƒ…å†µä¸‹ä¸é€‚åˆä½œä¸ºâ€œæºâ€è®°å½•ã€‚\r\n\r\nå®é™…è¦å¼ºè¡Œè®¾ç½®ä¸ºâ€œæºâ€ï¼Ÿ",
                         "AcceptForm",
                         MessageBoxButtons.OKCancel,
                         MessageBoxIcon.Question,
@@ -2649,46 +2649,46 @@ this.checkBox_prepare_createCallNumber.Checked);
             string strRole = ListViewUtil.GetItemText(item,
                 COLUMN_ROLE);
 
-            if (StringUtil.IsInList("Ô´", strRole) == true)
+            if (StringUtil.IsInList("æº", strRole) == true)
             {
-                StringUtil.SetInList(ref strRole, "Ô´", false);
+                StringUtil.SetInList(ref strRole, "æº", false);
 
-                // ¼ÇÒäÔÚlabelÖĞ
+                // è®°å¿†åœ¨labelä¸­
                 SetLabelSource(null);
             }
             else
             {
-                // Ìí¼ÓÇ°£¬¿´¿´ËùÊôÊı¾İ¿âÊÇ·ñ¾ß±¸ÏàÓ¦µÄÌØĞÔ
+                // æ·»åŠ å‰ï¼Œçœ‹çœ‹æ‰€å±æ•°æ®åº“æ˜¯å¦å…·å¤‡ç›¸åº”çš„ç‰¹æ€§
                 string strRecPath = ListViewUtil.GetItemText(item, COLUMN_RECPATH);
-                // ¸ù¾İ¼ÇÂ¼Â·¾¶£¬»ñµÃListViewItemÊÂÏîµÄimageindexÏÂ±ê
+                // æ ¹æ®è®°å½•è·¯å¾„ï¼Œè·å¾—ListViewItemäº‹é¡¹çš„imageindexä¸‹æ ‡
                 // return:
-                //      -2  ¸ù±¾²»ÊÇÊéÄ¿¿â
-                //      -1  ²»ÊÇ²É¹ºÔ´»òÄ¿±êµÄÆäËüÊéÄ¿¿â
-                //      0   Ô´
-                //      1   Ä¿±ê
-                //      2   Í¬Ê±ÎªÔ´ºÍÄ¿±ê
-        //      3   ÍâÔ´
+                //      -2  æ ¹æœ¬ä¸æ˜¯ä¹¦ç›®åº“
+                //      -1  ä¸æ˜¯é‡‡è´­æºæˆ–ç›®æ ‡çš„å…¶å®ƒä¹¦ç›®åº“
+                //      0   æº
+                //      1   ç›®æ ‡
+                //      2   åŒæ—¶ä¸ºæºå’Œç›®æ ‡
+        //      3   å¤–æº
                 int nRet = this.db_infos.GetItemType(strRecPath,
                             this.comboBox_prepare_type.Text);
                 if (nRet == -2 || nRet == -1)
                 {
-                    strError = "¼ÇÂ¼ '" + strRecPath + "' ËùÔÚµÄÊı¾İ¿â¸ù±¾ºÍ²É¹ºÒµÎñÎŞ¹Ø£¬²»ÄÜÌí¼Ó Ô´ ½ÇÉ«";
+                    strError = "è®°å½• '" + strRecPath + "' æ‰€åœ¨çš„æ•°æ®åº“æ ¹æœ¬å’Œé‡‡è´­ä¸šåŠ¡æ— å…³ï¼Œä¸èƒ½æ·»åŠ  æº è§’è‰²";
                     goto ERROR1;
                 }
                 if (nRet == 1)
                 {
-                    strError = "¼ÇÂ¼ '" + strRecPath + "' ËùÔÚµÄÊı¾İ¿âÎª¡°Ä¿±ê¡±ÀàĞÍ£¬²»ÄÜÌí¼Ó Ô´ ½ÇÉ«";
+                    strError = "è®°å½• '" + strRecPath + "' æ‰€åœ¨çš„æ•°æ®åº“ä¸ºâ€œç›®æ ‡â€ç±»å‹ï¼Œä¸èƒ½æ·»åŠ  æº è§’è‰²";
                     goto ERROR1;
                 }
 
 
-                // Ìí¼Ó
-                StringUtil.SetInList(ref strRole, "Ô´", true);
+                // æ·»åŠ 
+                StringUtil.SetInList(ref strRole, "æº", true);
 
-                // Çå³ıÆäËüÊÂÏîÀïÃæ¿ÉÄÜÓĞµÄ½ÇÉ«¡°Ô´¡±
-                ClearRole("Ô´", item);
+                // æ¸…é™¤å…¶å®ƒäº‹é¡¹é‡Œé¢å¯èƒ½æœ‰çš„è§’è‰²â€œæºâ€
+                ClearRole("æº", item);
 
-                // ¼ÇÒäÔÚlabelÖĞ
+                // è®°å¿†åœ¨labelä¸­
                 SetLabelSource(ListViewUtil.GetItemText(item, COLUMN_RECPATH));
             }
 
@@ -2707,15 +2707,15 @@ this.checkBox_prepare_createCallNumber.Checked);
         {
             string strError = "";
 
-            if (this.comboBox_prepare_type.Text == "Á¬Ğø³ö°æÎï")
+            if (this.comboBox_prepare_type.Text == "è¿ç»­å‡ºç‰ˆç‰©")
             {
-                strError = "¶ÔÓÚÁ¬Ğø³ö°æÎï£¬²»Ö§³Ö ÍâÔ´½ÇÉ«";
+                strError = "å¯¹äºè¿ç»­å‡ºç‰ˆç‰©ï¼Œä¸æ”¯æŒ å¤–æºè§’è‰²";
                 goto ERROR1;
             }
 
             if (this.listView_accept_records.SelectedItems.Count == 0)
             {
-                strError = "ÉĞÎ´Ñ¡¶¨ÒªÇĞ»»½ÇÉ«¡°ÍâÔ´¡±µÄÊÂÏî";
+                strError = "å°šæœªé€‰å®šè¦åˆ‡æ¢è§’è‰²â€œå¤–æºâ€çš„äº‹é¡¹";
                 goto ERROR1;
             }
 
@@ -2738,7 +2738,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             string strError = "";
             if (this.listView_accept_records.SelectedItems.Count == 0)
             {
-                strError = "ÉĞÎ´Ñ¡¶¨ÒªÇĞ»»½ÇÉ«¡°Ä¿±ê¡±µÄÊÂÏî";
+                strError = "å°šæœªé€‰å®šè¦åˆ‡æ¢è§’è‰²â€œç›®æ ‡â€çš„äº‹é¡¹";
                 goto ERROR1;
             }
 
@@ -2755,47 +2755,47 @@ this.checkBox_prepare_createCallNumber.Checked);
             string strRole = ListViewUtil.GetItemText(item,
                 COLUMN_ROLE);
 
-            if (StringUtil.IsInList("Ä¿±ê", strRole) == true)
+            if (StringUtil.IsInList("ç›®æ ‡", strRole) == true)
             {
-                // È¥µô
-                StringUtil.SetInList(ref strRole, "Ä¿±ê", false);
+                // å»æ‰
+                StringUtil.SetInList(ref strRole, "ç›®æ ‡", false);
 
-                // ¼ÇÒäÔÚlabelÖĞ
+                // è®°å¿†åœ¨labelä¸­
                 SetLabelTarget(null);
             }
             else
             {
-                // Ìí¼ÓÇ°£¬¿´¿´ËùÊôÊı¾İ¿âÊÇ·ñ¾ß±¸ÏàÓ¦µÄÌØĞÔ
+                // æ·»åŠ å‰ï¼Œçœ‹çœ‹æ‰€å±æ•°æ®åº“æ˜¯å¦å…·å¤‡ç›¸åº”çš„ç‰¹æ€§
                 string strRecPath = ListViewUtil.GetItemText(item, COLUMN_RECPATH);
-                // ¸ù¾İ¼ÇÂ¼Â·¾¶£¬»ñµÃListViewItemÊÂÏîµÄimageindexÏÂ±ê
+                // æ ¹æ®è®°å½•è·¯å¾„ï¼Œè·å¾—ListViewItemäº‹é¡¹çš„imageindexä¸‹æ ‡
                 // return:
-                //      -2  ¸ù±¾²»ÊÇÊéÄ¿¿â
-                //      -1  ²»ÊÇ²É¹ºÔ´»òÄ¿±êµÄÆäËüÊéÄ¿¿â
-                //      0   Ô´
-                //      1   Ä¿±ê
-                //      2   Í¬Ê±ÎªÔ´ºÍÄ¿±ê
-         //      3   ÍâÔ´
+                //      -2  æ ¹æœ¬ä¸æ˜¯ä¹¦ç›®åº“
+                //      -1  ä¸æ˜¯é‡‡è´­æºæˆ–ç›®æ ‡çš„å…¶å®ƒä¹¦ç›®åº“
+                //      0   æº
+                //      1   ç›®æ ‡
+                //      2   åŒæ—¶ä¸ºæºå’Œç›®æ ‡
+         //      3   å¤–æº
                int nRet = this.db_infos.GetItemType(strRecPath,
                             this.comboBox_prepare_type.Text);
                 if (nRet == -2 || nRet == -1)
                 {
-                    strError = "¼ÇÂ¼ '" + strRecPath + "' ËùÔÚµÄÊı¾İ¿â¸ù±¾ºÍ²É¹ºÒµÎñÎŞ¹Ø£¬²»ÄÜÌí¼Ó Ä¿±ê ½ÇÉ«";
+                    strError = "è®°å½• '" + strRecPath + "' æ‰€åœ¨çš„æ•°æ®åº“æ ¹æœ¬å’Œé‡‡è´­ä¸šåŠ¡æ— å…³ï¼Œä¸èƒ½æ·»åŠ  ç›®æ ‡ è§’è‰²";
                     goto ERROR1;
                 }
                 if (nRet == 0)
                 {
-                    strError = "¼ÇÂ¼ '" + strRecPath + "' ËùÔÚµÄÊı¾İ¿âÎª¡°Ô´¡±ÀàĞÍ£¬²»ÄÜÌí¼Ó Ä¿±ê ½ÇÉ«";
+                    strError = "è®°å½• '" + strRecPath + "' æ‰€åœ¨çš„æ•°æ®åº“ä¸ºâ€œæºâ€ç±»å‹ï¼Œä¸èƒ½æ·»åŠ  ç›®æ ‡ è§’è‰²";
                     goto ERROR1;
                 }
   
 
-                // Ìí¼Ó
-                StringUtil.SetInList(ref strRole, "Ä¿±ê", true);
+                // æ·»åŠ 
+                StringUtil.SetInList(ref strRole, "ç›®æ ‡", true);
 
-                // Çå³ıÆäËüÊÂÏîÀïÃæ¿ÉÄÜÓĞµÄ½ÇÉ«¡°Ä¿±ê¡±
-                ClearRole("Ä¿±ê", item);
+                // æ¸…é™¤å…¶å®ƒäº‹é¡¹é‡Œé¢å¯èƒ½æœ‰çš„è§’è‰²â€œç›®æ ‡â€
+                ClearRole("ç›®æ ‡", item);
 
-                // ¼ÇÒäÔÚlabelÖĞ
+                // è®°å¿†åœ¨labelä¸­
                 SetLabelTarget( ListViewUtil.GetItemText(item, COLUMN_RECPATH));
             }
 
@@ -2819,16 +2819,16 @@ this.checkBox_prepare_createCallNumber.Checked);
 
             
 
-            if (StringUtil.IsInList("Ô´", strRole) == true)
+            if (StringUtil.IsInList("æº", strRole) == true)
             {
-                // °üÀ¨ Ô´,Ä¿±ê ¶¼ÔÚroleÖĞµÄÇé¿ö
+                // åŒ…æ‹¬ æº,ç›®æ ‡ éƒ½åœ¨roleä¸­çš„æƒ…å†µ
                 item.BackColor = Color.LightBlue;
                 if (info.TitleMatch == true)
                     item.Font = new Font(item.Font, FontStyle.Bold);
                 else
                     item.Font = new Font(item.Font, FontStyle.Bold | FontStyle.Italic);
             }
-            else if (StringUtil.IsInList("Ä¿±ê", strRole) == true)
+            else if (StringUtil.IsInList("ç›®æ ‡", strRole) == true)
             {
                 item.BackColor = Color.LightPink;
                 if (info.TitleMatch == true)
@@ -2836,7 +2836,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                 else
                     item.Font = new Font(item.Font, FontStyle.Bold | FontStyle.Italic);
             }
-            else if (StringUtil.IsInList("ÍâÔ´", strRole) == true)
+            else if (StringUtil.IsInList("å¤–æº", strRole) == true)
             {
                 item.BackColor = Color.LightGreen;
                 if (info.TitleMatch == true)
@@ -2855,81 +2855,81 @@ this.checkBox_prepare_createCallNumber.Checked);
             }
 
             // imageindex value:
-            //      -2  ¸ù±¾²»ÊÇÊéÄ¿¿â
-            //      -1  ²»ÊÇ²É¹ºÔ´»òÄ¿±êµÄÆäËüÊéÄ¿¿â
-            //      0   Ô´
-            //      1   Ä¿±ê
-            //      2   Í¬Ê±ÎªÔ´ºÍÄ¿±ê
-            //      3   ÍâÔ´
+            //      -2  æ ¹æœ¬ä¸æ˜¯ä¹¦ç›®åº“
+            //      -1  ä¸æ˜¯é‡‡è´­æºæˆ–ç›®æ ‡çš„å…¶å®ƒä¹¦ç›®åº“
+            //      0   æº
+            //      1   ç›®æ ‡
+            //      2   åŒæ—¶ä¸ºæºå’Œç›®æ ‡
+            //      3   å¤–æº
             if (item.ImageIndex == TYPE_NOT_ORDER
                 || item.ImageIndex < 0
                 || info.TitleMatch == false
-                || (info.HasOrderInfo == false && item.ImageIndex == 0))  // µ¥´¿µÄÔ´£¬Èç¹û²»°üº¬¶©¹ºĞÅÏ¢£¬Ôò·¢»Ò 2009/10/23
+                || (info.HasOrderInfo == false && item.ImageIndex == 0))  // å•çº¯çš„æºï¼Œå¦‚æœä¸åŒ…å«è®¢è´­ä¿¡æ¯ï¼Œåˆ™å‘ç° 2009/10/23
                 item.ForeColor = SystemColors.GrayText;
             else
                 item.ForeColor = SystemColors.WindowText;
         }
 
-        // Çå³ı²ĞÓàµÄÔ´¡¢Ä¿±êĞÅÏ¢
+        // æ¸…é™¤æ®‹ä½™çš„æºã€ç›®æ ‡ä¿¡æ¯
         void ClearSourceTarget()
         {
             this.label_source.Tag = null;
             this.label_target.Tag = null;
         }
 
-        // ·É³ötips source
+        // é£å‡ºtips source
         private void label_source_MouseHover(object sender, EventArgs e)
         {
             object o = this.label_source.Tag;
             string strText = "";
             if (o == null)
-                strText = "Ô´ÉĞÎ´ÉèÖÃ";
+                strText = "æºå°šæœªè®¾ç½®";
             else
-                strText = "\r\nÔ´Îª " + (string)o + "\r\n";
+                strText = "\r\næºä¸º " + (string)o + "\r\n";
 
             this.toolTip_info.Show(strText, this.label_source, 1000);
         }
 
-        // ·É³ö tips target
+        // é£å‡º tips target
         private void label_target_MouseHover(object sender, EventArgs e)
         {
             object o = this.label_target.Tag;
             string strText = "";
             if (o == null)
-                strText = "Ä¿±êÉĞÎ´ÉèÖÃ";
+                strText = "ç›®æ ‡å°šæœªè®¾ç½®";
             else
-                strText = "\r\nÄ¿±êÎª " + (string)o + "\r\n";
+                strText = "\r\nç›®æ ‡ä¸º " + (string)o + "\r\n";
 
             this.toolTip_info.Show(strText, this.label_target, 1000);
         }
 
-        // µãÒ»ÏÂÊó±ê source
+        // ç‚¹ä¸€ä¸‹é¼ æ ‡ source
         private void label_source_MouseClick(object sender, MouseEventArgs e)
         {
             OnClickLabel(this.label_source, false);
         }
 
-        // µãÒ»ÏÂÊó±ê target
+        // ç‚¹ä¸€ä¸‹é¼ æ ‡ target
         private void label_target_MouseClick(object sender, MouseEventArgs e)
         {
             OnClickLabel(this.label_target, false);
         }
 
 
-        // Ë«»÷Êó±ê source
+        // åŒå‡»é¼ æ ‡ source
         private void label_source_DoubleClick(object sender, EventArgs e)
         {
             OnClickLabel(this.label_source, true);
 
         }
 
-        // Ë«»÷Êó±ê target
+        // åŒå‡»é¼ æ ‡ target
         private void label_target_DoubleClick(object sender, EventArgs e)
         {
             OnClickLabel(this.label_target, true);
         }
 
-        // Ë«»÷Êó±ê bibloSource
+        // åŒå‡»é¼ æ ‡ bibloSource
         private void label_biblioSource_DoubleClick(object sender, EventArgs e)
         {
             OnClickLabel(this.label_biblioSource, true);
@@ -2940,15 +2940,15 @@ this.checkBox_prepare_createCallNumber.Checked);
 
         }
 
-        // ·É³ö tips biblioSource
+        // é£å‡º tips biblioSource
         private void label_biblioSource_MouseHover(object sender, EventArgs e)
         {
             object o = this.label_biblioSource.Tag;
             string strText = "";
             if (o == null)
-                strText = "ÍâÔ´ÉĞÎ´ÉèÖÃ";
+                strText = "å¤–æºå°šæœªè®¾ç½®";
             else
-                strText = "\r\nÍâÔ´Îª " + (string)o + "\r\n";
+                strText = "\r\nå¤–æºä¸º " + (string)o + "\r\n";
 
             this.toolTip_info.Show(strText, this.label_target, 1000);
         }
@@ -2984,7 +2984,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ»ñÈ¡È«²¿Êı¾İ¿âÃû ...");
+            stop.Initial("æ­£åœ¨è·å–å…¨éƒ¨æ•°æ®åº“å ...");
             stop.BeginLoop();
 
             this.Update();
@@ -3017,7 +3017,7 @@ this.checkBox_prepare_createCallNumber.Checked);
         }
 
         /// <summary>
-        /// ¼¤»îµÚÒ»¸öÊôĞÔÒ³
+        /// æ¿€æ´»ç¬¬ä¸€ä¸ªå±æ€§é¡µ
         /// </summary>
         public void ActivateFirstPage()
         {
@@ -3032,42 +3032,42 @@ this.checkBox_prepare_createCallNumber.Checked);
             {
                 if (String.IsNullOrEmpty(this.tabComboBox_prepare_batchNo.Text) == true)
                 {
-                    strError = "ÉĞÎ´Ö¸¶¨ÑéÊÕÅú´ÎºÅ";
+                    strError = "å°šæœªæŒ‡å®šéªŒæ”¶æ‰¹æ¬¡å·";
                     goto ERROR1;
                 }
 
                 if (String.IsNullOrEmpty(this.comboBox_prepare_type.Text) == true)
                 {
-                    strError = "ÉĞÎ´Ö¸¶¨³ö°æÎïÀàĞÍ";
+                    strError = "å°šæœªæŒ‡å®šå‡ºç‰ˆç‰©ç±»å‹";
                     goto ERROR1;
                 }
 
-                if (this.comboBox_prepare_type.Text != "Í¼Êé"
-                    && this.comboBox_prepare_type.Text != "Á¬Ğø³ö°æÎï")
+                if (this.comboBox_prepare_type.Text != "å›¾ä¹¦"
+                    && this.comboBox_prepare_type.Text != "è¿ç»­å‡ºç‰ˆç‰©")
                 {
-                    strError = "Î´ÖªµÄ³ö°æÎïÀàĞÍ '" + this.comboBox_prepare_type.Text + "'";
+                    strError = "æœªçŸ¥çš„å‡ºç‰ˆç‰©ç±»å‹ '" + this.comboBox_prepare_type.Text + "'";
                     goto ERROR1;
                 }
 
                 if (String.IsNullOrEmpty(GetDbNameListString()) == true)
                 {
-                    strError = "ÉĞÎ´Ñ¡¶¨²ÎÓë¼ìË÷µÄÊéÄ¿¿â";
+                    strError = "å°šæœªé€‰å®šå‚ä¸æ£€ç´¢çš„ä¹¦ç›®åº“";
                     goto ERROR1;
                 }
 
-                // ÇĞ»»µ½ÏÂÒ»¸öpage
+                // åˆ‡æ¢åˆ°ä¸‹ä¸€ä¸ªpage
                 this.tabControl_main.SelectedTab = this.tabPage_accept;
                 return;
             }
             if (this.tabControl_main.SelectedTab == this.tabPage_accept)
             {
-                // ÆÈÊ¹detailWindow±£´æ
+                // è¿«ä½¿detailWindowä¿å­˜
                 SaveDetailWindowChanges();
 
 
 
 
-                // ÇĞ»»µ½ÏÂÒ»¸öpage
+                // åˆ‡æ¢åˆ°ä¸‹ä¸€ä¸ªpage
                 this.tabControl_main.SelectedTab = this.tabPage_finish;
                 return;
             }
@@ -3084,16 +3084,16 @@ this.checkBox_prepare_createCallNumber.Checked);
             MessageBox.Show(this, strError);
         }
 
-        #region source and target Ïà¹Ø
+        #region source and target ç›¸å…³
 
 
-        // ×Ô¶¯ÉèÖÃ¸÷ĞĞµÄ½ÇÉ«
-        // TODO: ¼ò»¯¸ÅÄî
+        // è‡ªåŠ¨è®¾ç½®å„è¡Œçš„è§’è‰²
+        // TODO: ç®€åŒ–æ¦‚å¿µ
         void AutoSetLinesRole()
         {
-            int nSourceItemCount = 0;   // Ô´½ÇÉ«ÊÂÏîÊıÄ¿¡£²»°üÀ¨Ë«½ÇÉ«ÊÂÏîÊıÄ¿
-            int nTargetItemCount = 0;   // Ä¿±ê½ÇÉ«ÊÂÏîÊıÄ¿¡£²»°üÀ¨Ë«½ÇÉ«ÊÂÏîÊıÄ¿
-            int nSourceAndTargetItemCount = 0;    // Í¬Ê±¾ß±¸Á½¸ö½ÇÉ«µÄÊÂÏîÊıÄ¿
+            int nSourceItemCount = 0;   // æºè§’è‰²äº‹é¡¹æ•°ç›®ã€‚ä¸åŒ…æ‹¬åŒè§’è‰²äº‹é¡¹æ•°ç›®
+            int nTargetItemCount = 0;   // ç›®æ ‡è§’è‰²äº‹é¡¹æ•°ç›®ã€‚ä¸åŒ…æ‹¬åŒè§’è‰²äº‹é¡¹æ•°ç›®
+            int nSourceAndTargetItemCount = 0;    // åŒæ—¶å…·å¤‡ä¸¤ä¸ªè§’è‰²çš„äº‹é¡¹æ•°ç›®
             for (int i = 0; i < this.listView_accept_records.Items.Count; i++)
             {
                 ListViewItem item = this.listView_accept_records.Items[i];
@@ -3106,7 +3106,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                     nSourceAndTargetItemCount++;
             }
 
-            // Èç¹ûµ±Ç°½öÓĞÒ»¸öÍ¬Ê±ÎªÔ´ºÍÄ¿±êµÄÊÂÏî
+            // å¦‚æœå½“å‰ä»…æœ‰ä¸€ä¸ªåŒæ—¶ä¸ºæºå’Œç›®æ ‡çš„äº‹é¡¹
             if (nSourceItemCount == 0 && nTargetItemCount == 0
                 && nSourceAndTargetItemCount == 1)
             {
@@ -3127,7 +3127,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                 return;
             }
 
-            // Èç¹ûµ±Ç°½öÓĞÒ»¸öÔ´ÊÂÏî£¬Ã»ÓĞÄ¿±êÊÂÏî¡£Ò²Ã»ÓĞË«ÖØÊÂÏî
+            // å¦‚æœå½“å‰ä»…æœ‰ä¸€ä¸ªæºäº‹é¡¹ï¼Œæ²¡æœ‰ç›®æ ‡äº‹é¡¹ã€‚ä¹Ÿæ²¡æœ‰åŒé‡äº‹é¡¹
             if (nSourceItemCount == 1 && nTargetItemCount == 0
                 && nSourceAndTargetItemCount == 0)
             {
@@ -3145,27 +3145,27 @@ this.checkBox_prepare_createCallNumber.Checked);
 
                 SetLabelSource(strRecPath);
                 SetLabelTarget("");
-                // ±íÃ÷ĞèÒª´´½¨Ä¿±ê¼ÇÂ¼
+                // è¡¨æ˜éœ€è¦åˆ›å»ºç›®æ ‡è®°å½•
                 return;
             }
 
 
-            // Èç¹ûµ±Ç°½öÓĞÈô¸É¸öÄ¿±êÊÂÏî£¬Ã»ÓĞÔ´ÊÂÏî¡£Ò²Ã»ÓĞË«ÖØÊÂÏî
-            // ÕâÖÖÇé¿öºÜÆæ¹Ö£¬Ö»ÄÜËµÃ÷Ö¸¶¨ISBNºÅµÄÍ¼Êé²¢Ã»ÓĞ±»¶©¹º(µ«ÊÇÒÔÇ°Ôø¾­ÊÕ²Ø¹ı)
-            // ¸ø³öÒ»¶¨µÄÌáÊ¾
+            // å¦‚æœå½“å‰ä»…æœ‰è‹¥å¹²ä¸ªç›®æ ‡äº‹é¡¹ï¼Œæ²¡æœ‰æºäº‹é¡¹ã€‚ä¹Ÿæ²¡æœ‰åŒé‡äº‹é¡¹
+            // è¿™ç§æƒ…å†µå¾ˆå¥‡æ€ªï¼Œåªèƒ½è¯´æ˜æŒ‡å®šISBNå·çš„å›¾ä¹¦å¹¶æ²¡æœ‰è¢«è®¢è´­(ä½†æ˜¯ä»¥å‰æ›¾ç»æ”¶è—è¿‡)
+            // ç»™å‡ºä¸€å®šçš„æç¤º
             if (nSourceItemCount == 0 && nTargetItemCount >= 1
                 && nSourceAndTargetItemCount == 0)
             {
             }
 
 
-            // ÓĞÒ»¸öÔ´ÊÂÏî£¬µ«ÊÇÓĞ¶à¸öÄ¿±êÊÂÏî¡£ÕâÊ±ºòÖ»ÄÜ×Ô¶¯ÉèÖÃÔ´ÊÂÏî£¬¶øÌáÊ¾Ñ¡ÔñÄ¿±êÊÂÏî¡£
-            // Èç¹û²»Ñ¡ÔñÄ¿±êÊÂÏî£¬Ôò²»ÔÊĞí½øĞĞÊµÖÊĞÔÑéÊÕ¡£
+            // æœ‰ä¸€ä¸ªæºäº‹é¡¹ï¼Œä½†æ˜¯æœ‰å¤šä¸ªç›®æ ‡äº‹é¡¹ã€‚è¿™æ—¶å€™åªèƒ½è‡ªåŠ¨è®¾ç½®æºäº‹é¡¹ï¼Œè€Œæç¤ºé€‰æ‹©ç›®æ ‡äº‹é¡¹ã€‚
+            // å¦‚æœä¸é€‰æ‹©ç›®æ ‡äº‹é¡¹ï¼Œåˆ™ä¸å…è®¸è¿›è¡Œå®è´¨æ€§éªŒæ”¶ã€‚
         }
 
-        // ÔÚÁĞ±íÖĞÇå³ıÈ«²¿ÊÂÏîÖĞÌØ¶¨µÄ½ÇÉ«×Ö·û´®
+        // åœ¨åˆ—è¡¨ä¸­æ¸…é™¤å…¨éƒ¨äº‹é¡¹ä¸­ç‰¹å®šçš„è§’è‰²å­—ç¬¦ä¸²
         // parameters:
-        //      exclude Çå³ıµÄÊ±ºò£¬ÒªÌø¹ıÕâ¸öÊÂÏî
+        //      exclude æ¸…é™¤çš„æ—¶å€™ï¼Œè¦è·³è¿‡è¿™ä¸ªäº‹é¡¹
         void ClearRole(string strText,
             ListViewItem exclude)
         {
@@ -3194,7 +3194,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             object o = label.Tag;
             if (o == null)
             {
-                // ·¢³ö¾¯¸æĞÔµÄÏìÉù
+                // å‘å‡ºè­¦å‘Šæ€§çš„å“å£°
                 Console.Beep();
                 return;
             }
@@ -3204,13 +3204,13 @@ this.checkBox_prepare_createCallNumber.Checked);
             ListViewItem item = ListViewUtil.FindItem(this.listView_accept_records, strRecPath, COLUMN_RECPATH);
             if (item == null)
             {
-                strError = "ÁĞ±íÖĞ¾ÓÈ»Ã»ÓĞÕÒµ½Â·¾¶Îª '" + strRecPath + "' µÄÊÂÏî";
+                strError = "åˆ—è¡¨ä¸­å±…ç„¶æ²¡æœ‰æ‰¾åˆ°è·¯å¾„ä¸º '" + strRecPath + "' çš„äº‹é¡¹";
                 goto ERROR1;
             }
 
             if (bDoubleClick == false)
             {
-                // ±íÊ¾Îªµ±Ç°½¹µãĞĞ(µ«ÊÇ²¢²»Ö±½ÓÑ¡ÖĞËü£¬ÒÔÃâ¾ªÈÅlistviewÒıÆğÏêÏ¸´°Áª¶¯)
+                // è¡¨ç¤ºä¸ºå½“å‰ç„¦ç‚¹è¡Œ(ä½†æ˜¯å¹¶ä¸ç›´æ¥é€‰ä¸­å®ƒï¼Œä»¥å…æƒŠæ‰°listviewå¼•èµ·è¯¦ç»†çª—è”åŠ¨)
                 this.listView_accept_records.FocusedItem = item;
             }
             else
@@ -3226,7 +3226,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             MessageBox.Show(this, strError);
         }
 
-        // ¹Û²ìÒ»¸ölistviewÊÂÏîÊÇ·ñÄÜ¹»±»ÉèÖÃÎªbiblioSource?
+        // è§‚å¯Ÿä¸€ä¸ªlistviewäº‹é¡¹æ˜¯å¦èƒ½å¤Ÿè¢«è®¾ç½®ä¸ºbiblioSource?
         bool IsBiblioSourceable(ListViewItem item)
         {
             if (item == null)
@@ -3234,14 +3234,14 @@ this.checkBox_prepare_createCallNumber.Checked);
 
             string strRecPath = ListViewUtil.GetItemText(item, COLUMN_RECPATH);
 
-            // ¸ù¾İ¼ÇÂ¼Â·¾¶£¬»ñµÃListViewItemÊÂÏîµÄimageindexÏÂ±ê
+            // æ ¹æ®è®°å½•è·¯å¾„ï¼Œè·å¾—ListViewItemäº‹é¡¹çš„imageindexä¸‹æ ‡
             // return:
-            //      -2  ¸ù±¾²»ÊÇÊéÄ¿¿â
-            //      -1  ²»ÊÇ²É¹ºÔ´»òÄ¿±êµÄÆäËüÊéÄ¿¿â
-            //      0   Ô´
-            //      1   Ä¿±ê
-            //      2   Í¬Ê±ÎªÔ´ºÍÄ¿±ê
-            //      3   ÍâÔ´
+            //      -2  æ ¹æœ¬ä¸æ˜¯ä¹¦ç›®åº“
+            //      -1  ä¸æ˜¯é‡‡è´­æºæˆ–ç›®æ ‡çš„å…¶å®ƒä¹¦ç›®åº“
+            //      0   æº
+            //      1   ç›®æ ‡
+            //      2   åŒæ—¶ä¸ºæºå’Œç›®æ ‡
+            //      3   å¤–æº
             int nRet = this.db_infos.GetItemType(strRecPath,
                         this.comboBox_prepare_type.Text);
             if (nRet == 3)
@@ -3249,7 +3249,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             return false;
         }
 
-        // ¹Û²ìÒ»¸ölistviewÊÂÏîÊÇ·ñÄÜ¹»±»ÉèÖÃÎªtarget?
+        // è§‚å¯Ÿä¸€ä¸ªlistviewäº‹é¡¹æ˜¯å¦èƒ½å¤Ÿè¢«è®¾ç½®ä¸ºtarget?
         bool IsTargetable(ListViewItem item)
         {
             if (item == null)
@@ -3257,14 +3257,14 @@ this.checkBox_prepare_createCallNumber.Checked);
 
             string strRecPath = ListViewUtil.GetItemText(item, COLUMN_RECPATH);
 
-            // ¸ù¾İ¼ÇÂ¼Â·¾¶£¬»ñµÃListViewItemÊÂÏîµÄimageindexÏÂ±ê
+            // æ ¹æ®è®°å½•è·¯å¾„ï¼Œè·å¾—ListViewItemäº‹é¡¹çš„imageindexä¸‹æ ‡
             // return:
-            //      -2  ¸ù±¾²»ÊÇÊéÄ¿¿â
-            //      -1  ²»ÊÇ²É¹ºÔ´»òÄ¿±êµÄÆäËüÊéÄ¿¿â
-            //      0   Ô´
-            //      1   Ä¿±ê
-            //      2   Í¬Ê±ÎªÔ´ºÍÄ¿±ê
-            //      3   ÍâÔ´
+            //      -2  æ ¹æœ¬ä¸æ˜¯ä¹¦ç›®åº“
+            //      -1  ä¸æ˜¯é‡‡è´­æºæˆ–ç›®æ ‡çš„å…¶å®ƒä¹¦ç›®åº“
+            //      0   æº
+            //      1   ç›®æ ‡
+            //      2   åŒæ—¶ä¸ºæºå’Œç›®æ ‡
+            //      3   å¤–æº
             int nRet = this.db_infos.GetItemType(strRecPath,
                         this.comboBox_prepare_type.Text);
             if (nRet == 1 || nRet == 2)
@@ -3272,7 +3272,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             return false;
         }
 
-        // ¹Û²ìÒ»¸ölistviewÊÂÏîÊÇ·ñÄÜ¹»±»ÉèÖÃÎªsource?
+        // è§‚å¯Ÿä¸€ä¸ªlistviewäº‹é¡¹æ˜¯å¦èƒ½å¤Ÿè¢«è®¾ç½®ä¸ºsource?
         bool IsSourceable(ListViewItem item)
         {
             if (item == null)
@@ -3280,14 +3280,14 @@ this.checkBox_prepare_createCallNumber.Checked);
 
             string strRecPath = ListViewUtil.GetItemText(item, COLUMN_RECPATH);
 
-            // ¸ù¾İ¼ÇÂ¼Â·¾¶£¬»ñµÃListViewItemÊÂÏîµÄimageindexÏÂ±ê
+            // æ ¹æ®è®°å½•è·¯å¾„ï¼Œè·å¾—ListViewItemäº‹é¡¹çš„imageindexä¸‹æ ‡
             // return:
-            //      -2  ¸ù±¾²»ÊÇÊéÄ¿¿â
-            //      -1  ²»ÊÇ²É¹ºÔ´»òÄ¿±êµÄÆäËüÊéÄ¿¿â
-            //      0   Ô´
-            //      1   Ä¿±ê
-            //      2   Í¬Ê±ÎªÔ´ºÍÄ¿±ê
-            //      3   ÍâÔ´
+            //      -2  æ ¹æœ¬ä¸æ˜¯ä¹¦ç›®åº“
+            //      -1  ä¸æ˜¯é‡‡è´­æºæˆ–ç›®æ ‡çš„å…¶å®ƒä¹¦ç›®åº“
+            //      0   æº
+            //      1   ç›®æ ‡
+            //      2   åŒæ—¶ä¸ºæºå’Œç›®æ ‡
+            //      3   å¤–æº
             int nRet = this.db_infos.GetItemType(strRecPath,
                         this.comboBox_prepare_type.Text);
             if (nRet == 0 || nRet == 2)
@@ -3322,13 +3322,13 @@ this.checkBox_prepare_createCallNumber.Checked);
 
             if (String.IsNullOrEmpty(info.BiblioTitle) == false)
             {
-                // ÒÑ¾­»ñµÃ¹ıÁË
+                // å·²ç»è·å¾—è¿‡äº†
                 strTitle = info.BiblioTitle;
                 return 1;
             }
 
             string strRecPath = ListViewUtil.GetItemText(item, COLUMN_RECPATH);
-            // »ñµÃÒ»¸öÊéÄ¿¼ÇÂ¼µÄtitle
+            // è·å¾—ä¸€ä¸ªä¹¦ç›®è®°å½•çš„title
             // return:
             //      -1  error
             //      0   not found title
@@ -3342,12 +3342,12 @@ this.checkBox_prepare_createCallNumber.Checked);
             return nRet;
         }
 
-        // ¸ù¾İsourceÊÂÏîµÄtitle£¬°ÑÀíÂÛÉÏµÄtargetÊÂÏî¹ıÂËÒ»·¬£¬Í»ÏÔtitle·ûºÏµÄ£¬µ­»¯title²»·ûºÏµÄ
-        // »òÕß¸ù¾İtargetÊÂÏîµÄtitle£¬°ÑÀíÂÛÉÏµÄsourceÊÂÏî¹ıÂËÒ»·¬£¬Í»ÏÔtitle·ûºÏµÄ£¬µ­»¯title²»·ûºÏµÄ
+        // æ ¹æ®sourceäº‹é¡¹çš„titleï¼ŒæŠŠç†è®ºä¸Šçš„targetäº‹é¡¹è¿‡æ»¤ä¸€ç•ªï¼Œçªæ˜¾titleç¬¦åˆçš„ï¼Œæ·¡åŒ–titleä¸ç¬¦åˆçš„
+        // æˆ–è€…æ ¹æ®targetäº‹é¡¹çš„titleï¼ŒæŠŠç†è®ºä¸Šçš„sourceäº‹é¡¹è¿‡æ»¤ä¸€ç•ªï¼Œçªæ˜¾titleç¬¦åˆçš„ï¼Œæ·¡åŒ–titleä¸ç¬¦åˆçš„
         // parameters:
-        //      start_item  ÒıÆğ±ä»¯µÄListViewItemÊÂÏî¡£Èç¹ûÎªsourceÊÂÏî£¬Ôò±¾º¯Êı»áÈ¥ĞŞ¸ÄÈô¸ÉtargetÊÂÏîµÄÏÔÊ¾×´Ì¬£»Èç¹ûÎªtargetÊÂÏî£¬Ôò±¾º¯Êı»áÈ¥ĞŞ¸ÄÈô¸ÉsourceÊÂÏîµÄÏÔÊ¾×´Ì¬
-        //      strRoles   ÒªÈ¥ĞŞ¸ÄµÄ½ÇÉ«¡£¿ÉÓÃÖµsource target biblioSource¡£ºÍstart_itemµÄ½ÇÉ«Ïà·´¡£¿ÉÒÔÊ¹ÓÃ¶ººÅ¼ä¸ôµÄÁĞ±í
-        //      strAction   "set" »òÕß "reset"¡£"set"±íÊ¾ĞèÒª¸ù¾İstart_itemµÄtitleÈ¥É¸Ñ¡È·¶¨ÆäËûÈô¸ÉÊÂÏîµÄÏÔÊ¾×´Ì¬£¬¶ø"reset"±íÊ¾È«²¿»Ö¸´¡°¼ÓÖØ¡±ÏÔÊ¾×´Ì¬¼´¿É¡£
+        //      start_item  å¼•èµ·å˜åŒ–çš„ListViewItemäº‹é¡¹ã€‚å¦‚æœä¸ºsourceäº‹é¡¹ï¼Œåˆ™æœ¬å‡½æ•°ä¼šå»ä¿®æ”¹è‹¥å¹²targetäº‹é¡¹çš„æ˜¾ç¤ºçŠ¶æ€ï¼›å¦‚æœä¸ºtargetäº‹é¡¹ï¼Œåˆ™æœ¬å‡½æ•°ä¼šå»ä¿®æ”¹è‹¥å¹²sourceäº‹é¡¹çš„æ˜¾ç¤ºçŠ¶æ€
+        //      strRoles   è¦å»ä¿®æ”¹çš„è§’è‰²ã€‚å¯ç”¨å€¼source target biblioSourceã€‚å’Œstart_itemçš„è§’è‰²ç›¸åã€‚å¯ä»¥ä½¿ç”¨é€—å·é—´éš”çš„åˆ—è¡¨
+        //      strAction   "set" æˆ–è€… "reset"ã€‚"set"è¡¨ç¤ºéœ€è¦æ ¹æ®start_itemçš„titleå»ç­›é€‰ç¡®å®šå…¶ä»–è‹¥å¹²äº‹é¡¹çš„æ˜¾ç¤ºçŠ¶æ€ï¼Œè€Œ"reset"è¡¨ç¤ºå…¨éƒ¨æ¢å¤â€œåŠ é‡â€æ˜¾ç¤ºçŠ¶æ€å³å¯ã€‚
         int FilterTitle(
             ListViewItem start_item,
             string strRoles,
@@ -3362,7 +3362,7 @@ this.checkBox_prepare_createCallNumber.Checked);
 
             if (start_item != null)
             {
-                Debug.Assert(strAction == "set", "µ±²ÎÊıstart_item²»Îª¿ÕµÄÊ±ºò£¬strAction²ÎÊıÓ¦µ±Îªset");
+                Debug.Assert(strAction == "set", "å½“å‚æ•°start_itemä¸ä¸ºç©ºçš„æ—¶å€™ï¼ŒstrActionå‚æ•°åº”å½“ä¸ºset");
 
                 // return:
                 //      -1  error
@@ -3381,7 +3381,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             }
             else
             {
-                Debug.Assert(strAction == "reset", "µ±²ÎÊıstart_itemÎª¿ÕµÄÊ±ºò£¬strAction²ÎÊıÓ¦µ±Îªreset");
+                Debug.Assert(strAction == "reset", "å½“å‚æ•°start_itemä¸ºç©ºçš„æ—¶å€™ï¼ŒstrActionå‚æ•°åº”å½“ä¸ºreset");
             }
 
 
@@ -3395,14 +3395,14 @@ this.checkBox_prepare_createCallNumber.Checked);
                 string strRecPath = ListViewUtil.GetItemText(item, COLUMN_RECPATH);
 
                 // 
-                // ¸ù¾İ¼ÇÂ¼Â·¾¶£¬»ñµÃListViewItemÊÂÏîµÄimageindexÏÂ±ê
+                // æ ¹æ®è®°å½•è·¯å¾„ï¼Œè·å¾—ListViewItemäº‹é¡¹çš„imageindexä¸‹æ ‡
                 // return:
-                //      -2  ¸ù±¾²»ÊÇÊéÄ¿¿â
-                //      -1  ²»ÊÇ²É¹ºÔ´»òÄ¿±êµÄÆäËüÊéÄ¿¿â
-                //      0   Ô´
-                //      1   Ä¿±ê
-                //      2   Í¬Ê±ÎªÔ´ºÍÄ¿±ê
-                //      3   ÍâÔ´
+                //      -2  æ ¹æœ¬ä¸æ˜¯ä¹¦ç›®åº“
+                //      -1  ä¸æ˜¯é‡‡è´­æºæˆ–ç›®æ ‡çš„å…¶å®ƒä¹¦ç›®åº“
+                //      0   æº
+                //      1   ç›®æ ‡
+                //      2   åŒæ—¶ä¸ºæºå’Œç›®æ ‡
+                //      3   å¤–æº
                 int nItemType = this.db_infos.GetItemType(strRecPath,
                     this.comboBox_prepare_type.Text);
 
@@ -3452,12 +3452,12 @@ this.checkBox_prepare_createCallNumber.Checked);
 
                 if (strSourceTitle.ToLower() == strCurrentTitle.ToLower())
                 {
-                    // ÏÔÊ¾Îª ÖØ
+                    // æ˜¾ç¤ºä¸º é‡
                     info.TitleMatch = true;
                 }
                 else
                 {
-                    // ÏÔÊ¾Îª Çá
+                    // æ˜¾ç¤ºä¸º è½»
                     info.TitleMatch = false;
                 }
 
@@ -3469,7 +3469,7 @@ this.checkBox_prepare_createCallNumber.Checked);
         }
 
         // 2008/10/22
-        // ½«¾ßÓĞÖ¸¶¨Â·¾¶µÄÊÂÏîÉèÖÃÎªÄ¿±ê¼ÇÂ¼
+        // å°†å…·æœ‰æŒ‡å®šè·¯å¾„çš„äº‹é¡¹è®¾ç½®ä¸ºç›®æ ‡è®°å½•
         int SetTarget(string strTargetRecPath,
             out string strError)
         {
@@ -3479,7 +3479,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                 strTargetRecPath, COLUMN_RECPATH);
             if (item == null)
             {
-                strError = "Â·¾¶Îª " + strTargetRecPath + " µÄListViewItemÊÂÏîÃ»ÓĞÕÒµ½";
+                strError = "è·¯å¾„ä¸º " + strTargetRecPath + " çš„ListViewItemäº‹é¡¹æ²¡æœ‰æ‰¾åˆ°";
                 return -1;
             }
 
@@ -3492,7 +3492,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             return nRet;
         }
 
-        // ¸øÒ»¸ölistview itemÊÂÏîÉèÖÃ¡¢È¥³ı¡¢ÇĞ»» biblioSource ½ÇÉ«
+        // ç»™ä¸€ä¸ªlistview itemäº‹é¡¹è®¾ç½®ã€å»é™¤ã€åˆ‡æ¢ biblioSource è§’è‰²
         int SetBiblioSource(ListViewItem item,
             string strAction,
             out string strError)
@@ -3506,9 +3506,9 @@ this.checkBox_prepare_createCallNumber.Checked);
                 return -1;
             }
 
-            if (this.comboBox_prepare_type.Text == "Á¬Ğø³ö°æÎï")
+            if (this.comboBox_prepare_type.Text == "è¿ç»­å‡ºç‰ˆç‰©")
             {
-                strError = "¶ÔÓÚÁ¬Ğø³ö°æÎï£¬²»Ö§³Ö ÍâÔ´½ÇÉ«";
+                strError = "å¯¹äºè¿ç»­å‡ºç‰ˆç‰©ï¼Œä¸æ”¯æŒ å¤–æºè§’è‰²";
                 return -1;
             }
 
@@ -3520,25 +3520,25 @@ this.checkBox_prepare_createCallNumber.Checked);
             string strRole = ListViewUtil.GetItemText(item,
                 COLUMN_ROLE);
 
-            if (StringUtil.IsInList("ÍâÔ´", strRole) == true)
+            if (StringUtil.IsInList("å¤–æº", strRole) == true)
             {
                 if (strAction == "set")
                 {
-                    // ¿´¿´ÊÇ²»ÊÇstrRecPath
+                    // çœ‹çœ‹æ˜¯ä¸æ˜¯strRecPath
                     string strExistRecPath = GetTargetRecPath();
                     if (strExistRecPath == strRecPath)
                         return 0;
 
-                    // È¥µô
-                    StringUtil.SetInList(ref strRole, "ÍâÔ´", false);
+                    // å»æ‰
+                    StringUtil.SetInList(ref strRole, "å¤–æº", false);
 
-                    // ¼ÇÒäÔÚlabelÖĞ
+                    // è®°å¿†åœ¨labelä¸­
                     SetLabelBiblioSource(null);
 
-                    // Ìí¼Ó
-                    StringUtil.SetInList(ref strRole, "ÍâÔ´", true);
+                    // æ·»åŠ 
+                    StringUtil.SetInList(ref strRole, "å¤–æº", true);
 
-                    // ¼ÇÒäÔÚlabelÖĞ
+                    // è®°å¿†åœ¨labelä¸­
                     SetLabelBiblioSource(ListViewUtil.GetItemText(item, COLUMN_RECPATH));
 
                     nRet = FilterTitle(
@@ -3555,10 +3555,10 @@ this.checkBox_prepare_createCallNumber.Checked);
                 }
                 else if (strAction == "toggle" || strAction == "clear")
                 {
-                    // È¥µô
-                    StringUtil.SetInList(ref strRole, "ÍâÔ´", false);
+                    // å»æ‰
+                    StringUtil.SetInList(ref strRole, "å¤–æº", false);
 
-                    // ¼ÇÒäÔÚlabelÖĞ
+                    // è®°å¿†åœ¨labelä¸­
                     SetLabelBiblioSource(null);
 
                     nRet = FilterTitle(
@@ -3576,44 +3576,44 @@ this.checkBox_prepare_createCallNumber.Checked);
             else
             {
                 if (strAction == "clear")
-                    return 0; // ±¾À´¾ÍÃ»ÓĞ
+                    return 0; // æœ¬æ¥å°±æ²¡æœ‰
 
-                // Ìí¼ÓÇ°£¬¿´¿´ËùÊôÊı¾İ¿âÊÇ·ñ¾ß±¸ÏàÓ¦µÄÌØĞÔ
+                // æ·»åŠ å‰ï¼Œçœ‹çœ‹æ‰€å±æ•°æ®åº“æ˜¯å¦å…·å¤‡ç›¸åº”çš„ç‰¹æ€§
                 // string strRecPath = ListViewUtil.GetItemText(item, COLUMN_RECPATH);
 
-                // ¸ù¾İ¼ÇÂ¼Â·¾¶£¬»ñµÃListViewItemÊÂÏîµÄimageindexÏÂ±ê
+                // æ ¹æ®è®°å½•è·¯å¾„ï¼Œè·å¾—ListViewItemäº‹é¡¹çš„imageindexä¸‹æ ‡
                 // return:
-                //      -2  ¸ù±¾²»ÊÇÊéÄ¿¿â
-                //      -1  ²»ÊÇ²É¹ºÔ´»òÄ¿±êµÄÆäËüÊéÄ¿¿â
-                //      0   Ô´
-                //      1   Ä¿±ê
-                //      2   Í¬Ê±ÎªÔ´ºÍÄ¿±ê
-                //      3   ÍâÔ´
+                //      -2  æ ¹æœ¬ä¸æ˜¯ä¹¦ç›®åº“
+                //      -1  ä¸æ˜¯é‡‡è´­æºæˆ–ç›®æ ‡çš„å…¶å®ƒä¹¦ç›®åº“
+                //      0   æº
+                //      1   ç›®æ ‡
+                //      2   åŒæ—¶ä¸ºæºå’Œç›®æ ‡
+                //      3   å¤–æº
                 nRet = this.db_infos.GetItemType(strRecPath,
                             this.comboBox_prepare_type.Text);
                 if (nRet == -2 || nRet == -1)
                 {
-                    strError = "¼ÇÂ¼ '" + strRecPath + "' ËùÔÚµÄÊı¾İ¿â¸ù±¾ºÍ" + this.comboBox_prepare_type.Text + "²É¹ºÒµÎñÎŞ¹Ø£¬²»ÄÜÌí¼Ó ÍâÔ´ ½ÇÉ«";
+                    strError = "è®°å½• '" + strRecPath + "' æ‰€åœ¨çš„æ•°æ®åº“æ ¹æœ¬å’Œ" + this.comboBox_prepare_type.Text + "é‡‡è´­ä¸šåŠ¡æ— å…³ï¼Œä¸èƒ½æ·»åŠ  å¤–æº è§’è‰²";
                     goto ERROR1;
                 }
                 if (nRet == 0)
                 {
-                    strError = "¼ÇÂ¼ '" + strRecPath + "' ËùÔÚµÄÊı¾İ¿âÎª¡°Ô´¡±ÀàĞÍ£¬²»ÄÜÌí¼Ó ÍâÔ´ ½ÇÉ«";
+                    strError = "è®°å½• '" + strRecPath + "' æ‰€åœ¨çš„æ•°æ®åº“ä¸ºâ€œæºâ€ç±»å‹ï¼Œä¸èƒ½æ·»åŠ  å¤–æº è§’è‰²";
                     goto ERROR1;
                 }
                 if (nRet == 1 || nRet == 2)
                 {
-                    strError = "¼ÇÂ¼ '" + strRecPath + "' ËùÔÚµÄÊı¾İ¿âÎª¡°Ä¿±ê¡±ÀàĞÍ£¬²»ÄÜÌí¼Ó ÍâÔ´ ½ÇÉ«";
+                    strError = "è®°å½• '" + strRecPath + "' æ‰€åœ¨çš„æ•°æ®åº“ä¸ºâ€œç›®æ ‡â€ç±»å‹ï¼Œä¸èƒ½æ·»åŠ  å¤–æº è§’è‰²";
                     goto ERROR1;
                 }
 
-                // Ìí¼Ó
-                StringUtil.SetInList(ref strRole, "ÍâÔ´", true);
+                // æ·»åŠ 
+                StringUtil.SetInList(ref strRole, "å¤–æº", true);
 
-                // Çå³ıÆäËüÊÂÏîÀïÃæ¿ÉÄÜÓĞµÄ½ÇÉ«¡°ÍâÔ´¡±
-                ClearRole("ÍâÔ´", item);
+                // æ¸…é™¤å…¶å®ƒäº‹é¡¹é‡Œé¢å¯èƒ½æœ‰çš„è§’è‰²â€œå¤–æºâ€
+                ClearRole("å¤–æº", item);
 
-                // ¼ÇÒäÔÚlabelÖĞ
+                // è®°å¿†åœ¨labelä¸­
                 SetLabelBiblioSource(ListViewUtil.GetItemText(item, COLUMN_RECPATH));
 
                 nRet = FilterTitle(
@@ -3637,7 +3637,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             return -1;
         }
 
-        // ¸øÒ»¸ölistview itemÊÂÏîÉèÖÃ¡¢È¥³ı¡¢ÇĞ»» target ½ÇÉ«
+        // ç»™ä¸€ä¸ªlistview itemäº‹é¡¹è®¾ç½®ã€å»é™¤ã€åˆ‡æ¢ target è§’è‰²
         int SetTarget(ListViewItem item,
             string strAction,
             out string strError)
@@ -3659,25 +3659,25 @@ this.checkBox_prepare_createCallNumber.Checked);
             string strRole = ListViewUtil.GetItemText(item,
                 COLUMN_ROLE);
 
-            if (StringUtil.IsInList("Ä¿±ê", strRole) == true)
+            if (StringUtil.IsInList("ç›®æ ‡", strRole) == true)
             {
                 if (strAction == "set")
                 {
-                    // ¿´¿´ÊÇ²»ÊÇstrRecPath
+                    // çœ‹çœ‹æ˜¯ä¸æ˜¯strRecPath
                     string strExistRecPath = GetTargetRecPath();
                     if (strExistRecPath == strRecPath)
                         return 0;
 
-                    // È¥µô
-                    StringUtil.SetInList(ref strRole, "Ä¿±ê", false);
+                    // å»æ‰
+                    StringUtil.SetInList(ref strRole, "ç›®æ ‡", false);
 
-                    // ¼ÇÒäÔÚlabelÖĞ
+                    // è®°å¿†åœ¨labelä¸­
                     SetLabelTarget(null);
 
-                    // Ìí¼Ó
-                    StringUtil.SetInList(ref strRole, "Ä¿±ê", true);
+                    // æ·»åŠ 
+                    StringUtil.SetInList(ref strRole, "ç›®æ ‡", true);
 
-                    // ¼ÇÒäÔÚlabelÖĞ
+                    // è®°å¿†åœ¨labelä¸­
                     SetLabelTarget(ListViewUtil.GetItemText(item, COLUMN_RECPATH));
 
                     nRet = FilterTitle(
@@ -3694,10 +3694,10 @@ this.checkBox_prepare_createCallNumber.Checked);
                 }
                 else if (strAction == "toggle" || strAction == "clear")
                 {
-                    // È¥µô
-                    StringUtil.SetInList(ref strRole, "Ä¿±ê", false);
+                    // å»æ‰
+                    StringUtil.SetInList(ref strRole, "ç›®æ ‡", false);
 
-                    // ¼ÇÒäÔÚlabelÖĞ
+                    // è®°å¿†åœ¨labelä¸­
                     SetLabelTarget(null);
 
                     nRet = FilterTitle(
@@ -3716,44 +3716,44 @@ this.checkBox_prepare_createCallNumber.Checked);
             else
             {
                 if (strAction == "clear")
-                    return 0; // ±¾À´¾ÍÃ»ÓĞ
+                    return 0; // æœ¬æ¥å°±æ²¡æœ‰
 
-                // Ìí¼ÓÇ°£¬¿´¿´ËùÊôÊı¾İ¿âÊÇ·ñ¾ß±¸ÏàÓ¦µÄÌØĞÔ
+                // æ·»åŠ å‰ï¼Œçœ‹çœ‹æ‰€å±æ•°æ®åº“æ˜¯å¦å…·å¤‡ç›¸åº”çš„ç‰¹æ€§
                 // string strRecPath = ListViewUtil.GetItemText(item, COLUMN_RECPATH);
 
-                // ¸ù¾İ¼ÇÂ¼Â·¾¶£¬»ñµÃListViewItemÊÂÏîµÄimageindexÏÂ±ê
+                // æ ¹æ®è®°å½•è·¯å¾„ï¼Œè·å¾—ListViewItemäº‹é¡¹çš„imageindexä¸‹æ ‡
                 // return:
-                //      -2  ¸ù±¾²»ÊÇÊéÄ¿¿â
-                //      -1  ²»ÊÇ²É¹ºÔ´»òÄ¿±êµÄÆäËüÊéÄ¿¿â
-                //      0   Ô´
-                //      1   Ä¿±ê
-                //      2   Í¬Ê±ÎªÔ´ºÍÄ¿±ê
-                //      3   ÍâÔ´
+                //      -2  æ ¹æœ¬ä¸æ˜¯ä¹¦ç›®åº“
+                //      -1  ä¸æ˜¯é‡‡è´­æºæˆ–ç›®æ ‡çš„å…¶å®ƒä¹¦ç›®åº“
+                //      0   æº
+                //      1   ç›®æ ‡
+                //      2   åŒæ—¶ä¸ºæºå’Œç›®æ ‡
+                //      3   å¤–æº
                 nRet = this.db_infos.GetItemType(strRecPath,
                             this.comboBox_prepare_type.Text);
                 if (nRet == -2 || nRet == -1)
                 {
-                    strError = "¼ÇÂ¼ '" + strRecPath + "' ËùÔÚµÄÊı¾İ¿â¸ù±¾ºÍ" + this.comboBox_prepare_type.Text + "²É¹ºÒµÎñÎŞ¹Ø£¬²»ÄÜÌí¼Ó Ä¿±ê ½ÇÉ«";
+                    strError = "è®°å½• '" + strRecPath + "' æ‰€åœ¨çš„æ•°æ®åº“æ ¹æœ¬å’Œ" + this.comboBox_prepare_type.Text + "é‡‡è´­ä¸šåŠ¡æ— å…³ï¼Œä¸èƒ½æ·»åŠ  ç›®æ ‡ è§’è‰²";
                     goto ERROR1;
                 }
                 if (nRet == 0)
                 {
-                    strError = "¼ÇÂ¼ '" + strRecPath + "' ËùÔÚµÄÊı¾İ¿âÎª¡°Ô´¡±ÀàĞÍ£¬²»ÄÜÌí¼Ó Ä¿±ê ½ÇÉ«";
+                    strError = "è®°å½• '" + strRecPath + "' æ‰€åœ¨çš„æ•°æ®åº“ä¸ºâ€œæºâ€ç±»å‹ï¼Œä¸èƒ½æ·»åŠ  ç›®æ ‡ è§’è‰²";
                     goto ERROR1;
                 }
                 if (nRet == 3)
                 {
-                    strError = "¼ÇÂ¼ '" + strRecPath + "' ËùÔÚµÄÊı¾İ¿âÎª¡°ÍâÔ´¡±ÀàĞÍ£¬²»ÄÜÌí¼Ó Ä¿±ê ½ÇÉ«";
+                    strError = "è®°å½• '" + strRecPath + "' æ‰€åœ¨çš„æ•°æ®åº“ä¸ºâ€œå¤–æºâ€ç±»å‹ï¼Œä¸èƒ½æ·»åŠ  ç›®æ ‡ è§’è‰²";
                     goto ERROR1;
                 }
 
-                // Ìí¼Ó
-                StringUtil.SetInList(ref strRole, "Ä¿±ê", true);
+                // æ·»åŠ 
+                StringUtil.SetInList(ref strRole, "ç›®æ ‡", true);
 
-                // Çå³ıÆäËüÊÂÏîÀïÃæ¿ÉÄÜÓĞµÄ½ÇÉ«¡°Ä¿±ê¡±
-                ClearRole("Ä¿±ê", item);
+                // æ¸…é™¤å…¶å®ƒäº‹é¡¹é‡Œé¢å¯èƒ½æœ‰çš„è§’è‰²â€œç›®æ ‡â€
+                ClearRole("ç›®æ ‡", item);
 
-                // ¼ÇÒäÔÚlabelÖĞ
+                // è®°å¿†åœ¨labelä¸­
                 SetLabelTarget(ListViewUtil.GetItemText(item, COLUMN_RECPATH));
 
                 nRet = FilterTitle(
@@ -3777,8 +3777,8 @@ this.checkBox_prepare_createCallNumber.Checked);
             return -1;
         }
 
-        // ¸øÒ»¸ölistview itemÊÂÏîÉèÖÃ(set)¡¢È¥³ı(clear)¡¢ÇĞ»»(toggle) source ½ÇÉ«
-        // toggleµÄÒâË¼ÊÇÔÚÓĞºÍÎŞÖ®¼äÇĞ»»
+        // ç»™ä¸€ä¸ªlistview itemäº‹é¡¹è®¾ç½®(set)ã€å»é™¤(clear)ã€åˆ‡æ¢(toggle) source è§’è‰²
+        // toggleçš„æ„æ€æ˜¯åœ¨æœ‰å’Œæ— ä¹‹é—´åˆ‡æ¢
         int SetSource(ListViewItem item,
             string strAction,
             out string strError)
@@ -3800,26 +3800,26 @@ this.checkBox_prepare_createCallNumber.Checked);
             string strRole = ListViewUtil.GetItemText(item,
                 COLUMN_ROLE);
 
-            if (StringUtil.IsInList("Ô´", strRole) == true)
+            if (StringUtil.IsInList("æº", strRole) == true)
             {
 
                 if (strAction == "set")
                 {
-                    // ¿´¿´ÊÇ²»ÊÇstrRecPath
+                    // çœ‹çœ‹æ˜¯ä¸æ˜¯strRecPath
                     string strExistRecPath = GetSourceRecPath();
                     if (strExistRecPath == strRecPath)
                         return 0;
 
-                    // È¥µô
-                    StringUtil.SetInList(ref strRole, "Ô´", false);
+                    // å»æ‰
+                    StringUtil.SetInList(ref strRole, "æº", false);
 
-                    // ¼ÇÒäÔÚlabelÖĞ
+                    // è®°å¿†åœ¨labelä¸­
                     SetLabelSource(null);
 
-                    // Ìí¼Ó
-                    StringUtil.SetInList(ref strRole, "Ô´", true);
+                    // æ·»åŠ 
+                    StringUtil.SetInList(ref strRole, "æº", true);
 
-                    // ¼ÇÒäÔÚlabelÖĞ
+                    // è®°å¿†åœ¨labelä¸­
                     SetLabelSource(strRecPath);
 
                     nRet = FilterTitle(
@@ -3836,10 +3836,10 @@ this.checkBox_prepare_createCallNumber.Checked);
                 }
                 else if (strAction == "toggle" || strAction == "clear")
                 {
-                    // È¥µô
-                    StringUtil.SetInList(ref strRole, "Ô´", false);
+                    // å»æ‰
+                    StringUtil.SetInList(ref strRole, "æº", false);
 
-                    // ¼ÇÒäÔÚlabelÖĞ
+                    // è®°å¿†åœ¨labelä¸­
                     SetLabelSource(null);
 
                     nRet = FilterTitle(
@@ -3857,44 +3857,44 @@ this.checkBox_prepare_createCallNumber.Checked);
             else
             {
                 if (strAction == "clear")
-                    return 0; // ±¾À´¾ÍÃ»ÓĞ
+                    return 0; // æœ¬æ¥å°±æ²¡æœ‰
 
-                // Ìí¼ÓÇ°£¬¿´¿´ËùÊôÊı¾İ¿âÊÇ·ñ¾ß±¸ÏàÓ¦µÄÌØĞÔ
+                // æ·»åŠ å‰ï¼Œçœ‹çœ‹æ‰€å±æ•°æ®åº“æ˜¯å¦å…·å¤‡ç›¸åº”çš„ç‰¹æ€§
                 // string strRecPath = ListViewUtil.GetItemText(item, COLUMN_RECPATH);
 
-                // ¸ù¾İ¼ÇÂ¼Â·¾¶£¬»ñµÃListViewItemÊÂÏîµÄimageindexÏÂ±ê
+                // æ ¹æ®è®°å½•è·¯å¾„ï¼Œè·å¾—ListViewItemäº‹é¡¹çš„imageindexä¸‹æ ‡
                 // return:
-                //      -2  ¸ù±¾²»ÊÇÊéÄ¿¿â
-                //      -1  ²»ÊÇ²É¹ºÔ´»òÄ¿±êµÄÆäËüÊéÄ¿¿â
-                //      0   Ô´
-                //      1   Ä¿±ê
-                //      2   Í¬Ê±ÎªÔ´ºÍÄ¿±ê
-                //      3   ÍâÔ´
+                //      -2  æ ¹æœ¬ä¸æ˜¯ä¹¦ç›®åº“
+                //      -1  ä¸æ˜¯é‡‡è´­æºæˆ–ç›®æ ‡çš„å…¶å®ƒä¹¦ç›®åº“
+                //      0   æº
+                //      1   ç›®æ ‡
+                //      2   åŒæ—¶ä¸ºæºå’Œç›®æ ‡
+                //      3   å¤–æº
                 nRet = this.db_infos.GetItemType(strRecPath,
                             this.comboBox_prepare_type.Text);
                 if (nRet == -2 || nRet == -1)
                 {
-                    strError = "¼ÇÂ¼ '" + strRecPath + "' ËùÔÚµÄÊı¾İ¿â¸ù±¾ºÍ" + this.comboBox_prepare_type.Text + "²É¹ºÒµÎñÎŞ¹Ø£¬²»ÄÜÌí¼Ó Ô´ ½ÇÉ«";
+                    strError = "è®°å½• '" + strRecPath + "' æ‰€åœ¨çš„æ•°æ®åº“æ ¹æœ¬å’Œ" + this.comboBox_prepare_type.Text + "é‡‡è´­ä¸šåŠ¡æ— å…³ï¼Œä¸èƒ½æ·»åŠ  æº è§’è‰²";
                     goto ERROR1;
                 }
                 if (nRet == 1)
                 {
-                    strError = "¼ÇÂ¼ '" + strRecPath + "' ËùÔÚµÄÊı¾İ¿âÎª¡°Ä¿±ê¡±ÀàĞÍ£¬²»ÄÜÌí¼Ó Ô´ ½ÇÉ«";
+                    strError = "è®°å½• '" + strRecPath + "' æ‰€åœ¨çš„æ•°æ®åº“ä¸ºâ€œç›®æ ‡â€ç±»å‹ï¼Œä¸èƒ½æ·»åŠ  æº è§’è‰²";
                     goto ERROR1;
                 }
                 if (nRet == 3)
                 {
-                    strError = "¼ÇÂ¼ '" + strRecPath + "' ËùÔÚµÄÊı¾İ¿âÎª¡°ÍâÔ´¡±ÀàĞÍ£¬²»ÄÜÌí¼Ó Ô´ ½ÇÉ«";
+                    strError = "è®°å½• '" + strRecPath + "' æ‰€åœ¨çš„æ•°æ®åº“ä¸ºâ€œå¤–æºâ€ç±»å‹ï¼Œä¸èƒ½æ·»åŠ  æº è§’è‰²";
                     goto ERROR1;
                 }
 
-                // Ìí¼Ó
-                StringUtil.SetInList(ref strRole, "Ô´", true);
+                // æ·»åŠ 
+                StringUtil.SetInList(ref strRole, "æº", true);
 
-                // Çå³ıÆäËüÊÂÏîÀïÃæ¿ÉÄÜÓĞµÄ½ÇÉ«¡°Ô´¡±
-                ClearRole("Ô´", item);
+                // æ¸…é™¤å…¶å®ƒäº‹é¡¹é‡Œé¢å¯èƒ½æœ‰çš„è§’è‰²â€œæºâ€
+                ClearRole("æº", item);
 
-                // ¼ÇÒäÔÚlabelÖĞ
+                // è®°å¿†åœ¨labelä¸­
                 SetLabelSource(ListViewUtil.GetItemText(item, COLUMN_RECPATH));
 
                 nRet = FilterTitle(
@@ -3922,13 +3922,13 @@ this.checkBox_prepare_createCallNumber.Checked);
         {
             if (String.IsNullOrEmpty(strRecPath) == true)
             {
-                this.label_source.Text = "Ô´(¿Õ)";
+                this.label_source.Text = "æº(ç©º)";
                 this.label_source.Font = new Font(this.label_source.Font, FontStyle.Regular);
                 this.label_source.Tag = null;
             }
             else
             {
-                this.label_source.Text = "Ô´";
+                this.label_source.Text = "æº";
                 this.label_source.Font = new Font(this.label_source.Font, FontStyle.Bold);
                 this.label_source.Tag = strRecPath;
             }
@@ -3938,13 +3938,13 @@ this.checkBox_prepare_createCallNumber.Checked);
         {
             if (String.IsNullOrEmpty(strRecPath) == true)
             {
-                this.label_biblioSource.Text = "ÍâÔ´(¿Õ)";
+                this.label_biblioSource.Text = "å¤–æº(ç©º)";
                 this.label_biblioSource.Font = new Font(this.label_target.Font, FontStyle.Regular);
                 this.label_biblioSource.Tag = null;
             }
             else
             {
-                this.label_biblioSource.Text = "ÍâÔ´";
+                this.label_biblioSource.Text = "å¤–æº";
                 this.label_biblioSource.Font = new Font(this.label_target.Font, FontStyle.Bold);
                 this.label_biblioSource.Tag = strRecPath;
             }
@@ -3954,13 +3954,13 @@ this.checkBox_prepare_createCallNumber.Checked);
         {
             if (String.IsNullOrEmpty(strRecPath) == true)
             {
-                this.label_target.Text = "Ä¿±ê(¿Õ)";
+                this.label_target.Text = "ç›®æ ‡(ç©º)";
                 this.label_target.Font = new Font(this.label_target.Font, FontStyle.Regular);
                 this.label_target.Tag = null;
             }
             else
             {
-                this.label_target.Text = "Ä¿±ê";
+                this.label_target.Text = "ç›®æ ‡";
                 this.label_target.Font = new Font(this.label_target.Font, FontStyle.Bold);
                 this.label_target.Tag = strRecPath;
             }
@@ -3990,24 +3990,24 @@ this.checkBox_prepare_createCallNumber.Checked);
             return (string)o;
         }
 
-        // µ±ÉèÖÃ Ô´ ½ÇÉ«Ç°£¬¾¯¸æÃ»ÓĞ¶©¹ºĞÅÏ¢
+        // å½“è®¾ç½® æº è§’è‰²å‰ï¼Œè­¦å‘Šæ²¡æœ‰è®¢è´­ä¿¡æ¯
         // return:
-        //      0   ·ÅÆú
-        //      1   ¼ÌĞø
+        //      0   æ”¾å¼ƒ
+        //      1   ç»§ç»­
         int WarningSetSource(ListViewItem item)
         {
             RecordInfo info = GetRecordInfo(item);
             string strRecPath = ListViewUtil.GetItemText(item, COLUMN_RECPATH);
             string strRole = ListViewUtil.GetItemText(item,
                 COLUMN_ROLE);
-            // ¼´½«ÉèÖÃ¡°Ô´¡±
-            if (StringUtil.IsInList("Ô´", strRole) == false)
+            // å³å°†è®¾ç½®â€œæºâ€
+            if (StringUtil.IsInList("æº", strRole) == false)
             {
-                // ¿´¿´ÊÇ·ñÓĞ¶©¹ºĞÅÏ¢
+                // çœ‹çœ‹æ˜¯å¦æœ‰è®¢è´­ä¿¡æ¯
                 if (info.HasOrderInfo == false)
                 {
                     DialogResult result = MessageBox.Show(this,
-                        "µ±Ç°¼ÇÂ¼ '" + strRecPath + "' ÖĞÎ´°üº¬ÏàÓ¦µÄ¶©¹ºĞÅÏ¢£¬Ò»°ãÇé¿öÏÂ²»ÊÊºÏ×÷Îª¡°Ô´¡±¼ÇÂ¼¡£\r\n\r\nÊµ¼ÊÒªÇ¿ĞĞÉèÖÃÎª¡°Ô´¡±£¿",
+                        "å½“å‰è®°å½• '" + strRecPath + "' ä¸­æœªåŒ…å«ç›¸åº”çš„è®¢è´­ä¿¡æ¯ï¼Œä¸€èˆ¬æƒ…å†µä¸‹ä¸é€‚åˆä½œä¸ºâ€œæºâ€è®°å½•ã€‚\r\n\r\nå®é™…è¦å¼ºè¡Œè®¾ç½®ä¸ºâ€œæºâ€ï¼Ÿ",
                         "AcceptForm",
                         MessageBoxButtons.OKCancel,
                         MessageBoxIcon.Question,
@@ -4022,7 +4022,7 @@ this.checkBox_prepare_createCallNumber.Checked);
 
         #endregion
 
-        #region drag and drop Ïà¹Ø
+        #region drag and drop ç›¸å…³
 
         private void label_source_DragEnter(object sender, DragEventArgs e)
         {
@@ -4032,7 +4032,7 @@ this.checkBox_prepare_createCallNumber.Checked);
 
                 ListViewItem item = ListViewUtil.FindItem(this.listView_accept_records, strRecPath, COLUMN_RECPATH);
 
-                // ¹Û²ìÒ»¸ölistviewÊÂÏîÊÇ·ñÄÜ¹»±»ÉèÖÃÎªsource?
+                // è§‚å¯Ÿä¸€ä¸ªlistviewäº‹é¡¹æ˜¯å¦èƒ½å¤Ÿè¢«è®¾ç½®ä¸ºsource?
                 if (IsSourceable(item) == false)
                 {
                     e.Effect = DragDropEffects.None;
@@ -4054,7 +4054,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             ListViewItem item = ListViewUtil.FindItem(this.listView_accept_records, strRecPath, COLUMN_RECPATH);
             if (item == null)
             {
-                strError = "ÁĞ±íÖĞ¾ÓÈ»Ã»ÓĞÕÒµ½Â·¾¶Îª '" + strRecPath + "' µÄÊÂÏî";
+                strError = "åˆ—è¡¨ä¸­å±…ç„¶æ²¡æœ‰æ‰¾åˆ°è·¯å¾„ä¸º '" + strRecPath + "' çš„äº‹é¡¹";
                 goto ERROR1;
             }
 
@@ -4065,14 +4065,14 @@ this.checkBox_prepare_createCallNumber.Checked);
             RecordInfo info = GetRecordInfo(item);
             string strRole = ListViewUtil.GetItemText(item,
                 COLUMN_ROLE);
-            // ¼´½«ÉèÖÃ¡°Ô´¡±
-            if (StringUtil.IsInList("Ô´", strRole) == false)
+            // å³å°†è®¾ç½®â€œæºâ€
+            if (StringUtil.IsInList("æº", strRole) == false)
             {
-                // ¿´¿´ÊÇ·ñÓĞ¶©¹ºĞÅÏ¢
+                // çœ‹çœ‹æ˜¯å¦æœ‰è®¢è´­ä¿¡æ¯
                 if (info.HasOrderInfo == false)
                 {
                     DialogResult result = MessageBox.Show(this,
-                        "µ±Ç°¼ÇÂ¼ '"+strRecPath+"' ÖĞÎ´°üº¬ÏàÓ¦µÄ¶©¹ºĞÅÏ¢£¬Ò»°ãÇé¿öÏÂ²»ÊÊºÏ×÷Îª¡°Ô´¡±¼ÇÂ¼¡£\r\n\r\nÊµ¼ÊÒªÇ¿ĞĞÉèÖÃÎª¡°Ô´¡±£¿",
+                        "å½“å‰è®°å½• '"+strRecPath+"' ä¸­æœªåŒ…å«ç›¸åº”çš„è®¢è´­ä¿¡æ¯ï¼Œä¸€èˆ¬æƒ…å†µä¸‹ä¸é€‚åˆä½œä¸ºâ€œæºâ€è®°å½•ã€‚\r\n\r\nå®é™…è¦å¼ºè¡Œè®¾ç½®ä¸ºâ€œæºâ€ï¼Ÿ",
                         "AcceptForm",
                         MessageBoxButtons.OKCancel,
                         MessageBoxIcon.Question,
@@ -4102,7 +4102,7 @@ this.checkBox_prepare_createCallNumber.Checked);
 
                 ListViewItem item = ListViewUtil.FindItem(this.listView_accept_records, strRecPath, COLUMN_RECPATH);
 
-                // ¹Û²ìÒ»¸ölistviewÊÂÏîÊÇ·ñÄÜ¹»±»ÉèÖÃÎªtarget?
+                // è§‚å¯Ÿä¸€ä¸ªlistviewäº‹é¡¹æ˜¯å¦èƒ½å¤Ÿè¢«è®¾ç½®ä¸ºtarget?
                 if (IsTargetable(item) == false)
                 {
                     e.Effect = DragDropEffects.None;
@@ -4124,7 +4124,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             ListViewItem item = ListViewUtil.FindItem(this.listView_accept_records, strRecPath, COLUMN_RECPATH);
             if (item == null)
             {
-                strError = "ÁĞ±íÖĞ¾ÓÈ»Ã»ÓĞÕÒµ½Â·¾¶Îª '" + strRecPath + "' µÄÊÂÏî";
+                strError = "åˆ—è¡¨ä¸­å±…ç„¶æ²¡æœ‰æ‰¾åˆ°è·¯å¾„ä¸º '" + strRecPath + "' çš„äº‹é¡¹";
                 goto ERROR1;
             }
 
@@ -4149,7 +4149,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             ListViewItem item = ListViewUtil.FindItem(this.listView_accept_records, strRecPath, COLUMN_RECPATH);
             if (item == null)
             {
-                strError = "ÁĞ±íÖĞ¾ÓÈ»Ã»ÓĞÕÒµ½Â·¾¶Îª '" + strRecPath + "' µÄÊÂÏî";
+                strError = "åˆ—è¡¨ä¸­å±…ç„¶æ²¡æœ‰æ‰¾åˆ°è·¯å¾„ä¸º '" + strRecPath + "' çš„äº‹é¡¹";
                 goto ERROR1;
             }
 
@@ -4171,7 +4171,7 @@ this.checkBox_prepare_createCallNumber.Checked);
 
                 ListViewItem item = ListViewUtil.FindItem(this.listView_accept_records, strRecPath, COLUMN_RECPATH);
 
-                // ¹Û²ìÒ»¸ölistviewÊÂÏîÊÇ·ñÄÜ¹»±»ÉèÖÃÎªtarget?
+                // è§‚å¯Ÿä¸€ä¸ªlistviewäº‹é¡¹æ˜¯å¦èƒ½å¤Ÿè¢«è®¾ç½®ä¸ºtarget?
                 if (IsBiblioSourceable(item) == false)
                 {
                     e.Effect = DragDropEffects.None;
@@ -4209,7 +4209,7 @@ this.checkBox_prepare_createCallNumber.Checked);
 
         private void listView_accept_records_DragDrop(object sender, DragEventArgs e)
         {
-            // TODO: ÈçºÎÊ¶±ğ´Ó×Ô¼ºdrag³öÀ´µÄÇé¿ö?
+            // TODO: å¦‚ä½•è¯†åˆ«ä»è‡ªå·±dragå‡ºæ¥çš„æƒ…å†µ?
 
             string strWhole = (String)e.Data.GetData("Text");
 
@@ -4224,8 +4224,8 @@ this.checkBox_prepare_createCallNumber.Checked);
 
 
         /*
-        // »ñµÃ(²É¹º)Ô´Êı¾İ¿âÃûÁĞ±í
-        // ËùÎ½Ô´Êı¾İ¿â¾ÍÊÇ¿â×éÖĞ°üº¬¶©¹º¿âµÄÄÇĞ©
+        // è·å¾—(é‡‡è´­)æºæ•°æ®åº“ååˆ—è¡¨
+        // æ‰€è°“æºæ•°æ®åº“å°±æ˜¯åº“ç»„ä¸­åŒ…å«è®¢è´­åº“çš„é‚£äº›
         List<string> GetOrderSourceDbNames()
         {
             List<string> results = new List<string>();
@@ -4239,9 +4239,9 @@ this.checkBox_prepare_createCallNumber.Checked);
             return results;
         }
 
-        // »ñµÃ(²É¹º)ÑéÊÕÄ¿±êÊı¾İ¿âÃûÁĞ±í
-        // ËùÎ½Ä¿±êÊı¾İ¿â¾ÍÊÇ¿â×éÖĞ°üº¬ÊµÌå¿â¿âµÄÄÇĞ©
-        // Èç¹ûÔ´¿âÒÑ¾­È·¶¨£¬ÄÇÃ´Ä¿±ê¿â(Ä¿Ç°)Ö»ÄÜÊÇÄÇĞ©ºÍÔ´¿âMarcSyntaxÏàÍ¬µÄÒ»²¿·Ö¡£
+        // è·å¾—(é‡‡è´­)éªŒæ”¶ç›®æ ‡æ•°æ®åº“ååˆ—è¡¨
+        // æ‰€è°“ç›®æ ‡æ•°æ®åº“å°±æ˜¯åº“ç»„ä¸­åŒ…å«å®ä½“åº“åº“çš„é‚£äº›
+        // å¦‚æœæºåº“å·²ç»ç¡®å®šï¼Œé‚£ä¹ˆç›®æ ‡åº“(ç›®å‰)åªèƒ½æ˜¯é‚£äº›å’Œæºåº“MarcSyntaxç›¸åŒçš„ä¸€éƒ¨åˆ†ã€‚
         List<string> GetOrderTargetDbNames(string strSourceSyntax)
         {
             List<string> results = new List<string>();
@@ -4252,7 +4252,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                 {
                     if (String.IsNullOrEmpty(strSourceSyntax) == false)
                     {
-                        Debug.Assert(String.IsNullOrEmpty(property.Syntax) == true, "²»ÄÜ³öÏÖ¿ÕÖµµÄsyntax");
+                        Debug.Assert(String.IsNullOrEmpty(property.Syntax) == true, "ä¸èƒ½å‡ºç°ç©ºå€¼çš„syntax");
                         if (property.Syntax.ToLower() == strSourceSyntax.ToLower())
                             results.Add(property.DbName);
                     }
@@ -4268,7 +4268,7 @@ this.checkBox_prepare_createCallNumber.Checked);
          * */
 
         /*
-        // »ñµÃÆÕÍ¨Êı¾İ¿â¶¨Òå
+        // è·å¾—æ™®é€šæ•°æ®åº“å®šä¹‰
         public int GetDatabaseInfo(
             string strDbName,
             out string strOutputInfo,
@@ -4279,7 +4279,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ»ñÈ¡Êı¾İ¿â " + strDbName + " µÄ¶¨Òå...");
+            stop.Initial("æ­£åœ¨è·å–æ•°æ®åº“ " + strDbName + " çš„å®šä¹‰...");
             stop.BeginLoop();
 
             this.Update();
@@ -4311,7 +4311,7 @@ this.checkBox_prepare_createCallNumber.Checked);
         }
          * */
 
-        // »ñµÃÒ»¸öÊéÄ¿¼ÇÂ¼
+        // è·å¾—ä¸€ä¸ªä¹¦ç›®è®°å½•
         // return:
         //      -1  error
         //      0   not found
@@ -4324,7 +4324,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             strXml = "";
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ»ñÈ¡ÊéÄ¿¼ÇÂ¼ ...");
+            stop.Initial("æ­£åœ¨è·å–ä¹¦ç›®è®°å½• ...");
             stop.BeginLoop();
 
             try
@@ -4334,7 +4334,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                 string[] results = null;
                 byte[] timestamp = null;
 
-                Debug.Assert(String.IsNullOrEmpty(strRecPath) == false, "strRecPathÖµ²»ÄÜÎª¿Õ");
+                Debug.Assert(String.IsNullOrEmpty(strRecPath) == false, "strRecPathå€¼ä¸èƒ½ä¸ºç©º");
 
                 long lRet = this.Channel.GetBiblioInfos(
                     stop,
@@ -4347,16 +4347,16 @@ this.checkBox_prepare_createCallNumber.Checked);
                 if (lRet == 0)
                 {
                     if (String.IsNullOrEmpty(strError) == true)
-                        strError = "¼ÇÂ¼ '" + strRecPath + "' Ã»ÓĞÕÒµ½";
+                        strError = "è®°å½• '" + strRecPath + "' æ²¡æœ‰æ‰¾åˆ°";
                     return 0;
                 }
 
                 if (lRet == -1)
                 {
-                    strError = "»ñµÃÊéÄ¿xmlÊ±·¢Éú´íÎó: " + strError;
+                    strError = "è·å¾—ä¹¦ç›®xmlæ—¶å‘ç”Ÿé”™è¯¯: " + strError;
                     return -1;
                 }
-                Debug.Assert(results != null && results.Length == 1, "results±ØĞë°üº¬1¸öÔªËØ");
+                Debug.Assert(results != null && results.Length == 1, "resultså¿…é¡»åŒ…å«1ä¸ªå…ƒç´ ");
                 strXml = results[0];
 
                 return 1;
@@ -4369,7 +4369,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             }
         }
 
-        // »ñµÃÒ»¸öÊéÄ¿¼ÇÂ¼µÄtitle
+        // è·å¾—ä¸€ä¸ªä¹¦ç›®è®°å½•çš„title
         // return:
         //      -1  error
         //      0   not found title
@@ -4382,7 +4382,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             strTitle = "";
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ»ñÈ¡ÊéÄ¿ÌâÃû ...");
+            stop.Initial("æ­£åœ¨è·å–ä¹¦ç›®é¢˜å ...");
             stop.BeginLoop();
 
             try
@@ -4392,7 +4392,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                 string[] results = null;
                 byte[] timestamp = null;
 
-                Debug.Assert(String.IsNullOrEmpty(strRecPath) == false, "strRecPathÖµ²»ÄÜÎª¿Õ");
+                Debug.Assert(String.IsNullOrEmpty(strRecPath) == false, "strRecPathå€¼ä¸èƒ½ä¸ºç©º");
 
                 long lRet = this.Channel.GetBiblioInfos(
                     stop,
@@ -4409,10 +4409,10 @@ this.checkBox_prepare_createCallNumber.Checked);
 
                 if (lRet == -1)
                 {
-                    strError = "»ñµÃÊéÄ¿titleÊ±·¢Éú´íÎó: " + strError;
+                    strError = "è·å¾—ä¹¦ç›®titleæ—¶å‘ç”Ÿé”™è¯¯: " + strError;
                     return -1;
                 }
-                Debug.Assert(results != null && results.Length == 1, "results±ØĞë°üº¬1¸öÔªËØ");
+                Debug.Assert(results != null && results.Length == 1, "resultså¿…é¡»åŒ…å«1ä¸ªå…ƒç´ ");
                 strTitle = results[0];
 
                 return 1;
@@ -4427,29 +4427,29 @@ this.checkBox_prepare_createCallNumber.Checked);
 
         private void tabControl_main_SelectedIndexChanged(object sender, EventArgs e)
         {
-            // ¼ì²é³ö°æÎïÀàĞÍÖµ
-            if (this.comboBox_prepare_type.Text != "Í¼Êé"
-                && this.comboBox_prepare_type.Text != "Á¬Ğø³ö°æÎï")
+            // æ£€æŸ¥å‡ºç‰ˆç‰©ç±»å‹å€¼
+            if (this.comboBox_prepare_type.Text != "å›¾ä¹¦"
+                && this.comboBox_prepare_type.Text != "è¿ç»­å‡ºç‰ˆç‰©")
             {
-                MessageBox.Show(this, "³ö°æÎïÀàĞÍ±ØĞëÎª Í¼Êé »ò Á¬Ğø³ö°æÎï");
+                MessageBox.Show(this, "å‡ºç‰ˆç‰©ç±»å‹å¿…é¡»ä¸º å›¾ä¹¦ æˆ– è¿ç»­å‡ºç‰ˆç‰©");
                 this.button_next.Enabled = false;
                 return;
             }
 
             /*
-            // ÉèÖÃISBN/ISSN±êÇ©
-            if (this.comboBox_prepare_type.Text == "Í¼Êé")
+            // è®¾ç½®ISBN/ISSNæ ‡ç­¾
+            if (this.comboBox_prepare_type.Text == "å›¾ä¹¦")
                 this.label_isbnIssn.Text = "ISBN(&I):";
             else
             {
-                Debug.Assert(this.comboBox_prepare_type.Text == "Á¬Ğø³ö°æÎï", "");
+                Debug.Assert(this.comboBox_prepare_type.Text == "è¿ç»­å‡ºç‰ˆç‰©", "");
                 this.label_isbnIssn.Text = "ISSN(&I):";
             }
              * */
             if (this.tabControl_main.SelectedTab == this.tabPage_accept)
             {
                 /*
-                // ¼ì²é¼ìË÷Í¾¾¶ÊÇ·ñºÍ³ö°æÎïÀàĞÍÃ¬¶Ü
+                // æ£€æŸ¥æ£€ç´¢é€”å¾„æ˜¯å¦å’Œå‡ºç‰ˆç‰©ç±»å‹çŸ›ç›¾
                 string strFromStyle = "";
 
                 try
@@ -4460,11 +4460,11 @@ this.checkBox_prepare_createCallNumber.Checked);
                 {
                 }
 
-                if (this.comboBox_prepare_type.Text == "Í¼Êé")
+                if (this.comboBox_prepare_type.Text == "å›¾ä¹¦")
                 {
                     if (strFromStyle.ToLower() == "issn")
                     {
-                        MessageBox.Show(this, "¾¯¸æ£º³ö°æÎïÀàĞÍÎª Í¼Êé Ê±£¬¼ìË÷ ISSN ¿ÖÅÂÄÑÒÔÃüÖĞ¡£ÇëÖØĞÂÑ¡ÔñÊÊµ±µÄ¼ìË÷Í¾¾¶");
+                        MessageBox.Show(this, "è­¦å‘Šï¼šå‡ºç‰ˆç‰©ç±»å‹ä¸º å›¾ä¹¦ æ—¶ï¼Œæ£€ç´¢ ISSN ææ€•éš¾ä»¥å‘½ä¸­ã€‚è¯·é‡æ–°é€‰æ‹©é€‚å½“çš„æ£€ç´¢é€”å¾„");
                         this.comboBox_accept_from.Focus();
                     }
                 }
@@ -4472,12 +4472,12 @@ this.checkBox_prepare_createCallNumber.Checked);
                 {
                     if (strFromStyle.ToLower() == "isbn")
                     {
-                        MessageBox.Show(this, "¾¯¸æ£º³ö°æÎïÀàĞÍÎª Á¬Ğø³ö°æÎï Ê±£¬¼ìË÷ ISBN ¿ÖÅÂÄÑÒÔÃüÖĞ¡£ÇëÖØĞÂÑ¡ÔñÊÊµ±µÄ¼ìË÷Í¾¾¶");
+                        MessageBox.Show(this, "è­¦å‘Šï¼šå‡ºç‰ˆç‰©ç±»å‹ä¸º è¿ç»­å‡ºç‰ˆç‰© æ—¶ï¼Œæ£€ç´¢ ISBN ææ€•éš¾ä»¥å‘½ä¸­ã€‚è¯·é‡æ–°é€‰æ‹©é€‚å½“çš„æ£€ç´¢é€”å¾„");
                         this.comboBox_accept_from.Focus();
                     }
                 }*/
 
-                // ¹Û²ì¼ìË÷Í¾¾¶£¬Èç¹ûÍ¼ÊéÊ±ÎªISSN£¬ÆÚ¿¯Ê±ÎªISBN£¬ÔòĞŞ¸ÄËü
+                // è§‚å¯Ÿæ£€ç´¢é€”å¾„ï¼Œå¦‚æœå›¾ä¹¦æ—¶ä¸ºISSNï¼ŒæœŸåˆŠæ—¶ä¸ºISBNï¼Œåˆ™ä¿®æ”¹å®ƒ
                 try
                 {
                     string strFromStyle = "";
@@ -4486,7 +4486,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                     strFromStyle = this.MainForm.GetBiblioFromStyle(this.comboBox_accept_from.Text);
 
 
-                    if (this.comboBox_prepare_type.Text == "Í¼Êé")
+                    if (this.comboBox_prepare_type.Text == "å›¾ä¹¦")
                     {
                         if (strFromStyle.ToLower() == "issn")
                         {
@@ -4510,7 +4510,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                 }
 
 
-                if (this.comboBox_prepare_type.Text == "Á¬Ğø³ö°æÎï")
+                if (this.comboBox_prepare_type.Text == "è¿ç»­å‡ºç‰ˆç‰©")
                 {
                     this.label_biblioSource.Visible = false;
                 }
@@ -4534,9 +4534,9 @@ this.checkBox_prepare_createCallNumber.Checked);
             // 2009/2/4
             print_form.PublicationType = this.comboBox_prepare_type.Text;
 
-            // ¸ù¾İÅú´ÎºÅ¼ìË÷×°ÔØÊı¾İ
+            // æ ¹æ®æ‰¹æ¬¡å·æ£€ç´¢è£…è½½æ•°æ®
             // parameters:
-            //      strDefaultBatchNo   È±Ê¡µÄÅú´ÎºÅ¡£Èç¹ûÎªnull£¬Ôò±íÊ¾²»Ê¹ÓÃÕâ¸ö²ÎÊı¡£
+            //      strDefaultBatchNo   ç¼ºçœçš„æ‰¹æ¬¡å·ã€‚å¦‚æœä¸ºnullï¼Œåˆ™è¡¨ç¤ºä¸ä½¿ç”¨è¿™ä¸ªå‚æ•°ã€‚
             print_form.LoadFromAcceptBatchNo(this.tabComboBox_prepare_batchNo.Text);
 
         }
@@ -4555,19 +4555,19 @@ this.checkBox_prepare_createCallNumber.Checked);
 
         void SetWindowTitle()
         {
-            this.Text = "ÑéÊÕ";
+            this.Text = "éªŒæ”¶";
 
             if (this.tabComboBox_prepare_batchNo.Text != "")
-                this.Text += " Åú´ÎºÅ: " + this.tabComboBox_prepare_batchNo.Text;
+                this.Text += " æ‰¹æ¬¡å·: " + this.tabComboBox_prepare_batchNo.Text;
             if (this.comboBox_prepare_type.Text != "")
-                this.Text += " ÀàĞÍ: " + this.comboBox_prepare_type.Text;
+                this.Text += " ç±»å‹: " + this.comboBox_prepare_type.Text;
         }
 
         int m_nInDropDown = 0;
 
         private void tabComboBox_prepare_batchNo_DropDown(object sender, EventArgs e)
         {
-            // ·ÀÖ¹ÖØÈë
+            // é˜²æ­¢é‡å…¥
             if (this.m_nInDropDown > 0)
                 return;
 
@@ -4588,7 +4588,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                         for (int i = 0; i < e1.KeyCounts.Count; i++)
                         {
                             KeyCount item = e1.KeyCounts[i];
-                            combobox.Items.Add(item.Key + "\t" + item.Count.ToString() + "±Ê");
+                            combobox.Items.Add(item.Key + "\t" + item.Count.ToString() + "ç¬”");
                         }
                     }
                     else
@@ -4605,11 +4605,11 @@ this.checkBox_prepare_createCallNumber.Checked);
         }
 
 
-        // ¸ù¾İ×Ö·û´®¹¹ÔìListViewItem¡£
-        // ±¾º¯ÊıºÍGlobal.BuildListViewItemµÄÇø±ğ£¬ÊÇÔö¼ÓÁËÒ»¸öÌØÊâµÄµÚ¶şÀ¸Ä¿£¬ÓÃÓÚÏÔÊ¾½ÇÉ«ĞÅÏ¢
-        // ×Ö·û´®µÄ¸ñÊ½Îª\t¼ä¸ôµÄ
+        // æ ¹æ®å­—ç¬¦ä¸²æ„é€ ListViewItemã€‚
+        // æœ¬å‡½æ•°å’ŒGlobal.BuildListViewItemçš„åŒºåˆ«ï¼Œæ˜¯å¢åŠ äº†ä¸€ä¸ªç‰¹æ®Šçš„ç¬¬äºŒæ ç›®ï¼Œç”¨äºæ˜¾ç¤ºè§’è‰²ä¿¡æ¯
+        // å­—ç¬¦ä¸²çš„æ ¼å¼ä¸º\té—´éš”çš„
         // parameters:
-        //      list    ¿ÉÒÔÎªnull¡£Èç¹ûÎªnull£¬¾ÍÃ»ÓĞ×Ô¶¯À©Õ¹ÁĞ±êÌâÊıÄ¿µÄ¹¦ÄÜ
+        //      list    å¯ä»¥ä¸ºnullã€‚å¦‚æœä¸ºnullï¼Œå°±æ²¡æœ‰è‡ªåŠ¨æ‰©å±•åˆ—æ ‡é¢˜æ•°ç›®çš„åŠŸèƒ½
         static ListViewItem BuildAcceptListViewItem(
             ListView list,
             string strLine)
@@ -4618,13 +4618,13 @@ this.checkBox_prepare_createCallNumber.Checked);
             string[] parts = strLine.Split(new char[] { '\t' });
             for (int i = 0,j=0; i < parts.Length; i++,j++)
             {
-                // Ìø¹ıµÚ¶şÁĞ
+                // è·³è¿‡ç¬¬äºŒåˆ—
                 if (j == 1)
                     j++;
 
                 ListViewUtil.ChangeItemText(item, j, parts[i]);
 
-                // È·±£ÁĞ±êÌâÊıÄ¿¹»
+                // ç¡®ä¿åˆ—æ ‡é¢˜æ•°ç›®å¤Ÿ
                 if (list != null)
                     ListViewUtil.EnsureColumns(list, parts.Length, 100);
 
@@ -4647,7 +4647,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             this.Cursor = Cursors.WaitCursor;
             this.EnableControls(false);
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ×°ÔØ¼ÇÂ¼ ...");
+            stop.Initial("æ­£åœ¨è£…è½½è®°å½• ...");
             stop.BeginLoop();
 
             try
@@ -4664,7 +4664,7 @@ this.checkBox_prepare_createCallNumber.Checked);
 
                     string strPath = item.Text;
 
-                    // ¼ì²éÊı¾İ¿âÃûÊÇ·ñÎªºÏ·¨ÊéÄ¿¿âÃû
+                    // æ£€æŸ¥æ•°æ®åº“åæ˜¯å¦ä¸ºåˆæ³•ä¹¦ç›®åº“å
                     string strDbName = Global.GetDbName(strPath);
                     if (MainForm.IsBiblioDbName(strDbName) == false)
                     {
@@ -4685,17 +4685,17 @@ this.checkBox_prepare_createCallNumber.Checked);
                     }
 
                     // 
-                    // ¸ù¾İ¼ÇÂ¼Â·¾¶£¬»ñµÃListViewItemÊÂÏîµÄimageindexÏÂ±ê
+                    // æ ¹æ®è®°å½•è·¯å¾„ï¼Œè·å¾—ListViewItemäº‹é¡¹çš„imageindexä¸‹æ ‡
                     // return:
-                    //      -2  ¸ù±¾²»ÊÇÊéÄ¿¿â
-                    //      -1  ²»ÊÇ²É¹ºÔ´»òÄ¿±êµÄÆäËüÊéÄ¿¿â
-                    //      0   Ô´
-                    //      1   Ä¿±ê
-                    //      2   Í¬Ê±ÎªÔ´ºÍÄ¿±ê
-                    //      3   ÍâÔ´
+                    //      -2  æ ¹æœ¬ä¸æ˜¯ä¹¦ç›®åº“
+                    //      -1  ä¸æ˜¯é‡‡è´­æºæˆ–ç›®æ ‡çš„å…¶å®ƒä¹¦ç›®åº“
+                    //      0   æº
+                    //      1   ç›®æ ‡
+                    //      2   åŒæ—¶ä¸ºæºå’Œç›®æ ‡
+                    //      3   å¤–æº
                     int image_index = this.db_infos.GetItemType(strPath,
                         this.comboBox_prepare_type.Text);
-                    // Debug.Assert(image_index != -2, "¾ÓÈ»¼ìË÷µ½·ÇÊéÄ¿¿âµÄ¼ÇÂ¼?");
+                    // Debug.Assert(image_index != -2, "å±…ç„¶æ£€ç´¢åˆ°éä¹¦ç›®åº“çš„è®°å½•?");
                     item.ImageIndex = image_index;
 
                     SetItemColor(item); //
@@ -4722,19 +4722,19 @@ this.checkBox_prepare_createCallNumber.Checked);
 
             if (nSkipCount > 0)
             {
-                MessageBox.Show(this, "ÓĞ " +nSkipCount.ToString()+" ¸ö²»ÊÇÊéÄ¿¿âµÄÊÂÏî±»ºöÂÔ");
+                MessageBox.Show(this, "æœ‰ " +nSkipCount.ToString()+" ä¸ªä¸æ˜¯ä¹¦ç›®åº“çš„äº‹é¡¹è¢«å¿½ç•¥");
             }
         }
 
         private void comboBox_prepare_type_SelectedIndexChanged(object sender, EventArgs e)
         {
-            // ³ö°æÎïÀàĞÍ±ä»¯£¬ÁĞ±íÖĞÔ­ÓĞµÄÊÂÏî±ØĞëÇå³ı£¬ÒÔÃâ·¢ÉúÎó»á
+            // å‡ºç‰ˆç‰©ç±»å‹å˜åŒ–ï¼Œåˆ—è¡¨ä¸­åŸæœ‰çš„äº‹é¡¹å¿…é¡»æ¸…é™¤ï¼Œä»¥å…å‘ç”Ÿè¯¯ä¼š
             this.listView_accept_records.Items.Clear();
 
-            // ÆÈÊ¹ÖØĞÂ»ñµÃÑéÊÕÅú´ÎºÅÁĞ±í
+            // è¿«ä½¿é‡æ–°è·å¾—éªŒæ”¶æ‰¹æ¬¡å·åˆ—è¡¨
             this.tabComboBox_prepare_batchNo.Items.Clear(); 
 
-            // Ë¢ĞÂ²ÎÓë¼ìË÷µÄÊéÄ¿¿âÃûÁĞ±í
+            // åˆ·æ–°å‚ä¸æ£€ç´¢çš„ä¹¦ç›®åº“ååˆ—è¡¨
             this.FillDbNameList();
         }
 
@@ -4751,7 +4751,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                 string strText = (string)this.checkedListBox_prepare_dbNames.Items[e.Index];
                 if (strText.Length > 0 && strText[0] == '<')
                 {
-                    // ½«ÆäÓàÊÂÏîµÄcheckedÇå³ı
+                    // å°†å…¶ä½™äº‹é¡¹çš„checkedæ¸…é™¤
                     for(int i=0;i<this.checkedListBox_prepare_dbNames.Items.Count;i++)
                     {
                         if (i == e.Index)
@@ -4762,7 +4762,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                 }
                 else
                 {
-                    // ½«"<...>"ÊÂÏîµÄcheckedÇå³ı
+                    // å°†"<...>"äº‹é¡¹çš„checkedæ¸…é™¤
                     string strFirstItemText = (string)this.checkedListBox_prepare_dbNames.Items[0];
                     if (strFirstItemText.Length > 0 && strFirstItemText[0] == '<')
                     {
@@ -4796,7 +4796,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                 {
                     BiblioDbProperty prop = this.MainForm.BiblioDbProperties[i];
 
-                    if (this.comboBox_prepare_type.Text == "Í¼Êé")
+                    if (this.comboBox_prepare_type.Text == "å›¾ä¹¦")
                     {
                         if (String.IsNullOrEmpty(prop.IssueDbName) == false)
                             continue;
@@ -4813,24 +4813,24 @@ this.checkBox_prepare_createCallNumber.Checked);
                 }
             }
 
-            // ¼ÓÈëµÚÒ»Ïî
+            // åŠ å…¥ç¬¬ä¸€é¡¹
             if (this.checkedListBox_prepare_dbNames.Items.Count > 1)
             {
-                if (this.comboBox_prepare_type.Text == "Í¼Êé")
+                if (this.comboBox_prepare_type.Text == "å›¾ä¹¦")
                 {
-                    this.checkedListBox_prepare_dbNames.Items.Insert(0, "<È«²¿Í¼Êé>");
+                    this.checkedListBox_prepare_dbNames.Items.Insert(0, "<å…¨éƒ¨å›¾ä¹¦>");
                 }
                 else
                 {
-                    this.checkedListBox_prepare_dbNames.Items.Insert(0, "<È«²¿ÆÚ¿¯>");
+                    this.checkedListBox_prepare_dbNames.Items.Insert(0, "<å…¨éƒ¨æœŸåˆŠ>");
                 }
 
-                // È±Ê¡¹´Ñ¡µÚÒ»Ïî
+                // ç¼ºçœå‹¾é€‰ç¬¬ä¸€é¡¹
                 this.checkedListBox_prepare_dbNames.SetItemChecked(0, true);
             }
             else
             {
-                // È±Ê¡¹´Ñ¡È«²¿ÊÂÏî
+                // ç¼ºçœå‹¾é€‰å…¨éƒ¨äº‹é¡¹
                 for (int i = 0; i < this.checkedListBox_prepare_dbNames.Items.Count; i++)
                 {
                     this.checkedListBox_prepare_dbNames.SetItemChecked(i, true);
@@ -4840,7 +4840,7 @@ this.checkBox_prepare_createCallNumber.Checked);
 
         private void comboBox_accept_matchStyle_TextChanged(object sender, EventArgs e)
         {
-            if (this.comboBox_accept_matchStyle.Text == "¿ÕÖµ")
+            if (this.comboBox_accept_matchStyle.Text == "ç©ºå€¼")
             {
                 this.textBox_accept_queryWord.Text = "";
                 this.textBox_accept_queryWord.Enabled = false;
@@ -4851,10 +4851,10 @@ this.checkBox_prepare_createCallNumber.Checked);
             }
         }
 
-        // ÊÇ·ñµ¥»÷ä¯ÀÀ¿òÁĞ±íĞĞ¼´¿É×°ÈëÏêÏ¸´°¡£
-        // Èç¹û==false£¬±íÊ¾ÒªË«»÷²ÅÄÜ×°Èë
+        // æ˜¯å¦å•å‡»æµè§ˆæ¡†åˆ—è¡¨è¡Œå³å¯è£…å…¥è¯¦ç»†çª—ã€‚
+        // å¦‚æœ==falseï¼Œè¡¨ç¤ºè¦åŒå‡»æ‰èƒ½è£…å…¥
         /// <summary>
-        /// ÊÇ·ñµ¥»÷ä¯ÀÀ¿òÁĞ±íĞĞ¼´¿É×°ÈëÏêÏ¸´°¡£Èç¹ûÎª false£¬±íÊ¾ÒªË«»÷²ÅÄÜ×°Èë
+        /// æ˜¯å¦å•å‡»æµè§ˆæ¡†åˆ—è¡¨è¡Œå³å¯è£…å…¥è¯¦ç»†çª—ã€‚å¦‚æœä¸º falseï¼Œè¡¨ç¤ºè¦åŒå‡»æ‰èƒ½è£…å…¥
         /// </summary>
         public bool SingleClickLoadDetail
         {
@@ -4873,7 +4873,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                 return;
 
             if (this.listView_accept_records.SelectedItems.Count == 0
-                || this.listView_accept_records.SelectedItems.Count > 1)    // 2009/2/3 ¶àÑ¡Ê±Ò²Òª½ûÖ¹½øÈëÏêÏ¸´°
+                || this.listView_accept_records.SelectedItems.Count > 1)    // 2009/2/3 å¤šé€‰æ—¶ä¹Ÿè¦ç¦æ­¢è¿›å…¥è¯¦ç»†çª—
             {
                 API.PostMessage(this.Handle, WM_LOAD_DETAIL, 0, -1);
                 return;
@@ -4881,28 +4881,28 @@ this.checkBox_prepare_createCallNumber.Checked);
             API.PostMessage(this.Handle, WM_LOAD_DETAIL, 0, this.listView_accept_records.SelectedIndices[0]);
         }
 
-        // ¼ÇÂ¼ĞÅÏ¢
-        // °üÀ¨£ºtitle
+        // è®°å½•ä¿¡æ¯
+        // åŒ…æ‹¬ï¼štitle
         /*public*/ class RecordInfo
         {
             public string BiblioTitle = "";
 
-            // ±¾ÊÂÏîµÄtitleÊÇ·ñºÍ¹Ø¼üÊÂÏîµÄtitleÆ¥ÅäÁË£¿Èç¹ûÆ¥ÅäÁË£¬ÏÔÊ¾ÎªÊµÔÚµÄ×´Ì¬£»·ñÔòÏÔÊ¾Îª·¢ĞéµÄ×´Ì¬
+            // æœ¬äº‹é¡¹çš„titleæ˜¯å¦å’Œå…³é”®äº‹é¡¹çš„titleåŒ¹é…äº†ï¼Ÿå¦‚æœåŒ¹é…äº†ï¼Œæ˜¾ç¤ºä¸ºå®åœ¨çš„çŠ¶æ€ï¼›å¦åˆ™æ˜¾ç¤ºä¸ºå‘è™šçš„çŠ¶æ€
             public bool TitleMatch = true;
 
-            // ÊÇ·ñº¬ÓĞ¶©¹ºĞÅÏ¢?
+            // æ˜¯å¦å«æœ‰è®¢è´­ä¿¡æ¯?
             public bool HasOrderInfo = true;
         }
 
         /// <summary>
-        /// ÊÇ·ñÒÑ¾­Í£¿¿
+        /// æ˜¯å¦å·²ç»åœé 
         /// </summary>
         public bool Docked = false;
 
         /// <summary>
-        /// ½øĞĞÍ£¿¿
+        /// è¿›è¡Œåœé 
         /// </summary>
-        /// <param name="bShowFixedPanel">ÊÇ·ñÍ¬Ê±´Ù³ÉÏÔÊ¾¹Ì¶¨Ãæ°å</param>
+        /// <param name="bShowFixedPanel">æ˜¯å¦åŒæ—¶ä¿ƒæˆæ˜¾ç¤ºå›ºå®šé¢æ¿</param>
         public void DoDock(bool bShowFixedPanel)
         {
             if (this.MainForm.CurrentAcceptControl != this.panel_main)
@@ -4918,7 +4918,7 @@ this.checkBox_prepare_createCallNumber.Checked);
         }
 
         /// <summary>
-        /// ´ÓÍ£¿¿×´Ì¬»Ö¸´³É¸¡¶¯×´Ì¬
+        /// ä»åœé çŠ¶æ€æ¢å¤æˆæµ®åŠ¨çŠ¶æ€
         /// </summary>
         public void DoFloating()
         {
@@ -4948,10 +4948,10 @@ this.checkBox_prepare_createCallNumber.Checked);
         }
 
         /// <summary>
-        /// ´¦Àí¶Ô»°¿ò¼ü
+        /// å¤„ç†å¯¹è¯æ¡†é”®
         /// </summary>
-        /// <param name="keyData">System.Windows.Forms.Keys ÖµÖ®Ò»£¬Ëü±íÊ¾Òª´¦ÀíµÄ¼ü¡£</param>
-        /// <returns>Èç¹û¿Ø¼ş´¦Àí²¢Ê¹ÓÃ»÷¼ü£¬ÔòÎª true£»·ñÔòÎª false£¬ÒÔÔÊĞí½øÒ»²½´¦Àí</returns>
+        /// <param name="keyData">System.Windows.Forms.Keys å€¼ä¹‹ä¸€ï¼Œå®ƒè¡¨ç¤ºè¦å¤„ç†çš„é”®ã€‚</param>
+        /// <returns>å¦‚æœæ§ä»¶å¤„ç†å¹¶ä½¿ç”¨å‡»é”®ï¼Œåˆ™ä¸º trueï¼›å¦åˆ™ä¸º falseï¼Œä»¥å…è®¸è¿›ä¸€æ­¥å¤„ç†</returns>
         protected override bool ProcessDialogKey(
 Keys keyData)
         {
@@ -4972,7 +4972,7 @@ Keys keyData)
         }
 
         /// <summary>
-        /// ´¦Àí»Ø³µ¼ü
+        /// å¤„ç†å›è½¦é”®
         /// </summary>
         public void DoEnterKey()
         {
@@ -4985,7 +4985,7 @@ Keys keyData)
 
 
 
-    // ²É¹ºÊı¾İ¿âĞÅÏ¢ÈİÆ÷
+    // é‡‡è´­æ•°æ®åº“ä¿¡æ¯å®¹å™¨
     /*public*/ class OrderDbInfos : List<OrderDbInfo>
     {
         public void Build(MainForm mainform)
@@ -5028,7 +5028,7 @@ Keys keyData)
             return null;
         }
 
-        // »ñµÃ¿ÉÒÔ×÷ÎªÄ¿±ê¿âµÄÊéÄ¿¿âÃû
+        // è·å¾—å¯ä»¥ä½œä¸ºç›®æ ‡åº“çš„ä¹¦ç›®åº“å
         public List<string> GetTargetDbNames()
         {
             List<string> results = new List<string>();
@@ -5043,18 +5043,18 @@ Keys keyData)
             return results;
         }
 
-        // ¸ù¾İ¼ÇÂ¼Â·¾¶£¬»ñµÃListViewItemÊÂÏîµÄimageindexÏÂ±ê
+        // æ ¹æ®è®°å½•è·¯å¾„ï¼Œè·å¾—ListViewItemäº‹é¡¹çš„imageindexä¸‹æ ‡
         // return:
-        //      -2  ¸ù±¾²»ÊÇÊéÄ¿¿â
-        //      -1  ²»ÊÇ²É¹ºÔ´»òÄ¿±êµÄÆäËüÊéÄ¿¿â
-        //      0   Ô´
-        //      1   Ä¿±ê
-        //      2   Í¬Ê±ÎªÔ´ºÍÄ¿±ê
-        //      3   ÍâÔ´
+        //      -2  æ ¹æœ¬ä¸æ˜¯ä¹¦ç›®åº“
+        //      -1  ä¸æ˜¯é‡‡è´­æºæˆ–ç›®æ ‡çš„å…¶å®ƒä¹¦ç›®åº“
+        //      0   æº
+        //      1   ç›®æ ‡
+        //      2   åŒæ—¶ä¸ºæºå’Œç›®æ ‡
+        //      3   å¤–æº
         public int GetItemType(string strRecPath,
             string strPubType)
         {
-            Debug.Assert(strPubType == "Á¬Ğø³ö°æÎï" || strPubType == "Í¼Êé", "");
+            Debug.Assert(strPubType == "è¿ç»­å‡ºç‰ˆç‰©" || strPubType == "å›¾ä¹¦", "");
 
             string strDbName = Global.GetDbName(strRecPath);
             for (int i = 0; i < this.Count; i++)
@@ -5064,84 +5064,84 @@ Keys keyData)
 
                 if (info.BiblioDbName == strDbName)
                 {
-                    // ×¢£ºÈç¹ûÊÇÔ´»òÄ¿±ê¿â£¬Ç§Íò²»Òª¶¨ÒåÎª¡°ÍâÔ´¡±½ÇÉ«£¬ÒòÎªÍâÔ´½ÇÉ«»áÓÅÏÈ
+                    // æ³¨ï¼šå¦‚æœæ˜¯æºæˆ–ç›®æ ‡åº“ï¼Œåƒä¸‡ä¸è¦å®šä¹‰ä¸ºâ€œå¤–æºâ€è§’è‰²ï¼Œå› ä¸ºå¤–æºè§’è‰²ä¼šä¼˜å…ˆ
                     if (StringUtil.IsInList("biblioSource", info.Role) == true)
                         return 3;
 
                     if (info.IsSourceAndTarget == true)
                     {
-                        if (strPubType == "Í¼Êé")
+                        if (strPubType == "å›¾ä¹¦")
                         {
                             if (String.IsNullOrEmpty(info.IssueDbName) == true)
                                 return 2;
 
-                            return -1;   // ÒòÓĞÆÚ¿â£¬²»ÄÜµ±×÷¡°Í¼Êé¡±ÀàĞÍµÄÄ¿±ê»òÕßÔ´
+                            return -1;   // å› æœ‰æœŸåº“ï¼Œä¸èƒ½å½“ä½œâ€œå›¾ä¹¦â€ç±»å‹çš„ç›®æ ‡æˆ–è€…æº
                         }
                         else
                         {
-                            Debug.Assert(strPubType == "Á¬Ğø³ö°æÎï", "");
+                            Debug.Assert(strPubType == "è¿ç»­å‡ºç‰ˆç‰©", "");
 
                             if (String.IsNullOrEmpty(info.IssueDbName) == false)
                                 return 2;
 
-                            // return 0;   // ÒòÃ»ÓĞÆÚ¿â£¬²»ÄÜµ±×÷¡°Á¬Ğø³ö°æÎï¡±ÀàĞÍµÄÄ¿±ê£¬µ«ÊÇ¿ÉÒÔµ±×÷Ô´
-                            return -1;  // ÒòÃ»ÓĞÆÚ¿â£¬²»ÄÜµ±×÷¡°Á¬Ğø³ö°æÎï¡±ÀàĞÍµÄÄ¿±ê»òÔ´ 2009/2/3 changed
+                            // return 0;   // å› æ²¡æœ‰æœŸåº“ï¼Œä¸èƒ½å½“ä½œâ€œè¿ç»­å‡ºç‰ˆç‰©â€ç±»å‹çš„ç›®æ ‡ï¼Œä½†æ˜¯å¯ä»¥å½“ä½œæº
+                            return -1;  // å› æ²¡æœ‰æœŸåº“ï¼Œä¸èƒ½å½“ä½œâ€œè¿ç»­å‡ºç‰ˆç‰©â€ç±»å‹çš„ç›®æ ‡æˆ–æº 2009/2/3 changed
                         }
                         // return 2;
                     }
                     if (info.IsSource == true)
                     {
-                        if (strPubType == "Í¼Êé")
+                        if (strPubType == "å›¾ä¹¦")
                         {
                             if (String.IsNullOrEmpty(info.IssueDbName) == true)
                                 return 0;
 
-                            return -1;   // ÒòÓĞÆÚ¿â£¬²»ÄÜµ±×÷¡°Í¼Êé¡±ÀàĞÍµÄÔ´
+                            return -1;   // å› æœ‰æœŸåº“ï¼Œä¸èƒ½å½“ä½œâ€œå›¾ä¹¦â€ç±»å‹çš„æº
                         }
                         else
                         {
-                            Debug.Assert(strPubType == "Á¬Ğø³ö°æÎï", "");
+                            Debug.Assert(strPubType == "è¿ç»­å‡ºç‰ˆç‰©", "");
 
                             if (String.IsNullOrEmpty(info.IssueDbName) == false)
                                 return 0;
 
-                            // return 0;   // ÒòÃ»ÓĞÆÚ¿â£¬²»ÄÜµ±×÷¡°Á¬Ğø³ö°æÎï¡±ÀàĞÍµÄÄ¿±ê£¬µ«ÊÇ¿ÉÒÔµ±×÷Ô´
-                            return -1;   // ÒòÃ»ÓĞÆÚ¿â£¬²»ÄÜµ±×÷¡°Á¬Ğø³ö°æÎï¡±ÀàĞÍµÄÄ¿±ê»òÔ´ 2009/2/3 changed
+                            // return 0;   // å› æ²¡æœ‰æœŸåº“ï¼Œä¸èƒ½å½“ä½œâ€œè¿ç»­å‡ºç‰ˆç‰©â€ç±»å‹çš„ç›®æ ‡ï¼Œä½†æ˜¯å¯ä»¥å½“ä½œæº
+                            return -1;   // å› æ²¡æœ‰æœŸåº“ï¼Œä¸èƒ½å½“ä½œâ€œè¿ç»­å‡ºç‰ˆç‰©â€ç±»å‹çš„ç›®æ ‡æˆ–æº 2009/2/3 changed
                         }
 
                         // return 0;
                     }
                     if (info.IsTarget == true)
                     {
-                        if (strPubType == "Í¼Êé")
+                        if (strPubType == "å›¾ä¹¦")
                         {
                             if (String.IsNullOrEmpty(info.IssueDbName) == true)
                                 return 1;
 
-                            return -1;   // ÒòÓĞÆÚ¿â£¬²»ÄÜµ±×÷¡°Í¼Êé¡±ÀàĞÍµÄÄ¿±ê
+                            return -1;   // å› æœ‰æœŸåº“ï¼Œä¸èƒ½å½“ä½œâ€œå›¾ä¹¦â€ç±»å‹çš„ç›®æ ‡
                         }
                         else
                         {
-                            Debug.Assert(strPubType == "Á¬Ğø³ö°æÎï", "");
+                            Debug.Assert(strPubType == "è¿ç»­å‡ºç‰ˆç‰©", "");
 
                             if (String.IsNullOrEmpty(info.IssueDbName) == false)
                                 return 1;
 
-                            return -1;   // ÒòÃ»ÓĞÆÚ¿â£¬²»ÄÜµ±×÷¡°Á¬Ğø³ö°æÎï¡±ÀàĞÍµÄÄ¿±ê
+                            return -1;   // å› æ²¡æœ‰æœŸåº“ï¼Œä¸èƒ½å½“ä½œâ€œè¿ç»­å‡ºç‰ˆç‰©â€ç±»å‹çš„ç›®æ ‡
                         }
 
                         // return 1;
                     }
 
-                    return -1;  // -1 ±íÊ¾¸ù±¾²»ÊÇ²É¹ºµÄÔ´»òÕßÄ¿±ê¿â£¬Ò²¾ÍÊÇËµ£¬ËùÆ¥ÅäµÄÕâ¸ö¿â£¬¼ÈÃ»ÓĞ°üº¬¶©¹º¿â£¬Ò²Ã»ÓĞ°üº¬ÊµÌå¿â
+                    return -1;  // -1 è¡¨ç¤ºæ ¹æœ¬ä¸æ˜¯é‡‡è´­çš„æºæˆ–è€…ç›®æ ‡åº“ï¼Œä¹Ÿå°±æ˜¯è¯´ï¼Œæ‰€åŒ¹é…çš„è¿™ä¸ªåº“ï¼Œæ—¢æ²¡æœ‰åŒ…å«è®¢è´­åº“ï¼Œä¹Ÿæ²¡æœ‰åŒ…å«å®ä½“åº“
                 }
             }
 
-            return -2;  // ¸ù±¾Ã»ÓĞÕÒµ½Õâ¸öÊéÄ¿¿âÃû
+            return -2;  // æ ¹æœ¬æ²¡æœ‰æ‰¾åˆ°è¿™ä¸ªä¹¦ç›®åº“å
         }
     }
 
-    // ²É¹ºÊı¾İ¿âĞÅÏ¢
+    // é‡‡è´­æ•°æ®åº“ä¿¡æ¯
     /*public*/ class OrderDbInfo
     {
         public string BiblioDbName = "";
@@ -5152,7 +5152,7 @@ Keys keyData)
         public string Syntax = "";
         public bool InCirculation = false;
 
-        public string Role = "";    // ½ÇÉ« 2009/10/23
+        public string Role = "";    // è§’è‰² 2009/10/23
 
         public bool IsOrderWork
         {
@@ -5164,7 +5164,7 @@ Keys keyData)
             }
         }
 
-        // ÊÇ·ñÎªÔ´
+        // æ˜¯å¦ä¸ºæº
         public bool IsSource
         {
             get
@@ -5175,7 +5175,7 @@ Keys keyData)
             }
         }
 
-        // ÊÇ·ñÎªÄ¿±ê
+        // æ˜¯å¦ä¸ºç›®æ ‡
         public bool IsTarget
         {
             get
@@ -5186,7 +5186,7 @@ Keys keyData)
             }
         }
 
-        // ÊÇ·ñ¼ÈÊÇÔ´¡¢Ò²ÊÇÄ¿±ê£¿
+        // æ˜¯å¦æ—¢æ˜¯æºã€ä¹Ÿæ˜¯ç›®æ ‡ï¼Ÿ
         public bool IsSourceAndTarget
         {
             get

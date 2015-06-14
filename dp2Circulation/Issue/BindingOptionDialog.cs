@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -31,37 +31,37 @@ namespace dp2Circulation
         {
             Debug.Assert(this.AppInfo != null, "");
 
-            // ×°¶©Åú´ÎºÅ
+            // è£…è®¢æ‰¹æ¬¡å·
             this.textBox_general_bindingBatchNo.Text = this.AppInfo.GetString(
                 "binding_form",
                 "binding_batchno",
                 "");
 
-            // ÑéÊÕÅú´ÎºÅ
+            // éªŒæ”¶æ‰¹æ¬¡å·
             this.textBox_general_acceptBatchNo.Text = this.AppInfo.GetString(
    "binding_form",
    "accept_batchno",
    "");
 
-            // ±à¼­Çø²¼¾Ö·½Ê½
+            // ç¼–è¾‘åŒºå¸ƒå±€æ–¹å¼
             this.comboBox_ui_splitterDirection.Text = this.AppInfo.GetString(
                 "binding_form",
                 "splitter_direction",
-                "Ë®Æ½");
+                "æ°´å¹³");
 
-            // ÏÔÊ¾¶©¹ºĞÅÏ¢×ø±êÖµ
+            // æ˜¾ç¤ºè®¢è´­ä¿¡æ¯åæ ‡å€¼
             this.checkBox_ui_displayOrderInfoXY.Checked = this.AppInfo.GetBoolean(
                 "binding_form",
                 "display_orderinfoxy",
                 false);
 
-            // ÏÔÊ¾·Ö¹İÍâ¶©¹º×é
+            // æ˜¾ç¤ºåˆ†é¦†å¤–è®¢è´­ç»„
             this.checkBox_ui_displayLockedOrderGroup.Checked = this.AppInfo.GetBoolean(
                 "binding_form",
                 "display_lockedOrderGroup",
                 true);
 
-            // ²á¸ñ×ÓÄÚÈİĞĞ
+            // å†Œæ ¼å­å†…å®¹è¡Œ
             {
                 string strLinesCfg = this.AppInfo.GetString(
         "binding_form",
@@ -76,7 +76,7 @@ namespace dp2Circulation
                 FillCellContentsList(strLinesCfg);
             }
 
-            // ×é¸ñ×ÓÄÚÈİĞĞ
+            // ç»„æ ¼å­å†…å®¹è¡Œ
             {
                 string strLinesCfg = this.AppInfo.GetString(
     "binding_form",
@@ -111,19 +111,19 @@ namespace dp2Circulation
                 "splitter_direction",
                 this.comboBox_ui_splitterDirection.Text);
 
-            // ÏÔÊ¾¶©¹ºĞÅÏ¢×ø±êÖµ
+            // æ˜¾ç¤ºè®¢è´­ä¿¡æ¯åæ ‡å€¼
             this.AppInfo.SetBoolean(
                 "binding_form",
                 "display_orderinfoxy",
                 this.checkBox_ui_displayOrderInfoXY.Checked);
 
-            // ÏÔÊ¾·Ö¹İÍâ¶©¹ºĞÅÏ¢
+            // æ˜¾ç¤ºåˆ†é¦†å¤–è®¢è´­ä¿¡æ¯
             this.AppInfo.SetBoolean(
                 "binding_form",
                 "display_lockedOrderGroup",
                 this.checkBox_ui_displayLockedOrderGroup.Checked);
 
-            // ²á¸ñ×ÓÄÚÈİĞĞ
+            // å†Œæ ¼å­å†…å®¹è¡Œ
             if (this.m_bCellContentsChanged == true)
             {
                 string strLinesCfg = GetCellContentList();
@@ -137,7 +137,7 @@ namespace dp2Circulation
          strLinesCfg);
             }
 
-            // ×é¸ñ×ÓÄÚÈİĞĞ
+            // ç»„æ ¼å­å†…å®¹è¡Œ
             if (this.m_bGroupContentsChanged == true)
             {
                 string strLinesCfg = GetGroupContentList();
@@ -244,17 +244,17 @@ namespace dp2Circulation
             if (dlg.DialogResult != DialogResult.OK)
                 return;
 
-            // ²éÖØ?
-            // Ãû³Æ²éÖØ
+            // æŸ¥é‡?
+            // åç§°æŸ¥é‡
             ListViewItem dup = ListViewUtil.FindItem(this.listView_cellContents_lines, dlg.FieldName, 0);
             if (dup != null)
             {
-                // ÈÃ²Ù×÷ÕßÄÜ¿´¼ûÒÑ¾­´æÔÚµÄĞĞ
+                // è®©æ“ä½œè€…èƒ½çœ‹è§å·²ç»å­˜åœ¨çš„è¡Œ
                 ListViewUtil.SelectLine(dup, true);
                 dup.EnsureVisible();
 
                 DialogResult result = MessageBox.Show(this,
-                    "µ±Ç°ÒÑ¾­´æÔÚÃûÎª '" + dlg.FieldName + "' µÄÄÚÈİĞĞ¡£¼ÌĞøĞÂÔö?",
+                    "å½“å‰å·²ç»å­˜åœ¨åä¸º '" + dlg.FieldName + "' çš„å†…å®¹è¡Œã€‚ç»§ç»­æ–°å¢?",
                     "BindingOptionDialog",
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question,
@@ -282,7 +282,7 @@ namespace dp2Circulation
         {
             if (this.listView_cellContents_lines.SelectedIndices.Count == 0)
             {
-                // Ã»ÓĞÑ¡ÔñÊÂÏî
+                // æ²¡æœ‰é€‰æ‹©äº‹é¡¹
                 this.button_cellContents_delete.Enabled = false;
                 this.button_cellContents_modify.Enabled = false;
                 this.button_cellContents_moveDown.Enabled = false;
@@ -291,7 +291,7 @@ namespace dp2Circulation
             }
             else
             {
-                // ÓĞÑ¡ÔñÊÂÏî
+                // æœ‰é€‰æ‹©äº‹é¡¹
                 this.button_cellContents_delete.Enabled = true;
                 this.button_cellContents_modify.Enabled = true;
                 if (this.listView_cellContents_lines.SelectedIndices[0] >= this.listView_cellContents_lines.Items.Count - 1)
@@ -313,12 +313,12 @@ namespace dp2Circulation
         {
             if (this.listView_cellContents_lines.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡¶¨ÒªÉ¾³ıµÄÊÂÏî");
+                MessageBox.Show(this, "å°šæœªé€‰å®šè¦åˆ é™¤çš„äº‹é¡¹");
                 return;
             }
 
             DialogResult result = MessageBox.Show(this,
-                "È·ÊµÒªÉ¾³ıÑ¡¶¨µÄ " + this.listView_cellContents_lines.SelectedItems.Count.ToString() + " ¸öÊÂÏî? ",
+                "ç¡®å®è¦åˆ é™¤é€‰å®šçš„ " + this.listView_cellContents_lines.SelectedItems.Count.ToString() + " ä¸ªäº‹é¡¹? ",
                 "BindingOptionDialog",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question,
@@ -332,7 +332,7 @@ namespace dp2Circulation
                 this.listView_cellContents_lines.Items.Remove(this.listView_cellContents_lines.SelectedItems[0]);
             }
 
-            // É¾³ıÊÂÏîºó£¬µ±Ç°ÒÑÑ¡ÔñÊÂÏîµÄÉÏÏÂÒÆ¶¯µÄ¿ÉÄÜĞÔ»áÓĞËù¸Ä±ä
+            // åˆ é™¤äº‹é¡¹åï¼Œå½“å‰å·²é€‰æ‹©äº‹é¡¹çš„ä¸Šä¸‹ç§»åŠ¨çš„å¯èƒ½æ€§ä¼šæœ‰æ‰€æ”¹å˜
             listView_cellContents_lines_SelectedIndexChanged(sender, null);
 
             this.m_bCellContentsChanged = true;
@@ -342,7 +342,7 @@ namespace dp2Circulation
         {
             if (this.listView_cellContents_lines.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡¶¨ÒªĞŞ¸ÄµÄÊÂÏî");
+                MessageBox.Show(this, "å°šæœªé€‰å®šè¦ä¿®æ”¹çš„äº‹é¡¹");
                 return;
             }
 
@@ -368,7 +368,7 @@ namespace dp2Circulation
         {
             if (this.listView_cellContents_lines.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡¶¨ÒªÒÆ¶¯µÄÊÂÏî");
+                MessageBox.Show(this, "å°šæœªé€‰å®šè¦ç§»åŠ¨çš„äº‹é¡¹");
                 return;
             }
 
@@ -376,7 +376,7 @@ namespace dp2Circulation
 
             if (nIndex == 0)
             {
-                MessageBox.Show(this, "ÒÑÔÚ¶¥²¿");
+                MessageBox.Show(this, "å·²åœ¨é¡¶éƒ¨");
                 return;
             }
 
@@ -392,7 +392,7 @@ namespace dp2Circulation
         {
             if (this.listView_cellContents_lines.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡¶¨ÒªÒÆ¶¯µÄÊÂÏî");
+                MessageBox.Show(this, "å°šæœªé€‰å®šè¦ç§»åŠ¨çš„äº‹é¡¹");
                 return;
             }
 
@@ -400,7 +400,7 @@ namespace dp2Circulation
 
             if (nIndex >= this.listView_cellContents_lines.Items.Count - 1)
             {
-                MessageBox.Show(this, "ÒÑÔÚµ×²¿");
+                MessageBox.Show(this, "å·²åœ¨åº•éƒ¨");
                 return;
             }
 
@@ -416,7 +416,7 @@ namespace dp2Circulation
         {
             if (this.listView_groupContents_lines.SelectedIndices.Count == 0)
             {
-                // Ã»ÓĞÑ¡ÔñÊÂÏî
+                // æ²¡æœ‰é€‰æ‹©äº‹é¡¹
                 this.button_groupContents_delete.Enabled = false;
                 this.button_groupContents_modify.Enabled = false;
                 this.button_groupContents_moveDown.Enabled = false;
@@ -425,7 +425,7 @@ namespace dp2Circulation
             }
             else
             {
-                // ÓĞÑ¡ÔñÊÂÏî
+                // æœ‰é€‰æ‹©äº‹é¡¹
                 this.button_groupContents_delete.Enabled = true;
                 this.button_groupContents_modify.Enabled = true;
                 if (this.listView_groupContents_lines.SelectedIndices[0] >= this.listView_cellContents_lines.Items.Count - 1)
@@ -446,7 +446,7 @@ namespace dp2Circulation
         {
             if (this.listView_groupContents_lines.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡¶¨ÒªÒÆ¶¯µÄÊÂÏî");
+                MessageBox.Show(this, "å°šæœªé€‰å®šè¦ç§»åŠ¨çš„äº‹é¡¹");
                 return;
             }
 
@@ -454,7 +454,7 @@ namespace dp2Circulation
 
             if (nIndex == 0)
             {
-                MessageBox.Show(this, "ÒÑÔÚ¶¥²¿");
+                MessageBox.Show(this, "å·²åœ¨é¡¶éƒ¨");
                 return;
             }
 
@@ -470,7 +470,7 @@ namespace dp2Circulation
         {
             if (this.listView_groupContents_lines.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡¶¨ÒªÒÆ¶¯µÄÊÂÏî");
+                MessageBox.Show(this, "å°šæœªé€‰å®šè¦ç§»åŠ¨çš„äº‹é¡¹");
                 return;
             }
 
@@ -478,7 +478,7 @@ namespace dp2Circulation
 
             if (nIndex >= this.listView_groupContents_lines.Items.Count - 1)
             {
-                MessageBox.Show(this, "ÒÑÔÚµ×²¿");
+                MessageBox.Show(this, "å·²åœ¨åº•éƒ¨");
                 return;
             }
 
@@ -502,17 +502,17 @@ namespace dp2Circulation
             if (dlg.DialogResult != DialogResult.OK)
                 return;
 
-            // ²éÖØ?
-            // Ãû³Æ²éÖØ
+            // æŸ¥é‡?
+            // åç§°æŸ¥é‡
             ListViewItem dup = ListViewUtil.FindItem(this.listView_groupContents_lines, dlg.FieldName, 0);
             if (dup != null)
             {
-                // ÈÃ²Ù×÷ÕßÄÜ¿´¼ûÒÑ¾­´æÔÚµÄĞĞ
+                // è®©æ“ä½œè€…èƒ½çœ‹è§å·²ç»å­˜åœ¨çš„è¡Œ
                 ListViewUtil.SelectLine(dup, true);
                 dup.EnsureVisible();
 
                 DialogResult result = MessageBox.Show(this,
-                    "µ±Ç°ÒÑ¾­´æÔÚÃûÎª '" + dlg.FieldName + "' µÄÄÚÈİĞĞ¡£¼ÌĞøĞÂÔö?",
+                    "å½“å‰å·²ç»å­˜åœ¨åä¸º '" + dlg.FieldName + "' çš„å†…å®¹è¡Œã€‚ç»§ç»­æ–°å¢?",
                     "BindingOptionDialog",
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question,
@@ -540,7 +540,7 @@ namespace dp2Circulation
         {
             if (this.listView_groupContents_lines.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡¶¨ÒªĞŞ¸ÄµÄÊÂÏî");
+                MessageBox.Show(this, "å°šæœªé€‰å®šè¦ä¿®æ”¹çš„äº‹é¡¹");
                 return;
             }
 
@@ -567,12 +567,12 @@ namespace dp2Circulation
         {
             if (this.listView_groupContents_lines.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡¶¨ÒªÉ¾³ıµÄÊÂÏî");
+                MessageBox.Show(this, "å°šæœªé€‰å®šè¦åˆ é™¤çš„äº‹é¡¹");
                 return;
             }
 
             DialogResult result = MessageBox.Show(this,
-                "È·ÊµÒªÉ¾³ıÑ¡¶¨µÄ " + this.listView_groupContents_lines.SelectedItems.Count.ToString() + " ¸öÊÂÏî? ",
+                "ç¡®å®è¦åˆ é™¤é€‰å®šçš„ " + this.listView_groupContents_lines.SelectedItems.Count.ToString() + " ä¸ªäº‹é¡¹? ",
                 "BindingOptionDialog",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question,
@@ -586,7 +586,7 @@ namespace dp2Circulation
                 this.listView_groupContents_lines.Items.Remove(this.listView_groupContents_lines.SelectedItems[0]);
             }
 
-            // É¾³ıÊÂÏîºó£¬µ±Ç°ÒÑÑ¡ÔñÊÂÏîµÄÉÏÏÂÒÆ¶¯µÄ¿ÉÄÜĞÔ»áÓĞËù¸Ä±ä
+            // åˆ é™¤äº‹é¡¹åï¼Œå½“å‰å·²é€‰æ‹©äº‹é¡¹çš„ä¸Šä¸‹ç§»åŠ¨çš„å¯èƒ½æ€§ä¼šæœ‰æ‰€æ”¹å˜
             listView_groupContents_lines_SelectedIndexChanged(sender, null);
 
             this.m_bGroupContentsChanged = true;

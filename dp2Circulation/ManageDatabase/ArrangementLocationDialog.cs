@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -15,14 +15,14 @@ namespace dp2Circulation
 {
     internal partial class ArrangementLocationDialog : Form
     {
-        public string LibraryCodeList = ""; // µ±Ç°ÓÃ»§¹ÜÏ½µÄ¹İ´úÂë
+        public string LibraryCodeList = ""; // å½“å‰ç”¨æˆ·ç®¡è¾–çš„é¦†ä»£ç 
 
         /// <summary>
-        /// »ñµÃÖµÁĞ±í
+        /// è·å¾—å€¼åˆ—è¡¨
         /// </summary>
         public event GetValueTableEventHandler GetValueTable = null;
 
-        public List<string> ExcludingLocationNames = new List<string>();   // ÒªÅÅ³ıµÄ¡¢ÒÑ¾­±»Ê¹ÓÃÁËµÄÖÖ´ÎºÅ¿âÃû
+        public List<string> ExcludingLocationNames = new List<string>();   // è¦æ’é™¤çš„ã€å·²ç»è¢«ä½¿ç”¨äº†çš„ç§æ¬¡å·åº“å
 
         public ArrangementLocationDialog()
         {
@@ -46,13 +46,13 @@ namespace dp2Circulation
 
         static bool MatchLocationNames(List<string> names, string name)
         {
-            bool bNamePattern = false;  // name ÀïÃæÊÇ·ñ°üº¬Í¨Åä·û?
+            bool bNamePattern = false;  // name é‡Œé¢æ˜¯å¦åŒ…å«é€šé…ç¬¦?
             if (name.IndexOf("*") != -1)
                 bNamePattern = true;
 
             foreach (string current in names)
             {
-                bool bCurrentPattern = false;  // current ÀïÃæÊÇ·ñ°üº¬Í¨Åä·û?
+                bool bCurrentPattern = false;  // current é‡Œé¢æ˜¯å¦åŒ…å«é€šé…ç¬¦?
                 if (current.IndexOf("*") != -1)
                     bCurrentPattern = true;
 
@@ -92,26 +92,26 @@ namespace dp2Circulation
 
             if (this.comboBox_location.Text == "")
             {
-                strError = "ÉĞÎ´Ö¸¶¨¹İ²ØµØµã";
+                strError = "å°šæœªæŒ‡å®šé¦†è—åœ°ç‚¹";
                 goto ERROR1;
             }
 
-            // ¼ì²é¶Ô»°¿òÖĞÊäÈëµÄ¹İ²ØµØµã£¬ÊÇ²»ÊÇ±»±ğ´¦ÓÃ¹ıµÄ£¿
+            // æ£€æŸ¥å¯¹è¯æ¡†ä¸­è¾“å…¥çš„é¦†è—åœ°ç‚¹ï¼Œæ˜¯ä¸æ˜¯è¢«åˆ«å¤„ç”¨è¿‡çš„ï¼Ÿ
             if (String.IsNullOrEmpty(this.comboBox_location.Text) == false
                 && this.ExcludingLocationNames != null)
             {
-                string strLocation = this.LocationString;   // ÕâÊÇÕı¹æ»¯ÁËµÄÖµ£¬½«"<¿Õ>"µÈ×ª»»³ÉÁËÊµ¼ÊµÄÖµ
+                string strLocation = this.LocationString;   // è¿™æ˜¯æ­£è§„åŒ–äº†çš„å€¼ï¼Œå°†"<ç©º>"ç­‰è½¬æ¢æˆäº†å®é™…çš„å€¼
 
 #if NO
                 if (this.ExcludingLocationNames.IndexOf(strLocation) != -1)
                 {
-                    strError = "ÄúËùÖ¸¶¨µÄ¹İ²ØµØµã '" + this.comboBox_location.Text + "' ÒÑ¾­±»Ê¹ÓÃ¹ıÁË";
+                    strError = "æ‚¨æ‰€æŒ‡å®šçš„é¦†è—åœ°ç‚¹ '" + this.comboBox_location.Text + "' å·²ç»è¢«ä½¿ç”¨è¿‡äº†";
                     goto ERROR1;
                 }
 #endif
                 if (MatchLocationNames(this.ExcludingLocationNames, strLocation) == true)
                 {
-                    strError = "ÄúËùÖ¸¶¨µÄ¹İ²ØµØµã '" + this.comboBox_location.Text + "' ÒÑ¾­±»Ê¹ÓÃ¹ıÁË";
+                    strError = "æ‚¨æ‰€æŒ‡å®šçš„é¦†è—åœ°ç‚¹ '" + this.comboBox_location.Text + "' å·²ç»è¢«ä½¿ç”¨è¿‡äº†";
                     goto ERROR1;
                 }
             }
@@ -135,20 +135,20 @@ namespace dp2Circulation
             get
             {
                 /*
-                if (this.comboBox_location.Text == "<¿Õ>"
+                if (this.comboBox_location.Text == "<ç©º>"
                     || this.comboBox_location.Text == "<blank>")
                     return "";
 
                 return this.comboBox_location.Text;
                  * */
                 string strText = this.comboBox_location.Text;
-                return strText.Replace("<¿Õ>", "").Replace("<blank>", "");
+                return strText.Replace("<ç©º>", "").Replace("<blank>", "");
             }
             set
             {
                 /*
                 if (String.IsNullOrEmpty(value) == true)
-                    this.comboBox_location.Text = "<¿Õ>";
+                    this.comboBox_location.Text = "<ç©º>";
                 else
                     this.comboBox_location.Text = value;
                  * */
@@ -161,7 +161,7 @@ namespace dp2Circulation
         {
             if (String.IsNullOrEmpty(value) == true)
             {
-                return "<¿Õ>";
+                return "<ç©º>";
             }
 
             string strLibraryCode = "";
@@ -171,7 +171,7 @@ namespace dp2Circulation
                 out strLibraryCode,
                 out strPureName);
             if (String.IsNullOrEmpty(strPureName) == true)
-                return strLibraryCode + "/<¿Õ>";
+                return strLibraryCode + "/<ç©º>";
             else
                 return value;
         }
@@ -180,7 +180,7 @@ namespace dp2Circulation
 
         private void comboBox_location_DropDown(object sender, EventArgs e)
         {
-            // ·ÀÖ¹ÖØÈë 2009/2/23
+            // é˜²æ­¢é‡å…¥ 2009/2/23
             if (this.m_nInDropDown > 0)
                 return;
 
@@ -195,7 +195,7 @@ namespace dp2Circulation
                 if (combobox.Items.Count == 0
                     && this.GetValueTable != null)
                 {
-                    // combobox.Items.Add("<¿Õ>");
+                    // combobox.Items.Add("<ç©º>");
 
                     GetValueTableEventArgs e1 = new GetValueTableEventArgs();
                     e1.DbName = "";
@@ -204,7 +204,7 @@ namespace dp2Circulation
                         e1.TableName = "location";
                     else
                     {
-                        Debug.Assert(false, "²»Ö§³ÖµÄsender");
+                        Debug.Assert(false, "ä¸æ”¯æŒçš„sender");
                         return;
                     }
 
@@ -215,7 +215,7 @@ namespace dp2Circulation
                         List<string> values = new List<string>();
                         for (int i = 0; i < e1.values.Length; i++)
                         {
-                            // ÅÅ³ı²¿·ÖÒÑ¾­ÓÃ¹ıµÄÖµ
+                            // æ’é™¤éƒ¨åˆ†å·²ç»ç”¨è¿‡çš„å€¼
                             if (this.ExcludingLocationNames != null)
                             {
                                 if (this.ExcludingLocationNames.IndexOf(e1.values[i]) != -1)
@@ -229,7 +229,7 @@ namespace dp2Circulation
 
                         if (String.IsNullOrEmpty(this.LibraryCodeList) == false)
                         {
-                            // ¹ıÂË³ö·ûºÏ¹İ´úÂëµÄÄÇĞ©Öµ×Ö·û´®
+                            // è¿‡æ»¤å‡ºç¬¦åˆé¦†ä»£ç çš„é‚£äº›å€¼å­—ç¬¦ä¸²
                             results = Global.FilterLocationsWithLibraryCodeList(this.LibraryCodeList,
                                 values);
                         }

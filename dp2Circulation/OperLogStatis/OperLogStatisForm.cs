@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -20,11 +20,11 @@ using DigitalPlatform.Xml;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ÈÕÖ¾Í³¼Æ´°
+    /// æ—¥å¿—ç»Ÿè®¡çª—
     /// </summary>
     public partial class OperLogStatisForm : MyScriptForm
     {
-        // bool Running = false;   // ÕıÔÚÖ´ĞĞÔËËã
+        // bool Running = false;   // æ­£åœ¨æ‰§è¡Œè¿ç®—
 
         string m_strMainCsDllName = "";
 
@@ -45,7 +45,7 @@ namespace dp2Circulation
 
 #if NO
         /// <summary>
-        /// ½Å±¾¹ÜÀíÆ÷
+        /// è„šæœ¬ç®¡ç†å™¨
         /// </summary>
         public ScriptManager ScriptManager = new ScriptManager();
 #endif
@@ -68,7 +68,7 @@ namespace dp2Circulation
 #endif
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public OperLogStatisForm()
         {
@@ -88,7 +88,7 @@ namespace dp2Circulation
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
 
             stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// ºÍÈİÆ÷¹ØÁª
+            stop.Register(MainForm.stopManager, true);	// å’Œå®¹å™¨å…³è”
 #endif
 
             ScriptManager.CfgFilePath =
@@ -109,7 +109,7 @@ namespace dp2Circulation
             }
             catch (FileNotFoundException)
             {
-                // ²»±Ø±¨´í 2009/2/4
+                // ä¸å¿…æŠ¥é”™ 2009/2/4
             }
             catch (Exception ex)
             {
@@ -117,26 +117,26 @@ namespace dp2Circulation
             }
 #endif
 
-            // ·½°¸Ãû
+            // æ–¹æ¡ˆå
             this.textBox_projectName.Text = this.MainForm.AppInfo.GetString(
                 "operlogstatisform",
                 "projectname",
                 "");
 
-            // ÆğÊ¼ÈÕÆÚ
+            // èµ·å§‹æ—¥æœŸ
             this.dateControl_start.Text = this.MainForm.AppInfo.GetString(
                  "operlogstatisform",
                  "start_date",
                  "");
 
-            // ½áÊøÈÕÆÚ
+            // ç»“æŸæ—¥æœŸ
             this.dateControl_end.Text = this.MainForm.AppInfo.GetString(
                 "operlogstatisform",
                 "end_date",
                 "");
 
             /*
-            // ÈçºÎÊä³ö±í¸ñ
+            // å¦‚ä½•è¾“å‡ºè¡¨æ ¼
             this.checkBox_startToEndTable.Checked = this.MainForm.AppInfo.GetBoolean(
                 "operlogstatisform",
                 "startToEndTable",
@@ -162,9 +162,9 @@ namespace dp2Circulation
 #if NO
             if (stop != null)
             {
-                if (stop.State == 0)    // 0 ±íÊ¾ÕıÔÚ´¦Àí
+                if (stop.State == 0)    // 0 è¡¨ç¤ºæ­£åœ¨å¤„ç†
                 {
-                    MessageBox.Show(this, "ÇëÔÚ¹Ø±Õ´°¿ÚÇ°Í£Ö¹ÕıÔÚ½øĞĞµÄ³¤Ê±²Ù×÷¡£");
+                    MessageBox.Show(this, "è¯·åœ¨å…³é—­çª—å£å‰åœæ­¢æ­£åœ¨è¿›è¡Œçš„é•¿æ—¶æ“ä½œã€‚");
                     e.Cancel = true;
                     return;
                 }
@@ -176,32 +176,32 @@ namespace dp2Circulation
         private void OperLogStatisForm_FormClosed(object sender, FormClosedEventArgs e)
         {
 #if NO
-            if (stop != null) // ÍÑÀë¹ØÁª
+            if (stop != null) // è„±ç¦»å…³è”
             {
-                stop.Unregister();	// ºÍÈİÆ÷¹ØÁª
+                stop.Unregister();	// å’Œå®¹å™¨å…³è”
                 stop = null;
             }
 #endif
 
-            // ·½°¸Ãû
+            // æ–¹æ¡ˆå
             this.MainForm.AppInfo.SetString(
                 "operlogstatisform",
                 "projectname",
                 this.textBox_projectName.Text);
 
-            // ÆğÊ¼ÈÕÆÚ
+            // èµ·å§‹æ—¥æœŸ
             this.MainForm.AppInfo.SetString(
                 "operlogstatisform",
                 "start_date",
                 this.dateControl_start.Text);
-            // ½áÊøÈÕÆÚ
+            // ç»“æŸæ—¥æœŸ
             this.MainForm.AppInfo.SetString(
                 "operlogstatisform",
                 "end_date",
                 this.dateControl_end.Text);
 
             /*
-            // ÈçºÎÊä³ö±í¸ñ
+            // å¦‚ä½•è¾“å‡ºè¡¨æ ¼
             this.MainForm.AppInfo.SetBoolean(
                 "operlogstatisform",
                 "startToEndTable",
@@ -300,9 +300,9 @@ namespace dp2Circulation
         }
         // 
         /// <summary>
-        /// ´´½¨È±Ê¡µÄ main.cs ÎÄ¼ş
+        /// åˆ›å»ºç¼ºçœçš„ main.cs æ–‡ä»¶
         /// </summary>
-        /// <param name="strFileName">ÎÄ¼şÈ«Â·¾¶</param>
+        /// <param name="strFileName">æ–‡ä»¶å…¨è·¯å¾„</param>
         static void CreateDefaultMainCsFile(string strFileName)
         {
             StreamWriter sw = new StreamWriter(strFileName, false, Encoding.UTF8);
@@ -331,7 +331,7 @@ namespace dp2Circulation
             sw.Close();
         }
 
-        // ·½°¸¹ÜÀí
+        // æ–¹æ¡ˆç®¡ç†
         private void button_projectManage_Click(object sender, EventArgs e)
         {
             ProjectManageDlg dlg = new ProjectManageDlg();
@@ -347,9 +347,9 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÔÊĞí»òÕß½ûÖ¹½çÃæ¿Ø¼ş¡£ÔÚ³¤²Ù×÷Ç°£¬Ò»°ãĞèÒª½ûÖ¹½çÃæ¿Ø¼ş£»²Ù×÷Íê³ÉºóÔÙÔÊĞí
+        /// å…è®¸æˆ–è€…ç¦æ­¢ç•Œé¢æ§ä»¶ã€‚åœ¨é•¿æ“ä½œå‰ï¼Œä¸€èˆ¬éœ€è¦ç¦æ­¢ç•Œé¢æ§ä»¶ï¼›æ“ä½œå®Œæˆåå†å…è®¸
         /// </summary>
-        /// <param name="bEnable">ÊÇ·ñÔÊĞí½çÃæ¿Ø¼ş¡£true ÎªÔÊĞí£¬ false Îª½ûÖ¹</param>
+        /// <param name="bEnable">æ˜¯å¦å…è®¸ç•Œé¢æ§ä»¶ã€‚true ä¸ºå…è®¸ï¼Œ false ä¸ºç¦æ­¢</param>
         public override void EnableControls(bool bEnable)
         {
             this.button_getProjectName.Enabled = bEnable;
@@ -369,7 +369,7 @@ namespace dp2Circulation
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚÖ´ĞĞ½Å±¾ ...");
+            stop.Initial("æ­£åœ¨æ‰§è¡Œè„šæœ¬ ...");
             stop.BeginLoop();
 
             this.Update();
@@ -387,7 +387,7 @@ namespace dp2Circulation
                 this.AssemblyMain = null;
 
                 // 2009/11/5 changed
-                // ·ÀÖ¹ÒÔÇ°²ĞÁôµÄ´ò¿ªµÄÎÄ¼şÒÀÈ»Ã»ÓĞ¹Ø±Õ
+                // é˜²æ­¢ä»¥å‰æ®‹ç•™çš„æ‰“å¼€çš„æ–‡ä»¶ä¾ç„¶æ²¡æœ‰å…³é—­
                 Global.ForceGarbageCollection();
 
                 /*
@@ -423,7 +423,7 @@ namespace dp2Circulation
 
                 m_strMainCsDllName = strDllName;
 
-                // ÎªStatisÅÉÉúÀàÉèÖÃ²ÎÊı
+                // ä¸ºStatisæ´¾ç”Ÿç±»è®¾ç½®å‚æ•°
                 objStatis.OperLogStatisForm = this;
                 objStatis.ProjectDir = strProjectLocate;
                  * */
@@ -437,10 +437,10 @@ namespace dp2Circulation
                 objStatis.EndDate = this.dateControl_end.Value;
 
 
-                // Ö´ĞĞ½Å±¾µÄOnInitial()
+                // æ‰§è¡Œè„šæœ¬çš„OnInitial()
 
-                // ´¥·¢ScriptÖĞOnInitial()´úÂë
-                // OnInitial()ºÍOnBeginµÄ±¾ÖÊÇø±ğ, ÔÚÓÚOnInitial()ÊÊºÏ¼ì²éºÍÉèÖÃÃæ°å²ÎÊı
+                // è§¦å‘Scriptä¸­OnInitial()ä»£ç 
+                // OnInitial()å’ŒOnBeginçš„æœ¬è´¨åŒºåˆ«, åœ¨äºOnInitial()é€‚åˆæ£€æŸ¥å’Œè®¾ç½®é¢æ¿å‚æ•°
                 if (objStatis != null)
                 {
                     StatisEventArgs args = new StatisEventArgs();
@@ -450,8 +450,8 @@ namespace dp2Circulation
                 }
 
 
-                // ´¥·¢ScriptÖĞOnBegin()´úÂë
-                // OnBegin()ÖĞÈÔÈ»ÓĞĞŞ¸ÄMainFormÃæ°åµÄ×ÔÓÉ
+                // è§¦å‘Scriptä¸­OnBegin()ä»£ç 
+                // OnBegin()ä¸­ä»ç„¶æœ‰ä¿®æ”¹MainFormé¢æ¿çš„è‡ªç”±
                 if (objStatis != null)
                 {
                     StatisEventArgs args = new StatisEventArgs();
@@ -460,16 +460,16 @@ namespace dp2Circulation
                         goto END1;
                 }
 
-                // Ñ­»·
+                // å¾ªç¯
                 nRet = DoLoop(DoRecord, out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
                 if (nRet == 1)
-                    goto END1;  // TODO: SkipAllÈçºÎÖ´ĞĞ? ÊÇ·ñÁ¬OnEndÒ²²»Ö´ĞĞÁË£¿
+                    goto END1;  // TODO: SkipAllå¦‚ä½•æ‰§è¡Œ? æ˜¯å¦è¿OnEndä¹Ÿä¸æ‰§è¡Œäº†ï¼Ÿ
 
             END1:
-                // ´¥·¢ScriptµÄOnEnd()´úÂë
+                // è§¦å‘Scriptçš„OnEnd()ä»£ç 
                 if (objStatis != null)
                 {
                     StatisEventArgs args = new StatisEventArgs();
@@ -484,7 +484,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = "½Å±¾Ö´ĞĞ¹ı³ÌÅ×³öÒì³£: \r\n" + ExceptionUtil.GetDebugText(ex);
+                strError = "è„šæœ¬æ‰§è¡Œè¿‡ç¨‹æŠ›å‡ºå¼‚å¸¸: \r\n" + ExceptionUtil.GetDebugText(ex);
                 return -1;
             }
             finally
@@ -537,9 +537,9 @@ namespace dp2Circulation
                 strDate = strLogFileName;
 
             DateTime currentDate = DateTimeUtil.Long8ToDateTime(strDate);
-            // strXmlÖĞÎªÈÕÖ¾¼ÇÂ¼
+            // strXmlä¸­ä¸ºæ—¥å¿—è®°å½•
 
-            // ´¥·¢ScriptÖĞOnRecord()´úÂë
+            // è§¦å‘Scriptä¸­OnRecord()ä»£ç 
             if (objStatis != null)
             {
                 objStatis.Xml = strXml;
@@ -558,10 +558,10 @@ namespace dp2Circulation
 
 
 
-        // ¶ÔÃ¿¸öÈÕÖ¾ÎÄ¼ş£¬Ã¿¸öÈÕÖ¾¼ÇÂ¼½øĞĞÑ­»·
+        // å¯¹æ¯ä¸ªæ—¥å¿—æ–‡ä»¶ï¼Œæ¯ä¸ªæ—¥å¿—è®°å½•è¿›è¡Œå¾ªç¯
         // return:
-        //      0   ÆÕÍ¨·µ»Ø
-        //      1   ÒªÈ«²¿ÖĞ¶Ï
+        //      0   æ™®é€šè¿”å›
+        //      1   è¦å…¨éƒ¨ä¸­æ–­
         int DoLoop(
             OperLogForm.Delegate_doRecord procDoRecord,
             out string strError)
@@ -572,20 +572,20 @@ namespace dp2Circulation
 
             List<string> LogFileNames = null;
 
-            // TODO: ÊÇ·ñĞèÒª¼ì²éÆğÖ¹ÈÕÆÚÊÇ·ñÎª¿ÕÖµ£¿¿ÕÖµÊÇ¾¯¸æ»¹ÊÇ¾Íµ±×÷½ñÌì£¿
+            // TODO: æ˜¯å¦éœ€è¦æ£€æŸ¥èµ·æ­¢æ—¥æœŸæ˜¯å¦ä¸ºç©ºå€¼ï¼Ÿç©ºå€¼æ˜¯è­¦å‘Šè¿˜æ˜¯å°±å½“ä½œä»Šå¤©ï¼Ÿ
 
             string strStartDate = DateTimeUtil.DateTimeToString8(this.dateControl_start.Value);
             string strEndDate = DateTimeUtil.DateTimeToString8(this.dateControl_end.Value);
 
             string strWarning = "";
 
-            // ¸ù¾İÈÕÆÚ·¶Î§£¬·¢ÉúÈÕÖ¾ÎÄ¼şÃû
+            // æ ¹æ®æ—¥æœŸèŒƒå›´ï¼Œå‘ç”Ÿæ—¥å¿—æ–‡ä»¶å
             // parameters:
-            //      strStartDate    ÆğÊ¼ÈÕÆÚ¡£8×Ö·û
-            //      strEndDate  ½áÊøÈÕÆÚ¡£8×Ö·û
+            //      strStartDate    èµ·å§‹æ—¥æœŸã€‚8å­—ç¬¦
+            //      strEndDate  ç»“æŸæ—¥æœŸã€‚8å­—ç¬¦
             // return:
-            //      -1  ´íÎó
-            //      0   ³É¹¦
+            //      -1  é”™è¯¯
+            //      0   æˆåŠŸ
             nRet = MakeLogFileNames(strStartDate,
                 strEndDate,
                 true,
@@ -621,7 +621,7 @@ out strError);
             return nRet;
         }
 
-        // ×¼±¸½Å±¾»·¾³
+        // å‡†å¤‡è„šæœ¬ç¯å¢ƒ
         int PrepareScript(string strProjectName,
             string strProjectLocate,
             // out Assembly assemblyMain,
@@ -640,7 +640,7 @@ out strError);
                 + "\"" + strProjectLocate + "\"";
 
             string[] saAddRef = {
-                                    // 2011/4/20 Ôö¼Ó
+                                    // 2011/4/20 å¢åŠ 
                                     "system.dll",
                                     "system.drawing.dll",
                                     "system.windows.forms.dll",
@@ -657,17 +657,17 @@ out strError);
 									Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
    									Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Script.dll",  // 2011/8/25 ĞÂÔö
+									Environment.CurrentDirectory + "\\digitalplatform.Script.dll",  // 2011/8/25 æ–°å¢
 									// Environment.CurrentDirectory + "\\digitalplatform.dp2.statis.dll",
 									// Environment.CurrentDirectory + "\\Interop.SHDocVw.dll",
 									Environment.CurrentDirectory + "\\dp2circulation.exe",
             };
 
 
-            // ´´½¨ProjectÖĞScript main.csµÄAssembly
+            // åˆ›å»ºProjectä¸­Script main.csçš„Assembly
             // return:
-            //		-2	³ö´í£¬µ«ÊÇÒÑ¾­ÌáÊ¾¹ı´íÎóĞÅÏ¢ÁË¡£
-            //		-1	³ö´í
+            //		-2	å‡ºé”™ï¼Œä½†æ˜¯å·²ç»æç¤ºè¿‡é”™è¯¯ä¿¡æ¯äº†ã€‚
+            //		-1	å‡ºé”™
             int nRet = ScriptManager.BuildAssembly(
                 "OperLogStatisForm",
                 strProjectName,
@@ -694,18 +694,18 @@ out strError);
                 goto ERROR1;
             }
 
-            // µÃµ½AssemblyÖĞStatisÅÉÉúÀàType
+            // å¾—åˆ°Assemblyä¸­Statisæ´¾ç”Ÿç±»Type
             Type entryClassType = ScriptManager.GetDerivedClassType(
                 this.AssemblyMain,
                 "dp2Circulation.OperLogStatis");
 
             if (entryClassType == null)
             {
-                strError = strMainCsDllName + "ÖĞÃ»ÓĞÕÒµ½ dp2Circulation.OperLogStatis ÅÉÉúÀà¡£";
+                strError = strMainCsDllName + "ä¸­æ²¡æœ‰æ‰¾åˆ° dp2Circulation.OperLogStatis æ´¾ç”Ÿç±»ã€‚";
                 goto ERROR1;
             }
 
-            // newÒ»¸öStatisÅÉÉú¶ÔÏó
+            // newä¸€ä¸ªStatisæ´¾ç”Ÿå¯¹è±¡
             objStatis = (OperLogStatis)entryClassType.InvokeMember(null,
                 BindingFlags.DeclaredOnly |
                 BindingFlags.Public | BindingFlags.NonPublic |
@@ -720,7 +720,7 @@ out strError);
                 goto ERROR1;
             }
 
-            // µÃµ½AssemblyÖĞStatisÅÉÉúÀàType
+            // å¾—åˆ°Assemblyä¸­Statisæ´¾ç”Ÿç±»Type
             Type entryClassType = ScriptManager.GetDerivedClassType(
                 this.AssemblyMain,
                 "dp2Circulation.OperLogStatis");
@@ -736,7 +736,7 @@ out strError);
 
 
 
-            // ÎªStatisÅÉÉúÀàÉèÖÃ²ÎÊı
+            // ä¸ºStatisæ´¾ç”Ÿç±»è®¾ç½®å‚æ•°
             objStatis.OperLogStatisForm = this;
             objStatis.ProjectDir = strProjectLocate;
             objStatis.InstanceDir = this.InstanceDir;
@@ -747,7 +747,7 @@ out strError);
         }
 
 
-        // ×¼±¸½Å±¾»·¾³(2)
+        // å‡†å¤‡è„šæœ¬ç¯å¢ƒ(2)
         int PrepareScript(string strProjectName,
             string strProjectLocate,
             out string strMainCsDllName,
@@ -763,7 +763,7 @@ out strError);
                 + "\"" + strProjectLocate + "\"";
 
             string[] saAddRef = {
-                                    // 2011/4/20 Ôö¼Ó
+                                    // 2011/4/20 å¢åŠ 
                                     "system.dll",
                                     "system.drawing.dll",
                                     "system.windows.forms.dll",
@@ -780,17 +780,17 @@ out strError);
 									Environment.CurrentDirectory + "\\digitalplatform.IO.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.Xml.dll",
    									Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Script.dll",  // 2011/8/25 ĞÂÔö
+									Environment.CurrentDirectory + "\\digitalplatform.Script.dll",  // 2011/8/25 æ–°å¢
 									// Environment.CurrentDirectory + "\\digitalplatform.dp2.statis.dll",
 									// Environment.CurrentDirectory + "\\Interop.SHDocVw.dll",
 									Environment.CurrentDirectory + "\\dp2circulation.exe",
             };
 
 
-            // ´´½¨ProjectÖĞScript main.csµÄAssembly
+            // åˆ›å»ºProjectä¸­Script main.csçš„Assembly
             // return:
-            //		-2	³ö´í£¬µ«ÊÇÒÑ¾­ÌáÊ¾¹ı´íÎóĞÅÏ¢ÁË¡£
-            //		-1	³ö´í
+            //		-2	å‡ºé”™ï¼Œä½†æ˜¯å·²ç»æç¤ºè¿‡é”™è¯¯ä¿¡æ¯äº†ã€‚
+            //		-1	å‡ºé”™
             int nRet = ScriptManager.BuildAssembly(
                 "OperLogStatisForm",
                 strProjectName,
@@ -816,26 +816,26 @@ out strError);
             return -1;
         }
 
-        // ¸ù¾İÈÕÆÚ·¶Î§£¬·¢ÉúÈÕÖ¾ÎÄ¼şÃû
+        // æ ¹æ®æ—¥æœŸèŒƒå›´ï¼Œå‘ç”Ÿæ—¥å¿—æ–‡ä»¶å
         // parameters:
-        //      strStartDate    ÆğÊ¼ÈÕÆÚ¡£8×Ö·û
-        //      strEndDate  ½áÊøÈÕÆÚ¡£8×Ö·û
+        //      strStartDate    èµ·å§‹æ—¥æœŸã€‚8å­—ç¬¦
+        //      strEndDate  ç»“æŸæ—¥æœŸã€‚8å­—ç¬¦
         // return:
-        //      -1  ´íÎó
-        //      0   ³É¹¦
+        //      -1  é”™è¯¯
+        //      0   æˆåŠŸ
         /// <summary>
-        /// ¸ù¾İÈÕÆÚ·¶Î§£¬·¢ÉúÈÕÖ¾ÎÄ¼şÃû
+        /// æ ¹æ®æ—¥æœŸèŒƒå›´ï¼Œå‘ç”Ÿæ—¥å¿—æ–‡ä»¶å
         /// </summary>
-        /// <param name="strStartDate">ÆğÊ¼ÈÕÆÚ¡£8×Ö·û</param>
-        /// <param name="strEndDate">½áÊøÈÕÆÚ¡£8×Ö·û</param>
-        /// <param name="bExt">ÊÇ·ñ°üº¬À©Õ¹Ãû ".log"</param>
-        /// <param name="LogFileNames">·µ»Ø´´½¨µÄÎÄ¼şÃû</param>
-        /// <param name="strWarning">·µ»Ø¾¯¸æĞÅÏ¢</param>
-        /// <param name="strError">·µ»Ø´íÎóĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í; 0: ³É¹¦</returns>
+        /// <param name="strStartDate">èµ·å§‹æ—¥æœŸã€‚8å­—ç¬¦</param>
+        /// <param name="strEndDate">ç»“æŸæ—¥æœŸã€‚8å­—ç¬¦</param>
+        /// <param name="bExt">æ˜¯å¦åŒ…å«æ‰©å±•å ".log"</param>
+        /// <param name="LogFileNames">è¿”å›åˆ›å»ºçš„æ–‡ä»¶å</param>
+        /// <param name="strWarning">è¿”å›è­¦å‘Šä¿¡æ¯</param>
+        /// <param name="strError">è¿”å›é”™è¯¯ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™; 0: æˆåŠŸ</returns>
         public static int MakeLogFileNames(string strStartDate,
             string strEndDate,
-            bool bExt,  // ÊÇ·ñ°üº¬À©Õ¹Ãû ".log"
+            bool bExt,  // æ˜¯å¦åŒ…å«æ‰©å±•å ".log"
             out List<string> LogFileNames,
             out string strWarning,
             out string strError)
@@ -847,7 +847,7 @@ out strError);
 
             if (String.Compare(strStartDate, strEndDate) > 0)
             {
-                strError = "ÆğÊ¼ÈÕÆÚ '" + strStartDate + "' ²»Ó¦´óÓÚ½áÊøÈÕÆÚ '" + strEndDate + "'¡£";
+                strError = "èµ·å§‹æ—¥æœŸ '" + strStartDate + "' ä¸åº”å¤§äºç»“æŸæ—¥æœŸ '" + strEndDate + "'ã€‚";
                 return -1;
             }
 
@@ -858,11 +858,11 @@ out strError);
                 LogFileNames.Add(strLogFileName + (bExt == true ? ".log" : ""));
 
                 string strNextLogFileName = "";
-                // »ñµÃ£¨ÀíÂÛÉÏ£©ÏÂÒ»¸öÈÕÖ¾ÎÄ¼şÃû
+                // è·å¾—ï¼ˆç†è®ºä¸Šï¼‰ä¸‹ä¸€ä¸ªæ—¥å¿—æ–‡ä»¶å
                 // return:
                 //      -1  error
-                //      0   ÕıÈ·
-                //      1   ÕıÈ·£¬²¢ÇÒstrLogFileNameÒÑ¾­ÊÇ½ñÌìµÄÈÕ×ÓÁË
+                //      0   æ­£ç¡®
+                //      1   æ­£ç¡®ï¼Œå¹¶ä¸”strLogFileNameå·²ç»æ˜¯ä»Šå¤©çš„æ—¥å­äº†
                 nRet = NextLogFileName(strLogFileName,
                     out strNextLogFileName,
                     out strError);
@@ -873,7 +873,7 @@ out strError);
                 {
                     if (String.Compare(strLogFileName, strEndDate) < 0)
                     {
-                        strWarning = "ÒòÈÕÆÚ·¶Î§µÄÎ²²¿ " + strEndDate + " ³¬¹ı½ñÌì(" + DateTime.Now.ToLongDateString() + ")£¬²¿·ÖÈÕÆÚ±»ÂÔÈ¥...";
+                        strWarning = "å› æ—¥æœŸèŒƒå›´çš„å°¾éƒ¨ " + strEndDate + " è¶…è¿‡ä»Šå¤©(" + DateTime.Now.ToLongDateString() + ")ï¼Œéƒ¨åˆ†æ—¥æœŸè¢«ç•¥å»...";
                         break;
                     }
                 }
@@ -886,11 +886,11 @@ out strError);
             return 0;
         }
 
-        // »ñµÃ£¨ÀíÂÛÉÏ£©ÏÂÒ»¸öÈÕÖ¾ÎÄ¼şÃû
+        // è·å¾—ï¼ˆç†è®ºä¸Šï¼‰ä¸‹ä¸€ä¸ªæ—¥å¿—æ–‡ä»¶å
         // return:
         //      -1  error
-        //      0   ÕıÈ·
-        //      1   ÕıÈ·£¬²¢ÇÒstrLogFileNameÒÑ¾­ÊÇ½ñÌìµÄÈÕ×ÓÁË
+        //      0   æ­£ç¡®
+        //      1   æ­£ç¡®ï¼Œå¹¶ä¸”strLogFileNameå·²ç»æ˜¯ä»Šå¤©çš„æ—¥å­äº†
         static int NextLogFileName(string strLogFileName,
             out string strNextLogFileName,
             out string strError)
@@ -913,8 +913,8 @@ out strError);
             }
             catch
             {
-                strError = "ÈÕÖ¾ÎÄ¼şÃû '" + strLogFileName + "' ÖĞµÄ '"
-                    + strYear + "' ²¿·Ö¸ñÊ½´íÎó";
+                strError = "æ—¥å¿—æ–‡ä»¶å '" + strLogFileName + "' ä¸­çš„ '"
+                    + strYear + "' éƒ¨åˆ†æ ¼å¼é”™è¯¯";
                 return -1;
             }
 
@@ -924,8 +924,8 @@ out strError);
             }
             catch
             {
-                strError = "ÈÕÖ¾ÎÄ¼şÃû '" + strLogFileName + "' ÖĞµÄ '"
-                    + strMonth + "' ²¿·Ö¸ñÊ½´íÎó";
+                strError = "æ—¥å¿—æ–‡ä»¶å '" + strLogFileName + "' ä¸­çš„ '"
+                    + strMonth + "' éƒ¨åˆ†æ ¼å¼é”™è¯¯";
                 return -1;
             }
 
@@ -935,8 +935,8 @@ out strError);
             }
             catch
             {
-                strError = "ÈÕÖ¾ÎÄ¼şÃû '" + strLogFileName + "' ÖĞµÄ '"
-                    + strDay + "' ²¿·Ö¸ñÊ½´íÎó";
+                strError = "æ—¥å¿—æ–‡ä»¶å '" + strLogFileName + "' ä¸­çš„ '"
+                    + strDay + "' éƒ¨åˆ†æ ¼å¼é”™è¯¯";
                 return -1;
             }
 
@@ -947,13 +947,13 @@ out strError);
             }
             catch (Exception ex)
             {
-                strError = "ÈÕÆÚ " + strLogFileName + " ¸ñÊ½´íÎó: " + ex.Message;
+                strError = "æ—¥æœŸ " + strLogFileName + " æ ¼å¼é”™è¯¯: " + ex.Message;
                 return -1;
             }
 
             DateTime now = DateTime.Now;
 
-            // Õı¹æ»¯Ê±¼ä
+            // æ­£è§„åŒ–æ—¶é—´
             nRet = RoundTime("day",
                 ref now,
                 out strError);
@@ -970,7 +970,7 @@ out strError);
             if (time >= now)
                 bNow = true;
 
-            time = time + new TimeSpan(1, 0, 0, 0); // ºóÃæÒ»Ìì
+            time = time + new TimeSpan(1, 0, 0, 0); // åé¢ä¸€å¤©
 
             strNextLogFileName = time.Year.ToString().PadLeft(4, '0')
             + time.Month.ToString().PadLeft(2, '0')
@@ -982,7 +982,7 @@ out strError);
             return 0;
         }
 
-        // °´ÕÕÊ±¼äµ¥Î»,°ÑÊ±¼äÖµÁãÍ·È¥³ı,Õı¹æ»¯,±ãÓÚºóÃæ¼ÆËã²î¶î
+        // æŒ‰ç…§æ—¶é—´å•ä½,æŠŠæ—¶é—´å€¼é›¶å¤´å»é™¤,æ­£è§„åŒ–,ä¾¿äºåé¢è®¡ç®—å·®é¢
         /*public*/ static int RoundTime(string strUnit,
             ref DateTime time,
             out string strError)
@@ -1002,7 +1002,7 @@ out strError);
             }
             else
             {
-                strError = "Î´ÖªµÄÊ±¼äµ¥Î» '" + strUnit + "'";
+                strError = "æœªçŸ¥çš„æ—¶é—´å•ä½ '" + strUnit + "'";
                 return -1;
             }
             time = time.ToUniversalTime();
@@ -1010,7 +1010,7 @@ out strError);
             return 0;
         }
 
-        // ÏÂÒ»²½ °´Å¥
+        // ä¸‹ä¸€æ­¥ æŒ‰é’®
         private void button_next_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -1022,44 +1022,44 @@ out strError);
 
                 if (String.IsNullOrEmpty(strProjectName) == true)
                 {
-                    strError = "ÉĞÎ´Ö¸¶¨·½°¸Ãû";
+                    strError = "å°šæœªæŒ‡å®šæ–¹æ¡ˆå";
                     this.textBox_projectName.Focus();
                     goto ERROR1;
                 }
 
 
-                // ÇĞ»»µ½Ê±¼ä·¶Î§page
+                // åˆ‡æ¢åˆ°æ—¶é—´èŒƒå›´page
                 this.tabControl_main.SelectedTab = this.tabPage_timeRange;
                 return;
             }
 
             if (this.tabControl_main.SelectedTab == this.tabPage_timeRange)
             {
-                // ¼ì²éÁ½¸öÈÕÆÚÊÇ·ñÎª¿Õ£¬ºÍ´óĞ¡¹ØÏµ
+                // æ£€æŸ¥ä¸¤ä¸ªæ—¥æœŸæ˜¯å¦ä¸ºç©ºï¼Œå’Œå¤§å°å…³ç³»
                 if (this.dateControl_start.Value == new DateTime((long)0))
                 {
-                    strError = "ÉĞÎ´Ö¸¶¨ÆğÊ¼ÈÕÆÚ";
+                    strError = "å°šæœªæŒ‡å®šèµ·å§‹æ—¥æœŸ";
                     this.dateControl_start.Focus();
                     goto ERROR1;
                 }
 
                 if (this.dateControl_end.Value == new DateTime((long)0))
                 {
-                    strError = "ÉĞÎ´Ö¸¶¨½áÊøÈÕÆÚ";
+                    strError = "å°šæœªæŒ‡å®šç»“æŸæ—¥æœŸ";
                     this.dateControl_end.Focus();
                     goto ERROR1;
                 }
 
                 if (this.dateControl_start.Value.Ticks > this.dateControl_end.Value.Ticks)
                 {
-                    strError = "ÆğÊ¼ÈÕÆÚ²»ÄÜ´óÓÚ½áÊøÈÕÆÚ";
+                    strError = "èµ·å§‹æ—¥æœŸä¸èƒ½å¤§äºç»“æŸæ—¥æœŸ";
                     goto ERROR1;
                 }
 
                 string strProjectName = this.textBox_projectName.Text;
                 if (String.IsNullOrEmpty(strProjectName) == true)
                 {
-                    strError = "ÉĞÎ´Ö¸¶¨·½°¸Ãû";
+                    strError = "å°šæœªæŒ‡å®šæ–¹æ¡ˆå";
                     this.textBox_projectName.Focus();
                     goto ERROR1;
                 }
@@ -1075,8 +1075,8 @@ out strError);
 #endif
 
                 string strProjectLocate = "";
-                // »ñµÃ·½°¸²ÎÊı
-                // strProjectNamePath	·½°¸Ãû£¬»òÕßÂ·¾¶
+                // è·å¾—æ–¹æ¡ˆå‚æ•°
+                // strProjectNamePath	æ–¹æ¡ˆåï¼Œæˆ–è€…è·¯å¾„
                 // return:
                 //		-1	error
                 //		0	not found project
@@ -1087,7 +1087,7 @@ out strError);
 
                 if (nRet == 0)
                 {
-                    strError = "·½°¸ " + strProjectName + " Ã»ÓĞÕÒµ½...";
+                    strError = "æ–¹æ¡ˆ " + strProjectName + " æ²¡æœ‰æ‰¾åˆ°...";
                     this.tabControl_main.SelectedTab = this.tabPage_selectProject;
                     goto ERROR1;
                 }
@@ -1097,7 +1097,7 @@ out strError);
                     goto ERROR1;
                 }
 
-                // ÇĞ»»µ½Ö´ĞĞpage
+                // åˆ‡æ¢åˆ°æ‰§è¡Œpage
                 this.tabControl_main.SelectedTab = this.tabPage_runStatis;
 
                 this.Running = true;
@@ -1117,7 +1117,7 @@ out strError);
                 }
 
                 this.tabControl_main.SelectedTab = this.tabPage_runStatis;
-                MessageBox.Show(this, "Í³¼ÆÍê³É¡£");
+                MessageBox.Show(this, "ç»Ÿè®¡å®Œæˆã€‚");
 
                 return;
             }
@@ -1126,7 +1126,7 @@ out strError);
 
             if (this.tabControl_main.SelectedTab == this.tabPage_runStatis)
             {
-                // ÇĞ»»µ½...
+                // åˆ‡æ¢åˆ°...
                 this.tabControl_main.SelectedTab = this.tabPage_print;
 
                 this.button_next.Enabled = false;
@@ -1137,10 +1137,10 @@ out strError);
             MessageBox.Show(this, strError);
         }
 
-        // »ñµÃ·½°¸Ãû
+        // è·å¾—æ–¹æ¡ˆå
         private void button_getProjectName_Click(object sender, EventArgs e)
         {
-            // ³öÏÖ¶Ô»°¿ò£¬Ñ¯ÎÊProjectÃû×Ö
+            // å‡ºç°å¯¹è¯æ¡†ï¼Œè¯¢é—®Projectåå­—
             GetProjectNameDlg dlg = new GetProjectNameDlg();
             MainForm.SetControlFont(dlg, this.Font, false);
 
@@ -1160,7 +1160,7 @@ out strError);
         }
 
         /// <summary>
-        /// ÓÃÓÚÊä³öĞÅÏ¢µÄ¿ØÖÆÌ¨(ä¯ÀÀÆ÷¿Ø¼ş)
+        /// ç”¨äºè¾“å‡ºä¿¡æ¯çš„æ§åˆ¶å°(æµè§ˆå™¨æ§ä»¶)
         /// </summary>
         public WebBrowser Console
         {
@@ -1174,13 +1174,13 @@ out strError);
         {
             if (this.objStatis == null)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ö´ĞĞÍ³¼Æ£¬ÎŞ·¨´òÓ¡");
+                MessageBox.Show(this, "å°šæœªæ‰§è¡Œç»Ÿè®¡ï¼Œæ— æ³•æ‰“å°");
                 return;
             }
 
             HtmlPrintForm printform = new HtmlPrintForm();
 
-            printform.Text = "´òÓ¡Í³¼Æ½á¹û";
+            printform.Text = "æ‰“å°ç»Ÿè®¡ç»“æœ";
             printform.MainForm = this.MainForm;
 
             Debug.Assert(this.objStatis != null, "");
@@ -1207,15 +1207,15 @@ out strError);
 
         // 
         /// <summary>
-        /// »ñµÃ¶ÁÕß¼ÇÂ¼
+        /// è·å¾—è¯»è€…è®°å½•
         /// </summary>
-        /// <param name="strReaderBarcode">¶ÁÕßÖ¤ÌõÂëºÅ</param>
-        /// <param name="strResultTypeList">½á¹ûÀàĞÍÁĞ±í</param>
-        /// <param name="results">·µ»Ø½á¹û×Ö·û´®Êı×é</param>
-        /// <param name="strRecPath">·µ»Ø¶ÁÕß¼ÇÂ¼Â·¾¶</param>
-        /// <param name="baTimestamp">·µ»Ø¶ÁÕß¼ÇÂ¼Ê±¼ä´Á</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í; 0: Ã»ÓĞÕÒµ½; 1: ÕÒµ½; >1: ÃüÖĞ¶àÓÚ 1 Ìõ</returns>
+        /// <param name="strReaderBarcode">è¯»è€…è¯æ¡ç å·</param>
+        /// <param name="strResultTypeList">ç»“æœç±»å‹åˆ—è¡¨</param>
+        /// <param name="results">è¿”å›ç»“æœå­—ç¬¦ä¸²æ•°ç»„</param>
+        /// <param name="strRecPath">è¿”å›è¯»è€…è®°å½•è·¯å¾„</param>
+        /// <param name="baTimestamp">è¿”å›è¯»è€…è®°å½•æ—¶é—´æˆ³</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™; 0: æ²¡æœ‰æ‰¾åˆ°; 1: æ‰¾åˆ°; >1: å‘½ä¸­å¤šäº 1 æ¡</returns>
         public int GetReaderInfo(string strReaderBarcode,
             string strResultTypeList,
             out string [] results,
@@ -1237,15 +1237,15 @@ out strError);
 
         //
         /// <summary>
-        /// »ñÈ¡ÊéÄ¿ÕªÒª
+        /// è·å–ä¹¦ç›®æ‘˜è¦
         /// </summary>
-        /// <param name="strItemBarcode">²áÌõÂëºÅ</param>
-        /// <param name="strConfirmItemRecPath">(²áÌõÂëºÅ·¢ÉúÖØ¸´Ê±)ÓÃÓÚÈ·ÈÏµÄ²á¼ÇÂ¼Â·¾¶</param>
-        /// <param name="strBiblioRecPathExclude">ÒªÅÅ³ıµÄÊéÄ¿¼ÇÂ¼Â·¾¶ÁĞ±í£¬ÓÃ¶ººÅ¼ä¸ô¡£³ı¿ªÁĞ±íÖĞµÄÕâĞ©ÊéÄ¿¼ÇÂ¼Â·¾¶, ²Å·µ»ØÕªÒªÄÚÈİ, ·ñÔò½ö½ö·µ»ØÊéÄ¿¼ÇÂ¼Â·¾¶</param>
-        /// <param name="strBiblioRecPath">·µ»ØÊéÄ¿¼ÇÂ¼Â·¾¶</param>
-        /// <param name="strSummary">·µ»ØÊéÄ¿ÕªÒª</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í; 0: Ã»ÓĞÕÒµ½; 1: ÕÒµ½</returns>
+        /// <param name="strItemBarcode">å†Œæ¡ç å·</param>
+        /// <param name="strConfirmItemRecPath">(å†Œæ¡ç å·å‘ç”Ÿé‡å¤æ—¶)ç”¨äºç¡®è®¤çš„å†Œè®°å½•è·¯å¾„</param>
+        /// <param name="strBiblioRecPathExclude">è¦æ’é™¤çš„ä¹¦ç›®è®°å½•è·¯å¾„åˆ—è¡¨ï¼Œç”¨é€—å·é—´éš”ã€‚é™¤å¼€åˆ—è¡¨ä¸­çš„è¿™äº›ä¹¦ç›®è®°å½•è·¯å¾„, æ‰è¿”å›æ‘˜è¦å†…å®¹, å¦åˆ™ä»…ä»…è¿”å›ä¹¦ç›®è®°å½•è·¯å¾„</param>
+        /// <param name="strBiblioRecPath">è¿”å›ä¹¦ç›®è®°å½•è·¯å¾„</param>
+        /// <param name="strSummary">è¿”å›ä¹¦ç›®æ‘˜è¦</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™; 0: æ²¡æœ‰æ‰¾åˆ°; 1: æ‰¾åˆ°</returns>
         public int GetBiblioSummary(string strItemBarcode,
             string strConfirmItemRecPath,
             string strBiblioRecPathExclude,
@@ -1265,13 +1265,13 @@ out strError);
         }
 
         // 2012/10/6
-        // »ñµÃ²á¼ÇÂ¼µÄÊéÄ¿ÕªÒª
+        // è·å¾—å†Œè®°å½•çš„ä¹¦ç›®æ‘˜è¦
         /// <summary>
-        /// »ñÈ¡ÊéÄ¿ÕªÒª
+        /// è·å–ä¹¦ç›®æ‘˜è¦
         /// </summary>
-        /// <param name="strItemBarcode">²áÌõÂëºÅ</param>
-        /// <param name="nMaxLength">ÊéÄ¿ÕªÒªµÄ×î´ó×Ö·ûÊı¡£-1 ±íÊ¾²»½Ø¶Ï¡£³¬¹ıÕâ¸ö×Ö·ûÊıµÄÊéÄ¿ÕªÒª±»½Ø¶Ï£¬Ä©Î²Ìí¼Ó"..."</param>
-        /// <returns>ÊéÄ¿ÕªÒª×Ö·û´®</returns>
+        /// <param name="strItemBarcode">å†Œæ¡ç å·</param>
+        /// <param name="nMaxLength">ä¹¦ç›®æ‘˜è¦çš„æœ€å¤§å­—ç¬¦æ•°ã€‚-1 è¡¨ç¤ºä¸æˆªæ–­ã€‚è¶…è¿‡è¿™ä¸ªå­—ç¬¦æ•°çš„ä¹¦ç›®æ‘˜è¦è¢«æˆªæ–­ï¼Œæœ«å°¾æ·»åŠ "..."</param>
+        /// <returns>ä¹¦ç›®æ‘˜è¦å­—ç¬¦ä¸²</returns>
         public string GetItemSummary(string strItemBarcode,
             int nMaxLength = -1)
         {
@@ -1294,12 +1294,12 @@ out strError);
         }
 
         // 2012/10/6
-        // »ñµÃ¶ÁÕßÕªÒª
+        // è·å¾—è¯»è€…æ‘˜è¦
         /// <summary>
-        /// »ñµÃ¶ÁÕßÕªÒª
+        /// è·å¾—è¯»è€…æ‘˜è¦
         /// </summary>
-        /// <param name="strPatronBarcode">¶ÁÕßÖ¤ÌõÂëºÅ</param>
-        /// <returns>¶ÁÕßÕªÒª</returns>
+        /// <param name="strPatronBarcode">è¯»è€…è¯æ¡ç å·</param>
+        /// <returns>è¯»è€…æ‘˜è¦</returns>
         public string GetPatronSummary(string strPatronBarcode)
         {
             string strError = "";
@@ -1307,13 +1307,13 @@ out strError);
 
             int nRet = strPatronBarcode.IndexOf("|");
             if (nRet != -1)
-                return "Ö¤ÌõÂëºÅ×Ö·û´® '" + strPatronBarcode + "' ÖĞ²»Ó¦¸ÃÓĞÊúÏß×Ö·û";
+                return "è¯æ¡ç å·å­—ç¬¦ä¸² '" + strPatronBarcode + "' ä¸­ä¸åº”è¯¥æœ‰ç«–çº¿å­—ç¬¦";
 
 
-            // ¿´¿´cacheÖĞÊÇ·ñÒÑ¾­ÓĞÁË
+            // çœ‹çœ‹cacheä¸­æ˜¯å¦å·²ç»æœ‰äº†
             StringCacheItem item = null;
             item = this.MainForm.SummaryCache.SearchItem(
-                "P:" + strPatronBarcode);   // Ç°×ºÊÇÎªÁËºÍ²áÌõÂëºÅÇø±ğ
+                "P:" + strPatronBarcode);   // å‰ç¼€æ˜¯ä¸ºäº†å’Œå†Œæ¡ç å·åŒºåˆ«
             if (item != null)
             {
                 Application.DoEvents();
@@ -1335,7 +1335,7 @@ out strError);
             }
             else if (lRet > 1)
             {
-                strSummary = "¶ÁÕßÖ¤ÌõÂëºÅ " + strPatronBarcode + " ÓĞÖØ¸´¼ÇÂ¼ " + lRet.ToString() + "Ìõ";
+                strSummary = "è¯»è€…è¯æ¡ç å· " + strPatronBarcode + " æœ‰é‡å¤è®°å½• " + lRet.ToString() + "æ¡";
                 return strSummary;
             }
 
@@ -1353,15 +1353,15 @@ out strError);
             }
             catch (Exception ex)
             {
-                strSummary = "¶ÁÕß¼ÇÂ¼XML×°ÈëDOMÊ±³ö´í: " + ex.Message;
+                strSummary = "è¯»è€…è®°å½•XMLè£…å…¥DOMæ—¶å‡ºé”™: " + ex.Message;
                 return strSummary;
             }
 
-            // ¶ÁÕßĞÕÃû
+            // è¯»è€…å§“å
             strSummary = DomUtil.GetElementText(dom.DocumentElement,
                 "name");
 
-            // Èç¹ûcacheÖĞÃ»ÓĞ£¬Ôò¼ÓÈëcache
+            // å¦‚æœcacheä¸­æ²¡æœ‰ï¼Œåˆ™åŠ å…¥cache
             item = this.MainForm.SummaryCache.EnsureItem(
                 "P:" + strPatronBarcode);
             item.Content = strSummary;
@@ -1371,14 +1371,14 @@ out strError);
 
         // 
         /// <summary>
-        /// »ñÈ¡ÊéÄ¿¼ÇÂ¼µÄ¾Ö²¿
+        /// è·å–ä¹¦ç›®è®°å½•çš„å±€éƒ¨
         /// </summary>
-        /// <param name="strBiblioRecPath">ÊéÄ¿¼ÇÂ¼Â·¾¶</param>
-        /// <param name="strBiblioXml">ÊéÄ¿¼ÇÂ¼ XML</param>
-        /// <param name="strPartName">¾Ö²¿Ãû</param>
-        /// <param name="strResultValue">·µ»Ø½á¹û×Ö·û´®</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í; 0: Ã»ÓĞÕÒµ½; 1: ÕÒµ½</returns>
+        /// <param name="strBiblioRecPath">ä¹¦ç›®è®°å½•è·¯å¾„</param>
+        /// <param name="strBiblioXml">ä¹¦ç›®è®°å½• XML</param>
+        /// <param name="strPartName">å±€éƒ¨å</param>
+        /// <param name="strResultValue">è¿”å›ç»“æœå­—ç¬¦ä¸²</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™; 0: æ²¡æœ‰æ‰¾åˆ°; 1: æ‰¾åˆ°</returns>
         public int GetBiblioPart(string strBiblioRecPath,
             string strBiblioXml,
             string strPartName,
@@ -1389,19 +1389,19 @@ out strError);
                     stop,
                     strBiblioRecPath,
                     strBiblioXml,
-                    strPartName,    // °üº¬'@'·ûºÅ
+                    strPartName,    // åŒ…å«'@'ç¬¦å·
                     out strResultValue,
                     out strError);
                 return (int)lRet;
         }
 
-        // ±¾º¯ÊıÊÇ²»ÊÇÄÃ¸øC#¶ş´Î¿ª·¢½Å±¾³ÌĞòÓÃµÄ£¿
+        // æœ¬å‡½æ•°æ˜¯ä¸æ˜¯æ‹¿ç»™C#äºŒæ¬¡å¼€å‘è„šæœ¬ç¨‹åºç”¨çš„ï¼Ÿ
         /// <summary>
-        /// »ñµÃºêÖµ
+        /// è·å¾—å®å€¼
         /// </summary>
-        /// <param name="strBiblioRecPath">ÊéÄ¿¼ÇÂ¼Â·¾¶</param>
-        /// <param name="strMacroName">ºêÃû</param>
-        /// <returns>ºêÖµ</returns>
+        /// <param name="strBiblioRecPath">ä¹¦ç›®è®°å½•è·¯å¾„</param>
+        /// <param name="strMacroName">å®å</param>
+        /// <returns>å®å€¼</returns>
         public string GetMacroValue(
             string strBiblioRecPath,
             string strMacroName)
@@ -1410,7 +1410,7 @@ out strError);
             string strError = "";
             string strResultValue = "";
             int nRet = 0;
-            // »ñÈ¡ÊéÄ¿¼ÇÂ¼µÄ¾Ö²¿
+            // è·å–ä¹¦ç›®è®°å½•çš„å±€éƒ¨
             nRet = GetBiblioPart(strBiblioRecPath,
                 "", // strBiblioXml
                 strMacroName,
@@ -1448,14 +1448,14 @@ out strError);
 
             string strName = control.Text.Replace(" ", "").Trim();
 
-            if (strName == "½ñÌì")
+            if (strName == "ä»Šå¤©")
             {
                 DateTime now = DateTime.Now;
 
                 strStartDate = DateTimeUtil.DateTimeToString8(now);
                 strEndDate = DateTimeUtil.DateTimeToString8(now);
             }
-            else if (strName == "±¾ÖÜ")
+            else if (strName == "æœ¬å‘¨")
             {
                 DateTime now = DateTime.Now;
                 int nDelta = (int)now.DayOfWeek; // 0-6 sunday - saturday
@@ -1465,19 +1465,19 @@ out strError);
                 // strEndDate = DateTimeUtil.DateTimeToString8(start + new TimeSpan(7, 0,0,0));
                 strEndDate = DateTimeUtil.DateTimeToString8(now);
             }
-            else if (strName == "±¾ÔÂ")
+            else if (strName == "æœ¬æœˆ")
             {
                 DateTime now = DateTime.Now;
                 strEndDate = DateTimeUtil.DateTimeToString8(now);
                 strStartDate = strEndDate.Substring(0, 6) + "01";
             }
-            else if (strName == "±¾Äê")
+            else if (strName == "æœ¬å¹´")
             {
                 DateTime now = DateTime.Now;
                 strEndDate = DateTimeUtil.DateTimeToString8(now);
                 strStartDate = strEndDate.Substring(0, 4) + "0101";
             }
-            else if (strName == "×î½üÆßÌì" || strName == "×î½ü7Ìì")
+            else if (strName == "æœ€è¿‘ä¸ƒå¤©" || strName == "æœ€è¿‘7å¤©")
             {
                 DateTime now = DateTime.Now;
                 DateTime start = now - new TimeSpan(7 - 1, 0, 0, 0);
@@ -1485,28 +1485,28 @@ out strError);
                 strStartDate = DateTimeUtil.DateTimeToString8(start);
                 strEndDate = DateTimeUtil.DateTimeToString8(now);
             }
-            else if (strName == "×î½üÈıÊ®Ìì" || strName == "×î½ü30Ìì")
+            else if (strName == "æœ€è¿‘ä¸‰åå¤©" || strName == "æœ€è¿‘30å¤©")
             {
                 DateTime now = DateTime.Now;
                 DateTime start = now - new TimeSpan(30 - 1, 0, 0, 0);
                 strStartDate = DateTimeUtil.DateTimeToString8(start);
                 strEndDate = DateTimeUtil.DateTimeToString8(now);
             }
-            else if (strName == "×î½üÈıÊ®Ò»Ìì" || strName == "×î½ü31Ìì")
+            else if (strName == "æœ€è¿‘ä¸‰åä¸€å¤©" || strName == "æœ€è¿‘31å¤©")
             {
                 DateTime now = DateTime.Now;
                 DateTime start = now - new TimeSpan(31 - 1, 0, 0, 0);
                 strStartDate = DateTimeUtil.DateTimeToString8(start);
                 strEndDate = DateTimeUtil.DateTimeToString8(now);
             }
-            else if (strName == "×î½üÈı°ÙÁùÊ®ÎåÌì" || strName == "×î½ü365Ìì")
+            else if (strName == "æœ€è¿‘ä¸‰ç™¾å…­åäº”å¤©" || strName == "æœ€è¿‘365å¤©")
             {
                 DateTime now = DateTime.Now;
                 DateTime start = now - new TimeSpan(365 - 1, 0, 0, 0);
                 strStartDate = DateTimeUtil.DateTimeToString8(start);
                 strEndDate = DateTimeUtil.DateTimeToString8(now);
             }
-            else if (strName == "×î½üÊ®Äê" || strName == "×î½ü10Äê")
+            else if (strName == "æœ€è¿‘åå¹´" || strName == "æœ€è¿‘10å¹´")
             {
                 DateTime now = DateTime.Now;
                 DateTime start = now - new TimeSpan(10 * 365 - 1, 0, 0, 0);
@@ -1515,7 +1515,7 @@ out strError);
             }
             else
             {
-                MessageBox.Show(this, "ÎŞ·¨Ê¶±ğµÄÖÜÆÚ '" + strName + "'");
+                MessageBox.Show(this, "æ— æ³•è¯†åˆ«çš„å‘¨æœŸ '" + strName + "'");
                 return;
             }
 
@@ -1523,7 +1523,7 @@ out strError);
             this.dateControl_end.Value = DateTimeUtil.Long8ToDateTime(strEndDate);
         }
 
-        // ÄÚÖÃÍ³¼Æ·½°¸ #1
+        // å†…ç½®ç»Ÿè®¡æ–¹æ¡ˆ #1
         private void button_defaultProject_1_Click(object sender, EventArgs e)
         {
             this.textBox_projectName.Text = "#1";

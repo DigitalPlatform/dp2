@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -16,7 +16,7 @@ using DigitalPlatform.Text;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ²É¹ºÄ£¿éµÄÑéÊÕÊ±ÇëÇóÓÃ»§³õ´ÎÊäÈë²áÌõÂëºÅµÄ¶Ô»°¿ò
+    /// é‡‡è´­æ¨¡å—çš„éªŒæ”¶æ—¶è¯·æ±‚ç”¨æˆ·åˆæ¬¡è¾“å…¥å†Œæ¡ç å·çš„å¯¹è¯æ¡†
     /// </summary>
     internal partial class InputItemBarcodeDialog : Form
     {
@@ -27,19 +27,19 @@ namespace dp2Circulation
         public event VerifyBarcodeHandler VerifyBarcode = null;
         public event DetectBarcodeDupHandler DetectBarcodeDup = null;
 
-        public EntityControl EntityControl = null;  // Ïà¹ØµÄEntityControl
+        public EntityControl EntityControl = null;  // ç›¸å…³çš„EntityControl
 
-        // ÎÄ±¾¿òÖĞÎÄ×ÖÏà¶ÔÓÚÄÚ´æÊÇ·ñ¸Ä±ä
+        // æ–‡æœ¬æ¡†ä¸­æ–‡å­—ç›¸å¯¹äºå†…å­˜æ˜¯å¦æ”¹å˜
         bool m_bTextChanged = false;
 
         const int WM_ACTIVATE_BARCODE_INPUT = API.WM_USER + 201;
 
         public List<InputBookItem> BookItems = null;
 
-        // ±£´æ×î³õµÄÌõÂëºÅ
+        // ä¿å­˜æœ€åˆçš„æ¡ç å·
         List<string> m_oldBarcodes = null;
 
-        int m_nIndex = -1;  // µ±Ç°ÊäÈëÓò¶ÔÓ¦µÄĞĞºÅ
+        int m_nIndex = -1;  // å½“å‰è¾“å…¥åŸŸå¯¹åº”çš„è¡Œå·
 
         bool m_bChanged = false;
 
@@ -49,7 +49,7 @@ namespace dp2Circulation
         const int COLUMN_REF_PRICE = 7;
 
         /// <summary>
-        /// ÄÚÈİÊÇ·ñ·¢Éú¹ıĞŞ¸Ä
+        /// å†…å®¹æ˜¯å¦å‘ç”Ÿè¿‡ä¿®æ”¹
         /// </summary>
         public bool Changed
         {
@@ -109,7 +109,7 @@ namespace dp2Circulation
             }
         }
 
-        // ½«textboxµÄĞŞ¸Ä¶ÒÏÖµ½ÄÚ´æÖĞ
+        // å°†textboxçš„ä¿®æ”¹å…‘ç°åˆ°å†…å­˜ä¸­
         int UpdateData(out string strError)
         {
             strError = "";
@@ -128,7 +128,7 @@ namespace dp2Circulation
 
             if (strCurrentBarcode != this.textBox_itemBarcode.Text)
             {
-                // Ğ£ÑébarcodeºÏ·¨ĞÔ
+                // æ ¡éªŒbarcodeåˆæ³•æ€§
                 if (this.VerifyBarcode != null
                     && this.textBox_itemBarcode.Text != "") // 2009/1/15
                 {
@@ -136,11 +136,11 @@ namespace dp2Circulation
                     e.Barcode = this.textBox_itemBarcode.Text;
                     this.VerifyBarcode(this, e);
                     // return:
-                    //      -2  ·şÎñÆ÷Ã»ÓĞÅäÖÃĞ£Ñé·½·¨£¬ÎŞ·¨Ğ£Ñé
+                    //      -2  æœåŠ¡å™¨æ²¡æœ‰é…ç½®æ ¡éªŒæ–¹æ³•ï¼Œæ— æ³•æ ¡éªŒ
                     //      -1  error
-                    //      0   ²»ÊÇºÏ·¨µÄÌõÂëºÅ
-                    //      1   ÊÇºÏ·¨µÄ¶ÁÕßÖ¤ÌõÂëºÅ
-                    //      2   ÊÇºÏ·¨µÄ²áÌõÂëºÅ
+                    //      0   ä¸æ˜¯åˆæ³•çš„æ¡ç å·
+                    //      1   æ˜¯åˆæ³•çš„è¯»è€…è¯æ¡ç å·
+                    //      2   æ˜¯åˆæ³•çš„å†Œæ¡ç å·
 
                     if (e.Result != -2)
                     {
@@ -150,16 +150,16 @@ namespace dp2Circulation
                                 strError = e.ErrorInfo;
                             else
                             {
-                                // Èç¹û´Ó·şÎñÆ÷¶ËÃ»ÓĞµÃµ½³ö´íĞÅÏ¢£¬Ôò²¹³ä
+                                // å¦‚æœä»æœåŠ¡å™¨ç«¯æ²¡æœ‰å¾—åˆ°å‡ºé”™ä¿¡æ¯ï¼Œåˆ™è¡¥å……
                                 //      -1  error
                                 if (e.Result == -1)
-                                    strError = "ÔÚĞ£ÑéÌõÂëºÅ '" + e.Barcode + "' Ê±³ö´í";
-                                //      0   ²»ÊÇºÏ·¨µÄÌõÂëºÅ
+                                    strError = "åœ¨æ ¡éªŒæ¡ç å· '" + e.Barcode + "' æ—¶å‡ºé”™";
+                                //      0   ä¸æ˜¯åˆæ³•çš„æ¡ç å·
                                 else if (e.Result == 0)
-                                    strError = "'" + e.Barcode + "' ²»ÊÇºÏ·¨µÄÌõÂëºÅ";
-                                //      1   ÊÇºÏ·¨µÄ¶ÁÕßÖ¤ÌõÂëºÅ
+                                    strError = "'" + e.Barcode + "' ä¸æ˜¯åˆæ³•çš„æ¡ç å·";
+                                //      1   æ˜¯åˆæ³•çš„è¯»è€…è¯æ¡ç å·
                                 else if (e.Result == 1)
-                                    strError = "'" + e.Barcode + "' ÊÇ¶ÁÕßÖ¤ÌõÂëºÅ(¶ø²»ÊÇ²áÌõÂëºÅ)";
+                                    strError = "'" + e.Barcode + "' æ˜¯è¯»è€…è¯æ¡ç å·(è€Œä¸æ˜¯å†Œæ¡ç å·)";
                             }
                             return -1;
                         }
@@ -169,12 +169,12 @@ namespace dp2Circulation
                 book_item.BookItem.Barcode = this.textBox_itemBarcode.Text;
                 this.Changed = true;
                 ListViewItem item = this.listView_barcodes.Items[index];
-                item.Font = new Font(item.Font, FontStyle.Bold);    // ¼Ó´Ö×ÖÌå±íÊ¾ÄÚÈİ±»¸Ä±äÁË
+                item.Font = new Font(item.Font, FontStyle.Bold);    // åŠ ç²—å­—ä½“è¡¨ç¤ºå†…å®¹è¢«æ”¹å˜äº†
 
                 book_item.BookItem.Changed = true;
                 book_item.BookItem.RefreshListView();
 
-                // ĞŞ¸ÄListViewItemÏÔÊ¾
+                // ä¿®æ”¹ListViewItemæ˜¾ç¤º
                 this.listView_barcodes.Items[index].Text = this.textBox_itemBarcode.Text;
 
                 this.m_bTextChanged = false;
@@ -189,14 +189,14 @@ namespace dp2Circulation
             /*
             if (this.textBox_itemBarcode.Text == "")
             {
-                MessageBox.Show(this, "ÉĞÎ´ÊäÈë²áÌõÂëºÅ");
+                MessageBox.Show(this, "å°šæœªè¾“å…¥å†Œæ¡ç å·");
                 this.textBox_itemBarcode.Focus();
                 return;
             }*/
 
             if (this.listView_barcodes.SelectedIndices.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡¶¨µ±Ç°ĞĞ");
+                MessageBox.Show(this, "å°šæœªé€‰å®šå½“å‰è¡Œ");
                 return;
             }
 
@@ -210,12 +210,12 @@ namespace dp2Circulation
                 return;
             }
 
-            // Ñ¡¶¨ºóÒ»ĞĞ
+            // é€‰å®šåä¸€è¡Œ
             int index = this.listView_barcodes.SelectedIndices[0];
 
             this.listView_barcodes.SelectedItems.Clear();
 
-            // Èç¹ûºóÃæÃ»ÓĞĞĞÁË
+            // å¦‚æœåé¢æ²¡æœ‰è¡Œäº†
             if (index >= this.listView_barcodes.Items.Count - 1)
             {
                 // this.listView_barcodes.SelectedItems[0].Selected = false;
@@ -242,27 +242,27 @@ namespace dp2Circulation
                 Debug.Assert(book_item != null, "");
 
                 ListViewItem item = new ListViewItem();
-                // ÌõÂë
+                // æ¡ç 
                 item.Text = book_item.BookItem.Barcode;
-                // ¾íÆÚĞÅÏ¢
+                // å·æœŸä¿¡æ¯
                 string strVolumeDisplayString = IssueManageControl.BuildVolumeDisplayString(
                     book_item.BookItem.PublishTime,
                     book_item.BookItem.Volume);
                 item.SubItems.Add(strVolumeDisplayString);
 
-                // Ì×Ğò
+                // å¥—åº
                 // 2010/12/1
                 item.SubItems.Add(book_item.Sequence);
 
-                // ¹İ²ØµØµã
+                // é¦†è—åœ°ç‚¹
                 item.SubItems.Add(book_item.BookItem.Location);
-                // ¶©¹ºÇşµÀ
+                // è®¢è´­æ¸ é“
                 item.SubItems.Add(book_item.BookItem.Seller);
-                // ¾­·ÑÀ´Ô´
+                // ç»è´¹æ¥æº
                 item.SubItems.Add(book_item.BookItem.Source);
-                // ¼Û¸ñ
+                // ä»·æ ¼
                 item.SubItems.Add(book_item.BookItem.Price);
-                // ÆäËû¼Û¸ñ
+                // å…¶ä»–ä»·æ ¼
                 item.SubItems.Add(book_item.OtherPrices);
 
                 item.Tag = book_item;
@@ -272,14 +272,14 @@ namespace dp2Circulation
                 this.m_oldBarcodes.Add(book_item.BookItem.Barcode);
             }
 
-            // Ñ¡¶¨µÚÒ»¸öÊÂÏî
+            // é€‰å®šç¬¬ä¸€ä¸ªäº‹é¡¹
             if (this.listView_barcodes.Items.Count > 0)
             {
                 this.listView_barcodes.Items[0].Selected = true;
             }
 
             /*
-            // ÈÃ×îºóÒ»¸öÊÂÏî¿É¼û
+            // è®©æœ€åä¸€ä¸ªäº‹é¡¹å¯è§
             if (this.listView_barcodes.Items.Count > 0)
                 this.listView_barcodes.EnsureVisible(this.listView_barcodes.Items.Count - 1);
              * */
@@ -329,7 +329,7 @@ namespace dp2Circulation
 
             try
             {
-                // ¾¯¸æÉĞÎ´ÊäÈëÌõÂëµÄĞĞ
+                // è­¦å‘Šå°šæœªè¾“å…¥æ¡ç çš„è¡Œ
                 int nBlankCount = 0;
                 for (int i = 0; i < this.listView_barcodes.Items.Count; i++)
                 {
@@ -341,7 +341,7 @@ namespace dp2Circulation
                 if (nBlankCount > 0)
                 {
                     DialogResult result = MessageBox.Show(this,
-                        "µ±Ç°ÓĞ "+nBlankCount.ToString()+" ¸ö²áÉĞÎ´ÊäÈëÌõÂë¡£\r\n\r\nÈ·ÊµÒª½áÊøÌõÂëÊäÈë? ",
+                        "å½“å‰æœ‰ "+nBlankCount.ToString()+" ä¸ªå†Œå°šæœªè¾“å…¥æ¡ç ã€‚\r\n\r\nç¡®å®è¦ç»“æŸæ¡ç è¾“å…¥? ",
                         "InputItemBarcodeDialog",
                         MessageBoxButtons.YesNo,
                         MessageBoxIcon.Question,
@@ -349,10 +349,10 @@ namespace dp2Circulation
                     if (result == DialogResult.No)
                         return;
 
-                    // ·ñÔò¼ÌĞø
+                    // å¦åˆ™ç»§ç»­
                 }
 
-                // ÌõÂë²éÖØ?
+                // æ¡ç æŸ¥é‡?
                 string strError = "";
                 int nRet = this.UpdateData(out strError);
                 if (nRet == -1)
@@ -370,7 +370,7 @@ namespace dp2Circulation
 
                     if (e1.Result == -1 || e1.Result == 1)
                     {
-                        // TODO: ¿É·ñ°üº¬MessageBox±êÌâ?
+                        // TODO: å¯å¦åŒ…å«MessageBoxæ ‡é¢˜?
                         MessageBox.Show(this, e1.ErrorInfo.Replace("; ", "\r\n"));
                         return;
                     }
@@ -450,7 +450,7 @@ namespace dp2Circulation
 
             int nIndex = this.listView_barcodes.SelectedIndices[0];
 
-            // ½«±ä»¯ºóµÄĞĞÌõÂë×°Èëtextbox
+            // å°†å˜åŒ–åçš„è¡Œæ¡ç è£…å…¥textbox
             if (nIndex != m_nIndex)
             {
                 ListViewItem item = this.listView_barcodes.Items[nIndex];
@@ -469,9 +469,9 @@ namespace dp2Circulation
        }
 
         /// <summary>
-        /// È±Ê¡´°¿Ú¹ı³Ì
+        /// ç¼ºçœçª—å£è¿‡ç¨‹
         /// </summary>
-        /// <param name="m">ÏûÏ¢</param>
+        /// <param name="m">æ¶ˆæ¯</param>
         protected override void DefWndProc(ref Message m)
         {
             switch (m.Msg)
@@ -531,31 +531,31 @@ namespace dp2Circulation
             ContextMenu contextMenu = new ContextMenu();
             MenuItem menuItem = null;
 
-            menuItem = new MenuItem("°´ÊéÄ¿¼Û ÖØÉè¼Û¸ñ(&B)");
+            menuItem = new MenuItem("æŒ‰ä¹¦ç›®ä»· é‡è®¾ä»·æ ¼(&B)");
             menuItem.Click += new System.EventHandler(this.menu_modifyPriceByBiblioPrice_Click);
             if (this.listView_barcodes.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("°´¶©¹º¼Û ÖØÉè¼Û¸ñ(&O)");
+            menuItem = new MenuItem("æŒ‰è®¢è´­ä»· é‡è®¾ä»·æ ¼(&O)");
             menuItem.Click += new System.EventHandler(this.menu_modifyPriceByOrderPrice_Click);
             if (this.listView_barcodes.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("°´ÑéÊÕ¼Û ÖØÉè¼Û¸ñ(&A)");
+            menuItem = new MenuItem("æŒ‰éªŒæ”¶ä»· é‡è®¾ä»·æ ¼(&A)");
             menuItem.Click += new System.EventHandler(this.menu_modifyPriceByArrivePrice_Click);
             if (this.listView_barcodes.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("ÖØÉè¼Û¸ñ(&M)");
+            menuItem = new MenuItem("é‡è®¾ä»·æ ¼(&M)");
             menuItem.Click += new System.EventHandler(this.menu_modifyPrice_Click);
             if (this.listView_barcodes.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("¸½¼ÓÕÛ¿Û(&M)");
+            menuItem = new MenuItem("é™„åŠ æŠ˜æ‰£(&M)");
             menuItem.Click += new System.EventHandler(this.menu_appendDiscount_Click);
             if (this.listView_barcodes.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
@@ -564,10 +564,10 @@ namespace dp2Circulation
             contextMenu.Show(this.listView_barcodes, new Point(e.X, e.Y));	
         }
 
-        // °´ÕÕ¶©¹º¼ÛÖØÉè¼Û¸ñ
+        // æŒ‰ç…§è®¢è´­ä»·é‡è®¾ä»·æ ¼
         void menu_modifyPriceByOrderPrice_Click(object sender, EventArgs e)
         {
-            ModifyPriceBy("¶©¹º¼Û");
+            ModifyPriceBy("è®¢è´­ä»·");
         }
 
         void ModifyPriceBy(string strRefName)
@@ -577,9 +577,9 @@ namespace dp2Circulation
                 // ListViewItem item = this.listView_barcodes.SelectedItems[i];
                 string strRefPrice = ListViewUtil.GetItemText(item, COLUMN_REF_PRICE);
 
-                // ½«¶ººÅ¼ä¸ôµÄ²ÎÊı±í½âÎöµ½HashtableÖĞ
+                // å°†é€—å·é—´éš”çš„å‚æ•°è¡¨è§£æåˆ°Hashtableä¸­
                 // parameters:
-                //      strText ×Ö·û´®¡£ĞÎÌ¬Èç "Ãû1=Öµ1,Ãû2=Öµ2"
+                //      strText å­—ç¬¦ä¸²ã€‚å½¢æ€å¦‚ "å1=å€¼1,å2=å€¼2"
                 Hashtable table = StringUtil.ParseParameters(strRefPrice,
                     ';',
                     ':');
@@ -588,16 +588,16 @@ namespace dp2Circulation
             }
         }
 
-        // °´ÕÕÑéÊÕ¼ÛÖØÉè¼Û¸ñ
+        // æŒ‰ç…§éªŒæ”¶ä»·é‡è®¾ä»·æ ¼
         void menu_modifyPriceByArrivePrice_Click(object sender, EventArgs e)
         {
-            ModifyPriceBy("ÑéÊÕ¼Û");
+            ModifyPriceBy("éªŒæ”¶ä»·");
         }
 
-        // °´ÕÕÊéÄ¿¼ÛÖØÉè¼Û¸ñ
+        // æŒ‰ç…§ä¹¦ç›®ä»·é‡è®¾ä»·æ ¼
         void menu_modifyPriceByBiblioPrice_Click(object sender, EventArgs e)
         {
-            ModifyPriceBy("ÊéÄ¿¼Û");
+            ModifyPriceBy("ä¹¦ç›®ä»·");
         }
 
         public string UsedDiscountString
@@ -624,15 +624,15 @@ namespace dp2Circulation
 
         }
 
-        // ¸½¼ÓÕÛ¿Û
+        // é™„åŠ æŠ˜æ‰£
         void menu_appendDiscount_Click(object sender, EventArgs e)
         {
             string strError = "";
 
             string strDiscountPart = InputDlg.GetInput(
     this,
-    "ÎªÒÑÓĞµÄ¼Û¸ñ×Ö·û´®¸½¼ÓÕÛ¿Û²¿·Ö",
-    "ÕÛ¿Û: ",
+    "ä¸ºå·²æœ‰çš„ä»·æ ¼å­—ç¬¦ä¸²é™„åŠ æŠ˜æ‰£éƒ¨åˆ†",
+    "æŠ˜æ‰£: ",
     this.UsedDiscountString,
     this.Font);
             if (strDiscountPart == null)
@@ -642,7 +642,7 @@ namespace dp2Circulation
 
             if (string.IsNullOrEmpty(strDiscountPart) == true)
             {
-                strError = "ËùÊäÈëµÄÕÛ¿Û²¿·ÖÎª¿Õ£¬·ÅÆú´¦Àí";
+                strError = "æ‰€è¾“å…¥çš„æŠ˜æ‰£éƒ¨åˆ†ä¸ºç©ºï¼Œæ”¾å¼ƒå¤„ç†";
                 goto ERROR1;
             }
 
@@ -651,11 +651,11 @@ namespace dp2Circulation
 
             if (string.IsNullOrEmpty(strDiscountPart) == true)
             {
-                strError = "ËùÊäÈëµÄÕÛ¿Û²¿·ÖµÄÓĞĞ§²¿·ÖÎª¿Õ£¬·ÅÆú´¦Àí";
+                strError = "æ‰€è¾“å…¥çš„æŠ˜æ‰£éƒ¨åˆ†çš„æœ‰æ•ˆéƒ¨åˆ†ä¸ºç©ºï¼Œæ”¾å¼ƒå¤„ç†";
                 goto ERROR1;
             }
 
-            this.UsedDiscountString = strDiscountPart;  // ¼ÇÒä
+            this.UsedDiscountString = strDiscountPart;  // è®°å¿†
 
             foreach (ListViewItem item in this.listView_barcodes.SelectedItems)
             {
@@ -663,7 +663,7 @@ namespace dp2Circulation
                 string strOldPrice = ListViewUtil.GetItemText(item, COLUMN_PRICE);
                 if (string.IsNullOrEmpty(strOldPrice) == true)
                 {
-                    strError = "µÚ "+(this.listView_barcodes.Items.IndexOf(item) + 1).ToString()+" ¸öÊÂÏî¼Û¸ñ²¿·ÖÎª¿Õ£¬ÎŞ·¨¸½¼ÓÕÛ¿Û²¿·Ö¡£²Ù×÷ÖĞ¶Ï";
+                    strError = "ç¬¬ "+(this.listView_barcodes.Items.IndexOf(item) + 1).ToString()+" ä¸ªäº‹é¡¹ä»·æ ¼éƒ¨åˆ†ä¸ºç©ºï¼Œæ— æ³•é™„åŠ æŠ˜æ‰£éƒ¨åˆ†ã€‚æ“ä½œä¸­æ–­";
                     goto ERROR1;
                 }
 
@@ -681,13 +681,13 @@ namespace dp2Circulation
             MessageBox.Show(this, strError);
         }
 
-        // ÖØÉè¼Û¸ñ
+        // é‡è®¾ä»·æ ¼
         void menu_modifyPrice_Click(object sender, EventArgs e)
         {
             string strNewPrice = InputDlg.GetInput(
     this,
-    "ÖØÉèÑ¡¶¨µÄÊÂÏîµÄ¼Û¸ñ",
-    "¼Û¸ñ: ",
+    "é‡è®¾é€‰å®šçš„äº‹é¡¹çš„ä»·æ ¼",
+    "ä»·æ ¼: ",
     "",
     this.Font);
             if (strNewPrice == null)
@@ -736,50 +736,50 @@ namespace dp2Circulation
 
     
     /// <summary>
-    /// ¶ÔÌõÂë½øĞĞ²éÖØ
+    /// å¯¹æ¡ç è¿›è¡ŒæŸ¥é‡
     /// </summary>
-    /// <param name="sender">·¢ËÍÕß</param>
-    /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+    /// <param name="sender">å‘é€è€…</param>
+    /// <param name="e">äº‹ä»¶å‚æ•°</param>
     public delegate void DetectBarcodeDupHandler(object sender,
     DetectBarcodeDupEventArgs e);
 
     /// <summary>
-    /// ¶ÔÌõÂë½øĞĞ²éÖØµÄ²ÎÊı
+    /// å¯¹æ¡ç è¿›è¡ŒæŸ¥é‡çš„å‚æ•°
     /// </summary>
     public class DetectBarcodeDupEventArgs : EventArgs
     {
         /// <summary>
-        /// EntityControl ¿Ø¼ş
+        /// EntityControl æ§ä»¶
         /// </summary>
         public EntityControl EntityControl = null;
 
         /// <summary>
-        /// BookItem µÄ¼¯ºÏ
+        /// BookItem çš„é›†åˆ
         /// </summary>
         public List<BookItem> BookItems = null;
 
         /// <summary>
-        /// ·µ»Ø³ö´íĞÅÏ¢
+        /// è¿”å›å‡ºé”™ä¿¡æ¯
         /// </summary>
         public string ErrorInfo = "";
 
         // return:
-        //      -1  ³ö´í¡£´íÎóĞÅÏ¢ÔÚErrorInfoÖĞ
-        //      0   Ã»ÓĞÖØ
-        //      1   ÓĞÖØ¡£ĞÅÏ¢ÔÚErrorInfoÖĞ
+        //      -1  å‡ºé”™ã€‚é”™è¯¯ä¿¡æ¯åœ¨ErrorInfoä¸­
+        //      0   æ²¡æœ‰é‡
+        //      1   æœ‰é‡ã€‚ä¿¡æ¯åœ¨ErrorInfoä¸­
         /// <summary>
-        /// ²éÖØ½á¹û£º
-        /// <para>-1:  ³ö´í¡£´íÎóĞÅÏ¢ÔÚErrorInfoÖĞ</para>
-        /// <para>0:   Ã»ÓĞÖØ</para>
-        /// <para>1:   ÓĞÖØ¡£ĞÅÏ¢ÔÚErrorInfoÖĞ</para>
+        /// æŸ¥é‡ç»“æœï¼š
+        /// <para>-1:  å‡ºé”™ã€‚é”™è¯¯ä¿¡æ¯åœ¨ErrorInfoä¸­</para>
+        /// <para>0:   æ²¡æœ‰é‡</para>
+        /// <para>1:   æœ‰é‡ã€‚ä¿¡æ¯åœ¨ErrorInfoä¸­</para>
         /// </summary>
         public int Result = 0;
     }
 
     internal class InputBookItem
     {
-        public string Sequence = "";    // Ì×Ğò¡£ÀıÈç¡°1/7¡±
-        public string OtherPrices = ""; // ºòÑ¡µÄÆäËû¼Û¸ñ¡£¸ñÊ½Îª: "¶©¹º¼Û:CNY12.00;ÑéÊÕ¼Û:CNY15.00"
+        public string Sequence = "";    // å¥—åºã€‚ä¾‹å¦‚â€œ1/7â€
+        public string OtherPrices = ""; // å€™é€‰çš„å…¶ä»–ä»·æ ¼ã€‚æ ¼å¼ä¸º: "è®¢è´­ä»·:CNY12.00;éªŒæ”¶ä»·:CNY15.00"
         public BookItem BookItem = null;
     }
 }

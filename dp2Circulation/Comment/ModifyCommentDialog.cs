@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,10 +12,10 @@ namespace dp2Circulation
     {
         int DisableNewTextChange = 0;
 
-        int DisableCurrentTextChange = 0;   // ÊÇ·ñ½ûÖ¹CurrentOldComment±»¸úËæĞŞ¸Ä? >0±íÊ¾½ûÖ¹
+        int DisableCurrentTextChange = 0;   // æ˜¯å¦ç¦æ­¢CurrentOldCommentè¢«è·Ÿéšä¿®æ”¹? >0è¡¨ç¤ºç¦æ­¢
 
-        public string OriginOldComment = "";    // ×î³õµÄ"¾É×¢ÊÍ"ÄÚÈİ
-        public string CurrentOldComment = "";   // ÔÚ´°¿ÚÄÚĞŞ¸Ä¹ıµÄ¡°¾É×¢ÊÍ¡±ÄÚÈİ
+        public string OriginOldComment = "";    // æœ€åˆçš„"æ—§æ³¨é‡Š"å†…å®¹
+        public string CurrentOldComment = "";   // åœ¨çª—å£å†…ä¿®æ”¹è¿‡çš„â€œæ—§æ³¨é‡Šâ€å†…å®¹
 
         public ModifyCommentDialog()
         {
@@ -64,14 +64,14 @@ namespace dp2Circulation
 
                 this.textBox_comment.ReadOnly = true;
 
-                // Ò»ÏÂ×Ó¸´Ô­µ½×î³õµÄ×´Ì¬
+                // ä¸€ä¸‹å­å¤åŸåˆ°æœ€åˆçš„çŠ¶æ€
                 this.DisableCurrentTextChange++;
                 this.textBox_comment.Text = this.OriginOldComment;
                 this.DisableCurrentTextChange--;
 
                 this.button_oldComment_insertDateTime.Enabled = false;
 
-                this.label_comment.Text = "×¢: µ±×îºóÌá½»µ½·şÎñÆ÷µÄÊ±ºò£¬ĞÂ×¢ÊÍ½«×Ô¶¯×·¼ÓÔÚ¾É×¢ÊÍµÄºóÃæ¡£";
+                this.label_comment.Text = "æ³¨: å½“æœ€åæäº¤åˆ°æœåŠ¡å™¨çš„æ—¶å€™ï¼Œæ–°æ³¨é‡Šå°†è‡ªåŠ¨è¿½åŠ åœ¨æ—§æ³¨é‡Šçš„åé¢ã€‚";
             }
             else
             {
@@ -84,14 +84,14 @@ namespace dp2Circulation
                 this.button_newComment_insertDateTime.Enabled = false;
 
                 this.textBox_comment.ReadOnly = false;
-                // ´ÓĞŞ¸ÄºóµÄ×îºó×´Ì¬¼ÌĞø½øĞĞ
+                // ä»ä¿®æ”¹åçš„æœ€åçŠ¶æ€ç»§ç»­è¿›è¡Œ
                 this.DisableCurrentTextChange++;
                 this.textBox_comment.Text = this.CurrentOldComment;
                 this.DisableCurrentTextChange--;
 
                 this.button_oldComment_insertDateTime.Enabled = true;
 
-                this.label_comment.Text = "×¢: µ±×îºóÌá½»µ½·şÎñÆ÷µÄÊ±ºò£¬¾É×¢ÊÍ½«±»ĞŞ¸Ä¡£";
+                this.label_comment.Text = "æ³¨: å½“æœ€åæäº¤åˆ°æœåŠ¡å™¨çš„æ—¶å€™ï¼Œæ—§æ³¨é‡Šå°†è¢«ä¿®æ”¹ã€‚";
             }
         }
 
@@ -215,20 +215,20 @@ namespace dp2Circulation
 
         private void button_oldComment_insertDateTime_MouseHover(object sender, EventArgs e)
         {
-            this.toolTip_usage.Show("²åÈëµ±Ç°ÈÕÆÚÊ±¼ä", this.button_oldComment_insertDateTime);
+            this.toolTip_usage.Show("æ’å…¥å½“å‰æ—¥æœŸæ—¶é—´", this.button_oldComment_insertDateTime);
 
         }
 
         private void button_newComment_insertDateTime_MouseHover(object sender, EventArgs e)
         {
-            this.toolTip_usage.Show("²åÈëµ±Ç°ÈÕÆÚÊ±¼ä", this.button_newComment_insertDateTime);
+            this.toolTip_usage.Show("æ’å…¥å½“å‰æ—¥æœŸæ—¶é—´", this.button_newComment_insertDateTime);
         }
 
         private void textBox_appendComment_Validating(object sender, CancelEventArgs e)
         {
             if (this.textBox_appendComment.Text.IndexOfAny(new char[] { '<', '>' }) != -1)
             {
-                MessageBox.Show(this, "×¢ÊÍÎÄ×ÖÖĞ²»ÔÊĞí°üº¬·ûºÅ '<' '>'");
+                MessageBox.Show(this, "æ³¨é‡Šæ–‡å­—ä¸­ä¸å…è®¸åŒ…å«ç¬¦å· '<' '>'");
                 e.Cancel = true;
             }
 
@@ -238,7 +238,7 @@ namespace dp2Circulation
         {
             if (this.textBox_comment.Text.IndexOfAny(new char[] { '<', '>' }) != -1)
             {
-                MessageBox.Show(this, "×¢ÊÍÎÄ×ÖÖĞ²»ÔÊĞí°üº¬·ûºÅ '<' '>'");
+                MessageBox.Show(this, "æ³¨é‡Šæ–‡å­—ä¸­ä¸å…è®¸åŒ…å«ç¬¦å· '<' '>'");
                 e.Cancel = true;
             }
         }

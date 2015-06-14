@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -6,45 +6,45 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 
-// 2013/3/16 Ìí¼Ó XML ×¢ÊÍ
+// 2013/3/16 æ·»åŠ  XML æ³¨é‡Š
 
 namespace dp2Circulation
 {
     /// <summary>
-    /// ÓÃÓÚ»ñµÃÒ»¸öÄ¿±êÊéÄ¿¿âÃûµÄ¶Ô»°¿ò
+    /// ç”¨äºè·å¾—ä¸€ä¸ªç›®æ ‡ä¹¦ç›®åº“åçš„å¯¹è¯æ¡†
     /// </summary>
     internal partial class GetAcceptTargetDbNameDlg : Form
     {
         /// <summary>
-        /// ±¾¶Ô»°¿òÊÇ·ñÒª×Ô¶¯½áÊø?
-        /// µ±½öÓĞÒ»ÏîºÏÊÊµÄÊÂÏî£¬²¢ÇÒÃû×ÖµÈÓÚthis.DbNameÊ±£¬×Ô¶¯½áÊø¶Ô»°¿ò
+        /// æœ¬å¯¹è¯æ¡†æ˜¯å¦è¦è‡ªåŠ¨ç»“æŸ?
+        /// å½“ä»…æœ‰ä¸€é¡¹åˆé€‚çš„äº‹é¡¹ï¼Œå¹¶ä¸”åå­—ç­‰äºthis.DbNameæ—¶ï¼Œè‡ªåŠ¨ç»“æŸå¯¹è¯æ¡†
         /// </summary>
         public bool AutoFinish = false;
 
         /// <summary>
-        /// ¿ò¼Ü´°¿Ú
+        /// æ¡†æ¶çª—å£
         /// </summary>
         public MainForm MainForm = null;
 
         /// <summary>
-        /// ÊÇ·ñÎªÆÚ¿¯Ä£Ê½? 
-        /// Èç¹ûÎªtrue£¬Ö»ÁĞ³öÓĞÏÂÊôÆÚ¿âµÄÊéÄ¿¿âÃû£»·ñÔòÖ»ÁĞ³öÃ»ÓĞÏÂÊôÆÚ¿âµÄÊéÄ¿¿âÃû 
+        /// æ˜¯å¦ä¸ºæœŸåˆŠæ¨¡å¼? 
+        /// å¦‚æœä¸ºtrueï¼Œåªåˆ—å‡ºæœ‰ä¸‹å±æœŸåº“çš„ä¹¦ç›®åº“åï¼›å¦åˆ™åªåˆ—å‡ºæ²¡æœ‰ä¸‹å±æœŸåº“çš„ä¹¦ç›®åº“å 
         /// </summary>
         public bool SeriesMode = false; // 2008/12/29
 
         /// <summary>
-        /// MARC ¾ßÌå¸ñÊ½¡£"unimarc"ºÍ"usmarc"Ö®Ò»
-        /// Èç¹ûÎª¿Õ£¬±íÊ¾¶Ô¸ñÊ½ÎŞÒªÇó£»Èç¹û²»Îª¿Õ£¬ÔòÒªÇóÎª¸Ã¸ñÊ½
+        /// MARC å…·ä½“æ ¼å¼ã€‚"unimarc"å’Œ"usmarc"ä¹‹ä¸€
+        /// å¦‚æœä¸ºç©ºï¼Œè¡¨ç¤ºå¯¹æ ¼å¼æ— è¦æ±‚ï¼›å¦‚æœä¸ä¸ºç©ºï¼Œåˆ™è¦æ±‚ä¸ºè¯¥æ ¼å¼
         /// </summary>
         public string MarcSyntax = "";  // 
 
         /// <summary>
-        /// ÓÃ»§×îºóÑ¡¶¨µÄÊı¾İ¿âÃû
+        /// ç”¨æˆ·æœ€åé€‰å®šçš„æ•°æ®åº“å
         /// </summary>
         public string DbName = "";
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public GetAcceptTargetDbNameDlg()
         {
@@ -69,7 +69,7 @@ namespace dp2Circulation
         {
             if (this.listView_dbnames.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡¶¨Ä¿±êÊı¾İ¿âÃû");
+                MessageBox.Show(this, "å°šæœªé€‰å®šç›®æ ‡æ•°æ®åº“å");
                 return;
             }
 

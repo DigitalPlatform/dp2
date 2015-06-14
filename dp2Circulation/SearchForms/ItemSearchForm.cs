@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -26,12 +26,12 @@ using System.Web;
 using System.Threading;
 using DigitalPlatform.dp2.Statis;
 
-// 2013/3/16 Ìí¼Ó XML ×¢ÊÍ
+// 2013/3/16 æ·»åŠ  XML æ³¨é‡Š
 
 namespace dp2Circulation
 {
     /// <summary>
-    /// ÊµÌå²éÑ¯´°¡¢¶©¹º²éÑ¯´°¡¢ÆÚ²éÑ¯´°¡¢ÆÀ×¢²éÑ¯´°
+    /// å®ä½“æŸ¥è¯¢çª—ã€è®¢è´­æŸ¥è¯¢çª—ã€æœŸæŸ¥è¯¢çª—ã€è¯„æ³¨æŸ¥è¯¢çª—
     /// </summary>
     public partial class ItemSearchForm : ItemSearchFormBase
     {
@@ -41,32 +41,32 @@ namespace dp2Circulation
         int m_nQueryIndex = -1;
 
         /// <summary>
-        /// ×î½üÒ»´Îµ¼³öµ½ÌõÂëºÅÎÄ¼şÊ±Ê¹ÓÃ¹ıµÄÎÄ¼şÃû
+        /// æœ€è¿‘ä¸€æ¬¡å¯¼å‡ºåˆ°æ¡ç å·æ–‡ä»¶æ—¶ä½¿ç”¨è¿‡çš„æ–‡ä»¶å
         /// </summary>
         public string ExportBarcodeFilename = "";
 
         /// <summary>
-        /// ×î½üÒ»´Îµ¼³öµ½¼ÇÂ¼Â·¾¶ÎÄ¼şÊ±Ê¹ÓÃ¹ıµÄÎÄ¼şÃû
+        /// æœ€è¿‘ä¸€æ¬¡å¯¼å‡ºåˆ°è®°å½•è·¯å¾„æ–‡ä»¶æ—¶ä½¿ç”¨è¿‡çš„æ–‡ä»¶å
         /// </summary>
         public string ExportRecPathFilename = "";
 
         /// <summary>
-        /// ×î½üÒ»´Îµ¼³öµ½ÎÄ±¾ÎÄ¼şÊ±Ê¹ÓÃ¹ıµÄÎÄ¼şÃû
+        /// æœ€è¿‘ä¸€æ¬¡å¯¼å‡ºåˆ°æ–‡æœ¬æ–‡ä»¶æ—¶ä½¿ç”¨è¿‡çš„æ–‡ä»¶å
         /// </summary>
         public string ExportTextFilename = "";
 
         /// <summary>
-        /// ×î½üÒ»´Îµ¼³öµ½ÊéÄ¿¿â¼ÇÂ¼Â·¾¶ÎÄ¼şÊ±Ê¹ÓÃ¹ıµÄÎÄ¼şÃû
+        /// æœ€è¿‘ä¸€æ¬¡å¯¼å‡ºåˆ°ä¹¦ç›®åº“è®°å½•è·¯å¾„æ–‡ä»¶æ—¶ä½¿ç”¨è¿‡çš„æ–‡ä»¶å
         /// </summary>
         public string ExportBiblioRecPathFilename = "";
 
         /// <summary>
-        /// ×î½üÒ»´Îµ¼³öµ½ÊµÌå¿â¼ÇÂ¼Â·¾¶ÎÄ¼şÊ±Ê¹ÓÃ¹ıµÄÎÄ¼şÃû
+        /// æœ€è¿‘ä¸€æ¬¡å¯¼å‡ºåˆ°å®ä½“åº“è®°å½•è·¯å¾„æ–‡ä»¶æ—¶ä½¿ç”¨è¿‡çš„æ–‡ä»¶å
         /// </summary>
         public string ExportItemRecPathFilename = "";
 
         /// <summary>
-        /// ä¯ÀÀ¿ò¡£ÏÔÊ¾¼ìË÷ÃüÖĞ¼ÇÂ¼µÄä¯ÀÀ¸ñÊ½
+        /// æµè§ˆæ¡†ã€‚æ˜¾ç¤ºæ£€ç´¢å‘½ä¸­è®°å½•çš„æµè§ˆæ ¼å¼
         /// </summary>
         public ListView ListViewRecords
         {
@@ -77,7 +77,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public ItemSearchForm()
         {
@@ -87,7 +87,7 @@ namespace dp2Circulation
 
             ListViewProperty prop = new ListViewProperty();
             this.listView_records.Tag = prop;
-            // µÚÒ»ÁĞÌØÊâ£¬¼ÇÂ¼Â·¾¶
+            // ç¬¬ä¸€åˆ—ç‰¹æ®Šï¼Œè®°å½•è·¯å¾„
             prop.SetSortStyle(0, ColumnSortStyle.RecPath);
             prop.GetColumnTitles -= new GetColumnTitlesEventHandler(prop_GetColumnTitles);
             prop.GetColumnTitles += new GetColumnTitlesEventHandler(prop_GetColumnTitles);
@@ -100,7 +100,7 @@ namespace dp2Circulation
         {
             if (e.Column.SortStyle.Name == "call_number")
             {
-                // ±È½ÏÁ½¸öË÷È¡ºÅµÄ´óĞ¡
+                // æ¯”è¾ƒä¸¤ä¸ªç´¢å–å·çš„å¤§å°
                 // return:
                 //      <0  s1 < s2
                 //      ==0 s1 == s2
@@ -109,9 +109,9 @@ namespace dp2Circulation
             }
             else if (e.Column.SortStyle.Name == "parent_id")
             {
-                // ÓÒ¶ÔÆë±È½Ï×Ö·û´®
+                // å³å¯¹é½æ¯”è¾ƒå­—ç¬¦ä¸²
                 // parameters:
-                //      chFill  Ìî³äÓÃµÄ×Ö·û
+                //      chFill  å¡«å……ç”¨çš„å­—ç¬¦
                 e.Result = StringUtil.CompareRecPath(e.String1, e.String2);
             }
             else
@@ -129,9 +129,9 @@ namespace dp2Circulation
             if (e.DbName == "<blank>")
             {
                 e.ColumnTitles = new ColumnPropertyCollection();
-                e.ColumnTitles.Add("¼ìË÷µã");
-                e.ColumnTitles.Add("ÊıÁ¿");
-                // ÊıÁ¿ÁĞµÄÅÅĞò
+                e.ColumnTitles.Add("æ£€ç´¢ç‚¹");
+                e.ColumnTitles.Add("æ•°é‡");
+                // æ•°é‡åˆ—çš„æ’åº
                 e.ListViewProperty.SetSortStyle(2, ColumnSortStyle.RightAlign);
                 return;
             }
@@ -141,14 +141,14 @@ namespace dp2Circulation
             if (temp != null)
             {
                 if (m_bBiblioSummaryColumn == true)
-                    e.ColumnTitles.Insert(0, "ÊéÄ¿ÕªÒª");
-                e.ColumnTitles.AddRange(temp);  // Òª¸´ÖÆ£¬²»ÒªÖ±½ÓÊ¹ÓÃ£¬ÒòÎªºóÃæ¿ÉÄÜ»áĞŞ¸Ä¡£ÅÂÓ°Ïìµ½Ô­¼ş
+                    e.ColumnTitles.Insert(0, "ä¹¦ç›®æ‘˜è¦");
+                e.ColumnTitles.AddRange(temp);  // è¦å¤åˆ¶ï¼Œä¸è¦ç›´æ¥ä½¿ç”¨ï¼Œå› ä¸ºåé¢å¯èƒ½ä¼šä¿®æ”¹ã€‚æ€•å½±å“åˆ°åŸä»¶
             }
 
             if (this.m_bFirstColumnIsKey == true)
-                e.ColumnTitles.Insert(0, "ÃüÖĞµÄ¼ìË÷µã");
+                e.ColumnTitles.Insert(0, "å‘½ä¸­çš„æ£€ç´¢ç‚¹");
 
-            // e.ListViewProperty.SetSortStyle(2, ColumnSortStyle.LeftAlign);   // Ó¦¸Ã¸ù¾İ typeÎªitem_barcode À´¾ö¶¨ÅÅĞò·½Ê½
+            // e.ListViewProperty.SetSortStyle(2, ColumnSortStyle.LeftAlign);   // åº”è¯¥æ ¹æ® typeä¸ºitem_barcode æ¥å†³å®šæ’åºæ–¹å¼
         }
 
         private void ItemSearchForm_Load(object sender, EventArgs e)
@@ -160,23 +160,23 @@ namespace dp2Circulation
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
 
             stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// ºÍÈİÆ÷¹ØÁª
+            stop.Register(MainForm.stopManager, true);	// å’Œå®¹å™¨å…³è”
              * */
             this.FillFromList();
 
             string strDefaulFrom = "";
             if (this.DbType == "item")
-                strDefaulFrom = "²áÌõÂë";
+                strDefaulFrom = "å†Œæ¡ç ";
             else if (this.DbType == "comment")
-                strDefaulFrom = "±êÌâ";
+                strDefaulFrom = "æ ‡é¢˜";
             else if (this.DbType == "order")
-                strDefaulFrom = "ÊéÉÌ";
+                strDefaulFrom = "ä¹¦å•†";
             else if (this.DbType == "issue")
-                strDefaulFrom = "ÆÚºÅ";
+                strDefaulFrom = "æœŸå·";
             else if (this.DbType == "arrive")
-                strDefaulFrom = "²áÌõÂëºÅ";
+                strDefaulFrom = "å†Œæ¡ç å·";
             else
-                throw new Exception("Î´ÖªµÄDbType '" + this.DbType + "'");
+                throw new Exception("æœªçŸ¥çš„DbType '" + this.DbType + "'");
 
 
             this.comboBox_from.Text = this.MainForm.AppInfo.GetString(
@@ -187,12 +187,12 @@ namespace dp2Circulation
             this.comboBox_entityDbName.Text = this.MainForm.AppInfo.GetString(
                 this.DbType + "_search_form",
                 "entity_db_name",
-                "<È«²¿>");
+                "<å…¨éƒ¨>");
 
             this.comboBox_matchStyle.Text = this.MainForm.AppInfo.GetString(
                 this.DbType + "_search_form",
                 "match_style",
-                "¾«È·Ò»ÖÂ");
+                "ç²¾ç¡®ä¸€è‡´");
 
             if (this.DbType != "arrive")
             {
@@ -204,17 +204,17 @@ namespace dp2Circulation
                 {
                     this.label_matchStyle.Visible = false;
                     this.comboBox_matchStyle.Visible = false;
-                    this.comboBox_matchStyle.Text = "¾«È·Ò»ÖÂ"; // Òş²Øºó£¬²ÉÓÃÈ±Ê¡Öµ
+                    this.comboBox_matchStyle.Text = "ç²¾ç¡®ä¸€è‡´"; // éšè—åï¼Œé‡‡ç”¨ç¼ºçœå€¼
 
                     this.label_entityDbName.Visible = false;
                     this.comboBox_entityDbName.Visible = false;
-                    this.comboBox_entityDbName.Text = "<È«²¿>"; // Òş²Øºó£¬²ÉÓÃÈ±Ê¡Öµ
+                    this.comboBox_entityDbName.Text = "<å…¨éƒ¨>"; // éšè—åï¼Œé‡‡ç”¨ç¼ºçœå€¼
 
                     string strName = this.DbTypeCaption;
                     if (this.DbType == "item")
-                        strName = "ÊµÌå";
+                        strName = "å®ä½“";
 
-                    this.label_message.Text = "µ±Ç°¼ìË÷Ëù²ÉÓÃµÄÆ¥Åä·½Ê½Îª '¾«È·Ò»ÖÂ'£¬Õë¶ÔÈ«²¿" + strName + "¿â";
+                    this.label_message.Text = "å½“å‰æ£€ç´¢æ‰€é‡‡ç”¨çš„åŒ¹é…æ–¹å¼ä¸º 'ç²¾ç¡®ä¸€è‡´'ï¼Œé’ˆå¯¹å…¨éƒ¨" + strName + "åº“";
                 }
             }
 
@@ -271,65 +271,65 @@ this.DbType + "_search_form",
         {
             string strLogic = "";
             if (this.tabControl_query.SelectedTab == this.tabPage_logic)
-                strLogic = " Âß¼­¼ìË÷";
+                strLogic = " é€»è¾‘æ£€ç´¢";
 
             if (this.DbType == "item")
             {
-                this.Text = "ÊµÌå²éÑ¯" + strLogic;
-                this.label_entityDbName.Text = "ÊµÌå¿â(&D)";
+                this.Text = "å®ä½“æŸ¥è¯¢" + strLogic;
+                this.label_entityDbName.Text = "å®ä½“åº“(&D)";
             }
             else
             {
-                this.Text = this.DbTypeCaption + "²éÑ¯" + strLogic;
-                this.label_entityDbName.Text = this.DbTypeCaption + "¿â(&D)";
+                this.Text = this.DbTypeCaption + "æŸ¥è¯¢" + strLogic;
+                this.label_entityDbName.Text = this.DbTypeCaption + "åº“(&D)";
             }
         }
 
         static string[] item_froms = {
-                                       "²áÌõÂë",
-                                       "Åú´ÎºÅ",
-                                       "µÇÂ¼ºÅ",
-                                       "Ë÷È¡ºÅ",
-                                       "²Î¿¼ID",
-                                       "¹İ²ØµØµã",
-                                       "Ë÷È¡ÀàºÅ",
-                                       "¸¸¼ÇÂ¼",
-                                       "×´Ì¬",
+                                       "å†Œæ¡ç ",
+                                       "æ‰¹æ¬¡å·",
+                                       "ç™»å½•å·",
+                                       "ç´¢å–å·",
+                                       "å‚è€ƒID",
+                                       "é¦†è—åœ°ç‚¹",
+                                       "ç´¢å–ç±»å·",
+                                       "çˆ¶è®°å½•",
+                                       "çŠ¶æ€",
                                        "__id"
                                    };
 
 
         static string[] comment_froms = {
-                "±êÌâ",
-                "×÷Õß",
-                "×÷ÕßÏÔÊ¾Ãû",
-                "ÕıÎÄ",
-                "²Î¿¼ID",
-                "×îºóĞŞ¸ÄÊ±¼ä",
-                "¸¸¼ÇÂ¼",
-                "×´Ì¬",
+                "æ ‡é¢˜",
+                "ä½œè€…",
+                "ä½œè€…æ˜¾ç¤ºå",
+                "æ­£æ–‡",
+                "å‚è€ƒID",
+                "æœ€åä¿®æ”¹æ—¶é—´",
+                "çˆ¶è®°å½•",
+                "çŠ¶æ€",
                 "__id"
                                       };
         static string[] order_froms = {
-                "ÊéÉÌ",
-                "Åú´ÎºÅ",
-                "²á²Î¿¼ID",
-                "¶©¹ºÊ±¼ä",
-                "²Î¿¼ID",
-                "¸¸¼ÇÂ¼",
-                "×´Ì¬",
+                "ä¹¦å•†",
+                "æ‰¹æ¬¡å·",
+                "å†Œå‚è€ƒID",
+                "è®¢è´­æ—¶é—´",
+                "å‚è€ƒID",
+                "çˆ¶è®°å½•",
+                "çŠ¶æ€",
                 "__id"
                                     };
         static string[] issue_froms = {
-                "³ö°æÊ±¼ä",
-                "ÆÚºÅ",
-                "×ÜÆÚºÅ",
-                "¾íºÅ",
-                "²á²Î¿¼ID",
-                "²Î¿¼ID",
-                "Åú´ÎºÅ",
-                "¸¸¼ÇÂ¼",
-                "×´Ì¬",
+                "å‡ºç‰ˆæ—¶é—´",
+                "æœŸå·",
+                "æ€»æœŸå·",
+                "å·å·",
+                "å†Œå‚è€ƒID",
+                "å‚è€ƒID",
+                "æ‰¹æ¬¡å·",
+                "çˆ¶è®°å½•",
+                "çŠ¶æ€",
                 "__id"
                                     };
 
@@ -337,7 +337,7 @@ this.DbType + "_search_form",
         {
             List<string> results = new List<string>();
 
-            // ÌîÈë´Ó·şÎñÆ÷»ñµÃµÄ×îĞÂfroms
+            // å¡«å…¥ä»æœåŠ¡å™¨è·å¾—çš„æœ€æ–°froms
             if (this.MainForm != null)
             {
                 BiblioDbFromInfo[] infos = null;
@@ -352,7 +352,7 @@ this.DbType + "_search_form",
                 else if (this.DbType == "arrive")
                     infos = this.MainForm.ArrivedDbFromInfos;
                 else
-                    throw new Exception("Î´ÖªµÄDbType '" + this.DbType + "'");
+                    throw new Exception("æœªçŸ¥çš„DbType '" + this.DbType + "'");
 
                 if (infos != null && infos.Length > 0)
                 {
@@ -377,55 +377,55 @@ this.DbType + "_search_form",
             else if (this.DbType == "arrive")
                 return new List<string>(arrive_froms);
             else
-                throw new Exception("Î´ÖªµÄDbType '" + this.DbType + "'");
+                throw new Exception("æœªçŸ¥çš„DbType '" + this.DbType + "'");
         }
 
         void FillFromList()
         {
 #if NO
             string[] item_froms = {
-                                       "²áÌõÂë",
-                                       "Åú´ÎºÅ",
-                                       "µÇÂ¼ºÅ",
-                                       "Ë÷È¡ºÅ",
-                                       "²Î¿¼ID",
-                                       "¹İ²ØµØµã",
-                                       "Ë÷È¡ÀàºÅ",
-                                       "¸¸¼ÇÂ¼",
-                                       "×´Ì¬",
+                                       "å†Œæ¡ç ",
+                                       "æ‰¹æ¬¡å·",
+                                       "ç™»å½•å·",
+                                       "ç´¢å–å·",
+                                       "å‚è€ƒID",
+                                       "é¦†è—åœ°ç‚¹",
+                                       "ç´¢å–ç±»å·",
+                                       "çˆ¶è®°å½•",
+                                       "çŠ¶æ€",
                                        "__id"
                                    };
             string[] comment_froms = {
-                "±êÌâ",
-                "×÷Õß",
-                "×÷ÕßÏÔÊ¾Ãû",
-                "ÕıÎÄ",
-                "²Î¿¼ID",
-                "×îºóĞŞ¸ÄÊ±¼ä",
-                "¸¸¼ÇÂ¼",
-                "×´Ì¬",
+                "æ ‡é¢˜",
+                "ä½œè€…",
+                "ä½œè€…æ˜¾ç¤ºå",
+                "æ­£æ–‡",
+                "å‚è€ƒID",
+                "æœ€åä¿®æ”¹æ—¶é—´",
+                "çˆ¶è®°å½•",
+                "çŠ¶æ€",
                 "__id"
                                       };
             string[] order_froms = {
-                "ÊéÉÌ",
-                "Åú´ÎºÅ",
-                "²á²Î¿¼ID",
-                "¶©¹ºÊ±¼ä",
-                "²Î¿¼ID",
-                "¸¸¼ÇÂ¼",
-                "×´Ì¬",
+                "ä¹¦å•†",
+                "æ‰¹æ¬¡å·",
+                "å†Œå‚è€ƒID",
+                "è®¢è´­æ—¶é—´",
+                "å‚è€ƒID",
+                "çˆ¶è®°å½•",
+                "çŠ¶æ€",
                 "__id"
                                     };
             string[] issue_froms = {
-                "³ö°æÊ±¼ä",
-                "ÆÚºÅ",
-                "×ÜÆÚºÅ",
-                "¾íºÅ",
-                "²á²Î¿¼ID",
-                "²Î¿¼ID",
-                "Åú´ÎºÅ",
-                "¸¸¼ÇÂ¼",
-                "×´Ì¬",
+                "å‡ºç‰ˆæ—¶é—´",
+                "æœŸå·",
+                "æ€»æœŸå·",
+                "å·å·",
+                "å†Œå‚è€ƒID",
+                "å‚è€ƒID",
+                "æ‰¹æ¬¡å·",
+                "çˆ¶è®°å½•",
+                "çŠ¶æ€",
                 "__id"
                                     };
 
@@ -440,7 +440,7 @@ this.DbType + "_search_form",
             else if (this.DbType == "issue")
                 froms = issue_froms;
             else
-                throw new Exception("Î´ÖªµÄDbType '" + this.DbType + "'");
+                throw new Exception("æœªçŸ¥çš„DbType '" + this.DbType + "'");
 
             this.comboBox_from.Items.Clear();
             foreach (string from in froms)
@@ -448,7 +448,7 @@ this.DbType + "_search_form",
                 this.comboBox_from.Items.Add(from);
             }
 
-            // ÌîÈë´Ó·şÎñÆ÷»ñµÃµÄ×îĞÂfroms
+            // å¡«å…¥ä»æœåŠ¡å™¨è·å¾—çš„æœ€æ–°froms
             if (this.MainForm != null)
             {
                 BiblioDbFromInfo[] infos = null;
@@ -461,7 +461,7 @@ this.DbType + "_search_form",
                 else if (this.DbType == "issue")
                     infos = this.MainForm.IssueDbFromInfos;
                 else
-                    throw new Exception("Î´ÖªµÄDbType '" + this.DbType + "'");
+                    throw new Exception("æœªçŸ¥çš„DbType '" + this.DbType + "'");
 
                 if (infos != null && infos.Length > 0)
                 {
@@ -495,9 +495,9 @@ this.DbType + "_search_form",
             /*
             if (stop != null)
             {
-                if (stop.State == 0)    // 0 ±íÊ¾ÕıÔÚ´¦Àí
+                if (stop.State == 0)    // 0 è¡¨ç¤ºæ­£åœ¨å¤„ç†
                 {
-                    MessageBox.Show(this, "ÇëÔÚ¹Ø±Õ´°¿ÚÇ°Í£Ö¹ÕıÔÚ½øĞĞµÄ³¤Ê±²Ù×÷¡£");
+                    MessageBox.Show(this, "è¯·åœ¨å…³é—­çª—å£å‰åœæ­¢æ­£åœ¨è¿›è¡Œçš„é•¿æ—¶æ“ä½œã€‚");
                     e.Cancel = true;
                     return;
                 }
@@ -509,9 +509,9 @@ this.DbType + "_search_form",
         private void ItemSearchForm_FormClosed(object sender, FormClosedEventArgs e)
         {
             /*
-            if (stop != null) // ÍÑÀë¹ØÁª
+            if (stop != null) // è„±ç¦»å…³è”
             {
-                stop.Unregister();	// ºÍÈİÆ÷¹ØÁª
+                stop.Unregister();	// å’Œå®¹å™¨å…³è”
                 stop = null;
             }*/
 
@@ -548,7 +548,7 @@ this.dp2QueryControl1.GetSaveString());
         }
 
         /// <summary>
-        /// »ñµÃÅäÖÃ²ÎÊı£ºµ±Ç°²éÑ¯´°µ¥´Î¼ìË÷×î´óÃüÖĞ¼ÇÂ¼ÌõÊı¶¨Òå¡£-1±íÊ¾²»ÏŞÖÆ
+        /// è·å¾—é…ç½®å‚æ•°ï¼šå½“å‰æŸ¥è¯¢çª—å•æ¬¡æ£€ç´¢æœ€å¤§å‘½ä¸­è®°å½•æ¡æ•°å®šä¹‰ã€‚-1è¡¨ç¤ºä¸é™åˆ¶
         /// </summary>
         public int MaxSearchResultCount
         {
@@ -563,7 +563,7 @@ this.dp2QueryControl1.GetSaveString());
 
         // 2008/1/20 
         /// <summary>
-        /// »ñµÃÅäÖÃ²ÎÊı£ºµ±Ç°²éÑ¯´°¼ìË÷Ê±£¬ÊÇ·ñÒÔÍÆ¶¯µÄ·½Ê½×°Èëä¯ÀÀÁĞ±í
+        /// è·å¾—é…ç½®å‚æ•°ï¼šå½“å‰æŸ¥è¯¢çª—æ£€ç´¢æ—¶ï¼Œæ˜¯å¦ä»¥æ¨åŠ¨çš„æ–¹å¼è£…å…¥æµè§ˆåˆ—è¡¨
         /// </summary>
         public bool PushFillingBrowse
         {
@@ -581,22 +581,22 @@ this.dp2QueryControl1.GetSaveString());
             string strText = this.comboBox_matchStyle.Text;
 
             // 2009/8/6 
-            if (strText == "¿ÕÖµ")
+            if (strText == "ç©ºå€¼")
                 return "null";
 
             if (String.IsNullOrEmpty(strText) == true)
-                return "left"; // È±Ê¡Ê±ÈÏÎªÊÇ Ç°·½Ò»ÖÂ
+                return "left"; // ç¼ºçœæ—¶è®¤ä¸ºæ˜¯ å‰æ–¹ä¸€è‡´
 
-            if (strText == "Ç°·½Ò»ÖÂ")
+            if (strText == "å‰æ–¹ä¸€è‡´")
                 return "left";
-            if (strText == "ÖĞ¼äÒ»ÖÂ")
+            if (strText == "ä¸­é—´ä¸€è‡´")
                 return "middle";
-            if (strText == "ºó·½Ò»ÖÂ")
+            if (strText == "åæ–¹ä¸€è‡´")
                 return "right";
-            if (strText == "¾«È·Ò»ÖÂ")
+            if (strText == "ç²¾ç¡®ä¸€è‡´")
                 return "exact";
 
-            return strText; // Ö±½Ó·µ»ØÔ­ÎÄ
+            return strText; // ç›´æ¥è¿”å›åŸæ–‡
         }
 
         private void button_search_Click(object sender, EventArgs e)
@@ -619,9 +619,9 @@ this.dp2QueryControl1.GetSaveString());
         void PushQuery(ItemQueryParam query)
         {
             if (query == null)
-                throw new Exception("queryÖµ²»ÄÜÎª¿Õ");
+                throw new Exception("queryå€¼ä¸èƒ½ä¸ºç©º");
 
-            // ½Ø¶ÏÎ²²¿¶àÓàµÄ
+            // æˆªæ–­å°¾éƒ¨å¤šä½™çš„
             if (this.m_nQueryIndex < this.m_queries.Count - 1)
                 this.m_queries.RemoveRange(this.m_nQueryIndex + 1, this.m_queries.Count - (this.m_nQueryIndex + 1));
 
@@ -693,8 +693,8 @@ this.dp2QueryControl1.GetSaveString());
                 "<all>",
                 strLocation, // 
                 -1,
-                "¹İ²ØµØµã",
-                "left", // this.textBox_queryWord.Text == "" ? "left" : "exact",    // Ô­À´Îªleft 2007/10/18 changed
+                "é¦†è—åœ°ç‚¹",
+                "left", // this.textBox_queryWord.Text == "" ? "left" : "exact",    // åŸæ¥ä¸ºleft 2007/10/18 changed
                 "zh",
                 null,   // strResultSetName
                 "",    // strSearchStyle
@@ -722,20 +722,20 @@ this.dp2QueryControl1.GetSaveString());
                 strStyle = "id";
             }
 
-            // ÊµÌå¿âÃû --> ÊéÄ¿¿âÃû
+            // å®ä½“åº“å --> ä¹¦ç›®åº“å
             Hashtable dbname_table = new Hashtable();
 
-            // ÊéÄ¿¿â¼ÇÂ¼Â·¾¶£¬ÓÃÓÚÈ¥ÖØ
+            // ä¹¦ç›®åº“è®°å½•è·¯å¾„ï¼Œç”¨äºå»é‡
             Hashtable bilio_recpath_table = new Hashtable();
 
-            // ×°Èëä¯ÀÀ¸ñÊ½
+            // è£…å…¥æµè§ˆæ ¼å¼
             for (; ; )
             {
-                Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                 if (stop != null && stop.State != 0)
                 {
-                    strError = "¼ìË÷¹²ÃüÖĞ " + lHitCount.ToString() + " Ìõ£¬ÒÑ×°Èë " + lStart.ToString() + " Ìõ£¬ÓÃ»§ÖĞ¶Ï...";
+                    strError = "æ£€ç´¢å…±å‘½ä¸­ " + lHitCount.ToString() + " æ¡ï¼Œå·²è£…å…¥ " + lStart.ToString() + " æ¡ï¼Œç”¨æˆ·ä¸­æ–­...";
                     return -1;
                 }
 
@@ -751,7 +751,7 @@ this.dp2QueryControl1.GetSaveString());
                     out strError);
                 if (lRet == -1)
                 {
-                    strError = "¼ìË÷¹²ÃüÖĞ " + lHitCount.ToString() + " Ìõ£¬ÒÑ×°Èë " + lStart.ToString() + " Ìõ£¬" + strError;
+                    strError = "æ£€ç´¢å…±å‘½ä¸­ " + lHitCount.ToString() + " æ¡ï¼Œå·²è£…å…¥ " + lStart.ToString() + " æ¡ï¼Œ" + strError;
                     return -1;
                 }
 
@@ -760,7 +760,7 @@ this.dp2QueryControl1.GetSaveString());
                     return 0;
                 }
 
-                // ´¦Àíä¯ÀÀ½á¹û
+                // å¤„ç†æµè§ˆç»“æœ
 
                 for (int i = 0; i < searchresults.Length; i++)
                 {
@@ -791,7 +791,7 @@ this.dp2QueryControl1.GetSaveString());
                 lStart += searchresults.Length;
                 lCount -= searchresults.Length;
 
-                stop.SetMessage("¹²ÃüÖĞ " + lHitCount.ToString() + " Ìõ£¬ÒÑ×°Èë " + lStart.ToString() + " Ìõ");
+                stop.SetMessage("å…±å‘½ä¸­ " + lHitCount.ToString() + " æ¡ï¼Œå·²è£…å…¥ " + lStart.ToString() + " æ¡");
 
                 if (lStart >= lHitCount || lCount <= 0)
                     break;
@@ -801,13 +801,13 @@ this.dp2QueryControl1.GetSaveString());
         }
 
         /// <summary>
-        /// Ö´ĞĞÒ»´Î¼ìË÷
+        /// æ‰§è¡Œä¸€æ¬¡æ£€ç´¢
         /// </summary>
-        /// <param name="bOutputKeyCount">ÊÇ·ñÒªÊä³öÎª key+count ĞÎÌ¬</param>
-        /// <param name="bOutputKeyID">ÊÇ·ñÎª keyid ĞÎÌ¬</param>
-        /// <param name="input_query">¼ìË÷Ê½</param>
-        /// <param name="bClearList">ÊÇ·ñÒªÔÚ¼ìË÷¿ªÊ¼Ê±Çå¿Õä¯ÀÀÁĞ±í</param>
-        /// <returns>-1:³ö´í 0:ÖĞ¶Ï 1:Õı³£½áÊø</returns>
+        /// <param name="bOutputKeyCount">æ˜¯å¦è¦è¾“å‡ºä¸º key+count å½¢æ€</param>
+        /// <param name="bOutputKeyID">æ˜¯å¦ä¸º keyid å½¢æ€</param>
+        /// <param name="input_query">æ£€ç´¢å¼</param>
+        /// <param name="bClearList">æ˜¯å¦è¦åœ¨æ£€ç´¢å¼€å§‹æ—¶æ¸…ç©ºæµè§ˆåˆ—è¡¨</param>
+        /// <returns>-1:å‡ºé”™ 0:ä¸­æ–­ 1:æ­£å¸¸ç»“æŸ</returns>
         public int DoSearch(bool bOutputKeyCount,
             bool bOutputKeyID,
             ItemQueryParam input_query,
@@ -819,7 +819,7 @@ this.dp2QueryControl1.GetSaveString());
             if (bOutputKeyCount == true
                 && bOutputKeyID == true)
             {
-                strError = "bOutputKeyCountºÍbOutputKeyID²»ÄÜÍ¬Ê±Îªtrue";
+                strError = "bOutputKeyCountå’ŒbOutputKeyIDä¸èƒ½åŒæ—¶ä¸ºtrue";
                 goto ERROR1;
             }
 
@@ -834,7 +834,7 @@ this.dp2QueryControl1.GetSaveString());
                 QueryToPanel(input_query, bClearList);
             }
 
-            // ¼ÇÒäÏÂ¼ìË÷Ê½
+            // è®°å¿†ä¸‹æ£€ç´¢å¼
             this.m_bFirstColumnIsKey = bOutputKeyID;
             this.ClearListViewPropertyCache();
 
@@ -853,7 +853,7 @@ this.dp2QueryControl1.GetSaveString());
 
             stop.Style = StopStyle.None;
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ¼ìË÷ ...");
+            stop.Initial("æ­£åœ¨æ£€ç´¢ ...");
             stop.BeginLoop();
 
             try
@@ -868,12 +868,12 @@ this.dp2QueryControl1.GetSaveString());
                     {
                         this.textBox_queryWord.Text = "";
 
-                        // ×¨ÃÅ¼ìË÷¿ÕÖµ
+                        // ä¸“é—¨æ£€ç´¢ç©ºå€¼
                         strMatchStyle = "exact";
                     }
                     else
                     {
-                        // ÎªÁËÔÚ¼ìË÷´ÊÎª¿ÕµÄÊ±ºò£¬¼ìË÷³öÈ«²¿µÄ¼ÇÂ¼
+                        // ä¸ºäº†åœ¨æ£€ç´¢è¯ä¸ºç©ºçš„æ—¶å€™ï¼Œæ£€ç´¢å‡ºå…¨éƒ¨çš„è®°å½•
                         strMatchStyle = "left";
                     }
                 }
@@ -900,7 +900,7 @@ this.dp2QueryControl1.GetSaveString());
                         this.textBox_queryWord.Text,
                         this.MaxSearchResultCount,
                         this.comboBox_from.Text,
-                        strMatchStyle, // this.textBox_queryWord.Text == "" ? "left" : "exact",    // Ô­À´Îªleft 2007/10/18 changed
+                        strMatchStyle, // this.textBox_queryWord.Text == "" ? "left" : "exact",    // åŸæ¥ä¸ºleft 2007/10/18 changed
                         this.Lang,
                         null,   // strResultSetName
                         "",    // strSearchStyle
@@ -954,16 +954,16 @@ this.dp2QueryControl1.GetSaveString());
 #if NO
                     string strArrivedDbName = "";
                     // return:
-                    //      -1  ³ö´í
-                    //      0   Ã»ÓĞÅäÖÃ
-                    //      1   ÕÒµ½
+                    //      -1  å‡ºé”™
+                    //      0   æ²¡æœ‰é…ç½®
+                    //      1   æ‰¾åˆ°
                     nRet = GetArrivedDbName(false, out strArrivedDbName, out strError);
                     if (nRet == -1 || nRet == 0)
                         goto ERROR1;
 #endif
                     if (string.IsNullOrEmpty(this.MainForm.ArrivedDbName) == true)
                     {
-                        strError = "µ±Ç°·şÎñÆ÷ÉĞÎ´ÅäÖÃÔ¤Ô¼µ½Êé¿âÃû";
+                        strError = "å½“å‰æœåŠ¡å™¨å°šæœªé…ç½®é¢„çº¦åˆ°ä¹¦åº“å";
                         goto ERROR1;
                     }
 
@@ -979,7 +979,7 @@ this.dp2QueryControl1.GetSaveString());
                         out strError);
                 }
                 else
-                    throw new Exception("Î´ÖªµÄDbType '" + this.DbType + "'");
+                    throw new Exception("æœªçŸ¥çš„DbType '" + this.DbType + "'");
 
                 if (lRet == -1)
                     goto ERROR1;
@@ -987,9 +987,9 @@ this.dp2QueryControl1.GetSaveString());
                 long lHitCount = lRet;
 
                 // return:
-                //      -1  ³ö´í
-                //      0   ÓÃ»§ÖĞ¶Ï
-                //      1   Õı³£Íê³É
+                //      -1  å‡ºé”™
+                //      0   ç”¨æˆ·ä¸­æ–­
+                //      1   æ­£å¸¸å®Œæˆ
                 nRet = FillBrowseList(
                     query,
                     lHitCount,
@@ -1000,7 +1000,7 @@ this.dp2QueryControl1.GetSaveString());
                     return 0;
 
                 // MessageBox.Show(this, Convert.ToString(lRet) + " : " + strError);
-                this.label_message.Text = "¼ìË÷¹²ÃüÖĞ " + lHitCount.ToString() + " Ìõ£¬ÒÑÈ«²¿×°Èë";
+                this.label_message.Text = "æ£€ç´¢å…±å‘½ä¸­ " + lHitCount.ToString() + " æ¡ï¼Œå·²å…¨éƒ¨è£…å…¥";
             }
             finally
             {
@@ -1019,19 +1019,19 @@ this.dp2QueryControl1.GetSaveString());
         return -1;
         }
 
-        #region Ô¤Ô¼µ½Êé¿âÏà¹Ø
+        #region é¢„çº¦åˆ°ä¹¦åº“ç›¸å…³
 
         static string[] arrive_froms = {
-                "²áÌõÂëºÅ",
-                "¶ÁÕßÖ¤ÌõÂëºÅ",
-                "²á²Î¿¼ID",
-                "×´Ì¬",
+                "å†Œæ¡ç å·",
+                "è¯»è€…è¯æ¡ç å·",
+                "å†Œå‚è€ƒID",
+                "çŠ¶æ€",
                 "__id"};
 
 #if NO
         /// <summary>
-        /// »ñµÃÔ¤Ô¼µ½Êé¿âµÄ¿âÃû
-        /// ×¢ÒâÊ¹ÓÃ´ËÊôĞÔµÄÊ±ºò£¬»á BeginLoop£¬Èç¹ûÍâ²ãÔø¾­ BeginLoop£¬»á´òÂÒ Stop µÄ×´Ì¬¡£ÒÔºóÕâÀï¿ÉÒÔ¸Ä½øÎªÊ¹ÓÃ Pooling Channel ¾ÍºÃÁË
+        /// è·å¾—é¢„çº¦åˆ°ä¹¦åº“çš„åº“å
+        /// æ³¨æ„ä½¿ç”¨æ­¤å±æ€§çš„æ—¶å€™ï¼Œä¼š BeginLoopï¼Œå¦‚æœå¤–å±‚æ›¾ç» BeginLoopï¼Œä¼šæ‰“ä¹± Stop çš„çŠ¶æ€ã€‚ä»¥åè¿™é‡Œå¯ä»¥æ”¹è¿›ä¸ºä½¿ç”¨ Pooling Channel å°±å¥½äº†
         /// </summary>
         string ArrivedDbName
         {
@@ -1041,9 +1041,9 @@ this.dp2QueryControl1.GetSaveString());
                 string strError = "";
                 string strArrivedDbName = "";
                 // return:
-                //      -1  ³ö´í
-                //      0   Ã»ÓĞÅäÖÃ
-                //      1   ÕÒµ½
+                //      -1  å‡ºé”™
+                //      0   æ²¡æœ‰é…ç½®
+                //      1   æ‰¾åˆ°
                 int nRet = GetArrivedDbName(true, out strArrivedDbName, out strError);
                 if (nRet == -1 || nRet == 0)
                     throw new Exception(strError);
@@ -1055,9 +1055,9 @@ this.dp2QueryControl1.GetSaveString());
         string _arrivedDbName = "";
 
         // return:
-        //      -1  ³ö´í
-        //      0   Ã»ÓĞÅäÖÃ
-        //      1   ÕÒµ½
+        //      -1  å‡ºé”™
+        //      0   æ²¡æœ‰é…ç½®
+        //      1   æ‰¾åˆ°
         int GetArrivedDbName(
             bool bBeginLoop,
             out string strDbName,
@@ -1075,7 +1075,7 @@ this.dp2QueryControl1.GetSaveString());
             if (bBeginLoop == true)
             {
                 stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.SetMessage("ÕıÔÚ»ñÈ¡Ô¤Ô¼µ½Êé¿âÃû ...");
+                stop.SetMessage("æ­£åœ¨è·å–é¢„çº¦åˆ°ä¹¦åº“å ...");
                 stop.BeginLoop();
             }
 
@@ -1092,7 +1092,7 @@ this.dp2QueryControl1.GetSaveString());
                 if (lRet == 0
                     || string.IsNullOrEmpty(strDbName) == true)
                 {
-                    strError = "Ô¤Ô¼µ½Êé¿âÃûÃ»ÓĞÅäÖÃ";
+                    strError = "é¢„çº¦åˆ°ä¹¦åº“åæ²¡æœ‰é…ç½®";
                     return 0;   // not found
                 }
                 this._arrivedDbName = strDbName;
@@ -1113,9 +1113,9 @@ this.dp2QueryControl1.GetSaveString());
         #endregion
 
         // return:
-        //      -1  ³ö´í
-        //      0   ÓÃ»§ÖĞ¶Ï»òÕßÎ´ÃüÖĞ
-        //      1   Õı³£Íê³É
+        //      -1  å‡ºé”™
+        //      0   ç”¨æˆ·ä¸­æ–­æˆ–è€…æœªå‘½ä¸­
+        //      1   æ­£å¸¸å®Œæˆ
         int FillBrowseList(
             ItemQueryParam query,
             long lHitCount,
@@ -1140,7 +1140,7 @@ this.dp2QueryControl1.GetSaveString());
                 strBrowseStyle = "keyid,key,id,cols";
             }
             //
-            this.label_message.Text = "¼ìË÷¹²ÃüÖĞ " + lHitCount.ToString() + " Ìõ";
+            this.label_message.Text = "æ£€ç´¢å…±å‘½ä¸­ " + lHitCount.ToString() + " æ¡";
             stop.SetProgressRange(0, lHitCount);
             stop.Style = StopStyle.EnableHalfStop;
 
@@ -1152,17 +1152,17 @@ this.dp2QueryControl1.GetSaveString());
             bool bPushFillingBrowse = this.PushFillingBrowse;
 
 
-            // ×°Èëä¯ÀÀ¸ñÊ½
+            // è£…å…¥æµè§ˆæ ¼å¼
             for (; ; )
             {
-                Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                 if (stop != null)
                 {
                     if (stop.State != 0)
                     {
-                        // MessageBox.Show(this, "ÓÃ»§ÖĞ¶Ï");
-                        this.label_message.Text = "¼ìË÷¹²ÃüÖĞ " + lHitCount.ToString() + " Ìõ£¬ÒÑ×°Èë " + lStart.ToString() + " Ìõ£¬ÓÃ»§ÖĞ¶Ï...";
+                        // MessageBox.Show(this, "ç”¨æˆ·ä¸­æ–­");
+                        this.label_message.Text = "æ£€ç´¢å…±å‘½ä¸­ " + lHitCount.ToString() + " æ¡ï¼Œå·²è£…å…¥ " + lStart.ToString() + " æ¡ï¼Œç”¨æˆ·ä¸­æ–­...";
                         return 0;
                     }
                 }
@@ -1179,17 +1179,17 @@ this.dp2QueryControl1.GetSaveString());
                     out strError);
                 if (lRet == -1)
                 {
-                    this.label_message.Text = "¼ìË÷¹²ÃüÖĞ " + lHitCount.ToString() + " Ìõ£¬ÒÑ×°Èë " + lStart.ToString() + " Ìõ£¬" + strError;
+                    this.label_message.Text = "æ£€ç´¢å…±å‘½ä¸­ " + lHitCount.ToString() + " æ¡ï¼Œå·²è£…å…¥ " + lStart.ToString() + " æ¡ï¼Œ" + strError;
                     goto ERROR1;
                 }
 
                 if (lRet == 0)
                 {
-                    MessageBox.Show(this, "Î´ÃüÖĞ");
+                    MessageBox.Show(this, "æœªå‘½ä¸­");
                     return 0;
                 }
 
-                // ´¦Àíä¯ÀÀ½á¹û
+                // å¤„ç†æµè§ˆç»“æœ
                 this.listView_records.BeginUpdate();
                 try
                 {
@@ -1216,10 +1216,10 @@ this.dp2QueryControl1.GetSaveString());
                         }
                         else if (bOutputKeyCount == true)
                         {
-                            // Êä³ökeys
+                            // è¾“å‡ºkeys
                             if (searchresult.Cols == null)
                             {
-                                strError = "ÒªÊ¹ÓÃ»ñÈ¡¼ìË÷µã¹¦ÄÜ£¬Çë½« dp2Library Ó¦ÓÃ·şÎñÆ÷ºÍ dp2Kernel Êı¾İ¿âÄÚºËÉı¼¶µ½×îĞÂ°æ±¾";
+                                strError = "è¦ä½¿ç”¨è·å–æ£€ç´¢ç‚¹åŠŸèƒ½ï¼Œè¯·å°† dp2Library åº”ç”¨æœåŠ¡å™¨å’Œ dp2Kernel æ•°æ®åº“å†…æ ¸å‡çº§åˆ°æœ€æ–°ç‰ˆæœ¬";
                                 goto ERROR1;
                             }
                             string[] cols = new string[(searchresult.Cols == null ? 0 : searchresult.Cols.Length) + 1];
@@ -1243,7 +1243,7 @@ this.dp2QueryControl1.GetSaveString());
                         {
                             if (searchresult.Cols == null)
                             {
-                                strError = "ÒªÊ¹ÓÃ´øÓĞ¼ìË÷µãµÄ¼ìË÷¹¦ÄÜ£¬Çë½« dp2Library Ó¦ÓÃ·şÎñÆ÷ºÍ dp2Kernel Êı¾İ¿âÄÚºËÉı¼¶µ½×îĞÂ°æ±¾";
+                                strError = "è¦ä½¿ç”¨å¸¦æœ‰æ£€ç´¢ç‚¹çš„æ£€ç´¢åŠŸèƒ½ï¼Œè¯·å°† dp2Library åº”ç”¨æœåŠ¡å™¨å’Œ dp2Kernel æ•°æ®åº“å†…æ ¸å‡çº§åˆ°æœ€æ–°ç‰ˆæœ¬";
                                 goto ERROR1;
                             }
 
@@ -1279,10 +1279,10 @@ this.dp2QueryControl1.GetSaveString());
                         && bAccessBiblioSummaryDenied == false)
                     {
                         // return:
-                        //      -2  »ñµÃÊéÄ¿ÕªÒªµÄÈ¨ÏŞ²»¹»
-                        //      -1  ³ö´í
-                        //      0   ÓÃ»§ÖĞ¶Ï
-                        //      1   Íê³É
+                        //      -2  è·å¾—ä¹¦ç›®æ‘˜è¦çš„æƒé™ä¸å¤Ÿ
+                        //      -1  å‡ºé”™
+                        //      0   ç”¨æˆ·ä¸­æ–­
+                        //      1   å®Œæˆ
                         int nRet = _fillBiblioSummaryColumn(items,
                             0,
                             false,
@@ -1295,7 +1295,7 @@ this.dp2QueryControl1.GetSaveString());
 
                         if (nRet == 0)
                         {
-                            this.label_message.Text = "¼ìË÷¹²ÃüÖĞ " + lHitCount.ToString() + " Ìõ£¬ÒÑ×°Èë " + lStart.ToString() + " Ìõ£¬ÓÃ»§ÖĞ¶Ï...";
+                            this.label_message.Text = "æ£€ç´¢å…±å‘½ä¸­ " + lHitCount.ToString() + " æ¡ï¼Œå·²è£…å…¥ " + lStart.ToString() + " æ¡ï¼Œç”¨æˆ·ä¸­æ–­...";
                             return 0;
                         }
                     }
@@ -1316,7 +1316,7 @@ this.dp2QueryControl1.GetSaveString());
                 lStart += searchresults.Length;
                 lCount -= searchresults.Length;
 
-                stop.SetMessage("¹²ÃüÖĞ " + lHitCount.ToString() + " Ìõ£¬ÒÑ×°Èë " + lStart.ToString() + " Ìõ");
+                stop.SetMessage("å…±å‘½ä¸­ " + lHitCount.ToString() + " æ¡ï¼Œå·²è£…å…¥ " + lStart.ToString() + " æ¡");
 
                 if (lStart >= lHitCount || lCount <= 0)
                     break;
@@ -1324,14 +1324,14 @@ this.dp2QueryControl1.GetSaveString());
             }
 
             if (bAccessBiblioSummaryDenied == true)
-                MessageBox.Show(this, "µ±Ç°ÓÃ»§²»¾ß±¸»ñÈ¡ÊéÄ¿ÕªÒªµÄÈ¨ÏŞ");
+                MessageBox.Show(this, "å½“å‰ç”¨æˆ·ä¸å…·å¤‡è·å–ä¹¦ç›®æ‘˜è¦çš„æƒé™");
 
             return 1;
         ERROR1:
             return -1;
         }
 
-        // ÔÚµÚÒ»ÁĞÇ°Ãæ²åÈëÒ»¸ö¿Õ°×ÁĞ
+        // åœ¨ç¬¬ä¸€åˆ—å‰é¢æ’å…¥ä¸€ä¸ªç©ºç™½åˆ—
         static string[] InsertBlankColumn(string [] cols,
             int nDelta = 1)
         {
@@ -1347,9 +1347,9 @@ this.dp2QueryControl1.GetSaveString());
 
 
         /// <summary>
-        /// ÔÊĞí»òÕß½ûÖ¹½çÃæ¿Ø¼ş¡£ÔÚ³¤²Ù×÷Ç°£¬Ò»°ãĞèÒª½ûÖ¹½çÃæ¿Ø¼ş£»²Ù×÷Íê³ÉºóÔÙÔÊĞí
+        /// å…è®¸æˆ–è€…ç¦æ­¢ç•Œé¢æ§ä»¶ã€‚åœ¨é•¿æ“ä½œå‰ï¼Œä¸€èˆ¬éœ€è¦ç¦æ­¢ç•Œé¢æ§ä»¶ï¼›æ“ä½œå®Œæˆåå†å…è®¸
         /// </summary>
-        /// <param name="bEnable">ÊÇ·ñÔÊĞí½çÃæ¿Ø¼ş¡£true ÎªÔÊĞí£¬ false Îª½ûÖ¹</param>
+        /// <param name="bEnable">æ˜¯å¦å…è®¸ç•Œé¢æ§ä»¶ã€‚true ä¸ºå…è®¸ï¼Œ false ä¸ºç¦æ­¢</param>
         public override void EnableControls(bool bEnable)
         {
             this.button_search.Enabled = bEnable;
@@ -1361,7 +1361,7 @@ this.dp2QueryControl1.GetSaveString());
 
             this.toolStrip_search.Enabled = bEnable;
 
-            if (this.comboBox_matchStyle.Text == "¿ÕÖµ")
+            if (this.comboBox_matchStyle.Text == "ç©ºå€¼")
             {
                 this.textBox_queryWord.Enabled = false;
             }
@@ -1398,7 +1398,7 @@ this.dp2QueryControl1.GetSaveString());
         {
             if (this.listView_records.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´ÔÚÁĞ±íÖĞÑ¡¶¨Òª×°Èë²áĞÅÏ¢´°µÄ²áÊÂÏî");
+                MessageBox.Show(this, "å°šæœªåœ¨åˆ—è¡¨ä¸­é€‰å®šè¦è£…å…¥å†Œä¿¡æ¯çª—çš„å†Œäº‹é¡¹");
                 return;
             }
 
@@ -1430,7 +1430,7 @@ this.dp2QueryControl1.GetSaveString());
         {
             if (this.listView_records.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´ÔÚÁĞ±íÖĞÑ¡¶¨Òª×°Èë²áĞÅÏ¢´°µÄ²áÊÂÏî");
+                MessageBox.Show(this, "å°šæœªåœ¨åˆ—è¡¨ä¸­é€‰å®šè¦è£…å…¥å†Œä¿¡æ¯çª—çš„å†Œäº‹é¡¹");
                 return;
             }
 
@@ -1458,13 +1458,13 @@ this.dp2QueryControl1.GetSaveString());
             form.LoadRecord(strBarcode);
         }
 
-        // ×°ÈëÖÖ²á´°£¬ÓÃ²á¼ÇÂ¼Â·¾¶
-        // ×Ô¶¯ÅĞ¶Ï¸Ã´ò¿ªĞÂ´°¿Ú»¹ÊÇÕ¼ÓÃÒÑÓĞµÄ´°¿Ú
+        // è£…å…¥ç§å†Œçª—ï¼Œç”¨å†Œè®°å½•è·¯å¾„
+        // è‡ªåŠ¨åˆ¤æ–­è¯¥æ‰“å¼€æ–°çª—å£è¿˜æ˜¯å ç”¨å·²æœ‰çš„çª—å£
         void menu_loadToEntityFormByRecPath_Click(object sender, EventArgs e)
         {
             if (this.listView_records.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´ÔÚÁĞ±íÖĞÑ¡¶¨Òª×°ÈëÖÖ²á´°µÄ²áÊÂÏî");
+                MessageBox.Show(this, "å°šæœªåœ¨åˆ—è¡¨ä¸­é€‰å®šè¦è£…å…¥ç§å†Œçª—çš„å†Œäº‹é¡¹");
                 return;
             }
 
@@ -1490,7 +1490,7 @@ this.dp2QueryControl1.GetSaveString());
             }
 
             // parameters:
-            //      bAutoSavePrev   ÊÇ·ñ×Ô¶¯Ìá½»±£´æÏÈÇ°·¢Éú¹ıµÄĞŞ¸Ä£¿Èç¹û==true£¬ÊÇ£»Èç¹û==false£¬ÔòÒª³öÏÖMessageBoxÌáÊ¾
+            //      bAutoSavePrev   æ˜¯å¦è‡ªåŠ¨æäº¤ä¿å­˜å…ˆå‰å‘ç”Ÿè¿‡çš„ä¿®æ”¹ï¼Ÿå¦‚æœ==trueï¼Œæ˜¯ï¼›å¦‚æœ==falseï¼Œåˆ™è¦å‡ºç°MessageBoxæç¤º
             // return:
             //      -1  error
             //      0   not found
@@ -1498,12 +1498,12 @@ this.dp2QueryControl1.GetSaveString());
             form.LoadItemByRecPath(strItemRecPath, false);
         }
 
-        // ×°ÈëÖÖ²á´°£¬ÓÃ²áÌõÂëºÅ
+        // è£…å…¥ç§å†Œçª—ï¼Œç”¨å†Œæ¡ç å·
         void menu_loadToEntityFormByBarcode_Click(object sender, EventArgs e)
         {
             if (this.listView_records.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´ÔÚÁĞ±íÖĞÑ¡¶¨Òª×°ÈëÖÖ²á´°µÄ²áÊÂÏî");
+                MessageBox.Show(this, "å°šæœªåœ¨åˆ—è¡¨ä¸­é€‰å®šè¦è£…å…¥ç§å†Œçª—çš„å†Œäº‹é¡¹");
                 return;
             }
 
@@ -1528,9 +1528,9 @@ this.dp2QueryControl1.GetSaveString());
                 form.Show();
             }
 
-            // ×°ÔØÒ»¸ö²á£¬Á¬´ø×°ÈëÖÖ
+            // è£…è½½ä¸€ä¸ªå†Œï¼Œè¿å¸¦è£…å…¥ç§
             // parameters:
-            //      bAutoSavePrev   ÊÇ·ñ×Ô¶¯Ìá½»±£´æÏÈÇ°·¢Éú¹ıµÄĞŞ¸Ä£¿Èç¹û==true£¬ÊÇ£»Èç¹û==false£¬ÔòÒª³öÏÖMessageBoxÌáÊ¾
+            //      bAutoSavePrev   æ˜¯å¦è‡ªåŠ¨æäº¤ä¿å­˜å…ˆå‰å‘ç”Ÿè¿‡çš„ä¿®æ”¹ï¼Ÿå¦‚æœ==trueï¼Œæ˜¯ï¼›å¦‚æœ==falseï¼Œåˆ™è¦å‡ºç°MessageBoxæç¤º
             // return:
             //      -1  error
             //      0   not found
@@ -1541,8 +1541,8 @@ this.dp2QueryControl1.GetSaveString());
 #endif
 
         /// <summary>
-        /// »ñµÃÅäÖÃ²ÎÊı£ºµ±ÔÚä¯ÀÀ¿òÖĞË«»÷Êó±ê×ó¼ü»òÕß»Ø³µ´ò¿ªÒ»¸ö´°¿Ú¹Û²ìµ±Ç°ĞĞµÄÊ±ºò£¬ÊÇ·ñÓÅÏÈ×°ÈëÒÑ¾­´ò¿ªµÄÖÖ²á´°/²á´°/¶©¹º´°/ÆÚ´°/ÆÀ×¢´°?
-        /// Õâ¸öÅäÖÃ²ÎÊıÊÇ¶ÔËùÓĞÀàĞÍµÄ²éÑ¯´°´°¶¼ÊÊÓÃµÄ
+        /// è·å¾—é…ç½®å‚æ•°ï¼šå½“åœ¨æµè§ˆæ¡†ä¸­åŒå‡»é¼ æ ‡å·¦é”®æˆ–è€…å›è½¦æ‰“å¼€ä¸€ä¸ªçª—å£è§‚å¯Ÿå½“å‰è¡Œçš„æ—¶å€™ï¼Œæ˜¯å¦ä¼˜å…ˆè£…å…¥å·²ç»æ‰“å¼€çš„ç§å†Œçª—/å†Œçª—/è®¢è´­çª—/æœŸçª—/è¯„æ³¨çª—?
+        /// è¿™ä¸ªé…ç½®å‚æ•°æ˜¯å¯¹æ‰€æœ‰ç±»å‹çš„æŸ¥è¯¢çª—çª—éƒ½é€‚ç”¨çš„
         /// </summary>
         public bool LoadToExistWindow
         {
@@ -1556,8 +1556,8 @@ this.dp2QueryControl1.GetSaveString());
         }
 
         /// <summary>
-        /// »ñµÃÅäÖÃ²ÎÊı£ºÊÇ·ñ×°Èë²á´°/¶©¹º´°/ÆÚ´°/ÆÀ×¢´°(¶ø²»ÊÇÖÖ²á´°)?
-        /// Õâ¸öÅäÖÃ²ÎÊı½ö¶Ô ItemSearchForm ÊÊÓÃ
+        /// è·å¾—é…ç½®å‚æ•°ï¼šæ˜¯å¦è£…å…¥å†Œçª—/è®¢è´­çª—/æœŸçª—/è¯„æ³¨çª—(è€Œä¸æ˜¯ç§å†Œçª—)?
+        /// è¿™ä¸ªé…ç½®å‚æ•°ä»…å¯¹ ItemSearchForm é€‚ç”¨
         /// </summary>
         public bool LoadToItemWindow
         {
@@ -1582,7 +1582,7 @@ this.dp2QueryControl1.GetSaveString());
         {
             if (this.listView_records.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´ÔÚÁĞ±íÖĞÑ¡¶¨Òª²Ù×÷µÄÊÂÏî");
+                MessageBox.Show(this, "å°šæœªåœ¨åˆ—è¡¨ä¸­é€‰å®šè¦æ“ä½œçš„äº‹é¡¹");
                 return;
             }
 
@@ -1604,11 +1604,11 @@ this.dp2QueryControl1.GetSaveString());
                     return;
                 }
 
-                // ×°ÈëÖÖ²á´°/ÊµÌå´°£¬ÓÃ²áÌõÂëºÅ/¼ÇÂ¼Â·¾¶
+                // è£…å…¥ç§å†Œçª—/å®ä½“çª—ï¼Œç”¨å†Œæ¡ç å·/è®°å½•è·¯å¾„
                 // parameters:
-                //      strTargetFormType   Ä¿±ê´°¿ÚÀàĞÍ "EntityForm" "ItemInfoForm"
-                //      strIdType   ±êÊ¶ÀàĞÍ "barcode" "recpath"
-                //      strOpenType ´ò¿ª´°¿ÚµÄ·½Ê½ "new" "exist"
+                //      strTargetFormType   ç›®æ ‡çª—å£ç±»å‹ "EntityForm" "ItemInfoForm"
+                //      strIdType   æ ‡è¯†ç±»å‹ "barcode" "recpath"
+                //      strOpenType æ‰“å¼€çª—å£çš„æ–¹å¼ "new" "exist"
                 LoadRecord("EntityForm",
                     "recpath",
                     strOpenStyle);
@@ -1626,9 +1626,9 @@ this.dp2QueryControl1.GetSaveString());
                 }
 
                 if (this.textBox_queryWord.Text == "")    // 2009/8/6 
-                    this.comboBox_matchStyle.Text = "¿ÕÖµ";
+                    this.comboBox_matchStyle.Text = "ç©ºå€¼";
                 else
-                    this.comboBox_matchStyle.Text = "¾«È·Ò»ÖÂ";
+                    this.comboBox_matchStyle.Text = "ç²¾ç¡®ä¸€è‡´";
 
                 DoSearch(false, false, null);
             }
@@ -1643,23 +1643,23 @@ this.dp2QueryControl1.GetSaveString());
             // this.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
         }
 
-        // ×°ÈëÖÖ²á´°/ÊµÌå´°£¬ÓÃ²áÌõÂëºÅ/¼ÇÂ¼Â·¾¶
+        // è£…å…¥ç§å†Œçª—/å®ä½“çª—ï¼Œç”¨å†Œæ¡ç å·/è®°å½•è·¯å¾„
         // parameters:
-        //      strTargetFormType   Ä¿±ê´°¿ÚÀàĞÍ "EntityForm" "ItemInfoForm"
-        //      strIdType   ±êÊ¶ÀàĞÍ "barcode" "recpath"
-        //      strOpenType ´ò¿ª´°¿ÚµÄ·½Ê½ "new" "exist"
+        //      strTargetFormType   ç›®æ ‡çª—å£ç±»å‹ "EntityForm" "ItemInfoForm"
+        //      strIdType   æ ‡è¯†ç±»å‹ "barcode" "recpath"
+        //      strOpenType æ‰“å¼€çª—å£çš„æ–¹å¼ "new" "exist"
         void LoadRecord(string strTargetFormType,
             string strIdType,
             string strOpenType)
         {
-            string strTargetFormName = "ÖÖ²á´°";
+            string strTargetFormName = "ç§å†Œçª—";
 
             if (strTargetFormType == "ItemInfoForm")
-                strTargetFormName = "ÊµÌå´°";
+                strTargetFormName = "å®ä½“çª—";
 
             if (this.listView_records.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´ÔÚÁĞ±íÖĞÑ¡¶¨Òª×°Èë" + strTargetFormName + "µÄĞĞ");
+                MessageBox.Show(this, "å°šæœªåœ¨åˆ—è¡¨ä¸­é€‰å®šè¦è£…å…¥" + strTargetFormName + "çš„è¡Œ");
                 return;
             }
 
@@ -1670,7 +1670,7 @@ this.dp2QueryControl1.GetSaveString());
                 // barcode
                 // strBarcodeOrRecPath = ListViewUtil.GetItemText(this.listView_records.SelectedItems[0], 1);
                 string strError = "";
-                // ¸ù¾İ ListViewItem ¶ÔÏó£¬»ñµÃ²áÌõÂëºÅÁĞµÄÄÚÈİ
+                // æ ¹æ® ListViewItem å¯¹è±¡ï¼Œè·å¾—å†Œæ¡ç å·åˆ—çš„å†…å®¹
                 int nRet = GetItemBarcodeOrRefID(
                     this.listView_records.SelectedItems[0],
                     true,
@@ -1716,9 +1716,9 @@ this.dp2QueryControl1.GetSaveString());
 
                 if (strIdType == "barcode")
                 {
-                    // ×°ÔØÒ»¸ö²á£¬Á¬´ø×°ÈëÖÖ
+                    // è£…è½½ä¸€ä¸ªå†Œï¼Œè¿å¸¦è£…å…¥ç§
                     // parameters:
-                    //      bAutoSavePrev   ÊÇ·ñ×Ô¶¯Ìá½»±£´æÏÈÇ°·¢Éú¹ıµÄĞŞ¸Ä£¿Èç¹û==true£¬ÊÇ£»Èç¹û==false£¬ÔòÒª³öÏÖMessageBoxÌáÊ¾
+                    //      bAutoSavePrev   æ˜¯å¦è‡ªåŠ¨æäº¤ä¿å­˜å…ˆå‰å‘ç”Ÿè¿‡çš„ä¿®æ”¹ï¼Ÿå¦‚æœ==trueï¼Œæ˜¯ï¼›å¦‚æœ==falseï¼Œåˆ™è¦å‡ºç°MessageBoxæç¤º
                     // return:
                     //      -1  error
                     //      0   not found
@@ -1732,7 +1732,7 @@ this.dp2QueryControl1.GetSaveString());
                     if (this.DbType == "item")
                     {
                         // parameters:
-                        //      bAutoSavePrev   ÊÇ·ñ×Ô¶¯Ìá½»±£´æÏÈÇ°·¢Éú¹ıµÄĞŞ¸Ä£¿Èç¹û==true£¬ÊÇ£»Èç¹û==false£¬ÔòÒª³öÏÖMessageBoxÌáÊ¾
+                        //      bAutoSavePrev   æ˜¯å¦è‡ªåŠ¨æäº¤ä¿å­˜å…ˆå‰å‘ç”Ÿè¿‡çš„ä¿®æ”¹ï¼Ÿå¦‚æœ==trueï¼Œæ˜¯ï¼›å¦‚æœ==falseï¼Œåˆ™è¦å‡ºç°MessageBoxæç¤º
                         // return:
                         //      -1  error
                         //      0   not found
@@ -1746,7 +1746,7 @@ this.dp2QueryControl1.GetSaveString());
                     else if (this.DbType == "issue")
                         form.LoadIssueByRecPath(strBarcodeOrRecPath, false);
                     else
-                        throw new Exception("Î´ÖªµÄDbType '" + this.DbType + "'");
+                        throw new Exception("æœªçŸ¥çš„DbType '" + this.DbType + "'");
                 }
             }
             else
@@ -1790,7 +1790,7 @@ this.dp2QueryControl1.GetSaveString());
                 {
                     Debug.Assert(strIdType == "recpath", "");
 
-                    // TODO: ĞèÒª¸ÄÔìÎªÊÊÓ¦¶àÖÖ¼ÇÂ¼
+                    // TODO: éœ€è¦æ”¹é€ ä¸ºé€‚åº”å¤šç§è®°å½•
                     form.LoadRecordByRecPath(strBarcodeOrRecPath, "");
                 }
             }
@@ -1874,13 +1874,13 @@ out strError);
             if (nRet == -1)
                 return -1;
             // 2015/6/14
-            // Èç¹û²áÌõÂëºÅÎª¿Õ£¬Ôò³¢ÊÔÓÃ ²Î¿¼ID
+            // å¦‚æœå†Œæ¡ç å·ä¸ºç©ºï¼Œåˆ™å°è¯•ç”¨ å‚è€ƒID
             if (string.IsNullOrEmpty(strBarcode) == true)
             {
                 // return:
-                //      -2  Ã»ÓĞÕÒµ½ÁĞ type
-                //      -1  ³ö´í
-                //      >=0 ÁĞºÅ
+                //      -2  æ²¡æœ‰æ‰¾åˆ°åˆ— type
+                //      -1  å‡ºé”™
+                //      >=0 åˆ—å·
                 nRet = GetColumnText(item,
 "item_refid",
 out strBarcode,
@@ -1920,14 +1920,14 @@ out strError);
                         strRecPath = this.listView_records.SelectedItems[0].Text;
                 }
 
-                string strOpenStyle = "ĞÂ¿ªµÄ";
+                string strOpenStyle = "æ–°å¼€çš„";
                 if (this.LoadToExistWindow == true)
-                    strOpenStyle = "ÒÑ´ò¿ªµÄ";
+                    strOpenStyle = "å·²æ‰“å¼€çš„";
 
                 bool bLoadToItemWindow = this.LoadToItemWindow;
 
-                menuItem = new MenuItem("´ò¿ª [¸ù¾İ" + this.DbTypeCaption + "¼ÇÂ¼Â·¾¶ '" + strRecPath + "' ×°Èëµ½" + strOpenStyle
-                    + (bLoadToItemWindow == true ? DbTypeCaption + "´°" : "ÖÖ²á´°")
+                menuItem = new MenuItem("æ‰“å¼€ [æ ¹æ®" + this.DbTypeCaption + "è®°å½•è·¯å¾„ '" + strRecPath + "' è£…å…¥åˆ°" + strOpenStyle
+                    + (bLoadToItemWindow == true ? DbTypeCaption + "çª—" : "ç§å†Œçª—")
                     + "](&O)");
                 menuItem.DefaultItem = true;
                 menuItem.Click += new System.EventHandler(this.listView_records_DoubleClick);
@@ -1951,43 +1951,43 @@ out strError);
                 bool bExistItemInfoForm = (this.MainForm.GetTopChildWindow<ItemInfoForm>() != null);
 
                 //
-                menuItem = new MenuItem("´ò¿ª·½Ê½(&T)");
+                menuItem = new MenuItem("æ‰“å¼€æ–¹å¼(&T)");
                 contextMenu.MenuItems.Add(menuItem);
 
-                // µÚÒ»¼¶×Ó²Ëµ¥
+                // ç¬¬ä¸€çº§å­èœå•
 
-                strOpenStyle = "ĞÂ¿ªµÄ";
+                strOpenStyle = "æ–°å¼€çš„";
 
-                // µ½²á´°£¬¼ÇÂ¼Â·¾¶
-                MenuItem subMenuItem = new MenuItem("×°Èë" + strOpenStyle + this.DbTypeCaption + "´°£¬¸ù¾İ¼ÇÂ¼Â·¾¶ '" + strRecPath + "'");
+                // åˆ°å†Œçª—ï¼Œè®°å½•è·¯å¾„
+                MenuItem subMenuItem = new MenuItem("è£…å…¥" + strOpenStyle + this.DbTypeCaption + "çª—ï¼Œæ ¹æ®è®°å½•è·¯å¾„ '" + strRecPath + "'");
                 subMenuItem.Click += new System.EventHandler(this.menu_itemInfoForm_recPath_newly_Click);
                 if (String.IsNullOrEmpty(strRecPath) == true)
                     subMenuItem.Enabled = false;
                 menuItem.MenuItems.Add(subMenuItem);
 
-                // µ½²á´°£¬ÌõÂë
+                // åˆ°å†Œçª—ï¼Œæ¡ç 
                 // if (this.DbType == "item")
                 if (string.IsNullOrEmpty(strBarcode) == false)
                 {
-                    subMenuItem = new MenuItem("×°Èë" + strOpenStyle + this.DbTypeCaption + "´°£¬¸ù¾İ²áÌõÂëºÅ '" + strBarcode + "'");
+                    subMenuItem = new MenuItem("è£…å…¥" + strOpenStyle + this.DbTypeCaption + "çª—ï¼Œæ ¹æ®å†Œæ¡ç å· '" + strBarcode + "'");
                     subMenuItem.Click += new System.EventHandler(this.menu_itemInfoForm_barcode_newly_Click);
                     if (String.IsNullOrEmpty(strBarcode) == true)
                         subMenuItem.Enabled = false;
                     menuItem.MenuItems.Add(subMenuItem);
                 }
 
-                // µ½ÖÖ²á´°£¬¼ÇÂ¼Â·¾¶
-                subMenuItem = new MenuItem("×°Èë" + strOpenStyle + "ÖÖ²á´°£¬¸ù¾İ¼ÇÂ¼Â·¾¶ '" + strRecPath + "'");
+                // åˆ°ç§å†Œçª—ï¼Œè®°å½•è·¯å¾„
+                subMenuItem = new MenuItem("è£…å…¥" + strOpenStyle + "ç§å†Œçª—ï¼Œæ ¹æ®è®°å½•è·¯å¾„ '" + strRecPath + "'");
                 subMenuItem.Click += new System.EventHandler(this.menu_entityForm_recPath_newly_Click);
                 if (String.IsNullOrEmpty(strRecPath) == true)
                     subMenuItem.Enabled = false;
                 menuItem.MenuItems.Add(subMenuItem);
 
-                // µ½ÖÖ²á´°£¬ÌõÂë
+                // åˆ°ç§å†Œçª—ï¼Œæ¡ç 
                 // if (this.DbType == "item")
                 if (string.IsNullOrEmpty(strBarcode) == false)
                 {
-                    subMenuItem = new MenuItem("×°Èë" + strOpenStyle + "ÖÖ²á´°£¬¸ù¾İ²áÌõÂëºÅ '" + strBarcode + "'");
+                    subMenuItem = new MenuItem("è£…å…¥" + strOpenStyle + "ç§å†Œçª—ï¼Œæ ¹æ®å†Œæ¡ç å· '" + strBarcode + "'");
                     subMenuItem.Click += new System.EventHandler(this.menu_entityForm_barcode_newly_Click);
                     if (String.IsNullOrEmpty(strBarcode) == true)
                         subMenuItem.Enabled = false;
@@ -1998,21 +1998,21 @@ out strError);
                 subMenuItem = new MenuItem("-");
                 menuItem.MenuItems.Add(subMenuItem);
 
-                strOpenStyle = "ÒÑ´ò¿ªµÄ";
+                strOpenStyle = "å·²æ‰“å¼€çš„";
 
-                // µ½²á´°£¬¼ÇÂ¼Â·¾¶
-                subMenuItem = new MenuItem("×°Èë" + strOpenStyle + this.DbTypeCaption + "´°£¬¸ù¾İ¼ÇÂ¼Â·¾¶ '" + strRecPath + "'");
+                // åˆ°å†Œçª—ï¼Œè®°å½•è·¯å¾„
+                subMenuItem = new MenuItem("è£…å…¥" + strOpenStyle + this.DbTypeCaption + "çª—ï¼Œæ ¹æ®è®°å½•è·¯å¾„ '" + strRecPath + "'");
                 subMenuItem.Click += new System.EventHandler(this.menu_itemInfoForm_recPath_exist_Click);
                 if (String.IsNullOrEmpty(strRecPath) == true
                     || bExistItemInfoForm == false)
                     subMenuItem.Enabled = false;
                 menuItem.MenuItems.Add(subMenuItem);
 
-                // µ½²á´°£¬ÌõÂë
+                // åˆ°å†Œçª—ï¼Œæ¡ç 
                 //if (this.DbType == "item")
                 if (string.IsNullOrEmpty(strBarcode) == false)
                 {
-                    subMenuItem = new MenuItem("×°Èë" + strOpenStyle + this.DbTypeCaption + "´°£¬¸ù¾İ²áÌõÂëºÅ '" + strBarcode + "'");
+                    subMenuItem = new MenuItem("è£…å…¥" + strOpenStyle + this.DbTypeCaption + "çª—ï¼Œæ ¹æ®å†Œæ¡ç å· '" + strBarcode + "'");
                     subMenuItem.Click += new System.EventHandler(this.menu_itemInfoForm_barcode_exist_Click);
                     if (String.IsNullOrEmpty(strBarcode) == true
                         || bExistItemInfoForm == false)
@@ -2020,19 +2020,19 @@ out strError);
                     menuItem.MenuItems.Add(subMenuItem);
                 }
 
-                // µ½ÖÖ²á´°£¬¼ÇÂ¼Â·¾¶
-                subMenuItem = new MenuItem("×°Èë" + strOpenStyle + "ÖÖ²á´°£¬¸ù¾İ¼ÇÂ¼Â·¾¶ '" + strRecPath + "'");
+                // åˆ°ç§å†Œçª—ï¼Œè®°å½•è·¯å¾„
+                subMenuItem = new MenuItem("è£…å…¥" + strOpenStyle + "ç§å†Œçª—ï¼Œæ ¹æ®è®°å½•è·¯å¾„ '" + strRecPath + "'");
                 subMenuItem.Click += new System.EventHandler(this.menu_entityForm_recPath_exist_Click);
                 if (String.IsNullOrEmpty(strRecPath) == true
                     || bExistEntityForm == false)
                     subMenuItem.Enabled = false;
                 menuItem.MenuItems.Add(subMenuItem);
 
-                // µ½ÖÖ²á´°£¬ÌõÂë
+                // åˆ°ç§å†Œçª—ï¼Œæ¡ç 
 //                if (this.DbType == "item")
                 if (string.IsNullOrEmpty(strBarcode) == false)
                 {
-                    subMenuItem = new MenuItem("×°Èë" + strOpenStyle + "ÖÖ²á´°£¬¸ù¾İ²áÌõÂëºÅ '" + strBarcode + "'");
+                    subMenuItem = new MenuItem("è£…å…¥" + strOpenStyle + "ç§å†Œçª—ï¼Œæ ¹æ®å†Œæ¡ç å· '" + strBarcode + "'");
                     subMenuItem.Click += new System.EventHandler(this.menu_entityForm_barcode_exist_Click);
                     if (String.IsNullOrEmpty(strBarcode) == true
                         || bExistEntityForm == false)
@@ -2047,12 +2047,12 @@ out strError);
             {
                 string strKey = ListViewUtil.GetItemText(this.listView_records.SelectedItems[0], 1);
 
-                menuItem = new MenuItem("¼ìË÷ '" + strKey + "' (&S)");
+                menuItem = new MenuItem("æ£€ç´¢ '" + strKey + "' (&S)");
                 menuItem.DefaultItem = true;
                 menuItem.Click += new System.EventHandler(this.listView_records_DoubleClick);
                 contextMenu.MenuItems.Add(menuItem);
 
-                menuItem = new MenuItem("ÔÚĞÂ¿ªµÄ" + this.DbTypeCaption + "²éÑ¯´°ÄÚ ¼ìË÷ '" + strKey + "' (&N)");
+                menuItem = new MenuItem("åœ¨æ–°å¼€çš„" + this.DbTypeCaption + "æŸ¥è¯¢çª—å†… æ£€ç´¢ '" + strKey + "' (&N)");
                 menuItem.Click += new System.EventHandler(this.listView_searchKeysAtNewWindow_Click);
                 contextMenu.MenuItems.Add(menuItem);
             }
@@ -2060,7 +2060,7 @@ out strError);
             // // //
 
 #if NOOOOOOOOOOO
-            menuItem = new MenuItem("¸ù¾İ²áÌõÂëºÅ '" + strBarcode + "' ×°Èëµ½"+strOpenStyle+"ÖÖ²á´°(&E)");
+            menuItem = new MenuItem("æ ¹æ®å†Œæ¡ç å· '" + strBarcode + "' è£…å…¥åˆ°"+strOpenStyle+"ç§å†Œçª—(&E)");
             menuItem.Click += new System.EventHandler(this.menu_loadToEntityFormByBarcode_Click);
             if (String.IsNullOrEmpty(strBarcode) == true)
                 menuItem.Enabled = false;
@@ -2072,13 +2072,13 @@ out strError);
             contextMenu.MenuItems.Add(menuItem);
 
 
-            menuItem = new MenuItem("¸ù¾İ²á¼ÇÂ¼Â·¾¶ '" + strRecPath + "' ×°Èëµ½"+strOpenStyle+"ÊµÌå´°(&P)");
+            menuItem = new MenuItem("æ ¹æ®å†Œè®°å½•è·¯å¾„ '" + strRecPath + "' è£…å…¥åˆ°"+strOpenStyle+"å®ä½“çª—(&P)");
             menuItem.Click += new System.EventHandler(this.menu_loadToItemInfoFormByRecPath_Click);
             if (String.IsNullOrEmpty(strRecPath) == true)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("¸ù¾İ²áÌõÂëºÅ '" + strBarcode + "' ×°Èëµ½"+strOpenStyle+"ÊµÌå´°(&B)");
+            menuItem = new MenuItem("æ ¹æ®å†Œæ¡ç å· '" + strBarcode + "' è£…å…¥åˆ°"+strOpenStyle+"å®ä½“çª—(&B)");
             menuItem.Click += new System.EventHandler(this.menu_loadToItemInfoFormByBarcode_Click);
             if (String.IsNullOrEmpty(strBarcode) == true)
                 menuItem.Enabled = false;
@@ -2094,7 +2094,7 @@ out strError);
              * */
             int nPathItemCount = nSeletedItemCount;
             if (nSeletedItemCount > 0 && String.IsNullOrEmpty(strFirstColumn) == true)
-                nPathItemCount = -1;    // ±íÊ¾²»Çå³ş
+                nPathItemCount = -1;    // è¡¨ç¤ºä¸æ¸…æ¥š
 
             if (contextMenu.MenuItems.Count > 0)
             {
@@ -2103,20 +2103,20 @@ out strError);
                 contextMenu.MenuItems.Add(menuItem);
             }
 
-            menuItem = new MenuItem("¼ôÇĞ(&T)");
+            menuItem = new MenuItem("å‰ªåˆ‡(&T)");
             menuItem.Click += new System.EventHandler(this.menu_cutToClipboard_Click);
             if (nSeletedItemCount == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
 
-            menuItem = new MenuItem("¸´ÖÆ(&C)");
+            menuItem = new MenuItem("å¤åˆ¶(&C)");
             menuItem.Click += new System.EventHandler(this.menu_copyToClipboard_Click);
             if (nSeletedItemCount == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("¸´ÖÆµ¥ÁĞ(&S)");
+            menuItem = new MenuItem("å¤åˆ¶å•åˆ—(&S)");
             // menuItem.Click += new System.EventHandler(this.menu_copySingleColumnToClipboard_Click);
             if (this.listView_records.SelectedIndices.Count == 0)
                 menuItem.Enabled = false;
@@ -2124,7 +2124,7 @@ out strError);
 
             for (int i = 0; i < this.listView_records.Columns.Count; i++)
             {
-                MenuItem subMenuItem = new MenuItem("¸´ÖÆÁĞ '" + this.listView_records.Columns[i].Text + "'");
+                MenuItem subMenuItem = new MenuItem("å¤åˆ¶åˆ— '" + this.listView_records.Columns[i].Text + "'");
                 subMenuItem.Tag = i;
                 subMenuItem.Click += new System.EventHandler(this.menu_copySingleColumnToClipboard_Click);
                 menuItem.MenuItems.Add(subMenuItem);
@@ -2138,13 +2138,13 @@ out strError);
             else
                 bHasClipboardObject = true;
 
-            menuItem = new MenuItem("Õ³Ìù[Ç°²å](&P)");
+            menuItem = new MenuItem("ç²˜è´´[å‰æ’](&P)");
             menuItem.Click += new System.EventHandler(this.menu_pasteFromClipboard_insertBefore_Click);
             if (bHasClipboardObject == false)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("Õ³Ìù[ºó²å](&V)");
+            menuItem = new MenuItem("ç²˜è´´[åæ’](&V)");
             menuItem.Click += new System.EventHandler(this.menu_pasteFromClipboard_insertAfter_Click);
             if (bHasClipboardObject == false)
                 menuItem.Enabled = false;
@@ -2155,7 +2155,7 @@ out strError);
             contextMenu.MenuItems.Add(menuItem);
 
 
-            menuItem = new MenuItem("È«Ñ¡(&A)");
+            menuItem = new MenuItem("å…¨é€‰(&A)");
             menuItem.Click += new System.EventHandler(this.menu_selectAllLines_Click);
             contextMenu.MenuItems.Add(menuItem);
 
@@ -2164,10 +2164,10 @@ out strError);
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
-            bool bLooping = (stop != null && stop.State == 0);    // 0 ±íÊ¾ÕıÔÚ´¦Àí
+            bool bLooping = (stop != null && stop.State == 0);    // 0 è¡¨ç¤ºæ­£åœ¨å¤„ç†
 
             {
-                menuItem = new MenuItem("¹¦ÄÜ(&F)");
+                menuItem = new MenuItem("åŠŸèƒ½(&F)");
                 contextMenu.MenuItems.Add(menuItem);
 
                 MenuItem subMenuItem = null;
@@ -2175,14 +2175,14 @@ out strError);
                 if (this.DbType == "item")
                 {
 #if NO
-                    subMenuItem = new MenuItem("¿ìËÙĞŞ¸Ä²á¼ÇÂ¼ [" + this.listView_records.SelectedItems.Count.ToString() + "] (&Q)");
+                    subMenuItem = new MenuItem("å¿«é€Ÿä¿®æ”¹å†Œè®°å½• [" + this.listView_records.SelectedItems.Count.ToString() + "] (&Q)");
                     subMenuItem.Click += new System.EventHandler(this.menu_quickChangeRecords_Click);
                     if (this.listView_records.SelectedItems.Count == 0 || bLooping == true)
                         subMenuItem.Enabled = false;
                     menuItem.MenuItems.Add(subMenuItem);
 #endif
 
-                    subMenuItem = new MenuItem("´´½¨Ë÷È¡ºÅ [" + this.listView_records.SelectedItems.Count.ToString() + "] (&C)");
+                    subMenuItem = new MenuItem("åˆ›å»ºç´¢å–å· [" + this.listView_records.SelectedItems.Count.ToString() + "] (&C)");
                     subMenuItem.Click += new System.EventHandler(this.menu_createCallNumber_Click);
                     if (this.listView_records.SelectedItems.Count == 0 || bLooping == true)
                         subMenuItem.Enabled = false;
@@ -2192,13 +2192,13 @@ out strError);
                     subMenuItem = new MenuItem("-");
                     menuItem.MenuItems.Add(subMenuItem);
 
-                    subMenuItem = new MenuItem("Ä£Äâ½èÊé [" + this.listView_records.SelectedItems.Count.ToString() + "] (&B)");
+                    subMenuItem = new MenuItem("æ¨¡æ‹Ÿå€Ÿä¹¦ [" + this.listView_records.SelectedItems.Count.ToString() + "] (&B)");
                     subMenuItem.Click += new System.EventHandler(this.menu_borrow_Click);
                     if (this.listView_records.SelectedItems.Count == 0 || bLooping == true)
                         subMenuItem.Enabled = false;
                     menuItem.MenuItems.Add(subMenuItem);
 
-                    subMenuItem = new MenuItem("Ä£Äâ»¹Êé [" + this.listView_records.SelectedItems.Count.ToString() + "] (&R)");
+                    subMenuItem = new MenuItem("æ¨¡æ‹Ÿè¿˜ä¹¦ [" + this.listView_records.SelectedItems.Count.ToString() + "] (&R)");
                     subMenuItem.Click += new System.EventHandler(this.menu_return_Click);
                     if (this.listView_records.SelectedItems.Count == 0 || bLooping == true)
                         subMenuItem.Enabled = false;
@@ -2207,25 +2207,25 @@ out strError);
 
                 if (this.DbType == "order")
                 {
-                    subMenuItem = new MenuItem("´òÓ¡¶©µ¥ (&O)");
+                    subMenuItem = new MenuItem("æ‰“å°è®¢å• (&O)");
                     subMenuItem.Click += new System.EventHandler(this.menu_printOrderForm_Click);
                     if (this.listView_records.SelectedItems.Count == 0 || bLooping == true)
                         subMenuItem.Enabled = false;
                     menuItem.MenuItems.Add(subMenuItem);
 
-                    subMenuItem = new MenuItem("´òÓ¡¶©µ¥[ÑéÊÕÇé¿ö] (&O)");
+                    subMenuItem = new MenuItem("æ‰“å°è®¢å•[éªŒæ”¶æƒ…å†µ] (&O)");
                     subMenuItem.Click += new System.EventHandler(this.menu_printOrderFormAccept_Click);
                     if (this.listView_records.SelectedItems.Count == 0 || bLooping == true)
                         subMenuItem.Enabled = false;
                     menuItem.MenuItems.Add(subMenuItem);
 
-                    subMenuItem = new MenuItem("´òÓ¡ÑéÊÕµ¥ (&A)");
+                    subMenuItem = new MenuItem("æ‰“å°éªŒæ”¶å• (&A)");
                     subMenuItem.Click += new System.EventHandler(this.menu_printAcceptForm_Click);
                     if (this.listView_records.SelectedItems.Count == 0 || bLooping == true)
                         subMenuItem.Enabled = false;
                     menuItem.MenuItems.Add(subMenuItem);
 
-                    subMenuItem = new MenuItem("´òÓ¡´ßÑ¯µ¥ (&C)");
+                    subMenuItem = new MenuItem("æ‰“å°å‚¬è¯¢å• (&C)");
                     subMenuItem.Click += new System.EventHandler(this.menu_printClaimForm_Click);
                     if (this.listView_records.SelectedItems.Count == 0 || bLooping == true)
                         subMenuItem.Enabled = false;
@@ -2237,13 +2237,13 @@ out strError);
 
             // if (this.DbType == "item" || this.DbType == "order")
             {
-                menuItem = new MenuItem("Åú´¦Àí(&B)");
+                menuItem = new MenuItem("æ‰¹å¤„ç†(&B)");
                 contextMenu.MenuItems.Add(menuItem);
 
                 MenuItem subMenuItem = null;
 
                 {
-                    subMenuItem = new MenuItem("¿ìËÙĞŞ¸Ä" + this.DbTypeCaption + "¼ÇÂ¼ [" + this.listView_records.SelectedItems.Count.ToString() + "] (&Q)");
+                    subMenuItem = new MenuItem("å¿«é€Ÿä¿®æ”¹" + this.DbTypeCaption + "è®°å½• [" + this.listView_records.SelectedItems.Count.ToString() + "] (&Q)");
                     subMenuItem.Click += new System.EventHandler(this.menu_quickChangeItemRecords_Click);
                     if (this.listView_records.SelectedItems.Count == 0 || this.InSearching == true)
                         subMenuItem.Enabled = false;
@@ -2254,45 +2254,45 @@ out strError);
                 subMenuItem = new MenuItem("-");
                 menuItem.MenuItems.Add(subMenuItem);
 
-                subMenuItem = new MenuItem("Ö´ĞĞ C# ½Å±¾ [" + this.listView_records.SelectedItems.Count.ToString() + "] (&M)");
+                subMenuItem = new MenuItem("æ‰§è¡Œ C# è„šæœ¬ [" + this.listView_records.SelectedItems.Count.ToString() + "] (&M)");
                 subMenuItem.Click += new System.EventHandler(this.menu_quickMarcQueryRecords_Click);
                 if (this.listView_records.SelectedItems.Count == 0 || this.InSearching == true)
                     subMenuItem.Enabled = false;
                 menuItem.MenuItems.Add(subMenuItem);
 
 #if NO
-                subMenuItem = new MenuItem("ÄÚ´æÖĞ½ÓÊÜĞŞ¸Ä [" + this.listView_records.SelectedItems.Count.ToString() + "] (&C)");
+                subMenuItem = new MenuItem("å†…å­˜ä¸­æ¥å—ä¿®æ”¹ [" + this.listView_records.SelectedItems.Count.ToString() + "] (&C)");
                 subMenuItem.Click += new System.EventHandler(this.menu_acceptSelectedChangedRecords_Click);
                 if (this.m_nChangedCount == 0 || this.listView_records.SelectedItems.Count == 0 || this.InSearching == true)
                     subMenuItem.Enabled = false;
                 menuItem.MenuItems.Add(subMenuItem);
 #endif
 
-                subMenuItem = new MenuItem("¶ªÆúĞŞ¸Ä [" + this.listView_records.SelectedItems.Count.ToString() + "] (&C)");
+                subMenuItem = new MenuItem("ä¸¢å¼ƒä¿®æ”¹ [" + this.listView_records.SelectedItems.Count.ToString() + "] (&C)");
                 subMenuItem.Click += new System.EventHandler(this.menu_clearSelectedChangedRecords_Click);
                 if (this.m_nChangedCount == 0 || this.listView_records.SelectedItems.Count == 0 || this.InSearching == true)
                     subMenuItem.Enabled = false;
                 menuItem.MenuItems.Add(subMenuItem);
 
-                subMenuItem = new MenuItem("¶ªÆúÈ«²¿ĞŞ¸Ä [" + this.m_nChangedCount.ToString() + "] (&L)");
+                subMenuItem = new MenuItem("ä¸¢å¼ƒå…¨éƒ¨ä¿®æ”¹ [" + this.m_nChangedCount.ToString() + "] (&L)");
                 subMenuItem.Click += new System.EventHandler(this.menu_clearAllChangedRecords_Click);
                 if (this.m_nChangedCount == 0 || this.InSearching == true)
                     subMenuItem.Enabled = false;
                 menuItem.MenuItems.Add(subMenuItem);
 
-                subMenuItem = new MenuItem("±£´æÑ¡¶¨µÄĞŞ¸Ä [" + this.listView_records.SelectedItems.Count.ToString() + "] (&S)");
+                subMenuItem = new MenuItem("ä¿å­˜é€‰å®šçš„ä¿®æ”¹ [" + this.listView_records.SelectedItems.Count.ToString() + "] (&S)");
                 subMenuItem.Click += new System.EventHandler(this.menu_saveSelectedChangedRecords_Click);
                 if (this.m_nChangedCount == 0 || this.listView_records.SelectedItems.Count == 0 || this.InSearching == true)
                     subMenuItem.Enabled = false;
                 menuItem.MenuItems.Add(subMenuItem);
 
-                subMenuItem = new MenuItem("±£´æÈ«²¿ĞŞ¸Ä [" + this.m_nChangedCount.ToString() + "] (&A)");
+                subMenuItem = new MenuItem("ä¿å­˜å…¨éƒ¨ä¿®æ”¹ [" + this.m_nChangedCount.ToString() + "] (&A)");
                 subMenuItem.Click += new System.EventHandler(this.menu_saveAllChangedRecords_Click);
                 if (this.m_nChangedCount == 0 || this.InSearching == true)
                     subMenuItem.Enabled = false;
                 menuItem.MenuItems.Add(subMenuItem);
 
-                subMenuItem = new MenuItem("´´½¨ĞÂµÄ C# ½Å±¾ÎÄ¼ş (&C)");
+                subMenuItem = new MenuItem("åˆ›å»ºæ–°çš„ C# è„šæœ¬æ–‡ä»¶ (&C)");
                 subMenuItem.Click += new System.EventHandler(this.menu_createMarcQueryCsFile_Click);
                 menuItem.MenuItems.Add(subMenuItem);
 
@@ -2300,7 +2300,7 @@ out strError);
                 subMenuItem = new MenuItem("-");
                 menuItem.MenuItems.Add(subMenuItem);
 
-                subMenuItem = new MenuItem("É¾³ı" + this.DbTypeCaption + "¼ÇÂ¼ [" + this.listView_records.SelectedItems.Count.ToString() + "] (&D)");
+                subMenuItem = new MenuItem("åˆ é™¤" + this.DbTypeCaption + "è®°å½• [" + this.listView_records.SelectedItems.Count.ToString() + "] (&D)");
                 subMenuItem.Click += new System.EventHandler(this.menu_deleteSelectedRecords_Click);
                 if (this.listView_records.SelectedItems.Count == 0
                     || this.InSearching == true)
@@ -2311,7 +2311,7 @@ out strError);
             }
 
 
-            MenuItem menuItemExport = new MenuItem("µ¼³ö(&X)");
+            MenuItem menuItemExport = new MenuItem("å¯¼å‡º(&X)");
             contextMenu.MenuItems.Add(menuItemExport);
 
             {
@@ -2319,26 +2319,26 @@ out strError);
 
                 if (this.DbType == "item")
                 {
-                    subMenuItem = new MenuItem("µ½ÌõÂëºÅÎÄ¼ş [" + (nPathItemCount == -1 ? "?" : nPathItemCount.ToString()) + "] (&B)...");
+                    subMenuItem = new MenuItem("åˆ°æ¡ç å·æ–‡ä»¶ [" + (nPathItemCount == -1 ? "?" : nPathItemCount.ToString()) + "] (&B)...");
                     subMenuItem.Click += new System.EventHandler(this.menu_exportBarcodeFile_Click);
                     if (nPathItemCount == 0)
                         subMenuItem.Enabled = false;
                     menuItemExport.MenuItems.Add(subMenuItem);
                 }
 
-                subMenuItem = new MenuItem("µ½¼ÇÂ¼Â·¾¶ÎÄ¼ş [" + (nPathItemCount == -1 ? "?" : nPathItemCount.ToString()) + "] (&S)...");
+                subMenuItem = new MenuItem("åˆ°è®°å½•è·¯å¾„æ–‡ä»¶ [" + (nPathItemCount == -1 ? "?" : nPathItemCount.ToString()) + "] (&S)...");
                 subMenuItem.Click += new System.EventHandler(this.menu_saveToRecordPathFile_Click);
                 if (nPathItemCount == 0)
                     subMenuItem.Enabled = false;
                 menuItemExport.MenuItems.Add(subMenuItem);
 
-                subMenuItem = new MenuItem("µ½ÎÄ±¾ÎÄ¼ş [" + nSeletedItemCount.ToString() + "] (&T)...");
+                subMenuItem = new MenuItem("åˆ°æ–‡æœ¬æ–‡ä»¶ [" + nSeletedItemCount.ToString() + "] (&T)...");
                 subMenuItem.Click += new System.EventHandler(this.menu_exportTextFile_Click);
                 if (nSeletedItemCount == 0)
                     subMenuItem.Enabled = false;
                 menuItemExport.MenuItems.Add(subMenuItem);
 
-                subMenuItem = new MenuItem("µ½ Excel ÎÄ¼ş [" + nSeletedItemCount.ToString() + "] (&E)...");
+                subMenuItem = new MenuItem("åˆ° Excel æ–‡ä»¶ [" + nSeletedItemCount.ToString() + "] (&E)...");
                 subMenuItem.Click += new System.EventHandler(this.menu_exportExcelFile_Click);
                 if (nSeletedItemCount == 0)
                     subMenuItem.Enabled = false;
@@ -2348,20 +2348,20 @@ out strError);
                 subMenuItem = new MenuItem("-");
                 menuItemExport.MenuItems.Add(subMenuItem);
 
-                subMenuItem = new MenuItem("×°ÈëÊéÄ¿²éÑ¯´°£¬½«Ëù´ÓÊôµÄÊéÄ¿¼ÇÂ¼ [" + (nPathItemCount == -1 ? "?" : nPathItemCount.ToString()) + "] (&B)...");
+                subMenuItem = new MenuItem("è£…å…¥ä¹¦ç›®æŸ¥è¯¢çª—ï¼Œå°†æ‰€ä»å±çš„ä¹¦ç›®è®°å½• [" + (nPathItemCount == -1 ? "?" : nPathItemCount.ToString()) + "] (&B)...");
                 subMenuItem.Click += new System.EventHandler(this.menu_exportToBiblioSearchForm_Click);
                 if (nPathItemCount == 0)
                     subMenuItem.Enabled = false;
                 menuItemExport.MenuItems.Add(subMenuItem);
 
 
-                subMenuItem = new MenuItem("½«Ëù´ÓÊôµÄÊéÄ¿¼ÇÂ¼Â·¾¶¹é²¢ºóµ¼³öµ½(ÊéÄ¿¿â)¼ÇÂ¼Â·¾¶ÎÄ¼ş [" + (nPathItemCount == -1 ? "?" : nPathItemCount.ToString()) + "] (&B)...");
+                subMenuItem = new MenuItem("å°†æ‰€ä»å±çš„ä¹¦ç›®è®°å½•è·¯å¾„å½’å¹¶åå¯¼å‡ºåˆ°(ä¹¦ç›®åº“)è®°å½•è·¯å¾„æ–‡ä»¶ [" + (nPathItemCount == -1 ? "?" : nPathItemCount.ToString()) + "] (&B)...");
                 subMenuItem.Click += new System.EventHandler(this.menu_saveToBiblioRecordPathFile_Click);
                 if (nPathItemCount == 0)
                     subMenuItem.Enabled = false;
                 menuItemExport.MenuItems.Add(subMenuItem);
 
-                subMenuItem = new MenuItem("½«Ëù´ÓÊôµÄÊéÄ¿¼ÇÂ¼µ¼³öµ½ MARC(ISO2709)ÎÄ¼ş [" + (nPathItemCount == -1 ? "?" : nPathItemCount.ToString()) + "] (&M)...");
+                subMenuItem = new MenuItem("å°†æ‰€ä»å±çš„ä¹¦ç›®è®°å½•å¯¼å‡ºåˆ° MARC(ISO2709)æ–‡ä»¶ [" + (nPathItemCount == -1 ? "?" : nPathItemCount.ToString()) + "] (&M)...");
                 subMenuItem.Click += new System.EventHandler(this.menu_saveBiblioRecordToMarcFile_Click);
                 if (nPathItemCount == 0)
                     subMenuItem.Enabled = false;
@@ -2373,7 +2373,7 @@ out strError);
                     subMenuItem = new MenuItem("-");
                     menuItemExport.MenuItems.Add(subMenuItem);
 
-                    subMenuItem = new MenuItem("½«¹ØÁªµÄÒÑÑéÊÕ²á¼ÇÂ¼Â·¾¶µ¼³öµ½(²á)¼ÇÂ¼Â·¾¶ÎÄ¼ş [" + (nPathItemCount == -1 ? "?" : nPathItemCount.ToString()) + "] (&I)...");
+                    subMenuItem = new MenuItem("å°†å…³è”çš„å·²éªŒæ”¶å†Œè®°å½•è·¯å¾„å¯¼å‡ºåˆ°(å†Œ)è®°å½•è·¯å¾„æ–‡ä»¶ [" + (nPathItemCount == -1 ? "?" : nPathItemCount.ToString()) + "] (&I)...");
                     subMenuItem.Click += new System.EventHandler(this.menu_saveToAcceptItemRecordPathFile_Click);
                     if (nPathItemCount == 0)
                         subMenuItem.Enabled = false;
@@ -2385,13 +2385,13 @@ out strError);
                     // ---
                     subMenuItem = new MenuItem("-");
 
-                    menuItemExport.MenuItems.Add(subMenuItem); subMenuItem = new MenuItem("×°Èë¶ÁÕß²éÑ¯´°£¬½«½èÕß¼ÇÂ¼ [" + (nPathItemCount == -1 ? "?" : nPathItemCount.ToString()) + "] (&B)...");
+                    menuItemExport.MenuItems.Add(subMenuItem); subMenuItem = new MenuItem("è£…å…¥è¯»è€…æŸ¥è¯¢çª—ï¼Œå°†å€Ÿè€…è®°å½• [" + (nPathItemCount == -1 ? "?" : nPathItemCount.ToString()) + "] (&B)...");
                     subMenuItem.Click += new System.EventHandler(this.menu_exportToReaderSearchForm_Click);
                     if (nPathItemCount == 0)
                         subMenuItem.Enabled = false;
                     menuItemExport.MenuItems.Add(subMenuItem);
 
-                    menuItemExport.MenuItems.Add(subMenuItem); subMenuItem = new MenuItem("Êä³öµ½ Excel ÎÄ¼ş£¬½«½èÕß¼ÇÂ¼ [" + (nPathItemCount == -1 ? "?" : nPathItemCount.ToString()) + "] (&R)...");
+                    menuItemExport.MenuItems.Add(subMenuItem); subMenuItem = new MenuItem("è¾“å‡ºåˆ° Excel æ–‡ä»¶ï¼Œå°†å€Ÿè€…è®°å½• [" + (nPathItemCount == -1 ? "?" : nPathItemCount.ToString()) + "] (&R)...");
                     subMenuItem.Click += new System.EventHandler(this.menu_exportToReaderExcelFile_Click);
                     if (nPathItemCount == 0)
                         subMenuItem.Enabled = false;
@@ -2400,11 +2400,11 @@ out strError);
                 }
             }
 
-            MenuItem menuItemImport = new MenuItem("µ¼Èë(&I)");
+            MenuItem menuItemImport = new MenuItem("å¯¼å…¥(&I)");
             contextMenu.MenuItems.Add(menuItemImport);
 
             {
-                MenuItem subMenuItem = new MenuItem("´Ó¼ÇÂ¼Â·¾¶ÎÄ¼şÖĞµ¼Èë(&I)...");
+                MenuItem subMenuItem = new MenuItem("ä»è®°å½•è·¯å¾„æ–‡ä»¶ä¸­å¯¼å…¥(&I)...");
                 subMenuItem.Click += new System.EventHandler(this.menu_importFromRecPathFile_Click);
                 menuItemImport.MenuItems.Add(subMenuItem);
 
@@ -2414,7 +2414,7 @@ out strError);
                     subMenuItem = new MenuItem("-");
                     menuItemImport.MenuItems.Add(subMenuItem);
 
-                    subMenuItem = new MenuItem("´ÓÌõÂëºÅÎÄ¼şÖĞµ¼Èë(&R)...");
+                    subMenuItem = new MenuItem("ä»æ¡ç å·æ–‡ä»¶ä¸­å¯¼å…¥(&R)...");
                     subMenuItem.Click += new System.EventHandler(this.menu_importFromBarcodeFile_Click);
                     menuItemImport.MenuItems.Add(subMenuItem);
                 }
@@ -2424,25 +2424,25 @@ out strError);
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("ÒÆ³ı [" + nSeletedItemCount.ToString() + "] (&D)");
+            menuItem = new MenuItem("ç§»é™¤ [" + nSeletedItemCount.ToString() + "] (&D)");
             menuItem.Click += new System.EventHandler(this.menu_removeSelectedItems_Click);
             if (nSeletedItemCount == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("Çå³ıÃüÖĞÁĞ±í(&C)");
+            menuItem = new MenuItem("æ¸…é™¤å‘½ä¸­åˆ—è¡¨(&C)");
             menuItem.Click += new System.EventHandler(this.menu_clearList_Click);
             if (nSeletedItemCount == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("Ë¢ĞÂ [" + nSeletedItemCount.ToString() + "] (&R)");
+            menuItem = new MenuItem("åˆ·æ–° [" + nSeletedItemCount.ToString() + "] (&R)");
             menuItem.Click += new System.EventHandler(this.menu_refreshSelectedItems_Click);
             if (nSeletedItemCount == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("Ë¢ĞÂÊéÄ¿ÕªÒª [" + nSeletedItemCount.ToString() + "] (&R)");
+            menuItem = new MenuItem("åˆ·æ–°ä¹¦ç›®æ‘˜è¦ [" + nSeletedItemCount.ToString() + "] (&R)");
             menuItem.Click += new System.EventHandler(this.menu_refreshSelectedItemsBiblioSummary_Click);
             if (nSeletedItemCount == 0)
                 menuItem.Enabled = false;
@@ -2460,13 +2460,13 @@ out strError);
             nRet = DoCirculation("borrow", out strError);
             if (nRet == -1)
                 goto ERROR1;
-            MessageBox.Show(this, "¹²´¦Àí " + nRet.ToString() + " ¸ö²á¼ÇÂ¼");
+            MessageBox.Show(this, "å…±å¤„ç† " + nRet.ToString() + " ä¸ªå†Œè®°å½•");
             return;
         ERROR1:
             MessageBox.Show(this, strError);
         }
 
-        // TODO: ÏÔÊ¾´¦ÀíºÄ·ÑµÄÊ±¼ä
+        // TODO: æ˜¾ç¤ºå¤„ç†è€—è´¹çš„æ—¶é—´
         void menu_return_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -2475,13 +2475,13 @@ out strError);
             nRet = DoCirculation("return", out strError);
             if (nRet == -1)
                 goto ERROR1;
-            MessageBox.Show(this, "¹²´¦Àí " + nRet.ToString() + " ¸ö²á¼ÇÂ¼");
+            MessageBox.Show(this, "å…±å¤„ç† " + nRet.ToString() + " ä¸ªå†Œè®°å½•");
             return;
         ERROR1:
             MessageBox.Show(this, strError);
         }
 
-        // ½øĞĞÁ÷Í¨²Ù×÷
+        // è¿›è¡Œæµé€šæ“ä½œ
         int DoCirculation(string strAction,
             out string strError)
         {
@@ -2492,24 +2492,24 @@ out strError);
 
             if (this.listView_records.SelectedItems.Count == 0)
             {
-                strError = "ÉĞÎ´Ñ¡¶¨Òª½øĞĞÅú´¦ÀíµÄÊÂÏî";
+                strError = "å°šæœªé€‰å®šè¦è¿›è¡Œæ‰¹å¤„ç†çš„äº‹é¡¹";
                 return -1;
             }
 
-            if (stop != null && stop.State == 0)    // 0 ±íÊ¾ÕıÔÚ´¦Àí
+            if (stop != null && stop.State == 0)    // 0 è¡¨ç¤ºæ­£åœ¨å¤„ç†
             {
-                strError = "Ä¿Ç°ÓĞ³¤²Ù×÷ÕıÔÚ½øĞĞ£¬ÎŞ·¨½øĞĞ½èÊé»òÕß»¹ÊéµÄ²Ù×÷";
+                strError = "ç›®å‰æœ‰é•¿æ“ä½œæ­£åœ¨è¿›è¡Œï¼Œæ— æ³•è¿›è¡Œå€Ÿä¹¦æˆ–è€…è¿˜ä¹¦çš„æ“ä½œ";
                 return -1;
             }
 
             string strOperName = "";
             if (strAction == "borrow")
-                strOperName = "½èÊé";
+                strOperName = "å€Ÿä¹¦";
             else if (strAction == "return")
-                strOperName = "»¹Êé";
+                strOperName = "è¿˜ä¹¦";
             else
             {
-                strError = "Î´ÖªµÄ strAction Öµ '"+strAction+"'";
+                strError = "æœªçŸ¥çš„ strAction å€¼ '"+strAction+"'";
                 return -1;
             }
 
@@ -2517,14 +2517,14 @@ out strError);
 
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ½øĞĞ" + strOperName + "²Ù×÷ ...");
+            stop.Initial("æ­£åœ¨è¿›è¡Œ" + strOperName + "æ“ä½œ ...");
             stop.BeginLoop();
 
             this.EnableControls(false);
             try
             {
 
-                // Èç¹û±ØÒª£¬´ÙÊ¹µÇÂ¼Ò»´Î£¬ÒÔ±ã¹Û²ìµ±Ç°ÓÃ»§µÄÈ¨ÏŞ
+                // å¦‚æœå¿…è¦ï¼Œä¿ƒä½¿ç™»å½•ä¸€æ¬¡ï¼Œä»¥ä¾¿è§‚å¯Ÿå½“å‰ç”¨æˆ·çš„æƒé™
                 if (string.IsNullOrEmpty(this.Channel.Rights) == true)
                 {
                     string strValue = "";
@@ -2535,14 +2535,14 @@ out strError);
                         out strError);
                 }
 
-                // ¼ì²éÇ°¶ËÈ¨ÏŞ
+                // æ£€æŸ¥å‰ç«¯æƒé™
                 if (StringUtil.IsInList("client_simulateborrow", this.Channel.Rights) == false)
                 {
-                    strError = "µ±Ç°ÓÃ»§²»¾ß±¸ client_simulateborrow È¨ÏŞ£¬ÎŞ·¨½øĞĞÄ£Äâ" + strOperName + "µÄ²Ù×÷";
+                    strError = "å½“å‰ç”¨æˆ·ä¸å…·å¤‡ client_simulateborrow æƒé™ï¼Œæ— æ³•è¿›è¡Œæ¨¡æ‹Ÿ" + strOperName + "çš„æ“ä½œ";
                     return -1;
                 }
 
-                // ´ò¿ªÒ»¸öĞÂµÄ¿ì½İ³öÄÉ´°
+                // æ‰“å¼€ä¸€ä¸ªæ–°çš„å¿«æ·å‡ºçº³çª—
                 QuickChargingForm form = new QuickChargingForm();
                 form.MdiParent = this.MainForm;
                 form.MainForm = this.MainForm;
@@ -2554,14 +2554,14 @@ out strError);
                 {
                     strReaderBarcode = InputDlg.GetInput(
          this,
-         "Åú´¦Àí" + strOperName,
-         "ÇëÊäÈë¶ÁÕßÖ¤ÌõÂëºÅ:",
+         "æ‰¹å¤„ç†" + strOperName,
+         "è¯·è¾“å…¥è¯»è€…è¯æ¡ç å·:",
          "",
          this.MainForm.DefaultFont);
                     if (strReaderBarcode == null)
                     {
                         form.Close();
-                        strError = "ÓÃ»§·ÅÆú²Ù×÷";
+                        strError = "ç”¨æˆ·æ”¾å¼ƒæ“ä½œ";
                         return -1;
                     }
 
@@ -2569,14 +2569,14 @@ out strError);
                     string strID = Guid.NewGuid().ToString();
                     form.AsyncDoAction(FuncState.Borrow, strReaderBarcode, strID);
                     DateTime start = DateTime.Now;
-                    // µÈ´ıÈÎÎñÍê³É
+                    // ç­‰å¾…ä»»åŠ¡å®Œæˆ
                     while (true)
                     {
-                        Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                        Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                         if (stop != null && stop.State != 0)
                         {
-                            strError = "ÓÃ»§ÖĞ¶Ï";
+                            strError = "ç”¨æˆ·ä¸­æ–­";
                             return -1;
                         }
 
@@ -2585,7 +2585,7 @@ out strError);
                         {
                             if (strState == "error")
                             {
-                                strError = "ÊäÈë¶ÁÕßÖ¤ÌõÂëºÅµÄ¹ı³ÌÓĞÎó";
+                                strError = "è¾“å…¥è¯»è€…è¯æ¡ç å·çš„è¿‡ç¨‹æœ‰è¯¯";
                                 return -1;
                             }
 
@@ -2596,7 +2596,7 @@ out strError);
                         TimeSpan delta = DateTime.Now - start;
                         if (delta.TotalSeconds > 30)
                         {
-                            strError = "ÈÎÎñ³¤Ê±¼äÃ»ÓĞ·´Ó¦£¬ºó¼Ì²Ù×÷±»·ÅÆú";
+                            strError = "ä»»åŠ¡é•¿æ—¶é—´æ²¡æœ‰ååº”ï¼Œåç»§æ“ä½œè¢«æ”¾å¼ƒ";
                             return -1;
                         }
                     }
@@ -2611,18 +2611,18 @@ out strError);
                 int i = 0;
                 foreach (ListViewItem item in this.listView_records.SelectedItems)
                 {
-                    Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                    Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                     if (stop != null && stop.State != 0)
                     {
-                        strError = "ÓÃ»§ÖĞ¶Ï";
+                        strError = "ç”¨æˆ·ä¸­æ–­";
                         return -1;
                     }
 
                     string strRecPath = ListViewUtil.GetItemText(item, 0);
 
                     string strItemBarcode = "";
-                    // ¸ù¾İ ListViewItem ¶ÔÏó£¬»ñµÃ²áÌõÂëºÅÁĞµÄÄÚÈİ
+                    // æ ¹æ® ListViewItem å¯¹è±¡ï¼Œè·å¾—å†Œæ¡ç å·åˆ—çš„å†…å®¹
                     nRet = GetItemBarcodeOrRefID(
                         item,
                         true,
@@ -2679,12 +2679,12 @@ out strError);
             {
                 stop.SetProgressValue(i++);
 
-                Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                 if (stop != null
                     && stop.State != 0)
                 {
-                    strError = "ÓÃ»§ÖĞ¶Ï";
+                    strError = "ç”¨æˆ·ä¸­æ–­";
                     return -1;
                 }
 
@@ -2694,12 +2694,12 @@ out strError);
                 string strReaderBarcode = "";
 
 
-                // »ñµÃÖ¸¶¨ÀàĞÍµÄµÄÁĞµÄÖµ
-                // Í¨¹ı browse ÅäÖÃÎÄ¼şÖĞµÄÀàĞÍÀ´Ö¸¶¨
+                // è·å¾—æŒ‡å®šç±»å‹çš„çš„åˆ—çš„å€¼
+                // é€šè¿‡ browse é…ç½®æ–‡ä»¶ä¸­çš„ç±»å‹æ¥æŒ‡å®š
                 // return:
-                //      -1  ³ö´í
-                //      0   Ö¸¶¨µÄÁĞÃ»ÓĞÕÒµ½
-                //      1   ÕÒµ½
+                //      -1  å‡ºé”™
+                //      0   æŒ‡å®šçš„åˆ—æ²¡æœ‰æ‰¾åˆ°
+                //      1   æ‰¾åˆ°
                 nRet = GetTypedColumnText(
                     item,
                     "borrower",
@@ -2710,7 +2710,7 @@ out strError);
                     return -1;
                 if (nRet == 0)
                 {
-                    // TODO: ×ª¶ø²ÉÓÃ¼ìË÷·¨»ñµÃÊéÄ¿¼ÇÂ¼Â·¾¶
+                    // TODO: è½¬è€Œé‡‡ç”¨æ£€ç´¢æ³•è·å¾—ä¹¦ç›®è®°å½•è·¯å¾„
                     nWarningLineCount++;
                     continue;
                 }
@@ -2718,7 +2718,7 @@ out strError);
                 if (string.IsNullOrEmpty(strReaderBarcode) == true)
                     continue;
 
-                // È¥ÖØ£¬²¢±£³ÖÔ­Ê¼Ë³Ğò
+                // å»é‡ï¼Œå¹¶ä¿æŒåŸå§‹é¡ºåº
                 if (table.ContainsKey(strReaderBarcode) == false)
                 {
                     reader_barcodes.Add(strReaderBarcode);
@@ -2748,12 +2748,12 @@ out strError);
             {
                 stop.SetProgressValue(i++);
 
-                Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                 if (stop != null
                     && stop.State != 0)
                 {
-                    strError = "ÓÃ»§ÖĞ¶Ï";
+                    strError = "ç”¨æˆ·ä¸­æ–­";
                     return -1;
                 }
 
@@ -2762,11 +2762,11 @@ out strError);
 
                 int nCol = -1;
                 string strBiblioRecPath = "";
-                // »ñµÃÊÂÏîËù´ÓÊôµÄÊéÄ¿¼ÇÂ¼µÄÂ·¾¶
+                // è·å¾—äº‹é¡¹æ‰€ä»å±çš„ä¹¦ç›®è®°å½•çš„è·¯å¾„
                 // return:
-                //      -1  ³ö´í
-                //      0   Ïà¹ØÊı¾İ¿âÃ»ÓĞÅäÖÃ parent id ä¯ÀÀÁĞ
-                //      1   ÕÒµ½
+                //      -1  å‡ºé”™
+                //      0   ç›¸å…³æ•°æ®åº“æ²¡æœ‰é…ç½® parent id æµè§ˆåˆ—
+                //      1   æ‰¾åˆ°
                 nRet = GetBiblioRecPath(item,
                     true,
                     out nCol,
@@ -2776,12 +2776,12 @@ out strError);
                     return -1;
                 if (nRet == 0)
                 {
-                    // TODO: ×ª¶ø²ÉÓÃ¼ìË÷·¨»ñµÃÊéÄ¿¼ÇÂ¼Â·¾¶
+                    // TODO: è½¬è€Œé‡‡ç”¨æ£€ç´¢æ³•è·å¾—ä¹¦ç›®è®°å½•è·¯å¾„
                     nWarningLineCount++;
                     continue;
                 }
 
-                // È¥ÖØ£¬²¢±£³ÖÔ­Ê¼Ë³Ğò
+                // å»é‡ï¼Œå¹¶ä¿æŒåŸå§‹é¡ºåº
                 if (table.ContainsKey(strBiblioRecPath) == false)
                 {
                     biblio_recpaths.Add(strBiblioRecPath);
@@ -2794,7 +2794,7 @@ out strError);
             return 0;
         }
 
-        // Êä³ö¶ÁÕßÏêÇéµ½ Excel ÎÄ¼ş¡£¶ÁÕßËù½èÔÄµÄ¸÷²áÍ¼Êé
+        // è¾“å‡ºè¯»è€…è¯¦æƒ…åˆ° Excel æ–‡ä»¶ã€‚è¯»è€…æ‰€å€Ÿé˜…çš„å„å†Œå›¾ä¹¦
         void menu_exportToReaderExcelFile_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -2805,13 +2805,13 @@ out strError);
 
             if (this.listView_records.SelectedItems.Count == 0)
             {
-                strError = "ÉĞÎ´Ñ¡¶¨Òª×°Èë¶ÁÕß²éÑ¯´°µÄĞĞ";
+                strError = "å°šæœªé€‰å®šè¦è£…å…¥è¯»è€…æŸ¥è¯¢çª—çš„è¡Œ";
                 goto ERROR1;
             }
 
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ×°Èë¼ÇÂ¼µ½¶ÁÕß²éÑ¯´° ...");
+            stop.Initial("æ­£åœ¨è£…å…¥è®°å½•åˆ°è¯»è€…æŸ¥è¯¢çª— ...");
             stop.BeginLoop();
 
             try
@@ -2825,17 +2825,17 @@ out strError);
                     goto ERROR1;
 
                 if (nWarningLineCount > 0)
-                    strText = "ÓĞ " + nWarningLineCount.ToString() + " ĞĞÒòÎªÏà¹Ø¿âä¯ÀÀ¸ñÊ½Ã»ÓĞ¶¨Òå type Îª borrower µÄÀ¸¶ø±»ºöÂÔ";
+                    strText = "æœ‰ " + nWarningLineCount.ToString() + " è¡Œå› ä¸ºç›¸å…³åº“æµè§ˆæ ¼å¼æ²¡æœ‰å®šä¹‰ type ä¸º borrower çš„æ è€Œè¢«å¿½ç•¥";
                 if (nDupCount > 0)
                 {
                     if (string.IsNullOrEmpty(strText) == false)
                         strText += "\r\n\r\n";
-                    strText += "¶ÁÕß¼ÇÂ¼ÓĞ " + nDupCount.ToString() + " ÏîÖØ¸´±»ºöÂÔ";
+                    strText += "è¯»è€…è®°å½•æœ‰ " + nDupCount.ToString() + " é¡¹é‡å¤è¢«å¿½ç•¥";
                 }
 
                 if (reader_barcodes.Count == 0)
                 {
-                    strError = "Ã»ÓĞÕÒµ½Ïà¹ØµÄ¶ÁÕß¼ÇÂ¼";
+                    strError = "æ²¡æœ‰æ‰¾åˆ°ç›¸å…³çš„è¯»è€…è®°å½•";
                     goto ERROR1;
                 }
 
@@ -2844,9 +2844,9 @@ out strError);
                 form.Show();
 
                 // return:
-                //      -1  ³ö´í
-                //      0   ÓÃ»§ÖĞ¶Ï
-                //      1   ³É¹¦
+                //      -1  å‡ºé”™
+                //      0   ç”¨æˆ·ä¸­æ–­
+                //      1   æˆåŠŸ
                 nRet = form.CreateReaderDetailExcelFile(reader_barcodes,
                     true,
                     out strError);
@@ -2875,7 +2875,7 @@ out strError);
             MessageBox.Show(this, strError);
         }
 
-        // ×°Èë¶ÁÕß²éÑ¯´°¿Ú
+        // è£…å…¥è¯»è€…æŸ¥è¯¢çª—å£
         void menu_exportToReaderSearchForm_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -2886,13 +2886,13 @@ out strError);
 
             if (this.listView_records.SelectedItems.Count == 0)
             {
-                strError = "ÉĞÎ´Ñ¡¶¨Òª×°Èë¶ÁÕß²éÑ¯´°µÄĞĞ";
+                strError = "å°šæœªé€‰å®šè¦è£…å…¥è¯»è€…æŸ¥è¯¢çª—çš„è¡Œ";
                 goto ERROR1;
             }
 
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ×°Èë¼ÇÂ¼µ½¶ÁÕß²éÑ¯´° ...");
+            stop.Initial("æ­£åœ¨è£…å…¥è®°å½•åˆ°è¯»è€…æŸ¥è¯¢çª— ...");
             stop.BeginLoop();
 
             try
@@ -2906,17 +2906,17 @@ out strError);
                     goto ERROR1;
 
                 if (nWarningLineCount > 0)
-                    strText = "ÓĞ " + nWarningLineCount.ToString() + " ĞĞÒòÎªÏà¹Ø¿âä¯ÀÀ¸ñÊ½Ã»ÓĞ¶¨Òå type Îª borrower µÄÀ¸¶ø±»ºöÂÔ";
+                    strText = "æœ‰ " + nWarningLineCount.ToString() + " è¡Œå› ä¸ºç›¸å…³åº“æµè§ˆæ ¼å¼æ²¡æœ‰å®šä¹‰ type ä¸º borrower çš„æ è€Œè¢«å¿½ç•¥";
                 if (nDupCount > 0)
                 {
                     if (string.IsNullOrEmpty(strText) == false)
                         strText += "\r\n\r\n";
-                    strText += "¶ÁÕß¼ÇÂ¼ÓĞ " + nDupCount.ToString() + " ÏîÖØ¸´±»ºöÂÔ";
+                    strText += "è¯»è€…è®°å½•æœ‰ " + nDupCount.ToString() + " é¡¹é‡å¤è¢«å¿½ç•¥";
                 }
 
                 if (reader_barcodes.Count == 0)
                 {
-                    strError = "Ã»ÓĞÕÒµ½Ïà¹ØµÄ¶ÁÕß¼ÇÂ¼";
+                    strError = "æ²¡æœ‰æ‰¾åˆ°ç›¸å…³çš„è¯»è€…è®°å½•";
                     goto ERROR1;
                 }
 
@@ -2955,8 +2955,8 @@ out strError);
         }
 
 
-        // TODO: ÓÅ»¯ºó£¬ºÍµ¼³öÊéÄ¿¼ÇÂ¼Â·¾¶ÎÄ¼şºÏ²¢´úÂë
-        // ½«´ÓÊôµÄÊéÄ¿¼ÇÂ¼×°ÈëÊéÄ¿²éÑ¯´°
+        // TODO: ä¼˜åŒ–åï¼Œå’Œå¯¼å‡ºä¹¦ç›®è®°å½•è·¯å¾„æ–‡ä»¶åˆå¹¶ä»£ç 
+        // å°†ä»å±çš„ä¹¦ç›®è®°å½•è£…å…¥ä¹¦ç›®æŸ¥è¯¢çª—
         void menu_exportToBiblioSearchForm_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -2964,7 +2964,7 @@ out strError);
 
             if (this.listView_records.SelectedItems.Count == 0)
             {
-                strError = "ÉĞÎ´Ñ¡¶¨Òª×°ÈëÊéÄ¿²éÑ¯´°µÄĞĞ";
+                strError = "å°šæœªé€‰å®šè¦è£…å…¥ä¹¦ç›®æŸ¥è¯¢çª—çš„è¡Œ";
                 goto ERROR1;
             }
 
@@ -2977,7 +2977,7 @@ out strError);
 
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ×°Èë¼ÇÂ¼µ½ÊéÄ¿²éÑ¯´° ...");
+            stop.Initial("æ­£åœ¨è£…å…¥è®°å½•åˆ°ä¹¦ç›®æŸ¥è¯¢çª— ...");
             stop.BeginLoop();
 
             form.EnableControls(false);
@@ -2988,22 +2988,22 @@ out strError);
                 Hashtable table = new Hashtable();
                 foreach (ListViewItem item in this.listView_records.SelectedItems)
                 {
-                    Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                    Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                     if (stop != null
                         && stop.State != 0)
                     {
-                        strError = "ÓÃ»§ÖĞ¶Ï";
+                        strError = "ç”¨æˆ·ä¸­æ–­";
                         goto ERROR1;
                     }
 
                     int nCol = -1;
                     string strBiblioRecPath = "";
-                    // »ñµÃÊÂÏîËù´ÓÊôµÄÊéÄ¿¼ÇÂ¼µÄÂ·¾¶
+                    // è·å¾—äº‹é¡¹æ‰€ä»å±çš„ä¹¦ç›®è®°å½•çš„è·¯å¾„
                     // return:
-                    //      -1  ³ö´í
-                    //      0   Ïà¹ØÊı¾İ¿âÃ»ÓĞÅäÖÃ parent id ä¯ÀÀÁĞ
-                    //      1   ÕÒµ½
+                    //      -1  å‡ºé”™
+                    //      0   ç›¸å…³æ•°æ®åº“æ²¡æœ‰é…ç½® parent id æµè§ˆåˆ—
+                    //      1   æ‰¾åˆ°
                     nRet = GetBiblioRecPath(item,
                         true,
                         out nCol,
@@ -3013,12 +3013,12 @@ out strError);
                         goto ERROR1;
                     if (nRet == 0)
                     {
-                        // TODO: ×ª¶ø²ÉÓÃ¼ìË÷·¨»ñµÃÊéÄ¿¼ÇÂ¼Â·¾¶
+                        // TODO: è½¬è€Œé‡‡ç”¨æ£€ç´¢æ³•è·å¾—ä¹¦ç›®è®°å½•è·¯å¾„
                         nWarningLineCount++;
                         continue;
                     }
 
-                    // È¥ÖØ£¬²¢±£³ÖÔ­Ê¼Ë³Ğò
+                    // å»é‡ï¼Œå¹¶ä¿æŒåŸå§‹é¡ºåº
                     if (table.ContainsKey(strBiblioRecPath) == false)
                     {
                         biblio_recpaths.Add(strBiblioRecPath);
@@ -3056,12 +3056,12 @@ out strError);
 
             string strText = "";
             if (nWarningLineCount > 0)
-                strText = "ÓĞ " + nWarningLineCount.ToString()+ " ĞĞÒòÎªÏà¹Ø¿âä¯ÀÀ¸ñÊ½Ã»ÓĞ°üº¬¸¸¼ÇÂ¼ ID ÁĞ¶ø±»ºöÂÔ";
+                strText = "æœ‰ " + nWarningLineCount.ToString()+ " è¡Œå› ä¸ºç›¸å…³åº“æµè§ˆæ ¼å¼æ²¡æœ‰åŒ…å«çˆ¶è®°å½• ID åˆ—è€Œè¢«å¿½ç•¥";
             if (nDupCount > 0)
             {
                 if (string.IsNullOrEmpty(strText) == false)
                     strText += "\r\n\r\n";
-                strText += "ÊéÄ¿¼ÇÂ¼ÓĞ "+nDupCount.ToString()+" ÏîÖØ¸´±»ºöÂÔ";
+                strText += "ä¹¦ç›®è®°å½•æœ‰ "+nDupCount.ToString()+" é¡¹é‡å¤è¢«å¿½ç•¥";
             }
 
             if (string.IsNullOrEmpty(strText) == false)
@@ -3072,11 +3072,11 @@ out strError);
             MessageBox.Show(this, strError);
         }
 
-        // É¾³ıËùÑ¡ÔñµÄ¼ÇÂ¼
+        // åˆ é™¤æ‰€é€‰æ‹©çš„è®°å½•
         void menu_deleteSelectedRecords_Click(object sender, EventArgs e)
         {
             DialogResult result = MessageBox.Show(this,
-    "È·ÊµÒª´ÓÊı¾İ¿âÖĞÉ¾³ıËùÑ¡¶¨µÄ " + this.listView_records.SelectedItems.Count.ToString() + " ¸ö"+this.DbTypeCaption+"¼ÇÂ¼?\r\n\r\n(OK É¾³ı£»Cancel È¡Ïû)",
+    "ç¡®å®è¦ä»æ•°æ®åº“ä¸­åˆ é™¤æ‰€é€‰å®šçš„ " + this.listView_records.SelectedItems.Count.ToString() + " ä¸ª"+this.DbTypeCaption+"è®°å½•?\r\n\r\n(OK åˆ é™¤ï¼›Cancel å–æ¶ˆ)",
     "BiblioSearchForm",
     MessageBoxButtons.OKCancel,
     MessageBoxIcon.Question,
@@ -3094,7 +3094,7 @@ out strError);
 
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚÉ¾³ı" + this.DbTypeCaption + "¼ÇÂ¼ ...");
+            stop.Initial("æ­£åœ¨åˆ é™¤" + this.DbTypeCaption + "è®°å½• ...");
             stop.BeginLoop();
 
             this.EnableControls(false);
@@ -3113,12 +3113,12 @@ out strError);
                 int i = 0;
                 foreach (LoaderItem item in loader)
                 {
-                    Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                    Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                     if (stop != null
                         && stop.State != 0)
                     {
-                        strError = "ÓÃ»§ÖĞ¶Ï";
+                        strError = "ç”¨æˆ·ä¸­æ–­";
                         goto ERROR1;
                     }
 
@@ -3146,7 +3146,7 @@ out strError);
                         entity.RefID = BookItem.GenRefID();
 #endif
 
-                    stop.SetMessage("ÕıÔÚÉ¾³ı"+this.DbTypeCaption+"¼ÇÂ¼ " + info.RecPath);
+                    stop.SetMessage("æ­£åœ¨åˆ é™¤"+this.DbTypeCaption+"è®°å½• " + info.RecPath);
 
                     string strBiblioRecPath = "";
                     EntityInfo[] errorinfos = null;
@@ -3191,7 +3191,7 @@ out strError);
                     }
                     else
                     {
-                        strError = "Î´ÖªµÄÊÂÏîÀàĞÍ '" + this.DbType + "'";
+                        strError = "æœªçŸ¥çš„äº‹é¡¹ç±»å‹ '" + this.DbType + "'";
                         goto ERROR1;
                     }
 
@@ -3225,14 +3225,14 @@ out strError);
                 this.listView_records.Enabled = true;
             }
 
-            MessageBox.Show(this, "³É¹¦É¾³ı" + this.DbTypeCaption + "¼ÇÂ¼ " + items.Count + " Ìõ");
+            MessageBox.Show(this, "æˆåŠŸåˆ é™¤" + this.DbTypeCaption + "è®°å½• " + items.Count + " æ¡");
             return;
         ERROR1:
             MessageBox.Show(this, strError);
         }
 
 
-        // ¿ìËÙĞŞ¸Ä¼ÇÂ¼
+        // å¿«é€Ÿä¿®æ”¹è®°å½•
         void menu_quickChangeItemRecords_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -3250,16 +3250,16 @@ out strError);
         }
 
 #if NO
-        // ¿ìËÙĞŞ¸Ä¼ÇÂ¼
+        // å¿«é€Ÿä¿®æ”¹è®°å½•
         void menu_quickChangeItemRecords_Click(object sender, EventArgs e)
         {
             string strError = "";
             int nRet = 0;
-            // bool bSkipUpdateBrowse = false; // ÊÇ·ñÒªÌø¹ı¸üĞÂä¯ÀÀĞĞ
+            // bool bSkipUpdateBrowse = false; // æ˜¯å¦è¦è·³è¿‡æ›´æ–°æµè§ˆè¡Œ
 
             if (this.listView_records.SelectedItems.Count == 0)
             {
-                strError = "ÉĞÎ´Ñ¡ÔñÒª¿ìËÙĞŞ¸ÄµÄ"+this.DbTypeCaption+"¼ÇÂ¼ÊÂÏî";
+                strError = "å°šæœªé€‰æ‹©è¦å¿«é€Ÿä¿®æ”¹çš„"+this.DbTypeCaption+"è®°å½•äº‹é¡¹";
                 goto ERROR1;
             }
 
@@ -3274,7 +3274,7 @@ out strError);
                 ChangeItemActionDialog dlg = new ChangeItemActionDialog();
                 MainForm.SetControlFont(dlg, this.Font, false);
                 dlg.DbType = this.DbType;
-                dlg.Text = "¿ìËÙĞŞ¸Ä" + this.DbTypeCaption + "¼ÇÂ¼ -- ÇëÖ¸¶¨¶¯×÷²ÎÊı";
+                dlg.Text = "å¿«é€Ÿä¿®æ”¹" + this.DbTypeCaption + "è®°å½• -- è¯·æŒ‡å®šåŠ¨ä½œå‚æ•°";
                 dlg.MainForm = this.MainForm;
                 dlg.GetValueTable -= new GetValueTableEventHandler(dlg_GetValueTable);
                 dlg.GetValueTable += new GetValueTableEventHandler(dlg_GetValueTable);
@@ -3292,12 +3292,12 @@ out strError);
 
             DateTime now = DateTime.Now;
 
-            // TODO: ¼ì²éÒ»ÏÂ£¬¿´¿´ÊÇ·ñÒ»ÏîĞŞ¸Ä¶¯×÷¶¼Ã»ÓĞ
-            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " ¿ªÊ¼Ö´ĞĞ¿ìËÙĞŞ¸Ä" + this.DbTypeCaption + "¼ÇÂ¼</div>");
+            // TODO: æ£€æŸ¥ä¸€ä¸‹ï¼Œçœ‹çœ‹æ˜¯å¦ä¸€é¡¹ä¿®æ”¹åŠ¨ä½œéƒ½æ²¡æœ‰
+            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " å¼€å§‹æ‰§è¡Œå¿«é€Ÿä¿®æ”¹" + this.DbTypeCaption + "è®°å½•</div>");
 
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("¿ìËÙĞŞ¸Ä" + this.DbTypeCaption + "¼ÇÂ¼ ...");
+            stop.Initial("å¿«é€Ÿä¿®æ”¹" + this.DbTypeCaption + "è®°å½• ...");
             stop.BeginLoop();
 
             EnableControls(false);
@@ -3326,12 +3326,12 @@ out strError);
                 int i = 0;
                 foreach (LoaderItem item in loader)
                 {
-                    Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                    Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                     if (stop != null
                         && stop.State != 0)
                     {
-                        strError = "ÓÃ»§ÖĞ¶Ï";
+                        strError = "ç”¨æˆ·ä¸­æ–­";
                         goto ERROR1;
                     }
 
@@ -3348,7 +3348,7 @@ out strError);
                     }
                     catch (Exception ex)
                     {
-                        strError = "×°ÔØXMLµ½DOMÊ±·¢Éú´íÎó: " + ex.Message;
+                        strError = "è£…è½½XMLåˆ°DOMæ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                         goto ERROR1;
                     }
 
@@ -3358,11 +3358,11 @@ out strError);
                 || this.DbType == "issue"
                 || this.DbType == "comment")
                     {
-                        // ĞŞ¸ÄÒ»¸ö¶©¹º¼ÇÂ¼ XmlDocument
+                        // ä¿®æ”¹ä¸€ä¸ªè®¢è´­è®°å½• XmlDocument
                         // return:
-                        //      -1  ³ö´í
-                        //      0   Ã»ÓĞÊµÖÊĞÔĞŞ¸Ä
-                        //      1   ·¢ÉúÁËĞŞ¸Ä
+                        //      -1  å‡ºé”™
+                        //      0   æ²¡æœ‰å®è´¨æ€§ä¿®æ”¹
+                        //      1   å‘ç”Ÿäº†ä¿®æ”¹
                         nRet = ModifyOrderRecord(
                             cfg_dom,
                             actions,
@@ -3407,11 +3407,11 @@ out strError);
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
 
-                this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " ½áÊø¿ìËÙĞŞ¸Ä" + this.DbTypeCaption + "¼ÇÂ¼</div>");
+                this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " ç»“æŸå¿«é€Ÿä¿®æ”¹" + this.DbTypeCaption + "è®°å½•</div>");
             }
 
             DoViewComment(false);
-            MessageBox.Show(this, "ĞŞ¸Ä" + this.DbTypeCaption + "¼ÇÂ¼ " + nChangedCount.ToString() + " Ìõ (¹²´¦Àí " + nProcessCount.ToString() + " Ìõ)\r\n\r\n(×¢ÒâĞŞ¸Ä²¢Î´×Ô¶¯±£´æ¡£ÇëÔÚ¹Û²ìÈ·ÈÏºó£¬Ê¹ÓÃ±£´æÃüÁî½«ĞŞ¸Ä±£´æ»Ø" + this.DbTypeCaption + "¿â)");
+            MessageBox.Show(this, "ä¿®æ”¹" + this.DbTypeCaption + "è®°å½• " + nChangedCount.ToString() + " æ¡ (å…±å¤„ç† " + nProcessCount.ToString() + " æ¡)\r\n\r\n(æ³¨æ„ä¿®æ”¹å¹¶æœªè‡ªåŠ¨ä¿å­˜ã€‚è¯·åœ¨è§‚å¯Ÿç¡®è®¤åï¼Œä½¿ç”¨ä¿å­˜å‘½ä»¤å°†ä¿®æ”¹ä¿å­˜å›" + this.DbTypeCaption + "åº“)");
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -3435,11 +3435,11 @@ out strError);
 
 
 #if NO
-        // ĞŞ¸ÄÒ»¸ö¶©¹º¼ÇÂ¼ XmlDocument
+        // ä¿®æ”¹ä¸€ä¸ªè®¢è´­è®°å½• XmlDocument
         // return:
-        //      -1  ³ö´í
-        //      0   Ã»ÓĞÊµÖÊĞÔĞŞ¸Ä
-        //      1   ·¢ÉúÁËĞŞ¸Ä
+        //      -1  å‡ºé”™
+        //      0   æ²¡æœ‰å®è´¨æ€§ä¿®æ”¹
+        //      1   å‘ç”Ÿäº†ä¿®æ”¹
         int ModifyOrderRecord(
             List<OneAction> actions,
             ref XmlDocument dom,
@@ -3458,13 +3458,13 @@ out strError);
             string strStateAction = this.MainForm.AppInfo.GetString(
                 "change_order_param",
                 "state",
-                "<²»¸Ä±ä>");
-            if (strStateAction != "<²»¸Ä±ä>")
+                "<ä¸æ”¹å˜>");
+            if (strStateAction != "<ä¸æ”¹å˜>")
             {
                 string strState = DomUtil.GetElementText(dom.DocumentElement,
                     "state");
 
-                if (strStateAction == "<Ôö¡¢¼õ>")
+                if (strStateAction == "<å¢ã€å‡>")
                 {
                     string strAdd = this.MainForm.AppInfo.GetString(
                 "change_order_param",
@@ -3506,19 +3506,19 @@ out strError);
                 }
             }
 
-            // ÆäËü×Ö¶Î
+            // å…¶å®ƒå­—æ®µ
             string strFieldName = this.MainForm.AppInfo.GetString(
 "change_order_param",
 "field_name",
-"<²»Ê¹ÓÃ>");
+"<ä¸ä½¿ç”¨>");
 
-            if (strFieldName != "<²»Ê¹ÓÃ>")
+            if (strFieldName != "<ä¸ä½¿ç”¨>")
             {
                 string strFieldValue = this.MainForm.AppInfo.GetString(
     "change_order_param",
     "field_value",
     "");
-                if (strFieldName == "±àºÅ")
+                if (strFieldName == "ç¼–å·")
                 {
                     ChangeField(ref dom,
             "index",
@@ -3527,7 +3527,7 @@ out strError);
             ref bChanged);
                 }
 
-                if (strFieldName == "ÊéÄ¿ºÅ")
+                if (strFieldName == "ä¹¦ç›®å·")
                 {
                     ChangeField(ref dom,
             "catalogNo",
@@ -3536,7 +3536,7 @@ out strError);
             ref bChanged);
                 }
 
-                if (strFieldName == "ÇşµÀ")
+                if (strFieldName == "æ¸ é“")
                 {
                     ChangeField(ref dom,
             "seller",
@@ -3545,7 +3545,7 @@ out strError);
             ref bChanged);
                 }
 
-                if (strFieldName == "¾­·ÑÀ´Ô´")
+                if (strFieldName == "ç»è´¹æ¥æº")
                 {
                     ChangeField(ref dom,
             "source",
@@ -3554,7 +3554,7 @@ out strError);
             ref bChanged);
                 }
 
-                if (strFieldName == "×¢ÊÍ")
+                if (strFieldName == "æ³¨é‡Š")
                 {
                     ChangeField(ref dom,
             "comment",
@@ -3563,7 +3563,7 @@ out strError);
             ref bChanged);
                 }
 
-                if (strFieldName == "Ê±¼ä·¶Î§")
+                if (strFieldName == "æ—¶é—´èŒƒå›´")
                 {
                     ChangeField(ref dom,
             "range",
@@ -3574,7 +3574,7 @@ out strError);
 
 
 
-                if (strFieldName == "°üº¬ÆÚÊı")
+                if (strFieldName == "åŒ…å«æœŸæ•°")
                 {
                     ChangeField(ref dom,
             "issueCount",
@@ -3583,7 +3583,7 @@ out strError);
             ref bChanged);
                 }
 
-                if (strFieldName == "¸´±¾Êı")
+                if (strFieldName == "å¤æœ¬æ•°")
                 {
                     ChangeField(ref dom,
             "copy",
@@ -3592,7 +3592,7 @@ out strError);
             ref bChanged);
                 }
 
-                if (strFieldName == "µ¥¼Û")
+                if (strFieldName == "å•ä»·")
                 {
                     ChangeField(ref dom,
             "price",
@@ -3601,7 +3601,7 @@ out strError);
             ref bChanged);
                 }
 
-                if (strFieldName == "×Ü¼Û¸ñ")
+                if (strFieldName == "æ€»ä»·æ ¼")
                 {
                     ChangeField(ref dom,
             "totalPrice",
@@ -3610,7 +3610,7 @@ out strError);
             ref bChanged);
                 }
 
-                if (strFieldName == "¶©¹ºÊ±¼ä")
+                if (strFieldName == "è®¢è´­æ—¶é—´")
                 {
                     ChangeField(ref dom,
             "orderTime",
@@ -3619,7 +3619,7 @@ out strError);
             ref bChanged);
                 }
 
-                if (strFieldName == "¶©µ¥ºÅ")
+                if (strFieldName == "è®¢å•å·")
                 {
                     ChangeField(ref dom,
             "orderID",
@@ -3628,7 +3628,7 @@ out strError);
             ref bChanged);
                 }
 
-                if (strFieldName == "¹İ²Ø·ÖÅä")
+                if (strFieldName == "é¦†è—åˆ†é…")
                 {
                     ChangeField(ref dom,
             "distribute",
@@ -3637,7 +3637,7 @@ out strError);
             ref bChanged);
                 }
 
-                if (strFieldName == "Àà±ğ")
+                if (strFieldName == "ç±»åˆ«")
                 {
                     ChangeField(ref dom,
             "class",
@@ -3646,7 +3646,7 @@ out strError);
             ref bChanged);
                 }
 
-                if (strFieldName == "ÇşµÀµØÖ·")
+                if (strFieldName == "æ¸ é“åœ°å€")
                 {
                     ChangeField(ref dom,
             "sellerAddress",
@@ -3655,7 +3655,7 @@ out strError);
             ref bChanged);
                 }
 
-                if (strFieldName == "Åú´ÎºÅ")
+                if (strFieldName == "æ‰¹æ¬¡å·")
                 {
                     ChangeField(ref dom,
             "batchNo",
@@ -3675,17 +3675,17 @@ out strError);
 
 #endif
 
-        // µ÷ÓÃ´òÓ¡¶©µ¥´°¿Ú [ÑéÊÕÇé¿ö]
+        // è°ƒç”¨æ‰“å°è®¢å•çª—å£ [éªŒæ”¶æƒ…å†µ]
         void menu_printOrderFormAccept_Click(object sender, EventArgs e)
         {
             string strError = "";
             string strFilename = PathUtil.MergePath(this.MainForm.DataDir, "~orderrecpath.txt");
-            bool bAppend = false;   // ²»Ï£Íû³öÏÖÑ¯ÎÊ×·¼ÓµÄ¶Ô»°¿ò£¬Ö±½Ó¸²¸Ç
-            // µ¼³öµ½¶©¹º¼ÇÂ¼Â·¾¶ÎÄ¼ş
+            bool bAppend = false;   // ä¸å¸Œæœ›å‡ºç°è¯¢é—®è¿½åŠ çš„å¯¹è¯æ¡†ï¼Œç›´æ¥è¦†ç›–
+            // å¯¼å‡ºåˆ°è®¢è´­è®°å½•è·¯å¾„æ–‡ä»¶
             // return:
-            //      -1  ³ö´í
-            //      0   ·ÅÆúµ¼³ö
-            //      >0  µ¼³ö³É¹¦£¬Êı×ÖÊÇÒÑ¾­µ¼³öµÄÌõÊı
+            //      -1  å‡ºé”™
+            //      0   æ”¾å¼ƒå¯¼å‡º
+            //      >0  å¯¼å‡ºæˆåŠŸï¼Œæ•°å­—æ˜¯å·²ç»å¯¼å‡ºçš„æ¡æ•°
             int nRet = ExportToRecPathFile(
                 strFilename,
                 ref bAppend,
@@ -3695,7 +3695,7 @@ out strError);
 
             if (nRet == 0)
             {
-                strError = "ËùÖ¸¶¨µÄ¶©¹º¼ÇÂ¼ÖĞÃ»ÓĞ°üº¬ÈÎºÎÒÑÑéÊÕµÄ²á¼ÇÂ¼ĞÅÏ¢";
+                strError = "æ‰€æŒ‡å®šçš„è®¢è´­è®°å½•ä¸­æ²¡æœ‰åŒ…å«ä»»ä½•å·²éªŒæ”¶çš„å†Œè®°å½•ä¿¡æ¯";
                 goto ERROR1;
             }
 
@@ -3706,11 +3706,11 @@ out strError);
 
             form.AcceptCondition = true;
 
-            // ´Ó(ÒÑÑéÊÕµÄ)²á¼ÇÂ¼Â·¾¶ÎÄ¼ş×°ÔØ
+            // ä»(å·²éªŒæ”¶çš„)å†Œè®°å½•è·¯å¾„æ–‡ä»¶è£…è½½
             // return:
-            //      -1  ³ö´í
-            //      0   ·ÅÆú
-            //      1   ×°ÔØ³É¹¦
+            //      -1  å‡ºé”™
+            //      0   æ”¾å¼ƒ
+            //      1   è£…è½½æˆåŠŸ
             nRet = form.LoadFromOrderRecPathFile(
                 true,
                 strFilename,
@@ -3724,17 +3724,17 @@ out strError);
         }
 
 
-        // µ÷ÓÃ´òÓ¡¶©µ¥´°¿Ú
+        // è°ƒç”¨æ‰“å°è®¢å•çª—å£
         void menu_printOrderForm_Click(object sender, EventArgs e)
         {
             string strError = "";
             string strFilename = PathUtil.MergePath(this.MainForm.DataDir, "~orderrecpath.txt");
-            bool bAppend = false;   // ²»Ï£Íû³öÏÖÑ¯ÎÊ×·¼ÓµÄ¶Ô»°¿ò£¬Ö±½Ó¸²¸Ç
-            // µ¼³öµ½¶©¹º¼ÇÂ¼Â·¾¶ÎÄ¼ş
+            bool bAppend = false;   // ä¸å¸Œæœ›å‡ºç°è¯¢é—®è¿½åŠ çš„å¯¹è¯æ¡†ï¼Œç›´æ¥è¦†ç›–
+            // å¯¼å‡ºåˆ°è®¢è´­è®°å½•è·¯å¾„æ–‡ä»¶
             // return:
-            //      -1  ³ö´í
-            //      0   ·ÅÆúµ¼³ö
-            //      >0  µ¼³ö³É¹¦£¬Êı×ÖÊÇÒÑ¾­µ¼³öµÄÌõÊı
+            //      -1  å‡ºé”™
+            //      0   æ”¾å¼ƒå¯¼å‡º
+            //      >0  å¯¼å‡ºæˆåŠŸï¼Œæ•°å­—æ˜¯å·²ç»å¯¼å‡ºçš„æ¡æ•°
             int nRet = ExportToRecPathFile(
                 strFilename,
                 ref bAppend,
@@ -3744,7 +3744,7 @@ out strError);
 
             if (nRet == 0)
             {
-                strError = "ËùÖ¸¶¨µÄ¶©¹º¼ÇÂ¼ÖĞÃ»ÓĞ°üº¬ÈÎºÎÒÑÑéÊÕµÄ²á¼ÇÂ¼ĞÅÏ¢";
+                strError = "æ‰€æŒ‡å®šçš„è®¢è´­è®°å½•ä¸­æ²¡æœ‰åŒ…å«ä»»ä½•å·²éªŒæ”¶çš„å†Œè®°å½•ä¿¡æ¯";
                 goto ERROR1;
             }
 
@@ -3755,11 +3755,11 @@ out strError);
 
             form.AcceptCondition = false;
 
-            // ´Ó(ÒÑÑéÊÕµÄ)²á¼ÇÂ¼Â·¾¶ÎÄ¼ş×°ÔØ
+            // ä»(å·²éªŒæ”¶çš„)å†Œè®°å½•è·¯å¾„æ–‡ä»¶è£…è½½
             // return:
-            //      -1  ³ö´í
-            //      0   ·ÅÆú
-            //      1   ×°ÔØ³É¹¦
+            //      -1  å‡ºé”™
+            //      0   æ”¾å¼ƒ
+            //      1   è£…è½½æˆåŠŸ
             nRet = form.LoadFromOrderRecPathFile(
                 true,
                 strFilename,
@@ -3772,14 +3772,14 @@ out strError);
             MessageBox.Show(this, strError);
         }
 
-                // µ÷ÓÃ´òÓ¡´ßÑ¯µ¥´°¿Ú
+                // è°ƒç”¨æ‰“å°å‚¬è¯¢å•çª—å£
         void menu_printClaimForm_Click(object sender, EventArgs e)
         {
             string strError = "";
 
             if (this.listView_records.SelectedItems.Count == 0)
             {
-                strError = "ÉĞÎ´Ñ¡¶¨Òª×°Èë´òÓ¡´ßÑ¯´°µÄĞĞ";
+                strError = "å°šæœªé€‰å®šè¦è£…å…¥æ‰“å°å‚¬è¯¢çª—çš„è¡Œ";
                 goto ERROR1;
             }
 
@@ -3823,17 +3823,17 @@ out strError);
         }
 
 
-        // µ÷ÓÃ´òÓ¡ÑéÊÕµ¥´°¿Ú
+        // è°ƒç”¨æ‰“å°éªŒæ”¶å•çª—å£
         void menu_printAcceptForm_Click(object sender, EventArgs e)
         {
             string strError = "";
             string strFilename = PathUtil.MergePath(this.MainForm.DataDir, "~itemrecpath.txt");
-            bool bAppend = false;   // ²»Ï£Íû³öÏÖÑ¯ÎÊ×·¼ÓµÄ¶Ô»°¿ò£¬Ö±½Ó¸²¸Ç
-            // µ¼³öµ½(ÒÑÑéÊÕµÄ)²á¼ÇÂ¼Â·¾¶ÎÄ¼ş
+            bool bAppend = false;   // ä¸å¸Œæœ›å‡ºç°è¯¢é—®è¿½åŠ çš„å¯¹è¯æ¡†ï¼Œç›´æ¥è¦†ç›–
+            // å¯¼å‡ºåˆ°(å·²éªŒæ”¶çš„)å†Œè®°å½•è·¯å¾„æ–‡ä»¶
             // return:
-            //      -1  ³ö´í
-            //      0   ·ÅÆúµ¼³ö
-            //      >0  µ¼³ö³É¹¦£¬Êı×ÖÊÇÒÑ¾­µ¼³öµÄÌõÊı
+            //      -1  å‡ºé”™
+            //      0   æ”¾å¼ƒå¯¼å‡º
+            //      >0  å¯¼å‡ºæˆåŠŸï¼Œæ•°å­—æ˜¯å·²ç»å¯¼å‡ºçš„æ¡æ•°
             int nRet = ExportToItemRecPathFile(
                 strFilename,
                 ref bAppend,
@@ -3843,7 +3843,7 @@ out strError);
 
             if (nRet == 0)
             {
-                strError = "ËùÖ¸¶¨µÄ¶©¹º¼ÇÂ¼ÖĞÃ»ÓĞ°üº¬ÈÎºÎÒÑÑéÊÕµÄ²á¼ÇÂ¼ĞÅÏ¢";
+                strError = "æ‰€æŒ‡å®šçš„è®¢è´­è®°å½•ä¸­æ²¡æœ‰åŒ…å«ä»»ä½•å·²éªŒæ”¶çš„å†Œè®°å½•ä¿¡æ¯";
                 goto ERROR1;
             }
 
@@ -3852,11 +3852,11 @@ out strError);
             form.MdiParent = this.MainForm;
             form.Show();
 
-            // ´Ó(ÒÑÑéÊÕµÄ)²á¼ÇÂ¼Â·¾¶ÎÄ¼ş×°ÔØ
+            // ä»(å·²éªŒæ”¶çš„)å†Œè®°å½•è·¯å¾„æ–‡ä»¶è£…è½½
             // return:
-            //      -1  ³ö´í
-            //      0   ·ÅÆú
-            //      1   ×°ÔØ³É¹¦
+            //      -1  å‡ºé”™
+            //      0   æ”¾å¼ƒ
+            //      1   è£…è½½æˆåŠŸ
             nRet = form.LoadFromItemRecPathFile(
                 true,
                 strFilename,
@@ -3869,21 +3869,21 @@ out strError);
             MessageBox.Show(this, strError);
         }
 
-        // µ¼³öµ½(ÒÑÑéÊÕµÄ)²á¼ÇÂ¼Â·¾¶ÎÄ¼ş
+        // å¯¼å‡ºåˆ°(å·²éªŒæ”¶çš„)å†Œè®°å½•è·¯å¾„æ–‡ä»¶
         void menu_saveToAcceptItemRecordPathFile_Click(object sender, EventArgs e)
         {
             string strError = "";
             int nRet = 0;
 
-            // Ñ¯ÎÊÎÄ¼şÃû
+            // è¯¢é—®æ–‡ä»¶å
             SaveFileDialog dlg = new SaveFileDialog();
 
-            dlg.Title = "ÇëÖ¸¶¨Òª±£´æµÄ²á¼ÇÂ¼Â·¾¶ÎÄ¼şÃû";
+            dlg.Title = "è¯·æŒ‡å®šè¦ä¿å­˜çš„å†Œè®°å½•è·¯å¾„æ–‡ä»¶å";
             dlg.CreatePrompt = false;
             dlg.OverwritePrompt = false;
             dlg.FileName = this.ExportItemRecPathFilename;
             // dlg.InitialDirectory = Environment.CurrentDirectory;
-            dlg.Filter = "²á¼ÇÂ¼Â·¾¶ÎÄ¼ş (*.txt)|*.txt|All files (*.*)|*.*";
+            dlg.Filter = "å†Œè®°å½•è·¯å¾„æ–‡ä»¶ (*.txt)|*.txt|All files (*.*)|*.*";
 
             dlg.RestoreDirectory = true;
 
@@ -3892,12 +3892,12 @@ out strError);
 
             this.ExportItemRecPathFilename = dlg.FileName;
 
-            bool bAppend = true;    // Ï£Íû³öÏÖ¶Ô»°¿òÑ¯ÎÊ×·¼Ó£¬Èç¹ûÎÄ¼şÒÑ¾­´æÔÚµÄ»°
-            // µ¼³öµ½(ÒÑÑéÊÕµÄ)²á¼ÇÂ¼Â·¾¶ÎÄ¼ş
+            bool bAppend = true;    // å¸Œæœ›å‡ºç°å¯¹è¯æ¡†è¯¢é—®è¿½åŠ ï¼Œå¦‚æœæ–‡ä»¶å·²ç»å­˜åœ¨çš„è¯
+            // å¯¼å‡ºåˆ°(å·²éªŒæ”¶çš„)å†Œè®°å½•è·¯å¾„æ–‡ä»¶
             // return:
-            //      -1  ³ö´í
-            //      0   ·ÅÆúµ¼³ö
-            //      >0  µ¼³ö³É¹¦£¬Êı×ÖÊÇÒÑ¾­µ¼³öµÄÌõÊı
+            //      -1  å‡ºé”™
+            //      0   æ”¾å¼ƒå¯¼å‡º
+            //      >0  å¯¼å‡ºæˆåŠŸï¼Œæ•°å­—æ˜¯å·²ç»å¯¼å‡ºçš„æ¡æ•°
             nRet = ExportToItemRecPathFile(
                 this.ExportItemRecPathFilename,
                 ref bAppend,
@@ -3905,23 +3905,23 @@ out strError);
             if (nRet == -1)
                 goto ERROR1;
 
-            string strExportStyle = "µ¼³ö";
+            string strExportStyle = "å¯¼å‡º";
             if (bAppend == true)
-                strExportStyle = "×·¼Ó";
+                strExportStyle = "è¿½åŠ ";
 
-            this.MainForm.StatusBarMessage = "²á¼ÇÂ¼Â·¾¶ " + nRet.ToString() + "¸ö ÒÑ³É¹¦" + strExportStyle + "µ½ÎÄ¼ş " + this.ExportItemRecPathFilename;
+            this.MainForm.StatusBarMessage = "å†Œè®°å½•è·¯å¾„ " + nRet.ToString() + "ä¸ª å·²æˆåŠŸ" + strExportStyle + "åˆ°æ–‡ä»¶ " + this.ExportItemRecPathFilename;
             return;
         ERROR1:
             MessageBox.Show(this, strError);
         }
 
-        // µ¼³öµ½(ÒÑÑéÊÕµÄ)²á¼ÇÂ¼Â·¾¶ÎÄ¼ş
+        // å¯¼å‡ºåˆ°(å·²éªŒæ”¶çš„)å†Œè®°å½•è·¯å¾„æ–‡ä»¶
         // parameters:
-        //      bAppend [in]Èç¹û¿ÉÄÜµÄ»°ÊÇ·ñ¾¡Á¿×·¼Óµ½ÒÑ¾­´æÔÚµÄÎÄ¼şÄ©Î² [out]Êµ¼Ê²ÉÓÃµÄÊÇ·ñÎª×·¼Ó·½Ê½
+        //      bAppend [in]å¦‚æœå¯èƒ½çš„è¯æ˜¯å¦å°½é‡è¿½åŠ åˆ°å·²ç»å­˜åœ¨çš„æ–‡ä»¶æœ«å°¾ [out]å®é™…é‡‡ç”¨çš„æ˜¯å¦ä¸ºè¿½åŠ æ–¹å¼
         // return:
-        //      -1  ³ö´í
-        //      0   ·ÅÆúµ¼³ö
-        //      >0  µ¼³ö³É¹¦£¬Êı×ÖÊÇÒÑ¾­µ¼³öµÄÌõÊı
+        //      -1  å‡ºé”™
+        //      0   æ”¾å¼ƒå¯¼å‡º
+        //      >0  å¯¼å‡ºæˆåŠŸï¼Œæ•°å­—æ˜¯å·²ç»å¯¼å‡ºçš„æ¡æ•°
         int ExportToItemRecPathFile(
             string strFilename,
             ref bool bAppend,
@@ -3933,7 +3933,7 @@ out strError);
             if (File.Exists(strFilename) == true && bAppend == true)
             {
                 DialogResult result = MessageBox.Show(this,
-                    "²á¼ÇÂ¼Â·¾¶ÎÄ¼ş '" + strFilename + "' ÒÑ¾­´æÔÚ¡£\r\n\r\n±¾´ÎÊä³öÄÚÈİÊÇ·ñÒª×·¼Óµ½¸ÃÎÄ¼şÎ²²¿? (Yes ×·¼Ó£»No ¸²¸Ç£»Cancel ·ÅÆúµ¼³ö)",
+                    "å†Œè®°å½•è·¯å¾„æ–‡ä»¶ '" + strFilename + "' å·²ç»å­˜åœ¨ã€‚\r\n\r\næœ¬æ¬¡è¾“å‡ºå†…å®¹æ˜¯å¦è¦è¿½åŠ åˆ°è¯¥æ–‡ä»¶å°¾éƒ¨? (Yes è¿½åŠ ï¼›No è¦†ç›–ï¼›Cancel æ”¾å¼ƒå¯¼å‡º)",
                     this.DbType + "SearchForm",
                     MessageBoxButtons.YesNoCancel,
                     MessageBoxIcon.Question,
@@ -3952,7 +3952,7 @@ out strError);
             else
                 bAppend = false;
 
-            // ´´½¨ÎÄ¼ş
+            // åˆ›å»ºæ–‡ä»¶
             StreamWriter sw = new StreamWriter(strFilename,
                 bAppend,	// append
                 System.Text.Encoding.UTF8);
@@ -3961,7 +3961,7 @@ out strError);
 
                 stop.Style = StopStyle.EnableHalfStop;
                 stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("ÕıÔÚµ¼³öÒÑÑéÊÕµÄ²á¼ÇÂ¼Â·¾¶ ...");
+                stop.Initial("æ­£åœ¨å¯¼å‡ºå·²éªŒæ”¶çš„å†Œè®°å½•è·¯å¾„ ...");
                 stop.BeginLoop();
 
                 this.EnableControls(false);
@@ -3974,11 +3974,11 @@ out strError);
 
                         List<string> itemrecpaths = null;
 
-                        // ¸ù¾İ¶©¹º¼ÇÂ¼Â·¾¶£¬¼ìË÷³ö¶©¹º¼ÇÂ¼£¬²¢ÇÒ»ñµÃÏà¹ØÁªµÄÒÑÑéÊÕ²á¼ÇÂ¼Â·¾¶
+                        // æ ¹æ®è®¢è´­è®°å½•è·¯å¾„ï¼Œæ£€ç´¢å‡ºè®¢è´­è®°å½•ï¼Œå¹¶ä¸”è·å¾—ç›¸å…³è”çš„å·²éªŒæ”¶å†Œè®°å½•è·¯å¾„
                         // parameters:
                         // return: 
-                        //      -1  ³ö´í
-                        //      1   ³É¹¦
+                        //      -1  å‡ºé”™
+                        //      1   æˆåŠŸ
                         int nRet = LoadOrderItem(item.Text,
                 out itemrecpaths,
                 out strError);
@@ -4014,12 +4014,12 @@ out strError);
             return nCount;
         }
 
-        // ¸ù¾İ¶©¹º¼ÇÂ¼Â·¾¶£¬¼ìË÷³ö¶©¹º¼ÇÂ¼£¬²¢ÇÒ»ñµÃÏà¹ØÁªµÄÒÑÑéÊÕ²á¼ÇÂ¼Â·¾¶
+        // æ ¹æ®è®¢è´­è®°å½•è·¯å¾„ï¼Œæ£€ç´¢å‡ºè®¢è´­è®°å½•ï¼Œå¹¶ä¸”è·å¾—ç›¸å…³è”çš„å·²éªŒæ”¶å†Œè®°å½•è·¯å¾„
         // parameters:
-        //      strRecPath  ¶©¹º¿â¼ÇÂ¼Â·¾¶
+        //      strRecPath  è®¢è´­åº“è®°å½•è·¯å¾„
         // return: 
-        //      -1  ³ö´í
-        //      1   ³É¹¦
+        //      -1  å‡ºé”™
+        //      1   æˆåŠŸ
         int LoadOrderItem(string strRecPath,
             out List<string> itemrecpaths,
             out string strError)
@@ -4050,11 +4050,11 @@ out strError);
                 out strError);
             if (lRet == -1 || lRet == 0)
             {
-                strError = "»ñÈ¡¶©¹º¼ÇÂ¼ " + strRecPath + " Ê±³ö´í: " + strError;
+                strError = "è·å–è®¢è´­è®°å½• " + strRecPath + " æ—¶å‡ºé”™: " + strError;
                 return -1;
             }
 
-            // ÆÊÎöÒ»¸ö¶©¹ºxml¼ÇÂ¼£¬È¡³öÓĞ¹ØĞÅÏ¢
+            // å‰–æä¸€ä¸ªè®¢è´­xmlè®°å½•ï¼Œå–å‡ºæœ‰å…³ä¿¡æ¯
             XmlDocument dom = new XmlDocument();
             try
             {
@@ -4062,15 +4062,15 @@ out strError);
             }
             catch (Exception ex)
             {
-                strError = "¶©¹º¼ÇÂ¼XML×°ÈëDOMÊ±³ö´í: " + ex.Message;
+                strError = "è®¢è´­è®°å½•XMLè£…å…¥DOMæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
-            // ¹Û²ì¶©¹º¿âÊÇ²»ÊÇÆÚ¿¯¿âÀàĞÍ
+            // è§‚å¯Ÿè®¢è´­åº“æ˜¯ä¸æ˜¯æœŸåˆŠåº“ç±»å‹
             // return:
-            //      -1  ²»ÊÇ¶©¹º¿â
-            //      0   Í¼ÊéÀàĞÍ
-            //      1   ÆÚ¿¯ÀàĞÍ
+            //      -1  ä¸æ˜¯è®¢è´­åº“
+            //      0   å›¾ä¹¦ç±»å‹
+            //      1   æœŸåˆŠç±»å‹
             nRet = this.MainForm.IsSeriesTypeFromOrderDbName(Global.GetDbName(strRecPath));
             if (nRet == -1)
             {
@@ -4086,20 +4086,20 @@ out strError);
                 string strRefID = DomUtil.GetElementText(dom.DocumentElement, "refID");
                 if (string.IsNullOrEmpty(strRefID) == true)
                 {
-                    strError = "¶©¹º¼ÇÂ¼ '" + strRecPath + "' ÖĞÃ»ÓĞ<refID>ÔªËØ";
+                    strError = "è®¢è´­è®°å½• '" + strRecPath + "' ä¸­æ²¡æœ‰<refID>å…ƒç´ ";
                     return -1;
                 }
 
                 string strBiblioDbName = this.MainForm.GetBiblioDbNameFromOrderDbName(Global.GetDbName(strRecPath));
                 string strIssueDbName = this.MainForm.GetIssueDbName(strBiblioDbName);
 
-                // Èç¹ûÊÇÆÚ¿¯µÄ¶©¹º¿â£¬»¹ĞèÒªÍ¨¹ı¶©¹º¼ÇÂ¼µÄrefid»ñµÃÆÚ¼ÇÂ¼£¬´ÓÆÚ¼ÇÂ¼ÖĞ²ÅÄÜµÃµ½¹İ²Ø·ÖÅäĞÅÏ¢
+                // å¦‚æœæ˜¯æœŸåˆŠçš„è®¢è´­åº“ï¼Œè¿˜éœ€è¦é€šè¿‡è®¢è´­è®°å½•çš„refidè·å¾—æœŸè®°å½•ï¼Œä»æœŸè®°å½•ä¸­æ‰èƒ½å¾—åˆ°é¦†è—åˆ†é…ä¿¡æ¯
                 string strOutputStyle = "";
                 lRet = Channel.SearchIssue(stop,
-    strIssueDbName, // "<È«²¿>",
+    strIssueDbName, // "<å…¨éƒ¨>",
     strRefID,
     -1,
-    "¶©¹º²Î¿¼ID",
+    "è®¢è´­å‚è€ƒID",
     "exact",
     this.Lang,
     "tempissue",
@@ -4108,7 +4108,7 @@ out strError);
     out strError);
                 if (lRet == -1 || lRet == 0)
                 {
-                    strError = "¼ìË÷ ¶©¹º²Î¿¼ID Îª " + strRefID + " µÄÆÚ¼ÇÂ¼Ê±³ö´í: " + strError;
+                    strError = "æ£€ç´¢ è®¢è´­å‚è€ƒID ä¸º " + strRefID + " çš„æœŸè®°å½•æ—¶å‡ºé”™: " + strError;
                     return -1;
                 }
 
@@ -4117,14 +4117,14 @@ out strError);
                 long lCount = lHitCount;
                 DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
 
-                // »ñÈ¡ÃüÖĞ½á¹û
+                // è·å–å‘½ä¸­ç»“æœ
                 for (; ; )
                 {
-                    Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                    Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                     if (stop != null && stop.State != 0)
                     {
-                        strError = "ÓÃ»§ÖĞ¶Ï";
+                        strError = "ç”¨æˆ·ä¸­æ–­";
                         return -1;
                     }
 
@@ -4139,12 +4139,12 @@ out strError);
                         out strError);
                     if (lRet == -1)
                     {
-                        strError = "»ñÈ¡½á¹û¼¯Ê±³ö´í: " + strError;
+                        strError = "è·å–ç»“æœé›†æ—¶å‡ºé”™: " + strError;
                         return -1;
                     }
                     if (lRet == 0)
                     {
-                        strError = "»ñÈ¡½á¹û¼¯Ê±³ö´í: lRet = 0";
+                        strError = "è·å–ç»“æœé›†æ—¶å‡ºé”™: lRet = 0";
                         return -1;
                     }
 
@@ -4171,11 +4171,11 @@ out strError);
     out strError);
                         if (lRet == -1 || lRet == 0)
                         {
-                            strError = "»ñÈ¡ÆÚ¼ÇÂ¼ " + strIssueRecPath + " Ê±³ö´í: " + strError;
+                            strError = "è·å–æœŸè®°å½• " + strIssueRecPath + " æ—¶å‡ºé”™: " + strError;
                             return -1;
                         }
 
-                        // ÆÊÎöÒ»¸öÆÚ¿¯xml¼ÇÂ¼£¬È¡³öÓĞ¹ØĞÅÏ¢
+                        // å‰–æä¸€ä¸ªæœŸåˆŠxmlè®°å½•ï¼Œå–å‡ºæœ‰å…³ä¿¡æ¯
                         XmlDocument issue_dom = new XmlDocument();
                         try
                         {
@@ -4183,15 +4183,15 @@ out strError);
                         }
                         catch (Exception ex)
                         {
-                            strError = "ÆÚ¼ÇÂ¼ '" + strOutputIssueRecPath + "' XML×°ÈëDOMÊ±³ö´í: " + ex.Message;
+                            strError = "æœŸè®°å½• '" + strOutputIssueRecPath + "' XMLè£…å…¥DOMæ—¶å‡ºé”™: " + ex.Message;
                             return -1;
                         }
 
-                        // Ñ°ÕÒ /orderInfo/* ÔªËØ
+                        // å¯»æ‰¾ /orderInfo/* å…ƒç´ 
                         XmlNode nodeRoot = issue_dom.DocumentElement.SelectSingleNode("orderInfo/*[refID/text()='" + strRefID + "']");
                         if (nodeRoot == null)
                         {
-                            strError = "ÆÚ¼ÇÂ¼ '" + strOutputIssueRecPath + "' ÖĞÃ»ÓĞÕÒµ½<refID>ÔªËØÖµÎª '" + strRefID + "' µÄ¶©¹ºÄÚÈİ½Úµã...";
+                            strError = "æœŸè®°å½• '" + strOutputIssueRecPath + "' ä¸­æ²¡æœ‰æ‰¾åˆ°<refID>å…ƒç´ å€¼ä¸º '" + strRefID + "' çš„è®¢è´­å†…å®¹èŠ‚ç‚¹...";
                             return -1;
                         }
 
@@ -4239,7 +4239,7 @@ out strError);
                         if (string.IsNullOrEmpty(strRefID) == true)
                             continue;
 
-                        // ¸ù¾İ²á¼ÇÂ¼µÄrefid×°Èë²á¼ÇÂ¼
+                        // æ ¹æ®å†Œè®°å½•çš„refidè£…å…¥å†Œè®°å½•
                         string strItemXml = "";
                         string strOutputItemRecPath = "";
 
@@ -4256,7 +4256,7 @@ out strError);
                             out strError);
                         if (lRet == -1 || lRet == 0)
                         {
-                            strError = "»ñÈ¡²á¼ÇÂ¼ " + strRefID + " Ê±³ö´í: " + strError;
+                            strError = "è·å–å†Œè®°å½• " + strRefID + " æ—¶å‡ºé”™: " + strError;
                         }
 
                         itemrecpaths.Add(strOutputItemRecPath);
@@ -4276,20 +4276,20 @@ out strError);
 
             if (this.listView_records.SelectedItems.Count == 0)
             {
-                strError = "ÉĞÎ´Ñ¡¶¨Òª½øĞĞÅú´¦ÀíµÄÊÂÏî";
+                strError = "å°šæœªé€‰å®šè¦è¿›è¡Œæ‰¹å¤„ç†çš„äº‹é¡¹";
                 goto ERROR1;
             }
 
-            if (stop != null && stop.State == 0)    // 0 ±íÊ¾ÕıÔÚ´¦Àí
+            if (stop != null && stop.State == 0)    // 0 è¡¨ç¤ºæ­£åœ¨å¤„ç†
             {
-                strError = "Ä¿Ç°ÓĞ³¤²Ù×÷ÕıÔÚ½øĞĞ£¬ÎŞ·¨½øĞĞ´´½¨Ë÷È¡ºÅµÄ²Ù×÷";
+                strError = "ç›®å‰æœ‰é•¿æ“ä½œæ­£åœ¨è¿›è¡Œï¼Œæ— æ³•è¿›è¡Œåˆ›å»ºç´¢å–å·çš„æ“ä½œ";
                 goto ERROR1;
             }
 
             bool bOverwrite = false;
             {
                 DialogResult result = MessageBox.Show(this,
-    "ÔÚºóÃæ¼´½«½øĞĞµÄ´¦Àí¹ı³ÌÖĞ£¬¶ÔÒÑ¾­´æÔÚË÷È¡ºÅµÄ²á¼ÇÂ¼£¬ÊÇ·ñÒªÖØĞÂ´´½¨Ë÷È¡ºÅ?\r\n\r\n(Yes: ÒªÖØĞÂ´´½¨£»No: ²»ÖØĞÂ´´½¨£¬¼´£ºÌø¹ı£»Cancel: ÏÖÔÚ¾Í·ÅÆú±¾´ÎÅú´¦Àí)",
+    "åœ¨åé¢å³å°†è¿›è¡Œçš„å¤„ç†è¿‡ç¨‹ä¸­ï¼Œå¯¹å·²ç»å­˜åœ¨ç´¢å–å·çš„å†Œè®°å½•ï¼Œæ˜¯å¦è¦é‡æ–°åˆ›å»ºç´¢å–å·?\r\n\r\n(Yes: è¦é‡æ–°åˆ›å»ºï¼›No: ä¸é‡æ–°åˆ›å»ºï¼Œå³ï¼šè·³è¿‡ï¼›Cancel: ç°åœ¨å°±æ”¾å¼ƒæœ¬æ¬¡æ‰¹å¤„ç†)",
     this.DbType + "SearchForm",
     MessageBoxButtons.YesNoCancel,
     MessageBoxIcon.Question,
@@ -4307,14 +4307,14 @@ out strError);
 
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ´´½¨Ë÷È¡ºÅ ...");
+            stop.Initial("æ­£åœ¨åˆ›å»ºç´¢å–å· ...");
             stop.BeginLoop();
 
             this.EnableControls(false);
             try
             {
 
-                // ´ò¿ªÒ»¸öĞÂµÄÖÖ²á´°
+                // æ‰“å¼€ä¸€ä¸ªæ–°çš„ç§å†Œçª—
                 EntityForm form = null;
 
                 form = new EntityForm();
@@ -4332,13 +4332,13 @@ out strError);
                 int i = 0;
                 foreach (ListViewItem item in this.listView_records.SelectedItems)
                 {
-                    Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                    Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                     if (stop != null)
                     {
                         if (stop.State != 0)
                         {
-                            MessageBox.Show(this, "ÓÃ»§ÖĞ¶Ï");
+                            MessageBox.Show(this, "ç”¨æˆ·ä¸­æ–­");
                             return;
                         }
                     }
@@ -4346,18 +4346,18 @@ out strError);
                     string strRecPath = ListViewUtil.GetItemText(item, 0);
 
                     // parameters:
-                    //      bAutoSavePrev   ÊÇ·ñ×Ô¶¯Ìá½»±£´æÏÈÇ°·¢Éú¹ıµÄĞŞ¸Ä£¿Èç¹û==true£¬ÊÇ£»Èç¹û==false£¬ÔòÒª³öÏÖMessageBoxÌáÊ¾
+                    //      bAutoSavePrev   æ˜¯å¦è‡ªåŠ¨æäº¤ä¿å­˜å…ˆå‰å‘ç”Ÿè¿‡çš„ä¿®æ”¹ï¼Ÿå¦‚æœ==trueï¼Œæ˜¯ï¼›å¦‚æœ==falseï¼Œåˆ™è¦å‡ºç°MessageBoxæç¤º
                     // return:
                     //      -1  error
                     //      0   not found
                     //      1   found
                     form.LoadItemByRecPath(strRecPath, true);
 
-                    // Îªµ±Ç°Ñ¡¶¨µÄÊÂÏî´´½¨Ë÷È¡ºÅ
+                    // ä¸ºå½“å‰é€‰å®šçš„äº‹é¡¹åˆ›å»ºç´¢å–å·
                     // return:
-                    //      -1  ³ö´í
-                    //      0   ·ÅÆú´¦Àí
-                    //      1   ÒÑ¾­´¦Àí
+                    //      -1  å‡ºé”™
+                    //      0   æ”¾å¼ƒå¤„ç†
+                    //      1   å·²ç»å¤„ç†
                     nRet = form.EntityControl.CreateCallNumber(bOverwrite, out strError);
                     if (nRet == -1)
                         goto ERROR;
@@ -4374,11 +4374,11 @@ out strError);
     out strError);
                         if (nRet == -1)
                         {
-                            strError = "Ë¢ĞÂä¯ÀÀÄÚÈİÊ±³ö´í: " + strError;
+                            strError = "åˆ·æ–°æµè§ˆå†…å®¹æ—¶å‡ºé”™: " + strError;
                             goto ERROR;
 #if NO
                             DialogResult result = MessageBox.Show(this,
-                                "Ë¢ĞÂä¯ÀÀÄÚÈİÊ±³ö´í: " + strError + "¡£\r\n\r\nÊÇ·ñ¼ÌĞøË¢ĞÂ? (OK Ë¢ĞÂ£»Cancel ·ÅÆúË¢ĞÂ)",
+                                "åˆ·æ–°æµè§ˆå†…å®¹æ—¶å‡ºé”™: " + strError + "ã€‚\r\n\r\næ˜¯å¦ç»§ç»­åˆ·æ–°? (OK åˆ·æ–°ï¼›Cancel æ”¾å¼ƒåˆ·æ–°)",
                                 this.DbType + "SearchForm",
                                 MessageBoxButtons.OKCancel,
                                 MessageBoxIcon.Question,
@@ -4400,7 +4400,7 @@ out strError);
                             itemsearchform.MdiParent = this.MainForm;
                             itemsearchform.MainForm = this.MainForm;
                             itemsearchform.Show();
-                            itemsearchform.QueryWordString = "´´½¨Ë÷È¡ºÅ¹ı³ÌÖĞ³ö´íµÄ²á¼ÇÂ¼";
+                            itemsearchform.QueryWordString = "åˆ›å»ºç´¢å–å·è¿‡ç¨‹ä¸­å‡ºé”™çš„å†Œè®°å½•";
 
                             active_mdi.Activate();
                         }
@@ -4410,17 +4410,17 @@ out strError);
 
                         this.OutputText(strRecPath + " : " + strError, 2);
 
-                        strError = "ÔÚÎª²á¼ÇÂ¼ " + strRecPath + " ´´½¨Ë÷È¡ºÅÊ±³ö´í: " + strError;
+                        strError = "åœ¨ä¸ºå†Œè®°å½• " + strRecPath + " åˆ›å»ºç´¢å–å·æ—¶å‡ºé”™: " + strError;
 
                         if (bHideMessageBox == false)
                         {
                             DialogResult result = MessageDialog.Show(this,
-                                strError + "¡£\r\n\r\nÊÇ·ñ¼ÌĞø´¦ÀíºóÃæµÄ¼ÇÂ¼? (¼ÌĞø£º ¼ÌĞø£»Í£Ö¹£º Í£Ö¹Õû¸öÅú´¦Àí)",
+                                strError + "ã€‚\r\n\r\næ˜¯å¦ç»§ç»­å¤„ç†åé¢çš„è®°å½•? (ç»§ç»­ï¼š ç»§ç»­ï¼›åœæ­¢ï¼š åœæ­¢æ•´ä¸ªæ‰¹å¤„ç†)",
             MessageBoxButtons.OKCancel,
             MessageBoxDefaultButton.Button1,
-            "²»ÔÙ³öÏÖ´Ë¶Ô»°¿ò",
+            "ä¸å†å‡ºç°æ­¤å¯¹è¯æ¡†",
             ref bHideMessageBox,
-            new string[] { "¼ÌĞø", "Í£Ö¹" });
+            new string[] { "ç»§ç»­", "åœæ­¢" });
                             if (result == System.Windows.Forms.DialogResult.Cancel)
                                 goto ERROR1;
                         }
@@ -4444,7 +4444,7 @@ out strError);
                 this.EnableControls(true);
             }
 
-            MessageBox.Show(this, "¹²´¦Àí "+nCount.ToString()+" ¸ö²á¼ÇÂ¼");
+            MessageBox.Show(this, "å…±å¤„ç† "+nCount.ToString()+" ä¸ªå†Œè®°å½•");
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -4464,10 +4464,10 @@ out strError);
 
 #if NO
         /// <summary>
-        /// Ïòä¯ÀÀ¿òÄ©Î²ĞÂ¼ÓÈëÒ»ĞĞ
+        /// å‘æµè§ˆæ¡†æœ«å°¾æ–°åŠ å…¥ä¸€è¡Œ
         /// </summary>
-        /// <param name="strLine">Òª¼ÓÈëµÄĞĞÄÚÈİ¡£Ã¿ÁĞÄÚÈİÖ®¼äÓÃ×Ö·û '\t' ¼ä¸ô</param>
-        /// <returns>ĞÂ´´½¨µÄ ListViewItem ¶ÔÏó</returns>
+        /// <param name="strLine">è¦åŠ å…¥çš„è¡Œå†…å®¹ã€‚æ¯åˆ—å†…å®¹ä¹‹é—´ç”¨å­—ç¬¦ '\t' é—´éš”</param>
+        /// <returns>æ–°åˆ›å»ºçš„ ListViewItem å¯¹è±¡</returns>
         public ListViewItem AddLineToBrowseList(string strLine)
         {
             ListViewItem item = Global.BuildListViewItem(
@@ -4491,20 +4491,20 @@ out strError);
 
             if (this.listView_records.SelectedItems.Count == 0)
             {
-                strError = "ÉĞÎ´Ñ¡ÔñÒª¿ìËÙĞŞ¸ÄµÄÊÂÏî";
+                strError = "å°šæœªé€‰æ‹©è¦å¿«é€Ÿä¿®æ”¹çš„äº‹é¡¹";
                 goto ERROR1;
             }
 
-            if (stop != null && stop.State == 0)    // 0 ±íÊ¾ÕıÔÚ´¦Àí
+            if (stop != null && stop.State == 0)    // 0 è¡¨ç¤ºæ­£åœ¨å¤„ç†
             {
-                strError = "Ä¿Ç°ÓĞ³¤²Ù×÷ÕıÔÚ½øĞĞ£¬ÎŞ·¨½øĞĞ¿ìËÙĞŞ¸Ä";
+                strError = "ç›®å‰æœ‰é•¿æ“ä½œæ­£åœ¨è¿›è¡Œï¼Œæ— æ³•è¿›è¡Œå¿«é€Ÿä¿®æ”¹";
                 goto ERROR1;
             }
 
 
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚĞŞ¸Ä²á¼ÇÂ¼ ...");
+            stop.Initial("æ­£åœ¨ä¿®æ”¹å†Œè®°å½• ...");
             stop.BeginLoop();
 
             this.EnableControls(false);
@@ -4524,12 +4524,12 @@ out strError);
                         int i = 0;
                         foreach (ListViewItem item in this.listView_records.SelectedItems)
                         {
-                            Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                            Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                             if (stop != null
                                 && stop.State != 0)
                             {
-                                strError = "ÓÃ»§ÖĞ¶Ï";
+                                strError = "ç”¨æˆ·ä¸­æ–­";
                                 goto ERROR1;
                             }
 
@@ -4538,19 +4538,19 @@ out strError);
 
                             if (stop != null)
                             {
-                                stop.SetMessage("ÕıÔÚ¹¹Ôì¼ÇÂ¼Â·¾¶ÎÄ¼ş " + item.Text + " ...");
+                                stop.SetMessage("æ­£åœ¨æ„é€ è®°å½•è·¯å¾„æ–‡ä»¶ " + item.Text + " ...");
                                 stop.SetProgressValue(i++);
                             }
 
                             /*
-                        // ½«²áÌõÂëºÅĞ´ÈëÎÄ¼ş
+                        // å°†å†Œæ¡ç å·å†™å…¥æ–‡ä»¶
                             string strBarcode = ListViewUtil.GetItemText(item, 1);
                             if (string.IsNullOrEmpty(strBarcode) == true)
                                 continue;
 
                             sr.WriteLine(strBarcode);
                              * */
-                            // ½«¼ÇÂ¼Â·¾¶Ğ´ÈëÎÄ¼ş
+                            // å°†è®°å½•è·¯å¾„å†™å…¥æ–‡ä»¶
                             string strRecPath = ListViewUtil.GetItemText(item, 0);
                             if (string.IsNullOrEmpty(strRecPath) == true)
                                 continue;
@@ -4562,11 +4562,11 @@ out strError);
 
                 if (stop != null)
                 {
-                    stop.SetMessage("ÕıÔÚµ÷ÓÃ¿ìËÙĞŞ¸Ä²á´°½øĞĞÅú´¦Àí ...");
+                    stop.SetMessage("æ­£åœ¨è°ƒç”¨å¿«é€Ÿä¿®æ”¹å†Œçª—è¿›è¡Œæ‰¹å¤„ç† ...");
                     stop.SetProgressValue(0);
                 }
 
-                // ĞÂ´ò¿ªÒ»¸ö¿ìËÙĞŞ¸Ä²á´°¿Ú
+                // æ–°æ‰“å¼€ä¸€ä¸ªå¿«é€Ÿä¿®æ”¹å†Œçª—å£
                 QuickChangeEntityForm form = new QuickChangeEntityForm();
                 // form.MainForm = this.MainForm;
                 form.MdiParent = this.MainForm;
@@ -4580,9 +4580,9 @@ out strError);
 
                 // form.DoBarcodeFile(m_strTempQuickBarcodeFilename);
                 // return:
-                //      -1  ³ö´í
-                //      0   ·ÅÆú´¦Àí
-                //      >=1 ´¦ÀíµÄÌõÊı
+                //      -1  å‡ºé”™
+                //      0   æ”¾å¼ƒå¤„ç†
+                //      >=1 å¤„ç†çš„æ¡æ•°
                 nRet = form.DoRecPathFile(m_strTempQuickBarcodeFilename);
                 form.Close();
 
@@ -4592,7 +4592,7 @@ out strError);
                 if (nRet == -1)
                 {
                     DialogResult result = MessageBox.Show(this,
-"²¿·Ö¼ÇÂ¼ÒÑ¾­·¢ÉúÁËĞŞ¸Ä£¬ÊÇ·ñĞèÒªË¢ĞÂä¯ÀÀĞĞ? (OK Ë¢ĞÂ£»Cancel ·ÅÆúË¢ĞÂ)",
+"éƒ¨åˆ†è®°å½•å·²ç»å‘ç”Ÿäº†ä¿®æ”¹ï¼Œæ˜¯å¦éœ€è¦åˆ·æ–°æµè§ˆè¡Œ? (OK åˆ·æ–°ï¼›Cancel æ”¾å¼ƒåˆ·æ–°)",
 this.DbType + "SearchForm",
 MessageBoxButtons.OKCancel,
 MessageBoxIcon.Question,
@@ -4608,12 +4608,12 @@ MessageBoxDefaultButton.Button1);
                     int i = 0;
                     foreach (ListViewItem item in this.listView_records.SelectedItems)
                     {
-                        Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                        Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                         if (stop != null
                             && stop.State != 0)
                         {
-                            strError = "ÓÃ»§ÖĞ¶Ï";
+                            strError = "ç”¨æˆ·ä¸­æ–­";
                             goto ERROR1;
                         }
 
@@ -4622,7 +4622,7 @@ MessageBoxDefaultButton.Button1);
 
                         if (stop != null)
                         {
-                            stop.SetMessage("ÕıÔÚË¢ĞÂä¯ÀÀĞĞ " + item.Text + " ...");
+                            stop.SetMessage("æ­£åœ¨åˆ·æ–°æµè§ˆè¡Œ " + item.Text + " ...");
                             stop.SetProgressValue(i++);
                         }
                         nRet = RefreshBrowseLine(item,
@@ -4630,7 +4630,7 @@ MessageBoxDefaultButton.Button1);
                         if (nRet == -1)
                         {
                             DialogResult result = MessageBox.Show(this,
-                                "Ë¢ĞÂä¯ÀÀÄÚÈİÊ±³ö´í: " + strError + "¡£\r\n\r\nÊÇ·ñ¼ÌĞøË¢ĞÂ? (OK Ë¢ĞÂ£»Cancel ·ÅÆúË¢ĞÂ)",
+                                "åˆ·æ–°æµè§ˆå†…å®¹æ—¶å‡ºé”™: " + strError + "ã€‚\r\n\r\næ˜¯å¦ç»§ç»­åˆ·æ–°? (OK åˆ·æ–°ï¼›Cancel æ”¾å¼ƒåˆ·æ–°)",
                                 this.DbType + "SearchForm",
                                 MessageBoxButtons.OKCancel,
                                 MessageBoxIcon.Question,
@@ -4662,7 +4662,7 @@ MessageBoxDefaultButton.Button1);
         {
             Cursor oldCursor = this.Cursor;
             this.Cursor = Cursors.WaitCursor;
-            // m_nInSelectedIndexChanged++;    // ½ûÖ¹ÊÂ¼şÏìÓ¦
+            // m_nInSelectedIndexChanged++;    // ç¦æ­¢äº‹ä»¶å“åº”
             try
             {
                 this.listView_records.SelectedIndexChanged -= new System.EventHandler(this.listView_records_SelectedIndexChanged);
@@ -4679,7 +4679,7 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
-        // Ë¢ĞÂÊéÄ¿ÕªÒª
+        // åˆ·æ–°ä¹¦ç›®æ‘˜è¦
         void menu_refreshSelectedItemsBiblioSummary_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -4687,7 +4687,7 @@ MessageBoxDefaultButton.Button1);
 
             if (this._listviewRecords.SelectedItems.Count == 0)
             {
-                strError = "ÉĞÎ´Ñ¡ÔñÒªË¢ĞÂµÄä¯ÀÀĞĞ";
+                strError = "å°šæœªé€‰æ‹©è¦åˆ·æ–°çš„æµè§ˆè¡Œ";
                 goto ERROR1;
             }
 
@@ -4703,11 +4703,11 @@ MessageBoxDefaultButton.Button1);
                     nChangedCount++;
             }
 
-            // ¾¯¸æÎ´±£´æµÄÄÚÈİ»á¶ªÊ§
+            // è­¦å‘Šæœªä¿å­˜çš„å†…å®¹ä¼šä¸¢å¤±
             if (nChangedCount > 0)
             {
                 DialogResult result = MessageBox.Show(this,
-    "ÒªË¢ĞÂµÄ " + this._listviewRecords.SelectedItems.Count.ToString() + " ¸öÊÂÏîÖĞÓĞ " + nChangedCount.ToString() + " ÏîĞŞ¸ÄºóÉĞÎ´±£´æ¡£Èç¹ûË¢ĞÂËüÃÇ£¬ĞŞ¸ÄÄÚÈİ»á¶ªÊ§¡£\r\n\r\nÊÇ·ñ¼ÌĞøË¢ĞÂ? (OK Ë¢ĞÂ£»Cancel ·ÅÆúË¢ĞÂ)",
+    "è¦åˆ·æ–°çš„ " + this._listviewRecords.SelectedItems.Count.ToString() + " ä¸ªäº‹é¡¹ä¸­æœ‰ " + nChangedCount.ToString() + " é¡¹ä¿®æ”¹åå°šæœªä¿å­˜ã€‚å¦‚æœåˆ·æ–°å®ƒä»¬ï¼Œä¿®æ”¹å†…å®¹ä¼šä¸¢å¤±ã€‚\r\n\r\næ˜¯å¦ç»§ç»­åˆ·æ–°? (OK åˆ·æ–°ï¼›Cancel æ”¾å¼ƒåˆ·æ–°)",
     "ItemSearchForm",
     MessageBoxButtons.OKCancel,
     MessageBoxIcon.Question,
@@ -4730,7 +4730,7 @@ MessageBoxDefaultButton.Button1);
             MessageBox.Show(this, strError);
         }
 
-        // Ë¢ĞÂËùÑ¡ÔñµÄĞĞ¡£Ò²¾ÍÊÇÖØĞÂ´ÓÊı¾İ¿âÖĞ×°ÔØä¯ÀÀÁĞ
+        // åˆ·æ–°æ‰€é€‰æ‹©çš„è¡Œã€‚ä¹Ÿå°±æ˜¯é‡æ–°ä»æ•°æ®åº“ä¸­è£…è½½æµè§ˆåˆ—
         void menu_refreshSelectedItems_Click(object sender, EventArgs e)
         {
 #if NO
@@ -4741,13 +4741,13 @@ MessageBoxDefaultButton.Button1);
 
             if (this.listView_records.SelectedItems.Count == 0)
             {
-                strError = "ÉĞÎ´Ñ¡ÔñÒªË¢ĞÂä¯ÀÀÁĞµÄÊÂÏî";
+                strError = "å°šæœªé€‰æ‹©è¦åˆ·æ–°æµè§ˆåˆ—çš„äº‹é¡¹";
                 goto ERROR1;
             }
 
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚË¢ĞÂä¯ÀÀÁĞ ...");
+            stop.Initial("æ­£åœ¨åˆ·æ–°æµè§ˆåˆ— ...");
             stop.BeginLoop();
 
             this.EnableControls(false);
@@ -4758,12 +4758,12 @@ MessageBoxDefaultButton.Button1);
                 int i = 0;
                 foreach (ListViewItem item in this.listView_records.SelectedItems)
                 {
-                    Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                    Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                     if (stop != null
                         && stop.State != 0)
                     {
-                        strError = "ÓÃ»§ÖĞ¶Ï";
+                        strError = "ç”¨æˆ·ä¸­æ–­";
                         goto ERROR1;
                     }
 
@@ -4772,7 +4772,7 @@ MessageBoxDefaultButton.Button1);
 
                     if (stop != null)
                     {
-                        stop.SetMessage("ÕıÔÚË¢ĞÂä¯ÀÀĞĞ " + item.Text + " ...");
+                        stop.SetMessage("æ­£åœ¨åˆ·æ–°æµè§ˆè¡Œ " + item.Text + " ...");
                         stop.SetProgressValue(i++);
                     }
                     nRet = RefreshBrowseLine(item,
@@ -4780,7 +4780,7 @@ MessageBoxDefaultButton.Button1);
                     if (nRet == -1)
                     {
                         DialogResult result = MessageBox.Show(this,
-                            "Ë¢ĞÂä¯ÀÀÄÚÈİÊ±³ö´í: " + strError + "¡£\r\n\r\nÊÇ·ñ¼ÌĞøË¢ĞÂ? (OK Ë¢ĞÂ£»Cancel ·ÅÆúË¢ĞÂ)",
+                            "åˆ·æ–°æµè§ˆå†…å®¹æ—¶å‡ºé”™: " + strError + "ã€‚\r\n\r\næ˜¯å¦ç»§ç»­åˆ·æ–°? (OK åˆ·æ–°ï¼›Cancel æ”¾å¼ƒåˆ·æ–°)",
                             this.DbType + "SearchForm",
                             MessageBoxButtons.OKCancel,
                             MessageBoxIcon.Question,
@@ -4809,7 +4809,7 @@ MessageBoxDefaultButton.Button1);
         }
 
 
-        // ´Ó´°¿ÚÖĞÒÆ×ßËùÑ¡ÔñµÄÊÂÏî
+        // ä»çª—å£ä¸­ç§»èµ°æ‰€é€‰æ‹©çš„äº‹é¡¹
         void menu_removeSelectedItems_Click(object sender, EventArgs e)
         {
             Cursor oldCursor = this.Cursor;
@@ -4823,12 +4823,12 @@ MessageBoxDefaultButton.Button1);
             this.Cursor = oldCursor;
         }
 
-        // ÔÚÒ»¸öĞÂ¿ªµÄÊµÌå²éÑ¯´°ÄÚ¼ìË÷key
+        // åœ¨ä¸€ä¸ªæ–°å¼€çš„å®ä½“æŸ¥è¯¢çª—å†…æ£€ç´¢key
         void listView_searchKeysAtNewWindow_Click(object sender, EventArgs e)
         {
             if (this.listView_records.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´ÔÚÁĞ±íÖĞÑ¡¶¨Òª²Ù×÷µÄÊÂÏî");
+                MessageBox.Show(this, "å°šæœªåœ¨åˆ—è¡¨ä¸­é€‰å®šè¦æ“ä½œçš„äº‹é¡¹");
                 return;
             }
 
@@ -4849,16 +4849,16 @@ MessageBoxDefaultButton.Button1);
                 input_query.QueryWord = ListViewUtil.GetItemText(item, 1);
                 input_query.DbNames = query.DbNames;
                 input_query.From = query.From;
-                input_query.MatchStyle = "¾«È·Ò»ÖÂ";
+                input_query.MatchStyle = "ç²¾ç¡®ä¸€è‡´";
 
                 // 2015/1/17
                 if (string.IsNullOrEmpty(input_query.QueryWord) == true)
-                    input_query.MatchStyle = "¿ÕÖµ";
+                    input_query.MatchStyle = "ç©ºå€¼";
                 else
-                    input_query.MatchStyle = "¾«È·Ò»ÖÂ";
+                    input_query.MatchStyle = "ç²¾ç¡®ä¸€è‡´";
 
 
-                // ¼ìË÷ÃüÖĞ¼ÇÂ¼(¶ø²»ÊÇkey)
+                // æ£€ç´¢å‘½ä¸­è®°å½•(è€Œä¸æ˜¯key)
                 int nRet = form.DoSearch(false, false, input_query, i == 0 ? true : false);
                 if (nRet != 1)
                     break;
@@ -4915,7 +4915,7 @@ MessageBoxDefaultButton.Button1);
             this.listView_records.SelectedIndexChanged += new System.EventHandler(this.listView_records_SelectedIndexChanged);
             listView_records_SelectedIndexChanged(null, null);
             TimeSpan delta = DateTime.Now - start_time;
-            this.MainForm.StatusBarMessage = "¼ôÇĞ²Ù×÷ ºÄÊ± " + delta.TotalSeconds.ToString() + " Ãë";
+            this.MainForm.StatusBarMessage = "å‰ªåˆ‡æ“ä½œ è€—æ—¶ " + delta.TotalSeconds.ToString() + " ç§’";
         }
 
         void menu_pasteFromClipboard_insertBefore_Click(object sender, EventArgs e)
@@ -4938,16 +4938,16 @@ MessageBoxDefaultButton.Button1);
             listView_records_SelectedIndexChanged(null, null);
         }
 
-        // TODO: ÓÅ»¯ËÙ¶È
+        // TODO: ä¼˜åŒ–é€Ÿåº¦
         void menu_importFromBarcodeFile_Click(object sender, EventArgs e)
         {
-            SetStatusMessage("");   // Çå³ıÒÔÇ°²ĞÁôµÄÏÔÊ¾
+            SetStatusMessage("");   // æ¸…é™¤ä»¥å‰æ®‹ç•™çš„æ˜¾ç¤º
 
             OpenFileDialog dlg = new OpenFileDialog();
 
-            dlg.Title = "ÇëÖ¸¶¨Òª´ò¿ªµÄÌõÂëºÅÎÄ¼şÃû";
+            dlg.Title = "è¯·æŒ‡å®šè¦æ‰“å¼€çš„æ¡ç å·æ–‡ä»¶å";
             dlg.FileName = this.m_strUsedBarcodeFilename;
-            dlg.Filter = "ÌõÂëºÅÎÄ¼ş (*.txt)|*.txt|All files (*.*)|*.*";
+            dlg.Filter = "æ¡ç å·æ–‡ä»¶ (*.txt)|*.txt|All files (*.*)|*.*";
             dlg.RestoreDirectory = true;
 
             if (dlg.ShowDialog() != DialogResult.OK)
@@ -4960,29 +4960,29 @@ MessageBoxDefaultButton.Button1);
 
             try
             {
-                // TODO: ×îºÃ×Ô¶¯Ì½²âÎÄ¼şµÄ±àÂë·½Ê½?
+                // TODO: æœ€å¥½è‡ªåŠ¨æ¢æµ‹æ–‡ä»¶çš„ç¼–ç æ–¹å¼?
                 sr = new StreamReader(dlg.FileName, Encoding.UTF8);
             }
             catch (Exception ex)
             {
-                strError = "´ò¿ªÎÄ¼ş " + dlg.FileName + " Ê§°Ü: " + ex.Message;
+                strError = "æ‰“å¼€æ–‡ä»¶ " + dlg.FileName + " å¤±è´¥: " + ex.Message;
                 goto ERROR1;
             }
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚµ¼ÈëÌõÂëºÅ ...");
+            stop.Initial("æ­£åœ¨å¯¼å…¥æ¡ç å· ...");
             stop.BeginLoop();
 
             try
             {
-                // µ¼ÈëµÄÊÂÏîÊÇÃ»ÓĞĞòµÄ£¬Òò´ËĞèÒªÇå³ıÒÑÓĞµÄÅÅĞò±êÖ¾
+                // å¯¼å…¥çš„äº‹é¡¹æ˜¯æ²¡æœ‰åºçš„ï¼Œå› æ­¤éœ€è¦æ¸…é™¤å·²æœ‰çš„æ’åºæ ‡å¿—
                 ListViewUtil.ClearSortColumns(this.listView_records);
 
 
                 if (this.listView_records.Items.Count > 0)
                 {
                     DialogResult result = MessageBox.Show(this,
-                        "µ¼ÈëÇ°ÊÇ·ñÒªÇå³ıÃüÖĞ¼ÇÂ¼ÁĞ±íÖĞµÄÏÖÓĞµÄ " + this.listView_records.Items.Count.ToString() + " ĞĞ?\r\n\r\n(Èç¹û²»Çå³ı£¬ÔòĞÂµ¼ÈëµÄĞĞ½«×·¼ÓÔÚÒÑÓĞĞĞºóÃæ)\r\n(Yes Çå³ı£»No ²»Çå³ı(×·¼Ó)£»Cancel ·ÅÆúµ¼Èë)",
+                        "å¯¼å…¥å‰æ˜¯å¦è¦æ¸…é™¤å‘½ä¸­è®°å½•åˆ—è¡¨ä¸­çš„ç°æœ‰çš„ " + this.listView_records.Items.Count.ToString() + " è¡Œ?\r\n\r\n(å¦‚æœä¸æ¸…é™¤ï¼Œåˆ™æ–°å¯¼å…¥çš„è¡Œå°†è¿½åŠ åœ¨å·²æœ‰è¡Œåé¢)\r\n(Yes æ¸…é™¤ï¼›No ä¸æ¸…é™¤(è¿½åŠ )ï¼›Cancel æ”¾å¼ƒå¯¼å…¥)",
                         this.DbType + "SearchForm",
                         MessageBoxButtons.YesNoCancel,
                         MessageBoxIcon.Question,
@@ -5001,13 +5001,13 @@ MessageBoxDefaultButton.Button1);
 
                 for (; ; )
                 {
-                    Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                    Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                     if (stop != null)
                     {
                         if (stop.State != 0)
                         {
-                            MessageBox.Show(this, "ÓÃ»§ÖĞ¶Ï");
+                            MessageBox.Show(this, "ç”¨æˆ·ä¸­æ–­");
                             return;
                         }
                     }
@@ -5035,7 +5035,7 @@ MessageBoxDefaultButton.Button1);
                     items.Add(item);
                 }
 
-                // Ë¢ĞÂä¯ÀÀĞĞ
+                // åˆ·æ–°æµè§ˆè¡Œ
                 int nRet = RefreshListViewLines(items,
                     false,
                     out strError);
@@ -5043,7 +5043,7 @@ MessageBoxDefaultButton.Button1);
                     goto ERROR1;
 
                 // 2014/1/15
-                // Ë¢ĞÂÊéÄ¿ÕªÒª
+                // åˆ·æ–°ä¹¦ç›®æ‘˜è¦
                 nRet = FillBiblioSummaryColumn(items,
                     false,
                     out strError);
@@ -5067,7 +5067,7 @@ MessageBoxDefaultButton.Button1);
 
 
 
-        // ´Ó¼ÇÂ¼Â·¾¶ÎÄ¼şÖĞµ¼Èë
+        // ä»è®°å½•è·¯å¾„æ–‡ä»¶ä¸­å¯¼å…¥
         void menu_importFromRecPathFile_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -5082,15 +5082,15 @@ MessageBoxDefaultButton.Button1);
         }
 
 
-        // µ÷ÓÃÇ°£¬¼ÇÂ¼Â·¾¶ÁĞÒÑ¾­ÓĞÖµ
+        // è°ƒç”¨å‰ï¼Œè®°å½•è·¯å¾„åˆ—å·²ç»æœ‰å€¼
         /// <summary>
-        /// Ë¢ĞÂÒ»¸öä¯ÀÀĞĞµÄ¸÷ÁĞĞÅÏ¢¡£
-        /// Ò²¾ÍÊÇ´ÓÊı¾İ¿âÖĞÖØĞÂ»ñÈ¡Ïà¹ØĞÅÏ¢¡£
-        /// ²»Ë¢ĞÂÊéÄ¿ÕªÒªÁĞ
+        /// åˆ·æ–°ä¸€ä¸ªæµè§ˆè¡Œçš„å„åˆ—ä¿¡æ¯ã€‚
+        /// ä¹Ÿå°±æ˜¯ä»æ•°æ®åº“ä¸­é‡æ–°è·å–ç›¸å…³ä¿¡æ¯ã€‚
+        /// ä¸åˆ·æ–°ä¹¦ç›®æ‘˜è¦åˆ—
         /// </summary>
-        /// <param name="item">ÒªË¢ĞÂµÄ ListViewItem ¶ÔÏó</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í; 0: ³É¹¦</returns>
+        /// <param name="item">è¦åˆ·æ–°çš„ ListViewItem å¯¹è±¡</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™; 0: æˆåŠŸ</returns>
         public int RefreshBrowseLine(ListViewItem item,
             out string strError)
         {
@@ -5133,22 +5133,22 @@ MessageBoxDefaultButton.Button1);
 
 
 
-        // µ¼³öÑ¡ÔñµÄĞĞÖĞÓĞÂ·¾¶µÄ²¿·ÖĞĞ µÄÌõÂëÀ¸ÄÚÈİ ÎªÌõÂëºÅÎÄ¼ş
+        // å¯¼å‡ºé€‰æ‹©çš„è¡Œä¸­æœ‰è·¯å¾„çš„éƒ¨åˆ†è¡Œ çš„æ¡ç æ å†…å®¹ ä¸ºæ¡ç å·æ–‡ä»¶
         void menu_exportBarcodeFile_Click(object sender, EventArgs e)
         {
             Debug.Assert(this.DbType == "item", "");
 
             string strError = "";
 
-            // Ñ¯ÎÊÎÄ¼şÃû
+            // è¯¢é—®æ–‡ä»¶å
             SaveFileDialog dlg = new SaveFileDialog();
 
-            dlg.Title = "ÇëÖ¸¶¨Òª±£´æµÄÌõÂëºÅÎÄ¼şÃû";
+            dlg.Title = "è¯·æŒ‡å®šè¦ä¿å­˜çš„æ¡ç å·æ–‡ä»¶å";
             dlg.CreatePrompt = false;
             dlg.OverwritePrompt = false;
             dlg.FileName = this.ExportBarcodeFilename;
             // dlg.InitialDirectory = Environment.CurrentDirectory;
-            dlg.Filter = "ÌõÂëºÅÎÄ¼ş (*.txt)|*.txt|All files (*.*)|*.*";
+            dlg.Filter = "æ¡ç å·æ–‡ä»¶ (*.txt)|*.txt|All files (*.*)|*.*";
 
             dlg.RestoreDirectory = true;
 
@@ -5162,7 +5162,7 @@ MessageBoxDefaultButton.Button1);
             if (File.Exists(this.ExportBarcodeFilename) == true)
             {
                 DialogResult result = MessageBox.Show(this,
-                    "ÎÄ¼ş '" + this.ExportBarcodeFilename + "' ÒÑ¾­´æÔÚ¡£\r\n\r\n±¾´ÎÊä³öÄÚÈİÊÇ·ñÒª×·¼Óµ½¸ÃÎÄ¼şÎ²²¿? (Yes ×·¼Ó£»No ¸²¸Ç£»Cancel ·ÅÆúµ¼³ö)",
+                    "æ–‡ä»¶ '" + this.ExportBarcodeFilename + "' å·²ç»å­˜åœ¨ã€‚\r\n\r\næœ¬æ¬¡è¾“å‡ºå†…å®¹æ˜¯å¦è¦è¿½åŠ åˆ°è¯¥æ–‡ä»¶å°¾éƒ¨? (Yes è¿½åŠ ï¼›No è¦†ç›–ï¼›Cancel æ”¾å¼ƒå¯¼å‡º)",
                     this.DbType + "SearchForm",
                     MessageBoxButtons.YesNoCancel,
                     MessageBoxIcon.Question,
@@ -5184,7 +5184,7 @@ MessageBoxDefaultButton.Button1);
             // m_tableBarcodeColIndex.Clear();
             ClearColumnIndexCache();
 
-            // ´´½¨ÎÄ¼ş
+            // åˆ›å»ºæ–‡ä»¶
             StreamWriter sw = new StreamWriter(this.ExportBarcodeFilename,
                 bAppend,	// append
                 System.Text.Encoding.UTF8);
@@ -5200,9 +5200,9 @@ MessageBoxDefaultButton.Button1);
 
 #if NO
                     string strRecPath = ListViewUtil.GetItemText(item, 0);
-                    // ¸ù¾İ¼ÇÂ¼Â·¾¶»ñµÃÊı¾İ¿âÃû
+                    // æ ¹æ®è®°å½•è·¯å¾„è·å¾—æ•°æ®åº“å
                     string strItemDbName = Global.GetDbName(strRecPath);
-                    // ¸ù¾İÊı¾İ¿âÃû»ñµÃ ²áÌõÂëºÅ ÁĞºÅ
+                    // æ ¹æ®æ•°æ®åº“åè·å¾— å†Œæ¡ç å· åˆ—å·
 
                     int nCol = -1;
                     object o = m_tableBarcodeColIndex[strItemDbName];
@@ -5212,18 +5212,18 @@ MessageBoxDefaultButton.Button1);
                         nCol = temp.FindColumnByType("item_barcode");
                         if (nCol == -1)
                         {
-                            // Õâ¸öÊµÌå¿âÃ»ÓĞÔÚ browse ÎÄ¼şÖĞ ²áÌõÂëºÅ ÁĞ
-                            strError = "¾¯¸æ£ºÊµÌå¿â '"+strItemDbName+"' µÄ browse ÅäÖÃÎÄ¼şÖĞÃ»ÓĞ¶¨Òå type Îª item_barcode µÄÁĞ¡£Çë×¢ÒâË¢ĞÂ»òĞŞ¸Ä´ËÅäÖÃÎÄ¼ş";
+                            // è¿™ä¸ªå®ä½“åº“æ²¡æœ‰åœ¨ browse æ–‡ä»¶ä¸­ å†Œæ¡ç å· åˆ—
+                            strError = "è­¦å‘Šï¼šå®ä½“åº“ '"+strItemDbName+"' çš„ browse é…ç½®æ–‡ä»¶ä¸­æ²¡æœ‰å®šä¹‰ type ä¸º item_barcode çš„åˆ—ã€‚è¯·æ³¨æ„åˆ·æ–°æˆ–ä¿®æ”¹æ­¤é…ç½®æ–‡ä»¶";
                             MessageBox.Show(this, strError);
 
-                            nCol = 0;   // Õâ¸ö´ó²¿·ÖÇé¿öÄÜ×àĞ§
+                            nCol = 0;   // è¿™ä¸ªå¤§éƒ¨åˆ†æƒ…å†µèƒ½å¥æ•ˆ
                         }
                         if (m_bBiblioSummaryColumn == false)
                             nCol += 1;
                         else 
                             nCol += 2;
 
-                        m_tableBarcodeColIndex[strItemDbName] = nCol;   // ´¢´æÆğÀ´
+                        m_tableBarcodeColIndex[strItemDbName] = nCol;   // å‚¨å­˜èµ·æ¥
                     }
                     else
                         nCol = (int)o;
@@ -5234,7 +5234,7 @@ MessageBoxDefaultButton.Button1);
 #endif
 
                     string strBarcode = "";
-                    // ¸ù¾İ ListViewItem ¶ÔÏó£¬»ñµÃ²áÌõÂëºÅÁĞµÄÄÚÈİ
+                    // æ ¹æ® ListViewItem å¯¹è±¡ï¼Œè·å¾—å†Œæ¡ç å·åˆ—çš„å†…å®¹
                     int nRet = GetItemBarcodeOrRefID(
                         item,
                         true,
@@ -5256,24 +5256,24 @@ MessageBoxDefaultButton.Button1);
                     sw.Close();
             }
 
-            string strExportStyle = "µ¼³ö";
+            string strExportStyle = "å¯¼å‡º";
             if (bAppend == true)
-                strExportStyle = "×·¼Ó";
+                strExportStyle = "è¿½åŠ ";
 
-            this.MainForm.StatusBarMessage = "²áÌõÂëºÅ " + this.listView_records.SelectedItems.Count.ToString() + "¸ö ÒÑ³É¹¦" + strExportStyle + "µ½ÎÄ¼ş " + this.ExportBarcodeFilename;
+            this.MainForm.StatusBarMessage = "å†Œæ¡ç å· " + this.listView_records.SelectedItems.Count.ToString() + "ä¸ª å·²æˆåŠŸ" + strExportStyle + "åˆ°æ–‡ä»¶ " + this.ExportBarcodeFilename;
             return;
         ERROR1:
             MessageBox.Show(strError);
         }
 
 
-        // µ±Ç°È±Ê¡µÄ±àÂë·½Ê½
+        // å½“å‰ç¼ºçœçš„ç¼–ç æ–¹å¼
         Encoding CurrentEncoding = Encoding.UTF8;
 
-        // ÎªÁË±£´æISO2709ÎÄ¼ş·şÎñµÄ¼¸¸ö±äÁ¿
+        // ä¸ºäº†ä¿å­˜ISO2709æ–‡ä»¶æœåŠ¡çš„å‡ ä¸ªå˜é‡
         /// <summary>
-        /// »ñÈ¡»òÉèÖÃÅäÖÃ²ÎÊı£º×î½üÒ»´ÎÊ¹ÓÃ¹ıµÄ ISO2709 ÎÄ¼şÃû
-        /// ÕâÊÇ ItemSearchForm ºÍ BiblioSearchForm ¶¼ÊÊÓÃµÄÒ»¸öÅäÖÃ²ÎÊı
+        /// è·å–æˆ–è®¾ç½®é…ç½®å‚æ•°ï¼šæœ€è¿‘ä¸€æ¬¡ä½¿ç”¨è¿‡çš„ ISO2709 æ–‡ä»¶å
+        /// è¿™æ˜¯ ItemSearchForm å’Œ BiblioSearchForm éƒ½é€‚ç”¨çš„ä¸€ä¸ªé…ç½®å‚æ•°
         /// </summary>
         public string LastIso2709FileName
         {
@@ -5294,8 +5294,8 @@ MessageBoxDefaultButton.Button1);
         }
 
         /// <summary>
-        /// »ñÈ¡»òÉèÖÃÅäÖÃ²ÎÊı£º×íÒâ½üÒ»´ÎÊä³öµ½ ISO2709 ÎÄ¼şÊ±ÊÇ·ñÒªÔÚ¼ÇÂ¼¼ä²åÈë»Ø³µ»»ĞĞ·ûºÅ
-        /// ÕâÊÇ ItemSearchForm ºÍ BiblioSearchForm ¶¼ÊÊÓÃµÄÒ»¸öÅäÖÃ²ÎÊı
+        /// è·å–æˆ–è®¾ç½®é…ç½®å‚æ•°ï¼šé†‰æ„è¿‘ä¸€æ¬¡è¾“å‡ºåˆ° ISO2709 æ–‡ä»¶æ—¶æ˜¯å¦è¦åœ¨è®°å½•é—´æ’å…¥å›è½¦æ¢è¡Œç¬¦å·
+        /// è¿™æ˜¯ ItemSearchForm å’Œ BiblioSearchForm éƒ½é€‚ç”¨çš„ä¸€ä¸ªé…ç½®å‚æ•°
         /// </summary>
         public bool LastCrLfIso2709
         {
@@ -5316,8 +5316,8 @@ MessageBoxDefaultButton.Button1);
         }
 
         /// <summary>
-        /// »ñÈ¡»òÉèÖÃÅäÖÃ²ÎÊı£º×î½üÒ»´ÎÊ¹ÓÃ¹ıµÄ±àÂë·½Ê½Ãû³Æ
-        /// ÕâÊÇ ItemSearchForm ºÍ BiblioSearchForm ¶¼ÊÊÓÃµÄÒ»¸öÅäÖÃ²ÎÊı
+        /// è·å–æˆ–è®¾ç½®é…ç½®å‚æ•°ï¼šæœ€è¿‘ä¸€æ¬¡ä½¿ç”¨è¿‡çš„ç¼–ç æ–¹å¼åç§°
+        /// è¿™æ˜¯ ItemSearchForm å’Œ BiblioSearchForm éƒ½é€‚ç”¨çš„ä¸€ä¸ªé…ç½®å‚æ•°
         /// </summary>
         public string LastEncodingName
         {
@@ -5338,8 +5338,8 @@ MessageBoxDefaultButton.Button1);
         }
 
         /// <summary>
-        /// »ñÈ¡»òÉèÖÃÅäÖÃ²ÎÊı£º×î½üÒ»´ÎÊ¹ÓÃ¹ıµÄ±àÄ¿¹æÔòÃû³Æ
-        /// ÕâÊÇ ItemSearchForm ºÍ BiblioSearchForm ¶¼ÊÊÓÃµÄÒ»¸öÅäÖÃ²ÎÊı
+        /// è·å–æˆ–è®¾ç½®é…ç½®å‚æ•°ï¼šæœ€è¿‘ä¸€æ¬¡ä½¿ç”¨è¿‡çš„ç¼–ç›®è§„åˆ™åç§°
+        /// è¿™æ˜¯ ItemSearchForm å’Œ BiblioSearchForm éƒ½é€‚ç”¨çš„ä¸€ä¸ªé…ç½®å‚æ•°
         /// </summary>
         public string LastCatalogingRule
         {
@@ -5348,7 +5348,7 @@ MessageBoxDefaultButton.Button1);
                 return this.MainForm.AppInfo.GetString(
                     "bibliosearchform",
                     "last_cataloging_rule",
-                    "<ÎŞÏŞÖÆ>");
+                    "<æ— é™åˆ¶>");
             }
             set
             {
@@ -5359,11 +5359,11 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
-        // ½«¹İ²ØµØµãÃûºÍ±àÄ¿¹æÔòÃûµÄ¶ÔÕÕ±í×°ÈëÄÚ´æ
+        // å°†é¦†è—åœ°ç‚¹åå’Œç¼–ç›®è§„åˆ™åçš„å¯¹ç…§è¡¨è£…å…¥å†…å­˜
         // return:
-        //      -1  ³ö´í
-        //      0   ÎÄ¼ş²»´æÔÚ
-        //      1   ³É¹¦
+        //      -1  å‡ºé”™
+        //      0   æ–‡ä»¶ä¸å­˜åœ¨
+        //      1   æˆåŠŸ
         static int LoadRuleNameTable(string strFilename,
             out Hashtable table,
             out string strError)
@@ -5382,7 +5382,7 @@ MessageBoxDefaultButton.Button1);
             }
             catch (Exception ex)
             {
-                strError = "×°ÔØXMLÎÄ¼ş '" + strFilename + "' Ê±·¢Éú´íÎó: " + ex.Message;
+                strError = "è£…è½½XMLæ–‡ä»¶ '" + strFilename + "' æ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                 return -1;
             }
 
@@ -5398,7 +5398,7 @@ MessageBoxDefaultButton.Button1);
             return 1;
         }
 
-        // ½«´ÓÊôµÄÊéÄ¿¼ÇÂ¼±£´æµ½MARCÎÄ¼ş
+        // å°†ä»å±çš„ä¹¦ç›®è®°å½•ä¿å­˜åˆ°MARCæ–‡ä»¶
         void menu_saveBiblioRecordToMarcFile_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -5406,20 +5406,20 @@ MessageBoxDefaultButton.Button1);
 
             if (this.listView_records.SelectedItems.Count == 0)
             {
-                strError = "ÉĞÎ´Ñ¡¶¨Òª±£´æµÄÊÂÏî";
+                strError = "å°šæœªé€‰å®šè¦ä¿å­˜çš„äº‹é¡¹";
                 goto ERROR1;
             }
 
-            // ÎªÁËÊéÄ¿¼ÇÂ¼Â·¾¶È¥ÖØ·şÎñ
+            // ä¸ºäº†ä¹¦ç›®è®°å½•è·¯å¾„å»é‡æœåŠ¡
             Hashtable biblio_recpath_table = new Hashtable();
 
             Hashtable rule_name_table = null;
             bool bTableExists = false;
-            // ½«¹İ²ØµØµãÃûºÍ±àÄ¿¹æÔòÃûµÄ¶ÔÕÕ±í×°ÈëÄÚ´æ
+            // å°†é¦†è—åœ°ç‚¹åå’Œç¼–ç›®è§„åˆ™åçš„å¯¹ç…§è¡¨è£…å…¥å†…å­˜
             // return:
-            //      -1  ³ö´í
-            //      0   ÎÄ¼ş²»´æÔÚ
-            //      1   ³É¹¦
+            //      -1  å‡ºé”™
+            //      0   æ–‡ä»¶ä¸å­˜åœ¨
+            //      1   æˆåŠŸ
             nRet = LoadRuleNameTable(PathUtil.MergePath(this.MainForm.DataDir, "cataloging_rules.xml"),
                 out rule_name_table,
                 out strError);
@@ -5433,7 +5433,7 @@ MessageBoxDefaultButton.Button1);
             Encoding preferredEncoding = this.CurrentEncoding;
 
             {
-                // ¹Û²ìÒª±£´æµÄµÚÒ»Ìõ¼ÇÂ¼µÄmarc syntax
+                // è§‚å¯Ÿè¦ä¿å­˜çš„ç¬¬ä¸€æ¡è®°å½•çš„marc syntax
             }
 
             OpenMarcFileDlg dlg = new OpenMarcFileDlg();
@@ -5451,8 +5451,8 @@ MessageBoxDefaultButton.Button1);
             dlg.EncodingListItems = Global.GetEncodingList(false);
             dlg.EncodingName =
                 (String.IsNullOrEmpty(this.LastEncodingName) == true ? Global.GetEncodingName(preferredEncoding) : this.LastEncodingName);
-            dlg.EncodingComment = "×¢: Ô­Ê¼±àÂë·½Ê½Îª " + Global.GetEncodingName(preferredEncoding);
-            dlg.MarcSyntax = "<×Ô¶¯>";    // strPreferedMarcSyntax;
+            dlg.EncodingComment = "æ³¨: åŸå§‹ç¼–ç æ–¹å¼ä¸º " + Global.GetEncodingName(preferredEncoding);
+            dlg.MarcSyntax = "<è‡ªåŠ¨>";    // strPreferedMarcSyntax;
             dlg.EnableMarcSyntax = false;
             dlg.ShowDialog(this);
             if (dlg.DialogResult != DialogResult.OK)
@@ -5463,7 +5463,7 @@ MessageBoxDefaultButton.Button1);
             if (bTableExists == false)
             {
                 strCatalogingRule = dlg.Rule;
-                if (strCatalogingRule == "<ÎŞÏŞÖÆ>")
+                if (strCatalogingRule == "<æ— é™åˆ¶>")
                     strCatalogingRule = null;
             }
 
@@ -5486,7 +5486,7 @@ MessageBoxDefaultButton.Button1);
             if (bExist == true)
             {
                 DialogResult result = MessageBox.Show(this,
-                    "ÎÄ¼ş '" + dlg.FileName + "' ÒÑ´æÔÚ£¬ÊÇ·ñÒÔ×·¼Ó·½Ê½Ğ´Èë¼ÇÂ¼?\r\n\r\n--------------------\r\n×¢£º(ÊÇ)×·¼Ó  (·ñ)¸²¸Ç  (È¡Ïû)·ÅÆú",
+                    "æ–‡ä»¶ '" + dlg.FileName + "' å·²å­˜åœ¨ï¼Œæ˜¯å¦ä»¥è¿½åŠ æ–¹å¼å†™å…¥è®°å½•?\r\n\r\n--------------------\r\næ³¨ï¼š(æ˜¯)è¿½åŠ   (å¦)è¦†ç›–  (å–æ¶ˆ)æ”¾å¼ƒ",
                     this.DbType + "SearchForm",
                     MessageBoxButtons.YesNoCancel,
                     MessageBoxIcon.Question,
@@ -5499,12 +5499,12 @@ MessageBoxDefaultButton.Button1);
 
                 if (result == DialogResult.Cancel)
                 {
-                    strError = "·ÅÆú´¦Àí...";
+                    strError = "æ”¾å¼ƒå¤„ç†...";
                     goto ERROR1;
                 }
             }
 
-            // ¼ì²éÍ¬Ò»¸öÎÄ¼şÁ¬Ğø´æÊ±ºòµÄ±àÂë·½Ê½Ò»ÖÂĞÔ
+            // æ£€æŸ¥åŒä¸€ä¸ªæ–‡ä»¶è¿ç»­å­˜æ—¶å€™çš„ç¼–ç æ–¹å¼ä¸€è‡´æ€§
             if (strLastFileName == dlg.FileName
                 && bAppend == true)
             {
@@ -5512,14 +5512,14 @@ MessageBoxDefaultButton.Button1);
                     && strLastEncodingName != dlg.EncodingName)
                 {
                     DialogResult result = MessageBox.Show(this,
-                        "ÎÄ¼ş '" + dlg.FileName + "' ÒÑÔÚÏÈÇ°ÒÑ¾­ÓÃ " + strLastEncodingName + " ±àÂë·½Ê½´æ´¢ÁË¼ÇÂ¼£¬ÏÖÔÚÓÖÒÔ²»Í¬µÄ±àÂë·½Ê½ " + dlg.EncodingName + " ×·¼Ó¼ÇÂ¼£¬ÕâÑù»áÔì³ÉÍ¬Ò»ÎÄ¼şÖĞ´æÔÚ²»Í¬±àÂë·½Ê½µÄ¼ÇÂ¼£¬¿ÉÄÜ»áÁîËüÎŞ·¨±»ÕıÈ·¶ÁÈ¡¡£\r\n\r\nÊÇ·ñ¼ÌĞø? (ÊÇ)×·¼Ó  (·ñ)·ÅÆú²Ù×÷",
+                        "æ–‡ä»¶ '" + dlg.FileName + "' å·²åœ¨å…ˆå‰å·²ç»ç”¨ " + strLastEncodingName + " ç¼–ç æ–¹å¼å­˜å‚¨äº†è®°å½•ï¼Œç°åœ¨åˆä»¥ä¸åŒçš„ç¼–ç æ–¹å¼ " + dlg.EncodingName + " è¿½åŠ è®°å½•ï¼Œè¿™æ ·ä¼šé€ æˆåŒä¸€æ–‡ä»¶ä¸­å­˜åœ¨ä¸åŒç¼–ç æ–¹å¼çš„è®°å½•ï¼Œå¯èƒ½ä¼šä»¤å®ƒæ— æ³•è¢«æ­£ç¡®è¯»å–ã€‚\r\n\r\næ˜¯å¦ç»§ç»­? (æ˜¯)è¿½åŠ   (å¦)æ”¾å¼ƒæ“ä½œ",
                         this.DbType + "SearchForm",
                         MessageBoxButtons.YesNo,
                         MessageBoxIcon.Question,
                         MessageBoxDefaultButton.Button2);
                     if (result == DialogResult.No)
                     {
-                        strError = "·ÅÆú´¦Àí...";
+                        strError = "æ”¾å¼ƒå¤„ç†...";
                         goto ERROR1;
                     }
 
@@ -5534,7 +5534,7 @@ MessageBoxDefaultButton.Button1);
             this.EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ±£´æµ½ MARC ÎÄ¼ş ...");
+            stop.Initial("æ­£åœ¨ä¿å­˜åˆ° MARC æ–‡ä»¶ ...");
             stop.BeginLoop();
 
             Stream s = null;
@@ -5552,7 +5552,7 @@ MessageBoxDefaultButton.Button1);
             }
             catch (Exception ex)
             {
-                strError = "´ò¿ª»ò´´½¨ÎÄ¼ş " + this.LastIso2709FileName + " Ê§°Ü£¬Ô­Òò: " + ex.Message;
+                strError = "æ‰“å¼€æˆ–åˆ›å»ºæ–‡ä»¶ " + this.LastIso2709FileName + " å¤±è´¥ï¼ŒåŸå› : " + ex.Message;
                 goto ERROR1;
             }
 
@@ -5563,13 +5563,13 @@ MessageBoxDefaultButton.Button1);
                 int i = 0;
                 foreach (ListViewItem item in this.listView_records.SelectedItems)
                 {
-                    Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                    Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                     if (stop != null)
                     {
                         if (stop.State != 0)
                         {
-                            strError = "ÓÃ»§ÖĞ¶Ï";
+                            strError = "ç”¨æˆ·ä¸­æ–­";
                             goto ERROR1;
                         }
                     }
@@ -5579,7 +5579,7 @@ MessageBoxDefaultButton.Button1);
                     if (String.IsNullOrEmpty(strRecPath) == true)
                         goto CONTINUE;
 
-                    stop.SetMessage("ÕıÔÚ×¼±¸¼ÇÂ¼ " + strRecPath + " µÄÊéÄ¿¼ÇÂ¼Â·¾¶ ...");
+                    stop.SetMessage("æ­£åœ¨å‡†å¤‡è®°å½• " + strRecPath + " çš„ä¹¦ç›®è®°å½•è·¯å¾„ ...");
                     stop.SetProgressValue(i);
 
                     string strItemRecPath = "";
@@ -5614,26 +5614,26 @@ out strError);
                     }
                     else if (nRet == 0)
                     {
-                        strError = "¼ÇÂ¼Â·¾¶ '" + strRecPath + "' Ã»ÓĞÕÒµ½¼ÇÂ¼";
+                        strError = "è®°å½•è·¯å¾„ '" + strRecPath + "' æ²¡æœ‰æ‰¾åˆ°è®°å½•";
                         goto ERROR1;
                     }
                     else if (nRet == 1)
                     {
                         item.Text = strItemRecPath;
                     }
-                    else if (nRet > 1) // ÃüÖĞ·¢ÉúÖØ¸´
+                    else if (nRet > 1) // å‘½ä¸­å‘ç”Ÿé‡å¤
                     {
-                        strError = "¼ÇÂ¼Â·¾¶ '" + strRecPath + "' ÃüÖĞ " + nRet.ToString() + " Ìõ¼ÇÂ¼£¬ÕâÊÇÒ»¸öÑÏÖØ´íÎó";
+                        strError = "è®°å½•è·¯å¾„ '" + strRecPath + "' å‘½ä¸­ " + nRet.ToString() + " æ¡è®°å½•ï¼Œè¿™æ˜¯ä¸€ä¸ªä¸¥é‡é”™è¯¯";
                     }
 
-                    // È¥ÖØ
+                    // å»é‡
                     if (biblio_recpath_table.ContainsKey(strBiblioRecPath) == true)
                         goto CONTINUE;
 
                     if (bTableExists == true)
                     {
                         strCatalogingRule = "";
-                        // ¸ù¾İ¹İ²ØµØµã»ñµÃ±àÄ¿¹æÔòÃû
+                        // æ ¹æ®é¦†è—åœ°ç‚¹è·å¾—ç¼–ç›®è§„åˆ™å
                         if (this.DbType == "item"
                             && string.IsNullOrEmpty(strLocation) == false)
                         {
@@ -5644,13 +5644,13 @@ out strError);
                                 strCatalogingRule = InputDlg.GetInput(
                                     this,
                                     null,
-                                    "ÇëÊäÈë¹İ²ØµØµã '" + strLocation + "' Ëù¶ÔÓ¦µÄ±àÄ¿¹æÔòÃû³Æ:",
+                                    "è¯·è¾“å…¥é¦†è—åœ°ç‚¹ '" + strLocation + "' æ‰€å¯¹åº”çš„ç¼–ç›®è§„åˆ™åç§°:",
                                     "NLC",
                                     this.MainForm.DefaultFont);
                                 if (strCatalogingRule == null)
                                 {
                                     DialogResult result = MessageBox.Show(this,
-                                        "ÓÉÓÚÄúÃ»ÓĞÖ¸¶¨¹İ²ØµØµã '" + strLocation + "' Ëù¶ÔÓ¦µÄ±àÄ¿¹æÔòÃû£¬´Ë¹İ²ØµØµã±»µ±×÷ <ÎŞÏŞÖÆ> ±àÄ¿¹æÔòÀ´´¦Àí¡£\r\n\r\nÊÇ·ñ¼ÌĞø²Ù×÷? (OK ¼ÌĞø£»Cancel ·ÅÆúÕû¸öµ¼³ö²Ù×÷)",
+                                        "ç”±äºæ‚¨æ²¡æœ‰æŒ‡å®šé¦†è—åœ°ç‚¹ '" + strLocation + "' æ‰€å¯¹åº”çš„ç¼–ç›®è§„åˆ™åï¼Œæ­¤é¦†è—åœ°ç‚¹è¢«å½“ä½œ <æ— é™åˆ¶> ç¼–ç›®è§„åˆ™æ¥å¤„ç†ã€‚\r\n\r\næ˜¯å¦ç»§ç»­æ“ä½œ? (OK ç»§ç»­ï¼›Cancel æ”¾å¼ƒæ•´ä¸ªå¯¼å‡ºæ“ä½œ)",
                                         this.DbType + "SearchForm",
                                         MessageBoxButtons.OKCancel,
                                         MessageBoxIcon.Question,
@@ -5660,7 +5660,7 @@ out strError);
                                     strCatalogingRule = "";
                                 }
 
-                                rule_name_table[strLocation] = strCatalogingRule; // ´¢´æµ½ÄÚ´æ£¬ºóÃæ¾Í²»ÔÙ×÷ÏàÍ¬µÄÑ¯ÎÊÁË
+                                rule_name_table[strLocation] = strCatalogingRule; // å‚¨å­˜åˆ°å†…å­˜ï¼Œåé¢å°±ä¸å†ä½œç›¸åŒçš„è¯¢é—®äº†
                             }
                         }
                     }
@@ -5668,7 +5668,7 @@ out strError);
                     string[] results = null;
                     byte[] baTimestamp = null;
 
-                    stop.SetMessage("ÕıÔÚ»ñÈ¡ÊéÄ¿¼ÇÂ¼ " + strBiblioRecPath);
+                    stop.SetMessage("æ­£åœ¨è·å–ä¹¦ç›®è®°å½• " + strBiblioRecPath);
 
                     long lRet = Channel.GetBiblioInfos(
                         stop,
@@ -5693,8 +5693,8 @@ out strError);
 
                     string strMARC = "";
                     string strMarcSyntax = "";
-                    // ½«XML¸ñÊ½×ª»»ÎªMARC¸ñÊ½
-                    // ×Ô¶¯´ÓÊı¾İ¼ÇÂ¼ÖĞ»ñµÃMARCÓï·¨
+                    // å°†XMLæ ¼å¼è½¬æ¢ä¸ºMARCæ ¼å¼
+                    // è‡ªåŠ¨ä»æ•°æ®è®°å½•ä¸­è·å¾—MARCè¯­æ³•
                     nRet = MarcUtil.Xml2Marc(strXml,
                         true,
                         null,
@@ -5703,7 +5703,7 @@ out strError);
                         out strError);
                     if (nRet == -1)
                     {
-                        strError = "XML×ª»»µ½MARC¼ÇÂ¼Ê±³ö´í: " + strError;
+                        strError = "XMLè½¬æ¢åˆ°MARCè®°å½•æ—¶å‡ºé”™: " + strError;
                         goto ERROR1;
                     }
 
@@ -5711,13 +5711,13 @@ out strError);
 
                     Debug.Assert(strMarcSyntax != "", "");
 
-                    // °´ÕÕ±àÄ¿¹æÔò¹ıÂË
-                    // »ñµÃÒ»¸öÌØ¶¨·ç¸ñµÄ MARC ¼ÇÂ¼
+                    // æŒ‰ç…§ç¼–ç›®è§„åˆ™è¿‡æ»¤
+                    // è·å¾—ä¸€ä¸ªç‰¹å®šé£æ ¼çš„ MARC è®°å½•
                     // parameters:
-                    //      strStyle    ÒªÆ¥ÅäµÄstyleÖµ¡£Èç¹ûÎªnull£¬±íÊ¾ÈÎºÎ$*Öµ¶¼Æ¥Åä£¬Êµ¼ÊÉÏĞ§¹ûÊÇÈ¥³ı$*²¢·µ»ØÈ«²¿×Ö¶ÎÄÚÈİ
+                    //      strStyle    è¦åŒ¹é…çš„styleå€¼ã€‚å¦‚æœä¸ºnullï¼Œè¡¨ç¤ºä»»ä½•$*å€¼éƒ½åŒ¹é…ï¼Œå®é™…ä¸Šæ•ˆæœæ˜¯å»é™¤$*å¹¶è¿”å›å…¨éƒ¨å­—æ®µå†…å®¹
                     // return:
-                    //      0   Ã»ÓĞÊµÖÊĞÔĞŞ¸Ä
-                    //      1   ÓĞÊµÖÊĞÔĞŞ¸Ä
+                    //      0   æ²¡æœ‰å®è´¨æ€§ä¿®æ”¹
+                    //      1   æœ‰å®è´¨æ€§ä¿®æ”¹
                     nRet = MarcUtil.GetMappedRecord(ref strMARC,
                         strCatalogingRule);
                     if (dlg.RemoveField998 == true)
@@ -5733,15 +5733,15 @@ out strError);
                         strMARC = record.Text;
                     }
 
-                    // ½«MARC»úÄÚ¸ñÊ½×ª»»ÎªISO2709¸ñÊ½
+                    // å°†MARCæœºå†…æ ¼å¼è½¬æ¢ä¸ºISO2709æ ¼å¼
                     // parameters:
-                    //      strSourceMARC   [in]»úÄÚ¸ñÊ½MARC¼ÇÂ¼¡£
-                    //      strMarcSyntax   [in]Îª"unimarc"»ò"usmarc"
-                    //      targetEncoding  [in]Êä³öISO2709µÄ±àÂë·½Ê½¡£ÎªUTF8¡¢codepage-936µÈµÈ
-                    //      baResult    [out]Êä³öµÄISO2709¼ÇÂ¼¡£±àÂë·½Ê½ÊÜtargetEncoding²ÎÊı¿ØÖÆ¡£×¢Òâ£¬»º³åÇøÄ©Î²²»°üº¬0×Ö·û¡£
+                    //      strSourceMARC   [in]æœºå†…æ ¼å¼MARCè®°å½•ã€‚
+                    //      strMarcSyntax   [in]ä¸º"unimarc"æˆ–"usmarc"
+                    //      targetEncoding  [in]è¾“å‡ºISO2709çš„ç¼–ç æ–¹å¼ã€‚ä¸ºUTF8ã€codepage-936ç­‰ç­‰
+                    //      baResult    [out]è¾“å‡ºçš„ISO2709è®°å½•ã€‚ç¼–ç æ–¹å¼å—targetEncodingå‚æ•°æ§åˆ¶ã€‚æ³¨æ„ï¼Œç¼“å†²åŒºæœ«å°¾ä¸åŒ…å«0å­—ç¬¦ã€‚
                     // return:
-                    //      -1  ³ö´í
-                    //      0   ³É¹¦
+                    //      -1  å‡ºé”™
+                    //      0   æˆåŠŸ
                     nRet = MarcUtil.CvtJineiToISO2709(
                         strMARC,
                         strMarcSyntax,
@@ -5759,7 +5759,7 @@ out strError);
 
                     if (sourceEncoding.Equals(targetEncoding) == true)
                     {
-                        // sourceºÍtarget±àÂë·½Ê½ÏàÍ¬£¬²»ÓÃ×ª»»
+                        // sourceå’Œtargetç¼–ç æ–¹å¼ç›¸åŒï¼Œä¸ç”¨è½¬æ¢
                         baTarget = record.m_baRecord;
                     }
                     else
@@ -5798,7 +5798,7 @@ out strError);
             }
             catch (Exception ex)
             {
-                strError = "Ğ´ÈëÎÄ¼ş " + this.LastIso2709FileName + " Ê§°Ü£¬Ô­Òò: " + ex.Message;
+                strError = "å†™å…¥æ–‡ä»¶ " + this.LastIso2709FileName + " å¤±è´¥ï¼ŒåŸå› : " + ex.Message;
                 goto ERROR1;
             }
             finally
@@ -5816,31 +5816,31 @@ out strError);
             // 
             if (bAppend == true)
                 MainForm.StatusBarMessage = nOutputCount.ToString()
-                    + "Ìõ¼ÇÂ¼³É¹¦×·¼Óµ½ÎÄ¼ş " + this.LastIso2709FileName + " Î²²¿";
+                    + "æ¡è®°å½•æˆåŠŸè¿½åŠ åˆ°æ–‡ä»¶ " + this.LastIso2709FileName + " å°¾éƒ¨";
             else
                 MainForm.StatusBarMessage = nOutputCount.ToString()
-                    + "Ìõ¼ÇÂ¼³É¹¦±£´æµ½ĞÂÎÄ¼ş " + this.LastIso2709FileName + " Î²²¿";
+                    + "æ¡è®°å½•æˆåŠŸä¿å­˜åˆ°æ–°æ–‡ä»¶ " + this.LastIso2709FileName + " å°¾éƒ¨";
 
             return;
         ERROR1:
             MessageBox.Show(this, strError);
         }
 
-         // ±£´æÑ¡ÔñµÄĞĞÖĞµÄÓĞÂ·¾¶µÄ²¿·ÖĞĞ µ½ÊéÄ¿¿â¼ÇÂ¼Â·¾¶ÎÄ¼ş
+         // ä¿å­˜é€‰æ‹©çš„è¡Œä¸­çš„æœ‰è·¯å¾„çš„éƒ¨åˆ†è¡Œ åˆ°ä¹¦ç›®åº“è®°å½•è·¯å¾„æ–‡ä»¶
         void menu_saveToBiblioRecordPathFile_Click(object sender, EventArgs e)
         {
             string strError = "";
             int nRet = 0;
 
-            // Ñ¯ÎÊÎÄ¼şÃû
+            // è¯¢é—®æ–‡ä»¶å
             SaveFileDialog dlg = new SaveFileDialog();
 
-            dlg.Title = "ÇëÖ¸¶¨Òª±£´æµÄ(ÊéÄ¿¿â)¼ÇÂ¼Â·¾¶ÎÄ¼şÃû";
+            dlg.Title = "è¯·æŒ‡å®šè¦ä¿å­˜çš„(ä¹¦ç›®åº“)è®°å½•è·¯å¾„æ–‡ä»¶å";
             dlg.CreatePrompt = false;
             dlg.OverwritePrompt = false;
             dlg.FileName = this.ExportBiblioRecPathFilename;
             // dlg.InitialDirectory = Environment.CurrentDirectory;
-            dlg.Filter = "¼ÇÂ¼Â·¾¶ÎÄ¼ş (*.txt)|*.txt|All files (*.*)|*.*";
+            dlg.Filter = "è®°å½•è·¯å¾„æ–‡ä»¶ (*.txt)|*.txt|All files (*.*)|*.*";
 
             dlg.RestoreDirectory = true;
 
@@ -5857,7 +5857,7 @@ out strError);
             if (File.Exists(this.ExportBiblioRecPathFilename) == true)
             {
                 DialogResult result = MessageBox.Show(this,
-                    "(ÊéÄ¿¿â)¼ÇÂ¼Â·¾¶ÎÄ¼ş '" + this.ExportBiblioRecPathFilename + "' ÒÑ¾­´æÔÚ¡£\r\n\r\n±¾´ÎÊä³öÄÚÈİÊÇ·ñÒª×·¼Óµ½¸ÃÎÄ¼şÎ²²¿? (Yes ×·¼Ó£»No ¸²¸Ç£»Cancel ·ÅÆúµ¼³ö)",
+                    "(ä¹¦ç›®åº“)è®°å½•è·¯å¾„æ–‡ä»¶ '" + this.ExportBiblioRecPathFilename + "' å·²ç»å­˜åœ¨ã€‚\r\n\r\næœ¬æ¬¡è¾“å‡ºå†…å®¹æ˜¯å¦è¦è¿½åŠ åˆ°è¯¥æ–‡ä»¶å°¾éƒ¨? (Yes è¿½åŠ ï¼›No è¦†ç›–ï¼›Cancel æ”¾å¼ƒå¯¼å‡º)",
                     this.DbType + "SearchForm",
                     MessageBoxButtons.YesNoCancel,
                     MessageBoxIcon.Question,
@@ -5880,10 +5880,10 @@ out strError);
             int nDupCount = 0;
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚµ¼³öÊéÄ¿¼ÇÂ¼Â·¾¶ ...");
+            stop.Initial("æ­£åœ¨å¯¼å‡ºä¹¦ç›®è®°å½•è·¯å¾„ ...");
             stop.BeginLoop();
 
-            // ´´½¨ÎÄ¼ş
+            // åˆ›å»ºæ–‡ä»¶
             StreamWriter sw = new StreamWriter(this.ExportBiblioRecPathFilename,
                 bAppend,	// append
                 System.Text.Encoding.UTF8);
@@ -5898,13 +5898,13 @@ out strError);
                     int i = 0;
                     foreach (ListViewItem item in this.listView_records.SelectedItems)
                     {
-                        Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                        Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                         if (stop != null)
                         {
                             if (stop.State != 0)
                             {
-                                strError = "ÓÃ»§ÖĞ¶Ï";
+                                strError = "ç”¨æˆ·ä¸­æ–­";
                                 goto ERROR1;
                             }
                         }
@@ -5914,7 +5914,7 @@ out strError);
                         if (String.IsNullOrEmpty(strRecPath) == true)
                             continue;
 
-                        stop.SetMessage("ÕıÔÚ×¼±¸¼ÇÂ¼ " + strRecPath + " µÄÊéÄ¿¼ÇÂ¼Â·¾¶ ...");
+                        stop.SetMessage("æ­£åœ¨å‡†å¤‡è®°å½• " + strRecPath + " çš„ä¹¦ç›®è®°å½•è·¯å¾„ ...");
                         stop.SetProgressValue(i++);
 
                         string strItemRecPath = "";
@@ -5939,16 +5939,16 @@ out strError);
                         }
                         else if (nRet == 0)
                         {
-                            strError = "¼ÇÂ¼Â·¾¶ '" + strRecPath + "' Ã»ÓĞÕÒµ½¼ÇÂ¼";
+                            strError = "è®°å½•è·¯å¾„ '" + strRecPath + "' æ²¡æœ‰æ‰¾åˆ°è®°å½•";
                             goto ERROR1;
                         }
                         else if (nRet == 1)
                         {
                             item.Text = strItemRecPath;
                         }
-                        else if (nRet > 1) // ÃüÖĞ·¢ÉúÖØ¸´
+                        else if (nRet > 1) // å‘½ä¸­å‘ç”Ÿé‡å¤
                         {
-                            strError = "¼ÇÂ¼Â·¾¶ '" + strRecPath + "' ÃüÖĞ " + nRet.ToString() + " Ìõ¼ÇÂ¼£¬ÕâÊÇÒ»¸öÑÏÖØ´íÎó";
+                            strError = "è®°å½•è·¯å¾„ '" + strRecPath + "' å‘½ä¸­ " + nRet.ToString() + " æ¡è®°å½•ï¼Œè¿™æ˜¯ä¸€ä¸ªä¸¥é‡é”™è¯¯";
                         }
 
                         paths.Add(strBiblioRecPath);
@@ -5959,10 +5959,10 @@ out strError);
                 paths.Sort();
                 StringUtil.RemoveDup(ref paths);
                  * */
-                stop.SetMessage("ÕıÔÚ¹é²¢...");
+                stop.SetMessage("æ­£åœ¨å½’å¹¶...");
                 StringUtil.RemoveDupNoSort(ref paths);
 
-                stop.SetMessage("ÕıÔÚĞ´ÈëÎÄ¼ş...");
+                stop.SetMessage("æ­£åœ¨å†™å…¥æ–‡ä»¶...");
                 int nBase = this.listView_records.SelectedItems.Count;
 
                 stop.SetProgressRange(0, nBase + paths.Count / 10);
@@ -5975,7 +5975,7 @@ out strError);
                     {
                         if (stop.State != 0)
                         {
-                            strError = "ÓÃ»§ÖĞ¶Ï";
+                            strError = "ç”¨æˆ·ä¸­æ–­";
                             goto ERROR1;
                         }
                     }
@@ -5999,7 +5999,7 @@ out strError);
                     {
                         if (stop.State != 0)
                         {
-                            strError = "ÓÃ»§ÖĞ¶Ï";
+                            strError = "ç”¨æˆ·ä¸­æ–­";
                             goto ERROR1;
                         }
                     }
@@ -6018,30 +6018,30 @@ out strError);
                     sw.Close();
             }
 
-            string strExportStyle = "µ¼³ö";
+            string strExportStyle = "å¯¼å‡º";
             if (bAppend == true)
-                strExportStyle = "×·¼Ó";
+                strExportStyle = "è¿½åŠ ";
 
-            this.MainForm.StatusBarMessage = "ÊéÄ¿¼ÇÂ¼Â·¾¶ " + biblio_recpaths.Count.ToString() + "¸ö ÒÑ³É¹¦" + strExportStyle + "µ½ÎÄ¼ş " + this.ExportBiblioRecPathFilename;
+            this.MainForm.StatusBarMessage = "ä¹¦ç›®è®°å½•è·¯å¾„ " + biblio_recpaths.Count.ToString() + "ä¸ª å·²æˆåŠŸ" + strExportStyle + "åˆ°æ–‡ä»¶ " + this.ExportBiblioRecPathFilename;
             return;
         ERROR1:
             MessageBox.Show(this, strError);
         }
 
-        // µ¼³öµ½¼ÇÂ¼Â·¾¶ÎÄ¼ş¡£ºÍµ±Ç°´°¿ÚµÄÀàĞÍÓĞ¹Ø
+        // å¯¼å‡ºåˆ°è®°å½•è·¯å¾„æ–‡ä»¶ã€‚å’Œå½“å‰çª—å£çš„ç±»å‹æœ‰å…³
         // parameters:
-        //      bAppend [in]Èç¹û¿ÉÄÜµÄ»°ÊÇ·ñ¾¡Á¿×·¼Óµ½ÒÑ¾­´æÔÚµÄÎÄ¼şÄ©Î² [out]Êµ¼Ê²ÉÓÃµÄÊÇ·ñÎª×·¼Ó·½Ê½
+        //      bAppend [in]å¦‚æœå¯èƒ½çš„è¯æ˜¯å¦å°½é‡è¿½åŠ åˆ°å·²ç»å­˜åœ¨çš„æ–‡ä»¶æœ«å°¾ [out]å®é™…é‡‡ç”¨çš„æ˜¯å¦ä¸ºè¿½åŠ æ–¹å¼
         // return:
-        //      -1  ³ö´í
-        //      0   ·ÅÆúµ¼³ö
-        //      >0  µ¼³ö³É¹¦£¬Êı×ÖÊÇÒÑ¾­µ¼³öµÄÌõÊı
+        //      -1  å‡ºé”™
+        //      0   æ”¾å¼ƒå¯¼å‡º
+        //      >0  å¯¼å‡ºæˆåŠŸï¼Œæ•°å­—æ˜¯å·²ç»å¯¼å‡ºçš„æ¡æ•°
         /// <summary>
-        /// ½«µ±Ç°Ñ¡¶¨µÄÊÂÏîµ¼³öµ½¼ÇÂ¼Â·¾¶ÎÄ¼ş
+        /// å°†å½“å‰é€‰å®šçš„äº‹é¡¹å¯¼å‡ºåˆ°è®°å½•è·¯å¾„æ–‡ä»¶
         /// </summary>
-        /// <param name="strFilename">¼ÇÂ¼Â·¾¶ÎÄ¼şÃû</param>
-        /// <param name="bAppend">[in]Èç¹û¿ÉÄÜµÄ»°ÊÇ·ñ¾¡Á¿×·¼Óµ½ÒÑ¾­´æÔÚµÄÎÄ¼şÄ©Î² [out]Êµ¼Ê²ÉÓÃµÄÊÇ·ñÎª×·¼Ó·½Ê½</param>
-        /// <param name="strError">³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í¡£´íÎóĞÅÏ¢ÔÚ strError ÖĞ; 0: ·ÅÆúµ¼³ö; >0 µ¼³ö³É¹¦£¬±¾·½·¨µÄ´ËÊ±µÄ·µ»ØÖµÊÇÒÑ¾­µ¼³öµÄ¼ÇÂ¼Êı</returns>
+        /// <param name="strFilename">è®°å½•è·¯å¾„æ–‡ä»¶å</param>
+        /// <param name="bAppend">[in]å¦‚æœå¯èƒ½çš„è¯æ˜¯å¦å°½é‡è¿½åŠ åˆ°å·²ç»å­˜åœ¨çš„æ–‡ä»¶æœ«å°¾ [out]å®é™…é‡‡ç”¨çš„æ˜¯å¦ä¸ºè¿½åŠ æ–¹å¼</param>
+        /// <param name="strError">å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™ã€‚é”™è¯¯ä¿¡æ¯åœ¨ strError ä¸­; 0: æ”¾å¼ƒå¯¼å‡º; >0 å¯¼å‡ºæˆåŠŸï¼Œæœ¬æ–¹æ³•çš„æ­¤æ—¶çš„è¿”å›å€¼æ˜¯å·²ç»å¯¼å‡ºçš„è®°å½•æ•°</returns>
         public int ExportToRecPathFile(string strFilename,
             ref bool bAppend,
             out string strError)
@@ -6052,7 +6052,7 @@ out strError);
             if (File.Exists(this.ExportRecPathFilename) == true && bAppend == true)
             {
                 DialogResult result = MessageBox.Show(this,
-                    "¼ÇÂ¼Â·¾¶ÎÄ¼ş '" + this.ExportRecPathFilename + "' ÒÑ¾­´æÔÚ¡£\r\n\r\n±¾´ÎÊä³öÄÚÈİÊÇ·ñÒª×·¼Óµ½¸ÃÎÄ¼şÎ²²¿? (Yes ×·¼Ó£»No ¸²¸Ç£»Cancel ·ÅÆúµ¼³ö)",
+                    "è®°å½•è·¯å¾„æ–‡ä»¶ '" + this.ExportRecPathFilename + "' å·²ç»å­˜åœ¨ã€‚\r\n\r\næœ¬æ¬¡è¾“å‡ºå†…å®¹æ˜¯å¦è¦è¿½åŠ åˆ°è¯¥æ–‡ä»¶å°¾éƒ¨? (Yes è¿½åŠ ï¼›No è¦†ç›–ï¼›Cancel æ”¾å¼ƒå¯¼å‡º)",
                     this.DbType + "SearchForm",
                     MessageBoxButtons.YesNoCancel,
                     MessageBoxIcon.Question,
@@ -6071,7 +6071,7 @@ out strError);
             else
                 bAppend = false;
 
-            // ´´½¨ÎÄ¼ş
+            // åˆ›å»ºæ–‡ä»¶
             StreamWriter sw = new StreamWriter(strFilename,
     bAppend,	// append
     System.Text.Encoding.UTF8);
@@ -6079,7 +6079,7 @@ out strError);
             {
                 stop.Style = StopStyle.EnableHalfStop;
                 stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("ÕıÔÚµ¼³ö¼ÇÂ¼Â·¾¶ ...");
+                stop.Initial("æ­£åœ¨å¯¼å‡ºè®°å½•è·¯å¾„ ...");
                 stop.BeginLoop();
 
                 this.EnableControls(false);
@@ -6115,20 +6115,20 @@ out strError);
             return nCount;
         }
 
-        // ±£´æÑ¡ÔñµÄĞĞÖĞµÄÓĞÂ·¾¶µÄ²¿·ÖĞĞ µ½¼ÇÂ¼Â·¾¶ÎÄ¼ş
+        // ä¿å­˜é€‰æ‹©çš„è¡Œä¸­çš„æœ‰è·¯å¾„çš„éƒ¨åˆ†è¡Œ åˆ°è®°å½•è·¯å¾„æ–‡ä»¶
         void menu_saveToRecordPathFile_Click(object sender, EventArgs e)
         {
             string strError = "";
 
-            // Ñ¯ÎÊÎÄ¼şÃû
+            // è¯¢é—®æ–‡ä»¶å
             SaveFileDialog dlg = new SaveFileDialog();
 
-            dlg.Title = "ÇëÖ¸¶¨Òª±£´æµÄ¼ÇÂ¼Â·¾¶ÎÄ¼şÃû";
+            dlg.Title = "è¯·æŒ‡å®šè¦ä¿å­˜çš„è®°å½•è·¯å¾„æ–‡ä»¶å";
             dlg.CreatePrompt = false;
             dlg.OverwritePrompt = false;
             dlg.FileName = this.ExportRecPathFilename;
             // dlg.InitialDirectory = Environment.CurrentDirectory;
-            dlg.Filter = "¼ÇÂ¼Â·¾¶ÎÄ¼ş (*.txt)|*.txt|All files (*.*)|*.*";
+            dlg.Filter = "è®°å½•è·¯å¾„æ–‡ä»¶ (*.txt)|*.txt|All files (*.*)|*.*";
 
             dlg.RestoreDirectory = true;
 
@@ -6140,9 +6140,9 @@ out strError);
             bool bAppend = true;
 
             // return:
-            //      -1  ³ö´í
-            //      0   ·ÅÆúµ¼³ö
-            //      >0  µ¼³ö³É¹¦£¬Êı×ÖÊÇÒÑ¾­µ¼³öµÄÌõÊı
+            //      -1  å‡ºé”™
+            //      0   æ”¾å¼ƒå¯¼å‡º
+            //      >0  å¯¼å‡ºæˆåŠŸï¼Œæ•°å­—æ˜¯å·²ç»å¯¼å‡ºçš„æ¡æ•°
             int nRet = ExportToRecPathFile(
                 this.ExportRecPathFilename,
                 ref bAppend,
@@ -6150,11 +6150,11 @@ out strError);
             if (nRet == -1)
                 goto ERROR1;
 
-            string strExportStyle = "µ¼³ö";
+            string strExportStyle = "å¯¼å‡º";
             if (bAppend == true)
-                strExportStyle = "×·¼Ó";
+                strExportStyle = "è¿½åŠ ";
 
-            this.MainForm.StatusBarMessage = "²á¼ÇÂ¼Â·¾¶ " + nRet.ToString() + "¸ö ÒÑ³É¹¦" + strExportStyle + "µ½ÎÄ¼ş " + this.ExportRecPathFilename;
+            this.MainForm.StatusBarMessage = "å†Œè®°å½•è·¯å¾„ " + nRet.ToString() + "ä¸ª å·²æˆåŠŸ" + strExportStyle + "åˆ°æ–‡ä»¶ " + this.ExportRecPathFilename;
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -6162,7 +6162,7 @@ out strError);
 
 #if NOOOOOOOOOOO
 
-        // °ÑListViewItemÎÄ±¾ÄÚÈİ¹¹ÔìÎªtab×Ö·û·Ö¸îµÄ×Ö·û´®
+        // æŠŠListViewItemæ–‡æœ¬å†…å®¹æ„é€ ä¸ºtabå­—ç¬¦åˆ†å‰²çš„å­—ç¬¦ä¸²
         static string BuildLine(ListViewItem item)
         {
             string strLine = "";
@@ -6176,8 +6176,8 @@ out strError);
             return strLine;
         }
 
-        // ¸ù¾İ×Ö·û´®¹¹ÔìListViewItem¡£
-        // ×Ö·û´®µÄ¸ñÊ½Îª\t¼ä¸ôµÄ
+        // æ ¹æ®å­—ç¬¦ä¸²æ„é€ ListViewItemã€‚
+        // å­—ç¬¦ä¸²çš„æ ¼å¼ä¸º\té—´éš”çš„
         static ListViewItem BuildListViewItem(string strLine)
         {
             ListViewItem item = new ListViewItem();
@@ -6192,18 +6192,18 @@ out strError);
 
 #endif
 
-        // ±£´æÑ¡ÔñµÄĞĞµ½ÎÄ±¾ÎÄ¼ş
+        // ä¿å­˜é€‰æ‹©çš„è¡Œåˆ°æ–‡æœ¬æ–‡ä»¶
         void menu_exportTextFile_Click(object sender, EventArgs e)
         {
-            // Ñ¯ÎÊÎÄ¼şÃû
+            // è¯¢é—®æ–‡ä»¶å
             SaveFileDialog dlg = new SaveFileDialog();
 
-            dlg.Title = "ÇëÖ¸¶¨Òª±£´æµÄÎÄ±¾ÎÄ¼şÃû";
+            dlg.Title = "è¯·æŒ‡å®šè¦ä¿å­˜çš„æ–‡æœ¬æ–‡ä»¶å";
             dlg.CreatePrompt = false;
             dlg.OverwritePrompt = false;
             dlg.FileName = this.ExportTextFilename;
             // dlg.InitialDirectory = Environment.CurrentDirectory;
-            dlg.Filter = "ÎÄ±¾ÎÄ¼ş (*.txt)|*.txt|All files (*.*)|*.*";
+            dlg.Filter = "æ–‡æœ¬æ–‡ä»¶ (*.txt)|*.txt|All files (*.*)|*.*";
 
             dlg.RestoreDirectory = true;
 
@@ -6217,7 +6217,7 @@ out strError);
             if (File.Exists(this.ExportTextFilename) == true)
             {
                 DialogResult result = MessageBox.Show(this,
-                    "ÎÄ±¾ÎÄ¼ş '" + this.ExportTextFilename + "' ÒÑ¾­´æÔÚ¡£\r\n\r\n±¾´ÎÊä³öÄÚÈİÊÇ·ñÒª×·¼Óµ½¸ÃÎÄ¼şÎ²²¿? (Yes ×·¼Ó£»No ¸²¸Ç£»Cancel ·ÅÆúµ¼³ö)",
+                    "æ–‡æœ¬æ–‡ä»¶ '" + this.ExportTextFilename + "' å·²ç»å­˜åœ¨ã€‚\r\n\r\næœ¬æ¬¡è¾“å‡ºå†…å®¹æ˜¯å¦è¦è¿½åŠ åˆ°è¯¥æ–‡ä»¶å°¾éƒ¨? (Yes è¿½åŠ ï¼›No è¦†ç›–ï¼›Cancel æ”¾å¼ƒå¯¼å‡º)",
                     this.DbType + "SearchForm",
                     MessageBoxButtons.YesNoCancel,
                     MessageBoxIcon.Question,
@@ -6236,7 +6236,7 @@ out strError);
             else
                 bAppend = false;
 
-            // ´´½¨ÎÄ¼ş
+            // åˆ›å»ºæ–‡ä»¶
             StreamWriter sw = new StreamWriter(this.ExportTextFilename,
                 bAppend,	// append
                 System.Text.Encoding.UTF8);
@@ -6259,21 +6259,21 @@ out strError);
                     sw.Close();
             }
 
-            string strExportStyle = "µ¼³ö";
+            string strExportStyle = "å¯¼å‡º";
             if (bAppend == true)
-                strExportStyle = "×·¼Ó";
+                strExportStyle = "è¿½åŠ ";
 
-            this.MainForm.StatusBarMessage = "ĞĞÄÚÈİ " + this.listView_records.SelectedItems.Count.ToString() + "¸ö ÒÑ³É¹¦" + strExportStyle + "µ½ÎÄ±¾ÎÄ¼ş " + this.ExportTextFilename;
+            this.MainForm.StatusBarMessage = "è¡Œå†…å®¹ " + this.listView_records.SelectedItems.Count.ToString() + "ä¸ª å·²æˆåŠŸ" + strExportStyle + "åˆ°æ–‡æœ¬æ–‡ä»¶ " + this.ExportTextFilename;
         }
 
-        // µ¼³öÑ¡ÔñµÄĞĞµ½ Excel ÎÄ¼ş
+        // å¯¼å‡ºé€‰æ‹©çš„è¡Œåˆ° Excel æ–‡ä»¶
         void menu_exportExcelFile_Click(object sender, EventArgs e)
         {
             string strError = "";
 
             if (this.listView_records.SelectedItems.Count == 0)
             {
-                strError = "ÉĞÎ´Ñ¡¶¨Òªµ¼³öµÄÊÂÏî";
+                strError = "å°šæœªé€‰å®šè¦å¯¼å‡ºçš„äº‹é¡¹";
                 goto ERROR1;
             }
 
@@ -6284,7 +6284,7 @@ out strError);
             }
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚµ¼³öÑ¡¶¨µÄÊÂÏîµ½ Excel ÎÄ¼ş ...");
+            stop.Initial("æ­£åœ¨å¯¼å‡ºé€‰å®šçš„äº‹é¡¹åˆ° Excel æ–‡ä»¶ ...");
             stop.BeginLoop();
 
             this.EnableControls(false);
@@ -6319,7 +6319,7 @@ out strError);
 
             ColumnSortStyle sortStyle = ColumnSortStyle.LeftAlign;
 
-            // µÚÒ»ÁĞÎª¼ÇÂ¼Â·¾¶£¬ÅÅĞò·ç¸ñÌØÊâ
+            // ç¬¬ä¸€åˆ—ä¸ºè®°å½•è·¯å¾„ï¼Œæ’åºé£æ ¼ç‰¹æ®Š
             if (nClickColumn == 0)
                 sortStyle = ColumnSortStyle.RecPath;
 
@@ -6327,7 +6327,7 @@ out strError);
                 sortStyle,
                 this.listView_records.Columns);
 
-            // ÅÅĞò
+            // æ’åº
             this.listView_records.ListViewItemSorter = new SortColumnsComparer(this.SortColumns);
 
             this.listView_records.ListViewItemSorter = null;
@@ -6340,7 +6340,7 @@ out strError);
             if (this.comboBox_entityDbName.Items.Count > 0)
                 return;
 
-            this.comboBox_entityDbName.Items.Add("<È«²¿>");
+            this.comboBox_entityDbName.Items.Add("<å…¨éƒ¨>");
 
             if (this.DbType == "arrive"
                 && string.IsNullOrEmpty(this.MainForm.ArrivedDbName) == false)
@@ -6350,9 +6350,9 @@ out strError);
             }
 
             if (this.DbType != "issue")
-                this.comboBox_entityDbName.Items.Add("<È«²¿Í¼Êé>");
+                this.comboBox_entityDbName.Items.Add("<å…¨éƒ¨å›¾ä¹¦>");
 
-            this.comboBox_entityDbName.Items.Add("<È«²¿ÆÚ¿¯>");
+            this.comboBox_entityDbName.Items.Add("<å…¨éƒ¨æœŸåˆŠ>");
 
             if (this.MainForm.BiblioDbProperties != null)
             {
@@ -6381,7 +6381,7 @@ out strError);
                             this.comboBox_entityDbName.Items.Add(property.IssueDbName);
                     }
                     else
-                        throw new Exception("Î´ÖªµÄDbType '" + this.DbType + "'");
+                        throw new Exception("æœªçŸ¥çš„DbType '" + this.DbType + "'");
 
                 }
             }
@@ -6398,7 +6398,7 @@ out strError);
             string strError = "";
             if (this.MainForm.NormalDbProperties == null)
             {
-                strError = "ÆÕÍ¨Êı¾İ¿âÊôĞÔÉĞÎ´³õÊ¼»¯";
+                strError = "æ™®é€šæ•°æ®åº“å±æ€§å°šæœªåˆå§‹åŒ–";
                 goto ERROR1;
             }
 
@@ -6413,7 +6413,7 @@ out strError);
             DoSearch(true, false, null);
         }
 
-        // ½« ItemQueryParam ÖĞµÄĞÅÏ¢»Ö¸´µ½Ãæ°åÖĞ
+        // å°† ItemQueryParam ä¸­çš„ä¿¡æ¯æ¢å¤åˆ°é¢æ¿ä¸­
         void QueryToPanel(ItemQueryParam query, 
             bool bClearList = true)
         {
@@ -6490,16 +6490,16 @@ out strError);
         private void textBox_queryWord_TextChanged(object sender, EventArgs e)
         {
             if (this.DbType == "item")
-                this.Text = "ÊµÌå²éÑ¯ " + this.textBox_queryWord.Text;
+                this.Text = "å®ä½“æŸ¥è¯¢ " + this.textBox_queryWord.Text;
             else
-                this.Text = this.DbTypeCaption + "²éÑ¯ " + this.textBox_queryWord.Text;
+                this.Text = this.DbTypeCaption + "æŸ¥è¯¢ " + this.textBox_queryWord.Text;
         }
 
 #if NO
         /// <summary>
-        /// È±Ê¡´°¿Ú¹ı³Ì
+        /// ç¼ºçœçª—å£è¿‡ç¨‹
         /// </summary>
-        /// <param name="m">ÏûÏ¢</param>
+        /// <param name="m">æ¶ˆæ¯</param>
         protected override void DefWndProc(ref Message m)
         {
             switch (m.Msg)
@@ -6512,11 +6512,11 @@ out strError);
                         {
                             if (this.listView_records.SelectedIndices.Count == 1)
                             {
-                                this.label_message.Text = "µÚ " + (this.listView_records.SelectedIndices[0] + 1).ToString() + " ĞĞ";
+                                this.label_message.Text = "ç¬¬ " + (this.listView_records.SelectedIndices[0] + 1).ToString() + " è¡Œ";
                             }
                             else
                             {
-                                this.label_message.Text = "´Ó " + (this.listView_records.SelectedIndices[0] + 1).ToString() + " ĞĞ¿ªÊ¼£¬¹²Ñ¡ÖĞ " + this.listView_records.SelectedIndices.Count.ToString() + " ¸öÊÂÏî";
+                                this.label_message.Text = "ä» " + (this.listView_records.SelectedIndices[0] + 1).ToString() + " è¡Œå¼€å§‹ï¼Œå…±é€‰ä¸­ " + this.listView_records.SelectedIndices.Count.ToString() + " ä¸ªäº‹é¡¹";
                             }
                         }
 
@@ -6577,7 +6577,7 @@ out strError);
 
         private void comboBox_matchStyle_TextChanged(object sender, EventArgs e)
         {
-            if (this.comboBox_matchStyle.Text == "¿ÕÖµ")
+            if (this.comboBox_matchStyle.Text == "ç©ºå€¼")
             {
                 this.textBox_queryWord.Text = "";
                 this.textBox_queryWord.Enabled = false;
@@ -6588,19 +6588,19 @@ out strError);
             }
         }
 
-        // Ïû³ı²ĞÓàÍ¼Ïñ
+        // æ¶ˆé™¤æ®‹ä½™å›¾åƒ
         private void comboBox_entityDbName_SizeChanged(object sender, EventArgs e)
         {
             this.comboBox_entityDbName.Invalidate();
         }
 
-        // Ïû³ı²ĞÓàÍ¼Ïñ
+        // æ¶ˆé™¤æ®‹ä½™å›¾åƒ
         private void comboBox_from_SizeChanged(object sender, EventArgs e)
         {
             this.comboBox_from.Invalidate();
         }
 
-        // Ïû³ı²ĞÓàÍ¼Ïñ
+        // æ¶ˆé™¤æ®‹ä½™å›¾åƒ
         private void comboBox_matchStyle_SizeChanged(object sender, EventArgs e)
         {
             this.comboBox_matchStyle.Invalidate();
@@ -6667,7 +6667,7 @@ out strError);
         {
             GetTimeDialog dlg = new GetTimeDialog();
             dlg.RangeMode = true;
-            // ·Ö¸îÎªÁ½¸ö×Ö·û´®
+            // åˆ†å‰²ä¸ºä¸¤ä¸ªå­—ç¬¦ä¸²
             try
             {
                 dlg.Rfc1123String = this.textBox_queryWord.Text;
@@ -6741,7 +6741,7 @@ out strError);
             if (string.IsNullOrEmpty(strXml2) == true)
                 return strXml1;
 
-            return strXml1; // ÁÙÊ±ÕâÑù
+            return strXml1; // ä¸´æ—¶è¿™æ ·
         }
 
         internal override string GetHeadString(bool bAjax = true)
@@ -6785,10 +6785,10 @@ out strError);
             if (string.IsNullOrEmpty(strOldXml) == false
                 && string.IsNullOrEmpty(strNewXml) == false)
             {
-                // ´´½¨Õ¹Ê¾Á½¸ö MARC ¼ÇÂ¼²îÒìµÄ HTML ×Ö·û´®
+                // åˆ›å»ºå±•ç¤ºä¸¤ä¸ª MARC è®°å½•å·®å¼‚çš„ HTML å­—ç¬¦ä¸²
                 // return:
-                //      -1  ³ö´í
-                //      0   ³É¹¦
+                //      -1  å‡ºé”™
+                //      0   æˆåŠŸ
                 nRet = MarcDiff.DiffXml(
                     strOldXml,
                     strNewXml,
@@ -6816,11 +6816,11 @@ out strError);
         }
 
 
-        // »ñµÃÒ»Ìõ¼ÇÂ¼
+        // è·å¾—ä¸€æ¡è®°å½•
         //return:
-        //      -1  ³ö´í
-        //      0   Ã»ÓĞÕÒµ½
-        //      1   ÕÒµ½
+        //      -1  å‡ºé”™
+        //      0   æ²¡æœ‰æ‰¾åˆ°
+        //      1   æ‰¾åˆ°
         internal override int GetRecord(
             string strRecPath,
             out string strXml,
@@ -6834,7 +6834,7 @@ out strError);
             string strOutputRecPath = "";
             string strBiblio = "";
             string strBiblioRecPath = "";
-            // »ñµÃ²á¼ÇÂ¼
+            // è·å¾—å†Œè®°å½•
             long lRet = 0;
 
             if (this.DbType == "item")
@@ -6895,19 +6895,19 @@ out strError);
             }
 
             if (lRet == 0)
-                return 0;  // ÊÇ·ñÉè¶¨ÎªÌØÊâ×´Ì¬?
+                return 0;  // æ˜¯å¦è®¾å®šä¸ºç‰¹æ®ŠçŠ¶æ€?
             if (lRet == -1)
                 return -1;
 
             return 1;
         }
 
-        // ±£´æÒ»Ìõ¼ÇÂ¼
-        // ±£´æ³É¹¦ºó£¬ info.Timestamp »á±»¸üĞÂ
+        // ä¿å­˜ä¸€æ¡è®°å½•
+        // ä¿å­˜æˆåŠŸåï¼Œ info.Timestamp ä¼šè¢«æ›´æ–°
         // return:
-        //      -2  Ê±¼ä´Á²»Æ¥Åä
-        //      -1  ³ö´í
-        //      0   ³É¹¦
+        //      -2  æ—¶é—´æˆ³ä¸åŒ¹é…
+        //      -1  å‡ºé”™
+        //      0   æˆåŠŸ
         internal override int SaveRecord(string strRecPath,
             BiblioInfo info,
             out byte[] baNewTimestamp,
@@ -6935,7 +6935,7 @@ out strError);
                 entityArray.Add(item_info);
             }
 
-            // ¸´ÖÆµ½Ä¿±ê
+            // å¤åˆ¶åˆ°ç›®æ ‡
             EntityInfo[] entities = null;
             entities = new EntityInfo[entityArray.Count];
             for (int i = 0; i < entityArray.Count; i++)
@@ -6977,13 +6977,13 @@ out strError);
                      out strError);
             else
             {
-                strError = "Î´ÖªµÄÊı¾İ¿âÀàĞÍ '" + this.DbType + "'";
+                strError = "æœªçŸ¥çš„æ•°æ®åº“ç±»å‹ '" + this.DbType + "'";
                 return -1;
             }
             if (lRet == -1)
                 return -1;
 
-            // string strWarning = ""; // ¾¯¸æĞÅÏ¢
+            // string strWarning = ""; // è­¦å‘Šä¿¡æ¯
 
             if (errorinfos == null)
                 return 0;
@@ -6994,18 +6994,18 @@ out strError);
 #if NO
                 if (String.IsNullOrEmpty(errorinfos[i].RefID) == true)
                 {
-                    strError = "·şÎñÆ÷·µ»ØµÄEntityInfo½á¹¹ÖĞRefIDÎª¿Õ";
+                    strError = "æœåŠ¡å™¨è¿”å›çš„EntityInfoç»“æ„ä¸­RefIDä¸ºç©º";
                     return -1;
                 }
 #endif
                 if (i == 0)
                     baNewTimestamp = errorinfos[i].NewTimestamp;
 
-                // Õı³£ĞÅÏ¢´¦Àí
+                // æ­£å¸¸ä¿¡æ¯å¤„ç†
                 if (errorinfos[i].ErrorCode == ErrorCodeValue.NoError)
                     continue;
 
-                strError += errorinfos[i].RefID + "ÔÚÌá½»±£´æ¹ı³ÌÖĞ·¢Éú´íÎó -- " + errorinfos[i].ErrorInfo + "\r\n";
+                strError += errorinfos[i].RefID + "åœ¨æäº¤ä¿å­˜è¿‡ç¨‹ä¸­å‘ç”Ÿé”™è¯¯ -- " + errorinfos[i].ErrorInfo + "\r\n";
             }
 
             info.Timestamp = baNewTimestamp;    // 2013/10/17
@@ -7016,46 +7016,46 @@ out strError);
             return 0;
         }
 
-        // ÔÚ×´Ì¬ĞĞÏÔÊ¾ÎÄ×ÖĞÅÏ¢
+        // åœ¨çŠ¶æ€è¡Œæ˜¾ç¤ºæ–‡å­—ä¿¡æ¯
         internal override void SetStatusMessage(string strMessage)
         {
             this.label_message.Text = strMessage;
         }
 
-        // ¶ªÆúÑ¡¶¨µÄĞŞ¸Ä
+        // ä¸¢å¼ƒé€‰å®šçš„ä¿®æ”¹
         void menu_clearSelectedChangedRecords_Click(object sender, EventArgs e)
         {
             ClearSelectedChangedRecords();
         }
 
 #if NO
-        // ½ÓÊÕÑ¡¶¨µÄĞŞ¸Ä
-        // ´Ë¹¦ÄÜÄÑÒÔ±»Ò»°ãÓÃ»§Àí½â¡£½ÓÊÜÁËµÄÎªºÎ·´¶ø²»ÄÜ±£´æÁË£¿
+        // æ¥æ”¶é€‰å®šçš„ä¿®æ”¹
+        // æ­¤åŠŸèƒ½éš¾ä»¥è¢«ä¸€èˆ¬ç”¨æˆ·ç†è§£ã€‚æ¥å—äº†çš„ä¸ºä½•åè€Œä¸èƒ½ä¿å­˜äº†ï¼Ÿ
         void menu_acceptSelectedChangedRecords_Click(object sender, EventArgs e)
         {
             AcceptSelectedChangedRecords();
         }
 #endif
 
-        // ¶ªÆúÈ«²¿ĞŞ¸Ä
+        // ä¸¢å¼ƒå…¨éƒ¨ä¿®æ”¹
         void menu_clearAllChangedRecords_Click(object sender, EventArgs e)
         {
             ClearAllChangedRecords();
         }
 
-        // ±£´æÑ¡¶¨ÊÂÏîµÄĞŞ¸Ä
+        // ä¿å­˜é€‰å®šäº‹é¡¹çš„ä¿®æ”¹
         void menu_saveSelectedChangedRecords_Click(object sender, EventArgs e)
         {
             SaveSelectedChangedRecords();
         }
 
-        // ±£´æÈ«²¿ĞŞ¸ÄÊÂÏî
+        // ä¿å­˜å…¨éƒ¨ä¿®æ”¹äº‹é¡¹
         void menu_saveAllChangedRecords_Click(object sender, EventArgs e)
         {
             SaveAllChangedRecords();
         }
 
-        // ´´½¨Ò»¸öĞÂµÄ C# ½Å±¾ÎÄ¼ş
+        // åˆ›å»ºä¸€ä¸ªæ–°çš„ C# è„šæœ¬æ–‡ä»¶
         void menu_createMarcQueryCsFile_Click(object sender, EventArgs e)
         {
             CreateStartCsFile();
@@ -7063,20 +7063,20 @@ out strError);
 
         // 
         /// <summary>
-        /// ´´½¨Ò»¸öĞÂµÄ C# ½Å±¾ÎÄ¼ş¡£»áµ¯³ö¶Ô»°¿òÑ¯ÎÊÎÄ¼şÃû¡£
-        /// ´úÂëÖĞµÄÀà´Ó ItemHost ÀàÅÉÉú
+        /// åˆ›å»ºä¸€ä¸ªæ–°çš„ C# è„šæœ¬æ–‡ä»¶ã€‚ä¼šå¼¹å‡ºå¯¹è¯æ¡†è¯¢é—®æ–‡ä»¶åã€‚
+        /// ä»£ç ä¸­çš„ç±»ä» ItemHost ç±»æ´¾ç”Ÿ
         /// </summary>
         public void CreateStartCsFile()
         {
-            // Ñ¯ÎÊÎÄ¼şÃû
+            // è¯¢é—®æ–‡ä»¶å
             SaveFileDialog dlg = new SaveFileDialog();
 
-            dlg.Title = "ÇëÖ¸¶¨Òª´´½¨µÄ½Å±¾ÎÄ¼şÃû";
+            dlg.Title = "è¯·æŒ‡å®šè¦åˆ›å»ºçš„è„šæœ¬æ–‡ä»¶å";
             dlg.CreatePrompt = false;
             dlg.OverwritePrompt = true;
             dlg.FileName = "";
             // dlg.InitialDirectory = Environment.CurrentDirectory;
-            dlg.Filter = "C# ½Å±¾ÎÄ¼ş (*.cs)|*.cs|All files (*.*)|*.*";
+            dlg.Filter = "C# è„šæœ¬æ–‡ä»¶ (*.cs)|*.cs|All files (*.*)|*.*";
 
             dlg.RestoreDirectory = true;
 
@@ -7105,20 +7105,20 @@ out strError);
 
             if (this.listView_records.SelectedItems.Count == 0)
             {
-                strError = "ÉĞÎ´Ñ¡ÔñÒªÖ´ĞĞ C# ½Å±¾µÄÊÂÏî";
+                strError = "å°šæœªé€‰æ‹©è¦æ‰§è¡Œ C# è„šæœ¬çš„äº‹é¡¹";
                 goto ERROR1;
             }
 
-            // ¶ÁÕßĞÅÏ¢»º´æ
-            // Èç¹ûÒÑ¾­³õÊ¼»¯£¬Ôò±£³Ö
+            // è¯»è€…ä¿¡æ¯ç¼“å­˜
+            // å¦‚æœå·²ç»åˆå§‹åŒ–ï¼Œåˆ™ä¿æŒ
             if (this.m_biblioTable == null)
                 this.m_biblioTable = new Hashtable();
 
             OpenFileDialog dlg = new OpenFileDialog();
 
-            dlg.Title = "ÇëÖ¸¶¨ C# ½Å±¾ÎÄ¼ş";
+            dlg.Title = "è¯·æŒ‡å®š C# è„šæœ¬æ–‡ä»¶";
             dlg.FileName = this.m_strUsedMarcQueryFilename;
-            dlg.Filter = "C# ½Å±¾ÎÄ¼ş (*.cs)|*.cs|All files (*.*)|*.*";
+            dlg.Filter = "C# è„šæœ¬æ–‡ä»¶ (*.cs)|*.cs|All files (*.*)|*.*";
             dlg.RestoreDirectory = true;
 
             if (dlg.ShowDialog() != DialogResult.OK)
@@ -7157,11 +7157,11 @@ out strError);
                 }
             }
 
-            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " ¿ªÊ¼Ö´ĞĞ½Å±¾ " + dlg.FileName + "</div>");
+            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " å¼€å§‹æ‰§è¡Œè„šæœ¬ " + dlg.FileName + "</div>");
 
             stop.Style = StopStyle.EnableHalfStop;
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚÕë¶Ô"+this.DbTypeCaption+"¼ÇÂ¼Ö´ĞĞ C# ½Å±¾ ...");
+            stop.Initial("æ­£åœ¨é’ˆå¯¹"+this.DbTypeCaption+"è®°å½•æ‰§è¡Œ C# è„šæœ¬ ...");
             stop.BeginLoop();
 
             this.EnableControls(false);
@@ -7200,19 +7200,19 @@ out strError);
                     items.Add(item);
                 }
 
-                bool bOldSource = true; // ÊÇ·ñÒª´Ó OldXml ¿ªÊ¼×öÆğ
+                bool bOldSource = true; // æ˜¯å¦è¦ä» OldXml å¼€å§‹åšèµ·
 
                 int nChangeCount = this.GetItemsChangeCount(items);
                 if (nChangeCount > 0)
                 {
                     bool bHideMessageBox = true;
                     DialogResult result = MessageDialog.Show(this,
-                        "µ±Ç°Ñ¡¶¨µÄ " + items.Count.ToString() + " ¸öÊÂÏîÖĞÓĞ " + nChangeCount + " ÏîĞŞ¸ÄÉĞÎ´±£´æ¡£\r\n\r\nÇëÎÊÈçºÎ½øĞĞĞŞ¸Ä? \r\n\r\n(ÖØĞÂĞŞ¸Ä) ÖØĞÂ½øĞĞĞŞ¸Ä£¬ºöÂÔÒÔÇ°ÄÚ´æÖĞµÄĞŞ¸Ä; \r\n(¼ÌĞøĞŞ¸Ä) ÒÔÉÏ´ÎµÄĞŞ¸ÄÎª»ù´¡¼ÌĞøĞŞ¸Ä; \r\n(·ÅÆú) ·ÅÆúÕû¸ö²Ù×÷",
+                        "å½“å‰é€‰å®šçš„ " + items.Count.ToString() + " ä¸ªäº‹é¡¹ä¸­æœ‰ " + nChangeCount + " é¡¹ä¿®æ”¹å°šæœªä¿å­˜ã€‚\r\n\r\nè¯·é—®å¦‚ä½•è¿›è¡Œä¿®æ”¹? \r\n\r\n(é‡æ–°ä¿®æ”¹) é‡æ–°è¿›è¡Œä¿®æ”¹ï¼Œå¿½ç•¥ä»¥å‰å†…å­˜ä¸­çš„ä¿®æ”¹; \r\n(ç»§ç»­ä¿®æ”¹) ä»¥ä¸Šæ¬¡çš„ä¿®æ”¹ä¸ºåŸºç¡€ç»§ç»­ä¿®æ”¹; \r\n(æ”¾å¼ƒ) æ”¾å¼ƒæ•´ä¸ªæ“ä½œ",
     MessageBoxButtons.YesNoCancel,
     MessageBoxDefaultButton.Button1,
     null,
     ref bHideMessageBox,
-    new string[] { "ÖØĞÂĞŞ¸Ä", "¼ÌĞøĞŞ¸Ä", "·ÅÆú" });
+    new string[] { "é‡æ–°ä¿®æ”¹", "ç»§ç»­ä¿®æ”¹", "æ”¾å¼ƒ" });
                     if (result == DialogResult.Cancel)
                         return;
                     if (result == DialogResult.No)
@@ -7230,12 +7230,12 @@ out strError);
                 int i = 0;
                 foreach (LoaderItem item in loader)
                 {
-                    Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                    Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                     if (stop != null
                         && stop.State != 0)
                     {
-                        strError = "ÓÃ»§ÖĞ¶Ï";
+                        strError = "ç”¨æˆ·ä¸­æ–­";
                         goto ERROR1;
                     }
 
@@ -7252,7 +7252,7 @@ out strError);
                     if (bOldSource == true)
                     {
                         host.ItemDom.LoadXml(info.OldXml);
-                        // ·ÅÆúÉÏÒ»´ÎµÄĞŞ¸Ä
+                        // æ”¾å¼ƒä¸Šä¸€æ¬¡çš„ä¿®æ”¹
                         if (string.IsNullOrEmpty(info.NewXml) == false)
                         {
                             info.NewXml = "";
@@ -7294,7 +7294,7 @@ out strError);
                         item.ListViewItem.ForeColor = SystemColors.InfoText;
                     }
 
-                    // ÏÔÊ¾Îª¹¤×÷µ¥ĞÎÊ½
+                    // æ˜¾ç¤ºä¸ºå·¥ä½œå•å½¢å¼
                     i++;
                 }
 
@@ -7330,7 +7330,7 @@ out strError);
 
                 this.EnableControls(true);
 
-                this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " ½áÊøÖ´ĞĞ½Å±¾ " + dlg.FileName + "</div>");
+                this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " ç»“æŸæ‰§è¡Œè„šæœ¬ " + dlg.FileName + "</div>");
             }
 
             DoViewComment(false);
@@ -7339,7 +7339,7 @@ out strError);
             MessageBox.Show(this, strError);
         }
 
-        // ×¼±¸½Å±¾»·¾³
+        // å‡†å¤‡è„šæœ¬ç¯å¢ƒ
         int PrepareMarcQuery(string strCsFileName,
             out Assembly assembly,
             out ItemHost host,
@@ -7352,14 +7352,14 @@ out strError);
 
             string strContent = "";
             Encoding encoding;
-            // ÄÜ×Ô¶¯Ê¶±ğÎÄ¼şÄÚÈİµÄ±àÂë·½Ê½µÄ¶ÁÈëÎÄ±¾ÎÄ¼şÄÚÈİÄ£¿é
+            // èƒ½è‡ªåŠ¨è¯†åˆ«æ–‡ä»¶å†…å®¹çš„ç¼–ç æ–¹å¼çš„è¯»å…¥æ–‡æœ¬æ–‡ä»¶å†…å®¹æ¨¡å—
             // parameters:
-            //      lMaxLength  ×°ÈëµÄ×î´ó³¤¶È¡£Èç¹û³¬¹ı£¬Ôò³¬¹ıµÄ²¿·Ö²»×°Èë¡£Èç¹ûÎª-1£¬±íÊ¾²»ÏŞÖÆ×°Èë³¤¶È
+            //      lMaxLength  è£…å…¥çš„æœ€å¤§é•¿åº¦ã€‚å¦‚æœè¶…è¿‡ï¼Œåˆ™è¶…è¿‡çš„éƒ¨åˆ†ä¸è£…å…¥ã€‚å¦‚æœä¸º-1ï¼Œè¡¨ç¤ºä¸é™åˆ¶è£…å…¥é•¿åº¦
             // return:
-            //      -1  ³ö´í strErrorÖĞÓĞ·µ»ØÖµ
-            //      0   ÎÄ¼ş²»´æÔÚ strErrorÖĞÓĞ·µ»ØÖµ
-            //      1   ÎÄ¼ş´æÔÚ
-            //      2   ¶ÁÈëµÄÄÚÈİ²»ÊÇÈ«²¿
+            //      -1  å‡ºé”™ strErrorä¸­æœ‰è¿”å›å€¼
+            //      0   æ–‡ä»¶ä¸å­˜åœ¨ strErrorä¸­æœ‰è¿”å›å€¼
+            //      1   æ–‡ä»¶å­˜åœ¨
+            //      2   è¯»å…¥çš„å†…å®¹ä¸æ˜¯å…¨éƒ¨
             int nRet = FileUtil.ReadTextFileContent(strCsFileName,
                 -1,
                 out strContent,
@@ -7370,7 +7370,7 @@ out strError);
 
             string strWarningInfo = "";
             string[] saAddRef = {
-                                    // 2011/4/20 Ôö¼Ó
+                                    // 2011/4/20 å¢åŠ 
                                     "system.dll",
                                     "system.drawing.dll",
                                     "system.windows.forms.dll",
@@ -7385,7 +7385,7 @@ out strError);
 									Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
    									Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Script.dll",  // 2011/8/25 ĞÂÔö
+									Environment.CurrentDirectory + "\\digitalplatform.Script.dll",  // 2011/8/25 æ–°å¢
 									Environment.CurrentDirectory + "\\digitalplatform.dp2.statis.dll",
                 Environment.CurrentDirectory + "\\dp2circulation.exe",
             };
@@ -7397,9 +7397,9 @@ out strError);
             if (nRet == -1)
                 goto ERROR1;
 
-            // Ö±½Ó±àÒëµ½ÄÚ´æ
+            // ç›´æ¥ç¼–è¯‘åˆ°å†…å­˜
             // parameters:
-            //		refs	¸½¼ÓµÄrefsÎÄ¼şÂ·¾¶¡£Â·¾¶ÖĞ¿ÉÄÜ°üº¬ºê%installdir%
+            //		refs	é™„åŠ çš„refsæ–‡ä»¶è·¯å¾„ã€‚è·¯å¾„ä¸­å¯èƒ½åŒ…å«å®%installdir%
             nRet = ScriptManager.CreateAssembly_1(strContent,
                 saAddRef,
                 "",
@@ -7409,17 +7409,17 @@ out strError);
             if (nRet == -1)
                 goto ERROR1;
 
-            // µÃµ½AssemblyÖĞHostÅÉÉúÀàType
+            // å¾—åˆ°Assemblyä¸­Hostæ´¾ç”Ÿç±»Type
             Type entryClassType = ScriptManager.GetDerivedClassType(
                 assembly,
                 "dp2Circulation.ItemHost");
             if (entryClassType == null)
             {
-                strError = strCsFileName + " ÖĞÃ»ÓĞÕÒµ½ dp2Circulation.ItemHost ÅÉÉúÀà";
+                strError = strCsFileName + " ä¸­æ²¡æœ‰æ‰¾åˆ° dp2Circulation.ItemHost æ´¾ç”Ÿç±»";
                 goto ERROR1;
             }
 
-            // newÒ»¸öHostÅÉÉú¶ÔÏó
+            // newä¸€ä¸ªHostæ´¾ç”Ÿå¯¹è±¡
             host = (ItemHost)entryClassType.InvokeMember(null,
                 BindingFlags.DeclaredOnly |
                 BindingFlags.Public | BindingFlags.NonPublic |
@@ -7432,10 +7432,10 @@ out strError);
         }
 
         /// <summary>
-        /// ´¦Àí¶Ô»°¿ò¼ü
+        /// å¤„ç†å¯¹è¯æ¡†é”®
         /// </summary>
-        /// <param name="keyData">System.Windows.Forms.Keys ÖµÖ®Ò»£¬Ëü±íÊ¾Òª´¦ÀíµÄ¼ü¡£</param>
-        /// <returns>Èç¹û¿Ø¼ş´¦Àí²¢Ê¹ÓÃ»÷¼ü£¬ÔòÎª true£»·ñÔòÎª false£¬ÒÔÔÊĞí½øÒ»²½´¦Àí</returns>
+        /// <param name="keyData">System.Windows.Forms.Keys å€¼ä¹‹ä¸€ï¼Œå®ƒè¡¨ç¤ºè¦å¤„ç†çš„é”®ã€‚</param>
+        /// <returns>å¦‚æœæ§ä»¶å¤„ç†å¹¶ä½¿ç”¨å‡»é”®ï¼Œåˆ™ä¸º trueï¼›å¦åˆ™ä¸º falseï¼Œä»¥å…è®¸è¿›ä¸€æ­¥å¤„ç†</returns>
         protected override bool ProcessDialogKey(
 Keys keyData)
         {
@@ -7449,16 +7449,16 @@ Keys keyData)
             return base.ProcessDialogKey(keyData);
         }
 
-        long m_lLoaded = 0; // ±¾´ÎÒÑ¾­×°Èëä¯ÀÀ¿òµÄÌõÊı
-        long m_lHitCount = 0;   // ¼ìË÷ÃüÖĞ½á¹ûÌõÊı
+        long m_lLoaded = 0; // æœ¬æ¬¡å·²ç»è£…å…¥æµè§ˆæ¡†çš„æ¡æ•°
+        long m_lHitCount = 0;   // æ£€ç´¢å‘½ä¸­ç»“æœæ¡æ•°
 
 
         /// <summary>
-        /// Ö´ĞĞÒ»´ÎÂß¼­¼ìË÷
+        /// æ‰§è¡Œä¸€æ¬¡é€»è¾‘æ£€ç´¢
         /// </summary>
-        /// <param name="bOutputKeyCount">ÊÇ·ñÒªÊä³öÎª key+count ĞÎÌ¬</param>
-        /// <param name="bOutputKeyID">ÊÇ·ñÎª keyid ĞÎÌ¬</param>
-        /// <param name="input_query">¼ìË÷Ê½</param>
+        /// <param name="bOutputKeyCount">æ˜¯å¦è¦è¾“å‡ºä¸º key+count å½¢æ€</param>
+        /// <param name="bOutputKeyID">æ˜¯å¦ä¸º keyid å½¢æ€</param>
+        /// <param name="input_query">æ£€ç´¢å¼</param>
         public void DoLogicSearch(bool bOutputKeyCount,
             bool bOutputKeyID,
             ItemQueryParam input_query)
@@ -7468,7 +7468,7 @@ Keys keyData)
             if (bOutputKeyCount == true
     && bOutputKeyID == true)
             {
-                strError = "bOutputKeyCountºÍbOutputKeyID²»ÄÜÍ¬Ê±Îªtrue";
+                strError = "bOutputKeyCountå’ŒbOutputKeyIDä¸èƒ½åŒæ—¶ä¸ºtrue";
                 goto ERROR1;
             }
 
@@ -7477,8 +7477,8 @@ Keys keyData)
                 QueryToPanel(input_query);
             }
 
-            bool bQuickLoad = false;    // ÊÇ·ñ¿ìËÙ×°Èë
-            bool bClear = true; // ÊÇ·ñÇå³ıä¯ÀÀ´°ÖĞÒÑÓĞµÄÄÚÈİ
+            bool bQuickLoad = false;    // æ˜¯å¦å¿«é€Ÿè£…å…¥
+            bool bClear = true; // æ˜¯å¦æ¸…é™¤æµè§ˆçª—ä¸­å·²æœ‰çš„å†…å®¹
 
             if ((Control.ModifierKeys & Keys.Shift) == Keys.Shift)
                 bQuickLoad = true;
@@ -7487,8 +7487,8 @@ Keys keyData)
                 bClear = false;
 
 
-            // ĞŞ¸Ä´°¿Ú±êÌâ
-            // this.Text = "ÊéÄ¿²éÑ¯ Âß¼­¼ìË÷";
+            // ä¿®æ”¹çª—å£æ ‡é¢˜
+            // this.Text = "ä¹¦ç›®æŸ¥è¯¢ é€»è¾‘æ£€ç´¢";
 
             this.m_bFirstColumnIsKey = bOutputKeyID;
             this.ClearListViewPropertyCache();
@@ -7501,7 +7501,7 @@ Keys keyData)
                 if (this.m_nChangedCount > 0)
                 {
                     DialogResult result = MessageBox.Show(this,
-                        "µ±Ç°ÃüÖĞ¼ÇÂ¼ÁĞ±íÖĞÓĞ " + this.m_nChangedCount.ToString() + " ÏîĞŞ¸ÄÉĞÎ´±£´æ¡£\r\n\r\nÊÇ·ñ¼ÌĞø²Ù×÷?\r\n\r\n(Yes Çå³ı£¬È»ºó¼ÌĞø²Ù×÷£»No ·ÅÆú²Ù×÷)",
+                        "å½“å‰å‘½ä¸­è®°å½•åˆ—è¡¨ä¸­æœ‰ " + this.m_nChangedCount.ToString() + " é¡¹ä¿®æ”¹å°šæœªä¿å­˜ã€‚\r\n\r\næ˜¯å¦ç»§ç»­æ“ä½œ?\r\n\r\n(Yes æ¸…é™¤ï¼Œç„¶åç»§ç»­æ“ä½œï¼›No æ”¾å¼ƒæ“ä½œ)",
                         "ItemSearchForm",
                         MessageBoxButtons.YesNo,
                         MessageBoxIcon.Question,
@@ -7522,7 +7522,7 @@ Keys keyData)
 
             stop.Style = StopStyle.None;
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ¼ìË÷ ...");
+            stop.Initial("æ­£åœ¨æ£€ç´¢ ...");
             stop.BeginLoop();
 
             this.EnableControls(false);
@@ -7562,9 +7562,9 @@ Keys keyData)
                 long lHitCount = lRet;
 
                 // return:
-                //      -1  ³ö´í
-                //      0   ÓÃ»§ÖĞ¶Ï
-                //      1   Õı³£Íê³É
+                //      -1  å‡ºé”™
+                //      0   ç”¨æˆ·ä¸­æ–­
+                //      1   æ­£å¸¸å®Œæˆ
                 nRet = FillBrowseList(
                     query,
                     lHitCount,
@@ -7575,7 +7575,7 @@ Keys keyData)
                     return;
 
                 // MessageBox.Show(this, Convert.ToString(lRet) + " : " + strError);
-                this.label_message.Text = "¼ìË÷¹²ÃüÖĞ " + lHitCount.ToString() + " Ìõ£¬ÒÑÈ«²¿×°Èë";
+                this.label_message.Text = "æ£€ç´¢å…±å‘½ä¸­ " + lHitCount.ToString() + " æ¡ï¼Œå·²å…¨éƒ¨è£…å…¥";
             }
             finally
             {
@@ -7597,7 +7597,7 @@ Keys keyData)
 
         private void dp2QueryControl1_GetList(object sender, GetListEventArgs e)
         {
-            // »ñµÃËùÓĞÊı¾İ¿âÃû
+            // è·å¾—æ‰€æœ‰æ•°æ®åº“å
             if (string.IsNullOrEmpty(e.Path) == true)
             {
                 if (this.MainForm.BiblioDbProperties != null)
@@ -7627,7 +7627,7 @@ Keys keyData)
                                 e.Values.Add(property.IssueDbName);
                         }
                         else
-                            throw new Exception("Î´ÖªµÄDbType '" + this.DbType + "'");
+                            throw new Exception("æœªçŸ¥çš„DbType '" + this.DbType + "'");
 
 
                     }
@@ -7635,8 +7635,8 @@ Keys keyData)
             }
             else
             {
-                // »ñµÃÌØ¶¨Êı¾İ¿âµÄ¼ìË÷Í¾¾¶
-                // Ã¿¸ö¿â¶¼Ò»Ñù
+                // è·å¾—ç‰¹å®šæ•°æ®åº“çš„æ£€ç´¢é€”å¾„
+                // æ¯ä¸ªåº“éƒ½ä¸€æ ·
                 List<string> froms = GetFromList();
                 foreach (string from in froms)
                 {
@@ -7657,13 +7657,13 @@ out strQueryXml,
 out strError);
             if (nRet == -1)
             {
-                strError = "ÔÚ´´½¨XML¼ìË÷Ê½µÄ¹ı³ÌÖĞ³ö´í: " + strError;
+                strError = "åœ¨åˆ›å»ºXMLæ£€ç´¢å¼çš„è¿‡ç¨‹ä¸­å‡ºé”™: " + strError;
                 goto ERROR1;
             }
 
             XmlViewerForm dlg = new XmlViewerForm();
 
-            dlg.Text = "¼ìË÷Ê½XML";
+            dlg.Text = "æ£€ç´¢å¼XML";
             dlg.MainForm = this.MainForm;
             dlg.XmlString = strQueryXml;
             // dlg.StartPosition = FormStartPosition.CenterScreen;
@@ -7682,13 +7682,13 @@ out strError);
         {
                     MenuItem menuItem = null;
 
-            menuItem = new MenuItem("¼ìË÷(&S)");
+            menuItem = new MenuItem("æ£€ç´¢(&S)");
             menuItem.Click += new System.EventHandler(this.menu_logicSearch_Click);
             e.ContextMenu.MenuItems.Add(menuItem);
 
 #if NO
-            // ¼ÌĞø×°Èë
-            menuItem = new MenuItem("¼ÌĞø×°Èë(&C)");
+            // ç»§ç»­è£…å…¥
+            menuItem = new MenuItem("ç»§ç»­è£…å…¥(&C)");
             menuItem.Click += new System.EventHandler(this.ToolStripMenuItem_continueLoad_Click);
             if (this.m_lHitCount <= this.listView_records.Items.Count)
                 menuItem.Enabled = false;
@@ -7697,13 +7697,13 @@ out strError);
             e.ContextMenu.MenuItems.Add(menuItem);
 #endif
 
-            // ½ö»ñµÃ¼ìË÷µã
-            menuItem = new MenuItem("½ö»ñµÃ¼ìË÷µã(&C)");
+            // ä»…è·å¾—æ£€ç´¢ç‚¹
+            menuItem = new MenuItem("ä»…è·å¾—æ£€ç´¢ç‚¹(&C)");
             menuItem.Click += new System.EventHandler(this.menu_logicSearchKeyCount_Click);
             e.ContextMenu.MenuItems.Add(menuItem);
 
-            // ´ø¼ìË÷µãµÄ¼ìË÷
-            menuItem = new MenuItem("´ø¼ìË÷µãµÄ¼ìË÷(&K)");
+            // å¸¦æ£€ç´¢ç‚¹çš„æ£€ç´¢
+            menuItem = new MenuItem("å¸¦æ£€ç´¢ç‚¹çš„æ£€ç´¢(&K)");
             menuItem.Click += new System.EventHandler(this.menu_logicSearchKeyID_Click);
             e.ContextMenu.MenuItems.Add(menuItem);
 
@@ -7717,13 +7717,13 @@ out strError);
             this.DoLogicSearch(false, false, null);
         }
 
-        // ½ö»ñµÃ¼ìË÷µã
+        // ä»…è·å¾—æ£€ç´¢ç‚¹
         void menu_logicSearchKeyCount_Click(object sender, EventArgs e)
         {
             this.DoLogicSearch(true, false, null);
         }
 
-        // key + id ¼ìË÷£¬´øÓĞ¼ìË÷µãµÄ¼ìË÷
+        // key + id æ£€ç´¢ï¼Œå¸¦æœ‰æ£€ç´¢ç‚¹çš„æ£€ç´¢
         void menu_logicSearchKeyID_Click(object sender, EventArgs e)
         {
             this.DoLogicSearch(false, true, null);
@@ -7731,37 +7731,37 @@ out strError);
     }
 
     /// <summary>
-    /// ²éÑ¯Ê±Ê¹ÓÃµÄÒ»¸ö¼ìË÷ÊÂÏî
+    /// æŸ¥è¯¢æ—¶ä½¿ç”¨çš„ä¸€ä¸ªæ£€ç´¢äº‹é¡¹
     /// </summary>
     public class ItemQueryParam
     {
         /// <summary>
-        /// ¼ìË÷´Ê
+        /// æ£€ç´¢è¯
         /// </summary>
         public string QueryWord = "";
 
         /// <summary>
-        /// Êı¾İ¿âÃû
+        /// æ•°æ®åº“å
         /// </summary>
         public string DbNames = "";
 
         /// <summary>
-        /// ¼ìË÷Í¾¾¶
+        /// æ£€ç´¢é€”å¾„
         /// </summary>
         public string From = "";
 
         /// <summary>
-        /// Æ¥Åä·½Ê½
+        /// åŒ¹é…æ–¹å¼
         /// </summary>
         public string MatchStyle = "";
 
         /// <summary>
-        /// ä¯ÀÀÁĞµÄµÚÒ»ÁĞÊÇ·ñÎªkey
+        /// æµè§ˆåˆ—çš„ç¬¬ä¸€åˆ—æ˜¯å¦ä¸ºkey
         /// </summary>
-        public bool FirstColumnIsKey = false;    // ä¯ÀÀÁĞµÄµÚÒ»ÁĞÊÇ·ñÎªkey
+        public bool FirstColumnIsKey = false;    // æµè§ˆåˆ—çš„ç¬¬ä¸€åˆ—æ˜¯å¦ä¸ºkey
 
         /// <summary>
-        /// ¼ìË÷ÃüÖĞºó×°Èë ListView µÄ ListViewItem ÊÂÏî
+        /// æ£€ç´¢å‘½ä¸­åè£…å…¥ ListView çš„ ListViewItem äº‹é¡¹
         /// </summary>
         public List<ListViewItem> Items = new List<ListViewItem>();
     }

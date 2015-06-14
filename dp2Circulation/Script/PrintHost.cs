@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Reflection;
@@ -14,109 +14,109 @@ using System.Web;
 namespace dp2Circulation
 {
     /// <summary>
-    /// Æ¾Ìõ´òÓ¡ËŞÖ÷Àà
+    /// å‡­æ¡æ‰“å°å®¿ä¸»ç±»
     /// </summary>
     public class PrintHost
     {
         /// <summary>
-        /// Í³¼Æ·½°¸´æ´¢Ä¿Â¼
+        /// ç»Ÿè®¡æ–¹æ¡ˆå­˜å‚¨ç›®å½•
         /// </summary>
-        public string ProjectDir = "";  // ·½°¸Ô´ÎÄ¼şËùÔÚÄ¿Â¼
+        public string ProjectDir = "";  // æ–¹æ¡ˆæºæ–‡ä»¶æ‰€åœ¨ç›®å½•
 
         /// <summary>
-        /// µ±Ç°ÕıÔÚÔËĞĞµÄÍ³¼Æ·½°¸ÊµÀıµÄ¶ÀÕ¼Ä¿Â¼¡£Ò»°ãÓÃÓÚ´æ´¢Í³¼Æ¹ı³ÌÖĞµÄÁÙÊ±ÎÄ¼ş
+        /// å½“å‰æ­£åœ¨è¿è¡Œçš„ç»Ÿè®¡æ–¹æ¡ˆå®ä¾‹çš„ç‹¬å ç›®å½•ã€‚ä¸€èˆ¬ç”¨äºå­˜å‚¨ç»Ÿè®¡è¿‡ç¨‹ä¸­çš„ä¸´æ—¶æ–‡ä»¶
         /// </summary>
-        public string InstanceDir = ""; // µ±Ç°ÊµÀı¶ÀÕ¼µÄÄ¿Â¼¡£ÓÃÓÚ´æ´¢ÁÙÊ±ÎÄ¼ş
+        public string InstanceDir = ""; // å½“å‰å®ä¾‹ç‹¬å çš„ç›®å½•ã€‚ç”¨äºå­˜å‚¨ä¸´æ—¶æ–‡ä»¶
 
         /// <summary>
-        /// ¿ò¼Ü´°¿Ú
+        /// æ¡†æ¶çª—å£
         /// </summary>
         public MainForm MainForm = null;
 
         /// <summary>
-        /// ½Å±¾±àÒëºóµÄ Assembly
+        /// è„šæœ¬ç¼–è¯‘åçš„ Assembly
         /// </summary>
         public Assembly Assembly = null;
 
         /*
-        // »ùÀàÖ÷¶¯¼ÇÒäµÄ½è»¹²Ù×÷ÓĞ¹ØĞÅÏ¢£¬±ãÓÚOnPrint()Ê±Ê¹ÓÃ
+        // åŸºç±»ä¸»åŠ¨è®°å¿†çš„å€Ÿè¿˜æ“ä½œæœ‰å…³ä¿¡æ¯ï¼Œä¾¿äºOnPrint()æ—¶ä½¿ç”¨
         public string CurrentReaderBarcode = "";
         public string CurrentReaderSummary = "";
         public List<BorrowItemInfo> BorrowItems = new List<BorrowItemInfo>();
         public List<ReturnItemInfo> ReturnItems = new List<ReturnItemInfo>();
          * */
         /// <summary>
-        /// ´òÓ¡ĞÅÏ¢
+        /// æ‰“å°ä¿¡æ¯
         /// </summary>
         public PrintInfo PrintInfo = new PrintInfo();
 
         /// <summary>
-        /// ÒÑ¾­´òÓ¡µÄĞÅÏ¢¼¯ºÏ
+        /// å·²ç»æ‰“å°çš„ä¿¡æ¯é›†åˆ
         /// </summary>
         public List<PrintInfo> PrintedInfos = new List<PrintInfo>();
 
         /// <summary>
-        /// PrintedInfos ¼¯ºÏµÄ×î´ó³ß´ç¡£È±Ê¡Îª 100
+        /// PrintedInfos é›†åˆçš„æœ€å¤§å°ºå¯¸ã€‚ç¼ºçœä¸º 100
         /// </summary>
-        public int MaxPrintedInfos = 100;  // ¶ÓÁĞ×î´ó³ß´ç
+        public int MaxPrintedInfos = 100;  // é˜Ÿåˆ—æœ€å¤§å°ºå¯¸
 
         /// <summary>
-        /// ÉĞÎ´´òÓ¡µÄĞÅÏ¢¼¯ºÏ
+        /// å°šæœªæ‰“å°çš„ä¿¡æ¯é›†åˆ
         /// </summary>
         public List<PrintInfo> UnprintInfos = new List<PrintInfo>();
 
         /// <summary>
-        /// UnprintInfos ¼¯ºÏµÄ×î´ó³ß´ç¡£È±Ê¡Îª 100
+        /// UnprintInfos é›†åˆçš„æœ€å¤§å°ºå¯¸ã€‚ç¼ºçœä¸º 100
         /// </summary>
-        public int MaxUnprintInfos = 100;    // ¶ÓÁĞ×î´ó³ß´ç
+        public int MaxUnprintInfos = 100;    // é˜Ÿåˆ—æœ€å¤§å°ºå¯¸
 
         /// <summary>
-        /// ³õÊ¼»¯
+        /// åˆå§‹åŒ–
         /// </summary>
-        /// <param name="sender">ÊÂ¼ş´¥·¢Õß</param>
-        /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+        /// <param name="sender">äº‹ä»¶è§¦å‘è€…</param>
+        /// <param name="e">äº‹ä»¶å‚æ•°</param>
         public virtual void OnInitial(object sender, EventArgs e)
         {
 
         }
 
         /// <summary>
-        /// ´òÓ¡
+        /// æ‰“å°
         /// </summary>
-        /// <param name="sender">ÊÂ¼ş´¥·¢Õß</param>
-        /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+        /// <param name="sender">äº‹ä»¶è§¦å‘è€…</param>
+        /// <param name="e">äº‹ä»¶å‚æ•°</param>
         public virtual void OnPrint(object sender, PrintEventArgs e)
         {
 
         }
 
         /// <summary>
-        /// ²âÊÔ´òÓ¡
+        /// æµ‹è¯•æ‰“å°
         /// </summary>
-        /// <param name="sender">ÊÂ¼ş´¥·¢Õß</param>
-        /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+        /// <param name="sender">äº‹ä»¶è§¦å‘è€…</param>
+        /// <param name="e">äº‹ä»¶å‚æ•°</param>
         public virtual void OnTestPrint(object sender, PrintEventArgs e)
         {
 
         }
 
         /// <summary>
-        /// Çå³ı´òÓ¡»úÅäÖÃ
+        /// æ¸…é™¤æ‰“å°æœºé…ç½®
         /// </summary>
-        /// <param name="sender">ÊÂ¼ş´¥·¢Õß</param>
-        /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+        /// <param name="sender">äº‹ä»¶è§¦å‘è€…</param>
+        /// <param name="e">äº‹ä»¶å‚æ•°</param>
         public virtual void OnClearPrinterPreference(object sender, PrintEventArgs e)
         {
 
         }
 
-        // ¶ÔÏó¼´½«±»¹Ø±Õ
-        // ³£ÓÃÀ´¿´¿´ÄÚ²¿»º³åÇøÊÇ·ñ»¹ÓĞÉĞÎ´´òÓ¡Êä³öµÄÄÚÈİ
+        // å¯¹è±¡å³å°†è¢«å…³é—­
+        // å¸¸ç”¨æ¥çœ‹çœ‹å†…éƒ¨ç¼“å†²åŒºæ˜¯å¦è¿˜æœ‰å°šæœªæ‰“å°è¾“å‡ºçš„å†…å®¹
         /// <summary>
-        /// ¶ÔÏó¼´½«±»¹Ø±Õ¡£³£ÓÃÀ´´¦ÀíÄÚ²¿»º³åÇøÊÇ·ñ»¹ÓĞÉĞÎ´´òÓ¡Êä³öµÄÄÚÈİ
+        /// å¯¹è±¡å³å°†è¢«å…³é—­ã€‚å¸¸ç”¨æ¥å¤„ç†å†…éƒ¨ç¼“å†²åŒºæ˜¯å¦è¿˜æœ‰å°šæœªæ‰“å°è¾“å‡ºçš„å†…å®¹
         /// </summary>
-        /// <param name="sender">ÊÂ¼ş´¥·¢Õß</param>
-        /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+        /// <param name="sender">äº‹ä»¶è§¦å‘è€…</param>
+        /// <param name="e">äº‹ä»¶å‚æ•°</param>
         public virtual void OnClose(object sender, EventArgs e)
         {
 
@@ -124,10 +124,10 @@ namespace dp2Circulation
 
         // 
         /// <summary>
-        /// Ã¿Ò»´ÎÉ¨Ãè¶ÁÕßÖ¤ÌõÂëÍê³Éºó´¥·¢Ò»´Î
+        /// æ¯ä¸€æ¬¡æ‰«æè¯»è€…è¯æ¡ç å®Œæˆåè§¦å‘ä¸€æ¬¡
         /// </summary>
-        /// <param name="sender">ÊÂ¼ş´¥·¢Õß</param>
-        /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+        /// <param name="sender">äº‹ä»¶è§¦å‘è€…</param>
+        /// <param name="e">äº‹ä»¶å‚æ•°</param>
         public virtual void OnReaderBarcodeScaned(object sender, ReaderBarcodeScanedEventArgs e)
         {
 
@@ -135,15 +135,15 @@ namespace dp2Circulation
 
         // 
         /// <summary>
-        /// Ã¿Ò»´Î½èÍê³Éºó´¥·¢Ò»´Î
+        /// æ¯ä¸€æ¬¡å€Ÿå®Œæˆåè§¦å‘ä¸€æ¬¡
         /// </summary>
-        /// <param name="sender">ÊÂ¼ş´¥·¢Õß</param>
-        /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+        /// <param name="sender">äº‹ä»¶è§¦å‘è€…</param>
+        /// <param name="e">äº‹ä»¶å‚æ•°</param>
         public virtual void OnBorrowed(object sender, BorrowedEventArgs e)
         {
             if (e.ReaderBarcode != this.PrintInfo.CurrentReaderBarcode)
             {
-                // Ç°Ãæ»ıÀÛµÄ´òÓ¡ĞÅÏ¢£¬ÍÆËÍµ½ÏàÓ¦µÄ¶ÓÁĞÖĞ£¬±ãÓÚËæÊ±ÌôÑ¡³öÀ´½øĞĞÖØĞÂ´òÓ¡
+                // å‰é¢ç§¯ç´¯çš„æ‰“å°ä¿¡æ¯ï¼Œæ¨é€åˆ°ç›¸åº”çš„é˜Ÿåˆ—ä¸­ï¼Œä¾¿äºéšæ—¶æŒ‘é€‰å‡ºæ¥è¿›è¡Œé‡æ–°æ‰“å°
                 if (String.IsNullOrEmpty(this.PrintInfo.CurrentReaderBarcode) == false
                     && this.PrintInfo.HasContent() == true
                     )
@@ -171,7 +171,7 @@ namespace dp2Circulation
             if (String.IsNullOrEmpty(this.PrintInfo.CurrentReaderSummary) == true)
                 this.PrintInfo.CurrentReaderSummary = e.ReaderSummary;
 
-            this.PrintInfo.PrintedCount = 0;    // °Ñ´òÓ¡´ÎÊıÇåÎª0£¬±íÊ¾ÄÚÈİÒÑ¾­±ä»¯£¬ĞÂ°æ±¾(Ôö²¹ºóµÄ)ÄÚÈİÉĞÎ´´òÓ¡
+            this.PrintInfo.PrintedCount = 0;    // æŠŠæ‰“å°æ¬¡æ•°æ¸…ä¸º0ï¼Œè¡¨ç¤ºå†…å®¹å·²ç»å˜åŒ–ï¼Œæ–°ç‰ˆæœ¬(å¢è¡¥åçš„)å†…å®¹å°šæœªæ‰“å°
 
             BorrowItemInfo info = new BorrowItemInfo();
             info.OperName = e.OperName;
@@ -188,21 +188,21 @@ namespace dp2Circulation
 
         // return:
         //      -1  error
-        //      0   Î´ÄÜÍÆËÍ
-        //      1    ÒÑ¾­ÍÆËÍ
+        //      0   æœªèƒ½æ¨é€
+        //      1    å·²ç»æ¨é€
         internal int PushCurrentToQueue(out string strError)
         {
             strError = "";
 
             if (this.PrintInfo.HasContent() == false)
             {
-                strError = "µ±Ç°Ã»ÓĞÄÚÈİ£¬²»±ØÍÆËÍ";
-                return 0; // µ±Ç°Ã»ÓĞÄÚÈİµÄ¾Í²»±ØÍÆËÍ
+                strError = "å½“å‰æ²¡æœ‰å†…å®¹ï¼Œä¸å¿…æ¨é€";
+                return 0; // å½“å‰æ²¡æœ‰å†…å®¹çš„å°±ä¸å¿…æ¨é€
             }
 
             if (this.PrintInfo.PrintedCount != 0)
             {
-                strError = "µ±Ç°ÄÚÈİÒÑ´æÔÚÓÚ¡°ÒÑ´òÓ¡¶ÓÁĞ¡±ÖĞ";
+                strError = "å½“å‰å†…å®¹å·²å­˜åœ¨äºâ€œå·²æ‰“å°é˜Ÿåˆ—â€ä¸­";
                 return 0;
             }
 
@@ -213,22 +213,22 @@ namespace dp2Circulation
             this.UnprintInfos.Add(this.PrintInfo);
 
             this.PrintInfo = new PrintInfo();
-            strError = "µ±Ç°ÄÚÈİ±»ÍÆËÍµ½¡°Î´´òÓ¡¶ÓÁĞ¡±ÖĞ";
+            strError = "å½“å‰å†…å®¹è¢«æ¨é€åˆ°â€œæœªæ‰“å°é˜Ÿåˆ—â€ä¸­";
             return 1;
         }
 
         // 
         /// <summary>
-        /// Ã¿Ò»´Î»¹Íê³Éºó´¥·¢Ò»´Î
+        /// æ¯ä¸€æ¬¡è¿˜å®Œæˆåè§¦å‘ä¸€æ¬¡
         /// </summary>
-        /// <param name="sender">ÊÂ¼ş´¥·¢Õß</param>
-        /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+        /// <param name="sender">äº‹ä»¶è§¦å‘è€…</param>
+        /// <param name="e">äº‹ä»¶å‚æ•°</param>
         public virtual void OnReturned(object sender, 
             ReturnedEventArgs e)
         {
             if (e.ReaderBarcode != this.PrintInfo.CurrentReaderBarcode)
             {
-                // Ç°Ãæ»ıÀÛµÄ´òÓ¡ĞÅÏ¢£¬ÍÆËÍµ½ÏàÓ¦µÄ¶ÓÁĞÖĞ£¬±ãÓÚËæÊ±ÌôÑ¡³öÀ´½øĞĞÖØĞÂ´òÓ¡
+                // å‰é¢ç§¯ç´¯çš„æ‰“å°ä¿¡æ¯ï¼Œæ¨é€åˆ°ç›¸åº”çš„é˜Ÿåˆ—ä¸­ï¼Œä¾¿äºéšæ—¶æŒ‘é€‰å‡ºæ¥è¿›è¡Œé‡æ–°æ‰“å°
                 if (String.IsNullOrEmpty(this.PrintInfo.CurrentReaderBarcode) == false
                     && this.PrintInfo.HasContent() == true
                     )
@@ -256,9 +256,9 @@ namespace dp2Circulation
             if (String.IsNullOrEmpty(this.PrintInfo.CurrentReaderSummary) == true)
                 this.PrintInfo.CurrentReaderSummary = e.ReaderSummary;
 
-            this.PrintInfo.PrintedCount = 0;    // °Ñ´òÓ¡´ÎÊıÇåÎª0£¬±íÊ¾ÄÚÈİÒÑ¾­±ä»¯£¬ĞÂ°æ±¾(Ôö²¹ºóµÄ)ÄÚÈİÉĞÎ´´òÓ¡
+            this.PrintInfo.PrintedCount = 0;    // æŠŠæ‰“å°æ¬¡æ•°æ¸…ä¸º0ï¼Œè¡¨ç¤ºå†…å®¹å·²ç»å˜åŒ–ï¼Œæ–°ç‰ˆæœ¬(å¢è¡¥åçš„)å†…å®¹å°šæœªæ‰“å°
 
-            // ¶Ô½èÔÄÊÂÏî½øĞĞ²éÖØ
+            // å¯¹å€Ÿé˜…äº‹é¡¹è¿›è¡ŒæŸ¥é‡
             bool bFoundDup = false;
             for (int i = 0; i < this.PrintInfo.BorrowItems.Count; i++)
             {
@@ -296,15 +296,15 @@ namespace dp2Circulation
 
         // 
         /// <summary>
-        /// Ã¿Ò»´Î½»·£½ğÍê³Éºó´¥·¢Ò»´Î
+        /// æ¯ä¸€æ¬¡äº¤ç½šé‡‘å®Œæˆåè§¦å‘ä¸€æ¬¡
         /// </summary>
-        /// <param name="sender">ÊÂ¼ş´¥·¢Õß</param>
-        /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+        /// <param name="sender">äº‹ä»¶è§¦å‘è€…</param>
+        /// <param name="e">äº‹ä»¶å‚æ•°</param>
         public virtual void OnAmerced(object sender, AmercedEventArgs e)
         {
             if (e.ReaderBarcode != this.PrintInfo.CurrentReaderBarcode)
             {
-                // Ç°Ãæ»ıÀÛµÄ´òÓ¡ĞÅÏ¢£¬ÍÆËÍµ½ÏàÓ¦µÄ¶ÓÁĞÖĞ£¬±ãÓÚËæÊ±ÌôÑ¡³öÀ´½øĞĞÖØĞÂ´òÓ¡
+                // å‰é¢ç§¯ç´¯çš„æ‰“å°ä¿¡æ¯ï¼Œæ¨é€åˆ°ç›¸åº”çš„é˜Ÿåˆ—ä¸­ï¼Œä¾¿äºéšæ—¶æŒ‘é€‰å‡ºæ¥è¿›è¡Œé‡æ–°æ‰“å°
                 if (String.IsNullOrEmpty(this.PrintInfo.CurrentReaderBarcode) == false
                     && this.PrintInfo.HasContent() == true
                     )
@@ -332,23 +332,23 @@ namespace dp2Circulation
             if (String.IsNullOrEmpty(this.PrintInfo.CurrentReaderSummary) == true)
                 this.PrintInfo.CurrentReaderSummary = e.ReaderSummary;
 
-            this.PrintInfo.PrintedCount = 0;    // °Ñ´òÓ¡´ÎÊıÇåÎª0£¬±íÊ¾ÄÚÈİÒÑ¾­±ä»¯£¬ĞÂ°æ±¾(Ôö²¹ºóµÄ)ÄÚÈİÉĞÎ´´òÓ¡
+            this.PrintInfo.PrintedCount = 0;    // æŠŠæ‰“å°æ¬¡æ•°æ¸…ä¸º0ï¼Œè¡¨ç¤ºå†…å®¹å·²ç»å˜åŒ–ï¼Œæ–°ç‰ˆæœ¬(å¢è¡¥åçš„)å†…å®¹å°šæœªæ‰“å°
 
             this.PrintInfo.OverdueItems.AddRange(e.OverdueInfos);
         }
 
 
-        // ½«×Ö·û´®°´ÕÕ¹æ¶¨µÄ×î´ó³¤¶È½Ø¶Ï
+        // å°†å­—ç¬¦ä¸²æŒ‰ç…§è§„å®šçš„æœ€å¤§é•¿åº¦æˆªæ–­
         // parameters:
-        //      nMaxBytes   ×î´óµÄÎ÷ÎÄ×Ö·ûÊı¡£ÕâÀï¼Ù¶¨Ã¿¸öÖĞÎÄ×Ö·ûµÄÏÔÊ¾¿í¶ÈÎªÎ÷ÎÄ×Ö·ûµÄ2±¶
-        //      strTruncatedMask    ·¢Éú½Ø¶ÏÊ±ÔÚÎ²²¿Ìí¼ÓµÄ±êÖ¾¡£ÀıÈç"..."
+        //      nMaxBytes   æœ€å¤§çš„è¥¿æ–‡å­—ç¬¦æ•°ã€‚è¿™é‡Œå‡å®šæ¯ä¸ªä¸­æ–‡å­—ç¬¦çš„æ˜¾ç¤ºå®½åº¦ä¸ºè¥¿æ–‡å­—ç¬¦çš„2å€
+        //      strTruncatedMask    å‘ç”Ÿæˆªæ–­æ—¶åœ¨å°¾éƒ¨æ·»åŠ çš„æ ‡å¿—ã€‚ä¾‹å¦‚"..."
         /// <summary>
-        /// ½«×Ö·û´®°´ÕÕ¹æ¶¨µÄ×î´ó³¤¶È½Ø¶Ï¡£¼Ù¶¨Ò»¸öºº×ÖµÈÓÚÁ½¸öÎ÷ÎÄ×Ö·û¿í¶È
+        /// å°†å­—ç¬¦ä¸²æŒ‰ç…§è§„å®šçš„æœ€å¤§é•¿åº¦æˆªæ–­ã€‚å‡å®šä¸€ä¸ªæ±‰å­—ç­‰äºä¸¤ä¸ªè¥¿æ–‡å­—ç¬¦å®½åº¦
         /// </summary>
-        /// <param name="strText">Ô­Ê¼×Ö·û´®</param>
-        /// <param name="nMaxBytes">×î´óµÄÎ÷ÎÄ×Ö·ûÊı¡£ÕâÀï¼Ù¶¨Ã¿¸öÖĞÎÄ×Ö·ûµÄÏÔÊ¾¿í¶ÈÎªÎ÷ÎÄ×Ö·ûµÄ2±¶</param>
-        /// <param name="strTruncatedMask">·¢Éú½Ø¶ÏÊ±ÔÚÎ²²¿Ìí¼ÓµÄ±êÖ¾¡£ÀıÈç"..."</param>
-        /// <returns>·µ»ØµÄ×Ö·û´®</returns>
+        /// <param name="strText">åŸå§‹å­—ç¬¦ä¸²</param>
+        /// <param name="nMaxBytes">æœ€å¤§çš„è¥¿æ–‡å­—ç¬¦æ•°ã€‚è¿™é‡Œå‡å®šæ¯ä¸ªä¸­æ–‡å­—ç¬¦çš„æ˜¾ç¤ºå®½åº¦ä¸ºè¥¿æ–‡å­—ç¬¦çš„2å€</param>
+        /// <param name="strTruncatedMask">å‘ç”Ÿæˆªæ–­æ—¶åœ¨å°¾éƒ¨æ·»åŠ çš„æ ‡å¿—ã€‚ä¾‹å¦‚"..."</param>
+        /// <returns>è¿”å›çš„å­—ç¬¦ä¸²</returns>
         public static string LimitByteWidth(string strText,
             int nMaxBytes,
             string strTruncatedMask)
@@ -382,50 +382,50 @@ namespace dp2Circulation
             return strResult;
         }
 
-        // »ñµÃÒ»¸öÓÒ¶ÔÆëµÄ×Ö·û´®
+        // è·å¾—ä¸€ä¸ªå³å¯¹é½çš„å­—ç¬¦ä¸²
         /// <summary>
-        /// »ñµÃÒ»¸öÓÒ¶ÔÆëµÄ×Ö·û´®¡£¼Ù¶¨Ò»¸öºº×ÖµÈÓÚÁ½¸öÎ÷ÎÄ×Ö·û¿í¶È
+        /// è·å¾—ä¸€ä¸ªå³å¯¹é½çš„å­—ç¬¦ä¸²ã€‚å‡å®šä¸€ä¸ªæ±‰å­—ç­‰äºä¸¤ä¸ªè¥¿æ–‡å­—ç¬¦å®½åº¦
         /// </summary>
-        /// <param name="strText">Ô­Ê¼×Ö·û´®</param>
-        /// <param name="nLineBytes">Ò»ĞĞÄÚµÄ×Ü×Ö·ûÊı</param>
-        /// <returns>·µ»ØµÄ×Ö·û´®</returns>
+        /// <param name="strText">åŸå§‹å­—ç¬¦ä¸²</param>
+        /// <param name="nLineBytes">ä¸€è¡Œå†…çš„æ€»å­—ç¬¦æ•°</param>
+        /// <returns>è¿”å›çš„å­—ç¬¦ä¸²</returns>
         public static string RightAlignString(string strText,
             int nLineBytes)
         {
             int nRet = GetBytesWidth(strText);
 
             if (nRet >= nLineBytes)
-                return strText; // ³¤¶ÈÒÑ¾­³¬¹ı£¬ÎŞ·¨½øĞĞÓÒ¶ÔÆë
+                return strText; // é•¿åº¦å·²ç»è¶…è¿‡ï¼Œæ— æ³•è¿›è¡Œå³å¯¹é½
 
             int nDelta = nLineBytes - nRet;
             return new string(' ', nDelta) + strText;
         }
 
-        // »ñµÃÒ»¸ö¾ÓÖĞµÄ×Ö·û´®
+        // è·å¾—ä¸€ä¸ªå±…ä¸­çš„å­—ç¬¦ä¸²
         /// <summary>
-        /// »ñµÃÒ»¸ö¾ÓÖĞµÄ×Ö·û´®¡£¼Ù¶¨Ò»¸öºº×ÖµÈÓÚÁ½¸öÎ÷ÎÄ×Ö·û¿í¶È
+        /// è·å¾—ä¸€ä¸ªå±…ä¸­çš„å­—ç¬¦ä¸²ã€‚å‡å®šä¸€ä¸ªæ±‰å­—ç­‰äºä¸¤ä¸ªè¥¿æ–‡å­—ç¬¦å®½åº¦
         /// </summary>
-        /// <param name="strText">Ô­Ê¼×Ö·û´®</param>
-        /// <param name="nLineBytes">Ò»ĞĞÄÚµÄ×Ü×Ö·ûÊı</param>
-        /// <returns>·µ»ØµÄ×Ö·û´®</returns>
+        /// <param name="strText">åŸå§‹å­—ç¬¦ä¸²</param>
+        /// <param name="nLineBytes">ä¸€è¡Œå†…çš„æ€»å­—ç¬¦æ•°</param>
+        /// <returns>è¿”å›çš„å­—ç¬¦ä¸²</returns>
         public static string CenterAlignString(string strText,
             int nLineBytes)
         {
             int nRet = GetBytesWidth(strText);
 
             if (nRet >= nLineBytes)
-                return strText; // ³¤¶ÈÒÑ¾­³¬¹ı£¬ÎŞ·¨½øĞĞ¾ÓÖĞ¶ÔÆë
+                return strText; // é•¿åº¦å·²ç»è¶…è¿‡ï¼Œæ— æ³•è¿›è¡Œå±…ä¸­å¯¹é½
 
             int nDelta = nLineBytes - nRet;
             return new string(' ', nDelta/2) + strText;
         }
 
-        // ÊıÒ»Êı×Ö·û´®ÄÚµÄÏàµ±ÓÚÎ÷ÎÄ×Ö·û¿í¶ÈbytesÊı
+        // æ•°ä¸€æ•°å­—ç¬¦ä¸²å†…çš„ç›¸å½“äºè¥¿æ–‡å­—ç¬¦å®½åº¦bytesæ•°
         /// <summary>
-        /// »ñµÃ×Ö·û´®ÄÚµÄÏàµ±ÓÚÎ÷ÎÄ×Ö·ûµÄ×Ö·ûÊı¡£¼Ù¶¨Ò»¸öºº×ÖµÈÓÚÁ½¸öÎ÷ÎÄ×Ö·û¿í¶È
+        /// è·å¾—å­—ç¬¦ä¸²å†…çš„ç›¸å½“äºè¥¿æ–‡å­—ç¬¦çš„å­—ç¬¦æ•°ã€‚å‡å®šä¸€ä¸ªæ±‰å­—ç­‰äºä¸¤ä¸ªè¥¿æ–‡å­—ç¬¦å®½åº¦
         /// </summary>
-        /// <param name="strText">×Ö·û´®</param>
-        /// <returns>×Ö·ûÊı</returns>
+        /// <param name="strText">å­—ç¬¦ä¸²</param>
+        /// <returns>å­—ç¬¦æ•°</returns>
         public static int GetBytesWidth(string strText)
         {
             int nByteCount = 0;
@@ -448,23 +448,23 @@ namespace dp2Circulation
             return nByteCount;
         }
 
-        // ½«×Ö·û´®¹æ¸ñ»¯Îª¹Ì¶¨ĞĞ³¤£¬²»³¬¹ıÏŞ¶¨ĞĞÊı×Ö·û´®
-        // ×¢£ºÈç¹ûÄÚÈİ²»×ãnMaxLines¶¨ÒåµÄĞĞÊı£¬ÔòÓĞ¶àÉÙĞĞ¾ÍÊÇ¶àÉÙĞĞ
-        // ×¢£ºÃ¿Ò»ĞĞ£¬°üÀ¨×îºóÒ»ĞĞÄ©Î²¶¼´øÓĞ»Ø³µ»»ĞĞ
+        // å°†å­—ç¬¦ä¸²è§„æ ¼åŒ–ä¸ºå›ºå®šè¡Œé•¿ï¼Œä¸è¶…è¿‡é™å®šè¡Œæ•°å­—ç¬¦ä¸²
+        // æ³¨ï¼šå¦‚æœå†…å®¹ä¸è¶³nMaxLineså®šä¹‰çš„è¡Œæ•°ï¼Œåˆ™æœ‰å¤šå°‘è¡Œå°±æ˜¯å¤šå°‘è¡Œ
+        // æ³¨ï¼šæ¯ä¸€è¡Œï¼ŒåŒ…æ‹¬æœ€åä¸€è¡Œæœ«å°¾éƒ½å¸¦æœ‰å›è½¦æ¢è¡Œ
         // parameters:
-        //      nFirstLineMaxBytes  Ê×ĞĞ×î´óµÄÎ÷ÎÄ×Ö·ûÊı¡£ÕâÀï¼Ù¶¨Ã¿¸öÖĞÎÄ×Ö·ûµÄÏÔÊ¾¿í¶ÈÎªÎ÷ÎÄ×Ö·ûµÄ2±¶
-        //      nOtherLineMaxBytes  ÆäÓàĞĞµÄÃ¿ĞĞÎ÷ÎÄ×Ö·ûÊı¼«ÏŞ
+        //      nFirstLineMaxBytes  é¦–è¡Œæœ€å¤§çš„è¥¿æ–‡å­—ç¬¦æ•°ã€‚è¿™é‡Œå‡å®šæ¯ä¸ªä¸­æ–‡å­—ç¬¦çš„æ˜¾ç¤ºå®½åº¦ä¸ºè¥¿æ–‡å­—ç¬¦çš„2å€
+        //      nOtherLineMaxBytes  å…¶ä½™è¡Œçš„æ¯è¡Œè¥¿æ–‡å­—ç¬¦æ•°æé™
         /// <summary>
-        /// ½«×Ö·û´®¹æ¸ñ»¯Îª¹Ì¶¨ĞĞ³¤£¬²»³¬¹ıÏŞ¶¨ĞĞÊı×Ö·û´®
-        /// ×¢£ºÈç¹ûÄÚÈİ²»×ãnMaxLines¶¨ÒåµÄĞĞÊı£¬ÔòÓĞ¶àÉÙĞĞ¾ÍÊÇ¶àÉÙĞĞ
-        /// ×¢£ºÃ¿Ò»ĞĞ£¬°üÀ¨×îºóÒ»ĞĞÄ©Î²¶¼´øÓĞ»Ø³µ»»ĞĞ
+        /// å°†å­—ç¬¦ä¸²è§„æ ¼åŒ–ä¸ºå›ºå®šè¡Œé•¿ï¼Œä¸è¶…è¿‡é™å®šè¡Œæ•°å­—ç¬¦ä¸²
+        /// æ³¨ï¼šå¦‚æœå†…å®¹ä¸è¶³nMaxLineså®šä¹‰çš„è¡Œæ•°ï¼Œåˆ™æœ‰å¤šå°‘è¡Œå°±æ˜¯å¤šå°‘è¡Œ
+        /// æ³¨ï¼šæ¯ä¸€è¡Œï¼ŒåŒ…æ‹¬æœ€åä¸€è¡Œæœ«å°¾éƒ½å¸¦æœ‰å›è½¦æ¢è¡Œ
         /// </summary>
-        /// <param name="strText">Ô­Ê¼×Ö·û´Öºº</param>
-        /// <param name="nFirstLineMaxBytes">Ê×ĞĞ×î´óµÄÎ÷ÎÄ×Ö·ûÊı¡£ÕâÀï¼Ù¶¨Ã¿¸öÖĞÎÄ×Ö·ûµÄÏÔÊ¾¿í¶ÈÎªÎ÷ÎÄ×Ö·ûµÄ2±¶</param>
-        /// <param name="nOtherLineMaxBytes">ÆäÓàĞĞµÄÃ¿ĞĞÎ÷ÎÄ×Ö·ûÊı¼«ÏŞ</param>
-        /// <param name="strOtherLinePrefix">Ìí¼ÓÔÚÆäÓàĞĞÇ°ÃæµÄÒıµ¼×Ö·û´®</param>
-        /// <param name="nMaxLines">×î¶àĞĞÊı</param>
-        /// <returns>·µ»ØµÄ×Ö·û´®</returns>
+        /// <param name="strText">åŸå§‹å­—ç¬¦ç²—æ±‰</param>
+        /// <param name="nFirstLineMaxBytes">é¦–è¡Œæœ€å¤§çš„è¥¿æ–‡å­—ç¬¦æ•°ã€‚è¿™é‡Œå‡å®šæ¯ä¸ªä¸­æ–‡å­—ç¬¦çš„æ˜¾ç¤ºå®½åº¦ä¸ºè¥¿æ–‡å­—ç¬¦çš„2å€</param>
+        /// <param name="nOtherLineMaxBytes">å…¶ä½™è¡Œçš„æ¯è¡Œè¥¿æ–‡å­—ç¬¦æ•°æé™</param>
+        /// <param name="strOtherLinePrefix">æ·»åŠ åœ¨å…¶ä½™è¡Œå‰é¢çš„å¼•å¯¼å­—ç¬¦ä¸²</param>
+        /// <param name="nMaxLines">æœ€å¤šè¡Œæ•°</param>
+        /// <returns>è¿”å›çš„å­—ç¬¦ä¸²</returns>
         public static string SplitLines(string strText,
             int nFirstLineMaxBytes,
             int nOtherLineMaxBytes,
@@ -496,7 +496,7 @@ namespace dp2Circulation
                 }
 
                 strResult += c;
-                if (nLineCount == 0)    // µÚÒ»ĞĞ
+                if (nLineCount == 0)    // ç¬¬ä¸€è¡Œ
                 {
                     if (nByteCount >= nFirstLineMaxBytes)
                     {
@@ -506,7 +506,7 @@ namespace dp2Circulation
 
                         if (i == strText.Length - 1)
                         {
-                            strResult += "\r\n";    // ×îÄ©Ò»ĞĞºó£¬²»ĞèÒªÇ°×º
+                            strResult += "\r\n";    // æœ€æœ«ä¸€è¡Œåï¼Œä¸éœ€è¦å‰ç¼€
                         }
                         else
                         {
@@ -519,7 +519,7 @@ namespace dp2Circulation
                 }
                 else
                 {
-                    // ÆäÓàĞĞ
+                    // å…¶ä½™è¡Œ
                     if (nByteCount >= nOtherLineMaxBytes)
                     {
                         nLineCount++;
@@ -528,7 +528,7 @@ namespace dp2Circulation
 
                         if (i == strText.Length - 1)
                         {
-                            strResult += "\r\n";    // ×îÄ©Ò»ĞĞºó£¬²»ĞèÒªÇ°×º
+                            strResult += "\r\n";    // æœ€æœ«ä¸€è¡Œåï¼Œä¸éœ€è¦å‰ç¼€
                         }
                         else
                         {
@@ -539,7 +539,7 @@ namespace dp2Circulation
                 }
             }
 
-            // Èç¹û×îºóÄ©Î²Ã»ÓĞ»Ø³µ»»ĞĞ£¬²¹³ä
+            // å¦‚æœæœ€åæœ«å°¾æ²¡æœ‰å›è½¦æ¢è¡Œï¼Œè¡¥å……
             if (strResult.Length > 0)
             {
                 if (strResult[strResult.Length - 1] != '\n')
@@ -549,20 +549,20 @@ namespace dp2Circulation
             return strResult;
         }
 
-        // ½«×Ö·û´®¹æ¸ñ»¯Îª¹Ì¶¨ĞĞ³¤£¬¹Ì¶¨ĞĞÊıµÄ×Ö·û´®
-        // ×¢£ºÈç¹ûÄÚÈİ²»×ãnFixLines¶¨ÒåµÄĞĞÊı£¬ÔòºóÃæÌí¿ÕĞĞÖ±µ½Õâ¸öĞĞÊı¡£±¾º¯ÊıÖ÷ÒªÊÇÎªÁËÊÊÓ¦¹Ì¶¨¸ß¶È´òÓ¡µÄÇéĞÎ
-        // ×¢£ºÃ¿Ò»ĞĞ£¬°üÀ¨×îºóÒ»ĞĞÄ©Î²¶¼´øÓĞ»Ø³µ»»ĞĞ
+        // å°†å­—ç¬¦ä¸²è§„æ ¼åŒ–ä¸ºå›ºå®šè¡Œé•¿ï¼Œå›ºå®šè¡Œæ•°çš„å­—ç¬¦ä¸²
+        // æ³¨ï¼šå¦‚æœå†…å®¹ä¸è¶³nFixLineså®šä¹‰çš„è¡Œæ•°ï¼Œåˆ™åé¢æ·»ç©ºè¡Œç›´åˆ°è¿™ä¸ªè¡Œæ•°ã€‚æœ¬å‡½æ•°ä¸»è¦æ˜¯ä¸ºäº†é€‚åº”å›ºå®šé«˜åº¦æ‰“å°çš„æƒ…å½¢
+        // æ³¨ï¼šæ¯ä¸€è¡Œï¼ŒåŒ…æ‹¬æœ€åä¸€è¡Œæœ«å°¾éƒ½å¸¦æœ‰å›è½¦æ¢è¡Œ
         // parameters:
-        //      nLineMaxBytes   Ã¿ĞĞ×î´óµÄÎ÷ÎÄ×Ö·ûÊı¡£ÕâÀï¼Ù¶¨Ã¿¸öÖĞÎÄ×Ö·ûµÄÏÔÊ¾¿í¶ÈÎªÎ÷ÎÄ×Ö·ûµÄ2±¶
+        //      nLineMaxBytes   æ¯è¡Œæœ€å¤§çš„è¥¿æ–‡å­—ç¬¦æ•°ã€‚è¿™é‡Œå‡å®šæ¯ä¸ªä¸­æ–‡å­—ç¬¦çš„æ˜¾ç¤ºå®½åº¦ä¸ºè¥¿æ–‡å­—ç¬¦çš„2å€
         /// <summary>
-        /// ½«×Ö·û´®¹æ¸ñ»¯Îª¹Ì¶¨ĞĞ³¤£¬¹Ì¶¨ĞĞÊıµÄ×Ö·û´®
-        /// ×¢£ºÈç¹ûÄÚÈİ²»×ãnFixLines¶¨ÒåµÄĞĞÊı£¬ÔòºóÃæÌí¿ÕĞĞÖ±µ½Õâ¸öĞĞÊı¡£±¾º¯ÊıÖ÷ÒªÊÇÎªÁËÊÊÓ¦¹Ì¶¨¸ß¶È´òÓ¡µÄÇéĞÎ
-        /// ×¢£ºÃ¿Ò»ĞĞ£¬°üÀ¨×îºóÒ»ĞĞÄ©Î²¶¼´øÓĞ»Ø³µ»»ĞĞ
+        /// å°†å­—ç¬¦ä¸²è§„æ ¼åŒ–ä¸ºå›ºå®šè¡Œé•¿ï¼Œå›ºå®šè¡Œæ•°çš„å­—ç¬¦ä¸²
+        /// æ³¨ï¼šå¦‚æœå†…å®¹ä¸è¶³nFixLineså®šä¹‰çš„è¡Œæ•°ï¼Œåˆ™åé¢æ·»ç©ºè¡Œç›´åˆ°è¿™ä¸ªè¡Œæ•°ã€‚æœ¬å‡½æ•°ä¸»è¦æ˜¯ä¸ºäº†é€‚åº”å›ºå®šé«˜åº¦æ‰“å°çš„æƒ…å½¢
+        /// æ³¨ï¼šæ¯ä¸€è¡Œï¼ŒåŒ…æ‹¬æœ€åä¸€è¡Œæœ«å°¾éƒ½å¸¦æœ‰å›è½¦æ¢è¡Œ
         /// </summary>
-        /// <param name="strText">Ô­Ê¼×Ö·û´®</param>
-        /// <param name="nLineMaxBytes">Ã¿ĞĞ×î´óµÄÎ÷ÎÄ×Ö·ûÊı¡£ÕâÀï¼Ù¶¨Ã¿¸öÖĞÎÄ×Ö·ûµÄÏÔÊ¾¿í¶ÈÎªÎ÷ÎÄ×Ö·ûµÄ2±¶</param>
-        /// <param name="nFixLines">¹Ì¶¨µÄĞĞÊı</param>
-        /// <returns>·µ»ØµÄ×Ö·û´®</returns>
+        /// <param name="strText">åŸå§‹å­—ç¬¦ä¸²</param>
+        /// <param name="nLineMaxBytes">æ¯è¡Œæœ€å¤§çš„è¥¿æ–‡å­—ç¬¦æ•°ã€‚è¿™é‡Œå‡å®šæ¯ä¸ªä¸­æ–‡å­—ç¬¦çš„æ˜¾ç¤ºå®½åº¦ä¸ºè¥¿æ–‡å­—ç¬¦çš„2å€</param>
+        /// <param name="nFixLines">å›ºå®šçš„è¡Œæ•°</param>
+        /// <returns>è¿”å›çš„å­—ç¬¦ä¸²</returns>
         public static string FixLines(string strText,
             int nLineMaxBytes,
             int nFixLines)
@@ -600,7 +600,7 @@ namespace dp2Circulation
                 }
             }
 
-            // ²¹×ãÊ£ÓàµÄ¿ÕĞĞ
+            // è¡¥è¶³å‰©ä½™çš„ç©ºè¡Œ
             if (nLineCount < nFixLines)
             {
                 for (; nLineCount >= nFixLines; nLineCount++)
@@ -626,13 +626,13 @@ namespace dp2Circulation
         // parameters:
         //      strPrinterName  "LPT1"
         /// <summary>
-        /// »ñµÃ´ú±í´òÓ¡»úµÄ StreamWriter ¶ÔÏó
+        /// è·å¾—ä»£è¡¨æ‰“å°æœºçš„ StreamWriter å¯¹è±¡
         /// </summary>
-        /// <param name="strPrinterName">´òÓ¡»úÃû×Ö</param>
-        /// <param name="encoding">±àÂë·½Ê½</param>
-        /// <param name="stream">·µ»Ø StreamWriter ¶ÔÏó</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í 0: ³É¹¦</returns>
+        /// <param name="strPrinterName">æ‰“å°æœºåå­—</param>
+        /// <param name="encoding">ç¼–ç æ–¹å¼</param>
+        /// <param name="stream">è¿”å› StreamWriter å¯¹è±¡</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™ 0: æˆåŠŸ</returns>
         public int GetPrinterStream(string strPrinterName,
             Encoding encoding,
             out StreamWriter stream,
@@ -649,20 +649,20 @@ namespace dp2Circulation
             {
                 // Marshal.ThrowExceptionForHR(Marshal.GetLastWin32Error());
                 stream = null;
-                strError = "Ã»ÓĞÁ¬½Ó´òÓ¡»ú»òÕß´òÓ¡»ú¶Ë¿Ú²»ÊÇ" + strPrinterName + "¡£´íÎóÂë: " + Marshal.GetLastWin32Error().ToString();
+                strError = "æ²¡æœ‰è¿æ¥æ‰“å°æœºæˆ–è€…æ‰“å°æœºç«¯å£ä¸æ˜¯" + strPrinterName + "ã€‚é”™è¯¯ç : " + Marshal.GetLastWin32Error().ToString();
                 return -1;
             }
 
-            // TODO: ¾İËµÕâ¸ö¹¹Ôìº¯Êı±»·Ï³ıÁË£¿
+            // TODO: æ®è¯´è¿™ä¸ªæ„é€ å‡½æ•°è¢«åºŸé™¤äº†ï¼Ÿ
             FileStream fs = new FileStream(iHandle, FileAccess.ReadWrite);
-            stream = new StreamWriter(fs, encoding); // ÓÃÓÚĞ´ÎÄ±¾
+            stream = new StreamWriter(fs, encoding); // ç”¨äºå†™æ–‡æœ¬
 
             return 0;
         }
 
         // 
         /// <summary>
-        /// »ñµÃ´òÓ¡»ú¶Ë¿ÚºÅ¡£È±Ê¡Îª LPT1
+        /// è·å¾—æ‰“å°æœºç«¯å£å·ã€‚ç¼ºçœä¸º LPT1
         /// </summary>
         public string PrinterName
         {
@@ -677,7 +677,7 @@ namespace dp2Circulation
 
         // 
         /// <summary>
-        /// µ±Ç°ÊÇ·ñÎªÔİÍ£´òÓ¡×´Ì¬
+        /// å½“å‰æ˜¯å¦ä¸ºæš‚åœæ‰“å°çŠ¶æ€
         /// </summary>
         public bool PausePrint
         {
@@ -693,381 +693,381 @@ namespace dp2Circulation
     }
 
     /// <summary>
-    /// ½èÊéÊÂ¼şµÄ²ÎÊı
+    /// å€Ÿä¹¦äº‹ä»¶çš„å‚æ•°
     /// </summary>
     public class BorrowedEventArgs : EventArgs
     {
         /// <summary>
-        /// ÓÃÓÚÏÔÊ¾µÄ²Ù×÷Ãû³Æ¡£Îª ½èÔÄ Ğø½è Ö®Ò»
+        /// ç”¨äºæ˜¾ç¤ºçš„æ“ä½œåç§°ã€‚ä¸º å€Ÿé˜… ç»­å€Ÿ ä¹‹ä¸€
         /// </summary>
-        public string OperName = "";    // ÏÔÊ¾²Ù×÷Ãû ½èÔÄ Ğø½è »¹»Ø ¶ªÊ§
+        public string OperName = "";    // æ˜¾ç¤ºæ“ä½œå å€Ÿé˜… ç»­å€Ÿ è¿˜å› ä¸¢å¤±
         
         /// <summary>
-        /// ÊéÄ¿ÕªÒª
+        /// ä¹¦ç›®æ‘˜è¦
         /// </summary>
-        public string BiblioSummary = "";   // ÊéÄ¿ÕªÒª
+        public string BiblioSummary = "";   // ä¹¦ç›®æ‘˜è¦
 
         /// <summary>
-        /// ¶ÁÕßÕªÒª
+        /// è¯»è€…æ‘˜è¦
         /// </summary>
-        public string ReaderSummary = "";   // ¶ÁÕßÕªÒª
+        public string ReaderSummary = "";   // è¯»è€…æ‘˜è¦
 
         /// <summary>
-        /// ²áÌõÂëºÅ
+        /// å†Œæ¡ç å·
         /// </summary>
-        public string ItemBarcode = ""; // ²áÌõÂëºÅ
+        public string ItemBarcode = ""; // å†Œæ¡ç å·
 
         /// <summary>
-        /// ¶ÁÕßÖ¤ÌõÂëºÅ
+        /// è¯»è€…è¯æ¡ç å·
         /// </summary>
-        public string ReaderBarcode = "";   // ¶ÁÕßÖ¤ÌõÂëºÅ
+        public string ReaderBarcode = "";   // è¯»è€…è¯æ¡ç å·
 
-        // --- ÒÔÏÂÎªºÍ½èÊéÓĞ¹ØµÄ²Ù×÷ĞÅÏ¢
+        // --- ä»¥ä¸‹ä¸ºå’Œå€Ÿä¹¦æœ‰å…³çš„æ“ä½œä¿¡æ¯
         /// <summary>
-        /// Ó¦»¹ÈÕÆÚ
+        /// åº”è¿˜æ—¥æœŸ
         /// </summary>
-        public DateTime LatestReturnDate = new DateTime(0);  // Ó¦»¹ÈÕÆÚ
+        public DateTime LatestReturnDate = new DateTime(0);  // åº”è¿˜æ—¥æœŸ
 
-        // ½èÊéÆÚÏŞ¡£ÀıÈç¡°20day¡±
+        // å€Ÿä¹¦æœŸé™ã€‚ä¾‹å¦‚â€œ20dayâ€
         /// <summary>
-        /// ÆÚÏŞ¡£ÀıÈç¡°20day¡±
+        /// æœŸé™ã€‚ä¾‹å¦‚â€œ20dayâ€
         /// </summary>
         public string Period = "";
 
-        // µ±Ç°ÎªĞø½èµÄµÚ¼¸´Î£¿0±íÊ¾³õ´Î½èÔÄ
+        // å½“å‰ä¸ºç»­å€Ÿçš„ç¬¬å‡ æ¬¡ï¼Ÿ0è¡¨ç¤ºåˆæ¬¡å€Ÿé˜…
         /// <summary>
-        /// µ±Ç°ÎªĞø½èµÄµÚ¼¸´Î£¿0±íÊ¾³õ´Î½èÔÄ
+        /// å½“å‰ä¸ºç»­å€Ÿçš„ç¬¬å‡ æ¬¡ï¼Ÿ0è¡¨ç¤ºåˆæ¬¡å€Ÿé˜…
         /// </summary>
         public long BorrowCount = 0;
 
         /// <summary>
-        /// ²Ù×÷ºÄ·ÑµÄÊ±¼ä
+        /// æ“ä½œè€—è´¹çš„æ—¶é—´
         /// </summary>
-        public TimeSpan TimeSpan = new TimeSpan(0); // ²Ù×÷ºÄ·ÑµÄÊ±¼ä
+        public TimeSpan TimeSpan = new TimeSpan(0); // æ“ä½œè€—è´¹çš„æ—¶é—´
 
         // 2008/5/9
         /// <summary>
-        /// ²á¼ÇÂ¼ XML ×Ö·û´®
+        /// å†Œè®°å½• XML å­—ç¬¦ä¸²
         /// </summary>
-        public string ItemXml = ""; // ²á¼ÇÂ¼XML¡£¸ù¾İOnInitial()ÖĞÊÇ·ñÉèÖÃÁËthis.MainForm.ChargingNeedReturnItemXml = true£¬Õâ¸öÖµ¿ÉÄÜÎª¿Õ
+        public string ItemXml = ""; // å†Œè®°å½•XMLã€‚æ ¹æ®OnInitial()ä¸­æ˜¯å¦è®¾ç½®äº†this.MainForm.ChargingNeedReturnItemXml = trueï¼Œè¿™ä¸ªå€¼å¯èƒ½ä¸ºç©º
 
         // 2011/6/26
         /// <summary>
-        /// ½èÊé²Ù×÷Õß
+        /// å€Ÿä¹¦æ“ä½œè€…
         /// </summary>
         public string BorrowOperator = "";
 
         /// <summary>
-        /// ³öÄÉ´°
+        /// å‡ºçº³çª—
         /// </summary>
         public IChargingForm ChargingForm = null;
     }
 
     /// <summary>
-    /// »¹ÊéÊÂ¼şµÄ²ÎÊı
+    /// è¿˜ä¹¦äº‹ä»¶çš„å‚æ•°
     /// </summary>
     public class ReturnedEventArgs : EventArgs
     {
         /// <summary>
-        /// ÓÃÓÚÏÔÊ¾µÄ²Ù×÷Ãû³Æ¡£Îª »¹»Ø ¶ªÊ§ Ö®Ò»
+        /// ç”¨äºæ˜¾ç¤ºçš„æ“ä½œåç§°ã€‚ä¸º è¿˜å› ä¸¢å¤± ä¹‹ä¸€
         /// </summary>
-        public string OperName = "";    // ÏÔÊ¾²Ù×÷Ãû ½èÔÄ Ğø½è »¹»Ø ¶ªÊ§
+        public string OperName = "";    // æ˜¾ç¤ºæ“ä½œå å€Ÿé˜… ç»­å€Ÿ è¿˜å› ä¸¢å¤±
 
         /// <summary>
-        /// ÊéÄ¿ÕªÒª
+        /// ä¹¦ç›®æ‘˜è¦
         /// </summary>
-        public string BiblioSummary = "";   // ÊéÄ¿ÕªÒª
+        public string BiblioSummary = "";   // ä¹¦ç›®æ‘˜è¦
 
         /// <summary>
-        /// ¶ÁÕßÕªÒª
+        /// è¯»è€…æ‘˜è¦
         /// </summary>
-        public string ReaderSummary = "";   // ¶ÁÕßÕªÒª
+        public string ReaderSummary = "";   // è¯»è€…æ‘˜è¦
 
         /// <summary>
-        /// ²áÌõÂëºÅ
+        /// å†Œæ¡ç å·
         /// </summary>
-        public string ItemBarcode = ""; // ²áÌõÂë
+        public string ItemBarcode = ""; // å†Œæ¡ç 
 
         /// <summary>
-        /// ¶ÁÕßÖ¤ÌõÂëºÅ
+        /// è¯»è€…è¯æ¡ç å·
         /// </summary>
-        public string ReaderBarcode = "";   // ¶ÁÕßÖ¤ÌõÂë
+        public string ReaderBarcode = "";   // è¯»è€…è¯æ¡ç 
 
         /// <summary>
-        /// ²Ù×÷ºÄ·ÑµÄÊ±¼ä
+        /// æ“ä½œè€—è´¹çš„æ—¶é—´
         /// </summary>
-        public TimeSpan TimeSpan = new TimeSpan(0); // ²Ù×÷ºÄ·ÑµÄÊ±¼ä
+        public TimeSpan TimeSpan = new TimeSpan(0); // æ“ä½œè€—è´¹çš„æ—¶é—´
 
-        // --- ÒÔÏÂÎªºÍ»¹ÊéÓĞ¹ØµÄ²Ù×÷ĞÅÏ¢
-        // ½èÊéÈÕÆÚ
+        // --- ä»¥ä¸‹ä¸ºå’Œè¿˜ä¹¦æœ‰å…³çš„æ“ä½œä¿¡æ¯
+        // å€Ÿä¹¦æ—¥æœŸ
         /// <summary>
-        /// ½èÊéÈÕÆÚ
+        /// å€Ÿä¹¦æ—¥æœŸ
         /// </summary>
         public DateTime BorrowDate = new DateTime(0);
 
-        // Ó¦»¹ÈÕÆÚ
+        // åº”è¿˜æ—¥æœŸ
         /// <summary>
-        /// Ó¦»¹ÈÕÆÚ
+        /// åº”è¿˜æ—¥æœŸ
         /// </summary>
         public DateTime LatestReturnDate = new DateTime(0); 
 
-        // ½èÊéÆÚÏŞ¡£ÀıÈç¡°20day¡±
+        // å€Ÿä¹¦æœŸé™ã€‚ä¾‹å¦‚â€œ20dayâ€
         /// <summary>
-        /// ½èÊéÆÚÏŞ¡£ÀıÈç¡°20day¡±
+        /// å€Ÿä¹¦æœŸé™ã€‚ä¾‹å¦‚â€œ20dayâ€
         /// </summary>
         public string Period = "";
 
-        // ÎªĞø½èµÄµÚ¼¸´Î£¿0±íÊ¾³õ´Î½èÔÄ
+        // ä¸ºç»­å€Ÿçš„ç¬¬å‡ æ¬¡ï¼Ÿ0è¡¨ç¤ºåˆæ¬¡å€Ÿé˜…
         /// <summary>
-        /// ÎªĞø½èµÄµÚ¼¸´Î£¿0±íÊ¾³õ´Î½èÔÄ
+        /// ä¸ºç»­å€Ÿçš„ç¬¬å‡ æ¬¡ï¼Ÿ0è¡¨ç¤ºåˆæ¬¡å€Ÿé˜…
         /// </summary>
         public long BorrowCount = 0;
 
-        // Î¥Ô¼½ğÃèÊö×Ö·û´®¡£XML¸ñÊ½
+        // è¿çº¦é‡‘æè¿°å­—ç¬¦ä¸²ã€‚XMLæ ¼å¼
         /// <summary>
-        /// Î¥Ô¼½ğÃèÊö XML ×Ö·û´®
+        /// è¿çº¦é‡‘æè¿° XML å­—ç¬¦ä¸²
         /// </summary>
         public string OverdueString = "";
 
         // 2008/5/9
         /// <summary>
-        /// ²á¼ÇÂ¼ XML ×Ö·û´®
+        /// å†Œè®°å½• XML å­—ç¬¦ä¸²
         /// </summary>
-        public string ItemXml = ""; // ²á¼ÇÂ¼XML¡£¸ù¾İOnInitial()ÖĞÊÇ·ñÉèÖÃÁËthis.MainForm.ChargingNeedReturnItemXml = true£¬Õâ¸öÖµ¿ÉÄÜÎª¿Õ
+        public string ItemXml = ""; // å†Œè®°å½•XMLã€‚æ ¹æ®OnInitial()ä¸­æ˜¯å¦è®¾ç½®äº†this.MainForm.ChargingNeedReturnItemXml = trueï¼Œè¿™ä¸ªå€¼å¯èƒ½ä¸ºç©º
 
         // 2011/6/26
         /// <summary>
-        /// ½èÊé²Ù×÷Õß
+        /// å€Ÿä¹¦æ“ä½œè€…
         /// </summary>
         public string BorrowOperator = "";
 
         /// <summary>
-        /// »¹Êé²Ù×÷Õß
+        /// è¿˜ä¹¦æ“ä½œè€…
         /// </summary>
         public string ReturnOperator = "";
 
         // 2013/4/2
         /// <summary>
-        /// ¹İ²ØµØµã
+        /// é¦†è—åœ°ç‚¹
         /// </summary>
         public string Location = "";
 
         /// <summary>
-        /// Í¼ÊéÀàĞÍ
+        /// å›¾ä¹¦ç±»å‹
         /// </summary>
         public string BookType = "";
 
         /// <summary>
-        /// ³öÄÉ´°
+        /// å‡ºçº³çª—
         /// </summary>
         public IChargingForm ChargingForm = null;
     }
 
     /// <summary>
-    /// ½»·ÑÊÂ¼şµÄ²ÎÊı
+    /// äº¤è´¹äº‹ä»¶çš„å‚æ•°
     /// </summary>
     public class AmercedEventArgs : EventArgs
     {
         /// <summary>
-        /// ÓÃÓÚÏÔÊ¾µÄ²Ù×÷Ãû³Æ¡£Îª¡°½»·Ñ¡±
+        /// ç”¨äºæ˜¾ç¤ºçš„æ“ä½œåç§°ã€‚ä¸ºâ€œäº¤è´¹â€
         /// </summary>
-        public string OperName = "";    // ÏÔÊ¾²Ù×÷Ãû ½»·Ñ
+        public string OperName = "";    // æ˜¾ç¤ºæ“ä½œå äº¤è´¹
 
         /// <summary>
-        /// ¶ÁÕßÖ¤ÌõÂëºÅ
+        /// è¯»è€…è¯æ¡ç å·
         /// </summary>
-        public string ReaderBarcode = "";   // ¶ÁÕßÖ¤ÌõÂë
+        public string ReaderBarcode = "";   // è¯»è€…è¯æ¡ç 
 
         /// <summary>
-        /// ¶ÁÕßÕªÒª
+        /// è¯»è€…æ‘˜è¦
         /// </summary>
-        public string ReaderSummary = "";   // ¶ÁÕßÕªÒª
+        public string ReaderSummary = "";   // è¯»è€…æ‘˜è¦
 
         /// <summary>
-        /// ²Ù×÷ºÄ·ÑµÄÊ±¼ä
+        /// æ“ä½œè€—è´¹çš„æ—¶é—´
         /// </summary>
-        public TimeSpan TimeSpan = new TimeSpan(0); // ²Ù×÷ºÄ·ÑµÄÊ±¼ä
+        public TimeSpan TimeSpan = new TimeSpan(0); // æ“ä½œè€—è´¹çš„æ—¶é—´
 
-        // --- ÒÔÏÂÎªºÍ½»·£½ğÓĞ¹ØµÄ²Ù×÷ĞÅÏ¢
+        // --- ä»¥ä¸‹ä¸ºå’Œäº¤ç½šé‡‘æœ‰å…³çš„æ“ä½œä¿¡æ¯
         /// <summary>
-        /// ½»·ÑĞÅÏ¢¼¯ºÏ
+        /// äº¤è´¹ä¿¡æ¯é›†åˆ
         /// </summary>
         public List<OverdueItemInfo> OverdueInfos = new List<OverdueItemInfo>();
 
         // 2011/6/26
         /// <summary>
-        /// ½»·Ñ²Ù×÷Õß
+        /// äº¤è´¹æ“ä½œè€…
         /// </summary>
-        public string AmerceOperator = "";  // ±¾´Î²Ù×÷Õß
+        public string AmerceOperator = "";  // æœ¬æ¬¡æ“ä½œè€…
     }
 
     /// <summary>
-    /// ¶ÁÕßÖ¤ÌõÂëºÅÉ¨ÈëÊÂ¼şµÄ²ÎÊı
+    /// è¯»è€…è¯æ¡ç å·æ‰«å…¥äº‹ä»¶çš„å‚æ•°
     /// </summary>
     public class ReaderBarcodeScanedEventArgs : EventArgs
     {
         /// <summary>
-        /// ¶ÁÕßÖ¤ÌõÂëºÅ
+        /// è¯»è€…è¯æ¡ç å·
         /// </summary>
         public string ReaderBarcode = "";
     }
 
     /// <summary>
-    /// ´òÓ¡ÊÂ¼şµÄ²ÎÊı
+    /// æ‰“å°äº‹ä»¶çš„å‚æ•°
     /// </summary>
     public class PrintEventArgs : EventArgs
     {
         /// <summary>
-        /// ´òÓ¡ĞÅÏ¢
+        /// æ‰“å°ä¿¡æ¯
         /// </summary>
         public PrintInfo PrintInfo = null;  // [in]
 
         /// <summary>
-        /// ´òÓ¡¶¯×÷ÀàĞÍ¡£Îª print/create Ö®Ò»
+        /// æ‰“å°åŠ¨ä½œç±»å‹ã€‚ä¸º print/create ä¹‹ä¸€
         /// </summary>
-        public string Action = "print"; // [in] ¶¯×÷ÀàĞÍ print--´òÓ¡ create-½ö½ö´´½¨ÄÚÈİ
+        public string Action = "print"; // [in] åŠ¨ä½œç±»å‹ print--æ‰“å° create-ä»…ä»…åˆ›å»ºå†…å®¹
 
         /// <summary>
-        /// ·µ»Ø´òÓ¡½á¹û×Ö·û´®
+        /// è¿”å›æ‰“å°ç»“æœå­—ç¬¦ä¸²
         /// </summary>
-        public string ResultString = "";    // [out] ´òÓ¡½á¹û×Ö·û´®
+        public string ResultString = "";    // [out] æ‰“å°ç»“æœå­—ç¬¦ä¸²
 
         /// <summary>
-        /// ·µ»Ø´òÓ¡½á¹û×Ö·û´®µÄ¸ñÊ½¡£Îª text html Ö®Ò»
+        /// è¿”å›æ‰“å°ç»“æœå­—ç¬¦ä¸²çš„æ ¼å¼ã€‚ä¸º text html ä¹‹ä¸€
         /// </summary>
-        public string ResultFormat = "text";    // [out] ´òÓ¡½á¹û×Ö·û´®µÄ¸ñÊ½ text html
+        public string ResultFormat = "text";    // [out] æ‰“å°ç»“æœå­—ç¬¦ä¸²çš„æ ¼å¼ text html
     }
 
-    // ½èÔÄÒ»¸ö²áµÄÓĞ¹ØĞÅÏ¢
+    // å€Ÿé˜…ä¸€ä¸ªå†Œçš„æœ‰å…³ä¿¡æ¯
     /// <summary>
-    /// ½èÔÄÒ»¸ö²áµÄÓĞ¹ØĞÅÏ¢
+    /// å€Ÿé˜…ä¸€ä¸ªå†Œçš„æœ‰å…³ä¿¡æ¯
     /// </summary>
     public class BorrowItemInfo
     {
         /// <summary>
-        /// ÓÃÓÚÏÔÊ¾µÄ²Ù×÷Ãû¡£Îª ½èÔÄ Ğø½è Ö®Ò»
+        /// ç”¨äºæ˜¾ç¤ºçš„æ“ä½œåã€‚ä¸º å€Ÿé˜… ç»­å€Ÿ ä¹‹ä¸€
         /// </summary>
-        public string OperName = "";    // ÏÔÊ¾²Ù×÷Ãû ½èÔÄ Ğø½è »¹»Ø ¶ªÊ§
+        public string OperName = "";    // æ˜¾ç¤ºæ“ä½œå å€Ÿé˜… ç»­å€Ÿ è¿˜å› ä¸¢å¤±
 
         /// <summary>
-        /// ²áÌõÂëºÅ
+        /// å†Œæ¡ç å·
         /// </summary>
-        public string ItemBarcode = ""; // ²áÌõÂëºÅ
+        public string ItemBarcode = ""; // å†Œæ¡ç å·
 
         /// <summary>
-        /// ÊéÄ¿ÕªÒª
+        /// ä¹¦ç›®æ‘˜è¦
         /// </summary>
-        public string BiblioSummary = "";   // ÊéÄ¿ÕªÒª
+        public string BiblioSummary = "";   // ä¹¦ç›®æ‘˜è¦
 
-        // Ó¦»¹ÈÕÆÚ
+        // åº”è¿˜æ—¥æœŸ
         /// <summary>
-        /// Ó¦»¹ÈÕÆÚ
+        /// åº”è¿˜æ—¥æœŸ
         /// </summary>
         public DateTime LatestReturnDate = new DateTime(0);
 
-        // ½èÊéÆÚÏŞ¡£ÀıÈç¡°20day¡±
+        // å€Ÿä¹¦æœŸé™ã€‚ä¾‹å¦‚â€œ20dayâ€
         /// <summary>
-        /// ½èÔÄÆÚÏŞ¡£ÀıÈç¡°20day¡±
+        /// å€Ÿé˜…æœŸé™ã€‚ä¾‹å¦‚â€œ20dayâ€
         /// </summary>
         public string Period = "";
 
-        // µ±Ç°ÎªĞø½èµÄµÚ¼¸´Î£¿0±íÊ¾³õ´Î½èÔÄ
+        // å½“å‰ä¸ºç»­å€Ÿçš„ç¬¬å‡ æ¬¡ï¼Ÿ0è¡¨ç¤ºåˆæ¬¡å€Ÿé˜…
         /// <summary>
-        /// µ±Ç°ÎªĞø½èµÄµÚ¼¸´Î£¿0±íÊ¾³õ´Î½èÔÄ
+        /// å½“å‰ä¸ºç»­å€Ÿçš„ç¬¬å‡ æ¬¡ï¼Ÿ0è¡¨ç¤ºåˆæ¬¡å€Ÿé˜…
         /// </summary>
         public long BorrowCount = 0;
 
         /// <summary>
-        /// ²Ù×÷ºÄ·ÑµÄÊ±¼ä
+        /// æ“ä½œè€—è´¹çš„æ—¶é—´
         /// </summary>
-        public TimeSpan TimeSpan = new TimeSpan(0); // ²Ù×÷ºÄ·ÑµÄÊ±¼ä
+        public TimeSpan TimeSpan = new TimeSpan(0); // æ“ä½œè€—è´¹çš„æ—¶é—´
 
         /// <summary>
-        /// ½èÊé²Ù×÷Õß
+        /// å€Ÿä¹¦æ“ä½œè€…
         /// </summary>
         public string BorrowOperator = "";  // 2011/6/27
 
     }
 
-    // »¹»ØÒ»¸ö²áµÄÓĞ¹ØĞÅÏ¢
+    // è¿˜å›ä¸€ä¸ªå†Œçš„æœ‰å…³ä¿¡æ¯
     /// <summary>
-    /// »¹»ØÒ»¸ö²áµÄÓĞ¹ØĞÅÏ¢
+    /// è¿˜å›ä¸€ä¸ªå†Œçš„æœ‰å…³ä¿¡æ¯
     /// </summary>
     public class ReturnItemInfo
     {
         /// <summary>
-        /// ÓÃÓÚÏÔÊ¾µÄ²Ù×÷Ãû¡£Îª »¹»Ø ¶ªÊ§ Ö®Ò»
+        /// ç”¨äºæ˜¾ç¤ºçš„æ“ä½œåã€‚ä¸º è¿˜å› ä¸¢å¤± ä¹‹ä¸€
         /// </summary>
-        public string OperName = "";    // ÏÔÊ¾²Ù×÷Ãû ½èÔÄ Ğø½è »¹»Ø ¶ªÊ§
+        public string OperName = "";    // æ˜¾ç¤ºæ“ä½œå å€Ÿé˜… ç»­å€Ÿ è¿˜å› ä¸¢å¤±
 
         /// <summary>
-        /// ²áÌõÂëºÅ
+        /// å†Œæ¡ç å·
         /// </summary>
-        public string ItemBarcode = ""; // ²áÌõÂëºÅ
+        public string ItemBarcode = ""; // å†Œæ¡ç å·
 
         /// <summary>
-        /// ÊéÄ¿ÕªÒª
+        /// ä¹¦ç›®æ‘˜è¦
         /// </summary>
-        public string BiblioSummary = "";   // ÊéÄ¿ÕªÒª
+        public string BiblioSummary = "";   // ä¹¦ç›®æ‘˜è¦
 
 
-        // --- ÒÔÏÂÎªºÍ»¹ÊéÓĞ¹ØµÄ²Ù×÷ĞÅÏ¢
-        // ½èÊéÈÕÆÚ
+        // --- ä»¥ä¸‹ä¸ºå’Œè¿˜ä¹¦æœ‰å…³çš„æ“ä½œä¿¡æ¯
+        // å€Ÿä¹¦æ—¥æœŸ
         /// <summary>
-        /// ½èÊéÈÕÆÚ
+        /// å€Ÿä¹¦æ—¥æœŸ
         /// </summary>
         public DateTime BorrowDate = new DateTime(0);
 
-        // Ó¦»¹ÈÕÆÚ
+        // åº”è¿˜æ—¥æœŸ
         /// <summary>
-        /// Ó¦»¹ÈÕÆÚ
+        /// åº”è¿˜æ—¥æœŸ
         /// </summary>
         public DateTime LatestReturnDate = new DateTime(0);
 
 
-        // ½èÊéÆÚÏŞ¡£ÀıÈç¡°20day¡±
+        // å€Ÿä¹¦æœŸé™ã€‚ä¾‹å¦‚â€œ20dayâ€
         /// <summary>
-        /// ½èÔÄÆÚÏŞ¡£ÀıÈç¡°20day¡±
+        /// å€Ÿé˜…æœŸé™ã€‚ä¾‹å¦‚â€œ20dayâ€
         /// </summary>
         public string Period = "";
 
-        // ÎªĞø½èµÄµÚ¼¸´Î£¿0±íÊ¾³õ´Î½èÔÄ
+        // ä¸ºç»­å€Ÿçš„ç¬¬å‡ æ¬¡ï¼Ÿ0è¡¨ç¤ºåˆæ¬¡å€Ÿé˜…
         /// <summary>
-        /// ÎªĞø½èµÄµÚ¼¸´Î£¿0±íÊ¾³õ´Î½èÔÄ
+        /// ä¸ºç»­å€Ÿçš„ç¬¬å‡ æ¬¡ï¼Ÿ0è¡¨ç¤ºåˆæ¬¡å€Ÿé˜…
         /// </summary>
         public long BorrowCount = 0;
 
         /// <summary>
-        /// ²Ù×÷ºÄ·ÑµÄÊ±¼ä
+        /// æ“ä½œè€—è´¹çš„æ—¶é—´
         /// </summary>
-        public TimeSpan TimeSpan = new TimeSpan(0); // ²Ù×÷ºÄ·ÑµÄÊ±¼ä
+        public TimeSpan TimeSpan = new TimeSpan(0); // æ“ä½œè€—è´¹çš„æ—¶é—´
         /*
-        // Î¥Ô¼½ğÃèÊö×Ö·û´®¡£XML¸ñÊ½
+        // è¿çº¦é‡‘æè¿°å­—ç¬¦ä¸²ã€‚XMLæ ¼å¼
         public string OverdueString = "";
          * */
 
         /// <summary>
-        /// ½èÊé²Ù×÷Õß
+        /// å€Ÿä¹¦æ“ä½œè€…
         /// </summary>
         public string BorrowOperator = "";  // 2011/6/27
 
         /// <summary>
-        /// »¹Êé²Ù×÷Õß
+        /// è¿˜ä¹¦æ“ä½œè€…
         /// </summary>
         public string ReturnOperator = "";  // 2011/6/27
 
         /// <summary>
-        /// ½»·ÑÊÂÏî¼¯ºÏ
+        /// äº¤è´¹äº‹é¡¹é›†åˆ
         /// </summary>
         public List<OverdueItemInfo> OverdueItems = new List<OverdueItemInfo>();
 
-        // ¸ù¾İXMLÆ¬¶Î£¬´´½¨OverdueItems¶ÔÏóÊı×é
+        // æ ¹æ®XMLç‰‡æ®µï¼Œåˆ›å»ºOverdueItemså¯¹è±¡æ•°ç»„
         /// <summary>
-        /// ¸ù¾İ XML Æ¬¶Ï£¬´´½¨³¬ÆÚÊÂÏî¼¯ºÏ
+        /// æ ¹æ® XML ç‰‡æ–­ï¼Œåˆ›å»ºè¶…æœŸäº‹é¡¹é›†åˆ
         /// </summary>
-        /// <param name="strOverdueString">XMLÆ¬¶Ï</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í 0: ³É¹¦</returns>
+        /// <param name="strOverdueString">XMLç‰‡æ–­</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™ 0: æˆåŠŸ</returns>
         public int BuildOverdueItems(string strOverdueString,
             out string strError)
         {
@@ -1091,7 +1091,7 @@ namespace dp2Circulation
                 return -1;
             }
 
-            // ²åÈëµ½×îÇ°Ãæ
+            // æ’å…¥åˆ°æœ€å‰é¢
             DomUtil.InsertFirstChild(dom.DocumentElement, fragment);
 
             XmlNodeList nodes = dom.DocumentElement.SelectNodes("overdue");
@@ -1122,71 +1122,71 @@ namespace dp2Circulation
 
     }
 
-    // ³¬ÆÚÊÂÏîĞÅÏ¢
+    // è¶…æœŸäº‹é¡¹ä¿¡æ¯
     /// <summary>
-    /// ½»·ÑÊÂÏîĞÅÏ¢
+    /// äº¤è´¹äº‹é¡¹ä¿¡æ¯
     /// </summary>
     public class OverdueItemInfo
     {
         /// <summary>
-        /// ²áÌõÂëºÅ
+        /// å†Œæ¡ç å·
         /// </summary>
         public string ItemBarcode = ""; // barcode
 
         /// <summary>
-        /// ²á¼ÇÂ¼Â·¾¶
+        /// å†Œè®°å½•è·¯å¾„
         /// </summary>
         public string RecPath = ""; // recPath
 
         /// <summary>
-        /// ÊÂÓÉ
+        /// äº‹ç”±
         /// </summary>
         public string Reason = "";  // reason
 
         /// <summary>
-        /// ½ğ¶î
+        /// é‡‘é¢
         /// </summary>
         public string Price = "";   // price
 
         /// <summary>
-        /// ¿ªÊ¼Ê±¼ä
+        /// å¼€å§‹æ—¶é—´
         /// </summary>
         public string BorrowDate = "";  // borrowDate
 
         /// <summary>
-        /// ÆÚÏŞ
+        /// æœŸé™
         /// </summary>
         public string BorrowPeriod = "";    // borrowPeriod
 
         /// <summary>
-        /// ½áÊøÊ±¼ä
+        /// ç»“æŸæ—¶é—´
         /// </summary>
         public string ReturnDate = "";  // returnDate
 
         /// <summary>
-        /// ½èÊé²Ù×÷Õß
+        /// å€Ÿä¹¦æ“ä½œè€…
         /// </summary>
         public string BorrowOperator = "";  // borrowOperator
 
         /// <summary>
-        /// »¹Êé²Ù×÷Õß
+        /// è¿˜ä¹¦æ“ä½œè€…
         /// </summary>
         public string ReturnOperator = "";    // operator
 
         /// <summary>
-        /// ½»·ÑÊÂÏî ID
+        /// äº¤è´¹äº‹é¡¹ ID
         /// </summary>
         public string ID = "";  // id
 
         /// <summary>
-        /// ×¢ÊÍ
+        /// æ³¨é‡Š
         /// </summary>
         public string Comment = ""; // comment 2008/11/15
 
         /// <summary>
-        /// ½»·Ñ²Ù×÷Õß
+        /// äº¤è´¹æ“ä½œè€…
         /// </summary>
-        public string AmerceOperator = "";  // Ö»ÔÚC#½Å±¾ÖĞÊ¹ÓÃ
+        public string AmerceOperator = "";  // åªåœ¨C#è„šæœ¬ä¸­ä½¿ç”¨
 
         static string GetLineText(string strCaption,
             string strValue,
@@ -1213,18 +1213,18 @@ namespace dp2Circulation
             StringBuilder text = new StringBuilder(4096);
             text.Append("<table class='amerce_item'>");
 
-            text.Append(GetLineText("ÊÂÓÉ", this.Reason));
-            text.Append(GetLineText("½ğ¶î", this.Price));
-            text.Append(GetLineText("²áÌõÂëºÅ", this.ItemBarcode, strItemLink));
+            text.Append(GetLineText("äº‹ç”±", this.Reason));
+            text.Append(GetLineText("é‡‘é¢", this.Price));
+            text.Append(GetLineText("å†Œæ¡ç å·", this.ItemBarcode, strItemLink));
 
-            text.Append(GetLineText("¿ªÊ¼Ê±¼ä", this.BorrowDate));
-            text.Append(GetLineText("¿ªÊ¼²Ù×÷Õß", this.BorrowOperator));
-            text.Append(GetLineText("ÆÚÏŞ", this.BorrowPeriod));
-            text.Append(GetLineText("½áÊøÊ±¼ä", this.ReturnDate));
-            text.Append(GetLineText("½áÊø²Ù×÷Õß", this.ReturnOperator));
-            text.Append(GetLineText("½»·ÑÊÂÏî ID", this.ID));
-            text.Append(GetLineText("×¢ÊÍ", this.Comment));
-            text.Append(GetLineText("½»·Ñ²Ù×÷Õß", this.AmerceOperator));
+            text.Append(GetLineText("å¼€å§‹æ—¶é—´", this.BorrowDate));
+            text.Append(GetLineText("å¼€å§‹æ“ä½œè€…", this.BorrowOperator));
+            text.Append(GetLineText("æœŸé™", this.BorrowPeriod));
+            text.Append(GetLineText("ç»“æŸæ—¶é—´", this.ReturnDate));
+            text.Append(GetLineText("ç»“æŸæ“ä½œè€…", this.ReturnOperator));
+            text.Append(GetLineText("äº¤è´¹äº‹é¡¹ ID", this.ID));
+            text.Append(GetLineText("æ³¨é‡Š", this.Comment));
+            text.Append(GetLineText("äº¤è´¹æ“ä½œè€…", this.AmerceOperator));
 
             text.Append("</table>");
 
@@ -1232,49 +1232,49 @@ namespace dp2Circulation
         }
     }
 
-    // »ùÀàÖ÷¶¯¼ÇÒäµÄ½è»¹²Ù×÷ÓĞ¹ØĞÅÏ¢£¬±ãÓÚOnPrint()Ê±Ê¹ÓÃ
+    // åŸºç±»ä¸»åŠ¨è®°å¿†çš„å€Ÿè¿˜æ“ä½œæœ‰å…³ä¿¡æ¯ï¼Œä¾¿äºOnPrint()æ—¶ä½¿ç”¨
     /// <summary>
-    /// ´òÓ¡ĞÅÏ¢
+    /// æ‰“å°ä¿¡æ¯
     /// </summary>
     public class PrintInfo
     {
         /// <summary>
-        /// ´´½¨Ê±¼ä
+        /// åˆ›å»ºæ—¶é—´
         /// </summary>
         public DateTime CreateTime = DateTime.Now;
 
         /// <summary>
-        /// µ±Ç°¶ÁÕßÖ¤ÌõÂëºÅ
+        /// å½“å‰è¯»è€…è¯æ¡ç å·
         /// </summary>
         public string CurrentReaderBarcode = "";
 
         /// <summary>
-        /// µ±Ç°¶ÁÕßÕªÒª
+        /// å½“å‰è¯»è€…æ‘˜è¦
         /// </summary>
         public string CurrentReaderSummary = "";
 
         /// <summary>
-        /// ½èÔÄĞÅÏ¢¼¯ºÏ
+        /// å€Ÿé˜…ä¿¡æ¯é›†åˆ
         /// </summary>
         public List<BorrowItemInfo> BorrowItems = new List<BorrowItemInfo>();
 
         /// <summary>
-        /// »¹ÊéĞÅÏ¢¼¯ºÏ
+        /// è¿˜ä¹¦ä¿¡æ¯é›†åˆ
         /// </summary>
         public List<ReturnItemInfo> ReturnItems = new List<ReturnItemInfo>();
 
         /// <summary>
-        /// ½»·ÑĞÅÏ¢¼¯ºÏ
+        /// äº¤è´¹ä¿¡æ¯é›†åˆ
         /// </summary>
         public List<OverdueItemInfo> OverdueItems = new List<OverdueItemInfo>();
 
         /// <summary>
-        /// ÒÑ¾­´òÓ¡¹ıµÄ´ÎÊı
+        /// å·²ç»æ‰“å°è¿‡çš„æ¬¡æ•°
         /// </summary>
-        public int PrintedCount = 0;    // ÒÑ¾­´òÓ¡¹ıµÄ´ÎÊı
+        public int PrintedCount = 0;    // å·²ç»æ‰“å°è¿‡çš„æ¬¡æ•°
 
         /// <summary>
-        /// Çå³ıÈ«²¿Êı¾İ
+        /// æ¸…é™¤å…¨éƒ¨æ•°æ®
         /// </summary>
         public void Clear()
         {
@@ -1287,9 +1287,9 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// µ±Ç°ÊÇ·ñÓĞ¿É´òÓ¡µÄÄÚÈİ
+        /// å½“å‰æ˜¯å¦æœ‰å¯æ‰“å°çš„å†…å®¹
         /// </summary>
-        /// <returns>ÊÇ·ñ</returns>
+        /// <returns>æ˜¯å¦</returns>
         public bool HasContent()
         {
             if (this.BorrowItems.Count > 0

@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,21 +12,21 @@ using DigitalPlatform;
 namespace dp2Circulation
 {
     /// <summary>
-    /// Í¨¹ıÅú´ÎºÅ½øĞĞ¼ìË÷
+    /// é€šè¿‡æ‰¹æ¬¡å·è¿›è¡Œæ£€ç´¢
     /// </summary>
     internal partial class SearchByBatchnoForm : Form
     {
         /// <summary>
-        /// ¿ò¼Ü´°¿Ú
+        /// æ¡†æ¶çª—å£
         /// </summary>
         public MainForm MainForm = null;
 
         /// <summary>
-        /// »ñÈ¡Åú´ÎºÅkey+countÖµÁĞ±í
+        /// è·å–æ‰¹æ¬¡å·key+countå€¼åˆ—è¡¨
         /// </summary>
         public event GetKeyCountListEventHandler GetBatchNoTable = null;
 
-        // ±£´æĞÅÏ¢µÄĞ¡½ÚÃû
+        // ä¿å­˜ä¿¡æ¯çš„å°èŠ‚å
         public string CfgSectionName = "SearchByBatchnoForm";
 
         public event GetValueTableEventHandler GetLocationValueTable = null;
@@ -53,12 +53,12 @@ namespace dp2Circulation
                 this.comboBox_location.Text = this.MainForm.AppInfo.GetString(
                     this.CfgSectionName, // "SearchByBatchnoForm",
                     "location",
-                    "<²»Ö¸¶¨>");
+                    "<ä¸æŒ‡å®š>");
             }
             else
             {
-                // µ±batchnoÖĞÓĞÔ¤ÏÈ×¼±¸µÄÖµµÄÊ±ºò£¬location¾ÍĞèÒª±ä³É¡°²»Ö¸¶¨¡±ÁË£¬ÒÔÃâÓÃµ½ÒÔÇ°²ĞÁôµÄÖµ
-                this.comboBox_location.Text = "<²»Ö¸¶¨>";
+                // å½“batchnoä¸­æœ‰é¢„å…ˆå‡†å¤‡çš„å€¼çš„æ—¶å€™ï¼Œlocationå°±éœ€è¦å˜æˆâ€œä¸æŒ‡å®šâ€äº†ï¼Œä»¥å…ç”¨åˆ°ä»¥å‰æ®‹ç•™çš„å€¼
+                this.comboBox_location.Text = "<ä¸æŒ‡å®š>";
             }
         }
 
@@ -110,12 +110,12 @@ namespace dp2Circulation
             FillDropDown((ComboBox)sender);
         }
 
-        // ·ÀÖ¹ÖØÈë 2009/7/19
+        // é˜²æ­¢é‡å…¥ 2009/7/19
         int m_nInDropDown = 0;
 
         void FillDropDown(ComboBox combobox)
         {
-            // ·ÀÖ¹ÖØÈë 2009/7/19
+            // é˜²æ­¢é‡å…¥ 2009/7/19
             if (this.m_nInDropDown > 0)
                 return;
 
@@ -139,7 +139,7 @@ namespace dp2Circulation
                         e1.TableName = "state";
                     else
                     {
-                        Debug.Assert(false, "²»Ö§³ÖµÄcombobox");
+                        Debug.Assert(false, "ä¸æ”¯æŒçš„combobox");
                     }*/
 
                     if (combobox == this.comboBox_location)
@@ -147,13 +147,13 @@ namespace dp2Circulation
                     else
                     {
 
-                        Debug.Assert(false, "²»Ö§³ÖµÄcombobox");
+                        Debug.Assert(false, "ä¸æ”¯æŒçš„combobox");
                     }
 
 
                     this.GetLocationValueTable(this, e1);
 
-                    combobox.Items.Add("<²»Ö¸¶¨>");
+                    combobox.Items.Add("<ä¸æŒ‡å®š>");
 
                     if (e1.values != null)
                     {
@@ -175,7 +175,7 @@ namespace dp2Circulation
             }
         }
 
-        // ÊÇ·ñÏÔÊ¾¹İ²ØµØµã ComboBox
+        // æ˜¯å¦æ˜¾ç¤ºé¦†è—åœ°ç‚¹ ComboBox
         public bool DisplayLocationList
         {
             get
@@ -189,10 +189,10 @@ namespace dp2Circulation
             }
         }
 
-        // dropdownÊÂ¼şÖĞÈç¹û½øĞĞcombobox.EnabledµÄĞŞ¸Ä£¬»áÔì³ÉÎŞ·¨Áô×¡ÏÂÀ­×´Ì¬¡£¿ÉÒÔ¸ÄÓÃ·ÀÖ¹ÖØÈëµÄÕûÊı
+        // dropdownäº‹ä»¶ä¸­å¦‚æœè¿›è¡Œcombobox.Enabledçš„ä¿®æ”¹ï¼Œä¼šé€ æˆæ— æ³•ç•™ä½ä¸‹æ‹‰çŠ¶æ€ã€‚å¯ä»¥æ”¹ç”¨é˜²æ­¢é‡å…¥çš„æ•´æ•°
         private void comboBox_batchNo_DropDown(object sender, EventArgs e)
         {
-            // ·ÀÖ¹ÖØÈë
+            // é˜²æ­¢é‡å…¥
             if (this.m_nInDropDown > 0)
                 return;
 
@@ -209,16 +209,16 @@ namespace dp2Circulation
                     this.GetBatchNoTable(this, e1);
 
                     // 2013/3/25
-                    // µ±Á½¸ö ComboBox ¶¼ÏÔÊ¾µÄÊ±ºò£¬²Å¶Ô Åú´ÎºÅ ÁĞ±í¼ÓÈëÕâ¸öÊÂÏî
+                    // å½“ä¸¤ä¸ª ComboBox éƒ½æ˜¾ç¤ºçš„æ—¶å€™ï¼Œæ‰å¯¹ æ‰¹æ¬¡å· åˆ—è¡¨åŠ å…¥è¿™ä¸ªäº‹é¡¹
                     if (this.comboBox_location.Visible == true)
-                        combobox.Items.Add("<²»Ö¸¶¨>");
+                        combobox.Items.Add("<ä¸æŒ‡å®š>");
 
                     if (e1.KeyCounts != null)
                     {
                         for (int i = 0; i < e1.KeyCounts.Count; i++)
                         {
                             KeyCount item = e1.KeyCounts[i];
-                            combobox.Items.Add(item.Key + "\t" + item.Count.ToString() + "±Ê");
+                            combobox.Items.Add(item.Key + "\t" + item.Count.ToString() + "ç¬”");
                         }
                     }
                     else
@@ -246,36 +246,36 @@ namespace dp2Circulation
     }
 
     /// <summary>
-    /// ¹Ø¼ü´ÊºÍÊıÁ¿×éºÏÖµ
+    /// å…³é”®è¯å’Œæ•°é‡ç»„åˆå€¼
     /// </summary>
     public class KeyCount
     {
         /// <summary>
-        /// ¹Ø¼ü´Ê
+        /// å…³é”®è¯
         /// </summary>
         public string Key = "";
 
         /// <summary>
-        /// ÊıÁ¿
+        /// æ•°é‡
         /// </summary>
         public int Count = 0;
     }
 
     /// <summary>
-    /// »ñµÃkey+countÖµÁĞ±íÊÂ¼ş
+    /// è·å¾—key+countå€¼åˆ—è¡¨äº‹ä»¶
     /// </summary>
-    /// <param name="sender">·¢ËÍÕß</param>
-    /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+    /// <param name="sender">å‘é€è€…</param>
+    /// <param name="e">äº‹ä»¶å‚æ•°</param>
     public delegate void GetKeyCountListEventHandler(object sender,
         GetKeyCountListEventArgs e);
 
     /// <summary>
-    /// »ñµÃkey+countÖµÁĞ±íÊÂ¼şµÄ²ÎÊı
+    /// è·å¾—key+countå€¼åˆ—è¡¨äº‹ä»¶çš„å‚æ•°
     /// </summary>
     public class GetKeyCountListEventArgs : EventArgs
     {
         /// <summary>
-        /// ÖµÁĞ±í
+        /// å€¼åˆ—è¡¨
         /// </summary>
         public List<KeyCount> KeyCounts = null;
     }

@@ -1,6 +1,4 @@
-﻿using DigitalPlatform;
-using DigitalPlatform.Text;
-using DigitalPlatform.Xml;
+﻿
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -10,6 +8,10 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Xml;
+
+using DigitalPlatform;
+using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
 
 namespace dp2Circulation
 {

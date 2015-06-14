@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -18,13 +18,13 @@ using DigitalPlatform.Xml;
 namespace dp2Circulation
 {
     /// <summary>
-    /// Ó¦¼±³öÄÉ´°
+    /// åº”æ€¥å‡ºçº³çª—
     /// </summary>
     public partial class UrgentChargingForm : MyForm
     {
 #if NO
         /// <summary>
-        /// ¿ò¼Ü´°¿Ú
+        /// æ¡†æ¶çª—å£
         /// </summary>
         public MainForm MainForm = null;
 
@@ -36,7 +36,7 @@ namespace dp2Circulation
 
         FuncState m_funcstate = FuncState.Borrow;
 
-        // ¼ÇÔØÁ¬ĞøÊäÈëµÄ²áÌõÂëºÅ
+        // è®°è½½è¿ç»­è¾“å…¥çš„å†Œæ¡ç å·
         List<BarcodeAndTime> m_itemBarcodes = new List<BarcodeAndTime>();
 
         const int WM_PREPARE = API.WM_USER + 200;
@@ -47,13 +47,13 @@ namespace dp2Circulation
         int m_nTextNumber = 0;
 
 
-        // ÏûÏ¢WM_SWITCH_FOCUSµÄwparam²ÎÊıÖµ
+        // æ¶ˆæ¯WM_SWITCH_FOCUSçš„wparamå‚æ•°å€¼
         const int READER_BARCODE = 0;
         // const int READER_PASSWORD = 1;
         const int ITEM_BARCODE = 2;
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public UrgentChargingForm()
         {
@@ -61,7 +61,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÊÇ·ñÒª×Ô¶¯Ğ£ÑéÌõÂëºÅ
+        /// æ˜¯å¦è¦è‡ªåŠ¨æ ¡éªŒæ¡ç å·
         /// </summary>
         public bool NeedVerifyBarcode
         {
@@ -75,7 +75,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ĞÅÏ¢¶Ô»°¿òµÄ²»Í¸Ã÷¶È
+        /// ä¿¡æ¯å¯¹è¯æ¡†çš„ä¸é€æ˜åº¦
         /// </summary>
         public double InfoDlgOpacity
         {
@@ -117,12 +117,12 @@ namespace dp2Circulation
 
 
             stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// ºÍÈİÆ÷¹ØÁª
+            stop.Register(MainForm.stopManager, true);	// å’Œå®¹å™¨å…³è”
 #endif
 
             this.MainForm.Urgent = true;
 
-            this.FuncState = this.FuncState;    // Ê¹"²Ù×÷"°´Å¥ÎÄ×ÖÏÔÊ¾ÕıÈ·
+            this.FuncState = this.FuncState;    // ä½¿"æ“ä½œ"æŒ‰é’®æ–‡å­—æ˜¾ç¤ºæ­£ç¡®
             Global.WriteHtml(this.webBrowser_operationInfo,
                 "<pre>");
             EnableControls(false);
@@ -143,9 +143,9 @@ namespace dp2Circulation
 #if NO
             if (stop != null)
             {
-                if (stop.State == 0)    // 0 ±íÊ¾ÕıÔÚ´¦Àí
+                if (stop.State == 0)    // 0 è¡¨ç¤ºæ­£åœ¨å¤„ç†
                 {
-                    MessageBox.Show(this, "ÇëÔÚ¹Ø±Õ´°¿ÚÇ°Í£Ö¹ÕıÔÚ½øĞĞµÄ³¤Ê±²Ù×÷¡£");
+                    MessageBox.Show(this, "è¯·åœ¨å…³é—­çª—å£å‰åœæ­¢æ­£åœ¨è¿›è¡Œçš„é•¿æ—¶æ“ä½œã€‚");
                     e.Cancel = true;
                     return;
                 }
@@ -168,8 +168,8 @@ namespace dp2Circulation
             }
         }
 
-        // Ğ´ÈëÈÕÖ¾ÎÄ¼ş
-        // ¸ñÊ½£º¹¦ÄÜ ¶ÁÕßÖ¤ÌõÂëºÅ ²áÌõÂëºÅ ²Ù×÷Ê±¼ä
+        // å†™å…¥æ—¥å¿—æ–‡ä»¶
+        // æ ¼å¼ï¼šåŠŸèƒ½ è¯»è€…è¯æ¡ç å· å†Œæ¡ç å· æ“ä½œæ—¶é—´
         int WriteLogFile(string strFunc,
             string strReaderBarcode,
             string strItemBarcode,
@@ -179,14 +179,14 @@ namespace dp2Circulation
 
             if (String.IsNullOrEmpty(strFunc) == true)
             {
-                strError = "strFunc²»ÄÜÎª¿Õ";
+                strError = "strFuncä¸èƒ½ä¸ºç©º";
                 return -1;
             }
 
             if (String.IsNullOrEmpty(strReaderBarcode) == true
                 && String.IsNullOrEmpty(strItemBarcode) == true)
             {
-                strError = "strReaderBarcodeºÍstrItemBarcode²»ÄÜÍ¬Ê±Îª¿Õ";
+                strError = "strReaderBarcodeå’ŒstrItemBarcodeä¸èƒ½åŒæ—¶ä¸ºç©º";
                 return -1;
             }
 
@@ -209,7 +209,7 @@ namespace dp2Circulation
         {
             if (this.textBox_readerBarcode.Text == "")
             {
-                MessageBox.Show(this, "¶ÁÕßÖ¤ÌõÂëºÅÎª¿Õ¡£");
+                MessageBox.Show(this, "è¯»è€…è¯æ¡ç å·ä¸ºç©ºã€‚");
 
                 this.textBox_readerBarcode.SelectAll();
                 this.textBox_readerBarcode.Focus();
@@ -228,26 +228,26 @@ namespace dp2Circulation
 
             if (this.textBox_itemBarcode.Text == "")
             {
-                strError = "²áÌõÂëºÅ²»ÄÜÎª¿Õ¡£";
+                strError = "å†Œæ¡ç å·ä¸èƒ½ä¸ºç©ºã€‚";
                 goto ERROR1;
             }
 
             if (this.DoubleItemInputAsEnd == true)
             {
 
-                // È¡³öÉÏ´ÎÊäÈëµÄ×îºóÒ»¸öÌõÂë£¬ºÍÄ¿Ç°ÊäÈëµÄÌõÂë±È½Ï£¬¿´ÊÇ·ñÒ»Ñù¡£
+                // å–å‡ºä¸Šæ¬¡è¾“å…¥çš„æœ€åä¸€ä¸ªæ¡ç ï¼Œå’Œç›®å‰è¾“å…¥çš„æ¡ç æ¯”è¾ƒï¼Œçœ‹æ˜¯å¦ä¸€æ ·ã€‚
                 if (this.m_itemBarcodes.Count > 0)
                 {
                     string strLastItemBarcode = this.m_itemBarcodes[m_itemBarcodes.Count - 1].Barcode;
                     TimeSpan delta = DateTime.Now - this.m_itemBarcodes[m_itemBarcodes.Count - 1].Time;
                     // MessageBox.Show(this, delta.TotalMilliseconds.ToString());
                     if (strLastItemBarcode == this.textBox_itemBarcode.Text
-                        && delta.TotalMilliseconds < 5000) // 5ÃëÒÔÄÚ
+                        && delta.TotalMilliseconds < 5000) // 5ç§’ä»¥å†…
                     {
-                        // Çå³ı²áÌõÂëºÅÊäÈëÓò
+                        // æ¸…é™¤å†Œæ¡ç å·è¾“å…¥åŸŸ
                         this.textBox_itemBarcode.Text = "";
-                        // Çå³ı¶ÁÕßÖ¤ÌõÂëºÅÊäÈëÓò
-                        this.textBox_readerBarcode.Text = "ÇëÊäÈëÏÂÒ»¸ö¶ÁÕßµÄÖ¤ÌõÂëºÅ...";
+                        // æ¸…é™¤è¯»è€…è¯æ¡ç å·è¾“å…¥åŸŸ
+                        this.textBox_readerBarcode.Text = "è¯·è¾“å…¥ä¸‹ä¸€ä¸ªè¯»è€…çš„è¯æ¡ç å·...";
                         this.SwitchFocus(READER_BARCODE, null);
                         return;
                     }
@@ -259,7 +259,7 @@ namespace dp2Circulation
                 barcodetime.Time = DateTime.Now;
 
                 this.m_itemBarcodes.Add(barcodetime);
-                // ½ö½ö±£³ÖÒ»¸öÌõÂë¾Í¿ÉÒÔÁË
+                // ä»…ä»…ä¿æŒä¸€ä¸ªæ¡ç å°±å¯ä»¥äº†
                 while (this.m_itemBarcodes.Count > 1)
                     this.m_itemBarcodes.RemoveAt(0);
             }
@@ -268,7 +268,7 @@ namespace dp2Circulation
             {
                 if (this.textBox_readerBarcode.Text == "")
                 {
-                    strError = "¶ÁÕßÖ¤ÌõÂëºÅ²»ÄÜÎª¿Õ¡£";
+                    strError = "è¯»è€…è¯æ¡ç å·ä¸èƒ½ä¸ºç©ºã€‚";
                     goto ERROR1;
                 }
 
@@ -281,9 +281,9 @@ namespace dp2Circulation
                     goto ERROR1;
 
                 string strFastInputText = ChargingInfoDlg.Show(this.CharingInfoHost,
-    "¶ÁÕß " + this.textBox_readerBarcode.Text
-    + " ½èÔÄ²á "
-    + this.textBox_itemBarcode.Text + " ³É¹¦¡£",
+    "è¯»è€… " + this.textBox_readerBarcode.Text
+    + " å€Ÿé˜…å†Œ "
+    + this.textBox_itemBarcode.Text + " æˆåŠŸã€‚",
     InfoColor.Green,
     "caption",
     this.InfoDlgOpacity,
@@ -301,8 +301,8 @@ namespace dp2Circulation
                     goto ERROR1;
 
                 string strFastInputText = ChargingInfoDlg.Show(this.CharingInfoHost,
-" ²á "
-+ this.textBox_itemBarcode.Text + " »¹»Ø³É¹¦¡£",
+" å†Œ "
++ this.textBox_itemBarcode.Text + " è¿˜å›æˆåŠŸã€‚",
 InfoColor.Green,
 "caption",
 this.InfoDlgOpacity,
@@ -315,7 +315,7 @@ this.InfoDlgOpacity,
             {
                 if (this.textBox_readerBarcode.Text == "")
                 {
-                    strError = "¶ÁÕßÖ¤ÌõÂëºÅ²»ÄÜÎª¿Õ¡£";
+                    strError = "è¯»è€…è¯æ¡ç å·ä¸èƒ½ä¸ºç©ºã€‚";
                     goto ERROR1;
                 }
 
@@ -327,9 +327,9 @@ this.InfoDlgOpacity,
                     goto ERROR1;
 
                 string strFastInputText = ChargingInfoDlg.Show(this.CharingInfoHost,
-"¶ÁÕß " + this.textBox_readerBarcode.Text
-+ " »¹»Ø²á "
-+ this.textBox_itemBarcode.Text + " ³É¹¦¡£",
+"è¯»è€… " + this.textBox_readerBarcode.Text
++ " è¿˜å›å†Œ "
++ this.textBox_itemBarcode.Text + " æˆåŠŸã€‚",
 InfoColor.Green,
 "caption",
 this.InfoDlgOpacity,
@@ -345,9 +345,9 @@ this.InfoDlgOpacity,
 
         }
 
-        // ´øÓĞ½¹µãÇĞ»»¹¦ÄÜµÄ
+        // å¸¦æœ‰ç„¦ç‚¹åˆ‡æ¢åŠŸèƒ½çš„
         /// <summary>
-        /// µ±Ç°¹¦ÄÜ×´Ì¬
+        /// å½“å‰åŠŸèƒ½çŠ¶æ€
         /// </summary>
         public FuncState SmartFuncState
         {
@@ -361,7 +361,7 @@ this.InfoDlgOpacity,
 
                 this.FuncState = value;
 
-                // ÇĞ»»Îª²»Í¬µÄ¹¦ÄÜµÄÊ±ºò£¬¶¨Î»½¹µã
+                // åˆ‡æ¢ä¸ºä¸åŒçš„åŠŸèƒ½çš„æ—¶å€™ï¼Œå®šä½ç„¦ç‚¹
                 if (old_funcstate != this.m_funcstate)
                 {
                     if (this.m_funcstate != FuncState.Return)
@@ -378,7 +378,7 @@ this.InfoDlgOpacity,
                         this.textBox_itemBarcode.Focus();
                     }
                 }
-                else // ÖØ¸´ÉèÖÃÎªÍ¬Ñù¹¦ÄÜ£¬µ±×÷Çå³ı¹¦ÄÜ
+                else // é‡å¤è®¾ç½®ä¸ºåŒæ ·åŠŸèƒ½ï¼Œå½“ä½œæ¸…é™¤åŠŸèƒ½
                 {
                     this.textBox_readerBarcode.Text = "";
                     this.textBox_itemBarcode.Text = "";
@@ -404,12 +404,12 @@ this.InfoDlgOpacity,
             }
             set
             {
-                // Çå³ı¼ÇÒäµÄ²áÌõÂëºÅ
+                // æ¸…é™¤è®°å¿†çš„å†Œæ¡ç å·
                 this.m_itemBarcodes.Clear();
 
                 if (this.m_funcstate != value
                     && value == FuncState.Return)
-                    MessageBox.Show(this, "¾¯¸æ£ºÊ¹ÓÃ²»´øÑéÖ¤¶ÁÕßÖ¤ÌõÂëºÅµÄ»¹»Ø¹¦ÄÜ£¬»áÓ°ÏìÈÕºóÊı¾İ¿â»Ö¸´µ½Êı¾İ¿âÊ±µÄÈİ´íÄÜÁ¦¡£ÇëÉ÷ÓÃ´Ë¹¦ÄÜ¡£");
+                    MessageBox.Show(this, "è­¦å‘Šï¼šä½¿ç”¨ä¸å¸¦éªŒè¯è¯»è€…è¯æ¡ç å·çš„è¿˜å›åŠŸèƒ½ï¼Œä¼šå½±å“æ—¥åæ•°æ®åº“æ¢å¤åˆ°æ•°æ®åº“æ—¶çš„å®¹é”™èƒ½åŠ›ã€‚è¯·æ…ç”¨æ­¤åŠŸèƒ½ã€‚");
 
 
                 this.m_funcstate = value;
@@ -420,20 +420,20 @@ this.InfoDlgOpacity,
 
                 if (m_funcstate == FuncState.Borrow)
                 {
-                    this.button_itemAction.Text = "½è";
+                    this.button_itemAction.Text = "å€Ÿ";
                     this.toolStripMenuItem_borrow.Checked = true;
                     this.textBox_readerBarcode.Enabled = true;
                 }
                 if (m_funcstate == FuncState.Return)
                 {
-                    this.button_itemAction.Text = "»¹";
+                    this.button_itemAction.Text = "è¿˜";
                     this.toolStripMenuItem_return.Checked = true;
                     this.textBox_readerBarcode.Text = "";
                     this.textBox_readerBarcode.Enabled = false;
                 }
                 if (m_funcstate == FuncState.VerifyReturn)
                 {
-                    this.button_itemAction.Text = "ÑéÖ¤»¹";
+                    this.button_itemAction.Text = "éªŒè¯è¿˜";
                     this.toolStripMenuItem_verifyReturn.Checked = true;
                     this.textBox_readerBarcode.Enabled = true;
                 }
@@ -473,7 +473,7 @@ this.InfoDlgOpacity,
         }
 
 
-        // ´ÓÎÄ¼şÖĞ×°ÈëÄÚÈİµ½ä¯ÀÀÆ÷
+        // ä»æ–‡ä»¶ä¸­è£…å…¥å†…å®¹åˆ°æµè§ˆå™¨
         int LoadLogFileContentToBrowser(out string strError)
         {
             strError = "";
@@ -501,12 +501,12 @@ this.InfoDlgOpacity,
             }
             catch (Exception ex)
             {
-                strError = "¶ÁÈ¡ÎÄ¼ş¹ı³Ì³ö´í: " + ex.Message;
+                strError = "è¯»å–æ–‡ä»¶è¿‡ç¨‹å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
             Global.WriteHtml(this.webBrowser_operationInfo,
-                "--- ´ËÇ° " + nLineCount + " ĞĞÎªÓ¦¼±ÈÕÖ¾ÎÄ¼ş " + this.LogFileName + " ÖĞÒÑ¾­´æ´¢µÄÄÚÈİ ---\r\n");
+                "--- æ­¤å‰ " + nLineCount + " è¡Œä¸ºåº”æ€¥æ—¥å¿—æ–‡ä»¶ " + this.LogFileName + " ä¸­å·²ç»å­˜å‚¨çš„å†…å®¹ ---\r\n");
 
             // Global.ScrollToEnd(this.webBrowser_operationInfo);
             API.PostMessage(this.Handle, WM_SCROLLTOEND, 0, 0);
@@ -518,22 +518,22 @@ this.InfoDlgOpacity,
         void SwitchFocus(int target,
     string strFastInput)
         {
-            // Ìá·ÀhashtableÔ½À´Ô½´ó
+            // æé˜²hashtableè¶Šæ¥è¶Šå¤§
             if (this.m_textTable.Count > 5)
             {
                 Debug.Assert(false, "");
                 this.m_textTable.Clear();
             }
 
-            int nNumber = -1;   // -1±íÊ¾²»ĞèÒª´«µİ×Ö·û´®²ÎÊı
+            int nNumber = -1;   // -1è¡¨ç¤ºä¸éœ€è¦ä¼ é€’å­—ç¬¦ä¸²å‚æ•°
 
-            // Èç¹ûĞèÒª´«µİ×Ö·û´®²ÎÊı
+            // å¦‚æœéœ€è¦ä¼ é€’å­—ç¬¦ä¸²å‚æ•°
             if (String.IsNullOrEmpty(strFastInput) == false)
             {
                 string strNumber = this.m_nTextNumber.ToString();
                 nNumber = this.m_nTextNumber;
                 this.m_nTextNumber++;
-                if (this.m_nTextNumber == -1)   // ±Ü¿ª-1
+                if (this.m_nTextNumber == -1)   // é¿å¼€-1
                     this.m_nTextNumber++;
 
                 this.m_textTable[strNumber] = strFastInput;
@@ -544,9 +544,9 @@ this.InfoDlgOpacity,
         }
 
         /// <summary>
-        /// È±Ê¡´°¿Ú¹ı³Ì
+        /// ç¼ºçœçª—å£è¿‡ç¨‹
         /// </summary>
-        /// <param name="m">ÏûÏ¢</param>
+        /// <param name="m">æ¶ˆæ¯</param>
         protected override void DefWndProc(ref Message m)
         {
             switch (m.Msg)
@@ -559,7 +559,7 @@ this.InfoDlgOpacity,
                         if (nRet == -1)
                             MessageBox.Show(this, strError);
 
-                        // È»ºóĞí¿É½çÃæ
+                        // ç„¶åè®¸å¯ç•Œé¢
                         EnableControls(true);
                         return;
                     }
@@ -622,9 +622,9 @@ this.InfoDlgOpacity,
         }
 
         /// <summary>
-        /// ÔÊĞí»òÕß½ûÖ¹½çÃæ¿Ø¼ş¡£ÔÚ³¤²Ù×÷Ç°£¬Ò»°ãĞèÒª½ûÖ¹½çÃæ¿Ø¼ş£»²Ù×÷Íê³ÉºóÔÙÔÊĞí
+        /// å…è®¸æˆ–è€…ç¦æ­¢ç•Œé¢æ§ä»¶ã€‚åœ¨é•¿æ“ä½œå‰ï¼Œä¸€èˆ¬éœ€è¦ç¦æ­¢ç•Œé¢æ§ä»¶ï¼›æ“ä½œå®Œæˆåå†å…è®¸
         /// </summary>
-        /// <param name="bEnable">ÊÇ·ñÔÊĞí½çÃæ¿Ø¼ş¡£true ÎªÔÊĞí£¬ false Îª½ûÖ¹</param>
+        /// <param name="bEnable">æ˜¯å¦å…è®¸ç•Œé¢æ§ä»¶ã€‚true ä¸ºå…è®¸ï¼Œ false ä¸ºç¦æ­¢</param>
         public override void EnableControls(bool bEnable)
         {
             this.textBox_itemBarcode.Enabled = bEnable;
@@ -668,7 +668,7 @@ this.InfoDlgOpacity,
 
         // 
         /// <summary>
-        /// »Ö¸´Ó¦¼±ÈÕÖ¾ÎÄ¼şµ½·şÎñÆ÷
+        /// æ¢å¤åº”æ€¥æ—¥å¿—æ–‡ä»¶åˆ°æœåŠ¡å™¨
         /// </summary>
         public void Recover()
         {
@@ -679,7 +679,7 @@ this.InfoDlgOpacity,
             int nLineCount = 0;
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ³õÊ¼»¯ä¯ÀÀÆ÷×é¼ş ...");
+            stop.Initial("æ­£åœ¨åˆå§‹åŒ–æµè§ˆå™¨ç»„ä»¶ ...");
             stop.BeginLoop();
 
             this.Update();
@@ -688,7 +688,7 @@ this.InfoDlgOpacity,
             EnableControls(false);
 
             Global.WriteHtml(this.webBrowser_operationInfo,
-    "¿ªÊ¼»Ö¸´¡£\r\n");
+    "å¼€å§‹æ¢å¤ã€‚\r\n");
 
 
             try
@@ -718,7 +718,7 @@ this.InfoDlgOpacity,
                     if (lRet == -1)
                     {
                         DialogResult result = MessageBox.Show(this,
-"ĞĞ\r\n" + strLine + "\r\n»Ö¸´µ½Êı¾İ¿âÊ±³ö´í£º" + strError + "¡£\r\n\r\nÒªÖĞ¶Ï´¦ÀíÃ´? ",
+"è¡Œ\r\n" + strLine + "\r\næ¢å¤åˆ°æ•°æ®åº“æ—¶å‡ºé”™ï¼š" + strError + "ã€‚\r\n\r\nè¦ä¸­æ–­å¤„ç†ä¹ˆ? ",
 "UrgentChargingForm",
 MessageBoxButtons.YesNo,
 MessageBoxIcon.Question,
@@ -743,12 +743,12 @@ strLine + " *** error: " + strError + "\r\n");
             }
             catch (FileNotFoundException)
             {
-                strError = "ÎÄ¼ş " + strLogFileName + "²»´æÔÚ¡£";
+                strError = "æ–‡ä»¶ " + strLogFileName + "ä¸å­˜åœ¨ã€‚";
                 goto ERROR1;
             }
             catch (Exception ex)
             {
-                strError = "¶ÁÈ¡ÎÄ¼ş¹ı³Ì³ö´í: " + ex.Message;
+                strError = "è¯»å–æ–‡ä»¶è¿‡ç¨‹å‡ºé”™: " + ex.Message;
                 goto ERROR1;
             }
             finally
@@ -761,9 +761,9 @@ strLine + " *** error: " + strError + "\r\n");
             }
 
             Global.WriteHtml(this.webBrowser_operationInfo,
-                "»Ö¸´Íê³É¡£¹²´¦Àí¼ÇÂ¼ " + nLineCount + " ¸ö¡£ \r\n");
+                "æ¢å¤å®Œæˆã€‚å…±å¤„ç†è®°å½• " + nLineCount + " ä¸ªã€‚ \r\n");
             Global.WriteHtml(this.webBrowser_operationInfo,
-    "×¢Òâ´ò¿ªÊı¾İÄ¿Â¼£¬¸ÄÃû±£´æ " + this.LogFileName + " ÎÄ¼ş£¬±ÜÃâ½«À´²»Ğ¡ĞÄÖØ¸´»Ö¸´¡£\r\n");
+    "æ³¨æ„æ‰“å¼€æ•°æ®ç›®å½•ï¼Œæ”¹åä¿å­˜ " + this.LogFileName + " æ–‡ä»¶ï¼Œé¿å…å°†æ¥ä¸å°å¿ƒé‡å¤æ¢å¤ã€‚\r\n");
 
             API.PostMessage(this.Handle, WM_SCROLLTOEND, 0, 0);
 
@@ -775,35 +775,35 @@ strLine + " *** error: " + strError + "\r\n");
 
         /*
 <root>
-  <operation>borrow</operation> ²Ù×÷ÀàĞÍ
-  <readerBarcode>R0000002</readerBarcode> ¶ÁÕßÖ¤ÌõÂëºÅ
-  <itemBarcode>0000001</itemBarcode>  ²áÌõÂëºÅ
-  <borrowDate>Fri, 08 Dec 2006 04:17:31 GMT</borrowDate> ½èÔÄÈÕÆÚ
-  <borrowPeriod>30day</borrowPeriod> ½èÔÄÆÚÏŞ
-  <no>0</no> Ğø½è´ÎÊı¡£0ÎªÊ×´ÎÆÕÍ¨½èÔÄ£¬1¿ªÊ¼ÎªĞø½è
-  <operator>test</operator> ²Ù×÷Õß
-  <operTime>Fri, 08 Dec 2006 04:17:31 GMT</operTime> ²Ù×÷Ê±¼ä
-  <confirmItemRecPath>...</confirmItemRecPath> ¸¨ÖúÅĞ¶ÏÓÃµÄ²á¼ÇÂ¼Â·¾¶
+  <operation>borrow</operation> æ“ä½œç±»å‹
+  <readerBarcode>R0000002</readerBarcode> è¯»è€…è¯æ¡ç å·
+  <itemBarcode>0000001</itemBarcode>  å†Œæ¡ç å·
+  <borrowDate>Fri, 08 Dec 2006 04:17:31 GMT</borrowDate> å€Ÿé˜…æ—¥æœŸ
+  <borrowPeriod>30day</borrowPeriod> å€Ÿé˜…æœŸé™
+  <no>0</no> ç»­å€Ÿæ¬¡æ•°ã€‚0ä¸ºé¦–æ¬¡æ™®é€šå€Ÿé˜…ï¼Œ1å¼€å§‹ä¸ºç»­å€Ÿ
+  <operator>test</operator> æ“ä½œè€…
+  <operTime>Fri, 08 Dec 2006 04:17:31 GMT</operTime> æ“ä½œæ—¶é—´
+  <confirmItemRecPath>...</confirmItemRecPath> è¾…åŠ©åˆ¤æ–­ç”¨çš„å†Œè®°å½•è·¯å¾„
   
-  <readerRecord recPath='...'>...</readerRecord>	×îĞÂ¶ÁÕß¼ÇÂ¼
-  <itemRecord recPath='...'>...</itemRecord>	×îĞÂ²á¼ÇÂ¼
+  <readerRecord recPath='...'>...</readerRecord>	æœ€æ–°è¯»è€…è®°å½•
+  <itemRecord recPath='...'>...</itemRecord>	æœ€æ–°å†Œè®°å½•
 </root>
          * 
          * 
  <root>
-  <operation>return</operation> ²Ù×÷ÀàĞÍ
-  <action>...</action> ¾ßÌå¶¯×÷ ÓĞreturn lostÁ½ÖÖ
-  <itemBarcode>0000001</itemBarcode> ²áÌõÂëºÅ
-  <readerBarcode>R0000002</readerBarcode> ¶ÁÕßÖ¤ÌõÂëºÅ
-  <operator>test</operator> ²Ù×÷Õß
-  <operTime>Fri, 08 Dec 2006 04:17:45 GMT</operTime> ²Ù×÷Ê±¼ä
-  <overdues>...</overdues> ³¬ÆÚ»ò¶ªÊ§Åâ¿îĞÅÏ¢ Í¨³£ÄÚÈİÎªÒ»¸ö×Ö·û´®£¬ÎªÒ»¸ö»ò¶à¸ö<overdue>ÔªËØXMLÎÄ±¾Æ¬¶Ï
+  <operation>return</operation> æ“ä½œç±»å‹
+  <action>...</action> å…·ä½“åŠ¨ä½œ æœ‰return lostä¸¤ç§
+  <itemBarcode>0000001</itemBarcode> å†Œæ¡ç å·
+  <readerBarcode>R0000002</readerBarcode> è¯»è€…è¯æ¡ç å·
+  <operator>test</operator> æ“ä½œè€…
+  <operTime>Fri, 08 Dec 2006 04:17:45 GMT</operTime> æ“ä½œæ—¶é—´
+  <overdues>...</overdues> è¶…æœŸæˆ–ä¸¢å¤±èµ”æ¬¾ä¿¡æ¯ é€šå¸¸å†…å®¹ä¸ºä¸€ä¸ªå­—ç¬¦ä¸²ï¼Œä¸ºä¸€ä¸ªæˆ–å¤šä¸ª<overdue>å…ƒç´ XMLæ–‡æœ¬ç‰‡æ–­
   
-  <confirmItemRecPath>...</confirmItemRecPath> ¸¨ÖúÅĞ¶ÏÓÃµÄ²á¼ÇÂ¼Â·¾¶
+  <confirmItemRecPath>...</confirmItemRecPath> è¾…åŠ©åˆ¤æ–­ç”¨çš„å†Œè®°å½•è·¯å¾„
   
-  <readerRecord recPath='...'>...</readerRecord>	×îĞÂ¶ÁÕß¼ÇÂ¼
-  <itemRecord recPath='...'>...</itemRecord>	×îĞÂ²á¼ÇÂ¼
-  <lostComment>...</lostComment> ¹ØÓÚ¶ªÊ§Çé¿öµÄ¸½×¢(×·¼ÓĞ´Èë²á¼ÇÂ¼<comment>µÄĞÅÏ¢)
+  <readerRecord recPath='...'>...</readerRecord>	æœ€æ–°è¯»è€…è®°å½•
+  <itemRecord recPath='...'>...</itemRecord>	æœ€æ–°å†Œè®°å½•
+  <lostComment>...</lostComment> å…³äºä¸¢å¤±æƒ…å†µçš„é™„æ³¨(è¿½åŠ å†™å…¥å†Œè®°å½•<comment>çš„ä¿¡æ¯)
 </root>
          * * */
         int BuildRecoverXml(
@@ -819,7 +819,7 @@ strLine + " *** error: " + strError + "\r\n");
 
             if (cols.Length < 4)
             {
-                strError = "strLine[" + strLine + "]¸ñÊ½²»ÕıÈ·£¬Ó¦Îª4À¸ÄÚÈİ¡£";
+                strError = "strLine[" + strLine + "]æ ¼å¼ä¸æ­£ç¡®ï¼Œåº”ä¸º4æ å†…å®¹ã€‚";
                 return -1;
             }
 
@@ -865,8 +865,8 @@ strOperTime);
                 DomUtil.SetElementText(dom.DocumentElement,
 "defaultBorrowPeriod",
 "60day");
-                // ×¢£º²»ÄÜÂ³Ã§Ğ´Èë<borrowPeriod>£¬¶øÊÇĞ´Èë<defaulBorrowPeriod>
-                // ÒòÎªÏÈÒª¸ø·şÎñÆ÷»ú»á£¬ÈÃËüÌ½²â¶ÁÕßÀàĞÍÕë¶Ô²áÀàĞÍµÄ½èÆÚ²ÎÊı£¬ÊµÔÚ²»ĞĞ²Å²ÉÓÃÕâÀï¸ø³öµÄÈ±Ê¡²ÎÊı¡£
+                // æ³¨ï¼šä¸èƒ½é²è½å†™å…¥<borrowPeriod>ï¼Œè€Œæ˜¯å†™å…¥<defaulBorrowPeriod>
+                // å› ä¸ºå…ˆè¦ç»™æœåŠ¡å™¨æœºä¼šï¼Œè®©å®ƒæ¢æµ‹è¯»è€…ç±»å‹é’ˆå¯¹å†Œç±»å‹çš„å€ŸæœŸå‚æ•°ï¼Œå®åœ¨ä¸è¡Œæ‰é‡‡ç”¨è¿™é‡Œç»™å‡ºçš„ç¼ºçœå‚æ•°ã€‚
 
 
                 // operTime
@@ -917,7 +917,7 @@ strUserName);
             }
             else
             {
-                strError = "²»ÄÜÊ¶±ğµÄfunction '" + strFunction + "'";
+                strError = "ä¸èƒ½è¯†åˆ«çš„function '" + strFunction + "'";
                 return -1;
             }
 
@@ -927,7 +927,7 @@ strUserName);
         }
 
         /// <summary>
-        /// »ñµÃ³öÄÉĞÅÏ¢µÄËŞÖ÷
+        /// è·å¾—å‡ºçº³ä¿¡æ¯çš„å®¿ä¸»
         /// </summary>
         internal ChargingInfoHost CharingInfoHost
         {

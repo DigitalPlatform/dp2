@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,27 +12,27 @@ using DigitalPlatform.Xml;
 
 namespace dp2Circulation
 {
-    // C# ½Å±¾ÖĞÒªÓÃµ½Õâ¸öÀàĞÍ is BindingForm
+    // C# è„šæœ¬ä¸­è¦ç”¨åˆ°è¿™ä¸ªç±»å‹ is BindingForm
     /// <summary>
-    /// ÏÔÊ¾ÆÚ¿¯×°¶©Í¼ĞÎ½çÃæµÄ¶Ô»°¿ò
+    /// æ˜¾ç¤ºæœŸåˆŠè£…è®¢å›¾å½¢ç•Œé¢çš„å¯¹è¯æ¡†
     /// </summary>
     public partial class BindingForm : Form
     {
-        // Ctrl+A×Ô¶¯´´½¨Êı¾İ
+        // Ctrl+Aè‡ªåŠ¨åˆ›å»ºæ•°æ®
         /// <summary>
-        /// ×Ô¶¯´´½¨Êı¾İ
+        /// è‡ªåŠ¨åˆ›å»ºæ•°æ®
         /// </summary>
         public event GenerateDataEventHandler GenerateData = null;
 
         const int WM_ENSURE_VISIBLE = API.WM_USER + 200;
 
         /// <summary>
-        /// ¿ò¼Ü´°¿Ú
+        /// æ¡†æ¶çª—å£
         /// </summary>
         public MainForm MainForm = null;
 
         /// <summary>
-        /// ÆÚ¿¯¿Ø¼şËù¹ØÁªµÄ ApplicationInfo ¶ÔÏó
+        /// æœŸåˆŠæ§ä»¶æ‰€å…³è”çš„ ApplicationInfo å¯¹è±¡
         /// </summary>
         public ApplicationInfo AppInfo 
         {
@@ -47,19 +47,19 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// »ñµÃ¶©¹ºĞÅÏ¢
+        /// è·å¾—è®¢è´­ä¿¡æ¯
         /// </summary>
         public event GetOrderInfoEventHandler GetOrderInfo = null;
 
         // public event GetItemInfoEventHandler GetItemInfo = null;
 
         /// <summary>
-        /// »ñµÃÖµÁĞ±í
+        /// è·å¾—å€¼åˆ—è¡¨
         /// </summary>
         public event GetValueTableEventHandler GetValueTable = null;
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public BindingForm()
         {
@@ -107,7 +107,7 @@ this.splitContainer_main,
             API.PostMessage(this.Handle, WM_ENSURE_VISIBLE, 0, 0);
         }
 
-        // »ñµÃË÷È¡ºÅ
+        // è·å¾—ç´¢å–å·
         void button_getAccessNo_Click(object sender, EventArgs e)
         {
 
@@ -118,7 +118,7 @@ this.splitContainer_main,
                     e1.ScriptEntry = "ManageCallNumber";
                 else
                     e1.ScriptEntry = "CreateCallNumber";
-                e1.FocusedControl = sender; // senderÎª×îÔ­Ê¼µÄ×Ó¿Ø¼ş
+                e1.FocusedControl = sender; // senderä¸ºæœ€åŸå§‹çš„å­æ§ä»¶
                 this.GenerateData(this, e1);
             }
         }
@@ -133,15 +133,15 @@ this.splitContainer_main,
             int index = this.BookItems.IndexOf(this.BookItem);
             if (index == -1)
             {
-                // Ôö²¹Ò»¸ö¶ÔÏó
+                // å¢è¡¥ä¸€ä¸ªå¯¹è±¡
                 item = new CallNumberItem();
                 callnumber_items.Add(item);
 
-                item.CallNumber = "";   // ²»Òª¸ø³öµ±Ç°µÄ£¬ÒÔÃâÓ°Ïìµ½È¡ºÅ½á¹û
+                item.CallNumber = "";   // ä¸è¦ç»™å‡ºå½“å‰çš„ï¼Œä»¥å…å½±å“åˆ°å–å·ç»“æœ
             }
             else
             {
-                // Ë¢ĞÂ×Ô¼ºµÄÎ»ÖÃ
+                // åˆ·æ–°è‡ªå·±çš„ä½ç½®
                 item = callnumber_items[index];
                 item.CallNumber = entityEditControl_editing.AccessNo;
             }
@@ -155,9 +155,9 @@ this.splitContainer_main,
 #endif
 
         /// <summary>
-        /// »ñµÃË÷È¡ºÅÊÂÏîÊı×é
+        /// è·å¾—ç´¢å–å·äº‹é¡¹æ•°ç»„
         /// </summary>
-        /// <returns>CallNumberItem Êı×é</returns>
+        /// <returns>CallNumberItem æ•°ç»„</returns>
         public List<CallNumberItem> GetCallNumberItems()
         {
             ItemBindingItem cur_item = null;
@@ -166,16 +166,16 @@ this.splitContainer_main,
                 cur_item = (ItemBindingItem)this.m_item;
             }
 
-            // ·µ»ØÍ¬Ò»ÖÖÆÚ¿¯ÄÚµÄÈ«²¿²áÊÂÏîĞÅÏ¢
+            // è¿”å›åŒä¸€ç§æœŸåˆŠå†…çš„å…¨éƒ¨å†Œäº‹é¡¹ä¿¡æ¯
             List<CallNumberItem> callnumber_items = this.bindingControl1.GetCallNumberItems(cur_item);
 
             {
                 CallNumberItem item = null;
-                // Ôö²¹Ò»¸ö¶ÔÏó
+                // å¢è¡¥ä¸€ä¸ªå¯¹è±¡
                 item = new CallNumberItem();
                 callnumber_items.Add(item);
 
-                item.CallNumber = "";   // ²»Òª¸ø³öµ±Ç°µÄ£¬ÒÔÃâÓ°Ïìµ½È¡ºÅ½á¹û
+                item.CallNumber = "";   // ä¸è¦ç»™å‡ºå½“å‰çš„ï¼Œä»¥å…å½±å“åˆ°å–å·ç»“æœ
 
                 item.RecPath = this.entityEditControl1.RecPath;
                 item.Location = entityEditControl1.LocationString;
@@ -187,9 +187,9 @@ this.splitContainer_main,
         }
 
         /// <summary>
-        /// È±Ê¡´°¿Ú¹ı³Ì
+        /// ç¼ºçœçª—å£è¿‡ç¨‹
         /// </summary>
-        /// <param name="m">ÏûÏ¢</param>
+        /// <param name="m">æ¶ˆæ¯</param>
         protected override void DefWndProc(ref Message m)
         {
             switch (m.Msg)
@@ -202,7 +202,7 @@ this.splitContainer_main,
         }
 
         /// <summary>
-        /// ×°ÔØÒÔÇ°´æ´¢µÄ×´Ì¬
+        /// è£…è½½ä»¥å‰å­˜å‚¨çš„çŠ¶æ€
         /// </summary>
         public void LoadState()
         {
@@ -215,20 +215,20 @@ this.splitContainer_main,
                 bEditAreaVisible = this.AppInfo.GetBoolean("bindingform",
                     "edit_area_visible", false);
             }
-            // Ò»¿ªÊ¼±à¼­ÇøÓòÊÇÒş²ØµÄ£¿»òÕß±£³ÖÉÏ´ÎµÄ×´Ì¬
+            // ä¸€å¼€å§‹ç¼–è¾‘åŒºåŸŸæ˜¯éšè—çš„ï¼Ÿæˆ–è€…ä¿æŒä¸Šæ¬¡çš„çŠ¶æ€
             VisibleEditArea(bEditAreaVisible);
 
             string strSplitterDirection = this.AppInfo.GetString(
                 "binding_form",
                 "splitter_direction",
-                "Ë®Æ½");
+                "æ°´å¹³");
 
-            if (strSplitterDirection == "´¹Ö±")
+            if (strSplitterDirection == "å‚ç›´")
                 this.splitContainer_main.Orientation = Orientation.Horizontal;
             else
                 this.splitContainer_main.Orientation = Orientation.Vertical;
 
-            // ÏÔÊ¾¶©¹ºĞÅÏ¢×ø±êÖµ
+            // æ˜¾ç¤ºè®¢è´­ä¿¡æ¯åæ ‡å€¼
             bool bValue = this.AppInfo.GetBoolean(
                 "binding_form",
                 "display_orderinfoxy",
@@ -239,7 +239,7 @@ this.splitContainer_main,
                 bNeedInvalidate = true;
             }
 
-            // ÏÔÊ¾·Ö¹İÍâ¶©¹º×é
+            // æ˜¾ç¤ºåˆ†é¦†å¤–è®¢è´­ç»„
              bValue = this.AppInfo.GetBoolean(
                 "binding_form",
                 "display_lockedOrderGroup",
@@ -250,13 +250,13 @@ this.splitContainer_main,
                 bNeedRelayout = true;
             }
 
-            // ÑéÊÕÅú´ÎºÅ
+            // éªŒæ”¶æ‰¹æ¬¡å·
             this.AcceptBatchNo = this.AppInfo.GetString(
                 "binding_form",
                 "accept_batchno",
                 "");
 
-            // ²á¸ñ×ÓÄÚÈİĞĞ
+            // å†Œæ ¼å­å†…å®¹è¡Œ
             {
                 string strLinesCfg = this.AppInfo.GetString(
         "binding_form",
@@ -278,7 +278,7 @@ this.splitContainer_main,
                 }
             }
 
-            // ×é¸ñ×ÓÄÚÈİĞĞ
+            // ç»„æ ¼å­å†…å®¹è¡Œ
             {
                 string strLinesCfg = this.AppInfo.GetString(
         "binding_form",
@@ -310,7 +310,7 @@ this.splitContainer_main,
                 // if (this.bindingControl1.HideLockedOrderGroup == false)
                 {
                     string strError = "";
-                    // °ÑÄÇĞ©µ±Ç°Òş²ØµÄºÏ¶©²áºÍ³ÉÔ±²áÊÔÍ¼ÖØĞÂ°²·ÅÒ»´Î
+                    // æŠŠé‚£äº›å½“å‰éšè—çš„åˆè®¢å†Œå’Œæˆå‘˜å†Œè¯•å›¾é‡æ–°å®‰æ”¾ä¸€æ¬¡
                     int nRet = this.bindingControl1.RelayoutHiddenBindingCell(out strError);
                     if (nRet == -1)
                         MessageBox.Show(this, strError);
@@ -325,7 +325,7 @@ this.splitContainer_main,
                 && this.DialogResult == DialogResult.Cancel)
             {
                 DialogResult dialog_result = MessageBox.Show(this,
-"´°¿ÚÄÚÈİ·¢Éú¹ıĞŞ¸Ä£¬Èô´ËÊ±¹Ø±Õ´°¿Ú½«µ¼ÖÂÕâĞ©ĞŞ¸Ä¶ªÊ§¡£\r\n\r\nÈ·ÊµÒª¹Ø±Õ´°¿Ú£¿",
+"çª—å£å†…å®¹å‘ç”Ÿè¿‡ä¿®æ”¹ï¼Œè‹¥æ­¤æ—¶å…³é—­çª—å£å°†å¯¼è‡´è¿™äº›ä¿®æ”¹ä¸¢å¤±ã€‚\r\n\r\nç¡®å®è¦å…³é—­çª—å£ï¼Ÿ",
 "BindingControls",
 MessageBoxButtons.YesNo,
 MessageBoxIcon.Question,
@@ -345,7 +345,7 @@ MessageBoxDefaultButton.Button2);
                 this.WindowState = FormWindowState.Normal;
             }
              * */
-            // ·Ö¸îÌõÎ»ÖÃ
+            // åˆ†å‰²æ¡ä½ç½®
             this.MainForm.SaveSplitterPos(
                 this.splitContainer_main,
                 "bindingform",
@@ -356,13 +356,13 @@ MessageBoxDefaultButton.Button2);
                 this.WindowState = old_state;
             }
              * */
-            // ÏÔÊ¾¶©¹ºĞÅÏ¢×ø±êÖµ
+            // æ˜¾ç¤ºè®¢è´­ä¿¡æ¯åæ ‡å€¼
             this.MainForm.AppInfo.SetBoolean(
                 "binding_form",
                 "display_orderinfoxy",
                 this.bindingControl1.DisplayOrderInfoXY);
 
-            // ÏÔÊ¾·Ö¹İÍâ¶©¹º×é
+            // æ˜¾ç¤ºåˆ†é¦†å¤–è®¢è´­ç»„
             this.MainForm.AppInfo.SetBoolean(
                 "binding_form",
                 "display_lockedOrderGroup",
@@ -392,7 +392,7 @@ MessageBoxDefaultButton.Button2);
         }
 
         /// <summary>
-        /// ÄÚÈİÊÇ·ñ·¢Éú¹ıĞŞ¸Ä
+        /// å†…å®¹æ˜¯å¦å‘ç”Ÿè¿‡ä¿®æ”¹
         /// </summary>
         public bool Changed
         {
@@ -439,7 +439,7 @@ MessageBoxDefaultButton.Button2);
         }
 
         /// <summary>
-        /// ²á¼ÇÂ¼±à¼­¿Ø¼ş¡£µ±Ç°Ñ¡¶¨µÄ²á¼ÇÂ¼
+        /// å†Œè®°å½•ç¼–è¾‘æ§ä»¶ã€‚å½“å‰é€‰å®šçš„å†Œè®°å½•
         /// </summary>
         public EntityEditControl EntityEditControl
         {
@@ -450,7 +450,7 @@ MessageBoxDefaultButton.Button2);
         }
 
 #if OLD_INITIAL
-        // ³õÊ¼»¯ÆÚ¼ä£¬×·¼ÓÒ»¸öÆÚ¶ÔÏó
+        // åˆå§‹åŒ–æœŸé—´ï¼Œè¿½åŠ ä¸€ä¸ªæœŸå¯¹è±¡
         public IssueBindingItem AppendIssue(string strXml,
             out string strError)
         {
@@ -462,7 +462,7 @@ MessageBoxDefaultButton.Button2);
             return this.bindingControl1.AppendIssue(strXml, out strError);
         }
 
-        // ³õÊ¼»¯ÆÚ¼ä£¬×·¼ÓÒ»¸öºÏ¶©²á¶ÔÏó
+        // åˆå§‹åŒ–æœŸé—´ï¼Œè¿½åŠ ä¸€ä¸ªåˆè®¢å†Œå¯¹è±¡
         public ItemBindingItem AppendBindItem(string strXml,
             out string strError)
         {
@@ -491,7 +491,7 @@ MessageBoxDefaultButton.Button2);
         }
 
 
-        // ³õÊ¼»¯
+        // åˆå§‹åŒ–
         public int Initial(out string strError)
         {
             if (this.bindingControl1.HasGetItemInfo() == false)
@@ -503,24 +503,24 @@ MessageBoxDefaultButton.Button2);
         }
 #endif
 
-        // ³õÊ¼»¯
+        // åˆå§‹åŒ–
         // parameters:
-        //      strLayoutMode   "auto" "accepting" "binding"¡£autoÎª×Ô¶¯Ä£Ê½£¬acceptingÎªÈ«²¿ĞĞÎª¼Çµ½£¬bindingÎªÈ«²¿ĞĞÎª×°¶©
+        //      strLayoutMode   "auto" "accepting" "binding"ã€‚autoä¸ºè‡ªåŠ¨æ¨¡å¼ï¼Œacceptingä¸ºå…¨éƒ¨è¡Œä¸ºè®°åˆ°ï¼Œbindingä¸ºå…¨éƒ¨è¡Œä¸ºè£…è®¢
         // return:
-        //      -1  ³ö´í
-        //      0   ³É¹¦
-        //      1   ³É¹¦£¬µ«ÓĞ¾¯¸æ¡£¾¯¸æĞÅÏ¢ÔÚstrErrorÖĞ
+        //      -1  å‡ºé”™
+        //      0   æˆåŠŸ
+        //      1   æˆåŠŸï¼Œä½†æœ‰è­¦å‘Šã€‚è­¦å‘Šä¿¡æ¯åœ¨strErrorä¸­
         /// <summary>
-        /// ³õÊ¼»¯
+        /// åˆå§‹åŒ–
         /// </summary>
-        /// <param name="strLayoutMode">²¼¾ÖÄ£Ê½¡£"auto" "accepting" "binding" Ö®Ò»¡£auto Îª×Ô¶¯Ä£Ê½£¬accepting ÎªÈ«²¿ĞĞÎª¼Çµ½£¬binding ÎªÈ«²¿ĞĞÎª×°¶©</param>
-        /// <param name="ItemXmls">²á¼ÇÂ¼ XML Êı×é</param>
-        /// <param name="IssueXmls">ÆÚ¼ÇÂ¼ XML Êı×é</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
+        /// <param name="strLayoutMode">å¸ƒå±€æ¨¡å¼ã€‚"auto" "accepting" "binding" ä¹‹ä¸€ã€‚auto ä¸ºè‡ªåŠ¨æ¨¡å¼ï¼Œaccepting ä¸ºå…¨éƒ¨è¡Œä¸ºè®°åˆ°ï¼Œbinding ä¸ºå…¨éƒ¨è¡Œä¸ºè£…è®¢</param>
+        /// <param name="ItemXmls">å†Œè®°å½• XML æ•°ç»„</param>
+        /// <param name="IssueXmls">æœŸè®°å½• XML æ•°ç»„</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
         /// <returns>
-        /// <para>-1: ³ö´í</para>>
-        /// <para>0: ³É¹¦</para>>
-        /// <para>1: ³É¹¦£¬µ«ÓĞ¾¯¸æ¡£¾¯¸æĞÅÏ¢ÔÚ strError ÖĞ</para>>
+        /// <para>-1: å‡ºé”™</para>>
+        /// <para>0: æˆåŠŸ</para>>
+        /// <para>1: æˆåŠŸï¼Œä½†æœ‰è­¦å‘Šã€‚è­¦å‘Šä¿¡æ¯åœ¨ strError ä¸­</para>>
         /// </returns>
         public int NewInitial(
             string strLayoutMode,
@@ -541,7 +541,7 @@ MessageBoxDefaultButton.Button2);
         }
 
         /// <summary>
-        /// ÊÇ·ñÎªĞÂ´´½¨µÄ²á¼ÇÂ¼ÉèÖÃ¡°¼Ó¹¤ÖĞ¡±×´Ì¬
+        /// æ˜¯å¦ä¸ºæ–°åˆ›å»ºçš„å†Œè®°å½•è®¾ç½®â€œåŠ å·¥ä¸­â€çŠ¶æ€
         /// </summary>
         public bool SetProcessingState
         {
@@ -556,7 +556,7 @@ MessageBoxDefaultButton.Button2);
         }
 
         /// <summary>
-        /// ÑéÊÕÅú´ÎºÅ
+        /// éªŒæ”¶æ‰¹æ¬¡å·
         /// </summary>
         public string AcceptBatchNo
         {
@@ -571,7 +571,7 @@ MessageBoxDefaultButton.Button2);
         }
 
         /// <summary>
-        /// ÑéÊÕÅú´ÎºÅÊÇ·ñÒÑ¾­ÔÚ½çÃæ±»ÊäÈëÁË
+        /// éªŒæ”¶æ‰¹æ¬¡å·æ˜¯å¦å·²ç»åœ¨ç•Œé¢è¢«è¾“å…¥äº†
         /// </summary>
         public bool AcceptBatchNoInputed
         {
@@ -585,9 +585,9 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
-        // »ñÈ¡ÖµÁĞ±íÊ±×÷ÎªÏßË÷µÄÊı¾İ¿âÃû
+        // è·å–å€¼åˆ—è¡¨æ—¶ä½œä¸ºçº¿ç´¢çš„æ•°æ®åº“å
         /// <summary>
-        /// ÊéÄ¿¿âÃû¡£»ñÈ¡ÖµÁĞ±íÊ±×÷ÎªÏßË÷µÄÊı¾İ¿âÃû
+        /// ä¹¦ç›®åº“åã€‚è·å–å€¼åˆ—è¡¨æ—¶ä½œä¸ºçº¿ç´¢çš„æ•°æ®åº“å
         /// </summary>
         public string BiblioDbName
         {
@@ -602,7 +602,7 @@ MessageBoxDefaultButton.Button2);
         }
 
         /// <summary>
-        /// µ±Ç°²Ù×÷ÕßÕÊ»§Ãû
+        /// å½“å‰æ“ä½œè€…å¸æˆ·å
         /// </summary>
         public string Operator
         {
@@ -617,7 +617,7 @@ MessageBoxDefaultButton.Button2);
         }
 
         /// <summary>
-        /// µ±Ç°ÓÃ»§¹ÜÏ½µÄ¹İ´úÂëÁĞ±í
+        /// å½“å‰ç”¨æˆ·ç®¡è¾–çš„é¦†ä»£ç åˆ—è¡¨
         /// </summary>
         public string LibraryCodeList
         {
@@ -648,15 +648,15 @@ MessageBoxDefaultButton.Button2);
         private void button_OK_Click(object sender, EventArgs e)
         {
             string strError = "";
-            // ÊÕÎ²×îºóÒ»´ÎÔÚ±à¼­ÇøÓòµÄĞŞ¸Ä
+            // æ”¶å°¾æœ€åä¸€æ¬¡åœ¨ç¼–è¾‘åŒºåŸŸçš„ä¿®æ”¹
             BackItem();
 
-            // ¶ÒÏÖ×îºóÒ»Ğ©×´Ì¬
+            // å…‘ç°æœ€åä¸€äº›çŠ¶æ€
             int nRet = this.bindingControl1.Finish(out strError);
             if (nRet == -1)
                 goto ERROR1;
 
-            // ¼ì²é
+            // æ£€æŸ¥
             nRet = this.bindingControl1.Check(out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -687,11 +687,11 @@ MessageBoxDefaultButton.Button2);
             string strError = "";
             int nRet = 0;
 
-            // ÊÕÎ²ÉÏ´ÎµÄ¶ÔÏó£¬´Ó±à¼­Æ÷µ½¶ÔÏó
+            // æ”¶å°¾ä¸Šæ¬¡çš„å¯¹è±¡ï¼Œä»ç¼–è¾‘å™¨åˆ°å¯¹è±¡
             if (this.orderDesignControl1.Changed == true
     && issue != null)
             {
-                // ½«order¿Ø¼şÖĞµÄĞÅÏ¢ĞŞ¸Ä¶ÒÏÖµ½IssueBindingItem¶ÔÏóÖĞ
+                // å°†orderæ§ä»¶ä¸­çš„ä¿¡æ¯ä¿®æ”¹å…‘ç°åˆ°IssueBindingItemå¯¹è±¡ä¸­
                 nRet = this.bindingControl1.GetFromOrderControl(
                     this.orderDesignControl1,
                     issue,
@@ -699,14 +699,14 @@ MessageBoxDefaultButton.Button2);
                 if (nRet == -1)
                     goto ERROR1;
 
-                if (nRet == 2)  // ÆÚĞÅÏ¢ÓĞ½øÒ»²½±ä»¯£¬ĞèÒªÉèÖÃµ½±à¼­Æ÷
+                if (nRet == 2)  // æœŸä¿¡æ¯æœ‰è¿›ä¸€æ­¥å˜åŒ–ï¼Œéœ€è¦è®¾ç½®åˆ°ç¼–è¾‘å™¨
                 {
                     string strOrderInfoMessage = "";
-                    // ¸ù¾İÆÚĞÅÏ¢³õÊ¼»¯²É¹º¿Ø¼ş
+                    // æ ¹æ®æœŸä¿¡æ¯åˆå§‹åŒ–é‡‡è´­æ§ä»¶
                     // return:
-                    //      -1  ³ö´í
-                    //      0   Ã»ÓĞÕÒµ½¶ÔÓ¦µÄ²É¹ºĞÅÏ¢
-                    //      1   ÕÒµ½²É¹ºĞÅÏ¢
+                    //      -1  å‡ºé”™
+                    //      0   æ²¡æœ‰æ‰¾åˆ°å¯¹åº”çš„é‡‡è´­ä¿¡æ¯
+                    //      1   æ‰¾åˆ°é‡‡è´­ä¿¡æ¯
                     nRet = this.bindingControl1.InitialOrderControl(
                         issue,
                         this.orderDesignControl1,
@@ -746,13 +746,13 @@ MessageBoxDefaultButton.Button2);
             string strError = "";
             int nRet = 0;
 
-            // ÊÕÎ²ÉÏ´ÎµÄ¶ÔÏó£¬´Ó±à¼­Æ÷µ½¶ÔÏó
+            // æ”¶å°¾ä¸Šæ¬¡çš„å¯¹è±¡ï¼Œä»ç¼–è¾‘å™¨åˆ°å¯¹è±¡
             if (this.entityEditControl1.Changed == true
     && item != null)
             {
                 string strXml = "";
                 nRet = this.entityEditControl1.GetData(
-                    false,  // ²»¼ì²éthis.Parent
+                    false,  // ä¸æ£€æŸ¥this.Parent
                     out strXml,
                     out strError);
                 if (nRet == -1)
@@ -776,7 +776,7 @@ MessageBoxDefaultButton.Button2);
             string strError = "";
             int nRet = 0;
 
-            // ÊÕÎ²ÉÏ´ÎµÄ¶ÔÏó£¬´Ó±à¼­Æ÷µ½¶ÔÏó
+            // æ”¶å°¾ä¸Šæ¬¡çš„å¯¹è±¡ï¼Œä»ç¼–è¾‘å™¨åˆ°å¯¹è±¡
             BackItem();
 
 #if ORDERDESIGN_CONTROL
@@ -784,7 +784,7 @@ MessageBoxDefaultButton.Button2);
 #endif
 
 
-            // ´Ó²á¶ÔÏóµ½±à¼­Æ÷
+            // ä»å†Œå¯¹è±¡åˆ°ç¼–è¾‘å™¨
             if (e.NewFocusObject is Cell)
             {
                 Cell cell = null;
@@ -809,7 +809,7 @@ MessageBoxDefaultButton.Button2);
                         this.entityEditControl1.SetReadOnly("binding");
                     this.entityEditControl1.Changed = false;
                     this.m_item = cell.item;
-                    this.entityEditControl1.ContentControl.Invalidate(); // ±³¾°ÓĞ¿ÉÄÜ¸Ä±ä
+                    this.entityEditControl1.ContentControl.Invalidate(); // èƒŒæ™¯æœ‰å¯èƒ½æ”¹å˜
                     this.entityEditControl1.Visible = true;
                     this.orderDesignControl1.Visible = false;
                     return;
@@ -819,7 +819,7 @@ MessageBoxDefaultButton.Button2);
 
             #if ORDERDESIGN_CONTROL
 
-            // ´ÓÆÚ¶ÔÏóµ½±à¼­Æ÷
+            // ä»æœŸå¯¹è±¡åˆ°ç¼–è¾‘å™¨
             if (e.NewFocusObject is IssueBindingItem)
             {
                 IssueBindingItem issue = null;
@@ -831,11 +831,11 @@ MessageBoxDefaultButton.Button2);
                 {
                     string strOrderInfoMessage = "";
 
-                    // ¸ù¾İÆÚĞÅÏ¢³õÊ¼»¯²É¹º¿Ø¼ş
+                    // æ ¹æ®æœŸä¿¡æ¯åˆå§‹åŒ–é‡‡è´­æ§ä»¶
                     // return:
-                    //      -1  ³ö´í
-                    //      0   Ã»ÓĞÕÒµ½¶ÔÓ¦µÄ²É¹ºĞÅÏ¢
-                    //      1   ÕÒµ½²É¹ºĞÅÏ¢
+                    //      -1  å‡ºé”™
+                    //      0   æ²¡æœ‰æ‰¾åˆ°å¯¹åº”çš„é‡‡è´­ä¿¡æ¯
+                    //      1   æ‰¾åˆ°é‡‡è´­ä¿¡æ¯
                     nRet = this.bindingControl1.InitialOrderControl(
                         issue,
                         this.orderDesignControl1,
@@ -871,7 +871,7 @@ MessageBoxDefaultButton.Button2);
         bool m_bEditAreaVisible = true;
 
         /// <summary>
-        /// ±à¼­ÇøÓòÊÇ·ñ¿É¼û
+        /// ç¼–è¾‘åŒºåŸŸæ˜¯å¦å¯è§
         /// </summary>
         public bool EditAreaVisible
         {
@@ -893,12 +893,12 @@ MessageBoxDefaultButton.Button2);
                 return;
             if (bVisible == false)
             {
-                // Òş²Ø±à¼­ÇøÓò¡£Ïàµ±ÓÚ°Ñ×°¶©¿Ø¼şÖ±½Ó·Åµ½¶¥²ã
+                // éšè—ç¼–è¾‘åŒºåŸŸã€‚ç›¸å½“äºæŠŠè£…è®¢æ§ä»¶ç›´æ¥æ”¾åˆ°é¡¶å±‚
 
-                // ´Ó¼¯ºÏÖĞÒÆ³ö×°¶©¿Ø¼ş
+                // ä»é›†åˆä¸­ç§»å‡ºè£…è®¢æ§ä»¶
                 this.splitContainer_main.Panel2.Controls.Remove(this.bindingControl1);
 
-                // ĞŞ¸Ä×°¶©¿Ø¼şµÄÎ»ÖÃºÍ³ß´ç
+                // ä¿®æ”¹è£…è®¢æ§ä»¶çš„ä½ç½®å’Œå°ºå¯¸
                 this.bindingControl1.Dock = DockStyle.None;
                 this.bindingControl1.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Bottom;
                 this.bindingControl1.Location = this.splitContainer_main.Location;
@@ -909,7 +909,7 @@ MessageBoxDefaultButton.Button2);
             }
             else
             {
-                // ÏÔÊ¾±à¼­ÇøÓò¡£Ïàµ±ÓÚ°Ñ·Ö¸î¿Ø¼şÖ±½Ó·Åµ½¶¥²ã
+                // æ˜¾ç¤ºç¼–è¾‘åŒºåŸŸã€‚ç›¸å½“äºæŠŠåˆ†å‰²æ§ä»¶ç›´æ¥æ”¾åˆ°é¡¶å±‚
                 this.splitContainer_main.Dock = DockStyle.None;
                 this.splitContainer_main.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top | AnchorStyles.Bottom;
                 this.splitContainer_main.Location = this.bindingControl1.Location;
@@ -960,7 +960,7 @@ MessageBoxDefaultButton.Button2);
         {
             this.VisibleEditArea(this.checkBox_displayEditArea.Checked);
 
-            // ÁîLoadState()¹¤×÷Õı³£
+            // ä»¤LoadState()å·¥ä½œæ­£å¸¸
             if (this.AppInfo != null)
             {
                 this.AppInfo.SetBoolean("bindingform",
@@ -970,10 +970,10 @@ MessageBoxDefaultButton.Button2);
 
         }
 
-        // Ñ¡Ïî
+        // é€‰é¡¹
         private void button_option1_Click(object sender, EventArgs e)
         {
-            // Í¬²½´æ´¢Öµ
+            // åŒæ­¥å­˜å‚¨å€¼
             this.MainForm.AppInfo.SetBoolean(
     "binding_form",
     "display_orderinfoxy",
@@ -997,8 +997,8 @@ MessageBoxDefaultButton.Button2);
             {
                 this.LoadState();
 
-                // TODO: ÏÔÊ¾ºÍÒş²Ø×´Ì¬µÄ¸Ä±ä£¬ĞèÒªÒıÆğÒ»´ÎÖØĞÂ³õÊ¼»¯²ÅĞĞ
-                // Ö÷ÒªÊÇÕÒ³öÀ´ÄÇĞ©ĞèÒªÏÔÊ¾µÄºÏ¶©²á¶ÔÏó¡£ĞèÒª×ÛºÏÅĞ¶ÏÆä³ÉÔ±ËùÊôµÄ¶©¹º×é
+                // TODO: æ˜¾ç¤ºå’Œéšè—çŠ¶æ€çš„æ”¹å˜ï¼Œéœ€è¦å¼•èµ·ä¸€æ¬¡é‡æ–°åˆå§‹åŒ–æ‰è¡Œ
+                // ä¸»è¦æ˜¯æ‰¾å‡ºæ¥é‚£äº›éœ€è¦æ˜¾ç¤ºçš„åˆè®¢å†Œå¯¹è±¡ã€‚éœ€è¦ç»¼åˆåˆ¤æ–­å…¶æˆå‘˜æ‰€å±çš„è®¢è´­ç»„
             }
         }
 
@@ -1076,7 +1076,7 @@ MessageBoxDefaultButton.Button2);
                 if (this.GenerateData != null)
                 {
                     GenerateDataEventArgs e1 = new GenerateDataEventArgs();
-                    e1.FocusedControl = sender; // senderÎª EntityEditControl
+                    e1.FocusedControl = sender; // senderä¸º EntityEditControl
                     this.GenerateData(this, e1);
                 }
                 e.e.SuppressKeyPress = true;    // 2015/5/28

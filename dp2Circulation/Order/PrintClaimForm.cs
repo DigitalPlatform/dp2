@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -31,18 +31,18 @@ using DigitalPlatform.CirculationClient.localhost;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ´òÓ¡´ßÑ¯µ¥´°
+    /// æ‰“å°å‚¬è¯¢å•çª—
     /// </summary>
     public partial class PrintClaimForm : MyForm
     {
-        // ×°ÔØÊı¾İÊ±µÄ·½Ê½
+        // è£…è½½æ•°æ®æ—¶çš„æ–¹å¼
         string SourceStyle = "";    // "bibliodatabase" "bibliorecpathfile" "orderdatabase" "orderrecpathfile"
 
-        // ÊéÉÌÃûºÍ OneSeller ¶ÔÏóµÄ¶ÔÕÕ±í
+        // ä¹¦å•†åå’Œ OneSeller å¯¹è±¡çš„å¯¹ç…§è¡¨
         Hashtable seller_table = new Hashtable();
 
         /// <summary>
-        /// ÕıÔÚ½øĞĞ´ßÑ¯²Ù×÷
+        /// æ­£åœ¨è¿›è¡Œå‚¬è¯¢æ“ä½œ
         /// </summary>
         bool Running = false;
 
@@ -51,7 +51,7 @@ namespace dp2Circulation
         public string Lang = "zh";
 
         /// <summary>
-        /// ¿ò¼Ü´°¿Ú
+        /// æ¡†æ¶çª—å£
         /// </summary>
         public MainForm MainForm = null;
         DigitalPlatform.Stop stop = null;
@@ -60,7 +60,7 @@ namespace dp2Circulation
         const int WM_LOADSIZE = API.WM_USER + 201;
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public PrintClaimForm()
         {
@@ -81,13 +81,13 @@ namespace dp2Circulation
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
 
             stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// ºÍÈİÆ÷¹ØÁª
+            stop.Register(MainForm.stopManager, true);	// å’Œå®¹å™¨å…³è”
 #endif
 
             this.comboBox_source_type.Text = this.MainForm.AppInfo.GetString(
                 "printclaimform",
                 "publication_type",
-                "Á¬Ğø³ö°æÎï");
+                "è¿ç»­å‡ºç‰ˆç‰©");
 
             this.checkBox_source_guess.Checked = this.MainForm.AppInfo.GetBoolean(
     "printclaimform",
@@ -106,18 +106,18 @@ namespace dp2Circulation
                 true);
 
 
-            // ÊäÈëµÄ¼ÇÂ¼Â·¾¶ÎÄ¼şÃû
+            // è¾“å…¥çš„è®°å½•è·¯å¾„æ–‡ä»¶å
             this.textBox_inputBiblioRecPathFilename.Text = this.MainForm.AppInfo.GetString(
                 "printclaimform",
                 "input_recpath_filename",
                 "");
 
 
-            // ÊäÈëµÄÊéÄ¿¿âÃû
+            // è¾“å…¥çš„ä¹¦ç›®åº“å
             this.comboBox_inputBiblioDbName.Text = this.MainForm.AppInfo.GetString(
                 "printclaimform",
                 "input_bibliodbname",
-                "<È«²¿>");
+                "<å…¨éƒ¨>");
 
             // 
             this.radioButton_inputStyle_orderRecPathFile.Checked = this.MainForm.AppInfo.GetBoolean(
@@ -131,20 +131,20 @@ false);
                 "inputstyle_orderdatabase",
                 false);
 
-            // ÊäÈëµÄ¶©¹º¿â¼ÇÂ¼Â·¾¶ÎÄ¼şÃû
+            // è¾“å…¥çš„è®¢è´­åº“è®°å½•è·¯å¾„æ–‡ä»¶å
             this.textBox_inputOrderRecPathFilename.Text = this.MainForm.AppInfo.GetString(
                 "printclaimform",
                 "input_orderrecpath_filename",
                 "");
 
 
-            // ÊäÈëµÄ¶©¹º¿âÃû
+            // è¾“å…¥çš„è®¢è´­åº“å
             this.comboBox_inputOrderDbName.Text = this.MainForm.AppInfo.GetString(
                 "printclaimform",
                 "input_orderdbname",
                 "");
 
-            // *** Ê±¼ä·¶Î§Ò³
+            // *** æ—¶é—´èŒƒå›´é¡µ
 
             this.checkBox_timeRange_usePublishTime.Checked = this.MainForm.AppInfo.GetBoolean(
                 "printclaimform",
@@ -166,7 +166,7 @@ false);
     "time_range_none",
     false);
 
-            // Ê±¼ä·¶Î§
+            // æ—¶é—´èŒƒå›´
             this.textBox_timeRange.Text = this.MainForm.AppInfo.GetString(
                 "printclaimform",
                 "time_range",
@@ -185,9 +185,9 @@ false);
 #if NO
             if (stop != null)
             {
-                if (stop.State == 0)    // 0 ±íÊ¾ÕıÔÚ´¦Àí
+                if (stop.State == 0)    // 0 è¡¨ç¤ºæ­£åœ¨å¤„ç†
                 {
-                    MessageBox.Show(this, "ÇëÔÚ¹Ø±Õ´°¿ÚÇ°Í£Ö¹ÕıÔÚ½øĞĞµÄ³¤Ê±²Ù×÷¡£");
+                    MessageBox.Show(this, "è¯·åœ¨å…³é—­çª—å£å‰åœæ­¢æ­£åœ¨è¿›è¡Œçš„é•¿æ—¶æ“ä½œã€‚");
                     e.Cancel = true;
                     return;
                 }
@@ -198,9 +198,9 @@ false);
         private void PrintClaimForm_FormClosed(object sender, FormClosedEventArgs e)
         {
 #if NO
-            if (stop != null) // ÍÑÀë¹ØÁª
+            if (stop != null) // è„±ç¦»å…³è”
             {
-                stop.Unregister();	// ºÍÈİÆ÷¹ØÁª
+                stop.Unregister();	// å’Œå®¹å™¨å…³è”
                 stop = null;
             }
 #endif
@@ -228,13 +228,13 @@ false);
 
 
 
-            // ÊäÈëµÄ¼ÇÂ¼Â·¾¶ÎÄ¼şÃû
+            // è¾“å…¥çš„è®°å½•è·¯å¾„æ–‡ä»¶å
             this.MainForm.AppInfo.SetString(
                 "printclaimform",
                 "input_recpath_filename",
                 this.textBox_inputBiblioRecPathFilename.Text);
 
-            // ÊäÈëµÄÊéÄ¿¿âÃû
+            // è¾“å…¥çš„ä¹¦ç›®åº“å
             this.MainForm.AppInfo.SetString(
                 "printclaimform",
                 "input_bibliodbname",
@@ -252,19 +252,19 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                 "inputstyle_orderdatabase",
                 this.radioButton_inputStyle_orderDatabase.Checked);
 
-            // ÊäÈëµÄ¶©¹º¿â¼ÇÂ¼Â·¾¶ÎÄ¼şÃû
+            // è¾“å…¥çš„è®¢è´­åº“è®°å½•è·¯å¾„æ–‡ä»¶å
             this.MainForm.AppInfo.SetString(
                 "printclaimform",
                 "input_orderrecpath_filename",
                 this.textBox_inputOrderRecPathFilename.Text);
 
-            // ÊäÈëµÄ¶©¹º¿âÃû
+            // è¾“å…¥çš„è®¢è´­åº“å
             this.MainForm.AppInfo.SetString(
                 "printclaimform",
                 "input_orderdbname",
                 this.comboBox_inputOrderDbName.Text);
 
-            // *** Ê±¼ä·¶Î§Ò³
+            // *** æ—¶é—´èŒƒå›´é¡µ
 
             this.MainForm.AppInfo.SetBoolean(
                 "printclaimform",
@@ -286,7 +286,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
     "time_range_none",
     this.checkBox_timeRange_none.Checked);
 
-            // Ê±¼ä·¶Î§
+            // æ—¶é—´èŒƒå›´
             this.MainForm.AppInfo.SetString(
                 "printclaimform",
                 "time_range",
@@ -298,7 +298,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
         void LoadSize()
         {
 #if NO
-            // ÉèÖÃ´°¿Ú³ß´ç×´Ì¬
+            // è®¾ç½®çª—å£å°ºå¯¸çŠ¶æ€
             MainForm.AppInfo.LoadMdiChildFormStates(this,
                 "mdi_form_state");
 #endif
@@ -334,7 +334,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
 #endif
 
             /*
-            // Èç¹ûMDI×Ó´°¿Ú²»ÊÇMainForm¸Õ¸Õ×¼±¸ÍË³öÊ±µÄ×´Ì¬£¬»Ö¸´Ëü¡£ÎªÁË¼ÇÒä³ß´ç×ö×¼±¸
+            // å¦‚æœMDIå­çª—å£ä¸æ˜¯MainFormåˆšåˆšå‡†å¤‡é€€å‡ºæ—¶çš„çŠ¶æ€ï¼Œæ¢å¤å®ƒã€‚ä¸ºäº†è®°å¿†å°ºå¯¸åšå‡†å¤‡
             if (this.WindowState != this.MainForm.MdiWindowState)
                 this.WindowState = this.MainForm.MdiWindowState;
              * */
@@ -353,9 +353,9 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
         }
 
         /// <summary>
-        /// È±Ê¡´°¿Ú¹ı³Ì
+        /// ç¼ºçœçª—å£è¿‡ç¨‹
         /// </summary>
-        /// <param name="m">ÏûÏ¢</param>
+        /// <param name="m">æ¶ˆæ¯</param>
         protected override void DefWndProc(ref Message m)
         {
             switch (m.Msg)
@@ -381,9 +381,9 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
 #endif
 
         /// <summary>
-        /// ÔÊĞí»òÕß½ûÖ¹½çÃæ¿Ø¼ş¡£ÔÚ³¤²Ù×÷Ç°£¬Ò»°ãĞèÒª½ûÖ¹½çÃæ¿Ø¼ş£»²Ù×÷Íê³ÉºóÔÙÔÊĞí
+        /// å…è®¸æˆ–è€…ç¦æ­¢ç•Œé¢æ§ä»¶ã€‚åœ¨é•¿æ“ä½œå‰ï¼Œä¸€èˆ¬éœ€è¦ç¦æ­¢ç•Œé¢æ§ä»¶ï¼›æ“ä½œå®Œæˆåå†å…è®¸
         /// </summary>
-        /// <param name="bEnable">ÊÇ·ñÔÊĞí½çÃæ¿Ø¼ş¡£true ÎªÔÊĞí£¬ false Îª½ûÖ¹</param>
+        /// <param name="bEnable">æ˜¯å¦å…è®¸ç•Œé¢æ§ä»¶ã€‚true ä¸ºå…è®¸ï¼Œ false ä¸ºç¦æ­¢</param>
         public override void EnableControls(bool bEnable)
         {
             this.comboBox_source_type.Enabled = bEnable;
@@ -409,13 +409,13 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
 
         public void SetBiblioRecPaths(List<string> recpaths)
         {
-            this.textBox_inputBiblioRecPathFilename.Text = StringUtil.MakePathList(recpaths) + ","; // È·±£ÖÁÉÙÓĞÒ»¸ö¶ººÅ
+            this.textBox_inputBiblioRecPathFilename.Text = StringUtil.MakePathList(recpaths) + ","; // ç¡®ä¿è‡³å°‘æœ‰ä¸€ä¸ªé€—å·
             this.radioButton_inputStyle_biblioRecPathFile.Checked = true;
         }
 
         public void SetOrderRecPaths(List<string> recpaths)
         {
-            this.textBox_inputOrderRecPathFilename.Text = StringUtil.MakePathList(recpaths) + ","; // È·±£ÖÁÉÙÓĞÒ»¸ö¶ººÅ
+            this.textBox_inputOrderRecPathFilename.Text = StringUtil.MakePathList(recpaths) + ","; // ç¡®ä¿è‡³å°‘æœ‰ä¸€ä¸ªé€—å·
             this.radioButton_inputStyle_orderRecPathFile.Checked = true;
         }
 
@@ -423,22 +423,22 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
         {
             get
             {
-                if (this.comboBox_source_type.Text == "Í¼Êé")
+                if (this.comboBox_source_type.Text == "å›¾ä¹¦")
                     return PublicationType.Book;
                 return PublicationType.Series;
             }
             set
             {
                 if (value == PublicationType.Book)
-                    this.comboBox_source_type.Text = "Í¼Êé";
+                    this.comboBox_source_type.Text = "å›¾ä¹¦";
                 else
-                    this.comboBox_source_type.Text = "Á¬Ğø³ö°æÎï";
+                    this.comboBox_source_type.Text = "è¿ç»­å‡ºç‰ˆç‰©";
             }
         }
 
-        // ÊäÈë·ç¸ñ
+        // è¾“å…¥é£æ ¼
         /// <summary>
-        /// ÊäÈë·½Ê½
+        /// è¾“å…¥æ–¹å¼
         /// </summary>
         public PrintClaimInputStyle InputStyle
         {
@@ -455,7 +455,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             }
         }
 
-        // ÔÚÊôĞÔÒ³ÖĞÊä³öÏÔÊ¾Ò»¸öÎÄ±¾ĞĞ
+        // åœ¨å±æ€§é¡µä¸­è¾“å‡ºæ˜¾ç¤ºä¸€ä¸ªæ–‡æœ¬è¡Œ
         void WriteTextLines(string strHtml)
         {
             /*
@@ -472,7 +472,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                 HttpUtility.HtmlEncode(strHtml));
         }
 
-        // ÔÚÊôĞÔÒ³ÖĞÊä³öÏÔÊ¾Ò»¸ö HTML ×Ö·û´®
+        // åœ¨å±æ€§é¡µä¸­è¾“å‡ºæ˜¾ç¤ºä¸€ä¸ª HTML å­—ç¬¦ä¸²
         void WriteHtml(string strHtml)
         {
             Global.WriteHtml(this.webBrowser_errorInfo,
@@ -482,14 +482,14 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
         static void OldSetHtmlString(WebBrowser webBrowser,
             string strHtml)
         {
-            // ¾¯¸æ ÕâÑùµ÷ÓÃ£¬²»»á×Ô¶¯<body onload='...'>ÊÂ¼ş
+            // è­¦å‘Š è¿™æ ·è°ƒç”¨ï¼Œä¸ä¼šè‡ªåŠ¨<body onload='...'>äº‹ä»¶
             HtmlDocument doc = webBrowser.Document;
 
             if (doc == null)
             {
                 webBrowser.Navigate("about:blank");
                 doc = webBrowser.Document;
-                Debug.Assert(doc != null, "doc²»Ó¦¸ÃÎªnull");
+                Debug.Assert(doc != null, "docä¸åº”è¯¥ä¸ºnull");
             }
 
             doc = doc.OpenNew(true);
@@ -499,12 +499,12 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
         // 2012//30
         // 
         /// <summary>
-        /// »ñµÃÒ»ÌõÊéÄ¿¼ÇÂ¼ÏÂÊôµÄÈ«²¿¶©¹º¼ÇÂ¼Â·¾¶
+        /// è·å¾—ä¸€æ¡ä¹¦ç›®è®°å½•ä¸‹å±çš„å…¨éƒ¨è®¢è´­è®°å½•è·¯å¾„
         /// </summary>
-        /// <param name="sw">Ò¦Ğ´ÈëµÄ StreamWriter ¶ÔÏó</param>
-        /// <param name="strBiblioRecPath">ÊéÄ¿¼ÇÂ¼Â·¾¶</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í£»>=0: ·µ»ØÊµ¼ÊĞ´ÈëµÄÂ·¾¶¸öÊı</returns>
+        /// <param name="sw">å§šå†™å…¥çš„ StreamWriter å¯¹è±¡</param>
+        /// <param name="strBiblioRecPath">ä¹¦ç›®è®°å½•è·¯å¾„</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™ï¼›>=0: è¿”å›å®é™…å†™å…¥çš„è·¯å¾„ä¸ªæ•°</returns>
         int GetChildOrderRedPath(StreamWriter sw,
             string strBiblioRecPath,
             out string strError)
@@ -542,7 +542,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                 {
                     if (orders[i].ErrorCode != ErrorCodeValue.NoError)
                     {
-                        strError = "Â·¾¶Îª '" + orders[i].OldRecPath + "' µÄ¶©¹º¼ÇÂ¼×°ÔØÖĞ·¢Éú´íÎó: " + orders[i].ErrorInfo;  // NewRecPath
+                        strError = "è·¯å¾„ä¸º '" + orders[i].OldRecPath + "' çš„è®¢è´­è®°å½•è£…è½½ä¸­å‘ç”Ÿé”™è¯¯: " + orders[i].ErrorInfo;  // NewRecPath
                         return -1;
                     }
 
@@ -558,7 +558,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
         }
 
         // 2012/8/30
-        // ¼ìË÷¶©¹º¿â£¬½«¶©¹º¼ÇÂ¼Â·¾¶Êä³öµ½ÎÄ¼ş
+        // æ£€ç´¢è®¢è´­åº“ï¼Œå°†è®¢è´­è®°å½•è·¯å¾„è¾“å‡ºåˆ°æ–‡ä»¶
         int SearchOrderRecPath(
             string strRecPathFilename,
             out string strError)
@@ -567,11 +567,11 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
 
             if (String.IsNullOrEmpty(this.comboBox_inputOrderDbName.Text) == true)
             {
-                strError = "ÉĞÎ´Ö¸¶¨¶©¹º¿âÃû";
+                strError = "å°šæœªæŒ‡å®šè®¢è´­åº“å";
                 return -1;
             }
 
-            // ´´½¨ÎÄ¼ş
+            // åˆ›å»ºæ–‡ä»¶
             StreamWriter sw = new StreamWriter(strRecPathFilename,
                 false,	// append
                 System.Text.Encoding.UTF8);
@@ -601,16 +601,16 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
 
                 DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
 
-                // ×°Èëä¯ÀÀ¸ñÊ½
+                // è£…å…¥æµè§ˆæ ¼å¼
                 for (; ; )
                 {
-                    Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                    Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                     if (stop != null)
                     {
                         if (stop.State != 0)
                         {
-                            strError = "ÓÃ»§ÖĞ¶Ï";
+                            strError = "ç”¨æˆ·ä¸­æ–­";
                             goto ERROR1;
                         }
                     }
@@ -629,13 +629,13 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
 
                     if (lRet == 0)
                     {
-                        strError = "Î´ÃüÖĞ";
+                        strError = "æœªå‘½ä¸­";
                         goto ERROR1;
                     }
 
                     Debug.Assert(searchresults != null, "");
 
-                    // ´¦Àíä¯ÀÀ½á¹û
+                    // å¤„ç†æµè§ˆç»“æœ
                     for (int i = 0; i < searchresults.Length; i++)
                     {
                         string strOrderRecPath = searchresults[i].Path;
@@ -646,7 +646,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                     lStart += searchresults.Length;
                     lCount -= searchresults.Length;
 
-                    stop.SetMessage("¹²ÓĞ¼ÇÂ¼ " + lHitCount.ToString() + " ¸ö¡£ÒÑ»ñµÃ¼ÇÂ¼ " + lStart.ToString() + " ¸ö");
+                    stop.SetMessage("å…±æœ‰è®°å½• " + lHitCount.ToString() + " ä¸ªã€‚å·²è·å¾—è®°å½• " + lStart.ToString() + " ä¸ª");
 
                     if (lStart >= lHitCount || lCount <= 0)
                         break;
@@ -664,9 +664,9 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
         }
 
         // 2012/8/30
-        // ¸ù¾İÊéÄ¿¿â¼ÇÂ¼Â·¾¶ÎÄ¼ş£¬µÃµ½ÏÂÊôµÄ¶©¹º¿â¼ÇÂ¼Â·¾¶
+        // æ ¹æ®ä¹¦ç›®åº“è®°å½•è·¯å¾„æ–‡ä»¶ï¼Œå¾—åˆ°ä¸‹å±çš„è®¢è´­åº“è®°å½•è·¯å¾„
         // parameters:
-        //      strBiblioRecPathFilename    ÊéÄ¿¿â¼ÇÂ¼Â·¾¶ÎÄ¼şÃû¡£Ò²¿ÉÒÔÊÇ¶ººÅ¼ä¸ôµÄÊéÄ¿¿â¼ÇÂ¼Â·¾¶ÁĞ±í
+        //      strBiblioRecPathFilename    ä¹¦ç›®åº“è®°å½•è·¯å¾„æ–‡ä»¶åã€‚ä¹Ÿå¯ä»¥æ˜¯é€—å·é—´éš”çš„ä¹¦ç›®åº“è®°å½•è·¯å¾„åˆ—è¡¨
         int GetOrderRecPath(string strBiblioRecPathFilename,
             string strOutputFilename,
             out string strError)
@@ -677,7 +677,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             string strTempFileName = "";
             if (strBiblioRecPathFilename.IndexOf(",") != -1)
             {
-                // ½«ÄÚÈİÏÈĞ´ÈëÒ»¸öÁÙÊ±ÎÄ¼ş
+                // å°†å†…å®¹å…ˆå†™å…¥ä¸€ä¸ªä¸´æ—¶æ–‡ä»¶
                 strTempFileName = this.MainForm.GetTempFileName("pcf_");
 
                 using (StreamWriter sw = new StreamWriter(strTempFileName, false, Encoding.UTF8))
@@ -687,7 +687,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                 strBiblioRecPathFilename = strTempFileName;
             }
 
-            // ´´½¨ÎÄ¼ş
+            // åˆ›å»ºæ–‡ä»¶
             using (StreamWriter sw = new StreamWriter(strOutputFilename,
                 false,	// append
                 System.Text.Encoding.UTF8))
@@ -707,38 +707,38 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                             if (String.IsNullOrEmpty(strBiblioRecPath) == true)
                                 continue;
 
-                            // ¼ì²éÊéÄ¿¿âÂ·¾¶
+                            // æ£€æŸ¥ä¹¦ç›®åº“è·¯å¾„
                             {
                                 string strDbName = Global.GetDbName(strBiblioRecPath);
                                 BiblioDbProperty prop = this.MainForm.GetBiblioDbProperty(strDbName);
 
                                 if (prop == null)
                                 {
-                                    strError = "¼ÇÂ¼Â·¾¶ '" + strBiblioRecPath + "' ÖĞµÄÊı¾İ¿âÃû '" + strDbName + "' ²»ÊÇÊéÄ¿¿âÃû";
+                                    strError = "è®°å½•è·¯å¾„ '" + strBiblioRecPath + "' ä¸­çš„æ•°æ®åº“å '" + strDbName + "' ä¸æ˜¯ä¹¦ç›®åº“å";
                                     return -1;
                                 }
 
                                 if (string.IsNullOrEmpty(prop.IssueDbName) == false)
                                 {
-                                    // ÆÚ¿¯¿â
-                                    if (this.comboBox_source_type.Text != "Á¬Ğø³ö°æÎï")
+                                    // æœŸåˆŠåº“
+                                    if (this.comboBox_source_type.Text != "è¿ç»­å‡ºç‰ˆç‰©")
                                     {
-                                        strError = "¼ÇÂ¼Â·¾¶ '" + strBiblioRecPath + "' ÖĞµÄÊéÄ¿¿âÃû '" + strDbName + "' ²»ÊÇÍ¼ÊéÀàĞÍ";
+                                        strError = "è®°å½•è·¯å¾„ '" + strBiblioRecPath + "' ä¸­çš„ä¹¦ç›®åº“å '" + strDbName + "' ä¸æ˜¯å›¾ä¹¦ç±»å‹";
                                         return -1;
                                     }
                                 }
                                 else
                                 {
-                                    // Í¼Êé¿â
-                                    if (this.comboBox_source_type.Text != "Í¼Êé")
+                                    // å›¾ä¹¦åº“
+                                    if (this.comboBox_source_type.Text != "å›¾ä¹¦")
                                     {
-                                        strError = "¼ÇÂ¼Â·¾¶ '" + strBiblioRecPath + "' ÖĞµÄÊéÄ¿¿âÃû '" + strDbName + "' ²»ÊÇÆÚ¿¯ÀàĞÍ";
+                                        strError = "è®°å½•è·¯å¾„ '" + strBiblioRecPath + "' ä¸­çš„ä¹¦ç›®åº“å '" + strDbName + "' ä¸æ˜¯æœŸåˆŠç±»å‹";
                                         return -1;
                                     }
                                 }
                             }
 
-                            // »ñµÃÒ»ÌõÊéÄ¿¼ÇÂ¼ÏÂÊôµÄÈ«²¿¶©¹º¼ÇÂ¼Â·¾¶
+                            // è·å¾—ä¸€æ¡ä¹¦ç›®è®°å½•ä¸‹å±çš„å…¨éƒ¨è®¢è´­è®°å½•è·¯å¾„
                             int nRet = GetChildOrderRedPath(sw,
                                 strBiblioRecPath,
                                 out strError);
@@ -750,7 +750,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                 }
                 catch (Exception ex)
                 {
-                    strError = "´¦ÀíÎÄ¼ş " + strBiblioRecPathFilename + " Ê±³ö´í: " + ex.Message;
+                    strError = "å¤„ç†æ–‡ä»¶ " + strBiblioRecPathFilename + " æ—¶å‡ºé”™: " + ex.Message;
                     return -1;
                 }
             }
@@ -762,7 +762,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
         }
 
         // 2012/8/3-
-        // ¼ìË÷ÊéÄ¿¿â£¬ »ñµÃÌØ¶¨Åú´ÎºÅ£¬»òÕßËùÓĞÊéÄ¿¼ÇÂ¼£¬È»ºó½«ÏÂÊôµÄ¶©¹º¼ÇÂ¼Â·¾¶Êä³öµ½ÎÄ¼ş
+        // æ£€ç´¢ä¹¦ç›®åº“ï¼Œ è·å¾—ç‰¹å®šæ‰¹æ¬¡å·ï¼Œæˆ–è€…æ‰€æœ‰ä¹¦ç›®è®°å½•ï¼Œç„¶åå°†ä¸‹å±çš„è®¢è´­è®°å½•è·¯å¾„è¾“å‡ºåˆ°æ–‡ä»¶
         int SearchBiblioOrderRecPath(
             string strBatchNo,
             string strRecPathFilename,
@@ -775,33 +775,33 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
 
             if (String.IsNullOrEmpty(strDbNameList) == true)
             {
-                if (this.comboBox_inputBiblioDbName.Text == "<È«²¿>"
+                if (this.comboBox_inputBiblioDbName.Text == "<å…¨éƒ¨>"
                     || this.comboBox_inputBiblioDbName.Text.ToLower() == "<all>"
                     || this.comboBox_inputBiblioDbName.Text == "")
                 {
-                    strError = "³ö°æÎïÀàĞÍ '" + this.comboBox_source_type.Text + "' ²»´æÔÚÆ¥ÅäµÄÊéÄ¿¿â";
+                    strError = "å‡ºç‰ˆç‰©ç±»å‹ '" + this.comboBox_source_type.Text + "' ä¸å­˜åœ¨åŒ¹é…çš„ä¹¦ç›®åº“";
                     return -1;
                 }
 
-                strError = "ÉĞÎ´Ö¸¶¨ÊéÄ¿¿âÃû";
+                strError = "å°šæœªæŒ‡å®šä¹¦ç›®åº“å";
                 return -1;
             }
 #endif
             if (String.IsNullOrEmpty(this.comboBox_inputBiblioDbName.Text) == true)
             {
-                strError = "ÉĞÎ´Ö¸¶¨ÊéÄ¿¿âÃû";
+                strError = "å°šæœªæŒ‡å®šä¹¦ç›®åº“å";
                 return -1;
             }
 
-            if (this.comboBox_inputBiblioDbName.Text == "<È«²¿>")
+            if (this.comboBox_inputBiblioDbName.Text == "<å…¨éƒ¨>")
             {
-                if (this.comboBox_source_type.Text == "Í¼Êé")
-                    this.comboBox_inputBiblioDbName.Text = "<È«²¿Í¼Êé>";
+                if (this.comboBox_source_type.Text == "å›¾ä¹¦")
+                    this.comboBox_inputBiblioDbName.Text = "<å…¨éƒ¨å›¾ä¹¦>";
                 else
-                    this.comboBox_inputBiblioDbName.Text = "<È«²¿ÆÚ¿¯>";
+                    this.comboBox_inputBiblioDbName.Text = "<å…¨éƒ¨æœŸåˆŠ>";
             }
 
-            // ´´½¨ÎÄ¼ş
+            // åˆ›å»ºæ–‡ä»¶
             StreamWriter sw = new StreamWriter(strRecPathFilename,
                 false,	// append
                 System.Text.Encoding.UTF8);
@@ -812,7 +812,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                 long lRet = 0;
                 string strQueryXml = "";
 
-                // ²»Ö¸¶¨Åú´ÎºÅ£¬ÒâÎ¶×ÅÌØ¶¨¿âÈ«²¿ÌõÂë
+                // ä¸æŒ‡å®šæ‰¹æ¬¡å·ï¼Œæ„å‘³ç€ç‰¹å®šåº“å…¨éƒ¨æ¡ç 
                 if (String.IsNullOrEmpty(strBatchNo) == true)
                 {
                     lRet = Channel.SearchBiblio(stop,
@@ -832,7 +832,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                 }
                 else
                 {
-                    // Ö¸¶¨Åú´ÎºÅ¡£ÌØ¶¨¿â¡£
+                    // æŒ‡å®šæ‰¹æ¬¡å·ã€‚ç‰¹å®šåº“ã€‚
                     lRet = Channel.SearchBiblio(stop,
                          this.comboBox_inputBiblioDbName.Text,
                          strBatchNo,
@@ -857,16 +857,16 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
 
                 DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
 
-                // ×°Èëä¯ÀÀ¸ñÊ½
+                // è£…å…¥æµè§ˆæ ¼å¼
                 for (; ; )
                 {
-                    Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                    Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                     if (stop != null)
                     {
                         if (stop.State != 0)
                         {
-                            strError = "ÓÃ»§ÖĞ¶Ï";
+                            strError = "ç”¨æˆ·ä¸­æ–­";
                             goto ERROR1;
                         }
                     }
@@ -886,13 +886,13 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
 
                     if (lRet == 0)
                     {
-                        strError = "Î´ÃüÖĞ";
+                        strError = "æœªå‘½ä¸­";
                         goto ERROR1;
                     }
 
                     Debug.Assert(searchresults != null, "");
 
-                    // ´¦Àíä¯ÀÀ½á¹û
+                    // å¤„ç†æµè§ˆç»“æœ
                     for (int i = 0; i < searchresults.Length; i++)
                     {
                         string strBiblioRecPath = searchresults[i].Path;
@@ -906,7 +906,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                     lStart += searchresults.Length;
                     lCount -= searchresults.Length;
 
-                    stop.SetMessage("¹²ÓĞ¼ÇÂ¼ " + lHitCount.ToString() + " ¸ö¡£ÒÑ»ñµÃ¼ÇÂ¼ " + lStart.ToString() + " ¸ö");
+                    stop.SetMessage("å…±æœ‰è®°å½• " + lHitCount.ToString() + " ä¸ªã€‚å·²è·å¾—è®°å½• " + lStart.ToString() + " ä¸ª");
 
                     if (lStart >= lHitCount || lCount <= 0)
                         break;
@@ -924,10 +924,10 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
         }
 
         // 2012/8/30
-        // ¹¹Ôì¶©¹º¿â¼ÇÂ¼Â·¾¶ÎÄ¼ş
+        // æ„é€ è®¢è´­åº“è®°å½•è·¯å¾„æ–‡ä»¶
         // return:
-        //      0   ÆÕÍ¨·µ»Ø
-        //      1   ÒªÈ«²¿ÖĞ¶Ï
+        //      0   æ™®é€šè¿”å›
+        //      1   è¦å…¨éƒ¨ä¸­æ–­
         int MakeOrderRecPathFile(
             out string strTempRecPathFilename,
             out string strError)
@@ -937,11 +937,11 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
 
             int nRet = 0;
 
-            // TODO: ÁÙÊ±ÎÄ¼şÊÇ·ñÉ¾³ı?
-            // ¼ÇÂ¼Â·¾¶ÁÙÊ±ÎÄ¼ş
+            // TODO: ä¸´æ—¶æ–‡ä»¶æ˜¯å¦åˆ é™¤?
+            // è®°å½•è·¯å¾„ä¸´æ—¶æ–‡ä»¶
             strTempRecPathFilename = this.MainForm.GetTempFileName("pcf_");
 
-            // Õû¸öÊéÄ¿¿â
+            // æ•´ä¸ªä¹¦ç›®åº“
             if (this.InputStyle == PrintClaimInputStyle.BiblioDatabase)
             {
                 this.SourceStyle = "bibliodatabase";
@@ -952,26 +952,26 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                     out strError);
                 if (nRet == -1)
                     return -1;
-                // strAccessPointName = "¼ÇÂ¼Â·¾¶";
+                // strAccessPointName = "è®°å½•è·¯å¾„";
             }
             else if (this.InputStyle == PrintClaimInputStyle.BiblioRecPathFile)
             {
                 this.SourceStyle = "bibliorecpathfile";
 
-                // ¸ù¾İÊéÄ¿¿â¼ÇÂ¼Â·¾¶ÎÄ¼ş£¬µÃµ½ÏÂÊôµÄ¶©¹º¿â¼ÇÂ¼Â·¾¶
+                // æ ¹æ®ä¹¦ç›®åº“è®°å½•è·¯å¾„æ–‡ä»¶ï¼Œå¾—åˆ°ä¸‹å±çš„è®¢è´­åº“è®°å½•è·¯å¾„
                 nRet = GetOrderRecPath(this.textBox_inputBiblioRecPathFilename.Text,
                     strTempRecPathFilename,
                     out strError);
                 if (nRet == -1)
                     return -1;
 
-                // strAccessPointName = "¼ÇÂ¼Â·¾¶";
+                // strAccessPointName = "è®°å½•è·¯å¾„";
             }
             else if (this.InputStyle == PrintClaimInputStyle.OrderDatabase)
             {
                 this.SourceStyle = "orderdatabase";
 
-                // ¼ìË÷¶©¹º¿â£¬½«¶©¹º¼ÇÂ¼Â·¾¶Êä³öµ½ÎÄ¼ş
+                // æ£€ç´¢è®¢è´­åº“ï¼Œå°†è®¢è´­è®°å½•è·¯å¾„è¾“å‡ºåˆ°æ–‡ä»¶
                 nRet = SearchOrderRecPath(
                     strTempRecPathFilename,
                     out strError);
@@ -981,7 +981,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             }
             else if (this.InputStyle == PrintClaimInputStyle.OrderRecPathFile)
             {
-                strError = "±¾º¯Êı²»ÄÜÓÃÓÚ´¦Àí´ËÇé¿ö";
+                strError = "æœ¬å‡½æ•°ä¸èƒ½ç”¨äºå¤„ç†æ­¤æƒ…å†µ";
                 return -1;
             }
             else
@@ -992,7 +992,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             return 0;
         }
 
-        // ×¼±¸Ê±¼ä¹ıÂË²ÎÊı
+        // å‡†å¤‡æ—¶é—´è¿‡æ»¤å‚æ•°
         int PrepareTimeFilter(out TimeFilter filter,
             out string strError)
         {
@@ -1019,13 +1019,13 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             if (this.checkBox_timeRange_useOrderTime.Checked == false
                 && this.checkBox_timeRange_usePublishTime.Checked == false)
             {
-                strError = "ÒªÇó³ö°æÊ±¼ä ºÍ ÒªÇó¶©¹ºÊ±¼äÂäÈëÖ¸¶¨·¶Î§£¬ĞèÒªÖÁÉÙÑ¡¶¨Ò»Ïî(³ı·ÇÑ¡¶¨ÁË¡°²»¹ıÂË¡±)";
+                strError = "è¦æ±‚å‡ºç‰ˆæ—¶é—´ å’Œ è¦æ±‚è®¢è´­æ—¶é—´è½å…¥æŒ‡å®šèŒƒå›´ï¼Œéœ€è¦è‡³å°‘é€‰å®šä¸€é¡¹(é™¤éé€‰å®šäº†â€œä¸è¿‡æ»¤â€)";
                 return -1;
             }
 
             if (string.IsNullOrEmpty(this.textBox_timeRange.Text) == true)
             {
-                strError = "ÉĞÎ´Éè¶¨Ê±¼ä·¶Î§Öµ";
+                strError = "å°šæœªè®¾å®šæ—¶é—´èŒƒå›´å€¼";
                 return -1;
             }
 
@@ -1043,7 +1043,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                 Debug.Assert(false, "");
             }
 
-            // È±Ê¡Ğ§¹ûÊÇÓÀÔ¶µÄ¹ıÈ¥-½ñÌìÏÖÔÚ
+            // ç¼ºçœæ•ˆæœæ˜¯æ°¸è¿œçš„è¿‡å»-ä»Šå¤©ç°åœ¨
             DateTime startTime = new DateTime(0);
             DateTime endTime = DateTime.Now;
 
@@ -1061,39 +1061,39 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             return 0;
         }
 
-        // »ñµÃÊı×ÖÖµ
+        // è·å¾—æ•°å­—å€¼
         static double GetValue(string strValue)
         {
-            if (strValue == "Ò»")
+            if (strValue == "ä¸€")
                 return 1;
-            if (strValue == "¶ş")
+            if (strValue == "äºŒ")
                 return 2;
-            if (strValue == "Á½")
+            if (strValue == "ä¸¤")
                 return 2;
-            if (strValue == "Èı")
+            if (strValue == "ä¸‰")
                 return 3;
-            if (strValue == "ËÄ")
+            if (strValue == "å››")
                 return 4;
-            if (strValue == "Îå")
+            if (strValue == "äº”")
                 return 5;
-            if (strValue == "Áù")
+            if (strValue == "å…­")
                 return 6;
-            if (strValue == "Æß")
+            if (strValue == "ä¸ƒ")
                 return 7;
-            if (strValue == "°Ë")
+            if (strValue == "å…«")
                 return 8;
-            if (strValue == "¾Å")
+            if (strValue == "ä¹")
                 return 9;
-            if (strValue == "Ê®")
+            if (strValue == "å")
                 return 10;
-            if (strValue == "Áã")
+            if (strValue == "é›¶")
                 return 0;
-            if (strValue == "°ë")
+            if (strValue == "åŠ")
                 return 0.5;
 
             double v = 0;
             if (double.TryParse(strValue, out v) == false)
-                throw new Exception("Êı×Ö '" + strValue + "' ¸ñÊ½´íÎó");
+                throw new Exception("æ•°å­— '" + strValue + "' æ ¼å¼é”™è¯¯");
 
             return v;
         }
@@ -1103,24 +1103,24 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             if (string.IsNullOrEmpty(strNameParam) == true)
                 return new TimeSpan();
 
-            if (strNameParam == "Á¢¼´")
+            if (strNameParam == "ç«‹å³")
                 return new TimeSpan();
 
-            string strName = strNameParam.Replace("ºó", "").Trim();
-            strName = strName.Replace("¸ö", "").Trim();
+            string strName = strNameParam.Replace("å", "").Trim();
+            strName = strName.Replace("ä¸ª", "").Trim();
 
-            if (strName.IndexOf("Äê") != -1)
+            if (strName.IndexOf("å¹´") != -1)
             {
-                string strNumber = strName.Replace("Äê", "").Trim();
+                string strNumber = strName.Replace("å¹´", "").Trim();
 
                 double v = GetValue(strNumber);
 
                 return new TimeSpan((int)((double)365 * v), 0, 0, 0);
             }
 
-            if (strName.IndexOf("ÔÂ") != -1)
+            if (strName.IndexOf("æœˆ") != -1)
             {
-                string strNumber = strName.Replace("ÔÂ", "").Trim();
+                string strNumber = strName.Replace("æœˆ", "").Trim();
 
                 double v = GetValue(strNumber);
 
@@ -1136,25 +1136,25 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                 return new TimeSpan((int)v, 0, 0, 0);
 
             }
-            if (strName.IndexOf("ÈÕ") != -1)
+            if (strName.IndexOf("æ—¥") != -1)
             {
-                string strNumber = strName.Replace("ÈÕ", "").Trim();
+                string strNumber = strName.Replace("æ—¥", "").Trim();
 
                 double v = GetValue(strNumber);
 
                 return new TimeSpan((int)(v * 24), 0, 0);
 
             }
-            if (strName.IndexOf("ÖÜ") != -1)
+            if (strName.IndexOf("å‘¨") != -1)
             {
-                string strNumber = strName.Replace("ÖÜ", "").Trim();
+                string strNumber = strName.Replace("å‘¨", "").Trim();
 
                 double v = GetValue(strNumber);
 
                 return new TimeSpan((int)((double)7 * v), 0, 0, 0);
             }
 
-            throw new Exception("ÎŞ·¨Ê¶±ğµÄÊ±¼ä³¤¶È '" + strNameParam + "'");
+            throw new Exception("æ— æ³•è¯†åˆ«çš„æ—¶é—´é•¿åº¦ '" + strNameParam + "'");
         }
 
 #if NO
@@ -1163,37 +1163,37 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             if (string.IsNullOrEmpty(strName) == true)
                 return new TimeSpan();
 
-            // Á¢¼´
-            if (strName == "Á¢¼´")
+            // ç«‹å³
+            if (strName == "ç«‹å³")
                 return new TimeSpan();
 
-            // Ò»ÖÜºó
-            if (strName == "Ò»ÖÜºó")
+            // ä¸€å‘¨å
+            if (strName == "ä¸€å‘¨å")
                 return new TimeSpan(7, 0, 0, 0);
 
-            if (strName == "°ëÄêºó")
+            if (strName == "åŠå¹´å")
                 return new TimeSpan(182, 0, 0, 0);
 
-            if (strName == "Ò»Äêºó")
+            if (strName == "ä¸€å¹´å")
                 return new TimeSpan(365, 0, 0, 0);
 
-            if (strName == "Á½Äêºó")
+            if (strName == "ä¸¤å¹´å")
                 return new TimeSpan(2 * 365, 0, 0, 0);
-            if (strName == "ÈıÄêºó")
+            if (strName == "ä¸‰å¹´å")
                 return new TimeSpan(3 * 365, 0, 0, 0);
 
-            if (strName == "ËÄÄêºó")
+            if (strName == "å››å¹´å")
                 return new TimeSpan(4 * 365, 0, 0, 0);
 
-            throw new Exception("²»ÄÜÊ¶±ğµÄÊ±¼ä³¤¶È '" + strName + "'");
+            throw new Exception("ä¸èƒ½è¯†åˆ«çš„æ—¶é—´é•¿åº¦ '" + strName + "'");
 
         }
 #endif
 
-        // ¶ÔÃ¿¸öÊéÄ¿¼ÇÂ¼½øĞĞÑ­»·
+        // å¯¹æ¯ä¸ªä¹¦ç›®è®°å½•è¿›è¡Œå¾ªç¯
         // return:
-        //      0   ÆÕÍ¨·µ»Ø
-        //      1   ÒªÈ«²¿ÖĞ¶Ï
+        //      0   æ™®é€šè¿”å›
+        //      1   è¦å…¨éƒ¨ä¸­æ–­
         int DoLoop(out string strError,
             out string strWarning)
         {
@@ -1209,7 +1209,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             this.seller_table.Clear();
 
 #if NO
-            // È±Ê¡Ğ§¹ûÊÇÓÀÔ¶µÄ¹ıÈ¥-½ñÌìÏÖÔÚ
+            // ç¼ºçœæ•ˆæœæ˜¯æ°¸è¿œçš„è¿‡å»-ä»Šå¤©ç°åœ¨
             DateTime startTime = new DateTime(0);
             DateTime endTime = DateTime.Now;
 
@@ -1224,27 +1224,27 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             }
 #endif
             TimeFilter filter = null;
-            // ×¼±¸Ê±¼ä¹ıÂË²ÎÊı
+            // å‡†å¤‡æ—¶é—´è¿‡æ»¤å‚æ•°
             nRet = PrepareTimeFilter(out filter,
                 out strError);
             if (nRet == -1)
             {
-                strError = "Ê±¼ä·¶Î§ÉèÖÃ²»ÕıÈ·: " + strError;
+                strError = "æ—¶é—´èŒƒå›´è®¾ç½®ä¸æ­£ç¡®: " + strError;
                 return -1;
             }
 
-            // Çå³ı´íÎóĞÅÏ¢´°¿ÚÖĞ²ĞÓàµÄÄÚÈİ
+            // æ¸…é™¤é”™è¯¯ä¿¡æ¯çª—å£ä¸­æ®‹ä½™çš„å†…å®¹
             OldSetHtmlString(this.webBrowser_errorInfo, "<pre>");
 
-            // ¼ÇÂ¼Â·¾¶ÁÙÊ±ÎÄ¼ş
+            // è®°å½•è·¯å¾„ä¸´æ—¶æ–‡ä»¶
             string strTempRecPathFilename = "";
             string strInputFilename = "";
 
-            // string strInputFileName = "";   // Íâ²¿Ö¸¶¨µÄÊäÈëÎÄ¼ş£¬ÎªÌõÂëºÅÎÄ¼ş»òÕß¼ÇÂ¼Â·¾¶ÎÄ¼ş¸ñÊ½
+            // string strInputFileName = "";   // å¤–éƒ¨æŒ‡å®šçš„è¾“å…¥æ–‡ä»¶ï¼Œä¸ºæ¡ç å·æ–‡ä»¶æˆ–è€…è®°å½•è·¯å¾„æ–‡ä»¶æ ¼å¼
             string strAccessPointName = "";
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ¼ìË÷ ...");
+            stop.Initial("æ­£åœ¨æ£€ç´¢ ...");
             stop.BeginLoop();
 
             EnableControls(false);
@@ -1258,7 +1258,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                         strInputFilename = this.textBox_inputOrderRecPathFilename.Text;
                     else
                     {
-                        // ½«ÄÚÈİÏÈĞ´ÈëÒ»¸öÁÙÊ±ÎÄ¼ş
+                        // å°†å†…å®¹å…ˆå†™å…¥ä¸€ä¸ªä¸´æ—¶æ–‡ä»¶
                         strTempRecPathFilename = this.MainForm.GetTempFileName("pcf_");
 
                         using (StreamWriter sw = new StreamWriter(strTempRecPathFilename, false, Encoding.UTF8))
@@ -1286,15 +1286,15 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                 }
                 catch (Exception ex)
                 {
-                    strError = "´ò¿ªÎÄ¼ş " + strInputFilename + " Ê§°Ü: " + ex.Message;
+                    strError = "æ‰“å¼€æ–‡ä»¶ " + strInputFilename + " å¤±è´¥: " + ex.Message;
                     return -1;
                 }
 
                 IssueHost issue_host = null;
                 BookHost order_host = null;
 
-                if (this.comboBox_source_type.Text == "Á¬Ğø³ö°æÎï"
-                    || this.comboBox_source_type.Text == "ÆÚ¿¯")
+                if (this.comboBox_source_type.Text == "è¿ç»­å‡ºç‰ˆç‰©"
+                    || this.comboBox_source_type.Text == "æœŸåˆŠ")
                 {
                     issue_host = new IssueHost();
                     issue_host.Channel = this.Channel;
@@ -1321,14 +1321,14 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
 
                     for (int nRecord=0; ;nRecord++)
                     {
-                        Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                        Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                         if (stop != null)
                         {
                             if (stop.State != 0)
                             {
                                 DialogResult result = MessageBox.Show(this,
-                                    "×¼±¸ÖĞ¶Ï¡£\r\n\r\nÈ·ÊµÒªÖĞ¶ÏÈ«²¿²Ù×÷? (Yes È«²¿ÖĞ¶Ï£»No ÖĞ¶ÏÑ­»·£¬µ«ÊÇ¼ÌĞøÊÕÎ²´¦Àí£»Cancel ·ÅÆúÖĞ¶Ï£¬¼ÌĞø²Ù×÷)",
+                                    "å‡†å¤‡ä¸­æ–­ã€‚\r\n\r\nç¡®å®è¦ä¸­æ–­å…¨éƒ¨æ“ä½œ? (Yes å…¨éƒ¨ä¸­æ–­ï¼›No ä¸­æ–­å¾ªç¯ï¼Œä½†æ˜¯ç»§ç»­æ”¶å°¾å¤„ç†ï¼›Cancel æ”¾å¼ƒä¸­æ–­ï¼Œç»§ç»­æ“ä½œ)",
                                     "bibliostatisform",
                                     MessageBoxButtons.YesNoCancel,
                                     MessageBoxIcon.Question,
@@ -1336,13 +1336,13 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
 
                                 if (result == DialogResult.Yes)
                                 {
-                                    strError = "ÓÃ»§ÖĞ¶Ï";
+                                    strError = "ç”¨æˆ·ä¸­æ–­";
                                     return -1;
                                 }
                                 if (result == DialogResult.No)
-                                    return 0;   // ¼Ù×°loopÕı³£½áÊø
+                                    return 0;   // å‡è£…loopæ­£å¸¸ç»“æŸ
 
-                                stop.Continue(); // ¼ÌĞøÑ­»·
+                                stop.Continue(); // ç»§ç»­å¾ªç¯
                             }
                         }
 
@@ -1357,50 +1357,50 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                             continue;
 
                         if (strOrderRecPath[0] == '#')
-                            continue;   // ×¢ÊÍĞĞ
+                            continue;   // æ³¨é‡Šè¡Œ
 
-                        // ¼ì²é¶©¹º¿âÂ·¾¶
+                        // æ£€æŸ¥è®¢è´­åº“è·¯å¾„
                         {
                             string strDbName = Global.GetDbName(strOrderRecPath);
                             string strBiblioDbName = this.MainForm.GetBiblioDbNameFromOrderDbName(strDbName);
                             if (string.IsNullOrEmpty(strBiblioDbName) == true)
                             {
-                                strError = "¼ÇÂ¼Â·¾¶ '" + strOrderRecPath + "' ÖĞµÄÊı¾İ¿âÃû '" + strDbName + "' ²»ÊÇ¶©¹º¿âÃû";
+                                strError = "è®°å½•è·¯å¾„ '" + strOrderRecPath + "' ä¸­çš„æ•°æ®åº“å '" + strDbName + "' ä¸æ˜¯è®¢è´­åº“å";
                                 return -1;
                             }
                             BiblioDbProperty prop = this.MainForm.GetBiblioDbProperty(strBiblioDbName);
                             if (prop == null)
                             {
-                                strError = "Êı¾İ¿âÃû '" + strBiblioDbName + "' ²»ÊÇÊéÄ¿¿âÃû";
+                                strError = "æ•°æ®åº“å '" + strBiblioDbName + "' ä¸æ˜¯ä¹¦ç›®åº“å";
                                 return -1;
                             }
 
                             if (string.IsNullOrEmpty(prop.IssueDbName) == false)
                             {
-                                // ÆÚ¿¯¿â
-                                if (this.comboBox_source_type.Text != "Á¬Ğø³ö°æÎï")
+                                // æœŸåˆŠåº“
+                                if (this.comboBox_source_type.Text != "è¿ç»­å‡ºç‰ˆç‰©")
                                 {
-                                    strError = "¼ÇÂ¼Â·¾¶ '" + strOrderRecPath + "' ÖĞµÄ¶©¹º¿âÃû '" + strDbName + "' ²»ÊÇÍ¼ÊéÀàĞÍ";
+                                    strError = "è®°å½•è·¯å¾„ '" + strOrderRecPath + "' ä¸­çš„è®¢è´­åº“å '" + strDbName + "' ä¸æ˜¯å›¾ä¹¦ç±»å‹";
                                     return -1;
                                 }
                             }
                             else
                             {
-                                // Í¼Êé¿â
-                                if (this.comboBox_source_type.Text != "Í¼Êé")
+                                // å›¾ä¹¦åº“
+                                if (this.comboBox_source_type.Text != "å›¾ä¹¦")
                                 {
-                                    strError = "¼ÇÂ¼Â·¾¶ '" + strOrderRecPath + "' ÖĞµÄ¶©¹º¿âÃû '" + strDbName + "' ²»ÊÇÆÚ¿¯ÀàĞÍ";
+                                    strError = "è®°å½•è·¯å¾„ '" + strOrderRecPath + "' ä¸­çš„è®¢è´­åº“å '" + strDbName + "' ä¸æ˜¯æœŸåˆŠç±»å‹";
                                     return -1;
                                 }
                             }
                         }
 
-                        stop.SetMessage("ÕıÔÚ»ñÈ¡µÚ " + (nRecord + 1).ToString() + " ¸ö¶©¹º¼ÇÂ¼£¬" + strAccessPointName + "Îª " + strOrderRecPath);
+                        stop.SetMessage("æ­£åœ¨è·å–ç¬¬ " + (nRecord + 1).ToString() + " ä¸ªè®¢è´­è®°å½•ï¼Œ" + strAccessPointName + "ä¸º " + strOrderRecPath);
 
                         stop.SetProgressValue(sr.BaseStream.Position);
                         // this.progressBar_records.Value = (int)sr.BaseStream.Position;
 
-                        // »ñµÃÊéÄ¿¼ÇÂ¼
+                        // è·å¾—ä¹¦ç›®è®°å½•
                         // string strOutputRecPath = "";
                         // byte[] baTimestamp = null;
 
@@ -1420,7 +1420,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                         string strBiblio = "";
                         // string strBiblioRecPath = "";
 
-                        // Result.Value -1³ö´í 0Ã»ÓĞÕÒµ½ 1ÕÒµ½ >1ÃüÖĞ¶àÓÚ1Ìõ
+                        // Result.Value -1å‡ºé”™ 0æ²¡æœ‰æ‰¾åˆ° 1æ‰¾åˆ° >1å‘½ä¸­å¤šäº1æ¡
                         lRet = Channel.GetBiblioInfo(
                             stop,
                             strAccessPoint,
@@ -1430,21 +1430,21 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                             out strError);
                         if (lRet == -1)
                         {
-                            strError = "»ñµÃÊéÄ¿¼ÇÂ¼ " + strAccessPoint + " Ê±·¢Éú´íÎó: " + strError;
+                            strError = "è·å¾—ä¹¦ç›®è®°å½• " + strAccessPoint + " æ—¶å‘ç”Ÿé”™è¯¯: " + strError;
                             this.WriteHtml(strError + "\r\n");
                             continue;
                         }
 
                         if (lRet == 0)
                         {
-                            strError = "ÊéÄ¿¼ÇÂ¼" + strAccessPointName + " " + strOrderRecPath + " ¶ÔÓ¦µÄXMLÊı¾İÃ»ÓĞÕÒµ½¡£";
+                            strError = "ä¹¦ç›®è®°å½•" + strAccessPointName + " " + strOrderRecPath + " å¯¹åº”çš„XMLæ•°æ®æ²¡æœ‰æ‰¾åˆ°ã€‚";
                             this.WriteHtml(strError + "\r\n");
                             continue;
                         }
 
                         if (lRet > 1)
                         {
-                            strError = "ÊéÄ¿¼ÇÂ¼" + strAccessPointName + " " + strOrderRecPath + " ¶ÔÓ¦Êı¾İ¶àÓÚÒ»Ìõ¡£";
+                            strError = "ä¹¦ç›®è®°å½•" + strAccessPointName + " " + strOrderRecPath + " å¯¹åº”æ•°æ®å¤šäºä¸€æ¡ã€‚";
                             this.WriteHtml(strError + "\r\n");
                             continue;
                         }
@@ -1454,7 +1454,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                         strXml = strBiblio;
 
 
-                        // ¿´¿´ÊÇ·ñÔÚÏ£ÍûÍ³¼ÆµÄ·¶Î§ÄÚ
+                        // çœ‹çœ‹æ˜¯å¦åœ¨å¸Œæœ›ç»Ÿè®¡çš„èŒƒå›´å†…
                         XmlDocument dom = new XmlDocument();
                         try
                         {
@@ -1462,11 +1462,11 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                         }
                         catch (Exception ex)
                         {
-                            strError = "ÊéÄ¿¼ÇÂ¼×°ÈëDOM·¢Éú´íÎó: " + ex.Message;
+                            strError = "ä¹¦ç›®è®°å½•è£…å…¥DOMå‘ç”Ÿé”™è¯¯: " + ex.Message;
                             continue;
                         }
 
-                        // strXmlÖĞÎªÊéÄ¿¼ÇÂ¼
+                        // strXmlä¸­ä¸ºä¹¦ç›®è®°å½•
                         string strBiblioDbName = Global.GetDbName(strOrderRecPath);
 
                         string strSyntax = this.MainForm.GetBiblioSyntax(strBiblioDbName);
@@ -1475,15 +1475,15 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
 
                         if (strSyntax == "usmarc" || strSyntax == "unimarc")
                         {
-                            // ½«XMLÊéÄ¿¼ÇÂ¼×ª»»ÎªMARC¸ñÊ½
+                            // å°†XMLä¹¦ç›®è®°å½•è½¬æ¢ä¸ºMARCæ ¼å¼
                             string strOutMarcSyntax = "";
                             string strMarc = "";
 
-                            // ½«MARCXML¸ñÊ½µÄxml¼ÇÂ¼×ª»»Îªmarc»úÄÚ¸ñÊ½×Ö·û´®
+                            // å°†MARCXMLæ ¼å¼çš„xmlè®°å½•è½¬æ¢ä¸ºmarcæœºå†…æ ¼å¼å­—ç¬¦ä¸²
                             // parameters:
-                            //		bWarning	==true, ¾¯¸æºó¼ÌĞø×ª»»,²»ÑÏ¸ñ¶Ô´ı´íÎó; = false, ·Ç³£ÑÏ¸ñ¶Ô´ı´íÎó,Óöµ½´íÎóºó²»¼ÌĞø×ª»»
-                            //		strMarcSyntax	Ö¸Ê¾marcÓï·¨,Èç¹û==""£¬Ôò×Ô¶¯Ê¶±ğ
-                            //		strOutMarcSyntax	out²ÎÊı£¬·µ»Ømarc£¬Èç¹ûstrMarcSyntax == ""£¬·µ»ØÕÒµ½marcÓï·¨£¬·ñÔò·µ»ØÓëÊäÈë²ÎÊıstrMarcSyntaxÏàÍ¬µÄÖµ
+                            //		bWarning	==true, è­¦å‘Šåç»§ç»­è½¬æ¢,ä¸ä¸¥æ ¼å¯¹å¾…é”™è¯¯; = false, éå¸¸ä¸¥æ ¼å¯¹å¾…é”™è¯¯,é‡åˆ°é”™è¯¯åä¸ç»§ç»­è½¬æ¢
+                            //		strMarcSyntax	æŒ‡ç¤ºmarcè¯­æ³•,å¦‚æœ==""ï¼Œåˆ™è‡ªåŠ¨è¯†åˆ«
+                            //		strOutMarcSyntax	outå‚æ•°ï¼Œè¿”å›marcï¼Œå¦‚æœstrMarcSyntax == ""ï¼Œè¿”å›æ‰¾åˆ°marcè¯­æ³•ï¼Œå¦åˆ™è¿”å›ä¸è¾“å…¥å‚æ•°strMarcSyntaxç›¸åŒçš„å€¼
                             nRet = MarcUtil.Xml2Marc(strXml,
                                 false,
                                 "", // strMarcSyntax
@@ -1498,7 +1498,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                                 if (strOutMarcSyntax != strSyntax
                                     && bSyntaxWarned == false)
                                 {
-                                    strWarning += "ÊéÄ¿¼ÇÂ¼ " + strOrderRecPath + " µÄsyntax '" + strOutMarcSyntax + "' ºÍÆäËùÊôÊı¾İ¿â '" + strBiblioDbName + "' µÄ¶¨Òåsyntax '" + strSyntax + "' ²»Ò»ÖÂ\r\n";
+                                    strWarning += "ä¹¦ç›®è®°å½• " + strOrderRecPath + " çš„syntax '" + strOutMarcSyntax + "' å’Œå…¶æ‰€å±æ•°æ®åº“ '" + strBiblioDbName + "' çš„å®šä¹‰syntax '" + strSyntax + "' ä¸ä¸€è‡´\r\n";
                                     bSyntaxWarned = true;
                                 }
                             }
@@ -1507,17 +1507,17 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                         }
                         else
                         {
-                            // ²»ÊÇMARC¸ñÊ½
+                            // ä¸æ˜¯MARCæ ¼å¼
                         }
 #endif
 
-                        if (this.comboBox_source_type.Text == "Á¬Ğø³ö°æÎï"
-                            || this.comboBox_source_type.Text == "ÆÚ¿¯")
+                        if (this.comboBox_source_type.Text == "è¿ç»­å‡ºç‰ˆç‰©"
+                            || this.comboBox_source_type.Text == "æœŸåˆŠ")
                         {
-                            // ´¦ÀíÆÚ¿¯
+                            // å¤„ç†æœŸåˆŠ
                             // return:
-                            //      0   Î´´¦Àí
-                            //      1   ÒÑ´¦Àí
+                            //      0   æœªå¤„ç†
+                            //      1   å·²å¤„ç†
                             nRet = ProcessIssues(
                                 issue_host,
                                 filter,
@@ -1525,10 +1525,10 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                         }
                         else
                         {
-                            // ´¦ÀíÍ¼Êé
+                            // å¤„ç†å›¾ä¹¦
                             // return:
-                            //      0   Î´´¦Àí
-                            //      1   ÒÑ´¦Àí
+                            //      0   æœªå¤„ç†
+                            //      1   å·²å¤„ç†
                             nRet = ProcessBooks(
                                 order_host,
                                 filter,
@@ -1539,12 +1539,12 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                             continue;
 
                         /*
-                        // ´¦ÀíÒ»ÌõÊéÄ¿¼ÇÂ¼ÒÔ¼°ÆäÏÂµÄ¶©¹º¡¢ÆÚ¼ÇÂ¼
+                        // å¤„ç†ä¸€æ¡ä¹¦ç›®è®°å½•ä»¥åŠå…¶ä¸‹çš„è®¢è´­ã€æœŸè®°å½•
                         nRet = host.LoadIssueRecords(strRecPath,
                             out strError);
                         if (nRet == -1)
                         {
-                            strError = "ÔÚIssueHostÖĞ×°Èë¼ÇÂ¼ " + strRecPath + " µÄÏÂÊôÆÚ¼ÇÂ¼Ê±·¢Éú´íÎó:" + strError;
+                            strError = "åœ¨IssueHostä¸­è£…å…¥è®°å½• " + strRecPath + " çš„ä¸‹å±æœŸè®°å½•æ—¶å‘ç”Ÿé”™è¯¯:" + strError;
                             this.WriteHtml(strError + "\r\n");
                             continue;
                         }
@@ -1553,7 +1553,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                             out strError);
                         if (nRet == -1)
                         {
-                            strError = "ÔÚIssueHostÖĞ×°Èë¼ÇÂ¼ " + strRecPath + " µÄÏÂÊô¶©¹º¼ÇÂ¼Ê±·¢Éú´íÎó: " + strError;
+                            strError = "åœ¨IssueHostä¸­è£…å…¥è®°å½• " + strRecPath + " çš„ä¸‹å±è®¢è´­è®°å½•æ—¶å‘ç”Ÿé”™è¯¯: " + strError;
                             this.WriteHtml(strError + "\r\n");
                             continue;
                         }
@@ -1561,7 +1561,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                         nRet = host.CreateIssues(out strError);
                         if (nRet == -1)
                         {
-                            strError = "ÔÚIssueHostÖĞCreateIssues() " + strRecPath + " error: " + strError;
+                            strError = "åœ¨IssueHostä¸­CreateIssues() " + strRecPath + " error: " + strError;
                             this.WriteHtml(strError + "\r\n");
                             continue;
                         }
@@ -1602,8 +1602,8 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
         }
 
         // return:
-        //      0   Î´´¦Àí
-        //      1   ÒÑ´¦Àí
+        //      0   æœªå¤„ç†
+        //      1   å·²å¤„ç†
         int ProcessIssues(
             IssueHost issue_host,
             TimeFilter filter,
@@ -1619,11 +1619,11 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             if (this.checkBox_debug.Checked == true)
                 debugInfo = new StringBuilder();
 
-            // ³õÊ¼»¯¿Ø¼ş
+            // åˆå§‹åŒ–æ§ä»¶
             // return:
             //      -1  error
-            //      0   Ã»ÓĞ¶©¹ºĞÅÏ¢
-            //      1   ³õÊ¼»¯³É¹¦
+            //      0   æ²¡æœ‰è®¢è´­ä¿¡æ¯
+            //      1   åˆå§‹åŒ–æˆåŠŸ
             int nRet = issue_host.Initial(strOrderRecPath,
                 this.checkBox_source_guess.Checked,
                 ref debugInfo,
@@ -1645,12 +1645,12 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             }
 
             List<IssueInfo> issue_infos = null;
-            // »ñµÃÆÚ¸÷ÖÖĞÅÏ¢
-            // Ã¿ÆÚÒ»ĞĞ£¬°´ÕÕÊéÉÌÃû½øĞĞÁË»ã×Ü
+            // è·å¾—æœŸå„ç§ä¿¡æ¯
+            // æ¯æœŸä¸€è¡Œï¼ŒæŒ‰ç…§ä¹¦å•†åè¿›è¡Œäº†æ±‡æ€»
             // return:
             //      -1  error
-            //      0   Ã»ÓĞÈÎºÎĞÅÏ¢
-            //      >0  ĞÅÏ¢¸öÊı
+            //      0   æ²¡æœ‰ä»»ä½•ä¿¡æ¯
+            //      >0  ä¿¡æ¯ä¸ªæ•°
             nRet = issue_host.GetIssueInfo(
                 out issue_infos,
                 out strError);
@@ -1662,16 +1662,16 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
 
             if (nRet != 0)
             {
-                this.WriteTextLines("´ÓÊôÓÚ " + issue_host.BiblioRecPath + "\r\n" + IssueHost.DumpIssueInfos(issue_infos) + "\r\n");
+                this.WriteTextLines("ä»å±äº " + issue_host.BiblioRecPath + "\r\n" + IssueHost.DumpIssueInfos(issue_infos) + "\r\n");
 
-                // ½«IssueInfoÊı×éÖĞ´¦ÔÚÖ¸¶¨Ê±¼ä·¶Î§ÒÔÍâµÄĞĞÒÆ³ı
+                // å°†IssueInfoæ•°ç»„ä¸­å¤„åœ¨æŒ‡å®šæ—¶é—´èŒƒå›´ä»¥å¤–çš„è¡Œç§»é™¤
                 string strDebugInfo = "";
                 IssueHost.RemoveOutofTimeRangeIssueInfos(ref issue_infos,
                     filter,
                     out strDebugInfo);
                 this.WriteTextLines(strDebugInfo + "\r\n");
 
-                // È¥³ıissue_infosÖĞÒÑ¾­µ½ÆëµÄĞĞ
+                // å»é™¤issue_infosä¸­å·²ç»åˆ°é½çš„è¡Œ
                 IssueHost.RemoveArrivedIssueInfos(ref issue_infos);
                 if (issue_infos.Count > 0)
                 {
@@ -1688,7 +1688,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                         string[] results = null;
                         byte[] timestamp = null;
 
-                        Debug.Assert(String.IsNullOrEmpty(strOrderRecPath) == false, "strRecPathÖµ²»ÄÜÎª¿Õ");
+                        Debug.Assert(String.IsNullOrEmpty(strOrderRecPath) == false, "strRecPathå€¼ä¸èƒ½ä¸ºç©º");
 
                         lRet = Channel.GetBiblioInfos(
                             stop,
@@ -1701,13 +1701,13 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                         if (lRet == -1 || lRet == 0)
                         {
                             if (lRet == 0 && String.IsNullOrEmpty(strError) == true)
-                                strError = "ÊéÄ¿¼ÇÂ¼ '" + issue_host.BiblioRecPath + "' ²»´æÔÚ";
+                                strError = "ä¹¦ç›®è®°å½• '" + issue_host.BiblioRecPath + "' ä¸å­˜åœ¨";
 
-                            strSummary = "»ñµÃÊéÄ¿ÕªÒªÊ±·¢Éú´íÎó: " + strError;
+                            strSummary = "è·å¾—ä¹¦ç›®æ‘˜è¦æ—¶å‘ç”Ÿé”™è¯¯: " + strError;
                         }
                         else
                         {
-                            Debug.Assert(results != null && results.Length == 3, "results±ØĞë°üº¬3¸öÔªËØ");
+                            Debug.Assert(results != null && results.Length == 3, "resultså¿…é¡»åŒ…å«3ä¸ªå…ƒç´ ");
                             strSummary = results[0];
                             strISBnISSN = results[1];
                             strTitle = results[2];
@@ -1715,7 +1715,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                     }
 
                     List<NamedIssueInfoCollection> series_results = null;
-                    // ½«IssueInfoÊı×éÅÅĞòºó°´ÕÕÊéÉÌÃû²ğ·ÖÎª¶ÀÁ¢µÄÊı×é
+                    // å°†IssueInfoæ•°ç»„æ’åºåæŒ‰ç…§ä¹¦å•†åæ‹†åˆ†ä¸ºç‹¬ç«‹çš„æ•°ç»„
                     series_results = IssueHost.SortIssueInfo(issue_infos);
 
                     for (int i = 0; i < series_results.Count; i++)
@@ -1724,16 +1724,16 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
 
                         string strAddressXml = "";
 
-                        // »ñµÃÊéÉÌµØÖ·
-                        if (list.Seller == "Ö±¶©"
-                            || list.Seller == "½»»»"
-                            || list.Seller == "Ôù")
+                        // è·å¾—ä¹¦å•†åœ°å€
+                        if (list.Seller == "ç›´è®¢"
+                            || list.Seller == "äº¤æ¢"
+                            || list.Seller == "èµ ")
                         {
                             strAddressXml = issue_host.GetAddressXml(list.Seller);
 
                             if (String.IsNullOrEmpty(strAddressXml) == true)
                             {
-                                this.WriteTextLines("*** ÌØÊâÇşµÀ " + list.Seller + " Î´ÄÜÔÚ¶©¹ºĞÅÏ¢ÖĞ·¢ÏÖÊéÉÌµØÖ·\r\n");
+                                this.WriteTextLines("*** ç‰¹æ®Šæ¸ é“ " + list.Seller + " æœªèƒ½åœ¨è®¢è´­ä¿¡æ¯ä¸­å‘ç°ä¹¦å•†åœ°å€\r\n");
                                 return 1;
                             }
 
@@ -1765,7 +1765,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                         else
                             exist_series.MergeIssueInfos(series);
 
-                        // Ê×´Î»ñµÃÊéÉÌµØÖ·
+                        // é¦–æ¬¡è·å¾—ä¹¦å•†åœ°å€
                         if (String.IsNullOrEmpty(seller.AddressXml) == true)
                             seller.AddressXml = strAddressXml;
                     }
@@ -1776,8 +1776,8 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
         }
 
         // return:
-        //      0   Î´´¦Àí
-        //      1   ÒÑ´¦Àí
+        //      0   æœªå¤„ç†
+        //      1   å·²å¤„ç†
         int ProcessBooks(
             BookHost book_host,
             TimeFilter filter,
@@ -1793,11 +1793,11 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             if (this.checkBox_debug.Checked == true)
                 debugInfo = new StringBuilder();
 
-            // ³õÊ¼»¯¿Ø¼ş
+            // åˆå§‹åŒ–æ§ä»¶
             // return:
             //      -1  error
-            //      0   Ã»ÓĞ¶©¹ºĞÅÏ¢
-            //      1   ³õÊ¼»¯³É¹¦
+            //      0   æ²¡æœ‰è®¢è´­ä¿¡æ¯
+            //      1   åˆå§‹åŒ–æˆåŠŸ
             int nRet = book_host.Initial(strOrderRecPath,
                 out strError);
             if (nRet == -1)
@@ -1815,12 +1815,12 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
 
             List<IssueInfo> issue_infos = null;
             string strWarning = "";
-            // »ñµÃÆÚ¸÷ÖÖĞÅÏ¢
-            // Ã¿ÆÚÒ»ĞĞ£¬°´ÕÕÊéÉÌÃû½øĞĞÁË»ã×Ü
+            // è·å¾—æœŸå„ç§ä¿¡æ¯
+            // æ¯æœŸä¸€è¡Œï¼ŒæŒ‰ç…§ä¹¦å•†åè¿›è¡Œäº†æ±‡æ€»
             // return:
             //      -1  error
-            //      0   Ã»ÓĞÈÎºÎĞÅÏ¢
-            //      >0  ĞÅÏ¢¸öÊı
+            //      0   æ²¡æœ‰ä»»ä½•ä¿¡æ¯
+            //      >0  ä¿¡æ¯ä¸ªæ•°
             nRet = book_host.GetOrderInfo(
                 filter,
                 out issue_infos,
@@ -1834,21 +1834,21 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
 
             if (string.IsNullOrEmpty(strWarning) == false)
             {
-                this.WriteTextLines("¾¯¸æ: " + strWarning + "\r\n");
+                this.WriteTextLines("è­¦å‘Š: " + strWarning + "\r\n");
             }
 
             if (nRet != 0)
             {
-                this.WriteTextLines("´ÓÊôÓÚ " + book_host.BiblioRecPath + "\r\n" + BookHost.DumpOrderInfos(issue_infos) + "\r\n");
+                this.WriteTextLines("ä»å±äº " + book_host.BiblioRecPath + "\r\n" + BookHost.DumpOrderInfos(issue_infos) + "\r\n");
 
-                // ½«IssueInfoÊı×éÖĞ´¦ÔÚÖ¸¶¨Ê±¼ä·¶Î§ÒÔÍâµÄĞĞÒÆ³ı
+                // å°†IssueInfoæ•°ç»„ä¸­å¤„åœ¨æŒ‡å®šæ—¶é—´èŒƒå›´ä»¥å¤–çš„è¡Œç§»é™¤
                 string strDebugInfo = "";
                 BookHost.RemoveOutofTimeRangeOrderInfos(ref issue_infos,
                     filter,
                     out strDebugInfo);
                 this.WriteTextLines(strDebugInfo + "\r\n");
 
-                // È¥³ıissue_infosÖĞÒÑ¾­µ½ÆëµÄĞĞ
+                // å»é™¤issue_infosä¸­å·²ç»åˆ°é½çš„è¡Œ
                 BookHost.RemoveArrivedOrderInfos(ref issue_infos);
                 if (issue_infos.Count > 0)
                 {
@@ -1866,7 +1866,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                         string[] results = null;
                         byte[] timestamp = null;
 
-                        Debug.Assert(String.IsNullOrEmpty(book_host.BiblioRecPath) == false, "book_host.BiblioRecPathÖµ²»ÄÜÎª¿Õ");
+                        Debug.Assert(String.IsNullOrEmpty(book_host.BiblioRecPath) == false, "book_host.BiblioRecPathå€¼ä¸èƒ½ä¸ºç©º");
 
                         lRet = Channel.GetBiblioInfos(
                             stop,
@@ -1879,13 +1879,13 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                         if (lRet == -1 || lRet == 0)
                         {
                             if (lRet == 0 && String.IsNullOrEmpty(strError) == true)
-                                strError = "ÊéÄ¿¼ÇÂ¼ '" + book_host.BiblioRecPath + "' ²»´æÔÚ";
+                                strError = "ä¹¦ç›®è®°å½• '" + book_host.BiblioRecPath + "' ä¸å­˜åœ¨";
 
-                            strSummary = "»ñµÃÊéÄ¿ÕªÒªÊ±·¢Éú´íÎó: " + strError;
+                            strSummary = "è·å¾—ä¹¦ç›®æ‘˜è¦æ—¶å‘ç”Ÿé”™è¯¯: " + strError;
                         }
                         else
                         {
-                            Debug.Assert(results != null && results.Length == 3, "results±ØĞë°üº¬3¸öÔªËØ");
+                            Debug.Assert(results != null && results.Length == 3, "resultså¿…é¡»åŒ…å«3ä¸ªå…ƒç´ ");
                             strSummary = results[0];
                             strISBnISSN = results[1];
                             strTitle = results[2];
@@ -1893,7 +1893,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                     }
 
                     List<NamedIssueInfoCollection> series_results = null;
-                    // ½«IssueInfoÊı×éÅÅĞòºó°´ÕÕÊéÉÌÃû²ğ·ÖÎª¶ÀÁ¢µÄÊı×é
+                    // å°†IssueInfoæ•°ç»„æ’åºåæŒ‰ç…§ä¹¦å•†åæ‹†åˆ†ä¸ºç‹¬ç«‹çš„æ•°ç»„
                     series_results = BookHost.SortOrderInfo(issue_infos);
 
                     for (int i = 0; i < series_results.Count; i++)
@@ -1902,16 +1902,16 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
 
                         string strAddressXml = "";
 
-                        // »ñµÃÊéÉÌµØÖ·
-                        if (list.Seller == "Ö±¶©"
-                            || list.Seller == "½»»»"
-                            || list.Seller == "Ôù")
+                        // è·å¾—ä¹¦å•†åœ°å€
+                        if (list.Seller == "ç›´è®¢"
+                            || list.Seller == "äº¤æ¢"
+                            || list.Seller == "èµ ")
                         {
                             strAddressXml = book_host.GetAddressXml(list.Seller);
 
                             if (String.IsNullOrEmpty(strAddressXml) == true)
                             {
-                                this.WriteTextLines("*** ÌØÊâÇşµÀ " + list.Seller + " Î´ÄÜÔÚ¶©¹ºĞÅÏ¢ÖĞ·¢ÏÖÊéÉÌµØÖ·\r\n");
+                                this.WriteTextLines("*** ç‰¹æ®Šæ¸ é“ " + list.Seller + " æœªèƒ½åœ¨è®¢è´­ä¿¡æ¯ä¸­å‘ç°ä¹¦å•†åœ°å€\r\n");
                                 return 1;
                             }
 
@@ -1942,7 +1942,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                         else
                             exist_series.MergeIssueInfos(series);
 
-                        // Ê×´Î»ñµÃÊéÉÌµØÖ·
+                        // é¦–æ¬¡è·å¾—ä¹¦å•†åœ°å€
                         if (String.IsNullOrEmpty(seller.AddressXml) == true)
                             seller.AddressXml = strAddressXml;
                     }
@@ -1953,8 +1953,8 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
         }
 
         // parameters:
-        //      strStyle    ÇşµÀÃû Îª Ö±¶©/½»»»/Ôù
-        //      strTitle    ÆÚ¿¯Ãû
+        //      strStyle    æ¸ é“å ä¸º ç›´è®¢/äº¤æ¢/èµ 
+        //      strTitle    æœŸåˆŠå
         static int BuildSellerName(
             string strStyle,
             string strTitle,
@@ -1976,7 +1976,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             }
             catch (Exception ex)
             {
-                strError = "µØÖ·XML¸ñÊ½²»ÕıÈ·: " + ex.Message;
+                strError = "åœ°å€XMLæ ¼å¼ä¸æ­£ç¡®: " + ex.Message;
                 return -1;
             }
 
@@ -1989,7 +1989,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             string strName = DomUtil.GetElementText(dom.DocumentElement,
                 "name");
 
-            if (strStyle == "Ö±¶©")
+            if (strStyle == "ç›´è®¢")
             {
                 if (String.IsNullOrEmpty(strDepartment) == false)
                     strSellerName = strDepartment
@@ -1997,13 +1997,13 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                         + "|" + strAddress
                         + "|" + strDepartment;
                 else
-                    strSellerName = "¡¶" + strTitle + "¡·±à¼­²¿"
+                    strSellerName = "ã€Š" + strTitle + "ã€‹ç¼–è¾‘éƒ¨"
                         + "|" + strZipcode
                         + "|" + strAddress
                         + "|" + strDepartment;
 
             }
-            else if (strStyle == "½»»»")
+            else if (strStyle == "äº¤æ¢")
             {
                 if (String.IsNullOrEmpty(strDepartment) == false)
                     strSellerName = strDepartment
@@ -2011,12 +2011,12 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                         + "|" + strAddress
                         + "|" + strDepartment;
                 else
-                    strSellerName = "¡¶" + strTitle + "¡·Ìá¹©Õß"
+                    strSellerName = "ã€Š" + strTitle + "ã€‹æä¾›è€…"
                         + "|" + strZipcode
                         + "|" + strAddress
                         + "|" + strDepartment;
             }
-            else if (strStyle == "Ôù")
+            else if (strStyle == "èµ ")
             {
                 if (String.IsNullOrEmpty(strName) == false)
                 {
@@ -2037,7 +2037,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             }
             else
             {
-                strError = "Î´ÖªµÄÇşµÀÃû '" + strStyle + "'";
+                strError = "æœªçŸ¥çš„æ¸ é“å '" + strStyle + "'";
                 return -1;
             }
 
@@ -2050,18 +2050,18 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             if (o != null)
                 return (OneSeller)o;
 
-            // ´´½¨Ò»¸öĞÂµÄ¶ÔÏó
+            // åˆ›å»ºä¸€ä¸ªæ–°çš„å¯¹è±¡
             OneSeller seller = new OneSeller();
             seller.Seller = strSeller;
             this.seller_table[strSeller] = seller;
             return seller;
         }
 
-        // ¸ù¾İ³ö°æÎïÀàĞÍ£¬»ñµÃÊı¾İ¿âÃûÁĞ±í
+        // æ ¹æ®å‡ºç‰ˆç‰©ç±»å‹ï¼Œè·å¾—æ•°æ®åº“ååˆ—è¡¨
         string GetBiblioDbNameList()
         {
-            // Ò»°ãĞÔµÄµ¥¸ö¿âÃû
-            if (this.comboBox_inputBiblioDbName.Text != "<È«²¿>"
+            // ä¸€èˆ¬æ€§çš„å•ä¸ªåº“å
+            if (this.comboBox_inputBiblioDbName.Text != "<å…¨éƒ¨>"
                 && this.comboBox_inputBiblioDbName.Text.ToLower() != "<all>"
                 && this.comboBox_inputBiblioDbName.Text != "")
                 return this.comboBox_inputBiblioDbName.Text;
@@ -2074,16 +2074,16 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                     BiblioDbProperty prop = this.MainForm.BiblioDbProperties[i];
 
                     if (String.IsNullOrEmpty(prop.OrderDbName) == true)
-                        continue;   // Ã»ÓĞ¶©¹º¹¦ÄÜµÄÊéÄ¿¿â²»ÔÚ¿¼ÂÇÖ®ÁĞ
+                        continue;   // æ²¡æœ‰è®¢è´­åŠŸèƒ½çš„ä¹¦ç›®åº“ä¸åœ¨è€ƒè™‘ä¹‹åˆ—
 
-                    if (this.comboBox_source_type.Text == "Í¼Êé")
+                    if (this.comboBox_source_type.Text == "å›¾ä¹¦")
                     {
                         if (String.IsNullOrEmpty(prop.IssueDbName) == false)
                             continue;
                     }
                     else
                     {
-                        // ÆÚ¿¯¡£ÒªÇóÆÚ¿âÃû²»Îª¿Õ
+                        // æœŸåˆŠã€‚è¦æ±‚æœŸåº“åä¸ä¸ºç©º
 
                         if (String.IsNullOrEmpty(prop.IssueDbName) == true)
                             continue;
@@ -2099,7 +2099,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             return StringUtil.MakePathList(dbnames, ",");
         }
 
-        // ¼ìË÷»ñµÃÌØ¶¨Åú´ÎºÅ£¬»òÕßËùÓĞÊéÄ¿¼ÇÂ¼Â·¾¶(Êä³öµ½ÎÄ¼ş)
+        // æ£€ç´¢è·å¾—ç‰¹å®šæ‰¹æ¬¡å·ï¼Œæˆ–è€…æ‰€æœ‰ä¹¦ç›®è®°å½•è·¯å¾„(è¾“å‡ºåˆ°æ–‡ä»¶)
         int SearchBiblioRecPath(
             string strBatchNo,
             string strRecPathFilename,
@@ -2111,19 +2111,19 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
 
             if (String.IsNullOrEmpty(strDbNameList) == true)
             {
-                if (this.comboBox_inputBiblioDbName.Text == "<È«²¿>"
+                if (this.comboBox_inputBiblioDbName.Text == "<å…¨éƒ¨>"
                     || this.comboBox_inputBiblioDbName.Text.ToLower() == "<all>"
                     || this.comboBox_inputBiblioDbName.Text == "")
                 {
-                    strError = "³ö°æÎïÀàĞÍ '" + this.comboBox_source_type.Text + "' ²»´æÔÚÆ¥ÅäµÄÊéÄ¿¿â";
+                    strError = "å‡ºç‰ˆç‰©ç±»å‹ '" + this.comboBox_source_type.Text + "' ä¸å­˜åœ¨åŒ¹é…çš„ä¹¦ç›®åº“";
                     return -1;
                 }
 
-                strError = "ÉĞÎ´Ö¸¶¨ÊéÄ¿¿âÃû";
+                strError = "å°šæœªæŒ‡å®šä¹¦ç›®åº“å";
                 return -1;
             }
 
-            // ´´½¨ÎÄ¼ş
+            // åˆ›å»ºæ–‡ä»¶
             StreamWriter sw = new StreamWriter(strRecPathFilename,
                 false,	// append
                 System.Text.Encoding.UTF8);
@@ -2131,7 +2131,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             try
             {
                 stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("ÕıÔÚ¼ìË÷ ...");
+                stop.Initial("æ­£åœ¨æ£€ç´¢ ...");
                 stop.BeginLoop();
 
                 EnableControls(false);
@@ -2141,7 +2141,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                     long lRet = 0;
                     string strQueryXml = "";
 
-                    // ²»Ö¸¶¨Åú´ÎºÅ£¬ÒâÎ¶×ÅÌØ¶¨¿âÈ«²¿ÌõÂë
+                    // ä¸æŒ‡å®šæ‰¹æ¬¡å·ï¼Œæ„å‘³ç€ç‰¹å®šåº“å…¨éƒ¨æ¡ç 
                     if (String.IsNullOrEmpty(strBatchNo) == true)
                     {
                         lRet = Channel.SearchBiblio(stop,
@@ -2161,7 +2161,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                     }
                     else
                     {
-                        // Ö¸¶¨Åú´ÎºÅ¡£ÌØ¶¨¿â¡£
+                        // æŒ‡å®šæ‰¹æ¬¡å·ã€‚ç‰¹å®šåº“ã€‚
                         lRet = Channel.SearchBiblio(stop,
                              strDbNameList,
                              strBatchNo,
@@ -2186,16 +2186,16 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
 
                     DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
 
-                    // ×°Èëä¯ÀÀ¸ñÊ½
+                    // è£…å…¥æµè§ˆæ ¼å¼
                     for (; ; )
                     {
-                        Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                        Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                         if (stop != null)
                         {
                             if (stop.State != 0)
                             {
-                                strError = "ÓÃ»§ÖĞ¶Ï";
+                                strError = "ç”¨æˆ·ä¸­æ–­";
                                 goto ERROR1;
                             }
                         }
@@ -2215,14 +2215,14 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
 
                         if (lRet == 0)
                         {
-                            strError = "Î´ÃüÖĞ";
+                            strError = "æœªå‘½ä¸­";
                             goto ERROR1;
                         }
 
                         Debug.Assert(searchresults != null, "");
 
 
-                        // ´¦Àíä¯ÀÀ½á¹û
+                        // å¤„ç†æµè§ˆç»“æœ
                         for (int i = 0; i < searchresults.Length; i++)
                         {
                             sw.Write(searchresults[i].Path + "\r\n");
@@ -2232,7 +2232,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                         lStart += searchresults.Length;
                         lCount -= searchresults.Length;
 
-                        stop.SetMessage("¹²ÓĞ¼ÇÂ¼ " + lHitCount.ToString() + " ¸ö¡£ÒÑ»ñµÃ¼ÇÂ¼ " + lStart.ToString() + " ¸ö");
+                        stop.SetMessage("å…±æœ‰è®°å½• " + lHitCount.ToString() + " ä¸ªã€‚å·²è·å¾—è®°å½• " + lStart.ToString() + " ä¸ª");
 
                         if (lStart >= lHitCount || lCount <= 0)
                             break;
@@ -2339,7 +2339,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                 }
                 else
                 {
-                    // Debug.Assert(false, "²»¿ÉÄÜ×ßµ½ÕâÀï");
+                    // Debug.Assert(false, "ä¸å¯èƒ½èµ°åˆ°è¿™é‡Œ");
                 }
             }
             else
@@ -2376,11 +2376,11 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             if (this.comboBox_inputBiblioDbName.Items.Count > 0)
                 return;
 
-            // this.comboBox_inputBiblioDbName.Items.Add("<È«²¿>");
-            if (this.comboBox_source_type.Text == "Í¼Êé")
-                this.comboBox_inputBiblioDbName.Items.Add("<È«²¿Í¼Êé>");
+            // this.comboBox_inputBiblioDbName.Items.Add("<å…¨éƒ¨>");
+            if (this.comboBox_source_type.Text == "å›¾ä¹¦")
+                this.comboBox_inputBiblioDbName.Items.Add("<å…¨éƒ¨å›¾ä¹¦>");
             else
-                this.comboBox_inputBiblioDbName.Items.Add("<È«²¿ÆÚ¿¯>");
+                this.comboBox_inputBiblioDbName.Items.Add("<å…¨éƒ¨æœŸåˆŠ>");
 
             if (this.MainForm.BiblioDbProperties != null)
             {
@@ -2389,16 +2389,16 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                     BiblioDbProperty prop = this.MainForm.BiblioDbProperties[i];
 
                     if (String.IsNullOrEmpty(prop.OrderDbName) == true)
-                        continue;   // Ã»ÓĞ¶©¹º¹¦ÄÜµÄÊéÄ¿¿â²»ÔÚ¿¼ÂÇÖ®ÁĞ
+                        continue;   // æ²¡æœ‰è®¢è´­åŠŸèƒ½çš„ä¹¦ç›®åº“ä¸åœ¨è€ƒè™‘ä¹‹åˆ—
 
-                    if (this.comboBox_source_type.Text == "Í¼Êé")
+                    if (this.comboBox_source_type.Text == "å›¾ä¹¦")
                     {
                         if (String.IsNullOrEmpty(prop.IssueDbName) == false)
                             continue;
                     }
                     else
                     {
-                        // ÆÚ¿¯¡£ÒªÇóÆÚ¿âÃû²»Îª¿Õ
+                        // æœŸåˆŠã€‚è¦æ±‚æœŸåº“åä¸ä¸ºç©º
 
                         if (String.IsNullOrEmpty(prop.IssueDbName) == true)
                             continue;
@@ -2419,7 +2419,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
 
 
 #if NO
-            // ¼ì²éÒ»ÏÂµ±Ç°ÒÑ¾­Ñ¡¶¨µÄÊéÄ¿¿âÃûºÍ³ö°æÎïÀàĞÍÊÇ·ñÃ¬¶Ü
+            // æ£€æŸ¥ä¸€ä¸‹å½“å‰å·²ç»é€‰å®šçš„ä¹¦ç›®åº“åå’Œå‡ºç‰ˆç‰©ç±»å‹æ˜¯å¦çŸ›ç›¾
              if (this.MainForm.BiblioDbProperties != null)
              {
                  for (int i = 0; i < this.MainForm.BiblioDbProperties.Count; i++)
@@ -2428,13 +2428,13 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
 
                      if (strText == prop.DbName)
                      {
-                         if (this.comboBox_source_type.Text == "Í¼Êé"
+                         if (this.comboBox_source_type.Text == "å›¾ä¹¦"
                              && String.IsNullOrEmpty(prop.IssueDbName) == false)
                          {
                              this.comboBox_inputBiblioDbName.Text = "";
                              break;
                          }
-                         else if (this.comboBox_source_type.Text == "Á¬Ğø³ö°æÎï"
+                         else if (this.comboBox_source_type.Text == "è¿ç»­å‡ºç‰ˆç‰©"
                              && String.IsNullOrEmpty(prop.IssueDbName) == true)
                          {
                              this.comboBox_inputBiblioDbName.Text = "";
@@ -2445,17 +2445,17 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             }
 #endif
 
-            // ¼ì²éÒ»ÏÂµ±Ç°ÒÑ¾­Ñ¡¶¨µÄ¶©¹º¿âÃûºÍ³ö°æÎïÀàĞÍÊÇ·ñÃ¬¶Ü
-            if (this.comboBox_source_type.Text == "Í¼Êé"
-    && this.comboBox_inputBiblioDbName.Text == "<È«²¿ÆÚ¿¯>")
+            // æ£€æŸ¥ä¸€ä¸‹å½“å‰å·²ç»é€‰å®šçš„è®¢è´­åº“åå’Œå‡ºç‰ˆç‰©ç±»å‹æ˜¯å¦çŸ›ç›¾
+            if (this.comboBox_source_type.Text == "å›¾ä¹¦"
+    && this.comboBox_inputBiblioDbName.Text == "<å…¨éƒ¨æœŸåˆŠ>")
             {
-                this.comboBox_inputBiblioDbName.Text = "<È«²¿Í¼Êé>";
+                this.comboBox_inputBiblioDbName.Text = "<å…¨éƒ¨å›¾ä¹¦>";
                 return;
             }
-            if (this.comboBox_source_type.Text == "Á¬Ğø³ö°æÎï"
-&& this.comboBox_inputBiblioDbName.Text == "<È«²¿Í¼Êé>")
+            if (this.comboBox_source_type.Text == "è¿ç»­å‡ºç‰ˆç‰©"
+&& this.comboBox_inputBiblioDbName.Text == "<å…¨éƒ¨å›¾ä¹¦>")
             {
-                this.comboBox_inputBiblioDbName.Text = "<È«²¿ÆÚ¿¯>";
+                this.comboBox_inputBiblioDbName.Text = "<å…¨éƒ¨æœŸåˆŠ>";
                 return;
             }
             string strText = this.comboBox_inputBiblioDbName.Text;
@@ -2467,13 +2467,13 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
 
                     if (strText == prop.DbName)
                     {
-                        if (this.comboBox_source_type.Text == "Í¼Êé"
+                        if (this.comboBox_source_type.Text == "å›¾ä¹¦"
                             && String.IsNullOrEmpty(prop.IssueDbName) == false)
                         {
                             this.comboBox_inputBiblioDbName.Text = "";
                             break;
                         }
-                        else if (this.comboBox_source_type.Text == "Á¬Ğø³ö°æÎï"
+                        else if (this.comboBox_source_type.Text == "è¿ç»­å‡ºç‰ˆç‰©"
                             && String.IsNullOrEmpty(prop.IssueDbName) == true)
                         {
                             this.comboBox_inputBiblioDbName.Text = "";
@@ -2492,17 +2492,17 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
 
              strText = this.comboBox_inputOrderDbName.Text;
 
-             // ¼ì²éÒ»ÏÂµ±Ç°ÒÑ¾­Ñ¡¶¨µÄ¶©¹º¿âÃûºÍ³ö°æÎïÀàĞÍÊÇ·ñÃ¬¶Ü
-             if (this.comboBox_source_type.Text == "Í¼Êé"
-     && this.comboBox_inputOrderDbName.Text == "<È«²¿ÆÚ¿¯>")
+             // æ£€æŸ¥ä¸€ä¸‹å½“å‰å·²ç»é€‰å®šçš„è®¢è´­åº“åå’Œå‡ºç‰ˆç‰©ç±»å‹æ˜¯å¦çŸ›ç›¾
+             if (this.comboBox_source_type.Text == "å›¾ä¹¦"
+     && this.comboBox_inputOrderDbName.Text == "<å…¨éƒ¨æœŸåˆŠ>")
              {
-                 this.comboBox_inputOrderDbName.Text = "<È«²¿Í¼Êé>";
+                 this.comboBox_inputOrderDbName.Text = "<å…¨éƒ¨å›¾ä¹¦>";
                  return;
              }
-             if (this.comboBox_source_type.Text == "Á¬Ğø³ö°æÎï"
-&& this.comboBox_inputOrderDbName.Text == "<È«²¿Í¼Êé>")
+             if (this.comboBox_source_type.Text == "è¿ç»­å‡ºç‰ˆç‰©"
+&& this.comboBox_inputOrderDbName.Text == "<å…¨éƒ¨å›¾ä¹¦>")
              {
-                 this.comboBox_inputOrderDbName.Text = "<È«²¿ÆÚ¿¯>";
+                 this.comboBox_inputOrderDbName.Text = "<å…¨éƒ¨æœŸåˆŠ>";
                  return;
              }
              if (this.MainForm.BiblioDbProperties != null)
@@ -2513,13 +2513,13 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
 
                      if (strText == prop.OrderDbName)
                      {
-                         if (this.comboBox_source_type.Text == "Í¼Êé"
+                         if (this.comboBox_source_type.Text == "å›¾ä¹¦"
                              && String.IsNullOrEmpty(prop.IssueDbName) == false)
                          {
                              this.comboBox_inputOrderDbName.Text = "";
                              break;
                          }
-                         else if (this.comboBox_source_type.Text == "Á¬Ğø³ö°æÎï"
+                         else if (this.comboBox_source_type.Text == "è¿ç»­å‡ºç‰ˆç‰©"
                              && String.IsNullOrEmpty(prop.IssueDbName) == true)
                          {
                              this.comboBox_inputOrderDbName.Text = "";
@@ -2541,7 +2541,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                 {
                     if (this.textBox_inputBiblioRecPathFilename.Text == "")
                     {
-                        strError = "ÉĞÎ´Ö¸¶¨ÊäÈëµÄÊéÄ¿¿â¼ÇÂ¼Â·¾¶ÎÄ¼şÃû";
+                        strError = "å°šæœªæŒ‡å®šè¾“å…¥çš„ä¹¦ç›®åº“è®°å½•è·¯å¾„æ–‡ä»¶å";
                         goto ERROR1;
                     }
                 }
@@ -2549,7 +2549,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                 {
                     if (this.comboBox_inputBiblioDbName.Text == "")
                     {
-                        strError = "ÉĞÎ´Ö¸¶¨ÊéÄ¿¿âÃû";
+                        strError = "å°šæœªæŒ‡å®šä¹¦ç›®åº“å";
                         goto ERROR1;
                     }
                 }
@@ -2557,7 +2557,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                 {
                     if (this.textBox_inputOrderRecPathFilename.Text == "")
                     {
-                        strError = "ÉĞÎ´Ö¸¶¨ÊäÈëµÄ¶©¹º¿â¼ÇÂ¼Â·¾¶ÎÄ¼şÃû";
+                        strError = "å°šæœªæŒ‡å®šè¾“å…¥çš„è®¢è´­åº“è®°å½•è·¯å¾„æ–‡ä»¶å";
                         goto ERROR1;
                     }
                 }
@@ -2565,12 +2565,12 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                 {
                     if (this.comboBox_inputOrderDbName.Text == "")
                     {
-                        strError = "ÉĞÎ´Ö¸¶¨¶©¹º¿âÃû";
+                        strError = "å°šæœªæŒ‡å®šè®¢è´­åº“å";
                         goto ERROR1;
                     }
                 }
 
-                // ÇĞ»»µ½ÈÕÆÚ·¶Î§page
+                // åˆ‡æ¢åˆ°æ—¥æœŸèŒƒå›´page
                 this.tabControl_main.SelectedTab = this.tabPage_timeRange;
                 return;
             }
@@ -2579,7 +2579,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             {
                 if (this.textBox_timeRange.Text == "")
                 {
-                    strError = "ÉĞÎ´Ö¸¶¨´ßÑ¯ÈÕÆÚ·¶Î§";
+                    strError = "å°šæœªæŒ‡å®šå‚¬è¯¢æ—¥æœŸèŒƒå›´";
                     goto ERROR1;
                 }
                 this.tabControl_main.SelectedTab = this.tabPage_run;
@@ -2590,10 +2590,10 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                 this.Running = true;
                 try
                 {
-                    // ¶ÔÃ¿¸öÊéÄ¿¼ÇÂ¼½øĞĞÑ­»·
+                    // å¯¹æ¯ä¸ªä¹¦ç›®è®°å½•è¿›è¡Œå¾ªç¯
                     // return:
-                    //      0   ÆÕÍ¨·µ»Ø
-                    //      1   ÒªÈ«²¿ÖĞ¶Ï
+                    //      0   æ™®é€šè¿”å›
+                    //      1   è¦å…¨éƒ¨ä¸­æ–­
                     int nRet = DoLoop(out strError,
                         out strWarning);
                     if (nRet == -1)
@@ -2604,7 +2604,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                     this.Running = false;
                 }
 
-                MessageBox.Show(this, "Í³¼ÆÍê³É¡£");
+                MessageBox.Show(this, "ç»Ÿè®¡å®Œæˆã€‚");
                 this.tabControl_main.SelectedTab = this.tabPage_print;
                 this.button_next.Enabled = false;
                 return;
@@ -2616,7 +2616,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             }
 
             if (String.IsNullOrEmpty(strWarning) == false)
-                MessageBox.Show(this, "¾¯¸æ: \r\n" + strWarning);
+                MessageBox.Show(this, "è­¦å‘Š: \r\n" + strWarning);
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -2636,14 +2636,14 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             this.button_next.Enabled = true;
         }
 
-        // ´òÓ¡´ßÑ¯µ¥
+        // æ‰“å°å‚¬è¯¢å•
         private void button_print_Click(object sender, EventArgs e)
         {
             string strError = "";
 
             if (this.seller_table.Count == 0)
             {
-                strError = "Ä¿Ç°Ã»ÓĞ¿É´òÓ¡µÄÄÚÈİ";
+                strError = "ç›®å‰æ²¡æœ‰å¯æ‰“å°çš„å†…å®¹";
                 goto ERROR1;
             }
 
@@ -2665,7 +2665,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
 
                 HtmlPrintForm printform = new HtmlPrintForm();
 
-                printform.Text = "´òÓ¡´ßÑ¯µ¥";
+                printform.Text = "æ‰“å°å‚¬è¯¢å•";
                 printform.MainForm = this.MainForm;
                 printform.Filenames = filenames;
                 this.MainForm.AppInfo.LinkFormState(printform, "printclaim_htmlprint_formstate");
@@ -2687,7 +2687,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             MessageBox.Show(this, strError);
         }
 
-        // »ñµÃ´¿´âµÄÊéÉÌÃû£¬¶ªµô'|'ºóÃæµÄ²¿·Ö
+        // è·å¾—çº¯ç²¹çš„ä¹¦å•†åï¼Œä¸¢æ‰'|'åé¢çš„éƒ¨åˆ†
         static string GetPureSellerName(string strText)
         {
             int nRet = strText.IndexOf("|");
@@ -2697,7 +2697,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             return strText.Substring(0, nRet);
         }
 
-        // ¹¹Ôì´¿ÎÄ±¾µÄÓÊ¼ÄµØÖ·×Ö·û´®
+        // æ„é€ çº¯æ–‡æœ¬çš„é‚®å¯„åœ°å€å­—ç¬¦ä¸²
         // parameters:
         static int BuildAddressText(
             string strAddressXml,
@@ -2718,7 +2718,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             }
             catch (Exception ex)
             {
-                strError = "µØÖ·XML¸ñÊ½²»ÕıÈ·: " + ex.Message;
+                strError = "åœ°å€XMLæ ¼å¼ä¸æ­£ç¡®: " + ex.Message;
                 return -1;
             }
 
@@ -2739,10 +2739,10 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
         // 
         // 
         /// <summary>
-        /// ¹ØÓÚÀ´Ô´µÄÃèÊö¡£
-        /// Èç¹ûÎª"batchno"·½Ê½£¬ÔòÎªÅú´ÎºÅ£»
-        /// Èç¹ûÎª"barcodefile"·½Ê½£¬ÔòÎªÌõÂëºÅÎÄ¼şÃû(´¿ÎÄ¼şÃû); 
-        /// Èç¹ûÎª"recpathfile"·½Ê½£¬ÔòÎª¼ÇÂ¼Â·¾¶ÎÄ¼şÃû(´¿ÎÄ¼şÃû)
+        /// å…³äºæ¥æºçš„æè¿°ã€‚
+        /// å¦‚æœä¸º"batchno"æ–¹å¼ï¼Œåˆ™ä¸ºæ‰¹æ¬¡å·ï¼›
+        /// å¦‚æœä¸º"barcodefile"æ–¹å¼ï¼Œåˆ™ä¸ºæ¡ç å·æ–‡ä»¶å(çº¯æ–‡ä»¶å); 
+        /// å¦‚æœä¸º"recpathfile"æ–¹å¼ï¼Œåˆ™ä¸ºè®°å½•è·¯å¾„æ–‡ä»¶å(çº¯æ–‡ä»¶å)
         /// </summary>
         public string SourceDescription
         {
@@ -2753,26 +2753,26 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                     string strText = "";
 
                     if (String.IsNullOrEmpty(this.comboBox_inputBiblioDbName.Text) == false)
-                        strText += "ÊéÄ¿¿â " + this.comboBox_inputBiblioDbName.Text;
+                        strText += "ä¹¦ç›®åº“ " + this.comboBox_inputBiblioDbName.Text;
 
                     return strText;
                 }
                 else if (this.SourceStyle == "bibliorecpathfile")
                 {
-                    return "ÊéÄ¿¿â¼ÇÂ¼Â·¾¶ÎÄ¼ş " + Path.GetFileName(this.textBox_inputBiblioRecPathFilename.Text);
+                    return "ä¹¦ç›®åº“è®°å½•è·¯å¾„æ–‡ä»¶ " + Path.GetFileName(this.textBox_inputBiblioRecPathFilename.Text);
                 }
                 else if (this.SourceStyle == "orderdatabase")
                 {
                     string strText = "";
 
                     if (String.IsNullOrEmpty(this.comboBox_inputOrderDbName.Text) == false)
-                        strText += "¶©¹º¿â " + this.comboBox_inputOrderDbName.Text;
+                        strText += "è®¢è´­åº“ " + this.comboBox_inputOrderDbName.Text;
 
                     return strText;
                 }
                 else if (this.SourceStyle == "orderrecpathfile")
                 {
-                    return "¶©¹º¿â¼ÇÂ¼Â·¾¶ÎÄ¼ş " + Path.GetFileName(this.textBox_inputOrderRecPathFilename.Text);
+                    return "è®¢è´­åº“è®°å½•è·¯å¾„æ–‡ä»¶ " + Path.GetFileName(this.textBox_inputOrderRecPathFilename.Text);
                 }
                 else
                 {
@@ -2782,7 +2782,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             }
         }
 
-        // ´òÓ¡ÊôÓÚÒ»¸öÊéÉÌµÄÈ«²¿ÆÚ¿¯ĞÅÏ¢
+        // æ‰“å°å±äºä¸€ä¸ªä¹¦å•†çš„å…¨éƒ¨æœŸåˆŠä¿¡æ¯
         int PrintOneSeller(OneSeller seller,
             out string strFilename,
             out string strError)
@@ -2806,17 +2806,17 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
 
             Hashtable macro_table = new Hashtable();
 
-            // Åú´ÎºÅ»òÎÄ¼şÃû ¶à¸öºê²»·½±ãÅĞ¶ÏºóÑ¡ÓÃ£¬Ö»ºÃºÏ²¢ÎªÒ»¸öºê
+            // æ‰¹æ¬¡å·æˆ–æ–‡ä»¶å å¤šä¸ªå®ä¸æ–¹ä¾¿åˆ¤æ–­åé€‰ç”¨ï¼Œåªå¥½åˆå¹¶ä¸ºä¸€ä¸ªå®
             macro_table["%sourcedescription%"] = this.SourceDescription;
 
 
-            // »ñµÃ´òÓ¡²ÎÊı
+            // è·å¾—æ‰“å°å‚æ•°
             PrintClaimPrintOption option = new PrintClaimPrintOption(this.MainForm.DataDir,
                 this.comboBox_source_type.Text);
             option.LoadData(this.MainForm.AppInfo,
                 "printclaim_printoption");
 
-            macro_table["%seller%"] = GetPureSellerName(seller.Seller); // ÇşµÀÃû
+            macro_table["%seller%"] = GetPureSellerName(seller.Seller); // æ¸ é“å
             macro_table["%selleraddress%"] = strAddressText;    // 2009/9/17
             macro_table["%libraryname%"] = this.MainForm.LibraryName;
             /*
@@ -2826,7 +2826,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             macro_table["%date%"] = DateTime.Now.ToLongDateString();
 
 
-            // ĞèÒª½«ÊôÓÚ²»Í¬ÊéÉÌµÄÎÄ¼şÃûÇ°×ºÇø±ğ¿ªÀ´
+            // éœ€è¦å°†å±äºä¸åŒä¹¦å•†çš„æ–‡ä»¶åå‰ç¼€åŒºåˆ«å¼€æ¥
             string strFileNamePrefix = this.MainForm.DataDir + "\\~printclaim_" + seller.GetHashCode().ToString() + "_";
 
             strFilename = strFileNamePrefix + "0" + ".html";
@@ -2836,44 +2836,44 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                 strFilename,
                 seller);
 
-            // Êä³öĞÅº¯ÄÚÈİ
+            // è¾“å‡ºä¿¡å‡½å†…å®¹
             {
 
-                // ÆÚ¿¯ÖÖÊı
+                // æœŸåˆŠç§æ•°
                 macro_table["%seriescount%"] = seller.Count.ToString();
-                // Ïà¹ØµÄÆÚÊı
+                // ç›¸å…³çš„æœŸæ•°
                 macro_table["%issuecount%"] = GetIssueCount(seller).ToString();
-                // È±µÄ²áÊı
+                // ç¼ºçš„å†Œæ•°
                 macro_table["%missingitemcount%"] = GetMissingItemCount(seller).ToString();
 
-                macro_table["%datadir%"] = this.MainForm.DataDir;   // ±ãÓÚÒıÓÃdatadirÏÂtemplatesÄ¿Â¼ÄÚµÄÄ³Ğ©ÎÄ¼ş
-                //// macro_table["%libraryserverdir%"] = this.MainForm.LibraryServerDir;  // ±ãÓÚÒıÓÃ·şÎñÆ÷¶ËµÄCSSÎÄ¼ş
+                macro_table["%datadir%"] = this.MainForm.DataDir;   // ä¾¿äºå¼•ç”¨datadirä¸‹templatesç›®å½•å†…çš„æŸäº›æ–‡ä»¶
+                //// macro_table["%libraryserverdir%"] = this.MainForm.LibraryServerDir;  // ä¾¿äºå¼•ç”¨æœåŠ¡å™¨ç«¯çš„CSSæ–‡ä»¶
 
-                string strTemplateFilePath = option.GetTemplatePageFilePath("ĞÅ¼şÕıÎÄ");
+                string strTemplateFilePath = option.GetTemplatePageFilePath("ä¿¡ä»¶æ­£æ–‡");
                 if (String.IsNullOrEmpty(strTemplateFilePath) == false)
                 {
                     /*
-	<div class='pageheader'>%date% ²Æ²úÕÊ²¾ -- %sourcedescription% -- (¹² %pagecount% Ò³)</div>
-	<div class='tabletitle'>%date% ²Æ²úÕÊ²¾ -- %barcodefilepath%</div>
-	<div class='itemcount'>²áÊı: %itemcount%</div>
-	<div class='bibliocount'>ÖÖÊı: %bibliocount%</div>
-	<div class='totalprice'>×Ü¼Û: %totalprice%</div>
+	<div class='pageheader'>%date% è´¢äº§å¸ç°¿ -- %sourcedescription% -- (å…± %pagecount% é¡µ)</div>
+	<div class='tabletitle'>%date% è´¢äº§å¸ç°¿ -- %barcodefilepath%</div>
+	<div class='itemcount'>å†Œæ•°: %itemcount%</div>
+	<div class='bibliocount'>ç§æ•°: %bibliocount%</div>
+	<div class='totalprice'>æ€»ä»·: %totalprice%</div>
 	<div class='sepline'><hr/></div>
-	<div class='batchno'>Åú´ÎºÅ: %batchno%</div>
-	<div class='location'>¹İ²ØµØµã: %location%</div>
-	<div class='location'>ÌõÂëºÅÎÄ¼ş: %barcodefilepath%</div>
-	<div class='location'>¼ÇÂ¼Â·¾¶ÎÄ¼ş: %recpathfilepath%</div>
+	<div class='batchno'>æ‰¹æ¬¡å·: %batchno%</div>
+	<div class='location'>é¦†è—åœ°ç‚¹: %location%</div>
+	<div class='location'>æ¡ç å·æ–‡ä»¶: %barcodefilepath%</div>
+	<div class='location'>è®°å½•è·¯å¾„æ–‡ä»¶: %recpathfilepath%</div>
 	<div class='sepline'><hr/></div>
 	<div class='pagefooter'>%pageno%/%pagecount%</div>
                      * * */
 
-                    // ¸ù¾İÄ£°å´òÓ¡
+                    // æ ¹æ®æ¨¡æ¿æ‰“å°
                     string strContent = "";
-                    // ÄÜ×Ô¶¯Ê¶±ğÎÄ¼şÄÚÈİµÄ±àÂë·½Ê½µÄ¶ÁÈëÎÄ±¾ÎÄ¼şÄÚÈİÄ£¿é
+                    // èƒ½è‡ªåŠ¨è¯†åˆ«æ–‡ä»¶å†…å®¹çš„ç¼–ç æ–¹å¼çš„è¯»å…¥æ–‡æœ¬æ–‡ä»¶å†…å®¹æ¨¡å—
                     // return:
-                    //      -1  ³ö´í
-                    //      0   ÎÄ¼ş²»´æÔÚ
-                    //      1   ÎÄ¼ş´æÔÚ
+                    //      -1  å‡ºé”™
+                    //      0   æ–‡ä»¶ä¸å­˜åœ¨
+                    //      1   æ–‡ä»¶å­˜åœ¨
                     nRet = Global.ReadTextFileContent(strTemplateFilePath,
                         out strContent,
                         out strError);
@@ -2887,17 +2887,17 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                 }
                 else
                 {
-                    // È±Ê¡µÄ¹Ì¶¨ÄÚÈİ´òÓ¡
+                    // ç¼ºçœçš„å›ºå®šå†…å®¹æ‰“å°
                     StreamUtil.WriteText(strFilename,
                         "<div class='letter'>");
 
                     string strAddressLine = "";
                     if (String.IsNullOrEmpty((string)macro_table["%selleraddress%"]) == false)
-                        strAddressLine = "ÖÂ£º%selleraddress%<br/><br/>";
+                        strAddressLine = "è‡´ï¼š%selleraddress%<br/><br/>";
 
-                    string strText = strAddressLine + "×ğ¾´µÄ %seller%:<br/>ÎÒ¹İÔÚ¹ó´¦¶©¹ºµÄÒÔÏÂ"+this.TypeName+" %seriescount% ÖÖ£¬ÓĞ "
-                        + (this.TypeName == "ÆÚ¿¯" ? "%issuecount% ÆÚ " : "")
-                        +"¹² %missingitemcount% ²áÖÁ½ñÎ´µ½¡£Íû¾¡¿ì²¹ÆëÎªÅÎ¡£Ğ»Ğ»¡£<br/><br/>%libraryname%<br/>%date%";
+                    string strText = strAddressLine + "å°Šæ•¬çš„ %seller%:<br/>æˆ‘é¦†åœ¨è´µå¤„è®¢è´­çš„ä»¥ä¸‹"+this.TypeName+" %seriescount% ç§ï¼Œæœ‰ "
+                        + (this.TypeName == "æœŸåˆŠ" ? "%issuecount% æœŸ " : "")
+                        +"å…± %missingitemcount% å†Œè‡³ä»Šæœªåˆ°ã€‚æœ›å°½å¿«è¡¥é½ä¸ºç›¼ã€‚è°¢è°¢ã€‚<br/><br/>%libraryname%<br/>%date%";
                     strText = StringUtil.MacroString(macro_table,
                         strText);
 
@@ -2932,14 +2932,14 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
         {
             get
             {
-                if (this.comboBox_source_type.Text == "Á¬Ğø³ö°æÎï"
-                    || this.comboBox_source_type.Text == "ÆÚ¿¯")
-                    return "ÆÚ¿¯";
-                return "Í¼Êé";
+                if (this.comboBox_source_type.Text == "è¿ç»­å‡ºç‰ˆç‰©"
+                    || this.comboBox_source_type.Text == "æœŸåˆŠ")
+                    return "æœŸåˆŠ";
+                return "å›¾ä¹¦";
             }
         }
 
-        // ²ÎÓëµÄÆÚÊı
+        // å‚ä¸çš„æœŸæ•°
         static int GetIssueCount(OneSeller seller)
         {
             int nCount = 0;
@@ -2953,7 +2953,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             return nCount;
         }
 
-        // È±µÄ²áÊı
+        // ç¼ºçš„å†Œæ•°
         static int GetMissingItemCount(OneSeller seller)
         {
             int nCount = 0;
@@ -2982,7 +2982,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             return nCount;
         }
 
-        // Êä³öÒ»ÖÖÆÚ¿¯µÄĞÅÏ¢
+        // è¾“å‡ºä¸€ç§æœŸåˆŠçš„ä¿¡æ¯
         void PrintOneSeries(PrintOption option,
             Hashtable macro_table, 
             OneSeries series,
@@ -2993,17 +2993,17 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             string strCaption = "";
 
 
-            // ±í¸ñ¿ªÊ¼
+            // è¡¨æ ¼å¼€å§‹
             StreamUtil.WriteText(strFilename,
                 "<br/><table class='table'>");   //   border='1'
 
 
-            // µÚÒ»¸öÀ¸Ä¿±êÌâ
+            // ç¬¬ä¸€ä¸ªæ ç›®æ ‡é¢˜
             StreamUtil.WriteText(strFilename,
                 "<tr class='column'>");
 
             strClass = "series_info";
-            strCaption = this.TypeName + "ĞÅÏ¢";
+            strCaption = this.TypeName + "ä¿¡æ¯";
             StreamUtil.WriteText(strFilename,
 "<td class='" + strClass + "' colspan='5'>" + strCaption + "</td>");
 
@@ -3011,7 +3011,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             StreamUtil.WriteText(strFilename,
                 "</tr>");
 
-            // ÆÚ¿¯ĞÅÏ¢ĞĞ
+            // æœŸåˆŠä¿¡æ¯è¡Œ
             StreamUtil.WriteText(strFilename,
                 "<tr class='series_info'>");
 
@@ -3024,21 +3024,21 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             StreamUtil.WriteText(strFilename,
                 "</tr>");
 
-            // µÚ¶ş¸öÀ¸Ä¿±êÌâ
+            // ç¬¬äºŒä¸ªæ ç›®æ ‡é¢˜
 
             StreamUtil.WriteText(strFilename,
     "</tr>");
 
-            // ÆÚ¿¯ĞÅÏ¢ĞĞ
+            // æœŸåˆŠä¿¡æ¯è¡Œ
 
-            // Í¨À¸£ºÈ±ÆÚĞÅÏ¢
+            // é€šæ ï¼šç¼ºæœŸä¿¡æ¯
             StreamUtil.WriteText(strFilename,
                 "<tr class='column'>");
             strClass = "missing_info";
-            if (this.TypeName == "ÆÚ¿¯")
-                strCaption = "È±ÆÚĞÅÏ¢";
+            if (this.TypeName == "æœŸåˆŠ")
+                strCaption = "ç¼ºæœŸä¿¡æ¯";
             else
-                strCaption = "È±ÊéĞÅÏ¢";
+                strCaption = "ç¼ºä¹¦ä¿¡æ¯";
 
             StreamUtil.WriteText(strFilename,
                 "<td class='" + strClass + "' colspan='" + option.Columns.Count.ToString() + "'>" + strCaption + "</td>");
@@ -3050,34 +3050,34 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                 "<tr class='column'>");
 
             strClass = "publishTime";
-            strCaption = "³ö°æÈÕÆÚ";
+            strCaption = "å‡ºç‰ˆæ—¥æœŸ";
             StreamUtil.WriteText(strFilename,
 "<td class='" + strClass + "'>" + strCaption + "</td>");
 
             strClass = "issue";
-            strCaption = "ÆÚºÅ";
+            strCaption = "æœŸå·";
             StreamUtil.WriteText(strFilename,
 "<td class='" + strClass + "'>" + strCaption + "</td>");
 
             strClass = "orderCount";
-            strCaption = "¶©¹º²áÊı";
+            strCaption = "è®¢è´­å†Œæ•°";
             StreamUtil.WriteText(strFilename,
 "<td class='" + strClass + "'>" + strCaption + "</td>");
 
             strClass = "arrivedCount";
-            strCaption = "Êµµ½²áÊı";
+            strCaption = "å®åˆ°å†Œæ•°";
             StreamUtil.WriteText(strFilename,
 "<td class='" + strClass + "'>" + strCaption + "</td>");
 
             strClass = "missingCount";
-            strCaption = "È±²áÊı";
+            strCaption = "ç¼ºå†Œæ•°";
             StreamUtil.WriteText(strFilename,
 "<td class='" + strClass + "'>" + strCaption + "</td>");
 
             StreamUtil.WriteText(strFilename,
 "</tr>");
              * */
-            // À¸Ä¿±êÌâ
+            // æ ç›®æ ‡é¢˜
             StreamUtil.WriteText(strFilename,
                 "<tr class='column'>");
 
@@ -3087,7 +3087,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
 
                 strCaption = column.Caption;
 
-                // Èç¹ûÃ»ÓĞcaption¶¨Òå£¬¾ÍÅ²ÓÃname¶¨Òå
+                // å¦‚æœæ²¡æœ‰captionå®šä¹‰ï¼Œå°±æŒªç”¨nameå®šä¹‰
                 if (String.IsNullOrEmpty(strCaption) == true)
                     strCaption = column.Name;
 
@@ -3101,12 +3101,12 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                 "</tr>");
 
 
-            // ÄÚÈİĞĞ
+            // å†…å®¹è¡Œ
             for (int i = 0; i < series.IssueInfos.Count; i++)
             {
                 IssueInfo info = series.IssueInfos[i];
 
-                // ²»Êä³öÒÑ¾­µ½ÆëµÄĞĞ
+                // ä¸è¾“å‡ºå·²ç»åˆ°é½çš„è¡Œ
                 if (info.MissingCount == "0")
                     continue;
 
@@ -3156,16 +3156,16 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
     "</tr>");
             }
 
-            // ±í¸ñ½áÊø
+            // è¡¨æ ¼ç»“æŸ
             StreamUtil.WriteText(strFilename,
                 "</table>");
         }
 
-        // »ñµÃÀ¸Ä¿ÄÚÈİ
+        // è·å¾—æ ç›®å†…å®¹
         string GetColumnContent(IssueInfo info,
             string strColumnName)
         {
-            // È¥µô"-- ?????"²¿·Ö
+            // å»æ‰"-- ?????"éƒ¨åˆ†
             /*
             string strText = strColumnName;
             int nRet = strText.IndexOf("--", 0);
@@ -3177,12 +3177,12 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
 
             try
             {
-                // TODO: ĞèÒªĞŞ¸Ä
-                // ÒªÖĞÓ¢ÎÄ¶¼¿ÉÒÔ
+                // TODO: éœ€è¦ä¿®æ”¹
+                // è¦ä¸­è‹±æ–‡éƒ½å¯ä»¥
                 switch (strText)
                 {
                     case "publishTime":
-                    case "³ö°æÈÕÆÚ":
+                    case "å‡ºç‰ˆæ—¥æœŸ":
                         {
                             string strPublishTime = "";
                             
@@ -3195,7 +3195,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                                 DateTime order_time = DateTimeUtil.FromRfc1123DateTimeString(info.OrderTime).ToLocalTime();
 
                                 string strDelay = this.comboBox_timeRange_afterOrder.Text;
-                                if (strDelay == "Á¢¼´")
+                                if (strDelay == "ç«‹å³")
                                     strDelay = "";
                                 if (string.IsNullOrEmpty(strDelay) == false)
                                     strDelay = " + " + strDelay;
@@ -3207,19 +3207,19 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                         }
 
                     case "issue":
-                    case "ÆÚºÅ":
+                    case "æœŸå·":
                         return info.Issue;
 
                     case "orderCount":
-                    case "¶©¹º²áÊı":
+                    case "è®¢è´­å†Œæ•°":
                         return info.OrderCount;
 
                     case "arrivedCount":
-                    case "Êµµ½²áÊı":
+                    case "å®åˆ°å†Œæ•°":
                         return info.ArrivedCount;
 
                     case "missingCount":
-                    case "È±²áÊı":
+                    case "ç¼ºå†Œæ•°":
                         return info.MissingCount;
 
                     default:
@@ -3233,19 +3233,19 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
         }
 
         // 2009/10/10
-        // »ñµÃcssÎÄ¼şµÄÂ·¾¶(»òÕßhttp:// µØÖ·)¡£½«¸ù¾İÊÇ·ñ¾ßÓĞ¡°Í³¼ÆÒ³¡±À´×Ô¶¯´¦Àí
+        // è·å¾—cssæ–‡ä»¶çš„è·¯å¾„(æˆ–è€…http:// åœ°å€)ã€‚å°†æ ¹æ®æ˜¯å¦å…·æœ‰â€œç»Ÿè®¡é¡µâ€æ¥è‡ªåŠ¨å¤„ç†
         // parameters:
-        //      strDefaultCssFileName   ¡°css¡±Ä£°åÈ±Ê¡Çé¿öÏÂ£¬½«²ÉÓÃµÄĞéÄâÄ¿Â¼ÖĞµÄcssÎÄ¼şÃû£¬´¿ÎÄ¼şÃû
+        //      strDefaultCssFileName   â€œcssâ€æ¨¡æ¿ç¼ºçœæƒ…å†µä¸‹ï¼Œå°†é‡‡ç”¨çš„è™šæ‹Ÿç›®å½•ä¸­çš„cssæ–‡ä»¶åï¼Œçº¯æ–‡ä»¶å
         string GetAutoCssUrl(PrintOption option,
             string strDefaultCssFileName)
         {
-            string strCssFilePath = option.GetTemplatePageFilePath("css");  // ´óĞ¡Ğ´²»Ãô¸Ğ
+            string strCssFilePath = option.GetTemplatePageFilePath("css");  // å¤§å°å†™ä¸æ•æ„Ÿ
             if (String.IsNullOrEmpty(strCssFilePath) == false)
                 return strCssFilePath;
             else
             {
-                // return this.MainForm.LibraryServerDir + "/" + strDefaultCssFileName;    // È±Ê¡µÄ
-                return PathUtil.MergePath(this.MainForm.DataDir, strDefaultCssFileName);    // È±Ê¡µÄ
+                // return this.MainForm.LibraryServerDir + "/" + strDefaultCssFileName;    // ç¼ºçœçš„
+                return PathUtil.MergePath(this.MainForm.DataDir, strDefaultCssFileName);    // ç¼ºçœçš„
             }
         }
 
@@ -3260,11 +3260,11 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
 
             /*
             // 2009/10/9
-            string strCssFilePath = option.GetTemplatePageFilePath("css");  // ´óĞ¡Ğ´²»Ãô¸Ğ
+            string strCssFilePath = option.GetTemplatePageFilePath("css");  // å¤§å°å†™ä¸æ•æ„Ÿ
             if (String.IsNullOrEmpty(strCssFilePath) == false)
                 strCssUrl = strCssFilePath;
             else
-                strCssUrl = this.MainForm.LibraryServerDir + "/printclaim.css";    // È±Ê¡µÄ
+                strCssUrl = this.MainForm.LibraryServerDir + "/printclaim.css";    // ç¼ºçœçš„
              * */
 
             string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
@@ -3273,7 +3273,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                 "<html><head>" + strLink + "</head><body>");
 
             /*
-            // Ò³Ã¼
+            // é¡µçœ‰
             string strPageHeaderText = option.PageHeader;
 
             if (String.IsNullOrEmpty(strPageHeaderText) == false)
@@ -3286,12 +3286,12 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             }
              * */
 
-            // ÊéÉÌÃû³Æ
+            // ä¹¦å•†åç§°
             StreamUtil.WriteText(strFileName,
     "<div class='seller'>" + GetPureSellerName(seller.Seller) + "</div>");
 
             /*
-            // ±í¸ñ±êÌâ
+            // è¡¨æ ¼æ ‡é¢˜
             string strTableTitleText = option.TableTitle;
 
             if (String.IsNullOrEmpty(strTableTitleText) == false)
@@ -3317,7 +3317,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
         {
 
             /*
-            // Ò³½Å
+            // é¡µè„š
             string strPageFooterText = option.PageFooter;
 
             if (String.IsNullOrEmpty(strPageFooterText) == false)
@@ -3363,10 +3363,10 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             TimeRangeDlg dlg = new TimeRangeDlg();
             MainForm.SetControlFont(dlg, this.Font, false);
 
-            dlg.Text = "´ßÑ¯ÈÕÆÚ·¶Î§";
+            dlg.Text = "å‚¬è¯¢æ—¥æœŸèŒƒå›´";
             dlg.StartDate = start;
             dlg.EndDate = end;
-            dlg.AllowStartDateNull = true;  // ÔÊĞíÆğµãÊ±¼äÎª¿Õ
+            dlg.AllowStartDateNull = true;  // å…è®¸èµ·ç‚¹æ—¶é—´ä¸ºç©º
 
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.ShowDialog(this);
@@ -3376,17 +3376,17 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
 
             this.textBox_timeRange.Text = Global.MakeTimeRangeString(dlg.StartDate, dlg.EndDate);
 
-            this.comboBox_timeRange_quickSet.Text = ""; // ÒÔÃâÎó»á
+            this.comboBox_timeRange_quickSet.Text = ""; // ä»¥å…è¯¯ä¼š
         }
 
-        // ¿ìËÙÉèÖÃ
+        // å¿«é€Ÿè®¾ç½®
         private void comboBox_timeRange_quickSet_TextChanged(object sender, EventArgs e)
         {
-            if (this.comboBox_timeRange_quickSet.Text == "½ñÌìÇ°")
+            if (this.comboBox_timeRange_quickSet.Text == "ä»Šå¤©å‰")
             {
                 this.textBox_timeRange.Text = Global.MakeTimeRangeString(new DateTime(0), DateTime.Now);
             }
-            else if (this.comboBox_timeRange_quickSet.Text == "Ò»ÔÂÇ°")
+            else if (this.comboBox_timeRange_quickSet.Text == "ä¸€æœˆå‰")
             {
                 DateTime now = DateTime.Now;
                 DateTime time = new DateTime(now.Year, now.Month, 1);
@@ -3394,7 +3394,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
 
                 this.textBox_timeRange.Text = Global.MakeTimeRangeString(new DateTime(0), time);
             }
-            else if (this.comboBox_timeRange_quickSet.Text == "°ëÄêÇ°")
+            else if (this.comboBox_timeRange_quickSet.Text == "åŠå¹´å‰")
             {
                 DateTime now = DateTime.Now;
                 DateTime time = new DateTime(now.Year, now.Month, 1);
@@ -3412,7 +3412,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
 
                 this.textBox_timeRange.Text = Global.MakeTimeRangeString(new DateTime(0), time);
             }
-            else if (this.comboBox_timeRange_quickSet.Text == "Ò»ÄêÇ°")
+            else if (this.comboBox_timeRange_quickSet.Text == "ä¸€å¹´å‰")
             {
                 DateTime now = DateTime.Now;
                 DateTime time = new DateTime(now.Year - 1, now.Month, 1);
@@ -3422,7 +3422,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             }
             else
             {
-                // Console.Beep(); // ±íÊ¾ÎŞ·¨ÉèÖÃ
+                // Console.Beep(); // è¡¨ç¤ºæ— æ³•è®¾ç½®
             }
         }
 
@@ -3433,7 +3433,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
 
         private void button_printOption_Click(object sender, EventArgs e)
         {
-            // ÅäÖÃ±êÌâºÍ·ç¸ñ
+            // é…ç½®æ ‡é¢˜å’Œé£æ ¼
             string strNamePath = "printclaim_printoption";
 
             PrintClaimPrintOption option = new PrintClaimPrintOption(this.MainForm.DataDir,
@@ -3447,14 +3447,14 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
 
             dlg.MainForm = this.MainForm;
             dlg.DataDir = this.MainForm.DataDir;
-            dlg.Text = this.comboBox_source_type.Text + " ´ßÑ¯µ¥ ´òÓ¡²ÎÊı";
+            dlg.Text = this.comboBox_source_type.Text + " å‚¬è¯¢å• æ‰“å°å‚æ•°";
             dlg.PrintOption = option;
             dlg.ColumnItems = new string[] {
-                "publishTime -- ³ö°æÈÕÆÚ",
-                "issue -- ÆÚºÅ",
-                "orderCount -- ¶©¹º²áÊı",
-                "arrivedCount -- Êµµ½²áÊı",
-                "missingCount -- È±²áÊı",
+                "publishTime -- å‡ºç‰ˆæ—¥æœŸ",
+                "issue -- æœŸå·",
+                "orderCount -- è®¢è´­å†Œæ•°",
+                "arrivedCount -- å®åˆ°å†Œæ•°",
+                "missingCount -- ç¼ºå†Œæ•°",
             };
 
 
@@ -3473,11 +3473,11 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
         {
             OpenFileDialog dlg = new OpenFileDialog();
 
-            dlg.Title = "ÇëÖ¸¶¨Òª´ò¿ªµÄ[ÊéÄ¿¿â]¼ÇÂ¼Â·¾¶ÎÄ¼şÃû";
+            dlg.Title = "è¯·æŒ‡å®šè¦æ‰“å¼€çš„[ä¹¦ç›®åº“]è®°å½•è·¯å¾„æ–‡ä»¶å";
             if (this.textBox_inputBiblioRecPathFilename.Text.IndexOf(",") == -1)
                 dlg.FileName = this.textBox_inputBiblioRecPathFilename.Text;
             // dlg.InitialDirectory = 
-            dlg.Filter = "¼ÇÂ¼Â·¾¶ÎÄ¼ş (*.txt)|*.txt|All files (*.*)|*.*";
+            dlg.Filter = "è®°å½•è·¯å¾„æ–‡ä»¶ (*.txt)|*.txt|All files (*.*)|*.*";
             dlg.RestoreDirectory = true;
 
             if (dlg.ShowDialog() != DialogResult.OK)
@@ -3490,11 +3490,11 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
         {
             OpenFileDialog dlg = new OpenFileDialog();
 
-            dlg.Title = "ÇëÖ¸¶¨Òª´ò¿ªµÄ[¶©¹º¿â]¼ÇÂ¼Â·¾¶ÎÄ¼şÃû";
+            dlg.Title = "è¯·æŒ‡å®šè¦æ‰“å¼€çš„[è®¢è´­åº“]è®°å½•è·¯å¾„æ–‡ä»¶å";
             if (this.textBox_inputOrderRecPathFilename.Text.IndexOf(",") == -1)
                 dlg.FileName = this.textBox_inputOrderRecPathFilename.Text;
             // dlg.InitialDirectory = 
-            dlg.Filter = "¼ÇÂ¼Â·¾¶ÎÄ¼ş (*.txt)|*.txt|All files (*.*)|*.*";
+            dlg.Filter = "è®°å½•è·¯å¾„æ–‡ä»¶ (*.txt)|*.txt|All files (*.*)|*.*";
             dlg.RestoreDirectory = true;
 
             if (dlg.ShowDialog() != DialogResult.OK)
@@ -3508,10 +3508,10 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             if (this.comboBox_inputOrderDbName.Items.Count > 0)
                 return;
 
-            if (this.comboBox_source_type.Text == "Í¼Êé")
-                this.comboBox_inputOrderDbName.Items.Add("<È«²¿Í¼Êé>");
+            if (this.comboBox_source_type.Text == "å›¾ä¹¦")
+                this.comboBox_inputOrderDbName.Items.Add("<å…¨éƒ¨å›¾ä¹¦>");
             else
-                this.comboBox_inputOrderDbName.Items.Add("<È«²¿ÆÚ¿¯>");
+                this.comboBox_inputOrderDbName.Items.Add("<å…¨éƒ¨æœŸåˆŠ>");
 
             if (this.MainForm.BiblioDbProperties != null)
             {
@@ -3522,14 +3522,14 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                     if (String.IsNullOrEmpty(prop.OrderDbName) == true)
                         continue; 
 
-                    if (this.comboBox_source_type.Text == "Í¼Êé")
+                    if (this.comboBox_source_type.Text == "å›¾ä¹¦")
                     {
                         if (String.IsNullOrEmpty(prop.IssueDbName) == false)
                             continue;
                     }
                     else
                     {
-                        // ÆÚ¿¯¡£ÒªÇóÆÚ¿âÃû²»Îª¿Õ
+                        // æœŸåˆŠã€‚è¦æ±‚æœŸåº“åä¸ä¸ºç©º
 
                         if (String.IsNullOrEmpty(prop.IssueDbName) == true)
                             continue;
@@ -3584,7 +3584,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             SetTimeRangeState(true);
         }
 
-        // ÉèÖÃÊ±¼ä·¶Î§ÖµÏà¹ØµÄ½çÃæÔªËØµÄEnabled×´Ì¬¡£°üÀ¨¡°¿ìËÙÉèÖÃ¡±²¿·Ö
+        // è®¾ç½®æ—¶é—´èŒƒå›´å€¼ç›¸å…³çš„ç•Œé¢å…ƒç´ çš„EnabledçŠ¶æ€ã€‚åŒ…æ‹¬â€œå¿«é€Ÿè®¾ç½®â€éƒ¨åˆ†
         void SetTimeRangeValueVisible(bool bVisible)
         {
             this.label_timerange.Visible = bVisible;
@@ -3601,7 +3601,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
 
         private void comboBox_source_type_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (this.comboBox_source_type.Text == "Í¼Êé")
+            if (this.comboBox_source_type.Text == "å›¾ä¹¦")
                 this.checkBox_source_guess.Enabled = false;
             else
                 this.checkBox_source_guess.Enabled = true;
@@ -3609,50 +3609,50 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
     }
 
     /// <summary>
-    /// ´ßÑ¯´°ÊäÈë·ç¸ñ
+    /// å‚¬è¯¢çª—è¾“å…¥é£æ ¼
     /// </summary>
     public enum PrintClaimInputStyle
     {
         /// <summary>
-        /// ÊéÄ¿¿â¼ÇÂ¼Â·¾¶ÎÄ¼ş
+        /// ä¹¦ç›®åº“è®°å½•è·¯å¾„æ–‡ä»¶
         /// </summary>
-        BiblioRecPathFile = 1,    // ÊéÄ¿¿â¼ÇÂ¼Â·¾¶ÎÄ¼ş
+        BiblioRecPathFile = 1,    // ä¹¦ç›®åº“è®°å½•è·¯å¾„æ–‡ä»¶
         /// <summary>
-        /// Õû¸öÊéÄ¿¿â
+        /// æ•´ä¸ªä¹¦ç›®åº“
         /// </summary>
-        BiblioDatabase = 2,     // Õû¸öÊéÄ¿¿â
+        BiblioDatabase = 2,     // æ•´ä¸ªä¹¦ç›®åº“
         /// <summary>
-        /// ¶©¹º¿â¼ÇÂ¼Â·¾¶ÎÄ¼ş
+        /// è®¢è´­åº“è®°å½•è·¯å¾„æ–‡ä»¶
         /// </summary>
-        OrderRecPathFile = 3,   // ¶©¹º¿â¼ÇÂ¼Â·¾¶ÎÄ¼ş
+        OrderRecPathFile = 3,   // è®¢è´­åº“è®°å½•è·¯å¾„æ–‡ä»¶
         /// <summary>
-        /// Õû¸ö¶©¹º¿â
+        /// æ•´ä¸ªè®¢è´­åº“
         /// </summary>
-        OrderDatabase = 4,      // Õû¸ö¶©¹º¿â
+        OrderDatabase = 4,      // æ•´ä¸ªè®¢è´­åº“
     }
 
     // 
     /// <summary>
-    /// Ò»¸öÊéÉÌËù¸ºÔğµÄËùÓĞÆÚ¿¯µÄÈ±ÆÚĞÅÏ¢£¬Á¬Í¬ÊéÉÌµØÖ·
+    /// ä¸€ä¸ªä¹¦å•†æ‰€è´Ÿè´£çš„æ‰€æœ‰æœŸåˆŠçš„ç¼ºæœŸä¿¡æ¯ï¼Œè¿åŒä¹¦å•†åœ°å€
     /// </summary>
     public class OneSeller : List<OneSeries>
     {
         /// <summary>
-        /// ÇşµÀ»òÊéÉÌÃû
+        /// æ¸ é“æˆ–ä¹¦å•†å
         /// </summary>
-        public string Seller = "";  // ÊéÉÌÃû
+        public string Seller = "";  // ä¹¦å•†å
 
         /// <summary>
-        /// µØÖ· XML
+        /// åœ°å€ XML
         /// </summary>
-        public string AddressXml = "";  // ÁªÏµµØÖ·ĞÅÏ¢
+        public string AddressXml = "";  // è”ç³»åœ°å€ä¿¡æ¯
 
         // 
         /// <summary>
-        /// ¸ù¾İÊéÄ¿¼ÇÂ¼Â·¾¶ÕÒµ½Ò»¸öÒÑ¾­´æÔÚµÄOneSeries¶ÔÏó
+        /// æ ¹æ®ä¹¦ç›®è®°å½•è·¯å¾„æ‰¾åˆ°ä¸€ä¸ªå·²ç»å­˜åœ¨çš„OneSerieså¯¹è±¡
         /// </summary>
-        /// <param name="strBiblioRecPath">ÊéÄ¿¼ÇÂ¼Â·¾¶</param>
-        /// <returns>OneSeries ¶ÔÏó</returns>
+        /// <param name="strBiblioRecPath">ä¹¦ç›®è®°å½•è·¯å¾„</param>
+        /// <returns>OneSeries å¯¹è±¡</returns>
         public OneSeries FindOneSeries(string strBiblioRecPath)
         {
             foreach (OneSeries series in this)
@@ -3667,19 +3667,19 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
 
     // 
     /// <summary>
-    /// Ò»ÖÖÆÚ¿¯µÄÈ±ÆÚĞÅÏ¢
+    /// ä¸€ç§æœŸåˆŠçš„ç¼ºæœŸä¿¡æ¯
     /// </summary>
     public class OneSeries
     {
         /// <summary>
-        /// ÊéÄ¿¼ÇÂ¼Â·¾¶
+        /// ä¹¦ç›®è®°å½•è·¯å¾„
         /// </summary>
-        public string BiblioRecPath = "";   // ÊéÄ¿¼ÇÂ¼Â·¾¶
+        public string BiblioRecPath = "";   // ä¹¦ç›®è®°å½•è·¯å¾„
 
         /// <summary>
-        /// ÊéÄ¿ÕªÒª
+        /// ä¹¦ç›®æ‘˜è¦
         /// </summary>
-        public string BiblioSummary = "";   // ÊéÄ¿ÕªÒª
+        public string BiblioSummary = "";   // ä¹¦ç›®æ‘˜è¦
 
         /// <summary>
         /// ISSN
@@ -3687,21 +3687,21 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
         public string ISSN = "";
 
         /// <summary>
-        /// ¿¯Ãû
+        /// åˆŠå
         /// </summary>
         public string Title = "";
 
         /// <summary>
-        /// ÆÚĞÅÏ¢¼¯ºÏ
+        /// æœŸä¿¡æ¯é›†åˆ
         /// </summary>
-        public List<IssueInfo> IssueInfos = new List<IssueInfo>();   // È±ÆÚĞÅÏ¢
+        public List<IssueInfo> IssueInfos = new List<IssueInfo>();   // ç¼ºæœŸä¿¡æ¯
 
         /// <summary>
-        /// ¼ÆËãÁ½¸öÊı×ÖÏà¼ÓµÄÖµ
+        /// è®¡ç®—ä¸¤ä¸ªæ•°å­—ç›¸åŠ çš„å€¼
         /// </summary>
-        /// <param name="s1">Êı×Ö×Ö·û´®1</param>
-        /// <param name="s2">Êı×Ö×Ö·û´®2</param>
-        /// <returns>½á¹û×Ö·û´®</returns>
+        /// <param name="s1">æ•°å­—å­—ç¬¦ä¸²1</param>
+        /// <param name="s2">æ•°å­—å­—ç¬¦ä¸²2</param>
+        /// <returns>ç»“æœå­—ç¬¦ä¸²</returns>
         public static string Add(string s1, string s2)
         {
             long v1 = 0;
@@ -3713,9 +3713,9 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
         }
 
         /// <summary>
-        /// ½« other_series ºÏ²¢½øÈëµ±Ç°¶ÔÏó¡£ºÏ²¢ÊÇ¸ù¾İ³ö°æÈÕÆÚºÍÆÚºÅ½øĞĞµÄ
+        /// å°† other_series åˆå¹¶è¿›å…¥å½“å‰å¯¹è±¡ã€‚åˆå¹¶æ˜¯æ ¹æ®å‡ºç‰ˆæ—¥æœŸå’ŒæœŸå·è¿›è¡Œçš„
         /// </summary>
-        /// <param name="other_series">ÁíÒ»ÖÖÆÚ¿¯µÄĞÅÏ¢</param>
+        /// <param name="other_series">å¦ä¸€ç§æœŸåˆŠçš„ä¿¡æ¯</param>
         public void MergeIssueInfos(OneSeries other_series)
         {
             int nAppendCount = 0;
@@ -3743,7 +3743,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                 }
             }
 
-            // ĞèÒªÖØĞÂÅÅĞò
+            // éœ€è¦é‡æ–°æ’åº
             if (nAppendCount > 0)
             {
                 this.IssueInfos.Sort(new IssueInfoSorter());
@@ -3752,35 +3752,35 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
     }
 
 #if NO
-    // Ò»¸öÊéÉÌËù¸ºÔğµÄËùÓĞÍ¼ÊéµÄÈ±ĞÅÏ¢£¬Á¬Í¬ÊéÉÌµØÖ·
+    // ä¸€ä¸ªä¹¦å•†æ‰€è´Ÿè´£çš„æ‰€æœ‰å›¾ä¹¦çš„ç¼ºä¿¡æ¯ï¼Œè¿åŒä¹¦å•†åœ°å€
     public class OneSellerMono : List<OneMono>
     {
-        public string Seller = "";  // ÊéÉÌÃû
-        public string AddressXml = "";  // ÁªÏµµØÖ·ĞÅÏ¢
+        public string Seller = "";  // ä¹¦å•†å
+        public string AddressXml = "";  // è”ç³»åœ°å€ä¿¡æ¯
     }
 
-    // Ò»ÖÖÍ¼ÊéµÄÈ±ĞÅÏ¢
+    // ä¸€ç§å›¾ä¹¦çš„ç¼ºä¿¡æ¯
     public class OneMono
     {
-        public string BiblioRecPath = "";   // ÊéÄ¿¼ÇÂ¼Â·¾¶
-        public string BiblioSummary = "";   // ÊéÄ¿ÕªÒª
+        public string BiblioRecPath = "";   // ä¹¦ç›®è®°å½•è·¯å¾„
+        public string BiblioSummary = "";   // ä¹¦ç›®æ‘˜è¦
         public string ISSN = "";
         public string Title = "";
 
-        public List<OrderInfo> OrderInfos = new List<OrderInfo>();   // È±ÆÚĞÅÏ¢
+        public List<OrderInfo> OrderInfos = new List<OrderInfo>();   // ç¼ºæœŸä¿¡æ¯
     }
 #endif
 
-    // ´ßÑ¯µ¥´òÓ¡ ¶¨ÒåÁËÌØ¶¨È±Ê¡ÖµµÄPrintOptionÅÉÉúÀà
+    // å‚¬è¯¢å•æ‰“å° å®šä¹‰äº†ç‰¹å®šç¼ºçœå€¼çš„PrintOptionæ´¾ç”Ÿç±»
     internal class PrintClaimPrintOption : PrintOption
     {
-        string PublicationType = "Í¼Êé"; // Í¼Êé Á¬Ğø³ö°æÎï
+        string PublicationType = "å›¾ä¹¦"; // å›¾ä¹¦ è¿ç»­å‡ºç‰ˆç‰©
 
         public override void LoadData(ApplicationInfo ai,
             string strPath)
         {
             string strNamePath = strPath;
-            if (this.PublicationType != "Í¼Êé")
+            if (this.PublicationType != "å›¾ä¹¦")
                 strNamePath = "series_" + strNamePath;
             base.LoadData(ai, strNamePath);
         }
@@ -3789,7 +3789,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             string strPath)
         {
             string strNamePath = strPath;
-            if (this.PublicationType != "Í¼Êé")
+            if (this.PublicationType != "å›¾ä¹¦")
                 strNamePath = "series_" + strNamePath;
             base.SaveData(ai, strNamePath);
         }
@@ -3800,53 +3800,53 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             this.DataDir = strDataDir;
             this.PublicationType = strPublicationType;
 
-            this.PageHeaderDefault = "%date% %seller% ´ßÑ¯µ¥ - Åú´ÎºÅ»òÎÄ¼şÃû: %batchno_or_recpathfilename% - (¹² %pagecount% Ò³)"; // TODO: ĞŞ¸Ä batchno_or_recpathfilename
+            this.PageHeaderDefault = "%date% %seller% å‚¬è¯¢å• - æ‰¹æ¬¡å·æˆ–æ–‡ä»¶å: %batchno_or_recpathfilename% - (å…± %pagecount% é¡µ)"; // TODO: ä¿®æ”¹ batchno_or_recpathfilename
             this.PageFooterDefault = "%pageno%/%pagecount%";
 
-            this.TableTitleDefault = "%date% %seller% ´ßÑ¯µ¥";
+            this.TableTitleDefault = "%date% %seller% å‚¬è¯¢å•";
 
             this.LinesPerPageDefault = 20;
 
-            // ColumnsÈ±Ê¡Öµ
+            // Columnsç¼ºçœå€¼
             Columns.Clear();
 
-            // "publishTime -- ³ö°æÈÕÆÚ",
+            // "publishTime -- å‡ºç‰ˆæ—¥æœŸ",
             Column column = new Column();
-            column.Name = "publishTime -- ³ö°æÈÕÆÚ";
-            column.Caption = "³ö°æÈÕÆÚ";
+            column.Name = "publishTime -- å‡ºç‰ˆæ—¥æœŸ";
+            column.Caption = "å‡ºç‰ˆæ—¥æœŸ";
             column.MaxChars = -1;
             this.Columns.Add(column);
 
-            if (strPublicationType == "Á¬Ğø³ö°æÎï"
-                || strPublicationType == "ÆÚ¿¯")
+            if (strPublicationType == "è¿ç»­å‡ºç‰ˆç‰©"
+                || strPublicationType == "æœŸåˆŠ")
             {
-                // "issue -- ÆÚºÅ"
+                // "issue -- æœŸå·"
                 column = new Column();
-                column.Name = "issue -- ÆÚºÅ";
-                column.Caption = "ÆÚºÅ";
+                column.Name = "issue -- æœŸå·";
+                column.Caption = "æœŸå·";
                 column.MaxChars = -1;
                 this.Columns.Add(column);
             }
 
 
-            // "orderCount -- ¶©¹º²áÊı"
+            // "orderCount -- è®¢è´­å†Œæ•°"
             column = new Column();
-            column.Name = "orderCount -- ¶©¹º²áÊı";
-            column.Caption = "¶©¹º²áÊı";
+            column.Name = "orderCount -- è®¢è´­å†Œæ•°";
+            column.Caption = "è®¢è´­å†Œæ•°";
             column.MaxChars = -1;
             this.Columns.Add(column);
 
-            // "arrivedCount -- Êµµ½²áÊı"
+            // "arrivedCount -- å®åˆ°å†Œæ•°"
             column = new Column();
-            column.Name = "arrivedCount -- Êµµ½²áÊı";
-            column.Caption = "Êµµ½²áÊı";
+            column.Name = "arrivedCount -- å®åˆ°å†Œæ•°";
+            column.Caption = "å®åˆ°å†Œæ•°";
             column.MaxChars = -1;
             this.Columns.Add(column);
 
-            // "missingCount -- È±²áÊı"
+            // "missingCount -- ç¼ºå†Œæ•°"
             column = new Column();
-            column.Name = "missingCount -- È±²áÊı";
-            column.Caption = "È±²áÊı";
+            column.Name = "missingCount -- ç¼ºå†Œæ•°";
+            column.Caption = "ç¼ºå†Œæ•°";
             column.MaxChars = -1;
             this.Columns.Add(column);
 
@@ -3855,34 +3855,34 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
 
     // 
     /// <summary>
-    /// Ê±¼ä¹ıÂËÆ÷¡£ÃèÊöÊ±¼ä¹ıÂËÒªÇó
+    /// æ—¶é—´è¿‡æ»¤å™¨ã€‚æè¿°æ—¶é—´è¿‡æ»¤è¦æ±‚
     /// </summary>
     public class TimeFilter
     {
         /// <summary>
-        /// ·ç¸ñ¡£"both" ¶şÕß¶¼ÓÃ(ÏÈÓÃ³ö°æÊ±¼ä£¬Èç¹ûÃ»ÓĞÔòÓÃ¶©¹ºÊ±¼ä) / "publishtime" Ö»ÓÃ³ö°æÊ±¼ä(Ã»ÓĞ³ö°æÊ±¼äÔò²»´¦Àí) / "ordertime" Ö»ÓÃ¶©¹ºÊ±¼äÆ«ÒÆ(Ã»ÓĞ¶©¹ºÊ±¼äÔò²»´¦Àí) / "none" ÍêÈ«²»¹ıÂË 
+        /// é£æ ¼ã€‚"both" äºŒè€…éƒ½ç”¨(å…ˆç”¨å‡ºç‰ˆæ—¶é—´ï¼Œå¦‚æœæ²¡æœ‰åˆ™ç”¨è®¢è´­æ—¶é—´) / "publishtime" åªç”¨å‡ºç‰ˆæ—¶é—´(æ²¡æœ‰å‡ºç‰ˆæ—¶é—´åˆ™ä¸å¤„ç†) / "ordertime" åªç”¨è®¢è´­æ—¶é—´åç§»(æ²¡æœ‰è®¢è´­æ—¶é—´åˆ™ä¸å¤„ç†) / "none" å®Œå…¨ä¸è¿‡æ»¤ 
         /// </summary>
-        public string Style = "both";   // "both" ¶şÕß¶¼ÓÃ(ÏÈÓÃ³ö°æÊ±¼ä£¬Èç¹ûÃ»ÓĞÔòÓÃ¶©¹ºÊ±¼ä) / "publishtime" Ö»ÓÃ³ö°æÊ±¼ä(Ã»ÓĞ³ö°æÊ±¼äÔò²»´¦Àí) / "ordertime" Ö»ÓÃ¶©¹ºÊ±¼äÆ«ÒÆ(Ã»ÓĞ¶©¹ºÊ±¼äÔò²»´¦Àí) / "none" ÍêÈ«²»¹ıÂË 
-        // ³ö°æÈÕÆÚ·¶Î§
-        // È±Ê¡Ğ§¹ûÊÇÓÀÔ¶µÄ¹ıÈ¥-½ñÌìÏÖÔÚ
+        public string Style = "both";   // "both" äºŒè€…éƒ½ç”¨(å…ˆç”¨å‡ºç‰ˆæ—¶é—´ï¼Œå¦‚æœæ²¡æœ‰åˆ™ç”¨è®¢è´­æ—¶é—´) / "publishtime" åªç”¨å‡ºç‰ˆæ—¶é—´(æ²¡æœ‰å‡ºç‰ˆæ—¶é—´åˆ™ä¸å¤„ç†) / "ordertime" åªç”¨è®¢è´­æ—¶é—´åç§»(æ²¡æœ‰è®¢è´­æ—¶é—´åˆ™ä¸å¤„ç†) / "none" å®Œå…¨ä¸è¿‡æ»¤ 
+        // å‡ºç‰ˆæ—¥æœŸèŒƒå›´
+        // ç¼ºçœæ•ˆæœæ˜¯æ°¸è¿œçš„è¿‡å»-ä»Šå¤©ç°åœ¨
         /// <summary>
-        /// ³ö°æÈÕÆÚ·¶Î§£¬¿ªÊ¼Ê±¼ä¡£È±Ê¡ÎªÓÀÔ¶µÄ¹ıÈ¥
+        /// å‡ºç‰ˆæ—¥æœŸèŒƒå›´ï¼Œå¼€å§‹æ—¶é—´ã€‚ç¼ºçœä¸ºæ°¸è¿œçš„è¿‡å»
         /// </summary>
         public DateTime StartTime = new DateTime(0);
         /// <summary>
-        /// ³ö°æÈÕÆÚ·¶Î§£¬½áÊøÊ±¼ä¡£È±Ê¡Îª½ñÌì
+        /// å‡ºç‰ˆæ—¥æœŸèŒƒå›´ï¼Œç»“æŸæ—¶é—´ã€‚ç¼ºçœä¸ºä»Šå¤©
         /// </summary>
         public DateTime EndTime = DateTime.Now;
 
-        // ¶©¹ºÈÕÆÚ + Æ«ÒÆÁ¿ ÂäÈëÖ¸¶¨·¶Î§
+        // è®¢è´­æ—¥æœŸ + åç§»é‡ è½å…¥æŒ‡å®šèŒƒå›´
         /// <summary>
-        /// ¶©¹ºÊ±¼äÆ«ÒÆÁ¿
+        /// è®¢è´­æ—¶é—´åç§»é‡
         /// </summary>
         public TimeSpan OrderTimeDelta = new TimeSpan();
 
-        // Ñ°ÕÒÊµµ½1²áÒÔÉÏµÄ×îºóÒ»ÆÚ¡£ÕâÊÇÒ»¸ö¼¼ÇÉ£¬ÒòÎªÈç¹ûÄ³ÆÚËäÈ»³¬¹ı´ßÈ±µÄ·¶Î§(½ÏÖ¸¶¨·¶Î§Ô½¹ı¿¿ºó)£¬µ«ËüÊµ¼ÊÉÏµ½ÁË£¬±íÃ÷±ÈÕâÆÚÊ±¼ä»¹ÒªÔçµÄÆÚÓ¦¸ÃÒ²µ½ÁË¡£ÕâÑù¾ÍÒª¿¼ÂÇÊµ¼ÊµÄÇé¿ö£¬¶ø²»ÊÇ¾ĞÄà²Ù×÷ÕßÉè¶¨µÄÊ±¼ä
+        // å¯»æ‰¾å®åˆ°1å†Œä»¥ä¸Šçš„æœ€åä¸€æœŸã€‚è¿™æ˜¯ä¸€ä¸ªæŠ€å·§ï¼Œå› ä¸ºå¦‚æœæŸæœŸè™½ç„¶è¶…è¿‡å‚¬ç¼ºçš„èŒƒå›´(è¾ƒæŒ‡å®šèŒƒå›´è¶Šè¿‡é å)ï¼Œä½†å®ƒå®é™…ä¸Šåˆ°äº†ï¼Œè¡¨æ˜æ¯”è¿™æœŸæ—¶é—´è¿˜è¦æ—©çš„æœŸåº”è¯¥ä¹Ÿåˆ°äº†ã€‚è¿™æ ·å°±è¦è€ƒè™‘å®é™…çš„æƒ…å†µï¼Œè€Œä¸æ˜¯æ‹˜æ³¥æ“ä½œè€…è®¾å®šçš„æ—¶é—´
         /// <summary>
-        /// ÊÇ·ñĞ£ÑéÊµ¼ÊÒÑµ½µÄÆÚ
+        /// æ˜¯å¦æ ¡éªŒå®é™…å·²åˆ°çš„æœŸ
         /// </summary>
         public bool VerifyArrivedIssue = false;
     }

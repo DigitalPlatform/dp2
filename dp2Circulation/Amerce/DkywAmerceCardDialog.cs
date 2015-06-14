@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -21,7 +21,7 @@ namespace dp2Circulation
         public AmerceItem[] AmerceItems = null;
         public List<OverdueItemInfo> OverdueInfos = null;
 
-        bool m_bDone = false;   // ¿Û¿îÊÇ·ñÍê³É
+        bool m_bDone = false;   // æ‰£æ¬¾æ˜¯å¦å®Œæˆ
 
         IpcClientChannel channel = new IpcClientChannel();
 
@@ -45,10 +45,10 @@ namespace dp2Circulation
         private void button_writeCard_Click(object sender, EventArgs e)
         {
             string strError = "";
-            // ·ÀÖ¹ÖØÈë
+            // é˜²æ­¢é‡å…¥
             if (this.m_nIn > 0)
             {
-                strError = "·¢Éú³åÍ»¡£ÉÔºóÖØÊÔ";
+                strError = "å‘ç”Ÿå†²çªã€‚ç¨åé‡è¯•";
                 goto ERROR1;
             }
 
@@ -60,7 +60,7 @@ namespace dp2Circulation
             try
             {
 
-                // ÏÈÍê³ÉÊı¾İ¿â²Ù×÷
+                // å…ˆå®Œæˆæ•°æ®åº“æ“ä½œ
                 nRet = this.AmerceForm.Submit(
                     this.AmerceItems,
                     this.OverdueInfos,
@@ -84,27 +84,27 @@ namespace dp2Circulation
 
                 int nRedoCount = 0;
                 REDO:
-                // ¿Û¿î
+                // æ‰£æ¬¾
                 // parameters:
-                //      strCardNumber   ÒªÇóµÄ¿¨ºÅ¡£Èç¹ûÎª¿Õ£¬Ôò±íÊ¾²»ÒªÇó¿¨ºÅ£¬Ö±½Ó´Óµ±Ç°¿¨ÉÏ¿Û¿î
-                //      strSubMoney Òª¿ÛµÄ¿î¶î¡£ÀıÈç£º"0.01"
-                //      strUsedCardNumber   Êµ¼Ê¿Û¿îµÄ¿¨ºÅ
-                //      strPrice    ¿Û¿îºóµÄÓà¶î
-                //      nErrorCode Ô­Ê¼´íÎóÂë
-                //          -1:Á¬½Ó´®¿Ú´íÎó;
-                //          -2:Ã»ÓĞ·¢ÏÖ¿¨Æ¬;
-                //          -3:ÎŞ·¨¶ÁÈ¡¿¨µÄÎ¨Ò»ĞòÁĞºÅ; 
-                //          -4:×°ÈëÃÜÔ¿´íÎó;
-                //          -5:¶Á¿¨´íÎó;
-                //          -6:¿¨ÒÑ¹ıÓĞÓĞĞ§ÆÚ;
-                //          -7:ÃÜÂë´íÎó
-                //          -8:ÊäÈëµÄ½ğ¶îÌ«´ó;
-                //          -9:Ğ´¿¨Ê§°Ü;
+                //      strCardNumber   è¦æ±‚çš„å¡å·ã€‚å¦‚æœä¸ºç©ºï¼Œåˆ™è¡¨ç¤ºä¸è¦æ±‚å¡å·ï¼Œç›´æ¥ä»å½“å‰å¡ä¸Šæ‰£æ¬¾
+                //      strSubMoney è¦æ‰£çš„æ¬¾é¢ã€‚ä¾‹å¦‚ï¼š"0.01"
+                //      strUsedCardNumber   å®é™…æ‰£æ¬¾çš„å¡å·
+                //      strPrice    æ‰£æ¬¾åçš„ä½™é¢
+                //      nErrorCode åŸå§‹é”™è¯¯ç 
+                //          -1:è¿æ¥ä¸²å£é”™è¯¯;
+                //          -2:æ²¡æœ‰å‘ç°å¡ç‰‡;
+                //          -3:æ— æ³•è¯»å–å¡çš„å”¯ä¸€åºåˆ—å·; 
+                //          -4:è£…å…¥å¯†é’¥é”™è¯¯;
+                //          -5:è¯»å¡é”™è¯¯;
+                //          -6:å¡å·²è¿‡æœ‰æœ‰æ•ˆæœŸ;
+                //          -7:å¯†ç é”™è¯¯
+                //          -8:è¾“å…¥çš„é‡‘é¢å¤ªå¤§;
+                //          -9:å†™å¡å¤±è´¥;
                 // return:
-                //      -1  ³ö´í
-                //      0   Ã»ÓĞ¿¨
-                //      1   ³É¹¦¿Û¿îºÍ»ñµÃĞÅÏ¢
-                //      2   ËäÈ»¿Û¿î³É¹¦£¬µ«ÊÇÉÏ´«Á÷Ë®Ê§°Ü
+                //      -1  å‡ºé”™
+                //      0   æ²¡æœ‰å¡
+                //      1   æˆåŠŸæ‰£æ¬¾å’Œè·å¾—ä¿¡æ¯
+                //      2   è™½ç„¶æ‰£æ¬¾æˆåŠŸï¼Œä½†æ˜¯ä¸Šä¼ æµæ°´å¤±è´¥
                 nRet = obj.SubCardMoney(this.CardNumber,
                     this.SubmitPrice,
                     strPassword,
@@ -114,7 +114,7 @@ namespace dp2Circulation
                     out strError);
                 if (nRet == 0)
                 {
-                    strError = "Çë·ÅÉÏIC¿¨£¬·ñÔòÎŞ·¨¿Û¿î";
+                    strError = "è¯·æ”¾ä¸ŠICå¡ï¼Œå¦åˆ™æ— æ³•æ‰£æ¬¾";
                     goto ERROR1;
                 }
 
@@ -126,7 +126,7 @@ namespace dp2Circulation
                         MainForm.SetControlFont(dlg, this.Font, false);
 
                         if (nRedoCount == 0)
-                            dlg.MessageText = "Çë(³Ö¿¨Õß)ÊäÈëIC¿¨ÃÜÂë";
+                            dlg.MessageText = "è¯·(æŒå¡è€…)è¾“å…¥ICå¡å¯†ç ";
                         else
                             dlg.MessageText = strError;
 
@@ -135,23 +135,23 @@ namespace dp2Circulation
                         dlg.ShowDialog(this);
 
                         if (dlg.DialogResult != DialogResult.OK)
-                            return; // ·ÅÆú¿Û¿î
+                            return; // æ”¾å¼ƒæ‰£æ¬¾
 
                         strPassword = dlg.Password;
                         nRedoCount++;
                         goto REDO;
                     }
 
-                    strError = "¿Û¿î´íÎó:" + strError;
+                    strError = "æ‰£æ¬¾é”™è¯¯:" + strError;
                     goto ERROR1;
                 }
 
-                // this.label_cardInfo.Text = "¿¨ºÅ: " + strCardNumber + "\r\n" + "¿¨ÉÏ½ğ¶î: " + strNewPrice;
+                // this.label_cardInfo.Text = "å¡å·: " + strCardNumber + "\r\n" + "å¡ä¸Šé‡‘é¢: " + strNewPrice;
 
                 this.m_bDone = true;
-                this.button_writeCard.Enabled = false;  // ±ÜÃâÔÙ´Î¿Û¿î
+                this.button_writeCard.Enabled = false;  // é¿å…å†æ¬¡æ‰£æ¬¾
                 bSucceed = true;
-                MessageBox.Show(this, "¿Û¿î " + this.SubmitPrice + " ³É¹¦£¬ĞÂÓà¶î " + strNewPrice);
+                MessageBox.Show(this, "æ‰£æ¬¾ " + this.SubmitPrice + " æˆåŠŸï¼Œæ–°ä½™é¢ " + strNewPrice);
 
                 if (nRet == 2)
                 {
@@ -160,7 +160,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = "´íÎó:" + ex.Message;
+                strError = "é”™è¯¯:" + ex.Message;
                 goto ERROR1;
             }
             finally
@@ -171,7 +171,7 @@ namespace dp2Circulation
                     nRet = this.AmerceForm.RollBack(out strError_1);
                     if (nRet == -1)
                     {
-                        strError_1 = "Õë¶Ô½»·Ñ²Ù×÷µÄRollbackÊ§°Ü: " + strError_1 + "\r\nÇëÏµÍ³¹ÜÀíÔ±½øĞĞÊÖ¶¯ÇåÀí";
+                        strError_1 = "é’ˆå¯¹äº¤è´¹æ“ä½œçš„Rollbackå¤±è´¥: " + strError_1 + "\r\nè¯·ç³»ç»Ÿç®¡ç†å‘˜è¿›è¡Œæ‰‹åŠ¨æ¸…ç†";
                         MessageBox.Show(this, strError_1);
                     }
                 }
@@ -200,7 +200,7 @@ namespace dp2Circulation
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            // ·ÀÖ¹ÖØÈë
+            // é˜²æ­¢é‡å…¥
             if (this.m_nIn > 0)
                 return;
 
@@ -221,9 +221,9 @@ namespace dp2Circulation
                 int nErrorCode = 0;
 
                 // return:
-                //      -1  ³ö´í
-                //      0   Ã»ÓĞ¿¨
-                //      1   ³É¹¦»ñµÃĞÅÏ¢
+                //      -1  å‡ºé”™
+                //      0   æ²¡æœ‰å¡
+                //      1   æˆåŠŸè·å¾—ä¿¡æ¯
                 int nRet = obj.GetCardInfo(out strCardNumber,
                     out strRest,
                     out strLimitMoney,
@@ -231,37 +231,37 @@ namespace dp2Circulation
                     out strError);
                 if (nRet == 0)
                 {
-                    this.label_cardInfo.Text = "Çë·ÅÉÏIC¿¨...";
+                    this.label_cardInfo.Text = "è¯·æ”¾ä¸ŠICå¡...";
                     this.SetColor(2);
                     return;
                 }
 
                 if (nRet == -1)
                 {
-                    this.label_cardInfo.Text = "¶Á¿¨´íÎó:" + strError;
+                    this.label_cardInfo.Text = "è¯»å¡é”™è¯¯:" + strError;
                     this.SetColor(1);
                     return;
                 }
 
 
-                this.label_cardInfo.Text = "¿¨ºÅ: " + strCardNumber + "\r\n" + "¿¨ÉÏ½ğ¶î: " + strRest;
+                this.label_cardInfo.Text = "å¡å·: " + strCardNumber + "\r\n" + "å¡ä¸Šé‡‘é¢: " + strRest;
 
-                // ºÍthis.CardNumber±È½Ï
+                // å’Œthis.CardNumberæ¯”è¾ƒ
                 if (this.CardNumber != strCardNumber)
                 {
-                    this.label_cardInfo.Text += "\r\n!!!¾¯¸æ£º½»·ÑÕßµÄ¿¨ºÅÓ¦µ±Îª '" + this.CardNumber + "'¡£²»ÊÇµ±Ç°ÔÚ¶Á¿¨Æ÷ÉÏµÄ¿¨";
+                    this.label_cardInfo.Text += "\r\n!!!è­¦å‘Šï¼šäº¤è´¹è€…çš„å¡å·åº”å½“ä¸º '" + this.CardNumber + "'ã€‚ä¸æ˜¯å½“å‰åœ¨è¯»å¡å™¨ä¸Šçš„å¡";
                     this.SetColor(1);
                 }
                 else
                 {
-                    // ¿´¿´Óà¶îÊÇ·ñ¹»?
+                    // çœ‹çœ‹ä½™é¢æ˜¯å¦å¤Ÿ?
                     try
                     {
                         Decimal rest = Convert.ToDecimal(strRest);
                         Decimal sub = Convert.ToDecimal(this.SubmitPrice);
                         if (rest < sub)
                         {
-                            this.label_cardInfo.Text += "\r\n!!!¾¯¸æ£ºÓà¶î²»×ã";
+                            this.label_cardInfo.Text += "\r\n!!!è­¦å‘Šï¼šä½™é¢ä¸è¶³";
                             this.SetColor(1);
                         }
                         else
@@ -278,12 +278,12 @@ namespace dp2Circulation
             }
             catch (System.Runtime.Remoting.RemotingException ex)
             {
-                this.label_cardInfo.Text = "IC¿¨¼à¿ØÄ£¿é DkywCardReader.exe ÉĞÎ´Æô¶¯ (´íÎóĞÅÏ¢:" + ex.Message + ")";
+                this.label_cardInfo.Text = "ICå¡ç›‘æ§æ¨¡å— DkywCardReader.exe å°šæœªå¯åŠ¨ (é”™è¯¯ä¿¡æ¯:" + ex.Message + ")";
                 this.SetColor(1);
             }
             catch (Exception ex)
             {
-                this.label_cardInfo.Text = "´íÎó:" + ex.Message;
+                this.label_cardInfo.Text = "é”™è¯¯:" + ex.Message;
                 this.SetColor(1);
             }
             finally
@@ -341,7 +341,7 @@ namespace dp2Circulation
 
         string m_strSubmitPrice = "";
 
-        // ±¾´ÎÒª¿Û¿îµÄÖµ¡£´¿Êı×Ö£¬Ã»ÓĞ»õ±Òµ¥Î»¡£Èç¹ûÎªÕıÊı£¬±íÊ¾¿Û¿î
+        // æœ¬æ¬¡è¦æ‰£æ¬¾çš„å€¼ã€‚çº¯æ•°å­—ï¼Œæ²¡æœ‰è´§å¸å•ä½ã€‚å¦‚æœä¸ºæ­£æ•°ï¼Œè¡¨ç¤ºæ‰£æ¬¾
         public string SubmitPrice
         {
             get
@@ -351,11 +351,11 @@ namespace dp2Circulation
             set
             {
                 this.m_strSubmitPrice = value;
-                this.label_thisPrice.Text = "±¾´ÎÄâ¿Û¿î: " + value;
+                this.label_thisPrice.Text = "æœ¬æ¬¡æ‹Ÿæ‰£æ¬¾: " + value;
             }
         }
 
-        // È·¶¨µÄ¿¨ºÅ£¬µ±Ç°½»¿îÕßµÄ¿¨
+        // ç¡®å®šçš„å¡å·ï¼Œå½“å‰äº¤æ¬¾è€…çš„å¡
 
         string m_strCardNumber = "";
 
@@ -371,9 +371,9 @@ namespace dp2Circulation
             }
         }
 
-        // ÉèÖÃ¿¨Æ¬ÏÔÊ¾¿Õ¼äµÄÑÕÉ«
+        // è®¾ç½®å¡ç‰‡æ˜¾ç¤ºç©ºé—´çš„é¢œè‰²
         // parameters:
-        //      nState  0 Õı³£ 1 ¶Á¿¨³ö´í 2 Ã»ÓĞ¿¨
+        //      nState  0 æ­£å¸¸ 1 è¯»å¡å‡ºé”™ 2 æ²¡æœ‰å¡
         void SetColor(int nState)
         {
             if (nState == 0)

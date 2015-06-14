@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -26,19 +26,19 @@ using DigitalPlatform.CommonControl;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ±êÇ©´òÓ¡´°
+    /// æ ‡ç­¾æ‰“å°çª—
     /// </summary>
     public partial class LabelPrintForm : ItemSearchFormBase    // MyForm
     {
-        // bool m_bBiblioSummaryColumn = true; // ÊÇ·ñÔÚä¯ÀÀÁĞ±íÖĞ ¼ÓÈëÊéÄ¿ÕªÒªÁĞ
+        // bool m_bBiblioSummaryColumn = true; // æ˜¯å¦åœ¨æµè§ˆåˆ—è¡¨ä¸­ åŠ å…¥ä¹¦ç›®æ‘˜è¦åˆ—
 
-        // bool m_bFirstColumnIsKey = false; // µ±Ç°listviewä¯ÀÀÁĞµÄµÚÒ»ÁĞÊÇ·ñÓ¦Îªkey
+        // bool m_bFirstColumnIsKey = false; // å½“å‰listviewæµè§ˆåˆ—çš„ç¬¬ä¸€åˆ—æ˜¯å¦åº”ä¸ºkey
 
 
         PrinterInfo m_printerInfo = null;
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public PrinterInfo PrinterInfo
         {
@@ -54,20 +54,20 @@ namespace dp2Circulation
         }
 
 #if NO
-        // ×î½üÊ¹ÓÃ¹ıµÄ¼ÇÂ¼Â·¾¶ÎÄ¼şÃû
+        // æœ€è¿‘ä½¿ç”¨è¿‡çš„è®°å½•è·¯å¾„æ–‡ä»¶å
         string m_strUsedRecPathFilename = "";
 #endif
 
         /// <summary>
-        /// ×î½üµ¼³öµÄ²áÌõÂëºÅÎÄ¼şÃû
+        /// æœ€è¿‘å¯¼å‡ºçš„å†Œæ¡ç å·æ–‡ä»¶å
         /// </summary>
         public string ExportBarcodeFilename = "";
         /// <summary>
-        /// ×î½üµ¼³öµÄ¼ÇÂ¼Â·¾¶ÎÄ¼şÃû
+        /// æœ€è¿‘å¯¼å‡ºçš„è®°å½•è·¯å¾„æ–‡ä»¶å
         /// </summary>
         public string ExportRecPathFilename = "";
         /// <summary>
-        /// ×î½üµ¼³öµÄÎÄ±¾ÎÄ¼şÃû
+        /// æœ€è¿‘å¯¼å‡ºçš„æ–‡æœ¬æ–‡ä»¶å
         /// </summary>
         public string ExportTextFilename = "";
 
@@ -83,10 +83,10 @@ namespace dp2Circulation
 
         PrintLabelDocument document = null;
 
-        string m_strPrintStyle = "";    // ´òÓ¡·ç¸ñ
+        string m_strPrintStyle = "";    // æ‰“å°é£æ ¼
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public LabelPrintForm()
         {
@@ -96,7 +96,7 @@ namespace dp2Circulation
 
             ListViewProperty prop = new ListViewProperty();
             this.listView_records.Tag = prop;
-            // µÚÒ»ÁĞÌØÊâ£¬¼ÇÂ¼Â·¾¶
+            // ç¬¬ä¸€åˆ—ç‰¹æ®Šï¼Œè®°å½•è·¯å¾„
             prop.SetSortStyle(0, ColumnSortStyle.RecPath);
             prop.GetColumnTitles -= new GetColumnTitlesEventHandler(prop_GetColumnTitles);
             prop.GetColumnTitles += new GetColumnTitlesEventHandler(prop_GetColumnTitles);
@@ -109,7 +109,7 @@ namespace dp2Circulation
         {
             if (e.Column.SortStyle.Name == "call_number")
             {
-                // ±È½ÏÁ½¸öË÷È¡ºÅµÄ´óĞ¡
+                // æ¯”è¾ƒä¸¤ä¸ªç´¢å–å·çš„å¤§å°
                 // return:
                 //      <0  s1 < s2
                 //      ==0 s1 == s2
@@ -118,9 +118,9 @@ namespace dp2Circulation
             }
             else if (e.Column.SortStyle.Name == "parent_id")
             {
-                // ÓÒ¶ÔÆë±È½Ï×Ö·û´®
+                // å³å¯¹é½æ¯”è¾ƒå­—ç¬¦ä¸²
                 // parameters:
-                //      chFill  Ìî³äÓÃµÄ×Ö·û
+                //      chFill  å¡«å……ç”¨çš„å­—ç¬¦
                 e.Result = StringUtil.CompareRecPath(e.String1, e.String2);
             }
             else
@@ -139,9 +139,9 @@ namespace dp2Circulation
             if (e.DbName == "<blank>")
             {
                 e.ColumnTitles = new ColumnPropertyCollection();
-                e.ColumnTitles.Add("¼ìË÷µã");
-                e.ColumnTitles.Add("ÊıÁ¿");
-                // ÊıÁ¿ÁĞµÄÅÅĞò
+                e.ColumnTitles.Add("æ£€ç´¢ç‚¹");
+                e.ColumnTitles.Add("æ•°é‡");
+                // æ•°é‡åˆ—çš„æ’åº
                 e.ListViewProperty.SetSortStyle(2, ColumnSortStyle.RightAlign);
                 return;
             }
@@ -151,14 +151,14 @@ namespace dp2Circulation
             if (temp != null)
             {
                 if (m_bBiblioSummaryColumn == true)
-                    e.ColumnTitles.Insert(0, "ÊéÄ¿ÕªÒª");
-                e.ColumnTitles.AddRange(temp);  // Òª¸´ÖÆ£¬²»ÒªÖ±½ÓÊ¹ÓÃ£¬ÒòÎªºóÃæ¿ÉÄÜ»áĞŞ¸Ä¡£ÅÂÓ°Ïìµ½Ô­¼ş
+                    e.ColumnTitles.Insert(0, "ä¹¦ç›®æ‘˜è¦");
+                e.ColumnTitles.AddRange(temp);  // è¦å¤åˆ¶ï¼Œä¸è¦ç›´æ¥ä½¿ç”¨ï¼Œå› ä¸ºåé¢å¯èƒ½ä¼šä¿®æ”¹ã€‚æ€•å½±å“åˆ°åŸä»¶
             }
 
             if (this.m_bFirstColumnIsKey == true)
-                e.ColumnTitles.Insert(0, "ÃüÖĞµÄ¼ìË÷µã");
+                e.ColumnTitles.Insert(0, "å‘½ä¸­çš„æ£€ç´¢ç‚¹");
 
-            // e.ListViewProperty.SetSortStyle(2, ColumnSortStyle.LeftAlign);   // Ó¦¸Ã¸ù¾İ typeÎªitem_barcode À´¾ö¶¨ÅÅĞò·½Ê½
+            // e.ListViewProperty.SetSortStyle(2, ColumnSortStyle.LeftAlign);   // åº”è¯¥æ ¹æ® typeä¸ºitem_barcode æ¥å†³å®šæ’åºæ–¹å¼
         }
 
         void ClearListViewPropertyCache()
@@ -182,7 +182,7 @@ namespace dp2Circulation
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
 
             stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// ºÍÈİÆ÷¹ØÁª
+            stop.Register(MainForm.stopManager, true);	// å’Œå®¹å™¨å…³è”
 #endif
 
             if (string.IsNullOrEmpty(this.textBox_labelFile_labelFilename.Text) == true)
@@ -220,7 +220,7 @@ namespace dp2Circulation
                     true);
             }
 
-            // µ±Ç°»î¶¯µÄproperty page
+            // å½“å‰æ´»åŠ¨çš„property page
             string strActivePage = this.MainForm.AppInfo.GetString(
                 "label_print_form",
                 "active_page",
@@ -236,7 +236,7 @@ namespace dp2Circulation
 
             if (this.PrinterInfo == null)
             {
-                this.PrinterInfo = this.MainForm.PreparePrinterInfo("È±Ê¡±êÇ©");
+                this.PrinterInfo = this.MainForm.PreparePrinterInfo("ç¼ºçœæ ‡ç­¾");
             }
             SetTitle();
         }
@@ -246,9 +246,9 @@ namespace dp2Circulation
 #if NO
             if (stop != null)
             {
-                if (stop.State == 0)    // 0 ±íÊ¾ÕıÔÚ´¦Àí
+                if (stop.State == 0)    // 0 è¡¨ç¤ºæ­£åœ¨å¤„ç†
                 {
-                    MessageBox.Show(this, "ÇëÔÚ¹Ø±Õ´°¿ÚÇ°Í£Ö¹ÕıÔÚ½øĞĞµÄ³¤Ê±²Ù×÷¡£");
+                    MessageBox.Show(this, "è¯·åœ¨å…³é—­çª—å£å‰åœæ­¢æ­£åœ¨è¿›è¡Œçš„é•¿æ—¶æ“ä½œã€‚");
                     e.Cancel = true;
                     return;
                 }
@@ -259,9 +259,9 @@ namespace dp2Circulation
         private void LabelPrintForm_FormClosed(object sender, FormClosedEventArgs e)
         {
 #if NO
-            if (stop != null) // ÍÑÀë¹ØÁª
+            if (stop != null) // è„±ç¦»å…³è”
             {
-                stop.Unregister();	// ºÍÈİÆ÷¹ØÁª
+                stop.Unregister();	// å’Œå®¹å™¨å…³è”
                 stop = null;
             }
 #endif
@@ -287,7 +287,7 @@ namespace dp2Circulation
                 "record_list_column_width",
                 strWidths);
 
-            // µ±Ç°»î¶¯µÄproperty page
+            // å½“å‰æ´»åŠ¨çš„property page
             string strActivePage = "";
 
             if (this.tabControl_main.SelectedTab == this.tabPage_labelFile)
@@ -304,7 +304,7 @@ namespace dp2Circulation
             {
                 string strType = this.PrinterInfo.Type;
                 if (string.IsNullOrEmpty(strType) == true)
-                    strType = "È±Ê¡±êÇ©";
+                    strType = "ç¼ºçœæ ‡ç­¾";
 
                 this.MainForm.SavePrinterInfo(strType,
                     this.PrinterInfo);
@@ -312,14 +312,14 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        ///ÖØĞÂÉèÖÃ´°¿Ú±êÌâ
+        ///é‡æ–°è®¾ç½®çª—å£æ ‡é¢˜
         /// </summary>
         public void SetTitle()
         {
             if (this.PrinterInfo == null)
-                this.Text = "±êÇ©´òÓ¡";
+                this.Text = "æ ‡ç­¾æ‰“å°";
             else
-                this.Text = "´òÓ¡ -- " + this.PrinterInfo.Type + " -- " + this.PrinterInfo.PaperName + " -- " + this.PrinterInfo.PrinterName + (this.PrinterInfo.Landscape == true ? " --- ºáÏò" : "");
+                this.Text = "æ‰“å° -- " + this.PrinterInfo.Type + " -- " + this.PrinterInfo.PaperName + " -- " + this.PrinterInfo.PrinterName + (this.PrinterInfo.Landscape == true ? " --- æ¨ªå‘" : "");
         }
 
 #if NO
@@ -339,9 +339,9 @@ namespace dp2Circulation
         {
             OpenFileDialog dlg = new OpenFileDialog();
 
-            dlg.Title = "ÇëÖ¸¶¨Òª´ò¿ªµÄ±êÇ©ÎÄ¼şÃû";
+            dlg.Title = "è¯·æŒ‡å®šè¦æ‰“å¼€çš„æ ‡ç­¾æ–‡ä»¶å";
             dlg.FileName = this.textBox_labelFile_labelFilename.Text;
-            dlg.Filter = "±êÇ©ÎÄ¼ş (*.txt)|*.txt|All files (*.*)|*.*";
+            dlg.Filter = "æ ‡ç­¾æ–‡ä»¶ (*.txt)|*.txt|All files (*.*)|*.*";
             dlg.RestoreDirectory = true;
 
             if (dlg.ShowDialog() != DialogResult.OK)
@@ -354,9 +354,9 @@ namespace dp2Circulation
         {
             OpenFileDialog dlg = new OpenFileDialog();
 
-            dlg.Title = "ÇëÖ¸¶¨Òª´ò¿ªµÄ±êÇ©¶¨ÒåÎÄ¼şÃû";
+            dlg.Title = "è¯·æŒ‡å®šè¦æ‰“å¼€çš„æ ‡ç­¾å®šä¹‰æ–‡ä»¶å";
             dlg.FileName = this.textBox_labelDefFilename.Text;
-            dlg.Filter = "±êÇ©¶¨ÒåÎÄ¼ş (*.xml)|*.xml|All files (*.*)|*.*";
+            dlg.Filter = "æ ‡ç­¾å®šä¹‰æ–‡ä»¶ (*.xml)|*.xml|All files (*.*)|*.*";
             dlg.RestoreDirectory = true;
 
             if (dlg.ShowDialog() != DialogResult.OK)
@@ -375,11 +375,11 @@ namespace dp2Circulation
 
             string strError = "";
             string strContent = "";
-            // ÄÜ×Ô¶¯Ê¶±ğÎÄ¼şÄÚÈİµÄ±àÂë·½Ê½µÄ¶ÁÈëÎÄ±¾ÎÄ¼şÄÚÈİÄ£¿é
+            // èƒ½è‡ªåŠ¨è¯†åˆ«æ–‡ä»¶å†…å®¹çš„ç¼–ç æ–¹å¼çš„è¯»å…¥æ–‡æœ¬æ–‡ä»¶å†…å®¹æ¨¡å—
             // return:
-            //      -1  ³ö´í
-            //      0   ÎÄ¼ş²»´æÔÚ
-            //      1   ÎÄ¼ş´æÔÚ
+            //      -1  å‡ºé”™
+            //      0   æ–‡ä»¶ä¸å­˜åœ¨
+            //      1   æ–‡ä»¶å­˜åœ¨
             int nRet = Global.ReadTextFileContent(this.textBox_labelFile_labelFilename.Text,
                 out strContent,
                 out strError);
@@ -407,13 +407,13 @@ namespace dp2Circulation
 
             /*
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚÖ´ĞĞ½Å±¾ ...");
+            stop.Initial("æ­£åœ¨æ‰§è¡Œè„šæœ¬ ...");
             stop.BeginLoop();
 
             try
             {*/
 
-            string strBiblioXml = "";   // Ïò·şÎñÆ÷Ìá¹©µÄXML¼ÇÂ¼
+            string strBiblioXml = "";   // å‘æœåŠ¡å™¨æä¾›çš„XMLè®°å½•
             long lRet = this.Channel.GetBiblioInfo(
                 null,   // this.stop,
                 strBiblioRecPath,
@@ -437,7 +437,7 @@ namespace dp2Circulation
             sw_error.WriteLine(strText);
         }
 
-        // ¸ù¾İ²á¼ÇÂ¼Â·¾¶´´½¨±êÇ©ÎÄ±¾ÎÄ¼ş
+        // æ ¹æ®å†Œè®°å½•è·¯å¾„åˆ›å»ºæ ‡ç­¾æ–‡æœ¬æ–‡ä»¶
         int BuildLabelFile(
             string strOutputFilename,
             string strOutputErrorFilename,
@@ -447,7 +447,7 @@ namespace dp2Circulation
 
             int nLabelCount = 0;
 
-            int nErrorCount = 0;    // ¼ÇÔØÊä³öµÄ´íÎó´ÎÊı¡£Èç¹û´¦Àí½áÊøºó´ËÖµÎª 0£¬±íÊ¾Ã»ÓĞÊä³öÈÎºÎ´íÎóĞÅÏ¢£¬µ«ÎÄ¼ş¿ÉÄÜÒòÎª UTF-8 µÄ Preamable ÓĞ 3 byte ³¤¶È¡£ËùÒÔĞèÒªÕâ¸ö±äÁ¿À´¶îÍâÅĞ¶Ï
+            int nErrorCount = 0;    // è®°è½½è¾“å‡ºçš„é”™è¯¯æ¬¡æ•°ã€‚å¦‚æœå¤„ç†ç»“æŸåæ­¤å€¼ä¸º 0ï¼Œè¡¨ç¤ºæ²¡æœ‰è¾“å‡ºä»»ä½•é”™è¯¯ä¿¡æ¯ï¼Œä½†æ–‡ä»¶å¯èƒ½å› ä¸º UTF-8 çš„ Preamable æœ‰ 3 byte é•¿åº¦ã€‚æ‰€ä»¥éœ€è¦è¿™ä¸ªå˜é‡æ¥é¢å¤–åˆ¤æ–­
 
             StreamWriter sw = null;
             try
@@ -458,7 +458,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = "´´½¨±êÇ©ÎÄ¼ş " + strOutputFilename + " Ê±³ö´í: " + ex.Message;
+                strError = "åˆ›å»ºæ ‡ç­¾æ–‡ä»¶ " + strOutputFilename + " æ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
@@ -474,7 +474,7 @@ namespace dp2Circulation
                 }
                 catch (Exception ex)
                 {
-                    strError = "´´½¨´íÎóĞÅÏ¢ÎÄ¼ş " + strOutputErrorFilename + " Ê±³ö´í: " + ex.Message;
+                    strError = "åˆ›å»ºé”™è¯¯ä¿¡æ¯æ–‡ä»¶ " + strOutputErrorFilename + " æ—¶å‡ºé”™: " + ex.Message;
                     if (sw != null)
                         sw.Close();
                     return -1;
@@ -482,7 +482,7 @@ namespace dp2Circulation
             }
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ»ñÈ¡²á¼ÇÂ¼ºÍ´´½¨±êÇ©ÎÄ¼ş ...");
+            stop.Initial("æ­£åœ¨è·å–å†Œè®°å½•å’Œåˆ›å»ºæ ‡ç­¾æ–‡ä»¶ ...");
             stop.BeginLoop();
 
             EnableControls(false);
@@ -513,7 +513,7 @@ namespace dp2Circulation
                     string strBiblioRecPath = "";
                     byte[] baTimestamp = null;
 
-                    // Result.Value -1³ö´í 0Ã»ÓĞÕÒµ½ 1ÕÒµ½ >1ÃüÖĞ¶àÓÚ1Ìõ
+                    // Result.Value -1å‡ºé”™ 0æ²¡æœ‰æ‰¾åˆ° 1æ‰¾åˆ° >1å‘½ä¸­å¤šäº1æ¡
                     long lRet = Channel.GetItemInfo(
                         stop,
                         strAccessPoint,
@@ -527,7 +527,7 @@ namespace dp2Circulation
                         out strError);
                     if (lRet == -1)
                     {
-                        strError = "»ñµÃ²á¼ÇÂ¼ {" + strRecPath + "} Ê±·¢Éú´íÎó: " + strError;
+                        strError = "è·å¾—å†Œè®°å½• {" + strRecPath + "} æ—¶å‘ç”Ÿé”™è¯¯: " + strError;
                         WriteErrorText(sw_error, strError);
                         nErrorCount++;
                         continue;
@@ -535,7 +535,7 @@ namespace dp2Circulation
 
                     if (lRet == 0)
                     {
-                        strError = "{" + strRecPath + "} µÄXMLÊı¾İÃ»ÓĞÕÒµ½¡£";
+                        strError = "{" + strRecPath + "} çš„XMLæ•°æ®æ²¡æœ‰æ‰¾åˆ°ã€‚";
                         WriteErrorText(sw_error, strError);
                         nErrorCount++;
                         continue;
@@ -543,7 +543,7 @@ namespace dp2Circulation
 
                     if (lRet > 1)
                     {
-                        strError = "{" + strRecPath + "} ¶ÔÓ¦Êı¾İ¼ÇÂ¼¶àÓÚÒ»Ìõ(Îª "+lRet.ToString()+" Ìõ)¡£";
+                        strError = "{" + strRecPath + "} å¯¹åº”æ•°æ®è®°å½•å¤šäºä¸€æ¡(ä¸º "+lRet.ToString()+" æ¡)ã€‚";
                         WriteErrorText(sw_error, strError);
                         nErrorCount++;
                         continue;
@@ -553,7 +553,7 @@ namespace dp2Circulation
 
                     strXml = strResult;
 
-                    // ¿´¿´ÊÇ·ñÔÚÏ£ÍûÍ³¼ÆµÄ·¶Î§ÄÚ
+                    // çœ‹çœ‹æ˜¯å¦åœ¨å¸Œæœ›ç»Ÿè®¡çš„èŒƒå›´å†…
                     XmlDocument dom = new XmlDocument();
                     try
                     {
@@ -561,7 +561,7 @@ namespace dp2Circulation
                     }
                     catch (Exception ex)
                     {
-                        strError = "²á¼ÇÂ¼ {"+strRecPath+"} XML×°ÈëDOM·¢Éú´íÎó: " + ex.Message;
+                        strError = "å†Œè®°å½• {"+strRecPath+"} XMLè£…å…¥DOMå‘ç”Ÿé”™è¯¯: " + ex.Message;
                         WriteErrorText(sw_error, strError);
                         nErrorCount++;
                         continue;
@@ -573,36 +573,36 @@ namespace dp2Circulation
                         strAccessNo = StringUtil.GetPlainTextCallNumber(strAccessNo);
 
                     if (string.IsNullOrEmpty(strAccessNo) == true
-    && strAccessNoSource == "´Ó²á¼ÇÂ¼")
+    && strAccessNoSource == "ä»å†Œè®°å½•")
                     {
-                        strError = "²á¼ÇÂ¼ {" + strRecPath + "} ÖĞÃ»ÓĞË÷È¡ºÅ×Ö¶ÎÄÚÈİ";
+                        strError = "å†Œè®°å½• {" + strRecPath + "} ä¸­æ²¡æœ‰ç´¢å–å·å­—æ®µå†…å®¹";
                         WriteErrorText(sw_error, strError);
                         nErrorCount++;
                         continue;
                     }
 
-                    if (strAccessNoSource == "´ÓÊéÄ¿¼ÇÂ¼"
-                        || (strAccessNoSource == "Ë³´Î´Ó²á¼ÇÂ¼¡¢ÊéÄ¿¼ÇÂ¼" && String.IsNullOrEmpty(strAccessNo) == true)
+                    if (strAccessNoSource == "ä»ä¹¦ç›®è®°å½•"
+                        || (strAccessNoSource == "é¡ºæ¬¡ä»å†Œè®°å½•ã€ä¹¦ç›®è®°å½•" && String.IsNullOrEmpty(strAccessNo) == true)
                         )
                     {
-                        // ´ÓÖÖÖĞÈ¡Ë÷È¡ºÅ
-                        // TODO: ¿ÉÒÔÔÚÏµÍ³²ÎÊıÖĞÅäÖÃ¼¸ÖÖ´¦Àí·½Ê½
-                        // 1) ½ö½ö´Ó²á¼ÇÂ¼ÖĞ»ñµÃ
-                        // 2) ½ö½ö´ÓÊéÄ¿¼ÇÂ¼ÖĞ»ñµÃ
-                        // 3) ÏÈ´Ó²á¼ÇÂ¼ÖĞ»ñµÃ£¬Èç¹ûÃ»ÓĞÔÙ´ÓÊéÄ¿¼ÇÂ¼ÖĞ»ñµÃ
-                        // ÄÇÃ´ÕâÀï¾Í½ö½ö¿ÉÒÔÔÚÊ×´Î³öÏÖÌØÊâÇé¿öµÄÊ±ºòÌáÊ¾Ò»ÏÂ¼´¿É¡£»òÕß´¦ÀíÍêÒÔºó¼¯ÖĞ×Ü½áÒ»ÏÂ³öÏÖÔÚ MessageBox ÖĞ
+                        // ä»ç§ä¸­å–ç´¢å–å·
+                        // TODO: å¯ä»¥åœ¨ç³»ç»Ÿå‚æ•°ä¸­é…ç½®å‡ ç§å¤„ç†æ–¹å¼
+                        // 1) ä»…ä»…ä»å†Œè®°å½•ä¸­è·å¾—
+                        // 2) ä»…ä»…ä»ä¹¦ç›®è®°å½•ä¸­è·å¾—
+                        // 3) å…ˆä»å†Œè®°å½•ä¸­è·å¾—ï¼Œå¦‚æœæ²¡æœ‰å†ä»ä¹¦ç›®è®°å½•ä¸­è·å¾—
+                        // é‚£ä¹ˆè¿™é‡Œå°±ä»…ä»…å¯ä»¥åœ¨é¦–æ¬¡å‡ºç°ç‰¹æ®Šæƒ…å†µçš„æ—¶å€™æç¤ºä¸€ä¸‹å³å¯ã€‚æˆ–è€…å¤„ç†å®Œä»¥åé›†ä¸­æ€»ç»“ä¸€ä¸‹å‡ºç°åœ¨ MessageBox ä¸­
 
 #if NO
                         if (bHideMessageBox == false)
                         {
-                            // TODO: °´Å¥ÎÄ×Ö½Ï³¤µÄÊ±ºò£¬Ó¦¸ÃÄÜ×Ô¶¯ÊÊÓ¦
+                            // TODO: æŒ‰é’®æ–‡å­—è¾ƒé•¿çš„æ—¶å€™ï¼Œåº”è¯¥èƒ½è‡ªåŠ¨é€‚åº”
                             result = MessageDialog.Show(this,
-        "²á¼ÇÂ¼ " + strRecPath + " ÖĞË÷È¡ºÅ×Ö¶ÎÄÚÈİÎª¿Õ¡£ÇëÎÊÊÇ·ñÒª¶ÔÕâÑùµÄ¼ÇÂ¼£¬ÊÔÌ½´ÓÊéÄ¿¼ÇÂ¼ÖĞ (905×Ö¶Î) »ñÈ¡Ë÷È¡ºÅ?\r\n\r\n(»ñÈ¡) ´ÓÊéÄ¿¼ÇÂ¼ÖĞ»ñÈ¡£»(Ìø¹ı) Ìø¹ıÕâÌõ¼ÇÂ¼; (ÖĞ¶Ï) ÖĞ¶Ï´¦Àí",
+        "å†Œè®°å½• " + strRecPath + " ä¸­ç´¢å–å·å­—æ®µå†…å®¹ä¸ºç©ºã€‚è¯·é—®æ˜¯å¦è¦å¯¹è¿™æ ·çš„è®°å½•ï¼Œè¯•æ¢ä»ä¹¦ç›®è®°å½•ä¸­ (905å­—æ®µ) è·å–ç´¢å–å·?\r\n\r\n(è·å–) ä»ä¹¦ç›®è®°å½•ä¸­è·å–ï¼›(è·³è¿‡) è·³è¿‡è¿™æ¡è®°å½•; (ä¸­æ–­) ä¸­æ–­å¤„ç†",
             MessageBoxButtons.YesNoCancel,
             MessageBoxDefaultButton.Button2,
             null,
             ref bHideMessageBox,
-            new string[] { "»ñÈ¡", "Ìø¹ı", "ÖĞ¶Ï" });
+            new string[] { "è·å–", "è·³è¿‡", "ä¸­æ–­" });
                         }
                         if (result == System.Windows.Forms.DialogResult.No)
                             goto CONTINUE;
@@ -617,7 +617,7 @@ namespace dp2Circulation
                                 out strError);
                             if (nRet == -1)
                             {
-                                strError = "´Ó²á¼ÇÂ¼ {" + strRecPath + "} ´ÓÊôµÄÖÖ¼ÇÂ¼ " + strBiblioRecPath + " ÖĞÈ¡Ë÷È¡ºÅµÄÊ±ºò·¢Éú´íÎó: " + strError;
+                                strError = "ä»å†Œè®°å½• {" + strRecPath + "} ä»å±çš„ç§è®°å½• " + strBiblioRecPath + " ä¸­å–ç´¢å–å·çš„æ—¶å€™å‘ç”Ÿé”™è¯¯: " + strError;
                                 WriteErrorText(sw_error, strError);
                                 nErrorCount++;
                                 continue;
@@ -626,8 +626,8 @@ namespace dp2Circulation
                             if (String.IsNullOrEmpty(strContent.Replace("/", "")) == true)
                             {
                                 strBiblio = "";
-                                // ÖÖÒ²Ã»ÓĞË÷È¡ºÅ
-                                strError = "²á¼ÇÂ¼ {" + strRecPath + "} ÖĞÃ»ÓĞË÷È¡ºÅ£¬²¢ÇÒÆä´ÓÊôµÄÖÖ¼ÇÂ¼ " + strBiblioRecPath + " ÖĞÒ²Ã»ÓĞË÷ÊéºÅ";
+                                // ç§ä¹Ÿæ²¡æœ‰ç´¢å–å·
+                                strError = "å†Œè®°å½• {" + strRecPath + "} ä¸­æ²¡æœ‰ç´¢å–å·ï¼Œå¹¶ä¸”å…¶ä»å±çš„ç§è®°å½• " + strBiblioRecPath + " ä¸­ä¹Ÿæ²¡æœ‰ç´¢ä¹¦å·";
                                 WriteErrorText(sw_error, strError);
                                 nErrorCount++;
                                 continue;
@@ -645,7 +645,7 @@ namespace dp2Circulation
                                 out strError);
                             if (nRet == -1)
                             {
-                                strError = "´Ó²á¼ÇÂ¼ {" + strRecPath + "} Ëù´ÓÊôµÄÊéÄ¿¼ÇÂ¼ " + strBiblioRecPath + " ÖĞÈ¡Ë÷È¡ºÅµÄÊ±ºò·¢Éú´íÎó: " + strError;
+                                strError = "ä»å†Œè®°å½• {" + strRecPath + "} æ‰€ä»å±çš„ä¹¦ç›®è®°å½• " + strBiblioRecPath + " ä¸­å–ç´¢å–å·çš„æ—¶å€™å‘ç”Ÿé”™è¯¯: " + strError;
                                 WriteErrorText(sw_error, strError);
                                 nErrorCount++;
                                 continue;
@@ -654,12 +654,12 @@ namespace dp2Circulation
                             if (String.IsNullOrEmpty(strContent.Replace("/", "")) == true)
                             {
                                 strBiblio = "";
-                                // ÖÖÒ²Ã»ÓĞË÷È¡ºÅ
+                                // ç§ä¹Ÿæ²¡æœ‰ç´¢å–å·
 
-                                if (strAccessNo == "Ë³´Î´Ó²á¼ÇÂ¼¡¢ÊéÄ¿¼ÇÂ¼")
-                                    strError = "²á¼ÇÂ¼ {" + strRecPath + "} ÖĞÃ»ÓĞË÷È¡ºÅ£¬²¢ÇÒÆä´ÓÊôµÄÊéÄ¿¼ÇÂ¼ " + strBiblioRecPath + " ÖĞÒ²Ã»ÓĞÕÒµ½Ë÷È¡ºÅ";
+                                if (strAccessNo == "é¡ºæ¬¡ä»å†Œè®°å½•ã€ä¹¦ç›®è®°å½•")
+                                    strError = "å†Œè®°å½• {" + strRecPath + "} ä¸­æ²¡æœ‰ç´¢å–å·ï¼Œå¹¶ä¸”å…¶ä»å±çš„ä¹¦ç›®è®°å½• " + strBiblioRecPath + " ä¸­ä¹Ÿæ²¡æœ‰æ‰¾åˆ°ç´¢å–å·";
                                 else
-                                    strError = "´Ó²á¼ÇÂ¼ {" + strRecPath + "} Ëù´ÓÊôµÄÊéÄ¿¼ÇÂ¼ " + strBiblioRecPath + " ÖĞÃ»ÓĞÕÒµ½Ë÷È¡ºÅ";
+                                    strError = "ä»å†Œè®°å½• {" + strRecPath + "} æ‰€ä»å±çš„ä¹¦ç›®è®°å½• " + strBiblioRecPath + " ä¸­æ²¡æœ‰æ‰¾åˆ°ç´¢å–å·";
                                 WriteErrorText(sw_error, strError);
                                 nErrorCount++;
                                 continue;
@@ -669,7 +669,7 @@ namespace dp2Circulation
                         }
 
 #if NO
-                        // ¾íºÅ?
+                        // å·å·?
                         string strVolume = DomUtil.GetElementText(dom.DocumentElement, "volume");
                         if (String.IsNullOrEmpty(strVolume) == false)
                             strAccessNo += "/" + strVolume;
@@ -686,7 +686,7 @@ namespace dp2Circulation
                     }
                     catch (Exception ex)
                     {
-                        strError = "Ğ´Èë±êÇ©ÎÄ¼ş " + strOutputFilename + " Ê±·¢Éú´íÎó: " + ex.Message;
+                        strError = "å†™å…¥æ ‡ç­¾æ–‡ä»¶ " + strOutputFilename + " æ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                         return -1;
                     }
 
@@ -722,10 +722,10 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ´òÓ¡Ô¤ÀÀ(¸ù¾İ±êÇ©ÎÄ¼ş)
+        /// æ‰“å°é¢„è§ˆ(æ ¹æ®æ ‡ç­¾æ–‡ä»¶)
         /// </summary>
-        /// <param name="bDisplayPrinterDialog">ÊÇ·ñÏÔÊ¾´òÓ¡»úÉèÖÃ¶Ô»°¿ò</param>
-        /// <returns>-1: ³ö´í; 0: ³É¹¦</returns>
+        /// <param name="bDisplayPrinterDialog">æ˜¯å¦æ˜¾ç¤ºæ‰“å°æœºè®¾ç½®å¯¹è¯æ¡†</param>
+        /// <returns>-1: å‡ºé”™; 0: æˆåŠŸ</returns>
         public int PrintPreviewFromLabelFile(bool bDisplayPrinterDialog = false)
         {
             string strError = "";
@@ -747,10 +747,10 @@ namespace dp2Circulation
 #if NO
         // 
         /// <summary>
-        /// ´òÓ¡Ô¤ÀÀ(¸ù¾İ±êÇ©ÎÄ¼ş)
+        /// æ‰“å°é¢„è§ˆ(æ ¹æ®æ ‡ç­¾æ–‡ä»¶)
         /// </summary>
-        /// <param name="bDisplayPrinterDialog">ÊÇ·ñÏÔÊ¾´òÓ¡»úÉèÖÃ¶Ô»°¿ò</param>
-        /// <returns>-1: ³ö´í; 0: ³É¹¦</returns>
+        /// <param name="bDisplayPrinterDialog">æ˜¯å¦æ˜¾ç¤ºæ‰“å°æœºè®¾ç½®å¯¹è¯æ¡†</param>
+        /// <returns>-1: å‡ºé”™; 0: æˆåŠŸ</returns>
         public int PrintPreviewFromLabelFile(bool bDisplayPrinterDialog = false)
         {
             string strError = "";
@@ -764,7 +764,7 @@ namespace dp2Circulation
 
             this.document.PreviewMode = true;
 
-            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " ¿ªÊ¼Ö´ĞĞ´òÓ¡Ô¤ÀÀ</div>");
+            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " å¼€å§‹æ‰§è¡Œæ‰“å°é¢„è§ˆ</div>");
             this.EnableControls(false);
             try
             {
@@ -779,7 +779,7 @@ namespace dp2Circulation
                         this.document.PrinterSettings.PrinterName = this.PrinterInfo.PrinterName;
                         if (this.document.PrinterSettings.IsValid == false)
                         {
-                            MessageBox.Show(this, "´òÓ¡»ú " + this.PrinterInfo.PrinterName + " µ±Ç°²»¿ÉÓÃ£¬ÇëÖØĞÂÑ¡¶¨´òÓ¡»ú");
+                            MessageBox.Show(this, "æ‰“å°æœº " + this.PrinterInfo.PrinterName + " å½“å‰ä¸å¯ç”¨ï¼Œè¯·é‡æ–°é€‰å®šæ‰“å°æœº");
                             this.document.PrinterSettings.PrinterName = strPrinterName;
                             this.PrinterInfo.PrinterName = "";
                             bDisplayPrinterDialog = true;
@@ -804,21 +804,21 @@ namespace dp2Circulation
                             this.document.DefaultPageSettings.PaperSize = found;
                         else
                         {
-                            MessageBox.Show(this, "´òÓ¡»ú " + this.PrinterInfo.PrinterName + " µÄÖ½ÕÅÀàĞÍ " + this.PrinterInfo.PaperName + " µ±Ç°²»¿ÉÓÃ£¬ÇëÖØĞÂÑ¡¶¨Ö½ÕÅ");
+                            MessageBox.Show(this, "æ‰“å°æœº " + this.PrinterInfo.PrinterName + " çš„çº¸å¼ ç±»å‹ " + this.PrinterInfo.PaperName + " å½“å‰ä¸å¯ç”¨ï¼Œè¯·é‡æ–°é€‰å®šçº¸å¼ ");
                             document.DefaultPageSettings.PaperSize = old_papersize;
                             this.PrinterInfo.PaperName = "";
                             bDisplayPrinterDialog = true;
                         }
                     }
 
-                    // Ö»ÒªÓĞÒ»¸ö´òÓ¡»úÊÂÏîÃ»ÓĞÈ·¶¨£¬¾ÍÒª³öÏÖ´òÓ¡»ú¶Ô»°¿ò
+                    // åªè¦æœ‰ä¸€ä¸ªæ‰“å°æœºäº‹é¡¹æ²¡æœ‰ç¡®å®šï¼Œå°±è¦å‡ºç°æ‰“å°æœºå¯¹è¯æ¡†
                     if (string.IsNullOrEmpty(this.PrinterInfo.PrinterName) == true
                         || string.IsNullOrEmpty(this.PrinterInfo.PaperName) == true)
                         bDisplayPrinterDialog = true;
                 }
                 else
                 {
-                    // Ã»ÓĞÊ×Ñ¡ÅäÖÃµÄÇé¿öÏÂÒª³öÏÖ´òÓ¡¶Ô»°¿ò
+                    // æ²¡æœ‰é¦–é€‰é…ç½®çš„æƒ…å†µä¸‹è¦å‡ºç°æ‰“å°å¯¹è¯æ¡†
                     bDisplayPrinterDialog = true;
                 }
 
@@ -829,7 +829,7 @@ namespace dp2Circulation
 
                     if (result == DialogResult.OK)
                     {
-                        // ¼ÇÒä´òÓ¡²ÎÊı
+                        // è®°å¿†æ‰“å°å‚æ•°
                         if (this.PrinterInfo == null)
                             this.PrinterInfo = new PrinterInfo();
                         this.PrinterInfo.PrinterName = document.PrinterSettings.PrinterName;
@@ -856,7 +856,7 @@ namespace dp2Circulation
 
                 this.EndPrint();
 
-                this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " ½áÊøÖ´ĞĞ´òÓ¡Ô¤ÀÀ</div>");
+                this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " ç»“æŸæ‰§è¡Œæ‰“å°é¢„è§ˆ</div>");
             }
 
             return 0;
@@ -868,20 +868,20 @@ namespace dp2Circulation
 
         void TracePrinterInfo()
         {
-            this.OutputText("´òÓ¡»úÃû³Æ: " + this.document.PrinterSettings.PrinterName);
-            this.OutputText("Ö½ÕÅÃû³Æ: " + this.document.DefaultPageSettings.PaperSize.ToString());
-            this.OutputText("Ö½ÕÅ·½Ïò: " +
-                    (this.document.DefaultPageSettings.Landscape == true ? "ºáÏò" : "×İÏò"));
-            this.OutputText("¿É´òÓ¡ÇøÓò: " + this.document.DefaultPageSettings.PrintableArea.ToString());
+            this.OutputText("æ‰“å°æœºåç§°: " + this.document.PrinterSettings.PrinterName);
+            this.OutputText("çº¸å¼ åç§°: " + this.document.DefaultPageSettings.PaperSize.ToString());
+            this.OutputText("çº¸å¼ æ–¹å‘: " +
+                    (this.document.DefaultPageSettings.Landscape == true ? "æ¨ªå‘" : "çºµå‘"));
+            this.OutputText("å¯æ‰“å°åŒºåŸŸ: " + this.document.DefaultPageSettings.PrintableArea.ToString());
         }
 
         /// <summary>
-        /// Ñ¡¶¨´òÓ¡»ú£¬°´´òÓ¡»úÃû
+        /// é€‰å®šæ‰“å°æœºï¼ŒæŒ‰æ‰“å°æœºå
         /// </summary>
-        /// <param name="document">PrintDocument ¶ÔÏó</param>
-        /// <param name="strPrinterName">´òÓ¡»úÃû</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>0: ³É¹¦Ñ¡¶¨: 1: Ã»ÓĞÑ¡¶¨£¬ÒòÎªÃû×Ö²»¿ÉÓÃ¡£½¨ÒéºóÃæ³öÏÖ´òÓ¡»ú¶Ô»°¿òÑ¡¶¨</returns>
+        /// <param name="document">PrintDocument å¯¹è±¡</param>
+        /// <param name="strPrinterName">æ‰“å°æœºå</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>0: æˆåŠŸé€‰å®š: 1: æ²¡æœ‰é€‰å®šï¼Œå› ä¸ºåå­—ä¸å¯ç”¨ã€‚å»ºè®®åé¢å‡ºç°æ‰“å°æœºå¯¹è¯æ¡†é€‰å®š</returns>
         public static int SelectPrinterByName(PrintDocument document,
             string strPrinterName,
             out string strError)
@@ -895,7 +895,7 @@ namespace dp2Circulation
                 document.PrinterSettings.PrinterName = strPrinterName;
                 if (document.PrinterSettings.IsValid == false)
                 {
-                    strError = "´òÓ¡»ú " + strPrinterName + " µ±Ç°²»¿ÉÓÃ£¬ÇëÖØĞÂÑ¡¶¨´òÓ¡»ú";
+                    strError = "æ‰“å°æœº " + strPrinterName + " å½“å‰ä¸å¯ç”¨ï¼Œè¯·é‡æ–°é€‰å®šæ‰“å°æœº";
                     document.PrinterSettings.PrinterName = strCurrentPrinterName;
                     return 1;
                 }
@@ -906,12 +906,12 @@ namespace dp2Circulation
 
 #if NO
         /// <summary>
-        /// Ñ¡¶¨Ö½ÕÅ£¬°´Ö½ÕÅÃû×Ö
+        /// é€‰å®šçº¸å¼ ï¼ŒæŒ‰çº¸å¼ åå­—
         /// </summary>
-        /// <param name="document">PrintDocument ¶ÔÏó</param>
-        /// <param name="strPaperName">Ö½ÕÅÃû×Ö</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>0: ³É¹¦Ñ¡¶¨: 1: Ã»ÓĞÑ¡¶¨£¬ÒòÎªÃû×Ö²»¿ÉÓÃ¡£½¨ÒéºóÃæ³öÏÖ´òÓ¡»ú¶Ô»°¿òÑ¡¶¨</returns>
+        /// <param name="document">PrintDocument å¯¹è±¡</param>
+        /// <param name="strPaperName">çº¸å¼ åå­—</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>0: æˆåŠŸé€‰å®š: 1: æ²¡æœ‰é€‰å®šï¼Œå› ä¸ºåå­—ä¸å¯ç”¨ã€‚å»ºè®®åé¢å‡ºç°æ‰“å°æœºå¯¹è¯æ¡†é€‰å®š</returns>
         public static int SelectPaperByName(PrintDocument document,
             string strPaperName,
             bool bCheck,
@@ -939,7 +939,7 @@ namespace dp2Circulation
                     document.DefaultPageSettings.PaperSize = found;
                 else
                 {
-                    strError = "´òÓ¡»ú " + document.PrinterSettings.PrinterName + " µÄÖ½ÕÅÀàĞÍ " + strPaperName + " µ±Ç°²»¿ÉÓÃ£¬ÇëÖØĞÂÑ¡¶¨Ö½ÕÅ";
+                    strError = "æ‰“å°æœº " + document.PrinterSettings.PrinterName + " çš„çº¸å¼ ç±»å‹ " + strPaperName + " å½“å‰ä¸å¯ç”¨ï¼Œè¯·é‡æ–°é€‰å®šçº¸å¼ ";
                     // document.DefaultPageSettings.PaperSize = old_papersize;
                     return 1;
                 }
@@ -949,14 +949,14 @@ namespace dp2Circulation
         }
 #endif
         /// <summary>
-        /// Ñ¡¶¨Ö½ÕÅ£¬°´Ö½ÕÅÃû×Ö
+        /// é€‰å®šçº¸å¼ ï¼ŒæŒ‰çº¸å¼ åå­—
         /// </summary>
-        /// <param name="document">PrintDocument ¶ÔÏó</param>
-        /// <param name="strPaperName">Ö½ÕÅÃû×Ö</param>
-        /// <param name="bLandscape">ÊÇ·ñÎªºáÏò</param>
-        /// <param name="bCheck">ÊÇ·ñ¼ì²éÖ½ÕÅ°üº¬ÔÚ´òÓ¡»úµÄÖ½ÕÅÁĞ±íÖĞ</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>0: ³É¹¦Ñ¡¶¨: 1: Ã»ÓĞÑ¡¶¨£¬ÒòÎªÃû×Ö²»¿ÉÓÃ¡£½¨ÒéºóÃæ³öÏÖ´òÓ¡»ú¶Ô»°¿òÑ¡¶¨</returns>
+        /// <param name="document">PrintDocument å¯¹è±¡</param>
+        /// <param name="strPaperName">çº¸å¼ åå­—</param>
+        /// <param name="bLandscape">æ˜¯å¦ä¸ºæ¨ªå‘</param>
+        /// <param name="bCheck">æ˜¯å¦æ£€æŸ¥çº¸å¼ åŒ…å«åœ¨æ‰“å°æœºçš„çº¸å¼ åˆ—è¡¨ä¸­</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>0: æˆåŠŸé€‰å®š: 1: æ²¡æœ‰é€‰å®šï¼Œå› ä¸ºåå­—ä¸å¯ç”¨ã€‚å»ºè®®åé¢å‡ºç°æ‰“å°æœºå¯¹è¯æ¡†é€‰å®š</returns>
         public static int SelectPaperByName(PrintDocument document,
             string strPaperName,
             bool bLandscape,
@@ -970,7 +970,7 @@ namespace dp2Circulation
             PaperSize paper_size = PrintUtil.BuildPaperSize(strPaperName);
             if (paper_size != null)
             {
-                // ½øĞĞ¼ì²é
+                // è¿›è¡Œæ£€æŸ¥
                 if (bCheck == true)
                 {
                     PaperSize found = null;
@@ -991,7 +991,7 @@ namespace dp2Circulation
                         goto END1;
                     }
 
-                    // Èç¹ûÃ»ÓĞÆ¥ÅäµÄ£¬ÔòÍË¶øÇóÆä´Î£¬ÓÃ³ß´çÆ¥ÅäÒ»¸ö
+                    // å¦‚æœæ²¡æœ‰åŒ¹é…çš„ï¼Œåˆ™é€€è€Œæ±‚å…¶æ¬¡ï¼Œç”¨å°ºå¯¸åŒ¹é…ä¸€ä¸ª
                     found = null;
                     foreach (PaperSize ps in document.PrinterSettings.PaperSizes)
                     {
@@ -1009,17 +1009,17 @@ namespace dp2Circulation
                         goto END1;
                     }
 
-                    strError = "´òÓ¡»ú " + document.PrinterSettings.PrinterName + " µÄÖ½ÕÅÀàĞÍ " + strPaperName + " µ±Ç°²»¿ÉÓÃ£¬ÇëÖØĞÂÑ¡¶¨Ö½ÕÅ";
+                    strError = "æ‰“å°æœº " + document.PrinterSettings.PrinterName + " çš„çº¸å¼ ç±»å‹ " + strPaperName + " å½“å‰ä¸å¯ç”¨ï¼Œè¯·é‡æ–°é€‰å®šçº¸å¼ ";
                     return 1;
                 }
 
             END1:
-                document.DefaultPageSettings.PaperSize = paper_size;    // ×¢£ºÖ±½Ó new PaperSize ÕâÑù¸³Öµ£¬»áµ¼ÖÂ´òÓ¡»ú¶Ô»°¿òÖĞÖ½ÕÅÃû×ÖÎª¿Õ¡£Ò²Ğí¿ÉÒÔ°Ñ PrinterSetting ÀïÃæµÄÒ²ĞŞ¸ÄÁË¾Í¿ÉÒÔÁË?
+                document.DefaultPageSettings.PaperSize = paper_size;    // æ³¨ï¼šç›´æ¥ new PaperSize è¿™æ ·èµ‹å€¼ï¼Œä¼šå¯¼è‡´æ‰“å°æœºå¯¹è¯æ¡†ä¸­çº¸å¼ åå­—ä¸ºç©ºã€‚ä¹Ÿè®¸å¯ä»¥æŠŠ PrinterSetting é‡Œé¢çš„ä¹Ÿä¿®æ”¹äº†å°±å¯ä»¥äº†?
                 document.DefaultPageSettings.Landscape = bLandscape;
             }
             else
             {
-                // ÊÔÌ½ÓÃÃû×ÖÀ´²éÕÒ
+                // è¯•æ¢ç”¨åå­—æ¥æŸ¥æ‰¾
                 PaperSize found = null;
                 foreach (PaperSize ps in document.PrinterSettings.PaperSizes)
                 {
@@ -1038,7 +1038,7 @@ namespace dp2Circulation
                     return 0;
                 }
 
-                strError = "´òÓ¡»ú " + document.PrinterSettings.PrinterName + " µÄÖ½ÕÅÀàĞÍ " + strPaperName + " µ±Ç°²»¿ÉÓÃ£¬ÇëÖØĞÂÑ¡¶¨Ö½ÕÅ";
+                strError = "æ‰“å°æœº " + document.PrinterSettings.PrinterName + " çš„çº¸å¼ ç±»å‹ " + strPaperName + " å½“å‰ä¸å¯ç”¨ï¼Œè¯·é‡æ–°é€‰å®šçº¸å¼ ";
                 return 1;
             }
 #if NO
@@ -1061,7 +1061,7 @@ namespace dp2Circulation
                     document.DefaultPageSettings.PaperSize = found;
                 else
                 {
-                    strError = "´òÓ¡»ú " + document.PrinterSettings.PrinterName + " µÄÖ½ÕÅÀàĞÍ " + strPaperName + " µ±Ç°²»¿ÉÓÃ£¬ÇëÖØĞÂÑ¡¶¨Ö½ÕÅ";
+                    strError = "æ‰“å°æœº " + document.PrinterSettings.PrinterName + " çš„çº¸å¼ ç±»å‹ " + strPaperName + " å½“å‰ä¸å¯ç”¨ï¼Œè¯·é‡æ–°é€‰å®šçº¸å¼ ";
                     // document.DefaultPageSettings.PaperSize = old_papersize;
                     return 1;
                 }
@@ -1072,14 +1072,14 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ´òÓ¡»ò´òÓ¡Ô¤ÀÀ
+        /// æ‰“å°æˆ–æ‰“å°é¢„è§ˆ
         /// </summary>
-        /// <param name="strLabelDefFileName">±êÇ©¶¨ÒåÎÄ¼ş</param>
-        /// <param name="strLabelFileName">±êÇ©ÄÚÈİÎÄ¼ş</param>
-        /// <param name="bDisplayPrinterDialog">ÊÇ·ñÏÔÊ¾´òÓ¡»úÉèÖÃ¶Ô»°¿ò</param>
-        /// <param name="bPrintPreview">ÊÇ·ñ½øĞĞ´òÓ¡Ô¤ÀÀ¡£false ±íÊ¾½øĞĞ´òÓ¡</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í; 0: ³É¹¦</returns>
+        /// <param name="strLabelDefFileName">æ ‡ç­¾å®šä¹‰æ–‡ä»¶</param>
+        /// <param name="strLabelFileName">æ ‡ç­¾å†…å®¹æ–‡ä»¶</param>
+        /// <param name="bDisplayPrinterDialog">æ˜¯å¦æ˜¾ç¤ºæ‰“å°æœºè®¾ç½®å¯¹è¯æ¡†</param>
+        /// <param name="bPrintPreview">æ˜¯å¦è¿›è¡Œæ‰“å°é¢„è§ˆã€‚false è¡¨ç¤ºè¿›è¡Œæ‰“å°</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™; 0: æˆåŠŸ</returns>
         public int Print(
             string strLabelDefFileName,
             string strLabelFileName,
@@ -1090,8 +1090,8 @@ namespace dp2Circulation
             strError = "";
             int nRet = 0;
 
-            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " ¿ªÊ¼Ö´ĞĞ´òÓ¡"
-                + (bPrintPreview == true ? "Ô¤ÀÀ" : "")
+            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " å¼€å§‹æ‰§è¡Œæ‰“å°"
+                + (bPrintPreview == true ? "é¢„è§ˆ" : "")
                 +"</div>");
 
             try
@@ -1128,7 +1128,7 @@ namespace dp2Circulation
                     if (this.PrinterInfo != null)
                     {
 
-                        // this.OutputText("»Ö¸´ÒÔÇ°µÄ´òÓ¡»úÃû: " + this.PrinterInfo.PrinterName + ", Ö½ÕÅÃû: " + this.PrinterInfo.PaperName);
+                        // this.OutputText("æ¢å¤ä»¥å‰çš„æ‰“å°æœºå: " + this.PrinterInfo.PrinterName + ", çº¸å¼ å: " + this.PrinterInfo.PaperName);
 
 #if NO
                         string strPrinterName = document.PrinterSettings.PrinterName;
@@ -1139,19 +1139,19 @@ namespace dp2Circulation
                             if (this.document.PrinterSettings.IsValid == false)
                             {
                                 this.document.PrinterSettings.PrinterName = strPrinterName;
-                                MessageBox.Show(this, "´òÓ¡»ú " + this.PrinterInfo.PrinterName + " µ±Ç°²»¿ÉÓÃ£¬ÇëÖØĞÂÑ¡¶¨´òÓ¡»ú");
+                                MessageBox.Show(this, "æ‰“å°æœº " + this.PrinterInfo.PrinterName + " å½“å‰ä¸å¯ç”¨ï¼Œè¯·é‡æ–°é€‰å®šæ‰“å°æœº");
                                 this.PrinterInfo.PrinterName = "";
                                 bDisplayPrinterDialog = true;
                             }
                         }
 #endif
-                        // °´ÕÕ´æ´¢µÄ´òÓ¡»úÃûÑ¡¶¨´òÓ¡»ú
+                        // æŒ‰ç…§å­˜å‚¨çš„æ‰“å°æœºåé€‰å®šæ‰“å°æœº
                         nRet = SelectPrinterByName(this.document,
                             this.PrinterInfo.PrinterName,
                             out  strError);
                         if (nRet == 1)
                         {
-                            MessageBox.Show(this, "´òÓ¡»ú " + this.PrinterInfo.PrinterName + " µ±Ç°²»¿ÉÓÃ£¬ÇëÖØĞÂÑ¡¶¨´òÓ¡»ú");
+                            MessageBox.Show(this, "æ‰“å°æœº " + this.PrinterInfo.PrinterName + " å½“å‰ä¸å¯ç”¨ï¼Œè¯·é‡æ–°é€‰å®šæ‰“å°æœº");
                             this.PrinterInfo.PrinterName = "";
                             bDisplayPrinterDialog = true;
                         }
@@ -1175,7 +1175,7 @@ namespace dp2Circulation
                                 this.document.DefaultPageSettings.PaperSize = found;
                             else
                             {
-                                MessageBox.Show(this, "´òÓ¡»ú " + this.PrinterInfo.PrinterName + " µÄÖ½ÕÅÀàĞÍ " + this.PrinterInfo.PaperName + " µ±Ç°²»¿ÉÓÃ£¬ÇëÖØĞÂÑ¡¶¨Ö½ÕÅ");
+                                MessageBox.Show(this, "æ‰“å°æœº " + this.PrinterInfo.PrinterName + " çš„çº¸å¼ ç±»å‹ " + this.PrinterInfo.PaperName + " å½“å‰ä¸å¯ç”¨ï¼Œè¯·é‡æ–°é€‰å®šçº¸å¼ ");
                                 document.DefaultPageSettings.PaperSize = old_papersize;
                                 this.PrinterInfo.PaperName = "";
                                 bDisplayPrinterDialog = true;
@@ -1183,7 +1183,7 @@ namespace dp2Circulation
                         }
 #endif
 
-                        // ĞèÒª×Ô¶¨ÒåÖ½ÕÅ
+                        // éœ€è¦è‡ªå®šä¹‰çº¸å¼ 
                         if (string.IsNullOrEmpty(this.label_param.DefaultPrinter) == true
                             && this.label_param.PageWidth > 0
                             && this.label_param.PageHeight > 0)
@@ -1208,13 +1208,13 @@ namespace dp2Circulation
                                 out strError);
                             if (nRet == 1)
                             {
-                                MessageBox.Show(this, "´òÓ¡»ú " + this.PrinterInfo.PrinterName + " µÄÖ½ÕÅÀàĞÍ " + this.PrinterInfo.PaperName + " µ±Ç°²»¿ÉÓÃ£¬ÇëÖØĞÂÑ¡¶¨Ö½ÕÅ");
+                                MessageBox.Show(this, "æ‰“å°æœº " + this.PrinterInfo.PrinterName + " çš„çº¸å¼ ç±»å‹ " + this.PrinterInfo.PaperName + " å½“å‰ä¸å¯ç”¨ï¼Œè¯·é‡æ–°é€‰å®šçº¸å¼ ");
                                 this.PrinterInfo.PaperName = "";
                                 bDisplayPrinterDialog = true;
                             }
                         }
 
-                        // Ö»ÒªÓĞÒ»¸ö´òÓ¡»úÊÂÏîÃ»ÓĞÈ·¶¨£¬¾ÍÒª³öÏÖ´òÓ¡»ú¶Ô»°¿ò
+                        // åªè¦æœ‰ä¸€ä¸ªæ‰“å°æœºäº‹é¡¹æ²¡æœ‰ç¡®å®šï¼Œå°±è¦å‡ºç°æ‰“å°æœºå¯¹è¯æ¡†
                         if (bCustomPaper == false)
                         {
                             if (string.IsNullOrEmpty(this.PrinterInfo.PrinterName) == true
@@ -1224,7 +1224,7 @@ namespace dp2Circulation
                     }
                     else
                     {
-                        // Ã»ÓĞÊ×Ñ¡ÅäÖÃµÄÇé¿öÏÂÒª³öÏÖ´òÓ¡¶Ô»°¿ò
+                        // æ²¡æœ‰é¦–é€‰é…ç½®çš„æƒ…å†µä¸‹è¦å‡ºç°æ‰“å°å¯¹è¯æ¡†
                         bDisplayPrinterDialog = true;
                     }
 
@@ -1245,11 +1245,11 @@ namespace dp2Circulation
                                 this.document.DefaultPageSettings.PaperSize = paper_size;
                             }
 
-                            // ¼ÇÒä´òÓ¡²ÎÊı
+                            // è®°å¿†æ‰“å°å‚æ•°
                             if (this.PrinterInfo == null)
                                 this.PrinterInfo = new PrinterInfo();
 
-                            // this.OutputText("´òÓ¡»ú¶Ô»°¿ò·µ»Øºó£¬ĞÂÑ¡¶¨µÄ´òÓ¡»úÃû: " + document.PrinterSettings.PrinterName + ", Ö½ÕÅÃû: " + document.DefaultPageSettings.PaperSize.PaperName);
+                            // this.OutputText("æ‰“å°æœºå¯¹è¯æ¡†è¿”å›åï¼Œæ–°é€‰å®šçš„æ‰“å°æœºå: " + document.PrinterSettings.PrinterName + ", çº¸å¼ å: " + document.DefaultPageSettings.PaperSize.PaperName);
 
                             this.PrinterInfo.PrinterName = document.PrinterSettings.PrinterName;
                             // this.PrinterInfo.PaperName = document.PrinterSettings.DefaultPageSettings.PaperSize.PaperName;  // document.DefaultPageSettings.PaperSize.PaperName
@@ -1267,16 +1267,16 @@ namespace dp2Circulation
                                     out strError);
                                 if (nRet == 1)
                                 {
-                                    // MessageBox.Show(this, "´òÓ¡»ú " + this.PrinterInfo.PrinterName + " µÄÖ½ÕÅÀàĞÍ " + this.PrinterInfo.PaperName + " µ±Ç°²»¿ÉÓÃ£¬ÇëÖØĞÂÑ¡¶¨Ö½ÕÅ");
+                                    // MessageBox.Show(this, "æ‰“å°æœº " + this.PrinterInfo.PrinterName + " çš„çº¸å¼ ç±»å‹ " + this.PrinterInfo.PaperName + " å½“å‰ä¸å¯ç”¨ï¼Œè¯·é‡æ–°é€‰å®šçº¸å¼ ");
                                     //this.PrinterInfo.PaperName = "";
                                     //bDisplayPrinterDialog = true;
 
-                                    this.OutputText("´òÓ¡»ú¶Ô»°¿ò·µ»Øºó£¬¾­¹ı¼ì²é£¬Ö½ÕÅ " + this.PrinterInfo.PaperName + " ²»ÔÚ´òÓ¡»ú " + this.PrinterInfo.PrinterName + " µÄ¿ÉÓÃÖ½ÕÅÁĞ±íÖĞ¡£³öÏÖ¶Ô»°¿òÈÃÓÃ»§ÖØĞÂÑ¡ÔñÖ½ÕÅ");
+                                    this.OutputText("æ‰“å°æœºå¯¹è¯æ¡†è¿”å›åï¼Œç»è¿‡æ£€æŸ¥ï¼Œçº¸å¼  " + this.PrinterInfo.PaperName + " ä¸åœ¨æ‰“å°æœº " + this.PrinterInfo.PrinterName + " çš„å¯ç”¨çº¸å¼ åˆ—è¡¨ä¸­ã€‚å‡ºç°å¯¹è¯æ¡†è®©ç”¨æˆ·é‡æ–°é€‰æ‹©çº¸å¼ ");
 
 
                                     SelectPaperDialog paper_dialog = new SelectPaperDialog();
                                     MainForm.SetControlFont(paper_dialog, this.Font, false);
-                                    paper_dialog.Comment = "Ö½ÕÅ " + this.PrinterInfo.PaperName + " ²»ÔÚ´òÓ¡»ú " + this.PrinterInfo.PrinterName + " µÄ¿ÉÓÃÖ½ÕÅÁĞ±íÖĞ¡£\r\nÇëÖØĞÂÑ¡¶¨Ö½ÕÅ";
+                                    paper_dialog.Comment = "çº¸å¼  " + this.PrinterInfo.PaperName + " ä¸åœ¨æ‰“å°æœº " + this.PrinterInfo.PrinterName + " çš„å¯ç”¨çº¸å¼ åˆ—è¡¨ä¸­ã€‚\r\nè¯·é‡æ–°é€‰å®šçº¸å¼ ";
                                     paper_dialog.Document = this.document;
                                     this.MainForm.AppInfo.LinkFormState(paper_dialog, "paper_dialog_state");
                                     paper_dialog.ShowDialog(this);
@@ -1285,7 +1285,7 @@ namespace dp2Circulation
                                     if (paper_dialog.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                                         return 0;
 
-                                    this.OutputText("¶Ô»°¿òÖĞĞÂÑ¡¶¨µÄÖ½ÕÅÃû: " + document.DefaultPageSettings.PaperSize.PaperName);
+                                    this.OutputText("å¯¹è¯æ¡†ä¸­æ–°é€‰å®šçš„çº¸å¼ å: " + document.DefaultPageSettings.PaperSize.PaperName);
                                 }
                             }
 
@@ -1319,13 +1319,13 @@ namespace dp2Circulation
                         this.Cursor = oldCursor;
                     this.EnableControls(true);
 
-                    this.EndPrint();    // ¹Ø±Õ±êÇ©ÎÄ¼ş¡£ºóÃæ²ÅÄÜÉ¾³ı
+                    this.EndPrint();    // å…³é—­æ ‡ç­¾æ–‡ä»¶ã€‚åé¢æ‰èƒ½åˆ é™¤
                 }
             }
             finally
             {
-                this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " ½áÊøÖ´ĞĞ´òÓ¡"
-                + (bPrintPreview == true ? "Ô¤ÀÀ" : "")
+                this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " ç»“æŸæ‰§è¡Œæ‰“å°"
+                + (bPrintPreview == true ? "é¢„è§ˆ" : "")
                 + "</div>");
             }
 
@@ -1337,15 +1337,15 @@ namespace dp2Circulation
 
         // 
         /// <summary>
-        /// ´òÓ¡Ô¤ÀÀ(¸ù¾İ²á¼ÇÂ¼)
+        /// æ‰“å°é¢„è§ˆ(æ ¹æ®å†Œè®°å½•)
         /// </summary>
-        /// <param name="bDisplayPrinterDialog">ÊÇ·ñÏÔÊ¾´òÓ¡»úÉèÖÃ¶Ô»°¿ò</param>
-        /// <returns>-1: ³ö´í; 0: ³É¹¦</returns>
+        /// <param name="bDisplayPrinterDialog">æ˜¯å¦æ˜¾ç¤ºæ‰“å°æœºè®¾ç½®å¯¹è¯æ¡†</param>
+        /// <returns>-1: å‡ºé”™; 0: æˆåŠŸ</returns>
         public int PrintPreviewFromItemRecords(bool bDisplayPrinterDialog = false)
         {
             string strError = "";
 
-            // ĞèÒªÏÈ´´½¨±êÇ©ÎÄ¼ş
+            // éœ€è¦å…ˆåˆ›å»ºæ ‡ç­¾æ–‡ä»¶
             string strLabelFilename = this.MainForm.NewTempFilename(
                 "temp_labelfiles",
                 "~label_");
@@ -1353,11 +1353,11 @@ namespace dp2Circulation
                 "temp_labelfiles",
                 "~error_");
 
-            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " ¿ªÊ¼Ö´ĞĞ´òÓ¡Ô¤ÀÀ</div>");
+            this.MainForm.OperHistory.AppendHtml("<div class='debug begin'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " å¼€å§‹æ‰§è¡Œæ‰“å°é¢„è§ˆ</div>");
 
             try
             {
-                this.textBox_errorInfo.Text = "µ±Ç°Ë÷È¡ºÅÀ´Ô´: " + this.AccessNoSource + "\r\n\r\n";
+                this.textBox_errorInfo.Text = "å½“å‰ç´¢å–å·æ¥æº: " + this.AccessNoSource + "\r\n\r\n";
 
                 int nRet = BuildLabelFile(
                     strLabelFilename,
@@ -1378,7 +1378,7 @@ namespace dp2Circulation
                     this.textBox_errorInfo.Text += strContent;
 
                     DialogResult result = MessageBox.Show(this,
-                        "´´½¨±êÇ©ÎÄ¼şµÄ¹ı³ÌÖĞÓĞ±¨´íĞÅÏ¢£¬ÇëÎÊÊÇ·ñ¼ÌĞø½øĞĞ´òÓ¡Ô¤ÀÀ?\r\n\r\n(Yes ¼ÌĞø´òÓ¡Ô¤ÀÀ£»No ²»½øĞĞ´òÓ¡Ô¤ÀÀ)",
+                        "åˆ›å»ºæ ‡ç­¾æ–‡ä»¶çš„è¿‡ç¨‹ä¸­æœ‰æŠ¥é”™ä¿¡æ¯ï¼Œè¯·é—®æ˜¯å¦ç»§ç»­è¿›è¡Œæ‰“å°é¢„è§ˆ?\r\n\r\n(Yes ç»§ç»­æ‰“å°é¢„è§ˆï¼›No ä¸è¿›è¡Œæ‰“å°é¢„è§ˆ)",
                         "LabelPrintForm",
                         MessageBoxButtons.YesNo,
                         MessageBoxIcon.Question,
@@ -1409,7 +1409,7 @@ namespace dp2Circulation
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show(this, "É¾³ıÁÙÊ±±êÇ©ÎÄ¼ş '"+strLabelFilename+"' Ê±³ö´í: " + ex.Message);
+                        MessageBox.Show(this, "åˆ é™¤ä¸´æ—¶æ ‡ç­¾æ–‡ä»¶ '"+strLabelFilename+"' æ—¶å‡ºé”™: " + ex.Message);
                     }
                 }
                 if (String.IsNullOrEmpty(strErrorFilename) == false)
@@ -1420,11 +1420,11 @@ namespace dp2Circulation
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show(this, "É¾³ıÁÙÊ±´íÎóÎÄ¼ş '" + strErrorFilename + "' Ê±³ö´í: " + ex.Message);
+                        MessageBox.Show(this, "åˆ é™¤ä¸´æ—¶é”™è¯¯æ–‡ä»¶ '" + strErrorFilename + "' æ—¶å‡ºé”™: " + ex.Message);
                     }
                 }
 
-                // this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " ½áÊøÖ´ĞĞ´òÓ¡Ô¤ÀÀ</div>");
+                // this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " ç»“æŸæ‰§è¡Œæ‰“å°é¢„è§ˆ</div>");
             }
 
             return 0;
@@ -1435,8 +1435,8 @@ namespace dp2Circulation
 
 
         // parameters:
-        //      strLabelFilename    ±êÇ©ÎÄ¼şÃû
-        //      strDefFilename  ¶¨ÒåÎÄ¼şÃû
+        //      strLabelFilename    æ ‡ç­¾æ–‡ä»¶å
+        //      strDefFilename  å®šä¹‰æ–‡ä»¶å
         int BeginPrint(
             string strLabelFilename,
             string strDefFilename,
@@ -1446,14 +1446,14 @@ namespace dp2Circulation
 
             if (String.IsNullOrEmpty(strDefFilename) == true)
             {
-                strError = "ÉĞÎ´Ö¸¶¨±êÇ©¶¨ÒåÎÄ¼şÃû";
+                strError = "å°šæœªæŒ‡å®šæ ‡ç­¾å®šä¹‰æ–‡ä»¶å";
                 return -1;
             }
 
 
             if (String.IsNullOrEmpty(strLabelFilename) == true)
             {
-                strError = "ÉĞÎ´Ö¸¶¨±êÇ©ÎÄ¼şÃû";
+                strError = "å°šæœªæŒ‡å®šæ ‡ç­¾æ–‡ä»¶å";
                 return -1;
             }
 
@@ -1516,9 +1516,9 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÔÊĞí»òÕß½ûÖ¹½çÃæ¿Ø¼ş¡£ÔÚ³¤²Ù×÷Ç°£¬Ò»°ãĞèÒª½ûÖ¹½çÃæ¿Ø¼ş£»²Ù×÷Íê³ÉºóÔÙÔÊĞí
+        /// å…è®¸æˆ–è€…ç¦æ­¢ç•Œé¢æ§ä»¶ã€‚åœ¨é•¿æ“ä½œå‰ï¼Œä¸€èˆ¬éœ€è¦ç¦æ­¢ç•Œé¢æ§ä»¶ï¼›æ“ä½œå®Œæˆåå†å…è®¸
         /// </summary>
-        /// <param name="bEnable">ÊÇ·ñÔÊĞí½çÃæ¿Ø¼ş¡£true ÎªÔÊĞí£¬ false Îª½ûÖ¹</param>
+        /// <param name="bEnable">æ˜¯å¦å…è®¸ç•Œé¢æ§ä»¶ã€‚true ä¸ºå…è®¸ï¼Œ false ä¸ºç¦æ­¢</param>
         public override void EnableControls(bool bEnable)
         {
             this.textBox_labelFile_labelFilename.Enabled = bEnable;
@@ -1537,10 +1537,10 @@ namespace dp2Circulation
 
         // 
         /// <summary>
-        /// ´òÓ¡(¸ù¾İ±êÇ©ÎÄ¼ş)
+        /// æ‰“å°(æ ¹æ®æ ‡ç­¾æ–‡ä»¶)
         /// </summary>
-        /// <param name="bDisplayPrinterDialog">ÊÇ·ñÏÔÊ¾´òÓ¡»úÉèÖÃ¶Ô»°¿ò</param>
-        /// <returns>-1: ³ö´í; 0: ³É¹¦</returns>
+        /// <param name="bDisplayPrinterDialog">æ˜¯å¦æ˜¾ç¤ºæ‰“å°æœºè®¾ç½®å¯¹è¯æ¡†</param>
+        /// <returns>-1: å‡ºé”™; 0: æˆåŠŸ</returns>
         public int PrintFromLabelFile(bool bDisplayPrinterDialog = true)
         {
             string strError = "";
@@ -1561,15 +1561,15 @@ namespace dp2Circulation
 
         // 
         /// <summary>
-        /// ´òÓ¡(¸ù¾İ²á¼ÇÂ¼)
+        /// æ‰“å°(æ ¹æ®å†Œè®°å½•)
         /// </summary>
-        /// <param name="bDisplayPrinterDialog">ÊÇ·ñÏÔÊ¾´òÓ¡»úÉèÖÃ¶Ô»°¿ò</param>
-        /// <returns>-1: ³ö´í; 0: ³É¹¦</returns>
+        /// <param name="bDisplayPrinterDialog">æ˜¯å¦æ˜¾ç¤ºæ‰“å°æœºè®¾ç½®å¯¹è¯æ¡†</param>
+        /// <returns>-1: å‡ºé”™; 0: æˆåŠŸ</returns>
         public int PrintFromItemRecords(bool bDisplayPrinterDialog = true)
         {
             string strError = "";
 
-            // ĞèÒªÏÈ´´½¨±êÇ©ÎÄ¼ş
+            // éœ€è¦å…ˆåˆ›å»ºæ ‡ç­¾æ–‡ä»¶
             string strLabelFilename = this.MainForm.NewTempFilename(
                 "temp_labelfiles",
                 "~label_");
@@ -1600,7 +1600,7 @@ namespace dp2Circulation
                     this.textBox_errorInfo.Text = strContent;
 
                     DialogResult result = MessageBox.Show(this,
-                        "´´½¨±êÇ©ÎÄ¼şµÄ¹ı³ÌÖĞÓĞ±¨´íĞÅÏ¢£¬ÇëÎÊÊÇ·ñ¼ÌĞø½øĞĞ´òÓ¡?\r\n\r\n(Yes ¼ÌĞø´òÓ¡£»No ²»½øĞĞ´òÓ¡)",
+                        "åˆ›å»ºæ ‡ç­¾æ–‡ä»¶çš„è¿‡ç¨‹ä¸­æœ‰æŠ¥é”™ä¿¡æ¯ï¼Œè¯·é—®æ˜¯å¦ç»§ç»­è¿›è¡Œæ‰“å°?\r\n\r\n(Yes ç»§ç»­æ‰“å°ï¼›No ä¸è¿›è¡Œæ‰“å°)",
                         "LabelPrintForm",
                         MessageBoxButtons.YesNo,
                         MessageBoxIcon.Question,
@@ -1645,7 +1645,7 @@ namespace dp2Circulation
                     }
                 }
 
-                // this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " ½áÊøÖ´ĞĞ´òÓ¡</div>");
+                // this.MainForm.OperHistory.AppendHtml("<div class='debug end'>" + HttpUtility.HtmlEncode(DateTime.Now.ToLongTimeString()) + " ç»“æŸæ‰§è¡Œæ‰“å°</div>");
             }
 
             return 0;
@@ -1657,7 +1657,7 @@ namespace dp2Circulation
 
         // 
         /// <summary>
-        /// ±êÇ©(ÄÚÈİ)ÎÄ¼şÃû
+        /// æ ‡ç­¾(å†…å®¹)æ–‡ä»¶å
         /// </summary>
         public string LabelFilename
         {
@@ -1673,7 +1673,7 @@ namespace dp2Circulation
 
         // 
         /// <summary>
-        /// ±êÇ©¶¨ÒåÎÄ¼şÃû
+        /// æ ‡ç­¾å®šä¹‰æ–‡ä»¶å
         /// </summary>
         public string LabelDefFilename
         {
@@ -1710,12 +1710,12 @@ namespace dp2Circulation
                 if (bSelected == true)
                     strRecPath = this.listView_records.SelectedItems[0].Text;
 
-                string strOpenStyle = "ĞÂ¿ªµÄ";
+                string strOpenStyle = "æ–°å¼€çš„";
                 if (this.LoadToExistDetailWindow == true)
-                    strOpenStyle = "ÒÑ´ò¿ªµÄ";
+                    strOpenStyle = "å·²æ‰“å¼€çš„";
 
 
-                menuItem = new MenuItem("´ò¿ª [¸ù¾İ²á¼ÇÂ¼Â·¾¶ '" + strRecPath + "' ×°Èëµ½" + strOpenStyle + "ÖÖ²á´°](&O)");
+                menuItem = new MenuItem("æ‰“å¼€ [æ ¹æ®å†Œè®°å½•è·¯å¾„ '" + strRecPath + "' è£…å…¥åˆ°" + strOpenStyle + "ç§å†Œçª—](&O)");
                 menuItem.DefaultItem = true;
                 menuItem.Click += new System.EventHandler(this.listView_records_DoubleClick);
                 if (String.IsNullOrEmpty(strRecPath) == true)
@@ -1738,36 +1738,36 @@ namespace dp2Circulation
                 bool bExistItemInfoForm = (this.MainForm.GetTopChildWindow<ItemInfoForm>() != null);
 
                 //
-                menuItem = new MenuItem("´ò¿ª·½Ê½(&T)");
+                menuItem = new MenuItem("æ‰“å¼€æ–¹å¼(&T)");
                 contextMenu.MenuItems.Add(menuItem);
 
-                // µÚÒ»¼¶×Ó²Ëµ¥
+                // ç¬¬ä¸€çº§å­èœå•
 
-                strOpenStyle = "ĞÂ¿ªµÄ";
+                strOpenStyle = "æ–°å¼€çš„";
 
-                // µ½ÊµÌå´°£¬¼ÇÂ¼Â·¾¶
-                MenuItem subMenuItem = new MenuItem("×°Èë" + strOpenStyle + "ÊµÌå´°£¬¸ù¾İ¼ÇÂ¼Â·¾¶ '" + strRecPath + "'");
+                // åˆ°å®ä½“çª—ï¼Œè®°å½•è·¯å¾„
+                MenuItem subMenuItem = new MenuItem("è£…å…¥" + strOpenStyle + "å®ä½“çª—ï¼Œæ ¹æ®è®°å½•è·¯å¾„ '" + strRecPath + "'");
                 subMenuItem.Click += new System.EventHandler(this.menu_itemInfoForm_recPath_newly_Click);
                 if (String.IsNullOrEmpty(strRecPath) == true)
                     subMenuItem.Enabled = false;
                 menuItem.MenuItems.Add(subMenuItem);
 
-                // µ½ÊµÌå´°£¬ÌõÂëºÅ
-                subMenuItem = new MenuItem("×°Èë" + strOpenStyle + "ÊµÌå´°£¬¸ù¾İ²áÌõÂëºÅ '" + strBarcode + "'");
+                // åˆ°å®ä½“çª—ï¼Œæ¡ç å·
+                subMenuItem = new MenuItem("è£…å…¥" + strOpenStyle + "å®ä½“çª—ï¼Œæ ¹æ®å†Œæ¡ç å· '" + strBarcode + "'");
                 subMenuItem.Click += new System.EventHandler(this.menu_itemInfoForm_barcode_newly_Click);
                 if (String.IsNullOrEmpty(strBarcode) == true)
                     subMenuItem.Enabled = false;
                 menuItem.MenuItems.Add(subMenuItem);
 
-                // µ½ÖÖ²á´°£¬¼ÇÂ¼Â·¾¶
-                subMenuItem = new MenuItem("×°Èë" + strOpenStyle + "ÖÖ²á´°£¬¸ù¾İ¼ÇÂ¼Â·¾¶ '" + strRecPath + "'");
+                // åˆ°ç§å†Œçª—ï¼Œè®°å½•è·¯å¾„
+                subMenuItem = new MenuItem("è£…å…¥" + strOpenStyle + "ç§å†Œçª—ï¼Œæ ¹æ®è®°å½•è·¯å¾„ '" + strRecPath + "'");
                 subMenuItem.Click += new System.EventHandler(this.menu_entityForm_recPath_newly_Click);
                 if (String.IsNullOrEmpty(strRecPath) == true)
                     subMenuItem.Enabled = false;
                 menuItem.MenuItems.Add(subMenuItem);
 
-                // µ½ÖÖ²á´°£¬ÌõÂë
-                subMenuItem = new MenuItem("×°Èë" + strOpenStyle + "ÖÖ²á´°£¬¸ù¾İ²áÌõÂë '" + strBarcode + "'");
+                // åˆ°ç§å†Œçª—ï¼Œæ¡ç 
+                subMenuItem = new MenuItem("è£…å…¥" + strOpenStyle + "ç§å†Œçª—ï¼Œæ ¹æ®å†Œæ¡ç  '" + strBarcode + "'");
                 subMenuItem.Click += new System.EventHandler(this.menu_entityForm_barcode_newly_Click);
                 if (String.IsNullOrEmpty(strBarcode) == true)
                     subMenuItem.Enabled = false;
@@ -1777,34 +1777,34 @@ namespace dp2Circulation
                 subMenuItem = new MenuItem("-");
                 menuItem.MenuItems.Add(subMenuItem);
 
-                strOpenStyle = "ÒÑ´ò¿ªµÄ";
+                strOpenStyle = "å·²æ‰“å¼€çš„";
 
-                // µ½ÊµÌå´°£¬¼ÇÂ¼Â·¾¶
-                subMenuItem = new MenuItem("×°Èë" + strOpenStyle + "ÊµÌå´°£¬¸ù¾İ¼ÇÂ¼Â·¾¶ '" + strRecPath + "'");
+                // åˆ°å®ä½“çª—ï¼Œè®°å½•è·¯å¾„
+                subMenuItem = new MenuItem("è£…å…¥" + strOpenStyle + "å®ä½“çª—ï¼Œæ ¹æ®è®°å½•è·¯å¾„ '" + strRecPath + "'");
                 subMenuItem.Click += new System.EventHandler(this.menu_itemInfoForm_recPath_exist_Click);
                 if (String.IsNullOrEmpty(strRecPath) == true
                     || bExistItemInfoForm == false)
                     subMenuItem.Enabled = false;
                 menuItem.MenuItems.Add(subMenuItem);
 
-                // µ½ÊµÌå´°£¬ÌõÂë
-                subMenuItem = new MenuItem("×°Èë" + strOpenStyle + "ÊµÌå´°£¬¸ù¾İ²áÌõÂëºÅ '" + strBarcode + "'");
+                // åˆ°å®ä½“çª—ï¼Œæ¡ç 
+                subMenuItem = new MenuItem("è£…å…¥" + strOpenStyle + "å®ä½“çª—ï¼Œæ ¹æ®å†Œæ¡ç å· '" + strBarcode + "'");
                 subMenuItem.Click += new System.EventHandler(this.menu_itemInfoForm_barcode_exist_Click);
                 if (String.IsNullOrEmpty(strBarcode) == true
                     || bExistItemInfoForm == false)
                     subMenuItem.Enabled = false;
                 menuItem.MenuItems.Add(subMenuItem);
 
-                // µ½ÖÖ²á´°£¬¼ÇÂ¼Â·¾¶
-                subMenuItem = new MenuItem("×°Èë" + strOpenStyle + "ÖÖ²á´°£¬¸ù¾İ¼ÇÂ¼Â·¾¶ '" + strRecPath + "'");
+                // åˆ°ç§å†Œçª—ï¼Œè®°å½•è·¯å¾„
+                subMenuItem = new MenuItem("è£…å…¥" + strOpenStyle + "ç§å†Œçª—ï¼Œæ ¹æ®è®°å½•è·¯å¾„ '" + strRecPath + "'");
                 subMenuItem.Click += new System.EventHandler(this.menu_entityForm_recPath_exist_Click);
                 if (String.IsNullOrEmpty(strRecPath) == true
                     || bExistEntityForm == false)
                     subMenuItem.Enabled = false;
                 menuItem.MenuItems.Add(subMenuItem);
 
-                // µ½ÖÖ²á´°£¬ÌõÂë
-                subMenuItem = new MenuItem("×°Èë" + strOpenStyle + "ÖÖ²á´°£¬¸ù¾İ²áÌõÂëºÅ '" + strBarcode + "'");
+                // åˆ°ç§å†Œçª—ï¼Œæ¡ç 
+                subMenuItem = new MenuItem("è£…å…¥" + strOpenStyle + "ç§å†Œçª—ï¼Œæ ¹æ®å†Œæ¡ç å· '" + strBarcode + "'");
                 subMenuItem.Click += new System.EventHandler(this.menu_entityForm_barcode_exist_Click);
                 if (String.IsNullOrEmpty(strBarcode) == true
                     || bExistEntityForm == false)
@@ -1825,14 +1825,14 @@ namespace dp2Circulation
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("¼ôÇĞ(&T)");
+            menuItem = new MenuItem("å‰ªåˆ‡(&T)");
             menuItem.Click += new System.EventHandler(this.menu_cutToClipboard_Click);
             if (nPathItemCount == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
 
-            menuItem = new MenuItem("¸´ÖÆ(&C)");
+            menuItem = new MenuItem("å¤åˆ¶(&C)");
             menuItem.Click += new System.EventHandler(this.menu_copyToClipboard_Click);
             if (nPathItemCount == 0)
                 menuItem.Enabled = false;
@@ -1848,13 +1848,13 @@ namespace dp2Circulation
             else
                 bHasClipboardObject = false;
 
-            menuItem = new MenuItem("Õ³Ìù[Ç°²å](&P)");
+            menuItem = new MenuItem("ç²˜è´´[å‰æ’](&P)");
             menuItem.Click += new System.EventHandler(this.menu_pasteFromClipboard_insertBefore_Click);
             if (bHasClipboardObject == false)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("Õ³Ìù[ºó²å](&V)");
+            menuItem = new MenuItem("ç²˜è´´[åæ’](&V)");
             menuItem.Click += new System.EventHandler(this.menu_pasteFromClipboard_insertAfter_Click);
             if (bHasClipboardObject == false)
                 menuItem.Enabled = false;
@@ -1865,7 +1865,7 @@ namespace dp2Circulation
             contextMenu.MenuItems.Add(menuItem);
 
 
-            menuItem = new MenuItem("È«Ñ¡(&A)");
+            menuItem = new MenuItem("å…¨é€‰(&A)");
             menuItem.Click += new System.EventHandler(this.menu_selectAllLines_Click);
             contextMenu.MenuItems.Add(menuItem);
 
@@ -1873,14 +1873,14 @@ namespace dp2Circulation
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("µ¼³öµ½ÌõÂëºÅÎÄ¼ş [" + nPathItemCount.ToString() + "] (&B)");
+            menuItem = new MenuItem("å¯¼å‡ºåˆ°æ¡ç å·æ–‡ä»¶ [" + nPathItemCount.ToString() + "] (&B)");
             menuItem.Click += new System.EventHandler(this.menu_exportBarcodeFile_Click);
             if (nPathItemCount == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
 
-            menuItem = new MenuItem("µ¼³öµ½¼ÇÂ¼Â·¾¶ÎÄ¼ş [" + nPathItemCount.ToString() + "] (&S)");
+            menuItem = new MenuItem("å¯¼å‡ºåˆ°è®°å½•è·¯å¾„æ–‡ä»¶ [" + nPathItemCount.ToString() + "] (&S)");
             menuItem.Click += new System.EventHandler(this.menu_saveToRecordPathFile_Click);
             if (nPathItemCount == 0)
                 menuItem.Enabled = false;
@@ -1890,7 +1890,7 @@ namespace dp2Circulation
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("µ¼³öµ½ÎÄ±¾ÎÄ¼ş [" + this.listView_records.SelectedItems.Count.ToString() + "] (&T)");
+            menuItem = new MenuItem("å¯¼å‡ºåˆ°æ–‡æœ¬æ–‡ä»¶ [" + this.listView_records.SelectedItems.Count.ToString() + "] (&T)");
             menuItem.Click += new System.EventHandler(this.menu_exportTextFile_Click);
             if (this.listView_records.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
@@ -1900,12 +1900,12 @@ namespace dp2Circulation
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("´Ó¼ÇÂ¼Â·¾¶ÎÄ¼şÖĞµ¼Èë(&I)");
+            menuItem = new MenuItem("ä»è®°å½•è·¯å¾„æ–‡ä»¶ä¸­å¯¼å…¥(&I)");
             menuItem.Click += new System.EventHandler(this.menu_importFromRecPathFile_Click);
             contextMenu.MenuItems.Add(menuItem);
 
 
-            menuItem = new MenuItem("´ÓÌõÂëºÅÎÄ¼şÖĞµ¼Èë(&R)...");
+            menuItem = new MenuItem("ä»æ¡ç å·æ–‡ä»¶ä¸­å¯¼å…¥(&R)...");
             menuItem.Click += new System.EventHandler(this.menu_importFromBarcodeFile_Click);
             contextMenu.MenuItems.Add(menuItem);
 
@@ -1913,13 +1913,13 @@ namespace dp2Circulation
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("ÒÆ³ıËùÑ¡ÔñÊÂÏî [" + this.listView_records.SelectedItems.Count.ToString() + "] (&D)");
+            menuItem = new MenuItem("ç§»é™¤æ‰€é€‰æ‹©äº‹é¡¹ [" + this.listView_records.SelectedItems.Count.ToString() + "] (&D)");
             menuItem.Click += new System.EventHandler(this.menu_removeSelectedItems_Click);
             if (this.listView_records.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("Çå³ıÁĞ±í(&C)");
+            menuItem = new MenuItem("æ¸…é™¤åˆ—è¡¨(&C)");
             menuItem.Click += new System.EventHandler(this.menu_clearList_Click);
             if (this.listView_records.Items.Count == 0)
                 menuItem.Enabled = false;
@@ -1947,7 +1947,7 @@ namespace dp2Circulation
         }
 
         // parameters:
-        //      bCut    ÊÇ·ñÎª¼ôÇĞ
+        //      bCut    æ˜¯å¦ä¸ºå‰ªåˆ‡
         void CopyLinesToClipboard(bool bCut)
         {
             Cursor oldCursor = this.Cursor;
@@ -1992,7 +1992,7 @@ namespace dp2Circulation
         }
 
         // parameters:
-        //      bInsertBefore   ÊÇ·ñÇ°²å? Èç¹û==trueÇ°²å£¬·ñÔòºó²å
+        //      bInsertBefore   æ˜¯å¦å‰æ’? å¦‚æœ==trueå‰æ’ï¼Œå¦åˆ™åæ’
         void PasteLines(bool bInsertBefore)
         {
             string strError = "";
@@ -2001,7 +2001,7 @@ namespace dp2Circulation
 
             if (ido == null)
             {
-                strError = "¼ôÌù°åÖĞÃ»ÓĞÄÚÈİ";
+                strError = "å‰ªè´´æ¿ä¸­æ²¡æœ‰å†…å®¹";
                 goto ERROR1;
             }
 
@@ -2102,7 +2102,7 @@ namespace dp2Circulation
             }
             else
             {
-                strError = "¼ôÌù°åÖĞ¼È²»´æÔÚClipboardBookItemCollectionÀàĞÍµÄÄÚÈİ£¬Ò²²»´æÔÚstringÀàĞÍÄÚÈİ";
+                strError = "å‰ªè´´æ¿ä¸­æ—¢ä¸å­˜åœ¨ClipboardBookItemCollectionç±»å‹çš„å†…å®¹ï¼Œä¹Ÿä¸å­˜åœ¨stringç±»å‹å†…å®¹";
                 goto ERROR1;
             }
 
@@ -2163,11 +2163,11 @@ namespace dp2Circulation
             {
                 if (this.listView_records.SelectedIndices.Count == 1)
                 {
-                    this.label_message.Text = "µÚ " + (this.listView_records.SelectedIndices[0] + 1).ToString() + " ĞĞ";
+                    this.label_message.Text = "ç¬¬ " + (this.listView_records.SelectedIndices[0] + 1).ToString() + " è¡Œ";
                 }
                 else
                 {
-                    this.label_message.Text = "´Ó " + (this.listView_records.SelectedIndices[0] + 1).ToString() + " ĞĞ¿ªÊ¼£¬¹²Ñ¡ÖĞ " + this.listView_records.SelectedIndices.Count.ToString() + " ¸öÊÂÏî";
+                    this.label_message.Text = "ä» " + (this.listView_records.SelectedIndices[0] + 1).ToString() + " è¡Œå¼€å§‹ï¼Œå…±é€‰ä¸­ " + this.listView_records.SelectedIndices.Count.ToString() + " ä¸ªäº‹é¡¹";
                 }
             }
 
@@ -2183,7 +2183,7 @@ namespace dp2Circulation
         {
             if (this.listView_records.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´ÔÚÁĞ±íÖĞÑ¡¶¨Òª²Ù×÷µÄÊÂÏî");
+                MessageBox.Show(this, "å°šæœªåœ¨åˆ—è¡¨ä¸­é€‰å®šè¦æ“ä½œçš„äº‹é¡¹");
                 return;
             }
 
@@ -2195,24 +2195,24 @@ namespace dp2Circulation
                 if (this.LoadToExistDetailWindow == true)
                     strOpenStyle = "exist";
 
-                // ×°ÈëÖÖ²á´°/ÊµÌå´°£¬ÓÃ²áÌõÂëºÅ/¼ÇÂ¼Â·¾¶
+                // è£…å…¥ç§å†Œçª—/å®ä½“çª—ï¼Œç”¨å†Œæ¡ç å·/è®°å½•è·¯å¾„
                 // parameters:
-                //      strTargetFormType   Ä¿±ê´°¿ÚÀàĞÍ "EntityForm" "ItemInfoForm"
-                //      strIdType   ±êÊ¶ÀàĞÍ "barcode" "recpath"
-                //      strOpenType ´ò¿ª´°¿ÚµÄ·½Ê½ "new" "exist"
+                //      strTargetFormType   ç›®æ ‡çª—å£ç±»å‹ "EntityForm" "ItemInfoForm"
+                //      strIdType   æ ‡è¯†ç±»å‹ "barcode" "recpath"
+                //      strOpenType æ‰“å¼€çª—å£çš„æ–¹å¼ "new" "exist"
                 LoadRecord("EntityForm",
                     "recpath",
                     strOpenStyle);
             }
             else
             {
-                MessageBox.Show(this, "µÚÒ»ÁĞ²»ÄÜÎª¿Õ");
+                MessageBox.Show(this, "ç¬¬ä¸€åˆ—ä¸èƒ½ä¸ºç©º");
             }
         }
 
         // 
         /// <summary>
-        /// ÊÇ·ñÓÅÏÈ×°ÈëÒÑ¾­´ò¿ªµÄÏêÏ¸´°?
+        /// æ˜¯å¦ä¼˜å…ˆè£…å…¥å·²ç»æ‰“å¼€çš„è¯¦ç»†çª—?
         /// </summary>
         public bool LoadToExistDetailWindow
         {
@@ -2225,22 +2225,22 @@ namespace dp2Circulation
             }
         }
 
-        // ×°ÈëÖÖ²á´°/ÊµÌå´°£¬ÓÃ²áÌõÂëºÅ/¼ÇÂ¼Â·¾¶
+        // è£…å…¥ç§å†Œçª—/å®ä½“çª—ï¼Œç”¨å†Œæ¡ç å·/è®°å½•è·¯å¾„
         // parameters:
-        //      strTargetFormType   Ä¿±ê´°¿ÚÀàĞÍ "EntityForm" "ItemInfoForm"
-        //      strIdType   ±êÊ¶ÀàĞÍ "barcode" "recpath"
-        //      strOpenType ´ò¿ª´°¿ÚµÄ·½Ê½ "new" "exist"
+        //      strTargetFormType   ç›®æ ‡çª—å£ç±»å‹ "EntityForm" "ItemInfoForm"
+        //      strIdType   æ ‡è¯†ç±»å‹ "barcode" "recpath"
+        //      strOpenType æ‰“å¼€çª—å£çš„æ–¹å¼ "new" "exist"
         void LoadRecord(string strTargetFormType,
             string strIdType,
             string strOpenType)
         {
-            string strTargetFormName = "ÖÖ²á´°";
+            string strTargetFormName = "ç§å†Œçª—";
             if (strTargetFormType == "ItemInfoForm")
-                strTargetFormName = "ÊµÌå´°";
+                strTargetFormName = "å®ä½“çª—";
 
             if (this.listView_records.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´ÔÚÁĞ±íÖĞÑ¡¶¨Òª×°Èë" + strTargetFormName + "µÄĞĞ");
+                MessageBox.Show(this, "å°šæœªåœ¨åˆ—è¡¨ä¸­é€‰å®šè¦è£…å…¥" + strTargetFormName + "çš„è¡Œ");
                 return;
             }
 
@@ -2252,7 +2252,7 @@ namespace dp2Circulation
                 // strBarcodeOrRecPath = ListViewUtil.GetItemText(this.listView_records.SelectedItems[0], 1);
 
                 string strError = "";
-                // ¸ù¾İ ListViewItem ¶ÔÏó£¬»ñµÃ²áÌõÂëºÅÁĞµÄÄÚÈİ
+                // æ ¹æ® ListViewItem å¯¹è±¡ï¼Œè·å¾—å†Œæ¡ç å·åˆ—çš„å†…å®¹
                 int nRet = GetItemBarcode(
                     this.listView_records.SelectedItems[0],
                     true,
@@ -2298,9 +2298,9 @@ namespace dp2Circulation
 
                 if (strIdType == "barcode")
                 {
-                    // ×°ÔØÒ»¸ö²á£¬Á¬´ø×°ÈëÖÖ
+                    // è£…è½½ä¸€ä¸ªå†Œï¼Œè¿å¸¦è£…å…¥ç§
                     // parameters:
-                    //      bAutoSavePrev   ÊÇ·ñ×Ô¶¯Ìá½»±£´æÏÈÇ°·¢Éú¹ıµÄĞŞ¸Ä£¿Èç¹û==true£¬ÊÇ£»Èç¹û==false£¬ÔòÒª³öÏÖMessageBoxÌáÊ¾
+                    //      bAutoSavePrev   æ˜¯å¦è‡ªåŠ¨æäº¤ä¿å­˜å…ˆå‰å‘ç”Ÿè¿‡çš„ä¿®æ”¹ï¼Ÿå¦‚æœ==trueï¼Œæ˜¯ï¼›å¦‚æœ==falseï¼Œåˆ™è¦å‡ºç°MessageBoxæç¤º
                     // return:
                     //      -1  error
                     //      0   not found
@@ -2312,7 +2312,7 @@ namespace dp2Circulation
                     Debug.Assert(strIdType == "recpath", "");
 
                     // parameters:
-                    //      bAutoSavePrev   ÊÇ·ñ×Ô¶¯Ìá½»±£´æÏÈÇ°·¢Éú¹ıµÄĞŞ¸Ä£¿Èç¹û==true£¬ÊÇ£»Èç¹û==false£¬ÔòÒª³öÏÖMessageBoxÌáÊ¾
+                    //      bAutoSavePrev   æ˜¯å¦è‡ªåŠ¨æäº¤ä¿å­˜å…ˆå‰å‘ç”Ÿè¿‡çš„ä¿®æ”¹ï¼Ÿå¦‚æœ==trueï¼Œæ˜¯ï¼›å¦‚æœ==falseï¼Œåˆ™è¦å‡ºç°MessageBoxæç¤º
                     // return:
                     //      -1  error
                     //      0   not found
@@ -2435,16 +2435,16 @@ namespace dp2Circulation
             ClearListViewItems();
         }
 
-        // TODO: ÓÅ»¯ËÙ¶È
+        // TODO: ä¼˜åŒ–é€Ÿåº¦
         void menu_importFromBarcodeFile_Click(object sender, EventArgs e)
         {
-            SetStatusMessage("");   // Çå³ıÒÔÇ°²ĞÁôµÄÏÔÊ¾
+            SetStatusMessage("");   // æ¸…é™¤ä»¥å‰æ®‹ç•™çš„æ˜¾ç¤º
 
             OpenFileDialog dlg = new OpenFileDialog();
 
-            dlg.Title = "ÇëÖ¸¶¨Òª´ò¿ªµÄÌõÂëºÅÎÄ¼şÃû";
+            dlg.Title = "è¯·æŒ‡å®šè¦æ‰“å¼€çš„æ¡ç å·æ–‡ä»¶å";
             dlg.FileName = this.m_strUsedBarcodeFilename;
-            dlg.Filter = "ÌõÂëºÅÎÄ¼ş (*.txt)|*.txt|All files (*.*)|*.*";
+            dlg.Filter = "æ¡ç å·æ–‡ä»¶ (*.txt)|*.txt|All files (*.*)|*.*";
             dlg.RestoreDirectory = true;
 
             if (dlg.ShowDialog() != DialogResult.OK)
@@ -2457,29 +2457,29 @@ namespace dp2Circulation
 
             try
             {
-                // TODO: ×îºÃ×Ô¶¯Ì½²âÎÄ¼şµÄ±àÂë·½Ê½?
+                // TODO: æœ€å¥½è‡ªåŠ¨æ¢æµ‹æ–‡ä»¶çš„ç¼–ç æ–¹å¼?
                 sr = new StreamReader(dlg.FileName, Encoding.UTF8);
             }
             catch (Exception ex)
             {
-                strError = "´ò¿ªÎÄ¼ş " + dlg.FileName + " Ê§°Ü: " + ex.Message;
+                strError = "æ‰“å¼€æ–‡ä»¶ " + dlg.FileName + " å¤±è´¥: " + ex.Message;
                 goto ERROR1;
             }
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚµ¼ÈëÌõÂëºÅ ...");
+            stop.Initial("æ­£åœ¨å¯¼å…¥æ¡ç å· ...");
             stop.BeginLoop();
 
             try
             {
-                // µ¼ÈëµÄÊÂÏîÊÇÃ»ÓĞĞòµÄ£¬Òò´ËĞèÒªÇå³ıÒÑÓĞµÄÅÅĞò±êÖ¾
+                // å¯¼å…¥çš„äº‹é¡¹æ˜¯æ²¡æœ‰åºçš„ï¼Œå› æ­¤éœ€è¦æ¸…é™¤å·²æœ‰çš„æ’åºæ ‡å¿—
                 ListViewUtil.ClearSortColumns(this.listView_records);
 
 
                 if (this.listView_records.Items.Count > 0)
                 {
                     DialogResult result = MessageBox.Show(this,
-                        "µ¼ÈëÇ°ÊÇ·ñÒªÇå³ıÃüÖĞ¼ÇÂ¼ÁĞ±íÖĞµÄÏÖÓĞµÄ " + this.listView_records.Items.Count.ToString() + " ĞĞ?\r\n\r\n(Èç¹û²»Çå³ı£¬ÔòĞÂµ¼ÈëµÄĞĞ½«×·¼ÓÔÚÒÑÓĞĞĞºóÃæ)\r\n(Yes Çå³ı£»No ²»Çå³ı(×·¼Ó)£»Cancel ·ÅÆúµ¼Èë)",
+                        "å¯¼å…¥å‰æ˜¯å¦è¦æ¸…é™¤å‘½ä¸­è®°å½•åˆ—è¡¨ä¸­çš„ç°æœ‰çš„ " + this.listView_records.Items.Count.ToString() + " è¡Œ?\r\n\r\n(å¦‚æœä¸æ¸…é™¤ï¼Œåˆ™æ–°å¯¼å…¥çš„è¡Œå°†è¿½åŠ åœ¨å·²æœ‰è¡Œåé¢)\r\n(Yes æ¸…é™¤ï¼›No ä¸æ¸…é™¤(è¿½åŠ )ï¼›Cancel æ”¾å¼ƒå¯¼å…¥)",
                         this.DbType + "SearchForm",
                         MessageBoxButtons.YesNoCancel,
                         MessageBoxIcon.Question,
@@ -2498,13 +2498,13 @@ namespace dp2Circulation
 
                 for (; ; )
                 {
-                    Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                    Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                     if (stop != null)
                     {
                         if (stop.State != 0)
                         {
-                            MessageBox.Show(this, "ÓÃ»§ÖĞ¶Ï");
+                            MessageBox.Show(this, "ç”¨æˆ·ä¸­æ–­");
                             return;
                         }
                     }
@@ -2532,7 +2532,7 @@ namespace dp2Circulation
                     items.Add(item);
                 }
 
-                // Ë¢ĞÂä¯ÀÀĞĞ
+                // åˆ·æ–°æµè§ˆè¡Œ
                 int nRet = RefreshListViewLines(items,
                     false,
                     out strError);
@@ -2540,7 +2540,7 @@ namespace dp2Circulation
                     goto ERROR1;
 
                 // 2014/1/15
-                // Ë¢ĞÂÊéÄ¿ÕªÒª
+                // åˆ·æ–°ä¹¦ç›®æ‘˜è¦
                 nRet = FillBiblioSummaryColumn(items,
                     false,
                     out strError);
@@ -2562,7 +2562,7 @@ namespace dp2Circulation
             MessageBox.Show(this, strError);
         }
 
-        // ´Ó¼ÇÂ¼Â·¾¶ÎÄ¼şÖĞµ¼Èë
+        // ä»è®°å½•è·¯å¾„æ–‡ä»¶ä¸­å¯¼å…¥
         void menu_importFromRecPathFile_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -2577,14 +2577,14 @@ namespace dp2Circulation
         }
 
 #if NO
-        // ´Ó¼ÇÂ¼Â·¾¶ÎÄ¼şÖĞµ¼Èë
+        // ä»è®°å½•è·¯å¾„æ–‡ä»¶ä¸­å¯¼å…¥
         void menu_importFromRecPathFile_Click(object sender, EventArgs e)
         {
             OpenFileDialog dlg = new OpenFileDialog();
 
-            dlg.Title = "ÇëÖ¸¶¨Òª´ò¿ªµÄ²á¼ÇÂ¼Â·¾¶ÎÄ¼şÃû";
+            dlg.Title = "è¯·æŒ‡å®šè¦æ‰“å¼€çš„å†Œè®°å½•è·¯å¾„æ–‡ä»¶å";
             dlg.FileName = this.m_strUsedRecPathFilename;
-            dlg.Filter = "¼ÇÂ¼Â·¾¶ÎÄ¼ş (*.txt)|*.txt|All files (*.*)|*.*";
+            dlg.Filter = "è®°å½•è·¯å¾„æ–‡ä»¶ (*.txt)|*.txt|All files (*.*)|*.*";
             dlg.RestoreDirectory = true;
 
             if (dlg.ShowDialog() != DialogResult.OK)
@@ -2597,30 +2597,30 @@ namespace dp2Circulation
 
             try
             {
-                // TODO: ×îºÃ×Ô¶¯Ì½²âÎÄ¼şµÄ±àÂë·½Ê½?
+                // TODO: æœ€å¥½è‡ªåŠ¨æ¢æµ‹æ–‡ä»¶çš„ç¼–ç æ–¹å¼?
                 sr = new StreamReader(dlg.FileName, Encoding.UTF8);
             }
             catch (Exception ex)
             {
-                strError = "´ò¿ªÎÄ¼ş " + dlg.FileName + " Ê§°Ü: " + ex.Message;
+                strError = "æ‰“å¼€æ–‡ä»¶ " + dlg.FileName + " å¤±è´¥: " + ex.Message;
                 goto ERROR1;
             }
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚµ¼Èë¼ÇÂ¼Â·¾¶ ...");
+            stop.Initial("æ­£åœ¨å¯¼å…¥è®°å½•è·¯å¾„ ...");
             stop.BeginLoop();
 
 
             try
             {
-                // µ¼ÈëµÄÊÂÏîÊÇÃ»ÓĞĞòµÄ£¬Òò´ËĞèÒªÇå³ıÒÑÓĞµÄÅÅĞò±êÖ¾
+                // å¯¼å…¥çš„äº‹é¡¹æ˜¯æ²¡æœ‰åºçš„ï¼Œå› æ­¤éœ€è¦æ¸…é™¤å·²æœ‰çš„æ’åºæ ‡å¿—
                 ListViewUtil.ClearSortColumns(this.listView_records);
 
 
                 if (this.listView_records.Items.Count > 0)
                 {
                     DialogResult result = MessageBox.Show(this,
-                        "µ¼ÈëÇ°ÊÇ·ñÒªÇå³ıÃüÖĞ¼ÇÂ¼ÁĞ±íÖĞµÄÏÖÓĞµÄ " + this.listView_records.Items.Count.ToString() + " ĞĞ?\r\n\r\n(Èç¹û²»Çå³ı£¬ÔòĞÂµ¼ÈëµÄĞĞ½«×·¼ÓÔÚÒÑÓĞĞĞºóÃæ)\r\n(Yes Çå³ı£»No ²»Çå³ı(×·¼Ó)£»Cancel ·ÅÆúµ¼Èë)",
+                        "å¯¼å…¥å‰æ˜¯å¦è¦æ¸…é™¤å‘½ä¸­è®°å½•åˆ—è¡¨ä¸­çš„ç°æœ‰çš„ " + this.listView_records.Items.Count.ToString() + " è¡Œ?\r\n\r\n(å¦‚æœä¸æ¸…é™¤ï¼Œåˆ™æ–°å¯¼å…¥çš„è¡Œå°†è¿½åŠ åœ¨å·²æœ‰è¡Œåé¢)\r\n(Yes æ¸…é™¤ï¼›No ä¸æ¸…é™¤(è¿½åŠ )ï¼›Cancel æ”¾å¼ƒå¯¼å…¥)",
                         "LabelPrintForm",
                         MessageBoxButtons.YesNoCancel,
                         MessageBoxIcon.Question,
@@ -2635,13 +2635,13 @@ namespace dp2Circulation
 
                 for (; ; )
                 {
-                    Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                    Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                     if (stop != null)
                     {
                         if (stop.State != 0)
                         {
-                            MessageBox.Show(this, "ÓÃ»§ÖĞ¶Ï");
+                            MessageBox.Show(this, "ç”¨æˆ·ä¸­æ–­");
                             return;
                         }
                     }
@@ -2651,7 +2651,7 @@ namespace dp2Circulation
                     if (strRecPath == null)
                         break;
 
-                    // TODO: ¼ì²éÂ·¾¶µÄÕıÈ·ĞÔ£¬¼ì²éÊı¾İ¿âÊÇ·ñÎªÊµÌå¿âÖ®Ò»
+                    // TODO: æ£€æŸ¥è·¯å¾„çš„æ­£ç¡®æ€§ï¼Œæ£€æŸ¥æ•°æ®åº“æ˜¯å¦ä¸ºå®ä½“åº“ä¹‹ä¸€
 
                     ListViewItem item = new ListViewItem();
                     item.Text = strRecPath;
@@ -2677,18 +2677,18 @@ namespace dp2Circulation
 #endif
 
 #if NO
-        // µ¼³öÑ¡ÔñµÄĞĞÖĞÓĞÂ·¾¶µÄ²¿·ÖĞĞ µÄÌõÂëÀ¸ÄÚÈİ ÎªÌõÂëºÅÎÄ¼ş
+        // å¯¼å‡ºé€‰æ‹©çš„è¡Œä¸­æœ‰è·¯å¾„çš„éƒ¨åˆ†è¡Œ çš„æ¡ç æ å†…å®¹ ä¸ºæ¡ç å·æ–‡ä»¶
         void menu_exportBarcodeFile_Click(object sender, EventArgs e)
         {
-            // Ñ¯ÎÊÎÄ¼şÃû
+            // è¯¢é—®æ–‡ä»¶å
             SaveFileDialog dlg = new SaveFileDialog();
 
-            dlg.Title = "ÇëÖ¸¶¨Òª±£´æµÄÌõÂëºÅÎÄ¼şÃû";
+            dlg.Title = "è¯·æŒ‡å®šè¦ä¿å­˜çš„æ¡ç å·æ–‡ä»¶å";
             dlg.CreatePrompt = false;
             dlg.OverwritePrompt = false;
             dlg.FileName = this.ExportBarcodeFilename;
             // dlg.InitialDirectory = Environment.CurrentDirectory;
-            dlg.Filter = "ÌõÂëºÅÎÄ¼ş (*.txt)|*.txt|All files (*.*)|*.*";
+            dlg.Filter = "æ¡ç å·æ–‡ä»¶ (*.txt)|*.txt|All files (*.*)|*.*";
 
             dlg.RestoreDirectory = true;
 
@@ -2702,7 +2702,7 @@ namespace dp2Circulation
             if (File.Exists(this.ExportBarcodeFilename) == true)
             {
                 DialogResult result = MessageBox.Show(this,
-                    "ÌõÂëºÅÎÄ¼ş '" + this.ExportBarcodeFilename + "' ÒÑ¾­´æÔÚ¡£\r\n\r\n±¾´ÎÊä³öÄÚÈİÊÇ·ñÒª×·¼Óµ½¸ÃÎÄ¼şÎ²²¿? (Yes ×·¼Ó£»No ¸²¸Ç£»Cancel ·ÅÆúµ¼³ö)",
+                    "æ¡ç å·æ–‡ä»¶ '" + this.ExportBarcodeFilename + "' å·²ç»å­˜åœ¨ã€‚\r\n\r\næœ¬æ¬¡è¾“å‡ºå†…å®¹æ˜¯å¦è¦è¿½åŠ åˆ°è¯¥æ–‡ä»¶å°¾éƒ¨? (Yes è¿½åŠ ï¼›No è¦†ç›–ï¼›Cancel æ”¾å¼ƒå¯¼å‡º)",
                     "LabelPrintForm",
                     MessageBoxButtons.YesNoCancel,
                     MessageBoxIcon.Question,
@@ -2721,7 +2721,7 @@ namespace dp2Circulation
             else
                 bAppend = false;
 
-            // ´´½¨ÎÄ¼ş
+            // åˆ›å»ºæ–‡ä»¶
             StreamWriter sw = new StreamWriter(this.ExportBarcodeFilename,
                 bAppend,	// append
                 System.Text.Encoding.UTF8);
@@ -2748,30 +2748,30 @@ namespace dp2Circulation
                     sw.Close();
             }
 
-            string strExportStyle = "µ¼³ö";
+            string strExportStyle = "å¯¼å‡º";
             if (bAppend == true)
-                strExportStyle = "×·¼Ó";
+                strExportStyle = "è¿½åŠ ";
 
-            this.MainForm.StatusBarMessage = "²áÌõÂëºÅ " + this.listView_records.SelectedItems.Count.ToString() + "¸ö ÒÑ³É¹¦" + strExportStyle + "µ½ÎÄ¼ş " + this.ExportBarcodeFilename;
+            this.MainForm.StatusBarMessage = "å†Œæ¡ç å· " + this.listView_records.SelectedItems.Count.ToString() + "ä¸ª å·²æˆåŠŸ" + strExportStyle + "åˆ°æ–‡ä»¶ " + this.ExportBarcodeFilename;
         }
 #endif
 
-        // µ¼³öÑ¡ÔñµÄĞĞÖĞÓĞÂ·¾¶µÄ²¿·ÖĞĞ µÄÌõÂëÀ¸ÄÚÈİ ÎªÌõÂëºÅÎÄ¼ş
+        // å¯¼å‡ºé€‰æ‹©çš„è¡Œä¸­æœ‰è·¯å¾„çš„éƒ¨åˆ†è¡Œ çš„æ¡ç æ å†…å®¹ ä¸ºæ¡ç å·æ–‡ä»¶
         void menu_exportBarcodeFile_Click(object sender, EventArgs e)
         {
             Debug.Assert(this.DbType == "item", "");
 
             string strError = "";
 
-            // Ñ¯ÎÊÎÄ¼şÃû
+            // è¯¢é—®æ–‡ä»¶å
             SaveFileDialog dlg = new SaveFileDialog();
 
-            dlg.Title = "ÇëÖ¸¶¨Òª±£´æµÄÌõÂëºÅÎÄ¼şÃû";
+            dlg.Title = "è¯·æŒ‡å®šè¦ä¿å­˜çš„æ¡ç å·æ–‡ä»¶å";
             dlg.CreatePrompt = false;
             dlg.OverwritePrompt = false;
             dlg.FileName = this.ExportBarcodeFilename;
             // dlg.InitialDirectory = Environment.CurrentDirectory;
-            dlg.Filter = "ÌõÂëºÅÎÄ¼ş (*.txt)|*.txt|All files (*.*)|*.*";
+            dlg.Filter = "æ¡ç å·æ–‡ä»¶ (*.txt)|*.txt|All files (*.*)|*.*";
 
             dlg.RestoreDirectory = true;
 
@@ -2785,7 +2785,7 @@ namespace dp2Circulation
             if (File.Exists(this.ExportBarcodeFilename) == true)
             {
                 DialogResult result = MessageBox.Show(this,
-                    "ÎÄ¼ş '" + this.ExportBarcodeFilename + "' ÒÑ¾­´æÔÚ¡£\r\n\r\n±¾´ÎÊä³öÄÚÈİÊÇ·ñÒª×·¼Óµ½¸ÃÎÄ¼şÎ²²¿? (Yes ×·¼Ó£»No ¸²¸Ç£»Cancel ·ÅÆúµ¼³ö)",
+                    "æ–‡ä»¶ '" + this.ExportBarcodeFilename + "' å·²ç»å­˜åœ¨ã€‚\r\n\r\næœ¬æ¬¡è¾“å‡ºå†…å®¹æ˜¯å¦è¦è¿½åŠ åˆ°è¯¥æ–‡ä»¶å°¾éƒ¨? (Yes è¿½åŠ ï¼›No è¦†ç›–ï¼›Cancel æ”¾å¼ƒå¯¼å‡º)",
                     this.DbType + "SearchForm",
                     MessageBoxButtons.YesNoCancel,
                     MessageBoxIcon.Question,
@@ -2807,7 +2807,7 @@ namespace dp2Circulation
             // m_tableBarcodeColIndex.Clear();
             ClearColumnIndexCache();
 
-            // ´´½¨ÎÄ¼ş
+            // åˆ›å»ºæ–‡ä»¶
             StreamWriter sw = new StreamWriter(this.ExportBarcodeFilename,
                 bAppend,	// append
                 System.Text.Encoding.UTF8);
@@ -2823,9 +2823,9 @@ namespace dp2Circulation
 
 #if NO
                     string strRecPath = ListViewUtil.GetItemText(item, 0);
-                    // ¸ù¾İ¼ÇÂ¼Â·¾¶»ñµÃÊı¾İ¿âÃû
+                    // æ ¹æ®è®°å½•è·¯å¾„è·å¾—æ•°æ®åº“å
                     string strItemDbName = Global.GetDbName(strRecPath);
-                    // ¸ù¾İÊı¾İ¿âÃû»ñµÃ ²áÌõÂëºÅ ÁĞºÅ
+                    // æ ¹æ®æ•°æ®åº“åè·å¾— å†Œæ¡ç å· åˆ—å·
 
                     int nCol = -1;
                     object o = m_tableBarcodeColIndex[strItemDbName];
@@ -2835,18 +2835,18 @@ namespace dp2Circulation
                         nCol = temp.FindColumnByType("item_barcode");
                         if (nCol == -1)
                         {
-                            // Õâ¸öÊµÌå¿âÃ»ÓĞÔÚ browse ÎÄ¼şÖĞ ²áÌõÂëºÅ ÁĞ
-                            strError = "¾¯¸æ£ºÊµÌå¿â '"+strItemDbName+"' µÄ browse ÅäÖÃÎÄ¼şÖĞÃ»ÓĞ¶¨Òå type Îª item_barcode µÄÁĞ¡£Çë×¢ÒâË¢ĞÂ»òĞŞ¸Ä´ËÅäÖÃÎÄ¼ş";
+                            // è¿™ä¸ªå®ä½“åº“æ²¡æœ‰åœ¨ browse æ–‡ä»¶ä¸­ å†Œæ¡ç å· åˆ—
+                            strError = "è­¦å‘Šï¼šå®ä½“åº“ '"+strItemDbName+"' çš„ browse é…ç½®æ–‡ä»¶ä¸­æ²¡æœ‰å®šä¹‰ type ä¸º item_barcode çš„åˆ—ã€‚è¯·æ³¨æ„åˆ·æ–°æˆ–ä¿®æ”¹æ­¤é…ç½®æ–‡ä»¶";
                             MessageBox.Show(this, strError);
 
-                            nCol = 0;   // Õâ¸ö´ó²¿·ÖÇé¿öÄÜ×àĞ§
+                            nCol = 0;   // è¿™ä¸ªå¤§éƒ¨åˆ†æƒ…å†µèƒ½å¥æ•ˆ
                         }
                         if (m_bBiblioSummaryColumn == false)
                             nCol += 1;
                         else 
                             nCol += 2;
 
-                        m_tableBarcodeColIndex[strItemDbName] = nCol;   // ´¢´æÆğÀ´
+                        m_tableBarcodeColIndex[strItemDbName] = nCol;   // å‚¨å­˜èµ·æ¥
                     }
                     else
                         nCol = (int)o;
@@ -2857,7 +2857,7 @@ namespace dp2Circulation
 #endif
 
                     string strBarcode = "";
-                    // ¸ù¾İ ListViewItem ¶ÔÏó£¬»ñµÃ²áÌõÂëºÅÁĞµÄÄÚÈİ
+                    // æ ¹æ® ListViewItem å¯¹è±¡ï¼Œè·å¾—å†Œæ¡ç å·åˆ—çš„å†…å®¹
                     int nRet = GetItemBarcode(
                         item,
                         true,
@@ -2879,28 +2879,28 @@ namespace dp2Circulation
                     sw.Close();
             }
 
-            string strExportStyle = "µ¼³ö";
+            string strExportStyle = "å¯¼å‡º";
             if (bAppend == true)
-                strExportStyle = "×·¼Ó";
+                strExportStyle = "è¿½åŠ ";
 
-            this.MainForm.StatusBarMessage = "²áÌõÂëºÅ " + this.listView_records.SelectedItems.Count.ToString() + "¸ö ÒÑ³É¹¦" + strExportStyle + "µ½ÎÄ¼ş " + this.ExportBarcodeFilename;
+            this.MainForm.StatusBarMessage = "å†Œæ¡ç å· " + this.listView_records.SelectedItems.Count.ToString() + "ä¸ª å·²æˆåŠŸ" + strExportStyle + "åˆ°æ–‡ä»¶ " + this.ExportBarcodeFilename;
             return;
         ERROR1:
             MessageBox.Show(strError);
         }
 
-        // ±£´æÑ¡ÔñµÄĞĞÖĞµÄÓĞÂ·¾¶µÄ²¿·ÖĞĞ µ½¼ÇÂ¼Â·¾¶ÎÄ¼ş
+        // ä¿å­˜é€‰æ‹©çš„è¡Œä¸­çš„æœ‰è·¯å¾„çš„éƒ¨åˆ†è¡Œ åˆ°è®°å½•è·¯å¾„æ–‡ä»¶
         void menu_saveToRecordPathFile_Click(object sender, EventArgs e)
         {
-            // Ñ¯ÎÊÎÄ¼şÃû
+            // è¯¢é—®æ–‡ä»¶å
             SaveFileDialog dlg = new SaveFileDialog();
 
-            dlg.Title = "ÇëÖ¸¶¨Òª±£´æµÄ¼ÇÂ¼Â·¾¶ÎÄ¼şÃû";
+            dlg.Title = "è¯·æŒ‡å®šè¦ä¿å­˜çš„è®°å½•è·¯å¾„æ–‡ä»¶å";
             dlg.CreatePrompt = false;
             dlg.OverwritePrompt = false;
             dlg.FileName = this.ExportRecPathFilename;
             // dlg.InitialDirectory = Environment.CurrentDirectory;
-            dlg.Filter = "¼ÇÂ¼Â·¾¶ÎÄ¼ş (*.txt)|*.txt|All files (*.*)|*.*";
+            dlg.Filter = "è®°å½•è·¯å¾„æ–‡ä»¶ (*.txt)|*.txt|All files (*.*)|*.*";
 
             dlg.RestoreDirectory = true;
 
@@ -2914,7 +2914,7 @@ namespace dp2Circulation
             if (File.Exists(this.ExportRecPathFilename) == true)
             {
                 DialogResult result = MessageBox.Show(this,
-                    "¼ÇÂ¼Â·¾¶ÎÄ¼ş '" + this.ExportRecPathFilename + "' ÒÑ¾­´æÔÚ¡£\r\n\r\n±¾´ÎÊä³öÄÚÈİÊÇ·ñÒª×·¼Óµ½¸ÃÎÄ¼şÎ²²¿? (Yes ×·¼Ó£»No ¸²¸Ç£»Cancel ·ÅÆúµ¼³ö)",
+                    "è®°å½•è·¯å¾„æ–‡ä»¶ '" + this.ExportRecPathFilename + "' å·²ç»å­˜åœ¨ã€‚\r\n\r\næœ¬æ¬¡è¾“å‡ºå†…å®¹æ˜¯å¦è¦è¿½åŠ åˆ°è¯¥æ–‡ä»¶å°¾éƒ¨? (Yes è¿½åŠ ï¼›No è¦†ç›–ï¼›Cancel æ”¾å¼ƒå¯¼å‡º)",
                     "LabelPrintForm",
                     MessageBoxButtons.YesNoCancel,
                     MessageBoxIcon.Question,
@@ -2933,7 +2933,7 @@ namespace dp2Circulation
             else
                 bAppend = false;
 
-            // ´´½¨ÎÄ¼ş
+            // åˆ›å»ºæ–‡ä»¶
             StreamWriter sw = new StreamWriter(this.ExportRecPathFilename,
                 bAppend,	// append
                 System.Text.Encoding.UTF8);
@@ -2957,28 +2957,28 @@ namespace dp2Circulation
                     sw.Close();
             }
 
-            string strExportStyle = "µ¼³ö";
+            string strExportStyle = "å¯¼å‡º";
             if (bAppend == true)
-                strExportStyle = "×·¼Ó";
+                strExportStyle = "è¿½åŠ ";
 
-            this.MainForm.StatusBarMessage = "²á¼ÇÂ¼Â·¾¶ " + this.listView_records.SelectedItems.Count.ToString() + "¸ö ÒÑ³É¹¦" + strExportStyle + "µ½ÎÄ¼ş " + this.ExportRecPathFilename;
+            this.MainForm.StatusBarMessage = "å†Œè®°å½•è·¯å¾„ " + this.listView_records.SelectedItems.Count.ToString() + "ä¸ª å·²æˆåŠŸ" + strExportStyle + "åˆ°æ–‡ä»¶ " + this.ExportRecPathFilename;
 
 
         }
 
 
-        // ±£´æÑ¡ÔñµÄĞĞµ½ÎÄ±¾ÎÄ¼ş
+        // ä¿å­˜é€‰æ‹©çš„è¡Œåˆ°æ–‡æœ¬æ–‡ä»¶
         void menu_exportTextFile_Click(object sender, EventArgs e)
         {
-            // Ñ¯ÎÊÎÄ¼şÃû
+            // è¯¢é—®æ–‡ä»¶å
             SaveFileDialog dlg = new SaveFileDialog();
 
-            dlg.Title = "ÇëÖ¸¶¨Òª±£´æµÄÎÄ±¾ÎÄ¼şÃû";
+            dlg.Title = "è¯·æŒ‡å®šè¦ä¿å­˜çš„æ–‡æœ¬æ–‡ä»¶å";
             dlg.CreatePrompt = false;
             dlg.OverwritePrompt = false;
             dlg.FileName = this.ExportTextFilename;
             // dlg.InitialDirectory = Environment.CurrentDirectory;
-            dlg.Filter = "ÎÄ±¾ÎÄ¼ş (*.txt)|*.txt|All files (*.*)|*.*";
+            dlg.Filter = "æ–‡æœ¬æ–‡ä»¶ (*.txt)|*.txt|All files (*.*)|*.*";
 
             dlg.RestoreDirectory = true;
 
@@ -2992,7 +2992,7 @@ namespace dp2Circulation
             if (File.Exists(this.ExportTextFilename) == true)
             {
                 DialogResult result = MessageBox.Show(this,
-                    "ÎÄ±¾ÎÄ¼ş '" + this.ExportTextFilename + "' ÒÑ¾­´æÔÚ¡£\r\n\r\n±¾´ÎÊä³öÄÚÈİÊÇ·ñÒª×·¼Óµ½¸ÃÎÄ¼şÎ²²¿? (Yes ×·¼Ó£»No ¸²¸Ç£»Cancel ·ÅÆúµ¼³ö)",
+                    "æ–‡æœ¬æ–‡ä»¶ '" + this.ExportTextFilename + "' å·²ç»å­˜åœ¨ã€‚\r\n\r\næœ¬æ¬¡è¾“å‡ºå†…å®¹æ˜¯å¦è¦è¿½åŠ åˆ°è¯¥æ–‡ä»¶å°¾éƒ¨? (Yes è¿½åŠ ï¼›No è¦†ç›–ï¼›Cancel æ”¾å¼ƒå¯¼å‡º)",
                     "LabelPrintForm",
                     MessageBoxButtons.YesNoCancel,
                     MessageBoxIcon.Question,
@@ -3011,7 +3011,7 @@ namespace dp2Circulation
             else
                 bAppend = false;
 
-            // ´´½¨ÎÄ¼ş
+            // åˆ›å»ºæ–‡ä»¶
             StreamWriter sw = new StreamWriter(this.ExportTextFilename,
                 bAppend,	// append
                 System.Text.Encoding.UTF8);
@@ -3034,14 +3034,14 @@ namespace dp2Circulation
                     sw.Close();
             }
 
-            string strExportStyle = "µ¼³ö";
+            string strExportStyle = "å¯¼å‡º";
             if (bAppend == true)
-                strExportStyle = "×·¼Ó";
+                strExportStyle = "è¿½åŠ ";
 
-            this.MainForm.StatusBarMessage = "ĞĞÄÚÈİ " + this.listView_records.SelectedItems.Count.ToString() + "¸ö ÒÑ³É¹¦" + strExportStyle + "µ½ÎÄ±¾ÎÄ¼ş " + this.ExportTextFilename;
+            this.MainForm.StatusBarMessage = "è¡Œå†…å®¹ " + this.listView_records.SelectedItems.Count.ToString() + "ä¸ª å·²æˆåŠŸ" + strExportStyle + "åˆ°æ–‡æœ¬æ–‡ä»¶ " + this.ExportTextFilename;
         }
 
-        // ´Ó´°¿ÚÖĞÒÆ×ßËùÑ¡ÔñµÄÊÂÏî
+        // ä»çª—å£ä¸­ç§»èµ°æ‰€é€‰æ‹©çš„äº‹é¡¹
         void menu_removeSelectedItems_Click(object sender, EventArgs e)
         {
             Cursor oldCursor = this.Cursor;
@@ -3082,7 +3082,7 @@ namespace dp2Circulation
 
             string strLine = textBox_errorInfo.Lines[y];
 
-            // Îö³ö²á¼ÇÂ¼Â·¾¶¡£ÔÚ {} ÖĞ
+            // æå‡ºå†Œè®°å½•è·¯å¾„ã€‚åœ¨ {} ä¸­
             int nRet = strLine.IndexOf("{");
             if (nRet == -1)
                 goto ERROR1;
@@ -3092,7 +3092,7 @@ namespace dp2Circulation
             if (nRet != -1)
                 strRecPath = strRecPath.Substring(0, nRet).Trim();
 
-            // Ñ¡¶¨listviewÖĞÄÇÒ»ĞĞ
+            // é€‰å®šlistviewä¸­é‚£ä¸€è¡Œ
             ListViewItem item = ListViewUtil.FindItem(this.listView_records,
                 strRecPath,
                 0);
@@ -3108,7 +3108,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ¼¤»î¡°±êÇ©ÎÄ¼ş¡±ÊôĞÔÒ³
+        /// æ¿€æ´»â€œæ ‡ç­¾æ–‡ä»¶â€å±æ€§é¡µ
         /// </summary>
         public void ActivateLabelFilePage()
         {
@@ -3116,19 +3116,19 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ¼¤»î¡°²á¼ÇÂ¼¡±ÊôĞÔÒ³
+        /// æ¿€æ´»â€œå†Œè®°å½•â€å±æ€§é¡µ
         /// </summary>
         public void ActivateItemRecordsPage()
         {
             this.tabControl_main.SelectedTab = this.tabPage_itemRecords;
         }
 
-        // ÔÚ´°¿Ú´ò¿ªÇ°TestingGridÊÇ·ñÉèÖÃ¹ı
+        // åœ¨çª—å£æ‰“å¼€å‰TestingGridæ˜¯å¦è®¾ç½®è¿‡
         bool m_bTestingGridSetted = false;
 
         //  
         /// <summary>
-        /// ÊÇ·ñ´òÓ¡²âÊÔÏß
+        /// æ˜¯å¦æ‰“å°æµ‹è¯•çº¿
         /// </summary>
         public bool TestingGrid
         {
@@ -3175,7 +3175,7 @@ namespace dp2Circulation
 #if NO
             if (string.IsNullOrEmpty(this.textBox_labelDefFilename.Text) == true)
             {
-                strError = "ÇëÏÈÖ¸¶¨±êÇ©¶¨ÒåÎÄ¼şÃû";
+                strError = "è¯·å…ˆæŒ‡å®šæ ‡ç­¾å®šä¹‰æ–‡ä»¶å";
                 goto ERROR1;
             }
 #endif
@@ -3204,12 +3204,12 @@ namespace dp2Circulation
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;
 
-            // ÎÄ¼şÃûÔÚÉè¼Æ¶Ô»°¿òÖĞ·¢ÉúÁË±ä»¯
+            // æ–‡ä»¶ååœ¨è®¾è®¡å¯¹è¯æ¡†ä¸­å‘ç”Ÿäº†å˜åŒ–
             if (string.IsNullOrEmpty(strOldFileName) == false
                 && strOldFileName != dlg.DefFileName)
             {
                 DialogResult result = MessageBox.Show(this,
-"ÄúÔÚ±êÇ©Éè¼Æ¶Ô»°¿òÖĞ×°ÔØÁËĞÂµÄ±êÇ©¶¨ÒåÎÄ¼şÃû '" + dlg.DefFileName + "'¡£\r\n\r\nÇëÎÊÒª°ÑÕâ¸ö±êÇ©¶¨ÒåÎÄ¼şÓ¦ÓÃµ½µ±Ç°´°¿ÚÃ´? \r\n\r\n(Yes: Ó¦ÓÃĞÂµÄÎÄ¼şÃû; No: ±£³ÖÒÔÇ°µÄÎÄ¼şÃû²»±ä)",
+"æ‚¨åœ¨æ ‡ç­¾è®¾è®¡å¯¹è¯æ¡†ä¸­è£…è½½äº†æ–°çš„æ ‡ç­¾å®šä¹‰æ–‡ä»¶å '" + dlg.DefFileName + "'ã€‚\r\n\r\nè¯·é—®è¦æŠŠè¿™ä¸ªæ ‡ç­¾å®šä¹‰æ–‡ä»¶åº”ç”¨åˆ°å½“å‰çª—å£ä¹ˆ? \r\n\r\n(Yes: åº”ç”¨æ–°çš„æ–‡ä»¶å; No: ä¿æŒä»¥å‰çš„æ–‡ä»¶åä¸å˜)",
 "LabePrintForm",
 MessageBoxButtons.YesNo,
 MessageBoxIcon.Question,
@@ -3220,7 +3220,7 @@ MessageBoxDefaultButton.Button1);
             else
                 this.textBox_labelDefFilename.Text = dlg.DefFileName;
 
-            // ¼´±ãÇ°ºóÎÄ¼şÃûÃ»ÓĞ±ä»¯£¬Ò²Òª´¥·¢Ò»´ÎË¢ĞÂ
+            // å³ä¾¿å‰åæ–‡ä»¶åæ²¡æœ‰å˜åŒ–ï¼Œä¹Ÿè¦è§¦å‘ä¸€æ¬¡åˆ·æ–°
             if (strOldFileName == this.textBox_labelDefFilename.Text)
             {
                 textBox_labelDefFilename_TextChanged(this, new EventArgs());
@@ -3234,22 +3234,22 @@ MessageBoxDefaultButton.Button1);
         private void textBox_labelDefFilename_TextChanged(object sender, EventArgs e)
         {
             if (string.IsNullOrEmpty(this.textBox_labelDefFilename.Text) == true)
-                this.button_editDefFile.Text = "´´½¨";
+                this.button_editDefFile.Text = "åˆ›å»º";
             else
-                this.button_editDefFile.Text = "Éè¼Æ";
+                this.button_editDefFile.Text = "è®¾è®¡";
 
-            // ÊÔÍ¼´ÓÎÄ¼şÖĞÈ¡µÃ´òÓ¡»úĞÅÏ¢£¬²¢ÏÔÊ¾ÔÚ´°¿Ú±êÌâÉÏ
+            // è¯•å›¾ä»æ–‡ä»¶ä¸­å–å¾—æ‰“å°æœºä¿¡æ¯ï¼Œå¹¶æ˜¾ç¤ºåœ¨çª—å£æ ‡é¢˜ä¸Š
             LoadPrinterInfo();
         }
 
-        // ÊÔÍ¼´Ó±êÇ©¶¨ÒåÎÄ¼şÖĞÈ¡µÃ´òÓ¡»úĞÅÏ¢£¬²¢ÏÔÊ¾ÔÚ´°¿Ú±êÌâÉÏ
+        // è¯•å›¾ä»æ ‡ç­¾å®šä¹‰æ–‡ä»¶ä¸­å–å¾—æ‰“å°æœºä¿¡æ¯ï¼Œå¹¶æ˜¾ç¤ºåœ¨çª—å£æ ‡é¢˜ä¸Š
         void LoadPrinterInfo()
         {
             string strError = "";
 
             if (String.IsNullOrEmpty(this.textBox_labelDefFilename.Text) == true)
             {
-                strError = "ÉĞÎ´Ö¸¶¨±êÇ©¶¨ÒåÎÄ¼şÃû";
+                strError = "å°šæœªæŒ‡å®šæ ‡ç­¾å®šä¹‰æ–‡ä»¶å";
                 goto ERROR1;
             }
 
@@ -3260,11 +3260,11 @@ MessageBoxDefaultButton.Button1);
             if (nRet == -1)
                 goto ERROR1;
 
-            // ¼ÇÒä´òÓ¡²ÎÊı
+            // è®°å¿†æ‰“å°å‚æ•°
             if (string.IsNullOrEmpty(label_param.DefaultPrinter) == false)
             {
-                PrinterInfo temp = new PrinterInfo("È±Ê¡±êÇ©", label_param.DefaultPrinter);
-                // Èç¹û label_param ÖĞ Landscape ºÍ DefaultPrinter ²»Ò»ÖÂ
+                PrinterInfo temp = new PrinterInfo("ç¼ºçœæ ‡ç­¾", label_param.DefaultPrinter);
+                // å¦‚æœ label_param ä¸­ Landscape å’Œ DefaultPrinter ä¸ä¸€è‡´
                 // temp.Landscape = label_param.Landscape;
                 this.PrinterInfo = temp;
             }
@@ -3274,11 +3274,11 @@ MessageBoxDefaultButton.Button1);
             return;
         }
 
-        // ´ÓºÎ´¦»ñÈ¡Ë÷È¡ºÅ
+        // ä»ä½•å¤„è·å–ç´¢å–å·
         /*
-´Ó²á¼ÇÂ¼
-´ÓÊéÄ¿¼ÇÂ¼
-Ë³´Î´Ó²á¼ÇÂ¼¡¢ÊéÄ¿¼ÇÂ¼
+ä»å†Œè®°å½•
+ä»ä¹¦ç›®è®°å½•
+é¡ºæ¬¡ä»å†Œè®°å½•ã€ä¹¦ç›®è®°å½•
          * */
         string AccessNoSource
         {
@@ -3287,7 +3287,7 @@ MessageBoxDefaultButton.Button1);
                 return this.MainForm.AppInfo.GetString(
                 "labelprint",
                 "accessNo_source",
-                "´Ó²á¼ÇÂ¼");
+                "ä»å†Œè®°å½•");
             }
         }
 

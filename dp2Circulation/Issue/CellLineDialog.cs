@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -24,7 +24,7 @@ namespace dp2Circulation
         {
             if (String.IsNullOrEmpty(this.comboBox_fieldName.Text) == true)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ö¸¶¨×Ö¶ÎÃû");
+                MessageBox.Show(this, "å°šæœªæŒ‡å®šå­—æ®µå");
                 return;
             }
 
@@ -59,7 +59,7 @@ namespace dp2Circulation
                 if (String.IsNullOrEmpty(strValue) == false)
                     return strValue;
 
-                // ÊµÔÚ²»ĞĞ£¬ÕÒcomboboxÓÒ²à
+                // å®åœ¨ä¸è¡Œï¼Œæ‰¾comboboxå³ä¾§
                 strValue = this.comboBox_fieldName.Text;
                 return GetRightPart(strValue);
             }
@@ -98,24 +98,24 @@ namespace dp2Circulation
         }
 
         public string[] GroupFieldNames = new string[] {
-"seller -- ¶©¹ºÇşµÀ",
-"source -- ¾­·ÑÀ´Ô´",
-"price -- µ¥²á¼Û¸ñ",
-"range -- Ê±¼ä·¶Î§",
-"batchNo -- Åú´ÎºÅ",
+"seller -- è®¢è´­æ¸ é“",
+"source -- ç»è´¹æ¥æº",
+"price -- å•å†Œä»·æ ¼",
+"range -- æ—¶é—´èŒƒå›´",
+"batchNo -- æ‰¹æ¬¡å·",
 
-"state -- ¶©¹º×´Ì¬",
-"range -- Ê±¼ä·¶Î§",
-"issueCount -- °üº¬ÆÚÊı",
-"orderTime -- ¶©¹ºÊ±¼ä",
-"orderID -- ¶©µ¥ID",
-"comment -- ×¢ÊÍ",
-"catalogNo -- ÊéÄ¿ºÅ",
-"copy -- ¸´±¾Êı",
-"distribute -- ¹İ²Ø·ÖÅä",
-"class -- ¶©¹ºÀàÄ¿",
-"totalPrice -- ×Ü¼Û¸ñ",
-"sellerAddres -- ÊéÉÌµØÖ·",
+"state -- è®¢è´­çŠ¶æ€",
+"range -- æ—¶é—´èŒƒå›´",
+"issueCount -- åŒ…å«æœŸæ•°",
+"orderTime -- è®¢è´­æ—¶é—´",
+"orderID -- è®¢å•ID",
+"comment -- æ³¨é‡Š",
+"catalogNo -- ä¹¦ç›®å·",
+"copy -- å¤æœ¬æ•°",
+"distribute -- é¦†è—åˆ†é…",
+"class -- è®¢è´­ç±»ç›®",
+"totalPrice -- æ€»ä»·æ ¼",
+"sellerAddres -- ä¹¦å•†åœ°å€",
         };
 
         public void FillGroupFieldNameTable()

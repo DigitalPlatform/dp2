@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -26,7 +26,7 @@ namespace dp2Circulation
         internal bool m_bHover = false;
         internal bool m_bFocus = false;
 
-        // ÊÇ·ñ±»Ñ¡¶¨?
+        // æ˜¯å¦è¢«é€‰å®š?
         internal bool m_bSelected = false;
 
         public bool Selected
@@ -38,7 +38,7 @@ namespace dp2Circulation
             set
             {
                 this.m_bSelected = value;
-                // TODO: ¸Ä±äÏÔÊ¾
+                // TODO: æ”¹å˜æ˜¾ç¤º
             }
         }
 
@@ -58,11 +58,11 @@ namespace dp2Circulation
             }
         }
 
-        // Ñ¡Ôñ¡£
-        // ×¢Òâ£º²¢²»¸ºÔğÊ§Ğ§Ïà¹ØÇøÓò
+        // é€‰æ‹©ã€‚
+        // æ³¨æ„ï¼šå¹¶ä¸è´Ÿè´£å¤±æ•ˆç›¸å…³åŒºåŸŸ
         // return:
-        //      true    ×´Ì¬·¢Éú±ä»¯
-        //      false   ×´Ì¬Ã»ÓĞ±ä»¯
+        //      true    çŠ¶æ€å‘ç”Ÿå˜åŒ–
+        //      false   çŠ¶æ€æ²¡æœ‰å˜åŒ–
         public virtual bool Select(SelectAction action)
         {
             bool bOldSelected = this.m_bSelected;
@@ -81,7 +81,7 @@ namespace dp2Circulation
             }
 
             /*
-            // µİ¹é
+            // é€’å½’
             if (bRecursive == true)
             {
                 for (int i = 0; i < this.ChildrenCollection.Count; i++)
@@ -95,7 +95,7 @@ namespace dp2Circulation
         }
     }
 
-    // ÓÃÓÚHitTest()º¯ÊıµÄÌØÊâÀà£¬±íÊ¾Òª»ñµÃÇ±ÔÚ¸ñ×ÓĞÅÏ¢
+    // ç”¨äºHitTest()å‡½æ•°çš„ç‰¹æ®Šç±»ï¼Œè¡¨ç¤ºè¦è·å¾—æ½œåœ¨æ ¼å­ä¿¡æ¯
     internal class NullCell : CellBase
     {
         public int X = -1;
@@ -107,7 +107,7 @@ namespace dp2Circulation
             this.Y = y;
         }
 
-        // »æÖÆNullCellÃ¿²áµÄ¸ñ×Ó
+        // ç»˜åˆ¶NullCellæ¯å†Œçš„æ ¼å­
         internal void Paint(
             BindingControl control,
             long start_x,
@@ -126,7 +126,7 @@ namespace dp2Circulation
 
             RectangleF rect;
 
-            // ½¹µãĞéÏß
+            // ç„¦ç‚¹è™šçº¿
             if (this.m_bFocus == true)
             {
                 rect = new RectangleF(
@@ -142,23 +142,23 @@ namespace dp2Circulation
         }
     }
 
-    // Ã¿Ò»¸öÏÔÊ¾µ¥Ôª
+    // æ¯ä¸€ä¸ªæ˜¾ç¤ºå•å…ƒ
     internal class Cell : CellBase
     {
         public IssueBindingItem Container = null;
 
         public ItemBindingItem item = null;
 
-        public bool OutofIssue = false; // ¾íÆÚºÅÊÇ·ñÓëËùÔÚĞĞ²»·û? == true ²»·û£»== false ·ûºÏ
+        public bool OutofIssue = false; // å·æœŸå·æ˜¯å¦ä¸æ‰€åœ¨è¡Œä¸ç¬¦? == true ä¸ç¬¦ï¼›== false ç¬¦åˆ
 
-        internal bool m_bDisplayCheckBox = false;   // ÊÇ·ñÒªÔÚhoverÊ±ÏÔÊ¾checkboxÍ¼Ïñ
+        internal bool m_bDisplayCheckBox = false;   // æ˜¯å¦è¦åœ¨hoveræ—¶æ˜¾ç¤ºcheckboxå›¾åƒ
 
-        // public bool Binded = false; // µ±itemÎªnullÊ±£¬ÕâÀïµÄBinded±íÊ¾²ÎÓë×°¶©µÄÕ¼¾İÎ»ÖÃµÄµ¥Ôª
+        // public bool Binded = false; // å½“itemä¸ºnullæ—¶ï¼Œè¿™é‡Œçš„Bindedè¡¨ç¤ºå‚ä¸è£…è®¢çš„å æ®ä½ç½®çš„å•å…ƒ
 
-        public ItemBindingItem ParentItem = null;  // Èç¹û±¾¸ñ×ÓÎª×°¶©³ÉÔ±£¬ÕâÀïÊÇËù´ÓÊôµÄºÏ¶©±¾¶ÔÏó
+        public ItemBindingItem ParentItem = null;  // å¦‚æœæœ¬æ ¼å­ä¸ºè£…è®¢æˆå‘˜ï¼Œè¿™é‡Œæ˜¯æ‰€ä»å±çš„åˆè®¢æœ¬å¯¹è±¡
 
-        // ÊÇ·ñÎªºÏ¶©³ÉÔ±¸ñ×Ó?
-        // ×¢Òâ£¬¼´±ãÎªºÏ¶©³ÉÔ±¸ñ×Ó£¬Ò²¿ÉÄÜÊÇ¿Õ°×¸ñ×Ó(¼´this.item == null)
+        // æ˜¯å¦ä¸ºåˆè®¢æˆå‘˜æ ¼å­?
+        // æ³¨æ„ï¼Œå³ä¾¿ä¸ºåˆè®¢æˆå‘˜æ ¼å­ï¼Œä¹Ÿå¯èƒ½æ˜¯ç©ºç™½æ ¼å­(å³this.item == null)
         public bool IsMember
         {
             get
@@ -195,11 +195,11 @@ namespace dp2Circulation
 
 
 
-        // Ñ¡Ôñ¡£
-        // ×¢Òâ£º²¢²»¸ºÔğÊ§Ğ§Ïà¹ØÇøÓò
+        // é€‰æ‹©ã€‚
+        // æ³¨æ„ï¼šå¹¶ä¸è´Ÿè´£å¤±æ•ˆç›¸å…³åŒºåŸŸ
         // return:
-        //      true    ×´Ì¬·¢Éú±ä»¯
-        //      false   ×´Ì¬Ã»ÓĞ±ä»¯
+        //      true    çŠ¶æ€å‘ç”Ÿå˜åŒ–
+        //      false   çŠ¶æ€æ²¡æœ‰å˜åŒ–
         public override bool Select(SelectAction action)
         {
             bool bOldSelected = this.m_bSelected;
@@ -218,7 +218,7 @@ namespace dp2Circulation
             }
 
             /*
-            // µİ¹é
+            // é€’å½’
             if (bRecursive == true)
             {
                 for (int i = 0; i < this.ChildrenCollection.Count; i++)
@@ -231,7 +231,7 @@ namespace dp2Circulation
             return (bOldSelected == this.m_bSelected ? false : true);
         }
 
-        // ½«±¾¶ÔÏó×ø±êÌåÏµ µÄ¾ØĞÎ ×ª»»Îª ¶¥²ã¶ÔÏóµÄ×ø±êÌåÏµ
+        // å°†æœ¬å¯¹è±¡åæ ‡ä½“ç³» çš„çŸ©å½¢ è½¬æ¢ä¸º é¡¶å±‚å¯¹è±¡çš„åæ ‡ä½“ç³»
         public RectangleF ToRootCoordinate(RectangleF rect)
         {
             float x_offs = 0;
@@ -276,17 +276,17 @@ namespace dp2Circulation
                         if ((nIndex % 2) == 0)
                         {
                             this.OutofIssue = false;
-                            return; // Ë«¸ñµÄ×ó±ßÃ»ÓĞ±ØÒªÉèÖÃ?
+                            return; // åŒæ ¼çš„å·¦è¾¹æ²¡æœ‰å¿…è¦è®¾ç½®?
                         }
              * */
 
             issue.RefreshOutofIssueValue(nIndex);
         }
 
-        // Cell µã»÷²âÊÔ
+        // Cell ç‚¹å‡»æµ‹è¯•
         // parameters:
-        //      p_x   ÒÑ¾­ÊÇÎÄµµ×ø±ê¡£¼´ÎÄµµ×óÉÏ½ÇÎª(0,0)
-        //      type    Òª²âÊÔµÄ×îÏÂ¼¶£¨Ò¶¼¶£©¶ÔÏóµÄÀàĞÍ¡£Èç¹ûÎªnull£¬±íÊ¾Ò»Ö±µ½Ä©¶Ë
+        //      p_x   å·²ç»æ˜¯æ–‡æ¡£åæ ‡ã€‚å³æ–‡æ¡£å·¦ä¸Šè§’ä¸º(0,0)
+        //      type    è¦æµ‹è¯•çš„æœ€ä¸‹çº§ï¼ˆå¶çº§ï¼‰å¯¹è±¡çš„ç±»å‹ã€‚å¦‚æœä¸ºnullï¼Œè¡¨ç¤ºä¸€ç›´åˆ°æœ«ç«¯
         public void HitTest(long p_x,
             long p_y,
             Type dest_type,
@@ -335,26 +335,26 @@ namespace dp2Circulation
         public PaintInfo GetPaintInfo()
         {
             PaintInfo info = new PaintInfo();
-            // ÆÕÍ¨µ¥²á
+            // æ™®é€šå•å†Œ
             info.ForeColor = this.Container.Container.SingleForeColor;
 
             if (this.IsMember == true)
             {
-                // ³ÉÔ±²á
+                // æˆå‘˜å†Œ
                 info.ForeColor = this.Container.Container.MemberForeColor;
                 info.BackColor = this.Container.Container.MemberBackColor;
             }
             else if (this.item != null
                 && this.item.Calculated == true)
             {
-                // Ô¤²âµÄµ¥²á
+                // é¢„æµ‹çš„å•å†Œ
                 info.ForeColor = this.Container.Container.CalculatedForeColor;
                 info.BackColor = this.Container.Container.CalculatedBackColor;
             }
             else if (this.item != null
            && this.item.IsParent == true)
             {
-                // ºÏ¶©±¾
+                // åˆè®¢æœ¬
                 info.ForeColor = this.Container.Container.ParentForeColor;
                 info.BackColor = this.Container.Container.ParentBackColor;
             }
@@ -376,20 +376,20 @@ namespace dp2Circulation
             bool bSelected = this.Selected;
             RectangleF rect;
 
-            // ÊÇ·ñ½øĞĞÁËÕûÌåĞı×ª
+            // æ˜¯å¦è¿›è¡Œäº†æ•´ä½“æ—‹è½¬
             bool bRotate = false;
 
-            // ÆÕÍ¨µ¥²á
+            // æ™®é€šå•å†Œ
             Color colorText = this.Container.Container.SingleForeColor;
             Color colorGray = this.Container.Container.SingleGrayColor;
             Brush brushBack = null;
             float fBorderWidth = 2;
             Color colorBorder = Color.FromArgb(255, Color.Gray);
 
-            // ±³¾°
+            // èƒŒæ™¯
             if (this.IsMember == true)
             {
-                // ³ÉÔ±²á
+                // æˆå‘˜å†Œ
 #if DEBUG
                 if (this.item != null)
                 {
@@ -408,7 +408,7 @@ namespace dp2Circulation
             else if (this.item != null
                 && this.item.Calculated == true)
             {
-                // Ô¤²âµÄµ¥²á
+                // é¢„æµ‹çš„å•å†Œ
                 fBorderWidth = (float)1;    //  0.2;
                 Color colorBack = this.Container.Container.CalculatedBackColor;
                 {
@@ -421,7 +421,7 @@ namespace dp2Circulation
             else if (this.item != null
            && this.item.IsParent == true)
             {
-                // ºÏ¶©±¾
+                // åˆè®¢æœ¬
                 fBorderWidth = 3;
                 Color colorBack = this.Container.Container.ParentBackColor;
                 {
@@ -441,7 +441,7 @@ namespace dp2Circulation
             }
 
 
-            // ±ß¿òºÍ±ßÌõ
+            // è¾¹æ¡†å’Œè¾¹æ¡
             {
 
                 rect = new RectangleF(start_x,
@@ -450,7 +450,7 @@ namespace dp2Circulation
                     nHeight);
 
                 /*
-                // Ã»ÓĞ½¹µãÊ±ÒªĞ¡Ò»Ğ©
+                // æ²¡æœ‰ç„¦ç‚¹æ—¶è¦å°ä¸€äº›
                 rect = GuiUtil.PaddingRect(this.Container.Container.CellMargin,
                     rect);
                  * */
@@ -460,12 +460,12 @@ namespace dp2Circulation
                 rectTest.Width += 2;
                 rectTest.Height += 2;
 
-                // ÓÅ»¯
+                // ä¼˜åŒ–
                 if (rectTest.IntersectsWith(e.ClipRectangle) == true
                     || bRotate == true)
                 {
                     float round_radius = 10;
-                    // ÒõÓ°
+                    // é˜´å½±
                     RectangleF rectShadow = rect;
                     rectShadow.Offset((float)1.5, (float)1.5);  // 0.5
                     // rectShadow.Inflate((float)-0.9, (float)-0.9);
@@ -514,7 +514,7 @@ namespace dp2Circulation
         }
 
 
-        // »æÖÆÃ¿²áµÄ¸ñ×Ó
+        // ç»˜åˆ¶æ¯å†Œçš„æ ¼å­
         internal virtual void Paint(
             long start_x,
             long start_y,
@@ -546,7 +546,7 @@ namespace dp2Circulation
 
             GraphicsState gstate = null;
 
-            // ÊÇ·ñ½øĞĞÁËÕûÌåĞı×ª
+            // æ˜¯å¦è¿›è¡Œäº†æ•´ä½“æ—‹è½¬
             bool bRotate = this.OutofIssue == true
                 | (this.m_bFocus == true && this.m_bHover == false);
 
@@ -571,7 +571,7 @@ namespace dp2Circulation
                 e.Graphics.Transform = x;
             }
 
-            // ÆÕÍ¨µ¥²á
+            // æ™®é€šå•å†Œ
             Color colorText = this.Container.Container.SingleForeColor;
             Color colorGray = this.Container.Container.SingleGrayColor;
             Brush brushBack = null;
@@ -579,14 +579,14 @@ namespace dp2Circulation
             Color colorBorder = Color.FromArgb(255, Color.Gray);
 
 
-            // ±³¾°
+            // èƒŒæ™¯
             if (bSelected == true)
             {
-                // Ñ¡¶¨ÁËµÄ¸ñ×Ó
+                // é€‰å®šäº†çš„æ ¼å­
                 Color colorBack = this.Container.Container.SelectedBackColor;
                 if (this.m_bFocus == true)
                 {
-                    // ×ó -- ÓÒ
+                    // å·¦ -- å³
                     brushBack = new LinearGradientBrush(
         new PointF(start_x, start_y + this.Height),
         new PointF(start_x + this.Width, start_y),
@@ -603,7 +603,7 @@ namespace dp2Circulation
             }
             else if (this.IsMember == true)
             {
-                // ³ÉÔ±²á
+                // æˆå‘˜å†Œ
 #if DEBUG
                 if (this.item != null)
                 {
@@ -614,7 +614,7 @@ namespace dp2Circulation
                 Color colorBack = this.Container.Container.MemberBackColor;
                 if (this.m_bFocus == true)
                 {
-                    // ×ó -- ÓÒ
+                    // å·¦ -- å³
                     brushBack = new LinearGradientBrush(
         new PointF(start_x, start_y + this.Height),
         new PointF(start_x + this.Width, start_y),
@@ -633,12 +633,12 @@ namespace dp2Circulation
             else if (this.item != null
                 && this.item.Calculated == true)
             {
-                // Ô¤²âµÄµ¥²á
+                // é¢„æµ‹çš„å•å†Œ
                 fBorderWidth = (float)1; 
                 Color colorBack = this.Container.Container.CalculatedBackColor;
                 if (this.m_bFocus == true)
                 {
-                    // ×ó -- ÓÒ
+                    // å·¦ -- å³
                     brushBack = new LinearGradientBrush(
         new PointF(start_x, start_y + this.Height),
         new PointF(start_x + this.Width, start_y),
@@ -657,12 +657,12 @@ namespace dp2Circulation
             else if (this.item != null
            && this.item.IsParent == true)
             {
-                // ºÏ¶©±¾
+                // åˆè®¢æœ¬
                 fBorderWidth = 1;   // 3
                 Color colorBack = this.Container.Container.ParentBackColor;
                 if (this.m_bFocus == true)
                 {
-                    // ×ó -- ÓÒ
+                    // å·¦ -- å³
                     brushBack = new LinearGradientBrush(
         new PointF(start_x, start_y + this.Height),
         new PointF(start_x + this.Width, start_y),
@@ -684,7 +684,7 @@ namespace dp2Circulation
                 Color colorBack = this.Container.Container.SingleBackColor;
                 if (this.m_bFocus == true)
                 {
-                    // ×ó -- ÓÒ
+                    // å·¦ -- å³
                     brushBack = new LinearGradientBrush(
         new PointF(start_x, start_y + this.Height),
         new PointF(start_x + this.Width, start_y),
@@ -700,21 +700,21 @@ namespace dp2Circulation
 
             Color colorSideBar = Color.FromArgb(0, 255, 255, 255);
 
-            // ĞÂ½¨µÄºÍ·¢Éú¹ıĞŞ¸ÄµÄ£¬²à±ßÌõÑÕÉ«ĞèÒªÉè¶¨
+            // æ–°å»ºçš„å’Œå‘ç”Ÿè¿‡ä¿®æ”¹çš„ï¼Œä¾§è¾¹æ¡é¢œè‰²éœ€è¦è®¾å®š
             if (this.item != null
                 && this.item.NewCreated == true)
             {
-                // ĞÂ´´½¨µÄµ¥²á
+                // æ–°åˆ›å»ºçš„å•å†Œ
                 colorSideBar = this.Container.Container.NewBarColor;
             }
             else if (this.item != null
            && this.item.Changed == true)
             {
-                // ĞŞ¸Ä¹ıµÄµÄµ¥²á
+                // ä¿®æ”¹è¿‡çš„çš„å•å†Œ
                 colorSideBar = this.Container.Container.ChangedBarColor;
             }
 
-            // ±ß¿òºÍ±ßÌõ
+            // è¾¹æ¡†å’Œè¾¹æ¡
             {
 
                 rect = new RectangleF(start_x,
@@ -723,7 +723,7 @@ namespace dp2Circulation
                     this.Container.Container.m_nCellHeight);
 
                 {
-                    // Ã»ÓĞ½¹µãÊ±ÒªĞ¡Ò»Ğ©
+                    // æ²¡æœ‰ç„¦ç‚¹æ—¶è¦å°ä¸€äº›
                     rect = GuiUtil.PaddingRect(this.Container.Container.CellMargin,
                         rect);
                 }
@@ -734,13 +734,13 @@ namespace dp2Circulation
                 rectTest.Width += 2;
                 rectTest.Height += 2;
 
-                // ÓÅ»¯
+                // ä¼˜åŒ–
                 if (rectTest.IntersectsWith(e.ClipRectangle) == true
                     || bRotate == true)
                 {
                     float round_radius = 10;
 
-                    // ÒõÓ°
+                    // é˜´å½±
                     RectangleF rectShadow = rect;
                     rectShadow.Offset((float)1.5, (float)1.5);  // 0.5
                     // rectShadow.Inflate((float)-0.9, (float)-0.9);
@@ -784,7 +784,7 @@ namespace dp2Circulation
                             round_radius,
                             que_radius);
 
-                    // ±ßÌõ¡£×ó²à
+                    // è¾¹æ¡ã€‚å·¦ä¾§
                     Brush brushSideBar = new SolidBrush(colorSideBar);
                     RectangleF rectSideBar = new RectangleF(
                         rect.X + penBorder.Width,
@@ -795,12 +795,12 @@ namespace dp2Circulation
                 }
             }
 
-            // »æÖÆÎÄ×Ö
+            // ç»˜åˆ¶æ–‡å­—
             if (this.item != null)
             {
-                Debug.Assert(this.item.Missing == false, "MissingÎªtrueµÄItem¶ÔÏóÓ¦¸ÃÔÚ³õÊ¼»¯¸Õ½áÊøÊ±¾Í¶ªÆú");
+                Debug.Assert(this.item.Missing == false, "Missingä¸ºtrueçš„Itemå¯¹è±¡åº”è¯¥åœ¨åˆå§‹åŒ–åˆšç»“æŸæ—¶å°±ä¸¢å¼ƒ");
 
-                // Ëø¶¨×´Ì¬µÄµ¥Ôª
+                // é”å®šçŠ¶æ€çš„å•å…ƒ
                 if (this.item.Locked == true && this.IsMember == false)
                 {
                     Padding margin = this.Container.Container.CellMargin;
@@ -824,7 +824,7 @@ namespace dp2Circulation
 
                 if (this.item.Calculated == true)
                 {
-                    // »æÖÆµ­É«µÄ¡°?¡±×ÖÑù
+                    // ç»˜åˆ¶æ·¡è‰²çš„â€œ?â€å­—æ ·
                     this.PaintQue(start_x,
                         start_y,
                         "?",
@@ -832,7 +832,7 @@ namespace dp2Circulation
                         e,
                         bRotate);
                 }
-                // ¡°Êı¾İ¿â¼ÇÂ¼¡±ÒÑ¾­É¾³ıµÄµ¥Ôª
+                // â€œæ•°æ®åº“è®°å½•â€å·²ç»åˆ é™¤çš„å•å…ƒ
                 if (this.item.Deleted == true)
                 {
                     /*
@@ -872,7 +872,7 @@ namespace dp2Circulation
                         bRotate);
                 }
 
-                // ±»ÈË½èÔÄµÄ¸ñ×Ó
+                // è¢«äººå€Ÿé˜…çš„æ ¼å­
                 if (String.IsNullOrEmpty(this.item.Borrower) == false)
                 {
                     Padding margin = this.Container.Container.CellMargin;
@@ -892,7 +892,7 @@ namespace dp2Circulation
                         bRotate);
                 }
 
-                if (StringUtil.IsInList("×¢Ïú", this.item.State) == true)
+                if (StringUtil.IsInList("æ³¨é”€", this.item.State) == true)
                 {
                     this.PaintTextLines(start_x, start_y, true,
                         colorText,
@@ -906,10 +906,10 @@ namespace dp2Circulation
                 }
 
                 if (this.m_bHover == true
-                    && this.m_bDisplayCheckBox == false)    // ÒªÏÔÊ¾checkbox£¬¾Í²»ÒªÏÔÊ¾ĞĞ±êÌâ
+                    && this.m_bDisplayCheckBox == false)    // è¦æ˜¾ç¤ºcheckboxï¼Œå°±ä¸è¦æ˜¾ç¤ºè¡Œæ ‡é¢˜
                     this.PaintLineLabels(start_x, start_y, e, bRotate);
 
-                // °ó¶¨ÁË²É¹ºĞÅÏ¢µÄ¸ñ×Ó£¬ÏÔÊ¾xyÖµ
+                // ç»‘å®šäº†é‡‡è´­ä¿¡æ¯çš„æ ¼å­ï¼Œæ˜¾ç¤ºxyå€¼
                 if (this.Container.Container.DisplayOrderInfoXY == true
                     && this.item != null && this.item.OrderInfoPosition.X != -1)
                 {
@@ -927,7 +927,7 @@ namespace dp2Circulation
                     rect = GuiUtil.PaddingRect(this.Container.Container.CellPadding,
                         rect);
 
-                    // ÓÒÉÏ½Ç
+                    // å³ä¸Šè§’
                     RectangleF rectText = new RectangleF(
                         rect.X + rect.Width - size.Width,
                         rect.Y,
@@ -950,10 +950,10 @@ namespace dp2Circulation
             else
             {
                 /*
-                // ¿Õ°×¸ñ×Ó¡£»æÖÆµ­É«µÄ¡°È±¡±×ÖÑù
+                // ç©ºç™½æ ¼å­ã€‚ç»˜åˆ¶æ·¡è‰²çš„â€œç¼ºâ€å­—æ ·
                 this.PaintQue(start_x,
                     start_y,
-                    "È±",
+                    "ç¼º",
                     colorGray,
                     e,
                     bRotate);
@@ -987,7 +987,7 @@ namespace dp2Circulation
                 float nHeightDelta = (rect.Height / 4);
                 rect = RectangleF.Inflate(rect, -nWidthDelta, -nHeightDelta);
 
-                // ÓÅ»¯
+                // ä¼˜åŒ–
                 if (rect.IntersectsWith(e.ClipRectangle) == true)
                 {
                     /*
@@ -1005,8 +1005,8 @@ namespace dp2Circulation
                     rect.X = rect.Width / 2;
                     rect.Y = rect.Height / 2;
                      * */
-                    e.Graphics.DrawString("È±",
-    new Font("Î¢ÈíÑÅºÚ",    // "Arial",
+                    e.Graphics.DrawString("ç¼º",
+    new Font("å¾®è½¯é›…é»‘",    // "Arial",
         rect.Height,
         FontStyle.Regular,
         GraphicsUnit.Pixel),
@@ -1016,8 +1016,8 @@ namespace dp2Circulation
 
 
                     /*
-                    e.Graphics.DrawString("È±",
-                        new Font("Î¢ÈíÑÅºÚ",    // "Arial",
+                    e.Graphics.DrawString("ç¼º",
+                        new Font("å¾®è½¯é›…é»‘",    // "Arial",
                             rect.Height,
                             FontStyle.Regular,
                             GraphicsUnit.Pixel),
@@ -1026,8 +1026,8 @@ namespace dp2Circulation
                         stringFormat);
                      * */
                     /*
-                    e.Graphics.DrawString("È±",
-    new Font("Î¢ÈíÑÅºÚ",    // "Arial",
+                    e.Graphics.DrawString("ç¼º",
+    new Font("å¾®è½¯é›…é»‘",    // "Arial",
         rect.Height,
         FontStyle.Regular,
         GraphicsUnit.Pixel),
@@ -1042,7 +1042,7 @@ namespace dp2Circulation
             }
 
 
-            // ½¹µãĞéÏß
+            // ç„¦ç‚¹è™šçº¿
             if (this.m_bFocus == true)
             {
                 rect = new RectangleF(
@@ -1067,10 +1067,10 @@ namespace dp2Circulation
                 e.Graphics.Restore(gstate);
             }
 
-            // ÒÆ¶¯°ÑÊÖ£¬²»ÒªĞı×ª¡£ÒòÎªĞı×ª»á´øÀ´µã»÷µÄ²»Ò»ÖÂ
+            // ç§»åŠ¨æŠŠæ‰‹ï¼Œä¸è¦æ—‹è½¬ã€‚å› ä¸ºæ—‹è½¬ä¼šå¸¦æ¥ç‚¹å‡»çš„ä¸ä¸€è‡´
             if (this.m_bHover == true)
             {
-                // °ÑÊÖ
+                // æŠŠæ‰‹
                 Rectangle rect1 = this.Container.Container.RectGrab;
                 rect1.Offset((int)start_x, (int)start_y);
                 ControlPaint.DrawContainerGrabHandle(
@@ -1090,7 +1090,7 @@ namespace dp2Circulation
                         nWidth,
                         nWidth);
 
-                    // ÏÔÊ¾°ëÍ¸Ã÷µÄÕÚÕÖ
+                    // æ˜¾ç¤ºåŠé€æ˜çš„é®ç½©
                     RectangleF rectShadow = rectCheckBox;
                     int nDelta = this.Width / 8;
                     rectShadow.Inflate(nDelta, nDelta);
@@ -1116,7 +1116,7 @@ namespace dp2Circulation
             }
         }
 
-        // »æÖÆ¡°È±ÆÚ¡±±êÖ¾
+        // ç»˜åˆ¶â€œç¼ºæœŸâ€æ ‡å¿—
         internal static void PaintMissingMask(RectangleF rect,
             Color colorGray,
             PaintEventArgs e,
@@ -1124,7 +1124,7 @@ namespace dp2Circulation
         {
             float delta = (rect.Width / 2) * (float)0.35;
             rect.Inflate(-delta, -delta);
-            // ÓÅ»¯
+            // ä¼˜åŒ–
             if (rect.IntersectsWith(e.ClipRectangle) == true
                     || bDoNotSpeedUp == true)
             {
@@ -1141,7 +1141,7 @@ namespace dp2Circulation
             }
         }
 
-        // »æÖÆ¡°±»ÈË½èÔÄ¡±±êÖ¾
+        // ç»˜åˆ¶â€œè¢«äººå€Ÿé˜…â€æ ‡å¿—
         internal static void PaintBorrowedMask(RectangleF rect,
             Color colorGray,
             PaintEventArgs e,
@@ -1149,7 +1149,7 @@ namespace dp2Circulation
         {
             float delta = (rect.Width / 2) * (float)0.35;
             rect.Inflate(-delta, -delta);
-            // ÓÅ»¯
+            // ä¼˜åŒ–
             if (rect.IntersectsWith(e.ClipRectangle) == true
                     || bDoNotSpeedUp == true)
             {
@@ -1164,12 +1164,12 @@ namespace dp2Circulation
 
                 GraphicsPath path = new GraphicsPath();
 
-                // Í·²¿
+                // å¤´éƒ¨
                 RectangleF rectUp = new RectangleF(rect.X + rect.Width / 2 - up_height / 2,
                     rect.Y, up_height, up_height);
                 path.AddArc(rectUp, 0, 360);
 
-                // ÉíÌå
+                // èº«ä½“
                 RectangleF rectDown = new RectangleF(rect.X,
                     rect.Y + up_height, rect.Width, down_height*2);
                 path.AddArc(rectDown, 180, 180);
@@ -1179,7 +1179,7 @@ namespace dp2Circulation
             }
         }
 
-        // »æÖÆ¡°¼ÇÂ¼ÒÑÉ¾³ı¡±±êÖ¾
+        // ç»˜åˆ¶â€œè®°å½•å·²åˆ é™¤â€æ ‡å¿—
         internal static void PaintLockedMask(RectangleF rect,
             Color colorGray,
             PaintEventArgs e,
@@ -1187,7 +1187,7 @@ namespace dp2Circulation
         {
             float delta = (rect.Width / 2) * (float)0.35;
             rect.Inflate(-delta, -delta);
-            // ÓÅ»¯
+            // ä¼˜åŒ–
             if (rect.IntersectsWith(e.ClipRectangle) == true
                     || bDoNotSpeedUp == true)
             {
@@ -1203,12 +1203,12 @@ namespace dp2Circulation
                 GraphicsPath path = new GraphicsPath();
 
                 RectangleF rectArc = new RectangleF(rect.X + rect.Width / 4, rect.Y, rect.Width / 2, rect.Height / 2);
-                // ×ó±ßÊúÏß
+                // å·¦è¾¹ç«–çº¿
                 path.AddLine(rect.X + rect.Width / 4, rect.Y + rect.Height / 2,
                     rect.X + rect.Width / 4, rect.Y + +rect.Height / 4);
-                // °ëÔ²»¡
+                // åŠåœ†å¼§
                 path.AddArc(rectArc, 180, 180);
-                // ÓÒ±ßÊúÏß
+                // å³è¾¹ç«–çº¿
                 path.AddLine(rect.X + rect.Width - rect.Width / 4,rect.Y + +rect.Height / 4 ,
                     rect.X + rect.Width - rect.Width / 4, rect.Y + rect.Height / 2);
                 // 
@@ -1220,7 +1220,7 @@ namespace dp2Circulation
             }
         }
 
-        // »æÖÆ¡°¼ÇÂ¼ÒÑÉ¾³ı¡±±êÖ¾
+        // ç»˜åˆ¶â€œè®°å½•å·²åˆ é™¤â€æ ‡å¿—
         internal static void PaintDeletedMask(RectangleF rect,
             Color colorGray,
             PaintEventArgs e,
@@ -1228,7 +1228,7 @@ namespace dp2Circulation
         {
             float delta = (rect.Width / 2) * (float)0.35;
             rect.Inflate(-delta, -delta);
-            // ÓÅ»¯
+            // ä¼˜åŒ–
             if (rect.IntersectsWith(e.ClipRectangle) == true
                     || bDoNotSpeedUp == true)
             {
@@ -1267,7 +1267,7 @@ new PointF(rect.X + rect.Width + little, rect.Y + rect.Height / 2 - little));
         }
 
         /*
-        // »æÖÆ¡°¼ÇÂ¼ÒÑÉ¾³ı¡±±êÖ¾
+        // ç»˜åˆ¶â€œè®°å½•å·²åˆ é™¤â€æ ‡å¿—
         internal static void PaintDeletedMask(RectangleF rect,
             Color colorGray,
             PaintEventArgs e,
@@ -1275,7 +1275,7 @@ new PointF(rect.X + rect.Width + little, rect.Y + rect.Height / 2 - little));
         {
             float delta = (rect.Width/2) * (float)0.35;
             rect.Inflate(-delta, -delta);
-            // ÓÅ»¯
+            // ä¼˜åŒ–
             if (rect.IntersectsWith(e.ClipRectangle) == true
                     || bDoNotSpeedUp == true)
             {
@@ -1310,7 +1310,7 @@ new PointF(rect.X + rect.Width + little, rect.Y + rect.Height / 2 - little));
             float nHeightDelta = (rect.Height / 4);
             rect = RectangleF.Inflate(rect, -nWidthDelta, -nHeightDelta);
 
-            // ÓÅ»¯
+            // ä¼˜åŒ–
             if (rect.IntersectsWith(e.ClipRectangle) == true
                     || bDoNotSpeedUp == true)
             {
@@ -1320,7 +1320,7 @@ new PointF(rect.X + rect.Width + little, rect.Y + rect.Height / 2 - little));
                 stringFormat.FormatFlags = StringFormatFlags.NoWrap;
 
                 e.Graphics.DrawString(strText,
-new Font("Î¢ÈíÑÅºÚ",    // "Arial",
+new Font("å¾®è½¯é›…é»‘",    // "Arial",
     rect.Height,
     FontStyle.Regular,
     GraphicsUnit.Pixel),
@@ -1345,7 +1345,7 @@ stringFormat);
                 stringFormat.FormatFlags = StringFormatFlags.NoWrap;
 
                 e.Graphics.DrawString(strText,
-new Font("Î¢ÈíÑÅºÚ",    // "Arial",
+new Font("å¾®è½¯é›…é»‘",    // "Arial",
 rect.Height,
 FontStyle.Regular,
 GraphicsUnit.Pixel),
@@ -1373,13 +1373,13 @@ stringFormat);
             int nWidth = this.Width - margin.Horizontal - padding.Horizontal;
             int nHeight = this.Height - margin.Vertical - padding.Vertical;
 
-            int nUsedHeight = 0;    // Ê¹ÓÃ¹ıµÄÀÛ»ı¸ß¶È
+            int nUsedHeight = 0;    // ä½¿ç”¨è¿‡çš„ç´¯ç§¯é«˜åº¦
             // Color colorText = this.Container.Container.MemberForeColor;
 
             if (bGrayText == true)
                 colorText = ControlPaint.Light(colorText, 1.5F);
 
-            // ×ó -- ÓÒ
+            // å·¦ -- å³
             LinearGradientBrush brushGradient = new LinearGradientBrush(
 new PointF(x0, 0),
 new PointF(x0 + 6, 0),
@@ -1394,14 +1394,14 @@ Color.FromArgb(0, Color.Gray)
             {
                 int nRestHeight = nHeight - nUsedHeight;
 
-                // »æÖÆĞĞ
+                // ç»˜åˆ¶è¡Œ
                 RectangleF rect = new RectangleF(
                     x0,
                     y0,
                     nWidth,
                     Math.Min(this.LineHeight, nRestHeight));
 
-                // ÓÅ»¯
+                // ä¼˜åŒ–
                 if (rect.IntersectsWith(e.ClipRectangle) == true
                     || bDoNotSpeedUp == true)
                 {
@@ -1410,7 +1410,7 @@ Color.FromArgb(0, Color.Gray)
                     string strText = this.item.GetText(strName);
                     if (strName == "intact")
                     {
-                        // Ô¤²â¸ñ×Ó£¬Ã»ÓĞ±ØÒªÏÔÊ¾ÍêºÃÂÊ
+                        // é¢„æµ‹æ ¼å­ï¼Œæ²¡æœ‰å¿…è¦æ˜¾ç¤ºå®Œå¥½ç‡
                         if (this.item.Calculated == false)
                         {
                             PaintIntactBar(
@@ -1436,7 +1436,7 @@ Color.FromArgb(0, Color.Gray)
                             e);
                     }
 
-                    // ÏÂ·½ÏßÌõ
+                    // ä¸‹æ–¹çº¿æ¡
                     if (nLineHeight < nRestHeight)
                     {
                         e.Graphics.DrawLine(penLine,
@@ -1513,7 +1513,7 @@ Color.FromArgb(0, Color.Gray)
             int nLeftWidth = (int)((float)nWidth * r);
             if (nLeftWidth > 0)
             {
-                // ×ó -- ÓÒ
+                // å·¦ -- å³
                 LinearGradientBrush brushGradient = new LinearGradientBrush(
     new PointF(x0, y0),
     new PointF(x0 + nLeftWidth, y0 + nHeight),
@@ -1536,7 +1536,7 @@ Color.FromArgb(0, Color.Gray)
                     rectRight);
             }
 
-            // °×É«£¬´ÖÌå
+            // ç™½è‰²ï¼Œç²—ä½“
             PaintText(
 x0,
 y0,
@@ -1574,13 +1574,13 @@ e);
             int nWidth = this.Width - margin.Horizontal - padding.Horizontal;
             int nHeight = this.Height - margin.Vertical - padding.Vertical;
 
-            int nUsedHeight = 0;    // Ê¹ÓÃ¹ıµÄÀÛ»ı¸ß¶È
+            int nUsedHeight = 0;    // ä½¿ç”¨è¿‡çš„ç´¯ç§¯é«˜åº¦
             Color colorText = Color.FromArgb(200, 0, 100, 0);
 
             Font font = this.Container.Container.m_fontLine;
             font = new Font(font, FontStyle.Bold);
 
-            // »ñµÃÎÄ×ÖµÄ×î´ó¿í¶È
+            // è·å¾—æ–‡å­—çš„æœ€å¤§å®½åº¦
             float fMaxTextWidth = 0;
             for (int i = 0; i < this.Container.Container.TextLineNames.Length / 2; i++)
             {
@@ -1590,7 +1590,7 @@ e);
                     fMaxTextWidth = size.Width;
             }
 
-            // »æÖÆ°ëÍ¸Ã÷±³¾°
+            // ç»˜åˆ¶åŠé€æ˜èƒŒæ™¯
             {
                 RectangleF rect1 = new RectangleF(
                     x0 + nWidth - (fMaxTextWidth + 4),
@@ -1602,7 +1602,7 @@ e);
                     || bDoNotSpeedUp == true)
                 {
 
-                    // ×ó -- ÓÒ
+                    // å·¦ -- å³
                     LinearGradientBrush brushGradient = new LinearGradientBrush(
     new PointF(rect1.X, rect1.Y),
     new PointF(rect1.X + rect1.Width, rect1.Y),
@@ -1627,14 +1627,14 @@ e);
             {
                 int nRestHeight = nHeight - nUsedHeight;
 
-                // »æÖÆĞĞ
+                // ç»˜åˆ¶è¡Œ
                 RectangleF rect = new RectangleF(
                     x0 + nWidth - fMaxTextWidth,
                     y0,
                     fMaxTextWidth,
                     Math.Min(nLineHeight, nRestHeight));
 
-                // ÓÅ»¯
+                // ä¼˜åŒ–
                 if (rect.IntersectsWith(e.ClipRectangle) == true
                     || bDoNotSpeedUp == true)
                 {
@@ -1658,7 +1658,7 @@ e);
                         rect,
                         stringFormat);
 
-                    // ÏÂ·½ÏßÌõ
+                    // ä¸‹æ–¹çº¿æ¡
                     if (nLineHeight < nRestHeight)
                     {
                         e.Graphics.DrawLine(penLine,
@@ -1721,7 +1721,7 @@ e);
             /*
             int nFontHeight = this.LineHeight - 4;   // Math.Min(nWidth, nHeight / 5);
 
-            Font font = new Font("Î¢ÈíÑÅºÚ",    // "Arial",
+            Font font = new Font("å¾®è½¯é›…é»‘",    // "Arial",
                 nFontHeight,
                 FontStyle.Regular,
                 GraphicsUnit.Pixel);
@@ -1762,7 +1762,7 @@ e);
             /*
             int nFontHeight = this.LineHeight - 4;   // Math.Min(nWidth, nHeight / 5);
 
-            Font font = new Font("Î¢ÈíÑÅºÚ",    // "Arial",
+            Font font = new Font("å¾®è½¯é›…é»‘",    // "Arial",
                 nFontHeight,
                 FontStyle.Regular,
                 GraphicsUnit.Pixel);
@@ -1792,7 +1792,7 @@ e);
 
     }
 
-    // ±È½Ï³ö°æÈÕÆÚ¡£Ğ¡µÄÔÚÇ°
+    // æ¯”è¾ƒå‡ºç‰ˆæ—¥æœŸã€‚å°çš„åœ¨å‰
     internal class CellPublishTimeComparer : IComparer<Cell>
     {
         int IComparer<Cell>.Compare(Cell x, Cell y)
@@ -1803,8 +1803,8 @@ e);
             int nRet = String.Compare(s1, s2);
             if (nRet == 0)
             {
-                // Èç¹û³ö°æÈÕÆÚÏàÍ¬£¬Ôò°Ñ¿Õ°×¸ñ×ÓÅÅÔÚÇ°Ãæ
-                // ÕâÑù×öµÄºÃ´¦ÊÇ£¬ÈÃ¿Õ°×¸ñ×ÓÏÈ´¦Àí£¬±ãÓÚËüÃÇ±»ºóÃæµÄÆäËûÍ¬ÆÚ¸ñ×Ó¸²¸Ç
+                // å¦‚æœå‡ºç‰ˆæ—¥æœŸç›¸åŒï¼Œåˆ™æŠŠç©ºç™½æ ¼å­æ’åœ¨å‰é¢
+                // è¿™æ ·åšçš„å¥½å¤„æ˜¯ï¼Œè®©ç©ºç™½æ ¼å­å…ˆå¤„ç†ï¼Œä¾¿äºå®ƒä»¬è¢«åé¢çš„å…¶ä»–åŒæœŸæ ¼å­è¦†ç›–
                 if (x.item == null && y.item == null)
                     return 0;
                 if (x.item == null)
@@ -1817,20 +1817,20 @@ e);
     }
 
 
-    // Ò»¸ö¶©¹º×éÏÔÊ¾µ¥Ôª
-    // ÏÔÊ¾¶©¹ºĞÅÏ¢£ºÊéÉÌ¡¢×Ê½ğÀ´Ô´¡¢¼Û¸ñ¡¢Ê±¼ä·¶Î§
+    // ä¸€ä¸ªè®¢è´­ç»„æ˜¾ç¤ºå•å…ƒ
+    // æ˜¾ç¤ºè®¢è´­ä¿¡æ¯ï¼šä¹¦å•†ã€èµ„é‡‘æ¥æºã€ä»·æ ¼ã€æ—¶é—´èŒƒå›´
     internal class GroupCell : Cell
     {
         public OrderBindingItem order = null;
 
-        public bool EndBracket = false; // == false Òıµ¼µÄ¶ÔÏó£¬×óÀ¨ºÅ£»==true£¬ÓÒ±ßµÄÀ¨ºÅ
+        public bool EndBracket = false; // == false å¼•å¯¼çš„å¯¹è±¡ï¼Œå·¦æ‹¬å·ï¼›==trueï¼Œå³è¾¹çš„æ‹¬å·
 
-        // ±¾¶ÔÏóÍ¬×éµÄ×éÍ·²¿¶ÔÏó
+        // æœ¬å¯¹è±¡åŒç»„çš„ç»„å¤´éƒ¨å¯¹è±¡
         public GroupCell HeadGroupCell
         {
             get
             {
-                Debug.Assert(this.EndBracket == true, "Ö»ÄÜ¶ÔÎ²²¿¶ÔÏóÊ¹ÓÃHeadGroupCell");
+                Debug.Assert(this.EndBracket == true, "åªèƒ½å¯¹å°¾éƒ¨å¯¹è±¡ä½¿ç”¨HeadGroupCell");
                 IssueBindingItem issue = this.Container;
                 Debug.Assert(issue != null, "");
                 int index = issue.IndexOfCell(this);
@@ -1859,18 +1859,18 @@ e);
         {
             get
             {
-                Debug.Assert(this.EndBracket == false, "Ö»ÄÜ¶ÔÍ·²¿¶ÔÏóÊ¹ÓÃMemberCells");
+                Debug.Assert(this.EndBracket == false, "åªèƒ½å¯¹å¤´éƒ¨å¯¹è±¡ä½¿ç”¨MemberCells");
                 return GetMemberCells(0x03);
             }
         }
 
         // parameters:
-        //      0x01    Ô¤²âµÄ
-        //      0x02    ÒÑ¾­µ½µÄ
-        //      0x03    È«²¿
+        //      0x01    é¢„æµ‹çš„
+        //      0x02    å·²ç»åˆ°çš„
+        //      0x03    å…¨éƒ¨
         List<Cell> GetMemberCells(int nStyle)
         {
-            Debug.Assert(this.EndBracket == false, "Ö»ÄÜ¶ÔÍ·²¿¶ÔÏóÊ¹ÓÃGetMemberCells()");
+            Debug.Assert(this.EndBracket == false, "åªèƒ½å¯¹å¤´éƒ¨å¯¹è±¡ä½¿ç”¨GetMemberCells()");
             List<Cell> results = new List<Cell>();
             IssueBindingItem issue = this.Container;
             if (issue == null)
@@ -1912,12 +1912,12 @@ e);
             return results;
         }
 
-        // Ë¢ĞÂ×éÄÚÃ¿¸ö¸ñ×ÓµÄOrderInfoXYĞÅÏ¢
+        // åˆ·æ–°ç»„å†…æ¯ä¸ªæ ¼å­çš„OrderInfoXYä¿¡æ¯
         internal void RefreshGroupMembersOrderInfo(int nOrderCountDelta,
             int nArrivedCountDelta)
         {
             string strError = "";
-            Debug.Assert(this.EndBracket == false, "Ö»ÄÜ¶ÔÍ·²¿¶ÔÏóÊ¹ÓÃRefreshOrderInfoXY()");
+            Debug.Assert(this.EndBracket == false, "åªèƒ½å¯¹å¤´éƒ¨å¯¹è±¡ä½¿ç”¨RefreshOrderInfoXY()");
             IssueBindingItem issue = this.Container;
             if (issue == null)
             {
@@ -1930,14 +1930,14 @@ e);
             if (head_index == -1)
             {
                 Debug.Assert(false, "");
-                strError = "ÔÚÈİÆ÷µÄ.Cells¼¯ºÏÖĞÃ»ÓĞÕÒµ½×Ô¼º";
+                strError = "åœ¨å®¹å™¨çš„.Cellsé›†åˆä¸­æ²¡æœ‰æ‰¾åˆ°è‡ªå·±";
                 throw new Exception(strError);
             }
 
             int nOrderIndex = issue.OrderItems.IndexOf(this.order);
             Debug.Assert(nOrderIndex != -1, "");
 
-            // ½«Í¬Ò»×éÖĞÈ«²¿¸ñ×ÓµÄ¶©¹ºĞÅÏ¢¶¨Î»²ÎÊıË¢ĞÂ
+            // å°†åŒä¸€ç»„ä¸­å…¨éƒ¨æ ¼å­çš„è®¢è´­ä¿¡æ¯å®šä½å‚æ•°åˆ·æ–°
             int y = 0;
             for (int i = head_index + 1; i < issue.Cells.Count; i++)
             {
@@ -1984,16 +1984,16 @@ e);
                 issue.AfterMembersChanged();
         }
 
-                // ÔÚ×éÄÚ²åÈëĞÂµÄ¸ñ×Ó(Ô¤²â¸ñ×Ó)
+                // åœ¨ç»„å†…æ’å…¥æ–°çš„æ ¼å­(é¢„æµ‹æ ¼å­)
         // parameters:
-        //      nInsertPos  ²åÈëÎ»ÖÃ¡£Èç¹ûÎª-1£¬±íÊ¾²åÈëÔÚÎ²²¿
+        //      nInsertPos  æ’å…¥ä½ç½®ã€‚å¦‚æœä¸º-1ï¼Œè¡¨ç¤ºæ’å…¥åœ¨å°¾éƒ¨
         // return:
-        //      ·µ»Ø²åÈëµÄindex(Õû¸öissue.CellsÏÂ±ê)
+        //      è¿”å›æ’å…¥çš„index(æ•´ä¸ªissue.Cellsä¸‹æ ‡)
         internal int InsertNewMemberCell(
             int nInsertPos,
             out string strError)
         {
-            Debug.Assert(this.EndBracket == false, "Ö»ÄÜ¶ÔÍ·²¿¶ÔÏóÊ¹ÓÃInsertGroupMemberCell()");
+            Debug.Assert(this.EndBracket == false, "åªèƒ½å¯¹å¤´éƒ¨å¯¹è±¡ä½¿ç”¨InsertGroupMemberCell()");
             IssueBindingItem issue = this.Container;
             if (issue == null)
             {
@@ -2005,7 +2005,7 @@ e);
             if (head_index == -1)
             {
                 Debug.Assert(false, "");
-                strError = "ÔÚÈİÆ÷µÄ.Cells¼¯ºÏÖĞÃ»ÓĞÕÒµ½×Ô¼º";
+                strError = "åœ¨å®¹å™¨çš„.Cellsé›†åˆä¸­æ²¡æœ‰æ‰¾åˆ°è‡ªå·±";
                 return -1;
             }
 
@@ -2031,7 +2031,7 @@ e);
 
             if (nStartIndex == -1)
             {
-                strError = "nInsertPosÖµ " + nInsertPos.ToString() + " ³¬¹ıÁË×éµÄ·¶Î§";
+                strError = "nInsertPoså€¼ " + nInsertPos.ToString() + " è¶…è¿‡äº†ç»„çš„èŒƒå›´";
                 return -1;
             }
 
@@ -2067,7 +2067,7 @@ e);
                     issue.Volume);
             }
 
-            // ½«Í¬Ò»×éÖĞÎ»ÓÚÓÒ±ßµÄ¸ñ×ÓµÄ¶©¹ºĞÅÏ¢¶¨Î»²ÎÊı¸Ä±ä
+            // å°†åŒä¸€ç»„ä¸­ä½äºå³è¾¹çš„æ ¼å­çš„è®¢è´­ä¿¡æ¯å®šä½å‚æ•°æ”¹å˜
             for (int i = nStartIndex + 1; i < issue.Cells.Count; i++)
             {
                 Cell cell = issue.GetCell(i);
@@ -2077,13 +2077,13 @@ e);
                 Debug.Assert(cell.item != null, "");
                 if (cell.item != null)
                 {
-                    // ÒòÎª²åÈë»á´øÀ´ÔöÁ¿
+                    // å› ä¸ºæ’å…¥ä¼šå¸¦æ¥å¢é‡
                     cell.item.OrderInfoPosition.Y++;
                 }
             }
 
 
-            // ³ıÁËĞŞ¸Ä<distribute>ÄÚÈİ£¬»¹ÒªĞŞ¸Ä<copy>ÄÚÈİ
+            // é™¤äº†ä¿®æ”¹<distribute>å†…å®¹ï¼Œè¿˜è¦ä¿®æ”¹<copy>å†…å®¹
             {
                 string strNewValue = "";
                 string strOldValue = "";
@@ -2103,16 +2103,16 @@ e);
         }
 
 #if NOOOOOOOOOOOOO
-        // ÔÚ×éÄÚ²åÈëĞÂµÄ¸ñ×Ó(Ô¤²â¸ñ×Ó)
+        // åœ¨ç»„å†…æ’å…¥æ–°çš„æ ¼å­(é¢„æµ‹æ ¼å­)
         // parameters:
-        //      nInsertPos  ²åÈëÎ»ÖÃ¡£Èç¹ûÎª-1£¬±íÊ¾²åÈëÔÚÎ²²¿
+        //      nInsertPos  æ’å…¥ä½ç½®ã€‚å¦‚æœä¸º-1ï¼Œè¡¨ç¤ºæ’å…¥åœ¨å°¾éƒ¨
         // return:
-        //      ·µ»Ø²åÈëµÄindex(Õû¸öissue.CellsÏÂ±ê)
+        //      è¿”å›æ’å…¥çš„index(æ•´ä¸ªissue.Cellsä¸‹æ ‡)
         internal int InsertNewMemberCell(
             int nInsertPos,
             out string strError)
         {
-            Debug.Assert(this.EndBracket == false, "Ö»ÄÜ¶ÔÍ·²¿¶ÔÏóÊ¹ÓÃInsertGroupMemberCell()");
+            Debug.Assert(this.EndBracket == false, "åªèƒ½å¯¹å¤´éƒ¨å¯¹è±¡ä½¿ç”¨InsertGroupMemberCell()");
             IssueBindingItem issue = this.Container;
             if (issue == null)
             {
@@ -2124,7 +2124,7 @@ e);
             if (head_index == -1)
             {
                 Debug.Assert(false, "");
-                strError = "ÔÚÈİÆ÷µÄ.Cells¼¯ºÏÖĞÃ»ÓĞÕÒµ½×Ô¼º";
+                strError = "åœ¨å®¹å™¨çš„.Cellsé›†åˆä¸­æ²¡æœ‰æ‰¾åˆ°è‡ªå·±";
                 return -1;
             }
 
@@ -2150,7 +2150,7 @@ e);
 
             if (nStartndex == -1)
             {
-                strError = "nInsertPosÖµ " + nInsertPos.ToString() + " ³¬¹ıÁË×éµÄ·¶Î§";
+                strError = "nInsertPoså€¼ " + nInsertPos.ToString() + " è¶…è¿‡äº†ç»„çš„èŒƒå›´";
                 return -1;
             }
 
@@ -2176,7 +2176,7 @@ e);
                 cell.Container = issue;
             }
 
-            // ½«Í¬Ò»×éÖĞÎ»ÓÚÓÒ±ßµÄ¸ñ×ÓµÄ¶©¹ºĞÅÏ¢¶¨Î»²ÎÊı¸Ä±ä
+            // å°†åŒä¸€ç»„ä¸­ä½äºå³è¾¹çš„æ ¼å­çš„è®¢è´­ä¿¡æ¯å®šä½å‚æ•°æ”¹å˜
             for (int i = nStartndex+1; i < issue.Cells.Count; i++)
             {
                 Cell cell = issue.GetCell(i);
@@ -2186,13 +2186,13 @@ e);
                 Debug.Assert(cell.item != null, "");
                 if (cell.item != null)
                 {
-                    // ÒòÎª²åÈë»á´øÀ´ÔöÁ¿
+                    // å› ä¸ºæ’å…¥ä¼šå¸¦æ¥å¢é‡
                     cell.item.OrderInfoPosition.Y++;
                 }
             }
 
-            // ×¢Òâ£º½ö½öĞŞ¸ÄÁË<distribute>ÄÚÈİ£¬¶øÃ»ÓĞĞŞ¸Ä<copy>ÄÚÈİ
-            // Òò´Ë±£´æºó£¬ÏÂ´ÎÆô¶¯£¬ĞÂÔö¼ÓµÄ¸ñ×ÓÓÖ»á²»¼ûÁË
+            // æ³¨æ„ï¼šä»…ä»…ä¿®æ”¹äº†<distribute>å†…å®¹ï¼Œè€Œæ²¡æœ‰ä¿®æ”¹<copy>å†…å®¹
+            // å› æ­¤ä¿å­˜åï¼Œä¸‹æ¬¡å¯åŠ¨ï¼Œæ–°å¢åŠ çš„æ ¼å­åˆä¼šä¸è§äº†
 
             bool bChanged = this.order.UpdateDistributeString(this);
             if (bChanged == true)
@@ -2206,7 +2206,7 @@ e);
         {
             get
             {
-                Debug.Assert(this.EndBracket == false, "Ö»ÄÜ¶ÔÍ·²¿¶ÔÏóÊ¹ÓÃCalculatedMemberCells");
+                Debug.Assert(this.EndBracket == false, "åªèƒ½å¯¹å¤´éƒ¨å¯¹è±¡ä½¿ç”¨CalculatedMemberCells");
                 return GetMemberCells(0x01);
             }
         }
@@ -2215,12 +2215,12 @@ e);
         {
             get
             {
-                Debug.Assert(this.EndBracket == false, "Ö»ÄÜ¶ÔÍ·²¿¶ÔÏóÊ¹ÓÃAcceptedMemberCells");
+                Debug.Assert(this.EndBracket == false, "åªèƒ½å¯¹å¤´éƒ¨å¯¹è±¡ä½¿ç”¨AcceptedMemberCells");
                 return GetMemberCells(0x02);
             }
         }
 
-        // »æÖÆÃ¿¸ö¶©¹º×éÒıµ¼µÄ¸ñ×Ó
+        // ç»˜åˆ¶æ¯ä¸ªè®¢è´­ç»„å¼•å¯¼çš„æ ¼å­
         internal override void Paint(
         long start_x,
         long start_y,
@@ -2249,7 +2249,7 @@ e);
 
             GraphicsState gstate = null;
 
-            // ÊÇ·ñ½øĞĞÁËÕûÌåĞı×ª
+            // æ˜¯å¦è¿›è¡Œäº†æ•´ä½“æ—‹è½¬
             bool bRotate = this.OutofIssue == true
                 | (this.m_bFocus == true && this.m_bHover == false);
 
@@ -2274,20 +2274,20 @@ e);
                 e.Graphics.Transform = x;
             }
 
-            // ÆÕÍ¨µ¥²á
+            // æ™®é€šå•å†Œ
             Color colorText = this.Container.Container.ForeColor;
             Color colorGray = this.Container.Container.GrayColor;
             Brush brushBack = null;
 
 
-            // ±³¾°
+            // èƒŒæ™¯
             if (bSelected == true)
             {
-                // Ñ¡¶¨ÁËµÄ¸ñ×Ó
+                // é€‰å®šäº†çš„æ ¼å­
                 Color colorBack = this.Container.Container.SelectedBackColor;
                 if (this.m_bFocus == true)
                 {
-                    // ×ó -- ÓÒ
+                    // å·¦ -- å³
                     brushBack = new LinearGradientBrush(
         new PointF(start_x, start_y + this.Height),
         new PointF(start_x + this.Width, start_y),
@@ -2304,13 +2304,13 @@ e);
             }
             else if (this.EndBracket == false)
             {
-                // ×ó»¨À¨ºÅ
+                // å·¦èŠ±æ‹¬å·
 
                 // brushBack = null;
                 Color colorBack = this.Container.Container.BackColor;
                 if (this.m_bFocus == true)
                 {
-                    // ×ó -- ÓÒ
+                    // å·¦ -- å³
                     brushBack = new LinearGradientBrush(
         new PointF(start_x, start_y + this.Height),
         new PointF(start_x + this.Width, start_y),
@@ -2321,7 +2321,7 @@ e);
                 else
                 {
                     // brushBack = new SolidBrush(colorBack);
-                    // ×ó -- ÓÒ
+                    // å·¦ -- å³
                     brushBack = new LinearGradientBrush(
         new PointF(start_x, start_y),
         new PointF(start_x + this.Width, start_y),
@@ -2333,13 +2333,13 @@ e);
             }
             else
             {
-                // ÓÒ»¨À¨ºÅ
+                // å³èŠ±æ‹¬å·
 
                 // brushBack = null;
                 Color colorBack = this.Container.Container.BackColor;
                 if (this.m_bFocus == true)
                 {
-                    // ×ó -- ÓÒ
+                    // å·¦ -- å³
                     brushBack = new LinearGradientBrush(
         new PointF(start_x, start_y + this.Height),
         new PointF(start_x + this.Width, start_y),
@@ -2361,22 +2361,22 @@ e);
 
             Color colorSideBar = Color.FromArgb(0, 255, 255, 255);
 
-            // ĞÂ½¨µÄºÍ·¢Éú¹ıĞŞ¸ÄµÄ£¬²à±ßÌõÑÕÉ«ĞèÒªÉè¶¨
+            // æ–°å»ºçš„å’Œå‘ç”Ÿè¿‡ä¿®æ”¹çš„ï¼Œä¾§è¾¹æ¡é¢œè‰²éœ€è¦è®¾å®š
             if (this.item != null
                 && this.item.NewCreated == true)
             {
-                // ĞÂ´´½¨µÄµ¥²á
+                // æ–°åˆ›å»ºçš„å•å†Œ
                 colorSideBar = this.Container.Container.NewBarColor;
             }
             else if (this.item != null
            && this.item.Changed == true)
             {
-                // ĞŞ¸Ä¹ıµÄµÄµ¥²á
+                // ä¿®æ”¹è¿‡çš„çš„å•å†Œ
                 colorSideBar = this.Container.Container.ChangedBarColor;
             }
 
 
-            // ±ß¿òºÍ±ßÌõ
+            // è¾¹æ¡†å’Œè¾¹æ¡
             {
 
                 rect = new RectangleF(start_x,
@@ -2385,13 +2385,13 @@ e);
                     this.Container.Container.m_nCellHeight);
 
                 {
-                    // Ã»ÓĞ½¹µãÊ±ÒªĞ¡Ò»Ğ©
+                    // æ²¡æœ‰ç„¦ç‚¹æ—¶è¦å°ä¸€äº›
                     rect = GuiUtil.PaddingRect(this.Container.Container.CellMargin,
                         rect);
                 }
                 // rect = RectangleF.Inflate(rect, -4, -4);
 
-                // ÓÅ»¯
+                // ä¼˜åŒ–
                 if (rect.IntersectsWith(e.ClipRectangle) == true
                     || bRotate == true)
                 {
@@ -2414,7 +2414,7 @@ e);
                     {
                         int height = 20;
                         int width = 20;
-                        // ÓÒÉÏ½Ç
+                        // å³ä¸Šè§’
                         RectangleF rectCircle = new RectangleF(
                             rect.X+rect.Width-20-20,  // radius * 2
                             rect.Y, // +rect.Height/2-height/2,
@@ -2439,7 +2439,7 @@ e);
                         stringFormat.FormatFlags = StringFormatFlags.NoWrap;
 
                         Brush brushText = new SolidBrush(this.Container.Container.BackColor);
-                        Font font = new Font("Î¢ÈíÑÅºÚ",
+                        Font font = new Font("å¾®è½¯é›…é»‘",
                             rectCircle.Height,
                             FontStyle.Bold,
                             GraphicsUnit.Pixel);
@@ -2451,7 +2451,7 @@ e);
 
                     }
 
-                    // ±ßÌõ¡£×ó²à
+                    // è¾¹æ¡ã€‚å·¦ä¾§
                     Brush brushSideBar = new SolidBrush(colorSideBar);
                     RectangleF rectSideBar = new RectangleF(
                         rect.X + penBorder.Width,
@@ -2463,7 +2463,7 @@ e);
                 }
             }
 
-            // »æÖÆÎÄ×Ö
+            // ç»˜åˆ¶æ–‡å­—
             if (this.order != null)
             {
                     this.PaintTextLines(start_x, start_y, false,
@@ -2476,10 +2476,10 @@ e);
             else
             {
                 /*
-                // ¿Õ°×¸ñ×Ó¡£»æÖÆµ­É«µÄ¡°È±¡±×ÖÑù
+                // ç©ºç™½æ ¼å­ã€‚ç»˜åˆ¶æ·¡è‰²çš„â€œç¼ºâ€å­—æ ·
                 this.PaintQue(start_x,
                     start_y,
-                    "È±",
+                    "ç¼º",
                     colorGray,
                     e,
                     bRotate);
@@ -2487,7 +2487,7 @@ e);
             }
 
 
-            // ½¹µãĞéÏß
+            // ç„¦ç‚¹è™šçº¿
             if (this.m_bFocus == true)
             {
                 rect = new RectangleF(
@@ -2506,7 +2506,7 @@ e);
                 e.Graphics.Restore(gstate);
             }
 
-            // ÒÆ¶¯°ÑÊÖ£¬²»ÒªĞı×ª¡£ÒòÎªĞı×ª»á´øÀ´µã»÷µÄ²»Ò»ÖÂ
+            // ç§»åŠ¨æŠŠæ‰‹ï¼Œä¸è¦æ—‹è½¬ã€‚å› ä¸ºæ—‹è½¬ä¼šå¸¦æ¥ç‚¹å‡»çš„ä¸ä¸€è‡´
             Rectangle rect1 = this.Container.Container.RectGrab;
             rect1.Offset((int)start_x, (int)start_y);
             if (this.m_bHover == true)
@@ -2517,7 +2517,7 @@ e);
             }
         }
 
-        // »æÖÆ¶©¹º×é¸ñ×ÓµÄÎÄ×ÖĞĞ
+        // ç»˜åˆ¶è®¢è´­ç»„æ ¼å­çš„æ–‡å­—è¡Œ
         internal override void PaintTextLines(float x0,
     float y0,
     bool bGrayText,
@@ -2533,13 +2533,13 @@ e);
             int nWidth = this.Width - margin.Horizontal - padding.Horizontal;
             int nHeight = this.Height - margin.Vertical - padding.Vertical;
 
-            int nUsedHeight = 0;    // Ê¹ÓÃ¹ıµÄÀÛ»ı¸ß¶È
+            int nUsedHeight = 0;    // ä½¿ç”¨è¿‡çš„ç´¯ç§¯é«˜åº¦
             // Color colorText = this.Container.Container.MemberForeColor;
 
             if (bGrayText == true)
                 colorText = ControlPaint.Light(colorText, 1.5F);
 
-            // ×ó -- ÓÒ
+            // å·¦ -- å³
             LinearGradientBrush brushGradient = new LinearGradientBrush(
 new PointF(x0, 0),
 new PointF(x0 + 6, 0),
@@ -2554,14 +2554,14 @@ Color.FromArgb(0, Color.Gray)
             {
                 int nRestHeight = nHeight - nUsedHeight;
 
-                // »æÖÆĞĞ
+                // ç»˜åˆ¶è¡Œ
                 RectangleF rect = new RectangleF(
                     x0,
                     y0,
                     nWidth,
                     Math.Min(this.LineHeight, nRestHeight));
 
-                // ÓÅ»¯
+                // ä¼˜åŒ–
                 if (rect.IntersectsWith(e.ClipRectangle) == true
                     || bDoNotSpeedUp == true)
                 {
@@ -2579,7 +2579,7 @@ Color.FromArgb(0, Color.Gray)
                         font,
                         e);
 
-                    // ÏÂ·½ÏßÌõ
+                    // ä¸‹æ–¹çº¿æ¡
                     if (nLineHeight < nRestHeight)
                     {
                         e.Graphics.DrawLine(penLine,
@@ -2597,7 +2597,7 @@ Color.FromArgb(0, Color.Gray)
             }
         }
 
-        // »æÖÆ¶©¹º×é¸ñ×ÓµÄÎÄ×Ö±êÇ©(×Ö¶ÎÃû)
+        // ç»˜åˆ¶è®¢è´­ç»„æ ¼å­çš„æ–‡å­—æ ‡ç­¾(å­—æ®µå)
         internal override void PaintLineLabels(float x0,
     float y0,
     PaintEventArgs e,
@@ -2612,13 +2612,13 @@ Color.FromArgb(0, Color.Gray)
             int nWidth = this.Width - margin.Horizontal - padding.Horizontal;
             int nHeight = this.Height - margin.Vertical - padding.Vertical;
 
-            int nUsedHeight = 0;    // Ê¹ÓÃ¹ıµÄÀÛ»ı¸ß¶È
+            int nUsedHeight = 0;    // ä½¿ç”¨è¿‡çš„ç´¯ç§¯é«˜åº¦
             Color colorText = Color.FromArgb(200, 0, 100, 0);
 
             Font font = this.Container.Container.m_fontLine;
             font = new Font(font, FontStyle.Bold);
 
-            // »ñµÃÎÄ×ÖµÄ×î´ó¿í¶È
+            // è·å¾—æ–‡å­—çš„æœ€å¤§å®½åº¦
             float fMaxTextWidth = 0;
             for (int i = 0; i < this.Container.Container.GroupTextLineNames.Length / 2; i++)
             {
@@ -2628,7 +2628,7 @@ Color.FromArgb(0, Color.Gray)
                     fMaxTextWidth = size.Width;
             }
 
-            // »æÖÆ°ëÍ¸Ã÷±³¾°
+            // ç»˜åˆ¶åŠé€æ˜èƒŒæ™¯
             {
                 RectangleF rect1 = new RectangleF(
                     x0 + nWidth - (fMaxTextWidth + 4),
@@ -2640,7 +2640,7 @@ Color.FromArgb(0, Color.Gray)
                     || bDoNotSpeedUp == true)
                 {
 
-                    // ×ó -- ÓÒ
+                    // å·¦ -- å³
                     LinearGradientBrush brushGradient = new LinearGradientBrush(
     new PointF(rect1.X, rect1.Y),
     new PointF(rect1.X + rect1.Width, rect1.Y),
@@ -2665,14 +2665,14 @@ Color.FromArgb(0, Color.Gray)
             {
                 int nRestHeight = nHeight - nUsedHeight;
 
-                // »æÖÆĞĞ
+                // ç»˜åˆ¶è¡Œ
                 RectangleF rect = new RectangleF(
                     x0 + nWidth - fMaxTextWidth,
                     y0,
                     fMaxTextWidth,
                     Math.Min(nLineHeight, nRestHeight));
 
-                // ÓÅ»¯
+                // ä¼˜åŒ–
                 if (rect.IntersectsWith(e.ClipRectangle) == true
                     || bDoNotSpeedUp == true)
                 {
@@ -2696,7 +2696,7 @@ Color.FromArgb(0, Color.Gray)
                         rect,
                         stringFormat);
 
-                    // ÏÂ·½ÏßÌõ
+                    // ä¸‹æ–¹çº¿æ¡
                     if (nLineHeight < nRestHeight)
                     {
                         e.Graphics.DrawLine(penLine,
@@ -2716,17 +2716,17 @@ Color.FromArgb(0, Color.Gray)
     }
 
     /// <summary>
-    /// Ç°¾°±³¾°ÑÕÉ«
+    /// å‰æ™¯èƒŒæ™¯é¢œè‰²
     /// </summary>
     public class PaintInfo
     {
         /// <summary>
-        /// ±³¾°ÑÕÉ«
+        /// èƒŒæ™¯é¢œè‰²
         /// </summary>
         public Color BackColor;
 
         /// <summary>
-        /// Ç°¾°ÑÕÉ«
+        /// å‰æ™¯é¢œè‰²
         /// </summary>
         public Color ForeColor;
     }

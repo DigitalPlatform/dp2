@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,16 +12,16 @@ using DigitalPlatform;
 namespace dp2Circulation
 {
     /// <summary>
-    /// »ñµÃ¹İ²ØµØµãÊäÈëµÄ¶Ô»°¿ò
+    /// è·å¾—é¦†è—åœ°ç‚¹è¾“å…¥çš„å¯¹è¯æ¡†
     /// </summary>
     internal partial class GetLocationDialog : Form
     {
         /// <summary>
-        /// ¿ò¼Ü´°¿Ú
+        /// æ¡†æ¶çª—å£
         /// </summary>
         public MainForm MainForm = null;
 
-        // ±£´æĞÅÏ¢µÄĞ¡½ÚÃû
+        // ä¿å­˜ä¿¡æ¯çš„å°èŠ‚å
         public string CfgSectionName = "GetLocationDialog";
 
 
@@ -74,12 +74,12 @@ namespace dp2Circulation
             FillDropDown((ComboBox)sender);
         }
 
-        // ·ÀÖ¹ÖØÈë 2009/7/19
+        // é˜²æ­¢é‡å…¥ 2009/7/19
         int m_nInDropDown = 0;
 
         void FillDropDown(ComboBox combobox)
         {
-            // ·ÀÖ¹ÖØÈë 2009/7/19
+            // é˜²æ­¢é‡å…¥ 2009/7/19
             if (this.m_nInDropDown > 0)
                 return;
 
@@ -99,13 +99,13 @@ namespace dp2Circulation
                     else
                     {
 
-                        Debug.Assert(false, "²»Ö§³ÖµÄcombobox");
+                        Debug.Assert(false, "ä¸æ”¯æŒçš„combobox");
                     }
 
 
                     this.GetLocationValueTable(this, e1);
 
-                    // combobox.Items.Add("<²»Ö¸¶¨>");
+                    // combobox.Items.Add("<ä¸æŒ‡å®š>");
 
                     if (e1.values != null)
                     {
@@ -136,7 +136,7 @@ namespace dp2Circulation
         {
             if (string.IsNullOrEmpty(this.comboBox_location.Text) == true)
             {
-                MessageBox.Show(this, "ÇëÖ¸¶¨¹İ²ØµØµã");
+                MessageBox.Show(this, "è¯·æŒ‡å®šé¦†è—åœ°ç‚¹");
                 return;
             }
 

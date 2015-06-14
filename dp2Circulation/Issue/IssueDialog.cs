@@ -1,19 +1,20 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+
 using DigitalPlatform.LibraryServer;
 
 namespace dp2Circulation
 {
     internal partial class IssueDialog : Form
     {
-        // public object Tag = null;   // Ğ¯´øÈÎºÎ¶ÔÏó
+        // public object Tag = null;   // æºå¸¦ä»»ä½•å¯¹è±¡
         /// <summary>
-        /// ²éÖØÊÂ¼ş
+        /// æŸ¥é‡äº‹ä»¶
         /// </summary>
         public event CheckDupEventHandler CheckDup = null;
 
@@ -43,11 +44,11 @@ namespace dp2Circulation
 
             if (this.textBox_publishTime.Text == "")
             {
-                strError = "ÉĞÎ´ÊäÈë³ö°æÊ±¼ä";
+                strError = "å°šæœªè¾“å…¥å‡ºç‰ˆæ—¶é—´";
                 goto ERROR1;
             }
 
-            // ¼ì²é³ö°æÊ±¼ä¸ñÊ½ÊÇ·ñÕıÈ·
+            // æ£€æŸ¥å‡ºç‰ˆæ—¶é—´æ ¼å¼æ˜¯å¦æ­£ç¡®
             int nRet = LibraryServerUtil.CheckSinglePublishTime(this.textBox_publishTime.Text,
                 out strError);
             if (nRet == -1)
@@ -55,34 +56,34 @@ namespace dp2Circulation
 
             if (this.textBox_issue.Text == "")
             {
-                strError = "ÉĞÎ´ÊäÈëÆÚºÅ";
+                strError = "å°šæœªè¾“å…¥æœŸå·";
                 goto ERROR1;
             }
 
-            // ¼ì²éÆÚºÅ¸ñÊ½ÊÇ·ñÕıÈ·
+            // æ£€æŸ¥æœŸå·æ ¼å¼æ˜¯å¦æ­£ç¡®
             nRet = VolumeInfo.CheckIssueNo(
-                "ÆÚºÅ",
+                "æœŸå·",
                 this.textBox_issue.Text,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
 
-            // ¼ì²é×ÜÆÚºÅ¸ñÊ½ÊÇ·ñÕıÈ·
+            // æ£€æŸ¥æ€»æœŸå·æ ¼å¼æ˜¯å¦æ­£ç¡®
             if (String.IsNullOrEmpty(this.textBox_zong.Text) == false)
             {
                 nRet = VolumeInfo.CheckIssueNo(
-                    "×ÜÆÚºÅ",
+                    "æ€»æœŸå·",
                     this.textBox_zong.Text,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
             }
 
-            // ¼ì²é¾íºÅ¸ñÊ½ÊÇ·ñÕıÈ·
+            // æ£€æŸ¥å·å·æ ¼å¼æ˜¯å¦æ­£ç¡®
             if (String.IsNullOrEmpty(this.textBox_volume.Text) == false)
             {
                 nRet = VolumeInfo.CheckIssueNo(
-                    "¾íºÅ",
+                    "å·å·",
                     this.textBox_volume.Text,
                     out strError);
                 if (nRet == -1)
@@ -101,7 +102,7 @@ namespace dp2Circulation
 
                 if (e1.DupIssues.Count > 0)
                 {
-                    // ½«ÖØ¸´µÄÆÚ¹öÈëÊÓÒ°
+                    // å°†é‡å¤çš„æœŸæ»šå…¥è§†é‡
 
                     MessageBox.Show(this, e1.DupInfo);
                     return;
@@ -109,10 +110,10 @@ namespace dp2Circulation
 
                 if (e1.WarningIssues.Count > 0)
                 {
-                    // ½«¾¯¸æµÄµÄÆÚ¹öÈëÊÓÒ°
+                    // å°†è­¦å‘Šçš„çš„æœŸæ»šå…¥è§†é‡
 
                     DialogResult dialog_result = MessageBox.Show(this,
-            "¾¯¸æ: " + e1.WarningInfo + "\r\n\r\nÊÇ·ñ¼ÌĞø?\r\n\r\n(OK: ²»Àí»á¾¯¸æ£¬¼ÌĞø½øĞĞºóĞø²Ù×÷; Cancel: ·µ»Ø¶Ô»°¿ò½øĞĞĞŞ¸Ä",
+            "è­¦å‘Š: " + e1.WarningInfo + "\r\n\r\næ˜¯å¦ç»§ç»­?\r\n\r\n(OK: ä¸ç†ä¼šè­¦å‘Šï¼Œç»§ç»­è¿›è¡Œåç»­æ“ä½œ; Cancel: è¿”å›å¯¹è¯æ¡†è¿›è¡Œä¿®æ”¹",
             "BindingControls",
             MessageBoxButtons.OKCancel,
             MessageBoxIcon.Question,
@@ -211,56 +212,56 @@ namespace dp2Circulation
     }
 
     /// <summary>
-    /// ²éÖØÊÂ¼ş
+    /// æŸ¥é‡äº‹ä»¶
     /// </summary>
-    /// <param name="sender">·¢ËÍÕß</param>
-    /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+    /// <param name="sender">å‘é€è€…</param>
+    /// <param name="e">äº‹ä»¶å‚æ•°</param>
     internal delegate void CheckDupEventHandler(object sender,
         CheckDupEventArgs e);
 
     /// <summary>
-    /// ²éÖØÊÂ¼şµÄ²ÎÊı
+    /// æŸ¥é‡äº‹ä»¶çš„å‚æ•°
     /// </summary>
     internal class CheckDupEventArgs : EventArgs
     {
         // [in]
         /// <summary>
-        /// [in] ³ö°æÊ±¼ä
+        /// [in] å‡ºç‰ˆæ—¶é—´
         /// </summary>
         public string PublishTime = "";
         /// <summary>
-        /// [in] µ±ÄêÆÚºÅ
+        /// [in] å½“å¹´æœŸå·
         /// </summary>
         public string Issue = "";
         /// <summary>
-        /// [in] ×ÜÆÚºÅ
+        /// [in] æ€»æœŸå·
         /// </summary>
         public string Zong = "";
         /// <summary>
-        /// [in] ¾íºÅ
+        /// [in] å·å·
         /// </summary>
         public string Volume = "";
 
         /// <summary>
-        /// [in] ÊÇ·ñÒªÈ·±£Ñ¡¶¨µÄÊÂÏî¿É¼û
+        /// [in] æ˜¯å¦è¦ç¡®ä¿é€‰å®šçš„äº‹é¡¹å¯è§
         /// </summary>
         public bool EnsureVisible = false;
 
         // [out]
         /// <summary>
-        /// [out] ·µ»ØÖØ¸´ĞÅÏ¢
+        /// [out] è¿”å›é‡å¤ä¿¡æ¯
         /// </summary>
         public string DupInfo = "";
         /// <summary>
-        /// [out] ·µ»Ø·¢ÉúÖØ¸´µÄÆÚ¶ÔÏó¼¯ºÏ
+        /// [out] è¿”å›å‘ç”Ÿé‡å¤çš„æœŸå¯¹è±¡é›†åˆ
         /// </summary>
         public List<IssueBindingItem> DupIssues = new List<IssueBindingItem>();
         /// <summary>
-        /// [out] ·µ»Ø¾¯¸æĞÅÏ¢
+        /// [out] è¿”å›è­¦å‘Šä¿¡æ¯
         /// </summary>
         public string WarningInfo = "";
         /// <summary>
-        /// [out] ·µ»Ø·¢Éú¾¯¸æµÄÆÚ¶ÔÏó¼¯ºÏ
+        /// [out] è¿”å›å‘ç”Ÿè­¦å‘Šçš„æœŸå¯¹è±¡é›†åˆ
         /// </summary>
         public List<IssueBindingItem> WarningIssues = new List<IssueBindingItem>();
     }

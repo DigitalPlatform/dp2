@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -23,14 +23,14 @@ using DigitalPlatform.CirculationClient.localhost;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ÅÅ¼ÜÌåÏµ ÊôĞÔÒ³
+    /// æ’æ¶ä½“ç³» å±æ€§é¡µ
     /// </summary>
     public partial class ManagerForm
     {
         bool m_bArrangementChanged = false;
 
         /// <summary>
-        /// ÅÅ¼ÜÌåÏµ¶¨ÒåÊÇ·ñ±»ĞŞ¸Ä
+        /// æ’æ¶ä½“ç³»å®šä¹‰æ˜¯å¦è¢«ä¿®æ”¹
         /// </summary>
         public bool ArrangementChanged
         {
@@ -54,13 +54,13 @@ namespace dp2Circulation
             string strZhongcihaoDbName,
             string strCallNumberStyle)
         {
-            string strResult = "ÅÅ¼ÜÌåÏµ: " + strGroupName + " ÀàºÅ=" + strClassType + " Çø·ÖºÅ=" + strQufenhaoType;
+            string strResult = "æ’æ¶ä½“ç³»: " + strGroupName + " ç±»å·=" + strClassType + " åŒºåˆ†å·=" + strQufenhaoType;
 
             if (String.IsNullOrEmpty(strZhongcihaoDbName) == false)
-                strResult += " ÖÖ´ÎºÅ¿â='" + strZhongcihaoDbName + "'";
+                strResult += " ç§æ¬¡å·åº“='" + strZhongcihaoDbName + "'";
 
             if (string.IsNullOrEmpty(strCallNumberStyle) == false)
-                strResult += " Ë÷È¡ºÅĞÎÌ¬='" + strCallNumberStyle + "'";
+                strResult += " ç´¢å–å·å½¢æ€='" + strCallNumberStyle + "'";
 
             return strResult;
         }
@@ -69,23 +69,23 @@ namespace dp2Circulation
         {
             /*
             if (String.IsNullOrEmpty(strLocationName) == true)
-                return "<¿Õ>";
+                return "<ç©º>";
 
             return strLocationName;
              * */
             return ArrangementLocationDialog.GetDisplayString(strLocationName);
         }
 
-        // ÁĞ³öÅÅ¼ÜÌåÏµ¶¨Òå
+        // åˆ—å‡ºæ’æ¶ä½“ç³»å®šä¹‰
         int ListArrangement(out string strError)
         {
             strError = "";
 
             if (this.ArrangementChanged == true)
             {
-                // ¾¯¸æÉĞÎ´±£´æ
+                // è­¦å‘Šå°šæœªä¿å­˜
                 DialogResult result = MessageBox.Show(this,
-                    "µ±Ç°´°¿ÚÄÚÅÅ¼ÜÌåÏµ¶¨Òå±»ĞŞ¸ÄºóÉĞÎ´±£´æ¡£Èô´ËÊ±Ë¢ĞÂ´°¿ÚÄÚÈİ£¬ÏÖÓĞÎ´±£´æĞÅÏ¢½«¶ªÊ§¡£\r\n\r\nÈ·ÊµÒªË¢ĞÂ? ",
+                    "å½“å‰çª—å£å†…æ’æ¶ä½“ç³»å®šä¹‰è¢«ä¿®æ”¹åå°šæœªä¿å­˜ã€‚è‹¥æ­¤æ—¶åˆ·æ–°çª—å£å†…å®¹ï¼Œç°æœ‰æœªä¿å­˜ä¿¡æ¯å°†ä¸¢å¤±ã€‚\r\n\r\nç¡®å®è¦åˆ·æ–°? ",
                     "ManagerForm",
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question,
@@ -101,7 +101,7 @@ namespace dp2Circulation
 
             string strArrangementXml = "";
 
-            // »ñµÃÖÖ´ÎºÅÏà¹Ø¶¨Òå
+            // è·å¾—ç§æ¬¡å·ç›¸å…³å®šä¹‰
             int nRet = GetArrangementInfo(out strArrangementXml,
                 out strError);
             if (nRet == -1)
@@ -117,7 +117,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = "fragment XML×°ÈëXmlDocumentFragmentÊ±³ö´í: " + ex.Message;
+                strError = "fragment XMLè£…å…¥XmlDocumentFragmentæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
@@ -125,13 +125,13 @@ namespace dp2Circulation
 
             /*
     <callNumber>
-        <group name="ÖĞÎÄ" classType="ÖĞÍ¼·¨" qufenhaoType="GCAT" zhongcihaodb="ÖÖ´ÎºÅ">
-            <location name="»ù²Ø¿â" />
-            <location name="Á÷Í¨¿â" />
+        <group name="ä¸­æ–‡" classType="ä¸­å›¾æ³•" qufenhaoType="GCAT" zhongcihaodb="ç§æ¬¡å·">
+            <location name="åŸºè—åº“" />
+            <location name="æµé€šåº“" />
         </group>
-        <group name="Ó¢ÎÄ" classType="¿ÆÍ¼·¨" qufenhaoType="zhongcihao" zhongcihaodb="ĞÂÖÖ´ÎºÅ¿â">
-            <location name="Ó¢ÎÄ»ù²Ø¿â" />
-            <location name="Ó¢ÎÄÁ÷Í¨¿â" />
+        <group name="è‹±æ–‡" classType="ç§‘å›¾æ³•" qufenhaoType="zhongcihao" zhongcihaodb="æ–°ç§æ¬¡å·åº“">
+            <location name="è‹±æ–‡åŸºè—åº“" />
+            <location name="è‹±æ–‡æµé€šåº“" />
         </group>
     </callNumber>
  * */
@@ -157,7 +157,7 @@ namespace dp2Circulation
 
                 this.treeView_arrangement.Nodes.Add(group_treenode);
 
-                // ¼ÓÈëlocation½Úµã
+                // åŠ å…¥locationèŠ‚ç‚¹
                 XmlNodeList location_nodes = node.SelectNodes("location");
                 for (int j = 0; j < location_nodes.Count; j++)
                 {
@@ -181,7 +181,7 @@ namespace dp2Circulation
             return 1;
         }
 
-        // »ñµÃÅÅ¼ÜÌåÏµÏà¹Ø¶¨Òå
+        // è·å¾—æ’æ¶ä½“ç³»ç›¸å…³å®šä¹‰
         int GetArrangementInfo(out string strArrangementXml,
             out string strError)
         {
@@ -191,7 +191,7 @@ namespace dp2Circulation
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ»ñÈ¡ÅÅ¼ÜÌåÏµ¶¨Òå ...");
+            stop.Initial("æ­£åœ¨è·å–æ’æ¶ä½“ç³»å®šä¹‰ ...");
             stop.BeginLoop();
 
             this.Update();
@@ -222,9 +222,9 @@ namespace dp2Circulation
             return -1;
         }
 
-        // ±£´æÅÅ¼ÜÌåÏµ¶¨Òå
+        // ä¿å­˜æ’æ¶ä½“ç³»å®šä¹‰
         // parameters:
-        //      strArrangementXml   ½Å±¾¶¨ÒåXML¡£×¢Òâ£¬Ã»ÓĞ¸ùÔªËØ
+        //      strArrangementXml   è„šæœ¬å®šä¹‰XMLã€‚æ³¨æ„ï¼Œæ²¡æœ‰æ ¹å…ƒç´ 
         int SetArrangementDef(string strArrangementXml,
             out string strError)
         {
@@ -233,7 +233,7 @@ namespace dp2Circulation
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ±£´æÅÅ¼ÜÌåÏµ¶¨Òå ...");
+            stop.Initial("æ­£åœ¨ä¿å­˜æ’æ¶ä½“ç³»å®šä¹‰ ...");
             stop.BeginLoop();
 
             this.Update();
@@ -265,7 +265,7 @@ namespace dp2Circulation
             return -1;
         }
 
-        // Ìá½»ÅÅ¼ÜÌåÏµ¶¨ÒåĞŞ¸Ä
+        // æäº¤æ’æ¶ä½“ç³»å®šä¹‰ä¿®æ”¹
         int SubmitArrangementDef(out string strError)
         {
             strError = "";
@@ -280,13 +280,13 @@ namespace dp2Circulation
             if (nRet == -1)
                 return -1;
 
-            this.MainForm.GetCallNumberInfo();  // 2009/6/5 Ë¢ĞÂÄÚ´æÖĞ²ĞÁôµÄ¾É¶¨ÒåĞÅÏ¢
+            this.MainForm.GetCallNumberInfo();  // 2009/6/5 åˆ·æ–°å†…å­˜ä¸­æ®‹ç•™çš„æ—§å®šä¹‰ä¿¡æ¯
 
             return 0;
         }
 
-        // ¹¹ÔìÅÅ¼ÜÌåÏµ¶¨ÒåµÄXMLÆ¬¶Î
-        // ×¢ÒâÊÇÏÂ¼¶Æ¬¶Ï¶¨Òå£¬Ã»ÓĞ<callNumber>ÔªËØ×÷Îª¸ù¡£
+        // æ„é€ æ’æ¶ä½“ç³»å®šä¹‰çš„XMLç‰‡æ®µ
+        // æ³¨æ„æ˜¯ä¸‹çº§ç‰‡æ–­å®šä¹‰ï¼Œæ²¡æœ‰<callNumber>å…ƒç´ ä½œä¸ºæ ¹ã€‚
         int BuildArrangementDef(out string strArrangementDef,
             out string strError)
         {
@@ -302,7 +302,7 @@ namespace dp2Circulation
 
                 if (item.ImageIndex == TYPE_ARRANGEMENT_GROUP)
                 {
-                    // È¡µÃname/classType/qufenhaoType/zhongcihaodbÊôĞÔ
+                    // å–å¾—name/classType/qufenhaoType/zhongcihaodbå±æ€§
                     string strXml = (string)item.Tag;
 
                     XmlDocument temp_dom = new XmlDocument();
@@ -312,7 +312,7 @@ namespace dp2Circulation
                     }
                     catch (Exception ex)
                     {
-                        strError = "group½ÚµãµÄXML×°ÈëDOMÊ±³ö´í: " + ex.Message;
+                        strError = "groupèŠ‚ç‚¹çš„XMLè£…å…¥DOMæ—¶å‡ºé”™: " + ex.Message;
                         return -1;
                     }
 
@@ -349,7 +349,7 @@ namespace dp2Circulation
                         }
                         catch (Exception ex)
                         {
-                            strError = "location fragment XML×°ÈëXmlDocumentFragmentÊ±³ö´í: " + ex.Message;
+                            strError = "location fragment XMLè£…å…¥XmlDocumentFragmentæ—¶å‡ºé”™: " + ex.Message;
                             return -1;
                         }
 
@@ -363,9 +363,9 @@ namespace dp2Circulation
             return 0;
         }
 
-        // »ñµÃtreeview_arrangementÖĞÒÑ¾­Ê¹ÓÃ¹ıµÄÈ«²¿ÖÖ´ÎºÅÃû
+        // è·å¾—treeview_arrangementä¸­å·²ç»ä½¿ç”¨è¿‡çš„å…¨éƒ¨ç§æ¬¡å·å
         // parameters:
-        //      exclude_node    ÒªÅÅ³ıµÄTreeNode½Úµã¡£Ò²¾ÍÊÇËµÕâ¸ö½ÚµãÓÃ¹ıµÄÖÖ´ÎºÅ¿â²»ËãÔÚÆäÖĞ
+        //      exclude_node    è¦æ’é™¤çš„TreeNodeèŠ‚ç‚¹ã€‚ä¹Ÿå°±æ˜¯è¯´è¿™ä¸ªèŠ‚ç‚¹ç”¨è¿‡çš„ç§æ¬¡å·åº“ä¸ç®—åœ¨å…¶ä¸­
         List<string> GetArrangementAllUsedZhongcihaoDbName(TreeNode exclude_node)
         {
             List<string> existing_dbnames = new List<string>();
@@ -401,9 +401,9 @@ namespace dp2Circulation
 
 
 
-        // »ñµÃtreeview_arrangementÖĞÒÑ¾­Ê¹ÓÃ¹ıµÄlocationÃû
+        // è·å¾—treeview_arrangementä¸­å·²ç»ä½¿ç”¨è¿‡çš„locationå
         // parameters:
-        //      exclude_node    ÒªÅÅ³ıµÄTreeNode½Úµã¡£Ò²¾ÍÊÇËµÕâ¸ö½ÚµãÓÃ¹ıµÄlocation²»ËãÔÚÆäÖĞ
+        //      exclude_node    è¦æ’é™¤çš„TreeNodeèŠ‚ç‚¹ã€‚ä¹Ÿå°±æ˜¯è¯´è¿™ä¸ªèŠ‚ç‚¹ç”¨è¿‡çš„locationä¸ç®—åœ¨å…¶ä¸­
         List<string> GetArrangementAllUsedLocationName(TreeNode exclude_node)
         {
             List<string> existing_locationnames = new List<string>();
@@ -413,7 +413,7 @@ namespace dp2Circulation
                 if (tree_node.ImageIndex != TYPE_ARRANGEMENT_GROUP)
                     continue;
 
-                // ½øÈëgroup½ÚµãµÄÏÂ²ã
+                // è¿›å…¥groupèŠ‚ç‚¹çš„ä¸‹å±‚
                 for (int j = 0; j < tree_node.Nodes.Count; j++)
                 {
                     TreeNode location_tree_node = tree_node.Nodes[j];
@@ -436,7 +436,7 @@ namespace dp2Circulation
 
                     string strLocationName = DomUtil.GetAttr(dom.DocumentElement, "name");
 
-                    existing_locationnames.Add(strLocationName);    // ¿ÕÒ²ÊÇÔÊĞíµÄ
+                    existing_locationnames.Add(strLocationName);    // ç©ºä¹Ÿæ˜¯å…è®¸çš„
                 }
             }
 
@@ -459,10 +459,10 @@ namespace dp2Circulation
             string strError = "";
             // int nRet = 0;
 
-            // µ±Ç°ÒÑÑ¡ÔñµÄnode
+            // å½“å‰å·²é€‰æ‹©çš„node
             if (this.treeView_arrangement.SelectedNode == null)
             {
-                MessageBox.Show("ÉĞÎ´Ñ¡ÔñÒª½øĞĞÉÏÏÂÒÆ¶¯µÄ½Úµã");
+                MessageBox.Show("å°šæœªé€‰æ‹©è¦è¿›è¡Œä¸Šä¸‹ç§»åŠ¨çš„èŠ‚ç‚¹");
                 return;
             }
 
@@ -485,7 +485,7 @@ namespace dp2Circulation
             {
                 if (index == 0)
                 {
-                    strError = "ÒÑ¾­µ½Í·";
+                    strError = "å·²ç»åˆ°å¤´";
                     goto ERROR1;
                 }
 
@@ -497,7 +497,7 @@ namespace dp2Circulation
             {
                 if (index >= nodes.Count - 1)
                 {
-                    strError = "ÒÑ¾­µ½Î²";
+                    strError = "å·²ç»åˆ°å°¾";
                     goto ERROR1;
                 }
 

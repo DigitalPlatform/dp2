@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -16,27 +16,27 @@ namespace dp2Circulation
     internal partial class IssueEditControl : ItemEditControlBase
     {
 #if NO
-        // »ñÈ¡ÖµÁĞ±íÊ±×÷ÎªÏßË÷µÄÊı¾İ¿âÃû
+        // è·å–å€¼åˆ—è¡¨æ—¶ä½œä¸ºçº¿ç´¢çš„æ•°æ®åº“å
         public string BiblioDbName = "";
 
         XmlDocument RecordDom = null;
 
         bool m_bChanged = false;
 
-        bool m_bInInitial = true;   // ÊÇ·ñÕıÔÚ³õÊ¼»¯¹ı³ÌÖ®ÖĞ
+        bool m_bInInitial = true;   // æ˜¯å¦æ­£åœ¨åˆå§‹åŒ–è¿‡ç¨‹ä¹‹ä¸­
 
-        Color ColorChanged = Color.Yellow; // ±íÊ¾ÄÚÈİ¸Ä±ä¹ıµÄÑÕÉ«
-        Color ColorDifference = Color.Blue; // ±íÊ¾ÄÚÈİÓĞ²îÒìµÄÑÕÉ«
+        Color ColorChanged = Color.Yellow; // è¡¨ç¤ºå†…å®¹æ”¹å˜è¿‡çš„é¢œè‰²
+        Color ColorDifference = Color.Blue; // è¡¨ç¤ºå†…å®¹æœ‰å·®å¼‚çš„é¢œè‰²
 
         string m_strParentId = "";
 
         /// <summary>
-        /// »ñµÃÖµÁĞ±í
+        /// è·å¾—å€¼åˆ—è¡¨
         /// </summary>
         public event GetValueTableEventHandler GetValueTable = null;
 
         /// <summary>
-        /// ÄÚÈİ·¢Éú¸Ä±ä
+        /// å†…å®¹å‘ç”Ÿæ”¹å˜
         /// </summary>
         public event ContentChangedEventHandler ContentChanged = null;
 
@@ -57,7 +57,7 @@ namespace dp2Circulation
         }
 #endif
 
-        #region Êı¾İ³ÉÔ±
+        #region æ•°æ®æˆå‘˜
 
 #if NO
         public string OldRecord = "";
@@ -231,7 +231,7 @@ namespace dp2Circulation
 
 #if NO
         /// <summary>
-        /// ÄÚÈİÊÇ·ñ·¢Éú¹ıĞŞ¸Ä
+        /// å†…å®¹æ˜¯å¦å‘ç”Ÿè¿‡ä¿®æ”¹
         /// </summary>
         public bool Changed
         {
@@ -247,7 +247,7 @@ namespace dp2Circulation
                 if (this.m_bChanged == false)
                     this.ResetColor();
 
-                // ´¥·¢ÊÂ¼ş
+                // è§¦å‘äº‹ä»¶
                 if (bOldValue != value && this.ContentChanged != null)
                 {
                     ContentChangedEventArgs e = new ContentChangedEventArgs();
@@ -261,13 +261,13 @@ namespace dp2Circulation
 
 #if NO
         /// <summary>
-        /// ÉèÖÃÊı¾İ
+        /// è®¾ç½®æ•°æ®
         /// </summary>
-        /// <param name="strXml">ÆÚ¼ÇÂ¼ XML</param>
-        /// <param name="strRecPath">ÆÚ¼ÇÂ¼Â·¾¶</param>
-        /// <param name="timestamp">Ê±¼ä´Á</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í; 0: ³É¹¦</returns>
+        /// <param name="strXml">æœŸè®°å½• XML</param>
+        /// <param name="strRecPath">æœŸè®°å½•è·¯å¾„</param>
+        /// <param name="timestamp">æ—¶é—´æˆ³</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™; 0: æˆåŠŸ</returns>
         public int SetData(string strXml,
             string strRecPath,
             byte[] timestamp,
@@ -289,7 +289,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = "XMLÊı¾İ×°ÔØµ½DOMÊ±³ö´í" + ex.Message;
+                strError = "XMLæ•°æ®è£…è½½åˆ°DOMæ—¶å‡ºé”™" + ex.Message;
                 return -1;
             }
 
@@ -359,7 +359,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// Çå³ıÈ«²¿ÄÚÈİ
+        /// æ¸…é™¤å…¨éƒ¨å†…å®¹
         /// </summary>
         public override void Clear()
         {
@@ -382,7 +382,7 @@ namespace dp2Circulation
         }
 
 #if NO
-        // ¿ÉÄÜ»áÅ×³öÒì³£
+        // å¯èƒ½ä¼šæŠ›å‡ºå¼‚å¸¸
         public XmlDocument DataDom
         {
             get
@@ -419,14 +419,14 @@ namespace dp2Circulation
                 this.RecordDom.DocumentElement.AppendChild(nodeOrderInfo);
             }
 
-            // TODO: ¿ÉÄÜ»áÅ×³öÒì³£ÄØ
+            // TODO: å¯èƒ½ä¼šæŠ›å‡ºå¼‚å¸¸å‘¢
             try
             {
                 nodeOrderInfo.InnerXml = this.OrderInfo;
             }
             catch (Exception ex)
             {
-                string strError = "¶©¹ºĞÅÏ¢ÄÚÇ¶XMLÆ¬¶Î '"+this.OrderInfo+"' ¸ñÊ½³ö´í: " + ex.Message;
+                string strError = "è®¢è´­ä¿¡æ¯å†…åµŒXMLç‰‡æ®µ '"+this.OrderInfo+"' æ ¼å¼å‡ºé”™: " + ex.Message;
                 throw new Exception(strError);
             }
              * */
@@ -438,7 +438,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                string strError = "¶©¹ºĞÅÏ¢(<orderInfo>ÔªËØ)ÄÚÇ¶XMLÆ¬¶Î '" + this.OrderInfo + "' ¸ñÊ½³ö´í: " + ex.Message;
+                string strError = "è®¢è´­ä¿¡æ¯(<orderInfo>å…ƒç´ )å†…åµŒXMLç‰‡æ®µ '" + this.OrderInfo + "' æ ¼å¼å‡ºé”™: " + ex.Message;
                 throw new Exception(strError);
             }
 
@@ -450,7 +450,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                string strError = "²Ù×÷ĞÅÏ¢(<operations>ÔªËØ)ÄÚÇ¶XMLÆ¬¶Î '" + this.Operations + "' ¸ñÊ½³ö´í: " + ex.Message;
+                string strError = "æ“ä½œä¿¡æ¯(<operations>å…ƒç´ )å†…åµŒXMLç‰‡æ®µ '" + this.Operations + "' æ ¼å¼å‡ºé”™: " + ex.Message;
                 throw new Exception(strError);
             }
 
@@ -461,11 +461,11 @@ namespace dp2Circulation
 
 #if NO
         /// <summary>
-        /// ´´½¨ºÃÊÊºÏÓÚ±£´æµÄ¼ÇÂ¼ĞÅÏ¢
+        /// åˆ›å»ºå¥½é€‚åˆäºä¿å­˜çš„è®°å½•ä¿¡æ¯
         /// </summary>
-        /// <param name="strXml">·µ»Ø¹¹ÔìºÃµÄÆÚ¼ÇÂ¼ XML</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í; 0: ³É¹¦</returns>
+        /// <param name="strXml">è¿”å›æ„é€ å¥½çš„æœŸè®°å½• XML</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™; 0: æˆåŠŸ</returns>
         public int GetData(
             out string strXml,
             out string strError)
@@ -481,7 +481,7 @@ namespace dp2Circulation
 
             if (this.ParentId == "")
             {
-                strError = "GetData()´íÎó£ºParent³ÉÔ±ÉĞÎ´¶¨Òå¡£";
+                strError = "GetData()é”™è¯¯ï¼šParentæˆå‘˜å°šæœªå®šä¹‰ã€‚";
                 return -1;
             }
 
@@ -529,7 +529,7 @@ namespace dp2Circulation
         internal override void ResetColor()
         {
             Color color = this.tableLayoutPanel_main.BackColor;
-            this.label_publishTime_color.BackColor = color;    // ºÍ±³¾°Ò»ÖÂ
+            this.label_publishTime_color.BackColor = color;    // å’ŒèƒŒæ™¯ä¸€è‡´
             this.label_state_color.BackColor = color;
             this.label_issue_color.BackColor = color;
             this.label_zong_color.BackColor = color;
@@ -644,32 +644,32 @@ namespace dp2Circulation
 
 #if NO
         /// <summary>
-        /// Ö»¶Á×´Ì¬·ç¸ñ
+        /// åªè¯»çŠ¶æ€é£æ ¼
         /// </summary>
         public enum ReadOnlyStyle
         {
             /// <summary>
-            /// Çå³ıÈ«²¿Ö»¶Á×´Ì¬£¬»Ö¸´¿É±à¼­×´Ì¬
+            /// æ¸…é™¤å…¨éƒ¨åªè¯»çŠ¶æ€ï¼Œæ¢å¤å¯ç¼–è¾‘çŠ¶æ€
             /// </summary>
-            Clear = 0,  // Çå³ıÈ«²¿ReadOnly×´Ì¬£¬»Ö¸´¿É±à¼­×´Ì¬
+            Clear = 0,  // æ¸…é™¤å…¨éƒ¨ReadOnlyçŠ¶æ€ï¼Œæ¢å¤å¯ç¼–è¾‘çŠ¶æ€
             /// <summary>
-            /// È«²¿Ö»¶Á
+            /// å…¨éƒ¨åªè¯»
             /// </summary>
-            All = 1,    // È«²¿½ûÖ¹ĞŞ¸Ä
+            All = 1,    // å…¨éƒ¨ç¦æ­¢ä¿®æ”¹
             /// <summary>
-            /// Í¼Êé¹İÒ»°ã¹¤×÷ÈËÔ±£¬²»ÄÜĞŞ¸ÄÂ·¾¶
+            /// å›¾ä¹¦é¦†ä¸€èˆ¬å·¥ä½œäººå‘˜ï¼Œä¸èƒ½ä¿®æ”¹è·¯å¾„
             /// </summary>
-            Librarian = 2,  // Í¼Êé¹İÒ»°ã¹¤×÷ÈËÔ±£¬²»ÄÜĞŞ¸ÄÂ·¾¶
+            Librarian = 2,  // å›¾ä¹¦é¦†ä¸€èˆ¬å·¥ä½œäººå‘˜ï¼Œä¸èƒ½ä¿®æ”¹è·¯å¾„
         }
 #endif
 
-        // ¸ù¾İÊı¾İµÄÊµ¼ÊÇé¿ö, ½«ÆÚ¹ÜÀí²»ĞèÒªĞŞ¸ÄµÄÄ³Ğ©ÓòÉèÖÃÎªReadOnly×´Ì¬
+        // æ ¹æ®æ•°æ®çš„å®é™…æƒ…å†µ, å°†æœŸç®¡ç†ä¸éœ€è¦ä¿®æ”¹çš„æŸäº›åŸŸè®¾ç½®ä¸ºReadOnlyçŠ¶æ€
         /// <summary>
-        /// ÉèÖÃÖ»¶Á×´Ì¬
+        /// è®¾ç½®åªè¯»çŠ¶æ€
         /// </summary>
-        /// <param name="strStyle">ÈçºÎÉèÖÃÖ»¶Á×´Ì¬¡£
-        /// "all" ±íÊ¾È«²¿ÎªÖ»¶Á£»
-        /// "librarian" ±íÊ¾Ö»ÓĞ¼ÇÂ¼Â·¾¶¡¢²Î¿¼IDÎªÖ»¶Á£¬ÆäÓàÎª¿É¸ÄĞ´
+        /// <param name="strStyle">å¦‚ä½•è®¾ç½®åªè¯»çŠ¶æ€ã€‚
+        /// "all" è¡¨ç¤ºå…¨éƒ¨ä¸ºåªè¯»ï¼›
+        /// "librarian" è¡¨ç¤ºåªæœ‰è®°å½•è·¯å¾„ã€å‚è€ƒIDä¸ºåªè¯»ï¼Œå…¶ä½™ä¸ºå¯æ”¹å†™
         /// </param>
         public override void SetReadOnly(string strStyle)
         {
@@ -691,7 +691,7 @@ namespace dp2Circulation
                 return;
             }
 
-            // ÏÈÇå³ıReadOnly
+            // å…ˆæ¸…é™¤ReadOnly
             this.textBox_publishTime.ReadOnly = false;
             this.comboBox_state.Enabled = true;
             this.textBox_issue.ReadOnly = false;
@@ -712,9 +712,9 @@ namespace dp2Circulation
             }
         }
 
-        // ½«¿ÉÄÜÒÑ¾­ÉèÖÃÎªReadOnly×´Ì¬µÄÄ³Ğ©ÓòÉèÎª¿É¸ÄĞ´×´Ì¬
+        // å°†å¯èƒ½å·²ç»è®¾ç½®ä¸ºReadOnlyçŠ¶æ€çš„æŸäº›åŸŸè®¾ä¸ºå¯æ”¹å†™çŠ¶æ€
         /// <summary>
-        /// ÉèÖÃÎª¿ÉĞŞ¸Ä×´Ì¬
+        /// è®¾ç½®ä¸ºå¯ä¿®æ”¹çŠ¶æ€
         /// </summary>
         public override void SetChangeable()
         {
@@ -723,12 +723,12 @@ namespace dp2Circulation
             this.textBox_refID.ReadOnly = false;
         }
 
-        // ·ÀÖ¹ÖØÈë 2009/7/19
+        // é˜²æ­¢é‡å…¥ 2009/7/19
         int m_nInDropDown = 0;
 
         private void comboBox_state_DropDown(object sender, EventArgs e)
         {
-            // ·ÀÖ¹ÖØÈë 2009/7/19
+            // é˜²æ­¢é‡å…¥ 2009/7/19
             if (this.m_nInDropDown > 0)
                 return;
 
@@ -750,7 +750,7 @@ namespace dp2Circulation
                         e1.TableName = "issueState";
                     else
                     {
-                        Debug.Assert(false, "²»Ö§³ÖµÄsender");
+                        Debug.Assert(false, "ä¸æ”¯æŒçš„sender");
                         return;
                     }
 
@@ -777,11 +777,11 @@ namespace dp2Circulation
             }
         }
 
-        // ±È½Ï×Ô¼ººÍrefControlµÄÊı¾İ²îÒì£¬ÓÃÌØÊâÑÕÉ«ÏÔÊ¾²îÒì×Ö¶Î
+        // æ¯”è¾ƒè‡ªå·±å’ŒrefControlçš„æ•°æ®å·®å¼‚ï¼Œç”¨ç‰¹æ®Šé¢œè‰²æ˜¾ç¤ºå·®å¼‚å­—æ®µ
         /// <summary>
-        /// ±È½Ï×Ô¼ººÍrefControlµÄÊı¾İ²îÒì£¬ÓÃÌØÊâÑÕÉ«ÏÔÊ¾²îÒì×Ö¶Î
+        /// æ¯”è¾ƒè‡ªå·±å’ŒrefControlçš„æ•°æ®å·®å¼‚ï¼Œç”¨ç‰¹æ®Šé¢œè‰²æ˜¾ç¤ºå·®å¼‚å­—æ®µ
         /// </summary>
-        /// <param name="r">ÒªºÍ×Ô¼º½øĞĞ±È½ÏµÄ¿Ø¼ş¶ÔÏó</param>
+        /// <param name="r">è¦å’Œè‡ªå·±è¿›è¡Œæ¯”è¾ƒçš„æ§ä»¶å¯¹è±¡</param>
         public override void HighlightDifferences(ItemEditControlBase r)
         {
             var refControl = r as IssueEditControl;
@@ -851,7 +851,7 @@ namespace dp2Circulation
                     e1.Name = "Operations";
                 else
                 {
-                    Debug.Assert(false, "Î´ÖªµÄ²¿¼ş");
+                    Debug.Assert(false, "æœªçŸ¥çš„éƒ¨ä»¶");
                     return;
                 }
 
@@ -896,7 +896,7 @@ namespace dp2Circulation
                     e1.Name = "Operations";
                 else
                 {
-                    Debug.Assert(false, "Î´ÖªµÄ²¿¼ş");
+                    Debug.Assert(false, "æœªçŸ¥çš„éƒ¨ä»¶");
                     return;
                 }
 
@@ -920,7 +920,7 @@ namespace dp2Circulation
 #if NO
         delegate void Delegate_filterValue(Control control);
 
-        // ¹ıÂËµô {} °üÎ§µÄ²¿·Ö
+        // è¿‡æ»¤æ‰ {} åŒ…å›´çš„éƒ¨åˆ†
         void FileterValue(Control control)
         {
             string strText = Global.GetPureSeletedValue(control.Text);

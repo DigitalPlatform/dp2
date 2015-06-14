@@ -6,11 +6,12 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Diagnostics;
+using System.Xml;
+
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient.localhost;
-using System.Diagnostics;
 using DigitalPlatform.CommonControl;
-using System.Xml;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 

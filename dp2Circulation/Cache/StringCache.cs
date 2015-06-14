@@ -1,4 +1,4 @@
-#define NEWLOCK
+ï»¿#define NEWLOCK
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -9,12 +9,12 @@ using System.Threading;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ×Ö·û´®¸ßËÙ»º´æ
+    /// å­—ç¬¦ä¸²é«˜é€Ÿç¼“å­˜
     /// </summary>
     public class StringCache
     {
         /// <summary>
-        /// ×î¶à¿ÉÒÔÈİÄÉµÄÊÂÏî¸öÊı
+        /// æœ€å¤šå¯ä»¥å®¹çº³çš„äº‹é¡¹ä¸ªæ•°
         /// </summary>
         public int MaxItems = 1000;
         Hashtable items = new Hashtable();
@@ -22,14 +22,14 @@ namespace dp2Circulation
         internal ReaderWriterLockSlim m_lock = new ReaderWriterLockSlim();
 #else
         internal ReaderWriterLock m_lock = new ReaderWriterLock();
-        internal static int m_nLockTimeout = 5000;	// 5000=5Ãë
+        internal static int m_nLockTimeout = 5000;	// 5000=5ç§’
 #endif
 
         /// <summary>
-        /// ¼ìË÷Ò»¸öÊÂÏî
+        /// æ£€ç´¢ä¸€ä¸ªäº‹é¡¹
         /// </summary>
-        /// <param name="strEntry">ÊÂÏîÃû</param>
-        /// <returns>Öµ</returns>
+        /// <param name="strEntry">äº‹é¡¹å</param>
+        /// <returns>å€¼</returns>
         public StringCacheItem SearchItem(string strEntry)
         {
 #if NEWLOCK
@@ -40,7 +40,7 @@ namespace dp2Circulation
 
             try
             {
-                // return null; // ²âÊÔ
+                // return null; // æµ‹è¯•
                 return (StringCacheItem)items[strEntry];
             }
             finally
@@ -53,12 +53,12 @@ namespace dp2Circulation
             }
         }
 
-        // µÃµ½ĞĞ¶ÔÏó¡£Èç¹û²»´æÔÚ£¬ÔòÁÙÊ±´´½¨Ò»¸ö
+        // å¾—åˆ°è¡Œå¯¹è±¡ã€‚å¦‚æœä¸å­˜åœ¨ï¼Œåˆ™ä¸´æ—¶åˆ›å»ºä¸€ä¸ª
         /// <summary>
-        /// µÃµ½ĞĞ¶ÔÏó¡£Èç¹û²»´æÔÚ£¬ÔòÁÙÊ±´´½¨Ò»¸ö
+        /// å¾—åˆ°è¡Œå¯¹è±¡ã€‚å¦‚æœä¸å­˜åœ¨ï¼Œåˆ™ä¸´æ—¶åˆ›å»ºä¸€ä¸ª
         /// </summary>
-        /// <param name="strEntry">ÊÂÏîÃû</param>
-        /// <returns>ÒÑ¾­´æÔÚµÄ»òÕßĞÂ´´½¨µÄ StringCacheItem ¶ÔÏó</returns>
+        /// <param name="strEntry">äº‹é¡¹å</param>
+        /// <returns>å·²ç»å­˜åœ¨çš„æˆ–è€…æ–°åˆ›å»ºçš„ StringCacheItem å¯¹è±¡</returns>
         public StringCacheItem EnsureItem(string strEntry)
         {
 #if NEWLOCK
@@ -72,7 +72,7 @@ namespace dp2Circulation
                 if (items.Count > MaxItems)
                     this.items.Clear();
 
-                // ¼ì²élineÊÂÏîÊÇ·ñ´æÔÚ
+                // æ£€æŸ¥lineäº‹é¡¹æ˜¯å¦å­˜åœ¨
                 StringCacheItem item = (StringCacheItem)items[strEntry];
 
                 if (item == null)
@@ -83,7 +83,7 @@ namespace dp2Circulation
                     items.Add(strEntry, item);
                 }
 
-                Debug.Assert(item != null, "lineÔÚÕâÀïÓ¦¸Ã!=null");
+                Debug.Assert(item != null, "lineåœ¨è¿™é‡Œåº”è¯¥!=null");
 
                 return item;
             }
@@ -98,7 +98,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÒÆ×ßËùÓĞÄÚÈİ
+        /// ç§»èµ°æ‰€æœ‰å†…å®¹
         /// </summary>
         public void RemoveAll()
         {
@@ -124,16 +124,16 @@ namespace dp2Circulation
     }
 
     /// <summary>
-    /// ×Ö·û´®»º´æ¶ÔÏó
+    /// å­—ç¬¦ä¸²ç¼“å­˜å¯¹è±¡
     /// </summary>
     public class StringCacheItem
     {
         /// <summary>
-        /// Ãû
+        /// å
         /// </summary>
         public string Key = "";
         /// <summary>
-        /// Öµ
+        /// å€¼
         /// </summary>
         public string Content = "";
     }

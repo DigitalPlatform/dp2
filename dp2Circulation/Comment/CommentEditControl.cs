@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -19,27 +19,27 @@ namespace dp2Circulation
     internal partial class CommentEditControl : ItemEditControlBase
     {
 #if NO
-        // »ñÈ¡ÖµÁĞ±íÊ±×÷ÎªÏßË÷µÄÊı¾İ¿âÃû
+        // è·å–å€¼åˆ—è¡¨æ—¶ä½œä¸ºçº¿ç´¢çš„æ•°æ®åº“å
         public string BiblioDbName = "";
 
         XmlDocument RecordDom = null;
 
         bool m_bChanged = false;
 
-        bool m_bInInitial = true;   // ÊÇ·ñÕıÔÚ³õÊ¼»¯¹ı³ÌÖ®ÖĞ
+        bool m_bInInitial = true;   // æ˜¯å¦æ­£åœ¨åˆå§‹åŒ–è¿‡ç¨‹ä¹‹ä¸­
 
-        Color ColorChanged = Color.Yellow; // ±íÊ¾ÄÚÈİ¸Ä±ä¹ıµÄÑÕÉ«
-        Color ColorDifference = Color.Blue; // ±íÊ¾ÄÚÈİÓĞ²îÒìµÄÑÕÉ«
+        Color ColorChanged = Color.Yellow; // è¡¨ç¤ºå†…å®¹æ”¹å˜è¿‡çš„é¢œè‰²
+        Color ColorDifference = Color.Blue; // è¡¨ç¤ºå†…å®¹æœ‰å·®å¼‚çš„é¢œè‰²
 
         string m_strParentId = "";
 
         /// <summary>
-        /// »ñµÃÖµÁĞ±í
+        /// è·å¾—å€¼åˆ—è¡¨
         /// </summary>
         public event GetValueTableEventHandler GetValueTable = null;
 
         /// <summary>
-        /// ÄÚÈİ·¢Éú¸Ä±ä
+        /// å†…å®¹å‘ç”Ÿæ”¹å˜
         /// </summary>
         public event ContentChangedEventHandler ContentChanged = null;
 
@@ -57,7 +57,7 @@ namespace dp2Circulation
             AddEvents(true);
         }
 
-        #region Êı¾İ³ÉÔ±
+        #region æ•°æ®æˆå‘˜
 
 #if NO
         public string OldRecord = "";
@@ -257,7 +257,7 @@ namespace dp2Circulation
 
 #if NO
         /// <summary>
-        /// ÄÚÈİÊÇ·ñ·¢Éú¹ıĞŞ¸Ä
+        /// å†…å®¹æ˜¯å¦å‘ç”Ÿè¿‡ä¿®æ”¹
         /// </summary>
         public bool Changed
         {
@@ -273,7 +273,7 @@ namespace dp2Circulation
                 if (this.m_bChanged == false)
                     this.ResetColor();
 
-                // ´¥·¢ÊÂ¼ş
+                // è§¦å‘äº‹ä»¶
                 if (bOldValue != value && this.ContentChanged != null)
                 {
                     ContentChangedEventArgs e = new ContentChangedEventArgs();
@@ -297,43 +297,43 @@ namespace dp2Circulation
         }
 #endif
 
-        // ½«´æ´¢Öµ×ª»¯Îª¿É¶ÁÎÄ×Ö
+        // å°†å­˜å‚¨å€¼è½¬åŒ–ä¸ºå¯è¯»æ–‡å­—
         static string GetOrderSuggestionCaption(string strText)
         {
             if (string.IsNullOrEmpty(strText) == true)
                 return "";
 
             if (strText == "yes")
-                return "[¶©¹º]";
+                return "[è®¢è´­]";
             if (strText == "no")
-                return "[²»¶©¹º]";
+                return "[ä¸è®¢è´­]";
             return strText;
         }
 
-        // ½«¿É¶ÁÎÄ×Ö±ä»¯Îª´æ´¢Öµ
+        // å°†å¯è¯»æ–‡å­—å˜åŒ–ä¸ºå­˜å‚¨å€¼
         static string GetOrderSuggestionValue(string strText)
         {
             if (string.IsNullOrEmpty(strText) == true)
                 return "";
-            if (strText == "[¿Õ]")
+            if (strText == "[ç©º]")
                 return "";
 
-            if (strText == "[¶©¹º]")
+            if (strText == "[è®¢è´­]")
                 return "yes";
-            if (strText == "[²»¶©¹º]")
+            if (strText == "[ä¸è®¢è´­]")
                 return "no";
             return strText;
         }
 
 #if NO
         /// <summary>
-        /// ÉèÖÃÊı¾İ
+        /// è®¾ç½®æ•°æ®
         /// </summary>
-        /// <param name="strXml">ÆÀ×¢¼ÇÂ¼ XML</param>
-        /// <param name="strRecPath">ÆÀ×¢¼ÇÂ¼Â·¾¶</param>
-        /// <param name="timestamp">Ê±¼ä´Á</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í; 0: ³É¹¦</returns>
+        /// <param name="strXml">è¯„æ³¨è®°å½• XML</param>
+        /// <param name="strRecPath">è¯„æ³¨è®°å½•è·¯å¾„</param>
+        /// <param name="timestamp">æ—¶é—´æˆ³</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™; 0: æˆåŠŸ</returns>
         public int SetData(string strXml,
             string strRecPath,
             byte[] timestamp,
@@ -352,7 +352,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = "XMLÊı¾İ×°ÔØµ½DOMÊ±³ö´í" + ex.Message;
+                strError = "XMLæ•°æ®è£…è½½åˆ°DOMæ—¶å‡ºé”™" + ex.Message;
                 return -1;
             }
 
@@ -431,7 +431,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// Çå³ıÈ«²¿ÄÚÈİ
+        /// æ¸…é™¤å…¨éƒ¨å†…å®¹
         /// </summary>
         public override void Clear()
         {
@@ -509,7 +509,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                string strError = "²Ù×÷ĞÅÏ¢(<operations>ÔªËØ)ÄÚÇ¶XMLÆ¬¶Î '" + this.Operations + "' ¸ñÊ½³ö´í: " + ex.Message;
+                string strError = "æ“ä½œä¿¡æ¯(<operations>å…ƒç´ )å†…åµŒXMLç‰‡æ®µ '" + this.Operations + "' æ ¼å¼å‡ºé”™: " + ex.Message;
                 throw new Exception(strError);
             }
 
@@ -517,11 +517,11 @@ namespace dp2Circulation
 
 #if NO
         /// <summary>
-        /// ´´½¨ºÃÊÊºÏÓÚ±£´æµÄ¼ÇÂ¼ĞÅÏ¢
+        /// åˆ›å»ºå¥½é€‚åˆäºä¿å­˜çš„è®°å½•ä¿¡æ¯
         /// </summary>
-        /// <param name="strXml">·µ»Ø¹¹ÔìºÃµÄÆÀ×¢¼ÇÂ¼ XML</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í; 0: ³É¹¦</returns>
+        /// <param name="strXml">è¿”å›æ„é€ å¥½çš„è¯„æ³¨è®°å½• XML</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™; 0: æˆåŠŸ</returns>
         public int GetData(
             out string strXml,
             out string strError)
@@ -537,7 +537,7 @@ namespace dp2Circulation
 
             if (this.ParentId == "")
             {
-                strError = "GetData()´íÎó£ºParent³ÉÔ±ÉĞÎ´¶¨Òå¡£";
+                strError = "GetData()é”™è¯¯ï¼šParentæˆå‘˜å°šæœªå®šä¹‰ã€‚";
                 return -1;
             }
 
@@ -601,7 +601,7 @@ namespace dp2Circulation
         internal override void ResetColor()
         {
             Color color = this.tableLayoutPanel_main.BackColor;
-            this.label_index_color.BackColor = color;    // ºÍ±³¾°Ò»ÖÂ
+            this.label_index_color.BackColor = color;    // å’ŒèƒŒæ™¯ä¸€è‡´
             this.label_state_color.BackColor = color;
             this.label_type_color.BackColor = color;
             this.label_orderSuggestion_color.BackColor = color;
@@ -621,7 +621,7 @@ namespace dp2Circulation
 #if NO
         delegate void Delegate_filterValue(Control control);
 
-        // ¹ıÂËµô {} °üÎ§µÄ²¿·Ö
+        // è¿‡æ»¤æ‰ {} åŒ…å›´çš„éƒ¨åˆ†
         void FileterValue(Control control)
         {
             string strText = Global.GetPureSeletedValue(control.Text);
@@ -629,8 +629,8 @@ namespace dp2Circulation
                 control.Text = strText;
         }
 
-        // ¹ıÂËµô {} °üÎ§µÄ²¿·Ö
-        // »¹ÓĞÁĞ±íÖµÈ¥ÖØµÄ¹¦ÄÜ
+        // è¿‡æ»¤æ‰ {} åŒ…å›´çš„éƒ¨åˆ†
+        // è¿˜æœ‰åˆ—è¡¨å€¼å»é‡çš„åŠŸèƒ½
         void FileterValueList(Control control)
         {
             List<string> results = StringUtil.FromListString(Global.GetPureSeletedValue(control.Text));
@@ -641,7 +641,7 @@ namespace dp2Circulation
         }
 #endif
 
-        // °²È«°æ±¾
+        // å®‰å…¨ç‰ˆæœ¬
         public static void FilterValueEx(Control owner,
     Control control)
         {
@@ -656,11 +656,11 @@ namespace dp2Circulation
 
         delegate void Delegate_filterValue(Control control);
 
-        // ²»°²È«°æ±¾
-        // ¹ıÂËµô {} °üÎ§µÄ²¿·Ö
+        // ä¸å®‰å…¨ç‰ˆæœ¬
+        // è¿‡æ»¤æ‰ {} åŒ…å›´çš„éƒ¨åˆ†
         static void __FilterValueEx(Control control)
         {
-            string strText = Global.GetPureSeletedValue(control.Text).Replace("[¿Õ]", "");
+            string strText = Global.GetPureSeletedValue(control.Text).Replace("[ç©º]", "");
             if (control.Text != strText)
                 control.Text = strText;
         }
@@ -710,14 +710,14 @@ namespace dp2Circulation
             }
             else
             {
-                Debug.Assert(false, "Î´´¦ÀíµÄÀàĞÍ " + sender.GetType().ToString());
+                Debug.Assert(false, "æœªå¤„ç†çš„ç±»å‹ " + sender.GetType().ToString());
                 return;
             }
 
             int nRet = strControlName.IndexOf("_");
             if (nRet == -1)
             {
-                Debug.Assert(false, "textboxÃû×ÖÖĞÃ»ÓĞÏÂ»®Ïß");
+                Debug.Assert(false, "textboxåå­—ä¸­æ²¡æœ‰ä¸‹åˆ’çº¿");
                 return;
             }
 
@@ -726,7 +726,7 @@ namespace dp2Circulation
             Label label = (Label)this.tableLayoutPanel_main.Controls[strLabelName];
             if (label == null)
             {
-                Debug.Assert(false, "Ã»ÓĞÕÒµ½Ãû×ÖÎª '" + strLabelName + "' µÄLabel¿Ø¼ş");
+                Debug.Assert(false, "æ²¡æœ‰æ‰¾åˆ°åå­—ä¸º '" + strLabelName + "' çš„Labelæ§ä»¶");
                 return;
             }
 
@@ -736,32 +736,32 @@ namespace dp2Circulation
 
 #if NO
         /// <summary>
-        /// Ö»¶Á×´Ì¬·ç¸ñ
+        /// åªè¯»çŠ¶æ€é£æ ¼
         /// </summary>
         public enum ReadOnlyStyle
         {
             /// <summary>
-            /// Çå³ıÈ«²¿Ö»¶Á×´Ì¬£¬»Ö¸´¿É±à¼­×´Ì¬
+            /// æ¸…é™¤å…¨éƒ¨åªè¯»çŠ¶æ€ï¼Œæ¢å¤å¯ç¼–è¾‘çŠ¶æ€
             /// </summary>
-            Clear = 0,  // Çå³ıÈ«²¿ReadOnly×´Ì¬£¬»Ö¸´¿É±à¼­×´Ì¬
+            Clear = 0,  // æ¸…é™¤å…¨éƒ¨ReadOnlyçŠ¶æ€ï¼Œæ¢å¤å¯ç¼–è¾‘çŠ¶æ€
             /// <summary>
-            /// È«²¿Ö»¶Á
+            /// å…¨éƒ¨åªè¯»
             /// </summary>
-            All = 1,    // È«²¿½ûÖ¹ĞŞ¸Ä
+            All = 1,    // å…¨éƒ¨ç¦æ­¢ä¿®æ”¹
             /// <summary>
-            /// Í¼Êé¹İÒ»°ã¹¤×÷ÈËÔ±£¬²»ÄÜĞŞ¸ÄÂ·¾¶
+            /// å›¾ä¹¦é¦†ä¸€èˆ¬å·¥ä½œäººå‘˜ï¼Œä¸èƒ½ä¿®æ”¹è·¯å¾„
             /// </summary>
-            Librarian = 2,  // Í¼Êé¹İÒ»°ã¹¤×÷ÈËÔ±£¬²»ÄÜĞŞ¸ÄÂ·¾¶
+            Librarian = 2,  // å›¾ä¹¦é¦†ä¸€èˆ¬å·¥ä½œäººå‘˜ï¼Œä¸èƒ½ä¿®æ”¹è·¯å¾„
         }
 #endif
 
-        // ¸ù¾İÊı¾İµÄÊµ¼ÊÇé¿ö, ½«ÆÚ¹ÜÀí²»ĞèÒªĞŞ¸ÄµÄÄ³Ğ©ÓòÉèÖÃÎªReadOnly×´Ì¬
+        // æ ¹æ®æ•°æ®çš„å®é™…æƒ…å†µ, å°†æœŸç®¡ç†ä¸éœ€è¦ä¿®æ”¹çš„æŸäº›åŸŸè®¾ç½®ä¸ºReadOnlyçŠ¶æ€
         /// <summary>
-        /// ÉèÖÃÖ»¶Á×´Ì¬
+        /// è®¾ç½®åªè¯»çŠ¶æ€
         /// </summary>
-        /// <param name="strStyle">ÈçºÎÉèÖÃÖ»¶Á×´Ì¬¡£
-        /// "all" ±íÊ¾È«²¿ÎªÖ»¶Á£»
-        /// "librarian" ±íÊ¾Ö»ÓĞ¼ÇÂ¼Â·¾¶¡¢²Î¿¼ID¡¢´´½¨Ê±¼ä¡¢ĞŞ¸ÄÊ±¼äÎªÖ»¶Á£¬ÆäÓàÎª¿É¸ÄĞ´
+        /// <param name="strStyle">å¦‚ä½•è®¾ç½®åªè¯»çŠ¶æ€ã€‚
+        /// "all" è¡¨ç¤ºå…¨éƒ¨ä¸ºåªè¯»ï¼›
+        /// "librarian" è¡¨ç¤ºåªæœ‰è®°å½•è·¯å¾„ã€å‚è€ƒIDã€åˆ›å»ºæ—¶é—´ã€ä¿®æ”¹æ—¶é—´ä¸ºåªè¯»ï¼Œå…¶ä½™ä¸ºå¯æ”¹å†™
         /// </param>
         public override void SetReadOnly(string strStyle)
         {
@@ -787,7 +787,7 @@ namespace dp2Circulation
                 return;
             }
 
-            // ÏÈÇå³ıReadOnly
+            // å…ˆæ¸…é™¤ReadOnly
             this.textBox_index.ReadOnly = false;
             this.textBox_title.ReadOnly = false;
 
@@ -818,9 +818,9 @@ namespace dp2Circulation
             }
         }
 
-        // ½«¿ÉÄÜÒÑ¾­ÉèÖÃÎªReadOnly×´Ì¬µÄÄ³Ğ©ÓòÉèÎª¿É¸ÄĞ´×´Ì¬
+        // å°†å¯èƒ½å·²ç»è®¾ç½®ä¸ºReadOnlyçŠ¶æ€çš„æŸäº›åŸŸè®¾ä¸ºå¯æ”¹å†™çŠ¶æ€
         /// <summary>
-        /// ÉèÖÃÎª¿ÉĞŞ¸Ä×´Ì¬
+        /// è®¾ç½®ä¸ºå¯ä¿®æ”¹çŠ¶æ€
         /// </summary>
         public override void SetChangeable()
         {
@@ -829,7 +829,7 @@ namespace dp2Circulation
             this.textBox_refID.ReadOnly = false;
         }
 
-        // ·ÀÖ¹ÖØÈë
+        // é˜²æ­¢é‡å…¥
         int m_nInDropDown = 0;
 
         private void checkedComboBox_state_DropDown(object sender, EventArgs e)
@@ -876,14 +876,14 @@ namespace dp2Circulation
                     e1.DbName = this.BiblioDbName;  // 2009/2/15 changed
 
                     if (combobox == this.comboBox_type)
-                        e1.TableName = "commentType";   // ÆÀ×¢ÀàĞÍ
+                        e1.TableName = "commentType";   // è¯„æ³¨ç±»å‹
                     else if (combobox == this.comboBox_orderSuggestion)
-                        e1.TableName = "orderSuggestion";   // ¶©¹º½¨Òé
+                        e1.TableName = "orderSuggestion";   // è®¢è´­å»ºè®®
                     else if (checked_combobox == this.checkedComboBox_state)
-                        e1.TableName = "commentState";  // ÆÀ×¢×´Ì¬
+                        e1.TableName = "commentState";  // è¯„æ³¨çŠ¶æ€
                     else
                     {
-                        Debug.Assert(false, "²»Ö§³ÖµÄsender");
+                        Debug.Assert(false, "ä¸æ”¯æŒçš„sender");
                         return;
                     }
 
@@ -914,11 +914,11 @@ namespace dp2Circulation
             }
         }
 
-        // ±È½Ï×Ô¼ººÍrefControlµÄÊı¾İ²îÒì£¬ÓÃÌØÊâÑÕÉ«ÏÔÊ¾²îÒì×Ö¶Î
+        // æ¯”è¾ƒè‡ªå·±å’ŒrefControlçš„æ•°æ®å·®å¼‚ï¼Œç”¨ç‰¹æ®Šé¢œè‰²æ˜¾ç¤ºå·®å¼‚å­—æ®µ
         /// <summary>
-        /// ±È½Ï×Ô¼ººÍrefControlµÄÊı¾İ²îÒì£¬ÓÃÌØÊâÑÕÉ«ÏÔÊ¾²îÒì×Ö¶Î
+        /// æ¯”è¾ƒè‡ªå·±å’ŒrefControlçš„æ•°æ®å·®å¼‚ï¼Œç”¨ç‰¹æ®Šé¢œè‰²æ˜¾ç¤ºå·®å¼‚å­—æ®µ
         /// </summary>
-        /// <param name="r">ÒªºÍ×Ô¼º½øĞĞ±È½ÏµÄ¿Ø¼ş¶ÔÏó</param>
+        /// <param name="r">è¦å’Œè‡ªå·±è¿›è¡Œæ¯”è¾ƒçš„æ§ä»¶å¯¹è±¡</param>
         public override void HighlightDifferences(ItemEditControlBase r)
         {
             var refControl = r as CommentEditControl;
@@ -1002,7 +1002,7 @@ namespace dp2Circulation
                     e1.Name = "Operations";
                 else
                 {
-                    Debug.Assert(false, "Î´ÖªµÄ²¿¼ş");
+                    Debug.Assert(false, "æœªçŸ¥çš„éƒ¨ä»¶");
                     return;
                 }
 
@@ -1048,7 +1048,7 @@ namespace dp2Circulation
                     e1.Name = "Operations";
                 else
                 {
-                    Debug.Assert(false, "Î´ÖªµÄ²¿¼ş");
+                    Debug.Assert(false, "æœªçŸ¥çš„éƒ¨ä»¶");
                     return;
                 }
 

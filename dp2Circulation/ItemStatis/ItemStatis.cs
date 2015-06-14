@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Windows.Forms;
@@ -10,64 +10,64 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.Marc;
 using DigitalPlatform.dp2.Statis;
 
-// 2013/3/26 Ìí¼Ó XML ×¢ÊÍ
+// 2013/3/26 æ·»åŠ  XML æ³¨é‡Š
 
 namespace dp2Circulation
 {
     /// <summary>
-    /// ItemStatisForm (²áÍ³¼Æ´°) Í³¼Æ·½°¸µÄËŞÖ÷Àà
+    /// ItemStatisForm (å†Œç»Ÿè®¡çª—) ç»Ÿè®¡æ–¹æ¡ˆçš„å®¿ä¸»ç±»
     /// </summary>
     public class ItemStatis : StatisHostBase
     {
         // private bool disposed = false;
 
         /// <summary>
-        /// ¹İ²ØµØµãÁĞ±í
+        /// é¦†è—åœ°ç‚¹åˆ—è¡¨
         /// </summary>
         public string LocationNames = "";
 
         /// <summary>
-        /// µ±Ç°²á¼ÇÂ¼µÄÊ±¼ä´Á
+        /// å½“å‰å†Œè®°å½•çš„æ—¶é—´æˆ³
         /// </summary>
-        public byte[] Timestamp = null; // µ±Ç°²á¼ÇÂ¼µÄÊ±¼ä´Á 2009/9/26
+        public byte[] Timestamp = null; // å½“å‰å†Œè®°å½•çš„æ—¶é—´æˆ³ 2009/9/26
 
         // public WebBrowser Console = null;
 
         /// <summary>
-        /// ±¾¶ÔÏóËù¹ØÁªµÄ ItemStatisForm (²áÍ³¼Æ´°)
+        /// æœ¬å¯¹è±¡æ‰€å…³è”çš„ ItemStatisForm (å†Œç»Ÿè®¡çª—)
         /// </summary>
-        public ItemStatisForm ItemStatisForm = null;	// ÒıÓÃ
+        public ItemStatisForm ItemStatisForm = null;	// å¼•ç”¨
 
         /// <summary>
-        /// µ±Ç°²á¼ÇÂ¼Â·¾¶
+        /// å½“å‰å†Œè®°å½•è·¯å¾„
         /// </summary>
-        public string CurrentRecPath = "";    // µ±Ç°²á¼ÇÂ¼Â·¾¶
+        public string CurrentRecPath = "";    // å½“å‰å†Œè®°å½•è·¯å¾„
         /// <summary>
-        /// µ±Ç°²á¼ÇÂ¼ÔÚÕûÅúÖĞµÄÏÂ±ê¡£´Ó 0 ¿ªÊ¼¼ÆÊı¡£Èç¹ûÎª -1£¬±íÊ¾ÉĞÎ´¿ªÊ¼´¦Àí
+        /// å½“å‰å†Œè®°å½•åœ¨æ•´æ‰¹ä¸­çš„ä¸‹æ ‡ã€‚ä» 0 å¼€å§‹è®¡æ•°ã€‚å¦‚æœä¸º -1ï¼Œè¡¨ç¤ºå°šæœªå¼€å§‹å¤„ç†
         /// </summary>
-        public long CurrentRecordIndex = -1; // µ±Ç°²á¼ÇÂ¼ÔÚÕûÅúÖĞµÄÆ«ÒÆÁ¿
+        public long CurrentRecordIndex = -1; // å½“å‰å†Œè®°å½•åœ¨æ•´æ‰¹ä¸­çš„åç§»é‡
 
         /// <summary>
-        /// µ±Ç°²á¼ÇÂ¼Ëù´ÓÊôµÄÊéÄ¿¼ÇÂ¼Â·¾¶
+        /// å½“å‰å†Œè®°å½•æ‰€ä»å±çš„ä¹¦ç›®è®°å½•è·¯å¾„
         /// </summary>
-        public string CurrentBiblioRecPath = "";    // µ±Ç°ÊéÄ¿¼ÇÂ¼Â·¾¶£¨Ö¸²á¼ÇÂ¼´ÓÊôµÄÊéÄ¿¼ÇÂ¼£©
+        public string CurrentBiblioRecPath = "";    // å½“å‰ä¹¦ç›®è®°å½•è·¯å¾„ï¼ˆæŒ‡å†Œè®°å½•ä»å±çš„ä¹¦ç›®è®°å½•ï¼‰
 
 #if NO
-        public string ProjectDir = "";  // ·½°¸Ô´ÎÄ¼şËùÔÚÄ¿Â¼
-        public string InstanceDir = ""; // µ±Ç°ÊµÀı¶ÀÕ¼µÄÄ¿Â¼¡£ÓÃÓÚ´æ´¢ÁÙÊ±ÎÄ¼ş
+        public string ProjectDir = "";  // æ–¹æ¡ˆæºæ–‡ä»¶æ‰€åœ¨ç›®å½•
+        public string InstanceDir = ""; // å½“å‰å®ä¾‹ç‹¬å çš„ç›®å½•ã€‚ç”¨äºå­˜å‚¨ä¸´æ—¶æ–‡ä»¶
 
-        public List<string> OutputFileNames = new List<string>(); // ´æ·ÅÊä³öµÄhtmlÎÄ¼ş
+        public List<string> OutputFileNames = new List<string>(); // å­˜æ”¾è¾“å‡ºçš„htmlæ–‡ä»¶
 
         int m_nFileNameSeed = 1;
 #endif
         /// <summary>
-        /// µ±Ç°ÕıÔÚ´¦ÀíµÄ²á XML ¼ÇÂ¼£¬XmlDocument ÀàĞÍ
+        /// å½“å‰æ­£åœ¨å¤„ç†çš„å†Œ XML è®°å½•ï¼ŒXmlDocument ç±»å‹
         /// </summary>
-        public XmlDocument ItemDom = null;    // Xml×°ÈëXmlDocument
+        public XmlDocument ItemDom = null;    // Xmlè£…å…¥XmlDocument
 
-        string m_strXml = "";    // ²á¼ÇÂ¼Ìå
+        string m_strXml = "";    // å†Œè®°å½•ä½“
         /// <summary>
-        /// µ±Ç°ÕıÔÚ´¦ÀíµÄ²á XML ¼ÇÂ¼£¬×Ö·û´®ÀàĞÍ
+        /// å½“å‰æ­£åœ¨å¤„ç†çš„å†Œ XML è®°å½•ï¼Œå­—ç¬¦ä¸²ç±»å‹
         /// </summary>
         public string Xml
         {
@@ -83,7 +83,7 @@ namespace dp2Circulation
 
         internal string m_strBiblioXml = "";
         /// <summary>
-        /// µ±Ç°ÕıÔÚ´¦ÀíµÄ²á¼ÇÂ¼Ëù´ÓÊôµÄÊéÄ¿ XML ¼ÇÂ¼£¬×Ö·û´®ÀàĞÍ
+        /// å½“å‰æ­£åœ¨å¤„ç†çš„å†Œè®°å½•æ‰€ä»å±çš„ä¹¦ç›® XML è®°å½•ï¼Œå­—ç¬¦ä¸²ç±»å‹
         /// </summary>
         public string BiblioXml
         {
@@ -93,7 +93,7 @@ namespace dp2Circulation
                     return this.m_strBiblioXml;
 
                 if (string.IsNullOrEmpty(this.CurrentBiblioRecPath) == true)
-                    throw new Exception("CurrentBiblioRecPathÎª¿Õ£¬ÎŞ·¨È¡µÃÊéÄ¿¼ÇÂ¼");
+                    throw new Exception("CurrentBiblioRecPathä¸ºç©ºï¼Œæ— æ³•å–å¾—ä¹¦ç›®è®°å½•");
 
                 string strBiblioXml = "";
                 string strError = "";
@@ -102,7 +102,7 @@ namespace dp2Circulation
                     out strBiblioXml,
                     out strError);
                 if (nRet == -1)
-                    throw new Exception("»ñµÃÊéÄ¿¼ÇÂ¼Ê±³ö´í: " + strError);
+                    throw new Exception("è·å¾—ä¹¦ç›®è®°å½•æ—¶å‡ºé”™: " + strError);
 
                 this.m_strBiblioXml = strBiblioXml;
                 return this.m_strBiblioXml;
@@ -112,7 +112,7 @@ namespace dp2Circulation
         internal XmlDocument m_biblioDom = null;
 
         /// <summary>
-        /// µ±Ç°ÕıÔÚ´¦ÀíµÄ²á¼ÇÂ¼Ëù´ÓÊôµÄÊéÄ¿ XML ¼ÇÂ¼£¬XmlDocument ÀàĞÍ
+        /// å½“å‰æ­£åœ¨å¤„ç†çš„å†Œè®°å½•æ‰€ä»å±çš„ä¹¦ç›® XML è®°å½•ï¼ŒXmlDocument ç±»å‹
         /// </summary>
         public XmlDocument BiblioDom
         {
@@ -139,7 +139,7 @@ namespace dp2Circulation
         internal string m_strMarcRecord = "";
         internal string m_strMarcSyntax = "";
         /// <summary>
-        /// µ±Ç°ÕıÔÚ´¦ÀíµÄ²á¼ÇÂ¼Ëù´ÓÊôµÄÊéÄ¿¼ÇÂ¼£¬ MARC ×Ö·û´®
+        /// å½“å‰æ­£åœ¨å¤„ç†çš„å†Œè®°å½•æ‰€ä»å±çš„ä¹¦ç›®è®°å½•ï¼Œ MARC å­—ç¬¦ä¸²
         /// </summary>
         public string MarcRecord
         {
@@ -148,18 +148,18 @@ namespace dp2Circulation
                 if (string.IsNullOrEmpty(this.m_strMarcRecord) == false)
                     return this.m_strMarcRecord;
 
-                // ½«XMLÊéÄ¿¼ÇÂ¼×ª»»ÎªMARC¸ñÊ½
+                // å°†XMLä¹¦ç›®è®°å½•è½¬æ¢ä¸ºMARCæ ¼å¼
                 string strOutMarcSyntax = "";
                 string strMarc = "";
                 string strError = "";
 
-                // ½«MARCXML¸ñÊ½µÄxml¼ÇÂ¼×ª»»Îªmarc»úÄÚ¸ñÊ½×Ö·û´®
+                // å°†MARCXMLæ ¼å¼çš„xmlè®°å½•è½¬æ¢ä¸ºmarcæœºå†…æ ¼å¼å­—ç¬¦ä¸²
                 // parameters:
-                //		bWarning	== true, ¾¯¸æºó¼ÌĞø×ª»»,²»ÑÏ¸ñ¶Ô´ı´íÎó; = false, ·Ç³£ÑÏ¸ñ¶Ô´ı´íÎó,Óöµ½´íÎóºó²»¼ÌĞø×ª»»
-                //		strMarcSyntax	Ö¸Ê¾marcÓï·¨,Èç¹û==""£¬Ôò×Ô¶¯Ê¶±ğ
-                //		strOutMarcSyntax	out²ÎÊı£¬·µ»Ømarc£¬Èç¹ûstrMarcSyntax == ""£¬·µ»ØÕÒµ½marcÓï·¨£¬·ñÔò·µ»ØÓëÊäÈë²ÎÊıstrMarcSyntaxÏàÍ¬µÄÖµ
+                //		bWarning	== true, è­¦å‘Šåç»§ç»­è½¬æ¢,ä¸ä¸¥æ ¼å¯¹å¾…é”™è¯¯; = false, éå¸¸ä¸¥æ ¼å¯¹å¾…é”™è¯¯,é‡åˆ°é”™è¯¯åä¸ç»§ç»­è½¬æ¢
+                //		strMarcSyntax	æŒ‡ç¤ºmarcè¯­æ³•,å¦‚æœ==""ï¼Œåˆ™è‡ªåŠ¨è¯†åˆ«
+                //		strOutMarcSyntax	outå‚æ•°ï¼Œè¿”å›marcï¼Œå¦‚æœstrMarcSyntax == ""ï¼Œè¿”å›æ‰¾åˆ°marcè¯­æ³•ï¼Œå¦åˆ™è¿”å›ä¸è¾“å…¥å‚æ•°strMarcSyntaxç›¸åŒçš„å€¼
                 int nRet = MarcUtil.Xml2Marc(this.BiblioXml,
-                    true,   // 2013/1/12 ĞŞ¸ÄÎªtrue
+                    true,   // 2013/1/12 ä¿®æ”¹ä¸ºtrue
                     "", // strMarcSyntax
                     out strOutMarcSyntax,
                     out strMarc,
@@ -174,13 +174,13 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// µ±Ç°ÕıÔÚ´¦ÀíµÄ²á¼ÇÂ¼Ëù´ÓÊôµÄÊéÄ¿¼ÇÂ¼µÄ MARC ¸ñÊ½¡£usmarc / unimarc
+        /// å½“å‰æ­£åœ¨å¤„ç†çš„å†Œè®°å½•æ‰€ä»å±çš„ä¹¦ç›®è®°å½•çš„ MARC æ ¼å¼ã€‚usmarc / unimarc
         /// </summary>
         public string MarcSyntax
         {
             get
             {
-                // ´ÙÊ¹MARC¸ñÊ½±»»ñµÃ
+                // ä¿ƒä½¿MARCæ ¼å¼è¢«è·å¾—
                 if (string.IsNullOrEmpty(this.m_strMarcSyntax) == true)
                 {
                     string strTemp = this.MarcRecord;
@@ -191,7 +191,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public ItemStatis()
         {
@@ -249,7 +249,7 @@ namespace dp2Circulation
                     // Dispose managed resources.
                 }
 
-                // É¾³ıËùÓĞÊä³öÎÄ¼ş
+                // åˆ é™¤æ‰€æœ‰è¾“å‡ºæ–‡ä»¶
                 if (this.OutputFileNames != null)
                 {
                     Global.DeleteFiles(this.OutputFileNames);
@@ -280,31 +280,31 @@ namespace dp2Circulation
         {
         }
 
-        // ³õÊ¼»¯
+        // åˆå§‹åŒ–
         public virtual void OnInitial(object sender, StatisEventArgs e)
         {
 
         }
 
-        // ¿ªÊ¼
+        // å¼€å§‹
         public virtual void OnBegin(object sender, StatisEventArgs e)
         {
 
         }
 
-        // Ã¿Ò»¼ÇÂ¼´¦Àí
+        // æ¯ä¸€è®°å½•å¤„ç†
         public virtual void OnRecord(object sender, StatisEventArgs e)
         {
 
         }
 
-        // ½áÊø
+        // ç»“æŸ
         public virtual void OnEnd(object sender, StatisEventArgs e)
         {
 
         }
 
-        // ´òÓ¡Êä³ö
+        // æ‰“å°è¾“å‡º
         public virtual void OnPrint(object sender, StatisEventArgs e)
         {
 
@@ -326,7 +326,7 @@ namespace dp2Circulation
             Global.WriteHtml(this.Console, HttpUtility.HtmlEncode(strText));
         }
 
-        // »ñµÃÒ»¸öĞÂµÄÊä³öÎÄ¼şÃû
+        // è·å¾—ä¸€ä¸ªæ–°çš„è¾“å‡ºæ–‡ä»¶å
         public string NewOutputFileName()
         {
             string strFileNamePrefix = this.ItemStatisForm.MainForm.DataDir + "\\~item_statis";
@@ -340,7 +340,7 @@ namespace dp2Circulation
             return strFileName;
         }
 
-        // ½«×Ö·û´®ÄÚÈİĞ´ÈëÎÄ±¾ÎÄ¼ş
+        // å°†å­—ç¬¦ä¸²å†…å®¹å†™å…¥æ–‡æœ¬æ–‡ä»¶
         public void WriteToOutputFile(string strFileName,
             string strText,
             Encoding encoding)
@@ -352,7 +352,7 @@ namespace dp2Circulation
             sw.Close();
         }
 
-        // É¾³ıÒ»¸öÊä³öÎÄ¼ş
+        // åˆ é™¤ä¸€ä¸ªè¾“å‡ºæ–‡ä»¶
         public void DeleteOutputFile(string strFileName)
         {
             int nIndex = this.OutputFileNames.IndexOf(strFileName);
@@ -374,7 +374,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// Õë¶Ôµ±Ç°²á¼ÇÂ¼Ëù´ÓÊôµÄÊéÄ¿¼ÇÂ¼Ö´ĞĞ MARC ¹ıÂËÆ÷
+        /// é’ˆå¯¹å½“å‰å†Œè®°å½•æ‰€ä»å±çš„ä¹¦ç›®è®°å½•æ‰§è¡Œ MARC è¿‡æ»¤å™¨
         /// </summary>
         public void DoMarcFilter()
         {

@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -20,7 +20,7 @@ using DigitalPlatform.CommonControl;
 namespace dp2Circulation
 {
     /// <summary>
-    /// Í£½è´°
+    /// åœå€Ÿçª—
     /// </summary>
     public partial class ReaderManageForm : MyForm
     {
@@ -32,7 +32,7 @@ namespace dp2Circulation
         WebExternalHost m_webExternalHost = new WebExternalHost();
 
         /// <summary>
-        /// »ñµÃÖµÁĞ±í
+        /// è·å¾—å€¼åˆ—è¡¨
         /// </summary>
         public event GetValueTableEventHandler GetValueTable = null;
 
@@ -41,7 +41,7 @@ namespace dp2Circulation
         public string Lang = "zh";
 
         /// <summary>
-        /// ¿ò¼Ü´°¿Ú
+        /// æ¡†æ¶çª—å£
         /// </summary>
         public MainForm MainForm = null;
 
@@ -50,13 +50,13 @@ namespace dp2Circulation
 
         bool m_bChanged = false;
 
-        string RecPath = "";    // ¶ÁÕß¼ÇÂ¼Â·¾¶
-        // string ReaderBarcode = "";  // ¶ÁÕßÖ¤ÌõÂëºÅ
+        string RecPath = "";    // è¯»è€…è®°å½•è·¯å¾„
+        // string ReaderBarcode = "";  // è¯»è€…è¯æ¡ç å·
         byte [] Timestamp = null;
         string OldRecord = "";
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public ReaderManageForm()
         {
@@ -79,7 +79,7 @@ namespace dp2Circulation
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
 
             stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// ºÍÈİÆ÷¹ØÁª
+            stop.Register(MainForm.stopManager, true);	// å’Œå®¹å™¨å…³è”
 #endif
 
             this.GetValueTable += new GetValueTableEventHandler(ReaderManageForm_GetValueTable);
@@ -124,9 +124,9 @@ namespace dp2Circulation
 #if NO
             if (stop != null)
             {
-                if (stop.State == 0)    // 0 ±íÊ¾ÕıÔÚ´¦Àí
+                if (stop.State == 0)    // 0 è¡¨ç¤ºæ­£åœ¨å¤„ç†
                 {
-                    MessageBox.Show(this, "ÇëÔÚ¹Ø±Õ´°¿ÚÇ°Í£Ö¹ÕıÔÚ½øĞĞµÄ³¤Ê±²Ù×÷¡£");
+                    MessageBox.Show(this, "è¯·åœ¨å…³é—­çª—å£å‰åœæ­¢æ­£åœ¨è¿›è¡Œçš„é•¿æ—¶æ“ä½œã€‚");
                     e.Cancel = true;
                     return;
                 }
@@ -135,9 +135,9 @@ namespace dp2Circulation
 
             if (this.Changed == true)
             {
-                // ¾¯¸æÉĞÎ´±£´æ
+                // è­¦å‘Šå°šæœªä¿å­˜
                 DialogResult result = MessageBox.Show(this,
-    "µ±Ç°ÓĞĞÅÏ¢±»ĞŞ¸ÄºóÉĞÎ´±£´æ¡£Èô´ËÊ±¹Ø±Õ´°¿Ú£¬ÏÖÓĞÎ´±£´æĞÅÏ¢½«¶ªÊ§¡£\r\n\r\nÈ·ÊµÒª¹Ø±Õ´°¿Ú? ",
+    "å½“å‰æœ‰ä¿¡æ¯è¢«ä¿®æ”¹åå°šæœªä¿å­˜ã€‚è‹¥æ­¤æ—¶å…³é—­çª—å£ï¼Œç°æœ‰æœªä¿å­˜ä¿¡æ¯å°†ä¸¢å¤±ã€‚\r\n\r\nç¡®å®è¦å…³é—­çª—å£? ",
     "ReaderManageForm",
     MessageBoxButtons.YesNo,
     MessageBoxIcon.Question,
@@ -158,9 +158,9 @@ namespace dp2Circulation
                 this.m_webExternalHost.Destroy();
 
 #if NO
-            if (stop != null) // ÍÑÀë¹ØÁª
+            if (stop != null) // è„±ç¦»å…³è”
             {
-                stop.Unregister();	// ºÍÈİÆ÷¹ØÁª
+                stop.Unregister();	// å’Œå®¹å™¨å…³è”
                 stop = null;
             }
 #endif
@@ -174,7 +174,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// µ±Ç°¶ÁÕßÖ¤ÌõÂëºÅ
+        /// å½“å‰è¯»è€…è¯æ¡ç å·
         /// </summary>
         public string ReaderBarcode
         {
@@ -189,7 +189,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÄÚÈİÊÇ·ñ·¢Éú¹ıĞŞ¸Ä
+        /// å†…å®¹æ˜¯å¦å‘ç”Ÿè¿‡ä¿®æ”¹
         /// </summary>
         public bool Changed
         {
@@ -203,12 +203,12 @@ namespace dp2Circulation
             }
         }
 
-        // ·ÀÖ¹ÖØÈë 2009/7/19
+        // é˜²æ­¢é‡å…¥ 2009/7/19
         int m_nInDropDown = 0;
 
         private void comboBox_operation_DropDown(object sender, EventArgs e)
         {
-            // ·ÀÖ¹ÖØÈë 2009/7/19
+            // é˜²æ­¢é‡å…¥ 2009/7/19
             if (this.m_nInDropDown > 0)
                 return;
 
@@ -255,7 +255,7 @@ namespace dp2Circulation
         {
             if (this.textBox_readerBarcode.Text == "")
             {
-                MessageBox.Show(this, "ÉĞÎ´Ö¸¶¨¶ÁÕßÖ¤ÌõÂëºÅ");
+                MessageBox.Show(this, "å°šæœªæŒ‡å®šè¯»è€…è¯æ¡ç å·");
                 return;
             }
 
@@ -268,10 +268,10 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ¸ù¾İ¶ÁÕßÖ¤ÌõÂëºÅ£¬×°Èë¶ÁÕß¼ÇÂ¼
+        /// æ ¹æ®è¯»è€…è¯æ¡ç å·ï¼Œè£…å…¥è¯»è€…è®°å½•
         /// </summary>
-        /// <param name="strBarcode">¶ÁÕßÖ¤ÌõÂëºÅ</param>
-        /// <returns>-1: ³ö´í; 0: ·ÅÆú; 1: ³É¹¦</returns>
+        /// <param name="strBarcode">è¯»è€…è¯æ¡ç å·</param>
+        /// <returns>-1: å‡ºé”™; 0: æ”¾å¼ƒ; 1: æˆåŠŸ</returns>
         public int LoadRecord(string strBarcode)
         {
             int nRet = this.LoadRecord(ref strBarcode);
@@ -280,14 +280,14 @@ namespace dp2Circulation
             return nRet;
         }
 
-        // ¸ù¾İ¶ÁÕßÖ¤ÌõÂëºÅ£¬×°Èë¶ÁÕß¼ÇÂ¼
+        // æ ¹æ®è¯»è€…è¯æ¡ç å·ï¼Œè£…å…¥è¯»è€…è®°å½•
         // return:
         //      0   cancelled
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="strBarcode">¶ÁÕßÖ¤ÌõÂëºÅ</param>
-        /// <returns>-1: ³ö´í; 0: ·ÅÆú; 1: ³É¹¦</returns>
+        /// <param name="strBarcode">è¯»è€…è¯æ¡ç å·</param>
+        /// <returns>-1: å‡ºé”™; 0: æ”¾å¼ƒ; 1: æˆåŠŸ</returns>
         public int LoadRecord(ref string strBarcode)
         {
             string strError = "";
@@ -295,9 +295,9 @@ namespace dp2Circulation
 
             if (this.Changed == true)
             {
-                // ¾¯¸æÉĞÎ´±£´æ
+                // è­¦å‘Šå°šæœªä¿å­˜
                 DialogResult result = MessageBox.Show(this,
-"µ±Ç°ÓĞĞÅÏ¢±»ĞŞ¸ÄºóÉĞÎ´±£´æ¡£Èô´ËÊ±×°ÔØĞÂÄÚÈİ£¬ÏÖÓĞÎ´±£´æĞÅÏ¢½«¶ªÊ§¡£\r\n\r\nÈ·ÊµÒª¸ù¾İÖ¤ÌõÂëºÅÖØĞÂ×°ÔØÄÚÈİ? ",
+"å½“å‰æœ‰ä¿¡æ¯è¢«ä¿®æ”¹åå°šæœªä¿å­˜ã€‚è‹¥æ­¤æ—¶è£…è½½æ–°å†…å®¹ï¼Œç°æœ‰æœªä¿å­˜ä¿¡æ¯å°†ä¸¢å¤±ã€‚\r\n\r\nç¡®å®è¦æ ¹æ®è¯æ¡ç å·é‡æ–°è£…è½½å†…å®¹? ",
 "ReaderManageForm",
 MessageBoxButtons.YesNo,
 MessageBoxIcon.Question,
@@ -308,7 +308,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ³õÊ¼»¯ä¯ÀÀÆ÷×é¼ş ...");
+            stop.Initial("æ­£åœ¨åˆå§‹åŒ–æµè§ˆå™¨ç»„ä»¶ ...");
             stop.BeginLoop();
 
             this.Update();
@@ -326,7 +326,7 @@ MessageBoxDefaultButton.Button2);
 
                 int nRedoCount = 0;
             REDO:
-                stop.SetMessage("ÕıÔÚ×°Èë¶ÁÕß¼ÇÂ¼ " + strBarcode + " ...");
+                stop.SetMessage("æ­£åœ¨è£…å…¥è¯»è€…è®°å½• " + strBarcode + " ...");
 
                 string[] results = null;
 
@@ -346,11 +346,11 @@ MessageBoxDefaultButton.Button2);
 
                 if (lRet > 1)
                 {
-                    // Èç¹ûÖØÊÔºóÒÀÈ»·¢ÉúÖØ¸´
+                    // å¦‚æœé‡è¯•åä¾ç„¶å‘ç”Ÿé‡å¤
                     if (nRedoCount > 0)
                     {
-                        strError = "ÌõÂë " + strBarcode + " ÃüÖĞ¼ÇÂ¼ " + lRet.ToString() + " Ìõ£¬·ÅÆú×°Èë¶ÁÕß¼ÇÂ¼¡£\r\n\r\n×¢ÒâÕâÊÇÒ»¸öÑÏÖØ´íÎó£¬ÇëÏµÍ³¹ÜÀíÔ±¾¡¿ìÅÅ³ı¡£";
-                        goto ERROR1;    // µ±³ö´í´¦Àí
+                        strError = "æ¡ç  " + strBarcode + " å‘½ä¸­è®°å½• " + lRet.ToString() + " æ¡ï¼Œæ”¾å¼ƒè£…å…¥è¯»è€…è®°å½•ã€‚\r\n\r\næ³¨æ„è¿™æ˜¯ä¸€ä¸ªä¸¥é‡é”™è¯¯ï¼Œè¯·ç³»ç»Ÿç®¡ç†å‘˜å°½å¿«æ’é™¤ã€‚";
+                        goto ERROR1;    // å½“å‡ºé”™å¤„ç†
                     }
                     SelectPatronDialog dlg = new SelectPatronDialog();
 
@@ -360,18 +360,18 @@ MessageBoxDefaultButton.Button2);
                         this.Channel,
                         this.stop,
                         StringUtil.SplitList(strRecPath),
-                        "ÇëÑ¡ÔñÒ»¸ö¶ÁÕß¼ÇÂ¼",
+                        "è¯·é€‰æ‹©ä¸€ä¸ªè¯»è€…è®°å½•",
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
-                    // TODO: ±£´æ´°¿ÚÄÚµÄ³ß´ç×´Ì¬
+                    // TODO: ä¿å­˜çª—å£å†…çš„å°ºå¯¸çŠ¶æ€
                     this.MainForm.AppInfo.LinkFormState(dlg, "ReaderManageForm_SelectPatronDialog_state");
                     dlg.ShowDialog(this);
                     this.MainForm.AppInfo.UnlinkFormState(dlg);
 
                     if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                     {
-                        strError = "·ÅÆúÑ¡Ôñ";
+                        strError = "æ”¾å¼ƒé€‰æ‹©";
                         return 0;
                     }
 
@@ -388,7 +388,7 @@ MessageBoxDefaultButton.Button2);
 
                 if (results == null || results.Length < 2)
                 {
-                    strError = "·µ»ØµÄresults²»Õı³£¡£";
+                    strError = "è¿”å›çš„resultsä¸æ­£å¸¸ã€‚";
                     goto ERROR1;
                 }
                 string strXml = "";
@@ -397,7 +397,7 @@ MessageBoxDefaultButton.Button2);
                 strXml = results[0];
                 strHtml = results[1];
 
-                // ±£´æ¸Õ»ñµÃµÄ¼ÇÂ¼
+                // ä¿å­˜åˆšè·å¾—çš„è®°å½•
                 this.OldRecord = strXml;
 
                 /*
@@ -433,7 +433,7 @@ MessageBoxDefaultButton.Button2);
                 if (lRet == -1)
                 {
                     ChargingForm.SetHtmlString(this.webBrowser_normalInfo,
-"×°ÔØ¶ÁÕß¼ÇÂ¼·¢Éú´íÎó: " + strError);
+"è£…è½½è¯»è€…è®°å½•å‘ç”Ÿé”™è¯¯: " + strError);
 
                 }
                 else
@@ -497,9 +497,9 @@ MessageBoxDefaultButton.Button2);
 #endif
 
         /// <summary>
-        /// ÔÊĞí»òÕß½ûÖ¹½çÃæ¿Ø¼ş¡£ÔÚ³¤²Ù×÷Ç°£¬Ò»°ãĞèÒª½ûÖ¹½çÃæ¿Ø¼ş£»²Ù×÷Íê³ÉºóÔÙÔÊĞí
+        /// å…è®¸æˆ–è€…ç¦æ­¢ç•Œé¢æ§ä»¶ã€‚åœ¨é•¿æ“ä½œå‰ï¼Œä¸€èˆ¬éœ€è¦ç¦æ­¢ç•Œé¢æ§ä»¶ï¼›æ“ä½œå®Œæˆåå†å…è®¸
         /// </summary>
-        /// <param name="bEnable">ÊÇ·ñÔÊĞí½çÃæ¿Ø¼ş¡£true ÎªÔÊĞí£¬ false Îª½ûÖ¹</param>
+        /// <param name="bEnable">æ˜¯å¦å…è®¸ç•Œé¢æ§ä»¶ã€‚true ä¸ºå…è®¸ï¼Œ false ä¸ºç¦æ­¢</param>
         public override void EnableControls(bool bEnable)
         {
             this.textBox_readerBarcode.Enabled = bEnable;
@@ -530,7 +530,7 @@ MessageBoxDefaultButton.Button2);
             this.AcceptButton = this.button_save;
         }
 
-        // ´ÓXML¼ÇÂ¼ÖĞ¶Á³ö²Ù×÷ĞÅÏ¢
+        // ä»XMLè®°å½•ä¸­è¯»å‡ºæ“ä½œä¿¡æ¯
         int LoadOperationInfo(out string strError)
         {
             strError = "";
@@ -542,7 +542,7 @@ MessageBoxDefaultButton.Button2);
             }
             catch (Exception ex)
             {
-                strError = "×°ÔØXML½øÈëDOMÊ±·¢Éú´íÎó: " + ex.Message;
+                strError = "è£…è½½XMLè¿›å…¥DOMæ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                 return -1;
             }
 
@@ -574,7 +574,7 @@ MessageBoxDefaultButton.Button2);
             }
             catch (Exception ex)
             {
-                strError = "×°ÔØXML½øÈëDOMÊ±·¢Éú´íÎó: " + ex.Message;
+                strError = "è£…è½½XMLè¿›å…¥DOMæ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                 return -1;
             }
 
@@ -609,7 +609,7 @@ MessageBoxDefaultButton.Button2);
 
             if (this.ReaderBarcode == "")
             {
-                strError = "ÉĞÎ´×°ÔØ¶ÁÕß¼ÇÂ¼£¬È±·¦Ö¤ÌõÂëºÅ";
+                strError = "å°šæœªè£…è½½è¯»è€…è®°å½•ï¼Œç¼ºä¹è¯æ¡ç å·";
                 goto ERROR1;
             }
 
@@ -621,7 +621,7 @@ MessageBoxDefaultButton.Button2);
 
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ±£´æ¶ÁÕß¼ÇÂ¼ " + this.ReaderBarcode + " ...");
+            stop.Initial("æ­£åœ¨ä¿å­˜è¯»è€…è®°å½• " + this.ReaderBarcode + " ...");
             stop.BeginLoop();
 
             EnableControls(false);
@@ -635,7 +635,7 @@ MessageBoxDefaultButton.Button2);
                 string strSavedXml = "";
                 string strSavedPath = "";
 
-                // changestate²Ù×÷ĞèÒª"setreaderinfo"ºÍ"changereaderstate"Ö®Ò»È¨ÏŞ¡£
+                // changestateæ“ä½œéœ€è¦"setreaderinfo"å’Œ"changereaderstate"ä¹‹ä¸€æƒé™ã€‚
                 long lRet = Channel.SetReaderInfo(
                     stop,
                     "changestate",   // "change",
@@ -661,7 +661,7 @@ MessageBoxDefaultButton.Button2);
                             baNewTimestamp,
                             strXml,
                             this.Timestamp,
-                            "Êı¾İ¿âÖĞµÄ¼ÇÂ¼ÔÚ±à¼­ÆÚ¼ä·¢ÉúÁË¸Ä±ä¡£Çë×ĞÏ¸ºË¶Ô£¬²¢ÖØĞÂĞŞ¸Ä´°¿ÚÖĞµÄÎ´±£´æ¼ÇÂ¼£¬°´È·¶¨°´Å¥ºó¿ÉÖØÊÔ±£´æ¡£");
+                            "æ•°æ®åº“ä¸­çš„è®°å½•åœ¨ç¼–è¾‘æœŸé—´å‘ç”Ÿäº†æ”¹å˜ã€‚è¯·ä»”ç»†æ ¸å¯¹ï¼Œå¹¶é‡æ–°ä¿®æ”¹çª—å£ä¸­çš„æœªä¿å­˜è®°å½•ï¼ŒæŒ‰ç¡®å®šæŒ‰é’®åå¯é‡è¯•ä¿å­˜ã€‚");
 
                         dlg.StartPosition = FormStartPosition.CenterScreen;
                         dlg.ShowDialog(this);
@@ -676,7 +676,7 @@ MessageBoxDefaultButton.Button2);
                             {
                                 MessageBox.Show(this, strError);
                             }
-                            MessageBox.Show(this, "Çë×¢ÒâÖØĞÂ±£´æ¼ÇÂ¼");
+                            MessageBox.Show(this, "è¯·æ³¨æ„é‡æ–°ä¿å­˜è®°å½•");
                             return;
                         }
                     }
@@ -690,18 +690,18 @@ MessageBoxDefaultButton.Button2);
 
                 if (lRet == 1)
                 {
-                    // ²¿·Ö×Ö¶Î±»¾Ü¾ø
+                    // éƒ¨åˆ†å­—æ®µè¢«æ‹’ç»
                     MessageBox.Show(this, strError);
 
                     if (Channel.ErrorCode == ErrorCode.PartialDenied)
                     {
-                        // ÌáĞÑÖØĞÂ×°ÔØ?
-                        MessageBox.Show(this, "ÇëÖØĞÂ×°ÔØ¼ÇÂ¼, ¼ì²éÄÄĞ©×Ö¶ÎÄÚÈİĞŞ¸Ä±»¾Ü¾ø¡£");
+                        // æé†’é‡æ–°è£…è½½?
+                        MessageBox.Show(this, "è¯·é‡æ–°è£…è½½è®°å½•, æ£€æŸ¥å“ªäº›å­—æ®µå†…å®¹ä¿®æ”¹è¢«æ‹’ç»ã€‚");
                     }
                 }
                 else
                 {
-                    // ÖØĞÂ×°ÔØ¼ÇÂ¼µ½±à¼­Æ÷
+                    // é‡æ–°è£…è½½è®°å½•åˆ°ç¼–è¾‘å™¨
                     /*
                     this.OldRecord = strSavedXml;
                     this.RecPath = strSavedPath;
@@ -728,10 +728,10 @@ MessageBoxDefaultButton.Button2);
                 stop.Initial("");
             }
 
-            MessageBox.Show(this, "±£´æ³É¹¦");
+            MessageBox.Show(this, "ä¿å­˜æˆåŠŸ");
             this.Changed = false;
 
-            // ÖØĞÂ×°ÔØ¼ÇÂ¼µ½±à¼­Æ÷
+            // é‡æ–°è£…è½½è®°å½•åˆ°ç¼–è¾‘å™¨
             string strReaderBarcode = this.ReaderBarcode;
             this.LoadRecord(ref strReaderBarcode);
             if (this.ReaderBarcode != strReaderBarcode)
@@ -765,9 +765,9 @@ MessageBoxDefaultButton.Button2);
         }
 
         /// <summary>
-        /// È±Ê¡´°¿Ú¹ı³Ì
+        /// ç¼ºçœçª—å£è¿‡ç¨‹
         /// </summary>
-        /// <param name="m">ÏûÏ¢</param>
+        /// <param name="m">æ¶ˆæ¯</param>
         protected override void DefWndProc(ref Message m)
         {
             switch (m.Msg)
@@ -815,19 +815,19 @@ MessageBoxDefaultButton.Button2);
             string[] lines = strWhole.Split(new string[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
             if (lines.Length < 1)
             {
-                strError = "Á¬Ò»ĞĞÒ²²»´æÔÚ";
+                strError = "è¿ä¸€è¡Œä¹Ÿä¸å­˜åœ¨";
                 goto ERROR1;
             }
 
             if (lines.Length > 1)
             {
-                strError = "Í£½è´°Ö»ÔÊĞíÍÏÈëÒ»¸ö¼ÇÂ¼";
+                strError = "åœå€Ÿçª—åªå…è®¸æ‹–å…¥ä¸€ä¸ªè®°å½•";
                 goto ERROR1;
             }
 
             string strFirstLine = lines[0].Trim();
 
-            // È¡µÃrecpath
+            // å–å¾—recpath
             string strRecPath = "";
             int nRet = strFirstLine.IndexOf("\t");
             if (nRet == -1)
@@ -835,7 +835,7 @@ MessageBoxDefaultButton.Button2);
             else
                 strRecPath = strFirstLine.Substring(0, nRet).Trim();
 
-            // ÅĞ¶ÏËüÊÇ²»ÊÇ¶ÁÕß¼ÇÂ¼Â·¾¶
+            // åˆ¤æ–­å®ƒæ˜¯ä¸æ˜¯è¯»è€…è®°å½•è·¯å¾„
             string strDbName = Global.GetDbName(strRecPath);
 
             if (this.MainForm.IsReaderDbName(strDbName) == true)
@@ -853,7 +853,7 @@ MessageBoxDefaultButton.Button2);
             }
             else
             {
-                strError = "¼ÇÂ¼Â·¾¶ '" + strRecPath + "' ÖĞµÄÊı¾İ¿âÃû²»ÊÇ¶ÁÕß¿âÃû...";
+                strError = "è®°å½•è·¯å¾„ '" + strRecPath + "' ä¸­çš„æ•°æ®åº“åä¸æ˜¯è¯»è€…åº“å...";
                 goto ERROR1;
             }
 

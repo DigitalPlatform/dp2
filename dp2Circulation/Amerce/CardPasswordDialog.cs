@@ -1,4 +1,4 @@
-using System;
+锘縰sing System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -23,7 +23,7 @@ namespace dp2Circulation
         {
             if (this.textBox_password.Text == "")
             {
-                MessageBox.Show(this, "尚未输入密码");
+                MessageBox.Show(this, "灏氭湭杈撳叆瀵嗙爜");
                 this.textBox_password.Focus();
                 return;
             }
@@ -76,9 +76,9 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// 缺省窗口过程
+        /// 缂虹渷绐楀彛杩囩▼
         /// </summary>
-        /// <param name="m">消息</param>
+        /// <param name="m">娑堟伅</param>
         protected override void DefWndProc(ref Message m)
         {
             switch (m.Msg)

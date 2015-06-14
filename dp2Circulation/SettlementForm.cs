@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -21,7 +21,7 @@ using DigitalPlatform.CirculationClient.localhost;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ½áËã´°
+    /// ç»“ç®—çª—
     /// </summary>
     public partial class SettlementForm : MyForm
     {
@@ -30,7 +30,7 @@ namespace dp2Circulation
         public string Lang = "zh";
 
         /// <summary>
-        /// ¿ò¼Ü´°¿Ú
+        /// æ¡†æ¶çª—å£
         /// </summary>
         public MainForm MainForm = null;
         DigitalPlatform.Stop stop = null;
@@ -38,13 +38,13 @@ namespace dp2Circulation
 
         const int WM_LOADSIZE = API.WM_USER + 201;
 
-        // Í¼±êÏÂ±ê
+        // å›¾æ ‡ä¸‹æ ‡
         const int ITEMTYPE_AMERCED = 0;
         const int ITEMTYPE_NEWLY_SETTLEMENTED = 1;
         const int ITEMTYPE_OLD_SETTLEMENTED = 2;
         const int ITEMTYPE_UNKNOWN = 3;
 
-        // ÁĞµÄÎ»ÖÃ
+        // åˆ—çš„ä½ç½®
         const int COLUMN_ID =               0;
         const int COLUMN_STATE =            1;
         const int COLUMN_READERBARCODE =    2;
@@ -65,11 +65,11 @@ namespace dp2Circulation
 
         const int COLUMN_RECPATH =          17;
 
-        // ²ÎÓëÅÅĞòµÄÁĞºÅÊı×é
+        // å‚ä¸æ’åºçš„åˆ—å·æ•°ç»„
         SortColumns SortColumns = new SortColumns();
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public SettlementForm()
         {
@@ -90,52 +90,52 @@ namespace dp2Circulation
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
 
             stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// ºÍÈİÆ÷¹ØÁª
+            stop.Register(MainForm.stopManager, true);	// å’Œå®¹å™¨å…³è”
 #endif
 
-            // ÆğÊ¼ÈÕÆÚ
+            // èµ·å§‹æ—¥æœŸ
             this.dateControl_start.Text = this.MainForm.AppInfo.GetString(
                  "settlementform",
                  "start_date",
                  "");
 
-            // ½áÊøÈÕÆÚ
+            // ç»“æŸæ—¥æœŸ
             this.dateControl_end.Text = this.MainForm.AppInfo.GetString(
                 "settlementform",
                 "end_date",
                 "");
 
-            // ÆğÊ¼Ë÷ÒıºÅ
+            // èµ·å§‹ç´¢å¼•å·
             this.textBox_range_startCtlno.Text = this.MainForm.AppInfo.GetString(
                 "settlementform",
                 "start_ctlno",
                 "");
 
-            // ½áÊøË÷ÒıºÅ
+            // ç»“æŸç´¢å¼•å·
             this.textBox_range_endCtlno.Text = this.MainForm.AppInfo.GetString(
                 "settlementform",
                 "end_ctlno",
                 "");
 
-            // ÊÕ·Ñ²Ù×÷Ê±¼ä·¶Î§
+            // æ”¶è´¹æ“ä½œæ—¶é—´èŒƒå›´
             this.radioButton_range_amerceOperTime.Checked = this.MainForm.AppInfo.GetBoolean(
                 "settlementform",
                 "range_amerceopertime",
                 true);
 
-            // Ë÷ÒıºÅ·¶Î§
+            // ç´¢å¼•å·èŒƒå›´
             this.radioButton_range_ctlno.Checked = this.MainForm.AppInfo.GetBoolean(
                 "settlementform",
                 "range_ctlno",
                 false);
 
-            // ×´Ì¬
+            // çŠ¶æ€
             this.comboBox_range_state.Text = this.MainForm.AppInfo.GetString(
                 "settlementform",
                 "range_state",
-                "<È«²¿>");
+                "<å…¨éƒ¨>");
 
-            // °´ÕÕÊÕ·ÑÕßĞ¡¼Æ
+            // æŒ‰ç…§æ”¶è´¹è€…å°è®¡
             this.checkBox_sumByAmerceOperator.Checked = this.MainForm.AppInfo.GetBoolean(
                 "settlementform",
                 "sumby_amerceoperator",
@@ -149,9 +149,9 @@ namespace dp2Circulation
 #if NO
             if (stop != null)
             {
-                if (stop.State == 0)    // 0 ±íÊ¾ÕıÔÚ´¦Àí
+                if (stop.State == 0)    // 0 è¡¨ç¤ºæ­£åœ¨å¤„ç†
                 {
-                    MessageBox.Show(this, "ÇëÔÚ¹Ø±Õ´°¿ÚÇ°Í£Ö¹ÕıÔÚ½øĞĞµÄ³¤Ê±²Ù×÷¡£");
+                    MessageBox.Show(this, "è¯·åœ¨å…³é—­çª—å£å‰åœæ­¢æ­£åœ¨è¿›è¡Œçš„é•¿æ—¶æ“ä½œã€‚");
                     e.Cancel = true;
                     return;
                 }
@@ -162,31 +162,31 @@ namespace dp2Circulation
         private void SettlementForm_FormClosed(object sender, FormClosedEventArgs e)
         {
 #if NO
-            if (stop != null) // ÍÑÀë¹ØÁª
+            if (stop != null) // è„±ç¦»å…³è”
             {
-                stop.Unregister();	// ºÍÈİÆ÷¹ØÁª
+                stop.Unregister();	// å’Œå®¹å™¨å…³è”
                 stop = null;
             }
 #endif
 
-            // ÆğÊ¼ÈÕÆÚ
+            // èµ·å§‹æ—¥æœŸ
             this.MainForm.AppInfo.SetString(
                 "settlementform",
                 "start_date",
                 this.dateControl_start.Text);
-            // ½áÊøÈÕÆÚ
+            // ç»“æŸæ—¥æœŸ
             this.MainForm.AppInfo.SetString(
                 "settlementform",
                 "end_date",
                 this.dateControl_end.Text);
 
-            // ÆğÊ¼Ë÷ÒıºÅ
+            // èµ·å§‹ç´¢å¼•å·
             this.MainForm.AppInfo.SetString(
                 "settlementform",
                 "start_ctlno",
                 this.textBox_range_startCtlno.Text);
 
-            // ½áÊøË÷ÒıºÅ
+            // ç»“æŸç´¢å¼•å·
             this.MainForm.AppInfo.SetString(
                 "settlementform",
                 "end_ctlno",
@@ -202,13 +202,13 @@ namespace dp2Circulation
                 "range_ctlno",
                 this.radioButton_range_ctlno.Checked);
 
-            // ×´Ì¬
+            // çŠ¶æ€
             this.MainForm.AppInfo.SetString(
                 "settlementform",
                 "range_state",
                 this.comboBox_range_state.Text);
 
-            // °´ÕÕÊÕ·ÑÕßĞ¡¼Æ
+            // æŒ‰ç…§æ”¶è´¹è€…å°è®¡
             this.MainForm.AppInfo.SetBoolean(
                 "settlementform",
                 "sumby_amerceoperator",
@@ -220,7 +220,7 @@ namespace dp2Circulation
         /*public*/ void LoadSize()
         {
 #if NO
-            // ÉèÖÃ´°¿Ú³ß´ç×´Ì¬
+            // è®¾ç½®çª—å£å°ºå¯¸çŠ¶æ€
             MainForm.AppInfo.LoadMdiChildFormStates(this,
                 "mdi_form_state");
 #endif
@@ -245,7 +245,7 @@ namespace dp2Circulation
 #endif
 
             /*
-            // Èç¹ûMDI×Ó´°¿Ú²»ÊÇMainForm¸Õ¸Õ×¼±¸ÍË³öÊ±µÄ×´Ì¬£¬»Ö¸´Ëü¡£ÎªÁË¼ÇÒä³ß´ç×ö×¼±¸
+            // å¦‚æœMDIå­çª—å£ä¸æ˜¯MainFormåˆšåˆšå‡†å¤‡é€€å‡ºæ—¶çš„çŠ¶æ€ï¼Œæ¢å¤å®ƒã€‚ä¸ºäº†è®°å¿†å°ºå¯¸åšå‡†å¤‡
             if (this.WindowState != this.MainForm.MdiWindowState)
                 this.WindowState = this.MainForm.MdiWindowState;
              * */
@@ -258,9 +258,9 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// È±Ê¡´°¿Ú¹ı³Ì
+        /// ç¼ºçœçª—å£è¿‡ç¨‹
         /// </summary>
-        /// <param name="m">ÏûÏ¢</param>
+        /// <param name="m">æ¶ˆæ¯</param>
         protected override void DefWndProc(ref Message m)
         {
             switch (m.Msg)
@@ -285,35 +285,35 @@ namespace dp2Circulation
         }
 #endif
 
-        // Õı¹æ»¯ÈÕÆÚÊ±¼ä¡£
+        // æ­£è§„åŒ–æ—¥æœŸæ—¶é—´ã€‚
         static void CanonicalizeDate(ref DateTime time,
             string strStyle)
         {
-            if (strStyle == "smallbound")   // ×îĞ¡±ß½ç
+            if (strStyle == "smallbound")   // æœ€å°è¾¹ç•Œ
             {
                 time = new DateTime(time.Year, time.Month, time.Day,
                     0, 0, 0, 0);
             }
-            else if (strStyle == "largebound") // ×î´ó±ß½ç
+            else if (strStyle == "largebound") // æœ€å¤§è¾¹ç•Œ
             {
                 time = new DateTime(time.Year, time.Month, time.Day,
                     23, 59, 59, 999);
             }
             else
             {
-                throw new Exception("Î´ÖªµÄ strStyleÖµ '" + strStyle + "'");
+                throw new Exception("æœªçŸ¥çš„ strStyleå€¼ '" + strStyle + "'");
             }
         }
 
 
-        // ¹¹ÔìXML¼ìË÷Ê½
+        // æ„é€ XMLæ£€ç´¢å¼
         // parameters:
-        //      start_time  ÆğÊ¼Ê±¼ä¡£±¾µØÊ±¼ä¡£
-        //      end_time    ½áÊøÊ±¼ä¡£±¾µØÊ±¼ä¡£
+        //      start_time  èµ·å§‹æ—¶é—´ã€‚æœ¬åœ°æ—¶é—´ã€‚
+        //      end_time    ç»“æŸæ—¶é—´ã€‚æœ¬åœ°æ—¶é—´ã€‚
         // return:
-        //      -1  ³ö´í
-        //      0   Î¥Ô¼½ğ¿âÃûÃ»ÓĞÅäÖÃ
-        //      1   ³É¹¦
+        //      -1  å‡ºé”™
+        //      0   è¿çº¦é‡‘åº“åæ²¡æœ‰é…ç½®
+        //      1   æˆåŠŸ
         int BuildQueryXml(DateTime start_time,
             DateTime end_time,
             string strState,
@@ -323,10 +323,10 @@ namespace dp2Circulation
             strQueryXml = "";
             strError = "";
 
-            string strDbName = "Î¥Ô¼½ğ";
-            string strFrom = "½É¿îÊ±¼ä";
+            string strDbName = "è¿çº¦é‡‘";
+            string strFrom = "ç¼´æ¬¾æ—¶é—´";
 
-            // ¶Ôstart_timeºÍend_time½øĞĞ¹æ·¶
+            // å¯¹start_timeå’Œend_timeè¿›è¡Œè§„èŒƒ
             CanonicalizeDate(ref start_time,
                 "smallbound");
             CanonicalizeDate(ref end_time,
@@ -338,7 +338,7 @@ namespace dp2Circulation
 
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.SetMessage("ÕıÔÚ»ñÈ¡Î¥Ô¼½ğ¿âÃû ...");
+            stop.SetMessage("æ­£åœ¨è·å–è¿çº¦é‡‘åº“å ...");
             stop.BeginLoop();
 
             try
@@ -354,7 +354,7 @@ namespace dp2Circulation
                 if (lRet == 0
                     || string.IsNullOrEmpty(strDbName) == true)
                 {
-                    strError = "Î¥Ô¼½ğ¿âÃûÃ»ÓĞÅäÖÃ¡£";
+                    strError = "è¿çº¦é‡‘åº“åæ²¡æœ‰é…ç½®ã€‚";
                     return 0;   // not found
                 }
             }
@@ -383,16 +383,16 @@ namespace dp2Circulation
 
 
             if (String.IsNullOrEmpty(strState) == false
-                && strState != "<È«²¿>")
+                && strState != "<å…¨éƒ¨>")
             {
-                if (strState == "ÒÑÊÕ·Ñ")
+                if (strState == "å·²æ”¶è´¹")
                     strState = "amerced";
-                else if (strState == "¾É½áËã"
-                    || strState == "ÒÑ½áËã")  // TODO: Ó¦µ±ĞŞ¸ÄÎª¡°¾É½áËã¡±
+                else if (strState == "æ—§ç»“ç®—"
+                    || strState == "å·²ç»“ç®—")  // TODO: åº”å½“ä¿®æ”¹ä¸ºâ€œæ—§ç»“ç®—â€
                     strState = "settlemented";
 
                 string strStateXml = "";
-                strStateXml = "<target list='" + strDbName + ":" + "×´Ì¬" + "'>"
+                strStateXml = "<target list='" + strDbName + ":" + "çŠ¶æ€" + "'>"
                             + "<item><word>"
                             + StringUtil.GetXmlStringSimple(strState)
                             + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item>"
@@ -407,14 +407,14 @@ namespace dp2Circulation
             return -1;
         }
 
-        // ¹¹ÔìXML¼ìË÷Ê½
+        // æ„é€ XMLæ£€ç´¢å¼
         // parameters:
-        //      strStartCtlno  ÆğÊ¼Ë÷ÒıºÅ¡£
-        //      strEndCtlno ½áÊøË÷ÒıºÅ¡£
+        //      strStartCtlno  èµ·å§‹ç´¢å¼•å·ã€‚
+        //      strEndCtlno ç»“æŸç´¢å¼•å·ã€‚
         // return:
-        //      -1  ³ö´í
-        //      0   Î¥Ô¼½ğ¿âÃûÃ»ÓĞÅäÖÃ
-        //      1   ³É¹¦
+        //      -1  å‡ºé”™
+        //      0   è¿çº¦é‡‘åº“åæ²¡æœ‰é…ç½®
+        //      1   æˆåŠŸ
         int BuildQueryXml(string strStartCtlno,
             string strEndCtlno,
             string strState,
@@ -429,11 +429,11 @@ namespace dp2Circulation
             if (String.IsNullOrEmpty(strEndCtlno) == true)
                 strEndCtlno = "9999999999";
 
-            string strDbName = "Î¥Ô¼½ğ";
+            string strDbName = "è¿çº¦é‡‘";
             string strFrom = "__id";
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.SetMessage("ÕıÔÚ»ñÈ¡Î¥Ô¼½ğ¿âÃû ...");
+            stop.SetMessage("æ­£åœ¨è·å–è¿çº¦é‡‘åº“å ...");
             stop.BeginLoop();
 
             try
@@ -450,7 +450,7 @@ namespace dp2Circulation
                 if (lRet == 0
                     || string.IsNullOrEmpty(strDbName) == true)
                 {
-                    strError = "Î¥Ô¼½ğ¿âÃûÃ»ÓĞÅäÖÃ¡£";
+                    strError = "è¿çº¦é‡‘åº“åæ²¡æœ‰é…ç½®ã€‚";
                     return 0;   // not found
                 }
             }
@@ -472,16 +472,16 @@ namespace dp2Circulation
             + "<lang>" + this.Lang + "</lang></target>";
 
             if (String.IsNullOrEmpty(strState) == false
-    && strState != "<È«²¿>")
+    && strState != "<å…¨éƒ¨>")
             {
-                if (strState == "ÒÑÊÕ·Ñ")
+                if (strState == "å·²æ”¶è´¹")
                     strState = "amerced";
-                else if (strState == "¾É½áËã"
-                    || strState == "ÒÑ½áËã")  // Ó¦µ±ĞŞ¸ÄÎª¡°¾É½áËã¡±
+                else if (strState == "æ—§ç»“ç®—"
+                    || strState == "å·²ç»“ç®—")  // åº”å½“ä¿®æ”¹ä¸ºâ€œæ—§ç»“ç®—â€
                     strState = "settlemented";
 
                 string strStateXml = "";
-                strStateXml = "<target list='" + strDbName + ":" + "×´Ì¬" + "'>"
+                strStateXml = "<target list='" + strDbName + ":" + "çŠ¶æ€" + "'>"
                             + "<item><word>"
                             + StringUtil.GetXmlStringSimple(strState)
                             + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item>"
@@ -497,7 +497,7 @@ namespace dp2Circulation
 
         int m_nInSearching = 0;
 
-        // ´Ó¡°Î¥Ô¼½ğ¡±¿â¼ìË÷³öÎ¥Ô¼½ğµÄ¼ÇÂ¼£¬²¢ÏÔÊ¾ÔÚlistiviewÖĞ
+        // ä»â€œè¿çº¦é‡‘â€åº“æ£€ç´¢å‡ºè¿çº¦é‡‘çš„è®°å½•ï¼Œå¹¶æ˜¾ç¤ºåœ¨listiviewä¸­
         int LoadAmercedRecords(
             bool bQuick,
             string strQueryXml,
@@ -514,7 +514,7 @@ namespace dp2Circulation
             this.toolStripStatusLabel_items_message2.Text = "";
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.SetMessage("ÕıÔÚ¼ìË÷Î¥Ô¼½ğ¼ÇÂ¼ ...");
+            stop.SetMessage("æ­£åœ¨æ£€ç´¢è¿çº¦é‡‘è®°å½• ...");
             stop.BeginLoop();
 
             this.EnableControls(false);
@@ -527,8 +527,8 @@ namespace dp2Circulation
             {
 
                 /*
-                string strDbName = "Î¥Ô¼½ğ";
-                string strFrom = "½É¿îÊ±¼ä";
+                string strDbName = "è¿çº¦é‡‘";
+                string strFrom = "ç¼´æ¬¾æ—¶é—´";
                 string strLang = "zh";
                 string strQueryXml = "";
                 string strStartTime = DateTimeUtil.Rfc1123DateTimeString(start_time.ToUniversalTime());
@@ -545,7 +545,7 @@ namespace dp2Circulation
                     goto ERROR1;
                 if (lRet == 0)
                 {
-                    strError = "Î¥Ô¼½ğ¿âÃûÃ»ÓĞÅäÖÃ¡£";
+                    strError = "è¿çº¦é‡‘åº“åæ²¡æœ‰é…ç½®ã€‚";
                     return 0;   // not found
                 }
 
@@ -574,7 +574,7 @@ namespace dp2Circulation
                     out strError);
                 if (lRet == 0)
                 {
-                    strError = "¼ìË÷Î´ÃüÖĞ";
+                    strError = "æ£€ç´¢æœªå‘½ä¸­";
                     return 0;   // not found
                 }
                 if (lRet == -1)
@@ -590,18 +590,18 @@ namespace dp2Circulation
 
                 stop.SetProgressRange(0, lHitCount);
 
-                // »ñµÃ½á¹û¼¯£¬×°Èëlistview
+                // è·å¾—ç»“æœé›†ï¼Œè£…å…¥listview
                 for (; ; )
                 {
-                    Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                    Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                     if (stop != null && stop.State != 0)
                     {
-                        strError = "ÓÃ»§ÖĞ¶Ï";
+                        strError = "ç”¨æˆ·ä¸­æ–­";
                         goto ERROR1;
                     }
 
-                    stop.SetMessage("ÕıÔÚ×°Èëä¯ÀÀĞÅÏ¢ " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (ÃüÖĞ " + lHitCount.ToString() + " Ìõ¼ÇÂ¼) ...");
+                    stop.SetMessage("æ­£åœ¨è£…å…¥æµè§ˆä¿¡æ¯ " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (å‘½ä¸­ " + lHitCount.ToString() + " æ¡è®°å½•) ...");
 
                     lRet = Channel.GetSearchResult(
                         stop,
@@ -617,18 +617,18 @@ namespace dp2Circulation
 
                     if (lRet == 0)
                     {
-                        strError = "Î´ÃüÖĞ";
+                        strError = "æœªå‘½ä¸­";
                         return 0;
                     }
 
-                    // ´¦Àíä¯ÀÀ½á¹û
+                    // å¤„ç†æµè§ˆç»“æœ
                     for (int i = 0; i < searchresults.Length; i++)
                     {
-                        Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                        Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                         if (stop != null && stop.State != 0)
                         {
-                            strError = "ÓÃ»§ÖĞ¶Ï";
+                            strError = "ç”¨æˆ·ä¸­æ–­";
                             goto ERROR1;
                         }
 
@@ -639,7 +639,7 @@ namespace dp2Circulation
                         byte[] timestamp = null;
                         string strXml = "";
 
-                        stop.SetMessage("ÕıÔÚ×°ÈëÎ¥Ô¼½ğ¼ÇÂ¼ " + strPath + " " + (lStart + i + 1).ToString() + " / " + lHitCount.ToString() + " ...");
+                        stop.SetMessage("æ­£åœ¨è£…å…¥è¿çº¦é‡‘è®°å½• " + strPath + " " + (lStart + i + 1).ToString() + " / " + lHitCount.ToString() + " ...");
 
                         lRet = Channel.GetRecord(stop,
                             strPath,
@@ -676,7 +676,7 @@ namespace dp2Circulation
 
                 if (nLoadCount != lHitCount)
                 {
-                    MessageBox.Show(this, "¼ìË÷ÃüÖĞ "+lHitCount.ToString()+" Ìõ£¬Êµ¼Ê×°Èë "+nLoadCount.ToString()+" Ìõ");
+                    MessageBox.Show(this, "æ£€ç´¢å‘½ä¸­ "+lHitCount.ToString()+" æ¡ï¼Œå®é™…è£…å…¥ "+nLoadCount.ToString()+" æ¡");
                 }
             }
             finally
@@ -696,9 +696,9 @@ namespace dp2Circulation
             return -1;
         }
 
-        // Ë¢ĞÂÖ¸¶¨idµÄÊÂÏîĞĞ
+        // åˆ·æ–°æŒ‡å®šidçš„äº‹é¡¹è¡Œ
         // parameters:
-        //      bPrepareStop    ÊÇ·ñ×¼±¸stopÑ­»·×´Ì¬£¿Èç¹ûÍâ²¿µ÷ÓÃÇ°ÒÑ¾­×¼±¸ºÃÁË£¬¾ÍĞèÒªÓÃfalseµ÷ÓÃ
+        //      bPrepareStop    æ˜¯å¦å‡†å¤‡stopå¾ªç¯çŠ¶æ€ï¼Ÿå¦‚æœå¤–éƒ¨è°ƒç”¨å‰å·²ç»å‡†å¤‡å¥½äº†ï¼Œå°±éœ€è¦ç”¨falseè°ƒç”¨
         int RefreshAmercedRecords(
             bool bPrepareStop,
             string[] ids,
@@ -709,7 +709,7 @@ namespace dp2Circulation
             if (bPrepareStop == true)
             {
                 stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.SetMessage("ÕıÔÚË¢ĞÂÎ¥Ô¼½ğ¼ÇÂ¼ ...");
+                stop.SetMessage("æ­£åœ¨åˆ·æ–°è¿çº¦é‡‘è®°å½• ...");
                 stop.BeginLoop();
 
                 this.EnableControls(false);
@@ -719,31 +719,31 @@ namespace dp2Circulation
             {
                 for (int i = 0; i < ids.Length; i++)
                 {
-                    Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                    Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                     if (stop != null)
                     {
                         if (stop.State != 0)
                         {
-                            strError = "ÓÃ»§ÖĞ¶Ï";
+                            strError = "ç”¨æˆ·ä¸­æ–­";
                             goto ERROR1;
                         }
                     }
 
                     string strID = ids[i];
 
-                    // ¸ù¾İidµÃµ½¼ÇÂ¼Â·¾¶
+                    // æ ¹æ®idå¾—åˆ°è®°å½•è·¯å¾„
                     ListViewItem item = GetItemByID(strID);
                     if (item == null)
                     {
-                        strError = "id '" + strID + "' ÔÚlistviewÖĞÃ»ÓĞÕÒµ½¶ÔÓ¦µÄitem";
+                        strError = "id '" + strID + "' åœ¨listviewä¸­æ²¡æœ‰æ‰¾åˆ°å¯¹åº”çš„item";
                         goto ERROR1;
                     }
 
                     string strPath = item.SubItems[COLUMN_RECPATH].Text;
 
 
-                    stop.SetMessage("ÕıÔÚ×°Èë¼ÇÂ¼ĞÅÏ¢ " + strPath);
+                    stop.SetMessage("æ­£åœ¨è£…å…¥è®°å½•ä¿¡æ¯ " + strPath);
                     byte[] timestamp = null;
                     string strXml = "";
 
@@ -786,7 +786,7 @@ namespace dp2Circulation
             return -1;
         }
 
-        // ¸ù¾İIDÔÚlistviewÖĞ²é³ö¼ÇÂ¼Â·¾¶
+        // æ ¹æ®IDåœ¨listviewä¸­æŸ¥å‡ºè®°å½•è·¯å¾„
         ListViewItem GetItemByID(string strID)
         {
             for (int i = 0; i < this.listView_amerced.Items.Count; i++)
@@ -801,9 +801,9 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÔÊĞí»òÕß½ûÖ¹½çÃæ¿Ø¼ş¡£ÔÚ³¤²Ù×÷Ç°£¬Ò»°ãĞèÒª½ûÖ¹½çÃæ¿Ø¼ş£»²Ù×÷Íê³ÉºóÔÙÔÊĞí
+        /// å…è®¸æˆ–è€…ç¦æ­¢ç•Œé¢æ§ä»¶ã€‚åœ¨é•¿æ“ä½œå‰ï¼Œä¸€èˆ¬éœ€è¦ç¦æ­¢ç•Œé¢æ§ä»¶ï¼›æ“ä½œå®Œæˆåå†å…è®¸
         /// </summary>
-        /// <param name="bEnable">ÊÇ·ñÔÊĞí½çÃæ¿Ø¼ş¡£true ÎªÔÊĞí£¬ false Îª½ûÖ¹</param>
+        /// <param name="bEnable">æ˜¯å¦å…è®¸ç•Œé¢æ§ä»¶ã€‚true ä¸ºå…è®¸ï¼Œ false ä¸ºç¦æ­¢</param>
         public override void EnableControls(bool bEnable)
         {
             this.button_next.Enabled = bEnable;
@@ -829,39 +829,39 @@ namespace dp2Circulation
             this.comboBox_range_state.Enabled = bEnable;
         }
 
-        // »ñµÃÓÃÓÚÏÔÊ¾ÓÃÍ¾µÄ×´Ì¬×Ö·û´®
+        // è·å¾—ç”¨äºæ˜¾ç¤ºç”¨é€”çš„çŠ¶æ€å­—ç¬¦ä¸²
         static string GetDisplayStateText(string strState)
         {
             if (strState == "amerced")
-                return "ÒÑÊÕ·Ñ";
+                return "å·²æ”¶è´¹";
 
             if (strState == "settlemented")
-                return "ĞÂ½áËã";
+                return "æ–°ç»“ç®—";
 
             return strState;
         }
 
-        // »ñµÃÓÃÓÚ´æ´¢ÓÃÍ¾µÄ×´Ì¬×Ö·û´®
+        // è·å¾—ç”¨äºå­˜å‚¨ç”¨é€”çš„çŠ¶æ€å­—ç¬¦ä¸²
         static string GetOriginStateText(string strState)
         {
-            if (strState == "ÒÑÊÕ·Ñ")
+            if (strState == "å·²æ”¶è´¹")
                 return "amerced";
 
-            if (strState == "ĞÂ½áËã")
+            if (strState == "æ–°ç»“ç®—")
                 return "settlemented";
 
-            if (strState == "¾É½áËã")   // 2009/1/30
+            if (strState == "æ—§ç»“ç®—")   // 2009/1/30
                 return "settlemented";
 
 
             return strState;
         }
 
-        // Ìî³äÒ»¸öĞÂµÄamercedĞĞ
-        // stopÒÑ¾­±»Íâ²ãBeginLoop()ÁË
-        // TODO: Summary»ñµÃÊ±³ö´í£¬×îºÃ×÷Îª¾¯¸æ¶ø²»ÊÇ´íÎó¡£
+        // å¡«å……ä¸€ä¸ªæ–°çš„amercedè¡Œ
+        // stopå·²ç»è¢«å¤–å±‚BeginLoop()äº†
+        // TODO: Summaryè·å¾—æ—¶å‡ºé”™ï¼Œæœ€å¥½ä½œä¸ºè­¦å‘Šè€Œä¸æ˜¯é”™è¯¯ã€‚
         // parameters:
-        //      item    ListViewÊÂÏî¡£Èç¹ûÎªnull£¬±íÊ¾±¾º¯ÊıĞèÒª´´½¨ĞÂµÄÊÂÏî
+        //      item    ListViewäº‹é¡¹ã€‚å¦‚æœä¸ºnullï¼Œè¡¨ç¤ºæœ¬å‡½æ•°éœ€è¦åˆ›å»ºæ–°çš„äº‹é¡¹
         int FillAmercedLine(
             ListViewItem item,
             Stop stop,
@@ -880,7 +880,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = "XML×°ÔØµ½DOMÊ±·¢Éú´íÎó: " + ex.Message;
+                strError = "XMLè£…è½½åˆ°DOMæ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                 return -1;
             }
 
@@ -920,7 +920,7 @@ namespace dp2Circulation
             if (bFillSummary == true)
             {
                 // stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.SetMessage("ÕıÔÚ»ñÈ¡ÕªÒª " + strItemBarcode + " ...");
+                stop.SetMessage("æ­£åœ¨è·å–æ‘˜è¦ " + strItemBarcode + " ...");
                 // stop.BeginLoop();
 
 
@@ -998,15 +998,15 @@ namespace dp2Circulation
             string strState = item.SubItems[COLUMN_STATE].Text;
 
             if (strState == "amerced" 
-                || strState == "ÒÑÊÕ·Ñ")
+                || strState == "å·²æ”¶è´¹")
             {
                 item.ImageIndex = ITEMTYPE_AMERCED;
                 item.BackColor = Color.LightYellow;
                 item.ForeColor = SystemColors.WindowText;
             }
             else if (strState == "settlemented"
-                || strState == "ĞÂ½áËã"
-                || strState == "¾É½áËã")
+                || strState == "æ–°ç»“ç®—"
+                || strState == "æ—§ç»“ç®—")
             {
                 if (strOldState == null)
                 {
@@ -1015,22 +1015,22 @@ namespace dp2Circulation
                     item.ForeColor = Color.Gray;
 
                     // 2009/1/30
-                    ListViewUtil.ChangeItemText(item, COLUMN_STATE, "¾É½áËã");
+                    ListViewUtil.ChangeItemText(item, COLUMN_STATE, "æ—§ç»“ç®—");
                 }
                 else if (strOldState == "settlemented"
-                    || strOldState == "ĞÂ½áËã")
+                    || strOldState == "æ–°ç»“ç®—")
                 {
-                    // ×´Ì¬²»±ä
+                    // çŠ¶æ€ä¸å˜
                     Debug.Assert(item.ImageIndex == ITEMTYPE_NEWLY_SETTLEMENTED, "");
                 }
-                else if (strOldState == "¾É½áËã")
+                else if (strOldState == "æ—§ç»“ç®—")
                 {
-                    // ×´Ì¬²»±ä
+                    // çŠ¶æ€ä¸å˜
                     Debug.Assert(item.ImageIndex == ITEMTYPE_OLD_SETTLEMENTED, "");
                 }
                 else
                 {
-                    Debug.Assert(strOldState == "amerced" || strOldState == "ÒÑÊÕ·Ñ", "");
+                    Debug.Assert(strOldState == "amerced" || strOldState == "å·²æ”¶è´¹", "");
                     item.ImageIndex = ITEMTYPE_NEWLY_SETTLEMENTED;
                     item.BackColor = Color.LightGreen;
                     item.ForeColor = SystemColors.WindowText;
@@ -1038,7 +1038,7 @@ namespace dp2Circulation
             }
             else
             {
-                item.ImageIndex = ITEMTYPE_UNKNOWN;    // Î´ÖªµÄÀàĞÍ
+                item.ImageIndex = ITEMTYPE_UNKNOWN;    // æœªçŸ¥çš„ç±»å‹
                 item.BackColor = SystemColors.Window;
                 item.ForeColor = SystemColors.WindowText;
             }
@@ -1063,12 +1063,12 @@ namespace dp2Circulation
             }
             else
             {
-                Debug.Assert(false, "Î´ÖªµÄtabpage×´Ì¬");
+                Debug.Assert(false, "æœªçŸ¥çš„tabpageçŠ¶æ€");
             }
 
         }
 
-        // ÏÂÒ»²½ °´Å¥
+        // ä¸‹ä¸€æ­¥ æŒ‰é’®
         private void button_next_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -1080,24 +1080,24 @@ namespace dp2Circulation
                 if (this.radioButton_range_amerceOperTime.Checked == true)  // 2009/1/29
                 {
 
-                    // ¼ì²éÁ½¸öÈÕÆÚÊÇ·ñÎª¿Õ£¬ºÍ´óĞ¡¹ØÏµ
+                    // æ£€æŸ¥ä¸¤ä¸ªæ—¥æœŸæ˜¯å¦ä¸ºç©ºï¼Œå’Œå¤§å°å…³ç³»
                     if (this.dateControl_start.Value == new DateTime((long)0))
                     {
-                        strError = "ÉĞÎ´Ö¸¶¨ÆğÊ¼ÈÕÆÚ";
+                        strError = "å°šæœªæŒ‡å®šèµ·å§‹æ—¥æœŸ";
                         this.dateControl_start.Focus();
                         goto ERROR1;
                     }
 
                     if (this.dateControl_end.Value == new DateTime((long)0))
                     {
-                        strError = "ÉĞÎ´Ö¸¶¨½áÊøÈÕÆÚ";
+                        strError = "å°šæœªæŒ‡å®šç»“æŸæ—¥æœŸ";
                         this.dateControl_end.Focus();
                         goto ERROR1;
                     }
 
                     if (this.dateControl_start.Value.Ticks > this.dateControl_end.Value.Ticks)
                     {
-                        strError = "ÆğÊ¼ÈÕÆÚ²»ÄÜ´óÓÚ½áÊøÈÕÆÚ";
+                        strError = "èµ·å§‹æ—¥æœŸä¸èƒ½å¤§äºç»“æŸæ—¥æœŸ";
                         goto ERROR1;
                     }
                 }
@@ -1108,9 +1108,9 @@ namespace dp2Circulation
                 if (this.radioButton_range_amerceOperTime.Checked == true)
                 {
                     // return:
-                    //      -1  ³ö´í
-                    //      0   Î¥Ô¼½ğ¿âÃûÃ»ÓĞÅäÖÃ
-                    //      1   ³É¹¦
+                    //      -1  å‡ºé”™
+                    //      0   è¿çº¦é‡‘åº“åæ²¡æœ‰é…ç½®
+                    //      1   æˆåŠŸ
                     nRet = BuildQueryXml(this.dateControl_start.Value,
                         this.dateControl_end.Value,
                         this.comboBox_range_state.Text,
@@ -1120,14 +1120,14 @@ namespace dp2Circulation
                 else
                 {
 
-                    // ¹¹ÔìXML¼ìË÷Ê½
+                    // æ„é€ XMLæ£€ç´¢å¼
                     // parameters:
-                    //      strStartCtlno  ÆğÊ¼Ë÷ÒıºÅ¡£
-                    //      strEndCtlno ½áÊøË÷ÒıºÅ¡£
+                    //      strStartCtlno  èµ·å§‹ç´¢å¼•å·ã€‚
+                    //      strEndCtlno ç»“æŸç´¢å¼•å·ã€‚
                     // return:
-                    //      -1  ³ö´í
-                    //      0   Î¥Ô¼½ğ¿âÃûÃ»ÓĞÅäÖÃ
-                    //      1   ³É¹¦
+                    //      -1  å‡ºé”™
+                    //      0   è¿çº¦é‡‘åº“åæ²¡æœ‰é…ç½®
+                    //      1   æˆåŠŸ
                     nRet = BuildQueryXml(this.textBox_range_startCtlno.Text,
                         this.textBox_range_endCtlno.Text,
                         this.comboBox_range_state.Text,
@@ -1139,11 +1139,11 @@ namespace dp2Circulation
                 if (nRet == -1)
                     goto ERROR1;
                 if (nRet == 0)
-                    goto ERROR1;    // Î¥Ô¼½ğ¿âÃ»ÓĞÅäÖÃ
+                    goto ERROR1;    // è¿çº¦é‡‘åº“æ²¡æœ‰é…ç½®
 
                 this.tabControl_main.SelectedTab = this.tabPage_items;
 
-                // ×°ÔØ¼ÇÂ¼
+                // è£…è½½è®°å½•
                 nRet = LoadAmercedRecords(
                     bQuick,
                     strQueryXml,
@@ -1177,35 +1177,35 @@ namespace dp2Circulation
                     if (nNewlySettlementedCount == 0
                         && nOldSettlementedCount == 0)
                     {
-                        MessageBox.Show(this, "µ±Ç°ÁĞ±íÖĞÃ»ÓĞÈÎºÎĞÂ½áËãºÍ¾É½áËãµÄÊÂÏî£¬ÎŞ·¨´òÓ¡³öÓĞÄÚÈİµÄ½áËãÇåµ¥");
+                        MessageBox.Show(this, "å½“å‰åˆ—è¡¨ä¸­æ²¡æœ‰ä»»ä½•æ–°ç»“ç®—å’Œæ—§ç»“ç®—çš„äº‹é¡¹ï¼Œæ— æ³•æ‰“å°å‡ºæœ‰å†…å®¹çš„ç»“ç®—æ¸…å•");
                         goto END1;
                     }
                 }
 
                 if (nAmercedCount > 0)
                 {
-                    // ÌáÊ¾½áËãËùÓĞÎ´½áËãµÄÊÂÏî
+                    // æç¤ºç»“ç®—æ‰€æœ‰æœªç»“ç®—çš„äº‹é¡¹
                     DialogResult result = MessageBox.Show(
                         this,
-                        "¶Ôµ±Ç°¼¯ºÏÖĞËùÓĞÎ´½áËãÊÂÏî½øĞĞ½áËã£¿\r\n\r\n(Yes ½áËã£¬²¢µ½ÏÂÒ»²½; No ²»½áËã£¬µ½ÏÂÒ»²½; Cancel ²»½áËã£¬Ò²²»µ½ÏÂÒ»²½)",
+                        "å¯¹å½“å‰é›†åˆä¸­æ‰€æœ‰æœªç»“ç®—äº‹é¡¹è¿›è¡Œç»“ç®—ï¼Ÿ\r\n\r\n(Yes ç»“ç®—ï¼Œå¹¶åˆ°ä¸‹ä¸€æ­¥; No ä¸ç»“ç®—ï¼Œåˆ°ä¸‹ä¸€æ­¥; Cancel ä¸ç»“ç®—ï¼Œä¹Ÿä¸åˆ°ä¸‹ä¸€æ­¥)",
                         "SettlementForm",
                         MessageBoxButtons.YesNoCancel,
                         MessageBoxIcon.Question,
                         MessageBoxDefaultButton.Button1);
                     if (result == DialogResult.Cancel)
                     {
-                        // Ò²²»ÇĞ»»Ò³
+                        // ä¹Ÿä¸åˆ‡æ¢é¡µ
                         goto END1;
                     }
                     if (result == DialogResult.No)
                     {
-                        // ²»½áËã£¬µ«ÊÇÇĞ»»Ò³
+                        // ä¸ç»“ç®—ï¼Œä½†æ˜¯åˆ‡æ¢é¡µ
                         this.tabControl_main.SelectedTab = this.tabPage_print;
                         this.button_next.Enabled = false;
                         goto END1;
                     }
 
-                    // ½áËã£¬²¢ÇĞ»»Ò³
+                    // ç»“ç®—ï¼Œå¹¶åˆ‡æ¢é¡µ
                     menu_selectAmerced_Click(this, null);
 
                     if (
@@ -1228,7 +1228,7 @@ namespace dp2Circulation
             }
             else
             {
-                Debug.Assert(false, "Î´ÖªµÄtabpage×´Ì¬");
+                Debug.Assert(false, "æœªçŸ¥çš„tabpageçŠ¶æ€");
             }
 
         END1:
@@ -1282,22 +1282,22 @@ namespace dp2Circulation
 
         }
 
-        // ½áËã
+        // ç»“ç®—
         private void button_settlement_Click(object sender, EventArgs e)
         {
             SettlementAction("settlement");
         }
 
-        // ³·Ïú½áËã
+        // æ’¤é”€ç»“ç®—
         private void button_undoSettlement_Click(object sender, EventArgs e)
         {
             SettlementAction("undosettlement");
         }
 
-        // ½áËã¡¢³·Ïú»òÕßÉ¾³ı
-        // TODO: ¶Ô¾É½áËãÊÂÏîµÄ³·Ïú£¬ÒªÉ÷ÖØ£¬ÖÁÉÙÒª¾¯¸æÒ»ÏÂ
+        // ç»“ç®—ã€æ’¤é”€æˆ–è€…åˆ é™¤
+        // TODO: å¯¹æ—§ç»“ç®—äº‹é¡¹çš„æ’¤é”€ï¼Œè¦æ…é‡ï¼Œè‡³å°‘è¦è­¦å‘Šä¸€ä¸‹
         // parameters:
-        //      bSettlement Èç¹ûÎªtrue£¬±íÊ¾½áËã£»Èç¹ûÎªfalse£¬±íÊ¾³·Ïú½áËã
+        //      bSettlement å¦‚æœä¸ºtrueï¼Œè¡¨ç¤ºç»“ç®—ï¼›å¦‚æœä¸ºfalseï¼Œè¡¨ç¤ºæ’¤é”€ç»“ç®—
         void SettlementAction(string strAction)
         {
             string strError = "";
@@ -1305,20 +1305,20 @@ namespace dp2Circulation
             string strOperName = "";
 
             if (strAction == "settlement")
-                strOperName = "½áËã";
+                strOperName = "ç»“ç®—";
             else if (strAction == "undosettlement")
-                strOperName = "³·Ïú½áËã";
+                strOperName = "æ’¤é”€ç»“ç®—";
             else if (strAction == "delete")
             {
-                strOperName = "É¾³ıÒÑ½áËãÊÂÏî";
+                strOperName = "åˆ é™¤å·²ç»“ç®—äº‹é¡¹";
             }
             else
             {
-                strError = "Î´ÄÜÊ¶±ğµÄ strAction ²ÎÊıÖµ '" + strAction + "'";
+                strError = "æœªèƒ½è¯†åˆ«çš„ strAction å‚æ•°å€¼ '" + strAction + "'";
                 goto ERROR1;
             }
 
-            // ¹¹ÔìidÁĞ±í
+            // æ„é€ idåˆ—è¡¨
             List<string> total_ids = new List<string>();
 
             List<ListViewItem> items = new List<ListViewItem>();
@@ -1327,7 +1327,7 @@ namespace dp2Circulation
             {
                 if (this.listView_amerced.CheckedItems.Count == 0)
                 {
-                    strError = "ÉĞÎ´¹´Ñ¡Òª" + strOperName + "µÄÊÂÏî";
+                    strError = "å°šæœªå‹¾é€‰è¦" + strOperName + "çš„äº‹é¡¹";
                     goto ERROR1;
                 }
 
@@ -1341,7 +1341,7 @@ namespace dp2Circulation
             {
                 if (this.listView_amerced.SelectedItems.Count == 0)
                 {
-                    strError = "ÉĞÎ´Ñ¡¶¨Òª" + strOperName + "µÄÊÂÏî";
+                    strError = "å°šæœªé€‰å®šè¦" + strOperName + "çš„äº‹é¡¹";
                     goto ERROR1;
                 }
 
@@ -1357,7 +1357,7 @@ namespace dp2Circulation
             int nNewlySettlementedCount = 0;
             int nOtherCount = 0;
 
-            // ÏÈ½øĞĞ¼ì²éºÍ¾¯¸æ
+            // å…ˆè¿›è¡Œæ£€æŸ¥å’Œè­¦å‘Š
             for (int i = 0; i < items.Count; i++)
             {
                 ListViewItem item = items[i];
@@ -1378,28 +1378,28 @@ namespace dp2Circulation
             {
                 if (nAmercedCount == 0)
                 {
-                    strError = "µ±Ç°Ñ¡¶¨µÄÊÂÏîÖĞ£¬ÒòÃ»ÓĞ°üº¬×´Ì¬Îª¡°ÒÑÊÕ·Ñ¡±µÄÊÂÏî£¬½áËã²Ù×÷ÎŞ·¨½øĞĞ";
+                    strError = "å½“å‰é€‰å®šçš„äº‹é¡¹ä¸­ï¼Œå› æ²¡æœ‰åŒ…å«çŠ¶æ€ä¸ºâ€œå·²æ”¶è´¹â€çš„äº‹é¡¹ï¼Œç»“ç®—æ“ä½œæ— æ³•è¿›è¡Œ";
                     goto ERROR1;
                 }
 
                 if (nOldSettlementedCount + nNewlySettlementedCount > 0)
-                    strWarning = "µ±Ç°Ñ¡¶¨µÄÊÂÏîÖĞÓĞ "
+                    strWarning = "å½“å‰é€‰å®šçš„äº‹é¡¹ä¸­æœ‰ "
                         + (nOldSettlementedCount + nNewlySettlementedCount).ToString()
-                        + " ¸öÒÑ¾­½áËãµÄÊÂÏî£¬ÔÚ½áËã²Ù×÷ÖĞ½«±»Ìø¹ı¡£";
+                        + " ä¸ªå·²ç»ç»“ç®—çš„äº‹é¡¹ï¼Œåœ¨ç»“ç®—æ“ä½œä¸­å°†è¢«è·³è¿‡ã€‚";
             }
             else if (strAction == "undosettlement")
             {
                 if (nOldSettlementedCount + nNewlySettlementedCount == 0)
                 {
-                    strError = "µ±Ç°Ñ¡¶¨µÄÊÂÏîÖĞ£¬ÒòÃ»ÓĞ°üº¬×´Ì¬Îª¡°ĞÂ½áËã¡±ºÍ¡°¾É½áËã¡±µÄÊÂÏî£¬³·Ïú½áËã²Ù×÷ÎŞ·¨½øĞĞ";
+                    strError = "å½“å‰é€‰å®šçš„äº‹é¡¹ä¸­ï¼Œå› æ²¡æœ‰åŒ…å«çŠ¶æ€ä¸ºâ€œæ–°ç»“ç®—â€å’Œâ€œæ—§ç»“ç®—â€çš„äº‹é¡¹ï¼Œæ’¤é”€ç»“ç®—æ“ä½œæ— æ³•è¿›è¡Œ";
                     goto ERROR1;
                 }
 
                 if (nOldSettlementedCount > 0)
                 {
-                    strWarning = "µ±Ç°Ñ¡¶¨µÄÊÂÏîÖĞÓĞ "
+                    strWarning = "å½“å‰é€‰å®šçš„äº‹é¡¹ä¸­æœ‰ "
                         + nOldSettlementedCount.ToString()
-                        + " ¸ö¾É½áËãÊÂÏî(¼´·Ç±¾´Î½áËãµÄÊÂÏî)¡£Èç¹ûÒª¶ÔËü(ÃÇ)½øĞĞ³·Ïú½áËãµÄ²Ù×÷£¬½«Ó°Ïìµ½ÒÔÇ°ÒÑ¾­´òÓ¡¹ıµÄ½áËãÇåµ¥µÄ×¼È·ĞÔºÍÈ¨ÍşĞÔ¡£\r\n\r\nÈ·ÊµÒª¶ÔËüÃÇ½øĞĞ³·Ïú½áËãµÄ²Ù×÷?";
+                        + " ä¸ªæ—§ç»“ç®—äº‹é¡¹(å³éæœ¬æ¬¡ç»“ç®—çš„äº‹é¡¹)ã€‚å¦‚æœè¦å¯¹å®ƒ(ä»¬)è¿›è¡Œæ’¤é”€ç»“ç®—çš„æ“ä½œï¼Œå°†å½±å“åˆ°ä»¥å‰å·²ç»æ‰“å°è¿‡çš„ç»“ç®—æ¸…å•çš„å‡†ç¡®æ€§å’Œæƒå¨æ€§ã€‚\r\n\r\nç¡®å®è¦å¯¹å®ƒä»¬è¿›è¡Œæ’¤é”€ç»“ç®—çš„æ“ä½œ?";
                     DialogResult result = MessageBox.Show(
                         this,
                         strWarning,
@@ -1409,7 +1409,7 @@ namespace dp2Circulation
                         MessageBoxDefaultButton.Button2);
                     if (result == DialogResult.Cancel)
                     {
-                        strError = "±¾´Î³·Ïú½áËãµÄ²Ù×÷ÒÑ¾­±»È«²¿·ÅÆú(ÎŞÂÛĞÂ¡¢¾É½áËãÊÂÏî)¡£";
+                        strError = "æœ¬æ¬¡æ’¤é”€ç»“ç®—çš„æ“ä½œå·²ç»è¢«å…¨éƒ¨æ”¾å¼ƒ(æ— è®ºæ–°ã€æ—§ç»“ç®—äº‹é¡¹)ã€‚";
                         goto ERROR1;
                     }
 
@@ -1417,24 +1417,24 @@ namespace dp2Circulation
                 }
 
                 if (nAmercedCount > 0)
-                    strWarning = "µ±Ç°Ñ¡¶¨µÄÊÂÏîÖĞÓĞ "
+                    strWarning = "å½“å‰é€‰å®šçš„äº‹é¡¹ä¸­æœ‰ "
     + nAmercedCount.ToString()
-    + " ¸öÎ´½áËã(¼´ÒÑÊÕ·Ñ×´Ì¬)µÄÊÂÏî£¬ÔÚ³·Ïú½áËãµÄ²Ù×÷ÖĞ½«±»Ìø¹ı¡£";
+    + " ä¸ªæœªç»“ç®—(å³å·²æ”¶è´¹çŠ¶æ€)çš„äº‹é¡¹ï¼Œåœ¨æ’¤é”€ç»“ç®—çš„æ“ä½œä¸­å°†è¢«è·³è¿‡ã€‚";
 
             }
             else if (strAction == "delete")
             {
                 if (nOldSettlementedCount + nNewlySettlementedCount == 0)
                 {
-                    strError = "µ±Ç°Ñ¡¶¨µÄÊÂÏîÖĞ£¬ÒòÃ»ÓĞ°üº¬×´Ì¬Îª¡°ĞÂ½áËã¡±ºÍ¡°¾É½áËã¡±µÄÊÂÏî£¬É¾³ıÒÑ½áËãÊÂÏîµÄ²Ù×÷ÎŞ·¨½øĞĞ";
+                    strError = "å½“å‰é€‰å®šçš„äº‹é¡¹ä¸­ï¼Œå› æ²¡æœ‰åŒ…å«çŠ¶æ€ä¸ºâ€œæ–°ç»“ç®—â€å’Œâ€œæ—§ç»“ç®—â€çš„äº‹é¡¹ï¼Œåˆ é™¤å·²ç»“ç®—äº‹é¡¹çš„æ“ä½œæ— æ³•è¿›è¡Œ";
                     goto ERROR1;
                 }
 
                 if (nOldSettlementedCount > 0)
                 {
-                    strWarning = "È·ÊµÒª´ÓÊı¾İ¿âÖĞÉ¾³ıµ±Ç°Ñ¡¶¨µÄ "
+                    strWarning = "ç¡®å®è¦ä»æ•°æ®åº“ä¸­åˆ é™¤å½“å‰é€‰å®šçš„ "
     + (nOldSettlementedCount + nNewlySettlementedCount).ToString()
-    + " ¸öÒÑ½áËãÊÂÏî?\r\n\r\n(¾¯¸æ£ºÉ¾³ı²Ù×÷ÊÇ²»¿ÉÄæµÄ))";
+    + " ä¸ªå·²ç»“ç®—äº‹é¡¹?\r\n\r\n(è­¦å‘Šï¼šåˆ é™¤æ“ä½œæ˜¯ä¸å¯é€†çš„))";
                     DialogResult result = MessageBox.Show(
                         this,
                         strWarning,
@@ -1444,7 +1444,7 @@ namespace dp2Circulation
                         MessageBoxDefaultButton.Button2);
                     if (result == DialogResult.Cancel)
                     {
-                        strError = "È¡Ïû²Ù×÷";
+                        strError = "å–æ¶ˆæ“ä½œ";
                         goto ERROR1;
                     }
 
@@ -1452,9 +1452,9 @@ namespace dp2Circulation
                 }
 
                 if (nAmercedCount > 0)
-                    strWarning = "µ±Ç°Ñ¡¶¨µÄÊÂÏîÖĞÓĞ "
+                    strWarning = "å½“å‰é€‰å®šçš„äº‹é¡¹ä¸­æœ‰ "
 + nAmercedCount.ToString()
-+ " ¸öÎ´½áËã(¼´ÒÑÊÕ·Ñ×´Ì¬)µÄÊÂÏî£¬ÔÚÉ¾³ıÒÑ½áËãÊÂÏîµÄ²Ù×÷ÖĞ½«±»Ìø¹ı¡£";
++ " ä¸ªæœªç»“ç®—(å³å·²æ”¶è´¹çŠ¶æ€)çš„äº‹é¡¹ï¼Œåœ¨åˆ é™¤å·²ç»“ç®—äº‹é¡¹çš„æ“ä½œä¸­å°†è¢«è·³è¿‡ã€‚";
 
             }
 
@@ -1463,7 +1463,7 @@ namespace dp2Circulation
                 MessageBox.Show(this, strWarning);
             }
 
-            // ÊÇ·ñÇ°¶Ë¾Í¿É½øĞĞÃ¬¶ÜĞÔ¼ì²é£¿
+            // æ˜¯å¦å‰ç«¯å°±å¯è¿›è¡ŒçŸ›ç›¾æ€§æ£€æŸ¥ï¼Ÿ
             for (int i = 0; i < items.Count; i++)
             {
                 ListViewItem item = items[i];
@@ -1474,11 +1474,11 @@ namespace dp2Circulation
                 if (strAction == "settlement")
                 {
                     if (strState == "settlemented"
-                        || strState == "ĞÂ½áËã"
-                        || strState == "¾É½áËã")
+                        || strState == "æ–°ç»“ç®—"
+                        || strState == "æ—§ç»“ç®—")
                     {
                         /*
-                        strError = "IDÎª " + strID + " µÄÊÂÏî×´Ì¬Îª"+strState+"£¬ÎŞ·¨ÔÙ½øĞĞ"+strAction+"²Ù×÷¡£ÇëÈ¥³ı¸ÃÊÂÏîµÄ¹´Ñ¡×´Ì¬ºóÔÙÖØĞÂÌá½»ÇëÇó¡£";
+                        strError = "IDä¸º " + strID + " çš„äº‹é¡¹çŠ¶æ€ä¸º"+strState+"ï¼Œæ— æ³•å†è¿›è¡Œ"+strAction+"æ“ä½œã€‚è¯·å»é™¤è¯¥äº‹é¡¹çš„å‹¾é€‰çŠ¶æ€åå†é‡æ–°æäº¤è¯·æ±‚ã€‚";
                         goto ERROR1;
                          * */
                         continue;
@@ -1488,10 +1488,10 @@ namespace dp2Circulation
                 if (strAction == "undosettlement")
                 {
                     if (strState == "amerced" 
-                        || strState == "ÒÑÊÕ·Ñ")
+                        || strState == "å·²æ”¶è´¹")
                     {
                         /*
-                        strError = "IDÎª " + strID + " µÄÊÂÏî×´Ì¬Îª"+strState+"£¬ÎŞ·¨½øĞĞ"+strAction+"²Ù×÷¡£ÇëÈ¥³ı¸ÃÊÂÏîµÄ¹´Ñ¡×´Ì¬ºóÔÙÖØĞÂÌá½»ÇëÇó¡£";
+                        strError = "IDä¸º " + strID + " çš„äº‹é¡¹çŠ¶æ€ä¸º"+strState+"ï¼Œæ— æ³•è¿›è¡Œ"+strAction+"æ“ä½œã€‚è¯·å»é™¤è¯¥äº‹é¡¹çš„å‹¾é€‰çŠ¶æ€åå†é‡æ–°æäº¤è¯·æ±‚ã€‚";
                         goto ERROR1;
                          * */
                         continue;
@@ -1501,10 +1501,10 @@ namespace dp2Circulation
                 if (strAction == "delete")
                 {
                     if (strState == "amerced" 
-                        || strState == "ÒÑÊÕ·Ñ")
+                        || strState == "å·²æ”¶è´¹")
                     {
                         /*
-                        strError = "IDÎª " + strID + " µÄÊÂÏî×´Ì¬Îª"+strState+"£¬ÎŞ·¨½øĞĞ"+strAction+"²Ù×÷¡£ÇëÈ¥³ı¸ÃÊÂÏîµÄ¹´Ñ¡×´Ì¬ºóÔÙÖØĞÂÌá½»ÇëÇó¡£"; 
+                        strError = "IDä¸º " + strID + " çš„äº‹é¡¹çŠ¶æ€ä¸º"+strState+"ï¼Œæ— æ³•è¿›è¡Œ"+strAction+"æ“ä½œã€‚è¯·å»é™¤è¯¥äº‹é¡¹çš„å‹¾é€‰çŠ¶æ€åå†é‡æ–°æäº¤è¯·æ±‚ã€‚"; 
                         goto ERROR1;
                          * */
                         continue;
@@ -1515,7 +1515,7 @@ namespace dp2Circulation
             }
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.SetMessage("ÕıÔÚ½øĞĞ"+strOperName+" ...");
+            stop.SetMessage("æ­£åœ¨è¿›è¡Œ"+strOperName+" ...");
             stop.BeginLoop();
 
             stop.SetProgressRange(0, total_ids.Count);
@@ -1530,7 +1530,7 @@ namespace dp2Circulation
                 int nBatchCount = (total_ids.Count / nPerCount) + ((total_ids.Count % nPerCount) != 0 ? 1 : 0);
                 for (int j = 0; j < nBatchCount; j++)
                 {
-                    // Ã¿ÂÖ´¦Àí10¸öid
+                    // æ¯è½®å¤„ç†10ä¸ªid
                     int nThisCount = Math.Min(total_ids.Count - j * nPerCount, nPerCount);
                     string[] ids = new string[nThisCount];
                     total_ids.CopyTo(j * nPerCount, ids, 0, nThisCount);
@@ -1544,7 +1544,7 @@ namespace dp2Circulation
                         goto ERROR1;
 
 
-                    // Ë¢ĞÂ
+                    // åˆ·æ–°
                     int nRet = RefreshAmercedRecords(
                         false,
                         ids,
@@ -1567,15 +1567,15 @@ namespace dp2Circulation
                 this.EnableControls(true);
             }
 
-            // ½áËã³É¹¦
-            MessageBox.Show(this, strOperName + "³É¹¦¡£(´¦Àí¼ÇÂ¼Êı " + total_ids.Count.ToString() + " ¸ö)");
+            // ç»“ç®—æˆåŠŸ
+            MessageBox.Show(this, strOperName + "æˆåŠŸã€‚(å¤„ç†è®°å½•æ•° " + total_ids.Count.ToString() + " ä¸ª)");
             this.OnItemTypeChanged();
             return;
         ERROR1:
             MessageBox.Show(this, strError);
         }
 
-        // ÓÒÊó±ê¼üpopup²Ëµ¥
+        // å³é¼ æ ‡é”®popupèœå•
         private void listView_amerced_MouseUp(object sender, MouseEventArgs e)
         {
             if (e.Button != MouseButtons.Right)
@@ -1593,9 +1593,9 @@ namespace dp2Circulation
             ContextMenu contextMenu = new ContextMenu();
             MenuItem menuItem = null;
 
-            string strSelectedName = "Ñ¡¶¨µÄ";
+            string strSelectedName = "é€‰å®šçš„";
             if (this.toolStripButton_items_useCheck.Checked == true)
-                strSelectedName = "¹´Ñ¡µÄ";
+                strSelectedName = "å‹¾é€‰çš„";
 
             int nSelectedCount = 0;
             if (this.toolStripButton_items_useCheck.Checked == true)
@@ -1603,15 +1603,15 @@ namespace dp2Circulation
             else
                 nSelectedCount = this.listView_amerced.SelectedItems.Count;
 
-            // ½áËã
-            menuItem = new MenuItem("½áËã" + strSelectedName + " " + nSelectedCount.ToString() + " ¸öÊÂÏî(&S)");
+            // ç»“ç®—
+            menuItem = new MenuItem("ç»“ç®—" + strSelectedName + " " + nSelectedCount.ToString() + " ä¸ªäº‹é¡¹(&S)");
             menuItem.Click += new System.EventHandler(this.toolStripButton_items_settlement_Click);
             if (nSelectedCount == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            // ³·Ïú½áËã
-            menuItem = new MenuItem("³·Ïú½áËã" + strSelectedName + " " + nSelectedCount.ToString() + " ¸öÊÂÏî(&S)");
+            // æ’¤é”€ç»“ç®—
+            menuItem = new MenuItem("æ’¤é”€ç»“ç®—" + strSelectedName + " " + nSelectedCount.ToString() + " ä¸ªäº‹é¡¹(&S)");
             menuItem.Click += new System.EventHandler(this.toolStripButton_items_undoSettlement_Click);
             if (nSelectedCount == 0)
                 menuItem.Enabled = false;
@@ -1622,7 +1622,7 @@ namespace dp2Circulation
             contextMenu.MenuItems.Add(menuItem);
 
 
-            menuItem = new MenuItem("ÒÆ³ı"+strSelectedName+" " + nSelectedCount.ToString() + " ¸öÊÂÏî(&R)");
+            menuItem = new MenuItem("ç§»é™¤"+strSelectedName+" " + nSelectedCount.ToString() + " ä¸ªäº‹é¡¹(&R)");
             menuItem.Click += new System.EventHandler(this.menu_removeSelectedItems_Click);
             if (nSelectedCount == 0)
                 menuItem.Enabled = false;
@@ -1632,18 +1632,18 @@ namespace dp2Circulation
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
-            string strText = "È«Ñ¡(&A)";
+            string strText = "å…¨é€‰(&A)";
             if (this.toolStripButton_items_useCheck.Checked == true)
-                strText = "È«¹´Ñ¡(&H)";
+                strText = "å…¨å‹¾é€‰(&H)";
 
             menuItem = new MenuItem(strText);
             menuItem.Click += new System.EventHandler(this.menu_selectAll_Click);
             contextMenu.MenuItems.Add(menuItem);
 
             if (this.toolStripButton_items_useCheck.Checked == true)
-                strText = "È«Çå³ı¹´Ñ¡(&U)";
+                strText = "å…¨æ¸…é™¤å‹¾é€‰(&U)";
             else
-                strText = "È«²»Ñ¡(&U)";
+                strText = "å…¨ä¸é€‰(&U)";
 
             menuItem = new MenuItem(strText);
             menuItem.Click += new System.EventHandler(this.menu_unSelectAll_Click);
@@ -1654,17 +1654,17 @@ namespace dp2Circulation
             contextMenu.MenuItems.Add(menuItem);
 
             if (this.toolStripButton_items_useCheck.Checked == true)
-                strText = "¹´Ñ¡";
+                strText = "å‹¾é€‰";
             else 
-                strText = "Ñ¡¶¨";
+                strText = "é€‰å®š";
 
-            menuItem = new MenuItem(strText+"È«²¿("+nAmercedCount.ToString()+"¸ö) ÒÑÊÕ·Ñ ÊÂÏî(&A)");
+            menuItem = new MenuItem(strText+"å…¨éƒ¨("+nAmercedCount.ToString()+"ä¸ª) å·²æ”¶è´¹ äº‹é¡¹(&A)");
             menuItem.Click += new System.EventHandler(this.menu_selectAmerced_Click);
             if (nAmercedCount == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem(strText+"È«²¿("+(nNewlySettlementedCount + nOldSettlementedCount).ToString()+"¸ö) ÒÑ½áËã(°üÀ¨ĞÂ½áËãºÍ¾É½áËã) ÊÂÏî(&S)");
+            menuItem = new MenuItem(strText+"å…¨éƒ¨("+(nNewlySettlementedCount + nOldSettlementedCount).ToString()+"ä¸ª) å·²ç»“ç®—(åŒ…æ‹¬æ–°ç»“ç®—å’Œæ—§ç»“ç®—) äº‹é¡¹(&S)");
             menuItem.Click += new System.EventHandler(this.menu_selectSettlemented_Click);
             if (nNewlySettlementedCount + nOldSettlementedCount == 0)
                 menuItem.Enabled = false;
@@ -1674,7 +1674,7 @@ namespace dp2Circulation
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("Ê¹ÓÃ¹´Ñ¡(&C)");
+            menuItem = new MenuItem("ä½¿ç”¨å‹¾é€‰(&C)");
             menuItem.Click += new System.EventHandler(this.menu_toggleUseCheck_Click);
             if (this.toolStripButton_items_useCheck.Checked == true)
                 menuItem.Checked = true;
@@ -1686,8 +1686,8 @@ namespace dp2Circulation
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
-            // ×¢£º¡°ÒÑ½áËã¡±°üÀ¨ĞÂ½áËãºÍ¾É½áËã
-            menuItem = new MenuItem("´ÓÊı¾İ¿âÖĞÉ¾³ıµ±Ç°" + strText + "µÄ ÒÑ½áËã(°üÀ¨ĞÂ½áËãºÍ¾É½áËã) ÊÂÏî(&D)");
+            // æ³¨ï¼šâ€œå·²ç»“ç®—â€åŒ…æ‹¬æ–°ç»“ç®—å’Œæ—§ç»“ç®—
+            menuItem = new MenuItem("ä»æ•°æ®åº“ä¸­åˆ é™¤å½“å‰" + strText + "çš„ å·²ç»“ç®—(åŒ…æ‹¬æ–°ç»“ç®—å’Œæ—§ç»“ç®—) äº‹é¡¹(&D)");
             menuItem.Click += new System.EventHandler(this.menu_deleteSettlementedItemsFromDb_Click);
             if (nSelectedCount == 0)
                 menuItem.Enabled = false;
@@ -1698,7 +1698,7 @@ namespace dp2Circulation
             contextMenu.MenuItems.Add(menuItem);
 
             // 
-            menuItem = new MenuItem("µ¼³öµ±Ç°" + strText + "µÄÊÂÏîµ½XMLÎÄ¼ş(&E)");
+            menuItem = new MenuItem("å¯¼å‡ºå½“å‰" + strText + "çš„äº‹é¡¹åˆ°XMLæ–‡ä»¶(&E)");
             menuItem.Click += new System.EventHandler(this.menu_exportToXmlFile_Click);
             if (nSelectedCount == 0 || this.m_nInSearching > 0)
                 menuItem.Enabled = false;
@@ -1715,7 +1715,7 @@ namespace dp2Circulation
 
             if (this.m_nInSearching > 0)
             {
-                strError = "µ±Ç°ÕıÔÚ½øĞĞÁíÒ»¼ìË÷²Ù×÷£¬ĞèÒªÏÈÍ£Ö¹Ëü£¬²ÅÄÜ½øĞĞµ¼³öÎ¥Ô¼½ğ¿â¼ÇÂ¼µÄ²Ù×÷...";
+                strError = "å½“å‰æ­£åœ¨è¿›è¡Œå¦ä¸€æ£€ç´¢æ“ä½œï¼Œéœ€è¦å…ˆåœæ­¢å®ƒï¼Œæ‰èƒ½è¿›è¡Œå¯¼å‡ºè¿çº¦é‡‘åº“è®°å½•çš„æ“ä½œ...";
                 goto ERROR1;
             }
 
@@ -1735,7 +1735,7 @@ namespace dp2Circulation
             strError = "";
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.SetMessage("ÕıÔÚµ¼³öÎ¥Ô¼½ğ¼ÇÂ¼ ...");
+            stop.SetMessage("æ­£åœ¨å¯¼å‡ºè¿çº¦é‡‘è®°å½• ...");
             stop.BeginLoop();
 
             this.EnableControls(false);
@@ -1748,7 +1748,7 @@ namespace dp2Circulation
                 {
                     if (this.listView_amerced.CheckedItems.Count == 0)
                     {
-                        strError = "ÉĞÎ´¹´Ñ¡Òªµ¼³öµÄÊÂÏî";
+                        strError = "å°šæœªå‹¾é€‰è¦å¯¼å‡ºçš„äº‹é¡¹";
                         goto ERROR1;
                     }
 
@@ -1762,7 +1762,7 @@ namespace dp2Circulation
                 {
                     if (this.listView_amerced.SelectedItems.Count == 0)
                     {
-                        strError = "ÉĞÎ´Ñ¡¶¨Òªµ¼³öµÄÊÂÏî";
+                        strError = "å°šæœªé€‰å®šè¦å¯¼å‡ºçš„äº‹é¡¹";
                         goto ERROR1;
                     }
 
@@ -1773,13 +1773,13 @@ namespace dp2Circulation
                     }
                 }
 
-                // ×¼±¸XMLÊä³öÎÄ¼ş
+                // å‡†å¤‡XMLè¾“å‡ºæ–‡ä»¶
                 SaveFileDialog dlg = new SaveFileDialog(); 
-                dlg.Title = "ÇëÖ¸¶¨Êä³öµÄXMLÎÄ¼ş";
+                dlg.Title = "è¯·æŒ‡å®šè¾“å‡ºçš„XMLæ–‡ä»¶";
                 dlg.OverwritePrompt = true;
                 dlg.CreatePrompt = false;
                 dlg.FileName = m_strOutputXmlFilename;
-                dlg.Filter = "XMLÎÄ¼ş (*.xml)|*.xml|All files (*.*)|*.*";
+                dlg.Filter = "XMLæ–‡ä»¶ (*.xml)|*.xml|All files (*.*)|*.*";
                 dlg.RestoreDirectory = true;
 
                 if (dlg.ShowDialog() != DialogResult.OK)
@@ -1787,32 +1787,32 @@ namespace dp2Circulation
 
                 m_strOutputXmlFilename = dlg.FileName;
 
-                // Êä³öµÄÎÄ¼şÁ÷
+                // è¾“å‡ºçš„æ–‡ä»¶æµ
 
                 using (FileStream outputfile = File.Create(m_strOutputXmlFilename))
                 {
-                    XmlTextWriter writer = null;   // Xml¸ñÊ½Êä³ö
+                    XmlTextWriter writer = null;   // Xmlæ ¼å¼è¾“å‡º
                     writer = new XmlTextWriter(outputfile, Encoding.UTF8);
                     writer.Formatting = Formatting.Indented;
                     writer.Indentation = 4;
 
-                    // Ğ´ÈİÆ÷ÔªËØ
+                    // å†™å®¹å™¨å…ƒç´ 
                     writer.WriteStartDocument();
                     writer.WriteStartElement("dprms", "collection", DpNs.dprms);
 
                     stop.SetProgressRange(0, items.Count);
                     for (int i = 0; i < items.Count; i++)
                     {
-                        Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                        Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                         if (stop != null
                             && stop.State != 0)
                         {
-                            strError = "ÓÃ»§ÖĞ¶Ï";
+                            strError = "ç”¨æˆ·ä¸­æ–­";
                             goto ERROR1;
                         }
 
-                        stop.SetMessage("ÕıÔÚµ¼³öÎ¥Ô¼½ğ¼ÇÂ¼ " + (i + 1).ToString() + " / " + items.Count.ToString() + " ...");
+                        stop.SetMessage("æ­£åœ¨å¯¼å‡ºè¿çº¦é‡‘è®°å½• " + (i + 1).ToString() + " / " + items.Count.ToString() + " ...");
 
                         ListViewItem item = items[i];
                         string strRecPath = ListViewUtil.GetItemText(item, COLUMN_RECPATH);
@@ -1826,7 +1826,7 @@ namespace dp2Circulation
                             out strXml,
                             out strError);
                         if (lRet == -1)
-                            goto ERROR1;    // TODO: ÌáÊ¾ÖØÊÔ
+                            goto ERROR1;    // TODO: æç¤ºé‡è¯•
 
                         XmlDocument dom = new XmlDocument();
                         try
@@ -1835,7 +1835,7 @@ namespace dp2Circulation
                         }
                         catch (Exception ex)
                         {
-                            strError = "XML×°ÈëDOMÊ±³ö´í: " + ex.Message;
+                            strError = "XMLè£…å…¥DOMæ—¶å‡ºé”™: " + ex.Message;
                             goto ERROR1;
                         }
                         dom.DocumentElement.WriteTo(writer);
@@ -1862,13 +1862,13 @@ namespace dp2Circulation
             return -1;
         }
 
-        // ´ÓÊı¾İ¿âÖĞÉ¾³ı ¹´Ñ¡µÄ ÒÑ½áËã(settlemented) ÊÂÏî
+        // ä»æ•°æ®åº“ä¸­åˆ é™¤ å‹¾é€‰çš„ å·²ç»“ç®—(settlemented) äº‹é¡¹
         void menu_deleteSettlementedItemsFromDb_Click(object sender, EventArgs e)
         {
             SettlementAction("delete");
         }
 
-        // ÒÆ³ıÑ¡¶¨(»ò¹´Ñ¡)µÄÊÂÏî
+        // ç§»é™¤é€‰å®š(æˆ–å‹¾é€‰)çš„äº‹é¡¹
         void menu_removeSelectedItems_Click(object sender, EventArgs e)
         {
             if (this.toolStripButton_items_useCheck.Checked == false)
@@ -1876,13 +1876,13 @@ namespace dp2Circulation
 
                 if (this.listView_amerced.SelectedItems.Count == 0)
                 {
-                    MessageBox.Show(this, "ÉĞÎ´Ñ¡¶¨ÈÎºÎĞèÒªÒÆ³ıµÄÊÂÏî");
+                    MessageBox.Show(this, "å°šæœªé€‰å®šä»»ä½•éœ€è¦ç§»é™¤çš„äº‹é¡¹");
                     return;
                 }
 
                 DialogResult result = MessageBox.Show(
                     this,
-                    "È·ÊµÒª´ÓÁĞ±íÖĞÒÆ³ıËùÑ¡¶¨µÄ "+this.listView_amerced.SelectedItems.Count.ToString()+" ¸öÊÂÏî?\r\n\r\n(×¢£º±¾²Ù×÷²»»á´ÓÊı¾İ¿âÖĞÉ¾³ı¼ÇÂ¼)",
+                    "ç¡®å®è¦ä»åˆ—è¡¨ä¸­ç§»é™¤æ‰€é€‰å®šçš„ "+this.listView_amerced.SelectedItems.Count.ToString()+" ä¸ªäº‹é¡¹?\r\n\r\n(æ³¨ï¼šæœ¬æ“ä½œä¸ä¼šä»æ•°æ®åº“ä¸­åˆ é™¤è®°å½•)",
                     "SettlementForm",
                     MessageBoxButtons.OKCancel,
                     MessageBoxIcon.Question,
@@ -1906,13 +1906,13 @@ namespace dp2Circulation
             {
                 if (this.listView_amerced.CheckedIndices.Count == 0)
                 {
-                    MessageBox.Show(this, "ÉĞÎ´¹´Ñ¡ÈÎºÎĞèÒªÒÆ³ıµÄÊÂÏî");
+                    MessageBox.Show(this, "å°šæœªå‹¾é€‰ä»»ä½•éœ€è¦ç§»é™¤çš„äº‹é¡¹");
                     return;
                 }
 
                 DialogResult result = MessageBox.Show(
                     this,
-                    "È·ÊµÒª´ÓÁĞ±íÖĞÒÆ³ıËù¹´Ñ¡µÄ " + this.listView_amerced.CheckedItems.Count.ToString() + " ¸öÊÂÏî?\r\n\r\n(×¢£º±¾²Ù×÷²»»á´ÓÊı¾İ¿âÖĞÉ¾³ı¼ÇÂ¼)",
+                    "ç¡®å®è¦ä»åˆ—è¡¨ä¸­ç§»é™¤æ‰€å‹¾é€‰çš„ " + this.listView_amerced.CheckedItems.Count.ToString() + " ä¸ªäº‹é¡¹?\r\n\r\n(æ³¨ï¼šæœ¬æ“ä½œä¸ä¼šä»æ•°æ®åº“ä¸­åˆ é™¤è®°å½•)",
                     "SettlementForm",
                     MessageBoxButtons.OKCancel,
                     MessageBoxIcon.Question,
@@ -1929,7 +1929,7 @@ namespace dp2Circulation
             this.OnItemTypeChanged();
         }
 
-        // È«(¹´)Ñ¡
+        // å…¨(å‹¾)é€‰
         void menu_selectAll_Click(object sender, EventArgs e)
         {
             if (this.toolStripButton_items_useCheck.Checked == false)
@@ -1948,7 +1948,7 @@ namespace dp2Circulation
             }
         }
 
-        // È«³·Ïú(¹´)Ñ¡
+        // å…¨æ’¤é”€(å‹¾)é€‰
         void menu_unSelectAll_Click(object sender, EventArgs e)
         {
             if (this.toolStripButton_items_useCheck.Checked == false)
@@ -1967,7 +1967,7 @@ namespace dp2Circulation
             }
         }
 
-        // Ö»(¹´)Ñ¡ amerced ×´Ì¬ÊÂÏî
+        // åª(å‹¾)é€‰ amerced çŠ¶æ€äº‹é¡¹
         void menu_selectAmerced_Click(object sender, EventArgs e)
         {
             for (int i = 0; i < this.listView_amerced.Items.Count; i++)
@@ -1978,7 +1978,7 @@ namespace dp2Circulation
                 if (this.toolStripButton_items_useCheck.Checked == true)
                 {
                     if (strState == "amerced"
-                        || strState == "ÒÑÊÕ·Ñ")
+                        || strState == "å·²æ”¶è´¹")
                         item.Checked = true;
                     else
                         item.Checked = false;
@@ -1986,7 +1986,7 @@ namespace dp2Circulation
                 else
                 {
                     if (strState == "amerced"
-                        || strState == "ÒÑÊÕ·Ñ")
+                        || strState == "å·²æ”¶è´¹")
                         item.Selected = true;
                     else
                         item.Selected = false;
@@ -1994,9 +1994,9 @@ namespace dp2Circulation
             }
         }
 
-        // Ñ¡¶¨È«²¿ settelmented ×´Ì¬ÊÂÏî
-        // ×¢£º²»¹ÜĞÂ¾É½áËãÊÂÏî£¬¶¼Ñ¡¶¨
-        // TODO: ¶Ô¾É½áËãÊÂÏîµÄ³·Ïú£¬ÒªÉ÷ÖØ£¬ÖÁÉÙÒª¾¯¸æÒ»ÏÂ
+        // é€‰å®šå…¨éƒ¨ settelmented çŠ¶æ€äº‹é¡¹
+        // æ³¨ï¼šä¸ç®¡æ–°æ—§ç»“ç®—äº‹é¡¹ï¼Œéƒ½é€‰å®š
+        // TODO: å¯¹æ—§ç»“ç®—äº‹é¡¹çš„æ’¤é”€ï¼Œè¦æ…é‡ï¼Œè‡³å°‘è¦è­¦å‘Šä¸€ä¸‹
         void menu_selectSettlemented_Click(object sender, EventArgs e)
         {
             for (int i = 0; i < this.listView_amerced.Items.Count; i++)
@@ -2007,8 +2007,8 @@ namespace dp2Circulation
                 if (this.toolStripButton_items_useCheck.Checked == true)
                 {
                     if (strState == "settlemented"
-                        || strState == "ĞÂ½áËã"
-                        || strState == "¾É½áËã")
+                        || strState == "æ–°ç»“ç®—"
+                        || strState == "æ—§ç»“ç®—")
                         item.Checked = true;
                     else
                         item.Checked = false;
@@ -2016,8 +2016,8 @@ namespace dp2Circulation
                 else
                 {
                     if (strState == "settlemented"
-                        || strState == "ĞÂ½áËã"
-                        || strState == "¾É½áËã")
+                        || strState == "æ–°ç»“ç®—"
+                        || strState == "æ—§ç»“ç®—")
                         item.Selected = true;
                     else
                         item.Selected = false;
@@ -2025,7 +2025,7 @@ namespace dp2Circulation
             }
         }
 
-        // ÊÇ·ñ°üº¬¼Û¸ñÁĞ?
+        // æ˜¯å¦åŒ…å«ä»·æ ¼åˆ—?
         static bool HasPriceColumn(PrintOption option)
         {
             for (int i = 0; i < option.Columns.Count; i++)
@@ -2036,7 +2036,7 @@ namespace dp2Circulation
 
 
                 if (strText == "price"
-                    || strText == "½ğ¶î")
+                    || strText == "é‡‘é¢")
                     return true;
             }
 
@@ -2045,13 +2045,13 @@ namespace dp2Circulation
 
 
 
-        #region ´òÓ¡Ïà¹Ø¹¦ÄÜ
+        #region æ‰“å°ç›¸å…³åŠŸèƒ½
 
-        // ¶Ô¼´½«´òÓ¡µÄÊÂÏî½øĞĞ¼ì²é£¬¿´¿´ÊÇ²»ÊÇ·ûºÏ½áËãÁ÷³Ì
+        // å¯¹å³å°†æ‰“å°çš„äº‹é¡¹è¿›è¡Œæ£€æŸ¥ï¼Œçœ‹çœ‹æ˜¯ä¸æ˜¯ç¬¦åˆç»“ç®—æµç¨‹
         // return:
-        //      -1  ³ö´í
-        //      0   Õı³£
-        //      1   ÓĞÎ¥·´Á÷³ÌµÄÇé¿ö³öÏÖ£¬ÔÚstrErrorÖĞÃèÊö
+        //      -1  å‡ºé”™
+        //      0   æ­£å¸¸
+        //      1   æœ‰è¿åæµç¨‹çš„æƒ…å†µå‡ºç°ï¼Œåœ¨strErrorä¸­æè¿°
         int CheckBeforeSettlementPrint(List<ListViewItem> items,
             out string strError)
         {
@@ -2068,7 +2068,7 @@ namespace dp2Circulation
                 string strState = item.SubItems[COLUMN_STATE].Text;
 
                 if (strState == "amerced"
-                    || strState == "ÒÑÊÕ·Ñ")
+                    || strState == "å·²æ”¶è´¹")
                 {
                     nAmercedStateCount++;
                 }
@@ -2079,12 +2079,12 @@ namespace dp2Circulation
 
             if (nAmercedStateCount > 0)
             {
-                strError = "µ±Ç°Äâ´òÓ¡µÄÊÂÏî¼¯ºÏÖĞ£¬ÓĞ " +nAmercedStateCount.ToString()+ " ¸öÒÑÊÕ·Ñµ«Î´½áËãµÄÊÂÏî(»Æµ×É«µÄÊÂÏî)£¬Èç¹ûÕâĞ©ÊÂÏî²ÎÓë´òÓ¡ºÍÍ³¼Æ£¬ÄÇÃ´×Ü¼ÆºÍĞ¡¼Æ½ğ¶î½«²»ÄÜ´ú±í½áËã½ğ¶î¡£";
+                strError = "å½“å‰æ‹Ÿæ‰“å°çš„äº‹é¡¹é›†åˆä¸­ï¼Œæœ‰ " +nAmercedStateCount.ToString()+ " ä¸ªå·²æ”¶è´¹ä½†æœªç»“ç®—çš„äº‹é¡¹(é»„åº•è‰²çš„äº‹é¡¹)ï¼Œå¦‚æœè¿™äº›äº‹é¡¹å‚ä¸æ‰“å°å’Œç»Ÿè®¡ï¼Œé‚£ä¹ˆæ€»è®¡å’Œå°è®¡é‡‘é¢å°†ä¸èƒ½ä»£è¡¨ç»“ç®—é‡‘é¢ã€‚";
             }
 
             if (nOldSettlementStateCount > 0)
             {
-                strError += "µ±Ç°Äâ´òÓ¡µÄÊÂÏî¼¯ºÏÖĞ£¬ÓĞ " + nOldSettlementStateCount.ToString() + " ¸öÒÔÍù(·Ç±¾´Î)½áËãµÄÊÂÏî(»ÒÉ«ÎÄ×ÖµÄÊÂÏî)£¬Èç¹ûÕâĞ©ÊÂÏî²ÎÓë´òÓ¡ºÍÍ³¼Æ£¬ÄÇÃ´×Ü¼ÆºÍĞ¡¼Æ½ğ¶î½«²»ÄÜ´ú±í±¾´Î½áËã½ğ¶î¡£";
+                strError += "å½“å‰æ‹Ÿæ‰“å°çš„äº‹é¡¹é›†åˆä¸­ï¼Œæœ‰ " + nOldSettlementStateCount.ToString() + " ä¸ªä»¥å¾€(éæœ¬æ¬¡)ç»“ç®—çš„äº‹é¡¹(ç°è‰²æ–‡å­—çš„äº‹é¡¹)ï¼Œå¦‚æœè¿™äº›äº‹é¡¹å‚ä¸æ‰“å°å’Œç»Ÿè®¡ï¼Œé‚£ä¹ˆæ€»è®¡å’Œå°è®¡é‡‘é¢å°†ä¸èƒ½ä»£è¡¨æœ¬æ¬¡ç»“ç®—é‡‘é¢ã€‚";
             }
 
             if (String.IsNullOrEmpty(strError) == false)
@@ -2097,14 +2097,14 @@ namespace dp2Circulation
         {
             string strError = "";
 
-            // ´´½¨Ò»¸öhtmlÎÄ¼ş£¬²¢ÏÔÊ¾ÔÚHtmlPrintFormÖĞ¡£
+            // åˆ›å»ºä¸€ä¸ªhtmlæ–‡ä»¶ï¼Œå¹¶æ˜¾ç¤ºåœ¨HtmlPrintFormä¸­ã€‚
 
             List<string> filenames = null;
             try
             {
                 // Debug.Assert(false, "");
 
-                // ¹¹ÔìhtmlÒ³Ãæ
+                // æ„é€ htmlé¡µé¢
                 int nRet = BuildHtml(
                     items,
                     out filenames,
@@ -2114,7 +2114,7 @@ namespace dp2Circulation
 
                 HtmlPrintForm printform = new HtmlPrintForm();
 
-                printform.Text = "´òÓ¡½áËãÇåµ¥";
+                printform.Text = "æ‰“å°ç»“ç®—æ¸…å•";
                 printform.MainForm = this.MainForm;
                 printform.Filenames = filenames;
                 this.MainForm.AppInfo.LinkFormState(printform, "printform_state");
@@ -2133,7 +2133,7 @@ namespace dp2Circulation
             MessageBox.Show(this, strError);
         }
 
-        // »ñµÃÊÂÏîÊı¡£ÅÅ³ıÁË¿Õ¶ÔÏó£¬Ò²¾ÍÊÇĞ¡¼ÆĞĞ
+        // è·å¾—äº‹é¡¹æ•°ã€‚æ’é™¤äº†ç©ºå¯¹è±¡ï¼Œä¹Ÿå°±æ˜¯å°è®¡è¡Œ
         static int GetItemCount(List<ListViewItem> items)
         {
             int nResult = 0;
@@ -2146,7 +2146,7 @@ namespace dp2Circulation
             return nResult;
         }
 
-        // ¹¹ÔìhtmlÒ³Ãæ
+        // æ„é€ htmlé¡µé¢
         int BuildHtml(
             List<ListViewItem> items,
             out List<string> filenames,
@@ -2156,24 +2156,24 @@ namespace dp2Circulation
 
             Hashtable macro_table = new Hashtable();
 
-            // »ñµÃ´òÓ¡²ÎÊı
+            // è·å¾—æ‰“å°å‚æ•°
             PrintOption option = new SettlementPrintOption(this.MainForm.DataDir);
             option.LoadData(this.MainForm.AppInfo,
                 "settlement_printoption");
 
-            // ¼ì²é°´ÊÕ·ÑÕßĞ¡¼ÆÊ±£¬ÊÇ·ñ¾ßÓĞ¼Û¸ñÁĞ
+            // æ£€æŸ¥æŒ‰æ”¶è´¹è€…å°è®¡æ—¶ï¼Œæ˜¯å¦å…·æœ‰ä»·æ ¼åˆ—
             if (this.checkBox_sumByAmerceOperator.Checked == true)
             {
-                // ¼ì²éÊÇ·ñ¾ßÓĞ¼Û¸ñÁĞ£¿
+                // æ£€æŸ¥æ˜¯å¦å…·æœ‰ä»·æ ¼åˆ—ï¼Ÿ
                 if (HasPriceColumn(option) == false)
                 {
-                    MessageBox.Show(this, "¾¯¸æ£ºËä´òÓ¡ÒªÇó¡®°´ÊÕ·ÑÕßĞ¡¼Æ½ğ¶î¡¯£¬µ«¡®¼Û¸ñ¡¯ÁĞ²¢Î´°üº¬ÔÚ´òÓ¡ÁĞÖĞ¡£Òò´ËĞ¡¼ÆµÄ½ğ¶îÎŞ·¨´òÓ¡³öÀ´¡£");
+                    MessageBox.Show(this, "è­¦å‘Šï¼šè™½æ‰“å°è¦æ±‚â€˜æŒ‰æ”¶è´¹è€…å°è®¡é‡‘é¢â€™ï¼Œä½†â€˜ä»·æ ¼â€™åˆ—å¹¶æœªåŒ…å«åœ¨æ‰“å°åˆ—ä¸­ã€‚å› æ­¤å°è®¡çš„é‡‘é¢æ— æ³•æ‰“å°å‡ºæ¥ã€‚");
                 }
             }
 
 
 
-            // ¼ÆËã³öÒ³×ÜÊı
+            // è®¡ç®—å‡ºé¡µæ€»æ•°
             int nTablePageCount = items.Count / option.LinesPerPage;
             if ((items.Count % option.LinesPerPage) != 0)
                 nTablePageCount++;
@@ -2185,14 +2185,14 @@ namespace dp2Circulation
             macro_table["%date%"] = DateTime.Now.ToLongDateString();
 
 
-            filenames = new List<string>();    // Ã¿Ò³Ò»¸öÎÄ¼ş£¬Õâ¸öÊı×é´æ·ÅÁËËùÓĞÎÄ¼şÃû
+            filenames = new List<string>();    // æ¯é¡µä¸€ä¸ªæ–‡ä»¶ï¼Œè¿™ä¸ªæ•°ç»„å­˜æ”¾äº†æ‰€æœ‰æ–‡ä»¶å
 
             string strFileNamePrefix = this.MainForm.DataDir + "\\~settlement";
 
             string strFileName = "";
 
-            // Êä³öĞÅÏ¢Ò³
-            // TODO: ÒªÔö¼Ó¡°Í³¼ÆÒ³¡±Ä£°å¹¦ÄÜ¡£ÈçºÎÓÃÄ£°åÀ´¶¨ÒåÑ­»·µÄĞĞ£¬ÓĞÒ»¶¨ÄÑ¶È
+            // è¾“å‡ºä¿¡æ¯é¡µ
+            // TODO: è¦å¢åŠ â€œç»Ÿè®¡é¡µâ€æ¨¡æ¿åŠŸèƒ½ã€‚å¦‚ä½•ç”¨æ¨¡æ¿æ¥å®šä¹‰å¾ªç¯çš„è¡Œï¼Œæœ‰ä¸€å®šéš¾åº¦
             {
                 int nItemCount = GetItemCount(items);
                 string strTotalPrice = GetTotalPrice(items).ToString();
@@ -2212,28 +2212,28 @@ namespace dp2Circulation
                     strFileName,
                     false);
 
-                // ÄÚÈİĞĞ
+                // å†…å®¹è¡Œ
                 StreamUtil.WriteText(strFileName,
                     "<table class='totalsum'>");
 
-                // ÁĞ±êÌâĞĞ
+                // åˆ—æ ‡é¢˜è¡Œ
                 StreamUtil.WriteText(strFileName,
                     "<tr class='totalsum_columtitle'>");
                 StreamUtil.WriteText(strFileName,
-                    "<td class='person'>ÊÕ·ÑÕß</td>");
+                    "<td class='person'>æ”¶è´¹è€…</td>");
                 StreamUtil.WriteText(strFileName,
-                    "<td class='itemcount'>ÊÂÏîÊı</td>");
+                    "<td class='itemcount'>äº‹é¡¹æ•°</td>");
                 StreamUtil.WriteText(strFileName,
-                    "<td class='price'>½ğ¶î</td>");
+                    "<td class='price'>é‡‘é¢</td>");
                 StreamUtil.WriteText(strFileName,
                     "</tr>");
 
-                // ×Ü¼ÆĞĞ
+                // æ€»è®¡è¡Œ
 
                 StreamUtil.WriteText(strFileName,
                     "<tr class='totalsum_line'>");
                 StreamUtil.WriteText(strFileName,
-                    "<td class='person'>×Ü¼Æ</td>");
+                    "<td class='person'>æ€»è®¡</td>");
                 StreamUtil.WriteText(strFileName,
                     "<td class='itemcount'>" + nItemCount.ToString() + "</td>");
                 StreamUtil.WriteText(strFileName,
@@ -2244,13 +2244,13 @@ namespace dp2Circulation
 
                 if (this.checkBox_sumByAmerceOperator.Checked == true)
                 {
-                    // ÊÕ·ÑÈËĞ¡¼Æ
+                    // æ”¶è´¹äººå°è®¡
 
-                    // Ğ¡¼ÆÌáÊ¾ĞĞ
+                    // å°è®¡æç¤ºè¡Œ
                     StreamUtil.WriteText(strFileName,
                         "<tr class='amerceoperatorsum_titleline'>");
                     StreamUtil.WriteText(strFileName,
-                        "<td class='amerceoperatorsum_titleline' colspan='3'>(ÒÔÏÂÎª°´ÊÕ·ÑÕß·ÖÀàµÄĞ¡¼Æ½ğ¶î)</td>");
+                        "<td class='amerceoperatorsum_titleline' colspan='3'>(ä»¥ä¸‹ä¸ºæŒ‰æ”¶è´¹è€…åˆ†ç±»çš„å°è®¡é‡‘é¢)</td>");
                     StreamUtil.WriteText(strFileName,
                         "</tr>");
 
@@ -2290,7 +2290,7 @@ namespace dp2Circulation
                     false);
             }
 
-            // ±í¸ñÒ³Ñ­»·
+            // è¡¨æ ¼é¡µå¾ªç¯
             for (int i = 0; i < nTablePageCount; i++)
             {
                 macro_table["%pageno%"] = (i + 1 + 1).ToString();
@@ -2303,7 +2303,7 @@ namespace dp2Circulation
                     macro_table,
                     strFileName,
                     true);
-                // ĞĞÑ­»·
+                // è¡Œå¾ªç¯
                 for (int j = 0; j < option.LinesPerPage; j++)
                 {
                     BuildTableLine(option,
@@ -2322,19 +2322,19 @@ namespace dp2Circulation
         }
 
         // 2009/10/10
-        // »ñµÃcssÎÄ¼şµÄÂ·¾¶(»òÕßhttp:// µØÖ·)¡£½«¸ù¾İÊÇ·ñ¾ßÓĞ¡°Í³¼ÆÒ³¡±À´×Ô¶¯´¦Àí
+        // è·å¾—cssæ–‡ä»¶çš„è·¯å¾„(æˆ–è€…http:// åœ°å€)ã€‚å°†æ ¹æ®æ˜¯å¦å…·æœ‰â€œç»Ÿè®¡é¡µâ€æ¥è‡ªåŠ¨å¤„ç†
         // parameters:
-        //      strDefaultCssFileName   ¡°css¡±Ä£°åÈ±Ê¡Çé¿öÏÂ£¬½«²ÉÓÃµÄĞéÄâÄ¿Â¼ÖĞµÄcssÎÄ¼şÃû£¬´¿ÎÄ¼şÃû
+        //      strDefaultCssFileName   â€œcssâ€æ¨¡æ¿ç¼ºçœæƒ…å†µä¸‹ï¼Œå°†é‡‡ç”¨çš„è™šæ‹Ÿç›®å½•ä¸­çš„cssæ–‡ä»¶åï¼Œçº¯æ–‡ä»¶å
         string GetAutoCssUrl(PrintOption option,
             string strDefaultCssFileName)
         {
-            string strCssFilePath = option.GetTemplatePageFilePath("css");  // ´óĞ¡Ğ´²»Ãô¸Ğ
+            string strCssFilePath = option.GetTemplatePageFilePath("css");  // å¤§å°å†™ä¸æ•æ„Ÿ
             if (String.IsNullOrEmpty(strCssFilePath) == false)
                 return strCssFilePath;
             else
             {
-                // return this.MainForm.LibraryServerDir + "/" + strDefaultCssFileName;    // È±Ê¡µÄ
-                return PathUtil.MergePath(this.MainForm.DataDir, strDefaultCssFileName);    // È±Ê¡µÄ
+                // return this.MainForm.LibraryServerDir + "/" + strDefaultCssFileName;    // ç¼ºçœçš„
+                return PathUtil.MergePath(this.MainForm.DataDir, strDefaultCssFileName);    // ç¼ºçœçš„
             }
         }
 
@@ -2359,11 +2359,11 @@ namespace dp2Circulation
 
             /*
             // 2009/10/9
-            string strCssFilePath = option.GetTemplatePageFilePath("css");  // ´óĞ¡Ğ´²»Ãô¸Ğ
+            string strCssFilePath = option.GetTemplatePageFilePath("css");  // å¤§å°å†™ä¸æ•æ„Ÿ
             if (String.IsNullOrEmpty(strCssFilePath) == false)
                 strCssUrl = strCssFilePath;
             else
-                strCssUrl = this.MainForm.LibraryServerDir + "/settlement.css";    // È±Ê¡µÄ
+                strCssUrl = this.MainForm.LibraryServerDir + "/settlement.css";    // ç¼ºçœçš„
              * */
 
             string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
@@ -2372,7 +2372,7 @@ namespace dp2Circulation
                 "<html><head>" + strLink + "</head><body>");
 
 
-            // Ò³Ã¼
+            // é¡µçœ‰
             string strPageHeaderText = option.PageHeader;
 
             if (String.IsNullOrEmpty(strPageHeaderText) == false)
@@ -2389,7 +2389,7 @@ namespace dp2Circulation
                  * */
             }
 
-            // ±í¸ñ±êÌâ
+            // è¡¨æ ¼æ ‡é¢˜
             string strTableTitleText = option.TableTitle;
 
             if (String.IsNullOrEmpty(strTableTitleText) == false)
@@ -2405,11 +2405,11 @@ namespace dp2Circulation
             if (bOutputTable == true)
             {
 
-                // ±í¸ñ¿ªÊ¼
+                // è¡¨æ ¼å¼€å§‹
                 StreamUtil.WriteText(strFileName,
                     "<table class='table'>");   //   border='1'
 
-                // À¸Ä¿±êÌâ
+                // æ ç›®æ ‡é¢˜
                 StreamUtil.WriteText(strFileName,
                     "<tr class='column'>");
 
@@ -2419,7 +2419,7 @@ namespace dp2Circulation
 
                     string strCaption = column.Caption;
 
-                    // Èç¹ûÃ»ÓĞcaption¶¨Òå£¬¾ÍÅ²ÓÃname¶¨Òå
+                    // å¦‚æœæ²¡æœ‰captionå®šä¹‰ï¼Œå°±æŒªç”¨nameå®šä¹‰
                     if (String.IsNullOrEmpty(strCaption) == true)
                         strCaption = column.Name;
 
@@ -2437,7 +2437,7 @@ namespace dp2Circulation
             return 0;
         }
 
-        // »ã×Ü¼Û¸ñ¡£¼Ù¶¨nIndex´¦ÔÚÇĞ»»ĞĞ(Í¬Ò»amerceOperatorĞĞ×éµÄ×îºóÒ»ĞĞ)
+        // æ±‡æ€»ä»·æ ¼ã€‚å‡å®šnIndexå¤„åœ¨åˆ‡æ¢è¡Œ(åŒä¸€amerceOperatorè¡Œç»„çš„æœ€åä¸€è¡Œ)
         static decimal ComputeSameAmerceOperatorSumPrice(List<ListViewItem> items,
             int nIndex,
             out string strAmerceOperator,
@@ -2449,7 +2449,7 @@ namespace dp2Circulation
             if (nIndex - 1 < 0)
                 return 0;
 
-            Debug.Assert(items[nIndex] == null, "ÆğµãÊÂÏîÓ¦Îªnull");
+            Debug.Assert(items[nIndex] == null, "èµ·ç‚¹äº‹é¡¹åº”ä¸ºnull");
 
             decimal total = 0;
 
@@ -2460,16 +2460,16 @@ namespace dp2Circulation
                 if (item == null)
                     break;
 
-                // Ë³±ã»ñµÃÊÕ·ÑÕß
+                // é¡ºä¾¿è·å¾—æ”¶è´¹è€…
                 if (String.IsNullOrEmpty(strAmerceOperator) == true)
                     strAmerceOperator = GetColumnContent(item, "amerceOperator");
 
                 string strPrice = GetColumnContent(item, "price");
 
-                // ÌáÈ¡³ö´¿Êı×Ö
+                // æå–å‡ºçº¯æ•°å­—
                 string strPurePrice = PriceUtil.GetPurePrice(strPrice);
 
-                nCount++;   // °üº¬ÁËÃ»ÓĞ¼Û¸ñ×Ö·û´®µÄÄÇĞ©ÊÂÏî
+                nCount++;   // åŒ…å«äº†æ²¡æœ‰ä»·æ ¼å­—ç¬¦ä¸²çš„é‚£äº›äº‹é¡¹
 
                 if (String.IsNullOrEmpty(strPurePrice) == true)
                     continue;
@@ -2498,11 +2498,11 @@ namespace dp2Circulation
             int nItemCount = 0;
             if (item == null)
             {
-                // »ã×ÜÇ°ÃæµÄ¼Û¸ñ
+                // æ±‡æ€»å‰é¢çš„ä»·æ ¼
                 strSumContent = ComputeSameAmerceOperatorSumPrice(items, nIndex, out strAmerceOperator, out nItemCount).ToString();
             }
 
-            // À¸Ä¿ÄÚÈİ
+            // æ ç›®å†…å®¹
             string strLineContent = "";
 
             for (int i = 0; i < option.Columns.Count; i++)
@@ -2511,17 +2511,17 @@ namespace dp2Circulation
 
                 string strContent = "";
 
-                // ±íÊ¾ĞèÒª´òÓ¡Ğ¡¼ÆĞĞ
+                // è¡¨ç¤ºéœ€è¦æ‰“å°å°è®¡è¡Œ
                 if (item == null)
                 {
                     string strColumnName = StringUtil.GetLeft(column.Name);
                     if ( strColumnName == "price"
-                        || strColumnName == "½ğ¶î")
+                        || strColumnName == "é‡‘é¢")
                     {
-                        strContent = strAmerceOperator + " ¹² " + nItemCount.ToString() + "Ïî Ğ¡¼Æ£º" + strSumContent;
+                        strContent = strAmerceOperator + " å…± " + nItemCount.ToString() + "é¡¹ å°è®¡ï¼š" + strSumContent;
                     }
                     else if (strColumnName == "amerceOperator"
-                        || strColumnName == "ÊÕ·ÑÕß")
+                        || strColumnName == "æ”¶è´¹è€…")
                     {
                         strContent = strAmerceOperator;
                     }
@@ -2535,7 +2535,7 @@ namespace dp2Circulation
                 if (strContent == "!!!#")
                     strContent = ((nPage * option.LinesPerPage) + nLine + 1).ToString();
 
-                // ½Ø¶Ï×Ö·û´®
+                // æˆªæ–­å­—ç¬¦ä¸²
                 if (column.MaxChars != -1)
                 {
                     if (strContent.Length > column.MaxChars)
@@ -2583,12 +2583,12 @@ namespace dp2Circulation
 
             if (bOutputTable == true)
             {
-                // ±í¸ñ½áÊø
+                // è¡¨æ ¼ç»“æŸ
                 StreamUtil.WriteText(strFileName,
                     "</table>");
             }
 
-            // Ò³½Å
+            // é¡µè„š
             string strPageFooterText = option.PageFooter;
 
             if (String.IsNullOrEmpty(strPageFooterText) == false)
@@ -2637,7 +2637,7 @@ namespace dp2Circulation
                 if (String.IsNullOrEmpty(strPrice) == true)
                     continue;
 
-                // ÌáÈ¡³ö´¿Êı×Ö
+                // æå–å‡ºçº¯æ•°å­—
                 string strPurePrice = PriceUtil.GetPurePrice(strPrice);
 
                 if (String.IsNullOrEmpty(strPurePrice) == true)
@@ -2651,10 +2651,10 @@ namespace dp2Circulation
 
 #endregion
 
-        // ´òÓ¡Ñ¡Ïî
+        // æ‰“å°é€‰é¡¹
         private void button_print_option_Click(object sender, EventArgs e)
         {
-            // ÅäÖÃ±êÌâºÍ·ç¸ñ
+            // é…ç½®æ ‡é¢˜å’Œé£æ ¼
             PrintOption option = new SettlementPrintOption(this.MainForm.DataDir);
             option.LoadData(this.MainForm.AppInfo,
                 "settlement_printoption");
@@ -2667,24 +2667,24 @@ namespace dp2Circulation
             dlg.DataDir = this.MainForm.DataDir;
             dlg.PrintOption = option;
             dlg.ColumnItems = new string[] {
-                "no -- ĞòºÅ",
-                "id -- ¼ÇÂ¼ID",
-                "state -- ×´Ì¬",
-                "readerBarcode -- ¶ÁÕßÖ¤ÌõÂëºÅ",
-                "summary -- ÕªÒª",
-                "price -- ½ğ¶î",
-                "comment -- ×¢ÊÍ",
-                "reason -- Ô­Òò",
-                "borrowDate -- ½èÔÄÈÕÆÚ",
-                "borrowPeriod -- ½èÔÄÊ±ÏŞ",
-                "returnDate -- »¹ÊéÈÕÆÚ",
-                "returnOperator -- »¹Êé²Ù×÷Õß",
-                "barcode -- ²áÌõÂëºÅ",
-                "amerceOperator -- ÊÕ·ÑÕß",
-                "amerceTime -- ÊÕ·ÑÈÕÆÚ",
-                "settlementOperator -- ½áËãÕß",
-                "settlementTime -- ½áËãÈÕÆÚ",
-                "recpath -- ¼ÇÂ¼Â·¾¶"
+                "no -- åºå·",
+                "id -- è®°å½•ID",
+                "state -- çŠ¶æ€",
+                "readerBarcode -- è¯»è€…è¯æ¡ç å·",
+                "summary -- æ‘˜è¦",
+                "price -- é‡‘é¢",
+                "comment -- æ³¨é‡Š",
+                "reason -- åŸå› ",
+                "borrowDate -- å€Ÿé˜…æ—¥æœŸ",
+                "borrowPeriod -- å€Ÿé˜…æ—¶é™",
+                "returnDate -- è¿˜ä¹¦æ—¥æœŸ",
+                "returnOperator -- è¿˜ä¹¦æ“ä½œè€…",
+                "barcode -- å†Œæ¡ç å·",
+                "amerceOperator -- æ”¶è´¹è€…",
+                "amerceTime -- æ”¶è´¹æ—¥æœŸ",
+                "settlementOperator -- ç»“ç®—è€…",
+                "settlementTime -- ç»“ç®—æ—¥æœŸ",
+                "recpath -- è®°å½•è·¯å¾„"
             };
 
             this.MainForm.AppInfo.LinkFormState(dlg, "settlement_printoption_formstate");
@@ -2698,74 +2698,74 @@ namespace dp2Circulation
                 "settlement_printoption");
         }
 
-        // »ñµÃÀ¸Ä¿ÄÚÈİ
+        // è·å¾—æ ç›®å†…å®¹
         static string GetColumnContent(ListViewItem item,
             string strColumnName)
         {
-            // È¥µô"-- ?????"²¿·Ö
+            // å»æ‰"-- ?????"éƒ¨åˆ†
             string strText = StringUtil.GetLeft(strColumnName);
 
             try
             {
 
-                // ÒªÖĞÓ¢ÎÄ¶¼¿ÉÒÔ
+                // è¦ä¸­è‹±æ–‡éƒ½å¯ä»¥
                 switch (strText)
                 {
                     case "no":
-                    case "ĞòºÅ":
-                        return "!!!#";  // ÌØÊâÖµ£¬±íÊ¾ĞòºÅ
+                    case "åºå·":
+                        return "!!!#";  // ç‰¹æ®Šå€¼ï¼Œè¡¨ç¤ºåºå·
                     case "id":
-                    case "¼ÇÂ¼ID":
+                    case "è®°å½•ID":
                         return item.SubItems[COLUMN_ID].Text;
                     case "state":
-                    case "×´Ì¬":
+                    case "çŠ¶æ€":
                         return item.SubItems[COLUMN_STATE].Text;
                     case "readerBarcode":
-                    case "¶ÁÕßÖ¤ÌõÂëºÅ":
+                    case "è¯»è€…è¯æ¡ç å·":
                         return item.SubItems[COLUMN_READERBARCODE].Text;
                     case "summary":
-                    case "ÕªÒª":
+                    case "æ‘˜è¦":
                         return item.SubItems[COLUMN_SUMMARY].Text;
                     case "price":
-                    case "½ğ¶î":
+                    case "é‡‘é¢":
                         return item.SubItems[COLUMN_PRICE].Text;
                     case "comment":
-                    case "×¢ÊÍ":
+                    case "æ³¨é‡Š":
                         return item.SubItems[COLUMN_COMMENT].Text;
                     case "reason":
-                    case "Ô­Òò":
+                    case "åŸå› ":
                         return item.SubItems[COLUMN_REASON].Text;
                     case "borrowDate":
-                    case "½èÔÄÈÕÆÚ":
+                    case "å€Ÿé˜…æ—¥æœŸ":
                         return item.SubItems[COLUMN_BORROWDATE].Text;
                     case "borrowPeriod":
-                    case "½èÔÄÊ±ÏŞ":
+                    case "å€Ÿé˜…æ—¶é™":
                         return item.SubItems[COLUMN_BORROWPERIOD].Text;
                     case "returnDate":
-                    case "»¹ÊéÈÕÆÚ":
+                    case "è¿˜ä¹¦æ—¥æœŸ":
                         return item.SubItems[COLUMN_RETURNDATE].Text;
                     case "returnOperator":
-                    case "»¹Êé²Ù×÷Õß":
+                    case "è¿˜ä¹¦æ“ä½œè€…":
                         return item.SubItems[COLUMN_RETURNOPERATOR].Text;
                     case "barcode":
-                    case "²áÌõÂëºÅ":
+                    case "å†Œæ¡ç å·":
                         return item.SubItems[COLUMN_BARCODE].Text;
                     case "amerceOperator":
-                    case "ÊÕ·ÑÕß":
+                    case "æ”¶è´¹è€…":
                         return item.SubItems[COLUMN_AMERCEOPERATOR].Text;
                     case "amerceTime":
-                    case "ÊÕ·ÑÈÕÆÚ":
+                    case "æ”¶è´¹æ—¥æœŸ":
                         return item.SubItems[COLUMN_AMERCETIME].Text;
 
 
                     case "settlementOperator":
-                    case "½áËãÕß":
+                    case "ç»“ç®—è€…":
                         return item.SubItems[COLUMN_SETTLEMENTOPERATOR].Text;
                     case "settlementTime":
-                    case "½áËãÈÕÆÚ":
+                    case "ç»“ç®—æ—¥æœŸ":
                         return item.SubItems[COLUMN_SETTLEMENTTIME].Text;
                     case "recpath":
-                    case "¼ÇÂ¼Â·¾¶":
+                    case "è®°å½•è·¯å¾„":
                         return item.SubItems[COLUMN_RECPATH].Text;
                     default:
                         return "undefined column";
@@ -2774,7 +2774,7 @@ namespace dp2Circulation
 
             catch
             {
-                return null;    // ±íÊ¾Ã»ÓĞÕâ¸ösubitemÏÂ±ê
+                return null;    // è¡¨ç¤ºæ²¡æœ‰è¿™ä¸ªsubitemä¸‹æ ‡
             }
 
         }
@@ -2785,7 +2785,7 @@ namespace dp2Circulation
             this.SortColumns.SetFirstColumn(nClickColumn,
                 this.listView_amerced.Columns);
 
-            // ÅÅĞò
+            // æ’åº
             this.listView_amerced.ListViewItemSorter = new SortColumnsComparer(this.SortColumns);
 
             this.listView_amerced.ListViewItemSorter = null;
@@ -2796,12 +2796,12 @@ namespace dp2Circulation
             SetNextButtonEnable();
         }
 
-        // ´òÓ¡±¾´Î½áËã²¿·Ö
+        // æ‰“å°æœ¬æ¬¡ç»“ç®—éƒ¨åˆ†
         private void button_print_printSettlemented_Click(object sender, EventArgs e)
         {
             string strError = "";
 
-            // ¼ì²éµ±Ç°ÅÅĞò×´Ì¬ºÍ°´ÊÕ·ÑÕßĞ¡¼ÆÖ®¼äÊÇ·ñ´æÔÚÃ¬¶Ü
+            // æ£€æŸ¥å½“å‰æ’åºçŠ¶æ€å’ŒæŒ‰æ”¶è´¹è€…å°è®¡ä¹‹é—´æ˜¯å¦å­˜åœ¨çŸ›ç›¾
             if (this.checkBox_sumByAmerceOperator.Checked == true)
             {
 
@@ -2813,12 +2813,12 @@ namespace dp2Circulation
                 {
                     ColumnClickEventArgs e1 = new ColumnClickEventArgs(COLUMN_AMERCEOPERATOR);
                     listView_amerced_ColumnClick(this, e1);
-                    MessageBox.Show(this, "Òò´òÓ¡ÒªÇó¡®°´ÊÕ·ÑÕßĞ¡¼Æ½ğ¶î¡¯£¬´òÓ¡Ç°Èí¼şÒÑ×Ô¶¯½«¼¯ºÏÄÚÊÂÏî°´¡®ÊÕ·ÑÕß¡¯ÅÅĞò¡£");
+                    MessageBox.Show(this, "å› æ‰“å°è¦æ±‚â€˜æŒ‰æ”¶è´¹è€…å°è®¡é‡‘é¢â€™ï¼Œæ‰“å°å‰è½¯ä»¶å·²è‡ªåŠ¨å°†é›†åˆå†…äº‹é¡¹æŒ‰â€˜æ”¶è´¹è€…â€™æ’åºã€‚");
                 }
 
             }
 
-            // Èç¹ûÒª´òÓ¡Ğ¡¼ÆĞĞ£¬ĞèÒªÔÚitems¼¯ºÏÖĞ²åÈënull¶ÔÏó£¬·½±ã´òÓ¡Ê±Õë¶Ô´¦Àí
+            // å¦‚æœè¦æ‰“å°å°è®¡è¡Œï¼Œéœ€è¦åœ¨itemsé›†åˆä¸­æ’å…¥nullå¯¹è±¡ï¼Œæ–¹ä¾¿æ‰“å°æ—¶é’ˆå¯¹å¤„ç†
             string strPrevAmerceOperator = "";
 
             List<ListViewItem> items = new List<ListViewItem>();
@@ -2826,7 +2826,7 @@ namespace dp2Circulation
             {
                 ListViewItem item = this.listView_amerced.Items[i];
 
-                // ÅÅ³ıÆäËû²»¸Ã´òÓ¡µÄ¶ÔÏó
+                // æ’é™¤å…¶ä»–ä¸è¯¥æ‰“å°çš„å¯¹è±¡
                 if (item.ImageIndex != ITEMTYPE_NEWLY_SETTLEMENTED)
                     continue;
 
@@ -2837,7 +2837,7 @@ namespace dp2Circulation
                     if (strAmerceOperator != strPrevAmerceOperator
                         && items.Count != 0)
                     {
-                        items.Add(null);    // ²åÈëÒ»¸ö¿Õ¶ÔÏó£¬±íÊ¾ÕâÀïÒª´òÓ¡Ğ¡¼ÆĞĞ
+                        items.Add(null);    // æ’å…¥ä¸€ä¸ªç©ºå¯¹è±¡ï¼Œè¡¨ç¤ºè¿™é‡Œè¦æ‰“å°å°è®¡è¡Œ
                     }
                 }
 
@@ -2849,7 +2849,7 @@ namespace dp2Circulation
                 }
             }
 
-            // ²»ÒªÍü¼Ç ×îºóÒ»¸öĞ¡¼ÆĞĞ
+            // ä¸è¦å¿˜è®° æœ€åä¸€ä¸ªå°è®¡è¡Œ
             if (this.checkBox_sumByAmerceOperator.Checked == true)
             {
                 if (items.Count > 0
@@ -2859,24 +2859,24 @@ namespace dp2Circulation
 
             if (items.Count == 0)
             {
-                strError = "µ±Ç°¼¯ºÏÖĞÃ»ÓĞ×´Ì¬Îª ĞÂ½áËã µÄÊÂÏî£¬Òò´ËÎŞ·¨´òÓ¡";
+                strError = "å½“å‰é›†åˆä¸­æ²¡æœ‰çŠ¶æ€ä¸º æ–°ç»“ç®— çš„äº‹é¡¹ï¼Œå› æ­¤æ— æ³•æ‰“å°";
                 goto ERROR1;
             }
 
             /*
 
-            // ¶Ô¼´½«´òÓ¡µÄÊÂÏî½øĞĞ¼ì²é£¬¿´¿´ÊÇ²»ÊÇ·ûºÏ½áËãÁ÷³Ì
+            // å¯¹å³å°†æ‰“å°çš„äº‹é¡¹è¿›è¡Œæ£€æŸ¥ï¼Œçœ‹çœ‹æ˜¯ä¸æ˜¯ç¬¦åˆç»“ç®—æµç¨‹
             // return:
-            //      -1  ³ö´í
-            //      0   Õı³£
-            //      1   ÓĞÎ¥·´Á÷³ÌµÄÇé¿ö³öÏÖ£¬ÔÚstrErrorÖĞÃèÊö
+            //      -1  å‡ºé”™
+            //      0   æ­£å¸¸
+            //      1   æœ‰è¿åæµç¨‹çš„æƒ…å†µå‡ºç°ï¼Œåœ¨strErrorä¸­æè¿°
             int nRet = CheckBeforeSettlementPrint(items,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
 
             if (nRet == 1)
-                MessageBox.Show(this, "¾¯¸æ: " + strError);
+                MessageBox.Show(this, "è­¦å‘Š: " + strError);
             */
             PrintList(items);
             return;
@@ -2884,10 +2884,10 @@ namespace dp2Circulation
             MessageBox.Show(this, strError);
         }
 
-        // ´òÓ¡È«²¿
+        // æ‰“å°å…¨éƒ¨
         private void button_print_printAll_Click(object sender, EventArgs e)
         {
-            // ¼ì²éµ±Ç°ÅÅĞò×´Ì¬ºÍ°´ÊÕ·ÑÕßĞ¡¼ÆÖ®¼äÊÇ·ñ´æÔÚÃ¬¶Ü
+            // æ£€æŸ¥å½“å‰æ’åºçŠ¶æ€å’ŒæŒ‰æ”¶è´¹è€…å°è®¡ä¹‹é—´æ˜¯å¦å­˜åœ¨çŸ›ç›¾
             if (this.checkBox_sumByAmerceOperator.Checked == true)
             {
 
@@ -2899,15 +2899,15 @@ namespace dp2Circulation
                 {
                     ColumnClickEventArgs e1 = new ColumnClickEventArgs(COLUMN_AMERCEOPERATOR);
                     listView_amerced_ColumnClick(this, e1);
-                    MessageBox.Show(this, "Òò´òÓ¡ÒªÇó¡®°´ÊÕ·ÑÕßĞ¡¼Æ½ğ¶î¡¯£¬´òÓ¡Ç°Èí¼şÒÑ×Ô¶¯½«¼¯ºÏÄÚÊÂÏî°´¡®ÊÕ·ÑÕß¡¯ÅÅĞò¡£");
+                    MessageBox.Show(this, "å› æ‰“å°è¦æ±‚â€˜æŒ‰æ”¶è´¹è€…å°è®¡é‡‘é¢â€™ï¼Œæ‰“å°å‰è½¯ä»¶å·²è‡ªåŠ¨å°†é›†åˆå†…äº‹é¡¹æŒ‰â€˜æ”¶è´¹è€…â€™æ’åºã€‚");
 
 
-                    // MessageBox.Show(this, "¾¯¸æ£º´òÓ¡ÒªÇó¡®°´ÊÕ·ÑÕßĞ¡¼Æ½ğ¶î¡¯£¬µ«´òÓ¡Ç°¼¯ºÏÄÚÊÂÏî²¢Î´°´¡®ÊÕ·ÑÕß¡¯ÅÅĞò£¬ÕâÑù´òÓ¡³öµÄĞ¡¼Æ½ğ¶î½«»á²»×¼È·¡£\r\n\r\nÒª±ÜÃâÕâÖÖÇé¿ö£¬¿ÉÔÚ´òÓ¡Ç°ÓÃÊó±ê×ó¼üµã¡®ÊÕ·ÑÕß¡¯À¸±êÌâ£¬È·±£°´ÆäÅÅĞò¡£");
+                    // MessageBox.Show(this, "è­¦å‘Šï¼šæ‰“å°è¦æ±‚â€˜æŒ‰æ”¶è´¹è€…å°è®¡é‡‘é¢â€™ï¼Œä½†æ‰“å°å‰é›†åˆå†…äº‹é¡¹å¹¶æœªæŒ‰â€˜æ”¶è´¹è€…â€™æ’åºï¼Œè¿™æ ·æ‰“å°å‡ºçš„å°è®¡é‡‘é¢å°†ä¼šä¸å‡†ç¡®ã€‚\r\n\r\nè¦é¿å…è¿™ç§æƒ…å†µï¼Œå¯åœ¨æ‰“å°å‰ç”¨é¼ æ ‡å·¦é”®ç‚¹â€˜æ”¶è´¹è€…â€™æ æ ‡é¢˜ï¼Œç¡®ä¿æŒ‰å…¶æ’åºã€‚");
                 }
 
             }
 
-            // Èç¹ûÒª´òÓ¡Ğ¡¼ÆĞĞ£¬ĞèÒªÔÚitems¼¯ºÏÖĞ²åÈënull¶ÔÏó£¬·½±ã´òÓ¡Ê±Õë¶Ô´¦Àí
+            // å¦‚æœè¦æ‰“å°å°è®¡è¡Œï¼Œéœ€è¦åœ¨itemsé›†åˆä¸­æ’å…¥nullå¯¹è±¡ï¼Œæ–¹ä¾¿æ‰“å°æ—¶é’ˆå¯¹å¤„ç†
             string strPrevAmerceOperator = "";
 
             List<ListViewItem> items = new List<ListViewItem>();
@@ -2922,7 +2922,7 @@ namespace dp2Circulation
                     if (strAmerceOperator != strPrevAmerceOperator
                         && items.Count != 0)
                     {
-                        items.Add(null);    // ²åÈëÒ»¸ö¿Õ¶ÔÏó£¬±íÊ¾ÕâÀïÒª´òÓ¡Ğ¡¼ÆĞĞ
+                        items.Add(null);    // æ’å…¥ä¸€ä¸ªç©ºå¯¹è±¡ï¼Œè¡¨ç¤ºè¿™é‡Œè¦æ‰“å°å°è®¡è¡Œ
                     }
                 }
 
@@ -2934,7 +2934,7 @@ namespace dp2Circulation
                 }
             }
 
-            // ²»ÒªÍü¼Ç ×îºóÒ»¸öĞ¡¼ÆĞĞ
+            // ä¸è¦å¿˜è®° æœ€åä¸€ä¸ªå°è®¡è¡Œ
             if (this.checkBox_sumByAmerceOperator.Checked == true)
             {
                 if (items.Count > 0
@@ -2944,18 +2944,18 @@ namespace dp2Circulation
 
             string strError = "";
 
-            // ¶Ô¼´½«´òÓ¡µÄÊÂÏî½øĞĞ¼ì²é£¬¿´¿´ÊÇ²»ÊÇ·ûºÏ½áËãÁ÷³Ì
+            // å¯¹å³å°†æ‰“å°çš„äº‹é¡¹è¿›è¡Œæ£€æŸ¥ï¼Œçœ‹çœ‹æ˜¯ä¸æ˜¯ç¬¦åˆç»“ç®—æµç¨‹
             // return:
-            //      -1  ³ö´í
-            //      0   Õı³£
-            //      1   ÓĞÎ¥·´Á÷³ÌµÄÇé¿ö³öÏÖ£¬ÔÚstrErrorÖĞÃèÊö
+            //      -1  å‡ºé”™
+            //      0   æ­£å¸¸
+            //      1   æœ‰è¿åæµç¨‹çš„æƒ…å†µå‡ºç°ï¼Œåœ¨strErrorä¸­æè¿°
             int nRet = CheckBeforeSettlementPrint(items,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
 
             if (nRet == 1)
-                MessageBox.Show(this, "¾¯¸æ: " + strError);
+                MessageBox.Show(this, "è­¦å‘Š: " + strError);
 
             PrintList(items);
             return;
@@ -2968,7 +2968,7 @@ namespace dp2Circulation
             this.MainForm.stopManager.Active(this.stop);
         }
 
-        // ·µ»ØÁĞ±íÖĞ¸÷ÀàÊÂÏîµÄ¸öÊı
+        // è¿”å›åˆ—è¡¨ä¸­å„ç±»äº‹é¡¹çš„ä¸ªæ•°
         void GetItemTypesCount(out int nAmercedCount,
             out int nOldSettlementedCount,
             out int nNewlySettlementedCount,
@@ -2993,7 +2993,7 @@ namespace dp2Circulation
             }
         }
 
-        // µ±ÈÎÒâÊÂÏîµÄÀàĞÍ·¢Éú±ä»¯
+        // å½“ä»»æ„äº‹é¡¹çš„ç±»å‹å‘ç”Ÿå˜åŒ–
         void OnItemTypeChanged()
         {
             int nAmercedCount = 0;
@@ -3020,20 +3020,20 @@ namespace dp2Circulation
             int nSelectedCount = 0;
             if (this.toolStripButton_items_useCheck.Checked == true)
             {
-                strText = "¹´Ñ¡";
+                strText = "å‹¾é€‰";
                 nSelectedCount = this.listView_amerced.CheckedItems.Count;
             }
             else
             {
-                strText = "Ñ¡¶¨";
+                strText = "é€‰å®š";
                 nSelectedCount = this.listView_amerced.SelectedItems.Count;
             }*/
 
-            this.toolStripStatusLabel_items_message1.Text = "ÒÑÊÕ·Ñ " + nAmercedCount.ToString() + ", ĞÂ½áËã " + nNewlySettlementedCount.ToString() + ", ¾É½áËã " + nOldSettlementedCount.ToString();
-            // this.label_items_message.Text = "ÒÑÊÕ·Ñ " + nAmercedCount.ToString() + ", ĞÂ½áËã " + nNewlySettlementedCount.ToString() + ", ¾É½áËã " + nOldSettlementedCount.ToString() + "    " + strText + " " + nSelectedCount.ToString();
+            this.toolStripStatusLabel_items_message1.Text = "å·²æ”¶è´¹ " + nAmercedCount.ToString() + ", æ–°ç»“ç®— " + nNewlySettlementedCount.ToString() + ", æ—§ç»“ç®— " + nOldSettlementedCount.ToString();
+            // this.label_items_message.Text = "å·²æ”¶è´¹ " + nAmercedCount.ToString() + ", æ–°ç»“ç®— " + nNewlySettlementedCount.ToString() + ", æ—§ç»“ç®— " + nOldSettlementedCount.ToString() + "    " + strText + " " + nSelectedCount.ToString();
         }
 
-        // Ñ¡Ôñ·¢Éú¸Ä±ä
+        // é€‰æ‹©å‘ç”Ÿæ”¹å˜
         private void listView_amerced_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (this.toolStripButton_items_useCheck.Checked == true)
@@ -3055,10 +3055,10 @@ namespace dp2Circulation
                 this.toolStripButton_items_undoSettlement.Enabled = true;
             }
 
-            this.toolStripStatusLabel_items_message2.Text = "Ñ¡¶¨ " + this.listView_amerced.SelectedItems.Count.ToString();
+            this.toolStripStatusLabel_items_message2.Text = "é€‰å®š " + this.listView_amerced.SelectedItems.Count.ToString();
         }
 
-        // ¹´Ñ¡·¢Éú¸Ä±ä
+        // å‹¾é€‰å‘ç”Ÿæ”¹å˜
         private void listView_amerced_ItemChecked(object sender, ItemCheckedEventArgs e)
         {
             if (this.toolStripButton_items_useCheck.Checked == false)
@@ -3081,17 +3081,17 @@ namespace dp2Circulation
 
             if (e != null)
             {
-                // ½«checked×´Ì¬µÄÊÂÏî×ÖÌå¼Ó´Ö£¬»òÕß·´Ö®
+                // å°†checkedçŠ¶æ€çš„äº‹é¡¹å­—ä½“åŠ ç²—ï¼Œæˆ–è€…åä¹‹
                 if (e.Item.Checked == true)
                     e.Item.Font = new Font(e.Item.Font, FontStyle.Bold);
                 else
                     e.Item.Font = new Font(e.Item.Font, FontStyle.Regular);
             }
 
-            this.toolStripStatusLabel_items_message2.Text = "¹´Ñ¡ " + this.listView_amerced.CheckedItems.Count.ToString();
+            this.toolStripStatusLabel_items_message2.Text = "å‹¾é€‰ " + this.listView_amerced.CheckedItems.Count.ToString();
         }
 
-        // ÇĞ»»¡°Ê¹ÓÃ¹´Ñ¡¡±×´Ì¬
+        // åˆ‡æ¢â€œä½¿ç”¨å‹¾é€‰â€çŠ¶æ€
         void menu_toggleUseCheck_Click(object sender, EventArgs e)
         {
             if (this.toolStripButton_items_useCheck.Checked == true)
@@ -3104,13 +3104,13 @@ namespace dp2Circulation
 
         private void toolStripButton_items_useCheck_Click(object sender, EventArgs e)
         {
-            // ÓÃºÎÖÖ·½Ê½À´Ñ¡Ôñ?
+            // ç”¨ä½•ç§æ–¹å¼æ¥é€‰æ‹©?
 
             if (this.toolStripButton_items_useCheck.Checked == true)
             {
                 this.listView_amerced.CheckBoxes = true;
 
-                // °ÑÔ­À´µÄselected±äÎªchecked
+                // æŠŠåŸæ¥çš„selectedå˜ä¸ºchecked
                 for (int i = 0; i < this.listView_amerced.Items.Count; i++)
                 {
                     ListViewItem item = this.listView_amerced.Items[i];
@@ -3127,7 +3127,7 @@ namespace dp2Circulation
             }
             else
             {
-                // °ÑÔ­À´µÄchecked±äÎªselected
+                // æŠŠåŸæ¥çš„checkedå˜ä¸ºselected
                 for (int i = 0; i < this.listView_amerced.Items.Count; i++)
                 {
                     ListViewItem item = this.listView_amerced.Items[i];
@@ -3186,83 +3186,83 @@ namespace dp2Circulation
 
     }
 
-    // ¶¨ÒåÁËÌØ¶¨È±Ê¡ÖµµÄPrintOptionÅÉÉúÀà
+    // å®šä¹‰äº†ç‰¹å®šç¼ºçœå€¼çš„PrintOptionæ´¾ç”Ÿç±»
     internal class SettlementPrintOption : PrintOption
     {
         public SettlementPrintOption(string strDataDir)
         {
             this.DataDir = strDataDir;
 
-            this.PageHeaderDefault = "%date% ÊÕ·Ñ½áËãÇåµ¥ - (¹² %pagecount% Ò³)";
+            this.PageHeaderDefault = "%date% æ”¶è´¹ç»“ç®—æ¸…å• - (å…± %pagecount% é¡µ)";
             this.PageFooterDefault = "%pageno%/%pagecount%";
 
-            this.TableTitleDefault = "%date% ÊÕ·Ñ½áËãÇåµ¥";
+            this.TableTitleDefault = "%date% æ”¶è´¹ç»“ç®—æ¸…å•";
 
             this.LinesPerPageDefault = 20;
 
-            // ColumnsÈ±Ê¡Öµ
+            // Columnsç¼ºçœå€¼
             Columns.Clear();
 
-            // "id -- ¼ÇÂ¼ID",
+            // "id -- è®°å½•ID",
             Column column = new Column();
-            column.Name = "id -- ¼ÇÂ¼ID";
-            column.Caption = "¼ÇÂ¼ID";
+            column.Name = "id -- è®°å½•ID";
+            column.Caption = "è®°å½•ID";
             column.MaxChars = -1;
             this.Columns.Add(column);
 
-            // "readerBarcode -- ¶ÁÕßÖ¤ÌõÂëºÅ",
+            // "readerBarcode -- è¯»è€…è¯æ¡ç å·",
             column = new Column();
-            column.Name = "readerBarcode -- ¶ÁÕßÖ¤ÌõÂëºÅ";
-            column.Caption = "¶ÁÕßÖ¤ÌõÂëºÅ";
+            column.Name = "readerBarcode -- è¯»è€…è¯æ¡ç å·";
+            column.Caption = "è¯»è€…è¯æ¡ç å·";
             column.MaxChars = -1;
             this.Columns.Add(column);
 
-            // "reason -- Ô­Òò",
+            // "reason -- åŸå› ",
             column = new Column();
-            column.Name = "reason -- Ô­Òò";
-            column.Caption = "Ô­Òò";
+            column.Name = "reason -- åŸå› ";
+            column.Caption = "åŸå› ";
             column.MaxChars = -1;
             this.Columns.Add(column);
 
-            // "price -- ½ğ¶î",
+            // "price -- é‡‘é¢",
             column = new Column();
-            column.Name = "price -- ½ğ¶î";
-            column.Caption = "½ğ¶î";
+            column.Name = "price -- é‡‘é¢";
+            column.Caption = "é‡‘é¢";
             column.MaxChars = -1;
             this.Columns.Add(column);
 
-            // "amerceOperator -- ÊÕ·ÑÕß",
+            // "amerceOperator -- æ”¶è´¹è€…",
             column = new Column();
-            column.Name = "amerceOperator -- ÊÕ·ÑÕß";
-            column.Caption = "ÊÕ·ÑÕß";
+            column.Name = "amerceOperator -- æ”¶è´¹è€…";
+            column.Caption = "æ”¶è´¹è€…";
             column.MaxChars = -1;
             this.Columns.Add(column);
 
-            // "amerceTime -- ÊÕ·ÑÈÕÆÚ",
+            // "amerceTime -- æ”¶è´¹æ—¥æœŸ",
             column = new Column();
-            column.Name = "amerceTime -- ÊÕ·ÑÈÕÆÚ";
-            column.Caption = "ÊÕ·ÑÈÕÆÚ";
+            column.Name = "amerceTime -- æ”¶è´¹æ—¥æœŸ";
+            column.Caption = "æ”¶è´¹æ—¥æœŸ";
             column.MaxChars = -1;
             this.Columns.Add(column);
 
-            // "settlementOperator -- ½áËãÕß",
+            // "settlementOperator -- ç»“ç®—è€…",
             column = new Column();
-            column.Name = "settlementOperator -- ½áËãÕß";
-            column.Caption = "½áËãÕß";
+            column.Name = "settlementOperator -- ç»“ç®—è€…";
+            column.Caption = "ç»“ç®—è€…";
             column.MaxChars = -1;
             this.Columns.Add(column);
 
-            // "settlementTime -- ½áËãÈÕÆÚ",
+            // "settlementTime -- ç»“ç®—æ—¥æœŸ",
             column = new Column();
-            column.Name = "settlementTime -- ½áËãÈÕÆÚ";
-            column.Caption = "½áËãÈÕÆÚ";
+            column.Name = "settlementTime -- ç»“ç®—æ—¥æœŸ";
+            column.Caption = "ç»“ç®—æ—¥æœŸ";
             column.MaxChars = -1;
             this.Columns.Add(column);
 
-            // "recpath -- ¼ÇÂ¼Â·¾¶"
+            // "recpath -- è®°å½•è·¯å¾„"
             column = new Column();
-            column.Name = "recpath -- ¼ÇÂ¼Â·¾¶";
-            column.Caption = "¼ÇÂ¼Â·¾¶";
+            column.Name = "recpath -- è®°å½•è·¯å¾„";
+            column.Caption = "è®°å½•è·¯å¾„";
             column.MaxChars = -1;
             this.Columns.Add(column);
 

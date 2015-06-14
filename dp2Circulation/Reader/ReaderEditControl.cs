@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -16,49 +16,49 @@ using DigitalPlatform.Text;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ¶ÁÕßĞÅÏ¢±à¼­¿Ø¼ş
+    /// è¯»è€…ä¿¡æ¯ç¼–è¾‘æ§ä»¶
     /// </summary>
     public partial class ReaderEditControl : ItemEditControlBase
     {
         /// <summary>
-        /// »ñµÃÍ¼Êé¹İ´úÂë
+        /// è·å¾—å›¾ä¹¦é¦†ä»£ç 
         /// </summary>
         public event GetLibraryCodeEventHandler GetLibraryCode = null;
 
         /// <summary>
-        /// ´´½¨Æ´ÒôµÄÊÂ¼ş
+        /// åˆ›å»ºæ‹¼éŸ³çš„äº‹ä»¶
         /// </summary>
         public event EventHandler CreatePinyin = null;
 
         /// <summary>
-        /// ±à¼­È¨ÏŞµÄÊÂ¼ş
+        /// ç¼–è¾‘æƒé™çš„äº‹ä»¶
         /// </summary>
         public event EventHandler EditRights = null;
 
 #if NO
         /// <summary>
-        /// »ñµÃÖµÁĞ±í
+        /// è·å¾—å€¼åˆ—è¡¨
         /// </summary>
         public event GetValueTableEventHandler GetValueTable = null;
 
         /// <summary>
-        /// ÄÚÈİ·¢Éú¸Ä±ä
+        /// å†…å®¹å‘ç”Ÿæ”¹å˜
         /// </summary>
         public event ContentChangedEventHandler ContentChanged = null;
 
-        // Font ChangedTextFont = null;    // ±íÊ¾±»¸Ä¶¯¹ıµÄÄÚÈİµÄ×ÖÌå
+        // Font ChangedTextFont = null;    // è¡¨ç¤ºè¢«æ”¹åŠ¨è¿‡çš„å†…å®¹çš„å­—ä½“
 
         XmlDocument RecordDom = null;
 
         bool m_bChanged = false;
 
-        bool m_bInInitial = true;   // ÊÇ·ñÕıÔÚ³õÊ¼»¯¹ı³ÌÖ®ÖĞ
+        bool m_bInInitial = true;   // æ˜¯å¦æ­£åœ¨åˆå§‹åŒ–è¿‡ç¨‹ä¹‹ä¸­
 
-        Color ColorChanged = Color.Yellow; // ±íÊ¾ÄÚÈİ¸Ä±ä¹ıµÄÑÕÉ«
-        Color ColorDifference = Color.Blue; // ±íÊ¾²îÒìµÄÑÕÉ«
+        Color ColorChanged = Color.Yellow; // è¡¨ç¤ºå†…å®¹æ”¹å˜è¿‡çš„é¢œè‰²
+        Color ColorDifference = Color.Blue; // è¡¨ç¤ºå·®å¼‚çš„é¢œè‰²
 #endif
 
-        #region Êı¾İ³ÉÔ±
+        #region æ•°æ®æˆå‘˜
 
 #if NO
         public string OldRecord = "";
@@ -66,7 +66,7 @@ namespace dp2Circulation
 #endif
 
         /// <summary>
-        /// ±³¾°ÑÕÉ«
+        /// èƒŒæ™¯é¢œè‰²
         /// </summary>
         [Category("Appearance")]
         [DescriptionAttribute("Back Color")]
@@ -84,7 +84,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ¶ÁÕßÖ¤ÌõÂëºÅ
+        /// è¯»è€…è¯æ¡ç å·
         /// </summary>
         public string Barcode
         {
@@ -99,7 +99,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// Ö¤ºÅ
+        /// è¯å·
         /// </summary>
         public string CardNumber
         {
@@ -113,11 +113,11 @@ namespace dp2Circulation
             }
         }
 
-        // Ö¸ÎÆÌØÕ÷×Ö·û´®
-        // base64±àÂë·½Ê½
+        // æŒ‡çº¹ç‰¹å¾å­—ç¬¦ä¸²
+        // base64ç¼–ç æ–¹å¼
         /// <summary>
-        /// Ö¸ÎÆÌØÕ÷×Ö·û´®¡£
-        /// base64±àÂë·½Ê½
+        /// æŒ‡çº¹ç‰¹å¾å­—ç¬¦ä¸²ã€‚
+        /// base64ç¼–ç æ–¹å¼
         /// </summary>
         public string Fingerprint
         {
@@ -139,7 +139,7 @@ namespace dp2Circulation
                 }
                 DomUtil.SetElementText(this.RecordDom.DocumentElement, "fingerprint", value);
 
-                // Çå³ı<fingerprint>ÔªËØ
+                // æ¸…é™¤<fingerprint>å…ƒç´ 
                 if (string.IsNullOrEmpty(value) == true)
                 {
                     XmlNode node = this.RecordDom.DocumentElement.SelectSingleNode("fingerprint");
@@ -151,9 +151,9 @@ namespace dp2Circulation
             }
         }
 
-        // Ö¸ÎÆÌØÕ÷×Ö·û´®µÄ°æ±¾ºÅ
+        // æŒ‡çº¹ç‰¹å¾å­—ç¬¦ä¸²çš„ç‰ˆæœ¬å·
         /// <summary>
-        /// Ö¸ÎÆÌØÕ÷×Ö·û´®µÄ°æ±¾ºÅ
+        /// æŒ‡çº¹ç‰¹å¾å­—ç¬¦ä¸²çš„ç‰ˆæœ¬å·
         /// </summary>
         public string FingerprintVersion
         {
@@ -180,7 +180,7 @@ namespace dp2Circulation
                 if (node == null)
                 {
                     if (string.IsNullOrEmpty(value) == true)
-                        return; // ÕıºÃ,¼ÈÈ»ÔªËØ²»´æÔÚ, ¾Í²»ÓÃÉ¾³ıÁË
+                        return; // æ­£å¥½,æ—¢ç„¶å…ƒç´ ä¸å­˜åœ¨, å°±ä¸ç”¨åˆ é™¤äº†
                     node = this.RecordDom.CreateElement("fingerprint");
                     this.RecordDom.DocumentElement.AppendChild(node);
                 }
@@ -190,7 +190,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ¶ÁÕß¼ÇÂ¼×´Ì¬
+        /// è¯»è€…è®°å½•çŠ¶æ€
         /// </summary>
         public string State
         {
@@ -205,7 +205,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ×¢ÊÍ
+        /// æ³¨é‡Š
         /// </summary>
         public string Comment
         {
@@ -220,7 +220,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ¶ÁÕßÀàĞÍ
+        /// è¯»è€…ç±»å‹
         /// </summary>
         public string ReaderType
         {
@@ -234,9 +234,9 @@ namespace dp2Circulation
             }
         }
 
-        // ´´½¨ÈÕÆÚ(RFC1123¸ñÊ½)
+        // åˆ›å»ºæ—¥æœŸ(RFC1123æ ¼å¼)
         /// <summary>
-        /// ´´½¨ÈÕÆÚ(RFC1123¸ñÊ½)
+        /// åˆ›å»ºæ—¥æœŸ(RFC1123æ ¼å¼)
         /// </summary>
         public string CreateDate
         {
@@ -250,9 +250,9 @@ namespace dp2Circulation
             }
         }
 
-        // Ê§Ğ§ÈÕÆÚ(RFC1123¸ñÊ½)
+        // å¤±æ•ˆæ—¥æœŸ(RFC1123æ ¼å¼)
         /// <summary>
-        /// Ê§Ğ§ÈÕÆÚ(RFC1123¸ñÊ½)
+        /// å¤±æ•ˆæ—¥æœŸ(RFC1123æ ¼å¼)
         /// </summary>
         public string ExpireDate
         {
@@ -267,9 +267,9 @@ namespace dp2Circulation
         }
 
         // 2007/6/15
-        // ×â½ğÊ§Ğ§ÈÕÆÚ(RFC1123¸ñÊ½)
+        // ç§Ÿé‡‘å¤±æ•ˆæ—¥æœŸ(RFC1123æ ¼å¼)
         /// <summary>
-        /// ×â½ğÊ§Ğ§ÈÕÆÚ(RFC1123¸ñÊ½)
+        /// ç§Ÿé‡‘å¤±æ•ˆæ—¥æœŸ(RFC1123æ ¼å¼)
         /// </summary>
         public string HireExpireDate
         {
@@ -285,7 +285,7 @@ namespace dp2Circulation
 
         // 2007/6/15
         /// <summary>
-        /// ×â½ğÖÜÆÚ
+        /// ç§Ÿé‡‘å‘¨æœŸ
         /// </summary>
         public string HirePeriod
         {
@@ -301,7 +301,7 @@ namespace dp2Circulation
 
         // 2008/11/11
         /// <summary>
-        /// Ñº½ğ
+        /// æŠ¼é‡‘
         /// </summary>
         public string Foregift
         {
@@ -315,9 +315,9 @@ namespace dp2Circulation
             }
         }
 
-        // ³öÉúÈÕÆÚ(RFC1123¸ñÊ½)
+        // å‡ºç”Ÿæ—¥æœŸ(RFC1123æ ¼å¼)
         /// <summary>
-        /// ³öÉúÈÕÆÚ(RFC1123¸ñÊ½)
+        /// å‡ºç”Ÿæ—¥æœŸ(RFC1123æ ¼å¼)
         /// </summary>
         public string DateOfBirth
         {
@@ -332,7 +332,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ¶ÁÕßĞÕÃû
+        /// è¯»è€…å§“å
         /// </summary>
         public string NameString
         {
@@ -347,7 +347,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ¶ÁÕßĞÕÃûÆ´Òô
+        /// è¯»è€…å§“åæ‹¼éŸ³
         /// </summary>
         public string NamePinyin
         {
@@ -362,7 +362,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ĞÔ±ğ
+        /// æ€§åˆ«
         /// </summary>
         public string Gender
         {
@@ -377,7 +377,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// Éí·İÖ¤ºÅ
+        /// èº«ä»½è¯å·
         /// </summary>
         public string IdCardNumber
         {
@@ -392,7 +392,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ²¿ÃÅ
+        /// éƒ¨é—¨
         /// </summary>
         public string Department
         {
@@ -408,7 +408,7 @@ namespace dp2Circulation
 
         // 2009/7/17
         /// <summary>
-        /// Ö°±ğ
+        /// èŒåˆ«
         /// </summary>
         public string Post
         {
@@ -423,7 +423,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// µØÖ·
+        /// åœ°å€
         /// </summary>
         public string Address
         {
@@ -438,7 +438,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// µç»°
+        /// ç”µè¯
         /// </summary>
         public string Tel
         {
@@ -453,7 +453,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// Email µØÖ·
+        /// Email åœ°å€
         /// </summary>
         public string Email
         {
@@ -468,7 +468,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// È¨ÏŞ
+        /// æƒé™
         /// </summary>
         public string Rights
         {
@@ -483,7 +483,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ´æÈ¡¶¨Òå
+        /// å­˜å–å®šä¹‰
         /// </summary>
         public string Access
         {
@@ -498,7 +498,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÊéÕ«Ãû³Æ
+        /// ä¹¦æ–‹åç§°
         /// </summary>
         public string PersonalLibrary
         {
@@ -513,7 +513,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ºÃÓÑ
+        /// å¥½å‹
         /// </summary>
         public string Friends
         {
@@ -528,7 +528,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ¶ÁÕß¼ÇÂ¼Â·¾¶
+        /// è¯»è€…è®°å½•è·¯å¾„
         /// </summary>
         public string RecPath
         {
@@ -545,7 +545,7 @@ namespace dp2Circulation
         #endregion
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public ReaderEditControl()
         {
@@ -579,7 +579,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÄÚÈİÊÇ·ñ·¢Éú¹ıĞŞ¸Ä
+        /// å†…å®¹æ˜¯å¦å‘ç”Ÿè¿‡ä¿®æ”¹
         /// </summary>
         public bool Changed
         {
@@ -595,7 +595,7 @@ namespace dp2Circulation
                 if (this.m_bChanged == false)
                     this.ResetColor();
 
-                // ´¥·¢ÊÂ¼ş
+                // è§¦å‘äº‹ä»¶
                 if (bOldValue != value && this.ContentChanged != null)
                 {
                     ContentChangedEventArgs e = new ContentChangedEventArgs();
@@ -608,10 +608,10 @@ namespace dp2Circulation
 #endif
 
         /// <summary>
-        /// ½« RFC1123 Ê±¼ä×Ö·û´®×ª»»ÎªÏÔÊ¾ÓÃµÄ±¾µØÊ±¼ä×Ö·û´®
+        /// å°† RFC1123 æ—¶é—´å­—ç¬¦ä¸²è½¬æ¢ä¸ºæ˜¾ç¤ºç”¨çš„æœ¬åœ°æ—¶é—´å­—ç¬¦ä¸²
         /// </summary>
-        /// <param name="strTime">RFC1123 Ê±¼ä×Ö·û´®</param>
-        /// <returns>±¾µØÊ±¼ä×Ö·û´®</returns>
+        /// <param name="strTime">RFC1123 æ—¶é—´å­—ç¬¦ä¸²</param>
+        /// <returns>æœ¬åœ°æ—¶é—´å­—ç¬¦ä¸²</returns>
         public static DateTime GetDateTime(string strTime)
         {
             DateTime time = new DateTime((long)0);
@@ -676,12 +676,12 @@ namespace dp2Circulation
         }
 #endif
         // parameters:
-        //      time    ÊÇ±¾µØÊ±¼ä
+        //      time    æ˜¯æœ¬åœ°æ—¶é—´
         /// <summary>
-        /// »ñµÃ RFC1123 Ê±¼ä×Ö·û´®
+        /// è·å¾— RFC1123 æ—¶é—´å­—ç¬¦ä¸²
         /// </summary>
-        /// <param name="time">±¾µØÊ±¼ä</param>
-        /// <returns>RDC1123 ×Ö·û´®</returns>
+        /// <param name="time">æœ¬åœ°æ—¶é—´</param>
+        /// <returns>RDC1123 å­—ç¬¦ä¸²</returns>
         public static string GetDateTimeString(DateTime time)
         {
             if (time == new DateTime((long)0))
@@ -701,13 +701,13 @@ namespace dp2Circulation
 
 #if NO
         /// <summary>
-        /// ÉèÖÃÊı¾İ
+        /// è®¾ç½®æ•°æ®
         /// </summary>
-        /// <param name="strXml">¶ÁÕß¼ÇÂ¼ XML</param>
-        /// <param name="strRecPath">¶ÁÕß¼ÇÂ¼Â·¾¶</param>
-        /// <param name="timestamp">Ê±¼ä´Á</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í; 0: ³É¹¦</returns>
+        /// <param name="strXml">è¯»è€…è®°å½• XML</param>
+        /// <param name="strRecPath">è¯»è€…è®°å½•è·¯å¾„</param>
+        /// <param name="timestamp">æ—¶é—´æˆ³</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™; 0: æˆåŠŸ</returns>
         public int SetData(string strXml,
             string strRecPath,
             byte[] timestamp,
@@ -726,7 +726,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = "XMLÊı¾İ×°ÔØµ½DOMÊ±³ö´í" + ex.Message;
+                strError = "XMLæ•°æ®è£…è½½åˆ°DOMæ—¶å‡ºé”™" + ex.Message;
                 return -1;
             }
 
@@ -734,7 +734,7 @@ namespace dp2Circulation
 
             try
             {
-                // this.Clear();    // ÕâÑùËÆºõÈ«ÃæÒ»Ğ©£¿Çå³ıÄÇĞ©Ã»ÓĞÖ¸Ã÷µÄ×Ö¶Î£¬ÌØ±ğÊÇ½«À´ĞÂÔöÔÚReaderInfoControlÖĞµÄĞÂ×Ö¶ÎÄÚÈİ
+                // this.Clear();    // è¿™æ ·ä¼¼ä¹å…¨é¢ä¸€äº›ï¼Ÿæ¸…é™¤é‚£äº›æ²¡æœ‰æŒ‡æ˜çš„å­—æ®µï¼Œç‰¹åˆ«æ˜¯å°†æ¥æ–°å¢åœ¨ReaderInfoControlä¸­çš„æ–°å­—æ®µå†…å®¹
 
                 this.Barcode = DomUtil.GetElementText(this.RecordDom.DocumentElement,
                     "barcode");
@@ -758,7 +758,7 @@ namespace dp2Circulation
                     "expireDate");
 
                 // 2007/6/15
-                // ×â½ğ
+                // ç§Ÿé‡‘
                 XmlNode nodeHire = this.RecordDom.DocumentElement.SelectSingleNode("hire");
                 if (nodeHire != null)
                 {
@@ -772,7 +772,7 @@ namespace dp2Circulation
                 }
 
                 // 2008/11/11
-                // Ñº½ğ
+                // æŠ¼é‡‘
                 this.Foregift = DomUtil.GetElementText(this.RecordDom.DocumentElement,
                     "foregift");
 
@@ -786,7 +786,7 @@ namespace dp2Circulation
                     "dateOfBirth");
                 if (string.IsNullOrEmpty(this.DateOfBirth) == true)
                 {
-                    // ¼æÈİ¾ÉÏ°¹ß
+                    // å…¼å®¹æ—§ä¹ æƒ¯
                     this.DateOfBirth = DomUtil.GetElementText(this.RecordDom.DocumentElement,
                         "birthday");
                 }
@@ -845,7 +845,7 @@ namespace dp2Circulation
                 "expireDate");
 
             // 2007/6/15
-            // ×â½ğ
+            // ç§Ÿé‡‘
             XmlNode nodeHire = this.RecordDom.DocumentElement.SelectSingleNode("hire");
             if (nodeHire != null)
             {
@@ -859,7 +859,7 @@ namespace dp2Circulation
             }
 
             // 2008/11/11
-            // Ñº½ğ
+            // æŠ¼é‡‘
             this.Foregift = DomUtil.GetElementText(this.RecordDom.DocumentElement,
                 "foregift");
 
@@ -876,7 +876,7 @@ namespace dp2Circulation
                 "dateOfBirth");
             if (string.IsNullOrEmpty(this.DateOfBirth) == true)
             {
-                // ¼æÈİ¾ÉÏ°¹ß
+                // å…¼å®¹æ—§ä¹ æƒ¯
                 this.DateOfBirth = DomUtil.GetElementText(this.RecordDom.DocumentElement,
                     "birthday");
             }
@@ -911,11 +911,11 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// Çå³ı¿Ø¼şÄÚÈ«²¿ÄÚÈİ
+        /// æ¸…é™¤æ§ä»¶å†…å…¨éƒ¨å†…å®¹
         /// </summary>
         public override void Clear()
         {
-            this.Initializing = true; // ·ÀÖ¹ÒòÎªÇå³ı¶ø±äÉ«
+            this.Initializing = true; // é˜²æ­¢å› ä¸ºæ¸…é™¤è€Œå˜è‰²
 
             try
             {
@@ -993,9 +993,9 @@ namespace dp2Circulation
 #endif
 
         /// <summary>
-        /// Çå³ıÔ¤Ô¼Î´È¡´ÎÊı
+        /// æ¸…é™¤é¢„çº¦æœªå–æ¬¡æ•°
         /// </summary>
-        /// <returns>¶ÁÕß¼ÇÂ¼ÊÇ·ñ·¢ÉúÁËĞŞ¸Ä</returns>
+        /// <returns>è¯»è€…è®°å½•æ˜¯å¦å‘ç”Ÿäº†ä¿®æ”¹</returns>
         public bool ClearOutofReservationCount()
         {
             if (this.RecordDom == null)
@@ -1006,7 +1006,7 @@ namespace dp2Circulation
                 return false;
 
 
-            // ÀÛ¼Æ´ÎÊı
+            // ç´¯è®¡æ¬¡æ•°
             string strCount = DomUtil.GetAttr(root, "count");
             if (String.IsNullOrEmpty(strCount) == true)
                 return false;
@@ -1075,8 +1075,8 @@ namespace dp2Circulation
                 "gender", this.Gender);
 
             // 2012/4/11
-            // ¸ù¾İ¼ÇÂ¼ÖĞÊÇ·ñÒÑ¾­ÓĞ<dateOfBirth>ÔªËØÀ´¾ö¶¨ÊÇ·ñÊ¹ÓÃÕâ¸öÔªËØ£¬ÒÔÃâ¶Ô¾ÉµÄdp2Library°æ±¾Ğ´¼ÇÂ¼¹ı³ÌÖĞ¶ªÊ§<dateOfBirth>ÔªËØ
-            XmlNode nodeExistBirthdate = this.RecordDom.DocumentElement.SelectSingleNode("dateOfBirth");    // BUG 2012/5/3 Ô­ÏÈÉÙÁË.DocumentElement
+            // æ ¹æ®è®°å½•ä¸­æ˜¯å¦å·²ç»æœ‰<dateOfBirth>å…ƒç´ æ¥å†³å®šæ˜¯å¦ä½¿ç”¨è¿™ä¸ªå…ƒç´ ï¼Œä»¥å…å¯¹æ—§çš„dp2Libraryç‰ˆæœ¬å†™è®°å½•è¿‡ç¨‹ä¸­ä¸¢å¤±<dateOfBirth>å…ƒç´ 
+            XmlNode nodeExistBirthdate = this.RecordDom.DocumentElement.SelectSingleNode("dateOfBirth");    // BUG 2012/5/3 åŸå…ˆå°‘äº†.DocumentElement
             if (nodeExistBirthdate == null)
                 DomUtil.SetElementText(this.RecordDom.DocumentElement,
                     "birthday", this.DateOfBirth);
@@ -1112,11 +1112,11 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ´´½¨ºÃÊÊºÏÓÚ±£´æµÄ¼ÇÂ¼ĞÅÏ¢
+        /// åˆ›å»ºå¥½é€‚åˆäºä¿å­˜çš„è®°å½•ä¿¡æ¯
         /// </summary>
-        /// <param name="strXml">·µ»Ø¹¹ÔìºÃµÄ¶ÁÕß¼ÇÂ¼ XML</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í; 0: ³É¹¦</returns>
+        /// <param name="strXml">è¿”å›æ„é€ å¥½çš„è¯»è€…è®°å½• XML</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™; 0: æˆåŠŸ</returns>
         public int GetData(
             out string strXml,
             out string strError)
@@ -1134,13 +1134,13 @@ namespace dp2Circulation
             /*
             if (this.Barcode == "")
             {
-                strError = "Barcode³ÉÔ±ÉĞÎ´¶¨Òå";
+                strError = "Barcodeæˆå‘˜å°šæœªå®šä¹‰";
                 return -1;
             }*/
 
             this.RefreshDom();
 
-            // É¾³ı¿ÕÔªËØ
+            // åˆ é™¤ç©ºå…ƒç´ 
             if (RemoveEmptyElement(ref this.RecordDom, out strError) == -1)
                 return -1;
 
@@ -1167,37 +1167,37 @@ namespace dp2Circulation
 
 #if NO
         /// <summary>
-        /// Ö»¶Á×´Ì¬·ç¸ñ
+        /// åªè¯»çŠ¶æ€é£æ ¼
         /// </summary>
         public enum ReadOnlyStyle
         {
             /// <summary>
-            /// Çå³ıÈ«²¿Ö»¶Á×´Ì¬£¬»Ö¸´¿É±à¼­×´Ì¬
+            /// æ¸…é™¤å…¨éƒ¨åªè¯»çŠ¶æ€ï¼Œæ¢å¤å¯ç¼–è¾‘çŠ¶æ€
             /// </summary>
-            Clear = 0,  // Çå³ıÈ«²¿ReadOnly×´Ì¬£¬»Ö¸´¿É±à¼­×´Ì¬
+            Clear = 0,  // æ¸…é™¤å…¨éƒ¨ReadOnlyçŠ¶æ€ï¼Œæ¢å¤å¯ç¼–è¾‘çŠ¶æ€
             /// <summary>
-            /// È«²¿Ö»¶Á
+            /// å…¨éƒ¨åªè¯»
             /// </summary>
-            All = 1,    // È«²¿½ûÖ¹ĞŞ¸Ä
+            All = 1,    // å…¨éƒ¨ç¦æ­¢ä¿®æ”¹
             /// <summary>
-            /// Í¼Êé¹İÒ»°ã¹¤×÷ÈËÔ±£¬²»ÄÜĞŞ¸ÄÂ·¾¶
+            /// å›¾ä¹¦é¦†ä¸€èˆ¬å·¥ä½œäººå‘˜ï¼Œä¸èƒ½ä¿®æ”¹è·¯å¾„
             /// </summary>
-            Librarian = 2,  // Í¼Êé¹İ¹¤×÷ÈËÔ±£¬²»ÄÜĞŞ¸ÄÂ·¾¶
+            Librarian = 2,  // å›¾ä¹¦é¦†å·¥ä½œäººå‘˜ï¼Œä¸èƒ½ä¿®æ”¹è·¯å¾„
             /// <summary>
-            /// ¶ÁÕß¡£²»ÄÜĞŞ¸ÄÌõÂëµÈĞí¶à×Ö¶Î
+            /// è¯»è€…ã€‚ä¸èƒ½ä¿®æ”¹æ¡ç ç­‰è®¸å¤šå­—æ®µ
             /// </summary>
-            Reader = 3, // ¶ÁÕß¡£²»ÄÜĞŞ¸ÄÌõÂëµÈĞí¶à×Ö¶Î
+            Reader = 3, // è¯»è€…ã€‚ä¸èƒ½ä¿®æ”¹æ¡ç ç­‰è®¸å¤šå­—æ®µ
         }
 #endif
 
         /// <summary>
-        /// ÉèÖÃÖ»¶Á×´Ì¬
+        /// è®¾ç½®åªè¯»çŠ¶æ€
         /// </summary>
-        /// <param name="strStyle">ÈçºÎÉèÖÃÖ»¶Á×´Ì¬¡£
-        /// "all" ±íÊ¾È«²¿ÎªÖ»¶Á£»
-        /// "librarian" ±íÊ¾Ö»ÓĞ¼ÇÂ¼Â·¾¶¡¢Ê§Ğ§Ê±¼äÎªÖ»¶Á£¬ÆäÓàÎª¿É¸ÄĞ´;
-        /// "reader" ±íÊ¾Ö»ÓĞĞÕÃûµÈ¼¸ÏîÎª¿É¸ÄĞ´£¬ÆäÓàÎªÖ»¶Á;
-        /// "clear" ±íÊ¾Çå³ıÈ«²¿Ö»¶Á×´Ì¬£¬Òµ¼´È«²¿¶¼ÊÇ¿É¸ÄĞ´×´Ì¬
+        /// <param name="strStyle">å¦‚ä½•è®¾ç½®åªè¯»çŠ¶æ€ã€‚
+        /// "all" è¡¨ç¤ºå…¨éƒ¨ä¸ºåªè¯»ï¼›
+        /// "librarian" è¡¨ç¤ºåªæœ‰è®°å½•è·¯å¾„ã€å¤±æ•ˆæ—¶é—´ä¸ºåªè¯»ï¼Œå…¶ä½™ä¸ºå¯æ”¹å†™;
+        /// "reader" è¡¨ç¤ºåªæœ‰å§“åç­‰å‡ é¡¹ä¸ºå¯æ”¹å†™ï¼Œå…¶ä½™ä¸ºåªè¯»;
+        /// "clear" è¡¨ç¤ºæ¸…é™¤å…¨éƒ¨åªè¯»çŠ¶æ€ï¼Œä¸šå³å…¨éƒ¨éƒ½æ˜¯å¯æ”¹å†™çŠ¶æ€
         /// </param>
         public override void SetReadOnly(string strStyle)
         {
@@ -1246,7 +1246,7 @@ namespace dp2Circulation
                 return;
             }
 
-            // ÏÈÇå³ı
+            // å…ˆæ¸…é™¤
             this.textBox_barcode.ReadOnly = false;
             this.textBox_cardNumber.ReadOnly = false;
             this.comboBox_readerType.Enabled = true;
@@ -1307,15 +1307,15 @@ namespace dp2Circulation
             }
             else if (strStyle == "clear")
             {
-                // Ç°ÃæÒÑ¾­Çå³ı
+                // å‰é¢å·²ç»æ¸…é™¤
             }
         }
 
-        // ±È½Ï×Ô¼ººÍrefControlµÄÊı¾İ²îÒì£¬ÓÃÌØÊâÑÕÉ«ÏÔÊ¾²îÒì×Ö¶Î
+        // æ¯”è¾ƒè‡ªå·±å’ŒrefControlçš„æ•°æ®å·®å¼‚ï¼Œç”¨ç‰¹æ®Šé¢œè‰²æ˜¾ç¤ºå·®å¼‚å­—æ®µ
         /// <summary>
-        /// ±È½Ï×Ô¼ººÍrefControlµÄÊı¾İ²îÒì£¬ÓÃÌØÊâÑÕÉ«ÏÔÊ¾²îÒì×Ö¶Î
+        /// æ¯”è¾ƒè‡ªå·±å’ŒrefControlçš„æ•°æ®å·®å¼‚ï¼Œç”¨ç‰¹æ®Šé¢œè‰²æ˜¾ç¤ºå·®å¼‚å­—æ®µ
         /// </summary>
-        /// <param name="r">ÒªºÍ×Ô¼º½øĞĞ±È½ÏµÄ¿Ø¼ş¶ÔÏó</param>
+        /// <param name="r">è¦å’Œè‡ªå·±è¿›è¡Œæ¯”è¾ƒçš„æ§ä»¶å¯¹è±¡</param>
         public override void HighlightDifferences(ItemEditControlBase r)
         {
             var refControl = r as ReaderEditControl;
@@ -1621,7 +1621,7 @@ namespace dp2Circulation
 
         private void textBox_recPath_TextChanged(object sender, EventArgs e)
         {
-            // ÆÈÊ¹ºóÃæ×Ô¶¯ÖØĞÂ»ñµÃÁĞ±íÖµ
+            // è¿«ä½¿åé¢è‡ªåŠ¨é‡æ–°è·å¾—åˆ—è¡¨å€¼
             this.comboBox_readerType.Items.Clear();
             this.comboBox_state.Items.Clear();
             this.comboBox_hirePeriod.Items.Clear();
@@ -1650,7 +1650,7 @@ namespace dp2Circulation
     /*|| this.GetValueTable == null*/)
                 return;
 
-            // ·ÀÖ¹ÖØÈë
+            // é˜²æ­¢é‡å…¥
             if (this.m_nInDropDown > 0)
                 return;
 
@@ -1670,7 +1670,7 @@ namespace dp2Circulation
                     e1.TableName = "hirePeriod";
                 else
                 {
-                    Debug.Assert(false, "²»Ö§³ÖµÄsender");
+                    Debug.Assert(false, "ä¸æ”¯æŒçš„sender");
                     return;
                 }
 
@@ -1690,7 +1690,7 @@ namespace dp2Circulation
                         e2.DbName = strDbName;
                         this.GetLibraryCode(this, e2);
                         string strLibraryCode = e2.LibraryCode;
-                        // ¹ıÂË³ö·ûºÏ¹Ü´úÂëµÄÄÇĞ©Öµ×Ö·û´®
+                        // è¿‡æ»¤å‡ºç¬¦åˆç®¡ä»£ç çš„é‚£äº›å€¼å­—ç¬¦ä¸²
                         results = Global.FilterValuesWithLibraryCode(strLibraryCode,
                             StringUtil.FromStringArray(e1.values));
                     }
@@ -1721,10 +1721,10 @@ namespace dp2Circulation
         {
             comboBox_readerType_DropDown(sender, e);
 
-            // ¸ø³öÈ±Ê¡Öµ 2014/9/7
+            // ç»™å‡ºç¼ºçœå€¼ 2014/9/7
             if (this.comboBox_state.Items.Count == 0)
             {
-                List<string> values = StringUtil.SplitList("×¢Ïú,Í£½è,¹ÒÊ§");
+                List<string> values = StringUtil.SplitList("æ³¨é”€,åœå€Ÿ,æŒ‚å¤±");
                 foreach (string s in values)
                 {
                     this.comboBox_state.Items.Add(s);
@@ -1749,12 +1749,12 @@ namespace dp2Circulation
 
             if (this.textBox_foregift.Text == "")
             {
-                strError = "½ğ¶îÎª¿Õ";
+                strError = "é‡‘é¢ä¸ºç©º";
                 goto ERROR1;
             }
 
             List<string> results = null;
-            // ½«ĞÎÈç"-123.4+10.55-20.3"µÄ¼Û¸ñ×Ö·û´®¹é²¢»ã×Ü
+            // å°†å½¢å¦‚"-123.4+10.55-20.3"çš„ä»·æ ¼å­—ç¬¦ä¸²å½’å¹¶æ±‡æ€»
             int nRet = PriceUtil.SumPrices(this.textBox_foregift.Text,
                 out results,
                 out strError);
@@ -1767,7 +1767,7 @@ namespace dp2Circulation
                 strText += results[i] + "\r\n";
             }
 
-            MessageBox.Show(this, "»ã×ÜºóµÄ½ğ¶îÎª: \r\n" + strText);
+            MessageBox.Show(this, "æ±‡æ€»åçš„é‡‘é¢ä¸º: \r\n" + strText);
 
             return;
         ERROR1:
@@ -1800,7 +1800,7 @@ namespace dp2Circulation
 #if NO
         delegate void Delegate_filterValue(ComboBox combobox);
 
-        // ¹ıÂËµô {} °üÎ§µÄ²¿·Ö
+        // è¿‡æ»¤æ‰ {} åŒ…å›´çš„éƒ¨åˆ†
         void FileterValue(ComboBox combobox)
         {
             string strText = Global.GetPureSeletedValue(combobox.Text);
@@ -1844,7 +1844,7 @@ namespace dp2Circulation
             }
         }
 
-        // ÖµÁĞ±í»º´æ±»ÇåÀíÁË¡£ÒªÇå³ıÏà¹Ø list.Items
+        // å€¼åˆ—è¡¨ç¼“å­˜è¢«æ¸…ç†äº†ã€‚è¦æ¸…é™¤ç›¸å…³ list.Items
         internal void OnValueTableCacheCleared()
         {
             this.comboBox_readerType.Items.Clear();
@@ -1852,7 +1852,7 @@ namespace dp2Circulation
             this.comboBox_hirePeriod.Items.Clear();
         }
 
-        // ±à¼­È¨ÏŞ
+        // ç¼–è¾‘æƒé™
         private void button_editRights_Click(object sender, EventArgs e)
         {
             if (this.EditRights != null)
@@ -1868,26 +1868,26 @@ namespace dp2Circulation
     }
 // 
     /// <summary>
-    /// »ñµÃÍ¼Êé¹İ´úÂëÊÂ¼ş
+    /// è·å¾—å›¾ä¹¦é¦†ä»£ç äº‹ä»¶
     /// </summary>
-    /// <param name="sender">´¥·¢Õß</param>
-    /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+    /// <param name="sender">è§¦å‘è€…</param>
+    /// <param name="e">äº‹ä»¶å‚æ•°</param>
     public delegate void GetLibraryCodeEventHandler(object sender,
     GetLibraryCodeEventArgs e);
 
     /// <summary>
-    /// »ñµÃÍ¼Êé¹İ´úÂëÊÂ¼şµÄ²ÎÊı
+    /// è·å¾—å›¾ä¹¦é¦†ä»£ç äº‹ä»¶çš„å‚æ•°
     /// </summary>
     public class GetLibraryCodeEventArgs : EventArgs
     {
         /// <summary>
-        /// [in] Êı¾İ¿âÃû
+        /// [in] æ•°æ®åº“å
         /// </summary>
-        public string DbName = "";  // [in] Êı¾İ¿âÃû
+        public string DbName = "";  // [in] æ•°æ®åº“å
 
         /// <summary>
-        /// [out] Í¼Êé¹İ´úÂë
+        /// [out] å›¾ä¹¦é¦†ä»£ç 
         /// </summary>
-        public string LibraryCode = ""; // [out] Í¼Êé¹İ´úÂë
+        public string LibraryCode = ""; // [out] å›¾ä¹¦é¦†ä»£ç 
     }
 }

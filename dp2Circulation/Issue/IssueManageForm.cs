@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -11,24 +11,24 @@ using DigitalPlatform;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ¹ÜÀíÆÚĞÅÏ¢µÄ¶Ô»°¿ò¡£¼´½«·ÏÖ¹
+    /// ç®¡ç†æœŸä¿¡æ¯çš„å¯¹è¯æ¡†ã€‚å³å°†åºŸæ­¢
     /// </summary>
     internal partial class IssueManageForm : Form
     {
         /// <summary>
-        /// ¿ò¼Ü´°¿Ú
+        /// æ¡†æ¶çª—å£
         /// </summary>
         public MainForm MainForm = null;
 
         public event GetOrderInfoEventHandler GetOrderInfo = null;
 
         /// <summary>
-        /// »ñµÃ²áĞÅÏ¢
+        /// è·å¾—å†Œä¿¡æ¯
         /// </summary>
         public event GetItemInfoEventHandler GetItemInfo = null;
 
         /// <summary>
-        /// »ñµÃÖµÁĞ±í
+        /// è·å¾—å€¼åˆ—è¡¨
         /// </summary>
         public event GetValueTableEventHandler GetValueTable = null;
 
@@ -53,7 +53,7 @@ namespace dp2Circulation
             {
                 MainForm.SetControlFont(this, this.MainForm.DefaultFont);
             }
-            // °ÑÊÂ¼ş¹Òµ½¿Ø¼şÉÏÃæ
+            // æŠŠäº‹ä»¶æŒ‚åˆ°æ§ä»¶ä¸Šé¢
             this.issueManageControl1.GetOrderInfo -= new GetOrderInfoEventHandler(issueManageControl1_GetOrderInfo);
             this.issueManageControl1.GetOrderInfo += new GetOrderInfoEventHandler(issueManageControl1_GetOrderInfo);
 
@@ -69,7 +69,7 @@ namespace dp2Circulation
             this.issueManageControl1.GenerateEntity += new GenerateEntityEventHandler(issueManageControl1_GenerateEntity);
              * */
 
-            this.issueManageControl1.Sort();    // ÅÅĞò 2009/2/8
+            this.issueManageControl1.Sort();    // æ’åº 2009/2/8
         }
 
         void issueManageControl1_GetValueTable(object sender, DigitalPlatform.GetValueTableEventArgs e)
@@ -110,7 +110,7 @@ namespace dp2Circulation
 
         private void button_OK_Click(object sender, EventArgs e)
         {
-            // ×¢Òâ¿Ø¼şÀïÃæ×îºóÒ»´ÎÊÕÎ²update
+            // æ³¨æ„æ§ä»¶é‡Œé¢æœ€åä¸€æ¬¡æ”¶å°¾update
             this.issueManageControl1.UpdateTreeNodeInfo();
 
             if (this.Changed == true)
@@ -128,7 +128,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÄÚÈİÊÇ·ñ·¢Éú¹ıĞŞ¸Ä
+        /// å†…å®¹æ˜¯å¦å‘ç”Ÿè¿‡ä¿®æ”¹
         /// </summary>
         public bool Changed
         {
@@ -156,7 +156,7 @@ namespace dp2Circulation
             return this.issueManageControl1.AppendNewItem(strXml, out strError);
         }
 
-        // »ñÈ¡ÖµÁĞ±íÊ±×÷ÎªÏßË÷µÄÊı¾İ¿âÃû
+        // è·å–å€¼åˆ—è¡¨æ—¶ä½œä¸ºçº¿ç´¢çš„æ•°æ®åº“å
         public string BiblioDbName
         {
             get

@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -21,7 +21,7 @@ using DigitalPlatform.CirculationClient.localhost;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ¿ìËÙĞŞ¸Ä²á´°
+    /// å¿«é€Ÿä¿®æ”¹å†Œçª—
     /// </summary>
     internal partial class QuickChangeEntityForm : MyForm
     {
@@ -38,7 +38,7 @@ namespace dp2Circulation
 #endif
 
         /// <summary>
-        /// µ±Ç°ÕıÔÚ´¦ÀíµÄÒ»Ìõ²á¼ÇÂ¼Ëù´ÓÊôµÄÊéÄ¿¼ÇÂ¼Â·¾¶
+        /// å½“å‰æ­£åœ¨å¤„ç†çš„ä¸€æ¡å†Œè®°å½•æ‰€ä»å±çš„ä¹¦ç›®è®°å½•è·¯å¾„
         /// </summary>
         public string BiblioRecPath = "";
 
@@ -46,12 +46,12 @@ namespace dp2Circulation
 
         const int WM_SWITCH_FOCUS = API.WM_USER + 200;
 
-        // ÏûÏ¢WM_SWITCH_FOCUSµÄwparam²ÎÊıÖµ
+        // æ¶ˆæ¯WM_SWITCH_FOCUSçš„wparamå‚æ•°å€¼
         const int ITEM_BARCODE = 0;
         const int CONTROL_STATE = 1;
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public QuickChangeEntityForm()
         {
@@ -94,7 +94,7 @@ namespace dp2Circulation
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
 
             stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// ºÍÈİÆ÷¹ØÁª
+            stop.Register(MainForm.stopManager, true);	// å’Œå®¹å™¨å…³è”
 #endif
 
             this.m_webExternalHost_biblio.Initial(this.MainForm, this.webBrowser_biblio);
@@ -123,9 +123,9 @@ namespace dp2Circulation
 #if NO
             if (stop != null)
             {
-                if (stop.State == 0)    // 0 ±íÊ¾ÕıÔÚ´¦Àí
+                if (stop.State == 0)    // 0 è¡¨ç¤ºæ­£åœ¨å¤„ç†
                 {
-                    MessageBox.Show(this, "ÇëÔÚ¹Ø±Õ´°¿ÚÇ°Í£Ö¹ÕıÔÚ½øĞĞµÄ³¤Ê±²Ù×÷¡£");
+                    MessageBox.Show(this, "è¯·åœ¨å…³é—­çª—å£å‰åœæ­¢æ­£åœ¨è¿›è¡Œçš„é•¿æ—¶æ“ä½œã€‚");
                     e.Cancel = true;
                     return;
                 }
@@ -135,9 +135,9 @@ namespace dp2Circulation
 
             if (this.entityEditControl1.Changed == true)
             {
-                // ¾¯¸æÉĞÎ´±£´æ
+                // è­¦å‘Šå°šæœªä¿å­˜
                 DialogResult result = MessageBox.Show(this,
-    "µ±Ç°ÓĞĞÅÏ¢±»ĞŞ¸ÄºóÉĞÎ´±£´æ¡£Èô´ËÊ±¹Ø±Õ´°¿Ú£¬ÏÖÓĞÎ´±£´æĞÅÏ¢½«¶ªÊ§¡£\r\n\r\nÈ·ÊµÒª¹Ø±Õ´°¿Ú? ",
+    "å½“å‰æœ‰ä¿¡æ¯è¢«ä¿®æ”¹åå°šæœªä¿å­˜ã€‚è‹¥æ­¤æ—¶å…³é—­çª—å£ï¼Œç°æœ‰æœªä¿å­˜ä¿¡æ¯å°†ä¸¢å¤±ã€‚\r\n\r\nç¡®å®è¦å…³é—­çª—å£? ",
     "QuickChangeEntityForm",
     MessageBoxButtons.YesNo,
     MessageBoxIcon.Question,
@@ -157,9 +157,9 @@ namespace dp2Circulation
                 this.m_webExternalHost_biblio.Destroy();
 
 #if NO
-            if (stop != null) // ÍÑÀë¹ØÁª
+            if (stop != null) // è„±ç¦»å…³è”
             {
-                stop.Unregister();	// ºÍÈİÆ÷¹ØÁª
+                stop.Unregister();	// å’Œå®¹å™¨å…³è”
                 stop = null;
             }
 #endif
@@ -186,15 +186,15 @@ namespace dp2Circulation
         //      0   not found
         //      1   found
         /// <summary>
-        /// ¸ù¾İ²áÌõÂëºÅ£¬×°Èë²á¼ÇÂ¼ºÍÊéÄ¿¼ÇÂ¼
+        /// æ ¹æ®å†Œæ¡ç å·ï¼Œè£…å…¥å†Œè®°å½•å’Œä¹¦ç›®è®°å½•
         /// </summary>
-        /// <param name="bEnableControls">ÊÇ·ñÔÚ´¦Àí¹ı³ÌÖĞ½ûÖ¹½çÃæÔªËØ</param>
-        /// <param name="strBarcode">²áÌõÂëºÅ</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
+        /// <param name="bEnableControls">æ˜¯å¦åœ¨å¤„ç†è¿‡ç¨‹ä¸­ç¦æ­¢ç•Œé¢å…ƒç´ </param>
+        /// <param name="strBarcode">å†Œæ¡ç å·</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
         /// <returns>
-        ///      -1  ³ö´í
-        ///      0   Ã»ÓĞÕÒµ½
-        ///      1   ÕÒµ½
+        ///      -1  å‡ºé”™
+        ///      0   æ²¡æœ‰æ‰¾åˆ°
+        ///      1   æ‰¾åˆ°
         /// </returns>
         public int LoadRecord(
             bool bEnableControls,
@@ -208,7 +208,7 @@ namespace dp2Circulation
                 EnableControls(false);
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("ÕıÔÚ³õÊ¼»¯ä¯ÀÀÆ÷×é¼ş ...");
+                stop.Initial("æ­£åœ¨åˆå§‹åŒ–æµè§ˆå™¨ç»„ä»¶ ...");
                 stop.BeginLoop();
 
 
@@ -226,7 +226,7 @@ namespace dp2Circulation
 
             this.textBox_message.Text = "";
 
-            stop.SetMessage("ÕıÔÚ×°Èë²á¼ÇÂ¼ " + strBarcode + " ...");
+            stop.SetMessage("æ­£åœ¨è£…å…¥å†Œè®°å½• " + strBarcode + " ...");
 
 
             try
@@ -257,7 +257,7 @@ namespace dp2Circulation
 
                 if (lRet > 1)
                 {
-                    strError = "²áÌõÂëºÅ " + strBarcode + " ·¢ÏÖ±»ÏÂÁĞ¶à¸ö²á¼ÇÂ¼ËùÊ¹ÓÃ: \r\n" + strItemRecPath + "\r\n\r\nÕâÊÇÒ»¸öÑÏÖØ´íÎó£¬ÇëÇóÖúÓÚÏµÍ³¹ÜÀíÔ±¾¡¿ìÅÅ³ı¡£";
+                    strError = "å†Œæ¡ç å· " + strBarcode + " å‘ç°è¢«ä¸‹åˆ—å¤šä¸ªå†Œè®°å½•æ‰€ä½¿ç”¨: \r\n" + strItemRecPath + "\r\n\r\nè¿™æ˜¯ä¸€ä¸ªä¸¥é‡é”™è¯¯ï¼Œè¯·æ±‚åŠ©äºç³»ç»Ÿç®¡ç†å‘˜å°½å¿«æ’é™¤ã€‚";
                     goto ERROR1;
                 }
 
@@ -282,7 +282,7 @@ namespace dp2Circulation
                 this.m_webExternalHost_biblio.SetHtmlString(strBiblioText,
                     "quickchangeentityform_biblio");
 
-                this.textBox_message.Text = "²á¼ÇÂ¼Â·¾¶: " + strItemRecPath + " £»Æä´ÓÊôµÄÖÖ(ÊéÄ¿)¼ÇÂ¼Â·¾¶: " + strBiblioRecPath;
+                this.textBox_message.Text = "å†Œè®°å½•è·¯å¾„: " + strItemRecPath + " ï¼›å…¶ä»å±çš„ç§(ä¹¦ç›®)è®°å½•è·¯å¾„: " + strBiblioRecPath;
 
             }
             finally
@@ -299,15 +299,15 @@ namespace dp2Circulation
 
             return 1;
         ERROR1:
-            strError = "×°ÔØ²áÌõÂëºÅÎª " + strBarcode + "µÄ¼ÇÂ¼·¢Éú´íÎó: " + strError;
+            strError = "è£…è½½å†Œæ¡ç å·ä¸º " + strBarcode + "çš„è®°å½•å‘ç”Ÿé”™è¯¯: " + strError;
             // MessageBox.Show(this, strError);
             return -1;
         }
 
         /// <summary>
-        /// ÔÊĞí»òÕß½ûÖ¹½çÃæ¿Ø¼ş¡£ÔÚ³¤²Ù×÷Ç°£¬Ò»°ãĞèÒª½ûÖ¹½çÃæ¿Ø¼ş£»²Ù×÷Íê³ÉºóÔÙÔÊĞí
+        /// å…è®¸æˆ–è€…ç¦æ­¢ç•Œé¢æ§ä»¶ã€‚åœ¨é•¿æ“ä½œå‰ï¼Œä¸€èˆ¬éœ€è¦ç¦æ­¢ç•Œé¢æ§ä»¶ï¼›æ“ä½œå®Œæˆåå†å…è®¸
         /// </summary>
-        /// <param name="bEnable">ÊÇ·ñÔÊĞí½çÃæ¿Ø¼ş¡£true ÎªÔÊĞí£¬ false Îª½ûÖ¹</param>
+        /// <param name="bEnable">æ˜¯å¦å…è®¸ç•Œé¢æ§ä»¶ã€‚true ä¸ºå…è®¸ï¼Œ false ä¸ºç¦æ­¢</param>
         public override void EnableControls(bool bEnable)
         {
             this.textBox_barcode.Enabled = bEnable;
@@ -337,14 +337,14 @@ namespace dp2Circulation
 
             // Debug.Assert(false, "");
 
-            // ÏÈ±£´æÇ°Ò»Ìõ
+            // å…ˆä¿å­˜å‰ä¸€æ¡
             if (this.entityEditControl1.Changed == true)
             {
                 if (this.LoadActionType == LoadActionType.LoadOnly)
                 {
-                    // ¾¯¸æÉĞÎ´±£´æ
+                    // è­¦å‘Šå°šæœªä¿å­˜
                     DialogResult result = MessageBox.Show(this,
-        "µ±Ç°ÓĞĞÅÏ¢±»ĞŞ¸ÄºóÉĞÎ´±£´æ¡£Èô´ËÊ±×°ÔØĞÂµÄĞÅÏ¢£¬ÏÖÓĞÎ´±£´æĞÅÏ¢½«¶ªÊ§¡£\r\n\r\nÊÇ·ñ±£´æºóÔÙ×°ÈëĞÂµÄĞÅÏ¢? (Yes ±£´æºó×°Èë; No ²»±£´æµ«×°Èë; Cancel ²»±£´æ£¬Ò²·ÅÆú×°Èë)",
+        "å½“å‰æœ‰ä¿¡æ¯è¢«ä¿®æ”¹åå°šæœªä¿å­˜ã€‚è‹¥æ­¤æ—¶è£…è½½æ–°çš„ä¿¡æ¯ï¼Œç°æœ‰æœªä¿å­˜ä¿¡æ¯å°†ä¸¢å¤±ã€‚\r\n\r\næ˜¯å¦ä¿å­˜åå†è£…å…¥æ–°çš„ä¿¡æ¯? (Yes ä¿å­˜åè£…å…¥; No ä¸ä¿å­˜ä½†è£…å…¥; Cancel ä¸ä¿å­˜ï¼Œä¹Ÿæ”¾å¼ƒè£…å…¥)",
         "QuickChangeEntityForm",
         MessageBoxButtons.YesNoCancel,
         MessageBoxIcon.Question,
@@ -356,7 +356,7 @@ namespace dp2Circulation
                 }
                 else
                 {
-                    // ÔÚ×°Èë²¢×Ô¶¯ĞŞ¸ÄµÄ×´Ì¬ÏÂ£¬²»±ØÑ¯ÎÊ£¬Ö±½Ó±£´æºó×°Èë
+                    // åœ¨è£…å…¥å¹¶è‡ªåŠ¨ä¿®æ”¹çš„çŠ¶æ€ä¸‹ï¼Œä¸å¿…è¯¢é—®ï¼Œç›´æ¥ä¿å­˜åè£…å…¥
                 }
 
 
@@ -379,44 +379,44 @@ namespace dp2Circulation
 
             if (this.LoadActionType == LoadActionType.LoadAndAutoChange)
             {
-                // ×Ô¶¯ĞŞ¸Ä
+                // è‡ªåŠ¨ä¿®æ”¹
                 AutoChangeData();
             }
 
             this.textBox_outputBarcodes.Text += this.textBox_barcode.Text + "\r\n";
 
             SETFOCUS:
-            // ½¹µã¶¨Î»
+            // ç„¦ç‚¹å®šä½
             string strFocusAction = this.MainForm.AppInfo.GetString(
 "change_param",
 "focusAction",
-"²áÌõÂëºÅ£¬²¢È«Ñ¡");
+"å†Œæ¡ç å·ï¼Œå¹¶å…¨é€‰");
 
 
-            if (strFocusAction == "²áÌõÂëºÅ£¬²¢È«Ñ¡")
+            if (strFocusAction == "å†Œæ¡ç å·ï¼Œå¹¶å…¨é€‰")
             {
                 SwitchFocus(0);
             }
-            else if (strFocusAction == "²áĞÅÏ¢±à¼­Æ÷")
+            else if (strFocusAction == "å†Œä¿¡æ¯ç¼–è¾‘å™¨")
             {
                 SwitchFocus(1);
             }
         }
 
         // return:
-        //      0   Ã»ÓĞÊµÖÊĞÔ¸Ä±ä
-        //      1   ÓĞÊµÖÊĞÔ¸Ä±ä
+        //      0   æ²¡æœ‰å®è´¨æ€§æ”¹å˜
+        //      1   æœ‰å®è´¨æ€§æ”¹å˜
         int AutoChangeData()
         {
             bool bChanged = false;
-            // ×°ÔØÖµ
+            // è£…è½½å€¼
             /*
             string strState = this.MainForm.AppInfo.GetString(
                 "change_param",
                 "state",
-                "<²»¸Ä±ä>");
+                "<ä¸æ”¹å˜>");
 
-            if (strState != "<²»¸Ä±ä>")
+            if (strState != "<ä¸æ”¹å˜>")
                 this.entityEditControl1.State = strState;
             */
 
@@ -425,12 +425,12 @@ namespace dp2Circulation
             string strStateAction = this.MainForm.AppInfo.GetString(
                 "change_param",
                 "state",
-                "<²»¸Ä±ä>");
-            if (strStateAction != "<²»¸Ä±ä>")
+                "<ä¸æ”¹å˜>");
+            if (strStateAction != "<ä¸æ”¹å˜>")
             {
                 string strState = this.entityEditControl1.State;
 
-                if (strStateAction == "<Ôö¡¢¼õ>")
+                if (strStateAction == "<å¢ã€å‡>")
                 {
                     string strAdd = this.MainForm.AppInfo.GetString(
                         "change_param",
@@ -467,9 +467,9 @@ namespace dp2Circulation
             string strLocation = this.MainForm.AppInfo.GetString(
                 "change_param",
                 "location",
-                "<²»¸Ä±ä>");
+                "<ä¸æ”¹å˜>");
 
-            if (strLocation != "<²»¸Ä±ä>")
+            if (strLocation != "<ä¸æ”¹å˜>")
             {
                 if (this.entityEditControl1.LocationString != strLocation)
                 {
@@ -482,9 +482,9 @@ namespace dp2Circulation
             string strBookType = this.MainForm.AppInfo.GetString(
                 "change_param",
                 "bookType",
-                "<²»¸Ä±ä>");
+                "<ä¸æ”¹å˜>");
 
-            if (strBookType != "<²»¸Ä±ä>")
+            if (strBookType != "<ä¸æ”¹å˜>")
             {
                 if (this.entityEditControl1.BookType != strBookType)
                 {
@@ -496,8 +496,8 @@ namespace dp2Circulation
             string strBatchNo = this.MainForm.AppInfo.GetString(
                 "change_param",
                 "batchNo",
-                "<²»¸Ä±ä>");
-            if (strBatchNo != "<²»¸Ä±ä>")
+                "<ä¸æ”¹å˜>");
+            if (strBatchNo != "<ä¸æ”¹å˜>")
             {
                 if (this.entityEditControl1.BatchNo != strBatchNo)
                 {
@@ -513,9 +513,9 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ³öÏÖ¶¯×÷²ÎÊı¶Ô»°¿ò£¬ÊÕ¼¯ÊäÈëĞÅÏ¢
+        /// å‡ºç°åŠ¨ä½œå‚æ•°å¯¹è¯æ¡†ï¼Œæ”¶é›†è¾“å…¥ä¿¡æ¯
         /// </summary>
-        /// <returns>true: È·¶¨; false: ·ÅÆú</returns>
+        /// <returns>true: ç¡®å®š; false: æ”¾å¼ƒ</returns>
         public bool SetChangeParameters()
         {
             ChangeEntityActionDialog dlg = new ChangeEntityActionDialog();
@@ -542,15 +542,15 @@ namespace dp2Circulation
             return false;
         }
 
-        // ĞŞ¸Ä²ÎÊı
+        // ä¿®æ”¹å‚æ•°
         private void button_changeParam_Click(object sender, EventArgs e)
         {
             SetChangeParameters();
         }
 
 
-        // ±£´æµ±Ç°ÊµÌå¼ÇÂ¼
-        // ±£´æÒÔºó£¬ºìÉ«µÄ×Ö·û½«±äÎªºÚÉ«
+        // ä¿å­˜å½“å‰å®ä½“è®°å½•
+        // ä¿å­˜ä»¥åï¼Œçº¢è‰²çš„å­—ç¬¦å°†å˜ä¸ºé»‘è‰²
         private void button_saveCurrentRecord_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -560,9 +560,9 @@ namespace dp2Circulation
         }
 
         // return:
-        //      -1  ³ö´í
-        //      0   Ã»ÓĞ±ØÒª±£´æ
-        //      1   ±£´æ³É¹¦
+        //      -1  å‡ºé”™
+        //      0   æ²¡æœ‰å¿…è¦ä¿å­˜
+        //      1   ä¿å­˜æˆåŠŸ
         int DoSave(bool bEnableControls,
             out string strError)
         {
@@ -575,14 +575,14 @@ namespace dp2Circulation
             {
                 if (this.entityEditControl1.Changed == false)
                 {
-                    strError = "Ã»ÓĞĞŞ¸Ä¹ıµÄĞÅÏ¢ĞèÒª±£´æ";
+                    strError = "æ²¡æœ‰ä¿®æ”¹è¿‡çš„ä¿¡æ¯éœ€è¦ä¿å­˜";
                     goto ERROR1;
                 }
 
                 EntityInfo[] entities = null;
                 EntityInfo[] errorinfos = null;
 
-                // ¹¹ÔìĞèÒªÌá½»µÄÊµÌåĞÅÏ¢Êı×é
+                // æ„é€ éœ€è¦æäº¤çš„å®ä½“ä¿¡æ¯æ•°ç»„
                 int nRet = BuildSaveEntities(
                     out entities,
                     out strError);
@@ -590,7 +590,7 @@ namespace dp2Circulation
                     goto ERROR1;
 
                 if (entities == null || entities.Length == 0)
-                    return 0; // Ã»ÓĞ±ØÒª±£´æ
+                    return 0; // æ²¡æœ‰å¿…è¦ä¿å­˜
 
 
                 nRet = SaveEntityRecords(
@@ -602,7 +602,7 @@ namespace dp2Circulation
 
                 this.entityEditControl1.Changed = false;    // 2007/4/4
 
-                // °Ñ³ö´íµÄÊÂÏîºÍĞèÒª¸üĞÂ×´Ì¬µÄÊÂÏî¶ÒÏÖµ½ÏÔÊ¾¡¢ÄÚ´æ
+                // æŠŠå‡ºé”™çš„äº‹é¡¹å’Œéœ€è¦æ›´æ–°çŠ¶æ€çš„äº‹é¡¹å…‘ç°åˆ°æ˜¾ç¤ºã€å†…å­˜
                 if (RefreshOperResult(errorinfos) == true)
                 {
                     if (nRet != -1)
@@ -616,7 +616,7 @@ namespace dp2Circulation
 
                 return 1;
             ERROR1:
-                strError = "±£´æÌõÂëÎª "+this.entityEditControl1.Barcode+" µÄ²á¼ÇÂ¼Ê±³ö´í: " + strError;
+                strError = "ä¿å­˜æ¡ç ä¸º "+this.entityEditControl1.Barcode+" çš„å†Œè®°å½•æ—¶å‡ºé”™: " + strError;
                 return -1;
             }
             finally
@@ -626,7 +626,7 @@ namespace dp2Circulation
             }
         }
 
-        // ¹¹ÔìÓÃÓÚ±£´æµÄÊµÌåĞÅÏ¢Êı×é
+        // æ„é€ ç”¨äºä¿å­˜çš„å®ä½“ä¿¡æ¯æ•°ç»„
         int BuildSaveEntities(
             out EntityInfo[] entities,
             out string strError)
@@ -658,7 +658,7 @@ namespace dp2Circulation
             info.OldRecord = this.entityEditControl1.OldRecord;
             info.OldTimestamp = this.entityEditControl1.Timestamp;
 
-            // info.RefID = this.RefID_1; // 2008/3/3 // ÕâÒ»¾äÄÑÒÔÀí½âÆäÒâË¼£¬ÄÑµÀÊÇ·´¸´Ê¹ÓÃÍ¬Ò»¸ö refid?
+            // info.RefID = this.RefID_1; // 2008/3/3 // è¿™ä¸€å¥éš¾ä»¥ç†è§£å…¶æ„æ€ï¼Œéš¾é“æ˜¯åå¤ä½¿ç”¨åŒä¸€ä¸ª refid?
 
             // 2013/6/23
             if (string.IsNullOrEmpty(info.RefID) == true)
@@ -669,8 +669,8 @@ namespace dp2Circulation
             return 0;
         }
 
-        // ±£´æÊµÌå¼ÇÂ¼
-        // ²»¸ºÔğË¢ĞÂ½çÃæºÍ±¨´í
+        // ä¿å­˜å®ä½“è®°å½•
+        // ä¸è´Ÿè´£åˆ·æ–°ç•Œé¢å’ŒæŠ¥é”™
         int SaveEntityRecords(
             bool bEnableControls,
             string strBiblioRecPath,
@@ -681,7 +681,7 @@ namespace dp2Circulation
             if (bEnableControls == true)
             {
                 stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("ÕıÔÚ±£´æ²áĞÅÏ¢ ...");
+                stop.Initial("æ­£åœ¨ä¿å­˜å†Œä¿¡æ¯ ...");
                 stop.BeginLoop();
 
                 this.Update();
@@ -716,16 +716,16 @@ namespace dp2Circulation
             return -1;
         }
 
-        // °Ñ±¨´íĞÅÏ¢ÖĞµÄ³É¹¦ÊÂÏîµÄ×´Ì¬ĞŞ¸Ä¶ÒÏÖ
-        // ²¢ÇÒ³¹µ×È¥³ıÃ»ÓĞ±¨´íµÄ¡°É¾³ı¡±BookItemÊÂÏî£¨ÄÚ´æºÍÊÓ¾õÉÏ£©
+        // æŠŠæŠ¥é”™ä¿¡æ¯ä¸­çš„æˆåŠŸäº‹é¡¹çš„çŠ¶æ€ä¿®æ”¹å…‘ç°
+        // å¹¶ä¸”å½»åº•å»é™¤æ²¡æœ‰æŠ¥é”™çš„â€œåˆ é™¤â€BookItemäº‹é¡¹ï¼ˆå†…å­˜å’Œè§†è§‰ä¸Šï¼‰
         // return:
-        //      false   Ã»ÓĞ¾¯¸æ
-        //      true    ³öÏÖ¾¯¸æ
+        //      false   æ²¡æœ‰è­¦å‘Š
+        //      true    å‡ºç°è­¦å‘Š
         bool RefreshOperResult(EntityInfo[] errorinfos)
         {
             int nRet = 0;
 
-            string strWarning = ""; // ¾¯¸æĞÅÏ¢
+            string strWarning = ""; // è­¦å‘Šä¿¡æ¯
 
             if (errorinfos == null)
                 return false;
@@ -738,7 +738,7 @@ namespace dp2Circulation
                 string strOldXml = errorinfos[i].OldRecord;
 
 
-                // Õı³£ĞÅÏ¢´¦Àí
+                // æ­£å¸¸ä¿¡æ¯å¤„ç†
                 if (errorinfos[i].ErrorCode == ErrorCodeValue.NoError)
                 {
 
@@ -759,26 +759,26 @@ namespace dp2Circulation
                     continue;
                 }
 
-                // ±¨´í´¦Àí
+                // æŠ¥é”™å¤„ç†
 
-                // TimeStampMismatch±¨´íµÄÊ±ºò, Êµ¼ÊÉÏOldRecordÖĞ·µ»ØÁËµ±Ç°¿âÖĞ¸ÃÎ»ÖÃµÄ¼ÇÂ¼, OldTimeStampÖĞÊÇ¶ÔÓ¦µÄÊ±¼ä´Á
-                // ĞèÒª³öÏÖ²Î¿¼ĞĞ, ±ãÓÚ²Ù×÷Õß¶Ô±È´¦Àí
+                // TimeStampMismatchæŠ¥é”™çš„æ—¶å€™, å®é™…ä¸ŠOldRecordä¸­è¿”å›äº†å½“å‰åº“ä¸­è¯¥ä½ç½®çš„è®°å½•, OldTimeStampä¸­æ˜¯å¯¹åº”çš„æ—¶é—´æˆ³
+                // éœ€è¦å‡ºç°å‚è€ƒè¡Œ, ä¾¿äºæ“ä½œè€…å¯¹æ¯”å¤„ç†
                 if (errorinfos[i].ErrorCode == ErrorCodeValue.TimestampMismatch)
                 {
                     this.entityEditControl1.OldRecord = errorinfos[i].OldRecord;
 
-                    // ÊÇ·ñĞèÒªÓÃ½çÃæÃüÁîÃ÷È·Ë¢ĞÂÒ»´Î, ²ÅĞĞ?
-                    // ÒòÎª²»Ë¢ĞÂ, ¿ÉÒÔ×èÖ¹Â³Ã§µØÖØĞÂÌá½»±£´æ
-                    this.entityEditControl1.Timestamp = errorinfos[i].OldTimestamp;    // ÕâÑù¾ÍÊ¹µÃÔÙ´Î±£´æ, Ã»ÓĞÁËÕÏ°­
+                    // æ˜¯å¦éœ€è¦ç”¨ç•Œé¢å‘½ä»¤æ˜ç¡®åˆ·æ–°ä¸€æ¬¡, æ‰è¡Œ?
+                    // å› ä¸ºä¸åˆ·æ–°, å¯ä»¥é˜»æ­¢é²è½åœ°é‡æ–°æäº¤ä¿å­˜
+                    this.entityEditControl1.Timestamp = errorinfos[i].OldTimestamp;    // è¿™æ ·å°±ä½¿å¾—å†æ¬¡ä¿å­˜, æ²¡æœ‰äº†éšœç¢
                 }
 
-                strWarning += "ÔÚÌá½»±£´æ¹ı³ÌÖĞ·¢Éú´íÎó -- " + errorinfos[i].ErrorInfo + "\r\n";
+                strWarning += "åœ¨æäº¤ä¿å­˜è¿‡ç¨‹ä¸­å‘ç”Ÿé”™è¯¯ -- " + errorinfos[i].ErrorInfo + "\r\n";
             }
 
             // 
             if (String.IsNullOrEmpty(strWarning) == false)
             {
-                strWarning += "\r\nÇë×¢ÒâĞŞ¸ÄºóÖØĞÂÌá½»±£´æ";
+                strWarning += "\r\nè¯·æ³¨æ„ä¿®æ”¹åé‡æ–°æäº¤ä¿å­˜";
                 MessageBox.Show(this, strWarning);
                 return true;
             }
@@ -797,7 +797,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ×°ÔØÀàĞÍ
+        /// è£…è½½ç±»å‹
         /// </summary>
         public LoadActionType LoadActionType
         {
@@ -814,12 +814,12 @@ namespace dp2Circulation
 
                 if (m_loadActionType == LoadActionType.LoadOnly)
                 {
-                    this.button_loadBarcode.Text = "Ö»×°Èë(²»ĞŞ¸Ä)";
+                    this.button_loadBarcode.Text = "åªè£…å…¥(ä¸ä¿®æ”¹)";
                     this.ToolStripMenuItem_loadOnly.Checked = true;
                 }
                 if (m_loadActionType == LoadActionType.LoadAndAutoChange)
                 {
-                    this.button_loadBarcode.Text = "×°Èë²¢×Ô¶¯ĞŞ¸Ä";
+                    this.button_loadBarcode.Text = "è£…å…¥å¹¶è‡ªåŠ¨ä¿®æ”¹";
                     this.ToolStripMenuItem_loadAndAutoChange.Checked = true;
                 }
 
@@ -835,12 +835,12 @@ namespace dp2Circulation
             this.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
         }
 
-        // Ì½²âÎÄ±¾ÎÄ¼şµÄĞĞÊı
+        // æ¢æµ‹æ–‡æœ¬æ–‡ä»¶çš„è¡Œæ•°
         // parameters:
-        //      bIncludeBlankLine   ÊÇ°üÀ¨¿ÕĞĞ
+        //      bIncludeBlankLine   æ˜¯åŒ…æ‹¬ç©ºè¡Œ
         // return:
-        //      -1  ³ö´í
-        //      >=0 ĞĞÊı
+        //      -1  å‡ºé”™
+        //      >=0 è¡Œæ•°
         static long GetTextLineCount(string strFilename,
             bool bIncludeBlankLine)
         {
@@ -853,7 +853,7 @@ namespace dp2Circulation
                 try
                 {
 
-                    // ÖğĞĞ¶ÁÈëÎÄ¼şÄÚÈİ
+                    // é€è¡Œè¯»å…¥æ–‡ä»¶å†…å®¹
                     for (; ; )
                     {
                         string strLine = "";
@@ -883,17 +883,17 @@ namespace dp2Circulation
         }
 
         // return:
-        //      -1  ³ö´í
-        //      0   ·ÅÆú´¦Àí
-        //      >=1 ´¦ÀíµÄÌõÊı
+        //      -1  å‡ºé”™
+        //      0   æ”¾å¼ƒå¤„ç†
+        //      >=1 å¤„ç†çš„æ¡æ•°
         /// <summary>
-        /// ¸ù¾İ²áÌõÂëºÅÎÄ¼ş½øĞĞ´¦Àí
+        /// æ ¹æ®å†Œæ¡ç å·æ–‡ä»¶è¿›è¡Œå¤„ç†
         /// </summary>
-        /// <param name="strFilename">²áÌõÂëºÅÎÄ¼şÃû</param>
+        /// <param name="strFilename">å†Œæ¡ç å·æ–‡ä»¶å</param>
         /// <returns>
-        ///      -1  ³ö´í
-        ///      0   ·ÅÆú´¦Àí
-        ///      >=1 ´¦ÀíµÄÌõÊı
+        ///      -1  å‡ºé”™
+        ///      0   æ”¾å¼ƒå¤„ç†
+        ///      >=1 å¤„ç†çš„æ¡æ•°
         /// </returns>
         public int DoBarcodeFile(string strFilename)
         {
@@ -906,9 +906,9 @@ namespace dp2Circulation
             // parameters:
             //      strFileType barcode/recpath
             // return:
-            //      -1  ³ö´í
-            //      0   ·ÅÆú
-            //      >=1 ´¦ÀíµÄÌõÊı
+            //      -1  å‡ºé”™
+            //      0   æ”¾å¼ƒ
+            //      >=1 å¤„ç†çš„æ¡æ•°
             int nRet = ProcessFile(
                     "barcode",
                     out strError);
@@ -922,17 +922,17 @@ namespace dp2Circulation
         }
 
         // return:
-        //      -1  ³ö´í
-        //      0   ·ÅÆú´¦Àí
-        //      >=1 ´¦ÀíµÄÌõÊı
+        //      -1  å‡ºé”™
+        //      0   æ”¾å¼ƒå¤„ç†
+        //      >=1 å¤„ç†çš„æ¡æ•°
         /// <summary>
-        /// ¸ù¾İ¼ÇÂ¼Â·¾¶ÎÄ¼ş½øĞĞ´¦Àí
+        /// æ ¹æ®è®°å½•è·¯å¾„æ–‡ä»¶è¿›è¡Œå¤„ç†
         /// </summary>
-        /// <param name="strFilename">¼ÇÂ¼Â·¾¶ÎÄ¼şÃû</param>
+        /// <param name="strFilename">è®°å½•è·¯å¾„æ–‡ä»¶å</param>
         /// <returns>
-        ///      -1  ³ö´í
-        ///      0   ·ÅÆú´¦Àí
-        ///      >=1 ´¦ÀíµÄÌõÊı
+        ///      -1  å‡ºé”™
+        ///      0   æ”¾å¼ƒå¤„ç†
+        ///      >=1 å¤„ç†çš„æ¡æ•°
         /// </returns>
         public int DoRecPathFile(string strFilename)
         {
@@ -945,9 +945,9 @@ namespace dp2Circulation
             // parameters:
             //      strFileType barcode/recpath
             // return:
-            //      -1  ³ö´í
-            //      0   ·ÅÆú
-            //      >=1 ´¦ÀíµÄÌõÊı
+            //      -1  å‡ºé”™
+            //      0   æ”¾å¼ƒ
+            //      >=1 å¤„ç†çš„æ¡æ•°
             int nRet = ProcessFile(
                     "recpath",
                     out strError);
@@ -963,9 +963,9 @@ namespace dp2Circulation
         // parameters:
         //      strFileType barcode/recpath
         // return:
-        //      -1  ³ö´í
-        //      0   ·ÅÆú
-        //      >=1 ´¦ÀíµÄÌõÊı
+        //      -1  å‡ºé”™
+        //      0   æ”¾å¼ƒ
+        //      >=1 å¤„ç†çš„æ¡æ•°
         int ProcessFile(
             string strFileType,
             out string strError)
@@ -980,8 +980,8 @@ namespace dp2Circulation
                     OpenFileDialog dlg = new OpenFileDialog();
 
                     dlg.FileName = this.textBox_barcodeFile.Text;
-                    dlg.Title = "ÇëÖ¸¶¨Òª´ò¿ªµÄÌõÂëºÅÎÄ¼şÃû";
-                    dlg.Filter = "ÌõÂëºÅÎÄ¼ş (*.txt)|*.txt|All files (*.*)|*.*";
+                    dlg.Title = "è¯·æŒ‡å®šè¦æ‰“å¼€çš„æ¡ç å·æ–‡ä»¶å";
+                    dlg.Filter = "æ¡ç å·æ–‡ä»¶ (*.txt)|*.txt|All files (*.*)|*.*";
                     dlg.RestoreDirectory = true;
 
                     if (dlg.ShowDialog() != DialogResult.OK)
@@ -999,8 +999,8 @@ namespace dp2Circulation
                     OpenFileDialog dlg = new OpenFileDialog();
 
                     dlg.FileName = this.textBox_recPathFile.Text;
-                    dlg.Title = "ÇëÖ¸¶¨Òª´ò¿ªµÄ¼ÇÂ¼Â·¾¶ÎÄ¼şÃû";
-                    dlg.Filter = "¼ÇÂ¼Â·¾¶ÎÄ¼ş (*.txt)|*.txt|All files (*.*)|*.*";
+                    dlg.Title = "è¯·æŒ‡å®šè¦æ‰“å¼€çš„è®°å½•è·¯å¾„æ–‡ä»¶å";
+                    dlg.Filter = "è®°å½•è·¯å¾„æ–‡ä»¶ (*.txt)|*.txt|All files (*.*)|*.*";
                     dlg.RestoreDirectory = true;
 
                     if (dlg.ShowDialog() != DialogResult.OK)
@@ -1013,16 +1013,16 @@ namespace dp2Circulation
             }
             else
             {
-                strError = "Î´ÖªµÄ strFileType '" + strFilename + "'";
+                strError = "æœªçŸ¥çš„ strFileType '" + strFilename + "'";
                 return -1;
             }
 
-            // Ì½²âÎÄ±¾ÎÄ¼şµÄĞĞÊı
+            // æ¢æµ‹æ–‡æœ¬æ–‡ä»¶çš„è¡Œæ•°
             // parameters:
-            //      bIncludeBlankLine   ÊÇ°üÀ¨¿ÕĞĞ
+            //      bIncludeBlankLine   æ˜¯åŒ…æ‹¬ç©ºè¡Œ
             // return:
-            //      -1  ³ö´í
-            //      >=0 ĞĞÊı
+            //      -1  å‡ºé”™
+            //      >=0 è¡Œæ•°
             long lLineCount = GetTextLineCount(strFilename,
                 false);
 
@@ -1035,7 +1035,7 @@ namespace dp2Circulation
             {
                 this.textBox_outputBarcodes.Text = "";
 
-                // ´ò¿ªÎÄ¼ş
+                // æ‰“å¼€æ–‡ä»¶
                 /*
                 try
                 {
@@ -1052,7 +1052,7 @@ namespace dp2Circulation
                 EnableControls(false);
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("ÕıÔÚ³õÊ¼»¯ä¯ÀÀÆ÷×é¼ş ...");
+                stop.Initial("æ­£åœ¨åˆå§‹åŒ–æµè§ˆå™¨ç»„ä»¶ ...");
                 stop.BeginLoop();
                 this.Update();
                 this.MainForm.Update();
@@ -1061,7 +1061,7 @@ namespace dp2Circulation
                 {
                     int nRet = 0;
 
-                    // ÖğĞĞ¶ÁÈëÎÄ¼şÄÚÈİ
+                    // é€è¡Œè¯»å…¥æ–‡ä»¶å†…å®¹
                     for (; ; )
                     {
                         Application.DoEvents();
@@ -1069,7 +1069,7 @@ namespace dp2Circulation
                         {
                             if (stop.State != 0)
                             {
-                                strError = "ÓÃ»§ÖĞ¶Ï1";
+                                strError = "ç”¨æˆ·ä¸­æ–­1";
                                 return -1;
                             }
                         }
@@ -1085,14 +1085,14 @@ namespace dp2Circulation
                             continue;
 
                         if (strFileType == "barcode")
-                            stop.SetMessage("ÕıÔÚ´¦Àí²áÌõÂëºÅ " + strLine + " ¶ÔÓ¦µÄ¼ÇÂ¼...");
+                            stop.SetMessage("æ­£åœ¨å¤„ç†å†Œæ¡ç å· " + strLine + " å¯¹åº”çš„è®°å½•...");
                         else
-                            stop.SetMessage("ÕıÔÚ´¦Àí¼ÇÂ¼Â·¾¶ " + strLine + " ¶ÔÓ¦µÄ¼ÇÂ¼...");
+                            stop.SetMessage("æ­£åœ¨å¤„ç†è®°å½•è·¯å¾„ " + strLine + " å¯¹åº”çš„è®°å½•...");
                         stop.SetProgressValue(nCurrentLine);
 
                         nCurrentLine++;
 
-                        // ÏÈ±£´æÇ°Ò»Ìõ
+                        // å…ˆä¿å­˜å‰ä¸€æ¡
                         if (this.entityEditControl1.Changed == true)
                         {
                             nRet = DoSave(false,
@@ -1111,10 +1111,10 @@ namespace dp2Circulation
                             continue;
                         }
 
-                        // ×Ô¶¯ĞŞ¸Ä
+                        // è‡ªåŠ¨ä¿®æ”¹
                         // return:
-                        //      0   Ã»ÓĞÊµÖÊĞÔ¸Ä±ä
-                        //      1   ÓĞÊµÖÊĞÔ¸Ä±ä
+                        //      0   æ²¡æœ‰å®è´¨æ€§æ”¹å˜
+                        //      1   æœ‰å®è´¨æ€§æ”¹å˜
                         AutoChangeData();
 
                         if (this.entityEditControl1.Changed == true)
@@ -1162,7 +1162,7 @@ namespace dp2Circulation
             }
         }
 
-        // ¸ù¾İÎÄ¼ş×Ô¶¯½øĞĞĞŞ¸Ä
+        // æ ¹æ®æ–‡ä»¶è‡ªåŠ¨è¿›è¡Œä¿®æ”¹
         private void button_beginByBarcodeFile_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -1170,34 +1170,34 @@ namespace dp2Circulation
             // parameters:
             //      strFileType barcode/recpath
             // return:
-            //      -1  ³ö´í
-            //      0   ·ÅÆú
-            //      >=1 ´¦ÀíµÄÌõÊı
+            //      -1  å‡ºé”™
+            //      0   æ”¾å¼ƒ
+            //      >=1 å¤„ç†çš„æ¡æ•°
             int nRet = ProcessFile(
                     "barcode",
                     out strError);
             if (nRet == -1)
                 goto ERROR1;
 
-            MessageBox.Show(this, "´¦ÀíÍê³É¡£¹²´¦Àí¼ÇÂ¼ " + nRet.ToString() + " Ìõ");
+            MessageBox.Show(this, "å¤„ç†å®Œæˆã€‚å…±å¤„ç†è®°å½• " + nRet.ToString() + " æ¡");
 
             return;
         ERROR1:
             MessageBox.Show(this, strError);
         }
 
-        // ±£´æÒÑ´¦ÀíÌõÂëºÅµ½ÌõÂëºÅÎÄ¼ş
+        // ä¿å­˜å·²å¤„ç†æ¡ç å·åˆ°æ¡ç å·æ–‡ä»¶
         private void button_saveToBarcodeFile_Click(object sender, EventArgs e)
         {
-            // Ñ¯ÎÊÎÄ¼şÈ«Â·¾¶
+            // è¯¢é—®æ–‡ä»¶å…¨è·¯å¾„
             SaveFileDialog dlg = new SaveFileDialog();
 
-            dlg.Title = "ÇëÖ¸¶¨Òª±£´æµÄ(ÌõÂëºÅ»òÂ·¾¶)Êä³öÎÄ¼şÃû";
+            dlg.Title = "è¯·æŒ‡å®šè¦ä¿å­˜çš„(æ¡ç å·æˆ–è·¯å¾„)è¾“å‡ºæ–‡ä»¶å";
             dlg.OverwritePrompt = true;
             dlg.CreatePrompt = false;
             // dlg.FileName = this.LocalPath;
             // dlg.InitialDirectory = Environment.CurrentDirectory;
-            dlg.Filter = "Êä³öÎÄ¼ş (*.txt)|*.txt|All files (*.*)|*.*";
+            dlg.Filter = "è¾“å‡ºæ–‡ä»¶ (*.txt)|*.txt|All files (*.*)|*.*";
             dlg.RestoreDirectory = true;
 
             if (dlg.ShowDialog() != DialogResult.OK)
@@ -1217,9 +1217,9 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// È±Ê¡´°¿Ú¹ı³Ì
+        /// ç¼ºçœçª—å£è¿‡ç¨‹
         /// </summary>
-        /// <param name="m">ÏûÏ¢</param>
+        /// <param name="m">æ¶ˆæ¯</param>
         protected override void DefWndProc(ref Message m)
         {
             switch (m.Msg)
@@ -1249,8 +1249,8 @@ namespace dp2Circulation
             OpenFileDialog dlg = new OpenFileDialog();
 
             dlg.FileName = this.textBox_barcodeFile.Text;
-            dlg.Title = "ÇëÖ¸¶¨Òª´ò¿ªµÄÌõÂëºÅÎÄ¼şÃû";
-            dlg.Filter = "ÌõÂëºÅÎÄ¼ş (*.txt)|*.txt|All files (*.*)|*.*";
+            dlg.Title = "è¯·æŒ‡å®šè¦æ‰“å¼€çš„æ¡ç å·æ–‡ä»¶å";
+            dlg.Filter = "æ¡ç å·æ–‡ä»¶ (*.txt)|*.txt|All files (*.*)|*.*";
             dlg.RestoreDirectory = true;
 
             if (dlg.ShowDialog() != DialogResult.OK)
@@ -1264,8 +1264,8 @@ namespace dp2Circulation
             OpenFileDialog dlg = new OpenFileDialog();
 
             dlg.FileName = this.textBox_recPathFile.Text;
-            dlg.Title = "ÇëÖ¸¶¨Òª´ò¿ªµÄ¼ÇÂ¼Â·¾¶ÎÄ¼şÃû";
-            dlg.Filter = "¼ÇÂ¼Â·¾¶ÎÄ¼ş (*.txt)|*.txt|All files (*.*)|*.*";
+            dlg.Title = "è¯·æŒ‡å®šè¦æ‰“å¼€çš„è®°å½•è·¯å¾„æ–‡ä»¶å";
+            dlg.Filter = "è®°å½•è·¯å¾„æ–‡ä»¶ (*.txt)|*.txt|All files (*.*)|*.*";
             dlg.RestoreDirectory = true;
 
             if (dlg.ShowDialog() != DialogResult.OK)
@@ -1281,16 +1281,16 @@ namespace dp2Circulation
             // parameters:
             //      strFileType barcode/recpath
             // return:
-            //      -1  ³ö´í
-            //      0   ·ÅÆú
-            //      >=1 ´¦ÀíµÄÌõÊı
+            //      -1  å‡ºé”™
+            //      0   æ”¾å¼ƒ
+            //      >=1 å¤„ç†çš„æ¡æ•°
             int nRet = ProcessFile(
                     "recpath",
                     out strError);
             if (nRet == -1)
                 goto ERROR1;
 
-            MessageBox.Show(this, "´¦ÀíÍê³É¡£¹²´¦Àí¼ÇÂ¼ " + nRet.ToString() + " Ìõ");
+            MessageBox.Show(this, "å¤„ç†å®Œæˆã€‚å…±å¤„ç†è®°å½• " + nRet.ToString() + " æ¡");
 
             return;
         ERROR1:
@@ -1300,17 +1300,17 @@ namespace dp2Circulation
     }
 
     /// <summary>
-    /// ×°ÔØÀàĞÍ
+    /// è£…è½½ç±»å‹
     /// </summary>
     public enum LoadActionType
     {
         /// <summary>
-        /// Ö»×°ÔØ(²»ĞŞ¸Ä)
+        /// åªè£…è½½(ä¸ä¿®æ”¹)
         /// </summary>
-        LoadOnly = 0,   // Ö»×°ÔØ(²»ĞŞ¸Ä)
+        LoadOnly = 0,   // åªè£…è½½(ä¸ä¿®æ”¹)
         /// <summary>
-        /// ×°ÔØ²¢ÇÒ×Ô¶¯ĞŞ¸Ä
+        /// è£…è½½å¹¶ä¸”è‡ªåŠ¨ä¿®æ”¹
         /// </summary>
-        LoadAndAutoChange = 1, // ×°ÔØ²¢ÇÒ×Ô¶¯ĞŞ¸Ä
+        LoadAndAutoChange = 1, // è£…è½½å¹¶ä¸”è‡ªåŠ¨ä¿®æ”¹
     }
 }

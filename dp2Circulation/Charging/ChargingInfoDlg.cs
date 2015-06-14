@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,8 +12,8 @@ using DigitalPlatform.Xml;
 
 namespace dp2Circulation
 {
-    // ³öÄÉ²Ù×÷ÏÔÊ¾²Ù×÷ÊÇ·ñ³É¹¦µÄĞÅÏ¢¶Ô»°¿ò
-    // ÓĞºì»ÆÂÌÈıÖÖ×´Ì¬
+    // å‡ºçº³æ“ä½œæ˜¾ç¤ºæ“ä½œæ˜¯å¦æˆåŠŸçš„ä¿¡æ¯å¯¹è¯æ¡†
+    // æœ‰çº¢é»„ç»¿ä¸‰ç§çŠ¶æ€
     internal partial class ChargingInfoDlg : Form
     {
         public ChargingInfoHost Host = null;
@@ -98,8 +98,8 @@ namespace dp2Circulation
 
         private void button_OK_Click(object sender, EventArgs e)
         {
-            // Èç¹ûÊäÈëÁË¿ì½İÎÄ×Ö£¬Í£Ö¹Î»ÓÚ±»¶áÈ¥µÄ¿ØÖÆÈ¨ÀïÃæµÄÎŞĞİÖ¹Ñ­»·
-            this.textBox_fastInputText.Enabled = false; // ±ÜÃâÖØ¸´ÊäÈë
+            // å¦‚æœè¾“å…¥äº†å¿«æ·æ–‡å­—ï¼Œåœæ­¢ä½äºè¢«å¤ºå»çš„æ§åˆ¶æƒé‡Œé¢çš„æ— ä¼‘æ­¢å¾ªç¯
+            this.textBox_fastInputText.Enabled = false; // é¿å…é‡å¤è¾“å…¥
 
             if (this.Host != null)
             {
@@ -107,7 +107,7 @@ namespace dp2Circulation
             }
             else
             {
-                // Debug.Assert(false, "Ã»ÓĞµ÷ÓÃÖĞ¶Ï»ñÈ¡ÊéÄ¿ÕªÒªµÄ¹¦ÄÜ£¬»áµ¼ÖÂ¶Ô»°¿ò¹Ø±ÕµÄÑÓ³Ù");
+                // Debug.Assert(false, "æ²¡æœ‰è°ƒç”¨ä¸­æ–­è·å–ä¹¦ç›®æ‘˜è¦çš„åŠŸèƒ½ï¼Œä¼šå¯¼è‡´å¯¹è¯æ¡†å…³é—­çš„å»¶è¿Ÿ");
             }
 
 
@@ -116,8 +116,8 @@ namespace dp2Circulation
         }
 
 
-        // Ê¡ÂÔ²ÎÊıµÄ°æ±¾
-        // È±Ê¡µÄÑÕÉ«Îªgreen
+        // çœç•¥å‚æ•°çš„ç‰ˆæœ¬
+        // ç¼ºçœçš„é¢œè‰²ä¸ºgreen
         static string Show(IWin32Window owner,
             string strText)
         {
@@ -125,8 +125,8 @@ namespace dp2Circulation
                 1.0);
         }
 
-        // Ê¡ÂÔ²ÎÊıµÄ°æ±¾
-        // È±Ê¡µÄÑÕÉ«Îªgreen
+        // çœç•¥å‚æ•°çš„ç‰ˆæœ¬
+        // ç¼ºçœçš„é¢œè‰²ä¸ºgreen
         static string Show(IWin32Window owner,
             string strText,
             double delayOpacity)
@@ -150,7 +150,7 @@ namespace dp2Circulation
             return Show(owner, strText, infocolor, null, delayOpacity);
         }
 
-        // Ô­Ê¼°æ±¾
+        // åŸå§‹ç‰ˆæœ¬
         static string Show(IWin32Window owner,
             string strText,
             InfoColor infocolor,
@@ -235,14 +235,14 @@ namespace dp2Circulation
             API.PostMessage(this.Handle, WM_SWITCH_FOCUS,
                 0, 0);
 
-            // ×¼±¸±äÍ¸Ã÷
+            // å‡†å¤‡å˜é€æ˜
             this.timer_transparent.Start();
         }
 
         /// <summary>
-        /// È±Ê¡´°¿Ú¹ı³Ì
+        /// ç¼ºçœçª—å£è¿‡ç¨‹
         /// </summary>
-        /// <param name="m">ÏûÏ¢</param>
+        /// <param name="m">æ¶ˆæ¯</param>
         protected override void DefWndProc(ref Message m)
         {
             switch (m.Msg)
@@ -276,7 +276,7 @@ namespace dp2Circulation
             this.timer_transparent.Start();
         }
 
-        // »Ö¸´²»Í¸Ã÷
+        // æ¢å¤ä¸é€æ˜
         private void textBox_fastInputText_KeyPress(object sender, KeyPressEventArgs e)
         {
             if (this.Opacity != 1.0)
@@ -285,10 +285,10 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ´¦Àí¶Ô»°¿ò¼ü
+        /// å¤„ç†å¯¹è¯æ¡†é”®
         /// </summary>
-        /// <param name="keyData">System.Windows.Forms.Keys ÖµÖ®Ò»£¬Ëü±íÊ¾Òª´¦ÀíµÄ¼ü¡£</param>
-        /// <returns>Èç¹û¿Ø¼ş´¦Àí²¢Ê¹ÓÃ»÷¼ü£¬ÔòÎª true£»·ñÔòÎª false£¬ÒÔÔÊĞí½øÒ»²½´¦Àí</returns>
+        /// <param name="keyData">System.Windows.Forms.Keys å€¼ä¹‹ä¸€ï¼Œå®ƒè¡¨ç¤ºè¦å¤„ç†çš„é”®ã€‚</param>
+        /// <returns>å¦‚æœæ§ä»¶å¤„ç†å¹¶ä½¿ç”¨å‡»é”®ï¼Œåˆ™ä¸º trueï¼›å¦åˆ™ä¸º falseï¼Œä»¥å…è®¸è¿›ä¸€æ­¥å¤„ç†</returns>
         protected override bool ProcessDialogKey(
     Keys keyData)
         {
@@ -313,28 +313,28 @@ namespace dp2Circulation
     }
 
     /// <summary>
-    /// (¿ìËÙ²Ù×÷¶Ô»°¿ò)ĞÅÏ¢ÑÕÉ«
+    /// (å¿«é€Ÿæ“ä½œå¯¹è¯æ¡†)ä¿¡æ¯é¢œè‰²
     /// </summary>
     public enum InfoColor
     {
         /// <summary>
-        /// ºìÉ«¡£²Ù×÷Ê§°Ü£»»òÕß½ûÖ¹
+        /// çº¢è‰²ã€‚æ“ä½œå¤±è´¥ï¼›æˆ–è€…ç¦æ­¢
         /// </summary>
-        Red = 0,    // ²Ù×÷Ê§°Ü£»»òÕß½ûÖ¹
+        Red = 0,    // æ“ä½œå¤±è´¥ï¼›æˆ–è€…ç¦æ­¢
 
         /// <summary>
-        /// Ç®ºìÉ«¡£²Ù×÷¿ÉÄÜÊ§°Ü£¬Ò²¿ÉÄÜ³É¹¦
+        /// é’±çº¢è‰²ã€‚æ“ä½œå¯èƒ½å¤±è´¥ï¼Œä¹Ÿå¯èƒ½æˆåŠŸ
         /// </summary>
-        LightRed = 1,   // ²Ù×÷¿ÉÄÜÊ§°Ü£¬Ò²¿ÉÄÜ³É¹¦
+        LightRed = 1,   // æ“ä½œå¯èƒ½å¤±è´¥ï¼Œä¹Ÿå¯èƒ½æˆåŠŸ
 
         /// <summary>
-        /// »ÆÉ«¡£²Ù×÷³É¹¦£¬µ«ÊÇÓĞºóĞø²Ù×÷ĞèÒªÁôÒâ
+        /// é»„è‰²ã€‚æ“ä½œæˆåŠŸï¼Œä½†æ˜¯æœ‰åç»­æ“ä½œéœ€è¦ç•™æ„
         /// </summary>
-        Yellow = 2, // ²Ù×÷³É¹¦£¬µ«ÊÇÓĞºóĞø²Ù×÷ĞèÒªÁôÒâ
+        Yellow = 2, // æ“ä½œæˆåŠŸï¼Œä½†æ˜¯æœ‰åç»­æ“ä½œéœ€è¦ç•™æ„
 
         /// <summary>
-        /// ÂÌÉ«¡£²Ù×÷³É¹¦£¬Ã»ÓĞºóĞø²Ù×÷
+        /// ç»¿è‰²ã€‚æ“ä½œæˆåŠŸï¼Œæ²¡æœ‰åç»­æ“ä½œ
         /// </summary>
-        Green = 3,  // ²Ù×÷³É¹¦£¬Ã»ÓĞºóĞø²Ù×÷
+        Green = 3,  // æ“ä½œæˆåŠŸï¼Œæ²¡æœ‰åç»­æ“ä½œ
     }
 }
