@@ -156,7 +156,7 @@ namespace DigitalPlatform.LibraryServer
             string strError = "";
 
             // 如果newrecpath为空但是oldrecpath有值，就用oldrecpath的值
-            // 2007/10/23 new add
+            // 2007/10/23
             if (String.IsNullOrEmpty(info.NewRecPath) == true)
             {
                 if (String.IsNullOrEmpty(info.OldRecPath) == false)
@@ -1235,7 +1235,7 @@ namespace DigitalPlatform.LibraryServer
             // 检索期库中全部从属于特定id的记录
 
             string strQueryXml = "<target list='"
-                + StringUtil.GetXmlStringSimple(strIssueDbName + ":" + "父记录")       // 2007/9/14 new add
+                + StringUtil.GetXmlStringSimple(strIssueDbName + ":" + "父记录")       // 2007/9/14
                 + "'><item><word>"
                 + strBiblioRecId
                 + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>" + "zh" + "</lang></target>";

@@ -152,7 +152,7 @@ namespace DigitalPlatform.GUI
             if (delimeter == (char)0)
                 aName = strPath.Split(new Char[] { '/', '\\' });   // 2007/8/2 changed 兼容原来，用/；现在推荐用\
             else
-                aName = strPath.Split(new Char[] { delimeter });   // 2007/8/2 new add
+                aName = strPath.Split(new Char[] { delimeter });   // 2007/8/2
 
 
             TreeNode node = null;

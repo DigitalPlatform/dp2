@@ -99,7 +99,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
             string strQueryXml = "<target list='"
-                + StringUtil.GetXmlStringSimple(strZhongcihaoDbName + ":" + "分类号")       // 2007/9/14 new add 
+                + StringUtil.GetXmlStringSimple(strZhongcihaoDbName + ":" + "分类号")       // 2007/9/14 
                 + "'><item><word>"
                 + StringUtil.GetXmlStringSimple(strClass)
                 + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang></target>";
@@ -979,7 +979,7 @@ for (int i = 0; i < nodes.Count; i++)
                 }
 
                 strQueryXml += "<target list='"
-                    + StringUtil.GetXmlStringSimple(strDbName + ":" + "索取号")       // 2007/9/14 new add
+                    + StringUtil.GetXmlStringSimple(strDbName + ":" + "索取号")       // 2007/9/14
                     + "'><item><word>"
                     + StringUtil.GetXmlStringSimple(strClass) + "/"
                     + "</word><match>left</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang></target>";
@@ -1079,7 +1079,7 @@ for (int i = 0; i < nodes.Count; i++)
                 }
 
                 strQueryXml += "<target list='"
-                    + StringUtil.GetXmlStringSimple(strDbName + ":" + strLeftFrom)       // 2007/9/14 new add
+                    + StringUtil.GetXmlStringSimple(strDbName + ":" + strLeftFrom)       // 2007/9/14
                     + "'><item><word>"
                     + StringUtil.GetXmlStringSimple(strClass)
                     + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang></target>";

@@ -1109,7 +1109,7 @@ namespace dp2Kernel
             }
         }
 
-        // 2008/11/14 new add
+        // 2008/11/14
         // 刷新数据库定义
         // parameter:
         //      strAction   动作。begin为开始刷新。end为结束刷新。
@@ -1643,7 +1643,7 @@ namespace dp2Kernel
 
                 if (nAdditionError == -50)
                 {
-                    result.ErrorCode = ErrorCodeValue.NotFoundSubRes;    // 2006/7/3 new add
+                    result.ErrorCode = ErrorCodeValue.NotFoundSubRes;    // 2006/7/3
                     result.ErrorString = strError;
                 }
 
@@ -2507,7 +2507,7 @@ namespace dp2Kernel
                 string strError = "";
                 // return:
                 //		-1	出错
-                //      -4  数据库不存在  2008/4/27 new add
+                //      -4  数据库不存在  2008/4/27
                 //      -5  未找到数据库
                 //		-6	无足够的权限
                 //		0	成功

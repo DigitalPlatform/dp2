@@ -470,7 +470,7 @@ namespace DigitalPlatform.rms.Client
 
             if (result.ErrorCode == ErrorCodeValue.NoError)
             {
-                this.ErrorCode = ChannelErrorCode.None; // 2008/7/29 new add
+                this.ErrorCode = ChannelErrorCode.None; // 2008/7/29
             }
             else if (result.ErrorCode == ErrorCodeValue.NotFound)
             {
@@ -1235,7 +1235,7 @@ namespace DigitalPlatform.rms.Client
         }
 
 
-        // 2008/11/14 new add
+        // 2008/11/14
         // 刷新数据库定义
         // return:
         //		-1	出错
@@ -2328,7 +2328,7 @@ namespace DigitalPlatform.rms.Client
             }
         }
 
-        // 2009/11/6 new add
+        // 2009/11/6
         // 根据指定的记录路径获得浏览格式记录
         // 浅包装版本
         // parameter:
@@ -4276,7 +4276,7 @@ REDO:
         }
 
 
-        // 写入资源。原始版本。2007/5/27 new add
+        // 写入资源。原始版本。2007/5/27
         public long WriteRes(string strResPath,
             string strRanges,
             long lTotalLength,
@@ -4479,7 +4479,7 @@ REDO:
                         out output_timestamp/*baOutputTimeStamp*/,soapresult);
 
                     this.ErrorInfo = result.ErrorString;	// 无论是否返回错误，都将result的ErrorString放到Channel中
-                    strError = result.ErrorString;  // 2007/6/28 new add 服务于 带有局部path的保存中返回值放在strError的情况
+                    strError = result.ErrorString;  // 2007/6/28 服务于 带有局部path的保存中返回值放在strError的情况
 
                     if (result.Value == -1)
                     {
@@ -4948,7 +4948,7 @@ ref strNewStyle);	// 不要数据体和metadata
                 out strError);
         }
 
-        // 获得资源。原始版本。2007/5/27 new add
+        // 获得资源。原始版本。2007/5/27
         //		-1	出错。具体出错原因在this.ErrorCode中。this.ErrorInfo中有出错信息。
         //		0	成功
         public long GetRes(string strResPath,
@@ -5625,7 +5625,7 @@ ref strNewStyle);	// 不要数据体和metadata
             string strObjectFileName,  // 任延华加,该参数代表存放对象数据的文件名
             string strLocalPath,       // 该参数代表本地文件名,有时会与strObjectFileName不同
             string strMime,
-            string strLastModifyTime,   // 2007/12/13 new add
+            string strLastModifyTime,   // 2007/12/13
             string strRange,
             bool bTailHint,
             byte[] timestamp,
@@ -5770,7 +5770,7 @@ ref strNewStyle);	// 不要数据体和metadata
         public long DoSaveResObject(string strPath,
             Stream file,
             long lTotalLength,
-            string strStyle,	// new add 2005/11/4
+            string strStyle,	// 2005/11/4
             string strMetadata,
             string strRange,
             bool bTailHint,

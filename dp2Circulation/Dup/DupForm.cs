@@ -403,7 +403,7 @@ namespace dp2Circulation
                 this.ClearDupState();
 
                 this.listView_browse.Items.Clear();
-                // 2008/11/22 new add
+                // 2008/11/22 
                 this.SortColumns.Clear();
                 SortColumns.ClearColumnSortDisplay(this.listView_browse.Columns);
 
@@ -494,7 +494,7 @@ namespace dp2Circulation
 
                         if (item.Text == this.RecordPath)
                         {
-                            // 如果就是发起记录自己  2008/2/29 new add
+                            // 如果就是发起记录自己  2008/2/29 
                             item.ImageIndex = ITEMTYPE_OVERTHRESHOLD;
                             item.BackColor = Color.LightGoldenrodYellow;
                             item.ForeColor = SystemColors.GrayText; // 表示就是发起记录自己
@@ -679,7 +679,7 @@ namespace dp2Circulation
                 ListViewItem item = this.listView_browse.Items[i];
 
                 if (item.Text == this.RecordPath)
-                    continue;   // 不包含发起记录自己 2008/2/29 new add
+                    continue;   // 不包含发起记录自己 2008/2/29 
 
                 if (item.ImageIndex == ITEMTYPE_OVERTHRESHOLD)
                     nCount++;
@@ -700,7 +700,7 @@ namespace dp2Circulation
                 ListViewItem item = this.listView_browse.Items[i];
 
                 if (item.Text == this.RecordPath)
-                    continue;   // 不包含发起记录自己 2008/2/29 new add
+                    continue;   // 不包含发起记录自己 2008/2/29 
 
                 if (item.ImageIndex == ITEMTYPE_OVERTHRESHOLD)
                     nCount++;
@@ -764,7 +764,7 @@ namespace dp2Circulation
         private void DupForm_Activated(object sender, EventArgs e)
         {
 #if NO
-            // 2009/8/13 new add
+            // 2009/8/13 
             this.MainForm.stopManager.Active(this.stop);
 #endif
 

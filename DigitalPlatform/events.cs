@@ -108,7 +108,7 @@ namespace DigitalPlatform
 
         /*
         // 触发所在的子控件
-        // 2009/2/24 new add
+        // 2009/2/24
         public object SenderControl = null;
          * */
     }

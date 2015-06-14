@@ -8,9 +8,8 @@ using DigitalPlatform.IO;
 
 namespace DigitalPlatform.Xml
 {
-    public class Text : TextVisual
+    public class XmlText : TextVisual
     {
-
         public override ItemRegion GetRegionName()
         {
             return ItemRegion.Text;

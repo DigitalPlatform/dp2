@@ -363,7 +363,7 @@ namespace DigitalPlatform.rms
                 strMatch = nodeMatch.InnerText.Trim(); // 2012/2/16
             else
             {
-                // 2008/11/23 new add
+                // 2008/11/23
                 nodeMatch = nodeItem.OwnerDocument.CreateElement("match");
                 nodeItem.AppendChild(nodeMatch);
             }
@@ -371,7 +371,7 @@ namespace DigitalPlatform.rms
 
             if (String.IsNullOrEmpty(strMatch) == true)
             {
-                strMatch = "left";  // 2008/11/23 new add
+                strMatch = "left";  // 2008/11/23
                 // DomUtil.SetNodeText(nodeMatch, strMatch);   // 原来是"left"
                 nodeMatch.InnerText = strMatch;   // 原来是"left"   // 2012/2/16
                 DomUtil.SetAttr(nodeMatch, "comment",
@@ -555,7 +555,7 @@ namespace DigitalPlatform.rms
                     return -1;
                 }
 
-                // 2009/7/19 new add
+                // 2009/7/19
                 if (db.InRebuildingKey == true)
                 {
                     strError = "数据库 '" + db.GetCaption(null) + "' 正处在重建检索点状态，不能进行检索...";
@@ -974,7 +974,7 @@ namespace DigitalPlatform.rms
                         }
                         catch (StackUnderflowException /*ex*/)
                         {
-                            // 2008/12/4 new add
+                            // 2008/12/4
                             string strOutXml = "";
                             if (node.ParentNode != null)
                             {

@@ -443,7 +443,7 @@ namespace DigitalPlatform.CirculationClient
                     if (currrent_node.Tag is dp2ServerNodeInfo)
                     {
                         // 如果是server节点，则需要取出URL
-                        // 2008/3/9 new add
+                        // 2008/3/9
                         dp2ServerNodeInfo info = (dp2ServerNodeInfo)currrent_node.Tag;
                         if (info == null)
                         {
@@ -1887,7 +1887,7 @@ false);
                 }
 
                 strText = "<target list='"
-                    + StringUtil.GetXmlStringSimple(item.Target)       // 2007/9/14 new add
+                    + StringUtil.GetXmlStringSimple(item.Target)       // 2007/9/14
                     + "'>" + strText
                     + "<lang>" + item.Lang + "</lang></target>";
 

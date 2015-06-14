@@ -470,12 +470,12 @@ namespace DigitalPlatform.Marc
         // 失去焦点时，应把内容还回去
         protected override void OnLostFocus(EventArgs e)
         {
-            // 2008/6/4 new add
+            // 2008/6/4
             this.MarcEditor.OldImeMode = this.ImeMode;
 
             if (this.DisableFlush > 0)
             {
-                base.OnLostFocus(e);    // new add
+                base.OnLostFocus(e);    //
                 return;
             }
 
@@ -489,13 +489,13 @@ namespace DigitalPlatform.Marc
             base.OnGotFocus(e);
             //this.SelectionLength = 0;
 
-            // 2008/6/4 new add
+            // 2008/6/4
             if (this.ImeMode != this.MarcEditor.OldImeMode)
             {
                 if (this.MarcEditor.ReadOnly == true)
                     this.ImeMode = this.MarcEditor.OldImeMode;
                 else
-                {   // 2009/11/20 new add
+                {   // 2009/11/20
                     if (this.MarcEditor.OldImeMode == ImeMode.Disable)
                         this.ImeMode = ImeMode.NoControl;
                     else
@@ -1067,7 +1067,7 @@ MarcEditor.WM_LEFTRIGHT_MOVED,
                             if (nOldSelectionStart < this.Text.Length)
                             {
                                 /*
-                                if (this.Text.Length >= this.MaxLength - 1) // 2008/12/18 new add
+                                if (this.Text.Length >= this.MaxLength - 1) // 2008/12/18
                                 {
                                     this.Text = this.Text.Remove(this.SelectionStart, 1);
                                     this.SelectionStart = nOldSelectionStart;

@@ -50,6 +50,7 @@ namespace dp2Circulation
             this.MenuItem_openIssueSearchForm = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openCommentSearchForm = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openInvoiceSearchForm = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_openArrivedSearchForm = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_openReaderInfoForm = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openItemInfoForm = new System.Windows.Forms.ToolStripMenuItem();
@@ -195,7 +196,7 @@ namespace dp2Circulation
             this.toolStripButton_close = new System.Windows.Forms.ToolStripButton();
             this.splitter_fixed = new System.Windows.Forms.Splitter();
             this.timer_operHistory = new System.Windows.Forms.Timer(this.components);
-            this.MenuItem_openArrivedSearchForm = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_openReservationListForm = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip_main.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
             this.toolStrip_main.SuspendLayout();
@@ -386,6 +387,14 @@ namespace dp2Circulation
             this.MenuItem_openInvoiceSearchForm.Text = "发票查询窗(&N)";
             this.MenuItem_openInvoiceSearchForm.Click += new System.EventHandler(this.MenuItem_openInvoiceSearchForm_Click);
             // 
+            // MenuItem_openArrivedSearchForm
+            // 
+            this.MenuItem_openArrivedSearchForm.Image = ((System.Drawing.Image)(resources.GetObject("MenuItem_openArrivedSearchForm.Image")));
+            this.MenuItem_openArrivedSearchForm.Name = "MenuItem_openArrivedSearchForm";
+            this.MenuItem_openArrivedSearchForm.Size = new System.Drawing.Size(176, 22);
+            this.MenuItem_openArrivedSearchForm.Text = "预约到书查询窗(&A)";
+            this.MenuItem_openArrivedSearchForm.Click += new System.EventHandler(this.MenuItem_openArrivedSearchForm_Click);
+            // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
@@ -463,6 +472,7 @@ namespace dp2Circulation
             this.toolStripMenuItem_statisProjectManagement,
             this.toolStripSeparator14,
             this.MenuItem_messageForm,
+            this.MenuItem_openReservationListForm,
             this.toolStripSeparator30,
             this.MenuItem_systemManagement,
             this.MenuItem_recoverUrgentLog,
@@ -705,7 +715,7 @@ namespace dp2Circulation
             // 
             this.MenuItem_messageForm.Name = "MenuItem_messageForm";
             this.MenuItem_messageForm.Size = new System.Drawing.Size(221, 22);
-            this.MenuItem_messageForm.Text = "消息窗(&M)";
+            this.MenuItem_messageForm.Text = "消息(&M)";
             this.MenuItem_messageForm.Click += new System.EventHandler(this.MenuItem_messageForm_Click);
             // 
             // toolStripSeparator30
@@ -1577,13 +1587,12 @@ namespace dp2Circulation
             this.splitter_fixed.TabIndex = 6;
             this.splitter_fixed.TabStop = false;
             // 
-            // MenuItem_openArrivedSearchForm
+            // MenuItem_openReservationListForm
             // 
-            this.MenuItem_openArrivedSearchForm.Image = ((System.Drawing.Image)(resources.GetObject("MenuItem_openArrivedSearchForm.Image")));
-            this.MenuItem_openArrivedSearchForm.Name = "MenuItem_openArrivedSearchForm";
-            this.MenuItem_openArrivedSearchForm.Size = new System.Drawing.Size(176, 22);
-            this.MenuItem_openArrivedSearchForm.Text = "预约到书查询窗(&A)";
-            this.MenuItem_openArrivedSearchForm.Click += new System.EventHandler(this.MenuItem_openArrivedSearchForm_Click);
+            this.MenuItem_openReservationListForm.Name = "MenuItem_openReservationListForm";
+            this.MenuItem_openReservationListForm.Size = new System.Drawing.Size(221, 22);
+            this.MenuItem_openReservationListForm.Text = "预约响应(&R)";
+            this.MenuItem_openReservationListForm.Click += new System.EventHandler(this.MenuItem_openReservationListForm_Click);
             // 
             // MainForm
             // 
@@ -1793,6 +1802,7 @@ namespace dp2Circulation
         private System.Windows.Forms.ToolStripMenuItem MenuItem_reLogin;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_openEntityRegisterWizard;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_openArrivedSearchForm;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_openReservationListForm;
     }
 }
 

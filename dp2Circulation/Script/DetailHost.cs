@@ -1723,7 +1723,7 @@ namespace dp2Circulation
 
                 // 取得馆藏地点
                 strLocation = edit.entityEditControl_editing.LocationString;
-                strLocation = StringUtil.GetPureLocationString(strLocation);  // 2009/3/29 new add
+                strLocation = StringUtil.GetPureLocationString(strLocation);  // 2009/3/29 
 
                 /*
                 if (String.IsNullOrEmpty(strLocation) == true)
@@ -1775,7 +1775,7 @@ namespace dp2Circulation
                 Debug.Assert(book_item != null, "");
 
                 strLocation = book_item.Location;
-                strLocation = StringUtil.GetPureLocationString(strLocation);  // 2009/3/29 new add
+                strLocation = StringUtil.GetPureLocationString(strLocation);  // 2009/3/29 
 
                 /*
                 if (String.IsNullOrEmpty(strLocation) == true)
@@ -1811,7 +1811,7 @@ namespace dp2Circulation
 
                 // 取得馆藏地点
                 strLocation = binding.EntityEditControl.LocationString;
-                strLocation = StringUtil.GetPureLocationString(strLocation);  // 2009/3/29 new add
+                strLocation = StringUtil.GetPureLocationString(strLocation);  // 2009/3/29 
 
                 // 获得关于一个特定馆藏地点的索取号配置信息
                 nRet = this.DetailForm.MainForm.GetArrangementInfo(strLocation,
@@ -1877,7 +1877,7 @@ namespace dp2Circulation
             dlg.MyselfItemRecPath = strItemRecPath;
             dlg.MyselfParentRecPath = this.DetailForm.BiblioRecPath;
 
-            dlg.MyselfCallNumberItems = callnumber_items;   // 2009/6/4 new add
+            dlg.MyselfCallNumberItems = callnumber_items;   // 2009/6/4 
 
             dlg.ClassNumber = strClass;
             dlg.LocationString = strLocation;
@@ -3331,7 +3331,7 @@ namespace dp2Circulation
 
                 // 取得馆藏地点
                 strLocation = edit.entityEditControl_editing.LocationString;
-                strLocation = Global.GetPureLocation(strLocation);  // 2009/3/29 new add
+                strLocation = Global.GetPureLocation(strLocation);  // 2009/3/29 
 
                 /*
                 if (String.IsNullOrEmpty(strLocation) == true)
@@ -3370,7 +3370,7 @@ namespace dp2Circulation
                 Debug.Assert(book_item != null, "");
 
                 strLocation = book_item.Location;
-                strLocation = Global.GetPureLocation(strLocation);  // 2009/3/29 new add
+                strLocation = Global.GetPureLocation(strLocation);  // 2009/3/29 
 
                 /*
                 if (String.IsNullOrEmpty(strLocation) == true)
@@ -3566,7 +3566,7 @@ chi	中文	如果是中文，则为空。
 
                 // 取得馆藏地点
                 strLocation = edit.entityEditControl_editing.LocationString;
-                strLocation = StringUtil.GetPureLocationString(strLocation);  // 2009/3/29 new add
+                strLocation = StringUtil.GetPureLocationString(strLocation);  // 2009/3/29 
 
                 /*
                 if (String.IsNullOrEmpty(strLocation) == true)
@@ -3616,7 +3616,7 @@ chi	中文	如果是中文，则为空。
                 Debug.Assert(book_item != null, "");
 
                 strLocation = book_item.Location;
-                strLocation = StringUtil.GetPureLocationString(strLocation);  // 2009/3/29 new add
+                strLocation = StringUtil.GetPureLocationString(strLocation);  // 2009/3/29 
 
                 /*
                 if (String.IsNullOrEmpty(strLocation) == true)
@@ -3655,7 +3655,7 @@ chi	中文	如果是中文，则为空。
 
                 // 取得馆藏地点
                 strLocation = binding.EntityEditControl.LocationString;
-                strLocation = StringUtil.GetPureLocationString(strLocation);  // 2009/3/29 new add
+                strLocation = StringUtil.GetPureLocationString(strLocation);  // 2009/3/29 
 
                 // 获得关于一个特定馆藏地点的索取号配置信息
                 nRet = this.DetailForm.MainForm.GetArrangementInfo(strLocation,
@@ -3824,7 +3824,7 @@ chi	中文	如果是中文，则为空。
                             dlg.Owner = (Form)sender;
                         dlg.MyselfItemRecPath = strItemRecPath;
                         dlg.MyselfParentRecPath = this.DetailForm.BiblioRecPath;
-                        dlg.MyselfCallNumberItems = callnumber_items;   // 2009/6/4 new add
+                        dlg.MyselfCallNumberItems = callnumber_items;   // 2009/6/4 
 
                         dlg.Show();
 
@@ -4052,11 +4052,11 @@ chi	中文	如果是中文，则为空。
             dlg.checkBox_savePassword.Checked = true;
 
             dlg.textBox_serverAddr.Enabled = false;
-            dlg.TopMost = true; // 2009/11/12 new add 因为ShowDialog(null)，为了防止对话框被放在非顶部
+            dlg.TopMost = true; // 2009/11/12  因为ShowDialog(null)，为了防止对话框被放在非顶部
             dlg.ShowDialog(null);
             if (dlg.DialogResult != DialogResult.OK)
             {
-                e.Cancel = true;    // 2009/11/12 new add 如果缺这一句，会造成Cancel后仍然重新弹出登录对话框
+                e.Cancel = true;    // 2009/11/12  如果缺这一句，会造成Cancel后仍然重新弹出登录对话框
                 return;
             }
 

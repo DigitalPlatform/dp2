@@ -340,7 +340,7 @@ namespace DigitalPlatform.Marc
 
         ToolTip toolTip1 = new ToolTip();
 
-        // 2008/6/4 new add
+        // 2008/6/4
         internal ImeMode OldImeMode = ImeMode.NoControl;    // off
 
         /// <summary>
@@ -534,7 +534,7 @@ namespace DigitalPlatform.Marc
         /// </summary>
         public event ParseMacroEventHandler ParseMacro = null;
 
-        // 2008/3/19 new add
+        // 2008/3/19
         /// <summary>
         /// Ctrl + 字母键 按下
         /// </summary>
@@ -592,12 +592,12 @@ namespace DigitalPlatform.Marc
 			InitializeComponent();
 
             /*
-            // 2008/11/26 new add
+            // 2008/11/26
             this.SetStyle(ControlStyles.Selectable, true);
              * */
 
             /*
-            // 2006/11/13 new add
+            // 2006/11/13
             // 初始化内部等宽字体
             if (this.m_captionFont == null)
             {
@@ -650,7 +650,7 @@ namespace DigitalPlatform.Marc
 		}
 		#endregion
 
-        // 2009/10/24 new add
+        // 2009/10/24
         internal bool m_bReadOnly = false;
 
         /// <summary>
@@ -679,7 +679,7 @@ namespace DigitalPlatform.Marc
                         if (this.curEdit.ImeMode == ImeMode.Disable
                             || this.curEdit.ImeMode == ImeMode.Off)
                         {
-                            this.curEdit.ImeMode = ImeMode.NoControl;  // 2009/11/12 new add
+                            this.curEdit.ImeMode = ImeMode.NoControl;  // 2009/11/12
                         }
                     }
                 }
@@ -990,7 +990,7 @@ namespace DigitalPlatform.Marc
                     break;
                      */
                     /*
-                    // 2008/11/26 new add
+                    // 2008/11/26
                 case API.WM_GETDLGCODE:
                     {
                         m.Result = new IntPtr(API.DLGC_WANTALLKEYS);
@@ -1069,7 +1069,7 @@ namespace DigitalPlatform.Marc
 
 		void InitialEditControl()
 		{
-            // 2009/11/20 new add
+            // 2009/11/20
             if (this.curEdit != null)
                 this.Controls.Remove(this.curEdit);
 
@@ -1081,7 +1081,7 @@ namespace DigitalPlatform.Marc
             curEdit.MaxLength = 0;
 			curEdit.Multiline = true;
 
-            // 2009/10/24 new add
+            // 2009/10/24
             if (curEdit.ReadOnly != this.ReadOnly)
                 curEdit.ReadOnly = this.ReadOnly;
 
@@ -1214,7 +1214,7 @@ namespace DigitalPlatform.Marc
                     }
                     else
                     {
-                        // 2009/10/24 new add
+                        // 2009/10/24
                         curEdit.ForeColor = this.defaultNameTextColor;
                         curEdit.BackColor = SystemColors.Control;
                     }
@@ -1228,7 +1228,7 @@ namespace DigitalPlatform.Marc
                     }
                     else
                     {
-                        // 2009/10/24 new add
+                        // 2009/10/24
                         curEdit.ForeColor = this.m_contentTextColor;
                         curEdit.BackColor = SystemColors.Control;
                     }
@@ -1250,7 +1250,7 @@ namespace DigitalPlatform.Marc
                 }
                 else
                 {
-                    // 2009/10/24 new add
+                    // 2009/10/24
                     curEdit.ForeColor = this.defaultNameTextColor;
                     curEdit.BackColor = SystemColors.Control;
                 }
@@ -1264,7 +1264,7 @@ namespace DigitalPlatform.Marc
                 }
                 else
                 {
-                    // 2009/10/24 new add
+                    // 2009/10/24
                     curEdit.ForeColor = this.defaultIndicatorTextColor;
                     curEdit.BackColor = SystemColors.Control;
                 }
@@ -1278,7 +1278,7 @@ namespace DigitalPlatform.Marc
                 }
                 else
                 {
-                    // 2009/10/24 new add
+                    // 2009/10/24
                     curEdit.ForeColor = this.m_contentTextColor;
                     curEdit.BackColor = SystemColors.Control;
                 }
@@ -1311,7 +1311,7 @@ namespace DigitalPlatform.Marc
             curEdit.Padding = new System.Windows.Forms.Padding(0);
             curEdit.AutoSize = false;
 
-            // 2009/10/24 new add
+            // 2009/10/24
             if (curEdit.ReadOnly != this.ReadOnly)
                 curEdit.ReadOnly = this.ReadOnly;
 		}
@@ -1345,7 +1345,7 @@ namespace DigitalPlatform.Marc
                 InitialEditControl();
 
 			if (nField == -1 
-                || this.FocusedField == null)   // 2008/11/29 new add
+                || this.FocusedField == null)   // 2008/11/29
 			{
 				this.curEdit.Text = "";
 				this.curEdit.Hide();
@@ -1414,7 +1414,7 @@ namespace DigitalPlatform.Marc
             try
             {
 
-                // 2008/3/20 new add
+                // 2008/3/20
                 if (this.curEdit == null)
                 {
                     // Debug.Assert(false, "");
@@ -1654,7 +1654,7 @@ System.Drawing.Drawing2D.SmoothingMode.HighQuality;
             if (this.record != null)
             {
                 this.record.RefreshNameCaption();
-                this.Invalidate();  // 2007/12/26 new add
+                this.Invalidate();  // 2007/12/26
             }
         }
 
@@ -2622,13 +2622,13 @@ END1:
 			get
 			{
                 if (this.SelectedFieldIndices.Count > 1)
-                    return null;    // new add
+                    return null;    //
 
 				if (this.FocusedFieldIndex == -1)
 					return null;
 				Debug.Assert(this.FocusedFieldIndex >= 0,"不可能的情况1");
 
-                // 2008/11/29 new add
+                // 2008/11/29
                 if (this.record.Fields.Count == 0)
                     return null;
 
@@ -2669,7 +2669,7 @@ END1:
 				return (int)this.SelectedFieldIndices[0];
 			}	
 
-            // 2007/7/17 new add 
+            // 2007/7/17 
             set
             {
                 // 先Flush
@@ -3064,7 +3064,7 @@ END1:
 
             this.m_nFocusCol = nCol;
 
-            // 2008/3/21 new add
+            // 2008/3/21
             if (this.curEdit == null)
                 InitialEditControl();
 
@@ -3901,7 +3901,7 @@ END1:
 			}
 			this.record.Fields.RemoveAt(fieldIndices);
 
-            // 2007/7/17 new add
+            // 2007/7/17
             AdjustOriginY();
 
 		}
@@ -4173,7 +4173,7 @@ END1:
 			this.AfterDocumentChanged(ScrollBarMember.Both,
 				iRect);
 
-            this.EnsureVisible();   // 2009/3/6 new add
+            this.EnsureVisible();   // 2009/3/6
 		}
 
 		// 粘贴插入_前插
@@ -4313,8 +4313,8 @@ END1:
 
         // 插入字段
         // parameters:
-        //      nInsertBefore   0: false; 1: true; -1:保持当前记忆状态 2010/12/12 new add
-        //      nAutoComplete   0: false; 1: true; -1:保持当前记忆状态 2008/7/29 new add
+        //      nInsertBefore   0: false; 1: true; -1:保持当前记忆状态 2010/12/12
+        //      nAutoComplete   0: false; 1: true; -1:保持当前记忆状态 2008/7/29
         /// <summary>
         /// 插入新字段
         /// </summary>
@@ -4551,7 +4551,7 @@ END1:
 			}
 			this.record.Fields.RemoveAt(fieldIndices);
 
-            // 2007/7/17 new add
+            // 2007/7/17
             AdjustOriginY();
 
 			return true;
@@ -4559,7 +4559,7 @@ END1:
 
         // 删除大量内容(字段)后，窗口原点偏移量可能处在不合适的位置，令操作者看不到上面显示的内容
         // 这时需要改变原点偏移量
-        // 2007/7/17 new add
+        // 2007/7/17
         void AdjustOriginY()
         {
 

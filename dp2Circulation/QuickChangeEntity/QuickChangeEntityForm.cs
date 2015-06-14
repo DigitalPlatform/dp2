@@ -600,7 +600,7 @@ namespace dp2Circulation
                     out errorinfos,
                     out strError);
 
-                this.entityEditControl1.Changed = false;    // 2007/4/4 new add
+                this.entityEditControl1.Changed = false;    // 2007/4/4
 
                 // 把出错的事项和需要更新状态的事项兑现到显示、内存
                 if (RefreshOperResult(errorinfos) == true)
@@ -649,7 +649,7 @@ namespace dp2Circulation
 
 
             info.Action = "change";
-            info.OldRecPath = this.entityEditControl1.RecPath;  //  2007/6/2 new add
+            info.OldRecPath = this.entityEditControl1.RecPath;  //  2007/6/2
             info.NewRecPath = this.entityEditControl1.RecPath;
 
             info.NewRecord = strXml;
@@ -658,7 +658,7 @@ namespace dp2Circulation
             info.OldRecord = this.entityEditControl1.OldRecord;
             info.OldTimestamp = this.entityEditControl1.Timestamp;
 
-            // info.RefID = this.RefID_1; // 2008/3/3 new add // 这一句难以理解其意思，难道是反复使用同一个 refid?
+            // info.RefID = this.RefID_1; // 2008/3/3 // 这一句难以理解其意思，难道是反复使用同一个 refid?
 
             // 2013/6/23
             if (string.IsNullOrEmpty(info.RefID) == true)

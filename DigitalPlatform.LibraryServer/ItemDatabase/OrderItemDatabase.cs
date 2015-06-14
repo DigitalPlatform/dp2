@@ -36,9 +36,9 @@ namespace DigitalPlatform.LibraryServer
                 "parent",   // 父记录ID
                 "index",    // 编号
                 "state",    // 状态
-                "catalogNo",    // 书目号 2008/8/31 new add
+                "catalogNo",    // 书目号 2008/8/31
                 "seller",   // 书商
-                "source",   // 2008/2/15 new add 经费来源
+                "source",   // 2008/2/15 经费来源
                 "range",    // 订购的时间范围
                 "issueCount",   // 订购(时间范围内)跨越多少期? 以便算出总价
                 "copy", // 复本数
@@ -47,12 +47,12 @@ namespace DigitalPlatform.LibraryServer
                 "orderTime",    // 订购时间
                 "orderID",  // 订单号
                 "distribute",   // 馆藏分配
-                "class",    // 类别 2008/8/31 new add
+                "class",    // 类别 2008/8/31
                 "comment",  // 注释
                 "batchNo",  // 批次号
-                "sellerAddress",    // 书商地址。用于非大宗订购情形 2009/2/13 new add
+                "sellerAddress",    // 书商地址。用于非大宗订购情形 2009/2/13
                 "refID",    // 参考ID 2010/3/15 add
-                "operations", // 2010/4/8 new add
+                "operations", // 2010/4/8
         };
 
         // DoOperChange()和DoOperMove()的下级函数
@@ -89,9 +89,9 @@ namespace DigitalPlatform.LibraryServer
                 "parent",   // 父记录ID
                 "index",    // 编号
                 "state",    // 状态
-                "catalogNo",    // 书目号 2008/8/31 new add
+                "catalogNo",    // 书目号 2008/8/31
                 "seller",   // 书商
-                "source",   // 2008/2/15 new add 经费来源
+                "source",   // 2008/2/15 经费来源
                 "range",    // 订购的时间范围
                 "issueCount",   // 订购(时间范围内)跨越多少期? 以便算出总价
                 "copy", // 复本数
@@ -100,7 +100,7 @@ namespace DigitalPlatform.LibraryServer
                 "orderTime",    // 订购时间
                 "orderID",  // 订单号
                 "distribute",   // 馆藏分配
-                "class",    // 类别 2008/8/31 new add
+                "class",    // 类别 2008/8/31
                 "comment",  // 注释
                 "batchNo",  // 批次号
             };

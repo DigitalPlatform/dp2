@@ -419,7 +419,7 @@ namespace DigitalPlatform.CommonControl
         {
             // string strText = this.comboBox_matchStyle.Text;
 
-            // 2009/8/6 new add
+            // 2009/8/6
             if (strText == "空值")
                 return "null";
 

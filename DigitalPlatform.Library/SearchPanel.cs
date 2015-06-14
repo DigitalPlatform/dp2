@@ -1038,7 +1038,7 @@ namespace DigitalPlatform.Library
 
             // 2007/4/5 改造 加上了 GetXmlStringSimple()
 			string strQueryXml = "<target list='"
-                + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 new add
+                + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14
                 + "'><item><word>"
 				+ StringUtil.GetXmlStringSimple(strKey)
                 + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang></target>";
@@ -1104,7 +1104,7 @@ namespace DigitalPlatform.Library
 
             // 2007/4/5 改造 加上了 GetXmlStringSimple()
 			string strQueryXml = "<target list='"
-                + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 new add
+                + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14
                 + "'><item><word>"
 				+ StringUtil.GetXmlStringSimple(strKey)
                 + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang></target>";

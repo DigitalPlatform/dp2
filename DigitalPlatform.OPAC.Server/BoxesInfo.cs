@@ -92,7 +92,7 @@ namespace DigitalPlatform.OPAC.Server
         }
 
         // 将信箱名字转换为boxtype值
-        // 2009/7/6 new add
+        // 2009/7/6
         public string GetBoxType(string strName)
         {
             for (int i = 0; i < this.Boxes.Count; i++)

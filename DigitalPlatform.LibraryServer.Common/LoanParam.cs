@@ -30,7 +30,7 @@ namespace DigitalPlatform.LibraryServer
                     // "可借总册数",
                     "可借册数",
                     "借期" ,
-                    // "可预约册数",   // 2007/7/8 new add
+                    // "可预约册数",   // 2007/7/8
                     "超期违约金因子",
                     "丢失违约金因子",
                     // "工作日历名",
@@ -288,7 +288,7 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
-        // 2009/3/10 new add
+        // 2009/3/10
         // 从<readerTypes>元素中获得读者类型
         public static List<string> GetReaderTypes( // XmlDocument cfg_dom,
             XmlNode root,
@@ -451,7 +451,7 @@ namespace DigitalPlatform.LibraryServer
         //      只有book类型匹配，算2分
         //      reader和book类型都不匹配，算1分
         public static int GetLoanParam(
-            XmlNode root,   // XmlDocument cfg_dom_param,    // 2008/8/22 new add
+            XmlNode root,   // XmlDocument cfg_dom_param,    // 2008/8/22
             string strLibraryCode,
             string strReaderType,
             string strBookType,
@@ -619,7 +619,7 @@ namespace DigitalPlatform.LibraryServer
                         weightnode.MatchResult = MatchResult.BookType | MatchResult.ReaderType;
                         weightnodes.Add(weightnode);
 
-                        // 2008/8/20 new add
+                        // 2008/8/20
                         if (strThisReaderType == "*")
                             weightnode.Wild++;
                         if (strThisBookType == "*")
@@ -652,7 +652,7 @@ namespace DigitalPlatform.LibraryServer
                         weightnode.MatchResult = MatchResult.ReaderType;
                         weightnodes.Add(weightnode);
 
-                        // 2008/8/20 new add
+                        // 2008/8/20
                         if (strThisReaderType == "*")
                             weightnode.Wild++;
 
@@ -675,7 +675,7 @@ namespace DigitalPlatform.LibraryServer
                         weightnode.MatchResult = MatchResult.BookType;
                         weightnodes.Add(weightnode);
 
-                        // 2008/8/20 new add
+                        // 2008/8/20
                         if (strThisBookType == "*")
                             weightnode.Wild++;
 
@@ -831,7 +831,7 @@ namespace DigitalPlatform.LibraryServer
             if (nDelta != 0)
                 return (int)(-1 * nDelta * 10);
 
-            // 2008/8/20 new add
+            // 2008/8/20
             // wild值大的靠后
             int nWild = x.Wild - y.Wild;
             if (nWild != 0)

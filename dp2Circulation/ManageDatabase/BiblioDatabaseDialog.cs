@@ -89,7 +89,7 @@ namespace dp2Circulation
                     "name");
                 this.comboBox_syntax.Text = DomUtil.GetAttr(dom.DocumentElement,
                     "syntax");
-                // 2009/10/23 new add
+                // 2009/10/23 
                 this.checkedComboBox_role.Text = DomUtil.GetAttr(dom.DocumentElement,
                     "role");
 
@@ -293,7 +293,7 @@ namespace dp2Circulation
                 {
                     if (String.IsNullOrEmpty(this.textBox_issueDbName.Text) == false)
                     {
-                        // 2009/2/6 new add
+                        // 2009/2/6 
                         if (this.CreateMode == false)
                         {
                             // 对话框警告
@@ -332,7 +332,7 @@ namespace dp2Circulation
 
                     if (String.IsNullOrEmpty(this.textBox_issueDbName.Text) == true)
                     {
-                        // 2009/2/6 new add
+                        // 2009/2/6 
                         if (this.CreateMode == false)
                         {
                             // 对话框警告
@@ -371,7 +371,7 @@ namespace dp2Circulation
                     goto ERROR1;
                 }
 
-                // 2009/11/5 new add
+                // 2009/11/5 
                 if (String.IsNullOrEmpty(this.textBox_entityDbName.Text) == true)
                 {
                     strError = "当角色为 orderWork (采购工作库)时，必须包含实体库";

@@ -144,7 +144,7 @@ namespace DigitalPlatform.Z3950
             return node;
         }
 
-        // 2007/7/16 new add
+        // 2007/7/16
         public BerNode NewChildBooleanNode(UInt16 uTag,
             char cClass,
             bool bData)
@@ -473,10 +473,10 @@ namespace DigitalPlatform.Z3950
                     if (baTempPackage == null)
                     {
                         // 是否有问题?
-                        continue;   // 2008/12/17 new add
+                        continue;   // 2008/12/17
                     }
 
-                    Debug.Assert(baTempPackage != null, "");    // 2008/12/17 new add
+                    Debug.Assert(baTempPackage != null, "");    // 2008/12/17
                     baPackage = ByteArray.Add(baPackage, baTempPackage);
                 }
             }
@@ -1041,7 +1041,7 @@ namespace DigitalPlatform.Z3950
 
             Debug.Assert(nUsedLen <= nLenParam, "");
             if (nUsedLen >= nLenParam)
-                return false;   // new add
+                return false;   //
 
             //*remainder=fieldlen+headerlen-len;
             return true;
@@ -1078,7 +1078,7 @@ namespace DigitalPlatform.Z3950
                     nTaglen += 1;
                     m_uTag += (UInt16)(c & 0x7F);
                     m_uTag <<= 7;   // 7 ?
-                    // m_uTag &= 0xFF; // new add
+                    // m_uTag &= 0xFF; //
                     c = baBuffer[offs + nDelta];
                     Debug.Assert(c >= 0, "");
                     nDelta++;
@@ -1359,7 +1359,7 @@ namespace DigitalPlatform.Z3950
                 }
 
             // 有问题？
-            if (i < this.m_baData.Length)   // 2007/7/16 new add
+            if (i < this.m_baData.Length)   // 2007/7/16
             {
                 for (j = 0; j < nLastused; j++)
                 {

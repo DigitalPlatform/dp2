@@ -119,7 +119,7 @@ namespace DigitalPlatform.OPAC.Server
         }
 
         // 在未指定语言的情况下获得全部数据库名
-        // 2009/6/17 new add
+        // 2009/6/17
         public List<string> GetAllNames()
         {
             List<string> results = new List<string>();
@@ -592,7 +592,7 @@ namespace DigitalPlatform.OPAC.Server
         // 从特定的数据库中, 匹配出满足特定风格列表的from列表
         // parameters:
         //      strFromStyle    from style的列表, 以逗号分割。
-        //                      如果为空，表示全部途径(2007/9/13 new add)
+        //                      如果为空，表示全部途径(2007/9/13)
         // return:
         //      null    没有找到
         //      以逗号分割的from名列表

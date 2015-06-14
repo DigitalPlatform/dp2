@@ -677,7 +677,7 @@ namespace DigitalPlatform.rms
                     if (nRet == -1)
                         return -1;
 
-                    // 2007/1/23 new add
+                    // 2007/1/23
                     if (OutputStrings != null)
                     {
                         for (int j = 0; j < OutputStrings.Count; j++)
@@ -1634,7 +1634,7 @@ namespace DigitalPlatform.rms
                 }
                 else if (strOneStyleLower == "distribute_refids")
                 {
-                    // 2008/10/22 new add
+                    // 2008/10/22
 
                     List<string> results = new List<string>();
                     

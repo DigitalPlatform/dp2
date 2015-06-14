@@ -58,7 +58,7 @@ namespace dp2Circulation
         /// <summary>
         /// 是否为新创建的册记录设置“加工中”状态
         /// </summary>
-        public bool SetProcessingState = true;   // 是否为新创建的册记录设置“加工中”状态 2009/10/19 new add
+        public bool SetProcessingState = true;   // 是否为新创建的册记录设置“加工中”状态 2009/10/19
         /// <summary>
         /// 是否为新创建的册记录创建索取号
         /// </summary>
@@ -231,7 +231,7 @@ namespace dp2Circulation
         {
             this.ListView.Items.Clear();
 
-            // 2009/2/10 new add
+            // 2009/2/10
             this.SortColumns.Clear();
             SortColumns.ClearColumnSortDisplay(this.ListView.Columns);
 
@@ -506,8 +506,8 @@ namespace dp2Circulation
 
             OrderDesignForm dlg = new OrderDesignForm();
             dlg.MainForm = this.MainForm;
-            dlg.SeriesMode = this.SeriesMode;   // 2008/12/24 new add
-            dlg.BiblioDbName = Global.GetDbName(this.BiblioRecPath);    // 2009/2/15 new add
+            dlg.SeriesMode = this.SeriesMode;   // 2008/12/24
+            dlg.BiblioDbName = Global.GetDbName(this.BiblioRecPath);    // 2009/2/15
             dlg.CheckDupItem = true;
 
             // TODO: 从缺省工作单中获得批次号? 只能直接在缺省工作单中修改?
@@ -701,7 +701,7 @@ namespace dp2Circulation
                     orderitem.Class = design_item.Class;
                     bChanged = true;
                 }
-                // 2009/2/13 new add
+                // 2009/2/13
                 string strAddressXml = design_item.SellerAddressXml;
                 if (String.IsNullOrEmpty(strAddressXml) == false)
                 {
@@ -723,7 +723,7 @@ namespace dp2Circulation
                     }
                 }
 
-                // 2009/11/9 new add
+                // 2009/11/9
                 try
                 {
                     if (orderitem.TotalPrice != design_item.TotalPrice)
@@ -758,7 +758,7 @@ namespace dp2Circulation
             }
 
             // 标记删除某些元素
-            // 2008/12/24 new add
+            // 2008/12/24
             for (int i = 0; i < save_orderitems.Count; i++)
             {
                 OrderItem order_item = save_orderitems[i];
@@ -896,7 +896,7 @@ namespace dp2Circulation
         }
 
         // 根据出版时间，匹配“时间范围”符合的订购记录
-        // 2008/12/24 new add
+        // 2008/12/24
         // parameters:
         //      strPublishTime  出版时间，8字符。如果为"*"，表示统配任意出版时间均可
         internal int GetOrderInfoByPublishTime(string strPublishTime,
@@ -1017,7 +1017,7 @@ namespace dp2Circulation
 
             OrderArriveForm dlg = new OrderArriveForm();
             dlg.MainForm = this.MainForm;
-            dlg.BiblioDbName = Global.GetDbName(this.BiblioRecPath);    // 2009/2/15 new add
+            dlg.BiblioDbName = Global.GetDbName(this.BiblioRecPath);    // 2009/2/15
             dlg.Text = "验收 -- 批次号:"+this.AcceptBatchNo+" -- 源:" + this.BiblioRecPath + ", 目标:" + this.TargetRecPath;
             dlg.TargetRecPath = this.TargetRecPath;
             dlg.ClearAllItems();
@@ -1142,22 +1142,22 @@ namespace dp2Circulation
 
                 orderitem.Parent = Global.GetRecordID(this.BiblioRecPath);
 
-                orderitem.CatalogNo = design_item.CatalogNo;    // 2008/8/31 new add
+                orderitem.CatalogNo = design_item.CatalogNo;    // 2008/8/31
                 orderitem.Seller = design_item.Seller;
 
                 orderitem.Source = OrderDesignControl.LinkOldNewValue(design_item.OldSource, design_item.Source);
 
-                orderitem.Range = design_item.RangeString;  // 2008/12/17 new add
-                orderitem.IssueCount = design_item.IssueCountString;    // 2008/12/17 new add
+                orderitem.Range = design_item.RangeString;  // 2008/12/17
+                orderitem.IssueCount = design_item.IssueCountString;    // 2008/12/17
 
                 orderitem.Copy = OrderDesignControl.LinkOldNewValue(design_item.OldCopyString, design_item.CopyString);
 
                 orderitem.Price = OrderDesignControl.LinkOldNewValue(design_item.OldPrice, design_item.Price);
 
                 orderitem.Distribute = design_item.Distribute;
-                orderitem.Class = design_item.Class;    // 2008/8/31 new add
+                orderitem.Class = design_item.Class;    // 2008/8/31
 
-                // 2009/2/13 new add
+                // 2009/2/13
                 string strAddressXml = design_item.SellerAddressXml;
                 if (String.IsNullOrEmpty(strAddressXml) == false)
                 {
@@ -1419,7 +1419,7 @@ namespace dp2Circulation
                         XmlDocument dom = new XmlDocument();
                         dom.LoadXml("<root />");
 
-                        // 2009/10/19 new add
+                        // 2009/10/19
                         // 状态
                         if (this.SetProcessingState == true)
                         {
@@ -1521,7 +1521,7 @@ namespace dp2Circulation
                     return -1;
                 }
 
-                // 2009/11/8 new add
+                // 2009/11/8
                 strTargetRecPath = data_container.TargetRecPath;
 
                 for (int i = 0; i < data_container.DataList.Count; i++)
@@ -1694,7 +1694,7 @@ namespace dp2Circulation
 
             OrderEditForm edit = new OrderEditForm();
 
-            edit.BiblioDbName = Global.GetDbName(this.BiblioRecPath);   // 2009/2/15 new add
+            edit.BiblioDbName = Global.GetDbName(this.BiblioRecPath);   // 2009/2/15
             edit.Text = "新增订购事项";
             edit.MainForm = this.MainForm;
             nRet = edit.InitialForEdit(orderitem,
@@ -2175,7 +2175,7 @@ namespace dp2Circulation
 
             OrderEditForm edit = new OrderEditForm();
 
-            edit.BiblioDbName = Global.GetDbName(this.BiblioRecPath);   // 2009/2/15 new add
+            edit.BiblioDbName = Global.GetDbName(this.BiblioRecPath);   // 2009/2/15
             edit.MainForm = this.MainForm;
             edit.ItemControl = this;
             string strError = "";
@@ -2354,7 +2354,7 @@ namespace dp2Circulation
         //      1   保存成功
         public int DoSaveOrders()
         {
-            // 2008/9/17 new add
+            // 2008/9/17
             if (this.Items == null)
                 return 0;
 
@@ -2487,7 +2487,7 @@ namespace dp2Circulation
                     orderitem.RefreshListView();
                 }
 
-                info.RefID = orderitem.RefID;  // 2008/2/17 new add
+                info.RefID = orderitem.RefID;  // 2008/2/17
 
                 string strXml = "";
                 nRet = orderitem.BuildRecord(out strXml,
@@ -2905,7 +2905,7 @@ namespace dp2Circulation
                 return "编号为 '" + strIndex + "' 的事项";
             if (String.IsNullOrEmpty(strRecPath) == false)
                 return "记录路径为 '" + strRecPath + "' 的事项";
-            // 2009/10/27 new add
+            // 2009/10/27
             if (String.IsNullOrEmpty(strRefID) == false)
                 return "参考ID为 '" + strRefID + "' 的事项";
 
@@ -2928,7 +2928,7 @@ namespace dp2Circulation
                 return "记录路径为 '" + strRecPath + "' 的事项";
 
             string strRefID = bookitem.RefID;
-            // 2008/6/24 new add
+            // 2008/6/24
             if (String.IsNullOrEmpty(strRefID) == false)
                 return "参考ID为 '" + strRefID + "' 的事项";
 
@@ -3677,7 +3677,7 @@ namespace dp2Circulation
         }
 
 #if NO
-        // 2009/11/23 new add
+        // 2009/11/23
         // 根据订购记录路径 检索出 书目记录 和全部下属订购记录，装入窗口
         // parameters:
         // return:
@@ -3852,7 +3852,7 @@ namespace dp2Circulation
     /// </summary>
     public class GenerateEntityEventArgs : EventArgs
     {
-        // 2009/11/5 new add
+        // 2009/11/5
         /// <summary>
         /// [in] 书目记录。一般用来传递外源书目数据。如果为空，表示直接利用源或者目标的书目记录
         /// </summary>
@@ -3893,7 +3893,7 @@ namespace dp2Circulation
         /// </summary>
         public string ErrorInfo = "";   // [out] 如果为非空，表示执行过程出错，这里是出错信息
 
-        // 2009/11/8 new add
+        // 2009/11/8
         /// <summary>
         /// [out] 返回新创建的、或者直接利用的目标记录路径
         /// </summary>
@@ -3949,7 +3949,7 @@ namespace dp2Circulation
     /// </summary>
     public class PrepareAcceptEventArgs : EventArgs
     {
-        // 2009/11/8 new add
+        // 2009/11/8
         /// <summary>
         /// [in] 外源记录的路径
         /// </summary>
@@ -3991,7 +3991,7 @@ namespace dp2Circulation
         /// <summary>
         /// [out] 是否为新创建的册记录设置“加工中”状态
         /// </summary>
-        public bool SetProcessingState = true;    // 是否为新创建的册记录设置“加工中”状态 2009/10/19 new add
+        public bool SetProcessingState = true;    // 是否为新创建的册记录设置“加工中”状态 2009/10/19
 
         // 
         /// <summary>

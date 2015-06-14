@@ -43,15 +43,15 @@ namespace DigitalPlatform.LibraryServer
                 "dateOfBirth",
                 "idCardNumber",
                 "department",
-                "post", // 2009/7/17 new add
+                "post", // 2009/7/17 
                 "address",
                 "tel",
                 "email",
                 "comment",
                 "zhengyuan",
                 "hire",
-                "cardNumber",   // 借书证号。为和原来的(100$b)兼容，也为了将来放RFID卡号 2008/10/14 new add
-                "foregift", // 押金。2008/11/11 new add
+                "cardNumber",   // 借书证号。为和原来的(100$b)兼容，也为了将来放RFID卡号 2008/10/14 
+                "foregift", // 押金。2008/11/11 
                 "displayName",  // 显示名
                 "preference",   // 个性化参数
                 "outofReservations",    // 预约未取参数
@@ -265,14 +265,14 @@ namespace DigitalPlatform.LibraryServer
                 "dateOfBirth",
                 "idCardNumber",
                 "department",
-                "post", // 2009/7/17 new add
+                "post", // 2009/7/17 
                 "address",
                 "tel",
                 "email",
                 "comment",
                 "zhengyuan",
                 "hire",
-                "cardNumber",   // 借书证号。为和原来的(100$b)兼容，也为了将来放RFID卡号  2008/10/14 new add
+                "cardNumber",   // 借书证号。为和原来的(100$b)兼容，也为了将来放RFID卡号  2008/10/14 
             };
                 */
                 RenameBirthday(domExist);
@@ -373,7 +373,7 @@ namespace DigitalPlatform.LibraryServer
             }
             else if (strAction == "changeforegift")
             {
-                // 2008/11/11 new add
+                // 2008/11/11 
                 string[] element_names_onlyforegift = new string[] {
                     "foregift",
                     "comment",
@@ -421,8 +421,8 @@ namespace DigitalPlatform.LibraryServer
                 "reservations",
                 "borrowHistory",
                 "outofReservations",
-                "hire", // 2008/11/11 new add
-                "foregift", // 2008/11/11 new add
+                "hire", // 2008/11/11 
+                "foregift", // 2008/11/11 
             };
 
             // TODO: 需要测试本函数，看看<hire>元素的属性值真能去掉么?
@@ -666,7 +666,7 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
 
-            // 2007/11/12 new add
+            // 2007/11/12 
             if (strAction == "new")
             {
                 if (String.IsNullOrEmpty(strOldXml) == false)
@@ -771,7 +771,6 @@ namespace DigitalPlatform.LibraryServer
             if (nRet == 1)
                 bBarcodeChanged = true;
 
-
             string strOldDisplayName = "";
             string strNewDisplayName = "";
 
@@ -830,6 +829,24 @@ namespace DigitalPlatform.LibraryServer
                         result.Value = -1;
                         result.ErrorInfo = strError + "证条码号不能为空。保存操作失败";
                         result.ErrorCode = ErrorCode.InvalidReaderBarcode;
+                        return result;
+                    }
+                }
+
+                if (strAction == "new"
+        || strAction == "change"
+        || strAction == "move")
+                {
+                    nRet = this.DoVerifyReaderFunction(
+                        sessioninfo,
+                        strAction,
+                        domNewRec,
+                        out strError);
+                    if (nRet != 0)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = strError;
+                        result.ErrorCode = ErrorCode.SystemError;
                         return result;
                     }
                 }
@@ -999,7 +1016,6 @@ namespace DigitalPlatform.LibraryServer
                             goto ERROR1;
                         }
 
-
                         if (nResultValue == 1)
                         {
                             // TODO: 需要多语种
@@ -1009,7 +1025,6 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                 SKIP_VERIFY:
-
                     List<string> aPath = null;
 
                     // 防止和其他读者的显示名相重复
@@ -1109,7 +1124,6 @@ namespace DigitalPlatform.LibraryServer
                     goto ERROR1;
                 }
 
-
                 // 兑现一个命令
                 if (strAction == "new")
                 {
@@ -1172,7 +1186,7 @@ namespace DigitalPlatform.LibraryServer
                     }
                     else
                     {
-                        // 2008/5/29 new add
+                        // 2008/5/29 
                         strSavedXml = domNewRec.OuterXml;
                     }
 
@@ -1302,8 +1316,6 @@ strLibraryCode);    // 读者所在的馆代码
                     }
 
                     strSavedRecPath = strRecPath;   // 保存过程不会改变记录路径
-
-
                 }
                 else if (strAction == "delete")
                 {
@@ -1347,8 +1359,6 @@ strLibraryCode);    // 读者所在的馆代码
                         result.ErrorCode = ErrorCode.ReaderBarcodeNotFound;
                         return result;
                     }
-
-
                 }
                 else
                 {
@@ -1356,7 +1366,6 @@ strLibraryCode);    // 读者所在的馆代码
                     strError = "不支持的操作命令 '" + strAction + "'";
                     goto ERROR1;
                 }
-
 
                 // 写入日志
                 if (domOperLog != null)
@@ -1637,7 +1646,7 @@ strLibraryCode);    // 读者所在的馆代码
                     aPath.CopyTo(pathlist);
                      * */
 
-                    // 2007/11/22 new add
+                    // 2007/11/22 
                     // 在删除操作中，遇到重复的是很平常的事情。只要
                     // strRecPath能够清晰地指出要删除的那一条，就可以执行删除
                     if (String.IsNullOrEmpty(strRecPath) == false)
@@ -1759,7 +1768,7 @@ strLibraryCode);    // 读者所在的馆代码
             nRet = ByteArray.Compare(baOldTimestamp, exist_timestamp);
             if (nRet != 0)
             {
-                // 2008/5/29 new add
+                // 2008/5/29 
                 if (bForce == true)
                 {
                     strError = "数据库中即将删除的读者记录已经发生了变化，请重新装载、仔细核对后再行删除。";
@@ -1817,7 +1826,7 @@ strLibraryCode);    // 读者所在的馆代码
                 out strError);
             if (lRet == -1)
             {
-                // 2009/7/17 new add
+                // 2009/7/17 
                 if (channel.ErrorCode == ChannelErrorCode.NotFound)
                 {
                     strError = "证条码号为 '" + strOldBarcode + "' 的读者记录(在删除的时候发现)已不存在";
@@ -1978,7 +1987,7 @@ strLibraryCode);    // 读者所在的馆代码
             string strOldBarcode = "";
             string strNewBarcode = "";
 
-            if (bExist == true) // 2008/5/29 new add
+            if (bExist == true) // 2008/5/29 
             {
 
                 // 比较新旧记录的条码号是否有改变
@@ -2006,7 +2015,7 @@ strLibraryCode);    // 读者所在的馆代码
                     bDetectCiculationInfo = true;
 
                     if (bHasCirculationInfo == true
-                        && bForce == false) // 2008/5/28 new add
+                        && bForce == false) // 2008/5/28 
                     {
                         // TODO: 可否增加允许同时修改所关联的已借阅册记录修改能力?
                         // 值得注意的是如何记录进操作日志，将来如何进行recover的问题
@@ -2025,7 +2034,7 @@ strLibraryCode);    // 读者所在的馆代码
                 if (strNewBarcode != strOldBarcode)
                     this.ClearLoginCache(strNewBarcode);
 
-                // 2009/1/23 new add
+                // 2009/1/23 
 
                 // 比较新旧记录的状态是否有改变，如果从其他状态修改为“注销”状态，则应引起注意，后面要进行必要的检查
 
@@ -2076,7 +2085,7 @@ strLibraryCode);    // 读者所在的馆代码
             {
                 if (bForce == true)
                 {
-                    // 2008/5/29 new add
+                    // 2008/5/29 
                     // 在强制修改模式下，时间戳不一致意义重大，直接返回出错，而不进行要害字段的比对判断
                     strError = "保存操作发生错误: 数据库中的原记录 (路径为'" + strRecPath + "') 已发生过修改";
                     errorcode = DigitalPlatform.rms.Client.rmsws_localhost.ErrorCodeValue.TimestampMismatch;
@@ -2134,7 +2143,7 @@ strLibraryCode);    // 读者所在的馆代码
             }
             else
             {
-                // 2008/5/29 new add
+                // 2008/5/29 
                 strNewXml = domNewRec.OuterXml;
             }
 
@@ -2523,7 +2532,7 @@ strLibraryCode);    // 读者所在的馆代码
                     //      -1  数据格式错误
                     //      0   没有发现超期
                     //      1   发现超期   strError中有提示信息
-                    //      2   已经在宽限期内，很容易超期 2009/3/13 new add
+                    //      2   已经在宽限期内，很容易超期 2009/3/13 
                     nRet = this.CheckPeriod(
                         calendar,
                         strBorrowDate,
@@ -2820,7 +2829,7 @@ strLibraryCode);    // 读者所在的馆代码
             }
 
             string strError = "";
-            // 2007/12/2 new add
+            // 2007/12/2 
             if (String.IsNullOrEmpty(strBarcode) == true)
             {
                 strError = "strBarcode参数值不能为空";
@@ -2895,7 +2904,7 @@ strLibraryCode);    // 读者所在的馆代码
                 {
                     string strReaderRecPath = strBarcode.Substring(strLeadPath.Length);
 
-                    // 2008/6/20 new add
+                    // 2008/6/20 
                     // 继续分离出(方向)命令部分
                     string strCommand = "";
                     nRet = strReaderRecPath.IndexOf("$");
@@ -3345,7 +3354,7 @@ out strError);
             {
                 string strResultType = result_types[i];
 
-                // 2008/4/3 new add
+                // 2008/4/3 
                 // if (String.Compare(strResultType, "calendar", true) == 0)
                 if (IsResultType(strResultType, "calendar") == true)
                 {
@@ -3441,7 +3450,7 @@ out strError);
                 // else if (String.Compare(strResultType, "advancexml", true) == 0)
                 else if (IsResultType(strResultType, "advancexml") == true)
                 {
-                    // 2008/4/3 new add
+                    // 2008/4/3 
                     string strOutputXml = "";
                     nRet = this.GetAdvanceReaderXml(
                         sessioninfo,
@@ -3469,7 +3478,7 @@ out strError);
                         this.CfgDir + "\\readerxml2html.cs.ref",
                         strLibraryCode,
                         strXml,
-                        strOutputPath,  // 2009/10/18 new add
+                        strOutputPath,  // 2009/10/18 
                         OperType.None,
                         null,
                         "",
@@ -3495,7 +3504,7 @@ out strError);
                         this.CfgDir + "\\readerxml2text.cs.ref",
                         strLibraryCode,
                         strXml,
-                        strOutputPath,  // 2009/10/18 new add
+                        strOutputPath,  // 2009/10/18 
                         OperType.None,
                         null,
                         "",
@@ -3756,7 +3765,7 @@ out strError);
 
                 if (strTargetRecId == "?" || String.IsNullOrEmpty(strTargetRecId) == true)
                 {
-                    // 2009/11/1 new add
+                    // 2009/11/1 
                     if (String.IsNullOrEmpty(strTargetRecId) == true)
                         strTargetRecPath += "/?";
 

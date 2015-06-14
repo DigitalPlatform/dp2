@@ -71,7 +71,7 @@ namespace dp2Circulation
             if (strDefaultValue != null)
                 dlg.textBox_lines.Text = strDefaultValue;
 
-            dlg.StartPosition = FormStartPosition.CenterScreen; // 2008/10/17 new add
+            dlg.StartPosition = FormStartPosition.CenterScreen; // 2008/10/17
             dlg.ShowDialog(owner);
 
             if (dlg.DialogResult != DialogResult.OK)

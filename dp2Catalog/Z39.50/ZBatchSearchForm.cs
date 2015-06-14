@@ -122,7 +122,7 @@ namespace dp2Catalog
                 MessageBox.Show(this, strError);
 
             this.zTargetControl1.Marc8Encoding = this.m_mainForm.Marc8Encoding;
-            this.zTargetControl1.MainForm = this.m_mainForm;  // 2007/12/16 new add
+            this.zTargetControl1.MainForm = this.m_mainForm;  // 2007/12/16
 
             // 选定上次选定的树节点
             string strLastTargetPath = m_mainForm.AppInfo.GetString(

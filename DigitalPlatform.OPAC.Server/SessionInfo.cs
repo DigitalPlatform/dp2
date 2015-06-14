@@ -874,7 +874,7 @@ namespace DigitalPlatform.OPAC.Server
 
         // 检索出册数据
         // 带有偏移量的版本
-        // 2009/6/9 new add
+        // 2009/6/9 
         // return:
         //      -2  实体库没有定义
         //      -1  出错
@@ -1000,7 +1000,7 @@ namespace DigitalPlatform.OPAC.Server
             string strBiblioRecId = ResPath.GetRecordId(strBiblioRecPath);
 
             string strQueryXml = "<target list='"
-                + StringUtil.GetXmlStringSimple(strCommentDbName + ":" + "父记录")       // 2007/9/14 new add
+                + StringUtil.GetXmlStringSimple(strCommentDbName + ":" + "父记录")       // 2007/9/14 
                 + "'><item><order>DESC</order><word>"
                 + strBiblioRecId
                 + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang></target>";

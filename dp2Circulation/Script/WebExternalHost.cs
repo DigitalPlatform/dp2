@@ -169,11 +169,11 @@ namespace dp2Circulation
 
 #if SINGLE_CHANNEL
 
-            // 2008/5/11 new add
+            // 2008/5/11 
             if (this.Channel != null)
             {
                 this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
-                this.IsInLoop = false;  // 2008/10/29 new add
+                this.IsInLoop = false;  // 2008/10/29 
                 // this.Channel.Abort();
                 this.Channel.Close();   // 2012/3/28
                 this.Channel = null;
@@ -197,13 +197,13 @@ namespace dp2Circulation
         /// </summary>
         public void Stop()
         {
-            // this.IsInLoop = false;  // 2008/10/29 new add
+            // this.IsInLoop = false;  // 2008/10/29 
 
             this.Clear();
 
 #if SINGLE_CHANNEL
 
-            // 2008/5/11 new add
+            // 2008/5/11 
             if (this.Channel != null)
             {
                 if (this.Channel.IsInSearching > 0)

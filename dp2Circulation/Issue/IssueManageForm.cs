@@ -69,7 +69,7 @@ namespace dp2Circulation
             this.issueManageControl1.GenerateEntity += new GenerateEntityEventHandler(issueManageControl1_GenerateEntity);
              * */
 
-            this.issueManageControl1.Sort();    // ≈≈–Ú 2009/2/8 new add
+            this.issueManageControl1.Sort();    // ≈≈–Ú 2009/2/8
         }
 
         void issueManageControl1_GetValueTable(object sender, DigitalPlatform.GetValueTableEventArgs e)

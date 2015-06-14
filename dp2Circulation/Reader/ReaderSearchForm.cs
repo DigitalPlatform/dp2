@@ -405,7 +405,7 @@ namespace dp2Circulation
         }
 
         // 是否以推动的方式装入浏览列表
-        // 2008/1/20 new add
+        // 2008/1/20 
         /// <summary>
         /// 是否以推动的方式装入浏览列表
         /// </summary>
@@ -424,7 +424,7 @@ namespace dp2Circulation
         {
             string strText = this.comboBox_matchStyle.Text;
 
-            // 2009/8/6 new add
+            // 2009/8/6 
             if (strText == "空值")
                 return "null";
 
@@ -1149,7 +1149,7 @@ out strError);
 
             this.comboBox_readerDbName.Items.Add("<全部>");
 
-            if (this.MainForm.ReaderDbNames != null)    // 2009/3/29 new add
+            if (this.MainForm.ReaderDbNames != null)    // 2009/3/29 
             {
                 for (int i = 0; i < this.MainForm.ReaderDbNames.Length; i++)
                 {
@@ -3376,7 +3376,7 @@ MessageBoxDefaultButton.Button1);
 
         #region 指纹缓存相关功能
 
-        Label m_labelPrompt = null;
+        System.Windows.Forms.Label m_labelPrompt = null;
 
         // 整个窗口出现一个大的提示
         // parameters:

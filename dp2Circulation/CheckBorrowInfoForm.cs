@@ -339,10 +339,10 @@ namespace dp2Circulation
                             strReaderBarcode,
                             "",
                             "",
-                            nStart,   // 2008/10/27 new add
-                            nPerCount,   // 2008/10/27 new add
-                            out nProcessedBorrowItems,   // 2008/10/27 new add
-                            out nTotalBorrowItems,   // 2008/10/27 new add
+                            nStart,   // 2008/10/27 
+                            nPerCount,   // 2008/10/27 
+                            out nProcessedBorrowItems,   // 2008/10/27 
+                            out nTotalBorrowItems,   // 2008/10/27 
                             out strOutputReaderBarcode,
                             out aDupPath,
                             out strError);
@@ -792,8 +792,8 @@ namespace dp2Circulation
                         "",
                         0,
                         -1,
-                        out nProcessedBorrowItems,   // 2008/10/27 new add
-                        out nTotalBorrowItems,   // 2008/10/27 new add
+                        out nProcessedBorrowItems,   // 2008/10/27 
+                        out nTotalBorrowItems,   // 2008/10/27 
                         out strOutputReaderBarcode,
                         out aDupPath,
                         out strError);
@@ -821,8 +821,8 @@ namespace dp2Circulation
                                     aDupPath[j],
                         0,
                         -1,
-                        out nProcessedBorrowItems,   // 2008/10/27 new add
-                        out nTotalBorrowItems,   // 2008/10/27 new add
+                        out nProcessedBorrowItems,   // 2008/10/27 
+                        out nTotalBorrowItems,   // 2008/10/27 
                                     out strOutputReaderBarcode,
                                     out aDupPathTemp,
                                     out strError);
@@ -970,8 +970,8 @@ namespace dp2Circulation
                         strConfirmItemRecPath,
                         0,
                         -1,
-                        out nProcessedBorrowItems,   // 2008/10/27 new add
-                        out nTotalBorrowItems,   // 2008/10/27 new add
+                        out nProcessedBorrowItems,   // 2008/10/27 
+                        out nTotalBorrowItems,   // 2008/10/27 
                         out strOutputReaderBarcode,
                         out aDupPath,
                         out strError);
@@ -1268,9 +1268,9 @@ namespace dp2Circulation
                     EntityInfo[] entities = new EntityInfo[1];
                     EntityInfo info = new EntityInfo();
 
-                    info.RefID = Guid.NewGuid().ToString(); // 2008/4/14 new add
+                    info.RefID = Guid.NewGuid().ToString(); // 2008/4/14 
                     info.Action = "change";
-                    info.OldRecPath = strItemRecPath;    // 2007/6/2 new add
+                    info.OldRecPath = strItemRecPath;    // 2007/6/2 
                     info.NewRecPath = strItemRecPath;
 
                     info.NewRecord = itemdom.OuterXml;
@@ -1504,8 +1504,8 @@ namespace dp2Circulation
                         "",
                         0,
                         -1,
-                        out nProcessedBorrowItems,   // 2008/10/27 new add
-                        out nTotalBorrowItems,   // 2008/10/27 new add
+                        out nProcessedBorrowItems,   // 2008/10/27 
+                        out nTotalBorrowItems,   // 2008/10/27 
                         out strOutputReaderBarcode,
                         out aDupPath,
                         out strError);
@@ -1530,8 +1530,8 @@ namespace dp2Circulation
                                     aDupPath[j],
                         0,
                         -1,
-                        out nProcessedBorrowItems,   // 2008/10/27 new add
-                        out nTotalBorrowItems,   // 2008/10/27 new add
+                        out nProcessedBorrowItems,   // 2008/10/27 
+                        out nTotalBorrowItems,   // 2008/10/27 
                                     out strOutputReaderBarcode,
                                     out aDupPathTemp,
                                     out strError);

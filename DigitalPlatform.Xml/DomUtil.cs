@@ -349,11 +349,11 @@ namespace DigitalPlatform.Xml
         // 注意，strValue不能为空，本函数无法解释缺省值
         public static bool IsBooleanTrue(string strValue)
         {
-            // 2008/6/4 new add
+            // 2008/6/4
             if (String.IsNullOrEmpty(strValue) == true)
                 throw new Exception("DomUtil.IsBoolean() 不能接受空字符串参数");
 
-            strValue = strValue.ToLower();  // 2008/6/4 new add
+            strValue = strValue.ToLower();  // 2008/6/4
 
             if (strValue == "yes" || strValue == "on"
                     || strValue == "1" || strValue == "true")
@@ -1457,7 +1457,7 @@ namespace DigitalPlatform.Xml
             return nodeFound;
         }
 
-        // 2009/10/31 new add
+        // 2009/10/31
         // 写入一个元素的OuterXml
         // return:
         //      返回变动后该元素的XmlNode
@@ -1566,7 +1566,7 @@ namespace DigitalPlatform.Xml
                 return nodeText.Value;
         }
 
-        // 删除一个元素 2006/10/26 new add
+        // 删除一个元素 2006/10/26
         // return:
         //      返回被删除掉的XmlNode
         public static XmlNode DeleteElement(XmlNode nodeRoot,
@@ -1585,7 +1585,7 @@ namespace DigitalPlatform.Xml
             return nodeFound.ParentNode.RemoveChild(nodeFound);
         }
 
-        // 删除若干个元素 2011/1/11 new add
+        // 删除若干个元素 2011/1/11
         // return:
         //      返回被删除掉的XmlNode数组
         public static List<XmlNode> DeleteElements(XmlNode nodeRoot,
@@ -1704,7 +1704,7 @@ namespace DigitalPlatform.Xml
             XmlNode nodeFound = nodeRoot.SelectSingleNode(strXpath);
 
             /*
-            // 2007/6/19 new add
+            // 2007/6/19
             if (nodeFound == null && strText == null)
             {
                 // 正好不存在，也不必删除了
@@ -1747,7 +1747,7 @@ namespace DigitalPlatform.Xml
             XmlNode nodeFound = nodeRoot.SelectSingleNode(strXpath);
 
             /*
-            // 2007/6/19 new add
+            // 2007/6/19
             if (nodeFound == null && strText == null)
             {
                 // 正好不存在，也不必删除了
@@ -1769,7 +1769,7 @@ namespace DigitalPlatform.Xml
             /*
             if (strText == null)
             {
-                // 2007/6/19 new add
+                // 2007/6/19
                 nodeFound.ParentNode.RemoveChild(nodeFound);
             }
             else

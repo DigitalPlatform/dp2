@@ -887,7 +887,7 @@ namespace dp2Catalog
                 // Marc syntax OID
                 this.textBox_originMarcSyntaxOID.Text = this.m_currentRecord.m_strSyntaxOID;
 
-                // 让确定的OID起作用 2008/3/25 new add
+                // 让确定的OID起作用 2008/3/25
                 if (String.IsNullOrEmpty(this.m_currentRecord.m_strSyntaxOID) == false)
                     this.AutoDetectedMarcSyntaxOID = "";
             }
@@ -1060,7 +1060,7 @@ namespace dp2Catalog
                 }
 
 #if NO
-                // 让确定的OID起作用 2008/3/25 new add
+                // 让确定的OID起作用 2008/3/25
                 if (String.IsNullOrEmpty(this.m_currentRecord.m_strSyntaxOID) == false)
                     this.AutoDetectedMarcSyntaxOID = "";
 #endif
@@ -1218,7 +1218,7 @@ namespace dp2Catalog
                 // Marc syntax OID
                 this.textBox_originMarcSyntaxOID.Text = this.m_currentRecord.m_strSyntaxOID;
 
-                // 让确定的OID起作用 2008/3/25 new add
+                // 让确定的OID起作用 2008/3/25
                 if (String.IsNullOrEmpty(this.m_currentRecord.m_strSyntaxOID) == false)
                     this.AutoDetectedMarcSyntaxOID = "";
             }
@@ -1678,7 +1678,7 @@ namespace dp2Catalog
                     }
 
 #if NO
-                    // 让确定的OID起作用 2008/3/25 new add
+                    // 让确定的OID起作用 2008/3/25
                     if (String.IsNullOrEmpty(this.m_currentRecord.m_strSyntaxOID) == false)
                         this.AutoDetectedMarcSyntaxOID = "";
 #endif
@@ -2281,7 +2281,7 @@ namespace dp2Catalog
 
                 strMarcSyntaxOID = this.m_currentRecord.m_strSyntaxOID;
 
-                // 2008/1/8 new add
+                // 2008/1/8
                 if (strMarcSyntaxOID == "1.2.840.10003.5.109.10")
                     strMarcSyntaxOID = "1.2.840.10003.5.10";    // MARCXML当作USMARC处理
             }
@@ -2688,7 +2688,7 @@ namespace dp2Catalog
                 return 0;
 
             // 储存用过的文件名
-            // 2009/9/21 new add
+            // 2009/9/21
             this.MainForm.LinkedMarcFileName = dlg.FileName;
             this.MainForm.LinkedEncodingName = dlg.EncodingName;
             this.MainForm.LinkedMarcSyntax = dlg.MarcSyntax;
@@ -2760,7 +2760,7 @@ namespace dp2Catalog
 
             string strMarcSyntax = this.linkMarcFile.MarcSyntax.ToLower();
 
-            // 2009/9/21 new add
+            // 2009/9/21
             if (strMarcSyntax == "unimarc")
                 this.AutoDetectedMarcSyntaxOID = "1.2.840.10003.5.1";   // UNIMARC
             else if (strMarcSyntax == "usmarc")
@@ -3836,7 +3836,7 @@ out strError1);
             dp2SearchForm dp2_searchform = null;
 
             if (this.LinkedSearchForm != null
-                && this.LinkedSearchForm.IsValid() == true   // 2008/3/17 new add
+                && this.LinkedSearchForm.IsValid() == true   // 2008/3/17
                 && this.LinkedSearchForm is dp2SearchForm)
             {
                 dp2_searchform = (dp2SearchForm)this.LinkedSearchForm;
@@ -3856,7 +3856,7 @@ out strError1);
                     dp2_searchform.WindowState = FormWindowState.Minimized;
                     dp2_searchform.Show();
 
-                    // 2008/3/17 new add
+                    // 2008/3/17
                     this.WindowState = old_state;
                     this.Activate();
 
@@ -3873,7 +3873,7 @@ out strError1);
             AmazonSearchForm searchform = null;
 
             if (this.LinkedSearchForm != null
-                && this.LinkedSearchForm.IsValid() == true   // 2008/3/17 new add
+                && this.LinkedSearchForm.IsValid() == true   // 2008/3/17
                 && this.LinkedSearchForm is AmazonSearchForm)
             {
                 searchform = (AmazonSearchForm)this.LinkedSearchForm;
@@ -3893,7 +3893,7 @@ out strError1);
                     searchform.WindowState = FormWindowState.Minimized;
                     searchform.Show();
 
-                    // 2008/3/17 new add
+                    // 2008/3/17
                     this.WindowState = old_state;
                     this.Activate();
 
@@ -5046,7 +5046,7 @@ out strError1);
             if (nRet == -1)
                 return -1;
 
-            // 2007/12/4 new add
+            // 2007/12/4
             ScriptManager.RemoveRefsBinDirMacro(ref saRef);
 
             string[] saAddRef = {
@@ -7282,7 +7282,7 @@ Keys keyData)
             if (nRet == -1)
                 return -1;
 
-            // 2007/12/4 new add
+            // 2007/12/4
             ScriptManager.RemoveRefsBinDirMacro(ref saRef);
 
             string[] saAddRef = {
@@ -7359,7 +7359,7 @@ Keys keyData)
                 hostObj.Assembly = assembly;
 
                 HostEventArgs e1 = new HostEventArgs();
-                e1.e = e;   // 2009/2/24 new add
+                e1.e = e;   // 2009/2/24
 
                 hostObj.Main(sender, e1);
             }

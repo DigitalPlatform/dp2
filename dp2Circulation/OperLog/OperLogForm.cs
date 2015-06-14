@@ -319,7 +319,7 @@ namespace dp2Circulation
 
 #if NO
             this.listView_records.Items.Clear();
-            // 2008/11/22 new add
+            // 2008/11/22
             this.SortColumns.Clear();
             SortColumns.ClearColumnSortDisplay(this.listView_records.Columns);
 
@@ -3489,7 +3489,7 @@ FileShare.ReadWrite))
 #endif
 #if NO
             this.listView_records.Items.Clear();
-            // 2008/11/22 new add
+            // 2008/11/22
             this.SortColumns.Clear();
             SortColumns.ClearColumnSortDisplay(this.listView_records.Columns);
 
@@ -3856,7 +3856,7 @@ FileShare.ReadWrite))
 
 #if NO
             this.listView_records.Items.Clear();
-            // 2008/11/22 new add
+            // 2008/11/22
             this.SortColumns.Clear();
             SortColumns.ClearColumnSortDisplay(this.listView_records.Columns);
 

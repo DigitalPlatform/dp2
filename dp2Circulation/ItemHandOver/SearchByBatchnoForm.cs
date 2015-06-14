@@ -110,12 +110,12 @@ namespace dp2Circulation
             FillDropDown((ComboBox)sender);
         }
 
-        // 防止重入 2009/7/19 new add
+        // 防止重入 2009/7/19
         int m_nInDropDown = 0;
 
         void FillDropDown(ComboBox combobox)
         {
-            // 防止重入 2009/7/19 new add
+            // 防止重入 2009/7/19
             if (this.m_nInDropDown > 0)
                 return;
 

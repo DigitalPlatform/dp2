@@ -11,12 +11,12 @@ namespace DigitalPlatform.Xml
 {
 	public class BoxExpandable : Box
 	{
-		public Text m_text1 = new Text ();
+		public XmlText m_text1 = new XmlText ();
 
 		public bool bExpand = true;         // µ±Ç°×´Ì¬
 
 
-		public Text MyText
+		public XmlText MyText
 		{
 			get
 			{

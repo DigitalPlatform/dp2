@@ -29,7 +29,7 @@ namespace dp2Circulation
         /// <summary>
         /// 当前册记录的时间戳
         /// </summary>
-        public byte[] Timestamp = null; // 当前册记录的时间戳 2009/9/26 new add
+        public byte[] Timestamp = null; // 当前册记录的时间戳 2009/9/26
 
         // public WebBrowser Console = null;
 
@@ -265,7 +265,7 @@ namespace dp2Circulation
                 handle = IntPtr.Zero;
                  * */
 
-                try // 2008/11/28 new add
+                try // 2008/11/28
                 {
                     this.FreeResources();
                 }

@@ -45,7 +45,7 @@ namespace DigitalPlatform.Xml
 		//		style	初始化风格。暂未使用。
 		public override void InitialVisualSpecial(Box boxTotal)
 		{
-			Text text = new Text ();
+			XmlText text = new XmlText ();
 			text.Name = "TextOfTextItem";
 			text.container = boxTotal;
 			Debug.Assert(this.m_paraValue1 != null,"初始值不能为null");

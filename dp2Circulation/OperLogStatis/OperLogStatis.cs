@@ -174,7 +174,7 @@ namespace dp2Circulation
                 CloseHandle(handle);
                 handle = IntPtr.Zero;
                  * */
-                try // 2009/10/21 new add
+                try // 2009/10/21
                 {
                     this.FreeResources();
                 }
@@ -185,7 +185,7 @@ namespace dp2Circulation
             disposed = true;
         }
 
-        // 2009/10/21 new add
+        // 2009/10/21
         public virtual void FreeResources()
         {
         }

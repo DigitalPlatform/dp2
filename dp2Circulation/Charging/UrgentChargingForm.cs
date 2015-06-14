@@ -891,7 +891,7 @@ strUserName);
 "action",
 "return");
 
-                // 2006/12/30 new add
+                // 2006/12/30 
                 if (String.IsNullOrEmpty(strReaderBarcode) == false)
                 {
                     DomUtil.SetElementText(dom.DocumentElement,

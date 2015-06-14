@@ -1172,7 +1172,7 @@ namespace dp2Circulation
                 if (nRet == 1)
                     return 1;
 
-                // 2009/2/25 new add
+                // 2009/2/25
                 Debug.Assert(nRet == 0, "");
 
                 // 此类从来没有过记录，当前是第一条
@@ -1548,7 +1548,7 @@ namespace dp2Circulation
             return 0;
         }
 
-        // 2008/9/19 new add
+        // 2008/9/19
         // 正规化即将比较的字符串
         // 按照'.'等切割符号，从左到右逐段规范化为彼此等长
         static void CanonicalString(ref string s1, ref string s2)

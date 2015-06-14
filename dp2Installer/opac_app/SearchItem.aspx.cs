@@ -193,7 +193,7 @@ ref sessioninfo) == false)
                 this.BrowseSearchResultControl1.Visible = true;
                 this.BrowseSearchResultControl1.ResultSetName = strResultSetName;
                 this.BrowseSearchResultControl1.ResultCount = (int)lRet;
-                this.BrowseSearchResultControl1.StartIndex = 0; // 2008/12/15 new add
+                this.BrowseSearchResultControl1.StartIndex = 0; // 2008/12/15
 
                 string strFormat = this.Request["format"];
                 if (String.IsNullOrEmpty(strFormat) == false)
@@ -291,7 +291,7 @@ ref sessioninfo) == false)
             this.BrowseSearchResultControl1.Visible = true;
             this.BrowseSearchResultControl1.ResultSetName = strResultSetName;
             this.BrowseSearchResultControl1.ResultCount = (int)lRet;
-            this.BrowseSearchResultControl1.StartIndex = 0; // 2008/12/15 new add
+            this.BrowseSearchResultControl1.StartIndex = 0; // 2008/12/15
         }
         finally
         {

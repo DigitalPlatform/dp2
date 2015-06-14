@@ -568,7 +568,7 @@ namespace dp2Circulation
                     }
                     catch (Exception ex)
                     {
-                        // 2009/2/8 new add
+                        // 2009/2/8
                         strError = "在获得日期 '" + strCurrentPublishTime + "' 的后一期出版日期时发生错误: " + ex.Message;
                         return -1;
                     }

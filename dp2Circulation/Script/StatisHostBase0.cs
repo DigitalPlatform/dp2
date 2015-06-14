@@ -108,7 +108,7 @@ namespace dp2Circulation
                  * */
                 if (_freed == false)
                 {
-                    try // 2009/10/10 new add
+                    try // 2009/10/10
                     {
                         this.FreeResources();
                     }

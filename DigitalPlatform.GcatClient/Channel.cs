@@ -238,7 +238,7 @@ namespace DigitalPlatform.GcatClient
 		}
 
         // 处理登录事宜
-        // 2007/6/29 new add
+        // 2007/6/29
         int DoNotLogin(ref string strError)
         {
             if (this.BeforeLogin != null)

@@ -267,7 +267,7 @@ namespace DigitalPlatform.OPAC.Server
                 }
             }
 
-            this.ProgressFileVersion = DateTime.Now.Ticks;  // 2009/7/16 new add
+            this.ProgressFileVersion = DateTime.Now.Ticks;  // 2009/7/16
         }
 
         public virtual string DefaultName
@@ -481,7 +481,7 @@ namespace DigitalPlatform.OPAC.Server
             try
             {
                 strText = (bDisplayTime == true ? DateTime.Now.ToString() + " " : "")
-                    + HttpUtility.HtmlEncode(strText);  // 2007/10/10 new add htmlencode()
+                    + HttpUtility.HtmlEncode(strText);  // 2007/10/10 htmlencode()
                 byte[] buffer = Encoding.UTF8.GetBytes(strText);
 
                 m_stream.Write(buffer, 0, buffer.Length);

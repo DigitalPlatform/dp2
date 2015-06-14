@@ -132,7 +132,7 @@ namespace dp2Circulation
             }
             catch (FileNotFoundException)
             {
-                // 不必报错 2009/2/4 new add
+                // 不必报错 2009/2/4
             }
             catch (Exception ex)
             {
@@ -539,7 +539,7 @@ namespace dp2Circulation
                 this.objStatis = null;
                 this.AssemblyMain = null;
 
-                // 2009/11/5 new add
+                // 2009/11/5
                 // 防止以前残留的打开的文件依然没有关闭
                 Global.ForceGarbageCollection();
 
@@ -838,7 +838,7 @@ namespace dp2Circulation
 
                 StreamReader sr = null;
 
-                // 2008/4/3 new add
+                // 2008/4/3
                 Encoding encoding = FileUtil.DetectTextFileEncoding(strInputFileName);
 
                 try
@@ -1541,7 +1541,7 @@ namespace dp2Circulation
 
             this.comboBox_inputReaderDbName.Items.Add("<全部>");
 
-            if (this.MainForm.ReaderDbNames != null)    // 2009/3/29 new add
+            if (this.MainForm.ReaderDbNames != null)    // 2009/3/29
             {
                 for (int i = 0; i < this.MainForm.ReaderDbNames.Length; i++)
                 {
@@ -1860,7 +1860,7 @@ namespace dp2Circulation
 
             StreamReader sr = null;
 
-            // 2008/4/3 new add
+            // 2008/4/3
             Encoding encoding = FileUtil.DetectTextFileEncoding(strCfgFilename);
 
             try

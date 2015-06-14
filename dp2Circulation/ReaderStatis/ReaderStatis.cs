@@ -194,7 +194,7 @@ namespace dp2Circulation
                 CloseHandle(handle);
                 handle = IntPtr.Zero;
                  * */
-                try // 2008/6/26 new add
+                try // 2008/6/26
                 {
                     this.FreeResources();
                 }

@@ -37,7 +37,7 @@ namespace DigitalPlatform.CirculationClient
             switch (m.Msg)
             {
                 case WM_MOVE_FOCUS:
-                    // 2008/7/1 new add
+                    // 2008/7/1
                     if (this.textBox_userName.Text == "")
                         this.textBox_userName.Focus();
                     else if (this.textBox_password.Text == "")

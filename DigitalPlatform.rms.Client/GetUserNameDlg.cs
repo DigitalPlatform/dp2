@@ -224,7 +224,7 @@ namespace DigitalPlatform.rms.Client
 			strError = "";
 
             string strQueryXml = "<target list='"
-                + StringUtil.GetXmlStringSimple(Defs.DefaultUserDb.Name)      // 2007/9/14 new add
+                + StringUtil.GetXmlStringSimple(Defs.DefaultUserDb.Name)      // 2007/9/14
                 + ":" + "__id'><item><word>"
 				+ "" + "</word><match>left</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang></target>";
 

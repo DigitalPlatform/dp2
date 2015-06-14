@@ -512,7 +512,7 @@ namespace dp2Catalog
                 dlg.OperLocation);
 
 
-            // 2006/12/30 new add
+            // 2006/12/30
             this.MainForm.AppInfo.SetString(
                 "config",
                 "circulation_server_url",

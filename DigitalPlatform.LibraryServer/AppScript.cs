@@ -1242,11 +1242,81 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "执行脚本函数'" + "VerifyItem" + "'出错：" + ex.Message;
+                strError = "执行脚本函数 '" + "VerifyItem" + "' 出错：" + ex.Message;
                 return -1;
             }
         }
 
+        // 执行脚本函数 VerifyReader
+        // parameters:
+        // return:
+        //      -2  not found script
+        //      -1  出错
+        //      0   成功
+        public int DoVerifyReaderFunction(
+            SessionInfo sessioninfo,
+            string strAction,
+            XmlDocument itemdom,
+            out string strError)
+        {
+            strError = "";
+            if (this.m_strAssemblyLibraryHostError != "")
+            {
+                strError = this.m_strAssemblyLibraryHostError;
+                return -1;
+            }
+
+            if (this.m_assemblyLibraryHost == null)
+            {
+                strError = "未定义<script>脚本代码，无法校验册记录。";
+                return -2;
+            }
+
+            Type hostEntryClassType = ScriptManager.GetDerivedClassType(
+                this.m_assemblyLibraryHost,
+                "DigitalPlatform.LibraryServer.LibraryHost");
+            if (hostEntryClassType == null)
+            {
+                strError = "<script>脚本中未找到DigitalPlatform.LibraryServer.LibraryHost类的派生类，无法校验条码号。";
+                return -2;
+            }
+
+            LibraryHost host = (LibraryHost)hostEntryClassType.InvokeMember(null,
+                BindingFlags.DeclaredOnly |
+                BindingFlags.Public | BindingFlags.NonPublic |
+                BindingFlags.Instance | BindingFlags.CreateInstance, null, null,
+                null);
+            if (host == null)
+            {
+                strError = "创建DigitalPlatform.LibraryServer.LibraryHost类的派生类的对象（构造函数）失败。";
+                return -1;
+            }
+
+            host.App = this;
+            host.SessionInfo = sessioninfo;
+
+            // 执行函数
+            try
+            {
+                return host.VerifyReader(strAction,
+                    itemdom,
+                    out strError);
+            }
+            catch (Exception ex)
+            {
+                strError = "执行脚本函数 '" + "VerifyReader" + "' 出错：" + ex.Message;
+                return -1;
+            }
+        }
+
+        // 判断一个字符串是否符合个人书斋地点名称的形态特征
+        public static bool IsPersonalLibraryRoom(string strRoom)
+        {
+            if (string.IsNullOrEmpty(strRoom) == false
+    && strRoom[0] == '~')
+                return true;
+            return false;
+        }
     }
 
     public class LibraryHost
@@ -1260,6 +1330,36 @@ namespace DigitalPlatform.LibraryServer
             //
             // TODO: Add constructor logic here
             //
+        }
+
+        // return:
+        //      -1  调用出错
+        //      0   校验正确
+        //      1   校验发现错误
+        public virtual int VerifyReader(string strAction,
+            XmlDocument readerdom,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            string strPersonalLibrary = DomUtil.GetElementText(readerdom.DocumentElement, "personalLibrary");
+
+            // 检查个人书斋名
+            if (strAction == "new"
+|| strAction == "change"
+|| strAction == "move")
+            {
+                if (string.IsNullOrEmpty(strPersonalLibrary) == false
+                    && strPersonalLibrary[0] != '~')
+                {
+                    // TODO: 注意普通馆藏地点字符串中的地点名字的第一字符不能为 '~'
+                    strError = "个人书斋名 '"+strPersonalLibrary+"' 不合法。第一字符必须为 '~'";
+                    return 1;
+                }
+            }
+
+            return 0;
         }
 
         // return:
@@ -1283,6 +1383,14 @@ namespace DigitalPlatform.LibraryServer
             LibraryApplication.ParseCalendarName(strLocation,
         out strLibraryCode,
         out strRoom);
+
+            // 检查馆藏地点字符串
+            if (strAction == "new"
+|| strAction == "change"
+|| strAction == "move")
+            {
+
+            }
 
             // 2014/1/10
             // 检查空条码号
@@ -1564,7 +1672,7 @@ namespace DigitalPlatform.LibraryServer
                 //      -1  数据格式错误
                 //      0   没有发现超期
                 //      1   发现超期   strError中有提示信息
-                //      2   已经在宽限期内，很容易超期 2009/3/13 new add
+                //      2   已经在宽限期内，很容易超期 2009/3/13
                 nRet = App.CheckPeriod(
                     calendar,
                     strBorrowDate,

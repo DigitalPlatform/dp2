@@ -350,7 +350,7 @@ namespace dp2Circulation
             }
 
             /*
-            // 2008/10/12 new add
+            // 2008/10/12
             if (this.LoanPolicyDefChanged == true)
             {
                 // ¾¯¸æÉÐÎ´±£´æ

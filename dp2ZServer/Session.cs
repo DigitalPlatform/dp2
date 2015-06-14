@@ -939,7 +939,7 @@ namedResultSets        (14)
 
             // resultSetStatus OPTIONAL
 
-            // 2007/11/7 new add
+            // 2007/11/7
             // presentStatus
             root.NewChildIntegerNode(BerTree.z3950_presentStatus, // 27
                 BerNode.ASN1_CONTEXT,   // ASNI_PRIMITIVE BUG!!!!

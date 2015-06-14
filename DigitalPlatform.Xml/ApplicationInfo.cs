@@ -417,7 +417,7 @@ namespace DigitalPlatform.Xml
             if (bVisible == true)
                 form.Visible = true;
 
-            /// form.Update();  // 2007/4/8 new add
+            /// form.Update();  // 2007/4/8
 		}
 
         // 装载MDI子窗口的最大化特性。需要在至少一个MDI子窗口打开后调用
@@ -458,7 +458,7 @@ namespace DigitalPlatform.Xml
             int nDefaultWidth,
             int nDefaultHeight)
 		{
-            // 2009/11/9 new add
+            // 2009/11/9
             FormWindowState savestate = form.WindowState;
             bool bStateChanged = false;
             if (form.WindowState != FormWindowState.Normal)
@@ -475,7 +475,7 @@ namespace DigitalPlatform.Xml
             if (this.LoadMdiSize != null)
                 this.LoadMdiSize(form, null);
 
-            // 2009/11/9 new add
+            // 2009/11/9
             if (bStateChanged == true)
                 form.WindowState = savestate;
 
@@ -510,7 +510,7 @@ namespace DigitalPlatform.Xml
 			FormWindowState savestate = form.WindowState;
 
 #if NO
-            // 2009/11/9 new add
+            // 2009/11/9
             bool bStateChanged = false;
             if (form.WindowState != FormWindowState.Normal)
             {

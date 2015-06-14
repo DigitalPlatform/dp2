@@ -80,7 +80,7 @@ namespace DigitalPlatform.LibraryServer
     public class ItemConverterEventArgs : EventArgs
     {
         public string Xml = "";
-        public string RecPath = ""; // 2009/10/18 new add
+        public string RecPath = ""; // 2009/10/18
         public int Index = -1;
         public int Count = 0;
         public string ActiveBarcode = "";

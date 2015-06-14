@@ -345,7 +345,7 @@ this.dp2QueryControl1.GetSaveString());
         }
 
         // 是否以推动的方式装入浏览列表
-        // 2008/1/20 new add
+        // 2008/1/20
         /// <summary>
         /// 是否以推动的方式装入浏览列表
         /// </summary>
@@ -368,7 +368,7 @@ this.dp2QueryControl1.GetSaveString());
         /// <returns>可用于检索式的匹配方式字符串</returns>
         public static string GetCurrentMatchStyle(string strText)
         {
-            // 2009/8/6 new add
+            // 2009/8/6
             if (strText == "空值")
                 return "null";
 
@@ -391,7 +391,7 @@ this.dp2QueryControl1.GetSaveString());
         {
             string strText = this.comboBox_matchStyle.Text;
 
-            // 2009/8/6 new add
+            // 2009/8/6
             if (strText == "空值")
                 return "null";
 
@@ -905,7 +905,7 @@ Keys keyData)
                 this.ClearListViewItems();
 
                 /*
-                // 2008/11/22 new add
+                // 2008/11/22
                 this.SortColumns.Clear();
                 SortColumns.ClearColumnSortDisplay(this.listView_records.Columns);
                  * */
@@ -970,7 +970,7 @@ Keys keyData)
                 }
                 else
                 {
-                    // 2009/11/5 new add
+                    // 2009/11/5
                     if (strMatchStyle == "null")
                     {
                         strError = "检索空值的时候，请保持检索词为空";

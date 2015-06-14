@@ -43,7 +43,7 @@ namespace DigitalPlatform.OPAC.Web
 
         List<string> tempItemBarcodes = null;
 
-        // 2007/10/18 new add
+        // 2007/10/18
         // 取消最外面的tag
         public override void RenderBeginTag(HtmlTextWriter writer)
         {
@@ -224,7 +224,7 @@ namespace DigitalPlatform.OPAC.Web
             if (nPageCount <= 1)
             {
                 pageswitcher.Visible = false;
-                resultinfo.Visible = false; // 2009/6/10 new add
+                resultinfo.Visible = false; // 2009/6/10
             }
             else
             {
@@ -643,15 +643,15 @@ namespace DigitalPlatform.OPAC.Web
 
             strText += "<td nowrap class='accessNo'>"
                 + this.GetString("索取号")
-                + "</td>";    // 2009/4/7 new add
+                + "</td>";    // 2009/4/7
 
             strText += "<td nowrap class='publishTime'>"
                 + this.GetString("出版日期")
-                + "</td>";    // 2010/4/22 new add
+                + "</td>";    // 2010/4/22
 
             strText += "<td nowrap class='volume'>"
                 + this.GetString("卷期")
-                + "</td>";    // 2009/4/7 new add
+                + "</td>";    // 2009/4/7
 
             strText += "<td nowrap class='price'>"
                 + this.GetString("价格")
@@ -728,19 +728,19 @@ namespace DigitalPlatform.OPAC.Web
                 || hideColumns.IndexOf("accessNo") == -1)
                 strText += "<td nowrap class='accessNo'>"
                 + this.GetString("索取号")
-                + "</td>";    // 2009/4/7 new add
+                + "</td>";    // 2009/4/7
 
             if (hideColumns == null
                 || hideColumns.IndexOf("publishTime") == -1)
                 strText += "<td nowrap class='publishTime'>"
                 + this.GetString("出版日期")
-                + "</td>";    // 2010/4/22 new add
+                + "</td>";    // 2010/4/22
 
             if (hideColumns == null
                 || hideColumns.IndexOf("volume") == -1)
                 strText += "<td nowrap class='volume'>"
                 + this.GetString("卷期")
-                + "</td>";    // 2009/4/7 new add
+                + "</td>";    // 2009/4/7
 
             if (hideColumns == null
                 || hideColumns.IndexOf("price") == -1)
@@ -1006,7 +1006,7 @@ namespace DigitalPlatform.OPAC.Web
                 reservationreaderbarcode_holder.Visible = true;
 
 
-                // 放入可能的内容 2008/9/27 new add
+                // 放入可能的内容 2008/9/27
                 if (sessioninfo.ReaderInfo != null
                     && String.IsNullOrEmpty(sessioninfo.ReaderInfo.ReaderDomBarcode) == false)
                 {
@@ -1481,7 +1481,7 @@ namespace DigitalPlatform.OPAC.Web
                 strResult += "<td class='location'>" + (strDisplayText == "" ? "&nbsp;" : strDisplayText) + "</td>";
 
             // 索取号
-            // 2009/4/7 new add
+            // 2009/4/7
             string strAccessNo = DomUtil.GetElementText(dom.DocumentElement, "accessNo");
             if (this.m_hidecolumns.IndexOf("accessNo") == -1)
             {
@@ -1504,13 +1504,13 @@ namespace DigitalPlatform.OPAC.Web
             }
 
             // 出版日期
-            // 2009/4/7 new add
+            // 2009/4/7
             string strPublishTime = DomUtil.GetElementText(dom.DocumentElement, "publishTime");
             if (this.m_hidecolumns.IndexOf("publishTime") == -1)
                 strResult += "<td class='publishTime'>" + (strPublishTime == "" ? "&nbsp;" : GetDisplayPublishTime(strPublishTime)) + "</td>";
 
             // 卷期信息
-            // 2009/4/7 new add
+            // 2009/4/7
             string strVolume = DomUtil.GetElementText(dom.DocumentElement, "volume");
             if (this.m_hidecolumns.IndexOf("volume") == -1)
                 strResult += "<td class='volume'>" + (strVolume == "" ? "&nbsp;" : strVolume) + "</td>";
@@ -1672,7 +1672,7 @@ namespace DigitalPlatform.OPAC.Web
                 //      -1  数据格式错误
                 //      0   没有发现超期
                 //      1   发现超期   strError中有提示信息
-                //      2   已经在宽限期内，很容易超期 2009/3/13 new add
+                //      2   已经在宽限期内，很容易超期 2009/3/13
                 nRet = app.CheckPeriod(
                     calendar,   // 2009/9/18 changed
                     strBorrowDate,
@@ -1688,7 +1688,7 @@ namespace DigitalPlatform.OPAC.Web
 
                 if (nRet == 1)
                     strOverDue = this.GetString("已超期");
-                else if (nRet == 2) // 2009/9/18 new add
+                else if (nRet == 2) // 2009/9/18
                     strOverDue = this.GetString("已在宽限期内，即将超期");
 
                 /*
@@ -1697,7 +1697,7 @@ namespace DigitalPlatform.OPAC.Web
                  * */
                 if (nRet == 1)
                     strClass = "borrows over";
-                else if (nRet == 2) // 2009/9/18 new add
+                else if (nRet == 2) // 2009/9/18
                     strClass = "borrows warning";
                 else if (nRet == 0 && lOver >= -5)
                     strClass = "borrows warning";
@@ -1794,7 +1794,7 @@ namespace DigitalPlatform.OPAC.Web
 
                     // 对于读者，隐去除自己以外的其他人的证条码号
                     if (loginstate == LoginState.NotLogin
-                        || loginstate == LoginState.Public  // 2009/4/10 new add
+                        || loginstate == LoginState.Public  // 2009/4/10
                         /*sessioninfo.Account == null*/
                         || (loginstate == LoginState.Reader
                         /*sessioninfo.Account != null

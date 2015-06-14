@@ -1178,7 +1178,7 @@ namespace DigitalPlatform.Library
                  * */
 
                 /*
-                this.m_strSearchStyle = strSearchStyle; // 2009/3/2 new add
+                this.m_strSearchStyle = strSearchStyle; // 2009/3/2
 				this.m_nCurWeight = nWeight;	// 为事件处理函数所预备
 				this.m_nThreshold = nThreshold;
                  * */
@@ -1186,7 +1186,7 @@ namespace DigitalPlatform.Library
 
                 // 2007/4/5 改造 加上了 GetXmlStringSimple()
                 string strQueryXml = "<target list='"
-                    + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 new add
+                    + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14
                     + "'><item><word>"
                     + StringUtil.GetXmlStringSimple(strKey)
                     + "</word><match>" + GetFirstQuerySearchStyle(strSearchStyle) + "</match><relation>=</relation><dataType>string</dataType><maxCount>" + Convert.ToString(nMax) + "</maxCount></item><lang>zh</lang></target>";

@@ -8,7 +8,7 @@ using DigitalPlatform.IO;
 
 namespace DigitalPlatform.Xml
 {
-    public class Label : TextVisual
+    public class XmlLabel : TextVisual
     {
         public override ItemRegion GetRegionName()
         {

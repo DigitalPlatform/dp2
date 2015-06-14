@@ -1349,7 +1349,7 @@ namespace dp2Circulation
             Debug.Assert(nFirstLineNo != 99999, "");
             Debug.Assert(nLastLineNo != -1,"");
 
-            // 2009/12/16 new add
+            // 2009/12/16 
             strPublishTimeString = this.Issues[nFirstLineNo].PublishTime
             + "-"
             + this.Issues[nLastLineNo].PublishTime;
@@ -1617,7 +1617,7 @@ namespace dp2Circulation
             this.Issues.Sort(new IssuePublishTimeComparer());
 
             // 检查是否有重复的出版日期
-            // 2010/3/21 new add
+            // 2010/3/21 
             string strPrevPublishTime = "";
             for (int i = 0; i < this.Issues.Count; i++)
             {
@@ -1870,7 +1870,7 @@ namespace dp2Circulation
                         XmlDocument dom = new XmlDocument();
                         dom.LoadXml("<root />");
 
-                        // 2009/10/19 new add
+                        // 2009/10/19 
                         // 状态
                         if (bSetProcessingState == true)
                         {
@@ -3635,7 +3635,7 @@ namespace dp2Circulation
             for (int i = 0; i < this.Issues.Count; i++)
             {
                 IssueBindingItem issue = this.Issues[i];
-                issue.RemoveTailNullCell(); // 2010/2/20 new add
+                issue.RemoveTailNullCell(); // 2010/2/20 
 
                 if (nMaxCells < issue.Cells.Count)
                     nMaxCells = issue.Cells.Count;
@@ -4026,7 +4026,7 @@ namespace dp2Circulation
                 }
 
                 if (result.Object != null
-                    && result.Object is CellBase)   // new add
+                    && result.Object is CellBase)   // 
                 {
                     // 
                     // 单独刷新一个
@@ -6865,7 +6865,7 @@ issue.Volume);
                     }
                     catch (Exception ex)
                     {
-                        // 2009/2/8 new add
+                        // 2009/2/8 
                         strError = "在获得日期 '" + ref_issue.PublishTime + "' 的后一期出版日期时发生错误: " + ex.Message;
                         goto ERROR1;
                     }
@@ -6880,7 +6880,7 @@ issue.Volume);
 
                     // 号码自动增量需要知道一个期是否跨年，可以通过查询采购信息得到一年所订阅的期数
                     if (nRefIssue >= nIssueCount
-                        && nIssueCount > 0) // 2010/3/3 new add
+                        && nIssueCount > 0) // 2010/3/3 
                     {
                         // 跨年了
                         strNextIssue = "1";
@@ -7405,7 +7405,7 @@ issue.Volume);
                     }
                     catch (Exception ex)
                     {
-                        // 2009/2/8 new add
+                        // 2009/2/8 
                         strError = "在获得日期 '" + ref_issue.PublishTime + "' 的后一期出版日期时发生错误: " + ex.Message;
                         return -1;
                     }
@@ -7415,7 +7415,7 @@ issue.Volume);
 
                 // 号码自动增量需要知道一个期是否跨年，可以通过查询采购信息得到一年所订阅的期数
                 if (nRefIssue >= nIssueCount
-                    && nIssueCount > 0) // 2010/3/3 new add
+                    && nIssueCount > 0) // 2010/3/3 
                 {
                     // 跨年了
                     dlg.Issue = "1";
@@ -11379,7 +11379,7 @@ MessageBoxDefaultButton.Button2);
                 int nOldCol = issue.Cells.IndexOf(member_cell);
                 Debug.Assert(nOldCol != -1, "");
 
-                // 2010/3/3 new add
+                // 2010/3/3 
                 bool bLastPos = false;
                 // 如果是所有成员的最后一个，并且和Parent同在一期
                 if (parent_item.MemberCells.Count <= 1
@@ -12378,7 +12378,7 @@ MessageBoxDefaultButton.Button2);
                         temp_parent.MemberCells.Remove(old_cell);
                     old_cell.ParentItem = null;
 
-                    old_cell.Container = null;  // new add
+                    old_cell.Container = null;  // 
 
                     int temp = members.IndexOf(old_cell);
                     if (temp >= i)
@@ -12393,7 +12393,7 @@ MessageBoxDefaultButton.Button2);
             Debug.Assert(nFirstLineNo != 99999, "");
             Debug.Assert(nLastLineNo != -1, "");
 
-            // 2009/12/16 new add
+            // 2009/12/16 
             strPublishTimeString = this.Issues[nFirstLineNo].PublishTime
             + "-"
             + this.Issues[nLastLineNo].PublishTime;
@@ -12547,7 +12547,7 @@ MessageBoxDefaultButton.Button2);
                         {
                         }
                         else
-                            issue.SetCell(nCol - 1, null);  // new add
+                            issue.SetCell(nCol - 1, null);  // 
 
                         cell.ParentItem = parent_cell.item;
                         if (item != null)
@@ -12669,7 +12669,7 @@ MessageBoxDefaultButton.Button2);
                         temp_parent.MemberCells.Remove(old_cell);
                     old_cell.ParentItem = null;
 
-                    old_cell.Container = null;  // new add
+                    old_cell.Container = null;  // 
 
                     int temp = members.IndexOf(old_cell);
                     if (temp >= i)

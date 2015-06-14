@@ -142,7 +142,7 @@ namespace DigitalPlatform.rms.Client
             else
                 this.m_list.Insert(nInsertPos, item);
 
-            // 2010/2/25 new add
+            // 2010/2/25
             if (this.m_hashtable.ContainsKey(strOrigin.ToUpper()) == true)
             {
                 strError = "已有名为 '" + strOrigin + "' 的事项，不能重复加入";

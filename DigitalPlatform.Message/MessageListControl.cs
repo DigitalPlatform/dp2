@@ -702,7 +702,7 @@ namespace DigitalPlatform.Message
                 "</td><td>"
             ));
 
-            // 全部删除按钮 2007/7/15 new add
+            // 全部删除按钮 2007/7/15
             Button deleteallbutton = new Button();
             deleteallbutton.ID = "deleteall";
             deleteallbutton.Text = this.GetString("全部删除");

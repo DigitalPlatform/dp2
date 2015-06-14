@@ -256,7 +256,7 @@ namespace dp2Circulation
                 if (lRet == -1 || lRet == 0)
                     goto ERROR1;
 
-                this.ItemRecPath = strItemRecPath;    // 2009/10/18 new add
+                this.ItemRecPath = strItemRecPath;    // 2009/10/18
                 this.BiblioRecPath = strBiblioRecPath;  // 2013/3/4
 
                 if (lRet > 1)
@@ -392,7 +392,7 @@ namespace dp2Circulation
 
             string strRecPath = strItemRecPath;
 
-            // 2009/10/18 new add
+            // 2009/10/18
             if (String.IsNullOrEmpty(strPrevNextStyle) == false)
             {
                 strRecPath += "$" + strPrevNextStyle.ToLower();
@@ -509,7 +509,7 @@ namespace dp2Circulation
                 }
                 else
                 {
-                    this.ItemRecPath = strOutputItemRecPath;    // 2009/10/18 new add
+                    this.ItemRecPath = strOutputItemRecPath;    // 2009/10/18
                     this.BiblioRecPath = strBiblioRecPath;  // 2013/3/4
 
 #if NO

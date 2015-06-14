@@ -134,7 +134,7 @@ namespace dp2Circulation
             }
             catch (FileNotFoundException)
             {
-                // 不必报错 2009/2/4 new add
+                // 不必报错 2009/2/4 
             }
             catch (Exception ex)
             {
@@ -575,7 +575,7 @@ namespace dp2Circulation
                 this.AssemblyMain = null;
                 MyFilterDocument filter = null;
 
-                // 2009/11/5 new add
+                // 2009/11/5 
                 // 防止以前残留的打开的文件依然没有关闭
                 Global.ForceGarbageCollection();
 

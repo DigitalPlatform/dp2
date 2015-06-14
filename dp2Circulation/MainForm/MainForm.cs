@@ -590,7 +590,7 @@ namespace dp2Circulation
             }
             catch (FileNotFoundException)
             {
-                // 不必报错 2009/2/4 new add
+                // 不必报错 2009/2/4 
             }
             catch (Exception ex)
             {
@@ -998,7 +998,7 @@ namespace dp2Circulation
         {
             strError = "";
 
-            // 2009/2/11 new add
+            // 2009/2/11 
             if (String.IsNullOrEmpty(this.LibraryServerUrl) == true)
                 return 0;
 
@@ -1320,7 +1320,7 @@ AppInfo.GetString("config",
                         if (nRet == -1)
                             goto END1;
 
-                        // 2008/11/29 new add
+                        // 2008/11/29 
                         nRet = InitialNormalDbProperties(false);
                         if (nRet == -1)
                             goto END1;
@@ -1331,13 +1331,13 @@ AppInfo.GetString("config",
                             goto END1;
 
                         // 获得索取号配置信息
-                        // 2009/2/24 new add
+                        // 2009/2/24 
                         nRet = GetCallNumberInfo(false);
                         if (nRet == -1)
                             goto END1;
 
                         // 获得前端交费接口配置信息
-                        // 2009/7/20 new add
+                        // 2009/7/20 
                         nRet = GetClientFineInterfaceInfo(false);
                         if (nRet == -1)
                             goto END1;
@@ -5679,7 +5679,7 @@ AppInfo.GetString("config",
             }
         }
 
-        // 2009/11/8 new add
+        // 2009/11/8 
         // 
         // Exception:
         //     可能会抛出Exception异常
@@ -5721,7 +5721,7 @@ AppInfo.GetString("config",
             if (this.BiblioDbFromInfos == null)
             {
                 throw new Exception("this.DbFromInfos尚未初始化");
-                // return null;    // 2009/3/29 new add
+                // return null;    // 2009/3/29 
             }
 
             Debug.Assert(this.BiblioDbFromInfos != null, "this.DbFromInfos尚未初始化");
@@ -5733,7 +5733,7 @@ AppInfo.GetString("config",
             {
                 string strCaption = parts[k].Trim();
 
-                // 2009/9/23 new add
+                // 2009/9/23 
                 // TODO: 是否可以直接使用\t后面的部分呢？
                 // 规整一下caption字符串，切除后面可能有的\t部分
                 int nRet = strCaption.IndexOf("\t");
@@ -7326,7 +7326,7 @@ AppInfo.GetString("config",
                 dlg.OperLocation);
 
 
-            // 2006/12/30 new add
+            // 2006/12/30 
             AppInfo.SetString(
                 "config",
                 "circulation_server_url",
@@ -7762,7 +7762,7 @@ out strError);
                 goto ERROR1;
             }
 
-            // 2009/11/25 new add
+            // 2009/11/25 
             if (this.IsBiblioSourceDb(strTargetDbName) == true)
             {
                 strError = "库 '" + strTargetDbName + "' 是 外源书目库 角色，不能作为目标库";
@@ -8144,7 +8144,7 @@ out strError);
         /// <returns>书目库名</returns>
         public string GetBiblioDbNameFromItemDbName(string strItemDbName)
         {
-            // 2008/11/28 new add
+            // 2008/11/28 
             // 实体库名为空，无法找书目库名。
             // 其实也可以找，不过找出来的就不是唯一的了，所以干脆不找
             if (String.IsNullOrEmpty(strItemDbName) == true)
@@ -8278,7 +8278,7 @@ out strError);
         /// <returns>书目库名</returns>
         public string GetBiblioDbNameFromIssueDbName(string strIssueDbName)
         {
-            // 2008/11/28 new add
+            // 2008/11/28 
             // 期库名为空，无法找书目库名。
             // 其实也可以找，不过找出来的就不是唯一的了，所以干脆不找
             if (String.IsNullOrEmpty(strIssueDbName) == true)
@@ -8305,7 +8305,7 @@ out strError);
         /// <returns>书目库名</returns>
         public string GetBiblioDbNameFromOrderDbName(string strOrderDbName)
         {
-            // 2008/11/28 new add
+            // 2008/11/28 
             // 订购库名为空，无法找书目库名。
             // 其实也可以找，不过找出来的就不是唯一的了，所以干脆不找
             if (String.IsNullOrEmpty(strOrderDbName) == true)
@@ -8482,7 +8482,7 @@ out strError);
             if (String.IsNullOrEmpty(strDbName) == true)
                 return false;
 
-            if (this.ReaderDbNames != null)    // 2009/3/29 new add
+            if (this.ReaderDbNames != null)    // 2009/3/29 
             {
                 for (int i = 0; i < this.ReaderDbNames.Length; i++)
                 {
@@ -10842,7 +10842,7 @@ Font font)
                 this.objStatis = null;
                 this.AssemblyMain = null;
 
-                // 2009/11/5 new add
+                // 2009/11/5 
                 // 防止以前残留的打开的文件依然没有关闭
                 Global.ForceGarbageCollection();
 
@@ -13320,6 +13320,16 @@ Keys keyData)
             }
             OpenWindow<ArrivedSearchForm>();
         }
+
+        private void MenuItem_openReservationListForm_Click(object sender, EventArgs e)
+        {
+            if (this.Version < 2.47)
+            {
+                MessageBox.Show(this, "dp2library 版本 2.47 和以上才能使用 预约响应窗");
+                return;
+            }
+            OpenWindow<ReservationListForm>();
+        }
     }
 
     /// <summary>
@@ -13390,27 +13400,27 @@ Keys keyData)
         /// <summary>
         /// 期库名
         /// </summary>
-        public string IssueDbName = ""; // 对应的期库名 2007/10/19 new add
+        public string IssueDbName = ""; // 对应的期库名 2007/10/19 
 
         /// <summary>
         /// 订购库名
         /// </summary>
-        public string OrderDbName = ""; // 对应的订购库名 2007/11/30 new add
+        public string OrderDbName = ""; // 对应的订购库名 2007/11/30 
 
         /// <summary>
         /// 评注库名
         /// </summary>
-        public string CommentDbName = "";   // 对应的评注库名 2009/10/23 new add
+        public string CommentDbName = "";   // 对应的评注库名 2009/10/23 
 
         /// <summary>
         /// 角色
         /// </summary>
-        public string Role = "";    // 角色 2009/10/23 new add
+        public string Role = "";    // 角色 2009/10/23 
 
         /// <summary>
         /// 是否参与流通
         /// </summary>
-        public bool InCirculation = true;  // 是否参与流通 2009/10/23 new add
+        public bool InCirculation = true;  // 是否参与流通 2009/10/23 
     }
 
     // 

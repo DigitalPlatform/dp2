@@ -61,7 +61,7 @@ namespace dp2Circulation
         /// <summary>
         /// 是否为新创建的册记录设置“加工中”状态
         /// </summary>
-        public bool SetProcessingState = true;   // 是否为新创建的册记录设置“加工中”状态 2009/10/19 new add
+        public bool SetProcessingState = true;   // 是否为新创建的册记录设置“加工中”状态 2009/10/19
 
         /// <summary>
         /// 是否为新创建的册记录创建索取号
@@ -216,7 +216,7 @@ namespace dp2Circulation
             this.ListView.Items.Clear();
             // this.BiblioRecPath = "";
 
-            // 2009/2/10 new add
+            // 2009/2/10
             this.SortColumns.Clear();
             SortColumns.ClearColumnSortDisplay(this.ListView.Columns);
         }
@@ -576,7 +576,7 @@ namespace dp2Circulation
 
             IssueEditForm edit = new IssueEditForm();
 
-            edit.BiblioDbName = Global.GetDbName(this.BiblioRecPath);   // 2009/2/15 new add
+            edit.BiblioDbName = Global.GetDbName(this.BiblioRecPath);   // 2009/2/15
             edit.Text = "新增期";
             edit.MainForm = this.MainForm;
             // edit.EntityForm = this;
@@ -932,7 +932,7 @@ namespace dp2Circulation
 
             IssueEditForm edit = new IssueEditForm();
 
-            edit.BiblioDbName = Global.GetDbName(this.BiblioRecPath);   // 2009/2/15 new add
+            edit.BiblioDbName = Global.GetDbName(this.BiblioRecPath);   // 2009/2/15
             edit.MainForm = this.MainForm;
             edit.ItemControl = this;
             string strError = "";
@@ -1108,7 +1108,7 @@ namespace dp2Circulation
         //      1   保存成功
         public int DoSaveIssues()
         {
-            // 2008/9/17 new add
+            // 2008/9/17
             if (this.Items == null)
                 return 0;
 
@@ -1217,7 +1217,7 @@ namespace dp2Circulation
                     issueitem.RefreshListView();
                 }
 
-                info.RefID = issueitem.RefID;  // 2008/2/17 new add
+                info.RefID = issueitem.RefID;  // 2008/2/17
 
                 string strXml = "";
                 nRet = issueitem.BuildRecord(out strXml,
@@ -1239,7 +1239,7 @@ namespace dp2Circulation
 
                     Debug.Assert(String.IsNullOrEmpty(issueitem.RecPath) == false, "issueitem.RecPath 不能为空");
 
-                    info.OldRecPath = issueitem.RecPath; // 2007/6/2 new add
+                    info.OldRecPath = issueitem.RecPath; // 2007/6/2
                     info.NewRecPath = issueitem.RecPath;
 
                     info.NewRecord = strXml;
@@ -2727,7 +2727,7 @@ namespace dp2Circulation
 
             IssueManageForm dlg = new IssueManageForm();
             dlg.MainForm = this.MainForm;
-            // 2009/2/15 new add
+            // 2009/2/15
             dlg.BiblioDbName = Global.GetDbName(this.BiblioRecPath);
 
             // 将已有的期信息反映到对话框中
@@ -2874,7 +2874,7 @@ namespace dp2Circulation
             {
                 // IssueItem issue_item = mask_delete_items[i];
 
-                // 2009/2/10 new add
+                // 2009/2/10
                 bool bFound = false;
                 // 检查有没有出版日期重复、状态为新增的其他行?
                 foreach (IssueItem temp in this.Items)
@@ -3124,7 +3124,7 @@ namespace dp2Circulation
                         XmlDocument dom = new XmlDocument();
                         dom.LoadXml("<root />");
 
-                        // 2009/10/19 new add
+                        // 2009/10/19
                         // 状态
                         if (this.SetProcessingState == true)
                         {
@@ -3506,7 +3506,7 @@ namespace dp2Circulation
 
             ColumnSortStyle sortStyle = ColumnSortStyle.LeftAlign;
 
-            // 2009/2/16 new add
+            // 2009/2/16
             // 第4/5/6列为号码数字，排序风格特殊
             if (nClickColumn == 3
                 || nClickColumn == 4
@@ -3750,7 +3750,7 @@ namespace dp2Circulation
         public string ErrorInfo = "";   // [out] 出错信息。如果为空则表示没有任何错误
     }
 
-    // 2009/10/12 new add
+    // 2009/10/12
     /// <summary>
     /// 获得册信息事件
     /// </summary>

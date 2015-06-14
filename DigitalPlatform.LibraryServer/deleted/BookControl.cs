@@ -311,7 +311,7 @@ namespace DigitalPlatform.LibraryServer
                     app.CfgDir + "\\itemxml2html.cs",
                     app.CfgDir + "\\itemxml2html.cs.ref",
                     strItemXml,
-                    strItemRecPath, // 2009/10/18 new add
+                    strItemRecPath, // 2009/10/18
                     out strResult,
                     out strError);
                 if (nRet == -1)

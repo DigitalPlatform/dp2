@@ -230,7 +230,7 @@ namespace DigitalPlatform.rms
 
                     // 空内容也要算作一列
 
-                    // 2008/12/18 new add
+                    // 2008/12/18
 
                     col_array.Add(strText);
                     nResultLength += strText.Length;
@@ -288,7 +288,7 @@ namespace DigitalPlatform.rms
                     string strConvert = DomUtil.GetAttr(colNode, "convert");
                     List<string> convert_methods = GetMethods(strConvert);
 
-                    // 2008/12/18 new add
+                    // 2008/12/18
                     if (String.IsNullOrEmpty(strConvert) == false)
                         strColText = ConvertText(convert_methods, strColText);
 

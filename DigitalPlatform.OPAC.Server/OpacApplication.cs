@@ -2283,7 +2283,7 @@ System.Text.Encoding.UTF8))
 
                     // 2007/4/5 改造 加上了 GetXmlStringSimple()
                     string strOneDbQuery = "<target list='"
-                        + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 new add
+                        + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 
                         + "'><item>"
                         + (bDesc == true ? "<order>DESC</order>" : "")
                         + "<word>"
@@ -3433,7 +3433,7 @@ out string strError)
                 byte[] timestamp = ByteArray.GetTimeStampByteArray(strResTimeStamp);
                 byte[] output_timestamp = null;
 
-                // 2007/12/13 new add
+                // 2007/12/13 
                 string strLastModifyTime = DateTime.UtcNow.ToString("u");
 
                 string strLocalPath = postedFile.FileName;

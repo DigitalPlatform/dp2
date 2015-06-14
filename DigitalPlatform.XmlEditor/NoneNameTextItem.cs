@@ -9,7 +9,7 @@ namespace DigitalPlatform.Xml
 	public class NoneNameTextItem : TextItem
 	{
 
-		public virtual void InitialLabelText(Label label)
+		public virtual void InitialLabelText(XmlLabel label)
 		{
 			// 一点点差异
 			if (this.Name.Length > 0 && this.Name[0] == '#')
@@ -28,7 +28,7 @@ namespace DigitalPlatform.Xml
 				this.childrenVisual.Clear();
 
 			// 加Label
-			Label label = new Label();
+			XmlLabel label = new XmlLabel();
 			label.container = this;
 
 			InitialLabelText(label);

@@ -79,7 +79,7 @@ namespace dp2Circulation
         const int TYPE_SOURCE = 0;
         const int TYPE_TARGET = 1;
         const int TYPE_SOURCE_AND_TARGET = 2;
-        const int TYPE_SOURCEBIBLIO = 3;   // 来自外源书目库 2009/11/5 new add
+        const int TYPE_SOURCEBIBLIO = 3;   // 来自外源书目库 2009/11/5
         const int TYPE_NOT_ORDER = 4;   // 来自和采购无关的数据库 2009/11/5 changed
 
         /*
@@ -271,7 +271,7 @@ namespace dp2Circulation
         bool InitialSizeParam()
         {
             /*
-            // 2008/12/10 new add 如果没有这一句，则1024X768小字体情况下会抛出异常
+            // 2008/12/10 如果没有这一句，则1024X768小字体情况下会抛出异常
             if (this.MdiParent == null)
                 return;
 
@@ -625,7 +625,7 @@ this.checkBox_prepare_createCallNumber.Checked);
         {
             string strText = this.comboBox_accept_matchStyle.Text;
 
-            // 2009/8/6 new add
+            // 2009/8/6
             if (strText == "空值")
                 return "null";
 
@@ -727,7 +727,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                 }
                 else
                 {
-                    // 2009/11/5 new add
+                    // 2009/11/5
                     if (strMatchStyle == "null")
                     {
                         strError = "检索空值的时候，请保持检索词为空";
@@ -853,7 +853,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                         Debug.Assert(image_index != -2, "居然检索到非书目库的记录?");
                         item.ImageIndex = image_index;
 
-                        SetItemColor(item); // new add
+                        SetItemColor(item); //
                     }
 
                     lStart += searchresults.Length;
@@ -1175,7 +1175,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             // 当前detailWindow内容清空
             ClearDetailWindow(true);
 
-            ClearSourceTarget();    // 2009/6/2 new add
+            ClearSourceTarget();    // 2009/6/2
 
             int nRet = DoSearch(out strError);
             if (nRet == -1)
@@ -1211,7 +1211,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                 {
                     m_detailWindow.Close();
 
-                    // 2009/2/3 new add
+                    // 2009/2/3
                     if (m_detailWindow.IsDisposed == false)
                         return false;   // 没有关闭成功。比方说警告了尚未保存？用户选择Cancel
 
@@ -1292,7 +1292,7 @@ this.checkBox_prepare_createCallNumber.Checked);
         }
 
         // 清空当前详细窗内容
-        // 2009/2/3 new add
+        // 2009/2/3
         bool ClearDetailWindow(bool bWarningNotSave)
         {
             if (this.m_detailWindow == null)
@@ -1314,7 +1314,7 @@ this.checkBox_prepare_createCallNumber.Checked);
         }
 
         // 强制当前详细窗内保存发生过的修改
-        // 2009/2/3 new add
+        // 2009/2/3
         void SaveDetailWindowChanges()
         {
             if (this.m_detailWindow == null)
@@ -1887,7 +1887,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                 goto ERROR1;
             }
 
-            // 2009/2/16 new add
+            // 2009/2/16
             // 看看AcceptForm中已经设定的源是否和e.SourceRecPath中的一致
             string strExistSourceRecPath = GetSourceRecPath();
             if (String.IsNullOrEmpty(strExistSourceRecPath) == false)
@@ -1939,7 +1939,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                 goto ERROR1;
             }
 
-            // 2009/10/23 new add
+            // 2009/10/23
             // 检查当前行是否合适设置为源角色
             nRet = WarningSetSource(source_item);
             if (nRet == 0)
@@ -1979,7 +1979,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             ListViewItem target_item = ListViewUtil.FindItem(this.listView_accept_records,
                 strTargetRecPath,
                 COLUMN_RECPATH);
-            if (target_item != null)    // 2008/12/3 new add
+            if (target_item != null)    // 2008/12/3
             {
                 // 看看目标事项是否已经为斜体
                 RecordInfo target_info = GetRecordInfo(target_item);
@@ -2002,7 +2002,7 @@ this.checkBox_prepare_createCallNumber.Checked);
 
             e.TargetRecPath = strTargetRecPath;
 
-            // 2009/11/5 new add
+            // 2009/11/5
             if (String.IsNullOrEmpty(strBiblioSourceRecPath) == false)
             {
                 ListViewItem biblioSource_item = ListViewUtil.FindItem(this.listView_accept_records,
@@ -2056,7 +2056,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             if (this.comboBox_prepare_type.Text == "连续出版物")
                 bSeriesMode = true;
 
-            // 期刊情况下，源角色和目标角色必须为同一条，这是一个额外的要求。2009/2/17 new add
+            // 期刊情况下，源角色和目标角色必须为同一条，这是一个额外的要求。2009/2/17
             if (bSeriesMode == true)
             {
                 if (e.TargetRecPath != e.SourceRecPath)
@@ -2275,7 +2275,7 @@ this.checkBox_prepare_createCallNumber.Checked);
         private void AcceptForm_Activated(object sender, EventArgs e)
         {
 #if NO
-            // 2009/8/13 new add
+            // 2009/8/13
             this.MainForm.stopManager.Active(this.stop);
 #endif
             EnableProgress();
@@ -2864,7 +2864,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             if (item.ImageIndex == TYPE_NOT_ORDER
                 || item.ImageIndex < 0
                 || info.TitleMatch == false
-                || (info.HasOrderInfo == false && item.ImageIndex == 0))  // 单纯的源，如果不包含订购信息，则发灰 2009/10/23 new add
+                || (info.HasOrderInfo == false && item.ImageIndex == 0))  // 单纯的源，如果不包含订购信息，则发灰 2009/10/23
                 item.ForeColor = SystemColors.GrayText;
             else
                 item.ForeColor = SystemColors.WindowText;
@@ -3187,7 +3187,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             }
         }
 
-        void OnClickLabel(Label label,
+        void OnClickLabel(System.Windows.Forms.Label label,
             bool bDoubleClick)
         {
             string strError = "";
@@ -3468,7 +3468,7 @@ this.checkBox_prepare_createCallNumber.Checked);
             return 0;
         }
 
-        // 2008/10/22 new add
+        // 2008/10/22
         // 将具有指定路径的事项设置为目标记录
         int SetTarget(string strTargetRecPath,
             out string strError)
@@ -4531,7 +4531,7 @@ this.checkBox_prepare_createCallNumber.Checked);
 
             print_form.Activate();
 
-            // 2009/2/4 new add
+            // 2009/2/4
             print_form.PublicationType = this.comboBox_prepare_type.Text;
 
             // 根据批次号检索装载数据
@@ -4698,7 +4698,7 @@ this.checkBox_prepare_createCallNumber.Checked);
                     // Debug.Assert(image_index != -2, "居然检索到非书目库的记录?");
                     item.ImageIndex = image_index;
 
-                    SetItemColor(item); // new add
+                    SetItemColor(item); //
 
                     string strError = "";
                     int nRet = RefreshBrowseLine(item, out strError);
@@ -5008,7 +5008,7 @@ Keys keyData)
                         info.Syntax = "unimarc";
                     // info.InCirculation = property.InCirculation;
 
-                    info.Role = property.Role;  // 2009/10/23 new add
+                    info.Role = property.Role;  // 2009/10/23
 
                     this.Add(info);
                 }
@@ -5152,7 +5152,7 @@ Keys keyData)
         public string Syntax = "";
         public bool InCirculation = false;
 
-        public string Role = "";    // 角色 2009/10/23 new add
+        public string Role = "";    // 角色 2009/10/23
 
         public bool IsOrderWork
         {

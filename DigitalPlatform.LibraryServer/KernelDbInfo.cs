@@ -87,7 +87,7 @@ namespace DigitalPlatform.LibraryServer
         // 从特定的数据库中, 匹配出满足特定风格列表的from列表
         // parameters:
         //      strFromStyle    from style的列表, 以逗号分割。
-        //                      如果为空，表示全部途径(2007/9/13 new add)
+        //                      如果为空，表示全部途径(2007/9/13)
         // return:
         //      null    没有找到
         //      以逗号分割的from名列表
@@ -102,7 +102,7 @@ namespace DigitalPlatform.LibraryServer
 
             string strResult = "";
 
-            // 2007/9/13 new add
+            // 2007/9/13
             if (String.IsNullOrEmpty(strFromStyles) == true
                 || strFromStyles == "<全部>" || strFromStyles.ToLower() == "<all>")
             {
@@ -133,7 +133,7 @@ namespace DigitalPlatform.LibraryServer
                     string strStyles = db.Froms[j].Styles;
 
                     if (StringUtil.IsInList(strStyle, strStyles) == true
-                        || strStyle == "<all>") // 2007/9/13 new add // 注：后来发现内核本来就支持<all>的from后，这里就没有必要了，但是代码仍保留
+                        || strStyle == "<all>") // 2007/9/13 // 注：后来发现内核本来就支持<all>的from后，这里就没有必要了，但是代码仍保留
                     {
                         Caption tempCaption = db.Froms[j].GetCaption(strLang);
                         if (tempCaption == null)

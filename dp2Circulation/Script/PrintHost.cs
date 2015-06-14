@@ -745,7 +745,7 @@ namespace dp2Circulation
         /// </summary>
         public TimeSpan TimeSpan = new TimeSpan(0); // 操作耗费的时间
 
-        // 2008/5/9 new add
+        // 2008/5/9
         /// <summary>
         /// 册记录 XML 字符串
         /// </summary>
@@ -829,7 +829,7 @@ namespace dp2Circulation
         /// </summary>
         public string OverdueString = "";
 
-        // 2008/5/9 new add
+        // 2008/5/9
         /// <summary>
         /// 册记录 XML 字符串
         /// </summary>
@@ -1111,7 +1111,7 @@ namespace dp2Circulation
                 info.ReturnOperator = DomUtil.GetAttr(node, "operator");
                 info.ID = DomUtil.GetAttr(node, "id");
 
-                // 2008/11/15 new add
+                // 2008/11/15
                 info.Comment = DomUtil.GetAttr(node, "comment");
 
                 this.OverdueItems.Add(info);
@@ -1181,7 +1181,7 @@ namespace dp2Circulation
         /// <summary>
         /// 注释
         /// </summary>
-        public string Comment = ""; // comment 2008/11/15 new add
+        public string Comment = ""; // comment 2008/11/15
 
         /// <summary>
         /// 交费操作者

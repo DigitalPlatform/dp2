@@ -484,7 +484,7 @@ this.splitContainer_inAndOutof,
             ColumnHeader columnHeader_biblioRecpath = new ColumnHeader();
             ColumnHeader columnHeader_accessno = new ColumnHeader();
 
-            // 2009/10/27 new add
+            // 2009/10/27 
             ColumnHeader columnHeader_targetRecpath = new ColumnHeader();
 
 
@@ -898,7 +898,7 @@ this.splitContainer_inAndOutof,
         static void SetItemColor(ListViewItem item,
             int nType)
         {
-            item.ImageIndex = nType;    // 2009/11/1 new add
+            item.ImageIndex = nType;    // 2009/11/1
 
             if (nType == TYPE_ERROR)
             {
@@ -992,7 +992,7 @@ this.splitContainer_inAndOutof,
             string strAccessNo = DomUtil.GetElementText(dom.DocumentElement,
                 "accessNo");
 
-            // 2007/6/20 new add
+            // 2007/6/20 
             strBorrowDate = DateTimeUtil.LocalTime(strBorrowDate, "u");
 
             string strBorrowPeriod = DomUtil.GetElementText(dom.DocumentElement,
@@ -1238,7 +1238,7 @@ this.splitContainer_inAndOutof,
                 goto ERROR1;
             }
 
-            // 2009/11/27 new add
+            // 2009/11/27
             if (this.checkBox_verify_autoUppercaseBarcode.Checked == true)
             {
                 string strUpper = this.textBox_verify_itemBarcode.Text.ToUpper();
@@ -1469,7 +1469,7 @@ this.splitContainer_inAndOutof,
                 return -1;
             }
 
-            // 2009/11/27 new add
+            // 2009/11/27
             if (this.checkBox_verify_autoUppercaseBarcode.Checked == true)
             {
                 strBarcode = strBarcode.ToUpper();

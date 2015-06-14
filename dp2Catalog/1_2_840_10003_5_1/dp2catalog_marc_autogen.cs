@@ -1089,7 +1089,7 @@ public class MyHost : MarcDetailHost
     }
 
     // 维护210对照关系
-    // 2008/10/17 new add
+    // 2008/10/17
     void Manage210()
     {
         string strError = "";

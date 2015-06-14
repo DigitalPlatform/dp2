@@ -1155,7 +1155,7 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                 }
 
                 if (String.IsNullOrEmpty(strBarcode) == true)
-                    continue;   // 2008/11/3 new add
+                    continue;   // 2008/11/3
 
 
                 // 对当前窗口内进行条码查重
@@ -1204,7 +1204,7 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
 
                 BookItem dupitem = null;
 
-                if (String.IsNullOrEmpty(strBarcode) == false)  // 2008/11/3 new add
+                if (String.IsNullOrEmpty(strBarcode) == false)  // 2008/11/3
                 {
                     // 对当前窗口内进行条码查重
                     dupitem = this.Items.GetItemByBarcode(strBarcode);
@@ -1300,7 +1300,7 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
 
             EntityEditForm edit = new EntityEditForm();
 
-            // 2009/2/24 new add
+            // 2009/2/24 
             edit.GenerateData -= new GenerateDataEventHandler(edit_GenerateData);
             edit.GenerateData += new GenerateDataEventHandler(edit_GenerateData);
 
@@ -1339,7 +1339,7 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
 
 
                 if (strOldBarcode != bookitem.Barcode // 条码改变了的情况下才查重
-                    && String.IsNullOrEmpty(bookitem.Barcode) == false)   // 2008/11/3 new add 不检查空的条码号是否重复
+                    && String.IsNullOrEmpty(bookitem.Barcode) == false)   // 2008/11/3 不检查空的条码号是否重复
                 {
 
                     // 对当前窗口内进行条码查重
@@ -1786,7 +1786,7 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
 
             EntityEditForm edit = new EntityEditForm();
 
-            // 2009/2/24 new add
+            // 2009/2/24 
             edit.GenerateData -= new GenerateDataEventHandler(edit_GenerateData);
             edit.GenerateData += new GenerateDataEventHandler(edit_GenerateData);
 
@@ -1943,14 +1943,14 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                 return -1;
             }
 
-            // 2008/9/17 new add
+            // 2008/9/17 
             if (this.Items == null)
                 this.Items = new BookItemCollection();
 
             // 看看是否有已经存在的记录
             BookItem exist_item = this.Items.GetItemByRefID(strRefID) as BookItem;
 
-            // 2009/12/16 new add
+            // 2009/12/16 
             if (exist_item != null)
             {
                 if (strAction == "neworchange")
@@ -2252,7 +2252,7 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                 goto ERROR1;
             }
 
-            if (String.IsNullOrEmpty(strBarcode) == false)  // 2008/11/3 new add
+            if (String.IsNullOrEmpty(strBarcode) == false)  // 2008/11/3
             {
 
                 // 对当前窗口内进行条码查重
@@ -2831,7 +2831,7 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
             if (String.IsNullOrEmpty(strRecPath) == false)
                 return "记录路径为 '" + strRecPath + "' 的事项";
 
-            // 2008/6/24 new add
+            // 2008/6/24 
             if (String.IsNullOrEmpty(strRefID) == false)
                 return "参考ID为 '" + strRefID + "' 的事项";
 
@@ -2859,7 +2859,7 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                 return "记录路径为 '" + strRecPath + "' 的事项";
 
             string strRefID = bookitem.RefID;
-            // 2008/6/24 new add
+            // 2008/6/24 
             if (String.IsNullOrEmpty(strRefID) == false)
                 return "参考ID为 '" + strRefID + "' 的事项";
 
@@ -3015,7 +3015,7 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
 
 #endif
 #if NO
-        // 2008/11/2 new add
+        // 2008/11/2
         // 
         // parameters:
         //      strItemBarcode  [out]返回册记录的册条码号
@@ -3107,7 +3107,7 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
 #endif
 
 #if NO
-        // 2010/2/26 new add
+        // 2010/2/26 
         // 
         // parameters:
         //      strItemBarcode  [out]返回册记录的册条码号
@@ -3212,7 +3212,7 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
         }
 
         // 
-        // 2009/10/12 new add
+        // 2009/10/12 
         // parameters:
         //      strPublishTime  出版时间，8字符。
         //                      如果为"*"，表示统配任意出版时间均可

@@ -561,7 +561,7 @@ this.dp2QueryControl1.GetSaveString());
             }
         }
 
-        // 2008/1/20 new add
+        // 2008/1/20 
         /// <summary>
         /// 获得配置参数：当前查询窗检索时，是否以推动的方式装入浏览列表
         /// </summary>
@@ -580,7 +580,7 @@ this.dp2QueryControl1.GetSaveString());
         {
             string strText = this.comboBox_matchStyle.Text;
 
-            // 2009/8/6 new add
+            // 2009/8/6 
             if (strText == "空值")
                 return "null";
 
@@ -1355,7 +1355,7 @@ this.dp2QueryControl1.GetSaveString());
             this.button_search.Enabled = bEnable;
             this.comboBox_from.Enabled = bEnable;
 
-            // 2008/11/21 new add
+            // 2008/11/21 
             this.comboBox_entityDbName.Enabled = bEnable;
             this.comboBox_matchStyle.Enabled = bEnable;
 
@@ -1625,7 +1625,7 @@ this.dp2QueryControl1.GetSaveString());
                     this.comboBox_from.Text = query.From;
                 }
 
-                if (this.textBox_queryWord.Text == "")    // 2009/8/6 new add
+                if (this.textBox_queryWord.Text == "")    // 2009/8/6 
                     this.comboBox_matchStyle.Text = "空值";
                 else
                     this.comboBox_matchStyle.Text = "精确一致";
@@ -1671,7 +1671,7 @@ this.dp2QueryControl1.GetSaveString());
                 // strBarcodeOrRecPath = ListViewUtil.GetItemText(this.listView_records.SelectedItems[0], 1);
                 string strError = "";
                 // 根据 ListViewItem 对象，获得册条码号列的内容
-                int nRet = GetItemBarcode(
+                int nRet = GetItemBarcodeOrRefID(
                     this.listView_records.SelectedItems[0],
                     true,
                     out strBarcodeOrRecPath,
@@ -1776,11 +1776,14 @@ this.dp2QueryControl1.GetSaveString());
                     form.Show();
                 }
 
-                form.DbType = this.DbType;
+                if (this.DbType == "arrive")
+                    form.DbType = "item";
+                else
+                    form.DbType = this.DbType;
 
                 if (strIdType == "barcode")
                 {
-                    Debug.Assert(this.DbType == "item", "");
+                    Debug.Assert(this.DbType == "item" || this.DbType == "arrive", "");
                     form.LoadRecord(strBarcodeOrRecPath);
                 }
                 else
@@ -1857,6 +1860,40 @@ this.dp2QueryControl1.GetSaveString());
             this.LoadToItemWindow = false;
         }
 
+        int GetItemBarcodeOrRefID(ListViewItem item,
+            bool bWarning,
+            out string strBarcode,
+            out string strError)
+        {
+            // strBarcode = ListViewUtil.GetItemText(this.listView_records.SelectedItems[0], 1);
+            int nRet = GetItemBarcode(
+item,
+bWarning,
+out strBarcode,
+out strError);
+            if (nRet == -1)
+                return -1;
+            // 2015/6/14
+            // 如果册条码号为空，则尝试用 参考ID
+            if (string.IsNullOrEmpty(strBarcode) == true)
+            {
+                // return:
+                //      -2  没有找到列 type
+                //      -1  出错
+                //      >=0 列号
+                nRet = GetColumnText(item,
+"item_refid",
+out strBarcode,
+out strError);
+                if (nRet >= 0 && string.IsNullOrEmpty(strBarcode) == false)
+                {
+                    strBarcode = "@refID:" + strBarcode;
+                }
+            }
+
+            return 0;
+        }
+
         private void listView_records_MouseUp(object sender, MouseEventArgs e)
         {
             if (e.Button != MouseButtons.Right)
@@ -1874,12 +1911,14 @@ this.dp2QueryControl1.GetSaveString());
                 strFirstColumn = ListViewUtil.GetItemText(this.listView_records.SelectedItems[0], 0);
             }
 
-
             if (String.IsNullOrEmpty(strFirstColumn) == false)
             {
                 string strRecPath = "";
                 if (bSelected == true)
-                    strRecPath = this.listView_records.SelectedItems[0].Text;
+                {
+                    if (this.DbType != "arrive")
+                        strRecPath = this.listView_records.SelectedItems[0].Text;
+                }
 
                 string strOpenStyle = "新开的";
                 if (this.LoadToExistWindow == true)
@@ -1900,12 +1939,12 @@ this.dp2QueryControl1.GetSaveString());
                 if (bSelected == true)
                 {
                     string strError = "";
-                    int nRet = GetItemBarcode(
+                    // strBarcode = ListViewUtil.GetItemText(this.listView_records.SelectedItems[0], 1);
+                    int nRet = GetItemBarcodeOrRefID(
     this.listView_records.SelectedItems[0],
     false,
     out strBarcode,
     out strError);
-                    // strBarcode = ListViewUtil.GetItemText(this.listView_records.SelectedItems[0], 1);
                 }
 
                 bool bExistEntityForm = (this.MainForm.GetTopChildWindow<EntityForm>() != null);
@@ -1927,7 +1966,8 @@ this.dp2QueryControl1.GetSaveString());
                 menuItem.MenuItems.Add(subMenuItem);
 
                 // 到册窗，条码
-                if (this.DbType == "item")
+                // if (this.DbType == "item")
+                if (string.IsNullOrEmpty(strBarcode) == false)
                 {
                     subMenuItem = new MenuItem("装入" + strOpenStyle + this.DbTypeCaption + "窗，根据册条码号 '" + strBarcode + "'");
                     subMenuItem.Click += new System.EventHandler(this.menu_itemInfoForm_barcode_newly_Click);
@@ -1944,7 +1984,8 @@ this.dp2QueryControl1.GetSaveString());
                 menuItem.MenuItems.Add(subMenuItem);
 
                 // 到种册窗，条码
-                if (this.DbType == "item")
+                // if (this.DbType == "item")
+                if (string.IsNullOrEmpty(strBarcode) == false)
                 {
                     subMenuItem = new MenuItem("装入" + strOpenStyle + "种册窗，根据册条码号 '" + strBarcode + "'");
                     subMenuItem.Click += new System.EventHandler(this.menu_entityForm_barcode_newly_Click);
@@ -1968,7 +2009,8 @@ this.dp2QueryControl1.GetSaveString());
                 menuItem.MenuItems.Add(subMenuItem);
 
                 // 到册窗，条码
-                if (this.DbType == "item")
+                //if (this.DbType == "item")
+                if (string.IsNullOrEmpty(strBarcode) == false)
                 {
                     subMenuItem = new MenuItem("装入" + strOpenStyle + this.DbTypeCaption + "窗，根据册条码号 '" + strBarcode + "'");
                     subMenuItem.Click += new System.EventHandler(this.menu_itemInfoForm_barcode_exist_Click);
@@ -1987,7 +2029,8 @@ this.dp2QueryControl1.GetSaveString());
                 menuItem.MenuItems.Add(subMenuItem);
 
                 // 到种册窗，条码
-                if (this.DbType == "item")
+//                if (this.DbType == "item")
+                if (string.IsNullOrEmpty(strBarcode) == false)
                 {
                     subMenuItem = new MenuItem("装入" + strOpenStyle + "种册窗，根据册条码号 '" + strBarcode + "'");
                     subMenuItem.Click += new System.EventHandler(this.menu_entityForm_barcode_exist_Click);
@@ -2012,7 +2055,6 @@ this.dp2QueryControl1.GetSaveString());
                 menuItem = new MenuItem("在新开的" + this.DbTypeCaption + "查询窗内 检索 '" + strKey + "' (&N)");
                 menuItem.Click += new System.EventHandler(this.listView_searchKeysAtNewWindow_Click);
                 contextMenu.MenuItems.Add(menuItem);
-
             }
 
             // // //
@@ -2581,7 +2623,7 @@ this.dp2QueryControl1.GetSaveString());
 
                     string strItemBarcode = "";
                     // 根据 ListViewItem 对象，获得册条码号列的内容
-                    nRet = GetItemBarcode(
+                    nRet = GetItemBarcodeOrRefID(
                         item,
                         true,
                         out strItemBarcode,
@@ -5139,7 +5181,8 @@ MessageBoxDefaultButton.Button1);
             else
                 bAppend = false;
 
-            m_tableBarcodeColIndex.Clear();
+            // m_tableBarcodeColIndex.Clear();
+            ClearColumnIndexCache();
 
             // 创建文件
             StreamWriter sw = new StreamWriter(this.ExportBarcodeFilename,
@@ -5192,7 +5235,7 @@ MessageBoxDefaultButton.Button1);
 
                     string strBarcode = "";
                     // 根据 ListViewItem 对象，获得册条码号列的内容
-                    int nRet = GetItemBarcode(
+                    int nRet = GetItemBarcodeOrRefID(
                         item,
                         true,
                         out strBarcode,

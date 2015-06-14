@@ -335,7 +335,7 @@ namespace DigitalPlatform.Library
             {
                 // 2007/4/5 改造 加上了 GetXmlStringSimple()
                 string strQueryXml = "<target list='"
-                    + StringUtil.GetXmlStringSimple(this.BiblioDbName + ":" + this.comboBox_from.Text)        // 2007/9/14 new add
+                    + StringUtil.GetXmlStringSimple(this.BiblioDbName + ":" + this.comboBox_from.Text)        // 2007/9/14
                     + "'><item><word>"
                     + StringUtil.GetXmlStringSimple(GetQueryString())
                     + "</word><match>left</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>" + this.Lang + "</lang></target>";
@@ -887,7 +887,7 @@ namespace DigitalPlatform.Library
 
                     // 2007/4/5 改造 加上了 GetXmlStringSimple()
                     string strQueryXml = "<target list='"
-                        + StringUtil.GetXmlStringSimple(strItemDbName + ":" + "册条码")       // 2007/9/14 new add
+                        + StringUtil.GetXmlStringSimple(strItemDbName + ":" + "册条码")       // 2007/9/14
                         + "'><item><word>"
                         + StringUtil.GetXmlStringSimple(strBarcode)
                         + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>" + this.Lang + "</lang></target>";
@@ -1172,7 +1172,7 @@ namespace DigitalPlatform.Library
             try
             {
                 string strQueryXml = "<target list='"
-                    + StringUtil.GetXmlStringSimple(this.ItemDbName + ":" + "父记录")       // 2007/9/14 new add
+                    + StringUtil.GetXmlStringSimple(this.ItemDbName + ":" + "父记录")       // 2007/9/14
                     + "'><item><word>"
                     + strBiblioRecId
                     + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>" + this.Lang + "</lang></target>";

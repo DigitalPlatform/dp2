@@ -736,7 +736,7 @@ namespace dp2Circulation
 
                         /*
                         // 如果册条码号为空，则改用路径装载
-                        // 2009/8/6 new add
+                        // 2009/8/6
                         if (String.IsNullOrEmpty(strBarcode) == true)
                         {
                             strBarcode = "@path:" + strRecPath;
@@ -1374,7 +1374,7 @@ namespace dp2Circulation
                 else
                     item = new ListViewItem("", 0); // 暂时还没有办法知道条码
 
-                // 2009/10/29 new add
+                // 2009/10/29
                 OriginItemData data = new OriginItemData();
                 item.Tag = data;
                 data.Timestamp = item_timestamp;
@@ -1611,7 +1611,7 @@ namespace dp2Circulation
         static void SetItemColor(ListViewItem item,
             int nType)
         {
-            item.ImageIndex = nType;    // 2009/11/1 new add
+            item.ImageIndex = nType;    // 2009/11/1
 
             if (nType == TYPE_ERROR)
             {
@@ -1730,7 +1730,7 @@ namespace dp2Circulation
                 "borrower");
             string strBorrowDate = DomUtil.GetElementText(dom.DocumentElement,
                 "borrowDate");
-            // 2007/6/20 new add
+            // 2007/6/20
             strBorrowDate = DateTimeUtil.LocalTime(strBorrowDate, "u");
             string strBorrowPeriod = DomUtil.GetElementText(dom.DocumentElement,
                 "borrowPeriod");

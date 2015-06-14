@@ -18,7 +18,7 @@ namespace DigitalPlatform
         // 当前焦点所在的子控件
         public object FocusedControl = null;
 
-        // 2009/2/27 new add
+        // 2009/2/27
         public string ScriptEntry = ""; // 入口函数名。如果为空，则会调用Main(object sender, GenerateDataEventArgs e)
 
         public bool ShowErrorBox = true;    // [in]是否要显示出错MessageBox

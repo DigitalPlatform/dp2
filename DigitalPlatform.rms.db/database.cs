@@ -1045,7 +1045,7 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
-        // 2008/11/14 new add
+        // 2008/11/14
         // 刷新数据库(SQL表)定义，注意虚函数不能为private
         // parameter:
         //		strError    out参数，返回出错信息
@@ -1555,7 +1555,7 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
-        // 2008/11/14 new add
+        // 2008/11/14
         // 重建记录的keys
         // parameter:
         //		strRecordID     记录ID
@@ -2469,7 +2469,7 @@ namespace DigitalPlatform.rms
 
                 // 目前不支持修改strType,strSqlDbName
 
-                if (strKeysText != null)  // 2008/4/30 new add
+                if (strKeysText != null)  // 2008/4/30
                 {
 
                     string strKeysFileName = "";//this.GetFixedCfgFileName("keys");
@@ -2541,7 +2541,7 @@ namespace DigitalPlatform.rms
                 }
 
 
-                if (strBrowseText != null)  // 2008/4/30 new add
+                if (strBrowseText != null)  // 2008/4/30
                 {
                     string strDbName = this.GetCaption("zh");
 

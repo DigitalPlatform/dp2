@@ -1913,7 +1913,7 @@ namespace dp2Circulation
             string strID = Global.GetRecordID(strPath);
 
             if (strID == "?"
-                || String.IsNullOrEmpty(strID) == true) // 2008/11/28 new add
+                || String.IsNullOrEmpty(strID) == true) // 2008/11/28 
                 return true;
 
             return false;

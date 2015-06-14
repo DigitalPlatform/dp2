@@ -1442,7 +1442,7 @@ namespace DigitalPlatform.rms
                         {
                             try
                             {
-                                command.CommandTimeout = 20 * 60;  // 把超时时间放大 2008/11/20 new add
+                                command.CommandTimeout = 20 * 60;  // 把超时时间放大 2008/11/20 
 
                                 command.ExecuteNonQuery();
                             }
@@ -1467,7 +1467,7 @@ namespace DigitalPlatform.rms
                         {
                             try
                             {
-                                command.CommandTimeout = 20 * 60;  // 把超时时间放大 2008/11/20 new add
+                                command.CommandTimeout = 20 * 60;  // 把超时时间放大 2008/11/20 
 
                                 command.ExecuteNonQuery();
                             }
@@ -1509,7 +1509,7 @@ namespace DigitalPlatform.rms
                                 try
                                 {
                                     command.CommandText = strLine;
-                                    command.CommandTimeout = 20 * 60;  // 把超时时间放大 2008/11/20 new add
+                                    command.CommandTimeout = 20 * 60;  // 把超时时间放大 2008/11/20 
 
                                     command.ExecuteNonQuery();
                                 }
@@ -1602,7 +1602,7 @@ namespace DigitalPlatform.rms
                         {
                             try
                             {
-                                command.CommandTimeout = 20 * 60;  // 把超时时间放大 2008/11/20 new add
+                                command.CommandTimeout = 20 * 60;  // 把超时时间放大 2008/11/20 
 
                                 command.ExecuteNonQuery();
                             }
@@ -1623,7 +1623,7 @@ namespace DigitalPlatform.rms
                         {
                             try
                             {
-                                command.CommandTimeout = 20 * 60;  // 把超时时间放大 2008/11/20 new add
+                                command.CommandTimeout = 20 * 60;  // 把超时时间放大 2008/11/20 
 
                                 command.ExecuteNonQuery();
                             }
@@ -1667,7 +1667,7 @@ namespace DigitalPlatform.rms
                         {
                             try
                             {
-                                command.CommandTimeout = 20 * 60;  // 把超时时间放大 2008/11/20 new add
+                                command.CommandTimeout = 20 * 60;  // 把超时时间放大 2008/11/20 
 
                                 command.ExecuteNonQuery();
                             }
@@ -1728,7 +1728,7 @@ namespace DigitalPlatform.rms
                                 try
                                 {
                                     command.CommandText = strLine;
-                                    command.CommandTimeout = 20 * 60;  // 把超时时间放大 2008/11/20 new add
+                                    command.CommandTimeout = 20 * 60;  // 把超时时间放大 2008/11/20 
 
                                     command.ExecuteNonQuery();
                                 }
@@ -2156,7 +2156,7 @@ namespace DigitalPlatform.rms
                                 + " ON " + tableInfo.SqlTableName + " " + KEY_COL_LIST + " \n";
                             strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_keystringnum_index \n"
                                 + " ON " + tableInfo.SqlTableName + " " + KEYNUM_COL_LIST + " \n";
-                            // 2008/11/20 new add
+                            // 2008/11/20 
                             strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_idstring_index \n"
                                 + " ON " + tableInfo.SqlTableName + " (idstring) \n";
                         }
@@ -2178,7 +2178,7 @@ namespace DigitalPlatform.rms
                                 + " ON " + tableInfo.SqlTableName + " " + KEY_COL_LIST + " \n";
                             strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_keystringnum_index \n"
                                 + " ON " + tableInfo.SqlTableName + " " + KEYNUM_COL_LIST + " \n";
-                            // 2008/11/20 new add
+                            // 2008/11/20 
                             strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_idstring_index \n"
                                 + " ON " + tableInfo.SqlTableName + " (idstring) \n";
                             strCommand += "END\n";
@@ -2244,7 +2244,7 @@ namespace DigitalPlatform.rms
                                 + " ON " + tableInfo.SqlTableName + " " + KEY_COL_LIST + " ;\n";
                             strCommand += " CREATE INDEX if not exists " + tableInfo.SqlTableName + "_keystringnum_index \n"
                                 + " ON " + tableInfo.SqlTableName + " " + KEYNUM_COL_LIST + " ;\n";
-                            // 2008/11/20 new add
+                            // 2008/11/20 
                             strCommand += " CREATE INDEX if not exists " + tableInfo.SqlTableName + "_idstring_index \n"
                                 + " ON " + tableInfo.SqlTableName + " (idstring) ;\n";
                         }
@@ -2449,7 +2449,7 @@ namespace DigitalPlatform.rms
                                     + " ON " + tableInfo.SqlTableName + " " + KEY_COL_LIST + " \n";
                                 strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_keystringnum_index \n"
                                     + " ON " + tableInfo.SqlTableName + " " + KEYNUM_COL_LIST + " \n";
-                                // 2008/11/20 new add
+                                // 2008/11/20 
                                 strCommand += " CREATE INDEX " + tableInfo.SqlTableName + "_idstring_index \n"
                                     + " ON " + tableInfo.SqlTableName + " (idstring) \n";
                             }
@@ -4462,7 +4462,7 @@ namespace DigitalPlatform.rms
                 if (aTableInfo == null || aTableInfo.Count == 0)
                     return 0;
 
-                // 2009/8/5 new add
+                // 2009/8/5 
                 bool bSearchNull = false;
                 if (searchItem.Match == "exact"
                     && searchItem.Relation == "="
@@ -4480,12 +4480,12 @@ namespace DigitalPlatform.rms
                 string strColumnList = "";
 
                 if (bOutputKeyCount == true
-                    && bSearchNull == false)    // 2009/8/6 new add
+                    && bSearchNull == false)    // 2009/8/6 
                 {
                     strColumnList = " keystring, count(*) ";
                 }
                 else if (bOutputKeyID == true
-                    && bSearchNull == false)    // 2010/5/12 new add
+                    && bSearchNull == false)    // 2010/5/12 
                 {
                     strColumnList = " keystring, idstring, fromstring ";
                 }
@@ -4949,7 +4949,7 @@ namespace DigitalPlatform.rms
                                 }
 
                                 // 如果DataReader==null，可能是SQL检索式出错了
-                                // 2007/9/14 new add
+                                // 2007/9/14 
                                 if (task.bError == true)
                                 {
                                     strError = task.ErrorString;
@@ -5247,7 +5247,7 @@ namespace DigitalPlatform.rms
                                 }
 
                                 // 如果DataReader==null，可能是SQL检索式出错了
-                                // 2007/9/14 new add
+                                // 2007/9/14 
                                 if (task.bError == true)
                                 {
                                     strError = task.ErrorString;
@@ -6281,7 +6281,7 @@ namespace DigitalPlatform.rms
                                         DomUtil.SetAttr(fileNode, "__size", (string)values["size"]);
 
 
-                                        // 2007/12/13 new add
+                                        // 2007/12/13 
                                         string strLastModifyTime = (string)values["lastmodifytime"];
                                         if (String.IsNullOrEmpty(strLastModifyTime) == false)
                                             DomUtil.SetAttr(fileNode, "__lastmodifytime", strLastModifyTime);
@@ -7192,7 +7192,7 @@ namespace DigitalPlatform.rms
                                     }
                                     else
                                     {
-                                        // 2008/3/13 new add
+                                        // 2008/3/13 
                                         outputTimestamp = null;
                                     }
                                 }
@@ -7208,7 +7208,7 @@ namespace DigitalPlatform.rms
                                     }
                                     else
                                     {
-                                        // 2008/3/13 new add
+                                        // 2008/3/13 
                                         outputTimestamp = null;
                                     }
                                 }
@@ -12322,7 +12322,7 @@ out baPreamble);
 
                 bool bRet = dr.Read();
 
-                // 2008/3/13 new add
+                // 2008/3/13 
                 if (bRet == true)
                 {
                     // 还有一行
@@ -13531,10 +13531,10 @@ out baPreamble);
                         int i = 0;
                         int nNameIndex = 0;
 
-                        int nCount = 0; // 累积的尚未发出的命令行数 2008/10/21 new add
-                        int nExecuted = 0;   // 已经发出执行的命令行数 2008/10/21 new add
+                        int nCount = 0; // 累积的尚未发出的命令行数 2008/10/21 
+                        int nExecuted = 0;   // 已经发出执行的命令行数 2008/10/21 
 
-                        int nMaxLinesPerExecute = (2100 / 5) - 1;   // 4个参数，加上一个sql命令字符串 2008/10/23 new add
+                        int nMaxLinesPerExecute = (2100 / 5) - 1;   // 4个参数，加上一个sql命令字符串 2008/10/23 
 
                         // 2006/12/8 把删除提前到增加以前
                         if (keysDelete != null)
@@ -16547,7 +16547,7 @@ bool bTempObject)
 
                 bool bRet = dr.Read();
 
-                // 2008/3/13 new add
+                // 2008/3/13 
                 if (bRet == true)
                 {
                     // 还有一行

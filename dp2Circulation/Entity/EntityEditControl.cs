@@ -138,7 +138,7 @@ namespace dp2Circulation
             }
         }
 
-        // 2008/2/15 new add
+        // 2008/2/15 
         /// <summary>
         /// 经费来源
         /// </summary>
@@ -334,7 +334,7 @@ namespace dp2Circulation
             }
         }
 
-        // 2008/12/12 new add
+        // 2008/12/12 
         /// <summary>
         /// 索取号
         /// </summary>
@@ -367,7 +367,7 @@ namespace dp2Circulation
             }
         }
 
-        // 2009/10/11 new add
+        // 2009/10/11 
         /// <summary>
         /// 完好率
         /// </summary>
@@ -383,7 +383,7 @@ namespace dp2Circulation
             }
         }
 
-        // 2009/10/11 new add
+        // 2009/10/11 
         /// <summary>
         /// 装订信息
         /// </summary>
@@ -399,7 +399,7 @@ namespace dp2Circulation
             }
         }
 
-        // 2009/10/24 new add
+        // 2009/10/24 
         /// <summary>
         /// 操作信息
         /// </summary>
@@ -551,7 +551,7 @@ namespace dp2Circulation
         }
 #endif
 
-        Label label_errorInfo = null;
+        System.Windows.Forms.Label label_errorInfo = null;
 
         // 错误信息文字
         public string ErrorInfo
@@ -594,7 +594,7 @@ namespace dp2Circulation
             }
         }
 #endif
-        public Label ErrorInfoLabel
+        public System.Windows.Forms.Label ErrorInfoLabel
         {
             get
             {
@@ -784,7 +784,7 @@ namespace dp2Circulation
                 {
                     for (int i = 0; i < this.tableLayoutPanel_main.RowStyles.Count; i++)
                     {
-                        Label label = this.tableLayoutPanel_main.GetControlFromPosition(0, i) as Label;
+                        System.Windows.Forms.Label label = this.tableLayoutPanel_main.GetControlFromPosition(0, i) as Label;
                         if (label != null)
                         {
                             label.TextAlign = ContentAlignment.MiddleRight;
@@ -801,7 +801,7 @@ namespace dp2Circulation
                         continue;
 
                     {
-                        Control label = this.tableLayoutPanel_main.GetControlFromPosition(0, i) as Label;
+                        Control label = this.tableLayoutPanel_main.GetControlFromPosition(0, i) as System.Windows.Forms.Label;
                         if (label != null)
                         {
                             if (label != this.label_barcode)
@@ -1691,7 +1691,7 @@ namespace dp2Circulation
                 this.textBox_borrowPeriod.ReadOnly = true;
                 this.textBox_borrowDate.ReadOnly = true;
                 this.textBox_recPath.ReadOnly = true;
-                this.textBox_refID.ReadOnly = true; // 2009/6/2 new add
+                this.textBox_refID.ReadOnly = true; // 2009/6/2 
 
                 if (this.textBox_borrower.Text != "")
                     this.textBox_barcode.ReadOnly = true;  // 为了测试服务器端API，可以修改为false
@@ -1708,7 +1708,7 @@ namespace dp2Circulation
                 this.textBox_borrowPeriod.ReadOnly = true;
                 this.textBox_borrowDate.ReadOnly = true;
                 this.textBox_recPath.ReadOnly = true;
-                this.textBox_refID.ReadOnly = true; // 2009/6/2 new add
+                this.textBox_refID.ReadOnly = true; // 2009/6/2 
 
                 if (this.textBox_borrower.Text != "")
                     this.textBox_barcode.ReadOnly = true;  // 为了测试服务器端API，可以修改为false
@@ -1731,7 +1731,7 @@ namespace dp2Circulation
             this.textBox_borrowPeriod.ReadOnly = false;
             this.textBox_borrowDate.ReadOnly = false;
             this.textBox_recPath.ReadOnly = false;
-            this.textBox_refID.ReadOnly = false; // 2009/6/2 new add
+            this.textBox_refID.ReadOnly = false; // 2009/6/2 
 
             this.textBox_barcode.ReadOnly = false;
         }
@@ -1774,7 +1774,7 @@ namespace dp2Circulation
 
         private void comboBox_location_DropDown(object sender, EventArgs e)
         {
-            // 防止重入 2009/2/23 new add
+            // 防止重入 2009/2/23 
             if (this.m_nInDropDown > 0)
                 return;
 

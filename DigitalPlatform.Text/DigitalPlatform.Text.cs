@@ -1526,7 +1526,7 @@ namespace DigitalPlatform.Text
             return String.Join(",", pathlist);
         }
 
-        // 2008/11/17 new add
+        // 2008/11/17
         public static string MakePathList(List<string> aPath,
             string strSep)
         {

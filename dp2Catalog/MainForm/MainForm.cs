@@ -2131,7 +2131,7 @@ out string strError)
                 searchform.WindowState = FormWindowState.Minimized;
                 searchform.Show();
 
-                // 2008/3/17 new add
+                // 2008/3/17 
                 this.WindowState = old_state;
                 this.Activate();
 
@@ -2160,7 +2160,7 @@ out string strError)
                 dp2_searchform.WindowState = FormWindowState.Minimized;
                 dp2_searchform.Show();
 
-                // 2008/3/17 new add
+                // 2008/3/17 
                 this.WindowState = old_state;
                 this.Activate();
 

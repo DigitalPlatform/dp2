@@ -3,7 +3,6 @@ using System.Xml;
 
 namespace DigitalPlatform.Xml
 {
-
 	public class EntityReferenceItem : NoneNameTextItem
 	{
 		internal EntityReferenceItem(XmlEditor document)
@@ -28,7 +27,7 @@ namespace DigitalPlatform.Xml
 		}
 
 		
-		public override void InitialLabelText(Label label)
+		public override void InitialLabelText(XmlLabel label)
 		{
 			label.Text = "&" + this.Name + ";";
 		}

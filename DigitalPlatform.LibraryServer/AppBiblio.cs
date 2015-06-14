@@ -398,8 +398,8 @@ namespace DigitalPlatform.LibraryServer
                             if (commands.Count == 1)
                             {
                                 result.Value = 0;
-                                result.ErrorCode = ErrorCode.NotFound;  // 2009/8/8 new add
-                                result.ErrorInfo = "书目记录 '" + strSearchRecPath + "' 不存在";  // 2009/8/8 new add
+                                result.ErrorCode = ErrorCode.NotFound;  // 2009/8/8 
+                                result.ErrorInfo = "书目记录 '" + strSearchRecPath + "' 不存在";  // 2009/8/8 
                                 return result;
                             }
                             // 填入空字符串
@@ -686,7 +686,7 @@ namespace DigitalPlatform.LibraryServer
                                 strLocalPath,
                                 strLocalPath + ".ref",
                                 strBiblioXml,
-                                strCurrentBiblioRecPath,   // 2009/10/18 new add
+                                strCurrentBiblioRecPath,   // 2009/10/18 
                                 out strSummary,
                                 out strError);
                         }
@@ -893,7 +893,7 @@ namespace DigitalPlatform.LibraryServer
                 }
                 else if (String.Compare(strBiblioType, "outputpath", true) == 0)
                 {
-                    strBiblio = strOutputPath;  // 2008/3/18 new add
+                    strBiblio = strOutputPath;  // 2008/3/18 
                 }
                 else if (String.Compare(strBiblioType, "timestamp", true) == 0)
                 {
@@ -901,7 +901,7 @@ namespace DigitalPlatform.LibraryServer
                 }
                 else if (String.Compare(strBiblioType, "metadata", true) == 0)
                 {
-                    strBiblio = strMetadata;  // 2010/10/27 new add
+                    strBiblio = strMetadata;  // 2010/10/27 
                 }
                 else if (String.Compare(strBiblioType, "html", true) == 0)
                 {
@@ -1475,7 +1475,7 @@ return result;
                         strLocalPath,
                         strLocalPath + ".ref",
                         strBiblioXml,
-                        strBiblioRecPath,   // 2009/10/18 new add
+                        strBiblioRecPath,   // 2009/10/18 
                         out strSummary,
                         out strError);
                 }
@@ -3456,7 +3456,7 @@ nsmgr);
                         strDeniedComment += " " + strError;
                 }
 
-                // 2009/11/2 new add
+                // 2009/11/2 
                 // 需要判断路径最后一级是否为问号？
                 string strTargetRecId = ResPath.GetRecordId(strBiblioRecPath);
                 if (strTargetRecId == "?" || String.IsNullOrEmpty(strTargetRecId) == true)
@@ -5101,7 +5101,7 @@ out strError);
 
             if (strTargetRecId == "?" || String.IsNullOrEmpty(strTargetRecId) == true)
             {
-                // 2009/11/1 new add
+                // 2009/11/1 
                 if (String.IsNullOrEmpty(strTargetRecId) == true)
                     strNewRecPath += "/?";
 

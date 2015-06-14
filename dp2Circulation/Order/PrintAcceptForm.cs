@@ -666,7 +666,7 @@ namespace dp2Circulation
                         }
 
                         this.listView_origin.Items.Clear();
-                        // 2008/11/22 new add
+                        // 2008/11/22
                         this.SortColumns_origin.Clear();
                         SortColumns.ClearColumnSortDisplay(this.listView_origin.Columns);
 
@@ -1935,7 +1935,7 @@ namespace dp2Circulation
             }
             else
             {
-                data.Changed = false;   // 2008/9/5 new add
+                data.Changed = false;   // 2008/9/5
             }
 
             string strState = DomUtil.GetElementText(dom.DocumentElement,
@@ -2799,10 +2799,10 @@ namespace dp2Circulation
 
                 macro_table["%pageno%"] = "1";
 
-                // 2009/7/30 new add
+                // 2009/7/30
                 macro_table["%datadir%"] = this.MainForm.DataDir;   // 便于引用datadir下templates目录内的某些文件
                 ////macro_table["%libraryserverdir%"] = this.MainForm.LibraryServerDir;  // 便于引用服务器端的CSS文件
-                // 2009/10/10 new add
+                // 2009/10/10
                 macro_table["%cssfilepath%"] = this.GetAutoCssUrl(option, "printaccept.css");  // 便于引用服务器端或“css”模板的CSS文件
 
                 strFileName = strFileNamePrefix + "0" + ".html";
@@ -2920,7 +2920,7 @@ namespace dp2Circulation
             return 0;
         }
 
-        // 2009/10/10 new add
+        // 2009/10/10
         // 获得css文件的路径(或者http:// 地址)。将根据是否具有“统计页”来自动处理
         // parameters:
         //      strDefaultCssFileName   “css”模板缺省情况下，将采用的虚拟目录中的css文件名，纯文件名
@@ -2957,7 +2957,7 @@ namespace dp2Circulation
             string strCssUrl = GetAutoCssUrl(option, "printaccept.css");
 
             /*
-            // 2009/10/9 new add
+            // 2009/10/9
             string strCssFilePath = option.GetTemplatePageFilePath("css");  // 大小写不敏感
             if (String.IsNullOrEmpty(strCssFilePath) == false)
                 strCssUrl = strCssFilePath;
@@ -3617,7 +3617,7 @@ namespace dp2Circulation
                 }
 
                 this.listView_origin.Items.Clear();
-                // 2008/11/22 new add
+                // 2008/11/22
                 this.SortColumns_origin.Clear();
                 SortColumns.ClearColumnSortDisplay(this.listView_origin.Columns);
 
@@ -4042,7 +4042,7 @@ out strError);
                 }
 
                 this.listView_origin.Items.Clear();
-                // 2008/11/22 new add
+                // 2008/11/22
                 this.SortColumns_origin.Clear();
                 SortColumns.ClearColumnSortDisplay(this.listView_origin.Columns);
 
@@ -5274,7 +5274,7 @@ out strError);
             // int nOrderIdSeed = 1;
 
             this.listView_merged.Items.Clear();
-            // 2008/11/22 new add
+            // 2008/11/22
             this.SortColumns_merged.Clear();
             SortColumns.ClearColumnSortDisplay(this.listView_merged.Columns);
 
@@ -6235,10 +6235,10 @@ out strError);
 
                 macro_table["%pageno%"] = "1";
 
-                // 2009/7/30 new add
+                // 2009/7/30
                 macro_table["%datadir%"] = this.MainForm.DataDir;   // 便于引用datadir下templates目录内的某些文件
                 ////macro_table["%libraryserverdir%"] = this.MainForm.LibraryServerDir;  // 便于引用服务器端的CSS文件
-                // 2009/10/10 new add
+                // 2009/10/10
                 macro_table["%cssfilepath%"] = this.GetAutoCssUrl(option, "acceptorigin.css");  // 便于引用服务器端或“css”模板的CSS文件
 
                 strFileName = strFileNamePrefix + "0" + ".html";
@@ -6374,7 +6374,7 @@ out strError);
             string strCssUrl = GetAutoCssUrl(option, "acceptorigin.css");
 
             /*
-            // 2009/10/9 new add
+            // 2009/10/9
             string strCssFilePath = option.GetTemplatePageFilePath("css");  // 大小写不敏感
             if (String.IsNullOrEmpty(strCssFilePath) == false)
                 strCssUrl = strCssFilePath;
@@ -7239,7 +7239,7 @@ ORIGIN_COLUMN_ACCEPTSUBCOPY);
 
         private void PrintAcceptForm_Activated(object sender, EventArgs e)
         {
-            // 2009/8/13 new add
+            // 2009/8/13
             this.MainForm.stopManager.Active(this.stop);
         }
 

@@ -303,7 +303,7 @@ namespace DigitalPlatform.IO
                     m_streamBig = File.Open(m_strBigFileName,
                         FileMode.OpenOrCreate, 
                         FileAccess.ReadWrite,
-                        FileShare.ReadWrite);  // 2007/12/26 new add
+                        FileShare.ReadWrite);  // 2007/12/26
                      * */
                 }
 
@@ -402,7 +402,7 @@ namespace DigitalPlatform.IO
                     m_streamSmall.Write(bufferPosition, 0, 8);
 				}
 
-                // 2007/7/3 new add
+                // 2007/7/3
                 item.BuildBuffer();
 
 				byte[] bufferLength = System.BitConverter.GetBytes((Int32)item.Length);
@@ -581,7 +581,7 @@ namespace DigitalPlatform.IO
 				m_streamBig = File.Open (m_strBigFileName,
 					FileMode.Open,
                     FileAccess.ReadWrite,
-                    FileShare.ReadWrite);   // 2007/12/26 new add
+                    FileShare.ReadWrite);   // 2007/12/26
 
 
 				bool bCountSeted = false;
@@ -867,7 +867,7 @@ namespace DigitalPlatform.IO
 				m_streamSmall = File.Open(m_strSmallFileName,
 					FileMode.OpenOrCreate,
                     FileAccess.ReadWrite,
-                    FileShare.ReadWrite);  // 2007/12/26 new add
+                    FileShare.ReadWrite);  // 2007/12/26
 
 			}
 

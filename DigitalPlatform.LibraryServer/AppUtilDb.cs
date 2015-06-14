@@ -272,7 +272,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
             string strQueryXml = "<target list='"
-                + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 new add
+                + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14
                 + "'><item><word>"
                 + StringUtil.GetXmlStringSimple(strKey)
                 + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang></target>";

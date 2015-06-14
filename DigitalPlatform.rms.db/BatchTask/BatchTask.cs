@@ -362,7 +362,7 @@ namespace DigitalPlatform.rms
                 }
             }
 
-            this.ProgressFileVersion = DateTime.Now.Ticks;  // 2009/7/16 new add
+            this.ProgressFileVersion = DateTime.Now.Ticks;  // 2009/7/16
         }
 
         public virtual string DefaultName

@@ -284,7 +284,7 @@ namespace dp2Catalog
             strMARC = encoding.GetString(marc);
 
             // 去掉最后若干连续的29字符或者0字符
-            // 2008/3/11 new add
+            // 2008/3/11
             int nDelta = 0;
             for (int i = strMARC.Length - 1; i > 24; i--)
             {
@@ -513,7 +513,7 @@ namespace dp2Catalog
             strMARC = encoding.GetString(marc);
 
             // 去掉最后若干连续的29字符或者0字符
-            // 2008/3/11 new add
+            // 2008/3/11
             int nDelta = 0;
             for (int i = strMARC.Length - 1; i > 24; i--)
             {
@@ -802,7 +802,7 @@ namespace dp2Catalog
             }
 
 
-            // 2008/3/24 new add
+            // 2008/3/24
             if (this.dtlpResDirControl1.SelectedNode != null)
                 this.dtlpResDirControl1.SelectedNode.EnsureVisible();
 

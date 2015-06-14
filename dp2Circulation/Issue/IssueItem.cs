@@ -114,7 +114,7 @@ namespace dp2Circulation
             {
                 DomUtil.SetElementText(this.RecordDom.DocumentElement, 
                     "parent", value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5
             }
         }
 
@@ -155,7 +155,7 @@ namespace dp2Circulation
             {
                 DomUtil.SetElementText(this.RecordDom.DocumentElement, 
                     "publishTime", value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5
             }
         }
 
@@ -173,7 +173,7 @@ namespace dp2Circulation
             {
                 DomUtil.SetElementText(this.RecordDom.DocumentElement,
                     "state", value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5
             }
         }
 
@@ -214,7 +214,7 @@ namespace dp2Circulation
                 DomUtil.SetElementInnerXml(this.RecordDom.DocumentElement, 
                     "orderInfo",
                     value);
-                this.Changed = true; // 2009/11/24 new add
+                this.Changed = true; // 2009/11/24
             }
         }
 
@@ -232,7 +232,7 @@ namespace dp2Circulation
             {
                 DomUtil.SetElementText(this.RecordDom.DocumentElement,
                     "comment", value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5
             }
         }
 
@@ -250,7 +250,7 @@ namespace dp2Circulation
             {
                 DomUtil.SetElementText(this.RecordDom.DocumentElement, 
                     "batchNo", value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5
             }
         }
 
@@ -268,7 +268,7 @@ namespace dp2Circulation
             {
                 DomUtil.SetElementText(this.RecordDom.DocumentElement, 
                     "volume", value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5
             }
         }
 
@@ -286,7 +286,7 @@ namespace dp2Circulation
             {
                 DomUtil.SetElementText(this.RecordDom.DocumentElement, 
                     "zong", value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5
             }
         }
 
@@ -304,7 +304,7 @@ namespace dp2Circulation
             {
                 DomUtil.SetElementText(this.RecordDom.DocumentElement,
                     "issue", value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5
             }
         }
 
@@ -453,7 +453,7 @@ namespace dp2Circulation
 
             // this.Initial();
 
-            this.Changed = false;   // 2009/3/5 new add
+            this.Changed = false;   // 2009/3/5
             this.ItemDisplayState = ItemDisplayState.Normal;
 
             // this.RefreshListView();
@@ -631,7 +631,7 @@ namespace dp2Circulation
             {
                 m_bChanged = value;
 
-                // 2009/3/5 new add
+                // 2009/3/5
                 if ((this.ItemDisplayState == ItemDisplayState.Normal)
                     && this.m_bChanged == true)
                     this.ItemDisplayState = ItemDisplayState.Changed;
@@ -662,7 +662,7 @@ namespace dp2Circulation
             item.SubItems.Add(this.Comment);
             item.SubItems.Add(this.BatchNo);
 
-            item.SubItems.Add(this.RefID);  // 2010/2/27 new add
+            item.SubItems.Add(this.RefID);  // 2010/2/27
 
             item.SubItems.Add(this.RecPath);
              * */
@@ -775,7 +775,7 @@ namespace dp2Circulation
                 Debug.Assert(false, "ItemDisplayState.Normal◊¥Ã¨∫ÕChanged == true√¨∂‹¡À");
             }
             else if ((this.ItemDisplayState == ItemDisplayState.Changed)
-                && this.Changed == false) // 2009/3/5 new add
+                && this.Changed == false) // 2009/3/5
             {
                 Debug.Assert(false, "ItemDisplayState.Changed◊¥Ã¨∫ÕChanged == false√¨∂‹¡À");
             }
@@ -954,7 +954,7 @@ namespace dp2Circulation
             return 0;
         }
 
-        // 2008/11/28 new add
+        // 2008/11/28
         public List<string> GetParentIDs()
         {
             List<string> results = new List<string>();

@@ -640,7 +640,7 @@ namespace dp2Circulation
             out strError);
         }
 
-        int m_nInGetCfgFile = 0;    // 防止GetCfgFile()函数重入 2008/3/6 new add
+        int m_nInGetCfgFile = 0;    // 防止GetCfgFile()函数重入 2008/3/6
 
         // 获得配置文件
         // parameters:

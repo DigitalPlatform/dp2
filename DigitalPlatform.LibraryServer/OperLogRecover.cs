@@ -227,7 +227,7 @@ namespace DigitalPlatform.LibraryServer
 
                 FileInfo[] fis = di.GetFiles("*.log");
 
-                // BUG!!! 以前缺乏排序。2008/2/1 new add
+                // BUG!!! 以前缺乏排序。2008/2/1
                 Array.Sort(fis, new FileInfoCompare());
 
 
@@ -385,7 +385,7 @@ namespace DigitalPlatform.LibraryServer
                         if (nRet == -1)
                         {
                             this.AppendResultText("发生错误：" + strError + "\r\n");
-                            // 2007/6/25 new add
+                            // 2007/6/25
                             // 如果为纯逻辑恢复，遇到错误就停下来。这便于进行测试。
                             // 若不想停下来，可以选择“逻辑+快照”型
                             if (this.RecoverLevel == RecoverLevel.Logic)
@@ -520,7 +520,7 @@ namespace DigitalPlatform.LibraryServer
             }
             else if (strOperation == "foregift")
             {
-                // 2008/11/11 new add
+                // 2008/11/11
                 nRet = this.App.RecoverForegift(this.RmsChannels,
                     this.RecoverLevel,
                     dom,

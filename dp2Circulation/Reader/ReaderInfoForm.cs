@@ -260,7 +260,7 @@ namespace dp2Circulation
         }
 
         /*
-        // 2008/10/28 new add
+        // 2008/10/28
         void NewExternal()
         {
             if (this.m_webExternalHost != null)
@@ -1026,7 +1026,7 @@ MessageBoxDefaultButton.Button2);
 
             this.toolStripDropDownButton_otherFunc.Enabled = bEnable;
 
-            // 2008/10/28 new add
+            // 2008/10/28
             this.toolStripButton_next.Enabled = bEnable;
             this.toolStripButton_prev.Enabled = bEnable;
         }
@@ -1491,7 +1491,7 @@ MessageBoxDefaultButton.Button2);
     strNewDefault);
 
                     this.m_strSetAction = "new";
-                    this.m_strLoadSource = "local";
+                    // this.m_strLoadSource = "local";
                     return -1;
                 }
                 if (nRet == -1 || nRet == 0)
@@ -1564,7 +1564,7 @@ this.MainForm.DataDir,
 select_temp_dlg.SelectedRecordXml);
 
                 this.m_strSetAction = "new";
-                this.m_strLoadSource = "server";
+                // this.m_strLoadSource = "server";
 
 #if NO
                 Global.ClearHtmlPage(this.webBrowser_readerInfo,
@@ -1649,7 +1649,7 @@ this.MainForm.DataDir,
 strNewDefault);
 
                 this.m_strSetAction = "new";
-                this.m_strLoadSource = "local";
+                // this.m_strLoadSource = "local";
 
                 this.readerEditControl1.Changed = false; // 2013/10/17
                 this.ObjectChanged = false; // 2013/10/17
@@ -1972,7 +1972,7 @@ strNewDefault);
 this.MainForm.DataDir,
 "xml",
 strSavedXml);
-                    // 2007/11/12 new add
+                    // 2007/11/12
                     this.m_strSetAction = "change";
 
                     // 装载记录到HTML
@@ -2135,7 +2135,7 @@ strSavedXml);
 
             // 合成<dprms:file>元素
             if (this.binaryResControl1 != null
-                && bIncludeFileID == true)  // 2008/12/3 new add
+                && bIncludeFileID == true)  // 2008/12/3
             {
                 List<string> ids = this.binaryResControl1.GetIds();
                 List<string> usages = this.binaryResControl1.GetUsages();
@@ -2456,7 +2456,7 @@ strSavedXml);
 this.MainForm.DataDir,
 "xml",
 strSavedXml);
-                    // 2007/11/12 new add
+                    // 2007/11/12
                     this.m_strSetAction = "change";
 
                     // 接着装入对象资源
@@ -2974,7 +2974,7 @@ MessageBoxDefaultButton.Button2);
                     this.SetXmlToWebbrowser(this.webBrowser_xml,
                         strSavedXml);
 
-                    // 2007/11/12 new add
+                    // 2007/11/12
                     this.m_strSetAction = "change";
                 }
 
@@ -3107,7 +3107,7 @@ MessageBoxDefaultButton.Button2);
                     this.SetXmlToWebbrowser(this.webBrowser_xml,
                         strSavedXml);
 
-                    // 2007/11/12 new add
+                    // 2007/11/12
                     this.m_strSetAction = "change";
 
                 }
@@ -4356,7 +4356,7 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
-        string m_strLoadSource = "";   // 从什么渠道装载的空白记录信息? local server idcard
+        // string m_strLoadSource = "";   // 从什么渠道装载的空白记录信息? local server idcard
 
         string m_strIdcardXml = "";
         byte[] m_baPhoto = null;
@@ -4671,7 +4671,7 @@ strReaderXml);
                 else
                     this.m_strSetAction = "new";
 
-                this.m_strLoadSource = "idcard";
+                // this.m_strLoadSource = "idcard";
                 return 1;
             }
             finally

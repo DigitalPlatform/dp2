@@ -17,7 +17,7 @@ namespace dp2Catalog
     public partial class ZTargetControl : TreeView
     {
         public bool AllowCheckbox = true;
-        public MainForm MainForm = null; // 2007/12/16 new add
+        public MainForm MainForm = null; // 2007/12/16
 
         public Marc8Encoding Marc8Encoding = null;
 
@@ -1543,7 +1543,7 @@ MessageBoxDefaultButton.Button2);
         {
             get
             {
-                // 2007/8/3 new add
+                // 2007/8/3
                 if (this.StartNode != null)
                 {
                     // Debug.Assert(this.ServerNode == this.StartNode.Parent, ""); // 2007/11/2 BUG

@@ -114,7 +114,7 @@ namespace DigitalPlatform.Message
         }
 
         // 将信箱名字转换为boxtype值
-        // 2009/7/6 new add
+        // 2009/7/6
         public string GetBoxType(string strName)
         {
             for (int i = 0; i < this.Boxes.Count; i++)
@@ -191,7 +191,7 @@ namespace DigitalPlatform.Message
             {
                 // 2007/4/5 改造 加上了 GetXmlStringSimple()
                 strQueryXml = "<target list='"
-                    + StringUtil.GetXmlStringSimple(this.MessageDbName)       // 2007/9/14 new add
+                    + StringUtil.GetXmlStringSimple(this.MessageDbName)       // 2007/9/14
                     + ":用户名信箱'><item><order>DESC</order><word>"
         + StringUtil.GetXmlStringSimple(strUserID + "|" + strBox + "|")
         + "</word><match>left</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item>"
@@ -202,7 +202,7 @@ namespace DigitalPlatform.Message
             {
                 // 2007/4/5 改造 加上了 GetXmlStringSimple()
                 strQueryXml = "<target list='"
-                    + StringUtil.GetXmlStringSimple(this.MessageDbName)       // 2007/9/14 new add
+                    + StringUtil.GetXmlStringSimple(this.MessageDbName)       // 2007/9/14
                     + ":用户名信箱'><item><order>DESC</order><word>"
         + StringUtil.GetXmlStringSimple(strUserID + "|" + strBox + "|0")
         + "</word><match>left</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item>"
@@ -213,7 +213,7 @@ namespace DigitalPlatform.Message
             {
                 // 2007/4/5 改造 加上了 GetXmlStringSimple()
                 strQueryXml = "<target list='"
-                    + StringUtil.GetXmlStringSimple(this.MessageDbName)       // 2007/9/14 new add
+                    + StringUtil.GetXmlStringSimple(this.MessageDbName)       // 2007/9/14
                     + ":用户名信箱'><item><order>DESC</order><word>"
         + StringUtil.GetXmlStringSimple(strUserID + "|" + strBox + "|1")
         + "</word><match>left</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item>"

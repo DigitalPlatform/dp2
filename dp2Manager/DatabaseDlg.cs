@@ -1289,7 +1289,7 @@ namespace dp2Manager
 		}
 
         /*
-        // 2008/11/14 new add
+        // 2008/11/14
         int RefreshDB(string strDbName,
     out string strError)
         {

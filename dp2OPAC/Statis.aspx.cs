@@ -109,7 +109,7 @@ ref sessioninfo) == false)
         {
             string strDate = this.Page.Request["date"];
 
-            // 2009/7/22 new add
+            // 2009/7/22
             if (String.IsNullOrEmpty(strDate) == true)
             {
                 if (this.HiddenField_activetab.Value == "day"

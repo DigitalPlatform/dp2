@@ -1410,7 +1410,7 @@ namespace dp2Catalog
             dp2SearchForm dp2_searchform = null;
 
             if (this.LinkedSearchForm != null
-                && this.LinkedSearchForm.IsValid() == true   // 2008/3/17 new add
+                && this.LinkedSearchForm.IsValid() == true   // 2008/3/17
                 && this.LinkedSearchForm is dp2SearchForm)
             {
                 dp2_searchform = (dp2SearchForm)this.LinkedSearchForm;
@@ -1429,7 +1429,7 @@ namespace dp2Catalog
                     dp2_searchform.WindowState = FormWindowState.Minimized;
                     dp2_searchform.Show();
 
-                    // 2008/3/17 new add
+                    // 2008/3/17
                     this.WindowState = old_state;
                     this.Activate();
 
@@ -1594,7 +1594,7 @@ namespace dp2Catalog
                     if (nRet == -1)
                         goto ERROR1;
 
-                    this.binaryResControl1.Clear(); // 2008/3/18 new add 清除残余的内容，避免保存回去的时候形成空对象资源
+                    this.binaryResControl1.Clear(); // 2008/3/18 清除残余的内容，避免保存回去的时候形成空对象资源
 
                     this.ObjectChanged = false;
                     this.BiblioChanged = false;
@@ -2212,7 +2212,7 @@ namespace dp2Catalog
             if (nRet == -1)
                 return -1;
 
-            // 2007/12/4 new add
+            // 2007/12/4
             ScriptManager.RemoveRefsBinDirMacro(ref saRef);
 
             string[] saAddRef = {

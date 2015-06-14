@@ -757,7 +757,7 @@ namespace dp2Circulation
                         }
 
                         this.listView_origin.Items.Clear();
-                        // 2008/11/22 new add
+                        // 2008/11/22
                         this.SortColumns_origin.Clear();
                         SortColumns.ClearColumnSortDisplay(this.listView_origin.Columns);
 
@@ -1407,7 +1407,7 @@ namespace dp2Circulation
             }
             else
             {
-                data.Changed = false;   // 2008/9/5 new add
+                data.Changed = false;   // 2008/9/5
             }
 
             string strState = DomUtil.GetElementText(dom.DocumentElement,
@@ -1556,7 +1556,7 @@ namespace dp2Circulation
             }
 
             // 检查和修改 状态
-            if (item.ImageIndex != TYPE_ERROR)  // 2009/11/23 new add
+            if (item.ImageIndex != TYPE_ERROR)  // 2009/11/23
             {
                 if (strState == "已验收")
                 {
@@ -1587,7 +1587,7 @@ namespace dp2Circulation
 
             if (string.IsNullOrEmpty(strOrderTime) == false)
             {
-                // 转化为本地时间格式 2009/1/5 new add
+                // 转化为本地时间格式 2009/1/5
                 try
                 {
                     DateTime order_time = DateTimeUtil.FromRfc1123DateTimeString(strOrderTime);
@@ -4300,7 +4300,7 @@ nLineIndex++,
             return 0;
         }
 
-        // 2009/10/10 new add
+        // 2009/10/10
         // 获得css文件的路径(或者http:// 地址)。将根据是否具有“统计页”来自动处理
         // parameters:
         //      strDefaultCssFileName   “css”模板缺省情况下，将采用的虚拟目录中的css文件名，纯文件名
@@ -4459,7 +4459,7 @@ nLineIndex++,
             string strCssUrl = GetAutoCssUrl(option, "printorder.css");
 
             /*
-            // 2009/10/9 new add
+            // 2009/10/9
             string strCssFilePath = option.GetTemplatePageFilePath("css");  // 大小写不敏感
             if (String.IsNullOrEmpty(strCssFilePath) == false)
                 strCssUrl = strCssFilePath;
@@ -5543,7 +5543,7 @@ nLineIndex++,
                 }
 
                 this.listView_origin.Items.Clear();
-                // 2008/11/22 new add
+                // 2008/11/22
                 this.SortColumns_origin.Clear();
                 SortColumns.ClearColumnSortDisplay(this.listView_origin.Columns);
             }
@@ -6149,7 +6149,7 @@ MessageBoxDefaultButton.Button2);
                 MessageBox.Show(this, strError);
             }
 
-            SetNextButtonEnable();  // 2008/12/22 new add
+            SetNextButtonEnable();  // 2008/12/22
 
             /*
             if (this.tabControl_main.SelectedTab == this.tabPage_verify)
@@ -6407,7 +6407,7 @@ MessageBoxDefaultButton.Button2);
             int nOrderIdSeed = 1;
 
             this.listView_merged.Items.Clear();
-            // 2008/11/22 new add
+            // 2008/11/22
             this.SortColumns_merged.Clear();
             SortColumns.ClearColumnSortDisplay(this.listView_merged.Columns);
 
@@ -6699,7 +6699,7 @@ ORIGIN_COLUMN_COPY);
                     }
                     else
                     {
-                        // 2009/11/9 new add
+                        // 2009/11/9
                         // 原始数据中的总价
                         strTotalPrice = ListViewUtil.GetItemText(current_source,
                             ORIGIN_COLUMN_TOTALPRICE);
@@ -7415,7 +7415,7 @@ MessageBoxDefaultButton.Button2);
             string strCssUrl = GetAutoCssUrl(option, "orderorigin.css");
 
             /*
-            // 2009/10/9 new add
+            // 2009/10/9
             string strCssFilePath = option.GetTemplatePageFilePath("css");  // 大小写不敏感
             if (String.IsNullOrEmpty(strCssFilePath) == false)
                 strCssUrl = strCssFilePath;
@@ -9233,7 +9233,7 @@ MessageBoxDefaultButton.Button2);
 
         private void PrintOrderForm_Activated(object sender, EventArgs e)
         {
-            // 2009/8/13 new add
+            // 2009/8/13
             this.MainForm.stopManager.Active(this.stop);
 
         }

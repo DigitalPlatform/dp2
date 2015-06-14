@@ -203,12 +203,12 @@ namespace dp2Circulation
             }
         }
 
-        // 防止重入 2009/7/19 new add
+        // 防止重入 2009/7/19
         int m_nInDropDown = 0;
 
         private void comboBox_operation_DropDown(object sender, EventArgs e)
         {
-            // 防止重入 2009/7/19 new add
+            // 防止重入 2009/7/19
             if (this.m_nInDropDown > 0)
                 return;
 
@@ -509,7 +509,7 @@ MessageBoxDefaultButton.Button2);
             this.comboBox_operation.Enabled = bEnable;
             this.tabControl_readerInfo.Enabled = bEnable;
 
-            // 2008/10/28 new add
+            // 2008/10/28
             this.button_save.Enabled = bEnable;
             this.button_load.Enabled = bEnable;
         }

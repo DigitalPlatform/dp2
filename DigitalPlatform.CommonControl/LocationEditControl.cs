@@ -334,7 +334,7 @@ namespace DigitalPlatform.CommonControl
         }
 
         // 将已经勾选的、具有ref id的事项设置为ReadOnly状态
-        // 2008/9/13 new add
+        // 2008/9/13
         // parameters:
         //      bClearAllReadOnlyBeforeSet  是否在设置前清除已有的readonly状态
         public void SetAlreadyCheckedToReadOnly(bool bClearAllReadOnlyBeforeSet)
@@ -873,7 +873,7 @@ namespace DigitalPlatform.CommonControl
                                 "馆藏地点字符串局部 '" + strSection + "' 中 " 
                                 + "数字 "+strCount+" 值太大，超过1000");
 
-                        // 2008/12/5 new add
+                        // 2008/12/5
                         if (nCount < 0)
                             throw new Exception(
                                 "馆藏地点字符串局部 '" + strSection + "' 中 " 
@@ -1035,7 +1035,7 @@ namespace DigitalPlatform.CommonControl
                 {
                     LocationItem item = this.LocationItems[i];
                     if (item.Arrived == true && 
-                        (item.ReadOnly == true || this.ReadOnly == true))// 2008/11/12 new add
+                        (item.ReadOnly == true || this.ReadOnly == true))// 2008/11/12
                         nValue++;
                 }
                 return nValue;
@@ -1088,7 +1088,7 @@ namespace DigitalPlatform.CommonControl
                         if (item.Arrived == true)
                             continue;
 
-                        // 2008/9/13 new add
+                        // 2008/9/13
                         if (item.ReadOnly == true)
                         {
                             nPassReadOnlyCount++;
@@ -1130,7 +1130,7 @@ namespace DigitalPlatform.CommonControl
                         if (item.Arrived == false)
                             continue;
 
-                        // 2008/9/13 new add
+                        // 2008/9/13
                         if (item.ReadOnly == true)
                         {
                             nPassReadOnlyCount++;
@@ -1139,7 +1139,7 @@ namespace DigitalPlatform.CommonControl
 
                         item.Arrived = false;
 
-                        // 2008/9/16 new add
+                        // 2008/9/16
                         // 删除本次刚刚增加的，但还没有来得及设置地点字符串的事项
                         if (String.IsNullOrEmpty(item.ArrivedID) == true
                             || item.ArrivedID == "*")
@@ -1223,7 +1223,7 @@ namespace DigitalPlatform.CommonControl
                     for (int i = nStart; i < value; i++)
                     {
                         LocationItem item = new LocationItem(this);
-                        item.LocationString = GetUsedText(i);   // 2009/10/13 new add
+                        item.LocationString = GetUsedText(i);   // 2009/10/13
                         item.Location = new Point(0, this.m_nLineHeight * i);
                         item.No = (i + 1).ToString();
                         item.State = ItemState.New;
@@ -1666,7 +1666,7 @@ namespace DigitalPlatform.CommonControl
             this.Container = container;
 
             if (container == null)
-                return; // 2008/8/29 new add
+                return; // 2008/8/29
 
             // 颜色
             label_color = new Label();
@@ -1791,7 +1791,7 @@ namespace DigitalPlatform.CommonControl
             {
                 Debug.Assert(this.checkBox_arrived != null, "");
 
-                this.DisableArrivedCheckedChanged++;    // 2008/12/17 new add
+                this.DisableArrivedCheckedChanged++;    // 2008/12/17
                 try
                 {
                     this.checkBox_arrived.Checked = value;
@@ -1845,7 +1845,7 @@ namespace DigitalPlatform.CommonControl
                 {
                     if (this.checkBox_arrived.Checked != true)
                     {
-                        this.DisableArrivedCheckedChanged++;    // 2009/12/17 new add
+                        this.DisableArrivedCheckedChanged++;    // 2009/12/17
                         try
                         {
                             this.checkBox_arrived.Checked = true;   // 补充设置状态
@@ -1894,7 +1894,7 @@ namespace DigitalPlatform.CommonControl
         }
 
         // 已到达(验收)checkbox被checked
-        // 2008/4/16 new add
+        // 2008/4/16
         void checkBox_arrived_CheckedChanged(object sender, EventArgs e)
         {
             this.Container.Changed = true;
@@ -1905,7 +1905,7 @@ namespace DigitalPlatform.CommonControl
 
         void label_color_MouseClick(object sender, MouseEventArgs e)
         {
-            this.Container.Focus(); // 2008/9/16 new add
+            this.Container.Focus(); // 2008/9/16
 
             if (e.Button == MouseButtons.Left)
             {
@@ -1981,12 +1981,12 @@ namespace DigitalPlatform.CommonControl
             this.Container.Changed = true;
         }
 
-        // 防止重入 2009/7/19 new add
+        // 防止重入 2009/7/19
         int m_nInDropDown = 0;
 
         void comboBox_location_DropDown(object sender, EventArgs e)
         {
-            // 防止重入 2009/7/19 new add
+            // 防止重入 2009/7/19
             if (this.m_nInDropDown > 0)
                 return;
 

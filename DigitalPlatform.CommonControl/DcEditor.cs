@@ -941,7 +941,7 @@ namespace DigitalPlatform.CommonControl
             strXml = "";
             strError = "";
 
-            // 2008/3/12 new add
+            // 2008/3/12
             if (this.CfgDom == null && this.Elements.Count == 0)
             {
                 return 0;
@@ -1066,7 +1066,7 @@ namespace DigitalPlatform.CommonControl
                 {
                     DomUtil.SetAttr(element,
                         "type",
-                        "xsi",  // 2007/12/25 new add
+                        "xsi",  // 2007/12/25
                         "http://www.w3.org/2001/XMLSchema-instance",
                         strSchemeName);
                     /*
@@ -1082,7 +1082,7 @@ namespace DigitalPlatform.CommonControl
                 {
                     DomUtil.SetAttr(element,
                         "lang",
-                        "xml", // 2007/12/25 new add
+                        "xml", // 2007/12/25
                         "http://www.w3.org/XML/1998/namespace",
                         strLanguageName);
 
@@ -2363,7 +2363,7 @@ namespace DigitalPlatform.CommonControl
             }
             set
             {
-                // 2007/12/20 new add
+                // 2007/12/20
                 string strElementValue = this.Container.GetElementValue(this.comboBox_element.Text);
 
                 string strTypeValue = this.Container.GetTypeCaption(strElementValue,
@@ -2381,7 +2381,7 @@ namespace DigitalPlatform.CommonControl
             }
             set
             {
-                // 2007/12/20 new add
+                // 2007/12/20
                 string strLangrageValue = this.Container.GetLanguageCaption(value);
 
                 this.comboBox_language.Text = strLangrageValue;
@@ -2732,7 +2732,7 @@ namespace DigitalPlatform.CommonControl
             this.comboBox_scheme.Items.Clear();
 
             // TODO: 当前comboBox_scheme.Text值也需要校验，看看是否还在合法列表值中。如果不在了，就要清空。
-            this.Scheme = "";    // 2008/1/9 new add
+            this.Scheme = "";    // 2008/1/9
 
             if ((this.State & ElementState.New) == 0)
                 this.State |= ElementState.Changed;

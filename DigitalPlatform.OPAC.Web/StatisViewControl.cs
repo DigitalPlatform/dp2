@@ -674,7 +674,7 @@ namespace DigitalPlatform.OPAC.Web
 
                 string strCategory = DomUtil.GetAttr(category, "name");
 
-                // 2009/7/31 new add
+                // 2009/7/31
                 string strCategoryCaption = this.GetStringEx(strCategory);
                 if (String.IsNullOrEmpty(strCategoryCaption) == true)
                     strCategoryCaption = strCategory;
@@ -692,7 +692,7 @@ namespace DigitalPlatform.OPAC.Web
                     string strItemName = DomUtil.GetAttr(item, "name");
                     string strItemValue = DomUtil.GetAttr(item, "value");
 
-                    // 2009/7/31 new add
+                    // 2009/7/31
                     string strItemNameCaption = this.GetStringEx(strItemName);
                     if (String.IsNullOrEmpty(strItemNameCaption) == true)
                         strItemNameCaption = strItemName;
@@ -914,7 +914,7 @@ namespace DigitalPlatform.OPAC.Web
 
                 string strCategory = DomUtil.GetAttr(category, "name");
 
-                // 2009/7/31 new add
+                // 2009/7/31
                 string strCategoryCaption = this.GetStringEx(strCategory);
                 if (String.IsNullOrEmpty(strCategoryCaption) == true)
                     strCategoryCaption = strCategory;
@@ -932,7 +932,7 @@ namespace DigitalPlatform.OPAC.Web
                     string strItemName = DomUtil.GetAttr(item, "name");
                     string strItemValue = DomUtil.GetAttr(item, "value");
 
-                    // 2009/7/31 new add
+                    // 2009/7/31
                     string strItemNameCaption = this.GetStringEx(strItemName);
                     if (String.IsNullOrEmpty(strItemNameCaption) == true)
                         strItemNameCaption = strItemName;

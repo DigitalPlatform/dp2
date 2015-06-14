@@ -1275,12 +1275,12 @@ out kernel_errorcode);
                 "dateOfBirth",
                 "idCardNumber",
                 "department",
-                "post", // 2009/7/17 new add
+                "post", // 2009/7/17
                 "address",
                 "tel",
                 "email",
                 "comment",
-                "cardNumber",   // 借书证号。为和原来的(100$b)兼容，也为了将来放RFID卡号 2008/10/14 new add
+                "cardNumber",   // 借书证号。为和原来的(100$b)兼容，也为了将来放RFID卡号 2008/10/14
                 "nation",   // 2011/9/24
             };
 

@@ -23,7 +23,7 @@ namespace dp2Circulation
     {
         int m_nBeforeAbort = -1;
 
-        bool m_bStopWatching = true;
+        // bool m_bStopWatching = true;
         internal Thread threadWorker = null;
         internal AutoResetEvent eventClose = new AutoResetEvent(false);	// true : initial state is signaled 
         internal AutoResetEvent eventActive = new AutoResetEvent(false);	// 激活信号
@@ -151,7 +151,7 @@ namespace dp2Circulation
         void BeginWorkerThread()
         {
             // 如果以前在做，立即停止
-            m_bStopWatching = true;
+            // m_bStopWatching = true;
 
             this.threadWorker =
         new Thread(new ThreadStart(this.ThreadMain));
@@ -250,7 +250,7 @@ namespace dp2Circulation
             finally
             {
                 eventFinished.Set();
-                this.m_bStopWatching = true;
+                // this.m_bStopWatching = true;
             }
 
         }

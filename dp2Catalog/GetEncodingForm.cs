@@ -43,7 +43,7 @@ namespace dp2Catalog
             }
             else
             {
-                this.comboBox_encoding.Text = "";   // 2007/8/9 new add
+                this.comboBox_encoding.Text = "";   // 2007/8/9
             }
 
         }

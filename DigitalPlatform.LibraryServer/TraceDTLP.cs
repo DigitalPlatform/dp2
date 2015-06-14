@@ -385,7 +385,7 @@ namespace DigitalPlatform.LibraryServer
         public override void Worker()
         {
             // 系统挂起的时候，不运行本线程
-            // 2007/12/18 new add
+            // 2007/12/18
             if (this.App.HangupReason == HangupReason.LogRecover)
                 return;
 
@@ -1941,7 +1941,7 @@ namespace DigitalPlatform.LibraryServer
                     if ((nRecordCount % 100) == 0)
                     {
                         // 每隔100条记忆一次断点信息
-                        // 2006/12/20 new add
+                        // 2006/12/20
                         this.StartInfo.Start = MemoBreakPoint(
                             this.m_strStartFileName,
                             this.m_nStartIndex,
@@ -3019,8 +3019,8 @@ out string strError)
                     DomUtil.SetAttr(nodeOverdue, "type", strType);
                 }
 
-                // 2007/9/27 new add
-                DomUtil.SetAttr(nodeOverdue, "id", "upgrade-" + this.App.GetOverdueID());   // 2008/2/8 new add "upgrade-"
+                // 2007/9/27
+                DomUtil.SetAttr(nodeOverdue, "id", "upgrade-" + this.App.GetOverdueID());   // 2008/2/8 "upgrade-"
             }
 
             return 0;
@@ -3691,7 +3691,7 @@ out strNextSubfieldName);
             public string strMergeComment = ""; // 合并过程细节注释
 
             // 从另一Group对象中合并必要的子字段值过来
-            // 2008/4/14 new add
+            // 2008/4/14
             public void MergeValue(Group group)
             {
                 int nRet = 0;

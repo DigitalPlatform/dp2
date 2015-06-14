@@ -138,7 +138,7 @@ namespace DigitalPlatform.OPAC.Web
                 // 获得摘要
                 string strSummary = "";
 
-                if (String.IsNullOrEmpty(strBarcode) == false)  // 2009/4/16 new add
+                if (String.IsNullOrEmpty(strBarcode) == false)  // 2009/4/16
                 {
                     string strBiblioRecPath = "";
                     long lRet = sessioninfo.Channel.GetBiblioSummary(

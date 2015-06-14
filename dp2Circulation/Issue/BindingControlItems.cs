@@ -257,7 +257,7 @@ namespace dp2Circulation
             {
                 cell.Container = this;
                 /*
-                // 2010/3/3 new add
+                // 2010/3/3
                 if (cell.item != null)
                     cell.item.Container = this;
                  * */
@@ -3314,7 +3314,7 @@ namespace dp2Circulation
 
                 if (exclude_parent_item != null
                     && cell_2.ParentItem == exclude_parent_item)
-                    return; // new add
+                    return; //
 
                 // 为合订格子
                 this.Container.MoveMemberCellsToRight(cell_2.ParentItem);
@@ -6114,7 +6114,7 @@ ControlPaint.Light(this.Container.IssueBoxForeColor, 0.99F)
 
             if (this.Container.Container.CheckProcessingState(this) == false
                 && this.Calculated == false
-                && this.Deleted == false)   // 2010/4/13 new add
+                && this.Deleted == false)   // 2010/4/13
             {
                 strError = "不具备“加工中”状态";
                 return 0;
@@ -6330,7 +6330,7 @@ ControlPaint.Light(this.Container.IssueBoxForeColor, 0.99F)
             // 批次号
             this.BatchNo = strBatchNo;
 
-            // 2009/10/19 new add
+            // 2009/10/19
             // 状态
             if (bSetProcessingState == true)
             {

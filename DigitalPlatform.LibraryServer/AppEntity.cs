@@ -35,22 +35,22 @@ namespace DigitalPlatform.LibraryServer
                 "parent",
                 "barcode",
                 "state",
-                "publishTime",   // 2007/10/24 new add
+                "publishTime",   // 2007/10/24 
                 "location",
-                "seller",   // 2007/10/24 new add
-                "source",   // 2008/2/15 new add 经费来源
+                "seller",   // 2007/10/24 
+                "source",   // 2008/2/15  经费来源
                 "price",
                 "bookType",
                 "registerNo",
                 "comment",
                 "mergeComment",
                 "batchNo",
-                "volume",    // 2007/10/19 new add
-                "refID",    // 2008/4/16 new add
-                "accessNo", // 2008/12/12 new add
-                "intact",   // 2009/10/11 new add
-                "binding",  // 2009/10/11 new add
-                "operations", // 2009/10/24 new add
+                "volume",    // 2007/10/19 
+                "refID",    // 2008/4/16 
+                "accessNo", // 2008/12/12 
+                "intact",   // 2009/10/11 
+                "binding",  // 2009/10/11 
+                "operations", // 2009/10/24 
                 "bindingCost",  // 2012/6/1 装订费
             };
 
@@ -197,7 +197,7 @@ namespace DigitalPlatform.LibraryServer
             if (nRet == -1)
                 goto ERROR1;
 
-            // 2008/12/5 new add
+            // 2008/12/5 
             if (String.IsNullOrEmpty(strItemDbName) == true)
                 return 0;
 
@@ -205,7 +205,7 @@ namespace DigitalPlatform.LibraryServer
             // 检索实体库中全部从属于特定id的记录
 
             string strQueryXml = "<target list='"
-                + StringUtil.GetXmlStringSimple(strItemDbName + ":" + "父记录")       // 2007/9/14 new add
+                + StringUtil.GetXmlStringSimple(strItemDbName + ":" + "父记录")       // 2007/9/14 
                 + "'><item><word>"
                 + strBiblioRecId
                 + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>" + "zh" + "</lang></target>";
@@ -1429,7 +1429,7 @@ namespace DigitalPlatform.LibraryServer
                 || bGetOtherLibraryItem == true)
             {
                 strQueryXml = "<target list='"
-                     + StringUtil.GetXmlStringSimple(strItemDbName + ":" + "父记录")       // 2007/9/14 new add
+                     + StringUtil.GetXmlStringSimple(strItemDbName + ":" + "父记录")       // 2007/9/14 
                      + "'><item><word>"
                      + strBiblioRecId
                      + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>" + "zh" + "</lang></target>";
@@ -1501,7 +1501,7 @@ namespace DigitalPlatform.LibraryServer
                 lCount = MAXPERBATCH;
 
             /*
-            // 2009/6/7 new add
+            // 2009/6/7 
             if (lCount > 0)
                 nResultCount = Math.Min(nResultCount-(int)lStart, (int)lCount);
              * */
@@ -1775,14 +1775,31 @@ namespace DigitalPlatform.LibraryServer
                     else
                     {
                         // 根据馆藏地点是否允许借阅, 设置checkbox状态
-                        List<string> locations = this.GetLocationTypes(strItemLibraryCode, true);
-                        if (locations.IndexOf(strPureLocationName) == -1)
+                        // 个人书斋不在 library.xml 中定义
+                        if (IsPersonalLibraryRoom(strPureLocationName) == false)    // 2015/6/14
+                        {
+                            List<string> locations = this.GetLocationTypes(strItemLibraryCode, true);
+                            if (locations.IndexOf(strPureLocationName) == -1)
+                            {
+                                string strText = "此册因属馆藏地点 " + strLocation + " 而不能外借。";
+                                XmlNode node = DomUtil.SetElementText(item_dom.DocumentElement,
+                                    "canBorrow", strText);
+                                DomUtil.SetAttr(node, "canBorrow", "false");
+                            }
+                        }
+#if NO
+                        // 2015/6/14
+                        // 同一分馆情况下，根据馆藏地点是否允许借阅, 设置checkbox状态
+                        // 个人书斋不在 library.xml 中定义。因此这里采用观察不能定义的地点的方法，只要不在这个不允许借阅的地点列表中，就算允许
+                        List<string> locations = this.GetCantBorrowLocationTypes(strItemLibraryCode);
+                        if (locations.IndexOf(strPureLocationName) != -1)
                         {
                             string strText = "此册因属馆藏地点 " + strLocation + " 而不能外借。";
                             XmlNode node = DomUtil.SetElementText(item_dom.DocumentElement,
                                 "canBorrow", strText);
                             DomUtil.SetAttr(node, "canBorrow", "false");
                         }
+#endif
                     }
                 }
             }
@@ -1867,7 +1884,7 @@ namespace DigitalPlatform.LibraryServer
                 //      -1  数据格式错误
                 //      0   没有发现超期
                 //      1   发现超期   strError中有提示信息
-                //      2   已经在宽限期内，很容易超期 2009/3/13 new add
+                //      2   已经在宽限期内，很容易超期 2009/3/13 
                 nRet = this.CheckPeriod(
                     calendar,   // 2009/9/18 changed
                     strBorrowDate,
@@ -1883,7 +1900,7 @@ namespace DigitalPlatform.LibraryServer
 
                 if (nRet == 1)
                     strOverDue = this.GetString("已超期");
-                else if (nRet == 2) // 2009/9/18 new add
+                else if (nRet == 2) // 2009/9/18 
                     strOverDue = this.GetString("已在宽限期内，即将到期");
 
                 /*
@@ -1892,7 +1909,7 @@ namespace DigitalPlatform.LibraryServer
                  * */
                 if (nRet == 1)
                     strClass = "over";
-                else if (nRet == 2) // 2009/9/18 new add
+                else if (nRet == 2) // 2009/9/18 
                     strClass = "warning";
                 else if (nRet == 0 && lOver >= -5)
                     strClass = "warning";
@@ -2044,7 +2061,7 @@ namespace DigitalPlatform.LibraryServer
                         StringUtil.SetInList(ref strStyle, "force", true);
 
                 }
-                    // 2008/10/6 new add
+                    // 2008/10/6 
                 else if (StringUtil.IsInList("force", info.Style) == true)
                 {
                     bForce = true;
@@ -2067,7 +2084,7 @@ namespace DigitalPlatform.LibraryServer
                     }
                 }
 
-                // 2008/10/6 new add
+                // 2008/10/6 
                 if (StringUtil.IsInList("nocheckdup", info.Style) == true)
                 {
                     bNoCheckDup = true;
@@ -2125,7 +2142,7 @@ namespace DigitalPlatform.LibraryServer
                 // 对info内的参数进行检查。
                 strError = "";
 
-                // 2008/2/17 new add
+                // 2008/2/17 
                 if (entityinfos.Length > 1  // 2013/9/26 只有一个记录的时候，不必依靠 refid 定位返回信息，因而也就不需要明显给出这个 RefID 成员了
                     && String.IsNullOrEmpty(info.RefID) == true)
                 {
@@ -2143,10 +2160,9 @@ namespace DigitalPlatform.LibraryServer
                     strError = "info.OldRecPath 值 '" + info.OldRecPath + "' 中不能包含逗号";
                 }
 
-
                 // 当操作为"delete"时，是否可以允许只设置OldRecPath，而不必设置NewRecPath
                 // 如果两个都设置，则要求设置为一致的。
-                // 2007/11/12 new add
+                // 2007/11/12 
                 if (info.Action == "delete")
                 {
                     if (String.IsNullOrEmpty(info.NewRecord) == false)
@@ -2157,7 +2173,7 @@ namespace DigitalPlatform.LibraryServer
                     {
                         strError = "strAction值为delete时, info.NewTimestamp参数必须为空";
                     }
-                        // 2008/6/24 new add
+                        // 2008/6/24 
                     else if (String.IsNullOrEmpty(info.NewRecPath) == false)
                     {
                         if (info.NewRecPath != info.OldRecPath)
@@ -2391,7 +2407,7 @@ namespace DigitalPlatform.LibraryServer
                                 || info.Action == "change"
                                 || info.Action == "move")       // delete操作不查重
                             && String.IsNullOrEmpty(strNewBarcode) == false
-                            && bNoCheckDup == false    // 2008/10/6 new add
+                            && bNoCheckDup == false    // 2008/10/6 
                             && bSimulate == false)
                         {
 #if NO
@@ -2598,7 +2614,7 @@ namespace DigitalPlatform.LibraryServer
                         }
                         else
                         {
-                            // 2008/5/29 new add
+                            // 2008/5/29 
                             strNewXml = info.NewRecord;
                         }
 
@@ -2820,7 +2836,7 @@ namespace DigitalPlatform.LibraryServer
 
                     // 写入日志
                     if (domOperLog != null
-                        && bNoEventLog == false)    // 2008/10/6 new add
+                        && bNoEventLog == false)    // 2008/10/6 
                     {
                         string strOperTime = this.Clock.GetClock();
                         DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
@@ -3352,7 +3368,7 @@ namespace DigitalPlatform.LibraryServer
             long lRet = 0;
             string strError = "";
 
-            // 2008/6/24 new add
+            // 2008/6/24 
             if (String.IsNullOrEmpty(info.NewRecPath) == false)
             {
                 if (info.NewRecPath != info.OldRecPath)
@@ -3518,7 +3534,7 @@ namespace DigitalPlatform.LibraryServer
             nRet = ByteArray.Compare(info.OldTimestamp, exist_timestamp);
             if (nRet != 0)
             {
-                // 2008/5/29 new add
+                // 2008/5/29 
                 if (bForce == true)
                 {
                     error = new EntityInfo(info);
@@ -3880,7 +3896,7 @@ namespace DigitalPlatform.LibraryServer
             string strOldBarcode = "";
             string strNewBarcode = "";
 
-            if (bExist == true) // 2009/3/9 new add
+            if (bExist == true) // 2009/3/9 
             {
                 // 比较新旧记录的条码号是否有改变
                 // return:
@@ -4128,7 +4144,7 @@ namespace DigitalPlatform.LibraryServer
             }
             else
             {
-                // 2008/5/29 new add
+                // 2008/5/29 
                 strNewXml = domNew.OuterXml;
             }
 
@@ -5160,10 +5176,10 @@ namespace DigitalPlatform.LibraryServer
     public class EntityInfo
     {
         [DataMember]
-        public string RefID = "";  // 2008/2/17 new add 前端发出Set...请求时给出的识别id，服务器包含在响应中，便于前端在响应后继续处理
+        public string RefID = "";  // 2008/2/17  前端发出Set...请求时给出的识别id，服务器包含在响应中，便于前端在响应后继续处理
 
         [DataMember]
-        public string OldRecPath = "";  // 原记录路径 2007/6/2 new add
+        public string OldRecPath = "";  // 原记录路径 2007/6/2 
         [DataMember]
         public string OldRecord = "";   // 旧记录
         [DataMember]
@@ -5180,7 +5196,7 @@ namespace DigitalPlatform.LibraryServer
         public string Action = "";   // 要执行的操作(get时此项无用) 值为new change delete move 4种之一。change要求OldRecPath和NewRecPath一样。move不要求两者一样。把move操作单列出来，主要是为了日志统计的便利。
 
         [DataMember]
-        public string Style = "";   // 2008/10/6 new add 风格。常用作附加的特性参数。例如: nocheckdup,noeventlog,force
+        public string Style = "";   // 2008/10/6  风格。常用作附加的特性参数。例如: nocheckdup,noeventlog,force
 
         [DataMember]
         public string ErrorInfo = "";   // 出错信息

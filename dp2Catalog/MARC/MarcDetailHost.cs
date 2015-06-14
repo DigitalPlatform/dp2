@@ -618,11 +618,11 @@ namespace dp2Catalog
             dlg.checkBox_savePassword.Checked = true;
 
             dlg.textBox_serverAddr.Enabled = false;
-            dlg.TopMost = true; // 2009/11/12 new add 因为ShowDialog(null)，为了防止对话框被放在非顶部
+            dlg.TopMost = true; // 2009/11/12 因为ShowDialog(null)，为了防止对话框被放在非顶部
             dlg.ShowDialog(null);
             if (dlg.DialogResult != DialogResult.OK)
             {
-                e.Cancel = true;    // 2009/11/12 new add 如果缺这一句，会造成Cancel后仍然重新弹出登录对话框
+                e.Cancel = true;    // 2009/11/12 如果缺这一句，会造成Cancel后仍然重新弹出登录对话框
                 return;
             }
 

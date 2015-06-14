@@ -457,7 +457,7 @@ namespace DigitalPlatform.Marc
             if (fields == null || fields.Count == 0)
                 return;
 
-            // 2007/7/17 new add
+            // 2007/7/17
             // 把小edit控件隐藏
             this.MarcEditor.HideTextBox();
 
@@ -509,7 +509,7 @@ namespace DigitalPlatform.Marc
             if (this.MarcEditor.SelectedFieldIndices.Count > 0)
                 nTailIndex = this.MarcEditor.SelectedFieldIndices[this.MarcEditor.SelectedFieldIndices.Count - 1];
 
-            // 2007/7/17 new add
+            // 2007/7/17
             // 焦点字段下标也被推动
             if (nTailIndex != -1)
             {
@@ -579,7 +579,7 @@ namespace DigitalPlatform.Marc
         /// </summary>
         /// <param name="nIndex">位置</param>
         /// <param name="field">字段对象</param>
-        public /*override*/ void Insert(int nIndex,
+        public /*override*/ new void Insert(int nIndex,
             Field field)
         {
             Debug.Assert(nIndex <= this.Count, "nIndex参数不合法");
@@ -706,7 +706,7 @@ namespace DigitalPlatform.Marc
         /// 在指定位置删除一个字段对象
         /// </summary>
         /// <param name="nFieldIndex">位置</param>
-        public /*override*/ void RemoveAt(int nFieldIndex)
+        public /*override*/ new void RemoveAt(int nFieldIndex)
         {
             this.MarcEditor.Flush();
             this.RemoveAtInternal(nFieldIndex);

@@ -359,7 +359,7 @@ false);
                 "hide_matchstyle",
                 false);
 
-            // 2008/1/20 new add
+            // 2008/1/20 
             this.checkBox_search_biblioPushFilling.Checked = ap.GetBoolean(
                 "biblio_search_form",
                 "push_filling_browse",
@@ -375,7 +375,7 @@ false);
                 "hide_matchstyle",
                 false);
 
-            // 2008/1/20 new add
+            // 2008/1/20 
             this.checkBox_search_readerPushFilling.Checked = ap.GetBoolean(
                 "reader_search_form",
                 "push_filling_browse",
@@ -388,13 +388,13 @@ false);
                 -1);
 
 
-            // 2008/11/21 new add
+            // 2008/11/21 
             this.checkBox_search_hideItemMatchStyleAndDbName.Checked = ap.GetBoolean(
                 "item_search_form",
                 "hide_matchstyle_and_dbname",
                 true);
 
-            // 2008/1/20 new add
+            // 2008/1/20 
             this.checkBox_search_itemPushFilling.Checked = ap.GetBoolean(
                 "item_search_form",
                 "push_filling_browse",
@@ -910,7 +910,7 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
                 "hide_matchstyle",
                 this.checkBox_search_hideBiblioMatchStyle.Checked);
 
-            // 2008/1/20 new add
+            // 2008/1/20 
             ap.SetBoolean(
                 "biblio_search_form",
                 "push_filling_browse",
@@ -927,7 +927,7 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
                 "hide_matchstyle",
                 this.checkBox_search_hideReaderMatchStyle.Checked);
 
-            // 2008/1/20 new add
+            // 2008/1/20 
             ap.SetBoolean(
                 "reader_search_form",
                 "push_filling_browse",
@@ -939,14 +939,14 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
                 "max_result_count",
                 (int)this.numericUpDown_search_maxItemResultCount.Value);
 
-            // 2008/11/21 new add
+            // 2008/11/21 
             ap.SetBoolean(
                 "item_search_form",
                 "hide_matchstyle_and_dbname",
                 this.checkBox_search_hideItemMatchStyleAndDbName.Checked);
 
 
-            // 2008/1/20 new add
+            // 2008/1/20 
             ap.SetBoolean(
                 "item_search_form",
                 "push_filling_browse",
@@ -1232,7 +1232,7 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
         }
 
         // 重新获得书目库名列表
-        // 2007/5/27 new add
+        // 2007/5/27 
         private void button_reloadBiblioDbNames_Click(object sender, EventArgs e)
         {
             this.Enabled = false;

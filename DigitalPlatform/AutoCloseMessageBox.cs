@@ -136,7 +136,7 @@ namespace DigitalPlatform
 			}
 		}
 
-        // 2008/12/1 new add
+        // 2008/12/1
         delegate string Delegate_SetTitleText(string strText);
 
         string SetTitleText(string strText)

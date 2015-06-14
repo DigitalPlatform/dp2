@@ -61,7 +61,7 @@ namespace DigitalPlatform.rms.Client
 			this.Path = GetDbName(this.Path);
 		}
 
-        // 2009/3/2 new add
+        // 2009/3/2
         public string GetDbName()
         {
             return GetDbName(this.Path);

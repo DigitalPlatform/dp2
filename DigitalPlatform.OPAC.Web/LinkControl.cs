@@ -140,7 +140,7 @@ namespace DigitalPlatform.OPAC.Web
                 }
             }
 
-            // 2007/7/11 new add
+            // 2007/7/11
             LoginState loginstate = GlobalUtil.GetLoginState(this.Page);
 
             XmlNode nodeUserType = null;

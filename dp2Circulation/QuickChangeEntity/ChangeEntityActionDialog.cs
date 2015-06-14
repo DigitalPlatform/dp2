@@ -124,7 +124,7 @@ namespace dp2Circulation
             this.Close();
         }
 
-        // 2009/7/19 new add
+        // 2009/7/19
         int m_nInDropDown = 0;
 
         void FillDropDown(ComboBox combobox)

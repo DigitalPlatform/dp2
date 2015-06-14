@@ -43,7 +43,7 @@ namespace DigitalPlatform.LibraryServer
 
         // 将读者记录数据从XML格式转换为HTML格式
         // parameters:
-        //      strRecPath  读者记录路径 2009/10/18 new add
+        //      strRecPath  读者记录路径 2009/10/18
         //      strLibraryCode  读者记录所从属的读者库的馆代码
         //      strResultType  细节格式。为了 '|' 间隔的若干名称字符串
         public int ConvertReaderXmlToHtml(
@@ -343,7 +343,7 @@ namespace DigitalPlatform.LibraryServer
 
         // 将一般库记录数据从XML格式转换为HTML格式
         // parameters:
-        //      strRecPath  记录路径。用途是为了给宿主对象的RecPath成员赋值  // 2009/10/18 new add
+        //      strRecPath  记录路径。用途是为了给宿主对象的RecPath成员赋值  // 2009/10/18
         // return:
         //      -2  基类为ReaderConverter
         public int ConvertRecordXmlToHtml(
@@ -426,7 +426,7 @@ namespace DigitalPlatform.LibraryServer
         // 将册记录数据从XML格式转换为HTML格式
         // 兼容旧函数，一次性调用(只触发Item()函数)，无批概念
         // parameters:
-        //      strRecPath  册记录路径。用途是为了给宿主对象的RecPath成员赋值  // 2009/10/18 new add
+        //      strRecPath  册记录路径。用途是为了给宿主对象的RecPath成员赋值  // 2009/10/18
         public int ConvertItemXmlToHtml(
             string strCsFileName,
             string strRefFileName,
@@ -455,7 +455,7 @@ namespace DigitalPlatform.LibraryServer
                 e.Count = 1;
                 e.ActiveBarcode = "";
                 e.Xml = strXml;
-                e.RecPath = strRecPath; // 2009/10/18 new add
+                e.RecPath = strRecPath; // 2009/10/18
 
                 obj.Item(this, e);
 

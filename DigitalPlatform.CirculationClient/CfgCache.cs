@@ -286,7 +286,7 @@ namespace DigitalPlatform.CirculationClient
                 {
                     // 替换文件名中的宏
                     strLocalName = strLocalName.Replace("%cfgcachedir%", this.m_strTempDir);
-                    try // 2008/3/27 new add
+                    try // 2008/3/27
                     {
                         File.Delete(strLocalName);
                     }

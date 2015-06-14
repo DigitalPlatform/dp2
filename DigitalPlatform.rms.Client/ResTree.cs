@@ -2503,7 +2503,7 @@ namespace DigitalPlatform.rms.Client
 
 			this.SelectedNode = nodeThis;
 
-            // 2009/3/3 new add
+            // 2009/3/3
             if (bBreak == true)
                 return false;
 
@@ -2640,7 +2640,7 @@ namespace DigitalPlatform.rms.Client
 						continue;
 
                     if (nodeDb.ImageIndex != RESTYPE_DB)
-                        continue;   // 2006/6/16 new add 因为可能有配置文件目录或者文件对象需要跳过
+                        continue;   // 2006/6/16 因为可能有配置文件目录或者文件对象需要跳过
 
 					if (strDb != "")
 						strDb += ";";
@@ -2720,7 +2720,7 @@ namespace DigitalPlatform.rms.Client
             return result;
         }
 
-        // 2008/11/17 new add
+        // 2008/11/17
         // 根据路径列表，勾选若干数据库
         // parameters:
         //      paths   路径的数组。每个路径的形态如: http://localhost/dp2kernel?数据库名
@@ -2833,7 +2833,7 @@ namespace DigitalPlatform.rms.Client
 			}
 		}
 
-        // 2008/11/17 new add
+        // 2008/11/17
         // 清除下级所有的选中的项(不包括自己)
         // parameters:
         //      nodeStart   起点node。如果为null, 表示从根层开始，清除全部
@@ -3020,7 +3020,7 @@ namespace DigitalPlatform.rms.Client
 				}
 
 				strText = "<target list='"
-                    + StringUtil.GetXmlStringSimple(item.Target)       // 2007/9/14 new add
+                    + StringUtil.GetXmlStringSimple(item.Target)       // 2007/9/14
                     + "'>" + strText 
 					+ "<lang>"+ item.Lang +"</lang></target>";
 

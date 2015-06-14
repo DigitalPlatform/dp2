@@ -173,7 +173,7 @@ namespace DigitalPlatform.OPAC.Server
 
         // 将一般库记录数据从XML格式转换为HTML格式
         // parameters:
-        //      strRecPath  记录路径。用途是为了给宿主对象的RecPath成员赋值  // 2009/10/18 new add
+        //      strRecPath  记录路径。用途是为了给宿主对象的RecPath成员赋值  // 2009/10/18
         // return:
         //      -2  基类为ReaderConverter
         public int ConvertRecordXmlToHtml(
@@ -566,7 +566,7 @@ namespace DigitalPlatform.OPAC.Server
 
         // 将读者记录数据从XML格式转换为HTML格式
         // parameters:
-        //      strRecPath  读者记录路径 2009/10/18 new add
+        //      strRecPath  读者记录路径 2009/10/18
         public int ConvertReaderXmlToHtml(
             SessionInfo sessioninfo,
             string strCsFileName,

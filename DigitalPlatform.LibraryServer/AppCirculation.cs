@@ -143,7 +143,7 @@ namespace DigitalPlatform.LibraryServer
                 byte[] timestamp = ByteArray.GetTimeStampByteArray(strResTimeStamp);
                 byte[] output_timestamp = null;
 
-                // 2007/12/13 new add
+                // 2007/12/13
                 string strLastModifyTime = DateTime.UtcNow.ToString("u");
 
                 string strLocalPath = postedFile.FileName;
@@ -635,12 +635,12 @@ namespace DigitalPlatform.LibraryServer
             string strReaderFormatList,
             out string [] reader_records,
 
-            string strBiblioFormatList, // 2008/5/9 new add
-            out string[] biblio_records, // 2008/5/9 new add
+            string strBiblioFormatList, // 2008/5/9
+            out string[] biblio_records, // 2008/5/9
 
             out string[] aDupPath,
             out string strOutputReaderBarcodeParam, // 2011/9/25
-            out BorrowInfo borrow_info   // 2007/12/6 new add
+            out BorrowInfo borrow_info   // 2007/12/6
             )
         {
             item_records = null;
@@ -987,7 +987,7 @@ namespace DigitalPlatform.LibraryServer
                     string strItemDbName = "";
 
                     // 看看册记录所从属的数据库，是否在参与流通的实体库之列
-                    // 2008/6/4 new add
+                    // 2008/6/4
                     if (String.IsNullOrEmpty(strOutputItemRecPath) == false)
                     {
                         strItemDbName = ResPath.GetDbName(strOutputItemRecPath);
@@ -1196,7 +1196,7 @@ namespace DigitalPlatform.LibraryServer
                         goto ERROR1;
                     }
 
-                    // 2007/1/2 new add
+                    // 2007/1/2
                     // 校验册条码号参数是否和XML记录中完全一致
 
                     string strRefID = "";
@@ -1648,7 +1648,7 @@ namespace DigitalPlatform.LibraryServer
                             this.CfgDir + "\\readerxml2html.cs.ref",
                             strLibraryCode,
                             strOutputReaderXml,
-                            strOutputReaderRecPath, // 2009/10/18 new add
+                            strOutputReaderRecPath, // 2009/10/18
                             OperType.Borrow,
                             saBorrowedItemBarcode,
                             strItemBarcode,
@@ -1677,7 +1677,7 @@ namespace DigitalPlatform.LibraryServer
                             this.CfgDir + "\\readerxml2text.cs.ref",
                             strLibraryCode,
                             strOutputReaderXml,
-                            strOutputReaderRecPath, // 2009/10/18 new add
+                            strOutputReaderRecPath, // 2009/10/18
                             OperType.Borrow,
                             saBorrowedItemBarcode,
                             strItemBarcode,
@@ -1763,7 +1763,7 @@ namespace DigitalPlatform.LibraryServer
                             this.CfgDir + "\\itemxml2html.cs",
                             this.CfgDir + "\\itemxml2html.cs.ref",
                             strOutputItemXml,
-                            strOutputItemRecPath,   // 2009/10/18 new add
+                            strOutputItemRecPath,   // 2009/10/18
                             out strItemRecord,
                             out strError);
                         if (nRet == -1)
@@ -1784,7 +1784,7 @@ namespace DigitalPlatform.LibraryServer
                             this.CfgDir + "\\itemxml2text.cs",
                             this.CfgDir + "\\itemxml2text.cs.ref",
                             strOutputItemXml,
-                            strOutputItemRecPath,   // 2009/10/18 new add
+                            strOutputItemRecPath,   // 2009/10/18
                             out strItemRecord,
                             out strError);
                         if (nRet == -1)
@@ -1824,7 +1824,7 @@ namespace DigitalPlatform.LibraryServer
                 } // end of for
             }
 
-            // 2008/5/9 new add
+            // 2008/5/9
             if (StringUtil.IsInList("biblio", strStyle) == true)
             {
                 if (String.IsNullOrEmpty(strBiblioRecID) == true)
@@ -2159,7 +2159,7 @@ namespace DigitalPlatform.LibraryServer
                     return result;
                 }
 
-                // 2008/6/17 new add
+                // 2008/6/17
                 if (nRet > 1)
                 {
                     // text-level: 内部错误
@@ -2170,7 +2170,7 @@ namespace DigitalPlatform.LibraryServer
             SKIP0:
 
                 // 看看读者记录所从属的数据库，是否在参与流通的读者库之列
-                // 2008/6/4 new add
+                // 2008/6/4
                 if (String.IsNullOrEmpty(strOutputReaderRecPath) == false)
                 {
                     if (this.TestMode == true || sessioninfo.TestMode == true)
@@ -2820,7 +2820,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
 
-            // 2008/4/14 new add
+            // 2008/4/14
             string strBookState = DomUtil.GetElementText(itemdom.DocumentElement, "state");
             if (String.IsNullOrEmpty(strBookState) == false)
             {
@@ -3309,7 +3309,7 @@ namespace DigitalPlatform.LibraryServer
 
         #endregion
 
-        // 2009/10/27 new add
+        // 2009/10/27
         // 获得读者姓名
         // return:
         //      -1  error
@@ -3389,14 +3389,14 @@ namespace DigitalPlatform.LibraryServer
             bool bForce,
             string strStyle,
 
-            string strItemFormatList,   // 2008/5/9 new add
-            out string[] item_records,  // 2008/5/9 new add
+            string strItemFormatList,   // 2008/5/9
+            out string[] item_records,  // 2008/5/9
 
             string strReaderFormatList,
             out string [] reader_records,
 
-            string strBiblioFormatList, // 2008/5/9 new add
-            out string[] biblio_records,    // 2008/5/9 new add
+            string strBiblioFormatList, // 2008/5/9
+            out string[] biblio_records,    // 2008/5/9
 
             out string[] aDupPath,
             out string strOutputReaderBarcodeParam,
@@ -3788,7 +3788,7 @@ namespace DigitalPlatform.LibraryServer
 
 
                     // 看看册记录所从属的数据库，是否在参与流通的实体库之列
-                    // 2008/6/4 new add
+                    // 2008/6/4
                     bool bItemDbInCirculation = true;
                     string strItemDbName = "";
                     if (String.IsNullOrEmpty(strOutputItemRecPath) == false)
@@ -4153,7 +4153,7 @@ namespace DigitalPlatform.LibraryServer
                         goto ERROR1;
                     }
 
-                    // 2008/6/17 new add
+                    // 2008/6/17
                     if (nRet > 1)
                     {
                         strError = "读入读者记录时，发现读者证条码号 '" + strReaderBarcode + "' 命中 " + nRet.ToString() + " 条，这是一个严重错误，请系统管理员尽快处理。";
@@ -4163,7 +4163,7 @@ namespace DigitalPlatform.LibraryServer
                     SKIP0:
 
                     // 看看读者记录所从属的数据库，是否在参与流通的读者库之列
-                    // 2008/6/4 new add
+                    // 2008/6/4
                     bool bReaderDbInCirculation = true;
                     string strReaderDbName = "";
                     if (String.IsNullOrEmpty(strOutputReaderRecPath) == false)
@@ -4281,7 +4281,7 @@ namespace DigitalPlatform.LibraryServer
                     string strReaderType = DomUtil.GetElementText(readerdom.DocumentElement,
                         "readerType");
 
-                    // 证状态 2009/1/29 new add
+                    // 证状态 2009/1/29
                     string strReaderState = DomUtil.GetElementText(readerdom.DocumentElement,
                         "state");
 
@@ -4692,7 +4692,7 @@ namespace DigitalPlatform.LibraryServer
                     }
 
                     // 读者证状态不为空情况下的提示
-                    // 2008/1/29 new add
+                    // 2008/1/29
                     if (String.IsNullOrEmpty(strReaderState) == false)
                     {
                         if (String.IsNullOrEmpty(result.ErrorInfo) == false)
@@ -4788,7 +4788,7 @@ namespace DigitalPlatform.LibraryServer
                                 this.CfgDir + "\\readerxml2html.cs.ref",
                                 strLibraryCode,
                                 strOutputReaderXml,
-                                strOutputReaderRecPath, // 2009/10/18 new add
+                                strOutputReaderRecPath, // 2009/10/18
                                 OperType.Return,
                                 null,
                                 strItemBarcodeParam,
@@ -4813,7 +4813,7 @@ namespace DigitalPlatform.LibraryServer
                                 this.CfgDir + "\\readerxml2text.cs.ref",
                                 strLibraryCode,
                                 strOutputReaderXml,
-                                strOutputReaderRecPath, // 2009/10/18 new add
+                                strOutputReaderRecPath, // 2009/10/18
                                 OperType.Return,
                                 null,
                                 strItemBarcodeParam,
@@ -4869,7 +4869,7 @@ namespace DigitalPlatform.LibraryServer
                 
             } // end if
 
-            // 2008/5/9 new add
+            // 2008/5/9
             if (String.IsNullOrEmpty(strOutputItemXml) == false
                 && StringUtil.IsInList("item", strStyle) == true)
             {
@@ -4889,7 +4889,7 @@ namespace DigitalPlatform.LibraryServer
                             this.CfgDir + "\\itemxml2html.cs",
                             this.CfgDir + "\\itemxml2html.cs.ref",
                             strOutputItemXml,
-                            strOutputItemRecPath,   // 2009/10/18 new add
+                            strOutputItemRecPath,   // 2009/10/18
                             out strItemRecord,
                             out strError);
                         if (nRet == -1)
@@ -4908,7 +4908,7 @@ namespace DigitalPlatform.LibraryServer
                             this.CfgDir + "\\itemxml2text.cs",
                             this.CfgDir + "\\itemxml2text.cs.ref",
                             strOutputItemXml,
-                            strOutputItemRecPath,   // 2009/10/18 new add
+                            strOutputItemRecPath,   // 2009/10/18
                             out strItemRecord,
                             out strError);
                         if (nRet == -1)
@@ -4943,7 +4943,7 @@ namespace DigitalPlatform.LibraryServer
                 } // end of for
             }
 
-            // 2008/5/9 new add
+            // 2008/5/9
             if (StringUtil.IsInList("biblio", strStyle) == true)
             {
                 if (String.IsNullOrEmpty(strBiblioRecID) == true)
@@ -5518,7 +5518,7 @@ namespace DigitalPlatform.LibraryServer
         // 修改日历
         // 分馆用户只能修改自己管辖的分馆的日历
         // parameters:
-        //      strAction   change new delete overwirte(2008/8/23 new add)
+        //      strAction   change new delete overwirte(2008/8/23)
         public int SetCalendar(string strAction,
             string strLibraryCodeList,
             CalenderInfo info,
@@ -5567,7 +5567,7 @@ namespace DigitalPlatform.LibraryServer
 
             XmlNode node = null;
 
-            // 2008/8/23 new add
+            // 2008/8/23
             if (strAction == "overwrite")
             {
                 if (String.IsNullOrEmpty(info.Name) == true)
@@ -6685,23 +6685,66 @@ out string strError)
             return 0;
         }
 
+        // 获得不允许外借的馆藏地点类型列表
+        // parameters:
+        //      strLibraryCode  一个图书馆代码
+        //`return:
+        //      纯粹的馆藏地点名字符串数组。所谓纯粹，就是“馆代码/地点名”中的地点名部分
+        public List<string> GetCantBorrowLocationTypes(string strLibraryCode)
+        {
+            List<string> result = new List<string>();
+            string strXPath = "//locationTypes/library[@code='" + strLibraryCode + "']/item";
+
+            XmlNodeList nodes = this.LibraryCfgDom.DocumentElement.SelectNodes(strXPath);
+            foreach (XmlElement item in nodes)
+            {
+                if (DomUtil.IsBooleanTrue(item.GetAttribute("canborrow"), false) == false)
+                    result.Add(item.InnerText.Trim());
+            }
+
+            // 兼容原来的习惯。找到那些不属于<library>元素后代的<item>元素
+            if (string.IsNullOrEmpty(strLibraryCode) == true)
+            {
+                strXPath = "//locationTypes/item[count(ancestor::library) = 0]";
+                nodes = this.LibraryCfgDom.DocumentElement.SelectNodes(strXPath);
+                foreach (XmlElement item in nodes)
+                {
+                    if (DomUtil.IsBooleanTrue(item.GetAttribute("canborrow"), false) == false)
+                        result.Add(item.InnerText.Trim());
+                }
+            }
+
+            return result;
+        }
+
+        // 2015/6/14 改造，采用先获得集合然后筛选的方法
         // 获得馆藏地点类型列表
         // parameters:
         //      strLibraryCode  一个图书馆代码
         //      bOnlyCanBorrow  是仅仅列出canborrow属性为'yes'的<item>事项
-        //`return:
+        // return:
         //      纯粹的馆藏地点名字符串数组。所谓纯粹，就是“馆代码/地点名”中的地点名部分
         public List<string> GetLocationTypes(string strLibraryCode,
             bool bOnlyCanBorrow)
         {
             List<string> result = new List<string>();
             string strXPath = "";
+#if NO
             if (bOnlyCanBorrow == true)
-                strXPath = "//locationTypes/library[@code='"+strLibraryCode+"']/item[@canborrow='yes']";
+            {
+                // 这里有个问题，canborrow 属性的值不一定是 yes no，可能是其他
+                strXPath = "//locationTypes/library[@code='" + strLibraryCode + "']/item[@canborrow='yes']";
+            }
             else
+#endif
                 strXPath = "//locationTypes/library[@code='" + strLibraryCode + "']/item";
 
             XmlNodeList nodes = this.LibraryCfgDom.DocumentElement.SelectNodes(strXPath);
+            foreach (XmlElement item in nodes)
+            {
+                if (bOnlyCanBorrow == false || DomUtil.IsBooleanTrue(item.GetAttribute("canborrow"), false) == true)
+                    result.Add(item.InnerText.Trim());
+            }
 
             for (int i = 0; i < nodes.Count; i++)
             {
@@ -6714,14 +6757,17 @@ out string strError)
             if (string.IsNullOrEmpty(strLibraryCode) == true)
             {
                 strXPath = "";
+#if NO
                 if (bOnlyCanBorrow == true)
                     strXPath = "//locationTypes/item[@canborrow='yes'][count(ancestor::library) = 0]";
                 else
+#endif
                     strXPath = "//locationTypes/item[count(ancestor::library) = 0]";
                 nodes = this.LibraryCfgDom.DocumentElement.SelectNodes(strXPath);
-                foreach (XmlNode node in nodes)
+                foreach (XmlElement item in nodes)
                 {
-                    result.Add(node.InnerText);
+                    if (bOnlyCanBorrow == false || DomUtil.IsBooleanTrue(item.GetAttribute("canborrow"), false) == true)
+                        result.Add(item.InnerText.Trim());
                 }
             }
 
@@ -6789,7 +6835,7 @@ out string strError)
         //      -1  数据格式错误
         //      0   没有发现超期
         //      1   发现超期   strError中有提示信息
-        //      2   已经在宽限期内，很容易超期 2009/3/13 new add
+        //      2   已经在宽限期内，很容易超期 2009/3/13
         public int CheckPeriod(
             Calendar calendar,
             string strBorrowDate,
@@ -6923,7 +6969,7 @@ out string strError)
                     // 反正已经超期，最后一天是不是在非工作日就没有必要提醒了
 
                     // "已超过借阅期限 (" + timeEnd.ToLongDateString() + ") " + Convert.ToString(lDelta1) + GetDisplayTimeUnit(strPeriodUnit) + "。";
-                    lOver = lDelta1;    // 2009/8/5 new add
+                    lOver = lDelta1;    // 2009/8/5
                     return 1;
                 }
                 else
@@ -6935,7 +6981,7 @@ out string strError)
                         GetDisplayTimeUnitLang(strPeriodUnit));
                         
                         // "已超过借阅期限 (" + timeEnd.ToLongDateString() + ") " + Convert.ToString(lDelta) + GetDisplayTimeUnit(strPeriodUnit) + "。";
-                    lOver = lDelta;    // 2009/8/5 new add
+                    lOver = lDelta;    // 2009/8/5
                     return 1;
                 }
             }
@@ -6974,7 +7020,7 @@ out string strError)
                     // "但根据 '" + calendar.Name + "' 显示，今天(" + now_rounded.ToLongDateString() + ")是非工作日，您可以在最近第一个工作日(" + nextWorkingDay.ToLongDateString() + ")去图书馆还书。";
                 }
 
-                lOver = 0;    // 2009/8/5 new add
+                lOver = 0;    // 2009/8/5
             }
             else
             {
@@ -6997,7 +7043,7 @@ out string strError)
                         // "本已超过借阅期限 (" + timeEnd.ToLongDateString() + ") " + Convert.ToString(lDelta) + GetDisplayTimeUnit(strPeriodUnit) + "。但";
                     bOverdue = true;
 
-                    lOver = lDelta;    // 2009/8/5 new add
+                    lOver = lDelta;    // 2009/8/5
                 }
                 else
                 {
@@ -7010,7 +7056,7 @@ out string strError)
 
                         // "距最后期限 (" + timeEnd.ToLongDateString() + ") 还有 " + Convert.ToString(-lDelta1) + GetDisplayTimeUnit(strPeriodUnit) + "。";
 
-                    lOver = lDelta1;    // 2009/8/5 new add
+                    lOver = lDelta1;    // 2009/8/5
                 }
 
                 if (bEndInNonWorkingDay == true)
@@ -7179,7 +7225,7 @@ out string strError)
                     // 反正已经超期，最后一天是不是在非工作日就没有必要提醒了
 
                     // "已超过借阅期限 (" + timeEnd.ToLongDateString() + ") " + Convert.ToString(lDelta1) + GetDisplayTimeUnit(strPeriodUnit) + "。";
-                    lOver = lDelta1;    // 2009/8/5 new add
+                    lOver = lDelta1;    // 2009/8/5
                     return 1;
                 }
                 else
@@ -7191,7 +7237,7 @@ out string strError)
                         GetDisplayTimeUnitLang(strPeriodUnit));
 
                     // "已超过借阅期限 (" + timeEnd.ToLongDateString() + ") " + Convert.ToString(lDelta) + GetDisplayTimeUnit(strPeriodUnit) + "。";
-                    lOver = lDelta;    // 2009/8/5 new add
+                    lOver = lDelta;    // 2009/8/5
                     return 1;
                 }
             }
@@ -7230,7 +7276,7 @@ out string strError)
                     // "但根据 '" + calendar.Name + "' 显示，今天(" + now_rounded.ToLongDateString() + ")是非工作日，您可以在最近第一个工作日(" + nextWorkingDay.ToLongDateString() + ")去图书馆还书。";
                 }
 
-                lOver = 0;    // 2009/8/5 new add
+                lOver = 0;    // 2009/8/5
             }
             else
             {
@@ -7253,7 +7299,7 @@ out string strError)
                     // "本已超过借阅期限 (" + timeEnd.ToLongDateString() + ") " + Convert.ToString(lDelta) + GetDisplayTimeUnit(strPeriodUnit) + "。但";
                     bOverdue = true;
 
-                    lOver = lDelta;    // 2009/8/5 new add
+                    lOver = lDelta;    // 2009/8/5
                 }
                 else
                 {
@@ -7266,7 +7312,7 @@ out string strError)
 
                     // "距最后期限 (" + timeEnd.ToLongDateString() + ") 还有 " + Convert.ToString(-lDelta1) + GetDisplayTimeUnit(strPeriodUnit) + "。";
 
-                    lOver = lDelta1;    // 2009/8/5 new add
+                    lOver = lDelta1;    // 2009/8/5
                 }
 
                 if (bEndInNonWorkingDay == true)
@@ -8094,7 +8140,7 @@ out string strError)
 
             string strFrom = "ID";
             string strQueryXml = "<target list='"
-                + StringUtil.GetXmlStringSimple(this.AmerceDbName + ":" + strFrom)       // 2007/9/14 new add
+                + StringUtil.GetXmlStringSimple(this.AmerceDbName + ":" + strFrom)       // 2007/9/14
                 + "'><item><word>"
                 + strAmercedItemId + "</word><match>" + "exact" + "</match><relation>=</relation><dataType>string</dataType><maxCount>100</maxCount></item><lang>" + "zh" + "</lang></target>";
 
@@ -8273,7 +8319,7 @@ out string strError)
                     }
 
 
-                    // 2008/11/11 new add
+                    // 2008/11/11
                     // undo交押金
                     XmlNode node_added = root.AppendChild(fragment);
                     bReaderDomChanged = true;
@@ -8717,7 +8763,7 @@ out string strError)
             }
 
             // 回滚
-            // 2009/7/14 new add
+            // 2009/7/14
             if (String.Compare(strFunction, "rollback", true) == 0)
             {
                 if (amerce_items != null)
@@ -9252,7 +9298,7 @@ out string strError)
             return nChangedCount;
         }
 
-        // 2008/6/19 new add
+        // 2008/6/19
         // 根据AmerceItem数组，修改readerdom中的<amerce>元素中的comment属性。
         // 为功能"modifycomment"服务。
         int ModifyComment(
@@ -9356,7 +9402,7 @@ out string strError)
                 results[i] = new AmerceItem();
                 results[i].ID = strID;
                 results[i].NewPrice = strNewPrice;
-                results[i].NewComment = strComment;    // 2007/4/17 new add
+                results[i].NewComment = strComment;    // 2007/4/17
             }
 
             return results;
@@ -9381,7 +9427,7 @@ out string strError)
                 if (String.IsNullOrEmpty(item.NewPrice) == false)
                     DomUtil.SetAttr(node, "newPrice", item.NewPrice);
 
-                // 2007/4/17 new add
+                // 2007/4/17
                 if (String.IsNullOrEmpty(item.NewComment) == false)
                     DomUtil.SetAttr(node, "newComment", item.NewComment);
 
@@ -9603,7 +9649,7 @@ out string strError)
             string strBorrowPeriod = DomUtil.GetElementText(dom.DocumentElement,
                 "borrowPeriod");
             string strBorrowOperator = DomUtil.GetElementText(dom.DocumentElement,
-                "borrowOperator");  // 2006/3/27 new add
+                "borrowOperator");  // 2006/3/27
 
 
             string strReturnDate = DomUtil.GetElementText(dom.DocumentElement,
@@ -9611,7 +9657,7 @@ out string strError)
             string strReturnOperator = DomUtil.GetElementText(dom.DocumentElement,
                 "returnOperator");
 
-            // 2008/6/23 new add
+            // 2008/6/23
             string strPauseStart = DomUtil.GetElementText(dom.DocumentElement,
                 "pauseStart");
 
@@ -9626,7 +9672,7 @@ out string strError)
 
             DomUtil.SetAttr(nodeOverdue, "reason", strReason);
 
-            // 2007/12/17 new add
+            // 2007/12/17
             if (String.IsNullOrEmpty(strOverduePeriod) == false)
                 DomUtil.SetAttr(nodeOverdue, "overduePeriod", strOverduePeriod);
 
@@ -9656,7 +9702,7 @@ out string strError)
             DomUtil.SetAttr(nodeOverdue, "operator", strReturnOperator);
             DomUtil.SetAttr(nodeOverdue, "id", strID);
 
-            // 2008/6/23 new add
+            // 2008/6/23
             if (String.IsNullOrEmpty(strPauseStart) == false)
                 DomUtil.SetAttr(nodeOverdue, "pauseStart", strPauseStart);
 
@@ -9697,7 +9743,7 @@ out string strError)
             string strItemRecPath = DomUtil.GetAttr(nodeOverdue, "recPath");
             string strReason = DomUtil.GetAttr(nodeOverdue, "reason");
 
-            // 2007/12/17 new add
+            // 2007/12/17
             string strOverduePeriod = DomUtil.GetAttr(nodeOverdue, "overduePeriod");
 
             string strPrice = "";
@@ -9711,7 +9757,7 @@ out string strError)
                 strOriginPrice = DomUtil.GetAttr(nodeOverdue, "price");
             }
 
-            // 2008/11/15 new add
+            // 2008/11/15
             // 看看价格字符串是否为宏?
             if (strPrice == "%return_foregift_price%")
             {
@@ -9754,7 +9800,7 @@ out string strError)
             string strID = DomUtil.GetAttr(nodeOverdue, "id");
             string strExistComment = DomUtil.GetAttr(nodeOverdue, "comment");
 
-            // 2008/6/23 new add
+            // 2008/6/23
             string strPauseStart = DomUtil.GetAttr(nodeOverdue, "pauseStart");
 
             // 写入DOM
@@ -9796,7 +9842,7 @@ out string strError)
                     "originPrice", strOriginPrice);
             }
 
-            // 2008/6/25 new add
+            // 2008/6/25
             {
                 bool bAppend = true;
                 if (string.IsNullOrEmpty(strNewComment) == false
@@ -9864,7 +9910,7 @@ out string strError)
             DomUtil.SetElementText(dom.DocumentElement,
                 "borrowPeriod", strBorrowPeriod);
             DomUtil.SetElementText(dom.DocumentElement,
-                "borrowOperator", strBorrowOperator);   // 2006/3/27 new add
+                "borrowOperator", strBorrowOperator);   // 2006/3/27
 
             DomUtil.SetElementText(dom.DocumentElement,
                 "returnDate", strReturnDate);
@@ -9876,7 +9922,7 @@ out string strError)
             DomUtil.SetElementText(dom.DocumentElement,
                 "operTime", strOperTime);
 
-            // 2008/6/23 new add
+            // 2008/6/23
             if (String.IsNullOrEmpty(strPauseStart) == false)
             {
                 DomUtil.SetElementText(dom.DocumentElement,
@@ -9975,7 +10021,7 @@ out string strError)
                 string strReason = "";
                 strReason = DomUtil.GetAttr(node, "reason");
 
-                // 2008/11/11 new add
+                // 2008/11/11
                 if (strReason == "押金。")
                 {
                     string strNewPrice = "";
@@ -11510,7 +11556,7 @@ out string strError)
                 string strReason = "超期。超 " + (lOver).ToString() + GetDisplayTimeUnitLang(strPeriodUnit) + "; 违约金因子: " + strPriceCfgString;
                 DomUtil.SetAttr(tempdom.DocumentElement, "reason", strReason);
 
-                // 超期时间长度 2007/12/17 new add
+                // 超期时间长度 2007/12/17
                 DomUtil.SetAttr(tempdom.DocumentElement, "overduePeriod", (lOver).ToString() + strPeriodUnit);
 
                 DomUtil.SetAttr(tempdom.DocumentElement, "price", strOverduePrice);
@@ -11738,7 +11784,7 @@ out string strError)
             DomUtil.DeleteElement(itemdom.DocumentElement,
     "borrower");
 
-            // 2009/9/18 new add
+            // 2009/9/18
             //DomUtil.SetElementText(itemdom.DocumentElement,
             //    "borrowerReaderType", "");
             DomUtil.DeleteElement(itemdom.DocumentElement,
@@ -12412,7 +12458,7 @@ out string strError)
                     // 删除读者记录中的reservation通知行
 
 
-                    // 在册记录中，删除相关的<reservations/request>元素 2007/1/17 new add
+                    // 在册记录中，删除相关的<reservations/request>元素 2007/1/17
                     XmlNodeList nodes = itemdom.DocumentElement.SelectNodes("reservations/request[@reader='" + strReaderBarcode + "']");
                     for (int i = 0; i < nodes.Count; i++)
                     {
@@ -12678,7 +12724,7 @@ out string strError)
 
             // 记载册记录路径
             if (String.IsNullOrEmpty(strItemRecPath) == false)
-                DomUtil.SetAttr(nodeBorrow, "recPath", strItemRecPath); // 2006/12/24 new add
+                DomUtil.SetAttr(nodeBorrow, "recPath", strItemRecPath); // 2006/12/24
 
 
             // 加入借期字段
@@ -13009,10 +13055,10 @@ out string strError)
 
             DomUtil.SetAttr(nodeBorrow, "operator", strOperator);
 
-            // 2007/11/5 new add
+            // 2007/11/5
             DomUtil.SetAttr(nodeBorrow, "type", strBookType);   // 在读者记录<borrows/borrow>元素中写入type属性，内容为图书册类型，便于后续借书的时候判断某一种册类型是否超过读者权限规定值。这种方式可以节省时间，不必从多个册记录中去获得册类型字段
 
-            // 2006/11/12 new add
+            // 2006/11/12
             string strBookPrice = DomUtil.GetElementText(itemdom.DocumentElement, "price");
             DomUtil.SetAttr(nodeBorrow, "price", strBookPrice);   // 在读者记录<borrows/borrow>元素中写入price属性，内容为图书册价格类型，便于后续借书的时候判断已经借的和即将借的总价格是否超过读者的押金余额。这种方式可以节省时间，不必从多个册记录中去获得册价格字段
 
@@ -13027,7 +13073,7 @@ out string strError)
                 if (bForce == false
                     && String.IsNullOrEmpty(strOldReaderBarcode) == false)
                 {
-                    // 2007/1/2 new add
+                    // 2007/1/2
                     if (strOldReaderBarcode == strReaderBarcode)
                     {
                         // text-level: 用户提示
@@ -13044,7 +13090,7 @@ out string strError)
             DomUtil.SetElementText(itemdom.DocumentElement,
                 "borrower", strReaderBarcode);
 
-            // 2008/9/18 new add
+            // 2008/9/18
             DomUtil.SetElementText(itemdom.DocumentElement,
                 "borrowerReaderType", strReaderType);
 
@@ -13134,7 +13180,7 @@ strBookPrice);    // 图书价格
         }
 
         // 将时间值的本地时间，按照单位转换为适当的显示字符串
-        // 2008/5/7 new add
+        // 2008/5/7
         static string GetLocalTimeString(string strUnit,
             DateTime time)
         {
@@ -13184,7 +13230,7 @@ strBookPrice);    // 图书价格
                     //      -1  数据格式错误
                     //      0   没有发现超期
                     //      1   发现超期   strError中有提示信息
-                    //      2   已经在宽限期内，很容易超期 2009/3/13 new add
+                    //      2   已经在宽限期内，很容易超期 2009/3/13
                     nRet = app.CheckPeriod(
                         calendar,
                         strBorrowDate,
@@ -13228,7 +13274,7 @@ strBookPrice);    // 图书价格
         }
 
         // 检查借阅证是否超期，是否有挂失等状态
-        // 2006/8/23 new add 但是 尚未测试
+        // 2006/8/23 但是 尚未测试
         // text-level: 用户提示 OPAC预约功能要调用此函数
         // return:
         //      -1  检测过程发生了错误。应当作不能借阅来处理
@@ -13593,7 +13639,7 @@ strBookPrice);    // 图书价格
                             goto ERROR1;
                         }
 
-                        // 2008/6/17 new add
+                        // 2008/6/17
                         if (nRet > 1)
                         {
                             strError = "读入源读者记录时，发现读者证条码号 " + strSourceReaderBarcode + " 命中 " + nRet.ToString() + " 条，这是一个严重错误，请系统管理员尽快处理。";
@@ -13650,7 +13696,7 @@ strBookPrice);    // 图书价格
                             goto ERROR1;
                         }
 
-                        // 2008/6/17 new add
+                        // 2008/6/17
                         if (nRet > 1)
                         {
                             strError = "读入目标读者记录时，发现读者证条码号 " + strTargetReaderBarcode + " 命中 " + nRet.ToString() + " 条，这是一个严重错误，请系统管理员尽快处理。";
@@ -15715,7 +15761,7 @@ REDO_REPAIR:
                         this.CfgDir + "\\readerxml2html.cs.ref",
                         strLibraryCode,
                         strReaderXml,
-                        strOutputReaderRecPath, // 2009/10/18 new add
+                        strOutputReaderRecPath, // 2009/10/18
                         OperType.None,
                         null,
                         "",
@@ -15740,7 +15786,7 @@ REDO_REPAIR:
                         this.CfgDir + "\\readerxml2text.cs.ref",
                         strLibraryCode,
                         strReaderXml,
-                        strOutputReaderRecPath, // 2009/10/18 new add
+                        strOutputReaderRecPath, // 2009/10/18
                         OperType.None,
                         null,
                         "",
@@ -16678,7 +16724,7 @@ REDO_REPAIR:
             }
 
             string strQueryXml = "<target list='"
-                + StringUtil.GetXmlStringSimple(this.AmerceDbName + ":" + "ID")       // 2007/9/14 new add
+                + StringUtil.GetXmlStringSimple(this.AmerceDbName + ":" + "ID")       // 2007/9/14
                 + "'>" + strText
                 + "<lang>zh</lang></target>";
 
@@ -17334,11 +17380,11 @@ Value data: HEX 0x1
         public string BorrowOperator = "";
 
         /*
-        // 2008/5/9 new add
+        // 2008/5/9
         // 所借的册的图书类型
         public string BookType = "";
 
-        // 2008/5/9 new add
+        // 2008/5/9
         // 所借的册的馆藏地点
         public string Location = "";
          * */
@@ -17376,14 +17422,14 @@ Value data: HEX 0x1
         [DataMember]
         public string ReturnOperator = "";
 
-        // 2008/5/9 new add
+        // 2008/5/9
         /// <summary>
         /// 所还的册的图书类型
         /// </summary>
         [DataMember]
         public string BookType = "";
 
-        // 2008/5/9 new add
+        // 2008/5/9
         /// <summary>
         /// 所还的册的馆藏地点
         /// </summary>

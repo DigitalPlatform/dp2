@@ -140,7 +140,7 @@ namespace dp2Catalog
 
             this.zTargetControl1.Marc8Encoding = this.m_mainForm.Marc8Encoding;
 
-            this.zTargetControl1.MainForm = this.m_mainForm;  // 2007/12/16 new add
+            this.zTargetControl1.MainForm = this.m_mainForm;  // 2007/12/16
 
             //// this.ZChannel.CommIdle += new CommIdleEventHandle(ZChannel_CommIdle);
             this.zTargetControl1.AllowCheckbox = false;
@@ -1482,7 +1482,7 @@ this.splitContainer_queryAndResultInfo,
 
             if (targetinfo.IgnoreReferenceID == false)
             {
-                // 2007/11/2 new add。可以帮助发现旧版本dp2zserver的错误
+                // 2007/11/2。可以帮助发现旧版本dp2zserver的错误
                 if (struInit_request.m_strReferenceId != init_response.m_strReferenceId)
                 {
                     strError = "请求的 reference id [" + struInit_request.m_strReferenceId + "] 和 响应的 reference id [" + init_response.m_strReferenceId + "] 不一致！";

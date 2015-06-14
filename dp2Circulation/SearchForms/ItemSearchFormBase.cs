@@ -23,7 +23,7 @@ namespace dp2Circulation
     public class ItemSearchFormBase : SearchFormBase
     {
         // 实体数据库名 --> 册条码号 列号
-        internal Hashtable m_tableBarcodeColIndex = new Hashtable();
+        // internal Hashtable m_tableBarcodeColIndex = new Hashtable();
 
         internal bool m_bBiblioSummaryColumn = true; // 是否在浏览列表中 加入书目摘要列
 
@@ -57,6 +57,7 @@ namespace dp2Circulation
             }
         }
 
+        // TODO: 如果册条码号为空，则根据参考 ID 返回 @refID:xxxxxxx 这样形式的内容
         // 根据 ListViewItem 对象，获得册条码号列的内容
         // parameters:
         //      bWarning    是否出现警告对话框
@@ -75,12 +76,43 @@ namespace dp2Circulation
             out string strError)
         {
             strError = "";
+            strBarcode = "";
 
             string strRecPath = ListViewUtil.GetItemText(item, 0);
             // 根据记录路径获得数据库名
             string strItemDbName = Global.GetDbName(strRecPath);
-            // 根据数据库名获得 册条码号 列号
+            if (string.IsNullOrEmpty(strItemDbName) == true)
+            {
+                strError = "从(来自事项第一列的)记录路径 '" + strRecPath + "' 获得库名时出错";
+                return -1;
+            }
 
+            // 根据数据库名获得 册条码号 列号
+            // return:
+            //      -1  该数据库 browse 配置文件中没有找到这个列 type 定义
+            //      其他  返回列 index
+            int nCol = GetColumnIndex(strItemDbName, "item_barcode");
+            if (nCol == -1)
+            {
+                // 这个实体库没有在 browse 文件中 册条码号 列
+                strError = "警告：实体库 '" + strItemDbName + "' 的 browse 配置文件中没有定义 type 为 item_barcode 的列。请注意刷新或修改此配置文件";
+                if (bWarning == true)
+                    MessageBox.Show(this, strError);
+
+                nCol = 0;   // 这个大部分情况能奏效
+
+                if (m_bBiblioSummaryColumn == false)
+                    nCol += 1;
+                else
+                    nCol += 2;
+
+                if (this.m_bFirstColumnIsKey == true)
+                    nCol++; // 2013/11/12
+            }
+
+            strBarcode = ListViewUtil.GetItemText(item, nCol);
+            return 0;
+#if NO
             int nCol = -1;
             object o = m_tableBarcodeColIndex[strItemDbName];
             if (o == null)
@@ -112,10 +144,134 @@ namespace dp2Circulation
             Debug.Assert(nCol > 0, "");
 
             strBarcode = ListViewUtil.GetItemText(item, nCol);
-
             return 0;
+#endif
         }
 
+#if NO
+                int GetBarcodeColumnIndex(string strItemDbName)
+        {
+            int nCol = -1;
+            object o = m_tableBarcodeColIndex[strItemDbName];
+            if (o == null)
+            {
+                ColumnPropertyCollection temp = this.MainForm.GetBrowseColumnProperties(strItemDbName);
+                nCol = temp.FindColumnByType("item_barcode");
+                if (nCol == -1)
+                {
+#if NO
+                    // 这个实体库没有在 browse 文件中 册条码号 列
+                    strError = "警告：实体库 '" + strItemDbName + "' 的 browse 配置文件中没有定义 type 为 item_barcode 的列。请注意刷新或修改此配置文件";
+                    if (bWarning == true)
+                        MessageBox.Show(this, strError);
+#endif
+
+                    nCol = 0;   // 这个大部分情况能奏效
+                }
+                if (m_bBiblioSummaryColumn == false)
+                    nCol += 1;
+                else
+                    nCol += 2;
+
+                if (this.m_bFirstColumnIsKey == true)
+                    nCol++; // 2013/11/12
+
+                m_tableBarcodeColIndex[strItemDbName] = nCol;   // 储存起来
+            }
+            else
+                nCol = (int)o;
+
+            Debug.Assert(nCol > 0, "");
+            return nCol;
+        }
+#endif
+
+        // 获得一个列 type 对应的列 index，针对特定的数据库
+        // return:
+        //      -1  该数据库 browse 配置文件中没有找到这个列 type 定义
+        //      其他  返回列 index
+        int GetColumnIndex(string strItemDbName, string strColumnType)
+        {
+            int nCol = -1;
+
+            // 根据数据库名和列 type 去获得 列号
+            string strCacheKey = strItemDbName + ":" + strColumnType;
+
+            object o = _columnIndexTable[strCacheKey];
+            if (o == null)
+            {
+                ColumnPropertyCollection temp = this.MainForm.GetBrowseColumnProperties(strItemDbName);
+                nCol = temp.FindColumnByType(strColumnType);
+                if (nCol == -1)
+                    return -1;
+
+                if (m_bBiblioSummaryColumn == false)
+                    nCol += 1;
+                else
+                    nCol += 2;
+
+                if (this.m_bFirstColumnIsKey == true)
+                    nCol++; // 2013/11/12
+
+                _columnIndexTable[strCacheKey] = nCol;   // 储存起来
+            }
+            else
+                nCol = (int)o;
+
+            Debug.Assert(nCol > 0, "");
+            return nCol;
+        }
+
+        public void ClearColumnIndexCache()
+        {
+            _columnIndexTable.Clear();
+        }
+
+        // 列 type 到 列号 index 的对照表
+        // key 格式为 数据库名:type，value 为 列 index
+        Hashtable _columnIndexTable = new Hashtable();
+
+        // 2015/6/14
+        // 获得特定角色的列的值
+        // return:
+        //      -2  没有找到列 type
+        //      -1  出错
+        //      >=0 列号
+        public int GetColumnText(
+            ListViewItem item,
+            string strColumnType,
+            out string strText,
+            out string strError)
+        {
+            strError = "";
+            strText = "";
+
+            string strRecPath = ListViewUtil.GetItemText(item, 0);
+            // 根据记录路径获得浏览记录的数据库名。注意，不一定是实体库名
+            string strItemDbName = Global.GetDbName(strRecPath);
+
+            if (string.IsNullOrEmpty(strItemDbName) == true)
+            {
+                strError = "从(来自事项第一列的)记录路径 '"+strRecPath+"' 获得库名时出错";
+                return -1;
+            }
+
+            // return:
+            //      -1  该数据库 browse 配置文件中没有找到这个列 type 定义
+            //      其他  返回列 index
+            int nCol = GetColumnIndex(strItemDbName, strColumnType);
+            if (nCol == -1)
+            {
+                // 这个实体库没有在 browse 文件中 册条码号 列
+                strError = "数据库 '" + strItemDbName + "' 的 browse 配置文件中没有定义 type 为 " + strColumnType + " 的列。请注意刷新或修改此配置文件";
+                return -2;
+            }
+
+            Debug.Assert(nCol > 0, "");
+
+            strText = ListViewUtil.GetItemText(item, nCol);
+            return nCol;
+        }
 
         /// <summary>
         /// 从记录路径文件导入
@@ -327,7 +483,7 @@ namespace dp2Circulation
             this._listviewRecords.Items.Clear();
 
             /*
-            // 2008/11/22 new add
+            // 2008/11/22 
             this.SortColumns.Clear();
             SortColumns.ClearColumnSortDisplay(this.listView_records.Columns);
              * */
@@ -902,47 +1058,13 @@ namespace dp2Circulation
             }
 
             string strItemDbName = Global.GetDbName(strItemRecPath);
-            int index = GetBarcodeColumnIndex(strItemDbName);
+            int index = GetColumnIndex(strItemDbName, "item_barcode");
+            if (index == -1)
+                index = 0;   // 这个大部分情况能奏效
 
             ListViewUtil.ChangeItemText(item, index, strBarcode);
 
             // TODO: 将书目记录路径放入item.Tag中备用
-        }
-
-        int GetBarcodeColumnIndex(string strItemDbName)
-        {
-            int nCol = -1;
-            object o = m_tableBarcodeColIndex[strItemDbName];
-            if (o == null)
-            {
-                ColumnPropertyCollection temp = this.MainForm.GetBrowseColumnProperties(strItemDbName);
-                nCol = temp.FindColumnByType("item_barcode");
-                if (nCol == -1)
-                {
-#if NO
-                    // 这个实体库没有在 browse 文件中 册条码号 列
-                    strError = "警告：实体库 '" + strItemDbName + "' 的 browse 配置文件中没有定义 type 为 item_barcode 的列。请注意刷新或修改此配置文件";
-                    if (bWarning == true)
-                        MessageBox.Show(this, strError);
-#endif
-
-                    nCol = 0;   // 这个大部分情况能奏效
-                }
-                if (m_bBiblioSummaryColumn == false)
-                    nCol += 1;
-                else
-                    nCol += 2;
-
-                if (this.m_bFirstColumnIsKey == true)
-                    nCol++; // 2013/11/12
-
-                m_tableBarcodeColIndex[strItemDbName] = nCol;   // 储存起来
-            }
-            else
-                nCol = (int)o;
-
-            Debug.Assert(nCol > 0, "");
-            return nCol;
         }
 
         // 根据册条码号，检索出其册记录路径和从属的书目记录路径，以及馆藏地点信息。

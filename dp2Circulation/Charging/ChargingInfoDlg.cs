@@ -199,7 +199,7 @@ namespace dp2Circulation
             return dlg.FastInputText;
         }
 
-        // 2009/6/2 new add
+        // 2009/6/2 
         public static string Show(ChargingInfoHost host,
             string strText,
             InfoColor infocolor,

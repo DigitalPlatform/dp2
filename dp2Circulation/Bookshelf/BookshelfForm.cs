@@ -112,7 +112,7 @@ namespace dp2Circulation
 
         private void BookshelfForm_Activated(object sender, EventArgs e)
         {
-            // 2009/8/13 new add
+            // 2009/8/13 
             this.MainForm.stopManager.Active(this.stop);
 
         }

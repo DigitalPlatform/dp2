@@ -28,7 +28,7 @@ namespace DigitalPlatform.dp2.Statis
             if (nIndex >= cells.Length)
                 return true;
 
-            // 2007/5/18 new add
+            // 2007/5/18
             if (cells[nIndex] == null)
                 return true;
 
@@ -42,7 +42,7 @@ namespace DigitalPlatform.dp2.Statis
         public string GetString(int nIndex,
             string strDefaultValue)
         {
-            // 2007/10/26 new add
+            // 2007/10/26
             if (nIndex == -1)
                 return this.Entry;
 
@@ -67,7 +67,7 @@ namespace DigitalPlatform.dp2.Statis
                 {
                     string strText = (string)obj;
 
-                    // 2008/4/3 new add
+                    // 2008/4/3
                     if (String.IsNullOrEmpty(strText) == true)
                         return strDefaultValue;
                     return strText;
@@ -201,7 +201,7 @@ namespace DigitalPlatform.dp2.Statis
             return result;
         }
 
-        // 2008/11/29 new add
+        // 2008/11/29
         // 得到一个单元值，自动转换为decimal类型
         // 如果一个单元不曾设置过数据，则返回0
         public decimal GetDecimal(int nIndex)
@@ -248,7 +248,7 @@ namespace DigitalPlatform.dp2.Statis
         {
             get
             {
-                // 2007/10/26 new add
+                // 2007/10/26
                 if (nIndex == -1)
                     return this.Entry;
 
@@ -407,7 +407,7 @@ namespace DigitalPlatform.dp2.Statis
             }
         }
 
-        // 2008/11/29 new add
+        // 2008/11/29
         // 为一列的整数值增量
         // 本方法只能应用在Int32或Int64值类型的列上，否则会抛出异常
         // parameters:
@@ -723,7 +723,7 @@ namespace DigitalPlatform.dp2.Statis
             line.IncValue(nColumn, createValue, incValue);
         }
 
-        // 2008/12/1 new add
+        // 2008/12/1
         // 累加一个单元的值
         // createValue	如果指定的单元不存在，则以此值创建新单元
         // incValue	如果指定的单元已经存在，则在原值上递增此值。
@@ -793,7 +793,7 @@ namespace DigitalPlatform.dp2.Statis
         }
 
 #if NO
-        // 2009/9/30 new add
+        // 2009/9/30
         // 自定义规则排序
         public void Sort(IComparer comparer)
         {

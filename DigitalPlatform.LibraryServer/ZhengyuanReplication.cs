@@ -262,7 +262,7 @@ namespace DigitalPlatform.LibraryServer
         public override void Worker()
         {
             // 系统挂起的时候，不运行本线程
-            // 2007/12/18 new add
+            // 2007/12/18
             if (this.App.HangupReason == HangupReason.LogRecover)
                 return;
             // 2012/2/4

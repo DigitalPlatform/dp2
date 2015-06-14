@@ -613,13 +613,13 @@ namespace DigitalPlatform.ResultSet
                         else if (bOutputKeyID == true)
                         {
                             /*
-                            // 2010/5/17 new add
+                            // 2010/5/17
                             // id值完全相同的时候，输出一个复制于左边对象的新对象，其BrowseText应该为原有两个的串接
                             DpRecord temp_record = new DpRecord(dpRecordLeft.ID);
                             temp_record.BrowseText = dpRecordLeft.BrowseText + new string(OR, 1) + dpRecordRight.BrowseText;
                             targetMiddle.Add(temp_record);
                              * */
-                            // 2010/5/17 new add
+                            // 2010/5/17
                             // id值完全相同的时候，如果Keys不相同，则同时输出左边和右边对象
                             if (left.BrowseText != right.BrowseText)
                             {
@@ -674,7 +674,7 @@ namespace DigitalPlatform.ResultSet
                             else if (bOutputKeyID == true)
                             {
                                 /*
-                                // 2010/5/17 new add
+                                // 2010/5/17
                                 // id值完全相同的时候，其BrowseText应该为原有两个的串接
                                 DpRecord temp_record = new DpRecord(left.ID);
                                 temp_record.BrowseText = left.BrowseText

@@ -104,7 +104,7 @@ namespace DigitalPlatform.LibraryServer
                     out strError);
             }
 
-            // 2008/11/16 new add
+            // 2008/11/16
             if (strAction == "refresh")
             {
                 return RefreshDatabaseDefs(
@@ -3340,7 +3340,7 @@ namespace DigitalPlatform.LibraryServer
                         }
                     }
 
-                    // 2009/11/13 new add
+                    // 2009/11/13
                     XmlNode exist_database_node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("itemdbgroup/database[@biblioDbName='"+strName+"']");
                     if (bRecreate == true && exist_database_node == null)
                     {
@@ -3357,7 +3357,7 @@ namespace DigitalPlatform.LibraryServer
                     if (String.IsNullOrEmpty(strUsage) == true)
                         strUsage = "book";
 
-                    // 2009/10/23 new add
+                    // 2009/10/23
                     string strRole = DomUtil.GetAttr(node, "role");
 
                     if (bRecreate == false)
@@ -3651,7 +3651,7 @@ namespace DigitalPlatform.LibraryServer
                     }
                     DomUtil.SetAttr(nodeNewDatabase, "syntax", strSyntax);
 
-                    // 2009/10/23 new add
+                    // 2009/10/23
                     DomUtil.SetAttr(nodeNewDatabase, "role", strRole);
 
                     DomUtil.SetAttr(nodeNewDatabase, "inCirculation", strInCirculation);
@@ -3735,7 +3735,7 @@ namespace DigitalPlatform.LibraryServer
 
                     DomUtil.SetAttr(nodeDatabase, "name", strName);
 
-                    // 2008/12/4 new add
+                    // 2008/12/4
                     // <itemdbgroup>内容更新，刷新配套的内存结构
                     nRet = this.LoadItemDbGroupParam(this.LibraryCfgDom,
                         out strError);
@@ -3802,7 +3802,7 @@ namespace DigitalPlatform.LibraryServer
 
                     DomUtil.SetAttr(nodeDatabase, "orderDbName", strName);
 
-                    // 2008/12/4 new add
+                    // 2008/12/4
                     // <itemdbgroup>内容更新，刷新配套的内存结构
                     nRet = this.LoadItemDbGroupParam(this.LibraryCfgDom,
                         out strError);
@@ -3869,7 +3869,7 @@ namespace DigitalPlatform.LibraryServer
 
                     DomUtil.SetAttr(nodeDatabase, "issueDbName", strName);
 
-                    // 2008/12/4 new add
+                    // 2008/12/4
                     // <itemdbgroup>内容更新，刷新配套的内存结构
                     nRet = this.LoadItemDbGroupParam(this.LibraryCfgDom,
                         out strError);
@@ -3936,7 +3936,7 @@ namespace DigitalPlatform.LibraryServer
 
                     DomUtil.SetAttr(nodeDatabase, "commentDbName", strName);
 
-                    // 2008/12/4 new add
+                    // 2008/12/4
                     // <itemdbgroup>内容更新，刷新配套的内存结构
                     nRet = this.LoadItemDbGroupParam(this.LibraryCfgDom,
                         out strError);
@@ -3952,7 +3952,7 @@ namespace DigitalPlatform.LibraryServer
                 {
                     // 创建读者库
 
-                    // 2009/11/13 new add
+                    // 2009/11/13
                     XmlNode exist_database_node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("readerdbgroup/database[@name='" + strName + "']");
                     if (bRecreate == true && exist_database_node == null)
                     {
@@ -5102,8 +5102,8 @@ namespace DigitalPlatform.LibraryServer
                             DomUtil.SetAttr(nodeDatabase, "unionCatalogStyle", cfg.UnionCatalogStyle);
                             string strInCirculation = cfg.InCirculation == true ? "true" : "false";
                             DomUtil.SetAttr(nodeDatabase, "inCirculation", strInCirculation);
-                            DomUtil.SetAttr(nodeDatabase, "role", cfg.Role);    // 2009/10/23 new add
-                            DomUtil.SetAttr(nodeDatabase, "replication", cfg.Replication);    // 2009/10/23 new add
+                            DomUtil.SetAttr(nodeDatabase, "role", cfg.Role);    // 2009/10/23
+                            DomUtil.SetAttr(nodeDatabase, "replication", cfg.Replication);    // 2009/10/23
                             /*
                             DomUtil.SetAttr(nodeDatabase, "biblioDbName", cfg.BiblioDbName);
                             DomUtil.SetAttr(nodeDatabase, "itemDbName", cfg.DbName);

@@ -86,7 +86,7 @@ namespace DigitalPlatform.LibraryServer
         //      2.44 (2015/4/30) GetSystemParameter() API 增加了 category=cfgs name=getDataDir 获得数据目录物理路径 
         //      2.45 (2015/5/15) 文件上传和 WriteRes() API 都得到了充实，支持 dp2libraryconsole 前端进行文件上传和管理操作了 
         //      2.46 (2015/5/18) 增加 API ListFile()
-        //      2.47 (2015/6/13) GetSystemParameter() API 正价了 category=arrived name=dbname
+        //      2.47 (2015/6/13) GetSystemParameter() API 增加了 category=arrived name=dbname
         public static string Version = "2.47";
 #if NO
         int m_nRefCount = 0;
@@ -905,7 +905,7 @@ namespace DigitalPlatform.LibraryServer
                         app.WriteErrorLog("INFO: InitialVdbs");
 #endif
 
-                        // 2008/6/6 new add 重新初始化虚拟库定义
+                        // 2008/6/6  重新初始化虚拟库定义
                         // 这样，其他地方调用的InitialVdbs()就可以去除了
                         // TODO: 为了提高运行速度，可以优化为，只有当<virtualDatabases>元素下的内容有改变时，才重新进行这个初始化
                         this.vdbs = null;
@@ -947,7 +947,7 @@ namespace DigitalPlatform.LibraryServer
                 // *** 初始化操作日志环境
                 if (bReload == false)   // 2014/4/2
                 {
-                    // this.OperLogDir = strOperLogDir;    // 2006/12/7 new add
+                    // this.OperLogDir = strOperLogDir;    // 2006/12/7 
 #if LOG_INFO
                     app.WriteErrorLog("INFO: OperLog.Initial");
 #endif
@@ -1330,7 +1330,7 @@ namespace DigitalPlatform.LibraryServer
                 this.MessageCenter.ServerUrl = this.WsUrl;
                 this.MessageCenter.MessageDbName = this.MessageDbName;
 
-                this.MessageCenter.VerifyAccount -= new VerifyAccountEventHandler(MessageCenter_VerifyAccount); // 2008/6/6 new add
+                this.MessageCenter.VerifyAccount -= new VerifyAccountEventHandler(MessageCenter_VerifyAccount); // 2008/6/6 
                 this.MessageCenter.VerifyAccount += new VerifyAccountEventHandler(MessageCenter_VerifyAccount);
 
 #if NO
@@ -1401,7 +1401,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
             return 0;
-            // 2008/10/13 new add
+            // 2008/10/13 
         ERROR1:
             if (bReload == false)
             {
@@ -1733,7 +1733,7 @@ namespace DigitalPlatform.LibraryServer
             if (bChanged == true)
             {
                 this.Changed = true;
-                this.ActivateManagerThread();   // 2009/3/10 new add
+                this.ActivateManagerThread();   // 2009/3/10 
             }
 
             return 0;
@@ -1823,7 +1823,7 @@ namespace DigitalPlatform.LibraryServer
         
 
 #if NO
-        // 2007/7/11 new add
+        // 2007/7/11 
         int LoadWebuiCfgDom(out string strError)
         {
             strError = "";
@@ -2120,7 +2120,7 @@ namespace DigitalPlatform.LibraryServer
 
                 writer.WriteAttributeString("name", this.ReaderDbs[i].DbName);
 
-                // 2008/6/3 new add
+                // 2008/6/3 
                 writer.WriteAttributeString("inCirculation", this.ReaderDbs[i].InCirculation == true ? "true" : "false");
 
                 // 2012/9/7
@@ -2188,7 +2188,7 @@ namespace DigitalPlatform.LibraryServer
                 }
 
 
-                // 2008/6/4 new add
+                // 2008/6/4 
                 bool bValue = true;
                 int nRet = DomUtil.GetBooleanParam(node,
                     "inCirculation",
@@ -2223,28 +2223,28 @@ namespace DigitalPlatform.LibraryServer
 
                 writer.WriteAttributeString("name", cfg.DbName);
 
-                writer.WriteAttributeString("biblioDbName", cfg.BiblioDbName);  // 2005/5/25 new add
+                writer.WriteAttributeString("biblioDbName", cfg.BiblioDbName);  // 2005/5/25 
 
                 // 以下两行缺，成为BUG
                 if (String.IsNullOrEmpty(cfg.IssueDbName) == false)
-                    writer.WriteAttributeString("issueDbName", cfg.IssueDbName);  // 2007/10/22 new add
+                    writer.WriteAttributeString("issueDbName", cfg.IssueDbName);  // 2007/10/22 
                 if (String.IsNullOrEmpty(cfg.BiblioDbSyntax) == false)
-                    writer.WriteAttributeString("syntax", cfg.BiblioDbSyntax);   // 2007/10/22 new add
+                    writer.WriteAttributeString("syntax", cfg.BiblioDbSyntax);   // 2007/10/22 
 
                 if (String.IsNullOrEmpty(cfg.OrderDbName) == false)
-                    writer.WriteAttributeString("orderDbName", cfg.OrderDbName);  // 2007/11/27 new add
+                    writer.WriteAttributeString("orderDbName", cfg.OrderDbName);  // 2007/11/27 
 
                 if (String.IsNullOrEmpty(cfg.CommentDbName) == false)
-                    writer.WriteAttributeString("commentDbName", cfg.CommentDbName);  // 2008/12/8 new add
+                    writer.WriteAttributeString("commentDbName", cfg.CommentDbName);  // 2008/12/8 
 
                 if (String.IsNullOrEmpty(cfg.UnionCatalogStyle) == false)
-                    writer.WriteAttributeString("unionCatalogStyle", cfg.UnionCatalogStyle);  // 2007/12/15 new add
+                    writer.WriteAttributeString("unionCatalogStyle", cfg.UnionCatalogStyle);  // 2007/12/15 
 
-                // 2008/6/4 new add
+                // 2008/6/4 
                 writer.WriteAttributeString("inCirculation", cfg.InCirculation == true ? "true" : "false");
 
                 if (String.IsNullOrEmpty(cfg.Role) == false)
-                    writer.WriteAttributeString("role", cfg.Role);  // 2009/10/23 new add
+                    writer.WriteAttributeString("role", cfg.Role);  // 2009/10/23 
 
                 if (String.IsNullOrEmpty(cfg.Replication) == false)
                     writer.WriteAttributeString("replication", cfg.Replication);
@@ -2569,7 +2569,7 @@ namespace DigitalPlatform.LibraryServer
                     writer.WriteAttributeString("dbname", this.ArrivedDbName);
                     writer.WriteAttributeString("reserveTimeSpan", this.ArrivedReserveTimeSpan);
 
-                    // 2007/11/5 new add
+                    // 2007/11/5 
                     writer.WriteAttributeString("outofReservationThreshold", this.OutofReservationThreshold.ToString());
                     writer.WriteAttributeString("canReserveOnshelf", this.CanReserveOnshelf == true ? "true" : "false");
 
@@ -2585,7 +2585,7 @@ namespace DigitalPlatform.LibraryServer
                     }*/
 
                     // -----------
-                    // 2007/11/5 new add
+                    // 2007/11/5 
                     // 入馆登记
                     // 元素<passgate>
                     // 属性writeOperLog
@@ -2599,7 +2599,7 @@ namespace DigitalPlatform.LibraryServer
                     // 属性dbname/reserveTimeSpan
                     writer.WriteStartElement("message");
                     writer.WriteAttributeString("dbname", this.MessageDbName);
-                    writer.WriteAttributeString("reserveTimeSpan", this.MessageReserveTimeSpan);    // 2007/11/5 new add
+                    writer.WriteAttributeString("reserveTimeSpan", this.MessageReserveTimeSpan);    // 2007/11/5 
                     writer.WriteEndElement();
 
                     /*
@@ -2623,7 +2623,7 @@ namespace DigitalPlatform.LibraryServer
                     // 属性dbname/overdueStyle
                     writer.WriteStartElement("amerce");
                     writer.WriteAttributeString("dbname", this.AmerceDbName);
-                    writer.WriteAttributeString("overdueStyle", this.OverdueStyle); // 2007/11/5 new add
+                    writer.WriteAttributeString("overdueStyle", this.OverdueStyle); // 2007/11/5 
                     writer.WriteEndElement();
 
                     // 发票
@@ -2744,7 +2744,7 @@ namespace DigitalPlatform.LibraryServer
                             node.WriteTo(writer);
                         }
 
-                        // 2009/7/20 new add
+                        // 2009/7/20 
                         // <clientFineInterface>
                         node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//clientFineInterface");
                         if (node != null)
@@ -2752,7 +2752,7 @@ namespace DigitalPlatform.LibraryServer
                             node.WriteTo(writer);
                         }
 
-                        // 2009/9/23 new add
+                        // 2009/9/23 
                         // <yczb>
                         /*
         <yczb>
@@ -2810,7 +2810,7 @@ namespace DigitalPlatform.LibraryServer
                         }
 
                         // <callNumber>
-                        // 2009/2/18 new add
+                        // 2009/2/18 
                         node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("callNumber");
                         if (node != null)
                         {
@@ -3288,7 +3288,7 @@ namespace DigitalPlatform.LibraryServer
         // 是否在配置的实体库名之列?
         public bool IsItemDbName(string strItemDbName)
         {
-            // 2008/10/16 new add
+            // 2008/10/16 
             if (String.IsNullOrEmpty(strItemDbName) == true)
                 return false;
 
@@ -3313,7 +3313,7 @@ namespace DigitalPlatform.LibraryServer
         {
             IsInCirculation = false;
 
-            // 2008/10/16 new add
+            // 2008/10/16 
             if (String.IsNullOrEmpty(strItemDbName) == true)
                 return false;
 
@@ -3348,7 +3348,7 @@ namespace DigitalPlatform.LibraryServer
         // 是否在配置的书目库名之列?
         public ItemDbCfg GetBiblioDbCfg(string strBiblioDbName)
         {
-            // 2008/10/16 new add
+            // 2008/10/16 
             if (String.IsNullOrEmpty(strBiblioDbName) == true)
                 return null;
 
@@ -3365,7 +3365,7 @@ namespace DigitalPlatform.LibraryServer
         // 是否具有orderWork角色
         public bool IsOrderWorkBiblioDb(string strBiblioDbName)
         {
-            // 2008/10/16 new add
+            // 2008/10/16 
             if (String.IsNullOrEmpty(strBiblioDbName) == true)
                 return false;
 
@@ -3381,7 +3381,7 @@ namespace DigitalPlatform.LibraryServer
         // 是否在配置的期库名之列?
         public bool IsIssueDbName(string strIssueDbName)
         {
-            // 2008/10/16 new add
+            // 2008/10/16 
             if (String.IsNullOrEmpty(strIssueDbName) == true)
                 return false;
 
@@ -3403,7 +3403,7 @@ namespace DigitalPlatform.LibraryServer
         // 是否在配置的订购库名之列?
         public bool IsOrderDbName(string strOrderDbName)
         {
-            // 2008/10/16 new add
+            // 2008/10/16 
             if (String.IsNullOrEmpty(strOrderDbName) == true)
                 return false;
 
@@ -3424,7 +3424,7 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 是否在配置的评注库名之列?
-        // 2008/12/8 new add
+        // 2008/12/8 
         public bool IsCommentDbName(string strCommentDbName)
         {
             if (String.IsNullOrEmpty(strCommentDbName) == true)
@@ -3611,7 +3611,7 @@ namespace DigitalPlatform.LibraryServer
 
         // 根据评注库名, 找到对应的书目库名
         // 注意，返回1的时候，strBiblioDbName也有可能为空
-        // 2009/10/18 new add
+        // 2009/10/18 
         // return:
         //      -1  出错
         //      0   没有找到
@@ -3654,7 +3654,7 @@ namespace DigitalPlatform.LibraryServer
 
         // 根据订购库名, 找到对应的书目库名
         // 注意，返回1的时候，strBiblioDbName也有可能为空
-        // 2008/8/28 new add
+        // 2008/8/28 
         // return:
         //      -1  出错
         //      0   没有找到
@@ -3697,7 +3697,7 @@ namespace DigitalPlatform.LibraryServer
 
         // 根据期库名, 找到对应的书目库名
         // 注意，返回1的时候，strBiblioDbName也有可能为空
-        // 2009/2/2 new add
+        // 2009/2/2 
         // return:
         //      -1  出错
         //      0   没有找到
@@ -4721,7 +4721,7 @@ namespace DigitalPlatform.LibraryServer
 
                 // 2007/4/5 改造 加上了 GetXmlStringSimple()
                 string strOneDbQuery = "<target list='"
-                    + StringUtil.GetXmlStringSimple(strDbName + ":" + "证条码")       // 2007/9/14 new add
+                    + StringUtil.GetXmlStringSimple(strDbName + ":" + "证条码")       // 2007/9/14 
                     + "'><item><word>"
                     + StringUtil.GetXmlStringSimple(strBarcode)
                     + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>1000</maxCount></item><lang>zh</lang></target>";
@@ -4921,7 +4921,7 @@ namespace DigitalPlatform.LibraryServer
 
                 // 2007/4/5 改造 加上了 GetXmlStringSimple()
                 string strOneDbQuery = "<target list='"
-                    + StringUtil.GetXmlStringSimple(strDbName + ":" + "证条码")  // TODO: 将来统一修改为“证条码号”     // 2007/9/14 new add
+                    + StringUtil.GetXmlStringSimple(strDbName + ":" + "证条码")  // TODO: 将来统一修改为“证条码号”     // 2007/9/14 
                     + "'><item><word>"
                     + StringUtil.GetXmlStringSimple(strBarcode)
                     + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>1000</maxCount></item><lang>zh</lang></target>";
@@ -5139,7 +5139,7 @@ namespace DigitalPlatform.LibraryServer
                 Debug.Assert(String.IsNullOrEmpty(strDbName) == false, "");
 
                 string strOneDbQuery = "<target list='"
-                    + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 new add
+                    + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 
                     + "'><item><word>"
                     + StringUtil.GetXmlStringSimple(strWord)
                     + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>1000</maxCount></item><lang>zh</lang></target>";
@@ -5410,7 +5410,7 @@ namespace DigitalPlatform.LibraryServer
                 Debug.Assert(String.IsNullOrEmpty(strDbName) == false, "");
 
                 string strOneDbQuery = "<target list='"
-                    + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 new add
+                    + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 
                     + "'><item><word>"
                     + StringUtil.GetXmlStringSimple(strWord)
                     + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>1000</maxCount></item><lang>zh</lang></target>";
@@ -5572,7 +5572,7 @@ namespace DigitalPlatform.LibraryServer
 
                 // 2007/4/5 改造 加上了 GetXmlStringSimple()
                 string strOneDbQuery = "<target list='"
-                    + StringUtil.GetXmlStringSimple(strDbName + ":" + "证条码")       // 2007/9/14 new add
+                    + StringUtil.GetXmlStringSimple(strDbName + ":" + "证条码")       // 2007/9/14 
                     + "'><item><word>"
                     + StringUtil.GetXmlStringSimple(strBarcode)
                     + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>"+nMax.ToString()+"</maxCount></item><lang>zh</lang></target>";
@@ -5952,13 +5952,13 @@ namespace DigitalPlatform.LibraryServer
             {
                 string strDbName = app.ItemDbs[i].DbName;
 
-                // 2008/10/16 new add
+                // 2008/10/16 
                 if (String.IsNullOrEmpty(strDbName) == true)
                     continue;
 
                 // 2007/4/5 改造 加上了 GetXmlStringSimple()
                 string strOneDbQuery = "<target list='"
-                    + StringUtil.GetXmlStringSimple(strDbName + ":" + "册条码")       // 2007/9/14 new add
+                    + StringUtil.GetXmlStringSimple(strDbName + ":" + "册条码")       // 2007/9/14 
                     + "'><item><word>"
                     + StringUtil.GetXmlStringSimple(strBarcode) + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>1000</maxCount></item><lang>zh</lang></target>";
                 // 1000 2011/9/5
@@ -6084,7 +6084,7 @@ namespace DigitalPlatform.LibraryServer
             {
                 string strDbName = app.ItemDbs[i].DbName;
 
-                // 2008/10/16 new add
+                // 2008/10/16 
                 if (String.IsNullOrEmpty(strDbName) == true)
                     continue;
 
@@ -6193,13 +6193,13 @@ namespace DigitalPlatform.LibraryServer
             {
                 string strDbName = app.ItemDbs[i].DbName;
 
-                // 2008/10/16 new add
+                // 2008/10/16 
                 if (String.IsNullOrEmpty(strDbName) == true)
                     continue;
 
                 // 2007/4/5 改造 加上了 GetXmlStringSimple()
                 string strOneDbQuery = "<target list='"
-                    + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 new add
+                    + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 
                     + "'><item><word>"
                     + StringUtil.GetXmlStringSimple(strBarcode)
                     + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>"+nMax.ToString()+"</maxCount></item><lang>zh</lang></target>";
@@ -6410,7 +6410,7 @@ namespace DigitalPlatform.LibraryServer
                     continue;
 
                 string strOneDbQuery = "<target list='"
-                    + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 new add
+                    + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 
                     + "'><item><word>"
                     + StringUtil.GetXmlStringSimple(strBarcode)
                     + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>" + nMax.ToString() + "</maxCount></item><lang>zh</lang></target>";
@@ -6568,7 +6568,7 @@ namespace DigitalPlatform.LibraryServer
                     continue;
 
                 string strOneDbQuery = "<target list='"
-                    + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 new add
+                    + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 
                     + "'><item><word>"
                     + StringUtil.GetXmlStringSimple(strBarcode)
                     + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>" + nMax.ToString() + "</maxCount></item><lang>zh</lang></target>";
@@ -7084,7 +7084,7 @@ namespace DigitalPlatform.LibraryServer
                     continue;
 
                 string strOneDbQuery = "<target list='"
-                    + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 new add
+                    + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 
                     + "'><item><word>"
                     + StringUtil.GetXmlStringSimple(strWordList)
                     + "</word><match>exact</match><relation>list</relation><dataType>string</dataType><maxCount>" + nMax.ToString() + "</maxCount></item><lang>zh</lang></target>";
@@ -7359,14 +7359,14 @@ namespace DigitalPlatform.LibraryServer
             {
                 string strDbName = app.ItemDbs[i].DbName;
 
-                // 2008/10/16 new add
+                // 2008/10/16 
                 if (String.IsNullOrEmpty(strDbName) == true)
                     continue;
 
 
                 // 2007/4/5 改造 加上了 GetXmlStringSimple()
                 string strOneDbQuery = "<target list='"
-                    + StringUtil.GetXmlStringSimple(strDbName + ":" + "册条码")       // 2007/9/14 new add
+                    + StringUtil.GetXmlStringSimple(strDbName + ":" + "册条码")       // 2007/9/14 
                     + "'><item><word>"
                     + StringUtil.GetXmlStringSimple(strBarcode)
                     + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>"+nMax.ToString()+"</maxCount></item><lang>zh</lang></target>";
@@ -7456,7 +7456,7 @@ namespace DigitalPlatform.LibraryServer
             prefixes.Add("NB:");
             prefixes.Add("EM:");
             prefixes.Add("TP:");
-            prefixes.Add("ID:");    // 2009/9/22 new add
+            prefixes.Add("ID:");    // 2009/9/22 
             prefixes.Add("CN:");    // 2012/11/7
 
             for (int i = 0; i < prefixes.Count; i++)
@@ -7611,7 +7611,7 @@ namespace DigitalPlatform.LibraryServer
                     // 最多100条
                     // 2007/4/5 改造 加上了 GetXmlStringSimple()
                     string strOneDbQuery = "<target list='"
-                        + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 new add
+                        + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 
                         + "'><item><word>"
                         + StringUtil.GetXmlStringSimple(strQueryWord)
                         + "</word><match>" + strMatch + "</match><relation>=</relation><dataType>string</dataType><maxCount>100</maxCount></item><lang>zh</lang></target>";
@@ -7649,7 +7649,7 @@ namespace DigitalPlatform.LibraryServer
                     // 最多100条
                     // 2007/4/5 改造 加上了 GetXmlStringSimple()
                     string strOneDbQuery = "<target list='"
-                        + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 new add
+                        + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 
                         + "'><item><word>"
                         + StringUtil.GetXmlStringSimple(strQueryWord)
                         + "</word><match>"+strMatch+"</match><relation>=</relation><dataType>string</dataType><maxCount>100</maxCount></item><lang>zh</lang></target>";
@@ -7771,7 +7771,7 @@ namespace DigitalPlatform.LibraryServer
                         "state");
                      * */
 
-                    if (strPassword != null)    // 2009/9/22 new add
+                    if (strPassword != null)    // 2009/9/22 
                     {
                         // 验证读者密码
                         // return:
@@ -8459,7 +8459,7 @@ namespace DigitalPlatform.LibraryServer
             strOutputUserName = "";
             strLibraryCode = "";
 
-            // 2009/9/22 new add
+            // 2009/9/22 
             if (String.IsNullOrEmpty(strLoginName) == true)
             {
                 strError = "参数 strLoginName 不能为空";
@@ -8641,7 +8641,7 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             account.AccountLibraryCode = strLibraryCode;
 
-            // 2009/9/26 new add
+            // 2009/9/26 
             if (String.IsNullOrEmpty(account.Barcode) == true)
             {
                 // text-level: 用户提示
@@ -8659,7 +8659,7 @@ namespace DigitalPlatform.LibraryServer
 "personalLibrary");
 
 
-            // 2007/2/15 new add
+            // 2007/2/15 
             account.ReaderDom = readerdom;
             account.ReaderDomLastTime = DateTime.Now;
 
@@ -9586,7 +9586,7 @@ namespace DigitalPlatform.LibraryServer
 
             int nResultCount = 0;
 
-            // strItemBarcode命令状态 2006/12/24 new add
+            // strItemBarcode命令状态 2006/12/24 
             if (strItemBarcode[0] == '@')
             {
                 // 获得册记录，通过册记录路径
@@ -10101,7 +10101,7 @@ namespace DigitalPlatform.LibraryServer
 
             string strTempDbName = ResPath.GetDbName(strItemRecPath);
 
-            // 2008/10/16 new add
+            // 2008/10/16 
             if (String.IsNullOrEmpty(strTempDbName) == true)
             {
                 strError = "从路径 '" + strItemRecPath + "' 中无法抽出库名部分...";
@@ -10895,7 +10895,7 @@ strLibraryCode);    // 读者所在的馆代码
 
         // TODO: 需要进行针对分馆用户的改造
         // 修改值列表
-        // 2008/8/21 new add
+        // 2008/8/21 
         // parameters:
         //      strAction   "new" "change" "overwirte" "delete"
         // return:
@@ -11845,7 +11845,7 @@ strLibraryCode);    // 读者所在的馆代码
 
                 // 2007/4/5 改造 加上了 GetXmlStringSimple()
                 string strOneDbQuery = "<target list='"
-                    + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 new add
+                    + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 
                     + "'><item><word>"
                     + StringUtil.GetXmlStringSimple(strWord)
                     + "</word><match>" + strMatchStyle + "</match><relation>=</relation><dataType>string</dataType>"
@@ -11948,7 +11948,7 @@ strLibraryCode);    // 读者所在的馆代码
                 /*
                 // 2007/4/5 改造 加上了 GetXmlStringSimple()
                 strOneDbQuery = "<target list='"
-                    + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 new add
+                    + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 
                     + "'><item><word>"
                     + StringUtil.GetXmlStringSimple(strWord) + "</word><match>" + strMatchStyle + "</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang></target>";
                  * */
@@ -12135,7 +12135,7 @@ strLibraryCode);    // 读者所在的馆代码
             {
                 // 2007/4/5 改造 加上了 GetXmlStringSimple()
                 strOneDbQuery = "<target list='"
-                    + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 new add
+                    + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 
                     + "'><item><word>"
                     + StringUtil.GetXmlStringSimple(strWord) + "</word><match>" + strMatchStyle + "</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang></target>";
             }
@@ -12620,7 +12620,7 @@ strLibraryCode);    // 读者所在的馆代码
         public class ReaderDbCfg
         {
             public string DbName = "";
-            public bool InCirculation = true;   // 2008/6/3 new add
+            public bool InCirculation = true;   // 2008/6/3 
 
             public string LibraryCode = "";     // 2012/9/7
         }
@@ -12787,8 +12787,8 @@ strLibraryCode);    // 读者所在的馆代码
             }
         }
 
-        public string AccountLibraryCode = ""; // 2007/12/15 new add
-        public string Access = "";  // 存取权限代码 2008/2/28 new add
+        public string AccountLibraryCode = ""; // 2007/12/15 
+        public string Access = "";  // 存取权限代码 2008/2/28 
 
         public string UserID = "";  // 用户唯一标识。对于读者，这就是证条码号
 
@@ -13020,18 +13020,18 @@ strLibraryCode);    // 读者所在的馆代码
         public string BiblioDbSyntax = "";  // 书目库MARC语法
 
         public string IssueDbName = ""; // 期库
-        public string OrderDbName = ""; // 订购库 2007/11/27 new add
-        public string CommentDbName = "";   // 评注库 2008/12/8 new add
+        public string OrderDbName = ""; // 订购库 2007/11/27 
+        public string CommentDbName = "";   // 评注库 2008/12/8 
 
-        public string UnionCatalogStyle = "";   // 联合编目特性 905  // 2007/12/15 new add
+        public string UnionCatalogStyle = "";   // 联合编目特性 905  // 2007/12/15 
 
         public string Replication = "";   // 复制  // 2013/11/19
         public string ReplicationServer = "";   // 复制-服务器名 用于加速访问
         public string ReplicationDbName = "";   // 复制-书目库名 用于加速访问
 
-        public bool InCirculation = true;   // 2008/6/4 new add
+        public bool InCirculation = true;   // 2008/6/4 
 
-        public string Role = "";    // 角色 biblioSource/orderWork // 2009/10/23 new add
+        public string Role = "";    // 角色 biblioSource/orderWork // 2009/10/23 
     }
 
     // API ListBiblioDbFroms()所使用的结构

@@ -1133,7 +1133,7 @@ namespace DigitalPlatform.Marc
         /// </summary>
         /// <param name="strName">字段名。3字符的字符串</param>
         /// <param name="strIndicator">字段指示符。为2字符的字符串，或者空字符串</param>
-        /// <param name="subfields">表示若干内嵌字段的字符串数组。每个字符串开始就是字段名</param>
+        /// <param name="fields">表示若干内嵌字段的字符串数组。每个字符串开始就是字段名</param>
         public MarcOuterField(string strName,
             string strIndicator,
             string[] fields)

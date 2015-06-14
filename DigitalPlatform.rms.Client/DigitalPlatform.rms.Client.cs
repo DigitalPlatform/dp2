@@ -321,7 +321,7 @@ namespace DigitalPlatform.rms.Client
 			if (strLanguage == "")
 				MessageBox.Show ("语言已选中，怎么为空呢？");
 			strXml = "<target list='"
-                + StringUtil.GetXmlStringSimple(strTarget)     // 2007/9/14 new add
+                + StringUtil.GetXmlStringSimple(strTarget)     // 2007/9/14
                 +"'>"+strXml+"<lang>"+strLanguage+"</lang></target>";
 			return strXml;
 		}
@@ -441,7 +441,7 @@ namespace DigitalPlatform.rms.Client
 				strXml += "<operator value='"+strOperator+"'/>";
 			}
 			strXml += "<target list='"+
-                StringUtil.GetXmlStringSimple(strTarget)     // 2007/9/14 new add
+                StringUtil.GetXmlStringSimple(strTarget)     // 2007/9/14
                 + "'>" + 
 				"<item>" +
 				"<word>" + StringUtil.GetXmlStringSimple(strWord) 

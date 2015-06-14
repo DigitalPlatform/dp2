@@ -735,7 +735,7 @@ namespace DigitalPlatform.OPAC.Web
             fromlist.Items.Clear();
             fromlist.Items.Add(this.GetString("quoted_all"));   // "<全部>"或者"<all>"
 
-            // 2007/10/9 new add
+            // 2007/10/9
             if (String.IsNullOrEmpty(strDbName) == true
                 || strDbName.ToLower() == "<all>"
                 || strDbName == "<全部>")
@@ -972,7 +972,7 @@ namespace DigitalPlatform.OPAC.Web
                 }
                 else
                 {
-                    // 2007/7/8 new add
+                    // 2007/7/8
                     // strMatchStyle = this.DefaultHiddenMatchStyle;
                     strMatchStyle = this.DefaultHiddenMatchStyle == "" ? "left" : this.DefaultHiddenMatchStyle;
                 }
@@ -1076,7 +1076,7 @@ namespace DigitalPlatform.OPAC.Web
                             continue;
                         }
 
-                        strTargetList = StringUtil.GetXmlStringSimple(strDbName + ":" + strFromCaptions); // 2007/9/14 new add
+                        strTargetList = StringUtil.GetXmlStringSimple(strDbName + ":" + strFromCaptions); // 2007/9/14
                     }
 
                     // 2008/6/6
@@ -1108,7 +1108,7 @@ namespace DigitalPlatform.OPAC.Web
                         }
                         else if (String.IsNullOrEmpty(strWord) == false)
                         {
-                            // 2008/3/9 new add
+                            // 2008/3/9
                             strDataType = "number";
                             // 2012/3/29
                             strMatchStyle = "exact";
@@ -1154,7 +1154,7 @@ namespace DigitalPlatform.OPAC.Web
                         + "<word>"
                         + StringUtil.GetXmlStringSimple(strWord)
                         + "</word><match>"
-                        + StringUtil.GetXmlStringSimple(strMatchStyle) // 2007/9/14 new add
+                        + StringUtil.GetXmlStringSimple(strMatchStyle) // 2007/9/14
                         + "</match><relation>" + strRelation + "</relation><dataType>" + strDataType + "</dataType>"
                         + "<maxCount>" + nMaxCount.ToString() + "</maxCount></item><lang>zh</lang></target>";
                 }
@@ -1262,7 +1262,7 @@ namespace DigitalPlatform.OPAC.Web
                 return; // 不能优化。优化后语言变化的时候不能刷新 2009/6/17
              * */
 
-            list.Items.Clear(); // 2009/6/17 new add
+            list.Items.Clear(); // 2009/6/17
 
             // 匹配方式列是否可见?
             bool bVisible = (this.SearchPanelStyle & SearchPanelStyle.MatchStyleColumn) == SearchPanelStyle.MatchStyleColumn;
@@ -1365,7 +1365,7 @@ namespace DigitalPlatform.OPAC.Web
                 return; // 不能优化。优化后语言发生变化时，列表不能刷新 2009/6/17
              * */
 
-            list.Items.Clear(); // 2009/6/17 new add
+            list.Items.Clear(); // 2009/6/17
 
             /*
             CirculationApplication app = (CirculationApplication)this.Page.Application["app"];
@@ -1416,7 +1416,7 @@ namespace DigitalPlatform.OPAC.Web
             }
              */
 
-            list.Items.Add(this.GetString("quoted_all"));   // <全部> 2007/10/9 new add
+            list.Items.Add(this.GetString("quoted_all"));   // <全部> 2007/10/9
 
             if (app.vdbs != null)   // 2015/1/26
             {
@@ -1485,18 +1485,18 @@ string strWrapperClass)
                 DropDownList match = (DropDownList)this.FindControl("match" + i.ToString());
                 Debug.Assert(match != null, "");
 
-                if (this.Page.IsPostBack == false)  // 2008/1/13 new add 防止postback的时候固执地重设为DefaultVisibleMatchStyle
+                if (this.Page.IsPostBack == false)  // 2008/1/13 防止postback的时候固执地重设为DefaultVisibleMatchStyle
                 {
                     if ((this.SearchPanelStyle & SearchPanelStyle.MatchStyleColumn) == SearchPanelStyle.MatchStyleColumn
                         && bSimplest == false)
                     {
-                        // 2007/7/8 new add
+                        // 2007/7/8
                         match.Text = this.DefaultVisibleMatchStyle == "" ? "left" : this.DefaultVisibleMatchStyle;
                     }
                     else
                     {
                         // 列隐藏时候的值
-                        // 2007/7/8 new add
+                        // 2007/7/8
                         match.Text = this.DefaultHiddenMatchStyle == "" ? "left" : this.DefaultHiddenMatchStyle;
                     }
                 }
@@ -1678,7 +1678,7 @@ string strWrapperClass)
     {
         public string QueryXml = "";
 
-        // 2008/11/24 new add
+        // 2008/11/24
         public string ErrorInfo = "";   // 如果有值，通常表示检索出错
     }
 }

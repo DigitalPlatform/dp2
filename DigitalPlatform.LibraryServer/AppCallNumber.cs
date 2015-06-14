@@ -167,7 +167,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
             strQueryXml = "<target list='"
-                    + StringUtil.GetXmlStringSimple(strTargetList)       // 2007/9/14 new add
+                    + StringUtil.GetXmlStringSimple(strTargetList)       // 2007/9/14
                     + "'>" + strQueryXml + "</target>";
 
             RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
@@ -701,7 +701,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
             string strQueryXml = "<target list='"
-                + StringUtil.GetXmlStringSimple(strZhongcihaoDbName + ":" + "分类号")       // 2007/9/14 new add 
+                + StringUtil.GetXmlStringSimple(strZhongcihaoDbName + ":" + "分类号")       // 2007/9/14 
                 + "'><item><word>"
                 + StringUtil.GetXmlStringSimple(strClass)
                 + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang></target>";

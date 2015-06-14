@@ -395,14 +395,14 @@ Control insertbefore)
                 // 右开始
                 strResult = "&nbsp;";
 
-                // 2007/1/18 new add
+                // 2007/1/18
                 string strArrivedItemBarcode = DomUtil.GetAttr(node, "arrivedItemBarcode");
 
                 //strResult += "" + strBarcodes + "</td>";
                 int nBarcodesCount = GetBarcodesCount(strBarcodes);
 
                 strResult += "" + MakeBarcodeListHyperLink(strBarcodes, strArrivedItemBarcode, ",")
-                    + (nBarcodesCount > 1 ? " 之一" : "")  // 2007/7/5 new add
+                    + (nBarcodesCount > 1 ? " 之一" : "")  // 2007/7/5
                     + "</td>";
 
                 // 操作者
@@ -424,7 +424,7 @@ Control insertbefore)
                         strState += string.Format(this.GetString("同一预约请求中的其余s册旋即失效"),  // "；同一预约请求中的其余 {0} 册旋即失效"
                             (nBarcodesCount - 1).ToString());
 
-                        // "；同一预约请求中的其余 " + (nBarcodesCount - 1).ToString() + " 册旋即失效";  // 2007/7/5 new add
+                        // "；同一预约请求中的其余 " + (nBarcodesCount - 1).ToString() + " 册旋即失效";  // 2007/7/5
                     }
                 }
                 strResult += "<td>" + strState + "</td>";

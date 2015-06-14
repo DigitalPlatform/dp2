@@ -31,7 +31,7 @@ namespace DigitalPlatform.Xml
 		//		style	初始化风格。暂未使用。
 		public override void InitialVisualSpecial(Box boxTotal)
 		{
-			Text text = new Text ();
+			XmlText text = new XmlText ();
 			text.Name = "TextOfAttrItem";
 			text.container = boxTotal;
 			Debug.Assert(this.m_paraValue1 != null,"m_paraValue是用来传递参数，不能为null");

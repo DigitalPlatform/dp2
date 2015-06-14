@@ -130,7 +130,7 @@ namespace DigitalPlatform.dp2.Statis
                 m_strUrl = value;
 
                 // eventDocumentComplete.Reset();
-                if (this.Visible == true)   // 2011/4/18 new add (IE 9)
+                if (this.Visible == true)   // 2011/4/18 (IE 9)
                 {
                     this.m_nNavigating++;
                     this.extendedWebBrowser1.Navigate(value);

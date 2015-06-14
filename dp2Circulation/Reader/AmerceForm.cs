@@ -2036,7 +2036,7 @@ this.splitContainer_lists,
             string strReturnOperator = DomUtil.GetElementText(dom.DocumentElement, "returnOperator");
             string strState = DomUtil.GetElementText(dom.DocumentElement, "state");
 
-            // 2007/6/18 new add
+            // 2007/6/18
             string strAmerceOperator = DomUtil.GetElementText(dom.DocumentElement, "operator");
             string strAmerceTime = DomUtil.GetElementText(dom.DocumentElement, "operTime");
 
@@ -2623,7 +2623,7 @@ this.splitContainer_lists,
                 info.ID = ListViewUtil.GetItemText(item,
                     COLUMN_AMERCING_ID);
 
-                // 2008/11/15 new add
+                // 2008/11/15
                 info.Comment = strComment;
 
                 overdue_infos.Add(info);
@@ -3787,7 +3787,7 @@ COLUMN_AMERCED_STATE);
 #if NO
         // 从合成的(价格+注释)字符串中析出两个部分
         // 并且去掉价格字符串头部的*符号
-        // 2007/4/19 new add
+        // 2007/4/19
         static void ParsePriceCommentString(string strText,
             bool bClearChangedChar,
             out string strPrice,

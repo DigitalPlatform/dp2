@@ -2195,7 +2195,7 @@ strElementName);
 
                 // 插入到最前面
                 XmlNode temp = DomUtil.InsertFirstChild(root, fragment);
-                // 2007/6/19 new add
+                // 2007/6/19
                 if (temp != null)
                 {
                     // returnDate 加入还书时间
@@ -2215,7 +2215,7 @@ strElementName);
                 while (root.ChildNodes.Count > 100)
                     root.RemoveChild(root.ChildNodes[root.ChildNodes.Count - 1]);
 
-                // 2007/6/19 new add
+                // 2007/6/19
                 // 增量借阅量属性值
                 string strBorrowCount = DomUtil.GetAttr(root, "count");
                 if (String.IsNullOrEmpty(strBorrowCount) == true)
@@ -2781,7 +2781,7 @@ strElementName);
 
                     if ((strAction == "change" 
                         || strAction == "move")
-                        && bForce == false) // 2008/10/6 new add
+                        && bForce == false) // 2008/10/6
                     {
                         string strSourceRecPath = "";
 
@@ -5238,7 +5238,7 @@ strElementName);
 
 </root>
 
-2007/12/18 new add
+2007/12/18
 <root>
   <operation>amerce</operation> 操作类型
   <action>expire</action> 以停代金到期
@@ -5253,7 +5253,7 @@ strElementName);
   <readerRecord recPath='...'>...</readerRecord>	最新读者记录
 </root>
          * 
-2008/6/20 new add
+2008/6/20
 <root>
   <operation>amerce</operation> 
   <action>modifycomment</action> 
@@ -5688,7 +5688,7 @@ strElementName);
                     }
                 }
 
-                // 2008/6/20 new add
+                // 2008/6/20
                 if (strAction == "modifycomment")
                 {
                     nRet = ModifyComment(
@@ -7473,7 +7473,7 @@ API: Settlement()
     + "<match>exact</match><relation>=</relation><dataType>string</dataType>"
     + "</item>";
                 string strQueryXml = "<target list='"
-                    + StringUtil.GetXmlStringSimple(this.AmerceDbName + ":" + "ID")       // 2007/9/14 new add
+                    + StringUtil.GetXmlStringSimple(this.AmerceDbName + ":" + "ID")       // 2007/9/14
                     + "'>" + strText
     + "<lang>zh</lang></target>";
 

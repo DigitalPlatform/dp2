@@ -268,7 +268,7 @@ namespace DigitalPlatform.Marc
             TemplateControl.AdjustTextboxSize(
                 false,
                 out nResultWidth,
-                out nResultHeight);    // 2008/7/20 new add
+                out nResultHeight);    // 2008/7/20
 
             int nHeightDelta = this.Height - this.TemplateControl.Height;
 

@@ -109,7 +109,7 @@ namespace dp2Circulation
             }
             catch (FileNotFoundException)
             {
-                // 不必报错 2009/2/4 new add
+                // 不必报错 2009/2/4
             }
             catch (Exception ex)
             {

@@ -406,7 +406,7 @@ namespace dp2Circulation
             }
         }
 
-        // 2009/7/17 new add
+        // 2009/7/17
         /// <summary>
         /// Ö°±ð
         /// </summary>
@@ -1640,7 +1640,7 @@ namespace dp2Circulation
             // this.ChangedTextFont = new Font(this.textBox_barcode.Font, FontStyle.Bold);
         }
 
-        // 2009/7/19 new add
+        // 2009/7/19
         int m_nInDropDown = 0;
 
         private void comboBox_readerType_DropDown(object sender, EventArgs e)

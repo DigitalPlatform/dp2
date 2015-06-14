@@ -1394,7 +1394,7 @@ namespace DigitalPlatform.LibraryServer
                 //      -1  数据格式错误
                 //      0   没有发现超期
                 //      1   发现超期   strError中有提示信息
-                //      2   已经在宽限期内，很容易超期 2009/3/13 new add
+                //      2   已经在宽限期内，很容易超期 2009/3/13
                 nRet = app.CheckPeriod(
                     calendar, 
                     strBorrowDate,
@@ -1526,7 +1526,7 @@ namespace DigitalPlatform.LibraryServer
                 // 状态
                 string strArrivedDate = DomUtil.GetAttr(node, "arrivedDate");
                 string strState = DomUtil.GetAttr(node, "state");
-                // 2007/1/18 new add
+                // 2007/1/18
                 string strArrivedItemBarcode = DomUtil.GetAttr(node, "arrivedItemBarcode");
                 if (strState == "arrived")
                 {

@@ -760,7 +760,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
 
         #region IChargingForm 接口相关
 
-        // 2008/10/31 new add
+        // 2008/10/31 
         ChargingInfoHost m_chargingInfoHost = null;
 
         /// <summary>

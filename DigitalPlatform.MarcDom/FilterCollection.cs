@@ -52,7 +52,7 @@ namespace DigitalPlatform.MarcDom
             return filter;
         }
 
-        // 2007/1/8 new add
+        // 2007/1/8
         public void Clear()
         {
             this.m_lock.AcquireWriterLock(m_nLockTimeout);

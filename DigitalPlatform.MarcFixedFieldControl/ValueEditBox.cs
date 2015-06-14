@@ -196,7 +196,7 @@ namespace DigitalPlatform.Marc
                     break;
                 case Keys.Delete:
                     {
-                        // 禁止Delete键的作用 2008/5/27 new add
+                        // 禁止Delete键的作用 2008/5/27
                         Console.Beep();
                         e.Handled = true;
                     }
@@ -204,7 +204,7 @@ namespace DigitalPlatform.Marc
                 case Keys.Back:
                     {
                         /* 不知这里为什么不管用
-                        // 禁止Backspace键的作用 2008/7/4 new add
+                        // 禁止Backspace键的作用 2008/7/4
                         Console.Beep();
                         e.Handled = true;
                         return;
@@ -265,7 +265,7 @@ namespace DigitalPlatform.Marc
                         {
                             case (int)Keys.Tab:
                                 {
-                                    // 禁止Tab键的作用 2008/7/28 new add
+                                    // 禁止Tab键的作用 2008/7/28
                                     Console.Beep();
                                     return;
                                 }
@@ -276,7 +276,7 @@ namespace DigitalPlatform.Marc
                                 break;
                             case (int)Keys.Back:
                                 {
-                                    // 禁止Backspace键的作用 2008/7/4 new add
+                                    // 禁止Backspace键的作用 2008/7/4
                                     Console.Beep();
                                     return;
                                 }

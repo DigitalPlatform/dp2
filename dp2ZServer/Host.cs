@@ -1084,7 +1084,7 @@ EventLogEntryType.Information);
                 }
             }
 
-            // 2007/8/9 new add
+            // 2007/8/9
             // 如果在this.BiblioDbProperties里面找不到，可以直接在xml配置的<database>元素中找
             XmlNode nodeDatabase = this.CfgDom.DocumentElement.SelectSingleNode("//databases/database[@name='" + strBiblioDbName + "']");
             if (nodeDatabase == null)

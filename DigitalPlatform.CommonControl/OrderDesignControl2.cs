@@ -155,13 +155,13 @@ namespace DigitalPlatform.CommonControl
                 this.label_arrivedTotalCopy.Visible = true;
                 this.textBox_arrivedTotalCopy.Visible = true;
 
-                // 2008/11/3 new add
+                // 2008/11/3
                 this.panel_targetRecPath.Visible = true;
 
                 this.label_newlyArriveTotalCopy.Visible = true;
                 this.textBox_newlyArriveTotalCopy.Visible = true;
 
-                // 2008/11/3 new add
+                // 2008/11/3
                 this.button_fullyAccept.Visible = true;
             }
             else
@@ -186,13 +186,13 @@ namespace DigitalPlatform.CommonControl
                 this.label_arrivedTotalCopy.Visible = false;
                 this.textBox_arrivedTotalCopy.Visible = false;
 
-                // 2008/11/3 new add
+                // 2008/11/3
                 this.panel_targetRecPath.Visible = false;
 
                 this.label_newlyArriveTotalCopy.Visible = false;
                 this.textBox_newlyArriveTotalCopy.Visible = false;
 
-                // 2008/11/3 new add
+                // 2008/11/3
                 this.button_fullyAccept.Visible = false;
             }
         }
@@ -433,7 +433,7 @@ namespace DigitalPlatform.CommonControl
                     return 1;
                 }
 
-                // 2009/11/9 new add
+                // 2009/11/9
                 string strTotalPrice = "";
 
                 try
@@ -464,7 +464,7 @@ namespace DigitalPlatform.CommonControl
                     }
                 }
 
-                if (this.ArriveMode == false)   // 2009/2/4 new add
+                if (this.ArriveMode == false)   // 2009/2/4
                 {
                     // 订购模式
                     if (String.IsNullOrEmpty(item.CopyString) == true)
@@ -527,7 +527,7 @@ namespace DigitalPlatform.CommonControl
                         return 1;
                     }
 
-                    // 2009/2/15 new add
+                    // 2009/2/15
                     if (item.Seller == "交换" || item.Seller == "赠")
                     {
                         if (String.IsNullOrEmpty(item.Source) == false)
@@ -568,7 +568,7 @@ namespace DigitalPlatform.CommonControl
                     if ((item.State & ItemState.ReadOnly) != 0)
                         continue;
 
-                    // 2009/2/4 new add 只检查新输入的订购事项
+                    // 2009/2/4 只检查新输入的订购事项
                     if (String.IsNullOrEmpty(item.StateString) == false)
                         continue;
 
@@ -579,7 +579,7 @@ namespace DigitalPlatform.CommonControl
                         if ((item.State & ItemState.ReadOnly) != 0)
                             continue;
 
-                        // 2009/2/4 new add 只检查新输入的订购事项
+                        // 2009/2/4 只检查新输入的订购事项
                         if (String.IsNullOrEmpty(item.StateString) == false)
                             continue;
 
@@ -708,7 +708,7 @@ namespace DigitalPlatform.CommonControl
             {
                 Item2 cur_element = this.Items[i];
 
-                // 要看看item本身的状态是不是完全不允许验收 2008/11/12 new add
+                // 要看看item本身的状态是不是完全不允许验收 2008/11/12
                 if (cur_element.location.ReadOnly == true)
                     continue;
 
@@ -962,7 +962,7 @@ namespace DigitalPlatform.CommonControl
                 }
                  * */
 
-                // 2008/12/30 new add
+                // 2008/12/30
                 this.textBox_arrivedTotalCopy.Text = "";
                 this.textBox_newlyArriveTotalCopy.Text = "";
                 this.textBox_newlyOrderTotalCopy.Text = "";
@@ -1241,7 +1241,7 @@ namespace DigitalPlatform.CommonControl
             }
             catch (Exception ex)
             {
-                // 2008/12/18 new add
+                // 2008/12/18
                 strError = ex.Message;
                 return -1;
             }
@@ -1396,7 +1396,7 @@ namespace DigitalPlatform.CommonControl
 
             }
             
-            // 2009/2/13 new add
+            // 2009/2/13
             try
             {
                 item.SellerAddressXml = DomUtil.GetElementOuterXml(dom.DocumentElement, "sellerAddress");
@@ -1436,7 +1436,7 @@ namespace DigitalPlatform.CommonControl
                 nTotalCopies += item.CopyValue;
             }
 
-            // 2008/8/27 new add
+            // 2008/8/27
             // ruguo you duoyu yige de 0 shixiang
             if (nTotalCopies == 0 && this.Items.Count > 1)
             {
@@ -1730,7 +1730,7 @@ namespace DigitalPlatform.CommonControl
                 {
                     MessageBox.Show(this, "新规划总册数 '" + this.textBox_newlyOrderTotalCopy.Text + "' 应当为纯数字");
 
-                    // 2008/9/16 new add
+                    // 2008/9/16
                     this.textBox_newlyOrderTotalCopy.Text = this.GetNewlyOrderTotalCopy().ToString();  // 改变回可行的值
                     return;
                 }
@@ -1912,7 +1912,7 @@ namespace DigitalPlatform.CommonControl
             {
                 MessageBox.Show(this, "新验收总册数 '" + this.textBox_newlyArriveTotalCopy.Text + "' 应当为纯数字");
 
-                // 2008/9/16 new add
+                // 2008/9/16
                 this.textBox_newlyArriveTotalCopy.Text = GetNewlyArriveTotalCopy().ToString();  // 改变回可行的值
                 return;
             }
@@ -1991,7 +1991,7 @@ namespace DigitalPlatform.CommonControl
                     {
                         int nThisCount = Math.Min(nDelta, nCheckable);
                         item.location.ArrivedCount += nThisCount;
-                        item.UpdateCopyCount(); // 2008/12/18 new add
+                        item.UpdateCopyCount(); // 2008/12/18
                     }
 
                     nDelta -= nCheckable;
@@ -2010,7 +2010,7 @@ namespace DigitalPlatform.CommonControl
                         return;
                     }
                     item.location.ArrivedCount += nDelta;
-                    item.UpdateCopyCount(); // 2008/12/18 new add
+                    item.UpdateCopyCount(); // 2008/12/18
                 }
 
                 return;
@@ -2030,7 +2030,7 @@ namespace DigitalPlatform.CommonControl
                     {
                         int nThisCount = Math.Min(nDelta, nUnCheckable);
                         item.location.ArrivedCount -= nThisCount;   // 会自动删除一些空白馆藏地点的事项
-                        item.UpdateCopyCount(); // 2008/12/18 new add
+                        item.UpdateCopyCount(); // 2008/12/18
                     }
 
                     nDelta -= nUnCheckable;
@@ -2149,7 +2149,7 @@ namespace DigitalPlatform.CommonControl
 
     public class Item2
     {
-        int m_nInDropDown = 0;  // 2009/1/15 new add
+        int m_nInDropDown = 0;  // 2009/1/15
 
         public OrderDesignControl2 Container = null;
 
@@ -2158,7 +2158,7 @@ namespace DigitalPlatform.CommonControl
         // 颜色、popupmenu
         public Label label_color = null;
 
-        // 书目号 2008/8/31 new add
+        // 书目号 2008/8/31
         public TextBox textBox_catalogNo = null;
 
         // 渠道
@@ -2184,7 +2184,7 @@ namespace DigitalPlatform.CommonControl
         // public TextBox textBox_location = null;
         public LocationEditControl location = null;
 
-        // 类别 2008/8/31 new add
+        // 类别 2008/8/31
         public ComboBox comboBox_class = null;
 
         // 渠道地址
@@ -2981,7 +2981,7 @@ namespace DigitalPlatform.CommonControl
 
         #region events
 
-        // 2008/9/13 new add
+        // 2008/9/13
         void location_ReadOnlyChanged(object sender, EventArgs e)
         {
             if (this.Container.ArriveMode == false)
@@ -3067,7 +3067,7 @@ namespace DigitalPlatform.CommonControl
 
             this.Container.Changed = true;
 
-            // 2009/2/15 new add
+            // 2009/2/15
             // 如果seller和source矛盾，则将seller清为空
             if (this.comboBox_seller.Text == "交换"
                 || this.comboBox_seller.Text == "赠")
@@ -3099,7 +3099,7 @@ namespace DigitalPlatform.CommonControl
 
             this.Container.Changed = true;
 
-            // 2009/2/15 new add
+            // 2009/2/15
             if (this.comboBox_seller.Text == "交换"
                 || this.comboBox_seller.Text == "赠")
                 this.comboBox_source.Text = "";
@@ -3229,7 +3229,7 @@ namespace DigitalPlatform.CommonControl
                     {
                         MessageBox.Show(this.Container, ex.Message);
 
-                        // 2008/9/16 new add
+                        // 2008/9/16
                         // this.comboBox_copy.Text = this.location.ArrivedCount.ToString(); 
                         // 恢复原来的值或者最近可用的值
                         // 2010/12/1 changed
@@ -3268,7 +3268,7 @@ namespace DigitalPlatform.CommonControl
 
         void comboBox_seller_DropDown(object sender, EventArgs e)
         {
-            // 防止重入 2009/1/15 new add
+            // 防止重入 2009/1/15
             if (this.m_nInDropDown > 0)
                 return;
 
@@ -3726,7 +3726,7 @@ namespace DigitalPlatform.CommonControl
         }
 
         // 原有的 复本数整数
-        // 2008/9/12 new add
+        // 2008/9/12
         public int OldCopyValue
         {
             get
@@ -3788,7 +3788,7 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
-        // 馆藏地点事项的个数 2008/9/12 new add
+        // 馆藏地点事项的个数 2008/9/12
         public int DistributeCount
         {
             get

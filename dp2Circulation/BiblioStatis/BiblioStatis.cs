@@ -232,7 +232,7 @@ namespace dp2Circulation
                 if (lRet == -1)
                     throw new Exception(strError);
 
-                lResultCount = lRet;    // 2009/11/23 new add
+                lResultCount = lRet;    // 2009/11/23 
 
                 if (infos == null)
                     return item_infos;

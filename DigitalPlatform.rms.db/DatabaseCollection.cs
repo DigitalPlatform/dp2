@@ -1182,7 +1182,7 @@ namespace DigitalPlatform.rms
         //		strError	out参数，返回出错信息
         // return:
         //		-1	出错
-        //      -4  数据库不存在  2008/4/27 new add
+        //      -4  数据库不存在  2008/4/27
         //      -5  未找到数据库
         //		-6	无足够的权限
         //		0	成功

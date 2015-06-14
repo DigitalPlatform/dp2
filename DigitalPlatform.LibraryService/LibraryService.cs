@@ -421,7 +421,7 @@ namespace dp2Library
         //      strUserName 用户名
         //      strPassword 密码
         //      strParamaters   登录参数 location=???,index=???,type=reader
-        //              如果是public登录，type应该是worker，不能是reader。因为reader会被程序把strUserName当成条码号来登录。public登录成功后，身份还是reader
+        //              如果是 public 登录，type应该是worker，不能是reader。因为reader会被程序把strUserName当成条码号来登录。public登录成功后，身份还是reader
         // return: result.Value:
         //      -1  error
         //      0   user not found, or password error
@@ -1760,7 +1760,7 @@ namespace dp2Library
 
                     // 2007/4/5 改造 加上了 GetXmlStringSimple()
                     string strOneDbQuery = "<target list='"
-                        + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)   // 2007/9/14 new add
+                        + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)   // 2007/9/14 
                         + "'><option warning='0'/><item><word>"
                         + StringUtil.GetXmlStringSimple(strQueryWord)
                         + "</word><match>" + strMatchStyle + "</match><relation>"+strRelation+"</relation><dataType>"+strDataType+"</dataType><maxCount>" + nPerMax.ToString() + "</maxCount></item><lang>" + strLang + "</lang></target>";
@@ -2077,7 +2077,7 @@ namespace dp2Library
 
                 // 2007/4/5 改造 加上了 GetXmlStringSimple()
                 string strOneDbQuery = "<target list='"
-                    + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)   // 2007/9/14 new add
+                    + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)   // 2007/9/14 
                     + "'><item><word>"
                     + StringUtil.GetXmlStringSimple(strQueryWord)
                     + "</word><match>" + strMatchStyle + "</match><relation>=</relation><dataType>string</dataType><maxCount>" + lMaxCount.ToString() + "</maxCount></item><lang>" + strLang + "</lang></target>";
@@ -2672,7 +2672,6 @@ namespace dp2Library
                     return result;
                 }
 
-
                 // 列出某类数据库的检索途径信息
                 // return:
                 //      -1  出错
@@ -2782,7 +2781,7 @@ namespace dp2Library
                     {
                         string strDbName = app.ItemDbs[i].BiblioDbName;
 
-                        // 2008/10/16 new add
+                        // 2008/10/16 
                         if (String.IsNullOrEmpty(strDbName) == true)
                             continue;
 
@@ -2897,7 +2896,7 @@ namespace dp2Library
                     }
                     else if (String.IsNullOrEmpty(strQueryWord) == false)
                     {
-                        // 2008/3/9 new add
+                        // 2008/3/9 
                         strDataType = "number";
                         // 2012/3/29
                         strMatchStyle = "exact";
@@ -3088,7 +3087,7 @@ namespace dp2Library
             }
         }
 
-        // 2009/10/31 new add
+        // 2009/10/31 
         // 复制或者移动书目信息(目前只能xml一种格式)
         // 权限:   需要具有setbiblioinfo权限
         // parameters:
@@ -3214,7 +3213,7 @@ namespace dp2Library
 
 
 #if NO
-        // 获得书目信息(可以用html或xml两种格式之一) 2006/9/18 new add
+        // 获得书目信息(可以用html或xml两种格式之一) 2006/9/18 
         // parameters:
         //      strBiblioRecPath    书目记录路径。
         //      strBiblioXml    如果不为空，表示前端发送过来的一条XML格式的记录，就不用从数据库中去取了
@@ -3576,7 +3575,7 @@ namespace dp2Library
         // return:
         //      result.Value    命中结果总数。如果为-1，则表示检索出错
         public LibraryServerResult SearchItem(
-            string strItemDbName,   // 2007/9/25 new add
+            string strItemDbName,   // 2007/9/25 
             string strQueryWord,
             int nPerMax,
             string strFrom,
@@ -3630,7 +3629,7 @@ namespace dp2Library
                 else if (strItemDbName == "<全部期刊>"
                     || strItemDbName.ToLower() == "<all series>")
                 {
-                    // 2009/2/2 new add
+                    // 2009/2/2 
                     for (int i = 0; i < app.ItemDbs.Count; i++)
                     {
                         string strCurrentItemDbName = app.ItemDbs[i].DbName;
@@ -3654,7 +3653,7 @@ namespace dp2Library
                 else if (strItemDbName == "<全部图书>"
                     || strItemDbName.ToLower() == "<all book>")
                 {
-                    // 2009/2/2 new add
+                    // 2009/2/2 
                     for (int i = 0; i < app.ItemDbs.Count; i++)
                     {
                         string strCurrentItemDbName = app.ItemDbs[i].DbName;
@@ -3762,7 +3761,7 @@ namespace dp2Library
 
                     // 2007/4/5 改造 加上了 GetXmlStringSimple()
                     string strOneDbQuery = "<target list='"
-                        + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)    // 2007/9/14 new add
+                        + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)    // 2007/9/14 
                         + "'><item>"
                         + (bDesc == true ? "<order>DESC</order>" : "")
                     + "<word>"
@@ -3897,7 +3896,7 @@ namespace dp2Library
                 {
                     // 权限字符串
                     if (StringUtil.IsInList("getiteminfo", sessioninfo.RightsOrigin) == false
-                        && StringUtil.IsInList("getentities", sessioninfo.RightsOrigin) == false   // 2009/10/18 new add
+                        && StringUtil.IsInList("getentities", sessioninfo.RightsOrigin) == false   // 2009/10/18 
                         && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
@@ -4081,7 +4080,7 @@ namespace dp2Library
                     {
                         strItemRecPath = strBarcode.Substring(strLeadPath.Length);
 
-                        // 2009/10/18 new add
+                        // 2009/10/18 
                         // 继续分离出(方向)命令部分
                         string strCommand = "";
                         nRet = strItemRecPath.IndexOf("$");
@@ -4110,7 +4109,7 @@ namespace dp2Library
                             goto ERROR1;
                         }
 
-                        // 2009/10/18 new add
+                        // 2009/10/18 
                         string strStyle = "content,data,metadata,timestamp,outputpath";
 
                         // 为了便于处理对象资源
@@ -4282,7 +4281,7 @@ namespace dp2Library
                         app.CfgDir + "\\"+strItemDbType+"xml2html.cs",
                         app.CfgDir + "\\" + strItemDbType + "xml2html.cs.ref",
                         strXml,
-                        strItemRecPath, // 2009/10/18 new add
+                        strItemRecPath, // 2009/10/18 
                         out strResult,
                         out strError);
                     if (nRet == -1)
@@ -4295,7 +4294,7 @@ namespace dp2Library
                         app.CfgDir + "\\" + strItemDbType + "xml2text.cs",
                         app.CfgDir + "\\" + strItemDbType + "xml2text.cs.ref",
                         strXml,
-                        strItemRecPath, // 2009/10/18 new add
+                        strItemRecPath, // 2009/10/18 
                         out strResult,
                         out strError);
                     if (nRet == -1)
@@ -5876,7 +5875,7 @@ namespace dp2Library
                         app.CfgDir + "\\issuexml2html.cs",
                         app.CfgDir + "\\issuexml2html.cs.ref",
                         strXml,
-                        strIssueRecPath,    // 2009/10/18 new add
+                        strIssueRecPath,    // 2009/10/18 
                         out strResult,
                         out strError);
                     if (nRet == -1)
@@ -5889,7 +5888,7 @@ namespace dp2Library
                         app.CfgDir + "\\issuexml2text.cs",
                         app.CfgDir + "\\issuexml2text.cs.ref",
                         strXml,
-                        strIssueRecPath,    // 2009/10/18 new add
+                        strIssueRecPath,    // 2009/10/18 
                         out strResult,
                         out strError);
                     if (nRet == -1)
@@ -6131,7 +6130,7 @@ namespace dp2Library
                     }
 
                     string strOneDbQuery = "<target list='"
-                        + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)    // 2007/9/14 new add
+                        + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)    // 2007/9/14 
                         + "'><item>"
                         + (bDesc == true ? "<order>DESC</order>" : "")
                         + "<word>"
@@ -6876,7 +6875,7 @@ namespace dp2Library
                         app.CfgDir + "\\orderxml2html.cs",
                         app.CfgDir + "\\orderxml2html.cs.ref",
                         strXml,
-                        strOrderRecPath,    // 2009/10/18 new add
+                        strOrderRecPath,    // 2009/10/18 
                         out strResult,
                         out strError);
                     if (nRet == -1)
@@ -6889,7 +6888,7 @@ namespace dp2Library
                         app.CfgDir + "\\orderxml2text.cs",
                         app.CfgDir + "\\orderxml2text.cs.ref",
                         strXml,
-                        strOrderRecPath,    // 2009/10/18 new add
+                        strOrderRecPath,    // 2009/10/18 
                         out strResult,
                         out strError);
                     if (nRet == -1)
@@ -7196,7 +7195,7 @@ namespace dp2Library
                     }
 
                     string strOneDbQuery = "<target list='"
-                        + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)    // 2007/9/14 new add
+                        + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)    // 2007/9/14 
                         + "'><item>"
                         + (bDesc == true ? "<order>DESC</order>" : "")
                     + "<word>"
@@ -8485,7 +8484,7 @@ namespace dp2Library
                 {
                     goto ERROR1;
                 }*/
-                // 2009/2/23 new add
+                // 2009/2/23 
                 result.ErrorInfo = strError;
 
                 result.Value = nResultValue;
@@ -9188,7 +9187,7 @@ namespace dp2Library
                         goto END1;
                     }
 
-                    // 2009/10/23 new add
+                    // 2009/10/23 
                     // 获得<itemdbgroup>元素下级XML
                     if (strName == "biblioDbGroup")
                     {
@@ -9433,7 +9432,7 @@ namespace dp2Library
                     }
 
                     /*
-                    // 2008/10/10 new add
+                    // 2008/10/10 
                     // <readertypes>元素内容
                     // strValue中是下级片断定义，没有<readertypes>元素作为根。
                     if (strName == "readerTypes")
@@ -9450,7 +9449,7 @@ namespace dp2Library
                         goto END1;
                     }
 
-                    // 2008/10/10 new add
+                    // 2008/10/10 
                     // <booktypes>元素内容
                     // strValue中是下级片断定义，没有<booktypes>元素作为根。
                     if (strName == "bookTypes")
@@ -9467,7 +9466,7 @@ namespace dp2Library
                         goto END1;
                     }*/
 
-                    // 2008/10/10 new add
+                    // 2008/10/10 
                     // <locationtypes>元素内容
                     // strValue中是下级片断定义，没有<locationTypes>元素作为根。
                     if (strName == "locationTypes")
@@ -9495,7 +9494,7 @@ namespace dp2Library
                         goto END1;
                     }
 
-                    // 2008/10/12 new add
+                    // 2008/10/12 
                     // <zhongcihao>元素内容
                     // strValue中是下级片断定义，没有<zhongcihao>元素作为根。
                     if (strName == "zhongcihao")
@@ -9513,7 +9512,7 @@ namespace dp2Library
                         goto END1;
                     }
 
-                    // 2009/2/18 new add
+                    // 2009/2/18 
                     // <callNumber>元素内容
                     // strValue中是下级片断定义，没有<callNumber>元素作为根。
                     if (strName == "callNumber")
@@ -9531,7 +9530,7 @@ namespace dp2Library
                         goto END1;
                     }
 
-                    // 2009/3/9 new add
+                    // 2009/3/9 
                     // <dup>元素内容
                     // strValue中是下级片断定义，没有<dup>元素作为根。
                     if (strName == "dup")
@@ -9549,7 +9548,7 @@ namespace dp2Library
                         goto END1;
                     }
 
-                    // 2008/10/13 new add
+                    // 2008/10/13 
                     // <script>元素内容
                     // strValue中是下级片断定义，没有<script>元素作为根。
                     if (strName == "script")
@@ -9640,7 +9639,7 @@ namespace dp2Library
                             goto NOTFOUND;
                     }
 
-                    // 2009/10/23 new add
+                    // 2009/10/23 
                     goto END1;
                 }
 
@@ -9662,7 +9661,7 @@ namespace dp2Library
                             strError = "category '" + strCategory + "' 中未知的 name '" + strName + "'";
                             goto NOTFOUND;
                     }
-                    // 2009/10/23 new add
+                    // 2009/10/23 
                     goto END1;
                 }
 
@@ -9722,7 +9721,7 @@ namespace dp2Library
                             strError = "category '" + strCategory + "' 中未知的 name '" + strName + "'";
                             goto NOTFOUND;
                     }
-                    // 2009/10/23 new add
+                    // 2009/10/23 
                     goto END1;
                 }
 
@@ -9791,7 +9790,7 @@ namespace dp2Library
                             strError = "category '" + strCategory + "' 中未知的 name '" + strName + "'";
                             goto NOTFOUND;
                     }
-                    // 2009/10/23 new add
+                    // 2009/10/23 
                     goto END1;
                 }
 
@@ -9822,11 +9821,11 @@ namespace dp2Library
                             strError = "category '" + strCategory + "' 中未知的 name '" + strName + "'";
                             goto NOTFOUND;
                     }
-                    // 2009/10/23 new add
+                    // 2009/10/23 
                     goto END1;
                 }
 
-                // 2007/10/19 new add
+                // 2007/10/19 
                 if (strCategory == "issue")
                 {
                     switch (strName)
@@ -9853,11 +9852,11 @@ namespace dp2Library
                             strError = "category '" + strCategory + "' 中未知的 name '" + strName + "'";
                             goto NOTFOUND;
                     }
-                    // 2009/10/23 new add
+                    // 2009/10/23 
                     goto END1;
                 }
 
-                // 2007/11/30 new add
+                // 2007/11/30 
                 if (strCategory == "order")
                 {
                     switch (strName)
@@ -9884,7 +9883,7 @@ namespace dp2Library
                             strError = "category '" + strCategory + "' 中未知的 name '" + strName + "'";
                             goto NOTFOUND;
                     }
-                    // 2009/10/23 new add
+                    // 2009/10/23 
                     goto END1;
                 }
 
@@ -9933,7 +9932,7 @@ namespace dp2Library
                             strError = "category '" + strCategory + "' 中未知的 name '" + strName + "'";
                             goto NOTFOUND;
                     }
-                    // 2009/10/23 new add
+                    // 2009/10/23 
                     goto END1;
                 }
 
@@ -9969,7 +9968,7 @@ namespace dp2Library
                             strError = "category '" + strCategory + "' 中未知的 name '" + strName + "'";
                             goto NOTFOUND;
                     }
-                    // 2009/10/23 new add
+                    // 2009/10/23 
                     goto END1;
                 }
 
@@ -10115,7 +10114,7 @@ namespace dp2Library
                 }
 
                 // 值列表
-                // 2008/8/21 new add
+                // 2008/8/21 
                 if (strCategory == "valueTable")
                 {
                     // TODO: 需要进行针对分馆用户的改造
@@ -10142,7 +10141,7 @@ namespace dp2Library
                     string strValueParam = dom.DocumentElement.InnerText;
 
                     // 修改值列表
-                    // 2008/8/21 new add
+                    // 2008/8/21 
                     // parameters:
                     //      strAction   "new" "change" "overwirte" "delete"
                     // return:
@@ -10218,7 +10217,7 @@ namespace dp2Library
                         goto END1;
                     }
 
-                    // 2008/10/10 new add
+                    // 2008/10/10 
                     // 设置<locationtypes>元素
                     // strValue中是下级片断定义，没有<locationTypes>元素作为根。
                     /*
@@ -10259,7 +10258,7 @@ namespace dp2Library
                         goto END1;
                     }
 
-                    // 2008/10/12 new add
+                    // 2008/10/12 
                     // 设置<zhongcihao>元素
                     // strValue中是下级片断定义，没有<zhongcihao>元素作为根。
                     /*
@@ -10303,7 +10302,7 @@ namespace dp2Library
                         goto END1;
                     }
 
-                    // 2009/2/18 new add
+                    // 2009/2/18 
                     // 设置<callNumber>元素
                     // strValue中是下级片断定义，没有<callNumber>元素作为根。
                     /*
@@ -10356,7 +10355,7 @@ namespace dp2Library
                         goto END1;
                     }
 
-                    // 2009/3/9 new add
+                    // 2009/3/9 
                     // 设置<dup>元素
                     // strValue中是下级片断定义，没有<dup>元素作为根。
                     /*
@@ -10419,7 +10418,7 @@ namespace dp2Library
                         goto END1;
                     }
 
-                    // 2008/10/13 new add
+                    // 2008/10/13 
                     // 设置<script>元素
                     // strValue中是下级片断定义，没有<script>元素作为根。
                     if (strName == "script")
@@ -10741,7 +10740,7 @@ namespace dp2Library
                     }
                 }
 
-                // 2008/8/3 new add
+                // 2008/8/3 
                 if (strAction == "upgradefromdt1000_crossref")
                 {
                     return app.CrossRefBorrowInfo(
@@ -12795,7 +12794,7 @@ out strError);
                         app.CfgDir + "\\commentxml2html.cs",
                         app.CfgDir + "\\commentxml2html.cs.ref",
                         strXml,
-                        strCommentRecPath,  // 2009/10/18 new add
+                        strCommentRecPath,  // 2009/10/18 
                         out strResult,
                         out strError);
                     if (nRet == -1)
@@ -12808,7 +12807,7 @@ out strError);
                         app.CfgDir + "\\commentxml2text.cs",
                         app.CfgDir + "\\commentxml2text.cs.ref",
                         strXml,
-                        strCommentRecPath,  // 2009/10/18 new add
+                        strCommentRecPath,  // 2009/10/18 
                         out strResult,
                         out strError);
                     if (nRet == -1)
@@ -13116,7 +13115,7 @@ out strError);
                     }
 
                     string strOneDbQuery = "<target list='"
-                        + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)    // 2007/9/14 new add
+                        + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)    // 2007/9/14 
                         + "'><item>"
                         + (bDesc == true ? "<order>DESC</order>" : "")
                         + "<word>"

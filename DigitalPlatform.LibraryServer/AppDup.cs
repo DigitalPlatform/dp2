@@ -506,7 +506,7 @@ namespace DigitalPlatform.LibraryServer
                 strSearchStyle = "exact";
 
             string strQueryXml = "<target list='"
-                + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14 new add
+                + StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom)       // 2007/9/14
                 + "'><item><word>"
                 + StringUtil.GetXmlStringSimple(strKey)
                 + "</word><match>" + strSearchStyle + "</match><relation>=</relation><dataType>string</dataType><maxCount>" + nMax.ToString() + "</maxCount></item><lang>zh</lang></target>";

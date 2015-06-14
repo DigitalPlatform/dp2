@@ -290,7 +290,7 @@ namespace DigitalPlatform.CommonControl
         {
             get
             {
-                // 2009/2/13 new add
+                // 2009/2/13
                 if (this.RecordDom == null)
                 {
                     this.RecordDom = new XmlDocument();
@@ -430,13 +430,13 @@ namespace DigitalPlatform.CommonControl
         }
         */
 
-        // 防止重入 2009/7/19 new add
+        // 防止重入 2009/7/19
         int m_nInDropDown = 0;
 
 
         private void comboBox_payStyle_DropDown(object sender, EventArgs e)
         {
-            // 防止重入 2009/1/15 new add
+            // 防止重入 2009/1/15
             if (this.m_nInDropDown > 0)
                 return;
 

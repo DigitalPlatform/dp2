@@ -140,7 +140,7 @@ namespace dp2Circulation
             string strJs = "";
 
             /*
-            // 2009/2/11 new add
+            // 2009/2/11
             if (String.IsNullOrEmpty(this.MainForm.LibraryServerDir) == false)
                 strJs = "<SCRIPT language='javaSCRIPT' src='" + this.MainForm.LibraryServerDir + "/getsummary.js" + "'></SCRIPT>";
             */
@@ -338,7 +338,7 @@ namespace dp2Circulation
                 if (nRet == -1)
                     return -1;
 
-                // 2008/5/9 new add
+                // 2008/5/9
                 this.Initial();
             }
 
@@ -1063,7 +1063,7 @@ out strError);
             string strItemBarcode,
             string strConfirmItemRecPath,
             string strReaderSummary,
-            string strItemXml,  // 2008/5/9 new add
+            string strItemXml,  // 2008/5/9
             BorrowInfo borrow_info,
             DateTime start_time,
             DateTime end_time)
@@ -1242,7 +1242,7 @@ out strError);
             string strItemBarcode,
             string strConfirmItemRecPath,
             string strReaderSummary,
-            string strItemXml,  // 2008/5/9 new add
+            string strItemXml,  // 2008/5/9
             ReturnInfo return_info,
             DateTime start_time,
             DateTime end_time)
@@ -1550,7 +1550,7 @@ out strError);
                 return -1;
             }
 
-            // 2007/12/4 new add
+            // 2007/12/4
             ScriptManager.RemoveRefsBinDirMacro(ref saRef);
 
             string[] saAddRef = {

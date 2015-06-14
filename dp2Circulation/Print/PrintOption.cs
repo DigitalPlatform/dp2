@@ -19,7 +19,7 @@ namespace dp2Circulation
         public string Evalue = "";  // 脚本代码
     }
 
-    // 2008/11/23 new add
+    // 2008/11/23
     /// <summary>
     /// 模板页参数
     /// </summary>

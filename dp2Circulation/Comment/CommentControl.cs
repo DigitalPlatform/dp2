@@ -703,7 +703,7 @@ namespace dp2Circulation
 #endif
 
 #if NO
-        // 2011/6/30 new add
+        // 2011/6/30 
         // 根据评注记录路径 检索出 书目记录 和全部下属评注记录，装入窗口
         // parameters:
         // return:
@@ -916,7 +916,7 @@ namespace dp2Circulation
                     commentitem.RefreshListView();
                 }
 
-                info.RefID = commentitem.RefID;  // 2008/2/17 new add
+                info.RefID = commentitem.RefID;  // 2008/2/17 
 
                 string strXml = "";
                 nRet = commentitem.BuildRecord(out strXml,
@@ -1305,7 +1305,7 @@ namespace dp2Circulation
                 return "记录路径为 '" + strRecPath + "' 的事项";
 
             string strRefID = bookitem.RefID;
-            // 2008/6/24 new add
+            // 2008/6/24 
             if (String.IsNullOrEmpty(strRefID) == false)
                 return "参考ID为 '" + strRefID + "' 的事项";
 

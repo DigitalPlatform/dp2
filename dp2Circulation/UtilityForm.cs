@@ -440,7 +440,7 @@ namespace dp2Circulation
         }
 
         WebCamera m_webCamera = null;
-        bool m_bStopCamera = true;
+        // bool m_bStopCamera = true;
 
         private void button_webCamera_start_Click(object sender, EventArgs e)
         {
@@ -449,7 +449,7 @@ namespace dp2Circulation
                 m_webCamera = new WebCamera(this.panel_camera_preview.Handle,
                     panel_camera_preview.Width, panel_camera_preview.Height);
                 m_webCamera.StartWebCam();
-                m_bStopCamera = false;
+                //m_bStopCamera = false;
                 this.button_webCamera_stop.Enabled = true;
                 this.button_webCamera_copyToClipboard.Enabled = true;
             }
@@ -461,7 +461,7 @@ namespace dp2Circulation
             {
                 m_webCamera.CloseWebcam();
                 m_webCamera = null;
-                m_bStopCamera = true;
+                //m_bStopCamera = true;
                 this.button_webCamera_stop.Enabled = false;
                 this.button_webCamera_start.Enabled = true;
                 this.button_webCamera_copyToClipboard.Enabled = false;

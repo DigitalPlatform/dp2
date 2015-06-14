@@ -195,7 +195,7 @@ namespace DigitalPlatform.LibraryServer
                         continue;
                     }
 
-                    // 2008/10/7 new add
+                    // 2008/10/7
                     if (nRet == 0)
                     {
                         strWarning += "册条码号 '" + strItemBarcode + "' 对应的记录不存在; ";
@@ -293,7 +293,7 @@ namespace DigitalPlatform.LibraryServer
 
                 string strID = DomUtil.GetAttr(node, "id");
 
-                // 2008/5/21 new add
+                // 2008/5/21
                 if (String.IsNullOrEmpty(strID) == true)
                 {
                     // 创建id
@@ -336,7 +336,7 @@ namespace DigitalPlatform.LibraryServer
 
                 DomUtil.SetAttr(node, "price", strPrice);
 
-                // 2008/5/21 new add
+                // 2008/5/21
                 string strType = DomUtil.GetAttr(node, "type");
                 if (String.IsNullOrEmpty(strType) == false)
                     DomUtil.SetAttr(node, "reason", strType + "。从dt1000升级过来");

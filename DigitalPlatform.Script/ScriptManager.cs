@@ -1443,7 +1443,7 @@ namespace DigitalPlatform.Script
 
 			if (strLocate != null)
 			{
-                // 2007/1/24 new add
+                // 2007/1/24
                 strLocate = MacroPath(strLocate);
 
 				DomUtil.SetAttr(node, "locate", strLocate);
@@ -1525,7 +1525,7 @@ namespace DigitalPlatform.Script
             // 2011/11/5
             strLastModified = DomUtil.GetAttr(node, "lastModified");
 
-            // 2007/1/24 new add
+            // 2007/1/24
             strProjectLocate = UnMacroPath(strProjectLocate);
 
 			return 1;
@@ -1637,7 +1637,7 @@ namespace DigitalPlatform.Script
 
 			strProjectLocate = DomUtil.GetAttr(nodeThis, "locate");
 
-            // 2007/1/24 new add
+            // 2007/1/24
             strProjectLocate = UnMacroPath(strProjectLocate);
 
 
@@ -1863,7 +1863,7 @@ namespace DigitalPlatform.Script
 			compilerParams = new CompilerParameters();
 
 			compilerParams.GenerateInMemory = true; //Assembly is created in memory
-			compilerParams.IncludeDebugInformation = true;  // 2007/1/15 new add
+			compilerParams.IncludeDebugInformation = true;  // 2007/1/15
 
 			if (strOutputFile != null && strOutputFile != "") 
 			{
@@ -1944,7 +1944,7 @@ namespace DigitalPlatform.Script
 			string strProjectDir)
 		{
             if (refs == null)
-                return; // 2008/1/13 new add
+                return; // 2008/1/13
 
 			Hashtable macroTable = new Hashtable();
 
@@ -1965,7 +1965,7 @@ namespace DigitalPlatform.Script
 		public static void RemoveRefsBinDirMacro(ref string[] refs)
 		{
             if (refs == null)
-                return; // 2008/1/13 new add
+                return; // 2008/1/13
 
 			Hashtable macroTable = new Hashtable();
 
@@ -2533,7 +2533,7 @@ namespace DigitalPlatform.Script
 						nodeCurrent.AppendChild(node);
 						DomUtil.SetAttr(node, "name", aName[i]);
 
-                        // 2007/1/24 new add
+                        // 2007/1/24
                         strLocate = MacroPath(strLocate);
 
 						DomUtil.SetAttr(node, "locate", strLocate);

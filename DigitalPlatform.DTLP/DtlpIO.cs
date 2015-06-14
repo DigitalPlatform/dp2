@@ -252,7 +252,7 @@ namespace DigitalPlatform.DTLP
 			else
 				m_strCurNumber = strNextNumber;
 
-			m_strPath = strPath;	// new add
+			m_strPath = strPath;	//
 
 			nRecCount ++;
 			return 0;
@@ -404,7 +404,7 @@ namespace DigitalPlatform.DTLP
 				goto ERROR1;
 			}
 
-            // 2007/8/18 new add
+            // 2007/8/18
             if (strVersion == "0.9")
                 strMaxNumber = strMaxNumber.PadLeft(7, '0');	// 7λ
             else
@@ -479,7 +479,7 @@ namespace DigitalPlatform.DTLP
 				goto ERROR1;
 			}
 
-            // 2007/8/18 new add
+            // 2007/8/18
             if (strVersion == "0.9")
                 strMinNumber = strMinNumber.PadLeft(7, '0');	// 7λ
             else

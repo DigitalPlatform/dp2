@@ -402,7 +402,7 @@ namespace DigitalPlatform.Marc
 				// strTempValue = strTempValue.Replace(' ','m');   // ?
                 /*
                 string strTemp = "";
-                strTempValue = strTemp.PadLeft(strTempValue.Length+1, 'M');   // 2008/7/16 new add
+                strTempValue = strTemp.PadLeft(strTempValue.Length+1, 'M');   // 2008/7/16
                  * */
                 strTempValue = strTempValue.Replace(' ','M');   // ?
 
@@ -1181,7 +1181,7 @@ namespace DigitalPlatform.Marc
                 // strTempValue = strTempValue.Replace(' ','m');   // ?
                 /*
                 string strTemp = "";
-                strTempValue = strTemp.PadLeft(strTempValue.Length+1, 'M');   // 2008/7/16 new add
+                strTempValue = strTemp.PadLeft(strTempValue.Length+1, 'M');   // 2008/7/16
                  * */
                 strTempValue = strTempValue.Replace(' ', 'M');   // ?
 
@@ -1241,7 +1241,7 @@ namespace DigitalPlatform.Marc
                 // strTempValue = strTempValue.Replace(' ','m');   // ?
                 /*
                 string strTemp = "";
-                strTempValue = strTemp.PadLeft(strTempValue.Length+1, 'M');   // 2008/7/16 new add
+                strTempValue = strTemp.PadLeft(strTempValue.Length+1, 'M');   // 2008/7/16
                  * */
                 strTempValue = strTempValue.Replace(' ', 'M');   // ?
 

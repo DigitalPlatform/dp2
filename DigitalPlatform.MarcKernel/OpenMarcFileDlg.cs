@@ -581,7 +581,7 @@ namespace DigitalPlatform.Marc
             }
         }
 
-        // 2008/11/10 new add
+        // 2008/11/10
         /// <summary>
         /// 输出文件时，是否加入 -01 字段
         /// </summary>

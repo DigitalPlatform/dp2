@@ -219,7 +219,7 @@ namespace DigitalPlatform.Text
                 strResult = "0" + strResult;
             }
 
-            // 2008/11/15 new add
+            // 2008/11/15
             if (bNegative == true)
                 return "-" + strResult;
 
@@ -784,7 +784,7 @@ namespace DigitalPlatform.Text
                 return -1;
             }
 
-            // 2008/11/11 new add
+            // 2008/11/11
             if (bNegative == true)
                 strValue = "-" + strValue;
 

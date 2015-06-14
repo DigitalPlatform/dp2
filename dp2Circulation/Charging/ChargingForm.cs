@@ -249,7 +249,7 @@ namespace dp2Circulation
         {
             get
             {
-                return false;   // 2008/10/29 new add
+                return false;   // 2008/10/29 
                 /*
                 return this.MainForm.AppInfo.GetBoolean(
                     "charging_form",
@@ -470,7 +470,7 @@ namespace dp2Circulation
             this.m_webExternalHost_readerInfo.Initial(this.MainForm, this.webBrowser_reader);
             this.webBrowser_reader.ObjectForScripting = this.m_webExternalHost_readerInfo;
 
-            // 2009/10/18 new add
+            // 2009/10/18 
             this.m_webExternalHost_itemInfo.Initial(this.MainForm, this.webBrowser_item);
             this.webBrowser_item.ObjectForScripting = this.m_webExternalHost_itemInfo;
 
@@ -748,7 +748,7 @@ namespace dp2Circulation
             // 切换为不同的功能的时候，定位焦点
             if (old_funcstate != this.m_funcstate)
             {
-                // 2008/9/26 new add
+                // 2008/9/26 
                 if (this.AutoClearTextbox == true)
                 {
                     this.textBox_readerBarcode.Text = "";
@@ -774,7 +774,7 @@ namespace dp2Circulation
             }
             else // 重复设置为同样功能，当作清除功能
             {
-                // 2008/9/26 new add
+                // 2008/9/26 
                 if (this.AutoClearTextbox == true)
                 {
                     this.textBox_readerBarcode.Text = "";
@@ -823,7 +823,7 @@ namespace dp2Circulation
                 this.toolStripMenuItem_renew.Checked = false;
                 this.toolStripMenuItem_lost.Checked = false;
 
-                // 2008/9/26 new add
+                // 2008/9/26 
                 if (this.AutoClearTextbox == true)
                 {
                     this.textBox_readerBarcode.Text = "";
@@ -1299,12 +1299,12 @@ namespace dp2Circulation
         private void button_loadReader_Click(object sender, EventArgs e)
         {
             this.button_loadReader.Enabled = false; // BUG 2009/6/2
-            this.textBox_readerBarcode.Enabled = false;   // 2009/10/20 new add
+            this.textBox_readerBarcode.Enabled = false;   // 2009/10/20 
 
             this.m_webExternalHost_readerInfo.StopPrevious();
             this.webBrowser_reader.Stop();
 
-            // 2009/10/20 new add
+            // 2009/10/20 
             this.m_webExternalHost_itemInfo.StopPrevious();
             this.webBrowser_item.Stop();
             this.m_webExternalHost_biblioInfo.StopPrevious();
@@ -1334,7 +1334,7 @@ namespace dp2Circulation
             Debug.Assert(this.MainForm != null, "this.MainForm == null");
             Debug.Assert(this.Channel != null, "this.Channel == null");
 
-            // 2008/9/26 new add
+            // 2008/9/26 
             if (this.AutoClearTextbox == true)
             {
                 this.textBox_readerPassword.Text = "";
@@ -1659,11 +1659,11 @@ namespace dp2Circulation
 
                                 this.textBox_readerBarcode.Text = strFastInputText;
 
-                                // 2009/6/2 new add
+                                // 2009/6/2 
                                 if (this.button_loadReader.Enabled == false)
                                     this.button_loadReader.Enabled = true;
                                 /*
-                                // 2009/11/8 new add
+                                // 2009/11/8 
                                 if (this.textBox_readerBarcode.Enabled == false)
                                     this.textBox_readerBarcode.Enabled = true;
                                  * */
@@ -1674,11 +1674,11 @@ namespace dp2Circulation
                             {
                                 this.textBox_readerPassword.Text = strFastInputText;
 
-                                // 2009/6/2 new add
+                                // 2009/6/2 
                                 if (this.button_verifyReaderPassword.Enabled == false)
                                     this.button_verifyReaderPassword.Enabled = true;
                                 /*
-                                // 2009/11/8 new add
+                                // 2009/11/8 
                                 if (this.textBox_readerPassword.Enabled == false)
                                     this.textBox_readerPassword.Enabled = true;
                                  * */
@@ -1689,11 +1689,11 @@ namespace dp2Circulation
                             {
                                 this.textBox_itemBarcode.Text = strFastInputText;
 
-                                // 2009/6/2 new add
+                                // 2009/6/2 
                                 if (this.button_itemAction.Enabled == false)
                                     this.button_itemAction.Enabled = true;
                                 /*
-                                // 2009/11/8 new add
+                                // 2009/11/8 
                                 if (this.textBox_itemBarcode.Enabled == false)
                                     this.textBox_itemBarcode.Enabled = true;
                                  * */
@@ -1706,10 +1706,10 @@ namespace dp2Circulation
 
                         if ((int)m.WParam == READER_BARCODE)
                         {
-                            // 2009/6/2 new add
+                            // 2009/6/2 
                             if (this.button_loadReader.Enabled == false)
                                 this.button_loadReader.Enabled = true;
-                            // 2009/11/8 new add
+                            // 2009/11/8 
                             if (this.textBox_readerBarcode.Enabled == false)
                                 this.textBox_readerBarcode.Enabled = true;
 
@@ -1720,16 +1720,14 @@ namespace dp2Circulation
                              * */
                             this.textBox_readerBarcode.SelectAll();
                             this.textBox_readerBarcode.Focus();
-
-
                         }
 
                         if ((int)m.WParam == READER_PASSWORD)
                         {
-                            // 2009/6/2 new add
+                            // 2009/6/2 
                             if (this.button_verifyReaderPassword.Enabled == false)
                                 this.button_verifyReaderPassword.Enabled = true;
-                            // 2009/11/8 new add
+                            // 2009/11/8 
                             if (this.textBox_readerPassword.Enabled == false)
                                 this.textBox_readerPassword.Enabled = true;
 
@@ -1739,10 +1737,10 @@ namespace dp2Circulation
 
                         if ((int)m.WParam == ITEM_BARCODE)
                         {
-                            // 2009/6/2 new add
+                            // 2009/6/2 
                             if (this.button_itemAction.Enabled == false)
                                 this.button_itemAction.Enabled = true;
-                            // 2009/11/8 new add
+                            // 2009/11/8 
                             if (this.textBox_itemBarcode.Enabled == false)
                                 this.textBox_itemBarcode.Enabled = true;
 
@@ -1790,12 +1788,12 @@ namespace dp2Circulation
         private void button_itemAction_Click(object sender, EventArgs e)
         {
             this.button_itemAction.Enabled = false;
-            this.textBox_itemBarcode.Enabled = false;   // 2009/10/20 new add
+            this.textBox_itemBarcode.Enabled = false;   // 2009/10/20 
 
             this.m_webExternalHost_itemInfo.StopPrevious();
             this.webBrowser_item.Stop();
 
-            // 2009/10/20 new add
+            // 2009/10/20 
             this.m_webExternalHost_readerInfo.StopPrevious();
             this.webBrowser_reader.Stop();
             this.m_webExternalHost_biblioInfo.StopPrevious();
@@ -2034,7 +2032,7 @@ dlg.UiState);
                 // 发现实际输入的是读者证条码号
                 if (nRet == 1)
                 {
-                    // 2008/1/2 new add
+                    // 2008/1/2 
                     if (this.AutoSwitchReaderBarcode == true)
                     {
                         string strItemBarcode = this.textBox_itemBarcode.Text;
@@ -3036,7 +3034,7 @@ dlg.UiState);
             this.MainForm.toolButton_refresh.Enabled = true;
         }
 
-        // 2008/10/31 new add
+        // 2008/10/31 
         ChargingInfoHost m_chargingInfoHost = null;
 
         /// <summary>

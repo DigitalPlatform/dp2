@@ -2640,7 +2640,7 @@ this.checkBox_import_fastMode.Checked);
 		//		-1: error
 		//		0:  successed
 		public int DoBackupItemUpload(Stream file,
-			ref DbNameMap map,  // 2007/6/5 new add
+			ref DbNameMap map,  // 2007/6/5 
 			bool bSkip,
 			string strCount,
 			out string strError)
@@ -2708,7 +2708,7 @@ this.checkBox_import_fastMode.Checked);
 					ref this.channel,
 					ref strRecordPath,
 					file,
-					ref map,    // 2007/6/5 new add ref
+					ref map,    // 2007/6/5  ref
 					i==0? true : false,
 					strCount,
 					out strError);
@@ -4547,7 +4547,7 @@ this.checkBox_import_fastMode.Checked);
                             }
                         }
 
-                        // 2008/11/9 new add
+                        // 2008/11/9 
                         if (String.IsNullOrEmpty(strXmlBody) == true)
                         {
                             bFirst = false;
@@ -4616,7 +4616,7 @@ this.checkBox_import_fastMode.Checked);
 
                         // ½«Xml×ª»»ÎªMARC
                         if (exportType == ExportFileType.ISO2709File
-                            && bFoundRecord == true)    // 2008/11/13 new add
+                            && bFoundRecord == true)    // 2008/11/13 
                         {
                             nRet = GetMarc(strXmlBody,
                                 out strMarc,

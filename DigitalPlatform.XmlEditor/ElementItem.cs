@@ -272,12 +272,12 @@ namespace DigitalPlatform.Xml
 		public override void InitialVisual()
 		{
 			bool bHasVisual = false;
-			Label label = this.GetLable();
+			XmlLabel label = this.GetLable();
 
 			if (label == null)
 			{
 				// 加Label
-				label = new Label();
+				label = new XmlLabel();
 				label.container = this;
 				label.Text = this.Name;
 				this.AddChildVisual(label);
@@ -529,7 +529,7 @@ namespace DigitalPlatform.Xml
 
 		
 		//得到attributes关闭时的text
-		public Text GetAttributesText()
+		public XmlText GetAttributesText()
 		{
 			Box boxTotal = this.GetBoxTotal();
 			if (boxTotal == null)
@@ -541,15 +541,15 @@ namespace DigitalPlatform.Xml
 
 			foreach(Visual visual in boxAttributes.childrenVisual )
 			{
-				if (visual is Text )
-					return (Text)visual;				
+				if (visual is XmlText )
+					return (XmlText)visual;				
 			}
 			return null;
 		}
 
 		
 		// 得到content关闭时的text
-		public Text GetContentText()
+		public XmlText GetContentText()
 		{
 			Box boxTotal = this.GetBoxTotal();
 			if (boxTotal == null)
@@ -561,8 +561,8 @@ namespace DigitalPlatform.Xml
 
 			foreach(Visual visual in boxContent.childrenVisual )
 			{
-				if (visual is Text )
-					return (Text)visual;				
+				if (visual is XmlText )
+					return (XmlText)visual;				
 			}
 			return null;
 		}
@@ -702,7 +702,7 @@ namespace DigitalPlatform.Xml
 
 			string strAttrsXml = "";
 			// 2.得到attributes关闭时的text
-			Text oText = this.GetAttributesText();
+			XmlText oText = this.GetAttributesText();
 			if (oText != null) 
 			{
 				strAttrsXml = oText.Text.Trim();
@@ -773,7 +773,7 @@ namespace DigitalPlatform.Xml
 
 			string strInnerXml = "";
 			// 2.得到attributes关闭时的text
-			Text oText = this.GetContentText();
+			XmlText oText = this.GetContentText();
 			if (oText != null) 
 			{
 				strInnerXml = oText.Text.Trim();
@@ -1061,7 +1061,7 @@ namespace DigitalPlatform.Xml
 			// 内存对象 大于 xml编辑框，则需要把内容对象的内容对现到xml编辑框
 			if (this.m_objAttrsTimestamp >= this.m_xmlAttrsTimestamp)
 			{
-				Text text = this.GetAttributesText();
+				XmlText text = this.GetAttributesText();
 				if (text != null)
 				{
 					text.Text = GetAttrsXmlWithoutFlush();
@@ -1088,7 +1088,7 @@ namespace DigitalPlatform.Xml
 			// 内存对象 大于 xml编辑框，则需要把内容对象的内容对现到xml编辑框
 			if (this.m_objChildrenTimestmap >= this.m_xmlChildrenTimestamp)
 			{
-				Text text = this.GetContentText();
+				XmlText text = this.GetContentText();
 				if (text != null)
 				{
 					text.Text = this.GetInnerXml(null);
@@ -1739,7 +1739,7 @@ namespace DigitalPlatform.Xml
 			Debug.Assert(false,"本对象不能使用该函数");
 		}
 
-		internal override Text GetVisualText()
+		internal override XmlText GetVisualText()
 		{
 			Debug.Assert(false,"本对象不能使用该函数");
 			return null;
@@ -1830,7 +1830,7 @@ namespace DigitalPlatform.Xml
 			else
 			{
 				// 2.得到attributes关闭时的text
-				Text oText = this.GetAttributesText();
+				XmlText oText = this.GetAttributesText();
 				if (oText != null) 
 				{
 					strAttrXml = oText.Text.Trim();

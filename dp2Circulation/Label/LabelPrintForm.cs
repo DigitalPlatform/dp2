@@ -2804,7 +2804,8 @@ namespace dp2Circulation
             else
                 bAppend = false;
 
-            m_tableBarcodeColIndex.Clear();
+            // m_tableBarcodeColIndex.Clear();
+            ClearColumnIndexCache();
 
             // 创建文件
             StreamWriter sw = new StreamWriter(this.ExportBarcodeFilename,

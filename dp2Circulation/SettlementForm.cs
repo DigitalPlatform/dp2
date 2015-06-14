@@ -506,7 +506,7 @@ namespace dp2Circulation
             strError = "";
 
             this.listView_amerced.Items.Clear();
-            // 2008/11/22 new add
+            // 2008/11/22
             this.SortColumns.Clear();
             SortColumns.ClearColumnSortDisplay(this.listView_amerced.Columns);
 
@@ -850,7 +850,7 @@ namespace dp2Circulation
             if (strState == "新结算")
                 return "settlemented";
 
-            if (strState == "旧结算")   // 2009/1/30 new add
+            if (strState == "旧结算")   // 2009/1/30
                 return "settlemented";
 
 
@@ -905,7 +905,7 @@ namespace dp2Circulation
             string strReturnOperator = DomUtil.GetElementText(dom.DocumentElement, "returnOperator");
             string strState = DomUtil.GetElementText(dom.DocumentElement, "state");
 
-            strState = GetDisplayStateText(strState);   // 2009/1/29 new add
+            strState = GetDisplayStateText(strState);   // 2009/1/29
 
             string strAmerceOperator = DomUtil.GetElementText(dom.DocumentElement, "operator");
             string strAmerceTime = DomUtil.GetElementText(dom.DocumentElement, "operTime");
@@ -1014,7 +1014,7 @@ namespace dp2Circulation
                     item.BackColor = SystemColors.Window;
                     item.ForeColor = Color.Gray;
 
-                    // 2009/1/30 new add
+                    // 2009/1/30
                     ListViewUtil.ChangeItemText(item, COLUMN_STATE, "旧结算");
                 }
                 else if (strOldState == "settlemented"
@@ -1077,7 +1077,7 @@ namespace dp2Circulation
             {
                 bool bQuick = Control.ModifierKeys == Keys.Control;
 
-                if (this.radioButton_range_amerceOperTime.Checked == true)  // 2009/1/29 new add
+                if (this.radioButton_range_amerceOperTime.Checked == true)  // 2009/1/29
                 {
 
                     // 检查两个日期是否为空，和大小关系
@@ -1252,7 +1252,7 @@ namespace dp2Circulation
 
         void SetRangeControlsEnabled(bool bEnable)
         {
-            // 2009/1/29 new add
+            // 2009/1/29
             if (bEnable == false)
             {
                 this.dateControl_start.Enabled = false;
@@ -2321,7 +2321,7 @@ namespace dp2Circulation
             return 0;
         }
 
-        // 2009/10/10 new add
+        // 2009/10/10
         // 获得css文件的路径(或者http:// 地址)。将根据是否具有“统计页”来自动处理
         // parameters:
         //      strDefaultCssFileName   “css”模板缺省情况下，将采用的虚拟目录中的css文件名，纯文件名
@@ -2358,7 +2358,7 @@ namespace dp2Circulation
             string strCssUrl = GetAutoCssUrl(option, "settlement.css");
 
             /*
-            // 2009/10/9 new add
+            // 2009/10/9
             string strCssFilePath = option.GetTemplatePageFilePath("css");  // 大小写不敏感
             if (String.IsNullOrEmpty(strCssFilePath) == false)
                 strCssUrl = strCssFilePath;

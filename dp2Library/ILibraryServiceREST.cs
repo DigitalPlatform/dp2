@@ -210,7 +210,7 @@ SessionMode = SessionMode.NotAllowed)]
 
         [OperationContract]
         LibraryServerResult SearchItem(
-            string strItemDbName,   // 2007/9/25 new add
+            string strItemDbName,   // 2007/9/25
             string strQueryWord,
             int nPerMax,
             string strFrom,

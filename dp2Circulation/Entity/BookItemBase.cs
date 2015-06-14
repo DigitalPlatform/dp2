@@ -90,7 +90,7 @@ namespace dp2Circulation
             }
             set
             {
-                // 2011/6/18 new add
+                // 2011/6/18 
                 if (this.Error != null)
                     this.Error.ErrorInfo = value;
             }
@@ -206,7 +206,7 @@ namespace dp2Circulation
 
             // this.Initial();
 
-            this.Changed = false;   // 2009/3/5 new add
+            this.Changed = false;   // 2009/3/5
             this.ItemDisplayState = ItemDisplayState.Normal;
 
             // this.RefreshListView();
@@ -254,7 +254,7 @@ namespace dp2Circulation
             {
                 m_bChanged = value;
 
-                // 2009/3/5 new add
+                // 2009/3/5
                 if ((this.ItemDisplayState == ItemDisplayState.Normal)
                     && this.m_bChanged == true)
                     this.ItemDisplayState = ItemDisplayState.Changed;
@@ -397,7 +397,7 @@ namespace dp2Circulation
                 Debug.Assert(false, "ItemDisplayState.Normal状态和Changed == true矛盾了");
             }
             else if ((this.ItemDisplayState == ItemDisplayState.Changed)
-                && this.Changed == false) // 2009/3/5 new add
+                && this.Changed == false) // 2009/3/5
             {
                 Debug.Assert(false, "ItemDisplayState.Changed状态和Changed == false矛盾了");
             }
@@ -554,7 +554,7 @@ namespace dp2Circulation
             set
             {
                 DomUtil.SetElementText(this.RecordDom.DocumentElement, "refID", value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5
             }
         }
 
@@ -573,7 +573,7 @@ namespace dp2Circulation
                 if (oldvalue != value)
                 {
                     DomUtil.SetElementText(this.RecordDom.DocumentElement, "parent", value);
-                    this.Changed = true; // 2009/3/5 new add
+                    this.Changed = true; // 2009/3/5
                 }
             }
         }
@@ -711,7 +711,7 @@ namespace dp2Circulation
             return 0;
         }
 
-        // 2008/11/28 new add
+        // 2008/11/28 
         /// <summary>
         /// 获得父记录 ID 的字符串集合
         /// </summary>
@@ -897,7 +897,7 @@ namespace dp2Circulation
             }
         }
 
-        // 2008/11/4 new add
+        // 2008/11/4
         // parameters:
         //      bClearOthersHilight 是否要清除其他事项的加亮?
         /// <summary>

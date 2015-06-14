@@ -809,7 +809,7 @@ namespace DigitalPlatform.LibraryServer
             XmlDocument dom1 = new XmlDocument();
             try
             {
-                // 2008/11/24 new add
+                // 2008/11/24
                 FileInfo fi = new FileInfo(strSourceFilename1);
                 if (fi.Exists == false || fi.Length == 0)
                     dom1.LoadXml("<root />");
@@ -825,7 +825,7 @@ namespace DigitalPlatform.LibraryServer
             XmlDocument dom2 = new XmlDocument();
             try
             {
-                // 2008/11/24 new add
+                // 2008/11/24
                 FileInfo fi = new FileInfo(strSourceFilename2);
                 if (fi.Exists == false || fi.Length == 0)
                     dom2.LoadXml("<root />");

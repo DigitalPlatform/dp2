@@ -1124,7 +1124,7 @@ namespace DigitalPlatform.OPAC.Web
                 if (formatnames.IndexOf(strLangName) == -1)
                     formatnames.Insert(0, strLangName);
 
-                // 2009/6/23 new add
+                // 2009/6/23
                 formatnames.Add(this.GetString("浏览"));
                 formatnames.Add("MARC");
 
@@ -2557,7 +2557,7 @@ namespace DigitalPlatform.OPAC.Web
                                             strLocalPath,
                                             strLocalPath + ".ref",
                                             strBiblioXml,
-                                            cols[0],    // 2009/10/18 new add
+                                            cols[0],    // 2009/10/18
                                             out strContent,
                                             out strError);
 
@@ -2568,7 +2568,7 @@ namespace DigitalPlatform.OPAC.Web
                                                 strLocalPath,
                                                 strLocalPath + ".ref",
                                                 strBiblioXml,
-                                                cols[0],    // 2009/10/18 new add
+                                                cols[0],    // 2009/10/18
                                                 OperType.None,
                                                 null,
                                                 "",

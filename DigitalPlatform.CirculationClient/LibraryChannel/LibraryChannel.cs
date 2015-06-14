@@ -271,7 +271,7 @@ namespace DigitalPlatform.CirculationClient
         /// <summary>
         /// 当前对象可以携带的扩展参数
         /// </summary>
-        public object Tag = null;   // 2008/10/28 new add //
+        public object Tag = null;   // 2008/10/28 //
 #endif
 
         /// <summary>
@@ -654,7 +654,7 @@ out strError);
         }
 
         /*
-        // 2007/11/20 new add
+        // 2007/11/20
         public int Timeout
         {
             get
@@ -1108,7 +1108,7 @@ out strError);
         /// 请参考 dp2Library API SearchReader() 的详细说明
         /// </summary>
         /// <param name="stop">Stop 对象</param>
-        /// <param name="strReaderDbNames">读者库名。可以为单个库名，也可以是逗号(半角)分割的读者库名列表。还可以为 <全部>/<all> 之一，表示全部读者库。</param>
+        /// <param name="strReaderDbNames">读者库名。可以为单个库名，也可以是逗号(半角)分割的读者库名列表。还可以为 &lt;全部&gt;/&lt;all&gt; 之一，表示全部读者库。</param>
         /// <param name="strQueryWord">检索词</param>
         /// <param name="nPerMax">一批检索命中的最大记录数。-1表示不限制</param>
         /// <param name="strFrom">检索途径</param>
@@ -1766,7 +1766,7 @@ out strError);
 
         }
 
-        // 2009/11/6 new add
+        // 2009/11/6
         // 获得指定记录的浏览信息
         // parameters:
         // rights:
@@ -2176,7 +2176,7 @@ out strError);
                     return -1;
                 }
 
-                // 2006/12/30 new add
+                // 2006/12/30
                 if (this.Url != ea.LibraryServerUrl)
                 {
                     this.Close();   // 迫使重新构造m_ws 2011/11/22
@@ -2292,7 +2292,9 @@ out strError);
         /// 请参考 dp2Library API GetItemInfo() 的详细说明
         /// </summary>
         /// <param name="stop">Stop 对象</param>
+        /// <param name="strItemDbType">数据库的类型</param>
         /// <param name="strBarcode">册条码号</param>
+        /// <param name="strItemXml">册记录XML。用于需要前端提交内容的场合</param>
         /// <param name="strResultType">希望在 strResult 参数中返回的册记录信息类型。值为 xml text html 之一</param>
         /// <param name="strResult">返回册记录的信息</param>
         /// <param name="strItemRecPath">返回册记录的路径</param>
@@ -5163,10 +5165,10 @@ out strError);
             string strReaderBarcode,
             string strItemBarcode,
             string strConfirmItemRecPath,
-            int nStart,   // 2008/10/27 new add
-            int nCount,   // 2008/10/27 new add
-            out int nProcessedBorrowItems,   // 2008/10/27 new add
-            out int nTotalBorrowItems,   // 2008/10/27 new add
+            int nStart,   // 2008/10/27
+            int nCount,   // 2008/10/27
+            out int nProcessedBorrowItems,   // 2008/10/27
+            out int nTotalBorrowItems,   // 2008/10/27
             out string strOutputReaderBarcode,
             out string[] aDupPath,
             out string strError)
@@ -7333,7 +7335,7 @@ out strError);
             return 0;
         }
 
-        // 2009/11/24 new add
+        // 2009/11/24
         static string BuildMetadata(string strMime,
             string strLocalPath)
         {

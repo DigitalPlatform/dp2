@@ -229,7 +229,7 @@ namespace dp2Circulation
             set
             {
                 DomUtil.SetElementText(this.RecordDom.DocumentElement, "barcode", value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5 
             }
         }
 
@@ -245,7 +245,7 @@ namespace dp2Circulation
             set
             {
                 DomUtil.SetElementText(this.RecordDom.DocumentElement, "registerNo", value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5 
             }
         }
 
@@ -261,12 +261,12 @@ namespace dp2Circulation
             set
             {
                 DomUtil.SetElementText(this.RecordDom.DocumentElement, "state", value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5
             }            
         }
 
         /// <summary>
-        /// 出版时间 2007/10/24 new add
+        /// 出版时间 2007/10/24 
         /// </summary>
         public string PublishTime
         {
@@ -277,12 +277,12 @@ namespace dp2Circulation
             set
             {
                 DomUtil.SetElementText(this.RecordDom.DocumentElement, "publishTime", value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5
             }
         }
 
         /// <summary>
-        /// 渠道(书商) 2007/10/24 new add
+        /// 渠道(书商) 2007/10/24 
         /// </summary>
         public string Seller
         {
@@ -293,12 +293,12 @@ namespace dp2Circulation
             set
             {
                 DomUtil.SetElementText(this.RecordDom.DocumentElement, "seller", value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5
             }
         }
 
         /// <summary>
-        /// 采购经费来源 2008/2/15 new add
+        /// 采购经费来源 2008/2/15 
         /// </summary>
         public string Source
         {
@@ -311,7 +311,7 @@ namespace dp2Circulation
             {
                 DomUtil.SetElementText(this.RecordDom.DocumentElement,
                     "source", value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5
             }
         }
 
@@ -329,7 +329,7 @@ namespace dp2Circulation
             set
             {
                 DomUtil.SetElementText(this.RecordDom.DocumentElement, "location", value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5
             }
         }
 
@@ -345,7 +345,7 @@ namespace dp2Circulation
             set
             {
                 DomUtil.SetElementText(this.RecordDom.DocumentElement, "price", value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5
             }
         }
 
@@ -361,7 +361,7 @@ namespace dp2Circulation
             set
             {
                 DomUtil.SetElementText(this.RecordDom.DocumentElement, "bookType", value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5
             }
         }
 
@@ -377,7 +377,7 @@ namespace dp2Circulation
             set
             {
                 DomUtil.SetElementText(this.RecordDom.DocumentElement, "comment", value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5
             }            
         }
 
@@ -393,7 +393,7 @@ namespace dp2Circulation
             set
             {
                 DomUtil.SetElementText(this.RecordDom.DocumentElement, "mergeComment", value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5
             }
         }
 
@@ -409,7 +409,7 @@ namespace dp2Circulation
             set
             {
                 DomUtil.SetElementText(this.RecordDom.DocumentElement, "batchNo", value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5
             }
         }
 
@@ -425,7 +425,7 @@ namespace dp2Circulation
             set
             {
                 DomUtil.SetElementText(this.RecordDom.DocumentElement, "volume", value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5
             }
         }
 
@@ -441,7 +441,7 @@ namespace dp2Circulation
             set
             {
                 DomUtil.SetElementText(this.RecordDom.DocumentElement, "accessNo", value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5
             }
         }
 
@@ -457,7 +457,7 @@ namespace dp2Circulation
             set
             {
                 DomUtil.SetElementText(this.RecordDom.DocumentElement, "borrower", value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5
             }
         }
 
@@ -473,7 +473,7 @@ namespace dp2Circulation
             set
             {
                 DomUtil.SetElementText(this.RecordDom.DocumentElement, "borrowDate", value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5
             }
         }
 
@@ -489,7 +489,7 @@ namespace dp2Circulation
             set
             {
                 DomUtil.SetElementText(this.RecordDom.DocumentElement, "borrowPeriod", value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5
             }
         }
 
@@ -777,7 +777,7 @@ namespace dp2Circulation
             return null;
         }
 
-        // 2008/11/4 new add
+        // 2008/11/4
         /// <summary>
         /// 选定(加亮)匹配指定批次号的那些行
         /// </summary>

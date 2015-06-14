@@ -1237,7 +1237,7 @@ namespace dp2Catalog
 
             if (string.IsNullOrEmpty(this.m_strRequestRefID) == false)
             {
-                // 2007/11/2 new add。可以帮助发现旧版本dp2zserver的错误
+                // 2007/11/2。可以帮助发现旧版本dp2zserver的错误
                 if (this.m_strRequestRefID != init_response.m_strReferenceId)
                 {
                     this.ErrorInfo = "请求的 reference id [" + this.m_strRequestRefID + "] 和 响应的 reference id [" + init_response.m_strReferenceId + "] 不一致！";
@@ -1245,7 +1245,7 @@ namespace dp2Catalog
                 }
             }
 
-            // 2007/11/5 new add检查version和options
+            // 2007/11/5检查version和options
             bool bOption_0 = BerTree.GetBit(init_response.m_strOptions,
                 0);
             if (bOption_0 == false)
@@ -1485,7 +1485,7 @@ namespace dp2Catalog
 
             if (bIgnoreReferenceID == false)
             {
-                // 2007/11/2 new add。可以帮助发现旧版本dp2zserver的错误
+                // 2007/11/2。可以帮助发现旧版本dp2zserver的错误
                 if (struInit_request.m_strReferenceId != init_response.m_strReferenceId)
                 {
                     strError = "请求的 reference id [" + struInit_request.m_strReferenceId + "] 和 响应的 reference id [" + init_response.m_strReferenceId + "] 不一致！";
@@ -1493,7 +1493,7 @@ namespace dp2Catalog
                 }
             }
 
-            // 2007/11/5 new add检查version和options
+            // 2007/11/5检查version和options
             bool bOption_0 = BerTree.GetBit(init_response.m_strOptions,
                 0);
             if (bOption_0 == false)

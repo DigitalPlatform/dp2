@@ -153,7 +153,7 @@ namespace DigitalPlatform.CirculationClient
 
             this.ErrorInfo = "";
 
-            // 2007/12/2 new add
+            // 2007/12/2 
             if (String.IsNullOrEmpty(strXml) == true)
             {
                 this.Changed = false;
@@ -1277,7 +1277,7 @@ namespace DigitalPlatform.CirculationClient
             string strID = GetRecordID(strPath);
 
             if (strID == "?"
-                || String.IsNullOrEmpty(strID) == true) // 2008/11/28 new add
+                || String.IsNullOrEmpty(strID) == true) // 2008/11/28 
                 return true;
 
             return false;

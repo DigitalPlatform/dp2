@@ -210,7 +210,7 @@ namespace DigitalPlatform.OPAC.Web
             if (nPageCount <= 1)
             {
                 pageswitcher.Visible = false;
-                resultinfo.Visible = false; // 2009/6/10 new add
+                resultinfo.Visible = false; // 2009/6/10
             }
             else
             {

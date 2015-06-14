@@ -111,14 +111,14 @@ namespace DigitalPlatform.LibraryServer
             return -1;
         }
 
-        // 2008/12/8 new add
+        // 2008/12/8
         // 检测数据库名是当前角色么? (注：不特定是哪个书目库下的成员库)
         public virtual bool IsItemDbName(string strItemDbName)
         {
             throw new Exception("尚未实现 IsItemDbName");
         }
 
-        // 2008/12/8 new add
+        // 2008/12/8
         // 通过事项数据库名找到书目库名
         // return:
         //      -1  error
@@ -674,14 +674,14 @@ namespace DigitalPlatform.LibraryServer
 
             /*
             // 如果newrecpath为空但是oldrecpath有值，就用oldrecpath的值
-            // 2007/10/23 new add
+            // 2007/10/23
             if (String.IsNullOrEmpty(info.NewRecPath) == true)
             {
                 if (String.IsNullOrEmpty(info.OldRecPath) == false)
                     info.NewRecPath = info.OldRecPath;
             }*/
 
-            // 2008/6/24 new add
+            // 2008/6/24
             if (String.IsNullOrEmpty(info.NewRecPath) == false)
             {
                 if (info.NewRecPath != info.OldRecPath)
@@ -870,7 +870,7 @@ namespace DigitalPlatform.LibraryServer
             nRet = ByteArray.Compare(info.OldTimestamp, exist_timestamp);
             if (nRet != 0)
             {
-                // 2008/10/19 new add
+                // 2008/10/19
                 if (bForce == true)
                 {
                     error = new EntityInfo(info);
@@ -1431,7 +1431,7 @@ out strError);
                         domExist);
                 }
 
-                if (nRet == 1 || bForce == true)    // 2008/10/19 new add
+                if (nRet == 1 || bForce == true)    // 2008/10/19
                 {
                     error = new EntityInfo(info);
                     // 错误信息中, 返回了修改过的原记录和新时间戳
@@ -1501,7 +1501,7 @@ out strError);
             }
             else
             {
-                // 2008/10/19 new add
+                // 2008/10/19
                 strNewXml = domNew.OuterXml;
             }
 
@@ -1764,7 +1764,7 @@ out strError);
                     {
                         strError = "strAction值为delete时, info.NewTimestamp参数必须为空";
                     }
-                    // 2008/6/24 new add
+                    // 2008/6/24
                     else if (String.IsNullOrEmpty(info.NewRecPath) == false)
                     {
                         if (info.NewRecPath != info.OldRecPath)
@@ -2031,7 +2031,7 @@ out strError);
                                 || info.Action == "change"
                                 || info.Action == "move")       // delete操作不查重
                             && bIsNewLocateParamNull == false
-                            && bNoCheckDup == false)    // 2008/10/19 new add
+                            && bNoCheckDup == false)    // 2008/10/19
                         {
                             /*
                             string strParentID = strNewParentID;
@@ -2377,7 +2377,7 @@ out strError);
 
                     // 写入日志
                     if (domOperLog != null
-                        && bNoEventLog == false)    // 2008/10/19 new add
+                        && bNoEventLog == false)    // 2008/10/19
                     {
                         string strOperTime = this.App.Clock.GetClock();
                         DomUtil.SetElementText(domOperLog.DocumentElement,
@@ -2564,7 +2564,7 @@ out strError);
 
             // 检索事项库中全部从属于特定id的记录
             string strQueryXml = "<target list='"
-                + StringUtil.GetXmlStringSimple(strItemDbName + ":" + "父记录")       // 2007/9/14 new add
+                + StringUtil.GetXmlStringSimple(strItemDbName + ":" + "父记录")       // 2007/9/14
                 + "'><item><word>"
                 + strBiblioRecId
                 + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>" + "zh" + "</lang></target>";

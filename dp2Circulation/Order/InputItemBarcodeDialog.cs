@@ -130,7 +130,7 @@ namespace dp2Circulation
             {
                 // 校验barcode合法性
                 if (this.VerifyBarcode != null
-                    && this.textBox_itemBarcode.Text != "") // 2009/1/15 new add
+                    && this.textBox_itemBarcode.Text != "") // 2009/1/15
                 {
                     VerifyBarcodeEventArgs e = new VerifyBarcodeEventArgs();
                     e.Barcode = this.textBox_itemBarcode.Text;

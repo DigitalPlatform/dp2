@@ -346,7 +346,7 @@ namespace dp2Catalog
         public string Syntax = "";  // 格式语法
         public string ItemDbName = "";  // 对应的实体库名
 
-        public string IssueDbName = ""; // 对应的期库名 2007/10/19 new add
+        public string IssueDbName = ""; // 对应的期库名 2007/10/19
     }
 
     // 实用库属性

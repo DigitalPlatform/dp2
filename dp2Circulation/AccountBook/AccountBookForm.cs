@@ -240,7 +240,7 @@ namespace dp2Circulation
             stop.Register(MainForm.stopManager, true);	// 和容器关联
 #endif
 
-            // 2009/2/2 new add
+            // 2009/2/2 
             this.comboBox_load_type.Text = this.MainForm.AppInfo.GetString(
                 "accountbookform",
                 "publication_type",
@@ -332,7 +332,7 @@ namespace dp2Circulation
         {
             if (this.MainForm != null && this.MainForm.AppInfo != null)
             {
-                // 2009/2/2 new add
+                // 2009/2/2 
                 this.MainForm.AppInfo.SetString(
                     "accountbookform",
                     "publication_type",
@@ -2785,7 +2785,7 @@ MessageBoxDefaultButton.Button1);
                 "orderTime");
             string strPrice = DomUtil.GetElementText(dom.DocumentElement,
                 "price");
-            // 2009/7/24 new add
+            // 2009/7/24 
             string strSeller = DomUtil.GetElementText(dom.DocumentElement,
                 "seller");
             string strSource = DomUtil.GetElementText(dom.DocumentElement,
@@ -2948,7 +2948,7 @@ MessageBoxDefaultButton.Button1);
                 "orderTime");
             string strPrice = DomUtil.GetElementText(dom.DocumentElement,
                 "price");
-            // 2009/7/24 new add
+            // 2009/7/24 
             string strSeller = DomUtil.GetElementText(dom.DocumentElement,
                 "seller");
             string strSource = DomUtil.GetElementText(dom.DocumentElement,
@@ -3410,7 +3410,7 @@ MessageBoxDefaultButton.Button1);
                 "borrower");
             string strBorrowDate = DomUtil.GetElementText(dom.DocumentElement,
                 "borrowDate");
-            // 2007/6/20 new add
+            // 2007/6/20 
             strBorrowDate = DateTimeUtil.LocalTime(strBorrowDate, "u");
             string strBorrowPeriod = DomUtil.GetElementText(dom.DocumentElement,
                 "borrowPeriod");
@@ -3997,7 +3997,7 @@ null,
                 macro_table["%barcodefilename%"] = "";
             }
 
-            // 2009/7/30 new add
+            // 2009/7/30 
             if (this.SourceStyle == "recpathfile")
             {
                 macro_table["%recpathfilepath%"] = this.RecPathFilePath;
@@ -4031,7 +4031,7 @@ null,
 
                 macro_table["%pageno%"] = "1";
 
-                // 2008/11/23 new add
+                // 2008/11/23 
                 macro_table["%datadir%"] = this.MainForm.DataDir;   // 便于引用datadir下templates目录内的某些文件
                 ////macro_table["%libraryserverdir%"] = this.MainForm.LibraryServerDir;  // 便于引用服务器端的CSS文件
 
@@ -4094,7 +4094,7 @@ null,
 
                     if (this.SourceStyle == "batchno")
                     {
-                        // 2008/11/22 new add
+                        // 2008/11/22 
                         if (String.IsNullOrEmpty(this.BatchNo) == false)
                         {
                             WriteParagraph(writer, "批次号\t" + this.BatchNo);
@@ -4114,7 +4114,7 @@ null,
                         }
                     }
 
-                    // 2009/7/30 new add
+                    // 2009/7/30 
                     if (this.SourceStyle == "recpathfile")
                     {
                         if (String.IsNullOrEmpty(this.RecPathFilePath) == false)
@@ -4590,7 +4590,7 @@ null,
                 macro_table["%barcodefilename%"] = "";
             }
 
-            // 2009/7/30 new add
+            // 2009/7/30 
             if (this.SourceStyle == "recpathfile")
             {
                 macro_table["%recpathfilepath%"] = this.RecPathFilePath;
@@ -4627,7 +4627,7 @@ null,
 
                 macro_table["%pageno%"] = "1";
 
-                // 2008/11/23 new add
+                // 2008/11/23 
                 macro_table["%datadir%"] = this.MainForm.DataDir;   // 便于引用datadir下templates目录内的某些文件
                 ////macro_table["%libraryserverdir%"] = this.MainForm.LibraryServerDir;  // 便于引用服务器端的CSS文件
 
@@ -4693,7 +4693,7 @@ null,
 
                         if (this.SourceStyle == "batchno")
                         {
-                            // 2008/11/22 new add
+                            // 2008/11/22 
                             if (String.IsNullOrEmpty(this.BatchNo) == false)
                             {
                                 sw.WriteLine("批次号\t" + this.BatchNo);
@@ -4713,7 +4713,7 @@ null,
                             }
                         }
 
-                        // 2009/7/30 new add
+                        // 2009/7/30 
                         if (this.SourceStyle == "recpathfile")
                         {
                             if (String.IsNullOrEmpty(this.RecPathFilePath) == false)
@@ -5209,7 +5209,7 @@ strTotalPrice);
             // 2009/7/24 changed
             if (this.SourceStyle == "batchno")
             {
-                // 2008/11/22 new add
+                // 2008/11/22 
                 macro_table["%batchno%"] = HttpUtility.HtmlEncode(this.BatchNo); // 批次号
                 macro_table["%location%"] = HttpUtility.HtmlEncode(this.LocationString); // 馆藏地点 用HtmlEncode()的原因是要防止里面出现的“<不指定>”字样
             }
@@ -5235,7 +5235,7 @@ strTotalPrice);
                 macro_table["%barcodefilename%"] = "";
             }
 
-            // 2009/7/30 new add
+            // 2009/7/30 
             if (this.SourceStyle == "recpathfile")
             {
                 macro_table["%recpathfilepath%"] = this.RecPathFilePath;
@@ -5272,10 +5272,10 @@ strTotalPrice);
 
                 macro_table["%pageno%"] = "1";
 
-                // 2008/11/23 new add
+                // 2008/11/23 
                 macro_table["%datadir%"] = this.MainForm.DataDir;   // 便于引用datadir下templates目录内的某些文件
                 ////macro_table["%libraryserverdir%"] = this.MainForm.LibraryServerDir;  // 便于引用服务器端的CSS文件
-                // 2009/10/10 new add
+                // 2009/10/10 
                 macro_table["%cssfilepath%"] = this.GetAutoCssUrl(option, "accountbook.css");  // 便于引用服务器端或“css”模板的CSS文件
 
                 // strFileName = strFileNamePrefix + "0" + ".html";
@@ -5352,7 +5352,7 @@ strTotalPrice);
                     if (this.SourceStyle == "batchno")
                     {
 
-                        // 2008/11/22 new add
+                        // 2008/11/22 
                         if (String.IsNullOrEmpty(this.BatchNo) == false)
                         {
                             StreamUtil.WriteText(strFileName,
@@ -5483,7 +5483,7 @@ strTotalPrice);
         }
 
         /*
-        // 2009/10/10 new add
+        // 2009/10/10 
         // 获得css文件的路径(或者http:// 地址)。将根据是否具有“统计页”来自动处理
         string GetAutoCssUrl(PrintOption option)
         {
@@ -5494,7 +5494,7 @@ strTotalPrice);
                 return this.MainForm.LibraryServerDir + "/accountbook.css";    // 缺省的
         }*/
 
-        // 2009/10/10 new add
+        // 2009/10/10 
         // 获得css文件的路径(或者http:// 地址)。将根据是否具有“统计页”来自动处理
         // parameters:
         //      strDefaultCssFileName   “css”模板缺省情况下，将采用的虚拟目录中的css文件名，纯文件名
@@ -6438,7 +6438,7 @@ strTotalPrice);
             SearchByBatchnoForm dlg = new SearchByBatchnoForm();
             MainForm.SetControlFont(dlg, this.Font, false);
 
-            // 2008/11/30 new add
+            // 2008/11/30 
             dlg.BatchNo = this.BatchNo;
             dlg.ItemLocation = this.LocationString;
 
@@ -6462,7 +6462,7 @@ strTotalPrice);
 
             this.SourceStyle = "batchno";
 
-            // 2008/11/22 new add
+            // 2008/11/22 
             this.BatchNo = dlg.BatchNo;
             this.LocationString = dlg.ItemLocation;
 
@@ -6528,7 +6528,7 @@ strTotalPrice);
             SearchByBatchnoForm dlg = new SearchByBatchnoForm();
             MainForm.SetControlFont(dlg, this.Font, false);
 
-            // 2008/11/30 new add
+            // 2008/11/30 
             dlg.BatchNo = this.BatchNo;
             dlg.ItemLocation = this.LocationString;
 
@@ -6552,7 +6552,7 @@ strTotalPrice);
 
             this.SourceStyle = "batchno";
 
-            // 2008/11/22 new add
+            // 2008/11/22 
             this.BatchNo = dlg.BatchNo;
             this.LocationString = dlg.ItemLocation;
 
@@ -6680,7 +6680,7 @@ strTotalPrice);
 
                         /*
                         // 如果册条码号为空，则改用路径装载
-                        // 2009/8/6 new add
+                        // 2009/8/6 
                         if (String.IsNullOrEmpty(strBarcode) == true)
                         {
                             strBarcode = "@path:" + strRecPath;
@@ -7497,7 +7497,7 @@ MessageBoxDefaultButton.Button1);
             // item.ImageIndex = TYPE_NORMAL;
             SetItemColor(item, TYPE_NORMAL);
 
-            // 2009/7/25 new add
+            // 2009/7/25 
             // 填充需要从订购库获得的栏目信息
             if (this.checkBox_load_fillOrderInfo.Checked == true)
                 FillOrderColumns(item, this.comboBox_load_type.Text);
@@ -7651,7 +7651,7 @@ MessageBoxDefaultButton.Button1);
                 "barcode -- 册条码号",
                 "summary -- 摘要",
 
-                // 2009/7/24 new add
+                // 2009/7/24 
                 "isbnIssn -- ISBN/ISSN",
                 "publishTime -- 出版时间",
                 "volume -- 卷期",
@@ -7719,7 +7719,7 @@ MessageBoxDefaultButton.Button1);
                 "barcode -- 册条码号",
                 "summary -- 摘要",
 
-                // 2009/7/24 new add
+                // 2009/7/24 
                 "isbnIssn -- ISBN/ISSN",
                 "publishTime -- 出版时间",
                 "volume -- 卷期",
@@ -7787,7 +7787,7 @@ MessageBoxDefaultButton.Button1);
                 "barcode -- 册条码号",
                 "summary -- 摘要",
 
-                // 2009/7/24 new add
+                // 2009/7/24 
                 "isbnIssn -- ISBN/ISSN",
                 "publishTime -- 出版时间",
                 "volume -- 卷期",
@@ -7953,7 +7953,7 @@ MessageBoxDefaultButton.Button1);
 
         private void AccountBookForm_Activated(object sender, EventArgs e)
         {
-            // 2009/8/13 new add
+            // 2009/8/13 
             this.MainForm.stopManager.Active(this.stop);
         }
 
@@ -8418,7 +8418,7 @@ MessageBoxDefaultButton.Button1);
 
             this.LinesPerPageDefault = 20;
 
-            // 2008/9/5 new add
+            // 2008/9/5 
             // Columns缺省值
             Columns.Clear();
 

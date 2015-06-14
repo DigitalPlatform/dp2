@@ -1589,7 +1589,7 @@ MessageBoxDefaultButton.Button1);
                 int j = 0;
                 for (j = 0; j < report.Count; j++)
                 {
-                    // 2007/10/26 new add
+                    // 2007/10/26
                     if (j >= aName.Length)
                         break;
 

@@ -209,7 +209,7 @@ namespace DigitalPlatform.Script
 		
 			checkBox_noneProject_CheckedChanged(null, null);
 
-            // 2009/2/8 new add
+            // 2009/2/8
             if (this.DisableNoneProject == true)
                 this.checkBox_noneProject.Enabled = false;
 		}

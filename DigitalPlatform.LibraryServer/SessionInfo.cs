@@ -462,7 +462,7 @@ namespace DigitalPlatform.LibraryServer
             string strXml = "";
 
             string strQueryXml = "<target list='"
-                + StringUtil.GetXmlStringSimple(strItemDbName + ":" + "父记录")       // 2007/9/14 new add
+                + StringUtil.GetXmlStringSimple(strItemDbName + ":" + "父记录")       // 2007/9/14
                 + "'><item><word>"
                 + strBiblioRecId
                 + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang></target>";
@@ -544,7 +544,7 @@ namespace DigitalPlatform.LibraryServer
 #if NO
         // 检索出册数据
         // 带有偏移量的版本
-        // 2009/6/9 new add
+        // 2009/6/9
         // return:
         //      命中的全部结果数量。
         public int SearchItems(
@@ -559,7 +559,7 @@ namespace DigitalPlatform.LibraryServer
             string strXml = "";
 
             string strQueryXml = "<target list='"
-                + StringUtil.GetXmlStringSimple(strItemDbName + ":" + "父记录")       // 2007/9/14 new add
+                + StringUtil.GetXmlStringSimple(strItemDbName + ":" + "父记录")       // 2007/9/14
                 + "'><item><order>DESC</order><word>"
                 + strBiblioRecId
                 + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang></target>";
@@ -652,7 +652,7 @@ namespace DigitalPlatform.LibraryServer
             // string strXml = "";
 
             string strQueryXml = "<target list='"
-                + StringUtil.GetXmlStringSimple(strCommentDbName + ":" + "父记录")       // 2007/9/14 new add
+                + StringUtil.GetXmlStringSimple(strCommentDbName + ":" + "父记录")       // 2007/9/14
                 + "'><item><order>DESC</order><word>"
                 + strBiblioRecId
                 + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang></target>";

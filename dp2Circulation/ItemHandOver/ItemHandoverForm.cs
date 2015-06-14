@@ -216,7 +216,7 @@ namespace dp2Circulation
             stop.Register(MainForm.stopManager, true);	// 和容器关联
 #endif
 
-            // 2009/2/2 new add
+            // 2009/2/2
             this.comboBox_load_type.Text = this.MainForm.AppInfo.GetString(
                 "itemhandoverform",
                 "publication_type",
@@ -297,7 +297,7 @@ namespace dp2Circulation
             if (this._scanBarcodeForm != null)
                 this._scanBarcodeForm.Close();
 
-            // 2009/2/2 new add
+            // 2009/2/2
             this.MainForm.AppInfo.SetString(
                 "itemhandoverform",
                 "publication_type",
@@ -964,7 +964,7 @@ this.splitContainer_inAndOutof,
             ColumnHeader columnHeader_biblioRecpath = new ColumnHeader();
             ColumnHeader columnHeader_accessno = new ColumnHeader();
 
-            // 2009/10/27 new add
+            // 2009/10/27
             ColumnHeader columnHeader_targetRecpath = new ColumnHeader();
 
 
@@ -1134,7 +1134,7 @@ this.splitContainer_inAndOutof,
                 else
                     item = new ListViewItem("", 0); // 暂时还没有办法知道条码
 
-                // 2009/10/29 new add
+                // 2009/10/29
                 OriginItemData data = new OriginItemData();
                 item.Tag = data;
                 data.Timestamp = item_timestamp;
@@ -1369,7 +1369,7 @@ this.splitContainer_inAndOutof,
             string strAccessNo = DomUtil.GetElementText(dom.DocumentElement,
                 "accessNo");
 
-            // 2007/6/20 new add
+            // 2007/6/20
             strBorrowDate = DateTimeUtil.LocalTime(strBorrowDate, "u");
 
             string strBorrowPeriod = DomUtil.GetElementText(dom.DocumentElement,
@@ -1510,7 +1510,7 @@ this.splitContainer_inAndOutof,
                 return;
             }
 
-            item.ImageIndex = nType;    // 2009/11/1 new add
+            item.ImageIndex = nType;    // 2009/11/1
 
             if (nType == TYPE_ERROR)
             {
@@ -1598,7 +1598,7 @@ this.splitContainer_inAndOutof,
             string strAccessNo = DomUtil.GetElementText(dom.DocumentElement,
                 "accessNo");
 
-            // 2007/6/20 new add
+            // 2007/6/20
             strBorrowDate = DateTimeUtil.LocalTime(strBorrowDate, "u");
 
             string strBorrowPeriod = DomUtil.GetElementText(dom.DocumentElement,
@@ -1958,7 +1958,7 @@ this.splitContainer_inAndOutof,
                 goto ERROR1;
             }
 
-            // 2009/11/27 new add
+            // 2009/11/27
             if (this.checkBox_verify_autoUppercaseBarcode.Checked == true)
             {
                 string strUpper = this.textBox_verify_itemBarcode.Text.ToUpper();
@@ -2332,7 +2332,7 @@ MessageBoxDefaultButton.Button2);
             // 2009/7/24 changed
             if (this.SourceStyle == "batchno")
             {
-                // 2008/11/22 new add
+                // 2008/11/22
                 macro_table["%batchno%"] = HttpUtility.HtmlEncode(this.BatchNo); // 批次号
                 macro_table["%location%"] = HttpUtility.HtmlEncode(this.LocationString); // 馆藏地点 用HtmlEncode()的原因是要防止里面出现的“<不指定>”字样
             }
@@ -2382,10 +2382,10 @@ MessageBoxDefaultButton.Button2);
 
                 macro_table["%pageno%"] = "1";
 
-                // 2008/11/23 new add
+                // 2008/11/23
                 macro_table["%datadir%"] = this.MainForm.DataDir;   // 便于引用datadir下templates目录内的某些文件
                 ////macro_table["%libraryserverdir%"] = this.MainForm.LibraryServerDir;  // 便于引用服务器端的CSS文件
-                // 2009/10/10 new add
+                // 2009/10/10
                 macro_table["%cssfilepath%"] = this.GetAutoCssUrl(option, "itemhandover.css");  // 便于引用服务器端或“css”模板的CSS文件
 
                 strFileName = strFileNamePrefix + "0" + ".html";
@@ -2459,7 +2459,7 @@ MessageBoxDefaultButton.Button2);
 
                     if (this.SourceStyle == "batchno")
                     {
-                        // 2008/11/22 new add
+                        // 2008/11/22
                         if (String.IsNullOrEmpty(this.BatchNo) == false)
                         {
                             StreamUtil.WriteText(strFileName,
@@ -2537,7 +2537,7 @@ MessageBoxDefaultButton.Button2);
             return 0;
         }
 
-        // 2009/10/10 new add
+        // 2009/10/10
         // 获得css文件的路径(或者http:// 地址)。将根据是否具有“统计页”来自动处理
         // parameters:
         //      strDefaultCssFileName   “css”模板缺省情况下，将采用的虚拟目录中的css文件名，纯文件名
@@ -2574,7 +2574,7 @@ MessageBoxDefaultButton.Button2);
             string strCssUrl = GetAutoCssUrl(option, "itemhandover.css");
 
             /*
-            // 2009/10/9 new add
+            // 2009/10/9
             string strCssFilePath = option.GetTemplatePageFilePath("css");  // 大小写不敏感
             if (String.IsNullOrEmpty(strCssFilePath) == false)
                 strCssUrl = strCssFilePath;
@@ -3029,7 +3029,7 @@ MessageBoxDefaultButton.Button2);
             SearchByBatchnoForm dlg = new SearchByBatchnoForm();
             MainForm.SetControlFont(dlg, this.Font, false);
 
-            // 2008/11/30 new add
+            // 2008/11/30
             dlg.BatchNo = this.BatchNo;
             dlg.ItemLocation = this.LocationString;
 
@@ -3053,7 +3053,7 @@ MessageBoxDefaultButton.Button2);
 
             this.SourceStyle = "batchno";
 
-            // 2008/11/22 new add
+            // 2008/11/22
             this.BatchNo = dlg.BatchNo;
             this.LocationString = dlg.ItemLocation;
 
@@ -3118,7 +3118,7 @@ MessageBoxDefaultButton.Button2);
             SearchByBatchnoForm dlg = new SearchByBatchnoForm();
             MainForm.SetControlFont(dlg, this.Font, false);
 
-            // 2008/11/30 new add
+            // 2008/11/30
             dlg.BatchNo = this.BatchNo;
             dlg.ItemLocation = this.LocationString;
 
@@ -3142,7 +3142,7 @@ MessageBoxDefaultButton.Button2);
 
             this.SourceStyle = "batchno";
 
-            // 2008/11/22 new add
+            // 2008/11/22
             this.BatchNo = dlg.BatchNo;
             this.LocationString = dlg.ItemLocation;
 
@@ -3302,7 +3302,7 @@ MessageBoxDefaultButton.Button2);
 
                         /*
                         // 如果册条码号为空，则改用路径装载
-                        // 2009/8/6 new add
+                        // 2009/8/6
                         if (String.IsNullOrEmpty(strBarcode) == true)
                         {
                             strBarcode = "@path:" + strRecPath;
@@ -4499,7 +4499,7 @@ MessageBoxDefaultButton.Button2);
 
         private void ItemHandoverForm_Activated(object sender, EventArgs e)
         {
-            // 2009/8/13 new add
+            // 2009/8/13
             this.MainForm.stopManager.Active(this.stop);
 
         }
@@ -6737,7 +6737,7 @@ new string[] { "summary", "@isbnissn", "targetrecpath" });
 
             this.LinesPerPageDefault = 20;
 
-            // 2008/9/5 new add
+            // 2008/9/5
             // Columns缺省值
             Columns.Clear();
 

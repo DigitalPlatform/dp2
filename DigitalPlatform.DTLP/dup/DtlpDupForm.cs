@@ -709,7 +709,7 @@ namespace DigitalPlatform.DTLP
 
                 if (strPath == strShorterStartRecordPath)
                 {
-                    // 如果就是发起记录自己  2008/2/29 new add
+                    // 如果就是发起记录自己  2008/2/29
                     item.ImageIndex = ITEMTYPE_OVERTHRESHOLD;
                     item.BackColor = Color.LightGoldenrodYellow;
                     item.ForeColor = SystemColors.GrayText; // 表示就是发起记录自己
@@ -885,7 +885,7 @@ namespace DigitalPlatform.DTLP
                 ListViewItem item = this.listView_browse.Items[i];
 
                 if (item.Text == strShorterStartRecordPath)
-                    continue;   // 不包含发起记录自己 2008/2/29 new add
+                    continue;   // 不包含发起记录自己 2008/2/29
 
                 if (item.ImageIndex == ITEMTYPE_OVERTHRESHOLD)
                     nCount++;

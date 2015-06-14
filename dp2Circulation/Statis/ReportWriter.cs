@@ -228,7 +228,7 @@ namespace dp2Circulation
                 int j = 0;
                 for (j = 0; j < report.Count; j++)
                 {
-                    // 2007/10/26 new add
+                    // 2007/10/26
                     if (j >= aName.Length)
                         break;
 
@@ -857,7 +857,7 @@ object o2)
 
         string m_strCssClass = "";
 
-        // CSS样式类。2007/5/18 new add
+        // CSS样式类。2007/5/18
         public string CssClass
         {
             get

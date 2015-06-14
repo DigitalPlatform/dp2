@@ -355,7 +355,7 @@ namespace DigitalPlatform.MarcDom
                  * 
                  * */
 
-                // 2009/10/8 new add
+                // 2009/10/8
                 // ºÏ≤Èmarc syntax «∑Ò∆•≈‰
                 if (String.IsNullOrEmpty(strMarcSyntax) == false)
                 {
@@ -1164,7 +1164,7 @@ namespace DigitalPlatform.MarcDom
 						out strNextFieldName);
 					if (nRet == -1)
 					{
-                        // 2009/11/1 new add
+                        // 2009/11/1
                         if (String.IsNullOrEmpty(strData) == true)
                             break;
 

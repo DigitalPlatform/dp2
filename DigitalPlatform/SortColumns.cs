@@ -184,7 +184,7 @@ namespace DigitalPlatform
                 column = new Column();
                 column.No = nFirstColumn;
                 column.Asc = true;  // 初始时为正向排序
-                column.SortStyle = firstColumnStyle;    // 2007/12/20 new add
+                column.SortStyle = firstColumnStyle;    // 2007/12/20
             }
 
             // 放到首部
@@ -223,7 +223,7 @@ namespace DigitalPlatform
                 else
                     column.Asc = true;
 
-                column.SortStyle = firstColumnStyle;    // 2008/11/30 new add
+                column.SortStyle = firstColumnStyle;    // 2008/11/30
 
                 // 修改这一列的视觉
                 ColumnHeader header = columns[column.No];
@@ -244,7 +244,7 @@ namespace DigitalPlatform
                 column = new Column();
                 column.No = nFirstColumn;
                 column.Asc = true;  // 初始时为正向排序
-                column.SortStyle = firstColumnStyle;    // 2007/12/20 new add
+                column.SortStyle = firstColumnStyle;    // 2007/12/20
             }
 
             // 放到首部

@@ -1079,7 +1079,7 @@ namespace dp2Catalog
         {
             // string strText = this.comboBox_matchStyle.Text;
 
-            // 2009/8/6 new add
+            // 2009/8/6
             if (strText == "空值")
                 return "null";
 
@@ -6734,7 +6734,7 @@ MessageBoxDefaultButton.Button2);
                 return;
 
             // 储存用过的文件名
-            // 2009/9/21 new add
+            // 2009/9/21
             this.MainForm.LinkedMarcFileName = dlg.FileName;
             this.MainForm.LinkedEncodingName = dlg.EncodingName;
             this.MainForm.LinkedMarcSyntax = dlg.MarcSyntax;

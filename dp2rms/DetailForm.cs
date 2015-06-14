@@ -3678,7 +3678,7 @@ namespace dp2rms
 
         }
 
-        int m_nInGetCfgFile = 0;    // 防止GetCfgFile()函数重入 2008/3/6 new add
+        int m_nInGetCfgFile = 0;    // 防止GetCfgFile()函数重入 2008/3/6
 
         // marc编辑窗要从外部获得配置文件内容
         private void MarcEditor_GetConfigFile(object sender,

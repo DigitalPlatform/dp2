@@ -20,7 +20,7 @@ namespace DigitalPlatform.Marc
         // 参与排序的列号数组
         SortColumns SortColumns = new SortColumns();
 
-        public ApplicationInfo AppInfo = null;  // 2009/9/18 new add
+        public ApplicationInfo AppInfo = null;  // 2009/9/18
 
 		private System.Windows.Forms.ColumnHeader columnHeader_value;
 		private System.Windows.Forms.ColumnHeader columnHeader_description;
@@ -172,7 +172,7 @@ namespace DigitalPlatform.Marc
             {
                 if (this.listView_valueList.Items[i].Text == strValue)
                 {
-                    this.listView_valueList.FocusedItem = this.listView_valueList.Items[i]; // 2009/9/18 new add
+                    this.listView_valueList.FocusedItem = this.listView_valueList.Items[i]; // 2009/9/18
                     this.listView_valueList.Items[i].Selected = true;
                     this.listView_valueList.EnsureVisible(i);
                     return;

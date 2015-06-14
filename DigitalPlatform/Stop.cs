@@ -9,7 +9,6 @@ using System.Windows.Forms;
 using System.Drawing;
 using System.IO;
 
-
 namespace DigitalPlatform
 {
     /*
@@ -375,7 +374,7 @@ namespace DigitalPlatform
             sw.Close();
         }
 
-        // 2007/8/2 new add
+        // 2007/8/2
         public void LinkReverseButtons(List<object> buttons)
         {
             // 检查
@@ -403,7 +402,7 @@ namespace DigitalPlatform
             }
         }
 
-        // 2007/8/2 new add
+        // 2007/8/2
         public void UnlinkReverseButtons(List<object> buttons)
         {
             // 检查
@@ -702,7 +701,7 @@ namespace DigitalPlatform
             {
                 if (lEnd == -1 && lStart == -1 && lValue == -1)
                 {
-                    if (progressbar.Visible != false)   // 2008/3/17 new add
+                    if (progressbar.Visible != false)   // 2008/3/17
                         progressbar.Visible = false;
                     if (lValue == -1)
                         return;
@@ -741,7 +740,7 @@ namespace DigitalPlatform
         {
             if (lEnd == -1 && lStart == -1 && lValue == -1)
             {
-                if (progressbar.Visible != false)   // 2008/3/17 new add
+                if (progressbar.Visible != false)   // 2008/3/17
                     progressbar.Visible = false;
                 if (lValue == -1)
                     return;
@@ -784,7 +783,7 @@ namespace DigitalPlatform
             {
                 if (lEnd == -1 && lStart == -1 && lValue == -1)
                 {
-                    if (progressbar.Visible != false)   // 2008/3/17 new add
+                    if (progressbar.Visible != false)   // 2008/3/17
                         progressbar.Visible = false;
 
                     if (lValue == -1)
@@ -817,7 +816,7 @@ namespace DigitalPlatform
         {
             if (lEnd == -1 && lStart == -1 && lValue == -1)
             {
-                if (progressbar.Visible != false)   // 2008/3/17 new add
+                if (progressbar.Visible != false)   // 2008/3/17
                     progressbar.Visible = false;
                 if (lValue == -1)
                     return;
@@ -1287,7 +1286,7 @@ namespace DigitalPlatform
         {
             if (stop == null)
             {
-                // 2007/8/1 new add
+                // 2007/8/1
                 EnableStopButtons(false);
                 EnableReverseButtons(true, StateParts.None);
                 InternalSetMessage("");
@@ -1325,7 +1324,7 @@ namespace DigitalPlatform
 
             if (bFound == false)
             {
-                // 2007/8/1 new add
+                // 2007/8/1
                 EnableStopButtons(false);
                 EnableReverseButtons(true,
                     StateParts.None);
@@ -1583,7 +1582,7 @@ namespace DigitalPlatform
                 {
                     // 如果为隐藏progress的意图，
                     // 将max和min都设置为-1，以便将来刷新的时候能体现隐藏
-                    // 2008/3/10 new add
+                    // 2008/3/10
                     active.ProgressMax = -1;
                     active.ProgressMin = -1;
                 }

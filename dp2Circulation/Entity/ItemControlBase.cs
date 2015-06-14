@@ -190,7 +190,7 @@ namespace dp2Circulation
         {
             this.m_listView.Items.Clear();
 
-            // 2008/11/22 new add
+            // 2008/11/22
             this.SortColumns.Clear();
             SortColumns.ClearColumnSortDisplay(this.m_listView.Columns);
         }
@@ -722,7 +722,7 @@ namespace dp2Circulation
                 strError = "因目标书目记录路径 '" + strNewBiblioRecPath + "' 中没有包含ID部分，无法进行操作";
                 return -1;
             }
-            // 2009/10/27 new add
+            // 2009/10/27
             if (strTargetBiblioRecID == "?")
             {
                 strError = "目标书目记录路径 '" + strNewBiblioRecPath + "' 中记录ID不应为问号";
@@ -743,7 +743,7 @@ namespace dp2Circulation
                 bMove = true;
                 strTargetEntityDbName = MainForm.GetItemDbName(strTargetBiblioDbName, this.ItemType);
 
-                // 2008/11/28 new add
+                // 2008/11/28
                 if (String.IsNullOrEmpty(strTargetEntityDbName) == true)
                 {
                     strError = "书目库 '" + strTargetBiblioDbName + "' 并没有从属的实体库定义。操作失败";
@@ -761,14 +761,14 @@ namespace dp2Circulation
 
                 EntityInfo info = new EntityInfo();
 
-                // 2008/4/16 new add
+                // 2008/4/16
                 if (String.IsNullOrEmpty(bookitem.RefID) == true)
                 {
                     bookitem.RefID = BookItem.GenRefID();
                     bookitem.RefreshListView();
                 }
 
-                info.RefID = bookitem.RefID; // 2008/2/17 new add
+                info.RefID = bookitem.RefID; // 2008/2/17
 
                 bookitem.Parent = strTargetBiblioRecID;   // !!!
 
@@ -780,7 +780,7 @@ namespace dp2Circulation
                 if (nRet == -1)
                     return -1;
 
-                info.OldRecPath = bookitem.RecPath; // 2007/6/2 new add
+                info.OldRecPath = bookitem.RecPath; // 2007/6/2
                 if (bMove == false)
                 {
                     info.Action = "change";
@@ -836,14 +836,14 @@ namespace dp2Circulation
 
                 EntityInfo info = new EntityInfo();
 
-                // 2008/4/16 new add
+                // 2008/4/16
                 if (String.IsNullOrEmpty(bookitem.RefID) == true)
                 {
                     bookitem.RefID = BookItem.GenRefID();
                     bookitem.RefreshListView();
                 }
 
-                info.RefID = bookitem.RefID; // 2008/2/17 new add
+                info.RefID = bookitem.RefID; // 2008/2/17
 
 
                 string strXml = "";
@@ -866,7 +866,7 @@ namespace dp2Circulation
                 if (bookitem.ItemDisplayState == ItemDisplayState.Changed)
                 {
                     info.Action = "change";
-                    info.OldRecPath = bookitem.RecPath; // 2007/6/2 new add
+                    info.OldRecPath = bookitem.RecPath; // 2007/6/2
                     info.NewRecPath = bookitem.RecPath;
 
                     info.NewRecord = strXml;
@@ -1138,7 +1138,7 @@ namespace dp2Circulation
                     if (bookitem.ErrorInfo == "")
                     {
                         this.Items.PhysicalDeleteItem(bookitem);
-                        i--;    // 2007/4/12 new add
+                        i--;    // 2007/4/12
                     }
                 }
             }

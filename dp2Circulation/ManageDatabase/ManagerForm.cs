@@ -673,7 +673,7 @@ namespace dp2Circulation
                 string strRole = DomUtil.GetAttr(node, "role");
                 string strLibraryCode = DomUtil.GetAttr(node, "libraryCode");
 
-                // 2008/7/2 new add
+                // 2008/7/2
                 // 空的名字将被忽略
                 if (String.IsNullOrEmpty(strName) == true)
                     continue;
@@ -932,7 +932,7 @@ namespace dp2Circulation
             return -1;
         }
 
-        // 2008/11/16 new add
+        // 2008/11/16
         //      strDatabaseInfo 要刷新的下属文件特性。<refreshStyle include="keys,browse" exclude="">(表示只刷新keys和browse两个重要配置文件)或者<refreshStyle include="*" exclude="template">(表示刷新全部文件，但是不要刷新template) 如果参数值为空，表示全部刷新
         // 
         /// <summary>
@@ -2120,7 +2120,6 @@ namespace dp2Circulation
                     goto ERROR1;
                 }
 
-
                 // TODO: 提醒哪些数据库需要刷新检索点
                 if (String.IsNullOrEmpty(strKeysChangedDbpaths) == false)
                 {
@@ -2167,11 +2166,14 @@ namespace dp2Circulation
 
             if (String.IsNullOrEmpty(strError) == false)
                 MessageBox.Show(this, strError);
+
+            // 2015/6/13
+            // 重新获得各种库名、列表
+            this.MainForm.StartPrepareNames(false, false);
             return;
         ERROR1:
             MessageBox.Show(this, strError);
         }
-
 
         // 初始化
         private void toolStripButton_initializeDatabase_Click(object sender, EventArgs e)
@@ -3800,7 +3802,7 @@ namespace dp2Circulation
             }
              * */
 
-            // 2009/6/27 new add
+            // 2009/6/27
             if (String.IsNullOrEmpty(dlg.CaptionsXml) == false)
                 dom.DocumentElement.InnerXml = dlg.CaptionsXml;
 
@@ -3908,7 +3910,7 @@ namespace dp2Circulation
 
                 dlg.Text = "请指定显示格式的属性";
                 // dlg.FormatName = DomUtil.GetAttr(dom.DocumentElement, "name");
-                dlg.CaptionsXml = dom.DocumentElement.InnerXml; // 2009/6/27 new add
+                dlg.CaptionsXml = dom.DocumentElement.InnerXml; // 2009/6/27
                 dlg.FormatType = DomUtil.GetAttr(dom.DocumentElement, "type");
                 dlg.ScriptFile = DomUtil.GetAttr(dom.DocumentElement, "scriptfile");
                 dlg.FormatStyle = DomUtil.GetAttr(dom.DocumentElement, "style");
@@ -3941,11 +3943,11 @@ namespace dp2Circulation
                 }
                  * */
 
-                // 2009/6/27 new add
+                // 2009/6/27
                 if (String.IsNullOrEmpty(dlg.CaptionsXml) == false)
                     dom.DocumentElement.InnerXml = dlg.CaptionsXml;
 
-                // 2009/6/27 new add
+                // 2009/6/27
                 current_treenode.Text = GetFormatDisplayString(dom.DocumentElement);
 
                 current_treenode.Tag = dom.DocumentElement.OuterXml;
@@ -4358,7 +4360,7 @@ namespace dp2Circulation
             strDisplayText += " type=" + "biblio";
             DomUtil.SetAttr(dom.DocumentElement, "type", "biblio");
 
-            // 2009/6/27 new add
+            // 2009/6/27
             dom.DocumentElement.InnerXml = "<caption lang=\"zh-CN\">详细</caption><caption lang=\"en\">Detail</caption>";
 
             TreeNode new_format_treenode = new TreeNode(strDisplayText, 1, 1);
@@ -6584,7 +6586,7 @@ namespace dp2Circulation
                 DomUtil.SetAttr(dom.DocumentElement, "zhongcihaodb", dlg.ZhongcihaoDbName);
 
                 current_treenode.Text = MakeZhongcihaoGroupNodeName(dlg.GroupName, dlg.ZhongcihaoDbName);
-                current_treenode.Tag = dom.DocumentElement.OuterXml;    // 2009/3/3 new add
+                current_treenode.Tag = dom.DocumentElement.OuterXml;    // 2009/3/3
 
                 // 确保展开
                 // current_treenode.Parent.Expand();

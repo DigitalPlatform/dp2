@@ -132,7 +132,7 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 在未指定语言的情况下获得全部数据库名
-        // 2009/6/17 new add
+        // 2009/6/17
         public List<string> GetAllNames()
         {
             List<string> results = new List<string>();

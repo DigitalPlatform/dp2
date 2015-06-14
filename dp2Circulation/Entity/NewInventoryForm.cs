@@ -67,8 +67,9 @@ this.BarcodeFilePath);
                 this.RecPathFilePath);
         }
 
-        void ClearBefore()
+        public override void ClearBefore()
         {
+            base.ClearBefore();
             this.dpTable1.Rows.Clear();
         }
 

@@ -348,7 +348,7 @@ namespace DigitalPlatform.Xml
 		//		1	儿子区
 		// style:
 		//		当前区域的状态
-		internal virtual Text GetVisualText()
+		internal virtual XmlText GetVisualText()
 		{
 			if (this.m_paraValue1 != null)
 			{
@@ -373,13 +373,13 @@ namespace DigitalPlatform.Xml
 			if (boxTotal.childrenVisual == null)
 				return null;
 
-			Text text = null;
+			XmlText text = null;
 			foreach(Visual childVisual in boxTotal.childrenVisual)
 			{
-				if (childVisual is Text
+				if (childVisual is XmlText
 					/*&& childVisual.Name == ""*/)
 				{
-					text = (Text)childVisual;
+					text = (XmlText)childVisual;
 				}
 			}
 
@@ -400,7 +400,7 @@ namespace DigitalPlatform.Xml
 			if (this.m_paraValue1 == null)
 			{
 				// 说明已建立的visual结构,从visual里得到值
-				Text text = this.GetVisualText();
+				XmlText text = this.GetVisualText();
 				if (text == null)
 				{
 					Debug.Assert(false,"m_paraValue为null时,visual不可能不存在");
@@ -425,7 +425,7 @@ namespace DigitalPlatform.Xml
 			if (this.m_paraValue1 == null)
 			{
 				// 说明已建立的visual结构,从visual里得到值
-				Text text = this.GetVisualText();
+				XmlText text = this.GetVisualText();
 				if (text == null)
 				{
 					Debug.Assert(false,"m_paraValue为null时,visual不可能不存在");
@@ -470,18 +470,18 @@ namespace DigitalPlatform.Xml
 
 
 		// 得到childrenVisual中的Label对象
-		public Label GetLable()
+		public XmlLabel GetLable()
 		{
 			if (this.childrenVisual == null)
 				return null;
 
-			Label label = null;
+			XmlLabel label = null;
 			for(int i=0;i<this.childrenVisual.Count;i++)
 			{
 				Visual visual = (Visual)this.childrenVisual[i];
-				if (visual is Label)
+				if (visual is XmlLabel)
 				{
-					label = (Label)visual;
+					label = (XmlLabel)visual;
 					break;
 				}
 			}
@@ -632,7 +632,7 @@ namespace DigitalPlatform.Xml
 				this.childrenVisual.Clear();
 
 			// 加Label
-			Label label = new Label();
+			XmlLabel label = new XmlLabel();
 			label.container = this;
 			label.Text = this.Name;
 			this.AddChildVisual(label);

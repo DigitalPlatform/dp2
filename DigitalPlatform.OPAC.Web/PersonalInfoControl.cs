@@ -131,7 +131,7 @@ namespace DigitalPlatform.OPAC.Web
                 + "</td><td class='birthday value'>"
                 + strBirthday + "</td></tr>";
 
-            // 证号 2008/11/11 new add
+            // 证号 2008/11/11
             string strCardNumber = DomUtil.GetElementText(ReaderDom.DocumentElement,
     "cardNumber");
             if (String.IsNullOrEmpty(strCardNumber) == false)
@@ -237,7 +237,7 @@ namespace DigitalPlatform.OPAC.Web
 + strExpireDate + "</td></tr>";
 
 
-            // 租金 2008/11/11 new add
+            // 租金 2008/11/11
             string strHireExpireDate = "";
             string strHirePeriod = "";
             XmlNode nodeHire = ReaderDom.DocumentElement.SelectSingleNode("hire");
@@ -258,7 +258,7 @@ namespace DigitalPlatform.OPAC.Web
                 + ": " + strHireExpireDate + "</td></tr>";
             }
 
-            // 押金 2008/11/11 new add
+            // 押金 2008/11/11
             string strForegift = DomUtil.GetElementText(ReaderDom.DocumentElement,
                 "foregift");
             if (String.IsNullOrEmpty(strForegift) == false)
@@ -380,7 +380,7 @@ namespace DigitalPlatform.OPAC.Web
 
             this.Controls.Add(new LiteralControl("</td></tr>"));
 
-            // 证号 2008/11/11 new add
+            // 证号 2008/11/11
             // 如果值为空，隐藏
             PlaceHolder holder = new PlaceHolder();
             holder.ID = "cardNumber_holder";
@@ -521,7 +521,7 @@ namespace DigitalPlatform.OPAC.Web
             this.Controls.Add(new LiteralControl("</td></tr>"));
 
 
-            // 租金 2008/11/11 new add
+            // 租金 2008/11/11
             holder = new PlaceHolder();
             holder.ID = "hire_holder";
             this.Controls.Add(holder);
@@ -536,7 +536,7 @@ namespace DigitalPlatform.OPAC.Web
 
             holder.Controls.Add(new LiteralControl("</td></tr>"));
 
-            // 押金 2008/11/11 new add
+            // 押金 2008/11/11
             holder = new PlaceHolder();
             holder.ID = "foregift_holder";
             this.Controls.Add(holder);
@@ -924,7 +924,7 @@ namespace DigitalPlatform.OPAC.Web
             text = (LiteralControl)this.FindControl("dateOfBirth");
             text.Text = strDateOfBirth;
 
-            // 证号 2008/11/11 new add
+            // 证号 2008/11/11
             string strCardNumber = DomUtil.GetElementText(ReaderDom.DocumentElement,
     "cardNumber");
             if (String.IsNullOrEmpty(strCardNumber) == true)
@@ -1005,7 +1005,7 @@ namespace DigitalPlatform.OPAC.Web
             text = (LiteralControl)this.FindControl("expireDate");
             text.Text = strExpireDate;
 
-            // 租金 2008/11/11 new add
+            // 租金 2008/11/11
             string strHireExpireDate = "";
             string strHirePeriod = "";
             XmlNode nodeHire = ReaderDom.DocumentElement.SelectSingleNode("hire");
@@ -1030,7 +1030,7 @@ namespace DigitalPlatform.OPAC.Web
                 holder.Visible = false;
             }
 
-            // 押金 2008/11/11 new add
+            // 押金 2008/11/11
             string strForegift = DomUtil.GetElementText(ReaderDom.DocumentElement,
                 "foregift");
             if (String.IsNullOrEmpty(strForegift) == false)

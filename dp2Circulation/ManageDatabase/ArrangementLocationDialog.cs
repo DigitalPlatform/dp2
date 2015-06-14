@@ -180,7 +180,7 @@ namespace dp2Circulation
 
         private void comboBox_location_DropDown(object sender, EventArgs e)
         {
-            // 防止重入 2009/2/23 new add
+            // 防止重入 2009/2/23
             if (this.m_nInDropDown > 0)
                 return;
 

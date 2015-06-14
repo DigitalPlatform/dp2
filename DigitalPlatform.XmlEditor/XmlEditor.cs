@@ -63,7 +63,7 @@ namespace DigitalPlatform.Xml
 
 		// 其它
 		public Item m_selectedItem = null; // 当前选中的Item对象
-		public Text m_curText = null;   // 当前编辑的Text对象
+		public XmlText m_curText = null;   // 当前编辑的Text对象
 
 		public bool m_bChanged = false;       //是否发生改变
 		bool m_bAllowPaint = true;       // 在 BeginUpdate() 和 EndUpdate()处用 
@@ -408,7 +408,7 @@ namespace DigitalPlatform.Xml
 
 
 		// 为SetEditPos()编写的私有函数
-		public void ChangeEditSizeAndMove(Text text)
+		public void ChangeEditSizeAndMove(XmlText text)
 		{
 			if (text == null)
 			{
@@ -836,9 +836,9 @@ namespace DigitalPlatform.Xml
 					this.EditControlTextToVisual();
 
 					//this.m_selectedItem = item;
-					if (visual is Text)
+					if (visual is XmlText)
 					{
-						this.SetCurText(item,(Text)visual);
+						this.SetCurText(item,(XmlText)visual);
 					}
 					else
 					{
@@ -858,7 +858,7 @@ namespace DigitalPlatform.Xml
 				}
 
 			//在文本上
-			if ((visual is Text) &&  (nRet == 0))
+			if ((visual is XmlText) &&  (nRet == 0))
 			{
 				//这里模拟单击一下，但位置跑了一大截
 				curEdit.Focus();
@@ -1435,7 +1435,7 @@ namespace DigitalPlatform.Xml
 				int nRet = -1;
 				nRet = this.VirtualRoot.HitTest(p, out visual); //HitT
 
-				if (nRet == 0 && visual is Text )  //看一下这里有没有问题
+				if (nRet == 0 && visual is XmlText )  //看一下这里有没有问题
 					Cursor = Cursors.IBeam;
 				else if (nRet == 2)
 					Cursor = Cursors.SizeWE;
@@ -2913,7 +2913,7 @@ namespace DigitalPlatform.Xml
 
             // 可能会改变文档根, 重设一下
             if (startItem.Parent == this.VirtualRoot)
-                this.docRoot = this.GetDocRoot();   // 2006/6/22 xietao new add
+                this.docRoot = this.GetDocRoot();   // 2006/6/22 xietao
 
 
 
@@ -3162,7 +3162,7 @@ namespace DigitalPlatform.Xml
 			}
 		}
 
-		public void SetCurText(Item item,Text text)
+		public void SetCurText(Item item,XmlText text)
 		{
 			this.EditControlTextToVisual();
 
@@ -3685,7 +3685,7 @@ namespace DigitalPlatform.Xml
 	{
 		public Item Lastitem = null;
 		public Item ActiveItem = null;
-		public Text CurText = null;
+		public XmlText CurText = null;
 	}
 
 	// 1.BeforeItemCreate

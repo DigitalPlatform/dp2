@@ -163,7 +163,7 @@ namespace DigitalPlatform.LibraryServer
                 return 1;
             }
 
-            // 2007/12/18 new add
+            // 2007/12/18
             if (this.HangupReason == HangupReason.LogRecover)
             {
                 strError = "当前系统正处在LogRecover挂起状态，无法启动新的批处理任务";
@@ -240,7 +240,7 @@ namespace DigitalPlatform.LibraryServer
                         task.StartInfo = param.StartInfo;
                     }
 
-                    // 激活 2007/10/10 new add
+                    // 激活 2007/10/10
                     task.eventActive.Set();
                     task.ManualStart = true;    // 表示为命令启动
 
@@ -262,7 +262,7 @@ namespace DigitalPlatform.LibraryServer
             task.StartWorkerThread();
 
             /*
-            // 激活 2007/10/10 new add
+            // 激活 2007/10/10
             task.eventActive.Set();
              * */
 

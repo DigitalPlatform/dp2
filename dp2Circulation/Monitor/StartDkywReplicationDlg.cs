@@ -89,7 +89,7 @@ namespace dp2Circulation
                 return 0;
             }
 
-            // 2009/7/16 new add
+            // 2009/7/16
             if (strStart == "!breakpoint")
             {
                 strRecordID = strStart;

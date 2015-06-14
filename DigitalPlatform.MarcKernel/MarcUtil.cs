@@ -403,7 +403,7 @@ namespace DigitalPlatform.Marc
         //	-1	一般性错误
         //	-2	MARC格式错误
         public static int Cvt2709ToFieldArray(
-            Encoding encoding,  // 2007/7/11 new add
+            Encoding encoding,  // 2007/7/11
             byte[] s,
             out List<byte[]> aResult,   // out
             out string strErrorInfo)
@@ -555,7 +555,7 @@ namespace DigitalPlatform.Marc
             }
 
             if (lenoffld != 4)
-            {	// 2001/5/15 new add
+            {	// 2001/5/15
                 strErrorInfo = "目次区中字段长度值占用字符数 "
                     + Convert.ToString(lenoffld)
                     + " 不正确，应为4...";
@@ -686,7 +686,7 @@ namespace DigitalPlatform.Marc
         //	-1	一般性错误
         //	-2	MARC格式错误
         public static int ForceCvt2709ToFieldArray(
-            ref Encoding encoding,  // 2007/7/11 new add 函数内可能发生变化
+            ref Encoding encoding,  // 2007/7/11 函数内可能发生变化
             byte[] s,
             out List<byte[]> aResult,
             out string strErrorInfo)
@@ -987,7 +987,7 @@ namespace DigitalPlatform.Marc
         {
             strError = "";
 
-            // 2007/7/23 new add
+            // 2007/7/23
             int nMaxBytes = 100000;
 
             int nRet = -1;
@@ -1379,7 +1379,7 @@ namespace DigitalPlatform.Marc
             return 0;
         }
 
-        // 2008/5/16 new add
+        // 2008/5/16
         // 将MARC记录转换为xml格式
         // parameters:
         //      strMarcSyntax   MARC格式．为 unimarc/usmarc之一，缺省为unimarc
@@ -2225,7 +2225,7 @@ namespace DigitalPlatform.Marc
             return strSubfield.Substring(1);
         }
 
-        // 2009/11/25 new add
+        // 2009/11/25
         // 替换第一个子字段
         // parameters:
         //      strMARC MARC记录
@@ -3286,7 +3286,7 @@ namespace DigitalPlatform.Marc
             if (nLen > 0)
                 strMARC = strMARC.Remove(nStartOffs, nLen);	// 删除原来内容
 
-            if (String.IsNullOrEmpty(strField) == false)    // 2008/11/10 new add
+            if (String.IsNullOrEmpty(strField) == false)    // 2008/11/10
                 strMARC = strMARC.Insert(nStartOffs, strField);	// 插入新的内容
 
             if (bFound == true)

@@ -77,7 +77,7 @@ namespace DigitalPlatform.OPAC.Server
 
                     item.UnionCatalogStyle = DomUtil.GetAttr(node, "unionCatalogStyle");
 
-                    // 2008/6/4 new add
+                    // 2008/6/4
                     bool bValue = true;
                     int nRet = DomUtil.GetBooleanParam(node,
                         "inCirculation",
@@ -161,7 +161,7 @@ namespace DigitalPlatform.OPAC.Server
         // 是否在配置的实体库名之列?
         public bool IsItemDbName(string strItemDbName)
         {
-            // 2008/10/16 new add
+            // 2008/10/16
             if (String.IsNullOrEmpty(strItemDbName) == true)
                 return false;
 
@@ -190,7 +190,7 @@ namespace DigitalPlatform.OPAC.Server
         {
             IsInCirculation = false;
 
-            // 2008/10/16 new add
+            // 2008/10/16
             if (String.IsNullOrEmpty(strItemDbName) == true)
                 return false;
 
@@ -210,7 +210,7 @@ namespace DigitalPlatform.OPAC.Server
         // 是否在配置的书目库名之列?
         public ItemDbCfg GetBiblioDbCfg(string strBiblioDbName)
         {
-            // 2008/10/16 new add
+            // 2008/10/16
             if (String.IsNullOrEmpty(strBiblioDbName) == true)
                 return null;
 
@@ -228,7 +228,7 @@ namespace DigitalPlatform.OPAC.Server
         // 是否具有orderWork角色
         public bool IsOrderWorkBiblioDb(string strBiblioDbName)
         {
-            // 2008/10/16 new add
+            // 2008/10/16
             if (String.IsNullOrEmpty(strBiblioDbName) == true)
                 return false;
 
@@ -245,7 +245,7 @@ namespace DigitalPlatform.OPAC.Server
         // 是否在配置的期库名之列?
         public bool IsIssueDbName(string strIssueDbName)
         {
-            // 2008/10/16 new add
+            // 2008/10/16
             if (String.IsNullOrEmpty(strIssueDbName) == true)
                 return false;
 
@@ -270,7 +270,7 @@ namespace DigitalPlatform.OPAC.Server
         // 是否在配置的订购库名之列?
         public bool IsOrderDbName(string strOrderDbName)
         {
-            // 2008/10/16 new add
+            // 2008/10/16
             if (String.IsNullOrEmpty(strOrderDbName) == true)
                 return false;
 
@@ -293,7 +293,7 @@ namespace DigitalPlatform.OPAC.Server
         }
 
         // 是否在配置的评注库名之列?
-        // 2008/12/8 new add
+        // 2008/12/8
         public bool IsCommentDbName(string strCommentDbName)
         {
             if (String.IsNullOrEmpty(strCommentDbName) == true)
@@ -596,7 +596,7 @@ strDbName2);
 
         // 根据评注库名, 找到对应的书目库名
         // 注意，返回1的时候，strBiblioDbName也有可能为空
-        // 2009/10/18 new add
+        // 2009/10/18
         // return:
         //      -1  出错
         //      0   没有找到
@@ -635,7 +635,7 @@ strDbName2);
 
         // 根据订购库名, 找到对应的书目库名
         // 注意，返回1的时候，strBiblioDbName也有可能为空
-        // 2008/8/28 new add
+        // 2008/8/28
         // return:
         //      -1  出错
         //      0   没有找到
@@ -674,7 +674,7 @@ strDbName2);
 
         // 根据期库名, 找到对应的书目库名
         // 注意，返回1的时候，strBiblioDbName也有可能为空
-        // 2009/2/2 new add
+        // 2009/2/2
         // return:
         //      -1  出错
         //      0   没有找到
@@ -851,13 +851,13 @@ strDbName2);
         public string BiblioDbSyntax = "";  // 书目库MARC语法
 
         public string IssueDbName = ""; // 期库
-        public string OrderDbName = ""; // 订购库 2007/11/27 new add
-        public string CommentDbName = "";   // 评注库 2008/12/8 new add
+        public string OrderDbName = ""; // 订购库 2007/11/27
+        public string CommentDbName = "";   // 评注库 2008/12/8
 
-        public string UnionCatalogStyle = "";   // 联合编目特性 905  // 2007/12/15 new add
+        public string UnionCatalogStyle = "";   // 联合编目特性 905  // 2007/12/15
 
-        public bool InCirculation = true;   // 2008/6/4 new add
+        public bool InCirculation = true;   // 2008/6/4
 
-        public string Role = "";    // 角色 biblioSource/orderWork // 2009/10/23 new add
+        public string Role = "";    // 角色 biblioSource/orderWork // 2009/10/23
     }
 }

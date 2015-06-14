@@ -47,7 +47,7 @@ namespace dp2Catalog
                 && this.dp2ResTree1.cfgCache == null)
                 this.dp2ResTree1.cfgCache = this.MainForm.cfgCache;
 
-            tabControl_main_SelectedIndexChanged(null, null);   // 2007/10/11 new add
+            tabControl_main_SelectedIndexChanged(null, null);   // 2007/10/11
         }
 
         private void SaveRecordDlg_FormClosed(object sender, FormClosedEventArgs e)

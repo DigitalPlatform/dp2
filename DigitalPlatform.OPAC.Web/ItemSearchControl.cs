@@ -915,7 +915,7 @@ namespace DigitalPlatform.OPAC.Web
                     }
                     else
                     {
-                        strTargetList = StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom); // 2007/9/14 new add
+                        strTargetList = StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom); // 2007/9/14
                     }
 
                     if (String.IsNullOrEmpty(strTargetList) == true)
@@ -932,7 +932,7 @@ namespace DigitalPlatform.OPAC.Web
                         + "'><item><word>"
                         + StringUtil.GetXmlStringSimple(strWord)
                         + "</word><match>"
-                        + StringUtil.GetXmlStringSimple(strMatchStyle) // 2007/9/14 new add
+                        + StringUtil.GetXmlStringSimple(strMatchStyle) // 2007/9/14
                         + "</match><relation>=</relation><dataType>string</dataType>"
                         + "<maxCount>" + nMaxCount.ToString() + "</maxCount>"
                         + (bDesc == true ? "<order>DESC</order>" : "")
@@ -1077,7 +1077,7 @@ namespace DigitalPlatform.OPAC.Web
                     }
                     else
                     {
-                        strTargetList = StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom); // 2007/9/14 new add
+                        strTargetList = StringUtil.GetXmlStringSimple(strDbName + ":" + strFrom); // 2007/9/14
                     }
 
                     if (String.IsNullOrEmpty(strTargetList) == true)
@@ -1101,7 +1101,7 @@ namespace DigitalPlatform.OPAC.Web
                         + "'><item><word>"
                         + StringUtil.GetXmlStringSimple(strWord)
                         + "</word><match>"
-                        + StringUtil.GetXmlStringSimple(strMatchStyle) // 2007/9/14 new add
+                        + StringUtil.GetXmlStringSimple(strMatchStyle) // 2007/9/14
                         + "</match><relation>=</relation><dataType>string</dataType>"
                         + "<maxCount>" + nMaxCount.ToString() + "</maxCount></item><lang>zh</lang></target>";
                 }
@@ -1194,7 +1194,7 @@ namespace DigitalPlatform.OPAC.Web
                 return; // 不能优化。优化后语言变化的时候不能刷新 2009/6/17
              * */
 
-            list.Items.Clear(); // 2009/6/17 new add
+            list.Items.Clear(); // 2009/6/17
 
             // 匹配方式列是否可见?
             bool bVisible = (this.SearchPanelStyle & SearchPanelStyle.MatchStyleColumn) == SearchPanelStyle.MatchStyleColumn;
@@ -1251,7 +1251,7 @@ namespace DigitalPlatform.OPAC.Web
 
             OpacApplication app = (OpacApplication)this.Page.Application["app"];
 
-            list.Items.Add(this.GetString("quoted_all"));   // <全部> 2007/10/9 new add
+            list.Items.Add(this.GetString("quoted_all"));   // <全部> 2007/10/9
             for (int i = 0; i < app.ItemDbs.Count; i++)
             {
                 ItemDbCfg cfg = app.ItemDbs[i];
@@ -1378,18 +1378,18 @@ string strWrapperClass)
                 DropDownList match = (DropDownList)this.FindControl("match" + i.ToString());
                 Debug.Assert(match != null, "");
 
-                if (this.Page.IsPostBack == false)  // 2008/1/13 new add 防止postback的时候固执地重设为DefaultVisibleMatchStyle
+                if (this.Page.IsPostBack == false)  // 2008/1/13 防止postback的时候固执地重设为DefaultVisibleMatchStyle
                 {
                     if ((this.SearchPanelStyle & SearchPanelStyle.MatchStyleColumn) == SearchPanelStyle.MatchStyleColumn
                         && bSimplest == false)
                     {
-                        // 2007/7/8 new add
+                        // 2007/7/8
                         match.Text = this.DefaultVisibleMatchStyle == "" ? "left" : this.DefaultVisibleMatchStyle;
                     }
                     else
                     {
                         // 列隐藏时候的值
-                        // 2007/7/8 new add
+                        // 2007/7/8
                         match.Text = this.DefaultHiddenMatchStyle == "" ? "left" : this.DefaultHiddenMatchStyle;
                     }
                 }

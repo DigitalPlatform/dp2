@@ -11,7 +11,7 @@ namespace DigitalPlatform.OPAC.Server
     {
         public OpacApplication App = null;
 
-        public string RecPath = ""; // 2009/10/18 new add
+        public string RecPath = ""; // 2009/10/18
 
         public RecordConverter()
         {

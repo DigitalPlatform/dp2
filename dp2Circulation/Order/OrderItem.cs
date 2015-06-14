@@ -156,7 +156,7 @@ namespace dp2Circulation
                 DomUtil.SetElementText(this.RecordDom.DocumentElement,
                     "parent",
                     value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5
             }
         }
 #endif
@@ -196,7 +196,7 @@ namespace dp2Circulation
                 DomUtil.SetElementText(this.RecordDom.DocumentElement,
                     "index",
                     value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5
             }
         }
 
@@ -215,7 +215,7 @@ namespace dp2Circulation
                 DomUtil.SetElementText(this.RecordDom.DocumentElement,
                     "state",
                     value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5
             }
         }
 
@@ -234,7 +234,7 @@ namespace dp2Circulation
                 DomUtil.SetElementText(this.RecordDom.DocumentElement,
                     "catalogNo",
                     value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5
             }
         }
 
@@ -253,7 +253,7 @@ namespace dp2Circulation
                 DomUtil.SetElementText(this.RecordDom.DocumentElement,
                     "seller",
                     value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5
             }
         }
 
@@ -272,7 +272,7 @@ namespace dp2Circulation
                 DomUtil.SetElementText(this.RecordDom.DocumentElement,
                     "source",
                     value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5
             }
         }
 
@@ -291,7 +291,7 @@ namespace dp2Circulation
                 DomUtil.SetElementText(this.RecordDom.DocumentElement,
                     "range",
                     value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5
             }
         }
 
@@ -310,7 +310,7 @@ namespace dp2Circulation
                 DomUtil.SetElementText(this.RecordDom.DocumentElement,
                     "issueCount",
                     value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5
             }
         }
 
@@ -329,7 +329,7 @@ namespace dp2Circulation
                 DomUtil.SetElementText(this.RecordDom.DocumentElement,
                     "copy",
                     value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5
             }
         }
 
@@ -345,7 +345,7 @@ namespace dp2Circulation
             set
             {
                 DomUtil.SetElementText(this.RecordDom.DocumentElement, "price", value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5
             }
         }
 
@@ -364,7 +364,7 @@ namespace dp2Circulation
                 DomUtil.SetElementText(this.RecordDom.DocumentElement,
                     "totalPrice",
                     value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5
             }
         }
 
@@ -383,7 +383,7 @@ namespace dp2Circulation
                 DomUtil.SetElementText(this.RecordDom.DocumentElement,
                     "orderTime",
                     value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5
             }
         }
 
@@ -402,7 +402,7 @@ namespace dp2Circulation
                 DomUtil.SetElementText(this.RecordDom.DocumentElement,
                     "orderID",
                     value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5
             }
         }
 
@@ -422,7 +422,7 @@ namespace dp2Circulation
                 DomUtil.SetElementText(this.RecordDom.DocumentElement,
                     "distribute",
                     value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5
             }
         }
 
@@ -441,7 +441,7 @@ namespace dp2Circulation
                 DomUtil.SetElementText(this.RecordDom.DocumentElement,
                     "class",
                     value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5
             }
         }
 
@@ -460,7 +460,7 @@ namespace dp2Circulation
                 DomUtil.SetElementText(this.RecordDom.DocumentElement,
                     "comment",
                     value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5
             }
         }
 
@@ -479,7 +479,7 @@ namespace dp2Circulation
                 DomUtil.SetElementText(this.RecordDom.DocumentElement,
                     "batchNo",
                     value);
-                this.Changed = true; // 2009/3/5 new add
+                this.Changed = true; // 2009/3/5
             }
         }
 
@@ -646,7 +646,7 @@ namespace dp2Circulation
 
             // this.Initial();
 
-            this.Changed = false;   // 2009/3/5 new add
+            this.Changed = false;   // 2009/3/5
             this.ItemDisplayState = ItemDisplayState.Normal;
 
             // this.RefreshListView();
@@ -692,7 +692,7 @@ namespace dp2Circulation
             {
                 m_bChanged = value;
 
-                // 2009/3/5 new add
+                // 2009/3/5
                 if ((this.ItemDisplayState == ItemDisplayState.Normal)
                     && this.m_bChanged == true)
                     this.ItemDisplayState = ItemDisplayState.Changed;
@@ -716,7 +716,7 @@ namespace dp2Circulation
             /*
             item.SubItems.Add(this.ErrorInfo);
             item.SubItems.Add(this.State);
-            item.SubItems.Add(this.CatalogNo);  // 2008/8/31 new add
+            item.SubItems.Add(this.CatalogNo);  // 2008/8/31
             item.SubItems.Add(this.Seller);
 
             item.SubItems.Add(this.Source);
@@ -736,7 +736,7 @@ namespace dp2Circulation
             item.SubItems.Add(this.Comment);
             item.SubItems.Add(this.BatchNo);
 
-            item.SubItems.Add(this.SellerAddress);  // 2009/2/13 new add
+            item.SubItems.Add(this.SellerAddress);  // 2009/2/13
 
             item.SubItems.Add(this.RefID);  // 2010/3/15
             item.SubItems.Add(this.RecPath);
@@ -921,7 +921,7 @@ strOrderTime);
                 Debug.Assert(false, "ItemDisplayState.Normal◊¥Ã¨∫ÕChanged == true√¨∂‹¡À");
             }
             else if ((this.ItemDisplayState == ItemDisplayState.Changed)
-                && this.Changed == false) // 2009/3/5 new add
+                && this.Changed == false) // 2009/3/5
             {
                 Debug.Assert(false, "ItemDisplayState.Changed◊¥Ã¨∫ÕChanged == false√¨∂‹¡À");
             }
@@ -995,7 +995,7 @@ strOrderTime);
                 this.State);
             ListViewUtil.ChangeItemText(item, 
                 COLUMN_CATALOGNO,
-                this.CatalogNo);   // 2008/8/31 new add
+                this.CatalogNo);   // 2008/8/31
             ListViewUtil.ChangeItemText(item, 
                 COLUMN_SELLER,
                 this.Seller);
@@ -1031,7 +1031,7 @@ strOrderTime);
                 this.Distribute);
             ListViewUtil.ChangeItemText(item,
                 COLUMN_CLASS,
-                this.Class);  // 2008/8/31 new add
+                this.Class);  // 2008/8/31
 
             ListViewUtil.ChangeItemText(item, 
                 COLUMN_COMMENT,
@@ -1127,7 +1127,7 @@ strOrderTime);
             return 0;
         }
 
-        // 2008/11/28 new add
+        // 2008/11/28
         public List<string> GetParentIDs()
         {
             List<string> results = new List<string>();

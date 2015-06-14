@@ -142,7 +142,7 @@ namespace DigitalPlatform.CirculationClient
             return null;
         }
 
-        // 2007/9/14 new add
+        // 2007/9/14
         public dp2Server GetServerByName(string strServerName)
         {
             dp2Server server = null;

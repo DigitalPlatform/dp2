@@ -1805,7 +1805,7 @@ out strError);
 
         }
 
-        public event AsyncGetImageEventHandler AsyncGetImage = null;
+        // public event AsyncGetImageEventHandler AsyncGetImage = null;
         // bool CoverImageRequested = false; // 如果为 true ,表示已经请求了异步获取图像，不要重复请求
 
         // 准备特定浏览行的封面图像

@@ -100,7 +100,7 @@ namespace dp2Circulation
                 handle = IntPtr.Zero;
                  * */
 
-                try // 2008/11/28 new add
+                try // 2008/11/28
                 {
                     this.FreeResources();
                 }

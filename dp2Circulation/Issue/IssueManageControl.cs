@@ -1127,7 +1127,7 @@ namespace dp2Circulation
 
             if (TreeView.SelectedNode != curSelectedNode)
             {
-                UpdateTreeNodeInfo();   // 2009/1/6 new add
+                UpdateTreeNodeInfo();   // 2009/1/6
 
                 TreeView.SelectedNode = curSelectedNode;
 
@@ -1512,7 +1512,7 @@ namespace dp2Circulation
                     }
                     catch (Exception ex)
                     {
-                        // 2009/2/8 new add
+                        // 2009/2/8
                         strError = "在获得日期 '" + ref_item.PublishTime + "' 的后一期出版日期时发生错误: " + ex.Message;
                         goto ERROR1;
                     }
@@ -1527,7 +1527,7 @@ namespace dp2Circulation
 
                     // 号码自动增量需要知道一个期是否跨年，可以通过查询采购信息得到一年所订阅的期数
                     if (nRefIssue >= nIssueCount
-                        && nIssueCount > 0) // 2010/3/3 new add
+                        && nIssueCount > 0) // 2010/3/3
                     {
                         // 跨年了
                         strNextIssue = "1";
@@ -1684,7 +1684,7 @@ namespace dp2Circulation
                 }
                 catch (Exception ex)
                 {
-                    // 2009/2/8 new add
+                    // 2009/2/8
                     strError = "在获得日期 '" + ref_item.PublishTime + "' 的后一期出版日期时发生错误: " + ex.Message;
                     goto ERROR1;
                 }
@@ -1693,7 +1693,7 @@ namespace dp2Circulation
 
                 // 号码自动增量需要知道一个期是否跨年，可以通过查询采购信息得到一年所订阅的期数
                 if (nRefIssue >= nIssueCount
-                    && nIssueCount > 0) // 2010/3/3 new add
+                    && nIssueCount > 0) // 2010/3/3
                 {
                     // 跨年了
                     dlg.Issue = "1";

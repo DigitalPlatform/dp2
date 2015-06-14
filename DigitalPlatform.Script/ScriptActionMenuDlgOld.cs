@@ -204,7 +204,7 @@ namespace DigitalPlatform.Script
                 {
 					item.Selected = true;
 
-                    // 2009/2/24 new add
+                    // 2009/2/24
                     if (first_item == null)
                         first_item = item;
                 }
@@ -212,7 +212,7 @@ namespace DigitalPlatform.Script
 				listView1.Items.Add(item);
 			}
 
-            // 2009/2/24 new add
+            // 2009/2/24
             if (first_item != null)
             {
                 listView1.FocusedItem = first_item;

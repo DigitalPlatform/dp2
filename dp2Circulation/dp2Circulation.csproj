@@ -68,6 +68,7 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
     <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
     <DocumentationFile>bin\Debug\dp2Circulation_codeComment.XML</DocumentationFile>
+    <NoWarn>1591</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -177,6 +178,12 @@
     </Compile>
     <Compile Include="Charging\QuickChargingForm.Designer.cs">
       <DependentUpon>QuickChargingForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Charging\ReservationListForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Charging\ReservationListForm.Designer.cs">
+      <DependentUpon>ReservationListForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Charging\SelectItemDialog.cs">
       <SubType>Form</SubType>
@@ -1353,6 +1360,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Charging\QuickChargingForm.resx">
       <DependentUpon>QuickChargingForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Charging\ReservationListForm.resx">
+      <DependentUpon>ReservationListForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Charging\SelectItemDialog.resx">
       <DependentUpon>SelectItemDialog.cs</DependentUpon>
@@ -2546,6 +2556,10 @@
     <ProjectReference Include="..\DigitalPlatform.Text\DigitalPlatform.Text.csproj">
       <Project>{26F96CC3-A4A9-4BC4-A10A-BC7E25581FF6}</Project>
       <Name>DigitalPlatform.Text</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.XmlEditor\DigitalPlatform.XmlEditor.csproj">
+      <Project>{A70527A4-10CC-4959-9409-3E51EB8C7A39}</Project>
+      <Name>DigitalPlatform.XmlEditor</Name>
     </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.Xml\DigitalPlatform.Xml.csproj">
       <Project>{E6489E89-1349-4EE7-A00B-AC96B9912587}</Project>

@@ -593,7 +593,7 @@ namespace DigitalPlatform.DTLP
 
 			param.ParaLong(m_nResultMaxLen);
 		
-			m_lErrno = 0;	// new add
+			m_lErrno = 0;	//
 			lRet = param.ParaToPackage(FUNC_CHDIR,
 				m_lErrno,
 				out baSendBuffer);
@@ -917,7 +917,7 @@ namespace DigitalPlatform.DTLP
 					if (this.Container.HasAskAccountInfoEventHandler == false)
 						return nRet;	// 无法获取账户信息，因此只好把错误上交
 
-                    // 2007/7/5 new add
+                    // 2007/7/5
                     if (nRedoCount > 10)
                         return nRet;	// 无法获取账户信息，因此只好把错误上交
 
@@ -2609,7 +2609,7 @@ namespace DigitalPlatform.DTLP
 				s += 4;
 
 				//*((long *)(lpResult+t)) = lBaoLen;
-				baResult = ByteArray.EnsureSize( baResult, t + 4);	// new add
+				baResult = ByteArray.EnsureSize( baResult, t + 4);	//
 				SetInt32Value(lBaoLen,
 					baResult, 
 					t);

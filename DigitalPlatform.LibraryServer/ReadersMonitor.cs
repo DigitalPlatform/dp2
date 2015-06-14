@@ -38,7 +38,7 @@ namespace DigitalPlatform.LibraryServer
         public override void Worker()
         {
             // 系统挂起的时候，不运行本线程
-            // 2007/12/18 new add
+            // 2007/12/18
             if (this.App.HangupReason == HangupReason.LogRecover)
                 return;
             // 2012/2/4
@@ -610,7 +610,7 @@ namespace DigitalPlatform.LibraryServer
             } // end of for
 
             // 刷新以停代金情况
-            // 2007/12/17 new add
+            // 2007/12/17
             if (StringUtil.IsInList("pauseBorrowing", this.App.OverdueStyle) == true)
             {
                 //
@@ -654,7 +654,7 @@ namespace DigitalPlatform.LibraryServer
                     // 时间戳冲突
                     if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
                     {
-                        if (nRedoCount > 10)    // 2008/5/27 new add
+                        if (nRedoCount > 10)    // 2008/5/27
                         {
                             strError = "ReadersMonitor 写回读者库记录 '" + strPath + "' 时发生时间戳冲突，重试10次后仍发生时间戳冲突: " + strError;
                             return -1;
@@ -1129,7 +1129,7 @@ namespace DigitalPlatform.LibraryServer
                     //      -1  数据格式错误
                     //      0   没有发现超期
                     //      1   发现超期   strError中有提示信息
-                    //      2   已经在宽限期内，很容易超期 2009/3/13 new add
+                    //      2   已经在宽限期内，很容易超期 2009/3/13
                     nRet = app.CheckPeriod(
                         calendar,
                         strBorrowDate,

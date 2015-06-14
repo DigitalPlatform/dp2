@@ -67,7 +67,7 @@ namespace DigitalPlatform.OPAC.Server
                     this.CommentColumn = new ColumnStorage();
                 else
                 {
-                    // 2006/7/6 new add
+                    // 2006/7/6
                     string strTemp1;
                     string strTemp2;
                     this.CommentColumn.Detach(out strTemp1,

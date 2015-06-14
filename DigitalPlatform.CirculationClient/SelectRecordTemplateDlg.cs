@@ -13,7 +13,7 @@ namespace DigitalPlatform.CirculationClient
 {
 	/// <summary>
     /// 选择新记录模板名的对话框
-    /// 本对话框根据一个xml模板文件，列出其中<template>元素的name属性值，让用户选择，
+    /// 本对话框根据一个xml模板文件，列出其中 template 元素的name属性值，让用户选择，
 	/// 最后对话框将选择的元素以及其下全部元素创建一个新的xml文档(字符串形式).
 	/// 本对话框不负责从服务获得文件。
 	/// </summary>
@@ -22,7 +22,7 @@ namespace DigitalPlatform.CirculationClient
         const int WM_AUTO_CLOSE = API.WM_USER + 200;
         public bool AutoClose = false;  // 对话框口打开后立即关闭?
 
-        // 2008/6/24 new add
+        // 2008/6/24
         public bool SaveMode = false;   // 是否为保存模式？
 
 		public ApplicationInfo ap = null;	// 引用
@@ -313,6 +313,9 @@ namespace DigitalPlatform.CirculationClient
 
 		void FillList(bool bAutoSelect)
 		{
+            // 2015/6/14
+            string strExistName = this.textBox_name.Text;
+
 			listView1.Items.Clear();
 			listView1_SelectedIndexChanged(null, null);
 
@@ -324,19 +327,22 @@ namespace DigitalPlatform.CirculationClient
 				string strComment =  DomUtil.GetAttr(nodes[i], "comment");
 
 				ListViewItem item = new ListViewItem(strName, 0);
+				item.SubItems.Add(strComment);
 
 				listView1.Items.Add(item);
 
-				item.SubItems.Add(strComment);
+                if (bAutoSelect == true
+                    && string.IsNullOrEmpty(strExistName) == false
+                    && strName == strExistName)
+                    item.Selected = true;
 			}
 
-			// 选择第一项
-			if (bAutoSelect == true) 
-			{
-				if (listView1.Items.Count != 0)
-					listView1.Items[0].Selected = true;
-			}
-
+            if (bAutoSelect == true && listView1.SelectedItems.Count == 0)
+            {
+                // 选择第一项
+                    if (listView1.Items.Count != 0)
+                        listView1.Items[0].Selected = true;
+            }
 		}
 
 		private void button_OK_Click(object sender, System.EventArgs e)

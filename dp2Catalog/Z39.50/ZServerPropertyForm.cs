@@ -23,7 +23,7 @@ namespace dp2Catalog
         public XmlNode XmlNode = null;  // 服务器XML节点
         public string InitialResultInfo = "";
 
-        public MainForm MainForm = null; // 2007/12/16 new add
+        public MainForm MainForm = null; // 2007/12/16
 
         public ZServerPropertyForm()
         {

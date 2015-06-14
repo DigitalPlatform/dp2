@@ -614,7 +614,7 @@ namespace DigitalPlatform.GUI
             if (col == 0)
                 return item.Text;
 
-            // 2008/5/14 new add。否则会抛出异常
+            // 2008/5/14。否则会抛出异常
             if (col >= item.SubItems.Count)
                 return "";
 
@@ -652,7 +652,7 @@ namespace DigitalPlatform.GUI
             item.SubItems[col].Text = strText;
         }
 
-        // 2009/10/21 new add
+        // 2009/10/21
         // 获得一个行的值。即把各个单元的值用\t字符连接起来
         public static string GetLineText(ListViewItem item)
         {
@@ -716,7 +716,7 @@ namespace DigitalPlatform.GUI
         }
 
         // 选择一行
-        // 2008/9/9 new add
+        // 2008/9/9
         // parameters:
         //		bMoveFocus	是否同时移动focus标志到所选择行
         public static void SelectLine(ListViewItem item,

@@ -1042,10 +1042,10 @@ namespace DigitalPlatform.LibraryServer
         public string Type = "";    // 账户类型
 
         [DataMember]
-        public string LibraryCode = ""; // 图书馆代码 2007/12/15 new add
+        public string LibraryCode = ""; // 图书馆代码 2007/12/15 
 
         [DataMember]
-        public string Access = "";  // 关于存取权限的定义 2008/2/28 new add
+        public string Access = "";  // 关于存取权限的定义 2008/2/28 
 
         [DataMember]
         public string Comment = "";  // 注释 2012/10/8

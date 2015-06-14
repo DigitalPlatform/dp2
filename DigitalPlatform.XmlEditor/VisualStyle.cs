@@ -555,9 +555,9 @@ namespace DigitalPlatform.Xml
 		object cTextColor = null;
 
 		DpFont refFont = null;
-		Border refBorder = null;
+		XmlBorder refBorder = null;
 		DpFont innerFont = null;
-		Border innerBorder = null;
+		XmlBorder innerBorder = null;
 
 		string strBelongName = null;
 		ArrayList belongList = null;	// ¼Ì³ÐµÄ·ç¸ñ
@@ -1340,11 +1340,11 @@ namespace DigitalPlatform.Xml
 	{
 		public ArrayList parallelNodes = new ArrayList ();
 
-		public Border this[int index]
+		public XmlBorder this[int index]
 		{
 			get 
 			{
-				return (Border)InnerList[index];
+				return (XmlBorder)InnerList[index];
 			}
 			set
 			{
@@ -1352,7 +1352,7 @@ namespace DigitalPlatform.Xml
 			}
 		}
 
-		public void Add(Border item)
+		public void Add(XmlBorder item)
 		{
 			InnerList.Add(item);
 		}
@@ -1362,7 +1362,7 @@ namespace DigitalPlatform.Xml
 			XmlNodeList nodeList = root.SelectNodes("//border");
 			for(int i=0;i<nodeList.Count ;i++)
 			{
-				Border border = new Border();
+				XmlBorder border = new XmlBorder();
 				border.CreateBy (nodeList[i]);
 
 				this.Add (border);
@@ -1374,9 +1374,9 @@ namespace DigitalPlatform.Xml
 			}
 		}
 
-		public Border GetBorder (string strBorderName)
+		public XmlBorder GetBorder (string strBorderName)
 		{
-			foreach(Border border in this)
+			foreach(XmlBorder border in this)
 			{
 				if (border.strName == strBorderName)
 					return border;
@@ -1384,7 +1384,7 @@ namespace DigitalPlatform.Xml
 			return null;
 		}
 
-		public Border GetBorder (XmlNode nodeBorder)
+		public XmlBorder GetBorder (XmlNode nodeBorder)
 		{
 			for(int i=0;i<parallelNodes.Count ;i++)
 			{
@@ -1398,7 +1398,7 @@ namespace DigitalPlatform.Xml
 		public string Dump()
 		{
 			string strInfo = "";
-			foreach(Border border in this)
+			foreach(XmlBorder border in this)
 			{
 				strInfo += border.Dump ();
 			}
@@ -1407,7 +1407,7 @@ namespace DigitalPlatform.Xml
 
 	}
 
-	public class Border
+	public class XmlBorder
 	{
 		public string strName = null;
 
@@ -1421,7 +1421,7 @@ namespace DigitalPlatform.Xml
 
 		public object color = null ;   //Color
 
-		public Border ()
+		public XmlBorder ()
 		{
 		}
 

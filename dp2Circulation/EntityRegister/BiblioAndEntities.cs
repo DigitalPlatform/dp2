@@ -2100,7 +2100,7 @@ MessageBoxDefaultButton.Button2);
                     if (bookitem.ErrorInfo == "")
                     {
                         this.Items.PhysicalDeleteItem(bookitem);
-                        i--;    // 2007/4/12 new add
+                        i--;    // 2007/4/12 
                     }
                 }
             }

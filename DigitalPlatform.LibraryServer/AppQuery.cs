@@ -80,6 +80,11 @@ namespace DigitalPlatform.LibraryServer
                 for (int j = 0; j < dbs.Count; j++)
                 {
                     Db db = dbs[j];
+
+                    // 允许预约到书库 2015/6/14
+                    if (db.DbName == this.ArrivedDbName)
+                        continue;
+
                     string strBiblioDbName = "";
                     string strDbType = this.GetDbType(db.DbName,
                         out strBiblioDbName);

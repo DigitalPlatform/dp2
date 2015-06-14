@@ -396,7 +396,7 @@ namespace dp2Circulation
             string strBarcode = this.entityEditControl_editing.Barcode;
 
             // 检查册条码号形式是否合法
-            if (String.IsNullOrEmpty(strBarcode) == false   // 2009/2/23 new add
+            if (String.IsNullOrEmpty(strBarcode) == false   // 2009/2/23 
                 && this.EntityControl != null
                 && this.EntityControl.NeedVerifyItemBarcode == true)
             {
@@ -463,7 +463,7 @@ namespace dp2Circulation
             string strBarcode = this.entityEditControl_editing.Barcode;
 
             // 检查册条码号形式是否合法
-            if (String.IsNullOrEmpty(strBarcode) == false   // 2009/2/23 new add
+            if (String.IsNullOrEmpty(strBarcode) == false   // 2009/2/23 
                 && this.EntityControl != null
                 && this.EntityControl.NeedVerifyItemBarcode == true)
             {
@@ -744,7 +744,7 @@ namespace dp2Circulation
             // 如果这里不检查，可否在提交保存的时候，先查完本种之类的重复，才真正向服务器提交?
             if (this.checkBox_autoSearchDup.Checked == true
                 && this.EntityControl != null
-                && String.IsNullOrEmpty(this.entityEditControl_editing.Barcode) == false)   // 2008/11/3 new add 不检查空的条码号是否重复
+                && String.IsNullOrEmpty(this.entityEditControl_editing.Barcode) == false)   // 2008/11/3 不检查空的条码号是否重复
             {
                 // Debug.Assert(false, "");
                 // 条码查重
@@ -797,7 +797,7 @@ namespace dp2Circulation
             // 如果这里不检查，可否在提交保存的时候，先查完本种之类的重复，才真正向服务器提交?
             if (this.checkBox_autoSearchDup.Checked == true
                 && this.EntityControl != null
-                && String.IsNullOrEmpty(this.entityEditControl_editing.Barcode) == false)   // 2008/11/3 new add 不检查空的条码号是否重复
+                && String.IsNullOrEmpty(this.entityEditControl_editing.Barcode) == false)   // 2008/11/3 不检查空的条码号是否重复
             {
                 // Debug.Assert(false, "");
                 // 条码查重
@@ -1237,7 +1237,7 @@ namespace dp2Circulation
                     break;
                 case "RefID":
                     Console.Beep();
-                    // this.entityEditControl_editing.RefID = bookitem.RefID;  // 2009/6/2 new add
+                    // this.entityEditControl_editing.RefID = bookitem.RefID;  // 2009/6/2
                     break;
                 default:
                     Debug.Assert(false, "未知的栏目名称 '" +e.Name+ "'");

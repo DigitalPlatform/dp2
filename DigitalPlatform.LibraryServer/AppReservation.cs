@@ -142,7 +142,6 @@ namespace DigitalPlatform.LibraryServer
                     }
                 }
 
-
                 XmlDocument readerdom = null;
                 nRet = LibraryApplication.LoadToDom(strReaderXml,
                     out readerdom,
@@ -204,7 +203,6 @@ namespace DigitalPlatform.LibraryServer
                     }
                 }
 
-
                 // 准备日志DOM
                 XmlDocument domOperLog = new XmlDocument();
                 domOperLog.LoadXml("<root />");
@@ -212,7 +210,6 @@ namespace DigitalPlatform.LibraryServer
     "libraryCode",
     strLibraryCode);    // 读者所在的馆代码
                 DomUtil.SetElementText(domOperLog.DocumentElement, "operation", "reservation");
-
 
                 if (String.Compare(strFunction, "new", true) == 0)
                 {
@@ -241,7 +238,6 @@ namespace DigitalPlatform.LibraryServer
                         return result;
                     }
                 } // end of "new"
-
 
                 // 为写回读者、册记录做准备
                 // byte[] timestamp = null;
@@ -777,7 +773,7 @@ namespace DigitalPlatform.LibraryServer
                 if (String.IsNullOrEmpty(strBorrower) == true
                     && nodesRequest.Count == 0)
                 {
-                    // 2009/10/19 new add
+                    // 2009/10/19 
                     // 状态为“加工中”
                     if (IncludeStateProcessing(strState) == true
                         && this.CanReserveOnshelf == false)
@@ -1322,7 +1318,7 @@ namespace DigitalPlatform.LibraryServer
                 DomUtil.SetAttr(readerRequestNode, "state", "arrived");
                 // 到达时间
                 DomUtil.SetAttr(readerRequestNode, "arrivedDate", this.Clock.GetClock());
-                // 实际到达的一个册条码号 2007/1/18 new add
+                // 实际到达的一个册条码号 2007/1/18 
                 DomUtil.SetAttr(readerRequestNode, "arrivedItemBarcode", strItemBarcodeParam);
 
                 // 写回读者记录
@@ -1525,7 +1521,7 @@ namespace DigitalPlatform.LibraryServer
                     this.WriteErrorLog("在还书操作中，加入新预约到书记录前, 删除已存在的预约到书库记录 '" + strOutputPath + "' 出错: " + strError);
                 }
 
-                DeletedNotifyRecPaths.Add(strOutputPath);    // 记忆已经被删除的记录路径 2007/7/5 new add
+                DeletedNotifyRecPaths.Add(strOutputPath);    // 记忆已经被删除的记录路径 2007/7/5 
 
                 goto REDODELETE;    // 如果有多条，循环删除
             }
@@ -1615,7 +1611,7 @@ namespace DigitalPlatform.LibraryServer
                 out strError);
             if (lRet == -1)
             {
-                // 写入错误日志 2007/1/3 new add
+                // 写入错误日志 2007/1/3 
                 this.WriteErrorLog("创建新的预约到书队列记录时出错: " + strError);
                 return -1;
             }
@@ -2119,7 +2115,7 @@ namespace DigitalPlatform.LibraryServer
 
             // 4) 删除当前通知记录
 
-            // 2007/7/5 new add
+            // 2007/7/5 
             bool bAlreadeDeleted = false;
             if (DeletedNotifyRecPaths != null)
             {

@@ -2817,7 +2817,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
                 "printclaim_printoption");
 
             macro_table["%seller%"] = GetPureSellerName(seller.Seller); // 渠道名
-            macro_table["%selleraddress%"] = strAddressText;    // 2009/9/17 new add
+            macro_table["%selleraddress%"] = strAddressText;    // 2009/9/17
             macro_table["%libraryname%"] = this.MainForm.LibraryName;
             /*
             macro_table["%pagecount%"] = nPageCount.ToString();
@@ -3232,7 +3232,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             }
         }
 
-        // 2009/10/10 new add
+        // 2009/10/10
         // 获得css文件的路径(或者http:// 地址)。将根据是否具有“统计页”来自动处理
         // parameters:
         //      strDefaultCssFileName   “css”模板缺省情况下，将采用的虚拟目录中的css文件名，纯文件名
@@ -3259,7 +3259,7 @@ this.radioButton_inputStyle_orderRecPathFile.Checked);
             string strCssUrl = GetAutoCssUrl(option, "printclaim.css");
 
             /*
-            // 2009/10/9 new add
+            // 2009/10/9
             string strCssFilePath = option.GetTemplatePageFilePath("css");  // 大小写不敏感
             if (String.IsNullOrEmpty(strCssFilePath) == false)
                 strCssUrl = strCssFilePath;

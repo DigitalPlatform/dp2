@@ -167,7 +167,7 @@ namespace DigitalPlatform.OPAC.Web
             //      null    xml文件不存在，或者<borrowInfoControl>元素不存在
             string strColumnStyle = GetColumnStyle(app);
             if (strColumnStyle == null)
-                strColumnStyle = "";    // 2009/11/23 new add 防止ToLower()抛出异常
+                strColumnStyle = "";    // 2009/11/23 防止ToLower()抛出异常
             if (strColumnStyle.ToLower() == "style1")
             {
                 // 新风格，将是否超期栏目修改为“应还日期”栏目
@@ -395,7 +395,7 @@ namespace DigitalPlatform.OPAC.Web
             //      null    xml文件不存在，或者<borrowInfoControl>元素不存在
             string strColumnStyle = GetColumnStyle(app);
             if (strColumnStyle == null)
-                strColumnStyle = "";    // 2009/11/23 new add 防止ToLower()抛出异常
+                strColumnStyle = "";    // 2009/11/23 防止ToLower()抛出异常
 
             // 借阅的册
             PlaceHolder borrowinfo = (PlaceHolder)this.FindControl("borrowinfo");

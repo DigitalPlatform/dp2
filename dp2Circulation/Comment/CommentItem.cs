@@ -780,7 +780,7 @@ this.LibraryCode);
                 Debug.Assert(false, "ItemDisplayState.Normal◊¥Ã¨∫ÕChanged == true√¨∂‹¡À");
             }
             else if ((this.ItemDisplayState == ItemDisplayState.Changed)
-                && this.Changed == false) // 2009/3/5 new add
+                && this.Changed == false) // 2009/3/5 
             {
                 Debug.Assert(false, "ItemDisplayState.Changed◊¥Ã¨∫ÕChanged == false√¨∂‹¡À");
             }

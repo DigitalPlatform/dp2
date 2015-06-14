@@ -24,7 +24,7 @@ namespace DigitalPlatform.DTLP
 
 			appinfo = appInfoParam;	// 保存下来备用
 
-            if (appInfoParam == null)   // 2006/11/21 new add
+            if (appInfoParam == null)   // 2006/11/21
                 return 0;
 
 			ArrayList saHost = LoadHosts(appInfoParam);
@@ -395,11 +395,11 @@ namespace DigitalPlatform.DTLP
 
                 stream.Write(baPackage, 0, nLen);
             }
-            catch (Exception /*ex*/)  // 2006/11/13 new add
+            catch (Exception /*ex*/)  // 2006/11/13
             {
                 nErrorNo = DtlpChannel.GL_SEND;
 
-                // 2008/10/7 new add
+                // 2008/10/7
                 if (client != null)
                 {
                     client.Close();
@@ -483,7 +483,7 @@ namespace DigitalPlatform.DTLP
             {
                 nErrorNo = DtlpChannel.GL_SEND;
 
-                // 2008/10/7 new add
+                // 2008/10/7
                 if (client != null)
                 {
                     client.Close();
@@ -560,7 +560,7 @@ namespace DigitalPlatform.DTLP
 					l = IPAddress.NetworkToHostOrder((Int32)l);
 					nLen = (int)l;
 
-                    if (nLen >= (1000 * 1024))  // 2006/11/26 new add
+                    if (nLen >= (1000 * 1024))  // 2006/11/26
                     {
                         // 长度位出现异常
                         goto ERROR1;
@@ -690,7 +690,7 @@ namespace DigitalPlatform.DTLP
                     l = IPAddress.NetworkToHostOrder((Int32)l);
                     nLen = (int)l;
 
-                    if (nLen >= (1000 * 1024))  // 2006/11/26 new add
+                    if (nLen >= (1000 * 1024))  // 2006/11/26
                     {
                         // 长度位出现异常
                         goto ERROR1;
