@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -6,28 +6,28 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using System.Xml;
+using System.Collections;
 
 using DigitalPlatform.Xml;
 using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.Text;
-using System.Collections;
 
-// 2013/3/16 Ìí¼Ó XML ×¢ÊÍ
+// 2013/3/16 æ·»åŠ  XML æ³¨é‡Š
 
 namespace dp2Circulation
 {
     /// <summary>
-    /// ÓÃÓÚÆô¶¯ dp2Library Í¬²½ ºóÌ¨ÈÎÎñ µÄ¶Ô»°¿ò
+    /// ç”¨äºå¯åŠ¨ dp2Library åŒæ­¥ åå°ä»»åŠ¡ çš„å¯¹è¯æ¡†
     /// </summary>
     internal partial class StartReplicationDlg : Form
     {
         /// <summary>
-        /// ºóÌ¨ÈÎÎñÆô¶¯²ÎÊı
+        /// åå°ä»»åŠ¡å¯åŠ¨å‚æ•°
         /// </summary>
         public BatchTaskStartInfo StartInfo = new BatchTaskStartInfo();
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public StartReplicationDlg()
         {
@@ -36,7 +36,7 @@ namespace dp2Circulation
 
         private void StartReplicationDlg_Load(object sender, EventArgs e)
         {
-            // ÆğÊ¼Î»ÖÃ²ÎÊı
+            // èµ·å§‹ä½ç½®å‚æ•°
             long index = 0;
             string strFileName = "";
             string strServer = "";
@@ -67,7 +67,7 @@ namespace dp2Circulation
                 // this.textBox_startIndex.Text = index.ToString();
             }
 
-            // Í¨ÓÃÆô¶¯²ÎÊı
+            // é€šç”¨å¯åŠ¨å‚æ•°
             // string strLevel = "";
             bool bClearFirst = false;
 
@@ -97,17 +97,17 @@ namespace dp2Circulation
             /*
             if (this.comboBox_replicationLevel.Text == "")
             {
-                MessageBox.Show(this, "ÉĞÎ´Ö¸¶¨ Í¬²½¼¶±ğ");
+                MessageBox.Show(this, "å°šæœªæŒ‡å®š åŒæ­¥çº§åˆ«");
                 return;
             }
              * */
 
-            // ºÏ³É²ÎÊı
+            // åˆæˆå‚æ•°
             if (this.tabControl1.SelectedTab == this.tabPage_specDay)
             {
                 if (this.textBox_startFileName.Text == "")
                 {
-                    MessageBox.Show(this, "ÉĞÎ´Ö¸¶¨ ÈÕÖ¾ÎÄ¼şÃû");
+                    MessageBox.Show(this, "å°šæœªæŒ‡å®š æ—¥å¿—æ–‡ä»¶å");
                     return;
                 }
 
@@ -131,7 +131,7 @@ namespace dp2Circulation
                     "");
             }
 
-            // Í¨ÓÃÆô¶¯²ÎÊı
+            // é€šç”¨å¯åŠ¨å‚æ•°
 #if NO
             string strLevel = this.comboBox_replicationLevel.Text;
             int nRet = strLevel.IndexOf('(');
@@ -151,7 +151,7 @@ namespace dp2Circulation
             this.Close();
         }
 
-        // ½âÎö ¿ªÊ¼ ²ÎÊı
+        // è§£æ å¼€å§‹ å‚æ•°
         static int ParseStart(string strStart,
             out long index,
             out string strDate,
@@ -174,7 +174,7 @@ namespace dp2Circulation
             {
                 if (long.TryParse(strIndex, out index) == false)
                 {
-                    strError = "index ²ÎÊıÖµ '" + strIndex + "' ²»ºÏ·¨£¬Ó¦Îª´¿Êı×Ö";
+                    strError = "index å‚æ•°å€¼ '" + strIndex + "' ä¸åˆæ³•ï¼Œåº”ä¸ºçº¯æ•°å­—";
                     return -1;
                 }
             }
@@ -186,7 +186,7 @@ namespace dp2Circulation
             return 0;
         }
 
-        // ¹¹Ôì¿ªÊ¼²ÎÊı£¬Ò²ÊÇ¶Ïµã×Ö·û´®
+        // æ„é€ å¼€å§‹å‚æ•°ï¼Œä¹Ÿæ˜¯æ–­ç‚¹å­—ç¬¦ä¸²
         static string BuildStart(
             string strIndex,
             string strDate,

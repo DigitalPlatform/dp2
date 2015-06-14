@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -9,12 +9,12 @@ using System.Windows.Forms;
 namespace dp2Circulation
 {
     /// <summary>
-    /// OPACÆÕÍ¨Êı¾İ¿â(Ïà¶ÔÓÚĞéÄâ¿â)
+    /// OPACæ™®é€šæ•°æ®åº“(ç›¸å¯¹äºè™šæ‹Ÿåº“)
     /// </summary>
     internal partial class OpacNormalDatabaseDialog : Form
     {
         /// <summary>
-        /// ÏµÍ³¹ÜÀí´°
+        /// ç³»ç»Ÿç®¡ç†çª—
         /// </summary>
         public ManagerForm ManagerForm = null;
 
@@ -51,7 +51,7 @@ namespace dp2Circulation
         {
             if (this.textBox_databaseName.Text == "")
             {
-                MessageBox.Show(this, "ÉĞÎ´Ö¸¶¨Êı¾İ¿âÃû");
+                MessageBox.Show(this, "å°šæœªæŒ‡å®šæ•°æ®åº“å");
                 return;
             }
 
@@ -66,7 +66,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// Êı¾İ¿âÃû¡£ÔÊĞíÊäÈë¶à¸öÊı¾İ¿âÃû£¬¶ººÅ¼ä¸ô
+        /// æ•°æ®åº“åã€‚å…è®¸è¾“å…¥å¤šä¸ªæ•°æ®åº“åï¼Œé€—å·é—´éš”
         /// </summary>
         public string DatabaseName
         {

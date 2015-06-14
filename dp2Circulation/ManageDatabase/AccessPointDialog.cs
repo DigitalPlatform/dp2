@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -16,7 +16,7 @@ namespace dp2Circulation
 {
     internal partial class AccessPointDialog : Form
     {
-        public BiblioDbFromInfo[] DbFromInfos = null;   // ÊéÄ¿¿â¼ìË÷Â·¾¶ĞÅÏ¢
+        public BiblioDbFromInfo[] DbFromInfos = null;   // ä¹¦ç›®åº“æ£€ç´¢è·¯å¾„ä¿¡æ¯
 
 
         public AccessPointDialog()
@@ -36,7 +36,7 @@ namespace dp2Circulation
         {
             comboBox_from.Items.Clear();
 
-            comboBox_from.Items.Add("<È«²¿>");
+            comboBox_from.Items.Add("<å…¨éƒ¨>");
 
             if (this.DbFromInfos == null)
                 return;
@@ -44,7 +44,7 @@ namespace dp2Circulation
             Debug.Assert(this.DbFromInfos != null);
 
             string strFirstItem = "";
-            // ×°Èë¼ìË÷Í¾¾¶
+            // è£…å…¥æ£€ç´¢é€”å¾„
             for (int i = 0; i < this.DbFromInfos.Length; i++)
             {
                 BiblioDbFromInfo info = this.DbFromInfos[i];
@@ -64,19 +64,19 @@ namespace dp2Circulation
 
             if (this.comboBox_fromName.Text == "")
             {
-                strError = "ÉĞÎ´ÊäÈë¼ìË÷Í¾¾¶";
+                strError = "å°šæœªè¾“å…¥æ£€ç´¢é€”å¾„";
                 goto ERROR1;
             }
 
             if (this.textBox_weight.Text == "")
             {
-                strError = "ÉĞÎ´ÊäÈëÈ¨Öµ";
+                strError = "å°šæœªè¾“å…¥æƒå€¼";
                 goto ERROR1;
             }
 
             if (this.tabComboBox_searchStyle.Text == "")
             {
-                strError = "ÉĞÎ´Ö¸¶¨¼ìË÷·½Ê½";
+                strError = "å°šæœªæŒ‡å®šæ£€ç´¢æ–¹å¼";
                 goto ERROR1;
             }
 
@@ -140,7 +140,7 @@ namespace dp2Circulation
                 {
                     if (StringUtil.IsPureNumber(parts[i]) == false)
                     {
-                        MessageBox.Show(this, "È¨Öµ±ØĞëÎª´¿Êı×Ö£¬»òÕß¶ººÅ¼ä¸ôµÄ´¿Êı×Ö");
+                        MessageBox.Show(this, "æƒå€¼å¿…é¡»ä¸ºçº¯æ•°å­—ï¼Œæˆ–è€…é€—å·é—´éš”çš„çº¯æ•°å­—");
                         e.Cancel = true;
                     }
                 }

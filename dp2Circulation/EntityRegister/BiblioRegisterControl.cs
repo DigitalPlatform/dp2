@@ -7,16 +7,17 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
+using System.Collections;
+using System.Xml;
+using System.IO;
+
+using DigitalPlatform;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Text;
 using DigitalPlatform.Marc;
 using DigitalPlatform.GUI;
 using DigitalPlatform.CirculationClient.localhost;
-using System.Collections;
-using System.Xml;
 using DigitalPlatform.Script;
-using System.IO;
-using DigitalPlatform;
 
 #pragma warning disable 1591
 

@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -17,12 +17,12 @@ namespace dp2Circulation
 
         int m_nInInitial = 0;
         /// <summary>
-        /// ÏµÍ³¹ÜÀí´°
+        /// ç³»ç»Ÿç®¡ç†çª—
         /// </summary>
         public ManagerForm ManagerForm = null;
 
-        public bool CreateMode = false; // ÊÇ·ñÎª´´½¨Ä£Ê½£¿==trueÎª´´½¨Ä£Ê½£»==falseÎªĞŞ¸ÄÄ£Ê½
-        public bool Recreate = false;   // ÊÇ·ñÎªÖØĞÂ´´½¨Ä£Ê½£¿µ±CreateMode == true Ê±Æğ×÷ÓÃ
+        public bool CreateMode = false; // æ˜¯å¦ä¸ºåˆ›å»ºæ¨¡å¼ï¼Ÿ==trueä¸ºåˆ›å»ºæ¨¡å¼ï¼›==falseä¸ºä¿®æ”¹æ¨¡å¼
+        public bool Recreate = false;   // æ˜¯å¦ä¸ºé‡æ–°åˆ›å»ºæ¨¡å¼ï¼Ÿå½“CreateMode == true æ—¶èµ·ä½œç”¨
 
         XmlDocument dom = null;
 
@@ -40,7 +40,7 @@ out string strError)
 
             if (String.IsNullOrEmpty(strDatabaseType) == true)
             {
-                strError = "strDatabaseType²ÎÊıÖµ²»ÄÜÎª¿Õ";
+                strError = "strDatabaseTypeå‚æ•°å€¼ä¸èƒ½ä¸ºç©º";
                 return -1;
             }
 
@@ -53,7 +53,7 @@ out string strError)
             }
             catch (Exception ex)
             {
-                strError = "XML×°ÈëDOMÊ±³ö´í: " + ex.Message;
+                strError = "XMLè£…å…¥DOMæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
@@ -61,11 +61,11 @@ out string strError)
                 "type");
             if (strType != this.DatabaseType)
             {
-                strError = "<database>ÔªËØµÄtypeÊôĞÔÖµ('" + strType + "')Ó¦µ±Îª '"+this.DatabaseType+"'";
+                strError = "<database>å…ƒç´ çš„typeå±æ€§å€¼('" + strType + "')åº”å½“ä¸º '"+this.DatabaseType+"'";
                 return -1;
             }
 
-            this.m_nInInitial++;    // ±ÜÃâxxxchangedÏìÓ¦
+            this.m_nInInitial++;    // é¿å…xxxchangedå“åº”
 
             try
             {
@@ -88,7 +88,7 @@ out string strError)
             {
                 if (String.IsNullOrEmpty(this.DatabaseType) == true)
                 {
-                    strError = "ÉĞÎ´Ö¸¶¨DatabaseType²ÎÊı";
+                    strError = "å°šæœªæŒ‡å®šDatabaseTypeå‚æ•°";
                     goto ERROR1;
                 }
             }
@@ -105,7 +105,7 @@ out string strError)
 
             if (this.CreateMode == true)
             {
-                // ´´½¨Ä£Ê½
+                // åˆ›å»ºæ¨¡å¼
                 EnableControls(false);
 
                 try
@@ -122,10 +122,10 @@ out string strError)
                     // type
                     DomUtil.SetAttr(nodeDatabase, "type", this.DatabaseType);
 
-                    // ¿âÃû
+                    // åº“å
                     if (this.textBox_dbName.Text == "")
                     {
-                        strError = "ÉĞÎ´Ö¸¶¨¿âÃû";
+                        strError = "å°šæœªæŒ‡å®šåº“å";
                         goto ERROR1;
                     }
                     nRet = Global.CheckDbName(this.textBox_dbName.Text,
@@ -138,7 +138,7 @@ out string strError)
 
                     strDatabaseInfo = dom.OuterXml;
 
-                    // ´´½¨Êı¾İ¿â
+                    // åˆ›å»ºæ•°æ®åº“
                     nRet = this.ManagerForm.CreateDatabase(
                         strDatabaseInfo,
                         this.Recreate,
@@ -155,7 +155,7 @@ out string strError)
             }
             else
             {
-                // ĞŞ¸ÄÄ£Ê½
+                // ä¿®æ”¹æ¨¡å¼
                 EnableControls(false);
 
                 try
@@ -163,10 +163,10 @@ out string strError)
                     string strDatabaseInfo = "";
                     string strOutputInfo = "";
 
-                    // ĞŞ¸ÄµÄÊı¾İ¿âÃû
+                    // ä¿®æ”¹çš„æ•°æ®åº“å
                     List<string> change_dbnames = new List<string>();
 
-                    // ÓÃÓÚĞŞ¸ÄÃüÁîµÄDOM
+                    // ç”¨äºä¿®æ”¹å‘½ä»¤çš„DOM
                     XmlDocument change_dom = new XmlDocument();
                     change_dom.LoadXml("<root />");
                     XmlNode nodeChangeDatabase = change_dom.CreateElement("database");
@@ -176,18 +176,18 @@ out string strError)
                     DomUtil.SetAttr(nodeChangeDatabase, "type", this.DatabaseType);
 
 
-                    // ¿âÃû
+                    // åº“å
                     string strOldReaderDbName = DomUtil.GetAttr(this.dom.DocumentElement,
                         "name");
 
                     if (String.IsNullOrEmpty(strOldReaderDbName) == false
                         && this.textBox_dbName.Text == "")
                     {
-                        strError = "¿âÃû²»ÄÜĞŞ¸ÄÎª¿Õ";
+                        strError = "åº“åä¸èƒ½ä¿®æ”¹ä¸ºç©º";
                         goto ERROR1;
                     }
 
-                    bool bChanged = false;  // ÊÇ·ñÓĞÊµÖÊĞÔĞŞ¸ÄÃüÁî
+                    bool bChanged = false;  // æ˜¯å¦æœ‰å®è´¨æ€§ä¿®æ”¹å‘½ä»¤
 
                     if (strOldReaderDbName != this.textBox_dbName.Text)
                     {
@@ -200,10 +200,10 @@ out string strError)
                         bChanged = true;
                     }
 
-                    // ÌáÊ¾ĞŞ¸ÄµÄÊı¾İ¿âÃû£¬ÒªÉ¾³ıµÄÊı¾İ¿â£¬Òª´´½¨µÄÊı¾İ¿â
-                    string strText = "Òª½«Êı¾İ¿âÃû " + strOldReaderDbName + " ĞŞ¸ÄÎª " + this.textBox_dbName.Text + ", È·ÊµÒª¼ÌĞø?";
+                    // æç¤ºä¿®æ”¹çš„æ•°æ®åº“åï¼Œè¦åˆ é™¤çš„æ•°æ®åº“ï¼Œè¦åˆ›å»ºçš„æ•°æ®åº“
+                    string strText = "è¦å°†æ•°æ®åº“å " + strOldReaderDbName + " ä¿®æ”¹ä¸º " + this.textBox_dbName.Text + ", ç¡®å®è¦ç»§ç»­?";
 
-                    // ¶Ô»°¿ò¾¯¸æ
+                    // å¯¹è¯æ¡†è­¦å‘Š
                     DialogResult result = MessageBox.Show(this,
                         strText,
                         "SimpleDatabaseDialog",
@@ -217,7 +217,7 @@ out string strError)
                     {
                         strDatabaseInfo = change_dom.OuterXml;
 
-                        // ĞŞ¸ÄÊı¾İ¿â
+                        // ä¿®æ”¹æ•°æ®åº“
                         nRet = this.ManagerForm.ChangeDatabase(
                             strOldReaderDbName,
                             strDatabaseInfo,
@@ -249,9 +249,9 @@ out string strError)
         }
 
         /// <summary>
-        /// ÔÊĞí»òÕß½ûÖ¹½çÃæ¿Ø¼ş¡£ÔÚ³¤²Ù×÷Ç°£¬Ò»°ãĞèÒª½ûÖ¹½çÃæ¿Ø¼ş£»²Ù×÷Íê³ÉºóÔÙÔÊĞí
+        /// å…è®¸æˆ–è€…ç¦æ­¢ç•Œé¢æ§ä»¶ã€‚åœ¨é•¿æ“ä½œå‰ï¼Œä¸€èˆ¬éœ€è¦ç¦æ­¢ç•Œé¢æ§ä»¶ï¼›æ“ä½œå®Œæˆåå†å…è®¸
         /// </summary>
-        /// <param name="bEnable">ÊÇ·ñÔÊĞí½çÃæ¿Ø¼ş¡£true ÎªÔÊĞí£¬ false Îª½ûÖ¹</param>
+        /// <param name="bEnable">æ˜¯å¦å…è®¸ç•Œé¢æ§ä»¶ã€‚true ä¸ºå…è®¸ï¼Œ false ä¸ºç¦æ­¢</param>
         public void EnableControls(bool bEnable)
         {
             this.textBox_dbName.Enabled = bEnable;

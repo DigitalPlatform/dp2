@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -27,14 +27,14 @@ using DigitalPlatform.CirculationClient.localhost;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ISO2709 Í³¼Æ´°
+    /// ISO2709 ç»Ÿè®¡çª—
     /// </summary>
     public partial class Iso2709StatisForm : MyScriptForm
     {
         OpenMarcFileDlg _openMarcFileDialog = null;
         // public HtmlViewerForm ErrorInfoForm = null;
 
-        // bool Running = false;   // ÕıÔÚÖ´ĞĞÔËËã
+        // bool Running = false;   // æ­£åœ¨æ‰§è¡Œè¿ç®—
 
 #if NO
         public LibraryChannel Channel = new LibraryChannel();
@@ -81,7 +81,7 @@ namespace dp2Circulation
 #endif
 
         /// <summary>
-        /// ÓÃÓÚÊä³öĞÅÏ¢µÄ¿ØÖÆÌ¨(ä¯ÀÀÆ÷¿Ø¼ş)
+        /// ç”¨äºè¾“å‡ºä¿¡æ¯çš„æ§åˆ¶å°(æµè§ˆå™¨æ§ä»¶)
         /// </summary>
         public WebBrowser Console
         {
@@ -92,7 +92,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public Iso2709StatisForm()
         {
@@ -122,7 +122,7 @@ namespace dp2Circulation
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
 
             stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// ºÍÈİÆ÷¹ØÁª
+            stop.Register(MainForm.stopManager, true);	// å’Œå®¹å™¨å…³è”
 #endif
 
             ScriptManager.CfgFilePath =
@@ -143,7 +143,7 @@ namespace dp2Circulation
             }
             catch (FileNotFoundException)
             {
-                // ²»±Ø±¨´í 2009/2/4
+                // ä¸å¿…æŠ¥é”™ 2009/2/4
             }
             catch (Exception ex)
             {
@@ -151,13 +151,13 @@ namespace dp2Circulation
             }
 #endif
 
-            // ÊäÈëµÄISO2709ÎÄ¼şÃû
+            // è¾“å…¥çš„ISO2709æ–‡ä»¶å
             this._openMarcFileDialog.FileName = this.MainForm.AppInfo.GetString(
                 "iso2709statisform",
                 "input_iso2709_filename",
                 "");
 
-            // ±àÂë·½Ê½
+            // ç¼–ç æ–¹å¼
             this._openMarcFileDialog.EncodingName = this.MainForm.AppInfo.GetString(
     "iso2709statisform",
     "input_iso2709_file_encoding",
@@ -173,7 +173,7 @@ namespace dp2Circulation
     "input_mode880",
     false);
 
-            // ·½°¸Ãû
+            // æ–¹æ¡ˆå
             this.textBox_projectName.Text = this.MainForm.AppInfo.GetString(
                 "iso2709statisform",
                 "projectname",
@@ -187,9 +187,9 @@ namespace dp2Circulation
 #if NO
             if (stop != null)
             {
-                if (stop.State == 0)    // 0 ±íÊ¾ÕıÔÚ´¦Àí
+                if (stop.State == 0)    // 0 è¡¨ç¤ºæ­£åœ¨å¤„ç†
                 {
-                    MessageBox.Show(this, "ÇëÔÚ¹Ø±Õ´°¿ÚÇ°Í£Ö¹ÕıÔÚ½øĞĞµÄ³¤Ê±²Ù×÷¡£");
+                    MessageBox.Show(this, "è¯·åœ¨å…³é—­çª—å£å‰åœæ­¢æ­£åœ¨è¿›è¡Œçš„é•¿æ—¶æ“ä½œã€‚");
                     e.Cancel = true;
                     return;
                 }
@@ -201,20 +201,20 @@ namespace dp2Circulation
         private void Iso2709StatisForm_FormClosed(object sender, FormClosedEventArgs e)
         {
 #if NO
-            if (stop != null) // ÍÑÀë¹ØÁª
+            if (stop != null) // è„±ç¦»å…³è”
             {
-                stop.Unregister();	// ºÍÈİÆ÷¹ØÁª
+                stop.Unregister();	// å’Œå®¹å™¨å…³è”
                 stop = null;
             }
 #endif
 
-            // ÊäÈëµÄISO2709ÎÄ¼şÃû
+            // è¾“å…¥çš„ISO2709æ–‡ä»¶å
             this.MainForm.AppInfo.SetString(
                 "iso2709statisform",
                 "input_iso2709_filename",
                 this._openMarcFileDialog.FileName);
 
-            // ±àÂë·½Ê½
+            // ç¼–ç æ–¹å¼
             this.MainForm.AppInfo.SetString(
     "iso2709statisform",
     "input_iso2709_file_encoding",
@@ -230,7 +230,7 @@ this._openMarcFileDialog.MarcSyntax);
 "input_mode880",
 this._openMarcFileDialog.Mode880);
 
-            // ·½°¸Ãû
+            // æ–¹æ¡ˆå
             this.MainForm.AppInfo.SetString(
                 "iso2709statisform",
                 "projectname",
@@ -297,7 +297,7 @@ this._openMarcFileDialog.Mode880);
             }
         }
 
-        // ´´½¨È±Ê¡µÄmain.csÎÄ¼ş
+        // åˆ›å»ºç¼ºçœçš„main.csæ–‡ä»¶
         static void CreateDefaultMainCsFile(string strFileName)
         {
             StreamWriter sw = new StreamWriter(strFileName, false, Encoding.UTF8);
@@ -342,9 +342,9 @@ this._openMarcFileDialog.Mode880);
         }
 
         /// <summary>
-        /// ÔÊĞí»òÕß½ûÖ¹½çÃæ¿Ø¼ş¡£ÔÚ³¤²Ù×÷Ç°£¬Ò»°ãĞèÒª½ûÖ¹½çÃæ¿Ø¼ş£»²Ù×÷Íê³ÉºóÔÙÔÊĞí
+        /// å…è®¸æˆ–è€…ç¦æ­¢ç•Œé¢æ§ä»¶ã€‚åœ¨é•¿æ“ä½œå‰ï¼Œä¸€èˆ¬éœ€è¦ç¦æ­¢ç•Œé¢æ§ä»¶ï¼›æ“ä½œå®Œæˆåå†å…è®¸
         /// </summary>
-        /// <param name="bEnable">ÊÇ·ñÔÊĞí½çÃæ¿Ø¼ş¡£true ÎªÔÊĞí£¬ false Îª½ûÖ¹</param>
+        /// <param name="bEnable">æ˜¯å¦å…è®¸ç•Œé¢æ§ä»¶ã€‚true ä¸ºå…è®¸ï¼Œ false ä¸ºç¦æ­¢</param>
         public override void EnableControls(bool bEnable)
         {
             this._openMarcFileDialog.MainPanel.Enabled = bEnable;
@@ -364,7 +364,7 @@ this._openMarcFileDialog.Mode880);
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚÖ´ĞĞ½Å±¾ ...");
+            stop.Initial("æ­£åœ¨æ‰§è¡Œè„šæœ¬ ...");
             stop.BeginLoop();
 
 
@@ -383,7 +383,7 @@ this._openMarcFileDialog.Mode880);
                 this.AssemblyMain = null;
 
                 // 2009/11/5
-                // ·ÀÖ¹ÒÔÇ°²ĞÁôµÄ´ò¿ªµÄÎÄ¼şÒÀÈ»Ã»ÓĞ¹Ø±Õ
+                // é˜²æ­¢ä»¥å‰æ®‹ç•™çš„æ‰“å¼€çš„æ–‡ä»¶ä¾ç„¶æ²¡æœ‰å…³é—­
                 Global.ForceGarbageCollection();
 
                 nRet = PrepareScript(strProjectName,
@@ -398,10 +398,10 @@ this._openMarcFileDialog.Mode880);
                 objStatis.InputFilename = this._openMarcFileDialog.FileName;
 
 
-                // Ö´ĞĞ½Å±¾µÄOnInitial()
+                // æ‰§è¡Œè„šæœ¬çš„OnInitial()
 
-                // ´¥·¢ScriptÖĞOnInitial()´úÂë
-                // OnInitial()ºÍOnBeginµÄ±¾ÖÊÇø±ğ, ÔÚÓÚOnInitial()ÊÊºÏ¼ì²éºÍÉèÖÃÃæ°å²ÎÊı
+                // è§¦å‘Scriptä¸­OnInitial()ä»£ç 
+                // OnInitial()å’ŒOnBeginçš„æœ¬è´¨åŒºåˆ«, åœ¨äºOnInitial()é€‚åˆæ£€æŸ¥å’Œè®¾ç½®é¢æ¿å‚æ•°
                 if (objStatis != null)
                 {
                     StatisEventArgs args = new StatisEventArgs();
@@ -416,8 +416,8 @@ this._openMarcFileDialog.Mode880);
                 }
 
 
-                // ´¥·¢ScriptÖĞOnBegin()´úÂë
-                // OnBegin()ÖĞÈÔÈ»ÓĞĞŞ¸ÄMainFormÃæ°åµÄ×ÔÓÉ
+                // è§¦å‘Scriptä¸­OnBegin()ä»£ç 
+                // OnBegin()ä¸­ä»ç„¶æœ‰ä¿®æ”¹MainFormé¢æ¿çš„è‡ªç”±
                 if (objStatis != null)
                 {
                     StatisEventArgs args = new StatisEventArgs();
@@ -431,16 +431,16 @@ this._openMarcFileDialog.Mode880);
                     }
                 }
 
-                // Ñ­»·
+                // å¾ªç¯
                 nRet = DoLoop(out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
                 if (nRet == 1)
-                    goto END1;  // TODO: SkipAllÈçºÎÖ´ĞĞ? ÊÇ·ñÁ¬OnEndÒ²²»Ö´ĞĞÁË£¿
+                    goto END1;  // TODO: SkipAllå¦‚ä½•æ‰§è¡Œ? æ˜¯å¦è¿OnEndä¹Ÿä¸æ‰§è¡Œäº†ï¼Ÿ
 
             END1:
-                // ´¥·¢ScriptµÄOnEnd()´úÂë
+                // è§¦å‘Scriptçš„OnEnd()ä»£ç 
                 if (objStatis != null)
                 {
                     StatisEventArgs args = new StatisEventArgs();
@@ -460,7 +460,7 @@ this._openMarcFileDialog.Mode880);
             }
             catch (Exception ex)
             {
-                strError = "½Å±¾Ö´ĞĞ¹ı³ÌÅ×³öÒì³£: \r\n" + ExceptionUtil.GetDebugText(ex);
+                strError = "è„šæœ¬æ‰§è¡Œè¿‡ç¨‹æŠ›å‡ºå¼‚å¸¸: \r\n" + ExceptionUtil.GetDebugText(ex);
                 return -1;
             }
             finally
@@ -478,7 +478,7 @@ this._openMarcFileDialog.Mode880);
             }
         }
 
-        // ×¼±¸½Å±¾»·¾³
+        // å‡†å¤‡è„šæœ¬ç¯å¢ƒ
         int PrepareScript(string strProjectName,
             string strProjectLocate,
             out Iso2709Statis objStatis,
@@ -496,7 +496,7 @@ this._openMarcFileDialog.Mode880);
                 + "\"" + strProjectLocate + "\"";
 
             string[] saAddRef = {
-                                    // 2011/4/20 Ôö¼Ó
+                                    // 2011/4/20 å¢åŠ 
                                     "system.dll",
                                     "system.drawing.dll",
                                     "system.windows.forms.dll",
@@ -511,16 +511,16 @@ this._openMarcFileDialog.Mode880);
 									Environment.CurrentDirectory + "\\digitalplatform.marcdom.dll",
 									Environment.CurrentDirectory + "\\digitalplatform.marcquery.dll",
    									Environment.CurrentDirectory + "\\digitalplatform.circulationclient.dll",
-									Environment.CurrentDirectory + "\\digitalplatform.Script.dll",  // 2011/8/25 ĞÂÔö
+									Environment.CurrentDirectory + "\\digitalplatform.Script.dll",  // 2011/8/25 æ–°å¢
 									Environment.CurrentDirectory + "\\digitalplatform.dp2.statis.dll",
                 Environment.CurrentDirectory + "\\dp2circulation.exe",
             };
 
 
-            // ´´½¨ProjectÖĞScript main.csµÄAssembly
+            // åˆ›å»ºProjectä¸­Script main.csçš„Assembly
             // return:
-            //		-2	³ö´í£¬µ«ÊÇÒÑ¾­ÌáÊ¾¹ı´íÎóĞÅÏ¢ÁË¡£
-            //		-1	³ö´í
+            //		-2	å‡ºé”™ï¼Œä½†æ˜¯å·²ç»æç¤ºè¿‡é”™è¯¯ä¿¡æ¯äº†ã€‚
+            //		-1	å‡ºé”™
             int nRet = ScriptManager.BuildAssembly(
                 "Iso2709StatisForm",
                 strProjectName,
@@ -547,23 +547,23 @@ this._openMarcFileDialog.Mode880);
                 goto ERROR1;
             }
 
-            // µÃµ½AssemblyÖĞIso2709StatisÅÉÉúÀàType
+            // å¾—åˆ°Assemblyä¸­Iso2709Statisæ´¾ç”Ÿç±»Type
             Type entryClassType = ScriptManager.GetDerivedClassType(
                 this.AssemblyMain,
                 "dp2Circulation.Iso2709Statis");
             if (entryClassType == null)
             {
-                strError = strMainCsDllName + "ÖĞÃ»ÓĞÕÒµ½ dp2Circulation.Iso2709Statis ÅÉÉúÀà¡£";
+                strError = strMainCsDllName + "ä¸­æ²¡æœ‰æ‰¾åˆ° dp2Circulation.Iso2709Statis æ´¾ç”Ÿç±»ã€‚";
                 goto ERROR1;
             }
-            // newÒ»¸öIso2709StatisÅÉÉú¶ÔÏó
+            // newä¸€ä¸ªIso2709Statisæ´¾ç”Ÿå¯¹è±¡
             objStatis = (Iso2709Statis)entryClassType.InvokeMember(null,
                 BindingFlags.DeclaredOnly |
                 BindingFlags.Public | BindingFlags.NonPublic |
                 BindingFlags.Instance | BindingFlags.CreateInstance, null, null,
                 null);
 
-            // ÎªIso2709StatisÅÉÉúÀàÉèÖÃ²ÎÊı
+            // ä¸ºIso2709Statisæ´¾ç”Ÿç±»è®¾ç½®å‚æ•°
             objStatis.Iso2709StatisForm = this;
             objStatis.ProjectDir = strProjectLocate;
             objStatis.InstanceDir = this.InstanceDir;
@@ -573,11 +573,11 @@ this._openMarcFileDialog.Mode880);
             return -1;
         }
 
-        // ×¢Òâ£ºÉÏ¼¶º¯ÊıRunScript()ÒÑ¾­Ê¹ÓÃÁËBeginLoop()ºÍEnableControls()
-        // ¶ÔÃ¿¸öIso2709Statis¼ÇÂ¼½øĞĞÑ­»·
+        // æ³¨æ„ï¼šä¸Šçº§å‡½æ•°RunScript()å·²ç»ä½¿ç”¨äº†BeginLoop()å’ŒEnableControls()
+        // å¯¹æ¯ä¸ªIso2709Statisè®°å½•è¿›è¡Œå¾ªç¯
         // return:
-        //      0   ÆÕÍ¨·µ»Ø
-        //      1   ÒªÈ«²¿ÖĞ¶Ï
+        //      0   æ™®é€šè¿”å›
+        //      1   è¦å…¨éƒ¨ä¸­æ–­
         int DoLoop(out string strError)
         {
             strError = "";
@@ -587,7 +587,7 @@ this._openMarcFileDialog.Mode880);
 
             if (string.IsNullOrEmpty(this._openMarcFileDialog.EncodingName) == true)
             {
-                strError = "ÉĞÎ´Ñ¡¶¨ ISO2709 ÎÄ¼şµÄ±àÂë·½Ê½";
+                strError = "å°šæœªé€‰å®š ISO2709 æ–‡ä»¶çš„ç¼–ç æ–¹å¼";
                 return -1;
             }
 
@@ -597,7 +597,7 @@ this._openMarcFileDialog.Mode880);
                 encoding = Encoding.GetEncoding(this._openMarcFileDialog.EncodingName);
 
 #if NO
-            // Çå³ı´íÎóĞÅÏ¢´°¿ÚÖĞ²ĞÓàµÄÄÚÈİ
+            // æ¸…é™¤é”™è¯¯ä¿¡æ¯çª—å£ä¸­æ®‹ä½™çš„å†…å®¹
             if (this.ErrorInfoForm != null)
             {
                 try
@@ -628,7 +628,7 @@ this._openMarcFileDialog.Mode880);
                 }
                 catch (Exception ex)
                 {
-                    strError = "´ò¿ªÎÄ¼ş " + strInputFileName + " Ê§°Ü: " + ex.Message;
+                    strError = "æ‰“å¼€æ–‡ä»¶ " + strInputFileName + " å¤±è´¥: " + ex.Message;
                     return -1;
                 }
 
@@ -638,7 +638,7 @@ this._openMarcFileDialog.Mode880);
 
                 /*
                 stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("ÕıÔÚ»ñÈ¡ISO2709¼ÇÂ¼ ...");
+                stop.Initial("æ­£åœ¨è·å–ISO2709è®°å½• ...");
                 stop.BeginLoop();
 
                 EnableControls(false);
@@ -650,14 +650,14 @@ this._openMarcFileDialog.Mode880);
 
                     for (int i = 0; ; i++)
                     {
-                        Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                        Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                         if (stop != null)
                         {
                             if (stop.State != 0)
                             {
                                 DialogResult result = MessageBox.Show(this,
-                                    "×¼±¸ÖĞ¶Ï¡£\r\n\r\nÈ·ÊµÒªÖĞ¶ÏÈ«²¿²Ù×÷? (Yes È«²¿ÖĞ¶Ï£»No ÖĞ¶ÏÑ­»·£¬µ«ÊÇ¼ÌĞøÊÕÎ²´¦Àí£»Cancel ·ÅÆúÖĞ¶Ï£¬¼ÌĞø²Ù×÷)",
+                                    "å‡†å¤‡ä¸­æ–­ã€‚\r\n\r\nç¡®å®è¦ä¸­æ–­å…¨éƒ¨æ“ä½œ? (Yes å…¨éƒ¨ä¸­æ–­ï¼›No ä¸­æ–­å¾ªç¯ï¼Œä½†æ˜¯ç»§ç»­æ”¶å°¾å¤„ç†ï¼›Cancel æ”¾å¼ƒä¸­æ–­ï¼Œç»§ç»­æ“ä½œ)",
                                     "Iso2709StatisForm",
                                     MessageBoxButtons.YesNoCancel,
                                     MessageBoxIcon.Question,
@@ -665,26 +665,26 @@ this._openMarcFileDialog.Mode880);
 
                                 if (result == DialogResult.Yes)
                                 {
-                                    strError = "ÓÃ»§ÖĞ¶Ï";
+                                    strError = "ç”¨æˆ·ä¸­æ–­";
                                     return -1;
                                 }
                                 if (result == DialogResult.No)
-                                    return 0;   // ¼Ù×°loopÕı³£½áÊø
+                                    return 0;   // å‡è£…loopæ­£å¸¸ç»“æŸ
 
-                                stop.Continue(); // ¼ÌĞøÑ­»·
+                                stop.Continue(); // ç»§ç»­å¾ªç¯
                             }
                         }
 
 
                         string strMARC = "";
 
-                        // ´ÓISO2709ÎÄ¼şÖĞ¶ÁÈëÒ»ÌõMARC¼ÇÂ¼
+                        // ä»ISO2709æ–‡ä»¶ä¸­è¯»å…¥ä¸€æ¡MARCè®°å½•
                         // return:
-                        //	-2	MARC¸ñÊ½´í
-                        //	-1	³ö´í
-                        //	0	ÕıÈ·
-                        //	1	½áÊø(µ±Ç°·µ»ØµÄ¼ÇÂ¼ÓĞĞ§)
-                        //	2	½áÊø(µ±Ç°·µ»ØµÄ¼ÇÂ¼ÎŞĞ§)
+                        //	-2	MARCæ ¼å¼é”™
+                        //	-1	å‡ºé”™
+                        //	0	æ­£ç¡®
+                        //	1	ç»“æŸ(å½“å‰è¿”å›çš„è®°å½•æœ‰æ•ˆ)
+                        //	2	ç»“æŸ(å½“å‰è¿”å›çš„è®°å½•æ— æ•ˆ)
                         int nRet = MarcUtil.ReadMarcRecord(file,
                             encoding,
                             true,	// bRemoveEndCrLf,
@@ -694,7 +694,7 @@ this._openMarcFileDialog.Mode880);
                         if (nRet == -2 || nRet == -1)
                         {
                             DialogResult result = MessageBox.Show(this,
-                                "¶ÁÈëMARC¼ÇÂ¼(" + nCount.ToString() + ")³ö´í: " + strError + "\r\n\r\nÈ·ÊµÒªÖĞ¶Ïµ±Ç°Åú´¦Àí²Ù×÷?",
+                                "è¯»å…¥MARCè®°å½•(" + nCount.ToString() + ")å‡ºé”™: " + strError + "\r\n\r\nç¡®å®è¦ä¸­æ–­å½“å‰æ‰¹å¤„ç†æ“ä½œ?",
                                 "Iso2709StatisForm",
                                 MessageBoxButtons.YesNo,
                                 MessageBoxIcon.Question,
@@ -705,32 +705,32 @@ this._openMarcFileDialog.Mode880);
                             }
                             else
                             {
-                                strError = "¶ÁÈëMARC¼ÇÂ¼(" + nCount.ToString() + ")³ö´í: " + strError;
+                                strError = "è¯»å…¥MARCè®°å½•(" + nCount.ToString() + ")å‡ºé”™: " + strError;
                                 GetErrorInfoForm().WriteHtml(strError + "\r\n");
                                 continue;
                             }
                         }
 
                         if (nRet != 0 && nRet != 1)
-                            return 0;	// ½áÊø
+                            return 0;	// ç»“æŸ
 
-                        stop.SetMessage("ÕıÔÚ»ñÈ¡µÚ " + (i + 1).ToString() + " ¸ö ISO2709 ¼ÇÂ¼");
+                        stop.SetMessage("æ­£åœ¨è·å–ç¬¬ " + (i + 1).ToString() + " ä¸ª ISO2709 è®°å½•");
                         this.progressBar_records.Value = (int)file.Position;
 
-                        // Ìø¹ıÌ«¶ÌµÄ¼ÇÂ¼
+                        // è·³è¿‡å¤ªçŸ­çš„è®°å½•
                         if (string.IsNullOrEmpty(strMARC) == true
                             || strMARC.Length <= 24)
                             continue;
 
                         if (this._openMarcFileDialog.Mode880 == true
-                            && (this._openMarcFileDialog.MarcSyntax == "usmarc" || this._openMarcFileDialog.MarcSyntax == "<×Ô¶¯>"))
+                            && (this._openMarcFileDialog.MarcSyntax == "usmarc" || this._openMarcFileDialog.MarcSyntax == "<è‡ªåŠ¨>"))
                         {
                             MarcRecord temp = new MarcRecord(strMARC);
                             MarcQuery.ToParallel(temp);
                             strMARC = temp.Text;
                         }
 
-                        // ´¥·¢ScriptÖĞOnRecord()´úÂë
+                        // è§¦å‘Scriptä¸­OnRecord()ä»£ç 
                         if (objStatis != null)
                         {
                             objStatis.MARC = strMARC;
@@ -752,7 +752,7 @@ this._openMarcFileDialog.Mode880);
 
                     /*
                     Global.WriteHtml(this.webBrowser_batchAddItemPrice,
-                        "´¦Àí½áÊø¡£¹²Ôö²¹¼Û¸ñ×Ö·û´® " + nCount.ToString() + " ¸ö¡£\r\n");
+                        "å¤„ç†ç»“æŸã€‚å…±å¢è¡¥ä»·æ ¼å­—ç¬¦ä¸² " + nCount.ToString() + " ä¸ªã€‚\r\n");
                      * */
 
                     return 0;
@@ -786,13 +786,13 @@ this._openMarcFileDialog.Mode880);
             {
                 if (string.IsNullOrEmpty(this._openMarcFileDialog.FileName) == true)
                 {
-                    strError = "ÉĞÎ´Ö¸¶¨ÊäÈëµÄISO2709ÎÄ¼şÃû";
+                    strError = "å°šæœªæŒ‡å®šè¾“å…¥çš„ISO2709æ–‡ä»¶å";
                     goto ERROR1;
                 }
 
                 if (string.IsNullOrEmpty(this._openMarcFileDialog.EncodingName) == true)
                 {
-                    strError = "ÉĞÎ´Ñ¡¶¨ ISO2709 ÎÄ¼şµÄ±àÂë·½Ê½";
+                    strError = "å°šæœªé€‰å®š ISO2709 æ–‡ä»¶çš„ç¼–ç æ–¹å¼";
                     goto ERROR1;
                 }
 
@@ -807,14 +807,14 @@ this._openMarcFileDialog.Mode880);
 
                 if (String.IsNullOrEmpty(strProjectName) == true)
                 {
-                    strError = "ÉĞÎ´Ö¸¶¨·½°¸Ãû";
+                    strError = "å°šæœªæŒ‡å®šæ–¹æ¡ˆå";
                     this.textBox_projectName.Focus();
                     goto ERROR1;
                 }
 
                 string strProjectLocate = "";
-                // »ñµÃ·½°¸²ÎÊı
-                // strProjectNamePath	·½°¸Ãû£¬»òÕßÂ·¾¶
+                // è·å¾—æ–¹æ¡ˆå‚æ•°
+                // strProjectNamePath	æ–¹æ¡ˆåï¼Œæˆ–è€…è·¯å¾„
                 // return:
                 //		-1	error
                 //		0	not found project
@@ -825,7 +825,7 @@ this._openMarcFileDialog.Mode880);
 
                 if (nRet == 0)
                 {
-                    strError = "·½°¸ " + strProjectName + " Ã»ÓĞÕÒµ½...";
+                    strError = "æ–¹æ¡ˆ " + strProjectName + " æ²¡æœ‰æ‰¾åˆ°...";
                     goto ERROR1;
                 }
                 if (nRet == -1)
@@ -834,7 +834,7 @@ this._openMarcFileDialog.Mode880);
                     goto ERROR1;
                 }
 
-                // ÇĞ»»µ½Ö´ĞĞpage
+                // åˆ‡æ¢åˆ°æ‰§è¡Œpage
                 this.tabControl_main.SelectedTab = this.tabPage_runStatis;
 
                 this.Running = true;
@@ -854,13 +854,13 @@ this._openMarcFileDialog.Mode880);
                 }
 
                 this.tabControl_main.SelectedTab = this.tabPage_runStatis;
-                MessageBox.Show(this, "Í³¼ÆÍê³É¡£");
+                MessageBox.Show(this, "ç»Ÿè®¡å®Œæˆã€‚");
                 return;
             }
 
             if (this.tabControl_main.SelectedTab == this.tabPage_runStatis)
             {
-                // ÇĞ»»µ½...
+                // åˆ‡æ¢åˆ°...
                 this.tabControl_main.SelectedTab = this.tabPage_print;
 
                 this.button_next.Enabled = false;
@@ -889,13 +889,13 @@ this._openMarcFileDialog.Mode880);
         {
             if (this.objStatis == null)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ö´ĞĞÍ³¼Æ£¬ÎŞ·¨´òÓ¡");
+                MessageBox.Show(this, "å°šæœªæ‰§è¡Œç»Ÿè®¡ï¼Œæ— æ³•æ‰“å°");
                 return;
             }
 
             HtmlPrintForm printform = new HtmlPrintForm();
 
-            printform.Text = "´òÓ¡Í³¼Æ½á¹û";
+            printform.Text = "æ‰“å°ç»Ÿè®¡ç»“æœ";
             printform.MainForm = this.MainForm;
 
             Debug.Assert(this.objStatis != null, "");
@@ -908,7 +908,7 @@ this._openMarcFileDialog.Mode880);
 
         private void button_getProjectName_Click(object sender, EventArgs e)
         {
-            // ³öÏÖ¶Ô»°¿ò£¬Ñ¯ÎÊProjectÃû×Ö
+            // å‡ºç°å¯¹è¯æ¡†ï¼Œè¯¢é—®Projectåå­—
             GetProjectNameDlg dlg = new GetProjectNameDlg();
             MainForm.SetControlFont(dlg, this.Font, false);
 
@@ -932,9 +932,9 @@ this._openMarcFileDialog.Mode880);
         {
             OpenFileDialog dlg = new OpenFileDialog();
 
-            dlg.Title = "ÇëÖ¸¶¨Òª´ò¿ªµÄISO2709ÎÄ¼şÃû";
+            dlg.Title = "è¯·æŒ‡å®šè¦æ‰“å¼€çš„ISO2709æ–‡ä»¶å";
             dlg.FileName = this.textBox_inputIso2709Filename.Text;
-            dlg.Filter = "ISO2709ÎÄ¼ş (*.iso)|*.iso|All files (*.*)|*.*";
+            dlg.Filter = "ISO2709æ–‡ä»¶ (*.iso)|*.iso|All files (*.*)|*.*";
             dlg.RestoreDirectory = true;
 
             if (dlg.ShowDialog() != DialogResult.OK)
@@ -946,7 +946,7 @@ this._openMarcFileDialog.Mode880);
 #endif
 
 #if NO
-        // »ñµÃ´íÎóĞÅÏ¢´°
+        // è·å¾—é”™è¯¯ä¿¡æ¯çª—
         HtmlViewerForm GetErrorInfoForm()
         {
             if (this.ErrorInfoForm == null
@@ -955,9 +955,9 @@ this._openMarcFileDialog.Mode880);
             {
                 this.ErrorInfoForm = new HtmlViewerForm();
                 this.ErrorInfoForm.ShowInTaskbar = false;
-                this.ErrorInfoForm.Text = "´íÎóĞÅÏ¢";
+                this.ErrorInfoForm.Text = "é”™è¯¯ä¿¡æ¯";
                 this.ErrorInfoForm.Show(this);
-                this.ErrorInfoForm.WriteHtml("<pre>");  // ×¼±¸ÎÄ±¾Êä³ö
+                this.ErrorInfoForm.WriteHtml("<pre>");  // å‡†å¤‡æ–‡æœ¬è¾“å‡º
             }
 
             return this.ErrorInfoForm;
@@ -972,18 +972,18 @@ this._openMarcFileDialog.Mode880);
 
         // 
         /// <summary>
-        /// ĞŞ¸ÄÊéÄ¿ĞÅÏ¢¡£
-        /// Çë²Î¿¼ dp2Library API SetBiblioInfo() µÄÏêÏ¸ËµÃ÷
+        /// ä¿®æ”¹ä¹¦ç›®ä¿¡æ¯ã€‚
+        /// è¯·å‚è€ƒ dp2Library API SetBiblioInfo() çš„è¯¦ç»†è¯´æ˜
         /// </summary>
-        /// <param name="strAction">¶¯×÷</param>
-        /// <param name="strBiblioRecPath">ÊéÄ¿¼ÇÂ¼Â·¾¶</param>
-        /// <param name="strBiblioType">ÊéÄ¿ÀàĞÍ</param>
-        /// <param name="strBiblio">ÊéÄ¿¼ÇÂ¼</param>
-        /// <param name="timestamp">Ê±¼ä´Á</param>
-        /// <param name="strOutputBiblioRecPath">·µ»ØÊµ¼ÊĞ´ÈëµÄÊéÄ¿¼ÇÂ¼Â·¾¶</param>
-        /// <param name="baNewTimestamp">·µ»Ø×îĞÂÊ±¼ä´Á</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í; 0: ³É¹¦</returns>
+        /// <param name="strAction">åŠ¨ä½œ</param>
+        /// <param name="strBiblioRecPath">ä¹¦ç›®è®°å½•è·¯å¾„</param>
+        /// <param name="strBiblioType">ä¹¦ç›®ç±»å‹</param>
+        /// <param name="strBiblio">ä¹¦ç›®è®°å½•</param>
+        /// <param name="timestamp">æ—¶é—´æˆ³</param>
+        /// <param name="strOutputBiblioRecPath">è¿”å›å®é™…å†™å…¥çš„ä¹¦ç›®è®°å½•è·¯å¾„</param>
+        /// <param name="baNewTimestamp">è¿”å›æœ€æ–°æ—¶é—´æˆ³</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™; 0: æˆåŠŸ</returns>
         public int SetBiblioInfo(string strAction,
                 string strBiblioRecPath,
                 string strBiblioType,
@@ -1009,16 +1009,16 @@ this._openMarcFileDialog.Mode880);
 
         // 
         /// <summary>
-        /// ´´½¨Ò»¸öÊµÌå¼ÇÂ¼
+        /// åˆ›å»ºä¸€ä¸ªå®ä½“è®°å½•
         /// </summary>
-        /// <param name="strBiblioRecPath">ÊéÄ¿¼ÇÂ¼Â·¾¶</param>
-        /// <param name="strItemXml">ÊµÌå¼ÇÂ¼ XML</param>
-        /// <param name="strStyle">´´½¨·ç¸ñ¡£"force"±íÊ¾Ç¿ÖÆĞ´Èë</param>
-        /// <param name="strNewItemRecPath">·µ»ØÊµ¼ÊĞ´ÈëµÄ²á¼ÇÂ¼Â·¾¶</param>
-        /// <param name="strNewXml">·µ»ØÊµ¼ÊĞ´ÈëµÄÊµÌå¼ÇÂ¼ XML</param>
-        /// <param name="baNewTimestamp">·µ»ØÊµÌå¼ÇÂ¼µÄ×îĞÂÊ±¼ä´Á</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í; 1: ³É¹¦</returns>
+        /// <param name="strBiblioRecPath">ä¹¦ç›®è®°å½•è·¯å¾„</param>
+        /// <param name="strItemXml">å®ä½“è®°å½• XML</param>
+        /// <param name="strStyle">åˆ›å»ºé£æ ¼ã€‚"force"è¡¨ç¤ºå¼ºåˆ¶å†™å…¥</param>
+        /// <param name="strNewItemRecPath">è¿”å›å®é™…å†™å…¥çš„å†Œè®°å½•è·¯å¾„</param>
+        /// <param name="strNewXml">è¿”å›å®é™…å†™å…¥çš„å®ä½“è®°å½• XML</param>
+        /// <param name="baNewTimestamp">è¿”å›å®ä½“è®°å½•çš„æœ€æ–°æ—¶é—´æˆ³</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™; 1: æˆåŠŸ</returns>
         public int CreateItemInfo(
             string strBiblioRecPath,
             string strItemXml,
@@ -1046,7 +1046,7 @@ this._openMarcFileDialog.Mode880);
             }
             catch (Exception ex)
             {
-                strError = "XML×°ÔØµ½DOMÊ±·¢Éú´íÎó: " + ex.Message;
+                strError = "XMLè£…è½½åˆ°DOMæ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                 return -1;
             }
 
@@ -1105,16 +1105,16 @@ this._openMarcFileDialog.Mode880);
 
         // 
         /// <summary>
-        /// ´´½¨Ò»¸ö¶©¹º¼ÇÂ¼
+        /// åˆ›å»ºä¸€ä¸ªè®¢è´­è®°å½•
         /// </summary>
-        /// <param name="strBiblioRecPath">ÊéÄ¿¼ÇÂ¼Â·¾¶</param>
-        /// <param name="strOrderXml">¶©¹º¼ÇÂ¼ XML</param>
-        /// <param name="strStyle">´´½¨·ç¸ñ¡£"force"±íÊ¾Ç¿ÖÆĞ´Èë</param>
-        /// <param name="strNewOrderRecPath">·µ»ØÊµ¼ÊĞ´ÈëµÄ¶©¹º¼ÇÂ¼Â·¾¶</param>
-        /// <param name="strNewXml">·µ»ØÊµ¼ÊĞ´ÈëµÄ¶©¹º¼ÇÂ¼ XML</param>
-        /// <param name="baNewTimestamp">·µ»Ø¶©¹º¼ÇÂ¼µÄ×îĞÂÊ±¼ä´Á</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í; 1: ³É¹¦</returns>
+        /// <param name="strBiblioRecPath">ä¹¦ç›®è®°å½•è·¯å¾„</param>
+        /// <param name="strOrderXml">è®¢è´­è®°å½• XML</param>
+        /// <param name="strStyle">åˆ›å»ºé£æ ¼ã€‚"force"è¡¨ç¤ºå¼ºåˆ¶å†™å…¥</param>
+        /// <param name="strNewOrderRecPath">è¿”å›å®é™…å†™å…¥çš„è®¢è´­è®°å½•è·¯å¾„</param>
+        /// <param name="strNewXml">è¿”å›å®é™…å†™å…¥çš„è®¢è´­è®°å½• XML</param>
+        /// <param name="baNewTimestamp">è¿”å›è®¢è´­è®°å½•çš„æœ€æ–°æ—¶é—´æˆ³</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™; 1: æˆåŠŸ</returns>
         public int CreateOrderInfo(
             string strBiblioRecPath,
             string strOrderXml,
@@ -1142,7 +1142,7 @@ this._openMarcFileDialog.Mode880);
             }
             catch (Exception ex)
             {
-                strError = "XML×°ÔØµ½DOMÊ±·¢Éú´íÎó: " + ex.Message;
+                strError = "XMLè£…è½½åˆ°DOMæ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                 return -1;
             }
 

@@ -2,18 +2,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using DigitalPlatform;
 using System.Windows.Forms;
-using DigitalPlatform.CirculationClient;
 using System.Collections;
 using System.IO;
+using System.Xml;
+using System.Diagnostics;
+
+using DigitalPlatform;
+using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
-using System.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.Range;
 using DigitalPlatform.CirculationClient.localhost;
-using System.Diagnostics;
 
 namespace dp2Circulation
 {

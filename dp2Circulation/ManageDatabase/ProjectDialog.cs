@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -17,16 +17,16 @@ using DigitalPlatform.CirculationClient.localhost;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ±à¼­Ò»¸ö²éÖØ·½°¸µÄ¶Ô»°¿ò ±»PageDup.csµ÷ÓÃ
+    /// ç¼–è¾‘ä¸€ä¸ªæŸ¥é‡æ–¹æ¡ˆçš„å¯¹è¯æ¡† è¢«PageDup.csè°ƒç”¨
     /// </summary>
     internal partial class ProjectDialog : Form
     {
-        public BiblioDbFromInfo[] DbFromInfos = null;   // ÊéÄ¿¿â¼ìË÷Â·¾¶ĞÅÏ¢
+        public BiblioDbFromInfo[] DbFromInfos = null;   // ä¹¦ç›®åº“æ£€ç´¢è·¯å¾„ä¿¡æ¯
 
         // public string AllBiblioDbInfoXml = "";
         public List<string> BiblioDbNames = null;
 
-        public bool CreateMode = false; // ÊÇ·ñÔÚ´´½¨Ä£Ê½£¿==false£¬±íÊ¾ÔÚĞŞ¸ÄÄ£Ê½
+        public bool CreateMode = false; // æ˜¯å¦åœ¨åˆ›å»ºæ¨¡å¼ï¼Ÿ==falseï¼Œè¡¨ç¤ºåœ¨ä¿®æ”¹æ¨¡å¼
         // public DupCfgDialog DupCfgDialog = null;
 
         public XmlDocument dom = null;
@@ -35,9 +35,9 @@ namespace dp2Circulation
 
         bool m_bChanged = false;
 
-        // ×ÜÌåÀ´Ëµ£¬ÄÚÈİÊÇ·ñ·¢ÉúÁË¸Ä±ä£¿
+        // æ€»ä½“æ¥è¯´ï¼Œå†…å®¹æ˜¯å¦å‘ç”Ÿäº†æ”¹å˜ï¼Ÿ
         /// <summary>
-        /// ÄÚÈİÊÇ·ñ·¢Éú¹ıĞŞ¸Ä
+        /// å†…å®¹æ˜¯å¦å‘ç”Ÿè¿‡ä¿®æ”¹
         /// </summary>
         public bool Changed
         {
@@ -84,7 +84,7 @@ namespace dp2Circulation
 
         bool m_bAccessPointsChanged = false;
 
-        // ¼ìË÷µãlistviewÖĞµÄÄÚÈİÊÇ·ñ·¢ÉúÁË¸Ä±ä£¿
+        // æ£€ç´¢ç‚¹listviewä¸­çš„å†…å®¹æ˜¯å¦å‘ç”Ÿäº†æ”¹å˜ï¼Ÿ
         public bool AccessPointsChanged
         {
             get
@@ -109,14 +109,14 @@ namespace dp2Circulation
         {
             if (this.CreateMode == false)
             {
-                // ÏÈ»ñµÃ<projectÔªËØ>
+                // å…ˆè·å¾—<projectå…ƒç´ >
                 if (String.IsNullOrEmpty(this.ProjectName) == false
                     && this.dom != null)
                 {
                     this.m_nodeProject = this.dom.DocumentElement.SelectSingleNode("//project[@name='" + this.ProjectName + "']");
                     if (this.m_nodeProject == null)
                     {
-                        MessageBox.Show(this, "DOMÖĞ²¢²»´æÔÚnameÊôĞÔÖµÎª '" + this.ProjectName + "' µÄ<project>ÔªËØ");
+                        MessageBox.Show(this, "DOMä¸­å¹¶ä¸å­˜åœ¨nameå±æ€§å€¼ä¸º '" + this.ProjectName + "' çš„<project>å…ƒç´ ");
                     }
                 }
 
@@ -124,10 +124,10 @@ namespace dp2Circulation
             }
             else
             {
-                // ´´½¨<projectÔªËØ>
+                // åˆ›å»º<projectå…ƒç´ >
                 if (this.dom != null)
                 {
-                    // TODO: ×¢Òâ²åÈëµ½×îºóÒ»Åú<default>ÔªËØµÄÇ°Ãæ
+                    // TODO: æ³¨æ„æ’å…¥åˆ°æœ€åä¸€æ‰¹<default>å…ƒç´ çš„å‰é¢
                     this.m_nodeProject = this.dom.CreateElement("project");
                     this.dom.DocumentElement.AppendChild(this.m_nodeProject);
                     DomUtil.SetAttr(this.m_nodeProject, "name", this.ProjectName);
@@ -157,10 +157,10 @@ namespace dp2Circulation
 
             if (this.Changed == false)
             {
-                Debug.Assert(false, "µ±OK°´Å¥¿ÉÒÔ°´ÏÂµÄÊ±ºò, this.Changed²»¿ÉÄÜÎªfalse");
+                Debug.Assert(false, "å½“OKæŒ‰é’®å¯ä»¥æŒ‰ä¸‹çš„æ—¶å€™, this.Changedä¸å¯èƒ½ä¸ºfalse");
             }
 
-            // ²éÖØ£¬¿´projectnameÊÇ·ñºÍÆäËû<project>ÔªËØµÄnameÊôĞÔÖµÏàÍ¬
+            // æŸ¥é‡ï¼Œçœ‹projectnameæ˜¯å¦å’Œå…¶ä»–<project>å…ƒç´ çš„nameå±æ€§å€¼ç›¸åŒ
             XmlNodeList nodes = this.dom.DocumentElement.SelectNodes("//project[@name='" + this.textBox_projectName.Text + "']");
             int nCount = 0;
             for (int i = 0; i < nodes.Count; i++)
@@ -176,7 +176,7 @@ namespace dp2Circulation
 
             if (nCount > 0)
             {
-                MessageBox.Show(this, "·¢ÏÖµ±Ç°·½°¸Ãû '" +this.textBox_projectName+ "' ºÍÆäËû "+nCount.ToString()+" ¸ö<project>ÔªËØ¾ßÓĞÏàÍ¬µÄnameÊôĞÔÖµ¡£±ØĞëĞŞ¸Äµ±Ç°·½°¸µÄÃû×Ö£¬±ÜÃâºÍËü(ÃÇ)ÏàÖØ¡£");
+                MessageBox.Show(this, "å‘ç°å½“å‰æ–¹æ¡ˆå '" +this.textBox_projectName+ "' å’Œå…¶ä»– "+nCount.ToString()+" ä¸ª<project>å…ƒç´ å…·æœ‰ç›¸åŒçš„nameå±æ€§å€¼ã€‚å¿…é¡»ä¿®æ”¹å½“å‰æ–¹æ¡ˆçš„åå­—ï¼Œé¿å…å’Œå®ƒ(ä»¬)ç›¸é‡ã€‚");
                 return;
             }
 
@@ -212,41 +212,41 @@ namespace dp2Circulation
 
             string strError = "";
 
-            // ²éÖØ
+            // æŸ¥é‡
             ListViewItem exist = FindDatabaseItem(dlg.DatabaseName);
             if (exist != null)
             {
                 exist.Selected = true;
                 exist.EnsureVisible();
 
-                strError = "ÒÑ¾­´æÔÚÃûÎª '" + dlg.DatabaseName + "' µÄÄ¿±ê¿âÊÂÏî¡£·ÅÆúĞÂ´´½¨ÊÂÏî¡£";
+                strError = "å·²ç»å­˜åœ¨åä¸º '" + dlg.DatabaseName + "' çš„ç›®æ ‡åº“äº‹é¡¹ã€‚æ”¾å¼ƒæ–°åˆ›å»ºäº‹é¡¹ã€‚";
                 goto ERROR1;
             }
 
             Debug.Assert(this.m_nodeProject != null, "");
 
-            // ÕÒµ½<project>ÔªËØ
+            // æ‰¾åˆ°<project>å…ƒç´ 
             XmlNode nodeProject = this.m_nodeProject;
             if (nodeProject == null)
             {
                 Debug.Assert(false, "");
-                strError = "m_nodeProject³ÉÔ±Îª¿Õ";
+                strError = "m_nodeProjectæˆå‘˜ä¸ºç©º";
                 goto ERROR1;
             }
 
-            // ´´½¨ĞÂµÄ<database>ÔªËØ
+            // åˆ›å»ºæ–°çš„<database>å…ƒç´ 
             XmlNode nodeDatabase = this.dom.CreateElement("database");
             nodeProject.AppendChild(nodeDatabase);
 
             DomUtil.SetAttr(nodeDatabase, "name", dlg.DatabaseName);
             DomUtil.SetAttr(nodeDatabase, "threshold", dlg.Threshold);
 
-            // ¶ÒÏÖ¶ÔListViewItemµÄÔö²¹
+            // å…‘ç°å¯¹ListViewItemçš„å¢è¡¥
             ListViewItem item = new ListViewItem(dlg.DatabaseName, 0);
             item.SubItems.Add(dlg.Threshold);
             this.listView_databases.Items.Add(item);
 
-            item.Selected = true;   // Ñ¡ÖĞ¸Õ²åÈëµÄlistviewitem¶ÔÏó
+            item.Selected = true;   // é€‰ä¸­åˆšæ’å…¥çš„listviewitemå¯¹è±¡
 
             this.Changed = true;
             return;
@@ -275,7 +275,7 @@ namespace dp2Circulation
         {
             if (this.listView_databases.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡ÔñÒªĞŞ¸ÄµÄÄ¿±êÊı¾İ¿âÊÂÏî");
+                MessageBox.Show(this, "å°šæœªé€‰æ‹©è¦ä¿®æ”¹çš„ç›®æ ‡æ•°æ®åº“äº‹é¡¹");
                 return;
             }
 
@@ -298,32 +298,32 @@ namespace dp2Circulation
 
             string strError = "";
 
-            // ²éÖØ
+            // æŸ¥é‡
             ListViewItem exist = FindDatabaseItem(dlg.DatabaseName);
             if (exist != null && exist != item)
             {
                 exist.Selected = true;
                 exist.EnsureVisible();
 
-                strError = "ÒÑ¾­´æÔÚÃûÎª '" + dlg.DatabaseName + "' µÄÄ¿±ê¿âÊÂÏî¡£·ÅÆú¸Õ²Å¶ÔÊÂÏîµÄĞŞ¸Ä¡£";
+                strError = "å·²ç»å­˜åœ¨åä¸º '" + dlg.DatabaseName + "' çš„ç›®æ ‡åº“äº‹é¡¹ã€‚æ”¾å¼ƒåˆšæ‰å¯¹äº‹é¡¹çš„ä¿®æ”¹ã€‚";
                 goto ERROR1;
             }
 
             Debug.Assert(this.m_nodeProject != null, "");
 
-            // ÕÒµ½ÏàÓ¦µÄ<database>ÔªËØ
+            // æ‰¾åˆ°ç›¸åº”çš„<database>å…ƒç´ 
             XmlNode nodeDatabase = this.m_nodeProject.SelectSingleNode("database[@name='" + item.Text + "']");
             if (nodeDatabase == null)
             {
-                strError = "ÃûÎª '" + item.Text + "' µÄ<database>ÔªËØ²¢²»´æÔÚ";
+                strError = "åä¸º '" + item.Text + "' çš„<database>å…ƒç´ å¹¶ä¸å­˜åœ¨";
                 goto ERROR1;
             }
 
-            // ¶ÒÏÖ¶ÔDOMµÄĞŞ¸Ä
+            // å…‘ç°å¯¹DOMçš„ä¿®æ”¹
             DomUtil.SetAttr(nodeDatabase, "name", dlg.DatabaseName);
             DomUtil.SetAttr(nodeDatabase, "threshold", dlg.Threshold);
 
-            // ¶ÒÏÖ¶ÔListViewItemµÄĞŞ¸Ä
+            // å…‘ç°å¯¹ListViewItemçš„ä¿®æ”¹
             item.Text = dlg.DatabaseName;
             ListViewUtil.ChangeItemText(item, 1, dlg.Threshold);
 
@@ -337,12 +337,12 @@ namespace dp2Circulation
         {
             if (this.listView_databases.SelectedIndices.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡ÔñÒªÉ¾³ıµÄÄ¿±êÊı¾İ¿âÊÂÏî");
+                MessageBox.Show(this, "å°šæœªé€‰æ‹©è¦åˆ é™¤çš„ç›®æ ‡æ•°æ®åº“äº‹é¡¹");
                 return;
             }
 
             DialogResult result = MessageBox.Show(this,
-                "È·ÊµÒªÉ¾³ıËùÑ¡¶¨µÄ " + this.listView_databases.SelectedIndices.Count.ToString() + " ¸öÄ¿±êÊı¾İ¿âÊÂÏî?",
+                "ç¡®å®è¦åˆ é™¤æ‰€é€‰å®šçš„ " + this.listView_databases.SelectedIndices.Count.ToString() + " ä¸ªç›®æ ‡æ•°æ®åº“äº‹é¡¹?",
                 "ProjectDialog",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question,
@@ -359,17 +359,17 @@ namespace dp2Circulation
 
                 Debug.Assert(this.m_nodeProject != null, "");
 
-                // ÕÒµ½ÏàÓ¦µÄ<database>ÔªËØ
+                // æ‰¾åˆ°ç›¸åº”çš„<database>å…ƒç´ 
                 XmlNode nodeDatabase = this.m_nodeProject.SelectSingleNode("database[@name='" + item.Text + "']");
                 if (nodeDatabase == null)
                 {
-                    strError = "ÃûÎª '" + item.Text + "' µÄ<database>ÔªËØ²¢²»´æÔÚ";
+                    strError = "åä¸º '" + item.Text + "' çš„<database>å…ƒç´ å¹¶ä¸å­˜åœ¨";
                     goto ERROR1;
                 }
-                // É¾³ıXML½Úµã
+                // åˆ é™¤XMLèŠ‚ç‚¹
                 nodeDatabase.ParentNode.RemoveChild(nodeDatabase);
 
-                // ¶ÒÏÖ¶ÔListViewItemµÄĞŞ¸Ä
+                // å…‘ç°å¯¹ListViewItemçš„ä¿®æ”¹
                 this.listView_databases.Items.RemoveAt(index);
             }
 
@@ -379,12 +379,12 @@ namespace dp2Circulation
             MessageBox.Show(this, strError);
         }
 
-        // ĞÂ½¨Ò»¸ö¼ìË÷µãÊÂÏî
+        // æ–°å»ºä¸€ä¸ªæ£€ç´¢ç‚¹äº‹é¡¹
         private void button_newAccessPoint_Click(object sender, EventArgs e)
         {
             AccessPointDialog dlg = new AccessPointDialog();
             MainForm.SetControlFont(dlg, this.Font, false);
-            // TODO: ÊÇ·ñĞèÒª°Ñµ±Ç°ÒÑ¾­Ñ¡ÔñµÄ¶ÔÏóµ±×÷²Î¿¼¶ÔÏó?
+            // TODO: æ˜¯å¦éœ€è¦æŠŠå½“å‰å·²ç»é€‰æ‹©çš„å¯¹è±¡å½“ä½œå‚è€ƒå¯¹è±¡?
             dlg.DbFromInfos = this.DbFromInfos;
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.ShowDialog(this);
@@ -397,17 +397,17 @@ namespace dp2Circulation
             new_item.SubItems.Add(dlg.SearchStyle);
             this.listView_accessPoints.Items.Add(new_item);
 
-            // TODO: ÊÇ·ñ½«À´ĞèÒª×ö³É²åÈëÔÚµ±Ç°ÒÑÑ¡ÔñµÄÊÂÏîÇ°Ãæ
+            // TODO: æ˜¯å¦å°†æ¥éœ€è¦åšæˆæ’å…¥åœ¨å½“å‰å·²é€‰æ‹©çš„äº‹é¡¹å‰é¢
 
             this.AccessPointsChanged = true;
         }
 
-        // ĞŞ¸ÄÒ»¸ö¼ìË÷µãÊÂÏî
+        // ä¿®æ”¹ä¸€ä¸ªæ£€ç´¢ç‚¹äº‹é¡¹
         private void button_modifyAccessPoint_Click(object sender, EventArgs e)
         {
             if (this.listView_accessPoints.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡ÔñÒªĞŞ¸ÄµÄ¼ìË÷µãÊÂÏî");
+                MessageBox.Show(this, "å°šæœªé€‰æ‹©è¦ä¿®æ”¹çš„æ£€ç´¢ç‚¹äº‹é¡¹");
                 return;
             }
 
@@ -433,17 +433,17 @@ namespace dp2Circulation
             this.AccessPointsChanged = true;
         }
 
-        // É¾³ıÒ»¸ö¼ìË÷µãÊÂÏî
+        // åˆ é™¤ä¸€ä¸ªæ£€ç´¢ç‚¹äº‹é¡¹
         private void button_deleteAccessPoint_Click(object sender, EventArgs e)
         {
             if (this.listView_accessPoints.SelectedIndices.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡ÔñÒªÉ¾³ıµÄ¼ìË÷µãÊÂÏî");
+                MessageBox.Show(this, "å°šæœªé€‰æ‹©è¦åˆ é™¤çš„æ£€ç´¢ç‚¹äº‹é¡¹");
                 return;
             }
 
             DialogResult result = MessageBox.Show(this,
-                "È·ÊµÒªÉ¾³ıËùÑ¡¶¨µÄ " + this.listView_accessPoints.SelectedIndices.Count.ToString() + " ¸ö¼ìË÷µãÊÂÏî?",
+                "ç¡®å®è¦åˆ é™¤æ‰€é€‰å®šçš„ " + this.listView_accessPoints.SelectedIndices.Count.ToString() + " ä¸ªæ£€ç´¢ç‚¹äº‹é¡¹?",
                     "ProjectDialog",
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question,
@@ -461,7 +461,7 @@ namespace dp2Circulation
             this.AccessPointsChanged = true;
         }
 
-        // Ìî³ä(Ä¿±ê)Êı¾İ¿âÁĞ±í
+        // å¡«å……(ç›®æ ‡)æ•°æ®åº“åˆ—è¡¨
         // throw:
         //      Exception
         void FillDatabaseList()
@@ -498,7 +498,7 @@ namespace dp2Circulation
                 this.button_deleteDatabase.Enabled = false;
                 this.button_modifyDatabase.Enabled = false;
 
-                // ÔÚÉÏÃælistviewÃ»ÓĞÑ¡ÔñÏîµÄÊ±ºò£¬ÏÂÃæÒ²ÎŞ·¨ÓÃ
+                // åœ¨ä¸Šé¢listviewæ²¡æœ‰é€‰æ‹©é¡¹çš„æ—¶å€™ï¼Œä¸‹é¢ä¹Ÿæ— æ³•ç”¨
                 this.button_newAccessPoint.Enabled = false;
                 this.button_modifyAccessPoint.Enabled = false;
                 this.button_deleteAccessPoint.Enabled = false;
@@ -510,16 +510,16 @@ namespace dp2Circulation
 
                 this.button_newAccessPoint.Enabled = true;
 
-                // ÆäÓàÁ½¸ö°´Å¥£¬²»È¥¹Ü
+                // å…¶ä½™ä¸¤ä¸ªæŒ‰é’®ï¼Œä¸å»ç®¡
             }
 
             FillAccessPointList();
         }
 
-        // ¸ù¾İµ±Ç°Ñ¡ÖĞµÄÊı¾İ¿âÃû£¬Ìî³ä¼ìË÷µãÁĞ±í
+        // æ ¹æ®å½“å‰é€‰ä¸­çš„æ•°æ®åº“åï¼Œå¡«å……æ£€ç´¢ç‚¹åˆ—è¡¨
         void FillAccessPointList()
         {
-            // ¼ì²éÏÈÇ°ÊÇ·ñÓĞĞŞ¸Ä£¿
+            // æ£€æŸ¥å…ˆå‰æ˜¯å¦æœ‰ä¿®æ”¹ï¼Ÿ
             if (this.AccessPointsChanged == true)
             {
                 PutAccessPoints();
@@ -529,7 +529,7 @@ namespace dp2Circulation
 
             if (this.listView_databases.SelectedItems.Count == 0)
             {
-                this.label_accessPoint.Text = "¼ìË÷µã(&A):";
+                this.label_accessPoint.Text = "æ£€ç´¢ç‚¹(&A):";
                 return;
             }
 
@@ -551,14 +551,14 @@ namespace dp2Circulation
                 this.listView_accessPoints.Items.Add(item);
             }
 
-            this.label_accessPoint.Text = "¼ìË÷µã(&A)[Õë¶Ô " + strDatabaseName + " ]:";
+            this.label_accessPoint.Text = "æ£€ç´¢ç‚¹(&A)[é’ˆå¯¹ " + strDatabaseName + " ]:";
 
             this.m_strCurDatabaseName = strDatabaseName;
 
             listView_accessPoints_SelectedIndexChanged(this, null);
         }
 
-        // ½«¼ìË÷µãĞÅÏ¢µÄĞŞ¸Ä£¬¶ÒÏÖµ½ÏàÓ¦µÄ<database>ÔªËØÄÚ
+        // å°†æ£€ç´¢ç‚¹ä¿¡æ¯çš„ä¿®æ”¹ï¼Œå…‘ç°åˆ°ç›¸åº”çš„<database>å…ƒç´ å†…
         void PutAccessPoints()
         {
             if (this.AccessPointsChanged == false)
@@ -570,21 +570,21 @@ namespace dp2Circulation
                 return;
             }
 
-            // ÕÒµ½ÏàÓ¦µÄ<database>ÔªËØ
+            // æ‰¾åˆ°ç›¸åº”çš„<database>å…ƒç´ 
             XmlNode nodeDatabase = this.dom.DocumentElement.SelectSingleNode("//project[@name='" + this.ProjectName + "']/database[@name='" + this.m_strCurDatabaseName + "']");
             if (nodeDatabase == null)
             {
-                Debug.Assert(false, "ÃûÎª '" + this.m_strCurDatabaseName + "' µÄ<database>ÔªËØ²¢²»´æÔÚ");
+                Debug.Assert(false, "åä¸º '" + this.m_strCurDatabaseName + "' çš„<database>å…ƒç´ å¹¶ä¸å­˜åœ¨");
                 return;
             }
 
-            // É¾³ıÔ­ÓĞµÄÏÂÊôÔªËØ
+            // åˆ é™¤åŸæœ‰çš„ä¸‹å±å…ƒç´ 
             while (nodeDatabase.ChildNodes.Count != 0)
             {
                 nodeDatabase.RemoveChild(nodeDatabase.ChildNodes[0]);
             }
 
-            // ½«listviewÖĞµÄÔªËØ¼ÓÈë
+            // å°†listviewä¸­çš„å…ƒç´ åŠ å…¥
             for (int i = 0; i < this.listView_accessPoints.Items.Count; i++)
             {
                 ListViewItem item = this.listView_accessPoints.Items[i];

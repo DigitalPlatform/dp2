@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -17,13 +17,13 @@ using DigitalPlatform.CommonControl;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ²á¼ÇÂ¼±à¼­¿Ø¼ş
+    /// å†Œè®°å½•ç¼–è¾‘æ§ä»¶
     /// </summary>
     public partial class EntityEditControl : ItemEditControlBase
     {
         public event ApendMenuEventHandler AppendMenu = null;
 
-        // ´´½¨×´Ì¬
+        // åˆ›å»ºçŠ¶æ€
         public override ItemDisplayState CreateState
         {
             get
@@ -39,14 +39,14 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ¹İ²ØµØµã¸Ä±äÊÂ¼ş
+        /// é¦†è—åœ°ç‚¹æ”¹å˜äº‹ä»¶
         /// </summary>
         public event TextChangeEventHandler LocationStringChanged = null;
 
-        #region Íâ²¿Ê¹ÓÃµÄ¶ÔÏó
+        #region å¤–éƒ¨ä½¿ç”¨çš„å¯¹è±¡
 
         /// <summary>
-        /// ´´½¨Ë÷È¡ºÅ °´Å¥
+        /// åˆ›å»ºç´¢å–å· æŒ‰é’®
         /// </summary>
         public System.Windows.Forms.Button GetAccessNoButton
         {
@@ -59,12 +59,12 @@ namespace dp2Circulation
 
         #endregion
 
-        #region Êı¾İ³ÉÔ±
+        #region æ•°æ®æˆå‘˜
 
 
 
         /// <summary>
-        /// ²áÌõÂëºÅ
+        /// å†Œæ¡ç å·
         /// </summary>
         public string Barcode
         {
@@ -79,7 +79,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ×´Ì¬
+        /// çŠ¶æ€
         /// </summary>
         public string State
         {
@@ -94,7 +94,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ³ö°æÊ±¼ä
+        /// å‡ºç‰ˆæ—¶é—´
         /// </summary>
         public string PublishTime
         {
@@ -109,7 +109,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ¹İ²ØµØ
+        /// é¦†è—åœ°
         /// </summary>
         public string LocationString
         {
@@ -124,7 +124,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÇşµÀ¡£¾­ÏúÉÌ
+        /// æ¸ é“ã€‚ç»é”€å•†
         /// </summary>
         public string Seller
         {
@@ -140,7 +140,7 @@ namespace dp2Circulation
 
         // 2008/2/15 
         /// <summary>
-        /// ¾­·ÑÀ´Ô´
+        /// ç»è´¹æ¥æº
         /// </summary>
         public string Source
         {
@@ -155,7 +155,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ¼Û¸ñ
+        /// ä»·æ ¼
         /// </summary>
         public string Price
         {
@@ -170,7 +170,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ×°¶©·ÑÓÃ
+        /// è£…è®¢è´¹ç”¨
         /// </summary>
         public string BindingCost
         {
@@ -185,7 +185,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ×¢ÊÍ
+        /// æ³¨é‡Š
         /// </summary>
         public string Comment
         {
@@ -200,7 +200,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ½èÔÄÕß
+        /// å€Ÿé˜…è€…
         /// </summary>
         public string Borrower
         {
@@ -215,7 +215,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ½èÔÄÈÕÆÚ
+        /// å€Ÿé˜…æ—¥æœŸ
         /// </summary>
         public string BorrowDate
         {
@@ -230,7 +230,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ½èÔÄÆÚÏŞ
+        /// å€Ÿé˜…æœŸé™
         /// </summary>
         public string BorrowPeriod
         {
@@ -245,7 +245,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ¼ÇÂ¼Â·¾¶
+        /// è®°å½•è·¯å¾„
         /// </summary>
         public string RecPath
         {
@@ -260,7 +260,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// Í¼ÊéÀàĞÍ
+        /// å›¾ä¹¦ç±»å‹
         /// </summary>
         public string BookType
         {
@@ -275,7 +275,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// µÇÂ¼ºÅ
+        /// ç™»å½•å·
         /// </summary>
         public string RegisterNo
         {
@@ -290,7 +290,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ºÏ²¢×¢ÊÍ
+        /// åˆå¹¶æ³¨é‡Š
         /// </summary>
         public string MergeComment
         {
@@ -305,7 +305,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// Åú´ÎºÅ
+        /// æ‰¹æ¬¡å·
         /// </summary>
         public string BatchNo
         {
@@ -320,7 +320,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ¾í²á
+        /// å·å†Œ
         /// </summary>
         public string Volume
         {
@@ -336,7 +336,7 @@ namespace dp2Circulation
 
         // 2008/12/12 
         /// <summary>
-        /// Ë÷È¡ºÅ
+        /// ç´¢å–å·
         /// </summary>
         public string AccessNo
         {
@@ -353,7 +353,7 @@ namespace dp2Circulation
 
 
         /// <summary>
-        /// ²Î¿¼ ID
+        /// å‚è€ƒ ID
         /// </summary>
         public string RefID
         {
@@ -369,7 +369,7 @@ namespace dp2Circulation
 
         // 2009/10/11 
         /// <summary>
-        /// ÍêºÃÂÊ
+        /// å®Œå¥½ç‡
         /// </summary>
         public string Intact
         {
@@ -385,7 +385,7 @@ namespace dp2Circulation
 
         // 2009/10/11 
         /// <summary>
-        /// ×°¶©ĞÅÏ¢
+        /// è£…è®¢ä¿¡æ¯
         /// </summary>
         public string Binding
         {
@@ -401,7 +401,7 @@ namespace dp2Circulation
 
         // 2009/10/24 
         /// <summary>
-        /// ²Ù×÷ĞÅÏ¢
+        /// æ“ä½œä¿¡æ¯
         /// </summary>
         public string Operations
         {
@@ -418,7 +418,7 @@ namespace dp2Circulation
         #endregion
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public EntityEditControl()
         {
@@ -479,7 +479,7 @@ namespace dp2Circulation
         bool _simpleMode = false;
 
         /// <summary>
-        /// ÊÇ·ñÎª¼òµ¥Ä£Ê½
+        /// æ˜¯å¦ä¸ºç®€å•æ¨¡å¼
         /// </summary>
         public bool SimpleMode
         {
@@ -499,7 +499,7 @@ namespace dp2Circulation
         string _displayMode = "full";
 
         /// <summary>
-        ///  ±à¼­ÇøÏÔÊ¾Ä£Ê½
+        ///  ç¼–è¾‘åŒºæ˜¾ç¤ºæ¨¡å¼
         /// </summary>
         public string DisplayMode
         {
@@ -553,7 +553,7 @@ namespace dp2Circulation
 
         System.Windows.Forms.Label label_errorInfo = null;
 
-        // ´íÎóĞÅÏ¢ÎÄ×Ö
+        // é”™è¯¯ä¿¡æ¯æ–‡å­—
         public string ErrorInfo
         {
             get
@@ -577,7 +577,7 @@ namespace dp2Circulation
         }
 
 #if NO
-        // ´íÎóĞÅÏ¢µÄÍ¼±ê
+        // é”™è¯¯ä¿¡æ¯çš„å›¾æ ‡
         public Image ErrorInfoIcon
         {
             get
@@ -615,7 +615,7 @@ namespace dp2Circulation
 
             StringFormat sf = new StringFormat();
             sf.Trimming = StringTrimming.None;
-            SizeF size = g.MeasureString(strText + "\r\n",   //¸ø×îºó¼ÓÒ»¸ö'\r\n'ÒÔ±£Ö¤Ëã³ö×îºó¿ÕĞĞµÄ¸ß¶È
+            SizeF size = g.MeasureString(strText + "\r\n",   //ç»™æœ€ååŠ ä¸€ä¸ª'\r\n'ä»¥ä¿è¯ç®—å‡ºæœ€åç©ºè¡Œçš„é«˜åº¦
                 label.Font,
                 nWidth,
                 sf);
@@ -628,9 +628,9 @@ namespace dp2Circulation
         }
 #endif
 
-        // ´´½¨ ErrorInfo ±êÇ©
+        // åˆ›å»º ErrorInfo æ ‡ç­¾
         // parameters:
-        //      strText ÎÄ×Ö¡£Èç¹ûÎª null£¬±íÊ¾²»ÉèÖÃ³õÊ¼ÎÄ±¾
+        //      strText æ–‡å­—ã€‚å¦‚æœä¸º nullï¼Œè¡¨ç¤ºä¸è®¾ç½®åˆå§‹æ–‡æœ¬
         void CreateErrorInfoLabel(string strText)
         {
             if (this.label_errorInfo != null)
@@ -667,7 +667,7 @@ namespace dp2Circulation
             this.tableLayoutPanel_main.SetColumnSpan(this.label_errorInfo, this.tableLayoutPanel_main.ColumnStyles.Count);
         }
 
-        // ÔÚ nRow Î»ÖÃ²åÈëÒ»¸öĞÂµÄ RowStyle¡£Í¬Ê±½«ºóÃæµÄ¿Ø¼şÏòºóÒÆ¶¯Ò»ĞĞ
+        // åœ¨ nRow ä½ç½®æ’å…¥ä¸€ä¸ªæ–°çš„ RowStyleã€‚åŒæ—¶å°†åé¢çš„æ§ä»¶å‘åç§»åŠ¨ä¸€è¡Œ
         public static void InsertRowStyle(TableLayoutPanel table, int nRow)
         {
             int nEnd = table.RowStyles.Count - 1;
@@ -681,7 +681,7 @@ namespace dp2Circulation
                 {
                     column_indices.Add(j);
                 }
-                // ÏÈÒÆ¶¯ textbox ÁĞ¡£Èç¹ûÓöµ½ Focued µÄ Control£¬»á´¥·¢ Leave ÊÂ¼ş£¬»áµ¼ÖÂĞŞ¸Ä Label ÑÕÉ«¡£ÕâÑùĞèÒªÄÜÕÒµ½Í¬ĞĞµÄ Label
+                // å…ˆç§»åŠ¨ textbox åˆ—ã€‚å¦‚æœé‡åˆ° Focued çš„ Controlï¼Œä¼šè§¦å‘ Leave äº‹ä»¶ï¼Œä¼šå¯¼è‡´ä¿®æ”¹ Label é¢œè‰²ã€‚è¿™æ ·éœ€è¦èƒ½æ‰¾åˆ°åŒè¡Œçš„ Label
                 if (column_indices.IndexOf(2) != -1)
                 {
                     column_indices.Remove(2);
@@ -689,7 +689,7 @@ namespace dp2Circulation
                 }
             }
 
-            // ÏÈÒÆ¶¯ºó·½µÄ¿Ø¼ş
+            // å…ˆç§»åŠ¨åæ–¹çš„æ§ä»¶
             for (int i = nEnd; i >= nRow; i--)
             {
                 foreach (int j in column_indices)
@@ -705,7 +705,7 @@ namespace dp2Circulation
 
             table.RowStyles.Insert(nRow, new RowStyle());
 
-            // table.RowStyles[nRow] = new RowStyle(); // ÁÙÊ±µÄ
+            // table.RowStyles[nRow] = new RowStyle(); // ä¸´æ—¶çš„
         }
 
         public Padding TablePadding
@@ -779,7 +779,7 @@ namespace dp2Circulation
                     controls.Add(this.textBox_refID);
                 }
 
-                // °ÑËùÓĞ label ĞŞ¸ÄÎªÓÒ¶ÔÆë
+                // æŠŠæ‰€æœ‰ label ä¿®æ”¹ä¸ºå³å¯¹é½
                 if (strMode == "simple_register")
                 {
                     for (int i = 0; i < this.tableLayoutPanel_main.RowStyles.Count; i++)
@@ -815,7 +815,7 @@ namespace dp2Circulation
 #if NO
                     if (strMode == "full")
                     {
-                        // ÏÔÊ¾
+                        // æ˜¾ç¤º
                         if (control.Visible == false)
                         {
                             SetLineVisible(control, true);
@@ -827,7 +827,7 @@ namespace dp2Circulation
 
                     if (strMode == "full" || controls.IndexOf(control) != -1)
                      {
-                        // ÏÔÊ¾
+                        // æ˜¾ç¤º
                         if (this.Visible == false || control.Visible == false)
                         {
                             SetLineVisible(control, true);
@@ -836,7 +836,7 @@ namespace dp2Circulation
                     }
                     else
                     {
-                        // Òş²Ø
+                        // éšè—
                         if (this.Visible == false || control.Visible == true)
                         {
                             SetLineVisible(control, false);
@@ -851,7 +851,7 @@ namespace dp2Circulation
                 this.EnableUpdate();
             }
 
-                // ĞŞÕı¾í¹ö·¶Î§¡£²»È»µÄ»°£¬Èç¹û°Ñ½¹µã·ÅÔÚ ConboBox ÉÏ¹ö¶¯¹öÂÖ£¬ÄÚÈİÇøÓò»áÅÜµ½ÉÏÃæÈ¥ÏÂ²»À´
+                // ä¿®æ­£å·æ»šèŒƒå›´ã€‚ä¸ç„¶çš„è¯ï¼Œå¦‚æœæŠŠç„¦ç‚¹æ”¾åœ¨ ConboBox ä¸Šæ»šåŠ¨æ»šè½®ï¼Œå†…å®¹åŒºåŸŸä¼šè·‘åˆ°ä¸Šé¢å»ä¸‹ä¸æ¥
                 if (strMode == "simple_register")
                 {
                     this.button_getAccessNo.Visible = false;
@@ -866,7 +866,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ³ÉÔ±¿Ø¼şµÄ±³¾°É«
+        /// æˆå‘˜æ§ä»¶çš„èƒŒæ™¯è‰²
         /// </summary>
         public Color MemberBackColor
         {
@@ -903,7 +903,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ³ÉÔ±¿Ø¼şµÄÇ°¾°É«
+        /// æˆå‘˜æ§ä»¶çš„å‰æ™¯è‰²
         /// </summary>
         public Color MemberForeColor
         {
@@ -940,7 +940,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ±³¾°É«
+        /// èƒŒæ™¯è‰²
         /// </summary>
         [Category("Appearance")]
         [DescriptionAttribute("Background Color")]
@@ -960,7 +960,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// Ç°¾°É«
+        /// å‰æ™¯è‰²
         /// </summary>
         [Category("Appearance")]
         [DescriptionAttribute("Foreground Color")]
@@ -981,7 +981,7 @@ namespace dp2Circulation
         }
 #if NO
         /// <summary>
-        /// ÄÚÈİÊÇ·ñ·¢Éú¹ıĞŞ¸Ä
+        /// å†…å®¹æ˜¯å¦å‘ç”Ÿè¿‡ä¿®æ”¹
         /// </summary>
         public bool Changed
         {
@@ -1003,7 +1003,7 @@ namespace dp2Circulation
                 if (this.m_bChanged == false)
                     this.ResetColor();
 
-                // ´¥·¢ÊÂ¼ş
+                // è§¦å‘äº‹ä»¶
                 if (bOldValue != value && this.ContentChanged != null)
                 {
                     ContentChangedEventArgs e = new ContentChangedEventArgs();
@@ -1018,13 +1018,13 @@ namespace dp2Circulation
 
 #if NO
         /// <summary>
-        /// ÉèÖÃÊı¾İ
+        /// è®¾ç½®æ•°æ®
         /// </summary>
-        /// <param name="strXml">ÊµÌå¼ÇÂ¼ XML</param>
-        /// <param name="strRecPath">ÊµÌå¼ÇÂ¼Â·¾¶</param>
-        /// <param name="timestamp">Ê±¼ä´Á</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í; 0: ³É¹¦</returns>
+        /// <param name="strXml">å®ä½“è®°å½• XML</param>
+        /// <param name="strRecPath">å®ä½“è®°å½•è·¯å¾„</param>
+        /// <param name="timestamp">æ—¶é—´æˆ³</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™; 0: æˆåŠŸ</returns>
         public int SetData(string strXml,
             string strRecPath,
             byte[] timestamp,
@@ -1046,7 +1046,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = "XMLÊı¾İ×°ÔØµ½DOMÊ±³ö´í" + ex.Message;
+                strError = "XMLæ•°æ®è£…è½½åˆ°DOMæ—¶å‡ºé”™" + ex.Message;
                 return -1;
             }
 
@@ -1142,7 +1142,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// Çå³ıÈ«²¿ÄÚÈİ
+        /// æ¸…é™¤å…¨éƒ¨å†…å®¹
         /// </summary>
         public override void Clear()
         {
@@ -1184,7 +1184,7 @@ namespace dp2Circulation
 
 
         /// <summary>
-        /// Ë¢ĞÂ ¼ÇÂ¼ XMLDOM¡£¼´°Ñ¿Ø¼şÖĞµÄÄÚÈİ¸üĞÂµ½ XMLDOM ÖĞ
+        /// åˆ·æ–° è®°å½• XMLDOMã€‚å³æŠŠæ§ä»¶ä¸­çš„å†…å®¹æ›´æ–°åˆ° XMLDOM ä¸­
         /// </summary>
         /*public*/ internal override void RefreshDom()
         {
@@ -1226,7 +1226,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                string strError = "²Ù×÷ĞÅÏ¢(<binding>ÔªËØ)ÄÚÇ¶XMLÆ¬¶Î '" + this.Binding + "' ¸ñÊ½³ö´í: " + ex.Message;
+                string strError = "æ“ä½œä¿¡æ¯(<binding>å…ƒç´ )å†…åµŒXMLç‰‡æ®µ '" + this.Binding + "' æ ¼å¼å‡ºé”™: " + ex.Message;
                 throw new Exception(strError);
             }
 
@@ -1239,7 +1239,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                string strError = "²Ù×÷ĞÅÏ¢(<operations>ÔªËØ)ÄÚÇ¶XMLÆ¬¶Î '" + this.Operations + "' ¸ñÊ½³ö´í: " + ex.Message;
+                string strError = "æ“ä½œä¿¡æ¯(<operations>å…ƒç´ )å†…åµŒXMLç‰‡æ®µ '" + this.Operations + "' æ ¼å¼å‡ºé”™: " + ex.Message;
                 throw new Exception(strError);
             }
         }
@@ -1247,9 +1247,9 @@ namespace dp2Circulation
 
 
         /// <summary>
-        /// ½«ÊäÈë½¹µãÉèÖÃµ½ÌõÂëºÅÊäÈëÓòÉÏ
+        /// å°†è¾“å…¥ç„¦ç‚¹è®¾ç½®åˆ°æ¡ç å·è¾“å…¥åŸŸä¸Š
         /// </summary>
-        /// <param name="bSelectAll">ÊÇ·ñÍ¬Ê±È«Ñ¡ÎÄ×Ö</param>
+        /// <param name="bSelectAll">æ˜¯å¦åŒæ—¶å…¨é€‰æ–‡å­—</param>
         public void FocusBarcode(bool bSelectAll)
         {
             if (bSelectAll == true)
@@ -1259,9 +1259,9 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ½«ÊäÈë½¹µãÉèÖÃµ½×´Ì¬ÊäÈëÓòÉÏ
+        /// å°†è¾“å…¥ç„¦ç‚¹è®¾ç½®åˆ°çŠ¶æ€è¾“å…¥åŸŸä¸Š
         /// </summary>
-        /// <param name="bSelectAll">ÊÇ·ñÍ¬Ê±È«Ñ¡ÎÄ×Ö</param>
+        /// <param name="bSelectAll">æ˜¯å¦åŒæ—¶å…¨é€‰æ–‡å­—</param>
         public void FocusState(bool bSelectAll)
         {
             if (bSelectAll == true)
@@ -1271,9 +1271,9 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ½«ÊäÈë½¹µãÉèÖÃµ½³ö°æÊ±¼äÊäÈëÓòÉÏ
+        /// å°†è¾“å…¥ç„¦ç‚¹è®¾ç½®åˆ°å‡ºç‰ˆæ—¶é—´è¾“å…¥åŸŸä¸Š
         /// </summary>
-        /// <param name="bSelectAll">ÊÇ·ñÍ¬Ê±È«Ñ¡ÎÄ×Ö</param>
+        /// <param name="bSelectAll">æ˜¯å¦åŒæ—¶å…¨é€‰æ–‡å­—</param>
         public void FocusPublishTime(bool bSelectAll)
         {
             if (bSelectAll == true)
@@ -1283,9 +1283,9 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ½«ÊäÈë½¹µãÉèÖÃµ½¹İ²ØµØÊäÈëÓòÉÏ
+        /// å°†è¾“å…¥ç„¦ç‚¹è®¾ç½®åˆ°é¦†è—åœ°è¾“å…¥åŸŸä¸Š
         /// </summary>
-        /// <param name="bSelectAll">ÊÇ·ñÍ¬Ê±È«Ñ¡ÎÄ×Ö</param>
+        /// <param name="bSelectAll">æ˜¯å¦åŒæ—¶å…¨é€‰æ–‡å­—</param>
         public void FocusLocationString(bool bSelectAll)
         {
             if (bSelectAll == true)
@@ -1295,9 +1295,9 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ½«ÊäÈë½¹µãÉèÖÃµ½ÇşµÀÊäÈëÓòÉÏ
+        /// å°†è¾“å…¥ç„¦ç‚¹è®¾ç½®åˆ°æ¸ é“è¾“å…¥åŸŸä¸Š
         /// </summary>
-        /// <param name="bSelectAll">ÊÇ·ñÍ¬Ê±È«Ñ¡ÎÄ×Ö</param>
+        /// <param name="bSelectAll">æ˜¯å¦åŒæ—¶å…¨é€‰æ–‡å­—</param>
         public void FocusSeller(bool bSelectAll)
         {
             if (bSelectAll == true)
@@ -1310,7 +1310,7 @@ namespace dp2Circulation
         internal override void ResetColor()
         {
             Color color = this.tableLayoutPanel_main.BackColor;
-            this.label_barcode_color.BackColor = color;    // ºÍ±³¾°Ò»ÖÂ
+            this.label_barcode_color.BackColor = color;    // å’ŒèƒŒæ™¯ä¸€è‡´
             this.label_state_color.BackColor = color;
             this.label_publishTime_color.BackColor = color;
             this.label_location_color.BackColor = color;
@@ -1403,7 +1403,7 @@ namespace dp2Circulation
             }
 #endif
 
-            // ±È½ÏĞÂ¾ÉÁ½¸öÖµ
+            // æ¯”è¾ƒæ–°æ—§ä¸¤ä¸ªå€¼
             if (this.LocationStringChanged != null)
             {
                 TextChangeEventArgs e1 = new TextChangeEventArgs();
@@ -1591,37 +1591,37 @@ namespace dp2Circulation
 
 #if NO
         /// <summary>
-        /// Ö»¶Á×´Ì¬·ç¸ñ
+        /// åªè¯»çŠ¶æ€é£æ ¼
         /// </summary>
         public enum ReadOnlyStyle
         {
             /// <summary>
-            /// Çå³ıÈ«²¿Ö»¶Á×´Ì¬£¬»Ö¸´¿É±à¼­×´Ì¬
+            /// æ¸…é™¤å…¨éƒ¨åªè¯»çŠ¶æ€ï¼Œæ¢å¤å¯ç¼–è¾‘çŠ¶æ€
             /// </summary>
-            Clear = 0,  // Çå³ıÈ«²¿ReadOnly×´Ì¬£¬»Ö¸´¿É±à¼­×´Ì¬
+            Clear = 0,  // æ¸…é™¤å…¨éƒ¨ReadOnlyçŠ¶æ€ï¼Œæ¢å¤å¯ç¼–è¾‘çŠ¶æ€
             /// <summary>
-            /// È«²¿Ö»¶Á
+            /// å…¨éƒ¨åªè¯»
             /// </summary>
-            All = 1,    // È«²¿½ûÖ¹ĞŞ¸Ä
+            All = 1,    // å…¨éƒ¨ç¦æ­¢ä¿®æ”¹
             /// <summary>
-            /// Í¼Êé¹İÒ»°ã¹¤×÷ÈËÔ±£¬²»ÄÜĞŞ¸ÄÂ·¾¶
+            /// å›¾ä¹¦é¦†ä¸€èˆ¬å·¥ä½œäººå‘˜ï¼Œä¸èƒ½ä¿®æ”¹è·¯å¾„
             /// </summary>
-            Librarian = 2,  // Í¼Êé¹İÒ»°ã¹¤×÷ÈËÔ±£¬²»ÄÜĞŞ¸ÄÂ·¾¶
+            Librarian = 2,  // å›¾ä¹¦é¦†ä¸€èˆ¬å·¥ä½œäººå‘˜ï¼Œä¸èƒ½ä¿®æ”¹è·¯å¾„
             /// <summary>
-            /// ×°¶©²Ù×÷Õß¡£³ıÁËÍ¼Êé¹İÒ»°ã¹¤×÷ÈËÔ±²»ÄÜĞŞ¸ÄµÄ×Ö¶ÎÍâ£¬»¹²»ÄÜĞŞ¸Ä¾í¡¢×°¶©ĞÅÏ¢¡¢²Ù×÷ÕßµÈ
+            /// è£…è®¢æ“ä½œè€…ã€‚é™¤äº†å›¾ä¹¦é¦†ä¸€èˆ¬å·¥ä½œäººå‘˜ä¸èƒ½ä¿®æ”¹çš„å­—æ®µå¤–ï¼Œè¿˜ä¸èƒ½ä¿®æ”¹å·ã€è£…è®¢ä¿¡æ¯ã€æ“ä½œè€…ç­‰
             /// </summary>
-            Binding = 3,    // ×°¶©²Ù×÷Õß¡£³ıÁËÍ¼Êé¹İÒ»°ã¹¤×÷ÈËÔ±²»ÄÜĞŞ¸ÄµÄ×Ö¶ÎÍâ£¬»¹²»ÄÜĞŞ¸Ä¾í¡¢binding¡¢²Ù×÷ÕßµÈ
+            Binding = 3,    // è£…è®¢æ“ä½œè€…ã€‚é™¤äº†å›¾ä¹¦é¦†ä¸€èˆ¬å·¥ä½œäººå‘˜ä¸èƒ½ä¿®æ”¹çš„å­—æ®µå¤–ï¼Œè¿˜ä¸èƒ½ä¿®æ”¹å·ã€bindingã€æ“ä½œè€…ç­‰
         }
 #endif
 
-        // ¸ù¾İÊı¾İµÄÊµ¼ÊÇé¿ö, ½«µä²Ø²á¹ÜÀí²»ĞèÒªĞŞ¸ÄµÄÄ³Ğ©ÓòÉèÖÃÎªReadOnly×´Ì¬
+        // æ ¹æ®æ•°æ®çš„å®é™…æƒ…å†µ, å°†å…¸è—å†Œç®¡ç†ä¸éœ€è¦ä¿®æ”¹çš„æŸäº›åŸŸè®¾ç½®ä¸ºReadOnlyçŠ¶æ€
         /// <summary>
-        /// ÉèÖÃÖ»¶Á×´Ì¬
+        /// è®¾ç½®åªè¯»çŠ¶æ€
         /// </summary>
-        /// <param name="strStyle">ÈçºÎÉèÖÃÖ»¶Á×´Ì¬¡£
-        /// "all" ±íÊ¾È«²¿ÎªÖ»¶Á£»
-        /// "librarian" ±íÊ¾Ö»ÓĞ¼ÇÂ¼Â·¾¶¡¢²Î¿¼ID¡¢½èÔÄÕß¡¢½èÔÄÆÚÏŞ¡¢½èÔÄÈÕÆÚÎªÖ»¶Á(Èç¹û½èÔÄÕß²»Îª¿Õ£¬Ôò²áÌõÂëºÅÒ²ÒªÉèÖÃÎªÖ»¶Á)£¬ÆäÓàÎª¿É¸ÄĞ´;
-        /// "binding" ±íÊ¾³ıÁË³ö°æÊ±¼ä¡¢½èÔÄÕß¡¢½èÔÄÆÚÏŞ¡¢½èÔÄÈÕÆÚ¡¢¼ÇÂ¼Â·¾¶¡¢²Î¿¼ID¡¢×°¶©ĞÅÏ¢¡¢²Ù×÷ĞÅÏ¢¡¢¾í²áĞÅÏ¢ÉèÖÃÎªÖ»¶ÁÒÔÍâ(Èç¹û½èÔÄÕß²»Îª¿Õ£¬Ôò²áÌõÂëºÅÒ²ÒªÉèÖÃÎªÖ»¶Á)£¬ÆäÓàÉèÖÃÎª¿É¸ÄĞ´;
+        /// <param name="strStyle">å¦‚ä½•è®¾ç½®åªè¯»çŠ¶æ€ã€‚
+        /// "all" è¡¨ç¤ºå…¨éƒ¨ä¸ºåªè¯»ï¼›
+        /// "librarian" è¡¨ç¤ºåªæœ‰è®°å½•è·¯å¾„ã€å‚è€ƒIDã€å€Ÿé˜…è€…ã€å€Ÿé˜…æœŸé™ã€å€Ÿé˜…æ—¥æœŸä¸ºåªè¯»(å¦‚æœå€Ÿé˜…è€…ä¸ä¸ºç©ºï¼Œåˆ™å†Œæ¡ç å·ä¹Ÿè¦è®¾ç½®ä¸ºåªè¯»)ï¼Œå…¶ä½™ä¸ºå¯æ”¹å†™;
+        /// "binding" è¡¨ç¤ºé™¤äº†å‡ºç‰ˆæ—¶é—´ã€å€Ÿé˜…è€…ã€å€Ÿé˜…æœŸé™ã€å€Ÿé˜…æ—¥æœŸã€è®°å½•è·¯å¾„ã€å‚è€ƒIDã€è£…è®¢ä¿¡æ¯ã€æ“ä½œä¿¡æ¯ã€å·å†Œä¿¡æ¯è®¾ç½®ä¸ºåªè¯»ä»¥å¤–(å¦‚æœå€Ÿé˜…è€…ä¸ä¸ºç©ºï¼Œåˆ™å†Œæ¡ç å·ä¹Ÿè¦è®¾ç½®ä¸ºåªè¯»)ï¼Œå…¶ä½™è®¾ç½®ä¸ºå¯æ”¹å†™;
         /// </param>
         public override void SetReadOnly(string strStyle)
         {
@@ -1656,7 +1656,7 @@ namespace dp2Circulation
                 return;
             }
 
-            // ÏÈÇå³ıReadOnly
+            // å…ˆæ¸…é™¤ReadOnly
             this.textBox_barcode.ReadOnly = false;
             this.checkedComboBox_state.Enabled = true;
             this.textBox_publishTime.ReadOnly = false;
@@ -1694,7 +1694,7 @@ namespace dp2Circulation
                 this.textBox_refID.ReadOnly = true; // 2009/6/2 
 
                 if (this.textBox_borrower.Text != "")
-                    this.textBox_barcode.ReadOnly = true;  // ÎªÁË²âÊÔ·şÎñÆ÷¶ËAPI£¬¿ÉÒÔĞŞ¸ÄÎªfalse
+                    this.textBox_barcode.ReadOnly = true;  // ä¸ºäº†æµ‹è¯•æœåŠ¡å™¨ç«¯APIï¼Œå¯ä»¥ä¿®æ”¹ä¸ºfalse
                 else
                     this.textBox_barcode.ReadOnly = false;
             }
@@ -1711,7 +1711,7 @@ namespace dp2Circulation
                 this.textBox_refID.ReadOnly = true; // 2009/6/2 
 
                 if (this.textBox_borrower.Text != "")
-                    this.textBox_barcode.ReadOnly = true;  // ÎªÁË²âÊÔ·şÎñÆ÷¶ËAPI£¬¿ÉÒÔĞŞ¸ÄÎªfalse
+                    this.textBox_barcode.ReadOnly = true;  // ä¸ºäº†æµ‹è¯•æœåŠ¡å™¨ç«¯APIï¼Œå¯ä»¥ä¿®æ”¹ä¸ºfalse
                 else
                     this.textBox_barcode.ReadOnly = false;
 
@@ -1721,9 +1721,9 @@ namespace dp2Circulation
             }
         }
 
-        // ½«¿ÉÄÜÒÑ¾­ÉèÖÃÎªReadOnly×´Ì¬µÄÄ³Ğ©ÓòÉèÎª¿É¸ÄĞ´×´Ì¬
+        // å°†å¯èƒ½å·²ç»è®¾ç½®ä¸ºReadOnlyçŠ¶æ€çš„æŸäº›åŸŸè®¾ä¸ºå¯æ”¹å†™çŠ¶æ€
         /// <summary>
-        /// ÉèÖÃÎª¿ÉĞŞ¸Ä×´Ì¬
+        /// è®¾ç½®ä¸ºå¯ä¿®æ”¹çŠ¶æ€
         /// </summary>
         public override void SetChangeable()
         {
@@ -1736,7 +1736,7 @@ namespace dp2Circulation
             this.textBox_barcode.ReadOnly = false;
         }
 
-        // »ñµÃÒ»¸öĞĞµÄÏÂÀ­ÁĞ±íÖµ
+        // è·å¾—ä¸€ä¸ªè¡Œçš„ä¸‹æ‹‰åˆ—è¡¨å€¼
         public List<string> GetLineValueList(EditLine line)
         {
             List<string> results = new List<string>();
@@ -1767,14 +1767,14 @@ namespace dp2Circulation
                 }
                 return results;
             }
-            return null;    // ±íÊ¾¸ù±¾Ã»ÓĞÏÂÀ­ÁĞ±í
+            return null;    // è¡¨ç¤ºæ ¹æœ¬æ²¡æœ‰ä¸‹æ‹‰åˆ—è¡¨
         }
 
         int m_nInDropDown = 0;
 
         private void comboBox_location_DropDown(object sender, EventArgs e)
         {
-            // ·ÀÖ¹ÖØÈë 2009/2/23 
+            // é˜²æ­¢é‡å…¥ 2009/2/23 
             if (this.m_nInDropDown > 0)
                 return;
 
@@ -1818,7 +1818,7 @@ namespace dp2Circulation
                         e1.TableName = "orderSource";
                     else
                     {
-                        Debug.Assert(false, "²»Ö§³ÖµÄsender");
+                        Debug.Assert(false, "ä¸æ”¯æŒçš„sender");
                         return;
                     }
 
@@ -1836,10 +1836,10 @@ namespace dp2Circulation
                     out strLibraryCode,
                     out strPureName);
 
-                        if (combobox != this.comboBox_location  // ¹İ²ØµØµÄÁĞ±í²»Òª±»¹ıÂË
+                        if (combobox != this.comboBox_location  // é¦†è—åœ°çš„åˆ—è¡¨ä¸è¦è¢«è¿‡æ»¤
                             && String.IsNullOrEmpty(this.comboBox_location.Text) == false)
                         {
-                            // ¹ıÂË³ö·ûºÏ¹İ´úÂëµÄÄÇĞ©Öµ×Ö·û´®
+                            // è¿‡æ»¤å‡ºç¬¦åˆé¦†ä»£ç çš„é‚£äº›å€¼å­—ç¬¦ä¸²
                             results = Global.FilterValuesWithLibraryCode(strLibraryCode,
                                 StringUtil.FromStringArray(e1.values));
                         }
@@ -1883,10 +1883,10 @@ namespace dp2Circulation
         {
             comboBox_location_DropDown(sender, e);
 
-            // ¸ø³öÈ±Ê¡Öµ 2014/9/7
+            // ç»™å‡ºç¼ºçœå€¼ 2014/9/7
             if (this.checkedComboBox_state.Items.Count == 0)
             {
-                List<string> values = StringUtil.SplitList("×¢Ïú,¶ªÊ§,¼Ó¹¤ÖĞ");
+                List<string> values = StringUtil.SplitList("æ³¨é”€,ä¸¢å¤±,åŠ å·¥ä¸­");
                 foreach (string s in values)
                 {
                     this.checkedComboBox_state.Items.Add(s);
@@ -1909,11 +1909,11 @@ namespace dp2Circulation
             comboBox_location_DropDown(sender, e);
         }
 
-        // ±È½Ï×Ô¼ººÍrefControlµÄÊı¾İ²îÒì£¬ÓÃÌØÊâÑÕÉ«ÏÔÊ¾²îÒì×Ö¶Î
+        // æ¯”è¾ƒè‡ªå·±å’ŒrefControlçš„æ•°æ®å·®å¼‚ï¼Œç”¨ç‰¹æ®Šé¢œè‰²æ˜¾ç¤ºå·®å¼‚å­—æ®µ
         /// <summary>
-        /// ±È½Ï×Ô¼ººÍrefControlµÄÊı¾İ²îÒì£¬ÓÃÌØÊâÑÕÉ«ÏÔÊ¾²îÒì×Ö¶Î
+        /// æ¯”è¾ƒè‡ªå·±å’ŒrefControlçš„æ•°æ®å·®å¼‚ï¼Œç”¨ç‰¹æ®Šé¢œè‰²æ˜¾ç¤ºå·®å¼‚å­—æ®µ
         /// </summary>
-        /// <param name="r">ÒªºÍ×Ô¼º½øĞĞ±È½ÏµÄ¿Ø¼ş¶ÔÏó</param>
+        /// <param name="r">è¦å’Œè‡ªå·±è¿›è¡Œæ¯”è¾ƒçš„æ§ä»¶å¯¹è±¡</param>
         public override void HighlightDifferences(ItemEditControlBase r)
         {
             var refControl = r as EntityEditControl;
@@ -2044,7 +2044,7 @@ namespace dp2Circulation
                     e1.Name = "Operations";
                 else 
                 {
-                    Debug.Assert(false, "Î´ÖªµÄ²¿¼ş");
+                    Debug.Assert(false, "æœªçŸ¥çš„éƒ¨ä»¶");
                     return;
                 }
 
@@ -2114,7 +2114,7 @@ namespace dp2Circulation
                     e1.Name = "Operations";
                 else
                 {
-                    Debug.Assert(false, "Î´ÖªµÄ²¿¼ş");
+                    Debug.Assert(false, "æœªçŸ¥çš„éƒ¨ä»¶");
                     return;
                 }
 
@@ -2160,7 +2160,7 @@ namespace dp2Circulation
 #endif
 
         /// <summary>
-        /// ³ĞÔØ³ÉÔ±¿Ø¼şµÄ TableLayoutPanel ¶ÔÏó
+        /// æ‰¿è½½æˆå‘˜æ§ä»¶çš„ TableLayoutPanel å¯¹è±¡
         /// </summary>
         public TableLayoutPanel ContentControl
         {
@@ -2176,7 +2176,7 @@ namespace dp2Circulation
             if (this.PaintContent != null)
                 this.PaintContent(sender, e);
 #endif
-            OnPaintContent(this, e);    // sender 2014/10/4 ĞŞ¸Ä
+            OnPaintContent(this, e);    // sender 2014/10/4 ä¿®æ”¹
         }
 
         private void comboBox_bookType_SelectedIndexChanged(object sender, EventArgs e)
@@ -2231,7 +2231,7 @@ namespace dp2Circulation
             contextMenu.MenuItems.Add(menuItem);
 
 
-            menuItem = new MenuItem("É¾³ı(&D)");
+            menuItem = new MenuItem("åˆ é™¤(&D)");
             contextMenu.MenuItems.Add(menuItem);
 #endif
             if (this.AppendMenu != null)
@@ -2260,25 +2260,25 @@ namespace dp2Circulation
     }
 
     /// <summary>
-    /// ÎÄ±¾·¢Éú±ä»¯
+    /// æ–‡æœ¬å‘ç”Ÿå˜åŒ–
     /// </summary>
-    /// <param name="sender">·¢ËÍÕß</param>
-    /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+    /// <param name="sender">å‘é€è€…</param>
+    /// <param name="e">äº‹ä»¶å‚æ•°</param>
     public delegate void TextChangeEventHandler(object sender,
     TextChangeEventArgs e);
 
     /// <summary>
-    /// ÎÄ±¾·¢Éú±ä»¯ÊÂ¼şµÄ²ÎÊı
+    /// æ–‡æœ¬å‘ç”Ÿå˜åŒ–äº‹ä»¶çš„å‚æ•°
     /// </summary>
     public class TextChangeEventArgs : EventArgs
     {
         /// <summary>
-        /// ¾ÉµÄÎÄ±¾
+        /// æ—§çš„æ–‡æœ¬
         /// </summary>
         public string OldText = "";
 
         /// <summary>
-        /// ĞÂµÄÎÄ±¾
+        /// æ–°çš„æ–‡æœ¬
         /// </summary>
         public string NewText = "";
     }

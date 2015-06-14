@@ -6,9 +6,10 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Diagnostics;
+
 using DigitalPlatform.Marc;
 using DigitalPlatform.IO;
-using System.Diagnostics;
 
 namespace dp2Circulation
 {

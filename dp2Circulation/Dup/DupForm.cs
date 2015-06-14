@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -19,11 +19,11 @@ using DigitalPlatform.CirculationClient.localhost;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ²éÖØ´°
+    /// æŸ¥é‡çª—
     /// </summary>
     public partial class DupForm : MyForm
     {
-        // ²ÎÓëÅÅĞòµÄÁĞºÅÊı×é
+        // å‚ä¸æ’åºçš„åˆ—å·æ•°ç»„
         SortColumns SortColumns = new SortColumns();
 
         /*
@@ -37,24 +37,24 @@ namespace dp2Circulation
         string m_strXmlRecord = "";
 
         /// <summary>
-        /// ¼ìË÷½áÊøĞÅºÅ
+        /// æ£€ç´¢ç»“æŸä¿¡å·
         /// </summary>
         public AutoResetEvent EventFinish = new AutoResetEvent(false);
 
         /// <summary>
-        /// ÊÇ·ñÒª(ÔÚ´°¿Ú´ò¿ªºó)×Ô¶¯Æô¶¯¼ìË÷
+        /// æ˜¯å¦è¦(åœ¨çª—å£æ‰“å¼€å)è‡ªåŠ¨å¯åŠ¨æ£€ç´¢
         /// </summary>
         public bool AutoBeginSearch = false;
 
         const int WM_INITIAL = API.WM_USER + 201;
 
-        const int ITEMTYPE_NORMAL = 0;  // ÆÕÍ¨ÊÂÏî
-        const int ITEMTYPE_OVERTHRESHOLD = 1; // È¨Öµ³¬¹ıãĞÖµµÄÊÂÏî
+        const int ITEMTYPE_NORMAL = 0;  // æ™®é€šäº‹é¡¹
+        const int ITEMTYPE_OVERTHRESHOLD = 1; // æƒå€¼è¶…è¿‡é˜ˆå€¼çš„äº‹é¡¹
 
-        #region Íâ²¿½Ó¿Ú
+        #region å¤–éƒ¨æ¥å£
 
         /// <summary>
-        /// ²éÖØ·½°¸Ãû
+        /// æŸ¥é‡æ–¹æ¡ˆå
         /// </summary>
         public string ProjectName
         {
@@ -69,7 +69,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ·¢Æğ²éÖØµÄ¼ÇÂ¼Â·¾¶¡£id¿ÉÒÔÎª?¡£Ö÷ÒªÓÃÀ´Ä£Äâ³ökeys
+        /// å‘èµ·æŸ¥é‡çš„è®°å½•è·¯å¾„ã€‚idå¯ä»¥ä¸º?ã€‚ä¸»è¦ç”¨æ¥æ¨¡æ‹Ÿå‡ºkeys
         /// </summary>
         public string RecordPath
         {
@@ -80,12 +80,12 @@ namespace dp2Circulation
             set
             {
                 this.textBox_recordPath.Text = value;
-                this.Text = "²éÖØ: " + value;
+                this.Text = "æŸ¥é‡: " + value;
             }
         }
 
         /// <summary>
-        /// ·¢Æğ²éÖØµÄXML¼ÇÂ¼
+        /// å‘èµ·æŸ¥é‡çš„XMLè®°å½•
         /// </summary>
         public string XmlRecord
         {
@@ -100,7 +100,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// »ñµÃ²éÖØ½á¹û£ºËùÃüÖĞµÄÈ¨Öµ³¬¹ıãĞÖµµÄ¼ÇÂ¼Â·¾¶µÄ¼¯ºÏ
+        /// è·å¾—æŸ¥é‡ç»“æœï¼šæ‰€å‘½ä¸­çš„æƒå€¼è¶…è¿‡é˜ˆå€¼çš„è®°å½•è·¯å¾„çš„é›†åˆ
         /// </summary>
         public string[] DupPaths
         {
@@ -117,7 +117,7 @@ namespace dp2Circulation
                         aPath.Add(item.Text);
                     }
                     else
-                        break;  // ¼Ù¶¨³¬¹ıãĞÖµµÄÊÂÏî¶¼ÔÚÇ°²¿£¬ÕâÀï¿ÉÒÔÓÅ»¯ÖĞ¶Ï
+                        break;  // å‡å®šè¶…è¿‡é˜ˆå€¼çš„äº‹é¡¹éƒ½åœ¨å‰éƒ¨ï¼Œè¿™é‡Œå¯ä»¥ä¼˜åŒ–ä¸­æ–­
                 }
 
                 if (aPath.Count == 0)
@@ -133,7 +133,7 @@ namespace dp2Circulation
         #endregion
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public DupForm()
         {
@@ -141,9 +141,9 @@ namespace dp2Circulation
 
             ListViewProperty prop = new ListViewProperty();
             this.listView_browse.Tag = prop;
-            // µÚÒ»ÁĞÌØÊâ£¬¼ÇÂ¼Â·¾¶
+            // ç¬¬ä¸€åˆ—ç‰¹æ®Šï¼Œè®°å½•è·¯å¾„
             prop.SetSortStyle(0, ColumnSortStyle.RecPath);
-            // µÚ¶şÁĞÌØÊâ£¬È¨ÖµºÍ£¬ÓÒ¶ÔÆë
+            // ç¬¬äºŒåˆ—ç‰¹æ®Šï¼Œæƒå€¼å’Œï¼Œå³å¯¹é½
             prop.SetSortStyle(1, ColumnSortStyle.RightAlign);
             prop.GetColumnTitles -= new GetColumnTitlesEventHandler(prop_GetColumnTitles);
             prop.GetColumnTitles += new GetColumnTitlesEventHandler(prop_GetColumnTitles);
@@ -155,9 +155,9 @@ namespace dp2Circulation
             e.ColumnTitles = new ColumnPropertyCollection();
             ColumnPropertyCollection temp = this.MainForm.GetBrowseColumnProperties(e.DbName);
             if (temp != null)
-                e.ColumnTitles.AddRange(temp);  // Òª¸´ÖÆ£¬²»ÒªÖ±½ÓÊ¹ÓÃ£¬ÒòÎªºóÃæ¿ÉÄÜ»áĞŞ¸Ä¡£ÅÂÓ°Ïìµ½Ô­¼ş
+                e.ColumnTitles.AddRange(temp);  // è¦å¤åˆ¶ï¼Œä¸è¦ç›´æ¥ä½¿ç”¨ï¼Œå› ä¸ºåé¢å¯èƒ½ä¼šä¿®æ”¹ã€‚æ€•å½±å“åˆ°åŸä»¶
 
-            e.ColumnTitles.Insert(0, "È¨ÖµºÍ");
+            e.ColumnTitles.Insert(0, "æƒå€¼å’Œ");
         }
 
         void ClearListViewPropertyCache()
@@ -180,7 +180,7 @@ namespace dp2Circulation
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
 
             stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// ºÍÈİÆ÷¹ØÁª
+            stop.Register(MainForm.stopManager, true);	// å’Œå®¹å™¨å…³è”
 #endif
 
             this.checkBox_includeLowCols.Checked = this.MainForm.AppInfo.GetBoolean(
@@ -211,7 +211,7 @@ namespace dp2Circulation
                     true);
             }
 
-            // ×Ô¶¯Æô¶¯²éÖØ
+            // è‡ªåŠ¨å¯åŠ¨æŸ¥é‡
             if (this.AutoBeginSearch == true)
             {
                 API.PostMessage(this.Handle, WM_INITIAL, 0, 0);
@@ -219,7 +219,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ¿ªÊ¼¼ìË÷
+        /// å¼€å§‹æ£€ç´¢
         /// </summary>
         public void BeginSearch()
         {
@@ -227,9 +227,9 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// È±Ê¡´°¿Ú¹ı³Ì
+        /// ç¼ºçœçª—å£è¿‡ç¨‹
         /// </summary>
-        /// <param name="m">ÏûÏ¢</param>
+        /// <param name="m">æ¶ˆæ¯</param>
         protected override void DefWndProc(ref Message m)
         {
             switch (m.Msg)
@@ -248,9 +248,9 @@ namespace dp2Circulation
 #if NO
             if (stop != null)
             {
-                if (stop.State == 0)    // 0 ±íÊ¾ÕıÔÚ´¦Àí
+                if (stop.State == 0)    // 0 è¡¨ç¤ºæ­£åœ¨å¤„ç†
                 {
-                    MessageBox.Show(this, "ÇëÔÚ¹Ø±Õ´°¿ÚÇ°Í£Ö¹ÕıÔÚ½øĞĞµÄ³¤Ê±²Ù×÷¡£");
+                    MessageBox.Show(this, "è¯·åœ¨å…³é—­çª—å£å‰åœæ­¢æ­£åœ¨è¿›è¡Œçš„é•¿æ—¶æ“ä½œã€‚");
                     e.Cancel = true;
                     return;
                 }
@@ -261,9 +261,9 @@ namespace dp2Circulation
         private void DupForm_FormClosed(object sender, FormClosedEventArgs e)
         {
 #if NO
-            if (stop != null) // ÍÑÀë¹ØÁª
+            if (stop != null) // è„±ç¦»å…³è”
             {
-                stop.Unregister();	// ºÍÈİÆ÷¹ØÁª
+                stop.Unregister();	// å’Œå®¹å™¨å…³è”
                 stop = null;
             }
 #endif
@@ -305,10 +305,10 @@ namespace dp2Circulation
 #endif
 
         /// <summary>
-        /// Æô¶¯¼ìË÷
+        /// å¯åŠ¨æ£€ç´¢
         /// </summary>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í; 0: ³É¹¦</returns>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™; 0: æˆåŠŸ</returns>
         public int DoSearch(out string strError)
         {
             strError = "";
@@ -348,9 +348,9 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÔÊĞí»òÕß½ûÖ¹½çÃæ¿Ø¼ş¡£ÔÚ³¤²Ù×÷Ç°£¬Ò»°ãĞèÒª½ûÖ¹½çÃæ¿Ø¼ş£»²Ù×÷Íê³ÉºóÔÙÔÊĞí
+        /// å…è®¸æˆ–è€…ç¦æ­¢ç•Œé¢æ§ä»¶ã€‚åœ¨é•¿æ“ä½œå‰ï¼Œä¸€èˆ¬éœ€è¦ç¦æ­¢ç•Œé¢æ§ä»¶ï¼›æ“ä½œå®Œæˆåå†å…è®¸
         /// </summary>
-        /// <param name="bEnable">ÊÇ·ñÔÊĞí½çÃæ¿Ø¼ş¡£true ÎªÔÊĞí£¬ false Îª½ûÖ¹</param>
+        /// <param name="bEnable">æ˜¯å¦å…è®¸ç•Œé¢æ§ä»¶ã€‚true ä¸ºå…è®¸ï¼Œ false ä¸ºç¦æ­¢</param>
         public override void EnableControls(bool bEnable)
         {
             this.button_search.Enabled = bEnable;
@@ -361,19 +361,19 @@ namespace dp2Circulation
         }
 
  
-        // ¼ìË÷
+        // æ£€ç´¢
         // return:
         //      -1  error
         //      0   succeed
         /// <summary>
-        /// Æô¶¯²éÖØ
+        /// å¯åŠ¨æŸ¥é‡
         /// </summary>
-        /// <param name="strProjectName">²éÖØ·½°¸Ãû</param>
-        /// <param name="strRecPath">·¢Æğ¼ÇÂ¼Â·¾¶</param>
-        /// <param name="strXml">·¢Æğ¼ÇÂ¼µÄ XML</param>
-        /// <param name="strUsedProjectName">·µ»ØÊµ¼ÊÊ¹ÓÃµÄ·½°¸Ãû</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í; >=0: ÃüÖĞµÄ¼ÇÂ¼Êı</returns>
+        /// <param name="strProjectName">æŸ¥é‡æ–¹æ¡ˆå</param>
+        /// <param name="strRecPath">å‘èµ·è®°å½•è·¯å¾„</param>
+        /// <param name="strXml">å‘èµ·è®°å½•çš„ XML</param>
+        /// <param name="strUsedProjectName">è¿”å›å®é™…ä½¿ç”¨çš„æ–¹æ¡ˆå</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™; >=0: å‘½ä¸­çš„è®°å½•æ•°</returns>
         public int DoSearch(string strProjectName,
             string strRecPath,
             string strXml,
@@ -383,7 +383,7 @@ namespace dp2Circulation
             strError = "";
             strUsedProjectName = "";
 
-            if (strProjectName == "<Ä¬ÈÏ>"
+            if (strProjectName == "<é»˜è®¤>"
                 || strProjectName == "<default>")
                 strProjectName = "";
 
@@ -392,7 +392,7 @@ namespace dp2Circulation
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ½øĞĞ²éÖØ ...");
+            stop.Initial("æ­£åœ¨è¿›è¡ŒæŸ¥é‡ ...");
             stop.BeginLoop();
 
             this.Update();
@@ -425,25 +425,25 @@ namespace dp2Circulation
                 long lHitCount = lRet;
 
                 if (lHitCount == 0)
-                    goto END1;   // ²éÖØ·¢ÏÖÃ»ÓĞÃüÖĞ
+                    goto END1;   // æŸ¥é‡å‘ç°æ²¡æœ‰å‘½ä¸­
 
                 if (stop != null)
                     stop.SetProgressRange(0, lHitCount);
 
                 long lStart = 0;
                 long lPerCount = Math.Min(50, lHitCount);
-                // ×°Èëä¯ÀÀ¸ñÊ½
+                // è£…å…¥æµè§ˆæ ¼å¼
                 for (; ; )
                 {
-                    Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                    Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                     if (stop != null && stop.State != 0)
                     {
-                        strError = "ÓÃ»§ÖĞ¶Ï";
+                        strError = "ç”¨æˆ·ä¸­æ–­";
                         goto ERROR1;
                     }
 
-                    stop.SetMessage("ÕıÔÚ×°Èëä¯ÀÀĞÅÏ¢ " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (ÃüÖĞ " + lHitCount.ToString() + " Ìõ¼ÇÂ¼) ...");
+                    stop.SetMessage("æ­£åœ¨è£…å…¥æµè§ˆä¿¡æ¯ " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (å‘½ä¸­ " + lHitCount.ToString() + " æ¡è®°å½•) ...");
 
                     DupSearchResult[] searchresults = null;
 
@@ -462,7 +462,7 @@ namespace dp2Circulation
 
                     Debug.Assert(searchresults != null, "");
 
-                    // ´¦Àíä¯ÀÀ½á¹û
+                    // å¤„ç†æµè§ˆç»“æœ
                     for (int i = 0; i < searchresults.Length; i++)
                     {
                         DupSearchResult result = searchresults[i];
@@ -473,7 +473,7 @@ namespace dp2Circulation
 
                         if (this.checkBox_returnAllRecords.Checked == false)
                         {
-                            // Óöµ½µÚÒ»¸öÈ¨Öµ½ÏµÍµÄ£¬¾ÍÖĞ¶ÏÈ«²¿»ñÈ¡ä¯ÀÀ¹ı³Ì
+                            // é‡åˆ°ç¬¬ä¸€ä¸ªæƒå€¼è¾ƒä½çš„ï¼Œå°±ä¸­æ–­å…¨éƒ¨è·å–æµè§ˆè¿‡ç¨‹
                             if (result.Weight < result.Threshold)
                                 goto END1;
                         }
@@ -494,10 +494,10 @@ namespace dp2Circulation
 
                         if (item.Text == this.RecordPath)
                         {
-                            // Èç¹û¾ÍÊÇ·¢Æğ¼ÇÂ¼×Ô¼º  2008/2/29 
+                            // å¦‚æœå°±æ˜¯å‘èµ·è®°å½•è‡ªå·±  2008/2/29 
                             item.ImageIndex = ITEMTYPE_OVERTHRESHOLD;
                             item.BackColor = Color.LightGoldenrodYellow;
-                            item.ForeColor = SystemColors.GrayText; // ±íÊ¾¾ÍÊÇ·¢Æğ¼ÇÂ¼×Ô¼º
+                            item.ForeColor = SystemColors.GrayText; // è¡¨ç¤ºå°±æ˜¯å‘èµ·è®°å½•è‡ªå·±
                         }
                         else if (result.Weight >= result.Threshold)
                         {
@@ -550,7 +550,7 @@ namespace dp2Circulation
             int nRet = 0;
 
             string[] projectnames = null;
-            // ÁĞ³ö¿ÉÓÃµÄ²éÖØ·½°¸Ãû
+            // åˆ—å‡ºå¯ç”¨çš„æŸ¥é‡æ–¹æ¡ˆå
             nRet = ListProjectNames(this.RecordPath,
                 out projectnames,
                 out strError);
@@ -570,12 +570,12 @@ namespace dp2Circulation
 
         // 
         /// <summary>
-        /// ÁĞ³ö¿ÉÓÃµÄ²éÖØ·½°¸Ãû
+        /// åˆ—å‡ºå¯ç”¨çš„æŸ¥é‡æ–¹æ¡ˆå
         /// </summary>
-        /// <param name="strRecPath">·¢Æğ¼ÇÂ¼Â·¾¶</param>
-        /// <param name="projectnames">·µ»Ø¿ÉÓÃµÄ²éÖØ·½°¸Ãû×Ö·û´®Êı×é</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í; >=0: ³É¹¦</returns>
+        /// <param name="strRecPath">å‘èµ·è®°å½•è·¯å¾„</param>
+        /// <param name="projectnames">è¿”å›å¯ç”¨çš„æŸ¥é‡æ–¹æ¡ˆåå­—ç¬¦ä¸²æ•°ç»„</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™; >=0: æˆåŠŸ</returns>
         public int ListProjectNames(string strRecPath,
             out string [] projectnames,
             out string strError)
@@ -586,7 +586,7 @@ namespace dp2Circulation
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ»ñÈ¡¿ÉÓÃµÄ²éÖØ·½°¸Ãû ...");
+            stop.Initial("æ­£åœ¨è·å–å¯ç”¨çš„æŸ¥é‡æ–¹æ¡ˆå ...");
             stop.BeginLoop();
 
             try
@@ -627,13 +627,13 @@ namespace dp2Circulation
 
         private void textBox_recordPath_TextChanged(object sender, EventArgs e)
         {
-            // ¼ÇÂ¼Â·¾¶»áÓ°Ïìµ½·½°¸ÃûÁĞ±í
-            // ĞŞ¸Ä¼ÇÂ¼Â·¾¶µÄÊ±ºò£¬ÆÈÊ¹·½°¸ÃûÏÂÀ­ÁĞ±íÇå¿Õ£¬ÕâÑùµ±ÓÃµ½ÏÂÀ­ÁĞ±íµÄÊ±ºò»á×Ô¶¯È¥»ñÈ¡ĞÂÄÚÈİ
+            // è®°å½•è·¯å¾„ä¼šå½±å“åˆ°æ–¹æ¡ˆååˆ—è¡¨
+            // ä¿®æ”¹è®°å½•è·¯å¾„çš„æ—¶å€™ï¼Œè¿«ä½¿æ–¹æ¡ˆåä¸‹æ‹‰åˆ—è¡¨æ¸…ç©ºï¼Œè¿™æ ·å½“ç”¨åˆ°ä¸‹æ‹‰åˆ—è¡¨çš„æ—¶å€™ä¼šè‡ªåŠ¨å»è·å–æ–°å†…å®¹
             this.comboBox_projectName.Items.Clear();
         }
 
         /// <summary>
-        /// µÈ´ı¼ìË÷½áÊø
+        /// ç­‰å¾…æ£€ç´¢ç»“æŸ
         /// </summary>
         public void WaitSearchFinish()
         {
@@ -650,7 +650,7 @@ namespace dp2Circulation
         {
             XmlViewerForm dlg = new XmlViewerForm();
 
-            dlg.Text = "µ±Ç°XMLÊı¾İ";
+            dlg.Text = "å½“å‰XMLæ•°æ®";
             dlg.MainForm = this.MainForm;
             dlg.XmlString = this.XmlRecord;
             dlg.StartPosition = FormStartPosition.CenterScreen;
@@ -664,13 +664,13 @@ namespace dp2Circulation
 
         void ClearDupState()
         {
-            this.label_dupMessage.Text = "ÉĞÎ´²éÖØ";
+            this.label_dupMessage.Text = "å°šæœªæŸ¥é‡";
         }
 
         /// <summary>
-        /// »ñµÃÖØ¸´Êı
+        /// è·å¾—é‡å¤æ•°
         /// </summary>
-        /// <returns>ÖØ¸´Êı</returns>
+        /// <returns>é‡å¤æ•°</returns>
         public int GetDupCount()
         {
             int nCount = 0;
@@ -679,18 +679,18 @@ namespace dp2Circulation
                 ListViewItem item = this.listView_browse.Items[i];
 
                 if (item.Text == this.RecordPath)
-                    continue;   // ²»°üº¬·¢Æğ¼ÇÂ¼×Ô¼º 2008/2/29 
+                    continue;   // ä¸åŒ…å«å‘èµ·è®°å½•è‡ªå·± 2008/2/29 
 
                 if (item.ImageIndex == ITEMTYPE_OVERTHRESHOLD)
                     nCount++;
                 else
-                    break;  // ¼Ù¶¨³¬¹ıÈ¨ÖµµÄÊÂÏî¶¼ÔÚÇ°²¿£¬Ò»µ©·¢ÏÖÒ»¸ö²»ÊÇµÄÊÂÏî£¬Ñ­»·¾Í½áÊø
+                    break;  // å‡å®šè¶…è¿‡æƒå€¼çš„äº‹é¡¹éƒ½åœ¨å‰éƒ¨ï¼Œä¸€æ—¦å‘ç°ä¸€ä¸ªä¸æ˜¯çš„äº‹é¡¹ï¼Œå¾ªç¯å°±ç»“æŸ
             }
 
             return nCount;
         }
 
-        // ÉèÖÃ²éÖØ×´Ì¬
+        // è®¾ç½®æŸ¥é‡çŠ¶æ€
         void SetDupState()
         {
             /*
@@ -700,30 +700,30 @@ namespace dp2Circulation
                 ListViewItem item = this.listView_browse.Items[i];
 
                 if (item.Text == this.RecordPath)
-                    continue;   // ²»°üº¬·¢Æğ¼ÇÂ¼×Ô¼º 2008/2/29 
+                    continue;   // ä¸åŒ…å«å‘èµ·è®°å½•è‡ªå·± 2008/2/29 
 
                 if (item.ImageIndex == ITEMTYPE_OVERTHRESHOLD)
                     nCount++;
                 else
-                    break;  // ¼Ù¶¨³¬¹ıÈ¨ÖµµÄÊÂÏî¶¼ÔÚÇ°²¿£¬Ò»µ©·¢ÏÖÒ»¸ö²»ÊÇµÄÊÂÏî£¬Ñ­»·¾Í½áÊø
+                    break;  // å‡å®šè¶…è¿‡æƒå€¼çš„äº‹é¡¹éƒ½åœ¨å‰éƒ¨ï¼Œä¸€æ—¦å‘ç°ä¸€ä¸ªä¸æ˜¯çš„äº‹é¡¹ï¼Œå¾ªç¯å°±ç»“æŸ
             }
              * */
 
             int nCount = GetDupCount();
 
             if (nCount > 0)
-                this.label_dupMessage.Text = "ÓĞ " + Convert.ToString(nCount) + " ÌõÖØ¸´¼ÇÂ¼¡£";
+                this.label_dupMessage.Text = "æœ‰ " + Convert.ToString(nCount) + " æ¡é‡å¤è®°å½•ã€‚";
             else
-                this.label_dupMessage.Text = "Ã»ÓĞÖØ¸´¼ÇÂ¼¡£";
+                this.label_dupMessage.Text = "æ²¡æœ‰é‡å¤è®°å½•ã€‚";
 
         }
 
-        // Ë«»÷
+        // åŒå‡»
         private void listView_browse_DoubleClick(object sender, EventArgs e)
         {
             if (this.listView_browse.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡¶¨Òª×°ÈëÏêÏ¸´°µÄÊÂÏî");
+                MessageBox.Show(this, "å°šæœªé€‰å®šè¦è£…å…¥è¯¦ç»†çª—çš„äº‹é¡¹");
                 return;
             }
             string strPath = this.listView_browse.SelectedItems[0].SubItems[0].Text;
@@ -743,7 +743,7 @@ namespace dp2Circulation
 
             ColumnSortStyle sortStyle = ColumnSortStyle.LeftAlign;
 
-            // µÚÒ»ÁĞÎª¼ÇÂ¼Â·¾¶£¬ÅÅĞò·ç¸ñÌØÊâ
+            // ç¬¬ä¸€åˆ—ä¸ºè®°å½•è·¯å¾„ï¼Œæ’åºé£æ ¼ç‰¹æ®Š
             if (nClickColumn == 0)
                 sortStyle = ColumnSortStyle.RecPath;
             else if (nClickColumn == 1)
@@ -754,7 +754,7 @@ namespace dp2Circulation
                 this.listView_browse.Columns,
                 true);
 
-            // ÅÅĞò
+            // æ’åº
             this.listView_browse.ListViewItemSorter = new SortColumnsComparer(this.SortColumns);
 
             this.listView_browse.ListViewItemSorter = null;
@@ -780,16 +780,16 @@ namespace dp2Circulation
                 {
                     if (item.Text == this.RecordPath)
                     {
-                        this.label_message.Text = "ĞòºÅ " + nLineNo.ToString() + ": ·¢Æğ²éÖØµÄ¼ÇÂ¼(×Ô¼º)";
+                        this.label_message.Text = "åºå· " + nLineNo.ToString() + ": å‘èµ·æŸ¥é‡çš„è®°å½•(è‡ªå·±)";
                     }
                     else
                     {
-                        this.label_message.Text = "ĞòºÅ " + nLineNo.ToString() + ": ÖØ¸´µÄ¼ÇÂ¼";
+                        this.label_message.Text = "åºå· " + nLineNo.ToString() + ": é‡å¤çš„è®°å½•";
                     }
                 }
                 else
                 {
-                    this.label_message.Text = "ĞòºÅ " + nLineNo.ToString();
+                    this.label_message.Text = "åºå· " + nLineNo.ToString();
                 }
             }
             else
@@ -797,7 +797,7 @@ namespace dp2Circulation
                 this.label_message.Text = "";
             }
 
-            // ×°Èë(Î´×°ÈëµÄ)ä¯ÀÀÁĞ
+            // è£…å…¥(æœªè£…å…¥çš„)æµè§ˆåˆ—
             if (this.listView_browse.SelectedItems.Count > 0)
             {
                 List<string> pathlist = new List<string>();
@@ -827,7 +827,7 @@ namespace dp2Circulation
     null);
         }
 
-        // ÓÒÊó±ê¼ü²Ëµ¥
+        // å³é¼ æ ‡é”®èœå•
         private void listView_browse_MouseUp(object sender, MouseEventArgs e)
         {
             if (e.Button != MouseButtons.Right)
@@ -836,14 +836,14 @@ namespace dp2Circulation
             ContextMenu contextMenu = new ContextMenu();
             MenuItem menuItem = null;
 
-            menuItem = new MenuItem("×°ÈëĞÂ¿ªµÄÖÖ²á´°(&N)");
+            menuItem = new MenuItem("è£…å…¥æ–°å¼€çš„ç§å†Œçª—(&N)");
             menuItem.Click += new System.EventHandler(this.menu_loadToNewDetailWindow_Click);
             if (this.listView_browse.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
             menuItem.DefaultItem = true;
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("×°ÈëÒÑ¾­´ò¿ªµÄÖÖ²á´°(&E)");
+            menuItem = new MenuItem("è£…å…¥å·²ç»æ‰“å¼€çš„ç§å†Œçª—(&E)");
             menuItem.Click += new System.EventHandler(this.menu_loadToExistDetailWindow_Click);
             if (this.listView_browse.SelectedItems.Count == 0
                 || this.MainForm.GetTopChildWindow<EntityForm>() == null)
@@ -854,7 +854,7 @@ namespace dp2Circulation
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("Ìî³äÈ«²¿ä¯ÀÀÁĞ(&F)");
+            menuItem = new MenuItem("å¡«å……å…¨éƒ¨æµè§ˆåˆ—(&F)");
             menuItem.Click += new System.EventHandler(this.menu_fillBrowseCols_Click);
             /*
             if (this.listView_browse.SelectedItems.Count == 0)
@@ -869,7 +869,7 @@ namespace dp2Circulation
         {
             if (this.listView_browse.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡¶¨Òª×°ÈëÖÖ²á´°µÄÊÂÏî");
+                MessageBox.Show(this, "å°šæœªé€‰å®šè¦è£…å…¥ç§å†Œçª—çš„äº‹é¡¹");
                 return;
             }
             string strPath = this.listView_browse.SelectedItems[0].SubItems[0].Text;
@@ -886,7 +886,7 @@ namespace dp2Circulation
         {
             if (this.listView_browse.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡¶¨Òª×°ÈëÖÖ²á´°µÄÊÂÏî");
+                MessageBox.Show(this, "å°šæœªé€‰å®šè¦è£…å…¥ç§å†Œçª—çš„äº‹é¡¹");
                 return;
             }
             string strPath = this.listView_browse.SelectedItems[0].SubItems[0].Text;
@@ -894,7 +894,7 @@ namespace dp2Circulation
             EntityForm form = this.MainForm.GetTopChildWindow<EntityForm>();
             if (form == null)
             {
-                MessageBox.Show(this, "Ä¿Ç°²¢Ã»ÓĞÒÑ¾­´ò¿ªµÄÖÖ²á´°");
+                MessageBox.Show(this, "ç›®å‰å¹¶æ²¡æœ‰å·²ç»æ‰“å¼€çš„ç§å†Œçª—");
                 return;
             }
             Global.Activate(form);
@@ -935,7 +935,7 @@ namespace dp2Circulation
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚÌî³ää¯ÀÀÁĞ ...");
+            stop.Initial("æ­£åœ¨å¡«å……æµè§ˆåˆ— ...");
             stop.BeginLoop();
 
             this.Update();
@@ -955,18 +955,18 @@ namespace dp2Circulation
                     if (nCount <= 0)
                         break;
 
-                    Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                    Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
                     if (stop != null)
                     {
                         if (stop.State != 0)
                         {
-                            strError = "ÓÃ»§ÖĞ¶Ï";
+                            strError = "ç”¨æˆ·ä¸­æ–­";
                             return -1;
                         }
                     }
 
-                    stop.SetMessage("ÕıÔÚ×°Èëä¯ÀÀĞÅÏ¢ " + (nStart + 1).ToString() + " - " + (nStart + nCount).ToString());
+                    stop.SetMessage("æ­£åœ¨è£…å…¥æµè§ˆä¿¡æ¯ " + (nStart + 1).ToString() + " - " + (nStart + nCount).ToString());
 
 
 

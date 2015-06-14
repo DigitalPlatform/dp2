@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,7 +12,7 @@ using DigitalPlatform.Xml;
 namespace dp2Circulation
 {
     /// <summary>
-    /// OPAC¼ÇÂ¼ä¯ÀÀ¸ñÊ½¶¨Òå¶Ô»°¿ò
+    /// OPACè®°å½•æµè§ˆæ ¼å¼å®šä¹‰å¯¹è¯æ¡†
     /// </summary>
     internal partial class OpacBrowseFormatDialog : Form
     {
@@ -37,15 +37,15 @@ namespace dp2Circulation
         {
             string strError = "";
 
-            // ¼ì²éµ±Ç°ÄÚÈİĞÎÊ½ÉÏÊÇ·ñºÏ·¨
+            // æ£€æŸ¥å½“å‰å†…å®¹å½¢å¼ä¸Šæ˜¯å¦åˆæ³•
             // return:
-            //      -1  ¼ì²é¹ı³Ì±¾Éí³ö´í
-            //      0   ¸ñÊ½ÓĞ´íÎó
-            //      1   ¸ñÊ½Ã»ÓĞ´íÎó
+            //      -1  æ£€æŸ¥è¿‡ç¨‹æœ¬èº«å‡ºé”™
+            //      0   æ ¼å¼æœ‰é”™è¯¯
+            //      1   æ ¼å¼æ²¡æœ‰é”™è¯¯
             int nRet = this.captionEditControl_formatName.Verify(out strError);
             if (nRet <= 0)
             {
-                strError = "¸ñÊ½ÃûÓĞÎÊÌâ: " + strError;
+                strError = "æ ¼å¼åæœ‰é—®é¢˜: " + strError;
                 this.captionEditControl_formatName.Focus();
                 goto ERROR1;
             }
@@ -59,7 +59,7 @@ namespace dp2Circulation
 
             if (String.IsNullOrEmpty(this.FormatName) == true)
             {
-                strError = "È±·¦ÓïÑÔ´úÂëÎªzhµÄ¸ñÊ½Ãû";
+                strError = "ç¼ºä¹è¯­è¨€ä»£ç ä¸ºzhçš„æ ¼å¼å";
                 goto ERROR1;
             }
 
@@ -76,7 +76,7 @@ namespace dp2Circulation
             this.Close();
         }
 
-        // ½«domÖĞµÄcaptionÆ¬¶ÏÓÃÀ´³õÊ¼»¯CaptionEditControl
+        // å°†domä¸­çš„captionç‰‡æ–­ç”¨æ¥åˆå§‹åŒ–CaptionEditControl
         int LoadCaptionsXml(out string strError)
         {
             strError = "";
@@ -145,8 +145,8 @@ namespace dp2Circulation
         }
 
         /*
-            <format name="ÏêÏ¸" type="biblio">
-                <caption lang="zh-CN">ÏêÏ¸</caption>
+            <format name="è¯¦ç»†" type="biblio">
+                <caption lang="zh-CN">è¯¦ç»†</caption>
                 <caption lang="en">Detail</caption>
 		    </format>
          * * */

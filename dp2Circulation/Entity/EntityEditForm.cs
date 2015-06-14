@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -17,51 +17,51 @@ using DigitalPlatform.LibraryServer;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ²á¼ÇÂ¼±à¼­¶Ô»°¿ò
+    /// å†Œè®°å½•ç¼–è¾‘å¯¹è¯æ¡†
     /// </summary>
     public partial class EntityEditForm : EntityEditFormBase
         // ItemEditFormBase<BookItem, BookItemCollection>
     {
         /*
-        // ´´½¨Ë÷È¡ºÅ
+        // åˆ›å»ºç´¢å–å·
         public event GenerateDataEventHandler GenerateAccessNo = null;
          * */
 
-        // Ctrl+A×Ô¶¯´´½¨Êı¾İ
+        // Ctrl+Aè‡ªåŠ¨åˆ›å»ºæ•°æ®
         /// <summary>
-        /// ×Ô¶¯´´½¨Êı¾İ
+        /// è‡ªåŠ¨åˆ›å»ºæ•°æ®
         /// </summary>
         public event GenerateDataEventHandler GenerateData = null;
 
 #if NO
         /// <summary>
-        /// ×î¿ªÊ¼Ê±µÄ BookItem ¶ÔÏó
+        /// æœ€å¼€å§‹æ—¶çš„ BookItem å¯¹è±¡
         /// </summary>
-        public BookItem StartBookItem = null;   // ×î¿ªÊ¼Ê±µÄ¶ÔÏó
+        public BookItem StartBookItem = null;   // æœ€å¼€å§‹æ—¶çš„å¯¹è±¡
 
         /// <summary>
-        /// µ±Ç° BookItem ¶ÔÏó
+        /// å½“å‰ BookItem å¯¹è±¡
         /// </summary>
         public BookItem BookItem = null;
 
         /// <summary>
-        /// BookItem ¼¯ºÏ
+        /// BookItem é›†åˆ
         /// </summary>
         public BookItemCollection BookItems = null;
 
         /// <summary>
-        /// ¿ò¼Ü´°¿Ú
+        /// æ¡†æ¶çª—å£
         /// </summary>
         public MainForm MainForm = null;
 
         /// <summary>
-        /// ¹ØÁªµÄ EntityControl ¶ÔÏó
+        /// å…³è”çš„ EntityControl å¯¹è±¡
         /// </summary>
         public EntityControl EntityControl = null;
 #endif
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public EntityEditForm()
         {
@@ -87,7 +87,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ±à¼­ÇøÏÔÊ¾Ä£Ê½
+        /// ç¼–è¾‘åŒºæ˜¾ç¤ºæ¨¡å¼
         /// </summary>
         public string DisplayMode
         {
@@ -103,7 +103,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// µ±Ç°¼ÇÂ¼µÄ±à¼­Æ÷
+        /// å½“å‰è®°å½•çš„ç¼–è¾‘å™¨
         /// </summary>
         public EntityEditControl Editing
         {
@@ -114,7 +114,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÒÑ´æÔÚ¼ÇÂ¼µÄ±à¼­Æ÷
+        /// å·²å­˜åœ¨è®°å½•çš„ç¼–è¾‘å™¨
         /// </summary>
         public EntityEditControl Existing
         {
@@ -125,16 +125,16 @@ namespace dp2Circulation
         }
 
 #if NO
-        // Îª±à¼­Ä¿µÄµÄ³õÊ¼»¯
+        // ä¸ºç¼–è¾‘ç›®çš„çš„åˆå§‹åŒ–
         // parameters:
-        //      bookitems   ÈİÆ÷¡£ÓÃÓÚUndoMaskDelete
+        //      bookitems   å®¹å™¨ã€‚ç”¨äºUndoMaskDelete
         /// <summary>
-        /// Îª±à¼­¶ø³õÊ¼»¯
+        /// ä¸ºç¼–è¾‘è€Œåˆå§‹åŒ–
         /// </summary>
-        /// <param name="bookitem">Òª±à¼­µÄ BookItem ¶ÔÏó</param>
-        /// <param name="bookitems">Ëù´ÓÊôµÄ BookItem ¼¯ºÏ¡£ÓÃÓÚÇ°ºó·­¶¯±à¼­</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í; 0: ³É¹¦</returns>
+        /// <param name="bookitem">è¦ç¼–è¾‘çš„ BookItem å¯¹è±¡</param>
+        /// <param name="bookitems">æ‰€ä»å±çš„ BookItem é›†åˆã€‚ç”¨äºå‰åç¿»åŠ¨ç¼–è¾‘</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™; 0: æˆåŠŸ</returns>
         public int InitialForEdit(
             BookItem bookitem,
             BookItemCollection bookitems,
@@ -152,9 +152,9 @@ namespace dp2Circulation
 #endif
 
         /// <summary>
-        /// »ñÈ¡Ë÷È¡ºÅÊÂÏî¼¯ºÏ
+        /// è·å–ç´¢å–å·äº‹é¡¹é›†åˆ
         /// </summary>
-        /// <returns>CallNumberItem ÊÂÏî¼¯ºÏ</returns>
+        /// <returns>CallNumberItem äº‹é¡¹é›†åˆ</returns>
         public List<CallNumberItem> GetCallNumberItems()
         {
             List<CallNumberItem> callnumber_items = this.Items.GetCallNumberItems();
@@ -164,15 +164,15 @@ namespace dp2Circulation
             int index = this.Items.IndexOf(this.Item);
             if (index == -1)
             {
-                // Ôö²¹Ò»¸ö¶ÔÏó
+                // å¢è¡¥ä¸€ä¸ªå¯¹è±¡
                 item = new CallNumberItem();
                 callnumber_items.Add(item);
 
-                item.CallNumber = "";   // ²»Òª¸ø³öµ±Ç°µÄ£¬ÒÔÃâÓ°Ïìµ½È¡ºÅ½á¹û
+                item.CallNumber = "";   // ä¸è¦ç»™å‡ºå½“å‰çš„ï¼Œä»¥å…å½±å“åˆ°å–å·ç»“æœ
             }
             else
             {
-                // Ë¢ĞÂ×Ô¼ºµÄÎ»ÖÃ
+                // åˆ·æ–°è‡ªå·±çš„ä½ç½®
                 item = callnumber_items[index];
                 item.CallNumber = entityEditControl_editing.AccessNo;
             }
@@ -196,7 +196,7 @@ namespace dp2Circulation
             LoadBookItem(this.BookItem);
             EnablePrevNextRecordButtons();
 
-            // ²Î¿¼¼ÇÂ¼
+            // å‚è€ƒè®°å½•
             if (this.BookItem != null
                 && this.BookItem.Error != null)
             {
@@ -211,7 +211,7 @@ namespace dp2Circulation
 
                 this.entityEditControl_existing.SetReadOnly(ReadOnlyStyle.All);
 
-                // Í»³ö²îÒìÄÚÈİ
+                // çªå‡ºå·®å¼‚å†…å®¹
                 this.entityEditControl_editing.HighlightDifferences(this.entityEditControl_existing);
 
             }
@@ -240,10 +240,10 @@ namespace dp2Circulation
             if (this.entityEditControl_editing.Initializing == false
                 && string.IsNullOrEmpty(this.entityEditControl_editing.AccessNo) == false)
             {
-                // MessageBox.Show(this, "ĞŞ¸Ä old '"+e.OldText+"' new '"+e.NewText+"'" );
+                // MessageBox.Show(this, "ä¿®æ”¹ old '"+e.OldText+"' new '"+e.NewText+"'" );
 
                 ArrangementInfo old_info = null;
-                // »ñµÃ¹ØÓÚÒ»¸öÌØ¶¨¹İ²ØµØµãµÄË÷È¡ºÅÅäÖÃĞÅÏ¢
+                // è·å¾—å…³äºä¸€ä¸ªç‰¹å®šé¦†è—åœ°ç‚¹çš„ç´¢å–å·é…ç½®ä¿¡æ¯
                 int nRet = this.MainForm.GetArrangementInfo(e.OldText,
                     out old_info,
                     out strError);
@@ -253,7 +253,7 @@ namespace dp2Circulation
                     goto ERROR1;
 
                 ArrangementInfo new_info = null;
-                // »ñµÃ¹ØÓÚÒ»¸öÌØ¶¨¹İ²ØµØµãµÄË÷È¡ºÅÅäÖÃĞÅÏ¢
+                // è·å¾—å…³äºä¸€ä¸ªç‰¹å®šé¦†è—åœ°ç‚¹çš„ç´¢å–å·é…ç½®ä¿¡æ¯
                 nRet = this.MainForm.GetArrangementInfo(e.NewText,
                    out new_info,
                    out strError);
@@ -265,7 +265,7 @@ namespace dp2Circulation
                 if (old_info.ArrangeGroupName != new_info.ArrangeGroupName)
                 {
                     DialogResult result = MessageBox.Show(this,
-    "ÄúĞŞ¸ÄÁË¹İ²ØµØµã£¬Òò¶ø±ä¶¯ÁË¼ÇÂ¼Ëù´ÓÊôµÄÅÅ¼ÜÌåÏµ£¬ÏÖÓĞµÄË÷È¡ºÅÒÑ²»ÔÙÊÊºÏ±ä¶¯ºóµÄÅÅ¼ÜÌåÏµ¡£\r\n\r\nÊÇ·ñÒª°Ñ´°¿ÚÖĞË÷È¡ºÅ×Ö¶ÎÄÚÈİÇå¿Õ£¬ÒÔ±ãÄúÉÔºóÖØĞÂ´´½¨Ë÷È¡ºÅ?",
+    "æ‚¨ä¿®æ”¹äº†é¦†è—åœ°ç‚¹ï¼Œå› è€Œå˜åŠ¨äº†è®°å½•æ‰€ä»å±çš„æ’æ¶ä½“ç³»ï¼Œç°æœ‰çš„ç´¢å–å·å·²ä¸å†é€‚åˆå˜åŠ¨åçš„æ’æ¶ä½“ç³»ã€‚\r\n\r\næ˜¯å¦è¦æŠŠçª—å£ä¸­ç´¢å–å·å­—æ®µå†…å®¹æ¸…ç©ºï¼Œä»¥ä¾¿æ‚¨ç¨åé‡æ–°åˆ›å»ºç´¢å–å·?",
     "EntityEditForm",
     MessageBoxButtons.YesNo,
     MessageBoxIcon.Question,
@@ -280,7 +280,7 @@ namespace dp2Circulation
             MessageBox.Show(this, strError);
         }
 
-        // »ñµÃË÷È¡ºÅ
+        // è·å¾—ç´¢å–å·
         void button_getAccessNo_Click(object sender, EventArgs e)
         {
 
@@ -291,7 +291,7 @@ namespace dp2Circulation
                     e1.ScriptEntry = "ManageCallNumber";
                 else
                     e1.ScriptEntry = "CreateCallNumber";
-                e1.FocusedControl = sender; // senderÎª×îÔ­Ê¼µÄ×Ó¿Ø¼ş
+                e1.FocusedControl = sender; // senderä¸ºæœ€åŸå§‹çš„å­æ§ä»¶
                 this.GenerateData(this, e1);
             }
 
@@ -315,14 +315,14 @@ namespace dp2Circulation
                 int nRet = FillEditing(bookitem, out strError);
                 if (nRet == -1)
                 {
-                    MessageBox.Show(this, "LoadBookItem() ·¢Éú´íÎó: " + strError);
+                    MessageBox.Show(this, "LoadBookItem() å‘ç”Ÿé”™è¯¯: " + strError);
                     return;
                 }
             }
             if (bookitem != null
                 && bookitem.ItemDisplayState == ItemDisplayState.Deleted)
             {
-                // ÒÑ¾­±ê¼ÇÉ¾³ıµÄÊÂÏî, ²»ÄÜ½øĞĞĞŞ¸Ä¡£µ«ÊÇ¿ÉÒÔ¹Û²ì
+                // å·²ç»æ ‡è®°åˆ é™¤çš„äº‹é¡¹, ä¸èƒ½è¿›è¡Œä¿®æ”¹ã€‚ä½†æ˜¯å¯ä»¥è§‚å¯Ÿ
                 this.entityEditControl_editing.SetReadOnly(ReadOnlyStyle.All);
                 this.checkBox_autoSearchDup.Enabled = false;
 
@@ -354,7 +354,7 @@ namespace dp2Circulation
             else
             {
                 this.button_OK.Enabled = true;
-                // this.button_Cancel.Text = "È¡Ïû";
+                // this.button_Cancel.Text = "å–æ¶ˆ";
             }
         }
 
@@ -380,11 +380,11 @@ namespace dp2Circulation
         }
 
 #if NO
-        // ½áÊøÒ»¸öÊÂÏîµÄ±à¼­
+        // ç»“æŸä¸€ä¸ªäº‹é¡¹çš„ç¼–è¾‘
         // return:
-        //      -1  ³ö´í
-        //      0   Ã»ÓĞ±ØÒª×örestore
-        //      1   ×öÁËrestore
+        //      -1  å‡ºé”™
+        //      0   æ²¡æœ‰å¿…è¦åšrestore
+        //      1   åšäº†restore
         int FinishOneBookItem(out string strError)
         {
             strError = "";
@@ -395,41 +395,41 @@ namespace dp2Circulation
 
             string strBarcode = this.entityEditControl_editing.Barcode;
 
-            // ¼ì²é²áÌõÂëºÅĞÎÊ½ÊÇ·ñºÏ·¨
+            // æ£€æŸ¥å†Œæ¡ç å·å½¢å¼æ˜¯å¦åˆæ³•
             if (String.IsNullOrEmpty(strBarcode) == false   // 2009/2/23 
                 && this.EntityControl != null
                 && this.EntityControl.NeedVerifyItemBarcode == true)
             {
-                // ĞÎÊ½Ğ£ÑéÌõÂëºÅ
+                // å½¢å¼æ ¡éªŒæ¡ç å·
                 // return:
-                //      -2  ·şÎñÆ÷Ã»ÓĞÅäÖÃĞ£Ñé·½·¨£¬ÎŞ·¨Ğ£Ñé
+                //      -2  æœåŠ¡å™¨æ²¡æœ‰é…ç½®æ ¡éªŒæ–¹æ³•ï¼Œæ— æ³•æ ¡éªŒ
                 //      -1  error
-                //      0   ²»ÊÇºÏ·¨µÄÌõÂëºÅ
-                //      1   ÊÇºÏ·¨µÄ¶ÁÕßÖ¤ÌõÂëºÅ
-                //      2   ÊÇºÏ·¨µÄ²áÌõÂëºÅ
+                //      0   ä¸æ˜¯åˆæ³•çš„æ¡ç å·
+                //      1   æ˜¯åˆæ³•çš„è¯»è€…è¯æ¡ç å·
+                //      2   æ˜¯åˆæ³•çš„å†Œæ¡ç å·
                 nRet = this.EntityControl.DoVerifyBarcode(
                     strBarcode,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
-                // ÊäÈëµÄÌõÂë¸ñÊ½²»ºÏ·¨
+                // è¾“å…¥çš„æ¡ç æ ¼å¼ä¸åˆæ³•
                 if (nRet == 0)
                 {
-                    strError = "ÄúÊäÈëµÄÌõÂë " + strBarcode + " ¸ñÊ½²»ÕıÈ·("+strError+")¡£ÇëÖØĞÂÊäÈë¡£";
+                    strError = "æ‚¨è¾“å…¥çš„æ¡ç  " + strBarcode + " æ ¼å¼ä¸æ­£ç¡®("+strError+")ã€‚è¯·é‡æ–°è¾“å…¥ã€‚";
                     goto ERROR1;
                 }
 
-                // Êµ¼ÊÊäÈëµÄÊÇ¶ÁÕßÖ¤ÌõÂëºÅ
+                // å®é™…è¾“å…¥çš„æ˜¯è¯»è€…è¯æ¡ç å·
                 if (nRet == 1)
                 {
-                    strError = "ÄúÊäÈëµÄÌõÂëºÅ " + strBarcode + " ÊÇ¶ÁÕßÖ¤ÌõÂëºÅ¡£ÇëÊäÈë²áÌõÂëºÅ¡£";
+                    strError = "æ‚¨è¾“å…¥çš„æ¡ç å· " + strBarcode + " æ˜¯è¯»è€…è¯æ¡ç å·ã€‚è¯·è¾“å…¥å†Œæ¡ç å·ã€‚";
                     goto ERROR1;
                 }
 
-                // ¶ÔÓÚ·şÎñÆ÷Ã»ÓĞÅäÖÃĞ£Ñé¹¦ÄÜ£¬µ«ÊÇÇ°¶Ë·¢³öÁËĞ£ÑéÒªÇóµÄÇé¿ö£¬¾¯¸æÒ»ÏÂ
+                // å¯¹äºæœåŠ¡å™¨æ²¡æœ‰é…ç½®æ ¡éªŒåŠŸèƒ½ï¼Œä½†æ˜¯å‰ç«¯å‘å‡ºäº†æ ¡éªŒè¦æ±‚çš„æƒ…å†µï¼Œè­¦å‘Šä¸€ä¸‹
                 if (nRet == -2)
-                    MessageBox.Show(this, "¾¯¸æ£ºÇ°¶Ë²á¹ÜÀí´°¿ªÆôÁËĞ£ÑéÌõÂë¹¦ÄÜ£¬µ«ÊÇ·şÎñÆ÷¶ËÈ±·¦ÏàÓ¦µÄ½Å±¾º¯Êı£¬ÎŞ·¨Ğ£ÑéÌõÂë¡£\r\n\r\nÈôÒª±ÜÃâ³öÏÖ´Ë¾¯¸æ¶Ô»°¿ò£¬Çë¹Ø±ÕÇ°¶Ë²á¹ÜÀí´°Ğ£Ñé¹¦ÄÜ");
+                    MessageBox.Show(this, "è­¦å‘Šï¼šå‰ç«¯å†Œç®¡ç†çª—å¼€å¯äº†æ ¡éªŒæ¡ç åŠŸèƒ½ï¼Œä½†æ˜¯æœåŠ¡å™¨ç«¯ç¼ºä¹ç›¸åº”çš„è„šæœ¬å‡½æ•°ï¼Œæ— æ³•æ ¡éªŒæ¡ç ã€‚\r\n\r\nè‹¥è¦é¿å…å‡ºç°æ­¤è­¦å‘Šå¯¹è¯æ¡†ï¼Œè¯·å…³é—­å‰ç«¯å†Œç®¡ç†çª—æ ¡éªŒåŠŸèƒ½");
 
             }
 
@@ -451,10 +451,10 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ½áÊøÇ°µÄĞ£Ñé
+        /// ç»“æŸå‰çš„æ ¡éªŒ
         /// </summary>
-        /// <param name="strError">·µ»Ø´íÎóĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í; 0: Ã»ÓĞ´íÎó</returns>
+        /// <param name="strError">è¿”å›é”™è¯¯ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™; 0: æ²¡æœ‰é”™è¯¯</returns>
         internal override int FinishVerify(out string strError)
         {
             strError = "";
@@ -462,70 +462,70 @@ namespace dp2Circulation
 
             string strBarcode = this.entityEditControl_editing.Barcode;
 
-            // ¼ì²é²áÌõÂëºÅĞÎÊ½ÊÇ·ñºÏ·¨
+            // æ£€æŸ¥å†Œæ¡ç å·å½¢å¼æ˜¯å¦åˆæ³•
             if (String.IsNullOrEmpty(strBarcode) == false   // 2009/2/23 
                 && this.EntityControl != null
                 && this.EntityControl.NeedVerifyItemBarcode == true)
             {
-                // ĞÎÊ½Ğ£ÑéÌõÂëºÅ
+                // å½¢å¼æ ¡éªŒæ¡ç å·
                 // return:
-                //      -2  ·şÎñÆ÷Ã»ÓĞÅäÖÃĞ£Ñé·½·¨£¬ÎŞ·¨Ğ£Ñé
+                //      -2  æœåŠ¡å™¨æ²¡æœ‰é…ç½®æ ¡éªŒæ–¹æ³•ï¼Œæ— æ³•æ ¡éªŒ
                 //      -1  error
-                //      0   ²»ÊÇºÏ·¨µÄÌõÂëºÅ
-                //      1   ÊÇºÏ·¨µÄ¶ÁÕßÖ¤ÌõÂëºÅ
-                //      2   ÊÇºÏ·¨µÄ²áÌõÂëºÅ
+                //      0   ä¸æ˜¯åˆæ³•çš„æ¡ç å·
+                //      1   æ˜¯åˆæ³•çš„è¯»è€…è¯æ¡ç å·
+                //      2   æ˜¯åˆæ³•çš„å†Œæ¡ç å·
                 nRet = this.EntityControl.DoVerifyBarcode(
                     strBarcode,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
-                // ÊäÈëµÄÌõÂë¸ñÊ½²»ºÏ·¨
+                // è¾“å…¥çš„æ¡ç æ ¼å¼ä¸åˆæ³•
                 if (nRet == 0)
                 {
-                    strError = "ÄúÊäÈëµÄÌõÂë " + strBarcode + " ¸ñÊ½²»ÕıÈ·(" + strError + ")¡£ÇëÖØĞÂÊäÈë¡£";
+                    strError = "æ‚¨è¾“å…¥çš„æ¡ç  " + strBarcode + " æ ¼å¼ä¸æ­£ç¡®(" + strError + ")ã€‚è¯·é‡æ–°è¾“å…¥ã€‚";
                     goto ERROR1;
                 }
 
-                // Êµ¼ÊÊäÈëµÄÊÇ¶ÁÕßÖ¤ÌõÂëºÅ
+                // å®é™…è¾“å…¥çš„æ˜¯è¯»è€…è¯æ¡ç å·
                 if (nRet == 1)
                 {
-                    strError = "ÄúÊäÈëµÄÌõÂëºÅ " + strBarcode + " ÊÇ¶ÁÕßÖ¤ÌõÂëºÅ¡£ÇëÊäÈë²áÌõÂëºÅ¡£";
+                    strError = "æ‚¨è¾“å…¥çš„æ¡ç å· " + strBarcode + " æ˜¯è¯»è€…è¯æ¡ç å·ã€‚è¯·è¾“å…¥å†Œæ¡ç å·ã€‚";
                     goto ERROR1;
                 }
 
-                // ¶ÔÓÚ·şÎñÆ÷Ã»ÓĞÅäÖÃĞ£Ñé¹¦ÄÜ£¬µ«ÊÇÇ°¶Ë·¢³öÁËĞ£ÑéÒªÇóµÄÇé¿ö£¬¾¯¸æÒ»ÏÂ
+                // å¯¹äºæœåŠ¡å™¨æ²¡æœ‰é…ç½®æ ¡éªŒåŠŸèƒ½ï¼Œä½†æ˜¯å‰ç«¯å‘å‡ºäº†æ ¡éªŒè¦æ±‚çš„æƒ…å†µï¼Œè­¦å‘Šä¸€ä¸‹
                 if (nRet == -2)
-                    MessageBox.Show(this, "¾¯¸æ£ºÇ°¶Ë²á¹ÜÀí´°¿ªÆôÁËĞ£ÑéÌõÂë¹¦ÄÜ£¬µ«ÊÇ·şÎñÆ÷¶ËÈ±·¦ÏàÓ¦µÄ½Å±¾º¯Êı£¬ÎŞ·¨Ğ£ÑéÌõÂë¡£\r\n\r\nÈôÒª±ÜÃâ³öÏÖ´Ë¾¯¸æ¶Ô»°¿ò£¬Çë¹Ø±ÕÇ°¶Ë²á¹ÜÀí´°Ğ£Ñé¹¦ÄÜ");
+                    MessageBox.Show(this, "è­¦å‘Šï¼šå‰ç«¯å†Œç®¡ç†çª—å¼€å¯äº†æ ¡éªŒæ¡ç åŠŸèƒ½ï¼Œä½†æ˜¯æœåŠ¡å™¨ç«¯ç¼ºä¹ç›¸åº”çš„è„šæœ¬å‡½æ•°ï¼Œæ— æ³•æ ¡éªŒæ¡ç ã€‚\r\n\r\nè‹¥è¦é¿å…å‡ºç°æ­¤è­¦å‘Šå¯¹è¯æ¡†ï¼Œè¯·å…³é—­å‰ç«¯å†Œç®¡ç†çª—æ ¡éªŒåŠŸèƒ½");
             }
 
-            // ¹İ²ØµØµã×Ö·û´®ÀïÃæ²»ÄÜÓĞĞÇºÅ
+            // é¦†è—åœ°ç‚¹å­—ç¬¦ä¸²é‡Œé¢ä¸èƒ½æœ‰æ˜Ÿå·
             string strLocation = this.entityEditControl_editing.LocationString;
             if (strLocation.IndexOf("*") != -1)
             {
-                strError = "¹İ²ØµØµã×Ö·û´®ÖĞ²»ÔÊĞí³öÏÖ×Ö·û '*'";
+                strError = "é¦†è—åœ°ç‚¹å­—ç¬¦ä¸²ä¸­ä¸å…è®¸å‡ºç°å­—ç¬¦ '*'";
                 goto ERROR1;
             }
 
 
-            // ¼Û¸ñ×Ö·û´®ÖĞ²»ÔÊĞí³öÏÖ @
+            // ä»·æ ¼å­—ç¬¦ä¸²ä¸­ä¸å…è®¸å‡ºç° @
             string strPrice = this.entityEditControl_editing.Price;
             if (strPrice.IndexOf("@") != -1)
             {
-                strError = "¼Û¸ñ×Ö·û´®ÖĞ²»ÔÊĞí³öÏÖ×Ö·û '@'";
+                strError = "ä»·æ ¼å­—ç¬¦ä¸²ä¸­ä¸å…è®¸å‡ºç°å­—ç¬¦ '@'";
                 goto ERROR1;
             }
 
             if (string.IsNullOrEmpty(strPrice) == false)
             {
                 CurrencyItem item = null;
-                // ½âÎöµ¥¸ö½ğ¶î×Ö·û´®¡£ÀıÈç CNY10.00 »ò -CNY100.00/7
+                // è§£æå•ä¸ªé‡‘é¢å­—ç¬¦ä¸²ã€‚ä¾‹å¦‚ CNY10.00 æˆ– -CNY100.00/7
                 nRet = PriceUtil.ParseSinglePrice(strPrice,
                     out item,
                     out strError);
                 if (nRet == -1)
                 {
-                    strError = "¼Û¸ñ×Ö·û´®¸ñÊ½²»ºÏ·¨: " +strError;
+                    strError = "ä»·æ ¼å­—ç¬¦ä¸²æ ¼å¼ä¸åˆæ³•: " +strError;
                     goto ERROR1;
                 }
             }
@@ -540,11 +540,11 @@ namespace dp2Circulation
                 // 2014/10/23
                 if (string.IsNullOrEmpty(this.entityEditControl_editing.PublishTime) == false)
                 {
-                    // ¼ì²é³ö°æÊ±¼ä·¶Î§×Ö·û´®ÊÇ·ñºÏ·¨
-                    // Èç¹ûÊ¹ÓÃµ¥¸ö³ö°æÊ±¼äÀ´µ÷ÓÃ±¾º¯Êı£¬Ò²ÊÇ¿ÉÒÔµÄ
+                    // æ£€æŸ¥å‡ºç‰ˆæ—¶é—´èŒƒå›´å­—ç¬¦ä¸²æ˜¯å¦åˆæ³•
+                    // å¦‚æœä½¿ç”¨å•ä¸ªå‡ºç‰ˆæ—¶é—´æ¥è°ƒç”¨æœ¬å‡½æ•°ï¼Œä¹Ÿæ˜¯å¯ä»¥çš„
                     // return:
-                    //      -1  ³ö´í
-                    //      0   ÕıÈ·
+                    //      -1  å‡ºé”™
+                    //      0   æ­£ç¡®
                     nRet = LibraryServerUtil.CheckPublishTimeRange(this.entityEditControl_editing.PublishTime,
                         out strError);
                     if (nRet == -1)
@@ -562,7 +562,7 @@ namespace dp2Circulation
                         out strError);
                     if (nRet == -1)
                     {
-                        strError = "¾íÆÚ×Ö·û´® '" + this.entityEditControl_editing.Volume + "' ¸ñÊ½´íÎó: " + strError;
+                        strError = "å·æœŸå­—ç¬¦ä¸² '" + this.entityEditControl_editing.Volume + "' æ ¼å¼é”™è¯¯: " + strError;
                         goto ERROR1;
                     }
                 }
@@ -583,40 +583,40 @@ namespace dp2Circulation
             /*
             string strBarcode = this.entityEditControl_editing.Barcode;
 
-            // ¼ì²é²áÌõÂëºÅĞÎÊ½ÊÇ·ñºÏ·¨
+            // æ£€æŸ¥å†Œæ¡ç å·å½¢å¼æ˜¯å¦åˆæ³•
             if (this.EntityForm != null
                 && this.EntityForm.NeedVerifyItemBarcode == true)
             {
-                // ĞÎÊ½Ğ£ÑéÌõÂëºÅ
+                // å½¢å¼æ ¡éªŒæ¡ç å·
                 // return:
-                //      -2  ·şÎñÆ÷Ã»ÓĞÅäÖÃĞ£Ñé·½·¨£¬ÎŞ·¨Ğ£Ñé
+                //      -2  æœåŠ¡å™¨æ²¡æœ‰é…ç½®æ ¡éªŒæ–¹æ³•ï¼Œæ— æ³•æ ¡éªŒ
                 //      -1  error
-                //      0   ²»ÊÇºÏ·¨µÄÌõÂëºÅ
-                //      1   ÊÇºÏ·¨µÄ¶ÁÕßÖ¤ÌõÂëºÅ
-                //      2   ÊÇºÏ·¨µÄ²áÌõÂëºÅ
+                //      0   ä¸æ˜¯åˆæ³•çš„æ¡ç å·
+                //      1   æ˜¯åˆæ³•çš„è¯»è€…è¯æ¡ç å·
+                //      2   æ˜¯åˆæ³•çš„å†Œæ¡ç å·
                 nRet = this.EntityForm.VerifyBarcode(
                     strBarcode,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
 
-                // ÊäÈëµÄÌõÂë¸ñÊ½²»ºÏ·¨
+                // è¾“å…¥çš„æ¡ç æ ¼å¼ä¸åˆæ³•
                 if (nRet == 0)
                 {
-                    strError = "ÄúÊäÈëµÄÌõÂë " + strBarcode + " ¸ñÊ½²»ÕıÈ·¡£ÇëÖØĞÂÊäÈë¡£";
+                    strError = "æ‚¨è¾“å…¥çš„æ¡ç  " + strBarcode + " æ ¼å¼ä¸æ­£ç¡®ã€‚è¯·é‡æ–°è¾“å…¥ã€‚";
                     goto ERROR1;
                 }
 
-                // Êµ¼ÊÊäÈëµÄÊÇ¶ÁÕßÖ¤ÌõÂë
+                // å®é™…è¾“å…¥çš„æ˜¯è¯»è€…è¯æ¡ç 
                 if (nRet == 1)
                 {
-                    strError = "ÄúÊäÈëµÄÌõÂëºÅ " + strBarcode + " ÊÇ¶ÁÕßÖ¤ÌõÂëºÅ¡£ÇëÊäÈë²áÌõÂëºÅ¡£";
+                    strError = "æ‚¨è¾“å…¥çš„æ¡ç å· " + strBarcode + " æ˜¯è¯»è€…è¯æ¡ç å·ã€‚è¯·è¾“å…¥å†Œæ¡ç å·ã€‚";
                     goto ERROR1;
                 }
 
-                // ¶ÔÓÚ·şÎñÆ÷Ã»ÓĞÅäÖÃĞ£Ñé¹¦ÄÜ£¬µ«ÊÇÇ°¶Ë·¢³öÁËĞ£ÑéÒªÇóµÄÇé¿ö£¬¾¯¸æÒ»ÏÂ
+                // å¯¹äºæœåŠ¡å™¨æ²¡æœ‰é…ç½®æ ¡éªŒåŠŸèƒ½ï¼Œä½†æ˜¯å‰ç«¯å‘å‡ºäº†æ ¡éªŒè¦æ±‚çš„æƒ…å†µï¼Œè­¦å‘Šä¸€ä¸‹
                 if (nRet == -2)
-                    MessageBox.Show(this, "¾¯¸æ£ºÇ°¶Ë²á¹ÜÀí´°¿ªÆôÁËĞ£ÑéÌõÂë¹¦ÄÜ£¬µ«ÊÇ·şÎñÆ÷¶ËÈ±·¦ÏàÓ¦µÄ½Å±¾º¯Êı£¬ÎŞ·¨Ğ£ÑéÌõÂë¡£\r\n\r\nÈôÒª±ÜÃâ³öÏÖ´Ë¾¯¸æ¶Ô»°¿ò£¬Çë¹Ø±ÕÇ°¶Ë²á¹ÜÀí´°Ğ£Ñé¹¦ÄÜ");
+                    MessageBox.Show(this, "è­¦å‘Šï¼šå‰ç«¯å†Œç®¡ç†çª—å¼€å¯äº†æ ¡éªŒæ¡ç åŠŸèƒ½ï¼Œä½†æ˜¯æœåŠ¡å™¨ç«¯ç¼ºä¹ç›¸åº”çš„è„šæœ¬å‡½æ•°ï¼Œæ— æ³•æ ¡éªŒæ¡ç ã€‚\r\n\r\nè‹¥è¦é¿å…å‡ºç°æ­¤è­¦å‘Šå¯¹è¯æ¡†ï¼Œè¯·å…³é—­å‰ç«¯å†Œç®¡ç†çª—æ ¡éªŒåŠŸèƒ½");
 
             }
 
@@ -631,9 +631,9 @@ namespace dp2Circulation
             if (nRet == -1)
                 goto ERROR1;
 
-            // TODO: Ìá½»±£´æºótimestamp²»Æ¥ÅäÊ±³öÏÖµÄ¶Ô»°¿ò£¬Ó¦µ±½ûÖ¹prev/next°´Å¥
+            // TODO: æäº¤ä¿å­˜åtimestampä¸åŒ¹é…æ—¶å‡ºç°çš„å¯¹è¯æ¡†ï¼Œåº”å½“ç¦æ­¢prev/nextæŒ‰é’®
 
-            // Õë¶ÔÓĞ±¨´íĞÅÏ¢µÄÇé¿ö
+            // é’ˆå¯¹æœ‰æŠ¥é”™ä¿¡æ¯çš„æƒ…å†µ
             if (this.BookItem != null
                 && this.BookItem.Error != null
                 && this.BookItem.Error.ErrorCode == DigitalPlatform.CirculationClient.localhost.ErrorCodeValue.TimestampMismatch)
@@ -642,8 +642,8 @@ namespace dp2Circulation
                 this.BookItem.Timestamp = this.BookItem.Error.OldTimestamp;
             }
 
-            this.BookItem.Error = null; // ½áÊø±¨´í×´Ì¬
-            // this.BookItem.RefreshListView();    //  Ë¢ĞÂÏÔÊ¾
+            this.BookItem.Error = null; // ç»“æŸæŠ¥é”™çŠ¶æ€
+            // this.BookItem.RefreshListView();    //  åˆ·æ–°æ˜¾ç¤º
 
             this.DialogResult = DialogResult.OK;
             this.Close();
@@ -662,7 +662,7 @@ namespace dp2Circulation
         }
 
 #if NO
-        // Ìî³ä±à¼­½çÃæÊı¾İ
+        // å¡«å……ç¼–è¾‘ç•Œé¢æ•°æ®
         int FillEditing(BookItem bookitem,
             out string strError)
         {
@@ -670,7 +670,7 @@ namespace dp2Circulation
 
             if (bookitem == null)
             {
-                strError = "bookitem²ÎÊıÖµÎª¿Õ";
+                strError = "bookitemå‚æ•°å€¼ä¸ºç©º";
                 return -1;
             }
 
@@ -691,20 +691,20 @@ namespace dp2Circulation
             return 0;
         }
 
-        // Ìî³ä²Î¿¼±à¼­½çÃæÊı¾İ
+        // å¡«å……å‚è€ƒç¼–è¾‘ç•Œé¢æ•°æ®
         int FillExisting(out string strError)
         {
             strError = "";
 
             if (this.BookItem == null)
             {
-                strError = "BookItemÎª¿Õ";
+                strError = "BookItemä¸ºç©º";
                 return -1;
             }
 
             if (this.BookItem.Error == null)
             {
-                strError = "BookItem.ErrorÎª¿Õ";
+                strError = "BookItem.Errorä¸ºç©º";
                 return -1;
             }
 
@@ -720,11 +720,11 @@ namespace dp2Circulation
             return 0;
         }
 
-        // ´Ó½çÃæÖĞ¸üĞÂbookitemÖĞµÄÊı¾İ
+        // ä»ç•Œé¢ä¸­æ›´æ–°bookitemä¸­çš„æ•°æ®
         // return:
         //      -1  error
-        //      0   Ã»ÓĞ±ØÒª¸üĞÂ
-        //      1   ÒÑ¾­¸üĞÂ
+        //      0   æ²¡æœ‰å¿…è¦æ›´æ–°
+        //      1   å·²ç»æ›´æ–°
         int Restore(out string strError)
         {
             strError = "";
@@ -735,23 +735,23 @@ namespace dp2Circulation
 
             if (this.BookItem == null)
             {
-                strError = "BookItemÎª¿Õ";
+                strError = "BookItemä¸ºç©º";
                 return -1;
             }
 
 
-            // TODO: ÊÇ·ñµ±Õâ¸öcheckboxÎªfalseµÄÊ±ºò£¬ÖÁÉÙÒ²Òª¼ì²é±¾ÖÖÖ®ÀàµÄÖØ¸´ÇéĞÎ£¿
-            // Èç¹ûÕâÀï²»¼ì²é£¬¿É·ñÔÚÌá½»±£´æµÄÊ±ºò£¬ÏÈ²éÍê±¾ÖÖÖ®ÀàµÄÖØ¸´£¬²ÅÕæÕıÏò·şÎñÆ÷Ìá½»?
+            // TODO: æ˜¯å¦å½“è¿™ä¸ªcheckboxä¸ºfalseçš„æ—¶å€™ï¼Œè‡³å°‘ä¹Ÿè¦æ£€æŸ¥æœ¬ç§ä¹‹ç±»çš„é‡å¤æƒ…å½¢ï¼Ÿ
+            // å¦‚æœè¿™é‡Œä¸æ£€æŸ¥ï¼Œå¯å¦åœ¨æäº¤ä¿å­˜çš„æ—¶å€™ï¼Œå…ˆæŸ¥å®Œæœ¬ç§ä¹‹ç±»çš„é‡å¤ï¼Œæ‰çœŸæ­£å‘æœåŠ¡å™¨æäº¤?
             if (this.checkBox_autoSearchDup.Checked == true
                 && this.EntityControl != null
-                && String.IsNullOrEmpty(this.entityEditControl_editing.Barcode) == false)   // 2008/11/3 ²»¼ì²é¿ÕµÄÌõÂëºÅÊÇ·ñÖØ¸´
+                && String.IsNullOrEmpty(this.entityEditControl_editing.Barcode) == false)   // 2008/11/3 ä¸æ£€æŸ¥ç©ºçš„æ¡ç å·æ˜¯å¦é‡å¤
             {
                 // Debug.Assert(false, "");
-                // ÌõÂë²éÖØ
+                // æ¡ç æŸ¥é‡
                 // return:
-                //      -1  ³ö´í
-                //      0   ²»ÖØ¸´
-                //      1   ÖØ¸´
+                //      -1  å‡ºé”™
+                //      0   ä¸é‡å¤
+                //      1   é‡å¤
                 nRet = this.EntityControl.CheckBarcodeDup(
                     this.entityEditControl_editing.Barcode,
                     this.BookItem,
@@ -761,17 +761,17 @@ namespace dp2Circulation
                 if (nRet == -1)
                     return -1;
                 if (nRet == 1)
-                    return -1;   // ÖØ¸´
+                    return -1;   // é‡å¤
             }
 
-            // »ñµÃ±à¼­ºóµÄÊı¾İ
+            // è·å¾—ç¼–è¾‘åçš„æ•°æ®
             try
             {
                 this.BookItem.RecordDom = this.entityEditControl_editing.DataDom;
             }
             catch (Exception ex)
             {
-                strError = "»ñµÃÊı¾İÊ±³ö´í: " + ex.Message;
+                strError = "è·å¾—æ•°æ®æ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
@@ -779,7 +779,7 @@ namespace dp2Circulation
             if (this.BookItem.ItemDisplayState != ItemDisplayState.New)
             {
                 this.BookItem.ItemDisplayState = ItemDisplayState.Changed;
-                // ÕâÒâÎ¶×ÅDeleted×´Ì¬Ò²»á±»ĞŞ¸ÄÎªChanged
+                // è¿™æ„å‘³ç€DeletedçŠ¶æ€ä¹Ÿä¼šè¢«ä¿®æ”¹ä¸ºChanged
             }
 
             this.BookItem.RefreshListView();
@@ -793,18 +793,18 @@ namespace dp2Circulation
             strError = "";
             int nRet = 0;
 
-            // TODO: ÊÇ·ñµ±Õâ¸öcheckboxÎªfalseµÄÊ±ºò£¬ÖÁÉÙÒ²Òª¼ì²é±¾ÖÖÖ®ÀàµÄÖØ¸´ÇéĞÎ£¿
-            // Èç¹ûÕâÀï²»¼ì²é£¬¿É·ñÔÚÌá½»±£´æµÄÊ±ºò£¬ÏÈ²éÍê±¾ÖÖÖ®ÀàµÄÖØ¸´£¬²ÅÕæÕıÏò·şÎñÆ÷Ìá½»?
+            // TODO: æ˜¯å¦å½“è¿™ä¸ªcheckboxä¸ºfalseçš„æ—¶å€™ï¼Œè‡³å°‘ä¹Ÿè¦æ£€æŸ¥æœ¬ç§ä¹‹ç±»çš„é‡å¤æƒ…å½¢ï¼Ÿ
+            // å¦‚æœè¿™é‡Œä¸æ£€æŸ¥ï¼Œå¯å¦åœ¨æäº¤ä¿å­˜çš„æ—¶å€™ï¼Œå…ˆæŸ¥å®Œæœ¬ç§ä¹‹ç±»çš„é‡å¤ï¼Œæ‰çœŸæ­£å‘æœåŠ¡å™¨æäº¤?
             if (this.checkBox_autoSearchDup.Checked == true
                 && this.EntityControl != null
-                && String.IsNullOrEmpty(this.entityEditControl_editing.Barcode) == false)   // 2008/11/3 ²»¼ì²é¿ÕµÄÌõÂëºÅÊÇ·ñÖØ¸´
+                && String.IsNullOrEmpty(this.entityEditControl_editing.Barcode) == false)   // 2008/11/3 ä¸æ£€æŸ¥ç©ºçš„æ¡ç å·æ˜¯å¦é‡å¤
             {
                 // Debug.Assert(false, "");
-                // ÌõÂë²éÖØ
+                // æ¡ç æŸ¥é‡
                 // return:
-                //      -1  ³ö´í
-                //      0   ²»ÖØ¸´
-                //      1   ÖØ¸´
+                //      -1  å‡ºé”™
+                //      0   ä¸é‡å¤
+                //      1   é‡å¤
                 nRet = this.EntityControl.CheckBarcodeDup(
                     this.entityEditControl_editing.Barcode,
                     this.Item,
@@ -814,7 +814,7 @@ namespace dp2Circulation
                 if (nRet == -1)
                     return -1;
                 if (nRet == 1)
-                    return -1;   // ÖØ¸´
+                    return -1;   // é‡å¤
             }
 
             return 0;
@@ -822,7 +822,7 @@ namespace dp2Circulation
 
 #if NO
         /// <summary>
-        /// ÊÇ·ñ×Ô¶¯²éÖØ
+        /// æ˜¯å¦è‡ªåŠ¨æŸ¥é‡
         /// </summary>
         public bool AutoSearchDup
         {
@@ -846,7 +846,7 @@ namespace dp2Circulation
             this.MainForm.MenuItem_restoreDefaultFont.Enabled = false;
         }
 
-        // ³·Ïú±ê¼ÇÉ¾³ı×´Ì¬
+        // æ’¤é”€æ ‡è®°åˆ é™¤çŠ¶æ€
         private void button_editing_undoMaskDelete_Click(object sender, EventArgs e)
         {
             if (this.Items != null)
@@ -865,15 +865,15 @@ namespace dp2Circulation
 
             if (this.EntityForm == null)
             {
-                strError = "Ã»ÓĞÈİÆ÷";
+                strError = "æ²¡æœ‰å®¹å™¨";
                 goto ERROR1;
             }
 
             int nIndex = this.EntityForm.IndexOfVisibleBookItems(this.BookItem);
             if (nIndex == -1)
             {
-                // ¾ÓÈ»ÔÚÈİÆ÷ÖĞÃ»ÓĞÕÒµ½
-                strError = "BookItemÊÂÏî¾ÓÈ»ÔÚÈİÆ÷ÖĞÃ»ÓĞÕÒµ½¡£";
+                // å±…ç„¶åœ¨å®¹å™¨ä¸­æ²¡æœ‰æ‰¾åˆ°
+                strError = "BookItemäº‹é¡¹å±…ç„¶åœ¨å®¹å™¨ä¸­æ²¡æœ‰æ‰¾åˆ°ã€‚";
                 Debug.Assert(false, strError);
                 goto ERROR1;
             }
@@ -885,17 +885,17 @@ namespace dp2Circulation
 
             if (nIndex <= -1)
             {
-                strError = "µ½Í·";
+                strError = "åˆ°å¤´";
                 goto ERROR1;
             }
 
             if (nIndex >= this.EntityForm.CountOfVisibleBookItems())
             {
-                strError = "µ½Î²";
+                strError = "åˆ°å°¾";
                 goto ERROR1;
             }
 
-            // ±£´æµ±Ç°ÊÂÏî
+            // ä¿å­˜å½“å‰äº‹é¡¹
             int nRet = FinishOneBookItem(out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -903,9 +903,9 @@ namespace dp2Circulation
             BookItem new_bookitem = this.EntityForm.GetAtVisibleBookItems(nIndex);
             LoadBookItem(new_bookitem);
 
-            // ÔÚlistviewÖĞ¹ö¶¯µ½¿É¼û·¶Î§
+            // åœ¨listviewä¸­æ»šåŠ¨åˆ°å¯è§èŒƒå›´
             new_bookitem.HilightListViewItem();
-            this.Text = "²áĞÅÏ¢";
+            this.Text = "å†Œä¿¡æ¯";
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -922,16 +922,16 @@ namespace dp2Circulation
             if (new_bookitem == null)
                 goto ERROR1;
 
-            // ±£´æµ±Ç°ÊÂÏî
+            // ä¿å­˜å½“å‰äº‹é¡¹
             int nRet = FinishOneBookItem(out strError);
             if (nRet == -1)
                 goto ERROR1;
 
             LoadBookItem(new_bookitem);
 
-            // ÔÚlistviewÖĞ¹ö¶¯µ½¿É¼û·¶Î§
+            // åœ¨listviewä¸­æ»šåŠ¨åˆ°å¯è§èŒƒå›´
             new_bookitem.HilightListViewItem(true);
-            this.Text = "²áĞÅÏ¢";
+            this.Text = "å†Œä¿¡æ¯";
             return;
         ERROR1:
             AutoCloseMessageBox.Show(this, strError, 2000);
@@ -939,9 +939,9 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÔÊĞí»òÕß½ûÖ¹½çÃæ¿Ø¼ş¡£ÔÚ³¤²Ù×÷Ç°£¬Ò»°ãĞèÒª½ûÖ¹½çÃæ¿Ø¼ş£»²Ù×÷Íê³ÉºóÔÙÔÊĞí
+        /// å…è®¸æˆ–è€…ç¦æ­¢ç•Œé¢æ§ä»¶ã€‚åœ¨é•¿æ“ä½œå‰ï¼Œä¸€èˆ¬éœ€è¦ç¦æ­¢ç•Œé¢æ§ä»¶ï¼›æ“ä½œå®Œæˆåå†å…è®¸
         /// </summary>
-        /// <param name="bEnable">ÊÇ·ñÔÊĞí½çÃæ¿Ø¼ş¡£true ÎªÔÊĞí£¬ false Îª½ûÖ¹</param>
+        /// <param name="bEnable">æ˜¯å¦å…è®¸ç•Œé¢æ§ä»¶ã€‚true ä¸ºå…è®¸ï¼Œ false ä¸ºç¦æ­¢</param>
         public void EnableControls(bool bEnable)
         {
             this.button_Cancel.Enabled = bEnable;
@@ -983,10 +983,10 @@ namespace dp2Circulation
         }
 
 #if NO
-        // ¸ù¾İµ±Ç°bookitemÊÂÏîÔÚÈİÆ÷ÖĞµÄÎ»ÖÃ£¬ÉèÖÃPrevRecordºÍNextRecord°´Å¥µÄEnabled×´Ì¬
+        // æ ¹æ®å½“å‰bookitemäº‹é¡¹åœ¨å®¹å™¨ä¸­çš„ä½ç½®ï¼Œè®¾ç½®PrevRecordå’ŒNextRecordæŒ‰é’®çš„EnabledçŠ¶æ€
         void EnablePrevNextRecordButtons()
         {
-            // ÓĞ²Î¿¼¼ÇÂ¼µÄÇé¿ö
+            // æœ‰å‚è€ƒè®°å½•çš„æƒ…å†µ
             if (this.BookItem != null
                 && this.BookItem.Error != null)
             {
@@ -996,7 +996,7 @@ namespace dp2Circulation
 
             if (this.EntityControl == null)
             {
-                // ÒòÎªÃ»ÓĞÈİÆ÷£¬ËùÒÔÎŞ·¨prev/next£¬ÓÚÊÇ¾Ídiable
+                // å› ä¸ºæ²¡æœ‰å®¹å™¨ï¼Œæ‰€ä»¥æ— æ³•prev/nextï¼Œäºæ˜¯å°±diable
                 goto DISABLE_TWO_BUTTON;
             }
 
@@ -1006,8 +1006,8 @@ namespace dp2Circulation
 
             if (nIndex == -1)
             {
-                // ¾ÓÈ»ÔÚÈİÆ÷ÖĞÃ»ÓĞÕÒµ½
-                // Debug.Assert(false, "BookItemÊÂÏî¾ÓÈ»ÔÚÈİÆ÷ÖĞÃ»ÓĞÕÒµ½¡£");
+                // å±…ç„¶åœ¨å®¹å™¨ä¸­æ²¡æœ‰æ‰¾åˆ°
+                // Debug.Assert(false, "BookItemäº‹é¡¹å±…ç„¶åœ¨å®¹å™¨ä¸­æ²¡æœ‰æ‰¾åˆ°ã€‚");
                 goto DISABLE_TWO_BUTTON;
             }
 
@@ -1051,8 +1051,8 @@ namespace dp2Circulation
             {
                 nNumber = -1;
 
-                // ¸øÒ»¸ö±»×Ö·ûÒıµ¼µÄÊı×ÖÔö¼ÓÒ»¸öÊıÁ¿¡£
-                // ÀıÈç B019 + 1 ±ä³É B020
+                // ç»™ä¸€ä¸ªè¢«å­—ç¬¦å¼•å¯¼çš„æ•°å­—å¢åŠ ä¸€ä¸ªæ•°é‡ã€‚
+                // ä¾‹å¦‚ B019 + 1 å˜æˆ B020
                 nRet = StringUtil.IncreaseLeadNumber(strValue,
                     nNumber,
                     out strResult,
@@ -1065,8 +1065,8 @@ namespace dp2Circulation
             {
                 nNumber = 1;
 
-                // ¸øÒ»¸ö±»×Ö·ûÒıµ¼µÄÊı×ÖÔö¼ÓÒ»¸öÊıÁ¿¡£
-                // ÀıÈç B019 + 1 ±ä³É B020
+                // ç»™ä¸€ä¸ªè¢«å­—ç¬¦å¼•å¯¼çš„æ•°å­—å¢åŠ ä¸€ä¸ªæ•°é‡ã€‚
+                // ä¾‹å¦‚ B019 + 1 å˜æˆ B020
                 nRet = StringUtil.IncreaseLeadNumber(strValue,
                     nNumber,
                     out strResult,
@@ -1078,10 +1078,10 @@ namespace dp2Circulation
             else if (strAction == "copy")
                 return strValue;
             else
-                return "Î´ÖªµÄstrActionÖµ '" + strAction + "'";
+                return "æœªçŸ¥çš„strActionå€¼ '" + strAction + "'";
         }
 
-        // entityeditcontrolµÄÄ³¸öÊäÈëÓò´¥·¢ÁË°´¼ü
+        // entityeditcontrolçš„æŸä¸ªè¾“å…¥åŸŸè§¦å‘äº†æŒ‰é”®
         private void entityEditControl_editing_ControlKeyDown(object sender,
             ControlKeyEventArgs e)
         {
@@ -1096,7 +1096,7 @@ namespace dp2Circulation
                 if (this.GenerateData != null)
                 {
                     GenerateDataEventArgs e1 = new GenerateDataEventArgs();
-                    e1.FocusedControl = sender; // senderÎª EntityEditControl
+                    e1.FocusedControl = sender; // senderä¸º EntityEditControl
                     this.GenerateData(this, e1);
                 }
                 e.e.SuppressKeyPress = true;    // 2015/5/28
@@ -1114,30 +1114,30 @@ namespace dp2Circulation
             }
             else if (e.e.KeyCode == Keys.OemOpenBrackets && e.e.Control == true)
             {
-                bUp = true; // ´ÓÉÏÃæ¿½±´
+                bUp = true; // ä»ä¸Šé¢æ‹·è´
             }
             else if (e.e.KeyCode == Keys.OemCloseBrackets && e.e.Control == true)
             {
-                bUp = false;    // ´ÓÏÂÃæ¿½±´
+                bUp = false;    // ä»ä¸‹é¢æ‹·è´
             }
             else if (e.e.KeyCode == Keys.OemMinus && e.e.Control == true)
             {
-                bUp = true; // ´ÓÉÏÃæ¼õÁ¿
+                bUp = true; // ä»ä¸Šé¢å‡é‡
                 strAction = "minus";
             }
             else if (e.e.KeyCode == Keys.Oemplus && e.e.Control == true)
             {
-                bUp = true;    // ´ÓÉÏÃæÔöÁ¿
+                bUp = true;    // ä»ä¸Šé¢å¢é‡
                 strAction = "plus";
             }
             else if (e.e.KeyCode == Keys.D0 && e.e.Control == true)
             {
-                bUp = false; // ´ÓÏÂÃæ¼õÁ¿
+                bUp = false; // ä»ä¸‹é¢å‡é‡
                 strAction = "minus";
             }
             else if (e.e.KeyCode == Keys.D9 && e.e.Control == true)
             {
-                bUp = false;    // ´ÓÏÂÃæÔöÁ¿
+                bUp = false;    // ä»ä¸‹é¢å¢é‡
                 strAction = "plus";
             }
             else
@@ -1240,7 +1240,7 @@ namespace dp2Circulation
                     // this.entityEditControl_editing.RefID = bookitem.RefID;  // 2009/6/2
                     break;
                 default:
-                    Debug.Assert(false, "Î´ÖªµÄÀ¸Ä¿Ãû³Æ '" +e.Name+ "'");
+                    Debug.Assert(false, "æœªçŸ¥çš„æ ç›®åç§° '" +e.Name+ "'");
                     return;
             }
 
@@ -1254,15 +1254,15 @@ namespace dp2Circulation
 
             if (this.EntityControl == null)
             {
-                strError = "Ã»ÓĞÈİÆ÷";
+                strError = "æ²¡æœ‰å®¹å™¨";
                 goto ERROR1;
             }
 
             int nIndex = this.EntityControl.IndexOfVisibleItems(this.BookItem);
             if (nIndex == -1)
             {
-                // ¾ÓÈ»ÔÚÈİÆ÷ÖĞÃ»ÓĞÕÒµ½
-                strError = "BookItemÊÂÏî¾ÓÈ»ÔÚÈİÆ÷ÖĞÃ»ÓĞÕÒµ½¡£";
+                // å±…ç„¶åœ¨å®¹å™¨ä¸­æ²¡æœ‰æ‰¾åˆ°
+                strError = "BookItemäº‹é¡¹å±…ç„¶åœ¨å®¹å™¨ä¸­æ²¡æœ‰æ‰¾åˆ°ã€‚";
                 Debug.Assert(false, strError);
                 goto ERROR1;
             }
@@ -1274,13 +1274,13 @@ namespace dp2Circulation
 
             if (nIndex <= -1)
             {
-                strError = "µ½Í·";
+                strError = "åˆ°å¤´";
                 goto ERROR1;
             }
 
             if (nIndex >= this.EntityControl.CountOfVisibleItems())
             {
-                strError = "µ½Î²";
+                strError = "åˆ°å°¾";
                 goto ERROR1;
             }
 
@@ -1296,9 +1296,9 @@ namespace dp2Circulation
         }
 
 #if NO
-        // »ñÈ¡ÖµÁĞ±íÊ±×÷ÎªÏßË÷µÄÊı¾İ¿âÃû
+        // è·å–å€¼åˆ—è¡¨æ—¶ä½œä¸ºçº¿ç´¢çš„æ•°æ®åº“å
         /// <summary>
-        /// ÊéÄ¿¿âÃû¡£»ñÈ¡ÖµÁĞ±íÊ±×÷ÎªÏßË÷µÄÊı¾İ¿âÃû
+        /// ä¹¦ç›®åº“åã€‚è·å–å€¼åˆ—è¡¨æ—¶ä½œä¸ºçº¿ç´¢çš„æ•°æ®åº“å
         /// </summary>
         public string BiblioDbName
         {
@@ -1316,7 +1316,7 @@ namespace dp2Circulation
     }
 
     /// <summary>
-    /// ²á¼ÇÂ¼±à¼­¶Ô»°¿òµÄ»ù´¡Àà
+    /// å†Œè®°å½•ç¼–è¾‘å¯¹è¯æ¡†çš„åŸºç¡€ç±»
     /// </summary>
     public class EntityEditFormBase : ItemEditFormBase<BookItem, BookItemCollection>
     {

@@ -8,11 +8,11 @@ using System.Windows.Forms;
 using System.Xml;
 using System.Diagnostics;
 using System.Reflection;
+using System.Globalization;
 
 using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
-using System.Globalization;
 
 namespace dp2Circulation
 {

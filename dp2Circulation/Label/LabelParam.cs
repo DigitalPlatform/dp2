@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Drawing;
@@ -13,28 +13,28 @@ using System.Diagnostics;
 namespace dp2Circulation
 {
     /// <summary>
-    /// Ò»¸ö±êÇ©µÄ³ß´ç¶¨ÒåĞÅÏ¢
+    /// ä¸€ä¸ªæ ‡ç­¾çš„å°ºå¯¸å®šä¹‰ä¿¡æ¯
     /// </summary>
     public class LabelParam
     {
-        // µ¥Î»£º°Ù·ÖÖ®Ò»Ó¢´ç
+        // å•ä½ï¼šç™¾åˆ†ä¹‹ä¸€è‹±å¯¸
 
-        // ±êÇ©¸ß¶È
+        // æ ‡ç­¾é«˜åº¦
         public double LabelHeight = 0;
-        // ±êÇ©¿í¶È
+        // æ ‡ç­¾å®½åº¦
         public double LabelWidth = 0;
 
-        // ĞĞ¼ä¾à 2014/2/23
+        // è¡Œé—´è· 2014/2/23
         public double LineSep = 0;
 
 
-        // ±êÇ©ÄÚÎÄ×ÖÇøµÄ±ß¾à
+        // æ ‡ç­¾å†…æ–‡å­—åŒºçš„è¾¹è·
         public DecimalPadding LabelPaddings = new DecimalPadding(0, 0, 0, 0);
 
         public List<LineFormat> LineFormats = new List<LineFormat>();
 
         public Font Font = new Font("Arial", 10, FontStyle.Regular, GraphicsUnit.Point);
-        public bool IsBarcodeFont = false;  // ÊÇ·ñÎªÌõÂë×ÖÌå£¿ Èç¹ûÊÇÌõÂë×ÖÌå£¬ÔòÒªÔÚÎÄ×Ö×óÓÒ¼ÓÉÏ *
+        public bool IsBarcodeFont = false;  // æ˜¯å¦ä¸ºæ¡ç å­—ä½“ï¼Ÿ å¦‚æœæ˜¯æ¡ç å­—ä½“ï¼Œåˆ™è¦åœ¨æ–‡å­—å·¦å³åŠ ä¸Š *
 
         public double PageWidth = 0;
         public double PageHeight = 0;
@@ -42,11 +42,11 @@ namespace dp2Circulation
         // public bool Landscape = false;
         public int RotateDegree = 0;
 
-        // Ò»Ò³Ö½ÕÅµÄºê¹Û¶¨ÒåĞÅÏ¢
-        // Ò³±ß¾à µ¥Î»Îª°Ù·ÖÖ®Ò»Ó¢´ç
+        // ä¸€é¡µçº¸å¼ çš„å®è§‚å®šä¹‰ä¿¡æ¯
+        // é¡µè¾¹è· å•ä½ä¸ºç™¾åˆ†ä¹‹ä¸€è‹±å¯¸
         public DecimalPadding PageMargins = new DecimalPadding(0, 0, 0, 0);
 
-        public string DefaultPrinter = "";  // È±Ê¡µÄ´òÓ¡»ú²ÎÊı¡£°üÀ¨´òÓ¡»úÃûºÍÖ½ÕÅÃû¡£Èç¹ûÃ»ÓĞ¶¨ÒåÒ³Ãæ³ß´ç£¬ÔòÓÃÖ½ÕÅµÄ³ß´ç×÷ÎªÒ³Ãæ³ß´ç
+        public string DefaultPrinter = "";  // ç¼ºçœçš„æ‰“å°æœºå‚æ•°ã€‚åŒ…æ‹¬æ‰“å°æœºåå’Œçº¸å¼ åã€‚å¦‚æœæ²¡æœ‰å®šä¹‰é¡µé¢å°ºå¯¸ï¼Œåˆ™ç”¨çº¸å¼ çš„å°ºå¯¸ä½œä¸ºé¡µé¢å°ºå¯¸
 
         public static int Build(string strLabelDefFilename,
             out LabelParam label_param,
@@ -64,7 +64,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = "×°ÔØÎÄ¼ş '" + strLabelDefFilename + "' µ½XMLDOMÊ±·¢Éú´íÎó: " + ex.Message;
+                strError = "è£…è½½æ–‡ä»¶ '" + strLabelDefFilename + "' åˆ°XMLDOMæ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                 return -1;
             }
 
@@ -92,7 +92,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = "Öµ¸ñÊ½´íÎó: " + ex.Message;
+                strError = "å€¼æ ¼å¼é”™è¯¯: " + ex.Message;
                 return -1;
             }
 
@@ -156,7 +156,7 @@ namespace dp2Circulation
                 out strError);
                     if (nRet == -1)
                     {
-                        strError = "<label>ÔªËØpaddingsÊôĞÔÖµ¸ñÊ½´íÎó: " + strError;
+                        strError = "<label>å…ƒç´ paddingså±æ€§å€¼æ ¼å¼é”™è¯¯: " + strError;
                         return -1;
                     }
                     label_param.LabelPaddings = margins;
@@ -178,7 +178,7 @@ namespace dp2Circulation
                 }
                 catch (Exception ex)
                 {
-                    strError = "<label>ÔªËØpaddingsÊôĞÔÖµ¸ñÊ½´íÎó: " + ex.Message;
+                    strError = "<label>å…ƒç´ paddingså±æ€§å€¼æ ¼å¼é”™è¯¯: " + ex.Message;
                     return -1;
                 }
 #endif
@@ -195,7 +195,7 @@ namespace dp2Circulation
                     }
                     catch (Exception ex)
                     {
-                        strError = "<label>ÔªËØ font ÊôĞÔÖµ¸ñÊ½´íÎó: " + ex.Message;
+                        strError = "<label>å…ƒç´  font å±æ€§å€¼æ ¼å¼é”™è¯¯: " + ex.Message;
                         return -1;
                     }
                 }
@@ -241,7 +241,7 @@ namespace dp2Circulation
     out strError);
                     if (nRet == -1)
                     {
-                        strError = "<page>ÔªËØmarginsÊôĞÔÖµ¸ñÊ½´íÎó: " + strError;
+                        strError = "<page>å…ƒç´ marginså±æ€§å€¼æ ¼å¼é”™è¯¯: " + strError;
                         return -1;
                     }
                     label_param.PageMargins = margins;
@@ -262,7 +262,7 @@ namespace dp2Circulation
                 }
                 catch (Exception ex)
                 {
-                    strError = "<page>ÔªËØmarginsÊôĞÔÖµ¸ñÊ½´íÎó: " + ex.Message;
+                    strError = "<page>å…ƒç´ marginså±æ€§å€¼æ ¼å¼é”™è¯¯: " + ex.Message;
                     return -1;
                 }
 #endif
@@ -278,7 +278,7 @@ namespace dp2Circulation
                     out strError);
                 if (nRet == -1)
                 {
-                    strError = "<page> ÔªËØµÄ landscape ÊôĞÔ´íÎó: " + strError;
+                    strError = "<page> å…ƒç´ çš„ landscape å±æ€§é”™è¯¯: " + strError;
                     return -1;
                 }
                 label_param.Landscape = bValue;
@@ -291,7 +291,7 @@ namespace dp2Circulation
                     out strError);
                 if (nRet == -1)
                 {
-                    strError = "<page> ÔªËØµÄ rotate ÊôĞÔ´íÎó: " + strError;
+                    strError = "<page> å…ƒç´ çš„ rotate å±æ€§é”™è¯¯: " + strError;
                     return -1;
                 }
                 label_param.RotateDegree = nValue;
@@ -317,12 +317,12 @@ namespace dp2Circulation
                     }
                     catch (Exception ex)
                     {
-                        strError = "<line>ÔªËØfontÊôĞÔÖµ¸ñÊ½´íÎó: " + ex.Message;
+                        strError = "<line>å…ƒç´ fontå±æ€§å€¼æ ¼å¼é”™è¯¯: " + ex.Message;
                         return -1;
                     }
                 }
                 else
-                    format.Font = null; // ¼Ì³ĞÒ³ÃæµÄ×ÖÌå
+                    format.Font = null; // ç»§æ‰¿é¡µé¢çš„å­—ä½“
 
                 format.Align = DomUtil.GetAttr(node, "align");
 
@@ -342,7 +342,7 @@ namespace dp2Circulation
                     }
                     catch (Exception ex)
                     {
-                        strError = "<line>ÔªËØoffsetÊôĞÔÖµ¸ñÊ½´íÎó: " + ex.Message;
+                        strError = "<line>å…ƒç´ offsetå±æ€§å€¼æ ¼å¼é”™è¯¯: " + ex.Message;
                         return -1;
                     }
                 }
@@ -363,7 +363,7 @@ namespace dp2Circulation
                     }
                     catch (Exception ex)
                     {
-                        strError = "<line>ÔªËØstartÊôĞÔÖµ¸ñÊ½´íÎó: " + ex.Message;
+                        strError = "<line>å…ƒç´ startå±æ€§å€¼æ ¼å¼é”™è¯¯: " + ex.Message;
                         return -1;
                     }
                 }
@@ -400,14 +400,14 @@ namespace dp2Circulation
             {
                 if (double.TryParse(strLeft, out left) == false)
                 {
-                    throw new Exception("×Ö·û´® '"+strLeft+"' ¸ñÊ½´íÎó¡£¶ººÅ×ó²àÓ¦¸ÃÊÇÒ»¸öÊı×Ö");
+                    throw new Exception("å­—ç¬¦ä¸² '"+strLeft+"' æ ¼å¼é”™è¯¯ã€‚é€—å·å·¦ä¾§åº”è¯¥æ˜¯ä¸€ä¸ªæ•°å­—");
                 }
             }
             if (string.IsNullOrEmpty(strRight) == false)
             {
                 if (double.TryParse(strRight, out right) == false)
                 {
-                    throw new Exception("×Ö·û´® '" + strRight + "' ¸ñÊ½´íÎó¡£¶ººÅÓÒ²àÓ¦¸ÃÊÇÒ»¸öÊı×Ö");
+                    throw new Exception("å­—ç¬¦ä¸² '" + strRight + "' æ ¼å¼é”™è¯¯ã€‚é€—å·å³ä¾§åº”è¯¥æ˜¯ä¸€ä¸ªæ•°å­—");
                 }
             }
         }
@@ -420,7 +420,7 @@ namespace dp2Circulation
                 + margin.Bottom.ToString();
         }
 
-        // ½«ÄÚÈİ´´½¨Îª XmlDocument
+        // å°†å†…å®¹åˆ›å»ºä¸º XmlDocument
         public int ToXmlDocument(out XmlDocument dom,
             out string strError)
         {
@@ -480,8 +480,8 @@ namespace dp2Circulation
 
                     DomUtil.SetAttr(line, "align", format.Align);
 
-                    Debug.Assert(double.IsNaN(format.OffsetX) == false, "OffsetX ²»¿ÉÄÜÎª NaN");
-                    Debug.Assert(double.IsNaN(format.OffsetY) == false, "OffsetY ²»¿ÉÄÜÎª NaN");
+                    Debug.Assert(double.IsNaN(format.OffsetX) == false, "OffsetX ä¸å¯èƒ½ä¸º NaN");
+                    Debug.Assert(double.IsNaN(format.OffsetY) == false, "OffsetY ä¸å¯èƒ½ä¸º NaN");
 
                     if (format.OffsetX != 0 || format.OffsetY != 0)
                         line.SetAttribute("offset", format.OffsetX + "," + format.OffsetY);
@@ -509,25 +509,25 @@ namespace dp2Circulation
         }
     }
 
-    // Ò»ĞĞµÄ¸ñÊ½
+    // ä¸€è¡Œçš„æ ¼å¼
     public class LineFormat
     {
-        public Font Font = null;    // Èç¹ûÎª¿Õ£¬Ôò±íÊ¾¼Ì³ĞÒ³ÃæµÄ×ÖÌå
+        public Font Font = null;    // å¦‚æœä¸ºç©ºï¼Œåˆ™è¡¨ç¤ºç»§æ‰¿é¡µé¢çš„å­—ä½“
         public string Align = "left";
-        public bool IsBarcodeFont = false;  // ÊÇ·ñÎªÌõÂë×ÖÌå£¿ Èç¹ûÊÇÌõÂë×ÖÌå£¬ÔòÒªÔÚÎÄ×Ö×óÓÒ¼ÓÉÏ *
+        public bool IsBarcodeFont = false;  // æ˜¯å¦ä¸ºæ¡ç å­—ä½“ï¼Ÿ å¦‚æœæ˜¯æ¡ç å­—ä½“ï¼Œåˆ™è¦åœ¨æ–‡å­—å·¦å³åŠ ä¸Š *
 
-        // ×óÉÏ½Ç¾ø¶ÔÎ»ÖÃ
+        // å·¦ä¸Šè§’ç»å¯¹ä½ç½®
         public double StartX = Double.NaN;
         public double StartY = Double.NaN;
 
-        // Ïà¶ÔÆ«ÒÆÎ»ÖÃ
+        // ç›¸å¯¹åç§»ä½ç½®
         public double OffsetX = 0;
         public double OffsetY = 0;
 
-        // Ç°¾°ÑÕÉ«
-        public string ForeColor = "";   // È±Ê¡ÎªºÚÉ«
-        // ±³¾°ÑÕÉ«
-        public string BackColor = "";   // È±Ê¡ÎªÍ¸Ã÷
+        // å‰æ™¯é¢œè‰²
+        public string ForeColor = "";   // ç¼ºçœä¸ºé»‘è‰²
+        // èƒŒæ™¯é¢œè‰²
+        public string BackColor = "";   // ç¼ºçœä¸ºé€æ˜
 
     }
 

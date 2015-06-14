@@ -1,5 +1,5 @@
-#define USE_LOCAL_CHANNEL
-#define USE_THREAD   // ÒªÊ¹ÓÃ¶ÀÁ¢µÄÏß³Ì¡£ËÆºõÕâÑù¸´ÔÓ»¯ÁË¼òµ¥µÄÎÊÌâ£¬Ã»ÓĞ±ØÒª
+ï»¿#define USE_LOCAL_CHANNEL
+#define USE_THREAD   // è¦ä½¿ç”¨ç‹¬ç«‹çš„çº¿ç¨‹ã€‚ä¼¼ä¹è¿™æ ·å¤æ‚åŒ–äº†ç®€å•çš„é—®é¢˜ï¼Œæ²¡æœ‰å¿…è¦
 
 using System;
 using System.Collections.Generic;
@@ -19,12 +19,12 @@ using DigitalPlatform.IO;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CirculationClient.localhost;
 
-// 2013/3/16 Ìí¼Ó XML ×¢ÊÍ
+// 2013/3/16 æ·»åŠ  XML æ³¨é‡Š
 
 namespace dp2Circulation
 {
     /// <summary>
-    /// ²Ù×÷ÀúÊ·
+    /// æ“ä½œå†å²
     /// </summary>
     public class OperHistory : ThreadBase
     {
@@ -33,7 +33,7 @@ namespace dp2Circulation
         List<OneCall> m_calls = new List<OneCall>();
 
         internal ReaderWriterLock m_lock = new ReaderWriterLock();
-        internal static int m_nLockTimeout = 5000;	// 5000=5Ãë
+        internal static int m_nLockTimeout = 5000;	// 5000=5ç§’
 
 #endif
 
@@ -45,33 +45,33 @@ namespace dp2Circulation
         internal Thread _thread = null;
 
         internal AutoResetEvent eventClose = new AutoResetEvent(false);	// true : initial state is signaled 
-        internal AutoResetEvent eventActive = new AutoResetEvent(false);	// ¼¤»îĞÅºÅ
+        internal AutoResetEvent eventActive = new AutoResetEvent(false);	// æ¿€æ´»ä¿¡å·
         internal AutoResetEvent eventFinished = new AutoResetEvent(false);	// true : initial state is signaled 
 
-        public int PerTime = 1000;   // 1 Ãë 5 * 60 * 1000;	// 5 ·ÖÖÓ
+        public int PerTime = 1000;   // 1 ç§’ 5 * 60 * 1000;	// 5 åˆ†é’Ÿ
 #endif
 #endif
 
         #endregion
 
-        bool m_bNeedReload = false; // ÊÇ·ñĞèÒªÖØĞÂ×°ÔØproject xml
+        bool m_bNeedReload = false; // æ˜¯å¦éœ€è¦é‡æ–°è£…è½½project xml
 
         /// <summary>
-        /// IE ä¯ÀÀÆ÷¿Ø¼ş£¬ÓÃÓÚÏÔÊ¾²Ù×÷ÀúÊ·ĞÅÏ¢
+        /// IE æµè§ˆå™¨æ§ä»¶ï¼Œç”¨äºæ˜¾ç¤ºæ“ä½œå†å²ä¿¡æ¯
         /// </summary>
         public WebBrowser WebBrowser = null;
 
         WebExternalHost m_webExternalHost = new WebExternalHost();
 
         /// <summary>
-        /// ¿ò¼Ü´°¿Ú
+        /// æ¡†æ¶çª—å£
         /// </summary>
         public MainForm MainForm = null;
 
 #if USE_LOCAL_CHANNEL
         // 2011/12/5
         /// <summary>
-        /// Í¨Ñ¶Í¨µÀ
+        /// é€šè®¯é€šé“
         /// </summary>
         public LibraryChannel Channel = new LibraryChannel();
 #endif
@@ -79,14 +79,14 @@ namespace dp2Circulation
         int m_nCount = 0;
 
         /// <summary>
-        /// ½Å±¾¹ÜÀíÆ÷
+        /// è„šæœ¬ç®¡ç†å™¨
         /// </summary>
         public ScriptManager ScriptManager = new ScriptManager();
 
-        Assembly PrintAssembly = null;   // ´òÓ¡´úÂëµÄAssembly
+        Assembly PrintAssembly = null;   // æ‰“å°ä»£ç çš„Assembly
 
         /// <summary>
-        /// ½Å±¾´úÂëÖĞ PrintHost ÅÉÉúÀà¶ÔÏóÊµÀı
+        /// è„šæœ¬ä»£ç ä¸­ PrintHost æ´¾ç”Ÿç±»å¯¹è±¡å®ä¾‹
         /// </summary>
         public PrintHost PrintHostObj = null;   // 
 
@@ -105,7 +105,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// »ñÈ¡ÅäÖÃ²ÎÊı£ºµ±Ç°ÕıÔÚÊ¹ÓÃµÄ³öÄÉ´òÓ¡·½°¸Ãû
+        /// è·å–é…ç½®å‚æ•°ï¼šå½“å‰æ­£åœ¨ä½¿ç”¨çš„å‡ºçº³æ‰“å°æ–¹æ¡ˆå
         /// </summary>
         public string CurrentProjectName
         {
@@ -119,16 +119,16 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÔÊĞí»òÕß½ûÖ¹½çÃæ¿Ø¼ş¡£ÔÚ³¤²Ù×÷Ç°£¬Ò»°ãĞèÒª½ûÖ¹½çÃæ¿Ø¼ş£»²Ù×÷Íê³ÉºóÔÙÔÊĞí
+        /// å…è®¸æˆ–è€…ç¦æ­¢ç•Œé¢æ§ä»¶ã€‚åœ¨é•¿æ“ä½œå‰ï¼Œä¸€èˆ¬éœ€è¦ç¦æ­¢ç•Œé¢æ§ä»¶ï¼›æ“ä½œå®Œæˆåå†å…è®¸
         /// </summary>
-        /// <param name="bEnable">ÊÇ·ñÔÊĞí½çÃæ¿Ø¼ş¡£true ÎªÔÊĞí£¬ false Îª½ûÖ¹</param>
+        /// <param name="bEnable">æ˜¯å¦å…è®¸ç•Œé¢æ§ä»¶ã€‚true ä¸ºå…è®¸ï¼Œ false ä¸ºç¦æ­¢</param>
         public void EnableControls(bool bEnable)
         {
 
         }
 
         /// <summary>
-        /// Çå³ıÒÑÓĞµÄ HTML ÏÔÊ¾
+        /// æ¸…é™¤å·²æœ‰çš„ HTML æ˜¾ç¤º
         /// </summary>
         public void ClearHtml()
         {
@@ -162,13 +162,13 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ³õÊ¼»¯ OperHistory ¶ÔÏó
-        /// ³õÊ¼»¯¹ı³ÌÖĞ£¬Òª±àÒë³öÄÉ´òÓ¡·½°¸½Å±¾´úÂë£¬Ê¹Ëü´¦ÓÚ¾ÍĞ÷×´Ì¬
+        /// åˆå§‹åŒ– OperHistory å¯¹è±¡
+        /// åˆå§‹åŒ–è¿‡ç¨‹ä¸­ï¼Œè¦ç¼–è¯‘å‡ºçº³æ‰“å°æ–¹æ¡ˆè„šæœ¬ä»£ç ï¼Œä½¿å®ƒå¤„äºå°±ç»ªçŠ¶æ€
         /// </summary>
-        /// <param name="main_form">¿ò¼Ü´°¿Ú</param>
-        /// <param name="webbrowser">ÓÃÓÚÏÔÊ¾²Ù×÷ÀúÊ·ĞÅÏ¢µÄ IE ä¯ÀÀÆ÷¿Ø¼ş</param>
-        /// <param name="strError">³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í£¬´íÎóĞÅÏ¢ÔÚ strErrorÖĞ£»0: ³É¹¦</returns>
+        /// <param name="main_form">æ¡†æ¶çª—å£</param>
+        /// <param name="webbrowser">ç”¨äºæ˜¾ç¤ºæ“ä½œå†å²ä¿¡æ¯çš„ IE æµè§ˆå™¨æ§ä»¶</param>
+        /// <param name="strError">å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™ï¼Œé”™è¯¯ä¿¡æ¯åœ¨ strErrorä¸­ï¼›0: æˆåŠŸ</returns>
         public int Initial(MainForm main_form,
             WebBrowser webbrowser,
             out string strError)
@@ -215,7 +215,7 @@ namespace dp2Circulation
 
             /*
 
-            // ×¼±¸script´úÂë
+            // å‡†å¤‡scriptä»£ç 
             string strCsFileName = this.MainForm.DataDir + "\\charging_print.cs";
             string strRefFileName = this.MainForm.DataDir + "\\charging_print.cs.ref";
 
@@ -227,9 +227,9 @@ namespace dp2Circulation
 
                 try
                 {
-                    // TODO: ÕâÀïµÄ×Ô¶¯Ì½Ë÷ÎÄ¼ş±àÂë·½Ê½¹¦ÄÜ²»ÕıÈ·£¬
-                    // ĞèÒª×¨ÃÅ±àĞ´Ò»¸öº¯ÊıÀ´Ì½²âÎÄ±¾ÎÄ¼şµÄ±àÂë·½Ê½
-                    // Ä¿Ç°Ö»ÄÜÓÃUTF-8±àÂë·½Ê½
+                    // TODO: è¿™é‡Œçš„è‡ªåŠ¨æ¢ç´¢æ–‡ä»¶ç¼–ç æ–¹å¼åŠŸèƒ½ä¸æ­£ç¡®ï¼Œ
+                    // éœ€è¦ä¸“é—¨ç¼–å†™ä¸€ä¸ªå‡½æ•°æ¥æ¢æµ‹æ–‡æœ¬æ–‡ä»¶çš„ç¼–ç æ–¹å¼
+                    // ç›®å‰åªèƒ½ç”¨UTF-8ç¼–ç æ–¹å¼
                     sr = new StreamReader(strCsFileName, encoding);
                 }
                 catch (Exception ex)
@@ -241,7 +241,7 @@ namespace dp2Circulation
                 sr.Close();
                 sr = null;
 
-                // .refÎÄ¼ş¿ÉÒÔÈ±Ê¡
+                // .refæ–‡ä»¶å¯ä»¥ç¼ºçœ
                 string strRef = "";
                 if (File.Exists(strRefFileName) == true)
                 {
@@ -259,14 +259,14 @@ namespace dp2Circulation
                     sr.Close();
                     sr = null;
 
-                    // ÌáÇ°¼ì²é
+                    // æå‰æ£€æŸ¥
                     string[] saRef = null;
                     nRet = ScriptManager.GetRefsFromXml(strRef,
                         out saRef,
                         out strError);
                     if (nRet == -1)
                     {
-                        strError = strRefFileName + " ÎÄ¼şÄÚÈİ(Ó¦ÎªXML¸ñÊ½)¸ñÊ½´íÎó: " + strError;
+                        strError = strRefFileName + " æ–‡ä»¶å†…å®¹(åº”ä¸ºXMLæ ¼å¼)æ ¼å¼é”™è¯¯: " + strError;
                         return -1;
                     }
                 }
@@ -276,7 +276,7 @@ namespace dp2Circulation
                    out strError);
                 if (nRet == -1)
                 {
-                    strError = "C#½Å±¾ÎÄ¼ş " + strCsFileName + " ×¼±¸¹ı³Ì·¢Éú´íÎó(³öÄÉµ¥¾İ´òÓ¡¹¦ÄÜÒò´ËÔİÊ±Ê§Ğ§)£º\r\n\r\n" + strError;
+                    strError = "C#è„šæœ¬æ–‡ä»¶ " + strCsFileName + " å‡†å¤‡è¿‡ç¨‹å‘ç”Ÿé”™è¯¯(å‡ºçº³å•æ®æ‰“å°åŠŸèƒ½å› æ­¤æš‚æ—¶å¤±æ•ˆ)ï¼š\r\n\r\n" + strError;
                     return -1;
                 }
             }
@@ -297,7 +297,7 @@ namespace dp2Circulation
             catch (FileNotFoundException ex)
             {
                 strError = "file not found : " + ex.Message;
-                return 0;   // µ±×÷Õı³£´¦Àí
+                return 0;   // å½“ä½œæ­£å¸¸å¤„ç†
             }
             catch (Exception ex)
             {
@@ -305,14 +305,14 @@ namespace dp2Circulation
                 return -1;
             }
 
-            // »ñµÃ·½°¸Ãû
+            // è·å¾—æ–¹æ¡ˆå
             string strProjectName = CurrentProjectName;
 
             if (String.IsNullOrEmpty(strProjectName) == false)
             {
                 string strProjectLocate = "";
-                // »ñµÃ·½°¸²ÎÊı
-                // strProjectNamePath	·½°¸Ãû£¬»òÕßÂ·¾¶
+                // è·å¾—æ–¹æ¡ˆå‚æ•°
+                // strProjectNamePath	æ–¹æ¡ˆåï¼Œæˆ–è€…è·¯å¾„
                 // return:
                 //		-1	error
                 //		0	not found project
@@ -322,7 +322,7 @@ namespace dp2Circulation
                     out strProjectLocate);
                 if (nRet == 0)
                 {
-                    strError = "Æ¾Ìõ´òÓ¡·½°¸ " + strProjectName + " Ã»ÓĞÕÒµ½...";
+                    strError = "å‡­æ¡æ‰“å°æ–¹æ¡ˆ " + strProjectName + " æ²¡æœ‰æ‰¾åˆ°...";
                     return -1;
                 }
                 if (nRet == -1)
@@ -353,7 +353,7 @@ namespace dp2Circulation
 #endif
 
         /// <summary>
-        /// ¹Ø±Õµ±Ç°¶ÔÏó¡£°üÀ¨¹Ø±ÕÍ¨Ñ¶Í¨µÀ
+        /// å…³é—­å½“å‰å¯¹è±¡ã€‚åŒ…æ‹¬å…³é—­é€šè®¯é€šé“
         /// </summary>
         public void Close()
         {
@@ -392,9 +392,9 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// Îª³öÄÉ´òÓ¡·½°¸´´½¨ÆğÊ¼µÄµÄ main.cs ÎÄ¼ş
+        /// ä¸ºå‡ºçº³æ‰“å°æ–¹æ¡ˆåˆ›å»ºèµ·å§‹çš„çš„ main.cs æ–‡ä»¶
         /// </summary>
-        /// <param name="strFileName">ÎÄ¼şÃû</param>
+        /// <param name="strFileName">æ–‡ä»¶å</param>
         public static void CreateDefaultMainCsFile(string strFileName)
         {
             using (StreamWriter sw = new StreamWriter(strFileName, false, Encoding.UTF8))
@@ -427,9 +427,9 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ´ò¿ª³öÄÉ´òÓ¡·½°¸¹ÜÀí´°¿Ú
+        /// æ‰“å¼€å‡ºçº³æ‰“å°æ–¹æ¡ˆç®¡ç†çª—å£
         /// </summary>
-        /// <param name="owner">ËŞÖ÷´°¿Ú</param>
+        /// <param name="owner">å®¿ä¸»çª—å£</param>
         public void OnProjectManager(IWin32Window owner)
         {
             ProjectManageDlg dlg = new ProjectManageDlg();
@@ -448,7 +448,7 @@ namespace dp2Circulation
 
             dlg.ShowDialog(owner);
 
-            // Èç¹ûĞèÒªÖØĞÂ×°ÔØproject xml
+            // å¦‚æœéœ€è¦é‡æ–°è£…è½½project xml
             if (this.m_bNeedReload == true)
             {
                 string strError = "";
@@ -464,18 +464,18 @@ namespace dp2Circulation
             }
         }
 
-        // ·¢ÉúÁË×Ô¶¯´´½¨project xmlÎÄ¼şµÄÊÂ¼ş
+        // å‘ç”Ÿäº†è‡ªåŠ¨åˆ›å»ºproject xmlæ–‡ä»¶çš„äº‹ä»¶
         void dlg_CreateProjectXmlFile(object sender, AutoCreateProjectXmlFileEventArgs e)
         {
             m_bNeedReload = true;
         }
 
         /// <summary>
-        /// µ÷ÓÃ³öÄÉ´òÓ¡½Å±¾ÖĞµÄ OnInitial() º¯Êı£¬³õÊ¼»¯¶ÔÏó×´Ì¬
+        /// è°ƒç”¨å‡ºçº³æ‰“å°è„šæœ¬ä¸­çš„ OnInitial() å‡½æ•°ï¼Œåˆå§‹åŒ–å¯¹è±¡çŠ¶æ€
         /// </summary>
         public void Initial()
         {
-            // ÔËĞĞScript´úÂë
+            // è¿è¡ŒScriptä»£ç 
             if (this.PrintAssembly != null)
             {
                 EventArgs e = new EventArgs();
@@ -488,19 +488,19 @@ namespace dp2Circulation
                 }
                 catch (Exception ex)
                 {
-                    string strErrorInfo = "<br/>OnInitial()Ê±³ö´í: " + HttpUtility.HtmlEncode(ExceptionUtil.GetDebugText(ex));
+                    string strErrorInfo = "<br/>OnInitial()æ—¶å‡ºé”™: " + HttpUtility.HtmlEncode(ExceptionUtil.GetDebugText(ex));
                     AppendHtml(strErrorInfo);
                 }
             }
         }
 
         /// <summary>
-        /// µ±¶ÁÕßÖ¤ÌõÂëºÅÉ¨ÈëÊ±±»´¥·¢
+        /// å½“è¯»è€…è¯æ¡ç å·æ‰«å…¥æ—¶è¢«è§¦å‘
         /// </summary>
-        /// <param name="strReaderBarcode">¶ÁÕßÖ¤ÌõÂëºÅ</param>
+        /// <param name="strReaderBarcode">è¯»è€…è¯æ¡ç å·</param>
         public void ReaderBarcodeScaned(string strReaderBarcode)
         {
-            // ÔËĞĞScript´úÂë
+            // è¿è¡ŒScriptä»£ç 
             if (this.PrintAssembly != null)
             {
                 ReaderBarcodeScanedEventArgs e = new ReaderBarcodeScanedEventArgs();
@@ -514,19 +514,19 @@ namespace dp2Circulation
                 }
                 catch (Exception ex)
                 {
-                    string strErrorInfo = "<br/>µ¥¾İ´òÓ¡½Å±¾ÔËĞĞÊ±³ö´í: " + HttpUtility.HtmlEncode(ExceptionUtil.GetDebugText(ex));
+                    string strErrorInfo = "<br/>å•æ®æ‰“å°è„šæœ¬è¿è¡Œæ—¶å‡ºé”™: " + HttpUtility.HtmlEncode(ExceptionUtil.GetDebugText(ex));
                     AppendHtml(strErrorInfo);
                 }
             }
         }
 
-        // ´´½¨´òÓ¡ÄÚÈİ²¢´òÓ¡³öÀ´
+        // åˆ›å»ºæ‰“å°å†…å®¹å¹¶æ‰“å°å‡ºæ¥
         /// <summary>
-        /// ´òÓ¡Ê±±»´¥·¢
+        /// æ‰“å°æ—¶è¢«è§¦å‘
         /// </summary>
         public void Print()
         {
-            // ÔËĞĞScript´úÂë
+            // è¿è¡ŒScriptä»£ç 
             if (this.PrintAssembly != null)
             {
                 PrintEventArgs e = new PrintEventArgs();
@@ -541,20 +541,20 @@ namespace dp2Circulation
                 }
                 catch (Exception ex)
                 {
-                    string strErrorInfo = "<br/>µ¥¾İ´òÓ¡½Å±¾ÔËĞĞÊ±³ö´í: " + HttpUtility.HtmlEncode(ExceptionUtil.GetDebugText(ex));
+                    string strErrorInfo = "<br/>å•æ®æ‰“å°è„šæœ¬è¿è¡Œæ—¶å‡ºé”™: " + HttpUtility.HtmlEncode(ExceptionUtil.GetDebugText(ex));
                     AppendHtml(strErrorInfo);
                 }
             }
         }
 
-        // ´´½¨´òÓ¡ÄÚÈİ²¢´òÓ¡³öÀ´
+        // åˆ›å»ºæ‰“å°å†…å®¹å¹¶æ‰“å°å‡ºæ¥
         /// <summary>
-        /// ´òÓ¡Ê±±»´¥·¢
+        /// æ‰“å°æ—¶è¢«è§¦å‘
         /// </summary>
-        /// <param name="info">´òÓ¡ĞÅÏ¢</param>
+        /// <param name="info">æ‰“å°ä¿¡æ¯</param>
         public void Print(PrintInfo info)
         {
-            // ÔËĞĞScript´úÂë
+            // è¿è¡ŒScriptä»£ç 
             if (this.PrintAssembly != null)
             {
                 PrintEventArgs e = new PrintEventArgs();
@@ -569,19 +569,19 @@ namespace dp2Circulation
                 }
                 catch (Exception ex)
                 {
-                    string strErrorInfo = "<br/>µ¥¾İ´òÓ¡½Å±¾ÔËĞĞÊ±³ö´í: " + HttpUtility.HtmlEncode(ExceptionUtil.GetDebugText(ex));
+                    string strErrorInfo = "<br/>å•æ®æ‰“å°è„šæœ¬è¿è¡Œæ—¶å‡ºé”™: " + HttpUtility.HtmlEncode(ExceptionUtil.GetDebugText(ex));
                     AppendHtml(strErrorInfo);
                 }
             }
         }
 
-        // ´´½¨´òÓ¡ÄÚÈİ
+        // åˆ›å»ºæ‰“å°å†…å®¹
         /// <summary>
-        /// Òª´´½¨´òÓ¡ÄÚÈİÊ±±»´¥·¢
+        /// è¦åˆ›å»ºæ‰“å°å†…å®¹æ—¶è¢«è§¦å‘
         /// </summary>
-        /// <param name="info">´òÓ¡ĞÅÏ¢</param>
-        /// <param name="strResultString">½á¹û×Ö·û´®</param>
-        /// <param name="strResultFormat">½á¹û×Ö·û´®µÄ¸ñÊ½</param>
+        /// <param name="info">æ‰“å°ä¿¡æ¯</param>
+        /// <param name="strResultString">ç»“æœå­—ç¬¦ä¸²</param>
+        /// <param name="strResultFormat">ç»“æœå­—ç¬¦ä¸²çš„æ ¼å¼</param>
         public void GetPrintContent(PrintInfo info,
             out string strResultString,
             out string strResultFormat)
@@ -589,7 +589,7 @@ namespace dp2Circulation
             strResultString = "";
             strResultFormat = "";
 
-            // ÔËĞĞScript´úÂë
+            // è¿è¡ŒScriptä»£ç 
             if (this.PrintAssembly != null)
             {
                 PrintEventArgs e = new PrintEventArgs();
@@ -604,7 +604,7 @@ namespace dp2Circulation
                 }
                 catch (Exception ex)
                 {
-                    string strErrorInfo = "<br/>µ¥¾İ´òÓ¡½Å±¾ÔËĞĞÊ±³ö´í: " + HttpUtility.HtmlEncode(ExceptionUtil.GetDebugText(ex));
+                    string strErrorInfo = "<br/>å•æ®æ‰“å°è„šæœ¬è¿è¡Œæ—¶å‡ºé”™: " + HttpUtility.HtmlEncode(ExceptionUtil.GetDebugText(ex));
                     AppendHtml(strErrorInfo);
                 }
 
@@ -615,11 +615,11 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÒªÇå³ı´òÓ¡»úÅäÖÃÊ±±»´¥·¢
+        /// è¦æ¸…é™¤æ‰“å°æœºé…ç½®æ—¶è¢«è§¦å‘
         /// </summary>
         public void ClearPrinterPreference()
         {
-            // ÔËĞĞScript´úÂë
+            // è¿è¡ŒScriptä»£ç 
             if (this.PrintAssembly != null)
             {
                 PrintEventArgs e = new PrintEventArgs();
@@ -633,18 +633,18 @@ namespace dp2Circulation
                 }
                 catch (Exception ex)
                 {
-                    string strErrorInfo = "<br/>µ¥¾İ´òÓ¡½Å±¾ÔËĞĞÊ±³ö´í: " + HttpUtility.HtmlEncode(ExceptionUtil.GetDebugText(ex));
+                    string strErrorInfo = "<br/>å•æ®æ‰“å°è„šæœ¬è¿è¡Œæ—¶å‡ºé”™: " + HttpUtility.HtmlEncode(ExceptionUtil.GetDebugText(ex));
                     AppendHtml(strErrorInfo);
                 }
             }
         }
 
         /// <summary>
-        /// Òª²âÊÔ´òÓ¡µÄÊ±ºò±»´¥·¢
+        /// è¦æµ‹è¯•æ‰“å°çš„æ—¶å€™è¢«è§¦å‘
         /// </summary>
         public void TestPrint()
         {
-            // ÔËĞĞScript´úÂë
+            // è¿è¡ŒScriptä»£ç 
             if (this.PrintAssembly != null)
             {
                 PrintEventArgs e = new PrintEventArgs();
@@ -658,7 +658,7 @@ namespace dp2Circulation
                 }
                 catch (Exception ex)
                 {
-                    string strErrorInfo = "<br/>µ¥¾İ´òÓ¡½Å±¾ÔËĞĞÊ±³ö´í: " + HttpUtility.HtmlEncode(ExceptionUtil.GetDebugText(ex));
+                    string strErrorInfo = "<br/>å•æ®æ‰“å°è„šæœ¬è¿è¡Œæ—¶å‡ºé”™: " + HttpUtility.HtmlEncode(ExceptionUtil.GetDebugText(ex));
                     AppendHtml(strErrorInfo);
                 }
             }
@@ -667,7 +667,7 @@ namespace dp2Circulation
         /*
         public void Action(string strActionName)
         {
-            // ÔËĞĞScript´úÂë
+            // è¿è¡ŒScriptä»£ç 
             if (this.PrintAssembly != null)
             {
                 ActionEventArgs e = new ActionEventArgs();
@@ -678,7 +678,7 @@ namespace dp2Circulation
                 int nRet = this.TriggerScriptAction(e, out strError);
                 if (nRet == -1)
                 {
-                    string strText = "<br/>µ¥¾İ´òÓ¡½Å±¾ÔËĞĞÊ±³ö´í: " + HttpUtility.HtmlEncode(strError);
+                    string strText = "<br/>å•æ®æ‰“å°è„šæœ¬è¿è¡Œæ—¶å‡ºé”™: " + HttpUtility.HtmlEncode(strError);
                     AppendHtml(strText);
                 }
             }
@@ -688,7 +688,7 @@ namespace dp2Circulation
 
 #if USE_THREAD
 
-        // ¹¤×÷Ïß³ÌÃ¿Ò»ÂÖÑ­»·µÄÊµÖÊĞÔ¹¤×÷
+        // å·¥ä½œçº¿ç¨‹æ¯ä¸€è½®å¾ªç¯çš„å®è´¨æ€§å·¥ä½œ
         public override void Worker()
         {
             List<OneCall> calls = new List<OneCall>();
@@ -808,7 +808,7 @@ namespace dp2Circulation
 
                     if (index == WaitHandle.WaitTimeout)
                     {
-                        // ³¬Ê±
+                        // è¶…æ—¶
                         eventActive.Reset();
                         Worker();
                         eventActive.Reset();
@@ -820,7 +820,7 @@ namespace dp2Circulation
                     }
                     else
                     {
-                        // µÃµ½¼¤»îĞÅºÅ
+                        // å¾—åˆ°æ¿€æ´»ä¿¡å·
                         eventActive.Reset();
                         Worker();
                         eventActive.Reset();
@@ -848,7 +848,7 @@ namespace dp2Circulation
             if (this._thread == null)
                 return;
 
-            // Èç¹ûÒÔÇ°ÔÚ×ö£¬Á¢¼´Í£Ö¹
+            // å¦‚æœä»¥å‰åœ¨åšï¼Œç«‹å³åœæ­¢
             m_bStopThread = true;
             this.eventClose.Set();
 
@@ -868,7 +868,7 @@ namespace dp2Circulation
             if (this._thread != null)
                 return;
 
-            // Èç¹ûÒÔÇ°ÔÚ×ö£¬Á¢¼´Í£Ö¹
+            // å¦‚æœä»¥å‰åœ¨åšï¼Œç«‹å³åœæ­¢
             StopThread(true);
 
 
@@ -954,7 +954,7 @@ namespace dp2Circulation
             DateTime start_time,
             DateTime end_time);
 
-        // ½èÔÄ¶¯×÷Òì²½ÊÂ¼ş
+        // å€Ÿé˜…åŠ¨ä½œå¼‚æ­¥äº‹ä»¶
         internal void BorrowAsync(IChargingForm charging_form,
             bool bRenew,
             string strReaderBarcode,
@@ -1004,13 +1004,13 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// »ñµÃÊéÄ¿ÕªÒª
+        /// è·å¾—ä¹¦ç›®æ‘˜è¦
         /// </summary>
-        /// <param name="strItemBarcode">²áÌõÂëºÅ</param>
-        /// <param name="strConfirmItemRecPath">ÓÃÓÚÈ·ÈÏµÄ²á¼ÇÂ¼Â·¾¶¡£¿ÉÒÔÎª¿Õ</param>
-        /// <param name="strSummary">ÊéÄ¿ÕªÒª</param>
-        /// <param name="strError">³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í£¬´íÎóĞÅÏ¢ÔÚ strErrorÖĞ£»0: Ã»ÓĞÕÒµ½; 1: ÕÒµ½ÁË</returns>
+        /// <param name="strItemBarcode">å†Œæ¡ç å·</param>
+        /// <param name="strConfirmItemRecPath">ç”¨äºç¡®è®¤çš„å†Œè®°å½•è·¯å¾„ã€‚å¯ä»¥ä¸ºç©º</param>
+        /// <param name="strSummary">ä¹¦ç›®æ‘˜è¦</param>
+        /// <param name="strError">å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™ï¼Œé”™è¯¯ä¿¡æ¯åœ¨ strErrorä¸­ï¼›0: æ²¡æœ‰æ‰¾åˆ°; 1: æ‰¾åˆ°äº†</returns>
         public int GetBiblioSummary(string strItemBarcode,
     string strConfirmItemRecPath,
     out string strSummary,
@@ -1068,14 +1068,14 @@ out strError);
             DateTime start_time,
             DateTime end_time)
         {
-            TimeSpan delta = end_time - start_time; // Î´°üÀ¨GetSummary()µÄÊ±¼ä
+            TimeSpan delta = end_time - start_time; // æœªåŒ…æ‹¬GetSummary()çš„æ—¶é—´
 
             string strText = "";
             int nRet = 0;
 
-            string strOperName = "½è";
+            string strOperName = "å€Ÿ";
             if (bRenew == true)
-                strOperName = "Ğø½è";
+                strOperName = "ç»­å€Ÿ";
 
             string strError = "";
             string strSummary = "";
@@ -1097,11 +1097,11 @@ out strError);
             strText = "<div class='item " + strOperClass + " borrow'>"
                 + "<div class='time_line'>"
                 + " <div class='time'>" + DateTime.Now.ToLongTimeString() + "</div>"
-                + " <div class='time_span'>ºÄÊ± " + DoubleToString(delta.TotalSeconds) + "Ãë</div>"
+                + " <div class='time_span'>è€—æ—¶ " + DoubleToString(delta.TotalSeconds) + "ç§’</div>"
                 + " <div class='clear'></div>"
                 + "</div>"
                 + "<div class='reader_line'>"
-                + " <div class='reader_prefix_text'>¶ÁÕß</div>"
+                + " <div class='reader_prefix_text'>è¯»è€…</div>"
                 + " <div class='reader_barcode'>" + strReaderLink + "</div>"
                 + " <div class='reader_summary'>" + HttpUtility.HtmlEncode(strReaderSummary) + "</div>"
                 + " <div class='clear'></div>"
@@ -1111,7 +1111,7 @@ out strError);
                 + " <div class='clear'></div>"
                 + "</div>"
                 + "<div class='item_line'>"
-                + " <div class='item_prefix_text'>²á</div>"
+                + " <div class='item_prefix_text'>å†Œ</div>"
                 + " <div class='item_barcode'>" + strItemLink + "</div> "
                 + " <div class='item_summary'>" + HttpUtility.HtmlEncode(strSummary) + "</div>"
                 + " <div class='clear'></div>"
@@ -1120,11 +1120,11 @@ out strError);
                 + "</div>";
             /*
             strText = "<div class='" + strOperClass + "'>"
-    + "<div class='time_line'><span class='time'>" + DateTime.Now.ToLongTimeString() + "</span> <span class='time_span'>ºÄÊ± " + delta.TotalSeconds.ToString() + "Ãë</span></div>"
-    + "<div class='reader_line'><span class='reader_prefix_text'>¶ÁÕß</span> <span class='reader_barcode'>[" + strReaderBarcode + "]</span>"
+    + "<div class='time_line'><span class='time'>" + DateTime.Now.ToLongTimeString() + "</span> <span class='time_span'>è€—æ—¶ " + delta.TotalSeconds.ToString() + "ç§’</span></div>"
+    + "<div class='reader_line'><span class='reader_prefix_text'>è¯»è€…</span> <span class='reader_barcode'>[" + strReaderBarcode + "]</span>"
 + " <span class='reader_summary'>" + strReaderSummary + "<span></div>"
 + "<div class='opername_line'><span class='opername'>" + strOperName + "<span></div>"
-+ "<div class='item_line'><span class='item_prefix_text'>²á</span> <span class='item_barcode'>[" + strItemBarcode + "]</span> "
++ "<div class='item_line'><span class='item_prefix_text'>å†Œ</span> <span class='item_barcode'>[" + strItemBarcode + "]</span> "
 + "<span class='item_summary' id='" + m_nCount.ToString() + "' onreadystatechange='GetOneSummary(\"" + m_nCount.ToString() + "\");'>" + strItemBarcode + "</span></div>"
 + "</div>";
              * */
@@ -1133,7 +1133,7 @@ out strError);
             m_nCount++;
 
 
-            // ÔËĞĞScript´úÂë
+            // è¿è¡ŒScriptä»£ç 
             if (this.PrintAssembly != null)
             {
                 BorrowedEventArgs e = new BorrowedEventArgs();
@@ -1165,20 +1165,20 @@ out strError);
                 }
                 catch (Exception ex)
                 {
-                    string strErrorInfo = "<br/>µ¥¾İ´òÓ¡½Å±¾ÔËĞĞÊ±³ö´í: " + HttpUtility.HtmlEncode(ExceptionUtil.GetDebugText(ex));
+                    string strErrorInfo = "<br/>å•æ®æ‰“å°è„šæœ¬è¿è¡Œæ—¶å‡ºé”™: " + HttpUtility.HtmlEncode(ExceptionUtil.GetDebugText(ex));
                     AppendHtml(strErrorInfo);
                 }
                 /*
                 if (nRet == -1)
                 {
-                    strText = "<br/>µ¥¾İ´òÓ¡½Å±¾ÔËĞĞÊ±³ö´í: " + HttpUtility.HtmlEncode(strError);
+                    strText = "<br/>å•æ®æ‰“å°è„šæœ¬è¿è¡Œæ—¶å‡ºé”™: " + HttpUtility.HtmlEncode(strError);
                     AppendHtml(strText);
                 }*/
             }
 
-            // ÓÃtips·É³öÏÔÊ¾¶ÁÕßºÍ²áµÄÕªÒªĞÅÏ¢£¿»òÕßÃ÷È·ÏÔÊ¾ÔÚÌõÂëºóÃæ£¿
-            // ¶ÁÕßÖ¤ºÍ²áÌõÂëºÅ±¾Éí¾ÍÊÇÃªµã£¿
-            // ¶ÁÕßÕªÒªÒªÃ´×öÔÚÇ°¶Ë£¬Í¨¹ıXML·¢Éú£¬ÒªÃ´×öÔÚ·şÎñÆ÷£¬ÓÃ¹Ì¶¨¹æÔò·¢Éú¡£
+            // ç”¨tipsé£å‡ºæ˜¾ç¤ºè¯»è€…å’Œå†Œçš„æ‘˜è¦ä¿¡æ¯ï¼Ÿæˆ–è€…æ˜ç¡®æ˜¾ç¤ºåœ¨æ¡ç åé¢ï¼Ÿ
+            // è¯»è€…è¯å’Œå†Œæ¡ç å·æœ¬èº«å°±æ˜¯é”šç‚¹ï¼Ÿ
+            // è¯»è€…æ‘˜è¦è¦ä¹ˆåšåœ¨å‰ç«¯ï¼Œé€šè¿‡XMLå‘ç”Ÿï¼Œè¦ä¹ˆåšåœ¨æœåŠ¡å™¨ï¼Œç”¨å›ºå®šè§„åˆ™å‘ç”Ÿã€‚
         }
 
         internal delegate void Delegate_Return(IChargingForm charging_form,
@@ -1247,14 +1247,14 @@ out strError);
             DateTime start_time,
             DateTime end_time)
         {
-            TimeSpan delta = end_time - start_time; // Î´°üÀ¨GetSummary()µÄÊ±¼ä
+            TimeSpan delta = end_time - start_time; // æœªåŒ…æ‹¬GetSummary()çš„æ—¶é—´
 
             string strText = "";
             int nRet = 0;
 
-            string strOperName = "»¹";
+            string strOperName = "è¿˜";
             if (bLost == true)
-                strOperName = "¶ªÊ§";
+                strOperName = "ä¸¢å¤±";
 
             string strError = "";
             string strSummary = "";
@@ -1279,11 +1279,11 @@ out strError);
             strText = "<div class='item " + strOperClass + " return'>"
                 + "<div class='time_line'>"
                 + " <div class='time'>" + DateTime.Now.ToLongTimeString() + "</div>"
-                + " <div class='time_span'>ºÄÊ± " + DoubleToString(delta.TotalSeconds) + "Ãë</div>"
+                + " <div class='time_span'>è€—æ—¶ " + DoubleToString(delta.TotalSeconds) + "ç§’</div>"
                 + " <div class='clear'></div>"
                 + "</div>"
                 + "<div class='reader_line'>"
-                + " <div class='reader_prefix_text'>¶ÁÕß</div>"
+                + " <div class='reader_prefix_text'>è¯»è€…</div>"
                 + " <div class='reader_barcode'>" + strReaderLink + "</div>"
                 + " <div class='reader_summary'>" + HttpUtility.HtmlEncode(strReaderSummary) + "</div>"
                 + " <div class='clear'></div>"
@@ -1293,7 +1293,7 @@ out strError);
                 + " <div class='clear'></div>"
                 + "</div>"
                 + "<div class='item_line'>"
-                + " <div class='item_prefix_text'>²á</div>"
+                + " <div class='item_prefix_text'>å†Œ</div>"
                 + " <div class='item_barcode'>" + strItemLink + "</div> "
                 + " <div class='item_summary'>" + HttpUtility.HtmlEncode(strSummary) + "</div>"
 
@@ -1305,18 +1305,18 @@ out strError);
 
             /*
             strText = "<div class='" + strOperClass + "'>"
-    + "<div class='time_line'><span class='time'>" + DateTime.Now.ToLongTimeString() + "</span> <span class='time_span'>ºÄÊ± " + delta.TotalSeconds.ToString() + "Ãë</span></div>"
-    + "<div class='reader_line'><span class='reader_prefix_text'>¶ÁÕß</span> <span class='reader_barcode'>[" + strReaderBarcode + "]</span>"
+    + "<div class='time_line'><span class='time'>" + DateTime.Now.ToLongTimeString() + "</span> <span class='time_span'>è€—æ—¶ " + delta.TotalSeconds.ToString() + "ç§’</span></div>"
+    + "<div class='reader_line'><span class='reader_prefix_text'>è¯»è€…</span> <span class='reader_barcode'>[" + strReaderBarcode + "]</span>"
 + " <span class='reader_summary'>" + strReaderSummary + "<span></div>"
 + "<div class='opername_line'><span class='opername'>" + strOperName + "<span></div>"
-+ "<div class='item_line'><span class='item_prefix_text'>²á</span> <span class='item_barcode'>[" + strItemBarcode + "]</span> "
++ "<div class='item_line'><span class='item_prefix_text'>å†Œ</span> <span class='item_barcode'>[" + strItemBarcode + "]</span> "
 + "<span class='item_summary' id='" + m_nCount.ToString() + "' onreadystatechange='GetOneSummary(\"" + m_nCount.ToString() + "\");'>" + strItemBarcode + "</span></div>"
 + "</div>";
              * */
             AppendHtml(strText);
             m_nCount++;
 
-            // ÔËĞĞScript´úÂë
+            // è¿è¡ŒScriptä»£ç 
             if (this.PrintAssembly != null)
             {
                 ReturnedEventArgs e = new ReturnedEventArgs();
@@ -1360,7 +1360,7 @@ out strError);
                 }
                 catch (Exception ex)
                 {
-                    string strErrorInfo = "<br/>µ¥¾İ´òÓ¡½Å±¾ÔËĞĞÊ±³ö´í: " + HttpUtility.HtmlEncode(ExceptionUtil.GetDebugText(ex));
+                    string strErrorInfo = "<br/>å•æ®æ‰“å°è„šæœ¬è¿è¡Œæ—¶å‡ºé”™: " + HttpUtility.HtmlEncode(ExceptionUtil.GetDebugText(ex));
                     AppendHtml(strErrorInfo);
                 }
             }
@@ -1368,9 +1368,9 @@ out strError);
 
         delegate void Delegate_AppendHtml(string strText);
         /// <summary>
-        /// Ïò IE ¿Ø¼şÖĞ×·¼ÓÒ»¶Î HTML ÄÚÈİ
+        /// å‘ IE æ§ä»¶ä¸­è¿½åŠ ä¸€æ®µ HTML å†…å®¹
         /// </summary>
-        /// <param name="strText">HTML ÄÚÈİ</param>
+        /// <param name="strText">HTML å†…å®¹</param>
         public void AppendHtml(string strText)
         {
             if (this.MainForm.InvokeRequired)
@@ -1384,7 +1384,7 @@ out strError);
                 strText);
             // Global.ScrollToEnd(this.WebBrowser);
 
-            // ÒòÎªHTMLÔªËØ×ÜÊÇÃ»ÓĞÊÕÎ²£¬ÆäËûÓĞĞ©·½·¨¿ÉÄÜ²»×àĞ§
+            // å› ä¸ºHTMLå…ƒç´ æ€»æ˜¯æ²¡æœ‰æ”¶å°¾ï¼Œå…¶ä»–æœ‰äº›æ–¹æ³•å¯èƒ½ä¸å¥æ•ˆ
             this.WebBrowser.Document.Window.ScrollTo(0,
     this.WebBrowser.Document.Body.ScrollRectangle.Height);
         }
@@ -1435,7 +1435,7 @@ out strError);
             DateTime start_time,
             DateTime end_time)
         {
-            string strOperName = "½»·Ñ";
+            string strOperName = "äº¤è´¹";
             TimeSpan delta = end_time - start_time;
 
             string strText = "";
@@ -1470,16 +1470,16 @@ out strError);
 
                 string strTimePrefix = "";
                 if (overdue_infos.Count > 1)
-                    strTimePrefix = overdue_infos.Count.ToString() + "±Ê½»·Ñ¹²";
+                    strTimePrefix = overdue_infos.Count.ToString() + "ç¬”äº¤è´¹å…±";
 
                 strText = "<div class='item " + strOperClass + " amerce'>"
                     + "<div class='time_line'>"
                     + " <div class='time'>" + DateTime.Now.ToLongTimeString() + "</div>"
-                    + " <div class='time_span'>" + strTimePrefix + "ºÄÊ± " + DoubleToString(delta.TotalSeconds) + "Ãë</div>"
+                    + " <div class='time_span'>" + strTimePrefix + "è€—æ—¶ " + DoubleToString(delta.TotalSeconds) + "ç§’</div>"
                     + " <div class='clear'></div>"
                     + "</div>"
                     + "<div class='reader_line'>"
-                    + " <div class='reader_prefix_text'>¶ÁÕß</div>"
+                    + " <div class='reader_prefix_text'>è¯»è€…</div>"
                     + " <div class='reader_barcode'>" + strReaderLink + "</div>"
                     + " <div class='reader_summary'>" + HttpUtility.HtmlEncode(strReaderSummary) + "</div>"
                     + " <div class='clear'></div>"
@@ -1498,7 +1498,7 @@ out strError);
 
             }
 
-            // ÔËĞĞScript´úÂë
+            // è¿è¡ŒScriptä»£ç 
             if (this.PrintAssembly != null)
             {
                 AmercedEventArgs e = new AmercedEventArgs();
@@ -1519,13 +1519,13 @@ out strError);
                 }
                 catch (Exception ex)
                 {
-                    string strErrorInfo = "<br/>µ¥¾İ´òÓ¡½Å±¾ÔËĞĞÊ±³ö´í: " + HttpUtility.HtmlEncode(ExceptionUtil.GetDebugText(ex));
+                    string strErrorInfo = "<br/>å•æ®æ‰“å°è„šæœ¬è¿è¡Œæ—¶å‡ºé”™: " + HttpUtility.HtmlEncode(ExceptionUtil.GetDebugText(ex));
                     AppendHtml(strErrorInfo);
                 }
                 /*
                 if (nRet == -1)
                 {
-                    strText = "<br/>µ¥¾İ´òÓ¡½Å±¾ÔËĞĞÊ±³ö´í: " + HttpUtility.HtmlEncode(strError);
+                    strText = "<br/>å•æ®æ‰“å°è„šæœ¬è¿è¡Œæ—¶å‡ºé”™: " + HttpUtility.HtmlEncode(strError);
                     AppendHtml(strText);
                 }*/
             }
@@ -1546,7 +1546,7 @@ out strError);
                 out strError);
             if (nRet == -1)
             {
-                strError = "strRef´úÂë\r\n\r\n" + strRef + "\r\n\r\n¸ñÊ½´íÎó: " + strError;
+                strError = "strRefä»£ç \r\n\r\n" + strRef + "\r\n\r\næ ¼å¼é”™è¯¯: " + strError;
                 return -1;
             }
 
@@ -1583,21 +1583,21 @@ out strError);
                 out strWarningInfo);
             if (nRet == -1)
             {
-                strError = "½Å±¾±àÒë·¢ÏÖ´íÎó»ò¾¯¸æ:\r\n" + strErrorInfo;
+                strError = "è„šæœ¬ç¼–è¯‘å‘ç°é”™è¯¯æˆ–è­¦å‘Š:\r\n" + strErrorInfo;
                 return -1;
             }
 
-            // µÃµ½AssemblyÖĞPrintHostÅÉÉúÀàType
+            // å¾—åˆ°Assemblyä¸­PrintHostæ´¾ç”Ÿç±»Type
             Type entryClassType = ScriptManager.GetDerivedClassType(
                 PrintAssembly,
                 "dp2Circulation.PrintHost");
             if (entryClassType == null)
             {
-                strError = "dp2Circulation.PrintHostÅÉÉúÀàÃ»ÓĞÕÒµ½";
+                strError = "dp2Circulation.PrintHostæ´¾ç”Ÿç±»æ²¡æœ‰æ‰¾åˆ°";
                 return -1;
             }
 
-            // newÒ»¸öPrintHostÅÉÉú¶ÔÏó
+            // newä¸€ä¸ªPrintHostæ´¾ç”Ÿå¯¹è±¡
             this.PrintHostObj = (PrintHost)entryClassType.InvokeMember(null,
                 BindingFlags.DeclaredOnly |
                 BindingFlags.Public | BindingFlags.NonPublic |
@@ -1606,7 +1606,7 @@ out strError);
 
             if (PrintHostObj == null)
             {
-                strError = "new PrintHostÅÉÉúÀà¶ÔÏóÊ§°Ü";
+                strError = "new PrintHostæ´¾ç”Ÿç±»å¯¹è±¡å¤±è´¥";
                 return -1;
             }
 
@@ -1617,7 +1617,7 @@ out strError);
 #endif
 
         string m_strInstanceDir = "";
-        // ´´½¨Î¨Ò»µÄÊµÀıÄ¿Â¼¡£dp2CirculationÍË³öºóÕâ¸öÄ¿Â¼²»»á±»±£Áô
+        // åˆ›å»ºå”¯ä¸€çš„å®ä¾‹ç›®å½•ã€‚dp2Circulationé€€å‡ºåè¿™ä¸ªç›®å½•ä¸ä¼šè¢«ä¿ç•™
         string InstanceDir
         {
             get
@@ -1632,7 +1632,7 @@ out strError);
             }
         }
 
-        // ×¼±¸½Å±¾»·¾³
+        // å‡†å¤‡è„šæœ¬ç¯å¢ƒ
         int PrepareScript(string strProjectName,
             string strProjectLocate,
             out string strError)
@@ -1665,10 +1665,10 @@ out strError);
             };
 
 
-            // ´´½¨ProjectÖĞScript main.csµÄAssembly
+            // åˆ›å»ºProjectä¸­Script main.csçš„Assembly
             // return:
-            //		-2	³ö´í£¬µ«ÊÇÒÑ¾­ÌáÊ¾¹ı´íÎóĞÅÏ¢ÁË¡£
-            //		-1	³ö´í
+            //		-2	å‡ºé”™ï¼Œä½†æ˜¯å·²ç»æç¤ºè¿‡é”™è¯¯ä¿¡æ¯äº†ã€‚
+            //		-1	å‡ºé”™
             int nRet = ScriptManager.BuildAssembly(
                 "OperHistory",
                 strProjectName,
@@ -1695,17 +1695,17 @@ out strError);
                 goto ERROR1;
             }
 
-            // µÃµ½AssemblyÖĞPrintHostÅÉÉúÀàType
+            // å¾—åˆ°Assemblyä¸­PrintHostæ´¾ç”Ÿç±»Type
             Type entryClassType = ScriptManager.GetDerivedClassType(
                 PrintAssembly,
                 "dp2Circulation.PrintHost");
             if (entryClassType == null)
             {
-                strError = "dp2Circulation.PrintHostÅÉÉúÀàÃ»ÓĞÕÒµ½";
+                strError = "dp2Circulation.PrintHostæ´¾ç”Ÿç±»æ²¡æœ‰æ‰¾åˆ°";
                 return -1;
             }
 
-            // newÒ»¸öPrintHostÅÉÉú¶ÔÏó
+            // newä¸€ä¸ªPrintHostæ´¾ç”Ÿå¯¹è±¡
             this.PrintHostObj = (PrintHost)entryClassType.InvokeMember(null,
                 BindingFlags.DeclaredOnly |
                 BindingFlags.Public | BindingFlags.NonPublic |
@@ -1714,7 +1714,7 @@ out strError);
 
             if (this.PrintHostObj == null)
             {
-                strError = "new PrintHostÅÉÉúÀà¶ÔÏóÊ§°Ü";
+                strError = "new PrintHostæ´¾ç”Ÿç±»å¯¹è±¡å¤±è´¥";
                 return -1;
             }
 

@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -10,12 +10,11 @@ using System.Xml;
 using DigitalPlatform.Xml;
 using DigitalPlatform.CirculationClient.localhost;
 
-
 namespace dp2Circulation
 {
     /// <summary>
-    /// ¸ú×ÙDTLP 
-    /// ´Ë¶Ô»°¿òÒÑ¾­±»·ÏÖ¹
+    /// è·Ÿè¸ªDTLP 
+    /// æ­¤å¯¹è¯æ¡†å·²ç»è¢«åºŸæ­¢
     /// </summary>
     internal partial class StartTraceDtlpDlg : Form
     {
@@ -28,7 +27,7 @@ namespace dp2Circulation
 
         private void StartTraceDtlpDlg_Load(object sender, EventArgs e)
         {
-            // ÆğÊ¼Î»ÖÃ²ÎÊı
+            // èµ·å§‹ä½ç½®å‚æ•°
             int index = 0;
             string strFileName = "";
             string strError = "";
@@ -56,7 +55,7 @@ namespace dp2Circulation
                 this.textBox_startIndex.Text = index.ToString();
             }
 
-            // Í¨ÓÃÆô¶¯²ÎÊı
+            // é€šç”¨å¯åŠ¨å‚æ•°
             bool bDump = false;
             bool bClearFirst = false;
             bool bLoop = true;
@@ -73,7 +72,7 @@ namespace dp2Circulation
             this.checkBox_clearBefore.Checked = bClearFirst;
             this.checkBox_loop.Checked = bLoop;
 
-            // ÉèÖÃºÃ³õÊ¼µÄEnalbed×´Ì¬
+            // è®¾ç½®å¥½åˆå§‹çš„EnalbedçŠ¶æ€
             checkBox_startAtServerBreakPoint_CheckedChanged(this, null);
             return;
         ERROR1:
@@ -85,7 +84,7 @@ namespace dp2Circulation
 
         }
 
-        // ¹¹Ôì¶Ïµã×Ö·û´®
+        // æ„é€ æ–­ç‚¹å­—ç¬¦ä¸²
         static string MakeBreakPointString(
             long indexLog,
             string strLogStartOffset,
@@ -116,7 +115,7 @@ namespace dp2Circulation
 
         private void button_OK_Click(object sender, EventArgs e)
         {
-            // ºÏ³É²ÎÊı
+            // åˆæˆå‚æ•°
             if (this.checkBox_startAtServerBreakPoint.Checked == true)
             {
                 this.StartInfo.Start = "!breakpoint";
@@ -136,7 +135,7 @@ namespace dp2Circulation
                         }
                         catch (Exception)
                         {
-                            MessageBox.Show(this, "¼ÇÂ¼Ë÷ÒıºÅ '" + this.textBox_startIndex.Text + "' ±ØĞëÎª´¿Êı×Ö");
+                            MessageBox.Show(this, "è®°å½•ç´¢å¼•å· '" + this.textBox_startIndex.Text + "' å¿…é¡»ä¸ºçº¯æ•°å­—");
                             return;
                         }
                     }
@@ -154,13 +153,13 @@ namespace dp2Circulation
 
 
 
-            // Í¨ÓÃÆô¶¯²ÎÊı
+            // é€šç”¨å¯åŠ¨å‚æ•°
             XmlDocument dom = new XmlDocument();
             dom.LoadXml("<root />");
 
             if (checkBox_startAtServerBreakPoint.Checked == true)
             {
-                // ²ÉÓÃ·şÎñÆ÷¶ÏµãÊ±£¬dumpÖµ·şÎñÆ÷×Ô»á¾ö¶¨£¬¶øclearFirstÔòÎªno£¬ÒòÎªclear½×¶ÎÊÇ²»¿ÉÄÜÖĞ¶ÏµÄ£¨¼ÈÈ»´Ó¶Ïµã¿ªÊ¼£¬¾Í±íÃ÷ÏÈÇ°³É¹¦Ö´ĞĞ¹ıÁË£¨Èç¹û±ØÒªµÄ»°£©£©¡£
+                // é‡‡ç”¨æœåŠ¡å™¨æ–­ç‚¹æ—¶ï¼Œdumpå€¼æœåŠ¡å™¨è‡ªä¼šå†³å®šï¼Œè€ŒclearFirståˆ™ä¸ºnoï¼Œå› ä¸ºclearé˜¶æ®µæ˜¯ä¸å¯èƒ½ä¸­æ–­çš„ï¼ˆæ—¢ç„¶ä»æ–­ç‚¹å¼€å§‹ï¼Œå°±è¡¨æ˜å…ˆå‰æˆåŠŸæ‰§è¡Œè¿‡äº†ï¼ˆå¦‚æœå¿…è¦çš„è¯ï¼‰ï¼‰ã€‚
                 DomUtil.SetAttr(dom.DocumentElement,
                     "dump",
                     "no");
@@ -196,13 +195,13 @@ namespace dp2Circulation
 
         }
 
-        // ½âÎöÍ¨ÓÃÆô¶¯²ÎÊı
-        // ¸ñÊ½
+        // è§£æé€šç”¨å¯åŠ¨å‚æ•°
+        // æ ¼å¼
         /*
          * <root dump='...' clearFirst='...' loop='...'/>
-         * dumpÈ±Ê¡Îªfalse
-         * clearFirstÈ±Ê¡Îªfalse
-         * loopÈ±Ê¡Îªtrue
+         * dumpç¼ºçœä¸ºfalse
+         * clearFirstç¼ºçœä¸ºfalse
+         * loopç¼ºçœä¸ºtrue
          * 
          * 
          * */
@@ -228,7 +227,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = "strParam²ÎÊı×°ÈëXML DOMÊ±³ö´í: " + ex.Message;
+                strError = "strParamå‚æ•°è£…å…¥XML DOMæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
@@ -281,7 +280,7 @@ namespace dp2Circulation
             if (String.IsNullOrEmpty(strStart) == true)
             {
                 DateTime now = DateTime.Now;
-                // µ±ÌìµÄÈÕÖ¾ÎÄ¼ş£¬ÒÔ±ã½İÊäÈë¶øÒÑ
+                // å½“å¤©çš„æ—¥å¿—æ–‡ä»¶ï¼Œä»¥ä¾¿æ·è¾“å…¥è€Œå·²
                 strLogFileName = now.Year.ToString().PadLeft(4, '0')
                 + now.Month.ToString().PadLeft(2, '0')
                 + now.Day.ToString().PadLeft(2, '0');
@@ -300,7 +299,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = "×°ÔØXML×Ö·û´®½øÈëDOMÊ±·¢Éú´íÎó: " + ex.Message;
+                strError = "è£…è½½XMLå­—ç¬¦ä¸²è¿›å…¥DOMæ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                 return -1;
             }
 
@@ -325,7 +324,7 @@ namespace dp2Circulation
                     }
                     catch
                     {
-                        strError = "<trace>ÔªËØÖĞindexÊôĞÔÖµ '" + strIndex + "' ¸ñÊ½´íÎó£¬Ó¦µ±Îª´¿Êı×Ö";
+                        strError = "<trace>å…ƒç´ ä¸­indexå±æ€§å€¼ '" + strIndex + "' æ ¼å¼é”™è¯¯ï¼Œåº”å½“ä¸ºçº¯æ•°å­—";
                         return -1;
                     }
                 }

@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -23,7 +23,7 @@ namespace dp2Circulation
 
         private void StartDkywReplicationDlg_Load(object sender, EventArgs e)
         {
-            // ÆğÊ¼Î»ÖÃ²ÎÊı
+            // èµ·å§‹ä½ç½®å‚æ•°
             string strRecordID = "";
             string strError = "";
 
@@ -45,7 +45,7 @@ namespace dp2Circulation
                 this.checkBox_startAtServerBreakPoint.Checked = false;
             }
 
-            // Í¨ÓÃÆô¶¯²ÎÊı
+            // é€šç”¨å¯åŠ¨å‚æ•°
             bool bLoop = false;
 
             nRet = ParseDkywReplicationParam(this.StartInfo.Param,
@@ -67,13 +67,13 @@ namespace dp2Circulation
 
         }
 
-        // ½âÎö ¿ªÊ¼ ²ÎÊı
+        // è§£æ å¼€å§‹ å‚æ•°
         // parameters:
-        //      strStart    Æô¶¯×Ö·û´®¡£¸ñÊ½ÎªXML
-        //                  Èç¹û×Ô¶¯×Ö·û´®Îª"!breakpoint"£¬±íÊ¾´Ó·şÎñÆ÷¼ÇÒäµÄ¶ÏµãĞÅÏ¢¿ªÊ¼
+        //      strStart    å¯åŠ¨å­—ç¬¦ä¸²ã€‚æ ¼å¼ä¸ºXML
+        //                  å¦‚æœè‡ªåŠ¨å­—ç¬¦ä¸²ä¸º"!breakpoint"ï¼Œè¡¨ç¤ºä»æœåŠ¡å™¨è®°å¿†çš„æ–­ç‚¹ä¿¡æ¯å¼€å§‹
         // return:
-        //      -1  ³ö´í
-        //      0   ÕıÈ·
+        //      -1  å‡ºé”™
+        //      0   æ­£ç¡®
         int ParseDkywReplicationStart(string strStart,
             out string strRecordID,
             out string strError)
@@ -103,7 +103,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = "×°ÔØXML×Ö·û´®½øÈëDOMÊ±·¢Éú´íÎó: " + ex.Message;
+                strError = "è£…è½½XMLå­—ç¬¦ä¸²è¿›å…¥DOMæ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                 return -1;
             }
 
@@ -116,11 +116,11 @@ namespace dp2Circulation
             return 0;
         }
 
-        // ½âÎöÍ¨ÓÃÆô¶¯²ÎÊı
-        // ¸ñÊ½
+        // è§£æé€šç”¨å¯åŠ¨å‚æ•°
+        // æ ¼å¼
         /*
          * <root loop='...'/>
-         * loopÈ±Ê¡Îªtrue
+         * loopç¼ºçœä¸ºtrue
          * 
          * */
         public static int ParseDkywReplicationParam(string strParam,
@@ -141,11 +141,11 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = "strParam²ÎÊı×°ÈëXML DOMÊ±³ö´í: " + ex.Message;
+                strError = "strParamå‚æ•°è£…å…¥XML DOMæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
-            // È±Ê¡Îªtrue
+            // ç¼ºçœä¸ºtrue
             string strLoop = DomUtil.GetAttr(dom.DocumentElement,
     "loop");
             if (strLoop.ToLower() == "no"
@@ -161,24 +161,24 @@ namespace dp2Circulation
         {
             string strError = "";
 
-            // ºÏ³É²ÎÊı
+            // åˆæˆå‚æ•°
             if (this.checkBox_startAtServerBreakPoint.Checked == true)
             {
                 this.StartInfo.Start = "!breakpoint";
-                // Í¨ÓÃÆô¶¯²ÎÊı
+                // é€šç”¨å¯åŠ¨å‚æ•°
                 this.StartInfo.Param = MakeArriveMonitorParam(this.checkBox_loop.Checked);
             }
             else
             {
                 if (this.textBox_startIndex.Text == "")
                 {
-                    strError = "ÉĞÎ´Ö¸¶¨Æğµã¼ÇÂ¼ºÅ";
+                    strError = "å°šæœªæŒ‡å®šèµ·ç‚¹è®°å½•å·";
                     this.textBox_startIndex.Focus();
                     goto ERROR1;
                 }
 
                 DialogResult result = MessageBox.Show(this,
-                    "Ö¸¶¨Æğµã¼ÇÂ¼ºÅµÄ·½Ê½ÈİÒ×µ¼ÖÂÊı¾İÖØ¸´¸ú×Ù£¬¶ÔÏµÍ³Õı³£ÔËĞĞ²úÉú²»ÀûµÄÓ°Ïì¡£Ò»°ãÇé¿öÏÂ£¬Ñ¡Ôñ´Ó·şÎñÆ÷±£ÁôµÄ¶Ïµã¿ªÊ¼´¦ÀíÎªºÃ¡£\r\n\r\nÈ·ÊµÒª¼ÌĞø(°´ÕÕÖ¸¶¨Æğµã¼ÇÂ¼ºÅµÄ·½Ê½½øĞĞ´¦Àí)?",
+                    "æŒ‡å®šèµ·ç‚¹è®°å½•å·çš„æ–¹å¼å®¹æ˜“å¯¼è‡´æ•°æ®é‡å¤è·Ÿè¸ªï¼Œå¯¹ç³»ç»Ÿæ­£å¸¸è¿è¡Œäº§ç”Ÿä¸åˆ©çš„å½±å“ã€‚ä¸€èˆ¬æƒ…å†µä¸‹ï¼Œé€‰æ‹©ä»æœåŠ¡å™¨ä¿ç•™çš„æ–­ç‚¹å¼€å§‹å¤„ç†ä¸ºå¥½ã€‚\r\n\r\nç¡®å®è¦ç»§ç»­(æŒ‰ç…§æŒ‡å®šèµ·ç‚¹è®°å½•å·çš„æ–¹å¼è¿›è¡Œå¤„ç†)?",
                     "StartDkywReplicationDlg",
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question,
@@ -188,7 +188,7 @@ namespace dp2Circulation
 
                 this.StartInfo.Start = MakeBreakPointString(this.textBox_startIndex.Text);
 
-                // Í¨ÓÃÆô¶¯²ÎÊı
+                // é€šç”¨å¯åŠ¨å‚æ•°
                 this.StartInfo.Param = MakeArriveMonitorParam(this.checkBox_loop.Checked);
             }
 
@@ -205,7 +205,7 @@ namespace dp2Circulation
             this.Close();
         }
 
-        // ¹¹Ôì¶Ïµã×Ö·û´®
+        // æ„é€ æ–­ç‚¹å­—ç¬¦ä¸²
         static string MakeBreakPointString(
             string strRecordID)
         {

@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -10,22 +10,22 @@ using System.Xml;
 using DigitalPlatform.Xml;
 using DigitalPlatform.CirculationClient.localhost;
 
-// 2013/3/16 Ìí¼Ó XML ×¢ÊÍ
+// 2013/3/16 æ·»åŠ  XML æ³¨é‡Š
 
 namespace dp2Circulation
 {
     /// <summary>
-    /// ÓÃÓÚÆô¶¯ dp2Library ÈÕÖ¾»Ö¸´ ºóÌ¨ÈÎÎñ µÄ¶Ô»°¿ò
+    /// ç”¨äºå¯åŠ¨ dp2Library æ—¥å¿—æ¢å¤ åå°ä»»åŠ¡ çš„å¯¹è¯æ¡†
     /// </summary>
     internal partial class StartLogRecoverDlg : Form
     {
         /// <summary>
-        /// ºóÌ¨ÈÎÎñÆô¶¯²ÎÊı
+        /// åå°ä»»åŠ¡å¯åŠ¨å‚æ•°
         /// </summary>
         public BatchTaskStartInfo StartInfo = new BatchTaskStartInfo();
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public StartLogRecoverDlg()
         {
@@ -34,7 +34,7 @@ namespace dp2Circulation
 
         private void StartLogRecoverDlg_Load(object sender, EventArgs e)
         {
-            // ÆğÊ¼Î»ÖÃ²ÎÊı
+            // èµ·å§‹ä½ç½®å‚æ•°
             long index = 0;
             string strFileName = "";
             string strError = "";
@@ -49,7 +49,7 @@ namespace dp2Circulation
             this.textBox_startFileName.Text = strFileName;
             this.textBox_startIndex.Text = index.ToString();
 
-            // Í¨ÓÃÆô¶¯²ÎÊı
+            // é€šç”¨å¯åŠ¨å‚æ•°
             string strRecoverLevel = "";
             bool bClearFirst = false;
 
@@ -78,12 +78,12 @@ namespace dp2Circulation
         {
             if (this.comboBox_recoverLevel.Text == "")
             {
-                MessageBox.Show(this, "ÉĞÎ´Ö¸¶¨ »Ö¸´¼¶±ğ");
+                MessageBox.Show(this, "å°šæœªæŒ‡å®š æ¢å¤çº§åˆ«");
                 return;
             }
 
 
-            // ºÏ³É²ÎÊı
+            // åˆæˆå‚æ•°
             if (this.textBox_startFileName.Text == "")
                 this.StartInfo.Start = "";
             else
@@ -97,7 +97,7 @@ namespace dp2Circulation
                     }
                     catch (Exception)
                     {
-                        MessageBox.Show(this, "¼ÇÂ¼Ë÷ÒıºÅ '" + this.textBox_startIndex.Text + "' ±ØĞëÎª´¿Êı×Ö");
+                        MessageBox.Show(this, "è®°å½•ç´¢å¼•å· '" + this.textBox_startIndex.Text + "' å¿…é¡»ä¸ºçº¯æ•°å­—");
                         return;
                     }
                 }
@@ -105,7 +105,7 @@ namespace dp2Circulation
             }
 
 
-            // Í¨ÓÃÆô¶¯²ÎÊı
+            // é€šç”¨å¯åŠ¨å‚æ•°
             string strRecoverLevel = this.comboBox_recoverLevel.Text;
             int nRet = strRecoverLevel.IndexOf('(');
             if (nRet != -1)
@@ -133,7 +133,7 @@ namespace dp2Circulation
 
         }
 
-        // ½âÎö ¿ªÊ¼ ²ÎÊı
+        // è§£æ å¼€å§‹ å‚æ•°
         static int ParseLogRecoverStart(string strStart,
             out long index,
             out string strFileName,
@@ -155,7 +155,7 @@ namespace dp2Circulation
                 }
                 catch (Exception)
                 {
-                    strError = "Æô¶¯²ÎÊı '" + strStart + "' ¸ñÊ½´íÎó£º" + "Èç¹ûÃ»ÓĞ@£¬ÔòÓ¦Îª´¿Êı×Ö¡£";
+                    strError = "å¯åŠ¨å‚æ•° '" + strStart + "' æ ¼å¼é”™è¯¯ï¼š" + "å¦‚æœæ²¡æœ‰@ï¼Œåˆ™åº”ä¸ºçº¯æ•°å­—ã€‚";
                     return -1;
                 }
                 return 0;
@@ -167,7 +167,7 @@ namespace dp2Circulation
             }
             catch (Exception)
             {
-                strError = "Æô¶¯²ÎÊı '" + strStart + "' ¸ñÊ½´íÎó£º'" + strStart.Substring(0, nRet).Trim() + "' ²¿·ÖÓ¦µ±Îª´¿Êı×Ö¡£";
+                strError = "å¯åŠ¨å‚æ•° '" + strStart + "' æ ¼å¼é”™è¯¯ï¼š'" + strStart.Substring(0, nRet).Trim() + "' éƒ¨åˆ†åº”å½“ä¸ºçº¯æ•°å­—ã€‚";
                 return -1;
             }
 
@@ -177,13 +177,13 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ½âÎöÈÕÖ¾»Ö¸´²ÎÊı
+        /// è§£ææ—¥å¿—æ¢å¤å‚æ•°
         /// </summary>
-        /// <param name="strParam">´ı½âÎöµÄ²ÎÊı×Ö·û´®</param>
-        /// <param name="strRecoverLevel">ÈÕÖ¾»Ö¸´¼¶±ğ</param>
-        /// <param name="bClearFirst">ÔÚ»Ö¸´Ç°ÊÇ·ñÇå³ıÏÖÓĞµÄÊı¾İ¿â¼ÇÂ¼</param>
-        /// <param name="strError">´íÎóĞÅÏ¢¡£µ±±¾·½·¨·¢Éú´íÎóÊ±</param>
-        /// <returns>-1: ³ö´í¡£´íÎóĞÅÏ¢ÔÚ strError ²ÎÊıÖĞ·µ»Ø£»0: ³É¹¦</returns>
+        /// <param name="strParam">å¾…è§£æçš„å‚æ•°å­—ç¬¦ä¸²</param>
+        /// <param name="strRecoverLevel">æ—¥å¿—æ¢å¤çº§åˆ«</param>
+        /// <param name="bClearFirst">åœ¨æ¢å¤å‰æ˜¯å¦æ¸…é™¤ç°æœ‰çš„æ•°æ®åº“è®°å½•</param>
+        /// <param name="strError">é”™è¯¯ä¿¡æ¯ã€‚å½“æœ¬æ–¹æ³•å‘ç”Ÿé”™è¯¯æ—¶</param>
+        /// <returns>-1: å‡ºé”™ã€‚é”™è¯¯ä¿¡æ¯åœ¨ strError å‚æ•°ä¸­è¿”å›ï¼›0: æˆåŠŸ</returns>
         public static int ParseLogRecoverParam(string strParam,
             out string strRecoverLevel,
             out bool bClearFirst,
@@ -204,15 +204,15 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = "strParam²ÎÊı×°ÈëXML DOMÊ±³ö´í: " + ex.Message;
+                strError = "strParamå‚æ•°è£…å…¥XML DOMæ—¶å‡ºé”™: " + ex.Message;
                 return -1;   
             }
 
             /*
-            Logic = 0,  // Âß¼­²Ù×÷
-            LogicAndSnapshot = 1,   // Âß¼­²Ù×÷£¬ÈôÊ§°ÜÔò×ªÓÃ¿ìÕÕ»Ö¸´
-            Snapshot = 3,   // £¨ÍêÈ«µÄ£©¿ìÕÕ
-            Robust = 4, // ×îÇ¿×³µÄÈİ´í»Ö¸´·½Ê½
+            Logic = 0,  // é€»è¾‘æ“ä½œ
+            LogicAndSnapshot = 1,   // é€»è¾‘æ“ä½œï¼Œè‹¥å¤±è´¥åˆ™è½¬ç”¨å¿«ç…§æ¢å¤
+            Snapshot = 3,   // ï¼ˆå®Œå…¨çš„ï¼‰å¿«ç…§
+            Robust = 4, // æœ€å¼ºå£®çš„å®¹é”™æ¢å¤æ–¹å¼
              * */
 
             strRecoverLevel = DomUtil.GetAttr(dom.DocumentElement,

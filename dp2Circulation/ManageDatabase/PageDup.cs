@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -23,7 +23,7 @@ using DigitalPlatform.CirculationClient.localhost;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ²éÖØ ÊôĞÔÒ³
+    /// æŸ¥é‡ å±æ€§é¡µ
     /// </summary>
     public partial class ManagerForm
     {
@@ -32,7 +32,7 @@ namespace dp2Circulation
         XmlDocument m_dup_dom = null;
 
         /// <summary>
-        /// ²éÖØ¶¨ÒåÊÇ·ñ±»ĞŞ¸Ä
+        /// æŸ¥é‡å®šä¹‰æ˜¯å¦è¢«ä¿®æ”¹
         /// </summary>
         public bool DupChanged
         {
@@ -50,16 +50,16 @@ namespace dp2Circulation
             }
         }
 
-        // ÁĞ³öÅÅ¼ÜÌåÏµ¶¨Òå
+        // åˆ—å‡ºæ’æ¶ä½“ç³»å®šä¹‰
         int ListDup(out string strError)
         {
             strError = "";
 
             if (this.DupChanged == true)
             {
-                // ¾¯¸æÉĞÎ´±£´æ
+                // è­¦å‘Šå°šæœªä¿å­˜
                 DialogResult result = MessageBox.Show(this,
-                    "µ±Ç°´°¿ÚÄÚ²éÖØ¶¨Òå±»ĞŞ¸ÄºóÉĞÎ´±£´æ¡£Èô´ËÊ±Ë¢ĞÂ´°¿ÚÄÚÈİ£¬ÏÖÓĞÎ´±£´æĞÅÏ¢½«¶ªÊ§¡£\r\n\r\nÈ·ÊµÒªË¢ĞÂ? ",
+                    "å½“å‰çª—å£å†…æŸ¥é‡å®šä¹‰è¢«ä¿®æ”¹åå°šæœªä¿å­˜ã€‚è‹¥æ­¤æ—¶åˆ·æ–°çª—å£å†…å®¹ï¼Œç°æœ‰æœªä¿å­˜ä¿¡æ¯å°†ä¸¢å¤±ã€‚\r\n\r\nç¡®å®è¦åˆ·æ–°? ",
                     "ManagerForm",
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question,
@@ -76,7 +76,7 @@ namespace dp2Circulation
 
             string strDupXml = "";
 
-            // »ñµÃÖÖ´ÎºÅÏà¹Ø¶¨Òå
+            // è·å¾—ç§æ¬¡å·ç›¸å…³å®šä¹‰
             int nRet = GetDupInfo(out strDupXml,
                 out strError);
             if (nRet == -1)
@@ -92,7 +92,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = "fragment XML×°ÈëXmlDocumentFragmentÊ±³ö´í: " + ex.Message;
+                strError = "fragment XMLè£…å…¥XmlDocumentFragmentæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
@@ -100,32 +100,32 @@ namespace dp2Circulation
 
             /*
  <dup>
-        <project name="²É¹º²éÖØ" comment="Ê¾Àı·½°¸">
-            <database name="²âÊÔÊéÄ¿¿â" threshold="60">
-                <accessPoint name="ÖøÕß" weight="50" searchStyle="" />
-                <accessPoint name="ÌâÃû" weight="70" searchStyle="" />
-                <accessPoint name="Ë÷ÊéÀàºÅ" weight="10" searchStyle="" />
+        <project name="é‡‡è´­æŸ¥é‡" comment="ç¤ºä¾‹æ–¹æ¡ˆ">
+            <database name="æµ‹è¯•ä¹¦ç›®åº“" threshold="60">
+                <accessPoint name="è‘—è€…" weight="50" searchStyle="" />
+                <accessPoint name="é¢˜å" weight="70" searchStyle="" />
+                <accessPoint name="ç´¢ä¹¦ç±»å·" weight="10" searchStyle="" />
             </database>
-            <database name="±àÄ¿¿â" threshold="60">
-                <accessPoint name="ÖøÕß" weight="50" searchStyle="" />
-                <accessPoint name="ÌâÃû" weight="70" searchStyle="" />
-                <accessPoint name="Ë÷ÊéÀàºÅ" weight="10" searchStyle="" />
-            </database>
-        </project>
-        <project name="±àÄ¿²éÖØ" comment="ÕâÊÇ±àÄ¿²éÖØÊ¾Àı·½°¸">
-            <database name="ÖĞÎÄÍ¼Êé" threshold="100">
-                <accessPoint name="ÔğÈÎÕß" weight="50" searchStyle="" />
-                <accessPoint name="ISBN" weight="80" searchStyle="" />
-                <accessPoint name="ÌâÃû" weight="20" searchStyle="" />
-            </database>
-            <database name="Í¼Êé²âÊÔ" threshold="100">
-                <accessPoint name="ÔğÈÎÕß" weight="50" searchStyle="" />
-                <accessPoint name="ISBN" weight="80" searchStyle="" />
-                <accessPoint name="ÌâÃû" weight="20" searchStyle="" />
+            <database name="ç¼–ç›®åº“" threshold="60">
+                <accessPoint name="è‘—è€…" weight="50" searchStyle="" />
+                <accessPoint name="é¢˜å" weight="70" searchStyle="" />
+                <accessPoint name="ç´¢ä¹¦ç±»å·" weight="10" searchStyle="" />
             </database>
         </project>
-        <default origin="ÖĞÎÄÍ¼Êé" project="±àÄ¿²éÖØ" />
-        <default origin="Í¼Êé²âÊÔ" project="±àÄ¿²éÖØ" />
+        <project name="ç¼–ç›®æŸ¥é‡" comment="è¿™æ˜¯ç¼–ç›®æŸ¥é‡ç¤ºä¾‹æ–¹æ¡ˆ">
+            <database name="ä¸­æ–‡å›¾ä¹¦" threshold="100">
+                <accessPoint name="è´£ä»»è€…" weight="50" searchStyle="" />
+                <accessPoint name="ISBN" weight="80" searchStyle="" />
+                <accessPoint name="é¢˜å" weight="20" searchStyle="" />
+            </database>
+            <database name="å›¾ä¹¦æµ‹è¯•" threshold="100">
+                <accessPoint name="è´£ä»»è€…" weight="50" searchStyle="" />
+                <accessPoint name="ISBN" weight="80" searchStyle="" />
+                <accessPoint name="é¢˜å" weight="20" searchStyle="" />
+            </database>
+        </project>
+        <default origin="ä¸­æ–‡å›¾ä¹¦" project="ç¼–ç›®æŸ¥é‡" />
+        <default origin="å›¾ä¹¦æµ‹è¯•" project="ç¼–ç›®æŸ¥é‡" />
     </dup>
              * * */
             FillProjectNameList(this.m_dup_dom);
@@ -163,7 +163,7 @@ namespace dp2Circulation
         {
             this.listView_dup_defaults.Items.Clear();
 
-            // »ñµÃÈ«²¿<sourceDatabase>ÔªËØnameÊôĞÔÖĞµÄ·¢ÆğÂ·¾¶
+            // è·å¾—å…¨éƒ¨<sourceDatabase>å…ƒç´ nameå±æ€§ä¸­çš„å‘èµ·è·¯å¾„
             List<string> startpaths = new List<string>();
             XmlNodeList nodes = dom.DocumentElement.SelectNodes("//default"); // "//defaultProject/sourceDatabase"
             for (int i = 0; i < nodes.Count; i++)
@@ -175,7 +175,7 @@ namespace dp2Circulation
             }
 
 
-            // ÏÈ°´ÕÕ²éÖØ·½°¸¶¨ÒåÖĞÓÃµ½¹ıµÄ·¢ÆğÂ·¾¶(Êı¾İ¿â)ÁĞ³ö¶àĞĞ
+            // å…ˆæŒ‰ç…§æŸ¥é‡æ–¹æ¡ˆå®šä¹‰ä¸­ç”¨åˆ°è¿‡çš„å‘èµ·è·¯å¾„(æ•°æ®åº“)åˆ—å‡ºå¤šè¡Œ
             List<string> database_names = GetAllDatabaseNames(dom);
             for (int i = 0; i < database_names.Count; i++)
             {
@@ -190,13 +190,13 @@ namespace dp2Circulation
                 ListViewItem item = new ListViewItem(strDatabaseName, 0);
                 item.SubItems.Add(strDefaultProject);
                 this.listView_dup_defaults.Items.Add(item);
-                item.Tag = 1;   // ±íÊ¾ÎªÊµÔÚ
+                item.Tag = 1;   // è¡¨ç¤ºä¸ºå®åœ¨
 
-                // ´ÓstartpathsÖĞÒÆ×ßÒÑ¾­ÓÃ¹ıµÄstartpath
+                // ä»startpathsä¸­ç§»èµ°å·²ç»ç”¨è¿‡çš„startpath
                 startpaths.Remove(strDatabaseName);
             }
 
-            // ÔÙ°´ÕÕ²éÖØ·½°¸¶¨ÒåÖĞÃ»ÓĞÓÃµ½¹ıµÄ·¢ÆğÂ·¾¶ÁĞ³ö¶àĞĞ
+            // å†æŒ‰ç…§æŸ¥é‡æ–¹æ¡ˆå®šä¹‰ä¸­æ²¡æœ‰ç”¨åˆ°è¿‡çš„å‘èµ·è·¯å¾„åˆ—å‡ºå¤šè¡Œ
             for (int i = 0; i < startpaths.Count; i++)
             {
                 string strDatabaseName = startpaths[i];
@@ -210,13 +210,13 @@ namespace dp2Circulation
                 ListViewItem item = new ListViewItem(strDatabaseName, 0);
                 item.SubItems.Add(strDefaultProject);
                 this.listView_dup_defaults.Items.Add(item);
-                item.Tag = null;    // ±íÊ¾Îª·¢Ğé
+                item.Tag = null;    // è¡¨ç¤ºä¸ºå‘è™š
 
-                item.ForeColor = SystemColors.GrayText; // ÑÕÉ«·¢Ğé£¬±íÊ¾Õâ¸öÊı¾İ¿âÃûÃ»ÓĞÔÚ²éÖØ·½°¸¶¨ÒåÖĞ³öÏÖ¹ı
+                item.ForeColor = SystemColors.GrayText; // é¢œè‰²å‘è™šï¼Œè¡¨ç¤ºè¿™ä¸ªæ•°æ®åº“åæ²¡æœ‰åœ¨æŸ¥é‡æ–¹æ¡ˆå®šä¹‰ä¸­å‡ºç°è¿‡
             }
         }
 
-        // »ñµÃÈ«²¿µÄÊı¾İ¿âÃû
+        // è·å¾—å…¨éƒ¨çš„æ•°æ®åº“å
         static List<string> GetAllDatabaseNames(XmlDocument dom)
         {
             List<string> results = new List<string>();
@@ -228,13 +228,13 @@ namespace dp2Circulation
 
             results.Sort();
 
-            // È¥ÖØ
+            // å»é‡
             StringUtil.RemoveDup(ref results);
 
             return results;
         }
 
-        // »ñµÃ²éÖØ¶¨Òå
+        // è·å¾—æŸ¥é‡å®šä¹‰
         int GetDupInfo(out string strDupXml,
             out string strError)
         {
@@ -244,7 +244,7 @@ namespace dp2Circulation
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ»ñÈ¡²éÖØ¶¨Òå ...");
+            stop.Initial("æ­£åœ¨è·å–æŸ¥é‡å®šä¹‰ ...");
             stop.BeginLoop();
 
             this.Update();
@@ -275,9 +275,9 @@ namespace dp2Circulation
             return -1;
         }
 
-        // ±£´æ²éÖØ¶¨Òå
+        // ä¿å­˜æŸ¥é‡å®šä¹‰
         // parameters:
-        //      strDupXml   ½Å±¾¶¨ÒåXML¡£×¢Òâ£¬Ã»ÓĞ¸ùÔªËØ
+        //      strDupXml   è„šæœ¬å®šä¹‰XMLã€‚æ³¨æ„ï¼Œæ²¡æœ‰æ ¹å…ƒç´ 
         int SetDupDef(string strDupXml,
             out string strError)
         {
@@ -286,7 +286,7 @@ namespace dp2Circulation
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ±£´æ²éÖØ¶¨Òå ...");
+            stop.Initial("æ­£åœ¨ä¿å­˜æŸ¥é‡å®šä¹‰ ...");
             stop.BeginLoop();
 
             this.Update();
@@ -318,7 +318,7 @@ namespace dp2Circulation
             return -1;
         }
 
-        // Ìá½»ÅÅ¼ÜÌåÏµ¶¨ÒåĞŞ¸Ä
+        // æäº¤æ’æ¶ä½“ç³»å®šä¹‰ä¿®æ”¹
         int SubmitDupDef(out string strError)
         {
             strError = "";
@@ -336,8 +336,8 @@ namespace dp2Circulation
             return 0;
         }
 
-        // ¹¹ÔìÅÅ¼ÜÌåÏµ¶¨ÒåµÄXMLÆ¬¶Î
-        // ×¢ÒâÊÇÏÂ¼¶Æ¬¶Ï¶¨Òå£¬Ã»ÓĞ<dup>ÔªËØ×÷Îª¸ù¡£
+        // æ„é€ æ’æ¶ä½“ç³»å®šä¹‰çš„XMLç‰‡æ®µ
+        // æ³¨æ„æ˜¯ä¸‹çº§ç‰‡æ–­å®šä¹‰ï¼Œæ²¡æœ‰<dup>å…ƒç´ ä½œä¸ºæ ¹ã€‚
         int BuildDupDef(out string strDupDef,
             out string strError)
         {
@@ -348,7 +348,7 @@ namespace dp2Circulation
             return 0;
         }
 
-        // ÔÚ·½°¸ÃûÁĞ±íÖĞ£¬Ñ¡¶¨Ò»¸öÌØ¶¨µÄÃû×ÖµÄĞĞ
+        // åœ¨æ–¹æ¡ˆååˆ—è¡¨ä¸­ï¼Œé€‰å®šä¸€ä¸ªç‰¹å®šçš„åå­—çš„è¡Œ
         void SelectProjectItem(string strProjectName)
         {
             for (int i = 0; i < this.listView_dup_projects.Items.Count; i++)
@@ -361,7 +361,7 @@ namespace dp2Circulation
             }
         }
 
-        // »ñµÃÈ«²¿ÊéÄ¿¿âÃûµÄÁĞ±í
+        // è·å¾—å…¨éƒ¨ä¹¦ç›®åº“åçš„åˆ—è¡¨
         List<string> GetAllBiblioDbNames()
         {
             List<string> results = new List<string>();
@@ -376,7 +376,7 @@ namespace dp2Circulation
             }
             catch (Exception /*ex*/)
             {
-                // strError = "XML×°ÈëDOMÊ±³ö´í: " + ex.Message;
+                // strError = "XMLè£…å…¥DOMæ—¶å‡ºé”™: " + ex.Message;
                 // return -1;
                 Debug.Assert(false, "");
                 return results;
@@ -398,7 +398,7 @@ namespace dp2Circulation
         }
 
 
-        // ·½°¸Ãû·¢Éú¸Ä±äºó£¬¶ÒÏÖµ½ÏÂ·½µÄÈ±Ê¡¹ØÏµÁĞ±íÖĞ
+        // æ–¹æ¡ˆåå‘ç”Ÿæ”¹å˜åï¼Œå…‘ç°åˆ°ä¸‹æ–¹çš„ç¼ºçœå…³ç³»åˆ—è¡¨ä¸­
         void ChangeDefaultProjectName(string strOldProjectName,
             string strNewProjectName)
         {
@@ -414,7 +414,7 @@ namespace dp2Circulation
             {
                 ListViewItem item = this.listView_dup_defaults.Items[i];
 
-                // ¶ÒÏÖÊÓ¾õĞŞ¸Ä
+                // å…‘ç°è§†è§‰ä¿®æ”¹
                 string strProjectName = ListViewUtil.GetItemText(item, 1);
                 if (strProjectName == strOldProjectName)
                 {
@@ -424,17 +424,17 @@ namespace dp2Circulation
                 }
 
             }
-            // ¶ÒÏÖDOMĞŞ¸Ä
+            // å…‘ç°DOMä¿®æ”¹
             XmlNodeList nodes = this.m_dup_dom.DocumentElement.SelectNodes(
                 "//default[@project='" + strOldProjectName + "']");
-            Debug.Assert(nCount == nodes.Count, "Á½±ßÊıÄ¿Ó¦¸ÃÏàµÈ");
+            Debug.Assert(nCount == nodes.Count, "ä¸¤è¾¹æ•°ç›®åº”è¯¥ç›¸ç­‰");
             for (int i = 0; i < nodes.Count; i++)
             {
                 XmlNode node = nodes[i];
 
                 if (String.IsNullOrEmpty(strNewProjectName) == true)
                 {
-                    // É¾³ı
+                    // åˆ é™¤
                     node.ParentNode.RemoveChild(node);
                 }
                 else

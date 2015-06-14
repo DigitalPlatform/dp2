@@ -1,4 +1,4 @@
-using System;
+锘縰sing System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -11,11 +11,11 @@ namespace dp2Circulation
     internal partial class OrderIndexFoundDupDlg : Form
     {
         /// <summary>
-        /// 框架窗口
+        /// 妗嗘灦绐楀彛
         /// </summary>
         public MainForm MainForm = null;
-        public string OrderText = "";   // 期的HTML信息
-        public string BiblioText = "";  // 种的HTML信息
+        public string OrderText = "";   // 鏈熺殑HTML淇℃伅
+        public string BiblioText = "";  // 绉嶇殑HTML淇℃伅
 
         public string MessageText
         {

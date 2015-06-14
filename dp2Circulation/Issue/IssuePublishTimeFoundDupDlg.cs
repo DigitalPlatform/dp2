@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -8,16 +8,16 @@ using System.Windows.Forms;
 
 namespace dp2Circulation
 {
-    // ÔÚ±à¼­ÆÚ¼ÇÂ¼¡¢ÆÚ¼Çµ½µÄ¹ı³ÌÖĞ£¬·¢ÏÖÓĞÖØ¸´³ö°æÈÕÆÚµÄ¼ÇÂ¼£¬
-    // ±¾¶Ô»°¿òÓÃÓÚÏÔÊ¾ÕâĞ©ÆÚ¼ÇÂ¼
+    // åœ¨ç¼–è¾‘æœŸè®°å½•ã€æœŸè®°åˆ°çš„è¿‡ç¨‹ä¸­ï¼Œå‘ç°æœ‰é‡å¤å‡ºç‰ˆæ—¥æœŸçš„è®°å½•ï¼Œ
+    // æœ¬å¯¹è¯æ¡†ç”¨äºæ˜¾ç¤ºè¿™äº›æœŸè®°å½•
     internal partial class IssuePublishTimeFoundDupDlg : Form
     {
         /// <summary>
-        /// ¿ò¼Ü´°¿Ú
+        /// æ¡†æ¶çª—å£
         /// </summary>
         public MainForm MainForm = null;
-        public string IssueText = "";   // ÆÚµÄHTMLĞÅÏ¢
-        public string BiblioText = "";  // ÖÖµÄHTMLĞÅÏ¢
+        public string IssueText = "";   // æœŸçš„HTMLä¿¡æ¯
+        public string BiblioText = "";  // ç§çš„HTMLä¿¡æ¯
 
 
         public string MessageText

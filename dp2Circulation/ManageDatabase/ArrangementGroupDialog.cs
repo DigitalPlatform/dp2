@@ -1,18 +1,19 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
+
 using DigitalPlatform.Text;
 
 namespace dp2Circulation
 {
     internal partial class ArrangementGroupDialog : Form
     {
-        public string AllZhongcihaoDatabaseInfoXml = "";// ¶¨ÒåÁËÈô¸ÉÖÖ´ÎºÅ¿âµÄXMLÆ¬¶Î
-        public List<string> ExcludingDbNames = new List<string>();   // ÒªÅÅ³ıµÄ¡¢ÒÑ¾­±»Ê¹ÓÃÁËµÄÖÖ´ÎºÅ¿âÃû
+        public string AllZhongcihaoDatabaseInfoXml = "";// å®šä¹‰äº†è‹¥å¹²ç§æ¬¡å·åº“çš„XMLç‰‡æ®µ
+        public List<string> ExcludingDbNames = new List<string>();   // è¦æ’é™¤çš„ã€å·²ç»è¢«ä½¿ç”¨äº†çš„ç§æ¬¡å·åº“å
 
         public ArrangementGroupDialog()
         {
@@ -40,46 +41,46 @@ namespace dp2Circulation
 
             if (this.textBox_groupName.Text == "")
             {
-                strError = "ÉĞÎ´ÊäÈëÅÅ¼ÜÌåÏµÃû";
+                strError = "å°šæœªè¾“å…¥æ’æ¶ä½“ç³»å";
                 goto ERROR1;
             }
 
             if (this.comboBox_classType.Text == "")
             {
-                strError = "ÉĞÎ´Ö¸¶¨ÀàºÅÀàĞÍ";
+                strError = "å°šæœªæŒ‡å®šç±»å·ç±»å‹";
                 goto ERROR1;
             }
 
             if (this.checkedComboBox_qufenhaoType.Text == "")
             {
-                strError = "ÉĞÎ´Ö¸¶¨Çø·ÖºÅÀàĞÍ";
+                strError = "å°šæœªæŒ‡å®šåŒºåˆ†å·ç±»å‹";
                 goto ERROR1;
             }
 
 #if NO
-            if (this.comboBox_qufenhaoType.Text != "ÖÖ´ÎºÅ"
+            if (this.comboBox_qufenhaoType.Text != "ç§æ¬¡å·"
                 && this.comboBox_qufenhaoType.Text.ToLower() != "zhongcihao"
                 && String.IsNullOrEmpty(this.textBox_zhongcihaoDbName.Text) == false)
             {
-                strError = "µ±Çø·ÖºÅÀàĞÍ²»ÊÇ¡°ÖÖ´ÎºÅ¡±Ê±£¬²»ÄÜÖ¸¶¨ÖÖ´ÎºÅ¿âÃû";
+                strError = "å½“åŒºåˆ†å·ç±»å‹ä¸æ˜¯â€œç§æ¬¡å·â€æ—¶ï¼Œä¸èƒ½æŒ‡å®šç§æ¬¡å·åº“å";
                 goto ERROR1;
             }
 #endif
-            if (StringUtil.IsInList("ÖÖ´ÎºÅ", this.checkedComboBox_qufenhaoType.Text) == false
+            if (StringUtil.IsInList("ç§æ¬¡å·", this.checkedComboBox_qufenhaoType.Text) == false
                 && StringUtil.IsInList("zhongcihao", this.checkedComboBox_qufenhaoType.Text) == false 
                 && String.IsNullOrEmpty(this.textBox_zhongcihaoDbName.Text) == false)
             {
-                strError = "µ±Çø·ÖºÅÀàĞÍ²»ÊÇ¡°ÖÖ´ÎºÅ¡±Ê±£¬²»ÄÜÖ¸¶¨ÖÖ´ÎºÅ¿âÃû";
+                strError = "å½“åŒºåˆ†å·ç±»å‹ä¸æ˜¯â€œç§æ¬¡å·â€æ—¶ï¼Œä¸èƒ½æŒ‡å®šç§æ¬¡å·åº“å";
                 goto ERROR1;
             }
 
-            // ¼ì²é¶Ô»°¿òÖĞµÃµ½µÄÖÖ´ÎºÅ¿â£¬ÊÇ²»ÊÇ±»±ğ´¦ÓÃ¹ıµÄÖÖ´ÎºÅ¿â£¿
+            // æ£€æŸ¥å¯¹è¯æ¡†ä¸­å¾—åˆ°çš„ç§æ¬¡å·åº“ï¼Œæ˜¯ä¸æ˜¯è¢«åˆ«å¤„ç”¨è¿‡çš„ç§æ¬¡å·åº“ï¼Ÿ
             if (String.IsNullOrEmpty(this.textBox_zhongcihaoDbName.Text) == false
                 && this.ExcludingDbNames != null)
             {
                 if (this.ExcludingDbNames.IndexOf(this.textBox_zhongcihaoDbName.Text) != -1)
                 {
-                    strError = "ÄúËùÖ¸¶¨µÄÖÖ´ÎºÅ¿â '" + this.textBox_zhongcihaoDbName.Text + "' ÒÑ¾­±»ÆäËûÅÅ¼ÜÌåÏµÊ¹ÓÃ¹ıÁË";
+                    strError = "æ‚¨æ‰€æŒ‡å®šçš„ç§æ¬¡å·åº“ '" + this.textBox_zhongcihaoDbName.Text + "' å·²ç»è¢«å…¶ä»–æ’æ¶ä½“ç³»ä½¿ç”¨è¿‡äº†";
                     goto ERROR1;
                 }
             }
@@ -103,8 +104,8 @@ namespace dp2Circulation
             GetOpacMemberDatabaseNameDialog dlg = new GetOpacMemberDatabaseNameDialog();
             MainForm.SetControlFont(dlg, this.Font, false);
             // dlg.Text = "";
-            dlg.AllDatabaseInfoXml = this.AllZhongcihaoDatabaseInfoXml;    // ¶¨ÒåÁËÈô¸ÉÖÖ´ÎºÅ¿âµÄXMLÆ¬¶Î
-            dlg.ExcludingDbNames = this.ExcludingDbNames;   // ÒªÅÅ³ıµÄ¡¢ÒÑ¾­±»Ê¹ÓÃÁËµÄÖÖ´ÎºÅ¿âÃû
+            dlg.AllDatabaseInfoXml = this.AllZhongcihaoDatabaseInfoXml;    // å®šä¹‰äº†è‹¥å¹²ç§æ¬¡å·åº“çš„XMLç‰‡æ®µ
+            dlg.ExcludingDbNames = this.ExcludingDbNames;   // è¦æ’é™¤çš„ã€å·²ç»è¢«ä½¿ç”¨äº†çš„ç§æ¬¡å·åº“å
             dlg.StartPosition = FormStartPosition.CenterScreen;
 
             dlg.ShowDialog(this);
@@ -118,7 +119,7 @@ namespace dp2Circulation
 #if NO
         private void comboBox_qufenhaoType_TextChanged(object sender, EventArgs e)
         {
-            if (this.comboBox_qufenhaoType.Text == "ÖÖ´ÎºÅ"
+            if (this.comboBox_qufenhaoType.Text == "ç§æ¬¡å·"
                 || this.comboBox_qufenhaoType.Text.ToLower() == "zhongcihao")
             {
                 this.textBox_zhongcihaoDbName.Enabled = true;
@@ -133,7 +134,7 @@ namespace dp2Circulation
         }
 #endif
 
-        // ÅÅ¼ÜÌåÏµÃû
+        // æ’æ¶ä½“ç³»å
         public string ArrangementName
         {
             get
@@ -170,7 +171,7 @@ namespace dp2Circulation
             }
         }
 
-        // ÖÖ´ÎºÅ¿âÃû
+        // ç§æ¬¡å·åº“å
         public string ZhongcihaoDbName
         {
             get
@@ -183,7 +184,7 @@ namespace dp2Circulation
             }
         }
 
-        // Ë÷È¡ºÅĞÎÌ¬
+        // ç´¢å–å·å½¢æ€
         public string CallNumberStyle
         {
             get
@@ -215,12 +216,12 @@ namespace dp2Circulation
 
             string[] values = new string [] {
                 "GCAT",
-                "ÖÖ´ÎºÅ",
-                "ËÄ½ÇºÅÂë",
-                "Ê¯Í·ÌÀÖøÕßºÅ",
-                "ÊÖ¶¯",
+                "ç§æ¬¡å·",
+                "å››è§’å·ç ",
+                "çŸ³å¤´æ±¤è‘—è€…å·",
+                "æ‰‹åŠ¨",
                 "Cutter-Sanborn Three-Figure",
-                "<ÎŞ>",
+                "<æ— >",
             };
             foreach (string s in values)
             {
@@ -230,7 +231,7 @@ namespace dp2Circulation
 
         private void checkedComboBox_qufenhaoType_TextChanged(object sender, EventArgs e)
         {
-            if (StringUtil.IsInList("ÖÖ´ÎºÅ", this.checkedComboBox_qufenhaoType.Text) == true
+            if (StringUtil.IsInList("ç§æ¬¡å·", this.checkedComboBox_qufenhaoType.Text) == true
                 || StringUtil.IsInList("zhongcihao", this.checkedComboBox_qufenhaoType.Text) == true)
             {
                 this.textBox_zhongcihaoDbName.Enabled = true;

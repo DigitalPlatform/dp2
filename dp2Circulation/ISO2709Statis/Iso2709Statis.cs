@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Windows.Forms;
@@ -12,41 +12,41 @@ using DigitalPlatform.Script;
 namespace dp2Circulation
 {
     /// <summary>
-    /// Iso2709StatisForm (ISO2709Í³¼Æ´°) Í³¼Æ·½°¸µÄËŞÖ÷Àà
+    /// Iso2709StatisForm (ISO2709ç»Ÿè®¡çª—) ç»Ÿè®¡æ–¹æ¡ˆçš„å®¿ä¸»ç±»
     /// </summary>
     public class Iso2709Statis : StatisHostBase
     {
         /// <summary>
-        /// ÊäÈëÎÄ¼şÃû¡£È«Â·¾¶
+        /// è¾“å…¥æ–‡ä»¶åã€‚å…¨è·¯å¾„
         /// </summary>
         public string InputFilename = "";
 
         /// <summary>
-        /// ±¾¶ÔÏóËù¹ØÁªµÄ Iso2709StatisForm (ISO2709Í³¼Æ´°)
+        /// æœ¬å¯¹è±¡æ‰€å…³è”çš„ Iso2709StatisForm (ISO2709ç»Ÿè®¡çª—)
         /// </summary>
-        public Iso2709StatisForm Iso2709StatisForm = null;	// ÒıÓÃ
+        public Iso2709StatisForm Iso2709StatisForm = null;	// å¼•ç”¨
 
 #if NO
         private bool disposed = false;
 
-        public List<string> OutputFileNames = new List<string>(); // ´æ·ÅÊä³öµÄhtmlÎÄ¼ş
+        public List<string> OutputFileNames = new List<string>(); // å­˜æ”¾è¾“å‡ºçš„htmlæ–‡ä»¶
 
         int m_nFileNameSeed = 1;
 
         public WebBrowser Console = null;
 
 
-        public string ProjectDir = "";  // ·½°¸Ô´ÎÄ¼şËùÔÚÄ¿Â¼
-        public string InstanceDir = ""; // µ±Ç°ÊµÀı¶ÀÕ¼µÄÄ¿Â¼¡£ÓÃÓÚ´æ´¢ÁÙÊ±ÎÄ¼ş
+        public string ProjectDir = "";  // æ–¹æ¡ˆæºæ–‡ä»¶æ‰€åœ¨ç›®å½•
+        public string InstanceDir = ""; // å½“å‰å®ä¾‹ç‹¬å çš„ç›®å½•ã€‚ç”¨äºå­˜å‚¨ä¸´æ—¶æ–‡ä»¶
 #endif
         /// <summary>
-        /// µ±Ç°¼ÇÂ¼ÔÚÕûÅúÖĞµÄÏÂ±ê
+        /// å½“å‰è®°å½•åœ¨æ•´æ‰¹ä¸­çš„ä¸‹æ ‡
         /// </summary>
-        public long CurrentRecordIndex = -1; // µ±Ç°XML¼ÇÂ¼ÔÚÕûÅúÖĞµÄÆ«ÒÆÁ¿
+        public long CurrentRecordIndex = -1; // å½“å‰XMLè®°å½•åœ¨æ•´æ‰¹ä¸­çš„åç§»é‡
 
-        string m_strMARC = "";    // MARC¼ÇÂ¼Ìå
+        string m_strMARC = "";    // MARCè®°å½•ä½“
         /// <summary>
-        /// µ±Ç°ÊéÄ¿¼ÇÂ¼µÄ MARC »úÄÚ¸ñÊ½×Ö·û´®
+        /// å½“å‰ä¹¦ç›®è®°å½•çš„ MARC æœºå†…æ ¼å¼å­—ç¬¦ä¸²
         /// </summary>
         public string MARC
         {
@@ -109,7 +109,7 @@ namespace dp2Circulation
                     // Dispose managed resources.
                 }
 
-                // É¾³ıËùÓĞÊä³öÎÄ¼ş
+                // åˆ é™¤æ‰€æœ‰è¾“å‡ºæ–‡ä»¶
                 if (this.OutputFileNames != null)
                 {
                     Global.DeleteFiles(this.OutputFileNames);
@@ -139,31 +139,31 @@ namespace dp2Circulation
         {
         }
 
-        // ³õÊ¼»¯
+        // åˆå§‹åŒ–
         public virtual void OnInitial(object sender, StatisEventArgs e)
         {
 
         }
 
-        // ¿ªÊ¼
+        // å¼€å§‹
         public virtual void OnBegin(object sender, StatisEventArgs e)
         {
 
         }
 
-        // Ã¿Ò»¼ÇÂ¼´¦Àí
+        // æ¯ä¸€è®°å½•å¤„ç†
         public virtual void OnRecord(object sender, StatisEventArgs e)
         {
 
         }
 
-        // ½áÊø
+        // ç»“æŸ
         public virtual void OnEnd(object sender, StatisEventArgs e)
         {
 
         }
 
-        // ´òÓ¡Êä³ö
+        // æ‰“å°è¾“å‡º
         public virtual void OnPrint(object sender, StatisEventArgs e)
         {
 
@@ -184,7 +184,7 @@ namespace dp2Circulation
             Global.WriteHtml(this.Console, HttpUtility.HtmlEncode(strText));
         }
 
-        // »ñµÃÒ»¸öĞÂµÄÊä³öÎÄ¼şÃû
+        // è·å¾—ä¸€ä¸ªæ–°çš„è¾“å‡ºæ–‡ä»¶å
         public string NewOutputFileName()
         {
             string strFileNamePrefix = this.Iso2709StatisForm.MainForm.DataDir + "\\~xml_statis";
@@ -198,7 +198,7 @@ namespace dp2Circulation
             return strFileName;
         }
 
-        // ½«×Ö·û´®ÄÚÈİĞ´ÈëÎÄ±¾ÎÄ¼ş
+        // å°†å­—ç¬¦ä¸²å†…å®¹å†™å…¥æ–‡æœ¬æ–‡ä»¶
         public void WriteToOutputFile(string strFileName,
             string strText,
             Encoding encoding)
@@ -210,7 +210,7 @@ namespace dp2Circulation
             sw.Close();
         }
 
-        // É¾³ıÒ»¸öÊä³öÎÄ¼ş
+        // åˆ é™¤ä¸€ä¸ªè¾“å‡ºæ–‡ä»¶
         public void DeleteOutputFile(string strFileName)
         {
             int nIndex = this.OutputFileNames.IndexOf(strFileName);

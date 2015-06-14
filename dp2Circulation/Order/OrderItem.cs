@@ -2,20 +2,16 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Windows.Forms;
-
 using System.Xml;
 using System.Drawing;
-
 using System.Diagnostics;
+using System.Collections;
 
 using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.GUI;
-
 using DigitalPlatform.CirculationClient.localhost;
-using System.Collections;
 using DigitalPlatform.IO;  // EntityInfo
-
 
 /*
  * TODO:

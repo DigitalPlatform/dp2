@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -11,11 +11,11 @@ using System.Windows.Forms;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ½»·ÑÊ±ĞŞ¸Ä½ğ¶îµÄ¶Ô»°¿ò
+    /// äº¤è´¹æ—¶ä¿®æ”¹é‡‘é¢çš„å¯¹è¯æ¡†
     /// </summary>
     internal partial class ModifyPriceDlg : Form
     {
-        public string OldPrice = "";    // ×î³õµÄ¾É¼Û¸ñ¡£ÓÃÓÚ°ïÖúÅĞ¶ÏOK°´Å¥µÄ×´Ì¬
+        public string OldPrice = "";    // æœ€åˆçš„æ—§ä»·æ ¼ã€‚ç”¨äºå¸®åŠ©åˆ¤æ–­OKæŒ‰é’®çš„çŠ¶æ€
 
         public ModifyPriceDlg()
         {
@@ -27,7 +27,7 @@ namespace dp2Circulation
             // 2011/12/2
             if (string.IsNullOrEmpty(this.textBox_price.Text) == true)
             {
-                MessageBox.Show(this, "½ğ¶î×Ö·û´®²»ÄÜÎª¿Õ");
+                MessageBox.Show(this, "é‡‘é¢å­—ç¬¦ä¸²ä¸èƒ½ä¸ºç©º");
                 return;
             }
 
@@ -80,7 +80,7 @@ namespace dp2Circulation
                 this.button_OK.Enabled = false;
         }
 
-        // Òª×·¼ÓµÄĞÂ×¢ÊÍ
+        // è¦è¿½åŠ çš„æ–°æ³¨é‡Š
         public string AppendComment
         {
             get
@@ -93,7 +93,7 @@ namespace dp2Circulation
             }
         }
 
-        // ÒÑ¾­´æÔÚµÄ×¢ÊÍ£¬»òÕßÖ±½ÓĞŞ¸ÄÒÑ¾­´æÔÚµÄ×¢ÊÍ
+        // å·²ç»å­˜åœ¨çš„æ³¨é‡Šï¼Œæˆ–è€…ç›´æ¥ä¿®æ”¹å·²ç»å­˜åœ¨çš„æ³¨é‡Š
         public string Comment
         {
             get
@@ -112,7 +112,7 @@ namespace dp2Circulation
 
             if (bRet == true)
             {
-                MessageBox.Show(this, "¼Û¸ñ×Ö·û´®ÖĞ²»ÄÜÓĞÈ«½ÇµÄÊı×ÖºÍ×ÖÄ¸");
+                MessageBox.Show(this, "ä»·æ ¼å­—ç¬¦ä¸²ä¸­ä¸èƒ½æœ‰å…¨è§’çš„æ•°å­—å’Œå­—æ¯");
                 e.Cancel = true;
                 return;
             }
@@ -137,7 +137,7 @@ namespace dp2Circulation
 
         private void button_insertDateTime_MouseHover(object sender, EventArgs e)
         {
-            this.toolTip_usage.Show("²åÈëµ±Ç°ÈÕÆÚÊ±¼ä", this.button_newComment_insertDateTime);
+            this.toolTip_usage.Show("æ’å…¥å½“å‰æ—¥æœŸæ—¶é—´", this.button_newComment_insertDateTime);
         }
 
         private void textBox_price_TextChanged(object sender, EventArgs e)
@@ -154,7 +154,7 @@ namespace dp2Circulation
         {
             if (this.textBox_appendComment.Text.IndexOfAny(new char[] { '<', '>' }) != -1)
             {
-                MessageBox.Show(this, "×¢ÊÍÎÄ×ÖÖĞ²»ÔÊĞí°üº¬·ûºÅ '<' '>'");
+                MessageBox.Show(this, "æ³¨é‡Šæ–‡å­—ä¸­ä¸å…è®¸åŒ…å«ç¬¦å· '<' '>'");
                 e.Cancel = true;
             }
         }

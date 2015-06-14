@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -14,7 +14,7 @@ using DigitalPlatform.Xml;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ¶©µ¥Êä³öÌØĞÔ
+    /// è®¢å•è¾“å‡ºç‰¹æ€§
     /// </summary>
     internal partial class OrderOutputItemDialog : Form
     {
@@ -24,12 +24,12 @@ namespace dp2Circulation
         public ApplicationInfo AppInfo = null;
 
         /// <summary>
-        /// »ñµÃÖµÁĞ±í
+        /// è·å¾—å€¼åˆ—è¡¨
         /// </summary>
         public event GetValueTableEventHandler GetValueTable = null;
 
-        // ÒÑ¾­ÓÃ¹ıµÄÇşµÀ(ÊéÉÌ)Ãû×Ö
-        // ½«ÀûÓÃÕâ¸öÁĞ±í£¬ÅÅ³ıcombobox_sellerÖĞµÄ²¿·ÖÊÂÏî
+        // å·²ç»ç”¨è¿‡çš„æ¸ é“(ä¹¦å•†)åå­—
+        // å°†åˆ©ç”¨è¿™ä¸ªåˆ—è¡¨ï¼Œæ’é™¤combobox_sellerä¸­çš„éƒ¨åˆ†äº‹é¡¹
         public List<string> ExcludeSellers = new List<string>();
 
         public OrderOutputItemDialog()
@@ -57,11 +57,11 @@ namespace dp2Circulation
             string strError = "";
             if (this.comboBox_seller.Text == "")
             {
-                strError = "ÉĞÎ´Ö¸¶¨ÇşµÀÃû";
+                strError = "å°šæœªæŒ‡å®šæ¸ é“å";
                 goto ERROR1;
             }
 
-            // Êä³ö¸ñÊ½¿ÉÒÔÎª¿Õ£¬±íÊ¾È±Ê¡µÄ¸ñÊ½
+            // è¾“å‡ºæ ¼å¼å¯ä»¥ä¸ºç©ºï¼Œè¡¨ç¤ºç¼ºçœçš„æ ¼å¼
 
             this.DialogResult = DialogResult.OK;
             this.Close();
@@ -78,11 +78,11 @@ namespace dp2Circulation
 
         private void button_findOutputFormat_Click(object sender, EventArgs e)
         {
-            // ³öÏÖ¶Ô»°¿ò£¬Ñ¯ÎÊProjectÃû×Ö
+            // å‡ºç°å¯¹è¯æ¡†ï¼Œè¯¢é—®Projectåå­—
             GetProjectNameDlg dlg = new GetProjectNameDlg();
             MainForm.SetControlFont(dlg, this.Font, false);
 
-            dlg.Text = "ÇëÖ¸¶¨ ¶©µ¥Êä³ö ·½°¸Ãû";
+            dlg.Text = "è¯·æŒ‡å®š è®¢å•è¾“å‡º æ–¹æ¡ˆå";
             dlg.scriptManager = this.ScriptManager;
             dlg.ProjectName = this.comboBox_outputFormat.Text;
             dlg.NoneProject = false;
@@ -147,7 +147,7 @@ namespace dp2Circulation
                         e1.TableName = "orderSeller";
                     else
                     {
-                        Debug.Assert(false, "²»Ö§³ÖµÄsender");
+                        Debug.Assert(false, "ä¸æ”¯æŒçš„sender");
                         return;
                     }
 
@@ -159,7 +159,7 @@ namespace dp2Circulation
                         {
                             string strValue = e1.values[i];
 
-                            // Ö»¼ÓÈëExcludeSellerÒÔÍâµÄÖµ
+                            // åªåŠ å…¥ExcludeSellerä»¥å¤–çš„å€¼
                             if (this.ExcludeSellers.IndexOf(strValue) == -1)
                                 combobox.Items.Add(e1.values[i]);
                         }
@@ -184,16 +184,16 @@ namespace dp2Circulation
 
         private void comboBox_outputFormat_TextChanged(object sender, EventArgs e)
         {
-            if (this.comboBox_outputFormat.Text == "<Ñ¡ÔñÒ»¸ö¶¨ÖÆ¸ñÊ½...>")
+            if (this.comboBox_outputFormat.Text == "<é€‰æ‹©ä¸€ä¸ªå®šåˆ¶æ ¼å¼...>")
             {
                 API.PostMessage(this.Handle, WM_FINDOUTPUTFORMAT, 0, 0);
             }
         }
 
         /// <summary>
-        /// È±Ê¡´°¿Ú¹ı³Ì
+        /// ç¼ºçœçª—å£è¿‡ç¨‹
         /// </summary>
-        /// <param name="m">ÏûÏ¢</param>
+        /// <param name="m">æ¶ˆæ¯</param>
         protected override void DefWndProc(ref Message m)
         {
             switch (m.Msg)

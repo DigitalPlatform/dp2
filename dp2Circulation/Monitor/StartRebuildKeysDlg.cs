@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -6,12 +6,12 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using System.Xml;
+using System.Collections;
+using System.Diagnostics;
 
 using DigitalPlatform.Xml;
 using DigitalPlatform.CirculationClient.localhost;
-using System.Collections;
 using DigitalPlatform.Text;
-using System.Diagnostics;
 
 namespace dp2Circulation
 {
@@ -26,7 +26,7 @@ namespace dp2Circulation
 
         private void StartArriveMonitorDlg_Load(object sender, EventArgs e)
         {
-            // ÆğÊ¼Î»ÖÃ²ÎÊı
+            // èµ·å§‹ä½ç½®å‚æ•°
             string strDbNameList = "";
             string strError = "";
 
@@ -40,7 +40,7 @@ namespace dp2Circulation
             this.textBox_dbNameList.Text = strDbNameList.Replace(",", "\r\n");
 
 #if NO
-            // Í¨ÓÃÆô¶¯²ÎÊı
+            // é€šç”¨å¯åŠ¨å‚æ•°
             bool bLoop = false;
 
             nRet = ParseArriveMonitorParam(this.StartInfo.Param,
@@ -60,11 +60,11 @@ namespace dp2Circulation
 
         }
 
-        #region ²ÎÊı×Ö·û´®´¦Àí
-        // ÕâĞ©º¯ÊıÒ²±» dp2Library Ç°¶ËÊ¹ÓÃ
+        #region å‚æ•°å­—ç¬¦ä¸²å¤„ç†
+        // è¿™äº›å‡½æ•°ä¹Ÿè¢« dp2Library å‰ç«¯ä½¿ç”¨
 
-        // ½âÎö ¿ªÊ¼ ²ÎÊı
-        // ²ÎÊıÔ­Ê¼´æ´¢µÄÊ±ºò£¬ÎªÁË±ÜÃâÔÚ²ÎÊı×Ö·û´®ÖĞ·¢Éú»ìÏı£¬Êı¾İ¿âÃûÖ®¼äÓÃ | ¼ä¸ô
+        // è§£æ å¼€å§‹ å‚æ•°
+        // å‚æ•°åŸå§‹å­˜å‚¨çš„æ—¶å€™ï¼Œä¸ºäº†é¿å…åœ¨å‚æ•°å­—ç¬¦ä¸²ä¸­å‘ç”Ÿæ··æ·†ï¼Œæ•°æ®åº“åä¹‹é—´ç”¨ | é—´éš”
         static int ParseStart(string strStart,
             out string strDbNameList,
             out string strError)
@@ -82,8 +82,8 @@ namespace dp2Circulation
             return 0;
         }
 
-        // ¹¹Ôì¿ªÊ¼²ÎÊı£¬Ò²ÊÇ¶Ïµã×Ö·û´®
-        // ²ÎÊıÔ­Ê¼´æ´¢µÄÊ±ºò£¬ÎªÁË±ÜÃâÔÚ²ÎÊı×Ö·û´®ÖĞ·¢Éú»ìÏı£¬Êı¾İ¿âÃûÖ®¼äÓÃ | ¼ä¸ô
+        // æ„é€ å¼€å§‹å‚æ•°ï¼Œä¹Ÿæ˜¯æ–­ç‚¹å­—ç¬¦ä¸²
+        // å‚æ•°åŸå§‹å­˜å‚¨çš„æ—¶å€™ï¼Œä¸ºäº†é¿å…åœ¨å‚æ•°å­—ç¬¦ä¸²ä¸­å‘ç”Ÿæ··æ·†ï¼Œæ•°æ®åº“åä¹‹é—´ç”¨ | é—´éš”
         static string BuildStart(
             string strDbNameList)
         {
@@ -96,7 +96,7 @@ namespace dp2Circulation
             return StringUtil.BuildParameterString(table);
         }
 
-        // ½âÎöÍ¨ÓÃÆô¶¯²ÎÊı
+        // è§£æé€šç”¨å¯åŠ¨å‚æ•°
         public static int ParseTaskParam(string strParam,
             out string strLevel,
             out bool bClearFirst,
@@ -136,14 +136,14 @@ namespace dp2Circulation
 
         private void button_OK_Click(object sender, EventArgs e)
         {
-            // ºÏ³É²ÎÊı
+            // åˆæˆå‚æ•°
             if (this.checkBox_startAtServerBreakPoint.Checked == true)
                 this.StartInfo.Start = "";
             else
                 this.StartInfo.Start = BuildStart(this.textBox_dbNameList.Text.Replace("\r\n", ","));
 
 #if NO
-            // Í¨ÓÃÆô¶¯²ÎÊı
+            // é€šç”¨å¯åŠ¨å‚æ•°
             this.StartInfo.Param = MakeArriveMonitorParam(this.checkBox_loop.Checked);
 #endif
 

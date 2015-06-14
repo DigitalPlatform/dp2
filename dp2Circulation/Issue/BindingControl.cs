@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -23,7 +23,7 @@ using DigitalPlatform.CommonControl;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ÆÚ¿¯Í¼ĞÎ½çÃæ¿Ø¼ş
+    /// æœŸåˆŠå›¾å½¢ç•Œé¢æ§ä»¶
     /// </summary>
     internal partial class BindingControl : Control
     {
@@ -49,12 +49,12 @@ namespace dp2Circulation
             }
         }*/
 
-        public string Operator = "";    // µ±Ç°²Ù×÷ÕßÕÊ»§Ãû
-        public string LibraryCodeList = "";     // µ±Ç°ÓÃ»§¹ÜÏ½µÄ¹İ´úÂëÁĞ±í
+        public string Operator = "";    // å½“å‰æ“ä½œè€…å¸æˆ·å
+        public string LibraryCodeList = "";     // å½“å‰ç”¨æˆ·ç®¡è¾–çš„é¦†ä»£ç åˆ—è¡¨
 
         public bool HideLockedOrderGroup
         {
-            // ÊÇ·ñÒş²ØÍêÈ«ÔÚ¹ÜÏ½·¶Î§ÒÔÍâµÄ¶©¹º×é¡£ĞÂÔöÆÚµÄÊ±ºò×Ô¶¯²»»á°üÀ¨²»Ïà¸ÉµÄ¶©¹º×é£¬Õâ¸öĞĞÎª²»ÊÜ´Ë±äÁ¿µÄ¿ØÖÆ
+            // æ˜¯å¦éšè—å®Œå…¨åœ¨ç®¡è¾–èŒƒå›´ä»¥å¤–çš„è®¢è´­ç»„ã€‚æ–°å¢æœŸçš„æ—¶å€™è‡ªåŠ¨ä¸ä¼šåŒ…æ‹¬ä¸ç›¸å¹²çš„è®¢è´­ç»„ï¼Œè¿™ä¸ªè¡Œä¸ºä¸å—æ­¤å˜é‡çš„æ§åˆ¶
             get
             {
                 return this.m_bHideLockedOrderGroup;
@@ -66,15 +66,15 @@ namespace dp2Circulation
             }
         }
 
-        internal bool m_bHideLockedOrderGroup = false;    // ÊÇ·ñÒş²ØÍêÈ«ÔÚ¹ÜÏ½·¶Î§ÒÔÍâµÄ¶©¹º×é¡£ĞÂÔöÆÚµÄÊ±ºò×Ô¶¯²»»á°üÀ¨²»Ïà¸ÉµÄ¶©¹º×é£¬Õâ¸öĞĞÎª²»ÊÜ´Ë±äÁ¿µÄ¿ØÖÆ
-        internal bool m_bHideLockedBindingCell = false;    // ÊÇ·ñÒş²ØÔÚ¹ÜÏ½·¶Î§ÒÔÍâµÄºÏ¶©²á
+        internal bool m_bHideLockedOrderGroup = false;    // æ˜¯å¦éšè—å®Œå…¨åœ¨ç®¡è¾–èŒƒå›´ä»¥å¤–çš„è®¢è´­ç»„ã€‚æ–°å¢æœŸçš„æ—¶å€™è‡ªåŠ¨ä¸ä¼šåŒ…æ‹¬ä¸ç›¸å¹²çš„è®¢è´­ç»„ï¼Œè¿™ä¸ªè¡Œä¸ºä¸å—æ­¤å˜é‡çš„æ§åˆ¶
+        internal bool m_bHideLockedBindingCell = false;    // æ˜¯å¦éšè—åœ¨ç®¡è¾–èŒƒå›´ä»¥å¤–çš„åˆè®¢å†Œ
 
         public string WholeLayout = "auto"; // auto/acception/binding
 
-        internal bool m_bChanged = false;    // Ö÷Òª¼ÇÔØÊÇ·ñÉ¾³ı¹ı¶ÔÏó
+        internal bool m_bChanged = false;    // ä¸»è¦è®°è½½æ˜¯å¦åˆ é™¤è¿‡å¯¹è±¡
 
         /// <summary>
-        /// ÄÚÈİÊÇ·ñ·¢Éú¹ıĞŞ¸Ä
+        /// å†…å®¹æ˜¯å¦å‘ç”Ÿè¿‡ä¿®æ”¹
         /// </summary>
         public bool Changed
         {
@@ -132,30 +132,30 @@ namespace dp2Circulation
         }
 
         public string[] DefaultTextLineNames = new string[] {
-            "location", "¹İ²ØµØµã",
-            "intact", "ÍêºÃÂÊ",
-            "state", "²á×´Ì¬",
-            "refID", "²Î¿¼ID",
-            "barcode", "²áÌõÂëºÅ",
+            "location", "é¦†è—åœ°ç‚¹",
+            "intact", "å®Œå¥½ç‡",
+            "state", "å†ŒçŠ¶æ€",
+            "refID", "å‚è€ƒID",
+            "barcode", "å†Œæ¡ç å·",
         };
 
         /*
         public string[] TextLineNames = new string[] {
-            "location", "¹İ²ØµØµã",
-            "intact", "ÍêºÃÂÊ",
-            "state", "²á×´Ì¬",
-            "refID", "²Î¿¼ID",
-            "barcode", "²áÌõÂëºÅ",
+            "location", "é¦†è—åœ°ç‚¹",
+            "intact", "å®Œå¥½ç‡",
+            "state", "å†ŒçŠ¶æ€",
+            "refID", "å‚è€ƒID",
+            "barcode", "å†Œæ¡ç å·",
         };
          * */
         public string[] TextLineNames = null;
 
         public string[] DefaultGroupTextLineNames = new string[] {
-            "seller", "¶©¹ºÇşµÀ",
-            "source", "¾­·ÑÀ´Ô´",
-            "price", "µ¥²á¼Û¸ñ",
-            "range", "Ê±¼ä·¶Î§",
-            "batchNo", "Åú´ÎºÅ",
+            "seller", "è®¢è´­æ¸ é“",
+            "source", "ç»è´¹æ¥æº",
+            "price", "å•å†Œä»·æ ¼",
+            "range", "æ—¶é—´èŒƒå›´",
+            "batchNo", "æ‰¹æ¬¡å·",
         };
 
         public string[] GroupTextLineNames = null;
@@ -163,20 +163,20 @@ namespace dp2Circulation
         public ApplicationInfo AppInfo = null;
 
         /// <summary>
-        /// ÊÇ·ñÎªĞÂ´´½¨µÄ²á¼ÇÂ¼ÉèÖÃ¡°¼Ó¹¤ÖĞ¡±×´Ì¬
+        /// æ˜¯å¦ä¸ºæ–°åˆ›å»ºçš„å†Œè®°å½•è®¾ç½®â€œåŠ å·¥ä¸­â€çŠ¶æ€
         /// </summary>
         public bool SetProcessingState = true;
 
-        bool m_bBindingBatchNoInputed = false; // ÊÇ·ñÊäÈë¹ıÁË×°¶©Åú´ÎºÅ
-        bool m_bAcceptingBatchNoInputed = false;    // ÊÇ·ñÊäÈë¹ıÁËÑéÊÕÅú´ÎºÅ
+        bool m_bBindingBatchNoInputed = false; // æ˜¯å¦è¾“å…¥è¿‡äº†è£…è®¢æ‰¹æ¬¡å·
+        bool m_bAcceptingBatchNoInputed = false;    // æ˜¯å¦è¾“å…¥è¿‡äº†éªŒæ”¶æ‰¹æ¬¡å·
 
         /// <summary>
-        /// ±à¼­Çø½»»¥
+        /// ç¼–è¾‘åŒºäº¤äº’
         /// </summary>
         public event EditAreaEventHandler EditArea = null;
 
         /// <summary>
-        /// ½¹µã·¢Éú¸Ä±ä
+        /// ç„¦ç‚¹å‘ç”Ÿæ”¹å˜
         /// </summary>
         public event FocusChangedEventHandler CellFocusChanged = null;
 
@@ -205,7 +205,7 @@ namespace dp2Circulation
             }
         }
 
-        // ÍÏ¶¯ÖĞÍ¾×î½ü¾­¹ıµÄ¶ÔÏó
+        // æ‹–åŠ¨ä¸­é€”æœ€è¿‘ç»è¿‡çš„å¯¹è±¡
         CellBase DragLastEndObject
         {
             get
@@ -218,7 +218,7 @@ namespace dp2Circulation
 
 
                 /*
-                 * // Èç¹ûÒªÎ§Ñ¡µÄ¹ı³ÌÖĞÒ²ÓĞfocus¸úËæÒÆ¶¯µÄ»°
+                 * // å¦‚æœè¦å›´é€‰çš„è¿‡ç¨‹ä¸­ä¹Ÿæœ‰focusè·Ÿéšç§»åŠ¨çš„è¯
                 if (m_bRectSelecting == true)
                 DrawSelectRect(true);
 
@@ -230,7 +230,7 @@ namespace dp2Circulation
                     DrawSelectRect(true);
                  * */
 
-                // Î§Ñ¡¹ı³ÌÖĞÃ»ÓĞfocus¸úËæÒÆ¶¯
+                // å›´é€‰è¿‡ç¨‹ä¸­æ²¡æœ‰focusè·Ÿéšç§»åŠ¨
                 if (value != null)
                     SetObjectFocus(m_DragLastEndObject);
             }
@@ -238,7 +238,7 @@ namespace dp2Circulation
 
         public bool CheckProcessingState(ItemBindingItem item)
         {
-            // ²»±Ø¼ì²é
+            // ä¸å¿…æ£€æŸ¥
             if (this.SetProcessingState == false)
                 return true;
 
@@ -248,113 +248,113 @@ namespace dp2Circulation
             return false;
         }
 
-        // ÍÏ¶¯¿ªÊ¼Ê±µÄ¶ÔÏó
+        // æ‹–åŠ¨å¼€å§‹æ—¶çš„å¯¹è±¡
         CellBase m_DragStartObject = null;
 
-        // ÍÏ¶¯ÖĞÍ¾×î½ü¾­¹ıµÄ¶ÔÏó
+        // æ‹–åŠ¨ä¸­é€”æœ€è¿‘ç»è¿‡çš„å¯¹è±¡
         CellBase m_DragLastEndObject = null;
-        // ÍÏ¶¯¿ªÊ¼Ê±µÄÊó±êÎ»ÖÃ£¬view×ø±ê
+        // æ‹–åŠ¨å¼€å§‹æ—¶çš„é¼ æ ‡ä½ç½®ï¼Œviewåæ ‡
         Point DragStartMousePosition = new Point(0, 0);
         //
-                // Êó±êÔÚÍÏ¶¯¿ªÊ¼Ê±µÄÎ»ÖÃ ÕûÌåÎÄµµ×ø±ê
+                // é¼ æ ‡åœ¨æ‹–åŠ¨å¼€å§‹æ—¶çš„ä½ç½® æ•´ä½“æ–‡æ¡£åæ ‡
         PointF m_DragStartPointOnDoc = new PointF(0, 0);
 
-        // Êó±êÔÚÍÏ¶¯ÖĞÍ¾Ê±µÄÎ»ÖÃ ÕûÌåÎÄµµ×ø±ê
+        // é¼ æ ‡åœ¨æ‹–åŠ¨ä¸­é€”æ—¶çš„ä½ç½® æ•´ä½“æ–‡æ¡£åæ ‡
         PointF m_DragCurrentPointOnDoc = new PointF(0, 0);
 
         bool m_bRectSelectMode = true;
-        bool m_bRectSelecting = false;  // ÕıÔÚ¾ØĞÎÑ¡ÔñÖĞÍ¾
+        bool m_bRectSelecting = false;  // æ­£åœ¨çŸ©å½¢é€‰æ‹©ä¸­é€”
 
 
-        bool m_bDraging = false;    // ÕıÔÚÍÏ×§ÖĞÍ¾ 2010/2/12
+        bool m_bDraging = false;    // æ­£åœ¨æ‹–æ‹½ä¸­é€” 2010/2/12
 
         ToolTip trackTip;
 
-        // °ïÖú¿ìËÙÇå³ıÏÔÊ¾µÄÑ¡Ôñ¶ÔÏóÏà¹ØÊı×é(²»ÊÇÌ«¾«È·)
+        // å¸®åŠ©å¿«é€Ÿæ¸…é™¤æ˜¾ç¤ºçš„é€‰æ‹©å¯¹è±¡ç›¸å…³æ•°ç»„(ä¸æ˜¯å¤ªç²¾ç¡®)
         List<CellBase> m_aSelectedArea = new List<CellBase>();
-        bool m_bSelectedAreaOverflowed = true;  // true¿ÉÒÔÓÃÀ´²âÊÔÃ»ÓĞÕâ¸ö»úÖÆÊ±µÄÇé¿ö
+        bool m_bSelectedAreaOverflowed = true;  // trueå¯ä»¥ç”¨æ¥æµ‹è¯•æ²¡æœ‰è¿™ä¸ªæœºåˆ¶æ—¶çš„æƒ…å†µ
 
-        // ½¹µãµ¥Ôª
+        // ç„¦ç‚¹å•å…ƒ
         public Cell FocusedCell = null;
 
 
 
-        // »ñµÃ²áĞÅÏ¢
+        // è·å¾—å†Œä¿¡æ¯
         public event GetItemInfoEventHandler GetItemInfo = null;
 
-        // »ñµÃ¶©¹ºĞÅÏ¢
+        // è·å¾—è®¢è´­ä¿¡æ¯
         public event GetOrderInfoEventHandler GetOrderInfo = null;
 
 
-        // ÆÚ Êı×é
+        // æœŸ æ•°ç»„
         public List<IssueBindingItem> Issues = new List<IssueBindingItem>();
 
-        public IssueBindingItem FreeIssue = null;   // ÎŞÖ÷µÄ£¬×ÔÓÉµÄÆÚ
+        public IssueBindingItem FreeIssue = null;   // æ— ä¸»çš„ï¼Œè‡ªç”±çš„æœŸ
 
-        // ºÏ¶©µÄ²á Êı×é
+        // åˆè®¢çš„å†Œ æ•°ç»„
         public List<ItemBindingItem> ParentItems = new List<ItemBindingItem>();
 
         /*
-        // ³õÊ¼»¯Ê±ÎŞÆÚ¿¯¶ÔÏó¹ÜÏ½µÄµ¥²á Êı×é
-        // ³õÊ¼»¯½áÊøºó£¬¾ÍÇå¿Õ
+        // åˆå§‹åŒ–æ—¶æ— æœŸåˆŠå¯¹è±¡ç®¡è¾–çš„å•å†Œ æ•°ç»„
+        // åˆå§‹åŒ–ç»“æŸåï¼Œå°±æ¸…ç©º
         internal List<ItemBindingItem> NoneIssueItems = new List<ItemBindingItem>();
          * */
 
-        // ³õÊ¼»¯Ê±ËùÓĞ²á¶ÔÏó Êı×é
-        // ³õÊ¼»¯½áÊøºó£¬¾ÍÇå¿Õ
+        // åˆå§‹åŒ–æ—¶æ‰€æœ‰å†Œå¯¹è±¡ æ•°ç»„
+        // åˆå§‹åŒ–ç»“æŸåï¼Œå°±æ¸…ç©º
         internal List<ItemBindingItem> InitialItems = new List<ItemBindingItem>();
 
         BorderStyle borderStyle = BorderStyle.Fixed3D;
 
-        #region Í¼ĞÎÏà¹Ø³ÉÔ±
+        #region å›¾å½¢ç›¸å…³æˆå‘˜
 
 
         public bool DisplayOrderInfoXY = false;
 
-        // ÆÕÍ¨µ¥²áµÄµ¥ÔªÑÕÉ«
-        //public Color BackColor = Color.White;   // ±³¾°É«
-        //public Color ForeColor = Color.Black;   // Ç°¾°É«£¬Ò²¾ÍÊÇÎÄ×ÖÑÕÉ«
-        public Color GrayColor = Color.Gray;   // Ç³É«±³¾°
+        // æ™®é€šå•å†Œçš„å•å…ƒé¢œè‰²
+        //public Color BackColor = Color.White;   // èƒŒæ™¯è‰²
+        //public Color ForeColor = Color.Black;   // å‰æ™¯è‰²ï¼Œä¹Ÿå°±æ˜¯æ–‡å­—é¢œè‰²
+        public Color GrayColor = Color.Gray;   // æµ…è‰²èƒŒæ™¯
 
-        // Ñ¡¶¨×´Ì¬µÄµ¥ÔªÑÕÉ«
-        public Color SelectedBackColor = Color.DarkRed; // Color.FromArgb(200, 255, 100, 100);    // ±³¾°É«
-        public Color SelectedForeColor = Color.Black;   // Ç°¾°É«£¬Ò²¾ÍÊÇÎÄ×ÖÑÕÉ«
-        public Color SelectedGrayColor = Color.FromArgb(170, 170, 255);  // Ç³É«±³¾°
+        // é€‰å®šçŠ¶æ€çš„å•å…ƒé¢œè‰²
+        public Color SelectedBackColor = Color.DarkRed; // Color.FromArgb(200, 255, 100, 100);    // èƒŒæ™¯è‰²
+        public Color SelectedForeColor = Color.Black;   // å‰æ™¯è‰²ï¼Œä¹Ÿå°±æ˜¯æ–‡å­—é¢œè‰²
+        public Color SelectedGrayColor = Color.FromArgb(170, 170, 255);  // æµ…è‰²èƒŒæ™¯
 
-        // µ¥²áµÄµ¥ÔªÑÕÉ«
-        public Color SingleBackColor = Color.White;    // ±³¾°É«
-        public Color SingleForeColor = Color.Black;   // Ç°¾°É«£¬Ò²¾ÍÊÇÎÄ×ÖÑÕÉ«
-        public Color SingleGrayColor = Color.DarkGray;   // Ç³É«±³¾°
+        // å•å†Œçš„å•å…ƒé¢œè‰²
+        public Color SingleBackColor = Color.White;    // èƒŒæ™¯è‰²
+        public Color SingleForeColor = Color.Black;   // å‰æ™¯è‰²ï¼Œä¹Ÿå°±æ˜¯æ–‡å­—é¢œè‰²
+        public Color SingleGrayColor = Color.DarkGray;   // æµ…è‰²èƒŒæ™¯
 
-        // ºÏ¶©³ÉÔ±µÄµ¥ÔªÑÕÉ«
-        public Color MemberBackColor = Color.FromArgb(200, 200, 200);    // ±³¾°É«
-        public Color MemberForeColor = Color.White;   // Ç°¾°É«£¬Ò²¾ÍÊÇÎÄ×ÖÑÕÉ«
-        public Color MemberGrayColor = Color.FromArgb(180, 180, 180);   // Ç³É«±³¾°
+        // åˆè®¢æˆå‘˜çš„å•å…ƒé¢œè‰²
+        public Color MemberBackColor = Color.FromArgb(200, 200, 200);    // èƒŒæ™¯è‰²
+        public Color MemberForeColor = Color.White;   // å‰æ™¯è‰²ï¼Œä¹Ÿå°±æ˜¯æ–‡å­—é¢œè‰²
+        public Color MemberGrayColor = Color.FromArgb(180, 180, 180);   // æµ…è‰²èƒŒæ™¯
 
-        // ºÏ¶©±¾µÄµ¥ÔªÑÕÉ«
-        public Color ParentBackColor = Color.FromArgb(150, 150, 150);    // ±³¾°É«
-        public Color ParentForeColor = Color.White;   // Ç°¾°É«£¬Ò²¾ÍÊÇÎÄ×ÖÑÕÉ«
-        public Color ParentGrayColor = Color.FromArgb(130, 130, 130);   // Ç³É«±³¾°
+        // åˆè®¢æœ¬çš„å•å…ƒé¢œè‰²
+        public Color ParentBackColor = Color.FromArgb(150, 150, 150);    // èƒŒæ™¯è‰²
+        public Color ParentForeColor = Color.White;   // å‰æ™¯è‰²ï¼Œä¹Ÿå°±æ˜¯æ–‡å­—é¢œè‰²
+        public Color ParentGrayColor = Color.FromArgb(130, 130, 130);   // æµ…è‰²èƒŒæ™¯
 
-        // ±íÊ¾ĞÂ´´½¨µÄ²à±ßÌõÑÕÉ«
+        // è¡¨ç¤ºæ–°åˆ›å»ºçš„ä¾§è¾¹æ¡é¢œè‰²
         public Color NewBarColor = Color.FromArgb(255, 255, 0);
 
-        // ±íÊ¾·¢Éú¹ıĞŞ¸ÄµÄ²à±ßÌõÑÕÉ«
+        // è¡¨ç¤ºå‘ç”Ÿè¿‡ä¿®æ”¹çš„ä¾§è¾¹æ¡é¢œè‰²
         public Color ChangedBarColor = Color.FromArgb(0, 255, 0);
 
-        // ÆÚ¸ñ×ÓµÄ
-        public Color IssueBoxBackColor = Color.FromArgb(255, Color.Black);  // ±³¾°ÑÕÉ« // Color.FromArgb(200, Color.White);
-        public Color IssueBoxForeColor = Color.FromArgb(255, Color.White);  // Ç°¾°ÑÕÉ«
-        public Color IssueBoxGrayColor = Color.DarkGray;   // Ç³É«±³¾°
+        // æœŸæ ¼å­çš„
+        public Color IssueBoxBackColor = Color.FromArgb(255, Color.Black);  // èƒŒæ™¯é¢œè‰² // Color.FromArgb(200, Color.White);
+        public Color IssueBoxForeColor = Color.FromArgb(255, Color.White);  // å‰æ™¯é¢œè‰²
+        public Color IssueBoxGrayColor = Color.DarkGray;   // æµ…è‰²èƒŒæ™¯
 
-        // Ô¤²âµÄµ¥ÔªÑÕÉ«
-        public Color CalculatedBackColor = Color.FromArgb(0, Color.White);   // ±³¾°É«
-        public Color CalculatedForeColor = Color.Gray;   // Ç°¾°É«£¬Ò²¾ÍÊÇÎÄ×ÖÑÕÉ«
-        public Color CalculatedGrayColor = Color.Yellow;   // Ç³É«±³¾°¡£¡°£¿¡±µÄÑÕÉ«
+        // é¢„æµ‹çš„å•å…ƒé¢œè‰²
+        public Color CalculatedBackColor = Color.FromArgb(0, Color.White);   // èƒŒæ™¯è‰²
+        public Color CalculatedForeColor = Color.Gray;   // å‰æ™¯è‰²ï¼Œä¹Ÿå°±æ˜¯æ–‡å­—é¢œè‰²
+        public Color CalculatedGrayColor = Color.Yellow;   // æµ…è‰²èƒŒæ™¯ã€‚â€œï¼Ÿâ€çš„é¢œè‰²
 
-        // ºÏ¶©²áÍâ¿ò
-        public Color FixedBorderColor = Color.DarkBlue; // Color.FromArgb(100, 110, 100) ¹Ì»¯µÄºÏ¶©·¶Î§Íâ¿ò
-        public Color NewlyBorderColor = Color.DarkBlue;  // DarkGreen ¿ÉĞŞ¸ÄµÄºÏ¶©·¶Î§Íâ¿ò
+        // åˆè®¢å†Œå¤–æ¡†
+        public Color FixedBorderColor = Color.DarkBlue; // Color.FromArgb(100, 110, 100) å›ºåŒ–çš„åˆè®¢èŒƒå›´å¤–æ¡†
+        public Color NewlyBorderColor = Color.DarkBlue;  // DarkGreen å¯ä¿®æ”¹çš„åˆè®¢èŒƒå›´å¤–æ¡†
 
         public enum BoundLineStyle
         {
@@ -362,37 +362,37 @@ namespace dp2Circulation
             Line = 1,
         }
 
-        // ºÏ¶©²áÁ¬½ÓÏßµÄ·ç¸ñ
+        // åˆè®¢å†Œè¿æ¥çº¿çš„é£æ ¼
         public BoundLineStyle LineStyle = BoundLineStyle.Curve;
 
-        // ¸÷ÖÖÑÕÉ«µÄÃû×Ö£º
+        // å„ç§é¢œè‰²çš„åå­—ï¼š
         // http://msdn.microsoft.com/en-us/library/system.windows.media.color(VS.95).aspx
 
-        // ÆÚÄÚµÄ×î´ó²áÊı
-        internal int m_nMaxItemCountOfOneIssue = -1; // -1 ±íÊ¾ÉĞÎ´³õÊ¼»¯
+        // æœŸå†…çš„æœ€å¤§å†Œæ•°
+        internal int m_nMaxItemCountOfOneIssue = -1; // -1 è¡¨ç¤ºå°šæœªåˆå§‹åŒ–
 
         int nNestedSetScrollBars = 0;
 
-        // ¾í¹öÌõ±ÈÂÊ Ğ¡ÓÚµÈÓÚ1.0F
+        // å·æ»šæ¡æ¯”ç‡ å°äºç­‰äº1.0F
         double m_v_ratio = 1.0F;
         double m_h_ratio = 1.0F;
 
-        int m_nLeftBlank = 20;	// ±ß¿Õ
+        int m_nLeftBlank = 20;	// è¾¹ç©º
         int m_nRightBlank = 20;
         int m_nTopBlank = 20;
         int m_nBottomBlank = 20;
 
-        long m_lWindowOrgX = 0;    // ´°¿ÚÔ­µã
+        long m_lWindowOrgX = 0;    // çª—å£åŸç‚¹
         long m_lWindowOrgY = 0;
 
-        long m_lContentWidth = 0;    // ÄÚÈİ²¿·ÖµÄ¿í¶È¡£°üÀ¨×ó±ß±êÌâ£¬Èô¸É¸ñ×Ó¡£²»°üÀ¨×óÓÒ¿Õ°×
-        long m_lContentHeight = 0;   // ÄÚÈİ²¿·ÖµÄ¸ß¶È
+        long m_lContentWidth = 0;    // å†…å®¹éƒ¨åˆ†çš„å®½åº¦ã€‚åŒ…æ‹¬å·¦è¾¹æ ‡é¢˜ï¼Œè‹¥å¹²æ ¼å­ã€‚ä¸åŒ…æ‹¬å·¦å³ç©ºç™½
+        long m_lContentHeight = 0;   // å†…å®¹éƒ¨åˆ†çš„é«˜åº¦
 
-        internal Font m_fontLine = null;    // ¸ñ×ÓÖĞÃ¿ĞĞÎÄ×ÖµÄ×ÖÌå
-        internal Font m_fontTitleSmall = null;   // ×ó²à±êÌâÎÄ×ÖµÄ×ÖÌå£¬Ğ¡µÄ
-        internal Font m_fontTitleLarge = null;   // ×ó²à±êÌâÎÄ×ÖµÄ×ÖÌå£¬´óµÄ
+        internal Font m_fontLine = null;    // æ ¼å­ä¸­æ¯è¡Œæ–‡å­—çš„å­—ä½“
+        internal Font m_fontTitleSmall = null;   // å·¦ä¾§æ ‡é¢˜æ–‡å­—çš„å­—ä½“ï¼Œå°çš„
+        internal Font m_fontTitleLarge = null;   // å·¦ä¾§æ ‡é¢˜æ–‡å­—çš„å­—ä½“ï¼Œå¤§çš„
 
-        internal int m_nLineHeight = 16;  // ÎÄ×Ö£¬Ã¿ĞĞµÄ¸ß¶È 18
+        internal int m_nLineHeight = 16;  // æ–‡å­—ï¼Œæ¯è¡Œçš„é«˜åº¦ 18
 
         internal int m_nCellHeight = 110;   // 70
         internal int m_nCellWidth = 130;
@@ -418,7 +418,7 @@ namespace dp2Circulation
             }
         }
 
-        Rectangle m_rectGrab = new Rectangle(4, 4, 16, 16); // dr g h ndle¾ØĞÎ(ÔÚCell×ø±êÄÚ)
+        Rectangle m_rectGrab = new Rectangle(4, 4, 16, 16); // dr g h ndleçŸ©å½¢(åœ¨Cellåæ ‡å†…)
 
         #endregion
 
@@ -436,19 +436,19 @@ namespace dp2Circulation
             trackTip = new ToolTip();
 
             int nFontHeight = this.m_nLineHeight - 4;
-            this.m_fontLine = new Font("Î¢ÈíÑÅºÚ",    // "Arial",
+            this.m_fontLine = new Font("å¾®è½¯é›…é»‘",    // "Arial",
                 nFontHeight,
                 FontStyle.Regular,
                 GraphicsUnit.Pixel);
 
             nFontHeight = this.m_nLineHeight - 4;
-            this.m_fontTitleSmall = new Font("Î¢ÈíÑÅºÚ",    // "Arial",
+            this.m_fontTitleSmall = new Font("å¾®è½¯é›…é»‘",    // "Arial",
                 nFontHeight,
                 FontStyle.Bold,
                 GraphicsUnit.Pixel);
 
             nFontHeight = this.m_nLineHeight + 4;
-            this.m_fontTitleLarge = new Font("Î¢ÈíÑÅºÚ",    // "Arial",
+            this.m_fontTitleLarge = new Font("å¾®è½¯é›…é»‘",    // "Arial",
                 nFontHeight,
                 FontStyle.Bold,
                 GraphicsUnit.Pixel);
@@ -457,7 +457,7 @@ namespace dp2Circulation
 
         string m_strBiblioDbName = "";
 
-        // »ñÈ¡ÖµÁĞ±íÊ±×÷ÎªÏßË÷µÄÊı¾İ¿âÃû
+        // è·å–å€¼åˆ—è¡¨æ—¶ä½œä¸ºçº¿ç´¢çš„æ•°æ®åº“å
         public string BiblioDbName
         {
             get
@@ -475,7 +475,7 @@ namespace dp2Circulation
             this.Issues.Clear();
         }
 
-        // ËùÓĞÒş²ØµÄ²áÊÂÏî
+        // æ‰€æœ‰éšè—çš„å†Œäº‹é¡¹
         internal List<ItemBindingItem> m_hideitems = new List<ItemBindingItem>();
         public List<ItemBindingItem> AllHideItems
         {
@@ -485,9 +485,9 @@ namespace dp2Circulation
             }
         }
 
-        // Íâ²¿½Ó¿Ú
-        // ËùÓĞÏÔÊ¾³öÀ´µÄºÍÒş²ØµÄ²áÊÂÏî
-        // ²»°üÀ¨ÒÑ¾­É¾³ıµÄÊÂÏî
+        // å¤–éƒ¨æ¥å£
+        // æ‰€æœ‰æ˜¾ç¤ºå‡ºæ¥çš„å’Œéšè—çš„å†Œäº‹é¡¹
+        // ä¸åŒ…æ‹¬å·²ç»åˆ é™¤çš„äº‹é¡¹
         public List<ItemBindingItem> AllItems
         {
             get
@@ -500,9 +500,9 @@ namespace dp2Circulation
             }
         }
 
-        // Íâ²¿½Ó¿Ú
-        // ËùÓĞÏÔÊ¾³öÀ´µÄ²áÊÂÏî
-        // ²»°üÀ¨ÒÑ¾­É¾³ıµÄÊÂÏî
+        // å¤–éƒ¨æ¥å£
+        // æ‰€æœ‰æ˜¾ç¤ºå‡ºæ¥çš„å†Œäº‹é¡¹
+        // ä¸åŒ…æ‹¬å·²ç»åˆ é™¤çš„äº‹é¡¹
         public List<ItemBindingItem> AllVisibleItems
         {
             get
@@ -542,8 +542,8 @@ namespace dp2Circulation
             return null;
         }
 
-        // ´ÓÆÚ¡¢²áÁ½¸ö²ã´Î£¬²éÕÒÒ»¸öÌØ¶¨refidµÄ²áÊÂÏî
-        // Ö»ÄÜÓÃÔÚ³õÊ¼»¯½×¶ÎµÄÇ°²¿
+        // ä»æœŸã€å†Œä¸¤ä¸ªå±‚æ¬¡ï¼ŒæŸ¥æ‰¾ä¸€ä¸ªç‰¹å®šrefidçš„å†Œäº‹é¡¹
+        // åªèƒ½ç”¨åœ¨åˆå§‹åŒ–é˜¶æ®µçš„å‰éƒ¨
         internal ItemBindingItem InitialFindItemByRefID(string strRefID)
         {
             for (int i = 0; i < this.Issues.Count; i++)
@@ -561,8 +561,8 @@ namespace dp2Circulation
             return null;
         }
 
-        // ´ÓÆÚ¡¢²áÁ½¸ö²ã´Î£¬²éÕÒÒ»¸öÌØ¶¨refidµÄ²áÊÂÏî
-        // Ö»ÄÜÓÃÔÚ³õÊ¼»¯½×¶ÎµÄÇ°²¿
+        // ä»æœŸã€å†Œä¸¤ä¸ªå±‚æ¬¡ï¼ŒæŸ¥æ‰¾ä¸€ä¸ªç‰¹å®šrefidçš„å†Œäº‹é¡¹
+        // åªèƒ½ç”¨åœ¨åˆå§‹åŒ–é˜¶æ®µçš„å‰éƒ¨
         internal Cell FindCellByRefID(string strRefID,
             IssueBindingItem exclude_issue)
         {
@@ -586,16 +586,16 @@ namespace dp2Circulation
             return null;
         }
 
-        // °²·Åµ¥¶ÀµÄ²á(¼´·ÇºÏ¶©³ÉÔ±²á)ÔÚĞĞ×îºóÒ»¸ö¿ÕÎ»
+        // å®‰æ”¾å•ç‹¬çš„å†Œ(å³éåˆè®¢æˆå‘˜å†Œ)åœ¨è¡Œæœ€åä¸€ä¸ªç©ºä½
         // return:
-        //      Êµ¼Ê°²·ÅµÄµ¥¸ñindexÎ»ÖÃ
+        //      å®é™…å®‰æ”¾çš„å•æ ¼indexä½ç½®
         static int PlaceSingleToTail(ItemBindingItem item)
         {
             Debug.Assert(item.Container != null, "");
 
             IssueBindingItem issue = item.Container;
 
-            // ´ÓÓÒ±ßÕÒ£¬ÕÒµ½µÚÒ»¸ö¿ÉÓÃµÄ¿ÕÎ»
+            // ä»å³è¾¹æ‰¾ï¼Œæ‰¾åˆ°ç¬¬ä¸€ä¸ªå¯ç”¨çš„ç©ºä½
             int nPos = issue.Cells.Count;
             for (int i = issue.Cells.Count - 1; i >= 0; i--)
             {
@@ -609,8 +609,8 @@ namespace dp2Circulation
             return nPos;
         }
 
-        // ĞÂ°æ±¾
-        // ½«ËùÓĞ³ÉÔ±CellÏòÓÒÒÆ¶¯Èô¸É¸öµ¥¸ñ
+        // æ–°ç‰ˆæœ¬
+        // å°†æ‰€æœ‰æˆå‘˜Cellå‘å³ç§»åŠ¨è‹¥å¹²ä¸ªå•æ ¼
         public void MoveMemberCellsToRight(ItemBindingItem parent_item,
             int nDistance)
         {
@@ -622,8 +622,8 @@ namespace dp2Circulation
             }
         }
 
-        // ĞÂ°æ±¾
-        // ½«ËùÓĞ³ÉÔ±CellÏòÓÒÒÆ¶¯Ò»¸öµ¥¸ñ
+        // æ–°ç‰ˆæœ¬
+        // å°†æ‰€æœ‰æˆå‘˜Cellå‘å³ç§»åŠ¨ä¸€ä¸ªå•æ ¼
         public void MoveMemberCellsToRight(ItemBindingItem parent_item)
         {
 #if DEBUG
@@ -649,36 +649,36 @@ namespace dp2Circulation
                 {
                     if (nCol != index)
                     {
-                        Debug.Assert(false, "ÊôÓÚÍ¬Ò»¸öºÏ¶©²áµÄ¸÷¸ö³ÉÔ±¸ñ×Óindex¾ÓÈ»²»Í¬");
+                        Debug.Assert(false, "å±äºåŒä¸€ä¸ªåˆè®¢å†Œçš„å„ä¸ªæˆå‘˜æ ¼å­indexå±…ç„¶ä¸åŒ");
                     }
                 }
 
                 nCol = index;
 #endif
 
-                // ×¢Òâ£¬indexÊµ¼ÊÉÏÎªË«¸ñµÄÓÒ²à¸ñ×Ó
+                // æ³¨æ„ï¼Œindexå®é™…ä¸Šä¸ºåŒæ ¼çš„å³ä¾§æ ¼å­
 
-                issue.GetBlankSingleIndex(index + 1);   // +1ÎªÒÆ¶¯ºóµÄÓÒ²à¸ñ×Ó¡£È·±£ÕâÀïÓĞ¸öµ¥¸ñ¼´¿É£¬¶ø²»ÄÜÈ¥È·±£Æä×ó·½µÄË«¸ñ£¬ÒòÎªÄÇÑùÉæ¼°µ½ÒÑ±»±¾ºÏ¶©·¶Î§Õ¼¾İµÄÎ»ÖÃ
+                issue.GetBlankSingleIndex(index + 1);   // +1ä¸ºç§»åŠ¨åçš„å³ä¾§æ ¼å­ã€‚ç¡®ä¿è¿™é‡Œæœ‰ä¸ªå•æ ¼å³å¯ï¼Œè€Œä¸èƒ½å»ç¡®ä¿å…¶å·¦æ–¹çš„åŒæ ¼ï¼Œå› ä¸ºé‚£æ ·æ¶‰åŠåˆ°å·²è¢«æœ¬åˆè®¢èŒƒå›´å æ®çš„ä½ç½®
 
-                // ¸´ÖÆÒ»¸öË«¸ñµ½±ğ´¦
-                // ±¾¹¦ÄÜ±È½ÏÔ­Ê¼£¬²»¸ºÔğ¼·Ñ¹¿ÕÎ»
+                // å¤åˆ¶ä¸€ä¸ªåŒæ ¼åˆ°åˆ«å¤„
+                // æœ¬åŠŸèƒ½æ¯”è¾ƒåŸå§‹ï¼Œä¸è´Ÿè´£æŒ¤å‹ç©ºä½
                 // parameters:
-                //      nSourceIndex    Ô´indexÎ»ÖÃ¡£×¢Òâ£¬±ØĞëÊÇË«¸ñµÄ×ó²à
-                //      nTargetIndex    Ä¿±êindexÎ»ÖÃ¡£×¢Òâ£¬±ØĞëÊÇË«¸ñµÄ×ó²à
+                //      nSourceIndex    æºindexä½ç½®ã€‚æ³¨æ„ï¼Œå¿…é¡»æ˜¯åŒæ ¼çš„å·¦ä¾§
+                //      nTargetIndex    ç›®æ ‡indexä½ç½®ã€‚æ³¨æ„ï¼Œå¿…é¡»æ˜¯åŒæ ¼çš„å·¦ä¾§
                 issue.CopyDoubleIndexTo(
                     index - 1,
                     index,
                     true);
                 /*
                 {
-                    // °á¶¯ÓÒ²à¸ñ×ÓÄÚÈİ
+                    // æ¬åŠ¨å³ä¾§æ ¼å­å†…å®¹
                     Cell right_cell = issue.GetCell(index);
                     issue.SetCell(index + 2, right_cell);
                     issue.SetCell(index, null);
                 }
 
                 {
-                    // ¿´¿´×ó²àÎ»ÖÃ? °ÑºÏ¶©¶ÔÏóÒ²Ò»²¢ÒÆ¶¯ÁË
+                    // çœ‹çœ‹å·¦ä¾§ä½ç½®? æŠŠåˆè®¢å¯¹è±¡ä¹Ÿä¸€å¹¶ç§»åŠ¨äº†
                     Cell temp_cell = issue.GetCell(index - 1);
                     if (cell != null)
                     {
@@ -691,7 +691,7 @@ namespace dp2Circulation
         }
 
 #if OLD_VERSION
-        // ½«ËùÓĞ³ÉÔ±CellÏòÓÒÒÆ¶¯Ò»¸öË«¸ñ
+        // å°†æ‰€æœ‰æˆå‘˜Cellå‘å³ç§»åŠ¨ä¸€ä¸ªåŒæ ¼
         public void MoveMemberCellsToRight(ItemBindingItem parent_item)
         {
             for(int i=0;i<parent_item.MemberCells.Count;i++)
@@ -714,7 +714,7 @@ namespace dp2Circulation
                 }
 
                 {
-                    // ¿´¿´ºÏ¶©Î»ÖÃ? °ÑºÏ¶©¶ÔÏóÒ²Ò»²¢ÒÆ¶¯ÁË
+                    // çœ‹çœ‹åˆè®¢ä½ç½®? æŠŠåˆè®¢å¯¹è±¡ä¹Ÿä¸€å¹¶ç§»åŠ¨äº†
                     Cell temp_cell = issue.GetCell(index - 1);
                     if (cell != null)
                     {
@@ -726,9 +726,9 @@ namespace dp2Circulation
         }
 #endif
 
-        //ĞÂ°æ±¾
-        // ¹Û²ìÒ»¸öºÏ¶©²áµÄËùÓĞÆÚ£¬¿´ÊÇ·ñ¿ÉÄÜÏò×óÒÆÒ»¸öµ¥¸ñ¡£
-        // Ò²¾ÍÊÇ¿´¿´×ó±ßÊÇ·ñ¶¼ÊÇ¿Õ°×Î»ÖÃ
+        //æ–°ç‰ˆæœ¬
+        // è§‚å¯Ÿä¸€ä¸ªåˆè®¢å†Œçš„æ‰€æœ‰æœŸï¼Œçœ‹æ˜¯å¦å¯èƒ½å‘å·¦ç§»ä¸€ä¸ªå•æ ¼ã€‚
+        // ä¹Ÿå°±æ˜¯çœ‹çœ‹å·¦è¾¹æ˜¯å¦éƒ½æ˜¯ç©ºç™½ä½ç½®
         public bool CanMoveToLeft(Cell parent_cell)
         {
             Debug.Assert(parent_cell != null, "");
@@ -771,7 +771,7 @@ namespace dp2Circulation
                 int nFirstLineNo = this.Issues.IndexOf(first_issue);
                 Debug.Assert(nFirstLineNo != -1, "");
 
-                // Èç¹ûÅ¼È»³öÏÖµÚÒ»¸ö³ÉÔ±²»ÔÚºÏ¶©²áÍ¬ÆÚµÄÇé¿ö£¬½ÃÕı×îĞ¡ĞĞºÅ
+                // å¦‚æœå¶ç„¶å‡ºç°ç¬¬ä¸€ä¸ªæˆå‘˜ä¸åœ¨åˆè®¢å†ŒåŒæœŸçš„æƒ…å†µï¼ŒçŸ«æ­£æœ€å°è¡Œå·
                 int nParentLineNo = this.Issues.IndexOf(parent_issue);
                 if (nParentLineNo < nFirstLineNo)
                     nFirstLineNo = nParentLineNo;
@@ -802,8 +802,8 @@ namespace dp2Circulation
 
 #if NOOOOOOOOOOOOOOOOO
 
-        // ¹Û²ìÒ»¸öºÏ¶©²áµÄËùÓĞÆÚ£¬¿´ÊÇ·ñ¿ÉÄÜÏò×óÒÆÒ»¸öË«¸ñ¡£
-        // Ò²¾ÍÊÇ¿´¿´×ó±ßÊÇ·ñ¶¼ÊÇ¿Õ°×Î»ÖÃ
+        // è§‚å¯Ÿä¸€ä¸ªåˆè®¢å†Œçš„æ‰€æœ‰æœŸï¼Œçœ‹æ˜¯å¦å¯èƒ½å‘å·¦ç§»ä¸€ä¸ªåŒæ ¼ã€‚
+        // ä¹Ÿå°±æ˜¯çœ‹çœ‹å·¦è¾¹æ˜¯å¦éƒ½æ˜¯ç©ºç™½ä½ç½®
         public bool CanMoveToLeft(Cell parent_cell)
         {
             Debug.Assert(parent_cell != null, "");
@@ -837,7 +837,7 @@ namespace dp2Circulation
                 int nFirstLineNo = this.Issues.IndexOf(first_issue);
                 Debug.Assert(nFirstLineNo != -1, "");
 
-                // Èç¹ûÅ¼È»³öÏÖµÚÒ»¸ö³ÉÔ±²»ÔÚºÏ¶©²áÍ¬ÆÚµÄÇé¿ö£¬½ÃÕı×îĞ¡ĞĞºÅ
+                // å¦‚æœå¶ç„¶å‡ºç°ç¬¬ä¸€ä¸ªæˆå‘˜ä¸åœ¨åˆè®¢å†ŒåŒæœŸçš„æƒ…å†µï¼ŒçŸ«æ­£æœ€å°è¡Œå·
                 int nParentLineNo = this.Issues.IndexOf(parent_issue);
                 if (nParentLineNo < nFirstLineNo)
                     nFirstLineNo = nParentLineNo;
@@ -860,9 +860,9 @@ namespace dp2Circulation
 
 #endif
 
-        // ĞÂ°æ±¾
-        // ½«ºÏ¶©±¾ºÍËùÓĞ³ÉÔ±CellÏò×óÒÆ¶¯Ò»¸öµ¥¸ñ
-        // ×¢Òâ£ºµ÷ÓÃ±¾º¯ÊıÇ°£¬ÒªÓÃCanMoveToLeft()¼ì²éÊÇ·ñÔÊĞí×óÒÆ¡£·ñÔò»áÒıÆğ³åÍ»
+        // æ–°ç‰ˆæœ¬
+        // å°†åˆè®¢æœ¬å’Œæ‰€æœ‰æˆå‘˜Cellå‘å·¦ç§»åŠ¨ä¸€ä¸ªå•æ ¼
+        // æ³¨æ„ï¼šè°ƒç”¨æœ¬å‡½æ•°å‰ï¼Œè¦ç”¨CanMoveToLeft()æ£€æŸ¥æ˜¯å¦å…è®¸å·¦ç§»ã€‚å¦åˆ™ä¼šå¼•èµ·å†²çª
         public bool MoveCellsToLeft(Cell parent_cell)
         {
             Debug.Assert(parent_cell != null, "");
@@ -892,8 +892,8 @@ namespace dp2Circulation
                         nCol - 1,
                         true);
 
-                    // ½«ÌÚ³öÀ´µÄÒ»¸ö¿ÕÎ»¼ÌĞøÉ¾³ı
-                    // ¿ÉÄÜ»áÒıÆğµİ¹é
+                    // å°†è…¾å‡ºæ¥çš„ä¸€ä¸ªç©ºä½ç»§ç»­åˆ é™¤
+                    // å¯èƒ½ä¼šå¼•èµ·é€’å½’
                     parent_issue.RemoveSingleIndex(nCol);
 
                     bChanged = true;
@@ -914,7 +914,7 @@ namespace dp2Circulation
                 int nFirstLineNo = this.Issues.IndexOf(first_issue);
                 Debug.Assert(nFirstLineNo != -1, "");
 
-                // Èç¹ûÅ¼È»³öÏÖµÚÒ»¸ö³ÉÔ±²»ÔÚºÏ¶©²áÍ¬ÆÚµÄÇé¿ö£¬½ÃÕı×îĞ¡ĞĞºÅ
+                // å¦‚æœå¶ç„¶å‡ºç°ç¬¬ä¸€ä¸ªæˆå‘˜ä¸åœ¨åˆè®¢å†ŒåŒæœŸçš„æƒ…å†µï¼ŒçŸ«æ­£æœ€å°è¡Œå·
                 int nParentLineNo = this.Issues.IndexOf(parent_issue);
                 if (nParentLineNo < nFirstLineNo)
                     nFirstLineNo = nParentLineNo;
@@ -943,8 +943,8 @@ namespace dp2Circulation
                     bChanged = true;
                 }
 
-                // ½«ÌÚ³öÀ´µÄÒ»¸ö×İÁĞµÄ¿ÕÎ»¼ÌĞøÉ¾³ı
-                // ¿ÉÄÜ»áÒıÆğµİ¹é
+                // å°†è…¾å‡ºæ¥çš„ä¸€ä¸ªçºµåˆ—çš„ç©ºä½ç»§ç»­åˆ é™¤
+                // å¯èƒ½ä¼šå¼•èµ·é€’å½’
                 for (int i = nFirstLineNo; i <= nLastLineNo; i++)
                 {
                     IssueBindingItem issue = this.Issues[i];
@@ -953,15 +953,15 @@ namespace dp2Circulation
                     if (issue.IssueLayoutState == IssueLayoutState.Accepting)
                         continue;
 
-                    // ÓÉÓÚÓÒ±ß¿ÉÄÜÊÇÒ»ÊúÁĞµÄºÏ¶©²á·¶Î§£¬¿ÉÄÜÒòÎªÇ°ÃæĞĞµÄÉ¾³ı¶øÒÑ¾­Á¬´øÑ¹ËõÁËºóÃæ¿ÕÎ»
+                    // ç”±äºå³è¾¹å¯èƒ½æ˜¯ä¸€ç«–åˆ—çš„åˆè®¢å†ŒèŒƒå›´ï¼Œå¯èƒ½å› ä¸ºå‰é¢è¡Œçš„åˆ é™¤è€Œå·²ç»è¿å¸¦å‹ç¼©äº†åé¢ç©ºä½
                     Cell cellTemp = issue.GetCell(nCol + 1);
                     if (cellTemp == null)
                     {
-                        // Ì½²âÊÇ·ñÎªºÏ¶©³ÉÔ±Õ¼¾İµÄÎ»ÖÃ
+                        // æ¢æµ‹æ˜¯å¦ä¸ºåˆè®¢æˆå‘˜å æ®çš„ä½ç½®
                         // return:
-                        //      -1  ÊÇ¡£²¢ÇÒÊÇË«¸ñµÄ×ó²àÎ»ÖÃ
-                        //      0   ²»ÊÇ
-                        //      1   ÊÇ¡£²¢ÇÒÊÇË«¸ñµÄÓÒ²àÎ»ÖÃ
+                        //      -1  æ˜¯ã€‚å¹¶ä¸”æ˜¯åŒæ ¼çš„å·¦ä¾§ä½ç½®
+                        //      0   ä¸æ˜¯
+                        //      1   æ˜¯ã€‚å¹¶ä¸”æ˜¯åŒæ ¼çš„å³ä¾§ä½ç½®
                         int nRet = issue.IsBoundIndex(nCol + 1);
                         if (nRet == -1 || nRet == 1)
                         {
@@ -979,7 +979,7 @@ namespace dp2Circulation
         }
 
 #if NOOOOOOOOOOOOOOOOOOOO
-        // ½«ºÏ¶©±¾ºÍËùÓĞ³ÉÔ±CellÏò×óÒÆ¶¯Ò»¸öË«¸ñ
+        // å°†åˆè®¢æœ¬å’Œæ‰€æœ‰æˆå‘˜Cellå‘å·¦ç§»åŠ¨ä¸€ä¸ªåŒæ ¼
         public bool MoveCellsToLeft(Cell parent_cell)
         {
             Debug.Assert(parent_cell != null, "");
@@ -1006,8 +1006,8 @@ namespace dp2Circulation
                     (nCol / 2) - 1,
                     true);
 
-                // ½«ÌÚ³öÀ´µÄÒ»¸ö¿ÕÎ»¼ÌĞøÉ¾³ı
-                // ¿ÉÄÜ»áÒıÆğµİ¹é
+                // å°†è…¾å‡ºæ¥çš„ä¸€ä¸ªç©ºä½ç»§ç»­åˆ é™¤
+                // å¯èƒ½ä¼šå¼•èµ·é€’å½’
                 parent_issue.RemovePosition(nCol / 2);
 
                 bChanged = true;
@@ -1025,7 +1025,7 @@ namespace dp2Circulation
                 int nFirstLineNo = this.Issues.IndexOf(first_issue);
                 Debug.Assert(nFirstLineNo != -1, "");
 
-                // Èç¹ûÅ¼È»³öÏÖµÚÒ»¸ö³ÉÔ±²»ÔÚºÏ¶©²áÍ¬ÆÚµÄÇé¿ö£¬½ÃÕı×îĞ¡ĞĞºÅ
+                // å¦‚æœå¶ç„¶å‡ºç°ç¬¬ä¸€ä¸ªæˆå‘˜ä¸åœ¨åˆè®¢å†ŒåŒæœŸçš„æƒ…å†µï¼ŒçŸ«æ­£æœ€å°è¡Œå·
                 int nParentLineNo = this.Issues.IndexOf(parent_issue);
                 if (nParentLineNo < nFirstLineNo)
                     nFirstLineNo = nParentLineNo;
@@ -1046,8 +1046,8 @@ namespace dp2Circulation
                     bChanged = true;
                 }
 
-                // ½«ÌÚ³öÀ´µÄÒ»¸ö×İÁĞµÄ¿ÕÎ»¼ÌĞøÉ¾³ı
-                // ¿ÉÄÜ»áÒıÆğµİ¹é
+                // å°†è…¾å‡ºæ¥çš„ä¸€ä¸ªçºµåˆ—çš„ç©ºä½ç»§ç»­åˆ é™¤
+                // å¯èƒ½ä¼šå¼•èµ·é€’å½’
                 for (int i = nFirstLineNo; i <= nLastLineNo; i++)
                 {
                     IssueBindingItem issue = this.Issues[i];
@@ -1064,7 +1064,7 @@ namespace dp2Circulation
 #endif
 
         /*
-        // Èç¹ûÒª°²·ÅµÄÎ»ÖÃÒÑ¾­´æÔÚÄÚÈİ£¬ÔòÏòÓÒÒÆ¶¯ËüÃÇ(Á½¸ñ)
+        // å¦‚æœè¦å®‰æ”¾çš„ä½ç½®å·²ç»å­˜åœ¨å†…å®¹ï¼Œåˆ™å‘å³ç§»åŠ¨å®ƒä»¬(ä¸¤æ ¼)
         int MoveToRight(IssueBindingItem issue,
             int nCol)
         {
@@ -1121,7 +1121,7 @@ namespace dp2Circulation
             public string Volume = "";
         }
 
-        // Í³¼Æ(bindingxmlÖĞ)È«²¿ºÏ¶©³ÉÔ±²áËùÊ¹ÓÃ¹ıµÄpublishtime×Ö·û´®
+        // ç»Ÿè®¡(bindingxmlä¸­)å…¨éƒ¨åˆè®¢æˆå‘˜å†Œæ‰€ä½¿ç”¨è¿‡çš„publishtimeå­—ç¬¦ä¸²
         int GetAllBindingXmlPublishTimes(
             out List<PublishTimeAndVolume> publishtimes,
             out string strError)
@@ -1129,7 +1129,7 @@ namespace dp2Circulation
             publishtimes = new List<PublishTimeAndVolume>();
             strError = "";
 
-            // ±éÀúºÏ¶©²á¶ÔÏóÊı×é
+            // éå†åˆè®¢å†Œå¯¹è±¡æ•°ç»„
             for (int i = 0; i < this.ParentItems.Count; i++)
             {
                 ItemBindingItem parent_item = this.ParentItems[i];
@@ -1138,7 +1138,7 @@ namespace dp2Circulation
                 if (String.IsNullOrEmpty(strBindingXml) == true)
                     continue;
 
-                // ¸ù¾İrefid, ÕÒµ½ËüÏÂÊôµÄÄÇĞ©ItemBindingItem¶ÔÏó
+                // æ ¹æ®refid, æ‰¾åˆ°å®ƒä¸‹å±çš„é‚£äº›ItemBindingItemå¯¹è±¡
                 XmlDocument dom = new XmlDocument();
                 dom.LoadXml("<root />");
                 try
@@ -1147,14 +1147,14 @@ namespace dp2Circulation
                 }
                 catch (Exception ex)
                 {
-                    strError = "²Î¿¼IDÎª '" + parent_item.RefID + "' µÄ²áĞÅÏ¢ÖĞ£¬<binding>ÔªËØÄÚÇ¶XML×°ÈëDOMÊ±³ö´í: " + ex.Message;
+                    strError = "å‚è€ƒIDä¸º '" + parent_item.RefID + "' çš„å†Œä¿¡æ¯ä¸­ï¼Œ<binding>å…ƒç´ å†…åµŒXMLè£…å…¥DOMæ—¶å‡ºé”™: " + ex.Message;
                     return -1;
                 }
 
                 /*
-                 * bindingxmlÖĞ£¬<item>ÔªËØÎ´±ØÓĞrefIDÊôĞÔ¡£
-                 * Ã»ÓĞrefIDÊôĞÔ£¬±íÃ÷ÕâÊÇÒ»¸ö±»É¾³ıÁË²á¼ÇÂ¼µÄµ¥´¿ĞÅÏ¢µ¥Ôª£¬»òÕßÊÇÈ±ÆÚÇé¿ö¡£
-                 * È±ÆÚ¿ÉÄÜ·¢ÉúÔÚ×°¶©·¶Î§µÄµÚÒ»²á»òÕß×îºóÒ»²á£¬ÒªÒıÆğ×¢Òâ
+                 * bindingxmlä¸­ï¼Œ<item>å…ƒç´ æœªå¿…æœ‰refIDå±æ€§ã€‚
+                 * æ²¡æœ‰refIDå±æ€§ï¼Œè¡¨æ˜è¿™æ˜¯ä¸€ä¸ªè¢«åˆ é™¤äº†å†Œè®°å½•çš„å•çº¯ä¿¡æ¯å•å…ƒï¼Œæˆ–è€…æ˜¯ç¼ºæœŸæƒ…å†µã€‚
+                 * ç¼ºæœŸå¯èƒ½å‘ç”Ÿåœ¨è£…è®¢èŒƒå›´çš„ç¬¬ä¸€å†Œæˆ–è€…æœ€åä¸€å†Œï¼Œè¦å¼•èµ·æ³¨æ„
                  * */
                 XmlNodeList nodes = dom.DocumentElement.SelectNodes("item");
                 if (nodes.Count == 0)
@@ -1166,10 +1166,10 @@ namespace dp2Circulation
                     if (String.IsNullOrEmpty(strPublishTime) == true)
                         continue;
                     if (strPublishTime.IndexOf("-") != -1)
-                        continue;   // ÊÇ·ñ±¨´í?
+                        continue;   // æ˜¯å¦æŠ¥é”™?
 
                     if (IndexOf(publishtimes, strPublishTime) != -1)
-                        continue;   // ÓÅ»¯£¬²»¼ÓÈëÄÇĞ©ÖØ¸´µÄÊÂÏî¡£TODO: ÊÇ·ñÒª¾¡Á¿ÓÃµÚÒ»¸ö·Ç¿ÕµÄvalume string?
+                        continue;   // ä¼˜åŒ–ï¼Œä¸åŠ å…¥é‚£äº›é‡å¤çš„äº‹é¡¹ã€‚TODO: æ˜¯å¦è¦å°½é‡ç”¨ç¬¬ä¸€ä¸ªéç©ºçš„valume string?
 
                     string strVolume = DomUtil.GetAttr(node, "volume");
                     PublishTimeAndVolume item = new PublishTimeAndVolume();
@@ -1182,11 +1182,11 @@ namespace dp2Circulation
             return 0;
         }
 
-        // ĞÂ°æ±¾
-        // °²·ÅºÏ¶©³ÉÔ±²á
+        // æ–°ç‰ˆæœ¬
+        // å®‰æ”¾åˆè®¢æˆå‘˜å†Œ
         // parameters:
-        //      items   ItemÊı×é¡£×¢ÒâÆäÖĞÓĞµÄItem¿ÉÄÜÆäContainerÎªnull£¬ÊôÓÚmissingĞÔÖÊ
-        //      strPublishTimeString    Êä³ö³ö°æÊ±¼ä·¶Î§×Ö·û´®
+        //      items   Itemæ•°ç»„ã€‚æ³¨æ„å…¶ä¸­æœ‰çš„Itemå¯èƒ½å…¶Containerä¸ºnullï¼Œå±äºmissingæ€§è´¨
+        //      strPublishTimeString    è¾“å‡ºå‡ºç‰ˆæ—¶é—´èŒƒå›´å­—ç¬¦ä¸²
         void PlaceMemberItems(
             Cell parent_cell,
             List<ItemBindingItem> items,
@@ -1209,9 +1209,9 @@ namespace dp2Circulation
                     {
                         issue = this.NewIssue(item.PublishTime,
                             item.Volume);
-                        // ±¾²Ù×÷¿ÉÄÜ»áÒıÆğÒ»Ğ©ºÏ¶©·¶Î§µÄ¶ÏÁÑ¡£
-                        // ĞèÒªĞŞ²¹¶ÏÁÑ´¦
-                        Debug.Assert(false, "²»Ó¦¸Ã×ßµ½ÕâÀï¡£ÒòÎªÇ°ÃæÒÑ¾­Ô¤ÏÈ´´½¨ÁËËùÓĞVirtualµÄÆÚ¶ÔÏó");
+                        // æœ¬æ“ä½œå¯èƒ½ä¼šå¼•èµ·ä¸€äº›åˆè®¢èŒƒå›´çš„æ–­è£‚ã€‚
+                        // éœ€è¦ä¿®è¡¥æ–­è£‚å¤„
+                        Debug.Assert(false, "ä¸åº”è¯¥èµ°åˆ°è¿™é‡Œã€‚å› ä¸ºå‰é¢å·²ç»é¢„å…ˆåˆ›å»ºäº†æ‰€æœ‰Virtualçš„æœŸå¯¹è±¡");
                     }
                     item.Container = issue;
                 }
@@ -1224,24 +1224,24 @@ namespace dp2Circulation
                 member_cells.Add(cell);
             }
 
-            // °²·ÅÏÂÊôµÄµ¥¶À²á
+            // å®‰æ”¾ä¸‹å±çš„å•ç‹¬å†Œ
             PlaceMemberCells(parent_cell,
                 member_cells,
                 nCol);
 
             if (bSetBidingRange == true)
             {
-                // ¿ÉÄÜ»áÅ×³öÒì³£
+                // å¯èƒ½ä¼šæŠ›å‡ºå¼‚å¸¸
                 SetBindingRange(parent_cell, false);
             }
         }
 
 #if OLD_VERSION
-        // °²·ÅºÏ¶©³ÉÔ±²á
-        // TODO: SetCellÒÑ¾­°²È«£¬´úÂë¿ÉÒÔ¼ò»¯
+        // å®‰æ”¾åˆè®¢æˆå‘˜å†Œ
+        // TODO: SetCellå·²ç»å®‰å…¨ï¼Œä»£ç å¯ä»¥ç®€åŒ–
         // parameters:
-        //      items   ItemÊı×é¡£×¢ÒâÆäÖĞÓĞµÄItem¿ÉÄÜÆäContainerÎªnull£¬ÊôÓÚmissingĞÔÖÊ
-        //      strPublishTimeString    Êä³ö³ö°æÊ±¼ä·¶Î§×Ö·û´®
+        //      items   Itemæ•°ç»„ã€‚æ³¨æ„å…¶ä¸­æœ‰çš„Itemå¯èƒ½å…¶Containerä¸ºnullï¼Œå±äºmissingæ€§è´¨
+        //      strPublishTimeString    è¾“å‡ºå‡ºç‰ˆæ—¶é—´èŒƒå›´å­—ç¬¦ä¸²
         void PlaceMemberItems(
             ItemBindingItem parent_item,
             List<ItemBindingItem> items,
@@ -1284,10 +1284,10 @@ namespace dp2Circulation
                 if (nLastLineNo < nIssueLineNo)
                     nLastLineNo = nIssueLineNo;
 
-                // ¼ì²éitem¶ÔÏóÊÇ·ñÒÑ¾­´æÔÚ
+                // æ£€æŸ¥itemå¯¹è±¡æ˜¯å¦å·²ç»å­˜åœ¨
                 int nExistIndex = issue.IndexOfItem(item);
 
-                // Èç¹û±¾À´¾ÍÔÚÄÇ¸öÎ»ÖÃÁË
+                // å¦‚æœæœ¬æ¥å°±åœ¨é‚£ä¸ªä½ç½®äº†
                 if (nExistIndex == nCol)
                 {
                     item.ParentItem = parent_item;
@@ -1297,26 +1297,26 @@ namespace dp2Circulation
                     temp_cell.ParentItem = parent_item;
                     Debug.Assert(temp_cell.IsMember == true, "");
 
-                    parent_item.MemberCells.Remove(temp_cell);  // ±£ÏÕ
+                    parent_item.MemberCells.Remove(temp_cell);  // ä¿é™©
 
                     parent_item.InsertMemberCell(temp_cell);
                     continue;
                 }
 
-                // É¾³ıÒÑ¾­´æÔÚµÄCell
+                // åˆ é™¤å·²ç»å­˜åœ¨çš„Cell
                 Cell exist_cell = null;
                 if (nExistIndex != -1)
                 {
                     Debug.Assert(false, "");
                     if ((nExistIndex % 2) == 0)
                     {
-                        // Èç¹ûÔÚÆæÊıÎ»ÖÃ£¬¾ÍºÜÆæ¹ÖÁË¡£ÒòÎªÕâ±íÃ÷ÕâÊÇÒ»¸öºÏ¶©µÄ²á
-                        throw new Exception("·¢ÏÖ½«Òª°²·ÅµÄÏÂÊô²á¶ÔÏó¾ÓÈ»ÔÚÆæÊıCellÎ»ÖÃÒÑ¾­´æÔÚ");
+                        // å¦‚æœåœ¨å¥‡æ•°ä½ç½®ï¼Œå°±å¾ˆå¥‡æ€ªäº†ã€‚å› ä¸ºè¿™è¡¨æ˜è¿™æ˜¯ä¸€ä¸ªåˆè®¢çš„å†Œ
+                        throw new Exception("å‘ç°å°†è¦å®‰æ”¾çš„ä¸‹å±å†Œå¯¹è±¡å±…ç„¶åœ¨å¥‡æ•°Cellä½ç½®å·²ç»å­˜åœ¨");
                     }
                     exist_cell = issue.GetCell(nExistIndex);
                     issue.Cells.RemoveAt(nExistIndex);
 
-                    issue.Cells.RemoveAt(nExistIndex-1);    // ×ó±ßÒ»¸ö£¬Ò²É¾³ı
+                    issue.Cells.RemoveAt(nExistIndex-1);    // å·¦è¾¹ä¸€ä¸ªï¼Œä¹Ÿåˆ é™¤
                 }
 
                 issue.GetBlankDoubleIndex(nCol, parent_item);
@@ -1328,7 +1328,7 @@ namespace dp2Circulation
                     cell.ParentItem = parent_item;
                     if (item.Missing == true)
                     {
-                        // Ö»ÊÇÕ¼¾İÎ»ÖÃ
+                        // åªæ˜¯å æ®ä½ç½®
                         cell.item = null;
                         Debug.Assert(item.Container == null, "");
                     }
@@ -1342,7 +1342,7 @@ namespace dp2Circulation
                 item.ParentItem = parent_item;
                 issue.SetCell(nCol, cell);
 
-                parent_item.MemberCells.Remove(cell);  // ±£ÏÕ
+                parent_item.MemberCells.Remove(cell);  // ä¿é™©
                 parent_item.InsertMemberCell(cell);
             }
 
@@ -1355,7 +1355,7 @@ namespace dp2Circulation
             + this.Issues[nLastLineNo].PublishTime;
 
 
-            // ²¹³ä¿ßÁş
+            // è¡¥å……çªŸçª¿
             for (int i = nFirstLineNo; i <= nLastLineNo; i++)
             {
                 IssueBindingItem issue = this.Issues[i];
@@ -1364,7 +1364,7 @@ namespace dp2Circulation
 
                 {
                     Cell cell = issue.GetCell(nCol);
-                    // Èç¹ûÊÇ¿Õ°×¸ñ×Ó£¬¶øÇÒÎŞÖ÷£¬ÔòÖ±½ÓÊ¹ÓÃ
+                    // å¦‚æœæ˜¯ç©ºç™½æ ¼å­ï¼Œè€Œä¸”æ— ä¸»ï¼Œåˆ™ç›´æ¥ä½¿ç”¨
                     if (cell != null
                         && cell.item == null
                         && cell.IsMember == false)
@@ -1379,11 +1379,11 @@ namespace dp2Circulation
 
                 {
                     Cell cell = new Cell();
-                    cell.item = null;   // Ö»ÊÇÕ¼¾İÎ»ÖÃ
+                    cell.item = null;   // åªæ˜¯å æ®ä½ç½®
                     cell.ParentItem = parent_item;
                     issue.SetCell(nCol, cell);
 
-                    // ·ÅÔÚºÏÊÊÎ»ÖÃ
+                    // æ”¾åœ¨åˆé€‚ä½ç½®
                     // parent_item.MemberCells.Add(cell);
 
                     parent_item.InsertMemberCell(cell);
@@ -1394,7 +1394,7 @@ namespace dp2Circulation
         }
 #endif
 
-        // ²éÕÒÌØ¶¨µÄIssue¶ÔÏó
+        // æŸ¥æ‰¾ç‰¹å®šçš„Issueå¯¹è±¡
         IssueBindingItem FindIssue(string strPublishTime)
         {
             for (int i = 0; i < this.Issues.Count; i++)
@@ -1406,9 +1406,9 @@ namespace dp2Circulation
             return null;
         }
 
-        // ´´½¨Ò»¸öĞÂµÄÆÚ¶ÔÏó
+        // åˆ›å»ºä¸€ä¸ªæ–°çš„æœŸå¯¹è±¡
         // parameters:
-        //      strVolume   ºÏ³ÉµÄ×Ö·û´®£¬±íÊ¾¾íÆÚ²á
+        //      strVolume   åˆæˆçš„å­—ç¬¦ä¸²ï¼Œè¡¨ç¤ºå·æœŸå†Œ
         IssueBindingItem NewIssue(string strPublishTime,
             string strVolumeString)
         {
@@ -1418,7 +1418,7 @@ namespace dp2Circulation
             string strZong = "";
             string strOneVolume = "";
 
-            // ½âÎöµ±ÄêÆÚºÅ¡¢×ÜÆÚºÅ¡¢¾íºÅµÄ×Ö·û´®
+            // è§£æå½“å¹´æœŸå·ã€æ€»æœŸå·ã€å·å·çš„å­—ç¬¦ä¸²
             VolumeInfo.ParseItemVolumeString(strVolumeString,
                 out strIssue,
                 out strZong,
@@ -1445,7 +1445,7 @@ namespace dp2Circulation
             {
                 IssueBindingItem issue = this.Issues[i];
 
-                // Ìø¹ı×ÔÓÉÆÚ
+                // è·³è¿‡è‡ªç”±æœŸ
                 if (String.IsNullOrEmpty(issue.PublishTime) == true)
                 {
                     nFreeIndex = i;
@@ -1473,9 +1473,9 @@ namespace dp2Circulation
         }
 
 #if OLD_INITIAL
-        // *** Îª³õÊ¼»¯·şÎñ
-        // »ñµÃËùÓĞIssueµÄItemsÖĞµÄrefid×Ö·û´®¡£×¢Òâ£¬²»ÊÇIssueµÄMemberCellsÖĞµÄ
-        // ×¢Òâ£¬IssueµÄItemsÊÇÎªÁË³õÊ¼»¯ÓÃÍ¾µÄ£¬ÔÚAppendIssue()µ÷ÓÃºó¾ß±¸¡£³õÊ¼»¯Íê³Éºó£¬¼´±»Çå³ı
+        // *** ä¸ºåˆå§‹åŒ–æœåŠ¡
+        // è·å¾—æ‰€æœ‰Issueçš„Itemsä¸­çš„refidå­—ç¬¦ä¸²ã€‚æ³¨æ„ï¼Œä¸æ˜¯Issueçš„MemberCellsä¸­çš„
+        // æ³¨æ„ï¼ŒIssueçš„Itemsæ˜¯ä¸ºäº†åˆå§‹åŒ–ç”¨é€”çš„ï¼Œåœ¨AppendIssue()è°ƒç”¨åå…·å¤‡ã€‚åˆå§‹åŒ–å®Œæˆåï¼Œå³è¢«æ¸…é™¤
         public List<string> AllIssueMembersRefIds
         {
             get
@@ -1504,7 +1504,7 @@ namespace dp2Circulation
 #if DEBUG
                         if (results.IndexOf(strRefID) != -1)
                         {
-                            Debug.Assert(false, "·¢ÏÖÓĞÖØ¸´µÄrefidÖµ '"+strRefID+"'");
+                            Debug.Assert(false, "å‘ç°æœ‰é‡å¤çš„refidå€¼ '"+strRefID+"'");
                         }
 #endif
                         results.Add(strRefID);
@@ -1524,7 +1524,7 @@ namespace dp2Circulation
                 string strPublishTime = item.PublishTime;
                 if (strPublishTime.IndexOf("-") != -1)
                 {
-                    item.Container = null;  // ÔİÊ±²»ÊôÓÚÄ³¸öÆÚ
+                    item.Container = null;  // æš‚æ—¶ä¸å±äºæŸä¸ªæœŸ
                     this.ParentItems.Add(item);
                     item.IsParent = true;
 
@@ -1533,7 +1533,7 @@ namespace dp2Circulation
                 }
 
                 // 2010/3/30
-                // ÌØÊâÇé¿öÏÂ£¬Ã»ÓĞ³ö°æÊ±¼ä·¶Î§£¬µ«ÊÇvolumstring±íÃ÷Îª¶à²áµÄ
+                // ç‰¹æ®Šæƒ…å†µä¸‹ï¼Œæ²¡æœ‰å‡ºç‰ˆæ—¶é—´èŒƒå›´ï¼Œä½†æ˜¯volumstringè¡¨æ˜ä¸ºå¤šå†Œçš„
                 if (String.IsNullOrEmpty(strPublishTime) == true
                     && string.IsNullOrEmpty(item.Volume) == false)
                 {
@@ -1545,7 +1545,7 @@ namespace dp2Circulation
                     {
                         if (infos.Count > 1)
                         {
-                            item.Container = null;  // ÔİÊ±²»ÊôÓÚÄ³¸öÆÚ
+                            item.Container = null;  // æš‚æ—¶ä¸å±äºæŸä¸ªæœŸ
                             this.ParentItems.Add(item);
                             item.IsParent = true;
 
@@ -1574,7 +1574,7 @@ namespace dp2Circulation
                     return -1;
                 }
 
-                item.Container = null;  // ÔİÊ±²»ÊôÓÚÈÎºÎÆÚ
+                item.Container = null;  // æš‚æ—¶ä¸å±äºä»»ä½•æœŸ
                 this.InitialItems.Add(item);
             }
 
@@ -1613,10 +1613,10 @@ namespace dp2Circulation
                 }
             }
 
-            // °´ÕÕpublishtimeÅÅĞò
+            // æŒ‰ç…§publishtimeæ’åº
             this.Issues.Sort(new IssuePublishTimeComparer());
 
-            // ¼ì²éÊÇ·ñÓĞÖØ¸´µÄ³ö°æÈÕÆÚ
+            // æ£€æŸ¥æ˜¯å¦æœ‰é‡å¤çš„å‡ºç‰ˆæ—¥æœŸ
             // 2010/3/21 
             string strPrevPublishTime = "";
             for (int i = 0; i < this.Issues.Count; i++)
@@ -1626,7 +1626,7 @@ namespace dp2Circulation
                     continue;
                 if (issue.PublishTime == strPrevPublishTime)
                 {
-                    strError = "³öÏÖÁËÖØ¸´³ö°æÈÕÆÚ '"+issue.PublishTime+"' µÄ¶à¸öÆÚ¼ÇÂ¼";
+                    strError = "å‡ºç°äº†é‡å¤å‡ºç‰ˆæ—¥æœŸ '"+issue.PublishTime+"' çš„å¤šä¸ªæœŸè®°å½•";
                     return -1;
                 }
 
@@ -1635,7 +1635,7 @@ namespace dp2Circulation
 
             if (this.Issues.Count > 0)
             {
-                // °Ñ×ÔÓÉÆÚ·ÅÔÚ×îºó
+                // æŠŠè‡ªç”±æœŸæ”¾åœ¨æœ€å
                 if (String.IsNullOrEmpty(this.Issues[0].PublishTime) == true)
                 {
                     IssueBindingItem free_issue = this.Issues[0];
@@ -1649,10 +1649,10 @@ namespace dp2Circulation
         }
 
 #if ODERDESIGN_CONTROL
-        // ½«¶©¹º¼ÇÂ¼×°ÔØµ½OrderDesignControlÖĞ
+        // å°†è®¢è´­è®°å½•è£…è½½åˆ°OrderDesignControlä¸­
         // return:
         //      -1  error
-        //      >=0 ¶©¹ºµÄ×Ü·İÊı
+        //      >=0 è®¢è´­çš„æ€»ä»½æ•°
         static int LoadOrderDesignItems(List<string> XmlRecords,
             OrderDesignControl control,
             out string strError)
@@ -1666,7 +1666,7 @@ namespace dp2Circulation
 
                 control.Clear();
 
-                int nOrderedCount = 0;  // Ë³±ã¼ÆËã³ö¶©¹ºµÄ×Ü·İÊı
+                int nOrderedCount = 0;  // é¡ºä¾¿è®¡ç®—å‡ºè®¢è´­çš„æ€»ä»½æ•°
                 for (int i = 0; i < XmlRecords.Count; i++)
                 {
                     DigitalPlatform.CommonControl.Item item =
@@ -1688,7 +1688,7 @@ namespace dp2Circulation
             }
         }
 
-        // ¸ù¾İÓÒ±ßµÄOrderDesignControlÄÚÈİ¹¹ÔìXML¼ÇÂ¼
+        // æ ¹æ®å³è¾¹çš„OrderDesignControlå†…å®¹æ„é€ XMLè®°å½•
         static int BuildOrderXmlRecords(
             OrderDesignControl control,
             out List<string> XmlRecords,
@@ -1708,18 +1708,18 @@ namespace dp2Circulation
 
                 XmlDocument dom = new XmlDocument();
                 dom.LoadXml(strXml);
-                XmlRecords.Add(dom.DocumentElement.OuterXml);   // ²»Òª°üº¬prolog
+                XmlRecords.Add(dom.DocumentElement.OuterXml);   // ä¸è¦åŒ…å«prolog
             }
 
             return 0;
         }
 
-        // ½«order¿Ø¼şÖĞµÄĞÅÏ¢ĞŞ¸Ä¶ÒÏÖµ½IssueBindingItem¶ÔÏóÖĞ
+        // å°†orderæ§ä»¶ä¸­çš„ä¿¡æ¯ä¿®æ”¹å…‘ç°åˆ°IssueBindingItemå¯¹è±¡ä¸­
         // return:
         //      -1  error
-        //      0   ²»±ØÒª¶ÒÏÖ
-        //      1   ¶ÒÏÖ
-        //      2   ²»µ«ÒÑ¾­¶ÒÏÖ£¬¶øÇÒÆÚĞÅÏ¢·¢ÉúÁË½øÒ»²½ĞŞ¸Ä(ÀıÈç´´½¨ÁË²á£¬ĞèÒªÖØĞÂ·´Ó³µ½²É¹º¿Ø¼şÖĞ)
+        //      0   ä¸å¿…è¦å…‘ç°
+        //      1   å…‘ç°
+        //      2   ä¸ä½†å·²ç»å…‘ç°ï¼Œè€Œä¸”æœŸä¿¡æ¯å‘ç”Ÿäº†è¿›ä¸€æ­¥ä¿®æ”¹(ä¾‹å¦‚åˆ›å»ºäº†å†Œï¼Œéœ€è¦é‡æ–°åæ˜ åˆ°é‡‡è´­æ§ä»¶ä¸­)
         public int GetFromOrderControl(
             OrderDesignControl order_control,
             IssueBindingItem issue,
@@ -1739,9 +1739,9 @@ namespace dp2Circulation
             }
 
 
-            // ½«¼´½«Àë¿ª½¹µãµÄĞŞ¸Ä¹ıµÄÓÒ±ßÊÂÏî±£´æ
+            // å°†å³å°†ç¦»å¼€ç„¦ç‚¹çš„ä¿®æ”¹è¿‡çš„å³è¾¹äº‹é¡¹ä¿å­˜
 
-            // É¾³ıorderInfoÔªËØÏÂµÄÈ«²¿ÔªËØ
+            // åˆ é™¤orderInfoå…ƒç´ ä¸‹çš„å…¨éƒ¨å…ƒç´ 
             XmlNodeList nodes = issue.dom.DocumentElement.SelectNodes("orderInfo/*");
             for (int i = 0; i < nodes.Count; i++)
             {
@@ -1750,7 +1750,7 @@ namespace dp2Circulation
             }
 
             List<string> XmlRecords = null;
-            // ¸ù¾İÓÒ±ßµÄOrderDesignControlÄÚÈİ¹¹ÔìXML¼ÇÂ¼
+            // æ ¹æ®å³è¾¹çš„OrderDesignControlå†…å®¹æ„é€ XMLè®°å½•
             int nRet = BuildOrderXmlRecords(
                 order_control,
                 out XmlRecords,
@@ -1773,7 +1773,7 @@ namespace dp2Circulation
                 }
                 catch (Exception ex)
                 {
-                    strError = "fragment XML×°ÈëXmlDocumentFragmentÊ±³ö´í: " + ex.Message;
+                    strError = "fragment XMLè£…å…¥XmlDocumentFragmentæ—¶å‡ºé”™: " + ex.Message;
                     return -1;
                 }
 
@@ -1786,11 +1786,11 @@ namespace dp2Circulation
             bool bItemCreated = false;
             List<IssueBindingItem> issues = new List<IssueBindingItem>();
             issues.Add(issue);
-            // ¸ù¾İÑéÊÕÊı¾İ£¬×Ô¶¯´´½¨ĞÂµÄ²á
+            // æ ¹æ®éªŒæ”¶æ•°æ®ï¼Œè‡ªåŠ¨åˆ›å»ºæ–°çš„å†Œ
             // return:
             //      -1  error
-            //      0   Ã»ÓĞ´´½¨²á
-            //      1   ´´½¨ÁË²á
+            //      0   æ²¡æœ‰åˆ›å»ºå†Œ
+            //      1   åˆ›å»ºäº†å†Œ
             nRet = CreateNewItems(issues,
                 GetAcceptingBatchNo(),
                 this.SetProcessingState,
@@ -1800,7 +1800,7 @@ namespace dp2Circulation
             if (nRet == 1)
                 bItemCreated = true;
 
-            // item.SetNodeCaption(tree_node); // Ë¢ĞÂ½ÚµãÏÔÊ¾
+            // item.SetNodeCaption(tree_node); // åˆ·æ–°èŠ‚ç‚¹æ˜¾ç¤º
 
             order_control.Changed = false;
 
@@ -1810,14 +1810,14 @@ namespace dp2Circulation
             return 1;
         }
 
-        // ¸ù¾İÑéÊÕÊı¾İ£¬×Ô¶¯´´½¨ĞÂµÄ²á
+        // æ ¹æ®éªŒæ”¶æ•°æ®ï¼Œè‡ªåŠ¨åˆ›å»ºæ–°çš„å†Œ
         // return:
         //      -1  error
-        //      0   Ã»ÓĞ´´½¨²á
-        //      1   ´´½¨ÁË²á
+        //      0   æ²¡æœ‰åˆ›å»ºå†Œ
+        //      1   åˆ›å»ºäº†å†Œ
         int CreateNewItems(List<IssueBindingItem> issueitems,
-            string strAcceptBatchNo,    // ÑéÊÕÅú´ÎºÅ
-            bool bSetProcessingState,   // ÊÇ·ñÎª×´Ì¬¼ÓÈë¡°¼Ó¹¤ÖĞ¡±
+            string strAcceptBatchNo,    // éªŒæ”¶æ‰¹æ¬¡å·
+            bool bSetProcessingState,   // æ˜¯å¦ä¸ºçŠ¶æ€åŠ å…¥â€œåŠ å·¥ä¸­â€
             out string strError)
         {
             strError = "";
@@ -1833,7 +1833,7 @@ namespace dp2Circulation
 
                 bool bOrderChanged = false;
 
-                // Õë¶ÔÒ»¸öÆÚÄÚÃ¿¸ö¶©¹º¼ÇÂ¼µÄÑ­»·
+                // é’ˆå¯¹ä¸€ä¸ªæœŸå†…æ¯ä¸ªè®¢è´­è®°å½•çš„å¾ªç¯
                 XmlNodeList order_nodes = issue_item.dom.DocumentElement.SelectNodes("orderInfo/*");
                 for (int j = 0; j < order_nodes.Count; j++)
                 {
@@ -1849,21 +1849,21 @@ namespace dp2Circulation
 
                     bool bLocationChanged = false;
 
-                    // ÎªÃ¿¸ö¹İ²ØµØµã´´½¨Ò»¸öÊµÌå¼ÇÂ¼
+                    // ä¸ºæ¯ä¸ªé¦†è—åœ°ç‚¹åˆ›å»ºä¸€ä¸ªå®ä½“è®°å½•
                     for (int k = 0; k < locations.Count; k++)
                     {
                         Location location = locations[k];
 
-                        // TODO: Òª×¢ÒâÁ½µã£º1) ÒÑ¾­ÑéÊÕ¹ıµÄĞĞ£¬ÀïÃæ³öÏÖ*µÄrefid£¬ÊÇ·ñÒªÔÙ´Î´´½¨²á£¿ÕâÑùĞ§¹û½áÊ¶£¬·´¸´ÓÃµÄÊ±ºòÓĞºÃ´¦
-                        // 2) Ã»ÓĞÑéÊÕ×ãµÄÊ±ºò£¬ÊÇ²»ÊÇÒª°´ÕÕÑéÊÕ×ãÀ´Ñ­»·ÁË£¿¼ì²éÒ»ÏÂ
+                        // TODO: è¦æ³¨æ„ä¸¤ç‚¹ï¼š1) å·²ç»éªŒæ”¶è¿‡çš„è¡Œï¼Œé‡Œé¢å‡ºç°*çš„refidï¼Œæ˜¯å¦è¦å†æ¬¡åˆ›å»ºå†Œï¼Ÿè¿™æ ·æ•ˆæœç»“è¯†ï¼Œåå¤ç”¨çš„æ—¶å€™æœ‰å¥½å¤„
+                        // 2) æ²¡æœ‰éªŒæ”¶è¶³çš„æ—¶å€™ï¼Œæ˜¯ä¸æ˜¯è¦æŒ‰ç…§éªŒæ”¶è¶³æ¥å¾ªç¯äº†ï¼Ÿæ£€æŸ¥ä¸€ä¸‹
 
-                        // ÒÑ¾­´´½¨¹ıµÄÊÂÏî£¬Ìø¹ı
+                        // å·²ç»åˆ›å»ºè¿‡çš„äº‹é¡¹ï¼Œè·³è¿‡
                         if (location.RefID != "*")
                             continue;
 
                         GenerateEntityData e = new GenerateEntityData();
 
-                        location.RefID = Guid.NewGuid().ToString();   // ĞŞ¸Äµ½¹İ²ØµØµã×Ö·û´®ÖĞ
+                        location.RefID = Guid.NewGuid().ToString();   // ä¿®æ”¹åˆ°é¦†è—åœ°ç‚¹å­—ç¬¦ä¸²ä¸­
 
                         bLocationChanged = true;
 
@@ -1871,10 +1871,10 @@ namespace dp2Circulation
                         dom.LoadXml("<root />");
 
                         // 2009/10/19 
-                        // ×´Ì¬
+                        // çŠ¶æ€
                         if (bSetProcessingState == true)
                         {
-                            // Ôö²¹¡°¼Ó¹¤ÖĞ¡±Öµ
+                            // å¢è¡¥â€œåŠ å·¥ä¸­â€å€¼
                             string strOldState = DomUtil.GetElementText(dom.DocumentElement,
                                 "state");
                             DomUtil.SetElementText(dom.DocumentElement,
@@ -1885,7 +1885,7 @@ namespace dp2Circulation
                         string strSeller = DomUtil.GetElementText(order_node,
                             "seller");
 
-                        // sellerÄÚÊÇµ¥´¿Öµ
+                        // sellerå†…æ˜¯å•çº¯å€¼
                         DomUtil.SetElementText(dom.DocumentElement,
                             "seller", strSeller);
 
@@ -1896,8 +1896,8 @@ namespace dp2Circulation
                         string strSource = DomUtil.GetElementText(order_node,
                             "source");
 
-                        // sourceÄÚ²ÉÓÃĞÂÖµ
-                        // ·ÖÀë "old[new]" ÄÚµÄÁ½¸öÖµ
+                        // sourceå†…é‡‡ç”¨æ–°å€¼
+                        // åˆ†ç¦» "old[new]" å†…çš„ä¸¤ä¸ªå€¼
                         OrderDesignControl.ParseOldNewValue(strSource,
                             out strOldValue,
                             out strNewValue);
@@ -1908,7 +1908,7 @@ namespace dp2Circulation
                         string strPrice = DomUtil.GetElementText(order_node,
                             "price");
 
-                        // priceÄÚ²ÉÓÃĞÂÖµ
+                        // priceå†…é‡‡ç”¨æ–°å€¼
                         OrderDesignControl.ParseOldNewValue(strPrice,
                             out strOldValue,
                             out strNewValue);
@@ -1924,14 +1924,14 @@ namespace dp2Circulation
                         DomUtil.SetElementText(dom.DocumentElement,
                             "publishTime", issue_item.PublishTime);
 
-                        // volume ÆäÊµÊÇµ±ÄêÆÚºÅ¡¢×ÜÆÚºÅ¡¢¾íºÅÔÚÒ»ÆğµÄÒ»¸ö×Ö·û´®
+                        // volume å…¶å®æ˜¯å½“å¹´æœŸå·ã€æ€»æœŸå·ã€å·å·åœ¨ä¸€èµ·çš„ä¸€ä¸ªå­—ç¬¦ä¸²
                         string strVolume = IssueManageControl.BuildItemVolumeString(issue_item.Issue,
                             issue_item.Zong,
                             issue_item.Volume);
                         DomUtil.SetElementText(dom.DocumentElement,
                             "volume", strVolume);
 
-                        // Åú´ÎºÅ
+                        // æ‰¹æ¬¡å·
                         DomUtil.SetElementText(dom.DocumentElement,
                             "batchNo", strAcceptBatchNo);
 
@@ -1948,7 +1948,7 @@ namespace dp2Circulation
                         new_cells.Add(item.ContainerCell);
                     }
 
-                    // ¹İ²ØµØµã×Ö·û´®ÓĞ±ä»¯£¬ĞèÒª·´Ó³¸øµ÷Ö÷
+                    // é¦†è—åœ°ç‚¹å­—ç¬¦ä¸²æœ‰å˜åŒ–ï¼Œéœ€è¦åæ˜ ç»™è°ƒä¸»
                     if (bLocationChanged == true)
                     {
                         strDistribute = locations.ToString();
@@ -1966,7 +1966,7 @@ namespace dp2Circulation
                         "orderInfo");
                     issue_item.Changed = true;
 
-                    // Ë¢ĞÂIssue?
+                    // åˆ·æ–°Issue?
                 }
 
             } // end of for i
@@ -1983,11 +1983,11 @@ namespace dp2Circulation
             return 0;
         }
 
-                // ¸ù¾İÆÚĞÅÏ¢³õÊ¼»¯²É¹º¿Ø¼ş
+                // æ ¹æ®æœŸä¿¡æ¯åˆå§‹åŒ–é‡‡è´­æ§ä»¶
         // return:
-        //      -1  ³ö´í
-        //      0   Ã»ÓĞÕÒµ½¶ÔÓ¦µÄ²É¹ºĞÅÏ¢
-        //      1   ÕÒµ½²É¹ºĞÅÏ¢
+        //      -1  å‡ºé”™
+        //      0   æ²¡æœ‰æ‰¾åˆ°å¯¹åº”çš„é‡‡è´­ä¿¡æ¯
+        //      1   æ‰¾åˆ°é‡‡è´­ä¿¡æ¯
         public int InitialOrderControl(
             IssueBindingItem issue,
             OrderDesignControl order_control,
@@ -2002,7 +2002,7 @@ namespace dp2Circulation
 
             if (nodes.Count > 0)
             {
-                // XMLÊı¾İÒÑ¾­¾ß±¸
+                // XMLæ•°æ®å·²ç»å…·å¤‡
                 for (int i = 0; i < nodes.Count; i++)
                 {
                     XmlRecords.Add(nodes[i].OuterXml);
@@ -2010,14 +2010,14 @@ namespace dp2Circulation
             }
             else if (this.GetOrderInfo != null)
             {
-                // ĞèÒª´ÓÍâ²¿»ñµÃ²É¹ºĞÅÏ¢
+                // éœ€è¦ä»å¤–éƒ¨è·å¾—é‡‡è´­ä¿¡æ¯
                 GetOrderInfoEventArgs e1 = new GetOrderInfoEventArgs();
                 e1.BiblioRecPath = "";
                 e1.PublishTime = issue.PublishTime;
                 this.GetOrderInfo(this, e1);
                 if (String.IsNullOrEmpty(e1.ErrorInfo) == false)
                 {
-                    strError = "ÔÚ»ñÈ¡±¾ÖÖÄÚ³ö°æÈÕÆÚÎª '" + issue.PublishTime + "' µÄ¶©¹ºĞÅÏ¢µÄ¹ı³ÌÖĞ·¢Éú´íÎó: " + e1.ErrorInfo;
+                    strError = "åœ¨è·å–æœ¬ç§å†…å‡ºç‰ˆæ—¥æœŸä¸º '" + issue.PublishTime + "' çš„è®¢è´­ä¿¡æ¯çš„è¿‡ç¨‹ä¸­å‘ç”Ÿé”™è¯¯: " + e1.ErrorInfo;
                     return -1;
                 }
 
@@ -2025,7 +2025,7 @@ namespace dp2Circulation
 
                 if (XmlRecords.Count == 0)
                 {
-                    strOrderInfoMessage = "³ö°æÈÕÆÚ '" + issue.PublishTime + "' Ã»ÓĞ¶ÔÓ¦µÄµÄ¶©¹ºĞÅÏ¢";
+                    strOrderInfoMessage = "å‡ºç‰ˆæ—¥æœŸ '" + issue.PublishTime + "' æ²¡æœ‰å¯¹åº”çš„çš„è®¢è´­ä¿¡æ¯";
                     // EanbleOrderDesignControl(false);
 
                     // issue.OrderedCount = -1;
@@ -2038,7 +2038,7 @@ namespace dp2Circulation
 
             // return:
             //      -1  error
-            //      >=0 ¶©¹ºµÄ×Ü·İÊı
+            //      >=0 è®¢è´­çš„æ€»ä»½æ•°
             int nRet = LoadOrderDesignItems(XmlRecords,
                 order_control,
                 out strError);
@@ -2052,7 +2052,7 @@ namespace dp2Circulation
 
 #endif
 
-        // ÊÇ·ñÒÑ¾­¹Ò½ÓµÄGetOrderInfoÊÂ¼ş
+        // æ˜¯å¦å·²ç»æŒ‚æ¥çš„GetOrderInfoäº‹ä»¶
         public bool HasGetOrderInfo()
         {
             if (this.GetOrderInfo == null)
@@ -2061,7 +2061,7 @@ namespace dp2Circulation
             return true;
         }
 
-        // Ç¿ÖÆÈÃ»ñÈ¡¶©¹ºĞÅÏ¢ÏŞ¶¨ÔÚµ±Ç°ÓÃ»§¹ÜÏ½·¶Î§ÄÚ
+        // å¼ºåˆ¶è®©è·å–è®¢è´­ä¿¡æ¯é™å®šåœ¨å½“å‰ç”¨æˆ·ç®¡è¾–èŒƒå›´å†…
         bool m_bForceNarrowRange = false;
 
         public void DoGetOrderInfo(object sender, GetOrderInfoEventArgs e)
@@ -2081,13 +2081,13 @@ namespace dp2Circulation
 
 
 
-        // ¶ÔÊÕÎ²×´Ì¬½øĞĞÈ«Ãæ¼ì²é
+        // å¯¹æ”¶å°¾çŠ¶æ€è¿›è¡Œå…¨é¢æ£€æŸ¥
         public int Check(out string strError)
         {
             strError = "";
 
-            // 1) ËùÓĞÆÚ¶ÔÏóµÄrefID¶¼Ó¦·Ç¿Õ£¬²¢ÇÒ²»ÖØ¸´
-            // publishtime²»ÖØ¸´
+            // 1) æ‰€æœ‰æœŸå¯¹è±¡çš„refIDéƒ½åº”éç©ºï¼Œå¹¶ä¸”ä¸é‡å¤
+            // publishtimeä¸é‡å¤
             List<string> issue_refids = new List<string>();
             List<string> issue_publishtimes = new List<string>();
             for (int i = 0; i < this.Issues.Count; i++)
@@ -2095,7 +2095,7 @@ namespace dp2Circulation
                 IssueBindingItem issue = this.Issues[i];
                 Debug.Assert(issue != null, "");
 
-                // Ìø¹ı×ÔÓÉÆÚ
+                // è·³è¿‡è‡ªç”±æœŸ
                 if (String.IsNullOrEmpty(issue.PublishTime) == true)
                     continue;
 
@@ -2104,27 +2104,27 @@ namespace dp2Circulation
                 {
                     if (String.IsNullOrEmpty(strError) == false)
                         strError += ";";
-                    strError += "ÆÚ '" + issue.Caption + "' µÄ²Î¿¼IDÖµÎª¿Õ";
+                    strError += "æœŸ '" + issue.Caption + "' çš„å‚è€ƒIDå€¼ä¸ºç©º";
                     continue;
                 }
 
-                // ¶Ôrefid²éÖØ
-                if (string.IsNullOrEmpty(issue.RefID) == false  // ĞèÒª·Ç¿Õ²Å²éÖØ
+                // å¯¹refidæŸ¥é‡
+                if (string.IsNullOrEmpty(issue.RefID) == false  // éœ€è¦éç©ºæ‰æŸ¥é‡
                     && issue_refids.IndexOf(issue.RefID) != -1)
                 {
                     if (String.IsNullOrEmpty(strError) == false)
                         strError += ";";
-                    strError += "ÆÚ '" + issue.Caption + "' µÄrefIDÖµ '"+issue.RefID+"' ºÍÆäËûÆÚ·¢ÉúÁËÖØ¸´";
+                    strError += "æœŸ '" + issue.Caption + "' çš„refIDå€¼ '"+issue.RefID+"' å’Œå…¶ä»–æœŸå‘ç”Ÿäº†é‡å¤";
                 }
 
                 issue_refids.Add(issue.RefID);
 
-                // ¶Ôpublishtime²éÖØ
+                // å¯¹publishtimeæŸ¥é‡
                 if (issue_publishtimes.IndexOf(issue.PublishTime) != -1)
                 {
                     if (String.IsNullOrEmpty(strError) == false)
                         strError += ";";
-                    strError += "ÆÚ '" + issue.Caption + "' µÄ³ö°æÊ±¼äÖµ '" + issue.PublishTime + "' ºÍÆäËûÆÚ·¢ÉúÁËÖØ¸´";
+                    strError += "æœŸ '" + issue.Caption + "' çš„å‡ºç‰ˆæ—¶é—´å€¼ '" + issue.PublishTime + "' å’Œå…¶ä»–æœŸå‘ç”Ÿäº†é‡å¤";
                 }
 
                 issue_publishtimes.Add(issue.PublishTime);
@@ -2138,10 +2138,10 @@ namespace dp2Circulation
 
 
 
-        // È·±£×î½Ó½üµ±Ç°ÈÕÆÚµÄÆÚ¸ñ×ÓÏÔÊ¾ÔÚÊÓÏßÄÚ
+        // ç¡®ä¿æœ€æ¥è¿‘å½“å‰æ—¥æœŸçš„æœŸæ ¼å­æ˜¾ç¤ºåœ¨è§†çº¿å†…
         public IssueBindingItem EnsureCurrentIssueVisible()
         {
-            // Ñ°ÕÒºÍµ±Ç°ÈÕÆÚ×î½Ó½üµÄÆÚ¸ñ×Ó
+            // å¯»æ‰¾å’Œå½“å‰æ—¥æœŸæœ€æ¥è¿‘çš„æœŸæ ¼å­
             DateTime now = DateTime.Now;
             TimeSpan min_delta = new TimeSpan(0);
             IssueBindingItem nearest_issue = null;
@@ -2188,7 +2188,7 @@ namespace dp2Circulation
                 this.EnsureVisible(nearest_issue);
                 if (m_lastFocusObj == null)
                 {
-                    // ×Ô¶¯°ÑµÚÒ»¸ö¸ñ×ÓÉèÎª½¹µã
+                    // è‡ªåŠ¨æŠŠç¬¬ä¸€ä¸ªæ ¼å­è®¾ä¸ºç„¦ç‚¹
 
                     m_lastFocusObj = nearest_issue.GetFirstCell();
                     SetObjectFocus(m_lastFocusObj);
@@ -2199,7 +2199,7 @@ namespace dp2Circulation
             return null;
         }
 
-        // ÓÃ¾íÆÚĞÅÏ¢ËÑÑ°ÆÚ¶ÔÏó
+        // ç”¨å·æœŸä¿¡æ¯æœå¯»æœŸå¯¹è±¡
         int SearchIssue(
             VolumeInfo info,
             out List<IssueBindingItem> issues,
@@ -2210,7 +2210,7 @@ namespace dp2Circulation
 
             if (String.IsNullOrEmpty(info.Year) == true)
             {
-                strError = "info.Year²»ÄÜÎª¿Õ";
+                strError = "info.Yearä¸èƒ½ä¸ºç©º";
                 return -1;
             }
 
@@ -2223,7 +2223,7 @@ namespace dp2Circulation
 
                 string strYearPart = IssueUtil.GetYearPart(issue.PublishTime);
 
-                // ¼ì²é³ö°æÊ±¼ä
+                // æ£€æŸ¥å‡ºç‰ˆæ—¶é—´
                 if (strYearPart != info.Year)
                     continue;
 
@@ -2231,7 +2231,7 @@ namespace dp2Circulation
                     issues.Add(issue);
             }
 
-            // Èç¹û¶àÓÚÒ»¸ö£¬²ÅÓÃ×ÜÆÚºÅÀ´¹ıÂË
+            // å¦‚æœå¤šäºä¸€ä¸ªï¼Œæ‰ç”¨æ€»æœŸå·æ¥è¿‡æ»¤
             if (issues.Count > 1 && String.IsNullOrEmpty(info.Zong) == false)
             {
                 List<IssueBindingItem> temp = new List<IssueBindingItem>();
@@ -2249,7 +2249,7 @@ namespace dp2Circulation
                     issues = temp;
             }
 
-            // Èç¹û¶àÓÚÒ»¸ö£¬²ÅÓÃ¾íºÅÀ´¹ıÂË
+            // å¦‚æœå¤šäºä¸€ä¸ªï¼Œæ‰ç”¨å·å·æ¥è¿‡æ»¤
             if (issues.Count > 1 && String.IsNullOrEmpty(info.Volumn) == false)
             {
                 List<IssueBindingItem> temp = new List<IssueBindingItem>();
@@ -2270,14 +2270,14 @@ namespace dp2Circulation
             return 0;
         }
 
-        // TODO: Ôö¼ÓÔÚÊÂÏîÒÑ¾­ÔÚÄÚ´æÖĞµÄÄÇÖÖ³õÊ¼»¯
-        // ³õÊ¼»¯¡£Ò»´ÎĞÔ³õÊ¼»¯£¬²»ÔÙĞèÒªÆäËûº¯Êı
+        // TODO: å¢åŠ åœ¨äº‹é¡¹å·²ç»åœ¨å†…å­˜ä¸­çš„é‚£ç§åˆå§‹åŒ–
+        // åˆå§‹åŒ–ã€‚ä¸€æ¬¡æ€§åˆå§‹åŒ–ï¼Œä¸å†éœ€è¦å…¶ä»–å‡½æ•°
         // parameters:
-        //      strLayoutMode   "auto" "accepting" "binding"¡£autoÎª×Ô¶¯Ä£Ê½£¬acceptingÎªÈ«²¿ĞĞÎª¼Çµ½£¬bindingÎªÈ«²¿ĞĞÎª×°¶©
+        //      strLayoutMode   "auto" "accepting" "binding"ã€‚autoä¸ºè‡ªåŠ¨æ¨¡å¼ï¼Œacceptingä¸ºå…¨éƒ¨è¡Œä¸ºè®°åˆ°ï¼Œbindingä¸ºå…¨éƒ¨è¡Œä¸ºè£…è®¢
         // return:
-        //      -1  ³ö´í
-        //      0   ³É¹¦
-        //      1   ³É¹¦£¬µ«ÓĞ¾¯¸æ¡£¾¯¸æĞÅÏ¢ÔÚstrErrorÖĞ
+        //      -1  å‡ºé”™
+        //      0   æˆåŠŸ
+        //      1   æˆåŠŸï¼Œä½†æœ‰è­¦å‘Šã€‚è­¦å‘Šä¿¡æ¯åœ¨strErrorä¸­
         public int NewInitial(
             string strLayoutMode,
             List<string> ItemXmls,
@@ -2296,20 +2296,20 @@ namespace dp2Circulation
             }
             else
             {
-                strError = "Î´ÖªµÄ²¼¾ÖÄ£Ê½ '"+strLayoutMode+"'";
+                strError = "æœªçŸ¥çš„å¸ƒå±€æ¨¡å¼ '"+strLayoutMode+"'";
                 return -1;
             }
 
-            // Ê×´ÎÉèÖÃ×´Ì¬¡£Ò»°ãÇé¿öÎªÒş²Ø±à¼­¿Ø¼ş
+            // é¦–æ¬¡è®¾ç½®çŠ¶æ€ã€‚ä¸€èˆ¬æƒ…å†µä¸ºéšè—ç¼–è¾‘æ§ä»¶
             if (this.CellFocusChanged != null)
             {
                 FocusChangedEventArgs e = new FocusChangedEventArgs();
                 this.CellFocusChanged(this, e);
             }
 
-            Hashtable placed_table = new Hashtable();   // ÒÑ¾­±»×÷ÎªºÏ¶©±¾ÏÂÊô°²·Å¹ıÎ»ÖÃµÄ²á¶ÔÏó
+            Hashtable placed_table = new Hashtable();   // å·²ç»è¢«ä½œä¸ºåˆè®¢æœ¬ä¸‹å±å®‰æ”¾è¿‡ä½ç½®çš„å†Œå¯¹è±¡
 
-            // °ÑËùÓĞÆÚ¶ÔÏóµÄCellsÊı×éÇå¿Õ
+            // æŠŠæ‰€æœ‰æœŸå¯¹è±¡çš„Cellsæ•°ç»„æ¸…ç©º
             this.FreeIssue = null;
             for (int i = 0; i < this.Issues.Count; i++)
             {
@@ -2320,7 +2320,7 @@ namespace dp2Circulation
                     this.FreeIssue = issue;
             }
 
-            // Èç¹ûÃ»ÓĞ£¬Ôò´´½¨×ÔÓÉÆÚ
+            // å¦‚æœæ²¡æœ‰ï¼Œåˆ™åˆ›å»ºè‡ªç”±æœŸ
             if (this.FreeIssue == null)
             {
                 this.FreeIssue = new IssueBindingItem();
@@ -2328,29 +2328,29 @@ namespace dp2Circulation
                 this.Issues.Add(this.FreeIssue);
             }
 
-            // ´´½¨this.InitalItems
+            // åˆ›å»ºthis.InitalItems
             nRet = CreateInitialItems(ItemXmls,
                 out strError);
             if (nRet == -1)
                 return -1;
 
 
-            // ´´½¨this.Issues
+            // åˆ›å»ºthis.Issues
             nRet = CreateIssues(IssueXmls,
                 out strError);
             if (nRet == -1)
                 return -1;
 
-            // ´´½¨this.ParentItems
+            // åˆ›å»ºthis.ParentItems
             nRet = CreateParentItems(out strError);
             if (nRet == -1)
                 return -1;
 
-            // Ê£ÏÂµÄ¾ÍÊÇÎŞ¹éÊôµÄµ¥²áÁË
+            // å‰©ä¸‹çš„å°±æ˜¯æ— å½’å±çš„å•å†Œäº†
 
-            // ´¦ÀíÃ»ÓĞÆÚ¹éÊôµÄµ¥²á¶ÔÏó£¬½«ËüÃÇ¹éÊôµ½ÊÊµ±µÄIssue¶ÔÏóµÄItems³ÉÔ±ÖĞ
-            // ÓÉÓÚvirtual issuesÕâÊ±ÒÑ¾­´´½¨ÁË£¬ºóÃæ²Å´´½¨ºÏ¶©²á£¬Òò´Ë³õÊ¼»¯ºÏ¶©×İÏò·¶Î§²»»á(?)³öÏÖ¶ÏÁÑ
-            // ×¢£ºÕâÀïÏÔÈ»Ã»ÓĞ¿¼ÂÇbindingxmlÖĞ¿ÉÄÜ»á³öÏÖµÄvirtual³ö°æÈÕÆÚ¡£ÄÇÊ±ÓĞ¿ÉÄÜ»á³öÏÖ¶ÏÁÑ
+            // å¤„ç†æ²¡æœ‰æœŸå½’å±çš„å•å†Œå¯¹è±¡ï¼Œå°†å®ƒä»¬å½’å±åˆ°é€‚å½“çš„Issueå¯¹è±¡çš„Itemsæˆå‘˜ä¸­
+            // ç”±äºvirtual issuesè¿™æ—¶å·²ç»åˆ›å»ºäº†ï¼Œåé¢æ‰åˆ›å»ºåˆè®¢å†Œï¼Œå› æ­¤åˆå§‹åŒ–åˆè®¢çºµå‘èŒƒå›´ä¸ä¼š(?)å‡ºç°æ–­è£‚
+            // æ³¨ï¼šè¿™é‡Œæ˜¾ç„¶æ²¡æœ‰è€ƒè™‘bindingxmlä¸­å¯èƒ½ä¼šå‡ºç°çš„virtualå‡ºç‰ˆæ—¥æœŸã€‚é‚£æ—¶æœ‰å¯èƒ½ä¼šå‡ºç°æ–­è£‚
             for (int i = 0; i < this.InitialItems.Count; i++)
             {
                 ItemBindingItem item = this.InitialItems[i];
@@ -2361,7 +2361,7 @@ namespace dp2Circulation
                 IssueBindingItem issue = this.FindIssue(item.PublishTime);
                 if (issue != null)
                 {
-                    // ×¢£ºÕâÀïÈç¹ûpublishtimeÎª¿ÕµÄ£¬ÕıºÃ¼ÓÈëµ½×ÔÓÉÆÚ
+                    // æ³¨ï¼šè¿™é‡Œå¦‚æœpublishtimeä¸ºç©ºçš„ï¼Œæ­£å¥½åŠ å…¥åˆ°è‡ªç”±æœŸ
                     issue.Items.Add(item);
                     item.Container = issue;
                 }
@@ -2380,7 +2380,7 @@ namespace dp2Circulation
             this.InitialItems.Clear();
 
             List<PublishTimeAndVolume> publishtimes = new List<PublishTimeAndVolume>();
-            // Í³¼Æ(bindingxmlÖĞ)È«²¿ºÏ¶©³ÉÔ±²áËùÊ¹ÓÃ¹ıµÄpublishtime×Ö·û´®
+            // ç»Ÿè®¡(bindingxmlä¸­)å…¨éƒ¨åˆè®¢æˆå‘˜å†Œæ‰€ä½¿ç”¨è¿‡çš„publishtimeå­—ç¬¦ä¸²
             nRet = GetAllBindingXmlPublishTimes(
                 out publishtimes,
                 out strError);
@@ -2403,7 +2403,7 @@ namespace dp2Circulation
             }
 
             /*
-            // µ÷ÊÔ
+            // è°ƒè¯•
             while (this.ParentItems.Count > 3)
                 this.ParentItems.RemoveAt(3);
              * */
@@ -2412,7 +2412,7 @@ namespace dp2Circulation
             // parent_item --> member_items
             Hashtable memberitems_table = null;
 
-            // ±éÀúºÏ¶©²á¶ÔÏóÊı×é£¬½¨Á¢³ÉÔ±¶ÔÏóÊı×é
+            // éå†åˆè®¢å†Œå¯¹è±¡æ•°ç»„ï¼Œå»ºç«‹æˆå‘˜å¯¹è±¡æ•°ç»„
             nRet = CreateMemberItemTable(
                 ref this.ParentItems,
                 out memberitems_table,
@@ -2421,7 +2421,7 @@ namespace dp2Circulation
             if (nRet == -1)
                 return -1;
 
-            // °Ñ³¬¹ı¹ÜÏ½·¶Î§µÄºÏ¶©²áµ¥ÔªÈ¥µô
+            // æŠŠè¶…è¿‡ç®¡è¾–èŒƒå›´çš„åˆè®¢å†Œå•å…ƒå»æ‰
             if (this.m_bHideLockedBindingCell == true
                 && Global.IsGlobalUser(this.LibraryCodeList) == false)
             {
@@ -2437,11 +2437,11 @@ namespace dp2Circulation
                     if (member_items.Count == 0)
                         continue;
 
-                    // ¼ì²éÒ»¸öºÏ¶©²áµÄËùÓĞ³ÉÔ±,¿´¿´ÊÇ²»ÊÇ(ÖÁÉÙÒ»¸ö)ºÍµ±Ç°¿É¼û¶©¹º×éÓĞ´ÓÊô¹ØÏµ?
+                    // æ£€æŸ¥ä¸€ä¸ªåˆè®¢å†Œçš„æ‰€æœ‰æˆå‘˜,çœ‹çœ‹æ˜¯ä¸æ˜¯(è‡³å°‘ä¸€ä¸ª)å’Œå½“å‰å¯è§è®¢è´­ç»„æœ‰ä»å±å…³ç³»?
                     // return:
-                    //      -1  ³ö´í
-                    //      0   Ã»ÓĞ½»²æ
-                    //      1   ÓĞ½»²æ
+                    //      -1  å‡ºé”™
+                    //      0   æ²¡æœ‰äº¤å‰
+                    //      1   æœ‰äº¤å‰
                     nRet = IsMemberCrossOrderGroup(parent_item,
                         member_items,
                         out strError);
@@ -2453,13 +2453,13 @@ namespace dp2Circulation
                     bool bLocked = (StringUtil.IsInList(strLibraryCode, this.LibraryCodeList) == false);
                     parent_item.Locked = bLocked;
 
-                    // ºÏ¶©±¾±¾Éí¹İ´úÂëÔÚÍâ£¬¶øÇÒÆä³ÉÔ±Ò²²»ºÍ¿É¼û¶©¹º×é½»²æµÄ£¬É¾³ıºÏ¶©±¾¶ÔÏó
+                    // åˆè®¢æœ¬æœ¬èº«é¦†ä»£ç åœ¨å¤–ï¼Œè€Œä¸”å…¶æˆå‘˜ä¹Ÿä¸å’Œå¯è§è®¢è´­ç»„äº¤å‰çš„ï¼Œåˆ é™¤åˆè®¢æœ¬å¯¹è±¡
                     if (bLocked == true
                         && nRet == 0)
                     {
                         // this.RemoveItem(parent_item, false);
 
-                        // ´ËÊ±ÉĞÎ´¼ÓÈëIssue¶ÔÏóÏÂÃæ
+                        // æ­¤æ—¶å°šæœªåŠ å…¥Issueå¯¹è±¡ä¸‹é¢
                         this.m_hideitems.Add(parent_item);
 
                         this.ParentItems.RemoveAt(i);
@@ -2468,7 +2468,7 @@ namespace dp2Circulation
                 }
 
 #endif
-                // °Ñµ±Ç°³¬¹ı¹ÜÏ½·¶Î§µÄºÏ¶©²áµ¥ÔªÈ¥µô
+                // æŠŠå½“å‰è¶…è¿‡ç®¡è¾–èŒƒå›´çš„åˆè®¢å†Œå•å…ƒå»æ‰
                 nRet = RemoveOutofBindingItems(
                     ref this.ParentItems,
                     memberitems_table,
@@ -2478,7 +2478,7 @@ namespace dp2Circulation
                 if (nRet == -1)
                     return -1;
 
-                // °Ñ×ÔÓÉÆÚÖĞµÄ³¬¹ı·¶Î§µÄµ¥ÔªÈ¥µô
+                // æŠŠè‡ªç”±æœŸä¸­çš„è¶…è¿‡èŒƒå›´çš„å•å…ƒå»æ‰
                 if (this.FreeIssue != null)
                 {
                     foreach (Cell cell in this.FreeIssue.Cells)
@@ -2497,7 +2497,7 @@ namespace dp2Circulation
 
             }
 
-            // °²·ÅºÏ¶©³ÉÔ±²á¶ÔÏó
+            // å®‰æ”¾åˆè®¢æˆå‘˜å†Œå¯¹è±¡
             nRet = PlaceMemberCell(
                 ref this.ParentItems,
                 memberitems_table,
@@ -2506,10 +2506,10 @@ namespace dp2Circulation
             if (nRet == -1)
                 return -1;
 
-            // °²·ÅÆäÓà²á¶ÔÏó¡£¼´·ÇºÏ¶©³ÉÔ±²á
+            // å®‰æ”¾å…¶ä½™å†Œå¯¹è±¡ã€‚å³éåˆè®¢æˆå‘˜å†Œ
             for (int i = 0; i < this.Issues.Count; i++)
             {
-                // ÏÈ´æ´¢ÔÙÅÅĞò
+                // å…ˆå­˜å‚¨å†æ’åº
                 List<ItemBindingItem> items = new List<ItemBindingItem>();
 
                 IssueBindingItem issue = this.Issues[i];
@@ -2522,32 +2522,32 @@ namespace dp2Circulation
 
                     items.Add(item);
                 }
-                issue.Items.Clear();    // ³õÊ¼»¯Ê¹ÃüÍê³ÉÒÔºóÁ¢¼´Çå³ı
+                issue.Items.Clear();    // åˆå§‹åŒ–ä½¿å‘½å®Œæˆä»¥åç«‹å³æ¸…é™¤
 
                 if (items.Count > 0)
                 {
                     if (String.IsNullOrEmpty(issue.PublishTime) == false)
                     {
-                        // °´ÕÕIntactÅÅĞò
+                        // æŒ‰ç…§Intactæ’åº
                         items.Sort(new ItemIntactComparer());
                     }
 
                     for (int j = 0; j < items.Count; j++)
                     {
                         ItemBindingItem item = items[j];
-                        // °²·ÅÔÚÁ½¸öÒ»×éµÄÓÒ±ßÎ»ÖÃ
+                        // å®‰æ”¾åœ¨ä¸¤ä¸ªä¸€ç»„çš„å³è¾¹ä½ç½®
                         PlaceSingleToTail(item);
                     }
                 }
 
                 if (String.IsNullOrEmpty(issue.PublishTime) == false)
                 {
-                    // Ê×´ÎÉèÖÃÃ¿¸ö¸ñ×ÓµÄOutputIssueÖµ
+                    // é¦–æ¬¡è®¾ç½®æ¯ä¸ªæ ¼å­çš„OutputIssueå€¼
                     issue.RefreshAllOutofIssueValue();
                 }
             }
 
-            // °ÑCellÖĞMissing×´Ì¬µÄItemÈ«²¿ÉèÖÃÎªnull
+            // æŠŠCellä¸­MissingçŠ¶æ€çš„Itemå…¨éƒ¨è®¾ç½®ä¸ºnull
             for (int i = 0; i < this.Issues.Count; i++)
             {
                 IssueBindingItem issue = this.Issues[i];
@@ -2563,7 +2563,7 @@ namespace dp2Circulation
             }
 
 #if NO
-            // °Ñ³¬¹ı¹ÜÏ½·¶Î§µÄºÏ¶©²áµ¥ÔªÈ¥µô
+            // æŠŠè¶…è¿‡ç®¡è¾–èŒƒå›´çš„åˆè®¢å†Œå•å…ƒå»æ‰
             if (this.HideLockedBindingCell == true
                 && Global.IsGlobalUser(this.LibraryCodeList) == false)
             {
@@ -2571,18 +2571,18 @@ namespace dp2Circulation
                 {
                     ItemBindingItem parent_item = this.ParentItems[i];
 
-                    // ¼ì²éÒ»¸öºÏ¶©²áµÄËùÓĞ³ÉÔ±,¿´¿´ÊÇ²»ÊÇ(ÖÁÉÙÒ»¸ö)ºÍµ±Ç°¿É¼û¶©¹º×éÓĞ´ÓÊô¹ØÏµ?
+                    // æ£€æŸ¥ä¸€ä¸ªåˆè®¢å†Œçš„æ‰€æœ‰æˆå‘˜,çœ‹çœ‹æ˜¯ä¸æ˜¯(è‡³å°‘ä¸€ä¸ª)å’Œå½“å‰å¯è§è®¢è´­ç»„æœ‰ä»å±å…³ç³»?
                     // return:
-                    //      -1  ³ö´í
-                    //      0   Ã»ÓĞ½»²æ
-                    //      1   ÓĞ½»²æ
+                    //      -1  å‡ºé”™
+                    //      0   æ²¡æœ‰äº¤å‰
+                    //      1   æœ‰äº¤å‰
                     nRet = IsMemberCrossOrderGroup(parent_item,
                         out strError);
                     if (nRet == -1)
                         return -1;
 
                     string strLibraryCode = Global.GetLibraryCode(parent_item.LocationString);
-                    // ºÏ¶©±¾±¾Éí¹İ´úÂëÔÚÍâ£¬¶øÇÒÆä³ÉÔ±Ò²²»ºÍ¿É¼û¶©¹º×é½»²æµÄ£¬É¾³ıºÏ¶©±¾¶ÔÏó
+                    // åˆè®¢æœ¬æœ¬èº«é¦†ä»£ç åœ¨å¤–ï¼Œè€Œä¸”å…¶æˆå‘˜ä¹Ÿä¸å’Œå¯è§è®¢è´­ç»„äº¤å‰çš„ï¼Œåˆ é™¤åˆè®¢æœ¬å¯¹è±¡
                     if (StringUtil.IsInList(strLibraryCode, this.LibraryCodeList) == false
                         && nRet == 0)
                     {
@@ -2592,7 +2592,7 @@ namespace dp2Circulation
                     }
                 }
 
-                // °Ñ×ÔÓÉÆÚÖĞµÄ³¬¹ı·¶Î§µÄµ¥ÔªÈ¥µô
+                // æŠŠè‡ªç”±æœŸä¸­çš„è¶…è¿‡èŒƒå›´çš„å•å…ƒå»æ‰
                 if (this.FreeIssue != null)
                 {
                     foreach (Cell cell in this.FreeIssue.Cells)
@@ -2606,18 +2606,18 @@ namespace dp2Circulation
                         }
                     }
                 }
-            // TODO: ĞèÒªÖØĞÂplacement
+            // TODO: éœ€è¦é‡æ–°placement
             }
 #endif
 
-            // ÉèÖÃ¼Çµ½²¼¾ÖÄ£Ê½
+            // è®¾ç½®è®°åˆ°å¸ƒå±€æ¨¡å¼
 
             if (strLayoutMode == "auto")
             {
                 for (int i = 0; i < this.Issues.Count; i++)
                 {
                     IssueBindingItem issue = this.Issues[i];
-                    // Ìø¹ı×ÔÓÉÆÚ
+                    // è·³è¿‡è‡ªç”±æœŸ
                     if (String.IsNullOrEmpty(issue.PublishTime) == true)
                         continue;
                     if (issue.HasMemberOrParentCell() == true)
@@ -2641,7 +2641,7 @@ namespace dp2Circulation
                 for (int i = 0; i < this.Issues.Count; i++)
                 {
                     IssueBindingItem issue = this.Issues[i];
-                    // Ìø¹ı×ÔÓÉÆÚ
+                    // è·³è¿‡è‡ªç”±æœŸ
                     if (String.IsNullOrEmpty(issue.PublishTime) == true)
                         continue;
                     {
@@ -2655,11 +2655,11 @@ namespace dp2Circulation
             else
             {
                 Debug.Assert(strLayoutMode == "binding", "");
-                // ±¾À´¾ÍÊÇÈ«²¿ĞĞÒÑ¾­Îª×°¶©Ä£Ê½
+                // æœ¬æ¥å°±æ˜¯å…¨éƒ¨è¡Œå·²ç»ä¸ºè£…è®¢æ¨¡å¼
                 for (int i = 0; i < this.Issues.Count; i++)
                 {
                     IssueBindingItem issue = this.Issues[i];
-                    // Ìø¹ı×ÔÓÉÆÚ
+                    // è·³è¿‡è‡ªç”±æœŸ
                     if (String.IsNullOrEmpty(issue.PublishTime) == true)
                         continue;
                     {
@@ -2689,9 +2689,9 @@ namespace dp2Circulation
         }
 
         // 2012/9/29
-        // ±éÀúºÏ¶©²á¶ÔÏóÊı×é£¬½¨Á¢³ÉÔ±¶ÔÏóÊı×é
+        // éå†åˆè®¢å†Œå¯¹è±¡æ•°ç»„ï¼Œå»ºç«‹æˆå‘˜å¯¹è±¡æ•°ç»„
         // parameters:
-        //      parent_items    ºÏ¶©²á¶ÔÏóÊı×é¡£´¦ÀíºóµÄ¶ÔÏó»á´ÓÕâ¸öÊı×éÖĞÒÆ×ß
+        //      parent_items    åˆè®¢å†Œå¯¹è±¡æ•°ç»„ã€‚å¤„ç†åçš„å¯¹è±¡ä¼šä»è¿™ä¸ªæ•°ç»„ä¸­ç§»èµ°
         int CreateMemberItemTable(
             ref List<ItemBindingItem> parent_items,
             out Hashtable memberitems_table,
@@ -2703,7 +2703,7 @@ namespace dp2Circulation
             // parent_item --> member_items
             memberitems_table = new Hashtable();
 
-            // ±éÀúºÏ¶©²á¶ÔÏóÊı×é£¬½¨Á¢³ÉÔ±¶ÔÏóÊı×é
+            // éå†åˆè®¢å†Œå¯¹è±¡æ•°ç»„ï¼Œå»ºç«‹æˆå‘˜å¯¹è±¡æ•°ç»„
             for (int i = 0; i < parent_items.Count; i++)
             {
                 ItemBindingItem parent_item = parent_items[i];
@@ -2716,7 +2716,7 @@ namespace dp2Circulation
 
                     if (String.IsNullOrEmpty(strVolume) == true)
                     {
-                        // Èç¹ûÃ»ÓĞBindingXml£¬²¢ÇÒÃ»ÓĞ¾íÆÚ·¶Î§£¬Ôò±»ÒÆ¶¯µ½×ÔÓÉÇøÓò
+                        // å¦‚æœæ²¡æœ‰BindingXmlï¼Œå¹¶ä¸”æ²¡æœ‰å·æœŸèŒƒå›´ï¼Œåˆ™è¢«ç§»åŠ¨åˆ°è‡ªç”±åŒºåŸŸ
                         parent_items.Remove(parent_item);
                         Cell temp = new Cell();
                         temp.item = parent_item;
@@ -2731,7 +2731,7 @@ namespace dp2Circulation
                         out strError);
                     if (nRet == -1 || infos.Count == 0) // 2015/5/8
                     {
-                        parent_item.Comment += "\r\n½âÎö¾íÆÚ×Ö·û´®µÄÊ±ºò·¢Éú´íÎó: " + strError;
+                        parent_item.Comment += "\r\nè§£æå·æœŸå­—ç¬¦ä¸²çš„æ—¶å€™å‘ç”Ÿé”™è¯¯: " + strError;
                         parent_items.Remove(parent_item);
                         Cell temp = new Cell();
                         temp.item = parent_item;
@@ -2749,11 +2749,11 @@ namespace dp2Circulation
 
                         ItemBindingItem sub_item = null;
 
-                        // TODO: ¿ÉÒÔÕ÷ÓÃrefidÎª*µÄ¶©¹ºĞÅÏ¢ÄÚµÄ¶ÔÏó
+                        // TODO: å¯ä»¥å¾ç”¨refidä¸º*çš„è®¢è´­ä¿¡æ¯å†…çš„å¯¹è±¡
 
-                        // Í¨¹ı¾íÆÚĞÅÏ¢Ñ°ÕÒºÏÊÊµÄ¿ÉÒÔÒÀ¸½µÄÆÚ¶ÔÏó
+                        // é€šè¿‡å·æœŸä¿¡æ¯å¯»æ‰¾åˆé€‚çš„å¯ä»¥ä¾é™„çš„æœŸå¯¹è±¡
                         List<IssueBindingItem> issues = null;
-                        // ÓÃ¾íÆÚĞÅÏ¢ËÑÑ°ÆÚ¶ÔÏó
+                        // ç”¨å·æœŸä¿¡æ¯æœå¯»æœŸå¯¹è±¡
                         nRet = SearchIssue(
                             info,
                             out issues,
@@ -2763,9 +2763,9 @@ namespace dp2Circulation
 
                         if (issues == null || issues.Count == 0)
                         {
-                            // ËÑÑ°Ê§°Ü£¬
-                            // TODO: Ò²Ğí¿ÉÒÔÖ¸³ö³ö´íÔ­Òò?
-                            strFailMessage = "ÆÚºÅ(Äê:" + info.Year + ") '" + info.IssueNo + "' Ã»ÓĞÕÒµ½ÆÚ¶ÔÏó";
+                            // æœå¯»å¤±è´¥ï¼Œ
+                            // TODO: ä¹Ÿè®¸å¯ä»¥æŒ‡å‡ºå‡ºé”™åŸå› ?
+                            strFailMessage = "æœŸå·(å¹´:" + info.Year + ") '" + info.IssueNo + "' æ²¡æœ‰æ‰¾åˆ°æœŸå¯¹è±¡";
                             bFailed = true;
                             break;
                         }
@@ -2775,25 +2775,25 @@ namespace dp2Circulation
 
                         if (sub_item == null)
                         {
-                            // Èç¹ûÃ»ÓĞÏÖ³ÉµÄitem¶ÔÏó£¬ÔòÍ¨¹ı<item>ÔªËØµÄÏà¹ØÊôĞÔÀ´´´½¨
+                            // å¦‚æœæ²¡æœ‰ç°æˆçš„itemå¯¹è±¡ï¼Œåˆ™é€šè¿‡<item>å…ƒç´ çš„ç›¸å…³å±æ€§æ¥åˆ›å»º
                             sub_item = new ItemBindingItem();
                             nRet = sub_item.Initial("<root />", out strError);
                             Debug.Assert(nRet != -1, "");
 
                             sub_item.Volume = info.GetString();
                             sub_item.PublishTime = strPublishTime;
-                            sub_item.RefID = "*";   // ÏóÕ÷ĞÔµÄ£¬»ò¿ÉÎüÄÉÉı¼¶ÉÏÀ´µÄ¶©¹º°ó¶¨Êı¾İ
+                            sub_item.RefID = "*";   // è±¡å¾æ€§çš„ï¼Œæˆ–å¯å¸çº³å‡çº§ä¸Šæ¥çš„è®¢è´­ç»‘å®šæ•°æ®
                         }
 
                         sub_item.ParentItem = parent_item;
                         sub_item.Deleted = true;
-                        sub_item.State = "ÒÑÉ¾³ı";
+                        sub_item.State = "å·²åˆ é™¤";
                         member_items.Add(sub_item);
                     }
 
                     if (bFailed == true)
                     {
-                        parent_item.Comment += "\r\n¾íÆÚ×Ö·û´®ÖĞµÄ²¿·ÖÆÚ²»´æÔÚ£¬ÎŞ·¨¸´Ô­ºÏ¶©×´Ì¬: " + strFailMessage;
+                        parent_item.Comment += "\r\nå·æœŸå­—ç¬¦ä¸²ä¸­çš„éƒ¨åˆ†æœŸä¸å­˜åœ¨ï¼Œæ— æ³•å¤åŸåˆè®¢çŠ¶æ€: " + strFailMessage;
                         parent_items.Remove(parent_item);
                         Cell temp = new Cell();
                         temp.item = parent_item;
@@ -2805,7 +2805,7 @@ namespace dp2Circulation
                     goto PLACEMEMT;
                 }
 
-                // ¸ù¾İrefid, ÕÒµ½ËüÏÂÊôµÄÄÇĞ©ItemBindingItem¶ÔÏó
+                // æ ¹æ®refid, æ‰¾åˆ°å®ƒä¸‹å±çš„é‚£äº›ItemBindingItemå¯¹è±¡
                 XmlDocument dom = new XmlDocument();
                 dom.LoadXml("<root />");
                 try
@@ -2814,21 +2814,21 @@ namespace dp2Circulation
                 }
                 catch (Exception ex)
                 {
-                    strError = "²Î¿¼IDÎª '" + parent_item.RefID + "' µÄ²áĞÅÏ¢ÖĞ£¬<binding>ÔªËØÄÚÇ¶XML×°ÈëDOMÊ±³ö´í: " + ex.Message;
+                    strError = "å‚è€ƒIDä¸º '" + parent_item.RefID + "' çš„å†Œä¿¡æ¯ä¸­ï¼Œ<binding>å…ƒç´ å†…åµŒXMLè£…å…¥DOMæ—¶å‡ºé”™: " + ex.Message;
                     return -1;
                 }
 
                 /*
-                 * bindingxmlÖĞ£¬<item>ÔªËØÎ´±ØÓĞrefIDÊôĞÔ¡£
-                 * Ã»ÓĞrefIDÊôĞÔ£¬±íÃ÷ÕâÊÇÒ»¸ö±»É¾³ıÁË²á¼ÇÂ¼µÄµ¥´¿ĞÅÏ¢µ¥Ôª£¬»òÕßÊÇÈ±ÆÚÇé¿ö¡£
-                 * È±ÆÚ¿ÉÄÜ·¢ÉúÔÚ×°¶©·¶Î§µÄµÚÒ»²á»òÕß×îºóÒ»²á£¬ÒªÒıÆğ×¢Òâ
+                 * bindingxmlä¸­ï¼Œ<item>å…ƒç´ æœªå¿…æœ‰refIDå±æ€§ã€‚
+                 * æ²¡æœ‰refIDå±æ€§ï¼Œè¡¨æ˜è¿™æ˜¯ä¸€ä¸ªè¢«åˆ é™¤äº†å†Œè®°å½•çš„å•çº¯ä¿¡æ¯å•å…ƒï¼Œæˆ–è€…æ˜¯ç¼ºæœŸæƒ…å†µã€‚
+                 * ç¼ºæœŸå¯èƒ½å‘ç”Ÿåœ¨è£…è®¢èŒƒå›´çš„ç¬¬ä¸€å†Œæˆ–è€…æœ€åä¸€å†Œï¼Œè¦å¼•èµ·æ³¨æ„
                  * */
 
                 parent_item.MemberCells.Clear();
                 XmlNodeList nodes = dom.DocumentElement.SelectNodes("item");
                 if (nodes.Count == 0)
                 {
-                    // ËäÈ»ÓĞBindingXml£¬µ«Ã»ÓĞÈÎºÎÏÂ¼¶<item>ÔªËØ£¬Ôò±»ÒÆ¶¯µ½×ÔÓÉÇøÓò
+                    // è™½ç„¶æœ‰BindingXmlï¼Œä½†æ²¡æœ‰ä»»ä½•ä¸‹çº§<item>å…ƒç´ ï¼Œåˆ™è¢«ç§»åŠ¨åˆ°è‡ªç”±åŒºåŸŸ
                     parent_items.Remove(parent_item);
                     Cell temp = new Cell();
                     temp.item = parent_item;
@@ -2842,7 +2842,7 @@ namespace dp2Circulation
                     XmlNode node = nodes[j];
                     string strRefID = DomUtil.GetAttr(node, "refID");
 
-                    bool bItemRecordDeleted = false;    // ²á¼ÇÂ¼ÊÇ·ñ±»É¾³ı?
+                    bool bItemRecordDeleted = false;    // å†Œè®°å½•æ˜¯å¦è¢«åˆ é™¤?
 
                     if (String.IsNullOrEmpty(strRefID) == true)
                     {
@@ -2866,19 +2866,19 @@ namespace dp2Circulation
                         {
                             if (String.IsNullOrEmpty(strWarning) == false)
                                 strWarning += "; ";
-                            // strWarning += "²Î¿¼IDÎª '" + parent_item.RefID + "' µÄ²áĞÅÏ¢ÖĞ£¬<binding>ÔªËØÄÚ°üº¬µÄ²Î¿¼ID '" + strRefID + "' Ã»ÓĞÕÒµ½¶ÔÓ¦µÄ²áĞÅÏ¢";
+                            // strWarning += "å‚è€ƒIDä¸º '" + parent_item.RefID + "' çš„å†Œä¿¡æ¯ä¸­ï¼Œ<binding>å…ƒç´ å†…åŒ…å«çš„å‚è€ƒID '" + strRefID + "' æ²¡æœ‰æ‰¾åˆ°å¯¹åº”çš„å†Œä¿¡æ¯";
                             bItemRecordDeleted = true;
                         }
                     }
 
                     if (sub_item == null)
                     {
-                        // Èç¹ûÃ»ÓĞÏÖ³ÉµÄitem¶ÔÏó£¬ÔòÍ¨¹ı<item>ÔªËØµÄÏà¹ØÊôĞÔÀ´´´½¨
+                        // å¦‚æœæ²¡æœ‰ç°æˆçš„itemå¯¹è±¡ï¼Œåˆ™é€šè¿‡<item>å…ƒç´ çš„ç›¸å…³å±æ€§æ¥åˆ›å»º
                         sub_item = new ItemBindingItem();
                         nRet = sub_item.Initial("<root />", out strError);
                         Debug.Assert(nRet != -1, "");
 
-                        // TODO: ¿ÉÒÔ°ÑnodeÖĞËùÓĞµÄÊôĞÔ¶¼·­ÒëÎªitemÖĞµÄÍ¬ÃûÔªËØ£¬ÕâÑù¾ÍÔÊĞí±£´æµÄµØ·½ËæÒâÀ©³ä×Ö¶ÎÁË
+                        // TODO: å¯ä»¥æŠŠnodeä¸­æ‰€æœ‰çš„å±æ€§éƒ½ç¿»è¯‘ä¸ºitemä¸­çš„åŒåå…ƒç´ ï¼Œè¿™æ ·å°±å…è®¸ä¿å­˜çš„åœ°æ–¹éšæ„æ‰©å……å­—æ®µäº†
                         sub_item.Volume = DomUtil.GetAttr(node, "volume");
                         sub_item.PublishTime = DomUtil.GetAttr(node, "publishTime");
                         sub_item.RefID = DomUtil.GetAttr(node, "refID");
@@ -2889,11 +2889,11 @@ namespace dp2Circulation
                         sub_item.Price = DomUtil.GetAttr(node, "price");
 
                         bool bMissing = false;
-                        // »ñµÃ²¼¶ûĞÍµÄÊôĞÔ²ÎÊıÖµ
+                        // è·å¾—å¸ƒå°”å‹çš„å±æ€§å‚æ•°å€¼
                         // return:
-                        //      -1  ³ö´í¡£µ«ÊÇnValueÖĞÒÑ¾­ÓĞÁËnDefaultValueÖµ£¬¿ÉÒÔ²»¼Ó¾¯¸æ¶øÖ±½ÓÊ¹ÓÃ
-                        //      0   Õı³£»ñµÃÃ÷È·¶¨ÒåµÄ²ÎÊıÖµ
-                        //      1   ²ÎÊıÃ»ÓĞ¶¨Òå£¬Òò´Ë´úÌæÒÔÈ±Ê¡²ÎÊıÖµ·µ»Ø
+                        //      -1  å‡ºé”™ã€‚ä½†æ˜¯nValueä¸­å·²ç»æœ‰äº†nDefaultValueå€¼ï¼Œå¯ä»¥ä¸åŠ è­¦å‘Šè€Œç›´æ¥ä½¿ç”¨
+                        //      0   æ­£å¸¸è·å¾—æ˜ç¡®å®šä¹‰çš„å‚æ•°å€¼
+                        //      1   å‚æ•°æ²¡æœ‰å®šä¹‰ï¼Œå› æ­¤ä»£æ›¿ä»¥ç¼ºçœå‚æ•°å€¼è¿”å›
                         DomUtil.GetBooleanParam(node,
                             "missing",
                             false,
@@ -2903,22 +2903,22 @@ namespace dp2Circulation
 
                         if (String.IsNullOrEmpty(sub_item.PublishTime) == true)
                         {
-                            // Ã»ÓĞpublishtime£¬Ò²ÎŞ·¨°²·Å
+                            // æ²¡æœ‰publishtimeï¼Œä¹Ÿæ— æ³•å®‰æ”¾
                         }
                     }
 
-                    // sub_item.Binded = true; // ×¢£ºplace½×¶Î»áÉèÖÃµÄ
+                    // sub_item.Binded = true; // æ³¨ï¼šplaceé˜¶æ®µä¼šè®¾ç½®çš„
                     sub_item.ParentItem = parent_item;
                     if (sub_item.Missing == false
                         && bItemRecordDeleted == true)
                     {
                         sub_item.Deleted = bItemRecordDeleted;
-                        sub_item.State = "ÒÑÉ¾³ı";
+                        sub_item.State = "å·²åˆ é™¤";
                     }
 
                     member_items.Add(sub_item);
 
-                    // Ê¹ÓÃºó×ÔÈ»»á±»¶ªÆú
+                    // ä½¿ç”¨åè‡ªç„¶ä¼šè¢«ä¸¢å¼ƒ
                 }
 
             PLACEMEMT:
@@ -2929,9 +2929,9 @@ namespace dp2Circulation
         }
 
         // 2012/9/29
-        // Ö»°²·ÅºÏ¶©²á¶ÔÏó
+        // åªå®‰æ”¾åˆè®¢å†Œå¯¹è±¡
         // parameters:
-        //      parent_items    ºÏ¶©²á¶ÔÏóÊı×é¡£ÎŞ·¨°²·ÅµÄºÏ¶©²á¶ÔÏó»á´ÓÕâ¸öÊı×éÖĞÒÆ×ß
+        //      parent_items    åˆè®¢å†Œå¯¹è±¡æ•°ç»„ã€‚æ— æ³•å®‰æ”¾çš„åˆè®¢å†Œå¯¹è±¡ä¼šä»è¿™ä¸ªæ•°ç»„ä¸­ç§»èµ°
         int PlaceParentItems(
             ref List<ItemBindingItem> parent_items,
             Hashtable memberitems_table,
@@ -2940,7 +2940,7 @@ namespace dp2Circulation
             strError = "";
 
             ////
-            // °²·Å²á¶ÔÏó
+            // å®‰æ”¾å†Œå¯¹è±¡
             for (int i = 0; i < parent_items.Count; i++)
             {
                 ItemBindingItem parent_item = parent_items[i];
@@ -2959,9 +2959,9 @@ namespace dp2Circulation
                 if (member_items.Count == 0)
                     continue;
 
-                // ²¼¾Ö
+                // å¸ƒå±€
 
-                // °ÑºÏ¶©²áµÄItemBindingItem¶ÔÏó°²·ÅÔÚÆäÏÂÊôµÄµÚÒ»¸ö²á¶ÔÏóËùÔÚµÄÆÚĞĞÄÚ
+                // æŠŠåˆè®¢å†Œçš„ItemBindingItemå¯¹è±¡å®‰æ”¾åœ¨å…¶ä¸‹å±çš„ç¬¬ä¸€ä¸ªå†Œå¯¹è±¡æ‰€åœ¨çš„æœŸè¡Œå†…
                 ItemBindingItem first_sub = member_items[0];
                 IssueBindingItem first_issue = first_sub.Container;
 
@@ -2971,12 +2971,12 @@ namespace dp2Circulation
 
                     if (String.IsNullOrEmpty(first_sub.PublishTime) == true)
                     {
-                        // ³ÉÔ±²áÃ»ÓĞpublishtimeÎŞ·¨°²·Å
-                        // Õâ¾Íµ¼ÖÂparent±»ÒÆ¶¯µ½×ÔÓÉÇø
+                        // æˆå‘˜å†Œæ²¡æœ‰publishtimeæ— æ³•å®‰æ”¾
+                        // è¿™å°±å¯¼è‡´parentè¢«ç§»åŠ¨åˆ°è‡ªç”±åŒº
                         parent_items.Remove(parent_item);
                         Cell temp = new Cell();
                         temp.item = parent_item;
-                        temp.item.Comment += "\r\nºÏ¶©²áµÄµÚÒ»¸ö³ÉÔ±²áÃ»ÓĞ³ö°æÊ±¼äĞÅÏ¢£¬Òò´ËºÏ¶©²áÒ²ÎŞ·¨Õı³£°²·Å£¬Ö»ºÃ·ÅÔÚ×ÔÓÉÆÚÖĞ";
+                        temp.item.Comment += "\r\nåˆè®¢å†Œçš„ç¬¬ä¸€ä¸ªæˆå‘˜å†Œæ²¡æœ‰å‡ºç‰ˆæ—¶é—´ä¿¡æ¯ï¼Œå› æ­¤åˆè®¢å†Œä¹Ÿæ— æ³•æ­£å¸¸å®‰æ”¾ï¼Œåªå¥½æ”¾åœ¨è‡ªç”±æœŸä¸­";
                         AddToFreeIssue(temp);
                         i--;
                         continue;
@@ -2994,17 +2994,17 @@ namespace dp2Circulation
 
                 Debug.Assert(first_issue != null, "");
 
-                // °²·ÅÔÚÁ½¸öÒ»×éµÄ¿¿×óÎ»ÖÃ¡£Å¼Êı
+                // å®‰æ”¾åœ¨ä¸¤ä¸ªä¸€ç»„çš„é å·¦ä½ç½®ã€‚å¶æ•°
                 int col = -1;
                 col = first_issue.GetFirstAvailableBoundColumn();
 
-                // °²·ÅºÏ¶©±¾¶ÔÏó
+                // å®‰æ”¾åˆè®¢æœ¬å¯¹è±¡
                 Cell parent_cell = new Cell();
                 parent_cell.item = parent_item;
-                parent_item.Container = first_issue; // ¼Ù×°ÊôÓÚÕâ¸öÆÚ
+                parent_item.Container = first_issue; // å‡è£…å±äºè¿™ä¸ªæœŸ
                 first_issue.SetCell(col, parent_cell);
 
-                // °²·ÅÏÂÊôµÄµ¥¶À²á
+                // å®‰æ”¾ä¸‹å±çš„å•ç‹¬å†Œ
                 try
                 {
                     PlaceMemberItems(parent_cell,
@@ -3023,9 +3023,9 @@ namespace dp2Circulation
         }
 
         // 2012/9/29
-        // °²·ÅºÏ¶©³ÉÔ±²á¶ÔÏó
+        // å®‰æ”¾åˆè®¢æˆå‘˜å†Œå¯¹è±¡
         // parameters:
-        //      parent_items    ºÏ¶©²á¶ÔÏóÊı×é¡£ÎŞ·¨°²·ÅµÄºÏ¶©²á¶ÔÏó»á´ÓÕâ¸öÊı×éÖĞÒÆ×ß
+        //      parent_items    åˆè®¢å†Œå¯¹è±¡æ•°ç»„ã€‚æ— æ³•å®‰æ”¾çš„åˆè®¢å†Œå¯¹è±¡ä¼šä»è¿™ä¸ªæ•°ç»„ä¸­ç§»èµ°
         int PlaceMemberCell(
             ref List<ItemBindingItem> parent_items,
             Hashtable memberitems_table,
@@ -3035,7 +3035,7 @@ namespace dp2Circulation
             strError = "";
 
             ////
-            // °²·Å²á¶ÔÏó
+            // å®‰æ”¾å†Œå¯¹è±¡
             for (int i = 0; i < parent_items.Count; i++)
             {
                 ItemBindingItem parent_item = parent_items[i];
@@ -3054,9 +3054,9 @@ namespace dp2Circulation
                 if (member_items.Count == 0)
                     continue;
 
-                // ²¼¾Ö
+                // å¸ƒå±€
 
-                // °ÑºÏ¶©²áµÄItemBindingItem¶ÔÏó°²·ÅÔÚÆäÏÂÊôµÄµÚÒ»¸ö²á¶ÔÏóËùÔÚµÄÆÚĞĞÄÚ
+                // æŠŠåˆè®¢å†Œçš„ItemBindingItemå¯¹è±¡å®‰æ”¾åœ¨å…¶ä¸‹å±çš„ç¬¬ä¸€ä¸ªå†Œå¯¹è±¡æ‰€åœ¨çš„æœŸè¡Œå†…
                 ItemBindingItem first_sub = member_items[0];
                 IssueBindingItem first_issue = first_sub.Container;
 
@@ -3066,12 +3066,12 @@ namespace dp2Circulation
 
                     if (String.IsNullOrEmpty(first_sub.PublishTime) == true)
                     {
-                        // ³ÉÔ±²áÃ»ÓĞpublishtimeÎŞ·¨°²·Å
-                        // Õâ¾Íµ¼ÖÂparent±»ÒÆ¶¯µ½×ÔÓÉÇø
+                        // æˆå‘˜å†Œæ²¡æœ‰publishtimeæ— æ³•å®‰æ”¾
+                        // è¿™å°±å¯¼è‡´parentè¢«ç§»åŠ¨åˆ°è‡ªç”±åŒº
                         parent_items.Remove(parent_item);
                         Cell temp = new Cell();
                         temp.item = parent_item;
-                        temp.item.Comment += "\r\nºÏ¶©²áµÄµÚÒ»¸ö³ÉÔ±²áÃ»ÓĞ³ö°æÊ±¼äĞÅÏ¢£¬Òò´ËºÏ¶©²áÒ²ÎŞ·¨Õı³£°²·Å£¬Ö»ºÃ·ÅÔÚ×ÔÓÉÆÚÖĞ";
+                        temp.item.Comment += "\r\nåˆè®¢å†Œçš„ç¬¬ä¸€ä¸ªæˆå‘˜å†Œæ²¡æœ‰å‡ºç‰ˆæ—¶é—´ä¿¡æ¯ï¼Œå› æ­¤åˆè®¢å†Œä¹Ÿæ— æ³•æ­£å¸¸å®‰æ”¾ï¼Œåªå¥½æ”¾åœ¨è‡ªç”±æœŸä¸­";
                         AddToFreeIssue(temp);
                         i--;
                         continue;
@@ -3089,17 +3089,17 @@ namespace dp2Circulation
 
                 Debug.Assert(first_issue != null, "");
 
-                // °²·ÅÔÚÁ½¸öÒ»×éµÄ¿¿×óÎ»ÖÃ¡£Å¼Êı
+                // å®‰æ”¾åœ¨ä¸¤ä¸ªä¸€ç»„çš„é å·¦ä½ç½®ã€‚å¶æ•°
                 int col = -1;
                 col = first_issue.GetFirstAvailableBoundColumn();
 
-                // °²·ÅºÏ¶©±¾¶ÔÏó
+                // å®‰æ”¾åˆè®¢æœ¬å¯¹è±¡
                 Cell parent_cell = new Cell();
                 parent_cell.item = parent_item;
-                parent_item.Container = first_issue; // ¼Ù×°ÊôÓÚÕâ¸öÆÚ
+                parent_item.Container = first_issue; // å‡è£…å±äºè¿™ä¸ªæœŸ
                 first_issue.SetCell(col, parent_cell);
 
-                // °²·ÅÏÂÊôµÄµ¥¶À²á
+                // å®‰æ”¾ä¸‹å±çš„å•ç‹¬å†Œ
                 try
                 {
                     PlaceMemberItems(parent_cell,
@@ -3112,7 +3112,7 @@ namespace dp2Circulation
                     return -1;
                 }
 
-                /* // this.Changed×îºó»á±»¸Ä±ä£¬¾ÍÃ»ÓĞÁËĞŞ¸Ä¼ÇºÅ£¬²»ºÃ¡£»¹ÊÇÓÃ²Ëµ¥ÃüÁîÊµÏÖ£¬²Ù×÷ÈËÔ±ĞèÒªÈ¥µ÷ÓÃ
+                /* // this.Changedæœ€åä¼šè¢«æ”¹å˜ï¼Œå°±æ²¡æœ‰äº†ä¿®æ”¹è®°å·ï¼Œä¸å¥½ã€‚è¿˜æ˜¯ç”¨èœå•å‘½ä»¤å®ç°ï¼Œæ“ä½œäººå‘˜éœ€è¦å»è°ƒç”¨
                 if (String.IsNullOrEmpty(parent_item.PublishTime) == true)
                 {
                     if (parent_item.RefreshPublishTime() == true)
@@ -3120,17 +3120,17 @@ namespace dp2Circulation
                 }
                  * */
 
-                // ¼ÇÒä
+                // è®°å¿†
                 foreach (ItemBindingItem temp in member_items)
                 {
                     placed_table[temp] = temp;
                 }
 
                 /*
-                // ÉÔºó²Å°²·ÅºÏ¶©±¾¶ÔÏó
+                // ç¨åæ‰å®‰æ”¾åˆè®¢æœ¬å¯¹è±¡
                 Cell cell = new Cell();
                 cell.item = parent_item;
-                parent_item.Container = first_issue; // ¼Ù×°ÊôÓÚÕâ¸öÆÚ
+                parent_item.Container = first_issue; // å‡è£…å±äºè¿™ä¸ªæœŸ
                 first_issue.SetCell(col, cell);
                  * */
 
@@ -3149,13 +3149,13 @@ namespace dp2Circulation
             return 0;
         }
 
-        // ¼ì²éÒ»¸öºÏ¶©²áµÄËùÓĞ³ÉÔ±,¿´¿´ÊÇ²»ÊÇ(ÖÁÉÙÒ»¸ö)ºÍµ±Ç°¿É¼û¶©¹º×éÓĞ´ÓÊô¹ØÏµ?
+        // æ£€æŸ¥ä¸€ä¸ªåˆè®¢å†Œçš„æ‰€æœ‰æˆå‘˜,çœ‹çœ‹æ˜¯ä¸æ˜¯(è‡³å°‘ä¸€ä¸ª)å’Œå½“å‰å¯è§è®¢è´­ç»„æœ‰ä»å±å…³ç³»?
         // parameters:
-        //      bRefreshOrderItem   ÊÇ·ñÇ¿ÖÆË¢ĞÂ¶©¹ºĞÅÏ¢?
+        //      bRefreshOrderItem   æ˜¯å¦å¼ºåˆ¶åˆ·æ–°è®¢è´­ä¿¡æ¯?
         // return:
-        //      -1  ³ö´í
-        //      0   Ã»ÓĞ½»²æ
-        //      1   ÓĞ½»²æ
+        //      -1  å‡ºé”™
+        //      0   æ²¡æœ‰äº¤å‰
+        //      1   æœ‰äº¤å‰
         int IsMemberCrossOrderGroup(ItemBindingItem parent_item,
             List<ItemBindingItem> member_items,
             bool bRefreshOrderItem,
@@ -3165,13 +3165,13 @@ namespace dp2Circulation
 
             List<string> visible_refids = new List<string>();
 
-            // »ñµÃËùÓĞ¿É¼û¶©¹º×éÖĞµÄrefid
+            // è·å¾—æ‰€æœ‰å¯è§è®¢è´­ç»„ä¸­çš„refid
             foreach (IssueBindingItem issue in this.Issues)
             {
                 if (issue == null)
                     continue;
 
-                // Ìø¹ı×ÔÓÉÆÚ
+                // è·³è¿‡è‡ªç”±æœŸ
                 if (string.IsNullOrEmpty(issue.PublishTime) == true)
                     continue;
 
@@ -3185,7 +3185,7 @@ namespace dp2Circulation
                     return -1;
 
                 List<string> refids = null;
-                // »ñµÃ¿É¼ûµÄ¶©¹º×éÖĞµÄrefid
+                // è·å¾—å¯è§çš„è®¢è´­ç»„ä¸­çš„refid
                 nRet = issue.GetVisibleRefIDs(
                     this.LibraryCodeList,
                     out refids,
@@ -3205,7 +3205,7 @@ namespace dp2Circulation
             return 0;
         }
 
-        // ÕÒµ½²¢É¾³ıÒ»¸öitem¡£Èç¹ûÕâ¸öitemÊÇºÏ¶©±¾¶ÔÏó£¬ÔòÒ²ÒªÉ¾³ıÆäÏÂÊôµÄ²áitem
+        // æ‰¾åˆ°å¹¶åˆ é™¤ä¸€ä¸ªitemã€‚å¦‚æœè¿™ä¸ªitemæ˜¯åˆè®¢æœ¬å¯¹è±¡ï¼Œåˆ™ä¹Ÿè¦åˆ é™¤å…¶ä¸‹å±çš„å†Œitem
         void RemoveItem(ItemBindingItem item,
             bool bRemoveMemberCell)
         {
@@ -3238,9 +3238,9 @@ namespace dp2Circulation
             this.m_hideitems.Add(item);
         }
 
-        // »ñµÃË÷È¡ºÅÏà¹ØµÄ²¿·ÖĞÅÏ¢
+        // è·å¾—ç´¢å–å·ç›¸å…³çš„éƒ¨åˆ†ä¿¡æ¯
         // parameters:
-        //      exclude_item    ÒªÅÅ³ıµÄ¶ÔÏó
+        //      exclude_item    è¦æ’é™¤çš„å¯¹è±¡
         public List<CallNumberItem> GetCallNumberItems(ItemBindingItem exclude_item)
         {
             List<ItemBindingItem> all_items = this.AllItems;
@@ -3265,28 +3265,28 @@ namespace dp2Circulation
         }
 
 #if OLD_INITIAL
-        // *** Îª³õÊ¼»¯·şÎñ
-        // ³õÊ¼»¯¡£Ó¦ÔÚAppendIssue() AppendNoneIssueSingleItems() ºÍAppendBindItem()ÒÔºóµ÷ÓÃ
+        // *** ä¸ºåˆå§‹åŒ–æœåŠ¡
+        // åˆå§‹åŒ–ã€‚åº”åœ¨AppendIssue() AppendNoneIssueSingleItems() å’ŒAppendBindItem()ä»¥åè°ƒç”¨
         // return:
-        //      -1  ³ö´í
-        //      0   ³É¹¦
-        //      1   ³É¹¦£¬µ«ÓĞ¾¯¸æ¡£¾¯¸æĞÅÏ¢ÔÚstrErrorÖĞ
+        //      -1  å‡ºé”™
+        //      0   æˆåŠŸ
+        //      1   æˆåŠŸï¼Œä½†æœ‰è­¦å‘Šã€‚è­¦å‘Šä¿¡æ¯åœ¨strErrorä¸­
         public int Initial(out string strError)
         {
             strError = "";
             string strWarning = "";
             int nRet = 0;
 
-            // Ê×´ÎÉèÖÃ×´Ì¬¡£Ò»°ãÇé¿öÎªÒş²Ø±à¼­¿Ø¼ş
+            // é¦–æ¬¡è®¾ç½®çŠ¶æ€ã€‚ä¸€èˆ¬æƒ…å†µä¸ºéšè—ç¼–è¾‘æ§ä»¶
             if (this.CellFocusChanged != null)
             {
                 FocusChangedEventArgs e = new FocusChangedEventArgs();
                 this.CellFocusChanged(this, e);
             }
 
-            Hashtable placed_table = new Hashtable();   // ÒÑ¾­±»×÷ÎªºÏ¶©±¾ÏÂÊô°²·Å¹ıÎ»ÖÃµÄ²á¶ÔÏó
+            Hashtable placed_table = new Hashtable();   // å·²ç»è¢«ä½œä¸ºåˆè®¢æœ¬ä¸‹å±å®‰æ”¾è¿‡ä½ç½®çš„å†Œå¯¹è±¡
 
-            // °ÑËùÓĞÆÚ¶ÔÏóµÄCellsÊı×éÇå¿Õ
+            // æŠŠæ‰€æœ‰æœŸå¯¹è±¡çš„Cellsæ•°ç»„æ¸…ç©º
             this.FreeIssue = null;
             for (int i = 0; i < this.Issues.Count; i++)
             {
@@ -3297,7 +3297,7 @@ namespace dp2Circulation
                     this.FreeIssue = issue;
             }
 
-            // Èç¹ûÃ»ÓĞ£¬Ôò´´½¨×ÔÓÉÆÚ
+            // å¦‚æœæ²¡æœ‰ï¼Œåˆ™åˆ›å»ºè‡ªç”±æœŸ
             if (this.FreeIssue == null)
             {
                 this.FreeIssue = new IssueBindingItem();
@@ -3305,7 +3305,7 @@ namespace dp2Circulation
                 this.Issues.Add(this.FreeIssue);
             }
 
-            // ´¦ÀíÃ»ÓĞÆÚ¹éÊôµÄµ¥²á¶ÔÏó£¬½«ËüÃÇ¹éÊôµ½ÊÊµ±µÄIssue¶ÔÏóµÄItems³ÉÔ±ÖĞ
+            // å¤„ç†æ²¡æœ‰æœŸå½’å±çš„å•å†Œå¯¹è±¡ï¼Œå°†å®ƒä»¬å½’å±åˆ°é€‚å½“çš„Issueå¯¹è±¡çš„Itemsæˆå‘˜ä¸­
             for (int i = 0; i < this.NoneIssueItems.Count; i++)
             {
                 ItemBindingItem item = this.NoneIssueItems[i];
@@ -3331,7 +3331,7 @@ namespace dp2Circulation
             this.NoneIssueItems.Clear();
 
 
-            // ±éÀúºÏ¶©²á¶ÔÏóÊı×é
+            // éå†åˆè®¢å†Œå¯¹è±¡æ•°ç»„
             for (int i = 0; i < this.ParentItems.Count; i++)
             {
                 ItemBindingItem parent_item = this.ParentItems[i];
@@ -3339,7 +3339,7 @@ namespace dp2Circulation
                 string strBindingXml = parent_item.Binding;
                 if (String.IsNullOrEmpty(strBindingXml) == true)
                 {
-                    // Èç¹ûÃ»ÓĞBindingXml£¬Ôò±»ÒÆ¶¯µ½×ÔÓÉÇøÓò
+                    // å¦‚æœæ²¡æœ‰BindingXmlï¼Œåˆ™è¢«ç§»åŠ¨åˆ°è‡ªç”±åŒºåŸŸ
                     this.ParentItems.Remove(parent_item);
                     Cell temp = new Cell();
                     temp.item = parent_item;
@@ -3348,7 +3348,7 @@ namespace dp2Circulation
                     continue;
                 }
 
-                // ¸ù¾İrefid, ÕÒµ½ËüÏÂÊôµÄÄÇĞ©ItemBindingItem¶ÔÏó
+                // æ ¹æ®refid, æ‰¾åˆ°å®ƒä¸‹å±çš„é‚£äº›ItemBindingItemå¯¹è±¡
                 XmlDocument dom = new XmlDocument();
                 dom.LoadXml("<root />");
                 try
@@ -3357,21 +3357,21 @@ namespace dp2Circulation
                 }
                 catch (Exception ex)
                 {
-                    strError = "²Î¿¼IDÎª '"+parent_item.RefID+"' µÄ²áĞÅÏ¢ÖĞ£¬<binding>ÔªËØÄÚÇ¶XML×°ÈëDOMÊ±³ö´í: " + ex.Message;
+                    strError = "å‚è€ƒIDä¸º '"+parent_item.RefID+"' çš„å†Œä¿¡æ¯ä¸­ï¼Œ<binding>å…ƒç´ å†…åµŒXMLè£…å…¥DOMæ—¶å‡ºé”™: " + ex.Message;
                     return -1;
                 }
 
                 /*
-                 * bindingxmlÖĞ£¬<item>ÔªËØÎ´±ØÓĞrefIDÊôĞÔ¡£
-                 * Ã»ÓĞrefIDÊôĞÔ£¬±íÃ÷ÕâÊÇÒ»¸ö±»É¾³ıÁË²á¼ÇÂ¼µÄµ¥´¿ĞÅÏ¢µ¥Ôª£¬»òÕßÊÇÈ±ÆÚÇé¿ö¡£
-                 * È±ÆÚ¿ÉÄÜ·¢ÉúÔÚ×°¶©·¶Î§µÄµÚÒ»²á»òÕß×îºóÒ»²á£¬ÒªÒıÆğ×¢Òâ
+                 * bindingxmlä¸­ï¼Œ<item>å…ƒç´ æœªå¿…æœ‰refIDå±æ€§ã€‚
+                 * æ²¡æœ‰refIDå±æ€§ï¼Œè¡¨æ˜è¿™æ˜¯ä¸€ä¸ªè¢«åˆ é™¤äº†å†Œè®°å½•çš„å•çº¯ä¿¡æ¯å•å…ƒï¼Œæˆ–è€…æ˜¯ç¼ºæœŸæƒ…å†µã€‚
+                 * ç¼ºæœŸå¯èƒ½å‘ç”Ÿåœ¨è£…è®¢èŒƒå›´çš„ç¬¬ä¸€å†Œæˆ–è€…æœ€åä¸€å†Œï¼Œè¦å¼•èµ·æ³¨æ„
                  * */
 
                 parent_item.MemberCells.Clear();
                 XmlNodeList nodes = dom.DocumentElement.SelectNodes("item");
                 if (nodes.Count == 0)
                 {
-                    // ËäÈ»BindingXml£¬µ«Ã»ÓĞÈÎºÎÏÂ¼¶<item>ÔªËØ£¬Ôò±»ÒÆ¶¯µ½×ÔÓÉÇøÓò
+                    // è™½ç„¶BindingXmlï¼Œä½†æ²¡æœ‰ä»»ä½•ä¸‹çº§<item>å…ƒç´ ï¼Œåˆ™è¢«ç§»åŠ¨åˆ°è‡ªç”±åŒºåŸŸ
                     this.ParentItems.Remove(parent_item);
                     Cell temp = new Cell();
                     temp.item = parent_item;
@@ -3387,7 +3387,7 @@ namespace dp2Circulation
                     XmlNode node = nodes[j];
                     string strRefID = DomUtil.GetAttr(node, "refID");
 
-                    bool bItemRecordDeleted = false;    // ²á¼ÇÂ¼ÊÇ·ñ±»É¾³ı?
+                    bool bItemRecordDeleted = false;    // å†Œè®°å½•æ˜¯å¦è¢«åˆ é™¤?
 
                     if (String.IsNullOrEmpty(strRefID) == true)
                     {
@@ -3403,21 +3403,21 @@ namespace dp2Circulation
                         {
                             if (String.IsNullOrEmpty(strWarning) == false)
                                 strWarning += "; ";
-                            // strWarning += "²Î¿¼IDÎª '" + parent_item.RefID + "' µÄ²áĞÅÏ¢ÖĞ£¬<binding>ÔªËØÄÚ°üº¬µÄ²Î¿¼ID '" + strRefID + "' Ã»ÓĞÕÒµ½¶ÔÓ¦µÄ²áĞÅÏ¢";
+                            // strWarning += "å‚è€ƒIDä¸º '" + parent_item.RefID + "' çš„å†Œä¿¡æ¯ä¸­ï¼Œ<binding>å…ƒç´ å†…åŒ…å«çš„å‚è€ƒID '" + strRefID + "' æ²¡æœ‰æ‰¾åˆ°å¯¹åº”çš„å†Œä¿¡æ¯";
                             bItemRecordDeleted = true;
                         }
                     }
 
                     if (sub_item == null)
                     {
-                        // Èç¹ûÃ»ÓĞÏÖ³ÉµÄitem¶ÔÏó£¬ÔòÍ¨¹ı<item>ÔªËØµÄÏà¹ØÊôĞÔÀ´´´½¨
+                        // å¦‚æœæ²¡æœ‰ç°æˆçš„itemå¯¹è±¡ï¼Œåˆ™é€šè¿‡<item>å…ƒç´ çš„ç›¸å…³å±æ€§æ¥åˆ›å»º
                         sub_item = new ItemBindingItem();
                         nRet = sub_item.Initial("<root />", out strError);
                         Debug.Assert(nRet != -1, "");
 
-                        sub_item.State = "ÒÑÉ¾³ı";
+                        sub_item.State = "å·²åˆ é™¤";
 
-                        // TODO: ¿ÉÒÔ°ÑnodeÖĞËùÓĞµÄÊôĞÔ¶¼·­ÒëÎªitemÖĞµÄÍ¬ÃûÔªËØ£¬ÕâÑù¾ÍÔÊĞí±£´æµÄµØ·½ËæÒâÀ©³ä×Ö¶ÎÁË
+                        // TODO: å¯ä»¥æŠŠnodeä¸­æ‰€æœ‰çš„å±æ€§éƒ½ç¿»è¯‘ä¸ºitemä¸­çš„åŒåå…ƒç´ ï¼Œè¿™æ ·å°±å…è®¸ä¿å­˜çš„åœ°æ–¹éšæ„æ‰©å……å­—æ®µäº†
                         sub_item.Volume = DomUtil.GetAttr(node, "volume");
                         sub_item.PublishTime = DomUtil.GetAttr(node, "publishTime");
                         sub_item.RefID = DomUtil.GetAttr(node, "refID");
@@ -3425,11 +3425,11 @@ namespace dp2Circulation
                         sub_item.RegisterNo = DomUtil.GetAttr(node, "registerNo");
 
                         bool bMissing = false;
-                        // »ñµÃ²¼¶ûĞÍµÄÊôĞÔ²ÎÊıÖµ
+                        // è·å¾—å¸ƒå°”å‹çš„å±æ€§å‚æ•°å€¼
                         // return:
-                        //      -1  ³ö´í¡£µ«ÊÇnValueÖĞÒÑ¾­ÓĞÁËnDefaultValueÖµ£¬¿ÉÒÔ²»¼Ó¾¯¸æ¶øÖ±½ÓÊ¹ÓÃ
-                        //      0   Õı³£»ñµÃÃ÷È·¶¨ÒåµÄ²ÎÊıÖµ
-                        //      1   ²ÎÊıÃ»ÓĞ¶¨Òå£¬Òò´Ë´úÌæÒÔÈ±Ê¡²ÎÊıÖµ·µ»Ø
+                        //      -1  å‡ºé”™ã€‚ä½†æ˜¯nValueä¸­å·²ç»æœ‰äº†nDefaultValueå€¼ï¼Œå¯ä»¥ä¸åŠ è­¦å‘Šè€Œç›´æ¥ä½¿ç”¨
+                        //      0   æ­£å¸¸è·å¾—æ˜ç¡®å®šä¹‰çš„å‚æ•°å€¼
+                        //      1   å‚æ•°æ²¡æœ‰å®šä¹‰ï¼Œå› æ­¤ä»£æ›¿ä»¥ç¼ºçœå‚æ•°å€¼è¿”å›
                         DomUtil.GetBooleanParam(node,
                             "missing",
                             false,
@@ -3438,19 +3438,19 @@ namespace dp2Circulation
                         sub_item.Missing = bMissing;
                     }
 
-                    // sub_item.Binded = true; // ×¢£ºplace½×¶Î»áÉèÖÃµÄ
+                    // sub_item.Binded = true; // æ³¨ï¼šplaceé˜¶æ®µä¼šè®¾ç½®çš„
                     sub_item.ParentItem = parent_item;
                     sub_item.Deleted = bItemRecordDeleted;
 
                     member_items.Add(sub_item);
 
-                    // Ê¹ÓÃºó×ÔÈ»»á±»¶ªÆú
+                    // ä½¿ç”¨åè‡ªç„¶ä¼šè¢«ä¸¢å¼ƒ
                 }
 
-                // ²¼¾Ö
+                // å¸ƒå±€
                 if (member_items.Count > 0)
                 {
-                    // °ÑºÏ¶©²áµÄItemBindingItem¶ÔÏó°²·ÅÔÚÆäÏÂÊôµÄµÚÒ»¸ö²á¶ÔÏóËùÔÚµÄÆÚĞĞÄÚ
+                    // æŠŠåˆè®¢å†Œçš„ItemBindingItemå¯¹è±¡å®‰æ”¾åœ¨å…¶ä¸‹å±çš„ç¬¬ä¸€ä¸ªå†Œå¯¹è±¡æ‰€åœ¨çš„æœŸè¡Œå†…
                     ItemBindingItem first_sub = member_items[0];
                     IssueBindingItem first_issue = first_sub.Container;
 
@@ -3468,11 +3468,11 @@ namespace dp2Circulation
 
                     Debug.Assert(first_issue != null, "");
 
-                    // °²·ÅÔÚÁ½¸öÒ»×éµÄ¿¿×óÎ»ÖÃ¡£Å¼Êı
+                    // å®‰æ”¾åœ¨ä¸¤ä¸ªä¸€ç»„çš„é å·¦ä½ç½®ã€‚å¶æ•°
                     int col = -1;
                     if ((first_issue.Cells.Count % 2) == 0)
                     {
-                        col = first_issue.Cells.Count;    // ¼ÇÒä°²·ÅµÄÁĞºÅ
+                        col = first_issue.Cells.Count;    // è®°å¿†å®‰æ”¾çš„åˆ—å·
                         first_issue.Cells.Add(null);
                     }
                     else
@@ -3482,23 +3482,23 @@ namespace dp2Circulation
                         first_issue.Cells.Add(null);
                     }
 
-                    // °²·ÅÏÂÊôµÄµ¥¶À²á
+                    // å®‰æ”¾ä¸‹å±çš„å•ç‹¬å†Œ
                     string strTemp = "";
                     PlaceMemberItems(parent_item,
                         member_items,
                         col + 1,
                         out strTemp);
 
-                    // ¼ÇÒä
+                    // è®°å¿†
                     foreach (ItemBindingItem temp in member_items)
                     {
                         placed_table[temp] = temp;
                     }
 
-                    // ÉÔºó²Å°²·ÅºÏ¶©±¾¶ÔÏó
+                    // ç¨åæ‰å®‰æ”¾åˆè®¢æœ¬å¯¹è±¡
                     Cell cell = new Cell();
                     cell.item = parent_item;
-                    parent_item.Container = first_issue; // ¼Ù×°ÊôÓÚÕâ¸öÆÚ
+                    parent_item.Container = first_issue; // å‡è£…å±äºè¿™ä¸ªæœŸ
                     first_issue.SetCell(col, cell);
 
 #if DEBUG
@@ -3514,7 +3514,7 @@ namespace dp2Circulation
                 }
             }
 
-            // °²·ÅÆäÓà²á¶ÔÏó¡£¼´·ÇºÏ¶©³ÉÔ±²á
+            // å®‰æ”¾å…¶ä½™å†Œå¯¹è±¡ã€‚å³éåˆè®¢æˆå‘˜å†Œ
             for (int i = 0; i < this.Issues.Count; i++)
             {
                 List<ItemBindingItem> items = new List<ItemBindingItem>();
@@ -3528,22 +3528,22 @@ namespace dp2Circulation
 
                     items.Add(item);
                 }
-                issue.Items.Clear();    // ³õÊ¼»¯Ê¹ÃüÍê³ÉÒÔºóÁ¢¼´Çå³ı
+                issue.Items.Clear();    // åˆå§‹åŒ–ä½¿å‘½å®Œæˆä»¥åç«‹å³æ¸…é™¤
 
                 if (items.Count > 0)
                 {
-                    // °´ÕÕIntactÅÅĞò
+                    // æŒ‰ç…§Intactæ’åº
                     items.Sort(new ItemIntactComparer());
 
                     for (int j = 0; j < items.Count; j++)
                     {
                         ItemBindingItem item = items[j];
-                        // °²·ÅÔÚÁ½¸öÒ»×éµÄÓÒ±ßÎ»ÖÃ
+                        // å®‰æ”¾åœ¨ä¸¤ä¸ªä¸€ç»„çš„å³è¾¹ä½ç½®
                         PlaceSingleToTail(item);
                     }
                 }
 
-                // Ê×´ÎÉèÖÃÃ¿¸ö¸ñ×ÓµÄOutputIssueÖµ
+                // é¦–æ¬¡è®¾ç½®æ¯ä¸ªæ ¼å­çš„OutputIssueå€¼
                 issue.RefreshAllOutofIssueValue();
 
 
@@ -3562,7 +3562,7 @@ namespace dp2Circulation
         }
 #endif
 
-        // ¶ÒÏÖËùÓĞµ¥²áºÍ³ÉÔ±²áitemµÄ<binding>ÔªËØ¡£ºÏ¶©²áµÄ<binding>ÔªËØÒÑ¾­ËæÊ±¶ÒÏÖÁË
+        // å…‘ç°æ‰€æœ‰å•å†Œå’Œæˆå‘˜å†Œitemçš„<binding>å…ƒç´ ã€‚åˆè®¢å†Œçš„<binding>å…ƒç´ å·²ç»éšæ—¶å…‘ç°äº†
         public int Finish(out string strError)
         {
             strError = "";
@@ -3581,14 +3581,14 @@ namespace dp2Circulation
                         continue;
 
                     if (this.ParentItems.IndexOf(cell.item) != -1)
-                        continue;   // Ìø¹ıºÏ¶©±¾
+                        continue;   // è·³è¿‡åˆè®¢æœ¬
 
                     if (cell.item.ParentItem != null)
                     {
-                        // ³ÉÔ±²á
+                        // æˆå‘˜å†Œ
                         string strXmlFragment = "";
-                        // ´´½¨×÷Îª³ÉÔ±²áµÄ<binding>ÔªËØÄÚÆ¬¶Ï
-                        // ½ö½ö´´½¨Ò»¸ö<bindingParent>ÔªËØ
+                        // åˆ›å»ºä½œä¸ºæˆå‘˜å†Œçš„<binding>å…ƒç´ å†…ç‰‡æ–­
+                        // ä»…ä»…åˆ›å»ºä¸€ä¸ª<bindingParent>å…ƒç´ 
                         int nRet = cell.item.BuildMyselfBindingXmlString(
                             out strXmlFragment,
                             out strError);
@@ -3602,8 +3602,8 @@ namespace dp2Circulation
                     }
                     else
                     {
-                        // µ¥²á
-                        // Çå³ıbindingxml
+                        // å•å†Œ
+                        // æ¸…é™¤bindingxml
                         if (String.IsNullOrEmpty(cell.item.Binding) == false)
                         {
                             cell.item.Binding = "";
@@ -3616,14 +3616,14 @@ namespace dp2Circulation
             return 0;
         }
 
-        // ÄÚÈİ¿í¶ÈÒª±ä»¯
+        // å†…å®¹å®½åº¦è¦å˜åŒ–
         void AfterWidthChanged(bool bAlwaysInvalidate)
         {
 
             int nOldMaxCells = this.m_nMaxItemCountOfOneIssue;
             bool bChanged = false;
 
-            // Õû¸öÄÚÈİÇøÓòµÄ¸ß¶È
+            // æ•´ä¸ªå†…å®¹åŒºåŸŸçš„é«˜åº¦
             long lNewHeight = this.m_nCellHeight * this.Issues.Count;
             if (lNewHeight != this.m_lContentHeight)
             {
@@ -3657,7 +3657,7 @@ namespace dp2Circulation
                 catch
                 {
                 }
-                // Ë¢ĞÂÏÔÊ¾
+                // åˆ·æ–°æ˜¾ç¤º
                 this.Invalidate();
             }
             else
@@ -3668,8 +3668,8 @@ namespace dp2Circulation
         }
 
 #if OLD_INITIAL
-        // *** Îª³õÊ¼»¯·şÎñ
-        // ³õÊ¼»¯ÆÚ¼ä£¬×·¼ÓÒ»¸öºÏ¶©²á¶ÔÏó
+        // *** ä¸ºåˆå§‹åŒ–æœåŠ¡
+        // åˆå§‹åŒ–æœŸé—´ï¼Œè¿½åŠ ä¸€ä¸ªåˆè®¢å†Œå¯¹è±¡
         public ItemBindingItem AppendBindItem(string strXml,
             out string strError)
         {
@@ -3687,8 +3687,8 @@ namespace dp2Circulation
             return item;
         }
 
-        // *** Îª³õÊ¼»¯·şÎñ
-        // ³õÊ¼»¯ÆÚ¼ä£¬×·¼ÓÒ»¸öÆÚ¶ÔÏó
+        // *** ä¸ºåˆå§‹åŒ–æœåŠ¡
+        // åˆå§‹åŒ–æœŸé—´ï¼Œè¿½åŠ ä¸€ä¸ªæœŸå¯¹è±¡
         public IssueBindingItem AppendIssue(string strXml,
             out string strError)
         {
@@ -3710,8 +3710,8 @@ namespace dp2Circulation
             return issue;
         }
 
-         // *** Îª³õÊ¼»¯·şÎñ
-       // ³õÊ¼»¯ÆÚ¼ä£¬×·¼ÓÒ»ÏµÁĞÎŞËùÊôÆÚ¶ÔÏóµÄµ¥²á¶ÔÏó
+         // *** ä¸ºåˆå§‹åŒ–æœåŠ¡
+       // åˆå§‹åŒ–æœŸé—´ï¼Œè¿½åŠ ä¸€ç³»åˆ—æ— æ‰€å±æœŸå¯¹è±¡çš„å•å†Œå¯¹è±¡
         public int AppendNoneIssueSingleItems(List<string> XmlRecords,
             out string strError)
         {
@@ -3743,7 +3743,7 @@ namespace dp2Circulation
         void InitialMaxItemCount()
         {
             if (this.m_nMaxItemCountOfOneIssue != -1)
-                return; // ÒÑ¾­³õÊ¼»¯
+                return; // å·²ç»åˆå§‹åŒ–
 
             int nMaxCount = 0;
             for (int i = 0; i < this.Issues.Count; i++)
@@ -3764,12 +3764,12 @@ namespace dp2Circulation
         void SetContentWidth()
         {
             Debug.Assert(this.m_nMaxItemCountOfOneIssue != -1, "");
-            // Õû¸öÄÚÈİÇøÓòµÄ¿í¶È
+            // æ•´ä¸ªå†…å®¹åŒºåŸŸçš„å®½åº¦
             this.m_lContentWidth = m_nLeftTextWidth + (this.m_nMaxItemCountOfOneIssue * m_nCellWidth);
         }
 
 #if OLD_INITIAL
-        // ÊÇ·ñÒÑ¾­¹Ò½ÓµÄGetItemInfoÊÂ¼ş
+        // æ˜¯å¦å·²ç»æŒ‚æ¥çš„GetItemInfoäº‹ä»¶
         public bool HasGetItemInfo()
         {
             if (this.GetItemInfo == null)
@@ -3779,15 +3779,15 @@ namespace dp2Circulation
         }
 #endif
 
-        #region Í¼ĞÎÏà¹ØµÄº¯Êı
+        #region å›¾å½¢ç›¸å…³çš„å‡½æ•°
 
         protected override void OnHandleCreated(EventArgs e)
         {
             base.OnHandleCreated(e);
 
-            // InitialMaxItemCount();  // ³õÊ¼»¯ÆÚÄÚ×î´óÊÂÏîÊı
+            // InitialMaxItemCount();  // åˆå§‹åŒ–æœŸå†…æœ€å¤§äº‹é¡¹æ•°
 
-            // Ê×´ÎÏÔÊ¾Ç°, OnSizeChanged()Ò»´ÎÒ²Ã»ÓĞ±»µ÷ÓÃÇ°, ÏÔÊ¾ºÃ¾í¹öÌõ
+            // é¦–æ¬¡æ˜¾ç¤ºå‰, OnSizeChanged()ä¸€æ¬¡ä¹Ÿæ²¡æœ‰è¢«è°ƒç”¨å‰, æ˜¾ç¤ºå¥½å·æ»šæ¡
             SetScrollBars(ScrollBarMember.Both);
         }
 
@@ -3803,7 +3803,7 @@ namespace dp2Circulation
             }
 
 
-            // Èç¹ûclientÇøÓò×ã¹»´ó£¬µ÷Õûorg£¬±ÜÃâ¿´²»¼ûÄ³²¿·Ö
+            // å¦‚æœclientåŒºåŸŸè¶³å¤Ÿå¤§ï¼Œè°ƒæ•´orgï¼Œé¿å…çœ‹ä¸è§æŸéƒ¨åˆ†
             DocumentOrgY = DocumentOrgY;
             DocumentOrgX = DocumentOrgX;
 
@@ -3812,10 +3812,10 @@ namespace dp2Circulation
         }
 
 
-        // µã»÷²âÊÔ
+        // ç‚¹å‡»æµ‹è¯•
         // parameters:
-        //      p_x µã»÷Î»ÖÃx¡£ÎªÆÁÄ»×ø±ê
-        //      type    Òª²âÊÔµÄ×îÏÂ¼¶£¨Ò¶¼¶£©¶ÔÏóµÄÀàĞÍ¡£Èç¹ûÎªnull£¬±íÊ¾Ò»Ö±µ½Ä©¶Ë
+        //      p_x ç‚¹å‡»ä½ç½®xã€‚ä¸ºå±å¹•åæ ‡
+        //      type    è¦æµ‹è¯•çš„æœ€ä¸‹çº§ï¼ˆå¶çº§ï¼‰å¯¹è±¡çš„ç±»å‹ã€‚å¦‚æœä¸ºnullï¼Œè¡¨ç¤ºä¸€ç›´åˆ°æœ«ç«¯
         void HitTest(long p_x,
             long p_y,
             Type dest_type,
@@ -3829,20 +3829,20 @@ namespace dp2Circulation
                 bIsRequiredType = true;
 
 
-            // »»ËãÎªÕûÌåÎÄµµ(°üº¬ÉÏÏÂ×óÓÒµÄ¿Õ°×ÇøÓò)×ø±ê
+            // æ¢ç®—ä¸ºæ•´ä½“æ–‡æ¡£(åŒ…å«ä¸Šä¸‹å·¦å³çš„ç©ºç™½åŒºåŸŸ)åæ ‡
             long x = p_x - m_lWindowOrgX;
             long y = p_y - m_lWindowOrgY;
 
             if (y < this.m_nTopBlank)
-                result.AreaPortion = AreaPortion.TopBlank;  // ÉÏ·½¿Õ°×
+                result.AreaPortion = AreaPortion.TopBlank;  // ä¸Šæ–¹ç©ºç™½
             else if (y > this.m_nTopBlank + this.m_lContentHeight)
-                result.AreaPortion = AreaPortion.BottomBlank;  // ÏÂ·½¿Õ°×
-            else if ((dest_type == null || bIsRequiredType == true) // Èç¹ûÄ©¼¶ÀàĞÍÓĞÌØÊâÒªÇó£¬Ôò×óÓÒ¿Õ°×¶¼Ëã×÷ÏÂ¼¶¶ÔÏóµÄ·¶Î§
+                result.AreaPortion = AreaPortion.BottomBlank;  // ä¸‹æ–¹ç©ºç™½
+            else if ((dest_type == null || bIsRequiredType == true) // å¦‚æœæœ«çº§ç±»å‹æœ‰ç‰¹æ®Šè¦æ±‚ï¼Œåˆ™å·¦å³ç©ºç™½éƒ½ç®—ä½œä¸‹çº§å¯¹è±¡çš„èŒƒå›´
                 && x < this.m_nLeftBlank)
-                result.AreaPortion = AreaPortion.LeftBlank;  // ×ó·½¿Õ°×
+                result.AreaPortion = AreaPortion.LeftBlank;  // å·¦æ–¹ç©ºç™½
             else if ((dest_type == null || bIsRequiredType == true)
                 && x > this.m_nLeftBlank + this.m_lContentWidth)
-                result.AreaPortion = AreaPortion.RightBlank;  // ÓÒ·½¿Õ°×
+                result.AreaPortion = AreaPortion.RightBlank;  // å³æ–¹ç©ºç™½
             else
             {
                 if (dest_type == typeof(BindingControl))
@@ -3879,7 +3879,7 @@ namespace dp2Circulation
                     y0 += this.m_nCellHeight;
                 }
 
-                // ÊµÔÚÎŞ·¨Æ¥Åä
+                // å®åœ¨æ— æ³•åŒ¹é…
                 result.AreaPortion = AreaPortion.Content;
                 goto END1;
             }
@@ -3928,7 +3928,7 @@ namespace dp2Circulation
 
             if (GuiUtil.PtInRect(e.X, e.Y, this.ClientRectangle) == false)
             {
-                // ·ÀÖ¹ÔÚ¾í¹öÌõÉÏµ¥»÷ºóÍÏ¶¯Ôì³É¸±×÷ÓÃ
+                // é˜²æ­¢åœ¨å·æ»šæ¡ä¸Šå•å‡»åæ‹–åŠ¨é€ æˆå‰¯ä½œç”¨
                 goto END1;
             }
 
@@ -3942,7 +3942,7 @@ namespace dp2Circulation
                 bool bShift = (Control.ModifierKeys == Keys.Shift);
 
                 HitTestResult result = null;
-                // ÆÁÄ»×ø±ê
+                // å±å¹•åæ ‡
                 this.HitTest(
                     e.X,
                     e.Y,
@@ -3955,7 +3955,7 @@ namespace dp2Circulation
 
                 if (result.AreaPortion == AreaPortion.Grab)
                 {
-                    // ÍÏ×§¶ÔÏó£¬¶ø²»ÊÇrectÎ§Ñ¡
+                    // æ‹–æ‹½å¯¹è±¡ï¼Œè€Œä¸æ˜¯rectå›´é€‰
                     this.BeginDraging();
                     this.DragStartObject = (Cell)result.Object;
                     goto END1;
@@ -3978,8 +3978,8 @@ namespace dp2Circulation
                 }
                  * */
 
-                // Çå³ıÒÔÇ°µÄÑ¡Ôñ
-                if (bControl == false && bShift == false)   // °´ÏÂÁËSHIFT£¬Ò²²»Çå³ıÒÔÇ°µÄ
+                // æ¸…é™¤ä»¥å‰çš„é€‰æ‹©
+                if (bControl == false && bShift == false)   // æŒ‰ä¸‹äº†SHIFTï¼Œä¹Ÿä¸æ¸…é™¤ä»¥å‰çš„
                 {
                     if (m_bSelectedAreaOverflowed == false)
                     {
@@ -3988,9 +3988,9 @@ namespace dp2Circulation
                     }
                     else
                     {
-                        // Ö»ºÃ²ÉÓÃ±éÀúµÄ·½·¨À´È«²¿Çå³ı
+                        // åªå¥½é‡‡ç”¨éå†çš„æ–¹æ³•æ¥å…¨éƒ¨æ¸…é™¤
                         /*
-                         * // Õâ¸ö·½·¨ÆÁÄ»Òª¶¶¶¯
+                         * // è¿™ä¸ªæ–¹æ³•å±å¹•è¦æŠ–åŠ¨
                         this.DataRoot.ClearAllSubSelected();
                         this.Invalidate();
                          * */
@@ -4000,13 +4000,13 @@ namespace dp2Circulation
                             this.Invalidate();
                         else
                         {
-                            // Õâ¸ö·½·¨ÆÁÄ»²»¶¶¶¯
+                            // è¿™ä¸ªæ–¹æ³•å±å¹•ä¸æŠ–åŠ¨
                             UpdateObjects(objects);
                         }
                     }
                 }
 
-                // È·±£µãµ½µÄ¶ÔÏóÈ«²¿½øÈëÊÓÒ°
+                // ç¡®ä¿ç‚¹åˆ°çš„å¯¹è±¡å…¨éƒ¨è¿›å…¥è§†é‡
                 if (result.Object != null
                     && result.Object is CellBase)
                 {
@@ -4014,7 +4014,7 @@ namespace dp2Circulation
                         this.Update();
                 }
 
-                // ¾ØĞÎÑ¡Ôñ¿ªÊ¼
+                // çŸ©å½¢é€‰æ‹©å¼€å§‹
                 if (m_bRectSelectMode == true
                     && e.Button == MouseButtons.Left)
                 {
@@ -4029,7 +4029,7 @@ namespace dp2Circulation
                     && result.Object is CellBase)   // 
                 {
                     // 
-                    // µ¥¶ÀË¢ĞÂÒ»¸ö
+                    // å•ç‹¬åˆ·æ–°ä¸€ä¸ª
                     List<CellBase> temp = new List<CellBase>();
                     temp.Add((CellBase)result.Object);
                     if (bControl == true)
@@ -4068,13 +4068,13 @@ namespace dp2Circulation
             // 2010/9/21 add
             if (String.IsNullOrEmpty(cell.Container.PublishTime) == true)
             {
-                strError = "×ÔÓÉÆÚµÄ¸ñ×Ó²»ÄÜ½øĞĞ¼Çµ½";
+                strError = "è‡ªç”±æœŸçš„æ ¼å­ä¸èƒ½è¿›è¡Œè®°åˆ°";
                 goto ERROR1;
             }
 
             if (cell.item.Locked == true)
             {
-                strError = "¸ñ×Ó×´Ì¬ÎªËø¶¨Ê± ²»ÔÊĞí½øĞĞ¼Çµ½»òÕß³·Ïú¼Çµ½µÄ²Ù×÷";
+                strError = "æ ¼å­çŠ¶æ€ä¸ºé”å®šæ—¶ ä¸å…è®¸è¿›è¡Œè®°åˆ°æˆ–è€…æ’¤é”€è®°åˆ°çš„æ“ä½œ";
                 goto ERROR1;
             }
 
@@ -4093,16 +4093,16 @@ namespace dp2Circulation
             }
             else
             {
-                strError = "¸ñ×Ó×´Ì¬ ²»ÊÊºÏ½øĞĞ¼Çµ½»òÕß³·Ïú¼Çµ½µÄ²Ù×÷";
+                strError = "æ ¼å­çŠ¶æ€ ä¸é€‚åˆè¿›è¡Œè®°åˆ°æˆ–è€…æ’¤é”€è®°åˆ°çš„æ“ä½œ";
                 goto ERROR1;
             }
 
-            // ´Óµ¥Ôª¸ñ×Ó±ä»¯ÎªËù´ÓÊôµÄÆÚ¸ñ×Ó
+            // ä»å•å…ƒæ ¼å­å˜åŒ–ä¸ºæ‰€ä»å±çš„æœŸæ ¼å­
             IssueBindingItem issue = cell.Container;
 
             this.UpdateObject(issue);
 
-            // Ë¢ĞÂ±à¼­ÇøÓò
+            // åˆ·æ–°ç¼–è¾‘åŒºåŸŸ
             if (cell == this.FocusObject)
             {
                 // Cell focus_obejct = (Cell)this.FocusObject;
@@ -4132,7 +4132,7 @@ namespace dp2Circulation
 
             bool bCheckBox = false;
 
-            // ÆÁÄ»×ø±ê
+            // å±å¹•åæ ‡
             this.HitTest(
                 p.X,
                 p.Y,
@@ -4141,7 +4141,7 @@ namespace dp2Circulation
             if (result == null)
                 goto END1;
 
-            // Ö»¹Ø×¢CellÀàĞÍ
+            // åªå…³æ³¨Cellç±»å‹
             if (result.Object != null)
             {
                 if (result.Object.GetType() != typeof(Cell)
@@ -4169,7 +4169,7 @@ namespace dp2Circulation
                             cell.m_bDisplayCheckBox = bCheckBox;
                             if (cell.Selected == true && bOld != bCheckBox)
                             {
-                                this.UpdateObjectHover(cell);    // ´ÙÊ¹¸Ä±ä
+                                this.UpdateObjectHover(cell);    // ä¿ƒä½¿æ”¹å˜
                             }
                         }
                     }
@@ -4197,7 +4197,7 @@ namespace dp2Circulation
                                 cell.m_bDisplayCheckBox = bCheckBox;
                             }
 
-                            // unselected cellµÄgrabÒÔÍâ²¿·Ö±»ÈÏÎªµÈÍ¬ÓÚoff
+                            // unselected cellçš„grabä»¥å¤–éƒ¨åˆ†è¢«è®¤ä¸ºç­‰åŒäºoff
                             if (cell.Selected == false && bCheckBox == false)
                                 result.Object = null;
                         }
@@ -4219,11 +4219,11 @@ namespace dp2Circulation
 
             /*
 
-            // ÈÔÔÚÉÏ´ÎµÄhover¶ÔÏóÉÏ
+            // ä»åœ¨ä¸Šæ¬¡çš„hoverå¯¹è±¡ä¸Š
             if (this.m_lastHoverObj == result.Object)
                 goto END1;
 
-            // ÔÚ²»Í¬µÄhover¶ÔÏóÉÏ£¬ÒÔÇ°µÄhover¶ÔÏóĞèÒªoff
+            // åœ¨ä¸åŒçš„hoverå¯¹è±¡ä¸Šï¼Œä»¥å‰çš„hoverå¯¹è±¡éœ€è¦off
             if (this.m_lastHoverObj != null)
             {
                 if (this.m_lastHoverObj.m_bHover != false)
@@ -4238,7 +4238,7 @@ namespace dp2Circulation
             if (this.m_lastHoverObj == null)
                 goto END1;
 
-            // ±¾´ÎµÄhover¶ÔÏóĞèÒªon
+            // æœ¬æ¬¡çš„hoverå¯¹è±¡éœ€è¦on
             if (this.m_lastHoverObj.m_bHover != true)
             {
                 this.m_lastHoverObj.m_bHover = true;
@@ -4251,9 +4251,9 @@ namespace dp2Circulation
         }
 
         /*
-        // ²âÊÔÊÇ·ñµã»÷µ½ÁËCellÖĞÑëµÄcheckbox²¿Î»
+        // æµ‹è¯•æ˜¯å¦ç‚¹å‡»åˆ°äº†Cellä¸­å¤®çš„checkboxéƒ¨ä½
         // parameters:
-        //      x   ¸ñ×ÓÄÚ²¿×ø±ê
+        //      x   æ ¼å­å†…éƒ¨åæ ‡
         bool HitCheckBox(int x,
             int y)
         {
@@ -4273,7 +4273,7 @@ namespace dp2Circulation
         }
          * */
 
-        // Ò»¸ö¸ñ×ÓÊÇ·ñÒª(¸¡¶¯)ÏÔÊ¾checkbox?
+        // ä¸€ä¸ªæ ¼å­æ˜¯å¦è¦(æµ®åŠ¨)æ˜¾ç¤ºcheckbox?
         static bool ShouldDisplayCheckBox(Cell cell)
         {
             if (cell is GroupCell)
@@ -4283,7 +4283,7 @@ namespace dp2Circulation
             if (cell.item != null)
             {
                 if (cell.item.Locked == true)
-                    return false;   // Ëø¶¨×´Ì¬µÄ¸ñ×Ó²»ÏÔÊ¾checkbox
+                    return false;   // é”å®šçŠ¶æ€çš„æ ¼å­ä¸æ˜¾ç¤ºcheckbox
 
                 if (cell.item.OrderInfoPosition.X != -1
                     && cell.item.NewCreated == true)
@@ -4342,7 +4342,7 @@ namespace dp2Circulation
                 }
                 else
                 {
-                    throw new Exception("FocusObject±ØĞëÎªÀàĞÍCell/NullCell/IssueBindingItemÖ®Ò»");
+                    throw new Exception("FocusObjectå¿…é¡»ä¸ºç±»å‹Cell/NullCell/IssueBindingItemä¹‹ä¸€");
                 }
                 
                 if (this.m_lastFocusObj == value)
@@ -4351,7 +4351,7 @@ namespace dp2Circulation
                 if (value is NullCell
                     && this.m_lastFocusObj is NullCell)
                 {
-                    // ËäÈ»ÒÑÓĞºÍ¼´½«ÉèÖÃµÄ¶ÔÏó²»Í¬£¬µ«ÊÇÖ¸ÏòµÄÎ»ÖÃºÍ×´Ì¬ÍêÈ«ÏàÍ¬
+                    // è™½ç„¶å·²æœ‰å’Œå³å°†è®¾ç½®çš„å¯¹è±¡ä¸åŒï¼Œä½†æ˜¯æŒ‡å‘çš„ä½ç½®å’ŒçŠ¶æ€å®Œå…¨ç›¸åŒ
                     NullCell new_cell = (NullCell)value;
                     NullCell exist_cell = (NullCell)this.m_lastFocusObj;
                     if (IsEqual(new_cell, exist_cell) == true)
@@ -4416,22 +4416,22 @@ namespace dp2Circulation
         {
             OnMouseHover(null);
 
-            // ÍÏ¶¯Ê±¿ÉÒÔ×Ô¶¯¾í¹ö
+            // æ‹–åŠ¨æ—¶å¯ä»¥è‡ªåŠ¨å·æ»š
             if (this.m_bDraging == true
                 && this.Capture == true
                 && e.Button == MouseButtons.Left)
             {
-                // ÍÏ¶¯Êó±ê
+                // æ‹–åŠ¨é¼ æ ‡
                 if (IsNearestPoint(this.DragStartMousePosition, e.Location) == true)
                 {
-                    // ·ÀÖ¹ÔÚÔ­µØ¾Í±»µ±×÷Êó±êÍÏ¶¯
+                    // é˜²æ­¢åœ¨åŸåœ°å°±è¢«å½“ä½œé¼ æ ‡æ‹–åŠ¨
                     goto END1;
                 }
 
-                // ÎªÁËÄÜ¾í¹ö
+                // ä¸ºäº†èƒ½å·æ»š
                 HitTestResult result = null;
 
-                // ÆÁÄ»×ø±ê
+                // å±å¹•åæ ‡
                 this.HitTest(
                     e.X,
                     e.Y,
@@ -4444,7 +4444,7 @@ namespace dp2Circulation
                     goto END1;
 
                 {
-                    // È·±£¿É¼û
+                    // ç¡®ä¿å¯è§
                     if (EnsureVisibleWhenScrolling(result) == true)
                         this.Update();
                 }
@@ -4465,15 +4465,15 @@ namespace dp2Circulation
                 goto END1;
             }
 
-            // Î§Ñ¡
+            // å›´é€‰
             if (this.Capture == true
                 && e.Button == MouseButtons.Left)
             {
 
-                // ÍÏ¶¯Êó±ê
+                // æ‹–åŠ¨é¼ æ ‡
                 if (IsNearestPoint(this.DragStartMousePosition, e.Location) == true)
                 {
-                    // ·ÀÖ¹ÔÚÔ­µØ¾Í±»µ±×÷Êó±êÍÏ¶¯
+                    // é˜²æ­¢åœ¨åŸåœ°å°±è¢«å½“ä½œé¼ æ ‡æ‹–åŠ¨
                     goto END1;
                 }
 
@@ -4483,15 +4483,15 @@ namespace dp2Circulation
                     && e.Button == MouseButtons.Left
                     )
                 {
-                    // Çå³ıÉÏ´ÎĞé¿òÍ¼Ïñ
+                    // æ¸…é™¤ä¸Šæ¬¡è™šæ¡†å›¾åƒ
                     DrawSelectRect(true);
 
-                    // »­³öÕâ´ÎµÄĞé¿òÍ¼Ïñ
+                    // ç”»å‡ºè¿™æ¬¡çš„è™šæ¡†å›¾åƒ
                     this.m_DragCurrentPointOnDoc = new PointF(e.X - m_lWindowOrgX,
                         e.Y - m_lWindowOrgY);
                     DrawSelectRect(true);
 
-                    // ÎªÁËÄÜ¾í¹ö
+                    // ä¸ºäº†èƒ½å·æ»š
                     {
                         /*
                         Type objType = typeof(Cell);
@@ -4502,7 +4502,7 @@ namespace dp2Circulation
 
                         result = null;
 
-                        // ÆÁÄ»×ø±ê
+                        // å±å¹•åæ ‡
                         this.HitTest(
                             e.X,
                             e.Y,
@@ -4515,12 +4515,12 @@ namespace dp2Circulation
                             goto END1;
 
                         {
-                            // Çå³ı
+                            // æ¸…é™¤
                             DrawSelectRect(true);
                             if (EnsureVisibleWhenScrolling(result) == true)
                                 this.Update();
 
-                            // ÖØ»­
+                            // é‡ç”»
                             DrawSelectRect(true);
                         }
 
@@ -4529,7 +4529,7 @@ namespace dp2Circulation
                             && result.Object.GetType() != typeof(NullCell))
                             goto END1;
 
-                        // ²¹ÉÏ
+                        // è¡¥ä¸Š
                         if (this.DragStartObject == null)
                             this.DragStartObject = (CellBase)result.Object;
 
@@ -4537,12 +4537,12 @@ namespace dp2Circulation
                         if (IsEqual((CellBase)this.DragLastEndObject,
                             (CellBase)result.Object) == false)
                         {
-                            // Çå³ı
+                            // æ¸…é™¤
                             DrawSelectRect(true);
                             if (EnsureVisibleWhenScrolling((CellBase)result.Object) == true)
                                 this.Update();
 
-                            // ÖØ»­
+                            // é‡ç”»
                             DrawSelectRect(true);
 
                             // if (result.Object is Cell)
@@ -4567,7 +4567,7 @@ namespace dp2Circulation
                     goto END1;
 
 #if NOOOOOOOOOOOOOOOOOO
-                // ÕÒµ½µ±Ç°Êó±êÏÂµÄ¶ÔÏó¡£±ØĞëÊÇºÍDragStartObjectÍ¬Ò»¼¶µÄ¶ÔÏó
+                // æ‰¾åˆ°å½“å‰é¼ æ ‡ä¸‹çš„å¯¹è±¡ã€‚å¿…é¡»æ˜¯å’ŒDragStartObjectåŒä¸€çº§çš„å¯¹è±¡
                 if (this.DragStartObject == null)
                     goto END1;
 
@@ -4575,7 +4575,7 @@ namespace dp2Circulation
                 bool bControl = (Control.ModifierKeys == Keys.Control);
                 bool bShift = (Control.ModifierKeys == Keys.Shift);
 
-                // ÆÁÄ»×ø±ê
+                // å±å¹•åæ ‡
                 this.HitTest(
                     e.X,
                     e.Y,
@@ -4611,16 +4611,16 @@ namespace dp2Circulation
                     goto END1;
                 }
 
-                // ·½·¨1
-                // ´Óthis.DragStartObject µ½ DragCurrentObject Ö®¼äÇå³ı
-                // È»ºó DragCurrentObject µ½ result.ObjectÖ®¼ä£¬Ñ¡ÉÏ
-                // Õâ¸ö·½·¨ËÙ¶ÈÂı
+                // æ–¹æ³•1
+                // ä»this.DragStartObject åˆ° DragCurrentObject ä¹‹é—´æ¸…é™¤
+                // ç„¶å DragCurrentObject åˆ° result.Objectä¹‹é—´ï¼Œé€‰ä¸Š
+                // è¿™ä¸ªæ–¹æ³•é€Ÿåº¦æ…¢
 
-                // ·½·¨2
-                // Currentµ½ result.ObjectÖ®¼ä£¬toggle£»È»ºó£¬ÔÚÁôÒâ°ÑStartÑ¡ÉÏ
+                // æ–¹æ³•2
+                // Currentåˆ° result.Objectä¹‹é—´ï¼Œtoggleï¼›ç„¶åï¼Œåœ¨ç•™æ„æŠŠStarté€‰ä¸Š
 
                 List<Cell> objects = null;
-                if (this.DragLastEndObject == null) // µÚÒ»´ÎµÄÌØÊâÇé¿ö
+                if (this.DragLastEndObject == null) // ç¬¬ä¸€æ¬¡çš„ç‰¹æ®Šæƒ…å†µ
                 {
                     // this.SetObjectFocus(this.DragStartObject, false);
 
@@ -4632,13 +4632,13 @@ namespace dp2Circulation
                 }
                 else
                 {
-                    // B CÖ®¼äµÄ·½Ïò
+                    // B Cä¹‹é—´çš„æ–¹å‘
                     this.m_nDirectionBC = GetDirection(this.DragLastEndObject, result.Object);
 
-                    Debug.Assert(this.m_nDirectionBC != 0, "B CÁ½¸ö¶ÔÏó£¬²»ÄÜÏàÍ¬");
+                    Debug.Assert(this.m_nDirectionBC != 0, "B Cä¸¤ä¸ªå¯¹è±¡ï¼Œä¸èƒ½ç›¸åŒ");
 
-                    // Èç¹û A-B B-CÍ¬Ïò£¬ Ôò²»°üº¬Í·²¿£¬°üº¬Î²²¿
-                    if (this.m_nDirectionAB == 0 // Ê×´ÎÌØÊâÇé¿ö
+                    // å¦‚æœ A-B B-CåŒå‘ï¼Œ åˆ™ä¸åŒ…å«å¤´éƒ¨ï¼ŒåŒ…å«å°¾éƒ¨
+                    if (this.m_nDirectionAB == 0 // é¦–æ¬¡ç‰¹æ®Šæƒ…å†µ
                         || this.m_nDirectionAB == this.m_nDirectionBC)
                     {
                         objects = GetRangeObjects(
@@ -4649,7 +4649,7 @@ namespace dp2Circulation
                     }
                     else
                     {
-                        // Èç¹û A-B B-C²»Í¬Ïò£¬ Ôò°üº¬Í·²¿£¬²»°üº¬Î²²¿
+                        // å¦‚æœ A-B B-Cä¸åŒå‘ï¼Œ åˆ™åŒ…å«å¤´éƒ¨ï¼Œä¸åŒ…å«å°¾éƒ¨
                         objects = GetRangeObjects(
                             true,
                             false,
@@ -4661,10 +4661,10 @@ namespace dp2Circulation
                 SelectObjects(objects, SelectAction.Toggle);
 
                 {
-                    // ×·¼ÓÑ¡ÉÏÔ­Ê¼Í·²¿
+                    // è¿½åŠ é€‰ä¸ŠåŸå§‹å¤´éƒ¨
                     List<AreaBase> temp = new List<AreaBase>();
                     temp.Add(this.DragStartObject);
-                    temp.Add(result.Object);    // CÒ²±£ÏÕ
+                    temp.Add(result.Object);    // Cä¹Ÿä¿é™©
                     SelectObjects(temp, SelectAction.On);
                 }
 
@@ -4676,7 +4676,7 @@ namespace dp2Circulation
                 // this.SetObjectFocus(this.DragLastEndObject, true);
 
 
-                // A B Ö®¼äµÄ·½Ïò
+                // A B ä¹‹é—´çš„æ–¹å‘
                 this.m_nDirectionAB = GetDirection(this.DragStartObject, this.DragLastEndObject);
 
                 if (EnsureVisibleWhenScrolling(result.Object) == true)
@@ -4706,7 +4706,7 @@ namespace dp2Circulation
             {
                 if (IsNearestPoint(this.DragStartMousePosition, e.Location) == false)
                 {
-                    // ·ÀÖ¹ÔÚÔ­µØµÄ¶àÓàÒ»´ÎMouseMoveÏûÏ¢Òş²Øtip´°¿Ú
+                    // é˜²æ­¢åœ¨åŸåœ°çš„å¤šä½™ä¸€æ¬¡MouseMoveæ¶ˆæ¯éšè—tipçª—å£
                     trackTip.Hide(this);
                 }
             }
@@ -4716,7 +4716,7 @@ namespace dp2Circulation
             base.OnMouseMove(e);
         }
 
-        // >0 ÔòÔİÊ±½ûÖ¹checkbox¹¦ÄÜ
+        // >0 åˆ™æš‚æ—¶ç¦æ­¢checkboxåŠŸèƒ½
         int m_nDisableCheckBox = 0;
 
         protected override void OnMouseUp(MouseEventArgs e)
@@ -4727,7 +4727,7 @@ namespace dp2Circulation
 
             //
 
-            // ÍÏ×§µÄ½áÊø´¦Àí
+            // æ‹–æ‹½çš„ç»“æŸå¤„ç†
             if (this.m_bDraging == true
                 && e.Button == MouseButtons.Left)
             {
@@ -4735,17 +4735,17 @@ namespace dp2Circulation
                 this.EndDraging();
                 this.DragLastEndObject = this.FocusObject;
 
-                // ÍÏ¶¯Êó±ê
+                // æ‹–åŠ¨é¼ æ ‡
                 if (IsNearestPoint(this.DragStartMousePosition, e.Location) == true)
                 {
-                    // ½ö½öÔÚÔ­µØclick down up
+                    // ä»…ä»…åœ¨åŸåœ°click down up
 
                 }
                 else
                 {
                     if (this.DragStartObject != this.DragLastEndObject)
                     {
-                        // MessageBox.Show(this, "ÍÏ¶¯½øÈë");
+                        // MessageBox.Show(this, "æ‹–åŠ¨è¿›å…¥");
                         this.DoDragEndFunction();
                         goto END1;
                     }
@@ -4760,7 +4760,7 @@ namespace dp2Circulation
                 && IsNearestPoint(this.DragStartMousePosition, e.Location) == true)
             {
                 HitTestResult result = null;
-                // ÆÁÄ»×ø±ê
+                // å±å¹•åæ ‡
                 this.HitTest(
                     e.X,
                     e.Y,
@@ -4778,7 +4778,7 @@ namespace dp2Circulation
             }
 
 
-            // ÍÏ¶¯¾ØĞÎ¿òÎ§Ñ¡µÄ½áÊø´¦Àí
+            // æ‹–åŠ¨çŸ©å½¢æ¡†å›´é€‰çš„ç»“æŸå¤„ç†
             if (m_bRectSelecting == true
                 && e.Button == MouseButtons.Left)
             {
@@ -4796,7 +4796,7 @@ namespace dp2Circulation
         }
 
 
-        // Êó±ê¹öÂÖ
+        // é¼ æ ‡æ»šè½®
         protected override void OnMouseWheel(MouseEventArgs e)
         {
             int numberOfTextLinesToMove = e.Delta * SystemInformation.MouseWheelScrollLines / 120;
@@ -4807,7 +4807,7 @@ namespace dp2Circulation
             // base.OnMouseWheel(e);
         }
 
-        // Êó±êË«»÷
+        // é¼ æ ‡åŒå‡»
         protected override void OnMouseDoubleClick(MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
@@ -4820,7 +4820,7 @@ namespace dp2Circulation
 
                 if (this.FocusObject is Cell)
                 {
-                    // ÏÔÊ¾±à¼­ÇøÓò
+                    // æ˜¾ç¤ºç¼–è¾‘åŒºåŸŸ
                     {
                         EditAreaEventArgs e1 = new EditAreaEventArgs();
                         e1.Action = "get_state";
@@ -4847,7 +4847,7 @@ namespace dp2Circulation
         {
             switch (e.KeyCode)
             {
-                // ²Ëµ¥¼ü
+                // èœå•é”®
                 case Keys.Apps:
                     {
                         Point p;
@@ -4886,7 +4886,7 @@ namespace dp2Circulation
                             && this.EnsureVisible(this.m_lastFocusObj) == true)
                             this.Update();
 
-                        // »ñµÃµ±Ç°½¹µã¸ñ×ÓµÄÖĞĞÄËùÔÚµÄ´°¿Ú×ø±ê
+                        // è·å¾—å½“å‰ç„¦ç‚¹æ ¼å­çš„ä¸­å¿ƒæ‰€åœ¨çš„çª—å£åæ ‡
                         RectangleF rect = this.GetViewRect(this.m_lastFocusObj);
 
                         if (e.KeyCode == Keys.PageDown)
@@ -4894,18 +4894,18 @@ namespace dp2Circulation
                         else
                             this.DocumentOrgY += this.ClientSize.Height;
 
-                        // ·­Ò³Ç°Í¬ÑùµÄ´°¿Ú×ø±êÎ»ÖÃ£¬Ä£ÄâµãÒ»ÏÂÊó±ê
+                        // ç¿»é¡µå‰åŒæ ·çš„çª—å£åæ ‡ä½ç½®ï¼Œæ¨¡æ‹Ÿç‚¹ä¸€ä¸‹é¼ æ ‡
                         MouseEventArgs e1 = new MouseEventArgs(MouseButtons.Left,
                             1,
                             (int)(rect.X + rect.Width / 2),
                             (int)(rect.Y + rect.Height / 2),
                             0);
 
-                        // TODO: µãµ½ÖĞĞÄÎ»ÖÃ£¬¿ÉÄÜ»áµ¼ÖÂ¼Çµ½¡£Òª·ÀÖ¹ 2011/8/4
+                        // TODO: ç‚¹åˆ°ä¸­å¿ƒä½ç½®ï¼Œå¯èƒ½ä¼šå¯¼è‡´è®°åˆ°ã€‚è¦é˜²æ­¢ 2011/8/4
 
-                        // µãµ½ĞÇÆÚ±êÌâÉÏÔõÃ´°ì£¿ËÆºõ»¹ĞèÒª¸üºÃµÄ½â¾ö°ì·¨¡£
-                        // ¿ÉÒÔ¹ÀËãµ±Ç°¿Í»§Çø¸ß¶ÈÏàµ±ÓÚ¶àÉÙĞĞ£¬È»ºóÖ±½Ó°Ñ½¹µã
-                        // ÊúÏòÒÆ¶¯ÕâÃ´¶àĞĞ£¬¾íÈëÊÓÏß·¶Î§£¬¼´¿É¡£
+                        // ç‚¹åˆ°æ˜ŸæœŸæ ‡é¢˜ä¸Šæ€ä¹ˆåŠï¼Ÿä¼¼ä¹è¿˜éœ€è¦æ›´å¥½çš„è§£å†³åŠæ³•ã€‚
+                        // å¯ä»¥ä¼°ç®—å½“å‰å®¢æˆ·åŒºé«˜åº¦ç›¸å½“äºå¤šå°‘è¡Œï¼Œç„¶åç›´æ¥æŠŠç„¦ç‚¹
+                        // ç«–å‘ç§»åŠ¨è¿™ä¹ˆå¤šè¡Œï¼Œå·å…¥è§†çº¿èŒƒå›´ï¼Œå³å¯ã€‚
                         this.m_nDisableCheckBox++;
 
                         this.OnMouseDown(e1);
@@ -4955,7 +4955,7 @@ namespace dp2Circulation
         }
 
         // parameters:
-        //      bCross  ÊÇ·ñÔÊĞí¿çÔ½ÆÚ¡¢²á±ß½ç
+        //      bCross  æ˜¯å¦å…è®¸è·¨è¶ŠæœŸã€å†Œè¾¹ç•Œ
         CellBase GetLeftCell(CellBase cell,
             bool bCross)
         {
@@ -4992,7 +4992,7 @@ namespace dp2Circulation
 
 
         // parameters:
-        //      bCross  ÊÇ·ñÔÊĞí¿çÔ½ÆÚ¡¢²á±ß½ç
+        //      bCross  æ˜¯å¦å…è®¸è·¨è¶ŠæœŸã€å†Œè¾¹ç•Œ
         CellBase GetRightCell(CellBase cell,
             bool bCross)
         {
@@ -5076,12 +5076,12 @@ namespace dp2Circulation
         }
 
         // 2011/8/4
-        // µ±Ã»ÓĞ½¹µã¶ÔÏóÊ±£¬ÉèÖÃÒ»¸ö½¹µã¶ÔÏó
+        // å½“æ²¡æœ‰ç„¦ç‚¹å¯¹è±¡æ—¶ï¼Œè®¾ç½®ä¸€ä¸ªç„¦ç‚¹å¯¹è±¡
         bool AutoSetFocusObject()
         {
             if (m_lastFocusObj == null)
             {
-                // ×Ô¶¯°ÑµÚÒ»¸ö¸ñ×ÓÉèÎª½¹µã
+                // è‡ªåŠ¨æŠŠç¬¬ä¸€ä¸ªæ ¼å­è®¾ä¸ºç„¦ç‚¹
                 if (this.Issues.Count > 0)
                 {
                     m_lastFocusObj = this.Issues[0].GetFirstCell();
@@ -5093,12 +5093,12 @@ namespace dp2Circulation
             return false;
         }
 
-        // ÉÏÏÂ×óÓÒ·½Ïò¼ü
+        // ä¸Šä¸‹å·¦å³æ–¹å‘é”®
         void DoArrowLeftRight(Keys key)
         {
             if (m_lastFocusObj == null)
             {
-                // ×Ô¶¯°ÑµÚÒ»¸ö¸ñ×ÓÉèÎª½¹µã
+                // è‡ªåŠ¨æŠŠç¬¬ä¸€ä¸ªæ ¼å­è®¾ä¸ºç„¦ç‚¹
                 if (this.Issues.Count > 0)
                 {
                     m_lastFocusObj = this.Issues[0].GetFirstCell();
@@ -5137,8 +5137,8 @@ namespace dp2Circulation
 
             if (obj != null)
             {
-                // Çå³ıÒÔÇ°µÄÑ¡Ôñ
-                if (bControl == false && bShift == false)   // °´ÏÂÁËSHIFT£¬Ò²²»Çå³ıÒÔÇ°µÄ
+                // æ¸…é™¤ä»¥å‰çš„é€‰æ‹©
+                if (bControl == false && bShift == false)   // æŒ‰ä¸‹äº†SHIFTï¼Œä¹Ÿä¸æ¸…é™¤ä»¥å‰çš„
                 {
                     if (m_bSelectedAreaOverflowed == false)
                     {
@@ -5147,21 +5147,21 @@ namespace dp2Circulation
                     }
                     else
                     {
-                        // Ö»ºÃ²ÉÓÃ±éÀúµÄ·½·¨À´È«²¿Çå³ı
+                        // åªå¥½é‡‡ç”¨éå†çš„æ–¹æ³•æ¥å…¨éƒ¨æ¸…é™¤
                         List<CellBase> objects = new List<CellBase>();
                         this.ClearAllSubSelected(ref objects, 100);
                         if (objects.Count >= 100)
                             this.Invalidate();
                         else
                         {
-                            // Õâ¸ö·½·¨ÆÁÄ»²»¶¶¶¯
+                            // è¿™ä¸ªæ–¹æ³•å±å¹•ä¸æŠ–åŠ¨
                             UpdateObjects(objects);
                         }
                     }
                 }
                 else
                 {
-                    // °´ÏÂÁËCtrl»òÕßShiftµÄÇé¿ö
+                    // æŒ‰ä¸‹äº†Ctrlæˆ–è€…Shiftçš„æƒ…å†µ
                     /*
                     if (obj.GetType() != this.DragStartObject.GetType())
                         return;
@@ -5197,19 +5197,19 @@ namespace dp2Circulation
                      * */
 
                     List<CellBase> cross = null;
-                    // aºÍbÖĞ½»²æµÄ²¿·Ö·ÅÈëunion£¬²¢´ÓaºÍbÖĞÈ¥µô
+                    // aå’Œbä¸­äº¤å‰çš„éƒ¨åˆ†æ”¾å…¥unionï¼Œå¹¶ä»aå’Œbä¸­å»æ‰
                     Compare(ref current,
                         ref last,
                         out cross);
 
                     SelectObjects(last, SelectAction.Toggle);
-                    // cross²¿·Ö²»ÓÃ²ÙĞÄ
+                    // crosséƒ¨åˆ†ä¸ç”¨æ“å¿ƒ
                     SelectObjects(current, SelectAction.On);
 
                     this.DragLastEndObject = obj;
 
-                    // ·½·¨2
-                    // Currentµ½ result.ObjectÖ®¼ä£¬toggle£»È»ºó£¬ÔÚÁôÒâ°ÑStartÑ¡ÉÏ
+                    // æ–¹æ³•2
+                    // Currentåˆ° result.Objectä¹‹é—´ï¼Œtoggleï¼›ç„¶åï¼Œåœ¨ç•™æ„æŠŠStarté€‰ä¸Š
 
                     if (EnsureVisibleWhenScrolling(obj) == true)
                         this.Update();
@@ -5220,9 +5220,9 @@ namespace dp2Circulation
 
             // END1:
                 this.DragStartObject = obj;
-                this.DragLastEndObject = null;  // Çå³ı
+                this.DragLastEndObject = null;  // æ¸…é™¤
 
-                // Ñ¡ÔñĞÂÒ»¸ö
+                // é€‰æ‹©æ–°ä¸€ä¸ª
                 List<CellBase> temp = new List<CellBase>();
                 temp.Add(obj);
                 if (bControl == true)
@@ -5243,7 +5243,7 @@ namespace dp2Circulation
             }
             else
             {
-                // ·¢³ö¾¯¸æĞÔµÄÏìÉù
+                // å‘å‡ºè­¦å‘Šæ€§çš„å“å£°
                 // Console.Beep();
             }
 
@@ -5255,15 +5255,15 @@ namespace dp2Circulation
             ToolStripMenuItem menuItem = null;
             ToolStripLabel label = null;
 
-            label = new ToolStripLabel("×°¶©");
+            label = new ToolStripLabel("è£…è®¢");
             label.Font = new Font(label.Font, FontStyle.Bold);
             label.ForeColor = Color.DarkGreen;
             contextMenu.Items.Add(label);
 
-            // ºÏ¶©Ñ¡ÔñµÄÊÂÏî
-            menuItem = new ToolStripMenuItem(" ºÏ¶©(&B)");
+            // åˆè®¢é€‰æ‹©çš„äº‹é¡¹
+            menuItem = new ToolStripMenuItem(" åˆè®¢(&B)");
             menuItem.Click += new EventHandler(menuItem_bindingSelectedItem_Click);
-            if (bHasCellSelected == false)  // TODO: ¿ÉÒÔÌõ¼ş¸üÑÏ¸ñÒ»Ğ©£¬Ö»ÓĞµ±¾ßÓĞÑ¡¶¨µÄÎ´×°¶©µÄµ¥²á£¬²Ëµ¥Ïî²Å¿ÉÓÃ
+            if (bHasCellSelected == false)  // TODO: å¯ä»¥æ¡ä»¶æ›´ä¸¥æ ¼ä¸€äº›ï¼Œåªæœ‰å½“å…·æœ‰é€‰å®šçš„æœªè£…è®¢çš„å•å†Œï¼Œèœå•é¡¹æ‰å¯ç”¨
                 menuItem.Enabled = false;
             contextMenu.Items.Add(menuItem);
 
@@ -5291,15 +5291,15 @@ namespace dp2Circulation
                 }
             }
 
-            // ½â³ıºÏ¶©
-            menuItem = new ToolStripMenuItem(" ½â³ıºÏ¶©(&R)");
+            // è§£é™¤åˆè®¢
+            menuItem = new ToolStripMenuItem(" è§£é™¤åˆè®¢(&R)");
             menuItem.Click += new EventHandler(menuItem_releaseBinding_Click);
             if (bHasParentCell == false)
                 menuItem.Enabled = false;
             contextMenu.Items.Add(menuItem);
 
-            // ½öÉ¾³ı³ÉÔ±²á¼ÇÂ¼
-            menuItem = new ToolStripMenuItem(" ½öÉ¾³ı³ÉÔ±²á¼ÇÂ¼(&D)");
+            // ä»…åˆ é™¤æˆå‘˜å†Œè®°å½•
+            menuItem = new ToolStripMenuItem(" ä»…åˆ é™¤æˆå‘˜å†Œè®°å½•(&D)");
             menuItem.Click += new EventHandler(menuItem_onlyDeleteMemberRecords_Click);
             if (bHasParentCell == false
                 && bHasMemberCell == false)
@@ -5307,15 +5307,15 @@ namespace dp2Circulation
             contextMenu.Items.Add(menuItem);
 
 
-            // ÒÆ³ö[²»ÊÕËõ]
-            menuItem = new ToolStripMenuItem(" ÒÆ³ö[²»ÊÕËõ](&M)");
+            // ç§»å‡º[ä¸æ”¶ç¼©]
+            menuItem = new ToolStripMenuItem(" ç§»å‡º[ä¸æ”¶ç¼©](&M)");
             menuItem.Click += new EventHandler(menuItem_removeFromBinding_Click);
             if (bHasMemberCell == false)
                 menuItem.Enabled = false;
             contextMenu.Items.Add(menuItem);
 
-            // ÒÆ³ö[ÊÕËõ]
-            menuItem = new ToolStripMenuItem(" ÒÆ³ö[ÊÕËõ](&S)");
+            // ç§»å‡º[æ”¶ç¼©]
+            menuItem = new ToolStripMenuItem(" ç§»å‡º[æ”¶ç¼©](&S)");
             menuItem.Click += new EventHandler(menuItem_removeFromBindingAndShrink_Click);
             if (bHasMemberCell == false)
                 menuItem.Enabled = false;
@@ -5328,29 +5328,29 @@ namespace dp2Circulation
             ToolStripMenuItem menuItem = null;
             ToolStripLabel label = null;
 
-            label = new ToolStripLabel("¼Çµ½");
+            label = new ToolStripLabel("è®°åˆ°");
             label.Font = new Font(label.Font, FontStyle.Bold);
             label.ForeColor = Color.DarkGreen;
             contextMenu.Items.Add(label);
 
-            // µ½
-            menuItem = new ToolStripMenuItem(" µ½(&A)");
+            // åˆ°
+            menuItem = new ToolStripMenuItem(" åˆ°(&A)");
             menuItem.Click += new EventHandler(menuItem_AcceptCells_Click);
             contextMenu.Items.Add(menuItem);
 
-            // ³·Ïú¼Çµ½
-            menuItem = new ToolStripMenuItem(" ³·Ïú¼Çµ½(&U)");
+            // æ’¤é”€è®°åˆ°
+            menuItem = new ToolStripMenuItem(" æ’¤é”€è®°åˆ°(&U)");
             menuItem.Click += new EventHandler(menuItem_unacceptCells_Click);
             contextMenu.Items.Add(menuItem);
 
 
-            // ĞÂÔöÔ¤²â¸ñ
-            menuItem = new ToolStripMenuItem(" ĞÂÔöÔ¤²â¸ñ[Ç°²å](&C)");
+            // æ–°å¢é¢„æµ‹æ ¼
+            menuItem = new ToolStripMenuItem(" æ–°å¢é¢„æµ‹æ ¼[å‰æ’](&C)");
             menuItem.Click += new EventHandler(menuItem_newCalulatedCells_Click);
             contextMenu.Items.Add(menuItem);
         }
 
-        // ÉÏÏÂÎÄ²Ëµ¥
+        // ä¸Šä¸‹æ–‡èœå•
         void PopupMenu(Point point)
         {
             ContextMenuStrip contextMenu = new ContextMenuStrip();
@@ -5359,19 +5359,19 @@ namespace dp2Circulation
             ToolStripSeparator menuSepItem = null;
             ToolStripLabel label = null;
 
-            // ÊÇ·ñÓĞ²á¸ñ×Ó±»Ñ¡Ôñ
+            // æ˜¯å¦æœ‰å†Œæ ¼å­è¢«é€‰æ‹©
             bool bHasCellSelected = this.HasCellSelected();
-            // ÊÇ·ñÓĞÆÚ¸ñ×Ó±»Ñ¡Ôñ
+            // æ˜¯å¦æœ‰æœŸæ ¼å­è¢«é€‰æ‹©
             bool bHasIssueSelected = this.HasIssueSelected();
 
             if (this.WholeLayout != "binding")
             {
-                // *** ¼Çµ½
+                // *** è®°åˆ°
                 BuildAcceptingMeneItems(contextMenu);
             }
             else
             {
-                // *** ×°¶©
+                // *** è£…è®¢
                 BuildBindingMeneItems(contextMenu,
                     bHasCellSelected);
             }
@@ -5381,34 +5381,34 @@ namespace dp2Circulation
             contextMenu.Items.Add(menuSepItem);
 
 
-            label = new ToolStripLabel("²á");
+            label = new ToolStripLabel("å†Œ");
             label.Font = new Font(label.Font, FontStyle.Bold);
             label.ForeColor = Color.DarkGreen;
             contextMenu.Items.Add(label);
 
-            // ±à¼­²á¸ñ×Ó
-            menuItem = new ToolStripMenuItem(" ±à¼­(&M)");
+            // ç¼–è¾‘å†Œæ ¼å­
+            menuItem = new ToolStripMenuItem(" ç¼–è¾‘(&M)");
             menuItem.Click += new EventHandler(menuItem_modifyCell_Click);
             if (bHasCellSelected == false)
                 menuItem.Enabled = false;
             contextMenu.Items.Add(menuItem);
 
-            // Ë¢ĞÂ³ö°æÊ±¼ä
-            menuItem = new ToolStripMenuItem(" Ë¢ĞÂ³ö°æÊ±¼ä(&P)");
+            // åˆ·æ–°å‡ºç‰ˆæ—¶é—´
+            menuItem = new ToolStripMenuItem(" åˆ·æ–°å‡ºç‰ˆæ—¶é—´(&P)");
             menuItem.Click += new EventHandler(menuItem_refreshPublishTime_Click);
             if (bHasCellSelected == false)
                 menuItem.Enabled = false;
             contextMenu.Items.Add(menuItem);
 
-            // Ë¢ĞÂ¾íÆÚ·¶Î§
-            menuItem = new ToolStripMenuItem(" Ë¢ĞÂ¾íÆÚ·¶Î§(&P)");
+            // åˆ·æ–°å·æœŸèŒƒå›´
+            menuItem = new ToolStripMenuItem(" åˆ·æ–°å·æœŸèŒƒå›´(&P)");
             menuItem.Click += new EventHandler(menuItem_refreshVolumeString_Click);
             if (bHasCellSelected == false)
                 menuItem.Enabled = false;
             contextMenu.Items.Add(menuItem);
 
-            // ÉèÎª¿Õ°×
-            menuItem = new ToolStripMenuItem(" ÉèÎª¿Õ°×(&B)");
+            // è®¾ä¸ºç©ºç™½
+            menuItem = new ToolStripMenuItem(" è®¾ä¸ºç©ºç™½(&B)");
             menuItem.Tag = point;
             menuItem.Click += new EventHandler(menuItem_setBlank_Click);
             if (bHasCellSelected == true || bHasIssueSelected == true)
@@ -5416,8 +5416,8 @@ namespace dp2Circulation
             contextMenu.Items.Add(menuItem);
 
             /*
-            // Ïò×óÒÆ¶¯
-            menuItem = new ToolStripMenuItem("Ïò×óÒÆ¶¯(&L)");
+            // å‘å·¦ç§»åŠ¨
+            menuItem = new ToolStripMenuItem("å‘å·¦ç§»åŠ¨(&L)");
             menuItem.Click += new EventHandler(menuItem_moveToLeft_Click);
             if (bHasSelected == false)
                 menuItem.Enabled = false;
@@ -5425,8 +5425,8 @@ namespace dp2Circulation
              * */
 
 
-            // É¾³ı²á¸ñ×Ó
-            menuItem = new ToolStripMenuItem(" É¾³ı(&D)");
+            // åˆ é™¤å†Œæ ¼å­
+            menuItem = new ToolStripMenuItem(" åˆ é™¤(&D)");
             menuItem.Click += new EventHandler(menuItem_deleteCells_Click);
             if (bHasCellSelected == false)
                 menuItem.Enabled = false;
@@ -5437,46 +5437,46 @@ namespace dp2Circulation
             menuSepItem = new ToolStripSeparator();
             contextMenu.Items.Add(menuSepItem);
 
-            label = new ToolStripLabel("ÆÚ");
+            label = new ToolStripLabel("æœŸ");
             label.Font = new Font(label.Font, FontStyle.Bold);
             label.ForeColor = Color.DarkGreen;
             contextMenu.Items.Add(label);
 
-            // ĞÂÔöÆÚ
-            menuItem = new ToolStripMenuItem(" ĞÂÔö[ºó²å](&N)");
+            // æ–°å¢æœŸ
+            menuItem = new ToolStripMenuItem(" æ–°å¢[åæ’](&N)");
             menuItem.Click += new EventHandler(menuItem_newIssue_Click);
             contextMenu.Items.Add(menuItem);
 
-            // ÔöÈ«¸÷ÆÚ
-            menuItem = new ToolStripMenuItem(" ÔöÈ«[ºó²å](&A)");
+            // å¢å…¨å„æœŸ
+            menuItem = new ToolStripMenuItem(" å¢å…¨[åæ’](&A)");
             menuItem.Click += new EventHandler(menuItem_newAllIssue_Click);
             contextMenu.Items.Add(menuItem);
 
-            // ĞŞ¸ÄÆÚ
-            menuItem = new ToolStripMenuItem(" ĞŞ¸Ä(&M)");
+            // ä¿®æ”¹æœŸ
+            menuItem = new ToolStripMenuItem(" ä¿®æ”¹(&M)");
             menuItem.Click += new EventHandler(menuItem_modifyIssue_Click);
             if (bHasIssueSelected == false)
                 menuItem.Enabled = false;
             contextMenu.Items.Add(menuItem);
 
-            // Ë¢ĞÂ¶©¹ºĞÅÏ¢
-            menuItem = new ToolStripMenuItem(" Ë¢ĞÂ¶©¹ºĞÅÏ¢(&R)");
+            // åˆ·æ–°è®¢è´­ä¿¡æ¯
+            menuItem = new ToolStripMenuItem(" åˆ·æ–°è®¢è´­ä¿¡æ¯(&R)");
             menuItem.Click += new EventHandler(menuItem_refreshOrderInfo_Click);
             if (bHasIssueSelected == false)
                 menuItem.Enabled = false;
             contextMenu.Items.Add(menuItem);
 
 
-            // É¾³ıÆÚ
-            menuItem = new ToolStripMenuItem(" É¾³ı(&D)");
+            // åˆ é™¤æœŸ
+            menuItem = new ToolStripMenuItem(" åˆ é™¤(&D)");
             menuItem.Tag = point;
             menuItem.Click += new EventHandler(menuItem_deleteIssues_Click);
             if (bHasIssueSelected == false)
                 menuItem.Enabled = false;
             contextMenu.Items.Add(menuItem);
 
-            // »Ö¸´ÆÚ¼ÇÂ¼
-            menuItem = new ToolStripMenuItem(" »Ö¸´ÆÚ¼ÇÂ¼(&V)");
+            // æ¢å¤æœŸè®°å½•
+            menuItem = new ToolStripMenuItem(" æ¢å¤æœŸè®°å½•(&V)");
             menuItem.Tag = point;
             menuItem.Click += new EventHandler(menuItem_recoverIssues_Click);
             if (bHasIssueSelected == false)
@@ -5484,8 +5484,8 @@ namespace dp2Circulation
             contextMenu.Items.Add(menuItem);
 
 
-            // ÇĞ»»ÆÚ²¼¾Ö
-            menuItem = new ToolStripMenuItem(" ÇĞ»»²¼¾Ö(&S)");
+            // åˆ‡æ¢æœŸå¸ƒå±€
+            menuItem = new ToolStripMenuItem(" åˆ‡æ¢å¸ƒå±€(&S)");
             /*
             if (bHasIssueSelected == false)
                 menuItem.Enabled = false;
@@ -5494,13 +5494,13 @@ namespace dp2Circulation
 
             if (menuItem.Enabled == true)
             {
-                // TODO:°ÑÍ³¼ÆÊıÁ¿Õ¼¶àÊıµÄÒ»ÖÖÄ£Ê½¸ø´ò¹´µ½×Ó²Ëµ¥ÉÏ
+                // TODO:æŠŠç»Ÿè®¡æ•°é‡å å¤šæ•°çš„ä¸€ç§æ¨¡å¼ç»™æ‰“å‹¾åˆ°å­èœå•ä¸Š
                 IssueLayoutState layout = GetMostSelectedLayoutState();
 
-                // ×Ó²Ëµ¥
+                // å­èœå•
                 {
                     ToolStripMenuItem subMenuItem = new ToolStripMenuItem();
-                    subMenuItem.Text = "×°¶©";
+                    subMenuItem.Text = "è£…è®¢";
                     subMenuItem.Tag = IssueLayoutState.Binding;
                     subMenuItem.Image = this.imageList_layout.Images[0];
                     subMenuItem.DisplayStyle = ToolStripItemDisplayStyle.ImageAndText;
@@ -5518,7 +5518,7 @@ namespace dp2Circulation
 
                 {
                     ToolStripMenuItem subMenuItem = new ToolStripMenuItem();
-                    subMenuItem.Text = "¼Çµ½";
+                    subMenuItem.Text = "è®°åˆ°";
                     subMenuItem.Tag = IssueLayoutState.Accepting;
                     subMenuItem.Image = this.imageList_layout.Images[1];
                     subMenuItem.DisplayStyle = ToolStripItemDisplayStyle.ImageAndText;
@@ -5540,7 +5540,7 @@ namespace dp2Circulation
                     menuItem.DropDown.Items.Add(menuSepItem);
 
                     ToolStripMenuItem subMenuItem = new ToolStripMenuItem();
-                    subMenuItem.Text = "ÖØĞÂ²¼¾Ö";
+                    subMenuItem.Text = "é‡æ–°å¸ƒå±€";
                     subMenuItem.Click += new EventHandler(MenuItem_refreshIssueLayout_Click);
                     menuItem.DropDown.Items.Add(subMenuItem);
                 }
@@ -5552,13 +5552,13 @@ namespace dp2Circulation
 
             if (this.WholeLayout != "binding")
             {
-                // *** ×°¶©
+                // *** è£…è®¢
                 BuildBindingMeneItems(contextMenu,
                     bHasCellSelected);
             }
             else
             {
-                // *** ¼Çµ½
+                // *** è®°åˆ°
                 BuildAcceptingMeneItems(contextMenu);
             }
 
@@ -5567,8 +5567,8 @@ namespace dp2Circulation
             contextMenu.Items.Add(menuSepItem);
 
 
-            // ±à¼­ÇøÓò
-            menuItem = new ToolStripMenuItem("±à¼­ÇøÓò(&E)");
+            // ç¼–è¾‘åŒºåŸŸ
+            menuItem = new ToolStripMenuItem("ç¼–è¾‘åŒºåŸŸ(&E)");
             menuItem.Click += new EventHandler(menuItem_toggleEditArea_Click);
             if (this.EditArea == null)
                 menuItem.Enabled = false;
@@ -5588,14 +5588,14 @@ namespace dp2Circulation
             contextMenu.Show(this, point);
         }
 
-        // Ë¢ĞÂ¶©¹ºĞÅÏ¢
+        // åˆ·æ–°è®¢è´­ä¿¡æ¯
         void menuItem_refreshOrderInfo_Click(object sender, EventArgs e)
         {
             string strError = "";
             int nRet = 0;
 
             List<IssueBindingItem> selected_issues = this.SelectedIssues;
-            // ÕûÀíÒ»ÏÂselected_issuesÊı×é
+            // æ•´ç†ä¸€ä¸‹selected_issuesæ•°ç»„
             for (int i = 0; i < selected_issues.Count; i++)
             {
                 IssueBindingItem issue = selected_issues[i];
@@ -5610,7 +5610,7 @@ namespace dp2Circulation
 
             if (selected_issues.Count == 0)
             {
-                strError = "ÉĞÎ´Ñ¡¶¨ÒªË¢ĞÂµÄÆÚ¸ñ×Ó";
+                strError = "å°šæœªé€‰å®šè¦åˆ·æ–°çš„æœŸæ ¼å­";
                 goto ERROR1;
             }
 
@@ -5624,13 +5624,13 @@ namespace dp2Circulation
             }
 
 
-            this.AfterWidthChanged(true);   // content¿í¶È¿ÉÄÜ¸Ä±ä
+            this.AfterWidthChanged(true);   // contentå®½åº¦å¯èƒ½æ”¹å˜
             return;
         ERROR1:
             MessageBox.Show(this, strError);
         }
 
-        // Ë¢ĞÂ³ö°æÊ±¼ä
+        // åˆ·æ–°å‡ºç‰ˆæ—¶é—´
         void menuItem_refreshPublishTime_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -5639,7 +5639,7 @@ namespace dp2Circulation
             List<Cell> selected_cells = this.SelectedCells;
             if (selected_cells.Count == 0)
             {
-                strError = "ÉĞÎ´Ñ¡¶¨ÒªË¢ĞÂ³ö°æÊ±¼äµÄ¸ñ×Ó";
+                strError = "å°šæœªé€‰å®šè¦åˆ·æ–°å‡ºç‰ˆæ—¶é—´çš„æ ¼å­";
                 goto ERROR1;
             }
 
@@ -5650,14 +5650,14 @@ namespace dp2Circulation
 
                 if (cell != null
                     && String.IsNullOrEmpty(cell.Container.PublishTime) == true)
-                    continue;   // Ìø¹ı×ÔÓÉÆÚÄÚµÄ
+                    continue;   // è·³è¿‡è‡ªç”±æœŸå†…çš„
 
                 if (cell.item == null)
                     continue;
 
                 if (this.IsBindingParent(cell) == true)
                 {
-                    // ºÏ¶©²á
+                    // åˆè®¢å†Œ
                     Debug.Assert(cell.item != null, "");
                     Debug.Assert(cell.item.IsMember == false, "");
 
@@ -5670,7 +5670,7 @@ namespace dp2Circulation
                 }
                 else if (cell.IsMember == true)
                 {
-                    // ×¢£ºcell.item¿ÉÄÜÎª¿Õ
+                    // æ³¨ï¼šcell.itemå¯èƒ½ä¸ºç©º
                     if (cell.item != null)
                     {
                         if (cell.item.RefreshPublishTime() == true)
@@ -5682,7 +5682,7 @@ namespace dp2Circulation
                 }
                 else
                 {
-                    // µ¥²á
+                    // å•å†Œ
                     if (cell.item != null
                         && cell.item.RefreshPublishTime() == true)
                     {
@@ -5694,7 +5694,7 @@ namespace dp2Circulation
 
             if (changed_cells.Count == 0)
             {
-                strError = "Ã»ÓĞ·¢ÉúË¢ĞÂ";
+                strError = "æ²¡æœ‰å‘ç”Ÿåˆ·æ–°";
                 goto ERROR1;
             }
 
@@ -5715,7 +5715,7 @@ namespace dp2Circulation
             MessageBox.Show(this, strError);
         }
 
-        // Ë¢ĞÂ¾íÆÚ·¶Î§
+        // åˆ·æ–°å·æœŸèŒƒå›´
         void menuItem_refreshVolumeString_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -5724,7 +5724,7 @@ namespace dp2Circulation
             List<Cell> selected_cells = this.SelectedCells;
             if (selected_cells.Count == 0)
             {
-                strError = "ÉĞÎ´Ñ¡¶¨ÒªË¢ĞÂ¾íÆÚ·¶Î§µÄ¸ñ×Ó";
+                strError = "å°šæœªé€‰å®šè¦åˆ·æ–°å·æœŸèŒƒå›´çš„æ ¼å­";
                 goto ERROR1;
             }
 
@@ -5735,14 +5735,14 @@ namespace dp2Circulation
 
                 if (cell != null
     && String.IsNullOrEmpty(cell.Container.PublishTime) == true)
-                    continue;   // Ìø¹ı×ÔÓÉÆÚÄÚµÄ
+                    continue;   // è·³è¿‡è‡ªç”±æœŸå†…çš„
 
                 if (cell.item == null)
                     continue;
 
                 if (this.IsBindingParent(cell) == true)
                 {
-                    // ºÏ¶©²á
+                    // åˆè®¢å†Œ
                     Debug.Assert(cell.item != null, "");
                     Debug.Assert(cell.item.IsMember == false, "");
 
@@ -5754,7 +5754,7 @@ namespace dp2Circulation
                 }
                 else if (cell.IsMember == true)
                 {
-                    // ×¢£ºcell.item¿ÉÄÜÎª¿Õ
+                    // æ³¨ï¼šcell.itemå¯èƒ½ä¸ºç©º
                     if (cell.item != null)
                     {
                         if (cell.item.RefreshVolumeString() == true)
@@ -5766,7 +5766,7 @@ namespace dp2Circulation
                 }
                 else
                 {
-                    // µ¥²á
+                    // å•å†Œ
                     if (cell.item != null
                         && cell.item.RefreshVolumeString() == true)
                     {
@@ -5778,7 +5778,7 @@ namespace dp2Circulation
 
             if (changed_cells.Count == 0)
             {
-                strError = "Ã»ÓĞ·¢ÉúË¢ĞÂ";
+                strError = "æ²¡æœ‰å‘ç”Ÿåˆ·æ–°";
                 goto ERROR1;
             }
 
@@ -5799,7 +5799,7 @@ namespace dp2Circulation
             MessageBox.Show(this, strError);
         }
 
-        // ½öÉ¾³ı³ÉÔ±²á¼ÇÂ¼¡£²¢²»¸Ä±äºÏ¶©·¶Î§¡£
+        // ä»…åˆ é™¤æˆå‘˜å†Œè®°å½•ã€‚å¹¶ä¸æ”¹å˜åˆè®¢èŒƒå›´ã€‚
         void menuItem_onlyDeleteMemberRecords_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -5809,18 +5809,18 @@ namespace dp2Circulation
             List<Cell> selected_cells = this.SelectedCells;
             if (selected_cells.Count == 0)
             {
-                strError = "ÉĞÎ´Ñ¡¶¨Òª(½ö)É¾³ı¼ÇÂ¼µÄ¸ñ×Ó";
+                strError = "å°šæœªé€‰å®šè¦(ä»…)åˆ é™¤è®°å½•çš„æ ¼å­";
                 goto ERROR1;
             }
 
-            // ÒÑ¾­²ÎÓë×°¶©µÄ²á
+            // å·²ç»å‚ä¸è£…è®¢çš„å†Œ
             List<Cell> member_cells = new List<Cell>();
 
-            // ºÏ¶©²á
+            // åˆè®¢å†Œ
             List<Cell> parent_cells = new List<Cell>();
 
 
-            // ·ÖÑ¡
+            // åˆ†é€‰
             for (int i = 0; i < selected_cells.Count; i++)
             {
                 Cell cell = selected_cells[i];
@@ -5833,17 +5833,17 @@ namespace dp2Circulation
                 }
                 else if (cell.IsMember == true)
                 {
-                    // ×¢£ºcell.item¿ÉÄÜÎª¿Õ
+                    // æ³¨ï¼šcell.itemå¯èƒ½ä¸ºç©º
                     member_cells.Add(cell);
                 }
                 else
                 {
-                    strError = "±¾¹¦ÄÜ²»ÄÜÓÃÓÚÆÕÍ¨µ¥²á¸ñ×Ó";
+                    strError = "æœ¬åŠŸèƒ½ä¸èƒ½ç”¨äºæ™®é€šå•å†Œæ ¼å­";
                     goto ERROR1;
                 }
             }
 
-            // ¼ì²é³ÉÔ±²á
+            // æ£€æŸ¥æˆå‘˜å†Œ
             strWarning = "";
             int nErrorCount = 0;
             int nOldCount = member_cells.Count;
@@ -5856,7 +5856,7 @@ namespace dp2Circulation
                 if (cell.item == null)
                     continue;
 
-                // ´ÓÊôÓÚËùÑ¡ºÏ¶©²áµÄ³ÉÔ±²á£¬Òª±ÜÃâÖØ¸´É¾³ı
+                // ä»å±äºæ‰€é€‰åˆè®¢å†Œçš„æˆå‘˜å†Œï¼Œè¦é¿å…é‡å¤åˆ é™¤
                 bool bFound = false;
                 for (int j = 0; j < parent_cells.Count; j++)
                 {
@@ -5878,36 +5878,36 @@ namespace dp2Circulation
 
                 if (String.IsNullOrEmpty(cell.item.Borrower) == false)
                 {
-                    // ÒÑ½è³ö×´Ì¬
+                    // å·²å€Ÿå‡ºçŠ¶æ€
                     if (String.IsNullOrEmpty(strWarning) == false)
                         strWarning += ";\r\n";
-                    strWarning += "²á '" + cell.item.RefID + "' ÉĞ´¦ÓÚ¡°ÒÑ½è³ö¡±×´Ì¬";
+                    strWarning += "å†Œ '" + cell.item.RefID + "' å°šå¤„äºâ€œå·²å€Ÿå‡ºâ€çŠ¶æ€";
                     nErrorCount++;
                     member_cells.RemoveAt(i);
                     i--;
                 }
             }
 
-            // ¾¯¸æ²»ÄÜÉ¾³ıµÄ³ÉÔ±²á
+            // è­¦å‘Šä¸èƒ½åˆ é™¤çš„æˆå‘˜å†Œ
             if (String.IsNullOrEmpty(strWarning) == false)
             {
                 strError =
-                    "ËùÑ¡¶¨µÄ " + nOldCount.ToString() + " ¸ö³ÉÔ±²áÖĞ£¬ÓĞÏÂÁĞ²á¼ÇÂ¼²»ÄÜÉ¾³ı:\r\n\r\n" + strWarning;
+                    "æ‰€é€‰å®šçš„ " + nOldCount.ToString() + " ä¸ªæˆå‘˜å†Œä¸­ï¼Œæœ‰ä¸‹åˆ—å†Œè®°å½•ä¸èƒ½åˆ é™¤:\r\n\r\n" + strWarning;
                     goto ERROR1;
             }
 
             strWarning = "";
             if (member_cells.Count > 0)
-                strWarning += " " + member_cells.Count.ToString() + " ¸ö³ÉÔ±²áµÄ²á¼ÇÂ¼";
+                strWarning += " " + member_cells.Count.ToString() + " ä¸ªæˆå‘˜å†Œçš„å†Œè®°å½•";
 
             if (parent_cells.Count > 0)
             {
                 if (String.IsNullOrEmpty(strWarning) == false)
-                    strWarning += " ºÍ";
-                strWarning += " " + parent_cells.Count.ToString() + " ¸öºÏ¶©²áÏÂÊôµÄËùÓĞ³ÉÔ±²á¼ÇÂ¼";
+                    strWarning += " å’Œ";
+                strWarning += " " + parent_cells.Count.ToString() + " ä¸ªåˆè®¢å†Œä¸‹å±çš„æ‰€æœ‰æˆå‘˜å†Œè®°å½•";
             }
 
-            strWarning = "È·ÊµÒªÉ¾³ıËùÑ¡¶¨µÄ" + strWarning + "?\r\n\r\n(×¢£º±¾¹¦ÄÜ²¢²»¸Ä±äºÏ¶©·¶Î§ºÍºÏ¶©×´Ì¬)";
+            strWarning = "ç¡®å®è¦åˆ é™¤æ‰€é€‰å®šçš„" + strWarning + "?\r\n\r\n(æ³¨ï¼šæœ¬åŠŸèƒ½å¹¶ä¸æ”¹å˜åˆè®¢èŒƒå›´å’Œåˆè®¢çŠ¶æ€)";
             DialogResult dialog_result = MessageBox.Show(this,
                 strWarning,
                 "BindingControls",
@@ -5917,9 +5917,9 @@ namespace dp2Circulation
             if (dialog_result == DialogResult.No)
                 return;
 
-            // ¿ªÊ¼É¾³ı
+            // å¼€å§‹åˆ é™¤
 
-            // ¼ì²éËùÑ¡ºÏ¶©²áÏÂÊôµÄÈ«²¿³ÉÔ±²á
+            // æ£€æŸ¥æ‰€é€‰åˆè®¢å†Œä¸‹å±çš„å…¨éƒ¨æˆå‘˜å†Œ
             strWarning = "";
             nErrorCount = 0;
             nOldCount = parent_cells.Count;
@@ -5929,14 +5929,14 @@ namespace dp2Circulation
                 if (parent_cell.item == null)
                     continue;
 
-                // ¼ì²éºÏ¶©²áµÄËø¶¨×´Ì¬
+                // æ£€æŸ¥åˆè®¢å†Œçš„é”å®šçŠ¶æ€
                 if (parent_cell.item.Locked == true)
                 {
-                    strError = "Ëø¶¨×´Ì¬µÄºÏ¶©²á£¬Æä³ÉÔ±²á²»ÔÊĞíÉ¾³ı";
+                    strError = "é”å®šçŠ¶æ€çš„åˆè®¢å†Œï¼Œå…¶æˆå‘˜å†Œä¸å…è®¸åˆ é™¤";
                     goto ERROR1;
                 }
 
-                // ´ÓÊôÓÚËùÑ¡ºÏ¶©²áµÄ³ÉÔ±²á£¬Òª±ÜÃâÖØ¸´É¾³ı
+                // ä»å±äºæ‰€é€‰åˆè®¢å†Œçš„æˆå‘˜å†Œï¼Œè¦é¿å…é‡å¤åˆ é™¤
                 for (int j = 0; j < parent_cell.item.MemberCells.Count; j++)
                 {
                     Cell member_cell = parent_cell.item.MemberCells[j];
@@ -5947,25 +5947,25 @@ namespace dp2Circulation
 
                     if (String.IsNullOrEmpty(member_cell.item.Borrower) == false)
                     {
-                        // ÒÑ½è³ö×´Ì¬
+                        // å·²å€Ÿå‡ºçŠ¶æ€
                         if (String.IsNullOrEmpty(strWarning) == false)
                             strWarning += ";\r\n";
-                        strWarning += "²á '" + member_cell.item.RefID + "' ÉĞ´¦ÓÚ¡°ÒÑ½è³ö¡±×´Ì¬";
+                        strWarning += "å†Œ '" + member_cell.item.RefID + "' å°šå¤„äºâ€œå·²å€Ÿå‡ºâ€çŠ¶æ€";
                         nErrorCount++;
                         j--;
                     }
                 }
             }
 
-            // ¾¯¸æ²»ÄÜÉ¾³ıµÄ(ËùÑ¡ºÏ¶©²áµÄ)³ÉÔ±²á
+            // è­¦å‘Šä¸èƒ½åˆ é™¤çš„(æ‰€é€‰åˆè®¢å†Œçš„)æˆå‘˜å†Œ
             if (String.IsNullOrEmpty(strWarning) == false)
             {
                 strError =
-                    "ËùÑ¡¶¨µÄ " + nOldCount.ToString() + " ¸öºÏ¶©²áÖĞ£¬ÓĞÏÂÁĞ³ÉÔ±²á¼ÇÂ¼²»ÄÜÉ¾³ı:\r\n\r\n" + strWarning;
+                    "æ‰€é€‰å®šçš„ " + nOldCount.ToString() + " ä¸ªåˆè®¢å†Œä¸­ï¼Œæœ‰ä¸‹åˆ—æˆå‘˜å†Œè®°å½•ä¸èƒ½åˆ é™¤:\r\n\r\n" + strWarning;
                     goto ERROR1;
             }
 
-            // É¾³ıºÏ¶©²áÏÂÊôµÄ³ÉÔ±²á¼ÇÂ¼
+            // åˆ é™¤åˆè®¢å†Œä¸‹å±çš„æˆå‘˜å†Œè®°å½•
             strWarning = "";
             for (int i = 0; i < parent_cells.Count; i++)
             {
@@ -5989,8 +5989,8 @@ namespace dp2Circulation
                 parent_cell.item.AfterMembersChanged();
             }
 
-            // É¾³ıµ¥¶ÀÑ¡Ôñ³ÉÔ±¸ñ×Ó
-            List<ItemBindingItem> temp_parent_items = new List<ItemBindingItem>();    // È¥ÖØ×÷ÓÃ
+            // åˆ é™¤å•ç‹¬é€‰æ‹©æˆå‘˜æ ¼å­
+            List<ItemBindingItem> temp_parent_items = new List<ItemBindingItem>();    // å»é‡ä½œç”¨
             for (int i = 0; i < member_cells.Count; i++)
             {
                 Cell cell = member_cells[i];
@@ -6019,7 +6019,7 @@ namespace dp2Circulation
 
         }
 
-        // ±à¼­Ò»¸ö²á¸ñ×Ó
+        // ç¼–è¾‘ä¸€ä¸ªå†Œæ ¼å­
         void menuItem_modifyCell_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -6033,13 +6033,13 @@ namespace dp2Circulation
                 cell = selected_cells[0];
             else
             {
-                strError = "ÉĞÎ´Ñ¡ÔñÒª±à¼­µÄ¸ñ×Ó";
+                strError = "å°šæœªé€‰æ‹©è¦ç¼–è¾‘çš„æ ¼å­";
                 goto ERROR1;
             }
 
             Debug.Assert(cell != null, "");
 
-            // ÏÔÊ¾±à¼­ÇøÓò
+            // æ˜¾ç¤ºç¼–è¾‘åŒºåŸŸ
             EditAreaEventArgs e1 = new EditAreaEventArgs();
             e1.Action = "get_state";
             this.EditArea(this, e1);
@@ -6058,7 +6058,7 @@ namespace dp2Circulation
             MessageBox.Show(this, strError);
         }
 
-        // ±à¼­ÆÚ
+        // ç¼–è¾‘æœŸ
         void menuItem_modifyIssue_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -6073,7 +6073,7 @@ namespace dp2Circulation
                 }
                 else
                 {
-                    strError = "ÉĞÎ´Ñ¡¶¨ÒªĞŞ¸ÄµÄÆÚ";
+                    strError = "å°šæœªé€‰å®šè¦ä¿®æ”¹çš„æœŸ";
                     goto ERROR1;
                 }
             }
@@ -6082,7 +6082,7 @@ namespace dp2Circulation
 
             if (String.IsNullOrEmpty(issue.PublishTime) == true)
             {
-                strError = "×ÔÓÉÆÚ²»ÄÜ±»ĞŞ¸Ä";
+                strError = "è‡ªç”±æœŸä¸èƒ½è¢«ä¿®æ”¹";
                 goto ERROR1;
             }
 
@@ -6111,13 +6111,13 @@ namespace dp2Circulation
             List<IssueBindingItem> warning_issues = null;
             string strWarning = "";
 
-            // ¶Ô³ö°æÊ±¼ä½øĞĞ²éÖØ
+            // å¯¹å‡ºç‰ˆæ—¶é—´è¿›è¡ŒæŸ¥é‡
             // parameters:
-            //      exclude ¼ì²éÖĞÒªÅÅ³ıµÄTreeNode¶ÔÏó
+            //      exclude æ£€æŸ¥ä¸­è¦æ’é™¤çš„TreeNodeå¯¹è±¡
             // return:
             //      -1  error
-            //      0   Ã»ÓĞÖØ
-            //      1   ÖØ
+            //      0   æ²¡æœ‰é‡
+            //      1   é‡
             nRet = CheckPublishTimeDup(dlg.PublishTime,
                 dlg.Issue,
                 dlg.Zong,
@@ -6131,18 +6131,18 @@ namespace dp2Circulation
                 goto ERROR1;
             if (nRet == 1)
             {
-                // Ñ¡ÖĞËùÖØ¸´µÄÆÚ¸ñ×Ó£¬±ãÓÚ²Ù×÷Õß¹Û²ìÖØ¸´µÄÇé¿ö
+                // é€‰ä¸­æ‰€é‡å¤çš„æœŸæ ¼å­ï¼Œä¾¿äºæ“ä½œè€…è§‚å¯Ÿé‡å¤çš„æƒ…å†µ
                 Debug.Assert(dup_issue != null, "");
                 if (dup_issue != null)
                 {
                     this.ClearAllSelection();
                     dup_issue.Select(SelectAction.On);
-                    this.EnsureVisible(dup_issue);  // È·±£¹öÈëÊÓÒ°
+                    this.EnsureVisible(dup_issue);  // ç¡®ä¿æ»šå…¥è§†é‡
                     this.UpdateObject(dup_issue);
                     this.Update();
                 }
 
-                MessageBox.Show(this, "ĞŞ¸ÄºóµÄÆÚ " + strError + "\r\nÇëĞŞ¸Ä¡£");
+                MessageBox.Show(this, "ä¿®æ”¹åçš„æœŸ " + strError + "\r\nè¯·ä¿®æ”¹ã€‚");
                 goto REDO_INPUT;
             }
              * */
@@ -6155,15 +6155,15 @@ namespace dp2Circulation
             issue.Comment = dlg.Comment;
             issue.Changed = true;
 
-            // ÉèÖÃ»òÕßË¢ĞÂÒ»¸ö²Ù×÷¼ÇÔØ
-            // ¿ÉÄÜ»áÅ×³öÒì³£
+            // è®¾ç½®æˆ–è€…åˆ·æ–°ä¸€ä¸ªæ“ä½œè®°è½½
+            // å¯èƒ½ä¼šæŠ›å‡ºå¼‚å¸¸
             issue.SetOperation(
                 "lastModified",
                 this.Operator,
                 "");
 
 
-            // ĞŞ¸ÄÈ«²¿ÏÂÊô¸ñ×ÓµÄvolume stringºÍpublish time
+            // ä¿®æ”¹å…¨éƒ¨ä¸‹å±æ ¼å­çš„volume stringå’Œpublish time
             string strNewVolumeString =
     VolumeInfo.BuildItemVolumeString(
     IssueUtil.GetYearPart(issue.PublishTime),
@@ -6176,7 +6176,7 @@ issue.Volume);
                 if (cell == null)
                     continue;
 
-                // ³ÉÔ±²á
+                // æˆå‘˜å†Œ
                 if (cell.item == null && cell.ParentItem != null)
                 {
                     cell.RefreshOutofIssue();
@@ -6188,7 +6188,7 @@ issue.Volume);
                     continue;
 
                 if (cell.item.IsParent == true)
-                    continue;   // ²»Ö±½ÓĞŞ¸ÄºÏ¶©²á¡£µ«ÊÇ£¬ºÏ¶©²áÄÚµÄÈÎºÎ¸ñ×Ó±ä»¯£¬¶¼»á×Ô¶¯»ã×Üµ½ºÏ¶©²á
+                    continue;   // ä¸ç›´æ¥ä¿®æ”¹åˆè®¢å†Œã€‚ä½†æ˜¯ï¼Œåˆè®¢å†Œå†…çš„ä»»ä½•æ ¼å­å˜åŒ–ï¼Œéƒ½ä¼šè‡ªåŠ¨æ±‡æ€»åˆ°åˆè®¢å†Œ
 
                 bool bChanged = false;
                 if (cell.item.PublishTime != issue.PublishTime)
@@ -6213,10 +6213,10 @@ issue.Volume);
                 }
             }
 
-            // Ñ¡ÖĞĞŞ¸Ä¹ıµÄÆÚ¸ñ×Ó
+            // é€‰ä¸­ä¿®æ”¹è¿‡çš„æœŸæ ¼å­
             this.ClearAllSelection();
             issue.Select(SelectAction.On);
-            this.EnsureVisible(issue);  // È·±£¹öÈëÊÓÒ°
+            this.EnsureVisible(issue);  // ç¡®ä¿æ»šå…¥è§†é‡
 
             this.AfterWidthChanged(true);
             return;
@@ -6224,7 +6224,7 @@ issue.Volume);
             MessageBox.Show(this, strError);
         }
 
-        // ¸ù¾İµ±Ç°Ñ¡ÔñµÄÆÚµÄÇé¿ö£¬Í³¼Æ³öÊıÁ¿×î¶àµÄ²¼¾ÖÄ£Ê½
+        // æ ¹æ®å½“å‰é€‰æ‹©çš„æœŸçš„æƒ…å†µï¼Œç»Ÿè®¡å‡ºæ•°é‡æœ€å¤šçš„å¸ƒå±€æ¨¡å¼
         IssueLayoutState GetMostSelectedLayoutState()
         {
             int nBindingCount = 0;
@@ -6244,28 +6244,28 @@ issue.Volume);
             return IssueLayoutState.Binding;
         }
 
-        // ĞÂÔöÔ¤²â¸ñ
-        // Ä¿Ç°Ö»ÄÜ´¦Àí ¼Çµ½²¼¾ÖµÄĞĞ
-        // Èç¹ûÑ¡¶¨ÁË¶©¹º×é¸ñ×Ó£¬ÔòÔÚ´Ë×éµÄÄ©Î²×·¼ÓÒ»¸öĞÂµÄÔ¤²â¸ñ£»
-        // Èç¹ûÑ¡¶¨ÁË¶©¹º×éÄÚµÄ¸ñ×Ó£¬ÔòÔÚ´ËÎ»ÖÃ²åÈëÒ»¸öĞÂµÄÔ¤²â¸ñ¡£
-        // Èç¹ûÍ¬Ò»¸ö×éÖĞÑ¡ÔñÁËÁ½Õß£¬ÔòÒÔ×éÄÚ¸ñ×ÓÑ¡ÔñÎªÓĞĞ§
-        // Èç¹ûÑ¡ÔñÁËÆäËû¸ñ×Ó£¬Ò²¾ÍÊÇ×éÍâµÄ¸ñ×Ó£¬Ôò±¾¹¦ÄÜÎŞĞ§
+        // æ–°å¢é¢„æµ‹æ ¼
+        // ç›®å‰åªèƒ½å¤„ç† è®°åˆ°å¸ƒå±€çš„è¡Œ
+        // å¦‚æœé€‰å®šäº†è®¢è´­ç»„æ ¼å­ï¼Œåˆ™åœ¨æ­¤ç»„çš„æœ«å°¾è¿½åŠ ä¸€ä¸ªæ–°çš„é¢„æµ‹æ ¼ï¼›
+        // å¦‚æœé€‰å®šäº†è®¢è´­ç»„å†…çš„æ ¼å­ï¼Œåˆ™åœ¨æ­¤ä½ç½®æ’å…¥ä¸€ä¸ªæ–°çš„é¢„æµ‹æ ¼ã€‚
+        // å¦‚æœåŒä¸€ä¸ªç»„ä¸­é€‰æ‹©äº†ä¸¤è€…ï¼Œåˆ™ä»¥ç»„å†…æ ¼å­é€‰æ‹©ä¸ºæœ‰æ•ˆ
+        // å¦‚æœé€‰æ‹©äº†å…¶ä»–æ ¼å­ï¼Œä¹Ÿå°±æ˜¯ç»„å¤–çš„æ ¼å­ï¼Œåˆ™æœ¬åŠŸèƒ½æ— æ•ˆ
         void menuItem_newCalulatedCells_Click(object sender, EventArgs e)
         {
             string strError = "";
             int nRet = 0;
 
-            // ´ÓÑ¡Ôñ·¶Î§ÖĞÌô³ö×éÖĞµÄ¸ñ×Ó»òÕß×é¸ñ×Ó¡£
+            // ä»é€‰æ‹©èŒƒå›´ä¸­æŒ‘å‡ºç»„ä¸­çš„æ ¼å­æˆ–è€…ç»„æ ¼å­ã€‚
             List<Cell> selected_cells = this.SelectedCells;
             if (selected_cells.Count == 0)
             {
-                strError = "ÉĞÎ´Ñ¡¶¨ÒªĞÂÔöÔ¤²â²á¸ñµÄ²Î¿¼¸ñ";
+                strError = "å°šæœªé€‰å®šè¦æ–°å¢é¢„æµ‹å†Œæ ¼çš„å‚è€ƒæ ¼";
                 goto ERROR1;
             }
 
             List<GroupCell> group_cells = new List<GroupCell>();
             List<Cell> ingroup_cells = new List<Cell>();
-            // ·ÖÑ¡
+            // åˆ†é€‰
             for (int i = 0; i < selected_cells.Count; i++)
             {
                 Cell cell = selected_cells[i];
@@ -6281,14 +6281,14 @@ issue.Volume);
                 {
                     if (cell.Container.IssueLayoutState != IssueLayoutState.Accepting)
                     {
-                        strError = "Ö»ÄÜ¶ÔÎ»ÓÚ¼Çµ½²¼¾ÖµÄÆÚÄÚµÄ²Î¿¼¸ñ×Ó½øĞĞĞÂÔöÔ¤²â¸ñµÄ²Ù×÷";
+                        strError = "åªèƒ½å¯¹ä½äºè®°åˆ°å¸ƒå±€çš„æœŸå†…çš„å‚è€ƒæ ¼å­è¿›è¡Œæ–°å¢é¢„æµ‹æ ¼çš„æ“ä½œ";
                         goto ERROR1;
                     }
                     ingroup_cells.Add(cell);
                 }
             }
 
-            // È¥µôÖØ¸´¡¢°ÑÎ²²¿¶ÔÏóÌæ»»ÎªÍ·²¿¶ÔÏó
+            // å»æ‰é‡å¤ã€æŠŠå°¾éƒ¨å¯¹è±¡æ›¿æ¢ä¸ºå¤´éƒ¨å¯¹è±¡
             for (int i = 0; i < group_cells.Count; i++)
             {
                 GroupCell group = group_cells[i];
@@ -6319,7 +6319,7 @@ issue.Volume);
                 }
             }
 
-            // Èç¹ûÒ»¸ö×éµÄ×éÄÚ¶ÔÏóÒÑ¾­±»Ñ¡ÔñÁË£¬¾Í²»ÒªÔÙÓĞÍ·²¿¶ÔÏó
+            // å¦‚æœä¸€ä¸ªç»„çš„ç»„å†…å¯¹è±¡å·²ç»è¢«é€‰æ‹©äº†ï¼Œå°±ä¸è¦å†æœ‰å¤´éƒ¨å¯¹è±¡
             for (int i = 0; i < group_cells.Count; i++)
             {
                 GroupCell group = group_cells[i];
@@ -6339,22 +6339,22 @@ issue.Volume);
 
             if (ingroup_cells.Count == 0 && group_cells.Count == 0)
             {
-                strError = "ËùÑ¡¶¨µÄ¸ñ×ÓÖĞÃ»ÓĞ°üº¬×é¸ñ×Ó»òÕß×éÄÚ¸ñ×Ó";
+                strError = "æ‰€é€‰å®šçš„æ ¼å­ä¸­æ²¡æœ‰åŒ…å«ç»„æ ¼å­æˆ–è€…ç»„å†…æ ¼å­";
                 goto ERROR1;
             }
 
             List<Cell> new_cells = new List<Cell>();
 
-            // ÏÈ±éÀú×é¸ñ×Ó
+            // å…ˆéå†ç»„æ ¼å­
             for (int i = 0; i < group_cells.Count; i++)
             {
                 GroupCell group = group_cells[i];
                 Debug.Assert(group.EndBracket == false, "");
-                // ÔÚ×éÄÚ²åÈëĞÂµÄ¸ñ×Ó(Ô¤²â¸ñ×Ó)
+                // åœ¨ç»„å†…æ’å…¥æ–°çš„æ ¼å­(é¢„æµ‹æ ¼å­)
                 // parameters:
-                //      nInsertPos  ²åÈëÎ»ÖÃ¡£Èç¹ûÎª-1£¬±íÊ¾²åÈëÔÚÎ²²¿
+                //      nInsertPos  æ’å…¥ä½ç½®ã€‚å¦‚æœä¸º-1ï¼Œè¡¨ç¤ºæ’å…¥åœ¨å°¾éƒ¨
                 // return:
-                //      ·µ»Ø²åÈëµÄindex(Õû¸öissue.CellsÏÂ±ê)
+                //      è¿”å›æ’å…¥çš„index(æ•´ä¸ªissue.Cellsä¸‹æ ‡)
                 nRet = group.InsertNewMemberCell(
                     -1,
                     out strError);
@@ -6363,7 +6363,7 @@ issue.Volume);
                 new_cells.Add(group.Container.GetCell(nRet));
             }
 
-            // È»ºó±éÀú×éÄÚ¸ñ×Ó
+            // ç„¶åéå†ç»„å†…æ ¼å­
             for (int i = 0; i < ingroup_cells.Count; i++)
             {
                 Cell cell = ingroup_cells[i];
@@ -6383,7 +6383,7 @@ issue.Volume);
                 new_cells.Add(group.Container.GetCell(nRet));
             }
 
-            // Ñ¡¶¨ĞÂ´´½¨µÄÄÇĞ©¶ÔÏó
+            // é€‰å®šæ–°åˆ›å»ºçš„é‚£äº›å¯¹è±¡
             this.ClearAllSelection();
             for (int i = 0; i < new_cells.Count; i++)
             {
@@ -6397,7 +6397,7 @@ issue.Volume);
             MessageBox.Show(this, strError);
         }
 
-        // ÇĞ»»ÆÚĞĞµÄ²¼¾Ö
+        // åˆ‡æ¢æœŸè¡Œçš„å¸ƒå±€
         void MenuItem_switchIssueLayout_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -6412,13 +6412,13 @@ issue.Volume);
 
             if (selected_issues.Count == 0)
             {
-                strError = "ÉĞÎ´Ñ¡ÔñÒªÇĞ»»²¼¾ÖµÄÆÚ¶ÔÏó";
+                strError = "å°šæœªé€‰æ‹©è¦åˆ‡æ¢å¸ƒå±€çš„æœŸå¯¹è±¡";
                 goto ERROR1;
             }
 
             List<IssueBindingItem> changed_issues = null;
 
-            // ³ÉÅúÇĞ»»ÆÚĞĞµÄ²¼¾ÖÄ£Ê½
+            // æˆæ‰¹åˆ‡æ¢æœŸè¡Œçš„å¸ƒå±€æ¨¡å¼
             nRet = SwitchIssueLayout(selected_issues,
                 layout,
                 out changed_issues,
@@ -6433,10 +6433,10 @@ issue.Volume);
             MessageBox.Show(this, strError);
         }
 
-        // °Ñµ±Ç°³¬¹ı¹ÜÏ½·¶Î§µÄºÏ¶©²áµ¥ÔªÈ¥µô
+        // æŠŠå½“å‰è¶…è¿‡ç®¡è¾–èŒƒå›´çš„åˆè®¢å†Œå•å…ƒå»æ‰
         // parameters:
-        //      bRemoveCell ÊÇ·ñÒª´Ó this.Issues ÀïÃæÈ¥µôÏà¹ØCell
-        //      bRemoveMemberCell ÊÇ·ñÒª´Ó this.Issues ÀïÃæÈ¥µôºÏ¶©³ÉÔ±Cell
+        //      bRemoveCell æ˜¯å¦è¦ä» this.Issues é‡Œé¢å»æ‰ç›¸å…³Cell
+        //      bRemoveMemberCell æ˜¯å¦è¦ä» this.Issues é‡Œé¢å»æ‰åˆè®¢æˆå‘˜Cell
         int RemoveOutofBindingItems(
             ref List<ItemBindingItem> binding_items,
             Hashtable memberitems_table,
@@ -6460,11 +6460,11 @@ issue.Volume);
                     if (member_items.Count == 0)
                         continue;
 
-                    // ¼ì²éÒ»¸öºÏ¶©²áµÄËùÓĞ³ÉÔ±,¿´¿´ÊÇ²»ÊÇ(ÖÁÉÙÒ»¸ö)ºÍµ±Ç°¿É¼û¶©¹º×éÓĞ´ÓÊô¹ØÏµ?
+                    // æ£€æŸ¥ä¸€ä¸ªåˆè®¢å†Œçš„æ‰€æœ‰æˆå‘˜,çœ‹çœ‹æ˜¯ä¸æ˜¯(è‡³å°‘ä¸€ä¸ª)å’Œå½“å‰å¯è§è®¢è´­ç»„æœ‰ä»å±å…³ç³»?
                     // return:
-                    //      -1  ³ö´í
-                    //      0   Ã»ÓĞ½»²æ
-                    //      1   ÓĞ½»²æ
+                    //      -1  å‡ºé”™
+                    //      0   æ²¡æœ‰äº¤å‰
+                    //      1   æœ‰äº¤å‰
                     nRet = IsMemberCrossOrderGroup(parent_item,
                         member_items,
                         true,
@@ -6477,7 +6477,7 @@ issue.Volume);
                     bool bLocked = (StringUtil.IsInList(strLibraryCode, this.LibraryCodeList) == false);
                     parent_item.Locked = bLocked;
 
-                    // ºÏ¶©±¾±¾Éí¹İ´úÂëÔÚÍâ£¬¶øÇÒÆä³ÉÔ±Ò²²»ºÍ¿É¼û¶©¹º×é½»²æµÄ£¬É¾³ıºÏ¶©±¾¶ÔÏó
+                    // åˆè®¢æœ¬æœ¬èº«é¦†ä»£ç åœ¨å¤–ï¼Œè€Œä¸”å…¶æˆå‘˜ä¹Ÿä¸å’Œå¯è§è®¢è´­ç»„äº¤å‰çš„ï¼Œåˆ é™¤åˆè®¢æœ¬å¯¹è±¡
                     if (bLocked == true
                         && nRet == 0)
                     {
@@ -6485,7 +6485,7 @@ issue.Volume);
                             this.RemoveItem(parent_item, bRemoveMemberCell);
                         else
                         {
-                            // ´ËÊ±ÉĞÎ´¼ÓÈëIssue¶ÔÏóÏÂÃæ
+                            // æ­¤æ—¶å°šæœªåŠ å…¥Issueå¯¹è±¡ä¸‹é¢
                             this.m_hideitems.Add(parent_item);
                         }
 
@@ -6498,7 +6498,7 @@ issue.Volume);
             return 0;
         }
 
-        // °ÑÄÇĞ©µ±Ç°Òş²ØµÄºÏ¶©²áºÍ³ÉÔ±²áÊÔÍ¼ÖØĞÂ°²·ÅÒ»´Î
+        // æŠŠé‚£äº›å½“å‰éšè—çš„åˆè®¢å†Œå’Œæˆå‘˜å†Œè¯•å›¾é‡æ–°å®‰æ”¾ä¸€æ¬¡
         public int RelayoutHiddenBindingCell(out string strError)
         {
             strError = "";
@@ -6514,7 +6514,7 @@ issue.Volume);
                     memberitems_table[item] = item.MemberItems;
                 }
 
-                // °Ñµ±Ç°³¬¹ı¹ÜÏ½·¶Î§µÄºÏ¶©²áµ¥ÔªÈ¥µô
+                // æŠŠå½“å‰è¶…è¿‡ç®¡è¾–èŒƒå›´çš„åˆè®¢å†Œå•å…ƒå»æ‰
                 nRet = RemoveOutofBindingItems(
                     ref this.ParentItems,
                     memberitems_table,
@@ -6530,14 +6530,14 @@ issue.Volume);
             if (this.m_hideitems.Count == 0)
                 return 0;
 
-            // Ìô³öÒş²ØµÄºÏ¶©²á
+            // æŒ‘å‡ºéšè—çš„åˆè®¢å†Œ
             List<ItemBindingItem> binding_items = new List<ItemBindingItem>();
             foreach (ItemBindingItem item in this.m_hideitems)
             {
                 if (item.IsParent == true)
                 {
                     if (this.ParentItems.IndexOf(item) != -1)
-                        continue;   // Èç¹ûÒÑ¾­ÏÔÊ¾ÁË£¬¾Í²»Òª´¦ÀíÁË
+                        continue;   // å¦‚æœå·²ç»æ˜¾ç¤ºäº†ï¼Œå°±ä¸è¦å¤„ç†äº†
                     binding_items.Add(item);
                 }
             }
@@ -6548,9 +6548,9 @@ issue.Volume);
             {
                 Hashtable memberitems_table = new Hashtable();
                 string strWarning = "";
-                // ±éÀúºÏ¶©²á¶ÔÏóÊı×é£¬½¨Á¢³ÉÔ±¶ÔÏóÊı×é
+                // éå†åˆè®¢å†Œå¯¹è±¡æ•°ç»„ï¼Œå»ºç«‹æˆå‘˜å¯¹è±¡æ•°ç»„
                 // parameters:
-                //      parent_items    ºÏ¶©²á¶ÔÏóÊı×é¡£´¦ÀíºóµÄ¶ÔÏó»á´ÓÕâ¸öÊı×éÖĞÒÆ×ß
+                //      parent_items    åˆè®¢å†Œå¯¹è±¡æ•°ç»„ã€‚å¤„ç†åçš„å¯¹è±¡ä¼šä»è¿™ä¸ªæ•°ç»„ä¸­ç§»èµ°
                 nRet = CreateMemberItemTable(
                     ref binding_items,
                     out memberitems_table,
@@ -6559,7 +6559,7 @@ issue.Volume);
                 if (nRet == -1)
                     return -1;
 
-                // °Ñµ±Ç°³¬¹ı¹ÜÏ½·¶Î§µÄºÏ¶©²áµ¥ÔªÈ¥µô
+                // æŠŠå½“å‰è¶…è¿‡ç®¡è¾–èŒƒå›´çš„åˆè®¢å†Œå•å…ƒå»æ‰
                 nRet = RemoveOutofBindingItems(
                     ref binding_items,
                     memberitems_table,
@@ -6570,9 +6570,9 @@ issue.Volume);
                     return -1;
 
                 /*
-                Hashtable placed_table = new Hashtable();   // ÒÑ¾­±»×÷ÎªºÏ¶©±¾ÏÂÊô°²·Å¹ıÎ»ÖÃµÄ²á¶ÔÏó
+                Hashtable placed_table = new Hashtable();   // å·²ç»è¢«ä½œä¸ºåˆè®¢æœ¬ä¸‹å±å®‰æ”¾è¿‡ä½ç½®çš„å†Œå¯¹è±¡
 
-                // °²·ÅºÏ¶©³ÉÔ±²á¶ÔÏó
+                // å®‰æ”¾åˆè®¢æˆå‘˜å†Œå¯¹è±¡
                 nRet = PlaceMemberCell(
                     ref binding_items,
                     memberitems_table,
@@ -6581,7 +6581,7 @@ issue.Volume);
                 if (nRet == -1)
                     return -1;
                  * */
-                // Ö»°²·ÅºÏ¶©²á¶ÔÏó
+                // åªå®‰æ”¾åˆè®¢å†Œå¯¹è±¡
                 nRet = PlaceParentItems(
                     ref binding_items,
                     memberitems_table,
@@ -6604,7 +6604,7 @@ issue.Volume);
             MenuItem_refreshIssueLayout_Click(null, null);
         }
 
-        // Ë¢ĞÂÈ«²¿ÆÚĞĞµÄ²¼¾Ö
+        // åˆ·æ–°å…¨éƒ¨æœŸè¡Œçš„å¸ƒå±€
         void MenuItem_refreshIssueLayout_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -6644,9 +6644,9 @@ issue.Volume);
             this.UpdateObjects(list);
         }
 
-        // ÔöÈ«¸÷ÆÚ
-        // ÔÚµ±Ç°Î»ÖÃºóÃæĞÂÔöÈô¸ÉÆÚ£¬Ö±µ½¿ÉÓÃ¶©¹º·¶Î§µÄÄ©Î²
-        // TODO: Ó¦µ±ÓÃµ±ÄêÆÚºÅÀ´²éÖØ£¬±ÜÃâ´íÎ»´óÁ¿´´½¨
+        // å¢å…¨å„æœŸ
+        // åœ¨å½“å‰ä½ç½®åé¢æ–°å¢è‹¥å¹²æœŸï¼Œç›´åˆ°å¯ç”¨è®¢è´­èŒƒå›´çš„æœ«å°¾
+        // TODO: åº”å½“ç”¨å½“å¹´æœŸå·æ¥æŸ¥é‡ï¼Œé¿å…é”™ä½å¤§é‡åˆ›å»º
         void menuItem_newAllIssue_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -6670,12 +6670,12 @@ issue.Volume);
             if (ref_issue == null)
                 ref_issue = GetTailIssue();
             REDO:
-            // ÕÒµ½×îºóÒ»ÆÚ¡£Èç¹ûÕÒ²»µ½£¬ÔòÏÈ³öÏÖ¶Ô»°¿òÑ¯ÎÊµÚÒ»ÆÚ
+            // æ‰¾åˆ°æœ€åä¸€æœŸã€‚å¦‚æœæ‰¾ä¸åˆ°ï¼Œåˆ™å…ˆå‡ºç°å¯¹è¯æ¡†è¯¢é—®ç¬¬ä¸€æœŸ
             if (ref_issue == null)
             {
                 string strStartDate = "";
                 string strEndDate = "";
-                // »ñµÃ¿ÉÓÃµÄ×î´ó¶©¹ºÊ±¼ä·¶Î§
+                // è·å¾—å¯ç”¨çš„æœ€å¤§è®¢è´­æ—¶é—´èŒƒå›´
                 // return:
                 //      -1  error
                 //      0   not found
@@ -6687,50 +6687,50 @@ issue.Volume);
                     goto ERROR1;
                 if (nRet == 0)
                 {
-                    strError = "µ±Ç°Ã»ÓĞ¶©¹ºĞÅÏ¢£¬ÎŞ·¨½øĞĞÔöÈ«²Ù×÷";
+                    strError = "å½“å‰æ²¡æœ‰è®¢è´­ä¿¡æ¯ï¼Œæ— æ³•è¿›è¡Œå¢å…¨æ“ä½œ";
                     goto ERROR1;
                 }
 
-                // ³öÏÖ¶Ô»°¿ò£¬ÈÃÊäÈëµÚÒ»ÆÚµÄ²ÎÊı¡£³ö°æÊ±¼äÓÉÈí¼ş×Ô¶¯Ì½²âºÍÍÆ¼ö
-                // ÕâÀïÒªÇóÈÕ³£¹ÜÀí¶©¹ºĞÅÏ¢°ÑÒÑ¾­µ½È«µÄ¶©¹º¼ÇÂ¼¡°·â±Õ¡±¡£·ñÔò»á³öÏÖ°ÑÔ­À´Ôç¾ÍÑéÊÕ¹ıµÄµÚÒ»ÆÚ³ö°æÊ±¼äÍÆ¼ö³öÀ´µÄÇé¿ö
-                // ËùÎ½·â±Õ(¶©¹ºĞÅÏ¢µÄ)²Ù×÷£¬¿ÉÒÔÓÉ¹ı¿¯×°¶©²Ù×÷À´¸ºÔğ
-                // ·â±Õ£¬ÊÇ°ÑÏà¹Ø¶©¹º¼ÇÂ¼µÄ<state>ÖĞÔö¼Ó¡°ÒÑÑéÊÕ¡±×Ö·û´®
+                // å‡ºç°å¯¹è¯æ¡†ï¼Œè®©è¾“å…¥ç¬¬ä¸€æœŸçš„å‚æ•°ã€‚å‡ºç‰ˆæ—¶é—´ç”±è½¯ä»¶è‡ªåŠ¨æ¢æµ‹å’Œæ¨è
+                // è¿™é‡Œè¦æ±‚æ—¥å¸¸ç®¡ç†è®¢è´­ä¿¡æ¯æŠŠå·²ç»åˆ°å…¨çš„è®¢è´­è®°å½•â€œå°é—­â€ã€‚å¦åˆ™ä¼šå‡ºç°æŠŠåŸæ¥æ—©å°±éªŒæ”¶è¿‡çš„ç¬¬ä¸€æœŸå‡ºç‰ˆæ—¶é—´æ¨èå‡ºæ¥çš„æƒ…å†µ
+                // æ‰€è°“å°é—­(è®¢è´­ä¿¡æ¯çš„)æ“ä½œï¼Œå¯ä»¥ç”±è¿‡åˆŠè£…è®¢æ“ä½œæ¥è´Ÿè´£
+                // å°é—­ï¼Œæ˜¯æŠŠç›¸å…³è®¢è´­è®°å½•çš„<state>ä¸­å¢åŠ â€œå·²éªŒæ”¶â€å­—ç¬¦ä¸²
                 IssueDialog dlg = new IssueDialog();
                 MainForm.SetControlFont(dlg, this.Font, false);
                 dlg.Tag = null;
                 dlg.CheckDup -= new CheckDupEventHandler(dlg_CheckDup);
                 dlg.CheckDup += new CheckDupEventHandler(dlg_CheckDup);
 
-                dlg.Text = "ÇëÖ¸¶¨Ê×ÆÚµÄÌØÕ÷";
-                dlg.PublishTime = strStartDate + "?";   // »ñµÃ¶©¹º·¶Î§µÄÆğµãÈÕÆÚ
-                dlg.EditComment = "µ±Ç°¶©¹ºÊ±¼ä·¶Î§Îª " + strStartDate + "-" + strEndDate;   // ÏÔÊ¾¿ÉÓÃµÄ¶©¹ºÊ±¼ä·¶Î§
+                dlg.Text = "è¯·æŒ‡å®šé¦–æœŸçš„ç‰¹å¾";
+                dlg.PublishTime = strStartDate + "?";   // è·å¾—è®¢è´­èŒƒå›´çš„èµ·ç‚¹æ—¥æœŸ
+                dlg.EditComment = "å½“å‰è®¢è´­æ—¶é—´èŒƒå›´ä¸º " + strStartDate + "-" + strEndDate;   // æ˜¾ç¤ºå¯ç”¨çš„è®¢è´­æ—¶é—´èŒƒå›´
                 dlg.StartPosition = FormStartPosition.CenterScreen;
 
             REDO_INPUT:
                 dlg.ShowDialog(this);
 
                 if (dlg.DialogResult != DialogResult.OK)
-                    return; // ·ÅÆúÕû¸ö¹¦ÄÜ
+                    return; // æ”¾å¼ƒæ•´ä¸ªåŠŸèƒ½
 
-                // ¼ì²éÒ»ÏÂÕâ¸ö³ö°æÊ±¼äÊÇ·ñ³¬¹ı¶©¹ºÊ±¼ä·¶Î§?
+                // æ£€æŸ¥ä¸€ä¸‹è¿™ä¸ªå‡ºç‰ˆæ—¶é—´æ˜¯å¦è¶…è¿‡è®¢è´­æ—¶é—´èŒƒå›´?
                 if (InOrderRange(dlg.PublishTime) == false)
                 {
-                    // TODO: ×îºÃÌáÊ¾µ±Ç°¿ÉÓÃµÄÊ±¼ä·¶Î§?
-                    MessageBox.Show(this, "ÄúÖ¸¶¨µÄÊ×ÆÚ³ö°æÊ±¼ä '" + dlg.PublishTime + "' ²»ÔÚµ±Ç°¿ÉÓÃµÄ¶©¹ºÊ±¼ä·¶Î§ÄÚ£¬ÇëÖØĞÂÊäÈë¡£");
+                    // TODO: æœ€å¥½æç¤ºå½“å‰å¯ç”¨çš„æ—¶é—´èŒƒå›´?
+                    MessageBox.Show(this, "æ‚¨æŒ‡å®šçš„é¦–æœŸå‡ºç‰ˆæ—¶é—´ '" + dlg.PublishTime + "' ä¸åœ¨å½“å‰å¯ç”¨çš„è®¢è´­æ—¶é—´èŒƒå›´å†…ï¼Œè¯·é‡æ–°è¾“å…¥ã€‚");
                     goto REDO_INPUT;
                 }
 
                 /*
-                // ²éÖØ?
-                // ¶ÔpublishTimeÒª²éÖØ£¬¶ÔºÅÂëÌåÏµÒª½øĞĞ¼ì²éºÍÌá³ö¾¯¸æ
+                // æŸ¥é‡?
+                // å¯¹publishTimeè¦æŸ¥é‡ï¼Œå¯¹å·ç ä½“ç³»è¦è¿›è¡Œæ£€æŸ¥å’Œæå‡ºè­¦å‘Š
                 IssueBindingItem dup_issue = null;
-                // ¶Ô³ö°æÊ±¼ä½øĞĞ²éÖØ
+                // å¯¹å‡ºç‰ˆæ—¶é—´è¿›è¡ŒæŸ¥é‡
                 // parameters:
-                //      exclude ¼ì²éÖĞÒªÅÅ³ıµÄTreeNode¶ÔÏó
+                //      exclude æ£€æŸ¥ä¸­è¦æ’é™¤çš„TreeNodeå¯¹è±¡
                 // return:
                 //      -1  error
-                //      0   Ã»ÓĞÖØ
-                //      1   ÖØ
+                //      0   æ²¡æœ‰é‡
+                //      1   é‡
                 nRet = CheckPublishTimeDup(dlg.PublishTime,
                     null,
                     out dup_issue,
@@ -6741,7 +6741,7 @@ issue.Volume);
                 {
                     // 
                     DialogResult dialog_result = MessageBox.Show(this,
-            "ÄúËùÉè¶¨µÄÊ×ÆÚ³ö°æÈÕÆÚ '"+dlg.PublishTime+"' ÒÑ¾­´æÔÚ£¬ÊÇ·ñÒªÊ¹ÓÃÕâ¸öÒÑ¾­´æÔÚµÄÆÚ×÷Îª²Î¿¼¶ÔÏó¼ÌĞø´´½¨ºóÃæµÄÆÚ?\r\n\r\n(Yes: ¼ÌĞø´´½¨; No: ·µ»ØÖØĞÂÊäÈëÊ×ÆÚ²ÎÊı; Cancel: ·ÅÆúÕû¸ö´´½¨¹ı³Ì)",
+            "æ‚¨æ‰€è®¾å®šçš„é¦–æœŸå‡ºç‰ˆæ—¥æœŸ '"+dlg.PublishTime+"' å·²ç»å­˜åœ¨ï¼Œæ˜¯å¦è¦ä½¿ç”¨è¿™ä¸ªå·²ç»å­˜åœ¨çš„æœŸä½œä¸ºå‚è€ƒå¯¹è±¡ç»§ç»­åˆ›å»ºåé¢çš„æœŸ?\r\n\r\n(Yes: ç»§ç»­åˆ›å»º; No: è¿”å›é‡æ–°è¾“å…¥é¦–æœŸå‚æ•°; Cancel: æ”¾å¼ƒæ•´ä¸ªåˆ›å»ºè¿‡ç¨‹)",
             "BindingControls",
             MessageBoxButtons.YesNoCancel,
             MessageBoxIcon.Question,
@@ -6772,8 +6772,8 @@ issue.Volume);
                 new_issue.NewCreated = true;
 
                 /*
-                // ÉèÖÃ»òÕßË¢ĞÂÒ»¸ö²Ù×÷¼ÇÔØ
-                // ¿ÉÄÜ»áÅ×³öÒì³£
+                // è®¾ç½®æˆ–è€…åˆ·æ–°ä¸€ä¸ªæ“ä½œè®°è½½
+                // å¯èƒ½ä¼šæŠ›å‡ºå¼‚å¸¸
                 new_issue.SetOperation(
                     "create",
                     this.Operator,
@@ -6781,11 +6781,11 @@ issue.Volume);
                  * */
 
 
-                // ²åÈëµ½ºÏÊÊµÄÎ»ÖÃ?
+                // æ’å…¥åˆ°åˆé€‚çš„ä½ç½®?
                 InsertIssueToIssues(new_issue);
 
-                // ÎªĞÂÔöµÄÆÚÉèÖÃºÃLayoutÄ£Ê½
-                // ÃÖ²¹ÒòÎª²åÈë´øÀ´µÄºÏ¶©±¾ÁÑ¶Ï
+                // ä¸ºæ–°å¢çš„æœŸè®¾ç½®å¥½Layoutæ¨¡å¼
+                // å¼¥è¡¥å› ä¸ºæ’å…¥å¸¦æ¥çš„åˆè®¢æœ¬è£‚æ–­
                 nRet = SetNewIssueLayout(new_issue,
                     out strError);
                 if (nRet == -1)
@@ -6798,7 +6798,7 @@ issue.Volume);
             else
             {
                 /*
-                // Ñ¡¶¨×îºóÒ»¸öTreeNode
+                // é€‰å®šæœ€åä¸€ä¸ªTreeNode
                 Debug.Assert(this.TreeView.Nodes.Count != 0, "");
                 TreeNode last_tree_node = this.TreeView.Nodes[this.TreeView.Nodes.Count - 1];
 
@@ -6811,7 +6811,7 @@ issue.Volume);
 
             int nPreferredDelta = -1;
 
-            // ½øĞĞÑ­»·£¬Ôö²¹È«²¿½Úµã
+            // è¿›è¡Œå¾ªç¯ï¼Œå¢è¡¥å…¨éƒ¨èŠ‚ç‚¹
             for (int i = 0; ; i++)
             {
                 string strNextPublishTime = "";
@@ -6821,11 +6821,11 @@ issue.Volume);
 
                 {
                     int nIssueCount = 0;
-                    // »ñµÃÒ»ÄêÄÚµÄÆÚ×ÜÊı
+                    // è·å¾—ä¸€å¹´å†…çš„æœŸæ€»æ•°
                     // return:
-                    //      -1  ³ö´í
-                    //      0   ÎŞ·¨»ñµÃ
-                    //      1   »ñµÃ
+                    //      -1  å‡ºé”™
+                    //      0   æ— æ³•è·å¾—
+                    //      1   è·å¾—
                     nRet = GetOneYearIssueCount(ref_issue.PublishTime,
                         out nIssueCount,
                         out strError);
@@ -6836,7 +6836,7 @@ issue.Volume);
                         goto REDO;
                     }
 
-                    // ²Î¿¼µÄÆÚºÅ
+                    // å‚è€ƒçš„æœŸå·
                     int nRefIssue = 0;
                     try
                     {
@@ -6852,46 +6852,46 @@ issue.Volume);
                     try
                     {
                         int nDelta = nPreferredDelta;
-                        // Ô¤²âÏÂÒ»ÆÚµÄ³ö°æÊ±¼ä
+                        // é¢„æµ‹ä¸‹ä¸€æœŸçš„å‡ºç‰ˆæ—¶é—´
                         // parameters:
-                        //      strPublishTime  µ±Ç°ÕâÒ»ÆÚ³ö°æÊ±¼ä
-                        //      nIssueCount Ò»ÄêÄÚ³ö¶àÉÙÆÚ
+                        //      strPublishTime  å½“å‰è¿™ä¸€æœŸå‡ºç‰ˆæ—¶é—´
+                        //      nIssueCount ä¸€å¹´å†…å‡ºå¤šå°‘æœŸ
                         strNextPublishTime = NextPublishTime(ref_issue.PublishTime,
                              nIssueCount,
                              ref nDelta);
-                        // µÚÒ»´Îµ÷ÓÃµÄÊ±ºò¼ÇÒäÏÂÀ´
+                        // ç¬¬ä¸€æ¬¡è°ƒç”¨çš„æ—¶å€™è®°å¿†ä¸‹æ¥
                         if (nPreferredDelta == -1)
                             nPreferredDelta = nDelta;
                     }
                     catch (Exception ex)
                     {
                         // 2009/2/8 
-                        strError = "ÔÚ»ñµÃÈÕÆÚ '" + ref_issue.PublishTime + "' µÄºóÒ»ÆÚ³ö°æÈÕÆÚÊ±·¢Éú´íÎó: " + ex.Message;
+                        strError = "åœ¨è·å¾—æ—¥æœŸ '" + ref_issue.PublishTime + "' çš„åä¸€æœŸå‡ºç‰ˆæ—¥æœŸæ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                         goto ERROR1;
                     }
 
                     if (strNextPublishTime == "????????")
                         break;
 
-                    // ¼ì²éÒ»ÏÂÕâ¸ö³ö°æÊ±¼äÊÇ·ñ³¬¹ı¶©¹ºÊ±¼ä·¶Î§?
+                    // æ£€æŸ¥ä¸€ä¸‹è¿™ä¸ªå‡ºç‰ˆæ—¶é—´æ˜¯å¦è¶…è¿‡è®¢è´­æ—¶é—´èŒƒå›´?
                     if (InOrderRange(strNextPublishTime) == false)
-                        break;  // ±ÜÃâ×îºó¶à²åÈëÒ»¸ö
+                        break;  // é¿å…æœ€åå¤šæ’å…¥ä¸€ä¸ª
 
 
-                    // ºÅÂë×Ô¶¯ÔöÁ¿ĞèÒªÖªµÀÒ»¸öÆÚÊÇ·ñ¿çÄê£¬¿ÉÒÔÍ¨¹ı²éÑ¯²É¹ºĞÅÏ¢µÃµ½Ò»ÄêËù¶©ÔÄµÄÆÚÊı
+                    // å·ç è‡ªåŠ¨å¢é‡éœ€è¦çŸ¥é“ä¸€ä¸ªæœŸæ˜¯å¦è·¨å¹´ï¼Œå¯ä»¥é€šè¿‡æŸ¥è¯¢é‡‡è´­ä¿¡æ¯å¾—åˆ°ä¸€å¹´æ‰€è®¢é˜…çš„æœŸæ•°
                     if (nRefIssue >= nIssueCount
                         && nIssueCount > 0) // 2010/3/3 
                     {
-                        // ¿çÄêÁË
+                        // è·¨å¹´äº†
                         strNextIssue = "1";
                         // 2010/3/16
-                        // Èç¹ûÔ¤²âµÄÏÂÒ»ÆÚ³ö°æÊ±¼ä²»ÊÇ²Î¿¼ÆÚµÄºóÒ»ÄêµÄÊ±¼ä£¬ÔòĞèÒªÇ¿ÖÆĞŞ¸Ä
+                        // å¦‚æœé¢„æµ‹çš„ä¸‹ä¸€æœŸå‡ºç‰ˆæ—¶é—´ä¸æ˜¯å‚è€ƒæœŸçš„åä¸€å¹´çš„æ—¶é—´ï¼Œåˆ™éœ€è¦å¼ºåˆ¶ä¿®æ”¹
                         string strNextYear = IssueUtil.GetYearPart(strNextPublishTime);
                         string strRefYear = IssueUtil.GetYearPart(ref_issue.PublishTime);
 
                         // 2012/5/14
-                        // Èç¹û²Î¿¼ÆÚËùÔÚÄê·İµÄ¸÷ÆÚÖ®¼äÒÑ¾­¿çÄê£¬Ôò²»±Ø×÷ĞŞÕı
-                        // ÊÔÍ¼ÕÒµ½²Î¿¼ÆÚÖ®Ç°µÄµÚÒ»ÆÚ
+                        // å¦‚æœå‚è€ƒæœŸæ‰€åœ¨å¹´ä»½çš„å„æœŸä¹‹é—´å·²ç»è·¨å¹´ï¼Œåˆ™ä¸å¿…ä½œä¿®æ­£
+                        // è¯•å›¾æ‰¾åˆ°å‚è€ƒæœŸä¹‹å‰çš„ç¬¬ä¸€æœŸ
                         string strRefFirstYear = "";
                         IssueBindingItem year_first_issue = GetYearFirstIssue(ref_issue);
                         if (year_first_issue != null)
@@ -6900,15 +6900,15 @@ issue.Volume);
                         }
 
                         if (string.Compare(strNextYear, strRefYear) <= 0
-                            && strRefYear == strRefFirstYear/*²Î¿¼ÆÚËùÔÚµÄÈ«Äê¸÷ÆÚ²»¿çÄê*/)
+                            && strRefYear == strRefFirstYear/*å‚è€ƒæœŸæ‰€åœ¨çš„å…¨å¹´å„æœŸä¸è·¨å¹´*/)
                         {
                             strNextYear = DateTimeUtil.NextYear(strRefYear);
                             strNextPublishTime = strNextYear + "0101";
 
                             // 2015/1/30
-                            // ¼ì²éÒ»ÏÂÕâ¸ö³ö°æÊ±¼äÊÇ·ñ³¬¹ı¶©¹ºÊ±¼ä·¶Î§?
+                            // æ£€æŸ¥ä¸€ä¸‹è¿™ä¸ªå‡ºç‰ˆæ—¶é—´æ˜¯å¦è¶…è¿‡è®¢è´­æ—¶é—´èŒƒå›´?
                             if (InOrderRange(strNextPublishTime) == false)
-                                break;  // ±ÜÃâ×îºó¶à²åÈëÒ»¸ö
+                                break;  // é¿å…æœ€åå¤šæ’å…¥ä¸€ä¸ª
                         }
                     }
                     else
@@ -6923,22 +6923,22 @@ issue.Volume);
                         strNextVolume = ref_issue.Volume;
                 }
 
-                // ¶ÔpublishTimeÒª²éÖØ£¬¶ÔºÅÂëÌåÏµÒª½øĞĞ¼ì²éºÍÌá³ö¾¯¸æ
+                // å¯¹publishTimeè¦æŸ¥é‡ï¼Œå¯¹å·ç ä½“ç³»è¦è¿›è¡Œæ£€æŸ¥å’Œæå‡ºè­¦å‘Š
                 List<IssueBindingItem> dup_issues = null;
                 List<IssueBindingItem> warning_issues = null;
                 string strWarning = "";
 
-                // ¶Ô³ö°æÊ±¼ä½øĞĞ²éÖØ
+                // å¯¹å‡ºç‰ˆæ—¶é—´è¿›è¡ŒæŸ¥é‡
                 // parameters:
-                //      exclude ¼ì²éÖĞÒªÅÅ³ıµÄTreeNode¶ÔÏó
+                //      exclude æ£€æŸ¥ä¸­è¦æ’é™¤çš„TreeNodeå¯¹è±¡
                 // return:
                 //      -1  error
-                //      0   Ã»ÓĞÖØ
-                //      1   ÖØ
+                //      0   æ²¡æœ‰é‡
+                //      1   é‡
                 nRet = CheckPublishTimeDup(strNextPublishTime,
                     strNextIssue,
                     strNextZong,
-                    "", // strNextVolume, ¹ÊÒâ²»¼ì²é¾íºÅ
+                    "", // strNextVolume, æ•…æ„ä¸æ£€æŸ¥å·å·
                     ref_issue,
                     out warning_issues,
                     out strWarning,
@@ -6948,15 +6948,15 @@ issue.Volume);
                     goto ERROR1;
                 if (nRet == 1)
                 {
-                    // this.TreeView.SelectedNode = dup_tree_node; // ÈôÃ»ÓĞÕâÒ»¾ä»áÒıÆğËÀÑ­»·
+                    // this.TreeView.SelectedNode = dup_tree_node; // è‹¥æ²¡æœ‰è¿™ä¸€å¥ä¼šå¼•èµ·æ­»å¾ªç¯
                     Debug.Assert(dup_issues.Count > 0, "");
-                    ref_issue = dup_issues[0];  // ·ÅÆú´´½¨£¬¶ø¸Ä½«·¢ÏÖµÄÖØ¸´¶ÔÏó×÷ÎªĞÂµÄ²Î¿¼Î»ÖÃ£¬¼ÌĞø´´½¨
+                    ref_issue = dup_issues[0];  // æ”¾å¼ƒåˆ›å»ºï¼Œè€Œæ”¹å°†å‘ç°çš„é‡å¤å¯¹è±¡ä½œä¸ºæ–°çš„å‚è€ƒä½ç½®ï¼Œç»§ç»­åˆ›å»º
                     continue;
                 }
                 if (warning_issues.Count > 0)
                 {
                     Debug.Assert(warning_issues.Count > 0, "");
-                    ref_issue = warning_issues[0];  // ·ÅÆú´´½¨£¬¶ø¸Ä½«·¢ÏÖµÄÖØ¸´¶ÔÏó×÷ÎªĞÂµÄ²Î¿¼Î»ÖÃ£¬¼ÌĞø´´½¨
+                    ref_issue = warning_issues[0];  // æ”¾å¼ƒåˆ›å»ºï¼Œè€Œæ”¹å°†å‘ç°çš„é‡å¤å¯¹è±¡ä½œä¸ºæ–°çš„å‚è€ƒä½ç½®ï¼Œç»§ç»­åˆ›å»º
                     continue;
                 }
 
@@ -6978,19 +6978,19 @@ issue.Volume);
                 new_issue.NewCreated = true;
 
                 /*
-                // ÉèÖÃ»òÕßË¢ĞÂÒ»¸ö²Ù×÷¼ÇÔØ
-                // ¿ÉÄÜ»áÅ×³öÒì³£
+                // è®¾ç½®æˆ–è€…åˆ·æ–°ä¸€ä¸ªæ“ä½œè®°è½½
+                // å¯èƒ½ä¼šæŠ›å‡ºå¼‚å¸¸
                 new_issue.SetOperation(
                     "create",
                     this.Operator,
                     "");
                  * */
 
-                // ²åÈëµ½ºÏÊÊµÄÎ»ÖÃ?
+                // æ’å…¥åˆ°åˆé€‚çš„ä½ç½®?
                 InsertIssueToIssues(new_issue);
 
-                // ÎªĞÂÔöµÄÆÚÉèÖÃºÃLayoutÄ£Ê½
-                // ÃÖ²¹ÒòÎª²åÈë´øÀ´µÄºÏ¶©±¾ÁÑ¶Ï
+                // ä¸ºæ–°å¢çš„æœŸè®¾ç½®å¥½Layoutæ¨¡å¼
+                // å¼¥è¡¥å› ä¸ºæ’å…¥å¸¦æ¥çš„åˆè®¢æœ¬è£‚æ–­
                 nRet = SetNewIssueLayout(new_issue,
                     out strError);
                 if (nRet == -1)
@@ -6999,7 +6999,7 @@ issue.Volume);
                 // nCreateCount++;
                 new_issues.Add(new_issue);
                 /*
-                // Ñ¡ÉÏĞÂ²åÈëµÄ½Úµã
+                // é€‰ä¸Šæ–°æ’å…¥çš„èŠ‚ç‚¹
                 this.TreeView.SelectedNode = tree_node;
                  * */
                 ref_issue = new_issue;
@@ -7013,23 +7013,23 @@ issue.Volume);
                     new_issues[i].Select(SelectAction.On);
                 }
                 // new_issue.Select(SelectAction.On);
-                // ±¾À´ĞèÒªUpdateObject()£¬µ«ÊÇÒòÎªºóÃæÓĞInvalidate()£¬¾ÍÃâÁË
-                this.AfterWidthChanged(true);   // content¸ß¶È¸Ä±ä
+                // æœ¬æ¥éœ€è¦UpdateObject()ï¼Œä½†æ˜¯å› ä¸ºåé¢æœ‰Invalidate()ï¼Œå°±å…äº†
+                this.AfterWidthChanged(true);   // contenté«˜åº¦æ”¹å˜
                 this.Update();
                 // Application.DoEvents();
             }
 
             string strMessage = "";
             if (new_issues.Count == 0)
-                strMessage = "Ã»ÓĞÔö¼ÓĞÂµÄÆÚĞĞ";
+                strMessage = "æ²¡æœ‰å¢åŠ æ–°çš„æœŸè¡Œ";
             else
-                strMessage = "¹²ĞÂÔöÁË " + new_issues.Count.ToString() + " ¸öÆÚĞĞ";
+                strMessage = "å…±æ–°å¢äº† " + new_issues.Count.ToString() + " ä¸ªæœŸè¡Œ";
 
             MessageBox.Show(this, strMessage);
 
             if (new_issues.Count > 0)
             {
-                // TODO: ËÆºõSetScrollBars()Ã»ÓĞ±ØÒªÁË£¿
+                // TODO: ä¼¼ä¹SetScrollBars()æ²¡æœ‰å¿…è¦äº†ï¼Ÿ
                 try
                 {
                     SetScrollBars(ScrollBarMember.Both);
@@ -7037,12 +7037,12 @@ issue.Volume);
                 catch
                 {
                 }
-                this.EnsureVisible(new_issues[new_issues.Count - 1]);  // ×îºóÒ»Ïî¿É¼û
+                this.EnsureVisible(new_issues[new_issues.Count - 1]);  // æœ€åä¸€é¡¹å¯è§
 
                 string strLockedCellLibraryCodes = GetLockedCellLibraryCodes(new_issues);
                 if (string.IsNullOrEmpty(strLockedCellLibraryCodes) == false)
                 {
-                    MessageBox.Show(this, "¾¯¸æ£ºÏÂÁĞ¹İ´úÂë²»ÔÚµ±Ç°ÓÃ»§¹ÜÏ½·¶Î§ÄÚ: \r\n\r\n" + strLockedCellLibraryCodes + "\r\n\r\nÊ¹ÓÃÁËÕâĞ©¹İ´úÂëµÄ¸ñ×ÓÒÑ¾­´¦ÓÚËø¶¨×´Ì¬¡£µ±ÆÚ¼ÇÂ¼Ìá½»±£´æµÄÊ±ºò¿ÉÄÜ»áÓöµ½±¨´í¡£½¨ÒéÊ¹ÓÃÈ«¾ÖÓÃ»§µÇÂ¼ºóÖØĞÂ²Ù×÷");
+                    MessageBox.Show(this, "è­¦å‘Šï¼šä¸‹åˆ—é¦†ä»£ç ä¸åœ¨å½“å‰ç”¨æˆ·ç®¡è¾–èŒƒå›´å†…: \r\n\r\n" + strLockedCellLibraryCodes + "\r\n\r\nä½¿ç”¨äº†è¿™äº›é¦†ä»£ç çš„æ ¼å­å·²ç»å¤„äºé”å®šçŠ¶æ€ã€‚å½“æœŸè®°å½•æäº¤ä¿å­˜çš„æ—¶å€™å¯èƒ½ä¼šé‡åˆ°æŠ¥é”™ã€‚å»ºè®®ä½¿ç”¨å…¨å±€ç”¨æˆ·ç™»å½•åé‡æ–°æ“ä½œ");
                 }
             }
 
@@ -7051,7 +7051,7 @@ issue.Volume);
             MessageBox.Show(this, strError);
         }
 
-        // ¾¯¸æ³¬¹ı¹ÜÏ½·¶Î§µÄ¸ñ×Ó
+        // è­¦å‘Šè¶…è¿‡ç®¡è¾–èŒƒå›´çš„æ ¼å­
         string GetLockedCellLibraryCodes(List<IssueBindingItem> issues)
         {
             List<string> locked_librarycodes = new List<string>();
@@ -7082,7 +7082,7 @@ issue.Volume);
             return StringUtil.MakePathList(locked_librarycodes);
         }
 
-        // ´ÓÓÒ¶Ë¿ªÊ¼£¬»ñµÃÒ»¶Î´¿´âÊı×Ö
+        // ä»å³ç«¯å¼€å§‹ï¼Œè·å¾—ä¸€æ®µçº¯ç²¹æ•°å­—
         static string GetPureNumber(string strText)
         {
             string strValue = "";
@@ -7123,26 +7123,26 @@ issue.Volume);
             return null;
         }
 
-        // ĞÂÔöÒ»ÆÚ
-        // ÔÚµ±Ç°Î»ÖÃºóÃæĞÂÔöÒ»ÆÚ
+        // æ–°å¢ä¸€æœŸ
+        // åœ¨å½“å‰ä½ç½®åé¢æ–°å¢ä¸€æœŸ
         void menuItem_newIssue_Click(object sender, EventArgs e)
         {
             string strError = "";
             int nRet = 0;
 
-            // ´ÓÑ¡Ôñ·¶Î§ÖĞÌô³öÆÚ¶ÔÏó¡£
+            // ä»é€‰æ‹©èŒƒå›´ä¸­æŒ‘å‡ºæœŸå¯¹è±¡ã€‚
 
-            // TODO: ¾¯¸æÔÚthis.SeletedCellsÖĞµÄÑ¡Ôñ?
+            // TODO: è­¦å‘Šåœ¨this.SeletedCellsä¸­çš„é€‰æ‹©?
 
             List<IssueBindingItem> ref_issues = this.SelectedIssues;
             /*
             if (ref_issues.Count == 0)
             {
-                strError = "ÉĞÎ´Ñ¡¶¨ÒªĞÂÔöÆÚµÄ(²Î¿¼)ÆÚ¶ÔÏó";
+                strError = "å°šæœªé€‰å®šè¦æ–°å¢æœŸçš„(å‚è€ƒ)æœŸå¯¹è±¡";
                 goto ERROR1;
             }
              * */
-            // ÕûÀíÒ»ÏÂref_issuesÊı×é
+            // æ•´ç†ä¸€ä¸‹ref_issuesæ•°ç»„
             for (int i = 0; i < ref_issues.Count; i++)
             {
                 IssueBindingItem ref_issue = ref_issues[i];
@@ -7155,10 +7155,10 @@ issue.Volume);
                 }
             }
 
-            List<IssueBindingItem> new_issues = new List<IssueBindingItem>();   // ĞÂ´´½¨µÄÆÚ
+            List<IssueBindingItem> new_issues = new List<IssueBindingItem>();   // æ–°åˆ›å»ºçš„æœŸ
             if (ref_issues.Count > 0)
             {
-                // ÓĞ²Î¿¼¶ÔÏó
+                // æœ‰å‚è€ƒå¯¹è±¡
                 for (int i = 0; i < ref_issues.Count; i++)
                 {
                     IssueBindingItem ref_issue = ref_issues[i];
@@ -7171,7 +7171,7 @@ issue.Volume);
                         continue;
 
                     IssueBindingItem new_issue = null;
-                    // ĞÂÔöÒ»¸öÆÚ(ºó²å)
+                    // æ–°å¢ä¸€ä¸ªæœŸ(åæ’)
                     nRet = NewOneIssue(
                         ref_issue,
                         false,
@@ -7186,12 +7186,12 @@ issue.Volume);
             }
             else
             {
-                // Èç¹ûÃ»ÓĞ²Î¿¼¶ÔÏó
+                // å¦‚æœæ²¡æœ‰å‚è€ƒå¯¹è±¡
                 Debug.Assert(ref_issues.Count == 0, "");
 
                 IssueBindingItem ref_issue = null;
 
-                // ÕÒµ½×îºóÒ»¸öÆÚ¶ÔÏó×÷Îª²Î¿¼¶ÔÏó
+                // æ‰¾åˆ°æœ€åä¸€ä¸ªæœŸå¯¹è±¡ä½œä¸ºå‚è€ƒå¯¹è±¡
                 /*
                 if (this.Issues.Count > 0)
                 {
@@ -7210,7 +7210,7 @@ issue.Volume);
                 ref_issue = GetTailIssue();
 
                 IssueBindingItem new_issue = null;
-                // ĞÂÔöÒ»¸öÆÚ(ºó²å)
+                // æ–°å¢ä¸€ä¸ªæœŸ(åæ’)
                 nRet = NewOneIssue(
                     ref_issue,
                     false,
@@ -7227,21 +7227,21 @@ issue.Volume);
 
             if (new_issues.Count > 0)
             {
-                // Ñ¡¶¨ĞÂ´´½¨µÄÆÚ
+                // é€‰å®šæ–°åˆ›å»ºçš„æœŸ
                 this.ClearAllSelection();
                 for (int i = 0; i < new_issues.Count; i++)
                 {
                     IssueBindingItem issue = new_issues[i];
                     issue.Select(SelectAction.On);
                 }
-                this.AfterWidthChanged(true);   // content¸ß¶È¸Ä±ä
+                this.AfterWidthChanged(true);   // contenté«˜åº¦æ”¹å˜
 
-                this.EnsureVisible(new_issues[0]);  // ¿É¼û
+                this.EnsureVisible(new_issues[0]);  // å¯è§
 
                 string strLockedCellLibraryCodes = GetLockedCellLibraryCodes(new_issues);
                 if (string.IsNullOrEmpty(strLockedCellLibraryCodes) == false)
                 {
-                    MessageBox.Show(this, "¾¯¸æ£ºÏÂÁĞ¹İ´úÂë²»ÔÚµ±Ç°ÓÃ»§¹ÜÏ½·¶Î§ÄÚ: \r\n\r\n" + strLockedCellLibraryCodes + "\r\n\r\nÊ¹ÓÃÁËÕâĞ©¹İ´úÂëµÄ¸ñ×ÓÒÑ¾­´¦ÓÚËø¶¨×´Ì¬¡£µ±ÆÚ¼ÇÂ¼Ìá½»±£´æµÄÊ±ºò¿ÉÄÜ»áÓöµ½±¨´í¡£½¨ÒéÊ¹ÓÃÈ«¾ÖÓÃ»§µÇÂ¼ºóÖØĞÂ²Ù×÷");
+                    MessageBox.Show(this, "è­¦å‘Šï¼šä¸‹åˆ—é¦†ä»£ç ä¸åœ¨å½“å‰ç”¨æˆ·ç®¡è¾–èŒƒå›´å†…: \r\n\r\n" + strLockedCellLibraryCodes + "\r\n\r\nä½¿ç”¨äº†è¿™äº›é¦†ä»£ç çš„æ ¼å­å·²ç»å¤„äºé”å®šçŠ¶æ€ã€‚å½“æœŸè®°å½•æäº¤ä¿å­˜çš„æ—¶å€™å¯èƒ½ä¼šé‡åˆ°æŠ¥é”™ã€‚å»ºè®®ä½¿ç”¨å…¨å±€ç”¨æˆ·ç™»å½•åé‡æ–°æ“ä½œ");
                 }
             }
             return;
@@ -7249,7 +7249,7 @@ issue.Volume);
             MessageBox.Show(this, strError);
         }
 
-        // Ñ¡ÖĞÈô¸ÉÆÚ¸ñ×Ó
+        // é€‰ä¸­è‹¥å¹²æœŸæ ¼å­
         public void SelectIssues(List<IssueBindingItem> issues,
             bool bEnsureVisible)
         {
@@ -7265,7 +7265,7 @@ issue.Volume);
             this.UpdateObjects(cells);
 
             if (bEnsureVisible == true)
-                this.EnsureVisible(issues[0]);  // È·±£¹öÈëÊÓÒ°
+                this.EnsureVisible(issues[0]);  // ç¡®ä¿æ»šå…¥è§†é‡
 
             // this.Update();
         }
@@ -7276,11 +7276,11 @@ issue.Volume);
             return string.Compare(strPublishTime1, strPublishTime2);
         }
 
-        // ĞÂÔöÒ»¸öÆÚ(ºó²å)
+        // æ–°å¢ä¸€ä¸ªæœŸ(åæ’)
         // return:
-        //      -1  ³ö´í
-        //      0   ·ÅÆú
-        //      1   ³É¹¦
+        //      -1  å‡ºé”™
+        //      0   æ”¾å¼ƒ
+        //      1   æˆåŠŸ
         int NewOneIssue(
             IssueBindingItem ref_issue,
             bool bUpdateDisplay,
@@ -7299,14 +7299,14 @@ issue.Volume);
 
             if (ref_issue == null)
             {
-                // Ã»ÓĞ²Î¿¼¶ÔÏó?
-                // ÕÒµ½µÚÒ»¸ö»¹Ã»ÓĞ¼Çµ½µÄ¶©¹ºÊ±¼ä·¶Î§µÄ¿ª¶Ë
-                // »ñµÃµÚÒ»¸öÎ´¼Çµ½µÄ¶©¹º·¶Î§µÄÆğÊ¼Ê±¼ä
+                // æ²¡æœ‰å‚è€ƒå¯¹è±¡?
+                // æ‰¾åˆ°ç¬¬ä¸€ä¸ªè¿˜æ²¡æœ‰è®°åˆ°çš„è®¢è´­æ—¶é—´èŒƒå›´çš„å¼€ç«¯
+                // è·å¾—ç¬¬ä¸€ä¸ªæœªè®°åˆ°çš„è®¢è´­èŒƒå›´çš„èµ·å§‹æ—¶é—´
                 string strFirstPublishTime = "";
                 // return:
-                //      -1  ³ö´í
-                //      0   ÎŞ·¨»ñµÃ
-                //      1   »ñµÃ
+                //      -1  å‡ºé”™
+                //      0   æ— æ³•è·å¾—
+                //      1   è·å¾—
                 nRet = GetFirstUseablePublishTime(
                     out strFirstPublishTime,
                     out strError);
@@ -7318,34 +7318,34 @@ issue.Volume);
                 if (String.IsNullOrEmpty(strFirstPublishTime) == false)
                 {
                     int nIssueCount = 0;
-                    // »ñµÃÒ»ÄêÄÚµÄÆÚ×ÜÊı
+                    // è·å¾—ä¸€å¹´å†…çš„æœŸæ€»æ•°
                     // return:
-                    //      -1  ³ö´í
-                    //      0   ÎŞ·¨»ñµÃ
-                    //      1   »ñµÃ
+                    //      -1  å‡ºé”™
+                    //      0   æ— æ³•è·å¾—
+                    //      1   è·å¾—
                     nRet = GetOneYearIssueCount(strFirstPublishTime,
                         out nIssueCount,
                         out strError);
                     if (nIssueCount > 0)
-                        dlg.EditComment = "Ò»Äê³ö°æ " + nIssueCount.ToString() + " ÆÚ";
+                        dlg.EditComment = "ä¸€å¹´å‡ºç‰ˆ " + nIssueCount.ToString() + " æœŸ";
                     else
-                        dlg.EditComment = "ÎŞ·¨µÃÖª´ËÄê³ö°æµÄÆÚÊı¡£Ã»ÓĞ¶ÔÓ¦µÄ¶©¹ºĞÅÏ¢";
+                        dlg.EditComment = "æ— æ³•å¾—çŸ¥æ­¤å¹´å‡ºç‰ˆçš„æœŸæ•°ã€‚æ²¡æœ‰å¯¹åº”çš„è®¢è´­ä¿¡æ¯";
                 }
 
-                // TODO: Ô¤²â³öµÚÒ»ÆÚµÄµ±ÄêÆÚºÅ
-                // Ëã·¨ÊÇ£¬¸ù¾İÒ»ÄêµÄÆÚÊı£¬¹Û²ìÆğÊ¼Ê±¼ä£¬·Ö²¼ÔÚµ±ÄêµÄ±ÈÀıÎ»ÖÃ£¬¹ÀËãÆÚºÅ
+                // TODO: é¢„æµ‹å‡ºç¬¬ä¸€æœŸçš„å½“å¹´æœŸå·
+                // ç®—æ³•æ˜¯ï¼Œæ ¹æ®ä¸€å¹´çš„æœŸæ•°ï¼Œè§‚å¯Ÿèµ·å§‹æ—¶é—´ï¼Œåˆ†å¸ƒåœ¨å½“å¹´çš„æ¯”ä¾‹ä½ç½®ï¼Œä¼°ç®—æœŸå·
             }
 
             if (ref_issue != null)
             {
-                // TODO: ×îºÃÄÜ×Ô¶¯ÔöÁ¿
+                // TODO: æœ€å¥½èƒ½è‡ªåŠ¨å¢é‡
 
                 int nIssueCount = 0;
-                // »ñµÃÒ»ÄêÄÚµÄÆÚ×ÜÊı
+                // è·å¾—ä¸€å¹´å†…çš„æœŸæ€»æ•°
                 // return:
-                //      -1  ³ö´í
-                //      0   ÎŞ·¨»ñµÃ
-                //      1   »ñµÃ
+                //      -1  å‡ºé”™
+                //      0   æ— æ³•è·å¾—
+                //      1   è·å¾—
                 nRet = GetOneYearIssueCount(ref_issue.PublishTime,
                     out nIssueCount,
                     out strError);
@@ -7369,9 +7369,9 @@ issue.Volume);
                 {
                     string strFirstPublishTime = "";
                     // return:
-                    //      -1  ³ö´í
-                    //      0   ÎŞ·¨»ñµÃ
-                    //      1   »ñµÃ
+                    //      -1  å‡ºé”™
+                    //      0   æ— æ³•è·å¾—
+                    //      1   è·å¾—
                     nRet = GetFirstUseablePublishTime(
                         out strFirstPublishTime,
                         out strError);
@@ -7379,8 +7379,8 @@ issue.Volume);
                         return -1;
                     if (nRet == 1)
                     {
-                        // TODO: Òª±È½Ï ref_issue.PublishTime ºÍ strFirstPublishTime
-                        // Èç¹ûÕıºÃºóÕß¸ü´ó£¬¼´¿É²ÉÄÉ¡£·ñÔò²»ÒË²ÉÄÉ
+                        // TODO: è¦æ¯”è¾ƒ ref_issue.PublishTime å’Œ strFirstPublishTime
+                        // å¦‚æœæ­£å¥½åè€…æ›´å¤§ï¼Œå³å¯é‡‡çº³ã€‚å¦åˆ™ä¸å®œé‡‡çº³
                         if (CompareDateString(ref_issue.PublishTime, strFirstPublishTime) < 0)
                         {
                             nRet = GetOneYearIssueCount(strFirstPublishTime,
@@ -7396,40 +7396,40 @@ issue.Volume);
 
                     try
                     {
-                        // Ô¤²âÏÂÒ»ÆÚµÄ³ö°æÊ±¼ä
+                        // é¢„æµ‹ä¸‹ä¸€æœŸçš„å‡ºç‰ˆæ—¶é—´
                         // parameters:
-                        //      strPublishTime  µ±Ç°ÕâÒ»ÆÚ³ö°æÊ±¼ä
-                        //      nIssueCount Ò»ÄêÄÚ³ö¶àÉÙÆÚ
+                        //      strPublishTime  å½“å‰è¿™ä¸€æœŸå‡ºç‰ˆæ—¶é—´
+                        //      nIssueCount ä¸€å¹´å†…å‡ºå¤šå°‘æœŸ
                         strNextPublishTime = NextPublishTime(ref_issue.PublishTime,
                              nIssueCount);
                     }
                     catch (Exception ex)
                     {
                         // 2009/2/8 
-                        strError = "ÔÚ»ñµÃÈÕÆÚ '" + ref_issue.PublishTime + "' µÄºóÒ»ÆÚ³ö°æÈÕÆÚÊ±·¢Éú´íÎó: " + ex.Message;
+                        strError = "åœ¨è·å¾—æ—¥æœŸ '" + ref_issue.PublishTime + "' çš„åä¸€æœŸå‡ºç‰ˆæ—¥æœŸæ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                         return -1;
                     }
                 }
 
                 dlg.PublishTime = strNextPublishTime;
 
-                // ºÅÂë×Ô¶¯ÔöÁ¿ĞèÒªÖªµÀÒ»¸öÆÚÊÇ·ñ¿çÄê£¬¿ÉÒÔÍ¨¹ı²éÑ¯²É¹ºĞÅÏ¢µÃµ½Ò»ÄêËù¶©ÔÄµÄÆÚÊı
+                // å·ç è‡ªåŠ¨å¢é‡éœ€è¦çŸ¥é“ä¸€ä¸ªæœŸæ˜¯å¦è·¨å¹´ï¼Œå¯ä»¥é€šè¿‡æŸ¥è¯¢é‡‡è´­ä¿¡æ¯å¾—åˆ°ä¸€å¹´æ‰€è®¢é˜…çš„æœŸæ•°
                 if (nRefIssue >= nIssueCount
                     && nIssueCount > 0) // 2010/3/3 
                 {
-                    // ¿çÄêÁË
+                    // è·¨å¹´äº†
                     dlg.Issue = "1";
 
 
 
                     // 2010/3/16
-                    // Èç¹ûÔ¤²âµÄÏÂÒ»ÆÚ³ö°æÊ±¼ä²»ÊÇ²Î¿¼ÆÚµÄºóÒ»ÄêµÄÊ±¼ä£¬ÔòĞèÒªÇ¿ÖÆĞŞ¸Ä
+                    // å¦‚æœé¢„æµ‹çš„ä¸‹ä¸€æœŸå‡ºç‰ˆæ—¶é—´ä¸æ˜¯å‚è€ƒæœŸçš„åä¸€å¹´çš„æ—¶é—´ï¼Œåˆ™éœ€è¦å¼ºåˆ¶ä¿®æ”¹
                     string strNextYear = IssueUtil.GetYearPart(strNextPublishTime);
                     string strRefYear = IssueUtil.GetYearPart(ref_issue.PublishTime);
 
                     // 2012/5/14
-                    // Èç¹û²Î¿¼ÆÚËùÔÚÄê·İµÄ¸÷ÆÚÖ®¼äÒÑ¾­¿çÄê£¬Ôò²»±Ø×÷ĞŞÕı
-                    // ÊÔÍ¼ÕÒµ½²Î¿¼ÆÚÖ®Ç°µÄµÚÒ»ÆÚ
+                    // å¦‚æœå‚è€ƒæœŸæ‰€åœ¨å¹´ä»½çš„å„æœŸä¹‹é—´å·²ç»è·¨å¹´ï¼Œåˆ™ä¸å¿…ä½œä¿®æ­£
+                    // è¯•å›¾æ‰¾åˆ°å‚è€ƒæœŸä¹‹å‰çš„ç¬¬ä¸€æœŸ
                     string strRefFirstYear = "";
                     IssueBindingItem year_first_issue = GetYearFirstIssue(ref_issue);
                     if (year_first_issue != null)
@@ -7438,7 +7438,7 @@ issue.Volume);
                     }
 
                     if (string.Compare(strNextYear, strRefYear) <= 0
-                        && strRefYear == strRefFirstYear/*²Î¿¼ÆÚËùÔÚµÄÈ«Äê¸÷ÆÚ²»¿çÄê*/)
+                        && strRefYear == strRefFirstYear/*å‚è€ƒæœŸæ‰€åœ¨çš„å…¨å¹´å„æœŸä¸è·¨å¹´*/)
                     {
                         strNextYear = DateTimeUtil.NextYear(strRefYear);
                         strNextPublishTime = strNextYear + "0101";
@@ -7457,9 +7457,9 @@ issue.Volume);
                     dlg.Volume = ref_issue.Volume;
 
                 if (nIssueCount > 0)
-                    dlg.EditComment = "Ò»Äê³ö°æ " + nIssueCount.ToString() + " ÆÚ";
+                    dlg.EditComment = "ä¸€å¹´å‡ºç‰ˆ " + nIssueCount.ToString() + " æœŸ";
                 else
-                    dlg.EditComment = "ÎŞ·¨µÃÖªÒ»Äê³ö°æµÄÆÚÊı¡£Ã»ÓĞ¶ÔÓ¦µÄ¶©¹ºĞÅÏ¢";
+                    dlg.EditComment = "æ— æ³•å¾—çŸ¥ä¸€å¹´å‡ºç‰ˆçš„æœŸæ•°ã€‚æ²¡æœ‰å¯¹åº”çš„è®¢è´­ä¿¡æ¯";
 
                 if (bGuestNumbers == true)
                 {
@@ -7480,15 +7480,15 @@ issue.Volume);
             if (dlg.DialogResult != DialogResult.OK)
                 return 0;
             /*
-            // ¶ÔpublishTimeÒª²éÖØ£¬¶ÔºÅÂëÌåÏµÒª½øĞĞ¼ì²éºÍÌá³ö¾¯¸æ
+            // å¯¹publishTimeè¦æŸ¥é‡ï¼Œå¯¹å·ç ä½“ç³»è¦è¿›è¡Œæ£€æŸ¥å’Œæå‡ºè­¦å‘Š
             IssueBindingItem dup_issue = null;
-            // ¶Ô³ö°æÊ±¼ä½øĞĞ²éÖØ
+            // å¯¹å‡ºç‰ˆæ—¶é—´è¿›è¡ŒæŸ¥é‡
             // parameters:
-            //      exclude ¼ì²éÖĞÒªÅÅ³ıµÄTreeNode¶ÔÏó
+            //      exclude æ£€æŸ¥ä¸­è¦æ’é™¤çš„TreeNodeå¯¹è±¡
             // return:
             //      -1  error
-            //      0   Ã»ÓĞÖØ
-            //      1   ÖØ
+            //      0   æ²¡æœ‰é‡
+            //      1   é‡
             nRet = CheckPublishTimeDup(dlg.PublishTime,
                 null,
                 out dup_issue,
@@ -7497,18 +7497,18 @@ issue.Volume);
                 return -1;
             if (nRet == 1)
             {
-                // Ñ¡ÖĞËùÖØ¸´µÄÆÚ¸ñ×Ó£¬±ãÓÚ²Ù×÷Õß¹Û²ìÖØ¸´µÄÇé¿ö
+                // é€‰ä¸­æ‰€é‡å¤çš„æœŸæ ¼å­ï¼Œä¾¿äºæ“ä½œè€…è§‚å¯Ÿé‡å¤çš„æƒ…å†µ
                 Debug.Assert(dup_issue != null, "");
                 if (dup_issue != null)
                 {
                     this.ClearAllSelection();
                     dup_issue.Select(SelectAction.On);
-                    this.EnsureVisible(dup_issue);  // È·±£¹öÈëÊÓÒ°
+                    this.EnsureVisible(dup_issue);  // ç¡®ä¿æ»šå…¥è§†é‡
                     this.UpdateObject(dup_issue);
                     this.Update();
                 }
 
-                MessageBox.Show(this, "ÄâĞÂÔöµÄÆÚĞĞ " + strError + "\r\nÇëĞŞ¸Ä¡£");
+                MessageBox.Show(this, "æ‹Ÿæ–°å¢çš„æœŸè¡Œ " + strError + "\r\nè¯·ä¿®æ”¹ã€‚");
                 goto REDO_INPUT;
             }
              * */
@@ -7527,42 +7527,42 @@ issue.Volume);
             new_issue.Volume = dlg.Volume;
             new_issue.Comment = dlg.Comment;
             new_issue.RefID = Guid.NewGuid().ToString();
-            // TODO: »ñµÃÑéÊÕĞÂÔöÆÚµÄÅú´ÎºÅ¡£»òÕßÑØÓÃÑéÊÕ²áµÄÅú´ÎºÅ?
+            // TODO: è·å¾—éªŒæ”¶æ–°å¢æœŸçš„æ‰¹æ¬¡å·ã€‚æˆ–è€…æ²¿ç”¨éªŒæ”¶å†Œçš„æ‰¹æ¬¡å·?
 
             new_issue.Changed = true;
             new_issue.NewCreated = true;
 
             /*
-            // ÉèÖÃ»òÕßË¢ĞÂÒ»¸ö²Ù×÷¼ÇÔØ
-            // ¿ÉÄÜ»áÅ×³öÒì³£
+            // è®¾ç½®æˆ–è€…åˆ·æ–°ä¸€ä¸ªæ“ä½œè®°è½½
+            // å¯èƒ½ä¼šæŠ›å‡ºå¼‚å¸¸
             new_issue.SetOperation(
                 "create",
                 this.Operator,
                 "");
              * */
 
-            // ²åÈëµ½ºÏÊÊµÄÎ»ÖÃ?
+            // æ’å…¥åˆ°åˆé€‚çš„ä½ç½®?
             InsertIssueToIssues(new_issue);
 
-            // ÎªĞÂÔöµÄÆÚÉèÖÃºÃLayoutÄ£Ê½
-            // ÃÖ²¹ÒòÎª²åÈë´øÀ´µÄºÏ¶©±¾ÁÑ¶Ï
+            // ä¸ºæ–°å¢çš„æœŸè®¾ç½®å¥½Layoutæ¨¡å¼
+            // å¼¥è¡¥å› ä¸ºæ’å…¥å¸¦æ¥çš„åˆè®¢æœ¬è£‚æ–­
             nRet = SetNewIssueLayout(new_issue,
                 out strError);
             if (nRet == -1)
                 return -1;
 
-            // Ñ¡ÉÏĞÂ²åÈëµÄ½Úµã
+            // é€‰ä¸Šæ–°æ’å…¥çš„èŠ‚ç‚¹
             if (bUpdateDisplay == true)
             {
                 this.ClearAllSelection();
                 new_issue.Select(SelectAction.On);
-                // ±¾À´ĞèÒªUpdateObject()£¬µ«ÊÇÒòÎªºóÃæÓĞInvalidate()£¬¾ÍÃâÁË
-                this.AfterWidthChanged(true);   // content¸ß¶È¸Ä±ä
+                // æœ¬æ¥éœ€è¦UpdateObject()ï¼Œä½†æ˜¯å› ä¸ºåé¢æœ‰Invalidate()ï¼Œå°±å…äº†
+                this.AfterWidthChanged(true);   // contenté«˜åº¦æ”¹å˜
             }
             return 1;
         }
 
-        // ÕÒµ½²Î¿¼ÆÚÇ°·½µ±ÄêµÚÒ»ÆÚµÄ½Úµã
+        // æ‰¾åˆ°å‚è€ƒæœŸå‰æ–¹å½“å¹´ç¬¬ä¸€æœŸçš„èŠ‚ç‚¹
         IssueBindingItem GetYearFirstIssue(IssueBindingItem ref_issue)
         {
             IssueBindingItem first = null;
@@ -7572,7 +7572,7 @@ issue.Volume);
                 IssueBindingItem issue = this.Issues[i];
                 if (String.IsNullOrEmpty(issue.PublishTime) == true)
                     continue;
-                // TODO: ×¢ÒâÆÚºÅ²»Á¬ĞøµÄÇé¿ö
+                // TODO: æ³¨æ„æœŸå·ä¸è¿ç»­çš„æƒ…å†µ
                 if (issue.Issue == "1")
                     first = issue;
                 if (issue == ref_issue)
@@ -7588,7 +7588,7 @@ issue.Volume);
             return first; 
         }
 
-        // ²éÖØ
+        // æŸ¥é‡
         void dlg_CheckDup(object sender, CheckDupEventArgs e)
         {
             IssueDialog dialog = (IssueDialog)sender;
@@ -7627,8 +7627,8 @@ issue.Volume);
             }
         }
 
-        // Çå³ıµ±Ç°ËùÓĞÑ¡Ôñ
-        // TODO: ²éÕÒµ½ÀàËÆµÄ¶àĞĞ´úÂë£¬¼ò»¯Îªº¯Êıµ÷ÓÃ
+        // æ¸…é™¤å½“å‰æ‰€æœ‰é€‰æ‹©
+        // TODO: æŸ¥æ‰¾åˆ°ç±»ä¼¼çš„å¤šè¡Œä»£ç ï¼Œç®€åŒ–ä¸ºå‡½æ•°è°ƒç”¨
         public void ClearAllSelection()
         {
             List<CellBase> objects = new List<CellBase>();
@@ -7637,14 +7637,14 @@ issue.Volume);
                 this.Invalidate();
             else
             {
-                // Õâ¸ö·½·¨ÆÁÄ»²»¶¶¶¯
+                // è¿™ä¸ªæ–¹æ³•å±å¹•ä¸æŠ–åŠ¨
                 UpdateObjects(objects);
             }
         }
 
-        #region --- ºÍĞÂÔöÆÚÓĞ¹ØµÄº¯Êı ---
+        #region --- å’Œæ–°å¢æœŸæœ‰å…³çš„å‡½æ•° ---
 
-        // »ñµÃ¿ÉÓÃµÄ×î´ó¶©¹ºÊ±¼ä·¶Î§
+        // è·å¾—å¯ç”¨çš„æœ€å¤§è®¢è´­æ—¶é—´èŒƒå›´
         // return:
         //      -1  error
         //      0   not found
@@ -7685,7 +7685,7 @@ issue.Volume);
                 }
                 catch (Exception ex)
                 {
-                    strError = "¶©¹ºXML×°ÈëDOMÊ±·¢Éú´íÎó: " + ex.Message;
+                    strError = "è®¢è´­XMLè£…å…¥DOMæ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                     return -1;
                 }
 
@@ -7708,7 +7708,7 @@ issue.Volume);
                 int nRet = strRange.IndexOf("-");
                 if (nRet == -1)
                 {
-                    strError = "Ê±¼ä·¶Î§ '" + strRange + "' ¸ñÊ½´íÎó£¬È±·¦-";
+                    strError = "æ—¶é—´èŒƒå›´ '" + strRange + "' æ ¼å¼é”™è¯¯ï¼Œç¼ºä¹-";
                     return -1;
                 }
 
@@ -7717,12 +7717,12 @@ issue.Volume);
 
                 if (strStart.Length != 8)
                 {
-                    strError = "Ê±¼ä·¶Î§ '" + strRange + "' ¸ñÊ½´íÎó£¬×ó±ß²¿·Ö×Ö·ûÊı²»Îª8";
+                    strError = "æ—¶é—´èŒƒå›´ '" + strRange + "' æ ¼å¼é”™è¯¯ï¼Œå·¦è¾¹éƒ¨åˆ†å­—ç¬¦æ•°ä¸ä¸º8";
                     return -1;
                 }
                 if (strEnd.Length != 8)
                 {
-                    strError = "Ê±¼ä·¶Î§ '" + strRange + "' ¸ñÊ½´íÎó£¬ÓÒ±ß²¿·Ö×Ö·ûÊı²»Îª8";
+                    strError = "æ—¶é—´èŒƒå›´ '" + strRange + "' æ ¼å¼é”™è¯¯ï¼Œå³è¾¹éƒ¨åˆ†å­—ç¬¦æ•°ä¸ä¸º8";
                     return -1;
                 }
 
@@ -7752,7 +7752,7 @@ issue.Volume);
             return 1;
         }
 
-        // ¼ì²âÒ»¸ö³ö°æÊ±¼äÊÇ·ñÔÚÒÑ¾­¶©¹ºµÄ·¶Î§ÄÚ
+        // æ£€æµ‹ä¸€ä¸ªå‡ºç‰ˆæ—¶é—´æ˜¯å¦åœ¨å·²ç»è®¢è´­çš„èŒƒå›´å†…
         bool InOrderRange(string strPublishTime)
         {
             if (this.GetOrderInfo == null)
@@ -7772,11 +7772,11 @@ issue.Volume);
             return true;
         }
 
-        // ½«Ò»¸öĞÂµÄIssue¶ÔÏó²åÈëthis.IssuesÊÊµ±µÄÎ»ÖÃ
-        // ×¢Òâ£¬µ÷ÓÃÇ°£¬²¢Î´²åÈëthis.Issues
+        // å°†ä¸€ä¸ªæ–°çš„Issueå¯¹è±¡æ’å…¥this.Issuesé€‚å½“çš„ä½ç½®
+        // æ³¨æ„ï¼Œè°ƒç”¨å‰ï¼Œå¹¶æœªæ’å…¥this.Issues
         void InsertIssueToIssues(IssueBindingItem issueInsert)
         {
-            int nFreeIndex = -1;    // ×ÔÓÉÆÚËùÔÚÎ»ÖÃ
+            int nFreeIndex = -1;    // è‡ªç”±æœŸæ‰€åœ¨ä½ç½®
             int nInsertIndex = -1;
             string strPublishTime = issueInsert.PublishTime;
             string strPrevPublishTime = "";
@@ -7796,7 +7796,7 @@ issue.Volume);
 
                 if (issue == issueInsert)
                 {
-                    throw new Exception("Òª²åÈëµÄÆÚÔÚµ÷ÓÃº¯ÊıÇ°ÒÑ¾­ÔÚÊı×éÀïÃæÁË");
+                    throw new Exception("è¦æ’å…¥çš„æœŸåœ¨è°ƒç”¨å‡½æ•°å‰å·²ç»åœ¨æ•°ç»„é‡Œé¢äº†");
                 }
 
                 if (String.Compare(strPublishTime, strPrevPublishTime) >= 0
@@ -7808,7 +7808,7 @@ issue.Volume);
 
             if (nInsertIndex == -1)
             {
-                // ²åÈëÔÚ×ÔÓÉÆÚÖ®Ç°
+                // æ’å…¥åœ¨è‡ªç”±æœŸä¹‹å‰
                 if (nFreeIndex != -1)
                 {
                     Debug.Assert(this.Issues.Count > 0, "");
@@ -7825,7 +7825,7 @@ issue.Volume);
                 this.Issues.Insert(nInsertIndex, issueInsert);
         }
 
-        // ÎªĞÂÔöµÄÆÚÉèÖÃºÃLayoutÄ£Ê½
+        // ä¸ºæ–°å¢çš„æœŸè®¾ç½®å¥½Layoutæ¨¡å¼
         int SetNewIssueLayout(IssueBindingItem issue,
             out string strError)
         {
@@ -7845,7 +7845,7 @@ issue.Volume);
             if (nLineNo > 0)
             {
                 prev_issue = this.Issues[nLineNo - 1];
-                // ÅÅ³ı×ÔÓÉÆÚ
+                // æ’é™¤è‡ªç”±æœŸ
                 if (String.IsNullOrEmpty(prev_issue.PublishTime) == true)
                     prev_issue = null;
             }
@@ -7853,12 +7853,12 @@ issue.Volume);
             if (nLineNo < this.Issues.Count - 1)
             {
                 next_issue = this.Issues[nLineNo + 1];
-                // ÅÅ³ı×ÔÓÉÆÚ
+                // æ’é™¤è‡ªç”±æœŸ
                 if (String.IsNullOrEmpty(next_issue.PublishTime) == true)
                     next_issue = null;
             }
 
-            // ÔÚ´Ë·¶Î§ÄÚ£¬Èç¹û·¢Éú»ñÈ¡¶©¹ºĞÅÏ¢µÄÇëÇó£¬ÔòÅ¤×ªÎª´Ó¹ÜÏ½·¶Î§»ñÈ¡
+            // åœ¨æ­¤èŒƒå›´å†…ï¼Œå¦‚æœå‘ç”Ÿè·å–è®¢è´­ä¿¡æ¯çš„è¯·æ±‚ï¼Œåˆ™æ‰­è½¬ä¸ºä»ç®¡è¾–èŒƒå›´è·å–
             bool bOld = m_bForceNarrowRange;
             m_bForceNarrowRange = true;
             try
@@ -7870,8 +7870,8 @@ issue.Volume);
                     || (prev_issue != null && prev_issue.IssueLayoutState == IssueLayoutState.Binding)
                     )
                 {
-                    // Èç¹ûµ±Ç°ÆÚÎª¶ÏÁÑÁËºÏ¶©²áµÄÇé¿ö£¬²¢ÇÒÇ°Ò»¸öÆÚ»òÕßºóÒ»¸öÆÚÖÁÉÙÓĞÒ»¸öÊÇBinding Layout£¬
-                    // ÄÇÃ´¾ÍÉèÖÃÎªBindingLayout
+                    // å¦‚æœå½“å‰æœŸä¸ºæ–­è£‚äº†åˆè®¢å†Œçš„æƒ…å†µï¼Œå¹¶ä¸”å‰ä¸€ä¸ªæœŸæˆ–è€…åä¸€ä¸ªæœŸè‡³å°‘æœ‰ä¸€ä¸ªæ˜¯Binding Layoutï¼Œ
+                    // é‚£ä¹ˆå°±è®¾ç½®ä¸ºBindingLayout
                     nRet = issue.ReLayoutBinding(out strError);
                     if (nRet == -1)
                         return -1;
@@ -7879,7 +7879,7 @@ issue.Volume);
                     return 0;
                 }
 
-                // ·ñÔòÉèÖÃÎªAccepting Layout
+                // å¦åˆ™è®¾ç½®ä¸ºAccepting Layout
                 nRet = issue.LayoutAccepting(out strError);
                 if (nRet == -1)
                     return -1;
@@ -7893,7 +7893,7 @@ issue.Volume);
             }
         }
 
-        // ÕÒµ½Ò»¸öºÏ¶©²áµÄÔÚBinding²¼¾ÖÏÂµÄÒÑ¾­²ÉÄÉµÄÁĞºÅ¡£×¢Òâ£¬ÊÇË«¸ñµÄ×ó²à¸ñ×Ó
+        // æ‰¾åˆ°ä¸€ä¸ªåˆè®¢å†Œçš„åœ¨Bindingå¸ƒå±€ä¸‹çš„å·²ç»é‡‡çº³çš„åˆ—å·ã€‚æ³¨æ„ï¼Œæ˜¯åŒæ ¼çš„å·¦ä¾§æ ¼å­
         internal int FindExistBoundCol(ItemBindingItem parent_item,
             IssueBindingItem exclude_issue)
         {
@@ -7923,7 +7923,7 @@ issue.Volume);
                     nCol = issue.IndexOfCell(cell);
                     if (nCol != -1)
                     {
-                        Debug.Assert(nCol != 0, "³ÉÔ±¸ñ×Ó²»Ó¦ÔÚ0ÁĞ³öÏÖ");
+                        Debug.Assert(nCol != 0, "æˆå‘˜æ ¼å­ä¸åº”åœ¨0åˆ—å‡ºç°");
                         return nCol - 1;
                     }
                 }
@@ -7933,26 +7933,26 @@ issue.Volume);
         }
 
 
-        // ¼ì²éÒ»¸öÆÚ¶ÔÏóµÄ×İÏòËùÔÚÎ»ÖÃÊÇ·ñ´©Ô½ÁËÏÖÓĞµÄºÏ¶©Ê±¼ä·¶Î§
-        // µÃµ½ÄÇĞ©±»´©Ô½µÄºÏ¶©²á¶ÔÏó
+        // æ£€æŸ¥ä¸€ä¸ªæœŸå¯¹è±¡çš„çºµå‘æ‰€åœ¨ä½ç½®æ˜¯å¦ç©¿è¶Šäº†ç°æœ‰çš„åˆè®¢æ—¶é—´èŒƒå›´
+        // å¾—åˆ°é‚£äº›è¢«ç©¿è¶Šçš„åˆè®¢å†Œå¯¹è±¡
         // parameters:
-        //      bOnlyDetect     ÊÇ·ñ½ö½ö¼ì²â£¬²»·µ»Ø¾ßÌåµÄparent item?
-        //      parent_items    ·µ»Ø±»´©Ô½µÄºÏ¶©²á¶ÔÏó
+        //      bOnlyDetect     æ˜¯å¦ä»…ä»…æ£€æµ‹ï¼Œä¸è¿”å›å…·ä½“çš„parent item?
+        //      parent_items    è¿”å›è¢«ç©¿è¶Šçš„åˆè®¢å†Œå¯¹è±¡
         internal int GetCrossBoundRange(IssueBindingItem issueTest,
             bool bOnlyDetect,
             out List<ItemAndCol> cross_infos)
         {
             cross_infos = new List<ItemAndCol>();
 
-            // ±éÀúºÏ¶©²á¶ÔÏóÊı×é
+            // éå†åˆè®¢å†Œå¯¹è±¡æ•°ç»„
             for (int i = 0; i < this.ParentItems.Count; i++)
             {
                 ItemBindingItem parent_item = this.ParentItems[i];
 
-                IssueBindingItem issue = parent_item.Container; // ¼Ù×°ÊôÓÚÕâ¸öÆÚ
-                Debug.Assert(issue != null, "ºÏ¶©²áµÄ Container ²»Ó¦¸ÃÎª¿Õ¡£ÕıÈ·µÄ´¦Àí·½Ê½ÊÇ°ÑÕâÑùµÄ²á·ÅÈë×ÔÓÉÆÚ¹ÜÏ½·¶Î§");
+                IssueBindingItem issue = parent_item.Container; // å‡è£…å±äºè¿™ä¸ªæœŸ
+                Debug.Assert(issue != null, "åˆè®¢å†Œçš„ Container ä¸åº”è¯¥ä¸ºç©ºã€‚æ­£ç¡®çš„å¤„ç†æ–¹å¼æ˜¯æŠŠè¿™æ ·çš„å†Œæ”¾å…¥è‡ªç”±æœŸç®¡è¾–èŒƒå›´");
 
-                // ÕÒµ½ĞĞºÅ
+                // æ‰¾åˆ°è¡Œå·
                 int nStartLineNo = this.Issues.IndexOf(issue);
                 Debug.Assert(nStartLineNo != -1, "");
                 if (nStartLineNo == -1)
@@ -7963,16 +7963,16 @@ issue.Volume);
                 Debug.Assert(nCol != -1, "");
                  * */
 
-                // ¿´¿´´¹Ö±·½Ïò°üº¬¶àÉÙ¸öÆÚ
+                // çœ‹çœ‹å‚ç›´æ–¹å‘åŒ…å«å¤šå°‘ä¸ªæœŸ
                 int nIssueCount = 0;
                 if (parent_item.MemberCells.Count == 0)
                     nIssueCount = 1;
                 else
                 {
-                    // TODO: Òª±£Ö¤item.MemberCellsÊı×éÖĞ¶ÔÏóÊÇÓĞĞòµÄ
+                    // TODO: è¦ä¿è¯item.MemberCellsæ•°ç»„ä¸­å¯¹è±¡æ˜¯æœ‰åºçš„
                     IssueBindingItem tail_issue = parent_item.MemberCells[parent_item.MemberCells.Count - 1].Container;// item.MemberItems[item.MemberItems.Count - 1].Container;
                     Debug.Assert(tail_issue != null, "");
-                    // ÕÒµ½ĞĞºÅ
+                    // æ‰¾åˆ°è¡Œå·
                     int nTailLineNo = this.Issues.IndexOf(tail_issue);
                     Debug.Assert(nTailLineNo != -1, "");
                     if (nTailLineNo == -1)
@@ -7996,7 +7996,7 @@ issue.Volume);
                     info.item = parent_item;
                     cross_infos.Add(info);
 
-                    // ÕÒµ½µ±Ç°ÕıÔÚÓÃµÄÁĞºÅ¡£Ë«¸ñµÄ×ó²à
+                    // æ‰¾åˆ°å½“å‰æ­£åœ¨ç”¨çš„åˆ—å·ã€‚åŒæ ¼çš„å·¦ä¾§
                     info.Index = FindExistBoundCol(parent_item,
                         issueTest);
                 }
@@ -8005,7 +8005,7 @@ issue.Volume);
             return cross_infos.Count;
         }
 
-                // ¼ì²éÒ»¸öÆÚ¶ÔÏóµÄ×İÏòËùÔÚÎ»ÖÃÊÇ·ñ´©Ô½ÁËÏÖÓĞµÄºÏ¶©Ê±¼ä·¶Î§
+                // æ£€æŸ¥ä¸€ä¸ªæœŸå¯¹è±¡çš„çºµå‘æ‰€åœ¨ä½ç½®æ˜¯å¦ç©¿è¶Šäº†ç°æœ‰çš„åˆè®¢æ—¶é—´èŒƒå›´
         internal bool IsIssueInExistingBoundRange(IssueBindingItem issueTest)
         {
             List<ItemAndCol> infos = null;
@@ -8017,18 +8017,18 @@ issue.Volume);
         }
 
 #if NOOOOOOOOOOOOOOO
-        // ¼ì²éÒ»¸öÆÚ¶ÔÏóµÄ×İÏòËùÔÚÎ»ÖÃÊÇ·ñ´©Ô½ÁËÏÖÓĞµÄºÏ¶©Ê±¼ä·¶Î§
+        // æ£€æŸ¥ä¸€ä¸ªæœŸå¯¹è±¡çš„çºµå‘æ‰€åœ¨ä½ç½®æ˜¯å¦ç©¿è¶Šäº†ç°æœ‰çš„åˆè®¢æ—¶é—´èŒƒå›´
         internal bool IsIssueInExistingBoundRange(IssueBindingItem issueTest)
         {
-            // ±éÀúºÏ¶©²á¶ÔÏóÊı×é
+            // éå†åˆè®¢å†Œå¯¹è±¡æ•°ç»„
             for (int i = 0; i < this.ParentItems.Count; i++)
             {
                 ItemBindingItem parent_item = this.ParentItems[i];
 
-                IssueBindingItem issue = parent_item.Container; // ¼Ù×°ÊôÓÚÕâ¸öÆÚ
+                IssueBindingItem issue = parent_item.Container; // å‡è£…å±äºè¿™ä¸ªæœŸ
                 Debug.Assert(issue != null, "");
 
-                // ÕÒµ½ĞĞºÅ
+                // æ‰¾åˆ°è¡Œå·
                 int nStartLineNo = this.Issues.IndexOf(issue);
                 Debug.Assert(nStartLineNo != -1, "");
                 if (nStartLineNo == -1)
@@ -8039,16 +8039,16 @@ issue.Volume);
                 Debug.Assert(nCol != -1, "");
                  * */
 
-                // ¿´¿´´¹Ö±·½Ïò°üº¬¶àÉÙ¸öÆÚ
+                // çœ‹çœ‹å‚ç›´æ–¹å‘åŒ…å«å¤šå°‘ä¸ªæœŸ
                 int nIssueCount = 0;
                 if (parent_item.MemberCells.Count == 0)
                     nIssueCount = 1;
                 else
                 {
-                    // TODO: Òª±£Ö¤item.MemberCellsÊı×éÖĞ¶ÔÏóÊÇÓĞĞòµÄ
+                    // TODO: è¦ä¿è¯item.MemberCellsæ•°ç»„ä¸­å¯¹è±¡æ˜¯æœ‰åºçš„
                     IssueBindingItem tail_issue = parent_item.MemberCells[parent_item.MemberCells.Count - 1].Container;// item.MemberItems[item.MemberItems.Count - 1].Container;
                     Debug.Assert(tail_issue != null, "");
-                    // ÕÒµ½ĞĞºÅ
+                    // æ‰¾åˆ°è¡Œå·
                     int nTailLineNo = this.Issues.IndexOf(tail_issue);
                     Debug.Assert(nTailLineNo != -1, "");
                     if (nTailLineNo == -1)
@@ -8072,13 +8072,13 @@ issue.Volume);
         }
 #endif
 
-        // ¶Ô³ö°æÊ±¼ä¡¢µ±ÄêÆÚºÅ¡¢¾íºÅ½øĞĞ²éÖØ
+        // å¯¹å‡ºç‰ˆæ—¶é—´ã€å½“å¹´æœŸå·ã€å·å·è¿›è¡ŒæŸ¥é‡
         // parameters:
-        //      exclude ¼ì²éÖĞÒªÅÅ³ıµÄTreeNode¶ÔÏó
+        //      exclude æ£€æŸ¥ä¸­è¦æ’é™¤çš„TreeNodeå¯¹è±¡
         // return:
         //      -1  error
-        //      0   Ã»ÓĞÖØ
-        //      1   ÖØ
+        //      0   æ²¡æœ‰é‡
+        //      1   é‡
         int CheckPublishTimeDup(string strPublishTime,
             string strIssue,
             string strZong,
@@ -8096,7 +8096,7 @@ issue.Volume);
 
             if (String.IsNullOrEmpty(strPublishTime) == true)
             {
-                strError = "³ö°æÊ±¼ä²»ÄÜÎª¿Õ";
+                strError = "å‡ºç‰ˆæ—¶é—´ä¸èƒ½ä¸ºç©º";
                 return -1;
             }
 
@@ -8112,16 +8112,16 @@ issue.Volume);
                 if (issue == exclude)
                     continue;
 
-                // ¼ì²é³ö°æÊ±¼ä
+                // æ£€æŸ¥å‡ºç‰ˆæ—¶é—´
                 if (issue.PublishTime == strPublishTime)
                 {
                     if (String.IsNullOrEmpty(strError) == false)
                         strError += ";\r\n";
-                    strError += "³ö°æÊ±¼ä '" + strPublishTime + "' ºÍÎ»ÖÃ " + (i + 1).ToString() + " (´Ó1¼ÆÊı)µÄÆÚÖØ¸´ÁË";
+                    strError += "å‡ºç‰ˆæ—¶é—´ '" + strPublishTime + "' å’Œä½ç½® " + (i + 1).ToString() + " (ä»1è®¡æ•°)çš„æœŸé‡å¤äº†";
                     dup_issues.Add(issue);
                 }
 
-                // ÔÚµ±Äê·¶Î§ÄÚ¼ì²éµ±ÄêÆÚºÅ¡¢ÔÚÆäËûÄê·¶Î§ÄÚ¼ì²é¾íºÅ
+                // åœ¨å½“å¹´èŒƒå›´å†…æ£€æŸ¥å½“å¹´æœŸå·ã€åœ¨å…¶ä»–å¹´èŒƒå›´å†…æ£€æŸ¥å·å·
                 {
                     string strYear = IssueUtil.GetYearPart(issue.PublishTime);
                     if (strYear == strCurYear)
@@ -8131,7 +8131,7 @@ issue.Volume);
                         {
                             if (String.IsNullOrEmpty(strWarning) == false)
                                 strWarning += ";\r\n";
-                            strWarning = "ÆÚºÅ '" + strIssue + "' ºÍÎ»ÖÃ " + (i + 1).ToString() + " (´Ó1¼ÆÊı)µÄÆÚÖØ¸´ÁË";
+                            strWarning = "æœŸå· '" + strIssue + "' å’Œä½ç½® " + (i + 1).ToString() + " (ä»1è®¡æ•°)çš„æœŸé‡å¤äº†";
                             warning_issues.Add(issue);
                         }
                     }
@@ -8142,21 +8142,21 @@ issue.Volume);
                         {
                             if (String.IsNullOrEmpty(strWarning) == false)
                                 strWarning += ";\r\n";
-                            strWarning = "¾íºÅ '" + strVolume + "' ºÍÎ»ÖÃ " + (i + 1).ToString() + " (´Ó1¼ÆÊı)µÄÆÚÖØ¸´ÁË";
+                            strWarning = "å·å· '" + strVolume + "' å’Œä½ç½® " + (i + 1).ToString() + " (ä»1è®¡æ•°)çš„æœŸé‡å¤äº†";
                             warning_issues.Add(issue);
                         }
                     }
                 }
 
 
-                // ¼ì²é×ÜÆÚºÅ
+                // æ£€æŸ¥æ€»æœŸå·
                 if (String.IsNullOrEmpty(strZong) == false)
                 {
                     if (strZong == issue.Zong)
                     {
                         if (String.IsNullOrEmpty(strWarning) == false)
                             strWarning += ";\r\n";
-                        strWarning = "×ÜÆÚºÅ '" + strZong + "' ºÍÎ»ÖÃ " + (i + 1).ToString() + " (´Ó1¼ÆÊı)µÄÆÚÖØ¸´ÁË";
+                        strWarning = "æ€»æœŸå· '" + strZong + "' å’Œä½ç½® " + (i + 1).ToString() + " (ä»1è®¡æ•°)çš„æœŸé‡å¤äº†";
                         warning_issues.Add(issue);
                     }
                 }
@@ -8179,7 +8179,7 @@ issue.Volume);
             }
             catch
             {
-                return "";  // ±ÜÃâ²éÖØ²éµ½×Ô¼º   // ÔöÁ¿Ê§°Ü    strNumber
+                return "";  // é¿å…æŸ¥é‡æŸ¥åˆ°è‡ªå·±   // å¢é‡å¤±è´¥    strNumber
             }
             return (v + 1).ToString();
         }
@@ -8205,18 +8205,18 @@ issue.Volume);
                 this.StartDate = strStartDate;
                 this.EndDate = strEndDate;
 
-                // TODO: ÑéÖ¤Á½¸öÈÕÆÚ¶¼ÒªÔÚÍ¬Ò»¸öÔÂÒÔÄÚ
+                // TODO: éªŒè¯ä¸¤ä¸ªæ—¥æœŸéƒ½è¦åœ¨åŒä¸€ä¸ªæœˆä»¥å†…
             }
 
             public PartOfMonth(DateTime start, DateTime end)
             {
                 this.StartDate = DateTimeUtil.DateTimeToString8(start);
                 this.EndDate = DateTimeUtil.DateTimeToString8(end);
-                // TODO: ÑéÖ¤Á½¸öÈÕÆÚ¶¼ÒªÔÚÍ¬Ò»¸öÔÂÒÔÄÚ
+                // TODO: éªŒè¯ä¸¤ä¸ªæ—¥æœŸéƒ½è¦åœ¨åŒä¸€ä¸ªæœˆä»¥å†…
             }
         }
 
-        // ÔÚÈô¸É²¿Î»ÖĞ¶¨Î»Ò»¸öÈÕÆÚ£¬²¢µÃµ½ÔÚ²¿·ÖÒÔÄÚµÄÆ«ÒÆÁ¿ delta
+        // åœ¨è‹¥å¹²éƒ¨ä½ä¸­å®šä½ä¸€ä¸ªæ—¥æœŸï¼Œå¹¶å¾—åˆ°åœ¨éƒ¨åˆ†ä»¥å†…çš„åç§»é‡ delta
         static void LocationPart(List<PartOfMonth> parts,
             string strPublishTime,
             out int index,
@@ -8243,7 +8243,7 @@ issue.Volume);
         }
 
         // parameters:
-        //      strEndTime  ÏŞ¶¨£¬²»³¬¹ıÕâ¸öÈÕÆÚ
+        //      strEndTime  é™å®šï¼Œä¸è¶…è¿‡è¿™ä¸ªæ—¥æœŸ
         static string AddDays(string strPublishTime, int days, string strEndTime)
         {
             string strResult = DateTimeUtil.DateTimeToString8(
@@ -8266,7 +8266,7 @@ issue.Volume);
             return GetMonthParts(DateTimeUtil.Long8ToDateTime(strPublishTime), nCount);
         }
 
-        // °ÑÒ»¸öÔÂ¾ùÔÈ»®·ÖÎª¼¸¸ö²¿·Ö
+        // æŠŠä¸€ä¸ªæœˆå‡åŒ€åˆ’åˆ†ä¸ºå‡ ä¸ªéƒ¨åˆ†
         static List<PartOfMonth> GetMonthParts(DateTime time, int nCount)
         {
             List<PartOfMonth> results = new List<PartOfMonth>();
@@ -8357,10 +8357,10 @@ issue.Volume);
                 return results;
             }
 
-            throw new Exception("Ôİ²»Ö§³ÖÒ»¸öÔÂÄÚ "+nCount.ToString()+" ¸ö·Ö¸î");
+            throw new Exception("æš‚ä¸æ”¯æŒä¸€ä¸ªæœˆå†… "+nCount.ToString()+" ä¸ªåˆ†å‰²");
         }
 
-        // °ü×°ºóµÄ°æ±¾
+        // åŒ…è£…åçš„ç‰ˆæœ¬
         public static string NextPublishTime(string strPublishTime,
             int nIssueCount)
         {
@@ -8370,13 +8370,13 @@ issue.Volume);
                 ref nPreferredDelta);
         }
 
-        // Ô¤²âÏÂÒ»ÆÚµÄ³ö°æÊ±¼ä
+        // é¢„æµ‹ä¸‹ä¸€æœŸçš„å‡ºç‰ˆæ—¶é—´
         // exception:
-        //      ¿ÉÄÜÒòstrPublishTimeÎª²»¿ÉÄÜµÄÈÕÆÚ¶øÅ×³öÒì³£
+        //      å¯èƒ½å› strPublishTimeä¸ºä¸å¯èƒ½çš„æ—¥æœŸè€ŒæŠ›å‡ºå¼‚å¸¸
         // parameters:
-        //      strPublishTime  µ±Ç°ÕâÒ»ÆÚ³ö°æÊ±¼ä
-        //      nIssueCount Ò»ÄêÄÚ³ö¶àÉÙÆÚ
-        //      nDelta  ÍÆ¼öµÄ×éÄÚÆ«ÒÆÌìÊı¡£µ÷ÓÃÇ°Èç¹ûÎª -1£¬±íÊ¾²»Ê¹ÓÃÕâ¸ö²ÎÊı¡£µ÷ÓÃºó·µ»Ø±¾´ÎµÃµ½µÄÆ«ÒÆ
+        //      strPublishTime  å½“å‰è¿™ä¸€æœŸå‡ºç‰ˆæ—¶é—´
+        //      nIssueCount ä¸€å¹´å†…å‡ºå¤šå°‘æœŸ
+        //      nDelta  æ¨èçš„ç»„å†…åç§»å¤©æ•°ã€‚è°ƒç”¨å‰å¦‚æœä¸º -1ï¼Œè¡¨ç¤ºä¸ä½¿ç”¨è¿™ä¸ªå‚æ•°ã€‚è°ƒç”¨åè¿”å›æœ¬æ¬¡å¾—åˆ°çš„åç§»
         public static string NextPublishTime(string strPublishTime,
             int nIssueCount,
             ref int nPreferredDelta)
@@ -8387,16 +8387,16 @@ issue.Volume);
 
             int nCount = 0;
 
-            // Ò»ÄêÒ»ÆÚ
+            // ä¸€å¹´ä¸€æœŸ
             if (nIssueCount == 1)
             {
                 return DateTimeUtil.DateTimeToString8(DateTimeUtil.NextYear(start));
             }
 
-            // Ò»ÄêÁ½ÆÚ
+            // ä¸€å¹´ä¸¤æœŸ
             else if (nIssueCount == 2)
             {
-                // 6¸öÔÂÒÔºóµÄÍ¬ÈÕ
+                // 6ä¸ªæœˆä»¥åçš„åŒæ—¥
                 for (int i = 0; i < 6; i++)
                 {
                     start = DateTimeUtil.NextMonth(start);
@@ -8405,10 +8405,10 @@ issue.Volume);
                 return DateTimeUtil.DateTimeToString8(start);
             }
 
-            // Ò»ÄêÈıÆÚ
+            // ä¸€å¹´ä¸‰æœŸ
             else if (nIssueCount == 3)
             {
-                // 4¸öÔÂÒÔºóµÄÍ¬ÈÕ
+                // 4ä¸ªæœˆä»¥åçš„åŒæ—¥
                 for (int i = 0; i < 4; i++)
                 {
                     start = DateTimeUtil.NextMonth(start);
@@ -8417,10 +8417,10 @@ issue.Volume);
                 return DateTimeUtil.DateTimeToString8(start);
             }
 
-            // Ò»Äê4ÆÚ
+            // ä¸€å¹´4æœŸ
             else if (nIssueCount == 4)
             {
-                // 3¸öÔÂÒÔºóµÄÍ¬ÈÕ
+                // 3ä¸ªæœˆä»¥åçš„åŒæ—¥
                 for (int i = 0; i < 3; i++)
                 {
                     start = DateTimeUtil.NextMonth(start);
@@ -8429,12 +8429,12 @@ issue.Volume);
                 return DateTimeUtil.DateTimeToString8(start);
             }
 
-            // Ò»Äê5ÆÚ ºÍÒ»Äê6ÆÚ´¦Àí°ì·¨Ò»Ñù
-            // Ò»Äê6ÆÚ
+            // ä¸€å¹´5æœŸ å’Œä¸€å¹´6æœŸå¤„ç†åŠæ³•ä¸€æ ·
+            // ä¸€å¹´6æœŸ
             else if (nIssueCount == 5 || nIssueCount == 6)
             {
                 // 
-                // 2¸öÔÂÒÔºóµÄÍ¬ÈÕ
+                // 2ä¸ªæœˆä»¥åçš„åŒæ—¥
                 for (int i = 0; i < 2; i++)
                 {
                     start = DateTimeUtil.NextMonth(start);
@@ -8443,144 +8443,144 @@ issue.Volume);
                 return DateTimeUtil.DateTimeToString8(start);
             }
 
-            // Ò»Äê7/8/9/10/11ÆÚ ºÍÒ»Äê12ÆÚ´¦Àí°ì·¨Ò»Ñù
-            // Ò»Äê12ÆÚ
+            // ä¸€å¹´7/8/9/10/11æœŸ å’Œä¸€å¹´12æœŸå¤„ç†åŠæ³•ä¸€æ ·
+            // ä¸€å¹´12æœŸ
             else if (nIssueCount >= 7 && nIssueCount <= 12)
             {
-                // 1¸öÔÂÒÔºóµÄÍ¬ÈÕ
+                // 1ä¸ªæœˆä»¥åçš„åŒæ—¥
                 start = DateTimeUtil.NextMonth(start);
 
                 return DateTimeUtil.DateTimeToString8(start);
             }
 
-            // Ò»Äê13ÆÚ ¿ÉÄÜÊÇ´íÎóµÄÊ±¼ä·¶Î§Ôì³ÉµÄ
-            // ºÍÒ»Äê12ÆÚ´¦Àí°ì·¨Ò»Ñù
+            // ä¸€å¹´13æœŸ å¯èƒ½æ˜¯é”™è¯¯çš„æ—¶é—´èŒƒå›´é€ æˆçš„
+            // å’Œä¸€å¹´12æœŸå¤„ç†åŠæ³•ä¸€æ ·
             else if (nIssueCount == 13)
             {
 
-                // 12ÔÂ·ÅÁ½ÆÚ
+                // 12æœˆæ”¾ä¸¤æœŸ
                 if (start.Month == 12)
                 {
-                    // 15ÌìÒÔºó
+                    // 15å¤©ä»¥å
                     start += new TimeSpan(15, 0, 0, 0);
                     return DateTimeUtil.DateTimeToString8(start);
                 }
 
-                // 1¸öÔÂÒÔºóµÄÍ¬ÈÕ
+                // 1ä¸ªæœˆä»¥åçš„åŒæ—¥
                 start = DateTimeUtil.NextMonth(start);
 
                 return DateTimeUtil.DateTimeToString8(start);
             }
 
 
-            // Ò»Äê24ÆÚ
+            // ä¸€å¹´24æœŸ
             else if (nIssueCount > 13 && nIssueCount <= 24)
             {
 #if NO
-                // 15ÌìÒÔºó
+                // 15å¤©ä»¥å
                 start += new TimeSpan(15, 0, 0, 0);
                 return DateTimeUtil.DateTimeToString8(start);
 #endif
                 nCount = 2;
             }
 
-            // Ò»Äê36ÆÚ
+            // ä¸€å¹´36æœŸ
             else if (nIssueCount > 24 && nIssueCount <= 36)
             {
-                // TODO: Èç¹ûÊÇ 36 ÆÚ£¬Ôò¾¡Á¿·Ö²¼ÔÚÃ¿ÔÂÒÔÄÚ 3 ÆÚ
-                // °ÑÒ»¸öÔÂ´ÖÂÔ»®·ÖÎª 30/3£¬¸ù¾İÂäÈëµÄ²¿·ÖÀ´²âËãÏÂÒ»¸öµÄÊ±¼ä
+                // TODO: å¦‚æœæ˜¯ 36 æœŸï¼Œåˆ™å°½é‡åˆ†å¸ƒåœ¨æ¯æœˆä»¥å†… 3 æœŸ
+                // æŠŠä¸€ä¸ªæœˆç²—ç•¥åˆ’åˆ†ä¸º 30/3ï¼Œæ ¹æ®è½å…¥çš„éƒ¨åˆ†æ¥æµ‹ç®—ä¸‹ä¸€ä¸ªçš„æ—¶é—´
                 nCount = 3;
 #if NO
-                // 10ÌìÒÔºó
+                // 10å¤©ä»¥å
                 now += new TimeSpan(10, 0, 0, 0);
                 return DateTimeUtil.DateTimeToString8(now);
 #endif
             }
 
-            // Ò»Äê48ÆÚ
+            // ä¸€å¹´48æœŸ
             else if (nIssueCount > 36 && nIssueCount <= 48)
             {
 #if NO
-                // 7ÌìÒÔºó
+                // 7å¤©ä»¥å
                 start += new TimeSpan(7, 0, 0, 0);
                 return DateTimeUtil.DateTimeToString8(start);
 #endif
                 nCount = 4;
             }
 
-            // Ò»Äê52ÆÚ
+            // ä¸€å¹´52æœŸ
             else if (nIssueCount > 48 && nIssueCount <= 52)
             {
-                // 7ÌìÒÔºó
+                // 7å¤©ä»¥å
                 start += new TimeSpan(7, 0, 0, 0);
                 return DateTimeUtil.DateTimeToString8(start);
             }
 
             // 2012/5/9
-            // Ò»Äê61ÆÚ
+            // ä¸€å¹´61æœŸ
             else if (nIssueCount > 52 && nIssueCount <= 61)
             {
-                // 6ÌìÒÔºó
+                // 6å¤©ä»¥å
                 start += new TimeSpan(6, 0, 0, 0);
                 return DateTimeUtil.DateTimeToString8(start);
             }
 
             // 2012/5/9
-            // Ò»Äê73ÆÚ
+            // ä¸€å¹´73æœŸ
             else if (nIssueCount > 61 && nIssueCount <= 73)
             {
-                // 5ÌìÒÔºó
+                // 5å¤©ä»¥å
                 start += new TimeSpan(5, 0, 0, 0);
                 return DateTimeUtil.DateTimeToString8(start);
             }
 
             // 2012/5/9
-            // Ò»Äê92ÆÚ
+            // ä¸€å¹´92æœŸ
             else if (nIssueCount > 73 && nIssueCount <= 92)
             {
-                // 4ÌìÒÔºó
+                // 4å¤©ä»¥å
                 start += new TimeSpan(4, 0, 0, 0);
                 return DateTimeUtil.DateTimeToString8(start);
             }
 
             // 2012/5/9
-            // Ò»Äê122ÆÚ
+            // ä¸€å¹´122æœŸ
             else if (nIssueCount > 92 && nIssueCount <= 122)
             {
-                // 3ÌìÒÔºó
+                // 3å¤©ä»¥å
                 start += new TimeSpan(3, 0, 0, 0);
                 return DateTimeUtil.DateTimeToString8(start);
             }
 
             // 2012/5/9
-            // Ò»Äê183ÆÚ
+            // ä¸€å¹´183æœŸ
             else if (nIssueCount > 122 && nIssueCount <= 183)
             {
-                // 2ÌìÒÔºó
+                // 2å¤©ä»¥å
                 start += new TimeSpan(2, 0, 0, 0);
                 return DateTimeUtil.DateTimeToString8(start);
             }
 
-            // Ò»Äê365ÆÚ
+            // ä¸€å¹´365æœŸ
             else if (nIssueCount > 183 && nIssueCount <= 365)
             {
-                // 1ÌìÒÔºó
+                // 1å¤©ä»¥å
                 start += new TimeSpan(1, 0, 0, 0);
                 return DateTimeUtil.DateTimeToString8(start);
             }
 
 #if NO
-            // Ò»Äê730ÆÚ
+            // ä¸€å¹´730æœŸ
             else if (nIssueCount > 365 && nIssueCount <= 730)
             {
-                // 12Ğ¡Ê±ÌìÒÔºó
+                // 12å°æ—¶å¤©ä»¥å
                 now += new TimeSpan(0, 12, 0, 0);
                 return DateTimeUtil.DateTimeToString8(now);
             }
 #endif
 
             if (nCount == 0)
-                return "????????";  // ÎŞ·¨´¦ÀíµÄÇéĞÎ
+                return "????????";  // æ— æ³•å¤„ç†çš„æƒ…å½¢
 
             List<PartOfMonth> parts = GetMonthParts(strPublishTime, nCount);
             int current_delta = 0;
@@ -8595,11 +8595,11 @@ issue.Volume);
             if (nPreferredDelta != -1)
                 nDelta = nPreferredDelta;
 
-            nPreferredDelta = current_delta;    // ·µ»Ø±¾´ÎµÄ
+            nPreferredDelta = current_delta;    // è¿”å›æœ¬æ¬¡çš„
 
             if (index >= nCount - 1)
             {
-                // ´¦ÔÚµ±ÔÂ×îºóÒ»¸ö²¿·ÖÁË¡£ĞèÒª·µ»ØÏÂÒ»¸öÔÂµÄµÚÒ»¸ö²¿·Ö
+                // å¤„åœ¨å½“æœˆæœ€åä¸€ä¸ªéƒ¨åˆ†äº†ã€‚éœ€è¦è¿”å›ä¸‹ä¸€ä¸ªæœˆçš„ç¬¬ä¸€ä¸ªéƒ¨åˆ†
                 List<PartOfMonth> next_parts = GetMonthParts(DateTimeUtil.NextMonth(start), nCount);
                 return AddDays(next_parts[0].StartDate, nDelta, next_parts[0].EndDate);
             }
@@ -8609,11 +8609,11 @@ issue.Volume);
 
         }
 
-        // »ñµÃÒ»ÄêÄÚµÄÆÚ×ÜÊı
+        // è·å¾—ä¸€å¹´å†…çš„æœŸæ€»æ•°
         // return:
-        //      -1  ³ö´í
-        //      0   ÎŞ·¨»ñµÃ
-        //      1   »ñµÃ
+        //      -1  å‡ºé”™
+        //      0   æ— æ³•è·å¾—
+        //      1   è·å¾—
         int GetOneYearIssueCount(string strPublishYear,
             out int nValue,
             out string strError)
@@ -8622,7 +8622,7 @@ issue.Volume);
             nValue = 0;
 
             if (this.GetOrderInfo == null)
-                return 0;   // ÎŞ·¨»ñµÃ
+                return 0;   // æ— æ³•è·å¾—
 
             GetOrderInfoEventArgs e1 = new GetOrderInfoEventArgs();
             e1.BiblioRecPath = "";
@@ -8631,7 +8631,7 @@ issue.Volume);
             this.GetOrderInfo(this, e1);
             if (String.IsNullOrEmpty(e1.ErrorInfo) == false)
             {
-                strError = "ÔÚ»ñÈ¡±¾ÖÖÄÚ³ö°æÈÕÆÚÎª '" + strPublishYear + "' µÄ¶©¹ºĞÅÏ¢µÄ¹ı³ÌÖĞ·¢Éú´íÎó: " + e1.ErrorInfo;
+                strError = "åœ¨è·å–æœ¬ç§å†…å‡ºç‰ˆæ—¥æœŸä¸º '" + strPublishYear + "' çš„è®¢è´­ä¿¡æ¯çš„è¿‡ç¨‹ä¸­å‘ç”Ÿé”™è¯¯: " + e1.ErrorInfo;
                 return -1;
             }
 
@@ -8649,7 +8649,7 @@ issue.Volume);
                 }
                 catch (Exception ex)
                 {
-                    strError = "XML×°ÈëDOMÊ±·¢Éú´íÎó: " + ex.Message;
+                    strError = "XMLè£…å…¥DOMæ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                     return -1;
                 }
 
@@ -8679,11 +8679,11 @@ issue.Volume);
             return 1;
         }
 
-        // »ñµÃµÚÒ»¸öÎ´¼Çµ½µÄ¶©¹º·¶Î§µÄÆğÊ¼Ê±¼ä
+        // è·å¾—ç¬¬ä¸€ä¸ªæœªè®°åˆ°çš„è®¢è´­èŒƒå›´çš„èµ·å§‹æ—¶é—´
         // return:
-        //      -1  ³ö´í
-        //      0   ÎŞ·¨»ñµÃ
-        //      1   »ñµÃ
+        //      -1  å‡ºé”™
+        //      0   æ— æ³•è·å¾—
+        //      1   è·å¾—
         int GetFirstUseablePublishTime(
             out string strPublishTime,
             out string strError)
@@ -8692,7 +8692,7 @@ issue.Volume);
             strError = "";
 
             if (this.GetOrderInfo == null)
-                return 0;   // ÎŞ·¨»ñµÃ
+                return 0;   // æ— æ³•è·å¾—
 
             GetOrderInfoEventArgs e1 = new GetOrderInfoEventArgs();
             e1.BiblioRecPath = "";
@@ -8701,7 +8701,7 @@ issue.Volume);
             this.GetOrderInfo(this, e1);
             if (String.IsNullOrEmpty(e1.ErrorInfo) == false)
             {
-                strError = "ÔÚ»ñÈ¡±¾ÖÖÄÚ³ö°æÈÕÆÚÎª '" + "*" + "' µÄ¶©¹ºĞÅÏ¢µÄ¹ı³ÌÖĞ·¢Éú´íÎó: " + e1.ErrorInfo;
+                strError = "åœ¨è·å–æœ¬ç§å†…å‡ºç‰ˆæ—¥æœŸä¸º '" + "*" + "' çš„è®¢è´­ä¿¡æ¯çš„è¿‡ç¨‹ä¸­å‘ç”Ÿé”™è¯¯: " + e1.ErrorInfo;
                 return -1;
             }
 
@@ -8720,15 +8720,15 @@ issue.Volume);
                 }
                 catch (Exception ex)
                 {
-                    strError = "XML×°ÈëDOMÊ±·¢Éú´íÎó: " + ex.Message;
+                    strError = "XMLè£…å…¥DOMæ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                     return -1;
                 }
 
                 string strState = DomUtil.GetElementText(dom.DocumentElement,
                     "state");
 
-                // ±íÊ¾ÒÑÈ«²¿ÑéÊÕ
-                if (StringUtil.IsInList("ÒÑÑéÊÕ", strState) == true)
+                // è¡¨ç¤ºå·²å…¨éƒ¨éªŒæ”¶
+                if (StringUtil.IsInList("å·²éªŒæ”¶", strState) == true)
                     continue;
 
                 string strRange = DomUtil.GetElementText(dom.DocumentElement,
@@ -8753,7 +8753,7 @@ issue.Volume);
                 int nRet = strRange.IndexOf("-");
                 if (nRet == -1)
                 {
-                    strError = "Ê±¼ä·¶Î§×Ö·û´® '"+strRange+"' ¸ñÊ½²»ÕıÈ·";
+                    strError = "æ—¶é—´èŒƒå›´å­—ç¬¦ä¸² '"+strRange+"' æ ¼å¼ä¸æ­£ç¡®";
                     return -1;
                 }
 
@@ -8763,7 +8763,7 @@ issue.Volume);
             if (timestrings.Count == 0)
                 return 0;
 
-            // ÅÅĞò£¬È¡µÃ×îĞ¡µÄÊ±¼äÖµ
+            // æ’åºï¼Œå–å¾—æœ€å°çš„æ—¶é—´å€¼
             timestrings.Sort();
             strPublishTime = timestrings[0];
 
@@ -8772,26 +8772,26 @@ issue.Volume);
 
         #endregion
 
-        // ³·Ïú¼Çµ½
+        // æ’¤é”€è®°åˆ°
         void menuItem_unacceptCells_Click(object sender, EventArgs e)
         {
             string strError = "";
             int nRet = 0;
 
-            // ´ÓÑ¡Ôñ·¶Î§ÖĞÌô³öÒÑ¾­¼Çµ½µÄ¸ñ×Ó¡£
-            // Èç¹ûÑ¡Ôñ·¶Î§ÖĞ°üº¬ÁËGroupCell left»òÕßGroupCellRight£¬Ôò±íÃ÷Ñ¡ÔñÁËÆäÏÂÊôµÄÈ«²¿¼Çµ½¸ñ×Ó¡£×¢Òâ²»ÒªÖØ¸´×¼±¸¸ñ×Ó¶ÔÏó
+            // ä»é€‰æ‹©èŒƒå›´ä¸­æŒ‘å‡ºå·²ç»è®°åˆ°çš„æ ¼å­ã€‚
+            // å¦‚æœé€‰æ‹©èŒƒå›´ä¸­åŒ…å«äº†GroupCell leftæˆ–è€…GroupCellRightï¼Œåˆ™è¡¨æ˜é€‰æ‹©äº†å…¶ä¸‹å±çš„å…¨éƒ¨è®°åˆ°æ ¼å­ã€‚æ³¨æ„ä¸è¦é‡å¤å‡†å¤‡æ ¼å­å¯¹è±¡
 
             List<Cell> selected_cells = this.SelectedCells;
             if (selected_cells.Count == 0)
             {
-                strError = "ÉĞÎ´Ñ¡¶¨Òª³·Ïú¼Çµ½µÄ²á";
+                strError = "å°šæœªé€‰å®šè¦æ’¤é”€è®°åˆ°çš„å†Œ";
                 goto ERROR1;
             }
 
             int nSkipCount = 0;
-            // Ô¤²â²á
+            // é¢„æµ‹å†Œ
             List<Cell> accepted_cells = new List<Cell>();
-            // ·ÖÑ¡
+            // åˆ†é€‰
             for (int i = 0; i < selected_cells.Count; i++)
             {
                 Cell cell = selected_cells[i];
@@ -8812,7 +8812,7 @@ issue.Volume);
                     for (int j = 0; j < temp.Count; j++)
                     {
                         Cell cell_temp = temp[j];
-                        // ±ÜÃâÖØ¸´¼ÓÈë
+                        // é¿å…é‡å¤åŠ å…¥
                         if (accepted_cells.IndexOf(cell_temp) == -1)
                             accepted_cells.Add(cell_temp);
                     }
@@ -8821,7 +8821,7 @@ issue.Volume);
 
                 if (cell.item != null && cell.item.OrderInfoPosition.X != -1)
                 {
-                    // ±ÜÃâÖØ¸´¼ÓÈë
+                    // é¿å…é‡å¤åŠ å…¥
                     if (accepted_cells.IndexOf(cell) == -1)
                         accepted_cells.Add(cell);
                     continue;
@@ -8832,52 +8832,52 @@ issue.Volume);
 
             if (accepted_cells.Count == 0)
             {
-                strError = "ËùÑ¡¶¨µÄ " + this.SelectedCells.Count.ToString() + " ¸ö¸ñ×ÓÖĞ£¬Ã»ÓĞ´¦ÓÚÒÑ¼Çµ½×´Ì¬µÄ¸ñ×Ó";
+                strError = "æ‰€é€‰å®šçš„ " + this.SelectedCells.Count.ToString() + " ä¸ªæ ¼å­ä¸­ï¼Œæ²¡æœ‰å¤„äºå·²è®°åˆ°çŠ¶æ€çš„æ ¼å­";
                 goto ERROR1;
             }
 
-            // Í³¼Æ³öÒªÉ¾³ıµÄ(·Ç±¾´ÎĞÂ´´½¨µÄ)²á¼ÇÂ¼
+            // ç»Ÿè®¡å‡ºè¦åˆ é™¤çš„(éæœ¬æ¬¡æ–°åˆ›å»ºçš„)å†Œè®°å½•
             int nOldRecordCount = 0;
             for (int i = 0; i < accepted_cells.Count; i++)
             {
                 Cell cell = accepted_cells[i];
                 Debug.Assert(cell != null, "");
 
-                // Í³¼Æ½«µ¼ÖÂÉ¾³ıµÄ·Ç±¾´Î´´½¨²á
+                // ç»Ÿè®¡å°†å¯¼è‡´åˆ é™¤çš„éæœ¬æ¬¡åˆ›å»ºå†Œ
                 if (cell.item.NewCreated == false
                     && cell.item.Deleted == false)
                 {
-                    // Òª¼ì²éÕâĞ©²áÀïÃæÊÇ·ñÓĞ½èÔÄĞÅÏ¢
+                    // è¦æ£€æŸ¥è¿™äº›å†Œé‡Œé¢æ˜¯å¦æœ‰å€Ÿé˜…ä¿¡æ¯
                     if (String.IsNullOrEmpty(cell.item.Borrower) == false)
                     {
-                        strError = "²á " +cell.item.RefID+ "(²áÌõÂëÎª'"+cell.item.Barcode+"') ÖĞ°üº¬ÓĞ½èÔÄĞÅÏ¢£¬²»ÄÜÉ¾³ı¡£²Ù×÷±»È¡Ïû";
+                        strError = "å†Œ " +cell.item.RefID+ "(å†Œæ¡ç ä¸º'"+cell.item.Barcode+"') ä¸­åŒ…å«æœ‰å€Ÿé˜…ä¿¡æ¯ï¼Œä¸èƒ½åˆ é™¤ã€‚æ“ä½œè¢«å–æ¶ˆ";
                         goto ERROR1;
                     }
                     nOldRecordCount++;
                 }
 
-                // ¼ì²éÊÇ·ñÎª³ÉÔ±²á
+                // æ£€æŸ¥æ˜¯å¦ä¸ºæˆå‘˜å†Œ
                 if (cell.IsMember == true)
                 {
-                    strError = "²á " + cell.item.RefID + " ÒÑ¾­±»ºÏ¶©£¬²»ÄÜ±»³·Ïú¼Çµ½¡£²Ù×÷±»È¡Ïû";
+                    strError = "å†Œ " + cell.item.RefID + " å·²ç»è¢«åˆè®¢ï¼Œä¸èƒ½è¢«æ’¤é”€è®°åˆ°ã€‚æ“ä½œè¢«å–æ¶ˆ";
                     goto ERROR1;
                 }
 
                 if (cell.item != null && cell.item.Locked == true)
                 {
-                    strError = "¶Ô´¦ÓÚËø¶¨×´Ì¬µÄ¸ñ×Ó²»ÄÜ½øĞĞ³·Ïú¼Çµ½²Ù×÷";
+                    strError = "å¯¹å¤„äºé”å®šçŠ¶æ€çš„æ ¼å­ä¸èƒ½è¿›è¡Œæ’¤é”€è®°åˆ°æ“ä½œ";
                     goto ERROR1;
                 }
             }
 
             string strMessage = "";
             if (nOldRecordCount > 0)
-                strMessage = "³·Ïú¼Çµ½µÄ²Ù×÷½«µ¼ÖÂÒÔÇ°´´½¨µÄ "+nOldRecordCount.ToString()+" ¸ö²á¼ÇÂ¼±»É¾³ı¡£\r\n\r\n";
+                strMessage = "æ’¤é”€è®°åˆ°çš„æ“ä½œå°†å¯¼è‡´ä»¥å‰åˆ›å»ºçš„ "+nOldRecordCount.ToString()+" ä¸ªå†Œè®°å½•è¢«åˆ é™¤ã€‚\r\n\r\n";
 
-            // ¾¯¸æ
+            // è­¦å‘Š
             DialogResult dialog_result = MessageBox.Show(this,
                 strMessage
-            + "È·ÊµÒª¶ÔËùÑ¡¶¨µÄ " + accepted_cells.Count.ToString() + " ¸ö¸ñ×Ó½øĞĞ³·Ïú¼Çµ½µÄ²Ù×÷?",
+            + "ç¡®å®è¦å¯¹æ‰€é€‰å®šçš„ " + accepted_cells.Count.ToString() + " ä¸ªæ ¼å­è¿›è¡Œæ’¤é”€è®°åˆ°çš„æ“ä½œ?",
 "BindingControls",
 MessageBoxButtons.YesNo,
 MessageBoxIcon.Question,
@@ -8892,7 +8892,7 @@ MessageBoxDefaultButton.Button2);
                 Debug.Assert(cell != null, "");
                 if (String.IsNullOrEmpty(cell.Container.PublishTime) == true)
                 {
-                    strError = "¶Ô´¦ÓÚ×ÔÓÉÆÚÖĞµÄ¸ñ×Ó²»ÄÜ½øĞĞ³·Ïú¼Çµ½²Ù×÷";
+                    strError = "å¯¹å¤„äºè‡ªç”±æœŸä¸­çš„æ ¼å­ä¸èƒ½è¿›è¡Œæ’¤é”€è®°åˆ°æ“ä½œ";
                     goto ERROR1;
                 }
             }
@@ -8906,12 +8906,12 @@ MessageBoxDefaultButton.Button2);
                     goto ERROR1;
             }
 
-            // ´Óµ¥Ôª¸ñ×Ó±ä»¯ÎªËù´ÓÊôµÄÆÚ¸ñ×Ó
+            // ä»å•å…ƒæ ¼å­å˜åŒ–ä¸ºæ‰€ä»å±çš„æœŸæ ¼å­
             List<IssueBindingItem> update_issues = GetIssueList(accepted_cells);
             this.UpdateIssues(update_issues);
             /*
 
-            // Ë¢ĞÂÆÚĞĞ
+            // åˆ·æ–°æœŸè¡Œ
             List<CellBase> update_cells = new List<CellBase>();
             for (int i = 0; i < update_issues.Count; i++)
             {
@@ -8920,7 +8920,7 @@ MessageBoxDefaultButton.Button2);
             this.UpdateObjects(update_cells);
              * */
 
-            // Ë¢ĞÂ±à¼­ÇøÓò
+            // åˆ·æ–°ç¼–è¾‘åŒºåŸŸ
             if (this.FocusObject != null && this.FocusObject is Cell)
             {
                 Cell focus_obejct = (Cell)this.FocusObject;
@@ -8940,29 +8940,29 @@ MessageBoxDefaultButton.Button2);
             MessageBox.Show(this, strError);
         }
 
-        // ¼Çµ½ -- µ½¡£¼´ÎªÔ¤²â¸ñ×Ó´´½¨ÕæÕıµÄ²á¼ÇÂ¼
-        // Îª<orderInfo>ÏÂµÄÌØ¶¨<root>ÄÚ<location>Éè¶¨refid£¬²¢ĞŞ¸Ä<copy>ÖĞµÄÒÑµ½Öµ²¿·Ö
-        // ÓÃ»§Èç¹ûÒªĞŞ¸Ä×Ö¶ÎÄÚÈİ£¬¿Éµ½²áĞÅÏ¢±à¼­Æ÷ÖĞ½øĞĞ¡£ÕâÀï¾Í²»ÔÙ³öÏÖ¶Ô»°¿òÁË¡£
-        // Åú´ÎºÅµÈ»á×Ô¶¯ÉèÖÃ
+        // è®°åˆ° -- åˆ°ã€‚å³ä¸ºé¢„æµ‹æ ¼å­åˆ›å»ºçœŸæ­£çš„å†Œè®°å½•
+        // ä¸º<orderInfo>ä¸‹çš„ç‰¹å®š<root>å†…<location>è®¾å®šrefidï¼Œå¹¶ä¿®æ”¹<copy>ä¸­çš„å·²åˆ°å€¼éƒ¨åˆ†
+        // ç”¨æˆ·å¦‚æœè¦ä¿®æ”¹å­—æ®µå†…å®¹ï¼Œå¯åˆ°å†Œä¿¡æ¯ç¼–è¾‘å™¨ä¸­è¿›è¡Œã€‚è¿™é‡Œå°±ä¸å†å‡ºç°å¯¹è¯æ¡†äº†ã€‚
+        // æ‰¹æ¬¡å·ç­‰ä¼šè‡ªåŠ¨è®¾ç½®
         void menuItem_AcceptCells_Click(object sender, EventArgs e)
         {
             string strError = "";
             int nRet = 0;
 
-            // ´ÓÑ¡Ôñ·¶Î§ÖĞÌô³öÔ¤²â¸ñ×Ó¡£
-            // Èç¹ûÑ¡Ôñ·¶Î§ÖĞ°üº¬ÁËGroupCell left»òÕßGroupCellRight£¬Ôò±íÃ÷Ñ¡ÔñÁËÆäÏÂÊôµÄÈ«²¿Ô¤²â¸ñ×Ó¡£×¢Òâ²»ÒªÖØ¸´×¼±¸¸ñ×Ó¶ÔÏó
+            // ä»é€‰æ‹©èŒƒå›´ä¸­æŒ‘å‡ºé¢„æµ‹æ ¼å­ã€‚
+            // å¦‚æœé€‰æ‹©èŒƒå›´ä¸­åŒ…å«äº†GroupCell leftæˆ–è€…GroupCellRightï¼Œåˆ™è¡¨æ˜é€‰æ‹©äº†å…¶ä¸‹å±çš„å…¨éƒ¨é¢„æµ‹æ ¼å­ã€‚æ³¨æ„ä¸è¦é‡å¤å‡†å¤‡æ ¼å­å¯¹è±¡
 
             List<Cell> selected_cells = this.SelectedCells;
             if (selected_cells.Count == 0)
             {
-                strError = "ÉĞÎ´Ñ¡¶¨Òª¼Çµ½µÄ²á";
+                strError = "å°šæœªé€‰å®šè¦è®°åˆ°çš„å†Œ";
                 goto ERROR1;
             }
 
             int nSkipCount = 0;
-            // Ô¤²â²á
+            // é¢„æµ‹å†Œ
             List<Cell> calculated_cells = new List<Cell>();
-            // ·ÖÑ¡
+            // åˆ†é€‰
             for (int i = 0; i < selected_cells.Count; i++)
             {
                 Cell cell = selected_cells[i];
@@ -8983,7 +8983,7 @@ MessageBoxDefaultButton.Button2);
                     for (int j = 0; j < member_cells.Count; j++)
                     {
                         Cell cell_temp = member_cells[j];
-                        // ±ÜÃâÖØ¸´¼ÓÈë
+                        // é¿å…é‡å¤åŠ å…¥
                         if (calculated_cells.IndexOf(cell_temp) == -1)
                             calculated_cells.Add(cell_temp);
                     }
@@ -8992,7 +8992,7 @@ MessageBoxDefaultButton.Button2);
 
                 if (cell.item != null && cell.item.Calculated == true)
                 {
-                    // ±ÜÃâÖØ¸´¼ÓÈë
+                    // é¿å…é‡å¤åŠ å…¥
                     if (calculated_cells.IndexOf(cell) == -1)
                         calculated_cells.Add(cell);
                     continue;
@@ -9003,7 +9003,7 @@ MessageBoxDefaultButton.Button2);
 
             if (calculated_cells.Count == 0)
             {
-                strError = "ËùÑ¡¶¨µÄ " + this.SelectedCells.Count.ToString()+ " ¸ö¸ñ×ÓÖĞ£¬Ã»ÓĞ´¦ÓÚÔ¤²â×´Ì¬µÄ¸ñ×Ó";
+                strError = "æ‰€é€‰å®šçš„ " + this.SelectedCells.Count.ToString()+ " ä¸ªæ ¼å­ä¸­ï¼Œæ²¡æœ‰å¤„äºé¢„æµ‹çŠ¶æ€çš„æ ¼å­";
                 goto ERROR1;
             }
 
@@ -9014,13 +9014,13 @@ MessageBoxDefaultButton.Button2);
 
                 if (String.IsNullOrEmpty(cell.Container.PublishTime) == true)
                 {
-                    strError = "¶Ô´¦ÓÚ×ÔÓÉÆÚÖĞµÄ¸ñ×Ó²»ÄÜ½øĞĞ¼Çµ½²Ù×÷";
+                    strError = "å¯¹å¤„äºè‡ªç”±æœŸä¸­çš„æ ¼å­ä¸èƒ½è¿›è¡Œè®°åˆ°æ“ä½œ";
                     goto ERROR1;
                 }
 
                 if (cell.item != null && cell.item.Locked == true)
                 {
-                    strError = "¶Ô´¦ÓÚËø¶¨×´Ì¬µÄ¸ñ×Ó²»ÄÜ½øĞĞ¼Çµ½²Ù×÷";
+                    strError = "å¯¹å¤„äºé”å®šçŠ¶æ€çš„æ ¼å­ä¸èƒ½è¿›è¡Œè®°åˆ°æ“ä½œ";
                     goto ERROR1;
                 }
             }
@@ -9034,12 +9034,12 @@ MessageBoxDefaultButton.Button2);
                     goto ERROR1;
             }
 
-            // ´Óµ¥Ôª¸ñ×Ó±ä»¯ÎªËù´ÓÊôµÄÆÚ¸ñ×Ó
+            // ä»å•å…ƒæ ¼å­å˜åŒ–ä¸ºæ‰€ä»å±çš„æœŸæ ¼å­
             List<IssueBindingItem> update_issues = GetIssueList(calculated_cells);
             this.UpdateIssues(update_issues);
             /*
 
-            // Ë¢ĞÂÆÚĞĞ
+            // åˆ·æ–°æœŸè¡Œ
             List<CellBase> update_cells = new List<CellBase>();
             for (int i = 0; i < update_issues.Count; i++)
             {
@@ -9048,7 +9048,7 @@ MessageBoxDefaultButton.Button2);
             this.UpdateObjects(update_cells);
              * */
 
-            // Ë¢ĞÂ±à¼­ÇøÓò
+            // åˆ·æ–°ç¼–è¾‘åŒºåŸŸ
             if (this.FocusObject != null && this.FocusObject is Cell)
             {
                 Cell focus_obejct = (Cell)this.FocusObject;
@@ -9068,10 +9068,10 @@ MessageBoxDefaultButton.Button2);
             MessageBox.Show(this, strError);
         }
 
-        // »ñµÃÆÚ¿¯Ãû³ÆµÄÁĞ±í¡£ÓÃÓÚÏÔÊ¾ÔÚ¶Ô»°¿òÉÏ
+        // è·å¾—æœŸåˆŠåç§°çš„åˆ—è¡¨ã€‚ç”¨äºæ˜¾ç¤ºåœ¨å¯¹è¯æ¡†ä¸Š
         // parameters:
-        //      strDelimiter    ·Ö¸ô·ûºÅ
-        //      nMaxCount   ×î¶àÁĞ³ö¶àÉÙ¸ö
+        //      strDelimiter    åˆ†éš”ç¬¦å·
+        //      nMaxCount   æœ€å¤šåˆ—å‡ºå¤šå°‘ä¸ª
         static string GetIssuesCaption(List<IssueBindingItem> issues,
             string strDelimiter,
             int nMaxCount)
@@ -9089,20 +9089,20 @@ MessageBoxDefaultButton.Button2);
             return strCaptions;
         }
 
-        // »Ö¸´Èô¸É¸öÆÚ¼ÇÂ¼
+        // æ¢å¤è‹¥å¹²ä¸ªæœŸè®°å½•
         void menuItem_recoverIssues_Click(object sender, EventArgs e)
         {
             string strError = "";
 
-            // ÒÑ¾­ÊÇÊµÔÚ×´Ì¬µÄÆÚ
+            // å·²ç»æ˜¯å®åœ¨çŠ¶æ€çš„æœŸ
             List<IssueBindingItem> normal_issues = new List<IssueBindingItem>();
-            // ·ûºÏ»Ö¸´Ìõ¼şµÄÆÚ
+            // ç¬¦åˆæ¢å¤æ¡ä»¶çš„æœŸ
             List<IssueBindingItem> selected_issues = new List<IssueBindingItem>();
             for (int i = 0; i < this.SelectedIssues.Count; i++)
             {
                 IssueBindingItem issue = this.SelectedIssues[i];
 
-                // Ìø¹ı×ÔÓÉÆÚ
+                // è·³è¿‡è‡ªç”±æœŸ
                 if (String.IsNullOrEmpty(issue.PublishTime) == true)
                     continue;
 
@@ -9118,7 +9118,7 @@ MessageBoxDefaultButton.Button2);
             if (normal_issues.Count == 0
                 && selected_issues.Count == 0)
             {
-                strError = "ÉĞÎ´Ñ¡ÔñÒª»Ö¸´µÄÆÚ¶ÔÏó";
+                strError = "å°šæœªé€‰æ‹©è¦æ¢å¤çš„æœŸå¯¹è±¡";
                 goto ERROR1;
             }
 
@@ -9127,7 +9127,7 @@ MessageBoxDefaultButton.Button2);
             {
                 strNormalIssueList = GetIssuesCaption(normal_issues,
                     "\r\n", 10);
-                strError = "²»ÄÜ»Ö¸´ÒÔÏÂ±¾À´¾Í¼ÇÂ¼µÄÆÚ:\r\n" + strNormalIssueList + "\r\n\r\n";
+                strError = "ä¸èƒ½æ¢å¤ä»¥ä¸‹æœ¬æ¥å°±è®°å½•çš„æœŸ:\r\n" + strNormalIssueList + "\r\n\r\n";
                 if (selected_issues.Count == 0)
                 {
                     goto ERROR1;
@@ -9139,9 +9139,9 @@ MessageBoxDefaultButton.Button2);
 
             string strMessage = strError;
             if (String.IsNullOrEmpty(strMessage) == false)
-                strMessage += "---\r\nÊÇ·ñÒª¼ÌĞø»Ö¸´ÆäÓàµÄÏÂÁĞÆÚµÄÊı¾İ¿â¼ÇÂ¼?\r\n " + strCaptions;
+                strMessage += "---\r\næ˜¯å¦è¦ç»§ç»­æ¢å¤å…¶ä½™çš„ä¸‹åˆ—æœŸçš„æ•°æ®åº“è®°å½•?\r\n " + strCaptions;
             else
-                strMessage += "È·ÊµÒª»Ö¸´ÏÂÁĞÆÚµÄÊı¾İ¿â¼ÇÂ¼?\r\n " + strCaptions;
+                strMessage += "ç¡®å®è¦æ¢å¤ä¸‹åˆ—æœŸçš„æ•°æ®åº“è®°å½•?\r\n " + strCaptions;
 
             // 
             DialogResult dialog_result = MessageBox.Show(this,
@@ -9161,7 +9161,7 @@ MessageBoxDefaultButton.Button2);
                     issue.RefID = Guid.NewGuid().ToString();
                 issue.Changed = true;
                 issue.NewCreated = true;
-                issue.AfterMembersChanged();    // Ë¢ĞÂIssue¶ÔÏóÄÚµÄXML
+                issue.AfterMembersChanged();    // åˆ·æ–°Issueå¯¹è±¡å†…çš„XML
                 this.m_bChanged = true;
             }
 
@@ -9172,7 +9172,7 @@ MessageBoxDefaultButton.Button2);
             MessageBox.Show(this, strError);
         }
 
-        // É¾³ıÈô¸É¸öÆÚ
+        // åˆ é™¤è‹¥å¹²ä¸ªæœŸ
         void menuItem_deleteIssues_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -9186,7 +9186,7 @@ MessageBoxDefaultButton.Button2);
 
             // Debug.WriteLine("hover=" + p.ToString());
 
-            // ÆÁÄ»×ø±ê
+            // å±å¹•åæ ‡
             this.HitTest(
                 p.X,
                 p.Y,
@@ -9194,7 +9194,7 @@ MessageBoxDefaultButton.Button2);
                 out result);
             if (result == null || !(result.Object is IssueBindingItem))
             {
-                strError = "Êó±êÎ´´¦ÓÚÊÊµ±µÄÎ»ÖÃ";
+                strError = "é¼ æ ‡æœªå¤„äºé€‚å½“çš„ä½ç½®";
                 goto ERROR1;
             }
 
@@ -9203,15 +9203,15 @@ MessageBoxDefaultButton.Button2);
             Debug.Assert(issue != null, "");
              * */
             List<string> messages = new List<string>();
-            // ·Ç¿ÕµÄÆÚ
+            // éç©ºçš„æœŸ
             List<IssueBindingItem> cantdelete_issues = new List<IssueBindingItem>();
-            // ·ûºÏÉ¾³ıÌõ¼şµÄÆÚ
+            // ç¬¦åˆåˆ é™¤æ¡ä»¶çš„æœŸ
             List<IssueBindingItem> selected_issues = new List<IssueBindingItem>();
             for (int i = 0; i < this.SelectedIssues.Count; i++)
             {
                 IssueBindingItem issue = this.SelectedIssues[i];
 
-                // Ìø¹ı×ÔÓÉÆÚ
+                // è·³è¿‡è‡ªç”±æœŸ
                 if (String.IsNullOrEmpty(issue.PublishTime) == true)
                     continue;
 
@@ -9229,7 +9229,7 @@ MessageBoxDefaultButton.Button2);
             if (cantdelete_issues.Count == 0
                 && selected_issues.Count == 0)
             {
-                strError = "ÉĞÎ´Ñ¡ÔñÒªÉ¾³ıµÄÆÚ¶ÔÏó";
+                strError = "å°šæœªé€‰æ‹©è¦åˆ é™¤çš„æœŸå¯¹è±¡";
                 goto ERROR1;
             }
 
@@ -9239,7 +9239,7 @@ MessageBoxDefaultButton.Button2);
             {
                 strNoneBlankList = GetIssuesCaption(noneblank_issues,
                     "\r\n", 10);
-                strError = "²»ÄÜÉ¾³ıÒÔÏÂ»¹º¬ÓĞ²áµÄÆÚ:\r\n" + strNoneBlankList + "\r\n\r\n";
+                strError = "ä¸èƒ½åˆ é™¤ä»¥ä¸‹è¿˜å«æœ‰å†Œçš„æœŸ:\r\n" + strNoneBlankList + "\r\n\r\n";
                 if (selected_issues.Count == 0)
                 {
                     goto ERROR1;
@@ -9259,7 +9259,7 @@ MessageBoxDefaultButton.Button2);
                     }
                 }
 
-                strError = "²»ÄÜÉ¾³ıÒÔÏÂÆÚ:\r\n" + strCantDeleteList + "\r\n\r\n";
+                strError = "ä¸èƒ½åˆ é™¤ä»¥ä¸‹æœŸ:\r\n" + strCantDeleteList + "\r\n\r\n";
                 if (selected_issues.Count == 0)
                 {
                     goto ERROR1;
@@ -9271,9 +9271,9 @@ MessageBoxDefaultButton.Button2);
 
             string strMessage = strError;
             if (String.IsNullOrEmpty(strMessage) == false)
-                strMessage += "---\r\nÊÇ·ñÒª¼ÌĞøÉ¾³ıÆäÓàµÄÏÂÁĞÆÚ?\r\n " + strCaptions;
+                strMessage += "---\r\næ˜¯å¦è¦ç»§ç»­åˆ é™¤å…¶ä½™çš„ä¸‹åˆ—æœŸ?\r\n " + strCaptions;
             else
-                strMessage += "È·ÊµÒªÉ¾³ıÏÂÁĞÆÚ?\r\n " + strCaptions;
+                strMessage += "ç¡®å®è¦åˆ é™¤ä¸‹åˆ—æœŸ?\r\n " + strCaptions;
 
             // 
             DialogResult dialog_result = MessageBox.Show(this,
@@ -9292,7 +9292,7 @@ MessageBoxDefaultButton.Button2);
                 if (this.FocusObject == issue)
                     this.FocusObject = null;
 
-                this.m_aSelectedArea.Remove(issue); // ·ÀÖ¹È¡ÏûÑ¡ÔñÊ±Å×³öÒì³£
+                this.m_aSelectedArea.Remove(issue); // é˜²æ­¢å–æ¶ˆé€‰æ‹©æ—¶æŠ›å‡ºå¼‚å¸¸
 
                 this.Issues.Remove(issue);
                 this.m_bChanged = true;
@@ -9305,7 +9305,7 @@ MessageBoxDefaultButton.Button2);
             MessageBox.Show(this, strError);
         }
 
-        // ´ò¿ª/¹Ø±Õ ±à¼­ÇøÓò
+        // æ‰“å¼€/å…³é—­ ç¼–è¾‘åŒºåŸŸ
         void menuItem_toggleEditArea_Click(object sender, EventArgs e)
         {
             if (this.EditArea == null)
@@ -9332,13 +9332,13 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
-        // ½«Ñ¡ÔñµÄºÏ¶©²áÏò×óÒÆ¶¯Ò»¸öË«¸ñ
+        // å°†é€‰æ‹©çš„åˆè®¢å†Œå‘å·¦ç§»åŠ¨ä¸€ä¸ªåŒæ ¼
         void menuItem_moveToLeft_Click(object sender, EventArgs e)
         {
             string strError = "";
             // string strWarning = "";
 
-            // ºÏ¶©²áÊı×é
+            // åˆè®¢å†Œæ•°ç»„
             List<Cell> parent_cells = new List<Cell>();
 
             List<Cell> selected_cells = this.SelectedCells;
@@ -9347,14 +9347,14 @@ MessageBoxDefaultButton.Button2);
                 Cell cell = selected_cells[i];
                 if (IsBindingParent(cell) == true)
                 {
-                    // ×¢£ºcell.item.MemberCells.Count ÓĞ¿ÉÄÜµÈÓÚ0
+                    // æ³¨ï¼šcell.item.MemberCells.Count æœ‰å¯èƒ½ç­‰äº0
                     parent_cells.Add(cell);
                 }
             }
 
             if (parent_cells.Count == 0)
             {
-                strError = "ËùÑ¡¶¨µÄµ¥ÔªÖĞ£¬Ã»ÓĞºÏ¶©²á";
+                strError = "æ‰€é€‰å®šçš„å•å…ƒä¸­ï¼Œæ²¡æœ‰åˆè®¢å†Œ";
                 goto ERROR1;
             }
 
@@ -9388,7 +9388,7 @@ MessageBoxDefaultButton.Button2);
             MessageBox.Show(this, strError);
         }
 
-        // ´ÓºÏ¶©±¾ÖĞÒÆ³ö³ÉÔ±²á£¬²¢(Èç¹û±ØÒª)ËõĞ¡ºÏ¶©·¶Î§
+        // ä»åˆè®¢æœ¬ä¸­ç§»å‡ºæˆå‘˜å†Œï¼Œå¹¶(å¦‚æœå¿…è¦)ç¼©å°åˆè®¢èŒƒå›´
         void menuItem_removeFromBindingAndShrink_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -9396,14 +9396,14 @@ MessageBoxDefaultButton.Button2);
 
             if (this.SelectedCells.Count == 0)
             {
-                strError = "ÉĞÎ´Ñ¡¶¨ÒªÒÆ³öµÄºÏ¶©³ÉÔ±²á";
+                strError = "å°šæœªé€‰å®šè¦ç§»å‡ºçš„åˆè®¢æˆå‘˜å†Œ";
                 goto ERROR1;
             }
 
             List<Cell> source_cells = new List<Cell>();
 
             source_cells.AddRange(this.SelectedCells);
-            // ½«ºÏ¶©³ÉÔ±²á´ÓºÏ¶©²áÖĞÒÆ³ö£¬³ÉÎªµ¥²á
+            // å°†åˆè®¢æˆå‘˜å†Œä»åˆè®¢å†Œä¸­ç§»å‡ºï¼Œæˆä¸ºå•å†Œ
             nRet = RemoveFromBinding(
                 true,   // shrink
                 false,
@@ -9417,7 +9417,7 @@ MessageBoxDefaultButton.Button2);
             MessageBox.Show(this, strError);
         }
 
-        // ´ÓºÏ¶©±¾ÖĞÒÆ³ö³ÉÔ±²á£¬²»ËõĞ¡ºÏ¶©·¶Î§
+        // ä»åˆè®¢æœ¬ä¸­ç§»å‡ºæˆå‘˜å†Œï¼Œä¸ç¼©å°åˆè®¢èŒƒå›´
         void menuItem_removeFromBinding_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -9425,14 +9425,14 @@ MessageBoxDefaultButton.Button2);
 
             if (this.SelectedCells.Count == 0)
             {
-                strError = "ÉĞÎ´Ñ¡¶¨ÒªÒÆ³öµÄºÏ¶©³ÉÔ±²á";
+                strError = "å°šæœªé€‰å®šè¦ç§»å‡ºçš„åˆè®¢æˆå‘˜å†Œ";
                 goto ERROR1;
             }
 
             List<Cell> source_cells = new List<Cell>();
 
             source_cells.AddRange(this.SelectedCells);
-            // ½«ºÏ¶©³ÉÔ±²á´ÓºÏ¶©²áÖĞÒÆ³ö£¬³ÉÎªµ¥²á
+            // å°†åˆè®¢æˆå‘˜å†Œä»åˆè®¢å†Œä¸­ç§»å‡ºï¼Œæˆä¸ºå•å†Œ
             nRet = RemoveFromBinding(
                 false,  // shrink
                 false,
@@ -9446,7 +9446,7 @@ MessageBoxDefaultButton.Button2);
             MessageBox.Show(this, strError);
         }
 
-        // ÉèÎª¿Õ°×
+        // è®¾ä¸ºç©ºç™½
         void menuItem_setBlank_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -9460,7 +9460,7 @@ MessageBoxDefaultButton.Button2);
 
             // Debug.WriteLine("hover=" + p.ToString());
 
-            // ÆÁÄ»×ø±ê
+            // å±å¹•åæ ‡
             this.HitTest(
                 p.X,
                 p.Y,
@@ -9468,7 +9468,7 @@ MessageBoxDefaultButton.Button2);
                 out result);
             if (result == null || !(result.Object is NullCell))
             {
-                strError = "Êó±êÎ´´¦ÓÚÊÊµ±µÄÎ»ÖÃ";
+                strError = "é¼ æ ‡æœªå¤„äºé€‚å½“çš„ä½ç½®";
                 goto ERROR1;
             }
 
@@ -9477,7 +9477,7 @@ MessageBoxDefaultButton.Button2);
             IssueBindingItem issue = this.Issues[null_cell.Y];
             Debug.Assert(issue != null, "");
 
-            // TODO: Èç¹ûÔÚÒÑ¾­×°¶©µÄ·¶Î§ÄÚ£¿ÊÇ·ñÒª°ÑbindedÉèÖÃÎªtrue
+            // TODO: å¦‚æœåœ¨å·²ç»è£…è®¢çš„èŒƒå›´å†…ï¼Ÿæ˜¯å¦è¦æŠŠbindedè®¾ç½®ä¸ºtrue
 
             Cell cell = new Cell();
             cell.item = null;
@@ -9489,21 +9489,21 @@ MessageBoxDefaultButton.Button2);
             cell.Select(SelectAction.On);
             this.FocusObject = cell;
 
-            // ÓĞ¿ÉÄÜĞÂ´´½¨µÄ¿Õ°×¸ñ×Ó³¬¹ıÁËÓÒ²à±ß½ç
+            // æœ‰å¯èƒ½æ–°åˆ›å»ºçš„ç©ºç™½æ ¼å­è¶…è¿‡äº†å³ä¾§è¾¹ç•Œ
             if (null_cell.X >= this.m_nMaxItemCountOfOneIssue)
                 this.AfterWidthChanged(true);
 
-            this.EnsureVisible(cell);  // È·±£¹öÈëÊÓÒ°
+            this.EnsureVisible(cell);  // ç¡®ä¿æ»šå…¥è§†é‡
 
             return;
         ERROR1:
             MessageBox.Show(this, strError);
         }
 
-        // É¾³ıËùÑ¡ÔñµÄ ¸ñ×Ó
+        // åˆ é™¤æ‰€é€‰æ‹©çš„ æ ¼å­
         void menuItem_deleteCells_Click(object sender, EventArgs e)
         {
-            // TODO: ¼ÇµÃ×îºó´ÓÑ¡Ôñ·¶Î§ÖĞÒÆ×ß this.m_aSelectedArea.Remove(deleted_cell); // ·ÀÖ¹È¡ÏûÑ¡ÔñÊ±Å×³öÒì³£
+            // TODO: è®°å¾—æœ€åä»é€‰æ‹©èŒƒå›´ä¸­ç§»èµ° this.m_aSelectedArea.Remove(deleted_cell); // é˜²æ­¢å–æ¶ˆé€‰æ‹©æ—¶æŠ›å‡ºå¼‚å¸¸
 
             string strError = "";
             string strWarning = "";
@@ -9512,23 +9512,23 @@ MessageBoxDefaultButton.Button2);
             List<Cell> selected_cells = this.SelectedCells;
             if (selected_cells.Count == 0)
             {
-                strError = "ÉĞÎ´Ñ¡¶¨ÒªÉ¾³ıµÄ¸ñ×Ó";
+                strError = "å°šæœªé€‰å®šè¦åˆ é™¤çš„æ ¼å­";
                 goto ERROR1;
             }
 
-            // µ¥²á
+            // å•å†Œ
             List<Cell> mono_cells = new List<Cell>();
 
-            // ÒÑ¾­²ÎÓë×°¶©µÄ²á
+            // å·²ç»å‚ä¸è£…è®¢çš„å†Œ
             List<Cell> member_cells = new List<Cell>();
 
-            // ºÏ¶©²á
+            // åˆè®¢å†Œ
             List<Cell> parent_cells = new List<Cell>();
 
-            // ¿Õ°×Cell
+            // ç©ºç™½Cell
             List<Cell> blank_cells = new List<Cell>();
 
-            // ·ÖÑ¡
+            // åˆ†é€‰
             for (int i = 0; i < selected_cells.Count; i++)
             {
                 Cell cell = selected_cells[i];
@@ -9541,7 +9541,7 @@ MessageBoxDefaultButton.Button2);
                 }
                 else if (cell.IsMember == true)
                 {
-                    // ×¢£ºcell.item¿ÉÄÜÎª¿Õ
+                    // æ³¨ï¼šcell.itemå¯èƒ½ä¸ºç©º
                     member_cells.Add(cell);
                 }
                 else
@@ -9549,27 +9549,27 @@ MessageBoxDefaultButton.Button2);
 
                 /*
                 blank_cells.Add(cell);
-                    // TODO: ¿Õ°×¸ñ×ÓÈçºÎ´¦Àí?
+                    // TODO: ç©ºç™½æ ¼å­å¦‚ä½•å¤„ç†?
                  * */
             }
 
             /*
-            // ¾¯¸æ£¬ºÏ¶©³ÉÔ±²áÒ²»á±»É¾³ı
-            // TODO: Òª¼ì²éºÏ¶©²áºÍËùÓĞÏÂÊô²á£¬¶¼Ã»ÓĞ½è»¹ĞÅÏ¢£¬·ûºÏÉ¾³ıÌõ¼ş
+            // è­¦å‘Šï¼Œåˆè®¢æˆå‘˜å†Œä¹Ÿä¼šè¢«åˆ é™¤
+            // TODO: è¦æ£€æŸ¥åˆè®¢å†Œå’Œæ‰€æœ‰ä¸‹å±å†Œï¼Œéƒ½æ²¡æœ‰å€Ÿè¿˜ä¿¡æ¯ï¼Œç¬¦åˆåˆ é™¤æ¡ä»¶
             if (binded_items.Count > 0)
             {
-                strError = "ÓĞ " + binded_items.Count.ToString() + " ¸öÊÂÏîÊÇÒÑ¾­±»ºÏ¶©µÄ²á£¬Òò´ËÎŞ·¨½øĞĞºÏ¶©";
+                strError = "æœ‰ " + binded_items.Count.ToString() + " ä¸ªäº‹é¡¹æ˜¯å·²ç»è¢«åˆè®¢çš„å†Œï¼Œå› æ­¤æ— æ³•è¿›è¡Œåˆè®¢";
                 goto ERROR1;
             }
 
             if (mono_items.Count == 0)
             {
-                strError = "ËùÑ¡¶¨µÄ¸ñ×ÓÖĞÃ»ÓĞ°üº¬ÈÎºÎ²á";
+                strError = "æ‰€é€‰å®šçš„æ ¼å­ä¸­æ²¡æœ‰åŒ…å«ä»»ä½•å†Œ";
                 goto ERROR1;
             }
              * */
 
-            // ¼ì²é¹Ì»¯²á
+            // æ£€æŸ¥å›ºåŒ–å†Œ
             strWarning = "";
             int nFixedCount = 0;
             int nOldCount = parent_cells.Count;
@@ -9589,24 +9589,24 @@ MessageBoxDefaultButton.Button2);
 
                 if (parent_cell.item.Locked == true)
                 {
-                    strError = "´¦ÓÚËø¶¨×´Ì¬µÄºÏ¶©²á²»ÄÜÉ¾³ı";
+                    strError = "å¤„äºé”å®šçŠ¶æ€çš„åˆè®¢å†Œä¸èƒ½åˆ é™¤";
                     goto ERROR1;
                 }
             }
 
             bool bAsked = false;
 
-            // ¾¯¸æ¹Ì»¯²á
+            // è­¦å‘Šå›ºåŒ–å†Œ
             if (String.IsNullOrEmpty(strWarning) == false)
             {
                 strError =
-                    "ËùÑ¡¶¨µÄ " + nOldCount.ToString() + " ¸öºÏ¶©²áÖĞ£¬ÓĞÏÂÁĞ²á´¦ÓÚ¹Ì»¯×´Ì¬£¬²»ÄÜÉ¾³ı:\r\n\r\n" + strWarning;
+                    "æ‰€é€‰å®šçš„ " + nOldCount.ToString() + " ä¸ªåˆè®¢å†Œä¸­ï¼Œæœ‰ä¸‹åˆ—å†Œå¤„äºå›ºåŒ–çŠ¶æ€ï¼Œä¸èƒ½åˆ é™¤:\r\n\r\n" + strWarning;
 
                 if (parent_cells.Count > 0)
                 {
-                    strError += "\r\n\r\nÊÇ·ñÒª¼ÌĞøÉ¾³ıËùÑ¡·¶Î§ÄÚµÄÆäÓà "
+                    strError += "\r\n\r\næ˜¯å¦è¦ç»§ç»­åˆ é™¤æ‰€é€‰èŒƒå›´å†…çš„å…¶ä½™ "
                         + (parent_cells.Count).ToString()
-                        + " ¸öºÏ¶©²á?";
+                        + " ä¸ªåˆè®¢å†Œ?";
                     DialogResult result = MessageBox.Show(this,
                         strError,
                         "BindingControls",
@@ -9621,7 +9621,7 @@ MessageBoxDefaultButton.Button2);
                     goto ERROR1;
             }
 
-            // ¼ì²éºÏ¶©²áµÄ³ÉÔ±²á
+            // æ£€æŸ¥åˆè®¢å†Œçš„æˆå‘˜å†Œ
             strWarning = "";
             int nErrorCount = 0;
             for (int i = 0; i < parent_cells.Count; i++)
@@ -9636,36 +9636,36 @@ MessageBoxDefaultButton.Button2);
                         continue;
 
                     if (CheckProcessingState(cell.item) == false
-    && cell.item.Calculated == false   // Ô¤²â¸ñ×Ó³ıÍâ
-    && cell.item.Deleted == false)  // ÒÑ¾­É¾³ıµÄ¸ñ×Ó³ıÍâ
+    && cell.item.Calculated == false   // é¢„æµ‹æ ¼å­é™¤å¤–
+    && cell.item.Deleted == false)  // å·²ç»åˆ é™¤çš„æ ¼å­é™¤å¤–
                     {
-                        // ²»ÊÇ"¼Ó¹¤ÖĞ"×´Ì¬
+                        // ä¸æ˜¯"åŠ å·¥ä¸­"çŠ¶æ€
                         if (String.IsNullOrEmpty(strWarning) == false)
                             strWarning += ";\r\n";
-                        strWarning += "²á '" + cell.item.RefID + "' ²»ÊÇ¡°¼Ó¹¤ÖĞ¡±×´Ì¬";
+                        strWarning += "å†Œ '" + cell.item.RefID + "' ä¸æ˜¯â€œåŠ å·¥ä¸­â€çŠ¶æ€";
                         nErrorCount++;
                     }
                     else if (String.IsNullOrEmpty(cell.item.Borrower) == false)
                     {
-                        // ÒÑ½è³ö×´Ì¬
+                        // å·²å€Ÿå‡ºçŠ¶æ€
                         if (String.IsNullOrEmpty(strWarning) == false)
                             strWarning += ";\r\n";
-                        strWarning += "²á '" + cell.item.RefID + "' ÉĞ´¦ÓÚ¡°ÒÑ½è³ö¡±×´Ì¬";
+                        strWarning += "å†Œ '" + cell.item.RefID + "' å°šå¤„äºâ€œå·²å€Ÿå‡ºâ€çŠ¶æ€";
                         nErrorCount++;
                     }
                 }
             }
-            // ¾¯¸æÓĞ²»ÒËÉ¾³ıµÄ³ÉÔ±²á µÄ ºÏ¶©²á
+            // è­¦å‘Šæœ‰ä¸å®œåˆ é™¤çš„æˆå‘˜å†Œ çš„ åˆè®¢å†Œ
             if (String.IsNullOrEmpty(strWarning) == false)
             {
                 strError =
-                    "ËùÑ¡¶¨µÄ " + parent_cells.Count.ToString() + " ¸öºÏ¶©²áÖĞ£¬ÒòÓĞÏÂÁĞ³ÉÔ±²á²»ÄÜÉ¾³ı:\r\n\r\n" + strWarning;
-                strError += "\r\n\r\nÒò´ËºÏ¶©²á±¾ÉíÒ²Á¬´ø×Å²»ÄÜ±»É¾³ı¡£\r\n\r\n(Èç¹ûÈ·ÊµÏëÒªÉ¾³ıºÏ¶©²á±¾Éí£¬¿ÉÏÈ½â³ıºÏ¶©ÒÔºó£¬ÔÙĞĞÉ¾³ı)";
+                    "æ‰€é€‰å®šçš„ " + parent_cells.Count.ToString() + " ä¸ªåˆè®¢å†Œä¸­ï¼Œå› æœ‰ä¸‹åˆ—æˆå‘˜å†Œä¸èƒ½åˆ é™¤:\r\n\r\n" + strWarning;
+                strError += "\r\n\r\nå› æ­¤åˆè®¢å†Œæœ¬èº«ä¹Ÿè¿å¸¦ç€ä¸èƒ½è¢«åˆ é™¤ã€‚\r\n\r\n(å¦‚æœç¡®å®æƒ³è¦åˆ é™¤åˆè®¢å†Œæœ¬èº«ï¼Œå¯å…ˆè§£é™¤åˆè®¢ä»¥åï¼Œå†è¡Œåˆ é™¤)";
 
                 goto ERROR1;
             }
 
-            // ¼ì²éµ¥²á
+            // æ£€æŸ¥å•å†Œ
             strWarning = "";
             nErrorCount = 0;
             nOldCount = mono_cells.Count;
@@ -9679,7 +9679,7 @@ MessageBoxDefaultButton.Button2);
                 {
                     if (String.IsNullOrEmpty(strWarning) == false)
                         strWarning += ";\r\n";
-                    strWarning += "¶©¹º×é¸ñ×Ó";
+                    strWarning += "è®¢è´­ç»„æ ¼å­";
                     nErrorCount++;
                     mono_cells.RemoveAt(i);
                     i--;
@@ -9689,49 +9689,49 @@ MessageBoxDefaultButton.Button2);
                     continue;
 
                 if (CheckProcessingState(cell.item) == false
-                    && cell.item.Calculated == false   // Ô¤²â¸ñ×Ó³ıÍâ
-                    && cell.item.Deleted == false)  // ÒÑ¾­É¾³ıµÄ¸ñ×Ó³ıÍâ
+                    && cell.item.Calculated == false   // é¢„æµ‹æ ¼å­é™¤å¤–
+                    && cell.item.Deleted == false)  // å·²ç»åˆ é™¤çš„æ ¼å­é™¤å¤–
                 {
-                    // ²»ÊÇ"¼Ó¹¤ÖĞ"×´Ì¬
+                    // ä¸æ˜¯"åŠ å·¥ä¸­"çŠ¶æ€
                     if (String.IsNullOrEmpty(strWarning) == false)
                         strWarning += ";\r\n";
-                    strWarning += "²á '"+cell.item.RefID+"' ²»ÊÇ¡°¼Ó¹¤ÖĞ¡±×´Ì¬";
+                    strWarning += "å†Œ '"+cell.item.RefID+"' ä¸æ˜¯â€œåŠ å·¥ä¸­â€çŠ¶æ€";
                     nErrorCount++;
                     mono_cells.RemoveAt(i);
                     i--;
                 }
                 else if (String.IsNullOrEmpty(cell.item.Borrower) == false)
                 {
-                    // ÒÑ½è³ö×´Ì¬
+                    // å·²å€Ÿå‡ºçŠ¶æ€
                     if (String.IsNullOrEmpty(strWarning) == false)
                         strWarning += ";\r\n";
-                    strWarning += "²á '" + cell.item.RefID + "' ÉĞ´¦ÓÚ¡°ÒÑ½è³ö¡±×´Ì¬";
+                    strWarning += "å†Œ '" + cell.item.RefID + "' å°šå¤„äºâ€œå·²å€Ÿå‡ºâ€çŠ¶æ€";
                     nErrorCount++;
                     mono_cells.RemoveAt(i);
                     i--;
                 }
                 else if (cell.item.Locked == true)
                 {
-                    // ÒÑ½è³ö×´Ì¬
+                    // å·²å€Ÿå‡ºçŠ¶æ€
                     if (String.IsNullOrEmpty(strWarning) == false)
                         strWarning += ";\r\n";
-                    strWarning += "²á '" + cell.item.RefID + "' ´¦ÓÚ¡°Ëø¶¨¡±×´Ì¬";
+                    strWarning += "å†Œ '" + cell.item.RefID + "' å¤„äºâ€œé”å®šâ€çŠ¶æ€";
                     nErrorCount++;
                     mono_cells.RemoveAt(i);
                     i--;
                 }
             }
-            // ¾¯¸æ²»ÄÜÉ¾³ıµÄµ¥²á
+            // è­¦å‘Šä¸èƒ½åˆ é™¤çš„å•å†Œ
             if (String.IsNullOrEmpty(strWarning) == false)
             {
                 strError =
-                    "ËùÑ¡¶¨µÄ " + nOldCount.ToString() + " ¸öµ¥²áÖĞ£¬ÓĞÏÂÁĞ²á²»ÄÜÉ¾³ı:\r\n\r\n" + strWarning;
+                    "æ‰€é€‰å®šçš„ " + nOldCount.ToString() + " ä¸ªå•å†Œä¸­ï¼Œæœ‰ä¸‹åˆ—å†Œä¸èƒ½åˆ é™¤:\r\n\r\n" + strWarning;
 
                 if (mono_cells.Count > 0)
                 {
-                    strError += "\r\n\r\nÊÇ·ñÒª¼ÌĞøÉ¾³ıËùÑ¡·¶Î§ÄÚµÄÆäÓà "
+                    strError += "\r\n\r\næ˜¯å¦è¦ç»§ç»­åˆ é™¤æ‰€é€‰èŒƒå›´å†…çš„å…¶ä½™ "
                         + (mono_cells.Count).ToString()
-                        + " ¸öµ¥²á?";
+                        + " ä¸ªå•å†Œ?";
                     DialogResult result = MessageBox.Show(this,
                         strError,
                         "BindingControls",
@@ -9746,7 +9746,7 @@ MessageBoxDefaultButton.Button2);
                     goto ERROR1;
             }
 
-            // ¼ì²é³ÉÔ±²á
+            // æ£€æŸ¥æˆå‘˜å†Œ
             strWarning = "";
             nErrorCount = 0;
             nOldCount = member_cells.Count;
@@ -9759,7 +9759,7 @@ MessageBoxDefaultButton.Button2);
                 if (cell.item == null)
                     continue;
 
-                // ´ÓÊôÓÚËùÑ¡ºÏ¶©²áµÄ³ÉÔ±²á£¬Òª±ÜÃâÖØ¸´É¾³ı
+                // ä»å±äºæ‰€é€‰åˆè®¢å†Œçš„æˆå‘˜å†Œï¼Œè¦é¿å…é‡å¤åˆ é™¤
                 bool bFound = false;
                 for (int j=0;j<parent_cells.Count;j++)
                 {
@@ -9781,34 +9781,34 @@ MessageBoxDefaultButton.Button2);
 
                 if (CheckProcessingState(cell.item) == false)
                 {
-                    // ²»ÊÇ"¼Ó¹¤ÖĞ"×´Ì¬
+                    // ä¸æ˜¯"åŠ å·¥ä¸­"çŠ¶æ€
                     if (String.IsNullOrEmpty(strWarning) == false)
                         strWarning += ";\r\n";
-                    strWarning += "²á '" + cell.item.RefID + "' ²»ÊÇ¡°¼Ó¹¤ÖĞ¡±×´Ì¬";
+                    strWarning += "å†Œ '" + cell.item.RefID + "' ä¸æ˜¯â€œåŠ å·¥ä¸­â€çŠ¶æ€";
                     nErrorCount++;
                     member_cells.RemoveAt(i);
                     i--;
                 }
                 else if (String.IsNullOrEmpty(cell.item.Borrower) == false)
                 {
-                    // ÒÑ½è³ö×´Ì¬
+                    // å·²å€Ÿå‡ºçŠ¶æ€
                     if (String.IsNullOrEmpty(strWarning) == false)
                         strWarning += ";\r\n";
-                    strWarning += "²á '" + cell.item.RefID + "' ÉĞ´¦ÓÚ¡°ÒÑ½è³ö¡±×´Ì¬";
+                    strWarning += "å†Œ '" + cell.item.RefID + "' å°šå¤„äºâ€œå·²å€Ÿå‡ºâ€çŠ¶æ€";
                     nErrorCount++;
                     member_cells.RemoveAt(i);
                     i--;
                 }
                 else
                 {
-                    // ´ÓÊôµÄºÏ¶©²á ²»ÊÇ¡°¼Ó¹¤ÖĞ¡±×´Ì¬
+                    // ä»å±çš„åˆè®¢å†Œ ä¸æ˜¯â€œåŠ å·¥ä¸­â€çŠ¶æ€
                     Cell parent_cell = cell.ParentItem.ContainerCell;
                     if (CheckProcessingState(parent_cell.item) == false)
                     {
-                        // ²»ÊÇ"¼Ó¹¤ÖĞ"×´Ì¬
+                        // ä¸æ˜¯"åŠ å·¥ä¸­"çŠ¶æ€
                         if (String.IsNullOrEmpty(strWarning) == false)
                             strWarning += ";\r\n";
-                        strWarning += "²á '" + cell.item.RefID + "' Ëù´ÓÊôµÄºÏ¶©²á´¦ÓÚ¹Ì»¯×´Ì¬";
+                        strWarning += "å†Œ '" + cell.item.RefID + "' æ‰€ä»å±çš„åˆè®¢å†Œå¤„äºå›ºåŒ–çŠ¶æ€";
                         nErrorCount++;
                         member_cells.RemoveAt(i);
                         i--;
@@ -9816,10 +9816,10 @@ MessageBoxDefaultButton.Button2);
 
                     if (parent_cell.item.Locked == true)
                     {
-                        // ²»ÊÇ"¼Ó¹¤ÖĞ"×´Ì¬
+                        // ä¸æ˜¯"åŠ å·¥ä¸­"çŠ¶æ€
                         if (String.IsNullOrEmpty(strWarning) == false)
                             strWarning += ";\r\n";
-                        strWarning += "²á '" + cell.item.RefID + "' Ëù´ÓÊôµÄºÏ¶©²á´¦ÓÚËø¶¨×´Ì¬";
+                        strWarning += "å†Œ '" + cell.item.RefID + "' æ‰€ä»å±çš„åˆè®¢å†Œå¤„äºé”å®šçŠ¶æ€";
                         nErrorCount++;
                         member_cells.RemoveAt(i);
                         i--;
@@ -9827,17 +9827,17 @@ MessageBoxDefaultButton.Button2);
                 }
             }
 
-            // ¾¯¸æ²»ÄÜÉ¾³ıµÄ³ÉÔ±²á
+            // è­¦å‘Šä¸èƒ½åˆ é™¤çš„æˆå‘˜å†Œ
             if (String.IsNullOrEmpty(strWarning) == false)
             {
                 strError =
-                    "ËùÑ¡¶¨µÄ " + nOldCount.ToString() + " ¸ö³ÉÔ±²áÖĞ£¬ÓĞÏÂÁĞ²á²»ÄÜÉ¾³ı:\r\n\r\n" + strWarning;
+                    "æ‰€é€‰å®šçš„ " + nOldCount.ToString() + " ä¸ªæˆå‘˜å†Œä¸­ï¼Œæœ‰ä¸‹åˆ—å†Œä¸èƒ½åˆ é™¤:\r\n\r\n" + strWarning;
 
                 if (member_cells.Count > 0)
                 {
-                    strError += "\r\n\r\nÊÇ·ñÒª¼ÌĞøÉ¾³ıËùÑ¡·¶Î§ÄÚµÄÆäÓà "
+                    strError += "\r\n\r\næ˜¯å¦è¦ç»§ç»­åˆ é™¤æ‰€é€‰èŒƒå›´å†…çš„å…¶ä½™ "
                         + (member_cells.Count).ToString()
-                        + " ¸ö³ÉÔ±²á?";
+                        + " ä¸ªæˆå‘˜å†Œ?";
                     DialogResult result = MessageBox.Show(this,
                         strError,
                         "BindingControls",
@@ -9852,13 +9852,13 @@ MessageBoxDefaultButton.Button2);
                     goto ERROR1;
             }
 
-            // ¾¯¸æ¼´½«É¾³ıºÏ¶©²á
+            // è­¦å‘Šå³å°†åˆ é™¤åˆè®¢å†Œ
             if (parent_cells.Count > 0)
             {
                 DialogResult dialog_result = MessageBox.Show(this,
-    "¾¯¸æ£ºÉ¾³ıºÏ¶©²áµÄÍ¬Ê±£¬Ò²½«É¾³ıÆäÏÂÊôµÄ³ÉÔ±²á¡£\r\n\r\n(Èç¹û½öÒªÉ¾³ıºÏ¶©²á¶ø±£ÁôÆä³ÉÔ±²á£¬¿É¸ÄÎªÏÈÓÃ¡°½â³ıºÏ¶©¡±¹¦ÄÜ£¬ÔÙ½øĞĞÉ¾³ı)\r\n\r\nÈ·ÊµÒªÉ¾³ıËùÑ¡¶¨µÄ "
+    "è­¦å‘Šï¼šåˆ é™¤åˆè®¢å†Œçš„åŒæ—¶ï¼Œä¹Ÿå°†åˆ é™¤å…¶ä¸‹å±çš„æˆå‘˜å†Œã€‚\r\n\r\n(å¦‚æœä»…è¦åˆ é™¤åˆè®¢å†Œè€Œä¿ç•™å…¶æˆå‘˜å†Œï¼Œå¯æ”¹ä¸ºå…ˆç”¨â€œè§£é™¤åˆè®¢â€åŠŸèƒ½ï¼Œå†è¿›è¡Œåˆ é™¤)\r\n\r\nç¡®å®è¦åˆ é™¤æ‰€é€‰å®šçš„ "
     + parent_cells.Count.ToString()
-    + " ¸öºÏ¶©²á¼°ÆäÏÂÊôµÄ³ÉÔ±²á?",
+    + " ä¸ªåˆè®¢å†ŒåŠå…¶ä¸‹å±çš„æˆå‘˜å†Œ?",
     "BindingControls",
     MessageBoxButtons.YesNo,
     MessageBoxIcon.Question,
@@ -9866,7 +9866,7 @@ MessageBoxDefaultButton.Button2);
                 if (dialog_result == DialogResult.No)
                     return;
                 bAsked = true;
-                // »¹Òª¾¯¸æÉ¾³ıÆäÓàµÄµ¥²á/³ÉÔ±²á?
+                // è¿˜è¦è­¦å‘Šåˆ é™¤å…¶ä½™çš„å•å†Œ/æˆå‘˜å†Œ?
                 if (mono_cells.Count > 0 || member_cells.Count > 0)
                     bAsked = false;
             }
@@ -9875,9 +9875,9 @@ MessageBoxDefaultButton.Button2);
             if (bAsked == false)
             {
                 DialogResult dialog_result = MessageBox.Show(this,
-    "È·ÊµÒªÉ¾³ıËùÑ¡¶¨µÄ "
+    "ç¡®å®è¦åˆ é™¤æ‰€é€‰å®šçš„ "
     + (mono_cells.Count + member_cells.Count + parent_cells.Count).ToString()
-    + " ¸ö²á?",
+    + " ä¸ªå†Œ?",
     "BindingControls",
     MessageBoxButtons.YesNo,
     MessageBoxIcon.Question,
@@ -9889,9 +9889,9 @@ MessageBoxDefaultButton.Button2);
 
 
 
-            // *** ¿ªÊ¼½øĞĞÉ¾³ı
+            // *** å¼€å§‹è¿›è¡Œåˆ é™¤
 
-            // É¾³ıµ¥²á
+            // åˆ é™¤å•å†Œ
             for (int i = 0; i < mono_cells.Count; i++)
             {
                 Cell cell = mono_cells[i];
@@ -9901,23 +9901,23 @@ MessageBoxDefaultButton.Button2);
                 int nCol = issue.IndexOfCell(cell);
                 Debug.Assert(nCol != -1, "");
 
-                // ¼Çµ½²¼¾ÖÄ£Ê½ÏÂµÄÉ¾³ı
+                // è®°åˆ°å¸ƒå±€æ¨¡å¼ä¸‹çš„åˆ é™¤
                 if (issue.IssueLayoutState == IssueLayoutState.Accepting)
                 {
                     DeleteOneCellInAcceptingLayout(cell);
                     continue;
                 }
 
-                // ×°¶©²¼¾ÖÄ£Ê½ÏÂµÄÉ¾³ı
+                // è£…è®¢å¸ƒå±€æ¨¡å¼ä¸‹çš„åˆ é™¤
 
-                // ¾ßÓĞ²É¹ºĞÅÏ¢¹ØÁªµÄ¸ñ×Ó
+                // å…·æœ‰é‡‡è´­ä¿¡æ¯å…³è”çš„æ ¼å­
                 if (cell.item != null
                     && cell.item.OrderInfoPosition.X != -1)
                 {
                     Debug.Assert(cell.item.OrderInfoPosition.Y != -1, "");
 
                     /*
-                    // Á½²½É¾³ı·¨
+                    // ä¸¤æ­¥åˆ é™¤æ³•
                     if (cell.item.Calculated == false)
                     {
                         nRet = cell.item.DoUnaccept(out strError);
@@ -9926,7 +9926,7 @@ MessageBoxDefaultButton.Button2);
                     }
                     else
                     {
-                        // É¾³ıÔ¤²â¸ñ£¬Òª¸üĞÂ¶©¹ºĞÅÏ¢
+                        // åˆ é™¤é¢„æµ‹æ ¼ï¼Œè¦æ›´æ–°è®¢è´­ä¿¡æ¯
                         nRet = cell.item.DoDelete(out strError);
                         if (nRet == -1)
                             goto ERROR1;
@@ -9934,8 +9934,8 @@ MessageBoxDefaultButton.Button2);
                     }
                      * */
 
-                    // Ò»²½É¾³ı·¨
-                    // É¾³ıÇ°²¿²Ù×÷£¬Òª¸üĞÂ¶©¹ºĞÅÏ¢
+                    // ä¸€æ­¥åˆ é™¤æ³•
+                    // åˆ é™¤å‰éƒ¨æ“ä½œï¼Œè¦æ›´æ–°è®¢è´­ä¿¡æ¯
                     nRet = cell.item.DoDelete(out strError);
                     if (nRet == -1)
                         goto ERROR1;
@@ -9948,12 +9948,12 @@ MessageBoxDefaultButton.Button2);
                 }
 
                 {
-                    // ºÏ¶©Ë«¸ñµÄ×ó²àÎ»ÖÃ£¬²»ÄÜÓÃRemoveSingleIndexÉ¾³ı
-                    // Ì½²âÊÇ·ñÎªºÏ¶©³ÉÔ±Õ¼¾İµÄÎ»ÖÃ
+                    // åˆè®¢åŒæ ¼çš„å·¦ä¾§ä½ç½®ï¼Œä¸èƒ½ç”¨RemoveSingleIndexåˆ é™¤
+                    // æ¢æµ‹æ˜¯å¦ä¸ºåˆè®¢æˆå‘˜å æ®çš„ä½ç½®
                     // return:
-                    //      -1  ÊÇ¡£²¢ÇÒÊÇË«¸ñµÄ×ó²àÎ»ÖÃ
-                    //      0   ²»ÊÇ
-                    //      1   ÊÇ¡£²¢ÇÒÊÇË«¸ñµÄÓÒ²àÎ»ÖÃ
+                    //      -1  æ˜¯ã€‚å¹¶ä¸”æ˜¯åŒæ ¼çš„å·¦ä¾§ä½ç½®
+                    //      0   ä¸æ˜¯
+                    //      1   æ˜¯ã€‚å¹¶ä¸”æ˜¯åŒæ ¼çš„å³ä¾§ä½ç½®
                     nRet = issue.IsBoundIndex(nCol);
                     if (nRet == -1)
                     {
@@ -9967,13 +9967,13 @@ MessageBoxDefaultButton.Button2);
                 }
 
             DODELETE:
-                // ÆäËûµ¥²á(¶©¹ºĞÅÏ¢¹ÜÏ½ÍâµÄµ¥²á)£¬É¾³ı
+                // å…¶ä»–å•å†Œ(è®¢è´­ä¿¡æ¯ç®¡è¾–å¤–çš„å•å†Œ)ï¼Œåˆ é™¤
                 issue.RemoveSingleIndex(nCol);
             CONTINUE:
                 this.m_bChanged = true;
             }
 
-            // É¾³ıºÏ¶©²á
+            // åˆ é™¤åˆè®¢å†Œ
             strWarning = "";
             for (int i = 0; i < parent_cells.Count; i++)
             {
@@ -9988,14 +9988,14 @@ MessageBoxDefaultButton.Button2);
                 Debug.Assert(parent_cell.item != null, "");
                 this.ParentItems.Remove(parent_cell.item);
 
-                parent_issue.SetCell(nParentCol, null); // TODO: ¿ÉÒÔĞŞ¸ÄÎª´øÓĞÑ¹ËõÄÜÁ¦
+                parent_issue.SetCell(nParentCol, null); // TODO: å¯ä»¥ä¿®æ”¹ä¸ºå¸¦æœ‰å‹ç¼©èƒ½åŠ›
                 this.m_bChanged = true;
 
                 for (int j = 0; j < parent_cell.item.MemberCells.Count; j++)
                 {
                     Cell cell = parent_cell.item.MemberCells[j];
 
-                    // TODO: ºÎ´¦¼ì²é³ÉÔ±²áÊÇ·ñ¿ÉÒÔ±»É¾³ı? ÀıÈçÊÇ·ñ¾ß±¸¼Ó¹¤ÖĞ×´Ì¬
+                    // TODO: ä½•å¤„æ£€æŸ¥æˆå‘˜å†Œæ˜¯å¦å¯ä»¥è¢«åˆ é™¤? ä¾‹å¦‚æ˜¯å¦å…·å¤‡åŠ å·¥ä¸­çŠ¶æ€
 
                     IssueBindingItem issue = cell.Container;
                     Debug.Assert(issue != null, "");
@@ -10009,7 +10009,7 @@ MessageBoxDefaultButton.Button2);
                     }
 #endif
 
-                    // ¾ßÓĞ²É¹ºĞÅÏ¢¹ØÁªµÄ¸ñ×Ó
+                    // å…·æœ‰é‡‡è´­ä¿¡æ¯å…³è”çš„æ ¼å­
                     if (cell.item != null
                         && cell.item.OrderInfoPosition.X != -1)
                     {
@@ -10019,7 +10019,7 @@ MessageBoxDefaultButton.Button2);
                             goto ERROR1;
                     }
 
-                    // Çå³ıÎªNullCell
+                    // æ¸…é™¤ä¸ºNullCell
                     issue.SetCell(nCurCol, null);
                     if (issue.IssueLayoutState == IssueLayoutState.Accepting)
                     {
@@ -10030,14 +10030,14 @@ MessageBoxDefaultButton.Button2);
                     }
                     this.m_bChanged = true;
 
-                    // ËùÑ¡¶¨µÄºÏ¶©²á¶ÔÏó£¬¿ÉÄÜÆäÏÂÊô¶ÔÏó£¬Ò²±»Ñ¡¶¨ÁË
-                    // ÕâÀï±£Ö¤²»ÔÙÖØ¸´É¾³ı
+                    // æ‰€é€‰å®šçš„åˆè®¢å†Œå¯¹è±¡ï¼Œå¯èƒ½å…¶ä¸‹å±å¯¹è±¡ï¼Œä¹Ÿè¢«é€‰å®šäº†
+                    // è¿™é‡Œä¿è¯ä¸å†é‡å¤åˆ é™¤
                     member_cells.Remove(cell);
                 }
             }
 
-            // É¾³ı³ÉÔ±²á
-            // ½«ºÏ¶©³ÉÔ±²á´ÓºÏ¶©²áÖĞÒÆ³ö£¬ÏûÊ§
+            // åˆ é™¤æˆå‘˜å†Œ
+            // å°†åˆè®¢æˆå‘˜å†Œä»åˆè®¢å†Œä¸­ç§»å‡ºï¼Œæ¶ˆå¤±
             nRet = RemoveFromBinding(
                 true,
                 true,
@@ -10052,7 +10052,7 @@ MessageBoxDefaultButton.Button2);
             MessageBox.Show(this, strError);
         }
 
-        // ÔÚ¼Çµ½²¼¾ÖÄ£Ê½ÏÂÉ¾³ıÒ»¸ö¸ñ×Ó
+        // åœ¨è®°åˆ°å¸ƒå±€æ¨¡å¼ä¸‹åˆ é™¤ä¸€ä¸ªæ ¼å­
         void DeleteOneCellInAcceptingLayout(Cell cell)
         {
             IssueBindingItem issue = cell.Container;
@@ -10074,7 +10074,7 @@ MessageBoxDefaultButton.Button2);
 
                 if (nCol < issue.Cells.Count)
                 {
-                    issue.SetCell(nCol, null);  // ·ÀÖ¹HoverObject Assertion
+                    issue.SetCell(nCol, null);  // é˜²æ­¢HoverObject Assertion
                     issue.Cells.RemoveAt(nCol);
                 }
 
@@ -10098,19 +10098,19 @@ MessageBoxDefaultButton.Button2);
 
             if (nCol < issue.Cells.Count)
             {
-                issue.SetCell(nCol, null);  // ·ÀÖ¹HoverObject Assertion
+                issue.SetCell(nCol, null);  // é˜²æ­¢HoverObject Assertion
                 issue.Cells.RemoveAt(nCol);
             }
         }
 
-        // ½â³ıºÏ¶©
-        // TODO: ³ÉÔ±¿Õ°×¸ñ×ÓÈçºÎ´¦Àí£¿
+        // è§£é™¤åˆè®¢
+        // TODO: æˆå‘˜ç©ºç™½æ ¼å­å¦‚ä½•å¤„ç†ï¼Ÿ
         void menuItem_releaseBinding_Click(object sender, EventArgs e)
         {
             string strError = "";
             string strWarning = "";
 
-            // ºÏ¶©²áÊı×é
+            // åˆè®¢å†Œæ•°ç»„
             List<ItemBindingItem> parent_items = new List<ItemBindingItem>();
 
             List<Cell> selected_cells = this.SelectedCells;
@@ -10119,25 +10119,25 @@ MessageBoxDefaultButton.Button2);
                 Cell cell = selected_cells[i];
                 if (IsBindingParent(cell) == true)
                 {
-                    // ¼ì²éËù¶¨×´Ì¬
+                    // æ£€æŸ¥æ‰€å®šçŠ¶æ€
                     if (cell.item.Locked == true)
                     {
-                        strError = "¶ÔËø¶¨×´Ì¬µÄºÏ¶©²á²»ÄÜ½â³ıºÏ¶©";
+                        strError = "å¯¹é”å®šçŠ¶æ€çš„åˆè®¢å†Œä¸èƒ½è§£é™¤åˆè®¢";
                         goto ERROR1;
                     }
 
-                    // ×¢£ºcell.item.MemberCells.Count ÓĞ¿ÉÄÜµÈÓÚ0
+                    // æ³¨ï¼šcell.item.MemberCells.Count æœ‰å¯èƒ½ç­‰äº0
                     parent_items.Add(cell.item);
                 }
             }
 
             if (parent_items.Count == 0)
             {
-                strError = "ËùÑ¡¶¨µÄµ¥ÔªÖĞ£¬Ã»ÓĞºÏ¶©²á";
+                strError = "æ‰€é€‰å®šçš„å•å…ƒä¸­ï¼Œæ²¡æœ‰åˆè®¢å†Œ";
                 goto ERROR1;
             }
 
-            // ¼ì²é¹Ì»¯²á
+            // æ£€æŸ¥å›ºåŒ–å†Œ
             int nFixedCount = 0;
             for (int i = 0; i < parent_items.Count; i++)
             {
@@ -10152,17 +10152,17 @@ MessageBoxDefaultButton.Button2);
                 }
             }
 
-            // ¾¯¸æ¹Ì»¯²á
+            // è­¦å‘Šå›ºåŒ–å†Œ
             if (String.IsNullOrEmpty(strWarning) == false)
             {
                 strError = 
-                    "ËùÑ¡¶¨µÄ " + parent_items.Count.ToString() + " ºÏ¶©²áÖĞ£¬ÓĞÏÂÁĞ²á´¦ÓÚ¹Ì»¯×´Ì¬£¬²»ÄÜ²ğ·Ö:\r\n\r\n"+strWarning;
+                    "æ‰€é€‰å®šçš„ " + parent_items.Count.ToString() + " åˆè®¢å†Œä¸­ï¼Œæœ‰ä¸‹åˆ—å†Œå¤„äºå›ºåŒ–çŠ¶æ€ï¼Œä¸èƒ½æ‹†åˆ†:\r\n\r\n"+strWarning;
 
                 if (parent_items.Count > nFixedCount)
                 {
-                    strError += "\r\n\r\nÊÇ·ñÒª¼ÌĞø²ğÉ¢ËùÑ¡·¶Î§ÄÚµÄÆäÓà "
+                    strError += "\r\n\r\næ˜¯å¦è¦ç»§ç»­æ‹†æ•£æ‰€é€‰èŒƒå›´å†…çš„å…¶ä½™ "
                         + (parent_items.Count - nFixedCount).ToString()
-                        + " ¸öºÏ¶©²á?";
+                        + " ä¸ªåˆè®¢å†Œ?";
                     DialogResult result = MessageBox.Show(this,
                         strError,
                         "BindingControls",
@@ -10196,7 +10196,7 @@ MessageBoxDefaultButton.Button2);
                 {
                     Cell cell = parent_item.MemberCells[j];
 
-                    // ¼ÇÒä×ó²à¿Õ°×Î»ÖÃ
+                    // è®°å¿†å·¦ä¾§ç©ºç™½ä½ç½®
                     Point p = GetCellPosition(cell);
                     p.X = p.X - 1;
                     nullpos_list.Add(p);
@@ -10210,7 +10210,7 @@ MessageBoxDefaultButton.Button2);
                         cell.item.ParentItem = null;
                         Debug.Assert(cell.item.IsMember == false, "");
 
-                        // ĞŞ¸ÄÈİÆ÷Cell binded
+                        // ä¿®æ”¹å®¹å™¨Cell binded
                         Cell container_cell = cell.item.ContainerCell;
                         Debug.Assert(container_cell != null, "");
                         Debug.Assert(container_cell == cell, "");
@@ -10233,13 +10233,13 @@ MessageBoxDefaultButton.Button2);
                  * */
                 parent_item.AfterMembersChanged();
 
-                // ÎªÁËMessageBox()¶øÇ¿ÖÆË¢ĞÂ
+                // ä¸ºäº†MessageBox()è€Œå¼ºåˆ¶åˆ·æ–°
                 this.Invalidate();
                 this.Update();
 
-                // Ñ¯ÎÊÊÇ·ñÒªÉ¾³ı ºÏ¶©²á ¶ÔÏó?
+                // è¯¢é—®æ˜¯å¦è¦åˆ é™¤ åˆè®¢å†Œ å¯¹è±¡?
                 DialogResult result = MessageBox.Show(this,
-    "ºÏ¶©²á '" + strPublishTime + "' ±»²ğÉ¢ºó£¬ÊÇ·ñË³±ãÉ¾³ıÔ­ÏÈ´ú±íºÏ¶©²áµÄ¶ÔÏó?\r\n\r\n(Yes: É¾³ı£»No: ÒÆÈë×ÔÓÉÇø£»Cancel: ±£ÁôÔÚÔ­µØ)",
+    "åˆè®¢å†Œ '" + strPublishTime + "' è¢«æ‹†æ•£åï¼Œæ˜¯å¦é¡ºä¾¿åˆ é™¤åŸå…ˆä»£è¡¨åˆè®¢å†Œçš„å¯¹è±¡?\r\n\r\n(Yes: åˆ é™¤ï¼›No: ç§»å…¥è‡ªç”±åŒºï¼›Cancel: ä¿ç•™åœ¨åŸåœ°)",
     "BindingControls",
     MessageBoxButtons.YesNoCancel,
     MessageBoxIcon.Question,
@@ -10257,21 +10257,21 @@ MessageBoxDefaultButton.Button2);
                 {
                     Debug.Assert(result == DialogResult.Cancel, "");
 
-                    // Èç¹ûºÏ¶©²áÒª±£ÁôÔÚÔ­µØ£¬ĞèÒª°ÑÔ­ÓĞºÏ¶©·¶Î§µÄµÚÒ»¸ö³ÉÔ±²áÏòÓÒ»òÕßÏò×óÒÆ¿ª£¬±ÜÃâÂäÈëÔ­ÓĞºÏ¶©·¶Î§ÄÚ
+                    // å¦‚æœåˆè®¢å†Œè¦ä¿ç•™åœ¨åŸåœ°ï¼Œéœ€è¦æŠŠåŸæœ‰åˆè®¢èŒƒå›´çš„ç¬¬ä¸€ä¸ªæˆå‘˜å†Œå‘å³æˆ–è€…å‘å·¦ç§»å¼€ï¼Œé¿å…è½å…¥åŸæœ‰åˆè®¢èŒƒå›´å†…
                     IssueBindingItem issue = parent_item.Container;
                     int nCol = issue.IndexOfCell(parent_cell);
                     Debug.Assert(nCol != -1, "");
 
                     Cell first_member_cell = issue.GetCell(nCol + 1);
-                    Debug.Assert(first_member_cell.IsMember == false, "¸Õ¸Õ½â³ıºÏ¶©£¬ÏÖÔÚ²»¿ÉÄÜÊÇºÏ¶©³ÉÔ±²áÁË");
+                    Debug.Assert(first_member_cell.IsMember == false, "åˆšåˆšè§£é™¤åˆè®¢ï¼Œç°åœ¨ä¸å¯èƒ½æ˜¯åˆè®¢æˆå‘˜å†Œäº†");
                     if (first_member_cell.item != null)
                     {
-                        // ÔÚÓÒ±ßÕÒµ½Ò»¸ö¿ÕÎ», ½«first_member_cell×ªÒÆ¹ıÈ¥
+                        // åœ¨å³è¾¹æ‰¾åˆ°ä¸€ä¸ªç©ºä½, å°†first_member_cellè½¬ç§»è¿‡å»
                         issue.GetBlankSingleIndex(nCol + 2/*, parent_item*/);
                         // issue.SetCell(nCol + 1, null);
                         issue.SetCell(nCol + 2, first_member_cell);
 
-                        // Ô­À´Î»ÖÃ¸ÄÎª¼ÓÈëÒ»¸ö¿Õ°×¸ñ×Ó
+                        // åŸæ¥ä½ç½®æ”¹ä¸ºåŠ å…¥ä¸€ä¸ªç©ºç™½æ ¼å­
                         {
                             Cell cell = new Cell();
                             cell.ParentItem = parent_item;
@@ -10281,12 +10281,12 @@ MessageBoxDefaultButton.Button2);
                         }
                     }
 
-                    // È¥µôÏÈÇ°¼ÇÒäµÄµÚÒ»Ïî£¬¼´£¬ºÏ¶©±¾Î»ÖÃ²»ÔÙĞèÒªºóÃæÉ¾³ı
+                    // å»æ‰å…ˆå‰è®°å¿†çš„ç¬¬ä¸€é¡¹ï¼Œå³ï¼Œåˆè®¢æœ¬ä½ç½®ä¸å†éœ€è¦åé¢åˆ é™¤
                     nullpos_list.RemoveAt(0);
                 }
             }
 
-            // É¾³ı¿Õ°×Î»ÖÃ
+            // åˆ é™¤ç©ºç™½ä½ç½®
             for (int i = 0; i < nullpos_list.Count; i++)
             {
                 Point p = nullpos_list[i];
@@ -10295,15 +10295,15 @@ MessageBoxDefaultButton.Button2);
                 Cell cell = issue.Cells[p.X];
                 if (cell == null)
                 {
-                    // Ì½²âÊÇ·ñÎªºÏ¶©³ÉÔ±Õ¼¾İµÄÎ»ÖÃ
+                    // æ¢æµ‹æ˜¯å¦ä¸ºåˆè®¢æˆå‘˜å æ®çš„ä½ç½®
                     // return:
-                    //      -1  ÊÇ¡£²¢ÇÒÊÇË«¸ñµÄ×ó²àÎ»ÖÃ
-                    //      0   ²»ÊÇ
-                    //      1   ÊÇ¡£²¢ÇÒÊÇË«¸ñµÄÓÒ²àÎ»ÖÃ
+                    //      -1  æ˜¯ã€‚å¹¶ä¸”æ˜¯åŒæ ¼çš„å·¦ä¾§ä½ç½®
+                    //      0   ä¸æ˜¯
+                    //      1   æ˜¯ã€‚å¹¶ä¸”æ˜¯åŒæ ¼çš„å³ä¾§ä½ç½®
                     int nRet = issue.IsBoundIndex(p.X);
                     if (nRet == -1 || nRet == 1)
                     {
-                        Debug.Assert(nRet != -1, "°´ÀíËµÕâÀï²»Ì«¿ÉÄÜ³öÏÖË«¸ñ×ó²à");
+                        Debug.Assert(nRet != -1, "æŒ‰ç†è¯´è¿™é‡Œä¸å¤ªå¯èƒ½å‡ºç°åŒæ ¼å·¦ä¾§");
                         Debug.Assert(nRet != 1, "");
                     }
                     else
@@ -10317,7 +10317,7 @@ MessageBoxDefaultButton.Button2);
             MessageBox.Show(this, strError);
         }
 
-        // »ñµÃÒ»¸ö¸ñ×ÓµÄ×ø±êx/y¡£×¢Òâ£¬ÊÇĞĞÁĞºÅ£¬¶ø²»ÊÇÏóËØÎ»ÖÃ
+        // è·å¾—ä¸€ä¸ªæ ¼å­çš„åæ ‡x/yã€‚æ³¨æ„ï¼Œæ˜¯è¡Œåˆ—å·ï¼Œè€Œä¸æ˜¯è±¡ç´ ä½ç½®
         Point GetCellPosition(Cell cell)
         {
             Debug.Assert(cell != null, "");
@@ -10341,7 +10341,7 @@ MessageBoxDefaultButton.Button2);
             return issue.Cells[p.X];
         }
 
-        // ÅĞ¶ÏÒ»¸ö¸ñ×ÓÊÇ·ñÎªºÏ¶©²á
+        // åˆ¤æ–­ä¸€ä¸ªæ ¼å­æ˜¯å¦ä¸ºåˆè®¢å†Œ
         internal bool IsBindingParent(Cell cellTest)
         {
             Debug.Assert(cellTest != null, "");
@@ -10353,7 +10353,7 @@ MessageBoxDefaultButton.Button2);
             return false;
         }
 
-        // ÅĞ¶ÏÒ»¸öItemÊÇ·ñÎªºÏ¶©²á
+        // åˆ¤æ–­ä¸€ä¸ªItemæ˜¯å¦ä¸ºåˆè®¢å†Œ
         bool IsBindingParent(ItemBindingItem itemTest)
         {
             Debug.Assert(itemTest != null, "");
@@ -10364,10 +10364,10 @@ MessageBoxDefaultButton.Button2);
         }
 
         /*
-        // ÅĞ¶ÏÒ»¸ö¸ñ×ÓÊÇ·ñÊôÓÚÒÑÓĞµÄ×°¶©·¶Î§?
+        // åˆ¤æ–­ä¸€ä¸ªæ ¼å­æ˜¯å¦å±äºå·²æœ‰çš„è£…è®¢èŒƒå›´?
         // return:
-        //      1   ÊôÓÚ×°¶©·¶Î§£¬¼´ÎªÄ³¸öºÏ¶©²áµÄ³ÉÔ±²á¡£cellParentÖĞ·µ»ØÁËºÏ¶©²á¸ñ×Ó¶ÔÏó
-        //      0   ²»ÊôÓÚ×°¶©·¶Î§¡£¼´£¬²»ÊÇºÏ¶©³ÉÔ±²á£¬¶øÊÇµ¥²á»òºÏ¶©²á¡£
+        //      1   å±äºè£…è®¢èŒƒå›´ï¼Œå³ä¸ºæŸä¸ªåˆè®¢å†Œçš„æˆå‘˜å†Œã€‚cellParentä¸­è¿”å›äº†åˆè®¢å†Œæ ¼å­å¯¹è±¡
+        //      0   ä¸å±äºè£…è®¢èŒƒå›´ã€‚å³ï¼Œä¸æ˜¯åˆè®¢æˆå‘˜å†Œï¼Œè€Œæ˜¯å•å†Œæˆ–åˆè®¢å†Œã€‚
         int IsBelongToBinding(Cell cellTest,
             out Cell cellParent,
             out string strError)
@@ -10390,8 +10390,8 @@ MessageBoxDefaultButton.Button2);
         }
          * */
 
-        // »ñµÃ³ÉÔ±²áËù´ÓÊôµÄºÏ¶©²á
-        // Èç¹ûÓÃºÏ¶©²áµ÷ÓÃ±¾º¯Êı£¬Ôò·µ»Ønull
+        // è·å¾—æˆå‘˜å†Œæ‰€ä»å±çš„åˆè®¢å†Œ
+        // å¦‚æœç”¨åˆè®¢å†Œè°ƒç”¨æœ¬å‡½æ•°ï¼Œåˆ™è¿”å›null
         Cell GetBindingParent(Cell cellTest)
         {
             if (cellTest == null)
@@ -10406,7 +10406,7 @@ MessageBoxDefaultButton.Button2);
             return null;
         }
 
-        // ÕÒ³öÊôÓÚÌØ¶¨µÄÆÚµÄ³ÉÔ±²á¶ÔÏó
+        // æ‰¾å‡ºå±äºç‰¹å®šçš„æœŸçš„æˆå‘˜å†Œå¯¹è±¡
         Cell GetMemberCellByIssue(Cell parent_cell,
             IssueBindingItem issue)
         {
@@ -10421,13 +10421,13 @@ MessageBoxDefaultButton.Button2);
             return null;
         }
 
-        // ×öÍÏ×§½áÊøÊ±µÄ¹¦ÄÜ
+        // åšæ‹–æ‹½ç»“æŸæ—¶çš„åŠŸèƒ½
         void DoDragEndFunction()
         {
             string strError = "";
             int nRet = 0;
 
-            // Èç¹ûÔ´ÊÇµ¥²á£¬Ä¿±êÎªºÏ¶©²á»ò³ÉÔ±²á£¬¾Í×ö¡°½«Èô¸Éµ¥²á¼ÓÈëÒ»¸öºÏ¶©²á¡±
+            // å¦‚æœæºæ˜¯å•å†Œï¼Œç›®æ ‡ä¸ºåˆè®¢å†Œæˆ–æˆå‘˜å†Œï¼Œå°±åšâ€œå°†è‹¥å¹²å•å†ŒåŠ å…¥ä¸€ä¸ªåˆè®¢å†Œâ€
             Cell source = (Cell)this.DragStartObject;
             Cell target = null;
             NullCell target_null = null;
@@ -10446,14 +10446,14 @@ MessageBoxDefaultButton.Button2);
 
             if (this.SelectedCells.IndexOf(source) != -1)
             {
-                // Ô´µ¥ÔªÊôÓÚÒÑ¾­Ñ¡ÔñµÄ·¶Î§
+                // æºå•å…ƒå±äºå·²ç»é€‰æ‹©çš„èŒƒå›´
                 source_cells.AddRange(this.SelectedCells);
 
-                // TODO: ¼ì²éÊı×éÖĞµ¥ÔªµÄÒ»ÖÂĞÔ£ºÒªÃ´¶¼ÊôÓÚÎ´×°¶©µÄµ¥²á£¬ÒªÃ´¶¼ÊôÓÚÒÑ¾­×°¶©µÄ³ÉÔ±²á
+                // TODO: æ£€æŸ¥æ•°ç»„ä¸­å•å…ƒçš„ä¸€è‡´æ€§ï¼šè¦ä¹ˆéƒ½å±äºæœªè£…è®¢çš„å•å†Œï¼Œè¦ä¹ˆéƒ½å±äºå·²ç»è£…è®¢çš„æˆå‘˜å†Œ
             }
             else 
             {
-                // Ô´µ¥Ôª²»ÊôÓÚÒÑ¾­Ñ¡ÔñµÄ·¶Î§
+                // æºå•å…ƒä¸å±äºå·²ç»é€‰æ‹©çš„èŒƒå›´
                 source_cells.Add(source);
             }
 
@@ -10467,7 +10467,7 @@ MessageBoxDefaultButton.Button2);
                 Cell source_parent = null;
                 Cell target_parent = null;
 
-                // ×¼±¸Ô´ºÏ¶©²á¶ÔÏó
+                // å‡†å¤‡æºåˆè®¢å†Œå¯¹è±¡
                 if (IsBindingParent(source_cells[0]) == true)
                     source_parent = source_cells[0];
                 else
@@ -10482,14 +10482,14 @@ MessageBoxDefaultButton.Button2);
                     source_parent = GetBindingParent(source_cells[0]);
                 }
 
-                // ×¼±¸Ä¿±êºÏ¶©²á¶ÔÏó
+                // å‡†å¤‡ç›®æ ‡åˆè®¢å†Œå¯¹è±¡
                 if (target != null)
                 {
                     if (IsBindingParent(target) == true)
                         target_parent = target;
                     else
                     {
-                        // ÅĞ¶Ïtarget¸ñ×ÓÊÇ·ñÊôÓÚÒÑÓĞµÄ×°¶©·¶Î§?
+                        // åˆ¤æ–­targetæ ¼å­æ˜¯å¦å±äºå·²æœ‰çš„è£…è®¢èŒƒå›´?
                         /*
                         nRet = IsBelongToBinding(target,
                             out target_parent,
@@ -10506,10 +10506,10 @@ MessageBoxDefaultButton.Button2);
                 }
 
                 // 1)
-                // µ¥²áµÄ¸ñ×ÓÍÏÈëºÏ¶©·¶Î§
+                // å•å†Œçš„æ ¼å­æ‹–å…¥åˆè®¢èŒƒå›´
                 if (source_parent == null && target_parent != null)
                 {
-                    // ½«Èô¸Éµ¥²á¼ÓÈëÒ»¸öºÏ¶©²á
+                    // å°†è‹¥å¹²å•å†ŒåŠ å…¥ä¸€ä¸ªåˆè®¢å†Œ
                     nRet = AddToBinding(source_cells,
                         target_parent,
                         out strError);
@@ -10519,13 +10519,13 @@ MessageBoxDefaultButton.Button2);
                 }
 
                 // 2)
-                // ºÏ¶©µÄ¸ñ×ÓÍÏÈëµ¥²á·¶Î§
+                // åˆè®¢çš„æ ¼å­æ‹–å…¥å•å†ŒèŒƒå›´
                 if (source_parent != null
                     && target_parent == null)
                 {
-                    Debug.Assert(this.ParentItems.IndexOf(source_parent.item) != -1, "Ô´ºÏ¶©²áÓ¦¸ÃÊÇthis.BindItemsÄÚÔªËØ");
+                    Debug.Assert(this.ParentItems.IndexOf(source_parent.item) != -1, "æºåˆè®¢å†Œåº”è¯¥æ˜¯this.BindItemså†…å…ƒç´ ");
 
-                    // ½øĞĞ¼ì²é£¬ÒªÇósource_cellsÖĞËùÓĞ³ÉÔ±¶¼ÊÇ³ÉÔ±²á
+                    // è¿›è¡Œæ£€æŸ¥ï¼Œè¦æ±‚source_cellsä¸­æ‰€æœ‰æˆå‘˜éƒ½æ˜¯æˆå‘˜å†Œ
                     for (int i = 0; i < source_cells.Count;i++)
                     {
                         Cell temp = source_cells[i];
@@ -10541,13 +10541,13 @@ MessageBoxDefaultButton.Button2);
 
                         if (temp_parent == null)
                         {
-                            strError = "ÒªÇóËùÍÏ×§µÄ¸ñ×Ó¶¼ÊÇºÏ¶©³ÉÔ±";
+                            strError = "è¦æ±‚æ‰€æ‹–æ‹½çš„æ ¼å­éƒ½æ˜¯åˆè®¢æˆå‘˜";
                             goto ERROR1;
                         }
                     }
 
-                    // ½«ºÏ¶©³ÉÔ±²á´ÓºÏ¶©²áÖĞÒÆ³ö£¬³ÉÎªµ¥²á
-                    // TODO: ÓĞ¿ÉÄÜ³öÏÖÇ°¶ÎmemberÎªNullCellµÄ·Ç³£Çé¿ö£¬Çë²âÊÔIsBinded
+                    // å°†åˆè®¢æˆå‘˜å†Œä»åˆè®¢å†Œä¸­ç§»å‡ºï¼Œæˆä¸ºå•å†Œ
+                    // TODO: æœ‰å¯èƒ½å‡ºç°å‰æ®µmemberä¸ºNullCellçš„éå¸¸æƒ…å†µï¼Œè¯·æµ‹è¯•IsBinded
                     nRet = RemoveFromBinding(
                         false,
                         false,
@@ -10559,28 +10559,28 @@ MessageBoxDefaultButton.Button2);
                 }
 
                 // 3)
-                // ºÏ¶©µÄ¸ñ×ÓÍÏÈëÁíÒ»¸öºÏ¶©·¶Î§
+                // åˆè®¢çš„æ ¼å­æ‹–å…¥å¦ä¸€ä¸ªåˆè®¢èŒƒå›´
                 if (source_parent != null
                     && target_parent != null)
                 {
-                    Debug.Assert(this.ParentItems.IndexOf(source_parent.item) != -1, "Ô´ºÏ¶©²áÓ¦¸ÃÊÇthis.BindItemsÄÚÔªËØ");
-                    Debug.Assert(this.ParentItems.IndexOf(target_parent.item) != -1, "Ä¿±êºÏ¶©²áÓ¦¸ÃÊÇthis.BindItemsÄÚÔªËØ");
+                    Debug.Assert(this.ParentItems.IndexOf(source_parent.item) != -1, "æºåˆè®¢å†Œåº”è¯¥æ˜¯this.BindItemså†…å…ƒç´ ");
+                    Debug.Assert(this.ParentItems.IndexOf(target_parent.item) != -1, "ç›®æ ‡åˆè®¢å†Œåº”è¯¥æ˜¯this.BindItemså†…å…ƒç´ ");
 
-                    // ½øĞĞ¼ì²é£¬ÒªÇó...
+                    // è¿›è¡Œæ£€æŸ¥ï¼Œè¦æ±‚...
                     for (int i = 0; i < source_cells.Count; i++)
                     {
                         Cell temp = source_cells[i];
 
                         if (temp.item != null)
                         {
-                            if (StringUtil.IsInList("×¢Ïú", temp.item.State) == true)
+                            if (StringUtil.IsInList("æ³¨é”€", temp.item.State) == true)
                             {
-                                strError = "³ö°æÈÕÆÚÎª '" + temp.item.PublishTime + "' µÄ²á¼ÇÂ¼×´Ì¬Îª¡°×¢Ïú¡±£¬²»ÄÜ±»ÍÏÈëÁíÒ»ºÏ¶©²á";
+                                strError = "å‡ºç‰ˆæ—¥æœŸä¸º '" + temp.item.PublishTime + "' çš„å†Œè®°å½•çŠ¶æ€ä¸ºâ€œæ³¨é”€â€ï¼Œä¸èƒ½è¢«æ‹–å…¥å¦ä¸€åˆè®¢å†Œ";
                                 goto ERROR1;
                             }
                         }
 
-                        // ½øĞĞ¼ì²é£¬ÒªÇósource_cellsÖĞËùÓĞ³ÉÔ±¶¼ÊÇ³ÉÔ±²á
+                        // è¿›è¡Œæ£€æŸ¥ï¼Œè¦æ±‚source_cellsä¸­æ‰€æœ‰æˆå‘˜éƒ½æ˜¯æˆå‘˜å†Œ
                         Cell temp_parent = null;
                         /*
                         nRet = IsBelongToBinding(temp,
@@ -10593,28 +10593,28 @@ MessageBoxDefaultButton.Button2);
 
                         if (temp_parent == null)
                         {
-                            strError = "ÒªÇóËùÍÏ×§µÄ¸ñ×Ó¶¼ÊÇºÏ¶©³ÉÔ±";
+                            strError = "è¦æ±‚æ‰€æ‹–æ‹½çš„æ ¼å­éƒ½æ˜¯åˆè®¢æˆå‘˜";
                             goto ERROR1;
                         }
 
-                        // ¼ì²éÔ´ºÏ¶©²áÊÇ·ñÎª¹Ì»¯×´Ì¬
+                        // æ£€æŸ¥æºåˆè®¢å†Œæ˜¯å¦ä¸ºå›ºåŒ–çŠ¶æ€
                         if (CheckProcessingState(temp_parent.item) == false)
                         {
-                            strError = "Ô´ºÏ¶©²á '" + temp_parent.item.PublishTime + "' Îª¹Ì»¯×´Ì¬£¬²»ÄÜ´ÓÖĞÍÏ³öµ¥²á";
+                            strError = "æºåˆè®¢å†Œ '" + temp_parent.item.PublishTime + "' ä¸ºå›ºåŒ–çŠ¶æ€ï¼Œä¸èƒ½ä»ä¸­æ‹–å‡ºå•å†Œ";
                             goto ERROR1;
                         }
 
-                        // ¼ì²éÔ´ºÏ¶©²áÊÇ·ñÎªËø¶¨×´Ì¬
+                        // æ£€æŸ¥æºåˆè®¢å†Œæ˜¯å¦ä¸ºé”å®šçŠ¶æ€
                         if (temp_parent.item.Locked == true)
                         {
-                            strError = "Ô´ºÏ¶©²á '" + temp_parent.item.PublishTime + "' ÎªËø¶¨×´Ì¬£¬²»ÄÜ´ÓÖĞÍÏ³öµ¥²á";
+                            strError = "æºåˆè®¢å†Œ '" + temp_parent.item.PublishTime + "' ä¸ºé”å®šçŠ¶æ€ï¼Œä¸èƒ½ä»ä¸­æ‹–å‡ºå•å†Œ";
                             goto ERROR1;
                         }
                     }
 
-                    // ĞèÒªÔ¤ÏÈ¼ì²é£¬¼´½«ÍÏÈëtarget_parent·¶Î§µÄ¶ÔÏó£¬ÊÇ·ñºÍÒÑÓĞµÄÆÚÖØ¸´ÁË
-                    // Èç¹û²»¼ì²é£¬¾Í¿ÉÄÜÔÚÍÏ³öÊ±ºò²»±¨´í¶øÔÚÍÏÈëµÄÊ±ºò±¨´í
-                    // TODO: ÕâÖÖÇé¿ö¿ÉÒÔµ±×÷½»»»¶ÔÏóÀ´ÊµÏÖ£¿³öÏÖMessageBox()Ñ¯ÎÊ
+                    // éœ€è¦é¢„å…ˆæ£€æŸ¥ï¼Œå³å°†æ‹–å…¥target_parentèŒƒå›´çš„å¯¹è±¡ï¼Œæ˜¯å¦å’Œå·²æœ‰çš„æœŸé‡å¤äº†
+                    // å¦‚æœä¸æ£€æŸ¥ï¼Œå°±å¯èƒ½åœ¨æ‹–å‡ºæ—¶å€™ä¸æŠ¥é”™è€Œåœ¨æ‹–å…¥çš„æ—¶å€™æŠ¥é”™
+                    // TODO: è¿™ç§æƒ…å†µå¯ä»¥å½“ä½œäº¤æ¢å¯¹è±¡æ¥å®ç°ï¼Ÿå‡ºç°MessageBox()è¯¢é—®
                     for (int i = 0; i < source_cells.Count; i++)
                     {
                         Cell cell = source_cells[i];
@@ -10624,31 +10624,31 @@ MessageBoxDefaultButton.Button2);
                             cell.Container);
                         if (dup_cell != null && dup_cell.item != null)
                         {
-                            strError = "Ä¿±êºÏ¶©²áÖĞÒÑÓĞ³ö°æÈÕÆÚÎª " + dup_cell.Container.PublishTime + " µÄ³ÉÔ±²á£¬²»ÄÜÍÏÈë³ö°æÈÕÆÚÏàÍ¬µÄ³ÉÔ±²á";
+                            strError = "ç›®æ ‡åˆè®¢å†Œä¸­å·²æœ‰å‡ºç‰ˆæ—¥æœŸä¸º " + dup_cell.Container.PublishTime + " çš„æˆå‘˜å†Œï¼Œä¸èƒ½æ‹–å…¥å‡ºç‰ˆæ—¥æœŸç›¸åŒçš„æˆå‘˜å†Œ";
                             goto ERROR1;
                         }
 
 
                     }
 
-                    // ¼ì²éÄ¿±êÊÇ·ñÎª¹Ì»¯×´Ì¬
+                    // æ£€æŸ¥ç›®æ ‡æ˜¯å¦ä¸ºå›ºåŒ–çŠ¶æ€
                     if (CheckProcessingState(target_parent.item) == false)
                     {
-                        strError = "Ä¿±êºÏ¶©²á '" + target_parent.item.PublishTime + "' Îª¹Ì»¯×´Ì¬£¬²»ÄÜÔÙÍÏÈëµ¥²á";
+                        strError = "ç›®æ ‡åˆè®¢å†Œ '" + target_parent.item.PublishTime + "' ä¸ºå›ºåŒ–çŠ¶æ€ï¼Œä¸èƒ½å†æ‹–å…¥å•å†Œ";
                         goto ERROR1;
                     }
 
-                    // ¼ì²éÄ¿±êÊÇ·ñÎªËø¶¨×´Ì¬
+                    // æ£€æŸ¥ç›®æ ‡æ˜¯å¦ä¸ºé”å®šçŠ¶æ€
                     if (target_parent.item.Locked == true)
                     {
-                        strError = "Ä¿±êºÏ¶©²á '" + target_parent.item.PublishTime + "' ÎªËø¶¨×´Ì¬£¬²»ÄÜÔÙÍÏÈëµ¥²á";
+                        strError = "ç›®æ ‡åˆè®¢å†Œ '" + target_parent.item.PublishTime + "' ä¸ºé”å®šçŠ¶æ€ï¼Œä¸èƒ½å†æ‹–å…¥å•å†Œ";
                         goto ERROR1;
                     }
 
-                    // ½«ºÏ¶©³ÉÔ±²á´ÓºÏ¶©²áÖĞÒÆ³ö£¬³ÉÎªÁÙÊ±¶ÔÏó
+                    // å°†åˆè®¢æˆå‘˜å†Œä»åˆè®¢å†Œä¸­ç§»å‡ºï¼Œæˆä¸ºä¸´æ—¶å¯¹è±¡
                     nRet = RemoveFromBinding(
                         true,
-                        false,  // TODO: ¿ÉÒÔÊÔÑétrue£¬¿´¿´AddToBinding()ÊÇ·ñ¿ÉÒÔÊÊÓ¦
+                        false,  // TODO: å¯ä»¥è¯•éªŒtrueï¼Œçœ‹çœ‹AddToBinding()æ˜¯å¦å¯ä»¥é€‚åº”
                         source_cells,
                         out strError);
                     if (nRet == -1)
@@ -10658,7 +10658,7 @@ MessageBoxDefaultButton.Button2);
                     VerifyAll();
 #endif
 
-                    // ½«Èô¸Éµ¥²á¼ÓÈëÒ»¸öºÏ¶©²á
+                    // å°†è‹¥å¹²å•å†ŒåŠ å…¥ä¸€ä¸ªåˆè®¢å†Œ
                     nRet = AddToBinding(source_cells,
                         target_parent,
                         out strError);
@@ -10684,19 +10684,19 @@ MessageBoxDefaultButton.Button2);
                 }
 
                 // 4)
-                // µ¥²áµÄ¸ñ×ÓÍÏÈëµ¥²á·¶Î§¡£Êµ¼ÊÉÏÊÇÒÆ¶¯µ¥²á¸ñ×ÓµÄÎ»ÖÃ
+                // å•å†Œçš„æ ¼å­æ‹–å…¥å•å†ŒèŒƒå›´ã€‚å®é™…ä¸Šæ˜¯ç§»åŠ¨å•å†Œæ ¼å­çš„ä½ç½®
                 if (source_parent == null && target_parent == null)
                 {
                     if (source_cells.Count > 1)
                     {
-                        strError = "Ä¿Ç°Ö»Ö§³Ö½«Ò»¸öµ¥²á¸ñ×ÓÍÏ¶¯Î»ÖÃ";
+                        strError = "ç›®å‰åªæ”¯æŒå°†ä¸€ä¸ªå•å†Œæ ¼å­æ‹–åŠ¨ä½ç½®";
                         goto ERROR1;
                     }
 
-                    // Ä¿±êÎªÆÕÍ¨¸ñ×Ó(·ÇNullCell)
+                    // ç›®æ ‡ä¸ºæ™®é€šæ ¼å­(éNullCell)
                     if (target != null)
                     {
-                        // ¿çÆÚÒÆ¶¯
+                        // è·¨æœŸç§»åŠ¨
                         if (target.Container != source_cells[0].Container)
                         {
                             Cell cell = source_cells[0];
@@ -10704,24 +10704,24 @@ MessageBoxDefaultButton.Button2);
                                 && cell.Container == this.FreeIssue)
                             {
                                 DialogResult result = MessageBox.Show(this,
-"À´×ÔÓÚ×ÔÓÉÆÚµÄºÏ¶©²á¸ñ×Ó " + cell.item.PublishTime + "(²Î¿¼ID:" + cell.item.RefID + ") Èô±»ÍÏÈëÆäËûÆÚ£¬½«±»¸Ä±äÎªµ¥²áĞÔÖÊ¡£\r\n\r\nÊÇ·ñ¼ÌĞø?",
+"æ¥è‡ªäºè‡ªç”±æœŸçš„åˆè®¢å†Œæ ¼å­ " + cell.item.PublishTime + "(å‚è€ƒID:" + cell.item.RefID + ") è‹¥è¢«æ‹–å…¥å…¶ä»–æœŸï¼Œå°†è¢«æ”¹å˜ä¸ºå•å†Œæ€§è´¨ã€‚\r\n\r\næ˜¯å¦ç»§ç»­?",
 "BindingControls",
 MessageBoxButtons.OKCancel,
 MessageBoxIcon.Question,
 MessageBoxDefaultButton.Button2);
                                 if (result == DialogResult.Cancel)
                                 {
-                                    strError = "ÍÏ¶¯²Ù×÷±»·ÅÆú";
+                                    strError = "æ‹–åŠ¨æ“ä½œè¢«æ”¾å¼ƒ";
                                     goto ERROR1;
                                 }
                                 cell.item.IsParent = false;
                             }
 
                             /*
-                            strError = "ÍÏ¶¯Ê±Ô´ºÍÄ¿±êÎ»ÖÃÓ¦ÊôÓÚÍ¬Ò»ÆÚ";
+                            strError = "æ‹–åŠ¨æ—¶æºå’Œç›®æ ‡ä½ç½®åº”å±äºåŒä¸€æœŸ";
                             goto ERROR1;
                              * */
-                            // ÒÆ¶¯Ò»¸ö¸ñ×Óµ½²»Í¬µÄÆÚ
+                            // ç§»åŠ¨ä¸€ä¸ªæ ¼å­åˆ°ä¸åŒçš„æœŸ
                             nRet = MoveToAnotherIssue(source_cells[0],
                                 target.Container,
                                 target.Container.IndexOfCell(target),
@@ -10731,7 +10731,7 @@ MessageBoxDefaultButton.Button2);
                             return;
                         }
 
-                        // Í¬Ò»ÆÚÄÚÒÆ¶¯
+                        // åŒä¸€æœŸå†…ç§»åŠ¨
                         IssueBindingItem issue = target.Container;
                         Debug.Assert(issue != null, "");
                         int nTargetCol = issue.IndexOfCell(target);
@@ -10745,19 +10745,19 @@ MessageBoxDefaultButton.Button2);
                         if (issue.IssueLayoutState == IssueLayoutState.Binding)
                         {
 
-                            // Ì½²âÊÇ·ñÎªºÏ¶©³ÉÔ±Õ¼¾İµÄÎ»ÖÃ
+                            // æ¢æµ‹æ˜¯å¦ä¸ºåˆè®¢æˆå‘˜å æ®çš„ä½ç½®
                             // return:
-                            //      -1  ÊÇ¡£²¢ÇÒÊÇË«¸ñµÄ×ó²àÎ»ÖÃ
-                            //      0   ²»ÊÇ
-                            //      1   ÊÇ¡£²¢ÇÒÊÇË«¸ñµÄÓÒ²àÎ»ÖÃ
+                            //      -1  æ˜¯ã€‚å¹¶ä¸”æ˜¯åŒæ ¼çš„å·¦ä¾§ä½ç½®
+                            //      0   ä¸æ˜¯
+                            //      1   æ˜¯ã€‚å¹¶ä¸”æ˜¯åŒæ ¼çš„å³ä¾§ä½ç½®
                             if (issue.IsBoundIndex(nSourceCol) != 0)
                             {
-                                strError = "Ô´²»ÄÜÊÇ³ÉÔ±²á";
+                                strError = "æºä¸èƒ½æ˜¯æˆå‘˜å†Œ";
                                 goto ERROR1;
                             }
                             if (issue.IsBoundIndex(nTargetCol) != 0)
                             {
-                                strError = "Ä¿±ê²»ÄÜÊÇ³ÉÔ±²á";
+                                strError = "ç›®æ ‡ä¸èƒ½æ˜¯æˆå‘˜å†Œ";
                                 goto ERROR1;
                             }
 
@@ -10791,38 +10791,38 @@ MessageBoxDefaultButton.Button2);
                         }
                     }
 
-                    // Ä¿±êÎªNullCell
+                    // ç›®æ ‡ä¸ºNullCell
                     if (target_null != null)
                     {
                         IssueBindingItem target_issue = this.Issues[target_null.Y];
                         Debug.Assert(target_issue != null, "");
 
-                        // ¿çÆÚÒÆ¶¯
+                        // è·¨æœŸç§»åŠ¨
                         if (target_issue != source_cells[0].Container)
                         {
-                            // ¼ì²éÔ´¶ÔÏó£¬ÊÇ·ñÎªÀ´×ÔÓÚ×ÔÓÉÆÚµÄºÏ¶©ĞÔÖÊµÄ¸ñ×Ó£¬Èç¹ûÊÇ£¬ĞèÒªĞŞ¸Äitem.IsParentÎªfalse
+                            // æ£€æŸ¥æºå¯¹è±¡ï¼Œæ˜¯å¦ä¸ºæ¥è‡ªäºè‡ªç”±æœŸçš„åˆè®¢æ€§è´¨çš„æ ¼å­ï¼Œå¦‚æœæ˜¯ï¼Œéœ€è¦ä¿®æ”¹item.IsParentä¸ºfalse
                             Cell cell = source_cells[0];
                             if (cell.item != null && cell.item.IsParent == true
                                 && cell.Container == this.FreeIssue)
                             {
                                 DialogResult result = MessageBox.Show(this,
-"À´×ÔÓÚ×ÔÓÉÆÚµÄºÏ¶©²á¸ñ×Ó " + cell.item.PublishTime + "(²Î¿¼ID:"+cell.item.RefID+") Èô±»ÍÏÈëÆäËûÆÚ£¬½«±»¸Ä±äÎªµ¥²áĞÔÖÊ¡£\r\n\r\nÊÇ·ñ¼ÌĞø?",
+"æ¥è‡ªäºè‡ªç”±æœŸçš„åˆè®¢å†Œæ ¼å­ " + cell.item.PublishTime + "(å‚è€ƒID:"+cell.item.RefID+") è‹¥è¢«æ‹–å…¥å…¶ä»–æœŸï¼Œå°†è¢«æ”¹å˜ä¸ºå•å†Œæ€§è´¨ã€‚\r\n\r\næ˜¯å¦ç»§ç»­?",
 "BindingControls",
 MessageBoxButtons.OKCancel,
 MessageBoxIcon.Question,
 MessageBoxDefaultButton.Button2);
                                 if (result == DialogResult.Cancel)
                                 {
-                                    strError = "ÍÏ¶¯²Ù×÷±»·ÅÆú";
+                                    strError = "æ‹–åŠ¨æ“ä½œè¢«æ”¾å¼ƒ";
                                     goto ERROR1;
                                 }
                                 cell.item.IsParent = false;
                             }
                             /*
-                            strError = "ÍÏ¶¯Ê±Ô´ºÍÄ¿±êÎ»ÖÃÓ¦ÊôÓÚÍ¬Ò»ÆÚ";
+                            strError = "æ‹–åŠ¨æ—¶æºå’Œç›®æ ‡ä½ç½®åº”å±äºåŒä¸€æœŸ";
                             goto ERROR1;
                              * */
-                            // ÒÆ¶¯Ò»¸ö¸ñ×Óµ½²»Í¬µÄÆÚ
+                            // ç§»åŠ¨ä¸€ä¸ªæ ¼å­åˆ°ä¸åŒçš„æœŸ
                             nRet = MoveToAnotherIssue(source_cells[0],
                                 target_issue,
                                 target_null.X,
@@ -10832,7 +10832,7 @@ MessageBoxDefaultButton.Button2);
                             return;
                         }
 
-                        // Í¬Ò»ÆÚÄÚÒÆ¶¯
+                        // åŒä¸€æœŸå†…ç§»åŠ¨
                         int nTargetCol = target_null.X;
                         Debug.Assert(nTargetCol != -1, "");
                         int nSourceCol = source_cells[0].Container.IndexOfCell(source_cells[0]);
@@ -10845,12 +10845,12 @@ MessageBoxDefaultButton.Button2);
                         {
                             if (target_issue.IsBoundIndex(nSourceCol) != 0)
                             {
-                                strError = "Ô´²»ÄÜÊÇ³ÉÔ±²á";
+                                strError = "æºä¸èƒ½æ˜¯æˆå‘˜å†Œ";
                                 goto ERROR1;
                             }
                             if (target_issue.IsBoundIndex(nTargetCol) != 0)
                             {
-                                strError = "Ä¿±ê²»ÄÜÊÇ³ÉÔ±²á";
+                                strError = "ç›®æ ‡ä¸èƒ½æ˜¯æˆå‘˜å†Œ";
                                 goto ERROR1;
                             }
 
@@ -10893,9 +10893,9 @@ MessageBoxDefaultButton.Button2);
             MessageBox.Show(this, strError);
         }
 
-        // ÒÆ¶¯Ò»¸ö¸ñ×Óµ½²»Í¬µÄÆÚ
+        // ç§»åŠ¨ä¸€ä¸ªæ ¼å­åˆ°ä¸åŒçš„æœŸ
         // parameters:
-        //      nInsertIndex   Òª²åÈëµÄµ¥¸ñindex
+        //      nInsertIndex   è¦æ’å…¥çš„å•æ ¼index
         int MoveToAnotherIssue(Cell source_cell,
             IssueBindingItem target_issue,
             int nInsertIndex,
@@ -10906,24 +10906,24 @@ MessageBoxDefaultButton.Button2);
 
             if (source_cell.Container == target_issue)
             {
-                strError = "±¾À´¾ÍÔÚÍ¬Ò»ÆÚ£¬²»ÊÇ¿çÆÚÒÆ¶¯";
+                strError = "æœ¬æ¥å°±åœ¨åŒä¸€æœŸï¼Œä¸æ˜¯è·¨æœŸç§»åŠ¨";
                 return -1;
             }
 
             if (source_cell is GroupCell)
             {
-                strError = "²»ÄÜÒÆ¶¯×éÊ×Î²¸ñ×Ó";
+                strError = "ä¸èƒ½ç§»åŠ¨ç»„é¦–å°¾æ ¼å­";
                 return -1;
             }
 
 #if DEBUG
             if (source_cell.item != null)
             {
-                Debug.Assert(source_cell.item.IsParent == false, "±¾º¯ÊıÖ»ÄÜ´¦Àí·ÇºÏ¶©²á");
+                Debug.Assert(source_cell.item.IsParent == false, "æœ¬å‡½æ•°åªèƒ½å¤„ç†éåˆè®¢å†Œ");
             }
 #endif
 
-            Debug.Assert(source_cell.IsMember == false, "±¾º¯ÊıÖ»ÄÜ´¦Àí·Ç³ÉÔ±µÄµ¥²á");
+            Debug.Assert(source_cell.IsMember == false, "æœ¬å‡½æ•°åªèƒ½å¤„ç†éæˆå‘˜çš„å•å†Œ");
 
             IssueBindingItem source_issue = source_cell.Container;
             Debug.Assert(source_issue != null, "");
@@ -10941,15 +10941,15 @@ MessageBoxDefaultButton.Button2);
             target_issue.Zong,
             target_issue.Volume);
 
-            string strMessage = "ÊÇ·ñÒª½«ÆÚ " 
+            string strMessage = "æ˜¯å¦è¦å°†æœŸ " 
                 + source_issue.PublishTime 
-                + " ÖĞµÄ¸ñ×ÓÒÆ¶¯µ½ ÆÚ " 
+                + " ä¸­çš„æ ¼å­ç§»åŠ¨åˆ° æœŸ " 
                 + target_issue.PublishTime 
-                + " ÖĞ£¿\r\n\r\nÕâÑù¸ñ×Ó³ıÁË³ö°æÈÕÆÚ»á¸Ä±äÎª "
+                + " ä¸­ï¼Ÿ\r\n\r\nè¿™æ ·æ ¼å­é™¤äº†å‡ºç‰ˆæ—¥æœŸä¼šæ”¹å˜ä¸º "
                 +target_issue.PublishTime
-                +" ÒÔÍâ£¬¾íÆÚºÅÒ²½«´Ó '"
+                +" ä»¥å¤–ï¼Œå·æœŸå·ä¹Ÿå°†ä» '"
                 + strOldVolumeString 
-                + "' ¸ÄÎª '" + strNewVolumeString + "'¡£";
+                + "' æ”¹ä¸º '" + strNewVolumeString + "'ã€‚";
 
             DialogResult result = MessageBox.Show(this,
     strMessage,
@@ -10958,27 +10958,27 @@ MessageBoxDefaultButton.Button2);
     MessageBoxIcon.Question,
     MessageBoxDefaultButton.Button2);
             if (result == DialogResult.No)
-                return 0;   // ·ÅÆúÁË
+                return 0;   // æ”¾å¼ƒäº†
 
             // GroupCell source_group = null;
 
-            // ´ÓÔ­À´µÄÆÚÒÆ×ß
+            // ä»åŸæ¥çš„æœŸç§»èµ°
             int nOldCol = source_issue.IndexOfCell(source_cell);
             Debug.Assert(nOldCol != -1, "");
             if (nOldCol != -1)
             {
                 /*
                 Cell temp = source_issue.GetCell(nOldCol - 1);
-                Debug.Assert(temp == null || temp.item == null, "Ë«¸ñµÄ×ó²àÎ»ÖÃÓ¦¸ÃÃ»ÓĞÄÚÈİ");
+                Debug.Assert(temp == null || temp.item == null, "åŒæ ¼çš„å·¦ä¾§ä½ç½®åº”è¯¥æ²¡æœ‰å†…å®¹");
                  * */
                 if (source_issue.IssueLayoutState == IssueLayoutState.Binding)
                 {
-                    // Çå³ı¾ÉÎ»ÖÃ
+                    // æ¸…é™¤æ—§ä½ç½®
 
                     if (source_cell.item != null
                         && source_cell.item.OrderInfoPosition.X != -1)
                     {
-                        // É¾³ıÇ°²¿²Ù×÷£¬Òª¸üĞÂ¶©¹ºĞÅÏ¢
+                        // åˆ é™¤å‰éƒ¨æ“ä½œï¼Œè¦æ›´æ–°è®¢è´­ä¿¡æ¯
                         nRet = source_cell.item.DoDelete(out strError);
                         if (nRet == -1)
                             return -1;
@@ -10986,7 +10986,7 @@ MessageBoxDefaultButton.Button2);
 
                     source_issue.RemoveSingleIndex(nOldCol);
 
-                    // Ê§È¥ºÍ¶©¹º×éµÄ¹ØÏµ£¬±äÎª¼Æ»®Íâ¸ñ×Ó
+                    // å¤±å»å’Œè®¢è´­ç»„çš„å…³ç³»ï¼Œå˜ä¸ºè®¡åˆ’å¤–æ ¼å­
                     if (source_cell.item != null)
                     {
                         source_cell.item.OrderInfoPosition.X = -1;
@@ -11026,14 +11026,14 @@ MessageBoxDefaultButton.Button2);
                 }
             }
 
-            // ĞèÒª¼ì²éÄ¿±êÎ»ÖÃ£¬²»ÄÜÊÇºÏ¶©±¾ËùÕ¼¾İµÄÁĞ
-            // ¿ÉÄÜ»á¸Ä±ä¸ñ¾Ö£¬nSourceNo»á±äµÃÎŞĞ§
+            // éœ€è¦æ£€æŸ¥ç›®æ ‡ä½ç½®ï¼Œä¸èƒ½æ˜¯åˆè®¢æœ¬æ‰€å æ®çš„åˆ—
+            // å¯èƒ½ä¼šæ”¹å˜æ ¼å±€ï¼ŒnSourceNoä¼šå˜å¾—æ— æ•ˆ
             if (nInsertIndex != -1)
             {
             }
             else
             {
-                // TODO: ¸ÄÎª»ñµÃÄ©Î²µÄµÚÒ»¸ö¿ÕÎ»
+                // TODO: æ”¹ä¸ºè·å¾—æœ«å°¾çš„ç¬¬ä¸€ä¸ªç©ºä½
                 if (target_issue.IssueLayoutState == IssueLayoutState.Binding)
                     nInsertIndex = target_issue.GetFirstAvailableSingleInsertIndex();
                 else
@@ -11052,7 +11052,7 @@ MessageBoxDefaultButton.Button2);
             if (source_cell.item != null)
                 source_cell.item.Container = target_issue;
 
-            GroupCell target_group = null;  // Ö»ÓĞÔÚAcceptionÄ£Ê½ÏÂ²Å¿ÉÄÜÓĞÖµ
+            GroupCell target_group = null;  // åªæœ‰åœ¨Acceptionæ¨¡å¼ä¸‹æ‰å¯èƒ½æœ‰å€¼
 
             if (target_issue.IssueLayoutState == IssueLayoutState.Accepting)
                 target_group = target_issue.BelongToGroup(nInsertIndex);
@@ -11062,7 +11062,7 @@ MessageBoxDefaultButton.Button2);
             if (source_cell.item != null)
                 bSourceHasOrderInfo = source_cell.item.OrderInfoPosition.X != -1;
 
-            // Èç¹ûÔ´±»´Ó×éÇøÓòÍÏ¶¯µ½¼Æ»®ÍâÇøÓò
+            // å¦‚æœæºè¢«ä»ç»„åŒºåŸŸæ‹–åŠ¨åˆ°è®¡åˆ’å¤–åŒºåŸŸ
             if (bSourceHasOrderInfo && target_group == null)
             {
                 if (source_cell.item != null)
@@ -11071,18 +11071,18 @@ MessageBoxDefaultButton.Button2);
                     source_cell.item.OrderInfoPosition.Y = -1;
                     if (source_cell.item.Calculated == true)
                     {
-                        // Ô¤²â¸ñ×Ó±äÎªÆÕÍ¨¿Õ°×¸ñ×Ó
+                        // é¢„æµ‹æ ¼å­å˜ä¸ºæ™®é€šç©ºç™½æ ¼å­
                         source_cell.item = null;
                     }
                 }
             }
 
-            // Èç¹ûÔ´±»´Ó¼Æ»®ÍâÇøÓòÍÏ¶¯µ½×éÇøÓò
+            // å¦‚æœæºè¢«ä»è®¡åˆ’å¤–åŒºåŸŸæ‹–åŠ¨åˆ°ç»„åŒºåŸŸ
             if (bSourceHasOrderInfo == false && target_group != null)
             {
                 if (source_cell.item == null)
                 {
-                    // ¿Õ°×¸ñ×ÓÒª±äÎªÔ¤²â¸ñÊ½
+                    // ç©ºç™½æ ¼å­è¦å˜ä¸ºé¢„æµ‹æ ¼å¼
                     source_cell.item = new ItemBindingItem();
                     source_cell.item.Container = target_issue;
                     source_cell.item.Initial("<root />", out strError);
@@ -11097,13 +11097,13 @@ MessageBoxDefaultButton.Button2);
             }
 
             // 2010/9/21
-            // °ÑÒÆ¶¯µ½×ÔÓÉÆÚµÄÔ¤²â×´Ì¬µÄ¸ñ×Ó±äÎª¿Õ°×¸ñ×Ó
+            // æŠŠç§»åŠ¨åˆ°è‡ªç”±æœŸçš„é¢„æµ‹çŠ¶æ€çš„æ ¼å­å˜ä¸ºç©ºç™½æ ¼å­
             if (source_cell.item != null)
             {
                 if (String.IsNullOrEmpty(source_cell.Container.PublishTime) == true
         && source_cell.item.Calculated == true)
                 {
-                    // Ô¤²â¸ñ×Ó±äÎªÆÕÍ¨¿Õ°×¸ñ×Ó
+                    // é¢„æµ‹æ ¼å­å˜ä¸ºæ™®é€šç©ºç™½æ ¼å­
                     source_cell.item = null;
                 }
             }
@@ -11111,7 +11111,7 @@ MessageBoxDefaultButton.Button2);
             Cell target_cell = source_cell;
             if (target_cell.item != null)
             {
-                // ĞŞ¸Ä²á¼ÇÂ¼ÄÚµÄ×Ö¶Î
+                // ä¿®æ”¹å†Œè®°å½•å†…çš„å­—æ®µ
                 target_cell.item.Volume = strNewVolumeString;
                 target_cell.item.PublishTime = target_issue.PublishTime;
                 target_cell.item.Changed = true;
@@ -11130,13 +11130,13 @@ MessageBoxDefaultButton.Button2);
     nTargetArrivedCountDelta);
             }
 
-            //this.Invalidate();   // TODO: ĞŞ¸ÄÎª×îÉÙÊ§Ğ§¡£Ô´¸ñ×ÓºÍÆäÓÒ±ßµÄÇøÓò£¬Ä¿±ê¸ñ×ÓºÍÓÒ±ßµÄÇøÓò
+            //this.Invalidate();   // TODO: ä¿®æ”¹ä¸ºæœ€å°‘å¤±æ•ˆã€‚æºæ ¼å­å’Œå…¶å³è¾¹çš„åŒºåŸŸï¼Œç›®æ ‡æ ¼å­å’Œå³è¾¹çš„åŒºåŸŸ
             this.AfterWidthChanged(true);
 
-            return 1;   // ×÷ÁË
+            return 1;   // ä½œäº†
         }
 
-        // ´ÓËùÑ¡ÔñµÄ¸ñ×ÓÖĞÑ¡ÔñÆÚºÅ×îĞ¡µÄÒ»¸ö£¬»ñµÃËüµÄÁĞºÅ
+        // ä»æ‰€é€‰æ‹©çš„æ ¼å­ä¸­é€‰æ‹©æœŸå·æœ€å°çš„ä¸€ä¸ªï¼Œè·å¾—å®ƒçš„åˆ—å·
         int DetectFirstMemberCol(List<Cell> members)
         {
             Debug.Assert(members.Count > 0, "");
@@ -11145,7 +11145,7 @@ MessageBoxDefaultButton.Button2);
             return cell.Container.Cells.IndexOf(cell);
         }
 
-        // ½«Èô¸Éµ¥²á¼ÓÈëÒ»¸öºÏ¶©²á
+        // å°†è‹¥å¹²å•å†ŒåŠ å…¥ä¸€ä¸ªåˆè®¢å†Œ
         int AddToBinding(List<Cell> singles,
             Cell parent,
             out string strError)
@@ -11153,18 +11153,18 @@ MessageBoxDefaultButton.Button2);
             strError = "";
 
             if (CheckProcessingState(parent.item) == false
-                && parent.item.Calculated == false   // Ô¤²â¸ñ×Ó³ıÍâ
-                    && parent.item.Deleted == false)  // ÒÑ¾­É¾³ıµÄ¸ñ×Ó³ıÍâ
+                && parent.item.Calculated == false   // é¢„æµ‹æ ¼å­é™¤å¤–
+                    && parent.item.Deleted == false)  // å·²ç»åˆ é™¤çš„æ ¼å­é™¤å¤–
             {
-                strError = "ºÏ¶©²á '" + parent.item.PublishTime + "' Îª¹Ì»¯×´Ì¬£¬²»ÄÜÔÙ¼ÓÈëµ¥²á";
+                strError = "åˆè®¢å†Œ '" + parent.item.PublishTime + "' ä¸ºå›ºåŒ–çŠ¶æ€ï¼Œä¸èƒ½å†åŠ å…¥å•å†Œ";
                 return -1;
             }
 
             if (parent.item.Locked == true
-    && parent.item.Calculated == false   // Ô¤²â¸ñ×Ó³ıÍâ
-        && parent.item.Deleted == false)  // ÒÑ¾­É¾³ıµÄ¸ñ×Ó³ıÍâ
+    && parent.item.Calculated == false   // é¢„æµ‹æ ¼å­é™¤å¤–
+        && parent.item.Deleted == false)  // å·²ç»åˆ é™¤çš„æ ¼å­é™¤å¤–
             {
-                strError = "ºÏ¶©²á '" + parent.item.PublishTime + "' ÎªËø¶¨×´Ì¬£¬²»ÄÜÔÙ¼ÓÈëµ¥²á";
+                strError = "åˆè®¢å†Œ '" + parent.item.PublishTime + "' ä¸ºé”å®šçŠ¶æ€ï¼Œä¸èƒ½å†åŠ å…¥å•å†Œ";
                 return -1;
             }
 
@@ -11174,7 +11174,7 @@ MessageBoxDefaultButton.Button2);
             if (String.IsNullOrEmpty(parent.item.RefID) == true)
                 parent.item.RefID = Guid.NewGuid().ToString();
 
-            // ¼ì²é£ºsinglesÖĞµÄ³ÉÔ±£¬Ó¦¸ÃºÍparentÏÂÊôµÄ¸ñ×ÓµÄÆÚ²»ÖØµş
+            // æ£€æŸ¥ï¼šsinglesä¸­çš„æˆå‘˜ï¼Œåº”è¯¥å’Œparentä¸‹å±çš„æ ¼å­çš„æœŸä¸é‡å 
             for (int i = 0; i < singles.Count; i++)
             {
                 Cell single = singles[i];
@@ -11188,14 +11188,14 @@ MessageBoxDefaultButton.Button2);
                     if (exist_cell.Container == single.Container
                         && exist_cell.item != null)
                     {
-                        strError = "ºÏ¶©²áÖĞÒÑ¾­°üº¬ÁË³ö°æÈÕÆÚÎª '" + issue.PublishTime + "' µÄ(·Ç¿Õ°×)²á(¸ñ×Ó)£¬²»ÄÜÖØ¸´¼ÓÈë";
+                        strError = "åˆè®¢å†Œä¸­å·²ç»åŒ…å«äº†å‡ºç‰ˆæ—¥æœŸä¸º '" + issue.PublishTime + "' çš„(éç©ºç™½)å†Œ(æ ¼å­)ï¼Œä¸èƒ½é‡å¤åŠ å…¥";
                         return -1;
                     }
                 }
             }
 
-            // ¼ì²éµ¥²á£¬¡°×¢Ïú¡±×´Ì¬µÄ²»ÄÜ¼ÓÈëºÏ¶©·¶Î§
-            // Ô¤²â×´Ì¬µÄ²»ÄÜ¼ÓÈëºÏ¶©·¶Î§
+            // æ£€æŸ¥å•å†Œï¼Œâ€œæ³¨é”€â€çŠ¶æ€çš„ä¸èƒ½åŠ å…¥åˆè®¢èŒƒå›´
+            // é¢„æµ‹çŠ¶æ€çš„ä¸èƒ½åŠ å…¥åˆè®¢èŒƒå›´
             for (int i = 0; i < singles.Count; i++)
             {
                 Cell single = singles[i];
@@ -11203,34 +11203,34 @@ MessageBoxDefaultButton.Button2);
 
                 if (single is GroupCell)
                 {
-                    strError = "¶©¹º×éÊ×Î²¸ñ×Ó²»ÄÜ²ÎÓëºÏ¶©";
+                    strError = "è®¢è´­ç»„é¦–å°¾æ ¼å­ä¸èƒ½å‚ä¸åˆè®¢";
                     return -1;
                 }
 
                 if (String.IsNullOrEmpty(single.Container.PublishTime) == true)
                 {
-                    strError = "À´×ÔÓÚ×ÔÓÉÆÚµÄ¸ñ×Ó²»ÄÜ¼ÓÈëºÏ¶©·¶Î§";
+                    strError = "æ¥è‡ªäºè‡ªç”±æœŸçš„æ ¼å­ä¸èƒ½åŠ å…¥åˆè®¢èŒƒå›´";
                     return -1;
                 }
 
                 if (single.item == null)
                     continue;
 
-                if (StringUtil.IsInList("×¢Ïú", single.item.State) == true)
+                if (StringUtil.IsInList("æ³¨é”€", single.item.State) == true)
                 {
-                    strError = "³ö°æÈÕÆÚÎª '" + single.item.PublishTime + "' µÄµ¥²á¼ÇÂ¼×´Ì¬Îª¡°×¢Ïú¡±£¬²»ÄÜ¼ÓÈëºÏ¶©·¶Î§";
+                    strError = "å‡ºç‰ˆæ—¥æœŸä¸º '" + single.item.PublishTime + "' çš„å•å†Œè®°å½•çŠ¶æ€ä¸ºâ€œæ³¨é”€â€ï¼Œä¸èƒ½åŠ å…¥åˆè®¢èŒƒå›´";
                     return -1;
                 }
 
                 if (String.IsNullOrEmpty(single.item.Borrower) == false)
                 {
-                    strError = "³ö°æÈÕÆÚÎª '" + single.item.PublishTime + "' µÄµ¥²á¼ÇÂ¼Ä¿Ç°´¦ÓÚ±»½èÔÄ×´Ì¬£¬²»ÄÜ¼ÓÈëºÏ¶©·¶Î§";
+                    strError = "å‡ºç‰ˆæ—¥æœŸä¸º '" + single.item.PublishTime + "' çš„å•å†Œè®°å½•ç›®å‰å¤„äºè¢«å€Ÿé˜…çŠ¶æ€ï¼Œä¸èƒ½åŠ å…¥åˆè®¢èŒƒå›´";
                     return -1;
                 }
 
                 if (single.item.Calculated == true)
                 {
-                    strError = "³ö°æÈÕÆÚÎª '" + single.item.PublishTime + "' µÄ¸ñ×ÓÎªÔ¤²â×´Ì¬£¬²»ÄÜ¼ÓÈëºÏ¶©·¶Î§";
+                    strError = "å‡ºç‰ˆæ—¥æœŸä¸º '" + single.item.PublishTime + "' çš„æ ¼å­ä¸ºé¢„æµ‹çŠ¶æ€ï¼Œä¸èƒ½åŠ å…¥åˆè®¢èŒƒå›´";
                     return -1;
                 }
             }
@@ -11249,14 +11249,14 @@ MessageBoxDefaultButton.Button2);
                 Debug.Assert(nCol != -1, "");
 
                 /*
-                // ¿´¿´×ó±ßÓĞÃ»ÓĞ¿ÕÒ»¸ñÎ»ÖÃ¡£Èç¹ûÓĞ£¬¾ÍÖ±½ÓÕ¼ÓÃ£¬Èç¹ûÃ»ÓĞ£¬ÔòÆ«ÓÒÕ¼ÓÃ
+                // çœ‹çœ‹å·¦è¾¹æœ‰æ²¡æœ‰ç©ºä¸€æ ¼ä½ç½®ã€‚å¦‚æœæœ‰ï¼Œå°±ç›´æ¥å ç”¨ï¼Œå¦‚æœæ²¡æœ‰ï¼Œåˆ™åå³å ç”¨
                 IssueBindingItem issue = singles[0].Container;
                 Debug.Assert(issue != null, "");
                  * */
                 nCol++;
             }
 
-            // °²·ÅÏÂÊôµÄµ¥¶À²á
+            // å®‰æ”¾ä¸‹å±çš„å•ç‹¬å†Œ
             PlaceMemberCells(parent,
                 singles,
                 nCol);
@@ -11283,7 +11283,7 @@ MessageBoxDefaultButton.Button2);
                 out strPublishTimeString);
             parent.item.PublishTime = strPublishTimeString;
 
-            // ´´½¨<binding>ÔªËØÄÚÆ¬¶Ï
+            // åˆ›å»º<binding>å…ƒç´ å†…ç‰‡æ–­
             parent.item.RefreshBindingXml();
 
             parent.item.Changed = true;
@@ -11306,12 +11306,12 @@ MessageBoxDefaultButton.Button2);
             return 0;
         }
 
-        // ½«ºÏ¶©³ÉÔ±²á´ÓºÏ¶©²áÖĞÒÆ³ö£¬³ÉÎªµ¥²á
-        // ×¢£ºÕâĞ©³ÉÔ±²á¿ÉÄÜ²¢²»¶¼ÊôÓÚÍ¬Ò»¸öºÏ¶©²á
-        // TODO: ĞèÒªĞÂÔö¼ÓÒ»¸ö¹¦ÄÜ£¬ÒÆ³öµÄ¶ÔÏó½øÈëÒ»¸öÊı×é£¬¶ø²»±Ø½øÈëÊµ¼ÊÏÔÊ¾µÄ¸ñ×Ó¡£ÕâĞ©¶ÔÏó½ô½Ó×Å»á±»ÓÃÀ´ÒÆÈëÁíÍâÒ»¸öºÏ¶©²á
+        // å°†åˆè®¢æˆå‘˜å†Œä»åˆè®¢å†Œä¸­ç§»å‡ºï¼Œæˆä¸ºå•å†Œ
+        // æ³¨ï¼šè¿™äº›æˆå‘˜å†Œå¯èƒ½å¹¶ä¸éƒ½å±äºåŒä¸€ä¸ªåˆè®¢å†Œ
+        // TODO: éœ€è¦æ–°å¢åŠ ä¸€ä¸ªåŠŸèƒ½ï¼Œç§»å‡ºçš„å¯¹è±¡è¿›å…¥ä¸€ä¸ªæ•°ç»„ï¼Œè€Œä¸å¿…è¿›å…¥å®é™…æ˜¾ç¤ºçš„æ ¼å­ã€‚è¿™äº›å¯¹è±¡ç´§æ¥ç€ä¼šè¢«ç”¨æ¥ç§»å…¥å¦å¤–ä¸€ä¸ªåˆè®¢å†Œ
         // parameters:
-        //      bShrink ÊÇ·ñÔÚÒÆ×ßÊ×Î»Î»ÖÃµÄ¸ñ×ÓÊ±ËõĞ¡×°¶©·¶Î§
-        //      bDelete ÊÇ·ñÉ¾³ıÒÆ³öµÄ¸ñ×Ó¡£==false£¬ÔòÒÆ³öµ½ÍâÃæ£¬»¹´æÔÚ£»==true£¬Ôò²»´æÔÚ
+        //      bShrink æ˜¯å¦åœ¨ç§»èµ°é¦–ä½ä½ç½®çš„æ ¼å­æ—¶ç¼©å°è£…è®¢èŒƒå›´
+        //      bDelete æ˜¯å¦åˆ é™¤ç§»å‡ºçš„æ ¼å­ã€‚==falseï¼Œåˆ™ç§»å‡ºåˆ°å¤–é¢ï¼Œè¿˜å­˜åœ¨ï¼›==trueï¼Œåˆ™ä¸å­˜åœ¨
         int RemoveFromBinding(
             bool bShrink,
             bool bDelete,
@@ -11323,7 +11323,7 @@ MessageBoxDefaultButton.Button2);
 
             if (bDelete == true)
             {
-                // ¼ì²é
+                // æ£€æŸ¥
                 for (int i = 0; i < members.Count; i++)
                 {
                     Cell member_cell = members[i];
@@ -11334,37 +11334,37 @@ MessageBoxDefaultButton.Button2);
                             return -1;
                         if (nRet == 0)
                         {
-                            strError = "²á "+member_cell.item.RefID+" ²»ÄÜ±»É¾³ı: " + strError;
+                            strError = "å†Œ "+member_cell.item.RefID+" ä¸èƒ½è¢«åˆ é™¤: " + strError;
                             return -1;
                         }
                     }
                 }
             }
 
-            bool bClearAsBlank = true;  // ÊÇ·ñÒªÔÚÉ¾³ıÎ»ÖÃÌî³ä¿Õ°×¸ñ×Ó¡£==true±íÊ¾ÒªÌî³ä£»·ñÔò¾ÍÊÇnull¸ñ×Ó
+            bool bClearAsBlank = true;  // æ˜¯å¦è¦åœ¨åˆ é™¤ä½ç½®å¡«å……ç©ºç™½æ ¼å­ã€‚==trueè¡¨ç¤ºè¦å¡«å……ï¼›å¦åˆ™å°±æ˜¯nullæ ¼å­
 
             if (bShrink == true)
                 bClearAsBlank = false;
 
-            List<Cell> parent_cells = new List<Cell>(); // ×îºóÍ³Ò»´¦ÀíSetBindingRange()
+            List<Cell> parent_cells = new List<Cell>(); // æœ€åç»Ÿä¸€å¤„ç†SetBindingRange()
             for (int i = 0; i < members.Count; i++)
             {
                 Cell member_cell = members[i];
 
                 ItemBindingItem parent_item = member_cell.ParentItem;
                 if (parent_item == null)
-                    continue;   // TODO: ÊÇ·ñÒª¾¯¸æ?
+                    continue;   // TODO: æ˜¯å¦è¦è­¦å‘Š?
 
                 if (CheckProcessingState(parent_item) == false)
                 {
-                    strError = "ºÏ¶©²á '" + parent_item.PublishTime + "' Îª¹Ì»¯×´Ì¬£¬²»ÄÜ´ÓÖĞÒÆ³öµ¥²á";
+                    strError = "åˆè®¢å†Œ '" + parent_item.PublishTime + "' ä¸ºå›ºåŒ–çŠ¶æ€ï¼Œä¸èƒ½ä»ä¸­ç§»å‡ºå•å†Œ";
                     return -1;
                 }
 
-                // ¼ì²éºÏ¶©²áµÄËø¶¨×´Ì¬
+                // æ£€æŸ¥åˆè®¢å†Œçš„é”å®šçŠ¶æ€
                 if (parent_item.Locked == true)
                 {
-                    strError = "ºÏ¶©²á '" + parent_item.PublishTime + "' ÎªËø¶¨×´Ì¬£¬²»ÄÜ´ÓÖĞÒÆ³öµ¥²á";
+                    strError = "åˆè®¢å†Œ '" + parent_item.PublishTime + "' ä¸ºé”å®šçŠ¶æ€ï¼Œä¸èƒ½ä»ä¸­ç§»å‡ºå•å†Œ";
                     return -1;
                 }
 
@@ -11381,14 +11381,14 @@ MessageBoxDefaultButton.Button2);
 
                 // 2010/3/3 
                 bool bLastPos = false;
-                // Èç¹ûÊÇËùÓĞ³ÉÔ±µÄ×îºóÒ»¸ö£¬²¢ÇÒºÍParentÍ¬ÔÚÒ»ÆÚ
+                // å¦‚æœæ˜¯æ‰€æœ‰æˆå‘˜çš„æœ€åä¸€ä¸ªï¼Œå¹¶ä¸”å’ŒParentåŒåœ¨ä¸€æœŸ
                 if (parent_item.MemberCells.Count <= 1
                     && parent_item.Container == member_cell.Container)
                 {
                     bLastPos = true;
                 }
 
-                // »ñµÃÍ¬Ò»ÆÚµÄÄ©Î²/µÚÒ»¸ö¿ÉÓÃÎ»ÖÃ
+                // è·å¾—åŒä¸€æœŸçš„æœ«å°¾/ç¬¬ä¸€ä¸ªå¯ç”¨ä½ç½®
                 int nNewCol = -1;
                 if (bDelete == false || bLastPos == true)
                 {
@@ -11408,16 +11408,16 @@ MessageBoxDefaultButton.Button2);
 
 
 
-                // ÔÚÔ­ÓĞÎ»ÖÃÌí¼Ó¿Õ°×¸ñ×Ó
-                // Á½ÖÖÓïÒå£º1)²»¸ºÔğËõĞ¡ºÏ¶©·¶Î§; 2)±ØÒªÊ±ÒªËõĞ¡ºÏ¶©·¶Î§¡£ÌØ±ğÊÇ×îºóÒ»¸öºÏ¶©²áÒÆ×ßµÄÊ±ºòÒª¾¯¸æ? ºÏ¶©²áÖĞÃ»ÓĞ³ÉÔ±£¬ËãºÏ¶©²áÃ´£¿Òª²»È»·ÅÈë×ÔÓÉÇø
+                // åœ¨åŸæœ‰ä½ç½®æ·»åŠ ç©ºç™½æ ¼å­
+                // ä¸¤ç§è¯­ä¹‰ï¼š1)ä¸è´Ÿè´£ç¼©å°åˆè®¢èŒƒå›´; 2)å¿…è¦æ—¶è¦ç¼©å°åˆè®¢èŒƒå›´ã€‚ç‰¹åˆ«æ˜¯æœ€åä¸€ä¸ªåˆè®¢å†Œç§»èµ°çš„æ—¶å€™è¦è­¦å‘Š? åˆè®¢å†Œä¸­æ²¡æœ‰æˆå‘˜ï¼Œç®—åˆè®¢å†Œä¹ˆï¼Ÿè¦ä¸ç„¶æ”¾å…¥è‡ªç”±åŒº
 
-                bool bOldSeted = false; // ¾ÉÎ»ÖÃÊÇ·ñÒÑ¾­±»´¦Àí°²·Å?
+                bool bOldSeted = false; // æ—§ä½ç½®æ˜¯å¦å·²ç»è¢«å¤„ç†å®‰æ”¾?
 
                 if (bClearAsBlank == false
                     && bDelete == true
                     ) // && bLastPos == false
                 {
-                    // ¿´¿´ÊÇ·ñÓĞ¶©¹ºĞÅÏ¢°ó¶¨
+                    // çœ‹çœ‹æ˜¯å¦æœ‰è®¢è´­ä¿¡æ¯ç»‘å®š
                     if (member_cell.item != null
                         && member_cell.item.OrderInfoPosition.X != -1)
                     {
@@ -11425,7 +11425,7 @@ MessageBoxDefaultButton.Button2);
                         if (nRet == -1)
                             return -1;
                     }
-                    // Çå³ıÎªNullCell
+                    // æ¸…é™¤ä¸ºNullCell
                     issue.SetCell(nOldCol, null);
                     if (issue.IssueLayoutState == IssueLayoutState.Accepting)
                     {
@@ -11433,7 +11433,7 @@ MessageBoxDefaultButton.Button2);
                         {
                             issue.Cells.RemoveAt(nOldCol);
                             if (nNewCol != -1)
-                                nNewCol = issue.GetFirstFreeBlankIndex();   // ÖØĞÂÉú³É
+                                nNewCol = issue.GetFirstFreeBlankIndex();   // é‡æ–°ç”Ÿæˆ
                         }
                     }
                     bOldSeted = true;
@@ -11444,7 +11444,7 @@ MessageBoxDefaultButton.Button2);
 
                 if (bClearAsBlank == true || bLastPos == true)
                 {
-                    // Çå³ıÎª¿Õ°×¸ñ×Ó
+                    // æ¸…é™¤ä¸ºç©ºç™½æ ¼å­
                     Cell blank_cell = new Cell();
                     blank_cell.Container = issue;
                     blank_cell.ParentItem = parent_item;
@@ -11457,34 +11457,34 @@ MessageBoxDefaultButton.Button2);
                     else
                     {
                         Debug.Assert(nNewCol != -1, "");
-                        issue.SetCell(nNewCol, blank_cell); // ĞÂÎ»ÖÃ´´½¨¿Õ°×µÄ¸ñ×Ó£¬×÷ÎªºÏ¶©³ÉÔ±
+                        issue.SetCell(nNewCol, blank_cell); // æ–°ä½ç½®åˆ›å»ºç©ºç™½çš„æ ¼å­ï¼Œä½œä¸ºåˆè®¢æˆå‘˜
                     }
                 }
 
                 if (bDelete == false
                     && issue.IssueLayoutState == IssueLayoutState.Binding)
                 {
-                    // ÔÚ×°¶©²¼¾ÖÏÂ£¬²»¸Ä±ä¶©¹º°ó¶¨µÄÒÆ¶¯£¬¿ÉÒÔËæÒâ½øĞĞ£¬
-                    // ²»±Øµ÷ÓÃDoDelete()º¯Êı
+                    // åœ¨è£…è®¢å¸ƒå±€ä¸‹ï¼Œä¸æ”¹å˜è®¢è´­ç»‘å®šçš„ç§»åŠ¨ï¼Œå¯ä»¥éšæ„è¿›è¡Œï¼Œ
+                    // ä¸å¿…è°ƒç”¨DoDelete()å‡½æ•°
                     if (bOldSeted == false)
                     {
-                        // Çå³ıÎªNullCell
+                        // æ¸…é™¤ä¸ºNullCell
                         Debug.Assert(nOldCol != -1, "");
                         issue.SetCell(nOldCol, null);
                         bOldSeted = true;
                     }
 
-                    // ÕÒÒ»¸öĞÂÎ»ÖÃ°²·Å
+                    // æ‰¾ä¸€ä¸ªæ–°ä½ç½®å®‰æ”¾
                     Debug.Assert(nNewCol != -1, "");
                     issue.GetNewSingleIndex(nNewCol);
                     issue.SetCell(nNewCol, member_cell);
                 }
 
                 if (member_cell.item != null)
-                    member_cell.item.ParentItem = null;  // ±äÎª·Ç³ÉÔ±
-                member_cell.ParentItem = null; // ±äÎª·Ç³ÉÔ±
+                    member_cell.item.ParentItem = null;  // å˜ä¸ºéæˆå‘˜
+                member_cell.ParentItem = null; // å˜ä¸ºéæˆå‘˜
 
-                // Èç¹û×°¶©·¶Î§·¢Éú±ä»¯
+                // å¦‚æœè£…è®¢èŒƒå›´å‘ç”Ÿå˜åŒ–
                 // parent_item.PublishTime = strPublishTimeString;
 
                 /*
@@ -11515,13 +11515,13 @@ MessageBoxDefaultButton.Button2);
                     }
                      * */
 
-                    // ´øÓĞÈ¥ÖØµÄÄÜÁ¦
+                    // å¸¦æœ‰å»é‡çš„èƒ½åŠ›
                     if (parent_cells.IndexOf(parent_cell) == -1)
                         parent_cells.Add(parent_cell);
                 }
                 else
                 {
-                    parent_cell.item.AfterMembersChanged(); // ËäÈ»²»Ñ¹Ëõ·¶Î§£¬µ«ÊÇ³ÉÔ±¿ÉÄÜ·¢Éú±ä»¯
+                    parent_cell.item.AfterMembersChanged(); // è™½ç„¶ä¸å‹ç¼©èŒƒå›´ï¼Œä½†æ˜¯æˆå‘˜å¯èƒ½å‘ç”Ÿå˜åŒ–
 
 #if DEBUG
                     VerifyListCell(parent_item.MemberCells);
@@ -11541,7 +11541,7 @@ MessageBoxDefaultButton.Button2);
 
             }
 
-            // Í³Ò»¼¯ÖĞ´¦Àí
+            // ç»Ÿä¸€é›†ä¸­å¤„ç†
             for (int i = 0; i < parent_cells.Count; i++)
             {
                 Cell parent_cell = parent_cells[i];
@@ -11579,11 +11579,11 @@ MessageBoxDefaultButton.Button2);
             return 0;
         }
 
-        // ¿ÉÄÜ»áÅ×³öÒì³£
-        // ÊÕËõºÏ¶©²á°üº¬µÄ·¶Î§£¬Ìî³äÖĞ²¿µÄNullCell¡£
-        // Î²²¿²»ĞèÒª¼ì²é£¬Ö»ĞèÒª¼ì²éÍ·²¿
+        // å¯èƒ½ä¼šæŠ›å‡ºå¼‚å¸¸
+        // æ”¶ç¼©åˆè®¢å†ŒåŒ…å«çš„èŒƒå›´ï¼Œå¡«å……ä¸­éƒ¨çš„NullCellã€‚
+        // å°¾éƒ¨ä¸éœ€è¦æ£€æŸ¥ï¼Œåªéœ€è¦æ£€æŸ¥å¤´éƒ¨
         // parameters:
-        //      bBackSetParent  ÊÇ·ñÒª°Ñ³ÉÔ±ĞÅÏ¢µÄĞŞ¸Ä¶ÒÏÖµ½parent¶ÔÏó?
+        //      bBackSetParent  æ˜¯å¦è¦æŠŠæˆå‘˜ä¿¡æ¯çš„ä¿®æ”¹å…‘ç°åˆ°parentå¯¹è±¡?
         void SetBindingRange(Cell parent_cell,
             bool bBackSetParent)
         {
@@ -11612,11 +11612,11 @@ MessageBoxDefaultButton.Button2);
                 }
                 else
                 {
-                    // Ëæ±ãÕÒµ½Ò»¸ö¿Õ°×¸ñ×Ó(²»ĞèÒªÁ½¸ö)
+                    // éšä¾¿æ‰¾åˆ°ä¸€ä¸ªç©ºç™½æ ¼å­(ä¸éœ€è¦ä¸¤ä¸ª)
                     nCol = issue.GetFirstFreeBlankIndex();
                 }
 
-                // ²¹³ä¿ßÁş
+                // è¡¥å……çªŸçª¿
                 {
                     int nSetCol = -1;
                     if (issue.IssueLayoutState == IssueLayoutState.Binding)
@@ -11644,18 +11644,18 @@ MessageBoxDefaultButton.Button2);
                     }
                     else
                     {
-                        // Ëæ±ãÕÒµ½Ò»¸ö¿Õ°×¸ñ×Ó(²»ĞèÒªÁ½¸ö)¡£½Ó½ünColÎ»ÖÃ¸üºÃ
+                        // éšä¾¿æ‰¾åˆ°ä¸€ä¸ªç©ºç™½æ ¼å­(ä¸éœ€è¦ä¸¤ä¸ª)ã€‚æ¥è¿‘nColä½ç½®æ›´å¥½
                         nSetCol = issue.GetFirstFreeBlankIndex();
                         Debug.Assert(nSetCol != -1, "");
                     }
 
                     {
                         Cell cell = new Cell();
-                        cell.item = null;   // Ö»ÊÇÕ¼¾İÎ»ÖÃ
+                        cell.item = null;   // åªæ˜¯å æ®ä½ç½®
                         cell.ParentItem = parent_cell.item;
                         issue.SetCell(nSetCol, cell);
 
-                        // ·ÅÔÚºÏÊÊÎ»ÖÃ
+                        // æ”¾åœ¨åˆé€‚ä½ç½®
                         parent_cell.item.InsertMemberCell(cell);
                     }
                 }
@@ -11702,7 +11702,7 @@ MessageBoxDefaultButton.Button2);
 
             // bool bChanged = false;
 
-            // ºÏ¶©²á¸ñ×Ó·¢Éú±ä¶¯
+            // åˆè®¢å†Œæ ¼å­å‘ç”Ÿå˜åŠ¨
             IssueBindingItem first_issue = this.Issues[nFirstLineNo];
             Debug.Assert(first_issue != null, "");
 
@@ -11714,7 +11714,7 @@ MessageBoxDefaultButton.Button2);
                 Debug.Assert(nOldCol != -1, "");
             }
 
-            // ¹ØÓÚfirst_issue
+            // å…³äºfirst_issue
             {
                 if (first_issue.IssueLayoutState == IssueLayoutState.Binding)
                 {
@@ -11730,22 +11730,22 @@ MessageBoxDefaultButton.Button2);
                 }
                 else
                 {
-                    // Ëæ±ãÕÒµ½Ò»¸ö¿Õ°×¸ñ×Ó(²»ĞèÒªÁ½¸ö)
+                    // éšä¾¿æ‰¾åˆ°ä¸€ä¸ªç©ºç™½æ ¼å­(ä¸éœ€è¦ä¸¤ä¸ª)
                     nCol = first_issue.GetFirstFreeBlankIndex();
                 }
             }
 
-            // Èç¹ûºÏ¶©²áĞĞ²»µÈÓÚÆäÒ»¸ö³ÉÔ±²áµÄĞĞ
+            // å¦‚æœåˆè®¢å†Œè¡Œä¸ç­‰äºå…¶ä¸€ä¸ªæˆå‘˜å†Œçš„è¡Œ
             if (parent_cell.Container != first_issue)
             {
                 if (old_first_issue != null)
                     old_first_issue.SetCell(nOldCol, null);
 
-                // TODO: ¾¡Á¿ÕÒµ½binding²¼¾ÖµÄÒ»¸ö³ÉÔ±ÒÑ¾­ÓÃ¹ıµÄÁĞ£¬ÕâÑù¾Í²»ÓÃ°á¶¯³ÉÔ±ÁË
+                // TODO: å°½é‡æ‰¾åˆ°bindingå¸ƒå±€çš„ä¸€ä¸ªæˆå‘˜å·²ç»ç”¨è¿‡çš„åˆ—ï¼Œè¿™æ ·å°±ä¸ç”¨æ¬åŠ¨æˆå‘˜äº†
 
                 first_issue.SetCell(nCol, parent_cell);
                 // 2010/3/29
-                // TODO: Èç¹ûĞÂµÄparentËùÔÚĞĞÎªbinding²¼¾Ö£¬ÄÇÃ´Òª½«ËùÓĞbinding²¼¾ÖµÄ³ÉÔ±ĞĞÖĞµÄ¸ñ×ÓÒÆÎ»£¬Âú×ãºÍÕâ¸öparentµÄÊúÎ»ÖÃ¹ØÏµ
+                // TODO: å¦‚æœæ–°çš„parentæ‰€åœ¨è¡Œä¸ºbindingå¸ƒå±€ï¼Œé‚£ä¹ˆè¦å°†æ‰€æœ‰bindingå¸ƒå±€çš„æˆå‘˜è¡Œä¸­çš„æ ¼å­ç§»ä½ï¼Œæ»¡è¶³å’Œè¿™ä¸ªparentçš„ç«–ä½ç½®å…³ç³»
                 PlaceMemberCells(parent_cell,
                     parent_cell.item.MemberCells,
                     nCol + 1);
@@ -11767,8 +11767,8 @@ MessageBoxDefaultButton.Button2);
              * */
 
 
-            nCol++; // nCol¶ÔAcceptingĞĞ²»Æğ×÷ÓÃ
-            // ²¹³ä¿ßÁş
+            nCol++; // nColå¯¹Acceptingè¡Œä¸èµ·ä½œç”¨
+            // è¡¥å……çªŸçª¿
             for (int i = nFirstLineNo; i <= nLastLineNo; i++)
             {
                 IssueBindingItem issue = this.Issues[i];
@@ -11797,8 +11797,8 @@ MessageBoxDefaultButton.Button2);
                     /*
                     {
                         Cell cell = issue.GetCell(nCol);
-                        // Èç¹ûÊÇ¿Õ°×¸ñ×Ó£¬¶øÇÒÎŞÖ÷£¬ÔòÖ±½ÓÊ¹ÓÃ
-                        // TODO: ÓĞµãÎÊÌâ£¿Õâ¸ö¿Õ°×¸ñ×ÓµÄ×ó·½µÄ¸ñ×ÓÄØ£¿ÊÇ·ñÎª±»Õ¼¾İµÄ?
+                        // å¦‚æœæ˜¯ç©ºç™½æ ¼å­ï¼Œè€Œä¸”æ— ä¸»ï¼Œåˆ™ç›´æ¥ä½¿ç”¨
+                        // TODO: æœ‰ç‚¹é—®é¢˜ï¼Ÿè¿™ä¸ªç©ºç™½æ ¼å­çš„å·¦æ–¹çš„æ ¼å­å‘¢ï¼Ÿæ˜¯å¦ä¸ºè¢«å æ®çš„?
                         if (cell != null
                             && cell.item == null
                             && cell.IsMember == false)
@@ -11819,18 +11819,18 @@ MessageBoxDefaultButton.Button2);
                 }
                 else
                 {
-                    // Ëæ±ãÕÒµ½Ò»¸ö¿Õ°×¸ñ×Ó(²»ĞèÒªÁ½¸ö)¡£½Ó½ünColÎ»ÖÃ¸üºÃ
+                    // éšä¾¿æ‰¾åˆ°ä¸€ä¸ªç©ºç™½æ ¼å­(ä¸éœ€è¦ä¸¤ä¸ª)ã€‚æ¥è¿‘nColä½ç½®æ›´å¥½
                     nSetCol = issue.GetFirstFreeBlankIndex();
                     Debug.Assert(nSetCol != -1, "");
                 }
 
                 {
                     Cell cell = new Cell();
-                    cell.item = null;   // Ö»ÊÇÕ¼¾İÎ»ÖÃ
+                    cell.item = null;   // åªæ˜¯å æ®ä½ç½®
                     cell.ParentItem = parent_cell.item;
                     issue.SetCell(nSetCol, cell);
 
-                    // ·ÅÔÚºÏÊÊÎ»ÖÃ
+                    // æ”¾åœ¨åˆé€‚ä½ç½®
                     parent_cell.item.InsertMemberCell(cell);
                     // bChanged = true;
                 }
@@ -11851,14 +11851,14 @@ MessageBoxDefaultButton.Button2);
                 return;
             }
 
-            // ´ÓÏÔÊ¾¸ñ×ÓÖĞÈ¥µô
-            // ´ÓÔ­À´´ÓÊôµÄÆÚĞĞÖĞÒÆ×ß
-            // TODO: µ¼ÖÂÑ¹Ëõ?
+            // ä»æ˜¾ç¤ºæ ¼å­ä¸­å»æ‰
+            // ä»åŸæ¥ä»å±çš„æœŸè¡Œä¸­ç§»èµ°
+            // TODO: å¯¼è‡´å‹ç¼©?
             int index = cell.Container.Cells.IndexOf(cell);
             Debug.Assert(index != -1, "");
             cell.Container.SetCell(index, null);
 
-            // ´ÓÒÑ×°¶©²á¼¯ºÏÖĞÒÆ×ß
+            // ä»å·²è£…è®¢å†Œé›†åˆä¸­ç§»èµ°
             this.ParentItems.Remove(cell.item);
 
             /*
@@ -11876,7 +11876,7 @@ MessageBoxDefaultButton.Button2);
                 }
             }
              * */
-            // ¼ÓÈë×ÔÓÉÆÚ
+            // åŠ å…¥è‡ªç”±æœŸ
             if (bAddToFree == true)
                 AddToFreeIssue(cell);
         }
@@ -11888,10 +11888,10 @@ MessageBoxDefaultButton.Button2);
             if (this.BindItems.IndexOf(item) == -1)
                 return;
 
-            // ´ÓÒÑ×°¶©²á¼¯ºÏÖĞÒÆ×ß
+            // ä»å·²è£…è®¢å†Œé›†åˆä¸­ç§»èµ°
             this.BindItems.Remove(item);
 
-            // ´ÓÔ­À´´ÓÊôµÄÆÚĞĞÖĞÒÆ×ß
+            // ä»åŸæ¥ä»å±çš„æœŸè¡Œä¸­ç§»èµ°
             IssueBindingItem issue = item.Container;
             Debug.Assert(issue != null, "");
             if (issue != null)
@@ -11906,14 +11906,14 @@ MessageBoxDefaultButton.Button2);
                 }
             }
 
-            // ¼ÓÈë×ÔÓÉÆÚ
+            // åŠ å…¥è‡ªç”±æœŸ
             if (bAddToFree == true)
                 AddToFreeIssue(item);
         }
          * */
 
         /*
-        // ¼ÓÈë×ÔÓÉÆÚ
+        // åŠ å…¥è‡ªç”±æœŸ
         void AddToFreeIssue(ItemBindingItem item)
         {
             Debug.Assert(this.FreeIssue != null, "");
@@ -11925,7 +11925,7 @@ MessageBoxDefaultButton.Button2);
         }
          * */
 
-        // ¼ÓÈë×ÔÓÉÆÚ
+        // åŠ å…¥è‡ªç”±æœŸ
         void AddToFreeIssue(Cell cell)
         {
             Debug.Assert(cell.item != null, "");
@@ -11969,7 +11969,7 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
-        // ÊÇ·ñÓĞµ¥Ôª±»Ñ¡Ôñ?
+        // æ˜¯å¦æœ‰å•å…ƒè¢«é€‰æ‹©?
         public bool HasCellSelected()
         {
             for (int i = 0; i < this.Issues.Count; i++)
@@ -11982,7 +11982,7 @@ MessageBoxDefaultButton.Button2);
             return false;
         }
 
-        // ÊÇ·ñÓĞµ¥Ôª±»Ñ¡Ôñ?
+        // æ˜¯å¦æœ‰å•å…ƒè¢«é€‰æ‹©?
         public bool HasIssueSelected()
         {
             for (int i = 0; i < this.Issues.Count; i++)
@@ -11996,12 +11996,12 @@ MessageBoxDefaultButton.Button2);
         }
 
         /*
-        // ¼ì²éÊÇ·ñÒ»ÆÚÖ»ÓĞÒ»¸ö²á¡£ÆÚ¿ÉÒÔ²»Á¬Ğø
-        // ¼ì²é£ºÒ»ÆÚÖ»ÄÜÓĞÒ»¸ö²á²ÎÓë¡£Ò²¾ÍÊÇËµ£¬Ã¿¸ö²áµÄContainer²»ÄÜÏàÍ¬
+        // æ£€æŸ¥æ˜¯å¦ä¸€æœŸåªæœ‰ä¸€ä¸ªå†Œã€‚æœŸå¯ä»¥ä¸è¿ç»­
+        // æ£€æŸ¥ï¼šä¸€æœŸåªèƒ½æœ‰ä¸€ä¸ªå†Œå‚ä¸ã€‚ä¹Ÿå°±æ˜¯è¯´ï¼Œæ¯ä¸ªå†Œçš„Containerä¸èƒ½ç›¸åŒ
         // return:
         //      -1  error
-        //      0   ºÏ¸ñ
-        //      1   ²»ºÏ¸ñ¡£strErrorÖĞÓĞÌáÊ¾
+        //      0   åˆæ ¼
+        //      1   ä¸åˆæ ¼ã€‚strErrorä¸­æœ‰æç¤º
         static int CheckBindingItems(List<ItemBindingItem> items,
             out string strError)
         {
@@ -12021,7 +12021,7 @@ MessageBoxDefaultButton.Button2);
 
                     if (item.Container == item1.Container)
                     {
-                        strError = "ÓĞÍ¬ÊôÓÚÒ»ÆÚ (" + item.PublishTime + ") µÄ¶à²á";
+                        strError = "æœ‰åŒå±äºä¸€æœŸ (" + item.PublishTime + ") çš„å¤šå†Œ";
                         return 1;
                     }
                 }
@@ -12031,12 +12031,12 @@ MessageBoxDefaultButton.Button2);
         }
          * */
 
-        // ¼ì²éÊÇ·ñÒ»ÆÚÖ»ÓĞÒ»¸ö²á¡£ÆÚ¿ÉÒÔ²»Á¬Ğø
-        // ¼ì²é£ºÒ»ÆÚÖ»ÄÜÓĞÒ»¸ö²á²ÎÓë¡£Ò²¾ÍÊÇËµ£¬Ã¿¸ö²áµÄContainer²»ÄÜÏàÍ¬
+        // æ£€æŸ¥æ˜¯å¦ä¸€æœŸåªæœ‰ä¸€ä¸ªå†Œã€‚æœŸå¯ä»¥ä¸è¿ç»­
+        // æ£€æŸ¥ï¼šä¸€æœŸåªèƒ½æœ‰ä¸€ä¸ªå†Œå‚ä¸ã€‚ä¹Ÿå°±æ˜¯è¯´ï¼Œæ¯ä¸ªå†Œçš„Containerä¸èƒ½ç›¸åŒ
         // return:
         //      -1  error
-        //      0   ºÏ¸ñ
-        //      1   ²»ºÏ¸ñ¡£strErrorÖĞÓĞÌáÊ¾
+        //      0   åˆæ ¼
+        //      1   ä¸åˆæ ¼ã€‚strErrorä¸­æœ‰æç¤º
         static int CheckBindingCells(List<Cell> cells,
             out string strError)
         {
@@ -12052,16 +12052,16 @@ MessageBoxDefaultButton.Button2);
                 }
 
                 if (cell.item != null
-                    && StringUtil.IsInList("×¢Ïú", cell.item.State) == true)
+                    && StringUtil.IsInList("æ³¨é”€", cell.item.State) == true)
                 {
-                    strError = "³ö°æÈÕÆÚÎª '" + cell.item.PublishTime + "' µÄµ¥²á¼ÇÂ¼×´Ì¬Îª¡°×¢Ïú¡±£¬²»ÄÜ¼ÓÈëºÏ¶©·¶Î§";
+                    strError = "å‡ºç‰ˆæ—¥æœŸä¸º '" + cell.item.PublishTime + "' çš„å•å†Œè®°å½•çŠ¶æ€ä¸ºâ€œæ³¨é”€â€ï¼Œä¸èƒ½åŠ å…¥åˆè®¢èŒƒå›´";
                     return 1;
                 }
 
                 if (cell.item != null
     && String.IsNullOrEmpty(cell.item.Borrower) == false)
                 {
-                    strError = "³ö°æÈÕÆÚÎª '" + cell.item.PublishTime + "' µÄµ¥²á¼ÇÂ¼Ä¿Ç°´¦ÓÚ±»½èÔÄ×´Ì¬£¬²»ÄÜ¼ÓÈëºÏ¶©·¶Î§";
+                    strError = "å‡ºç‰ˆæ—¥æœŸä¸º '" + cell.item.PublishTime + "' çš„å•å†Œè®°å½•ç›®å‰å¤„äºè¢«å€Ÿé˜…çŠ¶æ€ï¼Œä¸èƒ½åŠ å…¥åˆè®¢èŒƒå›´";
                     return 1;
                 }
 
@@ -12080,7 +12080,7 @@ MessageBoxDefaultButton.Button2);
 
                     if (cell.Container == cell1.Container)
                     {
-                        strError = "ÓĞÍ¬ÊôÓÚÒ»ÆÚ ("+cell.Container.PublishTime+") µÄ¶à²á";
+                        strError = "æœ‰åŒå±äºä¸€æœŸ ("+cell.Container.PublishTime+") çš„å¤šå†Œ";
                         return 1;
                     }
                 }
@@ -12090,8 +12090,8 @@ MessageBoxDefaultButton.Button2);
         }
 
 #if NOOOOOOOOOOOOOOOOOOO
-        // °²·ÅºÏ²¢±¾²áºÍÏÂÊô²áµÄCellÎ»ÖÃ
-        // ±¾º¯Êı¶Ôparent_cell.item.MemberCells²¢²»½øĞĞÇå³ı(½â³ı¹ØÏµ)¡£Èç¹ûÒª³¹µ×ÖØĞÂ´´½¨£¬ĞèÒªÔÚµ÷ÓÃ±¾º¯ÊıÇ°×ÔĞĞÇå³ı
+        // å®‰æ”¾åˆå¹¶æœ¬å†Œå’Œä¸‹å±å†Œçš„Cellä½ç½®
+        // æœ¬å‡½æ•°å¯¹parent_cell.item.MemberCellså¹¶ä¸è¿›è¡Œæ¸…é™¤(è§£é™¤å…³ç³»)ã€‚å¦‚æœè¦å½»åº•é‡æ–°åˆ›å»ºï¼Œéœ€è¦åœ¨è°ƒç”¨æœ¬å‡½æ•°å‰è‡ªè¡Œæ¸…é™¤
         void PlaceBinding(
             Cell parent_cell,
             List<Cell> member_cells,
@@ -12123,18 +12123,18 @@ MessageBoxDefaultButton.Button2);
             int nCol = -1;
             int nOldCol = parent_cell.Container.Cells.IndexOf(parent_cell);
 
-            // µ±Ç°ºÏ¶©²áËùÔÚµÄÆÚÎ»ÖÃ²»¶Ô£¬ĞèÒªµ÷Õû
+            // å½“å‰åˆè®¢å†Œæ‰€åœ¨çš„æœŸä½ç½®ä¸å¯¹ï¼Œéœ€è¦è°ƒæ•´
             if (first_issue != parent_cell.Container)
             {
-                // °ÑÔ­À´µÄÎ»ÖÃÉèÖÃÎª¿Õ¡£ÕâÑù¾Í²»»áÒıÆğGetFirstAvailableBindingColumn()ÎóÅĞ
+                // æŠŠåŸæ¥çš„ä½ç½®è®¾ç½®ä¸ºç©ºã€‚è¿™æ ·å°±ä¸ä¼šå¼•èµ·GetFirstAvailableBindingColumn()è¯¯åˆ¤
                 if (nOldCol != -1)
                     parent_cell.Container.SetCell(nOldCol, null);
 
                 nCol = first_issue.GetFirstAvailableBindingColumn();
 
-                //ÉèÖÃµ½ĞÂµÄÎ»ÖÃ
+                //è®¾ç½®åˆ°æ–°çš„ä½ç½®
                 first_issue.SetCell(nCol, parent_cell);
-                parent_cell.item.Container = first_issue;   // ¼Ù×°ÊôÓÚÕâ¸öÆÚ
+                parent_cell.item.Container = first_issue;   // å‡è£…å±äºè¿™ä¸ªæœŸ
             }
             else
             {
@@ -12144,13 +12144,13 @@ MessageBoxDefaultButton.Button2);
 
             Debug.Assert(nCol != -1, "");
 
-            // ÖØĞÂ°²ÅÅÔªËØË³Ğò£¬±£Ö¤ĞÂÔöµÄÔªËØÔÚºóÃæ
+            // é‡æ–°å®‰æ’å…ƒç´ é¡ºåºï¼Œä¿è¯æ–°å¢çš„å…ƒç´ åœ¨åé¢
             members.Clear();
             members.AddRange(parent_cell.item.MemberCells);
             members.AddRange(member_cells);
 
 
-            // °²·ÅÏÂÊôµÄµ¥¶À²á
+            // å®‰æ”¾ä¸‹å±çš„å•ç‹¬å†Œ
             PlaceMemberCells(parent_cell,
                 members,
                 nCol + 1,
@@ -12198,29 +12198,29 @@ MessageBoxDefaultButton.Button2);
 
                         if (issue.Cells.IndexOf(cell) != j)
                         {
-                            Debug.Assert(false, "issue.CellsÖĞÓĞÖØ¸´µÄÔªËØ");
+                            Debug.Assert(false, "issue.Cellsä¸­æœ‰é‡å¤çš„å…ƒç´ ");
                         }
 
                         if (cell.Container != issue)
                         {
-                            Debug.Assert(false, "cell.Container²»ÕıÈ·");
+                            Debug.Assert(false, "cell.Containerä¸æ­£ç¡®");
                         }
                     }
                 }
             }
 
-            // ±éÀúºÏ¶©²á¶ÔÏóÊı×é
+            // éå†åˆè®¢å†Œå¯¹è±¡æ•°ç»„
             for (int i = 0; i < this.ParentItems.Count; i++)
             {
                 ItemBindingItem parent_item = this.ParentItems[i];
 
-                IssueBindingItem issue = parent_item.Container; // ¼Ù×°ÊôÓÚÕâ¸öÆÚ
+                IssueBindingItem issue = parent_item.Container; // å‡è£…å±äºè¿™ä¸ªæœŸ
 
                 // Debug.Assert(issue != null, "issue == null");
 
                 if (issue != null)
                 {
-                    // ÕÒµ½ĞĞºÅ
+                    // æ‰¾åˆ°è¡Œå·
                     int nLineNo = this.Issues.IndexOf(issue);
                     Debug.Assert(nLineNo != -1, "");
 
@@ -12234,10 +12234,10 @@ MessageBoxDefaultButton.Button2);
         }
 
 #if NOOOOOOOOOOOOOOOOO
-        // °²·ÅºÏ¶©³ÉÔ±¸ñ×Ó
+        // å®‰æ”¾åˆè®¢æˆå‘˜æ ¼å­
         // parameters:
-        //      members   CellÊı×é¡£×¢ÒâÆäÖĞÓĞµÄCell¿ÉÄÜÆäitemÎªnull£¬Îª¿Õ°×¸ñ×Ó
-        //      strPublishTimeString    Êä³ö³ö°æÊ±¼ä·¶Î§×Ö·û´®
+        //      members   Cellæ•°ç»„ã€‚æ³¨æ„å…¶ä¸­æœ‰çš„Cellå¯èƒ½å…¶itemä¸ºnullï¼Œä¸ºç©ºç™½æ ¼å­
+        //      strPublishTimeString    è¾“å‡ºå‡ºç‰ˆæ—¶é—´èŒƒå›´å­—ç¬¦ä¸²
         void PlaceMemberCells(
             Cell parent_cell,
             List<Cell> members,
@@ -12277,11 +12277,11 @@ MessageBoxDefaultButton.Button2);
                 if (nLastLineNo < nIssueLineNo)
                     nLastLineNo = nIssueLineNo;
 
-                // ¼ì²écell¶ÔÏóÊÇ·ñÒÑ¾­´æÔÚ
+                // æ£€æŸ¥cellå¯¹è±¡æ˜¯å¦å·²ç»å­˜åœ¨
                 int nExistIndex = issue.Cells.IndexOf(cell);
 
-                // Èç¹ûCell±¾À´¾ÍÔÚÍ¬ÆÚµÄÄâ²åÈëÎ»ÖÃÁË
-                // Ö±½ÓÊ¹ÓÃ
+                // å¦‚æœCellæœ¬æ¥å°±åœ¨åŒæœŸçš„æ‹Ÿæ’å…¥ä½ç½®äº†
+                // ç›´æ¥ä½¿ç”¨
                 if (nExistIndex == nCol)
                 {
                     cell.ParentItem = parent_cell.item;
@@ -12290,29 +12290,29 @@ MessageBoxDefaultButton.Button2);
                         item.ParentItem = parent_cell.item;
                     }
 
-                    // parent_cell.item.MemberCells.Remove(cell);  // ±£ÏÕ
+                    // parent_cell.item.MemberCells.Remove(cell);  // ä¿é™©
                     parent_cell.item.InsertMemberCell(cell);
                     continue;
                 }
 
-                // CellÔÚÍ¬Ò»ÆÚ£¬µ«²»ÔÚºÏÊÊµÄÎ»ÖÃ¡£
-                // ÒÆ³öÒÑ¾­´æÔÚµÄCellµ½exist_cellÖĞ£¬´ıÓÃ
+                // Cellåœ¨åŒä¸€æœŸï¼Œä½†ä¸åœ¨åˆé€‚çš„ä½ç½®ã€‚
+                // ç§»å‡ºå·²ç»å­˜åœ¨çš„Cellåˆ°exist_cellä¸­ï¼Œå¾…ç”¨
                 Cell exist_cell = null;
                 if (nExistIndex != -1)
                 {
                     if ((nExistIndex % 2) == 0)
                     {
-                        // Èç¹ûÔÚÆæÊıÎ»ÖÃ£¬¾ÍºÜÆæ¹ÖÁË¡£ÒòÎªÕâ±íÃ÷ÕâÊÇÒ»¸öºÏ¶©µÄ²á
-                        throw new Exception("·¢ÏÖ½«Òª°²·ÅµÄÏÂÊô²á¶ÔÏó¾ÓÈ»ÔÚÆæÊıCellÎ»ÖÃÒÑ¾­´æÔÚ");
+                        // å¦‚æœåœ¨å¥‡æ•°ä½ç½®ï¼Œå°±å¾ˆå¥‡æ€ªäº†ã€‚å› ä¸ºè¿™è¡¨æ˜è¿™æ˜¯ä¸€ä¸ªåˆè®¢çš„å†Œ
+                        throw new Exception("å‘ç°å°†è¦å®‰æ”¾çš„ä¸‹å±å†Œå¯¹è±¡å±…ç„¶åœ¨å¥‡æ•°Cellä½ç½®å·²ç»å­˜åœ¨");
                     }
                     exist_cell = issue.GetCell(nExistIndex);
                     issue.Cells.RemoveAt(nExistIndex);
 
-                    issue.Cells.RemoveAt(nExistIndex - 1);    // ×ó±ßÒ»¸ö£¬Ò²É¾³ı
+                    issue.Cells.RemoveAt(nExistIndex - 1);    // å·¦è¾¹ä¸€ä¸ªï¼Œä¹Ÿåˆ é™¤
                 }
                 else
                 {
-                    // Cell²»ÔÚÍ¬Ò»ÆÚ
+                    // Cellä¸åœ¨åŒä¸€æœŸ
                     Debug.Assert(false, "");
                 }
 
@@ -12321,19 +12321,19 @@ MessageBoxDefaultButton.Button2);
                 /*
                 if (exist_cell == null)
                 {
-                    // Debug.Assert(false, "ºÃÏñ²»¿ÉÄÜ×ßµ½ÕâÀï");
+                    // Debug.Assert(false, "å¥½åƒä¸å¯èƒ½èµ°åˆ°è¿™é‡Œ");
 
                     exist_cell = new Cell();
                     exist_cell.ParentItem = parent_cell.item;
 
-                    // Ö»ÊÇÕ¼¾İÎ»ÖÃ
+                    // åªæ˜¯å æ®ä½ç½®
                     exist_cell.item = item;
                 }*/
 
                 if (exist_cell != null)
                 {
-                    // ¼ÓÈëµ½ÏÖÔÚÎ»ÖÃ
-                    // parent_cell.item.MemberCells.Remove(exist_cell);  // ±£ÏÕ
+                    // åŠ å…¥åˆ°ç°åœ¨ä½ç½®
+                    // parent_cell.item.MemberCells.Remove(exist_cell);  // ä¿é™©
 
                     parent_cell.item.InsertMemberCell(exist_cell);
 
@@ -12343,21 +12343,21 @@ MessageBoxDefaultButton.Button2);
                 else
                 {
                     /*
-                    // Cell²»ÔÚÍ¬Ò»ÆÚ£¬»òÕßÊÇ¶ÀÁ¢µÄµ¥²á
+                    // Cellä¸åœ¨åŒä¸€æœŸï¼Œæˆ–è€…æ˜¯ç‹¬ç«‹çš„å•å†Œ
                     Debug.Assert(cell != null, "");
 
-                    // ´ÓÔ­ÏÈµÄissueÎ»ÖÃÒÆ×ß
+                    // ä»åŸå…ˆçš„issueä½ç½®ç§»èµ°
 
-                    // ´ÓÔ­ÏÈµÄmemberÎ»ÖÃÒÆ×ß
+                    // ä»åŸå…ˆçš„memberä½ç½®ç§»èµ°
                     ItemBindingItem temp_parent = cell.ParentItem;
                     if (temp_parent != null)
                         temp_parent.MemberCells.Remove(cell);
                     cell.ParentItem = null;
                      * */
 
-                    Debug.Assert(false, "ºÃÏñ²»¿ÉÄÜ×ßµ½ÕâÀï");
+                    Debug.Assert(false, "å¥½åƒä¸å¯èƒ½èµ°åˆ°è¿™é‡Œ");
 
-                    // ¼ÓÈëµ½ÏÖÔÚmemberÎ»ÖÃ
+                    // åŠ å…¥åˆ°ç°åœ¨memberä½ç½®
                     // parent_cell.item.MemberCells.Remove(cell); 
                     parent_cell.item.InsertMemberCell(cell);
                 }
@@ -12369,7 +12369,7 @@ MessageBoxDefaultButton.Button2);
                     Debug.Assert(cell.item == item, "");
                 }
 
-                // ÔÚ¼´½«±»¸²¸ÇµÄÎ»ÖÃ½øĞĞ³¹µ×Çå³ı
+                // åœ¨å³å°†è¢«è¦†ç›–çš„ä½ç½®è¿›è¡Œå½»åº•æ¸…é™¤
                 Cell old_cell = issue.GetCell(nCol);
                 if (old_cell != null && old_cell != cell)
                 {
@@ -12399,7 +12399,7 @@ MessageBoxDefaultButton.Button2);
             + this.Issues[nLastLineNo].PublishTime;
 
 
-            // ²¹³ä¿ßÁş
+            // è¡¥å……çªŸçª¿
             for (int i = nFirstLineNo; i <= nLastLineNo; i++)
             {
                 IssueBindingItem issue = this.Issues[i];
@@ -12408,7 +12408,7 @@ MessageBoxDefaultButton.Button2);
 
                 {
                     Cell cell = issue.GetCell(nCol);
-                    // Èç¹ûÊÇ¿Õ°×¸ñ×Ó£¬¶øÇÒÎŞÖ÷£¬ÔòÖ±½ÓÊ¹ÓÃ
+                    // å¦‚æœæ˜¯ç©ºç™½æ ¼å­ï¼Œè€Œä¸”æ— ä¸»ï¼Œåˆ™ç›´æ¥ä½¿ç”¨
                     if (cell != null
                         && cell.item == null
                         && cell.Binded == false)
@@ -12421,7 +12421,7 @@ MessageBoxDefaultButton.Button2);
 
                 issue.GetBlankPosition(nCol / 2, parent_cell.item);
                 /*
-                // Èç¹ûÒª°²·ÅµÄÎ»ÖÃÒÑ¾­´æÔÚÄÚÈİ£¬ÔòÏòÓÒÒÆ¶¯ËüÃÇ(Á½¸ñ)
+                // å¦‚æœè¦å®‰æ”¾çš„ä½ç½®å·²ç»å­˜åœ¨å†…å®¹ï¼Œåˆ™å‘å³ç§»åŠ¨å®ƒä»¬(ä¸¤æ ¼)
                 if (issue.Cells.Count > nCol)
                 {
                     if (issue.Cells[nCol] != null)
@@ -12446,22 +12446,22 @@ MessageBoxDefaultButton.Button2);
 
                 {
                     Cell cell = new Cell();
-                    cell.item = null;   // Ö»ÊÇÕ¼¾İÎ»ÖÃ
+                    cell.item = null;   // åªæ˜¯å æ®ä½ç½®
                     cell.ParentItem = parent_cell.item;
                     issue.SetCell(nCol, cell);
 
-                    // ·ÅÔÚºÏÊÊÎ»ÖÃ
+                    // æ”¾åœ¨åˆé€‚ä½ç½®
                     parent_cell.item.InsertMemberCell(cell);
                 }
             }
         }
 #endif
 
-        // ×·¼Ó°²·ÅºÏ¶©³ÉÔ±¸ñ×Ó
-        // ×¢Òâ±¾º¯Êı²»¸ºÔğµ÷ÕûºÏ¶©²áCellµÄ¸ñ×ÓÎ»ÖÃ
+        // è¿½åŠ å®‰æ”¾åˆè®¢æˆå‘˜æ ¼å­
+        // æ³¨æ„æœ¬å‡½æ•°ä¸è´Ÿè´£è°ƒæ•´åˆè®¢å†ŒCellçš„æ ¼å­ä½ç½®
         // parameters:
-        //      members   CellÊı×é¡£×¢ÒâÆäÖĞÓĞµÄCell¿ÉÄÜÆäitemÎªnull£¬Îª¿Õ°×¸ñ×Ó
-        //      nCol    ÁĞºÅ¡£µ¥¸ñindexÎ»ÖÃ¡£TODO: Èç¹û==-1£¬¿ÉÒÔÑ¡µÚÒ»¸ö¸ñ×ÓËùÔÚÆÚµÄµÚÒ»¸öºÏ¶©¿ÉÓÃÎ»ÖÃ¡£¼ÇµÃ·µ»ØÕâ¸öÁĞºÅ£¬¸øµ÷ÓÃÕß
+        //      members   Cellæ•°ç»„ã€‚æ³¨æ„å…¶ä¸­æœ‰çš„Cellå¯èƒ½å…¶itemä¸ºnullï¼Œä¸ºç©ºç™½æ ¼å­
+        //      nCol    åˆ—å·ã€‚å•æ ¼indexä½ç½®ã€‚TODO: å¦‚æœ==-1ï¼Œå¯ä»¥é€‰ç¬¬ä¸€ä¸ªæ ¼å­æ‰€åœ¨æœŸçš„ç¬¬ä¸€ä¸ªåˆè®¢å¯ç”¨ä½ç½®ã€‚è®°å¾—è¿”å›è¿™ä¸ªåˆ—å·ï¼Œç»™è°ƒç”¨è€…
         void PlaceMemberCells(
             Cell parent_cell,
             List<Cell> members,
@@ -12486,9 +12486,9 @@ MessageBoxDefaultButton.Button2);
 
                 if (issue.IssueLayoutState == IssueLayoutState.Accepting)
                 {
-                    // ½«Ô­À´µÄ³ÉÔ±ÖĞÊôÓÚÕâ¸öÆÚµÄÉ¾³ı
+                    // å°†åŸæ¥çš„æˆå‘˜ä¸­å±äºè¿™ä¸ªæœŸçš„åˆ é™¤
                     parent_cell.item.RemoveMemberCell(issue);
-                    // ÀûÓÃ¾ÉµÄÎ»ÖÃ
+                    // åˆ©ç”¨æ—§çš„ä½ç½®
                     parent_cell.item.InsertMemberCell(cell);
                     cell.ParentItem = parent_cell.item;
                     if (cell.item != null)
@@ -12501,7 +12501,7 @@ MessageBoxDefaultButton.Button2);
                 }
 
                 // Debug.Assert(issue.Cells.IndexOf(cell) != -1, "");
-                // ÓĞÍêÈ«Ã»ÓĞ¼ÓÈëissue.CellsµÄCellµÄ¿ÉÄÜ
+                // æœ‰å®Œå…¨æ²¡æœ‰åŠ å…¥issue.Cellsçš„Cellçš„å¯èƒ½
 
                 // int nIssueLineNo = this.Issues.IndexOf(issue);
 
@@ -12509,17 +12509,17 @@ MessageBoxDefaultButton.Button2);
                     parent_cell.item,
                     item);
 
-                // ¼ì²écell¶ÔÏóÊÇ·ñÒÑ¾­´æÔÚ
+                // æ£€æŸ¥cellå¯¹è±¡æ˜¯å¦å·²ç»å­˜åœ¨
                 int nExistIndex = issue.Cells.IndexOf(cell);
 
-                // Èç¹ûCell±¾À´¾ÍÔÚÍ¬ÆÚµÄÄâ²åÈëÎ»ÖÃ×ó²à
+                // å¦‚æœCellæœ¬æ¥å°±åœ¨åŒæœŸçš„æ‹Ÿæ’å…¥ä½ç½®å·¦ä¾§
                 if (nExistIndex != -1
                     && nExistIndex == nCol - 1)
                 {
-                    // ¼ì²ânColÎ»ÖÃÊÇ·ñÎª¿Õ°×
+                    // æ£€æµ‹nColä½ç½®æ˜¯å¦ä¸ºç©ºç™½
                     if (issue.IsBlankSingleIndex(nCol) == true)
                     {
-                        // ¿ÉÒÔÓÅ»¯
+                        // å¯ä»¥ä¼˜åŒ–
                         cell.ParentItem = parent_cell.item;
                         if (item != null)
                             item.ParentItem = parent_cell.item;
@@ -12532,17 +12532,17 @@ MessageBoxDefaultButton.Button2);
                     }
                 }
 
-                // Èç¹ûCell±¾À´¾ÍÔÚÍ¬ÆÚµÄÄâ²åÈëÎ»ÖÃÁË
-                // Ö±½ÓÊ¹ÓÃ
+                // å¦‚æœCellæœ¬æ¥å°±åœ¨åŒæœŸçš„æ‹Ÿæ’å…¥ä½ç½®äº†
+                // ç›´æ¥ä½¿ç”¨
                 if (nExistIndex == nCol)
                 {
-                    // »¹Òª¿´¿´nCol×ó±ßµÄÎ»ÖÃÊÇ·ñºÏÊÊ
+                    // è¿˜è¦çœ‹çœ‹nColå·¦è¾¹çš„ä½ç½®æ˜¯å¦åˆé€‚
                     Cell cellLeft = issue.GetCell(nCol - 1);
 
                     if (IssueBindingItem.IsBlankOrNullCell(cellLeft) == true
                         || (cellLeft != null && cell.item != null && cell.item == parent_cell.item))
                     {
-                        // Çå¿Õ×ó²à
+                        // æ¸…ç©ºå·¦ä¾§
                         if (cellLeft != null && cell.item != null && cell.item == parent_cell.item)
                         {
                         }
@@ -12555,14 +12555,14 @@ MessageBoxDefaultButton.Button2);
                             item.ParentItem = parent_cell.item;
                         }
 
-                        // parent_cell.item.MemberCells.Remove(cell);  // ±£ÏÕ
+                        // parent_cell.item.MemberCells.Remove(cell);  // ä¿é™©
                         parent_cell.item.InsertMemberCell(cell);
                         continue;
                     }
                 }
 
-                // CellÔÚÍ¬Ò»ÆÚ£¬µ«²»ÔÚºÏÊÊµÄÎ»ÖÃ¡£
-                // ÒÆ³öÒÑ¾­´æÔÚµÄCellµ½exist_cellÖĞ£¬´ıÓÃ
+                // Cellåœ¨åŒä¸€æœŸï¼Œä½†ä¸åœ¨åˆé€‚çš„ä½ç½®ã€‚
+                // ç§»å‡ºå·²ç»å­˜åœ¨çš„Cellåˆ°exist_cellä¸­ï¼Œå¾…ç”¨
                 Cell exist_cell = null;
                 if (nExistIndex != -1)
                 {
@@ -12570,11 +12570,11 @@ MessageBoxDefaultButton.Button2);
 
                     if (nExistIndex > nCol)
                     {
-                        // Ì½²âÊÇ·ñÎªºÏ¶©³ÉÔ±Õ¼¾İµÄÎ»ÖÃ
+                        // æ¢æµ‹æ˜¯å¦ä¸ºåˆè®¢æˆå‘˜å æ®çš„ä½ç½®
                         // return:
-                        //      -1  ÊÇ¡£²¢ÇÒÊÇË«¸ñµÄ×ó²àÎ»ÖÃ
-                        //      0   ²»ÊÇ
-                        //      1   ÊÇ¡£²¢ÇÒÊÇË«¸ñµÄÓÒ²àÎ»ÖÃ
+                        //      -1  æ˜¯ã€‚å¹¶ä¸”æ˜¯åŒæ ¼çš„å·¦ä¾§ä½ç½®
+                        //      0   ä¸æ˜¯
+                        //      1   æ˜¯ã€‚å¹¶ä¸”æ˜¯åŒæ ¼çš„å³ä¾§ä½ç½®
                         int nRet = issue.IsBoundIndex(nExistIndex);
                         if (nRet == -1 || nRet == 1)
                             issue.SetCell(nExistIndex, null);   // 2010/3/29
@@ -12584,8 +12584,8 @@ MessageBoxDefaultButton.Button2);
                     else
                         issue.SetCell(nExistIndex, null);   // 2010/3/17
 
-                    // Èç¹ûºÏ¶©±¾¶ÔÏóÒ²ÔÚÍ¬Ò»ÆÚ£¬¿ÉÄÜ»áÒòÎªGetBlankDoubleIndex()¶ø¶ø±»ÒÆ¶¯¡£
-                    // ĞèÒªÖØĞÂÒÆ¶¯µ½ºÏÊÊµÄÎ»ÖÃ
+                    // å¦‚æœåˆè®¢æœ¬å¯¹è±¡ä¹Ÿåœ¨åŒä¸€æœŸï¼Œå¯èƒ½ä¼šå› ä¸ºGetBlankDoubleIndex()è€Œè€Œè¢«ç§»åŠ¨ã€‚
+                    // éœ€è¦é‡æ–°ç§»åŠ¨åˆ°åˆé€‚çš„ä½ç½®
                     if (parent_cell.Container == issue)
                     {
                         int nParentIndex = issue.IndexOfCell(parent_cell);
@@ -12599,11 +12599,11 @@ MessageBoxDefaultButton.Button2);
                 else
                 {
                     /*
-                    // Cell²»ÔÚÍ¬Ò»ÆÚ
+                    // Cellä¸åœ¨åŒä¸€æœŸ
                     Debug.Assert(false, "");
                      * */
 
-                    // Ã»ÓĞ¼ÓÈëissue.CellsµÄÇé¿ö
+                    // æ²¡æœ‰åŠ å…¥issue.Cellsçš„æƒ…å†µ
                 }
 
                 // issue.GetBlankDoubleIndex(nCol - 1, parent_cell.item);
@@ -12611,19 +12611,19 @@ MessageBoxDefaultButton.Button2);
                 /*
                 if (exist_cell == null)
                 {
-                    // Debug.Assert(false, "ºÃÏñ²»¿ÉÄÜ×ßµ½ÕâÀï");
+                    // Debug.Assert(false, "å¥½åƒä¸å¯èƒ½èµ°åˆ°è¿™é‡Œ");
 
                     exist_cell = new Cell();
                     exist_cell.ParentItem = parent_cell.item;
 
-                    // Ö»ÊÇÕ¼¾İÎ»ÖÃ
+                    // åªæ˜¯å æ®ä½ç½®
                     exist_cell.item = item;
                 }*/
 
                 if (exist_cell != null)
                 {
-                    // ¼ÓÈëµ½ÏÖÔÚÎ»ÖÃ
-                    // parent_cell.item.MemberCells.Remove(exist_cell);  // ±£ÏÕ
+                    // åŠ å…¥åˆ°ç°åœ¨ä½ç½®
+                    // parent_cell.item.MemberCells.Remove(exist_cell);  // ä¿é™©
 
                     parent_cell.item.InsertMemberCell(exist_cell);
 
@@ -12633,22 +12633,22 @@ MessageBoxDefaultButton.Button2);
                 else
                 {
                     /*
-                    // Cell²»ÔÚÍ¬Ò»ÆÚ£¬»òÕßÊÇ¶ÀÁ¢µÄµ¥²á
+                    // Cellä¸åœ¨åŒä¸€æœŸï¼Œæˆ–è€…æ˜¯ç‹¬ç«‹çš„å•å†Œ
                     Debug.Assert(cell != null, "");
 
-                    // ´ÓÔ­ÏÈµÄissueÎ»ÖÃÒÆ×ß
+                    // ä»åŸå…ˆçš„issueä½ç½®ç§»èµ°
 
-                    // ´ÓÔ­ÏÈµÄmemberÎ»ÖÃÒÆ×ß
+                    // ä»åŸå…ˆçš„memberä½ç½®ç§»èµ°
                     ItemBindingItem temp_parent = cell.ParentItem;
                     if (temp_parent != null)
                         temp_parent.MemberCells.Remove(cell);
                     cell.ParentItem = null;
                      * */
 
-                    // Debug.Assert(false, "ºÃÏñ²»¿ÉÄÜ×ßµ½ÕâÀï");
-                    // Ã»ÓĞÔ¤ÏÈ¼ÓÈëissue.CellsµÄÇé¿ö¿ÉÄÜ×ßµ½ÕâÀï
+                    // Debug.Assert(false, "å¥½åƒä¸å¯èƒ½èµ°åˆ°è¿™é‡Œ");
+                    // æ²¡æœ‰é¢„å…ˆåŠ å…¥issue.Cellsçš„æƒ…å†µå¯èƒ½èµ°åˆ°è¿™é‡Œ
 
-                    // ¼ÓÈëµ½ÏÖÔÚmemberÎ»ÖÃ
+                    // åŠ å…¥åˆ°ç°åœ¨memberä½ç½®
                     // parent_cell.item.MemberCells.Remove(cell); 
                     parent_cell.item.InsertMemberCell(cell);
                 }
@@ -12660,7 +12660,7 @@ MessageBoxDefaultButton.Button2);
                     Debug.Assert(cell.item == item, "");
                 }
 
-                // ÔÚ¼´½«±»¸²¸ÇµÄÎ»ÖÃ½øĞĞ³¹µ×Çå³ı
+                // åœ¨å³å°†è¢«è¦†ç›–çš„ä½ç½®è¿›è¡Œå½»åº•æ¸…é™¤
                 Cell old_cell = issue.GetCell(nCol);
                 if (old_cell != null && old_cell != cell)
                 {
@@ -12683,7 +12683,7 @@ MessageBoxDefaultButton.Button2);
         }
 
 #if NNNNNNNNNNNNNNNNNNNNN
-        // °²·ÅºÏ¶©±¾²áºÍÏÂÊô²áµÄCellÎ»ÖÃ
+        // å®‰æ”¾åˆè®¢æœ¬å†Œå’Œä¸‹å±å†Œçš„Cellä½ç½®
         void PlaceBinding(
             ItemBindingItem parent_item,
             List<ItemBindingItem> members,
@@ -12694,7 +12694,7 @@ MessageBoxDefaultButton.Button2);
 
             /*
             parent_item.MemberItems.Clear();
-            parent_item.MemberItems.AddRange(members);  // ×¢Òâ£¬´ËÊ±Ã¿¸ömemberµÄParentItemÉĞÎ´ÉèÖÃ
+            parent_item.MemberItems.AddRange(members);  // æ³¨æ„ï¼Œæ­¤æ—¶æ¯ä¸ªmemberçš„ParentItemå°šæœªè®¾ç½®
             */
             parent_item.MemberCells.Clear();
 
@@ -12708,9 +12708,9 @@ MessageBoxDefaultButton.Button2);
             Cell cell = new Cell();
             cell.item = parent_item;
             first_issue.SetCell(nCol, cell);
-            parent_item.Container = first_issue; // ¼Ù×°ÊôÓÚÕâ¸öÆÚ
+            parent_item.Container = first_issue; // å‡è£…å±äºè¿™ä¸ªæœŸ
 
-            // °²·ÅÏÂÊôµÄµ¥¶À²á
+            // å®‰æ”¾ä¸‹å±çš„å•ç‹¬å†Œ
             PlaceMemberItems(parent_item,
                 members,
                 nCol + 1,
@@ -12729,7 +12729,7 @@ MessageBoxDefaultButton.Button2);
         }
 #endif
 
-        // »ñµÃ¸ñ×Ó¶ÔÏóËù´ÓÊôµÄÆÚ¶ÔÏó
+        // è·å¾—æ ¼å­å¯¹è±¡æ‰€ä»å±çš„æœŸå¯¹è±¡
         static List<IssueBindingItem> GetIssueList(List<Cell> cells)
         {
             List<IssueBindingItem> results = new List<IssueBindingItem>();
@@ -12748,7 +12748,7 @@ MessageBoxDefaultButton.Button2);
             return results;
         }
 
-        // ³ÉÅúÇĞ»»ÆÚĞĞµÄ²¼¾ÖÄ£Ê½
+        // æˆæ‰¹åˆ‡æ¢æœŸè¡Œçš„å¸ƒå±€æ¨¡å¼
         static int SwitchIssueLayout(List<IssueBindingItem> issues,
             IssueLayoutState state,
             out List<IssueBindingItem> changed_issues,
@@ -12781,7 +12781,7 @@ MessageBoxDefaultButton.Button2);
             return 0;
         }
 
-        // ºÏ¶©Ñ¡ÔñµÄÊÂÏî
+        // åˆè®¢é€‰æ‹©çš„äº‹é¡¹
         void menuItem_bindingSelectedItem_Click(object sender,
             EventArgs e)
         {
@@ -12793,34 +12793,34 @@ MessageBoxDefaultButton.Button2);
 
             Cell parent_cell = null;
 
-            // Ñ¡¶¨µÄÓÃÓÚ×°¶©µÄµ¥²á
+            // é€‰å®šçš„ç”¨äºè£…è®¢çš„å•å†Œ
             List<Cell> member_cells = new List<Cell>();
 
-            // ÒÑ¾­²ÎÓë×°¶©µÄ²á
+            // å·²ç»å‚ä¸è£…è®¢çš„å†Œ
             List<Cell> binded_cells = new List<Cell>();
 
-            // Ä¿±ê²á¡£
-            // ÒÔÇ°¾Í´æÔÚµÄÊôÓÚ×ÔÓÉÆÚµÄ²á£¬ÓÃÓÚÖ±½Ó×÷ÎªºÏ¶©²á¶ÔÏó
+            // ç›®æ ‡å†Œã€‚
+            // ä»¥å‰å°±å­˜åœ¨çš„å±äºè‡ªç”±æœŸçš„å†Œï¼Œç”¨äºç›´æ¥ä½œä¸ºåˆè®¢å†Œå¯¹è±¡
             List<Cell> target_cells = new List<Cell>();
 
 
             List<Cell> selected_cells = this.SelectedCells;
             if (selected_cells.Count == 0)
             {
-                strError = "ÉĞÎ´Ñ¡¶¨ÒªºÏ¶©µÄ²á";
+                strError = "å°šæœªé€‰å®šè¦åˆè®¢çš„å†Œ";
                 goto ERROR1;
             }
 
-            // ¼ì²éËùÑ¡¶¨µÄÊÂÏî£¬±ØĞëÂú×ã
-            // 1) ²»ÊÇÒÑ¾­±»×°¶©µÄ²á
-            // 2) Ò»ÆÚÖ»ÄÜÓĞÒ»¸ö²á²ÎÓë¡£Ò²¾ÍÊÇËµ£¬Ã¿¸ö²áµÄContainer²»ÄÜÏàÍ¬
+            // æ£€æŸ¥æ‰€é€‰å®šçš„äº‹é¡¹ï¼Œå¿…é¡»æ»¡è¶³
+            // 1) ä¸æ˜¯å·²ç»è¢«è£…è®¢çš„å†Œ
+            // 2) ä¸€æœŸåªèƒ½æœ‰ä¸€ä¸ªå†Œå‚ä¸ã€‚ä¹Ÿå°±æ˜¯è¯´ï¼Œæ¯ä¸ªå†Œçš„Containerä¸èƒ½ç›¸åŒ
             for (int i = 0; i < selected_cells.Count; i++)
             {
                 Cell cell = selected_cells[i];
 
                 if (cell is GroupCell)
                 {
-                    strError = "¶©¹º×éÊ×Î²¸ñ×Ó²»ÄÜ²ÎÓëºÏ¶©";
+                    strError = "è®¢è´­ç»„é¦–å°¾æ ¼å­ä¸èƒ½å‚ä¸åˆè®¢";
                     goto ERROR1;
                 }
 
@@ -12829,7 +12829,7 @@ MessageBoxDefaultButton.Button2);
                 {
                     if (cell.item == null)
                     {
-                        strError = "Ñ¡ÔñµÄ¶ÔÏó²»ÄÜ°üº¬À´×ÔÓÚ×ÔÓÉÆÚµÄ¿Õ°×¸ñ×Ó";
+                        strError = "é€‰æ‹©çš„å¯¹è±¡ä¸èƒ½åŒ…å«æ¥è‡ªäºè‡ªç”±æœŸçš„ç©ºç™½æ ¼å­";
                         goto ERROR1;
                     }
 
@@ -12837,7 +12837,7 @@ MessageBoxDefaultButton.Button2);
                         && cell.item.IsParent == false)
                     {
                         DialogResult dialog_result = MessageBox.Show(this,
-    "Äú´Ó×ÔÓÉÆÚÖĞÑ¡¶¨µÄ¶ÔÏó²¢²»ÊÇºÏ¶©±¾£¬ÊÇ·ñÒª°ÑËüµ±×÷±¾´ÎºÏ¶©²Ù×÷µÄÄ¿±ê?\r\n\r\n(Yes: µ±×÷ºÏ¶©Ä¿±ê; No: ²»µ±×÷ºÏ¶©Ä¿±ê£¬²¢±»ºöÂÔ; Cancel: ·ÅÆúÕû¸öºÏ¶©²Ù×÷)",
+    "æ‚¨ä»è‡ªç”±æœŸä¸­é€‰å®šçš„å¯¹è±¡å¹¶ä¸æ˜¯åˆè®¢æœ¬ï¼Œæ˜¯å¦è¦æŠŠå®ƒå½“ä½œæœ¬æ¬¡åˆè®¢æ“ä½œçš„ç›®æ ‡?\r\n\r\n(Yes: å½“ä½œåˆè®¢ç›®æ ‡; No: ä¸å½“ä½œåˆè®¢ç›®æ ‡ï¼Œå¹¶è¢«å¿½ç•¥; Cancel: æ”¾å¼ƒæ•´ä¸ªåˆè®¢æ“ä½œ)",
     "BindingControls",
     MessageBoxButtons.YesNoCancel,
     MessageBoxIcon.Question,
@@ -12846,7 +12846,7 @@ MessageBoxDefaultButton.Button2);
                             cell.item.IsParent = true;
                         else if (dialog_result == DialogResult.Cancel)
                         {
-                            strError = "ºÏ¶©²Ù×÷±»·ÅÆú";
+                            strError = "åˆè®¢æ“ä½œè¢«æ”¾å¼ƒ";
                             goto ERROR1;
                         }
                         else if (dialog_result == DialogResult.No)
@@ -12871,12 +12871,12 @@ MessageBoxDefaultButton.Button2);
                     Debug.Assert(cell.item != null, "");
                     if (CheckProcessingState(cell.item) == false)
                     {
-                        strError = "ºÏ¶©²á '" + cell.item.PublishTime + "' Îª¹Ì»¯×´Ì¬£¬²»ÄÜ×÷Îª×°¶©Ä¿±ê";
+                        strError = "åˆè®¢å†Œ '" + cell.item.PublishTime + "' ä¸ºå›ºåŒ–çŠ¶æ€ï¼Œä¸èƒ½ä½œä¸ºè£…è®¢ç›®æ ‡";
                         goto ERROR1;
                     }
                     if (cell.item.Locked == true)
                     {
-                        strError = "ºÏ¶©²á '" + cell.item.PublishTime + "' ÎªËø¶¨×´Ì¬£¬²»ÄÜ×÷Îª×°¶©Ä¿±ê";
+                        strError = "åˆè®¢å†Œ '" + cell.item.PublishTime + "' ä¸ºé”å®šçŠ¶æ€ï¼Œä¸èƒ½ä½œä¸ºè£…è®¢ç›®æ ‡";
                         goto ERROR1;
                     }
                     target_cells.Add(cell);
@@ -12885,7 +12885,7 @@ MessageBoxDefaultButton.Button2);
 
                 if (cell.item != null && cell.item.Calculated == true)
                 {
-                    strError = "Ô¤²â¸ñ×Ó²»ÄÜ²ÎÓëºÏ¶©";
+                    strError = "é¢„æµ‹æ ¼å­ä¸èƒ½å‚ä¸åˆè®¢";
                     goto ERROR1;
                 }
 
@@ -12895,7 +12895,7 @@ MessageBoxDefaultButton.Button2);
                     binded_cells.Add(cell);
                 else
                 {
-                    // ÅÅ³ıºÏ¶©±¾¶ÔÏó£¬½ö¼ÓÈëÆÕÍ¨µ¥²á¶ÔÏó
+                    // æ’é™¤åˆè®¢æœ¬å¯¹è±¡ï¼Œä»…åŠ å…¥æ™®é€šå•å†Œå¯¹è±¡
                     if (this.IsBindingParent(cell) == false)
                     {
                         member_cells.Add(cell);
@@ -12907,31 +12907,31 @@ MessageBoxDefaultButton.Button2);
 
             if (binded_cells.Count > 0)
             {
-                strError = "ÓĞ " + binded_cells.Count.ToString() + " ¸öÊÂÏîÊÇÒÑ¾­±»ºÏ¶©µÄ³ÉÔ±²á£¬Òò´ËÎŞ·¨ÔÙ½øĞĞºÏ¶©";
+                strError = "æœ‰ " + binded_cells.Count.ToString() + " ä¸ªäº‹é¡¹æ˜¯å·²ç»è¢«åˆè®¢çš„æˆå‘˜å†Œï¼Œå› æ­¤æ— æ³•å†è¿›è¡Œåˆè®¢";
                 goto ERROR1;
             }
 
             if (member_cells.Count == 0)
             {
-                strError = "ËùÑ¡¶¨µÄ¸ñ×ÓÖĞÃ»ÓĞ°üº¬ÈÎºÎÎ´×°¶©µÄµ¥²á";
+                strError = "æ‰€é€‰å®šçš„æ ¼å­ä¸­æ²¡æœ‰åŒ…å«ä»»ä½•æœªè£…è®¢çš„å•å†Œ";
                 goto ERROR1;
             }
 
             if (target_cells.Count > 1)
             {
-                strError = "ËùÑ¡µÄ²áÖĞÓĞ " + target_cells.Count.ToString() + " ¸ö×ÔÓÉ²á»òÕßºÏ¶©²á£¬Òò´ËÎŞ·¨½øĞĞºÏ¶©¡£ÇëÈ·±£Ö»°üº¬Ò»¸ö(±»ÓÃ×÷ºÏ¶©Ä¿±êµÄ)×ÔÓÉ²á»òºÏ¶©²á";
+                strError = "æ‰€é€‰çš„å†Œä¸­æœ‰ " + target_cells.Count.ToString() + " ä¸ªè‡ªç”±å†Œæˆ–è€…åˆè®¢å†Œï¼Œå› æ­¤æ— æ³•è¿›è¡Œåˆè®¢ã€‚è¯·ç¡®ä¿åªåŒ…å«ä¸€ä¸ª(è¢«ç”¨ä½œåˆè®¢ç›®æ ‡çš„)è‡ªç”±å†Œæˆ–åˆè®¢å†Œ";
                 goto ERROR1;
             }
 
             // return:
             //      -1  error
-            //      0   ºÏ¸ñ
-            //      1   ²»ºÏ¸ñ¡£strErrorÖĞÓĞÌáÊ¾
+            //      0   åˆæ ¼
+            //      1   ä¸åˆæ ¼ã€‚strErrorä¸­æœ‰æç¤º
             nRet = CheckBindingCells(member_cells,
                 out strError);
             if (nRet != 0)
             {
-                strError = "ÎŞ·¨½øĞĞºÏ¶©: " + strError;
+                strError = "æ— æ³•è¿›è¡Œåˆè®¢: " + strError;
                 goto ERROR1;
             }
 
@@ -12952,7 +12952,7 @@ MessageBoxDefaultButton.Button2);
                 }
 
 #if DEBUG
-                // ¼ì²é
+                // æ£€æŸ¥
                 for (int i = 0; i < member_cells.Count; i++)
                 {
                     Cell cell = member_cells[i];
@@ -12962,14 +12962,14 @@ MessageBoxDefaultButton.Button2);
                 }
 #endif
 
-                // Èç¹ûÓĞÏÈÇ°Ñ¡¶¨µÄ¶ÔÏó±»¶ªÆú£¬ĞèÒªÌáÊ¾ÖØĞÂÑ¡Ôñ
+                // å¦‚æœæœ‰å…ˆå‰é€‰å®šçš„å¯¹è±¡è¢«ä¸¢å¼ƒï¼Œéœ€è¦æç¤ºé‡æ–°é€‰æ‹©
                 for (int i = 0; i < member_cells.Count; i++)
                 {
                     Cell cell = member_cells[i];
                     if (cell.Container == null
                         || (cell.item != null && cell.item.Container == null))
                     {
-                        strError = "ÒòÎªÇĞ»»²¼¾Ö£¬ÏÈÇ°Ñ¡ÔñµÄÄ³Ğ©¶ÔÏó·¢ÉúÁË±ä»¯£¬ÎŞ·¨¼ÌĞø½øĞĞºÏ¶©²Ù×÷¡£ÇëÖØĞÂÑ¡ÔñºóÔÙÊÔ";
+                        strError = "å› ä¸ºåˆ‡æ¢å¸ƒå±€ï¼Œå…ˆå‰é€‰æ‹©çš„æŸäº›å¯¹è±¡å‘ç”Ÿäº†å˜åŒ–ï¼Œæ— æ³•ç»§ç»­è¿›è¡Œåˆè®¢æ“ä½œã€‚è¯·é‡æ–°é€‰æ‹©åå†è¯•";
                         this.Invalidate();
                         goto ERROR1;
                     }
@@ -12977,13 +12977,13 @@ MessageBoxDefaultButton.Button2);
                     int nCol = issue.Cells.IndexOf(cell);
                     if (nCol == -1)
                     {
-                        strError = "ÒòÎªÇĞ»»²¼¾Ö£¬ÏÈÇ°Ñ¡ÔñµÄÄ³Ğ©¶ÔÏó·¢ÉúÁË±ä»¯£¬ÎŞ·¨¼ÌĞø½øĞĞºÏ¶©²Ù×÷¡£ÇëÖØĞÂÑ¡ÔñºóÔÙÊÔ";
+                        strError = "å› ä¸ºåˆ‡æ¢å¸ƒå±€ï¼Œå…ˆå‰é€‰æ‹©çš„æŸäº›å¯¹è±¡å‘ç”Ÿäº†å˜åŒ–ï¼Œæ— æ³•ç»§ç»­è¿›è¡Œåˆè®¢æ“ä½œã€‚è¯·é‡æ–°é€‰æ‹©åå†è¯•";
                         this.Invalidate();
                         goto ERROR1;
                     }
                 }
 
-                // TODO: Ê§Ğ§ÄÇĞ©±»¸Ä±äĞĞµÄÏÔÊ¾ÇøÓò
+                // TODO: å¤±æ•ˆé‚£äº›è¢«æ”¹å˜è¡Œçš„æ˜¾ç¤ºåŒºåŸŸ
             }
 
 #endif
@@ -12991,9 +12991,9 @@ MessageBoxDefaultButton.Button2);
             this.Invalidate();
             this.Update();
 
-            string strBatchNo = GetBindingBatchNo();   // Ö»ÄÜ·ÅÔÚÕâÀï¡£·ÅÔÚºóÃæ»áÒıÆğPaint()³ö´í
+            string strBatchNo = GetBindingBatchNo();   // åªèƒ½æ”¾åœ¨è¿™é‡Œã€‚æ”¾åœ¨åé¢ä¼šå¼•èµ·Paint()å‡ºé”™
 
-            // ½øĞĞºÏ¶©
+            // è¿›è¡Œåˆè®¢
             parent_cell = null;
             if (target_cells.Count == 0)
             {
@@ -13001,7 +13001,7 @@ MessageBoxDefaultButton.Button2);
                 ItemBindingItem parent_item = new ItemBindingItem();
                 this.ParentItems.Add(parent_item);
                 bAddToParentItems = true;
-                // ³õÊ¼»¯²áĞÅÏ¢
+                // åˆå§‹åŒ–å†Œä¿¡æ¯
                 nRet = parent_item.Initial("<root />",
                     out strError);
                 if (nRet == -1)
@@ -13009,8 +13009,8 @@ MessageBoxDefaultButton.Button2);
                 parent_item.NewCreated = true;
 
                 /*
-                // ÉèÖÃ»òÕßË¢ĞÂÒ»¸ö²Ù×÷¼ÇÔØ
-                // ¿ÉÄÜ»áÅ×³öÒì³£
+                // è®¾ç½®æˆ–è€…åˆ·æ–°ä¸€ä¸ªæ“ä½œè®°è½½
+                // å¯èƒ½ä¼šæŠ›å‡ºå¼‚å¸¸
                 parent_item.SetOperation(
                     "create",
                     this.Operator,
@@ -13019,7 +13019,7 @@ MessageBoxDefaultButton.Button2);
 
                 parent_item.RefID = Guid.NewGuid().ToString();
                 if (this.SetProcessingState == true)
-                    parent_item.State = Global.AddStateProcessing(parent_item.State);   // ¼Ó¹¤ÖĞ
+                    parent_item.State = Global.AddStateProcessing(parent_item.State);   // åŠ å·¥ä¸­
                 parent_item.BatchNo = strBatchNo;
                 parent_item.IsParent = true;
 
@@ -13030,33 +13030,33 @@ MessageBoxDefaultButton.Button2);
             {
                 parent_cell = target_cells[0];
 
-                // ´Ó×ÔÓÉÆÚÖĞÒÆ×ß
+                // ä»è‡ªç”±æœŸä¸­ç§»èµ°
                 if (parent_cell.Container == this.FreeIssue)
                 {
                     this.FreeIssue.RemoveCell(parent_cell.item);
                     parent_cell.Container = null;
-                    // TODO: Èç¹ûÊ§°Ü£¬ÊÇ·ñÒª»¹Ô­?
+                    // TODO: å¦‚æœå¤±è´¥ï¼Œæ˜¯å¦è¦è¿˜åŸ?
                     bRemoveFromFreeIssue = true;
                 }
 
-                // ¼ÓÈëBindItems
+                // åŠ å…¥BindItems
                 if (this.ParentItems.IndexOf(parent_cell.item) == -1)
                 {
                     this.ParentItems.Add(parent_cell.item);
                     parent_cell.Container = null;
-                    // TODO: Èç¹ûÊ§°Ü£¬ÊÇ·ñÒª»¹Ô­?
+                    // TODO: å¦‚æœå¤±è´¥ï¼Œæ˜¯å¦è¦è¿˜åŸ?
                     bAddToParentItems = true;
                 }
 
                 if (this.SetProcessingState == true)
-                    parent_cell.item.State = Global.AddStateProcessing(parent_cell.item.State);   // ¼Ó¹¤ÖĞ
+                    parent_cell.item.State = Global.AddStateProcessing(parent_cell.item.State);   // åŠ å·¥ä¸­
 
                 parent_cell.item.BatchNo = strBatchNo;
             }
 
             Debug.Assert(parent_cell.item.IsParent == true, "");
 
-            // ½«Èô¸Éµ¥²á¼ÓÈëÒ»¸öºÏ¶©²á
+            // å°†è‹¥å¹²å•å†ŒåŠ å…¥ä¸€ä¸ªåˆè®¢å†Œ
             nRet = AddToBinding(member_cells,
                 parent_cell,
                 out strError);
@@ -13066,10 +13066,10 @@ MessageBoxDefaultButton.Button2);
             }
 
             string strPreferredLocationString = "";
-            // ¼ì²é¹Ù²ÖµØµã×Ö·û´®ÊÇ·ñÔÚµ±Ç°ÓÃ»§¹ÜÏ½·¶Î§ÄÚ
+            // æ£€æŸ¥å®˜ä»“åœ°ç‚¹å­—ç¬¦ä¸²æ˜¯å¦åœ¨å½“å‰ç”¨æˆ·ç®¡è¾–èŒƒå›´å†…
             // return:
-            //      0   ÔÚµ±Ç°ÓÃ»§¹ÜÏ½·¶Î§ÄÚ£¬²»ĞèÒªĞŞ¸Ä
-            //      1   ²»ÔÚµ±Ç°ÓÃ»§¹ÜÏ½·¶Î§ÄÚ£¬ĞèÒªĞŞ¸Ä¡£strPreferredLocationStringÖĞÒÑ¾­ÉèÖÃÁËÒ»¸öÖµ£¬µ«Ö»µ½ÁË·Ö¹İ´úÂëÒ»¼¶£¬¿â·¿Ãû³ÆÎª¿Õ
+            //      0   åœ¨å½“å‰ç”¨æˆ·ç®¡è¾–èŒƒå›´å†…ï¼Œä¸éœ€è¦ä¿®æ”¹
+            //      1   ä¸åœ¨å½“å‰ç”¨æˆ·ç®¡è¾–èŒƒå›´å†…ï¼Œéœ€è¦ä¿®æ”¹ã€‚strPreferredLocationStringä¸­å·²ç»è®¾ç½®äº†ä¸€ä¸ªå€¼ï¼Œä½†åªåˆ°äº†åˆ†é¦†ä»£ç ä¸€çº§ï¼Œåº“æˆ¿åç§°ä¸ºç©º
             nRet = CheckLocationString(parent_cell.item.LocationString,
             out strPreferredLocationString,
             out strError);
@@ -13079,10 +13079,10 @@ MessageBoxDefaultButton.Button2);
             {
                 parent_cell.item.LocationString = strPreferredLocationString;
 
-                // TODO: ¿ÉÒÔÎÊYes No£¬Èç¹ûYes²ÅÖ÷¶¯´ò¿ªEditÇøÓò
-                MessageBox.Show(this, "ºÏ¶©³É¹¦¡£Çë×¢Òâ¼°Ê±ÉèÖÃºÏ¶©²á ¹İ²ØµØµã Öµ");
+                // TODO: å¯ä»¥é—®Yes Noï¼Œå¦‚æœYesæ‰ä¸»åŠ¨æ‰“å¼€EditåŒºåŸŸ
+                MessageBox.Show(this, "åˆè®¢æˆåŠŸã€‚è¯·æ³¨æ„åŠæ—¶è®¾ç½®åˆè®¢å†Œ é¦†è—åœ°ç‚¹ å€¼");
 
-                // Ñ¡¶¨ĞÂ´´½¨µÄ²á
+                // é€‰å®šæ–°åˆ›å»ºçš„å†Œ
                 this.ClearAllSelection();
                 menuItem_modifyCell_Click(null, null);
                 parent_cell.Select(SelectAction.On);
@@ -13098,15 +13098,15 @@ MessageBoxDefaultButton.Button2);
                 out strPublishTimeString);
             parent_item.PublishTime = strPublishTimeString;
 
-            // ´´½¨<binding>ÔªËØÄÚÆ¬¶Ï
+            // åˆ›å»º<binding>å…ƒç´ å†…ç‰‡æ–­
             parent_item.RefreshBindingXml();
-            parent_item.State = Global.AddStateProcessing(parent_item.State);   // ¼Ó¹¤ÖĞ
+            parent_item.State = Global.AddStateProcessing(parent_item.State);   // åŠ å·¥ä¸­
             parent_item.Changed = true;
             */
 
 
             /*
-            // Ñ¡¶¨ËùÓĞ³ÉÔ±¸ñ×Ó
+            // é€‰å®šæ‰€æœ‰æˆå‘˜æ ¼å­
             parent_item.SelectAllMemberCells();
             this.Invalidate(); 
              * */
@@ -13124,7 +13124,7 @@ MessageBoxDefaultButton.Button2);
 #endif
             return;
         ERROR1:
-            // ¸´Ô­
+            // å¤åŸ
             if (bAddToParentItems == true)
             {
                 this.ParentItems.Remove(parent_cell.item);
@@ -13151,10 +13151,10 @@ MessageBoxDefaultButton.Button2);
             MessageBox.Show(this, strError);
         }
 
-        // ¼ì²é¹Ù²ÖµØµã×Ö·û´®ÊÇ·ñÔÚµ±Ç°ÓÃ»§¹ÜÏ½·¶Î§ÄÚ
+        // æ£€æŸ¥å®˜ä»“åœ°ç‚¹å­—ç¬¦ä¸²æ˜¯å¦åœ¨å½“å‰ç”¨æˆ·ç®¡è¾–èŒƒå›´å†…
         // return:
-        //      0   ÔÚµ±Ç°ÓÃ»§¹ÜÏ½·¶Î§ÄÚ£¬²»ĞèÒªĞŞ¸Ä
-        //      1   ²»ÔÚµ±Ç°ÓÃ»§¹ÜÏ½·¶Î§ÄÚ£¬ĞèÒªĞŞ¸Ä¡£strPreferredLocationStringÖĞÒÑ¾­ÉèÖÃÁËÒ»¸öÖµ£¬µ«Ö»µ½ÁË·Ö¹İ´úÂëÒ»¼¶£¬¿â·¿Ãû³ÆÎª¿Õ
+        //      0   åœ¨å½“å‰ç”¨æˆ·ç®¡è¾–èŒƒå›´å†…ï¼Œä¸éœ€è¦ä¿®æ”¹
+        //      1   ä¸åœ¨å½“å‰ç”¨æˆ·ç®¡è¾–èŒƒå›´å†…ï¼Œéœ€è¦ä¿®æ”¹ã€‚strPreferredLocationStringä¸­å·²ç»è®¾ç½®äº†ä¸€ä¸ªå€¼ï¼Œä½†åªåˆ°äº†åˆ†é¦†ä»£ç ä¸€çº§ï¼Œåº“æˆ¿åç§°ä¸ºç©º
         int CheckLocationString(string strLocationString,
             out string strPreferredLocationString,
             out string strError)
@@ -13178,7 +13178,7 @@ MessageBoxDefaultButton.Button2);
             return 1;
         }
 
-        // »ñµÃ×°¶©Åú´ÎºÅ
+        // è·å¾—è£…è®¢æ‰¹æ¬¡å·
         string GetBindingBatchNo()
         {
             if (this.AppInfo == null)
@@ -13192,8 +13192,8 @@ MessageBoxDefaultButton.Button2);
             if (this.m_bBindingBatchNoInputed == true)
                 return strDefault;
 
-            string strResult = InputDlg.GetInput(this, "ÇëÖ¸¶¨×°¶©Åú´ÎºÅ",
-                "×°¶©Åú´ÎºÅ:",
+            string strResult = InputDlg.GetInput(this, "è¯·æŒ‡å®šè£…è®¢æ‰¹æ¬¡å·",
+                "è£…è®¢æ‰¹æ¬¡å·:",
                 strDefault,
                 this.Font);
             if (strResult == null)
@@ -13212,7 +13212,7 @@ MessageBoxDefaultButton.Button2);
         }
 
         /// <summary>
-        /// ÑéÊÕÅú´ÎºÅ
+        /// éªŒæ”¶æ‰¹æ¬¡å·
         /// </summary>
         public string AcceptBatchNo
         {
@@ -13238,7 +13238,7 @@ MessageBoxDefaultButton.Button2);
         }
 
         /// <summary>
-        /// ÑéÊÕÅú´ÎºÅÊÇ·ñÒÑ¾­ÔÚ½çÃæ±»ÊäÈëÁË
+        /// éªŒæ”¶æ‰¹æ¬¡å·æ˜¯å¦å·²ç»åœ¨ç•Œé¢è¢«è¾“å…¥äº†
         /// </summary>
         public bool AcceptBatchNoInputed
         {
@@ -13252,7 +13252,7 @@ MessageBoxDefaultButton.Button2);
             }
         }
 
-        // »ñµÃÑéÊÕÅú´ÎºÅ
+        // è·å¾—éªŒæ”¶æ‰¹æ¬¡å·
         internal string GetAcceptingBatchNo()
         {
             if (this.AppInfo == null)
@@ -13263,8 +13263,8 @@ MessageBoxDefaultButton.Button2);
             if (this.AcceptBatchNoInputed == true)
                 return strDefault;
 
-            string strResult = InputDlg.GetInput(this, "ÇëÖ¸¶¨ÑéÊÕÅú´ÎºÅ",
-                "ÑéÊÕÅú´ÎºÅ:",
+            string strResult = InputDlg.GetInput(this, "è¯·æŒ‡å®šéªŒæ”¶æ‰¹æ¬¡å·",
+                "éªŒæ”¶æ‰¹æ¬¡å·:",
                 strDefault,
                 this.Font);
             if (strResult == null)
@@ -13272,7 +13272,7 @@ MessageBoxDefaultButton.Button2);
 
             if (strResult != strDefault)
             {
-                // ¼ÇÒä
+                // è®°å¿†
                 this.AcceptBatchNo = strResult;
             }
 
@@ -13321,8 +13321,8 @@ lower_height - 1);
         }
 
         // paramters:
-        //      pen »æÖÆ±ß¿ò¡£¿ÉÒÔÎªnull£¬ÄÇÑù¾ÍÕûÌåÒ»¸öÌî³äÉ«£¬Ã»ÓĞ±ß¿ò
-        //      brush   »æÖÆÌî³äÉ«¡£¿ÉÒÔÎªnull£¬ÄÇÑù¾ÍÖ»ÓĞ±ß¿ò
+        //      pen ç»˜åˆ¶è¾¹æ¡†ã€‚å¯ä»¥ä¸ºnullï¼Œé‚£æ ·å°±æ•´ä½“ä¸€ä¸ªå¡«å……è‰²ï¼Œæ²¡æœ‰è¾¹æ¡†
+        //      brush   ç»˜åˆ¶å¡«å……è‰²ã€‚å¯ä»¥ä¸ºnullï¼Œé‚£æ ·å°±åªæœ‰è¾¹æ¡†
         public static void RoundRectangle(Graphics graphics,
             Pen pen,
             Brush brush,
@@ -13340,8 +13340,8 @@ lower_height - 1);
         }
 
         // paramters:
-        //      pen »æÖÆ±ß¿ò¡£¿ÉÒÔÎªnull£¬ÄÇÑù¾ÍÕûÌåÒ»¸öÌî³äÉ«£¬Ã»ÓĞ±ß¿ò
-        //      brush   »æÖÆÌî³äÉ«¡£¿ÉÒÔÎªnull£¬ÄÇÑù¾ÍÖ»ÓĞ±ß¿ò
+        //      pen ç»˜åˆ¶è¾¹æ¡†ã€‚å¯ä»¥ä¸ºnullï¼Œé‚£æ ·å°±æ•´ä½“ä¸€ä¸ªå¡«å……è‰²ï¼Œæ²¡æœ‰è¾¹æ¡†
+        //      brush   ç»˜åˆ¶å¡«å……è‰²ã€‚å¯ä»¥ä¸ºnullï¼Œé‚£æ ·å°±åªæœ‰è¾¹æ¡†
         public static void RoundRectangle(Graphics graphics,
             Pen pen,
             Brush brush,
@@ -13368,14 +13368,14 @@ lower_height - 1);
             path.Dispose();
         }
 
-        // °ü×°°æ±¾
+        // åŒ…è£…ç‰ˆæœ¬
         public static void PartRoundRectangle(
     Graphics graphics,
     Pen pen,
     Brush brush,
     RectangleF rect,
     float radius,
-    string strMask) // ×óÉÏ ÓÒÉÏ ÓÒÏÂ ×óÏÂ
+    string strMask) // å·¦ä¸Š å³ä¸Š å³ä¸‹ å·¦ä¸‹
         {
             PartRoundRectangle(graphics,
                 pen,
@@ -13388,10 +13388,10 @@ lower_height - 1);
                 strMask);
         }
 
-        // ²¿·ÖÔ²½ÇµÄ¾ØĞÎ
+        // éƒ¨åˆ†åœ†è§’çš„çŸ©å½¢
         // paramters:
-        //      pen »æÖÆ±ß¿ò¡£¿ÉÒÔÎªnull£¬ÄÇÑù¾ÍÕûÌåÒ»¸öÌî³äÉ«£¬Ã»ÓĞ±ß¿ò
-        //      brush   »æÖÆÌî³äÉ«¡£¿ÉÒÔÎªnull£¬ÄÇÑù¾ÍÖ»ÓĞ±ß¿ò
+        //      pen ç»˜åˆ¶è¾¹æ¡†ã€‚å¯ä»¥ä¸ºnullï¼Œé‚£æ ·å°±æ•´ä½“ä¸€ä¸ªå¡«å……è‰²ï¼Œæ²¡æœ‰è¾¹æ¡†
+        //      brush   ç»˜åˆ¶å¡«å……è‰²ã€‚å¯ä»¥ä¸ºnullï¼Œé‚£æ ·å°±åªæœ‰è¾¹æ¡†
         public static void PartRoundRectangle(
             Graphics graphics,
             Pen pen,
@@ -13401,7 +13401,7 @@ lower_height - 1);
             float width,
             float height,
             float radius,
-            string strMask) // ×óÉÏ ÓÒÉÏ ÓÒÏÂ ×óÏÂ
+            string strMask) // å·¦ä¸Š å³ä¸Š å³ä¸‹ å·¦ä¸‹
         {
             float x0 = 0;
             float y0 = 0;
@@ -13410,7 +13410,7 @@ lower_height - 1);
 
             GraphicsPath path = new GraphicsPath();
 
-            // ×óÉÏ --> ÓÒÉÏ
+            // å·¦ä¸Š --> å³ä¸Š
             if (strMask[0] == 'r')
             {
                 x0 = x + radius;
@@ -13434,13 +13434,13 @@ lower_height - 1);
             path.AddLine(x0, y0,
                 x0 + width0, y0);
 
-            // ÓÒÉÏ
+            // å³ä¸Š
             if (strMask[1] == 'r')
                 path.AddArc(x + width - (radius * 2), y,
                     radius * 2, radius * 2,
                     270, 90);
 
-            // ÓÒÉÏ --> ÓÒÏÂ
+            // å³ä¸Š --> å³ä¸‹
             if (strMask[1] == 'r')
             {
                 x0 = x + width;
@@ -13465,13 +13465,13 @@ lower_height - 1);
             path.AddLine(x0, y0, 
                 x0, y0 + height0);
 
-            // ÓÒÏÂ
+            // å³ä¸‹
             if (strMask[2] == 'r')
                 path.AddArc(x + width - (radius * 2), y + height - (radius * 2),
                     radius * 2, radius * 2,
                     0, 90); // Corner
 
-            // ÓÒÏÂ --> ×óÏÂ
+            // å³ä¸‹ --> å·¦ä¸‹
             if (strMask[2] == 'r')
             {
                 x0 = x + width - radius;
@@ -13495,13 +13495,13 @@ lower_height - 1);
             path.AddLine(x0, y0,
                 x0 - width0, y0);
 
-            // ×óÏÂ
+            // å·¦ä¸‹
             if (strMask[3] == 'r')
                 path.AddArc(x, y + height - (radius * 2), 
                     radius * 2, radius * 2,
                     90, 90);
 
-            // ×óÏÂ --> ×óÉÏ
+            // å·¦ä¸‹ --> å·¦ä¸Š
             if (strMask[3] == 'r')
             {
                 x0 = x;
@@ -13525,7 +13525,7 @@ lower_height - 1);
             path.AddLine(x0, y0,
                 x0, y0 - height0);
 
-            // ×óÉÏ
+            // å·¦ä¸Š
             if (strMask[0] == 'r')
                 path.AddArc(x, y, 
                     radius * 2, radius * 2,
@@ -13541,8 +13541,8 @@ lower_height - 1);
         }
 
         // paramters:
-        //      pen »æÖÆ±ß¿ò¡£¿ÉÒÔÎªnull£¬ÄÇÑù¾ÍÕûÌåÒ»¸öÌî³äÉ«£¬Ã»ÓĞ±ß¿ò
-        //      brush   »æÖÆÌî³äÉ«¡£¿ÉÒÔÎªnull£¬ÄÇÑù¾ÍÖ»ÓĞ±ß¿ò
+        //      pen ç»˜åˆ¶è¾¹æ¡†ã€‚å¯ä»¥ä¸ºnullï¼Œé‚£æ ·å°±æ•´ä½“ä¸€ä¸ªå¡«å……è‰²ï¼Œæ²¡æœ‰è¾¹æ¡†
+        //      brush   ç»˜åˆ¶å¡«å……è‰²ã€‚å¯ä»¥ä¸ºnullï¼Œé‚£æ ·å°±åªæœ‰è¾¹æ¡†
         public static void QueRoundRectangle(Graphics graphics,
             Pen pen,
             Brush brush,
@@ -13561,10 +13561,10 @@ lower_height - 1);
                 que_radius);
         }
 
-        // È±½ÇµÄ¾ØĞÎ
+        // ç¼ºè§’çš„çŸ©å½¢
         // paramters:
-        //      pen »æÖÆ±ß¿ò¡£¿ÉÒÔÎªnull£¬ÄÇÑù¾ÍÕûÌåÒ»¸öÌî³äÉ«£¬Ã»ÓĞ±ß¿ò
-        //      brush   »æÖÆÌî³äÉ«¡£¿ÉÒÔÎªnull£¬ÄÇÑù¾ÍÖ»ÓĞ±ß¿ò
+        //      pen ç»˜åˆ¶è¾¹æ¡†ã€‚å¯ä»¥ä¸ºnullï¼Œé‚£æ ·å°±æ•´ä½“ä¸€ä¸ªå¡«å……è‰²ï¼Œæ²¡æœ‰è¾¹æ¡†
+        //      brush   ç»˜åˆ¶å¡«å……è‰²ã€‚å¯ä»¥ä¸ºnullï¼Œé‚£æ ·å°±åªæœ‰è¾¹æ¡†
         public static void QueRoundRectangle(Graphics graphics,
             Pen pen,
             Brush brush,
@@ -13576,30 +13576,30 @@ lower_height - 1);
             float que_radius)
         {
             GraphicsPath path = new GraphicsPath();
-            // ×óÉÏ --> ÓÒÉÏ
+            // å·¦ä¸Š --> å³ä¸Š
             path.AddLine(x + radius, y,
                 x + width - (radius + que_radius), y);
-            // ÓÒÉÏ
+            // å³ä¸Š
             path.AddArc(x + width - (que_radius), y - que_radius,
                 que_radius * 2, que_radius * 2, 180, -90);
             /*
-            // ÓÒÉÏ --> ÓÒÏÂ
+            // å³ä¸Š --> å³ä¸‹
             path.AddLine(x + width, y + que_radius, 
                 x + width, y + height - (radius + que_radius));
              * */
 
-            // ÓÒÏÂ
+            // å³ä¸‹
             path.AddArc(x + width - (radius * 2), y + height - (radius * 2),
                 radius * 2, radius * 2, 0, 90); // Corner
-            // ÓÒÏÂ --> ×óÏÂ
+            // å³ä¸‹ --> å·¦ä¸‹
             path.AddLine(x + width - (radius * 2), y + height,
                 x + radius, y + height);
-            // ×óÏÂ
+            // å·¦ä¸‹
             path.AddArc(x, y + height - (radius * 2), 
                 radius * 2, radius * 2, 90, 90);
-            // ×óÏÂ --> ×óÉÏ
+            // å·¦ä¸‹ --> å·¦ä¸Š
             path.AddLine(x, y + height - (radius * 2), x, y + radius);
-            // ×óÉÏ
+            // å·¦ä¸Š
             path.AddArc(x, y, radius * 2, radius * 2, 180, 90);
             path.CloseFigure();
             if (brush != null)
@@ -13610,8 +13610,8 @@ lower_height - 1);
         }
 
         // paramters:
-        //      pen »æÖÆ±ß¿ò¡£¿ÉÒÔÎªnull£¬ÄÇÑù¾ÍÕûÌåÒ»¸öÌî³äÉ«£¬Ã»ÓĞ±ß¿ò
-        //      brush   »æÖÆÌî³äÉ«¡£¿ÉÒÔÎªnull£¬ÄÇÑù¾ÍÖ»ÓĞ±ß¿ò
+        //      pen ç»˜åˆ¶è¾¹æ¡†ã€‚å¯ä»¥ä¸ºnullï¼Œé‚£æ ·å°±æ•´ä½“ä¸€ä¸ªå¡«å……è‰²ï¼Œæ²¡æœ‰è¾¹æ¡†
+        //      brush   ç»˜åˆ¶å¡«å……è‰²ã€‚å¯ä»¥ä¸ºnullï¼Œé‚£æ ·å°±åªæœ‰è¾¹æ¡†
         public static void Circle(Graphics graphics,
             Pen pen,
             Brush brush,
@@ -13639,8 +13639,8 @@ lower_height - 1);
         }
 
         // paramters:
-        //      pen »æÖÆ±ß¿ò¡£¿ÉÒÔÎªnull£¬ÄÇÑù¾ÍÕûÌåÒ»¸öÌî³äÉ«£¬Ã»ÓĞ±ß¿ò
-        //      brush   »æÖÆÌî³äÉ«¡£¿ÉÒÔÎªnull£¬ÄÇÑù¾ÍÖ»ÓĞ±ß¿ò
+        //      pen ç»˜åˆ¶è¾¹æ¡†ã€‚å¯ä»¥ä¸ºnullï¼Œé‚£æ ·å°±æ•´ä½“ä¸€ä¸ªå¡«å……è‰²ï¼Œæ²¡æœ‰è¾¹æ¡†
+        //      brush   ç»˜åˆ¶å¡«å……è‰²ã€‚å¯ä»¥ä¸ºnullï¼Œé‚£æ ·å°±åªæœ‰è¾¹æ¡†
         public static void Bracket(Graphics graphics,
             Pen pen,
             bool bLeft,
@@ -13731,17 +13731,17 @@ lower_height - 1);
         {
             bool bControl = (Control.ModifierKeys == Keys.Control);
 
-            // Çå³ıÑ¡Ôñ¿ò
+            // æ¸…é™¤é€‰æ‹©æ¡†
             DrawSelectRect(true);
 
-            // ÕûÌåÎÄµµ×ø±ê
+            // æ•´ä½“æ–‡æ¡£åæ ‡
             RectangleF rect = MakeRect(m_DragStartPointOnDoc,
                 m_DragCurrentPointOnDoc);
 
-            // DataRoot×ø±ê
+            // DataRootåæ ‡
             rect.Offset(-this.m_nLeftBlank, -this.m_nTopBlank);
 
-            // Ñ¡ÔñÎ»ÓÚ¾ØĞÎÄÚµÄ¶ÔÏó
+            // é€‰æ‹©ä½äºçŸ©å½¢å†…çš„å¯¹è±¡
             List<Type> types = new List<Type>();
             types.Add(typeof(Cell));
 
@@ -13756,13 +13756,13 @@ lower_height - 1);
             else
                 this.Invalidate();
 
-            m_bRectSelecting = false;   // ½áÊø
+            m_bRectSelecting = false;   // ç»“æŸ
 
             this.DragStartObject = this.FocusObject;
             this.DragLastEndObject = this.FocusObject;
         }
 
-        // ½»»»Á½¸öÖµ
+        // äº¤æ¢ä¸¤ä¸ªå€¼
         static void Exchange<T>(ref T v1, ref T v2)
         {
             T temp = v1;
@@ -13770,8 +13770,8 @@ lower_height - 1);
             v2 = temp;
         }
 
-        // ¹¹ÔìÒ»¸ö¾ØĞÎ£¬Í¨¹ıÁ½¸ö¶Ëµã
-        // ±¾º¯Êı¿ÉÒÔ×Ô¶¯±È½Ï¶Ëµã´óĞ¡£¬´´½¨³öÕı¹æµÄ¾ØĞÎ
+        // æ„é€ ä¸€ä¸ªçŸ©å½¢ï¼Œé€šè¿‡ä¸¤ä¸ªç«¯ç‚¹
+        // æœ¬å‡½æ•°å¯ä»¥è‡ªåŠ¨æ¯”è¾ƒç«¯ç‚¹å¤§å°ï¼Œåˆ›å»ºå‡ºæ­£è§„çš„çŸ©å½¢
         static RectangleF MakeRect(PointF p1,
             PointF p2)
         {
@@ -13794,8 +13794,8 @@ lower_height - 1);
         }
 
 
-        // »­¡¢»òÕßÇå³ıÑ¡Ôñ¾ØĞÎ
-        // ÒòÎªÊÇÒì»òÔËËã£¬µÚÒ»´ÎÊÇ»­£¬µÚ¶ş´ÎÔÚÍ¬ÑùÎ»ÖÃ¾ÍÊÇÇå³ı
+        // ç”»ã€æˆ–è€…æ¸…é™¤é€‰æ‹©çŸ©å½¢
+        // å› ä¸ºæ˜¯å¼‚æˆ–è¿ç®—ï¼Œç¬¬ä¸€æ¬¡æ˜¯ç”»ï¼Œç¬¬äºŒæ¬¡åœ¨åŒæ ·ä½ç½®å°±æ˜¯æ¸…é™¤
         void DrawSelectRect(bool bUpdateBefore)
         {
             if (bUpdateBefore == true)
@@ -13811,8 +13811,8 @@ lower_height - 1);
                 FrameStyle.Dashed);
         }
 
-        // µãbÊÇ·ñ´¦ÔÚµãaÖÜÎ§Ò»¸ö²»´óµÄ¾ØĞÎ·¶Î§ÄÚ
-        // ¾ØĞÎ²ÉÓÃÏµÍ³DoubleClickSize
+        // ç‚¹bæ˜¯å¦å¤„åœ¨ç‚¹aå‘¨å›´ä¸€ä¸ªä¸å¤§çš„çŸ©å½¢èŒƒå›´å†…
+        // çŸ©å½¢é‡‡ç”¨ç³»ç»ŸDoubleClickSize
         static bool IsNearestPoint(Point a, Point b)
         {
             Rectangle rect = new Rectangle(a.X, a.Y, 0, 0);
@@ -13825,7 +13825,7 @@ lower_height - 1);
 
 
 
-        // Ñ¡ÔñÎ»ÓÚ¾ØĞÎÄÚµÄ¶ÔÏó
+        // é€‰æ‹©ä½äºçŸ©å½¢å†…çš„å¯¹è±¡
         public void Select(RectangleF rect,
             SelectAction action,
             List<Type> types,
@@ -13841,11 +13841,11 @@ lower_height - 1);
                 {
                     IssueBindingItem issue = this.Issues[i];
 
-                    // ÓÅ»¯
+                    // ä¼˜åŒ–
                     if (y > rect.Bottom)
                         break;
 
-                    // ±ä»»ÎªissueÄÚ×ø±ê
+                    // å˜æ¢ä¸ºissueå†…åæ ‡
                     RectangleF rectIssue = rect;
                     rectIssue.Offset(0, -y);
 
@@ -13866,7 +13866,7 @@ lower_height - 1);
             if (m_bRectSelecting == true)
                 return;
 
-            if (obj == null)    // ±íÊ¾¹Ø±Õ×îºófocus¶ÔÏóµÄfocus×´Ì¬
+            if (obj == null)    // è¡¨ç¤ºå…³é—­æœ€åfocuså¯¹è±¡çš„focusçŠ¶æ€
             {
                 goto OFF_OLD;
             }
@@ -13881,7 +13881,7 @@ lower_height - 1);
             if (obj == this.m_lastFocusObj)
                 return;
 
-            // offÏÈÇ°µÄfocus¶ÔÏó
+            // offå…ˆå‰çš„focuså¯¹è±¡
         OFF_OLD:
             if (this.m_lastFocusObj != null
                 && this.m_lastFocusObj.m_bFocus == true)
@@ -13890,11 +13890,11 @@ lower_height - 1);
                 this.UpdateObject(this.m_lastFocusObj);
             }
 
-            this.m_lastFocusObj = obj;  // ¼ÇÒä
+            this.m_lastFocusObj = obj;  // è®°å¿†
         }
 
 
-        // Ë¢ĞÂÒ»Èº¶ÔÏóµÄÇøÓò
+        // åˆ·æ–°ä¸€ç¾¤å¯¹è±¡çš„åŒºåŸŸ
         void UpdateObjects(List<CellBase> objects)
         {
             for (int i = 0; i < objects.Count; i++)
@@ -13921,7 +13921,7 @@ lower_height - 1);
             }
             else
             {
-                throw new Exception("obj±ØĞëÎªÀàĞÍCell/NullCell/IssueBindingItemÖ®Ò»");
+                throw new Exception("objå¿…é¡»ä¸ºç±»å‹Cell/NullCell/IssueBindingItemä¹‹ä¸€");
             }
 
             if (obj is NullCell)
@@ -13952,7 +13952,7 @@ lower_height - 1);
             }
         }
 
-        // Ë¢ĞÂÒ»¸ö¶ÔÏóµÄdrag handleÇøÓò
+        // åˆ·æ–°ä¸€ä¸ªå¯¹è±¡çš„drag handleåŒºåŸŸ
         void UpdateObjectHover(Cell obj)
         {
             UpdateObject(obj);
@@ -13969,12 +13969,12 @@ lower_height - 1);
              * */
         }
 
-        // È·±£Ò»¸öÇøÓòÔÚ´°¿Ú¿Í»§Çø¿É¼û
+        // ç¡®ä¿ä¸€ä¸ªåŒºåŸŸåœ¨çª—å£å®¢æˆ·åŒºå¯è§
         // parameters:
-        //      rectCell    Òª¹Ø×¢µÄÇøÓò
-        //      rectCaret   Òª¹Ø×¢µÄÇøÓòÖĞ£¬ÓÃÓÚ²åÈë·û£¨ÈÈµã£©µÄ¾ØĞÎ¡£Ò»°ã¿ÉÒÔĞ¡ÓÚrectCell
+        //      rectCell    è¦å…³æ³¨çš„åŒºåŸŸ
+        //      rectCaret   è¦å…³æ³¨çš„åŒºåŸŸä¸­ï¼Œç”¨äºæ’å…¥ç¬¦ï¼ˆçƒ­ç‚¹ï¼‰çš„çŸ©å½¢ã€‚ä¸€èˆ¬å¯ä»¥å°äºrectCell
         // return:
-        //      ÊÇ·ñ·¢Éú¾í¹öÁË
+        //      æ˜¯å¦å‘ç”Ÿå·æ»šäº†
         public bool EnsureVisible(RectangleF rectCell,
             RectangleF rectCaret)
         {
@@ -13990,7 +13990,7 @@ lower_height - 1);
             if (lDelta + rectCaret.Height >= this.ClientSize.Height)
             {
                 if (rectCaret.Height >= this.ClientSize.Height)
-                    DocumentOrgY = DocumentOrgY - (lDelta + (long)rectCaret.Height) + ClientSize.Height + /*µ÷ÕûÏµÊı*/ ((long)rectCaret.Height / 2) - (this.ClientSize.Height / 2);
+                    DocumentOrgY = DocumentOrgY - (lDelta + (long)rectCaret.Height) + ClientSize.Height + /*è°ƒæ•´ç³»æ•°*/ ((long)rectCaret.Height / 2) - (this.ClientSize.Height / 2);
                 else
                     DocumentOrgY = DocumentOrgY - (lDelta + (long)rectCaret.Height) + ClientSize.Height;
                 bScrolled = true;
@@ -13998,18 +13998,18 @@ lower_height - 1);
             else if (lDelta < 0)
             {
                 if (rectCaret.Height >= this.ClientSize.Height)
-                    DocumentOrgY = DocumentOrgY - (lDelta) - /*µ÷ÕûÏµÊı*/ (((long)rectCaret.Height / 2) - (this.ClientSize.Height / 2));
+                    DocumentOrgY = DocumentOrgY - (lDelta) - /*è°ƒæ•´ç³»æ•°*/ (((long)rectCaret.Height / 2) - (this.ClientSize.Height / 2));
                 else
                     DocumentOrgY = DocumentOrgY - (lDelta);
                 bScrolled = true;
             }
             else
             {
-                // y²»ĞèÒª¾í¹ö
+                // yä¸éœ€è¦å·æ»š
             }
 
             ////
-            // Ë®Æ½·½Ïò
+            // æ°´å¹³æ–¹å‘
             lDelta = 0;
 
             lDelta = (long)rectCell.X;
@@ -14018,7 +14018,7 @@ lower_height - 1);
             if (lDelta + rectCaret.Width >= this.ClientSize.Width)
             {
                 if (rectCaret.Width >= this.ClientSize.Width)
-                    DocumentOrgX = DocumentOrgX - (lDelta + (long)rectCaret.Width) + ClientSize.Width + /*µ÷ÕûÏµÊı*/ ((long)rectCaret.Width / 2) - (this.ClientSize.Width / 2);
+                    DocumentOrgX = DocumentOrgX - (lDelta + (long)rectCaret.Width) + ClientSize.Width + /*è°ƒæ•´ç³»æ•°*/ ((long)rectCaret.Width / 2) - (this.ClientSize.Width / 2);
                 else
                     DocumentOrgX = DocumentOrgX - (lDelta + (long)rectCaret.Width) + ClientSize.Width;
                 bScrolled = true;
@@ -14026,23 +14026,23 @@ lower_height - 1);
             else if (lDelta < 0)
             {
                 if (rectCaret.Width >= this.ClientSize.Width)
-                    DocumentOrgX = DocumentOrgX - (lDelta) - /*µ÷ÕûÏµÊı*/ (((long)rectCaret.Width / 2) - (this.ClientSize.Width / 2));
+                    DocumentOrgX = DocumentOrgX - (lDelta) - /*è°ƒæ•´ç³»æ•°*/ (((long)rectCaret.Width / 2) - (this.ClientSize.Width / 2));
                 else
                     DocumentOrgX = DocumentOrgX - (lDelta);
                 bScrolled = true;
             }
             else
             {
-                // x²»ĞèÒª¾í¹ö
+                // xä¸éœ€è¦å·æ»š
             }
 
 
             return bScrolled;
         }
 
-        // È·±£Ò»¸öµ¥ÔªÔÚ´°¿Ú¿Í»§Çø¿É¼û
+        // ç¡®ä¿ä¸€ä¸ªå•å…ƒåœ¨çª—å£å®¢æˆ·åŒºå¯è§
         // return:
-        //      ÊÇ·ñ·¢Éú¾í¹öÁË
+        //      æ˜¯å¦å‘ç”Ÿå·æ»šäº†
         public bool EnsureVisible(CellBase obj)
         {
             if (obj == null)
@@ -14058,7 +14058,7 @@ lower_height - 1);
 
             if (obj is IssueBindingItem)
             {
-                // ĞŞÕı
+                // ä¿®æ­£
                 IssueBindingItem issue = (IssueBindingItem)obj;
                 rectCaret.Width = this.m_nLeftTextWidth;
             }
@@ -14066,10 +14066,10 @@ lower_height - 1);
             return EnsureVisible(rectCell, rectCaret);
         }
 
-        // È·±£Ò»¸ö¶ÔÏóµ¥ÔªÔÚ´°¿Ú¿Í»§Çø¿É¼û
-        // ¶ÔDayAreaÓĞÌØÊâ´¦Àí
+        // ç¡®ä¿ä¸€ä¸ªå¯¹è±¡å•å…ƒåœ¨çª—å£å®¢æˆ·åŒºå¯è§
+        // å¯¹DayAreaæœ‰ç‰¹æ®Šå¤„ç†
         // return:
-        //      ÊÇ·ñ·¢Éú¾í¹öÁË
+        //      æ˜¯å¦å‘ç”Ÿå·æ»šäº†
         public bool EnsureVisibleWhenScrolling(CellBase obj)
         {
             if (obj == null)
@@ -14084,18 +14084,18 @@ lower_height - 1);
             if (obj is Cell)
             {
                 DayArea day = (DayArea)obj;
-                // Èç¹ûÊÇÃ¿ÔÂµÚÒ»¸öĞÇÆÚµÄÈÕ×Ó
+                // å¦‚æœæ˜¯æ¯æœˆç¬¬ä¸€ä¸ªæ˜ŸæœŸçš„æ—¥å­
                 if (day.Container.Week == 1)
                 {
-                    // µ÷Õû¾ØĞÎ£¬ÒÔ°üÀ¨ĞÇÆÚÃû±êÌâ
+                    // è°ƒæ•´çŸ©å½¢ï¼Œä»¥åŒ…æ‹¬æ˜ŸæœŸåæ ‡é¢˜
                     rectUpdate.Y -= this.DataRoot.m_nDayOfWeekTitleHeight;
                     rectUpdate.Height += this.DataRoot.m_nDayOfWeekTitleHeight;
                 }
             }*/
 
             // TODO:
-            // Èç¹ûÊÇÔÂ¡¢ÄêµÈ½Ï´ó³ß´çµÄÎïÌå£¬Ö»ÒªÕâ¸öÎïÌåµ±Ç°²¿·Ö¿É¼û£¬¾Í²»±Ø¾í¹öÁË
-            // Ò²¿ÉÒÔÍ¨¹ı°ÑcaretÉèÖÃÎªÒÑ¾­¿É¼ûµÄ²¿·Ö£¬À´ÊµÏÖÀàËÆĞ§¹û
+            // å¦‚æœæ˜¯æœˆã€å¹´ç­‰è¾ƒå¤§å°ºå¯¸çš„ç‰©ä½“ï¼Œåªè¦è¿™ä¸ªç‰©ä½“å½“å‰éƒ¨åˆ†å¯è§ï¼Œå°±ä¸å¿…å·æ»šäº†
+            // ä¹Ÿå¯ä»¥é€šè¿‡æŠŠcaretè®¾ç½®ä¸ºå·²ç»å¯è§çš„éƒ¨åˆ†ï¼Œæ¥å®ç°ç±»ä¼¼æ•ˆæœ
 
             RectangleF rectCell = rectUpdate;
 
@@ -14103,7 +14103,7 @@ lower_height - 1);
 
             if (obj is IssueBindingItem)
             {
-                // ĞŞÕı 2010/3/26
+                // ä¿®æ­£ 2010/3/26
                 IssueBindingItem issue = (IssueBindingItem)obj;
                 rectCaret.Width = this.m_nLeftTextWidth;
             }
@@ -14112,7 +14112,7 @@ lower_height - 1);
         }
 
         // return:
-        //      ÊÇ·ñ·¢Éú¾í¹öÁË
+        //      æ˜¯å¦å‘ç”Ÿå·æ»šäº†
         public bool EnsureVisibleWhenScrolling(HitTestResult result)
         {
             if (result == null)
@@ -14124,7 +14124,7 @@ lower_height - 1);
                 IssueBindingItem issue = (IssueBindingItem)result.Object;
 
                 RectangleF rectUpdate = GetViewRect(issue);
-                rectUpdate.Width = this.m_nLeftTextWidth;   // ×ó±ß±êÌâ²¿·Ö
+                rectUpdate.Width = this.m_nLeftTextWidth;   // å·¦è¾¹æ ‡é¢˜éƒ¨åˆ†
 
                 RectangleF rectCell = rectUpdate;
                 RectangleF rectCaret = rectUpdate;
@@ -14151,18 +14151,18 @@ lower_height - 1);
             }
             else
             {
-                throw new Exception("ÉĞ²»Ö§³ÖIssueBindingItem/Cell/NullCellÒÔÍâµÄÆäËûÀàĞÍ");
+                throw new Exception("å°šä¸æ”¯æŒIssueBindingItem/Cell/NullCellä»¥å¤–çš„å…¶ä»–ç±»å‹");
             }
 
         }
 
 
-        // Çå³ıµ±Ç°¶ÔÏó±¾ÉíÒÔ¼°È«²¿ÏÂ¼¶µÄÑ¡Ôñ±êÖ¾, ²¢·µ»ØĞèÒªË¢ĞÂµÄ¶ÔÏó
+        // æ¸…é™¤å½“å‰å¯¹è±¡æœ¬èº«ä»¥åŠå…¨éƒ¨ä¸‹çº§çš„é€‰æ‹©æ ‡å¿—, å¹¶è¿”å›éœ€è¦åˆ·æ–°çš„å¯¹è±¡
         public void ClearAllSubSelected(ref List<CellBase> objects,
             int nMaxCount)
         {
             /*
-            // ĞŞ¸Ä¹ıµÄ²Å¼ÓÈëÊı×é
+            // ä¿®æ”¹è¿‡çš„æ‰åŠ å…¥æ•°ç»„
             if (this.m_bSelected == true && objects.Count < nMaxCount)
                 objects.Add(this);
 
@@ -14176,11 +14176,11 @@ lower_height - 1);
             }
         }
 
-        // Ì½²âÁ½¸öÍ¬¼¶¶ÔÏóµÄÏÈºó¹ØÏµ
+        // æ¢æµ‹ä¸¤ä¸ªåŒçº§å¯¹è±¡çš„å…ˆåå…³ç³»
         // return:
-        //      -1  startÔÚendÖ®Ç°
-        //      0   startºÍendÊÇÍ¬Ò»¸ö¶ÔÏó
-        //      1   startÔÚendÖ®ºó
+        //      -1  startåœ¨endä¹‹å‰
+        //      0   startå’Œendæ˜¯åŒä¸€ä¸ªå¯¹è±¡
+        //      1   startåœ¨endä¹‹å
         int GetDirection(Cell start, Cell end)
         {
             Debug.Assert(start != null, "");
@@ -14200,14 +14200,14 @@ lower_height - 1);
 
             if (start_issue_index > end_issue_index)
             {
-                // startÔÚendºóÃæ
+                // startåœ¨endåé¢
                 return 1;
             }
 
-            return -1;  // startÔÚendÇ°Ãæ
+            return -1;  // startåœ¨endå‰é¢
         }
 
-        // aºÍbÖĞ½»²æµÄ²¿·Ö·ÅÈëunion£¬²¢´ÓaºÍbÖĞÈ¥µô
+        // aå’Œbä¸­äº¤å‰çš„éƒ¨åˆ†æ”¾å…¥unionï¼Œå¹¶ä»aå’Œbä¸­å»æ‰
         void Compare(ref List<CellBase> a,
             ref List<CellBase> b,
             out List<CellBase> union)
@@ -14256,7 +14256,7 @@ lower_height - 1);
             return false;
         }
 
-        // ´ÓÆğµãµ½ÖÕµã£¬¹¹Ôì°üº¬ËùÓĞĞÖµÜ¶ÔÏóµÄÊı×é
+        // ä»èµ·ç‚¹åˆ°ç»ˆç‚¹ï¼Œæ„é€ åŒ…å«æ‰€æœ‰å…„å¼Ÿå¯¹è±¡çš„æ•°ç»„
         List<CellBase> GetRangeObjects(
             CellBase start,
             CellBase end)
@@ -14348,7 +14348,7 @@ lower_height - 1);
         }
 
 #if NOOOOOOOOOOOOOOO
-        // ´ÓÆğµãµ½ÖÕµã£¬¹¹Ôì°üº¬ËùÓĞĞÖµÜ¶ÔÏóµÄÊı×é
+        // ä»èµ·ç‚¹åˆ°ç»ˆç‚¹ï¼Œæ„é€ åŒ…å«æ‰€æœ‰å…„å¼Ÿå¯¹è±¡çš„æ•°ç»„
         List<Cell> GetRangeObjects(
             bool bIncludeStart,
             bool bIncludeEnd,
@@ -14373,17 +14373,17 @@ lower_height - 1);
                 return result;
             }
 
-            // ÏÈ¹Û²ìÄÄ¸öÔÚÇ°Ãæ
+            // å…ˆè§‚å¯Ÿå“ªä¸ªåœ¨å‰é¢
             int nDirection = GetDirection(start, end);
 
             if (nDirection > 0)
             {
-                // ½»»»startºÍend
+                // äº¤æ¢startå’Œend
                 Cell temp = start;
                 start = end;
                 end = temp;
 
-                // ½»»»bool
+                // äº¤æ¢bool
                 bool bTemp = bIncludeStart;
                 bIncludeStart = bIncludeEnd;
                 bIncludeEnd = bTemp;
@@ -14394,28 +14394,28 @@ lower_height - 1);
                 start = start.GetNextSibling();
                 if (start == null)
                 {
-                    return result;  // ·µ»Ø¿Õ¼¯ºÏ
+                    return result;  // è¿”å›ç©ºé›†åˆ
                 }
                 Debug.Assert(start != null, "");
             }
 
-            // ´Óstartµ½end£¬½¨Á¢Êı×é
+            // ä»startåˆ°endï¼Œå»ºç«‹æ•°ç»„
             for (; ; )
             {
                 if (bIncludeEnd == false
                     && start == end)
-                    break;  // ²»°üº¬Î²²¿
+                    break;  // ä¸åŒ…å«å°¾éƒ¨
 
                 Debug.Assert(start != null, "");
                 result.Add(start);
 
                 if (start == end)
-                    break;  // °üº¬Î²²¿
+                    break;  // åŒ…å«å°¾éƒ¨
 
                 start = start.GetNextSibling();
                 if (start == null)
                 {
-                    Debug.Assert(false, "¾¹È»Ã»ÓĞÓöÉÏend");
+                    Debug.Assert(false, "ç«Ÿç„¶æ²¡æœ‰é‡ä¸Šend");
                     break;
                 }
             }
@@ -14452,7 +14452,7 @@ lower_height - 1);
         }
 
 
-        // Ñ¡ÔñÒ»ÏµÁĞ¶ÔÏó
+        // é€‰æ‹©ä¸€ç³»åˆ—å¯¹è±¡
         void SelectObjects(List<CellBase> aObject,
             SelectAction action)
         {
@@ -14465,7 +14465,7 @@ lower_height - 1);
                 if (obj == null)
                     continue;
 
-                // Êı×é²»ÊÇm_aSelectedArea²ÅÄÜ×ö
+                // æ•°ç»„ä¸æ˜¯m_aSelectedAreaæ‰èƒ½åš
                 if (aObject != m_aSelectedArea)
                 {
                     if (action == SelectAction.On
@@ -14489,7 +14489,7 @@ lower_height - 1);
                 /*
                 rectUpdate = Object.ToRootCoordinate(rectUpdate);
 
-                // ÓÉDataRoot×ø±ê£¬±ä»»ÎªÕûÌåÎÄµµ×ø±ê£¬È»ºó±ä»»ÎªÆÁÄ»×ø±ê
+                // ç”±DataRootåæ ‡ï¼Œå˜æ¢ä¸ºæ•´ä½“æ–‡æ¡£åæ ‡ï¼Œç„¶åå˜æ¢ä¸ºå±å¹•åæ ‡
                 rectUpdate.Offset(this.m_lWindowOrgX + m_nLeftBlank,
                     this.m_lWindowOrgY + m_nTopBlank);
                  */
@@ -14497,7 +14497,7 @@ lower_height - 1);
             }
         }
 
-        // µÃµ½Ò»¸ö¶ÔÏóµÄ¾ØĞÎ(view×ø±ê)
+        // å¾—åˆ°ä¸€ä¸ªå¯¹è±¡çš„çŸ©å½¢(viewåæ ‡)
         RectangleF GetViewRect(object objParam)
         {
             Debug.Assert(objParam != null, "");
@@ -14514,7 +14514,7 @@ lower_height - 1);
             }
             else
             {
-                throw new Exception("objParam±ØĞëÎªÀàĞÍCellºÍNullCellÖ®Ò»");
+                throw new Exception("objParamå¿…é¡»ä¸ºç±»å‹Cellå’ŒNullCellä¹‹ä¸€");
             }
 
             if (objParam is Cell)
@@ -14525,7 +14525,7 @@ lower_height - 1);
 
                 rect = obj.ToRootCoordinate(rect);
 
-                // ÓÉDataRoot×ø±ê£¬±ä»»ÎªÕûÌåÎÄµµ×ø±ê£¬È»ºó±ä»»Îªview×ø±ê
+                // ç”±DataRootåæ ‡ï¼Œå˜æ¢ä¸ºæ•´ä½“æ–‡æ¡£åæ ‡ï¼Œç„¶åå˜æ¢ä¸ºviewåæ ‡
                 rect.Offset(this.m_lWindowOrgX + m_nLeftBlank,
                     this.m_lWindowOrgY + m_nTopBlank);
 
@@ -14537,11 +14537,11 @@ lower_height - 1);
 
                 RectangleF rect = new RectangleF(0, 0, this.m_nCellWidth, this.m_nCellHeight);
 
-                // ±ä»»ÎªÄÚÈİÎÄµµ×ø±ê
+                // å˜æ¢ä¸ºå†…å®¹æ–‡æ¡£åæ ‡
                 rect.Offset(this.m_nLeftTextWidth + obj.X * this.m_nCellWidth,
                     obj.Y * this.m_nCellHeight);
 
-                // ÓÉÄÚÈİÎÄµµ×ø±ê£¬±ä»»ÎªÕûÌåÎÄµµ×ø±ê£¬È»ºó±ä»»Îªview×ø±ê
+                // ç”±å†…å®¹æ–‡æ¡£åæ ‡ï¼Œå˜æ¢ä¸ºæ•´ä½“æ–‡æ¡£åæ ‡ï¼Œç„¶åå˜æ¢ä¸ºviewåæ ‡
                 rect.Offset(this.m_lWindowOrgX + this.m_nLeftBlank,
                     this.m_lWindowOrgY + this.m_nTopBlank);
 
@@ -14562,14 +14562,14 @@ lower_height - 1);
 
                 RectangleF rect = new RectangleF(0,
                     0,
-                    this.m_nLeftTextWidth  +this.m_nCellWidth * this.m_nMaxItemCountOfOneIssue, // Ö»°üÀ¨×ó²à±êÌâ²¿·Ö
+                    this.m_nLeftTextWidth  +this.m_nCellWidth * this.m_nMaxItemCountOfOneIssue, // åªåŒ…æ‹¬å·¦ä¾§æ ‡é¢˜éƒ¨åˆ†
                     this.m_nCellHeight);
 
-                // ±ä»»ÎªÄÚÈİÎÄµµ×ø±ê
+                // å˜æ¢ä¸ºå†…å®¹æ–‡æ¡£åæ ‡
                 rect.Offset(0,
                     nLineNo * this.m_nCellHeight);
 
-                // ÓÉÄÚÈİÎÄµµ×ø±ê£¬±ä»»ÎªÕûÌåÎÄµµ×ø±ê£¬È»ºó±ä»»Îªview×ø±ê
+                // ç”±å†…å®¹æ–‡æ¡£åæ ‡ï¼Œå˜æ¢ä¸ºæ•´ä½“æ–‡æ¡£åæ ‡ï¼Œç„¶åå˜æ¢ä¸ºviewåæ ‡
                 rect.Offset(this.m_lWindowOrgX + this.m_nLeftBlank,
                     this.m_lWindowOrgY + this.m_nTopBlank);
 
@@ -14599,15 +14599,15 @@ lower_height - 1);
              * */
         }
 
-        // ÅĞ¶ÏÒ»¸öNullCellÊôÓÚÄÄ¸öºÏ¶©²á
+        // åˆ¤æ–­ä¸€ä¸ªNullCellå±äºå“ªä¸ªåˆè®¢å†Œ
         Cell BelongToBinding(NullCell cell)
         {
-            // ±éÀúºÏ¶©²á¶ÔÏóÊı×é
+            // éå†åˆè®¢å†Œå¯¹è±¡æ•°ç»„
             for (int i = 0; i < this.ParentItems.Count; i++)
             {
                 ItemBindingItem parent_item = this.ParentItems[i];
 
-                IssueBindingItem issue = parent_item.Container; // ¼Ù×°ÊôÓÚÕâ¸öÆÚ
+                IssueBindingItem issue = parent_item.Container; // å‡è£…å±äºè¿™ä¸ªæœŸ
                 Debug.Assert(issue != null, "");
 
                 // 2010/4/1
@@ -14622,7 +14622,7 @@ lower_height - 1);
                     && cell.X != nCol + 1)
                     continue;
 
-                // ÕÒµ½ĞĞºÅ
+                // æ‰¾åˆ°è¡Œå·
                 int nLineNo = this.Issues.IndexOf(issue);
                 Debug.Assert(nLineNo != -1, "");
                 if (cell.Y == nLineNo)
@@ -14639,7 +14639,7 @@ lower_height - 1);
                     if (issue.IssueLayoutState == IssueLayoutState.Accepting)
                         continue;
 
-                    // ÕÒµ½ĞĞºÅ
+                    // æ‰¾åˆ°è¡Œå·
                     nLineNo = this.Issues.IndexOf(issue);
                     Debug.Assert(nLineNo != -1, "");
 
@@ -14651,7 +14651,7 @@ lower_height - 1);
             return null;
         }
 
-        // ½«³ö°æÈÕÆÚ×Ö·û´®×ª»»ÎªÊÊºÏÏÔÊ¾µÄ¸ñÊ½
+        // å°†å‡ºç‰ˆæ—¥æœŸå­—ç¬¦ä¸²è½¬æ¢ä¸ºé€‚åˆæ˜¾ç¤ºçš„æ ¼å¼
         public static string GetDisplayPublishTime(string strPublishTime)
         {
             int nLength = strPublishTime.Length;
@@ -14666,7 +14666,7 @@ lower_height - 1);
             return strPublishTime;
         }
 
-        // ÊÇ·ñ±¾ÄêµÄµÚÒ»ÆÚ?
+        // æ˜¯å¦æœ¬å¹´çš„ç¬¬ä¸€æœŸ?
         internal bool IsYearFirstIssue(IssueBindingItem issue)
         {
             int index = this.Issues.IndexOf(issue);
@@ -14696,22 +14696,22 @@ lower_height - 1);
             long x = x0;
             long y = y0;
 
-            // Õû¸öÄÚÈİÇøÓòµÄ¸ß¶È
+            // æ•´ä¸ªå†…å®¹åŒºåŸŸçš„é«˜åº¦
             this.m_lContentHeight = this.m_nCellHeight * this.Issues.Count;
 
-            bool bDrawBottomLine = true;    // ÊÇ·ñÒª»­ÏÂ·½ÏßÌõ
+            bool bDrawBottomLine = true;    // æ˜¯å¦è¦ç”»ä¸‹æ–¹çº¿æ¡
 
             long lIssueWidth = this.m_lContentWidth;
             long lIssueHeight = this.m_nCellHeight; // issue.Height;
 
-            // ÓÅ»¯
+            // ä¼˜åŒ–
             int nStartLine = (int)((e.ClipRectangle.Top - y) / lIssueHeight);
             nStartLine = Math.Max(0, nStartLine);
             y += nStartLine * lIssueHeight;
 
             for (int i = nStartLine; i < this.Issues.Count; i++)
             {
-                // ÓÅ»¯
+                // ä¼˜åŒ–
                 if (y > e.ClipRectangle.Bottom)
                 {
                     bDrawBottomLine = false;
@@ -14724,7 +14724,7 @@ lower_height - 1);
                     || TooLarge(y) == true)
                     goto CONTINUE;
 
-                // ÓÅ»¯
+                // ä¼˜åŒ–
                 RectangleF rect = new RectangleF((int)x,
                     (int)y,
                     lIssueWidth,
@@ -14742,11 +14742,11 @@ lower_height - 1);
 
             long lHeight = lIssueHeight * this.Issues.Count;
 
-            // ÓÒ¡¢ÏÂÏßÌõ
+            // å³ã€ä¸‹çº¿æ¡
 
             Pen penFrame = new Pen(Color.FromArgb(50, Color.Gray), (float)1);
 
-            // ÓÒ·½ÊúÏß
+            // å³æ–¹ç«–çº¿
             if (TooLarge(x0 + this.m_lContentWidth) == false)
             {
                 e.Graphics.DrawLine(penFrame,
@@ -14755,7 +14755,7 @@ lower_height - 1);
                     );
             }
 
-            // ÏÂ·½ºáÏß
+            // ä¸‹æ–¹æ¨ªçº¿
             if (bDrawBottomLine == true
                 && TooLarge(y0 + lHeight) == false)
             {
@@ -14767,17 +14767,17 @@ lower_height - 1);
             }
 
 #if NOOOOOOOOOOOOOOOO
-            // »æÖÆºÏ¶©±¾·¶Î§µÄ·½¿ò
+            // ç»˜åˆ¶åˆè®¢æœ¬èŒƒå›´çš„æ–¹æ¡†
             // Debug.WriteLine("Draw border clip=" + e.ClipRectangle.ToString());
-            // ±éÀúºÏ¶©²á¶ÔÏóÊı×é
+            // éå†åˆè®¢å†Œå¯¹è±¡æ•°ç»„
             for (int i = 0; i < this.ParentItems.Count; i++)
             {
                 ItemBindingItem parent_item = this.ParentItems[i];
 
-                IssueBindingItem issue = parent_item.Container; // ¼Ù×°ÊôÓÚÕâ¸öÆÚ
+                IssueBindingItem issue = parent_item.Container; // å‡è£…å±äºè¿™ä¸ªæœŸ
                 Debug.Assert(issue != null, "");
 
-                // ÕÒµ½ĞĞºÅ
+                // æ‰¾åˆ°è¡Œå·
                 int nLineNo = this.Issues.IndexOf(issue);
                 Debug.Assert(nLineNo != -1, "");
                 if (nLineNo == -1)
@@ -14795,16 +14795,16 @@ lower_height - 1);
                     + (long)this.m_nLeftTextWidth
                     + (long)nCol * (long)m_nCellWidth;
 
-                // ¿´¿´´¹Ö±·½Ïò°üº¬¶àÉÙ¸öÆÚ
+                // çœ‹çœ‹å‚ç›´æ–¹å‘åŒ…å«å¤šå°‘ä¸ªæœŸ
                 int nIssueCount = 0;
                 if (parent_item.MemberCells.Count == 0)
                     nIssueCount = 1;
                 else
                 {
-                    // TODO: Òª±£Ö¤item.MemberCellsÊı×éÖĞ¶ÔÏóÊÇÓĞĞòµÄ
+                    // TODO: è¦ä¿è¯item.MemberCellsæ•°ç»„ä¸­å¯¹è±¡æ˜¯æœ‰åºçš„
                     IssueBindingItem tail_issue = parent_item.MemberCells[parent_item.MemberCells.Count - 1].Container;// item.MemberItems[item.MemberItems.Count - 1].Container;
                     Debug.Assert(tail_issue != null, "");
-                    // ÕÒµ½ĞĞºÅ
+                    // æ‰¾åˆ°è¡Œå·
                     int nTailLineNo = this.Issues.IndexOf(tail_issue);
                     Debug.Assert(nTailLineNo != -1, "");
 
@@ -14829,7 +14829,7 @@ lower_height - 1);
                     {
                         Color colorBorder = this.FixedBorderColor;
                         penBorder = new Pen(Color.FromArgb(100, colorBorder),
-                            (float)8);  // ¹Ì»¯£¬ÂÌÉ«ÊµÏß
+                            (float)8);  // å›ºåŒ–ï¼Œç»¿è‰²å®çº¿
                         // brushInner = new SolidBrush(Color.FromArgb(30, Color.Green));
                     }
                     else
@@ -14840,7 +14840,7 @@ lower_height - 1);
                             Color.FromArgb(255, colorBorder)
                             );    // back
                         penBorder = new Pen(brush,
-                            (float)4);  // ¿ÉĞŞ¸Ä£¬ºìÉ«ĞéÏß
+                            (float)4);  // å¯ä¿®æ”¹ï¼Œçº¢è‰²è™šçº¿
                         // penBorder.Alignment = PenAlignment.
                     }
 
@@ -14875,8 +14875,8 @@ lower_height - 1);
 
             }
 #endif
-            // »æÖÆºÏ¶©±¾·¶Î§µÄÁ¬½ÓÏß
-            // ±éÀúºÏ¶©²á¶ÔÏóÊı×é
+            // ç»˜åˆ¶åˆè®¢æœ¬èŒƒå›´çš„è¿æ¥çº¿
+            // éå†åˆè®¢å†Œå¯¹è±¡æ•°ç»„
             for (int i = 0; i < this.ParentItems.Count; i++)
             {
                 ItemBindingItem parent_item = this.ParentItems[i];
@@ -14896,7 +14896,7 @@ lower_height - 1);
                     out points,
                     out rectBound);
 
-                // ÓÅ»¯
+                // ä¼˜åŒ–
                 if (rectBound.IntersectsWith(e.ClipRectangle) == false)
                     continue;
 
@@ -14914,7 +14914,7 @@ lower_height - 1);
                 {
                     colorBorder = this.FixedBorderColor;
                     penBorder = new Pen(Color.FromArgb(150, colorBorder),
-                        (float)4);  // ¹Ì»¯
+                        (float)4);  // å›ºåŒ–
                     // brushInner = new SolidBrush(Color.FromArgb(30, Color.Green));
                 }
                 else
@@ -14925,13 +14925,13 @@ lower_height - 1);
                         Color.FromArgb(255, colorBorder)
                         );    // back
                     penBorder = new Pen(brush,
-                        (float)4);  // ¿ÉĞŞ¸Ä
+                        (float)4);  // å¯ä¿®æ”¹
                     // penBorder.Alignment = PenAlignment.
                 }
 
                 e.Graphics.RenderingOrigin = Point.Round(points[0]);
 
-                // »æÖÆ·½¿ò
+                // ç»˜åˆ¶æ–¹æ¡†
                 if (bAllBindingLayout == true)
                 {
                     float delta = (penBorder.Width / 2) + 1;
@@ -14945,7 +14945,7 @@ lower_height - 1);
                     continue;
                 }
 
-                        // »ñµÃ×İÏòÆ«ÒÆÁ¿
+                        // è·å¾—çºµå‘åç§»é‡
                 int nOffset = GetVerticalOffset(parent_item.Container,
                     parent_item);
                 if (nOffset == 0)
@@ -14986,7 +14986,7 @@ lower_height - 1);
             }
         }
 
-        // »ñµÃ×İÏòÆ«ÒÆÁ¿
+        // è·å¾—çºµå‘åç§»é‡
         static int GetVerticalOffset(IssueBindingItem issue,
             ItemBindingItem parent_item)
         {
@@ -15009,10 +15009,10 @@ lower_height - 1);
             Color colorBorder,
             PaintEventArgs e)
         {
-            // ×îºÃÊÇÅ¼Êı
+            // æœ€å¥½æ˜¯å¶æ•°
 
-            int nLargeCircleWidth = 16; // µÚÒ»¸ö´óÈ¦È¦µÄÖ±¾¶
-            int nCircleWidth = 10;  // ÆäËûĞ¡È¦È¦µÄÖ±¾¶
+            int nLargeCircleWidth = 16; // ç¬¬ä¸€ä¸ªå¤§åœˆåœˆçš„ç›´å¾„
+            int nCircleWidth = 10;  // å…¶ä»–å°åœˆåœˆçš„ç›´å¾„
 
             Pen pen = new Pen(colorBorder);
             Brush brush = new SolidBrush(Color.White);
@@ -15035,7 +15035,7 @@ lower_height - 1);
                        nCircleWidth);
                 }
 
-                // ÓÅ»¯
+                // ä¼˜åŒ–
                 if (rect.IntersectsWith(e.ClipRectangle) == false)
                     continue;
 
@@ -15052,10 +15052,10 @@ lower_height - 1);
             results = new PointF[0];
             rectBound = new RectangleF();
             List<PointF>  points = new List<PointF>();
-            IssueBindingItem parent_issue = parent_item.Container; // ¼Ù×°ÊôÓÚÕâ¸öÆÚ
+            IssueBindingItem parent_issue = parent_item.Container; // å‡è£…å±äºè¿™ä¸ªæœŸ
             Debug.Assert(parent_issue != null, "");
 
-            // ÕÒµ½¿ªÊ¼ĞĞºÅ
+            // æ‰¾åˆ°å¼€å§‹è¡Œå·
             int nStartLineNo = this.Issues.IndexOf(parent_issue);
             Debug.Assert(nStartLineNo != -1, "");
             if (nStartLineNo == -1)
@@ -15146,7 +15146,7 @@ lower_height - 1);
             Both = 2,
         }
 
-        // ¼ì²éÒ»¸ölongÊÇ·ñÔ½¹ıint16ÄÜ±í´ïµÄÖµ·¶Î§
+        // æ£€æŸ¥ä¸€ä¸ªlongæ˜¯å¦è¶Šè¿‡int16èƒ½è¡¨è¾¾çš„å€¼èŒƒå›´
         public static bool TooLarge(long lValue)
         {
             if (lValue >= Int16.MaxValue || lValue <= Int16.MinValue)
@@ -15175,7 +15175,7 @@ lower_height - 1);
                 int nClientWidth = this.ClientSize.Width;
                 int nClientHeight = this.ClientSize.Height;
 
-                // ÎÄµµ³ß´ç
+                // æ–‡æ¡£å°ºå¯¸
                 long lDocumentWidth = DocumentWidth;
                 long lDocumentHeight = DocumentHeight;
 
@@ -15197,7 +15197,7 @@ lower_height - 1);
                     else
                         this.m_h_ratio = 1.0F;
 
-                    // Ë®Æ½·½Ïò
+                    // æ°´å¹³æ–¹å‘
                     API.ScrollInfoStruct si = new API.ScrollInfoStruct();
 
                     si.cbSize = Marshal.SizeOf(si);
@@ -15227,7 +15227,7 @@ lower_height - 1);
                     else
                         this.m_v_ratio = 1.0F;
 
-                    // ´¹Ö±·½Ïò
+                    // å‚ç›´æ–¹å‘
                     API.ScrollInfoStruct si = new API.ScrollInfoStruct();
 
                     si.cbSize = Marshal.SizeOf(si);
@@ -15307,7 +15307,7 @@ lower_height - 1);
 
                 if (lDelta != 0)
                 {
-                    // Èç¹û¾í¹öµÄ¾àÀë³¬¹ı32Î»ÕûÊı·¶Î§
+                    // å¦‚æœå·æ»šçš„è·ç¦»è¶…è¿‡32ä½æ•´æ•°èŒƒå›´
                     if (lDelta >= Int32.MaxValue || lDelta <= Int32.MinValue)
                         this.Invalidate();
                     else
@@ -15374,7 +15374,7 @@ lower_height - 1);
                 long lDelta = m_lWindowOrgY - lWindowOrgY_old;
                 if (lDelta != 0)
                 {
-                    // Èç¹û¾í¹öµÄ¾àÀë³¬¹ı32Î»ÕûÊı·¶Î§
+                    // å¦‚æœå·æ»šçš„è·ç¦»è¶…è¿‡32ä½æ•´æ•°èŒƒå›´
                     if (lDelta >= Int32.MaxValue || lDelta <= Int32.MinValue)
                         this.Invalidate();
                     else
@@ -15418,7 +15418,7 @@ lower_height - 1);
 
             // e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
 
-            // e.Graphics.SetClip(e.ClipRectangle); // ·Ï»°
+            // e.Graphics.SetClip(e.ClipRectangle); // åºŸè¯
 
             long xOffset = m_lWindowOrgX + m_nLeftBlank;
             long yOffset = m_lWindowOrgY + m_nTopBlank;
@@ -15427,9 +15427,9 @@ lower_height - 1);
         }
 
         /// <summary>
-        /// È±Ê¡´°¿Ú¹ı³Ì
+        /// ç¼ºçœçª—å£è¿‡ç¨‹
         /// </summary>
-        /// <param name="m">ÏûÏ¢</param>
+        /// <param name="m">æ¶ˆæ¯</param>
         protected override void DefWndProc(ref Message m)
         {
             switch (m.Msg)
@@ -15552,10 +15552,10 @@ lower_height - 1);
             }
         }
 
-        // ÀûÓÃÊÂ¼ş½Ó¿Úthis.GetItemInfo£¬»ñµÃËùĞèµÄ²áĞÅÏ¢
+        // åˆ©ç”¨äº‹ä»¶æ¥å£this.GetItemInfoï¼Œè·å¾—æ‰€éœ€çš„å†Œä¿¡æ¯
         // return:
         //      -1  error
-        //      >-0 Ëù»ñµÃ¼ÇÂ¼¸öÊı¡£(XmlRecords.Count)
+        //      >-0 æ‰€è·å¾—è®°å½•ä¸ªæ•°ã€‚(XmlRecords.Count)
         internal int DoGetItemInfo(string strPublishTime,
             out List<string> XmlRecords,
             out string strError)
@@ -15566,7 +15566,7 @@ lower_height - 1);
 
             if (this.GetItemInfo == null)
             {
-                strError = "ÉĞÎ´¹Ò½ÓGetItemInfoÊÂ¼ş";
+                strError = "å°šæœªæŒ‚æ¥GetItemInfoäº‹ä»¶";
                 return -1;
             }
 
@@ -15577,7 +15577,7 @@ lower_height - 1);
             this.GetItemInfo(this, e1);
             if (String.IsNullOrEmpty(e1.ErrorInfo) == false)
             {
-                strError = "ÔÚ»ñÈ¡±¾ÖÖÄÚ³ö°æÈÕÆÚÎª '" + strPublishTime + "' µÄ²áĞÅÏ¢µÄ¹ı³ÌÖĞ·¢Éú´íÎó: " + e1.ErrorInfo;
+                strError = "åœ¨è·å–æœ¬ç§å†…å‡ºç‰ˆæ—¥æœŸä¸º '" + strPublishTime + "' çš„å†Œä¿¡æ¯çš„è¿‡ç¨‹ä¸­å‘ç”Ÿé”™è¯¯: " + e1.ErrorInfo;
                 return -1;
             }
 
@@ -15586,7 +15586,7 @@ lower_height - 1);
             return XmlRecords.Count;
         }
 
-        // Ä£·ÂMouseMoveÊÂ¼şµ¼ÖÂ¾í¹ö
+        // æ¨¡ä»¿MouseMoveäº‹ä»¶å¯¼è‡´å·æ»š
         private void timer_dragScroll_Tick(object sender, EventArgs e)
         {
             if (this.Capture == false)
@@ -15654,7 +15654,7 @@ lower_height - 1);
                 }
 
                 if (cell.item == null)
-                    continue;   // Ìø¹ıÈ±ÆÚ
+                    continue;   // è·³è¿‡ç¼ºæœŸ
 
                 IssueBindingItem issue = cell.Container;
                 Debug.Assert(issue != null, "");
@@ -15666,14 +15666,14 @@ lower_height - 1);
                 if (cell.item != null
                     && String.IsNullOrEmpty(cell.item.Volume) == false)
                 {
-                    // ½âÎöµ±ÄêÆÚºÅ¡¢×ÜÆÚºÅ¡¢¾íºÅµÄ×Ö·û´®
+                    // è§£æå½“å¹´æœŸå·ã€æ€»æœŸå·ã€å·å·çš„å­—ç¬¦ä¸²
                     VolumeInfo.ParseItemVolumeString(cell.item.Volume,
                         out strNo,
                         out strZong,
                         out strVolume);
                 }
 
-                // ÊµÔÚ²»ĞĞ£¬»¹ÊÇÓÃÆÚĞĞµÄ?
+                // å®åœ¨ä¸è¡Œï¼Œè¿˜æ˜¯ç”¨æœŸè¡Œçš„?
                 if (String.IsNullOrEmpty(strNo) == true)
                 {
                     strNo = issue.Issue;
@@ -15727,7 +15727,7 @@ lower_height - 1);
             {
                 if (String.IsNullOrEmpty(strValue) == false)
                     strValue += "=";
-                strValue += "×Ü." + strZongString;
+                strValue += "æ€»." + strZongString;
             }
 
             if (String.IsNullOrEmpty(strVolumnString) == false)
@@ -15747,40 +15747,40 @@ lower_height - 1);
 #endif
     }
 
-    // µã»÷¼ì²â½á¹û
+    // ç‚¹å‡»æ£€æµ‹ç»“æœ
     internal class HitTestResult
     {
-        public Object Object = null;    // µã»÷µ½µÄÄ©¼¶¶ÔÏó
+        public Object Object = null;    // ç‚¹å‡»åˆ°çš„æœ«çº§å¯¹è±¡
         public AreaPortion AreaPortion = AreaPortion.None;
 
-        // ¶ÔÏó×ø±êÏÂµÄµã»÷Î»ÖÃ
+        // å¯¹è±¡åæ ‡ä¸‹çš„ç‚¹å‡»ä½ç½®
         public long X = -1;
         public long Y = -1;
 
-        public int Param = 0;   // ÆäËû²ÎÊı
+        public int Param = 0;   // å…¶ä»–å‚æ•°
     }
 
-    // ÇøÓòÃû³Æ
+    // åŒºåŸŸåç§°
     internal enum AreaPortion
     {
         None = 0,
-        Blank = 1,    // ¿Õ°×²¿·Ö¡£Ö¸Cell²»×ãÑÓÉìµ½µÄ²¿·Ö£¬»òÕß¿ÕµÄCell¶ÔÏóËùÔÚÎ»ÖÃ
+        Blank = 1,    // ç©ºç™½éƒ¨åˆ†ã€‚æŒ‡Cellä¸è¶³å»¶ä¼¸åˆ°çš„éƒ¨åˆ†ï¼Œæˆ–è€…ç©ºçš„Cellå¯¹è±¡æ‰€åœ¨ä½ç½®
 
-        Content = 3,    // ÄÚÈİ±¾Ìå
-        LeftText = 4,   // ×ó±ßµÄÎÄ×Ö£¬Ö¸IssueBindingItem
+        Content = 3,    // å†…å®¹æœ¬ä½“
+        LeftText = 4,   // å·¦è¾¹çš„æ–‡å­—ï¼ŒæŒ‡IssueBindingItem
 
-        LeftBlank = 5,  // ×ó±ß¿Õ°×
-        TopBlank = 6,   // ÉÏ·½¿Õ°×
-        RightBlank = 7, // ÓÒ·½¿Õ°×
-        BottomBlank = 8,    // ÏÂ·½¿Õ°×
+        LeftBlank = 5,  // å·¦è¾¹ç©ºç™½
+        TopBlank = 6,   // ä¸Šæ–¹ç©ºç™½
+        RightBlank = 7, // å³æ–¹ç©ºç™½
+        BottomBlank = 8,    // ä¸‹æ–¹ç©ºç™½
 
         Grab = 9,   // moving grab handle
-        CheckBox = 10,  // ¸ñ×ÓÖĞÑëµÄcheckbox
+        CheckBox = 10,  // æ ¼å­ä¸­å¤®çš„checkbox
 
-        // NullCell = 10,  // Ç±ÔÚ¸ñ×ÓÎ»ÖÃ
+        // NullCell = 10,  // æ½œåœ¨æ ¼å­ä½ç½®
     }
 
-    // Ñ¡ÔñÒ»¸ö¶ÔÏóµÄ¶¯×÷
+    // é€‰æ‹©ä¸€ä¸ªå¯¹è±¡çš„åŠ¨ä½œ
     internal enum SelectAction
     {
         Toggle = 0,
@@ -15790,50 +15790,50 @@ lower_height - 1);
 
 
     /// <summary>
-    /// ½¹µã·¢Éú¸Ä±äÊÂ¼ş
+    /// ç„¦ç‚¹å‘ç”Ÿæ”¹å˜äº‹ä»¶
     /// </summary>
-    /// <param name="sender">·¢ËÍÕß</param>
-    /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+    /// <param name="sender">å‘é€è€…</param>
+    /// <param name="e">äº‹ä»¶å‚æ•°</param>
     public delegate void FocusChangedEventHandler(object sender,
     FocusChangedEventArgs e);
 
     /// <summary>
-    /// ½¹µã·¢Éú¸Ä±äÊÂ¼şµÄ²ÎÊı
+    /// ç„¦ç‚¹å‘ç”Ÿæ”¹å˜äº‹ä»¶çš„å‚æ•°
     /// </summary>
     public class FocusChangedEventArgs : EventArgs
     {
         /// <summary>
-        /// ÏÈÇ°½¹µãËùÔÚ¶ÔÏó
+        /// å…ˆå‰ç„¦ç‚¹æ‰€åœ¨å¯¹è±¡
         /// </summary>
         public object OldFocusObject = null;
         /// <summary>
-        /// ÏÖÔÚ½¹µãËùÔÚ¶ÔÏó
+        /// ç°åœ¨ç„¦ç‚¹æ‰€åœ¨å¯¹è±¡
         /// </summary>
         public object NewFocusObject = null;
     }
 
     /// <summary>
-    /// ±à¼­Çø½»»¥ÊÂ¼ş
+    /// ç¼–è¾‘åŒºäº¤äº’äº‹ä»¶
     /// </summary>
-    /// <param name="sender">·¢ËÍÕß</param>
-    /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+    /// <param name="sender">å‘é€è€…</param>
+    /// <param name="e">äº‹ä»¶å‚æ•°</param>
     public delegate void EditAreaEventHandler(object sender,
         EditAreaEventArgs e);
 
     /// <summary>
-    /// ±à¼­Çø½»»¥ÊÂ¼şµÄ²ÎÊı
+    /// ç¼–è¾‘åŒºäº¤äº’äº‹ä»¶çš„å‚æ•°
     /// </summary>
     public class EditAreaEventArgs : EventArgs
     {
         /// <summary>
-        /// [in] ¶¯×÷
+        /// [in] åŠ¨ä½œ
         /// </summary>
-        public string Action = "";  // [in] ¶¯×÷
+        public string Action = "";  // [in] åŠ¨ä½œ
 
         /// <summary>
-        /// [out] ½á¹û
+        /// [out] ç»“æœ
         /// </summary>
-        public string Result = "";  // [out] ½á¹û
+        public string Result = "";  // [out] ç»“æœ
     }
 
     internal class ItemAndCol

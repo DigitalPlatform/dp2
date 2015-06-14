@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -10,7 +10,7 @@ using System.Diagnostics;
 namespace dp2Circulation
 {
     /// <summary>
-    /// Ë¢ĞÂÊı¾İ¿â¶¨ÒåµÄ·½Ê½ºÍ·ç¸ñ
+    /// åˆ·æ–°æ•°æ®åº“å®šä¹‰çš„æ–¹å¼å’Œé£æ ¼
     /// </summary>
     internal partial class RefreshStyleDialog : Form
     {

@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -11,7 +11,7 @@ using System.Xml;
 namespace dp2Circulation
 {
     /// <summary>
-    /// Ö¸¶¨ÒÑÖªÊı¾İ¿â µÄ È±Ê¡²éÖØ·½Ê½µÄ ¶Ô»°¿ò
+    /// æŒ‡å®šå·²çŸ¥æ•°æ®åº“ çš„ ç¼ºçœæŸ¥é‡æ–¹å¼çš„ å¯¹è¯æ¡†
     /// </summary>
     internal partial class DefaultProjectDialog : Form
     {
@@ -27,7 +27,7 @@ namespace dp2Circulation
 
         private void DefaultProjectDialog_Load(object sender, EventArgs e)
         {
-            // Èç¹ûÃ»ÓĞ¸ø³öÊı¾İ¿âÃû£¬Õâ¸öÓò¾ÍÓ¦µ±¿ÉÒÔ±à¼­
+            // å¦‚æœæ²¡æœ‰ç»™å‡ºæ•°æ®åº“åï¼Œè¿™ä¸ªåŸŸå°±åº”å½“å¯ä»¥ç¼–è¾‘
             if (String.IsNullOrEmpty(this.DatabaseName) == true)
             {
                 this.comboBox_databaseName.Enabled = true;
@@ -89,16 +89,16 @@ namespace dp2Circulation
         /*
         private void button_findDatabaseName_Click(object sender, EventArgs e)
         {
-            // ĞèÒªÓĞDTLP×ÊÔ´¶Ô»°¿ò¡£ĞèÒªÓĞDtlpChannelsµÄÖ§³Ö
+            // éœ€è¦æœ‰DTLPèµ„æºå¯¹è¯æ¡†ã€‚éœ€è¦æœ‰DtlpChannelsçš„æ”¯æŒ
             if (this.DupCfgDialog == null)
             {
-                MessageBox.Show(this, "DupCfgDialog³ÉÔ±Îª¿Õ£¬ÎŞ·¨´ò¿ªÑ¡ÔñÄ¿±êÊı¾İ¿âµÄ¶Ô»°¿ò");
+                MessageBox.Show(this, "DupCfgDialogæˆå‘˜ä¸ºç©ºï¼Œæ— æ³•æ‰“å¼€é€‰æ‹©ç›®æ ‡æ•°æ®åº“çš„å¯¹è¯æ¡†");
                 return;
             }
 
             GetDtlpResDialog dlg = new GetDtlpResDialog();
 
-            dlg.Text = "ÇëÑ¡ÔñÊı¾İ¿â";
+            dlg.Text = "è¯·é€‰æ‹©æ•°æ®åº“";
             dlg.Initial(this.DupCfgDialog.DtlpChannels,
                 this.DupCfgDialog.DtlpChannel);
             dlg.StartPosition = FormStartPosition.CenterScreen;

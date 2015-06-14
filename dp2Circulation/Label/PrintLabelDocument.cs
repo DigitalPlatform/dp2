@@ -1,15 +1,13 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Drawing;
 using System.Drawing.Printing;
 using System.IO;
 using System.Diagnostics;
-
 using System.Windows.Forms;
 
 using DigitalPlatform.Text;
-
 
 namespace dp2Circulation
 {
@@ -17,7 +15,7 @@ namespace dp2Circulation
     {
         StreamReader sr = null;
 
-        int m_nPageNo = 0;  // 0±íÊ¾Ã»ÓĞ³õÊ¼»¯
+        int m_nPageNo = 0;  // 0è¡¨ç¤ºæ²¡æœ‰åˆå§‹åŒ–
 
         public int Open(StreamReader reader,
             out string strError)
@@ -40,7 +38,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = "´ò¿ªÎÄ¼ş " + strLabelFilename + " Ê±·¢Éú´íÎó: " + ex.Message;
+                strError = "æ‰“å¼€æ–‡ä»¶ " + strLabelFilename + " æ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                 return -1;
             }
 
@@ -58,7 +56,7 @@ namespace dp2Circulation
         {
             if (this.sr != null)
             {
-                this.sr.ReadToEnd();    // ±ØĞëÓĞÕâÒ»¾ä£¬·ñÔòÏÂ´Î»á¶Á³ö»º³åÇøÖĞµÄÄÚÈİ
+                this.sr.ReadToEnd();    // å¿…é¡»æœ‰è¿™ä¸€å¥ï¼Œå¦åˆ™ä¸‹æ¬¡ä¼šè¯»å‡ºç¼“å†²åŒºä¸­çš„å†…å®¹
                 this.sr.BaseStream.Seek(0, SeekOrigin.Begin);
             }
             this.m_nPageNo = 0;
@@ -124,7 +122,7 @@ namespace dp2Circulation
                 line_length);
         }
 
-        // TODO: ÓÃ DrawLines £¬×ªÍäµÄ²¿·Ö½ÓÍ·?
+        // TODO: ç”¨ DrawLines ï¼Œè½¬å¼¯çš„éƒ¨åˆ†æ¥å¤´?
         static void DrawFourAngel(
             Graphics g,
             Pen pen, 
@@ -134,57 +132,57 @@ namespace dp2Circulation
             float h,
             float line_length)
         {
-            // *** ×óÉÏ
+            // *** å·¦ä¸Š
 
-            // ºáÏß
+            // æ¨ªçº¿
             g.DrawLine(pen,
                 new PointF(x + 1, y + 1),
                 new PointF(x + 1 + line_length, y + 1)
                 );
 
-            // ÊúÏß
+            // ç«–çº¿
             g.DrawLine(pen,
                 new PointF(x+1, y+1),
                 new PointF(x+1, y+1 + line_length)
                 );
 
-            // *** ÓÒÉÏ
+            // *** å³ä¸Š
 
-            // ºáÏß
+            // æ¨ªçº¿
             g.DrawLine(pen,
                 new PointF(x + w - 1, y + 1),
                 new PointF(x + w - 1 - line_length, y + 1)
                 );
 
-            // ÊúÏß
+            // ç«–çº¿
             g.DrawLine(pen,
                 new PointF(x + w - 1, y + 1),
                 new PointF(x + w - 1, y + 1 + line_length)
                 );
 
-            // *** ×óÏÂ
+            // *** å·¦ä¸‹
 
-            // ºáÏß
+            // æ¨ªçº¿
             g.DrawLine(pen,
                 new PointF(x + 1, y + h - 1),
                 new PointF(x + 1 + line_length, y + h - 1)
                 );
 
-            // ÊúÏß
+            // ç«–çº¿
             g.DrawLine(pen,
                 new PointF(x + 1, y + h - 1),
                 new PointF(x + 1, y + h - 1 - line_length)
                 );
 
-            // *** ÓÒÏÂ
+            // *** å³ä¸‹
 
-            // ºáÏß
+            // æ¨ªçº¿
             g.DrawLine(pen,
                 new PointF(x + w - 1, y + h - 1),
                 new PointF(x + w - 1 - line_length, y + h - 1)
                 );
 
-            // ÊúÏß
+            // ç«–çº¿
             g.DrawLine(pen,
                 new PointF(x + w - 1, y + h - 1),
                 new PointF(x + w - 1, y + h - 1 - line_length)
@@ -193,17 +191,17 @@ namespace dp2Circulation
 
 
         /*
-        // ²âËã³öÒ»Ò³ÀïÃæÓĞ¶àÉÙ¸ölabel
+        // æµ‹ç®—å‡ºä¸€é¡µé‡Œé¢æœ‰å¤šå°‘ä¸ªlabel
         static int GetLabelCountOfOnePage(LabelParam label_param,
             PrintPageEventArgs e)
         {
             int nYCount = 0;
             int nXCount = 0;
 
-            // ´¹Ö±·½ÏòµÄ¸öÊı
+            // å‚ç›´æ–¹å‘çš„ä¸ªæ•°
             nYCount = (e.PageBounds.Height - label_param.PageMargins.Top - label_param.PageMargins.Bottom)
                 / label_param.Height;
-            // Ë®Æ½·½ÏòµÄ¸öÊı
+            // æ°´å¹³æ–¹å‘çš„ä¸ªæ•°
             nXCount = (e.PageBounds.Width - label_param.PageMargins.Left - label_param.PageMargins.Right)
             / label_param.Width;
 
@@ -218,8 +216,8 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÊÇ·ñ´¦ÓÚÔ¤ÀÀÄ£Ê½
-        /// ³ÌĞò¸ù¾İÕâ¸ö±êÖ¾¾ö¶¨Í¼ĞÎÔ­µãÎ»ÖÃ
+        /// æ˜¯å¦å¤„äºé¢„è§ˆæ¨¡å¼
+        /// ç¨‹åºæ ¹æ®è¿™ä¸ªæ ‡å¿—å†³å®šå›¾å½¢åŸç‚¹ä½ç½®
         /// </summary>
         public bool PreviewMode
         {
@@ -228,8 +226,8 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÊÇ·ñ´¦ÔÚÉè¼Æ×´Ì¬
-        /// ÔÚÉè¼Æ×´Ì¬ÏÂ£¬»áÏÔÊ¾³öÅäÖÃµÄÒ³ÃæºÍµ±Ç°´òÓ¡»úµÄÒ³ÃæÍ¼Ïñ£¬±ãÓÚ¶Ô±È
+        /// æ˜¯å¦å¤„åœ¨è®¾è®¡çŠ¶æ€
+        /// åœ¨è®¾è®¡çŠ¶æ€ä¸‹ï¼Œä¼šæ˜¾ç¤ºå‡ºé…ç½®çš„é¡µé¢å’Œå½“å‰æ‰“å°æœºçš„é¡µé¢å›¾åƒï¼Œä¾¿äºå¯¹æ¯”
         /// </summary>
         public bool IsDesignMode
         {
@@ -259,7 +257,7 @@ namespace dp2Circulation
                 rect.Width); 
         }
 
-        // Ğı×ªºóÖĞĞÄ¹éÎ»
+        // æ—‹è½¬åä¸­å¿ƒå½’ä½
         static void CenterMove(int nRotateDegree,
             float width,
             float height,
@@ -294,7 +292,7 @@ namespace dp2Circulation
                 return;
             }
 
-            Debug.Assert(false, "²»Ó¦¸Ã³öÏÖµÄĞı×ª¶ÈÊı " + nRotateDegree.ToString());
+            Debug.Assert(false, "ä¸åº”è¯¥å‡ºç°çš„æ—‹è½¬åº¦æ•° " + nRotateDegree.ToString());
         }
 
         internal void DoPrintPage(
@@ -336,7 +334,7 @@ namespace dp2Circulation
             }
 #endif
 
-            int nPageWidth = e.PageBounds.Width;    // PageBounds ÖĞÒÑ¾­ÊÇ°´ÕÕ Landscape ´¦Àí¹ıµÄ·½ÏòÁË
+            int nPageWidth = e.PageBounds.Width;    // PageBounds ä¸­å·²ç»æ˜¯æŒ‰ç…§ Landscape å¤„ç†è¿‡çš„æ–¹å‘äº†
             if (PageWidth != 0)
                 nPageWidth = (int)PageWidth;
 
@@ -347,20 +345,20 @@ namespace dp2Circulation
             DecimalPadding PageMargins = RotatePadding(label_param.PageMargins, 
                 e.PageSettings.Landscape);  // label_param.Landscape
 #if NO
-            // ´¹Ö±·½ÏòµÄ¸öÊı
+            // å‚ç›´æ–¹å‘çš„ä¸ªæ•°
             nYCount = (e.PageBounds.Height - label_param.PageMargins.Top - label_param.PageMargins.Bottom)
                 / label_param.Height;
-            // Ë®Æ½·½ÏòµÄ¸öÊı
+            // æ°´å¹³æ–¹å‘çš„ä¸ªæ•°
             nXCount = (e.PageBounds.Width - label_param.PageMargins.Left - label_param.PageMargins.Right)
             / label_param.Width;
 #endif
-            // ´¹Ö±·½ÏòµÄ¸öÊı
+            // å‚ç›´æ–¹å‘çš„ä¸ªæ•°
             nYCount = (int)
                 (
                 (double)(nPageHeight - PageMargins.Top - PageMargins.Bottom)
                 / (double)label_param.LabelHeight
                 );
-            // Ë®Æ½·½ÏòµÄ¸öÊı
+            // æ°´å¹³æ–¹å‘çš„ä¸ªæ•°
             nXCount = (int)
                 (
                 (double)(nPageWidth - PageMargins.Left - PageMargins.Right)
@@ -370,14 +368,14 @@ namespace dp2Circulation
             int from = 0;
             int to = 0;
             bool bOutput = true;
-            // Èç¹û e.PageSettings.PrinterSettings.FromPage == 0£¬»á±»µ±×÷´òÓ¡µÚÒ»Ò³
+            // å¦‚æœ e.PageSettings.PrinterSettings.FromPage == 0ï¼Œä¼šè¢«å½“ä½œæ‰“å°ç¬¬ä¸€é¡µ
             if (e.PageSettings.PrinterSettings.PrintRange == PrintRange.SomePages
                 && e.PageSettings.PrinterSettings.FromPage >= 1)
             {
                 from = e.PageSettings.PrinterSettings.FromPage;
                 to = e.PageSettings.PrinterSettings.ToPage;
 
-                // ½»»»£¬±£Ö¤fromÎªĞ¡
+                // äº¤æ¢ï¼Œä¿è¯fromä¸ºå°
                 if (from > to)
                 {
                     int temp = to;
@@ -392,7 +390,7 @@ namespace dp2Circulation
                     Debug.Assert(this.m_nPageNo >= 1, "");
                     long nLabelCount = (nXCount * nYCount) * (this.m_nPageNo - 1);
 
-                    // ´ÓÎÄ¼şÖĞÌø¹ıÕâÃ´¶àlabelµÄÄÚÈİĞĞ
+                    // ä»æ–‡ä»¶ä¸­è·³è¿‡è¿™ä¹ˆå¤šlabelçš„å†…å®¹è¡Œ
                     for (int i = 0; i < nLabelCount; i++)
                     {
                         List<string> lines = null;
@@ -424,11 +422,11 @@ namespace dp2Circulation
             else
             {
                 if (this.m_nPageNo == 0)
-                    this.m_nPageNo = 1; // Ò»°ãĞÔµÄ³õÊ¼»¯
+                    this.m_nPageNo = 1; // ä¸€èˆ¬æ€§çš„åˆå§‹åŒ–
             }
 
 
-            // ¼Ó¿ìÔËĞĞËÙ¶È
+            // åŠ å¿«è¿è¡Œé€Ÿåº¦
             float nXDelta = e.PageSettings.PrintableArea.Left;
             float nYDelta = e.PageSettings.PrintableArea.Top;
 
@@ -443,7 +441,7 @@ namespace dp2Circulation
             if (this.OriginAtMargins == true
                 || this.PreviewMode == true)   // false
             {
-                // true Èç¹ûÍ¼ĞÎÆğÊ¼ÓÚÒ³Ãæ±ß¾à¡£·ñÔòÆğÊ¼ÓÚ¿É´òÓ¡ÇøÓò
+                // true å¦‚æœå›¾å½¢èµ·å§‹äºé¡µé¢è¾¹è·ã€‚å¦åˆ™èµ·å§‹äºå¯æ‰“å°åŒºåŸŸ
                 nXDelta = 0;
                 nYDelta = 0;
             }
@@ -473,7 +471,7 @@ namespace dp2Circulation
 
                 pen.Dispose();
 #endif
-                // »æÖÆÕû¸öÖ½ÕÅ±³¾° °×É«
+                // ç»˜åˆ¶æ•´ä¸ªçº¸å¼ èƒŒæ™¯ ç™½è‰²
                 using (Brush brushBack = new SolidBrush(Color.White))
                 {
                     RectangleF rectPaper = new RectangleF(0 + 1 - nXDelta,
@@ -484,7 +482,7 @@ namespace dp2Circulation
                 }
 
 #if NO
-                // »æÖÆÅäÖÃÎÄ¼şµÄÒ³ÃæÇøÓò
+                // ç»˜åˆ¶é…ç½®æ–‡ä»¶çš„é¡µé¢åŒºåŸŸ
                 if (PageHeight > 0 && PageWidth > 0)
                 {
                     using (Brush brushBack = new SolidBrush(Color.FromArgb(128, Color.LightYellow)))
@@ -499,15 +497,15 @@ namespace dp2Circulation
 #endif
             }
 
-            // »æÖÆ¿É´òÓ¡ÇøÓò
-            // ÏÊºìÉ«
+            // ç»˜åˆ¶å¯æ‰“å°åŒºåŸŸ
+            // é²œçº¢è‰²
             if (bTestingGrid == true && bOutput == true)
             {
                 float nXOffs = 0;
                 float nYOffs = 0;
 
-                // Èç¹ûÎªÕıÊ½´òÓ¡£¬×óÉÏ½Ç(0,0)ÒÑ¾­¾ÍÊÇ¿ÉÒÔ´òÓ¡ÇøÓòµÄ×óÉÏ½Ç
-                // Èç¹ûÎªpreviewÄ£Ê½£¬Ôò×óÉÏ½ÇÒªÏòÓÒÏòÏÂÒÆ¶¯£¬²ÅÄÜÄ£Äâ³öÏÔÊ¾Ğ§¹û
+                // å¦‚æœä¸ºæ­£å¼æ‰“å°ï¼Œå·¦ä¸Šè§’(0,0)å·²ç»å°±æ˜¯å¯ä»¥æ‰“å°åŒºåŸŸçš„å·¦ä¸Šè§’
+                // å¦‚æœä¸ºpreviewæ¨¡å¼ï¼Œåˆ™å·¦ä¸Šè§’è¦å‘å³å‘ä¸‹ç§»åŠ¨ï¼Œæ‰èƒ½æ¨¡æ‹Ÿå‡ºæ˜¾ç¤ºæ•ˆæœ
 
 #if NO
                 if (this.OriginAtMargins == true
@@ -546,11 +544,11 @@ namespace dp2Circulation
     e.Graphics,
     pen,
     rect,
-    50);    // °ëÓ¢´ç
+    50);    // åŠè‹±å¯¸
                 }
             }
 
-            // ¼ÓÈë±ä»»
+            // åŠ å…¥å˜æ¢
             e.Graphics.TranslateTransform(-nXDelta, -nYDelta);
             nXDelta = 0;
             nYDelta = 0;
@@ -569,7 +567,7 @@ namespace dp2Circulation
 
             if (this.IsDesignMode)
             {
-                // »æÖÆÅäÖÃÎÄ¼şµÄÒ³ÃæÇøÓò
+                // ç»˜åˆ¶é…ç½®æ–‡ä»¶çš„é¡µé¢åŒºåŸŸ
                 if (PageHeight > 0 && PageWidth > 0)
                 {
                     using (Brush brushBack = new SolidBrush(Color.FromArgb(128, Color.LightYellow)))
@@ -583,8 +581,8 @@ namespace dp2Circulation
                 }
             }
 
-            // »æÖÆÄÚÈİÇøÓò±ß½ç(Ò²¾ÍÊÇÅÅ³ıÁËÒ³Ãæ±ß¿ÕµÄÖĞ¼ä²¿·Ö)
-            // µ­ÂÌÉ«
+            // ç»˜åˆ¶å†…å®¹åŒºåŸŸè¾¹ç•Œ(ä¹Ÿå°±æ˜¯æ’é™¤äº†é¡µé¢è¾¹ç©ºçš„ä¸­é—´éƒ¨åˆ†)
+            // æ·¡ç»¿è‰²
             if (bTestingGrid == true && bOutput == true)
             {
                 using (Pen pen = new Pen(Color.FromArgb(0, 100, 0), (float)2)) // 3
@@ -609,7 +607,7 @@ namespace dp2Circulation
             bool bEOF = false;
 
             float y = (float)PageMargins.Top;
-            // Ã¿Ò»ĞĞµÄÑ­»·
+            // æ¯ä¸€è¡Œçš„å¾ªç¯
             for (int i = 0; i < nYCount; i++)
             {
                 bool bDisplay = true;
@@ -623,7 +621,7 @@ namespace dp2Circulation
                     if (rectLine.Top > e.Graphics.ClipBounds.Bottom)
                     {
                         // Debug.WriteLine("break line loop at " + i.ToString());
-                        break;  // µ±Ç°ĞĞÔÚ¼ô²ÃÇøÓòµÄÏÂ·½£¬¿ÉÒÔÖĞ¶ÏÑ­»·ÁË
+                        break;  // å½“å‰è¡Œåœ¨å‰ªè£åŒºåŸŸçš„ä¸‹æ–¹ï¼Œå¯ä»¥ä¸­æ–­å¾ªç¯äº†
                     }
                     if (rectLine.IntersectsWith(e.Graphics.ClipBounds) == false)
                     {
@@ -632,7 +630,7 @@ namespace dp2Circulation
                     }
                 }
                 float x = (float)PageMargins.Left;
-                // Ã¿Ò»ÁĞµÄÑ­»·
+                // æ¯ä¸€åˆ—çš„å¾ªç¯
                 for (int j = 0; j < nXCount; j++)
                 {
                     List<string> lines = null;
@@ -646,7 +644,7 @@ namespace dp2Circulation
 
                     if (bOutput == true  && bDisplay == true)
                     {
-                        // ±êÇ©
+                        // æ ‡ç­¾
                         RectangleF rectLabel = new RectangleF(
     (float)x - nXDelta,
     (float)y - nYDelta,
@@ -656,7 +654,7 @@ namespace dp2Circulation
                         if (rectLabel.Left > e.Graphics.ClipBounds.Right)
                         {
                             // Debug.WriteLine("break label loop at i=" + i.ToString() + " j=" + j.ToString());
-                            // µ±Ç°±êÇ©ÔÚ¼ô²ÃÇøÓòµÄÓÒ·½£¬¿ÉÒÔ²»ÒªÏÔÊ¾ºóÃæµÄ±êÇ©ÁË
+                            // å½“å‰æ ‡ç­¾åœ¨å‰ªè£åŒºåŸŸçš„å³æ–¹ï¼Œå¯ä»¥ä¸è¦æ˜¾ç¤ºåé¢çš„æ ‡ç­¾äº†
                             bDisplay = false;
                         }
 
@@ -664,7 +662,7 @@ namespace dp2Circulation
                             || rectLabel.IntersectsWith(e.Graphics.ClipBounds) == true)
                         {
                             // Debug.WriteLine("i="+i.ToString()+" j="+j.ToString()+" rectLabel = "+rectLabel.ToString()+", clipbounds " + e.Graphics.ClipBounds.ToString());
-                            // ±êÇ©ÄÚÈİÇøÓò
+                            // æ ‡ç­¾å†…å®¹åŒºåŸŸ
                             RectangleF rectContent = new RectangleF(
                                     (float)x + (float)label_param.LabelPaddings.Left - nXDelta,
                                     (float)y + (float)label_param.LabelPaddings.Top - nYDelta,
@@ -672,11 +670,11 @@ namespace dp2Circulation
                                     (float)label_param.LabelHeight - (float)label_param.LabelPaddings.Top - (float)label_param.LabelPaddings.Bottom - 1);
 
 
-                            // »æÖÆ±êÇ©±ß½ç
-                            // »ÒÉ«
+                            // ç»˜åˆ¶æ ‡ç­¾è¾¹ç•Œ
+                            // ç°è‰²
                             if (bTestingGrid == true)
                             {
-                                // ±êÇ©°×É«±³¾°
+                                // æ ‡ç­¾ç™½è‰²èƒŒæ™¯
                                 if (this.IsDesignMode == true)
                                 {
                                     using (Brush brushBack = new SolidBrush(Color.FromArgb(200, Color.White)))
@@ -685,7 +683,7 @@ namespace dp2Circulation
                                     }
                                 }
 
-                                // ±êÇ©±ß½ç
+                                // æ ‡ç­¾è¾¹ç•Œ
                                 using (Pen pen = new Pen(Color.FromArgb(200, 200, 200), this.IsDesignMode ? (float)0.5 : (float)1))
                                 {
                                     e.Graphics.DrawRectangle(pen,
@@ -704,8 +702,8 @@ namespace dp2Circulation
                                 }
 
 
-                                // »æÖÆ±êÇ©ÄÚ²¿ÎÄ×ÖÇøÓò±ß½ç
-                                // µ­ºìÉ«
+                                // ç»˜åˆ¶æ ‡ç­¾å†…éƒ¨æ–‡å­—åŒºåŸŸè¾¹ç•Œ
+                                // æ·¡çº¢è‰²
 
                                 using (Pen pen = new Pen(Color.FromArgb(255, 200, 200), this.IsDesignMode ? (float)0.5 : (float)1))
                                 {
@@ -769,7 +767,7 @@ namespace dp2Circulation
                                         nLineHeight);
 
                                     bool bAbsLocation = false;
-                                    // ĞĞ¸ñÊ½µÄ start ºÍ offset
+                                    // è¡Œæ ¼å¼çš„ start å’Œ offset
                                     if (format != null)
                                     {
                                         if (double.IsNaN(format.StartX) == false)
@@ -777,11 +775,11 @@ namespace dp2Circulation
                                         if (double.IsNaN(format.StartY) == false)
                                         {
                                             rect.Y = (float)format.StartY;
-                                            bAbsLocation = true;    // Y ¾ø¶Ô¶¨Î»ºó£¬ĞĞ¸ß¶È²»²ÎÓëÀÛ¼Æ
+                                            bAbsLocation = true;    // Y ç»å¯¹å®šä½åï¼Œè¡Œé«˜åº¦ä¸å‚ä¸ç´¯è®¡
                                         }
                                         rect.Offset((float)format.OffsetX, (float)format.OffsetY);
 
-                                        y0 += (float)format.OffsetY;    // Y Æ«ÒÆºó£¬ÀÛ¼ÆÖµÒ²¸ú×Åµ÷Õû
+                                        y0 += (float)format.OffsetY;    // Y åç§»åï¼Œç´¯è®¡å€¼ä¹Ÿè·Ÿç€è°ƒæ•´
 
                                     }
 
@@ -828,8 +826,8 @@ namespace dp2Circulation
                                     }
 
 
-                                    // ÎÄ×ÖĞĞÇøÓò±ß½ç
-                                    // ºÚÉ«µã
+                                    // æ–‡å­—è¡ŒåŒºåŸŸè¾¹ç•Œ
+                                    // é»‘è‰²ç‚¹
                                     if (bTestingGrid == true && label_param.LineSep > 0)
                                     {
                                         using (Pen pen = new Pen(Color.Black, (float)1))

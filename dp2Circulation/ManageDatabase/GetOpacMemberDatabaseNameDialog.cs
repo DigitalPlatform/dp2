@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -16,15 +16,15 @@ namespace dp2Circulation
 {
     internal partial class GetOpacMemberDatabaseNameDialog : Form
     {
-        // ±íÊ¾µ±Ç°È«²¿Êı¾İ¿âĞÅÏ¢µÄXML×Ö·û´®
+        // è¡¨ç¤ºå½“å‰å…¨éƒ¨æ•°æ®åº“ä¿¡æ¯çš„XMLå­—ç¬¦ä¸²
         public string AllDatabaseInfoXml = "";
 
         /// <summary>
-        /// ÏµÍ³¹ÜÀí´°
+        /// ç³»ç»Ÿç®¡ç†çª—
         /// </summary>
         public ManagerForm ManagerForm = null;
 
-        // ĞèÒªÅÅ³ıµÄÈô¸ÉÊı¾İ¿âÃû
+        // éœ€è¦æ’é™¤çš„è‹¥å¹²æ•°æ®åº“å
         public List<string> ExcludingDbNames = null;
 
         public GetOpacMemberDatabaseNameDialog()
@@ -43,7 +43,7 @@ namespace dp2Circulation
             if (nRet == -1)
                 MessageBox.Show(this, strError);
 
-            // Ñ¡ÖĞµÚÒ»¸ö
+            // é€‰ä¸­ç¬¬ä¸€ä¸ª
             if (this.listView_databases.Items.Count > 0)
             {
                 if (this.SelectedDatabaseName != "")
@@ -56,7 +56,7 @@ namespace dp2Circulation
                 }
                 else
                 {
-                    // Ñ¡ÖĞµÚÒ»¸ö²»ÊÇ»ÒÉ«µÄitem
+                    // é€‰ä¸­ç¬¬ä¸€ä¸ªä¸æ˜¯ç°è‰²çš„item
                     for (int i = 0; i < this.listView_databases.Items.Count; i++)
                     {
                         ListViewItem item = this.listView_databases.Items[i];
@@ -70,7 +70,7 @@ namespace dp2Circulation
             }
         }
 
-        // ÔÚlistviewÖĞÁĞ³öËùÓĞÊı¾İ¿â
+        // åœ¨listviewä¸­åˆ—å‡ºæ‰€æœ‰æ•°æ®åº“
         int ListAllDatabases(string strAllDatbaseInfo,
             out string strError)
         {
@@ -88,7 +88,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = "XML×°ÈëDOMÊ±³ö´í: " + ex.Message;
+                strError = "XMLè£…å…¥DOMæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
@@ -114,18 +114,18 @@ namespace dp2Circulation
 
                 ListViewItem item = new ListViewItem(strName, 0);
                 item.SubItems.Add(strTypeName);
-                item.Tag = node.OuterXml;   // ¼ÇÔØXML¶¨ÒåÆ¬¶Ï
+                item.Tag = node.OuterXml;   // è®°è½½XMLå®šä¹‰ç‰‡æ–­
 
                 this.listView_databases.Items.Add(item);
 
                 if (this.ExcludingDbNames != null
     && this.ExcludingDbNames.Count > 0)
                 {
-                    // Èç¹ûÎªÒªÅÅ³ıµÄÊı¾İ¿âÃû£¬ÔòÑÕÉ«·¢»Ò
+                    // å¦‚æœä¸ºè¦æ’é™¤çš„æ•°æ®åº“åï¼Œåˆ™é¢œè‰²å‘ç°
                     if (this.ExcludingDbNames.IndexOf(strName) != -1)
                     {
-                        item.ForeColor = SystemColors.GrayText; // »ÒÉ«
-                        item.ImageIndex = 1;    // ±íÊ¾ÒªÅÅ³ı
+                        item.ForeColor = SystemColors.GrayText; // ç°è‰²
+                        item.ImageIndex = 1;    // è¡¨ç¤ºè¦æ’é™¤
                     }
                 }
             }
@@ -137,7 +137,7 @@ namespace dp2Circulation
         {
             if (this.textBox_databaseName.Text == "")
             {
-                MessageBox.Show(this, "ÉĞÎ´Ö¸¶¨Êı¾İ¿âÃû");
+                MessageBox.Show(this, "å°šæœªæŒ‡å®šæ•°æ®åº“å");
                 return;
             }
 

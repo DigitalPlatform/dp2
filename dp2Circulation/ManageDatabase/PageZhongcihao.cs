@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -23,14 +23,14 @@ using DigitalPlatform.CirculationClient.localhost;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ÖÖ´ÎºÅ ÊôĞÔÒ³
+    /// ç§æ¬¡å· å±æ€§é¡µ
     /// </summary>
     public partial class ManagerForm
     {
         bool m_bZhongcihaoChanged = false;
 
         /// <summary>
-        /// ÖÖ´ÎºÅ¶¨ÒåÊÇ·ñ±»ĞŞ¸Ä
+        /// ç§æ¬¡å·å®šä¹‰æ˜¯å¦è¢«ä¿®æ”¹
         /// </summary>
         public bool ZhongcihaoChanged
         {
@@ -51,17 +51,17 @@ namespace dp2Circulation
         static string MakeZhongcihaoGroupNodeName(string strGroupName,
     string strZhongcihaoDbName)
         {
-            return "×é: " + strGroupName + " ÖÖ´ÎºÅ¿â='" + strZhongcihaoDbName + "'";
+            return "ç»„: " + strGroupName + " ç§æ¬¡å·åº“='" + strZhongcihaoDbName + "'";
         }
 
         static string MakeZhongcihaoNstableNodeName(string strNsTableName)
         {
-            return "Ãû×Ö±í: " + strNsTableName;
+            return "åå­—è¡¨: " + strNsTableName;
         }
 
         static string MakeZhongcihaoDatabaseNodeName(string strBiblioDbName)
         {
-            return "ÊéÄ¿¿â: " + strBiblioDbName;
+            return "ä¹¦ç›®åº“: " + strBiblioDbName;
         }
 
         int ListZhongcihao(out string strError)
@@ -70,9 +70,9 @@ namespace dp2Circulation
 
             if (this.ZhongcihaoChanged == true)
             {
-                // ¾¯¸æÉĞÎ´±£´æ
+                // è­¦å‘Šå°šæœªä¿å­˜
                 DialogResult result = MessageBox.Show(this,
-                    "µ±Ç°´°¿ÚÄÚÖÖ´ÎºÅ¶¨Òå±»ĞŞ¸ÄºóÉĞÎ´±£´æ¡£Èô´ËÊ±Ë¢ĞÂ´°¿ÚÄÚÈİ£¬ÏÖÓĞÎ´±£´æĞÅÏ¢½«¶ªÊ§¡£\r\n\r\nÈ·ÊµÒªË¢ĞÂ? ",
+                    "å½“å‰çª—å£å†…ç§æ¬¡å·å®šä¹‰è¢«ä¿®æ”¹åå°šæœªä¿å­˜ã€‚è‹¥æ­¤æ—¶åˆ·æ–°çª—å£å†…å®¹ï¼Œç°æœ‰æœªä¿å­˜ä¿¡æ¯å°†ä¸¢å¤±ã€‚\r\n\r\nç¡®å®è¦åˆ·æ–°? ",
                     "ManagerForm",
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question,
@@ -88,7 +88,7 @@ namespace dp2Circulation
 
             string strZhongcihaoXml = "";
 
-            // »ñµÃÖÖ´ÎºÅÏà¹Ø¶¨Òå
+            // è·å¾—ç§æ¬¡å·ç›¸å…³å®šä¹‰
             int nRet = GetZhongcihaoInfo(out strZhongcihaoXml,
                 out strError);
             if (nRet == -1)
@@ -104,7 +104,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = "fragment XML×°ÈëXmlDocumentFragmentÊ±³ö´í: " + ex.Message;
+                strError = "fragment XMLè£…å…¥XmlDocumentFragmentæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
@@ -115,8 +115,8 @@ namespace dp2Circulation
         <nstable name="nstable">
             <item prefix="marc" uri="http://dp2003.com/UNIMARC" />
         </nstable>
-        <group name="ÖĞÎÄÊéÄ¿" zhongcihaodb="ÖÖ´ÎºÅ">
-            <database name="ÖĞÎÄÍ¼Êé" leftfrom="Ë÷È¡ÀàºÅ" 
+        <group name="ä¸­æ–‡ä¹¦ç›®" zhongcihaodb="ç§æ¬¡å·">
+            <database name="ä¸­æ–‡å›¾ä¹¦" leftfrom="ç´¢å–ç±»å·" 
 
 rightxpath="//marc:record/marc:datafield[@tag='905']/marc:subfield[@code='e']/text()" 
 
@@ -159,7 +159,7 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
 
                 this.treeView_zhongcihao.Nodes.Add(group_treenode);
 
-                // ¼ÓÈëdatabase½Úµã
+                // åŠ å…¥databaseèŠ‚ç‚¹
                 XmlNodeList database_nodes = node.SelectNodes("database");
                 for (int j = 0; j < database_nodes.Count; j++)
                 {
@@ -183,7 +183,7 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
             return 1;
         }
 
-        // »ñµÃÖÖ´ÎºÅÏà¹Ø¶¨Òå
+        // è·å¾—ç§æ¬¡å·ç›¸å…³å®šä¹‰
         int GetZhongcihaoInfo(out string strZhongcihaoXml,
             out string strError)
         {
@@ -193,7 +193,7 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ»ñÈ¡ÖÖ´ÎºÅ¶¨Òå ...");
+            stop.Initial("æ­£åœ¨è·å–ç§æ¬¡å·å®šä¹‰ ...");
             stop.BeginLoop();
 
             this.Update();
@@ -224,9 +224,9 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
             return -1;
         }
 
-        // ±£´æÖÖ´ÎºÅ¶¨Òå
+        // ä¿å­˜ç§æ¬¡å·å®šä¹‰
         // parameters:
-        //      strZhongcihaoXml   ½Å±¾¶¨ÒåXML¡£×¢Òâ£¬Ã»ÓĞ¸ùÔªËØ
+        //      strZhongcihaoXml   è„šæœ¬å®šä¹‰XMLã€‚æ³¨æ„ï¼Œæ²¡æœ‰æ ¹å…ƒç´ 
         int SetZhongcihaoDef(string strZhongcihaoXml,
             out string strError)
         {
@@ -235,7 +235,7 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ±£´æÖÖ´ÎºÅ¶¨Òå ...");
+            stop.Initial("æ­£åœ¨ä¿å­˜ç§æ¬¡å·å®šä¹‰ ...");
             stop.BeginLoop();
 
             this.Update();
@@ -268,7 +268,7 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
         }
 
 
-        // ¿´¿´Ö¸¶¨µÄprefixÊÇ·ñ´æÔÚ
+        // çœ‹çœ‹æŒ‡å®šçš„prefixæ˜¯å¦å­˜åœ¨
         // return:
         //      -1  error
         //      0   not found
@@ -278,11 +278,11 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
         {
             strError = "";
 
-            // ¿´¿´µ±Ç°ÊÇ·ñÒÑ¾­ÓĞÁËnstable½Úµã
+            // çœ‹çœ‹å½“å‰æ˜¯å¦å·²ç»æœ‰äº†nstableèŠ‚ç‚¹
             TreeNode existing_node = FindExistNstableNode();
             if (existing_node == null)
             {
-                strError = "ÉĞÎ´´´½¨Ãû×Ö±í½Úµã";
+                strError = "å°šæœªåˆ›å»ºåå­—è¡¨èŠ‚ç‚¹";
                 return -1;
             }
 
@@ -295,7 +295,7 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
             }
             catch (Exception ex)
             {
-                strError = "XML×°ÈëDOMÊ±³ö´í: " + ex.Message;
+                strError = "XMLè£…å…¥DOMæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
@@ -311,7 +311,7 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
             return 0;
         }
 
-        // ¸ù¾İÃû×Ö¿Õ¼äURI²éÕÒ¶ÔÓ¦µÄprefix
+        // æ ¹æ®åå­—ç©ºé—´URIæŸ¥æ‰¾å¯¹åº”çš„prefix
         // return:
         //      -1  error
         //      0   not found
@@ -323,11 +323,11 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
             strPrefix = "";
             strError = "";
 
-            // ¿´¿´µ±Ç°ÊÇ·ñÒÑ¾­ÓĞÁËnstable½Úµã
+            // çœ‹çœ‹å½“å‰æ˜¯å¦å·²ç»æœ‰äº†nstableèŠ‚ç‚¹
             TreeNode existing_node = FindExistNstableNode();
             if (existing_node == null)
             {
-                strError = "ÉĞÎ´´´½¨Ãû×Ö±í½Úµã£¬Òò´ËÎŞ·¨»ñµÃURI '" + strUri + "' Ëù¶ÔÓ¦µÄprefix";
+                strError = "å°šæœªåˆ›å»ºåå­—è¡¨èŠ‚ç‚¹ï¼Œå› æ­¤æ— æ³•è·å¾—URI '" + strUri + "' æ‰€å¯¹åº”çš„prefix";
                 return -1;
             }
 
@@ -340,7 +340,7 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
             }
             catch (Exception ex)
             {
-                strError = "XML×°ÈëDOMÊ±³ö´í: " + ex.Message;
+                strError = "XMLè£…å…¥DOMæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
@@ -359,7 +359,7 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
             return 0;
         }
 
-        // »ñµÃÊéÄ¿¿âµÄsyntax
+        // è·å¾—ä¹¦ç›®åº“çš„syntax
         // return:
         //      -1  error
         //      0   not found
@@ -373,7 +373,7 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
 
             if (String.IsNullOrEmpty(strBiblioDbName) == true)
             {
-                strError = "²ÎÊıstrBiblioDbNameµÄÖµ²»ÄÜÎª¿Õ";
+                strError = "å‚æ•°strBiblioDbNameçš„å€¼ä¸èƒ½ä¸ºç©º";
                 return -1;
             }
 
@@ -389,7 +389,7 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
             }
             catch (Exception ex)
             {
-                strError = "XML×°ÈëDOMÊ±³ö´í: " + ex.Message;
+                strError = "XMLè£…å…¥DOMæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
@@ -405,7 +405,7 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
                 {
                     if (strType != "biblio")
                     {
-                        strError = "Êı¾İ¿â '" + strBiblioDbName + "' ²¢²»ÊÇÊéÄ¿¿âÀàĞÍ£¬¶øÊÇ " + strType + " ÀàĞÍ";
+                        strError = "æ•°æ®åº“ '" + strBiblioDbName + "' å¹¶ä¸æ˜¯ä¹¦ç›®åº“ç±»å‹ï¼Œè€Œæ˜¯ " + strType + " ç±»å‹";
                         return -1;
                     }
 
@@ -420,12 +420,12 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
             return 0;
         }
 
-        // ¼ì²éÖ¸¶¨Ãû×ÖµÄÊéÄ¿¿âÊÇ·ñÒÑ¾­´´½¨
+        // æ£€æŸ¥æŒ‡å®šåå­—çš„ä¹¦ç›®åº“æ˜¯å¦å·²ç»åˆ›å»º
         // return:
-        //      -2  ËùÖ¸¶¨µÄÊéÄ¿¿âÃû×Ö£¬Êµ¼ÊÉÏÊÇÒ»¸öÒÑ¾­´æÔÚµÄÆäËûÀàĞÍµÄ¿âÃû
+        //      -2  æ‰€æŒ‡å®šçš„ä¹¦ç›®åº“åå­—ï¼Œå®é™…ä¸Šæ˜¯ä¸€ä¸ªå·²ç»å­˜åœ¨çš„å…¶ä»–ç±»å‹çš„åº“å
         //      -1  error
-        //      0   »¹Ã»ÓĞ´´½¨
-        //      1   ÒÑ¾­´´½¨
+        //      0   è¿˜æ²¡æœ‰åˆ›å»º
+        //      1   å·²ç»åˆ›å»º
         int CheckBiblioDbCreated(string strBiblioDbName,
             out string strError)
         {
@@ -433,7 +433,7 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
 
             if (String.IsNullOrEmpty(strBiblioDbName) == true)
             {
-                strError = "²ÎÊıstrBiblioDbNameµÄÖµ²»ÄÜÎª¿Õ";
+                strError = "å‚æ•°strBiblioDbNameçš„å€¼ä¸èƒ½ä¸ºç©º";
                 return -1;
             }
 
@@ -449,7 +449,7 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
             }
             catch (Exception ex)
             {
-                strError = "XML×°ÈëDOMÊ±³ö´í: " + ex.Message;
+                strError = "XMLè£…å…¥DOMæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
@@ -469,21 +469,21 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
                     string strEntityDbName = DomUtil.GetAttr(node, "entityDbName");
                     if (strEntityDbName == strBiblioDbName)
                     {
-                        strError = "ËùÄâ¶¨µÄÊéÄ¿¿âÃûºÍµ±Ç°ÒÑ¾­´æÔÚµÄÊµÌå¿âÃû '" + strEntityDbName + "' ÏàÖØÁË";
+                        strError = "æ‰€æ‹Ÿå®šçš„ä¹¦ç›®åº“åå’Œå½“å‰å·²ç»å­˜åœ¨çš„å®ä½“åº“å '" + strEntityDbName + "' ç›¸é‡äº†";
                         return -2;
                     }
 
                     string strOrderDbName = DomUtil.GetAttr(node, "orderDbName");
                     if (strOrderDbName == strBiblioDbName)
                     {
-                        strError = "ËùÄâ¶¨µÄÊéÄ¿¿âÃûºÍµ±Ç°ÒÑ¾­´æÔÚµÄ¶©¹º¿âÃû '" + strOrderDbName + "' ÏàÖØÁË";
+                        strError = "æ‰€æ‹Ÿå®šçš„ä¹¦ç›®åº“åå’Œå½“å‰å·²ç»å­˜åœ¨çš„è®¢è´­åº“å '" + strOrderDbName + "' ç›¸é‡äº†";
                         return -2;
                     }
 
                     string strIssueDbName = DomUtil.GetAttr(node, "issueDbName");
                     if (strIssueDbName == strBiblioDbName)
                     {
-                        strError = "ËùÄâ¶¨µÄÊéÄ¿¿âÃûºÍµ±Ç°ÒÑ¾­´æÔÚµÄÆÚ¿âÃû '" + strIssueDbName + "' ÏàÖØÁË";
+                        strError = "æ‰€æ‹Ÿå®šçš„ä¹¦ç›®åº“åå’Œå½“å‰å·²ç»å­˜åœ¨çš„æœŸåº“å '" + strIssueDbName + "' ç›¸é‡äº†";
                         return -2;
                     }
 
@@ -495,7 +495,7 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
 
                 if (strName == strBiblioDbName)
                 {
-                    strError = "ËùÄâ¶¨µÄÊéÄ¿¿âÃûºÍµ±Ç°ÒÑ¾­´æÔÚµÄ" + strTypeName + "¿âÃû '" + strName + "' ÏàÖØÁË";
+                    strError = "æ‰€æ‹Ÿå®šçš„ä¹¦ç›®åº“åå’Œå½“å‰å·²ç»å­˜åœ¨çš„" + strTypeName + "åº“å '" + strName + "' ç›¸é‡äº†";
                     return -2;
                 }
 
@@ -504,8 +504,8 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
             return 0;
         }
 
-        // »ñµÃ±íÊ¾ËùÓĞÊéÄ¿¿âµÄÃû×ÖºÍÀàĞÍµÄXML´úÂë
-        // TODO: ¼ÈÈ»ÁĞÈëµÄ¶¼ÊÇÊéÄ¿¿â£¬ÀàĞÍ¾ÍÊÇ¶àÓàµÄÁË
+        // è·å¾—è¡¨ç¤ºæ‰€æœ‰ä¹¦ç›®åº“çš„åå­—å’Œç±»å‹çš„XMLä»£ç 
+        // TODO: æ—¢ç„¶åˆ—å…¥çš„éƒ½æ˜¯ä¹¦ç›®åº“ï¼Œç±»å‹å°±æ˜¯å¤šä½™çš„äº†
         internal string GetAllBiblioDbInfoXml()
         {
             if (String.IsNullOrEmpty(this.AllDatabaseInfoXml) == true)
@@ -518,7 +518,7 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
             }
             catch (Exception /*ex*/)
             {
-                // strError = "XML×°ÈëDOMÊ±³ö´í: " + ex.Message;
+                // strError = "XMLè£…å…¥DOMæ—¶å‡ºé”™: " + ex.Message;
                 // return -1;
                 Debug.Assert(false, "");
                 return "";
@@ -542,9 +542,9 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
         }
 
 
-        // »ñµÃtreeviewÖĞÒÑ¾­Ê¹ÓÃ¹ıµÄÈ«²¿ÊéÄ¿¿âÃû
+        // è·å¾—treeviewä¸­å·²ç»ä½¿ç”¨è¿‡çš„å…¨éƒ¨ä¹¦ç›®åº“å
         // parameters:
-        //      exclude_node    ÒªÅÅ³ıµÄTreeNode½Úµã¡£Ò²¾ÍÊÇËµÕâ¸ö½ÚµãÓÃ¹ıµÄÊéÄ¿¿âÃû²»ËãÔÚÆäÖĞ
+        //      exclude_node    è¦æ’é™¤çš„TreeNodeèŠ‚ç‚¹ã€‚ä¹Ÿå°±æ˜¯è¯´è¿™ä¸ªèŠ‚ç‚¹ç”¨è¿‡çš„ä¹¦ç›®åº“åä¸ç®—åœ¨å…¶ä¸­
         List<string> Zhongcihao_GetAllUsedBiblioDbName(TreeNode exclude_node)
         {
             List<string> existing_dbnames = new List<string>();
@@ -554,7 +554,7 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
                 if (tree_node.ImageIndex != TYPE_ZHONGCIHAO_GROUP)
                     continue;
 
-                // ½øÈëgroup½ÚµãµÄÏÂ²ã
+                // è¿›å…¥groupèŠ‚ç‚¹çš„ä¸‹å±‚
                 for (int j = 0; j < tree_node.Nodes.Count; j++)
                 {
                     TreeNode database_tree_node = tree_node.Nodes[j];
@@ -597,7 +597,7 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
             return null;
         }
 
-        // Ìá½»ÖÖ´ÎºÅ¶¨ÒåĞŞ¸Ä
+        // æäº¤ç§æ¬¡å·å®šä¹‰ä¿®æ”¹
         int SubmitZhongcihaoDef(out string strError)
         {
             strError = "";
@@ -616,8 +616,8 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
         }
 
 
-        // ¹¹ÔìÖÖ´ÎºÅ¶¨ÒåµÄXMLÆ¬¶Î
-        // ×¢ÒâÊÇÏÂ¼¶Æ¬¶Ï¶¨Òå£¬Ã»ÓĞ<zhongcihao>ÔªËØ×÷Îª¸ù¡£
+        // æ„é€ ç§æ¬¡å·å®šä¹‰çš„XMLç‰‡æ®µ
+        // æ³¨æ„æ˜¯ä¸‹çº§ç‰‡æ–­å®šä¹‰ï¼Œæ²¡æœ‰<zhongcihao>å…ƒç´ ä½œä¸ºæ ¹ã€‚
         int BuildZhongcihaoDef(out string strZhongcihaoDef,
             out string strError)
         {
@@ -641,7 +641,7 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
                     }
                     catch (Exception ex)
                     {
-                        strError = "nstable fragment XML×°ÈëXmlDocumentFragmentÊ±³ö´í: " + ex.Message;
+                        strError = "nstable fragment XMLè£…å…¥XmlDocumentFragmentæ—¶å‡ºé”™: " + ex.Message;
                         return -1;
                     }
 
@@ -649,7 +649,7 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
                 }
                 else if (item.ImageIndex == TYPE_ZHONGCIHAO_GROUP)
                 {
-                    // È¡µÃnameºÍzhongcihaodbÁ½¸öÊôĞÔ
+                    // å–å¾—nameå’Œzhongcihaodbä¸¤ä¸ªå±æ€§
                     string strXml = (string)item.Tag;
 
                     XmlDocument temp_dom = new XmlDocument();
@@ -659,7 +659,7 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
                     }
                     catch (Exception ex)
                     {
-                        strError = "group½ÚµãµÄXML×°ÈëDOMÊ±³ö´í: " + ex.Message;
+                        strError = "groupèŠ‚ç‚¹çš„XMLè£…å…¥DOMæ—¶å‡ºé”™: " + ex.Message;
                         return -1;
                     }
 
@@ -687,7 +687,7 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
                         }
                         catch (Exception ex)
                         {
-                            strError = "database fragment XML×°ÈëXmlDocumentFragmentÊ±³ö´í: " + ex.Message;
+                            strError = "database fragment XMLè£…å…¥XmlDocumentFragmentæ—¶å‡ºé”™: " + ex.Message;
                             return -1;
                         }
 
@@ -701,12 +701,12 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
             return 0;
         }
 
-        // ¼ì²éÖ¸¶¨Ãû×ÖµÄÖÖ´ÎºÅ¿âÊÇ·ñÒÑ¾­´´½¨
+        // æ£€æŸ¥æŒ‡å®šåå­—çš„ç§æ¬¡å·åº“æ˜¯å¦å·²ç»åˆ›å»º
         // return:
-        //      -2  ËùÖ¸¶¨µÄÖÖ´ÎºÅ¿âÃû×Ö£¬Êµ¼ÊÉÏÊÇÒ»¸öÒÑ¾­´æÔÚµÄÆäËûÀàĞÍµÄ¿âÃû
+        //      -2  æ‰€æŒ‡å®šçš„ç§æ¬¡å·åº“åå­—ï¼Œå®é™…ä¸Šæ˜¯ä¸€ä¸ªå·²ç»å­˜åœ¨çš„å…¶ä»–ç±»å‹çš„åº“å
         //      -1  error
-        //      0   »¹Ã»ÓĞ´´½¨
-        //      1   ÒÑ¾­´´½¨
+        //      0   è¿˜æ²¡æœ‰åˆ›å»º
+        //      1   å·²ç»åˆ›å»º
         int CheckZhongcihaoDbCreated(string strZhongcihaoDbName,
             out string strError)
         {
@@ -714,7 +714,7 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
 
             if (String.IsNullOrEmpty(strZhongcihaoDbName) == true)
             {
-                strError = "²ÎÊıstrZhongcihaoDbNameµÄÖµ²»ÄÜÎª¿Õ";
+                strError = "å‚æ•°strZhongcihaoDbNameçš„å€¼ä¸èƒ½ä¸ºç©º";
                 return -1;
             }
 
@@ -730,7 +730,7 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
             }
             catch (Exception ex)
             {
-                strError = "XML×°ÈëDOMÊ±³ö´í: " + ex.Message;
+                strError = "XMLè£…å…¥DOMæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
@@ -752,28 +752,28 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
                 {
                     if (strName == strZhongcihaoDbName)
                     {
-                        strError = "ËùÄâ¶¨µÄÖÖ´ÎºÅ¿âÃûºÍµ±Ç°ÒÑ¾­´æÔÚµÄĞ¡ÊéÄ¿¿âÃû '" + strName + "' ÏàÖØÁË";
+                        strError = "æ‰€æ‹Ÿå®šçš„ç§æ¬¡å·åº“åå’Œå½“å‰å·²ç»å­˜åœ¨çš„å°ä¹¦ç›®åº“å '" + strName + "' ç›¸é‡äº†";
                         return -2;
                     }
 
                     string strEntityDbName = DomUtil.GetAttr(node, "entityDbName");
                     if (strEntityDbName == strZhongcihaoDbName)
                     {
-                        strError = "ËùÄâ¶¨µÄÖÖ´ÎºÅ¿âÃûºÍµ±Ç°ÒÑ¾­´æÔÚµÄÊµÌå¿âÃû '" + strEntityDbName + "' ÏàÖØÁË";
+                        strError = "æ‰€æ‹Ÿå®šçš„ç§æ¬¡å·åº“åå’Œå½“å‰å·²ç»å­˜åœ¨çš„å®ä½“åº“å '" + strEntityDbName + "' ç›¸é‡äº†";
                         return -2;
                     }
 
                     string strOrderDbName = DomUtil.GetAttr(node, "orderDbName");
                     if (strOrderDbName == strZhongcihaoDbName)
                     {
-                        strError = "ËùÄâ¶¨µÄÖÖ´ÎºÅ¿âÃûºÍµ±Ç°ÒÑ¾­´æÔÚµÄ¶©¹º¿âÃû '" + strOrderDbName + "' ÏàÖØÁË";
+                        strError = "æ‰€æ‹Ÿå®šçš„ç§æ¬¡å·åº“åå’Œå½“å‰å·²ç»å­˜åœ¨çš„è®¢è´­åº“å '" + strOrderDbName + "' ç›¸é‡äº†";
                         return -2;
                     }
 
                     string strIssueDbName = DomUtil.GetAttr(node, "issueDbName");
                     if (strIssueDbName == strZhongcihaoDbName)
                     {
-                        strError = "ËùÄâ¶¨µÄÖÖ´ÎºÅ¿âÃûºÍµ±Ç°ÒÑ¾­´æÔÚµÄÆÚ¿âÃû '" + strIssueDbName + "' ÏàÖØÁË";
+                        strError = "æ‰€æ‹Ÿå®šçš„ç§æ¬¡å·åº“åå’Œå½“å‰å·²ç»å­˜åœ¨çš„æœŸåº“å '" + strIssueDbName + "' ç›¸é‡äº†";
                         return -2;
                     }
 
@@ -785,7 +785,7 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
 
                 if (strName == strZhongcihaoDbName)
                 {
-                    strError = "ËùÄâ¶¨µÄÖÖ´ÎºÅ¿âÃûºÍµ±Ç°ÒÑ¾­´æÔÚµÄ" + strTypeName + "¿âÃû '" + strName + "' ÏàÖØÁË";
+                    strError = "æ‰€æ‹Ÿå®šçš„ç§æ¬¡å·åº“åå’Œå½“å‰å·²ç»å­˜åœ¨çš„" + strTypeName + "åº“å '" + strName + "' ç›¸é‡äº†";
                     return -2;
                 }
 
@@ -806,7 +806,7 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
             }
             catch (Exception /*ex*/)
             {
-                // strError = "XML×°ÈëDOMÊ±³ö´í: " + ex.Message;
+                // strError = "XMLè£…å…¥DOMæ—¶å‡ºé”™: " + ex.Message;
                 // return -1;
                 Debug.Assert(false, "");
                 return "";
@@ -829,9 +829,9 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
             return dom.OuterXml;
         }
 
-        // »ñµÃtreeview_zhongcihaoÖĞÒÑ¾­Ê¹ÓÃ¹ıµÄÈ«²¿ÖÖ´ÎºÅÃû
+        // è·å¾—treeview_zhongcihaoä¸­å·²ç»ä½¿ç”¨è¿‡çš„å…¨éƒ¨ç§æ¬¡å·å
         // parameters:
-        //      exclude_node    ÒªÅÅ³ıµÄTreeNode½Úµã¡£Ò²¾ÍÊÇËµÕâ¸ö½ÚµãÓÃ¹ıµÄÖÖ´ÎºÅ¿â²»ËãÔÚÆäÖĞ
+        //      exclude_node    è¦æ’é™¤çš„TreeNodeèŠ‚ç‚¹ã€‚ä¹Ÿå°±æ˜¯è¯´è¿™ä¸ªèŠ‚ç‚¹ç”¨è¿‡çš„ç§æ¬¡å·åº“ä¸ç®—åœ¨å…¶ä¸­
         List<string> GetAllUsedZhongcihaoDbName(TreeNode exclude_node)
         {
             List<string> existing_dbnames = new List<string>();
@@ -880,10 +880,10 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
             string strError = "";
             // int nRet = 0;
 
-            // µ±Ç°ÒÑÑ¡ÔñµÄnode
+            // å½“å‰å·²é€‰æ‹©çš„node
             if (this.treeView_zhongcihao.SelectedNode == null)
             {
-                MessageBox.Show("ÉĞÎ´Ñ¡ÔñÒª½øĞĞÉÏÏÂÒÆ¶¯µÄ½Úµã");
+                MessageBox.Show("å°šæœªé€‰æ‹©è¦è¿›è¡Œä¸Šä¸‹ç§»åŠ¨çš„èŠ‚ç‚¹");
                 return;
             }
 
@@ -906,7 +906,7 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
             {
                 if (index == 0)
                 {
-                    strError = "ÒÑ¾­µ½Í·";
+                    strError = "å·²ç»åˆ°å¤´";
                     goto ERROR1;
                 }
 
@@ -918,7 +918,7 @@ authorxpath="//marc:record/marc:datafield[@tag='200']/marc:subfield[@code='f' or
             {
                 if (index >= nodes.Count - 1)
                 {
-                    strError = "ÒÑ¾­µ½Î²";
+                    strError = "å·²ç»åˆ°å°¾";
                     goto ERROR1;
                 }
 

@@ -1,18 +1,16 @@
-﻿#pragma warning disable 1591
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml;
-
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform;
+using System.Diagnostics;
 using System.Collections;
+
+using DigitalPlatform;
+using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.CirculationClient.localhost;
-using System.Diagnostics;
 
 namespace dp2Circulation
 {
@@ -412,4 +410,3 @@ out strError);
     }
 }
 
-#pragma warning restore 1591

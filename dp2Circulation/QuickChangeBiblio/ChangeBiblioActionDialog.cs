@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -13,17 +13,17 @@ using DigitalPlatform.CommonControl;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ¿ìËÙĞŞ¸ÄÊéÄ¿ ¶¯×÷²ÎÊı ¶Ô»°¿ò
+    /// å¿«é€Ÿä¿®æ”¹ä¹¦ç›® åŠ¨ä½œå‚æ•° å¯¹è¯æ¡†
     /// </summary>
     internal partial class ChangeBiblioActionDialog : Form
     {
         /// <summary>
-        /// ¿ò¼Ü´°¿Ú
+        /// æ¡†æ¶çª—å£
         /// </summary>
         public MainForm MainForm = null;
 
         /// <summary>
-        /// »ñµÃÖµÁĞ±í
+        /// è·å¾—å€¼åˆ—è¡¨
         /// </summary>
         public event GetValueTableEventHandler GetValueTable = null;
         public string RefDbName = "";
@@ -35,13 +35,13 @@ namespace dp2Circulation
 
         private void ChangeBiblioActionDialog_Load(object sender, EventArgs e)
         {
-            // ×°ÔØÖµ
+            // è£…è½½å€¼
 
             // state
             this.comboBox_state.Text = this.MainForm.AppInfo.GetString(
                 "change_biblio_param",
                 "state",
-                "<²»¸Ä±ä>");
+                "<ä¸æ”¹å˜>");
 
             this.checkedComboBox_stateAdd.Text = this.MainForm.AppInfo.GetString(
                 "change_biblio_param",
@@ -56,7 +56,7 @@ namespace dp2Circulation
             this.comboBox_opertime.Text = this.MainForm.AppInfo.GetString(
     "change_biblio_param",
     "opertime",
-    "<²»¸Ä±ä>");
+    "<ä¸æ”¹å˜>");
             this.dateTimePicker1.Text = this.MainForm.AppInfo.GetString(
     "change_biblio_param",
     "opertime_value",
@@ -66,7 +66,7 @@ namespace dp2Circulation
             this.comboBox_batchNo.Text = this.MainForm.AppInfo.GetString(
 "change_biblio_param",
 "batchNo",
-"<²»¸Ä±ä>");
+"<ä¸æ”¹å˜>");
 
             comboBox_state_TextChanged(null, null);
             comboBox_opertime_TextChanged(null, null);
@@ -79,8 +79,8 @@ namespace dp2Circulation
                 return;
 
             /*
-            this.checkedComboBox_stateAdd.Items.Add("¶©¹ºÕ÷Ñ¯");
-            this.checkedComboBox_stateAdd.Items.Add("¶ÁÕß´´½¨");
+            this.checkedComboBox_stateAdd.Items.Add("è®¢è´­å¾è¯¢");
+            this.checkedComboBox_stateAdd.Items.Add("è¯»è€…åˆ›å»º");
              * */
             FillBiblioStateDropDown(this.checkedComboBox_stateAdd);
         }
@@ -91,15 +91,15 @@ namespace dp2Circulation
                 return;
 
             /*
-            this.checkedComboBox_stateRemove.Items.Add("¶©¹ºÕ÷Ñ¯");
-            this.checkedComboBox_stateRemove.Items.Add("¶ÁÕß´´½¨");
+            this.checkedComboBox_stateRemove.Items.Add("è®¢è´­å¾è¯¢");
+            this.checkedComboBox_stateRemove.Items.Add("è¯»è€…åˆ›å»º");
              * */
             FillBiblioStateDropDown(this.checkedComboBox_stateRemove);
         }
 
         private void button_OK_Click(object sender, EventArgs e)
         {
-            // ±£´æÖµ
+            // ä¿å­˜å€¼
 
             // state
             this.MainForm.AppInfo.SetString(
@@ -146,7 +146,7 @@ this.dateTimePicker1.Text);
         {
             string strText = this.comboBox_state.Text;
 
-            if (strText == "<Ôö¡¢¼õ>")
+            if (strText == "<å¢ã€å‡>")
             {
                 this.checkedComboBox_stateAdd.Enabled = true;
                 this.checkedComboBox_stateRemove.Enabled = true;
@@ -160,7 +160,7 @@ this.dateTimePicker1.Text);
                 this.checkedComboBox_stateRemove.Enabled = false;
             }
 
-            if (strText == "<²»¸Ä±ä>")
+            if (strText == "<ä¸æ”¹å˜>")
                 this.label_state.BackColor = this.BackColor;
             else
                 this.label_state.BackColor = Color.Green;
@@ -185,7 +185,7 @@ this.dateTimePicker1.Text);
         {
             string strText = this.comboBox_opertime.Text;
 
-            if (strText == "<Ö¸¶¨Ê±¼ä>")
+            if (strText == "<æŒ‡å®šæ—¶é—´>")
             {
                 this.dateTimePicker1.Enabled = true;
             }
@@ -195,7 +195,7 @@ this.dateTimePicker1.Text);
                 this.dateTimePicker1.Enabled = false;
             }
 
-            if (strText == "<²»¸Ä±ä>")
+            if (strText == "<ä¸æ”¹å˜>")
                 this.label_operTime.BackColor = this.BackColor;
             else
                 this.label_operTime.BackColor = Color.Green;
@@ -203,7 +203,7 @@ this.dateTimePicker1.Text);
 
         private void comboBox_batchNo_TextChanged(object sender, EventArgs e)
         {
-            if (this.comboBox_batchNo.Text == "<²»¸Ä±ä>")
+            if (this.comboBox_batchNo.Text == "<ä¸æ”¹å˜>")
                 this.label_batchNo.BackColor = this.BackColor;
             else
                 this.label_batchNo.BackColor = Color.Green;
@@ -212,7 +212,7 @@ this.dateTimePicker1.Text);
         int m_nInDropDown = 0;
         void FillBiblioStateDropDown(CheckedComboBox combobox)
         {
-            // ·ÀÖ¹ÖØÈë
+            // é˜²æ­¢é‡å…¥
             if (this.m_nInDropDown > 0)
                 return;
 
@@ -254,7 +254,7 @@ this.dateTimePicker1.Text);
 #if NO
         delegate void Delegate_filterValue(Control control);
 
-        // ¹ıÂËµô {} °üÎ§µÄ²¿·Ö
+        // è¿‡æ»¤æ‰ {} åŒ…å›´çš„éƒ¨åˆ†
         void FileterValue(Control control)
         {
             string strText = Global.GetPureSeletedValue(control.Text);
@@ -262,8 +262,8 @@ this.dateTimePicker1.Text);
                 control.Text = strText;
         }
 
-        // ¹ıÂËµô {} °üÎ§µÄ²¿·Ö
-        // »¹ÓĞÁĞ±íÖµÈ¥ÖØµÄ¹¦ÄÜ
+        // è¿‡æ»¤æ‰ {} åŒ…å›´çš„éƒ¨åˆ†
+        // è¿˜æœ‰åˆ—è¡¨å€¼å»é‡çš„åŠŸèƒ½
         void FileterValueList(Control control)
         {
             List<string> results = StringUtil.FromListString(Global.GetPureSeletedValue(control.Text));

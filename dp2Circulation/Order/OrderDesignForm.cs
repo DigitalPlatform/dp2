@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -13,8 +13,8 @@ using DigitalPlatform.IO;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ¹æ»®¶©¹º¶Ô»°¿ò
-    /// ÓÃÀ´·ÖÅä¶©¹ºµÄ¸´±¾Êı
+    /// è§„åˆ’è®¢è´­å¯¹è¯æ¡†
+    /// ç”¨æ¥åˆ†é…è®¢è´­çš„å¤æœ¬æ•°
     /// </summary>
     internal partial class OrderDesignForm : Form
     {
@@ -24,26 +24,26 @@ namespace dp2Circulation
 
 
         /// <summary>
-        /// ¿ò¼Ü´°¿Ú
+        /// æ¡†æ¶çª—å£
         /// </summary>
         public MainForm MainForm = null;
 
         /// <summary>
-        /// »ñµÃÖµÁĞ±í
+        /// è·å¾—å€¼åˆ—è¡¨
         /// </summary>
         public event GetValueTableEventHandler GetValueTable = null;
 
         /// <summary>
-        /// »ñµÃÈ±Ê¡¼ÇÂ¼
+        /// è·å¾—ç¼ºçœè®°å½•
         /// </summary>
         public event GetDefaultRecordEventHandler GetDefaultRecord = null;
         // 2012/10/4
         /// <summary>
-        /// ¼ì²é¹İ´úÂëÊÇ·ñÔÚ¹ÜÏ½·¶Î§ÄÚ
+        /// æ£€æŸ¥é¦†ä»£ç æ˜¯å¦åœ¨ç®¡è¾–èŒƒå›´å†…
         /// </summary>
         public event VerifyLibraryCodeEventHandler VerifyLibraryCode = null;
 
-        // ÊÂÏîÊı×é
+        // äº‹é¡¹æ•°ç»„
         public List<DigitalPlatform.CommonControl.Item> Items 
         {
             get
@@ -72,10 +72,10 @@ namespace dp2Circulation
             this.orderDesignControl1.VerifyLibraryCode -= new VerifyLibraryCodeEventHandler(orderDesignControl1_VerifyLibraryCode);
             this.orderDesignControl1.VerifyLibraryCode += new VerifyLibraryCodeEventHandler(orderDesignControl1_VerifyLibraryCode);
 
-            // Èç¹û´°¿Ú´ò¿ªµÄÊ±ºò£¬·¢ÏÖÒ»¸öÊÂÏîÒ²Ã»ÓĞ£¬¾ÍĞèÒª¼ÓÈëÒ»¸ö¿Õ°×ÊÂÏî£¬ÒÔ±ãÓÃ»§ÔÚ´Ë»ù´¡ÉÏ½øĞĞ±à¼­
+            // å¦‚æœçª—å£æ‰“å¼€çš„æ—¶å€™ï¼Œå‘ç°ä¸€ä¸ªäº‹é¡¹ä¹Ÿæ²¡æœ‰ï¼Œå°±éœ€è¦åŠ å…¥ä¸€ä¸ªç©ºç™½äº‹é¡¹ï¼Œä»¥ä¾¿ç”¨æˆ·åœ¨æ­¤åŸºç¡€ä¸Šè¿›è¡Œç¼–è¾‘
             if (this.orderDesignControl1.Items.Count == 0)
             {
-                // TODO: ĞèÒªÉ¾³ıÈ±Ê¡¾ÍÔÚÀïÃæµÄcopyÎª0µÄÎ¨Ò»ÊÂÏî£¬È»ºóÔö¼ÓÒ»¸öcopyÎª0µÄÊÂÏî¡£ĞÂÔö¼ÓµÄÊÂÏî»áÓĞÅú´ÎºÅµÈĞÅÏ¢¡£
+                // TODO: éœ€è¦åˆ é™¤ç¼ºçœå°±åœ¨é‡Œé¢çš„copyä¸º0çš„å”¯ä¸€äº‹é¡¹ï¼Œç„¶åå¢åŠ ä¸€ä¸ªcopyä¸º0çš„äº‹é¡¹ã€‚æ–°å¢åŠ çš„äº‹é¡¹ä¼šæœ‰æ‰¹æ¬¡å·ç­‰ä¿¡æ¯ã€‚
                 this.orderDesignControl1.InsertNewItem(0);  // this.orderDesignControl1.Items.Count
 
                 this.orderDesignControl1.RemoveMultipleZeroCopyItem();
@@ -91,9 +91,9 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// È±Ê¡´°¿Ú¹ı³Ì
+        /// ç¼ºçœçª—å£è¿‡ç¨‹
         /// </summary>
-        /// <param name="m">ÏûÏ¢</param>
+        /// <param name="m">æ¶ˆæ¯</param>
         protected override void DefWndProc(ref Message m)
         {
             switch (m.Msg)
@@ -107,7 +107,7 @@ namespace dp2Circulation
             base.DefWndProc(ref m);
         }
 
-        // È·±£ºÍµ±Ç°ÈÕÆÚÓĞ¹ØµÄÊÂÏî¹öÈëÊÓÒ°
+        // ç¡®ä¿å’Œå½“å‰æ—¥æœŸæœ‰å…³çš„äº‹é¡¹æ»šå…¥è§†é‡
         public void EnsureCurrentVisible(DateTime? time)
         {
             if (time == null)
@@ -125,8 +125,8 @@ namespace dp2Circulation
                         this.orderDesignControl1.SelectItem(item, nCount == 0 ? true : false);
                         nCount ++;
                     }
-                    // TODO: Èç¹ûÃ»ÓĞ¾«È·Æ¥ÅäµÄ£¬»¹¿ÉÒÔ¼ÆËã³öºÍµ±Ç°Ê±¼ä¾àÀë×î½üµÄ
-                    // Èç¹ûÊ±¼ä·¶Î§Îª¿Õ£¬»¹¿ÉÒÔ¿´¶©¹ºÊ±¼ä
+                    // TODO: å¦‚æœæ²¡æœ‰ç²¾ç¡®åŒ¹é…çš„ï¼Œè¿˜å¯ä»¥è®¡ç®—å‡ºå’Œå½“å‰æ—¶é—´è·ç¦»æœ€è¿‘çš„
+                    // å¦‚æœæ—¶é—´èŒƒå›´ä¸ºç©ºï¼Œè¿˜å¯ä»¥çœ‹è®¢è´­æ—¶é—´
                 }
 
                 if (nCount == 0)
@@ -151,7 +151,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÄÚÈİÊÇ·ñ·¢Éú¹ıĞŞ¸Ä
+        /// å†…å®¹æ˜¯å¦å‘ç”Ÿè¿‡ä¿®æ”¹
         /// </summary>
         public bool Changed
         {
@@ -168,17 +168,17 @@ namespace dp2Circulation
         private void button_OK_Click(object sender, EventArgs e)
         {
             string strError = "";
-            // ½øĞĞ¼ì²é
+            // è¿›è¡Œæ£€æŸ¥
             // return:
-            //      -1  º¯ÊıÔËĞĞ³ö´í
-            //      0   ¼ì²éÃ»ÓĞ·¢ÏÖ´íÎó
-            //      1   ¼ì²é·¢ÏÖÁË´íÎó
+            //      -1  å‡½æ•°è¿è¡Œå‡ºé”™
+            //      0   æ£€æŸ¥æ²¡æœ‰å‘ç°é”™è¯¯
+            //      1   æ£€æŸ¥å‘ç°äº†é”™è¯¯
             int nRet = this.orderDesignControl1.Check(out strError);
             if (nRet != 0)
             {
                 if (nRet == 1)
                 {
-                    strError = "¾­¼ì²é·¢ÏÖÊı¾İ²»¹æ·¶ÎÊÌâ:\r\n\r\n" + strError;
+                    strError = "ç»æ£€æŸ¥å‘ç°æ•°æ®ä¸è§„èŒƒé—®é¢˜:\r\n\r\n" + strError;
                 }
                 goto ERROR1;
             }
@@ -196,14 +196,14 @@ namespace dp2Circulation
             this.Close();
         }
 
-        // °ü×°ÒÑÓĞµÄº¯Êı
+        // åŒ…è£…å·²æœ‰çš„å‡½æ•°
         public DigitalPlatform.CommonControl.Item AppendNewItem(string strOrderXml,
             out string strError)
         {
             return this.orderDesignControl1.AppendNewItem(strOrderXml, out strError);
         }
 
-        // °ü×°ÒÑÓĞµÄº¯Êı
+        // åŒ…è£…å·²æœ‰çš„å‡½æ•°
         public void ClearAllItems()
         {
             this.orderDesignControl1.Clear();
@@ -222,7 +222,7 @@ namespace dp2Circulation
             }
         }
 
-        // »ñÈ¡ÖµÁĞ±íÊ±×÷ÎªÏßË÷µÄÊı¾İ¿âÃû
+        // è·å–å€¼åˆ—è¡¨æ—¶ä½œä¸ºçº¿ç´¢çš„æ•°æ®åº“å
         public string BiblioDbName
         {
             get

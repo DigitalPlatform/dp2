@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -11,20 +11,20 @@ using DigitalPlatform.Text;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ÊéÄ¿¼ÇÂ¼Áí´æÎª ¶Ô»°¿ò
+    /// ä¹¦ç›®è®°å½•å¦å­˜ä¸º å¯¹è¯æ¡†
     /// </summary>
     internal partial class BiblioSaveToDlg : Form
     {
         /// <summary>
-        /// ¿ò¼Ü´°¿Ú
+        /// æ¡†æ¶çª—å£
         /// </summary>
         public MainForm MainForm = null;
 
-        public string CurrentBiblioRecPath = "";    // µ±Ç°ÊéÄ¿¼ÇÂ¼µÄÂ·¾¶
+        public string CurrentBiblioRecPath = "";    // å½“å‰ä¹¦ç›®è®°å½•çš„è·¯å¾„
 
-        bool m_bSavedBuildLink = false; // ×î³õÏÔÊ¾µÄBuildLinkÖµ
+        bool m_bSavedBuildLink = false; // æœ€åˆæ˜¾ç¤ºçš„BuildLinkå€¼
 
-        int m_nManual = 0;  // Èç¹ûÎª0£¬±íÊ¾½çÃæÊÖ¶¯¹´Ñ¡¡£·ñÔò¾ÍÊÇ³ÌĞòÄÚ²¿È¥¸Ä±ächeckedÖµ
+        int m_nManual = 0;  // å¦‚æœä¸º0ï¼Œè¡¨ç¤ºç•Œé¢æ‰‹åŠ¨å‹¾é€‰ã€‚å¦åˆ™å°±æ˜¯ç¨‹åºå†…éƒ¨å»æ”¹å˜checkedå€¼
 
         public BiblioSaveToDlg()
         {
@@ -49,13 +49,13 @@ namespace dp2Circulation
         {
             if (String.IsNullOrEmpty(this.comboBox_biblioDbName.Text) == true)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ö¸¶¨ÊéÄ¿¿âÃû");
+                MessageBox.Show(this, "å°šæœªæŒ‡å®šä¹¦ç›®åº“å");
                 return;
             }
 
             if (String.IsNullOrEmpty(this.textBox_recordID.Text) == true)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ö¸¶¨¼ÇÂ¼ID");
+                MessageBox.Show(this, "å°šæœªæŒ‡å®šè®°å½•ID");
             }
 
 
@@ -165,7 +165,7 @@ namespace dp2Circulation
             }
         }
 
-        // comboboxÄÚµÄ¿âÃûÑ¡Ôñ±ä»¯ºó£¬¼ÇÂ¼ID±ä»¯Îª"?"
+        // comboboxå†…çš„åº“åé€‰æ‹©å˜åŒ–åï¼Œè®°å½•IDå˜åŒ–ä¸º"?"
         private void comboBox_biblioDbName_SelectedIndexChanged(object sender, EventArgs e)
         {
             this.textBox_recordID.Text = "?";
@@ -176,7 +176,7 @@ namespace dp2Circulation
             if (this.textBox_recordID.Text != "?"
                 && StringUtil.IsPureNumber(this.textBox_recordID.Text) == false)
             {
-                MessageBox.Show(this, "¼ÇÂ¼ID '"+this.textBox_recordID.Text+"' ²»ºÏ·¨¡£±ØĞëÎª'?'»ò´¿Êı×Ö(×¢:¾ùĞèÎª°ë½Ç)");
+                MessageBox.Show(this, "è®°å½•ID '"+this.textBox_recordID.Text+"' ä¸åˆæ³•ã€‚å¿…é¡»ä¸º'?'æˆ–çº¯æ•°å­—(æ³¨:å‡éœ€ä¸ºåŠè§’)");
                 e.Cancel = true;
                 return;
             }
@@ -186,17 +186,17 @@ namespace dp2Circulation
         {
             string strError = "";
 
-            // Èç¹ûÁí´æÇ°µÄ¼ÇÂ¼Â·¾¶ÖĞIDÎªÎÊºÅ£¬ÒâÎ¶×Å²»ÖªµÀÄ¿±êÂ·¾¶£¬Òò´ËÎŞ·¨´´½¨Ä¿±ê¹ØÏµ
-            // ËùÒÔÒª¼ì²éÄ¿±êÂ·¾¶£¬IDÓ¦²»ÎªÎÊºÅ
+            // å¦‚æœå¦å­˜å‰çš„è®°å½•è·¯å¾„ä¸­IDä¸ºé—®å·ï¼Œæ„å‘³ç€ä¸çŸ¥é“ç›®æ ‡è·¯å¾„ï¼Œå› æ­¤æ— æ³•åˆ›å»ºç›®æ ‡å…³ç³»
+            // æ‰€ä»¥è¦æ£€æŸ¥ç›®æ ‡è·¯å¾„ï¼ŒIDåº”ä¸ä¸ºé—®å·
             int nRet = this.MainForm.CheckBuildLinkCondition(
-                    this.RecPath,   // ÒªÁí´æÈ¥µÄÄÇÌõ
-                    this.CurrentBiblioRecPath,  // Áí´æÇ°µÄÄÇÌõ
+                    this.RecPath,   // è¦å¦å­˜å»çš„é‚£æ¡
+                    this.CurrentBiblioRecPath,  // å¦å­˜å‰çš„é‚£æ¡
                     true,
                     out strError);
-            // ¿´¿´ÊÇ·ñĞèÒªEnable/DiableÁ¬½Ócheckbox
+            // çœ‹çœ‹æ˜¯å¦éœ€è¦Enable/Diableè¿æ¥checkbox
             if (nRet == 1)
             {
-                // ¾¡Á¿»Ö¸´×î³õµÄ¹´Ñ¡£¬Èç¹û¿ÉÄÜµÄ»°
+                // å°½é‡æ¢å¤æœ€åˆçš„å‹¾é€‰ï¼Œå¦‚æœå¯èƒ½çš„è¯
                 if (this.m_bSavedBuildLink == true)
                 {
                     this.m_nManual++;
@@ -231,10 +231,10 @@ namespace dp2Circulation
         {
             if (this.m_nManual == 0)
             {
-                // Èç¹ûÊÖ¶¯ÔÚ½çÃæÃ÷È·ÉèÖÃÁËoff
+                // å¦‚æœæ‰‹åŠ¨åœ¨ç•Œé¢æ˜ç¡®è®¾ç½®äº†off
                 if (this.checkBox_buildLink.Checked == false
                     && this.m_bSavedBuildLink == true)
-                    this.m_bSavedBuildLink = false; // ²»ÔÙ¼á³Ö»Ö¸´
+                    this.m_bSavedBuildLink = false; // ä¸å†åšæŒæ¢å¤
             }
         }
 
@@ -254,7 +254,7 @@ namespace dp2Circulation
             this.RecPath = strText;
         }
 
-        // ÅĞ¶ÏÒ»¸ö×Ö·û´®ÊÇ·ñÎª¼ÇÂ¼Â·¾¶
+        // åˆ¤æ–­ä¸€ä¸ªå­—ç¬¦ä¸²æ˜¯å¦ä¸ºè®°å½•è·¯å¾„
         static bool IsRecPath(string strText)
         {
             if (strText.IndexOf("/") == -1)

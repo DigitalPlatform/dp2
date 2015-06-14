@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,23 +12,23 @@ using DigitalPlatform.GUI;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ¼ìË÷ÃüÖĞ¶àÌõ¼ÇÂ¼Ê±µÄä¯ÀÀÑ¡Ôñ¶Ô»°¿ò
+    /// æ£€ç´¢å‘½ä¸­å¤šæ¡è®°å½•æ—¶çš„æµè§ˆé€‰æ‹©å¯¹è¯æ¡†
     /// </summary>
     internal partial class BrowseSearchResultForm : Form
     {
         /// <summary>
-        /// ¿ò¼Ü´°¿Ú
+        /// æ¡†æ¶çª—å£
         /// </summary>
         public MainForm MainForm = null;
 
         public Stop stop = null;
         /// <summary>
-        /// ´ò¿ªÏêÏ¸´°
+        /// æ‰“å¼€è¯¦ç»†çª—
         /// </summary>
         public event OpenDetailEventHandler OpenDetail = null;
 
         /// <summary>
-        /// ÏÔÊ¾¼ÇÂ¼µÄListView´°
+        /// æ˜¾ç¤ºè®°å½•çš„ListViewçª—
         /// </summary>
         public ListView RecordsList
         {
@@ -45,7 +45,7 @@ namespace dp2Circulation
 
             ListViewProperty prop = new ListViewProperty();
             this.listView_records.Tag = prop;
-            // µÚÒ»ÁĞÌØÊâ£¬¼ÇÂ¼Â·¾¶
+            // ç¬¬ä¸€åˆ—ç‰¹æ®Šï¼Œè®°å½•è·¯å¾„
             prop.SetSortStyle(0, ColumnSortStyle.RecPath);
             prop.GetColumnTitles -= new GetColumnTitlesEventHandler(prop_GetColumnTitles);
             prop.GetColumnTitles += new GetColumnTitlesEventHandler(prop_GetColumnTitles);
@@ -56,8 +56,8 @@ namespace dp2Circulation
             if (e.DbName == "<blank>")
             {
                 e.ColumnTitles = new ColumnPropertyCollection();
-                e.ColumnTitles.Add("¼ìË÷µã");
-                e.ColumnTitles.Add("ÊıÁ¿");
+                e.ColumnTitles.Add("æ£€ç´¢ç‚¹");
+                e.ColumnTitles.Add("æ•°é‡");
                 return;
             }
 
@@ -69,7 +69,7 @@ namespace dp2Circulation
             this.button_OK.Enabled = false;
             if (this.listView_records.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡ÔñÊÂÏî");
+                MessageBox.Show(this, "å°šæœªé€‰æ‹©äº‹é¡¹");
                 this.button_OK.Enabled = true;
                 return;
             }
@@ -87,7 +87,7 @@ namespace dp2Circulation
             this.Close();
         }
 
-        // È·±£ÁĞ±êÌâÊıÁ¿×ã¹»
+        // ç¡®ä¿åˆ—æ ‡é¢˜æ•°é‡è¶³å¤Ÿ
         void EnsureColumns(int nCount)
         {
             if (this.listView_records.Columns.Count >= nCount)
@@ -98,7 +98,7 @@ namespace dp2Circulation
                 string strText = "";
                 if (i == 0)
                 {
-                    strText = "¼ÇÂ¼Â·¾¶";
+                    strText = "è®°å½•è·¯å¾„";
                 }
                 else
                 {
@@ -115,10 +115,10 @@ namespace dp2Circulation
 
 
         /// <summary>
-        /// ÔÚlistview×îºó×·¼ÓÒ»ĞĞ
+        /// åœ¨listviewæœ€åè¿½åŠ ä¸€è¡Œ
         /// </summary>
         /// <param name="strID">ID</param>
-        /// <param name="others">ÆäËûÁĞÄÚÈİ</param>
+        /// <param name="others">å…¶ä»–åˆ—å†…å®¹</param>
         public void NewLine(string strID,
             string[] others)
         {
@@ -145,9 +145,9 @@ namespace dp2Circulation
          */
 
         /// <summary>
-        /// ×°ÈëµÚÒ»Ìõ¼ÇÂ¼µ½ÏêÏ¸´°
+        /// è£…å…¥ç¬¬ä¸€æ¡è®°å½•åˆ°è¯¦ç»†çª—
         /// </summary>
-        /// <param name="bCloseWindow">ÊÇ·ñË³±ã¹Ø±Õ±¾´°¿Ú</param>
+        /// <param name="bCloseWindow">æ˜¯å¦é¡ºä¾¿å…³é—­æœ¬çª—å£</param>
         public void LoadFirstDetail(bool bCloseWindow)
         {
             if (this.listView_records.Items.Count == 0)
@@ -235,25 +235,25 @@ namespace dp2Circulation
     }
 
     /// <summary>
-    /// ´ò¿ªÏêÏ¸´°ÊÂ¼ş
+    /// æ‰“å¼€è¯¦ç»†çª—äº‹ä»¶
     /// </summary>
-    /// <param name="sender">·¢ËÍÕß</param>
-    /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+    /// <param name="sender">å‘é€è€…</param>
+    /// <param name="e">äº‹ä»¶å‚æ•°</param>
     public delegate void OpenDetailEventHandler(object sender,
     OpenDetailEventArgs e);
 
     /// <summary>
-    /// ´ò¿ªÏêÏ¸´°ÊÂ¼şµÄ²ÎÊı
+    /// æ‰“å¼€è¯¦ç»†çª—äº‹ä»¶çš„å‚æ•°
     /// </summary>
     public class OpenDetailEventArgs : EventArgs
     {
         /// <summary>
-        /// ¼ÇÂ¼È«Â·¾¶¼¯ºÏ¡£
+        /// è®°å½•å…¨è·¯å¾„é›†åˆã€‚
         /// </summary>
         public string[] Paths = null;
 
         /// <summary>
-        /// ÊÇ·ñ¿ªÎªĞÂ´°¿Ú
+        /// æ˜¯å¦å¼€ä¸ºæ–°çª—å£
         /// </summary>
         public bool OpenNew = false;
     }

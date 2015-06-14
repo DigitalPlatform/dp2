@@ -1,8 +1,4 @@
-﻿using DigitalPlatform;
-using DigitalPlatform.Drawing;
-using DigitalPlatform.EasyMarc;
-using DigitalPlatform.Script;
-using DigitalPlatform.Text;
+﻿
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,6 +9,12 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+
+using DigitalPlatform;
+using DigitalPlatform.Drawing;
+using DigitalPlatform.EasyMarc;
+using DigitalPlatform.Script;
+using DigitalPlatform.Text;
 
 namespace dp2Circulation
 {

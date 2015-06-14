@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -15,22 +15,23 @@ using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 
 using DigitalPlatform.CirculationClient.localhost;
+
 namespace dp2Circulation
 {
     /// <summary>
-    /// ²áÌõÂëºÅ·¢ÉúÖØ¸´Ê±µÄ¹Û²ìÑ¡Ôñ¶Ô»°¿ò
+    /// å†Œæ¡ç å·å‘ç”Ÿé‡å¤æ—¶çš„è§‚å¯Ÿé€‰æ‹©å¯¹è¯æ¡†
     /// </summary>
     internal partial class ItemBarcodeDupDlg : Form
     {
         WebExternalHost m_webExternalHost_biblio = new WebExternalHost();
 
         /// <summary>
-        /// ¿ò¼Ü´°¿Ú
+        /// æ¡†æ¶çª—å£
         /// </summary>
         public MainForm MainForm = null;
 
         /// <summary>
-        /// Í¨Ñ¶Í¨µÀ
+        /// é€šè®¯é€šé“
         /// </summary>
         LibraryChannel Channel = null;
 
@@ -46,7 +47,7 @@ namespace dp2Circulation
             InitializeComponent();
         }
 
-        // ³õÊ¼»¯Êı¾İ³ÉÔ±
+        // åˆå§‹åŒ–æ•°æ®æˆå‘˜
         public int Initial(
             MainForm mainform,
             string[] aPaths,
@@ -64,7 +65,7 @@ namespace dp2Circulation
 
             this.textBox_message.Text = strMessage;
 
-            this.InfoColor = InfoColor.LightRed; // ºìÉ«±íÊ¾¾¯¸æ
+            this.InfoColor = InfoColor.LightRed; // çº¢è‰²è¡¨ç¤ºè­¦å‘Š
 
             return 0;
         }
@@ -83,9 +84,9 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// È±Ê¡´°¿Ú¹ı³Ì
+        /// ç¼ºçœçª—å£è¿‡ç¨‹
         /// </summary>
-        /// <param name="m">ÏûÏ¢</param>
+        /// <param name="m">æ¶ˆæ¯</param>
         protected override void DefWndProc(ref Message m)
         {
             switch (m.Msg)
@@ -97,17 +98,17 @@ namespace dp2Circulation
                         if (nRet == -1)
                             MessageBox.Show(this, strError);
 
-                        // È»ºóĞí¿É½çÃæ
+                        // ç„¶åè®¸å¯ç•Œé¢
                         EnableControls(true);
 
-                        // Ä¬ÈÏÑ¡ÖĞµÚÒ»ĞĞ
+                        // é»˜è®¤é€‰ä¸­ç¬¬ä¸€è¡Œ
                         if (this.listView_items.Items.Count > 0
                             && this.listView_items.SelectedItems.Count == 0)
                             this.listView_items.Items[0].Selected = true;
 
-                        // È¥µôÈ«Ñ¡
+                        // å»æ‰å…¨é€‰
                         this.textBox_message.Select(0, 0);
-                        // ¸ü»»½¹µã
+                        // æ›´æ¢ç„¦ç‚¹
                         this.listView_items.Focus();
                         return;
                     }
@@ -118,9 +119,9 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÔÊĞí»òÕß½ûÖ¹½çÃæ¿Ø¼ş¡£ÔÚ³¤²Ù×÷Ç°£¬Ò»°ãĞèÒª½ûÖ¹½çÃæ¿Ø¼ş£»²Ù×÷Íê³ÉºóÔÙÔÊĞí
+        /// å…è®¸æˆ–è€…ç¦æ­¢ç•Œé¢æ§ä»¶ã€‚åœ¨é•¿æ“ä½œå‰ï¼Œä¸€èˆ¬éœ€è¦ç¦æ­¢ç•Œé¢æ§ä»¶ï¼›æ“ä½œå®Œæˆåå†å…è®¸
         /// </summary>
-        /// <param name="bEnable">ÊÇ·ñÔÊĞí½çÃæ¿Ø¼ş¡£true ÎªÔÊĞí£¬ false Îª½ûÖ¹</param>
+        /// <param name="bEnable">æ˜¯å¦å…è®¸ç•Œé¢æ§ä»¶ã€‚true ä¸ºå…è®¸ï¼Œ false ä¸ºç¦æ­¢</param>
         public void EnableControls(bool bEnable)
         {
             this.listView_items.Enabled = bEnable;
@@ -147,7 +148,7 @@ namespace dp2Circulation
         {
             if (this.listView_items.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´ÔÚÁĞ±íÖĞÑ¡¶¨Ò»¸ö²á");
+                MessageBox.Show(this, "å°šæœªåœ¨åˆ—è¡¨ä¸­é€‰å®šä¸€ä¸ªå†Œ");
                 return;
             }
 
@@ -163,7 +164,7 @@ namespace dp2Circulation
             this.Close();
         }
 
-        // ÔÚlistviewÖĞÌî³äÂ·¾¶ÁĞ¡£²»Ìî³äÆäËûÁĞ
+        // åœ¨listviewä¸­å¡«å……è·¯å¾„åˆ—ã€‚ä¸å¡«å……å…¶ä»–åˆ—
         void FillRecPath()
         {
             this.listView_items.Items.Clear();
@@ -172,7 +173,7 @@ namespace dp2Circulation
             {
 
                 ListViewItem item = new ListViewItem(this.aPaths[i], 0);
-                item.SubItems.Add("µã»÷¿É×°ÈëÊı¾İ...");
+                item.SubItems.Add("ç‚¹å‡»å¯è£…å…¥æ•°æ®...");
 
                 this.listView_items.Items.Add(item);
 
@@ -188,7 +189,7 @@ namespace dp2Circulation
         }
 
         /*
-        // Ìî³äÒ»ĞĞµÄĞÅÏ¢
+        // å¡«å……ä¸€è¡Œçš„ä¿¡æ¯
         int FillLine(
             ListViewItem item,
             string strRecPath,
@@ -207,7 +208,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = "XML×°ÈëDOMÊ§°Ü: " + ex.Message;
+                strError = "XMLè£…å…¥DOMå¤±è´¥: " + ex.Message;
                 return -1;
             }
 
@@ -256,14 +257,14 @@ namespace dp2Circulation
             info.ItemXml = strItemXml;
             info.RecPath = strRecPath;
 
-            item.Tag = info;    // ´¢´æÆğÀ´
+            item.Tag = info;    // å‚¨å­˜èµ·æ¥
             item.BackColor = SystemColors.Window;
 
             return 0;
         }
          * */
 
-        // Ìî³äÒ»ĞĞµÄĞÅÏ¢
+        // å¡«å……ä¸€è¡Œçš„ä¿¡æ¯
         int FillLine(
             ListViewItem item,
             out string strError)
@@ -284,7 +285,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = "XML×°ÈëDOMÊ§°Ü: " + ex.Message;
+                strError = "XMLè£…å…¥DOMå¤±è´¥: " + ex.Message;
                 return -1;
             }
 
@@ -332,7 +333,7 @@ namespace dp2Circulation
             return 0;
         }
 
-        // ÔÚÏÂÃæ×óÓÒÁ½¸ö´°¸ñÖĞ£¬ÏÔÊ¾²áºÍÊéÄ¿ĞÅÏ¢
+        // åœ¨ä¸‹é¢å·¦å³ä¸¤ä¸ªçª—æ ¼ä¸­ï¼Œæ˜¾ç¤ºå†Œå’Œä¹¦ç›®ä¿¡æ¯
         int DisplayItemAndBiblioInfo(ListViewItem item,
             out string strError)
         {
@@ -343,7 +344,7 @@ namespace dp2Circulation
             Debug.Assert(info != null, "");
             if (info == null)
             {
-                strError = "listviewitemµÄTagÉĞÎ´³õÊ¼»¯";
+                strError = "listviewitemçš„Tagå°šæœªåˆå§‹åŒ–";
                 return -1;
             }
 
@@ -364,7 +365,7 @@ namespace dp2Circulation
             this.m_webExternalHost_biblio.SetHtmlString(info.BiblioHtml,
                 "itembarcodedup_biblio");
 
-            // ÑÓ³Ù±¨´í
+            // å»¶è¿ŸæŠ¥é”™
             if (nRet == -1)
                 return -1;
 
@@ -377,7 +378,7 @@ namespace dp2Circulation
                 this.Channel.Abort();
         }
 
-        // ×°ÔØÈ«²¿ĞĞµÄÊı¾İ
+        // è£…è½½å…¨éƒ¨è¡Œçš„æ•°æ®
         int LoadAllItemData(out string strError)
         {
             strError = "";
@@ -403,7 +404,7 @@ namespace dp2Circulation
             return 0;
         }
 
-        // ÎªÒ»ĞĞ×°ÔØÊı¾İ
+        // ä¸ºä¸€è¡Œè£…è½½æ•°æ®
         int LoadItemData(ListViewItem item,
             out string strError)
         {
@@ -417,7 +418,7 @@ namespace dp2Circulation
             string strBiblioHtml = "";
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ»ñÈ¡Â·¾¶Îª '" + strRecPath + "' µÄ²áĞÅÏ¢ºÍÊéÄ¿ĞÅÏ¢ ...");
+            stop.Initial("æ­£åœ¨è·å–è·¯å¾„ä¸º '" + strRecPath + "' çš„å†Œä¿¡æ¯å’Œä¹¦ç›®ä¿¡æ¯ ...");
             stop.BeginLoop();
 
             Cursor oldCursor = this.Cursor;
@@ -439,7 +440,7 @@ namespace dp2Circulation
 
                 if (lRet == 0)
                 {
-                    strError = "Â·¾¶Îª '" + strRecPath + "' µÄ²á¼ÇÂ¼Ã»ÓĞÕÒµ½";
+                    strError = "è·¯å¾„ä¸º '" + strRecPath + "' çš„å†Œè®°å½•æ²¡æœ‰æ‰¾åˆ°";
                     goto ERROR1;   // not found
                 }
             }
@@ -458,14 +459,14 @@ namespace dp2Circulation
             info.ItemXml = strItemXml;
             info.RecPath = strRecPath;
 
-            item.Tag = info;    // ´¢´æÆğÀ´
+            item.Tag = info;    // å‚¨å­˜èµ·æ¥
 
             return 0;
         ERROR1:
             return -1;
         }
 
-        // listviewÊÂÏîÑ¡Ôñ¸Ä±ä£¬×°ÔØĞĞÄÚÈİ
+        // listviewäº‹é¡¹é€‰æ‹©æ”¹å˜ï¼Œè£…è½½è¡Œå†…å®¹
         private void listView_items_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (this.listView_items.SelectedItems.Count == 0)
@@ -484,7 +485,7 @@ namespace dp2Circulation
             string strError = "";
             int nRet = 0;
 
-            if (item.Tag != null) // ÒÑ¾­Ìî³äÁËÖµ
+            if (item.Tag != null) // å·²ç»å¡«å……äº†å€¼
             {
                 nRet = DisplayItemAndBiblioInfo(item,
                     out strError);
@@ -505,7 +506,7 @@ namespace dp2Circulation
             if (nRet == -1)
                 goto ERROR1;
 
-            // ÔÚ×óÏÂ¡¢ÓÒÏÂÏÔÊ¾³öÀ´
+            // åœ¨å·¦ä¸‹ã€å³ä¸‹æ˜¾ç¤ºå‡ºæ¥
             nRet = DisplayItemAndBiblioInfo(item,
     out strError);
             if (nRet == -1)

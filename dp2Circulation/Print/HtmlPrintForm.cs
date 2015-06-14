@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -14,12 +14,12 @@ using DigitalPlatform.Range;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ´òÓ¡ HTML ÄÚÈİµÄ´°¿Ú
+    /// æ‰“å° HTML å†…å®¹çš„çª—å£
     /// </summary>
     public partial class HtmlPrintForm : Form
     {
         /// <summary>
-        /// ¿ò¼Ü´°¿Ú
+        /// æ¡†æ¶çª—å£
         /// </summary>
         public MainForm MainForm = null;
 
@@ -27,18 +27,18 @@ namespace dp2Circulation
 
         AutoResetEvent eventPrintComplete = new AutoResetEvent(false);	// true : initial state is signaled 
 
-        // ÎÄ¼şÃûÊı×é
+        // æ–‡ä»¶åæ•°ç»„
         /// <summary>
-        /// ÎÄ¼şÃû¼¯ºÏ¡£ÓÃÓÚÉè¶¨ĞèÒª´òÓ¡µÄÄÇĞ© HTML ÎÄ¼şÃû
+        /// æ–‡ä»¶åé›†åˆã€‚ç”¨äºè®¾å®šéœ€è¦æ‰“å°çš„é‚£äº› HTML æ–‡ä»¶å
         /// </summary>
         public List<string> Filenames = new List<string>();
 
-        int m_nCurrenPageNo = 0;  // µ±Ç°ÏÔÊ¾Ò³
+        int m_nCurrenPageNo = 0;  // å½“å‰æ˜¾ç¤ºé¡µ
 
-        bool m_bShowDialog = false; // µÚÒ»Ò³´òÓ¡µÄÊ±ºòÊÇ·ñ³öÏÖ´òÓ¡¶Ô»°¿ò
+        bool m_bShowDialog = false; // ç¬¬ä¸€é¡µæ‰“å°çš„æ—¶å€™æ˜¯å¦å‡ºç°æ‰“å°å¯¹è¯æ¡†
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public HtmlPrintForm()
         {
@@ -51,7 +51,7 @@ namespace dp2Circulation
             {
                 MainForm.SetControlFont(this, this.MainForm.DefaultFont);
             }
-            // °ÑµÚÒ»Ò³×°Èë
+            // æŠŠç¬¬ä¸€é¡µè£…å…¥
             this.LoadPageFile();
 
             this.EnableButtons();
@@ -59,14 +59,14 @@ namespace dp2Circulation
             DisplayPageInfoLine();
 
             stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// ºÍÈİÆ÷¹ØÁª
+            stop.Register(MainForm.stopManager, true);	// å’Œå®¹å™¨å…³è”
         }
 
         private void HtmlPrintForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            if (stop != null) // ÍÑÀë¹ØÁª
+            if (stop != null) // è„±ç¦»å…³è”
             {
-                stop.Unregister();	// ºÍÈİÆ÷¹ØÁª
+                stop.Unregister();	// å’Œå®¹å™¨å…³è”
                 stop = null;
             }
         }
@@ -133,17 +133,17 @@ namespace dp2Circulation
             this.DisplayPageInfoLine();
         }
 
-        // ´òÓ¡
+        // æ‰“å°
         private void button_print_Click(object sender, EventArgs e)
         {
             string strError = "";
 
             if (Control.ModifierKeys == Keys.Control)
-                this.m_bShowDialog = true;  // Ç¿ÖÆ³öÏÖ´òÓ¡¶Ô»°¿ò
+                this.m_bShowDialog = true;  // å¼ºåˆ¶å‡ºç°æ‰“å°å¯¹è¯æ¡†
             else
                 this.m_bShowDialog = false;
 
-            RangeList rl = null;    // rl==null±íÊ¾È«²¿´òÓ¡
+            RangeList rl = null;    // rl==nullè¡¨ç¤ºå…¨éƒ¨æ‰“å°
 
             if (String.IsNullOrEmpty(this.textBox_printRange.Text) == false)
             {
@@ -153,7 +153,7 @@ namespace dp2Circulation
                 }
                 catch (Exception ex)
                 {
-                    strError = "´òÓ¡·¶Î§×Ö·û´®¸ñÊ½´íÎó: " + ex.Message;
+                    strError = "æ‰“å°èŒƒå›´å­—ç¬¦ä¸²æ ¼å¼é”™è¯¯: " + ex.Message;
                     goto ERROR1;
                 }
             }
@@ -166,14 +166,14 @@ namespace dp2Circulation
             }
             catch
             {
-                strError = "·İÊıÖµ¸ñÊ½´íÎó";
+                strError = "ä»½æ•°å€¼æ ¼å¼é”™è¯¯";
                 goto ERROR1;
             }
 
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ´òÓ¡ ...");
+            stop.Initial("æ­£åœ¨æ‰“å° ...");
             stop.BeginLoop();
             this.Update();
             this.MainForm.Update();
@@ -191,17 +191,17 @@ namespace dp2Circulation
                 for (int c = 0; c < nCopies; c++)
                 {
 
-                    // ´òÓ¡±í¸ñ¸÷Ò³
+                    // æ‰“å°è¡¨æ ¼å„é¡µ
                     for (int i = 0; i < this.Filenames.Count; i++)
                     {
-                        Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                        Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
 
                         if (stop != null)
                         {
                             if (stop.State != 0)
                             {
-                                strError = "ÓÃ»§ÖĞ¶Ï";
+                                strError = "ç”¨æˆ·ä¸­æ–­";
                                 goto ERROR1;
                             }
                         }
@@ -213,15 +213,15 @@ namespace dp2Circulation
                             // MessageBox.Show(this, "once");
                             nPrinted++;
 
-                            stop.SetMessage("ÕıÔÚ´òÓ¡µÚ " + (i + 1).ToString() + " Ò³...");
+                            stop.SetMessage("æ­£åœ¨æ‰“å°ç¬¬ " + (i + 1).ToString() + " é¡µ...");
 
                             this.m_nCurrenPageNo = i;
 
-                            this.LoadPageFile();    // Í¨¹ıcompletedÊÂ¼şÀ´Çı¶¯´òÓ¡¡£
+                            this.LoadPageFile();    // é€šè¿‡completedäº‹ä»¶æ¥é©±åŠ¨æ‰“å°ã€‚
 
                             while (true)
                             {
-                                Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+                                Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
                                 if (eventPrintComplete.WaitOne(100, true) == true)
                                     break;
                             }
@@ -236,15 +236,15 @@ namespace dp2Circulation
             {
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
-                stop.Initial("´òÓ¡Íê³É¡£¹²´òÓ¡ " + nPrinted.ToString() + "Ò³¡£");
+                stop.Initial("æ‰“å°å®Œæˆã€‚å…±æ‰“å° " + nPrinted.ToString() + "é¡µã€‚");
 
                 EnableControls(true);
             }
 
             if (nPrinted == 0)
             {
-                MessageBox.Show(this, "ÄúËùÖ¸¶¨µÄ´òÓ¡Ò³Âë·¶Î§ '" 
-                    +this.textBox_printRange.Text + "' Ã»ÓĞÕÒµ½Æ¥ÅäµÄÒ³¡£");
+                MessageBox.Show(this, "æ‚¨æ‰€æŒ‡å®šçš„æ‰“å°é¡µç èŒƒå›´ '" 
+                    +this.textBox_printRange.Text + "' æ²¡æœ‰æ‰¾åˆ°åŒ¹é…çš„é¡µã€‚");
             }
 
             return;
@@ -277,9 +277,9 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÔÊĞí»òÕß½ûÖ¹½çÃæ¿Ø¼ş¡£ÔÚ³¤²Ù×÷Ç°£¬Ò»°ãĞèÒª½ûÖ¹½çÃæ¿Ø¼ş£»²Ù×÷Íê³ÉºóÔÙÔÊĞí
+        /// å…è®¸æˆ–è€…ç¦æ­¢ç•Œé¢æ§ä»¶ã€‚åœ¨é•¿æ“ä½œå‰ï¼Œä¸€èˆ¬éœ€è¦ç¦æ­¢ç•Œé¢æ§ä»¶ï¼›æ“ä½œå®Œæˆåå†å…è®¸
         /// </summary>
-        /// <param name="bEnable">ÊÇ·ñÔÊĞí½çÃæ¿Ø¼ş¡£true ÎªÔÊĞí£¬ false Îª½ûÖ¹</param>
+        /// <param name="bEnable">æ˜¯å¦å…è®¸ç•Œé¢æ§ä»¶ã€‚true ä¸ºå…è®¸ï¼Œ false ä¸ºç¦æ­¢</param>
         public void EnableControls(bool bEnable)
         {
             this.button_print.Enabled = bEnable;
@@ -356,9 +356,9 @@ namespace dp2Circulation
 
         // 
         /// <summary>
-        /// ½«HTML×Ö·û´®´òÓ¡³öÀ´
+        /// å°†HTMLå­—ç¬¦ä¸²æ‰“å°å‡ºæ¥
         /// </summary>
-        /// <param name="strHtml">HTML ×Ö·û´®</param>
+        /// <param name="strHtml">HTML å­—ç¬¦ä¸²</param>
         public void PrintHtmlString(string strHtml)
         {
             Global.SetHtmlString(this.webBrowser1, strHtml);

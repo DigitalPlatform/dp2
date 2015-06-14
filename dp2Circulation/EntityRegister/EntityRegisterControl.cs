@@ -6,22 +6,23 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using DigitalPlatform.CommonControl;
 using System.Threading;
+using System.IO;
+using System.Reflection;
+using System.Diagnostics;
+using System.Xml;
+using System.Collections;
+using System.Net;
+
+using DigitalPlatform.CommonControl;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform;
 using DigitalPlatform.Text;
-using System.IO;
 using DigitalPlatform.MarcDom;
-using System.Reflection;
 using DigitalPlatform.Script;
-using System.Diagnostics;
 using DigitalPlatform.Marc;
-using System.Xml;
 using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.Xml;
-using System.Collections;
-using System.Net;
 using DigitalPlatform.AmazonInterface;
 
 namespace dp2Circulation

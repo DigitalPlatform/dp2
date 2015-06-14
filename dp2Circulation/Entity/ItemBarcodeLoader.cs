@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Collections;
+using System.Diagnostics;
+
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform;
 using DigitalPlatform.Text;
-using System.Diagnostics;
 using DigitalPlatform.CirculationClient.localhost;
 
 namespace dp2Circulation

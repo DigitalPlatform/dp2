@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,12 +12,12 @@ using DigitalPlatform.Xml;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ÓÃÓÚÑ¡Ôñµ¼ÈëÈô¸ÉÊı¾İ¿âµÄFromµÄ¶Ô»°¿ò
+    /// ç”¨äºé€‰æ‹©å¯¼å…¥è‹¥å¹²æ•°æ®åº“çš„Fromçš„å¯¹è¯æ¡†
     /// </summary>
     internal partial class ImportFromsDialog : Form
     {
         /// <summary>
-        /// ÏµÍ³¹ÜÀí´°
+        /// ç³»ç»Ÿç®¡ç†çª—
         /// </summary>
         public ManagerForm ManagerForm = null;
 
@@ -26,12 +26,12 @@ namespace dp2Circulation
         string m_strFromsXml = "";
 
         /// <summary>
-        /// ·µ»Ø±íÊ¾Ñ¡¶¨µÄ¼ìË÷Í¾¾¶µÄ XML
+        /// è¿”å›è¡¨ç¤ºé€‰å®šçš„æ£€ç´¢é€”å¾„çš„ XML
         /// </summary>
         public string SelectedFromsXml = "";
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public ImportFromsDialog()
         {
@@ -39,12 +39,12 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ³õÊ¼»¯
+        /// åˆå§‹åŒ–
         /// </summary>
-        /// <param name="managerform">ÏµÍ³¹ÜÀí´°</param>
-        /// <param name="dbnames">Êı¾İ¿âÃû¼¯ºÏ</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í  0: Õı³£</returns>
+        /// <param name="managerform">ç³»ç»Ÿç®¡ç†çª—</param>
+        /// <param name="dbnames">æ•°æ®åº“åé›†åˆ</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™  0: æ­£å¸¸</returns>
         public int Initial(ManagerForm managerform,
             List<string> dbnames,
             out string strError)
@@ -54,17 +54,17 @@ namespace dp2Circulation
             this.ManagerForm = managerform;
             this.m_dbnames = dbnames;
 
-            // ºÏ²¢ºóµÄ½á¹û
+            // åˆå¹¶åçš„ç»“æœ
             XmlDocument dom_total = new XmlDocument();
             dom_total.LoadXml("<root />");
 
-            // »ñµÃÈ«²¿Êı¾İ¿â¶¨Òå
+            // è·å¾—å…¨éƒ¨æ•°æ®åº“å®šä¹‰
             for (int i = 0; i < this.m_dbnames.Count; i++)
             {
                 string strDbName = this.m_dbnames[i];
 
                 string strOutputInfo = "";
-                // »ñµÃÆÕÍ¨Êı¾İ¿â¶¨Òå
+                // è·å¾—æ™®é€šæ•°æ®åº“å®šä¹‰
                 int nRet = this.ManagerForm.GetDatabaseInfo(
                     strDbName,
                     out strOutputInfo,
@@ -73,7 +73,7 @@ namespace dp2Circulation
                     return -1;
                 if (nRet == 0)
                 {
-                    strError = "Êı¾İ¿â '" + strDbName + "' ²»´æÔÚ";
+                    strError = "æ•°æ®åº“ '" + strDbName + "' ä¸å­˜åœ¨";
                     return -1;
                 }
 
@@ -84,7 +84,7 @@ namespace dp2Circulation
                 }
                 catch (Exception ex)
                 {
-                    strError = "XML×°ÈëDOMÊ±³ö´í: " + ex.Message;
+                    strError = "XMLè£…å…¥DOMæ—¶å‡ºé”™: " + ex.Message;
                     return -1;
                 }
 
@@ -94,24 +94,24 @@ namespace dp2Circulation
                     XmlNode node = nodes[j];
                     string strFromStyle = DomUtil.GetAttr(node, "style");
 
-                    // Ìø¹ıÃ»ÓĞstyleÊôĞÔµÄ<from>
+                    // è·³è¿‡æ²¡æœ‰styleå±æ€§çš„<from>
                     if (String.IsNullOrEmpty(strFromStyle) == true)
                         continue;
 
-                    // Ìø¹ı¡°¼ÇÂ¼Ë÷ÒıºÅ¡±style¡£ÒòÎªÕâ¸ö<from>ÔªËØÏÂÃ»ÓĞ<caption>ÔªËØ£¬»áÒıÆğÂé·³
+                    // è·³è¿‡â€œè®°å½•ç´¢å¼•å·â€styleã€‚å› ä¸ºè¿™ä¸ª<from>å…ƒç´ ä¸‹æ²¡æœ‰<caption>å…ƒç´ ï¼Œä¼šå¼•èµ·éº»çƒ¦
                     if (strFromStyle == "recid")
                         continue;
 
                     XmlNode nodeExist = dom_total.DocumentElement.SelectSingleNode("from[@style='" + strFromStyle + "']");
                     if (nodeExist != null)
                     {
-                        // styleÒÑ¾­´æÔÚ£¬¶Ôcaptions½øĞĞºÏ²¢Ôö²¹
+                        // styleå·²ç»å­˜åœ¨ï¼Œå¯¹captionsè¿›è¡Œåˆå¹¶å¢è¡¥
                         MergeCaptions(nodeExist,
                             node);
                         continue;
                     }
 
-                    // ĞÂÔö
+                    // æ–°å¢
                     XmlNode new_node = dom_total.CreateElement("from");
                     dom_total.DocumentElement.AppendChild(new_node);
                     DomUtil.SetAttr(new_node, "style", strFromStyle);
@@ -124,16 +124,16 @@ namespace dp2Circulation
             return 0;
         }
 
-        // ¶ÔÁ½¸ö<from>ÔªËØÏÂµÄÈô¸É<caption>°´ÕÕÓïÑÔ´úÂëÈ¥ÖØºÏ²¢
-        // ·½ÏòÊÇ´ÓnodeSourceºÏ²¢µ½nodeTargetÖĞ
-        // ¶ÔÓïÑÔ´úÂëÊÇ·ñÖØ£¬ÓĞÁ½ÖÖÅĞ¶Ï·½Ê½£ºÒ»ÖÖÊÇÍêÈ«Ò»Ñù²Å½ĞÖØ£»Ò»ÖÖÊÇ×ó±ß²¿·ÖÒ»Ñù¾Í½ĞÖØ¡£Ä¿Ç°²ÉÓÃÇ°Õß£¬ÒÔÇó×îÈ«ÃæµÄºÏ²¢Ğ§¹û
+        // å¯¹ä¸¤ä¸ª<from>å…ƒç´ ä¸‹çš„è‹¥å¹²<caption>æŒ‰ç…§è¯­è¨€ä»£ç å»é‡åˆå¹¶
+        // æ–¹å‘æ˜¯ä»nodeSourceåˆå¹¶åˆ°nodeTargetä¸­
+        // å¯¹è¯­è¨€ä»£ç æ˜¯å¦é‡ï¼Œæœ‰ä¸¤ç§åˆ¤æ–­æ–¹å¼ï¼šä¸€ç§æ˜¯å®Œå…¨ä¸€æ ·æ‰å«é‡ï¼›ä¸€ç§æ˜¯å·¦è¾¹éƒ¨åˆ†ä¸€æ ·å°±å«é‡ã€‚ç›®å‰é‡‡ç”¨å‰è€…ï¼Œä»¥æ±‚æœ€å…¨é¢çš„åˆå¹¶æ•ˆæœ
         /// <summary>
-        /// ¶ÔÁ½¸ö from ÔªËØÏÂµÄÈô¸É caption ÔªËØ°´ÕÕÓïÑÔ´úÂëÈ¥ÖØºÏ²¢
-        /// ·½ÏòÊÇ´ÓnodeSourceºÏ²¢µ½nodeTargetÖĞ
-        /// ¶ÔÓïÑÔ´úÂëÊÇ·ñÖØ£¬ÓĞÁ½ÖÖÅĞ¶Ï·½Ê½£ºÒ»ÖÖÊÇÍêÈ«Ò»Ñù²Å½ĞÖØ£»Ò»ÖÖÊÇ×ó±ß²¿·ÖÒ»Ñù¾Í½ĞÖØ¡£Ä¿Ç°²ÉÓÃÇ°Õß£¬ÒÔÇó×îÈ«ÃæµÄºÏ²¢Ğ§¹û
+        /// å¯¹ä¸¤ä¸ª from å…ƒç´ ä¸‹çš„è‹¥å¹² caption å…ƒç´ æŒ‰ç…§è¯­è¨€ä»£ç å»é‡åˆå¹¶
+        /// æ–¹å‘æ˜¯ä»nodeSourceåˆå¹¶åˆ°nodeTargetä¸­
+        /// å¯¹è¯­è¨€ä»£ç æ˜¯å¦é‡ï¼Œæœ‰ä¸¤ç§åˆ¤æ–­æ–¹å¼ï¼šä¸€ç§æ˜¯å®Œå…¨ä¸€æ ·æ‰å«é‡ï¼›ä¸€ç§æ˜¯å·¦è¾¹éƒ¨åˆ†ä¸€æ ·å°±å«é‡ã€‚ç›®å‰é‡‡ç”¨å‰è€…ï¼Œä»¥æ±‚æœ€å…¨é¢çš„åˆå¹¶æ•ˆæœ
         /// </summary>
-        /// <param name="nodeTarget">Ä¿±ê½Úµã</param>
-        /// <param name="nodeSource">Ô´½Úµã</param>
+        /// <param name="nodeTarget">ç›®æ ‡èŠ‚ç‚¹</param>
+        /// <param name="nodeSource">æºèŠ‚ç‚¹</param>
         public static void MergeCaptions(XmlNode nodeTarget,
             XmlNode nodeSource)
         {
@@ -165,7 +165,7 @@ namespace dp2Circulation
                 if (bFound == true)
                     continue;
 
-                // Ôö²¹
+                // å¢è¡¥
                 XmlNode new_caption = nodeTarget.OwnerDocument.CreateElement("caption");
                 nodeTarget.ParentNode.AppendChild(new_caption);
 
@@ -181,10 +181,10 @@ namespace dp2Circulation
 
         private void button_OK_Click(object sender, EventArgs e)
         {
-            // ¼ì²éµ±Ç°ÊÇ·ñÓĞÑ¡ÔñÊÂÏî£¿
+            // æ£€æŸ¥å½“å‰æ˜¯å¦æœ‰é€‰æ‹©äº‹é¡¹ï¼Ÿ
             if (this.fromEditControl1.SelectedElements.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡¶¨ÈÎºÎ¼ìË÷Í¾¾¶ÊÂÏî");
+                MessageBox.Show(this, "å°šæœªé€‰å®šä»»ä½•æ£€ç´¢é€”å¾„äº‹é¡¹");
                 return;
             }
 

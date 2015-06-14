@@ -1,4 +1,4 @@
-using System;
+锘縰sing System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -23,11 +23,11 @@ namespace dp2Circulation
 
             if (String.IsNullOrEmpty(this.textBox_xml.Text.Trim()) == true)
             {
-                strError = "XML代码不能为空";
+                strError = "XML浠ｇ爜涓嶈兘涓虹┖";
                 goto ERROR1;
             }
 
-            // 校验看看XML是否正确
+            // 鏍￠獙鐪嬬湅XML鏄惁姝ｇ‘
             string strOutXml = "";
             int nRet = DomUtil.GetIndentXml(this.textBox_xml.Text,
                 out strOutXml,

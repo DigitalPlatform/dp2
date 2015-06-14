@@ -5,15 +5,14 @@ using System.Text;
 using System.Xml;
 using System.Windows.Forms;
 using System.IO;
+using System.Data.SQLite;
+using System.Data;
 
 using DigitalPlatform;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.dp2.Statis;
-
-using System.Data.SQLite;
-using System.Data;
 
 namespace dp2Circulation
 {

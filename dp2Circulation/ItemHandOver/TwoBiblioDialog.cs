@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -9,14 +9,14 @@ using System.Windows.Forms;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ÏÔÊ¾ºÍ±à¼­Á½Ìõ MARC ÊéÄ¿¼ÇÂ¼µÄ¶Ô»°¿ò
+    /// æ˜¾ç¤ºå’Œç¼–è¾‘ä¸¤æ¡ MARC ä¹¦ç›®è®°å½•çš„å¯¹è¯æ¡†
     /// </summary>
     public partial class TwoBiblioDialog : Form
     {
         string m_strOldMessage = "";
 
         /// <summary>
-        /// ¹»°Âº¯Êı
+        /// å¤Ÿå¥¥å‡½æ•°
         /// </summary>
         public TwoBiblioDialog()
         {
@@ -38,7 +38,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// Ô´ MARC ×Ö·û´®
+        /// æº MARC å­—ç¬¦ä¸²
         /// </summary>
         public string MarcSource
         {
@@ -53,7 +53,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// Ô´ÊÇ·ñÎªÖ»¶Á
+        /// æºæ˜¯å¦ä¸ºåªè¯»
         /// </summary>
         public bool ReadOnlySource
         {
@@ -68,7 +68,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// Ä¿±ê MARC ×Ö·û´®
+        /// ç›®æ ‡ MARC å­—ç¬¦ä¸²
         /// </summary>
         public string MarcTarget
         {
@@ -83,7 +83,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// Ä¿±êÊÇ·ñÎªÖ»¶Á
+        /// ç›®æ ‡æ˜¯å¦ä¸ºåªè¯»
         /// </summary>
         public bool ReadOnlyTarget
         {
@@ -98,7 +98,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÏûÏ¢×Ö·û´®
+        /// æ¶ˆæ¯å­—ç¬¦ä¸²
         /// </summary>
         public string MessageText
         {
@@ -113,7 +113,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// Ô´±êÇ©ÎÄ×Ö
+        /// æºæ ‡ç­¾æ–‡å­—
         /// </summary>
         public string LabelSourceText
         {
@@ -128,7 +128,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// Ä¿±ê±êÇ©ÎÄ×Ö
+        /// ç›®æ ‡æ ‡ç­¾æ–‡å­—
         /// </summary>
         public string LabelTargetText
         {
@@ -143,7 +143,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÊÇ·ñÔÊĞíÖ±½ÓĞŞ¸ÄÄ¿±ê¼ÇÂ¼
+        /// æ˜¯å¦å…è®¸ç›´æ¥ä¿®æ”¹ç›®æ ‡è®°å½•
         /// </summary>
         public bool EditTarget
         {
@@ -171,7 +171,7 @@ namespace dp2Circulation
                 if (this.marcEditor2.Changed == true)
                 {
                     DialogResult result = MessageBox.Show(this,
-                        "ÊÇ·ñÒª·ÅÆú¸Õ²Å¶Ô´°¿ÚÖĞÄ¿±ê¼ÇÂ¼ÄÚÈİµÄĞŞ¸Ä?",
+                        "æ˜¯å¦è¦æ”¾å¼ƒåˆšæ‰å¯¹çª—å£ä¸­ç›®æ ‡è®°å½•å†…å®¹çš„ä¿®æ”¹?",
                         "TwoBiblioDialog",
                         MessageBoxButtons.YesNo,
                         MessageBoxIcon.Question,
@@ -192,8 +192,8 @@ namespace dp2Circulation
                 this.marcEditor1.ReadOnly = false;
                 this.marcEditor2.ReadOnly = true;
 
-                this.button_yes.Text = "¸²¸Ç(&O)";
-                this.button_no.Text = "²»¸²¸Ç(&N)";
+                this.button_yes.Text = "è¦†ç›–(&O)";
+                this.button_no.Text = "ä¸è¦†ç›–(&N)";
                 this.MessageText = this.m_strOldMessage;
             }
             else
@@ -201,10 +201,10 @@ namespace dp2Circulation
                 this.marcEditor1.ReadOnly = true;
                 this.marcEditor2.ReadOnly = false;
 
-                this.button_yes.Text = "±£´æ(&S)";
-                this.button_no.Text = "²»±£´æ(&N)";
+                this.button_yes.Text = "ä¿å­˜(&S)";
+                this.button_no.Text = "ä¸ä¿å­˜(&N)";
 
-                this.MessageText = "ÇëÎÊÊÇ·ñÒª±£´æ¶ÔÄ¿±ê¼ÇÂ¼µÄĞŞ¸Ä?";
+                this.MessageText = "è¯·é—®æ˜¯å¦è¦ä¿å­˜å¯¹ç›®æ ‡è®°å½•çš„ä¿®æ”¹?";
             }
         }
     }

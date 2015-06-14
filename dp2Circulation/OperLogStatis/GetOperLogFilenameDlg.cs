@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -8,27 +8,27 @@ using System.Windows.Forms;
 
 using DigitalPlatform.IO;
 
-// 2013/3/16 Ìí¼Ó XML ×¢ÊÍ
+// 2013/3/16 æ·»åŠ  XML æ³¨é‡Š
 
 namespace dp2Circulation
 {
     /// <summary>
-    /// ÓÃÓÚ»ñµÃµ¥¸öÈÕÖ¾ÎÄ¼şÃû£¬»òÕß·¶Î§ÈÕÖ¾ÎÄ¼şÃûµÄ¶Ô»°¿ò
+    /// ç”¨äºè·å¾—å•ä¸ªæ—¥å¿—æ–‡ä»¶åï¼Œæˆ–è€…èŒƒå›´æ—¥å¿—æ–‡ä»¶åçš„å¯¹è¯æ¡†
     /// </summary>
     internal partial class GetOperLogFilenameDlg : Form
     {
         /// <summary>
-        /// ÊÇ·ñÎªµ¥ĞĞÄ£Ê½£¿
+        /// æ˜¯å¦ä¸ºå•è¡Œæ¨¡å¼ï¼Ÿ
         /// </summary>
         public bool SingleMode = false; // 
 
         /// <summary>
-        /// Êä³öËùÑ¡ÔñµÄÎÄ¼şÃû
+        /// è¾“å‡ºæ‰€é€‰æ‹©çš„æ–‡ä»¶å
         /// </summary>
         public List<string> OperLogFilenames = new List<string>();
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public GetOperLogFilenameDlg()
         {
@@ -37,7 +37,7 @@ namespace dp2Circulation
 
         private void GetOperLogFilenameDlg_Load(object sender, EventArgs e)
         {
-            // »ñµÃ³õÊ¼»¯Öµ
+            // è·å¾—åˆå§‹åŒ–å€¼
             if (this.OperLogFilenames != null
                 && this.OperLogFilenames.Count >= 1)
             {
@@ -55,7 +55,7 @@ namespace dp2Circulation
             }
 
             if (this.SingleMode == true)
-                label_start.Text = "ÈÕÖ¾ËùÔÚÈÕÆÚ(&D):";
+                label_start.Text = "æ—¥å¿—æ‰€åœ¨æ—¥æœŸ(&D):";
         }
 
         private void button_OK_Click(object sender, EventArgs e)
@@ -77,7 +77,7 @@ namespace dp2Circulation
             if (String.IsNullOrEmpty(strEndDate) == true
                 && String.IsNullOrEmpty(strStartDate) == true)
             {
-                strError = "ÉĞÎ´Ö¸¶¨Ê±¼ä";
+                strError = "å°šæœªæŒ‡å®šæ—¶é—´";
                 goto ERROR1;
             }
 
@@ -95,13 +95,13 @@ namespace dp2Circulation
 
             string strWarning = "";
             List<string> LogFileNames = null;
-            // ¸ù¾İÈÕÆÚ·¶Î§£¬·¢ÉúÈÕÖ¾ÎÄ¼şÃû
+            // æ ¹æ®æ—¥æœŸèŒƒå›´ï¼Œå‘ç”Ÿæ—¥å¿—æ–‡ä»¶å
             // parameters:
-            //      strStartDate    ÆğÊ¼ÈÕÆÚ¡£8×Ö·û
-            //      strEndDate  ½áÊøÈÕÆÚ¡£8×Ö·û
+            //      strStartDate    èµ·å§‹æ—¥æœŸã€‚8å­—ç¬¦
+            //      strEndDate  ç»“æŸæ—¥æœŸã€‚8å­—ç¬¦
             // return:
-            //      -1  ´íÎó
-            //      0   ³É¹¦
+            //      -1  é”™è¯¯
+            //      0   æˆåŠŸ
             int nRet = OperLogStatisForm.MakeLogFileNames(strStartDate,
                 strEndDate,
                 true,

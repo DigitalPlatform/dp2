@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,39 +12,39 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 
-// 2013/3/16 Ìí¼Ó XML ×¢ÊÍ
+// 2013/3/16 æ·»åŠ  XML æ³¨é‡Š
 
 namespace dp2Circulation
 {
     /// <summary>
-    /// ´òÓ¡Ñ¡Ïî¶Ô»°¿ò
+    /// æ‰“å°é€‰é¡¹å¯¹è¯æ¡†
     /// </summary>
     internal partial class PrintOptionDlg : Form
     {
         /// <summary>
-        /// ±¾´°¿Ú´ÓÊôµÄ¿ò¼Ü´°¿Ú
+        /// æœ¬çª—å£ä»å±çš„æ¡†æ¶çª—å£
         /// </summary>
         public MainForm MainForm = null;
 
         /// <summary>
-        /// ´òÓ¡²ÎÊı
+        /// æ‰“å°å‚æ•°
         /// </summary>
         internal PrintOption PrintOption = new PrintOption();
 
         /// <summary>
-        /// ÒªÔÚÀ¸Ä¿ÃûÏÂÀ­ÁĞ±íÖĞÏÔÊ¾µÄÊÂÏî
+        /// è¦åœ¨æ ç›®åä¸‹æ‹‰åˆ—è¡¨ä¸­æ˜¾ç¤ºçš„äº‹é¡¹
         /// </summary>
         public string[] ColumnItems = null;
 
         /// <summary>
-        /// Êı¾İÄ¿Â¼¡£ÓÃÓÚ´æ´¢ÅäÖÃµÄÄ£°åÎÄ¼şµÈ
+        /// æ•°æ®ç›®å½•ã€‚ç”¨äºå­˜å‚¨é…ç½®çš„æ¨¡æ¿æ–‡ä»¶ç­‰
         /// </summary>
-        public string DataDir = ""; // Èç¹û´ËÏîÎª¿Õ£¬ÔòÎŞ·¨´´½¨ĞÂµÄÄ£°åÎÄ¼ş
+        public string DataDir = ""; // å¦‚æœæ­¤é¡¹ä¸ºç©ºï¼Œåˆ™æ— æ³•åˆ›å»ºæ–°çš„æ¨¡æ¿æ–‡ä»¶
 
-        int m_nCurrentTemplateIndex = -1;   // µ±Ç°ÎÄ¼şÄÚÈİËù¶ÔÓ¦µÄÄ£°ålistviewÊÂÏîindex
+        int m_nCurrentTemplateIndex = -1;   // å½“å‰æ–‡ä»¶å†…å®¹æ‰€å¯¹åº”çš„æ¨¡æ¿listviewäº‹é¡¹index
         bool m_bTemplateFileContentChanged = false;
 
-        bool m_bTempaltesChanged = false;   // Ä£°åÁĞ±í·¢ÉúÁË±ä»¯£¬ÌáĞÑÍË³öµÄÊ±ºòĞèÒª±£´æ
+        bool m_bTempaltesChanged = false;   // æ¨¡æ¿åˆ—è¡¨å‘ç”Ÿäº†å˜åŒ–ï¼Œæé†’é€€å‡ºçš„æ—¶å€™éœ€è¦ä¿å­˜
 
         List<string> m_newCreateTemplateFiles = new List<string>();
 
@@ -57,7 +57,7 @@ namespace dp2Circulation
 
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public PrintOptionDlg()
         {
@@ -101,7 +101,7 @@ namespace dp2Circulation
             if (this.m_bTempaltesChanged == true)
             {
                 DialogResult result = MessageBox.Show(this,
-                    "Ä£°åÒ³ÃæÓĞ¸Ä¶¯ÉĞÎ´±£´æ£¬È·ÊµÒª·ÅÆúÕâĞ©¸Ä¶¯?\r\n(Èç¹ûÏë±£´æÕâĞ©ĞŞ¸Ä²¢ÍË³ö´òÓ¡Ñ¡Ïî¶Ô»°¿ò£¬Òª°´´òÓ¡Ñ¡Ïî¶Ô»°¿òÏÂ²¿µÄ¡°È·¶¨¡±°´Å¥)",
+                    "æ¨¡æ¿é¡µé¢æœ‰æ”¹åŠ¨å°šæœªä¿å­˜ï¼Œç¡®å®è¦æ”¾å¼ƒè¿™äº›æ”¹åŠ¨?\r\n(å¦‚æœæƒ³ä¿å­˜è¿™äº›ä¿®æ”¹å¹¶é€€å‡ºæ‰“å°é€‰é¡¹å¯¹è¯æ¡†ï¼Œè¦æŒ‰æ‰“å°é€‰é¡¹å¯¹è¯æ¡†ä¸‹éƒ¨çš„â€œç¡®å®šâ€æŒ‰é’®)",
                     "PrintOptionDlg",
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question,
@@ -133,7 +133,7 @@ namespace dp2Circulation
             }
             catch
             {
-                MessageBox.Show(this, "Ã¿Ò³ĞĞÊıÖµ±ØĞëÎª´¿Êı×Ö");
+                MessageBox.Show(this, "æ¯é¡µè¡Œæ•°å€¼å¿…é¡»ä¸ºçº¯æ•°å­—");
                 return;
             }
 
@@ -177,11 +177,11 @@ namespace dp2Circulation
                 PrintOption.Columns.Add(column);
             }
 
-            // ¶ÒÏÖ×îºóÒ»´Î¶ÔtextboxµÄĞŞ¸Ä
+            // å…‘ç°æœ€åä¸€æ¬¡å¯¹textboxçš„ä¿®æ”¹
             this.RefreshContentToTemplateFile();
 
             /*
-            // ±£´æÄ£°åÁĞ±í
+            // ä¿å­˜æ¨¡æ¿åˆ—è¡¨
             if (this.m_bTempaltesChanged == true)
             {
                 PrintOption.TemplatePages.Clear();
@@ -199,7 +199,7 @@ namespace dp2Circulation
                 this.m_bTempaltesChanged = false;
             }
 
-            this.m_newCreateTemplateFiles.Clear();  // ±ÜÃâºóÃæClosing()´¦ÀíÖĞ²»Ğ¡ĞÄÉ¾³ı¸Õ¸Õ´´½¨µÄÎÄ¼ş
+            this.m_newCreateTemplateFiles.Clear();  // é¿å…åé¢Closing()å¤„ç†ä¸­ä¸å°å¿ƒåˆ é™¤åˆšåˆšåˆ›å»ºçš„æ–‡ä»¶
              * */
             SaveTemplatesChanges();
 
@@ -209,7 +209,7 @@ namespace dp2Circulation
 
         void SaveTemplatesChanges()
         {
-            // ±£´æÄ£°åÁĞ±í
+            // ä¿å­˜æ¨¡æ¿åˆ—è¡¨
             if (this.m_bTempaltesChanged == true)
             {
                 PrintOption.TemplatePages.Clear();
@@ -227,7 +227,7 @@ namespace dp2Circulation
                 this.m_bTempaltesChanged = false;
             }
 
-            this.m_newCreateTemplateFiles.Clear();  // ±ÜÃâºóÃæClosing()´¦ÀíÖĞ²»Ğ¡ĞÄÉ¾³ı¸Õ¸Õ´´½¨µÄÎÄ¼ş
+            this.m_newCreateTemplateFiles.Clear();  // é¿å…åé¢Closing()å¤„ç†ä¸­ä¸å°å¿ƒåˆ é™¤åˆšåˆšåˆ›å»ºçš„æ–‡ä»¶
         }
 
         private void button_Cancel_Click(object sender, EventArgs e)
@@ -243,7 +243,7 @@ namespace dp2Circulation
             this.Close();
         }
 
-        // É¾³ı±¾´Î¸Õ¸Õ´´½¨µÄÄ£°åÎÄ¼şÃÇ
+        // åˆ é™¤æœ¬æ¬¡åˆšåˆšåˆ›å»ºçš„æ¨¡æ¿æ–‡ä»¶ä»¬
         void RemoveNewCreatedTemplateFiles()
         {
             for (int i = 0; i < this.m_newCreateTemplateFiles.Count; i++)
@@ -260,7 +260,7 @@ namespace dp2Circulation
             this.m_newCreateTemplateFiles.Clear();
         }
 
-        // ĞÂÔöÀ¸Ä¿
+        // æ–°å¢æ ç›®
         private void button_columns_new_Click(object sender, EventArgs e)
         {
             PrintColumnDlg dlg = new PrintColumnDlg();
@@ -281,16 +281,16 @@ namespace dp2Circulation
             if (dlg.DialogResult != DialogResult.OK)
                 return;
 
-            // Ãû³Æ²éÖØ
+            // åç§°æŸ¥é‡
             ListViewItem dup = ListViewUtil.FindItem(this.listView_columns, dlg.ColumnName, 0);
             if (dup != null)
             {
-                // ÈÃ²Ù×÷ÕßÄÜ¿´¼ûÒÑ¾­´æÔÚµÄĞĞ
+                // è®©æ“ä½œè€…èƒ½çœ‹è§å·²ç»å­˜åœ¨çš„è¡Œ
                 ListViewUtil.SelectLine(dup, true);
                 dup.EnsureVisible();
 
                 DialogResult result = MessageBox.Show(this,
-                    "µ±Ç°ÒÑ¾­´æÔÚÃûÎª '"+dlg.ColumnName+"' µÄÀ¸Ä¿¡£¼ÌĞøĞÂÔö?",
+                    "å½“å‰å·²ç»å­˜åœ¨åä¸º '"+dlg.ColumnName+"' çš„æ ç›®ã€‚ç»§ç»­æ–°å¢?",
                     "PrintOptionDlg",
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question,
@@ -314,20 +314,20 @@ namespace dp2Circulation
 
             this.listView_columns.Items.Add(item);
 
-            // ÈÃ²Ù×÷ÕßÄÜ¿´¼ûĞÂ²åÈëµÄĞĞ
+            // è®©æ“ä½œè€…èƒ½çœ‹è§æ–°æ’å…¥çš„è¡Œ
             ListViewUtil.SelectLine(item, true);
             item.EnsureVisible();
 
-            // ĞÂÔöÊÂÏîºó£¬µ±Ç°ÒÑÑ¡ÔñÊÂÏîµÄÉÏÏÂÒÆ¶¯µÄ¿ÉÄÜĞÔ»áÓĞËù¸Ä±ä
+            // æ–°å¢äº‹é¡¹åï¼Œå½“å‰å·²é€‰æ‹©äº‹é¡¹çš„ä¸Šä¸‹ç§»åŠ¨çš„å¯èƒ½æ€§ä¼šæœ‰æ‰€æ”¹å˜
             listView_columns_SelectedIndexChanged(sender, null);
         }
 
-        // ĞŞ¸ÄÀ¸Ä¿
+        // ä¿®æ”¹æ ç›®
         private void button_columns_modify_Click(object sender, EventArgs e)
         {
             if (this.listView_columns.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡¶¨ÒªĞŞ¸ÄµÄÊÂÏî");
+                MessageBox.Show(this, "å°šæœªé€‰å®šè¦ä¿®æ”¹çš„äº‹é¡¹");
                 return;
             }
 
@@ -388,17 +388,17 @@ namespace dp2Circulation
 
         }
 
-        // É¾³ıÀ¸Ä¿
+        // åˆ é™¤æ ç›®
         private void button_columns_delete_Click(object sender, EventArgs e)
         {
             if (this.listView_columns.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡¶¨ÒªÉ¾³ıµÄÊÂÏî");
+                MessageBox.Show(this, "å°šæœªé€‰å®šè¦åˆ é™¤çš„äº‹é¡¹");
                 return;
             }
 
             DialogResult result = MessageBox.Show(this,
-                "È·ÊµÒªÉ¾³ıÑ¡¶¨µÄ "+this.listView_columns.SelectedItems.Count.ToString()+" ¸öÊÂÏî? ",
+                "ç¡®å®è¦åˆ é™¤é€‰å®šçš„ "+this.listView_columns.SelectedItems.Count.ToString()+" ä¸ªäº‹é¡¹? ",
                 "PrintOptionDlg",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question,
@@ -412,16 +412,16 @@ namespace dp2Circulation
                 this.listView_columns.Items.Remove(this.listView_columns.SelectedItems[0]);
             }
 
-            // É¾³ıÊÂÏîºó£¬µ±Ç°ÒÑÑ¡ÔñÊÂÏîµÄÉÏÏÂÒÆ¶¯µÄ¿ÉÄÜĞÔ»áÓĞËù¸Ä±ä
+            // åˆ é™¤äº‹é¡¹åï¼Œå½“å‰å·²é€‰æ‹©äº‹é¡¹çš„ä¸Šä¸‹ç§»åŠ¨çš„å¯èƒ½æ€§ä¼šæœ‰æ‰€æ”¹å˜
             listView_columns_SelectedIndexChanged(sender, null);
         }
 
-        // ÏòÉÏÒÆ¶¯(À¸Ä¿)
+        // å‘ä¸Šç§»åŠ¨(æ ç›®)
         private void button_columns_moveUp_Click(object sender, EventArgs e)
         {
             if (this.listView_columns.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡¶¨ÒªÒÆ¶¯µÄÊÂÏî");
+                MessageBox.Show(this, "å°šæœªé€‰å®šè¦ç§»åŠ¨çš„äº‹é¡¹");
                 return;
             }
 
@@ -429,7 +429,7 @@ namespace dp2Circulation
 
             if (nIndex == 0)
             {
-                MessageBox.Show(this, "ÒÑÔÚ¶¥²¿");
+                MessageBox.Show(this, "å·²åœ¨é¡¶éƒ¨");
                 return;
             }
 
@@ -439,12 +439,12 @@ namespace dp2Circulation
             this.listView_columns.Items.Insert(nIndex - 1, item);
         }
 
-        // ÏòÏÂÒÆ¶¯(À¸Ä¿)
+        // å‘ä¸‹ç§»åŠ¨(æ ç›®)
         private void button_columns_moveDown_Click(object sender, EventArgs e)
         {
             if (this.listView_columns.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡¶¨ÒªÒÆ¶¯µÄÊÂÏî");
+                MessageBox.Show(this, "å°šæœªé€‰å®šè¦ç§»åŠ¨çš„äº‹é¡¹");
                 return;
             }
 
@@ -452,7 +452,7 @@ namespace dp2Circulation
 
             if (nIndex >= this.listView_columns.Items.Count - 1)
             {
-                MessageBox.Show(this, "ÒÑÔÚµ×²¿");
+                MessageBox.Show(this, "å·²åœ¨åº•éƒ¨");
                 return;
             }
 
@@ -466,7 +466,7 @@ namespace dp2Circulation
         {
             if (this.listView_columns.SelectedIndices.Count == 0)
             {
-                // Ã»ÓĞÑ¡ÔñÊÂÏî
+                // æ²¡æœ‰é€‰æ‹©äº‹é¡¹
                 this.button_columns_delete.Enabled = false;
                 this.button_columns_modify.Enabled = false;
                 this.button_columns_moveDown.Enabled = false;
@@ -475,7 +475,7 @@ namespace dp2Circulation
             }
             else
             {
-                // ÓĞÑ¡ÔñÊÂÏî
+                // æœ‰é€‰æ‹©äº‹é¡¹
                 this.button_columns_delete.Enabled = true;
                 this.button_columns_modify.Enabled = true;
                 if (this.listView_columns.SelectedIndices[0] >= this.listView_columns.Items.Count - 1)
@@ -503,7 +503,7 @@ namespace dp2Circulation
             if (this.m_bTempaltesChanged == true)
             {
                 DialogResult result = MessageBox.Show(this,
-                    "µ±Ç°Ä£°åÁĞ±íÖĞÓĞ¸Ä¶¯ÉĞÎ´±£´æ¡£Èç´ËÊ±Ç¿ĞĞË¢ĞÂÁĞ±í£¬ĞÂÔöºÍ¸Ä¶¯µÄÄÚÈİ»á¶ªÊ§¡£\r\n\r\nÈ·ÊµÒªË¢ĞÂÁĞ±í? ",
+                    "å½“å‰æ¨¡æ¿åˆ—è¡¨ä¸­æœ‰æ”¹åŠ¨å°šæœªä¿å­˜ã€‚å¦‚æ­¤æ—¶å¼ºè¡Œåˆ·æ–°åˆ—è¡¨ï¼Œæ–°å¢å’Œæ”¹åŠ¨çš„å†…å®¹ä¼šä¸¢å¤±ã€‚\r\n\r\nç¡®å®è¦åˆ·æ–°åˆ—è¡¨? ",
                     "PrintOptionDlg",
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question,
@@ -556,7 +556,7 @@ namespace dp2Circulation
             {
                 string strError = "";
 
-                // ±£ÁôÎ»ÖÃ
+                // ä¿ç•™ä½ç½®
                 this.m_nCurrentTemplateIndex = this.listView_templates.SelectedIndices[0];
 
                 this.textBox_templates_content.Text = "";
@@ -577,9 +577,9 @@ namespace dp2Circulation
 
                 try
                 {
-                    // TODO: ÕâÀïµÄ×Ô¶¯Ì½Ë÷ÎÄ¼ş±àÂë·½Ê½¹¦ÄÜ²»ÕıÈ·£¬
-                    // ĞèÒª×¨ÃÅ±àĞ´Ò»¸öº¯ÊıÀ´Ì½²âÎÄ±¾ÎÄ¼şµÄ±àÂë·½Ê½
-                    // Ä¿Ç°Ö»ÄÜÓÃUTF-8±àÂë·½Ê½
+                    // TODO: è¿™é‡Œçš„è‡ªåŠ¨æ¢ç´¢æ–‡ä»¶ç¼–ç æ–¹å¼åŠŸèƒ½ä¸æ­£ç¡®ï¼Œ
+                    // éœ€è¦ä¸“é—¨ç¼–å†™ä¸€ä¸ªå‡½æ•°æ¥æ¢æµ‹æ–‡æœ¬æ–‡ä»¶çš„ç¼–ç æ–¹å¼
+                    // ç›®å‰åªèƒ½ç”¨UTF-8ç¼–ç æ–¹å¼
                     sr = new StreamReader(strFilePath, encoding);
                     this.textBox_templates_content.Text = sr.ReadToEnd();
                     sr.Close();
@@ -593,11 +593,11 @@ namespace dp2Circulation
                  * */
 
                 string strContent = "";
-                // ÄÜ×Ô¶¯Ê¶±ğÎÄ¼şÄÚÈİµÄ±àÂë·½Ê½µÄ¶ÁÈëÎÄ±¾ÎÄ¼şÄÚÈİÄ£¿é
+                // èƒ½è‡ªåŠ¨è¯†åˆ«æ–‡ä»¶å†…å®¹çš„ç¼–ç æ–¹å¼çš„è¯»å…¥æ–‡æœ¬æ–‡ä»¶å†…å®¹æ¨¡å—
                 // return:
-                //      -1  ³ö´í
-                //      0   ÎÄ¼ş²»´æÔÚ
-                //      1   ÎÄ¼ş´æÔÚ
+                //      -1  å‡ºé”™
+                //      0   æ–‡ä»¶ä¸å­˜åœ¨
+                //      1   æ–‡ä»¶å­˜åœ¨
                 int nRet = Global.ReadTextFileContent(strFilePath,
                     out strContent,
                     out strError);
@@ -621,7 +621,7 @@ namespace dp2Circulation
             ContextMenu contextMenu = new ContextMenu();
             MenuItem menuItem = null;
 
-            menuItem = new MenuItem("ĞÂÔöÄ£°å(&N)");
+            menuItem = new MenuItem("æ–°å¢æ¨¡æ¿(&N)");
             menuItem.Click += new System.EventHandler(this.menu_newTemplatePage_Click);
             if (String.IsNullOrEmpty(this.DataDir) == true)
                 menuItem.Enabled = false;
@@ -631,7 +631,7 @@ namespace dp2Circulation
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("ÓÃWindows¼ÇÊÂ±¾´ò¿ªÄ£°åÎÄ¼ş(&O)");
+            menuItem = new MenuItem("ç”¨Windowsè®°äº‹æœ¬æ‰“å¼€æ¨¡æ¿æ–‡ä»¶(&O)");
             menuItem.Click += new System.EventHandler(this.menu_openTemplateFileByNotepad_Click);
             if (this.listView_templates.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
@@ -642,7 +642,7 @@ namespace dp2Circulation
             contextMenu.MenuItems.Add(menuItem);
 
 
-            menuItem = new MenuItem("É¾³ı(&D)");
+            menuItem = new MenuItem("åˆ é™¤(&D)");
             menuItem.Click += new System.EventHandler(this.menu_deleteTemplatePages_Click);
             if (this.listView_templates.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
@@ -658,7 +658,7 @@ namespace dp2Circulation
             string strError = "";
             if (this.listView_templates.SelectedItems.Count == 0)
             {
-                strError = "ÉĞÎ´Ñ¡¶¨ÒªÓÃ¼ÇÊÂ±¾´ò¿ªµÄÄ£°åÎÄ¼şÊÂÏî";
+                strError = "å°šæœªé€‰å®šè¦ç”¨è®°äº‹æœ¬æ‰“å¼€çš„æ¨¡æ¿æ–‡ä»¶äº‹é¡¹";
                 goto ERROR1;
             }
             foreach (ListViewItem item in this.listView_templates.SelectedItems)
@@ -676,7 +676,7 @@ namespace dp2Circulation
 
         }
 
-        // ĞÂÔöÄ£°å
+        // æ–°å¢æ¨¡æ¿
         void menu_newTemplatePage_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -684,8 +684,8 @@ namespace dp2Circulation
             REDO_INPUT:
             string strName = DigitalPlatform.InputDlg.GetInput(
                 this,
-                "ÇëÖ¸¶¨Ä£°åÃû",
-                "Ä£°åÃû(&T):",
+                "è¯·æŒ‡å®šæ¨¡æ¿å",
+                "æ¨¡æ¿å(&T):",
                 "",
             this.Font);
             if (strName == null)
@@ -693,15 +693,15 @@ namespace dp2Circulation
 
             if (String.IsNullOrEmpty(strName) == true)
             {
-                MessageBox.Show(this, "Ä£°åÃû²»ÄÜÎª¿Õ");
+                MessageBox.Show(this, "æ¨¡æ¿åä¸èƒ½ä¸ºç©º");
                 goto REDO_INPUT;
             }
 
-            // ²éÖØ
+            // æŸ¥é‡
             ListViewItem dup = ListViewUtil.FindItem(this.listView_templates, strName, 0);
             if (dup != null)
             {
-                strError = "Ä£°åÃû '" + strName + "' ÔÚÁĞ±íÖĞÒÑ¾­´æÔÚ£¬²»ÄÜÖØ¸´¼ÓÈë";
+                strError = "æ¨¡æ¿å '" + strName + "' åœ¨åˆ—è¡¨ä¸­å·²ç»å­˜åœ¨ï¼Œä¸èƒ½é‡å¤åŠ å…¥";
                 goto ERROR1;
             }
 
@@ -714,7 +714,7 @@ namespace dp2Circulation
                 strFilePath = PathUtil.MergePath(strDir, "template_" + (i+1).ToString());
                 if (File.Exists(strFilePath) == false)
                 {
-                    // ´´½¨Ò»¸ö0×Ö½ÚµÄÎÄ¼ş
+                    // åˆ›å»ºä¸€ä¸ª0å­—èŠ‚çš„æ–‡ä»¶
                     try
                     {
                         File.Create(strFilePath).Close();
@@ -723,7 +723,7 @@ namespace dp2Circulation
                     {
                         if (nRedoCount > 10)
                         {
-                            strError = "´´½¨ÎÄ¼ş '" + strFilePath + "' Ê§°Ü...";
+                            strError = "åˆ›å»ºæ–‡ä»¶ '" + strFilePath + "' å¤±è´¥...";
                             goto ERROR1;
                         }
                         nRedoCount++;
@@ -733,17 +733,17 @@ namespace dp2Circulation
                 }
             }
 
-            // Çå³ıÔ­À´ÒÑÓĞµÄÑ¡Ôñ
+            // æ¸…é™¤åŸæ¥å·²æœ‰çš„é€‰æ‹©
             this.listView_templates.SelectedItems.Clear();
 
             ListViewItem item = new ListViewItem();
             item.Text = strName;
             item.SubItems.Add(strFilePath);
             this.listView_templates.Items.Add(item);
-            item.Selected = true;   // Ñ¡ÉÏĞÂÔöµÄÊÂÏî
+            item.Selected = true;   // é€‰ä¸Šæ–°å¢çš„äº‹é¡¹
             this.m_bTempaltesChanged = true;
 
-            item.EnsureVisible();   // ¹öÈëÊÓÒ°
+            item.EnsureVisible();   // æ»šå…¥è§†é‡
 
             this.m_newCreateTemplateFiles.Add(strFilePath);
 
@@ -757,13 +757,13 @@ namespace dp2Circulation
             string strError = "";
             if (this.listView_templates.SelectedItems.Count == 0)
             {
-                strError = "ÉĞÎ´Ñ¡¶¨ÒªÉ¾³ıµÄÄ£°åÊÂÏî";
+                strError = "å°šæœªé€‰å®šè¦åˆ é™¤çš„æ¨¡æ¿äº‹é¡¹";
                 goto ERROR1;
             }
 
-            // ¾¯¸æ
+            // è­¦å‘Š
             DialogResult result = MessageBox.Show(this,
-                "È·ÊµÒªÉ¾³ıËùÑ¡¶¨µÄ " + this.listView_templates.SelectedItems.Count.ToString() + " ÏîÄ£°åÎÄ¼ş?\r\n\r\n(¾¯¸æ: É¾³ı²Ù×÷Ò»µ©½øĞĞ£¬¾ÍÎŞ·¨ÓÃ´òÓ¡Ñ¡Ïî¶Ô»°¿òÉÏµÄ¡°È¡Ïû¡±°´Å¥À´È¡Ïû)",
+                "ç¡®å®è¦åˆ é™¤æ‰€é€‰å®šçš„ " + this.listView_templates.SelectedItems.Count.ToString() + " é¡¹æ¨¡æ¿æ–‡ä»¶?\r\n\r\n(è­¦å‘Š: åˆ é™¤æ“ä½œä¸€æ—¦è¿›è¡Œï¼Œå°±æ— æ³•ç”¨æ‰“å°é€‰é¡¹å¯¹è¯æ¡†ä¸Šçš„â€œå–æ¶ˆâ€æŒ‰é’®æ¥å–æ¶ˆ)",
                 "PrintOptionDlg",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question,
@@ -771,8 +771,8 @@ namespace dp2Circulation
             if (result == DialogResult.No)
                 return;
 
-            // ¶ÒÏÖ×îºóÒ»´Î¶ÔtextboxµÄĞŞ¸Ä
-            // ÒÔÃâÉ¾³ıºóindex·¢Éú±ä»¯£¬ÕÅ¹ÚÀî´÷
+            // å…‘ç°æœ€åä¸€æ¬¡å¯¹textboxçš„ä¿®æ”¹
+            // ä»¥å…åˆ é™¤åindexå‘ç”Ÿå˜åŒ–ï¼Œå¼ å† ææˆ´
             this.RefreshContentToTemplateFile();
 
             for (int i = this.listView_templates.SelectedIndices.Count - 1; i >= 0; i--)
@@ -788,7 +788,7 @@ namespace dp2Circulation
                 }
                 catch (Exception ex)
                 {
-                    strError = "É¾³ıÎÄ¼ş '" + strFilePath + "' Ê±·¢Éú´íÎó: " + ex.Message;
+                    strError = "åˆ é™¤æ–‡ä»¶ '" + strFilePath + "' æ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                     //goto ERROR1;
                     MessageBox.Show(this, strError);
                 }
@@ -799,7 +799,7 @@ namespace dp2Circulation
                 this.m_bTempaltesChanged = true;
             }
 
-            SaveTemplatesChanges(); // ĞŞ¸ÄÎŞ·¨³·Ïú
+            SaveTemplatesChanges(); // ä¿®æ”¹æ— æ³•æ’¤é”€
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -833,7 +833,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = "Ğ´ÈëÎÄ¼ş '" + strFilePath + "' Ê±·¢Éú´íÎó£º" + ex.Message;
+                strError = "å†™å…¥æ–‡ä»¶ '" + strFilePath + "' æ—¶å‘ç”Ÿé”™è¯¯ï¼š" + ex.Message;
                 goto ERROR1;
             }
 

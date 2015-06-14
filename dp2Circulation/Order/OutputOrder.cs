@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Windows.Forms;
@@ -15,53 +15,53 @@ using DigitalPlatform.CirculationClient.localhost;
 namespace dp2Circulation
 {
     /// <summary>
-    /// Êä³ö¶©µ¥µÄËŞÖ÷Àà
-    /// ÓÃÓÚ PrintOrderForm (´òÓ¡¶©µ¥´°)
+    /// è¾“å‡ºè®¢å•çš„å®¿ä¸»ç±»
+    /// ç”¨äº PrintOrderForm (æ‰“å°è®¢å•çª—)
     /// </summary>
     public class OutputOrder : StatisHostBase0
     {
         /// <summary>
-        /// ±¾¶ÔÏóËù¹ØÁªµÄ PrintOrderForm (´òÓ¡¶©µ¥´°)
+        /// æœ¬å¯¹è±¡æ‰€å…³è”çš„ PrintOrderForm (æ‰“å°è®¢å•çª—)
         /// </summary>
-        public PrintOrderForm PrintOrderForm = null;	// [in]´òÓ¡¶©µ¥´°
+        public PrintOrderForm PrintOrderForm = null;	// [in]æ‰“å°è®¢å•çª—
 
 #if NO
         private bool disposed = false;
         /// <summary>
-        /// Í³¼Æ·½°¸´æ´¢Ä¿Â¼
+        /// ç»Ÿè®¡æ–¹æ¡ˆå­˜å‚¨ç›®å½•
         /// </summary>
-        public string ProjectDir = "";  // [in]µ±Ç°¶©µ¥Êä³ö·½°¸µÄËùÔÚÄ¿Â¼
+        public string ProjectDir = "";  // [in]å½“å‰è®¢å•è¾“å‡ºæ–¹æ¡ˆçš„æ‰€åœ¨ç›®å½•
 
 #endif
 
         /// <summary>
-        /// ¹«¹²Êı¾İÄ¿Â¼
+        /// å…¬å…±æ•°æ®ç›®å½•
         /// </summary>
-        public string DataDir = ""; // [in]ÄÚÎñÇ°¶ËµÄÊı¾İÄ¿Â¼
+        public string DataDir = ""; // [in]å†…åŠ¡å‰ç«¯çš„æ•°æ®ç›®å½•
 
 
         /// <summary>
-        /// ÇşµÀÃû
+        /// æ¸ é“å
         /// </summary>
-        public string Seller = "";  // [in]ÇşµÀÃû
+        public string Seller = "";  // [in]æ¸ é“å
 
         /// <summary>
-        /// ¶©µ¥ XML ÎÄ¼şÃû
+        /// è®¢å• XML æ–‡ä»¶å
         /// </summary>
-        public string XmlFilename = ""; // [in]ÄÚÖÃµÄXML¸ñÊ½¶©µ¥ÎÄ¼ş£¬ÒÑ¾­´´½¨ºÃÁË¡£ÎÄ¼şÃûÈ«Â·¾¶
+        public string XmlFilename = ""; // [in]å†…ç½®çš„XMLæ ¼å¼è®¢å•æ–‡ä»¶ï¼Œå·²ç»åˆ›å»ºå¥½äº†ã€‚æ–‡ä»¶åå…¨è·¯å¾„
 
         /// <summary>
-        /// ¶©µ¥Êä³öÄ¿Â¼
+        /// è®¢å•è¾“å‡ºç›®å½•
         /// </summary>
-        public string OutputDir = "";   // [in]¶©µ¥Êä³öÄ¿Â¼
+        public string OutputDir = "";   // [in]è®¢å•è¾“å‡ºç›®å½•
 
         /// <summary>
-        /// µ±Ç°ËŞÖ÷ÖĞÒÑ¾­±»Ñ¡¶¨µÄ³ö°æÎïÀàĞÍ¡£ÖµÎª¡°Í¼Êé¡±¡°Á¬Ğø³ö°æÎï¡±Ö®Ò»
+        /// å½“å‰å®¿ä¸»ä¸­å·²ç»è¢«é€‰å®šçš„å‡ºç‰ˆç‰©ç±»å‹ã€‚å€¼ä¸ºâ€œå›¾ä¹¦â€â€œè¿ç»­å‡ºç‰ˆç‰©â€ä¹‹ä¸€
         /// </summary>
-        public string PubType = ""; // [in]µ±Ç°ËŞÖ÷ÖĞÒÑ¾­±»Ñ¡¶¨µÄ³ö°æÎïÀàĞÍ¡£ÖµÎª¡°Í¼Êé¡±¡°Á¬Ğø³ö°æÎï¡±Ö®Ò»
+        public string PubType = ""; // [in]å½“å‰å®¿ä¸»ä¸­å·²ç»è¢«é€‰å®šçš„å‡ºç‰ˆç‰©ç±»å‹ã€‚å€¼ä¸ºâ€œå›¾ä¹¦â€â€œè¿ç»­å‡ºç‰ˆç‰©â€ä¹‹ä¸€
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public OutputOrder()
         {
@@ -123,7 +123,7 @@ namespace dp2Circulation
                 }
 
                 /*
-                // É¾³ıËùÓĞÊä³öÎÄ¼ş
+                // åˆ é™¤æ‰€æœ‰è¾“å‡ºæ–‡ä»¶
                 if (this.OutputFileNames != null)
                 {
                     Global.DeleteFiles(this.OutputFileNames);
@@ -149,9 +149,9 @@ namespace dp2Circulation
             disposed = true;
         }
 
-        // ÊÍ·Å×ÊÔ´
+        // é‡Šæ”¾èµ„æº
         /// <summary>
-        /// ÊÍ·Å×ÊÔ´
+        /// é‡Šæ”¾èµ„æº
         /// </summary>
         public virtual void FreeResources()
         {
@@ -164,24 +164,24 @@ namespace dp2Circulation
             return Path.Combine(this.PrintOrderForm.MainForm.DataDir, "~outputorder_statis");
         }
 
-	    // ³õÊ¼»¯
+	    // åˆå§‹åŒ–
         // return:
-        //      false   ³õÊ¼»¯Ê§°Ü¡£´íÎóĞÅÏ¢ÔÚstrErrorÖĞ
-        //      true    ³õÊ¼»¯³É¹¦
+        //      false   åˆå§‹åŒ–å¤±è´¥ã€‚é”™è¯¯ä¿¡æ¯åœ¨strErrorä¸­
+        //      true    åˆå§‹åŒ–æˆåŠŸ
         /// <summary>
-        /// ³õÊ¼»¯
+        /// åˆå§‹åŒ–
         /// </summary>
-        /// <param name="strError">´íÎóĞÅÏ¢</param>
-        /// <returns>ÊÇ·ñ³õÊ¼»¯³É¹¦</returns>
+        /// <param name="strError">é”™è¯¯ä¿¡æ¯</param>
+        /// <returns>æ˜¯å¦åˆå§‹åŒ–æˆåŠŸ</returns>
         public virtual bool Initial(out string strError)
         {
             strError = "";
             return true;
         }
 
-        // Èë¿Úº¯Êı
+        // å…¥å£å‡½æ•°
         /// <summary>
-        /// Èë¿Úº¯Êı¡£ÖØÔØ´Ë·½·¨ÒÔÊµÏÖ½Å±¾¹¦ÄÜ
+        /// å…¥å£å‡½æ•°ã€‚é‡è½½æ­¤æ–¹æ³•ä»¥å®ç°è„šæœ¬åŠŸèƒ½
         /// </summary>
         public virtual void Output()
         {

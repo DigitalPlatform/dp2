@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -22,18 +22,18 @@ using DigitalPlatform.CommonControl;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ²á´° / ¶©¹º´° / ÆÚ´° / ÆÀ×¢´°
+    /// å†Œçª— / è®¢è´­çª— / æœŸçª— / è¯„æ³¨çª—
     /// </summary>
     public partial class ItemInfoForm : MyForm
     {
         // 
         /// <summary>
-        /// Êı¾İ¿âÀàĞÍ
+        /// æ•°æ®åº“ç±»å‹
         /// </summary>
         string m_strDbType = "item";  // comment order issue
 
         /// <summary>
-        /// Êı¾İ¿âÀàĞÍ¡£Îª item / order / issue / comment Ö®Ò»
+        /// æ•°æ®åº“ç±»å‹ã€‚ä¸º item / order / issue / comment ä¹‹ä¸€
         /// </summary>
         public string DbType
         {
@@ -51,18 +51,18 @@ namespace dp2Circulation
                     this.toolStripButton_addSubject.Visible = false;
 
                 this.Text = this.DbTypeCaption;
-                this.comboBox_from.Items.Clear();   // ´ÙÊ¹¸ü»»
+                this.comboBox_from.Items.Clear();   // ä¿ƒä½¿æ›´æ¢
             }
         }
 
         /// <summary>
-        /// µ±Ç°ÒÑ¾­×°ÔØµÄ¼ÇÂ¼Â·¾¶
+        /// å½“å‰å·²ç»è£…è½½çš„è®°å½•è·¯å¾„
         /// </summary>
-        public string ItemRecPath = ""; // µ±Ç°ÒÑ¾­×°ÔØµÄ²á¼ÇÂ¼Â·¾¶
+        public string ItemRecPath = ""; // å½“å‰å·²ç»è£…è½½çš„å†Œè®°å½•è·¯å¾„
         /// <summary>
-        /// µ±Ç°ÒÑ×°ÔØµÄÊéÄ¿¼ÇÂ¼Â·¾¶
+        /// å½“å‰å·²è£…è½½çš„ä¹¦ç›®è®°å½•è·¯å¾„
         /// </summary>
-        public string BiblioRecPath = "";   // µ±Ç°ÒÑ×°ÔØµÄÊéÄ¿¼ÇÂ¼Â·¾¶
+        public string BiblioRecPath = "";   // å½“å‰å·²è£…è½½çš„ä¹¦ç›®è®°å½•è·¯å¾„
 
         const int WM_LOAD_RECORD = API.WM_USER + 200;
         const int WM_PREV_RECORD = API.WM_USER + 201;
@@ -77,7 +77,7 @@ namespace dp2Circulation
         public string Lang = "zh";
 
         /// <summary>
-        /// ¿ò¼Ü´°¿Ú
+        /// æ¡†æ¶çª—å£
         /// </summary>
         public MainForm MainForm = null;
 
@@ -85,7 +85,7 @@ namespace dp2Circulation
 #endif
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public ItemInfoForm()
         {
@@ -107,7 +107,7 @@ namespace dp2Circulation
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
 
             stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// ºÍÈİÆ÷¹ØÁª
+            stop.Register(MainForm.stopManager, true);	// å’Œå®¹å™¨å…³è”
 #endif
 
             // webbrowser
@@ -140,9 +140,9 @@ namespace dp2Circulation
 #if NO
             if (stop != null)
             {
-                if (stop.State == 0)    // 0 ±íÊ¾ÕıÔÚ´¦Àí
+                if (stop.State == 0)    // 0 è¡¨ç¤ºæ­£åœ¨å¤„ç†
                 {
-                    MessageBox.Show(this, "ÇëÔÚ¹Ø±Õ´°¿ÚÇ°Í£Ö¹ÕıÔÚ½øĞĞµÄ³¤Ê±²Ù×÷¡£");
+                    MessageBox.Show(this, "è¯·åœ¨å…³é—­çª—å£å‰åœæ­¢æ­£åœ¨è¿›è¡Œçš„é•¿æ—¶æ“ä½œã€‚");
                     e.Cancel = true;
                     return;
                 }
@@ -161,9 +161,9 @@ namespace dp2Circulation
                 this.m_webExternalHost_biblio.Destroy();
 
 #if NO
-            if (stop != null) // ÍÑÀë¹ØÁª
+            if (stop != null) // è„±ç¦»å…³è”
             {
-                stop.Unregister();	// ºÍÈİÆ÷¹ØÁª
+                stop.Unregister();	// å’Œå®¹å™¨å…³è”
                 stop = null;
             }
             MainForm.AppInfo.SaveMdiChildFormStates(this,
@@ -188,9 +188,9 @@ namespace dp2Circulation
          * */
 
         /// <summary>
-        /// ÖØĞÂ×°ÔØµ±Ç°¼ÇÂ¼
+        /// é‡æ–°è£…è½½å½“å‰è®°å½•
         /// </summary>
-        /// <returns>-1: ³ö´í; 1: ³É¹¦</returns>
+        /// <returns>-1: å‡ºé”™; 1: æˆåŠŸ</returns>
         public int Reload()
         {
             return LoadRecordByRecPath(this.ItemRecPath, "");
@@ -198,11 +198,11 @@ namespace dp2Circulation
 
         // 
         /// <summary>
-        /// ¸ù¾İ²áÌõÂëºÅ£¬×°Èë²á¼ÇÂ¼ºÍÊéÄ¿¼ÇÂ¼
-        /// ±¾·½Ê½Ö»ÄÜµ± DbType Îª "item" Ê±µ÷ÓÃ
+        /// æ ¹æ®å†Œæ¡ç å·ï¼Œè£…å…¥å†Œè®°å½•å’Œä¹¦ç›®è®°å½•
+        /// æœ¬æ–¹å¼åªèƒ½å½“ DbType ä¸º "item" æ—¶è°ƒç”¨
         /// </summary>
-        /// <param name="strItemBarcode">²áÌõÂëºÅ</param>
-        /// <returns>-1: ³ö´í; 1: ³É¹¦</returns>
+        /// <param name="strItemBarcode">å†Œæ¡ç å·</param>
+        /// <returns>-1: å‡ºé”™; 1: æˆåŠŸ</returns>
         public int LoadRecord(string strItemBarcode)
         {
             Debug.Assert(this.m_strDbType == "item", "");
@@ -212,7 +212,7 @@ namespace dp2Circulation
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ³õÊ¼»¯ä¯ÀÀÆ÷×é¼ş ...");
+            stop.Initial("æ­£åœ¨åˆå§‹åŒ–æµè§ˆå™¨ç»„ä»¶ ...");
             stop.BeginLoop();
 
 
@@ -229,7 +229,7 @@ namespace dp2Circulation
             // this.textBox_message.Text = "";
             this.toolStripLabel_message.Text = "";
 
-            stop.SetMessage("ÕıÔÚ×°Èë²á¼ÇÂ¼ " + strItemBarcode + " ...");
+            stop.SetMessage("æ­£åœ¨è£…å…¥å†Œè®°å½• " + strItemBarcode + " ...");
 
 
             try
@@ -262,9 +262,9 @@ namespace dp2Circulation
                 if (lRet > 1)
                 {
                     this.textBox_queryWord.Text = strItemBarcode;
-                    this.comboBox_from.Text = "²áÌõÂë";
+                    this.comboBox_from.Text = "å†Œæ¡ç ";
 
-                    strError = "²áÌõÂëºÅ '" + strItemBarcode + "' ¼ìË÷ÃüÖĞ" + lRet.ToString() + " Ìõ²á¼ÇÂ¼£¬ËüÃÇµÄÂ·¾¶ÈçÏÂ£º" + strItemRecPath + "£»×°Èë²Ù×÷±»·ÅÆú¡£\r\n\r\nÕâÊÇÒ»¸öÑÏÖØµÄ´íÎó£¬Çë¾¡¿ìÁªÏµÏµÍ³¹ÜÀíÔ±½â¾ö´ËÎÊÌâ¡£\r\n\r\nÈçÒª×°ÈëÆäÖĞµÄÈÎºÎÒ»Ìõ£¬Çë²ÉÓÃ¼ÇÂ¼Â·¾¶·½Ê½×°Èë¡£";
+                    strError = "å†Œæ¡ç å· '" + strItemBarcode + "' æ£€ç´¢å‘½ä¸­" + lRet.ToString() + " æ¡å†Œè®°å½•ï¼Œå®ƒä»¬çš„è·¯å¾„å¦‚ä¸‹ï¼š" + strItemRecPath + "ï¼›è£…å…¥æ“ä½œè¢«æ”¾å¼ƒã€‚\r\n\r\nè¿™æ˜¯ä¸€ä¸ªä¸¥é‡çš„é”™è¯¯ï¼Œè¯·å°½å¿«è”ç³»ç³»ç»Ÿç®¡ç†å‘˜è§£å†³æ­¤é—®é¢˜ã€‚\r\n\r\nå¦‚è¦è£…å…¥å…¶ä¸­çš„ä»»ä½•ä¸€æ¡ï¼Œè¯·é‡‡ç”¨è®°å½•è·¯å¾„æ–¹å¼è£…å…¥ã€‚";
                     goto ERROR1;
                 }
 
@@ -279,7 +279,7 @@ namespace dp2Circulation
 
                 if (String.IsNullOrEmpty(strBiblioText) == true)
                     Global.SetHtmlString(this.webBrowser_biblio,
-                        "(ÊéÄ¿¼ÇÂ¼ '" + strBiblioRecPath + "' ²»´æÔÚ)");
+                        "(ä¹¦ç›®è®°å½• '" + strBiblioRecPath + "' ä¸å­˜åœ¨)");
                 else
                 {
 #if NO
@@ -292,13 +292,13 @@ namespace dp2Circulation
                         "iteminfoform_biblio");
                 }
 
-                // this.textBox_message.Text = "²á¼ÇÂ¼Â·¾¶: " + strItemRecPath + " £»Æä´ÓÊôµÄÖÖ(ÊéÄ¿)¼ÇÂ¼Â·¾¶: " + strBiblioRecPath;
-                this.toolStripLabel_message.Text = this.DbTypeCaption + "¼ÇÂ¼Â·¾¶: " + strItemRecPath + " £»Æä´ÓÊôµÄÖÖ(ÊéÄ¿)¼ÇÂ¼Â·¾¶: " + strBiblioRecPath;
+                // this.textBox_message.Text = "å†Œè®°å½•è·¯å¾„: " + strItemRecPath + " ï¼›å…¶ä»å±çš„ç§(ä¹¦ç›®)è®°å½•è·¯å¾„: " + strBiblioRecPath;
+                this.toolStripLabel_message.Text = this.DbTypeCaption + "è®°å½•è·¯å¾„: " + strItemRecPath + " ï¼›å…¶ä»å±çš„ç§(ä¹¦ç›®)è®°å½•è·¯å¾„: " + strBiblioRecPath;
 
                 this.textBox_queryWord.Text = strItemBarcode;
-                this.comboBox_from.Text = "²áÌõÂëºÅ";
+                this.comboBox_from.Text = "å†Œæ¡ç å·";
 
-                // ×îºó»ñµÃitem xml
+                // æœ€åè·å¾—item xml
                 lRet = Channel.GetItemInfo(
                     stop,
                     strItemBarcode,
@@ -321,8 +321,8 @@ namespace dp2Circulation
                     SetXmlToWebbrowser(this.webBrowser_itemXml,
                         strItemText);
                      * */
-                    // °Ñ XML ×Ö·û´®×°ÈëÒ»¸öWebä¯ÀÀÆ÷¿Ø¼ş
-                    // Õâ¸öº¯ÊıÄÜ¹»ÊÊÓ¦"<root ... />"ÕâÑùµÄÃ»ÓĞprologµÄXMLÄÚÈİ
+                    // æŠŠ XML å­—ç¬¦ä¸²è£…å…¥ä¸€ä¸ªWebæµè§ˆå™¨æ§ä»¶
+                    // è¿™ä¸ªå‡½æ•°èƒ½å¤Ÿé€‚åº”"<root ... />"è¿™æ ·çš„æ²¡æœ‰prologçš„XMLå†…å®¹
                     Global.SetXmlToWebbrowser(this.webBrowser_itemXml,
                         this.MainForm.DataDir,
                         "xml",
@@ -348,32 +348,32 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// Êı¾İ¿âÀàĞÍµÄÏÔÊ¾Ãû³Æ
+        /// æ•°æ®åº“ç±»å‹çš„æ˜¾ç¤ºåç§°
         /// </summary>
         public string DbTypeCaption
         {
             get
             {
                 if (this.m_strDbType == "item")
-                    return "²á";
+                    return "å†Œ";
                 else if (this.m_strDbType == "comment")
-                    return "ÆÀ×¢";
+                    return "è¯„æ³¨";
                 else if (this.m_strDbType == "order")
-                    return "¶©¹º";
+                    return "è®¢è´­";
                 else if (this.m_strDbType == "issue")
-                    return "ÆÚ";
+                    return "æœŸ";
                 else
-                    throw new Exception("Î´ÖªµÄDbType '" + this.m_strDbType + "'");
+                    throw new Exception("æœªçŸ¥çš„DbType '" + this.m_strDbType + "'");
             }
         }
 
         // 
         /// <summary>
-        /// ¸ù¾İ²á/¶©¹º/ÆÚ/ÆÀ×¢¼ÇÂ¼Â·¾¶£¬×°ÈëÊÂÏî¼ÇÂ¼ºÍÊéÄ¿¼ÇÂ¼
+        /// æ ¹æ®å†Œ/è®¢è´­/æœŸ/è¯„æ³¨è®°å½•è·¯å¾„ï¼Œè£…å…¥äº‹é¡¹è®°å½•å’Œä¹¦ç›®è®°å½•
         /// </summary>
-        /// <param name="strItemRecPath">ÊÂÏî¼ÇÂ¼Â·¾¶</param>
-        /// <param name="strPrevNextStyle">Ç°ºó·­¶¯·ç¸ñ</param>
-        /// <returns>-1: ³ö´í; 1: ³É¹¦</returns>
+        /// <param name="strItemRecPath">äº‹é¡¹è®°å½•è·¯å¾„</param>
+        /// <param name="strPrevNextStyle">å‰åç¿»åŠ¨é£æ ¼</param>
+        /// <returns>-1: å‡ºé”™; 1: æˆåŠŸ</returns>
         public int LoadRecordByRecPath(string strItemRecPath,
             string strPrevNextStyle)
         {
@@ -382,7 +382,7 @@ namespace dp2Circulation
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ³õÊ¼»¯ä¯ÀÀÆ÷×é¼ş ...");
+            stop.Initial("æ­£åœ¨åˆå§‹åŒ–æµè§ˆå™¨ç»„ä»¶ ...");
             stop.BeginLoop();
 
             this.Update();
@@ -411,7 +411,7 @@ namespace dp2Circulation
                 this.toolStripLabel_message.Text = "";
             }
 
-            stop.SetMessage("ÕıÔÚ×°Èë"+this.DbTypeCaption+"¼ÇÂ¼ " + strItemRecPath + " ...");
+            stop.SetMessage("æ­£åœ¨è£…å…¥"+this.DbTypeCaption+"è®°å½• " + strItemRecPath + " ...");
 
 
             try
@@ -480,7 +480,7 @@ namespace dp2Circulation
                          out strBiblioRecPath,
                          out strError);
                 else
-                    throw new Exception("Î´ÖªµÄDbType '" + this.m_strDbType + "'");
+                    throw new Exception("æœªçŸ¥çš„DbType '" + this.m_strDbType + "'");
 
 
                 if (lRet == -1 || lRet == 0)
@@ -490,7 +490,7 @@ namespace dp2Circulation
                     if (bPrevNext == true
                         && this.Channel.ErrorCode == DigitalPlatform.CirculationClient.localhost.ErrorCode.NotFound)
                     {
-                        strError += "\r\n\r\nĞÂ¼ÇÂ¼Ã»ÓĞ×°ÔØ£¬´°¿ÚÖĞ»¹±£ÁôÁË×°ÔØÇ°µÄ¼ÇÂ¼";
+                        strError += "\r\n\r\næ–°è®°å½•æ²¡æœ‰è£…è½½ï¼Œçª—å£ä¸­è¿˜ä¿ç•™äº†è£…è½½å‰çš„è®°å½•";
                         goto ERROR1;
                     }
 
@@ -524,7 +524,7 @@ namespace dp2Circulation
 
                 if (String.IsNullOrEmpty(strBiblioText) == true)
                     Global.SetHtmlString(this.webBrowser_biblio,
-                        "(ÊéÄ¿¼ÇÂ¼ '" + strBiblioRecPath + "' ²»´æÔÚ)");
+                        "(ä¹¦ç›®è®°å½• '" + strBiblioRecPath + "' ä¸å­˜åœ¨)");
                 else
                 {
 #if NO
@@ -537,12 +537,12 @@ namespace dp2Circulation
                         "iteminfoform_biblio");
                 }
 
-                // this.textBox_message.Text = "²á¼ÇÂ¼Â·¾¶: " + strOutputItemRecPath + " £»Æä´ÓÊôµÄÖÖ(ÊéÄ¿)¼ÇÂ¼Â·¾¶: " + strBiblioRecPath;
-                this.toolStripLabel_message.Text = this.DbTypeCaption+"¼ÇÂ¼Â·¾¶: " + strOutputItemRecPath + " £»Æä´ÓÊôµÄÖÖ(ÊéÄ¿)¼ÇÂ¼Â·¾¶: " + strBiblioRecPath;
+                // this.textBox_message.Text = "å†Œè®°å½•è·¯å¾„: " + strOutputItemRecPath + " ï¼›å…¶ä»å±çš„ç§(ä¹¦ç›®)è®°å½•è·¯å¾„: " + strBiblioRecPath;
+                this.toolStripLabel_message.Text = this.DbTypeCaption+"è®°å½•è·¯å¾„: " + strOutputItemRecPath + " ï¼›å…¶ä»å±çš„ç§(ä¹¦ç›®)è®°å½•è·¯å¾„: " + strBiblioRecPath;
                 this.textBox_queryWord.Text = this.ItemRecPath; // strItemRecPath;
-                this.comboBox_from.Text = this.DbTypeCaption+"¼ÇÂ¼Â·¾¶";
+                this.comboBox_from.Text = this.DbTypeCaption+"è®°å½•è·¯å¾„";
 
-                // ×îºó»ñµÃitem xml
+                // æœ€åè·å¾—item xml
                 if (this.m_strDbType == "item")
                 lRet = Channel.GetItemInfo(
                     stop,
@@ -595,7 +595,7 @@ namespace dp2Circulation
                          out strBiblioRecPath,
                          out strError);
                 else
-                    throw new Exception("Î´ÖªµÄDbType '" + this.m_strDbType + "'");
+                    throw new Exception("æœªçŸ¥çš„DbType '" + this.m_strDbType + "'");
 
 
                 if (lRet == -1 || lRet == 0)
@@ -609,8 +609,8 @@ namespace dp2Circulation
                     SetXmlToWebbrowser(this.webBrowser_itemXml,
                         strItemText);
                      * */
-                    // °Ñ XML ×Ö·û´®×°ÈëÒ»¸öWebä¯ÀÀÆ÷¿Ø¼ş
-                    // Õâ¸öº¯ÊıÄÜ¹»ÊÊÓ¦"<root ... />"ÕâÑùµÄÃ»ÓĞprologµÄXMLÄÚÈİ
+                    // æŠŠ XML å­—ç¬¦ä¸²è£…å…¥ä¸€ä¸ªWebæµè§ˆå™¨æ§ä»¶
+                    // è¿™ä¸ªå‡½æ•°èƒ½å¤Ÿé€‚åº”"<root ... />"è¿™æ ·çš„æ²¡æœ‰prologçš„XMLå†…å®¹
                     Global.SetXmlToWebbrowser(this.webBrowser_itemXml,
                         this.MainForm.DataDir,
                         "xml",
@@ -642,9 +642,9 @@ namespace dp2Circulation
 
         void SetMenuItemState()
         {
-            // ²Ëµ¥
+            // èœå•
 
-            // ¹¤¾ßÌõ°´Å¥
+            // å·¥å…·æ¡æŒ‰é’®
 
             this.MainForm.MenuItem_recoverUrgentLog.Enabled = false;
             this.MainForm.MenuItem_font.Enabled = false;
@@ -661,9 +661,9 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// È±Ê¡´°¿Ú¹ı³Ì
+        /// ç¼ºçœçª—å£è¿‡ç¨‹
         /// </summary>
-        /// <param name="m">ÏûÏ¢</param>
+        /// <param name="m">æ¶ˆæ¯</param>
         protected override void DefWndProc(ref Message m)
         {
             switch (m.Msg)
@@ -733,7 +733,7 @@ namespace dp2Circulation
         {
             if (this.textBox_queryWord.Text == "")
             {
-                MessageBox.Show(this, "ÉĞÎ´ÊäÈë¼ìË÷´Ê");
+                MessageBox.Show(this, "å°šæœªè¾“å…¥æ£€ç´¢è¯");
                 return;
             }
 
@@ -754,33 +754,33 @@ namespace dp2Circulation
             string strError;
             if (this.textBox_queryWord.Text == "")
             {
-                strError = "ÉĞÎ´ÊäÈë¼ìË÷´Ê";
+                strError = "å°šæœªè¾“å…¥æ£€ç´¢è¯";
                 goto ERROR1;
             }
 
-            if (this.comboBox_from.Text == "²áÌõÂë"
-                || this.comboBox_from.Text == "²áÌõÂëºÅ")
+            if (this.comboBox_from.Text == "å†Œæ¡ç "
+                || this.comboBox_from.Text == "å†Œæ¡ç å·")
             {
                 if (this.m_strDbType != "item")
                 {
-                    strError = "Ö»ÄÜµ±DbTypeÎªitemÊ±²ÅÄÜÊ¹ÓÃ ²áÌõÂëºÅ ¼ìË÷Í¾¾¶";
+                    strError = "åªèƒ½å½“DbTypeä¸ºitemæ—¶æ‰èƒ½ä½¿ç”¨ å†Œæ¡ç å· æ£€ç´¢é€”å¾„";
                     goto ERROR1;
                 }
                 int nRet = this.textBox_queryWord.Text.IndexOf("/");
                 if (nRet != -1)
                 {
-                    strError = "ÄúÊäÈëµÄ¼ìË÷´ÊËÆºõÎªÒ»¸ö¼ÇÂ¼Â·¾¶£¬¶ø²»ÊÇ²áÌõÂëºÅ";
+                    strError = "æ‚¨è¾“å…¥çš„æ£€ç´¢è¯ä¼¼ä¹ä¸ºä¸€ä¸ªè®°å½•è·¯å¾„ï¼Œè€Œä¸æ˜¯å†Œæ¡ç å·";
                     MessageBox.Show(this, strError);
                 }
 
                 LoadRecord(this.textBox_queryWord.Text);
             }
-            else if (this.comboBox_from.Text == this.DbTypeCaption + "¼ÇÂ¼Â·¾¶")
+            else if (this.comboBox_from.Text == this.DbTypeCaption + "è®°å½•è·¯å¾„")
             {
                 int nRet = this.textBox_queryWord.Text.IndexOf("/");
                 if (nRet == -1)
                 {
-                    strError = "ÄúÊäÈëµÄ¼ìË÷´ÊËÆºõÎªÒ»¸ö²áÌõÂëºÅ£¬¶ø²»ÊÇ"+this.DbTypeCaption+"¼ÇÂ¼Â·¾¶";
+                    strError = "æ‚¨è¾“å…¥çš„æ£€ç´¢è¯ä¼¼ä¹ä¸ºä¸€ä¸ªå†Œæ¡ç å·ï¼Œè€Œä¸æ˜¯"+this.DbTypeCaption+"è®°å½•è·¯å¾„";
                     MessageBox.Show(this, strError);
                 }
 
@@ -789,7 +789,7 @@ namespace dp2Circulation
             }
             else
             {
-                strError = "ÎŞ·¨Ê¶±ğµÄ¼ìË÷Í¾¾¶ '" + this.comboBox_from.Text + "'";
+                strError = "æ— æ³•è¯†åˆ«çš„æ£€ç´¢é€”å¾„ '" + this.comboBox_from.Text + "'";
                 goto ERROR1;
             }
 
@@ -799,15 +799,15 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÔÊĞí»òÕß½ûÖ¹½çÃæ¿Ø¼ş¡£ÔÚ³¤²Ù×÷Ç°£¬Ò»°ãĞèÒª½ûÖ¹½çÃæ¿Ø¼ş£»²Ù×÷Íê³ÉºóÔÙÔÊĞí
+        /// å…è®¸æˆ–è€…ç¦æ­¢ç•Œé¢æ§ä»¶ã€‚åœ¨é•¿æ“ä½œå‰ï¼Œä¸€èˆ¬éœ€è¦ç¦æ­¢ç•Œé¢æ§ä»¶ï¼›æ“ä½œå®Œæˆåå†å…è®¸
         /// </summary>
-        /// <param name="bEnable">ÊÇ·ñÔÊĞí½çÃæ¿Ø¼ş¡£true ÎªÔÊĞí£¬ false Îª½ûÖ¹</param>
+        /// <param name="bEnable">æ˜¯å¦å…è®¸ç•Œé¢æ§ä»¶ã€‚true ä¸ºå…è®¸ï¼Œ false ä¸ºç¦æ­¢</param>
         public override void EnableControls(bool bEnable)
         {
             this.comboBox_from.Enabled = bEnable;
             this.textBox_queryWord.Enabled = bEnable;
             this.button_load.Enabled = bEnable;
-            this.toolStrip1.Enabled = bEnable;  // ±ÜÃâÊ¹ÓÃ¹¤¾ßÌõÉÏµÄÃüÁî°´Å¥
+            this.toolStrip1.Enabled = bEnable;  // é¿å…ä½¿ç”¨å·¥å…·æ¡ä¸Šçš„å‘½ä»¤æŒ‰é’®
         }
 
         private void toolStripButton_prevRecord_Click(object sender, EventArgs e)
@@ -844,12 +844,12 @@ namespace dp2Circulation
             this.comboBox_from.Items.Clear();
 
             if (this.m_strDbType == "item")
-                this.comboBox_from.Items.Add("²áÌõÂëºÅ");
+                this.comboBox_from.Items.Add("å†Œæ¡ç å·");
 
-            this.comboBox_from.Items.Add(this.DbTypeCaption + "¼ÇÂ¼Â·¾¶");
+            this.comboBox_from.Items.Add(this.DbTypeCaption + "è®°å½•è·¯å¾„");
         }
 
-        // ÔöÌí×ÔÓÉ´Ê
+        // å¢æ·»è‡ªç”±è¯
         private void toolStripButton_addSubject_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -858,7 +858,7 @@ namespace dp2Circulation
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ»ñÈ¡ÊéÄ¿¼ÇÂ¼ ...");
+            stop.Initial("æ­£åœ¨è·å–ä¹¦ç›®è®°å½• ...");
             stop.BeginLoop();
 
             try
@@ -894,7 +894,7 @@ namespace dp2Circulation
                 dlg.ReserveSubjects = reserve_subjects;
                 dlg.ExistSubjects = exist_subjects;
                 dlg.HiddenNewSubjects = StringUtil.SplitList(strNewSubject.Replace("\\r", "\n"), '\n');
-                if (StringUtil.IsInList("ÒÑ´¦Àí", strCommentState) == false)
+                if (StringUtil.IsInList("å·²å¤„ç†", strCommentState) == false)
                     dlg.NewSubjects = dlg.HiddenNewSubjects;
 
                 this.MainForm.AppInfo.LinkFormState(dlg, "iteminfoform_addsubjectdialog_state");
@@ -908,17 +908,17 @@ namespace dp2Circulation
                 subjects.AddRange(dlg.ExistSubjects);
                 subjects.AddRange(dlg.NewSubjects);
 
-                StringUtil.RemoveDupNoSort(ref subjects);   // È¥ÖØ
-                StringUtil.RemoveBlank(ref subjects);   // È¥µô¿ÕÔªËØ
+                StringUtil.RemoveDupNoSort(ref subjects);   // å»é‡
+                StringUtil.RemoveBlank(ref subjects);   // å»æ‰ç©ºå…ƒç´ 
 
-                // ĞŞ¸ÄÖ¸Ê¾·û1Îª¿ÕµÄÄÇĞ© 610 ×Ö¶Î
+                // ä¿®æ”¹æŒ‡ç¤ºç¬¦1ä¸ºç©ºçš„é‚£äº› 610 å­—æ®µ
                 // parameters:
-                //      strSubject  ¿ÉÒÔĞŞ¸ÄµÄ×ÔÓÉ´ÊµÄ×ÜºÍ¡£°üÀ¨ÒÔÇ°´æÔÚµÄºÍ±¾´ÎÌí¼ÓµÄ
+                //      strSubject  å¯ä»¥ä¿®æ”¹çš„è‡ªç”±è¯çš„æ€»å’Œã€‚åŒ…æ‹¬ä»¥å‰å­˜åœ¨çš„å’Œæœ¬æ¬¡æ·»åŠ çš„
                 nRet = ChangeSubject(ref strBiblioXml,
                     subjects,
                     out strError);
 
-                // ±£´æÊéÄ¿¼ÇÂ¼
+                // ä¿å­˜ä¹¦ç›®è®°å½•
                 byte[] output_timestamp = null;
                 string strOutputBiblioRecPath = "";
                 long lRet = Channel.SetBiblioInfo(
@@ -935,15 +935,15 @@ namespace dp2Circulation
                 if (lRet == -1)
                     goto ERROR1;
 
-                // ĞŞ¸ÄÆÀ×¢¼ÇÂ¼×´Ì¬
+                // ä¿®æ”¹è¯„æ³¨è®°å½•çŠ¶æ€
                 // return:
-                //       -1  ³ö´í
-                //      0   Ã»ÓĞ·¢ÉúĞŞ¸Ä
-                //      1   ·¢ÉúÁËĞŞ¸Ä
+                //       -1  å‡ºé”™
+                //      0   æ²¡æœ‰å‘ç”Ÿä¿®æ”¹
+                //      1   å‘ç”Ÿäº†ä¿®æ”¹
                 nRet = ChangeCommentState(
                     this.BiblioRecPath,
                     this.ItemRecPath,
-                    "ÒÑ´¦Àí",
+                    "å·²å¤„ç†",
                     "",
                     out strError);
                 if (nRet == -1)
@@ -958,30 +958,30 @@ namespace dp2Circulation
                 EnableControls(true);
             }
 
-            // ÖØĞÂ×°ÔØÄÚÈİ
+            // é‡æ–°è£…è½½å†…å®¹
             this.Reload();
             return;
         ERROR1:
             MessageBox.Show(this, strError);
         }
 
-        // ĞŞ¸ÄÆÀ×¢µÄ×´Ì¬
+        // ä¿®æ”¹è¯„æ³¨çš„çŠ¶æ€
         // return:
-        //       -1  ³ö´í
-        //      0   Ã»ÓĞ·¢ÉúĞŞ¸Ä
-        //      1   ·¢ÉúÁËĞŞ¸Ä
+        //       -1  å‡ºé”™
+        //      0   æ²¡æœ‰å‘ç”Ÿä¿®æ”¹
+        //      1   å‘ç”Ÿäº†ä¿®æ”¹
         /// <summary>
-        /// ĞŞ¸ÄÆÀ×¢¼ÇÂ¼µÄ×´Ì¬×Ö¶Î
+        /// ä¿®æ”¹è¯„æ³¨è®°å½•çš„çŠ¶æ€å­—æ®µ
         /// </summary>
-        /// <param name="strBiblioRecPath">ÊéÄ¿¼ÇÂ¼Â·¾¶</param>
-        /// <param name="strCommentRecPath">ÆÀ×¢¼ÇÂ¼Â·¾¶</param>
-        /// <param name="strAddList">ÒªÔÚ×´Ì¬×Ö·û´®ÖĞ¼ÓÈëµÄ×Ó´®ÁĞ±í</param>
-        /// <param name="strRemoveList">ÒªÔÚ×´Ì¬×Ö·û´®ÖĞÉ¾³ıµÄ×Ó´®ÁĞ±í</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
+        /// <param name="strBiblioRecPath">ä¹¦ç›®è®°å½•è·¯å¾„</param>
+        /// <param name="strCommentRecPath">è¯„æ³¨è®°å½•è·¯å¾„</param>
+        /// <param name="strAddList">è¦åœ¨çŠ¶æ€å­—ç¬¦ä¸²ä¸­åŠ å…¥çš„å­ä¸²åˆ—è¡¨</param>
+        /// <param name="strRemoveList">è¦åœ¨çŠ¶æ€å­—ç¬¦ä¸²ä¸­åˆ é™¤çš„å­ä¸²åˆ—è¡¨</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
         /// <returns>
-        ///       -1  ³ö´í
-        ///      0   Ã»ÓĞ·¢ÉúĞŞ¸Ä
-        ///      1   ·¢ÉúÁËĞŞ¸Ä
+        ///       -1  å‡ºé”™
+        ///      0   æ²¡æœ‰å‘ç”Ÿä¿®æ”¹
+        ///      1   å‘ç”Ÿäº†ä¿®æ”¹
         /// </returns>
         public int ChangeCommentState(
             string strBiblioRecPath,
@@ -995,17 +995,17 @@ namespace dp2Circulation
 
             if (String.IsNullOrEmpty(strCommentRecPath) == true)
             {
-                strError = "CommentRecPathÎª¿Õ";
+                strError = "CommentRecPathä¸ºç©º";
                 goto ERROR1;
             }
 
             if (String.IsNullOrEmpty(strBiblioRecPath) == true)
             {
-                strError = "strBiblioRecPathÎª¿Õ";
+                strError = "strBiblioRecPathä¸ºç©º";
                 goto ERROR1;
             }
 
-            // »ñµÃ¾É¼ÇÂ¼
+            // è·å¾—æ—§è®°å½•
             string strOldXml = "";
             // byte[] timestamp = ByteArray.GetTimeStampByteArray(this.Timestamp);
 
@@ -1026,14 +1026,14 @@ out strTempBiblioRecPath,
 out strError);
             if (lRet == -1)
             {
-                strError = "»ñµÃÔ­ÓĞÆÀ×¢¼ÇÂ¼ '" + strCommentRecPath + "' Ê±³ö´í: " + strError;
+                strError = "è·å¾—åŸæœ‰è¯„æ³¨è®°å½• '" + strCommentRecPath + "' æ—¶å‡ºé”™: " + strError;
                 goto ERROR1;
             }
 
 #if NO
             if (ByteArray.Compare(comment_timestamp, timestamp) != 0)
             {
-                strError = "ĞŞ¸Ä±»¾Ü¾ø¡£ÒòÎª¼ÇÂ¼ '" + strCommentRecPath + "' ÔÚ±£´æÇ°ÒÑ¾­±»ÆäËûÈËĞŞ¸Ä¹ı¡£ÇëÖØĞÂ×°ÔØ";
+                strError = "ä¿®æ”¹è¢«æ‹’ç»ã€‚å› ä¸ºè®°å½• '" + strCommentRecPath + "' åœ¨ä¿å­˜å‰å·²ç»è¢«å…¶ä»–äººä¿®æ”¹è¿‡ã€‚è¯·é‡æ–°è£…è½½";
                 goto ERROR1;
             }
 #endif
@@ -1048,14 +1048,14 @@ out strError);
                 }
                 catch (Exception ex)
                 {
-                    strError = "×°ÔØ¼ÇÂ¼XML½øÈëDOMÊ±·¢Éú´íÎó: " + ex.Message;
+                    strError = "è£…è½½è®°å½•XMLè¿›å…¥DOMæ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                     goto ERROR1;
                 }
             }
             else
                 dom.LoadXml("<root/>");
 
-            // ½ö½öĞŞ¸Ä×´Ì¬
+            // ä»…ä»…ä¿®æ”¹çŠ¶æ€
             {
                 string strState = DomUtil.GetElementText(dom.DocumentElement,
                     "state");
@@ -1066,12 +1066,12 @@ out strError);
     strRemoveList);
 
                 if (strState == strOldState)
-                    return 0;   // Ã»ÓĞ±ØÒªĞŞ¸Ä
+                    return 0;   // æ²¡æœ‰å¿…è¦ä¿®æ”¹
 
                 DomUtil.SetElementText(dom.DocumentElement,
                     "state", strState);
 
-                // ÔÚ<operations>ÖĞĞ´ÈëÊÊµ±ÌõÄ¿
+                // åœ¨<operations>ä¸­å†™å…¥é€‚å½“æ¡ç›®
                 string strComment = "'" + strOldState + "' --> '" + strState + "'";
                 nRet = Global.SetOperation(
                     ref dom,
@@ -1091,7 +1091,7 @@ out strError);
             {
                 strNewCommentRecPath = strCommentRecPath;
 
-                // ¸²¸Ç
+                // è¦†ç›–
                 nRet = ChangeCommentInfo(
                     strBiblioRecPath,
                     strCommentRecPath,
@@ -1112,17 +1112,17 @@ out strError);
 
         // 
         /// <summary>
-        /// ĞŞ¸ÄÒ»¸öÆÀ×¢¼ÇÂ¼
+        /// ä¿®æ”¹ä¸€ä¸ªè¯„æ³¨è®°å½•
         /// </summary>
-        /// <param name="strBiblioRecPath">ÊéÄ¿¼ÇÂ¼Â·¾¶</param>
-        /// <param name="strCommentRecPath">ÆÀ×¢¼ÇÂ¼Â·¾¶</param>
-        /// <param name="strOldXml">ÆÀ×¢¼ÇÂ¼ĞŞ¸ÄÇ°µÄ XML</param>
-        /// <param name="strCommentXml">ÆÀ×¢¼ÇÂ¼ÒªĞŞ¸Ä³ÉµÄ XML</param>
-        /// <param name="timestamp">ĞŞ¸ÄÇ°µÄÊ±¼ä´Á</param>
-        /// <param name="strNewXml">·µ»ØÊµ¼Ê±£´æ³É¹¦µÄÆÀ×¢¼ÇÂ¼ XML</param>
-        /// <param name="baNewTimestamp">·µ»ØĞŞ¸ÄºóµÄÊ±¼ä´Á</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í; 1: ³É¹¦</returns>
+        /// <param name="strBiblioRecPath">ä¹¦ç›®è®°å½•è·¯å¾„</param>
+        /// <param name="strCommentRecPath">è¯„æ³¨è®°å½•è·¯å¾„</param>
+        /// <param name="strOldXml">è¯„æ³¨è®°å½•ä¿®æ”¹å‰çš„ XML</param>
+        /// <param name="strCommentXml">è¯„æ³¨è®°å½•è¦ä¿®æ”¹æˆçš„ XML</param>
+        /// <param name="timestamp">ä¿®æ”¹å‰çš„æ—¶é—´æˆ³</param>
+        /// <param name="strNewXml">è¿”å›å®é™…ä¿å­˜æˆåŠŸçš„è¯„æ³¨è®°å½• XML</param>
+        /// <param name="baNewTimestamp">è¿”å›ä¿®æ”¹åçš„æ—¶é—´æˆ³</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™; 1: æˆåŠŸ</returns>
         public int ChangeCommentInfo(
             string strBiblioRecPath,
             string strCommentRecPath,
@@ -1149,7 +1149,7 @@ out strError);
             }
             catch (Exception ex)
             {
-                strError = "XML×°ÔØµ½DOMÊ±·¢Éú´íÎó: " + ex.Message;
+                strError = "XMLè£…è½½åˆ°DOMæ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                 return -1;
             }
 
@@ -1211,15 +1211,15 @@ out strError);
         }
 
         /// <summary>
-        /// »ñµÃÆÀ×¢¼ÇÂ¼ÄÚÈİ
-        /// Çë²Î¿¼ dp2Library API GetCommentInfo() µÄÏêÏ¸ĞÅÏ¢
+        /// è·å¾—è¯„æ³¨è®°å½•å†…å®¹
+        /// è¯·å‚è€ƒ dp2Library API GetCommentInfo() çš„è¯¦ç»†ä¿¡æ¯
         /// </summary>
-        /// <param name="strCommentRecPath">ÆÀ×¢¼ÇÂ¼Â·¾¶</param>
-        /// <param name="strContent">·µ»ØÄÚÈİ</param>
-        /// <param name="strState">·µ»Ø×´Ì¬</param>
-        /// <param name="item_timestamp">·µ»ØÊ±¼ä´Á</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í; 0: ³É¹¦</returns>
+        /// <param name="strCommentRecPath">è¯„æ³¨è®°å½•è·¯å¾„</param>
+        /// <param name="strContent">è¿”å›å†…å®¹</param>
+        /// <param name="strState">è¿”å›çŠ¶æ€</param>
+        /// <param name="item_timestamp">è¿”å›æ—¶é—´æˆ³</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™; 0: æˆåŠŸ</returns>
         int GetCommentContent(string strCommentRecPath,
             out string strContent,
             out string strState,
@@ -1257,7 +1257,7 @@ out strError);
             }
             catch (Exception ex)
             {
-                strError = "XML×°ÈëDOMÊ±¼ä³ö´í: " + ex.Message;
+                strError = "XMLè£…å…¥DOMæ—¶é—´å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
@@ -1266,21 +1266,21 @@ out strError);
             return 0;
         }
 
-        // ĞŞ¸ÄÖ¸Ê¾·û1Îª¿ÕµÄÄÇĞ© 610 ×Ö¶Î
+        // ä¿®æ”¹æŒ‡ç¤ºç¬¦1ä¸ºç©ºçš„é‚£äº› 610 å­—æ®µ
         // parameters:
-        //      subjects  ¿ÉÒÔĞŞ¸ÄµÄ×ÔÓÉ´ÊµÄ×ÜºÍ¡£°üÀ¨ÒÔÇ°´æÔÚµÄºÍ±¾´ÎÌí¼ÓµÄ
+        //      subjects  å¯ä»¥ä¿®æ”¹çš„è‡ªç”±è¯çš„æ€»å’Œã€‚åŒ…æ‹¬ä»¥å‰å­˜åœ¨çš„å’Œæœ¬æ¬¡æ·»åŠ çš„
         static int ChangeSubject(ref string strBiblioXml,
             List<string> subjects,
             out string strError)
         {
             strError = "";
 
-            // ¶ÔÖ÷Ìâ´ÊÈ¥ÖØ
+            // å¯¹ä¸»é¢˜è¯å»é‡
 
             string strMARC = "";
             string strMarcSyntax = "";
-            // ½«XML¸ñÊ½×ª»»ÎªMARC¸ñÊ½
-            // ×Ô¶¯´ÓÊı¾İ¼ÇÂ¼ÖĞ»ñµÃMARCÓï·¨
+            // å°†XMLæ ¼å¼è½¬æ¢ä¸ºMARCæ ¼å¼
+            // è‡ªåŠ¨ä»æ•°æ®è®°å½•ä¸­è·å¾—MARCè¯­æ³•
             int nRet = MarcUtil.Xml2Marc(strBiblioXml,
                 true,
                 null,
@@ -1289,7 +1289,7 @@ out strError);
                 out strError);
             if (nRet == -1)
             {
-                strError = "XML×ª»»µ½MARC¼ÇÂ¼Ê±³ö´í: " + strError;
+                strError = "XMLè½¬æ¢åˆ°MARCè®°å½•æ—¶å‡ºé”™: " + strError;
                 return -1;
             }
 
@@ -1311,13 +1311,13 @@ out strError);
         }
 
         /// <summary>
-        /// ¸ù¾İÌá¹©µÄÖ÷Ìâ´Ê×Ö·û´® ĞŞ¸Ä MARC ¼ÇÂ¼ÖĞµÄ 610 »ò 653 ×Ö¶Î
+        /// æ ¹æ®æä¾›çš„ä¸»é¢˜è¯å­—ç¬¦ä¸² ä¿®æ”¹ MARC è®°å½•ä¸­çš„ 610 æˆ– 653 å­—æ®µ
         /// </summary>
-        /// <param name="strMARC">Òª²Ù×÷µÄ MARC ¼ÇÂ¼×Ö·û´®¡£»úÄÚ¸ñÊ½</param>
-        /// <param name="strMarcSyntax">MARC ¸ñÊ½</param>
-        /// <param name="subjects">Ö÷Ìâ´Ê×Ö·û´®¼¯ºÏ</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í; 0: ³É¹¦</returns>
+        /// <param name="strMARC">è¦æ“ä½œçš„ MARC è®°å½•å­—ç¬¦ä¸²ã€‚æœºå†…æ ¼å¼</param>
+        /// <param name="strMarcSyntax">MARC æ ¼å¼</param>
+        /// <param name="subjects">ä¸»é¢˜è¯å­—ç¬¦ä¸²é›†åˆ</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™; 0: æˆåŠŸ</returns>
         public static int ChangeSubject(ref string strMARC,
             string strMarcSyntax,
             List<string> subjects,
@@ -1333,19 +1333,19 @@ out strError);
                 nodes = record.select("field[@name='653' and @indicator1=' ']");
             else
             {
-                strError = "Î´ÖªµÄ MARC ¸ñÊ½ÀàĞÍ '" + strMarcSyntax + "'";
+                strError = "æœªçŸ¥çš„ MARC æ ¼å¼ç±»å‹ '" + strMarcSyntax + "'";
                 return -1;
             }
 
             if (subjects == null || subjects.Count == 0)
             {
-                // É¾³ıÄÇĞ©¿ÉÒÔÉ¾³ıµÄ 610 ×Ö¶Î
+                // åˆ é™¤é‚£äº›å¯ä»¥åˆ é™¤çš„ 610 å­—æ®µ
                 foreach (MarcNode node in nodes)
                 {
                     MarcNodeList subfields = node.select("subfield[@name='a']");
                     if (subfields.count == node.ChildNodes.count)
                     {
-                        // Èç¹û³ıÁË $a ÒÔÍâÃ»ÓĞÆäËûÈÎºÎ×Ó×Ö¶Î£¬Ôò×Ö¶Î¿ÉÒÔÉ¾³ı
+                        // å¦‚æœé™¤äº† $a ä»¥å¤–æ²¡æœ‰å…¶ä»–ä»»ä½•å­å­—æ®µï¼Œåˆ™å­—æ®µå¯ä»¥åˆ é™¤
                         node.detach();
                     }
                 }
@@ -1355,7 +1355,7 @@ out strError);
 
                 MarcNode field610 = null;
 
-                // Ö»ÁôÏÂÒ»¸ö 610 ×Ö¶Î
+                // åªç•™ä¸‹ä¸€ä¸ª 610 å­—æ®µ
                 if (nodes.count > 1)
                 {
                     int nCount = nodes.count;
@@ -1364,7 +1364,7 @@ out strError);
                         MarcNodeList subfields = node.select("subfield[@name='a']");
                         if (subfields.count == node.ChildNodes.count)
                         {
-                            // Èç¹û³ıÁË $a ÒÔÍâÃ»ÓĞÆäËûÈÎºÎ×Ó×Ö¶Î£¬Ôò×Ö¶Î¿ÉÒÔÉ¾³ı
+                            // å¦‚æœé™¤äº† $a ä»¥å¤–æ²¡æœ‰å…¶ä»–ä»»ä½•å­å­—æ®µï¼Œåˆ™å­—æ®µå¯ä»¥åˆ é™¤
                             node.detach();
                             nCount--;
                         }
@@ -1373,7 +1373,7 @@ out strError);
                             break;
                     }
 
-                    // ÖØĞÂÑ¡¶¨
+                    // é‡æ–°é€‰å®š
                     if (strMarcSyntax == "unimarc")
                         nodes = record.select("field[@name='610' and @indicator1=' ']");
                     else if (strMarcSyntax == "usmarc")
@@ -1383,7 +1383,7 @@ out strError);
                 }
                 else if (nodes.count == 0)
                 {
-                    // ´´½¨Ò»¸öĞÂµÄ 610 ×Ö¶Î
+                    // åˆ›å»ºä¸€ä¸ªæ–°çš„ 610 å­—æ®µ
                     if (strMarcSyntax == "unimarc")
                         field610 = new MarcField("610", "  ");
                     else if (strMarcSyntax == "usmarc")
@@ -1397,24 +1397,24 @@ out strError);
                     field610 = nodes[0];
                 }
 
-                // É¾³ıÈ«²¿ $a ×Ó×Ö¶Î
+                // åˆ é™¤å…¨éƒ¨ $a å­å­—æ®µ
                 field610.select("subfield[@name='a']").detach();
 
 
-                // Ìí¼ÓÈô¸É¸ö $a ×Ó×Ö¶Î
+                // æ·»åŠ è‹¥å¹²ä¸ª $a å­å­—æ®µ
                 Debug.Assert(subjects.Count > 0, "");
                 MarcNodeList source = new MarcNodeList();
                 for (int i = 0; i < subjects.Count; i++)
                 {
                     source.add(new MarcSubfield("a", subjects[i]));
                 }
-                // Ñ°ÕÒÊÊµ±Î»ÖÃ²åÈë
+                // å¯»æ‰¾é€‚å½“ä½ç½®æ’å…¥
                 field610.ChildNodes.insertSequence(source[0]);
                 if (source.count > 1)
                 {
-                    // ÔÚ¸Õ²åÈëµÄ¶ÔÏóºóÃæ²åÈëÆäÓàµÄ¶ÔÏó
+                    // åœ¨åˆšæ’å…¥çš„å¯¹è±¡åé¢æ’å…¥å…¶ä½™çš„å¯¹è±¡
                     MarcNodeList list = new MarcNodeList(source[0]);
-                    source.removeAt(0); // ÅÅ³ı¸Õ²åÈëµÄÒ»¸ö
+                    source.removeAt(0); // æ’é™¤åˆšæ’å…¥çš„ä¸€ä¸ª
                     list.after(source);
                 }
             }
@@ -1424,8 +1424,8 @@ out strError);
         }
 
         // parameters:
-        //      reserve_subjects   ±£ÁôµÄ×ÔÓÉ´Ê¡£Ö¸Ö¸Ê¾·û1Îª 0/1/2 µÄ×ÔÓÉ´Ê¡£ÕâĞ©×ÔÓÉ´Ê²»ÈÃ¶Ô»°¿òĞŞ¸Ä(¿ÉÒÔÔÚ MARC ±à¼­Æ÷ĞŞ¸Ä)
-        //      subjects          ÈÃĞŞ¸ÄµÄ×ÔÓÉ´Ê¡£Ö¸Ê¾·û1Îª ¿Õ¡£ÕâĞ©×ÔÓÉ´ÊÈÃ¶Ô»°¿òĞŞ¸Ä
+        //      reserve_subjects   ä¿ç•™çš„è‡ªç”±è¯ã€‚æŒ‡æŒ‡ç¤ºç¬¦1ä¸º 0/1/2 çš„è‡ªç”±è¯ã€‚è¿™äº›è‡ªç”±è¯ä¸è®©å¯¹è¯æ¡†ä¿®æ”¹(å¯ä»¥åœ¨ MARC ç¼–è¾‘å™¨ä¿®æ”¹)
+        //      subjects          è®©ä¿®æ”¹çš„è‡ªç”±è¯ã€‚æŒ‡ç¤ºç¬¦1ä¸º ç©ºã€‚è¿™äº›è‡ªç”±è¯è®©å¯¹è¯æ¡†ä¿®æ”¹
         int GetExistSubject(
             string strBiblioRecPath,
             out string strBiblioXml,
@@ -1442,7 +1442,7 @@ out strError);
 
             string[] results = null;
 
-            // »ñµÃÊéÄ¿¼ÇÂ¼
+            // è·å¾—ä¹¦ç›®è®°å½•
             long lRet = Channel.GetBiblioInfos(
                 stop,
                 strBiblioRecPath,
@@ -1466,8 +1466,8 @@ out strError);
 
             string strMARC = "";
             string strMarcSyntax = "";
-            // ½«XML¸ñÊ½×ª»»ÎªMARC¸ñÊ½
-            // ×Ô¶¯´ÓÊı¾İ¼ÇÂ¼ÖĞ»ñµÃMARCÓï·¨
+            // å°†XMLæ ¼å¼è½¬æ¢ä¸ºMARCæ ¼å¼
+            // è‡ªåŠ¨ä»æ•°æ®è®°å½•ä¸­è·å¾—MARCè¯­æ³•
             int nRet = MarcUtil.Xml2Marc(strBiblioXml,
                 true,
                 null,
@@ -1476,7 +1476,7 @@ out strError);
                 out strError);
             if (nRet == -1)
             {
-                strError = "XML×ª»»µ½MARC¼ÇÂ¼Ê±³ö´í: " + strError;
+                strError = "XMLè½¬æ¢åˆ°MARCè®°å½•æ—¶å‡ºé”™: " + strError;
                 return -1;
             }
 
@@ -1492,14 +1492,14 @@ out strError);
         }
 
         /// <summary>
-        /// ´Ó MARC ×Ö·û´®ÖĞ»ñµÃÖ÷Ìâ´ÊĞÅÏ¢
+        /// ä» MARC å­—ç¬¦ä¸²ä¸­è·å¾—ä¸»é¢˜è¯ä¿¡æ¯
         /// </summary>
-        /// <param name="strMARC">MARC ×Ö·û´®¡£»úÄÚ¸ñÊ½</param>
-        /// <param name="strMarcSyntax">MARC ¸ñÊ½</param>
-        /// <param name="reserve_subjects">·µ»ØÒª±£ÁôµÄÖ÷Ìâ´Ê¼¯ºÏ¡£×Ö¶ÎÖ¸Ê¾·û1 ²»Îª¿ÕµÄ</param>
-        /// <param name="subjects">·µ»ØÖ÷Ìâ´Ê¼¯ºÏ¡£×Ö¶ÎÖ¸Ê¾·û1 Îª¿ÕµÄ</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í; 0: ³É¹¦</returns>
+        /// <param name="strMARC">MARC å­—ç¬¦ä¸²ã€‚æœºå†…æ ¼å¼</param>
+        /// <param name="strMarcSyntax">MARC æ ¼å¼</param>
+        /// <param name="reserve_subjects">è¿”å›è¦ä¿ç•™çš„ä¸»é¢˜è¯é›†åˆã€‚å­—æ®µæŒ‡ç¤ºç¬¦1 ä¸ä¸ºç©ºçš„</param>
+        /// <param name="subjects">è¿”å›ä¸»é¢˜è¯é›†åˆã€‚å­—æ®µæŒ‡ç¤ºç¬¦1 ä¸ºç©ºçš„</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™; 0: æˆåŠŸ</returns>
         public static int GetSubjectInfo(string strMARC,
             string strMarcSyntax,
             out List<string> reserve_subjects,
@@ -1518,7 +1518,7 @@ out strError);
                 nodes = record.select("field[@name='653']/subfield[@name='a']");
             else
             {
-                strError = "Î´ÖªµÄ MARC ¸ñÊ½ÀàĞÍ '" + strMarcSyntax + "'";
+                strError = "æœªçŸ¥çš„ MARC æ ¼å¼ç±»å‹ '" + strMarcSyntax + "'";
                 return -1;
             }
 

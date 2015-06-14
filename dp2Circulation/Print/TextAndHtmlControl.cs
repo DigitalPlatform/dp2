@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -18,7 +18,7 @@ namespace dp2Circulation.Print
 
             if (this.m_bEnableHtml == false)
             {
-                // ÒªÒş²ØhtmlÏà¹Ø²¿¼ş
+                // è¦éšè—htmlç›¸å…³éƒ¨ä»¶
                 HideHtmlControls(true);
             }
         }
@@ -94,15 +94,15 @@ namespace dp2Circulation.Print
             {
                 this.tabControl1.TabPages.Remove(this.tabPage_html);
 
-                this.tabPage_text.Text = "´¿ÎÄ±¾";
+                this.tabPage_text.Text = "çº¯æ–‡æœ¬";
             }
             else
             {
                 this.tabControl1.TabPages.Add(this.tabPage_html);
                 this.tabControl1.SelectTab(this.tabPage_html);
 
-                this.tabPage_text.Text = "HTML´úÂë";
-                this.tabPage_html.Text = "´òÓ¡Ğ§¹û";
+                this.tabPage_text.Text = "HTMLä»£ç ";
+                this.tabPage_html.Text = "æ‰“å°æ•ˆæœ";
             }
         }
     }

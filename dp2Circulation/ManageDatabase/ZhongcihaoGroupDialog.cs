@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -10,8 +10,8 @@ namespace dp2Circulation
 {
     internal partial class ZhongcihaoGroupDialog : Form
     {
-        public string AllZhongcihaoDatabaseInfoXml = "";// ¶¨ÒåÁËÈô¸ÉÖÖ´ÎºÅ¿âµÄXMLÆ¬¶Î
-        public List<string> ExcludingDbNames = new List<string>();   // ÒªÅÅ³ıµÄ¡¢ÒÑ¾­±»Ê¹ÓÃÁËµÄÖÖ´ÎºÅ¿âÃû
+        public string AllZhongcihaoDatabaseInfoXml = "";// å®šä¹‰äº†è‹¥å¹²ç§æ¬¡å·åº“çš„XMLç‰‡æ®µ
+        public List<string> ExcludingDbNames = new List<string>();   // è¦æ’é™¤çš„ã€å·²ç»è¢«ä½¿ç”¨äº†çš„ç§æ¬¡å·åº“å
 
         public ZhongcihaoGroupDialog()
         {
@@ -29,22 +29,22 @@ namespace dp2Circulation
 
             if (this.textBox_groupName.Text == "")
             {
-                strError = "ÉĞÎ´ÊäÈë×éÃû";
+                strError = "å°šæœªè¾“å…¥ç»„å";
                 goto ERROR1;
             }
 
             if (this.textBox_zhongcihaoDbName.Text == "")
             {
-                strError = "ÉĞÎ´ÊäÈëÖÖ´ÎºÅ¿âÃû";
+                strError = "å°šæœªè¾“å…¥ç§æ¬¡å·åº“å";
                 goto ERROR1;
             }
 
-            // ¼ì²é¶Ô»°¿òÖĞµÃµ½µÄÖÖ´ÎºÅ¿â£¬ÊÇ²»ÊÇ±»±ğ´¦ÓÃ¹ıµÄÖÖ´ÎºÅ¿â£¿
+            // æ£€æŸ¥å¯¹è¯æ¡†ä¸­å¾—åˆ°çš„ç§æ¬¡å·åº“ï¼Œæ˜¯ä¸æ˜¯è¢«åˆ«å¤„ç”¨è¿‡çš„ç§æ¬¡å·åº“ï¼Ÿ
             if (this.ExcludingDbNames != null)
             {
                 if (this.ExcludingDbNames.IndexOf(this.textBox_zhongcihaoDbName.Text) != -1)
                 {
-                    strError = "ÄúËùÖ¸¶¨µÄÖÖ´ÎºÅ¿â '" + this.textBox_zhongcihaoDbName.Text + "' ÒÑ¾­±»ÆäËû×éÊ¹ÓÃ¹ıÁË";
+                    strError = "æ‚¨æ‰€æŒ‡å®šçš„ç§æ¬¡å·åº“ '" + this.textBox_zhongcihaoDbName.Text + "' å·²ç»è¢«å…¶ä»–ç»„ä½¿ç”¨è¿‡äº†";
                     goto ERROR1;
                 }
             }
@@ -68,8 +68,8 @@ namespace dp2Circulation
             GetOpacMemberDatabaseNameDialog dlg = new GetOpacMemberDatabaseNameDialog();
             MainForm.SetControlFont(dlg, this.Font, false);
             // dlg.Text = "";
-            dlg.AllDatabaseInfoXml = this.AllZhongcihaoDatabaseInfoXml;    // ¶¨ÒåÁËÈô¸ÉÖÖ´ÎºÅ¿âµÄXMLÆ¬¶Î
-            dlg.ExcludingDbNames = this.ExcludingDbNames;   // ÒªÅÅ³ıµÄ¡¢ÒÑ¾­±»Ê¹ÓÃÁËµÄÖÖ´ÎºÅ¿âÃû
+            dlg.AllDatabaseInfoXml = this.AllZhongcihaoDatabaseInfoXml;    // å®šä¹‰äº†è‹¥å¹²ç§æ¬¡å·åº“çš„XMLç‰‡æ®µ
+            dlg.ExcludingDbNames = this.ExcludingDbNames;   // è¦æ’é™¤çš„ã€å·²ç»è¢«ä½¿ç”¨äº†çš„ç§æ¬¡å·åº“å
             dlg.StartPosition = FormStartPosition.CenterScreen;
 
             dlg.ShowDialog(this);
@@ -80,7 +80,7 @@ namespace dp2Circulation
             this.textBox_zhongcihaoDbName.Text = dlg.SelectedDatabaseName;
         }
 
-        // ×éÃû
+        // ç»„å
         public string GroupName
         {
             get
@@ -93,7 +93,7 @@ namespace dp2Circulation
             }
         }
 
-        // ÖÖ´ÎºÅ¿âÃû
+        // ç§æ¬¡å·åº“å
         public string ZhongcihaoDbName
         {
             get

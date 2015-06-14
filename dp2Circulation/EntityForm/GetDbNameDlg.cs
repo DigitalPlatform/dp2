@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -11,17 +11,17 @@ using DigitalPlatform;
 namespace dp2Circulation
 {
     /// <summary>
-    /// Ñ¡ÔñÊı¾İ¿âÃûµÄ¶Ô»°¿ò
+    /// é€‰æ‹©æ•°æ®åº“åçš„å¯¹è¯æ¡†
     /// </summary>
     internal partial class GetDbNameDlg : Form
     {
         string m_strDbType = "biblio";    // biblio / reader
 
         const int WM_AUTO_CLOSE = API.WM_USER + 200;
-        public bool AutoClose = false;  // ¶Ô»°¿ò¿Ú´ò¿ªºóÁ¢¼´¹Ø±Õ?
+        public bool AutoClose = false;  // å¯¹è¯æ¡†å£æ‰“å¼€åç«‹å³å…³é—­?
 
         /// <summary>
-        /// ¿ò¼Ü´°¿Ú
+        /// æ¡†æ¶çª—å£
         /// </summary>
         public MainForm MainForm = null;
 
@@ -42,15 +42,15 @@ namespace dp2Circulation
             {
                 this.m_strDbType = value;
 
-                this.Text = "Ö¸¶¨" + this.GetTypeName() + "¿âÃû";
-                this.label_dbNameList.Text = this.GetTypeName() + "¿âÃûÁĞ±í(&L)";
-                this.label_dbName.Text = this.GetTypeName() + "¿âÃû(&N)";
+                this.Text = "æŒ‡å®š" + this.GetTypeName() + "åº“å";
+                this.label_dbNameList.Text = this.GetTypeName() + "åº“ååˆ—è¡¨(&L)";
+                this.label_dbName.Text = this.GetTypeName() + "åº“å(&N)";
             }
         }
 
         private void GetDbNameDlg_Load(object sender, EventArgs e)
         {
-            // Ìî³äÊı¾İ¿âÃûÁĞ±í
+            // å¡«å……æ•°æ®åº“ååˆ—è¡¨
             if (this.m_strDbType == "biblio")
             {
                 if (this.MainForm != null
@@ -75,7 +75,7 @@ namespace dp2Circulation
             }
 
 
-            // Ñ¡¶¨ÏîÄ¿
+            // é€‰å®šé¡¹ç›®
             if (String.IsNullOrEmpty(this.DbName) == false)
                 this.listBox_biblioDbNames.SelectedItem = this.DbName;
 
@@ -99,9 +99,9 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// È±Ê¡´°¿Ú¹ı³Ì
+        /// ç¼ºçœçª—å£è¿‡ç¨‹
         /// </summary>
-        /// <param name="m">ÏûÏ¢</param>
+        /// <param name="m">æ¶ˆæ¯</param>
         protected override void DefWndProc(ref Message m)
         {
             switch (m.Msg)
@@ -116,9 +116,9 @@ namespace dp2Circulation
         string GetTypeName()
         {
             if (this.m_strDbType == "biblio")
-                return "ÊéÄ¿";
+                return "ä¹¦ç›®";
             if (this.m_strDbType == "reader")
-                return "¶ÁÕß";
+                return "è¯»è€…";
 
             return this.m_strDbType;
         }
@@ -127,7 +127,7 @@ namespace dp2Circulation
         {
             if (this.textBox_dbName.Text == "")
             {
-                MessageBox.Show(this, "ÇëÖ¸¶¨"+this.GetTypeName()+"¿âÃû");
+                MessageBox.Show(this, "è¯·æŒ‡å®š"+this.GetTypeName()+"åº“å");
                 return;
             }
             this.DialogResult = DialogResult.OK;

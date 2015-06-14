@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -11,7 +11,7 @@ using DigitalPlatform.Text;
 namespace dp2Circulation
 {
     /// <summary>
-    /// Ä¿±ê¿âÊÂÏî ¶Ô»°¿ò
+    /// ç›®æ ‡åº“äº‹é¡¹ å¯¹è¯æ¡†
     /// </summary>
     internal partial class TargetDatabaseDialog : Form
     {
@@ -35,13 +35,13 @@ namespace dp2Circulation
         {
             if (this.comboBox_databaseName.Text == "")
             {
-                MessageBox.Show(this, "ÉĞÎ´ÊäÈëÊı¾İ¿âÃû");
+                MessageBox.Show(this, "å°šæœªè¾“å…¥æ•°æ®åº“å");
                 return;
             }
 
             if (this.textBox_threshold.Text == "")
             {
-                MessageBox.Show(this, "ÉĞÎ´ÊäÈëãĞÖµ");
+                MessageBox.Show(this, "å°šæœªè¾“å…¥é˜ˆå€¼");
                 return;
             }
 
@@ -83,16 +83,16 @@ namespace dp2Circulation
         private void button_findDatabaseName_Click(object sender, EventArgs e)
         {
             /*
-            // ĞèÒªÓĞDTLP×ÊÔ´¶Ô»°¿ò¡£ĞèÒªÓĞDtlpChannelsµÄÖ§³Ö
+            // éœ€è¦æœ‰DTLPèµ„æºå¯¹è¯æ¡†ã€‚éœ€è¦æœ‰DtlpChannelsçš„æ”¯æŒ
             if (this.DupCfgDialog == null)
             {
-                MessageBox.Show(this, "DupCfgDialog³ÉÔ±Îª¿Õ£¬ÎŞ·¨´ò¿ªÑ¡ÔñÄ¿±êÊı¾İ¿âµÄ¶Ô»°¿ò");
+                MessageBox.Show(this, "DupCfgDialogæˆå‘˜ä¸ºç©ºï¼Œæ— æ³•æ‰“å¼€é€‰æ‹©ç›®æ ‡æ•°æ®åº“çš„å¯¹è¯æ¡†");
                 return;
             }
 
             GetDtlpResDialog dlg = new GetDtlpResDialog();
 
-            dlg.Text = "ÇëÑ¡ÔñÄ¿±êÊı¾İ¿â";
+            dlg.Text = "è¯·é€‰æ‹©ç›®æ ‡æ•°æ®åº“";
             dlg.Initial(this.DupCfgDialog.DtlpChannels,
                 this.DupCfgDialog.DtlpChannel);
             dlg.StartPosition = FormStartPosition.CenterScreen;
@@ -106,7 +106,7 @@ namespace dp2Circulation
             GetOpacMemberDatabaseNameDialog dlg = new GetOpacMemberDatabaseNameDialog();
                     MainForm.SetControlFont(dlg, this.Font, false);
 
-            dlg.Text = "ÇëÑ¡ÔñÄ¿±êÊı¾İ¿â";
+            dlg.Text = "è¯·é€‰æ‹©ç›®æ ‡æ•°æ®åº“";
             dlg.SelectedDatabaseName = this.textBox_databaseName.Text;
             dlg.AllDatabaseInfoXml = AllBiblioDbInfoXml;
             dlg.ExcludingDbNames = used_dbnames;
@@ -125,7 +125,7 @@ namespace dp2Circulation
         {
             if (StringUtil.IsPureNumber(this.textBox_threshold.Text) == false)
             {
-                MessageBox.Show(this, "ãĞÖµ±ØĞëÎª´¿Êı×Ö");
+                MessageBox.Show(this, "é˜ˆå€¼å¿…é¡»ä¸ºçº¯æ•°å­—");
                 e.Cancel = true;
             }
         }
@@ -141,7 +141,7 @@ namespace dp2Circulation
 
                     if (this.UsedDbNames != null)
                     {
-                        // ÓÃ¹ıµÄÊı¾İ¿âÃû²»Òª¼ÓÈëÆäÖĞ
+                        // ç”¨è¿‡çš„æ•°æ®åº“åä¸è¦åŠ å…¥å…¶ä¸­
                         if (this.UsedDbNames.IndexOf(strDbName) == -1)
                             this.comboBox_databaseName.Items.Add(strDbName);
                     }

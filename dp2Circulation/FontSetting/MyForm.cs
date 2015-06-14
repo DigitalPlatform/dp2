@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -7,6 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.IO;
+using System.Web;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
@@ -15,20 +16,19 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Xml;
 
 using DigitalPlatform.CirculationClient.localhost;
-using System.Web;
 
-// 2013/3/16 Ìí¼Ó XML ×¢ÊÍ
+// 2013/3/16 æ·»åŠ  XML æ³¨é‡Š
 
 namespace dp2Circulation
 {
     /// <summary>
-    /// Í¨ÓÃµÄ MDI ×Ó´°¿Ú»ùÀà¡£Ìá¹©ÁËÍ¨Ñ¶Í¨µÀºÍ´°¿Ú³ß´çÎ¬³ÖµÈÍ¨ÓÃÉèÊ©
+    /// é€šç”¨çš„ MDI å­çª—å£åŸºç±»ã€‚æä¾›äº†é€šè®¯é€šé“å’Œçª—å£å°ºå¯¸ç»´æŒç­‰é€šç”¨è®¾æ–½
     /// </summary>
     public class MyForm : Form, IMdiWindow
     {
 
         /// <summary>
-        /// ´°¿ÚÊÇ·ñÎª¸¡¶¯×´Ì¬
+        /// çª—å£æ˜¯å¦ä¸ºæµ®åŠ¨çŠ¶æ€
         /// </summary>
         public virtual bool Floating
         {
@@ -36,19 +36,19 @@ namespace dp2Circulation
             set;
         }
         /// <summary>
-        /// Í¨Ñ¶Í¨µÀ
+        /// é€šè®¯é€šé“
         /// </summary>
         public LibraryChannel Channel = new LibraryChannel();
 
         /// <summary>
-        /// ½çÃæÓïÑÔ
+        /// ç•Œé¢è¯­è¨€
         /// </summary>
         public string Lang = "zh";
 
         MainForm m_mainForm = null;
 
         /// <summary>
-        /// µ±Ç°´°¿ÚËù´ÓÊôµÄ¿ò¼Ü´°¿Ú
+        /// å½“å‰çª—å£æ‰€ä»å±çš„æ¡†æ¶çª—å£
         /// </summary>
         public virtual MainForm MainForm
         {
@@ -60,7 +60,7 @@ namespace dp2Circulation
             }
             set
             {
-                // ÎªÁËÈÃ½Å±¾´úÂëÄÜ¼æÈİ
+                // ä¸ºäº†è®©è„šæœ¬ä»£ç èƒ½å…¼å®¹
                 this.m_mainForm = value;
             }
         }
@@ -68,7 +68,7 @@ namespace dp2Circulation
         internal DigitalPlatform.Stop stop = null;
 
         /// <summary>
-        /// ½ø¶ÈÌõºÍÍ£Ö¹°´Å¥
+        /// è¿›åº¦æ¡å’Œåœæ­¢æŒ‰é’®
         /// </summary>
         public Stop Progress
         {
@@ -95,12 +95,12 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÔÊĞí»òÕß½ûÖ¹½çÃæ¿Ø¼ş¡£ÔÚ³¤²Ù×÷Ç°£¬Ò»°ãĞèÒª½ûÖ¹½çÃæ¿Ø¼ş£»²Ù×÷Íê³ÉºóÔÙÔÊĞí
+        /// å…è®¸æˆ–è€…ç¦æ­¢ç•Œé¢æ§ä»¶ã€‚åœ¨é•¿æ“ä½œå‰ï¼Œä¸€èˆ¬éœ€è¦ç¦æ­¢ç•Œé¢æ§ä»¶ï¼›æ“ä½œå®Œæˆåå†å…è®¸
         /// </summary>
-        /// <param name="bEnable">ÊÇ·ñÔÊĞí½çÃæ¿Ø¼ş¡£true ÎªÔÊĞí£¬ false Îª½ûÖ¹</param>
+        /// <param name="bEnable">æ˜¯å¦å…è®¸ç•Œé¢æ§ä»¶ã€‚true ä¸ºå…è®¸ï¼Œ false ä¸ºç¦æ­¢</param>
         public virtual void EnableControls(bool bEnable)
         {
-            throw new Exception("ÉĞÎ´ÊµÏÖ EnableControls() ");
+            throw new Exception("å°šæœªå®ç° EnableControls() ");
         }
 
         internal Timer _timer = null;
@@ -127,7 +127,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ´°¿Ú Load Ê±±»´¥·¢
+        /// çª—å£ Load æ—¶è¢«è§¦å‘
         /// </summary>
         public virtual void OnMyFormLoad()
         {
@@ -143,39 +143,39 @@ namespace dp2Circulation
             this.Channel.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
 
             stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// ºÍÈİÆ÷¹ØÁª
+            stop.Register(MainForm.stopManager, true);	// å’Œå®¹å™¨å…³è”
         }
 
 
         /// <summary>
-        /// ´°¿Ú Closing Ê±±»´¥·¢
+        /// çª—å£ Closing æ—¶è¢«è§¦å‘
         /// </summary>
-        /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+        /// <param name="e">äº‹ä»¶å‚æ•°</param>
         public virtual void OnMyFormClosing(FormClosingEventArgs e)
         {
             if (stop != null)
             {
-                if (stop.State == 0)    // 0 ±íÊ¾ÕıÔÚ´¦Àí
+                if (stop.State == 0)    // 0 è¡¨ç¤ºæ­£åœ¨å¤„ç†
                 {
-                    MessageBox.Show(this, "ÇëÔÚ¹Ø±Õ´°¿ÚÇ°Í£Ö¹ÕıÔÚ½øĞĞµÄ³¤Ê±²Ù×÷¡£");
+                    MessageBox.Show(this, "è¯·åœ¨å…³é—­çª—å£å‰åœæ­¢æ­£åœ¨è¿›è¡Œçš„é•¿æ—¶æ“ä½œã€‚");
                     e.Cancel = true;
                     return;
                 }
             }
         }
 
-        // ÔÚ base.OnFormClosed(e); Ö®Ç°µ÷ÓÃ
+        // åœ¨ base.OnFormClosed(e); ä¹‹å‰è°ƒç”¨
         /// <summary>
-        /// ´°¿Ú Closed Ê±±»´¥·¢¡£ÔÚ base.OnFormClosed(e) Ö®Ç°±»µ÷ÓÃ
+        /// çª—å£ Closed æ—¶è¢«è§¦å‘ã€‚åœ¨ base.OnFormClosed(e) ä¹‹å‰è¢«è°ƒç”¨
         /// </summary>
         public virtual void OnMyFormClosed()
         {
             if (this.Channel != null)
-                this.Channel.Close();   // TODO: ×îºÃÏŞÖÆÒ»¸öÊ±¼ä£¬³¬¹ıÕâ¸öÊ±¼äÔòAbort()
+                this.Channel.Close();   // TODO: æœ€å¥½é™åˆ¶ä¸€ä¸ªæ—¶é—´ï¼Œè¶…è¿‡è¿™ä¸ªæ—¶é—´åˆ™Abort()
 
-            if (stop != null) // ÍÑÀë¹ØÁª
+            if (stop != null) // è„±ç¦»å…³è”
             {
-                stop.Unregister();	// ºÍÈİÆ÷¹ØÁª
+                stop.Unregister();	// å’Œå®¹å™¨å…³è”
                 stop = null;
             }
 
@@ -187,17 +187,17 @@ namespace dp2Circulation
             }
 
             /*
-            // Èç¹ûMDI×Ó´°¿Ú²»ÊÇMainForm¸Õ¸Õ×¼±¸ÍË³öÊ±µÄ×´Ì¬£¬»Ö¸´Ëü¡£ÎªÁË¼ÇÒä³ß´ç×ö×¼±¸
+            // å¦‚æœMDIå­çª—å£ä¸æ˜¯MainFormåˆšåˆšå‡†å¤‡é€€å‡ºæ—¶çš„çŠ¶æ€ï¼Œæ¢å¤å®ƒã€‚ä¸ºäº†è®°å¿†å°ºå¯¸åšå‡†å¤‡
             if (this.WindowState != this.MainForm.MdiWindowState)
                 this.WindowState = this.MainForm.MdiWindowState;
              * */
         }
 
         /// <summary>
-        /// Í¨Ñ¶Í¨µÀµÇÂ¼Ç°±»´¥·¢
+        /// é€šè®¯é€šé“ç™»å½•å‰è¢«è§¦å‘
         /// </summary>
-        /// <param name="sender">µ÷ÓÃÕß</param>
-        /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+        /// <param name="sender">è°ƒç”¨è€…</param>
+        /// <param name="e">äº‹ä»¶å‚æ•°</param>
         public virtual void Channel_BeforeLogin(object sender, BeforeLoginEventArgs e)
         {
             this.MainForm.Channel_BeforeLogin(this, e);
@@ -215,10 +215,10 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ¿ªÊ¼Ò»¸öÑ­»·
+        /// å¼€å§‹ä¸€ä¸ªå¾ªç¯
         /// </summary>
-        /// <param name="strStyle">·ç¸ñ¡£Èç¹û°üº¬ "halfstop"£¬±íÊ¾Í£Ö¹°´Å¥Ê¹ÓÃÎÂºÍÖĞ¶Ï·½Ê½ </param>
-        /// <param name="strMessage">ÒªÔÚ×´Ì¬ĞĞÏÔÊ¾µÄÏûÏ¢ÎÄ×Ö</param>
+        /// <param name="strStyle">é£æ ¼ã€‚å¦‚æœåŒ…å« "halfstop"ï¼Œè¡¨ç¤ºåœæ­¢æŒ‰é’®ä½¿ç”¨æ¸©å’Œä¸­æ–­æ–¹å¼ </param>
+        /// <param name="strMessage">è¦åœ¨çŠ¶æ€è¡Œæ˜¾ç¤ºçš„æ¶ˆæ¯æ–‡å­—</param>
         public void BeginLoop(string strStyle = "",
             string strMessage = "")
         {
@@ -231,7 +231,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ½áÊøÒ»¸öÑ­»·
+        /// ç»“æŸä¸€ä¸ªå¾ªç¯
         /// </summary>
         public void EndLoop()
         {
@@ -243,12 +243,12 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// Ñ­»·ÊÇ·ñ½áÊø£¿
+        /// å¾ªç¯æ˜¯å¦ç»“æŸï¼Ÿ
         /// </summary>
-        /// <returns>true: Ñ­»·ÒÑ¾­½áÊø; false: Ñ­»·ÉĞÎ´½áÊø</returns>
+        /// <returns>true: å¾ªç¯å·²ç»ç»“æŸ; false: å¾ªç¯å°šæœªç»“æŸ</returns>
         public bool IsStopped()
         {
-            Application.DoEvents();	// ³öÈÃ½çÃæ¿ØÖÆÈ¨
+            Application.DoEvents();	// å‡ºè®©ç•Œé¢æ§åˆ¶æƒ
 
             if (this.stop != null)
             {
@@ -260,16 +260,16 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÉèÖÃ½ø¶ÈÌõÉÏµÄÎÄ×ÖÏÔÊ¾
+        /// è®¾ç½®è¿›åº¦æ¡ä¸Šçš„æ–‡å­—æ˜¾ç¤º
         /// </summary>
-        /// <param name="strMessage">ÒªÏÔÊ¾µÄ×Ö·û´®</param>
+        /// <param name="strMessage">è¦æ˜¾ç¤ºçš„å­—ç¬¦ä¸²</param>
         public void SetProgressMessage(string strMessage)
         {
             stop.SetMessage(strMessage);
         }
 
         /// <summary>
-        /// Îªµ±Ç°´°¿Ú»Ö¸´È±Ê¡×ÖÌå
+        /// ä¸ºå½“å‰çª—å£æ¢å¤ç¼ºçœå­—ä½“
         /// </summary>
         public void RestoreDefaultFont()
         {
@@ -297,9 +297,9 @@ namespace dp2Circulation
             }
         }
 
-        // ÉèÖÃ×ÖÌå
+        // è®¾ç½®å­—ä½“
         /// <summary>
-        /// ÉèÖÃ»ù±¾×ÖÌå¡£»á³öÏÖÒ»¸ö¶Ô»°¿òÑ¯ÎÊÒªÉè¶¨µÄ×ÖÌå
+        /// è®¾ç½®åŸºæœ¬å­—ä½“ã€‚ä¼šå‡ºç°ä¸€ä¸ªå¯¹è¯æ¡†è¯¢é—®è¦è®¾å®šçš„å­—ä½“
         /// </summary>
         public void SetBaseFont()
         {
@@ -342,7 +342,7 @@ namespace dp2Circulation
 
             //ReLayout(this);
 
-            // ±£´æµ½ÅäÖÃÎÄ¼ş
+            // ä¿å­˜åˆ°é…ç½®æ–‡ä»¶
             SaveFontSetting();
         }
 
@@ -361,7 +361,7 @@ namespace dp2Circulation
         }*/
 
         /// <summary>
-        /// ±£´æ×ÖÌåÉèÖÃĞÅÏ¢µ½ÅäÖÃ²ÎÊı´æ´¢
+        /// ä¿å­˜å­—ä½“è®¾ç½®ä¿¡æ¯åˆ°é…ç½®å‚æ•°å­˜å‚¨
         /// </summary>
         public void SaveFontSetting()
         {
@@ -397,7 +397,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ´ÓÅäÖÃ²ÎÊı´æ´¢ÖĞ×°ÔØ×ÖÌåÉèÖÃĞÅÏ¢
+        /// ä»é…ç½®å‚æ•°å­˜å‚¨ä¸­è£…è½½å­—ä½“è®¾ç½®ä¿¡æ¯
         /// </summary>
         public void LoadFontSetting()
         {
@@ -423,7 +423,7 @@ namespace dp2Circulation
                 }
                 else
                 {
-                    // ÑØÓÃÏµÍ³µÄÈ±Ê¡×ÖÌå
+                    // æ²¿ç”¨ç³»ç»Ÿçš„ç¼ºçœå­—ä½“
                     if (this.MainForm != null)
                     {
                         MainForm.SetControlFont(this, this.MainForm.DefaultFont);
@@ -449,9 +449,9 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// Form ×°ÔØÊÂ¼ş
+        /// Form è£…è½½äº‹ä»¶
         /// </summary>
-        /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+        /// <param name="e">äº‹ä»¶å‚æ•°</param>
         protected override void OnLoad(EventArgs e)
         {
             this.OnMyFormLoad();
@@ -459,12 +459,12 @@ namespace dp2Circulation
 
             this.LoadFontSetting();
 
-            // ÉèÖÃ´°¿Ú³ß´ç×´Ì¬
-            // Ò»°ãÅÉÉúÀà»áÔÚ EntityForm_Load() º¯ÊıÖĞ
+            // è®¾ç½®çª—å£å°ºå¯¸çŠ¶æ€
+            // ä¸€èˆ¬æ´¾ç”Ÿç±»ä¼šåœ¨ EntityForm_Load() å‡½æ•°ä¸­
             /*
             this.MainForm.AppInfo.LoadMdiSize += new EventHandler(AppInfo_LoadMdiSize);
             this.MainForm.AppInfo.SaveMdiSize += new EventHandler(AppInfo_SaveMdiSize);
-             * Òò´ËÕâÀïÉÔºóÒ»µã´¦Àí³ß´ç³õÊ¼»¯ÊÇ±ØÒªµÄ
+             * å› æ­¤è¿™é‡Œç¨åä¸€ç‚¹å¤„ç†å°ºå¯¸åˆå§‹åŒ–æ˜¯å¿…è¦çš„
              * 
              * * */
             if (this.MainForm != null && this.MainForm.AppInfo != null
@@ -476,9 +476,9 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// Form ¹Ø±ÕÊÂ¼ş
+        /// Form å…³é—­äº‹ä»¶
         /// </summary>
-        /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+        /// <param name="e">äº‹ä»¶å‚æ•°</param>
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
             this.OnMyFormClosed();
@@ -487,19 +487,19 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÔÚ FormClosing ½×¶Î£¬ÊÇ·ñÒªÔ½¹ı this.OnMyFormClosing(e)
+        /// åœ¨ FormClosing é˜¶æ®µï¼Œæ˜¯å¦è¦è¶Šè¿‡ this.OnMyFormClosing(e)
         /// </summary>
         public bool SupressFormClosing = false;
 
         /// <summary>
-        /// ÊÇ·ñĞèÒªºöÂÔ³ß´çÉè¶¨µÄ¹ı³Ì
+        /// æ˜¯å¦éœ€è¦å¿½ç•¥å°ºå¯¸è®¾å®šçš„è¿‡ç¨‹
         /// </summary>
         public bool SupressSizeSetting = false;
 
         /// <summary>
-        /// Form ¼´½«¹Ø±ÕÊÂ¼ş
+        /// Form å³å°†å…³é—­äº‹ä»¶
         /// </summary>
-        /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+        /// <param name="e">äº‹ä»¶å‚æ•°</param>
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             base.OnFormClosing(e);
@@ -508,9 +508,9 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// Form ¼¤»îÊÂ¼ş
+        /// Form æ¿€æ´»äº‹ä»¶
         /// </summary>
-        /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+        /// <param name="e">äº‹ä»¶å‚æ•°</param>
         protected override void OnActivated(EventArgs e)
         {
             // if (this.stop != null)
@@ -529,25 +529,25 @@ namespace dp2Circulation
         }
 #endif
 
-        // ĞÎÊ½Ğ£ÑéÌõÂëºÅ
+        // å½¢å¼æ ¡éªŒæ¡ç å·
         // return:
-        //      -2  ·şÎñÆ÷Ã»ÓĞÅäÖÃĞ£Ñé·½·¨£¬ÎŞ·¨Ğ£Ñé
+        //      -2  æœåŠ¡å™¨æ²¡æœ‰é…ç½®æ ¡éªŒæ–¹æ³•ï¼Œæ— æ³•æ ¡éªŒ
         //      -1  error
-        //      0   ²»ÊÇºÏ·¨µÄÌõÂëºÅ
-        //      1   ÊÇºÏ·¨µÄ¶ÁÕßÖ¤ÌõÂëºÅ
-        //      2   ÊÇºÏ·¨µÄ²áÌõÂëºÅ
+        //      0   ä¸æ˜¯åˆæ³•çš„æ¡ç å·
+        //      1   æ˜¯åˆæ³•çš„è¯»è€…è¯æ¡ç å·
+        //      2   æ˜¯åˆæ³•çš„å†Œæ¡ç å·
         /// <summary>
-        /// ĞÎÊ½Ğ£ÑéÌõÂëºÅ
+        /// å½¢å¼æ ¡éªŒæ¡ç å·
         /// </summary>
-        /// <param name="strBarcode">ÒªĞ£ÑéµÄÌõÂëºÅ</param>
-        /// <param name="strLibraryCodeList">¹İ´úÂëÁĞ±í</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
+        /// <param name="strBarcode">è¦æ ¡éªŒçš„æ¡ç å·</param>
+        /// <param name="strLibraryCodeList">é¦†ä»£ç åˆ—è¡¨</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
         /// <returns>
-        /// <para>-2  ·şÎñÆ÷Ã»ÓĞÅäÖÃĞ£Ñé·½·¨£¬ÎŞ·¨Ğ£Ñé</para>
-        /// <para>-1  ³ö´í</para>
-        /// <para>0   ²»ÊÇºÏ·¨µÄÌõÂëºÅ</para>
-        /// <para>1   ÊÇºÏ·¨µÄ¶ÁÕßÖ¤ÌõÂëºÅ</para>
-        /// <para>2   ÊÇºÏ·¨µÄ²áÌõÂëºÅ</para>
+        /// <para>-2  æœåŠ¡å™¨æ²¡æœ‰é…ç½®æ ¡éªŒæ–¹æ³•ï¼Œæ— æ³•æ ¡éªŒ</para>
+        /// <para>-1  å‡ºé”™</para>
+        /// <para>0   ä¸æ˜¯åˆæ³•çš„æ¡ç å·</para>
+        /// <para>1   æ˜¯åˆæ³•çš„è¯»è€…è¯æ¡ç å·</para>
+        /// <para>2   æ˜¯åˆæ³•çš„å†Œæ¡ç å·</para>
         /// </returns>
         public virtual int VerifyBarcode(
             string strLibraryCodeList,
@@ -559,7 +559,7 @@ namespace dp2Circulation
             // EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚÑéÖ¤ÌõÂëºÅ " + strBarcode + "...");
+            stop.Initial("æ­£åœ¨éªŒè¯æ¡ç å· " + strBarcode + "...");
             stop.BeginLoop();
 
             try
@@ -583,21 +583,21 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// Ïò¿ØÖÆÌ¨Êä³ö HTML
+        /// å‘æ§åˆ¶å°è¾“å‡º HTML
         /// </summary>
-        /// <param name="strHtml">ÒªÊä³öµÄ HTML ×Ö·û´®</param>
+        /// <param name="strHtml">è¦è¾“å‡ºçš„ HTML å­—ç¬¦ä¸²</param>
         public void OutputHtml(string strHtml)
         {
             this.MainForm.OperHistory.AppendHtml(strHtml);
         }
 
         // parameters:
-        //      nWarningLevel   0 Õı³£ÎÄ±¾(°×É«±³¾°) 1 ¾¯¸æÎÄ±¾(»ÆÉ«±³¾°) >=2 ´íÎóÎÄ±¾(ºìÉ«±³¾°)
+        //      nWarningLevel   0 æ­£å¸¸æ–‡æœ¬(ç™½è‰²èƒŒæ™¯) 1 è­¦å‘Šæ–‡æœ¬(é»„è‰²èƒŒæ™¯) >=2 é”™è¯¯æ–‡æœ¬(çº¢è‰²èƒŒæ™¯)
         /// <summary>
-        /// Ïò¿ØÖÆÌ¨Êä³ö´¿ÎÄ±¾
+        /// å‘æ§åˆ¶å°è¾“å‡ºçº¯æ–‡æœ¬
         /// </summary>
-        /// <param name="strText">ÒªÊä³öµÄ´¿ÎÄ±¾×Ö·û´®</param>
-        /// <param name="nWarningLevel">¾¯¸æ¼¶±ğ¡£0 Õı³£ÎÄ±¾(°×É«±³¾°) 1 ¾¯¸æÎÄ±¾(»ÆÉ«±³¾°) >=2 ´íÎóÎÄ±¾(ºìÉ«±³¾°)</param>
+        /// <param name="strText">è¦è¾“å‡ºçš„çº¯æ–‡æœ¬å­—ç¬¦ä¸²</param>
+        /// <param name="nWarningLevel">è­¦å‘Šçº§åˆ«ã€‚0 æ­£å¸¸æ–‡æœ¬(ç™½è‰²èƒŒæ™¯) 1 è­¦å‘Šæ–‡æœ¬(é»„è‰²èƒŒæ™¯) >=2 é”™è¯¯æ–‡æœ¬(çº¢è‰²èƒŒæ™¯)</param>
         public void OutputText(string strText, int nWarningLevel = 0)
         {
             string strClass = "normal";
@@ -609,19 +609,19 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// MDI×Ó´°¿Ú±»Í¨ÖªÊÂ¼ş·¢Éú
+        /// MDIå­çª—å£è¢«é€šçŸ¥äº‹ä»¶å‘ç”Ÿ
         /// </summary>
-        /// <param name="e">ÊÂ¼şÀàĞÍ</param>
+        /// <param name="e">äº‹ä»¶ç±»å‹</param>
         public virtual void OnNotify(ParamChangedEventArgs e)
         {
 
         }
 
 
-        #region ÅäÖÃÎÄ¼şÏà¹Ø
+        #region é…ç½®æ–‡ä»¶ç›¸å…³
 
-        // °ü×°°æ±¾
-        // »ñµÃÅäÖÃÎÄ¼ş
+        // åŒ…è£…ç‰ˆæœ¬
+        // è·å¾—é…ç½®æ–‡ä»¶
         // parameters:
         //      
         // return:
@@ -640,9 +640,9 @@ namespace dp2Circulation
             out strError);
         }
 
-        int m_nInGetCfgFile = 0;    // ·ÀÖ¹GetCfgFile()º¯ÊıÖØÈë 2008/3/6
+        int m_nInGetCfgFile = 0;    // é˜²æ­¢GetCfgFile()å‡½æ•°é‡å…¥ 2008/3/6
 
-        // »ñµÃÅäÖÃÎÄ¼ş
+        // è·å¾—é…ç½®æ–‡ä»¶
         // parameters:
         //      
         // return:
@@ -660,20 +660,20 @@ namespace dp2Circulation
 
             if (m_nInGetCfgFile > 0)
             {
-                strError = "GetCfgFile() ÖØÈëÁË";
+                strError = "GetCfgFile() é‡å…¥äº†";
                 return -1;
             }
 
 
             Progress.OnStop += new StopEventHandler(this.DoStop);
-            Progress.Initial("ÕıÔÚÏÂÔØÅäÖÃÎÄ¼ş ...");
+            Progress.Initial("æ­£åœ¨ä¸‹è½½é…ç½®æ–‡ä»¶ ...");
             Progress.BeginLoop();
 
             m_nInGetCfgFile++;
 
             try
             {
-                Progress.SetMessage("ÕıÔÚÏÂÔØÅäÖÃÎÄ¼ş " + strCfgFilePath + " ...");
+                Progress.SetMessage("æ­£åœ¨ä¸‹è½½é…ç½®æ–‡ä»¶ " + strCfgFilePath + " ...");
                 string strMetaData = "";
                 string strOutputPath = "";
 
@@ -711,7 +711,7 @@ namespace dp2Circulation
             return -1;
         }
 
-        // »ñµÃÅäÖÃÎÄ¼ş
+        // è·å¾—é…ç½®æ–‡ä»¶
         // parameters:
         //      
         // return:
@@ -730,12 +730,12 @@ namespace dp2Circulation
 
             if (m_nInGetCfgFile > 0)
             {
-                strError = "GetCfgFile() ÖØÈëÁË";
+                strError = "GetCfgFile() é‡å…¥äº†";
                 return -1;
             }
 
             Progress.OnStop += new StopEventHandler(this.DoStop);
-            Progress.Initial("ÕıÔÚÏÂÔØÅäÖÃÎÄ¼ş ...");
+            Progress.Initial("æ­£åœ¨ä¸‹è½½é…ç½®æ–‡ä»¶ ...");
             Progress.BeginLoop();
 
             m_nInGetCfgFile++;
@@ -744,7 +744,7 @@ namespace dp2Circulation
             {
                 string strPath = strBiblioDbName + "/cfgs/" + strCfgFileName;
 
-                Progress.SetMessage("ÕıÔÚÏÂÔØÅäÖÃÎÄ¼ş " + strPath + " ...");
+                Progress.SetMessage("æ­£åœ¨ä¸‹è½½é…ç½®æ–‡ä»¶ " + strPath + " ...");
                 string strMetaData = "";
                 string strOutputPath = "";
 
@@ -783,7 +783,7 @@ namespace dp2Circulation
         }
 
 
-        // ±£´æÅäÖÃÎÄ¼ş
+        // ä¿å­˜é…ç½®æ–‡ä»¶
         public int SaveCfgFile(string strBiblioDbName,
             string strCfgFileName,
             string strContent,
@@ -793,14 +793,14 @@ namespace dp2Circulation
             strError = "";
 
             Progress.OnStop += new StopEventHandler(this.DoStop);
-            Progress.Initial("ÕıÔÚ±£´æÅäÖÃÎÄ¼ş ...");
+            Progress.Initial("æ­£åœ¨ä¿å­˜é…ç½®æ–‡ä»¶ ...");
             Progress.BeginLoop();
 
             try
             {
                 string strPath = strBiblioDbName + "/cfgs/" + strCfgFileName;
 
-                Progress.SetMessage("ÕıÔÚ±£´æÅäÖÃÎÄ¼ş " + strPath + " ...");
+                Progress.SetMessage("æ­£åœ¨ä¿å­˜é…ç½®æ–‡ä»¶ " + strPath + " ...");
 
                 byte[] output_timestamp = null;
                 string strOutputPath = "";

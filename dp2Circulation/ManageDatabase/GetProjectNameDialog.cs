@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,17 +12,17 @@ using DigitalPlatform.Xml;
 namespace dp2Circulation
 {
     /// <summary>
-    /// »ñµÃÒ»¸ö·½°¸Ãû
+    /// è·å¾—ä¸€ä¸ªæ–¹æ¡ˆå
     /// </summary>
     internal partial class GetProjectNameDialog : Form
     {
         /// <summary>
-        /// °üº¬¶¨Òå XML µÄ XmlDocument ¶ÔÏó
+        /// åŒ…å«å®šä¹‰ XML çš„ XmlDocument å¯¹è±¡
         /// </summary>
         public XmlDocument Dom = null;
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public GetProjectNameDialog()
         {
@@ -39,7 +39,7 @@ namespace dp2Circulation
         {
             if (this.textBox_projectName.Text == "")
             {
-                MessageBox.Show(this, "ÉĞÎ´Ö¸¶¨²éÖØ·½°¸Ãû");
+                MessageBox.Show(this, "å°šæœªæŒ‡å®šæŸ¥é‡æ–¹æ¡ˆå");
                 return;
             }
 
@@ -88,7 +88,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// Ñ¡¶¨µÄ·½°¸Ãû
+        /// é€‰å®šçš„æ–¹æ¡ˆå
         /// </summary>
         public string ProjectName
         {

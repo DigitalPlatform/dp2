@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -15,39 +15,39 @@ namespace dp2Circulation
 {
     /*
         <virtualDatabase>
-            <caption lang="zh-CN">ÖĞÎÄÊé¿¯</caption>
+            <caption lang="zh-CN">ä¸­æ–‡ä¹¦åˆŠ</caption>
             <caption lang="en">Chinese Books and Series</caption>
             <from style="title">
-                <caption lang="zh-CN">ÌâÃû</caption>
+                <caption lang="zh-CN">é¢˜å</caption>
                 <caption lang="en">Title</caption>
             </from>
             <from style="author">
-                <caption lang="zh-CN">ÖøÕß</caption>
+                <caption lang="zh-CN">è‘—è€…</caption>
                 <caption lang="en">Author</caption>
             </from>
-            <database name="ÖĞÎÄÍ¼Êé" />
-            <database name="ÖĞÎÄÆÚ¿¯" />
+            <database name="ä¸­æ–‡å›¾ä¹¦" />
+            <database name="ä¸­æ–‡æœŸåˆŠ" />
         </virtualDatabase>
      * * */
     /// <summary>
-    /// ¸ºÔğÅäÖÃ OPAC ²ÎÓë¼ìË÷¿âÖĞ virtualDatabase ÔªËØµÄ¶Ô»°¿ò
+    /// è´Ÿè´£é…ç½® OPAC å‚ä¸æ£€ç´¢åº“ä¸­ virtualDatabase å…ƒç´ çš„å¯¹è¯æ¡†
     /// </summary>
     internal partial class OpacVirtualDatabaseDialog : Form
     {
         /// <summary>
-        /// ÊÇ·ñÎª´´½¨Ä£Ê½?
-        /// true: ´´½¨Ä£Ê½; false: ĞŞ¸ÄÄ£Ê½
+        /// æ˜¯å¦ä¸ºåˆ›å»ºæ¨¡å¼?
+        /// true: åˆ›å»ºæ¨¡å¼; false: ä¿®æ”¹æ¨¡å¼
         /// </summary>
         public bool CreateMode = false;
 
         /// <summary>
-        /// ÏµÍ³¹ÜÀí´°
+        /// ç³»ç»Ÿç®¡ç†çª—
         /// </summary>
         public ManagerForm ManagerForm = null;
 
-        public string Xml = ""; // ´°¿Ú´ò¿ªÇ°ÓÃÓÚ×°ÔØ³õÊ¼»¯¶¨Òå£¬´°¿Ú¹Ø±Õºó£¬ÓÃ·µ»ØĞŞ¸ÄºóµÄ¶¨Òå
+        public string Xml = ""; // çª—å£æ‰“å¼€å‰ç”¨äºè£…è½½åˆå§‹åŒ–å®šä¹‰ï¼Œçª—å£å…³é—­åï¼Œç”¨è¿”å›ä¿®æ”¹åçš„å®šä¹‰
 
-        public List<string> ExistingOpacNormalDbNames = new List<string>(); // ÒÑ¾­´æÔÚµÄÆÕÍ¨¿âÃû¡£Ìí¼Ó³ÉÔ±¿âµÄÊ±ºò£¬Ó¦µ±´ÓÕâ¸ö·¶Î§ÄÚÌôÑ¡
+        public List<string> ExistingOpacNormalDbNames = new List<string>(); // å·²ç»å­˜åœ¨çš„æ™®é€šåº“åã€‚æ·»åŠ æˆå‘˜åº“çš„æ—¶å€™ï¼Œåº”å½“ä»è¿™ä¸ªèŒƒå›´å†…æŒ‘é€‰
 
         public OpacVirtualDatabaseDialog()
         {
@@ -66,7 +66,7 @@ namespace dp2Circulation
 
             this.Xml = strXml;
 
-            // Ìî³ä´°¿ÚÄÚÈİ
+            // å¡«å……çª—å£å†…å®¹
             if (String.IsNullOrEmpty(strXml) == false)
             {
                 XmlDocument dom = new XmlDocument();
@@ -76,11 +76,11 @@ namespace dp2Circulation
                 }
                 catch (Exception ex)
                 {
-                    strError = "XML×°ÔØµ½DOMÊ±³ö´í: " + ex.Message;
+                    strError = "XMLè£…è½½åˆ°DOMæ—¶å‡ºé”™: " + ex.Message;
                     return -1;
                 }
 
-                // ĞéÄâ¿âÃûcaptions
+                // è™šæ‹Ÿåº“åcaptions
                 XmlNodeList nodes = dom.DocumentElement.SelectNodes("caption");
                 string strCaptionsXml = "";
                 for (int i = 0; i < nodes.Count; i++)
@@ -91,7 +91,7 @@ namespace dp2Circulation
                 if (String.IsNullOrEmpty(strCaptionsXml) == false)
                     this.captionEditControl_virtualDatabaseName.Xml = strCaptionsXml;
 
-                // ³ÉÔ±¿â
+                // æˆå‘˜åº“
                 nodes = dom.DocumentElement.SelectNodes("database");
                 string strMemberDatabaseNames = "";
                 for (int i = 0; i < nodes.Count; i++)
@@ -100,7 +100,7 @@ namespace dp2Circulation
                 }
                 this.textBox_memberDatabases.Text = strMemberDatabaseNames;
 
-                // froms¶¨Òå
+                // fromså®šä¹‰
                 nodes = dom.DocumentElement.SelectNodes("from");
                 string strFromsXml = "";
                 for (int i = 0; i < nodes.Count; i++)
@@ -150,61 +150,61 @@ namespace dp2Circulation
 
         private void button_OK_Click(object sender, EventArgs e)
         {
-            // ½øĞĞ¼ì²é
+            // è¿›è¡Œæ£€æŸ¥
             string strError = "";
 
-            // ¼ì²éĞéÄâ¿âÃû
+            // æ£€æŸ¥è™šæ‹Ÿåº“å
 
-            // ¼ì²éµ±Ç°ÄÚÈİĞÎÊ½ÉÏÊÇ·ñºÏ·¨
+            // æ£€æŸ¥å½“å‰å†…å®¹å½¢å¼ä¸Šæ˜¯å¦åˆæ³•
             // return:
-            //      -1  ¼ì²é¹ı³Ì±¾Éí³ö´í
-            //      0   ¸ñÊ½ÓĞ´íÎó
-            //      1   ¸ñÊ½Ã»ÓĞ´íÎó
+            //      -1  æ£€æŸ¥è¿‡ç¨‹æœ¬èº«å‡ºé”™
+            //      0   æ ¼å¼æœ‰é”™è¯¯
+            //      1   æ ¼å¼æ²¡æœ‰é”™è¯¯
             int nRet = this.captionEditControl_virtualDatabaseName.Verify(out strError);
             if (nRet <= 0)
             {
-                strError = "ĞéÄâ¿âÃûÓĞÎÊÌâ: " + strError;
+                strError = "è™šæ‹Ÿåº“åæœ‰é—®é¢˜: " + strError;
                 this.tabControl_main.SelectedTab = this.tabPage_virtualDatabaseName;
                 this.captionEditControl_virtualDatabaseName.Focus();
                 goto ERROR1;
             }
 
-            // ¿´¿´ĞÂÔöµÄĞéÄâ¿âÃûºÍÒÑÓĞµÄÊı¾İ¿âÃûÊÇ·ñÖØ¸´
+            // çœ‹çœ‹æ–°å¢çš„è™šæ‹Ÿåº“åå’Œå·²æœ‰çš„æ•°æ®åº“åæ˜¯å¦é‡å¤
             if (this.CreateMode == true)
             {
-                // ¼ì²éĞÂÔöµÄĞéÄâ¿âÃûÊÇ·ñºÍµ±Ç°ÒÑ¾­´æÔÚµÄĞéÄâ¿âÃûÖØ¸´
+                // æ£€æŸ¥æ–°å¢çš„è™šæ‹Ÿåº“åæ˜¯å¦å’Œå½“å‰å·²ç»å­˜åœ¨çš„è™šæ‹Ÿåº“åé‡å¤
                 // return:
-                //      -1  ¼ì²éµÄ¹ı³Ì·¢Éú´íÎó
-                //      0   Ã»ÓĞÖØ¸´
-                //      1   ÓĞÖØ¸´
+                //      -1  æ£€æŸ¥çš„è¿‡ç¨‹å‘ç”Ÿé”™è¯¯
+                //      0   æ²¡æœ‰é‡å¤
+                //      1   æœ‰é‡å¤
                 nRet = this.ManagerForm.DetectVirtualDatabaseNameDup(this.captionEditControl_virtualDatabaseName.Xml,
                     out strError);
                 if (nRet == -1 || nRet == 1)
                     goto ERROR1;
             }
 
-            // ¼ì²é³ÉÔ±¿âÃû
+            // æ£€æŸ¥æˆå‘˜åº“å
             List<string> dbnames = GetMemberDatabaseNames();
             if (dbnames.Count == 0)
             {
-                strError = "ÉĞÎ´Ö¸¶¨³ÉÔ±¿âÃû: " + strError;
+                strError = "å°šæœªæŒ‡å®šæˆå‘˜åº“å: " + strError;
                 this.tabControl_main.SelectedTab = this.tabPage_memberDatabases;
                 this.textBox_memberDatabases.Focus();
                 goto ERROR1;
 
             }
 
-            // ¼ì²é¼ìË÷Í¾¾¶¶¨Òå
+            // æ£€æŸ¥æ£€ç´¢é€”å¾„å®šä¹‰
             nRet = this.fromEditControl1.Verify(out strError);
             if (nRet <= 0)
             {
-                strError = "¼ìË÷Í¾¾¶¶¨ÒåÓĞÎÊÌâ: " + strError;
+                strError = "æ£€ç´¢é€”å¾„å®šä¹‰æœ‰é—®é¢˜: " + strError;
                 this.tabControl_main.SelectedTab = this.tabPage_froms;
                 this.fromEditControl1.Focus();
                 goto ERROR1;
             }
 
-            // ¹¹Ôì¿ÉÒÔ·¢ËÍ¸ø·şÎñÆ÷µÄXML¶¨Òå
+            // æ„é€ å¯ä»¥å‘é€ç»™æœåŠ¡å™¨çš„XMLå®šä¹‰
             string strXml = "";
             nRet = BuildXml(out strXml,
                 out strError);
@@ -226,7 +226,7 @@ namespace dp2Circulation
             this.Close();
         }
 
-        // ¹¹Ôì¿ÉÒÔ·¢ËÍ¸ø·şÎñÆ÷µÄXML¶¨Òå
+        // æ„é€ å¯ä»¥å‘é€ç»™æœåŠ¡å™¨çš„XMLå®šä¹‰
         int BuildXml(out string strXml,
             out string strError)
         {
@@ -236,7 +236,7 @@ namespace dp2Circulation
             XmlDocument dom = new XmlDocument();
             dom.LoadXml("<virtualDatabase />");
 
-            // ¼ÓÈë±íÊ¾ĞéÄâ¿âÃûµÄcaptions
+            // åŠ å…¥è¡¨ç¤ºè™šæ‹Ÿåº“åçš„captions
             XmlDocumentFragment fragment = dom.CreateDocumentFragment();
             try
             {
@@ -244,7 +244,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = "virtual database name captions fragment XML×°ÈëXmlDocumentFragmentÊ±³ö´í: " + ex.Message;
+                strError = "virtual database name captions fragment XMLè£…å…¥XmlDocumentFragmentæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
@@ -258,7 +258,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = "froms fragment XML×°ÈëXmlDocumentFragmentÊ±³ö´í: " + ex.Message;
+                strError = "froms fragment XMLè£…å…¥XmlDocumentFragmentæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
@@ -278,7 +278,7 @@ namespace dp2Circulation
             return 0;
         }
 
-        // ²åÈëÒ»¸ö³ÉÔ±¿âÃû
+        // æ’å…¥ä¸€ä¸ªæˆå‘˜åº“å
         private void button_insertMemberDatabaseName_Click(object sender, EventArgs e)
         {
             int nRet = 0;
@@ -297,8 +297,8 @@ namespace dp2Circulation
                 strLine = this.textBox_memberDatabases.Lines[y];
              * */
 
-            // ÒªÅÅ³ıµÄÊı¾İ¿âÃû
-            // Á½ÀàÇé¿ö£ºÒ»ÀàÎªÒÑ¾­×÷Îª³ÉÔ±¿âÃûÊ¹ÓÃÁËµÄ£»Ò»ÀàÎªÉĞÎ´¶¨ÒåÎªOPACÆÕÍ¨¿âµÄ
+            // è¦æ’é™¤çš„æ•°æ®åº“å
+            // ä¸¤ç±»æƒ…å†µï¼šä¸€ç±»ä¸ºå·²ç»ä½œä¸ºæˆå‘˜åº“åä½¿ç”¨äº†çš„ï¼›ä¸€ç±»ä¸ºå°šæœªå®šä¹‰ä¸ºOPACæ™®é€šåº“çš„
             List<string> exclude_dbnames = new List<string>();
             for (int i = 0; i < this.textBox_memberDatabases.Lines.Length; i++)
             {
@@ -309,7 +309,7 @@ namespace dp2Circulation
                 exclude_dbnames.Add(strLine);
             }
 
-                // ²»ÔÚOPACÒÑ¾­¶¨ÒåµÄÆÕÍ¨¿âÃûÖ®ÁĞ£¬ÒªÅÅ³ı
+                // ä¸åœ¨OPACå·²ç»å®šä¹‰çš„æ™®é€šåº“åä¹‹åˆ—ï¼Œè¦æ’é™¤
             List<string> exclude1 = null;
             nRet = GetExcludeDbNames(this.ManagerForm.AllDatabaseInfoXml,
                 this.ExistingOpacNormalDbNames,
@@ -335,7 +335,7 @@ namespace dp2Circulation
 
             string strNewText = dlg.SelectedDatabaseName.Replace(",", "\r\n");
 
-            // Èç¹ûÏÈÇ°Ã»ÓĞÑ¡¶¨ÎÄ×Ö·¶Î§µÄ»°£¬¾ÍÒªÔÚĞÂ²åÈëµÄÄÚÈİÄ©Î²Ôö¼Ó»Ø³µ»»ĞĞ·ûºÅ
+            // å¦‚æœå…ˆå‰æ²¡æœ‰é€‰å®šæ–‡å­—èŒƒå›´çš„è¯ï¼Œå°±è¦åœ¨æ–°æ’å…¥çš„å†…å®¹æœ«å°¾å¢åŠ å›è½¦æ¢è¡Œç¬¦å·
             if (String.IsNullOrEmpty(this.textBox_memberDatabases.SelectedText) == true)
                 strNewText += "\r\n";
 
@@ -348,7 +348,7 @@ namespace dp2Circulation
             MessageBox.Show(this, strError);
         }
 
-        // »ñµÃÒªÅÅ³ıµÄ¡¢ÉĞÎ´¶¨ÒåÎªOPACÆÕÍ¨¿âµÄÊı¾İ¿âÃû
+        // è·å¾—è¦æ’é™¤çš„ã€å°šæœªå®šä¹‰ä¸ºOPACæ™®é€šåº“çš„æ•°æ®åº“å
         int GetExcludeDbNames(string strAllDatbaseInfo,
             List<string> opac_normal_dbnames,
             out List<string> results,
@@ -367,7 +367,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = "XML×°ÈëDOMÊ±³ö´í: " + ex.Message;
+                strError = "XMLè£…å…¥DOMæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
@@ -415,20 +415,20 @@ namespace dp2Circulation
         }
 #endif
 
-        // ÎªĞéÄâ¿âÃûcaptions±à¼­Æ÷Ä©Î²ĞÂÔöÒ»ĞĞ
+        // ä¸ºè™šæ‹Ÿåº“åcaptionsç¼–è¾‘å™¨æœ«å°¾æ–°å¢ä¸€è¡Œ
         private void button_virtualDatabaseName_newLine_Click(object sender, EventArgs e)
         {
             this.captionEditControl_virtualDatabaseName.NewElement();
         }
 
-        // ÔÚ¼ìË÷Í¾¾¶¶¨ÒåÁĞ±íÖĞ£¬ĞÂÔöÒ»¸ö¿ÕĞĞ£¬²åÈëµ½×îºó
+        // åœ¨æ£€ç´¢é€”å¾„å®šä¹‰åˆ—è¡¨ä¸­ï¼Œæ–°å¢ä¸€ä¸ªç©ºè¡Œï¼Œæ’å…¥åˆ°æœ€å
         private void button_froms_newBlankLine_Click(object sender, EventArgs e)
         {
             this.fromEditControl1.NewElement(true);
         }
 
-        // »ñµÃ³ÉÔ±Êı¾İ¿âÃûÁĞ±í
-        // »á×Ô¶¯È¥µô¿ÕĞĞ
+        // è·å¾—æˆå‘˜æ•°æ®åº“ååˆ—è¡¨
+        // ä¼šè‡ªåŠ¨å»æ‰ç©ºè¡Œ
         List<string> GetMemberDatabaseNames()
         {
             List<string> results = new List<string>();
@@ -444,9 +444,9 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÔÊĞí»òÕß½ûÖ¹½çÃæ¿Ø¼ş¡£ÔÚ³¤²Ù×÷Ç°£¬Ò»°ãĞèÒª½ûÖ¹½çÃæ¿Ø¼ş£»²Ù×÷Íê³ÉºóÔÙÔÊĞí
+        /// å…è®¸æˆ–è€…ç¦æ­¢ç•Œé¢æ§ä»¶ã€‚åœ¨é•¿æ“ä½œå‰ï¼Œä¸€èˆ¬éœ€è¦ç¦æ­¢ç•Œé¢æ§ä»¶ï¼›æ“ä½œå®Œæˆåå†å…è®¸
         /// </summary>
-        /// <param name="bEnable">ÊÇ·ñÔÊĞí½çÃæ¿Ø¼ş¡£true ÎªÔÊĞí£¬ false Îª½ûÖ¹</param>
+        /// <param name="bEnable">æ˜¯å¦å…è®¸ç•Œé¢æ§ä»¶ã€‚true ä¸ºå…è®¸ï¼Œ false ä¸ºç¦æ­¢</param>
         public void EnableControls(bool bEnable)
         {
             this.tabControl_main.Enabled = bEnable;
@@ -455,8 +455,8 @@ namespace dp2Circulation
             this.button_Cancel.Enabled = bEnable;
         }
 
-        // µ¼Èë³ÉÔ±¿âµÄÈ«²¿¼ìË÷Í¾¾¶(ÏÔÊ¾Ê±ÒÑÈ¥ÖØºÏ²¢)µ½µ±Ç°¼ìË÷Í¾¾¶¶¨ÒåÖĞ¡£
-        // µ¼Èëµ±Ç°¶¨Òå´°Ê±£¬·¢ÏÖÖØ¸´µÄstyleÒª¾¯¸æ¡£¶ÔÓÚÖØ¸´styleµÄ<from>ÔÊĞíÓÃ»§Ñ¡Ôñ±£ÁôÒÔÇ°µÄ»¹ÊÇÓÃĞÂµÄ³åÈë
+        // å¯¼å…¥æˆå‘˜åº“çš„å…¨éƒ¨æ£€ç´¢é€”å¾„(æ˜¾ç¤ºæ—¶å·²å»é‡åˆå¹¶)åˆ°å½“å‰æ£€ç´¢é€”å¾„å®šä¹‰ä¸­ã€‚
+        // å¯¼å…¥å½“å‰å®šä¹‰çª—æ—¶ï¼Œå‘ç°é‡å¤çš„styleè¦è­¦å‘Šã€‚å¯¹äºé‡å¤styleçš„<from>å…è®¸ç”¨æˆ·é€‰æ‹©ä¿ç•™ä»¥å‰çš„è¿˜æ˜¯ç”¨æ–°çš„å†²å…¥
         private void button_from_import_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -465,7 +465,7 @@ namespace dp2Circulation
             List<string> dbnames = GetMemberDatabaseNames();
             if (dbnames.Count == 0)
             {
-                strError = "ÉĞÎ´¶¨Òå³ÉÔ±¿âÃû£¬Òò´ËÎŞ·¨µ¼Èë³ÉÔ±¿âµÄ¼ìË÷Í¾¾¶¶¨Òå";
+                strError = "å°šæœªå®šä¹‰æˆå‘˜åº“åï¼Œå› æ­¤æ— æ³•å¯¼å…¥æˆå‘˜åº“çš„æ£€ç´¢é€”å¾„å®šä¹‰";
                 goto ERROR1;
             }
 
@@ -489,16 +489,16 @@ namespace dp2Circulation
                 this.fromEditControl1.Xml = dlg.SelectedFromsXml;
             else
             {
-                // Èç¹ûµ±Ç°ÒÑ¾­ÓĞÄÚÈİ£¬ÌáĞÑºÏ²¢»¹ÊÇÌæ´ú
+                // å¦‚æœå½“å‰å·²ç»æœ‰å†…å®¹ï¼Œæé†’åˆå¹¶è¿˜æ˜¯æ›¿ä»£
                 DialogResult result = MessageBox.Show(this,
-"µ±Ç°ÒÑ´æÔÚ¼ìË÷Í¾¾¶ÅäÖÃĞÅÏ¢¡£ÊÇ·ñ½«Òªµ¼ÈëµÄÄÚÈİÒªºÏ²¢µ½µ±Ç°´°¿Ú?\r\n\r\n(Yes: ºÏ²¢; No: ¸²¸Ç; Cancel: ·ÅÆú)",
+"å½“å‰å·²å­˜åœ¨æ£€ç´¢é€”å¾„é…ç½®ä¿¡æ¯ã€‚æ˜¯å¦å°†è¦å¯¼å…¥çš„å†…å®¹è¦åˆå¹¶åˆ°å½“å‰çª—å£?\r\n\r\n(Yes: åˆå¹¶; No: è¦†ç›–; Cancel: æ”¾å¼ƒ)",
 "OpacVirtuslDatabaseDialog",
 MessageBoxButtons.YesNoCancel,
 MessageBoxIcon.Question,
 MessageBoxDefaultButton.Button1);
                 if (result == DialogResult.Yes)
                 {
-                    // ºÏ²¢Òªµ¼ÈëµÄ¼ìË÷Í¾¾¶¶¨Òå
+                    // åˆå¹¶è¦å¯¼å…¥çš„æ£€ç´¢é€”å¾„å®šä¹‰
                     nRet = MergeImportFroms(dlg.SelectedFromsXml,
                         out strError);
                     if (nRet == -1)
@@ -507,7 +507,7 @@ MessageBoxDefaultButton.Button1);
                 }
                 if (result == DialogResult.No)
                 {
-                    // ¸²¸Ç
+                    // è¦†ç›–
                     this.fromEditControl1.Xml = dlg.SelectedFromsXml;
                 }
                 if (result == DialogResult.Cancel)
@@ -521,7 +521,7 @@ MessageBoxDefaultButton.Button1);
             MessageBox.Show(this, strError);
         }
 
-        // ºÏ²¢Òªµ¼ÈëµÄ¼ìË÷Í¾¾¶¶¨Òå
+        // åˆå¹¶è¦å¯¼å…¥çš„æ£€ç´¢é€”å¾„å®šä¹‰
         int MergeImportFroms(string strXml,
             out string strError)
         {
@@ -554,7 +554,7 @@ MessageBoxDefaultButton.Button1);
                     {
                         bFound = true;
 
-                        // TODO: ¶ÔÓÚÕÒµ½µÄÊÂÏî£¬ÓĞÃ»ÓĞ±ØÒª¶Ôcaptions½øĞĞºÏ²¢?
+                        // TODO: å¯¹äºæ‰¾åˆ°çš„äº‹é¡¹ï¼Œæœ‰æ²¡æœ‰å¿…è¦å¯¹captionsè¿›è¡Œåˆå¹¶?
                         break;
                     }
                 }

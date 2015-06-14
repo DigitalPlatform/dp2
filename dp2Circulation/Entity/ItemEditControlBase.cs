@@ -6,10 +6,10 @@ using System.Windows.Forms;
 using System.Xml;
 using System.Drawing;
 using System.Diagnostics;
+using System.ComponentModel;
 
 using DigitalPlatform;
 using DigitalPlatform.CommonControl;
-using System.ComponentModel;
 
 namespace dp2Circulation
 {

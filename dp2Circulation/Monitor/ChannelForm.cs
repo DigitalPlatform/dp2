@@ -6,11 +6,12 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Collections;
+using System.Diagnostics;
+
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient.localhost;
-using System.Diagnostics;
 using DigitalPlatform.GUI;
-using System.Collections;
 using DigitalPlatform.Text;
 
 namespace dp2Circulation

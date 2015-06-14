@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -22,7 +22,7 @@ using DigitalPlatform.CirculationClient.localhost;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ¿ìËÙĞŞ¸ÄÊéÄ¿´°
+    /// å¿«é€Ÿä¿®æ”¹ä¹¦ç›®çª—
     /// </summary>
     internal partial class QuickChangeBiblioForm : MyForm
     {
@@ -54,7 +54,7 @@ namespace dp2Circulation
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
 
             stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// ºÍÈİÆ÷¹ØÁª
+            stop.Register(MainForm.stopManager, true);	// å’Œå®¹å™¨å…³è”
 #endif
         }
 
@@ -75,9 +75,9 @@ namespace dp2Circulation
 #if NO
             if (stop != null)
             {
-                if (stop.State == 0)    // 0 ±íÊ¾ÕıÔÚ´¦Àí
+                if (stop.State == 0)    // 0 è¡¨ç¤ºæ­£åœ¨å¤„ç†
                 {
-                    MessageBox.Show(this, "ÇëÔÚ¹Ø±Õ´°¿ÚÇ°Í£Ö¹ÕıÔÚ½øĞĞµÄ³¤Ê±²Ù×÷¡£");
+                    MessageBox.Show(this, "è¯·åœ¨å…³é—­çª—å£å‰åœæ­¢æ­£åœ¨è¿›è¡Œçš„é•¿æ—¶æ“ä½œã€‚");
                     e.Cancel = true;
                     return;
                 }
@@ -88,21 +88,21 @@ namespace dp2Circulation
         private void QuickChangeBiblioForm_FormClosed(object sender, FormClosedEventArgs e)
         {
 #if NO
-            if (stop != null) // ÍÑÀë¹ØÁª
+            if (stop != null) // è„±ç¦»å…³è”
             {
-                stop.Unregister();	// ºÍÈİÆ÷¹ØÁª
+                stop.Unregister();	// å’Œå®¹å™¨å…³è”
                 stop = null;
             }
 #endif
 
 
-            // ³¤²Ù×÷ÔÚ½øĞĞÖĞ£¿
+            // é•¿æ“ä½œåœ¨è¿›è¡Œä¸­ï¼Ÿ
         }
 
         // return:
-        //      -1  ³ö´í
-        //      0   ·ÅÆú´¦Àí
-        //      1   Õı³£½áÊø
+        //      -1  å‡ºé”™
+        //      0   æ”¾å¼ƒå¤„ç†
+        //      1   æ­£å¸¸ç»“æŸ
         public int DoRecPathLines()
         {
             this.tabControl_input.SelectedTab = this.tabPage_paths;
@@ -213,9 +213,9 @@ namespace dp2Circulation
         }
 
         // return:
-        //      -1  ³ö´í
-        //      0   ·ÅÆú´¦Àí
-        //      1   Õı³£½áÊø
+        //      -1  å‡ºé”™
+        //      0   æ”¾å¼ƒå¤„ç†
+        //      1   æ­£å¸¸ç»“æŸ
         int DoTextLines()
         {
             string strError = "";
@@ -223,18 +223,18 @@ namespace dp2Circulation
 
             if (String.IsNullOrEmpty(this.textBox_paths.Text) == true)
             {
-                strError = "ÉĞÎ´Ö¸¶¨ÈÎºÎÂ·¾¶";
+                strError = "å°šæœªæŒ‡å®šä»»ä½•è·¯å¾„";
                 goto ERROR1;
             }
 
-            // TODO: MessageBoxÌáÊ¾½«Òª½øĞĞµÄĞŞ¸Ä¶¯×÷¡£²¢¾¯¸æ²»ÄÜ¸´Ô­
+            // TODO: MessageBoxæç¤ºå°†è¦è¿›è¡Œçš„ä¿®æ”¹åŠ¨ä½œã€‚å¹¶è­¦å‘Šä¸èƒ½å¤åŸ
 
-            // TODO: ¼ì²éĞŞ¸Ä¶¯×÷£¬¾¯¸æÄÇÖÖÊ²Ã´¶¼²»ĞŞ¸ÄµÄÇé¿ö
+            // TODO: æ£€æŸ¥ä¿®æ”¹åŠ¨ä½œï¼Œè­¦å‘Šé‚£ç§ä»€ä¹ˆéƒ½ä¸ä¿®æ”¹çš„æƒ…å†µ
             string strInfo = GetSummary();
             if (String.IsNullOrEmpty(strInfo) == true)
             {
                 DialogResult result = MessageBox.Show(this,
-    "µ±Ç°Ã»ÓĞÈÎºÎĞŞ¸Ä¶¯×÷¡£È·ÊµÒªÆô¶¯´¦Àí?",
+    "å½“å‰æ²¡æœ‰ä»»ä½•ä¿®æ”¹åŠ¨ä½œã€‚ç¡®å®è¦å¯åŠ¨å¤„ç†?",
     "dp2Circulation",
     MessageBoxButtons.OKCancel,
     MessageBoxIcon.Question,
@@ -245,7 +245,7 @@ namespace dp2Circulation
             else
             {
                 DialogResult result = MessageBox.Show(this,
-"¼´½«½øĞĞÏÂÊöĞŞ¸Ä¶¯×÷£º\r\n---"+strInfo+"\r\n\r\n¿ªÊ¼´¦Àí?",
+"å³å°†è¿›è¡Œä¸‹è¿°ä¿®æ”¹åŠ¨ä½œï¼š\r\n---"+strInfo+"\r\n\r\nå¼€å§‹å¤„ç†?",
 "dp2Circulation",
 MessageBoxButtons.OKCancel,
 MessageBoxIcon.Question,
@@ -254,8 +254,8 @@ MessageBoxDefaultButton.Button1);
                     return 0;
             }
 
-            int nCount = 0; // ×Ü¹²´¦Àí¶àÉÙÌõ
-            int nChangedCount = 0;  // ·¢ÉúĞŞ¸ÄµÄÓĞ¶àÉÙÌõ
+            int nCount = 0; // æ€»å…±å¤„ç†å¤šå°‘æ¡
+            int nChangedCount = 0;  // å‘ç”Ÿä¿®æ”¹çš„æœ‰å¤šå°‘æ¡
 
             DateTime now = DateTime.Now;
 
@@ -268,7 +268,7 @@ MessageBoxDefaultButton.Button1);
                 {
                     if (stop.State != 0)
                     {
-                        strError = "ÓÃ»§ÖĞ¶Ï1";
+                        strError = "ç”¨æˆ·ä¸­æ–­1";
                         goto ERROR1;
                     }
                 }
@@ -293,7 +293,7 @@ MessageBoxDefaultButton.Button1);
                 stop.SetProgressValue(i + 1);
             }
 
-            MessageBox.Show(this, "´¦ÀíÍê±Ï¡£¹²´¦Àí¼ÇÂ¼ " + nCount.ToString() + " Ìõ£¬Êµ¼Ê·¢ÉúĞŞ¸Ä " + nChangedCount.ToString() + " Ìõ");
+            MessageBox.Show(this, "å¤„ç†å®Œæ¯•ã€‚å…±å¤„ç†è®°å½• " + nCount.ToString() + " æ¡ï¼Œå®é™…å‘ç”Ÿä¿®æ”¹ " + nChangedCount.ToString() + " æ¡");
             return 1;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -307,18 +307,18 @@ MessageBoxDefaultButton.Button1);
 
             if (String.IsNullOrEmpty(this.textBox_recpathFile.Text) == true)
             {
-                strError = "ÉĞÎ´Ö¸¶¨¼ÇÂ¼Â·¾¶ÎÄ¼şÃû";
+                strError = "å°šæœªæŒ‡å®šè®°å½•è·¯å¾„æ–‡ä»¶å";
                 goto ERROR1;
             }
 
-            // TODO: MessageBoxÌáÊ¾½«Òª½øĞĞµÄĞŞ¸Ä¶¯×÷¡£²¢¾¯¸æ²»ÄÜ¸´Ô­
+            // TODO: MessageBoxæç¤ºå°†è¦è¿›è¡Œçš„ä¿®æ”¹åŠ¨ä½œã€‚å¹¶è­¦å‘Šä¸èƒ½å¤åŸ
 
-            // TODO: ¼ì²éĞŞ¸Ä¶¯×÷£¬¾¯¸æÄÇÖÖÊ²Ã´¶¼²»ĞŞ¸ÄµÄÇé¿ö
+            // TODO: æ£€æŸ¥ä¿®æ”¹åŠ¨ä½œï¼Œè­¦å‘Šé‚£ç§ä»€ä¹ˆéƒ½ä¸ä¿®æ”¹çš„æƒ…å†µ
             string strInfo = GetSummary();
             if (String.IsNullOrEmpty(strInfo) == true)
             {
                 DialogResult result = MessageBox.Show(this,
-    "µ±Ç°Ã»ÓĞÈÎºÎĞŞ¸Ä¶¯×÷¡£È·ÊµÒªÆô¶¯´¦Àí?",
+    "å½“å‰æ²¡æœ‰ä»»ä½•ä¿®æ”¹åŠ¨ä½œã€‚ç¡®å®è¦å¯åŠ¨å¤„ç†?",
     "dp2Circulation",
     MessageBoxButtons.OKCancel,
     MessageBoxIcon.Question,
@@ -329,7 +329,7 @@ MessageBoxDefaultButton.Button1);
             else
             {
                 DialogResult result = MessageBox.Show(this,
-"¼´½«½øĞĞÏÂÊöĞŞ¸Ä¶¯×÷£º\r\n---" + strInfo + "\r\n\r\n¿ªÊ¼´¦Àí?",
+"å³å°†è¿›è¡Œä¸‹è¿°ä¿®æ”¹åŠ¨ä½œï¼š\r\n---" + strInfo + "\r\n\r\nå¼€å§‹å¤„ç†?",
 "dp2Circulation",
 MessageBoxButtons.OKCancel,
 MessageBoxIcon.Question,
@@ -338,8 +338,8 @@ MessageBoxDefaultButton.Button1);
                     return;
             }
 
-            int nCount = 0; // ×Ü¹²´¦Àí¶àÉÙÌõ
-            int nChangedCount = 0;  // ·¢ÉúĞŞ¸ÄµÄÓĞ¶àÉÙÌõ
+            int nCount = 0; // æ€»å…±å¤„ç†å¤šå°‘æ¡
+            int nChangedCount = 0;  // å‘ç”Ÿä¿®æ”¹çš„æœ‰å¤šå°‘æ¡
 
             using (StreamReader sr = new StreamReader(this.textBox_recpathFile.Text))
             {
@@ -355,7 +355,7 @@ MessageBoxDefaultButton.Button1);
                     {
                         if (stop.State != 0)
                         {
-                            strError = "ÓÃ»§ÖĞ¶Ï2";
+                            strError = "ç”¨æˆ·ä¸­æ–­2";
                             goto ERROR1;
                         }
                     }
@@ -378,9 +378,9 @@ MessageBoxDefaultButton.Button1);
                     if (String.IsNullOrEmpty(strLine) == true)
                         continue;
                     // return:
-                    //      -1  ³ö´í
-                    //      0   Î´·¢Éú¸Ä±ä
-                    //      1   ·¢ÉúÁË¸Ä±ä
+                    //      -1  å‡ºé”™
+                    //      0   æœªå‘ç”Ÿæ”¹å˜
+                    //      1   å‘ç”Ÿäº†æ”¹å˜
                     nRet = ChangeOneRecord(strLine,
                         now,
                         out strError);
@@ -393,16 +393,16 @@ MessageBoxDefaultButton.Button1);
                 }
             }
 
-            MessageBox.Show(this, "´¦ÀíÍê±Ï¡£¹²´¦Àí¼ÇÂ¼ "+nCount.ToString()+" Ìõ£¬Êµ¼Ê·¢ÉúĞŞ¸Ä "+nChangedCount.ToString()+" Ìõ");
+            MessageBox.Show(this, "å¤„ç†å®Œæ¯•ã€‚å…±å¤„ç†è®°å½• "+nCount.ToString()+" æ¡ï¼Œå®é™…å‘ç”Ÿä¿®æ”¹ "+nChangedCount.ToString()+" æ¡");
             return;
         ERROR1:
             MessageBox.Show(this, strError);
         }
 
         /// <summary>
-        /// ÔÊĞí»òÕß½ûÖ¹½çÃæ¿Ø¼ş¡£ÔÚ³¤²Ù×÷Ç°£¬Ò»°ãĞèÒª½ûÖ¹½çÃæ¿Ø¼ş£»²Ù×÷Íê³ÉºóÔÙÔÊĞí
+        /// å…è®¸æˆ–è€…ç¦æ­¢ç•Œé¢æ§ä»¶ã€‚åœ¨é•¿æ“ä½œå‰ï¼Œä¸€èˆ¬éœ€è¦ç¦æ­¢ç•Œé¢æ§ä»¶ï¼›æ“ä½œå®Œæˆåå†å…è®¸
         /// </summary>
-        /// <param name="bEnable">ÊÇ·ñÔÊĞí½çÃæ¿Ø¼ş¡£true ÎªÔÊĞí£¬ false Îª½ûÖ¹</param>
+        /// <param name="bEnable">æ˜¯å¦å…è®¸ç•Œé¢æ§ä»¶ã€‚true ä¸ºå…è®¸ï¼Œ false ä¸ºç¦æ­¢</param>
         public override void EnableControls(bool bEnable)
         {
             this.textBox_paths.Enabled = bEnable;
@@ -414,9 +414,9 @@ MessageBoxDefaultButton.Button1);
         }
 
         // return:
-        //      -1  ³ö´í
-        //      0   Î´·¢Éú¸Ä±ä
-        //      1   ·¢ÉúÁË¸Ä±ä
+        //      -1  å‡ºé”™
+        //      0   æœªå‘ç”Ÿæ”¹å˜
+        //      1   å‘ç”Ÿäº†æ”¹å˜
         int ChangeOneRecord(string strBiblioRecPath,
             DateTime now,
             out string strError)
@@ -424,7 +424,7 @@ MessageBoxDefaultButton.Button1);
             strError = "";
             int nRet = 0;
 
-            stop.SetMessage("ÕıÔÚ´¦Àí " + strBiblioRecPath + " ...");
+            stop.SetMessage("æ­£åœ¨å¤„ç† " + strBiblioRecPath + " ...");
 
             string[] formats = new string[1];
             formats[0] = "xml";
@@ -460,7 +460,7 @@ MessageBoxDefaultButton.Button1);
             }
             catch (Exception ex)
             {
-                strError = "×°ÔØXMLµ½DOMÊ±·¢Éú´íÎó: " + ex.Message;
+                strError = "è£…è½½XMLåˆ°DOMæ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                 return -1;
             }
 
@@ -468,8 +468,8 @@ MessageBoxDefaultButton.Button1);
             string strMARC = "";
             string strMarcSyntax = "";
             string strOutMarcSyntax = "";
-            // ½«XML¸ñÊ½×ª»»ÎªMARC¸ñÊ½
-            // ×Ô¶¯´ÓÊı¾İ¼ÇÂ¼ÖĞ»ñµÃMARCÓï·¨
+            // å°†XMLæ ¼å¼è½¬æ¢ä¸ºMARCæ ¼å¼
+            // è‡ªåŠ¨ä»æ•°æ®è®°å½•ä¸­è·å¾—MARCè¯­æ³•
             nRet = MarcUtil.Xml2Marc(strXml,
                 true,
                 strMarcSyntax,
@@ -478,15 +478,15 @@ MessageBoxDefaultButton.Button1);
                 out strError);
             if (nRet == -1)
             {
-                strError = "XML×ª»»µ½MARC¼ÇÂ¼Ê±³ö´í: " + strError;
+                strError = "XMLè½¬æ¢åˆ°MARCè®°å½•æ—¶å‡ºé”™: " + strError;
                 return -1;
             }
 
-            // ĞŞ¸Ä
+            // ä¿®æ”¹
             // return:
-            //      -1  ³ö´í
-            //      0   Î´·¢Éú¸Ä±ä
-            //      1   ·¢ÉúÁË¸Ä±ä
+            //      -1  å‡ºé”™
+            //      0   æœªå‘ç”Ÿæ”¹å˜
+            //      1   å‘ç”Ÿäº†æ”¹å˜
             nRet = ModifyField998(ref strMARC,
                 now,
                 out strError);
@@ -495,7 +495,7 @@ MessageBoxDefaultButton.Button1);
             if (nRet == 0)
                 return 0;
 
-            // ×ª»»»Øxml¸ñÊ½
+            // è½¬æ¢å›xmlæ ¼å¼
             XmlDocument domMarc = null;
             nRet = MarcUtil.Marc2Xml(strMARC,
                 strOutMarcSyntax,
@@ -504,7 +504,7 @@ MessageBoxDefaultButton.Button1);
             if (nRet == -1)
                 return -1;
 
-            // ºÏ²¢<dprms:file>ÔªËØ
+            // åˆå¹¶<dprms:file>å…ƒç´ 
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
             nsmgr.AddNamespace("dprms", DpNs.dprms);
 
@@ -519,7 +519,7 @@ MessageBoxDefaultButton.Button1);
                 DomUtil.SetElementOuterXml(new_node, nodes[i].OuterXml);
             }
 
-            // ±£´æ
+            // ä¿å­˜
             byte[] baNewTimestamp = null;
             string strOutputPath = "";
             lRet = Channel.SetBiblioInfo(
@@ -535,14 +535,14 @@ MessageBoxDefaultButton.Button1);
     out strError);
             if (lRet == -1)
             {
-                strError = "±£´æÊéÄ¿¼ÇÂ¼ '" + strBiblioRecPath + "' Ê±³ö´í: " + strError;
+                strError = "ä¿å­˜ä¹¦ç›®è®°å½• '" + strBiblioRecPath + "' æ—¶å‡ºé”™: " + strError;
                 return -1;
             }
 
             return 1;
         }
 
-        // »ñµÃÃèÊöĞŞ¸ÄÇé¿öµÄÎÄ×Ö
+        // è·å¾—æè¿°ä¿®æ”¹æƒ…å†µçš„æ–‡å­—
         string GetSummary()
         {
             string strResult = "";
@@ -552,10 +552,10 @@ MessageBoxDefaultButton.Button1);
             string strStateAction = this.MainForm.AppInfo.GetString(
                 "change_biblio_param",
                 "state",
-                "<²»¸Ä±ä>");
-            if (strStateAction != "<²»¸Ä±ä>")
+                "<ä¸æ”¹å˜>");
+            if (strStateAction != "<ä¸æ”¹å˜>")
             {
-                if (strStateAction == "<Ôö¡¢¼õ>")
+                if (strStateAction == "<å¢ã€å‡>")
                 {
                     string strAdd = this.MainForm.AppInfo.GetString(
                 "change_biblio_param",
@@ -567,19 +567,19 @@ MessageBoxDefaultButton.Button1);
             "");
                     if (String.IsNullOrEmpty(strAdd) == false)
                     {
-                        strResult += "\r\nÔÚ×´Ì¬Öµ(998$s)ÖĞÌí¼Ó '"+strAdd+"'";
+                        strResult += "\r\nåœ¨çŠ¶æ€å€¼(998$s)ä¸­æ·»åŠ  '"+strAdd+"'";
                         nCount++;
                     }
                     if (String.IsNullOrEmpty(strRemove) == false)
                     {
-                        strResult += "\r\nÔÚ×´Ì¬Öµ(998$s)ÖĞÈ¥³ı '" + strAdd + "'";
+                        strResult += "\r\nåœ¨çŠ¶æ€å€¼(998$s)ä¸­å»é™¤ '" + strAdd + "'";
                         nCount++;
                     }
 
                 }
                 else
                 {
-                    strResult += "\r\n½«×´Ì¬Öµ(998$s)¸ÄÎª '" + strStateAction + "'";
+                    strResult += "\r\nå°†çŠ¶æ€å€¼(998$s)æ”¹ä¸º '" + strStateAction + "'";
                     nCount++;
                 }
 
@@ -589,26 +589,26 @@ MessageBoxDefaultButton.Button1);
             string strTimeAction = this.MainForm.AppInfo.GetString(
     "change_biblio_param",
     "opertime",
-    "<²»¸Ä±ä>");
-            if (strTimeAction != "<²»¸Ä±ä>")
+    "<ä¸æ”¹å˜>");
+            if (strTimeAction != "<ä¸æ”¹å˜>")
             {
-                if (strTimeAction == "<µ±Ç°Ê±¼ä>")
+                if (strTimeAction == "<å½“å‰æ—¶é—´>")
                 {
-                    strResult += "\r\n½«Ê±¼äÖµ(998$u)ÉèÖÃÎªµ±Ç°Ê±¼ä";
+                    strResult += "\r\nå°†æ—¶é—´å€¼(998$u)è®¾ç½®ä¸ºå½“å‰æ—¶é—´";
                     nCount++;
                 }
-                else if (strTimeAction == "<Çå³ı>")
+                else if (strTimeAction == "<æ¸…é™¤>")
                 {
-                    strResult += "\r\n½«Ê±¼äÖµ(998$u)Çå¿Õ";
+                    strResult += "\r\nå°†æ—¶é—´å€¼(998$u)æ¸…ç©º";
                     nCount++;
                 }
-                else if (strTimeAction == "<Ö¸¶¨Ê±¼ä>")
+                else if (strTimeAction == "<æŒ‡å®šæ—¶é—´>")
                 {
                     string strValue = this.MainForm.AppInfo.GetString(
                         "change_biblio_param",
                         "opertime_value",
                         "");
-                    strResult += "\r\n½«Ê±¼äÖµ(998$u)ĞŞ¸ÄÎª '" + strValue + "'";
+                    strResult += "\r\nå°†æ—¶é—´å€¼(998$u)ä¿®æ”¹ä¸º '" + strValue + "'";
                     nCount++;
                 }
                 else
@@ -621,21 +621,21 @@ MessageBoxDefaultButton.Button1);
             string strBatchNoAction = this.MainForm.AppInfo.GetString(
 "change_biblio_param",
 "batchNo",
-"<²»¸Ä±ä>");
-            if (strBatchNoAction != "<²»¸Ä±ä>")
+"<ä¸æ”¹å˜>");
+            if (strBatchNoAction != "<ä¸æ”¹å˜>")
             {
-                strResult += "\r\n½«Åú´ÎºÅÖµ(998$a)ĞŞ¸ÄÎª '" + strBatchNoAction + "'";
+                strResult += "\r\nå°†æ‰¹æ¬¡å·å€¼(998$a)ä¿®æ”¹ä¸º '" + strBatchNoAction + "'";
                 nCount++;
             }
 
             return strResult;
         }
 
-        // TODO: Ô¤ÏÈ½«AppInfoÖĞÖµÈ¡³ö£¬¼Ó¿ìËÙ¶È
+        // TODO: é¢„å…ˆå°†AppInfoä¸­å€¼å–å‡ºï¼ŒåŠ å¿«é€Ÿåº¦
         // return:
-        //      -1  ³ö´í
-        //      0   Î´·¢Éú¸Ä±ä
-        //      1   ·¢ÉúÁË¸Ä±ä
+        //      -1  å‡ºé”™
+        //      0   æœªå‘ç”Ÿæ”¹å˜
+        //      1   å‘ç”Ÿäº†æ”¹å˜
         int ModifyField998(ref string strMARC,
             DateTime now,
             out string strError)
@@ -661,13 +661,13 @@ MessageBoxDefaultButton.Button1);
             string strStateAction = this.MainForm.AppInfo.GetString(
                 "change_biblio_param",
                 "state",
-                "<²»¸Ä±ä>");
-            if (strStateAction != "<²»¸Ä±ä>")
+                "<ä¸æ”¹å˜>");
+            if (strStateAction != "<ä¸æ”¹å˜>")
             {
                 string strState = MarcUtil.GetSubfieldContent(strField998,
     "s");
 
-                if (strStateAction == "<Ôö¡¢¼õ>")
+                if (strStateAction == "<å¢ã€å‡>")
                 {
                     string strAdd = this.MainForm.AppInfo.GetString(
                 "change_biblio_param",
@@ -709,21 +709,21 @@ MessageBoxDefaultButton.Button1);
             string strTimeAction = this.MainForm.AppInfo.GetString(
     "change_biblio_param",
     "opertime",
-    "<²»¸Ä±ä>");
-            if (strTimeAction != "<²»¸Ä±ä>")
+    "<ä¸æ”¹å˜>");
+            if (strTimeAction != "<ä¸æ”¹å˜>")
             {
                 string strTime = MarcUtil.GetSubfieldContent(strField998,
     "u");
                 DateTime time = new DateTime(0);
-                if (strTimeAction == "<µ±Ç°Ê±¼ä>")
+                if (strTimeAction == "<å½“å‰æ—¶é—´>")
                 {
                     time = now;
                 }
-                else if (strTimeAction == "<Çå³ı>")
+                else if (strTimeAction == "<æ¸…é™¤>")
                 {
 
                 }
-                else if (strTimeAction == "<Ö¸¶¨Ê±¼ä>")
+                else if (strTimeAction == "<æŒ‡å®šæ—¶é—´>")
                 {
                     string strValue = this.MainForm.AppInfo.GetString(
                         "change_biblio_param",
@@ -731,7 +731,7 @@ MessageBoxDefaultButton.Button1);
                         "");
                     if (String.IsNullOrEmpty(strValue) == true)
                     {
-                        strError = "µ±½øĞĞ <Ö¸¶¨Ê±¼ä> ·½Ê½µÄĞŞ¸ÄÊ±£¬ËùÖ¸¶¨µÄÊ±¼äÖµ²»ÄÜÎª¿Õ";
+                        strError = "å½“è¿›è¡Œ <æŒ‡å®šæ—¶é—´> æ–¹å¼çš„ä¿®æ”¹æ—¶ï¼Œæ‰€æŒ‡å®šçš„æ—¶é—´å€¼ä¸èƒ½ä¸ºç©º";
                         return -1;
                     }
                     try
@@ -740,20 +740,20 @@ MessageBoxDefaultButton.Button1);
                     }
                     catch (Exception ex)
                     {
-                        strError = "ÎŞ·¨½âÎöÊ±¼ä×Ö·û´® '" + strValue + "' :" + ex.Message;
+                        strError = "æ— æ³•è§£ææ—¶é—´å­—ç¬¦ä¸² '" + strValue + "' :" + ex.Message;
                         return -1;
                     }
                 }
                 else
                 {
-                    // ²»Ö§³Ö
-                    strError = "²»Ö§³ÖµÄÊ±¼ä¶¯×÷ '" + strTimeAction + "'";
+                    // ä¸æ”¯æŒ
+                    strError = "ä¸æ”¯æŒçš„æ—¶é—´åŠ¨ä½œ '" + strTimeAction + "'";
                     return -1;
                 }
 
                 string strOldTime = strTime;
 
-                if (strTimeAction == "<Çå³ı>")
+                if (strTimeAction == "<æ¸…é™¤>")
                     strTime = "";
                 else
                     strTime = time.ToString("u");
@@ -771,8 +771,8 @@ MessageBoxDefaultButton.Button1);
             string strBatchNoAction = this.MainForm.AppInfo.GetString(
 "change_biblio_param",
 "batchNo",
-"<²»¸Ä±ä>");
-            if (strBatchNoAction != "<²»¸Ä±ä>")
+"<ä¸æ”¹å˜>");
+            if (strBatchNoAction != "<ä¸æ”¹å˜>")
             {
                 string strBatchNo = MarcUtil.GetSubfieldContent(strField998,
                     "a");
@@ -797,10 +797,10 @@ MessageBoxDefaultButton.Button1);
             return 1;
         }
 
-        // ÉèÖÃ¶¯×÷²ÎÊı
+        // è®¾ç½®åŠ¨ä½œå‚æ•°
         // return:
-        //      false   ·ÅÆú
-        //      true    È·ÈÏ
+        //      false   æ”¾å¼ƒ
+        //      true    ç¡®è®¤
         public bool SetChangeParameters()
         {
             ChangeBiblioActionDialog dlg = new ChangeBiblioActionDialog();
@@ -851,10 +851,10 @@ MessageBoxDefaultButton.Button1);
         {
             OpenFileDialog dlg = new OpenFileDialog();
 
-            dlg.Title = "ÇëÖ¸¶¨Òª´ò¿ªµÄ(ÊéÄ¿¿â)¼ÇÂ¼Â·¾¶ÎÄ¼şÃû";
+            dlg.Title = "è¯·æŒ‡å®šè¦æ‰“å¼€çš„(ä¹¦ç›®åº“)è®°å½•è·¯å¾„æ–‡ä»¶å";
             dlg.FileName = this.textBox_recpathFile.Text;
             // dlg.InitialDirectory = 
-            dlg.Filter = "¼ÇÂ¼Â·¾¶ÎÄ¼ş (*.txt)|*.txt|All files (*.*)|*.*";
+            dlg.Filter = "è®°å½•è·¯å¾„æ–‡ä»¶ (*.txt)|*.txt|All files (*.*)|*.*";
             dlg.RestoreDirectory = true;
 
             if (dlg.ShowDialog() != DialogResult.OK)

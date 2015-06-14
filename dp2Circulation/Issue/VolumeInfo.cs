@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -6,7 +6,7 @@ using DigitalPlatform.Text;
 
 namespace dp2Circulation
 {
-    // Ò»¸ö¾ßÌåµÄ¾íÆÚĞÅÏ¢
+    // ä¸€ä¸ªå…·ä½“çš„å·æœŸä¿¡æ¯
     internal class VolumeInfo
     {
         public string Year = "";
@@ -19,7 +19,7 @@ namespace dp2Circulation
             /*
             if (bIncludeYear == false)
             {
-                // ¹¹Ôì±í´ïÒ»¸ö²áËùÔÚµÄµ±ÄêÆÚºÅ¡¢×ÜÆÚºÅ¡¢¾íºÅµÄ×Ö·û´®
+                // æ„é€ è¡¨è¾¾ä¸€ä¸ªå†Œæ‰€åœ¨çš„å½“å¹´æœŸå·ã€æ€»æœŸå·ã€å·å·çš„å­—ç¬¦ä¸²
                 return BuildItemVolumeString(this.IssueNo,
                     this.Zong,
                     this.Volumn);
@@ -37,7 +37,7 @@ namespace dp2Circulation
              * */
         }
 
-        // ¹¹Ôì±í´ïÒ»¸ö²áËùÔÚµÄµ±ÄêÆÚºÅ¡¢×ÜÆÚºÅ¡¢¾íºÅµÄ×Ö·û´®
+        // æ„é€ è¡¨è¾¾ä¸€ä¸ªå†Œæ‰€åœ¨çš„å½“å¹´æœŸå·ã€æ€»æœŸå·ã€å·å·çš„å­—ç¬¦ä¸²
         public static string BuildItemVolumeString(
             string strYear,
             string strIssue,
@@ -61,7 +61,7 @@ namespace dp2Circulation
             {
                 if (strResult != "")
                     strResult += ", ";
-                strResult += "×Ü." + strZong;
+                strResult += "æ€»." + strZong;
             }
 
             if (String.IsNullOrEmpty(strVolume) == false)
@@ -75,7 +75,7 @@ namespace dp2Circulation
         }
 
         /*
-        // ¹¹Ôì±í´ïÒ»¸ö²áËùÔÚµÄµ±ÄêÆÚºÅ¡¢×ÜÆÚºÅ¡¢¾íºÅµÄ×Ö·û´®
+        // æ„é€ è¡¨è¾¾ä¸€ä¸ªå†Œæ‰€åœ¨çš„å½“å¹´æœŸå·ã€æ€»æœŸå·ã€å·å·çš„å­—ç¬¦ä¸²
         public static string BuildItemVolumeString(string strIssue,
             string strZong,
             string strVolume)
@@ -88,7 +88,7 @@ namespace dp2Circulation
             {
                 if (strResult != "")
                     strResult += ", ";
-                strResult += "×Ü." + strZong;
+                strResult += "æ€»." + strZong;
             }
 
             if (String.IsNullOrEmpty(strVolume) == false)
@@ -102,7 +102,7 @@ namespace dp2Circulation
         }
          * */
 
-        // ½âÎöno.ĞòÁĞ
+        // è§£æno.åºåˆ—
         public static int ExpandNoString(string strText,
             string strDefaultYear,
             out List<VolumeInfo> infos,
@@ -113,7 +113,7 @@ namespace dp2Circulation
 
             string strCurrentYear = strDefaultYear;
 
-            string[] no_parts = strText.Split(new char[] { ',', ':', ';', '£¬','£º','£»' });    // ':' ';' ÊÇÎªÁË¼æÈİÄ³¸ö½×¶ÎµÄÁÙÊ±ÓÃ·¨ 2001:no.1-2;2002:no.1-12
+            string[] no_parts = strText.Split(new char[] { ',', ':', ';', 'ï¼Œ','ï¼š','ï¼›' });    // ':' ';' æ˜¯ä¸ºäº†å…¼å®¹æŸä¸ªé˜¶æ®µçš„ä¸´æ—¶ç”¨æ³• 2001:no.1-2;2002:no.1-12
             for (int i = 0; i < no_parts.Length; i++)
             {
                 string strPart = no_parts[i].Trim();
@@ -126,13 +126,13 @@ namespace dp2Circulation
                     continue;
                 }
 
-                // È¥µô"no."²¿·Ö
+                // å»æ‰"no."éƒ¨åˆ†
                 if (StringUtil.HasHead(strPart, "no.") == true)
                 {
                     strPart = strPart.Substring(3).Trim();
                 }
 
-                // TODO: Ã»ÓĞ"no."¿ªÍ·µÄ£¬ÊÇ·ñ¾¯¸æ?
+                // TODO: æ²¡æœ‰"no."å¼€å¤´çš„ï¼Œæ˜¯å¦è­¦å‘Š?
 
                 if (String.IsNullOrEmpty(strPart) == true)
                     continue;
@@ -145,7 +145,7 @@ namespace dp2Circulation
                 }
                 catch (Exception ex)
                 {
-                    strError = "ĞòÁĞ '" + strPart + "' ¸ñÊ½´íÎó:" + ex.Message;
+                    strError = "åºåˆ— '" + strPart + "' æ ¼å¼é”™è¯¯:" + ex.Message;
                     return -1;
                 }
 
@@ -155,7 +155,7 @@ namespace dp2Circulation
 
                     if (String.IsNullOrEmpty(strCurrentYear) == true)
                     {
-                        strError = "µ±Óöµ½ '" + strNo + "' µÄÊ±ºò£¬Ã»ÓĞ±ØÒªµÄÄê·İĞÅÏ¢£¬ÎŞ·¨½âÎöno.ĞòÁĞĞÅÏ¢";
+                        strError = "å½“é‡åˆ° '" + strNo + "' çš„æ—¶å€™ï¼Œæ²¡æœ‰å¿…è¦çš„å¹´ä»½ä¿¡æ¯ï¼Œæ— æ³•è§£æno.åºåˆ—ä¿¡æ¯";
                         return -1;
                     }
 
@@ -170,7 +170,7 @@ namespace dp2Circulation
             return 0;
         }
 
-        // ½âÎö¾íÆÚ·¶Î§ĞòÁĞ¡£ÀıÈç¡°2001,no.1-12=×Ü.101-112=v.25*12¡±
+        // è§£æå·æœŸèŒƒå›´åºåˆ—ã€‚ä¾‹å¦‚â€œ2001,no.1-12=æ€».101-112=v.25*12â€
         public static int BuildVolumeInfos(string strText,
             out List<VolumeInfo> infos,
             out string strError)
@@ -198,7 +198,7 @@ namespace dp2Circulation
                     strNoString = strSegment;
                 else if (strSegment.IndexOf("v.") != -1)
                     strVolumnString = strSegment;
-                else if (strSegment.IndexOf("×Ü.") != -1)
+                else if (strSegment.IndexOf("æ€».") != -1)
                     strZongString = strSegment;
                 else
                 {
@@ -207,38 +207,38 @@ namespace dp2Circulation
             }
 
             // 2012/4/25
-            // µ±ÄêÆÚºÅĞòÁĞºÜÖØÒª£¬Èç¹ûÈ±ÁË£¬¹âÓĞ×ÜÆÚºÅºÍ¾íºÅÊÇ²»ĞĞµÄ
+            // å½“å¹´æœŸå·åºåˆ—å¾ˆé‡è¦ï¼Œå¦‚æœç¼ºäº†ï¼Œå…‰æœ‰æ€»æœŸå·å’Œå·å·æ˜¯ä¸è¡Œçš„
             if (string.IsNullOrEmpty(strNoString) == true
                 && (string.IsNullOrEmpty(strZongString) == false || string.IsNullOrEmpty(strVolumnString) == false))
             {
-                strError = "µ±ÄêÆÚºÅĞòÁĞ²»ÄÜÊ¡È´¡£'" + strText + "'";
+                strError = "å½“å¹´æœŸå·åºåˆ—ä¸èƒ½çœå´ã€‚'" + strText + "'";
                 if (notdef_segments.Count > 0)
-                    strError += "¡£×Ö·û´®ÖĞ³öÏÖÁËÎŞ·¨Ê¶±ğµÄĞòÁĞ: " + StringUtil.MakePathList(notdef_segments, "=");
+                    strError += "ã€‚å­—ç¬¦ä¸²ä¸­å‡ºç°äº†æ— æ³•è¯†åˆ«çš„åºåˆ—: " + StringUtil.MakePathList(notdef_segments, "=");
                 return -1;
             }
 
             if (String.IsNullOrEmpty(strNoString) == false)
             {
-                // È¥µô"y."²¿·Ö
+                // å»æ‰"y."éƒ¨åˆ†
                 if (StringUtil.HasHead(strYearString, "y.") == true)
                 {
                     strYearString = strYearString.Substring(2).Trim();
                 }
 
-                // ½âÎöno.ĞòÁĞ
+                // è§£æno.åºåˆ—
                 nRet = ExpandNoString(strNoString,
                     strYearString,
                     out infos,
                     out strError);
                 if (nRet == -1)
                 {
-                    strError = "½âÎöĞòÁĞ '" + strNoString + "' (Äê·İ'" + strYearString + "')Ê±·¢Éú´íÎó: " + strError;
+                    strError = "è§£æåºåˆ— '" + strNoString + "' (å¹´ä»½'" + strYearString + "')æ—¶å‘ç”Ÿé”™è¯¯: " + strError;
                     return -1;
                 }
             }
 
-            // È¥µô"×Ü."²¿·Ö
-            if (StringUtil.HasHead(strZongString, "×Ü.") == true)
+            // å»æ‰"æ€»."éƒ¨åˆ†
+            if (StringUtil.HasHead(strZongString, "æ€».") == true)
             {
                 strZongString = strZongString.Substring(2).Trim();
             }
@@ -253,7 +253,7 @@ namespace dp2Circulation
                 }
                 catch (Exception ex)
                 {
-                    strError = "×Ü. ĞòÁĞ '" + strZongString + "' ¸ñÊ½´íÎó:" + ex.Message;
+                    strError = "æ€». åºåˆ— '" + strZongString + "' æ ¼å¼é”™è¯¯:" + ex.Message;
                     return -1;
                 }
 
@@ -267,7 +267,7 @@ namespace dp2Circulation
                 }
             }
 
-            // È¥µô"v."²¿·Ö
+            // å»æ‰"v."éƒ¨åˆ†
             if (StringUtil.HasHead(strVolumnString, "v.") == true)
             {
                 strVolumnString = strVolumnString.Substring(2).Trim();
@@ -283,7 +283,7 @@ namespace dp2Circulation
                 }
                 catch (Exception ex)
                 {
-                    strError = "v.ĞòÁĞ '" + strVolumnString + "' ¸ñÊ½´íÎó:" + ex.Message;
+                    strError = "v.åºåˆ— '" + strVolumnString + "' æ ¼å¼é”™è¯¯:" + ex.Message;
                     return -1;
                 }
 
@@ -294,29 +294,29 @@ namespace dp2Circulation
                     if (i < volumes.Count)
                     {
                         info.Volumn = volumes[i];
-                        strLastValue = info.Volumn; // ¼ÇÒä×îºóÒ»¸ö
+                        strLastValue = info.Volumn; // è®°å¿†æœ€åä¸€ä¸ª
                     }
                     else
-                        info.Volumn = strLastValue; // ÑØÓÃ×îºóÒ»¸ö
+                        info.Volumn = strLastValue; // æ²¿ç”¨æœ€åä¸€ä¸ª
                 }
             }
 
-            // 2015/5/8 Èç¹û strText ÄÚÈİÎª¡°ÂÌ±Ê²É·ç¡±Ö®ÀàµÄ£¬¾ÍÎŞ·¨·ÖÎö³ö²¿¼ş
+            // 2015/5/8 å¦‚æœ strText å†…å®¹ä¸ºâ€œç»¿ç¬”é‡‡é£â€ä¹‹ç±»çš„ï¼Œå°±æ— æ³•åˆ†æå‡ºéƒ¨ä»¶
             if (infos.Count == 0 && notdef_segments.Count > 0)
             {
-                strError += "¾íÆÚ·¶Î§×Ö·û´®ÖĞ³öÏÖÁËÎŞ·¨Ê¶±ğµÄĞòÁĞ: " + StringUtil.MakePathList(notdef_segments, "=");
+                strError += "å·æœŸèŒƒå›´å­—ç¬¦ä¸²ä¸­å‡ºç°äº†æ— æ³•è¯†åˆ«çš„åºåˆ—: " + StringUtil.MakePathList(notdef_segments, "=");
                 return -1;
             }
 
             return 0;
         }
 
-        // Õ¹¿ªºÅÂë×Ö·û´®
-        // ¿ÉÄÜÅ×³öÒì³£
+        // å±•å¼€å·ç å­—ç¬¦ä¸²
+        // å¯èƒ½æŠ›å‡ºå¼‚å¸¸
         public static List<string> ExpandSequence(string strText)
         {
             List<string> results = new List<string>();
-            string[] parts = strText.Split(new char[] { ',','£¬' });
+            string[] parts = strText.Split(new char[] { ',','ï¼Œ' });
             for (int i = 0; i < parts.Length; i++)
             {
                 string strPart = parts[i];
@@ -366,7 +366,7 @@ namespace dp2Circulation
             return results;
         }
 
-        // ½âÎöµ±ÄêÆÚºÅ¡¢×ÜÆÚºÅ¡¢¾íºÅµÄ×Ö·û´®
+        // è§£æå½“å¹´æœŸå·ã€æ€»æœŸå·ã€å·å·çš„å­—ç¬¦ä¸²
         public static void ParseItemVolumeString(string strVolumeString,
             out string strIssue,
             out string strZong,
@@ -376,14 +376,14 @@ namespace dp2Circulation
             strZong = "";
             strVolume = "";
 
-            string[] segments = strVolumeString.Split(new char[] { ';', ',', '=','£»','£¬','£½' });    // ',','='Îª2010/2/24ĞÂÔö
+            string[] segments = strVolumeString.Split(new char[] { ';', ',', '=','ï¼›','ï¼Œ','ï¼' });    // ',','='ä¸º2010/2/24æ–°å¢
             for (int i = 0; i < segments.Length; i++)
             {
                 string strSegment = segments[i].Trim();
 
                 if (StringUtil.HasHead(strSegment, "no.") == true)
                     strIssue = strSegment.Substring(3).Trim();
-                else if (StringUtil.HasHead(strSegment, "×Ü.") == true)
+                else if (StringUtil.HasHead(strSegment, "æ€».") == true)
                     strZong = strSegment.Substring(2).Trim();
                 else if (StringUtil.HasHead(strSegment, "v.") == true)
                     strVolume = strSegment.Substring(2).Trim();
@@ -397,9 +397,9 @@ namespace dp2Circulation
         {
             strError = "";
 
-            if (strIssueNo.IndexOfAny(new char[] {'-','*',',',';','=','?','£­','£ª','£¬','£»','£½','£¿' }) != -1)
+            if (strIssueNo.IndexOfAny(new char[] {'-','*',',',';','=','?','ï¼','ï¼Š','ï¼Œ','ï¼›','ï¼','ï¼Ÿ' }) != -1)
             {
-                strError = strName + "×Ö·û´®ÖĞ²»ÄÜ°üº¬ÏÂÁĞ×Ö·û: '-','*',',',';','=','?'";
+                strError = strName + "å­—ç¬¦ä¸²ä¸­ä¸èƒ½åŒ…å«ä¸‹åˆ—å­—ç¬¦: '-','*',',',';','=','?'";
                 return -1;
             }
 
@@ -410,7 +410,7 @@ namespace dp2Circulation
 
     internal class IssueUtil
     {
-        // »ñµÃ³ö°æÈÕÆÚµÄÄê·İ²¿·Ö
+        // è·å¾—å‡ºç‰ˆæ—¥æœŸçš„å¹´ä»½éƒ¨åˆ†
         public static string GetYearPart(string strPublishTime)
         {
             if (String.IsNullOrEmpty(strPublishTime) == true)

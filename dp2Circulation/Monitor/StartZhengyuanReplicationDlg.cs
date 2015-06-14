@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -28,7 +28,7 @@ namespace dp2Circulation
             int nRet = 0;
 
 
-            // Í¨ÓÃÆô¶¯²ÎÊı
+            // é€šç”¨å¯åŠ¨å‚æ•°
             bool bForceDumpAll = false;
             bool bForceDumpDay = false;
             bool bAutoDumpDay = false;
@@ -64,7 +64,7 @@ namespace dp2Circulation
         private void button_OK_Click(object sender, EventArgs e)
         {
 
-            // Í¨ÓÃÆô¶¯²ÎÊı
+            // é€šç”¨å¯åŠ¨å‚æ•°
             XmlDocument dom = new XmlDocument();
             dom.LoadXml("<root />");
 
@@ -102,13 +102,13 @@ namespace dp2Circulation
 
         }
 
-        // ½âÎöÍ¨ÓÃÆô¶¯²ÎÊı
-        // ¸ñÊ½
+        // è§£æé€šç”¨å¯åŠ¨å‚æ•°
+        // æ ¼å¼
         /*
          * <root dump='...' clearFirst='...' loop='...'/>
-         * dumpÈ±Ê¡Îªfalse
-         * clearFirstÈ±Ê¡Îªfalse
-         * loopÈ±Ê¡Îªtrue
+         * dumpç¼ºçœä¸ºfalse
+         * clearFirstç¼ºçœä¸ºfalse
+         * loopç¼ºçœä¸ºtrue
          * 
          * 
          * */
@@ -139,7 +139,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = "strParam²ÎÊı×°ÈëXML DOMÊ±³ö´í: " + ex.Message;
+                strError = "strParamå‚æ•°è£…å…¥XML DOMæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 

@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Drawing;
@@ -7,7 +7,7 @@ using System.Drawing.Printing;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ÔÝÎ´Ê¹ÓÃ
+    /// æš‚æœªä½¿ç”¨
     /// </summary>
     internal class NewPrintController : PrintController
     {

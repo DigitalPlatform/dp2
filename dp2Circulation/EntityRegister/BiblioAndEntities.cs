@@ -7,18 +7,18 @@ using System.Text;
 using System.Windows.Forms;
 using System.Drawing;
 using System.Xml;
+using System.Diagnostics;
+using System.Drawing.Drawing2D;
 
+using DigitalPlatform;
 using DigitalPlatform.EasyMarc;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Text;
-using System.Diagnostics;
 using DigitalPlatform.Script;
-using DigitalPlatform;
 using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.Marc;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
-using System.Drawing.Drawing2D;
 
 namespace dp2Circulation
 {

@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Windows.Forms;
@@ -16,31 +16,31 @@ using DigitalPlatform.Script;
 namespace dp2Circulation
 {
     /// <summary>
-    /// OperLogStatisForm (ÈÕÖ¾Í³¼Æ´°) Í³¼Æ·½°¸µÄËŞÖ÷Àà
+    /// OperLogStatisForm (æ—¥å¿—ç»Ÿè®¡çª—) ç»Ÿè®¡æ–¹æ¡ˆçš„å®¿ä¸»ç±»
     /// </summary>
     public class OperLogStatis : StatisHostBase
     {
-        // »ù±¾Í³¼Æ±í¸ñ(È«·¶Î§Ò»¸ö±í)
+        // åŸºæœ¬ç»Ÿè®¡è¡¨æ ¼(å…¨èŒƒå›´ä¸€ä¸ªè¡¨)
 
         /// <summary>
-        /// ±¾¶ÔÏóËù¹ØÁªµÄ OperLogStatisForm (ÈÕÖ¾Í³¼Æ´°)
+        /// æœ¬å¯¹è±¡æ‰€å…³è”çš„ OperLogStatisForm (æ—¥å¿—ç»Ÿè®¡çª—)
         /// </summary>
-        public OperLogStatisForm OperLogStatisForm = null;	// ÒıÓÃ
+        public OperLogStatisForm OperLogStatisForm = null;	// å¼•ç”¨
 
         /// <summary>
-        /// ¿ªÊ¼ÈÕÆÚ
+        /// å¼€å§‹æ—¥æœŸ
         /// </summary>
         public DateTime StartDate = new DateTime(0);
 
         /// <summary>
-        /// ½áÊøÈÕÆÚ
+        /// ç»“æŸæ—¥æœŸ
         /// </summary>
         public DateTime EndDate = new DateTime(0);
 
         /// <summary>
-        /// »ñµÃ±íÊ¾ÈÕÆÚ·¶Î§µÄ×Ö·û´®
+        /// è·å¾—è¡¨ç¤ºæ—¥æœŸèŒƒå›´çš„å­—ç¬¦ä¸²
         /// </summary>
-        /// <returns>ÈÕÆÚ·¶Î§×Ö·û´®</returns>
+        /// <returns>æ—¥æœŸèŒƒå›´å­—ç¬¦ä¸²</returns>
         public string GetTimeRangeString()
         {
             string strStart = StartDate.ToLongDateString();
@@ -52,36 +52,36 @@ namespace dp2Circulation
             return strStart + "-" + strEnd;
         }
 
-        // µ±Ç°ÈÕÆÚ£¬ÔÚÔËĞĞÖĞ²»¶Ï±ä¶¯
+        // å½“å‰æ—¥æœŸï¼Œåœ¨è¿è¡Œä¸­ä¸æ–­å˜åŠ¨
         /// <summary>
-        /// µ±Ç°ÕıÔÚ´¦ÀíµÄÈÕÆÚ
+        /// å½“å‰æ­£åœ¨å¤„ç†çš„æ—¥æœŸ
         /// </summary>
         public DateTime CurrentDate = new DateTime(0);
 
 #if NO
         private bool disposed = false;
         public WebBrowser Console = null;
-        public string ProjectDir = "";  // ·½°¸Ô´ÎÄ¼şËùÔÚÄ¿Â¼
-        public string InstanceDir = ""; // µ±Ç°ÊµÀı¶ÀÕ¼µÄÄ¿Â¼¡£ÓÃÓÚ´æ´¢ÁÙÊ±ÎÄ¼ş
+        public string ProjectDir = "";  // æ–¹æ¡ˆæºæ–‡ä»¶æ‰€åœ¨ç›®å½•
+        public string InstanceDir = ""; // å½“å‰å®ä¾‹ç‹¬å çš„ç›®å½•ã€‚ç”¨äºå­˜å‚¨ä¸´æ—¶æ–‡ä»¶
 
-        public List<string> OutputFileNames = new List<string>(); // ´æ·ÅÊä³öµÄhtmlÎÄ¼ş
+        public List<string> OutputFileNames = new List<string>(); // å­˜æ”¾è¾“å‡ºçš„htmlæ–‡ä»¶
 
         int m_nFileNameSeed = 1;
 #endif
 
         /// <summary>
-        /// µ±Ç°ÕıÔÚ´¦ÀíµÄÈÕÖ¾ÎÄ¼şÃû¡£´¿ÎÄ¼şÃû
+        /// å½“å‰æ­£åœ¨å¤„ç†çš„æ—¥å¿—æ–‡ä»¶åã€‚çº¯æ–‡ä»¶å
         /// </summary>
-        public string CurrentLogFileName = "";    // µ±Ç°ÈÕÖ¾ÎÄ¼şÃû(´¿ÎÄ¼şÃû)
+        public string CurrentLogFileName = "";    // å½“å‰æ—¥å¿—æ–‡ä»¶å(çº¯æ–‡ä»¶å)
 
         /// <summary>
-        /// µ±Ç°ÈÕÖ¾¼ÇÂ¼ÔÚÎÄ¼şÖĞµÄÏÂ±ê (´Ó 0 ¿ªÊ¼¼ÆÊı)
+        /// å½“å‰æ—¥å¿—è®°å½•åœ¨æ–‡ä»¶ä¸­çš„ä¸‹æ ‡ (ä» 0 å¼€å§‹è®¡æ•°)
         /// </summary>
-        public long CurrentRecordIndex = -1; // µ±Ç°ÈÕÖ¾¼ÇÂ¼ÔÚÎÄ¼şÖĞµÄÆ«ÒÆÁ¿
+        public long CurrentRecordIndex = -1; // å½“å‰æ—¥å¿—è®°å½•åœ¨æ–‡ä»¶ä¸­çš„åç§»é‡
 
-        string m_strXml = "";    // ÈÕÖ¾¼ÇÂ¼Ìå
+        string m_strXml = "";    // æ—¥å¿—è®°å½•ä½“
         /// <summary>
-        /// µ±Ç°ÕıÔÚ´¦ÀíµÄÈÕÖ¾¼ÇÂ¼ XML ¼ÇÂ¼£¬×Ö·û´®ÀàĞÍ
+        /// å½“å‰æ­£åœ¨å¤„ç†çš„æ—¥å¿—è®°å½• XML è®°å½•ï¼Œå­—ç¬¦ä¸²ç±»å‹
         /// </summary>
         public string Xml
         {
@@ -96,7 +96,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public OperLogStatis()
 		{
@@ -159,7 +159,7 @@ namespace dp2Circulation
                     // Dispose managed resources.
                 }
 
-                // É¾³ıËùÓĞÊä³öÎÄ¼ş
+                // åˆ é™¤æ‰€æœ‰è¾“å‡ºæ–‡ä»¶
                 if (this.OutputFileNames != null)
                 {
                     Global.DeleteFiles(this.OutputFileNames);
@@ -190,31 +190,31 @@ namespace dp2Circulation
         {
         }
 
-        // ³õÊ¼»¯
+        // åˆå§‹åŒ–
         public virtual void OnInitial(object sender, StatisEventArgs e)
         {
 
         }
 
-        // ¿ªÊ¼
+        // å¼€å§‹
         public virtual void OnBegin(object sender, StatisEventArgs e)
         {
 
         }
 
-        // Ã¿Ò»¼ÇÂ¼´¦Àí
+        // æ¯ä¸€è®°å½•å¤„ç†
         public virtual void OnRecord(object sender, StatisEventArgs e)
         {
 
         }
 
-        // ½áÊø
+        // ç»“æŸ
         public virtual void OnEnd(object sender, StatisEventArgs e)
         {
 
         }
 
-        // ´òÓ¡Êä³ö
+        // æ‰“å°è¾“å‡º
         public virtual void OnPrint(object sender, StatisEventArgs e)
         {
 
@@ -236,7 +236,7 @@ namespace dp2Circulation
             Global.WriteHtml(this.Console, HttpUtility.HtmlEncode(strText));
         }
 
-        // »ñµÃÒ»¸öĞÂµÄÊä³öÎÄ¼şÃû
+        // è·å¾—ä¸€ä¸ªæ–°çš„è¾“å‡ºæ–‡ä»¶å
         public string NewOutputFileName()
         {
             string strFileNamePrefix = this.OperLogStatisForm.MainForm.DataDir + "\\~statis";
@@ -250,7 +250,7 @@ namespace dp2Circulation
             return strFileName;
         }
 
-        // ½«×Ö·û´®ÄÚÈİĞ´ÈëÎÄ±¾ÎÄ¼ş
+        // å°†å­—ç¬¦ä¸²å†…å®¹å†™å…¥æ–‡æœ¬æ–‡ä»¶
         public void WriteToOutputFile(string strFileName,
             string strText,
             Encoding encoding)
@@ -262,7 +262,7 @@ namespace dp2Circulation
             sw.Close();
         }
 
-        // É¾³ıÒ»¸öÊä³öÎÄ¼ş
+        // åˆ é™¤ä¸€ä¸ªè¾“å‡ºæ–‡ä»¶
         public void DeleteOutputFile(string strFileName)
         {
             int nIndex = this.OutputFileNames.IndexOf(strFileName);
@@ -279,18 +279,18 @@ namespace dp2Circulation
         }
 
 #endif
-        // ĞÂ°æ±¾
-        // »ñµÃÒ»¸ömodifyprice»òÕßamerce¶¯×÷ĞÍµÄÈÕÖ¾¼ÇÂ¼ÖĞµÄĞŞ¸ÄÎ¥Ô¼½ğµÄÏ¸½Ú
+        // æ–°ç‰ˆæœ¬
+        // è·å¾—ä¸€ä¸ªmodifypriceæˆ–è€…amerceåŠ¨ä½œå‹çš„æ—¥å¿—è®°å½•ä¸­çš„ä¿®æ”¹è¿çº¦é‡‘çš„ç»†èŠ‚
         // return:
         //      -1  error
-        //      0   ³É¹¦
+        //      0   æˆåŠŸ
         /// <summary>
-        /// »ñµÃÒ»¸ömodifyprice»òÕßamerce¶¯×÷ĞÍµÄÈÕÖ¾¼ÇÂ¼ÖĞµÄĞŞ¸ÄÎ¥Ô¼½ğµÄÏ¸½Ú
+        /// è·å¾—ä¸€ä¸ªmodifypriceæˆ–è€…amerceåŠ¨ä½œå‹çš„æ—¥å¿—è®°å½•ä¸­çš„ä¿®æ”¹è¿çº¦é‡‘çš„ç»†èŠ‚
         /// </summary>
-        /// <param name="domOperLog">ÈÕÖ¾¼ÇÂ¼ XmlDocument ¶ÔÏó</param>
-        /// <param name="prices">½ğ¶î¶ÔµÄ¼¯ºÏ</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í  0: ³É¹¦</returns>
+        /// <param name="domOperLog">æ—¥å¿—è®°å½• XmlDocument å¯¹è±¡</param>
+        /// <param name="prices">é‡‘é¢å¯¹çš„é›†åˆ</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™  0: æˆåŠŸ</returns>
         public static int ComputeAmerceModifiedPrice(XmlDocument domOperLog,
             out List<PricePair> prices,
             out string strError)
@@ -304,7 +304,7 @@ namespace dp2Circulation
             if (strAction != "modifyprice"
                 && strAction != "amerce")
             {
-                strError = "¶¯×÷ÀàĞÍÊÇ '" + strAction + "', ²»ÄÜÓÃÓÚµ÷ÓÃComputeAmerceModifiedPrice()º¯Êı¡£Ó¦µ±ÊÇmodifyprice/amerceÀàĞÍ";
+                strError = "åŠ¨ä½œç±»å‹æ˜¯ '" + strAction + "', ä¸èƒ½ç”¨äºè°ƒç”¨ComputeAmerceModifiedPrice()å‡½æ•°ã€‚åº”å½“æ˜¯modifyprice/amerceç±»å‹";
                 return -1;
             }
 
@@ -312,7 +312,7 @@ namespace dp2Circulation
             int nRet = 0;
 
 #if NO
-            // ¸ù¾İÈÕÖ¾¼ÇÂ¼ÖĞµÄ<oldReaderRecord>ÔªËØÄÚÇ¶ÎÄ±¾(µ±×÷Ò»¸öXML¼ÇÂ¼)ÖĞµÄ<overdue>ÔªËØ´´½¨ID-¼Û¸ñÁĞ±í
+            // æ ¹æ®æ—¥å¿—è®°å½•ä¸­çš„<oldReaderRecord>å…ƒç´ å†…åµŒæ–‡æœ¬(å½“ä½œä¸€ä¸ªXMLè®°å½•)ä¸­çš„<overdue>å…ƒç´ åˆ›å»ºID-ä»·æ ¼åˆ—è¡¨
             nRet = BuildIdPriceListFromOverdueTag(
                 domOperLog,
                 "oldReaderRecord",
@@ -357,7 +357,7 @@ namespace dp2Circulation
                 string strOldPrice = GetPriceByID(list, strID, out strDebug);
                 if (strOldPrice == null)
                 {
-                    strError = "ÈÕÖ¾ÎÄ¼ş¸ñÊ½´íÎó: ¸ù¾İid '" + strID + "' ÔÚÈÕÖ¾¼ÇÂ¼<oldReaderRecord>ÔªËØÎÄ±¾ÄÚ<overdue>ÔªËØÖĞÃ»ÓĞÕÒµ½¶ÔÓ¦µÄÊÂÏî¡£debug: " + strDebug;
+                    strError = "æ—¥å¿—æ–‡ä»¶æ ¼å¼é”™è¯¯: æ ¹æ®id '" + strID + "' åœ¨æ—¥å¿—è®°å½•<oldReaderRecord>å…ƒç´ æ–‡æœ¬å†…<overdue>å…ƒç´ ä¸­æ²¡æœ‰æ‰¾åˆ°å¯¹åº”çš„äº‹é¡¹ã€‚debug: " + strDebug;
                     return -1;
                 }
 
@@ -371,14 +371,14 @@ namespace dp2Circulation
             return 0;
         }
 
-        // °ü×°ºóµÄ°æ±¾£¬ÎªÁË¼æÈİÒÔÇ°µÄ°æ±¾
+        // åŒ…è£…åçš„ç‰ˆæœ¬ï¼Œä¸ºäº†å…¼å®¹ä»¥å‰çš„ç‰ˆæœ¬
         /// <summary>
-        /// ¼ÆËãÒ»¸öamerce»òundo¶¯×÷ÀàĞÍÈÕÖ¾¼ÇÂ¼ÖĞµÄÏà¹ØÎ¥Ô¼½ğ×Ü¶î¡£¼´½«·ÏÖ¹µÄ°æ±¾
+        /// è®¡ç®—ä¸€ä¸ªamerceæˆ–undoåŠ¨ä½œç±»å‹æ—¥å¿—è®°å½•ä¸­çš„ç›¸å…³è¿çº¦é‡‘æ€»é¢ã€‚å³å°†åºŸæ­¢çš„ç‰ˆæœ¬
         /// </summary>
-        /// <param name="domOperLog">ÈÕÖ¾¼ÇÂ¼ XmlDocument ¶ÔÏó</param>
-        /// <param name="prices">½ğ¶î×Ö·û´®¼¯ºÏ</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í  0: ³É¹¦</returns>
+        /// <param name="domOperLog">æ—¥å¿—è®°å½• XmlDocument å¯¹è±¡</param>
+        /// <param name="prices">é‡‘é¢å­—ç¬¦ä¸²é›†åˆ</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™  0: æˆåŠŸ</returns>
         public static int ComputeAmerceOrUndoPrice(XmlDocument domOperLog,
     out List<string> prices,
     out string strError)
@@ -390,52 +390,52 @@ namespace dp2Circulation
         }
 
         /*
-amerce ½»·Ñ
+amerce äº¤è´¹
 
 <root>
-<operation>amerce</operation> ²Ù×÷ÀàĞÍ
-<action>amerce</action> ¾ßÌå¶¯×÷¡£ÓĞamerce undo modifyprice
-<readerBarcode>...</readerBarcode> ¶ÁÕßÖ¤ÌõÂë
-<!-- <idList>...<idList> IDÁĞ±í£¬¶ººÅ¼ä¸ô ÒÑ·ÏÖ¹ -->
+<operation>amerce</operation> æ“ä½œç±»å‹
+<action>amerce</action> å…·ä½“åŠ¨ä½œã€‚æœ‰amerce undo modifyprice
+<readerBarcode>...</readerBarcode> è¯»è€…è¯æ¡ç 
+<!-- <idList>...<idList> IDåˆ—è¡¨ï¼Œé€—å·é—´éš” å·²åºŸæ­¢ -->
 <amerceItems>
 <amerceItem id="..." newPrice="..." comment="..." />
 ...
 </amerceItems>
-<amerceRecord recPath='...'><root><itemBarcode>0000001</itemBarcode><readerBarcode>R0000002</readerBarcode><state>amerced</state><id>632958375041543888-1</id><over>31day</over><borrowDate>Sat, 07 Oct 2006 09:04:28 GMT</borrowDate><borrowPeriod>30day</borrowPeriod><returnDate>Thu, 07 Dec 2006 09:04:27 GMT</returnDate><returnOperator>test</returnOperator></root></amerceRecord> ÔÚ·£¿î¿âÖĞ´´½¨µÄĞÂ¼ÇÂ¼¡£×¢Òâ<amerceRecord>ÔªËØ¿ÉÒÔÖØ¸´¡£<amerceRecord>ÔªËØÄÚÈİÀïÃæµÄ<itemBarcode><readerBarcode><id>µÈ¾ß±¸ÁË×ã¹»µÄĞÅÏ¢¡£
-<operator>test</operator> ²Ù×÷Õß
-<operTime>Fri, 08 Dec 2006 10:09:36 GMT</operTime> ²Ù×÷Ê±¼ä
+<amerceRecord recPath='...'><root><itemBarcode>0000001</itemBarcode><readerBarcode>R0000002</readerBarcode><state>amerced</state><id>632958375041543888-1</id><over>31day</over><borrowDate>Sat, 07 Oct 2006 09:04:28 GMT</borrowDate><borrowPeriod>30day</borrowPeriod><returnDate>Thu, 07 Dec 2006 09:04:27 GMT</returnDate><returnOperator>test</returnOperator></root></amerceRecord> åœ¨ç½šæ¬¾åº“ä¸­åˆ›å»ºçš„æ–°è®°å½•ã€‚æ³¨æ„<amerceRecord>å…ƒç´ å¯ä»¥é‡å¤ã€‚<amerceRecord>å…ƒç´ å†…å®¹é‡Œé¢çš„<itemBarcode><readerBarcode><id>ç­‰å…·å¤‡äº†è¶³å¤Ÿçš„ä¿¡æ¯ã€‚
+<operator>test</operator> æ“ä½œè€…
+<operTime>Fri, 08 Dec 2006 10:09:36 GMT</operTime> æ“ä½œæ—¶é—´
   
-<readerRecord recPath='...'>...</readerRecord>	×îĞÂ¶ÁÕß¼ÇÂ¼
+<readerRecord recPath='...'>...</readerRecord>	æœ€æ–°è¯»è€…è®°å½•
 </root>
 
 <root>
 <operation>amerce</operation> 
 <action>undo</action> 
-<readerBarcode>...</readerBarcode> ¶ÁÕßÖ¤ÌõÂë
-<!-- <idList>...<idList> IDÁĞ±í£¬¶ººÅ¼ä¸ô ÒÑ·ÏÖ¹ -->
+<readerBarcode>...</readerBarcode> è¯»è€…è¯æ¡ç 
+<!-- <idList>...<idList> IDåˆ—è¡¨ï¼Œé€—å·é—´éš” å·²åºŸæ­¢ -->
 <amerceItems>
 <amerceItem id="..." newPrice="..."/>
 ...
 </amerceItems>
-<amerceRecord recPath='...'><root><itemBarcode>0000001</itemBarcode><readerBarcode>R0000002</readerBarcode><state>amerced</state><id>632958375041543888-1</id><over>31day</over><borrowDate>Sat, 07 Oct 2006 09:04:28 GMT</borrowDate><borrowPeriod>30day</borrowPeriod><returnDate>Thu, 07 Dec 2006 09:04:27 GMT</returnDate><returnOperator>test</returnOperator></root></amerceRecord> UndoËùÈ¥µôµÄ·£¿î¿â¼ÇÂ¼
+<amerceRecord recPath='...'><root><itemBarcode>0000001</itemBarcode><readerBarcode>R0000002</readerBarcode><state>amerced</state><id>632958375041543888-1</id><over>31day</over><borrowDate>Sat, 07 Oct 2006 09:04:28 GMT</borrowDate><borrowPeriod>30day</borrowPeriod><returnDate>Thu, 07 Dec 2006 09:04:27 GMT</returnDate><returnOperator>test</returnOperator></root></amerceRecord> Undoæ‰€å»æ‰çš„ç½šæ¬¾åº“è®°å½•
 <operator>test</operator> 
 <operTime>Fri, 08 Dec 2006 10:12:20 GMT</operTime> 
   
-<readerRecord recPath='...'>...</readerRecord>	×îĞÂ¶ÁÕß¼ÇÂ¼
+<readerRecord recPath='...'>...</readerRecord>	æœ€æ–°è¯»è€…è®°å½•
 
 </root>
 
  * */
-        // ĞÂ°æ±¾£¬·µ»Ø×Ö·û´®Êı×é
-        // ¼ÆËãÒ»¸öamerce»òundo¶¯×÷ÀàĞÍÈÕÖ¾¼ÇÂ¼ÖĞµÄÏà¹ØÎ¥Ô¼½ğ×Ü¶î
+        // æ–°ç‰ˆæœ¬ï¼Œè¿”å›å­—ç¬¦ä¸²æ•°ç»„
+        // è®¡ç®—ä¸€ä¸ªamerceæˆ–undoåŠ¨ä½œç±»å‹æ—¥å¿—è®°å½•ä¸­çš„ç›¸å…³è¿çº¦é‡‘æ€»é¢
         /// <summary>
-        /// ¼ÆËãÒ»¸öamerce»òundo¶¯×÷ÀàĞÍÈÕÖ¾¼ÇÂ¼ÖĞµÄÏà¹ØÎ¥Ô¼½ğ×Ü¶î
+        /// è®¡ç®—ä¸€ä¸ªamerceæˆ–undoåŠ¨ä½œç±»å‹æ—¥å¿—è®°å½•ä¸­çš„ç›¸å…³è¿çº¦é‡‘æ€»é¢
         /// </summary>
-        /// <param name="domOperLog">ÈÕÖ¾¼ÇÂ¼ XmlDocument ¶ÔÏó</param>
-        /// <param name="strReasonHead">±íÊ¾·ÑÓÃÊÂÓÉµÄÒıµ¼×Ö·û´®</param>
-        /// <param name="prices">½ğ¶î×Ö·û´®¼¯ºÏ</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í  0: ³É¹¦</returns>
+        /// <param name="domOperLog">æ—¥å¿—è®°å½• XmlDocument å¯¹è±¡</param>
+        /// <param name="strReasonHead">è¡¨ç¤ºè´¹ç”¨äº‹ç”±çš„å¼•å¯¼å­—ç¬¦ä¸²</param>
+        /// <param name="prices">é‡‘é¢å­—ç¬¦ä¸²é›†åˆ</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™  0: æˆåŠŸ</returns>
         public static int ComputeAmerceOrUndoPrice(XmlDocument domOperLog,
             string strReasonHead,
             out List<string> prices,
@@ -452,11 +452,11 @@ amerce ½»·Ñ
 
             if (strAction == "modifyprice")
             {
-                strError = "¶¯×÷ÀàĞÍÊÇmodifyprice£¬²»ÄÜÓÉ±¾º¯Êı´¦Àí£¬Ó¦µ±ÓÉ ComputeAmerceModifiedPrice() º¯Êı´¦Àí¡£";
+                strError = "åŠ¨ä½œç±»å‹æ˜¯modifypriceï¼Œä¸èƒ½ç”±æœ¬å‡½æ•°å¤„ç†ï¼Œåº”å½“ç”± ComputeAmerceModifiedPrice() å‡½æ•°å¤„ç†ã€‚";
                 return -1;
             }
 
-            // ¸ù¾İÈÕÖ¾¼ÇÂ¼ÖĞµÄ <amerceRecord> ÔªËØ´´½¨ID-¼Û¸ñÁĞ±í
+            // æ ¹æ®æ—¥å¿—è®°å½•ä¸­çš„ <amerceRecord> å…ƒç´ åˆ›å»ºID-ä»·æ ¼åˆ—è¡¨
             nRet = BuildIdPriceListFromAmerceRecordTag(domOperLog,
                 false,
                 out list,
@@ -483,13 +483,13 @@ amerce ½»·Ñ
 
                 if (strAction == "amerce")
                 {
-                    // Èç¹ûÃ»ÓĞĞÂ¼Û¸ñ£¬¾ÍÕÒµ½¾É¼Û¸ñ
+                    // å¦‚æœæ²¡æœ‰æ–°ä»·æ ¼ï¼Œå°±æ‰¾åˆ°æ—§ä»·æ ¼
                     if (String.IsNullOrEmpty(strNewPrice) == true)
                     {
                         strNewPrice = GetPriceByID(list, strID, out strDebug);
                         if (strNewPrice == null)
                         {
-                            strError = "ÈÕÖ¾ÎÄ¼ş¸ñÊ½´íÎó: ¸ù¾İid '" + strID + "' ÔÚ<amerceRecord>ÔªËØÖĞÃ»ÓĞÕÒµ½¶ÔÓ¦µÄÊÂÏî¡£";
+                            strError = "æ—¥å¿—æ–‡ä»¶æ ¼å¼é”™è¯¯: æ ¹æ®id '" + strID + "' åœ¨<amerceRecord>å…ƒç´ ä¸­æ²¡æœ‰æ‰¾åˆ°å¯¹åº”çš„äº‹é¡¹ã€‚";
                             return -1;
                         }
                     }
@@ -499,15 +499,15 @@ amerce ½»·Ñ
                     strNewPrice = GetPriceByID(list, strID, out strDebug);
                     if (strNewPrice == null)
                     {
-                        strError = "ÈÕÖ¾ÎÄ¼ş¸ñÊ½´íÎó: ¸ù¾İid '" + strID + "' ÔÚ<amerceRecord>ÔªËØÖĞÃ»ÓĞÕÒµ½¶ÔÓ¦µÄÊÂÏî¡£";
+                        strError = "æ—¥å¿—æ–‡ä»¶æ ¼å¼é”™è¯¯: æ ¹æ®id '" + strID + "' åœ¨<amerceRecord>å…ƒç´ ä¸­æ²¡æœ‰æ‰¾åˆ°å¯¹åº”çš„äº‹é¡¹ã€‚";
                         return -1;
                     }
 
-                    // ÕÒµ½IDÁĞ±í
+                    // æ‰¾åˆ°IDåˆ—è¡¨
 
-                    // ÔÚ¶ÁÕß¼ÇÂ¼ÖĞµÄ<overdues>ÏÂÕÒµ½¶ÔÓ¦µÄ<overdue>ÔªËØ£¬È»ºóÔÚpriceÔªËØÖĞµÃµ½¼Û¸ñ
+                    // åœ¨è¯»è€…è®°å½•ä¸­çš„<overdues>ä¸‹æ‰¾åˆ°å¯¹åº”çš„<overdue>å…ƒç´ ï¼Œç„¶ååœ¨priceå…ƒç´ ä¸­å¾—åˆ°ä»·æ ¼
 
-                    // Ò²¿ÉÒÔ±éÀúÈÕÖ¾¼ÇÂ¼ÖĞ<amerceRecord>ÔªËØ£¬ÕÒµ½idÆ¥ÅäµÄ¼ÇÂ¼¡£
+                    // ä¹Ÿå¯ä»¥éå†æ—¥å¿—è®°å½•ä¸­<amerceRecord>å…ƒç´ ï¼Œæ‰¾åˆ°idåŒ¹é…çš„è®°å½•ã€‚
                 }
 
                 prices.Add(strNewPrice);
@@ -517,51 +517,51 @@ amerce ½»·Ñ
         }
 
         /*
-amerce ½»·Ñ
+amerce äº¤è´¹
 
 <root>
-  <operation>amerce</operation> ²Ù×÷ÀàĞÍ
-  <action>amerce</action> ¾ßÌå¶¯×÷¡£ÓĞamerce undo modifyprice
-  <readerBarcode>...</readerBarcode> ¶ÁÕßÖ¤ÌõÂë
-  <!-- <idList>...<idList> IDÁĞ±í£¬¶ººÅ¼ä¸ô ÒÑ·ÏÖ¹ -->
+  <operation>amerce</operation> æ“ä½œç±»å‹
+  <action>amerce</action> å…·ä½“åŠ¨ä½œã€‚æœ‰amerce undo modifyprice
+  <readerBarcode>...</readerBarcode> è¯»è€…è¯æ¡ç 
+  <!-- <idList>...<idList> IDåˆ—è¡¨ï¼Œé€—å·é—´éš” å·²åºŸæ­¢ -->
   <amerceItems>
 	<amerceItem id="..." newPrice="..." comment="..." />
 	...
   </amerceItems>
-  <amerceRecord recPath='...'><root><itemBarcode>0000001</itemBarcode><readerBarcode>R0000002</readerBarcode><state>amerced</state><id>632958375041543888-1</id><over>31day</over><borrowDate>Sat, 07 Oct 2006 09:04:28 GMT</borrowDate><borrowPeriod>30day</borrowPeriod><returnDate>Thu, 07 Dec 2006 09:04:27 GMT</returnDate><returnOperator>test</returnOperator></root></amerceRecord> ÔÚ·£¿î¿âÖĞ´´½¨µÄĞÂ¼ÇÂ¼¡£×¢Òâ<amerceRecord>ÔªËØ¿ÉÒÔÖØ¸´¡£<amerceRecord>ÔªËØÄÚÈİÀïÃæµÄ<itemBarcode><readerBarcode><id>µÈ¾ß±¸ÁË×ã¹»µÄĞÅÏ¢¡£
-  <operator>test</operator> ²Ù×÷Õß
-  <operTime>Fri, 08 Dec 2006 10:09:36 GMT</operTime> ²Ù×÷Ê±¼ä
+  <amerceRecord recPath='...'><root><itemBarcode>0000001</itemBarcode><readerBarcode>R0000002</readerBarcode><state>amerced</state><id>632958375041543888-1</id><over>31day</over><borrowDate>Sat, 07 Oct 2006 09:04:28 GMT</borrowDate><borrowPeriod>30day</borrowPeriod><returnDate>Thu, 07 Dec 2006 09:04:27 GMT</returnDate><returnOperator>test</returnOperator></root></amerceRecord> åœ¨ç½šæ¬¾åº“ä¸­åˆ›å»ºçš„æ–°è®°å½•ã€‚æ³¨æ„<amerceRecord>å…ƒç´ å¯ä»¥é‡å¤ã€‚<amerceRecord>å…ƒç´ å†…å®¹é‡Œé¢çš„<itemBarcode><readerBarcode><id>ç­‰å…·å¤‡äº†è¶³å¤Ÿçš„ä¿¡æ¯ã€‚
+  <operator>test</operator> æ“ä½œè€…
+  <operTime>Fri, 08 Dec 2006 10:09:36 GMT</operTime> æ“ä½œæ—¶é—´
   
-  <readerRecord recPath='...'>...</readerRecord>	×îĞÂ¶ÁÕß¼ÇÂ¼
+  <readerRecord recPath='...'>...</readerRecord>	æœ€æ–°è¯»è€…è®°å½•
 </root>
 
 <root>
   <operation>amerce</operation> 
   <action>undo</action> 
-  <readerBarcode>...</readerBarcode> ¶ÁÕßÖ¤ÌõÂë
-  <!-- <idList>...<idList> IDÁĞ±í£¬¶ººÅ¼ä¸ô ÒÑ·ÏÖ¹ -->
+  <readerBarcode>...</readerBarcode> è¯»è€…è¯æ¡ç 
+  <!-- <idList>...<idList> IDåˆ—è¡¨ï¼Œé€—å·é—´éš” å·²åºŸæ­¢ -->
   <amerceItems>
 	<amerceItem id="..." newPrice="..."/>
 	...
   </amerceItems>
-  <amerceRecord recPath='...'><root><itemBarcode>0000001</itemBarcode><readerBarcode>R0000002</readerBarcode><state>amerced</state><id>632958375041543888-1</id><over>31day</over><borrowDate>Sat, 07 Oct 2006 09:04:28 GMT</borrowDate><borrowPeriod>30day</borrowPeriod><returnDate>Thu, 07 Dec 2006 09:04:27 GMT</returnDate><returnOperator>test</returnOperator></root></amerceRecord> UndoËùÈ¥µôµÄ·£¿î¿â¼ÇÂ¼
+  <amerceRecord recPath='...'><root><itemBarcode>0000001</itemBarcode><readerBarcode>R0000002</readerBarcode><state>amerced</state><id>632958375041543888-1</id><over>31day</over><borrowDate>Sat, 07 Oct 2006 09:04:28 GMT</borrowDate><borrowPeriod>30day</borrowPeriod><returnDate>Thu, 07 Dec 2006 09:04:27 GMT</returnDate><returnOperator>test</returnOperator></root></amerceRecord> Undoæ‰€å»æ‰çš„ç½šæ¬¾åº“è®°å½•
   <operator>test</operator> 
   <operTime>Fri, 08 Dec 2006 10:12:20 GMT</operTime> 
   
-  <readerRecord recPath='...'>...</readerRecord>	×îĞÂ¶ÁÕß¼ÇÂ¼
+  <readerRecord recPath='...'>...</readerRecord>	æœ€æ–°è¯»è€…è®°å½•
 
 </root>
 
          * */
-        // ¼ÆËãÒ»¸öamerce»òundo¶¯×÷ÀàĞÍÈÕÖ¾¼ÇÂ¼ÖĞµÄÏà¹ØÎ¥Ô¼½ğ×Ü¶î
+        // è®¡ç®—ä¸€ä¸ªamerceæˆ–undoåŠ¨ä½œç±»å‹æ—¥å¿—è®°å½•ä¸­çš„ç›¸å…³è¿çº¦é‡‘æ€»é¢
         /// <summary>
-        /// ¼ÆËãÒ»¸öamerce»òundo¶¯×÷ÀàĞÍÈÕÖ¾¼ÇÂ¼ÖĞµÄÏà¹ØÎ¥Ô¼½ğ×Ü¶î¡£¼´½«·ÏÖ¹µÄ°æ±¾
+        /// è®¡ç®—ä¸€ä¸ªamerceæˆ–undoåŠ¨ä½œç±»å‹æ—¥å¿—è®°å½•ä¸­çš„ç›¸å…³è¿çº¦é‡‘æ€»é¢ã€‚å³å°†åºŸæ­¢çš„ç‰ˆæœ¬
         /// </summary>
-        /// <param name="domOperLog">ÈÕÖ¾¼ÇÂ¼ XmlDocument ¶ÔÏó</param>
-        /// <param name="nCount">½ğ¶î¸öÊı</param>
-        /// <param name="total_price">×Ü½ğ¶î</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í  0: ³É¹¦</returns>
+        /// <param name="domOperLog">æ—¥å¿—è®°å½• XmlDocument å¯¹è±¡</param>
+        /// <param name="nCount">é‡‘é¢ä¸ªæ•°</param>
+        /// <param name="total_price">æ€»é‡‘é¢</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™  0: æˆåŠŸ</returns>
         public static int ComputeAmerceOrUndoPrice(XmlDocument domOperLog,
             out int nCount,
             out decimal total_price,
@@ -579,13 +579,13 @@ amerce ½»·Ñ
 
             if (strAction == "modifyprice")
             {
-                strError = "¶¯×÷ÀàĞÍÊÇmodifyprice£¬²»ÄÜÓÉ±¾º¯Êı´¦Àí£¬Ó¦µ±ÓÉComputeAmerceModifiedPrice()º¯Êı´¦Àí¡£";
+                strError = "åŠ¨ä½œç±»å‹æ˜¯modifypriceï¼Œä¸èƒ½ç”±æœ¬å‡½æ•°å¤„ç†ï¼Œåº”å½“ç”±ComputeAmerceModifiedPrice()å‡½æ•°å¤„ç†ã€‚";
                 return -1;
             }
 
 
 
-            // ¸ù¾İÈÕÖ¾¼ÇÂ¼ÖĞµÄ<amerceRecord>ÔªËØ´´½¨ID-¼Û¸ñÁĞ±í
+            // æ ¹æ®æ—¥å¿—è®°å½•ä¸­çš„<amerceRecord>å…ƒç´ åˆ›å»ºID-ä»·æ ¼åˆ—è¡¨
             nRet = BuildIdPriceListFromAmerceRecordTag(domOperLog,
                 false,
                 out list,
@@ -605,13 +605,13 @@ amerce ½»·Ñ
 
                 if (strAction == "amerce")
                 {
-                    // Èç¹ûÃ»ÓĞĞÂ¼Û¸ñ£¬¾ÍÕÒµ½¾É¼Û¸ñ
+                    // å¦‚æœæ²¡æœ‰æ–°ä»·æ ¼ï¼Œå°±æ‰¾åˆ°æ—§ä»·æ ¼
                     if (String.IsNullOrEmpty(strNewPrice) == true)
                     {
                         strNewPrice = GetPriceByID(list, strID, out strDebug);
                         if (strNewPrice == null)
                         {
-                            strError = "ÈÕÖ¾ÎÄ¼ş¸ñÊ½´íÎó: ¸ù¾İid '" + strID + "' ÔÚ<amerceRecord>ÔªËØÖĞÃ»ÓĞÕÒµ½¶ÔÓ¦µÄÊÂÏî¡£";
+                            strError = "æ—¥å¿—æ–‡ä»¶æ ¼å¼é”™è¯¯: æ ¹æ®id '" + strID + "' åœ¨<amerceRecord>å…ƒç´ ä¸­æ²¡æœ‰æ‰¾åˆ°å¯¹åº”çš„äº‹é¡¹ã€‚";
                             return -1;
                         }
                     }
@@ -621,18 +621,18 @@ amerce ½»·Ñ
                     strNewPrice = GetPriceByID(list, strID, out strDebug);
                     if (strNewPrice == null)
                     {
-                        strError = "ÈÕÖ¾ÎÄ¼ş¸ñÊ½´íÎó: ¸ù¾İid '" + strID + "' ÔÚ<amerceRecord>ÔªËØÖĞÃ»ÓĞÕÒµ½¶ÔÓ¦µÄÊÂÏî¡£";
+                        strError = "æ—¥å¿—æ–‡ä»¶æ ¼å¼é”™è¯¯: æ ¹æ®id '" + strID + "' åœ¨<amerceRecord>å…ƒç´ ä¸­æ²¡æœ‰æ‰¾åˆ°å¯¹åº”çš„äº‹é¡¹ã€‚";
                         return -1;
                     }
 
-                    // ÕÒµ½IDÁĞ±í
+                    // æ‰¾åˆ°IDåˆ—è¡¨
 
-                    // ÔÚ¶ÁÕß¼ÇÂ¼ÖĞµÄ<overdues>ÏÂÕÒµ½¶ÔÓ¦µÄ<overdue>ÔªËØ£¬È»ºóÔÚpriceÔªËØÖĞµÃµ½¼Û¸ñ
+                    // åœ¨è¯»è€…è®°å½•ä¸­çš„<overdues>ä¸‹æ‰¾åˆ°å¯¹åº”çš„<overdue>å…ƒç´ ï¼Œç„¶ååœ¨priceå…ƒç´ ä¸­å¾—åˆ°ä»·æ ¼
 
-                    // Ò²¿ÉÒÔ±éÀúÈÕÖ¾¼ÇÂ¼ÖĞ<amerceRecord>ÔªËØ£¬ÕÒµ½idÆ¥ÅäµÄ¼ÇÂ¼¡£
+                    // ä¹Ÿå¯ä»¥éå†æ—¥å¿—è®°å½•ä¸­<amerceRecord>å…ƒç´ ï¼Œæ‰¾åˆ°idåŒ¹é…çš„è®°å½•ã€‚
                 }
 
-                // ÀÛ¼ÓstrNewPrice
+                // ç´¯åŠ strNewPrice
                 string strPurePrice = PriceUtil.GetPurePrice(strNewPrice);
                 decimal price = 0;
                 try
@@ -641,7 +641,7 @@ amerce ½»·Ñ
                 }
                 catch
                 {
-                    strError = "¼Û¸ñ×Ö·û´® '" + strPurePrice + "' ¸ñÊ½´íÎó1¡£";
+                    strError = "ä»·æ ¼å­—ç¬¦ä¸² '" + strPurePrice + "' æ ¼å¼é”™è¯¯1ã€‚";
                     return -1;
                 }
                 total_price += price;
@@ -652,23 +652,23 @@ amerce ½»·Ñ
             return 0;
         }
 
-        // ¾É°æ±¾
-        // ¼ÆËãÒ»¸ömodifyprice»òÕßamerce¶¯×÷ĞÍµÄÈÕÖ¾¼ÇÂ¼ÖĞµÄĞŞ¸ÄÎ¥Ô¼½ğ×Ü¶î
+        // æ—§ç‰ˆæœ¬
+        // è®¡ç®—ä¸€ä¸ªmodifypriceæˆ–è€…amerceåŠ¨ä½œå‹çš„æ—¥å¿—è®°å½•ä¸­çš„ä¿®æ”¹è¿çº¦é‡‘æ€»é¢
         // return:
         //      -1  error
-        //      9   Ã»ÓĞÕÒµ½Ïà¹ØÔªËØ
-        //      1   ³É¹¦
+        //      9   æ²¡æœ‰æ‰¾åˆ°ç›¸å…³å…ƒç´ 
+        //      1   æˆåŠŸ
         /// <summary>
-        /// ¼ÆËãÒ»¸ömodifyprice»òÕßamerce¶¯×÷ĞÍµÄÈÕÖ¾¼ÇÂ¼ÖĞµÄĞŞ¸ÄÎ¥Ô¼½ğ×Ü¶î¡£
-        /// ÕâÊÇ¼´½«·ÏÖ¹µÄ°æ±¾
+        /// è®¡ç®—ä¸€ä¸ªmodifypriceæˆ–è€…amerceåŠ¨ä½œå‹çš„æ—¥å¿—è®°å½•ä¸­çš„ä¿®æ”¹è¿çº¦é‡‘æ€»é¢ã€‚
+        /// è¿™æ˜¯å³å°†åºŸæ­¢çš„ç‰ˆæœ¬
         /// </summary>
-        /// <param name="domOperLog">ÈÕÖ¹¼ÇÂ¼ XmlDocument ¶ÔÏó</param>
-        /// <param name="nCount">·µ»ØÊÂÏî¸öÊé</param>
-        /// <param name="inc_price">Ôö¼ÓµÄ½ğ¶î</param>
-        /// <param name="dec_price">¼õÉÙµÄ½ğ¶î</param>
-        /// <param name="total_delta_price">×ÜÌåµÄ±ä¶¯½ğ¶î</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í; 0: Ã»ÓĞÕÒµ½£» 1: ÕÒµ½</returns>
+        /// <param name="domOperLog">æ—¥æ­¢è®°å½• XmlDocument å¯¹è±¡</param>
+        /// <param name="nCount">è¿”å›äº‹é¡¹ä¸ªä¹¦</param>
+        /// <param name="inc_price">å¢åŠ çš„é‡‘é¢</param>
+        /// <param name="dec_price">å‡å°‘çš„é‡‘é¢</param>
+        /// <param name="total_delta_price">æ€»ä½“çš„å˜åŠ¨é‡‘é¢</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™; 0: æ²¡æœ‰æ‰¾åˆ°ï¼› 1: æ‰¾åˆ°</returns>
         public static int ComputeAmerceModifiedPrice(XmlDocument domOperLog,
             out int nCount,
             out decimal inc_price,
@@ -688,7 +688,7 @@ amerce ½»·Ñ
             if (strAction != "modifyprice"
                 && strAction != "amerce")
             {
-                strError = "¶¯×÷ÀàĞÍÊÇ '" + strAction + "', ²»ÄÜÓÃÓÚµ÷ÓÃComputeAmerceModifiedPrice()º¯Êı¡£Ó¦µ±ÊÇmodifyprice/amerceÀàĞÍ";
+                strError = "åŠ¨ä½œç±»å‹æ˜¯ '" + strAction + "', ä¸èƒ½ç”¨äºè°ƒç”¨ComputeAmerceModifiedPrice()å‡½æ•°ã€‚åº”å½“æ˜¯modifyprice/amerceç±»å‹";
                 return -1;
             }
 
@@ -696,7 +696,7 @@ amerce ½»·Ñ
             int nRet = 0;
 
             /*
-            // ¸ù¾İÈÕÖ¾¼ÇÂ¼ÖĞµÄ<oldReaderRecord>ÔªËØÄÚÇ¶ÎÄ±¾(µ±×÷Ò»¸öXML¼ÇÂ¼)ÖĞµÄ<overdue>ÔªËØ´´½¨ID-¼Û¸ñÁĞ±í
+            // æ ¹æ®æ—¥å¿—è®°å½•ä¸­çš„<oldReaderRecord>å…ƒç´ å†…åµŒæ–‡æœ¬(å½“ä½œä¸€ä¸ªXMLè®°å½•)ä¸­çš„<overdue>å…ƒç´ åˆ›å»ºID-ä»·æ ¼åˆ—è¡¨
             nRet = BuildIdPriceListFromOverdueTag(
                 domOperLog,
                 "oldReaderRecord",
@@ -743,7 +743,7 @@ out strError);
                 }
                 catch
                 {
-                    strError = "¼Û¸ñ×Ö·û´® '" + strPureNewPrice + "' ¸ñÊ½´íÎó2¡£";
+                    strError = "ä»·æ ¼å­—ç¬¦ä¸² '" + strPureNewPrice + "' æ ¼å¼é”™è¯¯2ã€‚";
                     return -1;
                 }
 
@@ -752,7 +752,7 @@ out strError);
                 string strOldPrice = GetPriceByID(list, strID, out strDebug);
                 if (strOldPrice == null)
                 {
-                    strError = "ÈÕÖ¾ÎÄ¼ş¸ñÊ½´íÎó: ¸ù¾İid '" + strID + "' ÔÚÈÕÖ¾¼ÇÂ¼<oldReaderRecord>ÔªËØÎÄ±¾ÄÚ<overdue>ÔªËØÖĞÃ»ÓĞÕÒµ½¶ÔÓ¦µÄÊÂÏî¡£debug: " + strDebug;
+                    strError = "æ—¥å¿—æ–‡ä»¶æ ¼å¼é”™è¯¯: æ ¹æ®id '" + strID + "' åœ¨æ—¥å¿—è®°å½•<oldReaderRecord>å…ƒç´ æ–‡æœ¬å†…<overdue>å…ƒç´ ä¸­æ²¡æœ‰æ‰¾åˆ°å¯¹åº”çš„äº‹é¡¹ã€‚debug: " + strDebug;
                     return -1;
                 }
 
@@ -765,7 +765,7 @@ out strError);
                 }
                 catch
                 {
-                    strError = "¼Û¸ñ×Ö·û´® '" + strOldPurePrice + "' ¸ñÊ½´íÎó3¡£";
+                    strError = "ä»·æ ¼å­—ç¬¦ä¸² '" + strOldPurePrice + "' æ ¼å¼é”™è¯¯3ã€‚";
                     return -1;
                 }
 
@@ -790,9 +790,9 @@ out strError);
             return 1;
         }
 
-        // ¸ù¾İÈÕÖ¾¼ÇÂ¼ÖĞµÄ<amerceRecord>ÔªËØ´´½¨ID-¼Û¸ñÁĞ±í
+        // æ ¹æ®æ—¥å¿—è®°å½•ä¸­çš„<amerceRecord>å…ƒç´ åˆ›å»ºID-ä»·æ ¼åˆ—è¡¨
         // parameters:
-        //      bGetOriginPrice ÊÇ·ñÒª¾¡Á¿»ñµÃ originPrice ÔªËØÄÚÈİ
+        //      bGetOriginPrice æ˜¯å¦è¦å°½é‡è·å¾— originPrice å…ƒç´ å†…å®¹
         static int BuildIdPriceListFromAmerceRecordTag(
             XmlDocument domOperLog,
             bool bGetOriginPrice,
@@ -814,7 +814,7 @@ out strError);
                 }
                 catch (Exception ex)
                 {
-                    strError = "ÈÕÖ¾¼ÇÂ¼ÖĞ<amerceRecord>ÎÄ±¾×°ÈëDOMÊ§°Ü: " + ex.Message;
+                    strError = "æ—¥å¿—è®°å½•ä¸­<amerceRecord>æ–‡æœ¬è£…å…¥DOMå¤±è´¥: " + ex.Message;
                     return -1;
                 }
 
@@ -831,7 +831,7 @@ out strError);
 
                 IdPrice item = new IdPrice();
                 item.ID = strID;
-                // Èç¹ûÓĞÔ­Ê¼½ğ¶î£¬¾¡Á¿Ê¹ÓÃÔ­Ê¼½ğ¶î
+                // å¦‚æœæœ‰åŸå§‹é‡‘é¢ï¼Œå°½é‡ä½¿ç”¨åŸå§‹é‡‘é¢
                 if (bGetOriginPrice == true && string.IsNullOrEmpty(strOriginPrice) == false)
                     item.Price = strOriginPrice;
                 else
@@ -845,13 +845,13 @@ out strError);
         }
 
 #if NO
-        // ¸ù¾İÈÕÖ¾¼ÇÂ¼ÖĞµÄÄ³ÔªËØµÄÄÚÇ¶ÎÄ±¾µÄ<overdue>ÔªËØ´´½¨ID-¼Û¸ñÁĞ±í
-        // oldReaderRecord ÔªËØ »òÕß readerRecord ÔªËØ
+        // æ ¹æ®æ—¥å¿—è®°å½•ä¸­çš„æŸå…ƒç´ çš„å†…åµŒæ–‡æœ¬çš„<overdue>å…ƒç´ åˆ›å»ºID-ä»·æ ¼åˆ—è¡¨
+        // oldReaderRecord å…ƒç´  æˆ–è€… readerRecord å…ƒç´ 
         // parameters:
         // return:
         //      -1  error
-        //      0   ÒªÕÒµÄXMLÔªËØ²»´æÔÚ
-        //      1   ³É¹¦
+        //      0   è¦æ‰¾çš„XMLå…ƒç´ ä¸å­˜åœ¨
+        //      1   æˆåŠŸ
         static int BuildIdPriceListFromOverdueTag(
             XmlDocument domOperLog,
             string strElementTag,
@@ -864,7 +864,7 @@ out strError);
             XmlNode nodeRecord = domOperLog.DocumentElement.SelectSingleNode(strElementTag);
             if (nodeRecord == null)
             {
-                strError = "ÔªËØ <" +strElementTag+ "> ÔÚÈÕÖ¾¼ÇÂ¼ÖĞ²»´æÔÚ";
+                strError = "å…ƒç´  <" +strElementTag+ "> åœ¨æ—¥å¿—è®°å½•ä¸­ä¸å­˜åœ¨";
                 return 0;
             }
 
@@ -876,7 +876,7 @@ out strError);
             }
             catch (Exception ex)
             {
-                strError = "ÔªËØ <" + strElementTag + "> ÄÚÎÄ±¾×°ÈëXMLDOMÊ±·¢Éú´íÎó: " + ex.Message;
+                strError = "å…ƒç´  <" + strElementTag + "> å†…æ–‡æœ¬è£…å…¥XMLDOMæ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                 return -1;
             }
 
@@ -903,10 +903,10 @@ out strError);
         }
 #endif
 
-        // ÔÚlistÖĞ¸ù¾İidÕÒµ½¶ÔÓ¦µÄ¼Û¸ñ×Ö·û´®
+        // åœ¨listä¸­æ ¹æ®idæ‰¾åˆ°å¯¹åº”çš„ä»·æ ¼å­—ç¬¦ä¸²
         // return:
-        //      null    Ã»ÓĞÕÒµ½
-        //      ÆäËû    ÕÒµ½µÄ¼Û¸ñ×Ö·û´®
+        //      null    æ²¡æœ‰æ‰¾åˆ°
+        //      å…¶ä»–    æ‰¾åˆ°çš„ä»·æ ¼å­—ç¬¦ä¸²
         static string GetPriceByID(List<IdPrice> list,
             string strID,
             out string strDebug)
@@ -928,10 +928,10 @@ out strError);
             return null;    // not found
         }
 
-        // ÔÚlistÖĞ¸ù¾İidÕÒµ½¶ÔÓ¦µÄ Reason ×Ö·û´®
+        // åœ¨listä¸­æ ¹æ®idæ‰¾åˆ°å¯¹åº”çš„ Reason å­—ç¬¦ä¸²
         // return:
-        //      null    Ã»ÓĞÕÒµ½
-        //      ÆäËû    ÕÒµ½µÄ¼Û¸ñ×Ö·û´®
+        //      null    æ²¡æœ‰æ‰¾åˆ°
+        //      å…¶ä»–    æ‰¾åˆ°çš„ä»·æ ¼å­—ç¬¦ä¸²
         static string GetReasonByID(List<IdPrice> list,
             string strID,
             out string strDebug)
@@ -953,15 +953,15 @@ out strError);
             return null;    // not found
         }
 
-        // »ã×Ü¼Û¸ñ¶Ô
-        // NewPrice ¼õÈ¥ OldPrice
+        // æ±‡æ€»ä»·æ ¼å¯¹
+        // NewPrice å‡å» OldPrice
         /// <summary>
-        /// »ã×Ü½ğ¶î¶Ô¡£Ëã·¨ÊÇ NewPrice ¼õÈ¥ OldPrice
+        /// æ±‡æ€»é‡‘é¢å¯¹ã€‚ç®—æ³•æ˜¯ NewPrice å‡å» OldPrice
         /// </summary>
-        /// <param name="pairs">Òª»ã×ÜµÄ½ğ¶î¶Ô¼¯ºÏ</param>
-        /// <param name="strResult">½á¹û×Ö·û´®</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í  0: ³É¹¦</returns>
+        /// <param name="pairs">è¦æ±‡æ€»çš„é‡‘é¢å¯¹é›†åˆ</param>
+        /// <param name="strResult">ç»“æœå­—ç¬¦ä¸²</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™  0: æˆåŠŸ</returns>
         public static int TotalPricePair(
             List<PricePair> pairs,
             out string strResult,
@@ -981,9 +981,9 @@ out strError);
                 if (string.IsNullOrEmpty(pair.OldPrice) == false)
                 {
                     string strResultPrice = "";
-                    // ½«ĞÎÈç"-123.4+10.55-20.3"µÄ¼Û¸ñ×Ö·û´®·´×ªÕı¸ººÅ
+                    // å°†å½¢å¦‚"-123.4+10.55-20.3"çš„ä»·æ ¼å­—ç¬¦ä¸²åè½¬æ­£è´Ÿå·
                     // parameters:
-                    //      bSum    ÊÇ·ñÒªË³±ã»ã×Ü? true±íÊ¾Òª»ã×Ü
+                    //      bSum    æ˜¯å¦è¦é¡ºä¾¿æ±‡æ€»? trueè¡¨ç¤ºè¦æ±‡æ€»
                     nRet = PriceUtil.NegativePrices(pair.OldPrice,
                         true,
                         out strResultPrice,
@@ -1005,7 +1005,7 @@ out strError);
         }
     }
 
-    // ID-¼Û¸ñ¶şÔª×é
+    // ID-ä»·æ ¼äºŒå…ƒç»„
     internal class IdPrice
     {
         public string ID = "";
@@ -1014,7 +1014,7 @@ out strError);
     }
 
     /// <summary>
-    /// ¾ßÓĞÊ±¼ä·¶Î§ÌØĞÔµÄ±í¸ñµÄ¼¯ºÏ
+    /// å…·æœ‰æ—¶é—´èŒƒå›´ç‰¹æ€§çš„è¡¨æ ¼çš„é›†åˆ
     /// </summary>
     public class TimeRangedStatisTableCollection : List<TimeRangedStatisTable>
     {
@@ -1025,13 +1025,13 @@ out strError);
         int m_nColumnsHint = 0;
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
-        /// <param name="nColumnHint">À¸Ä¿Êı°µÊ¾</param>
-        /// <param name="bAllInOne">°´ ÆğÖ¹·¶Î§ </param>
-        /// <param name="bYear">°´ Ã¿Ò»Äê</param>
-        /// <param name="bMonth">°´ Ã¿Ò»ÔÂ</param>
-        /// <param name="bDay">°´ Ã¿Ò»ÈÕ</param>
+        /// <param name="nColumnHint">æ ç›®æ•°æš—ç¤º</param>
+        /// <param name="bAllInOne">æŒ‰ èµ·æ­¢èŒƒå›´ </param>
+        /// <param name="bYear">æŒ‰ æ¯ä¸€å¹´</param>
+        /// <param name="bMonth">æŒ‰ æ¯ä¸€æœˆ</param>
+        /// <param name="bDay">æŒ‰ æ¯ä¸€æ—¥</param>
         public TimeRangedStatisTableCollection(
             int nColumnHint,
             bool bAllInOne,
@@ -1047,12 +1047,12 @@ out strError);
         }
 
         /// <summary>
-        /// Ğ´ÈëÒ»¸öµ¥ÔªµÄÖµ
+        /// å†™å…¥ä¸€ä¸ªå•å…ƒçš„å€¼
         /// </summary>
-        /// <param name="currentTime">µ±Ç°Ê±¼ä</param>
-        /// <param name="strEntry">ÊÂÏîÃû</param>
-        /// <param name="nColumn">ÁĞºÅ</param>
-        /// <param name="value">Öµ</param>
+        /// <param name="currentTime">å½“å‰æ—¶é—´</param>
+        /// <param name="strEntry">äº‹é¡¹å</param>
+        /// <param name="nColumn">åˆ—å·</param>
+        /// <param name="value">å€¼</param>
         public void SetValue(
             DateTime currentTime,
             string strEntry,
@@ -1098,13 +1098,13 @@ out strError);
                 return;
             }
 
-            // Á¬½ÓÁ½¸ö¼Û¸ñ×Ö·û´®
+            // è¿æ¥ä¸¤ä¸ªä»·æ ¼å­—ç¬¦ä¸²
             string strPrices = PriceUtil.JoinPriceString(strOldValue,
                     strPrice);
 
             string strError = "";
             List<string> prices = null;
-            // ½«ĞÎÈç"-123.4+10.55-20.3"µÄ¼Û¸ñ×Ö·û´®ÇĞ¸îÎªµ¥¸öµÄ¼Û¸ñ×Ö·û´®£¬²¢¸÷×Ô´øÉÏÕı¸ººÅ
+            // å°†å½¢å¦‚"-123.4+10.55-20.3"çš„ä»·æ ¼å­—ç¬¦ä¸²åˆ‡å‰²ä¸ºå•ä¸ªçš„ä»·æ ¼å­—ç¬¦ä¸²ï¼Œå¹¶å„è‡ªå¸¦ä¸Šæ­£è´Ÿå·
             // return:
             //      -1  error
             //      0   succeed
@@ -1125,12 +1125,12 @@ out strError);
         }
 
         /// <summary>
-        /// ÔöÁ¿Ò»¸öµ¥ÔªµÄ½ğ¶î
+        /// å¢é‡ä¸€ä¸ªå•å…ƒçš„é‡‘é¢
         /// </summary>
-        /// <param name="currentTime">µ±Ç°Ê±¼ä</param>
-        /// <param name="strEntry">ÊÂÏîÃû</param>
-        /// <param name="nColumn">ÁĞºÅ</param>
-        /// <param name="strPrice">½ğ¶î×Ö·û´®</param>
+        /// <param name="currentTime">å½“å‰æ—¶é—´</param>
+        /// <param name="strEntry">äº‹é¡¹å</param>
+        /// <param name="nColumn">åˆ—å·</param>
+        /// <param name="strPrice">é‡‘é¢å­—ç¬¦ä¸²</param>
         public void IncPrice(
             DateTime currentTime,
             string strEntry,
@@ -1165,13 +1165,13 @@ out strError);
         }
 
         /// <summary>
-        /// ÔöÁ¿Ò»¸öµ¥ÔªµÄÕûÊıÖµ
+        /// å¢é‡ä¸€ä¸ªå•å…ƒçš„æ•´æ•°å€¼
         /// </summary>
-        /// <param name="currentTime">µ±Ç°Ê±¼ä</param>
-        /// <param name="strEntry">ÊÂÏîÃû</param>
-        /// <param name="nColumn">ÁĞºÅ</param>
-        /// <param name="createValue">´´½¨Öµ</param>
-        /// <param name="incValue">ÔöÁ¿Öµ</param>
+        /// <param name="currentTime">å½“å‰æ—¶é—´</param>
+        /// <param name="strEntry">äº‹é¡¹å</param>
+        /// <param name="nColumn">åˆ—å·</param>
+        /// <param name="createValue">åˆ›å»ºå€¼</param>
+        /// <param name="incValue">å¢é‡å€¼</param>
         public void IncValue(
             DateTime currentTime,
             string strEntry,
@@ -1208,12 +1208,12 @@ out strError);
 
         // 
         /// <summary>
-        /// »ñµÃÒ»¸öÊÊµ±µÄ±í¸ñ¡£Èç¹ûµ±Ç°²»´æÔÚ£¬»á×Ô¶¯´´½¨
+        /// è·å¾—ä¸€ä¸ªé€‚å½“çš„è¡¨æ ¼ã€‚å¦‚æœå½“å‰ä¸å­˜åœ¨ï¼Œä¼šè‡ªåŠ¨åˆ›å»º
         /// </summary>
-        /// <param name="currentTime">µ±Ç°Ê±¼ä</param>
-        /// <param name="strStyle">·ç¸ñ¡£ÄÚÈİÎª¿Õ×Ö·û´®»òÕß year/month/day</param>
-        /// <param name="nColumnsHint">À¸Ä¿Êı°µÊ¾</param>
-        /// <returns>TimeRangedStatisTable ÀàĞÍµÄ±í¸ñ¶ÔÏó</returns>
+        /// <param name="currentTime">å½“å‰æ—¶é—´</param>
+        /// <param name="strStyle">é£æ ¼ã€‚å†…å®¹ä¸ºç©ºå­—ç¬¦ä¸²æˆ–è€… year/month/day</param>
+        /// <param name="nColumnsHint">æ ç›®æ•°æš—ç¤º</param>
+        /// <returns>TimeRangedStatisTable ç±»å‹çš„è¡¨æ ¼å¯¹è±¡</returns>
         public TimeRangedStatisTable GetTable(DateTime currentTime,
             string strStyle,
             int nColumnsHint)
@@ -1225,7 +1225,7 @@ out strError);
                 && strStyle != "month"
                 && strStyle != "day")
             {
-                throw new Exception("ÎŞ·¨Ê¶±ğµÄstrStyle²ÎÊıÖµ'" + strStyle + "'");
+                throw new Exception("æ— æ³•è¯†åˆ«çš„strStyleå‚æ•°å€¼'" + strStyle + "'");
             }
 
 
@@ -1261,13 +1261,13 @@ out strError);
                         if (currentTime > table.EndTime)
                             table.EndTime = currentTime;
                         return table;
-                        // ×¢£ºÈç¹ûÖ»¾­ÀúÒ»ÌìµÄÍ³¼Æ£¬ÔòEndTime¾Í»áÎª¿ÕÖµ
+                        // æ³¨ï¼šå¦‚æœåªç»å†ä¸€å¤©çš„ç»Ÿè®¡ï¼Œåˆ™EndTimeå°±ä¼šä¸ºç©ºå€¼
                     }
                 }
 
             }
 
-            // Ã»ÓĞÕÒµ½¡£´´½¨Ò»¸öĞÂµÄ±í
+            // æ²¡æœ‰æ‰¾åˆ°ã€‚åˆ›å»ºä¸€ä¸ªæ–°çš„è¡¨
             TimeRangedStatisTable newTable = new TimeRangedStatisTable();
             newTable.StartTime = currentTime;
             newTable.Table = new Table(nColumnsHint);
@@ -1281,69 +1281,69 @@ out strError);
 
     // 
     /// <summary>
-    /// ¾ßÓĞÊ±¼ä·¶Î§ÌØĞÔµÄ±í¸ñ
+    /// å…·æœ‰æ—¶é—´èŒƒå›´ç‰¹æ€§çš„è¡¨æ ¼
     /// </summary>
     public class TimeRangedStatisTable
     {
         /// <summary>
-        /// ¿ªÊ¼Ê±¼ä
+        /// å¼€å§‹æ—¶é—´
         /// </summary>
         public DateTime StartTime = new DateTime(0);
 
         /// <summary>
-        /// ½áÊøÊ±¼ä
+        /// ç»“æŸæ—¶é—´
         /// </summary>
         public DateTime EndTime = new DateTime(0);
 
         /// <summary>
-        /// Ê±¼äÇĞ¸î·ç¸ñ¡£ÓĞ"year" "month" "day" "" 4ÖÖ
+        /// æ—¶é—´åˆ‡å‰²é£æ ¼ã€‚æœ‰"year" "month" "day" "" 4ç§
         /// </summary>
-        public string Style = "";   // Ê±¼äÇĞ¸î·ç¸ñ¡£ÓĞ"year" "month" "day" "" 4ÖÖ
+        public string Style = "";   // æ—¶é—´åˆ‡å‰²é£æ ¼ã€‚æœ‰"year" "month" "day" "" 4ç§
 
         // 
         /// <summary>
-        /// »ñµÃÊ±¼ä·¶Î§Ãû
+        /// è·å¾—æ—¶é—´èŒƒå›´å
         /// </summary>
         public string TimeRangeName
         {
             get
             {
                 if (this.Style == "year")
-                    return StartTime.Year.ToString().PadLeft(4, '0') + "Äê";
+                    return StartTime.Year.ToString().PadLeft(4, '0') + "å¹´";
 
                 if (this.Style == "month")
-                    return StartTime.Year.ToString().PadLeft(4, '0') + "Äê"
-                        + StartTime.Month.ToString() + "ÔÂ";
+                    return StartTime.Year.ToString().PadLeft(4, '0') + "å¹´"
+                        + StartTime.Month.ToString() + "æœˆ";
 
                 if (this.Style == "day")
-                    return StartTime.Year.ToString().PadLeft(4, '0') + "Äê"
-                        + StartTime.Month.ToString() + "ÔÂ"
-                        + StartTime.Day.ToString() + "ÈÕ";
+                    return StartTime.Year.ToString().PadLeft(4, '0') + "å¹´"
+                        + StartTime.Month.ToString() + "æœˆ"
+                        + StartTime.Day.ToString() + "æ—¥";
 
                 if (this.EndTime == new DateTime(0))
                 {
-                    return StartTime.Year.ToString().PadLeft(4, '0') + "Äê"
-        + StartTime.Month.ToString() + "ÔÂ"
-        + StartTime.Day.ToString() + "ÈÕ";
+                    return StartTime.Year.ToString().PadLeft(4, '0') + "å¹´"
+        + StartTime.Month.ToString() + "æœˆ"
+        + StartTime.Day.ToString() + "æ—¥";
                 }
 
-                return StartTime.Year.ToString().PadLeft(4, '0') + "Äê"
-                        + StartTime.Month.ToString() + "ÔÂ"
-                        + StartTime.Day.ToString() + "ÈÕ - "
-                        + EndTime.Year.ToString().PadLeft(4, '0') + "Äê"
-                        + EndTime.Month.ToString() + "ÔÂ"
-                        + EndTime.Day.ToString() + "ÈÕ";
+                return StartTime.Year.ToString().PadLeft(4, '0') + "å¹´"
+                        + StartTime.Month.ToString() + "æœˆ"
+                        + StartTime.Day.ToString() + "æ—¥ - "
+                        + EndTime.Year.ToString().PadLeft(4, '0') + "å¹´"
+                        + EndTime.Month.ToString() + "æœˆ"
+                        + EndTime.Day.ToString() + "æ—¥";
             }
         }
 
         /// <summary>
-        /// ÄÚº¬µÄ Table ÀàĞÍ¶ÔÏó
+        /// å†…å«çš„ Table ç±»å‹å¯¹è±¡
         /// </summary>
         public Table Table = null;
 
         // 
         /// <summary>
-        /// ÊÇ·ñÎª¿ÕµÄÊ±¼ä·¶Î§?
+        /// æ˜¯å¦ä¸ºç©ºçš„æ—¶é—´èŒƒå›´?
         /// </summary>
         public bool IsNullTimeRange
         {
@@ -1358,7 +1358,7 @@ out strError);
 
         // 
         /// <summary>
-        /// ÊÇ·ñ½ö½ö°üº¬Ò»ÌìµÄÊ±¼ä·¶Î§?
+        /// æ˜¯å¦ä»…ä»…åŒ…å«ä¸€å¤©çš„æ—¶é—´èŒƒå›´?
         /// </summary>
         public bool IsOneDayRange
         {
@@ -1376,16 +1376,16 @@ out strError);
     }
 
     /// <summary>
-    /// Ò»¶Ô½ğ¶î
+    /// ä¸€å¯¹é‡‘é¢
     /// </summary>
     public class PricePair
     {
         /// <summary>
-        /// ĞÂ½ğ¶î
+        /// æ–°é‡‘é¢
         /// </summary>
         public string NewPrice = "";
         /// <summary>
-        /// ¾É½ğ¶î
+        /// æ—§é‡‘é¢
         /// </summary>
         public string OldPrice = "";
     }

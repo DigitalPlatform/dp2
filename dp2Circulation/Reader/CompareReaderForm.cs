@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -11,12 +11,12 @@ using DigitalPlatform;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ±È½ÏÁ½Ìõ¶ÁÕß¼ÇÂ¼ÒìÍ¬µÄ¶Ô»°¿ò
+    /// æ¯”è¾ƒä¸¤æ¡è¯»è€…è®°å½•å¼‚åŒçš„å¯¹è¯æ¡†
     /// </summary>
     internal partial class CompareReaderForm : Form
     {
         /// <summary>
-        /// ¿ò¼Ü´°¿Ú
+        /// æ¡†æ¶çª—å£
         /// </summary>
         public MainForm MainForm = null;
 

@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -9,17 +9,17 @@ using System.Windows.Forms;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ³öÄÉ´òÓ¡¹ÜÀí´°
+    /// å‡ºçº³æ‰“å°ç®¡ç†çª—
     /// </summary>
     public partial class ChargingPrintManageForm : Form
     {
         /// <summary>
-        /// ¿ò¼Ü´°¿Ú
+        /// æ¡†æ¶çª—å£
         /// </summary>
         public MainForm MainForm = null;
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public ChargingPrintManageForm()
         {
@@ -127,7 +127,7 @@ namespace dp2Circulation
         {
             if (this.listView_printed_list.SelectedIndices.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡¶¨Òª´òÓ¡µÄÊÂÏî");
+                MessageBox.Show(this, "å°šæœªé€‰å®šè¦æ‰“å°çš„äº‹é¡¹");
                 return;
             }
 
@@ -175,7 +175,7 @@ namespace dp2Circulation
         {
             if (this.listView_unprint_list.SelectedIndices.Count == 0)
             {
-                MessageBox.Show(this, "ÉĞÎ´Ñ¡¶¨Òª´òÓ¡µÄÊÂÏî");
+                MessageBox.Show(this, "å°šæœªé€‰å®šè¦æ‰“å°çš„äº‹é¡¹");
                 return;
             }
 
@@ -211,7 +211,7 @@ namespace dp2Circulation
 
             if (this.MainForm.OperHistory.PrintHostObj == null)
             {
-                MessageBox.Show(this, "PrintHostObjÉĞÎ´³õÊ¼»¯");
+                MessageBox.Show(this, "PrintHostObjå°šæœªåˆå§‹åŒ–");
                 return;
             }
 
@@ -220,11 +220,11 @@ namespace dp2Circulation
 
             MessageBox.Show(this, strError);
 
-            // Ë¢ĞÂ
+            // åˆ·æ–°
             button_refresh_Click(null, null);
         }
 
-        // Çå³ı´òÓ¡»úÅäÖÃ
+        // æ¸…é™¤æ‰“å°æœºé…ç½®
         private void button_clearPrinterPreference_Click(object sender, EventArgs e)
         {
             this.MainForm.OperHistory.ClearPrinterPreference();

@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -17,16 +17,16 @@ namespace dp2Circulation
         int m_nInInitial = 0;
 
         /// <summary>
-        /// ÏµÍ³¹ÜÀí´°
+        /// ç³»ç»Ÿç®¡ç†çª—
         /// </summary>
         public ManagerForm ManagerForm = null;
 
-        public bool CreateMode = false; // ÊÇ·ñÎª´´½¨Ä£Ê½£¿==trueÎª´´½¨Ä£Ê½£»==falseÎªĞŞ¸ÄÄ£Ê½
-        public bool Recreate = false;   // ÊÇ·ñÎªÖØĞÂ´´½¨Ä£Ê½£¿µ±CreateMode == true Ê±Æğ×÷ÓÃ
+        public bool CreateMode = false; // æ˜¯å¦ä¸ºåˆ›å»ºæ¨¡å¼ï¼Ÿ==trueä¸ºåˆ›å»ºæ¨¡å¼ï¼›==falseä¸ºä¿®æ”¹æ¨¡å¼
+        public bool Recreate = false;   // æ˜¯å¦ä¸ºé‡æ–°åˆ›å»ºæ¨¡å¼ï¼Ÿå½“CreateMode == true æ—¶èµ·ä½œç”¨
         XmlDocument dom = null;
 
         /// <summary>
-        /// Í¼Êé¹İ´úÂëÁĞ±í×Ö·û´®¡£Ìá¹©¸ø combobox Ê¹ÓÃ
+        /// å›¾ä¹¦é¦†ä»£ç åˆ—è¡¨å­—ç¬¦ä¸²ã€‚æä¾›ç»™ combobox ä½¿ç”¨
         /// </summary>
         public string LibraryCodeList
         {
@@ -70,7 +70,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = "XML×°ÈëDOMÊ±³ö´í: " + ex.Message;
+                strError = "XMLè£…å…¥DOMæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
@@ -78,11 +78,11 @@ namespace dp2Circulation
                 "type");
             if (strType != "reader")
             {
-                strError = "<database>ÔªËØµÄtypeÊôĞÔÖµ('" + strType + "')Ó¦µ±Îªreader";
+                strError = "<database>å…ƒç´ çš„typeå±æ€§å€¼('" + strType + "')åº”å½“ä¸ºreader";
                 return -1;
             }
 
-            this.m_nInInitial++;    // ±ÜÃâxxxchangedÏìÓ¦
+            this.m_nInInitial++;    // é¿å…xxxchangedå“åº”
 
             try
             {
@@ -112,7 +112,7 @@ namespace dp2Circulation
 
         private void ReaderDatabaseDialog_Load(object sender, EventArgs e)
         {
-            // Èç¹ûÖ»ÓĞÒ»ÏîÁĞ±íÊÂÏî£¬¶øµ±Ç°Îª¿Õ°×£¬Ôò×Ô¶¯ÉèÖÃºÃÕâÒ»Ïî
+            // å¦‚æœåªæœ‰ä¸€é¡¹åˆ—è¡¨äº‹é¡¹ï¼Œè€Œå½“å‰ä¸ºç©ºç™½ï¼Œåˆ™è‡ªåŠ¨è®¾ç½®å¥½è¿™ä¸€é¡¹
             if (this.CreateMode == true
                 && string.IsNullOrEmpty(this.comboBox_libraryCode.Text) == true
                 && this.comboBox_libraryCode.Items.Count > 0)
@@ -126,7 +126,7 @@ namespace dp2Circulation
 
             if (this.CreateMode == true)
             {
-                // ´´½¨Ä£Ê½
+                // åˆ›å»ºæ¨¡å¼
                 EnableControls(false);
 
                 try
@@ -143,7 +143,7 @@ namespace dp2Circulation
                     // type
                     DomUtil.SetAttr(nodeDatabase, "type", "reader");
 
-                    // ÊÇ·ñ²ÎÓëÁ÷Í¨£¿
+                    // æ˜¯å¦å‚ä¸æµé€šï¼Ÿ
                     string strInCirculation = "true";
                     if (this.checkBox_inCirculation.Checked == true)
                         strInCirculation = "true";
@@ -152,10 +152,10 @@ namespace dp2Circulation
 
                     DomUtil.SetAttr(nodeDatabase, "inCirculation", strInCirculation);
 
-                    // ÊéÄ¿¿âÃû
+                    // ä¹¦ç›®åº“å
                     if (this.textBox_readerDbName.Text == "")
                     {
-                        strError = "ÉĞÎ´Ö¸¶¨¶ÁÕß¿âÃû";
+                        strError = "å°šæœªæŒ‡å®šè¯»è€…åº“å";
                         goto ERROR1;
                     }
                     nRet = Global.CheckDbName(this.textBox_readerDbName.Text,
@@ -173,7 +173,7 @@ namespace dp2Circulation
 
                     strDatabaseInfo = dom.OuterXml;
 
-                    // ´´½¨Êı¾İ¿â
+                    // åˆ›å»ºæ•°æ®åº“
                     nRet = this.ManagerForm.CreateDatabase(
                         strDatabaseInfo,
                         this.Recreate,
@@ -190,16 +190,16 @@ namespace dp2Circulation
             }
             else
             {
-                // ĞŞ¸ÄÄ£Ê½
+                // ä¿®æ”¹æ¨¡å¼
                 EnableControls(false);
 
                 try
                 {
 
-                    // ĞŞ¸ÄµÄÊı¾İ¿âÃû
+                    // ä¿®æ”¹çš„æ•°æ®åº“å
                     List<string> change_dbnames = new List<string>();
 
-                    // ÓÃÓÚĞŞ¸ÄÃüÁîµÄDOM
+                    // ç”¨äºä¿®æ”¹å‘½ä»¤çš„DOM
                     XmlDocument change_dom = new XmlDocument();
                     change_dom.LoadXml("<root />");
                     XmlNode nodeChangeDatabase = change_dom.CreateElement("database");
@@ -209,18 +209,18 @@ namespace dp2Circulation
                     DomUtil.SetAttr(nodeChangeDatabase, "type", "reader");
 
 
-                    // ÊéÄ¿¿âÃû
+                    // ä¹¦ç›®åº“å
                     string strOldReaderDbName = DomUtil.GetAttr(this.dom.DocumentElement,
                         "name");
 
                     if (String.IsNullOrEmpty(strOldReaderDbName) == false
                         && this.textBox_readerDbName.Text == "")
                     {
-                        strError = "¶ÁÕß¿âÃû²»ÄÜĞŞ¸ÄÎª¿Õ";
+                        strError = "è¯»è€…åº“åä¸èƒ½ä¿®æ”¹ä¸ºç©º";
                         goto ERROR1;
                     }
 
-                    bool bChanged = false;  // ÊÇ·ñÓĞÊµÖÊĞÔĞŞ¸ÄÃüÁî
+                    bool bChanged = false;  // æ˜¯å¦æœ‰å®è´¨æ€§ä¿®æ”¹å‘½ä»¤
 
                     if (strOldReaderDbName != this.textBox_readerDbName.Text)
                     {
@@ -236,7 +236,7 @@ namespace dp2Circulation
 
                     bool bInCirculationChanged = false;
 
-                    // ÊÇ·ñ²ÎÓëÁ÷Í¨
+                    // æ˜¯å¦å‚ä¸æµé€š
                     string strOldInCirculation = DomUtil.GetAttr(this.dom.DocumentElement,
                         "inCirculation");
                     if (String.IsNullOrEmpty(strOldInCirculation) == true)
@@ -253,7 +253,7 @@ namespace dp2Circulation
 
                     bool bLibraryCodeChanged = false;
 
-                    // ÊÇ·ñ²ÎÓëÁ÷Í¨
+                    // æ˜¯å¦å‚ä¸æµé€š
                     string strOldLibraryCode = DomUtil.GetAttr(this.dom.DocumentElement,
                         "libraryCode");
                     if (strOldLibraryCode != this.comboBox_libraryCode.Text)
@@ -267,35 +267,35 @@ namespace dp2Circulation
                     if (bChanged == false && bInCirculationChanged == false && bLibraryCodeChanged == false)
                         goto END1;
 
-                    // ÌáÊ¾ĞŞ¸ÄµÄÊı¾İ¿âÃû£¬ÒªÉ¾³ıµÄÊı¾İ¿â£¬Òª´´½¨µÄÊı¾İ¿â
+                    // æç¤ºä¿®æ”¹çš„æ•°æ®åº“åï¼Œè¦åˆ é™¤çš„æ•°æ®åº“ï¼Œè¦åˆ›å»ºçš„æ•°æ®åº“
                     string strText = "";
 
                     if (bChanged == true)
-                        strText += "Òª½«Êı¾İ¿âÃû '" + strOldReaderDbName + "' ĞŞ¸ÄÎª '" + this.textBox_readerDbName.Text + "'";
+                        strText += "è¦å°†æ•°æ®åº“å '" + strOldReaderDbName + "' ä¿®æ”¹ä¸º '" + this.textBox_readerDbName.Text + "'";
 
                     if (bInCirculationChanged == true)
                     {
                         if (strText != "")
-                            strText += "£»²¢";
+                            strText += "ï¼›å¹¶";
                         else
-                            strText += "Òª";
-                        strText += "½« 'ÊÇ·ñ²ÎÓëÁ÷Í¨' ×´Ì¬ ĞŞ¸ÄÎª"
-                            + (this.checkBox_inCirculation.Checked == true ? "'Òª²ÎÓë'" : "'²»²ÎÓë'");
+                            strText += "è¦";
+                        strText += "å°† 'æ˜¯å¦å‚ä¸æµé€š' çŠ¶æ€ ä¿®æ”¹ä¸º"
+                            + (this.checkBox_inCirculation.Checked == true ? "'è¦å‚ä¸'" : "'ä¸å‚ä¸'");
                     }
 
                     if (bLibraryCodeChanged == true)
                     {
                         if (strText != "")
-                            strText += "£»²¢";
+                            strText += "ï¼›å¹¶";
                         else
-                            strText += "Òª";
-                        strText += "½« Í¼Êé¹İ´úÂë ĞŞ¸ÄÎª '"
+                            strText += "è¦";
+                        strText += "å°† å›¾ä¹¦é¦†ä»£ç  ä¿®æ”¹ä¸º '"
                             + this.comboBox_libraryCode.Text + "'";
                     }
                         
-                    strText += "¡£\r\n\r\nÈ·ÊµÒª¼ÌĞø?";
+                    strText += "ã€‚\r\n\r\nç¡®å®è¦ç»§ç»­?";
 
-                    // ¶Ô»°¿ò¾¯¸æ
+                    // å¯¹è¯æ¡†è­¦å‘Š
                     DialogResult result = MessageBox.Show(this,
                         strText,
                         "ReaderDatabaseDialog",
@@ -310,7 +310,7 @@ namespace dp2Circulation
 
                     strDatabaseInfo = change_dom.OuterXml;
 
-                    // ĞŞ¸ÄÊı¾İ¿â
+                    // ä¿®æ”¹æ•°æ®åº“
                     nRet = this.ManagerForm.ChangeDatabase(
                         strOldReaderDbName,
                         strDatabaseInfo,
@@ -342,9 +342,9 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÔÊĞí»òÕß½ûÖ¹½çÃæ¿Ø¼ş¡£ÔÚ³¤²Ù×÷Ç°£¬Ò»°ãĞèÒª½ûÖ¹½çÃæ¿Ø¼ş£»²Ù×÷Íê³ÉºóÔÙÔÊĞí
+        /// å…è®¸æˆ–è€…ç¦æ­¢ç•Œé¢æ§ä»¶ã€‚åœ¨é•¿æ“ä½œå‰ï¼Œä¸€èˆ¬éœ€è¦ç¦æ­¢ç•Œé¢æ§ä»¶ï¼›æ“ä½œå®Œæˆåå†å…è®¸
         /// </summary>
-        /// <param name="bEnable">ÊÇ·ñÔÊĞí½çÃæ¿Ø¼ş¡£true ÎªÔÊĞí£¬ false Îª½ûÖ¹</param>
+        /// <param name="bEnable">æ˜¯å¦å…è®¸ç•Œé¢æ§ä»¶ã€‚true ä¸ºå…è®¸ï¼Œ false ä¸ºç¦æ­¢</param>
         public void EnableControls(bool bEnable)
         {
             this.textBox_readerDbName.Enabled = bEnable;

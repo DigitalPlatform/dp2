@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -10,7 +10,7 @@ using System.Diagnostics;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ´òÓ¡Ñ¡ÏîÖĞ ÊäÈëÒ»¸öÀ¸Ä¿²ÎÊıµÄ ¶Ô»°¿ò
+    /// æ‰“å°é€‰é¡¹ä¸­ è¾“å…¥ä¸€ä¸ªæ ç›®å‚æ•°çš„ å¯¹è¯æ¡†
     /// </summary>
     internal partial class PrintColumnDlg : Form
     {
@@ -69,7 +69,7 @@ namespace dp2Circulation
 
         // 2014/6/3
         /// <summary>
-        /// ½Å±¾
+        /// è„šæœ¬
         /// </summary>
         public string ColumnEvalue
         {
@@ -87,14 +87,14 @@ namespace dp2Circulation
         {
             if (this.comboBox_columnName.Text == "")
             {
-                MessageBox.Show(this, "ÉĞÎ´Ö¸¶¨À¸Ä¿Ãû");
+                MessageBox.Show(this, "å°šæœªæŒ‡å®šæ ç›®å");
                 return;
             }
 
             /*
             if (this.textBox_caption.Text == "")
             {
-                MessageBox.Show(this, "ÉĞÎ´Ö¸¶¨ÎÄ×Ö±êÌâ");
+                MessageBox.Show(this, "å°šæœªæŒ‡å®šæ–‡å­—æ ‡é¢˜");
                 return;
             }*/
 
@@ -109,7 +109,7 @@ namespace dp2Circulation
             this.Close();
         }
 
-        // µ±À¸Ä¿ÃûÑ¡¶¨ºó£¬À¸Ä¿±êÌâÎÄ×Ö¸úËæ±ä»¯
+        // å½“æ ç›®åé€‰å®šåï¼Œæ ç›®æ ‡é¢˜æ–‡å­—è·Ÿéšå˜åŒ–
         private void comboBox_columnName_DropDownClosed(object sender, EventArgs e)
         {
         }
@@ -124,9 +124,9 @@ namespace dp2Circulation
             this.textBox_caption.Text = strRight;
         }
 
-        // ÏÂÀ­ÁĞ±íÊÂÏî
+        // ä¸‹æ‹‰åˆ—è¡¨äº‹é¡¹
         /// <summary>
-        /// À¸Ä¿ÃûÏÂÀ­ÁĞ±íÊÂÏî
+        /// æ ç›®åä¸‹æ‹‰åˆ—è¡¨äº‹é¡¹
         /// </summary>
         public string[] ColumnItems
         {

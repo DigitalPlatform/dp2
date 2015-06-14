@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -10,12 +10,12 @@ using DigitalPlatform.CommonControl;
 
 namespace dp2Circulation
 {
-    // ÔÚ±à¼­²á¼ÇÂ¼¡¢ÌõÂë²áµÇ¼ÇµÄ¹ı³ÌÖĞ£¬·¢ÏÖÓĞÖØ¸´ÌõÂëµÄ¼ÇÂ¼£¬
-    // ±¾¶Ô»°¿òÓÃÓÚÏÔÊ¾ÕâĞ©²á¼ÇÂ¼
+    // åœ¨ç¼–è¾‘å†Œè®°å½•ã€æ¡ç å†Œç™»è®°çš„è¿‡ç¨‹ä¸­ï¼Œå‘ç°æœ‰é‡å¤æ¡ç çš„è®°å½•ï¼Œ
+    // æœ¬å¯¹è¯æ¡†ç”¨äºæ˜¾ç¤ºè¿™äº›å†Œè®°å½•
     internal partial class EntityBarcodeFoundDupDlg : Form
     {
         /// <summary>
-        /// ¿ò¼Ü´°¿Ú
+        /// æ¡†æ¶çª—å£
         /// </summary>
         public MainForm MainForm = null;
 
@@ -25,8 +25,8 @@ namespace dp2Circulation
         // 2012/2/9
         WebExternalHost m_webExternalHostBiblio = new WebExternalHost();
 
-        public string ItemText = "";    // ²áµÄHTMLĞÅÏ¢
-        public string BiblioText = "";  // ÖÖµÄHTMLĞÅÏ¢
+        public string ItemText = "";    // å†Œçš„HTMLä¿¡æ¯
+        public string BiblioText = "";  // ç§çš„HTMLä¿¡æ¯
 
         public string MessageText
         {

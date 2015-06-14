@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -73,7 +73,7 @@ namespace dp2Circulation
             if (String.IsNullOrEmpty(toolStripComboBox_dataSource.Text) == true
                 && String.IsNullOrEmpty(this.MARC) == true)
             {
-                strError = "Ã»ÓĞÖ¸¶¨×Ö¶ÎÃû";
+                strError = "æ²¡æœ‰æŒ‡å®šå­—æ®µå";
                 goto ERROR1;
             }
 
@@ -138,7 +138,7 @@ namespace dp2Circulation
             }
             else
             {
-                MessageBox.Show(this, "¾­¼ì²éÃ»ÓĞ·¢ÏÖÎÊÌâ");
+                MessageBox.Show(this, "ç»æ£€æŸ¥æ²¡æœ‰å‘ç°é—®é¢˜");
             }
 
             return;

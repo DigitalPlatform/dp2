@@ -7,15 +7,16 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
-using DigitalPlatform;
-using DigitalPlatform.GUI;
 using System.Diagnostics;
-using DigitalPlatform.Text;
-using DigitalPlatform.Xml;
 using System.Xml;
-using DigitalPlatform.IO;
 using System.Collections;
 using System.Web;
+
+using DigitalPlatform;
+using DigitalPlatform.GUI;
+using DigitalPlatform.Text;
+using DigitalPlatform.Xml;
+using DigitalPlatform.IO;
 
 namespace dp2Circulation
 {

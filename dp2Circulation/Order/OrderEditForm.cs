@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -17,40 +17,40 @@ using DigitalPlatform.IO;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ¶©¹º¼ÇÂ¼±à¼­¶Ô»°¿ò
+    /// è®¢è´­è®°å½•ç¼–è¾‘å¯¹è¯æ¡†
     /// </summary>
     public partial class OrderEditForm : OrderEditFormBase
         // ItemEditFormBase<OrderItem, OrderItemCollection>
     {
 #if NO
         /// <summary>
-        /// ÆğÊ¼ÊÂÏî
+        /// èµ·å§‹äº‹é¡¹
         /// </summary>
-        public OrderItem StartOrderItem = null;   // ×î¿ªÊ¼Ê±µÄ¶ÔÏó
+        public OrderItem StartOrderItem = null;   // æœ€å¼€å§‹æ—¶çš„å¯¹è±¡
 
         /// <summary>
-        /// µ±Ç°ÊÂÏî
+        /// å½“å‰äº‹é¡¹
         /// </summary>
         public OrderItem OrderItem = null;
 
         /// <summary>
-        /// ÊÂÏî¼¯ºÏ
+        /// äº‹é¡¹é›†åˆ
         /// </summary>
         public OrderItemCollection OrderItems = null;
 
         /// <summary>
-        /// ¿ò¼Ü´°¿Ú
+        /// æ¡†æ¶çª—å£
         /// </summary>
         public MainForm MainForm = null;
 
         /// <summary>
-        /// ¶©¹º¿Ø¼ş
+        /// è®¢è´­æ§ä»¶
         /// </summary>
         public OrderControl OrderControl = null;
 #endif
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public OrderEditForm()
         {
@@ -76,16 +76,16 @@ namespace dp2Circulation
 
 #if NO
 
-        // Îª±à¼­Ä¿µÄµÄ³õÊ¼»¯
+        // ä¸ºç¼–è¾‘ç›®çš„çš„åˆå§‹åŒ–
         // parameters:
-        //      bookitems   ÈİÆ÷¡£ÓÃÓÚUndoMaskDelete
+        //      bookitems   å®¹å™¨ã€‚ç”¨äºUndoMaskDelete
         /// <summary>
-        /// ³õÊ¼»¯
+        /// åˆå§‹åŒ–
         /// </summary>
-        /// <param name="orderitem">Òª±à¼­µÄ¶©¹ºÊÂÏî</param>
-        /// <param name="orderitems">ÊÂÏîËùÔÚµÄ¼¯ºÏ</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í; 0: ³É¹¦</returns>
+        /// <param name="orderitem">è¦ç¼–è¾‘çš„è®¢è´­äº‹é¡¹</param>
+        /// <param name="orderitems">äº‹é¡¹æ‰€åœ¨çš„é›†åˆ</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™; 0: æˆåŠŸ</returns>
         public int InitialForEdit(
             OrderItem orderitem,
             OrderItemCollection orderitems,
@@ -109,14 +109,14 @@ namespace dp2Circulation
                 int nRet = FillEditing(orderitem, out strError);
                 if (nRet == -1)
                 {
-                    MessageBox.Show(this, "LoadOrderItem() ·¢Éú´íÎó: " + strError);
+                    MessageBox.Show(this, "LoadOrderItem() å‘ç”Ÿé”™è¯¯: " + strError);
                     return;
                 }
             }
             if (orderitem != null
                 && orderitem.ItemDisplayState == ItemDisplayState.Deleted)
             {
-                // ÒÑ¾­±ê¼ÇÉ¾³ıµÄÊÂÏî, ²»ÄÜ½øĞĞĞŞ¸Ä¡£µ«ÊÇ¿ÉÒÔ¹Û²ì
+                // å·²ç»æ ‡è®°åˆ é™¤çš„äº‹é¡¹, ä¸èƒ½è¿›è¡Œä¿®æ”¹ã€‚ä½†æ˜¯å¯ä»¥è§‚å¯Ÿ
                 this.orderEditControl_editing.SetReadOnly(ReadOnlyStyle.All);
                 this.checkBox_autoSearchDup.Enabled = false;
 
@@ -167,11 +167,11 @@ namespace dp2Circulation
 
 
 
-        // ½áÊøÒ»¸öÊÂÏîµÄ±à¼­
+        // ç»“æŸä¸€ä¸ªäº‹é¡¹çš„ç¼–è¾‘
         // return:
-        //      -1  ³ö´í
-        //      0   Ã»ÓĞ±ØÒª×örestore
-        //      1   ×öÁËrestore
+        //      -1  å‡ºé”™
+        //      0   æ²¡æœ‰å¿…è¦åšrestore
+        //      1   åšäº†restore
         int FinishOneOrderItem(out string strError)
         {
             strError = "";
@@ -183,10 +183,10 @@ namespace dp2Circulation
 #if NO
             string strIndex = this.orderEditControl_editing.Index;
 
-            // TODOL ¼ì²é±àºÅĞÎÊ½ÊÇ·ñºÏ·¨
+            // TODOL æ£€æŸ¥ç¼–å·å½¢å¼æ˜¯å¦åˆæ³•
             if (String.IsNullOrEmpty(strIndex) == true)
             {
-                strError = "±àºÅ²»ÄÜÎª¿Õ";
+                strError = "ç¼–å·ä¸èƒ½ä¸ºç©º";
                 goto ERROR1;
             }
 #endif
@@ -200,7 +200,7 @@ namespace dp2Circulation
             return -1;
         }
 
-        // Ìî³ä±à¼­½çÃæÊı¾İ
+        // å¡«å……ç¼–è¾‘ç•Œé¢æ•°æ®
         int FillEditing(OrderItem orderitem,
             out string strError)
         {
@@ -208,7 +208,7 @@ namespace dp2Circulation
 
             if (orderitem == null)
             {
-                strError = "orderitem²ÎÊıÖµÎª¿Õ";
+                strError = "orderitemå‚æ•°å€¼ä¸ºç©º";
                 return -1;
             }
 
@@ -233,20 +233,20 @@ namespace dp2Circulation
 
 #if NO
 
-        // Ìî³ä²Î¿¼±à¼­½çÃæÊı¾İ
+        // å¡«å……å‚è€ƒç¼–è¾‘ç•Œé¢æ•°æ®
         int FillExisting(out string strError)
         {
             strError = "";
 
             if (this.OrderItem == null)
             {
-                strError = "OrderItemÎª¿Õ";
+                strError = "OrderItemä¸ºç©º";
                 return -1;
             }
 
             if (this.OrderItem.Error == null)
             {
-                strError = "OrderItem.ErrorÎª¿Õ";
+                strError = "OrderItem.Errorä¸ºç©º";
                 return -1;
             }
 
@@ -262,11 +262,11 @@ namespace dp2Circulation
             return 0;
         }
 
-        // ´Ó½çÃæÖĞ¸üĞÂorderitemÖĞµÄÊı¾İ
+        // ä»ç•Œé¢ä¸­æ›´æ–°orderitemä¸­çš„æ•°æ®
         // return:
         //      -1  error
-        //      0   Ã»ÓĞ±ØÒª¸üĞÂ
-        //      1   ÒÑ¾­¸üĞÂ
+        //      0   æ²¡æœ‰å¿…è¦æ›´æ–°
+        //      1   å·²ç»æ›´æ–°
         int Restore(out string strError)
         {
             strError = "";
@@ -277,23 +277,23 @@ namespace dp2Circulation
 
             if (this.OrderItem == null)
             {
-                strError = "OrderItemÎª¿Õ";
+                strError = "OrderItemä¸ºç©º";
                 return -1;
             }
 
 
-            // TODO: ÊÇ·ñµ±Õâ¸öcheckboxÎªfalseµÄÊ±ºò£¬ÖÁÉÙÒ²Òª¼ì²é±¾ÖÖÖ®ÀàµÄÖØ¸´ÇéĞÎ£¿
-            // Èç¹ûÕâÀï²»¼ì²é£¬¿É·ñÔÚÌá½»±£´æµÄÊ±ºò£¬ÏÈ²éÍê±¾ÖÖÖ®ÀàµÄÖØ¸´£¬²ÅÕæÕıÏò·şÎñÆ÷Ìá½»?
+            // TODO: æ˜¯å¦å½“è¿™ä¸ªcheckboxä¸ºfalseçš„æ—¶å€™ï¼Œè‡³å°‘ä¹Ÿè¦æ£€æŸ¥æœ¬ç§ä¹‹ç±»çš„é‡å¤æƒ…å½¢ï¼Ÿ
+            // å¦‚æœè¿™é‡Œä¸æ£€æŸ¥ï¼Œå¯å¦åœ¨æäº¤ä¿å­˜çš„æ—¶å€™ï¼Œå…ˆæŸ¥å®Œæœ¬ç§ä¹‹ç±»çš„é‡å¤ï¼Œæ‰çœŸæ­£å‘æœåŠ¡å™¨æäº¤?
             if (this.checkBox_autoSearchDup.Checked == true
                 && this.OrderControl != null)
             {
 #if NOOOOOOOOOOOOO
                 // Debug.Assert(false, "");
-                // ÌõÂë²éÖØ
+                // æ¡ç æŸ¥é‡
                 // return:
-                //      -1  ³ö´í
-                //      0   ²»ÖØ¸´
-                //      1   ÖØ¸´
+                //      -1  å‡ºé”™
+                //      0   ä¸é‡å¤
+                //      1   é‡å¤
                 nRet = this.EntityForm.CheckPublishTimeDup(
                     this.issueEditControl_editing.PublishTime,
                     this.IssueItem,
@@ -303,11 +303,11 @@ namespace dp2Circulation
                 if (nRet == -1)
                     return -1;
                 if (nRet == 1)
-                    return -1;   // ÖØ¸´
+                    return -1;   // é‡å¤
 #endif
             }
 
-            // »ñµÃ±à¼­ºóµÄÊı¾İ
+            // è·å¾—ç¼–è¾‘åçš„æ•°æ®
             try
             {
 
@@ -315,7 +315,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = "»ñµÃÊı¾İÊ±³ö´í: " + ex.Message;
+                strError = "è·å¾—æ•°æ®æ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
@@ -323,7 +323,7 @@ namespace dp2Circulation
             if (this.OrderItem.ItemDisplayState != ItemDisplayState.New)
             {
                 this.OrderItem.ItemDisplayState = ItemDisplayState.Changed;
-                // ÕâÒâÎ¶×ÅDeleted×´Ì¬Ò²»á±»ĞŞ¸ÄÎªChanged
+                // è¿™æ„å‘³ç€DeletedçŠ¶æ€ä¹Ÿä¼šè¢«ä¿®æ”¹ä¸ºChanged
             }
 
             this.OrderItem.RefreshListView();
@@ -332,7 +332,7 @@ namespace dp2Circulation
 
 
         /// <summary>
-        /// ÊÇ·ñ×Ô¶¯²éÖØ
+        /// æ˜¯å¦è‡ªåŠ¨æŸ¥é‡
         /// </summary>
         public bool AutoSearchDup
         {
@@ -355,25 +355,25 @@ namespace dp2Circulation
             if (new_orderitem == null)
                 goto ERROR1;
 
-            // ±£´æµ±Ç°ÊÂÏî
+            // ä¿å­˜å½“å‰äº‹é¡¹
             int nRet = FinishOneOrderItem(out strError);
             if (nRet == -1)
                 goto ERROR1;
 
             LoadOrderItem(new_orderitem);
 
-            // ÔÚlistviewÖĞ¹ö¶¯µ½¿É¼û·¶Î§
+            // åœ¨listviewä¸­æ»šåŠ¨åˆ°å¯è§èŒƒå›´
             new_orderitem.HilightListViewItem(true);
-            this.Text = "²áĞÅÏ¢";
+            this.Text = "å†Œä¿¡æ¯";
             return;
         ERROR1:
             MessageBox.Show(this, strError);
         }
 
         /// <summary>
-        /// ÔÊĞí»òÕß½ûÖ¹½çÃæ¿Ø¼ş¡£ÔÚ³¤²Ù×÷Ç°£¬Ò»°ãĞèÒª½ûÖ¹½çÃæ¿Ø¼ş£»²Ù×÷Íê³ÉºóÔÙÔÊĞí
+        /// å…è®¸æˆ–è€…ç¦æ­¢ç•Œé¢æ§ä»¶ã€‚åœ¨é•¿æ“ä½œå‰ï¼Œä¸€èˆ¬éœ€è¦ç¦æ­¢ç•Œé¢æ§ä»¶ï¼›æ“ä½œå®Œæˆåå†å…è®¸
         /// </summary>
-        /// <param name="bEnable">ÊÇ·ñÔÊĞí½çÃæ¿Ø¼ş¡£true ÎªÔÊĞí£¬ false Îª½ûÖ¹</param>
+        /// <param name="bEnable">æ˜¯å¦å…è®¸ç•Œé¢æ§ä»¶ã€‚true ä¸ºå…è®¸ï¼Œ false ä¸ºç¦æ­¢</param>
         public void EnableControls(bool bEnable)
         {
             this.button_Cancel.Enabled = bEnable;
@@ -393,10 +393,10 @@ namespace dp2Circulation
                 this.EnablePrevNextRecordButtons();
         }
 
-        // ¸ù¾İµ±Ç°bookitemÊÂÏîÔÚÈİÆ÷ÖĞµÄÎ»ÖÃ£¬ÉèÖÃPrevRecordºÍNextRecord°´Å¥µÄEnabled×´Ì¬
+        // æ ¹æ®å½“å‰bookitemäº‹é¡¹åœ¨å®¹å™¨ä¸­çš„ä½ç½®ï¼Œè®¾ç½®PrevRecordå’ŒNextRecordæŒ‰é’®çš„EnabledçŠ¶æ€
         void EnablePrevNextRecordButtons()
         {
-            // ÓĞ²Î¿¼¼ÇÂ¼µÄÇé¿ö
+            // æœ‰å‚è€ƒè®°å½•çš„æƒ…å†µ
             if (this.OrderItem != null
                 && this.OrderItem.Error != null)
             {
@@ -406,7 +406,7 @@ namespace dp2Circulation
 
             if (this.OrderControl == null)
             {
-                // ÒòÎªÃ»ÓĞÈİÆ÷£¬ËùÒÔÎŞ·¨prev/next£¬ÓÚÊÇ¾Ídiable
+                // å› ä¸ºæ²¡æœ‰å®¹å™¨ï¼Œæ‰€ä»¥æ— æ³•prev/nextï¼Œäºæ˜¯å°±diable
                 goto DISABLE_TWO_BUTTON;
             }
 
@@ -416,8 +416,8 @@ namespace dp2Circulation
 
             if (nIndex == -1)
             {
-                // ¾ÓÈ»ÔÚÈİÆ÷ÖĞÃ»ÓĞÕÒµ½
-                // Debug.Assert(false, "BookItemÊÂÏî¾ÓÈ»ÔÚÈİÆ÷ÖĞÃ»ÓĞÕÒµ½¡£");
+                // å±…ç„¶åœ¨å®¹å™¨ä¸­æ²¡æœ‰æ‰¾åˆ°
+                // Debug.Assert(false, "BookItemäº‹é¡¹å±…ç„¶åœ¨å®¹å™¨ä¸­æ²¡æœ‰æ‰¾åˆ°ã€‚");
                 goto DISABLE_TWO_BUTTON;
             }
 
@@ -448,15 +448,15 @@ namespace dp2Circulation
 
             if (this.OrderControl == null)
             {
-                strError = "Ã»ÓĞÈİÆ÷";
+                strError = "æ²¡æœ‰å®¹å™¨";
                 goto ERROR1;
             }
 
             int nIndex = this.OrderControl.IndexOfVisibleItems(this.OrderItem);
             if (nIndex == -1)
             {
-                // ¾ÓÈ»ÔÚÈİÆ÷ÖĞÃ»ÓĞÕÒµ½
-                strError = "OrderItemÊÂÏî¾ÓÈ»ÔÚÈİÆ÷ÖĞÃ»ÓĞÕÒµ½¡£";
+                // å±…ç„¶åœ¨å®¹å™¨ä¸­æ²¡æœ‰æ‰¾åˆ°
+                strError = "OrderItemäº‹é¡¹å±…ç„¶åœ¨å®¹å™¨ä¸­æ²¡æœ‰æ‰¾åˆ°ã€‚";
                 Debug.Assert(false, strError);
                 goto ERROR1;
             }
@@ -468,13 +468,13 @@ namespace dp2Circulation
 
             if (nIndex <= -1)
             {
-                strError = "µ½Í·";
+                strError = "åˆ°å¤´";
                 goto ERROR1;
             }
 
             if (nIndex >= this.OrderControl.CountOfVisibleItems())
             {
-                strError = "µ½Î²";
+                strError = "åˆ°å°¾";
                 goto ERROR1;
             }
 
@@ -495,7 +495,7 @@ namespace dp2Circulation
             LoadOrderItem(this.OrderItem);
             EnablePrevNextRecordButtons();
 
-            // ²Î¿¼¼ÇÂ¼
+            // å‚è€ƒè®°å½•
             if (this.OrderItem != null
                 && this.OrderItem.Error != null)
             {
@@ -510,7 +510,7 @@ namespace dp2Circulation
 
                 this.orderEditControl_existing.SetReadOnly(ReadOnlyStyle.All);
 
-                // Í»³ö²îÒìÄÚÈİ
+                // çªå‡ºå·®å¼‚å†…å®¹
                 this.orderEditControl_editing.HighlightDifferences(this.orderEditControl_existing);
 
             }
@@ -534,10 +534,10 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ½áÊøÇ°µÄĞ£Ñé
+        /// ç»“æŸå‰çš„æ ¡éªŒ
         /// </summary>
-        /// <param name="strError">·µ»Ø´íÎóĞÅÏ¢</param>
-        /// <returns>-1: ³ö´í; 0: Ã»ÓĞ´íÎó</returns>
+        /// <param name="strError">è¿”å›é”™è¯¯ä¿¡æ¯</param>
+        /// <returns>-1: å‡ºé”™; 0: æ²¡æœ‰é”™è¯¯</returns>
         internal override int FinishVerify(out string strError)
         {
             strError = "";
@@ -548,11 +548,11 @@ namespace dp2Circulation
 
             if (string.IsNullOrEmpty(strRange) == false)
             {
-                // ¼ì²é³ö°æÊ±¼ä·¶Î§×Ö·û´®ÊÇ·ñºÏ·¨
-                // Èç¹ûÊ¹ÓÃµ¥¸ö³ö°æÊ±¼äÀ´µ÷ÓÃ±¾º¯Êı£¬Ò²ÊÇ¿ÉÒÔµÄ
+                // æ£€æŸ¥å‡ºç‰ˆæ—¶é—´èŒƒå›´å­—ç¬¦ä¸²æ˜¯å¦åˆæ³•
+                // å¦‚æœä½¿ç”¨å•ä¸ªå‡ºç‰ˆæ—¶é—´æ¥è°ƒç”¨æœ¬å‡½æ•°ï¼Œä¹Ÿæ˜¯å¯ä»¥çš„
                 // return:
-                //      -1  ³ö´í
-                //      0   ÕıÈ·
+                //      -1  å‡ºé”™
+                //      0   æ­£ç¡®
                 nRet = LibraryServerUtil.CheckPublishTimeRange(strRange,
                     out strError);
                 if (nRet == -1)
@@ -568,18 +568,18 @@ namespace dp2Circulation
                     DateTime time = DateTimeUtil.FromRfc1123DateTimeString(strOrderTime);
                     if (time.Year == 1753)
                     {
-                        strError = "¶©¹ºÊ±¼ä×Ö·û´® '" + strOrderTime + "' ÕâÊÇÒ»¸ö²»Ì«¿ÉÄÜµÄÊ±¼ä";
+                        strError = "è®¢è´­æ—¶é—´å­—ç¬¦ä¸² '" + strOrderTime + "' è¿™æ˜¯ä¸€ä¸ªä¸å¤ªå¯èƒ½çš„æ—¶é—´";
                         goto ERROR1;
                     }
                 }
                 catch (Exception ex)
                 {
-                    strError = "¶©¹ºÊ±¼ä×Ö·û´® '" + strOrderTime + "' ¸ñÊ½´íÎó: " + ex.Message;
+                    strError = "è®¢è´­æ—¶é—´å­—ç¬¦ä¸² '" + strOrderTime + "' æ ¼å¼é”™è¯¯: " + ex.Message;
                     goto ERROR1;
                 }
             }
 
-            // TODO: ÑéÖ¤¹İ²Ø·ÖÅä×Ö·û´®
+            // TODO: éªŒè¯é¦†è—åˆ†é…å­—ç¬¦ä¸²
 
             return 0;
         ERROR1:
@@ -598,9 +598,9 @@ namespace dp2Circulation
             if (nRet == -1)
                 goto ERROR1;
 
-            // TODO: Ìá½»±£´æºótimestamp²»Æ¥ÅäÊ±³öÏÖµÄ¶Ô»°¿ò£¬Ó¦µ±½ûÖ¹prev/next°´Å¥
+            // TODO: æäº¤ä¿å­˜åtimestampä¸åŒ¹é…æ—¶å‡ºç°çš„å¯¹è¯æ¡†ï¼Œåº”å½“ç¦æ­¢prev/nextæŒ‰é’®
 
-            // Õë¶ÔÓĞ±¨´íĞÅÏ¢µÄÇé¿ö
+            // é’ˆå¯¹æœ‰æŠ¥é”™ä¿¡æ¯çš„æƒ…å†µ
             if (this.OrderItem != null
                 && this.OrderItem.Error != null
                 && this.OrderItem.Error.ErrorCode == DigitalPlatform.CirculationClient.localhost.ErrorCodeValue.TimestampMismatch)
@@ -609,7 +609,7 @@ namespace dp2Circulation
                 this.OrderItem.Timestamp = this.OrderItem.Error.OldTimestamp;
             }
 
-            this.OrderItem.Error = null; // ½áÊø±¨´í×´Ì¬
+            this.OrderItem.Error = null; // ç»“æŸæŠ¥é”™çŠ¶æ€
 
             this.DialogResult = DialogResult.OK;
             this.Close();
@@ -673,11 +673,11 @@ namespace dp2Circulation
             bool bUp = false;
             if (e.e.KeyCode == Keys.OemOpenBrackets && e.e.Control == true)
             {
-                bUp = true; // ´ÓÉÏÃæ¿½±´
+                bUp = true; // ä»ä¸Šé¢æ‹·è´
             }
             else if (e.e.KeyCode == Keys.OemCloseBrackets && e.e.Control == true)
             {
-                bUp = false;    // ´ÓÏÂÃæ¿½±´
+                bUp = false;    // ä»ä¸‹é¢æ‹·è´
             }
             else
                 return;
@@ -730,16 +730,16 @@ namespace dp2Circulation
                     //this.entityEditControl_editing.RecPath = bookitem.RecPath;
                     break;
                 default:
-                    Debug.Assert(false, "Î´ÖªµÄÀ¸Ä¿Ãû³Æ '" + e.Name + "'");
+                    Debug.Assert(false, "æœªçŸ¥çš„æ ç›®åç§° '" + e.Name + "'");
                     return;
             }
         }
 
 #if NO
-        // »ñÈ¡ÖµÁĞ±íÊ±×÷ÎªÏßË÷µÄÊı¾İ¿âÃû
+        // è·å–å€¼åˆ—è¡¨æ—¶ä½œä¸ºçº¿ç´¢çš„æ•°æ®åº“å
         /// <summary>
-        /// ÊéÄ¿¿âÃû¡£
-        /// »ñÈ¡ÖµÁĞ±íÊ±×÷ÎªÏßË÷µÄÊı¾İ¿âÃû
+        /// ä¹¦ç›®åº“åã€‚
+        /// è·å–å€¼åˆ—è¡¨æ—¶ä½œä¸ºçº¿ç´¢çš„æ•°æ®åº“å
         /// </summary>
         public string BiblioDbName
         {
@@ -757,7 +757,7 @@ namespace dp2Circulation
     }
 
     /// <summary>
-    /// ¶©¹º¼ÇÂ¼±à¼­¶Ô»°¿òµÄ»ù´¡Àà
+    /// è®¢è´­è®°å½•ç¼–è¾‘å¯¹è¯æ¡†çš„åŸºç¡€ç±»
     /// </summary>
     public class OrderEditFormBase : ItemEditFormBase<OrderItem, OrderItemCollection>
     {
