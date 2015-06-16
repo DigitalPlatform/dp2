@@ -340,7 +340,7 @@ namespace dp2Circulation
                 {
                     strTypeList += ",html";
 
-                    if (this.MainForm.Version >= 2.25)
+                    if (this.MainForm.ServerVersion >= 2.25)
                         strTypeList += ":noborrowhistory";
 
                     nTypeCount = 2;

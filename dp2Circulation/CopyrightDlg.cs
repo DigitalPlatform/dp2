@@ -195,7 +195,7 @@ namespace dp2Circulation
 			Assembly myAssembly = Assembly.GetAssembly(this.GetType());
 			textBox_environment.Text = "版本和环境:\r\n本机 .NET Framework 版本: " + myAssembly.ImageRuntimeVersion
 				+ "\r\n本软件: " + myAssembly.FullName
-                + "\r\n当前连接的 dp2Library (位于 "+this.MainForm.LibraryServerUrl+"): " + this.MainForm.Version.ToString()
+                + "\r\n当前连接的 dp2Library (位于 "+this.MainForm.LibraryServerUrl+"): " + this.MainForm.ServerVersion.ToString() + " UID:" + this.MainForm.ServerUID
                 + "\r\n\r\n本机 MAC 地址: " + StringUtil.MakePathList(SerialCodeForm.GetMacAddress());
 			 
 			/*

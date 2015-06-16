@@ -8541,7 +8541,7 @@ MessageBoxDefaultButton.Button1);
             string strError = "";
             int nRet = 0;
 
-            if (this.MainForm.Version < 2.39)
+            if (this.MainForm.ServerVersion < 2.39)
             {
                 strError = "本功能需要配合 dp2library 2.39 或以上版本才能使用";
                 goto ERROR1;
@@ -10887,7 +10887,7 @@ value);
             string strError = "";
             int nRet = 0;
 
-            if (this.MainForm.Version < 2.39)
+            if (this.MainForm.ServerVersion < 2.39)
             {
                 strError = "本功能需要配合 dp2library 2.39 或以上版本才能使用";
                 goto ERROR1;

@@ -112,7 +112,7 @@ namespace dp2Circulation
             PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strFileName));
 
             if (File.Exists(strFileName) == false
-                || MainForm.GetServersCfgFileVersion(strFileName) < (double)0.01)
+                || MainForm.GetServersCfgFileVersion(strFileName) < MainForm.SERVERSXML_VERSION)
             {
                 string strError = "";
                 // 创建 servers.xml 配置文件

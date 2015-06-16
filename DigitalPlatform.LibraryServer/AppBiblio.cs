@@ -3622,14 +3622,6 @@ out strError);
             else if (strAction == "delete"
                 || strAction == "onlydeletesubrecord")
             {
-                // 注：这里的模拟删除不是太容易模拟。
-                // 因为真正删除的时候，是根据实际存在的下属记录的类型来检查权限的。也许模拟删除可以根据假定每种下属记录都存在的情况来检查权限。但这样往往是比实际情况要偏严的。如果有其他参数，能指出调用者关注哪些下属记录的类型就好了
-                if (bSimulate == true)
-                {
-                    strError = "尚未实现对 '"+strAction+"' 的模拟操作";
-                    goto ERROR1;
-                }
-
                 // 只有order权限的情况
                 if (StringUtil.IsInList("setbiblioinfo", sessioninfo.RightsOrigin) == false
                     && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == true)
@@ -3639,7 +3631,10 @@ out strError);
                     {
                         // 非工作库。要求原来记录不存在
                         strError = "当前帐户只有order权限而没有setbiblioinfo权限，不能用delete功能删除书目记录 '" + strBiblioRecPath + "'";
-                        goto ERROR1;
+                        result.Value = -1;
+                        result.ErrorInfo = strError;
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
                     }
                 }
 
@@ -3702,384 +3697,42 @@ out strError);
                             result.ErrorCode = ErrorCode.AccessDenied;
                             return result;
                         }
-
                     }
                 }
 
-                // 这个删除不是那么简单，需要同时删除下属的实体记录
-                // 要对种和实体都进行锁定
-                this.BiblioLocks.LockForWrite(strBiblioRecPath);
-                try
+                // 注：这里的模拟删除不是太容易模拟。
+                // 因为真正删除的时候，是根据实际存在的下属记录的类型来检查权限的。也许模拟删除可以根据假定每种下属记录都存在的情况来检查权限。但这样往往是比实际情况要偏严的。如果有其他参数，能指出调用者关注哪些下属记录的类型就好了
+                if (bSimulate == true)
                 {
-                    // 探测书目记录有没有下属的实体记录(也顺便看看实体记录里面是否有流通信息)?
-                    List<DeleteEntityInfo> entityinfos = null;
-                    string strStyle = "check_borrow_info";
-                    long lHitCount = 0;
-
-                    // return:
-                    //      -2  not exist entity dbname
-                    //      -1  error
-                    //      >=0 含有流通信息的实体记录个数
-                    nRet = SearchChildEntities(channel,
-                        strBiblioRecPath,
-                        strStyle,
-                        sessioninfo.GlobalUser == false ? CheckItemRecord : (Delegate_checkRecord)null,
-                        sessioninfo.GlobalUser == false ? sessioninfo.LibraryCodeList : null,
-                out lHitCount,
-                        out entityinfos,
-                        out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
-
-                    if (nRet == -2)
-                    {
-                        Debug.Assert(entityinfos.Count == 0, "");
-                    }
-
-                    // 如果有实体记录，则要求setentities权限，才能一同删除实体们
-                    if (entityinfos != null && entityinfos.Count > 0)
-                    {
-                        // 权限字符串
-                        if (StringUtil.IsInList("setentities", sessioninfo.RightsOrigin) == false
-                            && StringUtil.IsInList("setiteminfo", sessioninfo.RightsOrigin) == false)
-                        {
-                            result.Value = -1;
-                            result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的实体记录，但当前用户不具备setiteminfo或setentities权限，不能删除它们。";
-                            result.ErrorCode = ErrorCode.AccessDenied;
-                            return result;
-                        }
-
-                        if (this.DeleteBiblioSubRecords == false)
-                        {
-                            result.Value = -1;
-                            result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的实体记录，不允许删除书目记录";
-                            result.ErrorCode = ErrorCode.AccessDenied;
-                            return result;
-                        }
-
-                        // bFoundEntities = true;
-                    }
-
-                    //
-                    // 探测书目记录有没有下属的订购记录
-                    List<DeleteEntityInfo> orderinfos = null;
-                    // bool bFoundOrders = false;
-
-                    // return:
-                    //      -1  error
-                    //      0   not exist entity dbname
-                    //      1   exist entity dbname
-                    nRet = this.OrderItemDatabase.SearchChildItems(channel,
-                        strBiblioRecPath,
-                        "check_circulation_info", // 在DeleteEntityInfo结构中*不*返回OldRecord内容
-                        out lHitCount,
-                        out orderinfos,
-                        out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
-
-                    if (nRet == 0)
-                    {
-                        Debug.Assert(orderinfos.Count == 0, "");
-                    }
-
-                    // 如果有订购记录，则要求setorders权限，才能一同删除它们
-                    if (orderinfos != null && orderinfos.Count > 0)
-                    {
-                        // 权限字符串
-                        if (StringUtil.IsInList("setorders", sessioninfo.RightsOrigin) == false
-                            && StringUtil.IsInList("setorderinfo", sessioninfo.RightsOrigin) == false
-                            && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
-                        {
-                            result.Value = -1;
-                            result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的订购记录，但当前用户不具备order、setorderinfo或setorders权限，不能删除它们。";
-                            result.ErrorCode = ErrorCode.AccessDenied;
-                            return result;
-                        }
-
-                        if (this.DeleteBiblioSubRecords == false)
-                        {
-                            result.Value = -1;
-                            result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的订购记录，不允许删除书目记录";
-                            result.ErrorCode = ErrorCode.AccessDenied;
-                            return result;
-                        }
-
-                        // bFoundOrders = true;
-                    }
-
-                    //
-                    // 探测书目记录有没有下属的期记录
-                    List<DeleteEntityInfo> issueinfos = null;
-                    // bool bFoundIssues = false;
-
-                    // return:
-                    //      -1  error
-                    //      0   not exist entity dbname
-                    //      1   exist entity dbname
-                    nRet = this.IssueItemDatabase.SearchChildItems(channel,
-                        strBiblioRecPath,
-                        "check_circulation_info", // 在DeleteEntityInfo结构中*不*返回OldRecord内容
-                        out lHitCount,
-                        out issueinfos,
-                        out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
-
-                    if (nRet == 0)
-                    {
-                        Debug.Assert(issueinfos.Count == 0, "");
-                    }
-
-                    // 如果有期记录，则要求setissues权限，才能一同删除它们
-                    if (issueinfos != null && issueinfos.Count > 0)
-                    {
-                        // 权限字符串
-                        if (StringUtil.IsInList("setissues", sessioninfo.RightsOrigin) == false
-                            && StringUtil.IsInList("setissueinfo", sessioninfo.RightsOrigin) == false)
-                        {
-                            result.Value = -1;
-                            result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的期记录，但当前用户不具备setissueinfo或setissues权限，不能删除它们。";
-                            result.ErrorCode = ErrorCode.AccessDenied;
-                            return result;
-                        }
-
-                        if (this.DeleteBiblioSubRecords == false)
-                        {
-                            result.Value = -1;
-                            result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的期记录，不允许删除书目记录";
-                            result.ErrorCode = ErrorCode.AccessDenied;
-                            return result;
-                        }
-                        // bFoundIssues = true;
-                    }
-
-                    // 探测书目记录有没有下属的评注记录
-                    List<DeleteEntityInfo> commentinfos = null;
-                    // return:
-                    //      -1  error
-                    //      0   not exist entity dbname
-                    //      1   exist entity dbname
-                    nRet = this.CommentItemDatabase.SearchChildItems(channel,
-                        strBiblioRecPath,
-                        "check_circulation_info", // 在DeleteEntityInfo结构中*不*返回OldRecord内容
-                        out lHitCount,
-                        out commentinfos,
-                        out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
-
-                    if (nRet == 0)
-                    {
-                        Debug.Assert(commentinfos.Count == 0, "");
-                    }
-
-                    // 如果有评注记录，则要求setcommentinfo权限，才能一同删除它们
-                    if (commentinfos != null && commentinfos.Count > 0)
-                    {
-                        // 权限字符串
-                        if (StringUtil.IsInList("setcommentinfo", sessioninfo.RightsOrigin) == false)
-                        {
-                            result.Value = -1;
-                            result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的评注记录，但当前用户不具备setcommentinfo权限，不能删除它们。";
-                            result.ErrorCode = ErrorCode.AccessDenied;
-                            return result;
-                        }
-
-                        if (this.DeleteBiblioSubRecords == false)
-                        {
-                            result.Value = -1;
-                            result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的评注记录，不允许删除书目记录";
-                            result.ErrorCode = ErrorCode.AccessDenied;
-                            return result;
-                        }
-                    }
-
-
+                    //strError = "尚未实现对 '"+strAction+"' 的模拟操作";
+                    //goto ERROR1;
+                    // 模拟删除记录的操作
                     baOutputTimestamp = null;
-
-                    if (strAction == "delete")
-                    {
-                        // 删除书目记录
-                        lRet = channel.DoDeleteRes(strBiblioRecPath,
-                            baTimestamp,
-                            out baOutputTimestamp,
-                            out strError);
-                        if (lRet == -1)
-                        {
-                            if (channel.ErrorCode == ChannelErrorCode.NotFound
-                                && (entityinfos.Count > 0 || orderinfos.Count > 0 || issueinfos.Count > 0)
-                                )
-                            {
-                                bBiblioNotFound = true;
-                                // strWarning = "书目记录 '" + strBiblioRecPath + "' 不存在";
-                            }
-                            else
-                                goto ERROR1;
-                        }
-                    }
-
-                    strBiblio = ""; // 以免后面把残余信息写入操作日志的 <record>元素 2013/3/11
-                    baOutputTimestamp = null;
-
-                    // 删除属于同一书目记录的全部实体记录
-                    // 这是需要提供EntityInfo数组的版本
-                    // return:
-                    //      -1  error
-                    //      0   没有找到属于书目记录的任何实体记录，因此也就无从删除
-                    //      >0  实际删除的实体记录数
-                    nRet = DeleteBiblioChildEntities(channel,
-                        entityinfos,
-                        domOperLog,
-                        out strError);
-                    if (nRet == -1 && bBiblioNotFound == false)
-                    {
-                        // TODO: 当书目记录中有对象资源时，DoSaveTextRes就无法恢复了
-
-                        // 重新保存回去书目记录, 以便还有下次重试删除的机会
-                        // 因此需要注意，前端在删除失败后，不要忘记了更新timestamp
-                        if (strAction == "delete")
-                        {
-                            string strError_1 = "";
-                            lRet = channel.DoSaveTextRes(strBiblioRecPath,
-                                strExistingXml,
-                                false,
-                                "content", // ,ignorechecktimestamp
-                                null,   // timestamp
-                                out baOutputTimestamp,
-                                out strOutputBiblioRecPath,
-                                out strError_1);
-                            if (lRet == -1)
-                            {
-                                strError = "删除下级实体记录失败: " + strError + "；\r\n并且试图重新写回刚刚已删除的书目记录 '"+strBiblioRecPath+"' 的操作也发生了错误: " + strError_1;
-                                goto ERROR1;
-                            }
-                        }
-
-                        goto ERROR1;
-                    }
-
-                    // return:
-                    //      -1  error
-                    //      0   没有找到属于书目记录的任何实体记录，因此也就无从删除
-                    //      >0  实际删除的实体记录数
-                    nRet = this.OrderItemDatabase.DeleteBiblioChildItems(sessioninfo.Channels,
-                        orderinfos,
-                        domOperLog,
-                        out strError);
-                    if (nRet == -1 && bBiblioNotFound == false)
-                    {
-                        // 重新保存回去书目记录, 以便还有下次重试删除的机会
-                        // 因此需要注意，前端在删除失败后，不要忘记了更新timestamp
-                        try
-                        {
-                            string strError_1 = "";
-                            lRet = channel.DoSaveTextRes(strBiblioRecPath,
-                                strExistingXml,
-                                false,
-                                "content", // ,ignorechecktimestamp
-                                null,   // timestamp
-                                out baOutputTimestamp,
-                                out strOutputBiblioRecPath,
-                                out strError_1);
-                            if (lRet == -1)
-                            {
-                                strError = "删除下级订购记录失败: " + strError + "；\r\n并且试图重新写回刚刚已删除的书目记录 '" + strBiblioRecPath + "' 的操作也发生了错误: " + strError_1;
-                                goto ERROR1;
-                            }
-                            goto ERROR1;
-                        }
-                        finally
-                        {
-                            if (entityinfos.Count > 0)
-                                strError += "；\r\n刚删除的 " + entityinfos.Count.ToString() + " 个册记录已经无法恢复";
-                        }
-                    }
-
-                    // return:
-                    //      -1  error
-                    //      0   没有找到属于书目记录的任何实体记录，因此也就无从删除
-                    //      >0  实际删除的实体记录数
-                    nRet = this.IssueItemDatabase.DeleteBiblioChildItems(sessioninfo.Channels,
-                        issueinfos,
-                        domOperLog,
-                        out strError);
-                    if (nRet == -1 && bBiblioNotFound == false)
-                    {
-                        // 重新保存回去书目记录, 以便还有下次重试删除的机会
-                        // 因此需要注意，前端在删除失败后，不要忘记了更新timestamp
-                        try
-                        {
-                            string strError_1 = "";
-                            lRet = channel.DoSaveTextRes(strBiblioRecPath,
-                                strExistingXml,
-                                false,
-                                "content", // ,ignorechecktimestamp
-                                null,   // timestamp
-                                out baOutputTimestamp,
-                                out strOutputBiblioRecPath,
-                                out strError_1);
-                            if (lRet == -1)
-                            {
-                                strError = "删除下级期记录失败: " + strError + "；\r\n并且试图重新写回刚刚已删除的书目记录 '" + strBiblioRecPath + "' 的操作也发生了错误: " + strError_1;
-                                goto ERROR1;
-                            }
-                            goto ERROR1;
-                        }
-                        finally
-                        {
-                            if (entityinfos.Count > 0)
-                                strError += "；\r\n刚删除的 " + entityinfos.Count.ToString() + " 个册记录已经无法恢复";
-                            if (orderinfos.Count > 0)
-                                strError += "；\r\n刚删除的 " + orderinfos.Count.ToString() + " 个订购记录已经无法恢复";
-                        }
-                    }
-
-                    // return:
-                    //      -1  error
-                    //      0   没有找到属于书目记录的任何实体记录，因此也就无从删除
-                    //      >0  实际删除的实体记录数
-                    nRet = this.CommentItemDatabase.DeleteBiblioChildItems(sessioninfo.Channels,
-                        commentinfos,
-                        domOperLog,
-                        out strError);
-                    if (nRet == -1 && bBiblioNotFound == false)
-                    {
-                        // 重新保存回去书目记录, 以便还有下次重试删除的机会
-                        // 因此需要注意，前端在删除失败后，不要忘记了更新timestamp
-                        try
-                        {
-                            string strError_1 = "";
-                            lRet = channel.DoSaveTextRes(strBiblioRecPath,
-                                strExistingXml,
-                                false,
-                                "content", // ,ignorechecktimestamp
-                                null,   // timestamp
-                                out baOutputTimestamp,
-                                out strOutputBiblioRecPath,
-                                out strError_1);
-                            if (lRet == -1)
-                            {
-                                strError = "删除下级评注记录失败: " + strError + "；\r\n并且试图重新写回刚刚已删除的书目记录 '" + strBiblioRecPath + "' 的操作也发生了错误: " + strError_1;
-                                goto ERROR1;
-                            }
-                            goto ERROR1;
-                        }
-                        finally
-                        {
-                            if (entityinfos.Count > 0)
-                                strError += "；\r\n刚删除的 " + entityinfos.Count.ToString() + " 个册记录已经无法恢复";
-                            if (orderinfos.Count > 0)
-                                strError += "；\r\n刚删除的 " + orderinfos.Count.ToString() + " 个订购记录已经无法恢复";
-                            if (issueinfos.Count > 0)
-                                strError += "；\r\n刚删除的 " + issueinfos.Count.ToString() + " 个期记录已经无法恢复";
-                        }
-                    }
+                    strOutputBiblioRecPath = strBiblioRecPath;
+                    goto END1;
                 }
-                finally
-                {
-                    this.BiblioLocks.UnlockForWrite(strBiblioRecPath);
-                }
+
+                // 删除书目记录的下级记录
+                // return:
+                //      -1  失败
+                //      0   成功
+                //      1   需要结束运行，result 结果已经设置好了
+                nRet = DeleteBiblioAndSubRecords(
+            sessioninfo,
+            strAction,
+            strBiblioRecPath,
+            strExistingXml,
+            baTimestamp,
+            ref bBiblioNotFound,
+            ref strBiblio,
+            ref baOutputTimestamp,
+            ref domOperLog,
+            ref result,
+            out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                if (nRet == 1)
+                    return result;
             }
             else if (strAction == "onlydeletebiblio")
             {
@@ -4092,7 +3745,10 @@ out strError);
                     {
                         // 非工作库。要求原来记录不存在
                         strError = "当前帐户只有order权限而没有setbiblioinfo权限，不能用onlydeletebiblio功能删除书目记录 '" + strBiblioRecPath + "'";
-                        goto ERROR1;
+                        result.Value = -1;
+                        result.ErrorInfo = strError;
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
                     }
                 }
 
@@ -4192,6 +3848,7 @@ out strError);
                 goto ERROR1;
             }
 
+        END1:
             if (bSimulate == false)
             {
                 if (string.IsNullOrEmpty(strOutputBiblioRecPath) == false)
@@ -4237,6 +3894,426 @@ out strError);
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
             return result;
+        }
+
+        // 删除书目记录的下级记录
+        // return:
+        //      -1  失败
+        //      0   成功
+        //      1   需要结束运行，result 结果已经设置好了
+        int DeleteBiblioAndSubRecords(
+            SessionInfo sessioninfo,
+            string strAction,
+            string strBiblioRecPath,
+            string strExistingXml,
+            byte [] baTimestamp,
+            ref bool bBiblioNotFound,
+            ref string strBiblio,
+            ref byte[] baOutputTimestamp,
+            ref XmlDocument domOperLog,
+            ref LibraryServerResult result,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+            long lRet = 0;
+
+            // 这个删除不是那么简单，需要同时删除下属的实体记录
+            // 要对种和实体都进行锁定
+            this.BiblioLocks.LockForWrite(strBiblioRecPath);
+            try
+            {
+                // 探测书目记录有没有下属的实体记录(也顺便看看实体记录里面是否有流通信息)?
+                List<DeleteEntityInfo> entityinfos = null;
+                string strStyle = "check_borrow_info";
+                long lHitCount = 0;
+
+                RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+                if (channel == null)
+                {
+                    strError = "channel == null";
+                    goto ERROR1;
+                }
+
+                // return:
+                //      -2  not exist entity dbname
+                //      -1  error
+                //      >=0 含有流通信息的实体记录个数
+                nRet = SearchChildEntities(channel,
+                    strBiblioRecPath,
+                    strStyle,
+                    sessioninfo.GlobalUser == false ? CheckItemRecord : (Delegate_checkRecord)null,
+                    sessioninfo.GlobalUser == false ? sessioninfo.LibraryCodeList : null,
+                    out lHitCount,
+                    out entityinfos,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                if (nRet == -2)
+                {
+                    Debug.Assert(entityinfos.Count == 0, "");
+                }
+
+                // 如果有实体记录，则要求setentities权限，才能一同删除实体们
+                if (entityinfos != null && entityinfos.Count > 0)
+                {
+                    // 权限字符串
+                    if (StringUtil.IsInList("setentities", sessioninfo.RightsOrigin) == false
+                        && StringUtil.IsInList("setiteminfo", sessioninfo.RightsOrigin) == false)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的实体记录，但当前用户不具备setiteminfo或setentities权限，不能删除它们。";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        // return result;
+                        return 1;
+                    }
+
+                    if (this.DeleteBiblioSubRecords == false)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的实体记录，不允许删除书目记录";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        // return result;
+                        return 1;
+                    }
+
+                    // bFoundEntities = true;
+                }
+
+                //
+                // 探测书目记录有没有下属的订购记录
+                List<DeleteEntityInfo> orderinfos = null;
+                // bool bFoundOrders = false;
+
+                // return:
+                //      -1  error
+                //      0   not exist entity dbname
+                //      1   exist entity dbname
+                nRet = this.OrderItemDatabase.SearchChildItems(channel,
+                    strBiblioRecPath,
+                    "check_circulation_info", // 在DeleteEntityInfo结构中*不*返回OldRecord内容
+                    out lHitCount,
+                    out orderinfos,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                if (nRet == 0)
+                {
+                    Debug.Assert(orderinfos.Count == 0, "");
+                }
+
+                // 如果有订购记录，则要求setorders权限，才能一同删除它们
+                if (orderinfos != null && orderinfos.Count > 0)
+                {
+                    // 权限字符串
+                    if (StringUtil.IsInList("setorders", sessioninfo.RightsOrigin) == false
+                        && StringUtil.IsInList("setorderinfo", sessioninfo.RightsOrigin) == false
+                        && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的订购记录，但当前用户不具备order、setorderinfo或setorders权限，不能删除它们。";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        // return result;
+                        return 1;
+                    }
+
+                    if (this.DeleteBiblioSubRecords == false)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的订购记录，不允许删除书目记录";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        // return result;
+                        return 1;
+                    }
+
+                    // bFoundOrders = true;
+                }
+
+                //
+                // 探测书目记录有没有下属的期记录
+                List<DeleteEntityInfo> issueinfos = null;
+                // bool bFoundIssues = false;
+
+                // return:
+                //      -1  error
+                //      0   not exist entity dbname
+                //      1   exist entity dbname
+                nRet = this.IssueItemDatabase.SearchChildItems(channel,
+                    strBiblioRecPath,
+                    "check_circulation_info", // 在DeleteEntityInfo结构中*不*返回OldRecord内容
+                    out lHitCount,
+                    out issueinfos,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                if (nRet == 0)
+                {
+                    Debug.Assert(issueinfos.Count == 0, "");
+                }
+
+                // 如果有期记录，则要求setissues权限，才能一同删除它们
+                if (issueinfos != null && issueinfos.Count > 0)
+                {
+                    // 权限字符串
+                    if (StringUtil.IsInList("setissues", sessioninfo.RightsOrigin) == false
+                        && StringUtil.IsInList("setissueinfo", sessioninfo.RightsOrigin) == false)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的期记录，但当前用户不具备setissueinfo或setissues权限，不能删除它们。";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        // return result;
+                        return 1;
+                    }
+
+                    if (this.DeleteBiblioSubRecords == false)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的期记录，不允许删除书目记录";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        // return result;
+                        return 1;
+                    }
+                    // bFoundIssues = true;
+                }
+
+                // 探测书目记录有没有下属的评注记录
+                List<DeleteEntityInfo> commentinfos = null;
+                // return:
+                //      -1  error
+                //      0   not exist entity dbname
+                //      1   exist entity dbname
+                nRet = this.CommentItemDatabase.SearchChildItems(channel,
+                    strBiblioRecPath,
+                    "check_circulation_info", // 在DeleteEntityInfo结构中*不*返回OldRecord内容
+                    out lHitCount,
+                    out commentinfos,
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                if (nRet == 0)
+                {
+                    Debug.Assert(commentinfos.Count == 0, "");
+                }
+
+                // 如果有评注记录，则要求setcommentinfo权限，才能一同删除它们
+                if (commentinfos != null && commentinfos.Count > 0)
+                {
+                    // 权限字符串
+                    if (StringUtil.IsInList("setcommentinfo", sessioninfo.RightsOrigin) == false)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的评注记录，但当前用户不具备setcommentinfo权限，不能删除它们。";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        // return result;
+                        return 1;
+                    }
+
+                    if (this.DeleteBiblioSubRecords == false)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = "设置书目信息的删除(delete)操作被拒绝。因拟删除的书目记录带有下属的评注记录，不允许删除书目记录";
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        // return result;
+                        return 1;
+                    }
+                }
+
+
+                baOutputTimestamp = null;
+
+                if (strAction == "delete")
+                {
+                    // 删除书目记录
+                    lRet = channel.DoDeleteRes(strBiblioRecPath,
+                        baTimestamp,
+                        out baOutputTimestamp,
+                        out strError);
+                    if (lRet == -1)
+                    {
+                        if (channel.ErrorCode == ChannelErrorCode.NotFound
+                            && (entityinfos.Count > 0 || orderinfos.Count > 0 || issueinfos.Count > 0)
+                            )
+                        {
+                            bBiblioNotFound = true;
+                            // strWarning = "书目记录 '" + strBiblioRecPath + "' 不存在";
+                        }
+                        else
+                            goto ERROR1;
+                    }
+                }
+
+                strBiblio = ""; // 以免后面把残余信息写入操作日志的 <record>元素 2013/3/11
+                baOutputTimestamp = null;
+
+                // 删除属于同一书目记录的全部实体记录
+                // 这是需要提供EntityInfo数组的版本
+                // return:
+                //      -1  error
+                //      0   没有找到属于书目记录的任何实体记录，因此也就无从删除
+                //      >0  实际删除的实体记录数
+                nRet = DeleteBiblioChildEntities(channel,
+                    entityinfos,
+                    domOperLog,
+                    out strError);
+                if (nRet == -1 && bBiblioNotFound == false)
+                {
+                    // TODO: 当书目记录中有对象资源时，DoSaveTextRes就无法恢复了
+
+                    // 重新保存回去书目记录, 以便还有下次重试删除的机会
+                    // 因此需要注意，前端在删除失败后，不要忘记了更新timestamp
+                    if (strAction == "delete")
+                    {
+                        string strError_1 = "";
+                        string strOutputBiblioRecPath = "";
+                        lRet = channel.DoSaveTextRes(strBiblioRecPath,
+                            strExistingXml,
+                            false,
+                            "content", // ,ignorechecktimestamp
+                            null,   // timestamp
+                            out baOutputTimestamp,
+                            out strOutputBiblioRecPath,
+                            out strError_1);
+                        if (lRet == -1)
+                        {
+                            strError = "删除下级实体记录失败: " + strError + "；\r\n并且试图重新写回刚刚已删除的书目记录 '" + strBiblioRecPath + "' 的操作也发生了错误: " + strError_1;
+                            goto ERROR1;
+                        }
+                    }
+
+                    goto ERROR1;
+                }
+
+                // return:
+                //      -1  error
+                //      0   没有找到属于书目记录的任何实体记录，因此也就无从删除
+                //      >0  实际删除的实体记录数
+                nRet = this.OrderItemDatabase.DeleteBiblioChildItems(sessioninfo.Channels,
+                    orderinfos,
+                    domOperLog,
+                    out strError);
+                if (nRet == -1 && bBiblioNotFound == false)
+                {
+                    // 重新保存回去书目记录, 以便还有下次重试删除的机会
+                    // 因此需要注意，前端在删除失败后，不要忘记了更新timestamp
+                    try
+                    {
+                        string strError_1 = "";
+                        string strOutputBiblioRecPath = "";
+                        lRet = channel.DoSaveTextRes(strBiblioRecPath,
+                            strExistingXml,
+                            false,
+                            "content", // ,ignorechecktimestamp
+                            null,   // timestamp
+                            out baOutputTimestamp,
+                            out strOutputBiblioRecPath,
+                            out strError_1);
+                        if (lRet == -1)
+                        {
+                            strError = "删除下级订购记录失败: " + strError + "；\r\n并且试图重新写回刚刚已删除的书目记录 '" + strBiblioRecPath + "' 的操作也发生了错误: " + strError_1;
+                            goto ERROR1;
+                        }
+                        goto ERROR1;
+                    }
+                    finally
+                    {
+                        if (entityinfos.Count > 0)
+                            strError += "；\r\n刚删除的 " + entityinfos.Count.ToString() + " 个册记录已经无法恢复";
+                    }
+                }
+
+                // return:
+                //      -1  error
+                //      0   没有找到属于书目记录的任何实体记录，因此也就无从删除
+                //      >0  实际删除的实体记录数
+                nRet = this.IssueItemDatabase.DeleteBiblioChildItems(sessioninfo.Channels,
+                    issueinfos,
+                    domOperLog,
+                    out strError);
+                if (nRet == -1 && bBiblioNotFound == false)
+                {
+                    // 重新保存回去书目记录, 以便还有下次重试删除的机会
+                    // 因此需要注意，前端在删除失败后，不要忘记了更新timestamp
+                    try
+                    {
+                        string strError_1 = "";
+                        string strOutputBiblioRecPath = "";
+                        lRet = channel.DoSaveTextRes(strBiblioRecPath,
+                            strExistingXml,
+                            false,
+                            "content", // ,ignorechecktimestamp
+                            null,   // timestamp
+                            out baOutputTimestamp,
+                            out strOutputBiblioRecPath,
+                            out strError_1);
+                        if (lRet == -1)
+                        {
+                            strError = "删除下级期记录失败: " + strError + "；\r\n并且试图重新写回刚刚已删除的书目记录 '" + strBiblioRecPath + "' 的操作也发生了错误: " + strError_1;
+                            goto ERROR1;
+                        }
+                        goto ERROR1;
+                    }
+                    finally
+                    {
+                        if (entityinfos.Count > 0)
+                            strError += "；\r\n刚删除的 " + entityinfos.Count.ToString() + " 个册记录已经无法恢复";
+                        if (orderinfos.Count > 0)
+                            strError += "；\r\n刚删除的 " + orderinfos.Count.ToString() + " 个订购记录已经无法恢复";
+                    }
+                }
+
+                // return:
+                //      -1  error
+                //      0   没有找到属于书目记录的任何实体记录，因此也就无从删除
+                //      >0  实际删除的实体记录数
+                nRet = this.CommentItemDatabase.DeleteBiblioChildItems(sessioninfo.Channels,
+                    commentinfos,
+                    domOperLog,
+                    out strError);
+                if (nRet == -1 && bBiblioNotFound == false)
+                {
+                    // 重新保存回去书目记录, 以便还有下次重试删除的机会
+                    // 因此需要注意，前端在删除失败后，不要忘记了更新timestamp
+                    try
+                    {
+                        string strError_1 = "";
+                        string strOutputBiblioRecPath = "";
+                        lRet = channel.DoSaveTextRes(strBiblioRecPath,
+                            strExistingXml,
+                            false,
+                            "content", // ,ignorechecktimestamp
+                            null,   // timestamp
+                            out baOutputTimestamp,
+                            out strOutputBiblioRecPath,
+                            out strError_1);
+                        if (lRet == -1)
+                        {
+                            strError = "删除下级评注记录失败: " + strError + "；\r\n并且试图重新写回刚刚已删除的书目记录 '" + strBiblioRecPath + "' 的操作也发生了错误: " + strError_1;
+                            goto ERROR1;
+                        }
+                        goto ERROR1;
+                    }
+                    finally
+                    {
+                        if (entityinfos.Count > 0)
+                            strError += "；\r\n刚删除的 " + entityinfos.Count.ToString() + " 个册记录已经无法恢复";
+                        if (orderinfos.Count > 0)
+                            strError += "；\r\n刚删除的 " + orderinfos.Count.ToString() + " 个订购记录已经无法恢复";
+                        if (issueinfos.Count > 0)
+                            strError += "；\r\n刚删除的 " + issueinfos.Count.ToString() + " 个期记录已经无法恢复";
+                    }
+                }
+            }
+            finally
+            {
+                this.BiblioLocks.UnlockForWrite(strBiblioRecPath);
+            }
+            return 0;
+        ERROR1:
+            return -1;
         }
 
         // 如果返回值不是0，就中断循环并返回

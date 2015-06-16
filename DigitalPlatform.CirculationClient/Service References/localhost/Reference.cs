@@ -7,7 +7,6 @@
 //     重新生成代码，这些更改将会丢失。
 // </auto-generated>
 //------------------------------------------------------------------------------
-#pragma warning disable 1591
 
 namespace DigitalPlatform.CirculationClient.localhost {
     using System.Runtime.Serialization;
@@ -2962,12 +2961,12 @@ namespace DigitalPlatform.CirculationClient.localhost {
         DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndListFile(out DigitalPlatform.CirculationClient.localhost.FileItemInfo[] infos, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetVersion", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetVersionResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetVersion();
+        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetVersion(out string uid);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/rest/dp2libraryREST/GetVersion", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/GetVersionResponse")]
         System.IAsyncResult BeginGetVersion(System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetVersion(System.IAsyncResult result);
+        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetVersion(out string uid, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/rest/dp2libraryREST/Login", ReplyAction="http://dp2003.com/dp2library/rest/dp2libraryREST/LoginResponse")]
         DigitalPlatform.CirculationClient.localhost.LibraryServerResult Login(out string strOutputUserName, out string strRights, out string strLibraryCode, string strUserName, string strPassword, string strParameters);
@@ -4007,10 +4006,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
+        public string uid {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[0]));
+            }
+        }
+        
         public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -7797,8 +7803,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         lLength}, this.onEndListFileDelegate, this.onListFileCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetVersion() {
-            return base.Channel.GetVersion();
+        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetVersion(out string uid) {
+            return base.Channel.GetVersion(out uid);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
@@ -7807,8 +7813,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetVersion(System.IAsyncResult result) {
-            return base.Channel.EndGetVersion(result);
+        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetVersion(out string uid, System.IAsyncResult result) {
+            return base.Channel.EndGetVersion(out uid, result);
         }
         
         private System.IAsyncResult OnBeginGetVersion(object[] inValues, System.AsyncCallback callback, object asyncState) {
@@ -7816,8 +7822,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndGetVersion(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetVersion(result);
+            string uid = this.GetDefaultValueForInitialization<string>();
+            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetVersion(out uid, result);
             return new object[] {
+                    uid,
                     retVal};
         }
         
@@ -12836,12 +12844,12 @@ namespace DigitalPlatform.CirculationClient.localhost {
         DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndListFile(out DigitalPlatform.CirculationClient.localhost.FileItemInfo[] infos, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/GetVersion", ReplyAction="http://dp2003.com/dp2library/dp2library/GetVersionResponse")]
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetVersion();
+        DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetVersion(out string uid);
         
         [System.ServiceModel.OperationContractAttribute(AsyncPattern=true, Action="http://dp2003.com/dp2library/dp2library/GetVersion", ReplyAction="http://dp2003.com/dp2library/dp2library/GetVersionResponse")]
         System.IAsyncResult BeginGetVersion(System.AsyncCallback callback, object asyncState);
         
-        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetVersion(System.IAsyncResult result);
+        DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetVersion(out string uid, System.IAsyncResult result);
         
         [System.ServiceModel.OperationContractAttribute(Action="http://dp2003.com/dp2library/dp2library/Login", ReplyAction="http://dp2003.com/dp2library/dp2library/LoginResponse")]
         DigitalPlatform.CirculationClient.localhost.LibraryServerResult Login(out string strOutputUserName, out string strRights, out string strLibraryCode, string strUserName, string strPassword, string strParameters);
@@ -13875,10 +13883,17 @@ namespace DigitalPlatform.CirculationClient.localhost {
             this.results = results;
         }
         
+        public string uid {
+            get {
+                base.RaiseExceptionIfNecessary();
+                return ((string)(this.results[0]));
+            }
+        }
+        
         public DigitalPlatform.CirculationClient.localhost.LibraryServerResult Result {
             get {
                 base.RaiseExceptionIfNecessary();
-                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[0]));
+                return ((DigitalPlatform.CirculationClient.localhost.LibraryServerResult)(this.results[1]));
             }
         }
     }
@@ -17665,8 +17680,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
                         lLength}, this.onEndListFileDelegate, this.onListFileCompletedDelegate, userState);
         }
         
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetVersion() {
-            return base.Channel.GetVersion();
+        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult GetVersion(out string uid) {
+            return base.Channel.GetVersion(out uid);
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
@@ -17675,8 +17690,8 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
-        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetVersion(System.IAsyncResult result) {
-            return base.Channel.EndGetVersion(result);
+        public DigitalPlatform.CirculationClient.localhost.LibraryServerResult EndGetVersion(out string uid, System.IAsyncResult result) {
+            return base.Channel.EndGetVersion(out uid, result);
         }
         
         private System.IAsyncResult OnBeginGetVersion(object[] inValues, System.AsyncCallback callback, object asyncState) {
@@ -17684,8 +17699,10 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
         
         private object[] OnEndGetVersion(System.IAsyncResult result) {
-            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetVersion(result);
+            string uid = this.GetDefaultValueForInitialization<string>();
+            DigitalPlatform.CirculationClient.localhost.LibraryServerResult retVal = this.EndGetVersion(out uid, result);
             return new object[] {
+                    uid,
                     retVal};
         }
         
@@ -22611,4 +22628,3 @@ namespace DigitalPlatform.CirculationClient.localhost {
         }
     }
 }
-#pragma warning restore 1591

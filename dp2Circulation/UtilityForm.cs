@@ -604,12 +604,13 @@ namespace dp2Circulation
             try
             {
                 string strVersion = "";
+                string strUID = "";
 
                 // 第一次可能要登录，先不计算时间
                 long lRet = this.Channel.GetVersion(
     this.stop,
-
     out strVersion,
+    out strUID,
     out strError);
                 if (lRet == -1)
                     goto ERROR1;
@@ -628,6 +629,7 @@ namespace dp2Circulation
                     lRet = this.Channel.GetVersion(
 this.stop,
 out strVersion,
+out strUID,
 out strError);
                     if (lRet == -1)
                         goto ERROR1;

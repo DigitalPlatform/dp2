@@ -26,7 +26,7 @@ SessionMode = SessionMode.NotAllowed)]
             RequestFormat = WebMessageFormat.Json,
             ResponseFormat = WebMessageFormat.Json)]
          * */
-        LibraryServerResult GetVersion();
+        LibraryServerResult GetVersion(out string uid);
 
         [OperationContract]
         /*

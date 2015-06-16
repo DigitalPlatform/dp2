@@ -87,7 +87,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.45 (2015/5/15) 文件上传和 WriteRes() API 都得到了充实，支持 dp2libraryconsole 前端进行文件上传和管理操作了 
         //      2.46 (2015/5/18) 增加 API ListFile()
         //      2.47 (2015/6/13) GetSystemParameter() API 增加了 category=arrived name=dbname
-        public static string Version = "2.47";
+        //      2.48 (2015/6/16) GetVersion() API 增加了 out uid 参数
+        public static string Version = "2.48";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()

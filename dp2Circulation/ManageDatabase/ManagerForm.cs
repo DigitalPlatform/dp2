@@ -2020,7 +2020,7 @@ namespace dp2Circulation
             MainForm.SetControlFont(style_dlg, this.Font, false);
 
             // 2.38
-            if (this.MainForm.Version >= 2.38)
+            if (this.MainForm.ServerVersion >= 2.38)
             {
                 style_dlg.AutoRebuildKeysVisible = true;
             }
@@ -8200,7 +8200,7 @@ namespace dp2Circulation
                 menuItem = new MenuItem("修改 " + strName + " (&M)");
                 menuItem.Click += new System.EventHandler(this.toolStripButton_calendar_modify_Click);
                 if (this.listView_calendar.SelectedItems.Count == 0
-                || this.MainForm.Version < 2.29)
+                || this.MainForm.ServerVersion < 2.29)
                     menuItem.Enabled = false;
                 // 缺省命令
                 menuItem.DefaultItem = true;
@@ -8214,7 +8214,7 @@ namespace dp2Circulation
 
             menuItem = new MenuItem("新增(&N)");
             menuItem.Click += new System.EventHandler(this.toolStripButton_calendar_new_Click);
-            if (this.MainForm.Version < 2.29)
+            if (this.MainForm.ServerVersion < 2.29)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
@@ -8234,7 +8234,7 @@ namespace dp2Circulation
             menuItem = new MenuItem(strText);
             menuItem.Click += new System.EventHandler(this.toolStripButton_calendar_delete_Click);
             if (this.listView_calendar.SelectedItems.Count == 0
-                || this.MainForm.Version < 2.29)
+                || this.MainForm.ServerVersion < 2.29)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
@@ -8245,7 +8245,7 @@ namespace dp2Circulation
             menuItem = new MenuItem("保存(&S)");
             menuItem.Click += new System.EventHandler(this.toolStripButton_calendar_save_Click);
             if (this.CalendarDefChanged == false
-                || this.MainForm.Version < 2.29)
+                || this.MainForm.ServerVersion < 2.29)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 

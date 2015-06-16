@@ -422,8 +422,10 @@ namespace DigitalPlatform.CirculationClient
             version = 0;
 
             string strVersion = "";
+            string strUID = "";
             long lRet = channel.GetVersion(stop,
 out strVersion,
+out strUID,
 out strError);
             if (lRet == -1)
             {
@@ -1267,15 +1269,18 @@ out strError);
         /// </summary>
         /// <param name="stop">Stop 对象</param>
         /// <param name="strVersion">返回版本号</param>
+        /// <param name="strUID">返回UID</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>0: 成功</returns>
         public long GetVersion(
-    DigitalPlatform.Stop stop,
-    out string strVersion,
-    out string strError)
+            DigitalPlatform.Stop stop,
+            out string strVersion,
+            out string strUID,
+            out string strError)
         {
             strError = "";
             strVersion = "";
+            strUID = "";
 
         REDO:
             try
@@ -1298,7 +1303,7 @@ out strError);
                     return -1;
                 }
 
-                LibraryServerResult result = this.ws.EndGetVersion(
+                LibraryServerResult result = this.ws.EndGetVersion(out strUID,
                     soapresult);
                 if (result.Value == -1 && result.ErrorCode == ErrorCode.NotLogin)
                 {

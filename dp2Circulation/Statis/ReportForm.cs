@@ -92,8 +92,8 @@ namespace dp2Circulation
             // DelaySetUploadButtonState();
             BeginUpdateUploadButtonText();
 
-            if (this.MainForm.Version < 2.31)
-                MessageBox.Show(this, "报表窗需要和 dp2library 2.31 以上版本配套使用。(当前 dp2library 版本为 " + this.MainForm.Version.ToString() + ")\r\n\r\n请及时升级 dp2library 到最新版本");
+            if (this.MainForm.ServerVersion < 2.31)
+                MessageBox.Show(this, "报表窗需要和 dp2library 2.31 以上版本配套使用。(当前 dp2library 版本为 " + this.MainForm.ServerVersion.ToString() + ")\r\n\r\n请及时升级 dp2library 到最新版本");
             else
             {
                 double version = 0;

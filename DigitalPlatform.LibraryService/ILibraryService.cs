@@ -24,7 +24,7 @@ namespace dp2Library
     public interface ILibraryService
     {
         [OperationContract(IsInitiating = true, IsTerminating = false)]
-        LibraryServerResult GetVersion();
+        LibraryServerResult GetVersion(out string uid);
 
         [OperationContract(IsInitiating = true, IsTerminating = false)]
         LibraryServerResult Login(

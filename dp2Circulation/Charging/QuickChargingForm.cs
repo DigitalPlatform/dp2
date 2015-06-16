@@ -1465,12 +1465,12 @@ false);
             {
                 if (_cardControl != null)
                 {
-                    if (this.NoBorrowHistory == true && this.MainForm.Version >= 2.25)
+                    if (this.NoBorrowHistory == true && this.MainForm.ServerVersion >= 2.25)
                         return "xml:noborrowhistory";
 
                     return "xml";
                 }
-                if (this.NoBorrowHistory == true && this.MainForm.Version >= 2.21)
+                if (this.NoBorrowHistory == true && this.MainForm.ServerVersion >= 2.21)
                     return "html:noborrowhistory";
 
                 return "html";
@@ -3067,7 +3067,7 @@ e.Height);
                 if (this.Container.SpeakPatronName == true)
                     strStyle += ",summary";
                 strStyle += ",xml";
-            if (this.Container.MainForm.Version >= 2.25)
+            if (this.Container.MainForm.ServerVersion >= 2.25)
             strStyle += ":noborrowhistory";
 #if NO
             if (this.VoiceName == true)
@@ -3144,7 +3144,7 @@ e.Height);
                         strReaderXml = "";
 
                         strStyle = "xml";
-            if (this.Container.MainForm.Version >= 2.25)
+            if (this.Container.MainForm.ServerVersion >= 2.25)
             strStyle += ":noborrowhistory";
                         results = null;
 
@@ -3272,7 +3272,7 @@ e.Height);
 
         string GetPostFix()
         {
-            if (this.Container.MainForm.Version >= 2.24)
+            if (this.Container.MainForm.ServerVersion >= 2.24)
                 return ":noborrowhistory";
             return "";
         }
@@ -3344,7 +3344,7 @@ e.Height);
             // 读者返回格式
             string strReaderFormatList = "";
             bool bName = false; // 是否直接取得读者姓名，而不要获得读者 XML
-            if (this.Container.MainForm.Version >= 2.24)
+            if (this.Container.MainForm.ServerVersion >= 2.24)
             {
                 strReaderFormatList = this.Container.PatronRenderFormat + ",summary";
                 bName = true;
@@ -3585,7 +3585,7 @@ end_time);
                 // 读者返回格式
                 string strReaderFormatList = "";
                 bool bName = false; // 是否直接取得读者姓名，而不要获得读者 XML
-                if (this.Container.MainForm.Version >= 2.24)
+                if (this.Container.MainForm.ServerVersion >= 2.24)
                 {
                     strReaderFormatList = this.Container.PatronRenderFormat + ",summary";
                     bName = true;

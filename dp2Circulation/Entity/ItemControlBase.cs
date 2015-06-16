@@ -1984,7 +1984,7 @@ namespace dp2Circulation
             strError = "";
             strResultXml = "";
 
-            if (this.MainForm.Version < 2.43)
+            if (this.MainForm.ServerVersion < 2.43)
             {
                 strError = "获得子记录检索点要求 dp2Library 版本在 2.43 及以上";
                 return -1;

@@ -36,6 +36,10 @@ namespace DigitalPlatform.OPAC.Server
         public LibraryChannelPool ChannelPool = new LibraryChannelPool();
 
         public double dp2LibraryVersion = 0;
+
+        // 2015/6/16
+        public string dp2LibraryUID = "";
+
         // 按照 IP 限定 Session 数目
         public IpTable IpTable = new IpTable();
 
@@ -1190,9 +1194,11 @@ namespace DigitalPlatform.OPAC.Server
                     // 检查版本号
                     {
                         string strVersion = "";
+                        string strUID = "";
                         lRet = session.Channel.GetVersion(
                             null,
                             out strVersion,
+                            out strUID,
                             out strError);
                         if (lRet == -1)
                         {
@@ -1218,6 +1224,7 @@ namespace DigitalPlatform.OPAC.Server
                         }
 
                         this.dp2LibraryVersion = value;
+                        this.dp2LibraryUID = strUID;
 
                         double base_version = 2.40; // 2.18
                         if (value < base_version)

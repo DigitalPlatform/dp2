@@ -2858,10 +2858,10 @@ AppInfo.GetString("config",
                 double base_version = 2.36;
                 string strExpire = GetExpireParam();
                 if (string.IsNullOrEmpty(strExpire) == false
-                    && this.Version < base_version
-                    && this.Version != 0)
+                    && this.ServerVersion < base_version
+                    && this.ServerVersion != 0)
                 {
-                    string strError = "具有失效序列号参数的 dp2Circulation 需要和 dp2Library " + base_version + " 或以上版本配套使用 (而当前 dp2Library 版本号为 " + this.Version.ToString() + " )。\r\n\r\n请升级 dp2Library 到最新版本，然后重新启动 dp2Circulation。\r\n\r\n点“确定”按钮退出";
+                    string strError = "具有失效序列号参数的 dp2Circulation 需要和 dp2Library " + base_version + " 或以上版本配套使用 (而当前 dp2Library 版本号为 " + this.ServerVersion.ToString() + " )。\r\n\r\n请升级 dp2Library 到最新版本，然后重新启动 dp2Circulation。\r\n\r\n点“确定”按钮退出";
                     MessageBox.Show(strError);
                     Application.Exit();
                     return;
@@ -3176,7 +3176,12 @@ AppInfo.GetString("config",
         /// <summary>
         /// 当前连接的 dp2Library 版本号
         /// </summary>
-        public double Version {get;set;}    // = 0
+        public double ServerVersion {get;set;}    // = 0
+
+        /// <summary>
+        /// 当前连接的 dp2library 的 uid
+        /// </summary>
+        public string ServerUID { get; set; }
 
         // return:
         //      -1  error
@@ -3211,15 +3216,19 @@ AppInfo.GetString("config",
             try
             {
                 string strVersion = "";
+                string strUID = "";
+
                 long lRet = Channel.GetVersion(Stop,
     out strVersion,
+    out strUID,
     out strError);
                 if (lRet == -1)
                 {
                     if (this.Channel.WcfException is System.ServiceModel.Security.MessageSecurityException)
                     {
                         // 原来的dp2Library不具备GetVersion() API，会走到这里
-                        this.Version = 0;
+                        this.ServerVersion = 0;
+                        this.ServerUID = "";
                         strError = "当前 dp2Circulation 版本需要和 dp2Library 2.1 或以上版本配套使用 (而当前 dp2Library 版本号为 '2.0或以下' )。请升级 dp2Library 到最新版本。";
                         return 0;
                     }
@@ -3228,6 +3237,7 @@ AppInfo.GetString("config",
                     return -1;
                 }
 
+                this.ServerUID = strUID;
 
                 double value = 0;
 
@@ -3246,7 +3256,7 @@ AppInfo.GetString("config",
                     }
                 }
 
-                this.Version = value;
+                this.ServerVersion = value;
 
                 double base_version = 2.33;
                 if (value < base_version)   // 2.12
@@ -3261,9 +3271,9 @@ AppInfo.GetString("config",
                 }
 
 #if SN
-                if (this.TestMode == true && this.Version < 2.34)
+                if (this.TestMode == true && this.ServerVersion < 2.34)
                 {
-                    strError = "dp2Circulation 的评估模式只能在所连接的 dp2library 版本为 2.34 以上时才能使用 (当前 dp2library 版本为 "+this.Version.ToString()+")";
+                    strError = "dp2Circulation 的评估模式只能在所连接的 dp2library 版本为 2.34 以上时才能使用 (当前 dp2library 版本为 "+this.ServerVersion.ToString()+")";
                     this.AppInfo.Save();
                     MessageBox.Show(this, strError);
                     DialogResult result = MessageBox.Show(this,
@@ -3369,7 +3379,7 @@ AppInfo.GetString("config",
                     this.ReaderDbFromInfos = infos;
                 }
 
-                if (this.Version >= 2.11)
+                if (this.ServerVersion >= 2.11)
                 {
                     // 获得实体库的检索途径
                     infos = null;
@@ -3428,7 +3438,7 @@ AppInfo.GetString("config",
                     this.CommentDbFromInfos = infos;
                 }
 
-                if (this.Version >= 2.17)
+                if (this.ServerVersion >= 2.17)
                 {
                     // 获得发票库的检索途径
                     infos = null;
@@ -3462,7 +3472,7 @@ AppInfo.GetString("config",
 
                 }
 
-                if (this.Version >= 2.47)
+                if (this.ServerVersion >= 2.47)
                 {
                     // 获得预约到书库的检索途径
                     infos = null;
@@ -3751,7 +3761,7 @@ AppInfo.GetString("config",
                 string strValue = "";
                 long lRet = Channel.GetSystemParameter(Stop,
                     "cfgs",
-                    this.Version >= 2.23 ? "listFileNamesEx" : "listFileNames",
+                    this.ServerVersion >= 2.23 ? "listFileNamesEx" : "listFileNames",
                     out strValue,
                     out strError);
                 if (lRet == -1)
@@ -3764,7 +3774,7 @@ AppInfo.GetString("config",
 
                 string[] filenames = null;
                 
-                if (this.Version >= 2.23)
+                if (this.ServerVersion >= 2.23)
                     filenames = strValue.Replace("||", "?").Split(new char[] { '?' });
                 else
                     filenames = strValue.Split(new char[] { ',' });
@@ -4104,7 +4114,7 @@ AppInfo.GetString("config",
                     this.NormalDbProperties.Add(normal);
                 }
 
-                if (this.Version >= 2.23)
+                if (this.ServerVersion >= 2.23)
                 {
                     // 构造文件名列表
                     List<string> filenames = new List<string>();
@@ -4884,7 +4894,7 @@ AppInfo.GetString("config",
             {
                 this._arrivedDbName = "";
 
-                if (this.Version < 2.47)
+                if (this.ServerVersion < 2.47)
                     return 0;
 
                 string strValue = "";
@@ -13036,6 +13046,11 @@ Keys keyData)
 
         private void MenuItem_openEntityRegisterWizard_Click(object sender, EventArgs e)
         {
+            if (this.ServerVersion < 2.48)
+            {
+                MessageBox.Show(this, "dp2library 版本 2.48 和以上才能使用 册登记窗");
+                return;
+            }
             OpenWindow<EntityRegisterWizard>();
         }
 
@@ -13054,19 +13069,24 @@ Keys keyData)
 
         // HnbUrl.HnbUrl
 
+#if NO
         static string _baseCfg = @"
 <root>
   <server name='红泥巴.数字平台中心' type='dp2library' url='http://123.103.13.236/dp2library' userName='public'/>
   <server name='亚马逊中国' type='amazon' url='webservices.amazon.cn'/>
 </root>";
+#endif
 
-#if NO
                 static string _baseCfg = @"
 <root>
-  <server name='红泥巴.数字平台中心' type='dp2library' url='net.pipe://localhost/dp2library/xe' userName='public'/>
+  <server name='红泥巴.数字平台中心' type='dp2library' url='http://hnbclub.cn/dp2library' userName='public'/>
   <server name='亚马逊中国' type='amazon' url='webservices.amazon.cn'/>
 </root>";
-#endif
+
+        // servers.xml 版本号
+        // 0.01 2014/12/10
+        // 0.02 2015/6/15 access 属性中增加 delete 值类型
+        public const double SERVERSXML_VERSION = 0.02;
 
         // 创建 servers.xml 配置文件
         public int BuildServersCfgFile(string strCfgFileName,
@@ -13080,9 +13100,7 @@ Keys keyData)
                 XmlDocument dom = new XmlDocument();
                 dom.LoadXml(_baseCfg);
 
-                // 版本号
-                // 0.01 2014/12/10
-                dom.DocumentElement.SetAttribute("version", "0.01");
+                dom.DocumentElement.SetAttribute("version", SERVERSXML_VERSION.ToString());
 
                 // 添加当前服务器
                 {
@@ -13172,11 +13190,27 @@ Keys keyData)
                     XmlElement server = dom.DocumentElement.SelectSingleNode("server[@name='红泥巴.数字平台中心']") as XmlElement;
                     if (server != null)
                         strHnbUrl = server.GetAttribute("url");
+#if NO
                     // 当前服务器是红泥巴服务器，要删除多余的事项
                     // TODO: 判断两个 URL 是否相等的时候，需要用 DNS 得到 IP 进行比较
                     if (ServerDlg.IsSameUrl(this.LibraryServerUrl, strHnbUrl) == true)
                     // if (string.Compare(this.LibraryServerUrl, strHnbUrl, true) == 0)
                     {
+                        server.ParentNode.RemoveChild(server);
+                    }
+
+#endif
+
+                    // return:
+                    //      -1  出错
+                    //      0   不是同一个服务器
+                    //      1   是同一个服务器
+                    nRet = IsSameDp2libraryServer(this.LibraryServerUrl, strHnbUrl, out strError);
+                    if (nRet == -1)
+                        return -1;
+                    if (nRet == 1)
+                    {
+                        // TODO: 为当前服务器节点增加注释，表示实际上它就是红泥巴服务器
                         server.ParentNode.RemoveChild(server);
                     }
                 }
@@ -13188,6 +13222,72 @@ Keys keyData)
             {
                 strError = ex.Message;
                 return -1;
+            }
+        }
+
+        // 判断两个 URL 是否指向的是同一个 dp2library 服务器
+        // 算法是，从 dp2library 服务器获得它的 uid，然后比较
+        // return:
+        //      -1  出错
+        //      0   不是同一个服务器
+        //      1   是同一个服务器
+        public int IsSameDp2libraryServer(string strUrl1,
+            string strUrl2, 
+            out string strError)
+        {
+            strError = "";
+
+            string strUID1 = "";
+            string strUID2 = "";
+            int nRet = GetDp2libraryServerUID(null, strUrl1, out strUID1, out strError);
+            if (nRet == -1)
+            {
+                strError = "获得服务器 "+strUrl1+" 的 UID 时出错: " + strError;
+                return -1;
+            }
+            if (string.IsNullOrEmpty(strUID1) == true)
+            {
+                strError = "获得服务器 " + strUrl1 + " 的 UID 时出错: UID 为空";
+                return -1;
+            }
+            nRet = GetDp2libraryServerUID(null, strUrl2, out strUID2, out strError);
+            if (nRet == -1)
+            {
+                strError = "获得服务器 " + strUrl2 + " 的 UID 时出错: " + strError;
+                return -1;
+            }
+            if (string.IsNullOrEmpty(strUID2) == true)
+            {
+                strError = "获得服务器 " + strUrl2 + " 的 UID 时出错: UID 为空";
+                return -1;
+            }
+
+            if (strUID1 != strUID2)
+                return 0;
+            return 1;
+        }
+
+        public static int GetDp2libraryServerUID(Stop stop, 
+            string strURL,
+            out string strUID,
+            out string strError)
+        {
+            strError = "";
+            strUID = "";
+
+            LibraryChannel channel = new LibraryChannel();
+            try
+            {
+                channel.Url = strURL;
+                string strVersion = "";
+                long lRet = channel.GetVersion(stop, out strVersion, out strUID, out strError);
+                if (lRet == -1)
+                    return -1;
+                return 0;
+            }
+            finally
+            {
+                channel.Close();
             }
         }
 
@@ -13313,7 +13413,7 @@ Keys keyData)
 
         private void MenuItem_openArrivedSearchForm_Click(object sender, EventArgs e)
         {
-            if (this.Version < 2.47)
+            if (this.ServerVersion < 2.47)
             {
                 MessageBox.Show(this, "dp2library 版本 2.47 和以上才能使用 预约到书查询窗");
                 return;
@@ -13323,7 +13423,7 @@ Keys keyData)
 
         private void MenuItem_openReservationListForm_Click(object sender, EventArgs e)
         {
-            if (this.Version < 2.47)
+            if (this.ServerVersion < 2.47)
             {
                 MessageBox.Show(this, "dp2library 版本 2.47 和以上才能使用 预约响应窗");
                 return;

@@ -559,7 +559,7 @@ MessageBoxDefaultButton.Button1);
             PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strFileName));
 
             if (File.Exists(strFileName) == false
-                || MainForm.GetServersCfgFileVersion(strFileName) < (double)0.01)
+                || MainForm.GetServersCfgFileVersion(strFileName) < MainForm.SERVERSXML_VERSION)
             {
                 string strError = "";
                 // 创建 servers.xml 配置文件
@@ -3144,6 +3144,33 @@ int nCount)
             return false;
         }
 
+        // 判断一个 server 是否适合删除记录
+        bool IsDeleteable(XmlElement server,
+            string strEditBiblioRecPath)
+        {
+            bool bAppend = Global.IsAppendRecPath(strEditBiblioRecPath);
+            if (bAppend == true)
+                return false;   // 追加形态的路径不适合用于参数操作
+
+            string strBiblioDbName = Global.GetDbName(strEditBiblioRecPath);
+            if (string.IsNullOrEmpty(strBiblioDbName) == true)
+                return false;
+
+            XmlNodeList databases = server.SelectNodes("database[@name='" + strBiblioDbName + "']");
+            foreach (XmlElement database in databases)
+            {
+                bool bIsTarget = DomUtil.GetBooleanParam(database, "isTarget", false);
+                if (bIsTarget == true)
+                {
+                    string strAccess = database.GetAttribute("access");
+                    if (StringUtil.IsInList("delete", strAccess) == true)
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
         // 为保存书目记录的需要，根据书目记录的路径，匹配适当的目标
         // parameters:
         //      bAllowCopyTo    是否允许书目记录复制到其他库？这发生在原始库不让 overwrite 的时候
@@ -3227,7 +3254,6 @@ int nCount)
 
             // _currentAccount.IsLocalServer == true ?
 
-            // string strEditServerUrl = "";
             string strEditServerName = this._biblio.ServerName;
             string strEditBiblioRecPath = this._biblio.BiblioRecPath;
 
@@ -3238,7 +3264,7 @@ int nCount)
                 XmlElement server = (XmlElement)_base.ServersDom.DocumentElement.SelectSingleNode("server[@name='" + strEditServerName + "']");
                 if (server != null)
                 {
-                    if (IsWritable(server, strEditBiblioRecPath) == true)
+                    if (IsDeleteable(server, strEditBiblioRecPath) == true)
                     {
                         strServerName = strEditServerName;
                         strBiblioRecPath = strEditBiblioRecPath;
@@ -4331,6 +4357,8 @@ MessageBoxDefaultButton.Button2);
             if (lRet == -1)
             {
                 // 注意检查部分允许写入的报错
+                if (channel.ErrorCode != ErrorCode.AccessDenied)
+                    return -1;
             }
             else
                 biblio_access_list.Add("append");
@@ -4351,6 +4379,8 @@ out baNewTimestamp,
 out strError);
             if (lRet == -1)
             {
+                if (channel.ErrorCode != ErrorCode.AccessDenied)
+                    return -1;
             }
             else
             {
@@ -4359,6 +4389,34 @@ out strError);
                     biblio_access_list.Add("partial_overwrite");
                 else
                     biblio_access_list.Add("overwrite");
+            }
+
+            // 模拟书目删除
+            strAction = "simulate_delete";
+            strPath = strBiblioDbName + "/0";
+            lRet = channel.SetBiblioInfo(
+stop,
+strAction,
+strPath,
+"xml",
+strXml,
+null,   // baTimestamp,
+"",
+out strOutputPath,
+out baNewTimestamp,
+out strError);
+            if (lRet == -1)
+            {
+                if (channel.ErrorCode != ErrorCode.AccessDenied)
+                    return -1;
+            }
+            else
+            {
+                // 注意检查部分允许写入的报错
+                if (channel.ErrorCode == ErrorCode.PartialDenied)
+                    biblio_access_list.Add("partial_delete");
+                else
+                    biblio_access_list.Add("delete");
             }
 
             strBiblioAccess = StringUtil.MakePathList(biblio_access_list);
@@ -4397,9 +4455,16 @@ out strError);
      entities,
      out errorinfos,
      out strError);
-            if (lRet == -1 || string.IsNullOrEmpty(GetErrorInfo(errorinfos)) == false)
+            if (lRet == -1)
             {
-
+                List<string> normal_errors = new List<string>();
+                List<string> accessdenied_errors = new List<string>();
+                GetErrorInfo(errorinfos, out normal_errors, out accessdenied_errors);
+                if (normal_errors.Count > 0)
+                {
+                    strError = StringUtil.MakePathList(normal_errors, " ; ");
+                    return -1;
+                }
             }
             else
             {
@@ -4407,49 +4472,104 @@ out strError);
             }
 
             // 模拟实体覆盖写入
-            entities[0].Action = "change";
+            info.Action = "change";
             lRet = channel.SetEntities(
 stop,
 strPath,
 entities,
 out errorinfos,
 out strError);
-            if (lRet == -1 || string.IsNullOrEmpty(GetErrorInfo(errorinfos)) == false)
+            if (lRet == -1)
             {
-
+                List<string> normal_errors = new List<string>();
+                List<string> accessdenied_errors = new List<string>();
+                GetErrorInfo(errorinfos, out normal_errors, out accessdenied_errors);
+                if (normal_errors.Count > 0)
+                {
+                    strError = StringUtil.MakePathList(normal_errors, " ; ");
+                    return -1;
+                }
             }
             else
             {
                 entity_access_list.Add("overwrite");
             }
 
-            strEntityAccess = StringUtil.MakePathList(entity_access_list);
+            // 模拟实体删除操作
+            info.Action = "delete";
 
+            // 是否要提供旧记录？
+            info.OldRecPath = "";
+            info.OldRecord = "";
+            info.OldTimestamp = null;
+
+            info.NewRecPath = "";
+            info.NewRecord = "";
+            info.NewTimestamp = null;
+
+            lRet = channel.SetEntities(
+stop,
+strPath,
+entities,
+out errorinfos,
+out strError);
+            if (lRet == -1)
+            {
+                List<string> normal_errors = new List<string>();
+                List<string> accessdenied_errors = new List<string>();
+                GetErrorInfo(errorinfos, out normal_errors, out accessdenied_errors);
+                if (normal_errors.Count > 0)
+                {
+                    strError = StringUtil.MakePathList(normal_errors, " ; ");
+                    return -1;
+                }
+            }
+            else
+            {
+                entity_access_list.Add("delete");
+            }
+
+            strEntityAccess = StringUtil.MakePathList(entity_access_list);
             return 0;
         }
 
-        static string GetErrorInfo(EntityInfo[] errorinfos)
+        static int GetErrorInfo(EntityInfo[] errorinfos,
+            out List<string> normal_errors,
+            out List<string> accessdenied_errors)
         {
-            if (errorinfos == null)
-                return "";
+            normal_errors = new List<string>();
+            accessdenied_errors = new List<string>();
 
-            string strError = "";
-            for (int i = 0; i < errorinfos.Length; i++)
+            if (errorinfos == null)
+                return 0;
+
+            int nCount = 0;
+            foreach (EntityInfo info in errorinfos)
             {
-                if (String.IsNullOrEmpty(errorinfos[i].RefID) == true)
+                if (String.IsNullOrEmpty(info.RefID) == true)
                 {
-                    strError = "服务器返回的EntityInfo结构中RefID为空";
-                    return strError;
+                    normal_errors.Add("服务器返回的 EntityInfo 结构中 RefID 为空");
+                    nCount++;
+                    return nCount;
                 }
 
                 // 正常信息处理
-                if (errorinfos[i].ErrorCode == ErrorCodeValue.NoError)
+                if (info.ErrorCode == ErrorCodeValue.NoError)
                     continue;
 
-                strError += errorinfos[i].RefID + "在提交保存过程中发生错误 -- " + errorinfos[i].ErrorInfo + "\r\n";
+                if (info.ErrorCode == ErrorCodeValue.AccessDenied)
+                {
+                    accessdenied_errors.Add(info.ErrorInfo);
+                    nCount++;
+                }
+                else
+                {
+                    normal_errors.Add(info.RefID + "在提交保存过程中发生错误 -- " + info.ErrorInfo);
+                    nCount++;
+                }
             }
 
-            return strError;
+            return nCount;
         }
 
         private void button_setting_reCreateServersXml_Click(object sender, EventArgs e)

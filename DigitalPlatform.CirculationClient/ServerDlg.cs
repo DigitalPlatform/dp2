@@ -149,9 +149,26 @@ namespace DigitalPlatform.CirculationClient
 Dns.GetHostEntry(strHost2).AddressList,
 a => a.AddressFamily == AddressFamily.InterNetwork);
 #endif
-            IPAddress[] address_list1 = Dns.GetHostAddresses(strHost1); 
-            IPAddress[] address_list2 = Dns.GetHostAddresses(strHost2);
+            IPAddress[] address_list1 = null; 
+            IPAddress[] address_list2 = null;
 
+            try
+            {
+                address_list1 = Dns.GetHostAddresses(strHost1);
+            }
+            catch(Exception ex)
+            {
+                throw new Exception("解析主机名 '"+strHost1+"' 时出错: " + ex.Message + "\r\n请检查网络状态是否正常");
+            }
+
+            try
+            {
+                address_list2 = Dns.GetHostAddresses(strHost2);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("解析主机名 '" + strHost2 + "' 时出错: " + ex.Message + "\r\n检查网络状态是否正常");
+            }
 
             foreach(IPAddress address1 in address_list1)
             {

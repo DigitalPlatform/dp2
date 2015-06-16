@@ -94,6 +94,7 @@ namespace dp2Circulation
             this.MenuItem_updateStatisProjectsFromDisk = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator14 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_messageForm = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_openReservationListForm = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator30 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_systemManagement = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openClockForm = new System.Windows.Forms.ToolStripMenuItem();
@@ -196,7 +197,6 @@ namespace dp2Circulation
             this.toolStripButton_close = new System.Windows.Forms.ToolStripButton();
             this.splitter_fixed = new System.Windows.Forms.Splitter();
             this.timer_operHistory = new System.Windows.Forms.Timer(this.components);
-            this.MenuItem_openReservationListForm = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip_main.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
             this.toolStrip_main.SuspendLayout();
@@ -309,15 +309,15 @@ namespace dp2Circulation
             // MenuItem_openEntityRegisterWizard
             // 
             this.MenuItem_openEntityRegisterWizard.Name = "MenuItem_openEntityRegisterWizard";
-            this.MenuItem_openEntityRegisterWizard.Size = new System.Drawing.Size(176, 22);
-            this.MenuItem_openEntityRegisterWizard.Text = "册登记向导(&T)";
+            this.MenuItem_openEntityRegisterWizard.Size = new System.Drawing.Size(195, 22);
+            this.MenuItem_openEntityRegisterWizard.Text = "册登记窗(&T)";
             this.MenuItem_openEntityRegisterWizard.Click += new System.EventHandler(this.MenuItem_openEntityRegisterWizard_Click);
             // 
             // MenuItem_openEntityRegisterForm
             // 
             this.MenuItem_openEntityRegisterForm.Name = "MenuItem_openEntityRegisterForm";
-            this.MenuItem_openEntityRegisterForm.Size = new System.Drawing.Size(176, 22);
-            this.MenuItem_openEntityRegisterForm.Text = "册登记窗(&E)";
+            this.MenuItem_openEntityRegisterForm.Size = new System.Drawing.Size(195, 22);
+            this.MenuItem_openEntityRegisterForm.Text = "(暂未使用)册登记窗(&E)";
             this.MenuItem_openEntityRegisterForm.Visible = false;
             this.MenuItem_openEntityRegisterForm.Click += new System.EventHandler(this.MenuItem_openEntityRegisterForm_Click);
             // 
@@ -331,7 +331,7 @@ namespace dp2Circulation
             this.MenuItem_openReaderSearchForm.Image = ((System.Drawing.Image)(resources.GetObject("MenuItem_openReaderSearchForm.Image")));
             this.MenuItem_openReaderSearchForm.ImageTransparentColor = System.Drawing.Color.Fuchsia;
             this.MenuItem_openReaderSearchForm.Name = "MenuItem_openReaderSearchForm";
-            this.MenuItem_openReaderSearchForm.Size = new System.Drawing.Size(176, 22);
+            this.MenuItem_openReaderSearchForm.Size = new System.Drawing.Size(195, 22);
             this.MenuItem_openReaderSearchForm.Text = "读者查询窗(&S)";
             this.MenuItem_openReaderSearchForm.Click += new System.EventHandler(this.MenuItem_openReaderSearchForm_Click);
             // 
@@ -717,6 +717,13 @@ namespace dp2Circulation
             this.MenuItem_messageForm.Size = new System.Drawing.Size(221, 22);
             this.MenuItem_messageForm.Text = "消息(&M)";
             this.MenuItem_messageForm.Click += new System.EventHandler(this.MenuItem_messageForm_Click);
+            // 
+            // MenuItem_openReservationListForm
+            // 
+            this.MenuItem_openReservationListForm.Name = "MenuItem_openReservationListForm";
+            this.MenuItem_openReservationListForm.Size = new System.Drawing.Size(221, 22);
+            this.MenuItem_openReservationListForm.Text = "预约响应(&R)";
+            this.MenuItem_openReservationListForm.Click += new System.EventHandler(this.MenuItem_openReservationListForm_Click);
             // 
             // toolStripSeparator30
             // 
@@ -1586,13 +1593,6 @@ namespace dp2Circulation
             this.splitter_fixed.Size = new System.Drawing.Size(2, 256);
             this.splitter_fixed.TabIndex = 6;
             this.splitter_fixed.TabStop = false;
-            // 
-            // MenuItem_openReservationListForm
-            // 
-            this.MenuItem_openReservationListForm.Name = "MenuItem_openReservationListForm";
-            this.MenuItem_openReservationListForm.Size = new System.Drawing.Size(221, 22);
-            this.MenuItem_openReservationListForm.Text = "预约响应(&R)";
-            this.MenuItem_openReservationListForm.Click += new System.EventHandler(this.MenuItem_openReservationListForm_Click);
             // 
             // MainForm
             // 

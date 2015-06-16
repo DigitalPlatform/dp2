@@ -408,9 +408,21 @@ namespace dp2Library
 
         // 2012/4/15
         // 获得版本号
-        public LibraryServerResult GetVersion()
+        public LibraryServerResult GetVersion(out string uid)
         {
-            LibraryServerResult result = new LibraryServerResult();
+            uid = "";
+            LibraryServerResult result = this.PrepareEnvironment("GerVersion", false);
+            if (result.Value == -1)
+                return result;
+
+            Debug.Assert(app != null, "");
+
+            if (app.LibraryCfgDom != null && app.LibraryCfgDom.DocumentElement != null)
+                uid = app.LibraryCfgDom.DocumentElement.GetAttribute("uid");
+            else
+                uid = "";
+
+            // LibraryServerResult result = new LibraryServerResult();
             result.Value = 0;
             result.ErrorInfo = LibraryApplication.Version;  // "2.18";
             return result;
