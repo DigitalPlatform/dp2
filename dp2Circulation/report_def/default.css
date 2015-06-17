@@ -27,16 +27,15 @@ DIV.createtime
 	padding: 4pt;
 }
 
-TABLE.table
-{
-    	font-size: 10pt;
-    	/*width: 100%;*/
-	margin: auto;
-	border-color: #efefef;
-	border-width: 16px; 
-	border-style: solid;
-	border-collapse:collapse;
-	background-color: #eeeeee;
+TABLE.table {
+    font-size: 10pt;
+    /*width: 100%;*/
+    margin: auto;
+    border-color: #efefef;
+    border-width: 16px;
+    border-style: solid;
+    border-collapse: collapse;
+    background-color: #eeeeee;
 }
 
 TABLE.table TR

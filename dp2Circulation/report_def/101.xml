@@ -4,7 +4,8 @@
   </titleComment>
   <columns>
     <column name="部门" align="left" sum="no" class="department" eval="" />
-    <column name="册数" align="right" sum="yes" class="items" eval="" />
+    <column name="借书册数" align="right" sum="yes" class="borrowitems" eval="" />
+    <column name="还书册数" align="right" sum="yes" class="returnitems" eval="" />
   </columns>
   <css>
   </css>

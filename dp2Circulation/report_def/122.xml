@@ -3,9 +3,9 @@
   <titleComment>
   </titleComment>
   <columns>
-    <column name="证条码号" type="String" align="left" sum="no" class="" eval="" />
-    <column name="姓名" type="String" align="left" sum="no" class="" eval="" />
-    <column name="单位" type="String" align="left" sum="no" class="" eval="" />
+    <column name="证条码号" type="String" align="left" sum="no" class="patronbarcode" eval="" />
+    <column name="姓名" type="String" align="left" sum="no" class="name" eval="" />
+    <column name="单位" type="String" align="left" sum="no" class="department" eval="" />
   </columns>
   <css>
   </css>

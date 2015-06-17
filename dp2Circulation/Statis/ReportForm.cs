@@ -2834,6 +2834,7 @@ MessageBoxDefaultButton.Button1);
     writer,
     strOutputFileName,
     macro_table,
+    "创建 131 表时",
     out strError);
                 if (nRet == -1)
                     return -1;
@@ -2981,6 +2982,7 @@ MessageBoxDefaultButton.Button1);
 writer,
 strOutputFileName,
 macro_table,
+    "创建 "+strReportType+" 表时",
 out strError);
         }
 
@@ -3029,6 +3031,7 @@ out strError);
 writer,
 strOutputFileName,
 macro_table,
+    "创建 201 表时",
 out strError);
         }
 
@@ -3075,6 +3078,7 @@ out strError);
 writer,
 strOutputFileName,
 macro_table,
+    "创建 202 表时",
 out strError);
         }
 
@@ -3128,6 +3132,7 @@ out strError);
 writer,
 strOutputFileName,
 macro_table,
+    "创建 "+strReportType+" 表时",
 out strError);
         }
 
@@ -3405,6 +3410,7 @@ out strError);
 writer,
 strOutputFileName,
 macro_table,
+    "创建 302 表时",
 out strError);
         }
 
@@ -3483,6 +3489,7 @@ out strError);
 writer,
 strOutputFileName,
 macro_table,
+    "创建 "+strType+" 表时",
 out strError);
 
             
@@ -3796,7 +3803,6 @@ out string strError)
                 using (SQLiteCommand command = new SQLiteCommand(text.ToString(),
     connection))
                 {
-
                     try
                     {
                         using (SQLiteDataReader dr = command.ExecuteReader(CommandBehavior.Default))
@@ -3851,11 +3857,12 @@ out string strError)
         }
 
         int RunQuery(
-    List<string> commands,
-    ReportWriter writer,
-    string strOutputFileName,
-    Hashtable macro_table,
-    out string strError)
+            List<string> commands,
+            ReportWriter writer,
+            string strOutputFileName,
+            Hashtable macro_table,
+            string strErrorInfoTitle,
+            out string strError)
         {
             strError = "";
 
@@ -3880,7 +3887,6 @@ out string strError)
                 using (SQLiteCommand command = new SQLiteCommand(text.ToString(),
     connection))
                 {
-
                     try
                     {
                         using (SQLiteDataReader dr = command.ExecuteReader(CommandBehavior.Default))
@@ -3899,7 +3905,7 @@ out string strError)
                     }
                     catch (SQLiteException ex)
                     {
-                        strError = "执行SQL语句发生错误: " + ex.Message + "\r\nSQL 语句: " + text.ToString();
+                        strError = strErrorInfoTitle + " 执行SQL语句发生错误: " + ex.Message + "\r\nSQL 语句: " + text.ToString();
                         return -1;
                     }
                 } // end of using command
@@ -3949,43 +3955,86 @@ out string strError)
             if (StringUtil.IsInList("101", strStyle) == true)
             {
                 // 101 表 按照读者 *自然单位* 分类的借书册数表
+#if NO
                 strCommand = "select reader.department, count(*) as count "
                      + " FROM operlogcircu left outer JOIN reader ON operlogcircu.readerbarcode <> '' AND operlogcircu.readerbarcode = reader.readerbarcode "
                      + " WHERE operlogcircu.operation = 'borrow' and operlogcircu.action = 'borrow' "
                      + "     AND operlogcircu.date >= '" + strStartDate + "' AND operlogcircu.date <= '" + strEndDate + "' "
                      + "     AND reader.librarycode = '" + strLibraryCode + "' "
                      + " GROUP BY reader.department ORDER BY count DESC, reader.department;";
+#endif
+                // 2015/6/17 增加了 return 列
+                strCommand = "select reader.department, "
+                    + " count(case operlogcircu.operation when 'borrow' then operlogcircu.action end) as borrow, "
+                    + " count(case operlogcircu.operation when 'return' then operlogcircu.action end) as return "
+                    + " FROM operlogcircu left outer JOIN reader ON operlogcircu.readerbarcode <> '' AND operlogcircu.readerbarcode = reader.readerbarcode "
+                     + " WHERE operlogcircu.date >= '" + strStartDate + "' AND operlogcircu.date <= '" + strEndDate + "' "
+                     + "     AND reader.librarycode = '" + strLibraryCode + "' "
+                     + " GROUP BY reader.department ORDER BY borrow DESC, reader.department;";
             }
             else if (StringUtil.IsInList("102", strStyle) == true)
             {
                 // 102 表 按照 *指定的单位* 分类的借书册数表
                 // 这里每次只能获得一个单位的一行数据。需要按照不同单位 (strParameters) 多次循环调用本函数
+#if NO
                 strCommand = "select '" + strParameters + "' as department, count(*) as count "
                      + " FROM operlogcircu JOIN reader ON operlogcircu.readerbarcode <> '' AND operlogcircu.readerbarcode = reader.readerbarcode "
                      + " WHERE operlogcircu.operation = 'borrow' and operlogcircu.action = 'borrow' "
                      + "     AND operlogcircu.date >= '" + strStartDate + "' AND operlogcircu.date <= '" + strEndDate + "' "
                      + "     AND reader.librarycode = '" + strLibraryCode + "' AND reader.department like '" + strParameters + "' "
                      + "  ORDER BY count DESC, department;";
+#endif
+                // 2015/6/17 增加了 return 列
+                strCommand = "select '" + strParameters + "' as department, "
+                    + " count(case operlogcircu.operation when 'borrow' then operlogcircu.action end) as borrow, "
+                    + " count(case operlogcircu.operation when 'return' then operlogcircu.action end) as return "
+                     + " FROM operlogcircu JOIN reader ON operlogcircu.readerbarcode <> '' AND operlogcircu.readerbarcode = reader.readerbarcode "
+                     + " WHERE operlogcircu.date >= '" + strStartDate + "' AND operlogcircu.date <= '" + strEndDate + "' "
+                     + "     AND reader.librarycode = '" + strLibraryCode + "' AND reader.department like '" + strParameters + "' "
+                     + "  ORDER BY borrow DESC, department;";
+
             }
             else if (StringUtil.IsInList("111", strStyle) == true)
             {
                 // 111 表 按照读者 *自然类型* 分类的借书册数表
+#if NO
                 strCommand = "select reader.readertype, count(*) as count "
                      + " FROM operlogcircu JOIN reader ON operlogcircu.readerbarcode <> '' AND operlogcircu.readerbarcode = reader.readerbarcode "
                      + " WHERE operlogcircu.operation = 'borrow' and operlogcircu.action = 'borrow' "
                      + "     AND operlogcircu.date >= '" + strStartDate + "' AND operlogcircu.date <= '" + strEndDate + "' "
                      + "     AND reader.librarycode = '" + strLibraryCode + "' "
                      + " GROUP BY reader.readertype ORDER BY count DESC, reader.readertype;";
+#endif
+                // 2015/6/17 增加了 return 列
+                strCommand = "select reader.readertype, "
+                    + " count(case operlogcircu.operation when 'borrow' then operlogcircu.action end) as borrow, "
+                    + " count(case operlogcircu.operation when 'return' then operlogcircu.action end) as return "
+     + " FROM operlogcircu JOIN reader ON operlogcircu.readerbarcode <> '' AND operlogcircu.readerbarcode = reader.readerbarcode "
+     + " WHERE operlogcircu.date >= '" + strStartDate + "' AND operlogcircu.date <= '" + strEndDate + "' "
+     + "     AND reader.librarycode = '" + strLibraryCode + "' "
+     + " GROUP BY reader.readertype ORDER BY borrow DESC, reader.readertype;";
+
             }
             else if (StringUtil.IsInList("121", strStyle) == true)
             {
                 // 121 表 按照读者 *姓名* 分类的借书册数表
+#if NO
                 strCommand = "select operlogcircu.readerbarcode, reader.name, reader.department, count(*) as count "
                      + " FROM operlogcircu JOIN reader ON operlogcircu.readerbarcode <> '' AND operlogcircu.readerbarcode = reader.readerbarcode "
                      + " WHERE operlogcircu.operation = 'borrow' and operlogcircu.action = 'borrow' "
                      + "     AND operlogcircu.date >= '" + strStartDate + "' AND operlogcircu.date <= '" + strEndDate + "' "
                      + "     AND reader.librarycode = '" + strLibraryCode + "' "
                      + " GROUP BY operlogcircu.readerbarcode ORDER BY count DESC, reader.department, operlogcircu.readerbarcode ;";
+#endif
+                // 2015/6/17 增加了 return 列
+                strCommand = "select operlogcircu.readerbarcode, reader.name, reader.department, "
+                    + " count(case operlogcircu.operation when 'borrow' then operlogcircu.action end) as borrow, "
+                    + " count(case operlogcircu.operation when 'return' then operlogcircu.action end) as return "
+     + " FROM operlogcircu JOIN reader ON operlogcircu.readerbarcode <> '' AND operlogcircu.readerbarcode = reader.readerbarcode "
+     + " WHERE operlogcircu.date >= '" + strStartDate + "' AND operlogcircu.date <= '" + strEndDate + "' "
+     + "     AND reader.librarycode = '" + strLibraryCode + "' "
+     + " GROUP BY operlogcircu.readerbarcode ORDER BY borrow DESC, reader.department, operlogcircu.readerbarcode ;";
+
             }
             else if (StringUtil.IsInList("122", strStyle) == true)
             {
@@ -4045,9 +4094,6 @@ select readerbarcode, name, department from reader  WHERE librarycode = '合肥�
 
             return 0;
         }
-
-
-
 
         static string GetString(SQLiteDataReader dr, int index)
         {
@@ -4111,6 +4157,7 @@ select readerbarcode, name, department from reader  WHERE librarycode = '合肥�
             if (StringUtil.IsInList("201", strStyle) == true)
             {
                 // 201 表 按照图书 *种* 分类的借书册数表
+#if NO
                 strCommand = "select item.bibliorecpath, biblio.summary, count(*) as count "
                      + " FROM operlogcircu "
                     + " JOIN item ON operlogcircu.itembarcode <> '' AND operlogcircu.itembarcode = item.itembarcode "
@@ -4119,6 +4166,18 @@ select readerbarcode, name, department from reader  WHERE librarycode = '合肥�
                      + "     AND operlogcircu.date >= '" + strStartDate + "' AND operlogcircu.date <= '" + strEndDate + "' "
                      + "     AND " + strLocationLike
                      + " GROUP BY item.bibliorecpath ORDER BY count DESC ;";
+#endif
+                // 2015/6/17 增加了 return 列
+                strCommand = "select item.bibliorecpath, biblio.summary, "
+                    + " count(case operlogcircu.operation when 'borrow' then operlogcircu.action end) as borrow, "
+                    + " count(case operlogcircu.operation when 'return' then operlogcircu.action end) as return "
+     + " FROM operlogcircu "
+    + " JOIN item ON operlogcircu.itembarcode <> '' AND operlogcircu.itembarcode = item.itembarcode "
+     + " JOIN biblio ON item.bibliorecpath <> '' AND biblio.bibliorecpath = item.bibliorecpath "
+     + " WHERE operlogcircu.date >= '" + strStartDate + "' AND operlogcircu.date <= '" + strEndDate + "' "
+     + "     AND " + strLocationLike
+     + " GROUP BY item.bibliorecpath ORDER BY borrow DESC ;";
+
             }
             else if (StringUtil.IsInList("202", strStyle) == true)
             {
@@ -4139,10 +4198,12 @@ select readerbarcode, name, department from reader  WHERE librarycode = '合肥�
             else if (StringUtil.IsInList("212", strStyle) == true
                 || StringUtil.IsInList("213", strStyle) == true)
             {
+#if NO
                 string strOperation = "borrow";
 
                 if (StringUtil.IsInList("213", strStyle) == true)
                     strOperation = "return";
+#endif
 
                 string strClassTableName = "class_" + strParameters;
 
@@ -4162,6 +4223,7 @@ select readerbarcode, name, department from reader  WHERE librarycode = '合肥�
 #endif
 
                 // 212 表 按照图书 *分类* 分类的借书册数表
+#if NO
                 // 213 表 按照图书 *分类* 分类的还书册数表
                 strCommand = 
                     // "select substr(" + strDistinctClassTableName + ".class,1,1) as classhead, count(*) as count "
@@ -4173,6 +4235,21 @@ select readerbarcode, name, department from reader  WHERE librarycode = '合肥�
                      + "     AND operlogcircu.date >= '" + strStartDate + "' AND operlogcircu.date <= '" + strEndDate + "' "
                      + "     AND " + strLocationLike
                      + " GROUP BY classhead ORDER BY classhead ;";
+#endif
+                // 2015/6/17 212 和 213 表合并为 212 表
+
+                strCommand =
+                    // "select substr(" + strDistinctClassTableName + ".class,1,1) as classhead, count(*) as count "
+    "select " + strClassColumn + " as classhead, "
+
+                    + " count(case operlogcircu.operation when 'borrow' then operlogcircu.action end) as borrow, "
+                    + " count(case operlogcircu.operation when 'return' then operlogcircu.action end) as return "
+                    // strCommand = "select " + strClassTableName + ".class as class, count(*) as count "
+     + " FROM operlogcircu left outer JOIN item ON operlogcircu.itembarcode <> '' AND operlogcircu.itembarcode = item.itembarcode "
+     + " left outer JOIN " + strDistinctClassTableName + " ON item.bibliorecpath <> '' AND " + strDistinctClassTableName + ".bibliorecpath = item.bibliorecpath "
+     + " WHERE operlogcircu.date >= '" + strStartDate + "' AND operlogcircu.date <= '" + strEndDate + "' "
+     + "     AND " + strLocationLike
+     + " GROUP BY classhead ORDER BY classhead ;";
             }
             else
             {
@@ -10456,6 +10533,8 @@ MessageBoxDefaultButton.Button1);
                 {
                     if (strReportType == "212" && class_styles.Count == 0)
                         continue;
+                    if (strReportType == "213")
+                        continue;   // 213 表已经被废止，其原有功能被合并到 212 表
 
                     // 获得分馆的所有馆藏地点
 
