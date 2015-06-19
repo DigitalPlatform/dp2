@@ -1127,6 +1127,7 @@ namespace DigitalPlatform.EasyMarc
         public void SetMarc(string strMarc)
         {
             this.Clear();
+            this.MarcDefDom = null;  // 迫使重新获得字段名提示信息
 
             this.DisableUpdate();
             try

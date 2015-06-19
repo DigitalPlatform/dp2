@@ -617,14 +617,17 @@ MessageBoxDefaultButton.Button1);
                 this.toolStripButton_start.Enabled = true;
 
             if (this.tabControl_main.SelectedTab == this.tabPage_biblioAndItems)
+            {
                 this.toolStripButton_save.Enabled = true;
-            else
-                this.toolStripButton_save.Enabled = false;
-
-            if (this.tabControl_main.SelectedTab == this.tabPage_biblioAndItems)
                 this.toolStripButton_delete.Enabled = true;
+                this.toolStripLabel_biblioSource.Visible = true;
+            }
             else
+            {
+                this.toolStripButton_save.Enabled = false;
                 this.toolStripButton_delete.Enabled = false;
+                this.toolStripLabel_biblioSource.Visible = false;
+            }
         }
 
         private void tabControl_main_SelectedIndexChanged(object sender, EventArgs e)
@@ -1045,7 +1048,7 @@ MessageBoxDefaultButton.Button1);
             info.RecPath = strASIN + "@" + _base.CurrentAccount.ServerName;
             info.MarcSyntax = "unimarc";
             AddBiblioBrowseLine(
-                -1,
+                TYPE_AMAZON,  // -1,
                 info.RecPath,
                 StringUtil.MakePathList(cols, "\t"),
                 info,
@@ -1431,13 +1434,17 @@ out string strError)
                                 if (nRet == -1)
                                     goto ERROR1;
 
+                                int image_index = -1;
+                                if (account.IsLocalServer == false)
+                                    image_index = TYPE_CLOUD;
+
                                 RegisterBiblioInfo info = new RegisterBiblioInfo();
                                 info.OldXml = strXml;   // strMARC;
                                 info.Timestamp = item.Timestamp;
                                 info.RecPath = item.RecPath + "@" + account.ServerName;
                                 info.MarcSyntax = strMarcSyntax;
                                 AddBiblioBrowseLine(
-                                    -1,
+                                    image_index,    // -1,
                                     info.RecPath,
                                     strBrowseText,
                                     info,
@@ -1488,6 +1495,8 @@ out string strError)
 
         public const int TYPE_ERROR = 2;
         public const int TYPE_INFO = 3;
+        public const int TYPE_CLOUD = 4;
+        public const int TYPE_AMAZON = 5;
 
         public void AddBiblioBrowseLine(string strText,
     int nType,
@@ -1527,6 +1536,8 @@ out string strError)
 
             // 序号
             DpCell cell = new DpCell();
+            cell.Alignment = DpTextAlignment.Far;
+            cell.Font = new Font(this.Font.FontFamily, this.Font.Size * 2);
             cell.Text = (this.dpTable_browseLines.Rows.Count + 1).ToString();
             {
                 cell.ImageIndex = nType;
@@ -1744,10 +1755,17 @@ out string strError)
         }
 
         // 更新浏览行中缓冲的书目信息
+        // parameters:
+        //      new_info    要更新的 RegisterBiblioInfo 对象。如果为 null，表示要删除此浏览行
         void RefreshBrowseLineBiblio(string strRecPath,
             RegisterBiblioInfo new_info)
         {
-            Debug.Assert(strRecPath == new_info.RecPath, "");
+#if DEBUG
+            if (new_info != null)
+            {
+                Debug.Assert(strRecPath == new_info.RecPath, "");
+            }
+#endif
 
             foreach (DpRow row in this.dpTable_browseLines.Rows)
             {
@@ -1756,6 +1774,12 @@ out string strError)
                     continue;
                 if (info.RecPath == strRecPath)
                 {
+                    if (new_info == null)
+                    {
+                        this.dpTable_browseLines.Rows.Remove(row);
+                        // TODO: 需要修改后面的浏览行的序号
+                        return;
+                    }
 #if NO
                     info.OldXml = "";
                     info.NewXml = "";
@@ -2044,9 +2068,52 @@ out strError);
             bool bAutoSetFocus,
             out string strError)
         {
+            strError = "";
+
+            string strStartText = info.RecPath;
+
+            string strStartServerName = "";
+            string strStartRecPath = "";
+            StringUtil.ParseTwoPart(info.RecPath, "@", out strStartRecPath, out strStartServerName);
+
+            // 给书目记录一个本地路径，用于后面可能发生的保存操作
+            string strServerName = "";
+            string strBiblioRecPath = "";
+
+            AccountInfo _currentAccount = _base.GetAccountInfo(strStartServerName, false);
+            if (_currentAccount == null)
+            {
+                strError = "服务器名 '" + strStartServerName + "' 没有配置";
+                return -1;
+            }
+
+            // 根据书目记录的路径，匹配适当的目标
+            // return:
+            //      -1  出错
+            //      0   没有找到
+            //      1   找到
+            int nRet = GetTargetInfo(
+                _currentAccount.IsLocalServer == false ? true : false,
+                strStartServerName,
+                strStartRecPath,
+                out strServerName,
+                out strBiblioRecPath);
+            if (nRet == -1)
+                return -1;
+            if (nRet == 0)
+            {
+                // strError = "来自服务器 '" + this._biblio.ServerName + "' 的书目记录 '" + this._biblio.BiblioRecPath + "' 没有找到匹配的保存目标";
+                strServerName = strStartServerName;
+                strBiblioRecPath = strStartRecPath;
+            }
+
+            info.RecPath = strBiblioRecPath + "@" + strServerName;
+
+            this.toolStripLabel_biblioSource.Text = strStartText + " --> " + info.RecPath;
+
             OnImportantFieldsChanged(info.MarcSyntax);
 
-            int nRet = this._biblio.SetBiblio(info, bAutoSetFocus, out strError);
+            nRet = this._biblio.SetBiblio(info, bAutoSetFocus, out strError);
             if (nRet == -1)
                 return -1;
             {
@@ -2225,11 +2292,14 @@ MessageBoxDefaultButton.Button1);
             {
                 if (string.IsNullOrEmpty(this._biblio.BiblioRecPath) == true
                     && string.IsNullOrEmpty(this._biblio.ServerName) == true)
-                    e.Path = e.Path + "@!unknown";
+                {
+                    // e.Path = e.Path + "@!unknown";
+                    e.Path = e.Path;
+                }
                 else
                 {
                     // e.Path = Global.GetDbName(this.BiblioRecPath) + "/cfgs/" + e.Path + "@" + this.ServerName;
-                    e.Path = e.Path + "@" + this._biblio.ServerName;
+                    e.Path = e.Path + ":" + this._biblio.BiblioRecPath + "@" + this._biblio.ServerName;
                 }
 
                 // GetConfigDom(this, e);
@@ -2237,6 +2307,15 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
+        // 从 marcdef 中获得 MARC 格式定义
+        static string GetMarcSyntax(XmlDocument marcdef_dom)
+        {
+            XmlNode node = marcdef_dom.DocumentElement.SelectSingleNode("//MARCSyntax");
+            if (node == null)
+                return null;
+
+            return node.InnerText.Trim().ToLower();
+        }
 
         public void MarcEditor_GetConfigDom(object sender, GetConfigDomEventArgs e)
         {
@@ -2250,9 +2329,16 @@ MessageBoxDefaultButton.Button1);
                 goto ERROR1;
             }
 
+            // e.Path 是这样的形态 marcdef:中文图书/1@当前服务器 。冒号后面部分可以缺省，表示未知服务器的记录(没有路径和服务器名)
+
             string strPath = "";
             string strServerName = "";
             StringUtil.ParseTwoPart(e.Path, "@", out strPath, out strServerName);
+
+            //
+            string strPureFileName = "";
+            string strBiblioRecPath = "";
+            StringUtil.ParseTwoPart(strPath, ":", out strPureFileName, out strBiblioRecPath);
 
             string strServerType = _base.GetServerType(strServerName);
             if (strServerType == "amazon" || strServerName == "!unknown")
@@ -2281,7 +2367,7 @@ MessageBoxDefaultButton.Button1);
                 return;
             }
 
-            AccountInfo account = _base.GetAccountInfo(strServerName);
+            AccountInfo account = _base.GetAccountInfo(strServerName, false);   // false 可以不影响可能正在进行的检索长操作，因为长操作可能要用到 this._base._currentAccount
             if (account == null)
             {
                 e.ErrorInfo = "e.Path 中 '" + e.Path + "' 服务器名 '" + strServerName + "' 没有配置";
@@ -2290,12 +2376,12 @@ MessageBoxDefaultButton.Button1);
 
             Debug.Assert(strServerType == "dp2library", "");
 
-            //BiblioRegisterControl control = sender as BiblioRegisterControl;
-            //string strBiblioDbName = Global.GetDbName(control.BiblioRecPath);
-            string strBiblioDbName = Global.GetDbName(this._biblio.BiblioRecPath);
+
+            // string strBiblioDbName = Global.GetDbName(this._biblio.BiblioRecPath);
+            string strBiblioDbName = Global.GetDbName(strBiblioRecPath);
 
             // 得到干净的文件名
-            string strCfgFilePath = strBiblioDbName + "/cfgs/" + strPath;    // e.Path;
+            string strCfgFilePath = strBiblioDbName + "/cfgs/" + strPureFileName;    // e.Path;
             int nRet = strCfgFilePath.IndexOf("#");
             if (nRet != -1)
             {
@@ -2304,48 +2390,77 @@ MessageBoxDefaultButton.Button1);
 
             // 在cache中寻找
             e.XmlDocument = this.MainForm.DomCache.FindObject(strCfgFilePath);
-            if (e.XmlDocument != null)
-                return;
-
-            // TODO: 可以通过服务器名，得到 url username 等配置参数
-
-            // 下载配置文件
-            string strContent = "";
-            string strError = "";
-
-            byte[] baCfgOutputTimestamp = null;
-            // return:
-            //      -1  error
-            //      0   not found
-            //      1   found
-            nRet = GetCfgFileContent(
-                account.ServerUrl,
-                account.UserName,
-                strCfgFilePath,
-                out strContent,
-                out baCfgOutputTimestamp,
-                out strError);
-            if (nRet == -1 || nRet == 0)
+            if (e.XmlDocument == null)
             {
-                e.ErrorInfo = "获得配置文件 '" + strCfgFilePath + "' 时出错：" + strError;
-                goto ERROR1;
+
+                // TODO: 可以通过服务器名，得到 url username 等配置参数
+
+                // 下载配置文件
+                string strContent = "";
+                string strError = "";
+
+                byte[] baCfgOutputTimestamp = null;
+                // return:
+                //      -1  error
+                //      0   not found
+                //      1   found
+                nRet = GetCfgFileContent(
+                    account.ServerUrl,
+                    account.UserName,
+                    strCfgFilePath,
+                    out strContent,
+                    out baCfgOutputTimestamp,
+                    out strError);
+                if (nRet == -1 || nRet == 0)
+                {
+                    e.ErrorInfo = "获得配置文件 '" + strCfgFilePath + "' 时出错：" + strError;
+                    goto ERROR1;
+                }
+                else
+                {
+                    XmlDocument dom = new XmlDocument();
+                    try
+                    {
+                        dom.LoadXml(strContent);
+                    }
+                    catch (Exception ex)
+                    {
+                        e.ErrorInfo = "配置文件 '" + strCfgFilePath + "' 装入XMLDUM时出错: " + ex.Message;
+                        goto ERROR1;
+                    }
+                    e.XmlDocument = dom;
+                    this.MainForm.DomCache.SetObject(strCfgFilePath, dom);  // 保存到缓存
+                }
             }
-            else
+
+            // 只使用属于数据库的 marcdef 文件中的 MarcSyntax 信息，然后使用安装目录中的 marcdef 配置文件
             {
+                string strFileName = "";
+
+                string strMarcSyntax = GetMarcSyntax(e.XmlDocument);
+                if (strMarcSyntax == "usmarc")
+                    strFileName = Path.Combine(this.MainForm.DataDir, "usmarc_cfgs/" + strPureFileName);
+                else
+                    strFileName = Path.Combine(this.MainForm.DataDir, "unimarc_cfgs/" + strPureFileName);
+
+                // 在cache中寻找
+                e.XmlDocument = this.MainForm.DomCache.FindObject(strFileName);
+                if (e.XmlDocument != null)
+                    return;
+
                 XmlDocument dom = new XmlDocument();
                 try
                 {
-                    dom.LoadXml(strContent);
+                    dom.Load(strFileName);
                 }
                 catch (Exception ex)
                 {
-                    e.ErrorInfo = "配置文件 '" + strCfgFilePath + "' 装入XMLDUM时出错: " + ex.Message;
+                    e.ErrorInfo = "配置文件 '" + strFileName + "' 装入 XMLDOM 时出错: " + ex.Message;
                     goto ERROR1;
                 }
                 e.XmlDocument = dom;
-                this.MainForm.DomCache.SetObject(strCfgFilePath, dom);  // 保存到缓存
+                this.MainForm.DomCache.SetObject(strFileName, dom);  // 保存到缓存
             }
-
             return;
         ERROR1:
             this.ShowMessage(e.ErrorInfo, "red", true);
@@ -2881,6 +2996,8 @@ int nCount)
                     //      1   找到
                     nRet = GetTargetInfo(
                         _currentAccount.IsLocalServer == false ? true : false,
+                        this._biblio.ServerName,
+                        this._biblio.BiblioRecPath,
                         out strServerName,
                         out strBiblioRecPath);
 #if NO
@@ -2942,6 +3059,8 @@ int nCount)
 
                     if (string.IsNullOrEmpty(strWarning) == true)
                         this._biblio.BiblioChanged = false;
+
+                    this.toolStripLabel_biblioSource.Text = this._biblio.BiblioRecPath + "@" + this._biblio.ServerName;
 
                     bBiblioSaved = true;
 
@@ -3180,6 +3299,8 @@ int nCount)
         //      1   找到
         int GetTargetInfo(
             bool bAllowCopyTo,
+            string strEditServerName,
+            string strEditBiblioRecPath,
             out string strServerName,
             out string strBiblioRecPath)
         {
@@ -3187,8 +3308,8 @@ int nCount)
             strBiblioRecPath = "";
 
             // string strEditServerUrl = "";
-            string strEditServerName = this._biblio.ServerName;
-            string strEditBiblioRecPath = this._biblio.BiblioRecPath;
+            //string strEditServerName = this._biblio.ServerName;
+            //string strEditBiblioRecPath = this._biblio.BiblioRecPath;
 
             if (string.IsNullOrEmpty(strEditServerName) == false
                 && string.IsNullOrEmpty(strEditBiblioRecPath) == false)
@@ -3335,6 +3456,9 @@ int nCount)
 
                 _biblio.BiblioChanged = false;
                 _biblio.EntitiesChanged = false;
+
+                this.RefreshBrowseLineBiblio(_biblio.BiblioRecPath + "@" + _biblio.ServerName, null);
+
                 this.ShowMessage("书目记录 " + strBiblioRecPath + "@" + strServerName + " 删除成功", "green", true);
             }
             finally

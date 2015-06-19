@@ -2530,7 +2530,7 @@
   <Field name="200">
     <Property>
       <Label xml:lang="en">Title And Author</Label>
-      <Label xml:lang='zh'>书名</Label>
+      <Label xml:lang='zh'>书名与作者</Label>
     </Property>
     <Subfield name="a" Pinyin="9">
       <Property>
@@ -2783,7 +2783,7 @@
   </Field>
   <Field name="211">
     <Property>
-      <Label xml:lang="en">Projected Publication Data</Label>
+      <Label xml:lang="en">Projected Publication Date</Label>
       <Label xml:lang='zh'>预定出版日期</Label>
     </Property>
     <Subfield name="a">
@@ -5558,7 +5558,7 @@
       <Property>
         <Label xml:lang="en">
         </Label>
-        <Label xml:lang='zh'>分类号</Label>
+        <Label xml:lang='zh'>红泥巴分类号</Label>
       </Property>
     </Subfield>
     <Subfield name="b">
@@ -5587,13 +5587,13 @@
   <Field name="690">
     <Property>
       <Label xml:lang="en">CLC</Label>
-      <Label xml:lang='zh'>中国图书馆分类法分类号</Label>
+      <Label xml:lang='zh'>中图法分类号</Label>
     </Property>
     <Subfield name="a">
       <Property>
         <Label xml:lang="en">
         </Label>
-        <Label xml:lang='zh'>分类号</Label>
+        <Label xml:lang='zh'>中图法分类号</Label>
       </Property>
     </Subfield>
     <Subfield name="v">

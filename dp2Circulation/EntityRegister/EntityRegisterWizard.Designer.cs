@@ -80,6 +80,7 @@
             this.toolStripButton_save = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_delete = new System.Windows.Forms.ToolStripButton();
+            this.toolStripLabel_biblioSource = new System.Windows.Forms.ToolStripLabel();
             this.easyMarcControl1 = new DigitalPlatform.EasyMarc.EasyMarcControl();
             this.tabControl_main.SuspendLayout();
             this.tabPage_settings.SuspendLayout();
@@ -422,9 +423,10 @@
             this.imageList_progress.TransparentColor = System.Drawing.Color.White;
             this.imageList_progress.Images.SetKeyName(0, "process_32.png");
             this.imageList_progress.Images.SetKeyName(1, "action_success_24.png");
-            this.imageList_progress.Images.SetKeyName(2, "dialog_error_24.png");
-            this.imageList_progress.Images.SetKeyName(3, "progress_information.bmp");
-            this.imageList_progress.Images.SetKeyName(4, "circle_24.png");
+            this.imageList_progress.Images.SetKeyName(2, "StatusAnnotations_Blocked_32xLG_color.png");
+            this.imageList_progress.Images.SetKeyName(3, "StatusAnnotations_Information_32xLG_color.png");
+            this.imageList_progress.Images.SetKeyName(4, "Cloud_32xLG.png");
+            this.imageList_progress.Images.SetKeyName(5, "amazon.ico");
             // 
             // toolStrip1
             // 
@@ -439,7 +441,8 @@
             this.toolStripButton_new,
             this.toolStripButton_save,
             this.toolStripSeparator2,
-            this.toolStripButton_delete});
+            this.toolStripButton_delete,
+            this.toolStripLabel_biblioSource});
             this.toolStrip1.Location = new System.Drawing.Point(0, 282);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(473, 25);
@@ -453,6 +456,7 @@
             this.toolStripButton_start.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_start.Image")));
             this.toolStripButton_start.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_start.Name = "toolStripButton_start";
+            this.toolStripButton_start.Overflow = System.Windows.Forms.ToolStripItemOverflow.Never;
             this.toolStripButton_start.Size = new System.Drawing.Size(60, 22);
             this.toolStripButton_start.Text = "重新开始";
             this.toolStripButton_start.Click += new System.EventHandler(this.toolStripButton_start_Click);
@@ -492,6 +496,7 @@
             this.toolStripButton_new.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_new.Image")));
             this.toolStripButton_new.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_new.Name = "toolStripButton_new";
+            this.toolStripButton_new.Overflow = System.Windows.Forms.ToolStripItemOverflow.Never;
             this.toolStripButton_new.Size = new System.Drawing.Size(52, 22);
             this.toolStripButton_new.Text = "新建";
             this.toolStripButton_new.ToolTipText = "新建书目记录";
@@ -503,6 +508,7 @@
             this.toolStripButton_save.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_save.Image")));
             this.toolStripButton_save.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_save.Name = "toolStripButton_save";
+            this.toolStripButton_save.Overflow = System.Windows.Forms.ToolStripItemOverflow.Never;
             this.toolStripButton_save.Size = new System.Drawing.Size(52, 22);
             this.toolStripButton_save.Text = "保存";
             this.toolStripButton_save.Click += new System.EventHandler(this.toolStripButton_save_Click);
@@ -518,9 +524,16 @@
             this.toolStripButton_delete.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_delete.Image")));
             this.toolStripButton_delete.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_delete.Name = "toolStripButton_delete";
+            this.toolStripButton_delete.Overflow = System.Windows.Forms.ToolStripItemOverflow.Never;
             this.toolStripButton_delete.Size = new System.Drawing.Size(52, 22);
             this.toolStripButton_delete.Text = "删除";
             this.toolStripButton_delete.Click += new System.EventHandler(this.toolStripButton_delete_Click);
+            // 
+            // toolStripLabel_biblioSource
+            // 
+            this.toolStripLabel_biblioSource.Name = "toolStripLabel_biblioSource";
+            this.toolStripLabel_biblioSource.Size = new System.Drawing.Size(0, 22);
+            this.toolStripLabel_biblioSource.ToolTipText = "书目记录来源";
             // 
             // easyMarcControl1
             // 
@@ -620,5 +633,6 @@
         private System.Windows.Forms.ComboBox comboBox_settings_colorStyle;
         private System.Windows.Forms.Button button_settings_reCreateServersXml;
         private System.Windows.Forms.Button button_settings_bilbioDefault;
+        private System.Windows.Forms.ToolStripLabel toolStripLabel_biblioSource;
     }
 }
