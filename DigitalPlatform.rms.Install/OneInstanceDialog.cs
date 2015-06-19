@@ -631,6 +631,7 @@ namespace DigitalPlatform.rms
         }
 
         // 准备可选的缺省绑定内容
+        // 2015/6/19 为了安全考虑，缺省情况下只绑定 net.pipe 协议。其他协议需要安装者主动选择才行
         int PrepareDefaultBindings(string strTail,
             out string [] default_urls,
             out string strError)
@@ -642,13 +643,14 @@ namespace DigitalPlatform.rms
             if (this.VerifyBindings == null)
             {
                 default_urls = new string[] {
-                    "net.tcp://localhost:8002/dp2kernel/" + strTail,
+                    // "net.tcp://localhost:8002/dp2kernel/" + strTail,
                     "net.pipe://localhost/dp2kernel/" + strTail,
-                    "http://localhost:8001/dp2kernel/" + strTail
+                    // "http://localhost:8001/dp2kernel/" + strTail
                 };
                 return 0;
             }
 
+#if NO
             string strTcpUrl = "";
             for (int nPort = 8002; ; nPort++)
             {
@@ -661,6 +663,7 @@ namespace DigitalPlatform.rms
                     break;
                 }
             }
+#endif
 
             string strPipeUrl = "";
             for (int nNumber = 0; ; nNumber++)
@@ -678,6 +681,7 @@ namespace DigitalPlatform.rms
                 }
             }
 
+#if NO
             string strHttpUrl = "";
             for (int nPort = 8001; ; nPort++)
             {
@@ -690,11 +694,12 @@ namespace DigitalPlatform.rms
                     break;
                 }
             }
+#endif
 
             default_urls = new string[] {
-                    strTcpUrl,
+                    // strTcpUrl,
                     strPipeUrl,
-                    strHttpUrl
+                    // strHttpUrl
                 };
             return 0;
         }
@@ -722,8 +727,8 @@ namespace DigitalPlatform.rms
 
             string [] default_urls = null;
             nRet = PrepareDefaultBindings(strTail,
-            out default_urls,
-            out strError);
+                out default_urls,
+                out strError);
             if (nRet == -1)
             {
                 strError = "准备缺省班定值时发生错误: " + strError;

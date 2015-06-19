@@ -5,13 +5,15 @@ using System.Text;
 using System.Collections;
 using System.Threading;
 
-namespace DigitalPlatform.LibraryServer
+namespace DigitalPlatform
 {
     /// <summary>
     /// 用户名信息表。用于防范试探密码的攻击
     /// </summary>
     public class UserNameTable
     {
+        public string ServerName = "dp2library";
+
         public int FailCount = 10; // 尝试多少次登录失败后，会被禁止
 
         public int ShortPauseTicks = 2000;  // 短暂暂停的毫秒数
@@ -21,6 +23,11 @@ namespace DigitalPlatform.LibraryServer
         Hashtable _table = new Hashtable();
 
         public TimeSpan PauseTime = new TimeSpan(0, 10, 0);  // 一次禁止的时间长度 十分钟
+
+        public UserNameTable(string strServerName)
+        {
+            this.ServerName = strServerName;
+        }
 
 #if NO
         public UserNameInfo GetInfo(string strUserName)
@@ -67,7 +74,7 @@ namespace DigitalPlatform.LibraryServer
             {
                 if (DateTime.Now < info.RetryTime)
                 {
-                    strError = "前端 ["+strClientIP+"] 因登录失败的次数太多，已被 dp2library 列入监控名单，禁止使用 Login() API";
+                    strError = "前端 [" + strClientIP + "] 因登录失败的次数太多，已被 " + this.ServerName + " 列入监控名单，禁止使用 Login() API";
                     Thread.Sleep(ShortPauseTicks);
                     return -1;
                 }
@@ -75,7 +82,7 @@ namespace DigitalPlatform.LibraryServer
 
             if (DateTime.Now < info.RetryTime)
             {
-                strError = "登录操作被暂时禁止。请于 "+info.RetryTime.ToShortTimeString()+" 以后重试登录";
+                strError = "登录操作被暂时禁止。请于 " + info.RetryTime.ToShortTimeString() + " 以后重试登录";
                 Thread.Sleep(ShortPauseTicks);
                 return -1;
             }

@@ -51,6 +51,7 @@
             this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_test = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openDp2OPACHomePage = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_getSqllocaldbexePath = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_help = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openUserFolder = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openDataFolder = new System.Windows.Forms.ToolStripMenuItem();
@@ -70,7 +71,6 @@
             this.toolStripStatusLabel_main = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripProgressBar_main = new System.Windows.Forms.ToolStripProgressBar();
             this.webBrowser1 = new System.Windows.Forms.WebBrowser();
-            this.MenuItem_getSqllocaldbexePath = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
@@ -246,6 +246,14 @@
             this.MenuItem_openDp2OPACHomePage.Text = "打开浏览器访问 dp2OPAC";
             this.MenuItem_openDp2OPACHomePage.Click += new System.EventHandler(this.MenuItem_openDp2OPACHomePage_Click);
             // 
+            // MenuItem_getSqllocaldbexePath
+            // 
+            this.MenuItem_getSqllocaldbexePath.Name = "MenuItem_getSqllocaldbexePath";
+            this.MenuItem_getSqllocaldbexePath.Size = new System.Drawing.Size(320, 22);
+            this.MenuItem_getSqllocaldbexePath.Text = "get sqllocaldb.exe path";
+            this.MenuItem_getSqllocaldbexePath.Visible = false;
+            this.MenuItem_getSqllocaldbexePath.Click += new System.EventHandler(this.MenuItem_getSqllocaldbexePath_Click);
+            // 
             // MenuItem_help
             // 
             this.MenuItem_help.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -408,13 +416,6 @@
             this.webBrowser1.Name = "webBrowser1";
             this.webBrowser1.Size = new System.Drawing.Size(372, 229);
             this.webBrowser1.TabIndex = 7;
-            // 
-            // MenuItem_getSqllocaldbexePath
-            // 
-            this.MenuItem_getSqllocaldbexePath.Name = "MenuItem_getSqllocaldbexePath";
-            this.MenuItem_getSqllocaldbexePath.Size = new System.Drawing.Size(320, 22);
-            this.MenuItem_getSqllocaldbexePath.Text = "get sqllocaldb.exe path";
-            this.MenuItem_getSqllocaldbexePath.Click += new System.EventHandler(this.MenuItem_getSqllocaldbexePath_Click);
             // 
             // MainForm
             // 

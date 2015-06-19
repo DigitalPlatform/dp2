@@ -245,6 +245,7 @@
     <Compile Include="ThreadBase.cs" />
     <Compile Include="TransparentToolStripRenderer.cs" />
     <Compile Include="TreeViewUtil.cs" />
+    <Compile Include="UserNameTable.cs" />
     <Compile Include="WebCamera.cs" />
     <Compile Include="WizardPages.cs">
       <SubType>Component</SubType>

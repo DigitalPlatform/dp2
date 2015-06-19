@@ -16,6 +16,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
 using DigitalPlatform.ResultSet;
+using System.ServiceModel.Channels;
 
 namespace dp2Kernel
 {
@@ -156,15 +157,46 @@ namespace dp2Kernel
             return 0;
         }
 
+        public static void GetClientAddress(out string strIP, out string strVia)
+        {
+            strIP = "";
+            MessageProperties prop = OperationContext.Current.IncomingMessageProperties;
+
+            strVia = prop.Via.ToString();
+
+            if (prop.Via.Scheme == "net.pipe")
+            {
+                // 没有 IP
+                strIP = "localhost";
+                return;
+            }
+            try
+            {
+                RemoteEndpointMessageProperty endpoint = prop[RemoteEndpointMessageProperty.Name] as RemoteEndpointMessageProperty;
+                strIP = endpoint.Address;
+            }
+            catch
+            {
+            }
+            strVia = prop.Via.ToString();
+        }
+
         int InitialSession(out string strError)
         {
             strError = "";
+
+            string strIP = "";
+            string strVia = "";
+            GetClientAddress(out strIP, out strVia);
 
             sessioninfo = new SessionInfo();
             // return:
             //      -1  出错
             //      0   成功
             int nRet = sessioninfo.Initial(app,
+                 OperationContext.Current.SessionId,
+                strIP,
+                strVia,
                 out strError);
             if (nRet == -1)
                 return -1;
@@ -322,6 +354,13 @@ namespace dp2Kernel
                 int nRet = 0;
                 string strError0 = "";
 
+                nRet = app.UserNameTable.BeforeLogin(strUserName,
+    sessioninfo.ClientIP,
+    out strError);
+                if (nRet == -1)
+                {
+                    goto ERROR1;
+                }
 
                 // 如果先前已经登录过，这里先Logout
                 if (String.IsNullOrEmpty(this.sessioninfo.UserName) == false)
@@ -336,7 +375,6 @@ namespace dp2Kernel
                         strError0 = "登录前的登出操作错误 : " + strError;
 
                     this.sessioninfo.UserName = "";
-
                 }
 
                 Debug.Assert(app.Users != null, "");
@@ -351,6 +389,16 @@ namespace dp2Kernel
                     strPassword,
                     out user,
                     out strError);
+
+                if (nRet == 0 || nRet == 1)
+                {
+                    string strLogText = app.UserNameTable.AfterLogin(strUserName,
+                        sessioninfo.ClientIP,
+                        nRet);
+                    if (string.IsNullOrEmpty(strLogText) == false)
+                        app.WriteErrorLog("!!! " + strLogText);
+                }
+
                 if (nRet == -1)
                 {
                     result.Value = -1;
@@ -374,6 +422,11 @@ namespace dp2Kernel
 
                 this.sessioninfo.UserName = user.Name;
                 result.Value = 1;
+                return result;
+            ERROR1:
+                result.Value = -1;
+                result.ErrorString = strError;
+                result.ErrorCode = ErrorCodeValue.CommonError;
                 return result;
             }
             catch (Exception ex)
@@ -832,15 +885,13 @@ namespace dp2Kernel
 
             try
             {
-
-                if (this.sessioninfo.UserName == "")
+                if (string.IsNullOrEmpty(this.sessioninfo.UserName) == true)
                 {
                     result.Value = -1;
                     result.ErrorCode = ErrorCodeValue.NotLogin;
                     result.ErrorString = "尚未登录";
                     return result;
                 }
-
 
                 if (PrepareUser(ref result) == -1)
                     return result;
@@ -891,8 +942,7 @@ namespace dp2Kernel
 
             try
             {
-
-                if (this.sessioninfo.UserName == "")
+                if (string.IsNullOrEmpty(this.sessioninfo.UserName) == true)
                 {
                     result.Value = -1;
                     result.ErrorCode = ErrorCodeValue.NotLogin;
@@ -905,7 +955,6 @@ namespace dp2Kernel
 
                 if (PrepareUser(ref result) == -1)
                     return result;
-
 
                 if (user.Name == strUserName)  // 自己修改自己的情况
                 {
@@ -942,7 +991,6 @@ namespace dp2Kernel
                         result.ErrorString = strError;
                         return result;
                     }
-
                 }
 
                 // result.Value = 0

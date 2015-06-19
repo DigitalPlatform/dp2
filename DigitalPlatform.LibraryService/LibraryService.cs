@@ -490,7 +490,6 @@ namespace dp2Library
                     goto ERROR1;
                 }
 
-
                 Hashtable parameters = StringUtil.ParseParameters(strParameters, ',', '=');
 
                 // 评估模式
@@ -641,18 +640,17 @@ namespace dp2Library
                         // 第二阶段：
                     }
 
-                        // 工作人员登录(或者被代理者登录)
-                        nRet = sessioninfo.Login(strUserName,
-                             strPassword,
-                             strLocation,
-                             StringUtil.HasHead(strLocation, "#opac") == true || strLocation == "@web" ? true : false,  // todo: 判断 #opac 或者 #opac_xxxx
-                             sessioninfo.ClientIP,
-                             strGetToken,
-                             out strRights,
-                             out strLibraryCode,
-                             out strError);
-                        strOutputUserName = strUserName;
-
+                    // 工作人员登录(或者被代理者登录)
+                    nRet = sessioninfo.Login(strUserName,
+                         strPassword,
+                         strLocation,
+                         StringUtil.HasHead(strLocation, "#opac") == true || strLocation == "@web" ? true : false,  // todo: 判断 #opac 或者 #opac_xxxx
+                         sessioninfo.ClientIP,
+                         strGetToken,
+                         out strRights,
+                         out strLibraryCode,
+                         out strError);
+                    strOutputUserName = strUserName;
                 }
                 else
                 {
@@ -717,7 +715,6 @@ namespace dp2Library
                                 }
                                 goto ERROR1;
                             }
-
 
                             // 检查工作人员帐户是否具备 simulatereader 权限
                             if (StringUtil.IsInList("simulatereader", strRights) == false)

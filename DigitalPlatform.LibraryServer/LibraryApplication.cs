@@ -123,7 +123,7 @@ namespace DigitalPlatform.LibraryServer
         public Hashtable ParamTable = new Hashtable();
 
         // 防止试探密码攻击的设施
-        public UserNameTable UserNameTable = new UserNameTable();
+        public UserNameTable UserNameTable = new UserNameTable("dp2library");
 
         // Session集合
         public SessionTable SessionTable = new SessionTable();

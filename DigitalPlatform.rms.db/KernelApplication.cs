@@ -40,6 +40,8 @@ namespace DigitalPlatform.rms
         // 用户集合
         public UserCollection Users = null;
 
+        // 防止试探密码攻击的设施
+        public UserNameTable UserNameTable = new UserNameTable("dp2kernel");
 
 
         #region 工作线程

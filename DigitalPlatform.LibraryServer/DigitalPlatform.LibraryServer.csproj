@@ -150,7 +150,6 @@
     <Compile Include="Threads\RebuildKeys.cs" />
     <Compile Include="TraceDTLP.cs" />
     <Compile Include="UnhandledExceptionModule.cs" />
-    <Compile Include="UserNameTable.cs" />
     <Compile Include="VirtualDatabase.cs" />
     <Compile Include="ZhengyuanReplication.cs" />
   </ItemGroup>

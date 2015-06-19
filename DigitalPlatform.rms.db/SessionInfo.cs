@@ -76,6 +76,8 @@ namespace DigitalPlatform.rms
         // 用户名
         public string UserName = "";
 
+        public string ClientIP = "";  // 前端 IP 地址
+
         private KernelApplication app = null;
 
         // 初始化用户对象
@@ -85,11 +87,15 @@ namespace DigitalPlatform.rms
         //      -1  出错
         //      0   成功
         public int Initial(KernelApplication app,
+            string strSessionID,
+            string strIP,
+            string strVia,
             out string strError)
         {
             strError = "";
 
             this.app = app;
+            this.ClientIP = strIP;
 
             this.UserName = "";
 
