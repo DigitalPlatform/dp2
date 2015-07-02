@@ -469,11 +469,65 @@ namespace dp2LibraryConsole
                 return false;
             }
 
+            if (parameters[0] == "download")
+            {
+                if (parameters.Count < 2)
+                {
+                    Console.WriteLine("download 命令用法: download 源文件或目录 [目标文件或目录]");
+                    // 如果目标目录省略，则表示和源目录同名
+                    return false;
+                }
+
+                string strSource = parameters[1];   // strSource 可能为 "*.*" 这样的模式
+                string strTarget = "";  // strTarget 可能空缺
+
+                if (parameters.Count > 2)
+                    strTarget = parameters[2];
+
+                nRet = DoDownload(strSource,
+strTarget,
+out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                return false;
+            }
+
             Console.WriteLine("unknown command '" + line + "'");
             return false;
         ERROR1:
             Console.WriteLine(strError);
             return false;
+        }
+
+        // 进行文件或目录下载
+        // return:
+        //      -1  出错
+        //      0   正常
+        int DoDownload(string strSource,
+            string strTargetParam,
+            out string strError)
+        {
+            strError = "";
+
+            string strLocalDir = "";
+            FileSystemLoader.ChangeDirectory(this._currentLocalDir, strTargetParam, out strLocalDir);
+            strLocalDir = (new DirectoryInfo(strLocalDir)).FullName;
+
+            List<FileItemInfo> filenames = null;
+
+            int nRet = RemoteList(
+                GetRemoteCurrentDir(),  // "!upload/" + this._currentDir,
+                strSource,
+                out filenames,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            nRet = DownloadFiles("", filenames, strLocalDir, out strError);
+            if (nRet == -1)
+                return -1;
+
+            return 0;
         }
 
         string GetRemoteCurrentDir()
@@ -487,6 +541,12 @@ namespace dp2LibraryConsole
             return "!upload" + this._currentDir.Replace("\\", "/"); // 调用文件相关 API 的时候，逻辑路径要求斜杠字符为 '/'
         }
 
+#if NO
+        static string GetRemoteDir(string strRelative)
+        {
+            return "upload" + strRelative.Replace("\\", "/"); // 调用文件相关 API 的时候，逻辑路径要求斜杠字符为 '/'
+        }
+#endif
 
         // 获得 cd 命令第二个以及以后的参数
         // 能够把 cd program files 解析出 'program files'
@@ -1367,6 +1427,109 @@ value);
             return 0;
         ERROR1:
             return -1;
+        }
+
+        // 从 dp2library 服务器下载一个文件
+        // return:
+        //		-1	出错
+        //		0   下载文件成功
+        static int DownloadFile(
+            Stop stop,
+            LibraryChannel channel,
+            string strServerFilePath,
+            string strClientFilePath,
+            out string strError)
+        {
+            strError = "";
+
+            string strMetaData = "";
+            byte[] baOutputTimeStamp = null;
+            string strOutputPath = "";
+            // parameters:
+            //		strOutputFileName	输出文件名。可以为null。如果调用前文件已经存在, 会被覆盖。
+            // return:
+            //		-1	出错。具体出错原因在this.ErrorCode中。this.ErrorInfo中有出错信息。
+            //		0	成功
+            long lRet = channel.GetRes(
+                stop,
+                strServerFilePath,
+                strClientFilePath,
+                out strMetaData,
+                out baOutputTimeStamp,
+                out strOutputPath,
+                out strError);
+            if (lRet == -1)
+                return -1;
+
+            return 0;
+        }
+
+        int DownloadFiles(
+            string strRemoteBase,
+            List<FileItemInfo> filenames,
+            string strTargetDir,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            foreach (FileItemInfo info in filenames)
+            {
+                string strDelta = "";
+                if (string.IsNullOrEmpty(strRemoteBase) == true)
+                {
+                    strDelta = Path.GetFileName(info.Name);
+                    strRemoteBase = Path.GetDirectoryName(info.Name);
+                }
+                else
+                    strDelta = info.Name.Substring(strRemoteBase.Length + 1);
+
+                if (info.Size != -1)
+                {
+                    string strLocalPath = Path.Combine(strTargetDir, strDelta);
+                    PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strLocalPath));
+
+                    // Console.WriteLine(info.Name);
+                    Console.WriteLine(strLocalPath);
+                    // TODO: info.Name 中的斜杠应该为 /，以减少转换的麻烦
+
+                    // 从 dp2library 服务器下载一个文件
+                    // return:
+                    //		-1	出错
+                    //		0   下载文件成功
+                    nRet = DownloadFile(
+            null,
+            this.Channel,
+            "!upload" + info.Name.Replace("\\", "/"),
+            strLocalPath,
+            out strError);
+                    if (nRet == -1)
+                        return -1;
+                }
+                else
+                {
+                    List<FileItemInfo> filenames1 = null;
+
+                    nRet = RemoteList(
+    "!upload", // GetRemoteCurrentDir(),  // "!upload/" + this._currentDir,
+    info.Name.Substring(1).Replace("\\", "/"),
+    out filenames1,
+    out strError);
+                    if (nRet == -1)
+                        return -1;
+
+
+                    nRet = DownloadFiles(
+                        Path.Combine(strRemoteBase, strDelta),
+            filenames1,
+            Path.Combine(strTargetDir, strDelta),
+            out strError);
+                    if (nRet == -1)
+                        return -1;
+                }
+            }
+
+            return 0;
         }
 
 #if NO

@@ -8621,7 +8621,6 @@ namespace dp2Library
 
                     string strCurrentDirectory = Path.Combine(app.DataDir, strCategory.Substring(1));
 
-
                     if (strAction == "delete")
                     {
                         // 删除文件或者目录
@@ -11658,8 +11657,6 @@ namespace dp2Library
                     }
 #endif
 
-
-
                     // 下载本地文件
                     // TODO: 限制 nMaxLength 最大值
                     // return:
@@ -11692,7 +11689,6 @@ namespace dp2Library
                     strOutputResPath = strResPath;
                     return result;
                 }
-
 
                 // 权限判断
 
