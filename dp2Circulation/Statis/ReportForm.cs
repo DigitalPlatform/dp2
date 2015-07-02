@@ -54,7 +54,7 @@ namespace dp2Circulation
                 MainForm.SetControlFont(this, this.MainForm.DefaultFont);
             }
 
-            this.UiState = this.MainForm.AppInfo.GetString("report_form", "ui_state", "");
+            this.UiState = this.MainForm.AppInfo.GetString(GetReportSection(), "ui_state", "");
 
 #if NO
             string strError = "";
@@ -81,7 +81,7 @@ namespace dp2Circulation
         void Check()
         {
             string strError = "";
-            int nRet = _cfg.LoadCfgFile(this.MainForm.UserDir, "report_def.xml", out strError);
+            int nRet = _cfg.LoadCfgFile(GetBaseDirectory(), "report_def.xml", out strError);
             if (nRet == -1)
                 MessageBox.Show(this, strError);
 
@@ -138,7 +138,7 @@ namespace dp2Circulation
             }
 
             if (this.MainForm != null && this.MainForm.AppInfo != null)
-                this.MainForm.AppInfo.SetString("report_form", "ui_state", this.UiState);
+                this.MainForm.AppInfo.SetString(GetReportSection(), "ui_state", this.UiState);
 
             // 删除所有输出文件
             if (this.OutputFileNames != null)
@@ -1005,7 +1005,7 @@ MessageBoxDefaultButton.Button1);
             strError = "";
             styles = new List<BiblioDbFromInfo>();
 
-            string strBreakPointFileName = Path.Combine(this.MainForm.UserDir, "report_breakpoint.xml");
+            string strBreakPointFileName = Path.Combine(GetBaseDirectory(), "report_breakpoint.xml");
             XmlDocument task_dom = new XmlDocument();
             try
             {
@@ -1034,7 +1034,7 @@ MessageBoxDefaultButton.Button1);
             strError = "";
             styles = new List<string>();
 
-            string strBreakPointFileName = Path.Combine(this.MainForm.UserDir, "report_breakpoint.xml");
+            string strBreakPointFileName = Path.Combine(GetBaseDirectory(), "report_breakpoint.xml");
             XmlDocument task_dom = new XmlDocument();
             try
             {
@@ -5215,11 +5215,10 @@ from operlogamerce
             dlg.ModifyMode = true;
 
             this.MainForm.AppInfo.LinkFormState(dlg, "LibraryReportConfigForm_state");
-            dlg.UiState = this.MainForm.AppInfo.GetString("report_form", "LibraryReportConfigForm_ui_state", "");
+            dlg.UiState = this.MainForm.AppInfo.GetString(GetReportSection(), "LibraryReportConfigForm_ui_state", "");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.SetString("report_form", "LibraryReportConfigForm_ui_state", dlg.UiState);
+            this.MainForm.AppInfo.SetString(GetReportSection(), "LibraryReportConfigForm_ui_state", dlg.UiState);
             this.MainForm.AppInfo.UnlinkFormState(dlg);
-
 
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;
@@ -5254,9 +5253,9 @@ from operlogamerce
 
             REDO:
             this.MainForm.AppInfo.LinkFormState(dlg, "LibraryReportConfigForm_state");
-            dlg.UiState = this.MainForm.AppInfo.GetString("report_form", "LibraryReportConfigForm_ui_state", "");
+            dlg.UiState = this.MainForm.AppInfo.GetString(GetReportSection(), "LibraryReportConfigForm_ui_state", "");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.SetString("report_form", "LibraryReportConfigForm_ui_state", dlg.UiState);
+            this.MainForm.AppInfo.SetString(GetReportSection(), "LibraryReportConfigForm_ui_state", dlg.UiState);
             this.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
@@ -5659,7 +5658,7 @@ MessageBoxDefaultButton.Button2);
                             "first_operlog_date",
                             strFirstDate);
 
-                        this.MainForm.AppInfo.SetString("reportform",
+                        this.MainForm.AppInfo.SetString(GetReportSection(),
                             "daily_report_end_date",
                             strFirstDate);
 
@@ -6186,7 +6185,7 @@ out strError);
         // 清除断点文件
         void ClearBreakPoint()
         {
-            string strBreakPointFileName = Path.Combine(this.MainForm.UserDir, "report_breakpoint.xml");
+            string strBreakPointFileName = Path.Combine(GetBaseDirectory(), "report_breakpoint.xml");
 
             File.Delete(strBreakPointFileName);
 
@@ -6201,7 +6200,7 @@ out strError);
             string strError = "";
             int nRet = 0;
 
-            string strBreakPointFileName = Path.Combine(this.MainForm.UserDir, "report_breakpoint.xml");
+            string strBreakPointFileName = Path.Combine(GetBaseDirectory(), "report_breakpoint.xml");
 
             // File.Delete(strBreakPointFileName);
 
@@ -6318,7 +6317,7 @@ out strError);
         {
             strError = "";
 
-            string strFileName = Path.Combine(this.MainForm.UserDir, "report_breakpoint.xml");
+            string strFileName = Path.Combine(GetBaseDirectory(), "report_breakpoint.xml");
             XmlDocument dom = new XmlDocument();
             try
             {
@@ -6354,7 +6353,7 @@ out strError);
             strError = "";
             version = 0;
 
-            string strFileName = Path.Combine(this.MainForm.UserDir, "report_breakpoint.xml");
+            string strFileName = Path.Combine(GetBaseDirectory(), "report_breakpoint.xml");
             XmlDocument dom = new XmlDocument();
             try
             {
@@ -6396,7 +6395,7 @@ out strError);
             strState = "";
             lIndex = 0;
 
-            string strFileName = Path.Combine(this.MainForm.UserDir, "report_breakpoint.xml");
+            string strFileName = Path.Combine(GetBaseDirectory(), "report_breakpoint.xml");
             XmlDocument dom = new XmlDocument();
             try
             {
@@ -6428,14 +6427,24 @@ out strError);
             return 0;
         }
 
+        // 获得和当前服务器、用户相关的报表信息本地存储目录
+        string GetBaseDirectory()
+        {
+            // 2015/6/20 将数据库文件存储在和每个 dp2library 服务器和用户名相关的目录中
+            string strDirectory = Path.Combine(this.MainForm.ServerCfgDir, ReportForm.GetValidPathString(this.MainForm.GetCurrentUserName()));
+            PathUtil.CreateDirIfNeed(strDirectory);
+            return strDirectory;
+        }
+
         string GetOperlogConnectionString()
         {
-            return SQLiteUtil.GetConnectionString(this.MainForm.UserDir, "operlog.bin");
+            // return SQLiteUtil.GetConnectionString(this.MainForm.UserDir, "operlog.bin");
+
+            return SQLiteUtil.GetConnectionString(GetBaseDirectory(), "operlog.bin");
         }
 
         // DoReplication() 过程中使用的 class 属性列表
         List<BiblioDbFromInfo> _classFromStyles = new List<BiblioDbFromInfo>();
-
 
         // 同步
         // 注：中途遇到异常(例如 Loader 抛出异常)，可能会丢失 INSERT_BATCH 条以内的日志记录写入 operlog 表
@@ -8726,7 +8735,7 @@ strSourceRecPath);
             }
 #endif
 
-            string strTaskFileName = Path.Combine(this.MainForm.UserDir, "dailyreport_task.xml");
+            string strTaskFileName = Path.Combine(GetBaseDirectory(), "dailyreport_task.xml");
             XmlDocument task_dom = new XmlDocument();
 
             if (File.Exists(strTaskFileName) == true)
@@ -8777,7 +8786,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             // 这个日期是上次处理完成的那一天的后一天，也就是说下次处理，从这天开始即可
-            string strLastDate = this.MainForm.AppInfo.GetString("reportform",
+            string strLastDate = this.MainForm.AppInfo.GetString(GetReportSection(),
 "daily_report_end_date",
 "20130101");
 
@@ -8795,7 +8804,7 @@ MessageBoxDefaultButton.Button1);
             }
 #endif
 
-            string strReportNameList = this.MainForm.AppInfo.GetString("reportform",
+            string strReportNameList = this.MainForm.AppInfo.GetString(GetReportSection(),
     "createwhat_reportnames",
     "");
 
@@ -8805,12 +8814,12 @@ MessageBoxDefaultButton.Button1);
             // 询问那些报表需要创建
             CreateWhatsReportDialog dlg = new CreateWhatsReportDialog();
             MainForm.SetControlFont(dlg, this.Font, false);
-            dlg.DateRange = this.MainForm.AppInfo.GetString("reportform",
+            dlg.DateRange = this.MainForm.AppInfo.GetString(GetReportSection(),
     "createwhat_daterange",
     "");
             if (string.IsNullOrEmpty(dlg.DateRange) == true)
                 dlg.DateRange = strLastDate + "-" + strEndDate; // 从上次最后处理时间，到今天
-            dlg.Freguency = this.MainForm.AppInfo.GetString("reportform",
+            dlg.Freguency = this.MainForm.AppInfo.GetString(GetReportSection(),
     "createwhat_frequency",
     "year,month,day");
             // dlg.ReportsNames = report_names;
@@ -8819,19 +8828,19 @@ MessageBoxDefaultButton.Button1);
             if (string.IsNullOrEmpty(strReportNameList) == false)
                 dlg.SelectedReportsNames = StringUtil.SplitList(strReportNameList);
             this.MainForm.AppInfo.LinkFormState(dlg, "CreateWhatsReportDialog_state");
-            dlg.UiState = this.MainForm.AppInfo.GetString("report_form", "CreateWhatsReportDialog_ui_state", "");
+            dlg.UiState = this.MainForm.AppInfo.GetString(GetReportSection(), "CreateWhatsReportDialog_ui_state", "");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.SetString("report_form", "CreateWhatsReportDialog_ui_state", dlg.UiState);
+            this.MainForm.AppInfo.SetString(GetReportSection(), "CreateWhatsReportDialog_ui_state", dlg.UiState);
             this.MainForm.AppInfo.UnlinkFormState(dlg);
 
 
-            this.MainForm.AppInfo.SetString("reportform",
+            this.MainForm.AppInfo.SetString(GetReportSection(),
 "createwhat_reportnames",
 StringUtil.MakePathList(dlg.SelectedReportsNames));
-            this.MainForm.AppInfo.SetString("reportform",
+            this.MainForm.AppInfo.SetString(GetReportSection(),
 "createwhat_frequency",
 dlg.Freguency);
-            this.MainForm.AppInfo.SetString("reportform",
+            this.MainForm.AppInfo.SetString(GetReportSection(),
 "createwhat_daterange",
 dlg.DateRange);
 
@@ -8977,24 +8986,6 @@ dlg.DateRange);
                             }
                         }
 
-#if NO
-                        // 特定分馆的报表输出目录
-                        // string strOutputDir = Path.Combine(this.MainForm.UserDir, "reports/" + (string.IsNullOrEmpty(strLibraryCode) == true ? "global" : strLibraryCode));
-                        string strOutputDir = GetReportOutputDir(strLibraryCode);
-                        string strIndexXmlFileName = Path.Combine(strOutputDir, "index.xml");
-                        string strIndexHtmlFileName = Path.Combine(strOutputDir, "index.html");
-
-                        if (stop != null)
-                            stop.SetMessage("正在创建 " + strIndexHtmlFileName);
-
-                        // 根据 index.xml 文件创建 index.html 文件
-                        nRet = CreateIndexHtmlFile(strIndexXmlFileName,
-                            strIndexHtmlFileName,
-                            out strError);
-                        if (nRet == -1)
-                            goto ERROR1;
-#endif
-
                     }
                 }
                 finally
@@ -9022,7 +9013,7 @@ dlg.DateRange);
 
             // 由于没有修改报表最后时间，所以“每日报表”按钮状态和文字没有变化 
 
-            strTaskFileName = Path.Combine(this.MainForm.UserDir, "dailyreport_task.xml");
+            strTaskFileName = Path.Combine(GetBaseDirectory(), "dailyreport_task.xml");
             task_dom.Save(strTaskFileName); // 预先保存一次
 
             DO_TASK:
@@ -9065,36 +9056,6 @@ dlg.DateRange);
             if (strEnabled == "false")
                 this.button_start_uploadReport.Enabled = false;
         }
-
-#if NO
-        // 设置“上传报表”按钮的状态和文字
-        void SetUploadButtonState()
-        {
-            string strReportDir = Path.Combine(this.MainForm.UserDir, "reports");
-            // string strZipFileName = Path.Combine(this.MainForm.UserDir, "reports.zip");
-
-            DirectoryInfo di = new DirectoryInfo(strReportDir);
-            if (di.Exists == false)
-            {
-                // 报表目录不存在
-                this.button_start_uploadReport.Text = "上传报表";
-                this.button_start_uploadReport.Enabled = false;
-                return;
-            }
-
-            Cursor oldCursor = this.Cursor;
-            this.Cursor = Cursors.WaitCursor;
-            bool bOldEnabled = this.tabControl1.Enabled;
-            this.tabControl1.Enabled = false;
-            List<string> filenames = GetFileNames(strReportDir, FileAttributes.Archive);
-            this.tabControl1.Enabled = bOldEnabled;
-            this.Cursor = oldCursor;
-
-            this.button_start_uploadReport.Text = "上传报表 (" + filenames.Count.ToString() + ")";
-            this.button_start_uploadReport.Enabled = true;
-        }
-
-#endif
 
         // 设置 “每日报表” 按钮的状态和文字
         // 当每日同步结束后，或者修改了最后统计日期后，需要更新这个按钮的状态
@@ -9192,7 +9153,7 @@ dlg.DateRange);
 #endif
 
             bool bFirst = false;    // 是否为第一次做
-            string strTaskFileName = Path.Combine(this.MainForm.UserDir, "dailyreport_task.xml");
+            string strTaskFileName = Path.Combine(GetBaseDirectory(), "dailyreport_task.xml");
             XmlDocument task_dom = new XmlDocument();
 
             if (File.Exists(strTaskFileName) == true)
@@ -9228,7 +9189,7 @@ MessageBoxDefaultButton.Button1);
 #if NO
             // 获得上次处理的末尾日期
             // 这个日期是上次处理完成的那一天的后一天，也就是说下次处理，从这天开始即可
-            string strLastDay = this.MainForm.AppInfo.GetString("reportform",
+            string strLastDay = this.MainForm.AppInfo.GetString(GetReportSection(),
     "daily_report_end_date",
     "");
             if (string.IsNullOrEmpty(strLastDay) == true)
@@ -9257,7 +9218,7 @@ MessageBoxDefaultButton.Button1);
 
             // 看看是不是首次执行
             {
-                string strFileName = Path.Combine(this.MainForm.UserDir, "report_breakpoint.xml");
+                string strFileName = Path.Combine(GetBaseDirectory(), "report_breakpoint.xml");
                 XmlDocument dom = new XmlDocument();
                 try
                 {
@@ -9274,7 +9235,7 @@ MessageBoxDefaultButton.Button1);
                 }
 
                 string strFirstDate = DomUtil.GetAttr(dom.DocumentElement, "first_operlog_date");
-                string strLastDay = this.MainForm.AppInfo.GetString("reportform",
+                string strLastDay = this.MainForm.AppInfo.GetString(GetReportSection(),
                     "daily_report_end_date",
                     "");
                 if (strFirstDate == strLastDay)
@@ -9429,24 +9390,6 @@ MessageBoxDefaultButton.Button1);
                     {
                         // CloseIndexXmlDocument();
                     }
-
-#if NO
-                    // 特定分馆的报表输出目录
-                    // string strOutputDir = Path.Combine(this.MainForm.UserDir, "reports/" + (string.IsNullOrEmpty(strLibraryCode) == true ? "global" : strLibraryCode));
-                    string strOutputDir = GetReportOutputDir(strLibraryCode);
-                    string strIndexXmlFileName = Path.Combine(strOutputDir, "index.xml");
-                    string strIndexHtmlFileName = Path.Combine(strOutputDir, "index.html");
-
-                    if (stop != null)
-                        stop.SetMessage("正在创建 " + strIndexHtmlFileName);
-
-                    // 根据 index.xml 文件创建 index.html 文件
-                    nRet = CreateIndexHtmlFile(strIndexXmlFileName,
-                        strIndexHtmlFileName,
-                        out strError);
-                    if (nRet == -1)
-                        goto ERROR1;
-#endif
                 }
 
 #if NO
@@ -9480,7 +9423,7 @@ MessageBoxDefaultButton.Button1);
             if (string.IsNullOrEmpty(strRealEndDate) == false)
             {
                 // 这个日期是上次处理完成的那一天的后一天，也就是说下次处理，从这天开始即可
-                this.MainForm.AppInfo.SetString("reportform",
+                this.MainForm.AppInfo.SetString(GetReportSection(),
                     "daily_report_end_date",
                     GetNextDate(strRealEndDate));
                 SetDailyReportButtonState();
@@ -9491,7 +9434,7 @@ MessageBoxDefaultButton.Button1);
             if (bFoundReports == false)
                 MessageBox.Show(this, "当前没有任何报表配置可供创建报表。请先去“报表配置”属性页配置好各个分馆的报表");
 #endif
-            strTaskFileName = Path.Combine(this.MainForm.UserDir, "dailyreport_task.xml");
+            strTaskFileName = Path.Combine(GetBaseDirectory(), "dailyreport_task.xml");
             task_dom.Save(strTaskFileName); // 预先保存一次
 
             DO_TASK:
@@ -9709,7 +9652,7 @@ MessageBoxDefaultButton.Button1);
             if (string.IsNullOrEmpty(strRealEndDate) == false)
             {
                 // 这个日期是上次处理完成的那一天的后一天，也就是说下次处理，从这天开始即可
-                this.MainForm.AppInfo.SetString("reportform",
+                this.MainForm.AppInfo.SetString(GetReportSection(),
                     "daily_report_end_date",
                     GetNextDate(strRealEndDate));
                 SetDailyReportButtonState();
@@ -9749,6 +9692,13 @@ MessageBoxDefaultButton.Button1);
             return -1;
         }
 
+        // 获得和当前服务器、用户相关的报表窗配置 section 名字字符串
+        string GetReportSection()
+        {
+            string strServerUrl = ReportForm.GetValidPathString(this.MainForm.LibraryServerUrl.Replace("/", "_"));
+
+            return "r_" + strServerUrl + "_" + ReportForm.GetValidPathString(this.MainForm.GetCurrentUserName());
+        }
 
         // 获得即将执行的每日报表的时间范围
         // return:
@@ -9763,7 +9713,7 @@ MessageBoxDefaultButton.Button1);
 
             // 获得上次处理的末尾日期
             // 这个日期是上次处理完成的那一天的后一天，也就是说下次处理，从这天开始即可
-            string strLastDay = this.MainForm.AppInfo.GetString("reportform",
+            string strLastDay = this.MainForm.AppInfo.GetString(GetReportSection(),
     "daily_report_end_date",
     "");
             if (string.IsNullOrEmpty(strLastDay) == true)
@@ -10128,7 +10078,10 @@ MessageBoxDefaultButton.Button1);
         // 特定分馆的报表输出目录
         string GetReportOutputDir(string strLibraryCode)
         {
-            return Path.Combine(this.MainForm.UserDir, "reports\\" + GetValidPathString(GetDisplayLibraryCode(strLibraryCode)));
+            // return Path.Combine(this.MainForm.UserDir, "reports\\" + GetValidPathString(GetDisplayLibraryCode(strLibraryCode)));
+
+            // 2015/6/20 将创建好的报表文件存储在和每个 dp2library 服务器和用户名相关的目录中
+            return Path.Combine(GetBaseDirectory(), "reports\\" + GetValidPathString(GetDisplayLibraryCode(strLibraryCode)));
         }
 
         // parameters:
@@ -11677,7 +11630,7 @@ MessageBoxDefaultButton.Button1);
             string strError = "";
 
             // 这个日期是上次处理完成的那一天的后一天，也就是说下次处理，从这天开始即可
-            string strLastDate = this.MainForm.AppInfo.GetString("reportform",
+            string strLastDate = this.MainForm.AppInfo.GetString(GetReportSection(),
 "daily_report_end_date",
 "20130101");
 
@@ -11700,7 +11653,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             // 这个日期是上次处理完成的那一天的后一天，也就是说下次处理，从这天开始即可
-            this.MainForm.AppInfo.SetString("reportform",
+            this.MainForm.AppInfo.SetString(GetReportSection(),
     "daily_report_end_date",
     strLastDate);
             SetDailyReportButtonState();
@@ -11753,8 +11706,8 @@ MessageBoxDefaultButton.Button1);
             }
 #endif
 
-            string strReportDir = Path.Combine(this.MainForm.UserDir, "reports");
-            string strZipFileName = Path.Combine(this.MainForm.UserDir, "reports.zip");
+            string strReportDir = Path.Combine(GetBaseDirectory(), "reports");
+            string strZipFileName = Path.Combine(GetBaseDirectory(), "reports.zip");
 
             string strServerFileName = "!upload/reports/reports.zip";
 
@@ -11942,9 +11895,9 @@ MessageBoxDefaultButton.Button1);
             MainForm.SetControlFont(dlg, this.Font, false);
             dlg.MainForm = this.MainForm;
             this.MainForm.AppInfo.LinkFormState(dlg, "FtpUploadDialog_state");
-            dlg.UiState = this.MainForm.AppInfo.GetString("report_form", "FtpUploadDialog_ui_state", "");
+            dlg.UiState = this.MainForm.AppInfo.GetString(GetReportSection(), "FtpUploadDialog_ui_state", "");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.SetString("report_form", "FtpUploadDialog_ui_state", dlg.UiState);
+            this.MainForm.AppInfo.SetString(GetReportSection(), "FtpUploadDialog_ui_state", dlg.UiState);
             this.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
@@ -11954,7 +11907,7 @@ MessageBoxDefaultButton.Button1);
 
             Application.DoEvents();
 
-            string strReportDir = Path.Combine(this.MainForm.UserDir, "reports");
+            string strReportDir = Path.Combine(GetBaseDirectory(), "reports");
             List<string> filenames = null;
 
             bool bDelete = this.DeleteReportFileAfterUpload;
@@ -12404,9 +12357,9 @@ MessageBoxDefaultButton.Button1);
             MainForm.SetControlFont(dlg, this.Font, false);
             dlg.MainForm = this.MainForm;
             this.MainForm.AppInfo.LinkFormState(dlg, "ConvertReportFormatDialog_state");
-            dlg.UiState = this.MainForm.AppInfo.GetString("report_form", "ConvertReportFormatDialog_ui_state", "");
+            dlg.UiState = this.MainForm.AppInfo.GetString(GetReportSection(), "ConvertReportFormatDialog_ui_state", "");
             dlg.ShowDialog(this);
-            this.MainForm.AppInfo.SetString("report_form", "ConvertReportFormatDialog_ui_state", dlg.UiState);
+            this.MainForm.AppInfo.SetString(GetReportSection(), "ConvertReportFormatDialog_ui_state", dlg.UiState);
             this.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
@@ -12513,7 +12466,7 @@ MessageBoxDefaultButton.Button1);
             {
                 this._counting = new FileCounting();
                 this._counting.ReportForm = this;
-                this._counting.Directory = Path.Combine(this.MainForm.UserDir, "reports");
+                this._counting.Directory = Path.Combine(GetBaseDirectory(), "reports");
             }
             this._counting.BeginThread();
         }
@@ -12527,7 +12480,7 @@ MessageBoxDefaultButton.Button1);
         private void tabPage_option_Enter(object sender, EventArgs e)
         {
             // Debug.WriteLine("Enter page");
-            this.checkBox_option_deleteReportFileAfterUpload.Checked = this.MainForm.AppInfo.GetBoolean("report_form",
+            this.checkBox_option_deleteReportFileAfterUpload.Checked = this.MainForm.AppInfo.GetBoolean(GetReportSection(),
                 "deleteReportFileAfterUpload",
                 true);
         }
@@ -12535,7 +12488,7 @@ MessageBoxDefaultButton.Button1);
         private void tabPage_option_Leave(object sender, EventArgs e)
         {
             // Debug.WriteLine("Leave page");
-            this.MainForm.AppInfo.SetBoolean("report_form",
+            this.MainForm.AppInfo.SetBoolean(GetReportSection(),
                 "deleteReportFileAfterUpload",
                 this.checkBox_option_deleteReportFileAfterUpload.Checked);
         }
@@ -12547,7 +12500,7 @@ MessageBoxDefaultButton.Button1);
         {
             get
             {
-                return this.MainForm.AppInfo.GetBoolean("report_form",
+                return this.MainForm.AppInfo.GetBoolean(GetReportSection(),
     "deleteReportFileAfterUpload",
     true);
             }

@@ -189,7 +189,6 @@ namespace dp2Circulation
         /// </summary>
         public string UserDir = ""; // 2013/6/16
 
-
         public string UserTempDir = ""; // 2015/1/4
 
         // 保存界面信息
@@ -11102,7 +11101,8 @@ Font font)
             get
             {
                 // return PathUtil.MergePath(this.DataDir, "operlogcache");
-                return PathUtil.MergePath(this.UserDir, "operlogcache");    // 2013/6/16
+                // return PathUtil.MergePath(this.UserDir, "operlogcache");    // 2013/6/16
+                return Path.Combine(this.ServerCfgDir, "operlogcache"); // 2015/6/20
             }
         }
 

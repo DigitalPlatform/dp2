@@ -1209,7 +1209,6 @@ namespace dp2Library
                 CultureInfo(strLang);
         }
 
-
         // 获得读者信息
         // parameters:
         //      strBarcode  读者证条码号。如果前方引导以"@path:"，则表示读者记录路径。在@path引导下，路径后面还可以跟随 "$prev"或"$next"表示方向

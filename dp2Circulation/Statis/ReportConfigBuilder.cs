@@ -27,13 +27,13 @@ namespace dp2Circulation
             set;
         }
 
-        public int LoadCfgFile(string strUserDir,
+        public int LoadCfgFile(string strBaseDir,
             string strFileName,
             out string strError)
         {
             strError = "";
 
-            this.CfgFileName = Path.Combine(strUserDir, strFileName);  // "report_def.xml"
+            this.CfgFileName = Path.Combine(strBaseDir, strFileName);  // "report_def.xml"
             this.CfgDom = new XmlDocument();
             try
             {

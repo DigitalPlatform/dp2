@@ -72,8 +72,6 @@ ref sessioninfo) == false)
         {
             string strBiblioRecPath = strBarcode.Substring("biblio_html:".Length);
 
-
-
             // 获得书目记录XML
             string[] formats = new string[1];
             formats[0] = "xml";
@@ -110,7 +108,6 @@ ref sessioninfo) == false)
             }
             string strBiblioXml = results[0];
 
-
             // 创建HTML
             string strBiblioDbName = ResPath.GetDbName(strBiblioRecPath);
 
@@ -124,7 +121,6 @@ ref sessioninfo) == false)
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
-
 
             // 将种记录数据从XML格式转换为HTML格式
             string strResult = "";

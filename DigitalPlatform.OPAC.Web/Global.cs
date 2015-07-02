@@ -14,7 +14,6 @@ namespace DigitalPlatform.OPAC.Web
     /// </summary>
     public class GlobalUtil
     {
-
         public static LoginState GetLoginState(Page page)
         {
             SessionInfo sessioninfo = (SessionInfo)page.Session["sessioninfo"];

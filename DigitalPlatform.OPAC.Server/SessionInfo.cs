@@ -303,6 +303,32 @@ namespace DigitalPlatform.OPAC.Server
             }
         }
 
+        // 重新登录
+        // parameters:
+        // return:
+        //      -1  出错
+        //      0   成功
+        public int ReLogin(out string strError)
+        {
+            // 尽量用已有的设施实现功能
+            BeforeLoginEventArgs e = new BeforeLoginEventArgs();
+            e.FirstTry = true;
+            Channel_BeforeLogin(this, e);
+
+            // return:
+            //      -1  error
+            //      0   登录未成功
+            //      1   登录成功
+            //      >1  有多个账户符合条件。
+            long lRet = this.Channel.Login(e.UserName,
+                e.Password,
+                e.Parameters,
+                out strError);
+            if (lRet == -1 || lRet == 0)
+                return -1;
+            return 0;
+        }
+
         // return:
         //      -1  error
         //      0   登录未成功

@@ -67,7 +67,7 @@ ref sessioninfo) == false)
         }
 
         // 是否登录?
-        if (sessioninfo.UserID == "")
+        if (string.IsNullOrEmpty(sessioninfo.UserID) == true)
         {
             if (/*this.IsPostBack == true && */strAction == "gettreedata")
             {
@@ -110,7 +110,6 @@ ref sessioninfo) == false)
             DisplayTreeStruct(strID);
             return;
         }
-
 
         string strUrl = this.Request["file"];
         string strNode = this.Request["node"];

@@ -164,7 +164,9 @@
     <Content Include="design.txt" />
     <Content Include="Docs\deleted.txt" />
     <Content Include="Docs\操作权限表.txt" />
-    <Content Include="DocumentFormat.OpenXml.dll" />
+    <Content Include="DocumentFormat.OpenXml.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Filter.aspx" />
     <Content Include="GetObject.aspx" />
     <Content Include="GetPhoto.aspx" />
