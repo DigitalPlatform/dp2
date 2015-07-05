@@ -1196,6 +1196,11 @@ namespace dp2Circulation
                             this.AppInfo.SetString("sn", "sn", "test");
                             this.AppInfo.Save();
                         }
+                        else if (first_dialog.Mode == "community")
+                        {
+                            this.AppInfo.SetString("sn", "sn", "community");
+                            this.AppInfo.Save();
+                        }
                     }
 
 #if NO
@@ -12771,6 +12776,15 @@ Keys keyData)
                     return 0;
                 }
             }
+            else if (strSerialCode == "community")
+            {
+                if (string.IsNullOrEmpty(strRequirFuncList) == true)
+                {
+                    this.TestMode = false;
+                    this.AppInfo.SetString("main_form", "last_mode", "community");
+                    return 0;
+                }
+            }
             else
             {
                 this.TestMode = false;
@@ -12990,6 +13004,12 @@ Keys keyData)
                 // 覆盖写入 运行模式 信息，防止用户作弊
                 // 小型版没有对应的评估模式
                 this.AppInfo.SetString("main_form", "last_mode", "test");
+                return;
+            }
+            else if (strSerialCode == "community")
+            {
+                this.TestMode = false;
+                this.AppInfo.SetString("main_form", "last_mode", "community");
                 return;
             }
             else

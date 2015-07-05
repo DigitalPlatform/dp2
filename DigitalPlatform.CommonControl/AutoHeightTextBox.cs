@@ -51,7 +51,14 @@ namespace DigitalPlatform.CommonControl
                 else if (this.BorderStyle == System.Windows.Forms.BorderStyle.FixedSingle)
                     nBorderWidth = SystemInformation.BorderSize.Height * 2;
 
-                int nNewHeight = (this.Font.Height + 1) * numberOfLines + nBorderWidth;
+                /*
+                 * Set TextBox Height -
+http://www.codeproject.com/Articles/29140/Set-TextBox-Height
+Textboxes have a 3-pixel lower and 4-pixel upper white space around
+the font height. Therefore, the calculation increases the height by 7
+pixels.
+                 * */
+                int nNewHeight = (this.Font.Height + 1) * numberOfLines + nBorderWidth + 7;
                 if (this.Height != nNewHeight)
                     this.Height = nNewHeight;
 
