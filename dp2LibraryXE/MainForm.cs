@@ -428,7 +428,7 @@ FormWindowState.Normal);
         void SetListenUrl(string strMode)
         {
             // 设置监听 URL
-            if (strMode == "miniServer")
+            if (strMode == "miniServer" || strMode == "miniTest")    // "miniServer"
             {
                 string strNewUrl = InputDlg.GetInput(
 this,
@@ -452,6 +452,7 @@ this.Font);
 
         #region 序列号机制
 
+        // 是否为社区版
         bool _testMode = false;
 
         public bool TestMode
@@ -475,16 +476,16 @@ this.Font);
             if (this.IsServer == true)
             {
                 if (this.TestMode == true)
-                    this.Text = "dp2Library XE 小型服务器 (评估模式)";
+                    this.Text = "dp2Library XE 小型服务器 [社区版]";
                 else
-                    this.Text = "dp2Library XE 小型服务器";
+                    this.Text = "dp2Library XE 小型服务器 [专业版]";
             }
             else
             {
                 if (this.TestMode == true)
-                    this.Text = "dp2Library XE 单机 (评估模式)";
+                    this.Text = "dp2Library XE 单机 [社区版]";
                 else
-                    this.Text = "dp2Library XE 单机";
+                    this.Text = "dp2Library XE 单机 [专业版]";
             }
 
             Assembly myAssembly = Assembly.GetAssembly(this.GetType());
@@ -493,7 +494,9 @@ this.Font);
 dp2Library XE
 ---
 dp2 图书馆集成系统 图书馆应用服务器 "
-                + (this.IsServer == false ? "单机版" : "小型版") +
+                + (this.IsServer == false ? "单机" : "小型服务器") 
+                + (this.TestMode == false ? " [专业版]" : " [社区版]")
+                +
 @"
 ---
 (C) 版权所有 2014-2015 数字平台(北京)软件有限责任公司
@@ -505,7 +508,7 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
             + "版本和环境:\r\n本机 .NET Framework 版本: " + myAssembly.ImageRuntimeVersion
             + "\r\n本软件: " + myAssembly.FullName + "\r\n\r\n";
 
-                WriteTextToConsole(strContent);
+            AppendString(strContent);
         }
 #if SN
         int _maxClients = 5;
@@ -552,6 +555,8 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
 
 #endif
 
+        // 许可方式
+        // "server" 表示服务器验证服务器自己的序列号，就不要求前端验证前端自己的序列号了
         string _licenseType = "";
         public string LicenseType
         {
@@ -654,7 +659,7 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
                 FirstRunDialog first_dialog = new FirstRunDialog();
                 MainForm.SetControlFont(first_dialog, this.Font);
                 first_dialog.MainForm = this;
-                first_dialog.Mode = this.AppInfo.GetString("main_form", "last_mode", "standard");
+                first_dialog.Mode = this.AppInfo.GetString("main_form", "last_mode", "test");   // "standard"
                 first_dialog.StartPosition = FormStartPosition.CenterScreen;
                 if (first_dialog.ShowDialog(this) == System.Windows.Forms.DialogResult.Cancel)
                 {
@@ -664,15 +669,18 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
 
                 // 首次写入 运行模式 信息
                 this.AppInfo.SetString("main_form", "last_mode", first_dialog.Mode);
-                if (first_dialog.Mode == "test")
+                if (first_dialog.Mode == "test" || first_dialog.Mode == "miniTest")
                 {
-                    this.AppInfo.SetString("sn", "sn", "test");
+                    this.AppInfo.SetString("sn", "sn", first_dialog.Mode);
                     this.AppInfo.Save();
                 }
 
                 ////
                 SetListenUrl(first_dialog.Mode);
             }
+
+            // 修改前的模式
+            string strOldMode = this.AppInfo.GetString("main_form", "last_mode", "test");   // "standard"
 
         REDO_VERIFY:
             strSerialCode = this.AppInfo.GetString("sn", "sn", "");
@@ -681,7 +689,13 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
                 this.TestMode = true;
                 // 覆盖写入 运行模式 信息，防止用户作弊
                 // 小型版没有对应的评估模式
-                this.AppInfo.SetString("main_form", "last_mode", "test");
+                this.AppInfo.SetString("main_form", "last_mode", strSerialCode);
+                return 0;
+            }
+            else if (strSerialCode == "miniTest")
+            {
+                this.TestMode = true;
+                this.AppInfo.SetString("main_form", "last_mode", strSerialCode);
                 return 0;
             }
             else
@@ -711,6 +725,10 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
                     strError = "放弃";
                     return -1;
                 }
+                string strMode = CannonicalizeInputMode(strOldMode, strSerialCode);
+                if (strMode != strSerialCode)
+                    this.AppInfo.SetString("sn", "sn", strMode);
+
                 goto REDO_VERIFY;
             }
             return 0;
@@ -1608,7 +1626,6 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
                     return -1;
                 }
 
-
                 // TODO: 必须是 http net.tcp 协议之一
             }
             else
@@ -1633,8 +1650,11 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
 
             if (this.library_host != null)
             {
-                this.library_host.SetTestMode(this.TestMode);
-                this.library_host.SetMaxClients(this.MaxClients);
+                // this.library_host.SetTestMode(this.TestMode);
+                if (this.TestMode == true)
+                    this.library_host.SetMaxClients(5); // 社区版限定 5 个前端
+                else
+                    this.library_host.SetMaxClients(this.MaxClients);
                 this.library_host.SetLicenseType(this.LicenseType);
             }
 
@@ -2764,8 +2784,8 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
         {
             get
             {
-                string strMode = this.AppInfo.GetString("main_form", "last_mode", "standard");
-                if (strMode == "miniServer")
+                string strMode = this.AppInfo.GetString("main_form", "last_mode", "test");  // "standard"
+                if (strMode == "miniServer" || strMode == "miniTest")    // "miniServer"
                     return true;
                 return false;
                 // return this.AppInfo.GetBoolean("product", "isServer", false);
@@ -2776,6 +2796,35 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
                 this.AppInfo.SetBoolean("product", "isServer", value);
             }
              * */
+        }
+
+        /* 和以前兼容的 Mode 含义
+test	-- community single
+miniTest	-- community mini 这是新增的
+standard	-- enterprise single
+miniServer	-- enterprise mini
+ * */
+        // 正规化输入的模式字符串
+        // community 模式是模糊的，可能指单机，也可能指小型服务器
+        // 根据以前的模式定义，复原 community 类型的详细模式
+        static string CannonicalizeInputMode(string strOldMode, string strNewMode)
+        {
+            if (strNewMode == "singleCommunity")
+                return "test";
+
+            if (strNewMode == "miniCommunity")
+                return "miniTest";
+
+            // 将模糊的变清晰
+            if (strNewMode == "community")
+            {
+                if (strOldMode == "test" || strOldMode == "standard")
+                    return "test";
+                if (strOldMode == "miniTest" || strOldMode == "miniServer")
+                    return "miniTest";
+            }
+
+            return strNewMode;
         }
 
         private void MenuItem_resetSerialCode_Click(object sender, EventArgs e)
@@ -2793,7 +2842,7 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
             }
 
             // 修改前的模式
-            string strOldMode = this.AppInfo.GetString("main_form", "last_mode", "standard");
+            string strOldMode = this.AppInfo.GetString("main_form", "last_mode", "test");   // "standard"
 
             string strSerialCode = "";
         REDO_VERIFY:
@@ -2832,12 +2881,27 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
                     Application.Exit();
                     return;
                 }
-                if (strSerialCode == "test")
+
+                string strMode = CannonicalizeInputMode(strOldMode, strSerialCode);
+
+                if (strMode != strSerialCode)
+                    this.AppInfo.SetString("sn", "sn", strMode);
+
+                Debug.Assert(strMode == "test"
+                    || strMode == "miniTest"
+                    || strMode == "standard"
+                    || strMode == "miniServer", "");
+
+                if (strMode == "test" || strMode == "miniTest")
                 {
                     this.TestMode = true;
-                    this.AppInfo.SetString("main_form", "last_mode", "test");
+                    this.AppInfo.SetString("main_form", "last_mode", strMode);
                     this.AppInfo.Save();
-                    return;
+                    // 
+                    SetListenUrl(strMode);
+                    SetTitle();
+
+                    goto RESTART;
                 }
                 else
                     this.TestMode = false;
@@ -2851,17 +2915,20 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
                         if (this.TestMode == true)
                             this.AppInfo.SetString("main_form", "last_mode", "test");
                         else
-                            this.AppInfo.SetString("main_form", "last_mode", "standard");
+                            this.AppInfo.SetString("main_form", "last_mode", "standard");   // "standard"
                     }
                     else
                     {
                         // 反转为小型服务器
-                        this.AppInfo.SetString("main_form", "last_mode", "miniServer");
+                        if (this.TestMode == true)
+                            this.AppInfo.SetString("main_form", "last_mode", "miniTest"); // "miniServer"
+                        else
+                            this.AppInfo.SetString("main_form", "last_mode", "miniServer"); // "miniServer"
                         this.TestMode = false;
                     }
 
                     // 设置监听 URL
-                    SetListenUrl(this.AppInfo.GetString("main_form", "last_mode", "standard"));
+                    SetListenUrl(this.AppInfo.GetString("main_form", "last_mode", "test")); // "standard"
 
                     SetTitle();
                 }
@@ -2872,17 +2939,27 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
                     string strProduct = (string)table["product"];
 
                     if (strProduct == "dp2libraryXE server")
-                        this.AppInfo.SetString("main_form", "last_mode", "miniServer");
-                    else if (this.TestMode == true)
-                        this.AppInfo.SetString("main_form", "last_mode", "test");
+                    {
+                        if (this.TestMode == true)
+                            this.AppInfo.SetString("main_form", "last_mode", "miniTest"); // "miniServer"
+                        else
+                            this.AppInfo.SetString("main_form", "last_mode", "miniServer"); // "miniServer"
+                    }
                     else
-                        this.AppInfo.SetString("main_form", "last_mode", "standard");
+                    {
+                        if (this.TestMode == true)
+                            this.AppInfo.SetString("main_form", "last_mode", "test");
+                        else
+                            this.AppInfo.SetString("main_form", "last_mode", "standard");   // "standard"
+                    }
                 }
                 this.AppInfo.Save();
 
                 goto REDO_VERIFY;
             }
 
+
+            RESTART:
             // 修改后的模式
             //string strNewMode = this.AppInfo.GetString("main_form", "last_mode", "standard");
             //if (strOldMode != strNewMode)

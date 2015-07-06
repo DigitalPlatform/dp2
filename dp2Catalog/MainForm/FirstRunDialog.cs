@@ -10,6 +10,7 @@ using System.IO;
 
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
+using System.Diagnostics;
 
 namespace dp2Catalog
 {
@@ -97,7 +98,9 @@ namespace dp2Catalog
             if (this.comboBox_server_serverType.Text == "其它服务器"
                 || string.IsNullOrEmpty(this.comboBox_server_serverType.Text) == true)
             {
-                string strServerName = InputDlg.GetInput(this, "请给这个服务器取一个便于识别的名字", "服务器名:", "新服务器", this.Font);
+                string strServerName = InputDlg.GetInput(this,
+                    "请给这个服务器取一个便于识别的名字",
+                    "[请给这个服务器取一个便于识别的名字]\r\n服务器名:", "新服务器", this.Font);
                 if (strServerName != null)
                 {
                     // this.comboBox_server_serverType.Text = strServerName;
@@ -424,9 +427,9 @@ namespace dp2Catalog
         {
             if (this.radioButton_licenseMode_standard.Checked == true)
             {
-                this.radioButton_licenseMode_testing.Checked = false;
+                this.radioButton_licenseMode_community.Checked = false;
             }
-            else if (this.radioButton_licenseMode_testing.Checked == true)
+            else if (this.radioButton_licenseMode_community.Checked == true)
             {
                 this.radioButton_licenseMode_standard.Checked = false;
             }
@@ -436,17 +439,20 @@ namespace dp2Catalog
         {
             get
             {
-                if (this.radioButton_licenseMode_testing.Checked == true)
-                    return "test";
+                if (this.radioButton_licenseMode_community.Checked == true)
+                    return "community";  // "test"
                 else
                     return "standard";
             }
             set
             {
-                if (value == "test")
-                    this.radioButton_licenseMode_testing.Checked = true;
+                if (value == "community")    // "test"
+                    this.radioButton_licenseMode_community.Checked = true;
                 else
+                {
+                    Debug.Assert(value == "standard", "");
                     this.radioButton_licenseMode_standard.Checked = true;
+                }
             }
         }
 

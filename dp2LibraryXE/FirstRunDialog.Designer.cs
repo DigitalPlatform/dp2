@@ -41,14 +41,18 @@
             this.tabPage_licenseMode = new System.Windows.Forms.TabPage();
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
-            this.radioButton_licenseMode_standard = new System.Windows.Forms.RadioButton();
-            this.radioButton_licenseMode_testing = new System.Windows.Forms.RadioButton();
-            this.label3 = new System.Windows.Forms.Label();
-            this.radioButton_licenseMode_miniServer = new System.Windows.Forms.RadioButton();
+            this.radioButton_licenseMode_enterprise = new System.Windows.Forms.RadioButton();
+            this.radioButton_licenseMode_community = new System.Windows.Forms.RadioButton();
+            this.tabPage_singleOrMini = new System.Windows.Forms.TabPage();
+            this.label5 = new System.Windows.Forms.Label();
+            this.radioButton_mini = new System.Windows.Forms.RadioButton();
+            this.label6 = new System.Windows.Forms.Label();
+            this.radioButton_single = new System.Windows.Forms.RadioButton();
             this.tabControl_main.SuspendLayout();
             this.tabPage_welcome.SuspendLayout();
             this.tabPage_license.SuspendLayout();
             this.tabPage_licenseMode.SuspendLayout();
+            this.tabPage_singleOrMini.SuspendLayout();
             this.SuspendLayout();
             // 
             // button_prev
@@ -92,6 +96,7 @@
             this.tabControl_main.Controls.Add(this.tabPage_welcome);
             this.tabControl_main.Controls.Add(this.tabPage_license);
             this.tabControl_main.Controls.Add(this.tabPage_licenseMode);
+            this.tabControl_main.Controls.Add(this.tabPage_singleOrMini);
             this.tabControl_main.Location = new System.Drawing.Point(1, 12);
             this.tabControl_main.Name = "tabControl_main";
             this.tabControl_main.SelectedIndex = 0;
@@ -118,8 +123,8 @@
             this.label_welcome.Name = "label_welcome";
             this.label_welcome.Size = new System.Drawing.Size(435, 201);
             this.label_welcome.TabIndex = 0;
-            this.label_welcome.Text = "欢迎使用\r\ndp2 单机版/小型版图书馆服务器 (dp2Library XE)\r\n这是一个图书馆业务服务器软件\r\n\r\n(C)2006-2015 版权所有 数字平台(北京)" +
-    "软件有限责任公司";
+            this.label_welcome.Text = "欢迎使用\r\ndp2 单机版/小型版图书馆服务器 (dp2Library XE)\r\n这是一个图书馆业务服务器软件\r\n\r\n(C)2006-2015 版权所有 数字平台" +
+    "(北京)软件有限责任公司";
             this.label_welcome.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // tabPage_license
@@ -163,28 +168,26 @@
             // tabPage_licenseMode
             // 
             this.tabPage_licenseMode.AutoScroll = true;
-            this.tabPage_licenseMode.Controls.Add(this.label3);
-            this.tabPage_licenseMode.Controls.Add(this.radioButton_licenseMode_miniServer);
             this.tabPage_licenseMode.Controls.Add(this.label2);
             this.tabPage_licenseMode.Controls.Add(this.label1);
-            this.tabPage_licenseMode.Controls.Add(this.radioButton_licenseMode_standard);
-            this.tabPage_licenseMode.Controls.Add(this.radioButton_licenseMode_testing);
+            this.tabPage_licenseMode.Controls.Add(this.radioButton_licenseMode_enterprise);
+            this.tabPage_licenseMode.Controls.Add(this.radioButton_licenseMode_community);
             this.tabPage_licenseMode.Location = new System.Drawing.Point(4, 22);
             this.tabPage_licenseMode.Name = "tabPage_licenseMode";
             this.tabPage_licenseMode.Size = new System.Drawing.Size(441, 207);
             this.tabPage_licenseMode.TabIndex = 2;
-            this.tabPage_licenseMode.Text = "授权模式";
+            this.tabPage_licenseMode.Text = "发行版";
             this.tabPage_licenseMode.UseVisualStyleBackColor = true;
             // 
             // label2
             // 
             this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.label2.Location = new System.Drawing.Point(28, 123);
+            this.label2.Location = new System.Drawing.Point(28, 94);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(385, 38);
+            this.label2.Size = new System.Drawing.Size(368, 38);
             this.label2.TabIndex = 3;
-            this.label2.Text = "需要注册后才能启用。\r\n数据库的数量和记录容量无任何限制。";
+            this.label2.Text = "付费版本。需要输入序列号。\r\n";
             // 
             // label1
             // 
@@ -192,53 +195,90 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.label1.Location = new System.Drawing.Point(26, 37);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(387, 64);
+            this.label1.Size = new System.Drawing.Size(370, 37);
             this.label1.TabIndex = 2;
-            this.label1.Text = "评估模式不需要注册即可使用。\r\n在此许可您在非生产环境下免费评估使用本软件 30 天，详见“最终用户许可协议”。\r\n评估模式下，数据库的数量和记录容量有一定限制。" +
-    "";
+            this.label1.Text = "免费版本";
             // 
-            // radioButton_licenseMode_standard
+            // radioButton_licenseMode_enterprise
             // 
-            this.radioButton_licenseMode_standard.AutoSize = true;
-            this.radioButton_licenseMode_standard.Checked = true;
-            this.radioButton_licenseMode_standard.Location = new System.Drawing.Point(7, 104);
-            this.radioButton_licenseMode_standard.Name = "radioButton_licenseMode_standard";
-            this.radioButton_licenseMode_standard.Size = new System.Drawing.Size(89, 16);
-            this.radioButton_licenseMode_standard.TabIndex = 1;
-            this.radioButton_licenseMode_standard.Text = "正式 - 单机";
-            this.radioButton_licenseMode_standard.UseVisualStyleBackColor = true;
-            this.radioButton_licenseMode_standard.CheckedChanged += new System.EventHandler(this.radioButton_licenseMode_standard_CheckedChanged);
+            this.radioButton_licenseMode_enterprise.AutoSize = true;
+            this.radioButton_licenseMode_enterprise.Location = new System.Drawing.Point(7, 75);
+            this.radioButton_licenseMode_enterprise.Name = "radioButton_licenseMode_enterprise";
+            this.radioButton_licenseMode_enterprise.Size = new System.Drawing.Size(59, 16);
+            this.radioButton_licenseMode_enterprise.TabIndex = 1;
+            this.radioButton_licenseMode_enterprise.Text = "专业版";
+            this.radioButton_licenseMode_enterprise.UseVisualStyleBackColor = true;
+            this.radioButton_licenseMode_enterprise.CheckedChanged += new System.EventHandler(this.radioButton_licenseMode_standard_CheckedChanged);
             // 
-            // radioButton_licenseMode_testing
+            // radioButton_licenseMode_community
             // 
-            this.radioButton_licenseMode_testing.AutoSize = true;
-            this.radioButton_licenseMode_testing.Location = new System.Drawing.Point(7, 18);
-            this.radioButton_licenseMode_testing.Name = "radioButton_licenseMode_testing";
-            this.radioButton_licenseMode_testing.Size = new System.Drawing.Size(89, 16);
-            this.radioButton_licenseMode_testing.TabIndex = 0;
-            this.radioButton_licenseMode_testing.Text = "评估 - 单机";
-            this.radioButton_licenseMode_testing.UseVisualStyleBackColor = true;
-            this.radioButton_licenseMode_testing.CheckedChanged += new System.EventHandler(this.radioButton_licenseMode_testing_CheckedChanged);
+            this.radioButton_licenseMode_community.AutoSize = true;
+            this.radioButton_licenseMode_community.Checked = true;
+            this.radioButton_licenseMode_community.Location = new System.Drawing.Point(7, 18);
+            this.radioButton_licenseMode_community.Name = "radioButton_licenseMode_community";
+            this.radioButton_licenseMode_community.Size = new System.Drawing.Size(59, 16);
+            this.radioButton_licenseMode_community.TabIndex = 0;
+            this.radioButton_licenseMode_community.TabStop = true;
+            this.radioButton_licenseMode_community.Text = "社区版";
+            this.radioButton_licenseMode_community.UseVisualStyleBackColor = true;
+            this.radioButton_licenseMode_community.CheckedChanged += new System.EventHandler(this.radioButton_licenseMode_testing_CheckedChanged);
             // 
-            // label3
+            // tabPage_singleOrMini
             // 
-            this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.tabPage_singleOrMini.Controls.Add(this.label5);
+            this.tabPage_singleOrMini.Controls.Add(this.radioButton_mini);
+            this.tabPage_singleOrMini.Controls.Add(this.label6);
+            this.tabPage_singleOrMini.Controls.Add(this.radioButton_single);
+            this.tabPage_singleOrMini.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_singleOrMini.Name = "tabPage_singleOrMini";
+            this.tabPage_singleOrMini.Size = new System.Drawing.Size(441, 207);
+            this.tabPage_singleOrMini.TabIndex = 3;
+            this.tabPage_singleOrMini.Text = "单机/小型";
+            this.tabPage_singleOrMini.UseVisualStyleBackColor = true;
+            // 
+            // label5
+            // 
+            this.label5.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.label3.Location = new System.Drawing.Point(28, 183);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(385, 50);
-            this.label3.TabIndex = 5;
-            this.label3.Text = "需要注册后才能启用。\r\n数据库的数量和记录容量无任何限制。";
+            this.label5.Location = new System.Drawing.Point(33, 96);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(353, 37);
+            this.label5.TabIndex = 11;
+            this.label5.Text = "网络版。允许多台电脑访问同一工作数据库。\r\n";
             // 
-            // radioButton_licenseMode_miniServer
+            // radioButton_mini
             // 
-            this.radioButton_licenseMode_miniServer.AutoSize = true;
-            this.radioButton_licenseMode_miniServer.Location = new System.Drawing.Point(7, 164);
-            this.radioButton_licenseMode_miniServer.Name = "radioButton_licenseMode_miniServer";
-            this.radioButton_licenseMode_miniServer.Size = new System.Drawing.Size(125, 16);
-            this.radioButton_licenseMode_miniServer.TabIndex = 4;
-            this.radioButton_licenseMode_miniServer.Text = "正式 - 小型服务器";
-            this.radioButton_licenseMode_miniServer.UseVisualStyleBackColor = true;
+            this.radioButton_mini.AutoSize = true;
+            this.radioButton_mini.Location = new System.Drawing.Point(14, 77);
+            this.radioButton_mini.Name = "radioButton_mini";
+            this.radioButton_mini.Size = new System.Drawing.Size(83, 16);
+            this.radioButton_mini.TabIndex = 10;
+            this.radioButton_mini.Text = "小型服务器";
+            this.radioButton_mini.UseVisualStyleBackColor = true;
+            this.radioButton_mini.CheckedChanged += new System.EventHandler(this.radioButton_mini_CheckedChanged);
+            // 
+            // label6
+            // 
+            this.label6.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.label6.Location = new System.Drawing.Point(33, 37);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(353, 37);
+            this.label6.TabIndex = 9;
+            this.label6.Text = "只能从本机访问工作数据库。\r\n";
+            // 
+            // radioButton_single
+            // 
+            this.radioButton_single.AutoSize = true;
+            this.radioButton_single.Checked = true;
+            this.radioButton_single.Location = new System.Drawing.Point(14, 18);
+            this.radioButton_single.Name = "radioButton_single";
+            this.radioButton_single.Size = new System.Drawing.Size(47, 16);
+            this.radioButton_single.TabIndex = 8;
+            this.radioButton_single.TabStop = true;
+            this.radioButton_single.Text = "单机";
+            this.radioButton_single.UseVisualStyleBackColor = true;
+            this.radioButton_single.CheckedChanged += new System.EventHandler(this.radioButton_single_CheckedChanged);
             // 
             // FirstRunDialog
             // 
@@ -260,6 +300,8 @@
             this.tabPage_license.PerformLayout();
             this.tabPage_licenseMode.ResumeLayout(false);
             this.tabPage_licenseMode.PerformLayout();
+            this.tabPage_singleOrMini.ResumeLayout(false);
+            this.tabPage_singleOrMini.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -276,11 +318,14 @@
         private System.Windows.Forms.Label label_welcome;
         private System.Windows.Forms.TextBox textBox_license;
         private System.Windows.Forms.CheckBox checkBox_license_agree;
-        private System.Windows.Forms.RadioButton radioButton_licenseMode_standard;
-        private System.Windows.Forms.RadioButton radioButton_licenseMode_testing;
+        private System.Windows.Forms.RadioButton radioButton_licenseMode_enterprise;
+        private System.Windows.Forms.RadioButton radioButton_licenseMode_community;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.RadioButton radioButton_licenseMode_miniServer;
+        private System.Windows.Forms.TabPage tabPage_singleOrMini;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.RadioButton radioButton_mini;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.RadioButton radioButton_single;
     }
 }

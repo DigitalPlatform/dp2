@@ -44,7 +44,7 @@ namespace dp2Catalog
 
         void LoadPage()
         {
-            this.webBrowser1.Url = new Uri("http://dp2003.com/dp2portal/view.aspx?link=xe.xml");
+            this.webBrowser1.Url = new Uri("http://dp2003.com/dp2portal/view.aspx?link=opensource.xml");
         }
 
         private void AdvertiseForm_FormClosing(object sender, FormClosingEventArgs e)

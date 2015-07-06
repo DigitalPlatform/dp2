@@ -47,7 +47,7 @@ namespace dp2Circulation
             if (this.tabControl_main.SelectedTab == this.tabPage_serverInfo)
             {
                 if (string.IsNullOrEmpty(this.comboBox_server_serverType.Text) == true
-                    && this.radioButton_licenseMode_testing.Checked == true)
+                    && this.radioButton_licenseMode_community.Checked == true)
                     this.comboBox_server_serverType.SelectedIndex = 0;  // 自动选定单机版
             }
         }
@@ -541,9 +541,9 @@ MessageBoxDefaultButton.Button1);
         {
             if (this.radioButton_licenseMode_standard.Checked == true)
             {
-                this.radioButton_licenseMode_testing.Checked = false;
+                this.radioButton_licenseMode_community.Checked = false;
             }
-            else if (this.radioButton_licenseMode_testing.Checked == true)
+            else if (this.radioButton_licenseMode_community.Checked == true)
             {
                 this.radioButton_licenseMode_standard.Checked = false;
             }
@@ -553,15 +553,15 @@ MessageBoxDefaultButton.Button1);
         {
             get
             {
-                if (this.radioButton_licenseMode_testing.Checked == true)
-                    return "test";
+                if (this.radioButton_licenseMode_community.Checked == true)
+                    return "community";  // "test";
                 else
                     return "standard";
             }
             set
             {
-                if (value == "test")
-                    this.radioButton_licenseMode_testing.Checked = true;
+                if (value == "community")    // "test"
+                    this.radioButton_licenseMode_community.Checked = true;
                 else 
                     this.radioButton_licenseMode_standard.Checked = true;
             }

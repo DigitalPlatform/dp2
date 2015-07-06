@@ -211,7 +211,6 @@ namespace dp2Catalog
                     MessageBox.Show(strError);
             }
 
-
             cfgCache.TempDir = this.DataDir
                 + "\\cfgcache";
             cfgCache.InstantSave = true;
@@ -265,7 +264,6 @@ namespace dp2Catalog
 
             this.Servers.ServerChanged += new dp2ServerChangedEventHandle(Servers_ServerChanged);
 
-
             if (IsFirstRun == true && this.Servers.Count == 0)
             {
 #if NO
@@ -288,9 +286,9 @@ namespace dp2Catalog
 
                 // 首次写入 运行模式 信息
                 this.AppInfo.SetString("main_form", "last_mode", first_dialog.Mode);
-                if (first_dialog.Mode == "test")
+                if (first_dialog.Mode == "test" || first_dialog.Mode == "community")
                 {
-                    this.AppInfo.SetString("sn", "sn", "test");
+                    this.AppInfo.SetString("sn", "sn", first_dialog.Mode);
                     this.AppInfo.Save();
                 }
 
@@ -3846,13 +3844,29 @@ out string strError)
             }
         }
 
+        bool _communityMode = false;
+
+        public bool CommunityMode
+        {
+            get
+            {
+                return this._communityMode;
+            }
+            set
+            {
+                this._communityMode = value;
+                SetTitle();
+            }
+        }
+
         void SetTitle()
         {
             if (this.TestMode == true)
                 this.Text = "dp2Catalog V2 -- 编目 [评估模式]";
+            else if (this.CommunityMode == true)
+                this.Text = "dp2Catalog V2 -- 编目 [社区版]";
             else
-                this.Text = "dp2Catalog V2 -- 编目";
-
+                this.Text = "dp2Catalog V2 -- 编目 [专业版]";
         }
 
 #if SN
@@ -3920,9 +3934,20 @@ out string strError)
                 if (string.IsNullOrEmpty(strRequirFuncList) == true)
                 {
                     this.TestMode = true;
+                    this.CommunityMode = false;
                     // 覆盖写入 运行模式 信息，防止用户作弊
                     // 小型版没有对应的评估模式
                     this.AppInfo.SetString("main_form", "last_mode", "test");
+                    return 0;
+                }
+            }
+            else if (strSerialCode == "community")
+            {
+                if (string.IsNullOrEmpty(strRequirFuncList) == true)
+                {
+                    this.TestMode = false;
+                    this.CommunityMode = true;
+                    this.AppInfo.SetString("main_form", "last_mode", "community");
                     return 0;
                 }
             }
@@ -4145,7 +4170,7 @@ out string strError)
             string strError = "";
             int nRet = 0;
 
-                        // 2014/11/15
+            // 2014/11/15
             string strFirstMac = "";
             List<string> macs = SerialCodeForm.GetMacAddress();
             if (macs.Count != 0)
@@ -4160,14 +4185,23 @@ out string strError)
             if (strSerialCode == "test")
             {
                 this.TestMode = true;
+                this.CommunityMode = false;
                 // 覆盖写入 运行模式 信息，防止用户作弊
                 // 小型版没有对应的评估模式
                 this.AppInfo.SetString("main_form", "last_mode", "test");
                 return;
             }
+            else if (strSerialCode == "community")
+            {
+                this.TestMode = false;
+                this.CommunityMode = true;
+                this.AppInfo.SetString("main_form", "last_mode", "community");
+                return;
+            }
             else
             {
                 this.TestMode = false;
+                this.CommunityMode = false;
                 this.AppInfo.SetString("main_form", "last_mode", "standard");
             }
 

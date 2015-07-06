@@ -12697,13 +12697,29 @@ Keys keyData)
             }
         }
 
+        bool _communityMode = false;
+
+        public bool CommunityMode
+        {
+            get
+            {
+                return this._communityMode;
+            }
+            set
+            {
+                this._communityMode = value;
+                SetTitle();
+            }
+        }
+
         void SetTitle()
         {
             if (this.TestMode == true)
                 this.Text = "dp2Circulation V2 -- 内务 [评估模式]";
+            else if (this.CommunityMode == true)
+                this.Text = "dp2Circulation V2 -- 内务 [社区版]";
             else
-                this.Text = "dp2Circulation V2 -- 内务";
-
+                this.Text = "dp2Circulation V2 -- 内务 [专业版]";
         }
 
 #if SN
@@ -12770,6 +12786,7 @@ Keys keyData)
                 if (string.IsNullOrEmpty(strRequirFuncList) == true)
                 {
                     this.TestMode = true;
+                    this.CommunityMode = false;
                     // 覆盖写入 运行模式 信息，防止用户作弊
                     // 小型版没有对应的评估模式
                     this.AppInfo.SetString("main_form", "last_mode", "test");
@@ -12781,6 +12798,7 @@ Keys keyData)
                 if (string.IsNullOrEmpty(strRequirFuncList) == true)
                 {
                     this.TestMode = false;
+                    this.CommunityMode = true;
                     this.AppInfo.SetString("main_form", "last_mode", "community");
                     return 0;
                 }
@@ -12788,6 +12806,7 @@ Keys keyData)
             else
             {
                 this.TestMode = false;
+                this.CommunityMode = false;
                 this.AppInfo.SetString("main_form", "last_mode", "standard");
             }
 
@@ -13001,6 +13020,7 @@ Keys keyData)
             if (strSerialCode == "test")
             {
                 this.TestMode = true;
+                this.CommunityMode = false;
                 // 覆盖写入 运行模式 信息，防止用户作弊
                 // 小型版没有对应的评估模式
                 this.AppInfo.SetString("main_form", "last_mode", "test");
@@ -13009,12 +13029,14 @@ Keys keyData)
             else if (strSerialCode == "community")
             {
                 this.TestMode = false;
+                this.CommunityMode = true;
                 this.AppInfo.SetString("main_form", "last_mode", "community");
                 return;
             }
             else
             {
                 this.TestMode = false;
+                this.CommunityMode = false;
                 this.AppInfo.SetString("main_form", "last_mode", "standard");
             }
 

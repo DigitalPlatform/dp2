@@ -145,6 +145,7 @@ namespace DigitalPlatform.LibraryServer
 
         /// <summary>
         /// 许可类型
+        /// "server" 表示服务器验证服务器自己的序列号，就不要求前端验证前端自己的序列号了
         /// </summary>
         public string LicenseType
         {

@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using System.IO;
 
 using DigitalPlatform;
+using System.Diagnostics;
 
 namespace dp2LibraryXE
 {
@@ -114,64 +115,131 @@ namespace dp2LibraryXE
 
         private void radioButton_licenseMode_testing_CheckedChanged(object sender, EventArgs e)
         {
-#if NO
-            if (this.radioButton_licenseMode_testing.Checked == true)
-                this.radioButton_licenseMode_standard.Checked = false;
-            else
-                this.radioButton_licenseMode_standard.Checked = true;
-#endif
-            OnChecked();
+            OnLicenseTypeChecked();
         }
 
         private void radioButton_licenseMode_standard_CheckedChanged(object sender, EventArgs e)
         {
-#if NO
-            if (this.radioButton_licenseMode_standard.Checked == true)
-                this.radioButton_licenseMode_testing.Checked = false;
-            else
-                this.radioButton_licenseMode_testing.Checked = true;
-#endif
-            OnChecked();
+            OnLicenseTypeChecked();
         }
 
-        void OnChecked()
+        void OnLicenseTypeChecked()
         {
-            if (this.radioButton_licenseMode_standard.Checked == true)
+                // 社区
+            if (this.radioButton_licenseMode_community.Checked == true)
             {
-                this.radioButton_licenseMode_testing.Checked = false;
-                this.radioButton_licenseMode_miniServer.Checked = false;
+                this.radioButton_licenseMode_enterprise.Checked = false;
             }
-            else if (this.radioButton_licenseMode_testing.Checked == true)
+            // 企业
+            else if (this.radioButton_licenseMode_enterprise.Checked == true)
             {
-                this.radioButton_licenseMode_standard.Checked = false;
-                this.radioButton_licenseMode_miniServer.Checked = false;
-            }
-            else if (this.radioButton_licenseMode_miniServer.Checked == true)
-            {
-                this.radioButton_licenseMode_standard.Checked = false;
-                this.radioButton_licenseMode_testing.Checked = false;
+                this.radioButton_licenseMode_community.Checked = false;
             }
         }
 
+        /* 和以前兼容的 Mode 含义
+test	-- community single
+miniTest	-- community mini 这是新增的
+standard	-- enterprise single
+miniServer	-- enterprise mini
+         * */
         public string Mode
         {
             get
             {
-                if (this.radioButton_licenseMode_testing.Checked == true)
-                    return "test";
-                if (this.radioButton_licenseMode_standard.Checked == true)
+                if (this.LicenseType == "community")
+                {
+                    if (this.IsServer == false)
+                        return "test";
+                    return "miniTest";
+                }
+                if (this.IsServer == false)
                     return "standard";
                 return "miniServer";
             }
             set
             {
                 if (value == "test")
-                    this.radioButton_licenseMode_testing.Checked = true;
+                {
+                    this.LicenseType = "community";
+                    this.IsServer = false;
+                }
+                else if (value == "miniTest")
+                {
+                    this.LicenseType = "community";
+                    this.IsServer = true;
+                }
                 else if (value == "standard")
-                    this.radioButton_licenseMode_standard.Checked = true;
+                {
+                    this.LicenseType = "enterprise";
+                    this.IsServer = false;
+                }
+                else if (value == "miniServer")
+                {
+                    this.LicenseType = "enterprise";
+                    this.IsServer = true;
+                }
                 else
-                    this.radioButton_licenseMode_miniServer.Checked = true;
+                {
+                    throw new Exception("无法识别的 Mode 值 '"+value+"'");
+                }
             }
+        }
+
+        /// <summary>
+        /// 发行版类型
+        /// </summary>
+        string LicenseType
+        {
+            get
+            {
+                if (this.radioButton_licenseMode_community.Checked == true)
+                    return "community";
+                return "enterprise"; 
+            }
+            set
+            {
+                if (value == "community")
+                    this.radioButton_licenseMode_community.Checked = true;
+                else
+                {
+                    Debug.Assert(value == "enterprise", "");
+                    this.radioButton_licenseMode_enterprise.Checked = true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 是否为小型版
+        /// </summary>
+        public bool IsServer
+        {
+            get
+            {
+                return this.radioButton_mini.Checked;
+            }
+            set
+            {
+                this.radioButton_mini.Checked = value;
+            }
+        }
+
+        private void radioButton_single_CheckedChanged(object sender, EventArgs e)
+        {
+            OnServerTypeChecked();
+        }
+
+        private void radioButton_mini_CheckedChanged(object sender, EventArgs e)
+        {
+            OnServerTypeChecked();
+        }
+
+        void OnServerTypeChecked()
+        {
+            if (this.radioButton_single.Checked == true)
+                this.radioButton_mini.Checked = false;
+            else if (this.radioButton_mini.Checked == true)
+                this.radioButton_single.Checked = false;
         }
     }
 }
