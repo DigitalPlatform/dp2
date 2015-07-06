@@ -67,7 +67,7 @@ namespace dp2Circulation
                 this._layer.Location = rect.Location;
             }
 
-            this.BeginInvoke(new Action<Step, string>(SetStep), Step.PrepareSearchBiblio, "");
+            this.BeginInvoke(new Func<Step, string, bool>(SetStep), Step.PrepareSearchBiblio, "");
         }
 
         // 更新连线的源控件矩形
@@ -219,11 +219,16 @@ namespace dp2Circulation
             return this._step;
         }
 
-        public void SetStep(Step step, string strStyle = "")
+        // return:
+        //      false   出错
+        //      true    成功
+        public bool SetStep(Step step, string strStyle = "")
         {
             int nRet = 0;
 
-            REDO_SETSTEP:
+            Step save = this._step;
+
+        REDO_SETSTEP:
 
             this._step = step;
 
@@ -233,7 +238,7 @@ namespace dp2Circulation
             {
                 SetTarget("None");
                 this.EnableInput(false);
-                return;
+                return true;
             }
 
             // 准备检索书目
@@ -259,7 +264,8 @@ namespace dp2Circulation
                     if (nRet == -1)
                     {
                         this.DisplayError("操作出错");
-                        return;
+                        this._step = save;
+                        return false;
                     }
                 }
 
@@ -270,16 +276,16 @@ namespace dp2Circulation
                     this.textBox_input.SelectAll();
                     this.textBox_input.Focus(); // 将输入焦点切换回来
                 }
-                    SetTarget("QueryWord");
+                SetTarget("QueryWord");
                 DisplayInfo(step);
-                return;
+                return true;
             }
 
             if (step == Step.SearchingBiblio)
             {
                 this.SetTarget("ResultList");
                 DisplayInfo(step);
-                return;
+                return true;
             }
 
             if (step == Step.SearchBiblioCompleted)
@@ -288,14 +294,14 @@ namespace dp2Circulation
 
                 this.SetTarget("ResultList");
                 DisplayInfo(step);
-                return;
+                return true;
             }
 
             if (step == Step.SearchBiblioError)
             {
                 this.SetTarget("ResultList");
                 this.DisplayInfo(Step.SearchBiblioError);
-                return;
+                return true;
             }
 
             if (step == Step.SearchBiblioNotFound)
@@ -304,7 +310,7 @@ namespace dp2Circulation
 
                 this.SetTarget("ResultList");
                 this.DisplayInfo(Step.SearchBiblioNotFound);
-                return;
+                return true;
             }
 
             // 在书目命中多条结果中选择
@@ -317,7 +323,7 @@ namespace dp2Circulation
                 this.textBox_input.SelectAll();
                 this.SetTarget("ResultList");
                 DisplayInfo(step);
-                return;
+                return true;
             }
 
             // 编辑书目记录
@@ -389,7 +395,7 @@ namespace dp2Circulation
                 }
                 
                 DisplayInfo(step);
-                return;
+                return true;
             }
 
             // 增加新的册记录
@@ -414,14 +420,15 @@ namespace dp2Circulation
                     }
                     else
                     {
-                        Debug.Assert(false, "");
+                        ////
+                        ////Debug.Assert(false, "");
                     }
                     DisplayInfo(step);
 
                     this.textBox_input.SelectAll();
                     this.SetTarget("Entities");
 
-                    return;
+                    return true;
                 }
 
                 this.textBox_input.SelectAll();
@@ -492,8 +499,10 @@ namespace dp2Circulation
                 }
 
                 DisplayInfo(step);
-                return;
+                return true;
             }
+
+            return true;
         }
 
         void LinkEntityLine(EditLine line)
@@ -958,13 +967,15 @@ namespace dp2Circulation
                     // 越过第一个字段
                     this._currentEntityLine = GetNextEntityLine(this._currentEntityLine);
 #endif
-                    this.BeginInvoke(new Action<Step, string>(SetStep), Step.EditEntity, "");
+                    this.BeginInvoke(new Func<Step, string, bool>(SetStep), Step.EditEntity, "");
                     return;
                 }
 
                 if (QuickChargingForm.IsISBN(ref strText) == true)
                 {
-                    this.SetStep(Step.PrepareSearchBiblio);
+                    // TODO: 连带引起保存书目和册记录可能会失败哟
+                    if (this.SetStep(Step.PrepareSearchBiblio) == false)
+                        return;
                     this.textBox_input.Text = strText;
                     this.BeginInvoke(new Action<object, EventArgs>(button_scan_Click), this, new EventArgs());
                     return;
@@ -979,7 +990,7 @@ namespace dp2Circulation
                         // 越过第一个字段
                         this._currentEntityLine = GetNextEntityLine(this._currentEntityLine);
 
-                        this.BeginInvoke(new Action<Step, string>(SetStep), Step.EditEntity, "");
+                        this.BeginInvoke(new Func<Step, string, bool>(SetStep), Step.EditEntity, "");
                         return;
                     }
                     // 为册编辑器当前行输入内容，顺次进入下一行。等所有字段都输入完以后，自动进入 EditEntity 等待输入册条码号的状态

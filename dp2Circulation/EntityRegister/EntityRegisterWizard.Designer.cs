@@ -69,6 +69,7 @@
             this.dpColumn_recPath = new DigitalPlatform.CommonControl.DpColumn();
             this.tabPage_biblioAndItems = new System.Windows.Forms.TabPage();
             this.splitContainer_biblioAndItems = new System.Windows.Forms.SplitContainer();
+            this.easyMarcControl1 = new DigitalPlatform.EasyMarc.EasyMarcControl();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.imageList_progress = new System.Windows.Forms.ImageList(this.components);
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
@@ -81,7 +82,6 @@
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_delete = new System.Windows.Forms.ToolStripButton();
             this.toolStripLabel_biblioSource = new System.Windows.Forms.ToolStripLabel();
-            this.easyMarcControl1 = new DigitalPlatform.EasyMarc.EasyMarcControl();
             this.tabControl_main.SuspendLayout();
             this.tabPage_settings.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -175,7 +175,7 @@
             this.checkBox_settings_keyboardWizard.Name = "checkBox_settings_keyboardWizard";
             this.checkBox_settings_keyboardWizard.Size = new System.Drawing.Size(114, 16);
             this.checkBox_settings_keyboardWizard.TabIndex = 4;
-            this.checkBox_settings_keyboardWizard.Text = "打开输入面板(&K)";
+            this.checkBox_settings_keyboardWizard.Text = "打开向导面板(&K)";
             this.checkBox_settings_keyboardWizard.UseVisualStyleBackColor = true;
             this.checkBox_settings_keyboardWizard.CheckedChanged += new System.EventHandler(this.checkBox_settings_keyboardWizard_CheckedChanged);
             // 
@@ -404,6 +404,24 @@
             this.splitContainer_biblioAndItems.TabIndex = 0;
             this.splitContainer_biblioAndItems.DoubleClick += new System.EventHandler(this.splitContainer_biblioAndItems_DoubleClick);
             // 
+            // easyMarcControl1
+            // 
+            this.easyMarcControl1.AutoScroll = true;
+            this.easyMarcControl1.CaptionWidth = 106;
+            this.easyMarcControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.easyMarcControl1.HideIndicator = true;
+            this.easyMarcControl1.HideSelection = false;
+            this.easyMarcControl1.IncludeNumber = false;
+            this.easyMarcControl1.Location = new System.Drawing.Point(0, 0);
+            this.easyMarcControl1.MarcDefDom = null;
+            this.easyMarcControl1.Name = "easyMarcControl1";
+            this.easyMarcControl1.Size = new System.Drawing.Size(231, 245);
+            this.easyMarcControl1.TabIndex = 0;
+            this.easyMarcControl1.SelectionChanged += new System.EventHandler(this.easyMarcControl1_SelectionChanged);
+            this.easyMarcControl1.GetConfigDom += new DigitalPlatform.Marc.GetConfigDomEventHandle(this.easyMarcControl1_GetConfigDom);
+            this.easyMarcControl1.Enter += new System.EventHandler(this.easyMarcControl1_Enter);
+            this.easyMarcControl1.Leave += new System.EventHandler(this.easyMarcControl1_Leave);
+            // 
             // flowLayoutPanel1
             // 
             this.flowLayoutPanel1.AutoScroll = true;
@@ -535,24 +553,6 @@
             this.toolStripLabel_biblioSource.Size = new System.Drawing.Size(0, 22);
             this.toolStripLabel_biblioSource.ToolTipText = "书目记录来源";
             // 
-            // easyMarcControl1
-            // 
-            this.easyMarcControl1.AutoScroll = true;
-            this.easyMarcControl1.CaptionWidth = 106;
-            this.easyMarcControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.easyMarcControl1.HideIndicator = true;
-            this.easyMarcControl1.HideSelection = false;
-            this.easyMarcControl1.IncludeNumber = false;
-            this.easyMarcControl1.Location = new System.Drawing.Point(0, 0);
-            this.easyMarcControl1.MarcDefDom = null;
-            this.easyMarcControl1.Name = "easyMarcControl1";
-            this.easyMarcControl1.Size = new System.Drawing.Size(231, 245);
-            this.easyMarcControl1.TabIndex = 0;
-            this.easyMarcControl1.SelectionChanged += new System.EventHandler(this.easyMarcControl1_SelectionChanged);
-            this.easyMarcControl1.GetConfigDom += new DigitalPlatform.Marc.GetConfigDomEventHandle(this.easyMarcControl1_GetConfigDom);
-            this.easyMarcControl1.Enter += new System.EventHandler(this.easyMarcControl1_Enter);
-            this.easyMarcControl1.Leave += new System.EventHandler(this.easyMarcControl1_Leave);
-            // 
             // EntityRegisterWizard
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -566,7 +566,7 @@
             this.Name = "EntityRegisterWizard";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
-            this.Text = "册登记向导";
+            this.Text = "册登记";
             this.Activated += new System.EventHandler(this.EntityRegisterWizard_Activated);
             this.Deactivate += new System.EventHandler(this.EntityRegisterWizard_Deactivate);
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.EntityRegisterWizard_FormClosing);

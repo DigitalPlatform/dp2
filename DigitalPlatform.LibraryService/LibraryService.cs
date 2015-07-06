@@ -417,10 +417,14 @@ namespace dp2Library
 
             Debug.Assert(app != null, "");
 
+#if NO
             if (app.LibraryCfgDom != null && app.LibraryCfgDom.DocumentElement != null)
-                uid = app.LibraryCfgDom.DocumentElement.GetAttribute("uid");
+                uid = app.LibraryCfgDom.DocumentElement.GetAttribute("uid");    // 这个写法的问题是可能 app.UID 还来不及保存到 xml 文件，那么就无法通过 xml 文件获得最新信息了
             else
                 uid = "";
+#endif
+
+            uid = app.UID;  // 2015/7/6
 
             // LibraryServerResult result = new LibraryServerResult();
             result.Value = 0;

@@ -142,7 +142,7 @@ namespace DigitalPlatform.CirculationClient
                 CreateBiblioDatabaseNode(database_dom,
                     "中文图书",
                     "book",
-                    "orderRecommendStore",
+                    "orderRecommendStore,catalogTarget",    // 2015/7/6 增加 catalogTarget
                     "unimarc",
                     true);
                 biblio_dbnames.Add("中文图书");

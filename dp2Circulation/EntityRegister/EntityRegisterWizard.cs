@@ -3609,7 +3609,9 @@ MessageBoxDefaultButton.Button1);
                 return -1;
 
             // 清除窗口内容
+            this._inWizardControl++;    // 2015/7/6 避免因为清除 EasyMarcControl 内容而引起对 OnMarcSelectionChanged() KeyboardForm 的波动
             _biblio.Clear();
+            this._inWizardControl--;
 
             this.textBox_queryWord.Text = "";
             this.dpTable_browseLines.Rows.Clear();
