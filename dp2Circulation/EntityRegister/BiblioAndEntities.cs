@@ -19,6 +19,7 @@ using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.Marc;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
+using System.Threading;
 
 namespace dp2Circulation
 {
@@ -662,6 +663,7 @@ MessageBoxDefaultButton.Button2);
             {
                 if (this.GenerateData != null)
                 {
+                    // 如果遇到报错会弹出 MessageBox
                     GenerateDataEventArgs e1 = new GenerateDataEventArgs();
                     if (e.Name == "AccessNo")
                         e1.ScriptEntry = "CreateCallNumber";
@@ -669,6 +671,22 @@ MessageBoxDefaultButton.Button2);
                     this.GenerateData(this, e1);
                 }
                 e.e.SuppressKeyPress = true;    // 避免 Ctrl+A 键引起 textbox 文本的无谓改变
+                return;
+            }
+            else if (e.Name == "AccessNo"
+                && e.e.KeyCode == Keys.Enter
+                && (StringUtil.HasHead(edit.AccessNo, "@accessNo") == true || string.IsNullOrEmpty(edit.AccessNo) == true))
+            {
+                if (this.GenerateData != null)
+                {
+                    // MessageBox.Show(this.Owner, "create call number");
+                    // edit.ErrorInfo = "";
+                    // 如果遇到报错会弹出 MessageBox
+                    GenerateDataEventArgs e1 = new GenerateDataEventArgs();
+                    e1.ScriptEntry = "CreateCallNumber";
+                    e1.FocusedControl = sender; // sender为 EntityEditControl
+                    this.GenerateData(this, e1);
+                }
                 return;
             }
             else if (e.e.KeyCode == Keys.PageDown && e.e.Control == true)
@@ -923,30 +941,32 @@ MessageBoxDefaultButton.Button2);
                 && string.IsNullOrEmpty(edit.AccessNo) == false)
             {
                 ArrangementInfo old_info = null;
+                string strOldName = "[not found]";
                 // 获得关于一个特定馆藏地点的索取号配置信息
+                // <returns>-1: 出错; 0: 没有找到; 1: 找到</returns>
                 int nRet = this.MainForm.GetArrangementInfo(e.OldText,
                     out old_info,
                     out strError);
-                if (nRet == 0)
-                    return;
                 if (nRet == -1)
                     goto ERROR1;
+                if (nRet == 1)
+                    strOldName = old_info.ArrangeGroupName;
 
                 ArrangementInfo new_info = null;
+                string strNewName = "[not found]";
                 // 获得关于一个特定馆藏地点的索取号配置信息
                 nRet = this.MainForm.GetArrangementInfo(e.NewText,
                    out new_info,
                    out strError);
-                if (nRet == 0)
-                    return;
                 if (nRet == -1)
                     goto ERROR1;
+                if (nRet == 1)
+                    strNewName = new_info.ArrangeGroupName;
 
-                if (old_info.ArrangeGroupName != new_info.ArrangeGroupName)
+                if (strOldName != strNewName)
                 {
-                    // TODO: 可直接重新创建索取号
                     DialogResult result = MessageBox.Show(this.Owner,
-    "您修改了馆藏地点，因而变动了记录所从属的排架体系，现有的索取号已不再适合变动后的排架体系。\r\n\r\n是否要把窗口中索取号字段内容清空，以便您稍后重新创建索取号?",
+    "您修改了馆藏地点，因而变动了记录所从属的排架体系，现有的索取号已不再适合变动后的排架体系。\r\n\r\n是否重新创建索取号?",
     "册登记",
     MessageBoxButtons.YesNo,
     MessageBoxIcon.Question,
@@ -954,6 +974,23 @@ MessageBoxDefaultButton.Button2);
                     if (result == DialogResult.No)
                         return;
                     edit.AccessNo = "";
+                    edit.ErrorInfo = "";
+                    if (this.GenerateData != null)
+                    {
+                        Cursor old_cursor = edit.Cursor;
+                        edit.Cursor = Cursors.WaitCursor;
+                        try
+                        {
+                            GenerateDataEventArgs e1 = new GenerateDataEventArgs();
+                            e1.ScriptEntry = "CreateCallNumber";
+                            e1.FocusedControl = edit; // sender为 EntityEditControl
+                            this.GenerateData(this, e1);
+                        }
+                        finally
+                        {
+                            edit.Cursor = old_cursor;
+                        }
+                    }
                 }
             }
             return;
@@ -1483,7 +1520,8 @@ MessageBoxDefaultButton.Button2);
                     if (string.IsNullOrEmpty(e1.ErrorInfo) == false)
                     {
                         // TODO: edit 控件索取号右边要有个提示区就好了。或者 tips
-
+                        strError = e1.ErrorInfo;
+                        return -1;
                     }
                     else
                     {
@@ -2473,6 +2511,7 @@ MessageBoxDefaultButton.Button2);
             DomUtil.SetElementText(dom.DocumentElement, "barcode", strItemBarcode);
             DomUtil.SetElementText(dom.DocumentElement, "refID", Guid.NewGuid().ToString());
 
+            string strErrorInfo = "";
             // 兑现 @price 宏，如果有书目记录的话
             // TODO: 当书目记录切换的时候，是否还要重新兑现一次宏?
 
@@ -2480,7 +2519,10 @@ MessageBoxDefaultButton.Button2);
             nRet = ReplaceEntityMacro(dom,
                 out strError);
             if (nRet == -1)
-                return -1;
+            {
+                // return -1;
+                strErrorInfo = strError;
+            }
             // 添加一个新的册对象
             nRet = NewEntity(dom.DocumentElement.OuterXml,
                 bAutoSetFocus,
@@ -2488,6 +2530,9 @@ MessageBoxDefaultButton.Button2);
                 out strError);
             if (nRet == -1)
                 return -1;
+
+            if (string.IsNullOrEmpty(strErrorInfo) == false)
+                control.ErrorInfo = strErrorInfo;
 
             return 0;
         }

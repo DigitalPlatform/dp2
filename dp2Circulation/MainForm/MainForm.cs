@@ -191,6 +191,8 @@ namespace dp2Circulation
 
         public string UserTempDir = ""; // 2015/1/4
 
+        public string UserLogDir = ""; // 2015/7/8
+
         // 保存界面信息
         /// <summary>
         /// 配置存储
@@ -467,6 +469,10 @@ namespace dp2Circulation
 
                 this.UserTempDir = Path.Combine(this.UserDir, "temp");
                 PathUtil.CreateDirIfNeed(this.UserTempDir);
+
+                // 2015/7/8
+                this.UserLogDir = Path.Combine(this.UserDir, "log");
+                PathUtil.CreateDirIfNeed(this.UserLogDir);
 
                 // 删除一些以前的目录
                 string strDir = PathUtil.MergePath(this.DataDir, "operlogcache");
@@ -13471,6 +13477,51 @@ Keys keyData)
                 return;
             }
             OpenWindow<ReservationListForm>();
+        }
+
+        // 属性页标题文字动画
+        public void FixedPageAnimation(TabPage page)
+        {
+            if (this.InvokeRequired)
+            {
+                this.BeginInvoke(new Action<TabPage>(FixedPageAnimation), page);
+                return;
+            }
+
+            string strChars = "▁▂▃▅▆▇▉";
+
+            string strText = page.Text;
+            int index = strChars.IndexOf(strText[0]);
+            if (index == -1)
+            {
+                page.Text = strChars[0] + " " + page.Text;
+                return;
+            }
+            char new_char;
+            if (index < strChars.Length - 1)
+                new_char = strChars[index + 1];
+            else
+                new_char = strChars[0];
+            page.Text = new string(new_char, 1) + page.Text.Substring(1);
+        }
+
+        public TabPage PageOperHistory
+        {
+            get
+            {
+                return this.tabPage_history;
+            }
+        }
+
+        // 写入日志文件。每天创建一个单独的日志文件
+        public void WriteErrorLog(string strText)
+        {
+            FileUtil.WriteErrorLog(
+                this.UserLogDir,
+                this.UserLogDir,
+                strText,
+                "log_",
+                ".txt");
         }
     }
 

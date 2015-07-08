@@ -1712,5 +1712,10 @@ dlg.UiState);
             }
 
         }
+
+        private void button_testThrow_Click(object sender, EventArgs e)
+        {
+            throw new Exception("test throw exception");
+        }
     }
 }

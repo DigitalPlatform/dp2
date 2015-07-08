@@ -691,96 +691,96 @@ namespace dp2Circulation
         // 工作线程每一轮循环的实质性工作
         public override void Worker()
         {
-            List<OneCall> calls = new List<OneCall>();
-            this.m_lock.AcquireWriterLock(m_nLockTimeout);
-            this.m_inOnTimer++;
+            this.MainForm.FixedPageAnimation(this.MainForm.PageOperHistory);
+
             try
             {
-                for (int i = 0; i < this.m_calls.Count; i++)
-                {
-                    OneCall call = this.m_calls[i];
-
-                    calls.Add(call);
-                }
-
-                this.m_calls.Clear();
-            }
-            finally
-            {
-                this.m_inOnTimer--;
-                this.m_lock.ReleaseWriterLock();
-            }
-
-            foreach (OneCall call in calls)
-            {
-                if (call.name == "borrow")
-                {
-                    /*
-                    Delegate_Borrow d = (Delegate_Borrow)call.func;
-                    this.MainForm.Invoke(d, call.parameters);
-                     * */
-                    Borrow((IChargingForm)call.parameters[0],
-                        (bool)call.parameters[1],
-                        (string)call.parameters[2],
-                        (string)call.parameters[3],
-                        (string)call.parameters[4],
-                        (string)call.parameters[5],
-                        (string)call.parameters[6],
-                        (BorrowInfo)call.parameters[7],
-                        (DateTime)call.parameters[8],
-                        (DateTime)call.parameters[9]);
-                }
-                else if (call.name == "return")
-                {
-                    /*
-                    Delegate_Return d = (Delegate_Return)call.func;
-                    this.MainForm.Invoke(d, call.parameters);
-                     * */
-                    Return((IChargingForm)call.parameters[0],
-                        (bool)call.parameters[1],
-                        (string)call.parameters[2],
-                        (string)call.parameters[3],
-                        (string)call.parameters[4],
-                        (string)call.parameters[5],
-                        (string)call.parameters[6],
-                        (ReturnInfo)call.parameters[7],
-                        (DateTime)call.parameters[8],
-                        (DateTime)call.parameters[9]);
-                }
-                else if (call.name == "amerce")
-                {
-                    /*
-                    Delegate_Amerce d = (Delegate_Amerce)call.func;
-                    this.MainForm.Invoke(d, call.parameters);
-                     * */
-                    Amerce((string)call.parameters[0],
-    (string)call.parameters[1],
-    (List<OverdueItemInfo>)call.parameters[2],
-    (string)call.parameters[3],
-    (DateTime)call.parameters[4],
-    (DateTime)call.parameters[5]);
-                }
-            }
-
-#if NO
-            if (calls.Count > 0)
-            {
+                List<OneCall> calls = new List<OneCall>();
                 this.m_lock.AcquireWriterLock(m_nLockTimeout);
                 this.m_inOnTimer++;
                 try
                 {
-                    for (int i = 0; i < calls.Count; i++)
+                    for (int i = 0; i < this.m_calls.Count; i++)
                     {
-                        this.m_calls.RemoveAt(0);
+                        OneCall call = this.m_calls[i];
+
+                        calls.Add(call);
                     }
+
+                    this.m_calls.Clear();
                 }
                 finally
                 {
                     this.m_inOnTimer--;
                     this.m_lock.ReleaseWriterLock();
                 }
+
+                foreach (OneCall call in calls)
+                {
+                    if (call.name == "borrow")
+                    {
+                        /*
+                        Delegate_Borrow d = (Delegate_Borrow)call.func;
+                        this.MainForm.Invoke(d, call.parameters);
+                         * */
+                        Borrow((IChargingForm)call.parameters[0],
+                            (bool)call.parameters[1],
+                            (string)call.parameters[2],
+                            (string)call.parameters[3],
+                            (string)call.parameters[4],
+                            (string)call.parameters[5],
+                            (string)call.parameters[6],
+                            (BorrowInfo)call.parameters[7],
+                            (DateTime)call.parameters[8],
+                            (DateTime)call.parameters[9]);
+                    }
+                    else if (call.name == "return")
+                    {
+                        /*
+                        Delegate_Return d = (Delegate_Return)call.func;
+                        this.MainForm.Invoke(d, call.parameters);
+                         * */
+                        // throw new Exception("test error");
+                        Return((IChargingForm)call.parameters[0],
+                            (bool)call.parameters[1],
+                            (string)call.parameters[2],
+                            (string)call.parameters[3],
+                            (string)call.parameters[4],
+                            (string)call.parameters[5],
+                            (string)call.parameters[6],
+                            (ReturnInfo)call.parameters[7],
+                            (DateTime)call.parameters[8],
+                            (DateTime)call.parameters[9]);
+                    }
+                    else if (call.name == "amerce")
+                    {
+                        /*
+                        Delegate_Amerce d = (Delegate_Amerce)call.func;
+                        this.MainForm.Invoke(d, call.parameters);
+                         * */
+                        Amerce((string)call.parameters[0],
+        (string)call.parameters[1],
+        (List<OverdueItemInfo>)call.parameters[2],
+        (string)call.parameters[3],
+        (DateTime)call.parameters[4],
+        (DateTime)call.parameters[5]);
+                    }
+                }
             }
-#endif
+            catch(Exception ex)
+            {
+                string strError = "OperHistory 的工作线程出现异常: \r\n" + ExceptionUtil.GetDebugText(ex);
+                this.MainForm.WriteErrorLog(strError);
+
+                string strText = "<div class='item error'>"
+                + "<div class='item_line'>"
+    + " <div class='item_summary'>" + HttpUtility.HtmlEncode(strError).Replace("\r\n", "<br/>") + "</div>"
+                + "</div>"
+                + " <div class='clear'></div>"
+    + "</div>";
+                AppendHtml(strText);
+
+            }
         }
 
 #if NO

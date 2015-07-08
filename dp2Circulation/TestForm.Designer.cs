@@ -163,6 +163,7 @@ namespace dp2Circulation
             this.label23 = new System.Windows.Forms.Label();
             this.button_cutter_convertTextToXml = new System.Windows.Forms.Button();
             this.tabPage_optimize = new System.Windows.Forms.TabPage();
+            this.button_test_loginAttack = new System.Windows.Forms.Button();
             this.numericUpDown_test_tryChannelCount = new System.Windows.Forms.NumericUpDown();
             this.label28 = new System.Windows.Forms.Label();
             this.button_test_channelAttack = new System.Windows.Forms.Button();
@@ -201,7 +202,7 @@ namespace dp2Circulation
             this.tabPage_test = new System.Windows.Forms.TabPage();
             this.button_testGetMergeStyleDialog = new System.Windows.Forms.Button();
             this.button_test_detectInstallation = new System.Windows.Forms.Button();
-            this.button_test_loginAttack = new System.Windows.Forms.Button();
+            this.button_testThrow = new System.Windows.Forms.Button();
             this.tabControl_main.SuspendLayout();
             this.tabPage_diskSpace.SuspendLayout();
             this.tabPage_windowsEventLog.SuspendLayout();
@@ -406,6 +407,7 @@ namespace dp2Circulation
             // 
             // tabPage_windowsEventLog
             // 
+            this.tabPage_windowsEventLog.Controls.Add(this.button_testThrow);
             this.tabPage_windowsEventLog.Controls.Add(this.button_testExceptionMessage);
             this.tabPage_windowsEventLog.Controls.Add(this.button_createEventLogDir);
             this.tabPage_windowsEventLog.Controls.Add(this.textBox_evenLogDirName);
@@ -1787,6 +1789,16 @@ namespace dp2Circulation
             this.tabPage_optimize.Text = "ÀŸ∂»”≈ªØ";
             this.tabPage_optimize.UseVisualStyleBackColor = true;
             // 
+            // button_test_loginAttack
+            // 
+            this.button_test_loginAttack.Location = new System.Drawing.Point(4, 95);
+            this.button_test_loginAttack.Name = "button_test_loginAttack";
+            this.button_test_loginAttack.Size = new System.Drawing.Size(101, 23);
+            this.button_test_loginAttack.TabIndex = 4;
+            this.button_test_loginAttack.Text = " ‘ÃΩ√‹¬Î";
+            this.button_test_loginAttack.UseVisualStyleBackColor = true;
+            this.button_test_loginAttack.Click += new System.EventHandler(this.button_test_loginAttack_Click);
+            // 
             // numericUpDown_test_tryChannelCount
             // 
             this.numericUpDown_test_tryChannelCount.Location = new System.Drawing.Point(190, 53);
@@ -2061,7 +2073,7 @@ namespace dp2Circulation
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.easyMarcControl1.AutoScroll = true;
-            this.easyMarcControl1.CaptionWidth = 116;
+            this.easyMarcControl1.CaptionWidth = 106;
             this.easyMarcControl1.HideIndicator = true;
             this.easyMarcControl1.IncludeNumber = false;
             this.easyMarcControl1.Location = new System.Drawing.Point(4, 75);
@@ -2114,6 +2126,7 @@ namespace dp2Circulation
             this.entitiesControl1.Location = new System.Drawing.Point(3, 14);
             this.entitiesControl1.MainForm = null;
             this.entitiesControl1.Name = "entitiesControl1";
+            this.entitiesControl1.Progress = null;
             this.entitiesControl1.ServersDom = null;
             this.entitiesControl1.Size = new System.Drawing.Size(333, 194);
             this.entitiesControl1.TabIndex = 0;
@@ -2201,15 +2214,16 @@ namespace dp2Circulation
             this.button_test_detectInstallation.UseVisualStyleBackColor = true;
             this.button_test_detectInstallation.Click += new System.EventHandler(this.button_test_detectInstallation_Click);
             // 
-            // button_test_loginAttack
+            // button_testThrow
             // 
-            this.button_test_loginAttack.Location = new System.Drawing.Point(4, 95);
-            this.button_test_loginAttack.Name = "button_test_loginAttack";
-            this.button_test_loginAttack.Size = new System.Drawing.Size(101, 23);
-            this.button_test_loginAttack.TabIndex = 4;
-            this.button_test_loginAttack.Text = " ‘ÃΩ√‹¬Î";
-            this.button_test_loginAttack.UseVisualStyleBackColor = true;
-            this.button_test_loginAttack.Click += new System.EventHandler(this.button_test_loginAttack_Click);
+            this.button_testThrow.Location = new System.Drawing.Point(8, 127);
+            this.button_testThrow.Margin = new System.Windows.Forms.Padding(2);
+            this.button_testThrow.Name = "button_testThrow";
+            this.button_testThrow.Size = new System.Drawing.Size(176, 22);
+            this.button_testThrow.TabIndex = 4;
+            this.button_testThrow.Text = "Test throw Exception ";
+            this.button_testThrow.UseVisualStyleBackColor = true;
+            this.button_testThrow.Click += new System.EventHandler(this.button_testThrow_Click);
             // 
             // TestForm
             // 
@@ -2452,5 +2466,6 @@ namespace dp2Circulation
         private System.Windows.Forms.Button button_test_detectInstallation;
         private System.Windows.Forms.Button button_testGetMergeStyleDialog;
         private System.Windows.Forms.Button button_test_loginAttack;
+        private System.Windows.Forms.Button button_testThrow;
     }
 }

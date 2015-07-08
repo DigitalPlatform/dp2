@@ -13,6 +13,7 @@ using DigitalPlatform;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.CommonControl;
+using DigitalPlatform.GUI;
 
 namespace dp2Circulation
 {
@@ -1870,6 +1871,15 @@ namespace dp2Circulation
                         if (combobox != null)
                             combobox.Items.Add("<not found>");
                     }
+
+                    // 获得 ComboBox 列表事项的最大宽度
+                    if (combobox != null)
+                    {
+                        int nMaxWidth = GuiUtil.GetComboBoxMaxItemWidth(combobox);
+                        if (combobox.DropDownWidth < nMaxWidth)
+                            combobox.DropDownWidth = nMaxWidth;
+                    }
+
                 }
             }
             finally

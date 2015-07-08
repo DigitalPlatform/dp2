@@ -24,6 +24,22 @@ namespace DigitalPlatform.GUI
 
     public class GuiUtil
     {
+        // http://stackoverflow.com/questions/4842160/auto-width-of-comboboxs-content
+        // 获得 ComboBox 列表事项的最大宽度
+        public static int GetComboBoxMaxItemWidth(ComboBox cb)
+        {
+            int maxWidth = 0, temp = 0;
+            foreach (string s in cb.Items)
+            {
+                temp = TextRenderer.MeasureText(s, cb.Font).Width;
+                if (temp > maxWidth)
+                {
+                    maxWidth = temp;
+                }
+            }
+            return maxWidth + SystemInformation.VerticalScrollBarWidth;
+        }
+
         public static float GetSplitterState(SplitContainer container)
         {
             float fValue = (float)container.SplitterDistance /

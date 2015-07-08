@@ -243,26 +243,29 @@ namespace dp2Circulation
                 // MessageBox.Show(this, "修改 old '"+e.OldText+"' new '"+e.NewText+"'" );
 
                 ArrangementInfo old_info = null;
+                string strOldName = "[not found]";
                 // 获得关于一个特定馆藏地点的索取号配置信息
+                // <returns>-1: 出错; 0: 没有找到; 1: 找到</returns>
                 int nRet = this.MainForm.GetArrangementInfo(e.OldText,
                     out old_info,
                     out strError);
-                if (nRet == 0)
-                    return;
                 if (nRet == -1)
                     goto ERROR1;
+                if (nRet == 1)
+                    strOldName = old_info.ArrangeGroupName;
 
                 ArrangementInfo new_info = null;
+                string strNewName = "[not found]";
                 // 获得关于一个特定馆藏地点的索取号配置信息
                 nRet = this.MainForm.GetArrangementInfo(e.NewText,
                    out new_info,
                    out strError);
-                if (nRet == 0)
-                    return;
                 if (nRet == -1)
                     goto ERROR1;
+                if (nRet == 1)
+                    strNewName = new_info.ArrangeGroupName;
 
-                if (old_info.ArrangeGroupName != new_info.ArrangeGroupName)
+                if (strOldName != strNewName)
                 {
                     DialogResult result = MessageBox.Show(this,
     "您修改了馆藏地点，因而变动了记录所从属的排架体系，现有的索取号已不再适合变动后的排架体系。\r\n\r\n是否要把窗口中索取号字段内容清空，以便您稍后重新创建索取号?",
