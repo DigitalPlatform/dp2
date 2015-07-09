@@ -200,7 +200,6 @@ namespace dp2Catalog
             // 菜单状态
             this.SetMenuItemState();
 
-
             // cfgcache
             nRet = cfgCache.Load(this.DataDir
                 + "\\cfgcache.xml",
@@ -214,7 +213,6 @@ namespace dp2Catalog
             cfgCache.TempDir = this.DataDir
                 + "\\cfgcache";
             cfgCache.InstantSave = true;
-
 
             // Z39.50 froms
             nRet = LoadFroms(this.DataDir + "\\bib1use.xml", out strError);
@@ -1542,14 +1540,13 @@ namespace dp2Catalog
 
             // 亚马逊 缺省服务器变化
             {
-                // 遍历当前打开的所有chargingform
+                // 遍历当前打开的所有AmazonSearchForm
                 List<Form> forms = GetChildWindows(typeof(AmazonSearchForm));
                 foreach (Form child in forms)
                 {
                     AmazonSearchForm form = (AmazonSearchForm)child;
                     // 让按钮文字显示出来
                     form.RefreshUI();
-
                 }
             }
         }
@@ -1559,7 +1556,7 @@ namespace dp2Catalog
             if (e.Section == "dp2searchform"
                 && e.Entry == "layout")
             {
-                // 遍历当前打开的所有chargingform
+                // 遍历当前打开的所有dp2SearchForm
                 List<Form> forms = GetChildWindows(typeof(dp2SearchForm));
                 foreach (Form child in forms)
                 {

@@ -445,7 +445,6 @@ namespace dp2Circulation
                 m_backgroundForm.Show();
             }
 
-
             if (ApplicationDeployment.IsNetworkDeployed == true)
             {
                 // MessageBox.Show(this, "network");
@@ -530,15 +529,11 @@ namespace dp2Circulation
 
             InitialFixedPanel();
 
-            // this.Update();   // 优化
-
-
             stopManager.Initial(this.toolButton_stop,
                 (object)this.toolStripStatusLabel_main,
                 (object)this.toolStripProgressBar_main);
             stopManager.OnDisplayMessage += new DisplayMessageEventHandler(stopManager_OnDisplayMessage);
             this.SetMenuItemState();
-
 
             // cfgcache
             nRet = cfgCache.Load(this.DataDir
@@ -549,7 +544,6 @@ namespace dp2Circulation
                 if (IsFirstRun == false)
                     MessageBox.Show(strError);
             }
-
 
             cfgCache.TempDir = this.DataDir
                 + "\\cfgcache";
@@ -859,8 +853,6 @@ namespace dp2Circulation
             if (e.CloseReason == CloseReason.UserClosing && e.Cancel == true)
                 return;
 
-
-
             // if (e.CloseReason != CloseReason.ApplicationExitCall)
             if (e.CloseReason == CloseReason.UserClosing)   // 2014/8/13
             {
@@ -944,7 +936,6 @@ namespace dp2Circulation
             // 保存窗口尺寸状态
             if (AppInfo != null)
             {
-
                 string strOpenedMdiWindow = GuiUtil.GetOpenedMdiWindowString(this);
                 this.AppInfo.SetString(
                     "main_form",
@@ -962,7 +953,6 @@ namespace dp2Circulation
             int nRet = cfgCache.Save(null, out strError);
             if (nRet == -1)
                 MessageBox.Show(this, strError);
-
 
             // 消除短期保存的密码
             bool bSavePasswordLong =
@@ -990,7 +980,6 @@ namespace dp2Circulation
 
             if (this.Channel != null)
                 this.Channel.Close();   // TODO: 最好限制一个时间，超过这个时间则Abort()
-
         }
 
 #if NO
@@ -1489,7 +1478,7 @@ AppInfo.GetString("config",
         {
             // 缺省开一个Z search form
             if (String.IsNullOrEmpty(strOpenedMdiWindow) == true)
-                strOpenedMdiWindow = "dp2Circulation.ChargingForm";
+                strOpenedMdiWindow = "dp2Circulation.QuickChargingForm"; // "dp2Circulation.ChargingForm";
 
             string[] types = strOpenedMdiWindow.Split(new char[] { ',' });
             for (int i = 0; i < types.Length; i++)
@@ -13153,7 +13142,11 @@ Keys keyData)
                 // 添加当前服务器
                 {
                     XmlElement server = dom.CreateElement("server");
-                    dom.DocumentElement.AppendChild(server);
+                    if (dom.DocumentElement.FirstChild != null)
+                        dom.DocumentElement.InsertBefore(server, dom.DocumentElement.FirstChild);   // 插入到最前面
+                    else
+                        dom.DocumentElement.AppendChild(server);
+
                     server.SetAttribute("name", "当前服务器");
                     server.SetAttribute("type", "dp2library");
                     server.SetAttribute("url", ".");
