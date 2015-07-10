@@ -984,6 +984,7 @@ MessageBoxDefaultButton.Button1);
             finally
             {
                 search.Idle -= search_Idle;
+                this.ClearMessage();
             }
 
         ERROR1:

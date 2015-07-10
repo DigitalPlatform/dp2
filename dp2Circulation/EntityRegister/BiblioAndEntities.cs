@@ -541,7 +541,7 @@ MessageBoxDefaultButton.Button2);
             // this.flowLayoutPanel1.PerformLayout();
             // this.tableLayoutPanel1.PerformLayout();
 
-            this.AdjustFlowLayoutHeight();
+            // this.AdjustFlowLayoutHeight();
 
             if (bAutoSetFocus == true)
                 control.Focus();    // 这一句让 Edit Control 部分可见，但不是全部可见
@@ -1071,7 +1071,7 @@ MessageBoxDefaultButton.Button2);
             }
 
             // 移走 Button
-            foreach(Control control in buttons)
+            foreach (Control control in buttons)
             {
                 this.flowLayoutPanel1.Controls.Remove(control);
             }
@@ -1084,7 +1084,7 @@ MessageBoxDefaultButton.Button2);
             {
                 this.flowLayoutPanel1.Controls.Add(control);
             }
-
+            
             // 注：edit 控件加入到末尾，不会改变前面已有的 edit 控件显示的序号
 
             // 重新设置 TabIndex
@@ -1308,6 +1308,13 @@ MessageBoxDefaultButton.Button2);
 
         public void AdjustFlowLayoutHeight()
         {
+            if (this.easyMarcControl1.InvokeRequired)
+            {
+                this.easyMarcControl1.Invoke(new Action(AdjustFlowLayoutHeight));
+                return;
+            }
+
+            this.flowLayoutPanel1.PerformLayout();
 #if NO
             if (this.easyMarcControl1.InvokeRequired)
             {
@@ -2035,7 +2042,7 @@ MessageBoxDefaultButton.Button2);
             if (errorinfos == null)
                 return false;
 
-            bool bHeightChanged = false;
+            // bool bHeightChanged = false;
 
             foreach (EntityInfo info in errorinfos)
             {
@@ -2112,8 +2119,11 @@ MessageBoxDefaultButton.Button2);
 #endif
 
                     // control.ErrorInfo = "";
+#if NO
                     if (SetEditErrorInfo(control, "") == true)
                         bHeightChanged = true;
+#endif
+                    SetEditErrorInfo(control, "");
 
                     control.Changed = false;
                     control.CreateState = ItemDisplayState.Normal;
@@ -2123,8 +2133,12 @@ MessageBoxDefaultButton.Button2);
 
                 // 报错处理
                 // control.ErrorInfo = info.ErrorInfo;
+#if NO
                 if (SetEditErrorInfo(control, info.ErrorInfo) == true)
                     bHeightChanged = true;
+#endif
+                SetEditErrorInfo(control, info.ErrorInfo);
+
                 strWarning += strLocationSummary + "在提交保存过程中发生错误 -- " + info.ErrorInfo + "\r\n";
             }
 
@@ -2143,8 +2157,11 @@ MessageBoxDefaultButton.Button2);
                 }
             }
 #endif
+
+#if NO
             if (bHeightChanged == true)
                 AdjustFlowLayoutHeight();
+#endif
 
             // 
             if (String.IsNullOrEmpty(strWarning) == false)
@@ -2204,7 +2221,7 @@ MessageBoxDefaultButton.Button2);
 
         // return:
         //      错误信息字符串是否确实被改变
-        public static bool SetEditErrorInfo(EntityEditControl edit,
+        public bool SetEditErrorInfo(EntityEditControl edit,
             string strErrorInfo)
         {
             if (edit.InvokeRequired)
@@ -2214,6 +2231,7 @@ MessageBoxDefaultButton.Button2);
             if (edit.ErrorInfo != strErrorInfo)
             {
                 edit.ErrorInfo = strErrorInfo;
+                AdjustFlowLayoutHeight();   // 2015.7.9
                 return true;
             }
 
@@ -2327,35 +2345,17 @@ MessageBoxDefaultButton.Button2);
         public void AddPlus()
         {
             PlusButton button_plus = new PlusButton();
-#if NO
-            string strFontName = "";
-            Font ref_font = GuiUtil.GetDefaultFont();
-            if (ref_font != null)
-                strFontName = ref_font.Name;
-            else
-                strFontName = this.Owner.Font.Name;
 
-            button_plus.Font = new Font(strFontName, this.Owner.Font.Size * 8, FontStyle.Bold);  // 12
-#endif
-
-#if NO
-            button_plus.ForeColor = this.flowLayoutPanel1.ForeColor;  // SystemColors.GrayText;
-            button_plus.BackColor = _entityBackColor;
-#endif
             SetControlColor(button_plus);
 
-            // label_plus.AutoSize = true;
-            // label_plus.Text = "+";
             button_plus.Size = new Size(100, 100);
             button_plus.AutoSize = false;
             button_plus.Margin = new Padding(8, 8, 8, 8);
             button_plus.FlatStyle = FlatStyle.Flat;
 
-            this.flowLayoutPanel1.Controls.Add(button_plus);
-
-            // button_plus.TextAlign = ContentAlignment.MiddleCenter;
-
             AddPlusEvents(button_plus, true);
+
+            this.flowLayoutPanel1.Controls.Add(button_plus);
         }
 
         void AddPlusEvents(PlusButton button_plus, bool bAdd)
@@ -2532,8 +2532,9 @@ MessageBoxDefaultButton.Button2);
                 return -1;
 
             if (string.IsNullOrEmpty(strErrorInfo) == false)
-                control.ErrorInfo = strErrorInfo;
-
+            {
+                SetEditErrorInfo(control, strErrorInfo);
+            }
             return 0;
         }
 

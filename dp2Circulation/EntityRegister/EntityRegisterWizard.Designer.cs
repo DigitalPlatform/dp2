@@ -61,9 +61,11 @@
             this.checkBox_settings_needAccessNo = new System.Windows.Forms.CheckBox();
             this.button_settings_entityDefault = new System.Windows.Forms.Button();
             this.tabPage_searchBiblio = new System.Windows.Forms.TabPage();
+            this.tableLayoutPanel_search = new System.Windows.Forms.TableLayoutPanel();
+            this.panel_search = new System.Windows.Forms.Panel();
+            this.button_search = new System.Windows.Forms.Button();
             this.comboBox_from = new System.Windows.Forms.ComboBox();
             this.textBox_queryWord = new System.Windows.Forms.TextBox();
-            this.button_search = new System.Windows.Forms.Button();
             this.dpTable_browseLines = new DigitalPlatform.CommonControl.DpTable();
             this.dpColumn_no = new DigitalPlatform.CommonControl.DpColumn();
             this.dpColumn_recPath = new DigitalPlatform.CommonControl.DpColumn();
@@ -82,16 +84,20 @@
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_delete = new System.Windows.Forms.ToolStripButton();
             this.toolStripLabel_biblioSource = new System.Windows.Forms.ToolStripLabel();
+            this.tableLayoutPanel_main = new System.Windows.Forms.TableLayoutPanel();
             this.tabControl_main.SuspendLayout();
             this.tabPage_settings.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.tabPage_searchBiblio.SuspendLayout();
+            this.tableLayoutPanel_search.SuspendLayout();
+            this.panel_search.SuspendLayout();
             this.tabPage_biblioAndItems.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_biblioAndItems)).BeginInit();
             this.splitContainer_biblioAndItems.Panel1.SuspendLayout();
             this.splitContainer_biblioAndItems.Panel2.SuspendLayout();
             this.splitContainer_biblioAndItems.SuspendLayout();
             this.toolStrip1.SuspendLayout();
+            this.tableLayoutPanel_main.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl_main
@@ -102,10 +108,11 @@
             this.tabControl_main.Controls.Add(this.tabPage_settings);
             this.tabControl_main.Controls.Add(this.tabPage_searchBiblio);
             this.tabControl_main.Controls.Add(this.tabPage_biblioAndItems);
-            this.tabControl_main.Location = new System.Drawing.Point(0, 2);
+            this.tabControl_main.Location = new System.Drawing.Point(0, 0);
+            this.tabControl_main.Margin = new System.Windows.Forms.Padding(0);
             this.tabControl_main.Name = "tabControl_main";
             this.tabControl_main.SelectedIndex = 0;
-            this.tabControl_main.Size = new System.Drawing.Size(474, 277);
+            this.tabControl_main.Size = new System.Drawing.Size(473, 282);
             this.tabControl_main.TabIndex = 0;
             this.tabControl_main.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.tabControl_main_DrawItem);
             this.tabControl_main.SelectedIndexChanged += new System.EventHandler(this.tabControl_main_SelectedIndexChanged);
@@ -123,7 +130,7 @@
             this.tabPage_settings.Controls.Add(this.button_settings_entityDefault);
             this.tabPage_settings.Location = new System.Drawing.Point(4, 22);
             this.tabPage_settings.Name = "tabPage_settings";
-            this.tabPage_settings.Size = new System.Drawing.Size(466, 251);
+            this.tabPage_settings.Size = new System.Drawing.Size(465, 256);
             this.tabPage_settings.TabIndex = 2;
             this.tabPage_settings.Text = "参数设定";
             // 
@@ -267,17 +274,55 @@
             // tabPage_searchBiblio
             // 
             this.tabPage_searchBiblio.BackColor = System.Drawing.Color.DimGray;
-            this.tabPage_searchBiblio.Controls.Add(this.comboBox_from);
-            this.tabPage_searchBiblio.Controls.Add(this.textBox_queryWord);
-            this.tabPage_searchBiblio.Controls.Add(this.button_search);
-            this.tabPage_searchBiblio.Controls.Add(this.dpTable_browseLines);
+            this.tabPage_searchBiblio.Controls.Add(this.tableLayoutPanel_search);
             this.tabPage_searchBiblio.ForeColor = System.Drawing.Color.White;
             this.tabPage_searchBiblio.Location = new System.Drawing.Point(4, 22);
             this.tabPage_searchBiblio.Name = "tabPage_searchBiblio";
-            this.tabPage_searchBiblio.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_searchBiblio.Size = new System.Drawing.Size(466, 251);
+            this.tabPage_searchBiblio.Size = new System.Drawing.Size(465, 256);
             this.tabPage_searchBiblio.TabIndex = 0;
             this.tabPage_searchBiblio.Text = "检索书目";
+            // 
+            // tableLayoutPanel_search
+            // 
+            this.tableLayoutPanel_search.ColumnCount = 1;
+            this.tableLayoutPanel_search.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel_search.Controls.Add(this.panel_search, 0, 0);
+            this.tableLayoutPanel_search.Controls.Add(this.dpTable_browseLines, 0, 1);
+            this.tableLayoutPanel_search.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel_search.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel_search.Margin = new System.Windows.Forms.Padding(0);
+            this.tableLayoutPanel_search.Name = "tableLayoutPanel_search";
+            this.tableLayoutPanel_search.RowCount = 2;
+            this.tableLayoutPanel_search.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel_search.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel_search.Size = new System.Drawing.Size(465, 256);
+            this.tableLayoutPanel_search.TabIndex = 13;
+            // 
+            // panel_search
+            // 
+            this.panel_search.AutoSize = true;
+            this.panel_search.Controls.Add(this.button_search);
+            this.panel_search.Controls.Add(this.comboBox_from);
+            this.panel_search.Controls.Add(this.textBox_queryWord);
+            this.panel_search.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel_search.Location = new System.Drawing.Point(0, 3);
+            this.panel_search.Margin = new System.Windows.Forms.Padding(0, 3, 0, 0);
+            this.panel_search.Name = "panel_search";
+            this.panel_search.Size = new System.Drawing.Size(465, 29);
+            this.panel_search.TabIndex = 12;
+            // 
+            // button_search
+            // 
+            this.button_search.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_search.Image = ((System.Drawing.Image)(resources.GetObject("button_search.Image")));
+            this.button_search.Location = new System.Drawing.Point(390, 0);
+            this.button_search.Name = "button_search";
+            this.button_search.Size = new System.Drawing.Size(75, 23);
+            this.button_search.TabIndex = 11;
+            this.button_search.Text = "检索(&S)";
+            this.button_search.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
+            this.button_search.UseVisualStyleBackColor = true;
+            this.button_search.Click += new System.EventHandler(this.button_search_Click);
             // 
             // comboBox_from
             // 
@@ -288,7 +333,7 @@
             "书名",
             "作者",
             "出版社"});
-            this.comboBox_from.Location = new System.Drawing.Point(6, 6);
+            this.comboBox_from.Location = new System.Drawing.Point(3, 2);
             this.comboBox_from.Name = "comboBox_from";
             this.comboBox_from.Size = new System.Drawing.Size(121, 20);
             this.comboBox_from.TabIndex = 9;
@@ -298,31 +343,15 @@
             this.textBox_queryWord.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_queryWord.Font = new System.Drawing.Font("宋体", 12F);
-            this.textBox_queryWord.Location = new System.Drawing.Point(133, 5);
+            this.textBox_queryWord.Location = new System.Drawing.Point(130, 0);
             this.textBox_queryWord.Name = "textBox_queryWord";
-            this.textBox_queryWord.Size = new System.Drawing.Size(249, 26);
+            this.textBox_queryWord.Size = new System.Drawing.Size(254, 26);
             this.textBox_queryWord.TabIndex = 10;
             this.textBox_queryWord.Enter += new System.EventHandler(this.textBox_queryWord_Enter);
             this.textBox_queryWord.Leave += new System.EventHandler(this.textBox_queryWord_Leave);
             // 
-            // button_search
-            // 
-            this.button_search.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_search.Image = ((System.Drawing.Image)(resources.GetObject("button_search.Image")));
-            this.button_search.Location = new System.Drawing.Point(388, 4);
-            this.button_search.Name = "button_search";
-            this.button_search.Size = new System.Drawing.Size(75, 23);
-            this.button_search.TabIndex = 11;
-            this.button_search.Text = "检索(&S)";
-            this.button_search.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
-            this.button_search.UseVisualStyleBackColor = true;
-            this.button_search.Click += new System.EventHandler(this.button_search_Click);
-            // 
             // dpTable_browseLines
             // 
-            this.dpTable_browseLines.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.dpTable_browseLines.AutoDocCenter = true;
             this.dpTable_browseLines.BackColor = System.Drawing.Color.DimGray;
             this.dpTable_browseLines.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
@@ -330,6 +359,7 @@
             this.dpTable_browseLines.Columns.Add(this.dpColumn_recPath);
             this.dpTable_browseLines.ColumnsBackColor = System.Drawing.Color.Gray;
             this.dpTable_browseLines.ColumnsForeColor = System.Drawing.Color.White;
+            this.dpTable_browseLines.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dpTable_browseLines.DocumentBorderColor = System.Drawing.Color.DarkGray;
             this.dpTable_browseLines.DocumentMargin = new System.Windows.Forms.Padding(8);
             this.dpTable_browseLines.DocumentOrgX = ((long)(0));
@@ -342,10 +372,11 @@
             this.dpTable_browseLines.HoverBackColor = System.Drawing.SystemColors.HotTrack;
             this.dpTable_browseLines.InactiveHighlightBackColor = System.Drawing.SystemColors.InactiveCaption;
             this.dpTable_browseLines.InactiveHightlightForeColor = System.Drawing.SystemColors.InactiveCaptionText;
-            this.dpTable_browseLines.Location = new System.Drawing.Point(3, 33);
+            this.dpTable_browseLines.Location = new System.Drawing.Point(0, 32);
+            this.dpTable_browseLines.Margin = new System.Windows.Forms.Padding(0);
             this.dpTable_browseLines.Name = "dpTable_browseLines";
             this.dpTable_browseLines.Padding = new System.Windows.Forms.Padding(12);
-            this.dpTable_browseLines.Size = new System.Drawing.Size(460, 215);
+            this.dpTable_browseLines.Size = new System.Drawing.Size(465, 224);
             this.dpTable_browseLines.TabIndex = 8;
             this.dpTable_browseLines.Text = "dpTable1";
             this.dpTable_browseLines.PaintRegion += new DigitalPlatform.CommonControl.PaintRegionEventHandler(this.dpTable_browseLines_PaintRegion);
@@ -379,8 +410,7 @@
             this.tabPage_biblioAndItems.ForeColor = System.Drawing.Color.White;
             this.tabPage_biblioAndItems.Location = new System.Drawing.Point(4, 22);
             this.tabPage_biblioAndItems.Name = "tabPage_biblioAndItems";
-            this.tabPage_biblioAndItems.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_biblioAndItems.Size = new System.Drawing.Size(466, 251);
+            this.tabPage_biblioAndItems.Size = new System.Drawing.Size(465, 256);
             this.tabPage_biblioAndItems.TabIndex = 1;
             this.tabPage_biblioAndItems.Text = "种和册";
             // 
@@ -388,7 +418,8 @@
             // 
             this.splitContainer_biblioAndItems.BackColor = System.Drawing.Color.DimGray;
             this.splitContainer_biblioAndItems.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer_biblioAndItems.Location = new System.Drawing.Point(3, 3);
+            this.splitContainer_biblioAndItems.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer_biblioAndItems.Margin = new System.Windows.Forms.Padding(0);
             this.splitContainer_biblioAndItems.Name = "splitContainer_biblioAndItems";
             // 
             // splitContainer_biblioAndItems.Panel1
@@ -398,8 +429,8 @@
             // splitContainer_biblioAndItems.Panel2
             // 
             this.splitContainer_biblioAndItems.Panel2.Controls.Add(this.flowLayoutPanel1);
-            this.splitContainer_biblioAndItems.Size = new System.Drawing.Size(460, 245);
-            this.splitContainer_biblioAndItems.SplitterDistance = 231;
+            this.splitContainer_biblioAndItems.Size = new System.Drawing.Size(465, 256);
+            this.splitContainer_biblioAndItems.SplitterDistance = 233;
             this.splitContainer_biblioAndItems.SplitterWidth = 8;
             this.splitContainer_biblioAndItems.TabIndex = 0;
             this.splitContainer_biblioAndItems.DoubleClick += new System.EventHandler(this.splitContainer_biblioAndItems_DoubleClick);
@@ -414,8 +445,9 @@
             this.easyMarcControl1.IncludeNumber = false;
             this.easyMarcControl1.Location = new System.Drawing.Point(0, 0);
             this.easyMarcControl1.MarcDefDom = null;
+            this.easyMarcControl1.Margin = new System.Windows.Forms.Padding(0);
             this.easyMarcControl1.Name = "easyMarcControl1";
-            this.easyMarcControl1.Size = new System.Drawing.Size(231, 245);
+            this.easyMarcControl1.Size = new System.Drawing.Size(233, 256);
             this.easyMarcControl1.TabIndex = 0;
             this.easyMarcControl1.SelectionChanged += new System.EventHandler(this.easyMarcControl1_SelectionChanged);
             this.easyMarcControl1.GetConfigDom += new DigitalPlatform.Marc.GetConfigDomEventHandle(this.easyMarcControl1_GetConfigDom);
@@ -428,8 +460,9 @@
             this.flowLayoutPanel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 0);
+            this.flowLayoutPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(221, 245);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(224, 256);
             this.flowLayoutPanel1.TabIndex = 0;
             this.flowLayoutPanel1.SizeChanged += new System.EventHandler(this.flowLayoutPanel1_SizeChanged);
             this.flowLayoutPanel1.Enter += new System.EventHandler(this.flowLayoutPanel1_Enter);
@@ -553,14 +586,29 @@
             this.toolStripLabel_biblioSource.Size = new System.Drawing.Size(0, 22);
             this.toolStripLabel_biblioSource.ToolTipText = "书目记录来源";
             // 
+            // tableLayoutPanel_main
+            // 
+            this.tableLayoutPanel_main.ColumnCount = 1;
+            this.tableLayoutPanel_main.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel_main.Controls.Add(this.tabControl_main, 0, 0);
+            this.tableLayoutPanel_main.Controls.Add(this.toolStrip1, 0, 1);
+            this.tableLayoutPanel_main.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel_main.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel_main.Margin = new System.Windows.Forms.Padding(0);
+            this.tableLayoutPanel_main.Name = "tableLayoutPanel_main";
+            this.tableLayoutPanel_main.RowCount = 2;
+            this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel_main.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel_main.Size = new System.Drawing.Size(473, 307);
+            this.tableLayoutPanel_main.TabIndex = 10;
+            // 
             // EntityRegisterWizard
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.DimGray;
             this.ClientSize = new System.Drawing.Size(473, 307);
-            this.Controls.Add(this.toolStrip1);
-            this.Controls.Add(this.tabControl_main);
+            this.Controls.Add(this.tableLayoutPanel_main);
             this.DoubleBuffered = true;
             this.ForeColor = System.Drawing.Color.White;
             this.Name = "EntityRegisterWizard";
@@ -582,7 +630,10 @@
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.tabPage_searchBiblio.ResumeLayout(false);
-            this.tabPage_searchBiblio.PerformLayout();
+            this.tableLayoutPanel_search.ResumeLayout(false);
+            this.tableLayoutPanel_search.PerformLayout();
+            this.panel_search.ResumeLayout(false);
+            this.panel_search.PerformLayout();
             this.tabPage_biblioAndItems.ResumeLayout(false);
             this.splitContainer_biblioAndItems.Panel1.ResumeLayout(false);
             this.splitContainer_biblioAndItems.Panel2.ResumeLayout(false);
@@ -590,8 +641,9 @@
             this.splitContainer_biblioAndItems.ResumeLayout(false);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
+            this.tableLayoutPanel_main.ResumeLayout(false);
+            this.tableLayoutPanel_main.PerformLayout();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -634,5 +686,8 @@
         private System.Windows.Forms.Button button_settings_reCreateServersXml;
         private System.Windows.Forms.Button button_settings_bilbioDefault;
         private System.Windows.Forms.ToolStripLabel toolStripLabel_biblioSource;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_main;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_search;
+        private System.Windows.Forms.Panel panel_search;
     }
 }
