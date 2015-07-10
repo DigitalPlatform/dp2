@@ -258,6 +258,51 @@ namespace DigitalPlatform.EasyMarc
                 OnSelectionChanged(new EventArgs());
         }
 
+        internal void Verify()
+        {
+            for (int i = 0; i < this.Items.Count;i++ )
+            {
+                EasyLine start = this.Items[i];
+
+                for(int j=i+1;j<this.Items.Count;j++)
+                {
+                    EasyLine current = this.Items[j];
+
+                    if (start.textBox_content == current.textBox_content)
+                        throw new Exception(i.ToString() + "==" + j.ToString());
+                }
+            }
+
+            for (int i = 0; i < this.Items.Count; i++)
+            {
+                EasyLine line = this.Items[i];
+
+                for (int j = 0; j < this.tableLayoutPanel_content.ColumnStyles.Count; j++)
+                {
+                    Control control = tableLayoutPanel_content.GetAnyControlAt(j, i);
+
+                    Debug.Assert(control != null, "");
+
+                    if (j == 0)
+                        Debug.Assert(control == line.label_color, "");
+                    if (j == 1)
+                        Debug.Assert(control == line.label_caption, "");
+                    if (j == 2)
+                        Debug.Assert(control == line.splitter, "");
+                    if (j == 3)
+                        Debug.Assert(control == line.textBox_content, "");
+
+                    int row_span = this.tableLayoutPanel_content.GetRowSpan(control);
+                    Debug.Assert(row_span == 1, "");
+
+                    int col_span = this.tableLayoutPanel_content.GetColumnSpan(control);
+                    Debug.Assert(col_span == 1, "");
+
+                }
+            }
+
+        }
+
         // 得到上一个可以输入内容的字段或子字段对象
         // parameters:
         //      ref_line    参考的对象。从它前面一个开始获取。如果为 null，表示获取最后一个可编辑的对象
@@ -1282,6 +1327,10 @@ namespace DigitalPlatform.EasyMarc
 
             if (bChanged == true)
                 this.FireTextChanged();
+
+#if DEBUG
+            this.Verify();
+#endif
 
             return subfield_line;
         }
@@ -2890,6 +2939,8 @@ namespace DigitalPlatform.EasyMarc
 
             try
             {
+                List<Control> hidden_controls = new List<Control>();
+
                 // 移除本行相关的控件
                 table.Controls.Remove(this.label_color);
                 table.Controls.Remove(this.label_caption);
@@ -2899,7 +2950,6 @@ namespace DigitalPlatform.EasyMarc
 
                 Debug.Assert(this.Container.Items.Count == table.RowCount - 2, "");
 
-                List<Control> hidden_controls = new List<Control>();
                 // 然后压缩后方的
                 int nEnd = Math.Min(table.RowCount - 1 - 1, this.Container.Items.Count - 1);
                 for (int i = nRow; i < nEnd; i++)
@@ -2912,15 +2962,19 @@ namespace DigitalPlatform.EasyMarc
                         Control control = table.GetAnyControlAt(j, i + EasyMarcControl.RESERVE_LINES + 1);
                         if (control != null)
                         {
-                            table.Controls.Remove(control);
                             if (control.Visible == false)
                             {
                                 control.Visible = true;
                                 hidden_controls.Add(control);
                             }
+                            table.Controls.Remove(control);
                             // Add 对于插入 Visible = false 的 Control 有问题。
                             // 为了避免问题，对这样的 Control 先显示，插入，最后再恢复为隐藏状态
                             table.Controls.Add(control, j, i + EasyMarcControl.RESERVE_LINES);
+                        }
+                        else
+                        {
+                            Debug.Assert(false, "");
                         }
                     }
 
@@ -2967,15 +3021,19 @@ namespace DigitalPlatform.EasyMarc
                         Control control = table.GetAnyControlAt(j, i + EasyMarcControl.RESERVE_LINES);
                         if (control != null)
                         {
-                            table.Controls.Remove(control);
                             if (control.Visible == false)
                             {
                                 control.Visible = true;
                                 hidden_controls.Add(control);
                             }
+                            table.Controls.Remove(control);
                             // Add 对于插入 Visible = false 的 Control 有问题。
                             // 为了避免问题，对这样的 Control 先显示，插入，最后再恢复为隐藏状态
                             table.Controls.Add(control, j, i + EasyMarcControl.RESERVE_LINES + 1);
+                        }
+                        else
+                        {
+                            Debug.Assert(false, "");
                         }
                     }
                 }
@@ -2984,12 +3042,44 @@ namespace DigitalPlatform.EasyMarc
                 table.Controls.Add(this.label_caption, 1, nRow + EasyMarcControl.RESERVE_LINES);
                 if (this.splitter != null)
                     table.Controls.Add(this.splitter, 2, nRow + EasyMarcControl.RESERVE_LINES);
+                if (this.textBox_content.Visible == false)
+                {
+                    this.textBox_content.Visible = true;
+                    hidden_controls.Add(this.textBox_content);
+                }
+                // 插入前，这里应该没有 Control
+                {
+                    // 这一句话必须有，不然会出现 BUG
+                    Control temp = table.GetAnyControlAt(3, nRow + EasyMarcControl.RESERVE_LINES);
+                    Debug.Assert(temp == null, "");
+                }
+
                 table.Controls.Add(this.textBox_content, 3, nRow + EasyMarcControl.RESERVE_LINES);
+
+#if NO
+#if DEBUG
+                // 插入后，这里应该有 Control
+                {
+                    Control temp = table.GetAnyControlAt(3, nRow + EasyMarcControl.RESERVE_LINES);
+                    Debug.Assert(temp != null, "");
+                }
+#endif
+#endif
 
                 foreach (Control control in hidden_controls)
                 {
                     control.Visible = false;
                 }
+
+#if NO
+#if DEBUG
+                // 恢复隐藏后，这里应该有 Control
+                {
+                    Control temp = table.GetAnyControlAt(3, nRow + EasyMarcControl.RESERVE_LINES);
+                    Debug.Assert(temp != null, "");
+                }
+#endif
+#endif
             }
             finally
             {
@@ -3336,12 +3426,23 @@ namespace DigitalPlatform.EasyMarc
             menuItem.Checked = this.Container.IncludeNumber;
             contextMenu.MenuItems.Add(menuItem);
 
+            //
+            menuItem = new MenuItem("Verify");
+            menuItem.Click += new System.EventHandler(this.menu_verify_Click);
+            contextMenu.MenuItems.Add(menuItem);
+
+
             /*
             menuItem = new MenuItem("test");
             menuItem.Click += new System.EventHandler(this.menu_test_Click);
             contextMenu.MenuItems.Add(menuItem);
              * */
             contextMenu.Show(this.label_color, new Point(e.X, e.Y));
+        }
+
+        void menu_verify_Click(object sender, EventArgs e)
+        {
+            this.Container.Verify();
         }
 
         // 打开定长模板对话框

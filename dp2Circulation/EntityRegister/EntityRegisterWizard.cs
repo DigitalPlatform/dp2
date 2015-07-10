@@ -4701,23 +4701,31 @@ out strError);
 
         private void button_setting_reCreateServersXml_Click(object sender, EventArgs e)
         {
-            string strError = "";
-            // string strFileName = Path.Combine(this.MainForm.ServerCfgDir, "servers.xml");
-            // 当前登录的主要服务器不同，则需要的 xml 配置文件是不同的。应当存储在各自的目录中
-            string strFileName = Path.Combine(this.MainForm.ServerCfgDir, ReportForm.GetValidPathString(this.MainForm.GetCurrentUserName()) + "\\servers.xml");
-            PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strFileName));
-
-            // 创建 servers.xml 配置文件
-            int nRet = this.MainForm.BuildServersCfgFile(strFileName,
-                out strError);
-            if (nRet == -1)
+            this.EnableControls(false);
+            try
             {
-                MessageBox.Show(this, strError);
-                return;
-            }
+                string strError = "";
+                // string strFileName = Path.Combine(this.MainForm.ServerCfgDir, "servers.xml");
+                // 当前登录的主要服务器不同，则需要的 xml 配置文件是不同的。应当存储在各自的目录中
+                string strFileName = Path.Combine(this.MainForm.ServerCfgDir, ReportForm.GetValidPathString(this.MainForm.GetCurrentUserName()) + "\\servers.xml");
+                PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strFileName));
 
-            // 重新加载
-            LoadServerXml();
+                // 创建 servers.xml 配置文件
+                int nRet = this.MainForm.BuildServersCfgFile(strFileName,
+                    out strError);
+                if (nRet == -1)
+                {
+                    MessageBox.Show(this, strError);
+                    return;
+                }
+
+                // 重新加载
+                LoadServerXml();
+            }
+            finally
+            {
+                this.EnableControls(true);
+            }
         }
 
         public string UnimarcBiblioDefault

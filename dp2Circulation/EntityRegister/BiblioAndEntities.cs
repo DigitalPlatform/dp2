@@ -1062,6 +1062,8 @@ MessageBoxDefaultButton.Button2);
         // 将册记录编辑控件加入末尾。注意末尾可能有 Button 控件，要插入在它前面
         void AddEditControl(EntityEditControl edit)
         {
+            this.flowLayoutPanel1.SuspendLayout();
+
             List<Control> buttons = new List<Control>();
             // 先将 Button 标识出来
             foreach (Control control in this.flowLayoutPanel1.Controls)
@@ -1093,6 +1095,8 @@ MessageBoxDefaultButton.Button2);
             {
                 control.TabIndex = i++;
             }
+
+            this.flowLayoutPanel1.ResumeLayout(true);
         }
 
         void edit_PaintContent(object sender, PaintEventArgs e)
