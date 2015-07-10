@@ -173,7 +173,6 @@ namespace dp2Circulation
 
                 Debug.Assert(entities != null, "");
 
-
                 for (int i = 0; i < entities.Length; i++)
                 {
                     if (entities[i].ErrorCode != ErrorCodeValue.NoError)
@@ -1638,7 +1637,6 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                 bookitem.Barcode = "";
                 bookitem.Parent = Global.GetRecordID(this.BiblioRecPath);
 
-
                 // 加入列表
                 this.Items.Add(bookitem);
                 bookitem.ItemDisplayState = ItemDisplayState.New;
@@ -1770,10 +1768,8 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                 goto ERROR1;
             }
 
-
             bookitem.Barcode = strBarcode;
             bookitem.Parent = Global.GetRecordID(this.BiblioRecPath);
-
 
             // 先加入列表
             this.Items.Add(bookitem);
@@ -1898,6 +1894,48 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
         ERROR1:
             MessageBox.Show(ForegroundWindow.Instance, strError);
             return;
+        }
+
+        // 提交实体保存请求
+        // return:
+        //      -1  出错
+        //      0   没有必要保存
+        //      1   保存成功
+        /// <summary>
+        /// 提交 Items 保存请求
+        /// </summary>
+        /// <returns>-1: 出错; 0: 没有必要保存; 1: 保存成功</returns>
+        public override int SaveItems(out string strError)
+        {
+            // TODO: 是否要先保存以前的选择，功能执行完以后恢复以前的选择?
+
+            ListViewUtil.ClearSelection(this.listView);
+            // this.listView.SelectedItems.Clear();
+
+            // 如果必要，创建索取号
+            foreach (ListViewItem item in this.listView.Items)
+            {
+                BookItem bookitem = (BookItem)item.Tag;
+                if (bookitem == null)
+                    continue;
+
+                if (StringUtil.HasHead(bookitem.AccessNo, "@accessNo") == true)
+                {
+                    item.Selected = true;
+                }
+            }
+
+            if (this.listView.SelectedItems.Count > 0)
+            {
+                GenerateDataEventArgs ret = this.DoGenerateData("CreateCallNumber", false);    // 直接启动CreateCallNumber()函数
+                if (string.IsNullOrEmpty(ret.ErrorInfo) == false)
+                {
+                    strError = "保存册记录前创建索取号失败: " + ret.ErrorInfo + "\r\n\r\n保存没有成功";
+                    return -1;
+                }
+            }
+
+            return base.SaveItems(out strError);
         }
 
         // 外部调用，设置一个实体记录。
@@ -2093,7 +2131,7 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                 // 设置缺省值
                 nRet = SetItemDefaultValues(
                     "quickRegister_default",
-                true,
+                    true,
                     bookitem,
                     out strError);
                 if (nRet == -1)

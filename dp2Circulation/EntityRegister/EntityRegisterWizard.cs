@@ -1397,6 +1397,18 @@ out string strError)
                             int i = 0;
                             foreach (BiblioItem item in loader)
                             {
+                                if (string.IsNullOrEmpty(item.ErrorInfo) == false)
+                                {
+                                    AddBiblioBrowseLine(
+                                        TYPE_ERROR,
+                                        item.RecPath,
+                                        item.ErrorInfo,
+                                        null,
+                                        false);
+                                    i++;
+                                    continue;
+                                }
+
                                 string strXml = item.Content;
 
                                 string strMarcSyntax = "";
@@ -1740,6 +1752,8 @@ out string strError)
                 strError = "XML 转换到 MARC 记录时出错: " + strError;
                 return -1;
             }
+
+            Debug.Assert(string.IsNullOrEmpty(strMarcSyntax) == false, "");
 
             nRet = BuildMarcBrowseText(
                 strMarcSyntax,

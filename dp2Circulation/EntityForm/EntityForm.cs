@@ -4138,6 +4138,11 @@ true);
             string strResultValue = "";
             int nRet = 0;
 
+            // 2015/7/10
+            // @accessNo 只能由前端处理
+            if (strMacroName == "@accessNo")
+                return strMacroName;
+
             // 书目记录XML格式
             string strXmlBody = "";
 
@@ -4154,7 +4159,6 @@ true);
                     return strError;
             }
 
-
             // 获取书目记录的局部
             nRet = GetBiblioPart(this.BiblioRecPath,
                 strXmlBody,
@@ -4164,14 +4168,13 @@ true);
             if (nRet == -1)
             {
                 if (String.IsNullOrEmpty(strResultValue) == true)
-                    return strError;
+                    return strMacroName + ":error:" + strError;
 
                 return strResultValue;
             }
 
             return strResultValue;
         }
-
 
         // 全部保存
         private void button_save_Click(object sender, EventArgs e)

@@ -1330,7 +1330,7 @@ namespace dp2Circulation
         /// 提交 Items 保存请求
         /// </summary>
         /// <returns>-1: 出错; 0: 没有必要保存; 1: 保存成功</returns>
-        public int SaveItems(out string strError)
+        public virtual int SaveItems(out string strError)
         {
             strError = "";
             if (this.Items == null)
@@ -1427,7 +1427,7 @@ namespace dp2Circulation
         /// 提交 Items 保存请求
         /// </summary>
         /// <returns>-1: 出错; 0: 没有必要保存; 1: 保存成功</returns>
-        public int DoSaveItems()
+        public virtual int DoSaveItems()
         {
             string strError = "";
             int nRet = SaveItems(out strError);

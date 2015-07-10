@@ -1432,18 +1432,42 @@ namespace DigitalPlatform.LibraryServer
                     return nRet;
             }
 
-            // 2014/11/28
-            string strPrice = DomUtil.GetElementText(itemdom.DocumentElement, "price");
-            if (string.IsNullOrEmpty(strPrice) == false)
+            // 检查价格字符串
+            if (strAction == "new"
+|| strAction == "change"
+|| strAction == "move")
             {
-                // return:
-                //      -1  调用出错
-                //      0   校验正确
-                //      1   校验发现错误
-                nRet = VerifyItemPrice(strLibraryCode, strPrice, out strError);
-                if (nRet != 0)
-                    return nRet;
+                // 2014/11/28
+                string strPrice = DomUtil.GetElementText(itemdom.DocumentElement, "price");
+                if (string.IsNullOrEmpty(strPrice) == false)
+                {
+                    // return:
+                    //      -1  调用出错
+                    //      0   校验正确
+                    //      1   校验发现错误
+                    nRet = VerifyItemPrice(strLibraryCode, strPrice, out strError);
+                    if (nRet != 0)
+                        return nRet;
+                }
             }
+
+            // 2015/7/10
+            // 检查索取号字符串
+            if (strAction == "new"
+|| strAction == "change"
+|| strAction == "move")
+            {
+                string strAccessNo = DomUtil.GetElementText(itemdom.DocumentElement, "accessNo");
+                if (string.IsNullOrEmpty(strAccessNo) == false)
+                {
+                    if (StringUtil.HasHead(strAccessNo, "@accessNo") == true)
+                    {
+                        strError = "索取号字符串中的宏尚未兑现";
+                        return 1;
+                    }
+                }
+            }
+
             return 0;
         }
 

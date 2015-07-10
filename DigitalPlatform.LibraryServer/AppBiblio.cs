@@ -441,6 +441,7 @@ namespace DigitalPlatform.LibraryServer
                 if (formats != null)
                 {
                     List<string> temp_results = null;
+                    // TODO: getbibliopart 应能返回函数的值
                     nRet = BuildFormats(
                         sessioninfo,
                         strCurrentBiblioRecPath,

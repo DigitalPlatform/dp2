@@ -672,11 +672,6 @@ namespace DigitalPlatform.GUI
         public static void ClearSelection(ListView list)
         {
             list.SelectedItems.Clear();
-            /*
-            for (int i = 0; i < list.SelectedItems.Count; i++)
-            {
-                list.SelectedItems[i].Selected = false;
-            }*/
         }
 
         // Çå³ýÈ«²¿ Checked ×´Ì¬

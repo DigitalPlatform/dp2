@@ -209,7 +209,6 @@ namespace DigitalPlatform.CommonControl
                 if (this.m_focusObj != value)
                     bChanged = true;
 
-
                 if (this.m_focusObj != null
                     && bChanged == true/*this.m_focusObj != value*/)
                 {
@@ -221,6 +220,9 @@ namespace DigitalPlatform.CommonControl
                 {
                     this.InvalidateObject(this.m_focusObj);
                 }
+
+                // 2015/7/10
+                this.m_shiftStartObj = value;
             }
         }
 
@@ -1031,7 +1033,6 @@ namespace DigitalPlatform.CommonControl
 
         protected override void OnMouseDown(MouseEventArgs e)
         {
-            
             if (GuiUtil.PtInRect(e.X, e.Y, this.ClientRectangle) == false)
             {
                 // 防止在卷滚条上单击后拖动造成副作用
@@ -1121,6 +1122,14 @@ namespace DigitalPlatform.CommonControl
 
                         if (bShift == true)
                         {
+                            // //
+                            if (this.m_shiftStartObj == null)
+                            {
+                                // 将第一个已经选定的对象作为 shiftStartObject
+                                if (this.SelectedRows.Count > 0)
+                                    this.m_shiftStartObj = this.SelectedRows[0];
+                            }
+
                             bool bChanged = SelectRange(this.m_shiftStartObj, result_line, true);
                             if (bChanged == true
                                 || bNeedTriggerEvent == true)
@@ -2436,7 +2445,6 @@ Color.FromArgb(100, this.m_hoverBackColor)
                 }
 
             SELECT:
-
                 if (nOldIndex != index)
                 {
                     DpRow line = this.Rows[index];
@@ -2474,6 +2482,21 @@ Color.FromArgb(100, this.m_hoverBackColor)
 
                     if (bShift == true)
                     {
+                        if (this.m_shiftStartObj == null)
+                        {
+                            
+                            // 将第一个已经选定的对象作为 shiftStartObject
+                            if (this.m_bFullRowSelect == true)
+                            {
+                                if (this.SelectedRows.Count > 0)
+                                    this.m_shiftStartObj = this.SelectedRows[0];
+                            }
+                            else
+                            {
+                                // TODO:
+                            }
+                        }
+
                         bool bSelectionChanged = SelectRange(this.m_shiftStartObj, line, true);
                         if (bSelectionChanged == true
                             || bNeedTriggerEvent == true)
