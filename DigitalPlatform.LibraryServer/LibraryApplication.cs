@@ -12564,6 +12564,7 @@ strLibraryCode);    // 读者所在的馆代码
         // 检查用户使用 GetRes API 的权限
         // parameters:
         //      strLibraryCodeList  当前用户所管辖的馆代码列表
+        //      strRights   访问者的权限
         //      strLibraryCode  [out]如果是访问读者库，这里返回实际访问的读者库的馆代码。如果不是访问读者库，则返回空
         //      strFilePath  [out]物理文件路径
         // return:
@@ -12571,6 +12572,7 @@ strLibraryCode);    // 读者所在的馆代码
         //      0   不具备权限
         //      1   具备权限
         public int CheckGetResRights(
+            SessionInfo sessioninfo,
             string strLibraryCodeList,
             string strRights,
             string strResPath,
@@ -12615,8 +12617,271 @@ strLibraryCode);    // 读者所在的馆代码
                 return 1;
             }
 
+            string strDbName = StringUtil.GetFirstPartPath(ref strPath);
+
+            // 书目库
+            if (this.IsBiblioDbName(strDbName) == true)
+            {
+                string strRecordID = StringUtil.GetFirstPartPath(ref strPath);
+
+                // cfgs
+                if (strRecordID == "cfgs")
+                {
+                    return 1;   // 书目库下属的配置文件
+                }
+
+                // 记录ID
+                if (StringUtil.IsPureNumber(strRecordID) == true
+                    || strRecordID == "?")
+                {
+                    // 只到记录ID这一层
+                    if (string.IsNullOrEmpty(strPath) == true)
+                    {
+                        return 1;
+                    }
+
+                    string strObject = StringUtil.GetFirstPartPath(ref strPath);
+
+                    // 对象资源
+                    if (strObject == "object")
+                    {
+                        string strObjectID = StringUtil.GetFirstPartPath(ref strPath);
+                        // 根据 ID 得到权限定义进行判断
+                        string strXmlRecordPath = strDbName + "/" + strRecordID;
+
+                        string strObjectRights = "";
+                        // 获得对象的 rights 属性
+                        // 需要先获得元数据 XML，然后从中得到 file 元素的 rights 属性
+                        // return:
+                        //      -1  出错
+                        //      0   没有找到 object id 相关的信息
+                        //      1   找到
+                        int nRet = GetObjectRights(
+            sessioninfo,
+            strXmlRecordPath,
+            strObjectID,
+            out strObjectRights,
+            out strError);
+                        if (nRet == -1)
+                            return -1;
+                        if (nRet == 0)
+                            return 1;   // TODO: 此时是否允许访问?
+                        if (string.IsNullOrEmpty(strObjectRights) == true)
+                            return 1;   // 没有定义 rights 的对象是允许任何访问者来获取的
+
+                        if (CanGet(strRights, strObjectRights) == true)
+                            return 1;
+
+                        strError = "读取资源 " + strResPath + " 被拒绝。不具备相应的权限";
+                        return 0;
+                    }
+                }
+
+                strError = "读取资源 " + strResPath + " 被拒绝。不具备相应的权限";
+                return 0;
+            }
+
+#if NO
+            // 读者库
+            if (this.IsReaderDbName(strDbName, out strLibraryCode) == true)
+            {
+                // 2012/9/22
+                if (SessionInfo.IsGlobalUser(strLibraryCodeList) == false)
+                {
+                    if (StringUtil.IsInList(strLibraryCode, strLibraryCodeList) == false)
+                    {
+                        strError = "写入资源 " + strResPath + " 被拒绝。读者库 '" + strDbName + "' 不在当前用户的管辖范围 '" + strLibraryCodeList + "' 内";
+                        return 0;
+                    }
+                }
+
+                string strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
+
+                // cfgs
+                if (strFirstPart == "cfgs")
+                {
+                    strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
+                    if (strFirstPart == "template")
+                    {
+                        if (StringUtil.IsInList("writetemplate", strRights) == false)
+                        {
+                            strError = "写入模板配置文件 " + strResPath + " 被拒绝。不具备writetemplate权限";
+                            return 0;
+                        }
+                        return 1;   // 如果有了writetemplate权限，就不再需要writeres权限
+                    }
+
+                }
+
+                // 记录ID
+                if (StringUtil.IsPureNumber(strFirstPart) == true
+                    || strFirstPart == "?")
+                {
+                    // 只到记录ID这一层
+                    if (strPath == "")
+                    {
+                        /*
+                        if (StringUtil.IsInList("writerecord", strRights) == false)
+                        {
+                            strError = "直接写入记录 " + strResPath + " 被拒绝。不具备writerecord权限。";
+                            return 0;
+                        }
+                        return 1;   // 如果有了writerecord权限，就不再需要writeres权限
+                         * */
+                        strError = "不允许使用WriteRes()写入读者库记录";
+                        return 0;
+                    }
+
+                    strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
+
+                    // 对象资源
+                    if (strFirstPart == "object")
+                    {
+                        if (StringUtil.IsInList("writeobject", strRights) == false)
+                        {
+                            strError = "写入对象资源 " + strResPath + " 被拒绝。不具备writeobject权限";
+                            return 0;
+                        }
+                        return 1;   // 如果有了writeobject权限，就不再需要writeres权限
+                    }
+                }
+
+                if (StringUtil.IsInList("writeres", strRights) == false)
+                {
+                    strError = "写入资源 " + strResPath + " 被拒绝。不具备writeres权限";
+                    return 0;
+                }
+            }
+#endif
+
+            return 1;
+#if NO
             strError = "获取资源 " + strResPath + " 被拒绝。不具备特定的权限";
             return 0;
+#endif
+        }
+
+        // 对象是否允许被获取?
+        static bool CanGet(string strUserRights, string strObjectRights)
+        {
+            string[] users = strUserRights.Split(new char[] {','}, StringSplitOptions.RemoveEmptyEntries);
+            string[] objects = strObjectRights.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach(string o in objects)
+            {
+                if (IndexOf(users, o) != -1)
+                    return true;
+                if (StringUtil.HasHead(o, "level-") == true)
+                {
+                    if (HasLevel(o, users) == true)
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
+        // strList 中是否包含了高于或者等于 strLevel 要求的字符串?
+        static bool HasLevel(string strLevel, string [] list)
+        {
+            int level = GetLevelNumber(strLevel);
+
+            // string[] list = strList.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (string o in list)
+            {
+                if (StringUtil.HasHead(o, "level-") == true)
+                {
+                    int current = GetLevelNumber(o);
+                    if (current >= level)
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
+        // 获得 "level-10" 字符串中的数字值
+        static int GetLevelNumber(string strText)
+        {
+            int nRet = strText.IndexOf("-");
+            if (nRet == -1)
+                return -1;
+            strText = strText.Substring(nRet + 1);
+            int number = -1;
+            int.TryParse(strText, out number);
+            return number;
+        }
+
+        static int IndexOf(string[] strings, string s)
+        {
+            int i = 0;
+            foreach (string o in strings)
+            {
+                if (s == o)
+                    return i;
+                i++;
+            }
+            return -1;
+        }
+
+        // 获得对象的 rights 属性
+        // 需要先获得元数据 XML，然后从中得到 file 元素的 rights 属性
+        // return:
+        //      -1  出错
+        //      0   没有找到 object id 相关的信息
+        //      1   找到
+        int GetObjectRights(
+            SessionInfo sessioninfo,
+            string strXmlRecordPath,
+            string strObjectID,
+            out string strRights,
+            out string strError)
+        {
+            strError = "";
+            strRights = "";
+
+            RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
+            string strXml = "";
+            string strMetaData = "";
+            byte[] timestamp = null;
+            string strTempOutputPath = "";
+            long lRet = channel.GetRes(strXmlRecordPath,
+                out strXml,
+                out strMetaData,
+                out timestamp,
+                out strTempOutputPath,
+                out strError);
+            if (lRet == -1)
+            {
+                strError = "获得元数据记录 '" + strXmlRecordPath + "' 时出错: " + strError;
+                return -1;
+            }
+
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(strXml);
+            }
+            catch (Exception ex)
+            {
+                strError = "元数据记录 XML 装入 DOM 时出错: " + ex.Message;
+                return -1;
+            }
+
+            XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
+            nsmgr.AddNamespace("dprms", DpNs.dprms);
+
+            var node = dom.DocumentElement.SelectSingleNode("//dprms:file[@id='"+strObjectID+"']", 
+                nsmgr) as XmlElement;
+            if (node == null)
+                return 0;
+            strRights = node.GetAttribute("rights");
+            return 1;
         }
 
         public class ReaderDbCfg

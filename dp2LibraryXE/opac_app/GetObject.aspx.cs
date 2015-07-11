@@ -1,4 +1,6 @@
-﻿using System;
+﻿#define CHANNEL_POOL
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -52,13 +54,23 @@ ref sessioninfo) == false)
 
         string strError = "";
 
+        LibraryChannel channel = null;
+#if CHANNEL_POOL
+            channel = sessioninfo.GetChannel(true, sessioninfo.Parameters);
+#else
+        channel = sessioninfo.GetChannel(false);
+#endif
         int nRet = app.DownloadObject(
             this,
             // flushdelegate,
             // sessioninfo.Channels,
+            channel,
             strURI,
             bSaveAs,
             out strError);
+#if CHANNEL_POOL
+            sessioninfo.ReturnChannel(channel);
+#endif
         if (nRet == -1)
             Response.Write(strError);
 

@@ -73,12 +73,21 @@ namespace DigitalPlatform.CirculationClient
             }
         }
 
+
+        /// <summary>
+        /// 权限值配置文件全路径
+        /// </summary>
+        public string RightsCfgFileName
+        {
+            get;
+            set;
+        }
+
         public const string CaptionNormal = "已上载";
         public const string CaptionNew = "尚未上载(新增对象)";
         public const string CaptionChanged = "尚未上载(修改过的对象)";
         public const string CaptionDeleted = "标记删除";
         public const string CaptionError = "错误";
-
 
         public const int COLUMN_ID = 0;
         public const int COLUMN_STATE = 1;
@@ -87,6 +96,7 @@ namespace DigitalPlatform.CirculationClient
         public const int COLUMN_MIME = 4;
         public const int COLUMN_TIMESTAMP = 5;
         public const int COLUMN_USAGE = 6;
+        public const int COLUMN_RIGHTS = 7;
 
         /*
         public const int TYPE_UPLOADED = 0;
@@ -236,9 +246,10 @@ namespace DigitalPlatform.CirculationClient
                 for (int i = 0; i < nodes.Count; i++)
                 {
                     XmlNode node = nodes[i];
-                    string strID = DomUtil.GetAttr(node, "id");
 
+                    string strID = DomUtil.GetAttr(node, "id");
                     string strUsage = DomUtil.GetAttr(node, "usage");
+                    string strRights = DomUtil.GetAttr(node, "rights");
 
                     ListViewItem item = new ListViewItem();
                     // item.Text = strID;
@@ -278,10 +289,9 @@ namespace DigitalPlatform.CirculationClient
                         continue;
                     }
 
-
                     // state
                     SetLineInfo(item,
-                        strUsage,
+                        // strUsage,
                         LineState.Normal);
 
                     // localpath
@@ -303,8 +313,10 @@ namespace DigitalPlatform.CirculationClient
 
                     // usage
                     ListViewUtil.ChangeItemText(item, COLUMN_USAGE, strUsage);
-                }
 
+                    // rights
+                    ListViewUtil.ChangeItemText(item, COLUMN_RIGHTS, strRights);
+                }
 
                 this.Changed = false;
 
@@ -369,6 +381,19 @@ namespace DigitalPlatform.CirculationClient
             info.ResChanged = bChanged;
         }
 
+        void SetXmlChanged(ListViewItem item,
+bool bChanged)
+        {
+            LineInfo info = (LineInfo)item.Tag;
+            if (info == null)
+            {
+                info = new LineInfo();
+                item.Tag = info;
+            }
+
+            info.XmlChanged = bChanged;
+        }
+
         /*
         void SetLineState(ListViewItem item,
             LineState state)
@@ -415,10 +440,11 @@ namespace DigitalPlatform.CirculationClient
         }
          * */
 
+        // 设置 item 的 Tag，并设置 item 的前景背景颜色
         // parameters:
         //      strInitialUsage 如果为null，则不设置此项
         void SetLineInfo(ListViewItem item,
-            string strInitialUsage,
+            // string strInitialUsage,
             LineState state)
         {
             if (state == LineState.Normal)
@@ -459,8 +485,10 @@ namespace DigitalPlatform.CirculationClient
                 item.Tag = info;
             }
 
+#if NO
             if (strInitialUsage != null)
                 info.InitialUsage = strInitialUsage;
+#endif
             info.LineState = state;
         }
 
@@ -632,7 +660,6 @@ namespace DigitalPlatform.CirculationClient
             }
         }
 
-
         void menu_modify_Click(object sender, EventArgs e)
         {
             if (this.ListView.SelectedItems.Count == 0)
@@ -660,6 +687,11 @@ namespace DigitalPlatform.CirculationClient
             dlg.SizeString = ListViewUtil.GetItemText(item, COLUMN_SIZE);
             dlg.Timestamp = ListViewUtil.GetItemText(item, COLUMN_TIMESTAMP);
             dlg.Usage = ListViewUtil.GetItemText(item, COLUMN_USAGE);
+            dlg.Rights = ListViewUtil.GetItemText(item, COLUMN_RIGHTS);
+            dlg.RightsCfgFileName = this.RightsCfgFileName;
+
+            string strOldUsage = dlg.Usage;
+            string strOldRights = dlg.Rights;
 
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.ShowDialog(this);
@@ -669,7 +701,9 @@ namespace DigitalPlatform.CirculationClient
 
             if (old_state != LineState.New)
             {
-                SetLineInfo(item, null, LineState.Changed);
+                SetLineInfo(item, 
+                    // null, 
+                    LineState.Changed);
                 SetResChanged(item, dlg.ResChanged);
             }
             else
@@ -677,11 +711,16 @@ namespace DigitalPlatform.CirculationClient
                 SetResChanged(item, true);
             }
 
+            if (strOldRights != dlg.Rights
+                || strOldUsage != dlg.Usage)
+                SetXmlChanged(item, true);
+
             ListViewUtil.ChangeItemText(item, COLUMN_MIME, dlg.Mime);
             ListViewUtil.ChangeItemText(item, COLUMN_LOCALPATH, dlg.LocalPath);
             ListViewUtil.ChangeItemText(item, COLUMN_SIZE, dlg.SizeString);
             ListViewUtil.ChangeItemText(item, COLUMN_TIMESTAMP, dlg.Timestamp);
             ListViewUtil.ChangeItemText(item, COLUMN_USAGE, dlg.Usage);
+            ListViewUtil.ChangeItemText(item, COLUMN_RIGHTS, dlg.Rights);
             this.Changed = true;
         }
 
@@ -712,6 +751,7 @@ namespace DigitalPlatform.CirculationClient
 
             dlg.ID = GetNewID();
             dlg.State = "";
+            dlg.RightsCfgFileName = this.RightsCfgFileName;
 
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.ShowDialog(this);
@@ -722,8 +762,11 @@ namespace DigitalPlatform.CirculationClient
             ListViewItem item = new ListViewItem();
             this.ListView.Items.Add(item);
 
-            SetLineInfo(item, null, LineState.New);
+            SetLineInfo(item,
+                // null,
+                LineState.New);
             SetResChanged(item, true);
+            SetXmlChanged(item, true);
 
             ListViewUtil.ChangeItemText(item, COLUMN_ID, dlg.ID);
             ListViewUtil.ChangeItemText(item, COLUMN_MIME, dlg.Mime);
@@ -731,6 +774,7 @@ namespace DigitalPlatform.CirculationClient
             ListViewUtil.ChangeItemText(item, COLUMN_SIZE, dlg.SizeString);
             ListViewUtil.ChangeItemText(item, COLUMN_TIMESTAMP, dlg.Timestamp);
             ListViewUtil.ChangeItemText(item, COLUMN_USAGE, dlg.Usage);
+            ListViewUtil.ChangeItemText(item, COLUMN_RIGHTS, dlg.Rights);
             this.Changed = true;
         }
 
@@ -748,6 +792,8 @@ namespace DigitalPlatform.CirculationClient
 
             return results;
         }
+
+        // TODO: findItemByRights 可以用一个或者多个 right 值进行搜寻
 
         // 返回全部已经标记删除的事项
         public List<ListViewItem> FindAllMaskDeleteItem()
@@ -822,8 +868,17 @@ namespace DigitalPlatform.CirculationClient
         }
 
         public int ChangeObjectFile(ListViewItem item,
+    string strObjectFilePath,
+    string strUsage,
+    out string strError)
+        {
+            return ChangeObjectFile(item, strObjectFilePath, strUsage, "", out strError);
+        }
+
+        public int ChangeObjectFile(ListViewItem item,
             string strObjectFilePath,
             string strUsage,
+            string strRights,
             out string strError)
         {
             strError = "";
@@ -849,6 +904,11 @@ namespace DigitalPlatform.CirculationClient
             dlg.SizeString = ListViewUtil.GetItemText(item, COLUMN_SIZE);
             dlg.Timestamp = ListViewUtil.GetItemText(item, COLUMN_TIMESTAMP);
             dlg.Usage = strUsage;
+            dlg.Rights = strRights;
+            dlg.RightsCfgFileName = this.RightsCfgFileName;
+
+            string strOldUsage = dlg.Usage;
+            string strOldRights = dlg.Rights;
 
             int nRet = dlg.SetObjectFilePath(strObjectFilePath,
             out strError);
@@ -857,7 +917,9 @@ namespace DigitalPlatform.CirculationClient
 
             if (old_state != LineState.New)
             {
-                SetLineInfo(item, null, LineState.Changed);
+                SetLineInfo(item, 
+                    // null, 
+                    LineState.Changed);
                 SetResChanged(item, true);
             }
             else
@@ -865,13 +927,17 @@ namespace DigitalPlatform.CirculationClient
                 SetResChanged(item, true);
             }
 
+            if (strOldRights != dlg.Rights
+                || strOldUsage != dlg.Usage)
+                SetXmlChanged(item, true);
+
             ListViewUtil.ChangeItemText(item, COLUMN_MIME, dlg.Mime);
             ListViewUtil.ChangeItemText(item, COLUMN_LOCALPATH, dlg.LocalPath);
             ListViewUtil.ChangeItemText(item, COLUMN_SIZE, dlg.SizeString);
             ListViewUtil.ChangeItemText(item, COLUMN_TIMESTAMP, dlg.Timestamp);
             ListViewUtil.ChangeItemText(item, COLUMN_USAGE, dlg.Usage);
+            ListViewUtil.ChangeItemText(item, COLUMN_RIGHTS, dlg.Rights);
             this.Changed = true;
-
             return 0;
         }
 
@@ -880,12 +946,14 @@ namespace DigitalPlatform.CirculationClient
         /// </summary>
         /// <param name="strObjectFilePath">对象文件名全路径</param>
         /// <param name="strUsage">用途字符串</param>
+        /// <param name="strRights">权限</param>
         /// <param name="item">返回 ListView 中心创建的 ListViewItem 对象</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>-1: 出错; 0: 成功</returns>
         public int AppendNewItem(
             string strObjectFilePath,
             string strUsage,
+            string strRights,
             out ListViewItem item,
             out string strError)
         {
@@ -897,6 +965,8 @@ namespace DigitalPlatform.CirculationClient
 
             dlg.State = "";
             dlg.Usage = strUsage;
+            dlg.Rights = strRights;
+            dlg.RightsCfgFileName = this.RightsCfgFileName;
 
             int nRet = dlg.SetObjectFilePath(strObjectFilePath,
                 out strError);
@@ -907,8 +977,11 @@ namespace DigitalPlatform.CirculationClient
             item = new ListViewItem();
             this.ListView.Items.Add(item);
 
-            SetLineInfo(item, null, LineState.New);
+            SetLineInfo(item,
+                // null,
+                LineState.New);
             SetResChanged(item, true);
+            SetXmlChanged(item, true);
 
             ListViewUtil.ChangeItemText(item, COLUMN_ID, dlg.ID);
             ListViewUtil.ChangeItemText(item, COLUMN_MIME, dlg.Mime);
@@ -916,8 +989,8 @@ namespace DigitalPlatform.CirculationClient
             ListViewUtil.ChangeItemText(item, COLUMN_SIZE, dlg.SizeString);
             ListViewUtil.ChangeItemText(item, COLUMN_TIMESTAMP, dlg.Timestamp);
             ListViewUtil.ChangeItemText(item, COLUMN_USAGE, dlg.Usage);
+            ListViewUtil.ChangeItemText(item, COLUMN_RIGHTS, dlg.Rights);
             this.Changed = true;
-
             return 0;
         }
 
@@ -948,7 +1021,9 @@ namespace DigitalPlatform.CirculationClient
                 // 保存旧状态
                 SetOldLineState(item, state);
 
-                SetLineInfo(item, null, LineState.Deleted);
+                SetLineInfo(item, 
+                    // null, 
+                    LineState.Deleted);
 
                 this.Changed = true;
 
@@ -1005,7 +1080,9 @@ namespace DigitalPlatform.CirculationClient
                 // 保存旧状态
                 SetOldLineState(item, state);
 
-                SetLineInfo(item, null, LineState.Deleted);
+                SetLineInfo(item, 
+                    // null, 
+                    LineState.Deleted);
 
                 this.Changed = true;
 
@@ -1059,7 +1136,9 @@ namespace DigitalPlatform.CirculationClient
                 Debug.Assert(old_state != LineState.Deleted, "");
 
                 // 恢复标记删除前的旧状态
-                SetLineInfo(item, null, old_state);
+                SetLineInfo(item,
+                    // null, 
+                    old_state);
 
                 this.Changed = true;
             }
@@ -1202,16 +1281,50 @@ namespace DigitalPlatform.CirculationClient
                 LineInfo info = (LineInfo)item.Tag;
                 if (info != null)
                 {
+#if NO
                     string strUsage = ListViewUtil.GetItemText(item, COLUMN_USAGE);
                     if (strUsage != info.InitialUsage)
                         return true;
+#endif
+                    if (info.XmlChanged == true)
+                        return true;
                 }
-
             }
 
             return false;
         }
 
+        // 在 XmlDocument 对象中添加 <file> 元素。新元素加入在根之下
+        public int AddFileFragments(ref XmlDocument domRecord,
+            out string strError)
+        {
+            strError = "";
+            foreach (ListViewItem item in this.ListView.Items)
+            {
+                string strID = ListViewUtil.GetItemText(item, COLUMN_ID);
+
+                if (String.IsNullOrEmpty(strID) == true)
+                    continue;
+
+                string strUsage = ListViewUtil.GetItemText(item, COLUMN_USAGE);
+                string strRights = ListViewUtil.GetItemText(item, COLUMN_RIGHTS);
+
+                XmlElement node = domRecord.CreateElement("dprms",
+                    "file",
+                    DpNs.dprms);
+                domRecord.DocumentElement.AppendChild(node);
+
+                node.SetAttribute("id", strID);
+                if (string.IsNullOrEmpty(strUsage) == false)
+                    node.SetAttribute("usage", strUsage);
+                if (string.IsNullOrEmpty(strRights) == false)
+                    node.SetAttribute("rights", strRights);
+            }
+
+            return 0;
+        }
+
+#if NO
         // 获得全部ID
         public List<string> GetIds()
         {
@@ -1249,12 +1362,13 @@ namespace DigitalPlatform.CirculationClient
                     continue;   // 忽略标记删除的事项
 
                 string strUsage = ListViewUtil.GetItemText(item, COLUMN_USAGE);
-
                 results.Add(strUsage);
             }
 
             return results;
         }
+
+#endif
 
         // 从路径中取出记录号部分
         // parammeters:
@@ -1335,7 +1449,7 @@ namespace DigitalPlatform.CirculationClient
                 {
                     ListViewItem item = this.ListView.Items[i];
                     LineInfo info = (LineInfo)item.Tag;
-                    string strUsage = ListViewUtil.GetItemText(item, COLUMN_USAGE);
+                    // string strUsage = ListViewUtil.GetItemText(item, COLUMN_USAGE);
 
                     LineState state = GetLineState(item);
 
@@ -1347,7 +1461,11 @@ namespace DigitalPlatform.CirculationClient
                             if (info != null
                                 && info.ResChanged == false)
                             {
-                                SetLineInfo(item, strUsage, LineState.Normal);
+                                SetLineInfo(item,
+                                    // strUsage, 
+                                    LineState.Normal);
+                                SetXmlChanged(item, false);
+                                SetResChanged(item, false);
                                 continue;   // 资源没有修改的，则跳过上载
                             }
                         }
@@ -1360,7 +1478,7 @@ namespace DigitalPlatform.CirculationClient
                         if (state == LineState.Deleted)
                         {
                             this.ListView.Items.Remove(item);
-                            i--;    // 2011/11/23
+                            i--;
                         }
 
                         continue;
@@ -1512,10 +1630,12 @@ namespace DigitalPlatform.CirculationClient
 
                     }
 
-                    SetLineInfo(item, strUsage, LineState.Normal);
-
+                    SetLineInfo(item, 
+                        // strUsage, 
+                        LineState.Normal);
+                    SetXmlChanged(item, false);
+                    SetResChanged(item, false);
                 }
-
 
                 this.Changed = false;
                 return nUploadCount;
@@ -1535,7 +1655,6 @@ namespace DigitalPlatform.CirculationClient
                     Stop.Style = old_stop_style;
                 }
             }
-
         }
 
         private void ListView_KeyDown(object sender, KeyEventArgs e)
@@ -1613,9 +1732,11 @@ size.Height);
         // 标记删除前的状态
         public LineState OldLineState = LineState.Normal;
 
-        public string InitialUsage = "";    // 最初的usage值
+        // public string InitialUsage = "";    // 最初的usage值
 
         public bool ResChanged = false; // 资源是否修改过。如果一个事项修改过，但是资源没有修改过，则为usage修改过
+
+        public bool XmlChanged = false; // 描述资源的 usage rights 是否修改过。2015/7/11
     }
 
     enum LineState

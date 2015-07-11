@@ -74,13 +74,13 @@ namespace DigitalPlatform.EasyMarc
             this.DoubleBuffered = true;
 
             InitializeComponent();
+
         }
 
         /// <summary>
         /// 解析宏
         /// </summary>
         public event ParseMacroEventHandler ParseMacro = null;
-
 
         // 原始的行数组
         public List<EasyLine> Items = new List<EasyLine>();
@@ -2590,6 +2590,22 @@ namespace DigitalPlatform.EasyMarc
             }
             return false;
         }
+
+        internal void DoMouseWheel(MouseEventArgs e)
+        {
+            int nValue = this.tableLayoutPanel_content.VerticalScroll.Value;
+            nValue -= e.Delta;
+            if (nValue > this.tableLayoutPanel_content.VerticalScroll.Maximum)
+                nValue = this.tableLayoutPanel_content.VerticalScroll.Maximum;
+            if (nValue < this.tableLayoutPanel_content.VerticalScroll.Minimum)
+                nValue = this.tableLayoutPanel_content.VerticalScroll.Minimum;
+
+            if (this.tableLayoutPanel_content.VerticalScroll.Value != nValue)
+            {
+                this.tableLayoutPanel_content.VerticalScroll.Value = nValue;
+                this.tableLayoutPanel_content.PerformLayout();
+            }
+        }
     }
 
     // 字段行
@@ -3115,6 +3131,9 @@ namespace DigitalPlatform.EasyMarc
             this.textBox_content.KeyPress -= textBox_content_KeyPress;
             this.textBox_content.KeyPress += textBox_content_KeyPress;
 
+            this.textBox_content.MouseWheel -= textBox_content_MouseWheel;
+            this.textBox_content.MouseWheel += textBox_content_MouseWheel;
+
             // this.splitter.Paint += new PaintEventHandler(splitter_Paint);
 
             this.splitter.MouseDown -= new MouseEventHandler(splitter_MouseDown);
@@ -3130,6 +3149,11 @@ namespace DigitalPlatform.EasyMarc
             this.label_caption.MouseWheel -= new MouseEventHandler(textBox_comment_MouseWheel);
             this.label_caption.MouseWheel += new MouseEventHandler(textBox_comment_MouseWheel);
 #endif
+        }
+
+        void textBox_content_MouseWheel(object sender, MouseEventArgs e)
+        {
+            this.Container.DoMouseWheel(e);
         }
 
         void textBox_content_KeyPress(object sender, KeyPressEventArgs e)

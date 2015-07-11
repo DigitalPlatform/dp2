@@ -46,88 +46,91 @@ namespace DigitalPlatform.CirculationClient
             this.label1 = new System.Windows.Forms.Label();
             this.textBox_usage = new System.Windows.Forms.TextBox();
             this.label7 = new System.Windows.Forms.Label();
+            this.textBox_rights = new System.Windows.Forms.TextBox();
+            this.label8 = new System.Windows.Forms.Label();
+            this.button_editRights = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // textBox_timestamp
             // 
-            this.textBox_timestamp.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_timestamp.Location = new System.Drawing.Point(112, 229);
+            this.textBox_timestamp.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_timestamp.Location = new System.Drawing.Point(112, 257);
             this.textBox_timestamp.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_timestamp.Name = "textBox_timestamp";
             this.textBox_timestamp.ReadOnly = true;
             this.textBox_timestamp.Size = new System.Drawing.Size(188, 21);
-            this.textBox_timestamp.TabIndex = 14;
+            this.textBox_timestamp.TabIndex = 17;
             // 
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(7, 231);
+            this.label6.Location = new System.Drawing.Point(7, 259);
             this.label6.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(65, 12);
-            this.label6.TabIndex = 13;
+            this.label6.TabIndex = 16;
             this.label6.Text = "时间戳(&T):";
             // 
             // textBox_mime
             // 
-            this.textBox_mime.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_mime.Location = new System.Drawing.Point(112, 204);
+            this.textBox_mime.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_mime.Location = new System.Drawing.Point(112, 232);
             this.textBox_mime.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_mime.Name = "textBox_mime";
             this.textBox_mime.Size = new System.Drawing.Size(188, 21);
-            this.textBox_mime.TabIndex = 12;
+            this.textBox_mime.TabIndex = 15;
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(7, 206);
+            this.label3.Location = new System.Drawing.Point(7, 234);
             this.label3.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(77, 12);
-            this.label3.TabIndex = 11;
+            this.label3.TabIndex = 14;
             this.label3.Text = "媒体类型(&M):";
             // 
             // button_Cancel
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_Cancel.Location = new System.Drawing.Point(331, 229);
+            this.button_Cancel.Location = new System.Drawing.Point(331, 268);
             this.button_Cancel.Margin = new System.Windows.Forms.Padding(2);
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(75, 22);
-            this.button_Cancel.TabIndex = 16;
+            this.button_Cancel.TabIndex = 19;
             this.button_Cancel.Text = "取消";
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
             // button_OK
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_OK.Location = new System.Drawing.Point(331, 205);
+            this.button_OK.Location = new System.Drawing.Point(331, 244);
             this.button_OK.Margin = new System.Windows.Forms.Padding(2);
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(75, 22);
-            this.button_OK.TabIndex = 15;
+            this.button_OK.TabIndex = 18;
             this.button_OK.Text = "确定";
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
             // textBox_size
             // 
-            this.textBox_size.Location = new System.Drawing.Point(112, 179);
+            this.textBox_size.Location = new System.Drawing.Point(112, 207);
             this.textBox_size.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_size.Name = "textBox_size";
             this.textBox_size.ReadOnly = true;
             this.textBox_size.Size = new System.Drawing.Size(102, 21);
-            this.textBox_size.TabIndex = 10;
+            this.textBox_size.TabIndex = 13;
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(7, 181);
+            this.label5.Location = new System.Drawing.Point(7, 209);
             this.label5.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(53, 12);
-            this.label5.TabIndex = 9;
+            this.label5.TabIndex = 12;
             this.label5.Text = "尺寸(&S):";
             // 
             // button_findLocalPath
@@ -143,8 +146,8 @@ namespace DigitalPlatform.CirculationClient
             // 
             // textBox_localPath
             // 
-            this.textBox_localPath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_localPath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_localPath.Location = new System.Drawing.Point(9, 96);
             this.textBox_localPath.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_localPath.Name = "textBox_localPath";
@@ -183,8 +186,8 @@ namespace DigitalPlatform.CirculationClient
             // 
             // textBox_serverName
             // 
-            this.textBox_serverName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_serverName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_serverName.Cursor = System.Windows.Forms.Cursors.IBeam;
             this.textBox_serverName.Location = new System.Drawing.Point(112, 10);
             this.textBox_serverName.Margin = new System.Windows.Forms.Padding(2);
@@ -205,8 +208,8 @@ namespace DigitalPlatform.CirculationClient
             // 
             // textBox_usage
             // 
-            this.textBox_usage.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_usage.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_usage.Location = new System.Drawing.Point(112, 139);
             this.textBox_usage.Margin = new System.Windows.Forms.Padding(2);
             this.textBox_usage.Name = "textBox_usage";
@@ -223,11 +226,45 @@ namespace DigitalPlatform.CirculationClient
             this.label7.TabIndex = 7;
             this.label7.Text = "用途(&U):";
             // 
+            // textBox_rights
+            // 
+            this.textBox_rights.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_rights.Location = new System.Drawing.Point(112, 164);
+            this.textBox_rights.Margin = new System.Windows.Forms.Padding(2);
+            this.textBox_rights.Name = "textBox_rights";
+            this.textBox_rights.Size = new System.Drawing.Size(188, 21);
+            this.textBox_rights.TabIndex = 10;
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(7, 166);
+            this.label8.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(53, 12);
+            this.label8.TabIndex = 9;
+            this.label8.Text = "权限(&R):";
+            // 
+            // button_editRights
+            // 
+            this.button_editRights.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_editRights.Location = new System.Drawing.Point(304, 164);
+            this.button_editRights.Margin = new System.Windows.Forms.Padding(2);
+            this.button_editRights.Name = "button_editRights";
+            this.button_editRights.Size = new System.Drawing.Size(32, 22);
+            this.button_editRights.TabIndex = 11;
+            this.button_editRights.Text = "...";
+            this.button_editRights.Click += new System.EventHandler(this.button_editRights_Click);
+            // 
             // ResObjectDlg
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(415, 261);
+            this.ClientSize = new System.Drawing.Size(415, 300);
+            this.Controls.Add(this.button_editRights);
+            this.Controls.Add(this.textBox_rights);
+            this.Controls.Add(this.label8);
             this.Controls.Add(this.textBox_usage);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.textBox_timestamp);
@@ -274,5 +311,8 @@ namespace DigitalPlatform.CirculationClient
         private System.Windows.Forms.Label label1;
         public System.Windows.Forms.TextBox textBox_usage;
         private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.TextBox textBox_rights;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.Button button_editRights;
     }
 }

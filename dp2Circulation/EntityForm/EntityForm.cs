@@ -747,6 +747,8 @@ namespace dp2Circulation
                 this.binaryResControl1.Channel = this.Channel;
                 this.binaryResControl1.Stop = this.Progress;
 
+                this.binaryResControl1.RightsCfgFileName = Path.Combine(this.MainForm.DataDir, "binaryresrights.xml");
+
                 this.m_macroutil.ParseOneMacro -= new ParseOneMacroEventHandler(m_macroutil_ParseOneMacro);
                 this.m_macroutil.ParseOneMacro += new ParseOneMacroEventHandler(m_macroutil_ParseOneMacro);
 
@@ -6257,6 +6259,7 @@ true);
             if (this.binaryResControl1 != null
                 && bIncludeFileID == true)  // 2008/12/3 
             {
+#if NO
                 List<string> ids = this.binaryResControl1.GetIds();
                 List<string> usages = this.binaryResControl1.GetUsages();
 
@@ -6278,6 +6281,12 @@ true);
                     if (string.IsNullOrEmpty(strUsage) == false)
                         DomUtil.SetAttr(node, "usage", strUsage);
                 }
+#endif
+                // 在 XmlDocument 对象中添加 <file> 元素。新元素加入在根之下
+                nRet = this.binaryResControl1.AddFileFragments(ref domMarc,
+            out strError);
+                if (nRet == -1)
+                    return -1;
             }
 
 
@@ -6486,13 +6495,11 @@ true);
             bool bDisplaySuccess = StringUtil.IsInList("displaysuccess", strStyle);
             bool bSearchDup = StringUtil.IsInList("searchdup", strStyle);
 
-
             if (this.Cataloging == false)
             {
                 strError = "当前不允许编目功能，因此也不允许保存书目信息的功能";
                 return -1;
             }
-
 
             // 如果刚才在删除后模式，现在取消这个模式 2007/10/15
             if (this.DeletedMode == true)
@@ -6598,7 +6605,6 @@ MessageBoxDefaultButton.Button2);
             if (Channel.ErrorCode == ErrorCode.PartialDenied)
                 bPartialDenied = true;
 
-
             this.BiblioTimestamp = baNewTimestamp;
             this.BiblioRecPath = strOutputPath;
             this.BiblioOriginPath = strOutputPath;
@@ -6620,7 +6626,6 @@ MessageBoxDefaultButton.Button2);
                 if (nRet == -1)
                     goto ERROR1;
             }
-
 
             // 清除ReadOnly状态，如果998$t已经消失
             if (this.m_marcEditor.ReadOnly == true)
@@ -6690,6 +6695,8 @@ MessageBoxDefaultButton.Button2);
 #endif
                     }
                 }
+
+                DoViewComment(false);   // 重新显示固定面板区的属性 XML 2015/7/11
 
                 if (bPartialDenied == true)
                 {
@@ -11649,6 +11656,7 @@ strMARC);
                 nRet = this.binaryResControl1.AppendNewItem(
                     strTempFilePath,
                     strUsage,
+                    "", // rights
                     out item,
                     out strError);
             }

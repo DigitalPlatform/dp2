@@ -8,9 +8,13 @@ using System.Windows.Forms;
 using System.IO;
 
 using DigitalPlatform;
+using DigitalPlatform.GUI;
 
 namespace DigitalPlatform.CirculationClient
 {
+    /// <summary>
+    /// 编辑资源对象的对话框
+    /// </summary>
     public partial class ResObjectDlg : Form
     {
         public ResObjectDlg()
@@ -104,6 +108,18 @@ namespace DigitalPlatform.CirculationClient
             }
         }
 
+        public string Rights
+        {
+            get
+            {
+                return this.textBox_rights.Text;
+            }
+            set
+            {
+                this.textBox_rights.Text = value;
+            }
+        }
+
         bool m_bResChanged = false; // 对象被改变过
         public bool ResChanged
         {
@@ -127,14 +143,12 @@ namespace DigitalPlatform.CirculationClient
 
             this.DialogResult = DialogResult.OK;
             this.Close();
-
         }
 
         private void button_Cancel_Click(object sender, EventArgs e)
         {
             this.DialogResult = DialogResult.Cancel;
             this.Close();
-
         }
 
         private void button_findLocalPath_Click(object sender, EventArgs e)
@@ -207,6 +221,32 @@ namespace DigitalPlatform.CirculationClient
                 return;
 
             this.m_bResChanged = true;
+        }
+
+        /// <summary>
+        /// 权限值配置文件全路径
+        /// </summary>
+        public string RightsCfgFileName
+        {
+            get;
+            set;
+        }
+
+        private void button_editRights_Click(object sender, EventArgs e)
+        {
+            DigitalPlatform.CommonDialog.PropertyDlg dlg = new DigitalPlatform.CommonDialog.PropertyDlg();
+            GuiUtil.AutoSetDefaultFont(dlg);
+
+            dlg.StartPosition = FormStartPosition.CenterScreen;
+            dlg.Text = "对象的权限";
+            dlg.PropertyString = this.textBox_rights.Text;
+            dlg.CfgFileName = RightsCfgFileName;
+            dlg.ShowDialog(this);
+
+            if (dlg.DialogResult != DialogResult.OK)
+                return;
+
+            this.textBox_rights.Text = dlg.PropertyString;
         }
     }
 }

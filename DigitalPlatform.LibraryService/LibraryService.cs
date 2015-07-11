@@ -8595,6 +8595,7 @@ namespace dp2Library
                     else
                     {
                         nRet = app.CheckGetResRights(
+                            sessioninfo,
                             sessioninfo.LibraryCodeList,
                             sessioninfo.RightsOrigin,
                             strCategory,
@@ -11630,6 +11631,7 @@ namespace dp2Library
                     //      0   不具备权限
                     //      1   具备权限
                     int nRet = app.CheckGetResRights(
+                        sessioninfo,
                         sessioninfo.LibraryCodeList,
                         sessioninfo.RightsOrigin,
                         strResPath,
@@ -11703,6 +11705,40 @@ namespace dp2Library
                     result.ErrorInfo = "获取资源被拒绝。不具备getres权限。";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
+                }
+
+                // 判断资源读取权限
+                {
+                    string strFilePath = "";
+                    string strLibraryCode = "";
+
+                    // 检查用户使用 GetRes API 的权限
+                    // return:
+                    //      -1  error
+                    //      0   不具备权限
+                    //      1   具备权限
+                    int nRet = app.CheckGetResRights(
+                        sessioninfo,
+                        sessioninfo.LibraryCodeList,
+                        sessioninfo.RightsOrigin,
+                        strResPath,
+                        out strLibraryCode,
+                        out strFilePath,
+                        out strError);
+                    if (nRet == 0)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = strError;
+                        result.ErrorCode = ErrorCode.AccessDenied;
+                        return result;
+                    }
+                    if (nRet == -1)
+                    {
+                        result.Value = -1;
+                        result.ErrorInfo = strError;
+                        result.ErrorCode = ErrorCode.SystemError;
+                        return result;
+                    }
                 }
 
                 RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);

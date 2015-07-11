@@ -429,7 +429,6 @@ namespace dp2Circulation
             AddEvents(true);
 
             SetMouseWheelSimulateEvent();
-
         }
 
         /*public*/ void SetMouseWheelSimulateEvent()

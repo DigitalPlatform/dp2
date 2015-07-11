@@ -343,7 +343,7 @@ namespace DigitalPlatform.LibraryServer
         [DataMember]
         public string Count = ""; // ¸öÊý ´¿Êý×Ö
 
-        public string ToString()
+        public override string ToString()
         {
             Hashtable table = new Hashtable();
             if (string.IsNullOrEmpty(this.Param) == false)

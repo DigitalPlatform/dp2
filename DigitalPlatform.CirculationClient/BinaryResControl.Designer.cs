@@ -36,6 +36,7 @@ namespace DigitalPlatform.CirculationClient
             this.columnHeader_mime = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_timestamp = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_usage = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_rights = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.SuspendLayout();
             // 
             // ListView
@@ -48,7 +49,8 @@ namespace DigitalPlatform.CirculationClient
             this.columnHeader_size,
             this.columnHeader_mime,
             this.columnHeader_timestamp,
-            this.columnHeader_usage});
+            this.columnHeader_usage,
+            this.columnHeader_rights});
             this.ListView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.ListView.FullRowSelect = true;
             this.ListView.HideSelection = false;
@@ -99,6 +101,11 @@ namespace DigitalPlatform.CirculationClient
             this.columnHeader_usage.Text = "”√Õæ";
             this.columnHeader_usage.Width = 100;
             // 
+            // columnHeader_rights
+            // 
+            this.columnHeader_rights.Text = "»®œﬁ";
+            this.columnHeader_rights.Width = 200;
+            // 
             // BinaryResControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -121,5 +128,6 @@ namespace DigitalPlatform.CirculationClient
         private System.Windows.Forms.ColumnHeader columnHeader_mime;
         private System.Windows.Forms.ColumnHeader columnHeader_timestamp;
         private System.Windows.Forms.ColumnHeader columnHeader_usage;
+        private System.Windows.Forms.ColumnHeader columnHeader_rights;
     }
 }

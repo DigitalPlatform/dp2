@@ -2101,7 +2101,6 @@ strSavedXml);
             if (nRet == -1)
                 return -1;
 
-
             XmlDocument dom = new XmlDocument();
             try
             {
@@ -2112,7 +2111,6 @@ strSavedXml);
                 strError = "XML数据装入DOM时出错: " + ex.Message;
                 return -1;
             }
-
 
             Debug.Assert(dom != null, "");
 
@@ -2132,11 +2130,11 @@ strSavedXml);
                 }
             }
 
-
             // 合成<dprms:file>元素
             if (this.binaryResControl1 != null
                 && bIncludeFileID == true)  // 2008/12/3
             {
+#if NO
                 List<string> ids = this.binaryResControl1.GetIds();
                 List<string> usages = this.binaryResControl1.GetUsages();
 
@@ -2170,6 +2168,12 @@ strSavedXml);
                         DomUtil.SetAttr(node, "usage", strUsage);
 
                 }
+#endif
+                // 在 XmlDocument 对象中添加 <file> 元素。新元素加入在根之下
+                nRet = this.binaryResControl1.AddFileFragments(ref dom,
+            out strError);
+                if (nRet == -1)
+                    return -1;
             }
 
             strXml = dom.OuterXml;
@@ -4242,9 +4246,9 @@ MessageBoxDefaultButton.Button2);
                 nRet = this.binaryResControl1.AppendNewItem(
     strTempFilePath,
     "cardphoto",
+    "",
     out item,
     out strError);
-
             }
             else
             {

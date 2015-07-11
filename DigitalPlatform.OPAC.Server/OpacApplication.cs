@@ -3542,28 +3542,44 @@ out strError);
             }
         }
 
+        // parameters:
+        //      channel 通讯通道。如果为 null，则函数会自动使用管理员身份创建通道
         public int DownloadObject(System.Web.UI.Page Page,
+            LibraryChannel channel,
             string strPath,
             bool bSaveAs,
             out string strError)
         {
             strError = "";
-            // 临时的SessionInfo对象
-            SessionInfo session = new SessionInfo(this);
-            session.UserID = this.ManagerUserName;
-            session.Password = this.ManagerPassword;
-            session.IsReader = false;
-            try
+
+            if (channel == null)
             {
-                return DownloadObject(Page,
-                    session.Channel,
-                    strPath,
-                    bSaveAs,
-                    out strError);
+                // 临时的SessionInfo对象
+                // 用管理员身份
+                SessionInfo session = new SessionInfo(this);
+                session.UserID = this.ManagerUserName;
+                session.Password = this.ManagerPassword;
+                session.IsReader = false;
+                try
+                {
+                    return DownloadObject0(Page,
+                        session.Channel,
+                        strPath,
+                        bSaveAs,
+                        out strError);
+                }
+                finally
+                {
+                    session.CloseSession();
+                }
             }
-            finally
+            else
             {
-                session.CloseSession();
+                return DownloadObject0(Page,
+    channel,
+    strPath,
+    bSaveAs,
+    out strError);
             }
         }
 
@@ -3624,13 +3640,12 @@ out strError);
             return 0;
         }
 
-
         // 下载对象资源
         // return:
         //      -1  出错
         //      0   304返回
         //      1   200返回
-        public int DownloadObject(System.Web.UI.Page Page,
+        public int DownloadObject0(System.Web.UI.Page Page,
     LibraryChannel channel,
     string strPath,
     bool bSaveAs,
@@ -3668,6 +3683,11 @@ out strError);
                 out strError);
             if (lRet == -1)
             {
+                if (channel.ErrorCode == ErrorCode.AccessDenied)
+                {
+                    // 权限不够
+                    return -1;
+                }
                 strError = "GetRes() (for metadata) Error : " + strError;
                 return -1;
             }
@@ -3675,7 +3695,7 @@ out strError);
             if (Page.Response.IsClientConnected == false)
                 return -1;
 
-            // 取metadata中的mime类型信息
+            // 取 metadata 中的 mime 类型信息
             Hashtable values = ParseMedaDataXml(strMetaData,
                 out strError);
 
@@ -3706,7 +3726,6 @@ out strError);
                         Page.Response.SuppressContent = true;
                         return 0;
                     }
-
                 }
 
                 Page.Response.AddHeader("Last-Modified", DateTimeUtil.Rfc1123DateTimeString(lastmodified)); // .ToUniversalTime()
@@ -3756,7 +3775,6 @@ Value data: HEX 0x1
             Page.Response.AddHeader("Content-Transfer-Encoding", "binary");
              * */
 
-
             // 设置媒体类型
             if (strMime == "text/plain")
                 strMime = "text";
@@ -3768,12 +3786,10 @@ Value data: HEX 0x1
                 Page.Response.AddHeader("Content-Length", strSize);
             }
 
-
             if (Page.Response.IsClientConnected == false)
                 return -1;
 
             // 传输数据
-
             lRet = channel.GetRes(
                 stop,
                 strPath,
