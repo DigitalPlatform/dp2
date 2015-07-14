@@ -146,7 +146,6 @@ namespace dp2Library
             return 0;
         }
 
-
         public static void GetClientAddress(out string strIP, out string strVia)
         {
             strIP = "";

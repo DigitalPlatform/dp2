@@ -222,10 +222,116 @@ namespace DigitalPlatform.CirculationClient
                 result.Add(strName, strValue);
             }
 
-
             return result;
         }
 
+        // 填充列表内容
+        // return:
+        //      -1  error
+        //      0   没有填充任何内容，列表为空
+        //      1   已经填充了内容
+        public int LoadObject(XmlNodeList nodes,
+            out string strError)
+        {
+            strError = "";
+
+            bool bOldEnabled = this.Enabled;
+
+            this.Enabled = bOldEnabled;
+            try
+            {
+                this.ListView.Items.Clear();
+
+                List<ListViewItem> items = new List<ListViewItem>();
+                // 第一阶段，把来自 XML 记录中的 <file> 元素信息填入。
+                // 这样就保证了至少可以在保存书目记录阶段能还原 XML 记录中的相关部分
+                foreach(XmlElement node in nodes)
+                {
+                    string strID = DomUtil.GetAttr(node, "id");
+                    string strUsage = DomUtil.GetAttr(node, "usage");
+                    string strRights = DomUtil.GetAttr(node, "rights");
+
+                    ListViewItem item = new ListViewItem();
+
+                    // state
+                    SetLineInfo(item,
+                        LineState.Normal);
+
+                    // id
+                    ListViewUtil.ChangeItemText(item, COLUMN_ID, strID);
+                    // usage
+                    ListViewUtil.ChangeItemText(item, COLUMN_USAGE, strUsage);
+                    // rights
+                    ListViewUtil.ChangeItemText(item, COLUMN_RIGHTS, strRights);
+                    this.ListView.Items.Add(item);
+
+                    items.Add(item);
+                }
+
+                // 第二阶段，从 dp2library 服务器获取 metadata 信息，填充其他字段内容
+                foreach(ListViewItem item in items)
+                {
+                    string strID = ListViewUtil.GetItemText(item, COLUMN_ID);
+
+                    string strMetadataXml = "";
+                    byte[] baMetadataTimestamp = null;
+                    // 获得一个对象资源的元数据
+                    int nRet = GetOneObjectMetadata(
+                        this.BiblioRecPath,
+                        strID,
+                        out strMetadataXml,
+                        out baMetadataTimestamp,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        if (Channel.ErrorCode == localhost.ErrorCode.AccessDenied)
+                        {
+                            return -1;
+                        }
+                        // item.SubItems.Add(strError);
+                        ListViewUtil.ChangeItemText(item, COLUMN_STATE, strError);
+                        item.ImageIndex = 1;    // error!
+                        continue;
+                    }
+
+                    // 取metadata值
+                    Hashtable values = ParseMedaDataXml(strMetadataXml,
+                        out strError);
+                    if (values == null)
+                    {
+                        ListViewUtil.ChangeItemText(item, COLUMN_STATE, strError);
+                        item.ImageIndex = 1;    // error!
+                        continue;
+                    }
+
+                    // localpath
+                    ListViewUtil.ChangeItemText(item, COLUMN_LOCALPATH, (string)values["localpath"]);
+
+                    // size
+                    ListViewUtil.ChangeItemText(item, COLUMN_SIZE, (string)values["size"]);
+
+                    // mime
+                    ListViewUtil.ChangeItemText(item, COLUMN_MIME, (string)values["mimetype"]);
+
+                    // tiemstamp
+                    string strTimestamp = ByteArray.GetHexTimeStampString(baMetadataTimestamp);
+                    ListViewUtil.ChangeItemText(item, COLUMN_TIMESTAMP, strTimestamp);
+                }
+
+                this.Changed = false;
+
+                if (this.ListView.Items.Count > 0)
+                    return 1;
+
+                return 0;
+            }
+            finally
+            {
+                this.Enabled = bOldEnabled;
+            }
+        }
+
+#if NO
         // return:
         //      -1  error
         //      0   没有装载
@@ -240,7 +346,6 @@ namespace DigitalPlatform.CirculationClient
             this.Enabled = bOldEnabled;
             try
             {
-
                 this.ListView.Items.Clear();
 
                 for (int i = 0; i < nodes.Count; i++)
@@ -330,6 +435,7 @@ namespace DigitalPlatform.CirculationClient
                 this.Enabled = bOldEnabled;
             }
         }
+#endif
 
         static LineState GetLineState(ListViewItem item)
         {
@@ -1626,8 +1732,6 @@ bool bChanged)
 
                             goto ERROR1;
                         }
-
-
                     }
 
                     SetLineInfo(item, 

@@ -642,7 +642,6 @@ namespace DigitalPlatform.LibraryServer
             long lRet = 0;
 
             // 参数检查
-
             if (strAction == "delete")
             {
                 if (String.IsNullOrEmpty(strNewXml) == false)
@@ -789,7 +788,6 @@ namespace DigitalPlatform.LibraryServer
             if (nRet == 1)
                 bDisplayNameChanged = true;
 
-
             string strLockBarcode = "";
 
             if (strAction == "new"
@@ -806,7 +804,6 @@ namespace DigitalPlatform.LibraryServer
                 }
                 strLockBarcode = strOldBarcode;
             }
-
 
             // 加读者记录锁
             if (String.IsNullOrEmpty(strLockBarcode) == false)
@@ -1127,6 +1124,8 @@ namespace DigitalPlatform.LibraryServer
                 // 兑现一个命令
                 if (strAction == "new")
                 {
+                    this.SessionTable.CloseSessionByReaderBarcode(strNewBarcode);
+
                     // 检查新记录的路径中的id部分是否正确
                     // 库名部分，前面已经统一检查过了
                     if (String.IsNullOrEmpty(strRecPath) == true)
@@ -1268,20 +1267,19 @@ strLibraryCode);    // 读者所在的馆代码
                         baNewTimestamp = output_timestamp;
 
                         // 成功
-
                         if (this.Statis != null)
                             this.Statis.IncreaseEntryValue(
                             strLibraryCode,
                             "修改读者信息",
                             "创建新记录数",
                             1);
-
                     }
                 }
                 else if (strAction == "change"
                     || strAction == "changestate"
                     || strAction == "changeforegift")
                 {
+                    this.SessionTable.CloseSessionByReaderBarcode(strNewBarcode);
 
                     // 需要检查，即将被覆盖数据库记录中，是否有流通信息，如果有，则不能修改读者证条码号
 
@@ -1319,6 +1317,8 @@ strLibraryCode);    // 读者所在的馆代码
                 }
                 else if (strAction == "delete")
                 {
+                    this.SessionTable.CloseSessionByReaderBarcode(strNewBarcode);
+
                     // return:
                     //      -2  记录中有流通信息，不能删除
                     //      -1  出错

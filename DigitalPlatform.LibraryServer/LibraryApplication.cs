@@ -12617,6 +12617,10 @@ strLibraryCode);    // 读者所在的馆代码
                 return 1;
             }
 
+            // 如果具备 writeres 权限，则具备所有对象的读取权限了
+            if (StringUtil.IsInList("writeres", strRights) == true)
+                return 1;
+
             string strDbName = StringUtil.GetFirstPartPath(ref strPath);
 
             // 书目库

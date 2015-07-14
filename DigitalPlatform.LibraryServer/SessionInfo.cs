@@ -961,6 +961,10 @@ SetStartEventArgs e);
         // TODO: 是否登录过，也决定了通道的空闲生存时间
     }
 
+    /// <summary>
+    /// SessionInfo 存储结构
+    /// SessionTable 本身是个 Hashtable，以 Session ID 字符串 --> SessionInfo 方式存储了所有 SessionInfo
+    /// </summary>
     public class SessionTable : Hashtable
     {
         ReaderWriterLockSlim m_lock = new ReaderWriterLockSlim();
@@ -1109,7 +1113,6 @@ SetStartEventArgs e);
                 return sessioninfo;
             }
 
-
             if (this.Count > _nMaxCount)
                 throw new ApplicationException("Session 数量超过 " + _nMaxCount.ToString());
 
@@ -1183,7 +1186,6 @@ SetStartEventArgs e);
                 throw new ApplicationException("锁定尝试中超时");
             try
             {
-
                 foreach (string key in remove_keys)
                 {
                     SessionInfo sessioninfo = (SessionInfo)this[key];
@@ -1240,6 +1242,77 @@ SetStartEventArgs e);
             DeleteSession(sessioninfo);
 
             return true;
+        }
+
+        public int CloseSessionByReaderBarcode(string strReaderBarcode)
+        {
+            List<string> remove_keys = new List<string>();
+
+            if (this.m_lock.TryEnterReadLock(m_nLockTimeout) == false)
+                throw new ApplicationException("锁定尝试中超时");
+            try
+            {
+                foreach (string key in this.Keys)
+                {
+                    SessionInfo info = (SessionInfo)this[key];
+
+                    if (info == null)
+                        continue;
+
+                    if (info.Account == null)
+                        continue;
+
+                    if (info.Account.Barcode == strReaderBarcode
+                        && info.Account.Barcode == info.Account.UserID)
+                        remove_keys.Add(key);   // 这里不能删除，因为 foreach 还要用枚举器
+                }
+            }
+            finally
+            {
+                this.m_lock.ExitReadLock();
+            }
+
+            if (remove_keys.Count == 0)
+                return 0;   // 没有找到
+
+            int nCount = 0;
+            List<SessionInfo> delete_sessions = new List<SessionInfo>();
+            if (this.m_lock.TryEnterWriteLock(m_nLockTimeout) == false)
+                throw new ApplicationException("锁定尝试中超时");
+            try
+            {
+                foreach (string key in remove_keys)
+                {
+                    SessionInfo sessioninfo = (SessionInfo)this[key];
+                    if (sessioninfo == null)
+                        continue;
+
+                    // 和 sessionid 的 hashtable 脱离关系
+                    this.Remove(key);
+
+                    delete_sessions.Add(sessioninfo);
+
+                    if (string.IsNullOrEmpty(sessioninfo.ClientIP) == false)
+                    {
+                        _incIpCount(sessioninfo.ClientIP, -1);
+                        sessioninfo.ClientIP = "";
+                    }
+
+                    nCount++;
+                }
+            }
+            finally
+            {
+                this.m_lock.ExitWriteLock();
+            }
+
+            // 把 CloseSession 放在锁定范围外面，主要是想尽量减少锁定的时间
+            foreach (SessionInfo info in delete_sessions)
+            {
+                info.CloseSession();
+            }
+            return nCount;
+
         }
 
         public void DeleteSession(SessionInfo sessioninfo,
@@ -1613,7 +1686,6 @@ SetStartEventArgs e);
                 throw new ApplicationException("锁定尝试中超时");
             try
             {
-
                 // 按照 IP 地址聚集
                 // strClientIP 参数可用于筛选
                 if (strStyle == "ip-count")

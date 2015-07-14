@@ -18,7 +18,7 @@ namespace DigitalPlatform.LibraryServer
             this.LoginCache = new MemoryCache("login");
         }
 
-            // 清除 LoginCache
+        // 清除 LoginCache
         internal void ClearLoginCache(string strReaderBarcode)
         {
             if (this.LoginCache != null)
@@ -26,8 +26,9 @@ namespace DigitalPlatform.LibraryServer
                 // 清除全部事项
                 if (string.IsNullOrEmpty(strReaderBarcode) == true)
                 {
-                    this.LoginCache.Dispose();
+                    MemoryCache old = this.LoginCache;
                     this.LoginCache = new MemoryCache("login");
+                    old.Dispose();
                     return;
                 }
                 this.LoginCache.Remove(strReaderBarcode);
