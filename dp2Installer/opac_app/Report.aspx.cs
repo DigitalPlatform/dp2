@@ -24,7 +24,6 @@ using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CirculationClient.localhost;
 
-
 public partial class Report : MyWebPage
 {
     protected void Page_Init(object sender, EventArgs e)
@@ -87,11 +86,25 @@ ref sessioninfo) == false)
             return;
         }
 
-        LoginState loginstate = GlobalUtil.GetLoginState(this.Page);
+        // 2015/6/22
+        // 访问 sessioninfo.RightsOrigin 的时候可能会得到空，这时候需要重新登录一下 dp2library 服务器，让这个属性具有该有的值
+        if (string.IsNullOrEmpty(sessioninfo.RightsOrigin) == true)
+        {
+            string strError = "";
+            if (sessioninfo.ReLogin(out strError) == -1)
+            {
+                this.Response.StatusCode = 403;
+                this.Response.StatusDescription = strError + "。请重新登录";
+                this.Response.End();
+                return;
+            }
+        }
+
+        // LoginState loginstate = GlobalUtil.GetLoginState(this.Page);
 
         // 权限是否具备?
-        if (loginstate == LoginState.Librarian
-    && StringUtil.IsInList("viewreport", sessioninfo.RightsOrigin) == true)
+        if (// loginstate == LoginState.Librarian &&
+            StringUtil.IsInList("viewreport", sessioninfo.RightsOrigin) == true)
         {
         }
         else

@@ -1628,7 +1628,6 @@ namespace dp2Kernel
 
             try
             {
-
                 // 判断是否是登录状态
                 if (this.sessioninfo.UserName == "")
                 {
@@ -1735,7 +1734,6 @@ namespace dp2Kernel
                     result.ErrorCode = ErrorCodeValue.CommonError;
                     result.ErrorString = "目前不支持attachment风格。";
                     return result;
-
                 }
 
                 return result;

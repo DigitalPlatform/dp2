@@ -11819,6 +11819,54 @@ namespace dp2Library
                 ConvertKernelErrorCode(channel.ErrorCode,
                     ref result);
 
+                string strXmlRecPath = "";
+                string strObjectID = "";
+                // 解析对象路径
+                // parameters:
+                //      strPathParam    等待解析的路径
+                //      strXmlRecPath   返回元数据记录路径
+                //      strObjectID     返回对象 ID
+                // return:
+                //      false   不是记录路径
+                //      true    是记录路径
+                StringUtil.ParseObjectPath(strResPath,
+                    out strXmlRecPath,
+                    out strObjectID);
+
+                if (app.GetObjectWriteToOperLog == true
+                    && nStart == 0 // 获取全部二进制信息的循环中，只记载第一次 API 访问
+                    && string.IsNullOrEmpty(strObjectID) == false
+                    && StringUtil.IsInList("data", strStyle) == true)
+                {
+                    XmlDocument domOperLog = new XmlDocument();
+                    domOperLog.LoadXml("<root />");
+
+                    DomUtil.SetElementText(domOperLog.DocumentElement,
+                        "operation",
+                        "getRes");
+                    DomUtil.SetElementText(domOperLog.DocumentElement, "path",
+    strResPath);
+                    DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
+                        sessioninfo.UserID);
+
+                    string strOperTime = app.Clock.GetClock();
+
+                    DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
+                        strOperTime);
+
+                    int nRet = app.OperLog.WriteOperLog(domOperLog,
+                        sessioninfo.ClientAddress,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "GetRes() API 写入日志时发生错误: " + strError;
+                        result.Value = -1;
+                        result.ErrorCode = ErrorCode.SystemError;
+                        result.ErrorInfo = strError;
+                        return result;
+                    }
+                }
+
                 return result;
             }
             catch (Exception ex)

@@ -15605,7 +15605,6 @@ REDO_REPAIR:
                 }
             }
 
-
             string strReaderXml = "";
             string strOutputReaderRecPath = "";
             string strLibraryCode = "";
@@ -15679,7 +15678,6 @@ REDO_REPAIR:
                     "所有门之总量",
                     1);
 
-
                 // 增量特定门的累计量
                 if (this.Statis != null)
                     nResultValue = this.Statis.IncreaseEntryValue(
@@ -15688,34 +15686,36 @@ REDO_REPAIR:
                     String.IsNullOrEmpty(strGateName) == true ? "(blank)" : strGateName,
                     (int)1);
 
-                XmlDocument domOperLog = new XmlDocument();
-                domOperLog.LoadXml("<root />");
-                DomUtil.SetElementText(domOperLog.DocumentElement,
-    "libraryCode",
-    strLibraryCode);    // 读者所在的馆代码
-                DomUtil.SetElementText(domOperLog.DocumentElement,
-                    "operation",
-                    "passgate");
-                DomUtil.SetElementText(domOperLog.DocumentElement,
-                    "readerBarcode",
-                    strReaderBarcode);
-                DomUtil.SetElementText(domOperLog.DocumentElement,
-    "libraryCode",
-    strLibraryCode);
-                DomUtil.SetElementText(domOperLog.DocumentElement,
-                    "gateName",
-                    strGateName);
-
-                DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
-                    sessioninfo.UserID);
-
-                string strOperTime = this.Clock.GetClock();
-
-                DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
-                    strOperTime);
-
                 if (this.PassgateWriteToOperLog == true)
                 {
+                    XmlDocument domOperLog = new XmlDocument();
+                    domOperLog.LoadXml("<root />");
+#if NO
+                    DomUtil.SetElementText(domOperLog.DocumentElement,
+        "libraryCode",
+        strLibraryCode);    // 读者所在的馆代码
+#endif
+                    DomUtil.SetElementText(domOperLog.DocumentElement,
+                        "operation",
+                        "passgate");
+                    DomUtil.SetElementText(domOperLog.DocumentElement,
+                        "readerBarcode",
+                        strReaderBarcode);
+                    DomUtil.SetElementText(domOperLog.DocumentElement,
+        "libraryCode",
+        strLibraryCode);
+                    DomUtil.SetElementText(domOperLog.DocumentElement,
+                        "gateName",
+                        strGateName);
+
+                    DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
+                        sessioninfo.UserID);
+
+                    string strOperTime = this.Clock.GetClock();
+
+                    DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
+                        strOperTime);
+
                     nRet = this.OperLog.WriteOperLog(domOperLog,
                         sessioninfo.ClientAddress,
                         out strError);
@@ -15725,8 +15725,6 @@ REDO_REPAIR:
                         goto ERROR1;
                     }
                 }
-
-
             } // 读者记录锁定范围结束
             finally
             {

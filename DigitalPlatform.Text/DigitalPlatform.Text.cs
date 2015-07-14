@@ -18,6 +18,53 @@ namespace DigitalPlatform.Text
 	{
         public static string SpecialChars = "！·＃￥％……—＊（）——＋－＝［］《》＜＞，。？／＼｜｛｝“”‘’•";
 
+        // 解析对象路径
+        // parameters:
+        //      strPathParam    等待解析的路径
+        //      strXmlRecPath   返回元数据记录路径
+        //      strObjectID     返回对象 ID
+        // return:
+        //      false   不是记录路径
+        //      true    是记录路径
+        public static bool ParseObjectPath(string strPathParam,
+            out string strXmlRecPath,
+            out string strObjectID)
+        {
+            strXmlRecPath = "";
+            strObjectID = "";
+
+            if (string.IsNullOrEmpty(strPathParam) == true)
+                return false;
+
+            string strPath = strPathParam;
+
+            string strDbName = StringUtil.GetFirstPartPath(ref strPath);
+
+            string strRecordID = StringUtil.GetFirstPartPath(ref strPath);
+
+            if (string.IsNullOrEmpty(strRecordID) == true)
+                return false;
+
+            // 记录ID
+            if (StringUtil.IsPureNumber(strRecordID) == false)
+                return false;
+
+            strXmlRecPath = strDbName + "/" + strRecordID;
+
+            // 只到记录ID这一层
+            if (string.IsNullOrEmpty(strPath) == true)
+                return true;
+
+            string strObject = StringUtil.GetFirstPartPath(ref strPath);
+
+            // 对象资源
+            if (strObject != "object")
+                return false;
+
+            strObjectID = StringUtil.GetFirstPartPath(ref strPath);
+            return true;
+        }
+
         // 
         /// <summary>
         /// 兑现字符串中的宏值

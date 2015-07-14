@@ -15,6 +15,7 @@ using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
 using DigitalPlatform.CommonControl;
+using DigitalPlatform.GUI;
 
 namespace dp2Circulation
 {
@@ -51,9 +52,9 @@ namespace dp2Circulation
 
         int m_nTail = 0;
 
-        string HtmlString = "";
+        // string HtmlString = "";
 
-        const int WM_SETHTML = API.WM_USER + 201;
+        // const int WM_SETHTML = API.WM_USER + 201;
         const int WM_RESTOREFOCUS = API.WM_USER + 202;
 
         bool m_bActive = false;
@@ -65,8 +66,6 @@ namespace dp2Circulation
         {
             InitializeComponent();
         }
-
-
 
         private void PassGateForm_Load(object sender, EventArgs e)
         {
@@ -93,8 +92,6 @@ namespace dp2Circulation
             this.commander.IsBusy -= new IsBusyEventHandler(commander_IsBusy);
             this.commander.IsBusy += new IsBusyEventHandler(commander_IsBusy);
 
-
-
             this.AcceptButton = this.button_passGate;
 
             this.textBox_gateName.Text = this.MainForm.AppInfo.GetString(
@@ -113,7 +110,6 @@ namespace dp2Circulation
                 "passgate_form",
                 "hide_readername",
                 false);
-
 
             this.StartWorkerThread();
         }
@@ -253,7 +249,6 @@ namespace dp2Circulation
         {
             this.eventClose.Set();
             this.m_bClosed = true;
-
         }
 
         /*public*/ void Stop()
@@ -281,7 +276,6 @@ namespace dp2Circulation
                         // 超时
                         eventActive.Reset();
                         Worker();
-
                     }
                     else if (index == 0)
                     {
@@ -305,135 +299,207 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                string strErrorText = "PassGateForm工作线程出现异常: " + ExceptionUtil.GetDebugText(ex);
+                string strErrorText = "PassGateForm ThreadMain() 出现异常: " + ExceptionUtil.GetDebugText(ex);
+                this.MainForm.WriteErrorLog(strErrorText);
             }
-
         }
 
+        ListViewItem GetItem(int i)
+        {
+            if (this.listView_list.InvokeRequired)
+            {
+                return (ListViewItem)this.listView_list.Invoke(new Func<int, ListViewItem>(GetItem), i);
+            }
+
+            return this.listView_list.Items[i];
+        }
+
+        void SetItemText(ListViewItem item, int column, string strText)
+        {
+            if (this.listView_list.InvokeRequired)
+            {
+                this.listView_list.BeginInvoke(new Action<ListViewItem, int, string>(SetItemText), item, column, strText);
+                return;
+            }
+
+            ListViewUtil.ChangeItemText(item, column, strText);
+        }
+
+        void SetCounterText(long v)
+        {
+            if (this.textBox_counter.InvokeRequired)
+            {
+                this.textBox_counter.BeginInvoke(new Action<long>(SetCounterText), v);
+                return;
+            }
+            this.textBox_counter.Text = v.ToString();
+        }
+
+        void SetItemImageIndex(ListViewItem item, int v)
+        {
+            if (this.listView_list.InvokeRequired)
+            {
+                this.listView_list.BeginInvoke(new Action<ListViewItem, int>(SetItemImageIndex), item, v);
+                return;
+            }
+
+            item.ImageIndex = v;
+        }
+
+        void StartSetHtml(string strHtml)
+        {
+            if (this.InvokeRequired)
+            {
+                this.BeginInvoke(new Action<string>(StartSetHtml), strHtml);
+                return;
+            }
+
+            // API.PostMessage(this.Handle, WM_SETHTML, 0, 0);
+            this.m_webExternalHost.SetHtmlString(strHtml,
+    "passgateform_reader");
+        }
         // listview imageindex 0:尚未初始化 1:已经初始化 2:出错
 
         // 工作线程每一轮循环的实质性工作
-        /*public*/ void Worker()
+        void Worker()
         {
-            string strError = "";
-
-            for (int i = this.m_nTail; i < this.listView_list.Items.Count; i++)
+            try
             {
-                ListViewItem item = this.listView_list.Items[i];
+                string strError = "";
 
-                if (item.ImageIndex == 1)
-                    continue;
-
-                // string strBarcode = item.Text;
-                ReaderInfo info = (ReaderInfo)item.Tag;
-                string strBarcode = info.ReaderBarcode;
-
-                stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("正在初始化浏览器组件 ...");
-                stop.BeginLoop();
-
-
-                string strTypeList = "xml";
-                int nTypeCount = 1;
-
-                if (this.checkBox_displayReaderDetailInfo.Checked == true)
+                for (int i = this.m_nTail; i < this.listView_list.Items.Count; i++)
                 {
-                    strTypeList += ",html";
+                    // ListViewItem item = this.listView_list.Items[i];
+                    ListViewItem item = GetItem(i);
 
-                    if (this.MainForm.ServerVersion >= 2.25)
-                        strTypeList += ":noborrowhistory";
+                    if (item.ImageIndex == 1)
+                        continue;
 
-                    nTypeCount = 2;
-                }
+                    // string strBarcode = item.Text;
+                    ReaderInfo info = (ReaderInfo)item.Tag;
+                    string strBarcode = info.ReaderBarcode;
 
-                try
-                {
-                    string[] results = null;
-                    long lRet = Channel.PassGate(stop,
-                        strBarcode,
-                        this.textBox_gateName.Text, // strGateName
-                        strTypeList,
-                        out results,
-                        out strError);
-                    if (lRet == -1)
+                    stop.OnStop += new StopEventHandler(this.DoStop);
+                    stop.Initial("正在初始化浏览器组件 ...");
+                    stop.BeginLoop();
+
+                    string strTypeList = "xml";
+                    int nTypeCount = 1;
+
+                    if (this.checkBox_displayReaderDetailInfo.Checked == true)
                     {
-                        OnError(item, strError);
-                        goto CONTINUE;
+                        strTypeList += ",html";
+
+                        if (this.MainForm.ServerVersion >= 2.25)
+                            strTypeList += ":noborrowhistory";
+
+                        nTypeCount = 2;
                     }
 
-                    this.textBox_counter.Text = lRet.ToString();
-
-                    if (results.Length != nTypeCount)
+                    try
                     {
-                        strError = "results error...";
-                        OnError(item, strError);
-                        goto CONTINUE;
+                        string[] results = null;
+                        long lRet = Channel.PassGate(stop,
+                            strBarcode,
+                            this.textBox_gateName.Text, // strGateName
+                            strTypeList,
+                            out results,
+                            out strError);
+                        if (lRet == -1)
+                        {
+                            OnError(item, strError);
+                            goto CONTINUE;
+                        }
+
+                        // this.textBox_counter.Text = lRet.ToString();
+                        SetCounterText(lRet);
+
+                        if (results.Length != nTypeCount)
+                        {
+                            strError = "results error...";
+                            OnError(item, strError);
+                            goto CONTINUE;
+                        }
+
+                        string strXml = results[0];
+
+                        string strReaderName = "";
+                        string strState = "";
+                        int nRet = GetRecordInfo(strXml,
+                            out strReaderName,
+                            out strState,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            OnError(item, strError);
+                            goto CONTINUE;
+                        }
+
+                        info.ReaderName = strReaderName;
+
+                        if (this.checkBox_hideReaderName.Checked == true)
+                        {
+                            string strText = "";
+                            // item.SubItems[1].Text = strText.PadLeft(strReaderName.Length, '*');
+                            SetItemText(item, 1, strText.PadLeft(strReaderName.Length, '*'));
+                        }
+                        else
+                        {
+                            // item.SubItems[1].Text = strReaderName;
+                            SetItemText(item, 1, strReaderName);
+                        }
+
+                        // item.SubItems[2].Text = strState;
+                        SetItemText(item, 2, strState);
+
+                        // item.ImageIndex = 1;    // error
+                        SetItemImageIndex(item, 1);
+
+                        if (this.checkBox_displayReaderDetailInfo.Checked == true
+                            && results.Length == 2)
+                        {
+                            this.m_webExternalHost.StopPrevious();
+                            this.webBrowser_readerInfo.Stop();
+
+                            // this.HtmlString = results[1];
+
+                            // API.PostMessage(this.Handle, WM_SETHTML, 0, 0);
+                            StartSetHtml(results[1]);
+                        }
                     }
-
-                    string strXml = results[0];
-
-                    string strReaderName = "";
-                    string strState = "";
-                    int nRet = GetRecordInfo(strXml,
-                        out strReaderName,
-                        out strState,
-                        out strError);
-                    if (nRet == -1)
+                    finally
                     {
-                        OnError(item, strError);
-                        goto CONTINUE;
+                        stop.EndLoop();
+                        stop.OnStop -= new StopEventHandler(this.DoStop);
+                        stop.Initial("");
                     }
-
-                    info.ReaderName = strReaderName;
-
-                    if (this.checkBox_hideReaderName.Checked == true)
-                    {
-                        string strText = "";
-                        item.SubItems[1].Text = strText.PadLeft(strReaderName.Length, '*');
-                    }
-                    else
-                        item.SubItems[1].Text = strReaderName;
-
-                    item.SubItems[2].Text = strState;
-                    item.ImageIndex = 1;    // error
-
-
-                    if (this.checkBox_displayReaderDetailInfo.Checked == true
-                        && results.Length == 2)
-                    {
-
-                        this.m_webExternalHost.StopPrevious();
-                        this.webBrowser_readerInfo.Stop();
-
-                        this.HtmlString = results[1];
-
-                        // this.commander.AddMessage(WM_SETHTML);
-                        API.PostMessage(this.Handle, WM_SETHTML, 0, 0);
-                    }
-
-                }
-                finally
-                {
-                    stop.EndLoop();
-                    stop.OnStop -= new StopEventHandler(this.DoStop);
-                    stop.Initial("");
-                }
 
                 CONTINUE:
-
-                this.m_nTail = i;
+                    this.m_nTail = i;
+                }
             }
-
+            catch(Exception ex)
+            {
+                string strErrorText = "PassGateForm Worker() 出现异常: " + ExceptionUtil.GetDebugText(ex);
+                this.MainForm.WriteErrorLog(strErrorText);
+            }
         }
 
         void OnError(ListViewItem item,
             string strError)
         {
+            if (this.InvokeRequired)
+            {
+                this.BeginInvoke(new Action<ListViewItem, string>(OnError), item, strError);
+                return;
+            }
+
             item.SubItems[1].Text = strError;
             item.ImageIndex = 2;    // error
 
-            this.HtmlString = strError;
-            API.PostMessage(this.Handle, WM_SETHTML, 0, 0);
+            // this.HtmlString = strError;
+            // API.PostMessage(this.Handle, WM_SETHTML, 0, 0);
+            StartSetHtml(strError);
 
             // 发出警告性的响声
             Console.Beep();
@@ -475,21 +541,17 @@ namespace dp2Circulation
         {
             switch (m.Msg)
             {
+#if NO
                 case WM_SETHTML:
                     if (this.m_webExternalHost.CanCallNew(
                         this.commander,
                         m.Msg) == true)
                     {
-#if NO
-                        Global.SetHtmlString(this.webBrowser_readerInfo,
-                            this.HtmlString,
-                            this.MainForm.DataDir,
-                            "passgateform_reader");
-#endif
                         this.m_webExternalHost.SetHtmlString(this.HtmlString,
                             "passgateform_reader");
                     }
                     return;
+#endif
                 case WM_RESTOREFOCUS:
                     this.textBox_readerBarcode.Focus();
                     this.textBox_readerBarcode.SelectAll();

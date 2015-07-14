@@ -472,6 +472,8 @@ namespace dp2Circulation
                 nRet = GetSettlementString(dom, out strHtml, out strError);
             else if (strOperation == "passgate")
                 nRet = GetPassGateString(dom, out strHtml, out strError);
+            else if (strOperation == "getRes")
+                nRet = GetGetResString(dom, out strHtml, out strError);
             else if (strOperation == "setEntity"
                 || strOperation == "setOrder"
                 || strOperation == "setIssue"
@@ -1473,6 +1475,38 @@ namespace dp2Circulation
                 BuildClientAddressLine(dom) +
                 "</table>";
 
+            return 0;
+        }
+
+        // GetRes
+        int GetGetResString(XmlDocument dom,
+    out string strHtml,
+    out string strError)
+        {
+            strHtml = "";
+            strError = "";
+            //int nRet = 0;
+
+#if NO
+            XmlNode node = null;
+            string strLibraryCode = DomUtil.GetElementText(dom.DocumentElement, "libraryCode", out node);
+            if (node != null && string.IsNullOrEmpty(strLibraryCode) == true)
+                strLibraryCode = "<空>";
+#endif
+            string strOperation = DomUtil.GetElementText(dom.DocumentElement, "operation");
+            string strResPath = DomUtil.GetElementText(dom.DocumentElement, "path");
+            string strOperator = DomUtil.GetElementText(dom.DocumentElement, "operator");
+            string strOperTime = GetRfc1123DisplayString(
+                DomUtil.GetElementText(dom.DocumentElement, "operTime"));
+
+            strHtml =
+                "<table class='operlog'>" +
+                BuildHtmlLine("操作类型", strOperation + " -- 获取对象") +
+                BuildHtmlLine("对象路径", strResPath) +
+                BuildHtmlLine("操作者", strOperator) +
+                BuildHtmlLine("操作时间", strOperTime) +
+                BuildClientAddressLine(dom) +
+                "</table>";
             return 0;
         }
 

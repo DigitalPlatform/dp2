@@ -599,7 +599,6 @@ namespace dp2Circulation
         // 2015/1/4
         void DeleteAllTempFiles()
         {
-
             foreach (string filename in this._tempfilenames)
             {
                 try

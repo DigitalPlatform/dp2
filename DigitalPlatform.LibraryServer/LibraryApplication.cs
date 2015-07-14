@@ -319,6 +319,9 @@ namespace DigitalPlatform.LibraryServer
 
         public bool PassgateWriteToOperLog = true;
 
+        // GetRes() API 获取对象的动作是否写入操作日志
+        public bool GetObjectWriteToOperLog = false;
+
         // 2013/5/24
         // 用于出纳操作的辅助性的检索途径
         public List<string> PatronAdditionalFroms = new List<string>();
@@ -776,7 +779,17 @@ namespace DigitalPlatform.LibraryServer
                         true);
                 }
 
+                // 对象管理
+                // 元素<object>
+                // 属性 writeOperLog
+                node = dom.DocumentElement.SelectSingleNode("//object");
+                if (node != null)
+                {
+                    string strWriteOperLog = DomUtil.GetAttr(node, "writeGetResOperLog");
 
+                    this.GetObjectWriteToOperLog = ToBoolean(strWriteOperLog,
+                        false);
+                }
                 // 消息
                 // 元素<message>
                 // 属性dbname/reserveTimeSpan
@@ -2595,6 +2608,14 @@ namespace DigitalPlatform.LibraryServer
                     writer.WriteAttributeString("writeOperLog", this.PassgateWriteToOperLog == true ? "true" : "false");
                     writer.WriteEndElement();
 
+                    // -----------
+                    // 2015/7/14
+                    // 对象管理
+                    // 元素<object>
+                    // 属性 writeOperLog
+                    writer.WriteStartElement("object");
+                    writer.WriteAttributeString("writeGetResOperLog", this.GetObjectWriteToOperLog == true ? "true" : "false");
+                    writer.WriteEndElement();
 
                     // 消息
                     // 元素<message>

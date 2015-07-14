@@ -178,6 +178,7 @@ ref sessioninfo) == false)
 
         nRet = app.DownloadObject(
             this,
+            null,
             strPhotoPath,
             false,
             out strError);

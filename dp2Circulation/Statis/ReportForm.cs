@@ -265,7 +265,7 @@ namespace dp2Circulation
                 loader.nLevel = 2;  //  this.MainForm.OperLogLevel;
                 loader.AutoCache = false;
                 loader.CacheDir = "";
-                loader.Filter = "borrow,return,setReaderInfo,setBiblioInfo,setEntity,setOrder,setIssue,setComment,amerce";
+                loader.Filter = "borrow,return,setReaderInfo,setBiblioInfo,setEntity,setOrder,setIssue,setComment,amerce,passgate,getRes";
 
                 loader.ProgressStart = lProgressStart;
 
@@ -5375,7 +5375,8 @@ MessageBoxDefaultButton.Button2);
         // 0.06 (2014/6/16) operlogxxx 表中增加了 subno 字段
         // 0.07 (2014/6/19) operlogitem 表增加了 itembarcode 字段
         // 0.08 (2014/11/6) reader 表增加了 state 字段 
-        static double _version = 0.08;
+        // 0.09 (2015/7/14) 增加了 operlogpassgate 和 operloggetres 表
+        static double _version = 0.09;
 
         // TODO: 最好把第一次初始化本地 sql 表的动作也纳入 XML 文件中，这样做单项任务的时候，就不会毁掉其他的表
         // 创建批处理计划
@@ -5631,8 +5632,6 @@ MessageBoxDefaultButton.Button2);
                         }
                     }
                 }
-
-
 
                 // *** 创建日志表
                 if (strTypeList == "*"

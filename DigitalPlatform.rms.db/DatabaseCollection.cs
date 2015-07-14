@@ -4440,7 +4440,6 @@ namespace DigitalPlatform.rms
             if (strStyle == null)
                 strStyle = "";
 
-
             //------------------------------------------------
             // 开始做事情
             //---------------------------------------------------
@@ -4555,8 +4554,6 @@ namespace DigitalPlatform.rms
                 //////////////////////////////////////////
 
                 DOGET:
-
-
                     // 检查对数据库中记录的权限
                     string strExistRights = "";
                     bool bHasRight = user.HasRights(strDbName + "/" + strRecordID,

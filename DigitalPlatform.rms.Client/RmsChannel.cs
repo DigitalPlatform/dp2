@@ -5342,12 +5342,10 @@ ref strNewStyle);	// 不要数据体和metadata
             strMetaData = "";
             strOutputPath = "";
 
-
             this.ErrorCode = ChannelErrorCode.None;
             this.ErrorInfo = "";
 
             string strStyle = strStyleParam;
-
 
             if (StringUtil.IsInList("attachment", strStyle) == true)
             {
@@ -5468,7 +5466,6 @@ ref strNewStyle);	// 不要数据体和metadata
                     ConvertErrorCode(result);
                     strError = result.ErrorString;
 
-
                     if (result.Value == -1)
                     {
                         if (result.ErrorCode == ErrorCodeValue.NotLogin
@@ -5494,8 +5491,6 @@ ref strNewStyle);	// 不要数据体和metadata
                          */
                         return -1;
                     }
-
-
 
                     if (bHasMetadataStyle == true)
                     {

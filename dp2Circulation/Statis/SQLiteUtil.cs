@@ -15,7 +15,9 @@ using DigitalPlatform.Text;
 
 namespace dp2Circulation
 {
-
+    /// <summary>
+    /// 针对 SQLite 数据库进行操作的实用类
+    /// </summary>
     class SQLiteUtil
     {
         public static string GetLocalTime(string strTime)
@@ -81,6 +83,8 @@ DbType.Int64);
                                   "issue",
                                   "comment",
                                   "amerce",
+                                  "passgate",
+                                  "getres",
                                   };
 
         public static int IndexOfType(string strType)
@@ -150,6 +154,17 @@ DbType.Int64);
                 + "itembarcode nvarchar (255) NULL ," + " "
                 + "readerbarcode nvarchar (255) NULL ," + " ";
             }
+            else if (strDbType == "passgate")
+            {
+                strFields = "librarycode nvarchar (255) NULL ," + " "
+                + "gatename nvarchar (255) NULL ," + " "
+                + "readerbarcode nvarchar (255) NULL ," + " ";
+            }
+            else if (strDbType == "getres")
+            {
+                strFields = "xmlrecpath nvarchar (255) NULL ," + " "
+                + "objectid nvarchar (255) NULL ," + " ";
+            }
             else
             {
                 strError = "未知的数据库类型 '" + strDbType + "'";
@@ -170,14 +185,13 @@ DbType.Int64);
                 + "itembarcode nvarchar (255) NULL ," + " "
                 + "readerbarcode nvarchar (255) NULL ," + " "
 #endif
- + strFields
+                + strFields
                 + "operator nvarchar (255) NULL," + " "
                 + "opertime nvarchar (255) NULL  "
                 + ") ; ";
 
             strCommand += " CREATE UNIQUE INDEX " + strTableName + "_id_index \n"
     + " ON " + strTableName + " (date, no, subno) ;\n";
-
 
             using (SQLiteConnection connection = new SQLiteConnection(strConnectionString))
             {
@@ -397,7 +411,6 @@ DbType.Int64);
             using (SQLiteCommand command = new SQLiteCommand("",
 connection))
             {
-
                 StringBuilder text = new StringBuilder(4096);
                 int i = 0;
                 foreach (OperLogLineBase line in this)
@@ -597,6 +610,10 @@ line.ReaderBarcode);
                     this._buffers.Add(new OperLogLines<CommentOperLogLine>() as OperLogLinesBase);
                 else if (type == "amerce")
                     this._buffers.Add(new OperLogLines<AmerceOperLogLine>() as OperLogLinesBase);
+                else if (type == "passgate")
+                    this._buffers.Add(new OperLogLines<PassGateOperLogLine>() as OperLogLinesBase);
+                else if (type == "getres")
+                    this._buffers.Add(new OperLogLines<GetResOperLogLine>() as OperLogLinesBase);
                 else
                     throw new Exception("未知的 dbtype '"+type+"'");
             }
@@ -614,7 +631,6 @@ line.ReaderBarcode);
             long lIndex,
             out string strError)
         {
-
             if (strOperation == "borrow" || strOperation == "return")
             {
                 Debug.Assert(OperLogTable.IndexOfType("circu") == 0, "");
@@ -663,12 +679,23 @@ line.ReaderBarcode);
                 OperLogLines<AmerceOperLogLine> lines = this._buffers[7] as OperLogLines<AmerceOperLogLine>;
                 return lines.AddLine(dom, strDate, lIndex, out strError);
             }
+            else if (strOperation == "passgate")
+            {
+                Debug.Assert(OperLogTable.IndexOfType("passgate") == 8, "");
+                OperLogLines<PassGateOperLogLine> lines = this._buffers[8] as OperLogLines<PassGateOperLogLine>;
+                return lines.AddLine(dom, strDate, lIndex, out strError);
+            }
+            else if (strOperation == "getRes")
+            {
+                Debug.Assert(OperLogTable.IndexOfType("getres") == 9, "");
+                OperLogLines<GetResOperLogLine> lines = this._buffers[9] as OperLogLines<GetResOperLogLine>;
+                return lines.AddLine(dom, strDate, lIndex, out strError);
+            }
             strError = "不能识别的 strOperation '" + strOperation + "'";
             return -2;
         }
 
         const int INSERT_BATCH = 100;  // 300;
-
 
         // 把所有累积的行写入数据库。然后清空
         public int WriteToDb(
@@ -1077,6 +1104,7 @@ this.OperTime);
             }
         }
     }
+
     // 评注操作
     class CommentOperLogLine : ItemOperLogLine
     {
@@ -1575,6 +1603,222 @@ this.OperTime);
         }
     }
 
+    // 获取对象操作 每行
+    class GetResOperLogLine : OperLogLineBase
+    {
+        // 对象 ID
+        public string ObjectID = "";
+
+        // 元数据记录路径
+        public string XmlRecPath = "";
+
+        static string TableName
+        {
+            get
+            {
+                return "operloggetres";
+            }
+        }
+
+        // 根据日志 XML 记录填充数据
+        public override int SetData(XmlDocument dom,
+            string strDate,
+            long lIndex,
+            out List<OperLogLineBase> lines,
+            out string strError)
+        {
+            strError = "";
+
+            int nRet = base.SetData(dom, strDate, lIndex, out lines, out strError);
+            if (nRet == -1)
+                return -1;
+
+            string strResPath = DomUtil.GetElementText(dom.DocumentElement,
+                "path");
+
+            string strXmlRecPath = "";
+            string strObjectID = "";
+            // 解析对象路径
+            // parameters:
+            //      strPathParam    等待解析的路径
+            //      strXmlRecPath   返回元数据记录路径
+            //      strObjectID     返回对象 ID
+            // return:
+            //      false   不是记录路径
+            //      true    是记录路径
+            StringUtil.ParseObjectPath(strResPath,
+            out strXmlRecPath,
+            out strObjectID);
+
+            this.XmlRecPath = strXmlRecPath;
+            this.ObjectID = strObjectID;
+            return 0;
+        }
+
+        public override void BuidWriteCommand(SQLiteCommand command,
+    int i,
+    bool bInsertOrReplace,
+    StringBuilder text)
+        {
+            if (bInsertOrReplace == true)
+                text.Append(" INSERT OR REPLACE ");
+            else
+                text.Append(" INSERT ");
+
+            text.Append(
+" INTO " + TableName + " (date, no, subno, operation, action, xmlrecpath, objectid, operator, opertime) "
++ " VALUES("
++ "@date" + i
++ ", @no" + i
++ ", @subno" + i
++ ", @operation" + i
++ ", @action" + i
++ ", @xmlrecpath" + i
++ ", @objectid" + i
++ ", @operator" + i
++ ", @opertime" + i + ")"
++ " ; ");
+            SQLiteUtil.SetParameter(command,
+                "@date" + i,
+                this.Date);
+            SQLiteUtil.SetParameter(command,
+                "@no" + i,
+                this.No.ToString());
+            SQLiteUtil.SetParameter(command,
+                "@subno" + i,
+                this.SubNo.ToString());
+            SQLiteUtil.SetParameter(command,
+                "@operation" + i,
+                this.Operation);
+            SQLiteUtil.SetParameter(command,
+                "@action" + i,
+                this.Action);
+
+            SQLiteUtil.SetParameter(command,
+                "@xmlrecpath" + i,
+                this.XmlRecPath);
+
+            SQLiteUtil.SetParameter(command,
+                "@objectid" + i,
+                this.ObjectID);
+
+            SQLiteUtil.SetParameter(command,
+"@operator" + i,
+this.Operator);
+            SQLiteUtil.SetParameter(command,
+"@opertime" + i,
+this.OperTime);
+        }
+    }
+
+    // 入馆登记 每行
+    class PassGateOperLogLine : OperLogLineBase
+    {
+        // 馆代码
+        public string LibraryCode = "";
+
+        // 读者证条码号
+        public string ReaderBarcode = "";
+
+        // 门名称
+        public string GateName = "";
+
+        static string TableName
+        {
+            get
+            {
+                return "operlogpassgate";
+            }
+        }
+
+        // 根据日志 XML 记录填充数据
+        public override int SetData(XmlDocument dom,
+            string strDate,
+            long lIndex,
+            out List<OperLogLineBase> lines,
+            out string strError)
+        {
+            strError = "";
+
+            int nRet = base.SetData(dom, strDate, lIndex, out lines, out strError);
+            if (nRet == -1)
+                return -1;
+
+            string strLibraryCode = DomUtil.GetElementText(dom.DocumentElement,
+    "libraryCode");
+
+            string strReaderBarcode = DomUtil.GetElementText(dom.DocumentElement,
+                "readerBarcode");
+
+            string strGateName = DomUtil.GetElementText(dom.DocumentElement,
+    "gateName");
+
+            this.LibraryCode = strLibraryCode;
+            this.ReaderBarcode = strReaderBarcode;
+            this.GateName = strGateName;
+            return 0;
+        }
+
+        public override void BuidWriteCommand(SQLiteCommand command,
+    int i,
+    bool bInsertOrReplace,
+    StringBuilder text)
+        {
+            if (bInsertOrReplace == true)
+                text.Append(" INSERT OR REPLACE ");
+            else
+                text.Append(" INSERT ");
+
+            text.Append(
+" INTO " + TableName + " (date, no, subno, operation, action, gatename, readerbarcode, librarycode, operator, opertime) "
++ " VALUES("
++ "@date" + i
++ ", @no" + i
++ ", @subno" + i
++ ", @operation" + i
++ ", @action" + i
++ ", @gatename" + i
++ ", @readerbarcode" + i
++ ", @librarycode" + i
++ ", @operator" + i
++ ", @opertime" + i + ")"
++ " ; ");
+            SQLiteUtil.SetParameter(command,
+                "@date" + i,
+                this.Date);
+            SQLiteUtil.SetParameter(command,
+                "@no" + i,
+                this.No.ToString());
+            SQLiteUtil.SetParameter(command,
+                "@subno" + i,
+                this.SubNo.ToString());
+            SQLiteUtil.SetParameter(command,
+                "@operation" + i,
+                this.Operation);
+            SQLiteUtil.SetParameter(command,
+                "@action" + i,
+                this.Action);
+
+            SQLiteUtil.SetParameter(command,
+                "@gatename" + i,
+                this.GateName);
+
+            SQLiteUtil.SetParameter(command,
+                "@readerbarcode" + i,
+                this.ReaderBarcode);
+
+            SQLiteUtil.SetParameter(command,
+    "@librarycode" + i,
+    this.LibraryCode);
+
+            SQLiteUtil.SetParameter(command,
+"@operator" + i,
+this.Operator);
+            SQLiteUtil.SetParameter(command,
+"@opertime" + i,
+this.OperTime);
+        }
+    }
 
 #if NO
     class OperLogLine

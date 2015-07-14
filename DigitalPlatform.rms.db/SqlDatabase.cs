@@ -6280,7 +6280,6 @@ namespace DigitalPlatform.rms
                                         DomUtil.SetAttr(fileNode, "__localpath", (string)values["localpath"]);
                                         DomUtil.SetAttr(fileNode, "__size", (string)values["size"]);
 
-
                                         // 2007/12/13 
                                         string strLastModifyTime = (string)values["lastmodifytime"];
                                         if (String.IsNullOrEmpty(strLastModifyTime) == false)
@@ -6511,7 +6510,6 @@ namespace DigitalPlatform.rms
 #endif
             }
         }
-
 
         // 得到xml数据
         // 线:安全的,供外部调

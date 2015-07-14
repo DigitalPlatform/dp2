@@ -559,6 +559,14 @@ namespace DigitalPlatform.LibraryServer
             {
                 // 暂未实现
             }
+            else if (strOperation == "passgate")
+            {
+                // 只读
+            }
+            else if (strOperation == "getRes")
+            {
+                // 只读 2015/7/14
+            }
             else
             {
                 strError = "不能识别的日志操作类型 '" + strOperation + "'";
