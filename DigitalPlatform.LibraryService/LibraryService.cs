@@ -11802,6 +11802,35 @@ namespace dp2Library
                     }
                 }
 
+                bool bWriteLog = false; // 是否需要记入操作日志
+                bool bClearMetadata = false;    // 是否需要在返回前清除 strMetadata 内容
+                string strXmlRecPath = "";
+                string strObjectID = "";
+                // 解析对象路径
+                // parameters:
+                //      strPathParam    等待解析的路径
+                //      strXmlRecPath   返回元数据记录路径
+                //      strObjectID     返回对象 ID
+                // return:
+                //      false   不是记录路径
+                //      true    是记录路径
+                StringUtil.ParseObjectPath(strResPath,
+                    out strXmlRecPath,
+                    out strObjectID);
+                if (app.GetObjectWriteToOperLog == true
+                    && nStart == 0 // 获取全部二进制信息的循环中，只记载第一次 API 访问
+                    && string.IsNullOrEmpty(strObjectID) == false
+                    && StringUtil.IsInList("data", strStyle) == true)
+                {
+                    bWriteLog = true;
+                    // 为了获得对象的大小信息，需要得到 metadata
+                    if (StringUtil.IsInList("metadata", strStyle) == false)
+                    {
+                        StringUtil.SetInList(ref strStyle, "metadata", true);
+                        bClearMetadata = true;
+                    }
+                }
+
                 lRet = channel.GetRes(strResPath,
                     nStart,
                     nLength,
@@ -11819,25 +11848,11 @@ namespace dp2Library
                 ConvertKernelErrorCode(channel.ErrorCode,
                     ref result);
 
-                string strXmlRecPath = "";
-                string strObjectID = "";
-                // 解析对象路径
-                // parameters:
-                //      strPathParam    等待解析的路径
-                //      strXmlRecPath   返回元数据记录路径
-                //      strObjectID     返回对象 ID
-                // return:
-                //      false   不是记录路径
-                //      true    是记录路径
-                StringUtil.ParseObjectPath(strResPath,
-                    out strXmlRecPath,
-                    out strObjectID);
-
-                if (app.GetObjectWriteToOperLog == true
-                    && nStart == 0 // 获取全部二进制信息的循环中，只记载第一次 API 访问
-                    && string.IsNullOrEmpty(strObjectID) == false
-                    && StringUtil.IsInList("data", strStyle) == true)
+                if (bWriteLog)
                 {
+                    Hashtable table = StringUtil.ParseMedaDataXml(strMetadata,
+                        out strError);
+
                     XmlDocument domOperLog = new XmlDocument();
                     domOperLog.LoadXml("<root />");
 
@@ -11846,6 +11861,14 @@ namespace dp2Library
                         "getRes");
                     DomUtil.SetElementText(domOperLog.DocumentElement, "path",
     strResPath);
+                    if (table != null)
+                    {
+                        DomUtil.SetElementText(domOperLog.DocumentElement, "size",
+                            (string)table["size"]);
+                        DomUtil.SetElementText(domOperLog.DocumentElement, "mime",
+                            (string)table["mimetype"]);
+                    }
+
                     DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
                         sessioninfo.UserID);
 
@@ -11859,6 +11882,8 @@ namespace dp2Library
                         out strError);
                     if (nRet == -1)
                     {
+                        if (bClearMetadata == true)
+                            strMetadata = "";
                         strError = "GetRes() API 写入日志时发生错误: " + strError;
                         result.Value = -1;
                         result.ErrorCode = ErrorCode.SystemError;
@@ -11866,6 +11891,9 @@ namespace dp2Library
                         return result;
                     }
                 }
+
+                if (bClearMetadata == true)
+                    strMetadata = "";
 
                 return result;
             }
@@ -13457,6 +13485,7 @@ out strError);
             {
                 int nRet = 0;
 
+                // TODO: 应考虑权限问题。
                 if (strAction == "delete")
                 {
                     bool bMoveToRecycleBin = StringUtil.IsInList("movetorecyclebin", strStyle);
@@ -13527,6 +13556,37 @@ out strError);
                 {
                     foreach (MessageData data in messages)
                     {
+                        // 崩溃报告还要写入操作日志
+                        if (data.strRecipient == "crash")
+                        {
+                            XmlDocument domOperLog = new XmlDocument();
+                            domOperLog.LoadXml("<root />");
+
+                            DomUtil.SetElementText(domOperLog.DocumentElement,
+                                "operation",
+                                "crashReport");
+                            DomUtil.SetElementText(domOperLog.DocumentElement, "subject",
+                                data.strSubject);
+                            DomUtil.SetElementText(domOperLog.DocumentElement, "sender",
+                                data.strSender);
+                            DomUtil.SetElementText(domOperLog.DocumentElement, "mime",
+                                data.strMime);
+                            DomUtil.SetElementText(domOperLog.DocumentElement, "content",
+                                data.strBody);
+
+                            string strOperTime = app.Clock.GetClock();
+                            DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
+                                strOperTime);
+                            nRet = app.OperLog.WriteOperLog(domOperLog,
+                                sessioninfo.ClientAddress,
+                                out strError);
+                            if (nRet == -1)
+                            {
+                                strError = "崩溃报告写入操作日志时出错: " + strError;
+                                goto ERROR1;
+                            }
+                        }
+
                         nRet = app.MessageCenter.SendMessage(
                             sessioninfo.Channels,
                             data.strRecipient,

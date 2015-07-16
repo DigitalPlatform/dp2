@@ -951,7 +951,7 @@ namespace dp2Circulation
 
             this.listView_users.Items.Add(item);
 
-            MessageBox.Show(this, "用户信息创建成功");
+            MessageBox.Show(this, "用户 '" + info.UserName + "' 创建成功");
             return;
         ERROR1:
             MessageBox.Show(this, strError);

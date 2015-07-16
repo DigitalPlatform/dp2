@@ -163,7 +163,9 @@ DbType.Int64);
             else if (strDbType == "getres")
             {
                 strFields = "xmlrecpath nvarchar (255) NULL ," + " "
-                + "objectid nvarchar (255) NULL ," + " ";
+                + "objectid nvarchar (255) NULL ," + " "
+                + "size nvarchar (255) NULL ," + " "
+                + "mime nvarchar (255) NULL ," + " ";
             }
             else
             {
@@ -1612,6 +1614,9 @@ this.OperTime);
         // 元数据记录路径
         public string XmlRecPath = "";
 
+        public string Size = "";
+        public string Mime = "";
+
         static string TableName
         {
             get
@@ -1635,6 +1640,10 @@ this.OperTime);
 
             string strResPath = DomUtil.GetElementText(dom.DocumentElement,
                 "path");
+            string strSize = DomUtil.GetElementText(dom.DocumentElement,
+                "size");
+            string strMime = DomUtil.GetElementText(dom.DocumentElement,
+                "mime");
 
             string strXmlRecPath = "";
             string strObjectID = "";
@@ -1652,6 +1661,8 @@ this.OperTime);
 
             this.XmlRecPath = strXmlRecPath;
             this.ObjectID = strObjectID;
+            this.Size = strSize;
+            this.Mime = strMime;
             return 0;
         }
 
@@ -1666,7 +1677,7 @@ this.OperTime);
                 text.Append(" INSERT ");
 
             text.Append(
-" INTO " + TableName + " (date, no, subno, operation, action, xmlrecpath, objectid, operator, opertime) "
+" INTO " + TableName + " (date, no, subno, operation, action, xmlrecpath, objectid, size, mime, operator, opertime) "
 + " VALUES("
 + "@date" + i
 + ", @no" + i
@@ -1675,6 +1686,8 @@ this.OperTime);
 + ", @action" + i
 + ", @xmlrecpath" + i
 + ", @objectid" + i
++ ", @size" + i
++ ", @mime" + i
 + ", @operator" + i
 + ", @opertime" + i + ")"
 + " ; ");
@@ -1701,6 +1714,13 @@ this.OperTime);
             SQLiteUtil.SetParameter(command,
                 "@objectid" + i,
                 this.ObjectID);
+
+            SQLiteUtil.SetParameter(command,
+    "@size" + i,
+    this.Size);
+            SQLiteUtil.SetParameter(command,
+                "@mime" + i,
+                this.Mime);
 
             SQLiteUtil.SetParameter(command,
 "@operator" + i,

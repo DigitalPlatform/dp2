@@ -13,6 +13,7 @@ using System.IO;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Range;
+using DigitalPlatform.Text;
 
 namespace DigitalPlatform.CirculationClient
 {
@@ -192,6 +193,7 @@ namespace DigitalPlatform.CirculationClient
                 out strError);
         }
 
+#if NO
         static Hashtable ParseMedaDataXml(string strXml,
             out string strError)
         {
@@ -224,6 +226,7 @@ namespace DigitalPlatform.CirculationClient
 
             return result;
         }
+#endif
 
         // 填充列表内容
         // return:
@@ -295,7 +298,7 @@ namespace DigitalPlatform.CirculationClient
                     }
 
                     // 取metadata值
-                    Hashtable values = ParseMedaDataXml(strMetadataXml,
+                    Hashtable values = StringUtil.ParseMedaDataXml(strMetadataXml,
                         out strError);
                     if (values == null)
                     {

@@ -1,4 +1,5 @@
 using DigitalPlatform;
+using DigitalPlatform.CirculationClient;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -47,7 +48,7 @@ namespace dp2Circulation
                 return;
 
             Exception ex = (Exception)e.ExceptionObject;
-            string strError = "发生未捕获的异常: " + ExceptionUtil.GetDebugText(ex);
+            string strError = "发生未捕获的异常: \r\n" + ExceptionUtil.GetDebugText(ex);
             MainForm main_form = Form.ActiveForm as MainForm;
             if (main_form != null)
                 main_form.WriteErrorLog(strError);
@@ -71,6 +72,9 @@ namespace dp2Circulation
                     Application.Exit();
             }
 #endif
+
+            // 崩溃报告
+            CrashReport(strError);
         }
 
         static void Application_ThreadException(object sender, 
@@ -80,7 +84,7 @@ namespace dp2Circulation
                 return;
 
             Exception ex = (Exception)e.Exception;
-            string strError = "发生未捕获的界面线程异常: " + ExceptionUtil.GetDebugText(ex);
+            string strError = "发生未捕获的界面线程异常: \r\n" + ExceptionUtil.GetDebugText(ex);
             MainForm main_form = Form.ActiveForm as MainForm;
             if (main_form != null)
                 main_form.WriteErrorLog(strError);
@@ -95,11 +99,58 @@ namespace dp2Circulation
     MessageBoxDefaultButton.Button2,
     ref bTemp,
     new string[] { "关闭", "继续" });
+            {
+                CrashReport(strError);
+            }
             if (result == DialogResult.Yes)
             {
                 //End();
                 bExiting = true;
                 Application.Exit();
+            }
+        }
+
+        static void CrashReport(string strText)
+        {
+            MainForm main_form = Form.ActiveForm as MainForm;
+
+            MessageBar _messageBar = null;
+
+            _messageBar = new MessageBar();
+            _messageBar.TopMost = false;
+            //_messageBar.BackColor = SystemColors.Info;
+            //_messageBar.ForeColor = SystemColors.InfoText;
+            _messageBar.Text = "dp2Circulation 出现异常";
+            _messageBar.MessageText = "正在向 dp2003.com 发送崩溃报告 ...";
+            _messageBar.StartPosition = FormStartPosition.CenterScreen;
+            _messageBar.Show(main_form);
+            _messageBar.Update();
+
+            int nRet = 0;
+            string strError = "";
+            try
+            {
+                // 崩溃报告
+                nRet = LibraryChannel.CrashReport(
+                    "dp2circulation",
+                    strText,
+                    out strError);
+            }
+            finally
+            {
+                _messageBar.Close();
+                _messageBar = null;
+            }
+
+            if (nRet == -1)
+            {
+                strError = "向 dp2003.com 发送崩溃报告时出错，未能发送成功。详细情况: " + strError;
+                MessageBox.Show(main_form, strError);
+                // 写入错误日志
+                if (main_form != null)
+                    main_form.WriteErrorLog(strError);
+                else
+                    WriteWindowsLog(strError, EventLogEntryType.Error);
             }
         }
 

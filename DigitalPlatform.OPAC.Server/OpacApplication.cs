@@ -3289,6 +3289,7 @@ out strError);
             }
         }
 
+#if NO
         static Hashtable ParseMedaDataXml(string strXml,
 out string strError)
         {
@@ -3322,6 +3323,7 @@ out string strError)
 
             return result;
         }
+#endif
 
         // 采用了代理帐户
         public int SaveUploadFile(
@@ -3696,9 +3698,8 @@ out strError);
                 return -1;
 
             // 取 metadata 中的 mime 类型信息
-            Hashtable values = ParseMedaDataXml(strMetaData,
+            Hashtable values = StringUtil.ParseMedaDataXml(strMetaData,
                 out strError);
-
             if (values == null)
             {
                 strError = "ParseMedaDataXml() Error :" + strError;

@@ -402,10 +402,7 @@ namespace DigitalPlatform.CirculationClient
             SecurityBindingElement bootstrap = secureTokenParams.BootstrapSecurityBindingElement;
             // Set the MaxClockSkew on the bootstrap element.
             bootstrap.LocalClientSettings.IdentityVerifier = new CustomIdentityVerifier();
-
-
             return new CustomBinding(outputBec);
-
         }
 
         // return:
@@ -655,6 +652,56 @@ out strError);
             m_nInSearching--;
         }
 
+        // 崩溃报告
+        public static int CrashReport(
+            string strSubject,  // 一般为 "dp2circulation"
+            string strContent, 
+            out string strError)
+        {
+            strError = "";
+
+            LibraryChannel channel = new LibraryChannel();
+            channel.Url = "http://dp2003.com/dp2library";
+            // channel.Url = "http://localhost:8001/dp2library";    // 测试用
+            channel.Timeout = new TimeSpan(0, 1, 0);
+            try
+            {
+                long lRet = channel.Login("public",
+                    "",
+                    "",
+                    out strError);
+                if (lRet != 1)
+                    return -1;
+
+                MessageData[] messages = new MessageData[1];
+                MessageData[] output_messages = null;
+
+                messages[0] = new MessageData();
+                messages[0].strRecipient = "crash";
+                messages[0].strSender = "";
+                messages[0].strSubject = strSubject;
+                messages[0].strMime = "text";
+                messages[0].strBody = strContent;
+                //messages[0].strRecordID = strOldRecordID;   // string strOldRecordID,
+                //messages[0].TimeStamp = baOldTimeStamp;   // byte [] baOldTimeStamp,
+
+                lRet = channel.SetMessage(
+                    "send",
+                    "",
+                    messages,
+                    out output_messages,
+                    out strError);
+                if (lRet == -1)
+                    return -1;
+
+                return 0;
+            }
+            finally
+            {
+                channel.Close();
+            }
+        }
+
         /*
         // 2007/11/20
         public int Timeout
@@ -901,6 +948,7 @@ out strError);
             }
             catch (Exception ex)
             {
+                // TODO: 是否显示 InnerException? 本地时钟不对怎么办?
                 strError = ex.Message;
                 return -1;
             }

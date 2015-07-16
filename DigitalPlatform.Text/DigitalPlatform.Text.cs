@@ -18,6 +18,47 @@ namespace DigitalPlatform.Text
 	{
         public static string SpecialChars = "！·＃￥％……—＊（）——＋－＝［］《》＜＞，。？／＼｜｛｝“”‘’•";
 
+        public static Hashtable ParseMedaDataXml(string strXml,
+    out string strError)
+        {
+            strError = "";
+            Hashtable result = new Hashtable();
+
+            if (string.IsNullOrEmpty(strXml) == true)
+                return result;
+
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.LoadXml(strXml);
+            }
+            catch (Exception ex)
+            {
+                strError = ex.Message;
+                return null;
+            }
+
+            if (dom.DocumentElement == null)
+                return result;
+
+            XmlAttributeCollection attrs = dom.DocumentElement.Attributes;
+            foreach(XmlAttribute attr in dom.DocumentElement.Attributes)
+            {
+                result.Add(attr.Name, attr.Value);
+            }
+#if NO
+            for (int i = 0; i < attrs.Count; i++)
+            {
+                string strName = attrs[i].Name;
+                string strValue = attrs[i].Value;
+
+                result.Add(strName, strValue);
+            }
+#endif
+
+            return result;
+        }
+
         // 解析对象路径
         // parameters:
         //      strPathParam    等待解析的路径
@@ -1171,6 +1212,22 @@ namespace DigitalPlatform.Text
             // 2011/12/26
             if (string.IsNullOrEmpty(strText) == true)
                 return new List<string>();
+
+            string[] parts = strText.Split(new char[] { delimeter });
+            List<string> results = new List<string>();
+            results.AddRange(parts);
+            return results;
+        }
+
+        // 2015/7/16
+        public static List<string> SplitList(string strText,
+            string strSep)
+        {
+            if (string.IsNullOrEmpty(strText) == true)
+                return new List<string>();
+
+            char delimeter = (char)1;
+            strText = strText.Replace(strSep, new string(delimeter, 1));
 
             string[] parts = strText.Split(new char[] { delimeter });
             List<string> results = new List<string>();

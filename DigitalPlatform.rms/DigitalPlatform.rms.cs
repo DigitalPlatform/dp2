@@ -12,43 +12,7 @@ namespace DigitalPlatform.rms
 {
 	public class rmsUtil
 	{
-
-		// 任延华将此函数从ResFileList类里移到此处，以便服务器也可以使用该函数
-		public static Hashtable ParseMedaDataXml(string strXml,
-			out string strError)
-		{
-			strError = "";
-			Hashtable result = new Hashtable();
-
-
-			if (strXml == "")
-				return result;
-
-			XmlDocument dom = new XmlDocument();
-
-			try 
-			{
-				dom.LoadXml(strXml);
-			}
-			catch (Exception ex)
-			{
-				strError = ex.Message;
-				return null;
-			}
-
-			XmlAttributeCollection attrs = dom.DocumentElement.Attributes;
-			for(int i=0;i<attrs.Count;i++)
-			{
-				string strName = attrs[i].Name;
-				string strValue = attrs[i].Value;
-
-				result.Add(strName, strValue);
-			}
-
-			return result;
-		}
-
-/*
+#if NO
 		// 将片断流(sourceStream)中全部内容根据contentrange字符串定义的位置
 		// 还原复制到目标文件(strOriginFileName)中
 		// 也就是说,contentrange字符串实际上定义的是从目标文件抽取到片断的规则
@@ -103,10 +67,9 @@ namespace DigitalPlatform.rms
 			fileOrigin.Close();
   			return lTotalBytes;
 		}
+#endif
 
-*/
-
-		//得到传和的字符串，组合返回一个文件名字符串
+		// 得到传和的字符串，组合返回一个文件名字符串
 		public static string makeFilePath(string strDir,
 			string strPrefix,
 			string strFileName)
@@ -117,7 +80,6 @@ namespace DigitalPlatform.rms
 			return strResult;
 		}
 	}
-
 
 	//表示文件片断的类
 	public class FragmentItem

@@ -6,6 +6,7 @@ using DigitalPlatform.Text;
 using System.Text.RegularExpressions;
 using DigitalPlatform.IO;
 using System.Xml;
+using System.Collections;
 
 namespace DigitalPlatform.LibraryServer
 {

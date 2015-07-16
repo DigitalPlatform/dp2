@@ -1,0 +1,17 @@
+<root>
+  <title>入馆登记工作量\r%library%\r%daterange%</title>
+  <titleComment>
+  </titleComment>
+  <columns>
+    <column name="门名称" type="String" align="left" sum="no" class="gatename" eval="" />
+    <column name="登记次" type="" align="right" sum="yes" class="pass_count" eval="" />
+    <column name="操作总量" type="" align="right" sum="yes" class="total" eval="" />
+  </columns>
+  <css>
+  </css>
+  <typeName>482 入馆登记工作量，按门名称</typeName>
+  <columnSortStyle>
+  </columnSortStyle>
+  <createFrequency>day,month,year</createFrequency>
+  <property fresh="false" />
+</root>

@@ -3527,6 +3527,58 @@ out strError);
 #endif
         }
 
+                // return:
+        //      -1  出错
+        //      0   没有创建文件(因为输出的表格为空)
+        //      1   成功创建文件
+        int Create_493_report(
+            string strLibraryCode,
+            string strClassType,
+            string strClassCaption,
+            string strDateRange,
+            string strCfgFile,
+            Hashtable macro_table,
+            List<string> filters,
+            string strOutputFileName,
+            out string strError)
+        {
+            strError = "";
+
+            // macro_table["%linecount%"] = tableDepartment.Count.ToString();
+            macro_table["%daterange%"] = strDateRange;
+            macro_table["%class%"] = string.IsNullOrEmpty(strClassCaption) == false ? strClassCaption : strClassType;
+            macro_table["%createtime%"] = DateTime.Now.ToLongDateString();
+
+            ReportWriter writer = null;
+            int nRet = GetReportWriter(strCfgFile,
+                out writer,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            List<string> commands = new List<string>();
+
+            string strCommand = "";
+            nRet = CreateClassReportCommand(
+                strLibraryCode,
+                strDateRange,
+                "493",
+                strClassType,
+                filters,
+                out strCommand,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            commands.Add(strCommand);
+
+            return RunQuery(
+                commands,
+                writer,
+                strOutputFileName,
+                macro_table,
+                "创建 493 表时",
+                out strError);
+        }
 #if NO
         // source : operator unit amerce_count amerce_money undo_count undo_money expire_count total_count
         // target : operator amerce_count amerce_money undo_count undo_money expire_count total_count
@@ -4652,7 +4704,10 @@ out strError);
         // 2) 期登记工作量 按工作人员 452
         // 1) 违约金流水 471
         // 2) 违约金工作量 按工作人员 472
-
+        // 1) 入馆登记流水 481
+        // 2) 入馆登记工作量 按门名称 482
+        // 1) 获取对象流水 491
+        // 2) 获取对象工作量 按操作者 492
         int CreateWorkerReportCommand(
             string strLibraryCode,
             string strDateRange,
@@ -4887,9 +4942,162 @@ from operlogamerce
                      + " GROUP BY operlogamerce.operator, operlogamerce.unit "
                     + " ORDER BY operlogamerce.operator ;";
             }
+            else if (nNumber == 481)
+            {
+                // 481 表，入馆登记流水
+                strCommand = "select '', operlogpassgate.action, operlogpassgate.gatename, operlogpassgate.readerbarcode, reader.name, operlogpassgate.opertime, operlogpassgate.operator "  // 
+                     + " FROM operlogpassgate "
+                     + " left outer JOIN reader ON operlogpassgate.readerbarcode <> '' AND operlogpassgate.readerbarcode = reader.readerbarcode "
+                    // + " left outer JOIN user ON operlogamerce.operator = user.id "
+                     + " WHERE "
+                     + "     operlogpassgate.date >= '" + strStartDate + "' AND operlogpassgate.date <= '" + strEndDate + "' "
+                     + "     AND reader.librarycode = '" + strLibraryCode + "' "
+                     + " ORDER BY operlogpassgate.opertime ;";
+            }
+            else if (nNumber == 482)
+            {
+                // 482 表，每个门名称的入馆登记数量
+                strCommand = "select operlogpassgate.gatename,  "  // 
+                     + "  count(*) as pass_count, "
+                     + "  count(*) as total_count "
+                     + " FROM operlogpassgate "
+                     + " left outer JOIN reader ON operlogpassgate.readerbarcode <> '' AND operlogpassgate.readerbarcode = reader.readerbarcode "
+                     + " WHERE "
+                     + "     operlogpassgate.date >= '" + strStartDate + "' AND operlogpassgate.date <= '" + strEndDate + "' "
+                     + "     AND reader.librarycode = '" + strLibraryCode + "' "
+                     + " GROUP BY operlogpassgate.gatename "
+                    + " ORDER BY operlogpassgate.gatename ;";
+            }
+            else if (nNumber == 491)
+            {
+                // 491 表，获取对象流水
+                // TODO: 可以加上读者姓名和单位列
+                strCommand = "select '', operloggetres.action, operloggetres.xmlrecpath, biblio.summary, operloggetres.objectid, operloggetres.size, operloggetres.opertime, operloggetres.operator "  // 
+                     + " FROM operloggetres "
+                     + " left outer JOIN biblio ON operloggetres.xmlrecpath <> '' AND operloggetres.xmlrecpath = biblio.bibliorecpath "
+                     + " left outer JOIN reader ON operloggetres.operator <> '' AND operloggetres.operator = reader.readerbarcode "
+                     + " left outer JOIN user ON operloggetres.operator = user.id "
+                     + " WHERE "
+                     + "     operloggetres.date >= '" + strStartDate + "' AND operloggetres.date <= '" + strEndDate + "' "
+                     + "     AND ( reader.librarycode = '" + strLibraryCode + "' OR user.librarycodelist like '%," + strLibraryCode + ",%') "
+                     + " ORDER BY operloggetres.opertime ;";
+            }
+            else if (nNumber == 492)
+            {
+                // 492 表，每个操作者获取对象的量
+                strCommand = "select operloggetres.operator,  "  // 
+                    // + " operloggetres.unit, "
+                    + "  count(case operloggetres.action when '' then operloggetres.action end) as get_count,"
+                    + "  sum(case operloggetres.action when '' then operloggetres.size end) as get_size,"
+                    + "  count(*) as total_count "
+                     + " FROM operloggetres "
+                     + " left outer JOIN reader ON operloggetres.operator <> '' AND operloggetres.operator = reader.readerbarcode "
+                     + " left outer JOIN user ON operloggetres.operator = user.id "
+                     + " WHERE "
+                     + "     operloggetres.date >= '" + strStartDate + "' AND operloggetres.date <= '" + strEndDate + "' "
+                     + "     AND ( reader.librarycode = '" + strLibraryCode + "' OR user.librarycodelist like '%," + strLibraryCode + ",%') "
+                     + " GROUP BY operloggetres.operator "
+                    + " ORDER BY operloggetres.operator ;";
+            }
             else
             {
                 strError = "CreateWorkerReport() 中 strStyle=" + strStyle + " 没有分支处理";
+                return -1;
+            }
+
+            return 0;
+        }
+
+        // 创建分类报表，关于获取对象
+        // 1) 493 按照分类的获取对象数字
+        int CreateClassReportCommand(
+            // string strLocation, // "名称/"
+            string strLibraryCode,
+    string strDateRange,
+    string strStyle,
+    string strClassType,
+            List<string> filters,
+    out string strCommand,
+    out string strError)
+        {
+            strError = "";
+            strCommand = "";
+
+            string strStartDate = "";
+            string strEndDate = "";
+
+            try
+            {
+                // 将日期字符串解析为起止范围日期
+                // throw:
+                //      Exception
+                DateTimeUtil.ParseDateRange(strDateRange,
+                    out strStartDate,
+                    out strEndDate);
+                if (string.IsNullOrEmpty(strEndDate) == true)
+                    strEndDate = strStartDate;
+            }
+            catch (Exception ex)
+            {
+                strError = "日期范围字符串 '" + strDateRange + "' 格式不正确";
+                return -1;
+            }
+
+            if (StringUtil.IsInList("493", strStyle) == true)
+            {
+                /*
+select substr(class_clc.class,1,1) as class1,
+  count(operloggetres.action) as get_count,
+  sum(operloggetres.size) as get_size
+  FROM operloggetres 
+ left outer JOIN reader ON operloggetres.operator <> '' AND operloggetres.operator = reader.readerbarcode 
+ left outer JOIN user ON operloggetres.operator = user.id 
+ JOIN class_clc ON class_clc.bibliorecpath = operloggetres.xmlrecpath 
+        where ...
+ GROUP BY class1 
+ ORDER BY class1
+
+                 * 
+                 * */
+                string strClassTableName = "class_" + strClassType;
+
+                int nRet = PrepareDistinctClassTable(
+strClassTableName,
+out strError);
+                if (nRet == -1)
+                    return -1;
+
+                string strDistinctClassTableName = "class_" + strClassType + "_d";
+
+                string strClassColumn = BuildClassColumnFragment(strDistinctClassTableName,
+                    filters,
+                    "other");
+
+#if NO
+                strStartDate = strStartDate.Insert(6, "-").Insert(4, "-");
+                strEndDate = strEndDate.Insert(6, "-").Insert(4, "-");
+#endif
+
+                // 493 表 按照图书 *分类* 的获取对象数字
+                strCommand = "select " + strClassColumn + " as classhead, "
+                    + " count(operloggetres.action) as get_count, "
+                    + " sum(operloggetres.size) as get_size "
+                     + " FROM operloggetres "
+                     + " left outer JOIN reader ON operloggetres.operator <> '' AND operloggetres.operator = reader.readerbarcode "
+                    + " left outer JOIN user ON operloggetres.operator = user.id "
+                     + " LEFT OUTER JOIN " + strDistinctClassTableName + " ON operloggetres.xmlrecpath <> '' AND " + strDistinctClassTableName + ".bibliorecpath = operloggetres.xmlrecpath "
+                     + " WHERE "
+                     + "     operloggetres.date >= '" + strStartDate + "' AND operloggetres.date <= '" + strEndDate + "' "
+                     + "     AND ( reader.librarycode = '" + strLibraryCode + "' OR user.librarycodelist like '%," + strLibraryCode + ",%') "
+                     + " GROUP BY classhead ORDER BY classhead ;";
+                // left outer join 是包含了左边找不到右边的那些行， 然后 class 列为 NULL
+            }
+            else if (StringUtil.IsInList("???", strStyle) == true)
+            {
+            }
+            else
+            {
+                strError = "不支持的 strStyle '" + strStyle + "'";
                 return -1;
             }
 
@@ -8807,7 +9015,6 @@ MessageBoxDefaultButton.Button1);
     "createwhat_reportnames",
     "");
 
-
             // 询问创建报表的时间范围
             // 询问那些频率的日期需要创建
             // 询问那些报表需要创建
@@ -8825,17 +9032,16 @@ MessageBoxDefaultButton.Button1);
             dlg.LoadReportList(nodeFirstLibrary);
 
             if (string.IsNullOrEmpty(strReportNameList) == false)
-                dlg.SelectedReportsNames = StringUtil.SplitList(strReportNameList);
+                dlg.SelectedReportsNames = StringUtil.SplitList(strReportNameList, "|||");
             this.MainForm.AppInfo.LinkFormState(dlg, "CreateWhatsReportDialog_state");
             dlg.UiState = this.MainForm.AppInfo.GetString(GetReportSection(), "CreateWhatsReportDialog_ui_state", "");
             dlg.ShowDialog(this);
             this.MainForm.AppInfo.SetString(GetReportSection(), "CreateWhatsReportDialog_ui_state", dlg.UiState);
             this.MainForm.AppInfo.UnlinkFormState(dlg);
 
-
             this.MainForm.AppInfo.SetString(GetReportSection(),
 "createwhat_reportnames",
-StringUtil.MakePathList(dlg.SelectedReportsNames));
+StringUtil.MakePathList(dlg.SelectedReportsNames, "|||"));
             this.MainForm.AppInfo.SetString(GetReportSection(),
 "createwhat_frequency",
 dlg.Freguency);
@@ -8904,7 +9110,6 @@ dlg.DateRange);
                         task_dom.DocumentElement.AppendChild(library_element);
                         library_element.SetAttribute("code", strLibraryCode);
 
-
                         foreach (string strTimeType in freq_types)
                         {
                             List<string> report_names = new List<string>();
@@ -8966,7 +9171,7 @@ dlg.DateRange);
                                 item_element.SetAttribute("timeType", strTimeType);
                                 item_element.SetAttribute("time", time.ToString());
                                 item_element.SetAttribute("isTail", bTailTime ? "true" : "false");
-                                item_element.SetAttribute("reportNames", StringUtil.MakePathList(report_names));
+                                item_element.SetAttribute("reportNames", StringUtil.MakePathList(report_names, "|||"));
 
 #if NO
                                 nRet = CreateOneTimeReports(
@@ -9563,7 +9768,7 @@ MessageBoxDefaultButton.Button1);
                         OneTime time = OneTime.FromString(item_element.GetAttribute("time"));
                         // List<OneTime> times = OneTime.TimesFromString(item_element.GetAttribute("times"));
                         bool bTailTime = DomUtil.IsBooleanTrue(item_element.GetAttribute("isTail"));
-                        List<string> report_names = StringUtil.SplitList(item_element.GetAttribute("reportNames"));
+                        List<string> report_names = StringUtil.SplitList(item_element.GetAttribute("reportNames"), "|||");
                         if (report_names.Count == 0)
                             report_names = null;
 
@@ -10331,7 +10536,14 @@ MessageBoxDefaultButton.Button1);
                 {
                     XmlNode node = nodeLibrary.SelectSingleNode("reports/report[@name='" + strName + "']");
                     if (node == null)
+                    {
                         continue;
+#if NO
+                        strError = "在配置文件中没有找到馆代码为 '" + strLibraryCode + "' 的 <library> 元素下的 name 属性值为 '"+strName+"' 的 report 元素";
+                        return -1;
+                        // TODO: 出现 MessageBox 警告，但可以选择继续
+#endif
+                    }
                     report_nodes.Add(node);
                 }
 
@@ -10758,7 +10970,7 @@ MessageBoxDefaultButton.Button1);
                             // 写入 index.xml
                             nRet = WriteIndexXml(
                                 strTimeType,
-                        time.Time,
+                                time.Time,
                                 GetLocationCaption(strLocation),  // 把名字区别开。否则写入 <report> 会重叠覆盖
                                 strName,    // strReportsDir,
                                 strOutputFileName,
@@ -10787,7 +10999,12 @@ MessageBoxDefaultButton.Button1);
                     || strReportType == "451"
                     || strReportType == "452"
                     || strReportType == "471"
-                    || strReportType == "472")
+                    || strReportType == "472"
+                    || strReportType == "481"
+                    || strReportType == "482"
+                    || strReportType == "491"
+                    || strReportType == "492"
+                    )
                 {
                     nRet = Create_4XX_report(strLibraryCode,
                         time.Time,
@@ -10802,6 +11019,74 @@ MessageBoxDefaultButton.Button1);
                         nAdd = -1;
                     else if (nRet == 1)
                         nAdd = 1;
+                }
+                else if (strReportType == "493")
+                {
+#if NO
+                        // 这里稍微特殊一点，循环要写入多个输出文件
+                        if (string.IsNullOrEmpty(strOutputFileName) == true)
+                            strOutputFileName = Path.Combine(strOutputDir, Guid.NewGuid().ToString() + ".rml");
+#endif
+                    List<OneClassType> class_table = null;
+                    nRet = OneClassType.BuildClassTypes(strNameTable,
+    out class_table,
+    out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "报表类型 '" + strReportType + "' 的名字表定义不合法： " + strError;
+                        return -1;
+                    }
+
+                    foreach (BiblioDbFromInfo style in class_styles)
+                    {
+                        Application.DoEvents();
+
+                        OneClassType current_type = null;
+                        if (class_table.Count > 0)
+                        {
+                            // 只处理设定的那些 class styles
+                            int index = OneClassType.IndexOf(class_table, style.Style);
+                            if (index == -1)
+                                continue;
+                            current_type = class_table[index];
+                        }
+
+                        // 这里稍微特殊一点，循环要写入多个输出文件
+                        if (string.IsNullOrEmpty(strOutputFileName) == true)
+                            strOutputFileName = Path.Combine(strOutputDir, Guid.NewGuid().ToString() + ".rml");
+
+                        nRet = Create_493_report(
+                            strLibraryCode,
+                            style.Style,
+                            style.Caption,
+                            time.Time,
+                            strCfgFile,
+                            macro_table,
+                            current_type == null ? null : current_type.Filters,
+                            strOutputFileName,
+                            out strError);
+                        if (nRet == -1)
+                            return -1;
+
+                        // if (nRet == 1)
+                        {
+                            // 写入 index.xml
+                            nRet = WriteIndexXml(
+                                strTimeType,
+                                time.Time,
+                                style.Caption,  // 把名字区别开。否则写入 <report> 会重叠覆盖
+                                strName,    // strReportsDir,
+                                strOutputFileName,
+                                strReportType,
+                     nRet == 1,
+                               out strError);
+                            if (nRet == -1)
+                                return -1;
+
+                            strOutputFileName = "";
+                        }
+                    }
+
                 }
                 else
                 {

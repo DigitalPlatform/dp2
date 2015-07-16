@@ -386,7 +386,7 @@ namespace DigitalPlatform.rms.Client
 
 				// 观察mime
 				// 取metadata
-				values = rmsUtil.ParseMedaDataXml(strMetaData,
+				values = StringUtil.ParseMedaDataXml(strMetaData,
 					out strError);
 				if (values == null)
 				{
@@ -503,7 +503,7 @@ namespace DigitalPlatform.rms.Client
 
 			// 观察mime
 			// 取metadata
-			values = rmsUtil.ParseMedaDataXml(strMetaData,
+			values = StringUtil.ParseMedaDataXml(strMetaData,
 				out strError);
 			if (values == null)
 			{

@@ -431,7 +431,6 @@ namespace dp2Circulation
             writer.WriteEndElement();   // </tr>
             writer.WriteEndElement();   // </thead>
 
-
             // 合计数组
             object[] sums = null;   // 2008/12/1 new changed
 
@@ -685,7 +684,6 @@ namespace dp2Circulation
                         strText = "合计(" + nLineCount.ToString() + "行)";
                     else if (column.Sum == true)
                     {
-
                         if (string.IsNullOrEmpty(column.Eval) == false)
                         {
                             strText = engine.Evaluate(column.Eval).ToString();
@@ -768,7 +766,7 @@ object o2)
                 if (o1 is string)
                     return (string)o1 + (string)o2;
 
-                throw new Exception("无法支持的 Auto 类型累加");
+                throw new Exception("无法支持的 Auto 类型累加 o1 type=" + o1.GetType().ToString() + ", o2 type=" + o2.GetType().ToString());
             }
             if (datatype == ColumnDataType.Number)
             {
@@ -780,15 +778,23 @@ object o2)
                     return (double)o1 + (double)o2;
                 if (o1 is decimal)
                     return (decimal)o1 + (decimal)o2;
+                if (o1 is string)   // 2015/7/16
+                {
+                    Int64 v1 = 0;
+                    Int64 v2 = 0;
+                    Int64.TryParse(o1 as string, out v1);
+                    Int64.TryParse(o2 as string, out v2);
+                    return (v1 + v2).ToString();
+                }
 
-                throw new Exception("无法支持的 Number 类型累加");
+                throw new Exception("无法支持的 Number 类型累加 o1 type=" + o1.GetType().ToString() + ", o2 type=" + o2.GetType().ToString());
             }
             if (datatype == ColumnDataType.String)
             {
                 if (o1 is string)
                     return (string)o1 + (string)o2;
 
-                throw new Exception("无法支持的 String 类型累加");
+                throw new Exception("无法支持的 String 类型累加 o1 type=" + o1.GetType().ToString() + ", o2 type=" + o2.GetType().ToString());
             }
             if (datatype == ColumnDataType.Price) // 100倍金额整数
             {
@@ -804,7 +810,7 @@ object o2)
             }
             if (datatype == ColumnDataType.Currency)
             {
-                // 这一举容易发现列 数据类型 的错误
+                // 这一句容易发现列 数据类型 的错误
                 return PriceUtil.JoinPriceString((string)o1,
                     (string)o2);
 #if NO
@@ -813,7 +819,7 @@ object o2)
                     Convert.ToString(o2));
 #endif
             }
-            throw new Exception("无法支持的 " + datatype.ToString() + " 类型累加");
+            throw new Exception("无法支持的 " + datatype.ToString() + " 类型累加 o1 type=" + o1.GetType().ToString() + ", o2 type=" + o2.GetType().ToString());
         }
 
         static void WriteTitles(XmlTextWriter writer,

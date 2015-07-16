@@ -2135,7 +2135,7 @@ namespace DigitalPlatform.OPAC.Server
                             strMetaData = strItemMetadata;
 
                         // 取metadata
-                        Hashtable values = rmsUtil.ParseMedaDataXml(strMetaData,
+                        Hashtable values = StringUtil.ParseMedaDataXml(strMetaData,
                             out strError);
                         if (values == null)
                         {

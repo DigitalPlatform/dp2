@@ -334,7 +334,8 @@ namespace dp2Circulation
             else if (strNumber == "212"
                 || strNumber == "213"
                 || strNumber == "301"
-                || strNumber == "302")
+                || strNumber == "302"
+                || strNumber == "493")
             {
                 List<string> results = null;
                 // 获得所有的分类号 style
@@ -425,6 +426,7 @@ namespace dp2Circulation
                     || strNumber == "213"
                     || strNumber == "301"
                     || strNumber == "302"
+                    || strNumber == "493"
                     )
                 {
                     this.label_nameTable_strings.Text = "分类号名列表 [每行一个名称]";

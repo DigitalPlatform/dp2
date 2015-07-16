@@ -6269,7 +6269,7 @@ namespace DigitalPlatform.rms
                                     // ½âÎömetadata
                                     if (strObjectMetadata != "")
                                     {
-                                        Hashtable values = rmsUtil.ParseMedaDataXml(strObjectMetadata,
+                                        Hashtable values = StringUtil.ParseMedaDataXml(strObjectMetadata,
                                             out strError);
                                         if (values == null)
                                             return -1;

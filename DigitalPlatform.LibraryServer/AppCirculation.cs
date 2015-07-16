@@ -17104,7 +17104,7 @@ REDO_REPAIR:
             return 0;
         }
 
-
+#if NO
         static Hashtable ParseMedaDataXml(string strXml,
     out string strError)
         {
@@ -17138,6 +17138,7 @@ REDO_REPAIR:
 
             return result;
         }
+#endif
 
         // 下载对象资源
         // return:
@@ -17198,7 +17199,7 @@ REDO_REPAIR:
                 return -1;
 
             // 取metadata中的mime类型信息
-            Hashtable values = ParseMedaDataXml(strMetaData,
+            Hashtable values = StringUtil.ParseMedaDataXml(strMetaData,
                 out strError);
 
             if (values == null)

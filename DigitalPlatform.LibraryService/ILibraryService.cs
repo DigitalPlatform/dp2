@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.ServiceModel;
-// using System.ServiceModel.Web;
 using System.Text;
 
 using System.Net.Security;
@@ -259,7 +258,6 @@ namespace dp2Library
                     out string[] aDupPath,
                     out string strOutputReaderBarcode);
 
-
         [OperationContract(IsInitiating = true, IsTerminating = false)]
         LibraryServerResult Return(
                     string strAction,
@@ -311,7 +309,7 @@ namespace dp2Library
         LibraryServerResult GetIssueInfo(
                     string strRefID,
                     // string strBiblioRecPath,
-            string strItemXml,
+                    string strItemXml,
                     string strResultType,
                     out string strResult,
                     out string strIssueRecPath,
@@ -373,7 +371,7 @@ namespace dp2Library
         LibraryServerResult GetOrderInfo(
                     string strRefID,
                     // string strBiblioRecPath,
-            string strItemXml,
+                    string strItemXml,
                     string strResultType,
                     out string strResult,
                     out string strOrderRecPath,
@@ -549,15 +547,15 @@ namespace dp2Library
         LibraryServerResult Foregift(
                     string strAction,
                     string strReaderBarcode,
-            out string strOutputReaderXml,
-            out string strOutputID);
+                    out string strOutputReaderXml,
+                    out string strOutputID);
 
         [OperationContract(IsInitiating = true, IsTerminating = false)]
         LibraryServerResult Hire(
                     string strAction,
                     string strReaderBarcode,
-            out string strOutputReaderXml,
-            out string strOutputID);
+                    out string strOutputReaderXml,
+                    out string strOutputID);
 
         [OperationContract(IsInitiating = true, IsTerminating = false)]
         LibraryServerResult Settlement(
@@ -707,7 +705,7 @@ namespace dp2Library
         LibraryServerResult GetCommentInfo(
                     string strRefID,
                     // string strBiblioRecPath,
-            string strItemXml,
+                    string strItemXml,
                     string strResultType,
                     out string strResult,
                     out string strCommentRecPath,
@@ -737,27 +735,26 @@ namespace dp2Library
 
         [OperationContract(IsInitiating = true, IsTerminating = false)]
         LibraryServerResult GetMessage(
-    string[] message_ids,
-    MessageLevel messagelevel,
-    out List<MessageData> messages);
+            string[] message_ids,
+            MessageLevel messagelevel,
+            out List<MessageData> messages);
 
         [OperationContract(IsInitiating = true, IsTerminating = false)]
         LibraryServerResult ListMessage(
-    string strStyle,
-    string strResultsetName,
-    string strBoxType,
-    MessageLevel messagelevel,
-    int nStart,
-    int nCount,
-    out int nTotalCount,
-    out List<MessageData> messages);
-
+            string strStyle,
+            string strResultsetName,
+            string strBoxType,
+            MessageLevel messagelevel,
+            int nStart,
+            int nCount,
+            out int nTotalCount,
+            out List<MessageData> messages);
 
         [OperationContract(IsInitiating = true, IsTerminating = false)]
         LibraryServerResult SetMessage(string strAction,
-    string strStyle,
-    List<MessageData> messages,
-    out List<MessageData> output_messages);
+            string strStyle,
+            List<MessageData> messages,
+            out List<MessageData> output_messages);
 
         [OperationContract(IsInitiating = true, IsTerminating = false)]
         LibraryServerResult GetStatisInfo(string strDateRangeString,

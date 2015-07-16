@@ -5033,9 +5033,6 @@ ref strNewStyle);	// 不要数据体和metadata
                 this.ClearRedoCount();
                 return result.Value;
             } // end try
-
-
-
             catch (Exception ex)
             {
                 /*

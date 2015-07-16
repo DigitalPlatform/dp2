@@ -474,6 +474,8 @@ namespace dp2Circulation
                 nRet = GetPassGateString(dom, out strHtml, out strError);
             else if (strOperation == "getRes")
                 nRet = GetGetResString(dom, out strHtml, out strError);
+            else if (strOperation == "crashReport")
+                nRet = GetCrashReportString(dom, out strHtml, out strError);
             else if (strOperation == "setEntity"
                 || strOperation == "setOrder"
                 || strOperation == "setIssue"
@@ -1495,6 +1497,8 @@ namespace dp2Circulation
 #endif
             string strOperation = DomUtil.GetElementText(dom.DocumentElement, "operation");
             string strResPath = DomUtil.GetElementText(dom.DocumentElement, "path");
+            string strSize = DomUtil.GetElementText(dom.DocumentElement, "size");
+            string strMime = DomUtil.GetElementText(dom.DocumentElement, "mime");
             string strOperator = DomUtil.GetElementText(dom.DocumentElement, "operator");
             string strOperTime = GetRfc1123DisplayString(
                 DomUtil.GetElementText(dom.DocumentElement, "operTime"));
@@ -1503,6 +1507,46 @@ namespace dp2Circulation
                 "<table class='operlog'>" +
                 BuildHtmlLine("操作类型", strOperation + " -- 获取对象") +
                 BuildHtmlLine("对象路径", strResPath) +
+                BuildHtmlLine("尺寸", strSize) +
+                BuildHtmlLine("媒体类型", strMime) +
+                BuildHtmlLine("操作者", strOperator) +
+                BuildHtmlLine("操作时间", strOperTime) +
+                BuildClientAddressLine(dom) +
+                "</table>";
+            return 0;
+        }
+
+        // CrashReport
+        int GetCrashReportString(XmlDocument dom,
+    out string strHtml,
+    out string strError)
+        {
+            strHtml = "";
+            strError = "";
+            //int nRet = 0;
+
+#if NO
+            XmlNode node = null;
+            string strLibraryCode = DomUtil.GetElementText(dom.DocumentElement, "libraryCode", out node);
+            if (node != null && string.IsNullOrEmpty(strLibraryCode) == true)
+                strLibraryCode = "<空>";
+#endif
+            string strOperation = DomUtil.GetElementText(dom.DocumentElement, "operation");
+            string strSubject = DomUtil.GetElementText(dom.DocumentElement, "subject");
+            string strSender = DomUtil.GetElementText(dom.DocumentElement, "sender");
+            string strMime = DomUtil.GetElementText(dom.DocumentElement, "mime");
+            string strContent = DomUtil.GetElementText(dom.DocumentElement, "content");
+            string strOperator = DomUtil.GetElementText(dom.DocumentElement, "operator");
+            string strOperTime = GetRfc1123DisplayString(
+                DomUtil.GetElementText(dom.DocumentElement, "operTime"));
+
+            strHtml =
+                "<table class='operlog'>" +
+                BuildHtmlLine("操作类型", strOperation + " -- 崩溃报告") +
+                BuildHtmlLine("主题", strSubject) +
+                BuildHtmlLine("发送者", strSender) +
+                BuildHtmlLine("媒体类型", strMime) +
+                BuildHtmlEncodedLine("内容",  HttpUtility.HtmlEncode(strContent).Replace("\r\n", "<br/>")) +
                 BuildHtmlLine("操作者", strOperator) +
                 BuildHtmlLine("操作时间", strOperTime) +
                 BuildClientAddressLine(dom) +
@@ -2006,7 +2050,7 @@ DomUtil.GetElementInnerXml(dom.DocumentElement, "deletedCommentRecords"));
                 "</tr>";
         }
 
-        // 自动 HhmlEncode 一个字符串。
+        // 自动 HmlEncode 一个字符串。
         // 如果字符串的第一个字符为 '<'，表示不需要 encode。
         // 特殊情况下，正文正好第一个字符为 '<' 但是也需要 encode，就不适合用本函数
         static string AutoHtmlEncode(string strText)

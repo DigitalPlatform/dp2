@@ -567,6 +567,10 @@ namespace DigitalPlatform.LibraryServer
             {
                 // 只读 2015/7/14
             }
+            else if (strOperation == "crashReport")
+            {
+                // 只读 2015/7/16
+            }
             else
             {
                 strError = "不能识别的日志操作类型 '" + strOperation + "'";
