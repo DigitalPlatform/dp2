@@ -3,14 +3,13 @@
     <using>
   <![CDATA[
 
-
 // CNMARC格式图书 html 格式构造
-// (C)Copyright 2006-2011 数字平台(北京)软件有限责任公司
-// 编写人：谢涛 江汇泉
-// 最后修改时间: 2011/8/27
+// (C)Copyright 2006-2015 数字平台(北京)软件有限责任公司
+// 最后修改时间: 2015/7/17
 
 // 2011/8/27 将search.aspx修改为searchbiblio.aspx
 // 2014/11/5 封面图片
+// 2015/7/17 数字资源对象表格显示，采用 ScriptUtil.BuildObjectHtmlTable() 构造
 
 using System;
 using System.Collections.Generic;
@@ -1210,6 +1209,7 @@ using DigitalPlatform.Text;
       </end>
         </field>
       <!-- 显示多媒体信息 -->
+      <!--
       <field name="856">
         <![CDATA[
         if (this.DupCount > 1)
@@ -1337,6 +1337,7 @@ using DigitalPlatform.Text;
         ]]>
         </end>
       </field>
+      -->
         <!-- 905 馆藏信息 -->
         <field name="905">
             <subfield name="b">
@@ -1404,6 +1405,8 @@ using DigitalPlatform.Text;
         <end>
           <![CDATA[
                       Root._imageUrl = ScriptUtil.GetCoverImageUrl(this.Data, "MediumImage");
+                      
+                      Root.s856 = ScriptUtil.BuildObjectHtmlTable(this.Data, Host.RecPath);
 		]]></end>
     </record>
     <end>
@@ -1579,8 +1582,9 @@ using DigitalPlatform.Text;
 		Host.ResultString += "</tr>";
 	}      
       
+
 	// 电子资源
-	if (s856.Length > 0)
+	if (string.IsNullOrEmpty(s856) == false)
 	{
 		Host.ResultString += "<tr class='content'>";
 		Host.ResultString += "<td class='name' width='10%' nowrap>" + SS("电子资源") + "</td>";

@@ -654,6 +654,7 @@ out strError);
 
         // 崩溃报告
         public static int CrashReport(
+            string strSender,
             string strSubject,  // 一般为 "dp2circulation"
             string strContent, 
             out string strError)
@@ -678,7 +679,7 @@ out strError);
 
                 messages[0] = new MessageData();
                 messages[0].strRecipient = "crash";
-                messages[0].strSender = "";
+                messages[0].strSender = strSender;
                 messages[0].strSubject = strSubject;
                 messages[0].strMime = "text";
                 messages[0].strBody = strContent;

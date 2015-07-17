@@ -182,6 +182,10 @@
       <Project>{74242530-EF96-457E-852D-5C21A3EA8449}</Project>
       <Name>DigitalPlatform.MarcKernel</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DigitalPlatform.MarcQuery\DigitalPlatform.MarcQuery.csproj">
+      <Project>{57fe2fb1-4134-409b-876c-8a1c0776b498}</Project>
+      <Name>DigitalPlatform.MarcQuery</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DigitalPlatform.Message\DigitalPlatform.Message.csproj">
       <Project>{D0C73839-5A5E-41BA-B1E5-104EEC488E33}</Project>
       <Name>DigitalPlatform.Message</Name>

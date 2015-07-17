@@ -65,7 +65,7 @@ namespace dp2Library
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(75, 29);
             this.button_Cancel.TabIndex = 21;
-            this.button_Cancel.Text = "·ÅÆú";
+            this.button_Cancel.Text = "È¡Ïû";
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 

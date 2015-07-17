@@ -12280,6 +12280,11 @@ strLibraryCode);    // 读者所在的馆代码
 
 
         // 检查用户使用 WriteRes API 的权限
+        // 注： 
+        //      writetemplate 写入模板配置文件 template 所需要的权限; 
+        //      writeobject 写入对象所需要的权限; 
+        //      writerecord 写入数据库文件所需要的权限
+        //      writeres 写入数据库记录、配置文件、对象等所需要的笼统的权限
         // parameters:
         //      strLibraryCodeList  当前用户所管辖的馆代码列表
         //      strLibraryCode  [out]如果是写入读者库，这里返回实际写入的读者库的馆代码。如果不是写入读者库，则返回空
@@ -12349,7 +12354,6 @@ strLibraryCode);    // 读者所在的馆代码
                         }
                         return 1;   // 如果有了writetemplate权限，就不再需要writeres权限
                     }
-
                 }
 
                 // 记录ID
@@ -12416,7 +12420,6 @@ strLibraryCode);    // 读者所在的馆代码
                         }
                         return 1;   // 如果有了writetemplate权限，就不再需要writeres权限
                     }
-
                 }
 
                 // 记录ID
@@ -12485,7 +12488,6 @@ strLibraryCode);    // 读者所在的馆代码
                         }
                         return 1;   // 如果有了writetemplate权限，就不再需要writeres权限
                     }
-
                 }
 
                 // 记录ID
@@ -12638,8 +12640,9 @@ strLibraryCode);    // 读者所在的馆代码
                 return 1;
             }
 
-            // 如果具备 writeres 权限，则具备所有对象的读取权限了
-            if (StringUtil.IsInList("writeres", strRights) == true)
+            // 如果具备 writeobject 权限，则具备所有对象的读取权限了
+            if (StringUtil.IsInList("writeobject", strRights) == true
+                || StringUtil.IsInList("writeres", strRights) == true)
                 return 1;
 
             string strDbName = StringUtil.GetFirstPartPath(ref strPath);
@@ -12787,7 +12790,7 @@ strLibraryCode);    // 读者所在的馆代码
         }
 
         // 对象是否允许被获取?
-        static bool CanGet(string strUserRights, string strObjectRights)
+        public static bool CanGet(string strUserRights, string strObjectRights)
         {
             string[] users = strUserRights.Split(new char[] {','}, StringSplitOptions.RemoveEmptyEntries);
             string[] objects = strObjectRights.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);

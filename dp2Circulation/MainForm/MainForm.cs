@@ -68,7 +68,6 @@ namespace dp2Circulation
         MainFormHost objStatis = null;
         Assembly AssemblyMain = null;
 
-        // int AssemblyVersion = 0;
         string m_strInstanceDir = "";
 
         /// <summary>
@@ -166,14 +165,6 @@ namespace dp2Circulation
         public CfgCache cfgCache = new CfgCache();
 
         // 统计窗中assembly的版本计数
-        /*
-        public int OperLogStatisAssemblyVersion = 0;
-        public int ReaderStatisAssemblyVersion = 0;
-        public int ItemStatisAssemblyVersion = 0;
-        public int BiblioStatisAssemblyVersion = 0;
-        public int XmlStatisAssemblyVersion = 0;
-        public int Iso2709StatisAssemblyVersion = 0;
-         * */
         internal int StatisAssemblyVersion = 0;
 
         bool m_bUrgent = false;
@@ -3175,7 +3166,7 @@ AppInfo.GetString("config",
         /// <summary>
         /// 当前连接的 dp2Library 版本号
         /// </summary>
-        public double ServerVersion {get;set;}    // = 0
+        public double ServerVersion { get; set; }    // = 0
 
         /// <summary>
         /// 当前连接的 dp2library 的 uid
@@ -13364,11 +13355,15 @@ Keys keyData)
         {
             if (this.Channel != null && string.IsNullOrEmpty(this.Channel.UserName) == false)
                 return this.Channel.UserName;
+
             // TODO: 或者迫使登录一次
-            return AppInfo.GetString(
+            if (this.AppInfo != null)
+                return AppInfo.GetString(
                     "default_account",
                     "username",
                     "");
+
+            return "";
         }
 
         #endregion // servers.xml

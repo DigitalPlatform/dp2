@@ -4985,7 +4985,7 @@ from operlogamerce
             else if (nNumber == 492)
             {
                 // 492 表，每个操作者获取对象的量
-                strCommand = "select operloggetres.operator,  "  // 
+                strCommand = "select operloggetres.operator, reader.name, reader.department, "  // 
                     // + " operloggetres.unit, "
                     + "  count(case operloggetres.action when '' then operloggetres.action end) as get_count,"
                     + "  sum(case operloggetres.action when '' then operloggetres.size end) as get_size,"

@@ -47,9 +47,9 @@
     <item name="删除过期消息条数" role="all" />
     <item name="*" role="librarian" />
   </category>
-  <category name="跟踪DTLP" role="librarian" >
-    <item name="覆盖记录条数" role="librarian" />
-    <item name="删除记录条数" role="librarian" />
-    <item name="*" role="librarian" />
+  <category name="获取对象" role="all" >
+    <item name="次" role="all" />
+    <item name="尺寸" role="all" />
+    <item name="*" role="all" />
   </category>
 </root>

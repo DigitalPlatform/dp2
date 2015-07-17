@@ -125,7 +125,7 @@ namespace dp2Batch
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(75, 22);
             this.button_Cancel.TabIndex = 2;
-            this.button_Cancel.Text = "·ÅÆú";
+            this.button_Cancel.Text = "È¡Ïû";
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
             // DbNameMapDlg

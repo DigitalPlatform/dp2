@@ -136,7 +136,7 @@ namespace DigitalPlatform.DTLP
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(67, 22);
             this.button_Cancel.TabIndex = 5;
-            this.button_Cancel.Text = "·ÅÆú";
+            this.button_Cancel.Text = "È¡Ïû";
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
             // button_OK

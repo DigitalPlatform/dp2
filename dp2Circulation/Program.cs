@@ -130,11 +130,20 @@ namespace dp2Circulation
             string strError = "";
             try
             {
+                string strSender = "";
+                if (main_form != null)
+                    strSender = main_form.GetCurrentUserName() + "@" + main_form.ServerUID;
                 // 崩溃报告
                 nRet = LibraryChannel.CrashReport(
+                    strSender,
                     "dp2circulation",
                     strText,
                     out strError);
+            }
+            catch (Exception ex)
+            {
+                strError = "CrashReport() 过程出现异常: " + ExceptionUtil.GetDebugText(ex);
+                nRet = -1;
             }
             finally
             {

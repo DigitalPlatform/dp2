@@ -55,7 +55,7 @@ namespace DigitalPlatform.LibraryServer
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(56, 23);
             this.button_Cancel.TabIndex = 19;
-            this.button_Cancel.Text = "·ÅÆú";
+            this.button_Cancel.Text = "È¡Ïû";
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
@@ -197,7 +197,7 @@ namespace DigitalPlatform.LibraryServer
             this.textBox_kernelUrl.Name = "textBox_kernelUrl";
             this.textBox_kernelUrl.Size = new System.Drawing.Size(334, 21);
             this.textBox_kernelUrl.TabIndex = 12;
-            this.textBox_kernelUrl.Text = "http://localhost:8001/dp2Kernel";
+            this.textBox_kernelUrl.Text = "net.pipe://localhost/dp2Kernel";
             // 
             // label1
             // 

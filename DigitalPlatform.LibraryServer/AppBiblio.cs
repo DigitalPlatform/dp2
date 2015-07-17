@@ -1698,8 +1698,8 @@ return result;
                     }
                 }
 
-
                 // 如果不具备writeobjects权限
+                // TODO: 是否 writeres 权限也管用?
                 if (StringUtil.IsInList("writeobject", strRights) == false)
                 {
                     // TODO: 用MergeDprmsFile()函数替代下面段落 
@@ -1730,7 +1730,6 @@ return result;
                         domNew.DocumentElement.AppendChild(fragment);
                     }
                 }
-
 
                 if (StringUtil.IsInList("905", strUnionCatalogStyle) == true)
                 {
@@ -1861,8 +1860,6 @@ return result;
                                 root_new.AppendChild(fragment);
                         }
                     }
-
-
                 }
 
                 strNewBiblioXml = domNew.OuterXml;
@@ -2021,6 +2018,7 @@ return result;
         //      0   成功
         //      1   有部分修改要求被拒绝。strError 中返回了注释信息
         static int MergeOldNewBiblioByFieldNameList(
+            string strUserRights,
             string strDefaultOperation,
             string strFieldNameList,
             string strOldBiblioXml,
@@ -2078,7 +2076,6 @@ return result;
                 && string.IsNullOrEmpty(strNewMarcSyntax) == true)
                 return 0;   // 不是 MARC 格式
 
-
             string strMarcSyntax = "";
             if (string.IsNullOrEmpty(strOldMarcSyntax) == false)
                 strMarcSyntax = strOldMarcSyntax;
@@ -2100,6 +2097,24 @@ return result;
                 }
             }
 
+            int field_856_count = Get856Count(strNewMarc);
+
+            // 对 strNewMarc 进行过滤，将那些当前用户无法读取的 856 字段删除
+            // 对 MARC 记录进行过滤，将那些当前用户无法读取的 856 字段删除
+            // return:
+            //      -1  出错
+            //      其他  滤除的 856 字段个数
+            nRet = RemoveCantGet856(
+                strUserRights,
+                ref strNewMarc,
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+            bool b856Removed = false;
+            if (nRet > 0)
+                b856Removed = true;
+
             string strComment = "";
             // 按照字段修改权限定义，合并新旧两个 MARC 记录
             // return:
@@ -2119,6 +2134,17 @@ return result;
             if (nRet == 1)
                 bNotAccepted = true;
 
+            // 要将 strNewMarc 处理前的 856 字段个数和处理后的 856 字段个数进行比较，如果有变化，就表示有的字段没有被接纳，...
+            if (b856Removed == true
+                && field_856_count > Get856Count(strNewMarc))
+            {
+                // TODO: 这里还可以精细处理一下，当 strFieldNameList 中规定不能保存 856 时，strComment 就不要增加内容了
+                bNotAccepted = true;
+                if (string.IsNullOrEmpty(strComment) == false)
+                    strComment += "; ";
+                strComment += "部分 856 字段的修改被拒绝(因为其权限导致当前用户获取被限制)";
+            }
+
             nRet = MarcUtil.Marc2XmlEx(strNewMarc,
                 strMarcSyntax,
                 ref strNewBiblioXml,
@@ -2133,7 +2159,6 @@ return result;
             }
             return 0;
         }
-
 
 #if NO
         // 根据允许的字段名列表，合并新旧两条书目记录
@@ -2435,6 +2460,62 @@ nsmgr);
 
 #endif
 
+        public static int Get856Count(string strMARC)
+        {
+            MarcRecord record = new MarcRecord(strMARC);
+            return record.select("field[@name='856']").count;
+        }
+
+        // 对 MARC 记录进行过滤，将那些当前用户无法读取的 856 字段删除
+        // return:
+        //      -1  出错
+        //      其他  滤除的 856 字段个数
+        public static int RemoveCantGet856(
+            string strUserRights,
+            ref string strMARC,
+            out string strError)
+        {
+            strError = "";
+
+            // 只要当前账户具备 writeobject 或 writeres 权限，等于他可以获取任何对象，为了编辑加工的需要
+            if (StringUtil.IsInList("writeobject", strUserRights) == true
+                || StringUtil.IsInList("writeres", strUserRights) == true)
+                return 0;
+
+            MarcRecord record = new MarcRecord(strMARC);
+            MarcNodeList fields = record.select("field[@name='856']");
+
+            if (fields.count == 0)
+                return 0;
+
+            List<MarcField> delete_fields = new List<MarcField>();
+            foreach (MarcField field in fields)
+            {
+                string x = field.select("subfield[@name='x']").FirstContent;
+
+                if (string.IsNullOrEmpty(s) == true)
+                    continue;
+
+                Hashtable table = StringUtil.ParseParameters(x, ';', ':');
+                string strObjectRights = (string)table["rights"];
+
+                if (string.IsNullOrEmpty(strObjectRights) == true)
+                    continue;
+
+                // 对象是否允许被获取?
+                if (CanGet(strUserRights, strObjectRights) == false)
+                    delete_fields.Add(field);
+            }
+
+            foreach(MarcField field in delete_fields)
+            {
+                field.detach();
+            }
+
+            if (delete_fields.Count > 0)
+                strMARC = record.Text;
+            return delete_fields.Count;
+        }
 
         // 通知读者推荐的新书到书
         // parameters:

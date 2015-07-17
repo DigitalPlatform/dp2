@@ -164,7 +164,6 @@ namespace DigitalPlatform.Marc
                 return -1;
             }
 
-
             var differ = new MarcDiffer();
             var builder = new MarcDiffBuilder(differ);
             var result = builder.BuildDiffModel(strOldBody, strNewBody);
@@ -209,7 +208,6 @@ namespace DigitalPlatform.Marc
                 }
                 else if (newline.Type == ChangeType.Inserted)
                 {
-
                     Debug.Assert(strNewFieldName != null, "");
 
                     if (rights_table.InsertFieldNames.Contains(strNewFieldName) == true)

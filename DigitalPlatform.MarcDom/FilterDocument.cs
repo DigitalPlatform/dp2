@@ -391,21 +391,18 @@ namespace DigitalPlatform.MarcDom
 						goto DOEND;
 					if (itemFilter.Break == BreakType.SkipCaseEnd)
 						return 0;	// 立即结束
-				}
+                }
 
-			}
+            }
 
-			DOEND:
-
-				if (itemFilter != null) 
-				{
-					// 执行end部分代码
-					itemFilter.OnEnd();
-				}
-
-
-			return 0;
-		}
+        DOEND:
+            if (itemFilter != null)
+            {
+                // 执行end部分代码
+                itemFilter.OnEnd();
+            }
+            return 0;
+        }
 
 
 		#region 内部逻辑

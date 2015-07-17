@@ -54,6 +54,8 @@ namespace dp2LibraryXE
         /// </summary>
         public string UserDir = "";
 
+        public string TempDir = "";
+
         /// <summary>
         /// dp2Kernel 数据目录
         /// </summary>
@@ -204,6 +206,9 @@ namespace dp2LibraryXE
             }
             PathUtil.CreateDirIfNeed(this.UserDir);
 
+            this.TempDir = Path.Combine(this.UserDir, "temp");
+            PathUtil.CreateDirIfNeed(this.TempDir);
+
             this.AppInfo = new ApplicationInfo(Path.Combine(this.UserDir, "settings.xml"));
 
             this.KernelDataDir = Path.Combine(this.UserDir, "kernel_data");
@@ -339,7 +344,19 @@ FormWindowState.Normal);
                 {
                     nRet = dp2OPAC_UpdateAppDir(false, out strError);
                     if (nRet == -1)
-                        MessageBox.Show(this, "自动升级 dp2OPAC 过程出错: " + strError);
+                        MessageBox.Show(this, "自动升级 dp2OPAC 程序目录过程出错: " + strError);
+
+                    // 2015/7/17
+                    // 自动升级 dp2OPAC 的数据目录中的 style 子目录
+                    // 使用 opac_style.zip 来更新
+
+                    // 更新 dp2OPAC 数据目录中的 style 子目录
+                    // parameters:
+                    //      bAuto   是否自动更新。true 表示(.zip 文件发生了变化)有必要才更新; false 表示无论如何均更新
+                    nRet = UpdateOpacStyles(true,
+                        out strError);
+                    if (nRet == -1)
+                        MessageBox.Show(this, "自动升级 dp2OPAC 数据目录的 style 子目录过程出错: " + strError);
 
                     // 检查当前超级用户帐户是否为空密码
                     // return:
@@ -3283,6 +3300,15 @@ this.Font);
             if (nRet == -1)
                 return -1;
 
+            // 2015/7/17 opac_style.zip 中的内容在首次安装后就要覆盖到数据目录。这样可以不在 opac_data.zip 文件中包含 style 子目录了
+            // 更新 dp2OPAC 数据目录中的 style 子目录
+            // parameters:
+            //      bAuto   是否自动更新。true 表示(.zip 文件发生了变化)有必要才更新; false 表示无论如何均更新
+            nRet = UpdateOpacStyles(false,
+            out strError);
+            if (nRet == -1)
+                return -1;
+
             // 删除以前的目录
             nRet = DeleteDataDirectory(
                 this.OpacAppDir,
@@ -3346,6 +3372,224 @@ this.Font);
             return string.Compare(strTimestamp1, strTimestamp2);
         }
 
+        // 更新 dp2OPAC 数据目录中的 style 子目录
+        // parameters:
+        //      bAuto   是否自动更新。true 表示(.zip 文件发生了变化)有必要才更新; false 表示无论如何均更新
+        int UpdateOpacStyles(
+            bool bAuto,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            string strZipFileName = Path.Combine(this.DataDir, "opac_style.zip");
+
+            string strTargetPath = Path.Combine(this.OpacDataDir, "style");
+            if (Directory.Exists(strTargetPath) == true || bAuto == false)
+            {
+                nRet = dp2OPAC_extractDir(
+                    bAuto,
+                    strZipFileName,
+                    strTargetPath,
+                    true,   // 需要避开 .css.macro 文件的 .css 文件
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+            }
+
+            return 0;
+        }
+
+        // 2015/7/17
+        // 从 opac_style.zip 中展开目录内容
+        // parameters:
+        //      bAuto   是否自动更新。如果为 true，表示根据以前的时间戳判断是否有必要更新。如果为 false，表示强制更新
+        //      bDetectMacroFile    是否检测 .css.macro 文件。如果为 true，表示检测到同名的 .css.macro 文件后，.css 文件就不拷贝了
+        int dp2OPAC_extractDir(
+            bool bAuto,
+            string strZipFileName,
+            string strTargetDir,
+            bool bDetectMacroFile,
+            out string strError)
+        {
+            strError = "";
+
+            // 记忆的时间戳，其入口事项和 zip 文件名以及目标目录路径均有关，这样当目标目录变化的时候，也能促使重新刷新
+            string strEntry = Path.GetFileName(strZipFileName) + "|" + strTargetDir;
+
+            string strOldTimestamp = "";
+            int nRet = _versionManager.GetFileVersion(strEntry, out strOldTimestamp);
+            string strNewTimestamp = File.GetLastWriteTime(strZipFileName).ToString();
+            if (bAuto == false || strOldTimestamp != strNewTimestamp)
+            {
+                try
+                {
+                    using (ZipFile zip = ZipFile.Read(strZipFileName))
+                    {
+                        for (int i = 0; i < zip.Count; i++)
+                        {
+                            ZipEntry e = zip[i];
+                            // string strFullPath = Path.Combine(strTargetDir, e.FileName);
+                            string strPart = GetSubPath(e.FileName);
+                            string strFullPath = Path.Combine(strTargetDir, strPart);
+
+                            e.FileName = strPart;
+
+                            // 观察 .css 文件是否有同名的 .css.macro 文件，如果有则不复制了
+                            if (bDetectMacroFile == true
+                                && Path.GetExtension(strFullPath).ToLower() == ".css")
+                            {
+                                string strTempPath = strFullPath + ".macro";
+                                if (File.Exists(strTempPath) == true)
+                                    continue;
+                            }
+
+                            {
+                                // 观察文件版本
+                                if (File.Exists(strFullPath) == true)
+                                {
+                                    // .zip 中的对应文件的时间戳
+                                    string strZipTimestamp = e.LastModified.ToString();
+
+                                    // 版本管理器记载的时间戳
+                                    string strTimestamp = "";
+                                    nRet = _versionManager.GetFileVersion(strFullPath, out strTimestamp);
+                                    if (nRet == 1)
+                                    {
+                                        // *** 记载过上次的版本
+
+                                        if (strZipTimestamp == strTimestamp)
+                                            continue;
+
+                                        if ((e.Attributes & FileAttributes.Directory) == 0)
+                                            AppendString("更新配置文件 " + strFullPath + "\r\n");
+
+                                        // 覆盖前看看当前物理文件是否已经是修改过
+                                        string strPhysicalTimestamp = File.GetLastWriteTime(strFullPath).ToString();
+                                        if (strPhysicalTimestamp != strTimestamp)
+                                        {
+                                            // 需要备份
+                                            BackupFile(strFullPath);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        // *** 没有记载过版本
+
+                                        if ((e.Attributes & FileAttributes.Directory) == 0)
+                                            AppendString("更新配置文件 " + strFullPath + "\r\n");
+
+                                        // 覆盖前看看当前物理文件是否已经是修改过
+                                        string strPhysicalTimestamp = File.GetLastWriteTime(strFullPath).ToString();
+                                        if (strPhysicalTimestamp != strZipTimestamp)
+                                        {
+                                            // 需要备份
+                                            BackupFile(strFullPath);
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    if ((e.Attributes & FileAttributes.Directory) == 0)
+                                        AppendString("创建配置文件 " + strFullPath + "\r\n");
+                                }
+
+                                if ((e.Attributes & FileAttributes.Directory) == 0)
+                                {
+                                    ExtractFile(e, strTargetDir);
+                                }
+                                else
+                                    e.Extract(strTargetDir, ExtractExistingFileAction.OverwriteSilently);
+
+                                if ((e.Attributes & FileAttributes.Directory) == 0)
+                                {
+                                    if (e.LastModified != File.GetLastWriteTime(strFullPath))
+                                    {
+                                        // 时间有可能不一致，可能是夏令时之类的问题
+                                        File.SetLastWriteTime(strFullPath, e.LastModified);
+                                    }
+                                    Debug.Assert(e.LastModified == File.GetLastWriteTime(strFullPath));
+                                    _versionManager.SetFileVersion(strFullPath, e.LastModified.ToString());
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    strError = ex.Message;
+                    return -1;
+                }
+
+                _versionManager.SetFileVersion(strEntry, strNewTimestamp);
+                _versionManager.AutoSave();
+            }
+
+            _versionManager.AutoSave();
+            return 0;
+        }
+
+        // 去掉第一级路径
+        static string GetSubPath(string strPath)
+        {
+            int nRet = strPath.IndexOfAny(new char[] { '/', '\\' }, 0);
+            if (nRet == -1)
+                return "";
+            return strPath.Substring(nRet + 1);
+        }
+
+        void ExtractFile(ZipEntry e, string strTargetDir)
+        {
+#if NO
+            string strTempDir = Path.Combine(this.UserDir, "temp");
+            PathUtil.CreateDirIfNeed(strTempDir);
+#endif
+            string strTempDir = this.TempDir;
+
+            string strTempPath = Path.Combine(strTempDir, Path.GetFileName(e.FileName));
+            string strTargetPath = Path.Combine(strTargetDir, e.FileName);
+
+            using (FileStream stream = new FileStream(strTempPath, FileMode.Create))
+            {
+                e.Extract(stream);
+            }
+
+            int nErrorCount = 0;
+            for (; ; )
+            {
+                try
+                {
+                    // 确保目标目录已经创建
+                    PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strTargetPath));
+
+                    File.Copy(strTempPath, strTargetPath, true);
+                }
+                catch (Exception ex)
+                {
+                    if (nErrorCount > 10)
+                    {
+                        DialogResult result = MessageBox.Show(this,
+"复制文件 " + strTempPath + " 到 " + strTargetPath + " 的过程中出现错误: " + ex.Message + "。\r\n\r\n是否要重试？",
+"dp2Installer",
+MessageBoxButtons.RetryCancel,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+                        if (result == System.Windows.Forms.DialogResult.Cancel)
+                        {
+                            throw new Exception("复制文件 " + strTargetPath + " 到 " + strTargetPath + " 的过程中出现错误: " + ex.Message);
+                        }
+                        nErrorCount = 0;
+                    }
+
+                    nErrorCount++;
+                    Thread.Sleep(1000);
+                    continue;
+                }
+                break;
+            }
+            File.Delete(strTempPath);
+        }
+
         // 刷新应用程序目录
         // parameters:
         //      bForce  true 强制升级  false 自动升级，如果 .zip 文件时间戳没有变化就不升级
@@ -3370,7 +3614,7 @@ this.Font);
                     AppendString("已安装时间戳 " + strOldTimestamp + "\r\n");
                 AppendString("将安装时间戳 " + strNewTimestamp + "\r\n");
 
-                // 要求在 opac_data.zip 内准备要安装的数据文件(初次安装而不是升级安装)
+                // 要求在 opac_app.zip 内准备要安装的数据文件(初次安装而不是升级安装)
                 try
                 {
                     using (ZipFile zip = ZipFile.Read(strZipFileName))

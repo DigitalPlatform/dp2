@@ -5,6 +5,8 @@ using System.Text;
 using DigitalPlatform.Marc;
 using DigitalPlatform.Text;
 using System.Collections;
+using System.Web;
+using System.Diagnostics;
 
 namespace DigitalPlatform.Script
 {
@@ -68,8 +70,6 @@ namespace DigitalPlatform.Script
 
             return strOutputUri;
         }
-
-
 
         // "object/1"
         // "1/object/1"
@@ -176,5 +176,100 @@ namespace DigitalPlatform.Script
                 return strUrl;
             return strSmallUrl;
         }
+
+        // 创建 OPAC 详细页面中的对象资源显示局部 HTML。这是一个 <table> 片段
+        // 前导语 $3
+        // 链接文字 $y $f
+        // URL $u
+        // 格式类型 $q
+        // 对象ID $8
+        // 对象尺寸 $s
+        // 公开注释 $z
+        public static string BuildObjectHtmlTable(string strMARC, string strRecPath)
+        {
+            // Debug.Assert(false, "");
+
+            MarcRecord record = new MarcRecord(strMARC);
+            MarcNodeList fields = record.select("field[@name='856']");
+
+            if (fields.count == 0)
+                return "";
+
+            StringBuilder text = new StringBuilder();
+
+            text.Append("<table class='object_table'>");
+            text.Append("<tr class='column_title'>");
+            text.Append("<td>名称</td>");
+            text.Append("<td>链接</td>");
+            text.Append("<td>媒体类型</td>");
+            text.Append("<td>尺寸</td>");
+            text.Append("<td>字节数</td>");
+            text.Append("</tr>");
+
+            foreach (MarcField field in fields)
+            {
+                string x = field.select("subfield[@name='x']").FirstContent;
+
+                Hashtable table = StringUtil.ParseParameters(x, ';', ':');
+                string strType = (string)table["type"];
+                string strSize = (string)table["size"];
+
+                string u = field.select("subfield[@name='u']").FirstContent;
+                string strUri = MakeObjectUrl(strRecPath, u);
+
+                string strObjectUrl = strUri;
+                if (StringUtil.HasHead(strUri, "http:") == false)
+                    strObjectUrl = "./getobject.aspx?uri=" + HttpUtility.UrlEncode(strUri);
+
+                string y = field.select("subfield[@name='y']").FirstContent;
+                string f = field.select("subfield[@name='f']").FirstContent;
+
+                string urlLabel = "";
+                if (string.IsNullOrEmpty(y) == false)
+                    urlLabel = y;
+                else
+                    urlLabel = f;
+                if (string.IsNullOrEmpty(urlLabel) == true)
+                    urlLabel = strType;
+                if (string.IsNullOrEmpty(urlLabel) == true)
+                    urlLabel = strObjectUrl;
+
+                string urlTemp = "";
+                if (String.IsNullOrEmpty(strObjectUrl) == false)
+                {
+                    urlTemp += "<a href='" + strObjectUrl + "'>";
+                    urlTemp += urlLabel;
+                    urlTemp += "</a>";
+                }
+                else
+                    urlTemp = urlLabel;
+
+                string s_3 = field.select("subfield[@name='3']").FirstContent;
+                string s_q = field.select("subfield[@name='q']").FirstContent;
+                string s_s = field.select("subfield[@name='s']").FirstContent;
+                string s_z = field.select("subfield[@name='z']").FirstContent;
+
+                text.Append("<tr class='content'>");
+                text.Append("<td>"+HttpUtility.HtmlEncode(s_3 + " " + strType)+"</td>");
+                text.Append("<td>"+urlTemp+"</td>");
+                text.Append("<td>"+HttpUtility.HtmlEncode(s_q)+"</td>");
+                text.Append("<td>"+HttpUtility.HtmlEncode(strSize)+"</td>");
+                text.Append("<td>"+HttpUtility.HtmlEncode(s_s)+"</td>");
+                text.Append("</tr>");
+
+                if (string.IsNullOrEmpty(s_z) == false)
+                {
+                    text.Append("<tr class='comment'>");
+                    text.Append("<td colspan='5'>" + HttpUtility.HtmlEncode(s_z) + "</td>");
+                    text.Append("</tr>");
+                }
+
+            }
+            text.Append("</table>");
+
+            return text.ToString();
+        }
+
+    
     }
 }

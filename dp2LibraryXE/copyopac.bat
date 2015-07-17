@@ -34,5 +34,17 @@ cd ..
 
 cd ..
 
+
+md opac_style
+cd opac_style
+
+xcopy ..\..\dp2opac\style\*.* /Y
+md 0
+xcopy ..\..\dp2opac\style\0 0 /Y
+
+cd ..
+
+
 ..\ziputil opac_app opac_app.zip -t
 ..\ziputil opac_data opac_data.zip -t
+..\ziputil opac_style opac_style.zip -t

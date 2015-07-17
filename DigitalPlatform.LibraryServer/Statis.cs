@@ -305,7 +305,6 @@ namespace DigitalPlatform.LibraryServer
                     "endTime", DateTime.Now.ToString());
 
                 SaveDom(false);
-
                 return fNewValue;
             }
             finally
@@ -406,6 +405,9 @@ namespace DigitalPlatform.LibraryServer
 	初始化数据库次数
 	覆盖记录条数
 	删除记录条数
+获取对象
+    次
+    尺寸
      * * */
 
 }

@@ -11867,7 +11867,22 @@ namespace dp2Library
                             (string)table["size"]);
                         DomUtil.SetElementText(domOperLog.DocumentElement, "mime",
                             (string)table["mimetype"]);
+
+                        Int64 v = 0;
+                        if (app.Statis != null && Int64.TryParse((string)table["size"], out v) == true)
+                            app.Statis.IncreaseEntryValue(
+                            sessioninfo.LibraryCodeList,
+                            "获取对象",
+                            "尺寸",
+                            v);
                     }
+
+                    if (app.Statis != null)
+                        app.Statis.IncreaseEntryValue(
+                        sessioninfo.LibraryCodeList,
+                        "获取对象",
+                        "次",
+                        1);
 
                     DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
                         sessioninfo.UserID);
@@ -13695,7 +13710,6 @@ out strError);
                 this.BeginSearch();
                 try
                 {
-
                     // 合并时间范围内的多个XML文件
                     nRet = app.MergeXmlFiles(
                         sessioninfo.LibraryCodeList,
