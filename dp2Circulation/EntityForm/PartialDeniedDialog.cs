@@ -173,9 +173,11 @@ strHtml2 +
                     "拟保存的记录",
                     strOldMARC,
                     strOldFragmentXml,
+                    "",
                     "实际保存后的记录",
                     strNewMARC,
                     strNewFragmentXml,
+                    "",
                     out strHtml2,
                     out strError);
                 if (nRet == -1)

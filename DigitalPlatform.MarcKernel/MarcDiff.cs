@@ -86,6 +86,24 @@ namespace DigitalPlatform.Marc
             return 0;
         }
 
+        // 末尾是否有内码为 1 的字符？
+        static bool HasMask(string strText)
+        {
+            if (string.IsNullOrEmpty(strText) == true)
+                return false;
+            if (strText[strText.Length - 1] == (char)1)
+                return true;
+            return false;
+        }
+
+        // 去掉末尾的内码为 1 的字符
+        static string RemoveMask(string strText)
+        {
+            if (HasMask(strText) == true)
+                return strText.Substring(0, strText.Length - 1);
+            return strText;
+        }
+
         // 按照字段修改权限定义，合并新旧两个 MARC 记录
         // parameters:
         //      strDefaultOperation   insert/replace/delete 之一或者逗号间隔组合
@@ -180,6 +198,7 @@ namespace DigitalPlatform.Marc
         Modified
     }
              * */
+            // 字段名如果最后增加了一个 ！ 字符，表示这是因为 856 权限原因被拒绝操作的字段。如果 856 字段名后面没有 ！ 字符，则表示是因为 fieldnamelist 定义缘故被拒绝的
             // 被拒绝插入的字段名
             List<string> denied_insert_fieldnames = new List<string>();
             // 被拒绝删除的字段名
@@ -204,17 +223,22 @@ namespace DigitalPlatform.Marc
 
                 if (newline.Type == ChangeType.Unchanged)
                 {
-                    fields.Add(newline.Text);
+                    fields.Add(RemoveMask(newline.Text));
                 }
                 else if (newline.Type == ChangeType.Inserted)
                 {
                     Debug.Assert(strNewFieldName != null, "");
 
-                    if (rights_table.InsertFieldNames.Contains(strNewFieldName) == true)
+                    // 注：有标记的字段不允许插入
+                    bool bMask = HasMask(newline.Text);
+
+                    if (rights_table.InsertFieldNames.Contains(strNewFieldName) == true
+                        && bMask == false)
                         fields.Add(newline.Text);
                     else
                     {
-                        denied_insert_fieldnames.Add(strNewFieldName);
+                        denied_insert_fieldnames.Add(strNewFieldName 
+                            + (bMask ? "!" : ""));
                         bNotAccepted = true;
                     }
                 }
@@ -228,14 +252,20 @@ namespace DigitalPlatform.Marc
                     string strOldFieldName = GetFieldName(oldline.Text);
                     Debug.Assert(strOldFieldName != null, "");
 
-                    if (rights_table.ReplaceFieldNames.Contains(strNewFieldName) == true && rights_table.ReplaceFieldNames.Contains(strOldFieldName) == true)
+                    // 注：有标记的字段不允许用于替换
+                    bool bMask = HasMask(newline.Text);
+
+                    if (rights_table.ReplaceFieldNames.Contains(strNewFieldName) == true
+                        && rights_table.ReplaceFieldNames.Contains(strOldFieldName) == true
+                        && bMask == false)
                         fields.Add(newline.Text);
                     else
                     {
                         fields.Add(result.OldText.Lines[index].Text);    // 依然采用修改前的值
                         bNotAccepted = true;
 
-                        denied_change_fieldnames.Add(strOldFieldName);
+                        denied_change_fieldnames.Add(strOldFieldName
+                            + (bMask ? "!" : ""));
                     }
                 }
                 else if (oldline.Type == ChangeType.Deleted)
@@ -699,8 +729,6 @@ namespace DigitalPlatform.Marc
     strNewFragmentXml);
             }
 
-
-
             string strLineClass = "datafield";
             StringBuilder strResult = new StringBuilder(4096);
 
@@ -809,7 +837,14 @@ namespace DigitalPlatform.Marc
 
             XmlDocument dom = new XmlDocument();
             dom.PreserveWhitespace = false;
-            dom.LoadXml(strXml);
+            try
+            {
+                dom.LoadXml(strXml);
+            }
+            catch (Exception ex)
+            {
+                return -1;
+            }
             StringBuilder result = new StringBuilder(4096);
             foreach (XmlNode node in dom.DocumentElement.ChildNodes)
             {

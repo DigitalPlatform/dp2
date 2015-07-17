@@ -190,7 +190,6 @@ TABLE.marc TD.fieldname, TABLE.marc TD.indicator, TABLE.marc TR.header TD.conten
 {
      font-family: "Courier New", Tahoma, Arial, Helvetica, sans-serif;
      font-weight: bold;
-
 }
 
 TABLE.marc TD.indicator
@@ -210,7 +209,7 @@ TABLE.marc TD.indicator
 
 TABLE.marc TD.content
 {
-
+    word-break:break-all;
 }
 
 TABLE.marc SPAN.subfield

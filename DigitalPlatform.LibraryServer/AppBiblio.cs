@@ -201,7 +201,6 @@ namespace DigitalPlatform.LibraryServer
 
                 // 检查数据库路径，看看是不是已经正规定义的编目库？
 
-
                 // 分离出命令部分
                 string strCommand = "";
                 nRet = command.IndexOf("$");
@@ -363,7 +362,6 @@ namespace DigitalPlatform.LibraryServer
                 }
                 else
                 {
-
                     RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
                     if (channel == null)
                     {
@@ -422,7 +420,9 @@ namespace DigitalPlatform.LibraryServer
 
                     // 2013/3/6
                     // 过滤字段内容
-                    if (string.IsNullOrEmpty(strAccessParameters) == false)
+                    if (string.IsNullOrEmpty(strAccessParameters) == false
+                        || !(StringUtil.IsInList("writeres", sessioninfo.Rights) == true || StringUtil.IsInList("writeobject", sessioninfo.Rights) == true)
+                        )
                     {
                         // 根据字段权限定义过滤出允许的内容
                         // return:
@@ -430,9 +430,10 @@ namespace DigitalPlatform.LibraryServer
                         //      0   成功
                         //      1   有部分字段被修改或滤除
                         nRet = FilterBiblioByFieldNameList(
-                strAccessParameters,
-                ref strBiblioXml,
-                out strError);
+                            sessioninfo.Rights,
+                            strAccessParameters,
+                            ref strBiblioXml,
+                            out strError);
                         if (nRet == -1)
                             goto ERROR1;
                     }
@@ -1620,13 +1621,16 @@ return result;
             try
             {
 
-                if (string.IsNullOrEmpty(strFieldNameList) == false)
+                if (string.IsNullOrEmpty(strFieldNameList) == false
+                    || !(StringUtil.IsInList("writeres", strRights) == true || StringUtil.IsInList("writeobject", strRights) == true)
+                    )
                 {
                     // return:
                     //      -1  出错
                     //      0   成功
                     //      1   有部分修改要求被拒绝。strError 中返回了注释信息
                     int nRet = MergeOldNewBiblioByFieldNameList(
+                        strRights,
                         strDefaultOperation,
                         strFieldNameList,
                         strOldBiblioXml,
@@ -1945,11 +1949,14 @@ return result;
         }
 
         // 根据字段权限定义过滤出允许的内容
+        // parameters:
+        //      strFieldNameList    字段过滤列表。如果为空，则表示不(利用它)对字段进行过滤
         // return:
         //      -1  出错
         //      0   成功
         //      1   有部分字段被修改或滤除
         static int FilterBiblioByFieldNameList(
+            string strUserRights,
             string strFieldNameList,
             ref string strBiblioXml,
             out string strError)
@@ -1983,36 +1990,59 @@ return result;
             if (string.IsNullOrEmpty(strMarcSyntax) == true)
                 return 0;   // 不是 MARC 格式
 
-            // 根据字段权限定义过滤出允许的内容
+            bool bChanged = false;
+
+            // 对 MARC 记录进行过滤，将那些当前用户无法读取的 856 字段删除
             // return:
             //      -1  出错
-            //      0   成功
-            //      1   有部分字段被修改或滤除
-            nRet = MarcDiff.FilterFields(strFieldNameList,
+            //      其他  滤除的 856 字段个数
+            nRet = RemoveCantGet856(
+                strUserRights,
                 ref strMarc,
                 out strError);
             if (nRet == -1)
                 return -1;
-            bool bChanged = false;
-            if (nRet == 1)
+            if (nRet > 0)
                 bChanged = true;
 
-            nRet = MarcUtil.Marc2XmlEx(strMarc,
-                strMarcSyntax,
-                ref strBiblioXml,
-                out strError);
-            if (nRet == -1)
-                return -1;
+            if (string.IsNullOrEmpty(strFieldNameList) == false)
+            {
+                // 根据字段权限定义过滤出允许的内容
+                // return:
+                //      -1  出错
+                //      0   成功
+                //      1   有部分字段被修改或滤除
+                nRet = MarcDiff.FilterFields(strFieldNameList,
+                    ref strMarc,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                if (nRet == 1)
+                    bChanged = true;
+            }
 
             if (bChanged == true)
+            {
+                nRet = MarcUtil.Marc2XmlEx(strMarc,
+                    strMarcSyntax,
+                    ref strBiblioXml,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+
                 return 1;
+            }
+
             return 0;
         }
 
         // 根据允许的字段名列表，合并新旧两条书目记录
         // 列表中不允许的字段，沿用旧记录中的原始字段内容
         // 算法等于在 new 中复原了那些不让修改的 MARC 字段
+        // 2015/7/17 本函数还能保护 856 字段，避免用户修改自己不能获取的 856 rights 的字段。UNIMARC 和 USMARC 都是用 856 表示数字资源
         // TODO: 特定的数据库应该规定了 MARC 格式，可以作为本函数输入参数。这样可以避免复杂的判断
+        // parameters:
+        //      strFieldNameList    字段过滤列表。如果为空，则表示不(利用它)对字段进行过滤，即全用新记录的字段
         // return:
         //      -1  出错
         //      0   成功
@@ -2104,18 +2134,25 @@ return result;
             // return:
             //      -1  出错
             //      其他  滤除的 856 字段个数
-            nRet = RemoveCantGet856(
+            nRet = MaskCantGet856(
                 strUserRights,
                 ref strNewMarc,
                 out strError);
             if (nRet == -1)
                 return -1;
 
-            bool b856Removed = false;
+            bool b856Masked = false;
             if (nRet > 0)
-                b856Removed = true;
+                b856Masked = true;
 
             string strComment = "";
+            bool bNotAccepted = false;
+
+            if (string.IsNullOrEmpty(strFieldNameList) == true)
+            {
+                strFieldNameList = "*:***-***"; // 所有字段都允许操作
+            }
+
             // 按照字段修改权限定义，合并新旧两个 MARC 记录
             // return:
             //      -1  出错
@@ -2130,12 +2167,12 @@ return result;
                 out strError);
             if (nRet == -1)
                 return -1;
-            bool bNotAccepted = false;
             if (nRet == 1)
                 bNotAccepted = true;
 
+
             // 要将 strNewMarc 处理前的 856 字段个数和处理后的 856 字段个数进行比较，如果有变化，就表示有的字段没有被接纳，...
-            if (b856Removed == true
+            if (b856Masked == true
                 && field_856_count > Get856Count(strNewMarc))
             {
                 // TODO: 这里还可以精细处理一下，当 strFieldNameList 中规定不能保存 856 时，strComment 就不要增加内容了
@@ -2466,6 +2503,55 @@ nsmgr);
             return record.select("field[@name='856']").count;
         }
 
+        // 对 MARC 记录进行标记，将那些当前用户无法读取的 856 字段打上特殊标记(内码为 1 的字符)
+        // return:
+        //      -1  出错
+        //      其他  滤除的 856 字段个数
+        public static int MaskCantGet856(
+            string strUserRights,
+            ref string strMARC,
+            out string strError)
+        {
+            strError = "";
+
+            // 只要当前账户具备 writeobject 或 writeres 权限，等于他可以获取任何对象，为了编辑加工的需要
+            if (StringUtil.IsInList("writeobject", strUserRights) == true
+                || StringUtil.IsInList("writeres", strUserRights) == true)
+                return 0;
+
+            MarcRecord record = new MarcRecord(strMARC);
+            MarcNodeList fields = record.select("field[@name='856']");
+
+            if (fields.count == 0)
+                return 0;
+
+            int nCount = 0;
+            foreach (MarcField field in fields)
+            {
+                string x = field.select("subfield[@name='x']").FirstContent;
+
+                if (string.IsNullOrEmpty(x) == true)
+                    continue;
+
+                Hashtable table = StringUtil.ParseParameters(x, ';', ':');
+                string strObjectRights = (string)table["rights"];
+
+                if (string.IsNullOrEmpty(strObjectRights) == true)
+                    continue;
+
+                // 对象是否允许被获取?
+                if (CanGet(strUserRights, strObjectRights) == false)
+                {
+                    field.Content += new string((char)1, 1);
+                    nCount++;
+                }
+            }
+
+            if (nCount > 0)
+                strMARC = record.Text;
+            return nCount;
+        }
+
         // 对 MARC 记录进行过滤，将那些当前用户无法读取的 856 字段删除
         // return:
         //      -1  出错
@@ -2493,7 +2579,7 @@ nsmgr);
             {
                 string x = field.select("subfield[@name='x']").FirstContent;
 
-                if (string.IsNullOrEmpty(s) == true)
+                if (string.IsNullOrEmpty(x) == true)
                     continue;
 
                 Hashtable table = StringUtil.ParseParameters(x, ';', ':');

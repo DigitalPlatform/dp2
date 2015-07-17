@@ -28,14 +28,25 @@ namespace DigitalPlatform.Marc
                 if (string.IsNullOrEmpty(strSegment) == true)
                     continue;
 
+                string strStart = "";
+                string strEnd = "";
+                if (strSegment == "*"
+                    || strSegment == "***"
+                    || strSegment == "*-*"
+                    || strSegment == "***-***")
+                {
+                    strStart = "*";
+                    strEnd = "*";
+                    goto CONTINUE;
+                }
+
                 if (strSegment.Length < 3)
                 {
                     strError = "每一段长度须至少 3 字符。'"+strSegment+"'";
                     return -1;
                 }
                 // -
-                string strStart = "";
-                string strEnd = "";
+
                 int nRet = strSegment.IndexOf("-",3);
                 if (nRet != -1)
                 {
@@ -59,6 +70,7 @@ namespace DigitalPlatform.Marc
                     return -1;
                 }
 
+                CONTINUE:
                 FieldNameItem item = new FieldNameItem();
                 item.StartFieldName = strStart;
                 if (string.IsNullOrEmpty(strEnd) == true)
@@ -87,6 +99,9 @@ namespace DigitalPlatform.Marc
         {
             foreach (FieldNameItem item in this)
             {
+                if (item.StartFieldName == "*")
+                    return true;
+
                 if (string.Compare(strFieldName, item.StartFieldName) >= 0
                     && string.Compare(strFieldName, item.EndFieldName) <= 0)
                     return true;
@@ -94,8 +109,6 @@ namespace DigitalPlatform.Marc
 
             return false;
         }
-
-
     }
 
     // 分列操作类型的字段名列表
