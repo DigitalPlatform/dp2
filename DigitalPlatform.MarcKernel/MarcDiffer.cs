@@ -394,6 +394,7 @@ namespace DigitalPlatform.Marc
             for (int i = 0; i < pieces.Length; i++)
             {
                 string piece = pieces[i];
+                // if (ignoreWhitespace) piece = piece.TrimEnd(new char [] {(char)1}).Trim();  // 2015/7/18
                 if (ignoreWhitespace) piece = piece.Trim();
                 if (ignoreCase) piece = piece.ToUpperInvariant();
 

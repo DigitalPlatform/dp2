@@ -411,201 +411,7 @@ namespace dp2Circulation
             this.toolStrip_main.BackColor = Color.Transparent;
              * */
 
-            this.SetBevel(false);
-#if NO
-            if (!API.DwmIsCompositionEnabled())
-            {
-                //MessageBox.Show("This demo requires Vista, with Aero enabled.");
-                //Application.Exit();
-            }
-            else
-            {
-                SetGlassRegion();
-            }
-#endif
-
-            // 获得MdiClient窗口
-            {
-                Type t = typeof(Form);
-                PropertyInfo pi = t.GetProperty("MdiClient", BindingFlags.Instance | BindingFlags.NonPublic);
-                this.MdiClient = (MdiClient)pi.GetValue(this, null);
-                this.MdiClient.SizeChanged += new EventHandler(MdiClient_SizeChanged);
-
-                m_backgroundForm = new BackgroundForm();
-                m_backgroundForm.MdiParent = this;
-                m_backgroundForm.Show();
-            }
-
-            if (ApplicationDeployment.IsNetworkDeployed == true)
-            {
-                // MessageBox.Show(this, "network");
-                DataDir = Application.LocalUserAppDataPath;
-            }
-            else
-            {
-                // MessageBox.Show(this, "no network");
-                DataDir = Environment.CurrentDirectory;
-            }
-
-            string strError = "";
-            int nRet = 0;
-
-            {
-                // 2013/6/16
-                this.UserDir = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-                    "dp2Circulation_v2");
-                PathUtil.CreateDirIfNeed(this.UserDir);
-
-                this.UserTempDir = Path.Combine(this.UserDir, "temp");
-                PathUtil.CreateDirIfNeed(this.UserTempDir);
-
-                // 2015/7/8
-                this.UserLogDir = Path.Combine(this.UserDir, "log");
-                PathUtil.CreateDirIfNeed(this.UserLogDir);
-
-                // 删除一些以前的目录
-                string strDir = PathUtil.MergePath(this.DataDir, "operlogcache");
-                if (Directory.Exists(strDir) == true)
-                {
-                    nRet = Global.DeleteDataDir(
-                        this,
-                        strDir,
-                        out strError);
-                    if (nRet == -1)
-                    {
-                        MessageBox.Show(this, "删除以前遗留的文件目录时发生错误: " + strError);
-                    }
-                }
-                strDir = PathUtil.MergePath(this.DataDir, "fingerprintcache");
-                if (Directory.Exists(strDir) == true)
-                {
-                    nRet = Global.DeleteDataDir(
-                    this,
-                    strDir,
-                    out strError);
-                    if (nRet == -1)
-                    {
-                        MessageBox.Show(this, "删除以前遗留的文件目录时发生错误: " + strError);
-                    }
-                }
-            }
-
-            {
-                string strCssUrl = PathUtil.MergePath(this.DataDir, "/background.css");
-                string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
-
-                Global.WriteHtml(m_backgroundForm.WebBrowser,
-                    "<html><head>" + strLink + "</head><body>");
-            }
-
-            // 设置窗口尺寸状态
-            if (AppInfo != null)
-            {
-                // 首次运行，尽量利用“微软雅黑”字体
-                if (this.IsFirstRun == true)
-                {
-                    SetFirstDefaultFont();
-                }
-
-                MainForm.SetControlFont(this, this.DefaultFont);
-
-                AppInfo.LoadFormStates(this,
-                    "mainformstate",
-                    FormWindowState.Maximized);
-
-                // 程序一启动就把这些参数设置为初始状态
-                this.DisplayScriptErrorDialog = false;
-            }
-
-            InitialFixedPanel();
-
-            stopManager.Initial(this.toolButton_stop,
-                (object)this.toolStripStatusLabel_main,
-                (object)this.toolStripProgressBar_main);
-            stopManager.OnDisplayMessage += new DisplayMessageEventHandler(stopManager_OnDisplayMessage);
-            this.SetMenuItemState();
-
-            // cfgcache
-            nRet = cfgCache.Load(this.DataDir
-                + "\\cfgcache.xml",
-                out strError);
-            if (nRet == -1)
-            {
-                if (IsFirstRun == false)
-                    MessageBox.Show(strError);
-            }
-
-            cfgCache.TempDir = this.DataDir
-                + "\\cfgcache";
-            cfgCache.InstantSave = true;
-
-            // 2013/4/12
-            // 清除以前残余的文件
-            cfgCache.Upgrade();
-
-            // 消除上次程序意外终止时遗留的短期保存密码
-            bool bSavePasswordLong =
-    AppInfo.GetBoolean(
-    "default_account",
-    "savepassword_long",
-    false);
-
-            if (bSavePasswordLong == false)
-            {
-                AppInfo.SetString(
-                    "default_account",
-                    "password",
-                    "");
-            }
-
-            StartPrepareNames(true, true);
-
-            this.MdiClient.ClientSizeChanged += new EventHandler(MdiClient_ClientSizeChanged);
-
-            // GuiUtil.RegisterIE9DocMode();
-
-            #region 脚本支持
-            ScriptManager.applicationInfo = this.AppInfo;
-            ScriptManager.CfgFilePath =
-                this.DataDir + "\\mainform_statis_projects.xml";
-            ScriptManager.DataDir = this.DataDir;
-
-            ScriptManager.CreateDefaultContent -= new CreateDefaultContentEventHandler(scriptManager_CreateDefaultContent);
-            ScriptManager.CreateDefaultContent += new CreateDefaultContentEventHandler(scriptManager_CreateDefaultContent);
-
-            try
-            {
-                ScriptManager.Load();
-            }
-            catch (FileNotFoundException)
-            {
-                // 不必报错 2009/2/4 
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(this, ex.Message);
-            }
-            #endregion
-
-
-            this.qrRecognitionControl1.Catched += new DigitalPlatform.Drawing.CatchedEventHandler(qrRecognitionControl1_Catched);
-            this.qrRecognitionControl1.CurrentCamera = AppInfo.GetString(
-                "mainform",
-                "current_camera",
-                "");
-            this.qrRecognitionControl1.EndCatch();  // 一开始的时候并不打开摄像头 2013/5/25
-
-            this.m_strPinyinGcatID = this.AppInfo.GetString("entity_form", "gcat_pinyin_api_id", "");
-            this.m_bSavePinyinGcatID = this.AppInfo.GetBoolean("entity_form", "gcat_pinyin_api_saveid", false);
-
-#if NO
-            // 2015/5/24
-            MouseLButtonMessageFilter filter = new MouseLButtonMessageFilter();
-            filter.MainForm = this;
-            Application.AddMessageFilter(filter);
-#endif
-
+            this.BeginInvoke(new Action(FirstInitial));
         }
 
         string m_strPrevMessageText = "";
@@ -671,7 +477,6 @@ namespace dp2Circulation
                 MessageBox.Show(this, "安装字体文件 " + strFontFilePath + " 失败");
                 return;
             }
-
 
             {
                 // 成功
@@ -1121,6 +926,217 @@ namespace dp2Circulation
 
 #endif
 
+        // 程序启动时候需要执行的初始化操作
+        // 这些操作只需要执行一次。也就是说，和登录和连接的服务器无关。如果有关，则要放在 InitialProperties() 中
+        // FormLoad() 中的许多操作应当移动到这里来，以便尽早显示出框架窗口
+        void FirstInitial()
+        {
+            this.SetBevel(false);
+#if NO
+            if (!API.DwmIsCompositionEnabled())
+            {
+                //MessageBox.Show("This demo requires Vista, with Aero enabled.");
+                //Application.Exit();
+            }
+            else
+            {
+                SetGlassRegion();
+            }
+#endif
+
+            // 获得MdiClient窗口
+            {
+                Type t = typeof(Form);
+                PropertyInfo pi = t.GetProperty("MdiClient", BindingFlags.Instance | BindingFlags.NonPublic);
+                this.MdiClient = (MdiClient)pi.GetValue(this, null);
+                this.MdiClient.SizeChanged += new EventHandler(MdiClient_SizeChanged);
+
+                m_backgroundForm = new BackgroundForm();
+                m_backgroundForm.MdiParent = this;
+                m_backgroundForm.Show();
+            }
+
+            if (ApplicationDeployment.IsNetworkDeployed == true)
+            {
+                // MessageBox.Show(this, "network");
+                DataDir = Application.LocalUserAppDataPath;
+            }
+            else
+            {
+                // MessageBox.Show(this, "no network");
+                DataDir = Environment.CurrentDirectory;
+            }
+
+            string strError = "";
+            int nRet = 0;
+
+            {
+                // 2013/6/16
+                this.UserDir = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                    "dp2Circulation_v2");
+                PathUtil.CreateDirIfNeed(this.UserDir);
+
+                this.UserTempDir = Path.Combine(this.UserDir, "temp");
+                PathUtil.CreateDirIfNeed(this.UserTempDir);
+
+                // 2015/7/8
+                this.UserLogDir = Path.Combine(this.UserDir, "log");
+                PathUtil.CreateDirIfNeed(this.UserLogDir);
+
+                // 删除一些以前的目录
+                string strDir = PathUtil.MergePath(this.DataDir, "operlogcache");
+                if (Directory.Exists(strDir) == true)
+                {
+                    nRet = Global.DeleteDataDir(
+                        this,
+                        strDir,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        MessageBox.Show(this, "删除以前遗留的文件目录时发生错误: " + strError);
+                    }
+                }
+                strDir = PathUtil.MergePath(this.DataDir, "fingerprintcache");
+                if (Directory.Exists(strDir) == true)
+                {
+                    nRet = Global.DeleteDataDir(
+                    this,
+                    strDir,
+                    out strError);
+                    if (nRet == -1)
+                    {
+                        MessageBox.Show(this, "删除以前遗留的文件目录时发生错误: " + strError);
+                    }
+                }
+            }
+
+            {
+                string strCssUrl = PathUtil.MergePath(this.DataDir, "/background.css");
+                string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
+
+                Global.WriteHtml(m_backgroundForm.WebBrowser,
+                    "<html><head>" + strLink + "</head><body>");
+            }
+
+            // 设置窗口尺寸状态
+            if (AppInfo != null)
+            {
+                // 首次运行，尽量利用“微软雅黑”字体
+                if (this.IsFirstRun == true)
+                {
+                    SetFirstDefaultFont();
+                }
+
+                MainForm.SetControlFont(this, this.DefaultFont);
+
+                AppInfo.LoadFormStates(this,
+                    "mainformstate",
+                    FormWindowState.Maximized);
+
+                // 程序一启动就把这些参数设置为初始状态
+                this.DisplayScriptErrorDialog = false;
+            }
+
+            InitialFixedPanel();
+
+            stopManager.Initial(this.toolButton_stop,
+                (object)this.toolStripStatusLabel_main,
+                (object)this.toolStripProgressBar_main);
+            stopManager.OnDisplayMessage += new DisplayMessageEventHandler(stopManager_OnDisplayMessage);
+            this.SetMenuItemState();
+
+            // cfgcache
+            nRet = cfgCache.Load(this.DataDir
+                + "\\cfgcache.xml",
+                out strError);
+            if (nRet == -1)
+            {
+                if (IsFirstRun == false)
+                    MessageBox.Show(strError);
+            }
+
+            cfgCache.TempDir = this.DataDir
+                + "\\cfgcache";
+            cfgCache.InstantSave = true;
+
+            // 2013/4/12
+            // 清除以前残余的文件
+            cfgCache.Upgrade();
+
+            // 消除上次程序意外终止时遗留的短期保存密码
+            bool bSavePasswordLong =
+    AppInfo.GetBoolean(
+    "default_account",
+    "savepassword_long",
+    false);
+
+            if (bSavePasswordLong == false)
+            {
+                AppInfo.SetString(
+                    "default_account",
+                    "password",
+                    "");
+            }
+
+            StartPrepareNames(true, true);
+
+            this.MdiClient.ClientSizeChanged += new EventHandler(MdiClient_ClientSizeChanged);
+
+            // GuiUtil.RegisterIE9DocMode();
+
+            #region 脚本支持
+            ScriptManager.applicationInfo = this.AppInfo;
+            ScriptManager.CfgFilePath =
+                this.DataDir + "\\mainform_statis_projects.xml";
+            ScriptManager.DataDir = this.DataDir;
+
+            ScriptManager.CreateDefaultContent -= new CreateDefaultContentEventHandler(scriptManager_CreateDefaultContent);
+            ScriptManager.CreateDefaultContent += new CreateDefaultContentEventHandler(scriptManager_CreateDefaultContent);
+
+            try
+            {
+                ScriptManager.Load();
+            }
+            catch (FileNotFoundException)
+            {
+                // 不必报错 2009/2/4 
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ex.Message);
+            }
+            #endregion
+
+            this.qrRecognitionControl1.Catched += new DigitalPlatform.Drawing.CatchedEventHandler(qrRecognitionControl1_Catched);
+            this.qrRecognitionControl1.CurrentCamera = AppInfo.GetString(
+                "mainform",
+                "current_camera",
+                "");
+            this.qrRecognitionControl1.EndCatch();  // 一开始的时候并不打开摄像头 2013/5/25
+
+            this.m_strPinyinGcatID = this.AppInfo.GetString("entity_form", "gcat_pinyin_api_id", "");
+            this.m_bSavePinyinGcatID = this.AppInfo.GetBoolean("entity_form", "gcat_pinyin_api_saveid", false);
+
+#if NO
+            // 2015/5/24
+            MouseLButtonMessageFilter filter = new MouseLButtonMessageFilter();
+            filter.MainForm = this;
+            Application.AddMessageFilter(filter);
+#endif
+
+            // 2015/7/19
+            // 复制 datadir default_objectrights.xml --> userdir objectrights.xml
+            {
+                string strTargetFileName = Path.Combine(this.UserDir, "objectrights.xml");
+                if (File.Exists(strTargetFileName) == false)
+                {
+                    string strSourceFileName = Path.Combine(this.DataDir, "default_objectrights.xml");
+                    File.Copy(strSourceFileName, strTargetFileName, false);
+                }
+            }
+        }
+
         // 初始化各种参数
         bool InitialProperties(bool bFullInitial, bool bRestoreLastOpenedWindow)
         {
@@ -1367,9 +1383,7 @@ AppInfo.GetString("config",
 
                 // 安装条码字体
                 InstallBarcodeFont();
-
             END1:
-
                 Stop = new DigitalPlatform.Stop();
                 Stop.Register(stopManager, true);	// 和容器关联
                 Stop.SetMessage("正在删除以前遗留的临时文件...");
@@ -1397,7 +1411,6 @@ AppInfo.GetString("config",
                 if (InitialClientScript(out strError) == -1)
                     MessageBox.Show(this, strError);
 
-
                 // 初始化历史对象，包括C#脚本
                 if (this.OperHistory == null)
                 {
@@ -1411,7 +1424,6 @@ AppInfo.GetString("config",
                     // this.timer_operHistory.Start();
 
                 }
-
             }
             finally
             {
@@ -1449,7 +1461,6 @@ AppInfo.GetString("config",
 
                 // 初始化指纹高速缓存
                 FirstInitialFingerprintCache();
-
             }
             return true;
         }
@@ -3200,7 +3211,7 @@ AppInfo.GetString("config",
             }
 
             Stop.OnStop += new StopEventHandler(this.DoStop);
-            Stop.Initial("正在检查版本号, 请稍候 ...");
+            Stop.Initial("正在检查服务器 "+this.Channel.Url+" 的版本号, 请稍候 ...");
             Stop.BeginLoop();
 
             try

@@ -9,6 +9,7 @@ using System.Xml.XPath;
 using System.Xml;
 using System.IO;
 
+using DigitalPlatform;
 //using DigitalPlatform.XmlEditor;
 using DigitalPlatform.GUI;
 using DigitalPlatform.IO;
@@ -16,7 +17,7 @@ using DigitalPlatform.Range;
 using DigitalPlatform.Xml;
 using DigitalPlatform.rms;
 using DigitalPlatform.rms.Client;
-using DigitalPlatform;
+using DigitalPlatform.Text;
 
 namespace dp2rms
 {
@@ -569,7 +570,7 @@ namespace dp2rms
 				}
 
 				// ȡmetadata
-				Hashtable values = rmsUtil.ParseMedaDataXml(strMetaData,
+				Hashtable values = StringUtil.ParseMedaDataXml(strMetaData,
 					out strError);
 				if (values == null)
 				{

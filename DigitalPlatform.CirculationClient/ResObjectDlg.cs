@@ -234,7 +234,7 @@ namespace DigitalPlatform.CirculationClient
 
         private void button_editRights_Click(object sender, EventArgs e)
         {
-            DigitalPlatform.CommonDialog.PropertyDlg dlg = new DigitalPlatform.CommonDialog.PropertyDlg();
+            DigitalPlatform.CommonControl.PropertyDlg dlg = new DigitalPlatform.CommonControl.PropertyDlg();
             GuiUtil.AutoSetDefaultFont(dlg);
 
             dlg.StartPosition = FormStartPosition.CenterScreen;

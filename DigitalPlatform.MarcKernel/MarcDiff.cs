@@ -252,20 +252,50 @@ namespace DigitalPlatform.Marc
                     string strOldFieldName = GetFieldName(oldline.Text);
                     Debug.Assert(strOldFieldName != null, "");
 
-                    // 注：有标记的字段不允许用于替换
-                    bool bMask = HasMask(newline.Text);
+                    // 注：如果 new 有标记，说明如果替换后，前端看不到这种替换，所以不允许替换
+                    //  如果 old 有标记，则替换会超越权限，等于删除了不应删除的 856
+                    //  等于前端只能将能管辖的 856 改成新的也能管辖的状态才被允许
+                    bool bMaskNew = HasMask(newline.Text);
+                    bool bMaskOld = HasMask(oldline.Text);
+
+                    bool bReserveOld = false;
 
                     if (rights_table.ReplaceFieldNames.Contains(strNewFieldName) == true
                         && rights_table.ReplaceFieldNames.Contains(strOldFieldName) == true
-                        && bMask == false)
-                        fields.Add(newline.Text);
-                    else
+                        )
                     {
-                        fields.Add(result.OldText.Lines[index].Text);    // 依然采用修改前的值
+                        if (bMaskNew == false && bMaskOld == false)
+                            fields.Add(newline.Text);
+                        if (bMaskNew == true && bMaskOld == false)
+                        {
+                            bReserveOld = true;
+                        }
+                        if (bMaskNew == false && bMaskOld == true)
+                        {
+                            // 有时候这种情况：
+                            //    111 -> 删除
+                            //    222 -> 2222 (修改内容)
+                            // 会被识别成
+                            //    111 -> 2222 (修改内容)
+                            //    222 -> 删除
+                            // 这样，第一个修改动作应该不接受。循环到后面，第二个修改正好被接受，所以总体上不会造成 222 重复
+                            // 所以，第一个修改此时操作办法：old new 都进去
+                            fields.Add(RemoveMask(oldline.Text));
+                            fields.Add(newline.Text);
+                        }
+                        if (bMaskNew == true && bMaskOld == true)
+                        {
+                            bReserveOld = true;
+                        }
+                    }
+                    
+                    if (bReserveOld)
+                    {
+                        fields.Add(RemoveMask(result.OldText.Lines[index].Text));    // 依然采用修改前的值
                         bNotAccepted = true;
 
                         denied_change_fieldnames.Add(strOldFieldName
-                            + (bMask ? "!" : ""));
+                            + (bMaskNew ? "!" : ""));
                     }
                 }
                 else if (oldline.Type == ChangeType.Deleted)
@@ -273,12 +303,22 @@ namespace DigitalPlatform.Marc
                     string strOldFieldName = GetFieldName(oldline.Text);
                     Debug.Assert(strOldFieldName != null, "");
 
-                    if (rights_table.DeleteFieldNames.Contains(strOldFieldName) == false)
-                    {
-                        fields.Add(oldline.Text);   // 不允许删除
-                        bNotAccepted = true;
+                    // 注：有标记的字段不允许用于删除
+                    bool bMask = HasMask(oldline.Text);
 
-                        denied_delete_fieldnames.Add(strOldFieldName);
+                    if (rights_table.DeleteFieldNames.Contains(strOldFieldName) == false
+                        || bMask == true)
+                    {
+                        fields.Add(RemoveMask(oldline.Text));   // 不允许删除
+
+                        // 当具有标记的时候，表示这是因为旧记录中的字段权限禁止当前用户获取，造成前端得不到这个字段，然后在提交保存的时候也就没有这个字段，并不是前端故意要删除这个字段，因而也就不要做 partial_denied 提示了
+                        if (bMask == false)
+                        {
+                            bNotAccepted = true;
+
+                            denied_delete_fieldnames.Add(strOldFieldName
+                                + (bMask ? "!" : ""));
+                        }
                     }
                     else
                     {
@@ -837,6 +877,7 @@ namespace DigitalPlatform.Marc
 
             XmlDocument dom = new XmlDocument();
             dom.PreserveWhitespace = false;
+#if NO
             try
             {
                 dom.LoadXml(strXml);
@@ -845,6 +886,9 @@ namespace DigitalPlatform.Marc
             {
                 return -1;
             }
+#endif
+            dom.LoadXml(strXml);    // 可能会抛出异常
+
             StringBuilder result = new StringBuilder(4096);
             foreach (XmlNode node in dom.DocumentElement.ChildNodes)
             {

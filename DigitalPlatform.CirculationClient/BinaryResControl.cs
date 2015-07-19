@@ -920,7 +920,6 @@ bool bChanged)
             return results;
         }
 
-
         // 按照id字符串搜寻事项
         public List<ListViewItem> FindItemByID(string strID)
         {
@@ -974,6 +973,24 @@ bool bChanged)
             }
 
             return 0;
+        }
+
+        public bool ChangeObjectRights(ListViewItem item, string strRights)
+        {
+            string strExistingRights = ListViewUtil.GetItemText(item, COLUMN_RIGHTS);
+            if (strRights == strExistingRights)
+                return false;
+
+            LineState old_state = GetLineState(item);
+
+            ListViewUtil.ChangeItemText(item, COLUMN_RIGHTS, strRights);
+
+            if (old_state != LineState.New)
+                SetLineInfo(item, LineState.Changed);
+
+            SetXmlChanged(item, true);
+            this.Changed = true;
+            return true;
         }
 
         public int ChangeObjectFile(ListViewItem item,
@@ -1176,7 +1193,6 @@ bool bChanged)
                 // 如果本来就是已经标记删除的事项
                 if (state == LineState.Deleted)
                     continue;
-
 
                 // 如果本来就是新增事项，那么彻底从listview中移除
                 if (state == LineState.New)

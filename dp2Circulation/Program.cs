@@ -17,8 +17,6 @@ namespace dp2Circulation
         [STAThread]
         static void Main()
         {
-             //AppDomain currentDomain = AppDomain.CurrentDomain;
-  //currentDomain.UnhandledException += new UnhandledExceptionEventHandler(MyHandler);
             Begin();
 
             Application.EnableVisualStyles();
@@ -57,14 +55,15 @@ namespace dp2Circulation
 
             // TODO: 把信息提供给数字平台的开发人员，以便纠错
             // TODO: 显示为红色窗口，表示警告的意思
-            bool bTemp = false;
+            bool bSendReport = true;
             DialogResult result = MessageDlg.Show(main_form,
     "dp2Circulation 发生未知的异常:\r\n\r\n" + strError + "\r\n---\r\n\r\n点“关闭”即关闭程序",
     "dp2Circulation 发生未知的异常",
     MessageBoxButtons.OK,
     MessageBoxDefaultButton.Button1,
-    ref bTemp,
-    new string[] { "关闭" });
+    ref bSendReport,
+    new string[] { "关闭" },
+    "将信息发送给开发者");
 #if NO
             if (result == DialogResult.Yes)
             {
@@ -73,8 +72,9 @@ namespace dp2Circulation
             }
 #endif
 
-            // 崩溃报告
-            CrashReport(strError);
+            // 发送异常报告
+            if (bSendReport)
+                CrashReport(strError);
         }
 
         static void Application_ThreadException(object sender, 
@@ -91,16 +91,18 @@ namespace dp2Circulation
             else
                 WriteWindowsLog(strError, EventLogEntryType.Error);
 
-            bool bTemp = false;
+            bool bSendReport = true;
             DialogResult result = MessageDlg.Show(main_form,
     "dp2Circulation 发生未知的异常:\r\n\r\n" + strError + "\r\n---\r\n\r\n是否关闭程序?",
     "dp2Circulation 发生未知的异常",
     MessageBoxButtons.YesNo,
     MessageBoxDefaultButton.Button2,
-    ref bTemp,
-    new string[] { "关闭", "继续" });
+    ref bSendReport,
+    new string[] { "关闭", "继续" },
+    "将信息发送给开发者");
             {
-                CrashReport(strError);
+                if (bSendReport)
+                    CrashReport(strError);
             }
             if (result == DialogResult.Yes)
             {
@@ -121,7 +123,7 @@ namespace dp2Circulation
             //_messageBar.BackColor = SystemColors.Info;
             //_messageBar.ForeColor = SystemColors.InfoText;
             _messageBar.Text = "dp2Circulation 出现异常";
-            _messageBar.MessageText = "正在向 dp2003.com 发送崩溃报告 ...";
+            _messageBar.MessageText = "正在向 dp2003.com 发送异常报告 ...";
             _messageBar.StartPosition = FormStartPosition.CenterScreen;
             _messageBar.Show(main_form);
             _messageBar.Update();
@@ -153,7 +155,7 @@ namespace dp2Circulation
 
             if (nRet == -1)
             {
-                strError = "向 dp2003.com 发送崩溃报告时出错，未能发送成功。详细情况: " + strError;
+                strError = "向 dp2003.com 发送异常报告时出错，未能发送成功。详细情况: " + strError;
                 MessageBox.Show(main_form, strError);
                 // 写入错误日志
                 if (main_form != null)

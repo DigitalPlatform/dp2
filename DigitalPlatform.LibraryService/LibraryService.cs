@@ -13571,7 +13571,7 @@ out strError);
                 {
                     foreach (MessageData data in messages)
                     {
-                        // 崩溃报告还要写入操作日志
+                        // 异常报告还要写入操作日志
                         if (data.strRecipient == "crash")
                         {
                             XmlDocument domOperLog = new XmlDocument();
@@ -13597,7 +13597,7 @@ out strError);
                                 out strError);
                             if (nRet == -1)
                             {
-                                strError = "崩溃报告写入操作日志时出错: " + strError;
+                                strError = "异常报告写入操作日志时出错: " + strError;
                                 goto ERROR1;
                             }
                         }

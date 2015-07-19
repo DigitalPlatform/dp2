@@ -652,7 +652,7 @@ out strError);
             m_nInSearching--;
         }
 
-        // 崩溃报告
+        // 发送异常报告
         public static int CrashReport(
             string strSender,
             string strSubject,  // 一般为 "dp2circulation"

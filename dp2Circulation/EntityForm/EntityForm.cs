@@ -747,7 +747,7 @@ namespace dp2Circulation
                 this.binaryResControl1.Channel = this.Channel;
                 this.binaryResControl1.Stop = this.Progress;
 
-                this.binaryResControl1.RightsCfgFileName = Path.Combine(this.MainForm.DataDir, "binaryresrights.xml");
+                this.binaryResControl1.RightsCfgFileName = Path.Combine(this.MainForm.UserDir, "objectrights.xml");
 
                 this.m_macroutil.ParseOneMacro -= new ParseOneMacroEventHandler(m_macroutil_ParseOneMacro);
                 this.m_macroutil.ParseOneMacro += new ParseOneMacroEventHandler(m_macroutil_ParseOneMacro);
@@ -9575,6 +9575,7 @@ merge_dlg.UiState);
                 ListViewItem item = this.binaryResControl1.ListView.Items[i];
 
                 string strID = ListViewUtil.GetItemText(item, BinaryResControl.COLUMN_ID);
+                // 当 e.ID 为空的时候表示希望获得所有的行的信息。否则就是获得特定 id 的行的信息
                 if (String.IsNullOrEmpty(e.ID) == true
                     || strID == e.ID)
                 {
@@ -9589,13 +9590,28 @@ merge_dlg.UiState);
                     catch
                     {
                     }
-
+                    resinfo.Usage = ListViewUtil.GetItemText(item, BinaryResControl.COLUMN_USAGE);
+                    resinfo.Rights = ListViewUtil.GetItemText(item, BinaryResControl.COLUMN_RIGHTS);
                     resinfos.Add(resinfo);
                 }
-
             }
 
             e.Results = resinfos;
+        }
+
+        // return:
+        //      false   没有找到指定 ID 的对象
+        //      true    找到并修改了 rights 值
+        public bool ChangeObjectRigths(string strID, string strRights)
+        {
+            List<ListViewItem> items = this.binaryResControl1.FindItemByID(strID);
+            if (items.Count == 0)
+                return false;
+            foreach(ListViewItem item in items)
+            {
+                this.binaryResControl1.ChangeObjectRights(item, strRights);
+            }
+            return true;
         }
 
         // 设置目标记录

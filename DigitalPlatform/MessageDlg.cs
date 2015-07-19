@@ -19,8 +19,8 @@ namespace DigitalPlatform
 		public MessageBoxButtons buttons = MessageBoxButtons.OKCancel;
 		public MessageBoxDefaultButton defaultButton = MessageBoxDefaultButton.Button1;
 
-		private System.Windows.Forms.TextBox textBox_message;
-		public System.Windows.Forms.CheckBox checkBox_noAsk;
+        private System.Windows.Forms.TextBox textBox_message;
+        private CheckBox checkBox_noAsk;
 		private System.Windows.Forms.Button button_1;
 		private System.Windows.Forms.Button button_2;
 		private System.Windows.Forms.Button button_3;
@@ -387,12 +387,15 @@ namespace DigitalPlatform
 			MessageBoxButtons buttons,
 			MessageBoxDefaultButton defaultButton,
 			ref bool bChecked,
-            string [] button_texts = null)
+            string [] button_texts = null,
+            string strCheckBoxText = "")
 		{
 			MessageDlg dlg = new MessageDlg();
             Font font = GuiUtil.GetDefaultFont();
             if (font != null)
                 dlg.Font = font;
+            if (string.IsNullOrEmpty(strCheckBoxText) == false)
+                dlg.checkBox_noAsk.Text = strCheckBoxText;
 			dlg.checkBox_noAsk.Checked = bChecked;
 			dlg.buttons = buttons;
 			dlg.defaultButton = defaultButton;

@@ -706,7 +706,7 @@ namespace dp2Circulation
         // ±à¼­È¨ÏÞ
         private void button_editUserRights_Click(object sender, EventArgs e)
         {
-            DigitalPlatform.CommonDialog.PropertyDlg dlg = new DigitalPlatform.CommonDialog.PropertyDlg();
+            DigitalPlatform.CommonControl.PropertyDlg dlg = new DigitalPlatform.CommonControl.PropertyDlg();
             MainForm.SetControlFont(dlg, this.Font, false);
 
             dlg.StartPosition = FormStartPosition.CenterScreen;

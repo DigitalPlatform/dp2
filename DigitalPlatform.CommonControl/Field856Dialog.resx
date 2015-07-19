@@ -117,7 +117,29 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <metadata name="toolStrip_rights.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>17, 17</value>
+  </metadata>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="toolStripButton_copyRights_856ToObject.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
+        YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAACFSURBVDhPtZFRCsAgDEM9m4fzGjul/m5EGgi2sk7Yg4LY
+        5CFb+Y0xxq1j13lQqrXOSQt675cdtwLNOBBkIBJgpzIHlpSsAt5hLO7BsrU2QxgV6M7iHpYYVAHueLa4
+        R0ssrOdXgYbX4css7uGHiiQs8y9tiSTpMlHJ5zKh5KhMUDwu5yjlAYoiL6bqrbZsAAAAAElFTkSuQmCC
+</value>
+  </data>
+  <data name="toolStripButton_copyRights_objectTo856.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
+        YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAB/SURBVDhPtZFRCsAgDEM9m4fzGjtl/d2INBBm3SxsgUBX
+        kzfQ8qvM7ID9MycUe+8nnIaw3FobTkG0XGsd3oZE5RRkVaYJ8fgsHGo4mrcA/JOWCHkFsHwH6JnHZzHI
+        y1QAd7DHZzHIWQHYEYI5lD5RBIA086gVYFsoqX39tUq5AMi8L6aOTq28AAAAAElFTkSuQmCC
+</value>
+  </data>
+  <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>48</value>
+  </metadata>
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         AAABAAgAICAQAAAAAADoAgAAhgAAABAQEAAAAAAAKAEAAG4DAAAwMAAAAQAIAKgOAACWBAAAICAAAAEA

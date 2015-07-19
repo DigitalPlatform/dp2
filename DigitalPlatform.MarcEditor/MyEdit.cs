@@ -6,8 +6,7 @@ using System.Threading;
 using System.Diagnostics;
 
 using DigitalPlatform.GUI;
-
-
+// using DigitalPlatform.CommonControl;
 
 namespace DigitalPlatform.Marc
 {
@@ -42,9 +41,6 @@ namespace DigitalPlatform.Marc
                 this.m_bChanged = value;
             }
         }
-
-
-
 
         /*
         protected override void CreateHandle()
@@ -1157,8 +1153,6 @@ MarcEditor.WM_LEFTRIGHT_MOVED,
                                 API.MakeLParam(point.x, point.y));
 
                             e.Handled = true;
-
-
                         }
 #if BIDI_SUPPORT
                         // 插入符避免处在方向符号和子字段符号(31)之间
@@ -1867,6 +1861,16 @@ API.MakeLParam(x, y));
                 3,
                 rect);
         }
+
+#if NO
+        public override void OnHeightChanged()
+        {
+            this.MarcEditor.AfterItemHeightChanged(this.MarcEditor.FocusedFieldIndex,
+    -1);
+
+            base.OnHeightChanged();
+        }
+#endif
 
         public void EnsureVisible()
         {

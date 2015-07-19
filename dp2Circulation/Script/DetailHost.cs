@@ -7,6 +7,7 @@ using System.Reflection;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.Xml;
+using System.IO;
 
 using DigitalPlatform;
 using DigitalPlatform.Marc;
@@ -4179,6 +4180,10 @@ chi	中文	如果是中文，则为空。
 
             Field856Dialog dlg = new Field856Dialog();
             GuiUtil.SetControlFont(dlg, this.DetailForm.MainForm.DefaultFont, false);
+            dlg.RightsCfgFileName = Path.Combine(this.DetailForm.MainForm.UserDir, "objectrights.xml");
+
+            dlg.GetResInfo -= new GetResInfoEventHandler(dlg_GetResInfo);
+            dlg.GetResInfo += new GetResInfoEventHandler(dlg_GetResInfo);
 
             if (field_856 != null)
             {
@@ -4198,19 +4203,15 @@ chi	中文	如果是中文，则为空。
                 }
             }
 
-            dlg.GetResInfo -= new GetResInfoEventHandler(dlg_GetResInfo);
-            dlg.GetResInfo += new GetResInfoEventHandler(dlg_GetResInfo);
-
         REDO_INPUT:
             this.DetailForm.MainForm.AppInfo.LinkFormState(dlg, "ctrl_a_field856dialog_state");
             dlg.ShowDialog(this.DetailForm);
             this.DetailForm.MainForm.AppInfo.UnlinkFormState(dlg);
 
-
             if (dlg.DialogResult != DialogResult.OK)
                 return;
 
-            // 新创建情况下，检查一下id是否已经存在，给与适当警告
+            // 新创建情况下，检查一下 id 是否已经存在，给与适当警告
             if (field_856 == null
                 && String.IsNullOrEmpty(dlg.Subfield_u) == false)
             {
@@ -4219,7 +4220,7 @@ chi	中文	如果是中文，则为空。
                 if (dup_fields.Count > 0)
                 {
                     DialogResult result = MessageBox.Show(this.DetailForm,
-                        "当前MARC编辑器中已经存在 " + dup_fields.Count + " 个856字段其$" + LinkSubfieldName + "子字段关联了对象ID '" + dlg.Subfield_u + "' ，确实要再次新创建一个关联此对象ID的新856字段?\r\n\r\n(注：如果必要，多个856字段是可以关联同一对象ID的)\r\n\r\n(Yes: 立即创建; No: 不创建，关闭对话框，输入的内容丢失; Cancel: 重新打开对话框以便进一步修改)",
+                        "当前 MARC 编辑器中已经存在 " + dup_fields.Count + " 个 856 字段其 $" + LinkSubfieldName + " 子字段关联了对象ID '" + dlg.Subfield_u + "' ，确实要再次新创建一个关联此对象 ID 的新 856 字段?\r\n\r\n(注：如果必要，多个856字段是可以关联同一对象ID的)\r\n\r\n(Yes: 立即创建; No: 不创建，关闭对话框，输入的内容丢失; Cancel: 重新打开对话框以便进一步修改)",
                         "DetailHost",
                         MessageBoxButtons.YesNoCancel,
                         MessageBoxIcon.Question,
@@ -4241,6 +4242,12 @@ chi	中文	如果是中文，则为空。
 
                 field_856.IndicatorAndValue = dlg.Value;
                 this.DetailForm.MarcEditor.EnsureVisible();
+
+                // 修改对象的 rights
+                if (string.IsNullOrEmpty(dlg.Subfield_u) == false)
+                {
+                    this.DetailForm.ChangeObjectRigths(dlg.Subfield_u, dlg.ObjectRights);
+                }
             }
         }
 

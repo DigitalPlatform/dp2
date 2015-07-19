@@ -2127,6 +2127,8 @@ return result;
                 }
             }
 
+            bool b856Masked = false;
+
             int field_856_count = Get856Count(strNewMarc);
 
             // 对 strNewMarc 进行过滤，将那些当前用户无法读取的 856 字段删除
@@ -2140,8 +2142,15 @@ return result;
                 out strError);
             if (nRet == -1)
                 return -1;
+            if (nRet > 0)
+                b856Masked = true;
 
-            bool b856Masked = false;
+            nRet = MaskCantGet856(
+    strUserRights,
+    ref strOldMarc,
+    out strError);
+            if (nRet == -1)
+                return -1;
             if (nRet > 0)
                 b856Masked = true;
 
@@ -2514,10 +2523,19 @@ nsmgr);
         {
             strError = "";
 
+            if (string.IsNullOrEmpty(strMARC) == true)
+                return 0;
+
             // 只要当前账户具备 writeobject 或 writeres 权限，等于他可以获取任何对象，为了编辑加工的需要
             if (StringUtil.IsInList("writeobject", strUserRights) == true
                 || StringUtil.IsInList("writeres", strUserRights) == true)
                 return 0;
+
+            string strMaskChar = new string((char)1, 1);
+
+            // 在处理前替换记录中可能出现的 (char)1
+            // 建议在调用本函数前，探测 strMARC 中是否有这个符号，如果有，可能是相关环节检查不严创建了这样的记录，需要进一步检查处理
+            strMARC = strMARC.Replace(strMaskChar, "*");
 
             MarcRecord record = new MarcRecord(strMARC);
             MarcNodeList fields = record.select("field[@name='856']");
@@ -2542,7 +2560,7 @@ nsmgr);
                 // 对象是否允许被获取?
                 if (CanGet(strUserRights, strObjectRights) == false)
                 {
-                    field.Content += new string((char)1, 1);
+                    field.Content += strMaskChar;
                     nCount++;
                 }
             }

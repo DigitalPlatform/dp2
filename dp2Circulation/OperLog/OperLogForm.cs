@@ -1542,7 +1542,7 @@ namespace dp2Circulation
 
             strHtml =
                 "<table class='operlog'>" +
-                BuildHtmlLine("操作类型", strOperation + " -- 崩溃报告") +
+                BuildHtmlLine("操作类型", strOperation + " -- 异常报告") +
                 BuildHtmlLine("主题", strSubject) +
                 BuildHtmlLine("发送者", strSender) +
                 BuildHtmlLine("媒体类型", strMime) +

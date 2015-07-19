@@ -929,7 +929,6 @@ namespace dp2Catalog
             if (this.binaryResControl1 == null)
                 return 0;
 
-
             XmlDocument domDc = new XmlDocument();
             try
             {
@@ -953,6 +952,7 @@ namespace dp2Catalog
                     node.ParentNode.RemoveChild(node);
             }
 
+#if NO
             // 然后增加本次的id们
             List<string> ids = this.binaryResControl1.GetIds();
 
@@ -968,6 +968,10 @@ namespace dp2Catalog
                 domDc.DocumentElement.AppendChild(node);
                 DomUtil.SetAttr(node, "id", strID);
             }
+#endif
+            int nRet = this.binaryResControl1.AddFileFragments(ref domDc, out strError);
+            if (nRet == -1)
+                return -1;
 
             strXml = domDc.OuterXml;
             return 1;

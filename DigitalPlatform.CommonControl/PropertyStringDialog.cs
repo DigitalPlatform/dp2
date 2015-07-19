@@ -13,13 +13,12 @@ using DigitalPlatform.GUI;
 
 namespace DigitalPlatform.CommonControl
 {
-    // 服务于CheckedCombobox
+    // 服务于 CheckedCombobox
     public partial class PropertyStringDialog : Form
     {
         public CheckedComboBox CheckedComboBox = null;
 
         const int WM_CLOSE = API.WM_USER + 201;
-
 
         public bool HideCloseButton 
         {

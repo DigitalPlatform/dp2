@@ -7,12 +7,12 @@ using System.Windows.Forms;
 using System.Xml;
 using DigitalPlatform.Xml;
 
-namespace DigitalPlatform.CommonDialog
+namespace DigitalPlatform.CommonControl
 {
 	/// <summary>
-	/// ¼´½«±»·ÏÖ¹
+	/// Summary description for PropertyDlg.
 	/// </summary>
-	public class PropertyDlg111 : System.Windows.Forms.Form
+	public class PropertyDlg : System.Windows.Forms.Form
 	{
 		public string CfgFileName = "";
 		public string Lang = "zh";
@@ -38,7 +38,7 @@ namespace DigitalPlatform.CommonDialog
         private Panel panel_down;
 		private System.ComponentModel.IContainer components;
 
-		public PropertyDlg111()
+		public PropertyDlg()
 		{
 			//
 			// Required for Windows Form Designer support
@@ -73,7 +73,7 @@ namespace DigitalPlatform.CommonDialog
 		private void InitializeComponent()
 		{
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PropertyDlg111));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PropertyDlg));
             this.label_property = new System.Windows.Forms.Label();
             this.textBox_property = new System.Windows.Forms.TextBox();
             this.button_Cancel = new System.Windows.Forms.Button();

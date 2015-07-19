@@ -1080,6 +1080,7 @@ namespace DigitalPlatform.Marc
             curEdit.BorderStyle = BorderStyle.None;  // BorderStyle.FixedSingle;
             curEdit.MaxLength = 0;
 			curEdit.Multiline = true;
+            curEdit.WordWrap = true;
 
             // 2009/10/24
             if (curEdit.ReadOnly != this.ReadOnly)

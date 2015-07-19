@@ -15,6 +15,15 @@ namespace DigitalPlatform.CommonControl
     {
         int _lineCount = 1;
 
+        public event EventHandler HeightChanged = null;
+
+        // 因为文本变化调整高度引起的高度变化
+        public virtual void OnHeightChanged()
+        {
+            if (this.HeightChanged != null)
+                this.HeightChanged(this, new EventArgs());
+        }
+
         protected override void OnFontChanged(EventArgs e)
         {
             base.OnFontChanged(e);
@@ -60,7 +69,10 @@ pixels.
                  * */
                 int nNewHeight = (this.Font.Height + 1) * numberOfLines + nBorderWidth + 7;
                 if (this.Height != nNewHeight)
+                {
                     this.Height = nNewHeight;
+                    this.OnHeightChanged();
+                }
 
                 _lineCount = numberOfLines;
             }

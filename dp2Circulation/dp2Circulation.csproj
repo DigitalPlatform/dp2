@@ -2459,7 +2459,7 @@
     <Content Include="settlement.css" />
     <None Include="TestCutter.xml" />
     <None Include="Testing\MarcQuery测试用例.txt" />
-    <Content Include="binaryresrights.xml">
+    <Content Include="default_objectrights.xml">
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
