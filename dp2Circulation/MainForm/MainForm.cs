@@ -11387,8 +11387,6 @@ Font font)
                 out strError);
         }
 
-        // 汉字字符串转换为拼音。新版本
-        // 如果函数中已经MessageBox报错，则strError第一字符会为空格
         /// <summary>
         /// 汉字字符串转换为拼音，智能方式
         /// </summary>
@@ -11400,15 +11398,46 @@ Font font)
         /// <param name="strError">返回出错信息</param>
         /// <returns>-1: 出错; 0: 用户希望中断; 1: 正常; 2: 结果字符串中有没有找到拼音的汉字</returns>
         public int SmartHanziTextToPinyin(
+IWin32Window owner,
+string strText,
+PinyinStyle style,
+bool bAutoSel,
+out string strPinyin,
+out string strError)
+        {
+            return SmartHanziTextToPinyin(owner,
+                strText,
+                style,
+               (bAutoSel ? "auto" : ""),
+                out strPinyin,
+                out strError);
+        }
+
+        // 汉字字符串转换为拼音。新版本
+        // 如果函数中已经MessageBox报错，则strError第一字符会为空格
+        /// <summary>
+        /// 汉字字符串转换为拼音，智能方式
+        /// </summary>
+        /// <param name="owner">用于函数中 MessageBox 和对话框 的宿主窗口</param>
+        /// <param name="strText">输入字符串</param>
+        /// <param name="style">转换为拼音的风格</param>
+        /// <param name="strDuoyinStyle">是否自动选择多音字。auto/first 的一个或者组合。如果为 auto,first 表示优先按照智能拼音选择，没有智能拼音的，选择第一个</param>
+        /// <param name="strPinyin">返回拼音字符串</param>
+        /// <param name="strError">返回出错信息</param>
+        /// <returns>-1: 出错; 0: 用户希望中断; 1: 正常; 2: 结果字符串中有没有找到拼音的汉字</returns>
+        public int SmartHanziTextToPinyin(
             IWin32Window owner,
             string strText,
             PinyinStyle style,
-            bool bAutoSel,
+            string strDuoyinStyle,  // bool bAutoSel,
             out string strPinyin,
             out string strError)
         {
             strPinyin = "";
             strError = "";
+
+            bool bAuto = StringUtil.IsInList("auto", strDuoyinStyle);
+            bool bFirst = StringUtil.IsInList("first", strDuoyinStyle);
 
             bool bNotFoundPinyin = false;   // 是否出现过没有找到拼音、只能把汉字放入结果字符串的情况
 
@@ -11583,10 +11612,32 @@ Font font)
                                 dlg.ActivePinyin = pinyin_parts[index];
                             dlg.Hanzi = strHanzi;
 
+#if NO
                             if (bAutoSel == true
                                 && string.IsNullOrEmpty(dlg.ActivePinyin) == false)
                             {
                                 dlg.ResultPinyin = dlg.ActivePinyin;
+                                dlg.DialogResult = DialogResult.OK;
+                            }
+                            else
+                            {
+                                this.AppInfo.LinkFormState(dlg, "SelPinyinDlg_state");
+
+                                dlg.ShowDialog(owner);
+
+                                this.AppInfo.UnlinkFormState(dlg);
+                            }
+#endif
+                            if (bAuto == true
+    && string.IsNullOrEmpty(dlg.ActivePinyin) == false)
+                            {
+                                dlg.ResultPinyin = dlg.ActivePinyin;
+                                dlg.DialogResult = DialogResult.OK;
+                            }
+                            else if (bFirst == true
+                                && string.IsNullOrEmpty(dlg.Pinyins) == false)
+                            {
+                                dlg.ResultPinyin = SelPinyinDlg.GetFirstPinyin(dlg.Pinyins);
                                 dlg.DialogResult = DialogResult.OK;
                             }
                             else
@@ -11642,7 +11693,6 @@ Font font)
                     Debug.Assert(node.NodeType == XmlNodeType.Text, "");
                     node.ParentNode.RemoveChild(node);
                 }
-
 
                 // 把没有p属性的<char>元素去掉，以便上传
                 XmlNodeList nodes = dom.DocumentElement.SelectNodes("//char");
@@ -11718,6 +11768,27 @@ Font font)
             }
         }
 
+        // 2015/7/20
+        // 包装后的版本
+        public int HanziTextToPinyin(
+    IWin32Window owner,
+    bool bLocal,
+    string strText,
+    PinyinStyle style,
+    bool bAutoSel,
+    out string strPinyin,
+    out string strError)
+        {
+            return HanziTextToPinyin(
+    owner,
+    bLocal,
+    strText,
+    style,
+    (bAutoSel ? "auto" : ""),
+    out strPinyin,
+    out strError);
+        }
+
         // 把字符串中的汉字和拼音分离
         // parameters:
         //      bLocal  是否从本机获取拼音
@@ -11732,6 +11803,7 @@ Font font)
         /// <param name="bLocal">是否从本地获取拼音信息</param>
         /// <param name="strText">输入字符串</param>
         /// <param name="style">转换为拼音的风格</param>
+        /// <param name="strDuoyinStyle">处理多音字的风格</param>
         /// <param name="strPinyin">返回拼音字符串</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>-1: 出错; 0: 用户希望中断; 1: 正常; 2: 结果字符串中有没有找到拼音的汉字</returns>
@@ -11740,11 +11812,15 @@ Font font)
             bool bLocal,
             string strText,
             PinyinStyle style,
+            string strDuoyinStyle,  // 2015/7/20
             out string strPinyin,
             out string strError)
         {
             strError = "";
             strPinyin = "";
+
+            bool bAuto = StringUtil.IsInList("auto", strDuoyinStyle);
+            bool bFirst = StringUtil.IsInList("first", strDuoyinStyle);
 
             // string strSpecialChars = "！·＃￥％……—＊（）——＋－＝［］《》＜＞，。？／＼｜｛｝“”‘’";
             bool bNotFoundPinyin = false;   // 是否出现过没有找到拼音、只能把汉字放入结果字符串的情况
@@ -11842,11 +11918,20 @@ Font font)
                     dlg.Pinyins = strResultPinyin;
                     dlg.Hanzi = strHanzi;
 
-                    this.AppInfo.LinkFormState(dlg, "SelPinyinDlg_state");
+                    if (bFirst == true
+&& string.IsNullOrEmpty(dlg.Pinyins) == false)
+                    {
+                        dlg.ResultPinyin = SelPinyinDlg.GetFirstPinyin(dlg.Pinyins);
+                        dlg.DialogResult = DialogResult.OK;
+                    }
+                    else
+                    {
+                        this.AppInfo.LinkFormState(dlg, "SelPinyinDlg_state");
 
-                    dlg.ShowDialog(owner);
+                        dlg.ShowDialog(owner);
 
-                    this.AppInfo.UnlinkFormState(dlg);
+                        this.AppInfo.UnlinkFormState(dlg);
+                    }
 
                     Debug.Assert(DialogResult.Cancel != DialogResult.Abort, "推断");
 
@@ -11930,6 +12015,66 @@ Font font)
             return cfg_items.Count;
         }
 
+        // 2015/7/20 新函数
+        // 汉字字符串转换为拼音
+        // 这个函数会按照当前配置，自动决定使用下层的加拼音函数
+        // return:
+        //      -1  出错
+        //      0   用户希望中断
+        //      1   正常
+        /// <summary>
+        /// 汉字字符串转换为拼音
+        /// </summary>
+        /// <param name="owner">用于函数中 MessageBox 和对话框 的宿主窗口</param>
+        /// <param name="strHanzi">输入字符串</param>
+        /// <param name="style">转换为拼音的风格</param>
+        /// <param name="strDuoyinStyle">处理多音字的风格</param>
+        /// <param name="strPinyin">返回拼音字符串</param>
+        /// <param name="strError">返回出错信息</param>
+        /// <returns>-1: 出错; 0: 用户希望中断; 1: 正常; 2: 结果字符串中有没有找到拼音的汉字</returns>
+        public int GetPinyin(
+            IWin32Window owner,
+            string strHanzi,
+            PinyinStyle style,
+            string strDuoyinStyle,  // bool bAutoSel,
+            out string strPinyin,
+            out string strError)
+        {
+            strError = "";
+            // return:
+            //      -1  出错
+            //      0   用户希望中断
+            //      1   正常
+            if (string.IsNullOrEmpty(this.PinyinServerUrl) == true
+               || this.ForceUseLocalPinyinFunc == true)
+            {
+                return this.HanziTextToPinyin(
+                    owner,
+                    true,	// 本地，快速
+                    strHanzi,
+                    style,
+                    strDuoyinStyle,
+                    out strPinyin,
+                    out strError);
+            }
+            else
+            {
+                // 汉字字符串转换为拼音
+                // 如果函数中已经MessageBox报错，则strError第一字符会为空格
+                // return:
+                //      -1  出错
+                //      0   用户希望中断
+                //      1   正常
+                return this.SmartHanziTextToPinyin(
+                    owner,
+                    strHanzi,
+                    style,
+                    strDuoyinStyle,
+                    out strPinyin,
+                    out strError);
+            }
+        }
+
         // 包装后的 汉字到拼音 函数
         // parameters:
         // return:
@@ -11971,6 +12116,7 @@ Font font)
                     true,	// 本地，快速
                     strHanzi,
                     style,
+                    "auto",
                     out strPinyin,
                     out strError);
             }
@@ -11986,7 +12132,7 @@ Font font)
                     owner,
                     strHanzi,
                     style,
-                    bAutoSel,
+                    "auto", // bAutoSel,
                     out strPinyin,
                     out strError);
             }

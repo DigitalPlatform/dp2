@@ -796,7 +796,6 @@ strServerUrl);
             {
                 var element = item as XmlElement;
 
-
                 List<string> cols = null;
                 string strASIN = "";
                 string strCoverImageUrl = "";
@@ -1033,12 +1032,18 @@ nsmgr,
             return strText;
         }
 
+        class Creator
+        {
+            public string Name = "";
+            public string Role = "";
+        }
+
         // 获得创建者字段的值
-        static List<string> GetCreatorValues(XmlNode root,
+        static List<Creator> GetCreatorValues(XmlNode root,
             XmlNamespaceManager nsmgr,
             string strXPath)
         {
-            List<string> results = new List<string>();
+            List<Creator> results = new List<Creator>();
             XmlNodeList nodes = root.SelectNodes(strXPath, nsmgr);
             foreach (XmlElement node in nodes)
             {
@@ -1048,7 +1053,7 @@ nsmgr,
             return results;
         }
 
-        static string GetCreatorValue(XmlElement element,
+        static Creator GetCreatorValue(XmlElement element,
     XmlNamespaceManager nsmgr)
         {
             string strRole = element.GetAttribute("Role");
@@ -1058,7 +1063,11 @@ nsmgr,
             if (strRole == "译者")
                 strRole = "译";
 
-            return element.InnerText.Trim() + strRole;
+            Creator creator = new Creator();
+            creator.Name = element.InnerText.Trim();
+            creator.Role = strRole;
+
+            return  creator;
         }
 
         // 获得尺寸字段的值
@@ -1188,6 +1197,51 @@ nsmgr,
             return info;
         }
 
+        /*
+    <EditorialReviews>
+        <EditorialReview>
+            <Source>内容简介</Source>
+            <Content>  这本由佛瑞斯特·卡特著的《少年小树之歌》讲述了：差不多在印第安紫罗兰开花以后，你会讶异地发现，拂上脸庞的风竟然如羽毛般温柔暖和，而且还带着一些泥土的气息，春天的脚步正渐渐地接近。&lt;br&gt;    接着闪电又来了，它击中了山顶的岩石，巨大的蓝色火球四处进落，照得整个天空一片闪动着的蓝。豆大的雨点稀落地从云端洒下，仿佛预告着接下来大得惊人的雨即将降临。&lt;br&gt;    夏天则是生命力量最澎湃的时刻，就像人在壮年一般。而当萧瑟的秋风吹起，我们觉得自己开始苍老，一股归乡的思绪充塞心头，有些人称这感觉为乡愁。万物销声匿迹的冬天就像我们躯体的死亡，但是当春天来临时，它们又会重生。</Content>
+            <IsLinkSuppressed>0</IsLinkSuppressed>
+        </EditorialReview>
+    </EditorialReviews>
+         * */
+        // 获得价格字段的值
+        // parameters:
+        //      strXPath    EditorialReviews/EditorialReview
+        //      strSourceType   "内容简介"
+        static List<string> GetCommentValues(XmlNode root,
+            XmlNamespaceManager nsmgr,
+            string strXPath,
+            string strSourceType)
+        {
+            List<string> results = new List<string>();
+            XmlNodeList nodes = root.SelectNodes(strXPath, nsmgr);
+            foreach (XmlElement node in nodes)
+            {
+                string strText = GetCommentValue(node, nsmgr, strSourceType);
+                if (string.IsNullOrEmpty(strText) == false)
+                    results.Add(strText);
+            }
+
+            return results;
+        }
+
+        static string GetCommentValue(XmlElement element,
+            XmlNamespaceManager nsmgr,
+            string strSourceType)
+        {
+            XmlElement source = element.SelectSingleNode("amazon:Source", nsmgr) as XmlElement;
+            XmlElement content = element.SelectSingleNode("amazon:Content", nsmgr) as XmlElement;
+
+            if (source == null)
+                return "";
+            if (source != null && source.InnerText.Trim() != strSourceType)
+                return "";
+            return content.InnerText.Trim();
+        }
+
+
         // 将亚马逊 XML 格式转换为 UNIMARC 格式
         public static int AmazonXmlToUNIMARC(XmlNode root,
             out string strMARC,
@@ -1243,7 +1297,7 @@ nsmgr,
             List<string> titles = GetFieldValues(root,
                 nsmgr,
                 "amazon:ItemAttributes/amazon:Title");
-            List<string> creators = GetCreatorValues(root,
+            List<Creator> creators = GetCreatorValues(root,
                 nsmgr,
                 "amazon:ItemAttributes/amazon:Creator");
             {
@@ -1255,11 +1309,24 @@ nsmgr,
                     field.ChildNodes.add(new MarcSubfield("a", title));
                 }
                 int i = 0;
-                foreach (string creator in creators)
+                foreach (Creator creator in creators)
                 {
-                    field.ChildNodes.add(new MarcSubfield(i == 0 ? "f" : "g", creator));
+                    field.ChildNodes.add(new MarcSubfield(i == 0 ? "f" : "g", creator.Name + creator.Role));
                     i++;
                 }
+            }
+
+            // 2015/7/19
+            // 205
+            List<string> editions = GetFieldValues(root,
+nsmgr,
+"amazon:ItemAttributes/amazon:Edition");
+            foreach (string edition in editions)
+            {
+                MarcField field = new MarcField("205", "  ");
+                record.ChildNodes.add(field);
+
+                field.ChildNodes.add(new MarcSubfield("a", edition));
             }
 
             // 210
@@ -1305,6 +1372,66 @@ nsmgr,
                 }
             }
 
+            // 2015/7/19
+            // 330
+            List<string> reviews = GetCommentValues(root,
+    nsmgr,
+    "amazon:EditorialReviews/amazon:EditorialReview",
+    "内容简介");
+            if (reviews.Count > 0)
+            {
+                MarcField field = new MarcField("330", "  ");
+                record.ChildNodes.add(field);
+                foreach (string review in reviews)
+                {
+                    field.ChildNodes.add(new MarcSubfield("a", review));
+                }
+            }
+
+            // 2015/7/19
+            // 610
+            List<string> subjects = GetFieldValues(root,
+    nsmgr,
+    "amazon:Subjects/amazon:Subject");
+            if (subjects.Count > 0)
+            {
+                MarcField field = new MarcField("610", "0 ");
+                record.ChildNodes.add(field);
+                foreach (string subject in subjects)
+                {
+                    field.ChildNodes.add(new MarcSubfield("a", subject));
+                }
+            }
+
+            // 2015/7/19
+            // 7xx
+            // authors 里面的元素通常已经被 creators 包含，creators 元素多余 authors。
+            // 转换策略是，把 authors 里的作为 701，creators 里面余下的作为 702
+            List<Creator> authors = GetCreatorValues(root,
+    nsmgr,
+    "amazon:ItemAttributes/amazon:Author");
+            foreach (Creator author in authors)
+            {
+                MarcField field = new MarcField("701", " 0");
+                record.ChildNodes.add(field);
+
+                field.ChildNodes.add(new MarcSubfield("a", author.Name));
+                if (string.IsNullOrEmpty(author.Role) == false)
+                    field.ChildNodes.add(new MarcSubfield("4", author.Role));
+            }
+
+            foreach(Creator creator in creators)
+            {
+                if (IndexOf(authors, creator.Name) != -1)
+                    continue;
+                MarcField field = new MarcField("702", " 0");
+                record.ChildNodes.add(field);
+
+                field.ChildNodes.add(new MarcSubfield("a", creator.Name));
+                if (string.IsNullOrEmpty(creator.Role) == false)
+                    field.ChildNodes.add(new MarcSubfield("4", creator.Role));
+            }
+
             // 856
             string[] names = new string[] { 
                 "SmallImage",
@@ -1332,6 +1459,18 @@ nsmgr,
 
             strMARC = record.Text;
             return 0;
+        }
+
+        static int IndexOf(List<Creator> list, string strName)
+        {
+            int i = 0;
+            foreach(Creator creator in list)
+            {
+                if (creator.Name == strName)
+                    return i;
+                i++;
+            }
+            return -1;
         }
 
         // 根据 URL 获得媒体类型

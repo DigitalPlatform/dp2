@@ -2598,6 +2598,7 @@ MessageBoxDefaultButton.Button2);
             return result.ToString();
         }
 
+#if NO
         // 返回 errors 中的涉及到的字段超过 name_list 的范围的部分列表
         public static List<string> GetOutOfRangeFieldNames(List<BiblioError> errors, List<string> name_list)
         {
@@ -2610,6 +2611,20 @@ MessageBoxDefaultButton.Button2);
                 // TODO: error.FieldName 内容，可以扩展为允许 xxx,xxx 这样的形态
                 if (EasyMarcControl.MatchFieldName(error.FieldName, name_list) == false)
                     results.Add(error.FieldName);
+            }
+            StringUtil.RemoveDup(ref results);  // 对结果集合中的名字去重
+            return results;
+        }
+#endif
+        // 返回 errors 中的涉及到的字段超过 name_list 的范围的部分列表
+        public static List<string> GetFieldNames(List<BiblioError> errors)
+        {
+            List<string> results = new List<string>();
+            foreach (BiblioError error in errors)
+            {
+                if (string.IsNullOrEmpty(error.FieldName) == true)
+                    continue;
+                results.Add(error.FieldName);
             }
             StringUtil.RemoveDup(ref results);  // 对结果集合中的名字去重
             return results;

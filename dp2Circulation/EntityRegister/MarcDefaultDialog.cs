@@ -57,27 +57,27 @@ namespace dp2Circulation
             }
         }
 
-        public string UnimarcImportantFields
+        public string UnimarcHiddenFields
         {
             get
             {
-                return this.textBox_unimarc_importantFields.Text;
+                return this.textBox_unimarc_hiddenFields.Text;
             }
             set
             {
-                this.textBox_unimarc_importantFields.Text = value;
+                this.textBox_unimarc_hiddenFields.Text = value;
             }
         }
 
-        public string Marc21ImportantFields
+        public string Marc21HiddenFields
         {
             get
             {
-                return this.textBox_marc21_importantFields.Text;
+                return this.textBox_marc21_hiddenFields.Text;
             }
             set
             {
-                this.textBox_marc21_importantFields.Text = value;
+                this.textBox_marc21_hiddenFields.Text = value;
             }
         }
     }

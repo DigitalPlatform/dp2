@@ -30,17 +30,17 @@
         {
             this.tabControl_main = new System.Windows.Forms.TabControl();
             this.tabPage_unimarc = new System.Windows.Forms.TabPage();
-            this.tabPage_marc21 = new System.Windows.Forms.TabPage();
-            this.button_OK = new System.Windows.Forms.Button();
-            this.button_cancel = new System.Windows.Forms.Button();
+            this.textBox_unimarc_hiddenFields = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
             this.textBox_unimarc_default = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.textBox_unimarc_importantFields = new System.Windows.Forms.TextBox();
-            this.label2 = new System.Windows.Forms.Label();
-            this.textBox_marc21_importantFields = new System.Windows.Forms.TextBox();
+            this.tabPage_marc21 = new System.Windows.Forms.TabPage();
+            this.textBox_marc21_hiddenFields = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.textBox_marc21_default = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
+            this.button_OK = new System.Windows.Forms.Button();
+            this.button_cancel = new System.Windows.Forms.Button();
             this.tabControl_main.SuspendLayout();
             this.tabPage_unimarc.SuspendLayout();
             this.tabPage_marc21.SuspendLayout();
@@ -62,7 +62,7 @@
             // tabPage_unimarc
             // 
             this.tabPage_unimarc.AutoScroll = true;
-            this.tabPage_unimarc.Controls.Add(this.textBox_unimarc_importantFields);
+            this.tabPage_unimarc.Controls.Add(this.textBox_unimarc_hiddenFields);
             this.tabPage_unimarc.Controls.Add(this.label2);
             this.tabPage_unimarc.Controls.Add(this.textBox_unimarc_default);
             this.tabPage_unimarc.Controls.Add(this.label1);
@@ -74,10 +74,57 @@
             this.tabPage_unimarc.Text = "UNIMARC";
             this.tabPage_unimarc.UseVisualStyleBackColor = true;
             // 
+            // textBox_unimarc_hiddenFields
+            // 
+            this.textBox_unimarc_hiddenFields.AcceptsReturn = true;
+            this.textBox_unimarc_hiddenFields.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_unimarc_hiddenFields.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBox_unimarc_hiddenFields.HideSelection = false;
+            this.textBox_unimarc_hiddenFields.ImeMode = System.Windows.Forms.ImeMode.Disable;
+            this.textBox_unimarc_hiddenFields.Location = new System.Drawing.Point(6, 185);
+            this.textBox_unimarc_hiddenFields.Multiline = true;
+            this.textBox_unimarc_hiddenFields.Name = "textBox_unimarc_hiddenFields";
+            this.textBox_unimarc_hiddenFields.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox_unimarc_hiddenFields.Size = new System.Drawing.Size(355, 126);
+            this.textBox_unimarc_hiddenFields.TabIndex = 6;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(4, 170);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(197, 12);
+            this.label2.TabIndex = 5;
+            this.label2.Text = "要隐藏的字段[每行一个字段名](&I):";
+            // 
+            // textBox_unimarc_default
+            // 
+            this.textBox_unimarc_default.AcceptsReturn = true;
+            this.textBox_unimarc_default.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_unimarc_default.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBox_unimarc_default.HideSelection = false;
+            this.textBox_unimarc_default.Location = new System.Drawing.Point(6, 27);
+            this.textBox_unimarc_default.Multiline = true;
+            this.textBox_unimarc_default.Name = "textBox_unimarc_default";
+            this.textBox_unimarc_default.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox_unimarc_default.Size = new System.Drawing.Size(355, 126);
+            this.textBox_unimarc_default.TabIndex = 4;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(4, 12);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(173, 12);
+            this.label1.TabIndex = 3;
+            this.label1.Text = "记录初始值[每行一个字段](&D):";
+            // 
             // tabPage_marc21
             // 
             this.tabPage_marc21.AutoScroll = true;
-            this.tabPage_marc21.Controls.Add(this.textBox_marc21_importantFields);
+            this.tabPage_marc21.Controls.Add(this.textBox_marc21_hiddenFields);
             this.tabPage_marc21.Controls.Add(this.label3);
             this.tabPage_marc21.Controls.Add(this.textBox_marc21_default);
             this.tabPage_marc21.Controls.Add(this.label4);
@@ -88,6 +135,53 @@
             this.tabPage_marc21.TabIndex = 1;
             this.tabPage_marc21.Text = "MARC21";
             this.tabPage_marc21.UseVisualStyleBackColor = true;
+            // 
+            // textBox_marc21_hiddenFields
+            // 
+            this.textBox_marc21_hiddenFields.AcceptsReturn = true;
+            this.textBox_marc21_hiddenFields.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_marc21_hiddenFields.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBox_marc21_hiddenFields.HideSelection = false;
+            this.textBox_marc21_hiddenFields.ImeMode = System.Windows.Forms.ImeMode.Disable;
+            this.textBox_marc21_hiddenFields.Location = new System.Drawing.Point(6, 185);
+            this.textBox_marc21_hiddenFields.Multiline = true;
+            this.textBox_marc21_hiddenFields.Name = "textBox_marc21_hiddenFields";
+            this.textBox_marc21_hiddenFields.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox_marc21_hiddenFields.Size = new System.Drawing.Size(355, 126);
+            this.textBox_marc21_hiddenFields.TabIndex = 10;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(4, 170);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(197, 12);
+            this.label3.TabIndex = 9;
+            this.label3.Text = "要隐藏的字段[每行一个字段名](&I):";
+            // 
+            // textBox_marc21_default
+            // 
+            this.textBox_marc21_default.AcceptsReturn = true;
+            this.textBox_marc21_default.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_marc21_default.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textBox_marc21_default.HideSelection = false;
+            this.textBox_marc21_default.Location = new System.Drawing.Point(6, 27);
+            this.textBox_marc21_default.Multiline = true;
+            this.textBox_marc21_default.Name = "textBox_marc21_default";
+            this.textBox_marc21_default.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox_marc21_default.Size = new System.Drawing.Size(355, 126);
+            this.textBox_marc21_default.TabIndex = 8;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(4, 12);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(173, 12);
+            this.label4.TabIndex = 7;
+            this.label4.Text = "记录初始值[每行一个字段](&D):";
             // 
             // button_OK
             // 
@@ -111,100 +205,6 @@
             this.button_cancel.Text = "取消";
             this.button_cancel.UseVisualStyleBackColor = true;
             this.button_cancel.Click += new System.EventHandler(this.button_cancel_Click);
-            // 
-            // textBox_unimarc_default
-            // 
-            this.textBox_unimarc_default.AcceptsReturn = true;
-            this.textBox_unimarc_default.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_unimarc_default.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBox_unimarc_default.HideSelection = false;
-            this.textBox_unimarc_default.Location = new System.Drawing.Point(6, 27);
-            this.textBox_unimarc_default.Multiline = true;
-            this.textBox_unimarc_default.Name = "textBox_unimarc_default";
-            this.textBox_unimarc_default.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_unimarc_default.Size = new System.Drawing.Size(372, 126);
-            this.textBox_unimarc_default.TabIndex = 4;
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(4, 12);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(173, 12);
-            this.label1.TabIndex = 3;
-            this.label1.Text = "记录初始值[每行一个字段](&D):";
-            // 
-            // textBox_unimarc_importantFields
-            // 
-            this.textBox_unimarc_importantFields.AcceptsReturn = true;
-            this.textBox_unimarc_importantFields.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_unimarc_importantFields.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBox_unimarc_importantFields.HideSelection = false;
-            this.textBox_unimarc_importantFields.ImeMode = System.Windows.Forms.ImeMode.Disable;
-            this.textBox_unimarc_importantFields.Location = new System.Drawing.Point(6, 185);
-            this.textBox_unimarc_importantFields.Multiline = true;
-            this.textBox_unimarc_importantFields.Name = "textBox_unimarc_importantFields";
-            this.textBox_unimarc_importantFields.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_unimarc_importantFields.Size = new System.Drawing.Size(372, 126);
-            this.textBox_unimarc_importantFields.TabIndex = 6;
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(4, 170);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(173, 12);
-            this.label2.TabIndex = 5;
-            this.label2.Text = "显示字段[每行一个字段名](&I):";
-            // 
-            // textBox_marc21_importantFields
-            // 
-            this.textBox_marc21_importantFields.AcceptsReturn = true;
-            this.textBox_marc21_importantFields.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_marc21_importantFields.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBox_marc21_importantFields.HideSelection = false;
-            this.textBox_marc21_importantFields.ImeMode = System.Windows.Forms.ImeMode.Disable;
-            this.textBox_marc21_importantFields.Location = new System.Drawing.Point(6, 185);
-            this.textBox_marc21_importantFields.Multiline = true;
-            this.textBox_marc21_importantFields.Name = "textBox_marc21_importantFields";
-            this.textBox_marc21_importantFields.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_marc21_importantFields.Size = new System.Drawing.Size(372, 126);
-            this.textBox_marc21_importantFields.TabIndex = 10;
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(4, 170);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(173, 12);
-            this.label3.TabIndex = 9;
-            this.label3.Text = "显示字段[每行一个字段名](&I):";
-            // 
-            // textBox_marc21_default
-            // 
-            this.textBox_marc21_default.AcceptsReturn = true;
-            this.textBox_marc21_default.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_marc21_default.Font = new System.Drawing.Font("Courier New", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBox_marc21_default.HideSelection = false;
-            this.textBox_marc21_default.Location = new System.Drawing.Point(6, 27);
-            this.textBox_marc21_default.Multiline = true;
-            this.textBox_marc21_default.Name = "textBox_marc21_default";
-            this.textBox_marc21_default.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_marc21_default.Size = new System.Drawing.Size(372, 126);
-            this.textBox_marc21_default.TabIndex = 8;
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(4, 12);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(173, 12);
-            this.label4.TabIndex = 7;
-            this.label4.Text = "记录初始值[每行一个字段](&D):";
             // 
             // MarcDefaultDialog
             // 
@@ -238,9 +238,9 @@
         private System.Windows.Forms.Button button_cancel;
         private System.Windows.Forms.TextBox textBox_unimarc_default;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox textBox_unimarc_importantFields;
+        private System.Windows.Forms.TextBox textBox_unimarc_hiddenFields;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.TextBox textBox_marc21_importantFields;
+        private System.Windows.Forms.TextBox textBox_marc21_hiddenFields;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox textBox_marc21_default;
         private System.Windows.Forms.Label label4;

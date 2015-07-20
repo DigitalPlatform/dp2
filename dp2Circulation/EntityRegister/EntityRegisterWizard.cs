@@ -2126,7 +2126,7 @@ out strError);
 
             this.toolStripLabel_biblioSource.Text = strStartText + " --> " + info.RecPath;
 
-            OnImportantFieldsChanged(info.MarcSyntax);
+            OnHiddenFieldsChanged(info.MarcSyntax);
 
             nRet = this._biblio.SetBiblio(info, bAutoSetFocus, out strError);
             if (nRet == -1)
@@ -2902,6 +2902,7 @@ int nCount)
                 {
                     // 观察报错的字段是否有隐藏状态的。如果有，则需要把它们显示出来，以便操作者观察修改
                     {
+#if NO
                         List<string> important_fieldnames = null; //  StringUtil.SplitList(this.textBox_settings_importantFields.Text.Replace("\r\n", ","));
                         if (_biblio.MarcSyntax == "unimarc")
                             important_fieldnames = StringUtil.SplitList(this.UnimarcBiblioImportantFields);
@@ -2911,6 +2912,10 @@ int nCount)
                         List<string> hidden_fieldnames = BiblioError.GetOutOfRangeFieldNames(errors, important_fieldnames);
                         if (hidden_fieldnames.Count > 0)
                             this.easyMarcControl1.HideFields(hidden_fieldnames, false); // null, false 可显示全部隐藏字段
+#endif
+                        List<string> names = BiblioError.GetFieldNames(errors);
+                        if (names.Count > 0)
+                            this.easyMarcControl1.HideFields(names, true); // null, false 可显示全部隐藏字段
                     }
 
                     bool bTemp = false;
@@ -3921,25 +3926,22 @@ MessageBoxDefaultButton.Button1);
         }
 #endif
 
-        void OnImportantFieldsChanged(string strMarcSyntax = null)
+        void OnHiddenFieldsChanged(string strMarcSyntax = null)
         {
             if (this._biblio != null)
             {
                 if (strMarcSyntax == null)
                     strMarcSyntax = this._biblio.MarcSyntax;
 
-                List<string> important_fieldnames = null;
+                List<string> hidden_fieldnames = null;
                 if (strMarcSyntax == "unimarc")
-                    important_fieldnames = StringUtil.SplitList(this.UnimarcBiblioImportantFields);
+                    hidden_fieldnames = StringUtil.SplitList(this.UnimarcBiblioHiddenFields);
                 else
-                    important_fieldnames = StringUtil.SplitList(this.Marc21BiblioImportantFields);
+                    hidden_fieldnames = StringUtil.SplitList(this.Marc21BiblioHiddenFields);
 
-                important_fieldnames.Insert(0, "rvs");
+                // hidden_fieldnames.Insert(0, "rvs");
 
-                this._biblio.HideFieldNames = important_fieldnames;
-
-                //this._biblio.HideFieldNames = StringUtil.SplitList(this.textBox_settings_importantFields.Text.Replace("\r\n", ","));
-                //this._biblio.HideFieldNames.Insert(0, "rvs");
+                this._biblio.HideFieldNames = hidden_fieldnames;
             }
         }
 
@@ -4774,6 +4776,7 @@ out strError);
             }
         }
 
+#if NO
         public string UnimarcBiblioImportantFields
         {
             get
@@ -4807,7 +4810,40 @@ out strError);
                 OnImportantFieldsChanged();
             }
         }
+#endif
+        public string UnimarcBiblioHiddenFields
+        {
+            get
+            {
+                return this.MainForm.AppInfo.GetString("entityRegisterWizard",
+                    "unimarcHiddenFields",
+                    "00*,1**,856,9**");
+            }
+            set
+            {
+                this.MainForm.AppInfo.SetString("entityRegisterWizard",
+                    "unimarcHiddenFields",
+                    value);
+                OnHiddenFieldsChanged();
+            }
+        }
 
+        public string Marc21BiblioHiddenFields
+        {
+            get
+            {
+                return this.MainForm.AppInfo.GetString("entityRegisterWizard",
+                    "marc21HiddenFields",
+                    "00*,856");
+            }
+            set
+            {
+                this.MainForm.AppInfo.SetString("entityRegisterWizard",
+                    "marc21HiddenFields",
+                    value);
+                OnHiddenFieldsChanged();
+            }
+        }
 
         private void button_settings_bilbioDefault_Click(object sender, EventArgs e)
         {
@@ -4817,9 +4853,9 @@ out strError);
             // GuiUtil.AutoSetDefaultFont(dlg);
 
             dlg.UnimarcDefault = this.UnimarcBiblioDefault;
-            dlg.UnimarcImportantFields = this.UnimarcBiblioImportantFields.Replace(",","\r\n");
+            dlg.UnimarcHiddenFields = this.UnimarcBiblioHiddenFields.Replace(",","\r\n");
             dlg.Marc21Default = this.Marc21BiblioDefault;
-            dlg.Marc21ImportantFields = this.Marc21BiblioImportantFields.Replace(",", "\r\n");
+            dlg.Marc21HiddenFields = this.Marc21BiblioHiddenFields.Replace(",", "\r\n");
 
             dlg.StartPosition = FormStartPosition.CenterScreen;
             this.MainForm.AppInfo.LinkFormState(dlg, "entityRegisterWizard_biblioDefault");
@@ -4829,9 +4865,9 @@ out strError);
                 return;
 
             this.UnimarcBiblioDefault = dlg.UnimarcDefault;
-            this.UnimarcBiblioImportantFields = dlg.UnimarcImportantFields.Replace("\r\n", ",");
+            this.UnimarcBiblioHiddenFields = dlg.UnimarcHiddenFields.Replace("\r\n", ",");
             this.Marc21BiblioDefault = dlg.Marc21Default;
-            this.Marc21BiblioImportantFields = dlg.Marc21ImportantFields.Replace("\r\n", ",");
+            this.Marc21BiblioHiddenFields = dlg.Marc21HiddenFields.Replace("\r\n", ",");
 
         }
 #if NO

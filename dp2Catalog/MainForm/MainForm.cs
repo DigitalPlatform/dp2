@@ -2811,7 +2811,7 @@ out string strError)
         /// <param name="owner">用于函数中 MessageBox 和对话框 的宿主窗口</param>
         /// <param name="strHanzi">输入字符串</param>
         /// <param name="style">转换为拼音的风格</param>
-        /// <param name="bAutoSel">是否自动选择多音字</param>
+        /// <param name="strDuoyinStyle">多音字处理风格。为 auto first 的组合，逗号分隔</param>
         /// <param name="strPinyin">返回拼音字符串</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>-1: 出错; 0: 用户希望中断; 1: 正常; 2: 结果字符串中有没有找到拼音的汉字</returns>
@@ -3342,7 +3342,6 @@ out string strError)
 
                 if (dom.DocumentElement.ChildNodes.Count > 0)
                 {
-
                     // return:
                     //      -2  strID验证失败
                     //      -1  出错
