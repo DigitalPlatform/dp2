@@ -9,6 +9,7 @@ using System.Web.Routing;
 using DigitalPlatform;
 using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.IO;
+using System.IO;
 
 namespace dp2OPAC
 {
@@ -84,8 +85,9 @@ namespace dp2OPAC
                     app = new OpacApplication();
                     Application["app"] = app;
 
-                    string strHostDir = this.Server.MapPath(".");
-
+                    // string strHostDir = this.Server.MapPath(".");
+                    string strHostDir = Path.GetDirectoryName(this.Server.MapPath("~/start.xml"));  // 2015/7/20
+                    
                     nRet = app.Load(
                         false,
                         strDataDir,

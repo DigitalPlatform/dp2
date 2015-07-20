@@ -301,7 +301,6 @@ namespace DigitalPlatform.OPAC.Server
 
             try
             {
-
                 nRet = filter.DoRecord(null,
                     strMarc,
                     0,
