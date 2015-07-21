@@ -174,7 +174,6 @@ namespace dp2Circulation
             {
                 this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
                 this.IsInLoop = false;  // 2008/10/29 
-                // this.Channel.Abort();
                 this.Channel.Close();   // 2012/3/28
                 this.Channel = null;
             }

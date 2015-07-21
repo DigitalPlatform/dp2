@@ -141,6 +141,9 @@ namespace DigitalPlatform.CirculationClient
     /// </summary>
     public class LibraryChannel
     {
+        internal ReaderWriterLock m_lock = new ReaderWriterLock();
+        internal static int m_nLockTimeout = 5000;	// 5000=5秒
+
         /// <summary>
         /// dp2Library 服务器的 URL
         /// </summary>
@@ -1041,8 +1044,7 @@ out strError);
             if (ex0 is System.TimeoutException)
             {
                 this.ErrorCode = ErrorCode.RequestTimeOut;
-                this.m_ws.Abort();
-                this.m_ws = null;
+                this.AbortIt();
                 strError = GetExceptionMessage(ex0);
                 return 0;
             }
@@ -1051,8 +1053,7 @@ out strError);
             {
                 System.ServiceModel.Security.MessageSecurityException ex = (System.ServiceModel.Security.MessageSecurityException)ex0;
                 this.ErrorCode = ErrorCode.RequestError;	// 一般错误
-                this.m_ws.Abort();
-                this.m_ws = null;
+                this.AbortIt();
                 // return ex.Message + (ex.InnerException != null ? " InnerException: " + ex.InnerException.Message : "") ;
                 strError = GetExceptionMessage(ex);
                 if (this.m_nRedoCount == 0)
@@ -1067,8 +1068,7 @@ out strError);
             {
                 CommunicationObjectFaultedException ex = (CommunicationObjectFaultedException)ex0;
                 this.ErrorCode = ErrorCode.RequestError;	// 一般错误
-                this.m_ws.Abort();
-                this.m_ws = null;
+                this.AbortIt();
                 strError = GetExceptionMessage(ex);
                 // 2011/7/2
                 if (this.m_nRedoCount == 0)
@@ -1083,8 +1083,7 @@ out strError);
             {
                 EndpointNotFoundException ex = (EndpointNotFoundException)ex0;
                 this.ErrorCode = ErrorCode.RequestError;	// 一般错误
-                this.m_ws.Abort();
-                this.m_ws = null;
+                this.AbortIt();
                 strError = "服务器 " + this.Url + " 没有响应";
                 return 0;
             }
@@ -1094,8 +1093,7 @@ out strError);
             {
                 this.ErrorCode = ErrorCode.RequestError;	// 一般错误
                 this.MaxReceivedMessageSize *= 2;    // 下次扩大一倍
-                this.m_ws.Abort();
-                this.m_ws = null;
+                this.AbortIt();
                 strError = GetExceptionMessage(ex0);
                 if (this.m_nRedoCount == 0
                     && this.MaxReceivedMessageSize < 1024 * 1024 * 10)
@@ -1117,8 +1115,8 @@ out strError);
             this.ErrorCode = ErrorCode.RequestError;	// 一般错误
             if (this.m_ws != null)
             {
-                this.m_ws.Abort();
-                this.m_ws = null;   // 一般来说异常都需要重新分配Client()。如果有例外，可以在前面分支
+                this.AbortIt();
+                // 一般来说异常都需要重新分配Client()。如果有例外，可以在前面分支
             }
             strError = GetExceptionMessage(ex0);
             return 0;
@@ -9227,8 +9225,7 @@ out strError);
 #if NO
                 // TODO: Search()要单独处理
                 // this.m_ws.Abort();
-                this.m_ws.Close();  // test
-                this.m_ws = null;
+                this.AbortIt();
 #endif
                 this.Close();
             }
@@ -9246,21 +9243,63 @@ out strError);
 #endif
         }
 
+        /*
+crashReport -- 异常报告 
+主题 dp2circulation 
+媒体类型 text 
+内容 发生未捕获的界面线程异常: 
+Type: System.NullReferenceException
+Message: 未将对象引用设置到对象的实例。
+Stack:
+在 DigitalPlatform.CirculationClient.LibraryChannel.Close()
+在 dp2Circulation.WebExternalHost.Destroy()
+在 dp2Circulation.EntityBarcodeFoundDupDlg.EntityBarcodeFoundDupDlg_FormClosed(Object sender, FormClosedEventArgs e)
+在 System.Windows.Forms.Form.OnFormClosed(FormClosedEventArgs e)
+在 System.Windows.Forms.Form.CheckCloseDialog(Boolean closingOnly)
+
+ 
+操作时间 2015/7/21 14:19:54 (Tue, 21 Jul 2015 14:19:54 +0800) 
+前端地址 117.10.161.38经由 http://dp2003.com/dp2library 
+         * */
+        // Close() 和 AbortIt() 很可能被不同的线程调用，其中一个设置 m_ws 为 null 可能会导致另外一个方法抛出异常
         public void Close()
         {
-            if (this.m_ws != null)
+            this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            try
             {
-                // TODO: Search()要单独处理
-                try
+                if (this.m_ws != null)
                 {
-                    if (this.m_ws.State != CommunicationState.Faulted)
-                        this.m_ws.Close();
+                    // TODO: Search()要单独处理
+                    try
+                    {
+                        if (this.m_ws.State != CommunicationState.Faulted)
+                            this.m_ws.Close();
+                    }
+                    catch
+                    {
+                        if (this.m_ws != null)
+                            this.m_ws.Abort();
+                    }
+                    this.m_ws = null;
                 }
-                catch
-                {
-                    this.m_ws.Abort();
-                }
+            }
+            finally
+            {
+                this.m_lock.ReleaseWriterLock();
+            }
+        }
+
+        void AbortIt()
+        {
+            this.m_lock.AcquireWriterLock(m_nLockTimeout);
+            try
+            {
+                this.m_ws.Abort();
                 this.m_ws = null;
+            }
+            finally
+            {
+                this.m_lock.ReleaseWriterLock();
             }
         }
 

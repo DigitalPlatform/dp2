@@ -1692,7 +1692,6 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
 
             if (String.IsNullOrEmpty(strBarcode) == false)
             {
-
                 // 对当前窗口内进行条码查重
                 BookItem dupitem = this.Items.GetItemByBarcode(strBarcode);
                 if (dupitem != null)
@@ -1747,6 +1746,8 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                         dlg.BiblioText = strBiblioText;
                         dlg.ItemText = strItemText;
                         dlg.MessageText = "拟新增的册条码号 '" + strBarcode + "' 在数据库中发现已经存在。因此无法新增。";
+
+                        this.MainForm.AppInfo.LinkFormState(dlg, "EntityBarcodeFoundDupDlg_state");
                         dlg.ShowDialog(this);
                         return;
                     }
@@ -1868,6 +1869,7 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                         dlg.BiblioText = strBiblioText;
                         dlg.ItemText = strItemText;
                         dlg.MessageText = "拟新增的册信息中，条码 '" + bookitem.Barcode + "' 在数据库中发现已经存在。按“确定”按钮重新输入。";
+                        this.MainForm.AppInfo.LinkFormState(dlg, "EntityBarcodeFoundDupDlg_state");
                         dlg.ShowDialog(this);
                         goto REDO;
                     }
@@ -2332,6 +2334,7 @@ if (String.IsNullOrEmpty(this.BiblioRecPath) == true)
                         dlg.BiblioText = strBiblioText;
                         dlg.ItemText = strItemText;
                         dlg.MessageText = "拟新增的册信息中，条码 '" + strBarcode + "' 在数据库中发现已经存在。";
+                        this.MainForm.AppInfo.LinkFormState(dlg, "EntityBarcodeFoundDupDlg_state");
                         dlg.ShowDialog(this);
                         return 0;
                     }
