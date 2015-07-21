@@ -40,6 +40,19 @@ namespace DigitalPlatform.CommonControl
             InitializeComponent();
         }
 
+        void ClearItems()
+        {
+            if (this.Items != null)
+            {
+                foreach (TableItemBase item in this.Items)
+                {
+                    if (item != null)
+                        item.Dispose();
+                }
+                this.Items.Clear();
+            }
+        }
+
         public void SetTitleLine(List<string> titles)
         {
             int nColumnIndex = 0;
@@ -410,7 +423,7 @@ namespace DigitalPlatform.CommonControl
     /// <summary>
     /// 行基础类型
     /// </summary>
-    public class TableItemBase 
+    public class TableItemBase : IDisposable
     {
         public TableControlBase Container = null;
 
@@ -419,6 +432,48 @@ namespace DigitalPlatform.CommonControl
 
         // 颜色、popupmenu
         public Label label_color = null;
+
+        #region 释放资源
+
+        ~TableItemBase()
+        {
+            Dispose(false);
+        }
+
+        private bool disposed = false;
+        public void Dispose()
+        {
+            Dispose(true);
+            // Take yourself off the Finalization queue 
+            // to prevent finalization code for this object
+            // from executing a second time.
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!this.disposed)
+            {
+                if (disposing)
+                {
+                    // release managed resources if any
+                    AddEvents(false);
+                }
+
+                // release unmanaged resource
+
+                // Note that this is not thread safe.
+                // Another thread could start disposing the object
+                // after the managed resources are disposed,
+                // but before the disposed flag is set to true.
+                // If thread safety is necessary, it must be
+                // implemented by the client.
+            }
+            disposed = true;
+        }
+
+        #endregion
+
 
         // 从tablelayoutpanel中移除本Item涉及的控件
         // parameters:
@@ -455,6 +510,8 @@ namespace DigitalPlatform.CommonControl
 
                 table.RowCount--;
                 // table.RowStyles.RemoveAt(nRow);
+
+                this.AddEvents(false);  // 2015/7/21
             }
             finally
             {
@@ -508,7 +565,7 @@ namespace DigitalPlatform.CommonControl
             }
 
             // events
-            AddEvents();
+            AddEvents(true);
         }
 
         public virtual void AddControls(TableLayoutPanel table, int nRow)
@@ -517,7 +574,7 @@ namespace DigitalPlatform.CommonControl
         }
 
 
-        public virtual void AddEvents()
+        public virtual void AddEvents(bool bAdd)
         {
 
         }

@@ -4822,6 +4822,7 @@ out strError);
         /// 校验条码号
         /// </summary>
         /// <param name="stop"></param>
+        /// <param name="strLibraryCode">馆代码</param>
         /// <param name="strBarcode">条码号</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>

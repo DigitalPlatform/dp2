@@ -5,6 +5,7 @@ xcopy ..\..\dp2opac\*.asax /Y
 xcopy ..\..\dp2opac\*.aspx /Y
 xcopy ..\..\dp2opac\*.aspx.cs /Y
 xcopy ..\..\dp2opac\*.aspx.designer.cs /Y
+xcopy ..\..\dp2opac\*.asax.cs /Y
 xcopy ..\..\dp2opac\web.config /Y
 
 del about.* /Q

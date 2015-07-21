@@ -1058,13 +1058,25 @@ namespace DigitalPlatform.CommonControl
 
         }
 
+        void ClearItems()
+        {
+            if (this.Items != null)
+            {
+                foreach (Item item in this.Items)
+                {
+                    if (item != null)
+                        item.Dispose();
+                }
+                this.Items.Clear();
+            }
+        }
+
         public void Clear()
         {
             this.DisableUpdate();
 
             try
             {
-
                 for (int i = 0; i < this.Items.Count; i++)
                 {
                     Item element = this.Items[i];
@@ -1072,7 +1084,9 @@ namespace DigitalPlatform.CommonControl
                         element);
                 }
 
-                this.Items.Clear();
+                // this.Items.Clear();
+                this.ClearItems();
+
                 this.tableLayoutPanel_content.RowCount = 2;    // 为什么是2？
                 for (; ; )
                 {
@@ -2412,7 +2426,7 @@ Color.FromArgb(50, Color.Gray)
         ReadOnly = 0x10, // 状态为只读的行。订购态下，因为“已订购”，订单已经发出，内容不能再更改了；验收态下，因为尚未订购，所以不能进行验收，内容不能更改
     }
 
-    public class Item
+    public class Item : IDisposable
     {
         int m_nInDropDown = 0;  // 2009/1/15
 
@@ -2467,10 +2481,49 @@ Color.FromArgb(50, Color.Gray)
         // 主动修改location控件的ArrivedCount，需要避免递归处理由此引起的事件
         int DisableLocationArrivedChanged = 0;
 
+        #region 释放资源
+
+        ~Item()
+        {
+            Dispose(false);
+        }
+
+        private bool disposed = false;
+        public void Dispose()
+        {
+            Dispose(true);
+            // Take yourself off the Finalization queue 
+            // to prevent finalization code for this object
+            // from executing a second time.
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!this.disposed)
+            {
+                if (disposing)
+                {
+                    // release managed resources if any
+                    AddEvents(false);
+                }
+
+                // release unmanaged resource
+
+                // Note that this is not thread safe.
+                // Another thread could start disposing the object
+                // after the managed resources are disposed,
+                // but before the disposed flag is set to true.
+                // If thread safety is necessary, it must be
+                // implemented by the client.
+            }
+            disposed = true;
+        }
+
+        #endregion
 
         public Item(OrderDesignControl container)
         {
-
             this.Container = container;
             int nTopBlank = (int)this.Container.Font.GetHeight() + 2;
 
@@ -2894,7 +2947,7 @@ Color.FromArgb(50, Color.Gray)
             table.Controls.Add(this.label_sellerAddress, 10, nRow);
             table.Controls.Add(this.label_other, 11, nRow);
 
-            AddEvents();
+            AddEvents(true);
         }
 
         // 从tablelayoutpanel中移除本Item涉及的控件
@@ -2961,7 +3014,6 @@ Color.FromArgb(50, Color.Gray)
                     table.Controls.Remove(issueCount);
                     table.Controls.Add(issueCount, 5, i - 1 + 1);
 
-
                     // copy
                     DoubleComboBox copy = line.comboBox_copy;
                     table.Controls.Remove(copy);
@@ -2991,12 +3043,12 @@ Color.FromArgb(50, Color.Gray)
                     Label other = line.label_other;
                     table.Controls.Remove(other);
                     table.Controls.Add(other, 11, i - 1 + 1);
-
                 }
 
                 table.RowCount--;
                 table.RowStyles.RemoveAt(nRow);
 
+                this.AddEvents(false);  // 2015/7/21
             }
             finally
             {
@@ -3015,7 +3067,6 @@ Color.FromArgb(50, Color.Gray)
 
             try
             {
-
                 Debug.Assert(table.RowCount == this.Container.Items.Count + 3, "");
 
                 // 先移动后方的
@@ -3104,120 +3155,126 @@ Color.FromArgb(50, Color.Gray)
             }
 
             // events
-            AddEvents();
+            AddEvents(true);
         }
 
 
-        void AddEvents()
+        void AddEvents(bool bAdd)
         {
-            // label_color
-            this.label_color.MouseUp -= new MouseEventHandler(label_color_MouseUp);
-            this.label_color.MouseUp += new MouseEventHandler(label_color_MouseUp);
+            if (bAdd)
+            {
+                // label_color
+                this.label_color.MouseUp += new MouseEventHandler(label_color_MouseUp);
 
-            this.label_color.MouseClick -= new MouseEventHandler(label_color_MouseClick);
-            this.label_color.MouseClick += new MouseEventHandler(label_color_MouseClick);
+                this.label_color.MouseClick += new MouseEventHandler(label_color_MouseClick);
 
-            // catalog no 
-            this.textBox_catalogNo.Enter -= new EventHandler(control_Enter);
-            this.textBox_catalogNo.Enter += new EventHandler(control_Enter);
+                // catalog no 
+                this.textBox_catalogNo.Enter += new EventHandler(control_Enter);
 
-            this.textBox_catalogNo.TextChanged -= new EventHandler(textBox_catalogNo_TextChanged);
-            this.textBox_catalogNo.TextChanged += new EventHandler(textBox_catalogNo_TextChanged);
+                this.textBox_catalogNo.TextChanged += new EventHandler(textBox_catalogNo_TextChanged);
 
-            // seller
-            this.comboBox_seller.DropDown -= new EventHandler(comboBox_seller_DropDown);
-            this.comboBox_seller.DropDown += new EventHandler(comboBox_seller_DropDown);
+                // seller
+                this.comboBox_seller.DropDown += new EventHandler(comboBox_seller_DropDown);
 
-            this.comboBox_seller.Enter -= new EventHandler(control_Enter);
-            this.comboBox_seller.Enter += new EventHandler(control_Enter);
+                this.comboBox_seller.Enter += new EventHandler(control_Enter);
 
-            this.comboBox_seller.TextChanged -= new EventHandler(comboBox_seller_TextChanged);
-            this.comboBox_seller.TextChanged += new EventHandler(comboBox_seller_TextChanged);
+                this.comboBox_seller.TextChanged += new EventHandler(comboBox_seller_TextChanged);
 
-            this.comboBox_seller.SelectedIndexChanged -= new EventHandler(comboBox_seller_SelectedIndexChanged);
-            this.comboBox_seller.SelectedIndexChanged += new EventHandler(comboBox_seller_SelectedIndexChanged);
+                this.comboBox_seller.SelectedIndexChanged += new EventHandler(comboBox_seller_SelectedIndexChanged);
 
-            // source
-            this.comboBox_source.ComboBox.DropDown -= new EventHandler(comboBox_seller_DropDown);
-            this.comboBox_source.ComboBox.DropDown += new EventHandler(comboBox_seller_DropDown);
+                // source
+                this.comboBox_source.ComboBox.DropDown += new EventHandler(comboBox_seller_DropDown);
 
-            this.comboBox_source.Enter -= new EventHandler(control_Enter);
-            this.comboBox_source.Enter += new EventHandler(control_Enter);
+                this.comboBox_source.Enter += new EventHandler(control_Enter);
 
-            this.comboBox_source.ComboBox.TextChanged -= new EventHandler(comboBox_source_TextChanged);
-            this.comboBox_source.ComboBox.TextChanged += new EventHandler(comboBox_source_TextChanged);
+                this.comboBox_source.ComboBox.TextChanged += new EventHandler(comboBox_source_TextChanged);
 
-            this.comboBox_source.SelectedIndexChanged -= new EventHandler(comboBox_seller_SelectedIndexChanged);
-            this.comboBox_source.SelectedIndexChanged += new EventHandler(comboBox_seller_SelectedIndexChanged);
+                this.comboBox_source.SelectedIndexChanged += new EventHandler(comboBox_seller_SelectedIndexChanged);
 
-            // 2012/5/26
-            // range
-            this.dateRange_range.DateTextChanged -= new EventHandler(dateRange_range_DateTextChanged);
-            this.dateRange_range.DateTextChanged += new EventHandler(dateRange_range_DateTextChanged);
+                // 2012/5/26
+                // range
+                this.dateRange_range.DateTextChanged += new EventHandler(dateRange_range_DateTextChanged);
 
-            this.dateRange_range.Enter -= new EventHandler(control_Enter);
-            this.dateRange_range.Enter += new EventHandler(control_Enter);
+                this.dateRange_range.Enter += new EventHandler(control_Enter);
 
-            // issuecount
-            this.comboBox_issueCount.TextChanged -= new EventHandler(comboBox_issueCount_TextChanged);
-            this.comboBox_issueCount.TextChanged +=new EventHandler(comboBox_issueCount_TextChanged);
+                // issuecount
+                this.comboBox_issueCount.TextChanged += new EventHandler(comboBox_issueCount_TextChanged);
 
-            this.comboBox_issueCount.Enter -= new EventHandler(control_Enter);
-            this.comboBox_issueCount.Enter += new EventHandler(control_Enter);
+                this.comboBox_issueCount.Enter += new EventHandler(control_Enter);
 
-            // copy
-            this.comboBox_copy.ComboBox.DropDown -= new EventHandler(comboBox_copy_DropDown);
-            this.comboBox_copy.ComboBox.DropDown += new EventHandler(comboBox_copy_DropDown);
+                // copy
+                this.comboBox_copy.ComboBox.DropDown += new EventHandler(comboBox_copy_DropDown);
 
-            this.comboBox_copy.Enter -= new EventHandler(control_Enter);
-            this.comboBox_copy.Enter += new EventHandler(control_Enter);
+                this.comboBox_copy.Enter += new EventHandler(control_Enter);
 
-            this.comboBox_copy.ComboBox.TextChanged -= new EventHandler(comboBox_copy_TextChanged);
-            this.comboBox_copy.ComboBox.TextChanged += new EventHandler(comboBox_copy_TextChanged);
+                this.comboBox_copy.ComboBox.TextChanged += new EventHandler(comboBox_copy_TextChanged);
 
-            // price
-            this.textBox_price.TextBox.TextChanged -= new EventHandler(Price_TextChanged);
-            this.textBox_price.TextBox.TextChanged += new EventHandler(Price_TextChanged);
+                // price
+                this.textBox_price.TextBox.TextChanged += new EventHandler(Price_TextChanged);
 
-            this.textBox_price.TextBox.Enter -= new EventHandler(control_Enter);
-            this.textBox_price.TextBox.Enter += new EventHandler(control_Enter);
+                this.textBox_price.TextBox.Enter += new EventHandler(control_Enter);
 
-            // location
-            this.location.GetValueTable -= new GetValueTableEventHandler(textBox_location_GetValueTable);
-            this.location.GetValueTable += new GetValueTableEventHandler(textBox_location_GetValueTable);
+                // location
+                this.location.GetValueTable += new GetValueTableEventHandler(textBox_location_GetValueTable);
 
-            this.location.Enter -= new EventHandler(control_Enter);
-            this.location.Enter += new EventHandler(control_Enter);
+                this.location.Enter += new EventHandler(control_Enter);
 
-            this.location.ContentChanged -= new ContentChangedEventHandler(location_ContentChanged);
-            this.location.ContentChanged += new ContentChangedEventHandler(location_ContentChanged);
+                this.location.ContentChanged += new ContentChangedEventHandler(location_ContentChanged);
 
-            this.location.ArrivedChanged -= new EventHandler(location_ArrivedChanged);
-            this.location.ArrivedChanged += new EventHandler(location_ArrivedChanged);
+                this.location.ArrivedChanged += new EventHandler(location_ArrivedChanged);
 
-            this.location.ReadOnlyChanged -= new EventHandler(location_ReadOnlyChanged);
-            this.location.ReadOnlyChanged += new EventHandler(location_ReadOnlyChanged);
+                this.location.ReadOnlyChanged += new EventHandler(location_ReadOnlyChanged);
 
-            // class
-            this.comboBox_class.DropDown -= new EventHandler(comboBox_seller_DropDown);
-            this.comboBox_class.DropDown += new EventHandler(comboBox_seller_DropDown);
+                // class
+                this.comboBox_class.DropDown += new EventHandler(comboBox_seller_DropDown);
 
-            this.comboBox_class.Enter -= new EventHandler(control_Enter);
-            this.comboBox_class.Enter += new EventHandler(control_Enter);
+                this.comboBox_class.Enter += new EventHandler(control_Enter);
 
-            this.comboBox_class.TextChanged -=new EventHandler(comboBox_class_TextChanged);
-            this.comboBox_class.TextChanged += new EventHandler(comboBox_class_TextChanged);
+                this.comboBox_class.TextChanged += new EventHandler(comboBox_class_TextChanged);
 
-            this.comboBox_class.SelectedIndexChanged -= new EventHandler(comboBox_seller_SelectedIndexChanged);
-            this.comboBox_class.SelectedIndexChanged += new EventHandler(comboBox_seller_SelectedIndexChanged);
+                this.comboBox_class.SelectedIndexChanged += new EventHandler(comboBox_seller_SelectedIndexChanged);
 
-            // address
-            this.label_sellerAddress.Click -= new EventHandler(control_Enter);
-            this.label_sellerAddress.Click += new EventHandler(control_Enter);
+                // address
+                this.label_sellerAddress.Click += new EventHandler(control_Enter);
 
-            // other
-            this.label_other.Click -= new EventHandler(control_Enter);
-            this.label_other.Click += new EventHandler(control_Enter);
+                // other
+                this.label_other.Click += new EventHandler(control_Enter);
+            }
+            else
+            {
+                this.label_color.MouseUp -= new MouseEventHandler(label_color_MouseUp);
+                this.label_color.MouseClick -= new MouseEventHandler(label_color_MouseClick);
+                this.textBox_catalogNo.Enter -= new EventHandler(control_Enter);
+                this.textBox_catalogNo.TextChanged -= new EventHandler(textBox_catalogNo_TextChanged);
+                this.comboBox_seller.DropDown -= new EventHandler(comboBox_seller_DropDown);
+                this.comboBox_seller.Enter -= new EventHandler(control_Enter);
+                this.comboBox_seller.TextChanged -= new EventHandler(comboBox_seller_TextChanged);
+                this.comboBox_seller.SelectedIndexChanged -= new EventHandler(comboBox_seller_SelectedIndexChanged);
+                this.comboBox_source.ComboBox.DropDown -= new EventHandler(comboBox_seller_DropDown);
+                this.comboBox_source.Enter -= new EventHandler(control_Enter);
+                this.comboBox_source.ComboBox.TextChanged -= new EventHandler(comboBox_source_TextChanged);
+                this.comboBox_source.SelectedIndexChanged -= new EventHandler(comboBox_seller_SelectedIndexChanged);
+                this.dateRange_range.DateTextChanged -= new EventHandler(dateRange_range_DateTextChanged);
+                this.dateRange_range.Enter -= new EventHandler(control_Enter);
+                this.comboBox_issueCount.TextChanged -= new EventHandler(comboBox_issueCount_TextChanged);
+                this.comboBox_issueCount.Enter -= new EventHandler(control_Enter);
+                this.comboBox_copy.ComboBox.DropDown -= new EventHandler(comboBox_copy_DropDown);
+                this.comboBox_copy.Enter -= new EventHandler(control_Enter);
+                this.comboBox_copy.ComboBox.TextChanged -= new EventHandler(comboBox_copy_TextChanged);
+                this.textBox_price.TextBox.TextChanged -= new EventHandler(Price_TextChanged);
+                this.textBox_price.TextBox.Enter -= new EventHandler(control_Enter);
+                this.location.GetValueTable -= new GetValueTableEventHandler(textBox_location_GetValueTable);
+                this.location.Enter -= new EventHandler(control_Enter);
+                this.location.ContentChanged -= new ContentChangedEventHandler(location_ContentChanged);
+                this.location.ArrivedChanged -= new EventHandler(location_ArrivedChanged);
+                this.location.ReadOnlyChanged -= new EventHandler(location_ReadOnlyChanged);
+                this.comboBox_class.DropDown -= new EventHandler(comboBox_seller_DropDown);
+                this.comboBox_class.Enter -= new EventHandler(control_Enter);
+                this.comboBox_class.TextChanged -= new EventHandler(comboBox_class_TextChanged);
+                this.comboBox_class.SelectedIndexChanged -= new EventHandler(comboBox_seller_SelectedIndexChanged);
+                this.label_sellerAddress.Click -= new EventHandler(control_Enter);
+                this.label_other.Click -= new EventHandler(control_Enter);
+            }
         }
 
         // 过滤掉 {} 包围的部分

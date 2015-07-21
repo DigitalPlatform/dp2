@@ -90,6 +90,23 @@ namespace dp2Circulation
 #endif
         }
 
+        // 2015/7/21
+        /// <summary> 
+        /// 清理所有正在使用的资源。
+        /// </summary>
+        /// <param name="disposing">如果应释放托管资源，为 true；否则为 false。</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                // release managed resources if any
+                AddEvents(false);
+            }
+
+            base.Dispose(disposing);
+        }
+
+
         /// <summary>
         /// 是否正在执行初始化
         /// </summary>
@@ -377,6 +394,9 @@ namespace dp2Circulation
         // 添加、删除各种事件
         internal void AddEvents(bool bAdd)
         {
+            if (this._tableLayoutPanel_main == null)
+                return;
+
             Debug.Assert(this._tableLayoutPanel_main != null, "");
 
             if (bAdd)
@@ -461,7 +481,6 @@ namespace dp2Circulation
                     }
                 }
             }
-
         }
 
         public void OnSelectionChanged(EventArgs e)

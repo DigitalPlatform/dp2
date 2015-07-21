@@ -298,7 +298,6 @@ namespace dp2Circulation
             brushWhite.Dispose();
             brushPurple.Dispose();
             brushBlack.Dispose();
-
         }
 
         private void timer1_Tick(object sender, EventArgs e)

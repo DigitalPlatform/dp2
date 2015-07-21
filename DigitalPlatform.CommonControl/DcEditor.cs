@@ -476,13 +476,25 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
+        void ClearElements()
+        {
+            if (this.Elements != null)
+            {
+                foreach (DcElement element in this.Elements)
+                {
+                    if (element != null)
+                        element.Dispose();
+                }
+                this.Elements.Clear();
+            }
+        }
+
         public void Clear()
         {
             this.DisableUpdate();
 
             try
             {
-
                 for (int i = 0; i < this.Elements.Count; i++)
                 {
                     DcElement element = this.Elements[i];
@@ -496,7 +508,9 @@ namespace DigitalPlatform.CommonControl
                     line = this.Lines[0];
                  * */
 
-                this.Elements.Clear();
+                // this.Elements.Clear();
+                this.ClearElements();
+
                 this.tableLayoutPanel_main.RowCount = 2;    // 为什么是2？
                 for (; ; )
                 {
@@ -2096,7 +2110,7 @@ namespace DigitalPlatform.CommonControl
         Selected = 0x04,    // 被选择
     }
 
-    public class DcElement
+    public class DcElement : IDisposable
     {
         public DcEditor Container = null;
 
@@ -2137,6 +2151,47 @@ namespace DigitalPlatform.CommonControl
                 }
             }
         }
+
+        #region 释放资源
+
+        ~DcElement()
+        {
+            Dispose(false);
+        }
+
+        private bool disposed = false;
+        public void Dispose()
+        {
+            Dispose(true);
+            // Take yourself off the Finalization queue 
+            // to prevent finalization code for this object
+            // from executing a second time.
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!this.disposed)
+            {
+                if (disposing)
+                {
+                    // release managed resources if any
+                    AddEvents(false);
+                }
+
+                // release unmanaged resource
+
+                // Note that this is not thread safe.
+                // Another thread could start disposing the object
+                // after the managed resources are disposed,
+                // but before the disposed flag is set to true.
+                // If thread safety is necessary, it must be
+                // implemented by the client.
+            }
+            disposed = true;
+        }
+
+        #endregion
 
         void SetLineColor()
         {
@@ -2483,63 +2538,69 @@ namespace DigitalPlatform.CommonControl
             table.Controls.Add(this.comboBox_language, 3, nRow);
             table.Controls.Add(this.textBox_value, 4, nRow);
 
-            AddEvents();
+            AddEvents(true);
         }
 
-        void AddEvents()
+        void AddEvents(bool bAdd)
         {
             // events
 
-            // label_color
-            this.label_color.MouseUp -= new MouseEventHandler(label_color_MouseUp);
-            this.label_color.MouseUp += new MouseEventHandler(label_color_MouseUp);
+            if (bAdd)
+            {
+                // label_color
+                this.label_color.MouseUp += new MouseEventHandler(label_color_MouseUp);
 
-            this.label_color.MouseClick -= new MouseEventHandler(label_color_MouseClick);
-            this.label_color.MouseClick += new MouseEventHandler(label_color_MouseClick);
+                this.label_color.MouseClick += new MouseEventHandler(label_color_MouseClick);
 
-            // element
-            this.comboBox_element.TextChanged -= new EventHandler(comboBox_element_TextChanged);
-            this.comboBox_element.TextChanged += new EventHandler(comboBox_element_TextChanged);
+                // element
+                this.comboBox_element.TextChanged += new EventHandler(comboBox_element_TextChanged);
 
-            this.comboBox_element.DropDown -= new EventHandler(comboBox_element_DropDown);
-            this.comboBox_element.DropDown += new EventHandler(comboBox_element_DropDown);
+                this.comboBox_element.DropDown += new EventHandler(comboBox_element_DropDown);
 
-            this.comboBox_element.Enter -= new EventHandler(comboBox_element_Enter);
-            this.comboBox_element.Enter += new EventHandler(comboBox_element_Enter);
+                this.comboBox_element.Enter += new EventHandler(comboBox_element_Enter);
 
-            // scheme
-            this.comboBox_scheme.DropDown -= new EventHandler(comboBox_scheme_DropDown);
-            this.comboBox_scheme.DropDown += new EventHandler(comboBox_scheme_DropDown);
+                // scheme
+                this.comboBox_scheme.DropDown += new EventHandler(comboBox_scheme_DropDown);
 
-            this.comboBox_scheme.TextChanged -= new EventHandler(comboBox_scheme_TextChanged);
-            this.comboBox_scheme.TextChanged += new EventHandler(comboBox_scheme_TextChanged);
+                this.comboBox_scheme.TextChanged += new EventHandler(comboBox_scheme_TextChanged);
 
-            this.comboBox_scheme.Enter -= new EventHandler(comboBox_scheme_Enter);
-            this.comboBox_scheme.Enter += new EventHandler(comboBox_scheme_Enter);
+                this.comboBox_scheme.Enter += new EventHandler(comboBox_scheme_Enter);
 
-            // language
-            this.comboBox_language.DropDown -= new EventHandler(comboBox_language_DropDown);
-            this.comboBox_language.DropDown += new EventHandler(comboBox_language_DropDown);
+                // language
+                this.comboBox_language.DropDown += new EventHandler(comboBox_language_DropDown);
 
-            this.comboBox_language.TextChanged -= new EventHandler(comboBox_language_TextChanged);
-            this.comboBox_language.TextChanged += new EventHandler(comboBox_language_TextChanged);
+                this.comboBox_language.TextChanged += new EventHandler(comboBox_language_TextChanged);
 
-            this.comboBox_language.Enter -= new EventHandler(comboBox_language_Enter);
-            this.comboBox_language.Enter += new EventHandler(comboBox_language_Enter);
+                this.comboBox_language.Enter += new EventHandler(comboBox_language_Enter);
 
-            // value
-            this.textBox_value.KeyUp -= new KeyEventHandler(textBox_value_KeyUp);
-            this.textBox_value.KeyUp += new KeyEventHandler(textBox_value_KeyUp);
+                // value
+                this.textBox_value.KeyUp += new KeyEventHandler(textBox_value_KeyUp);
 
-            this.textBox_value.TextChanged -= new EventHandler(textBox_value_TextChanged);
-            this.textBox_value.TextChanged += new EventHandler(textBox_value_TextChanged);
+                this.textBox_value.TextChanged += new EventHandler(textBox_value_TextChanged);
 
-            this.textBox_value.Enter -= new EventHandler(textBox_value_Enter);
-            this.textBox_value.Enter += new EventHandler(textBox_value_Enter);
+                this.textBox_value.Enter += new EventHandler(textBox_value_Enter);
 
-            // 2011/2/24
-            this.textBox_value.MouseWheel -= new MouseEventHandler(textBox_value_MouseWheel);
-            this.textBox_value.MouseWheel += new MouseEventHandler(textBox_value_MouseWheel);
+                // 2011/2/24
+                this.textBox_value.MouseWheel += new MouseEventHandler(textBox_value_MouseWheel);
+            }
+            else
+            {
+                this.label_color.MouseUp -= new MouseEventHandler(label_color_MouseUp);
+                this.label_color.MouseClick -= new MouseEventHandler(label_color_MouseClick);
+                this.comboBox_element.TextChanged -= new EventHandler(comboBox_element_TextChanged);
+                this.comboBox_element.DropDown -= new EventHandler(comboBox_element_DropDown);
+                this.comboBox_element.Enter -= new EventHandler(comboBox_element_Enter);
+                this.comboBox_scheme.DropDown -= new EventHandler(comboBox_scheme_DropDown);
+                this.comboBox_scheme.TextChanged -= new EventHandler(comboBox_scheme_TextChanged);
+                this.comboBox_scheme.Enter -= new EventHandler(comboBox_scheme_Enter);
+                this.comboBox_language.DropDown -= new EventHandler(comboBox_language_DropDown);
+                this.comboBox_language.TextChanged -= new EventHandler(comboBox_language_TextChanged);
+                this.comboBox_language.Enter -= new EventHandler(comboBox_language_Enter);
+                this.textBox_value.KeyUp -= new KeyEventHandler(textBox_value_KeyUp);
+                this.textBox_value.TextChanged -= new EventHandler(textBox_value_TextChanged);
+                this.textBox_value.Enter -= new EventHandler(textBox_value_Enter);
+                this.textBox_value.MouseWheel -= new MouseEventHandler(textBox_value_MouseWheel);
+            }
         }
 
         // 将鼠标滚轮转而对tablelayout起作用
@@ -3058,6 +3119,7 @@ namespace DigitalPlatform.CommonControl
                 table.RowCount--;
                 table.RowStyles.RemoveAt(nRow);
 
+                this.AddEvents(false);
             }
             finally
             {
@@ -3078,7 +3140,6 @@ namespace DigitalPlatform.CommonControl
 
             try
             {
-
                 Debug.Assert(table.RowCount == 
                     this.Container.Elements.Count + 3, "");
 
@@ -3137,10 +3198,8 @@ namespace DigitalPlatform.CommonControl
             // this.FillLists();
 
             // events
-            AddEvents();
+            AddEvents(true);
         }
-
-
 
         // 填充元素名列表
         public void FillElementList()

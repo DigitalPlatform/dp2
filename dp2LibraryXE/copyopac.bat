@@ -4,6 +4,8 @@ cd opac_app
 xcopy ..\..\dp2opac\*.asax /Y
 xcopy ..\..\dp2opac\*.aspx /Y
 xcopy ..\..\dp2opac\*.aspx.cs /Y
+xcopy ..\..\dp2opac\*.aspx.designer.cs /Y
+xcopy ..\..\dp2opac\*.asax.cs /Y
 
 del about.* /Q
 del search2.* /Q

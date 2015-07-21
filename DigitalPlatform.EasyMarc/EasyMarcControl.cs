@@ -74,7 +74,6 @@ namespace DigitalPlatform.EasyMarc
             this.DoubleBuffered = true;
 
             InitializeComponent();
-
         }
 
         /// <summary>
@@ -1105,6 +1104,19 @@ namespace DigitalPlatform.EasyMarc
                 this.FireTextChanged();
         }
 
+        void ClearItems()
+        {
+            if (this.Items != null)
+            {
+                foreach (EasyLine item in this.Items)
+                {
+                    if (item != null)
+                        item.Dispose();
+                }
+
+                this.Items.Clear();
+            }
+        }
         /// <summary>
         /// 清除全部行
         /// </summary>
@@ -1133,7 +1145,11 @@ namespace DigitalPlatform.EasyMarc
                 }
 #endif
 
-                this.Items.Clear();
+                // this.Items.Clear();
+                this.ClearItems();
+
+                GC.SuppressFinalize(this);
+
                 this.tableLayoutPanel_content.RowCount = 2;    // 为什么是2？
 
                 for (; ; )
@@ -2828,7 +2844,7 @@ namespace DigitalPlatform.EasyMarc
     /// <summary>
     /// 视觉行基类
     /// </summary>
-    public class EasyLine
+    public class EasyLine : IDisposable
     {
         public EasyMarcControl Container = null;
 
@@ -2844,6 +2860,47 @@ namespace DigitalPlatform.EasyMarc
         public AutoHeightTextBox textBox_content = null;
 
         ItemState m_state = ItemState.Normal;
+
+        #region 释放资源
+
+        ~EasyLine()
+        {
+            Dispose(false);
+        }
+
+        private bool disposed = false;
+        public void Dispose()
+        {
+            Dispose(true);
+            // Take yourself off the Finalization queue 
+            // to prevent finalization code for this object
+            // from executing a second time.
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!this.disposed)
+            {
+                if (disposing)
+                {
+                    // release managed resources if any
+                    AddEvents(false);
+                }
+
+                // release unmanaged resource
+
+                // Note that this is not thread safe.
+                // Another thread could start disposing the object
+                // after the managed resources are disposed,
+                // but before the disposed flag is set to true.
+                // If thread safety is necessary, it must be
+                // implemented by the client.
+            }
+            disposed = true;
+        }
+
+        #endregion
 
         // 字段名或者子字段名
         string _name = "";
@@ -3103,44 +3160,35 @@ namespace DigitalPlatform.EasyMarc
             }
 
             // events
-            AddEvents();
+            AddEvents(true);
         }
 
 
-        void AddEvents()
+        void AddEvents(bool bAdd)
         {
-            this.label_caption.MouseUp -= new MouseEventHandler(label_color_MouseUp);
-            this.label_caption.MouseUp += new MouseEventHandler(label_color_MouseUp);
-            this.label_color.MouseUp -= new MouseEventHandler(label_color_MouseUp);
-            this.label_color.MouseUp += new MouseEventHandler(label_color_MouseUp);
+            if (bAdd)
+            {
+                this.label_caption.MouseUp += new MouseEventHandler(label_color_MouseUp);
+                this.label_color.MouseUp += new MouseEventHandler(label_color_MouseUp);
 
-            this.label_caption.MouseClick -= new MouseEventHandler(label_caption_MouseClick);
-            this.label_caption.MouseClick += new MouseEventHandler(label_caption_MouseClick);
-            this.label_color.MouseClick -= new MouseEventHandler(label_color_MouseClick);
-            this.label_color.MouseClick += new MouseEventHandler(label_color_MouseClick);
+                this.label_caption.MouseClick += new MouseEventHandler(label_caption_MouseClick);
+                this.label_color.MouseClick += new MouseEventHandler(label_color_MouseClick);
 
-            this.textBox_content.TextChanged -= new EventHandler(textBox_content_TextChanged);
-            this.textBox_content.TextChanged += new EventHandler(textBox_content_TextChanged);
+                this.textBox_content.TextChanged += new EventHandler(textBox_content_TextChanged);
 
-            this.textBox_content.Enter -= new EventHandler(control_Enter);
-            this.textBox_content.Enter += new EventHandler(control_Enter);
+                this.textBox_content.Enter += new EventHandler(control_Enter);
 
-            this.textBox_content.KeyDown -= textBox_content_KeyDown;
-            this.textBox_content.KeyDown += textBox_content_KeyDown;
+                this.textBox_content.KeyDown += textBox_content_KeyDown;
 
-            this.textBox_content.KeyPress -= textBox_content_KeyPress;
-            this.textBox_content.KeyPress += textBox_content_KeyPress;
+                this.textBox_content.KeyPress += textBox_content_KeyPress;
 
-            this.textBox_content.MouseWheel -= textBox_content_MouseWheel;
-            this.textBox_content.MouseWheel += textBox_content_MouseWheel;
+                this.textBox_content.MouseWheel += textBox_content_MouseWheel;
 
-            // this.splitter.Paint += new PaintEventHandler(splitter_Paint);
+                // this.splitter.Paint += new PaintEventHandler(splitter_Paint);
 
-            this.splitter.MouseDown -= new MouseEventHandler(splitter_MouseDown);
-            this.splitter.MouseDown += new MouseEventHandler(splitter_MouseDown);
+                this.splitter.MouseDown += new MouseEventHandler(splitter_MouseDown);
 
-            this.splitter.MouseUp -= new MouseEventHandler(splitter_MouseUp);
-            this.splitter.MouseUp += new MouseEventHandler(splitter_MouseUp);
+                this.splitter.MouseUp += new MouseEventHandler(splitter_MouseUp);
 
 #if NO
             this.label_color.MouseWheel -= new MouseEventHandler(textBox_comment_MouseWheel);
@@ -3149,6 +3197,21 @@ namespace DigitalPlatform.EasyMarc
             this.label_caption.MouseWheel -= new MouseEventHandler(textBox_comment_MouseWheel);
             this.label_caption.MouseWheel += new MouseEventHandler(textBox_comment_MouseWheel);
 #endif
+            }
+            else
+            {
+                this.label_caption.MouseUp -= new MouseEventHandler(label_color_MouseUp);
+                this.label_color.MouseUp -= new MouseEventHandler(label_color_MouseUp);
+                this.label_caption.MouseClick -= new MouseEventHandler(label_caption_MouseClick);
+                this.label_color.MouseClick -= new MouseEventHandler(label_color_MouseClick);
+                this.textBox_content.TextChanged -= new EventHandler(textBox_content_TextChanged);
+                this.textBox_content.Enter -= new EventHandler(control_Enter);
+                this.textBox_content.KeyDown -= textBox_content_KeyDown;
+                this.textBox_content.KeyPress -= textBox_content_KeyPress;
+                this.textBox_content.MouseWheel -= textBox_content_MouseWheel;
+                this.splitter.MouseDown -= new MouseEventHandler(splitter_MouseDown);
+                this.splitter.MouseUp -= new MouseEventHandler(splitter_MouseUp);
+            }
         }
 
         void textBox_content_MouseWheel(object sender, MouseEventArgs e)

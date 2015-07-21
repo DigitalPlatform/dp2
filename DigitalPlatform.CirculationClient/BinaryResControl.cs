@@ -1067,6 +1067,21 @@ bool bChanged)
             return 0;
         }
 
+        // 包装后的版本，兼容以前的用法
+        public int AppendNewItem(
+            string strObjectFilePath,
+            string strUsage,
+            out ListViewItem item,
+            out string strError)
+        {
+            return AppendNewItem(
+                strObjectFilePath,
+                strUsage,
+                "",
+                out item,
+                out strError);
+        }
+
         /// <summary>
         /// 追加一个对象
         /// </summary>

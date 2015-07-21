@@ -3614,7 +3614,15 @@ MessageBoxDefaultButton.Button2);
                     AppendString("已安装时间戳 " + strOldTimestamp + "\r\n");
                 AppendString("将安装时间戳 " + strNewTimestamp + "\r\n");
 
-                // 要求在 opac_app.zip 内准备要安装的数据文件(初次安装而不是升级安装)
+                // 2015/7/21
+                // 先删除 目标目录下的 app_code 目录内的所有文件
+                // 这是因为以前版本的 dp2OPAC 可能在这里遗留了 global.asax.cs 文件，而新版本移动到其上级子目录存储了
+                string strAppCodeDir = Path.Combine(this.OpacAppDir, "app_code");
+                if (Directory.Exists(strAppCodeDir) == true)
+                {
+                    PathUtil.DeleteDirectory(strAppCodeDir);
+                }
+
                 try
                 {
                     using (ZipFile zip = ZipFile.Read(strZipFileName))

@@ -510,13 +510,25 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
+        void ClearElements()
+        {
+            if (this.Elements != null)
+            {
+                foreach (FromElement element in this.Elements)
+                {
+                    if (element != null)
+                        element.Dispose();
+                }
+                this.Elements.Clear();
+            }
+        }
+
         public void Clear()
         {
             this.DisableUpdate();
 
             try
             {
-
                 for (int i = 0; i < this.Elements.Count; i++)
                 {
                     FromElement element = this.Elements[i];
@@ -524,7 +536,9 @@ namespace DigitalPlatform.CommonControl
                         element);
                 }
 
-                this.Elements.Clear();
+                // this.Elements.Clear();
+                this.ClearElements();
+
                 this.tableLayoutPanel_main.RowCount = 2;    // 为什么是2？
                 for (; ; )
                 {
@@ -532,13 +546,11 @@ namespace DigitalPlatform.CommonControl
                         break;
                     this.tableLayoutPanel_main.RowStyles.RemoveAt(2);
                 }
-
             }
             finally
             {
                 this.EnableUpdate();
             }
-
         }
 
         // 清除一个FromElement对象对应的Control
@@ -1052,7 +1064,7 @@ namespace DigitalPlatform.CommonControl
     }
 
 
-    public class FromElement
+    public class FromElement : IDisposable
     {
         public FromEditControl Container = null;
 
@@ -1082,6 +1094,47 @@ namespace DigitalPlatform.CommonControl
                 }
             }
         }
+
+        #region 释放资源
+
+        ~FromElement()
+        {
+            Dispose(false);
+        }
+
+        private bool disposed = false;
+        public void Dispose()
+        {
+            Dispose(true);
+            // Take yourself off the Finalization queue 
+            // to prevent finalization code for this object
+            // from executing a second time.
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!this.disposed)
+            {
+                if (disposing)
+                {
+                    // release managed resources if any
+                    AddEvents(false);
+                }
+
+                // release unmanaged resource
+
+                // Note that this is not thread safe.
+                // Another thread could start disposing the object
+                // after the managed resources are disposed,
+                // but before the disposed flag is set to true.
+                // If thread safety is necessary, it must be
+                // implemented by the client.
+            }
+            disposed = true;
+        }
+
+        #endregion
 
         void SetLineColor()
         {
@@ -1135,7 +1188,6 @@ namespace DigitalPlatform.CommonControl
             captions.AutoScroll = false;
              * */
 
-
             // 是否有单独的标题行?
             captions.HasTitleLine = this.Container.m_bHasCaptionsTitleLine;
 
@@ -1182,44 +1234,49 @@ namespace DigitalPlatform.CommonControl
             table.Controls.Add(this.textBox_style, 1, nRow);
             table.Controls.Add(this.captions, 2, nRow);
 
-            AddEvents();
+            AddEvents(true);
         }
 
-        void AddEvents()
+        void AddEvents(bool bAdd)
         {
             // events
 
-            // label_color
-            this.label_color.MouseUp -= new MouseEventHandler(label_color_MouseUp);
-            this.label_color.MouseUp += new MouseEventHandler(label_color_MouseUp);
+            if (bAdd)
+            {
+                // label_color
+                this.label_color.MouseUp += new MouseEventHandler(label_color_MouseUp);
 
-            this.label_color.MouseClick -= new MouseEventHandler(label_color_MouseClick);
-            this.label_color.MouseClick += new MouseEventHandler(label_color_MouseClick);
+                this.label_color.MouseClick += new MouseEventHandler(label_color_MouseClick);
 
-            // style
-            this.textBox_style.KeyUp -= new KeyEventHandler(textBox_value_KeyUp);
-            this.textBox_style.KeyUp += new KeyEventHandler(textBox_value_KeyUp);
+                // style
+                this.textBox_style.KeyUp += new KeyEventHandler(textBox_value_KeyUp);
 
-            this.textBox_style.TextChanged -= new EventHandler(textBox_value_TextChanged);
-            this.textBox_style.TextChanged += new EventHandler(textBox_value_TextChanged);
+                this.textBox_style.TextChanged += new EventHandler(textBox_value_TextChanged);
 
-            this.textBox_style.Enter -= new EventHandler(textBox_value_Enter);
-            this.textBox_style.Enter += new EventHandler(textBox_value_Enter);
+                this.textBox_style.Enter += new EventHandler(textBox_value_Enter);
 
+                // captions
+                this.captions.ElementCountChanged += new EventHandler(captions_ElementCountChanged);
+                /*
+                this.comboBox_language.DropDown -= new EventHandler(comboBox_language_DropDown);
+                this.comboBox_language.DropDown += new EventHandler(comboBox_language_DropDown);
 
-            // captions
-            this.captions.ElementCountChanged -= new EventHandler(captions_ElementCountChanged);
-            this.captions.ElementCountChanged += new EventHandler(captions_ElementCountChanged);
-            /*
-            this.comboBox_language.DropDown -= new EventHandler(comboBox_language_DropDown);
-            this.comboBox_language.DropDown += new EventHandler(comboBox_language_DropDown);
+                this.comboBox_language.TextChanged -= new EventHandler(comboBox_language_TextChanged);
+                this.comboBox_language.TextChanged += new EventHandler(comboBox_language_TextChanged);
 
-            this.comboBox_language.TextChanged -= new EventHandler(comboBox_language_TextChanged);
-            this.comboBox_language.TextChanged += new EventHandler(comboBox_language_TextChanged);
-
-            this.comboBox_language.Enter -= new EventHandler(comboBox_language_Enter);
-            this.comboBox_language.Enter += new EventHandler(comboBox_language_Enter);
-            */
+                this.comboBox_language.Enter -= new EventHandler(comboBox_language_Enter);
+                this.comboBox_language.Enter += new EventHandler(comboBox_language_Enter);
+                */
+            }
+            else
+            {
+                this.label_color.MouseUp -= new MouseEventHandler(label_color_MouseUp);
+                this.label_color.MouseClick -= new MouseEventHandler(label_color_MouseClick);
+                this.textBox_style.KeyUp -= new KeyEventHandler(textBox_value_KeyUp);
+                this.textBox_style.TextChanged -= new EventHandler(textBox_value_TextChanged);
+                this.textBox_style.Enter -= new EventHandler(textBox_value_Enter);
+                this.captions.ElementCountChanged -= new EventHandler(captions_ElementCountChanged);
+            }
         }
 
         void captions_ElementCountChanged(object sender, EventArgs e)
@@ -1561,6 +1618,7 @@ namespace DigitalPlatform.CommonControl
 
         void textBox_value_KeyUp(object sender, KeyEventArgs e)
         {
+
         }
 
         void textBox_value_TextChanged(object sender, EventArgs e)
@@ -1570,7 +1628,6 @@ namespace DigitalPlatform.CommonControl
             if ((this.State & ElementState.New) == 0)
                 this.State |= ElementState.Changed;
         }
-
 
         // 本元素所从属的控件拥有了焦点了么?
         public bool IsSubControlFocused()
@@ -1594,7 +1651,6 @@ namespace DigitalPlatform.CommonControl
 
             try
             {
-
                 Debug.Assert(table.RowCount ==
                     this.Container.Elements.Count + 3, "");
 
@@ -1617,14 +1673,11 @@ namespace DigitalPlatform.CommonControl
                     CaptionEditControl captions = line.captions;
                     table.Controls.Remove(captions);
                     table.Controls.Add(captions, 2, i + 1 + 1);
-
-
                 }
 
                 table.Controls.Add(this.label_color, 0, nRow + 1);
                 table.Controls.Add(this.textBox_style, 1, nRow + 1);
                 table.Controls.Add(this.captions, 2, nRow + 1);
-
             }
             finally
             {
@@ -1632,7 +1685,7 @@ namespace DigitalPlatform.CommonControl
             }
 
             // events
-            AddEvents();
+            AddEvents(true);
         }
 
         // 移除本Element
@@ -1673,13 +1726,12 @@ namespace DigitalPlatform.CommonControl
                     CaptionEditControl captions = line.captions;
                     table.Controls.Remove(captions);
                     table.Controls.Add(captions, 2, i - 1 + 1);
-
-
                 }
 
                 table.RowCount--;
                 table.RowStyles.RemoveAt(nRow);
 
+                this.AddEvents(false);
             }
             finally
             {
@@ -1698,7 +1750,6 @@ namespace DigitalPlatform.CommonControl
         //      nCol    1 style列; 2: captions列
         public void Select(int nCol)
         {
-
             if (nCol == 1)
             {
                 this.textBox_style.SelectAll();

@@ -702,7 +702,7 @@ FormWindowState.Normal);
                 return 0;
             }
 
-            // 要求在 library_app.zip 内准备要安装的可执行程序文件
+            // 要求在 xxx_app.zip 内准备要安装的可执行程序文件
             try
             {
                 using (ZipFile zip = ZipFile.Read(strZipFileName))
@@ -721,7 +721,6 @@ FormWindowState.Normal);
                         string strFullPath = Path.Combine(strTargetDir, strPart);
 
                         e.FileName = strPart;
-
 
                         if ((e.Attributes & FileAttributes.Directory) == 0)
                         {
@@ -1623,6 +1622,15 @@ MessageBoxDefaultButton.Button2);
                         continue;
 
                     AppendString("*** 更新 IIS 虚拟目录 " + info.IisPath + " 对应的物理目录 " + info.PhysicalPath + " 中的可执行文件 ...\r\n");
+
+                    // 2015/7/21
+                    // 先删除 目标目录下的 app_code 目录内的所有文件
+                    // 这是因为以前版本的 dp2OPAC 可能在这里遗留了 global.asax.cs 文件，而新版本移动到其上级子目录存储了，并且 app_code 子目录内没有任何文件了
+                    string strAppCodeDir = Path.Combine(info.PhysicalPath, "app_code");
+                    if (Directory.Exists(strAppCodeDir) == true)
+                    {
+                        PathUtil.DeleteDirectory(strAppCodeDir);
+                    }
 
                     List<string> excludes = new List<string>() { "web.config" };
                     // 更新可执行目录

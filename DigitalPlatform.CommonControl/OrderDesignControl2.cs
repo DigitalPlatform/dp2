@@ -2872,6 +2872,7 @@ namespace DigitalPlatform.CommonControl
         }
 #endif
 
+        // TODO: 需要增加参数 bAdd
         void AddEvents()
         {
             // label_color

@@ -2492,37 +2492,45 @@ MessageBoxDefaultButton.Button1);
             // this._biblioRegister.ReadOnly = bReadOnly;
         }
 
-        public override void AddEvents()
+        public override void AddEvents(bool bAdd)
         {
-            this.label_color.MouseUp -= new MouseEventHandler(label_color_MouseUp);
-            this.label_color.MouseUp += new MouseEventHandler(label_color_MouseUp);
+            if (bAdd)
+            {
+                this.label_color.MouseUp += new MouseEventHandler(label_color_MouseUp);
 
-            this.label_color.MouseClick -= new MouseEventHandler(label_color_MouseClick);
-            this.label_color.MouseClick += new MouseEventHandler(label_color_MouseClick);
+                this.label_color.MouseClick += new MouseEventHandler(label_color_MouseClick);
 
-            this._biblioRegister.Enter -= new EventHandler(control_Enter);
-            this._biblioRegister.Enter += new EventHandler(control_Enter);
+                this._biblioRegister.Enter += new EventHandler(control_Enter);
 
-            this._biblioRegister.GetConfigDom -= new GetConfigDomEventHandle(_biblioRegister_GetConfigDom);
-            this._biblioRegister.GetConfigDom += new GetConfigDomEventHandle(_biblioRegister_GetConfigDom);
+                this._biblioRegister.GetConfigDom += new GetConfigDomEventHandle(_biblioRegister_GetConfigDom);
 
-            this._biblioRegister.LoadEntities -= new EventHandler(_biblioRegister_LoadEntities);
-            this._biblioRegister.LoadEntities += new EventHandler(_biblioRegister_LoadEntities);
+                this._biblioRegister.LoadEntities += new EventHandler(_biblioRegister_LoadEntities);
 
-            this._biblioRegister.EnsureVisible -= new EnsureVisibleEventHandler(_biblioRegister_EnsureVisible);
-            this._biblioRegister.EnsureVisible += new EnsureVisibleEventHandler(_biblioRegister_EnsureVisible);
+                this._biblioRegister.EnsureVisible += new EnsureVisibleEventHandler(_biblioRegister_EnsureVisible);
 
-            this._biblioRegister.AsyncGetImage -= new AsyncGetImageEventHandler(_biblioRegister_AsyncGetImage);
-            this._biblioRegister.AsyncGetImage += new AsyncGetImageEventHandler(_biblioRegister_AsyncGetImage);
+                this._biblioRegister.AsyncGetImage += new AsyncGetImageEventHandler(_biblioRegister_AsyncGetImage);
 #if NO
             this._biblioRegister.GetServerType -= new GetServerTypeEventHandler(_biblioRegister_GetServerType);
             this._biblioRegister.GetServerType += new GetServerTypeEventHandler(_biblioRegister_GetServerType);
 #endif
-            this._biblioRegister.GetValueTable -= new GetValueTableEventHandler(_biblioRegister_GetValueTable);
-            this._biblioRegister.GetValueTable += new GetValueTableEventHandler(_biblioRegister_GetValueTable);
+                this._biblioRegister.GetValueTable += new GetValueTableEventHandler(_biblioRegister_GetValueTable);
 
-            this._biblioRegister.DeleteItem -= new DeleteItemEventHandler(_biblioRegister_DeleteItem);
-            this._biblioRegister.DeleteItem += new DeleteItemEventHandler(_biblioRegister_DeleteItem);
+                this._biblioRegister.DeleteItem += new DeleteItemEventHandler(_biblioRegister_DeleteItem);
+            }
+            else
+            {
+                this.label_color.MouseUp -= new MouseEventHandler(label_color_MouseUp);
+                this.label_color.MouseClick -= new MouseEventHandler(label_color_MouseClick);
+                this._biblioRegister.Enter -= new EventHandler(control_Enter);
+                this._biblioRegister.GetConfigDom -= new GetConfigDomEventHandle(_biblioRegister_GetConfigDom);
+                this._biblioRegister.LoadEntities -= new EventHandler(_biblioRegister_LoadEntities);
+                this._biblioRegister.EnsureVisible -= new EnsureVisibleEventHandler(_biblioRegister_EnsureVisible);
+                this._biblioRegister.AsyncGetImage -= new AsyncGetImageEventHandler(_biblioRegister_AsyncGetImage);
+                this._biblioRegister.GetValueTable -= new GetValueTableEventHandler(_biblioRegister_GetValueTable);
+                this._biblioRegister.DeleteItem -= new DeleteItemEventHandler(_biblioRegister_DeleteItem);
+            }
+
+            base.AddEvents(bAdd);
         }
 
         void _biblioRegister_DeleteItem(object sender, DeleteItemEventArgs e)

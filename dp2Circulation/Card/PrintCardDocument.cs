@@ -377,35 +377,35 @@ namespace dp2Circulation
                     nYOffs = e.PageSettings.PrintableArea.Top;
                 }
 
-                Pen pen = new Pen(Color.Green, (float)1);
-
-                DrawFourAngel(
-                    e.Graphics,
-                    pen,
-                    nXOffs,
-                    nYOffs,
-                    nPrintableWidth,
-                    nPrintableHeight,
-                    50);    // 半英寸
-
-                pen.Dispose();
+                using (Pen pen = new Pen(Color.Green, (float)1))
+                {
+                    DrawFourAngel(
+                        e.Graphics,
+                        pen,
+                        nXOffs,
+                        nYOffs,
+                        nPrintableWidth,
+                        nPrintableHeight,
+                        50);    // 半英寸
+                }
             }
 
             // 绘制内容区域边界(也就是排除了页面边空的中间部分)
             // 绿色
             if (bTestingGrid == true && bOutput == true)
             {
-                Pen pen = new Pen(Color.Green, (float)3);
+                using (Pen pen = new Pen(Color.Green, (float)3))
+                {
 
-                /*
-                e.Graphics.DrawRectangle(pen,
-                    label_param.PageMargins.Left - nXDelta,
-                    label_param.PageMargins.Top - nYDelta,
-                    e.PageBounds.Width - label_param.PageMargins.Left - label_param.PageMargins.Right,
-                    e.PageBounds.Height - label_param.PageMargins.Top - label_param.PageMargins.Bottom);
-                */
+                    /*
+                    e.Graphics.DrawRectangle(pen,
+                        label_param.PageMargins.Left - nXDelta,
+                        label_param.PageMargins.Top - nYDelta,
+                        e.PageBounds.Width - label_param.PageMargins.Left - label_param.PageMargins.Right,
+                        e.PageBounds.Height - label_param.PageMargins.Top - label_param.PageMargins.Bottom);
+                    */
 
-                pen.Dispose();
+                }
             }
 
             // bool bEOF = false;
@@ -478,7 +478,6 @@ namespace dp2Circulation
                     Page current_page = this.m_pages[0];
                     this.m_pages.RemoveAt(0);
 
-
                     if (bOutput == true)
                     {
                         nRet = DoPrintPage(e.Graphics,
@@ -493,19 +492,16 @@ out strError);
                         // 黑色
                         if (bTestingGrid == true)
                         {
-                            Pen pen = new Pen(Color.Black, (float)1);
-
-                            e.Graphics.DrawRectangle(pen,
-                                x - nXDelta,
-                                y - nYDelta,
-                                this.m_pagesetting.Width,
-                                this.m_pagesetting.Height);
-
-                            pen.Dispose();
+                            using (Pen pen = new Pen(Color.Black, (float)1))
+                            {
+                                e.Graphics.DrawRectangle(pen,
+                                    x - nXDelta,
+                                    y - nYDelta,
+                                    this.m_pagesetting.Width,
+                                    this.m_pagesetting.Height);
+                            }
                         }
-
                     } // end if bOutput == true
-
 
                     x += this.m_pagesetting.Width;
                 }
@@ -546,7 +542,6 @@ out strError);
                     }
                 }
             }
-
 
             this.m_nPageNo++;
             e.HasMorePages = true;

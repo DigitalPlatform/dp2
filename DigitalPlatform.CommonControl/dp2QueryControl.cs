@@ -641,7 +641,7 @@ namespace DigitalPlatform.CommonControl
         }
     }
 
-    public class dp2QueryLine
+    public class dp2QueryLine : IDisposable
     {
         public dp2QueryControl Container = null;
 
@@ -652,6 +652,48 @@ namespace DigitalPlatform.CommonControl
         public TextBox textBox_word = null;
         public ComboBox comboBox_from = null;
         public ComboBox comboBox_matchStyle = null;
+
+        #region 释放资源
+
+        ~dp2QueryLine()
+        {
+            Dispose(false);
+        }
+
+        private bool disposed = false;
+        public void Dispose()
+        {
+            Dispose(true);
+            // Take yourself off the Finalization queue 
+            // to prevent finalization code for this object
+            // from executing a second time.
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!this.disposed)
+            {
+                if (disposing)
+                {
+                    // release managed resources if any
+                    AddEvents(false);
+                }
+
+                // release unmanaged resource
+
+                // Note that this is not thread safe.
+                // Another thread could start disposing the object
+                // after the managed resources are disposed,
+                // but before the disposed flag is set to true.
+                // If thread safety is necessary, it must be
+                // implemented by the client.
+            }
+            disposed = true;
+        }
+
+        #endregion
+
 
         public string LogicOperatorString
         {
@@ -790,9 +832,6 @@ namespace DigitalPlatform.CommonControl
             label_state.AutoSize = true;
             label_state.Image = this.Container.imageList_states.Images[0];
             label_state.ImageAlign = ContentAlignment.MiddleCenter;
-            label_state.MouseUp -= new MouseEventHandler(label_state_MouseUp);
-            label_state.MouseUp += new MouseEventHandler(label_state_MouseUp);
-            label_state.MouseHover += new EventHandler(label_state_MouseHover);
 
             comboBox_logicOperator = new ComboBox();
             comboBox_logicOperator.DropDownStyle = ComboBoxStyle.DropDownList;
@@ -807,9 +846,6 @@ namespace DigitalPlatform.CommonControl
                 "SUB 减",
             });
             comboBox_logicOperator.Text = "AND 与";
-            comboBox_logicOperator.SizeChanged -= new EventHandler(comboBox_SizeChanged);
-            comboBox_logicOperator.SizeChanged += new EventHandler(comboBox_SizeChanged);
-
 
             // servers
             comboBox_server = new ComboBox();
@@ -822,15 +858,7 @@ namespace DigitalPlatform.CommonControl
             comboBox_server.Size = new Size(120, 28);
             comboBox_server.MinimumSize = new Size(100, 28);
             comboBox_server.Text = "";
-            comboBox_server.DropDown -= new EventHandler(comboBox_server_DropDown);
-            comboBox_server.DropDown += new EventHandler(comboBox_server_DropDown);
-            comboBox_server.TextChanged -= new EventHandler(comboBox_server_TextChanged);
-            comboBox_server.TextChanged += new EventHandler(comboBox_server_TextChanged);
             comboBox_server.DropDownWidth = 150;
-            comboBox_server.DropDownClosed -= new EventHandler(comboBox_server_TextChanged);
-            comboBox_server.DropDownClosed += new EventHandler(comboBox_server_TextChanged);
-            comboBox_server.SizeChanged -= new EventHandler(comboBox_SizeChanged);
-            comboBox_server.SizeChanged += new EventHandler(comboBox_SizeChanged);
 
             // dbname
             comboBox_dbName = new ComboBox();
@@ -841,13 +869,7 @@ namespace DigitalPlatform.CommonControl
             comboBox_dbName.Size = new Size(120, 28);
             comboBox_dbName.MinimumSize = new Size(100, 28);
             comboBox_dbName.Text = "";
-            comboBox_dbName.DropDown -= new EventHandler(comboBox_dbName_DropDown);
-            comboBox_dbName.DropDown += new EventHandler(comboBox_dbName_DropDown);
-            comboBox_dbName.TextChanged -= new EventHandler(comboBox_dbName_TextChanged);
-            comboBox_dbName.TextChanged += new EventHandler(comboBox_dbName_TextChanged);
             comboBox_dbName.DropDownWidth = 150;
-            comboBox_dbName.SizeChanged -= new EventHandler(comboBox_SizeChanged);
-            comboBox_dbName.SizeChanged += new EventHandler(comboBox_SizeChanged);
 
             //
             textBox_word = new TextBox();
@@ -858,9 +880,6 @@ namespace DigitalPlatform.CommonControl
             textBox_word.Size = new Size(150, 28);
             textBox_word.MinimumSize = new Size(100, 28);
             // textBox_word.Margin = new Padding(-1, -1, -1, -1);
-            textBox_word.TextChanged -= new EventHandler(textBox_word_TextChanged);
-            textBox_word.TextChanged += new EventHandler(textBox_word_TextChanged);
-            textBox_word.KeyDown += new KeyEventHandler(textBox_word_KeyDown);
 
             //
             comboBox_from = new ComboBox();
@@ -872,10 +891,6 @@ namespace DigitalPlatform.CommonControl
             comboBox_from.MaximumSize = new Size(150, 28);
             comboBox_from.Size = new Size(100, 28);
             comboBox_from.MinimumSize = new Size(50, 28);
-            comboBox_from.DropDown -= new EventHandler(comboBox_from_DropDown);
-            comboBox_from.DropDown += new EventHandler(comboBox_from_DropDown);
-            comboBox_from.SizeChanged -= new EventHandler(comboBox_SizeChanged);
-            comboBox_from.SizeChanged += new EventHandler(comboBox_SizeChanged);
 
             // matchstyle
             comboBox_matchStyle = new ComboBox();
@@ -893,10 +908,70 @@ namespace DigitalPlatform.CommonControl
                 "空值",
             });
             comboBox_matchStyle.Text = "前方一致";
-            comboBox_matchStyle.SizeChanged -= new EventHandler(comboBox_SizeChanged);
-            comboBox_matchStyle.SizeChanged += new EventHandler(comboBox_SizeChanged);
-            comboBox_matchStyle.DropDownClosed -= new EventHandler(comboBox_matchStyle_DropDownClosed);
-            comboBox_matchStyle.DropDownClosed += new EventHandler(comboBox_matchStyle_DropDownClosed);
+
+            AddEvents(true);
+        }
+
+        void AddEvents(bool bAdd)
+        {
+            if (bAdd)
+            {
+                label_state.MouseUp += new MouseEventHandler(label_state_MouseUp);
+
+                label_state.MouseHover += new EventHandler(label_state_MouseHover);
+                comboBox_logicOperator.SizeChanged += new EventHandler(comboBox_SizeChanged);
+                comboBox_server.DropDown += new EventHandler(comboBox_server_DropDown);
+                comboBox_server.TextChanged += new EventHandler(comboBox_server_TextChanged);
+                comboBox_server.DropDownClosed += new EventHandler(comboBox_server_TextChanged);
+                comboBox_server.SizeChanged += new EventHandler(comboBox_SizeChanged);
+                comboBox_dbName.DropDown += new EventHandler(comboBox_dbName_DropDown);
+                comboBox_dbName.TextChanged += new EventHandler(comboBox_dbName_TextChanged);
+                comboBox_dbName.SizeChanged += new EventHandler(comboBox_SizeChanged);
+                textBox_word.TextChanged += new EventHandler(textBox_word_TextChanged);
+                textBox_word.KeyDown += new KeyEventHandler(textBox_word_KeyDown);
+                comboBox_from.DropDown += new EventHandler(comboBox_from_DropDown);
+                comboBox_from.SizeChanged += new EventHandler(comboBox_SizeChanged);
+                comboBox_matchStyle.SizeChanged += new EventHandler(comboBox_SizeChanged);
+                comboBox_matchStyle.DropDownClosed += new EventHandler(comboBox_matchStyle_DropDownClosed);
+            }
+            else
+            {
+                if (label_state != null)
+                {
+                    label_state.MouseUp -= new MouseEventHandler(label_state_MouseUp);
+                    label_state.MouseHover -= new EventHandler(label_state_MouseHover);
+                }
+                if (comboBox_logicOperator != null)
+                    comboBox_logicOperator.SizeChanged -= new EventHandler(comboBox_SizeChanged);
+                if (comboBox_server != null)
+                {
+                    comboBox_server.DropDown -= new EventHandler(comboBox_server_DropDown);
+                    comboBox_server.TextChanged -= new EventHandler(comboBox_server_TextChanged);
+                    comboBox_server.DropDownClosed -= new EventHandler(comboBox_server_TextChanged);
+                    comboBox_server.SizeChanged -= new EventHandler(comboBox_SizeChanged);
+                }
+                if (comboBox_dbName != null)
+                {
+                    comboBox_dbName.DropDown -= new EventHandler(comboBox_dbName_DropDown);
+                    comboBox_dbName.TextChanged -= new EventHandler(comboBox_dbName_TextChanged);
+                    comboBox_dbName.SizeChanged -= new EventHandler(comboBox_SizeChanged);
+                }
+                if (textBox_word != null)
+                {
+                    textBox_word.TextChanged -= new EventHandler(textBox_word_TextChanged);
+                    textBox_word.KeyDown -= new KeyEventHandler(textBox_word_KeyDown);
+                }
+                if (comboBox_from != null)
+                {
+                    comboBox_from.DropDown -= new EventHandler(comboBox_from_DropDown);
+                    comboBox_from.SizeChanged -= new EventHandler(comboBox_SizeChanged);
+                }
+                if (comboBox_matchStyle != null)
+                {
+                    comboBox_matchStyle.SizeChanged -= new EventHandler(comboBox_SizeChanged);
+                    comboBox_matchStyle.DropDownClosed -= new EventHandler(comboBox_matchStyle_DropDownClosed);
+                }
+            }
         }
 
         void textBox_word_KeyDown(object sender, KeyEventArgs e)
@@ -1421,7 +1496,6 @@ namespace DigitalPlatform.CommonControl
             table.Controls.Remove(this.textBox_word);
             table.Controls.Remove(this.comboBox_from);
             table.Controls.Remove(this.comboBox_matchStyle);
-
         }
     }
 

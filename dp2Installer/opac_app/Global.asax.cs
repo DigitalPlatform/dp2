@@ -9,8 +9,9 @@ using System.Web.Routing;
 using DigitalPlatform;
 using DigitalPlatform.OPAC.Server;
 using DigitalPlatform.IO;
+using System.IO;
 
-namespace NewOPAC
+namespace dp2OPAC
 {
     /// <summary>
     /// Summary description for Global.
@@ -84,8 +85,9 @@ namespace NewOPAC
                     app = new OpacApplication();
                     Application["app"] = app;
 
-                    string strHostDir = this.Server.MapPath(".");
-
+                    // string strHostDir = this.Server.MapPath(".");
+                    string strHostDir = Path.GetDirectoryName(this.Server.MapPath("~/start.xml"));  // 2015/7/20
+                    
                     nRet = app.Load(
                         false,
                         strDataDir,
@@ -159,6 +161,11 @@ namespace NewOPAC
             try
             {
                 app = (OpacApplication)Application["app"];
+
+                if (app == null)
+                {
+                    throw new Exception("app == null while Session_Start(). global error info : " + (string)Application["errorinfo"]);
+                }
 
                 string strClientIP = HttpContext.Current.Request.UserHostAddress.ToString();
                 // 增量计数

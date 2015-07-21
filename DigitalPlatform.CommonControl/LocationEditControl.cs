@@ -481,12 +481,28 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
+        void ClearItems()
+        {
+            if (this.LocationItems != null)
+            {
+                foreach (LocationItem item in this.LocationItems)
+                {
+                    if (item != null)
+                        item.Dispose();
+                }
+                this.LocationItems.Clear();
+            }
+        }
+
         public void Clear()
         {
-            this.LocationItems.Clear();
+            // this.LocationItems.Clear();
+            this.ClearItems();
 
-            while(this.panel_main.Controls.Count != 0)
+            while (this.panel_main.Controls.Count != 0)
+            {
                 this.panel_main.Controls.RemoveAt(0);
+            }
         }
 
         public void SelectAll()
@@ -1527,7 +1543,7 @@ namespace DigitalPlatform.CommonControl
     }
 
     // 一个馆藏地点事项
-    public class LocationItem
+    public class LocationItem : IDisposable
     {
         int DisableArrivedCheckedChanged = 0;   // 是否需要禁止由checkBox_arrived的Checked修改连带引起触发事件。程序主动的修改需要禁止；而用户一般鼠标操作需要触发
 
@@ -1579,6 +1595,47 @@ namespace DigitalPlatform.CommonControl
                 }
             }
         }
+
+        #region 释放资源
+
+        ~LocationItem()
+        {
+            Dispose(false);
+        }
+
+        private bool disposed = false;
+        public void Dispose()
+        {
+            Dispose(true);
+            // Take yourself off the Finalization queue 
+            // to prevent finalization code for this object
+            // from executing a second time.
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!this.disposed)
+            {
+                if (disposing)
+                {
+                    // release managed resources if any
+                    AddEvents(false);
+                }
+
+                // release unmanaged resource
+
+                // Note that this is not thread safe.
+                // Another thread could start disposing the object
+                // after the managed resources are disposed,
+                // but before the disposed flag is set to true.
+                // If thread safety is necessary, it must be
+                // implemented by the client.
+            }
+            disposed = true;
+        }
+
+        #endregion
 
         internal void SetLineColor()
         {
@@ -1690,8 +1747,6 @@ namespace DigitalPlatform.CommonControl
             container.panel_main.Controls.Add(comboBox_library);
              * */
 
-
-
             // 馆藏地点
             comboBox_location = new ComboBox();
             comboBox_location.DropDownStyle = ComboBoxStyle.DropDown;
@@ -1712,7 +1767,7 @@ namespace DigitalPlatform.CommonControl
             if (this.Container.ArriveMode == false)
                 this.checkBox_arrived.Enabled = false;  // 在订购状态下，已验收标记也需要显示出来，但处在Disable状态，不可修改
 
-            AddEvents();
+            AddEvents(true);
         }
 
         public void RemoveFromContainer()
@@ -1862,35 +1917,42 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
-        void AddEvents()
+        // 2015/7/21
+        void AddEvents(bool bAdd)
         {
-            // label_color
-            this.label_color.MouseUp -= new MouseEventHandler(label_color_MouseUp);
-            this.label_color.MouseUp += new MouseEventHandler(label_color_MouseUp);
+            if (bAdd)
+            {
+                // label_color
+                this.label_color.MouseUp += new MouseEventHandler(label_color_MouseUp);
 
-            label_color.MouseClick -= new MouseEventHandler(label_color_MouseClick);
-            label_color.MouseClick += new MouseEventHandler(label_color_MouseClick);
+                label_color.MouseClick += new MouseEventHandler(label_color_MouseClick);
 
-            /*
-            // library
-            this.comboBox_library.DropDown -= new EventHandler(comboBox_location_DropDown);
-            this.comboBox_library.DropDown += new EventHandler(comboBox_location_DropDown);
-             * */
+                /*
+                // library
+                this.comboBox_library.DropDown -= new EventHandler(comboBox_location_DropDown);
+                this.comboBox_library.DropDown += new EventHandler(comboBox_location_DropDown);
+                 * */
 
 
-            // location
-            this.comboBox_location.DropDown -= new EventHandler(comboBox_location_DropDown);
-            this.comboBox_location.DropDown += new EventHandler(comboBox_location_DropDown);
+                // location
+                this.comboBox_location.DropDown += new EventHandler(comboBox_location_DropDown);
 
-            this.comboBox_location.TextChanged -= new EventHandler(comboBox_location_TextChanged);
-            this.comboBox_location.TextChanged += new EventHandler(comboBox_location_TextChanged);
+                this.comboBox_location.TextChanged += new EventHandler(comboBox_location_TextChanged);
 
-            this.comboBox_location.Enter -= new EventHandler(comboBox_location_Enter);
-            this.comboBox_location.Enter += new EventHandler(comboBox_location_Enter);
+                this.comboBox_location.Enter += new EventHandler(comboBox_location_Enter);
 
-            // arrived
-            this.checkBox_arrived.CheckedChanged -= new EventHandler(checkBox_arrived_CheckedChanged);
-            this.checkBox_arrived.CheckedChanged += new EventHandler(checkBox_arrived_CheckedChanged);
+                // arrived
+                this.checkBox_arrived.CheckedChanged += new EventHandler(checkBox_arrived_CheckedChanged);
+            }
+            else
+            {
+                this.label_color.MouseUp -= new MouseEventHandler(label_color_MouseUp);
+                label_color.MouseClick -= new MouseEventHandler(label_color_MouseClick);
+                this.comboBox_location.DropDown -= new EventHandler(comboBox_location_DropDown);
+                this.comboBox_location.TextChanged -= new EventHandler(comboBox_location_TextChanged);
+                this.comboBox_location.Enter -= new EventHandler(comboBox_location_Enter);
+                this.checkBox_arrived.CheckedChanged -= new EventHandler(checkBox_arrived_CheckedChanged);
+            }
         }
 
         // 已到达(验收)checkbox被checked

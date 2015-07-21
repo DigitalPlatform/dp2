@@ -446,6 +446,20 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
+        void ClearElements()
+        {
+            if (this.Elements != null)
+            {
+                foreach (CaptionElement caption in this.Elements)
+                {
+                    if (caption != null)
+                        caption.Dispose();
+                }
+
+                this.Elements.Clear();
+            }
+        }
+
         public void Clear()
         {
             this.DisableUpdate();
@@ -460,7 +474,9 @@ namespace DigitalPlatform.CommonControl
                         element);
                 }
 
-                this.Elements.Clear();
+                // this.Elements.Clear();
+                this.ClearElements();
+
                 this.tableLayoutPanel_main.RowCount = BASE_ROW_COUNT;    // 为什么是1？
                 for (; ; )
                 {
@@ -477,7 +493,6 @@ namespace DigitalPlatform.CommonControl
 
             if (this.ElementCountChanged != null)
                 this.ElementCountChanged(this, new EventArgs());
-
         }
 
         // 清除一个CaptionElement对象对应的Control
@@ -973,7 +988,7 @@ namespace DigitalPlatform.CommonControl
     }
 
 
-    public class CaptionElement
+    public class CaptionElement : IDisposable
     {
         public CaptionEditControl Container = null;
 
@@ -1004,6 +1019,47 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
+        #region 释放资源
+
+        ~CaptionElement()
+        {
+            Dispose(false);
+        }
+
+        private bool disposed = false;
+        public void Dispose()
+        {
+            Dispose(true);
+            // Take yourself off the Finalization queue 
+            // to prevent finalization code for this object
+            // from executing a second time.
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!this.disposed)
+            {
+                if (disposing)
+                {
+                    // release managed resources if any
+                    AddEvents(false);
+                }
+
+                // release unmanaged resource
+
+                // Note that this is not thread safe.
+                // Another thread could start disposing the object
+                // after the managed resources are disposed,
+                // but before the disposed flag is set to true.
+                // If thread safety is necessary, it must be
+                // implemented by the client.
+            }
+            disposed = true;
+        }
+
+        #endregion
+
         internal void SetLineColor()
         {
             if ((this.m_state & ElementState.Selected) != 0)
@@ -1020,7 +1076,6 @@ namespace DigitalPlatform.CommonControl
                     return;
                 }
             }
-
 
             if ((this.m_state & ElementState.New) != 0)
             {
@@ -1102,40 +1157,45 @@ namespace DigitalPlatform.CommonControl
             table.Controls.Add(this.comboBox_language, 1, nRow);
             table.Controls.Add(this.textBox_value, 2, nRow);
 
-            AddEvents();
+            AddEvents(true);
         }
 
-        void AddEvents()
+        void AddEvents(bool bAdd)
         {
             // events
 
-            // label_color
-            this.label_color.MouseUp -= new MouseEventHandler(label_color_MouseUp);
-            this.label_color.MouseUp += new MouseEventHandler(label_color_MouseUp);
+            if (bAdd)
+            {
+                // label_color
+                this.label_color.MouseUp += new MouseEventHandler(label_color_MouseUp);
 
-            this.label_color.MouseClick -= new MouseEventHandler(label_color_MouseClick);
-            this.label_color.MouseClick += new MouseEventHandler(label_color_MouseClick);
+                this.label_color.MouseClick += new MouseEventHandler(label_color_MouseClick);
 
+                // language
+                this.comboBox_language.DropDown += new EventHandler(comboBox_language_DropDown);
 
-            // language
-            this.comboBox_language.DropDown -= new EventHandler(comboBox_language_DropDown);
-            this.comboBox_language.DropDown += new EventHandler(comboBox_language_DropDown);
+                this.comboBox_language.TextChanged += new EventHandler(comboBox_language_TextChanged);
 
-            this.comboBox_language.TextChanged -= new EventHandler(comboBox_language_TextChanged);
-            this.comboBox_language.TextChanged += new EventHandler(comboBox_language_TextChanged);
+                this.comboBox_language.Enter += new EventHandler(comboBox_language_Enter);
 
-            this.comboBox_language.Enter -= new EventHandler(comboBox_language_Enter);
-            this.comboBox_language.Enter += new EventHandler(comboBox_language_Enter);
+                // value
+                this.textBox_value.KeyUp += new KeyEventHandler(textBox_value_KeyUp);
 
-            // value
-            this.textBox_value.KeyUp -= new KeyEventHandler(textBox_value_KeyUp);
-            this.textBox_value.KeyUp += new KeyEventHandler(textBox_value_KeyUp);
+                this.textBox_value.TextChanged += new EventHandler(textBox_value_TextChanged);
 
-            this.textBox_value.TextChanged -= new EventHandler(textBox_value_TextChanged);
-            this.textBox_value.TextChanged += new EventHandler(textBox_value_TextChanged);
-
-            this.textBox_value.Enter -= new EventHandler(textBox_value_Enter);
-            this.textBox_value.Enter += new EventHandler(textBox_value_Enter);
+                this.textBox_value.Enter += new EventHandler(textBox_value_Enter);
+            }
+            else
+            {
+                this.label_color.MouseUp -= new MouseEventHandler(label_color_MouseUp);
+                this.label_color.MouseClick -= new MouseEventHandler(label_color_MouseClick);
+                this.comboBox_language.DropDown -= new EventHandler(comboBox_language_DropDown);
+                this.comboBox_language.TextChanged -= new EventHandler(comboBox_language_TextChanged);
+                this.comboBox_language.Enter -= new EventHandler(comboBox_language_Enter);
+                this.textBox_value.KeyUp -= new KeyEventHandler(textBox_value_KeyUp);
+                this.textBox_value.TextChanged -= new EventHandler(textBox_value_TextChanged);
+                this.textBox_value.Enter -= new EventHandler(textBox_value_Enter);
+            }
         }
 
         void label_color_MouseUp(object sender, MouseEventArgs e)
@@ -1549,7 +1609,7 @@ namespace DigitalPlatform.CommonControl
             }
 
             // events
-            AddEvents();
+            AddEvents(true);
         }
 
         // 移除本Element
@@ -1581,7 +1641,6 @@ namespace DigitalPlatform.CommonControl
                     table.Controls.Remove(label);
                     table.Controls.Add(label, 0, i - 1 + 1);
 
-
                     // language
                     ComboBox language = line.comboBox_language;
                     table.Controls.Remove(language);
@@ -1591,12 +1650,12 @@ namespace DigitalPlatform.CommonControl
                     TextBox text = line.textBox_value;
                     table.Controls.Remove(text);
                     table.Controls.Add(text, 2, i - 1 + 1);
-
                 }
 
                 table.RowCount--;
                 table.RowStyles.RemoveAt(nRow);
 
+                this.AddEvents(false);
             }
             finally
             {

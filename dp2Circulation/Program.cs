@@ -3,6 +3,7 @@ using DigitalPlatform.CirculationClient;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -46,12 +47,15 @@ namespace dp2Circulation
                 return;
 
             Exception ex = (Exception)e.ExceptionObject;
-            string strError = "发生未捕获的异常: \r\n" + ExceptionUtil.GetDebugText(ex);
             MainForm main_form = Form.ActiveForm as MainForm;
+#if NO
+            string strError = "发生未捕获的异常: \r\n" + ExceptionUtil.GetDebugText(ex);
             if (main_form != null)
                 main_form.WriteErrorLog(strError);
             else
                 WriteWindowsLog(strError, EventLogEntryType.Error);
+#endif
+            string strError = GetExceptionText(ex, "");
 
             // TODO: 把信息提供给数字平台的开发人员，以便纠错
             // TODO: 显示为红色窗口，表示警告的意思
@@ -77,6 +81,34 @@ namespace dp2Circulation
                 CrashReport(strError);
         }
 
+        static string GetExceptionText(Exception ex, string strType)
+        {
+            // Exception ex = (Exception)e.Exception;
+            string strError = "发生未捕获的"+strType+"异常: \r\n" + ExceptionUtil.GetDebugText(ex);
+            Assembly myAssembly = Assembly.GetAssembly(typeof(Program));
+            strError += "\r\ndp2Circulation 版本: " + myAssembly.FullName;
+            strError += "\r\n操作系统：" + Environment.OSVersion.ToString();
+
+            // TODO: 给出操作系统的一般信息
+
+            MainForm main_form = Form.ActiveForm as MainForm;
+            if (main_form != null)
+            {
+                try
+                {
+                    main_form.WriteErrorLog(strError);
+                }
+                catch
+                {
+                    WriteWindowsLog(strError, EventLogEntryType.Error);
+                }
+            }
+            else
+                WriteWindowsLog(strError, EventLogEntryType.Error);
+
+            return strError;
+        }
+
         static void Application_ThreadException(object sender, 
             ThreadExceptionEventArgs e)
         {
@@ -84,12 +116,18 @@ namespace dp2Circulation
                 return;
 
             Exception ex = (Exception)e.Exception;
-            string strError = "发生未捕获的界面线程异常: \r\n" + ExceptionUtil.GetDebugText(ex);
             MainForm main_form = Form.ActiveForm as MainForm;
+#if NO
+            string strError = "发生未捕获的界面线程异常: \r\n" + ExceptionUtil.GetDebugText(ex);
             if (main_form != null)
                 main_form.WriteErrorLog(strError);
             else
                 WriteWindowsLog(strError, EventLogEntryType.Error);
+
+            Assembly myAssembly = Assembly.GetAssembly(typeof(Program));
+            strError += "\r\n\r\ndp2Circulation 版本:" + myAssembly.FullName;
+#endif
+            string strError = GetExceptionText(ex, "界面线程");
 
             bool bSendReport = true;
             DialogResult result = MessageDlg.Show(main_form,

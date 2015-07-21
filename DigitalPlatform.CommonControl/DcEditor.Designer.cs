@@ -13,6 +13,12 @@
         /// <param name="disposing">如果应释放托管资源，为 true；否则为 false。</param>
         protected override void Dispose(bool disposing)
         {
+            // 2015/7/21
+            if (disposing)
+            {
+                this.ClearElements();
+            }
+
             if (disposing && (components != null))
             {
                 components.Dispose();
