@@ -12,20 +12,28 @@ namespace dp2Circulation
     static class Program
     {
         static bool bExiting = false;
+
+        static MainForm _mainForm = null;
+        // 这里用 _mainForm 存储窗口对象，不采取 Form.ActiveForm 获取的方式。原因如下
+        // http://stackoverflow.com/questions/17117372/form-activeform-occasionally-works
+        // Form.ActiveForm occasionally works
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
         static void Main()
         {
-            Begin();
+            PrepareCatchException();
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainForm());
+            _mainForm = new MainForm();
+            Application.Run(_mainForm);
         }
 
-        static void Begin()
+        // 准备接管未捕获的异常
+        static void PrepareCatchException()
         {
             Application.ThreadException += Application_ThreadException;
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
@@ -47,7 +55,7 @@ namespace dp2Circulation
                 return;
 
             Exception ex = (Exception)e.ExceptionObject;
-            MainForm main_form = Form.ActiveForm as MainForm;
+            // MainForm main_form = Form.ActiveForm as MainForm;
 #if NO
             string strError = "发生未捕获的异常: \r\n" + ExceptionUtil.GetDebugText(ex);
             if (main_form != null)
@@ -60,7 +68,7 @@ namespace dp2Circulation
             // TODO: 把信息提供给数字平台的开发人员，以便纠错
             // TODO: 显示为红色窗口，表示警告的意思
             bool bSendReport = true;
-            DialogResult result = MessageDlg.Show(main_form,
+            DialogResult result = MessageDlg.Show(_mainForm,
     "dp2Circulation 发生未知的异常:\r\n\r\n" + strError + "\r\n---\r\n\r\n点“关闭”即关闭程序",
     "dp2Circulation 发生未知的异常",
     MessageBoxButtons.OK,
@@ -91,12 +99,12 @@ namespace dp2Circulation
 
             // TODO: 给出操作系统的一般信息
 
-            MainForm main_form = Form.ActiveForm as MainForm;
-            if (main_form != null)
+            // MainForm main_form = Form.ActiveForm as MainForm;
+            if (_mainForm != null)
             {
                 try
                 {
-                    main_form.WriteErrorLog(strError);
+                    _mainForm.WriteErrorLog(strError);
                 }
                 catch
                 {
@@ -116,7 +124,7 @@ namespace dp2Circulation
                 return;
 
             Exception ex = (Exception)e.Exception;
-            MainForm main_form = Form.ActiveForm as MainForm;
+            // MainForm main_form = Form.ActiveForm as MainForm;
 #if NO
             string strError = "发生未捕获的界面线程异常: \r\n" + ExceptionUtil.GetDebugText(ex);
             if (main_form != null)
@@ -130,7 +138,7 @@ namespace dp2Circulation
             string strError = GetExceptionText(ex, "界面线程");
 
             bool bSendReport = true;
-            DialogResult result = MessageDlg.Show(main_form,
+            DialogResult result = MessageDlg.Show(_mainForm,
     "dp2Circulation 发生未知的异常:\r\n\r\n" + strError + "\r\n---\r\n\r\n是否关闭程序?",
     "dp2Circulation 发生未知的异常",
     MessageBoxButtons.YesNo,
@@ -152,7 +160,7 @@ namespace dp2Circulation
 
         static void CrashReport(string strText)
         {
-            MainForm main_form = Form.ActiveForm as MainForm;
+            // MainForm main_form = Form.ActiveForm as MainForm;
 
             MessageBar _messageBar = null;
 
@@ -163,7 +171,7 @@ namespace dp2Circulation
             _messageBar.Text = "dp2Circulation 出现异常";
             _messageBar.MessageText = "正在向 dp2003.com 发送异常报告 ...";
             _messageBar.StartPosition = FormStartPosition.CenterScreen;
-            _messageBar.Show(main_form);
+            _messageBar.Show(_mainForm);
             _messageBar.Update();
 
             int nRet = 0;
@@ -171,8 +179,8 @@ namespace dp2Circulation
             try
             {
                 string strSender = "";
-                if (main_form != null)
-                    strSender = main_form.GetCurrentUserName() + "@" + main_form.ServerUID;
+                if (_mainForm != null)
+                    strSender = _mainForm.GetCurrentUserName() + "@" + _mainForm.ServerUID;
                 // 崩溃报告
                 nRet = LibraryChannel.CrashReport(
                     strSender,
@@ -194,10 +202,10 @@ namespace dp2Circulation
             if (nRet == -1)
             {
                 strError = "向 dp2003.com 发送异常报告时出错，未能发送成功。详细情况: " + strError;
-                MessageBox.Show(main_form, strError);
+                MessageBox.Show(_mainForm, strError);
                 // 写入错误日志
-                if (main_form != null)
-                    main_form.WriteErrorLog(strError);
+                if (_mainForm != null)
+                    _mainForm.WriteErrorLog(strError);
                 else
                     WriteWindowsLog(strError, EventLogEntryType.Error);
             }

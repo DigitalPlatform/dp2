@@ -157,13 +157,16 @@ string strText)
 
             if (strCurrentBarcode != this.textBox_itemBarcode.Text)
             {
-                // 2015/7/22
-                // 在 listview 内对册条码号进行查重
-                ListViewItem dup = ListViewUtil.FindItem(this.listView_barcodes, this.textBox_itemBarcode.Text, 0);
-                if (dup != null)
+                if (string.IsNullOrEmpty(this.textBox_itemBarcode.Text) == false)
                 {
-                    strError = "册条码号 '"+this.textBox_itemBarcode.Text+"' 在当前列表中已经存在，不允许重复登入";
-                    return -1;
+                    // 2015/7/22
+                    // 在 listview 内对册条码号进行查重
+                    ListViewItem dup = ListViewUtil.FindItem(this.listView_barcodes, this.textBox_itemBarcode.Text, 0);
+                    if (dup != null)
+                    {
+                        strError = "册条码号 '" + this.textBox_itemBarcode.Text + "' 在当前列表中已经存在，不允许重复登入";
+                        return -1;
+                    }
                 }
 
                 // 校验barcode合法性
