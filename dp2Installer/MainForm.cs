@@ -1942,7 +1942,7 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
-        private void MenuItem_sendDebugInfos_Click(object sender, EventArgs e)
+        private void MenuItem_zipDebugInfos_Click(object sender, EventArgs e)
         {
             string strError = "";
             int nRet = 0;
@@ -1952,7 +1952,7 @@ MessageBoxDefaultButton.Button1);
             this._floatingMessage.Text = "正在打包事件日志信息 ...";
             try
             {
-                string strZipFileName = Path.Combine(this.TempDir, "eventlog.zip");
+                string strZipFileName = Path.Combine(this.TempDir, "dp2installer_eventlog.zip");
 
                 List<EventLog> logs = new List<EventLog>();
 
@@ -2130,7 +2130,7 @@ MessageBoxDefaultButton.Button1);
 
                     using (StreamWriter sw = new StreamWriter(strDescriptionFilename, false, Encoding.UTF8))
                     {
-                        sw.Write(GetEnvimentDescription());
+                        sw.Write(GetEnvironmentDescription());
                     }
                 }
                 catch (Exception ex)
@@ -2758,7 +2758,7 @@ MessageBoxDefaultButton.Button1);
         }
 
         // 获得环境描述字符串
-        string GetEnvimentDescription()
+        string GetEnvironmentDescription()
         {
             string strError = "";
 

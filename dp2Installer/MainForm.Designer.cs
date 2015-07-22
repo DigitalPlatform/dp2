@@ -153,7 +153,7 @@
             this.MenuItem_sendDebugInfos.Name = "MenuItem_sendDebugInfos";
             this.MenuItem_sendDebugInfos.Size = new System.Drawing.Size(242, 22);
             this.MenuItem_sendDebugInfos.Text = "打包事件日志信息(&S)";
-            this.MenuItem_sendDebugInfos.Click += new System.EventHandler(this.MenuItem_sendDebugInfos_Click);
+            this.MenuItem_sendDebugInfos.Click += new System.EventHandler(this.MenuItem_zipDebugInfos_Click);
             // 
             // toolStripSeparator8
             // 

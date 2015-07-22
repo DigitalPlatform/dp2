@@ -51,7 +51,7 @@
     <SuiteName>dp2 V2</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>28</ApplicationRevision>
+    <ApplicationRevision>31</ApplicationRevision>
     <ApplicationVersion>2.4.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -371,6 +371,7 @@
     <Compile Include="MainForm\FirstRunDialog.Designer.cs">
       <DependentUpon>FirstRunDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="MainForm\PackageEventLog.cs" />
     <Compile Include="ManageDatabase\CalendarDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -1246,9 +1247,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Docs\deleted.txt" />
-    <Content Include="EntityRegister\servers.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <Content Include="EntityRegister\servers.xml" />
     <Content Include="eula.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -2848,6 +2847,16 @@
       <IncludeHash>True</IncludeHash>
       <FileType>File</FileType>
     </PublishFile>
+    <PublishFile Include="Docs\deleted.txt">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Exclude</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
     <PublishFile Include="DocumentFormat.OpenXml">
       <Visible>False</Visible>
       <Group>
@@ -2857,6 +2866,16 @@
       <PublishState>Include</PublishState>
       <IncludeHash>True</IncludeHash>
       <FileType>Assembly</FileType>
+    </PublishFile>
+    <PublishFile Include="EntityRegister\servers.xml">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Exclude</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
     </PublishFile>
     <PublishFile Include="eula.txt">
       <Visible>False</Visible>

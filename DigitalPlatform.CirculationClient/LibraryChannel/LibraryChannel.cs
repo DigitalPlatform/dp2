@@ -9294,8 +9294,11 @@ Stack:
             this.m_lock.AcquireWriterLock(m_nLockTimeout);
             try
             {
-                this.m_ws.Abort();
-                this.m_ws = null;
+                if (this.m_ws != null)
+                {
+                    this.m_ws.Abort();
+                    this.m_ws = null;
+                }
             }
             finally
             {

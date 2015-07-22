@@ -13668,6 +13668,83 @@ Keys keyData)
                 "log_",
                 ".txt");
         }
+
+        // 打包错误日志
+        private void menuItem_packageErrorLog_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            bool bControl = Control.ModifierKeys == Keys.Control;
+
+            Stop = new DigitalPlatform.Stop();
+            Stop.Register(stopManager, true);	// 和容器关联
+
+            Stop.OnStop += new StopEventHandler(this.DoStop);
+            Stop.Initial("正在打包事件日志信息 ...");
+            Stop.BeginLoop();
+            this.EnableControls(false);
+
+            try
+            {
+                string strTempDir = Path.Combine(this.UserTempDir, "~zip_events");
+                PathUtil.CreateDirIfNeed(strTempDir);
+
+                string strZipFileName = Path.Combine(strTempDir, "dp2circulation_eventlog.zip");
+
+                List<EventLog> logs = new List<EventLog>();
+
+                // logs.Add(new EventLog("DigitalPlatform", ".", "*"));
+                logs.Add(new EventLog("Application"));
+
+                // "最近31天" "最近十年" "最近七天"
+
+                nRet = PackageEventLog.Package(logs,
+                    strZipFileName,
+                    bControl ? "最近十年" : "最近31天",
+                    this.UserDir,
+                    strTempDir,
+                    (strText) =>
+                        {
+                            Application.DoEvents();
+
+                            if (strText != null)
+                                this.Stop.SetMessage(strText);
+
+                            if (this.Stop != null && this.Stop.State != 0)
+                                return false;
+                            return true;
+                        },
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                try
+                {
+                    System.Diagnostics.Process.Start(strTempDir);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(this, ex.Message);
+                }
+            }
+            finally
+            {
+                this.EnableControls(true);
+                Stop.EndLoop();
+                Stop.OnStop -= new StopEventHandler(this.DoStop);
+                Stop.Initial("");
+
+                if (Stop != null) // 脱离关联
+                {
+                    Stop.Unregister(true);
+                    Stop = null;
+                }
+            }
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
     }
 
     /// <summary>
