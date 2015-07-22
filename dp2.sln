@@ -142,6 +142,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestDp2Library", "TestDp2Li
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestMarcKernel", "TestMarcKernel\TestMarcKernel.csproj", "{8F0670E0-63EA-4467-856A-2B51E407904C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dp2MServer", "dp2MServer\dp2MServer.csproj", "{8517DD5D-DE8C-4D15-B3D3-6A17E502940E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -770,6 +772,16 @@ Global
 		{8F0670E0-63EA-4467-856A-2B51E407904C}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{8F0670E0-63EA-4467-856A-2B51E407904C}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{8F0670E0-63EA-4467-856A-2B51E407904C}.Release|x86.ActiveCfg = Release|Any CPU
+		{8517DD5D-DE8C-4D15-B3D3-6A17E502940E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8517DD5D-DE8C-4D15-B3D3-6A17E502940E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8517DD5D-DE8C-4D15-B3D3-6A17E502940E}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{8517DD5D-DE8C-4D15-B3D3-6A17E502940E}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{8517DD5D-DE8C-4D15-B3D3-6A17E502940E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8517DD5D-DE8C-4D15-B3D3-6A17E502940E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8517DD5D-DE8C-4D15-B3D3-6A17E502940E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8517DD5D-DE8C-4D15-B3D3-6A17E502940E}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{8517DD5D-DE8C-4D15-B3D3-6A17E502940E}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{8517DD5D-DE8C-4D15-B3D3-6A17E502940E}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

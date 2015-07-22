@@ -13745,6 +13745,11 @@ Keys keyData)
         ERROR1:
             MessageBox.Show(this, strError);
         }
+
+        private void MenuItem_chatForm_Click(object sender, EventArgs e)
+        {
+            OpenWindow<ChatForm>();
+        }
     }
 
     /// <summary>

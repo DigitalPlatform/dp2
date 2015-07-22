@@ -104,7 +104,14 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>.\Jurassic.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.AspNet.SignalR.Client">
+      <HintPath>..\packages\Microsoft.AspNet.SignalR.Client.1.2.2\lib\net40\Microsoft.AspNet.SignalR.Client.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Newtonsoft.Json.6.0.4\lib\net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
@@ -310,6 +317,12 @@
     </Compile>
     <Compile Include="Entity\NewInventoryForm.Designer.cs">
       <DependentUpon>NewInventoryForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="IM\ChatForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="IM\ChatForm.Designer.cs">
+      <DependentUpon>ChatForm.cs</DependentUpon>
     </Compile>
     <Compile Include="ItemHandOver\ScanBarcodeForm.cs">
       <SubType>Form</SubType>
@@ -1422,6 +1435,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Entity\NewInventoryForm.resx">
       <DependentUpon>NewInventoryForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="IM\ChatForm.resx">
+      <DependentUpon>ChatForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ItemHandOver\ScanBarcodeForm.resx">
       <DependentUpon>ScanBarcodeForm.cs</DependentUpon>

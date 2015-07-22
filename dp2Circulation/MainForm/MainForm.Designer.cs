@@ -154,6 +154,8 @@ namespace dp2Circulation
             this.MenuItem_resetSerialCode = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_utility = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator20 = new System.Windows.Forms.ToolStripSeparator();
+            this.menuItem_packageErrorLog = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator31 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_copyright = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip_main = new System.Windows.Forms.StatusStrip();
             this.toolStripProgressBar_main = new System.Windows.Forms.ToolStripProgressBar();
@@ -197,8 +199,7 @@ namespace dp2Circulation
             this.toolStripButton_close = new System.Windows.Forms.ToolStripButton();
             this.splitter_fixed = new System.Windows.Forms.Splitter();
             this.timer_operHistory = new System.Windows.Forms.Timer(this.components);
-            this.toolStripSeparator31 = new System.Windows.Forms.ToolStripSeparator();
-            this.menuItem_packageErrorLog = new System.Windows.Forms.ToolStripMenuItem();
+            this.MenuItem_chatForm = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip_main.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
             this.toolStrip_main.SuspendLayout();
@@ -473,6 +474,7 @@ namespace dp2Circulation
             this.toolStripMenuItem_statisForm,
             this.toolStripMenuItem_statisProjectManagement,
             this.toolStripSeparator14,
+            this.MenuItem_chatForm,
             this.MenuItem_messageForm,
             this.MenuItem_openReservationListForm,
             this.toolStripSeparator30,
@@ -1178,6 +1180,18 @@ namespace dp2Circulation
             this.toolStripSeparator20.Name = "toolStripSeparator20";
             this.toolStripSeparator20.Size = new System.Drawing.Size(174, 6);
             // 
+            // menuItem_packageErrorLog
+            // 
+            this.menuItem_packageErrorLog.Name = "menuItem_packageErrorLog";
+            this.menuItem_packageErrorLog.Size = new System.Drawing.Size(177, 22);
+            this.menuItem_packageErrorLog.Text = "打包错误日志(&L)...";
+            this.menuItem_packageErrorLog.Click += new System.EventHandler(this.menuItem_packageErrorLog_Click);
+            // 
+            // toolStripSeparator31
+            // 
+            this.toolStripSeparator31.Name = "toolStripSeparator31";
+            this.toolStripSeparator31.Size = new System.Drawing.Size(174, 6);
+            // 
             // MenuItem_copyright
             // 
             this.MenuItem_copyright.Name = "MenuItem_copyright";
@@ -1598,17 +1612,12 @@ namespace dp2Circulation
             this.splitter_fixed.TabIndex = 6;
             this.splitter_fixed.TabStop = false;
             // 
-            // toolStripSeparator31
+            // MenuItem_chatForm
             // 
-            this.toolStripSeparator31.Name = "toolStripSeparator31";
-            this.toolStripSeparator31.Size = new System.Drawing.Size(174, 6);
-            // 
-            // menuItem_packageErrorLog
-            // 
-            this.menuItem_packageErrorLog.Name = "menuItem_packageErrorLog";
-            this.menuItem_packageErrorLog.Size = new System.Drawing.Size(177, 22);
-            this.menuItem_packageErrorLog.Text = "打包错误日志(&L)...";
-            this.menuItem_packageErrorLog.Click += new System.EventHandler(this.menuItem_packageErrorLog_Click);
+            this.MenuItem_chatForm.Name = "MenuItem_chatForm";
+            this.MenuItem_chatForm.Size = new System.Drawing.Size(221, 22);
+            this.MenuItem_chatForm.Text = "聊天(&C)";
+            this.MenuItem_chatForm.Click += new System.EventHandler(this.MenuItem_chatForm_Click);
             // 
             // MainForm
             // 
@@ -1821,6 +1830,7 @@ namespace dp2Circulation
         private System.Windows.Forms.ToolStripMenuItem MenuItem_openReservationListForm;
         private System.Windows.Forms.ToolStripMenuItem menuItem_packageErrorLog;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator31;
+        private System.Windows.Forms.ToolStripMenuItem MenuItem_chatForm;
     }
 }
 

@@ -31,6 +31,8 @@ namespace dp2Circulation
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CfgDlg));
             this.tabControl_main = new System.Windows.Forms.TabControl();
             this.tabPage_server = new System.Windows.Forms.TabPage();
+            this.textBox_server_dp2MServerUrl = new System.Windows.Forms.TextBox();
+            this.label29 = new System.Windows.Forms.Label();
             this.textBox_server_pinyin_gcatUrl = new System.Windows.Forms.TextBox();
             this.label20 = new System.Windows.Forms.Label();
             this.textBox_server_authorNumber_gcatUrl = new System.Windows.Forms.TextBox();
@@ -268,12 +270,14 @@ namespace dp2Circulation
             this.tabControl_main.Multiline = true;
             this.tabControl_main.Name = "tabControl_main";
             this.tabControl_main.SelectedIndex = 0;
-            this.tabControl_main.Size = new System.Drawing.Size(498, 293);
+            this.tabControl_main.Size = new System.Drawing.Size(498, 313);
             this.tabControl_main.TabIndex = 0;
             // 
             // tabPage_server
             // 
             this.tabPage_server.AutoScroll = true;
+            this.tabPage_server.Controls.Add(this.textBox_server_dp2MServerUrl);
+            this.tabPage_server.Controls.Add(this.label29);
             this.tabPage_server.Controls.Add(this.textBox_server_pinyin_gcatUrl);
             this.tabPage_server.Controls.Add(this.label20);
             this.tabPage_server.Controls.Add(this.textBox_server_authorNumber_gcatUrl);
@@ -284,10 +288,28 @@ namespace dp2Circulation
             this.tabPage_server.Location = new System.Drawing.Point(4, 58);
             this.tabPage_server.Name = "tabPage_server";
             this.tabPage_server.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_server.Size = new System.Drawing.Size(490, 231);
+            this.tabPage_server.Size = new System.Drawing.Size(490, 251);
             this.tabPage_server.TabIndex = 0;
             this.tabPage_server.Text = " 服务器 ";
             this.tabPage_server.UseVisualStyleBackColor = true;
+            // 
+            // textBox_server_dp2MServerUrl
+            // 
+            this.textBox_server_dp2MServerUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_server_dp2MServerUrl.Location = new System.Drawing.Point(9, 211);
+            this.textBox_server_dp2MServerUrl.Name = "textBox_server_dp2MServerUrl";
+            this.textBox_server_dp2MServerUrl.Size = new System.Drawing.Size(470, 21);
+            this.textBox_server_dp2MServerUrl.TabIndex = 8;
+            // 
+            // label29
+            // 
+            this.label29.AutoSize = true;
+            this.label29.Location = new System.Drawing.Point(7, 195);
+            this.label29.Name = "label29";
+            this.label29.Size = new System.Drawing.Size(137, 12);
+            this.label29.TabIndex = 7;
+            this.label29.Text = "dp2MServer 服务器 URL:";
             // 
             // textBox_server_pinyin_gcatUrl
             // 
@@ -405,7 +427,7 @@ namespace dp2Circulation
             this.tabPage_defaultAccount.Location = new System.Drawing.Point(4, 58);
             this.tabPage_defaultAccount.Name = "tabPage_defaultAccount";
             this.tabPage_defaultAccount.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_defaultAccount.Size = new System.Drawing.Size(490, 231);
+            this.tabPage_defaultAccount.Size = new System.Drawing.Size(490, 251);
             this.tabPage_defaultAccount.TabIndex = 1;
             this.tabPage_defaultAccount.Text = " 缺省帐户 ";
             this.tabPage_defaultAccount.UseVisualStyleBackColor = true;
@@ -510,7 +532,7 @@ namespace dp2Circulation
             this.tabPage_cacheManage.Location = new System.Drawing.Point(4, 58);
             this.tabPage_cacheManage.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage_cacheManage.Name = "tabPage_cacheManage";
-            this.tabPage_cacheManage.Size = new System.Drawing.Size(490, 231);
+            this.tabPage_cacheManage.Size = new System.Drawing.Size(490, 251);
             this.tabPage_cacheManage.TabIndex = 2;
             this.tabPage_cacheManage.Text = " 缓存管理 ";
             this.tabPage_cacheManage.UseVisualStyleBackColor = true;
@@ -617,7 +639,7 @@ namespace dp2Circulation
             this.tabPage_charging.Location = new System.Drawing.Point(4, 58);
             this.tabPage_charging.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage_charging.Name = "tabPage_charging";
-            this.tabPage_charging.Size = new System.Drawing.Size(490, 231);
+            this.tabPage_charging.Size = new System.Drawing.Size(490, 251);
             this.tabPage_charging.TabIndex = 3;
             this.tabPage_charging.Text = "出纳";
             this.tabPage_charging.UseVisualStyleBackColor = true;
@@ -854,7 +876,7 @@ namespace dp2Circulation
             this.tabPage_quickCharging.Controls.Add(this.checkBox_quickCharging_verifyBarcode);
             this.tabPage_quickCharging.Location = new System.Drawing.Point(4, 58);
             this.tabPage_quickCharging.Name = "tabPage_quickCharging";
-            this.tabPage_quickCharging.Size = new System.Drawing.Size(490, 231);
+            this.tabPage_quickCharging.Size = new System.Drawing.Size(490, 251);
             this.tabPage_quickCharging.TabIndex = 17;
             this.tabPage_quickCharging.Text = "快捷出纳";
             this.tabPage_quickCharging.UseVisualStyleBackColor = true;
@@ -972,7 +994,7 @@ namespace dp2Circulation
             this.tabPage_itemManagement.Location = new System.Drawing.Point(4, 58);
             this.tabPage_itemManagement.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage_itemManagement.Name = "tabPage_itemManagement";
-            this.tabPage_itemManagement.Size = new System.Drawing.Size(490, 231);
+            this.tabPage_itemManagement.Size = new System.Drawing.Size(490, 251);
             this.tabPage_itemManagement.TabIndex = 5;
             this.tabPage_itemManagement.Text = "种册";
             this.tabPage_itemManagement.UseVisualStyleBackColor = true;
@@ -1093,7 +1115,7 @@ namespace dp2Circulation
             this.tabPage_ui.Location = new System.Drawing.Point(4, 58);
             this.tabPage_ui.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage_ui.Name = "tabPage_ui";
-            this.tabPage_ui.Size = new System.Drawing.Size(490, 231);
+            this.tabPage_ui.Size = new System.Drawing.Size(490, 251);
             this.tabPage_ui.TabIndex = 4;
             this.tabPage_ui.Text = "外观";
             this.tabPage_ui.UseVisualStyleBackColor = true;
@@ -1171,7 +1193,7 @@ namespace dp2Circulation
             this.tabPage_passgate.Location = new System.Drawing.Point(4, 58);
             this.tabPage_passgate.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage_passgate.Name = "tabPage_passgate";
-            this.tabPage_passgate.Size = new System.Drawing.Size(490, 231);
+            this.tabPage_passgate.Size = new System.Drawing.Size(490, 251);
             this.tabPage_passgate.TabIndex = 6;
             this.tabPage_passgate.Text = "入馆登记";
             this.tabPage_passgate.UseVisualStyleBackColor = true;
@@ -1222,7 +1244,7 @@ namespace dp2Circulation
             this.tabPage_search.Location = new System.Drawing.Point(4, 58);
             this.tabPage_search.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage_search.Name = "tabPage_search";
-            this.tabPage_search.Size = new System.Drawing.Size(490, 231);
+            this.tabPage_search.Size = new System.Drawing.Size(490, 251);
             this.tabPage_search.TabIndex = 7;
             this.tabPage_search.Text = "检索";
             this.tabPage_search.UseVisualStyleBackColor = true;
@@ -1643,7 +1665,7 @@ namespace dp2Circulation
             this.tabPage_print.Location = new System.Drawing.Point(4, 58);
             this.tabPage_print.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage_print.Name = "tabPage_print";
-            this.tabPage_print.Size = new System.Drawing.Size(490, 231);
+            this.tabPage_print.Size = new System.Drawing.Size(490, 251);
             this.tabPage_print.TabIndex = 8;
             this.tabPage_print.Text = "凭条打印";
             this.tabPage_print.UseVisualStyleBackColor = true;
@@ -1667,7 +1689,7 @@ namespace dp2Circulation
             this.label_print_projectNameMessage.Location = new System.Drawing.Point(114, 181);
             this.label_print_projectNameMessage.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label_print_projectNameMessage.Name = "label_print_projectNameMessage";
-            this.label_print_projectNameMessage.Size = new System.Drawing.Size(171, 51);
+            this.label_print_projectNameMessage.Size = new System.Drawing.Size(154, 51);
             this.label_print_projectNameMessage.TabIndex = 8;
             // 
             // textBox_print_projectName
@@ -1744,7 +1766,7 @@ namespace dp2Circulation
             this.toolStripDropDownButton_managePrintScript});
             this.toolStrip_print.Location = new System.Drawing.Point(0, 14);
             this.toolStrip_print.Name = "toolStrip_print";
-            this.toolStrip_print.Size = new System.Drawing.Size(288, 20);
+            this.toolStrip_print.Size = new System.Drawing.Size(271, 20);
             this.toolStrip_print.TabIndex = 0;
             this.toolStrip_print.Visible = false;
             // 
@@ -1784,7 +1806,7 @@ namespace dp2Circulation
             this.tabPage_amerce.Location = new System.Drawing.Point(4, 58);
             this.tabPage_amerce.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage_amerce.Name = "tabPage_amerce";
-            this.tabPage_amerce.Size = new System.Drawing.Size(490, 231);
+            this.tabPage_amerce.Size = new System.Drawing.Size(490, 251);
             this.tabPage_amerce.TabIndex = 10;
             this.tabPage_amerce.Text = "违约/交费";
             this.tabPage_amerce.UseVisualStyleBackColor = true;
@@ -1843,7 +1865,7 @@ namespace dp2Circulation
             this.tabPage_accept.Location = new System.Drawing.Point(4, 58);
             this.tabPage_accept.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage_accept.Name = "tabPage_accept";
-            this.tabPage_accept.Size = new System.Drawing.Size(490, 231);
+            this.tabPage_accept.Size = new System.Drawing.Size(490, 251);
             this.tabPage_accept.TabIndex = 11;
             this.tabPage_accept.Text = "验收";
             this.tabPage_accept.UseVisualStyleBackColor = true;
@@ -1865,7 +1887,7 @@ namespace dp2Circulation
             this.tabPage_cardReader.Controls.Add(this.groupBox8);
             this.tabPage_cardReader.Location = new System.Drawing.Point(4, 58);
             this.tabPage_cardReader.Name = "tabPage_cardReader";
-            this.tabPage_cardReader.Size = new System.Drawing.Size(490, 231);
+            this.tabPage_cardReader.Size = new System.Drawing.Size(490, 251);
             this.tabPage_cardReader.TabIndex = 12;
             this.tabPage_cardReader.Text = "读卡器";
             this.tabPage_cardReader.UseVisualStyleBackColor = true;
@@ -1912,7 +1934,7 @@ namespace dp2Circulation
             this.tabPage_patron.Controls.Add(this.checkBox_patron_displaySetReaderBarcodeDialog);
             this.tabPage_patron.Location = new System.Drawing.Point(4, 58);
             this.tabPage_patron.Name = "tabPage_patron";
-            this.tabPage_patron.Size = new System.Drawing.Size(490, 231);
+            this.tabPage_patron.Size = new System.Drawing.Size(490, 251);
             this.tabPage_patron.TabIndex = 13;
             this.tabPage_patron.Text = "读者";
             this.tabPage_patron.UseVisualStyleBackColor = true;
@@ -1968,7 +1990,7 @@ namespace dp2Circulation
             this.tabPage_operLog.Controls.Add(this.checkBox_operLog_displayReaderBorrowHistory);
             this.tabPage_operLog.Location = new System.Drawing.Point(4, 58);
             this.tabPage_operLog.Name = "tabPage_operLog";
-            this.tabPage_operLog.Size = new System.Drawing.Size(490, 231);
+            this.tabPage_operLog.Size = new System.Drawing.Size(490, 251);
             this.tabPage_operLog.TabIndex = 15;
             this.tabPage_operLog.Text = "日志";
             this.tabPage_operLog.UseVisualStyleBackColor = true;
@@ -2041,7 +2063,7 @@ namespace dp2Circulation
             this.tabPage_global.Controls.Add(this.checkBox_global_displayScriptErrorDialog);
             this.tabPage_global.Location = new System.Drawing.Point(4, 58);
             this.tabPage_global.Name = "tabPage_global";
-            this.tabPage_global.Size = new System.Drawing.Size(490, 231);
+            this.tabPage_global.Size = new System.Drawing.Size(490, 251);
             this.tabPage_global.TabIndex = 14;
             this.tabPage_global.Text = "全局";
             this.tabPage_global.UseVisualStyleBackColor = true;
@@ -2083,7 +2105,7 @@ namespace dp2Circulation
             this.tabPage_fingerprint.Controls.Add(this.button_fingerprint_clearLocalCacheFiles);
             this.tabPage_fingerprint.Location = new System.Drawing.Point(4, 58);
             this.tabPage_fingerprint.Name = "tabPage_fingerprint";
-            this.tabPage_fingerprint.Size = new System.Drawing.Size(490, 231);
+            this.tabPage_fingerprint.Size = new System.Drawing.Size(490, 251);
             this.tabPage_fingerprint.TabIndex = 16;
             this.tabPage_fingerprint.Text = "指纹";
             this.tabPage_fingerprint.UseVisualStyleBackColor = true;
@@ -2143,7 +2165,7 @@ namespace dp2Circulation
             this.groupBox7.Controls.Add(this.textBox_fingerprint_readerUrl);
             this.groupBox7.Location = new System.Drawing.Point(3, 14);
             this.groupBox7.Name = "groupBox7";
-            this.groupBox7.Size = new System.Drawing.Size(416, 84);
+            this.groupBox7.Size = new System.Drawing.Size(382, 84);
             this.groupBox7.TabIndex = 0;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = " 指纹阅读器接口 URL ";
@@ -2151,7 +2173,7 @@ namespace dp2Circulation
             // button_fingerprint_setDefaultValue
             // 
             this.button_fingerprint_setDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(305, 47);
+            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(271, 47);
             this.button_fingerprint_setDefaultValue.Name = "button_fingerprint_setDefaultValue";
             this.button_fingerprint_setDefaultValue.Size = new System.Drawing.Size(105, 23);
             this.button_fingerprint_setDefaultValue.TabIndex = 1;
@@ -2165,7 +2187,7 @@ namespace dp2Circulation
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_fingerprint_readerUrl.Location = new System.Drawing.Point(6, 20);
             this.textBox_fingerprint_readerUrl.Name = "textBox_fingerprint_readerUrl";
-            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(404, 21);
+            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(370, 21);
             this.textBox_fingerprint_readerUrl.TabIndex = 0;
             // 
             // button_fingerprint_clearLocalCacheFiles
@@ -2184,7 +2206,7 @@ namespace dp2Circulation
             this.tabPage_labelPrint.Controls.Add(this.label28);
             this.tabPage_labelPrint.Location = new System.Drawing.Point(4, 58);
             this.tabPage_labelPrint.Name = "tabPage_labelPrint";
-            this.tabPage_labelPrint.Size = new System.Drawing.Size(490, 231);
+            this.tabPage_labelPrint.Size = new System.Drawing.Size(490, 251);
             this.tabPage_labelPrint.TabIndex = 18;
             this.tabPage_labelPrint.Text = "标签打印";
             this.tabPage_labelPrint.UseVisualStyleBackColor = true;
@@ -2214,7 +2236,7 @@ namespace dp2Circulation
             // button_OK
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_OK.Location = new System.Drawing.Point(351, 310);
+            this.button_OK.Location = new System.Drawing.Point(351, 330);
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(75, 22);
             this.button_OK.TabIndex = 1;
@@ -2226,7 +2248,7 @@ namespace dp2Circulation
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.button_Cancel.Location = new System.Drawing.Point(432, 310);
+            this.button_Cancel.Location = new System.Drawing.Point(432, 330);
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(75, 22);
             this.button_Cancel.TabIndex = 2;
@@ -2240,7 +2262,7 @@ namespace dp2Circulation
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
-            this.ClientSize = new System.Drawing.Size(517, 342);
+            this.ClientSize = new System.Drawing.Size(517, 362);
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);
             this.Controls.Add(this.tabControl_main);
@@ -2496,5 +2518,7 @@ namespace dp2Circulation
         private System.Windows.Forms.CheckBox checkBox_charging_autoOperItemDialogSingleItem;
         private System.Windows.Forms.CheckBox checkBox_charging_isbnBorrow;
         private System.Windows.Forms.CheckBox checkBox_quickCharging_isbnBorrow;
+        private System.Windows.Forms.TextBox textBox_server_dp2MServerUrl;
+        private System.Windows.Forms.Label label29;
     }
 }

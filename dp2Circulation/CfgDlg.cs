@@ -81,6 +81,12 @@ namespace dp2Circulation
                 "pinyin_server_url",
                 "http://dp2003.com/gcatserver/");    // 
 
+            // dp2MServer URL
+            this.textBox_server_dp2MServerUrl.Text =
+                ap.GetString("config",
+                "im_server_url",
+                "http://dp2003.com/dp2MServer");
+
 
             // default account
             this.textBox_defaultAccount_userName.Text =
@@ -641,7 +647,10 @@ false);
                 "pinyin_server_url",
                 this.textBox_server_pinyin_gcatUrl.Text);
 
-
+            // dp2MServer URL
+            ap.SetString("config",
+                "im_server_url",
+                this.textBox_server_dp2MServerUrl.Text);
 
             // default account
 

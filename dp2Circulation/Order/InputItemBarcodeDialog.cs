@@ -12,6 +12,8 @@ using DigitalPlatform;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
+using System.Threading;
+using DigitalPlatform.CommonControl;
 
 namespace dp2Circulation
 {
@@ -20,6 +22,8 @@ namespace dp2Circulation
     /// </summary>
     internal partial class InputItemBarcodeDialog : Form
     {
+        FloatingMessageForm _floatingMessage = null;
+
         public ApplicationInfo AppInfo = null;
 
         public bool SeriesMode = false;
@@ -92,6 +96,13 @@ namespace dp2Circulation
             }
 
             FillBookItemList();
+
+            {
+                _floatingMessage = new FloatingMessageForm(this);
+                _floatingMessage.Font = new System.Drawing.Font(this.Font.FontFamily, this.Font.Size * 2, FontStyle.Bold);
+                _floatingMessage.Opacity = 0.7;
+                _floatingMessage.Show(this);
+            }
         }
 
         private void InputItemBarcodeDialog_FormClosed(object sender, FormClosedEventArgs e)
@@ -109,7 +120,25 @@ namespace dp2Circulation
             }
         }
 
-        // 将textbox的修改兑现到内存中
+        void SetFloatMessage(string strColor,
+string strText)
+        {
+            if (this.InvokeRequired)
+            {
+                // 事件是在多线程上下文中触发的，需要 Invoke 显示信息
+                this.BeginInvoke(new Action<string, string>(SetFloatMessage), strColor, strText);
+                return;
+            }
+
+            if (strColor == "waiting")
+                this._floatingMessage.RectColor = Color.FromArgb(80, 80, 80);
+            else
+                this._floatingMessage.RectColor = Color.Purple;
+
+            this._floatingMessage.Text = strText;
+        }
+
+        // 将 textbox 的修改兑现到内存中
         int UpdateData(out string strError)
         {
             strError = "";
@@ -128,41 +157,60 @@ namespace dp2Circulation
 
             if (strCurrentBarcode != this.textBox_itemBarcode.Text)
             {
+                // 2015/7/22
+                // 在 listview 内对册条码号进行查重
+                ListViewItem dup = ListViewUtil.FindItem(this.listView_barcodes, this.textBox_itemBarcode.Text, 0);
+                if (dup != null)
+                {
+                    strError = "册条码号 '"+this.textBox_itemBarcode.Text+"' 在当前列表中已经存在，不允许重复登入";
+                    return -1;
+                }
+
                 // 校验barcode合法性
                 if (this.VerifyBarcode != null
                     && this.textBox_itemBarcode.Text != "") // 2009/1/15
                 {
-                    VerifyBarcodeEventArgs e = new VerifyBarcodeEventArgs();
-                    e.Barcode = this.textBox_itemBarcode.Text;
-                    this.VerifyBarcode(this, e);
-                    // return:
-                    //      -2  服务器没有配置校验方法，无法校验
-                    //      -1  error
-                    //      0   不是合法的条码号
-                    //      1   是合法的读者证条码号
-                    //      2   是合法的册条码号
-
-                    if (e.Result != -2)
+                    this.SetFloatMessage("waiting", "正在验证册条码号，请稍候 ...");
+                    Application.DoEvents();
+                    // Thread.Sleep(5000);
+                    try
                     {
-                        if (e.Result != 2)
+                        VerifyBarcodeEventArgs e = new VerifyBarcodeEventArgs();
+                        e.Barcode = this.textBox_itemBarcode.Text;
+                        this.VerifyBarcode(this, e);
+                        // return:
+                        //      -2  服务器没有配置校验方法，无法校验
+                        //      -1  error
+                        //      0   不是合法的条码号
+                        //      1   是合法的读者证条码号
+                        //      2   是合法的册条码号
+                        if (e.Result != -2)
                         {
-                            if (String.IsNullOrEmpty(strError) == false)
-                                strError = e.ErrorInfo;
-                            else
+                            if (e.Result != 2)
                             {
-                                // 如果从服务器端没有得到出错信息，则补充
-                                //      -1  error
-                                if (e.Result == -1)
-                                    strError = "在校验条码号 '" + e.Barcode + "' 时出错";
-                                //      0   不是合法的条码号
-                                else if (e.Result == 0)
-                                    strError = "'" + e.Barcode + "' 不是合法的条码号";
-                                //      1   是合法的读者证条码号
-                                else if (e.Result == 1)
-                                    strError = "'" + e.Barcode + "' 是读者证条码号(而不是册条码号)";
+                                if (String.IsNullOrEmpty(strError) == false)
+                                    strError = e.ErrorInfo;
+                                else
+                                {
+                                    // 如果从服务器端没有得到出错信息，则补充
+                                    //      -1  error
+                                    if (e.Result == -1)
+                                        strError = "在校验条码号 '" + e.Barcode + "' 时出错";
+                                    //      0   不是合法的条码号
+                                    else if (e.Result == 0)
+                                        strError = "'" + e.Barcode + "' 不是合法的条码号";
+                                    //      1   是合法的读者证条码号
+                                    else if (e.Result == 1)
+                                        strError = "'" + e.Barcode + "' 是读者证条码号(而不是册条码号)";
+                                }
+                                return -1;
                             }
-                            return -1;
                         }
+
+                    }
+                    finally
+                    {
+                        this.SetFloatMessage("", "");
                     }
                 }
 
@@ -186,29 +234,43 @@ namespace dp2Circulation
         
         private void button_register_Click(object sender, EventArgs e)
         {
-            /*
-            if (this.textBox_itemBarcode.Text == "")
-            {
-                MessageBox.Show(this, "尚未输入册条码号");
-                this.textBox_itemBarcode.Focus();
-                return;
-            }*/
-
             if (this.listView_barcodes.SelectedIndices.Count == 0)
             {
                 MessageBox.Show(this, "尚未选定当前行");
                 return;
             }
 
-            string strError = "";
-            int nRet = UpdateData(out strError);
-            if (nRet == -1)
+            this.Enabled = false;
+            try
             {
-                MessageBox.Show(this, strError);
+                string strError = "";
+                /*
+发生未捕获的界面线程异常: 
+Type: System.ArgumentOutOfRangeException
+Message: InvalidArgument=Value of '0' is not valid for 'index'.
+Parameter name: index
+Stack:
+at System.Windows.Forms.ListView.SelectedIndexCollection.get_Item(Int32 index)
+at dp2Circulation.InputItemBarcodeDialog.button_register_Click(Object sender, EventArgs e)
+                 * * */
+                // 2015/7/22 注：UpdateData() 方法里面可能涉及到 Channel 的调用，会出让界面控制权，这时候操作者如果鼠标点击 ListView，可能会改变 SelectedIndices。
+                // 为此，需要暂时禁止整个对话框
+                int nRet = UpdateData(out strError);
+                if (nRet == -1)
+                {
+                    MessageBox.Show(this, strError);
+                    return;
+                }
+            }
+            finally
+            {
+                this.Enabled = true;
+
                 this.textBox_itemBarcode.SelectAll();
                 this.textBox_itemBarcode.Focus();
-                return;
             }
+
+            Debug.Assert(this.listView_barcodes.SelectedIndices.Count > 0, "");
 
             // 选定后一行
             int index = this.listView_barcodes.SelectedIndices[0];
