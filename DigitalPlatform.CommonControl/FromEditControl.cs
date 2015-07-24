@@ -1077,6 +1077,14 @@ namespace DigitalPlatform.CommonControl
         // Captions
         public CaptionEditControl captions = null;
 
+        void DisposeChildControls()
+        {
+            label_color.Dispose();
+            textBox_style.Dispose();
+            captions.Dispose();
+            Container = null;
+        }
+
         ElementState m_state = ElementState.Normal;
 
         public ElementState State
@@ -1120,6 +1128,7 @@ namespace DigitalPlatform.CommonControl
                 {
                     // release managed resources if any
                     AddEvents(false);
+                    DisposeChildControls();
                 }
 
                 // release unmanaged resource

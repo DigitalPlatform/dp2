@@ -2120,11 +2120,6 @@ namespace DigitalPlatform.CommonControl
         // ÔªËØ
         public ComboBox comboBox_element = null;
 
-        /*
-        // ÐÞÊÎ´Ê
-        public ComboBox comboBox_refinement = null;
-         * */
-
         // ±àÂë·½°¸
         public ComboBox comboBox_scheme = null;
 
@@ -2133,6 +2128,16 @@ namespace DigitalPlatform.CommonControl
 
         // ÄÚÈÝ
         public TextBox textBox_value = null;
+
+        void DisposeChildControls()
+        {
+            label_color.Dispose();
+            comboBox_element.Dispose();
+            comboBox_scheme.Dispose();
+            comboBox_language.Dispose();
+            textBox_value.Dispose();
+            Container = null;
+        }
 
         ElementState m_state = ElementState.Normal;
 
@@ -2177,6 +2182,7 @@ namespace DigitalPlatform.CommonControl
                 {
                     // release managed resources if any
                     AddEvents(false);
+                    DisposeChildControls();
                 }
 
                 // release unmanaged resource
@@ -2213,7 +2219,6 @@ namespace DigitalPlatform.CommonControl
 
             this.label_color.BackColor = SystemColors.Window;
         }
-
 
         public DcElement(DcEditor container)
         {
@@ -2273,7 +2278,6 @@ namespace DigitalPlatform.CommonControl
             comboBox_scheme.MinimumSize = new Size(50, 28);
 
             comboBox_scheme.ForeColor = this.Container.tableLayoutPanel_main.ForeColor;
-
 
             // language
             comboBox_language = new ComboBox();

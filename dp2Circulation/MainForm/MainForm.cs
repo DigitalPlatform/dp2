@@ -1268,7 +1268,6 @@ AppInfo.GetString("config",
                 {
                     try
                     {
-
                         // 2013/6/18
                         nRet = TouchServer(false);
                         if (nRet == -1)
@@ -3025,6 +3024,7 @@ AppInfo.GetString("config",
             }
         }
 
+        int _inPrepareSearch = 0;   // 进入的次数，用以防止嵌套调用
 
         // return:
         //      0   没有准备成功
@@ -3037,18 +3037,21 @@ AppInfo.GetString("config",
         public int PrepareSearch(bool bActivateStop = true)
         {
             if (String.IsNullOrEmpty(this.LibraryServerUrl) == true)
-                return 0;
+                return 0;   // 调用者在看到返回 0 以后，不应再调用 EndSearch() 了
 
-            this.Channel.Url = this.LibraryServerUrl;
+            this._inPrepareSearch++;
 
-            this.Channel.BeforeLogin -= new DigitalPlatform.CirculationClient.BeforeLoginEventHandle(Channel_BeforeLogin);
-            this.Channel.BeforeLogin += new DigitalPlatform.CirculationClient.BeforeLoginEventHandle(Channel_BeforeLogin);
+            if (this._inPrepareSearch == 1)
+            {
+                this.Channel.Url = this.LibraryServerUrl;
 
-            this.Channel.AfterLogin -= new AfterLoginEventHandle(Channel_AfterLogin);
-            this.Channel.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
+                this.Channel.BeforeLogin += new DigitalPlatform.CirculationClient.BeforeLoginEventHandle(Channel_BeforeLogin);
 
-            Stop = new DigitalPlatform.Stop();
-            Stop.Register(stopManager, bActivateStop);	// 和容器关联
+                this.Channel.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
+
+                Stop = new DigitalPlatform.Stop();
+                Stop.Register(stopManager, bActivateStop);	// 和容器关联
+            }
 
             return 1;
         }
@@ -3059,11 +3062,19 @@ AppInfo.GetString("config",
         /// <returns>返回 0</returns>
         public int EndSearch(bool bActivateStop = true)
         {
-            if (Stop != null) // 脱离关联
+            if (this._inPrepareSearch == 1)
             {
-                Stop.Unregister(bActivateStop);	// 和容器关联
-                Stop = null;
+                if (Stop != null) // 脱离关联
+                {
+                    Stop.Unregister(bActivateStop);	// 和容器关联
+                    Stop = null;
+                }
+
+                this.Channel.BeforeLogin -= new DigitalPlatform.CirculationClient.BeforeLoginEventHandle(Channel_BeforeLogin);
+                this.Channel.AfterLogin -= new AfterLoginEventHandle(Channel_AfterLogin);
             }
+
+            this._inPrepareSearch--;
 
             return 0;
         }
@@ -13321,7 +13332,12 @@ Keys keyData)
                             string strBiblioAccess = "";
                             string strEntityAccess = "";
 
-                            this.PrepareSearch(true);
+                            nRet = this.PrepareSearch(true);
+                            if (nRet == 0)
+                            {
+                                strError = "PrepareSearch() error";
+                                return -1;
+                            }
                             try
                             {
                                 nRet = EntityRegisterWizard.DetectAccess(this.Channel,

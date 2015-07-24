@@ -2443,6 +2443,12 @@ MessageBoxDefaultButton.Button1);
 
         public BiblioRegisterControl _biblioRegister = null;
 
+        public override void DisposeChildControls()
+        {
+            _biblioRegister.Dispose();
+            base.DisposeChildControls();
+        }
+
         /// <summary>
         /// 构造函数
         /// </summary>
@@ -2475,7 +2481,6 @@ MessageBoxDefaultButton.Button1);
         {
             table.Controls.Remove(this.label_color);
             table.Controls.Remove(this._biblioRegister);
-
         }
 
         public override void AddControls(TableLayoutPanel table, int nRow)

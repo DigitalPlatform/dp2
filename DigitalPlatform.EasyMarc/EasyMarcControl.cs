@@ -1145,10 +1145,10 @@ namespace DigitalPlatform.EasyMarc
                 }
 #endif
 
+                Debug.Assert(this.tableLayoutPanel_content.Controls.Count == 0, "");
+
                 // this.Items.Clear();
                 this.ClearItems();
-
-                GC.SuppressFinalize(this);
 
                 this.tableLayoutPanel_content.RowCount = 2;    // 为什么是2？
 
@@ -2861,6 +2861,15 @@ namespace DigitalPlatform.EasyMarc
 
         ItemState m_state = ItemState.Normal;
 
+        void DisposeChildControls()
+        {
+            label_color.Dispose();
+            label_caption.Dispose();
+            splitter.Dispose();
+            textBox_content.Dispose();
+            Container = null;
+        }
+
         #region 释放资源
 
         ~EasyLine()
@@ -2886,6 +2895,7 @@ namespace DigitalPlatform.EasyMarc
                 {
                     // release managed resources if any
                     AddEvents(false);
+                    DisposeChildControls();
                 }
 
                 // release unmanaged resource
@@ -3175,19 +3185,14 @@ namespace DigitalPlatform.EasyMarc
                 this.label_color.MouseClick += new MouseEventHandler(label_color_MouseClick);
 
                 this.textBox_content.TextChanged += new EventHandler(textBox_content_TextChanged);
-
                 this.textBox_content.Enter += new EventHandler(control_Enter);
-
                 this.textBox_content.KeyDown += textBox_content_KeyDown;
-
                 this.textBox_content.KeyPress += textBox_content_KeyPress;
-
                 this.textBox_content.MouseWheel += textBox_content_MouseWheel;
 
                 // this.splitter.Paint += new PaintEventHandler(splitter_Paint);
 
                 this.splitter.MouseDown += new MouseEventHandler(splitter_MouseDown);
-
                 this.splitter.MouseUp += new MouseEventHandler(splitter_MouseUp);
 
 #if NO

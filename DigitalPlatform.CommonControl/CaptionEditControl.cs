@@ -1001,6 +1001,14 @@ namespace DigitalPlatform.CommonControl
         // 文字
         public TextBox textBox_value = null;
 
+        void DisposeChildControls()
+        {
+            label_color.Dispose();
+            comboBox_language.Dispose();
+            textBox_value.Dispose();
+            Container = null;
+        }
+
         ElementState m_state = ElementState.Normal;
 
         public ElementState State
@@ -1044,6 +1052,7 @@ namespace DigitalPlatform.CommonControl
                 {
                     // release managed resources if any
                     AddEvents(false);
+                    DisposeChildControls();
                 }
 
                 // release unmanaged resource
@@ -1113,8 +1122,6 @@ namespace DigitalPlatform.CommonControl
             comboBox_language.ForeColor = this.Container.tableLayoutPanel_main.ForeColor;
 
             comboBox_language.Text = "";
-
-
 
             // value
             textBox_value = new TextBox();
@@ -1476,8 +1483,6 @@ namespace DigitalPlatform.CommonControl
                 return;
             }
         }
-
-
 
         // 在颜色label上单击鼠标
         void label_color_MouseClick(object sender, MouseEventArgs e)

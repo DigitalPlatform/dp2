@@ -653,6 +653,18 @@ namespace DigitalPlatform.CommonControl
         public ComboBox comboBox_from = null;
         public ComboBox comboBox_matchStyle = null;
 
+        void DisposeChildControls()
+        {
+            label_state.Dispose();
+            comboBox_logicOperator.Dispose();
+            comboBox_server.Dispose();
+            comboBox_dbName.Dispose();
+            textBox_word.Dispose();
+            comboBox_from.Dispose();
+            comboBox_matchStyle.Dispose();
+            Container = null;
+        }
+
         #region 释放资源
 
         ~dp2QueryLine()
@@ -678,6 +690,7 @@ namespace DigitalPlatform.CommonControl
                 {
                     // release managed resources if any
                     AddEvents(false);
+                    DisposeChildControls();
                 }
 
                 // release unmanaged resource

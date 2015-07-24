@@ -1552,15 +1552,18 @@ namespace DigitalPlatform.CommonControl
         // 颜色、popupmenu
         public Label label_color = null;
 
-        /*
-        // 馆名
-        public ComboBox comboBox_library = null;
-         * */
-
         // 馆藏地点
         public ComboBox comboBox_location = null;
 
         public CheckBox checkBox_arrived = null;
+
+        void DisposeChildControls()
+        {
+            label_color.Dispose();
+            comboBox_location.Dispose();
+            checkBox_arrived.Dispose();
+            Container = null;
+        }
 
         ItemState m_state = ItemState.Normal;
 
@@ -1621,6 +1624,7 @@ namespace DigitalPlatform.CommonControl
                 {
                     // release managed resources if any
                     AddEvents(false);
+                    DisposeChildControls();
                 }
 
                 // release unmanaged resource

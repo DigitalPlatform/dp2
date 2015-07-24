@@ -66,6 +66,18 @@ namespace dp2Circulation
         // 批次号
         public Label label_batchNo = null;
 
+        public override void DisposeChildControls()
+        {
+            splitter.Dispose();
+            textBox_barcode.Dispose();
+            comboBox_location.Dispose();
+            comboBox_bookType.Dispose();
+            textBox_accessNo.Dispose();
+            textBox_price.Dispose();
+            label_refID.Dispose();
+            label_batchNo.Dispose();
+            base.DisposeChildControls();
+        }
 
         public EntityLine(EntitiesControl container)
         {

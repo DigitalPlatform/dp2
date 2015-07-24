@@ -2458,7 +2458,6 @@ Color.FromArgb(50, Color.Gray)
         // 单价
         public DoubleTextBox textBox_price = null;
 
-
         // 去向
         // public TextBox textBox_location = null;
         public LocationEditControl location = null;
@@ -2475,6 +2474,23 @@ Color.FromArgb(50, Color.Gray)
         public Label label_other = null;
 
         internal string m_otherXml = "";    // 表示其他信息的XML记录
+
+        void DisposeChildControls()
+        {
+            label_color.Dispose();
+            textBox_catalogNo.Dispose();
+            comboBox_seller.Dispose();
+            comboBox_source.Dispose();
+            dateRange_range.Dispose();
+            comboBox_issueCount.Dispose();
+            comboBox_copy.Dispose();
+            textBox_price.Dispose();
+            location.Dispose();
+            comboBox_class.Dispose();
+            label_sellerAddress.Dispose();
+            label_other.Dispose();
+            Container = null;
+        }
 
         ItemState m_state = ItemState.Normal;
 
@@ -2506,6 +2522,7 @@ Color.FromArgb(50, Color.Gray)
                 {
                     // release managed resources if any
                     AddEvents(false);
+                    DisposeChildControls();
                 }
 
                 // release unmanaged resource
@@ -2541,7 +2558,6 @@ Color.FromArgb(50, Color.Gray)
             textBox_catalogNo.Margin = new Padding(6, nTopBlank + 6, 6, 0);
             textBox_catalogNo.ForeColor = this.Container.tableLayoutPanel_content.ForeColor;
             // this.textBox_catalogNo.Visible = false;
-
 
             // 渠道
             comboBox_seller = new ComboBox();
@@ -2600,8 +2616,6 @@ Color.FromArgb(50, Color.Gray)
                 1, 0);
             // this.dateRange_range.Visible = false;
 
-
-
             // 期数
             /*
             textBox_issueCount = new TextBox();
@@ -2634,8 +2648,6 @@ Color.FromArgb(50, Color.Gray)
             comboBox_issueCount.Margin = new Padding(6, nTopBlank + 6, // + 3,
                 6, 0);
             // this.comboBox_issueCount.Visible = false;
-
-
 
             // 复本数
             /*
@@ -2670,8 +2682,6 @@ Color.FromArgb(50, Color.Gray)
             comboBox_copy.MinimumSize = new Size(30, 28*2);
             // this.comboBox_copy.Visible = false;
 
-
-
             // 单价
             textBox_price = new DoubleTextBox();
             textBox_price.TextBox.BorderStyle = BorderStyle.None;
@@ -2689,7 +2699,6 @@ Color.FromArgb(50, Color.Gray)
                 6, 0);
             // textBox_price.BorderStyle = BorderStyle.FixedSingle;
             // this.textBox_price.Visible = false;
-
 
             // 去向
             location = new LocationEditControl();
@@ -2733,7 +2742,6 @@ Color.FromArgb(50, Color.Gray)
 
             this.label_sellerAddress.ForeColor = this.Container.tableLayoutPanel_content.ForeColor;
             // this.label_sellerAddress.Visible = false;
-
 
             // 其他
             this.label_other = new Label();

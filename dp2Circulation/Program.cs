@@ -24,7 +24,7 @@ namespace dp2Circulation
         [STAThread]
         static void Main()
         {
-            PrepareCatchException();
+            //PrepareCatchException();
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);

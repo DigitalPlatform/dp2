@@ -980,7 +980,6 @@ namespace dp2Circulation
                         if (Channel.ErrorCode == ErrorCode.ItemBarcodeDup)
                         {
                             this.MainForm.PrepareSearch();
-
                             try
                             {
                                 ItemBarcodeDupDlg dupdlg = new ItemBarcodeDupDlg();
@@ -1016,7 +1015,6 @@ namespace dp2Circulation
                                 this.MainForm.EndSearch();
                             }
                         }
-
 
                         goto ERROR1;
                     } // end of return -1

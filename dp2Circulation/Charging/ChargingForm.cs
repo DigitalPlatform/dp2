@@ -2234,7 +2234,6 @@ dlg.UiState);
                             if (Channel.ErrorCode == DigitalPlatform.CirculationClient.localhost.ErrorCode.ItemBarcodeDup)
                             {
                                 this.MainForm.PrepareSearch();
-
                                 try
                                 {
                                     ItemBarcodeDupDlg dupdlg = new ItemBarcodeDupDlg();
@@ -2470,7 +2469,6 @@ dlg.UiState);
                             if (Channel.ErrorCode == DigitalPlatform.CirculationClient.localhost.ErrorCode.ItemBarcodeDup)
                             {
                                 this.MainForm.PrepareSearch();
-
                                 try
                                 {
                                     ItemBarcodeDupDlg dupdlg = new ItemBarcodeDupDlg();

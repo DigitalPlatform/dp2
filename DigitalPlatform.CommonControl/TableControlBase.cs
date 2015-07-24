@@ -433,6 +433,12 @@ namespace DigitalPlatform.CommonControl
         // 颜色、popupmenu
         public Label label_color = null;
 
+        public virtual void DisposeChildControls()
+        {
+            label_color.Dispose();
+            Container = null;
+        }
+
         #region 释放资源
 
         ~TableItemBase()
@@ -458,6 +464,7 @@ namespace DigitalPlatform.CommonControl
                 {
                     // release managed resources if any
                     AddEvents(false);
+                    DisposeChildControls();
                 }
 
                 // release unmanaged resource
