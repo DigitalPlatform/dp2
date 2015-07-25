@@ -24,12 +24,27 @@ namespace dp2Circulation
         [STAThread]
         static void Main()
         {
-            //PrepareCatchException();
+            if (IsDevelopMode() == false)
+                PrepareCatchException();
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             _mainForm = new MainForm();
             Application.Run(_mainForm);
+        }
+
+        public static bool IsDevelopMode()
+        {
+            string[] args = Environment.GetCommandLineArgs();
+            int i = 0;
+            foreach(string arg in args)
+            {
+                if (i > 0 && arg == "develop")
+                    return true;
+                i++;
+            }
+
+            return false;
         }
 
         // 准备接管未捕获的异常

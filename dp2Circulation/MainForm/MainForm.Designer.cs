@@ -92,7 +92,8 @@ namespace dp2Circulation
             this.toolStripSeparator22 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_installStatisProjectsFromDisk = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_updateStatisProjectsFromDisk = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator14 = new System.Windows.Forms.ToolStripSeparator();
+            this.MenuItem_separator_function2 = new System.Windows.Forms.ToolStripSeparator();
+            this.MenuItem_chatForm = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_messageForm = new System.Windows.Forms.ToolStripMenuItem();
             this.MenuItem_openReservationListForm = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator30 = new System.Windows.Forms.ToolStripSeparator();
@@ -199,7 +200,6 @@ namespace dp2Circulation
             this.toolStripButton_close = new System.Windows.Forms.ToolStripButton();
             this.splitter_fixed = new System.Windows.Forms.Splitter();
             this.timer_operHistory = new System.Windows.Forms.Timer(this.components);
-            this.MenuItem_chatForm = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip_main.SuspendLayout();
             this.statusStrip_main.SuspendLayout();
             this.toolStrip_main.SuspendLayout();
@@ -473,7 +473,7 @@ namespace dp2Circulation
             this.toolStripSeparator13,
             this.toolStripMenuItem_statisForm,
             this.toolStripMenuItem_statisProjectManagement,
-            this.toolStripSeparator14,
+            this.MenuItem_separator_function2,
             this.MenuItem_chatForm,
             this.MenuItem_messageForm,
             this.MenuItem_openReservationListForm,
@@ -710,10 +710,17 @@ namespace dp2Circulation
             this.MenuItem_updateStatisProjectsFromDisk.Text = "从磁盘目录检查更新全部方案(&P)";
             this.MenuItem_updateStatisProjectsFromDisk.Click += new System.EventHandler(this.MenuItem_updateStatisProjectsFromDisk_Click);
             // 
-            // toolStripSeparator14
+            // MenuItem_separator_function2
             // 
-            this.toolStripSeparator14.Name = "toolStripSeparator14";
-            this.toolStripSeparator14.Size = new System.Drawing.Size(218, 6);
+            this.MenuItem_separator_function2.Name = "MenuItem_separator_function2";
+            this.MenuItem_separator_function2.Size = new System.Drawing.Size(218, 6);
+            // 
+            // MenuItem_chatForm
+            // 
+            this.MenuItem_chatForm.Name = "MenuItem_chatForm";
+            this.MenuItem_chatForm.Size = new System.Drawing.Size(221, 22);
+            this.MenuItem_chatForm.Text = "聊天(&C)";
+            this.MenuItem_chatForm.Click += new System.EventHandler(this.MenuItem_chatForm_Click);
             // 
             // MenuItem_messageForm
             // 
@@ -1612,13 +1619,6 @@ namespace dp2Circulation
             this.splitter_fixed.TabIndex = 6;
             this.splitter_fixed.TabStop = false;
             // 
-            // MenuItem_chatForm
-            // 
-            this.MenuItem_chatForm.Name = "MenuItem_chatForm";
-            this.MenuItem_chatForm.Size = new System.Drawing.Size(221, 22);
-            this.MenuItem_chatForm.Text = "聊天(&C)";
-            this.MenuItem_chatForm.Click += new System.EventHandler(this.MenuItem_chatForm_Click);
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -1717,7 +1717,7 @@ namespace dp2Circulation
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator12;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator13;
         internal System.Windows.Forms.ToolStripButton toolButton_print;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator14;
+        private System.Windows.Forms.ToolStripSeparator MenuItem_separator_function2;
         private System.Windows.Forms.TabPage tabPage_history;
         private System.Windows.Forms.WebBrowser webBrowser_history;
         private System.Windows.Forms.ToolStripMenuItem MenuItem_ui;

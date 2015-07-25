@@ -944,6 +944,14 @@ namespace dp2Circulation
             }
 #endif
 
+            if (Program.IsDevelopMode() == false)
+            {
+                this.MenuItem_separator_function2.Visible = false;
+                this.MenuItem_chatForm.Visible = false;
+                this.MenuItem_messageForm.Visible = false;
+                this.MenuItem_openReservationListForm.Visible = false;
+            }
+
             // 获得MdiClient窗口
             {
                 Type t = typeof(Form);
@@ -1132,7 +1140,13 @@ namespace dp2Circulation
                 if (File.Exists(strTargetFileName) == false)
                 {
                     string strSourceFileName = Path.Combine(this.DataDir, "default_objectrights.xml");
-                    File.Copy(strSourceFileName, strTargetFileName, false);
+                    if (File.Exists(strSourceFileName) == false)
+                    {
+                        MessageBox.Show(this, "配置文件 '"+strSourceFileName+"' 不存在，无法复制到用户目录。\r\n\r\n建议尽量直接从 dp2003.com 以 ClickOnce 方式安装 dp2circulation，以避免绿色安装时复制配置文件不全带来的麻烦");
+                        Application.Exit();
+                    }
+                    else
+                        File.Copy(strSourceFileName, strTargetFileName, false);
                 }
             }
         }
