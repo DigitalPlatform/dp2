@@ -367,12 +367,12 @@ this._openMarcFileDialog.Mode880);
             stop.Initial("正在执行脚本 ...");
             stop.BeginLoop();
 
-
             this.Update();
             this.MainForm.Update();
 
-
-
+            _dllPaths.Clear();
+            _dllPaths.Add(strProjectLocate);
+            AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(CurrentDomain_AssemblyResolve);
             try
             {
 
@@ -397,7 +397,6 @@ this._openMarcFileDialog.Mode880);
                 objStatis.Console = this.Console;
                 objStatis.InputFilename = this._openMarcFileDialog.FileName;
 
-
                 // 执行脚本的OnInitial()
 
                 // 触发Script中OnInitial()代码
@@ -414,7 +413,6 @@ this._openMarcFileDialog.Mode880);
                         goto ERROR1;
                     }
                 }
-
 
                 // 触发Script中OnBegin()代码
                 // OnBegin()中仍然有修改MainForm面板的自由
@@ -456,7 +454,6 @@ this._openMarcFileDialog.Mode880);
 
             ERROR1:
                 return -1;
-
             }
             catch (Exception ex)
             {
@@ -475,6 +472,7 @@ this._openMarcFileDialog.Mode880);
                 this.AssemblyMain = null;
 
                 EnableControls(true);
+                AppDomain.CurrentDomain.AssemblyResolve -= new ResolveEventHandler(CurrentDomain_AssemblyResolve);
             }
         }
 

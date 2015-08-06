@@ -2364,7 +2364,8 @@ Color.FromArgb(100, this.m_hoverBackColor)
             if (this.m_bFullRowSelect == true)
             {
                 DpRow focus_line = GetLineObj(this.m_focusObj);
-                if (focus_line.InternalSelect(SelectAction.Toggle) == true)
+                if (focus_line != null
+                    && focus_line.InternalSelect(SelectAction.Toggle) == true)
                 {
                     InvalidateLine(focus_line);
                     TriggerSelectionChanged();  // 2014/11/11

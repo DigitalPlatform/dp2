@@ -600,6 +600,14 @@ false);
                 "accessNo_source",
                 "从册记录");
 
+            // *** 消息
+
+            // 共享书目数据
+            this.checkBox_message_shareBiblio.Checked = ap.GetBoolean(
+                "message",
+                "share_biblio",
+                false);
+
             checkBox_charging_isbnBorrow_CheckedChanged(this, null);
             checkBox_quickCharging_isbnBorrow_CheckedChanged(this, null);
 
@@ -1133,7 +1141,15 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
             ap.SetString(
                 "labelprint",
                 "accessNo_source",
-                this.comboBox_labelPrint_accessNoSource.Text); 
+                this.comboBox_labelPrint_accessNoSource.Text);
+
+            // *** 消息
+
+            // 共享书目数据
+            ap.SetBoolean(
+                "message",
+                "share_biblio",
+                this.checkBox_message_shareBiblio.Checked);
 
             if (m_bServerCfgChanged == true
                 && this.MainForm != null)

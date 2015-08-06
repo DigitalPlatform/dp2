@@ -710,7 +710,7 @@ namespace dp2Circulation
             string strTargetBiblioDbName = Global.GetDbName(strNewBiblioRecPath);
 
             // 检查一下目标编目库名是不是合法的编目库名
-            if (MainForm.IsValidBiblioDbName(strTargetBiblioDbName) == false)
+            if (MainForm.IsBiblioDbName(strTargetBiblioDbName) == false)
             {
                 strError = "目标库名 '" + strTargetBiblioDbName + "' 不在系统定义的书目库名之列";
                 return -1;

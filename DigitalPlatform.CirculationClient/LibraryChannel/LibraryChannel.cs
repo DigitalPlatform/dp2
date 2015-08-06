@@ -9196,9 +9196,21 @@ out strError);
 
         public void DoStop()
         {
-            IAsyncResult result = this.ws.BeginStop(
-                null,
-                null);
+            // 2015/7/30 增加捕获异常语句
+            try
+            {
+                IAsyncResult result = this.ws.BeginStop(
+                    null,
+                    null);
+            }
+            catch (CommunicationObjectFaultedException)
+            {
+                // 这里是不用处理的
+            }
+            catch
+            {
+                // TODO: 这里最好探究一下什么原因引起的
+            }
         }
 
         // 异常:可能会抛出异常

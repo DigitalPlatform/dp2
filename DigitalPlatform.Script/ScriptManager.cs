@@ -1031,6 +1031,24 @@ namespace DigitalPlatform.Script
             }
         }
 
+        // 2015/8/6
+        // 根据指定的路径解析 DLL Assembly
+        public static Assembly ResolveAssembly(string strName, List<string> paths)
+        {
+            int nRet = strName.IndexOf(",");
+            if (nRet != -1)
+                strName = strName.Substring(0, nRet).Trim();
+
+            foreach (string path in paths)
+            {
+                string strFileName = Path.Combine(path, strName + ".dll");
+                if (File.Exists(strFileName) == true)
+                    return Assembly.LoadFile(strFileName);
+            }
+
+            return null;
+        }
+
 		// 创建Assembly
 		// parameters:
 		//		saAddtionalRef	附加的refs文件路径。路径中可能包含宏%installdir%

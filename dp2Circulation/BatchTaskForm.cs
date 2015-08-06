@@ -339,9 +339,9 @@ namespace dp2Circulation
                     return -1;
                 }
             }
-            /*
             else if (strTaskName == "读者信息同步")
             {
+#if NO
                 StartPatronReplicationDlg dlg = new StartPatronReplicationDlg();
                 MainForm.SetControlFont(dlg, this.Font, false);
                 startinfo.Start = "!breakpoint";    // 一开始就有适当的缺省值，避免从头开始跟踪
@@ -352,8 +352,9 @@ namespace dp2Circulation
                     strError = "用户放弃启动";
                     return -1;
                 }
+#endif
+                startinfo.Start = "activate";   // 表示立即启动，忽略服务器原有定时启动参数
             }
-            */
 
             this.m_lock.AcquireWriterLock(m_nLockTimeout);
 

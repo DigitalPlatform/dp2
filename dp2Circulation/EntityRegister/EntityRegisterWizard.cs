@@ -484,6 +484,17 @@ MessageBoxDefaultButton.Button1);
 
         private void EntityRegisterWizard_FormClosed(object sender, FormClosedEventArgs e)
         {
+            if (_searchParam != null)
+            {
+                try
+                {
+                    _searchParam._searchComplete = true;
+                }
+                catch
+                {
+
+                }
+            }
 
             if (this._genData != null)
             {
@@ -806,6 +817,21 @@ MessageBoxDefaultButton.Button1);
                     }
                 }
 
+                // 检索共享网络
+                if (this.MainForm != null && this.MainForm.MessageHub != null
+                    && this.MainForm.MessageHub.ShareBiblio == true)
+                {
+                    nRet = SearchLineMessage(
+                        strQueryWord,
+                        strFrom,
+                        bAutoSetFocus,
+                        out strError);
+                    if (nRet == -1)
+                        strTotalError += strError + "\r\n";
+                    else
+                        nHitCount += nRet;
+                }
+
                 if (string.IsNullOrEmpty(strTotalError) == false)
                     this.ShowMessage(strError, "red", true);
                 else if (nHitCount == 0)
@@ -848,9 +874,12 @@ MessageBoxDefaultButton.Button1);
             }
             finally
             {
-                this.Progress.EndLoop();
-                this.Progress.OnStop -= new StopEventHandler(this.DoStop);
-                // this.Progress.Initial("");
+                if (this.Progress != null)
+                {
+                    this.Progress.EndLoop();
+                    this.Progress.OnStop -= new StopEventHandler(this.DoStop);
+                    // this.Progress.Initial("");
+                }
 
                 if (bAutoSetFocus == false)
                     _inWizardControl--;
@@ -1056,6 +1085,216 @@ MessageBoxDefaultButton.Button1);
                 bAutoSetFocus);
 
             return 0;
+        }
+
+
+        #endregion
+
+        #region 针对 dp2MServer 共享网络的检索
+
+        // return:
+        //      -1  出错
+        //      >=0 命中的记录数
+        int SearchLineMessage(
+            string strQueryWord,
+            string strFrom,
+            // AccountInfo account,
+            bool bAutoSetFocus,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            string strFromStyle = "";
+
+            if (string.IsNullOrEmpty(strFrom) == true)
+                strFrom = "ISBN";
+
+            if (strFrom == "书名" || strFrom == "题名")
+                strFromStyle = "title";
+            else if (strFrom == "作者" || strFrom == "著者" || strFrom == "责任者")
+                strFromStyle = "contributor";
+            else if (strFrom == "出版社" || strFrom == "出版者")
+                strFromStyle = "publisher";
+            else if (strFrom == "出版日期")
+                strFromStyle = "publishtime";
+            else if (strFrom == "主题词")
+                strFromStyle = "subject";
+
+            if (string.IsNullOrEmpty(strFromStyle) == true)
+            {
+                try
+                {
+                    strFromStyle = this.MainForm.GetBiblioFromStyle(strFrom);
+                }
+                catch (Exception ex)
+                {
+                    strError = ex.Message;
+                    goto ERROR1;
+                }
+
+                if (String.IsNullOrEmpty(strFromStyle) == true)
+                {
+                    strError = "GetFromStyle()没有找到 '" + strFrom + "' 对应的 style 字符串";
+                    goto ERROR1;
+                }
+            }
+
+            string strMatchStyle = "left";  // BiblioSearchForm.GetCurrentMatchStyle(this.comboBox_matchStyle.Text);
+            if (string.IsNullOrEmpty(strQueryWord) == true)
+            {
+                if (strMatchStyle == "null")
+                {
+                    strQueryWord = "";
+
+                    // 专门检索空值
+                    strMatchStyle = "exact";
+                }
+                else
+                {
+                    // 为了在检索词为空的时候，检索出全部的记录
+                    strMatchStyle = "left";
+                }
+            }
+            else
+            {
+                if (strMatchStyle == "null")
+                {
+                    strError = "检索空值的时候，请保持检索词为空";
+                    goto ERROR1;
+                }
+            }
+
+            this.ShowMessage("正在针对 共享网络\r\n检索 " + strQueryWord + " ...",
+                "progress", false);
+
+                string strSearchID = Guid.NewGuid().ToString();
+                _searchParam = new SearchParam();
+                _searchParam._searchID = strSearchID;
+                _searchParam._autoSetFocus = bAutoSetFocus;
+                _searchParam._searchComplete = false;
+                _searchParam._searchCount = 0;
+                this.MainForm.MessageHub.SearchResponseEvent += MessageHub_SearchResponseEvent;
+
+            try
+            {
+                string strOutputSearchID = "";
+                nRet = this.MainForm.MessageHub.BeginSearchBiblio(
+                    strSearchID,
+                    "<全部>",
+    strQueryWord,
+    strFromStyle,
+    strMatchStyle,
+    "",
+    1000,
+    out strOutputSearchID,
+    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+                if (nRet == 0)
+                    return 0;
+
+                // 装入浏览记录
+                {
+                    TimeSpan timeout = new TimeSpan(0,1,0);
+                    DateTime start_time = DateTime.Now;
+                    while (_searchParam._searchComplete == false)
+                    {
+                        Application.DoEvents();
+                        Thread.Sleep(200);
+                        if (DateTime.Now - start_time > timeout)    // 超时
+                            break;
+                        if (this.Progress != null && this.Progress.State != 0)
+                        {
+                            strError = "用户中断";
+                            goto ERROR1;
+                        }
+                    }
+                }
+
+                return _searchParam._searchCount;
+            }
+            finally
+            {
+                this.ClearMessage();
+                {
+                    this.MainForm.MessageHub.SearchResponseEvent -= MessageHub_SearchResponseEvent;
+                    _searchParam._searchID = "";
+                }
+            }
+
+        ERROR1:
+            strError = "针对 共享网络 检索出错: " + strError;
+            AddBiblioBrowseLine(strError, TYPE_ERROR, bAutoSetFocus);
+            return -1;
+        }
+
+        class SearchParam
+        {
+            public string _searchID = "";
+            public bool _autoSetFocus = false;
+            public bool _searchComplete = false;
+            public int _searchCount = 0;
+        }
+
+        SearchParam _searchParam = null;
+
+        void MessageHub_SearchResponseEvent(object sender, SearchResponseEventArgs e)
+        {
+            if (e.SsearchID != _searchParam._searchID)
+                return;
+            if (e.ResultCount == -1 && e.Start == -1)
+            {
+                // 检索过程结束
+                _searchParam._searchComplete = true;
+                return;
+            }
+            string strError = "";
+
+            if (e.ResultCount == -1)
+            {
+                strError = e.ErrorInfo;
+                goto ERROR1;
+            }
+            foreach(BiblioRecord record in e.Records)
+            {
+                string strXml = record.Data;
+
+                string strMarcSyntax = "";
+                string strBrowseText = "";
+                int nRet = BuildBrowseText(strXml,
+out strBrowseText,
+out strMarcSyntax,
+out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                int image_index = -1;
+                image_index = TYPE_CLOUD;
+
+                RegisterBiblioInfo info = new RegisterBiblioInfo();
+                info.OldXml = strXml;   // strMARC;
+                info.Timestamp = ByteArray.GetTimeStampByteArray(record.Timestamp);
+                info.RecPath = record.RecPath;
+                info.MarcSyntax = strMarcSyntax;
+                AddBiblioBrowseLine(
+                    image_index,    // -1,
+                    info.RecPath,
+                    strBrowseText,
+                    info,
+                    _searchParam._autoSetFocus);
+                _searchParam._searchCount++;
+            }
+
+            return;
+        ERROR1:
+            // 加入一个文本行
+            AddBiblioBrowseLine(
+                TYPE_ERROR,
+                "", // item.RecPath,
+                strError,
+                null,
+                false);
         }
 
 
@@ -2094,12 +2333,20 @@ out strError);
             // 给书目记录一个本地路径，用于后面可能发生的保存操作
             string strServerName = "";
             string strBiblioRecPath = "";
+            bool bAllowCopy = true;
 
             AccountInfo _currentAccount = _base.GetAccountInfo(strStartServerName, false);
             if (_currentAccount == null)
             {
-                strError = "服务器名 '" + strStartServerName + "' 没有配置";
-                return -1;
+                //strError = "服务器名 '" + strStartServerName + "' 没有配置";
+                //return -1;
+            }
+            else
+            {
+                if (_currentAccount.IsLocalServer == false)
+                    bAllowCopy = true;
+                else
+                    bAllowCopy = false;
             }
 
             // 根据书目记录的路径，匹配适当的目标
@@ -2108,7 +2355,7 @@ out strError);
             //      0   没有找到
             //      1   找到
             int nRet = GetTargetInfo(
-                _currentAccount.IsLocalServer == false ? true : false,
+                bAllowCopy,
                 strStartServerName,
                 strStartRecPath,
                 out strServerName,

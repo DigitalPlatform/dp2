@@ -8865,7 +8865,6 @@ MessageBoxDefaultButton.Button2);
             writer.Close();
             writer = null;
 
-
             // 执行脚本
             OutputProjectData format = GetFormat(strSeller);
             if (format == null)

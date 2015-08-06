@@ -601,9 +601,12 @@ namespace dp2Circulation
             stop.Initial("正在执行脚本 ...");
             stop.BeginLoop();
 
-
             this.Update();
             this.MainForm.Update();
+
+            _dllPaths.Clear();
+            _dllPaths.Add(strProjectLocate);
+            AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(CurrentDomain_AssemblyResolve);
 
             try
             {
@@ -718,6 +721,7 @@ namespace dp2Circulation
                 this.AssemblyMain = null;
 
                 EnableControls(true);
+                AppDomain.CurrentDomain.AssemblyResolve -= new ResolveEventHandler(CurrentDomain_AssemblyResolve);
             }
         }
 

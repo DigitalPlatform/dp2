@@ -9,6 +9,7 @@ using System.IO;
 using DigitalPlatform;
 using DigitalPlatform.IO;
 using DigitalPlatform.Script;
+using System.Reflection;
 
 namespace dp2Circulation
 {
@@ -211,6 +212,14 @@ namespace dp2Circulation
                 {
                 }
             }
+        }
+
+        // 附加的 DLL 搜索路径
+        internal List<string> _dllPaths = new List<string>();
+
+        internal Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
+        {
+            return ScriptManager.ResolveAssembly(args.Name, _dllPaths);
         }
     }
 }

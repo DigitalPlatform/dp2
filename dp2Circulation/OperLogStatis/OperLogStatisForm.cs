@@ -375,9 +375,12 @@ namespace dp2Circulation
             this.Update();
             this.MainForm.Update();
 
+            _dllPaths.Clear();
+            _dllPaths.Add(strProjectLocate);
+            AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(CurrentDomain_AssemblyResolve);
+
             try
             {
-
                 int nRet = 0;
                 strError = "";
 
@@ -403,7 +406,6 @@ namespace dp2Circulation
                 if (nRet == -1)
                     goto ERROR1;
 
-
                 /*
                  * 
                  * 
@@ -428,14 +430,12 @@ namespace dp2Circulation
                 objStatis.ProjectDir = strProjectLocate;
                  * */
 
-
                 // this.AssemblyMain = assemblyMain;
 
                 objStatis.ProjectDir = strProjectLocate;
                 objStatis.Console = this.Console;
                 objStatis.StartDate = this.dateControl_start.Value;
                 objStatis.EndDate = this.dateControl_end.Value;
-
 
                 // 执行脚本的OnInitial()
 
@@ -448,7 +448,6 @@ namespace dp2Circulation
                     if (args.Continue == ContinueType.SkipAll)
                         goto END1;
                 }
-
 
                 // 触发Script中OnBegin()代码
                 // OnBegin()中仍然有修改MainForm面板的自由
@@ -500,9 +499,11 @@ namespace dp2Circulation
                 this.AssemblyMain = null;
 
                 EnableControls(true);
+                AppDomain.CurrentDomain.AssemblyResolve -= new ResolveEventHandler(CurrentDomain_AssemblyResolve);
             }
         }
 
+#if NO
         Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
         {
             Debug.Assert(false, "");
@@ -514,6 +515,7 @@ namespace dp2Circulation
 
             // return null;
         }
+#endif
 
         int DoRecord(string strLogFileName,
     string strXml,

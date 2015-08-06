@@ -51,7 +51,7 @@
     <SuiteName>dp2 V2</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>32</ApplicationRevision>
+    <ApplicationRevision>37</ApplicationRevision>
     <ApplicationVersion>2.4.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -108,6 +108,15 @@
       <HintPath>..\packages\Microsoft.AspNet.SignalR.Client.1.2.2\lib\net40\Microsoft.AspNet.SignalR.Client.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.Threading.Tasks">
+      <HintPath>..\packages\Microsoft.Bcl.Async.1.0.168\lib\net40\Microsoft.Threading.Tasks.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Threading.Tasks.Extensions">
+      <HintPath>..\packages\Microsoft.Bcl.Async.1.0.168\lib\net40\Microsoft.Threading.Tasks.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Threading.Tasks.Extensions.Desktop">
+      <HintPath>..\packages\Microsoft.Bcl.Async.1.0.168\lib\net40\Microsoft.Threading.Tasks.Extensions.Desktop.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Newtonsoft.Json.6.0.4\lib\net40\Newtonsoft.Json.dll</HintPath>
@@ -131,10 +140,20 @@
     </Reference>
     <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.IO">
+      <HintPath>..\packages\Microsoft.Bcl.1.1.8\lib\net40\System.IO.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net" />
+    <Reference Include="System.Runtime">
+      <HintPath>..\packages\Microsoft.Bcl.1.1.8\lib\net40\System.Runtime.dll</HintPath>
+    </Reference>
     <Reference Include="System.Runtime.Remoting" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Speech" />
+    <Reference Include="System.Threading.Tasks">
+      <HintPath>..\packages\Microsoft.Bcl.1.1.8\lib\net40\System.Threading.Tasks.dll</HintPath>
+    </Reference>
     <Reference Include="System.Web" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
@@ -324,6 +343,13 @@
     <Compile Include="IM\ChatForm.Designer.cs">
       <DependentUpon>ChatForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="IM\ChatLoginDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="IM\ChatLoginDialog.Designer.cs">
+      <DependentUpon>ChatLoginDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="IM\MessageHub.cs" />
     <Compile Include="ItemHandOver\ScanBarcodeForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -378,13 +404,34 @@
     <Compile Include="Label\SelectPaperDialog.Designer.cs">
       <DependentUpon>SelectPaperDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="MainForm\DbNameExtension.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="MainForm\FirstRunDialog.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="MainForm\FirstRunDialog.Designer.cs">
       <DependentUpon>FirstRunDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="MainForm\FixPanelExtension.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainForm\FontExtension.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainForm\InitialExtension.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="MainForm\PackageEventLog.cs" />
+    <Compile Include="MainForm\PinyinExtension.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainForm\QrExtension.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainForm\ScriptExtension.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="ManageDatabase\CalendarDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -1438,6 +1485,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="IM\ChatForm.resx">
       <DependentUpon>ChatForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="IM\ChatLoginDialog.resx">
+      <DependentUpon>ChatLoginDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ItemHandOver\ScanBarcodeForm.resx">
       <DependentUpon>ScanBarcodeForm.cs</DependentUpon>
@@ -3249,6 +3299,11 @@ xcopy $(TargetDir)x64 x64 /Y</PostBuildEvent>
     <PreBuildEvent>CD /D $(ProjectDir)
 CALL copyinterop.bat</PreBuildEvent>
   </PropertyGroup>
+  <Import Project="..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" />
+  <Target Name="EnsureBclBuildImported" BeforeTargets="BeforeBuild" Condition="'$(BclBuildImported)' == ''">
+    <Error Condition="!Exists('..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" Text="This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=317567." HelpKeyword="BCLBUILD2001" />
+    <Error Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" Text="The build restored NuGet packages. Build the project again to include these packages in the build. For more information, see http://go.microsoft.com/fwlink/?LinkID=317568." HelpKeyword="BCLBUILD2002" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

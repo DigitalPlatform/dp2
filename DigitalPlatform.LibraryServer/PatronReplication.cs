@@ -154,6 +154,10 @@ namespace DigitalPlatform.LibraryServer
             string strError = "";
             int nRet = 0;
 
+            BatchTaskStartInfo startinfo = this.StartInfo;
+            if (startinfo == null)
+                startinfo = new BatchTaskStartInfo();   // 按照缺省值来
+
             // 获取配置参数
             // return:
             //      -1  出错
@@ -266,9 +270,15 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 // 如果nRet == 0，表示没有配置相关参数，则兼容原来的习惯，每次都作
-                if (nRet == 0)
+                if (nRet == 0 )
                 {
 
+                }
+                else if (nRet == 1 && startinfo.Start == "activate")
+                {
+                    // 2015/8/4
+                    // 虽然 library.xml 中定义了每日定时启动，但被前端要求立即启动
+                    this.AppendResultText("任务 '" + this.Name + "' 被立即启动\r\n");
                 }
                 else if (nRet == 1)
                 {
@@ -301,8 +311,6 @@ namespace DigitalPlatform.LibraryServer
             {
                 // 把数据文件写入有映射关系的读者库
                 this.AppendResultText("*** 同步读者数据任务开始\r\n");
-
-
 
                 string strXmlFilename = PathUtil.MergePath(this.App.PatronReplicationDir, "data.xml");
 
@@ -500,12 +508,10 @@ namespace DigitalPlatform.LibraryServer
                 this.App.WriteErrorLog(strErrorText);
             }
 
-
             return;
-
         ERROR1:
             AppendResultText("PatronReplication thread error : " + strError + "\r\n");
-        this.App.WriteErrorLog("PatronReplication thread error : " + strError + "\r\n");
+            this.App.WriteErrorLog("PatronReplication thread error : " + strError + "\r\n");
             return;
         }
 
@@ -817,7 +823,6 @@ idElementName="barcode"
             Debug.Assert(string.IsNullOrEmpty(this.PatronDbName) == false, "");
 
             SessionInfo sessioninfo = GetTempSessionInfo();
-
 
             if (string.IsNullOrEmpty(strLastNumber) == true)
                 strLastNumber = "-1";

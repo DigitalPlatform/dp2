@@ -2422,7 +2422,41 @@ namespace dp2Circulation
             {
                 sw.Write(strHtml);
             }
-            webBrowser.Navigate(strTempFilename);
+            // webBrowser.Navigate(strTempFilename);
+            Navigate(webBrowser, strTempFilename);  // 2015/7/28
+        }
+
+        // 2015/7/28 
+        // 能处理异常的 Navigate
+        static void Navigate(WebBrowser webBrowser, string urlString)
+        {
+            int nRedoCount = 0;
+        REDO:
+            try
+            {
+                webBrowser.Navigate(urlString);
+            }
+            catch (System.Runtime.InteropServices.COMException ex)
+            {
+                /*
+System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使用中。 (异常来自 HRESULT:0x800700AA)
+   在 System.Windows.Forms.UnsafeNativeMethods.IWebBrowser2.Navigate2(Object& URL, Object& flags, Object& targetFrameName, Object& postData, Object& headers)
+   在 System.Windows.Forms.WebBrowser.PerformNavigate2(Object& URL, Object& flags, Object& targetFrameName, Object& postData, Object& headers)
+   在 System.Windows.Forms.WebBrowser.Navigate(String urlString)
+   在 dp2Circulation.QuickChargingForm._setReaderRenderString(String strText) 位置 F:\cs4.0\dp2Circulation\Charging\QuickChargingForm.cs:行号 394
+                 * */
+                if ((uint)ex.ErrorCode == 0x800700AA)
+                {
+                    nRedoCount++;
+                    if (nRedoCount < 5)
+                    {
+                        Thread.Sleep(200);
+                        goto REDO;
+                    }
+                }
+
+                throw ex;
+            }
         }
 
         // 有问题，不要用
@@ -2441,7 +2475,8 @@ namespace dp2Circulation
             {
                 sw.Write(strHtml);
             }
-            webBrowser.Navigate(strTempFilename);
+            // webBrowser.Navigate(strTempFilename);
+            Navigate(webBrowser, strTempFilename);  // 2015/7/28
         }
 
         // 把 XML 字符串装入一个Web浏览器控件
@@ -2481,13 +2516,14 @@ namespace dp2Circulation
     System.Text.Encoding.UTF8);
                 sw.Write("XML内容装入DOM时出错: " + ex.Message + "\r\n\r\n" + strXml);
                 sw.Close();
-                webBrowser.Navigate(strTargetFileName);
-
+                // webBrowser.Navigate(strTargetFileName);
+                Navigate(webBrowser, strTargetFileName);  // 2015/7/28
                 return;
             }
 
             dom.Save(strTargetFileName);
-            webBrowser.Navigate(strTargetFileName);
+            // webBrowser.Navigate(strTargetFileName);
+            Navigate(webBrowser, strTargetFileName);  // 2015/7/28
         }
 
         internal static void PrepareStop(WebBrowser webBrowser)
@@ -2588,7 +2624,9 @@ namespace dp2Circulation
 
             if (doc == null)
             {
-                webBrowser.Navigate("about:blank");
+                // webBrowser.Navigate("about:blank");
+                Navigate(webBrowser, "about:blank");  // 2015/7/28
+
                 doc = webBrowser.Document;
 #if NO
                 webBrowser.DocumentText = "<h1>hello</h1>";
@@ -2710,7 +2748,8 @@ namespace dp2Circulation
 
             if (doc == null)
             {
-                webBrowser.Navigate("about:blank");
+                // webBrowser.Navigate("about:blank");
+                Navigate(webBrowser, "about:blank");  // 2015/7/28
                 doc = webBrowser.Document;
             }
 

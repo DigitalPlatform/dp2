@@ -286,7 +286,7 @@ namespace dp2Catalog
                                 if (MarcDetailHost.ContainHanzi(strHanzi) == false)
                                     continue;
 
-                                string strPinyin;
+                                string strPinyin = "";
 
                                 strPinyin = (string)old_selected[strHanzi];
                                 if (string.IsNullOrEmpty(strPinyin) == true)

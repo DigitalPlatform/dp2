@@ -215,6 +215,8 @@ strServerUrl);
         // 准备临时文件名
         void PrepareTempFile()
         {
+            DeleteTempFile();
+
             // 如果以前有临时文件名，就直接沿用
             if (string.IsNullOrEmpty(this.TempFilename) == true)
             {
@@ -234,6 +236,8 @@ strServerUrl);
 
         void DeleteTempFile()
         {
+            // DisposeWebClients();
+
             // 删除临时文件
             if (string.IsNullOrEmpty(this.TempFilename) == false)
             {
@@ -263,6 +267,24 @@ strServerUrl);
         string m_strError = ""; // 异步操作中用于保存出错信息
 
         bool _userFullElementSet = true;
+
+#if NO
+        List<WebClient> _webClients = new List<WebClient>();
+
+        void DisposeWebClients()
+        {
+            foreach (WebClient webClient in _webClients)
+            {
+                if (webClient != null)
+                {
+                    webClient.DownloadFileCompleted -= new AsyncCompletedEventHandler(webClient_MultiLineDownloadFileCompleted);
+                    webClient.Dispose();
+                }
+            }
+
+            _webClients.Clear();
+        }
+#endif
 
         // 多行检索中的一行检索
         // return:
@@ -301,7 +323,6 @@ strServerUrl);
 
             this.m_bError = false;
             this.m_exception = null;
-
 #if NO
             if (this.webClient != null)
             {
@@ -311,6 +332,8 @@ strServerUrl);
             }
 #endif
             webClient = new WebClient();
+
+            // _webClients.Add(webClient);
 
             webClient.DownloadFileCompleted += new AsyncCompletedEventHandler(webClient_MultiLineDownloadFileCompleted);
             // webClient.DownloadProgressChanged += new DownloadProgressChangedEventHandler(webClient_DownloadProgressChanged);
@@ -327,7 +350,7 @@ strServerUrl);
                 this.m_exception = ex;
                 strError = ex.Message;
                 this.m_bError = true;
-                return -1;
+                goto ERROR1;
             }
 
             // 等待检索结束
@@ -335,7 +358,7 @@ strServerUrl);
             if (bError == true)
             {
                 strError = this.m_strError;
-                return -1;
+                goto ERROR1;
             }
 
             {
@@ -344,20 +367,23 @@ strServerUrl);
                 if (e == null || e.Cancelled == true)
                 {
                     strError = "请求被取消";
-                    return -1;
+                    goto ERROR1;
                 }
 
                 if (e != null && e.Error != null)
                 {
                     strError = "请求过程发生错误: " + ExceptionUtil.GetExceptionMessage(e.Error);
                     this.m_exception = e.Error;
-                    return -1;
+                    goto ERROR1;
                 }
             }
 
             // 如果要求每行的检索命中装入大于 10 条，需要在这里获取后面几批的浏览结果
-
             return 0;
+        ERROR1:
+            // 迫使更换临时文件
+            DeleteTempFile();   // 2015/8/4
+            return -1;
         }
 
         // 休眠一段时间
@@ -442,7 +468,7 @@ strServerUrl);
                 this.m_exception = ex;
                 strError = ex.Message;
                 this.m_bError = true;
-                return -1;
+                goto ERROR1;
             }
 
             // 等待检索结束
@@ -450,7 +476,7 @@ strServerUrl);
             if (bError == true)
             {
                 strError = this.m_strError;
-                return -1;
+                goto ERROR1;
             }
 
             {
@@ -459,19 +485,22 @@ strServerUrl);
                 if (e == null || e.Cancelled == true)
                 {
                     strError = "请求被取消";
-                    return -1;
+                    goto ERROR1;
                 }
 
                 if (e != null && e.Error != null)
                 {
                     strError = "请求过程发生错误: " + ExceptionUtil.GetExceptionMessage(e.Error);
                     this.m_exception = e.Error;
-                    return -1;
+                    goto ERROR1;
                 }
             }
 
-
             return 0;
+        ERROR1:
+            // 迫使更换临时文件
+            DeleteTempFile();   // 2015/8/4
+            return -1;
         }
 
         /// <summary>
@@ -496,10 +525,12 @@ strServerUrl);
                 if (nTimeCount > 0 && nTimeCount > this.Timeout)
                 {
                     webClient.CancelAsync();
+#if NO
                     nTimeCount = -1;
                     this.m_strError = "超时";
                     this.m_bError = true;
                     break;  // 2015/5/22
+#endif
                 }
                 // Application.DoEvents();
                 if (eventComplete.WaitOne(100) == true)

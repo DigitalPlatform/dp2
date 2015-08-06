@@ -135,6 +135,8 @@ namespace DigitalPlatform.Script
             return 0;
         }
 
+        // 校验 ISBN 字符串
+        // 注：返回 -1 和 返回 1 的区别：-1 表示调用过程出错，暗示对这样的 ISBN 字符串应当预先检查，若不符合基本形式要求则避免调用本函数
         // return:
         //      -1  出错
         //      0   校验正确
@@ -147,7 +149,7 @@ namespace DigitalPlatform.Script
             if (string.IsNullOrEmpty(strISBNParam) == true)
             {
                 strError = "ISBN字符串内容为空";
-                return 1;
+                return -1;
             }
 
             string strISBN = strISBNParam.Replace("-", "");
@@ -165,10 +167,18 @@ namespace DigitalPlatform.Script
 
             if (strISBN.Length == 10)
             {
-                char c = GetIsbn10VerifyChar(strISBN);
-                if (c != strISBN[9])
+                try
                 {
-                    strError = "ISBN '"+strISBN+"' 校验不正确";
+                    char c = GetIsbn10VerifyChar(strISBN);
+                    if (c != strISBN[9])
+                    {
+                        strError = "ISBN '" + strISBN + "' 校验不正确";
+                        return 1;
+                    }
+                }
+                catch(ArgumentException ex)
+                {
+                    strError = "ISBN '" + strISBN + "' 校验不正确: " + ex.Message;
                     return 1;
                 }
             }
@@ -197,9 +207,8 @@ namespace DigitalPlatform.Script
             strISBN = strISBN.Replace("-", "");
             strISBN = strISBN.Replace(" ", "");
 
-
             if (strISBN.Length < 9)
-                throw new Exception("用于计算校验位的ISBN-10长度至少要在9位数字以上(不包括横杠在内)");
+                throw new ArgumentException("用于计算校验位的ISBN-10长度至少要在9位数字以上(不包括横杠在内)");
 
             int sum = 0;
             for (int i = 0; i < 9; i++)

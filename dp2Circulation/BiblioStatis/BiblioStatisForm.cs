@@ -557,14 +557,14 @@ namespace dp2Circulation
             stop.Initial("正在执行脚本 ...");
             stop.BeginLoop();
 
-
             this.Update();
             this.MainForm.Update();
 
-
+            _dllPaths.Clear();
+            _dllPaths.Add(strProjectLocate);
+            AppDomain.CurrentDomain.AssemblyResolve += new ResolveEventHandler(CurrentDomain_AssemblyResolve);
             try
             {
-
                 int nRet = 0;
                 strError = "";
                 strWarning = "";
@@ -578,7 +578,6 @@ namespace dp2Circulation
                 // 2009/11/5 
                 // 防止以前残留的打开的文件依然没有关闭
                 Global.ForceGarbageCollection();
-
 
                 nRet = PrepareScript(strProjectName,
                     strProjectLocate,
@@ -651,7 +650,6 @@ namespace dp2Circulation
 
             ERROR1:
                 return -1;
-
             }
             catch (Exception ex)
             {
@@ -670,6 +668,8 @@ namespace dp2Circulation
                 this.AssemblyMain = null;
 
                 EnableControls(true);
+
+                AppDomain.CurrentDomain.AssemblyResolve -= new ResolveEventHandler(CurrentDomain_AssemblyResolve);
             }
         }
 

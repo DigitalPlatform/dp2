@@ -25,7 +25,7 @@ namespace DigitalPlatform.CommonControl
     /// <summary>
     /// TableLayoutPanel 扩展方法
     /// </summary>
-    public static class TableLayoutPanelExtention
+    public static class TableLayoutPanelExtension
     {
         // 重新调整所有 TextBox 的高度
         public static void ResetAllTextBoxHeight(this TableLayoutPanel panel)

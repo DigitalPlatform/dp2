@@ -3498,7 +3498,7 @@ out string strError)
                             if (MarcDetailHost.ContainHanzi(strHanzi) == false)
                                 continue;
 
-                            string strPinyin;
+                            string strPinyin = "";
 #if NO
                             // 把字符串中的汉字和拼音分离
                             // return:

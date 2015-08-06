@@ -600,7 +600,7 @@ namespace dp2Circulation
                                     strSubfieldPrefix = "{" + strCmd + "}";
                                 }
 
-                                string strPinyin;
+                                string strPinyin = "";
 
                                 strPinyin = (string)old_selected[strHanzi];
                                 if (string.IsNullOrEmpty(strPinyin) == true)
