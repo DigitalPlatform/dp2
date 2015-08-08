@@ -12,6 +12,14 @@ namespace DigitalPlatform.LibraryServer
 {
     public class LibraryServerUtil
     {
+        public static string GetLibraryXmlUid(XmlDocument dom)
+        {
+            if (dom.DocumentElement == null)
+                return null;
+
+            return dom.DocumentElement.GetAttribute("uid");
+        }
+
         public static double GetLibraryXmlVersion(XmlDocument dom)
         {
             // 找到<version>元素
@@ -152,7 +160,6 @@ namespace DigitalPlatform.LibraryServer
 
             return 0;
         }
-
 
         // 检查出版时间范围字符串是否合法
         // 如果使用单个出版时间来调用本函数，也是可以的

@@ -56,6 +56,8 @@ namespace dp2LibraryXE
 
         public string TempDir = "";
 
+        public string UserLogDir = ""; // 2015/8/8
+
         /// <summary>
         /// dp2Kernel 数据目录
         /// </summary>
@@ -208,6 +210,10 @@ namespace dp2LibraryXE
 
             this.TempDir = Path.Combine(this.UserDir, "temp");
             PathUtil.CreateDirIfNeed(this.TempDir);
+
+            // 2015/8/8
+            this.UserLogDir = Path.Combine(this.UserDir, "log");
+            PathUtil.CreateDirIfNeed(this.UserLogDir);
 
             this.AppInfo = new ApplicationInfo(Path.Combine(this.UserDir, "settings.xml"));
 
@@ -2466,6 +2472,25 @@ http://dp2003.com" + (this.IsServer == false ? "" : @"
             return 0;
         }
 
+        public string GetLibraryXmlUid()
+        {
+            if (string.IsNullOrEmpty(this.LibraryDataDir) == true)
+                return null;
+
+            string strFilename = PathUtil.MergePath(this.LibraryDataDir, "library.xml");
+            XmlDocument dom = new XmlDocument();
+            try
+            {
+                dom.Load(strFilename);
+            }
+            catch
+            {
+                return null;
+            }
+
+            return LibraryServerUtil.GetLibraryXmlUid(dom);
+        }
+
         // 创建/修改 library.xml 文件
         // return:
         //      -1  error
@@ -3098,6 +3123,8 @@ miniServer	-- enterprise mini
 
         private void MenuItem_copyright_Click(object sender, EventArgs e)
         {
+            throw new Exception("test exception");
+
             MessageBox.Show(this, "dp2Library XE\r\ndp2 图书馆集成系统 图书馆应用服务器 单机版/小型版\r\n\r\n(C)2006-2015 版权所有 数字平台(北京)软件有限责任公司");
         }
 
@@ -4568,6 +4595,17 @@ Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
                 MessageBox.Show(this, strError);
 #endif
             MessageBox.Show(this, FindExePath("sqllocaldb.exe"));
+        }
+
+        // 写入日志文件。每天创建一个单独的日志文件
+        public void WriteErrorLog(string strText)
+        {
+            FileUtil.WriteErrorLog(
+                this.UserLogDir,
+                this.UserLogDir,
+                strText,
+                "log_",
+                ".txt");
         }
     }
 

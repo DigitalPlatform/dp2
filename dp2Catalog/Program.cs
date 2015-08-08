@@ -171,8 +171,8 @@ namespace dp2Catalog
             try
             {
                 string strSender = "";
-                if (_mainForm != null)
-                    strSender = "@" + GetMacAddressString();
+                // if (_mainForm != null)
+                    strSender = "@MAC:" + GetMacAddressString();
 
                 // ±¿¿£±®∏Ê
                 nRet = LibraryChannel.CrashReport(
