@@ -76,6 +76,9 @@ namespace dp2Catalog
 
         public string UserTempDir = "";
 
+        public string UserLogDir = ""; // 2015/8/8
+
+
         //保存界面信息
         public ApplicationInfo AppInfo = new ApplicationInfo("dp2catalog.xml");
 
@@ -138,6 +141,10 @@ namespace dp2Catalog
 
                 this.UserTempDir = Path.Combine(this.UserDir, "temp");
                 PathUtil.CreateDirIfNeed(this.UserTempDir);
+
+                // 2015/8/8
+                this.UserLogDir = Path.Combine(this.UserDir, "log");
+                PathUtil.CreateDirIfNeed(this.UserLogDir);
 
                 string strOldFileName = Path.Combine(this.DataDir, "zserver.xml");
                 string strNewFileName = Path.Combine(this.UserDir, "zserver.xml");
@@ -1428,6 +1435,8 @@ namespace dp2Catalog
         // 版权
         private void MenuItem_copyright_Click(object sender, EventArgs e)
         {
+            // throw new Exception("test throw exception");
+
             CopyrightDlg dlg = new CopyrightDlg();
             GuiUtil.SetControlFont(dlg, this.DefaultFont);
 
@@ -4263,6 +4272,16 @@ out string strError)
             }
         }
 
+        // 写入日志文件。每天创建一个单独的日志文件
+        public void WriteErrorLog(string strText)
+        {
+            FileUtil.WriteErrorLog(
+                this.UserLogDir,
+                this.UserLogDir,
+                strText,
+                "log_",
+                ".txt");
+        }
     }
 
     public class EnableState
