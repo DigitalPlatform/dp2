@@ -61,6 +61,8 @@ namespace dp2Installer
 
         public string TempDir = "";
 
+        public string UserLogDir = ""; // 2015/8/8
+
         /// <summary>
         /// 配置存储
         /// </summary>
@@ -161,6 +163,10 @@ FormWindowState.Normal);
 
             this.TempDir = Path.Combine(this.UserDir, "temp");
             PathUtil.CreateDirIfNeed(this.TempDir);
+
+            // 2015/8/8
+            this.UserLogDir = Path.Combine(this.UserDir, "log");
+            PathUtil.CreateDirIfNeed(this.UserLogDir);
 
             _versionManager.Load(Path.Combine(this.UserDir, "file_version.xml"));
 
@@ -1383,7 +1389,7 @@ MessageBoxDefaultButton.Button2);
 
         private void MenuItem_copyright_Click(object sender, EventArgs e)
         {
-
+            // throw new Exception("test throw exception");
         }
 
         // 检查和设置各个实例的序列号
@@ -4537,6 +4543,16 @@ DigitalPlatform.CirculationClient.BeforeLoginEventArgs e)
             AppendString("出错: " + strError + "\r\n");
             MessageBox.Show(this, strError);
         }
-    }
 
+        // 写入日志文件。每天创建一个单独的日志文件
+        public void WriteErrorLog(string strText)
+        {
+            FileUtil.WriteErrorLog(
+                this.UserLogDir,
+                this.UserLogDir,
+                strText,
+                "log_",
+                ".txt");
+        }
+    }
 }

@@ -106,8 +106,8 @@
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.MenuItem_file,
-            this.dp2LibraryToolStripMenuItem,
             this.MenuItem_dp2Kernel,
+            this.dp2LibraryToolStripMenuItem,
             this.MenuItem_dp2OPAC,
             this.MenuItem_help});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
@@ -539,6 +539,7 @@
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
             this.toolStripSeparator3.Size = new System.Drawing.Size(251, 6);
+            this.toolStripSeparator3.Visible = false;
             // 
             // MenuItem_copyright
             // 
