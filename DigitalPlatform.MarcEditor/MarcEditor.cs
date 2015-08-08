@@ -3096,8 +3096,32 @@ END1:
             }
         }
 
+        /*
+操作类型 crashReport -- 异常报告 
+主题 dp2circulation 
+发送者 xxxxx
+媒体类型 text 
+内容 发生未捕获的界面线程异常: 
+Type: System.Exception
+Message: 下标越界。
+Stack:
+在 DigitalPlatform.Marc.FieldCollection.get_Item(Int32 nIndex)
+在 DigitalPlatform.Marc.MarcEditor.AddSelectedField(Int32 nStartFieldIndex, Int32 nEndFieldIndex, Boolean bClear)
+在 DigitalPlatform.Marc.MarcEditor.OnMouseDown(MouseEventArgs e)
+在 System.Windows.Forms.Control.WmMouseDown(Message& m, MouseButtons button, Int32 clicks)
+在 System.Windows.Forms.Control.WndProc(Message& m)
+在 System.Windows.Forms.Control.ControlNativeWindow.OnMessage(Message& m)
+在 System.Windows.Forms.Control.ControlNativeWindow.WndProc(Message& m)
+在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
 
-		// 把一个字段设为当前活动的字段
+
+dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, PublicKeyToken=null
+操作系统：Microsoft Windows NT 5.1.2600 Service Pack 3 
+操作时间 2015/8/7 14:43:27 (Fri, 07 Aug 2015 14:43:27 +0800) 
+前端地址 xxxxx 经由 http://dp2003.com/dp2library 
+         * 
+         * */
+        // 把一个字段设为当前活动的字段
 		internal void AddSelectedField(int nStartFieldIndex,
 			int nEndFieldIndex,
 			bool bClear)
@@ -3122,6 +3146,10 @@ END1:
 
 			for(int i = nIndex1;i<=nIndex2;i++)
 			{
+                // 2015/8/8
+                // 保护下标范围
+                if (i < 0 || i >= this.Record.Fields.Count)
+                    continue;
 				this.SelectedFieldIndices.Add(i);
 				Field field = this.record.Fields[i];
 				field.Selected = true;

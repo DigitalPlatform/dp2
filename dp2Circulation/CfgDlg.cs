@@ -85,7 +85,7 @@ namespace dp2Circulation
             this.textBox_server_dp2MServerUrl.Text =
                 ap.GetString("config",
                 "im_server_url",
-                "http://dp2003.com/dp2MServer");
+                "http://dp2003.com:8083/dp2MServer");
 
 
             // default account
@@ -603,10 +603,12 @@ false);
             // *** 消息
 
             // 共享书目数据
+            _disableShareBiblioChangedEvent++;
             this.checkBox_message_shareBiblio.Checked = ap.GetBoolean(
                 "message",
                 "share_biblio",
                 false);
+            _disableShareBiblioChangedEvent--;
 
             checkBox_charging_isbnBorrow_CheckedChanged(this, null);
             checkBox_quickCharging_isbnBorrow_CheckedChanged(this, null);
@@ -1526,6 +1528,27 @@ MessageBoxDefaultButton.Button2);
         {
             this.groupBox_quickCharging_selectItemDialog.Enabled = this.checkBox_quickCharging_isbnBorrow.Checked;
 
+        }
+
+        int _disableShareBiblioChangedEvent = 0;
+
+        private void checkBox_message_shareBiblio_CheckedChanged(object sender, EventArgs e)
+        {
+            if (_disableShareBiblioChangedEvent == 0 && this.checkBox_message_shareBiblio.Checked == true)
+            {
+                DialogResult result = MessageBox.Show(this,
+    "确实要共享书目数据?\r\n\r\n共享书目数据将允许他人检索和获取您的全部书目记录。如果您不同意使用这个功能，请点“否”",
+    "CfgDlg",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+                if (result != DialogResult.Yes)
+                {
+                    _disableShareBiblioChangedEvent++;
+                    this.checkBox_message_shareBiblio.Checked = false;
+                    _disableShareBiblioChangedEvent--;
+                }
+            }
         }
 
 

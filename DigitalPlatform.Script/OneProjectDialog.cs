@@ -974,13 +974,20 @@ namespace DigitalPlatform.Script
         // 在 Visual Studio Code 中打开
         private void button_openInCode_Click(object sender, EventArgs e)
         {
-            ProcessStartInfo startInfo = new ProcessStartInfo("code");
-            startInfo.Arguments = ".";
-            startInfo.WindowStyle = ProcessWindowStyle.Hidden;
-            startInfo.CreateNoWindow = true;
-            // startInfo.UseShellExecute = false;
-            startInfo.WorkingDirectory = this.textBox_projectLocate.Text;
-            Process p = Process.Start(startInfo);
+            try
+            {
+                ProcessStartInfo startInfo = new ProcessStartInfo("code");
+                startInfo.Arguments = ".";
+                startInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                startInfo.CreateNoWindow = true;
+                // startInfo.UseShellExecute = false;
+                startInfo.WorkingDirectory = this.textBox_projectLocate.Text;
+                Process p = Process.Start(startInfo);
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(this, "启动 Vusual Studio Code 时发生异常(可能是 Code 尚未安装):" + ex.Message);
+            }
         }
 	}
 }

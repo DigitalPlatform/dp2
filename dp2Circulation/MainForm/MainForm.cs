@@ -719,7 +719,7 @@ namespace dp2Circulation
             }
 #endif
             if (this.MessageHub != null)
-                this.MessageHub.Close();
+                this.MessageHub.Finalize();
 
             if (m_propertyViewer != null)
                 m_propertyViewer.Close();
@@ -1358,9 +1358,15 @@ namespace dp2Circulation
 
             string strOldDefaultFontString = this.DefaultFontString;
             bool bOldShareBiblio = false;
-            
+            string strOldDp2MserverUrl = "";
+
             if (this.MessageHub != null)
+            {
                 bOldShareBiblio = this.MessageHub.ShareBiblio;
+                strOldDp2MserverUrl = this.MessageHub.dp2MServerUrl;
+            }
+
+            
 
             CfgDlg dlg = new CfgDlg();
 
@@ -1406,11 +1412,16 @@ namespace dp2Circulation
             }
 
             if (this.MessageHub != null
-                && bOldShareBiblio != this.MessageHub.ShareBiblio)
+                && (bOldShareBiblio != this.MessageHub.ShareBiblio || strOldDp2MserverUrl != this.MessageHub.dp2MServerUrl))
             {
+                // URL 变化，需要先关闭然后重新连接
+                if (strOldDp2MserverUrl != this.MessageHub.dp2MServerUrl)
+                    this.MessageHub.CloseConnection();
+
                 // TODO: 如果没有 Connect，要先 Connect
                 this.MessageHub.Connect();
-                this.MessageHub.Login();    // 重新登录
+                if (bOldShareBiblio != this.MessageHub.ShareBiblio)
+                    this.MessageHub.Login();    // 重新登录
             }
         }
 
