@@ -2739,7 +2739,8 @@ MessageBoxDefaultButton.Button1);
     {
         public MainForm MainForm = null;
         public string ID = "";
-        public string ResultString = "";
+        public string ResultString = "";    // 结果字符串。用 \t 字符分隔
+        public string ColumnTitles = "";    // 栏目标题。用 \t 字符分隔 2015/8/11
     }
 
     public class BrowseFilterDocument : FilterDocument

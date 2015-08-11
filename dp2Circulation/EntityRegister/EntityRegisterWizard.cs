@@ -1267,9 +1267,11 @@ MessageBoxDefaultButton.Button1);
 
                 string strMarcSyntax = "";
                 string strBrowseText = "";
+                string strColumnTitles = "";
                 int nRet = BuildBrowseText(strXml,
 out strBrowseText,
 out strMarcSyntax,
+out strColumnTitles,
 out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -1305,156 +1307,6 @@ out strError);
 
         #endregion
 
-        #region 创建书目记录的浏览格式
-
-        // 创建MARC格式记录的浏览格式
-        // paramters:
-        //      strMARC MARC机内格式
-        public int BuildMarcBrowseText(
-            string strMarcSyntax,
-            string strMARC,
-            out string strBrowseText,
-            out string strError)
-        {
-            strBrowseText = "";
-            strError = "";
-
-            FilterHost host = new FilterHost();
-            host.ID = "";
-            host.MainForm = this.MainForm;
-
-            BrowseFilterDocument filter = null;
-
-            string strFilterFileName = Path.Combine(this.MainForm.DataDir, strMarcSyntax.Replace(".", "_") + "_cfgs\\marc_browse.fltx");
-
-            int nRet = this.PrepareMarcFilter(
-                host,
-                strFilterFileName,
-                out filter,
-                out strError);
-            if (nRet == -1)
-                goto ERROR1;
-
-            try
-            {
-                nRet = filter.DoRecord(null,
-        strMARC,
-        0,
-        out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-
-                strBrowseText = host.ResultString;
-
-            }
-            finally
-            {
-                // 归还对象
-                this.MainForm.Filters.SetFilter(strFilterFileName, filter);
-            }
-
-            return 0;
-        ERROR1:
-            return -1;
-        }
-
-        public int PrepareMarcFilter(
-FilterHost host,
-string strFilterFileName,
-out BrowseFilterDocument filter,
-out string strError)
-        {
-            strError = "";
-
-            // 看看是否有现成可用的对象
-            filter = (BrowseFilterDocument)this.MainForm.Filters.GetFilter(strFilterFileName);
-
-            if (filter != null)
-            {
-                filter.FilterHost = host;
-                return 1;
-            }
-
-            // 新创建
-            // string strFilterFileContent = "";
-
-            filter = new BrowseFilterDocument();
-
-            filter.FilterHost = host;
-            filter.strOtherDef = "FilterHost Host = null;";
-
-            filter.strPreInitial = " BrowseFilterDocument doc = (BrowseFilterDocument)this.Document;\r\n";
-            filter.strPreInitial += " Host = ("
-                + "FilterHost" + ")doc.FilterHost;\r\n";
-
-            // filter.Load(strFilterFileName);
-
-            try
-            {
-                filter.Load(strFilterFileName);
-            }
-            catch (Exception ex)
-            {
-                strError = ex.Message;
-                return -1;
-            }
-
-            string strCode = "";    // c#代码
-
-            int nRet = filter.BuildScriptFile(out strCode,
-                out strError);
-            if (nRet == -1)
-                goto ERROR1;
-
-            string strBinDir = Environment.CurrentDirectory;
-
-            string[] saAddRef1 = {
-										 strBinDir + "\\digitalplatform.marcdom.dll",
-										 // this.BinDir + "\\digitalplatform.marckernel.dll",
-										 // this.BinDir + "\\digitalplatform.libraryserver.dll",
-										 strBinDir + "\\digitalplatform.dll",
-										 strBinDir + "\\digitalplatform.Text.dll",
-										 strBinDir + "\\digitalplatform.IO.dll",
-										 strBinDir + "\\digitalplatform.Xml.dll",
-										 strBinDir + "\\dp2circulation.exe" };
-
-            Assembly assembly = null;
-            string strWarning = "";
-            string strLibPaths = "";
-
-            string[] saRef2 = filter.GetRefs();
-
-            string[] saRef = new string[saRef2.Length + saAddRef1.Length];
-            Array.Copy(saRef2, saRef, saRef2.Length);
-            Array.Copy(saAddRef1, 0, saRef, saRef2.Length, saAddRef1.Length);
-
-            // 创建Script的Assembly
-            nRet = ScriptManager.CreateAssembly_1(strCode,
-                saRef,
-                strLibPaths,
-                out assembly,
-                out strError,
-                out strWarning);
-
-            if (nRet == -2)
-                goto ERROR1;
-            if (nRet == -1)
-            {
-                if (strWarning == "")
-                {
-                    goto ERROR1;
-                }
-                // MessageBox.Show(this, strWarning);
-            }
-
-            filter.Assembly = assembly;
-
-            return 0;
-        ERROR1:
-            return -1;
-        }
-
-        #endregion
 
         #region 针对 dp2library 服务器的检索
 
@@ -1657,6 +1509,7 @@ out string strError)
 
                                 string strMarcSyntax = "";
                                 string strBrowseText = "";
+                                string strColumnTitles = "";
 #if NO
                                 string strMARC = "";
                                 // 将XML格式转换为MARC格式
@@ -1687,6 +1540,7 @@ out string strError)
                                 nRet = BuildBrowseText(strXml,
             out strBrowseText,
             out strMarcSyntax,
+            out strColumnTitles,
             out strError);
                                 if (nRet == -1)
                                     goto ERROR1;
@@ -1971,48 +1825,6 @@ out string strError)
             this.dpTable_browseLines.Rows.Clear();
         }
 
-        int BuildBrowseText(string strXml,
-            out string strBrowseText,
-            out string strMarcSyntax,
-            out string strError)
-        {
-            strError = "";
-            strBrowseText = "";
-            strMarcSyntax = "";
-
-            int nRet = 0;
-
-            string strMARC = "";
-            // 将XML格式转换为MARC格式
-            // 自动从数据记录中获得MARC语法
-            nRet = MarcUtil.Xml2Marc(strXml,    // info.OldXml,
-                true,
-                null,
-                out strMarcSyntax,
-                out strMARC,
-                out strError);
-            if (nRet == -1)
-            {
-                strError = "XML 转换到 MARC 记录时出错: " + strError;
-                return -1;
-            }
-
-            Debug.Assert(string.IsNullOrEmpty(strMarcSyntax) == false, "");
-
-            nRet = BuildMarcBrowseText(
-                strMarcSyntax,
-                strMARC,
-                out strBrowseText,
-                out strError);
-            if (nRet == -1)
-            {
-                strError = "MARC 记录转换到浏览格式时出错: " + strError;
-                return -1;
-            }
-
-            return 0;
-        }
-
         // 更新浏览行中缓冲的书目信息
         // parameters:
         //      new_info    要更新的 RegisterBiblioInfo 对象。如果为 null，表示要删除此浏览行
@@ -2054,10 +1866,12 @@ out string strError)
                     string strError = "";
                     string strBrowseText = "";
                     string strMarcSyntax = "";
+                    string strColumnTitles = "";
 
                     int nRet = BuildBrowseText(dup.OldXml,
 out strBrowseText,
 out strMarcSyntax,
+out strColumnTitles,
 out strError);
                     if (nRet == -1)
                         strBrowseText = strError;

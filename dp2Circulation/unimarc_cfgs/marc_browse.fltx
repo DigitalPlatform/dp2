@@ -3,6 +3,10 @@
 <using>
 <![CDATA[
 
+// UNIMARC 书目记录浏览格式创建程序
+// 修改历史：
+// 2015/8/11  增加 Host.ColumnTitles 输出
+
 using System;
 using System.IO;
 using System.Text;
@@ -126,6 +130,8 @@ string sPubDate = "";
 			// sprintf(&_sOutput, "%s\t%s\t%s\t%s", &sTitle, &sAuthor, &sPublisher, &sPubDate)
 
 			Host.ResultString = sTitle + "\t" + sAuthor + "\t" + sPublisher + "\t" + sPubDate;
+      
+      Host.ColumnTitles = "书名\t作者\t出版者\t出版日期";
 		]]>
 		</end>
 </filter>

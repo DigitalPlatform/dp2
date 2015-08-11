@@ -784,7 +784,40 @@ MessageBoxDefaultButton.Button1);
             this.button_saveResult_saveSingleHitFile.Enabled = bEnable;
         }
 
+        /*
+操作类型 crashReport -- 异常报告 
+主题 dp2catalog 
+发送者 xxx 
+媒体类型 text 
+内容 发生未捕获的界面线程异常: 
+Type: System.IO.FileNotFoundException
+Message: 未能找到文件“C:\Documents and Settings\Administrator\桌面\工大1.txt”。
+Stack:
+在 System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+在 System.IO.FileStream.Init(String path, FileMode mode, FileAccess access, Int32 rights, Boolean useRights, FileShare share, Int32 bufferSize, FileOptions options, SECURITY_ATTRIBUTES secAttrs, String msgPath, Boolean bFromProxy, Boolean useLongPath)
+在 System.IO.FileStream..ctor(String path, FileMode mode, FileAccess access, FileShare share, Int32 bufferSize, FileOptions options)
+在 System.IO.StreamReader..ctor(String path, Encoding encoding, Boolean detectEncodingFromByteOrderMarks, Int32 bufferSize)
+在 System.IO.StreamReader..ctor(String path, Encoding encoding)
+在 dp2Catalog.ZBatchSearchForm.PrepareQueryLines(List`1& lines, String& strError)
+在 dp2Catalog.ZBatchSearchForm.DoSearch(String& strError)
+在 dp2Catalog.ZBatchSearchForm.button_next_Click(Object sender, EventArgs e)
+在 System.Windows.Forms.Control.OnClick(EventArgs e)
+在 System.Windows.Forms.Button.OnClick(EventArgs e)
+在 System.Windows.Forms.Button.OnMouseUp(MouseEventArgs mevent)
+在 System.Windows.Forms.Control.WmMouseUp(Message& m, MouseButtons button, Int32 clicks)
+在 System.Windows.Forms.Control.WndProc(Message& m)
+在 System.Windows.Forms.ButtonBase.WndProc(Message& m)
+在 System.Windows.Forms.Button.WndProc(Message& m)
+在 System.Windows.Forms.Control.ControlNativeWindow.OnMessage(Message& m)
+在 System.Windows.Forms.Control.ControlNativeWindow.WndProc(Message& m)
+在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
 
+
+dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKeyToken=null
+操作系统：Microsoft Windows NT 5.1.2600 Service Pack 3 
+操作时间 2015/8/11 9:28:18 (Tue, 11 Aug 2015 09:28:18 +0800) 
+前端地址 xxx 经由 http://dp2003.com/dp2library 
+         * */
         int PrepareQueryLines(out List<QueryLine> lines,
             out string strError)
         {
@@ -833,47 +866,61 @@ MessageBoxDefaultButton.Button1);
             else
             {
                 Encoding encoding = FileUtil.DetectTextFileEncoding(this.textBox_queryLines_filename.Text);
-                using (StreamReader sr = new StreamReader(this.textBox_queryLines_filename.Text, encoding))
+                try
                 {
-                    if (this.stop != null)
-                        this.stop.SetProgressRange(0, sr.BaseStream.Length);
-                    for (int i = 0; ; i++)
+                    // TODO: 是否要限定文件的最大行数？或者对于行数太多的文件，直接从文件分批读入处理，不进入内存?
+                    using (StreamReader sr = new StreamReader(this.textBox_queryLines_filename.Text, encoding))
                     {
-                        Application.DoEvents();	// 出让界面控制权
-
-                        if (stop != null && stop.State != 0)
-                        {
-                            strError = "用户中断";
-                            return -1;
-                        }
-
-                        string strWord = sr.ReadLine();
-                        if (strWord == null)
-                            break;
-                        strWord = strWord.Trim();
-
-                        if (String.IsNullOrEmpty(strWord) == true)
-                            continue;
-
-                        string strQueryXml = BuildQueryXml(strWord);
-
-                        QueryLine line = new QueryLine();
-                        line.LineNo = i;
-                        line.Word = strWord;
-                        line.QueryXml = strQueryXml;
-                        line.ResultRows = new List<DpRow>();
-
-                        lines.Add(line);
-
                         if (this.stop != null)
+                            this.stop.SetProgressRange(0, sr.BaseStream.Length);
+                        for (int i = 0; ; i++)
                         {
-                            stop.SetMessage("正在准备检索词 " + strWord);
-                            stop.SetProgressValue(sr.BaseStream.Position);
-                        }
-                    }
-                    if (this.stop != null)
-                        this.stop.HideProgress();
+                            Application.DoEvents();	// 出让界面控制权
 
+                            if (stop != null && stop.State != 0)
+                            {
+                                strError = "用户中断";
+                                return -1;
+                            }
+
+                            string strWord = sr.ReadLine();
+                            if (strWord == null)
+                                break;
+                            strWord = strWord.Trim();
+
+                            if (String.IsNullOrEmpty(strWord) == true)
+                                continue;
+
+                            string strQueryXml = BuildQueryXml(strWord);
+
+                            QueryLine line = new QueryLine();
+                            line.LineNo = i;
+                            line.Word = strWord;
+                            line.QueryXml = strQueryXml;
+                            line.ResultRows = new List<DpRow>();
+
+                            lines.Add(line);
+
+                            if (this.stop != null)
+                            {
+                                stop.SetMessage("正在准备检索词 " + strWord);
+                                stop.SetProgressValue(sr.BaseStream.Position);
+                            }
+                        }
+                        if (this.stop != null)
+                            this.stop.HideProgress();
+
+                    }
+                }
+                catch (FileNotFoundException)
+                {
+                    strError = "文件 '" + this.textBox_queryLines_filename.Text + "' 不存在";
+                    return -1;
+                }
+                catch (Exception ex)
+                {
+                    strError = "读取文件 '" + this.textBox_queryLines_filename.Text + "' 内容的过程出现异常: " + ex.Message;
+                    return -1;
                 }
             }
 

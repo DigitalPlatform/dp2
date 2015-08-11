@@ -880,11 +880,20 @@ namespace DigitalPlatform.GUI
         //      strPath 路径。例如"中文图书/3"
         public static string GetDbName(string strPath)
         {
-            int nRet = strPath.LastIndexOf("/");
-            if (nRet == -1)
-                return strPath;
+            // 看看是否有服务器名部分 2015/8/11
+            string strServerName = "";
+            int nRet = strPath.IndexOf("@");
+            if (nRet != -1)
+            {
+                strServerName = strPath.Substring(nRet).Trim(); // 包含字符 '@'
+                strPath = strPath.Substring(0, nRet).Trim();
+            }
 
-            return strPath.Substring(0, nRet).Trim();
+            nRet = strPath.LastIndexOf("/");
+            if (nRet == -1)
+                return strPath + strServerName;
+
+            return strPath.Substring(0, nRet).Trim() + strServerName;
         }
     }
 

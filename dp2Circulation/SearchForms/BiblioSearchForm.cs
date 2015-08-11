@@ -23,6 +23,8 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Script;
 using System.Web;
 using DigitalPlatform.Text;
+using DigitalPlatform.MessageClient;
+using System.Threading;
 
 namespace dp2Circulation
 {
@@ -90,14 +92,28 @@ namespace dp2Circulation
             }
 
             // e.ColumnTitles = this.MainForm.GetBrowseColumnNames(e.DbName);
-
-            e.ColumnTitles = new ColumnPropertyCollection();
-            ColumnPropertyCollection temp = this.MainForm.GetBrowseColumnProperties(e.DbName);
-            if (temp != null)
-                e.ColumnTitles.AddRange(temp);  // 要复制，不要直接使用，因为后面可能会修改。怕影响到原件
+            if (e.DbName.IndexOf("@") == -1)
+            {
+                e.ColumnTitles = new ColumnPropertyCollection();
+                ColumnPropertyCollection temp = this.MainForm.GetBrowseColumnProperties(e.DbName);
+                if (temp != null)
+                    e.ColumnTitles.AddRange(temp);  // 要复制，不要直接使用，因为后面可能会修改。怕影响到原件
+            }
+            else
+            {
+                e.ColumnTitles = new ColumnPropertyCollection();
+                string strColumnTitles = (string)_browseTitleTable[e.DbName];
+                List<string> titles = StringUtil.SplitList(strColumnTitles, '\t');
+                foreach(string s in titles)
+                {
+                    ColumnProperty property = new ColumnProperty(s);
+                    e.ColumnTitles.Add(property);
+                }
+            }
 
             if (this.m_bFirstColumnIsKey == true)
                 e.ColumnTitles.Insert(0, "命中的检索点");
+
         }
 
         void ClearListViewPropertyCache()
@@ -168,6 +184,8 @@ namespace dp2Circulation
              */
             if (this.MainForm != null)
                 this.MainForm.FixedSelectedPageChanged += new EventHandler(MainForm_FixedSelectedPageChanged);
+
+            UpdateMenu();
 
 #if NO
             if (this.MainForm.NormalDbProperties == null
@@ -856,6 +874,7 @@ Keys keyData)
             ItemQueryParam input_query = null)
         {
             string strError = "";
+            int nRet = 0;
 
             if (bOutputKeyCount == true
     && bOutputKeyID == true)
@@ -872,7 +891,6 @@ Keys keyData)
 
             if ((Control.ModifierKeys & Keys.Control) == Keys.Control)
                 bClear = false;
-
 
             // 修改窗口标题
             this.Text = "书目查询 " + this.textBox_queryWord.Text;
@@ -988,6 +1006,24 @@ Keys keyData)
                 {
                     strOutputStyle = "keyid";
                     // strBrowseStyle = "keyid,id,key,cols";
+                }
+
+                if (this.SearchShareBiblio == true)
+                {
+                    // 开始检索共享书目
+                    // return:
+                    //      -1  出错
+                    //      0   没有检索目标
+                    //      1   成功启动检索
+                    nRet = BeginSearchShareBiblio(
+                        this.textBox_queryWord.Text,
+                        strFromStyle,
+                        strMatchStyle,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        // 显示半透明信息
+                    }
                 }
 
                 string strQueryXml = "";
@@ -1194,23 +1230,216 @@ Keys keyData)
 
                 // MessageBox.Show(this, Convert.ToString(lRet) + " : " + strError);
                 this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条书目记录，已全部装入";
+
+
+                if (this.SearchShareBiblio)
+                {
+                    // 结束检索共享书目
+                    // return:
+                    //      -1  出错
+                    //      >=0 命中记录个数
+                    nRet = EndSearchShareBiblio(out strError);
+                    if (nRet == -1)
+                    {
+                        // 显示半透明信息
+                    }
+                }
+
+
             }
             finally
             {
+                this.MainForm.MessageHub.SearchResponseEvent -= MessageHub_SearchResponseEvent;
+
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
                 stop.Initial("");
                 stop.HideProgress();
                 stop.Style = StopStyle.None;
 
-
                 this.EnableControlsInSearching(true);
             }
 
             return;
-
         ERROR1:
             MessageBox.Show(this, strError);
+        }
+
+        // 开始检索共享书目
+        // return:
+        //      -1  出错
+        //      0   没有检索目标
+        //      1   成功启动检索
+        int BeginSearchShareBiblio(
+            string strQueryWord,
+            string strFromStyle,
+            string strMatchStyle,
+            out string strError)
+        {
+            strError = "";
+
+            string strSearchID = Guid.NewGuid().ToString();
+            _searchParam = new SearchParam();
+            _searchParam._searchID = strSearchID;
+            _searchParam._searchComplete = false;
+            _searchParam._searchCount = 0;
+            this.MainForm.MessageHub.SearchResponseEvent += MessageHub_SearchResponseEvent;
+
+            string strOutputSearchID = "";
+            int nRet = this.MainForm.MessageHub.BeginSearchBiblio(
+                strSearchID,
+                "<全部>",
+strQueryWord,
+strFromStyle,
+strMatchStyle,
+"",
+1000,
+out strOutputSearchID,
+out strError);
+            if (nRet == -1)
+            {
+                // 检索过程结束
+                _searchParam._searchComplete = true;
+                return -1;
+            }
+            if (nRet == 0)
+            {
+                // 检索过程结束
+                _searchParam._searchComplete = true;
+                return 0;
+            }
+
+            return 1;
+        }
+
+        // 结束检索共享书目
+        // return:
+        //      -1  出错
+        //      >=0 命中记录个数
+        int EndSearchShareBiblio(out string strError)
+        {
+            strError = "";
+
+            try
+            {
+                // 装入浏览记录
+                TimeSpan timeout = new TimeSpan(0, 1, 0);
+                DateTime start_time = DateTime.Now;
+                while (_searchParam._searchComplete == false)
+                {
+                    Application.DoEvents();
+                    Thread.Sleep(200);
+                    if (DateTime.Now - start_time > timeout)    // 超时
+                        break;
+                    if (this.Progress != null && this.Progress.State != 0)
+                    {
+                        strError = "用户中断";
+                        return -1;
+                    }
+                }
+
+                return _searchParam._searchCount;
+            }
+            finally
+            {
+                _searchParam._searchID = "";
+            }
+        }
+
+        class SearchParam
+        {
+            public string _searchID = "";
+            // public bool _autoSetFocus = false;
+            public bool _searchComplete = false;
+            public int _searchCount = 0;
+        }
+
+        SearchParam _searchParam = null;
+
+        // 外来数据的浏览列标题的对照表。书目库名(包含服务器名部分) --> 列标题字符串
+        Hashtable _browseTitleTable = new Hashtable();
+
+        void MessageHub_SearchResponseEvent(object sender, SearchResponseEventArgs e)
+        {
+            if (e.SsearchID != _searchParam._searchID)
+                return;
+            if (e.ResultCount == -1 && e.Start == -1)
+            {
+                // 检索过程结束
+                _searchParam._searchComplete = true;
+                return;
+            }
+            string strError = "";
+
+            if (e.ResultCount == -1)
+            {
+                strError = e.ErrorInfo;
+                goto ERROR1;
+            }
+
+            // TODO: 注意来自共享网络的图书馆名不能和 servers.xml 中的名字冲突。另外需要检查，不同的 UID，图书馆名字不能相同，如果发生冲突，则需要给分配 ..1 ..2 这样的编号以示区别
+            // 需要一直保存一个 UID 到图书馆命的对照表在内存备用
+            // TODO: 来自共享网络的记录，图标或 @ 后面的名字应该有明显的形态区别
+            foreach (BiblioRecord record in e.Records)
+            {
+                string strXml = record.Data;
+
+                string strMarcSyntax = "";
+                string strBrowseText = "";
+                string strColumnTitles = "";
+                int nRet = BuildBrowseText(strXml,
+out strBrowseText,
+out strMarcSyntax,
+out strColumnTitles,
+out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                string strRecPath = record.RecPath + "@" + (string.IsNullOrEmpty(record.LibraryName) == false ? record.LibraryName : record.LibraryUID);
+
+                string strDbName = ListViewProperty.GetDbName(strRecPath);
+                _browseTitleTable[strDbName] = strColumnTitles;
+
+                List<string> column_list = StringUtil.SplitList(strBrowseText, '\t');
+                string [] cols = new string[column_list.Count];
+                column_list.CopyTo(cols);
+
+                this.Invoke((Action)(() => { 
+                    ListViewItem item = Global.AppendNewLine(
+    this.listView_records,
+    strRecPath,
+    cols);
+                }
+                ));
+
+                
+
+#if NO
+                RegisterBiblioInfo info = new RegisterBiblioInfo();
+                info.OldXml = strXml;   // strMARC;
+                info.Timestamp = ByteArray.GetTimeStampByteArray(record.Timestamp);
+                info.RecPath = record.RecPath + "@" + (string.IsNullOrEmpty(record.LibraryName) == false ? record.LibraryName : record.LibraryUID);
+                info.MarcSyntax = strMarcSyntax;
+#endif
+                _searchParam._searchCount++;
+            }
+
+            return;
+        ERROR1:
+            // 加入一个文本行
+            {
+                string[] cols = new string[1];
+                cols[0] = strError;
+                this.Invoke((Action)(() =>
+                {
+
+                    ListViewItem item = Global.AppendNewLine(
+        this.listView_records,
+        "error",
+        cols);
+                }
+    ));
+            }
         }
 
         private void listView_records_DoubleClick(object sender, EventArgs e)
@@ -7213,6 +7442,43 @@ strNewMARC);
             set
             {
                 this.comboBox_matchStyle.Text = value;
+            }
+        }
+
+        private void ToolStripMenuItem_searchShareBiblio_Click(object sender, EventArgs e)
+        {
+            if (this.SearchShareBiblio == false)
+                this.SearchShareBiblio = true;
+            else
+                this.SearchShareBiblio = false;
+
+            UpdateMenu();
+        }
+
+        // 更新菜单状态
+        void UpdateMenu()
+        {
+            this.ToolStripMenuItem_searchShareBiblio.Checked = this.SearchShareBiblio;
+        }
+
+        public bool SearchShareBiblio
+        {
+            get
+            {
+                if (this.MainForm != null && this.MainForm.AppInfo != null)
+                    return this.MainForm.AppInfo.GetBoolean(
+        "biblio_search_form",
+        "search_sharebiblio",
+        true);
+                return false;
+            }
+            set
+            {
+                if (this.MainForm != null && this.MainForm.AppInfo != null)
+                    this.MainForm.AppInfo.SetBoolean(
+        "biblio_search_form",
+        "search_sharebiblio",
+        value);
             }
         }
     }

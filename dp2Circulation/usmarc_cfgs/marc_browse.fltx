@@ -3,6 +3,10 @@
 <using>
 <![CDATA[
 
+// MARC21 书目记录浏览格式创建程序
+// 修改历史：
+// 2015/8/11  增加 Host.ColumnTitles 输出
+
 using System;
 using System.IO;
 using System.Text;
@@ -121,6 +125,8 @@ string s_245_c = "";
       + FilterDocument.TrimEndChar(sAuthor) + "\t"
       + FilterDocument.TrimEndChar(sPublisher) + "\t"
       + FilterDocument.TrimEndChar(sPubDate);
+      
+      Host.ColumnTitles = "书名\t作者\t出版者\t出版日期";
 		]]>
 		</end>
 </filter>

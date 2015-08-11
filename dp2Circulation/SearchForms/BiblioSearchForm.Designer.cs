@@ -47,6 +47,8 @@ namespace dp2Circulation
             this.ToolStripMenuItem_continueLoad = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem_searchKeyID = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem_searchKeys = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
+            this.ToolStripMenuItem_searchShareBiblio = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripDropDownButton_inputTimeString = new System.Windows.Forms.ToolStripDropDownButton();
             this.ToolStripMenuItem_rfc1123Single = new System.Windows.Forms.ToolStripMenuItem();
@@ -102,7 +104,7 @@ namespace dp2Circulation
             this.textBox_queryWord.Location = new System.Drawing.Point(89, 4);
             this.textBox_queryWord.Margin = new System.Windows.Forms.Padding(4);
             this.textBox_queryWord.Name = "textBox_queryWord";
-            this.textBox_queryWord.Size = new System.Drawing.Size(137, 21);
+            this.textBox_queryWord.Size = new System.Drawing.Size(100, 21);
             this.textBox_queryWord.TabIndex = 1;
             this.textBox_queryWord.TextChanged += new System.EventHandler(this.textBox_queryWord_TextChanged);
             this.textBox_queryWord.Enter += new System.EventHandler(this.textBox_queryWord_Enter);
@@ -189,7 +191,7 @@ namespace dp2Circulation
             this.comboBox_from.Location = new System.Drawing.Point(89, 63);
             this.comboBox_from.Margin = new System.Windows.Forms.Padding(4);
             this.comboBox_from.Name = "comboBox_from";
-            this.comboBox_from.Size = new System.Drawing.Size(137, 22);
+            this.comboBox_from.Size = new System.Drawing.Size(100, 22);
             this.comboBox_from.TabIndex = 6;
             this.comboBox_from.SizeChanged += new System.EventHandler(this.comboBox_from_SizeChanged);
             // 
@@ -220,7 +222,7 @@ namespace dp2Circulation
             this.comboBox_matchStyle.Location = new System.Drawing.Point(89, 93);
             this.comboBox_matchStyle.Margin = new System.Windows.Forms.Padding(4);
             this.comboBox_matchStyle.Name = "comboBox_matchStyle";
-            this.comboBox_matchStyle.Size = new System.Drawing.Size(137, 20);
+            this.comboBox_matchStyle.Size = new System.Drawing.Size(100, 20);
             this.comboBox_matchStyle.TabIndex = 8;
             this.comboBox_matchStyle.Text = "前方一致";
             this.comboBox_matchStyle.SizeChanged += new System.EventHandler(this.comboBox_matchStyle_SizeChanged);
@@ -236,7 +238,7 @@ namespace dp2Circulation
             this.checkedComboBox_biblioDbNames.Margin = new System.Windows.Forms.Padding(4);
             this.checkedComboBox_biblioDbNames.Name = "checkedComboBox_biblioDbNames";
             this.checkedComboBox_biblioDbNames.Padding = new System.Windows.Forms.Padding(4);
-            this.checkedComboBox_biblioDbNames.Size = new System.Drawing.Size(137, 22);
+            this.checkedComboBox_biblioDbNames.Size = new System.Drawing.Size(100, 22);
             this.checkedComboBox_biblioDbNames.TabIndex = 9;
             this.checkedComboBox_biblioDbNames.DropDown += new System.EventHandler(this.checkedComboBox_biblioDbNames_DropDown);
             this.checkedComboBox_biblioDbNames.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.checkedComboBox_biblioDbNames_ItemChecked);
@@ -254,10 +256,10 @@ namespace dp2Circulation
             this.toolStripSeparator1,
             this.toolStripButton_prevQuery,
             this.toolStripButton_nextQuery});
-            this.toolStrip_search.Location = new System.Drawing.Point(230, 0);
+            this.toolStrip_search.Location = new System.Drawing.Point(193, 0);
             this.toolStrip_search.Name = "toolStrip_search";
             this.toolStrip_search.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
-            this.toolStrip_search.Size = new System.Drawing.Size(120, 25);
+            this.toolStrip_search.Size = new System.Drawing.Size(157, 25);
             this.toolStrip_search.TabIndex = 13;
             this.toolStrip_search.Text = "检索";
             // 
@@ -277,7 +279,9 @@ namespace dp2Circulation
             this.toolStripDropDownButton_searchKeys.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ToolStripMenuItem_continueLoad,
             this.toolStripMenuItem_searchKeyID,
-            this.toolStripMenuItem_searchKeys});
+            this.toolStripMenuItem_searchKeys,
+            this.toolStripSeparator4,
+            this.ToolStripMenuItem_searchShareBiblio});
             this.toolStripDropDownButton_searchKeys.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton_searchKeys.Image")));
             this.toolStripDropDownButton_searchKeys.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDropDownButton_searchKeys.Name = "toolStripDropDownButton_searchKeys";
@@ -306,6 +310,18 @@ namespace dp2Circulation
             this.toolStripMenuItem_searchKeys.Size = new System.Drawing.Size(160, 22);
             this.toolStripMenuItem_searchKeys.Text = "仅获得检索点";
             this.toolStripMenuItem_searchKeys.Click += new System.EventHandler(this.toolStripMenuItem_searchKeys_Click);
+            // 
+            // toolStripSeparator4
+            // 
+            this.toolStripSeparator4.Name = "toolStripSeparator4";
+            this.toolStripSeparator4.Size = new System.Drawing.Size(157, 6);
+            // 
+            // ToolStripMenuItem_searchShareBiblio
+            // 
+            this.ToolStripMenuItem_searchShareBiblio.Name = "ToolStripMenuItem_searchShareBiblio";
+            this.ToolStripMenuItem_searchShareBiblio.Size = new System.Drawing.Size(160, 22);
+            this.ToolStripMenuItem_searchShareBiblio.Text = "使用共享网络";
+            this.ToolStripMenuItem_searchShareBiblio.Click += new System.EventHandler(this.ToolStripMenuItem_searchShareBiblio_Click);
             // 
             // toolStripSeparator3
             // 
@@ -392,7 +408,7 @@ namespace dp2Circulation
             // 
             // button_search
             // 
-            this.button_search.Location = new System.Drawing.Point(233, 31);
+            this.button_search.Location = new System.Drawing.Point(196, 31);
             this.button_search.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button_search.Name = "button_search";
             this.button_search.Size = new System.Drawing.Size(0, 0);
@@ -599,5 +615,7 @@ namespace dp2Circulation
         private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_uRange;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_searchKeys;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_searchShareBiblio;
     }
 }

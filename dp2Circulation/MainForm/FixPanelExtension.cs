@@ -239,8 +239,8 @@ namespace dp2Circulation
                 throw new ArgumentException("名字为 '" + strName + "' 的 fixpage 不存在");
 
             // 清除原有控件
-            while (this.tabPage_generateData.Controls.Count > 0)
-                this.tabPage_generateData.Controls.RemoveAt(0);
+            while (page.Controls.Count > 0)
+                page.Controls.RemoveAt(0);
 
             if (value != null)
             {
