@@ -297,7 +297,7 @@ this._openMarcFileDialog.Mode880);
             }
         }
 
-        // 创建缺省的main.cs文件
+        // 创建缺省的 main.cs 文件
         static void CreateDefaultMainCsFile(string strFileName)
         {
             StreamWriter sw = new StreamWriter(strFileName, false, Encoding.UTF8);
@@ -313,7 +313,6 @@ this._openMarcFileDialog.Mode880);
             sw.WriteLine("using DigitalPlatform.Xml;");
             sw.WriteLine("using DigitalPlatform.Marc;");
 
-
             sw.WriteLine("public class MyStatis : Iso2709Statis");
 
             sw.WriteLine("{");
@@ -321,7 +320,6 @@ this._openMarcFileDialog.Mode880);
             sw.WriteLine("	public override void OnBegin(object sender, StatisEventArgs e)");
             sw.WriteLine("	{");
             sw.WriteLine("	}");
-
 
             sw.WriteLine("}");
             sw.Close();
@@ -338,7 +336,6 @@ this._openMarcFileDialog.Mode880);
             dlg.DataDir = this.MainForm.DataDir;
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.ShowDialog(this);
-
         }
 
         /// <summary>

@@ -10,6 +10,7 @@ using System.IO;
 using System.Diagnostics;
 using System.Reflection;
 using System.Xml;
+using System.Web;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
@@ -27,7 +28,6 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.GcatClient;
 using DigitalPlatform.GcatClient.gcat_new_ws;
-using System.Web;
 
 namespace dp2Catalog
 {
@@ -258,7 +258,6 @@ namespace dp2Catalog
                     e.Cancel = true;
                     return;
                 }
-
             }
 
             if (/*this.EntitiesChanged == true
@@ -267,7 +266,6 @@ namespace dp2Catalog
                 || */this.BiblioChanged == true
                 )
             {
-
                 // 警告尚未保存
                 DialogResult result = MessageBox.Show(this,
     "当前有 " + GetCurrentChangedPartName() + " 被修改后尚未保存。若此时关闭窗口，现有未保存信息将丢失。\r\n\r\n确实要关闭窗口? ",
@@ -1385,7 +1383,6 @@ namespace dp2Catalog
                 }
             }
 
-
             // 当处于连接MARC文件状态时
             if (this.linkMarcFile != null)
             {
@@ -1433,7 +1430,6 @@ namespace dp2Catalog
                 }
                 if (nRet == -1)
                     goto ERROR1;
-
 
                 LoadLinkedMarcRecord(strMarc, baRecord);
                 return 0;
@@ -1566,6 +1562,35 @@ namespace dp2Catalog
             return 0;
         }
 
+        /*
+操作类型 crashReport -- 异常报告 
+主题 dp2catalog 
+发送者 xxxx 
+媒体类型 text 
+内容 发生未捕获的界面线程异常: 
+Type: System.ObjectDisposedException
+Message: 无法访问已释放的对象。
+对象名:“MarcEditor”。
+Stack:
+在 System.Windows.Forms.Control.CreateHandle()
+在 System.Windows.Forms.Control.get_Handle()
+在 DigitalPlatform.Marc.Field.CalculateHeight(Graphics g, Boolean bIgnoreEdit)
+在 DigitalPlatform.Marc.FieldCollection.AddInternal(String strName, String strIndicator, String strValue, Boolean bFireTextChanged, Boolean bInOrder, Int32& nOutputPosition)
+在 DigitalPlatform.Marc.Record.SetMarc(String strMarc, Boolean bCheckMarcDef, String& strError)
+在 DigitalPlatform.Marc.MarcEditor.set_Marc(String value)
+在 dp2Catalog.MarcDetailForm.LoadRecord(ISearchForm searchform, Int32 index, Boolean bForceFullElementSet, Boolean bReload)
+在 dp2Catalog.dp2SearchForm.LoadDetail(Int32 index, Boolean bOpenNew)
+在 dp2Catalog.dp2SearchForm.listView_browse_DoubleClick(Object sender, EventArgs e)
+在 System.Windows.Forms.ListView.WndProc(Message& m)
+在 DigitalPlatform.GUI.ListViewNF.WndProc(Message& m)
+在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
+
+
+dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKeyToken=null
+操作系统：Microsoft Windows NT 6.1.7601 Service Pack 1 
+操作时间 2015/8/10 13:48:50 (Mon, 10 Aug 2015 13:48:50 +0800) 
+前端地址 xxxx 经由 http://dp2003.com/dp2library 
+         * */
         // 从检索窗装载MARC记录
         // parameters:
         //      bForceFullElementSet    是否强制用Full元素集。如果为false，表示无所谓，也就是说按照当前的元素集(有可能是Full，也有可能是Brief)
@@ -1580,159 +1605,169 @@ namespace dp2Catalog
             bool bReload = false)
         {
             string strError = "";
-            string strMARC = "";
 
-            this.LinkedSearchForm = searchform;
-            // this.SavePath = "";  // 2011/5/5 去除
-
-            DigitalPlatform.Z3950.Record record = null;
-            Encoding currentEncoding = null;
-
-            this.CurrentRecord = null;
-            string strSavePath = "";
-            byte[] baTimestamp = null;
-
-            this.m_nDisableInitialAssembly++;   // 防止多次初始化Assembly
+            this.stop.BeginLoop();  // 在这里启用 stop，可以防止在装载的中途 Form 被关闭、造成 MarcEditor 设置 MARC 字符串过程抛出异常
+            this.EnableControls(false);
             try
             {
-                string strOutStyle = "";
-                LoginInfo logininfo = null;
-                string strXmlFragment = "";
-                long lVersion = 0;
+                string strMARC = "";
 
-                string strParameters = "hilight_browse_line";
-                if (bForceFullElementSet == true)
-                    strParameters += ",force_full";
-                if (bReload == true)
-                    strParameters += ",reload";
+                this.LinkedSearchForm = searchform;
+                // this.SavePath = "";  // 2011/5/5 去除
 
-                // 获得一条MARC/XML记录
-                // return:
-                //      -1  error
-                //      0   suceed
-                //      1   为诊断记录
-                //      2   分割条，需要跳过这条记录
-                int nRet = searchform.GetOneRecord(
-                    "marc",
-                    index,  // 即将废止
-                    "index:" + index.ToString(),
-                    strParameters,  // true,
-                    out strSavePath,
-                    out strMARC,
-                    out strXmlFragment,
-                    out strOutStyle,
-                    out baTimestamp,
-                    out lVersion,
-                    out record,
-                    out currentEncoding,
-                    out logininfo,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-                if (nRet == 2)
-                    return 2;
+                DigitalPlatform.Z3950.Record record = null;
+                Encoding currentEncoding = null;
 
-                nRet = this.LoadXmlFragment(strXmlFragment,
-        out strError);
-                if (nRet == -1)
-                    goto ERROR1;
+                this.CurrentRecord = null;
+                string strSavePath = "";
+                byte[] baTimestamp = null;
 
-                this.LoginInfo = logininfo;
-
-                if (strOutStyle != "marc")
+                this.m_nDisableInitialAssembly++;   // 防止多次初始化Assembly
+                try
                 {
-                    strError = "所获取的记录不是marc格式";
-                    goto ERROR1;
-                }
+                    string strOutStyle = "";
+                    LoginInfo logininfo = null;
+                    string strXmlFragment = "";
+                    long lVersion = 0;
 
-                this.RecordVersion = lVersion;
+                    string strParameters = "hilight_browse_line";
+                    if (bForceFullElementSet == true)
+                        strParameters += ",force_full";
+                    if (bReload == true)
+                        strParameters += ",reload";
 
-                this.CurrentRecord = record;
-                if (this.m_currentRecord != null)
-                {
-                    // 装入二进制编辑器
-                    this.binaryEditor_originData.SetData(
-                        this.m_currentRecord.m_baRecord);
-
-                    // 装入ISO2709文本
-                    nRet = this.Set2709OriginText(this.m_currentRecord.m_baRecord,
-                        this.CurrentEncoding,
+                    // 获得一条MARC/XML记录
+                    // return:
+                    //      -1  error
+                    //      0   suceed
+                    //      1   为诊断记录
+                    //      2   分割条，需要跳过这条记录
+                    int nRet = searchform.GetOneRecord(
+                        "marc",
+                        index,  // 即将废止
+                        "index:" + index.ToString(),
+                        strParameters,  // true,
+                        out strSavePath,
+                        out strMARC,
+                        out strXmlFragment,
+                        out strOutStyle,
+                        out baTimestamp,
+                        out lVersion,
+                        out record,
+                        out currentEncoding,
+                        out logininfo,
                         out strError);
                     if (nRet == -1)
+                        goto ERROR1;
+                    if (nRet == 2)
+                        return 2;
+
+                    nRet = this.LoadXmlFragment(strXmlFragment,
+            out strError);
+                    if (nRet == -1)
+                        goto ERROR1;
+
+                    this.LoginInfo = logininfo;
+
+                    if (strOutStyle != "marc")
                     {
-                        this.textBox_originData.Text = strError;
+                        strError = "所获取的记录不是marc格式";
+                        goto ERROR1;
                     }
 
-                    // 数据库名
-                    this.textBox_originDatabaseName.Text = this.m_currentRecord.m_strDBName;
+                    this.RecordVersion = lVersion;
 
-                    // Marc syntax OID
-                    this.textBox_originMarcSyntaxOID.Text = this.m_currentRecord.m_strSyntaxOID;
-
-                    // 2014/5/18
-                    if (this.UseAutoDetectedMarcSyntaxOID == true)
+                    this.CurrentRecord = record;
+                    if (this.m_currentRecord != null)
                     {
-                        this.AutoDetectedMarcSyntaxOID = this.m_currentRecord.AutoDetectedSyntaxOID;
-                        if (string.IsNullOrEmpty(this.AutoDetectedMarcSyntaxOID) == false)
-                            this.textBox_originMarcSyntaxOID.Text = this.AutoDetectedMarcSyntaxOID;
-                    }
+                        // 装入二进制编辑器
+                        this.binaryEditor_originData.SetData(
+                            this.m_currentRecord.m_baRecord);
+
+                        // 装入ISO2709文本
+                        nRet = this.Set2709OriginText(this.m_currentRecord.m_baRecord,
+                            this.CurrentEncoding,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            this.textBox_originData.Text = strError;
+                        }
+
+                        // 数据库名
+                        this.textBox_originDatabaseName.Text = this.m_currentRecord.m_strDBName;
+
+                        // Marc syntax OID
+                        this.textBox_originMarcSyntaxOID.Text = this.m_currentRecord.m_strSyntaxOID;
+
+                        // 2014/5/18
+                        if (this.UseAutoDetectedMarcSyntaxOID == true)
+                        {
+                            this.AutoDetectedMarcSyntaxOID = this.m_currentRecord.AutoDetectedSyntaxOID;
+                            if (string.IsNullOrEmpty(this.AutoDetectedMarcSyntaxOID) == false)
+                                this.textBox_originMarcSyntaxOID.Text = this.AutoDetectedMarcSyntaxOID;
+                        }
 
 #if NO
                     // 让确定的OID起作用 2008/3/25
                     if (String.IsNullOrEmpty(this.m_currentRecord.m_strSyntaxOID) == false)
                         this.AutoDetectedMarcSyntaxOID = "";
 #endif
-                }
-                else
-                {
-                    byte[] baMARC = this.CurrentEncoding.GetBytes(strMARC);
-                    // 装入二进制编辑器
-                    this.binaryEditor_originData.SetData(
-                        baMARC);
-
-                    // 装入ISO2709文本
-                    nRet = this.Set2709OriginText(baMARC,
-                        this.CurrentEncoding,
-                        out strError);
-                    if (nRet == -1)
+                    }
+                    else
                     {
-                        this.textBox_originData.Text = strError;
+                        byte[] baMARC = this.CurrentEncoding.GetBytes(strMARC);
+                        // 装入二进制编辑器
+                        this.binaryEditor_originData.SetData(
+                            baMARC);
+
+                        // 装入ISO2709文本
+                        nRet = this.Set2709OriginText(baMARC,
+                            this.CurrentEncoding,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            this.textBox_originData.Text = strError;
+                        }
                     }
                 }
+                finally
+                {
+                    this.m_nDisableInitialAssembly--;
+                }
+
+                this.SavePath = strSavePath;
+                this.CurrentTimestamp = baTimestamp;
+                this.CurrentEncoding = currentEncoding;
+
+                // 装入MARC编辑器
+                this.MarcEditor.Marc = strMARC;
+
+                DisplayHtml(strMARC, this.textBox_originMarcSyntaxOID.Text);
+
+                // 构造路径
+
+                string strPath = searchform.CurrentProtocol + ":"
+                    + searchform.CurrentResultsetPath
+                    + "/" + (index + 1).ToString();
+
+                this.textBox_tempRecPath.Text = strPath;
+
+                this.MarcEditor.MarcDefDom = null; // 强制刷新字段名提示
+                this.MarcEditor.RefreshNameCaption();
+
+                this.BiblioChanged = false;
+
+                if (this.MarcEditor.FocusedFieldIndex == -1)
+                    this.MarcEditor.FocusedFieldIndex = 0;
+
+                this.MarcEditor.Focus();
+                return 0;
             }
             finally
             {
-                this.m_nDisableInitialAssembly--;
+                this.stop.EndLoop();
+                this.EnableControls(true);
             }
-
-            this.SavePath = strSavePath;
-            this.CurrentTimestamp = baTimestamp;
-            this.CurrentEncoding = currentEncoding;
-
-            // 装入MARC编辑器
-            this.MarcEditor.Marc = strMARC;
-
-            DisplayHtml(strMARC, this.textBox_originMarcSyntaxOID.Text);
-
-            // 构造路径
-
-            string strPath = searchform.CurrentProtocol + ":"
-                + searchform.CurrentResultsetPath
-                + "/" + (index + 1).ToString();
-
-            this.textBox_tempRecPath.Text = strPath;
-
-
-            this.MarcEditor.MarcDefDom = null; // 强制刷新字段名提示
-            this.MarcEditor.RefreshNameCaption();
-
-            this.BiblioChanged = false;
-
-            if (this.MarcEditor.FocusedFieldIndex == -1)
-                this.MarcEditor.FocusedFieldIndex = 0;
-
-            this.MarcEditor.Focus();
-            return 0;
         ERROR1:
             MessageBox.Show(this, strError);
             return -1;

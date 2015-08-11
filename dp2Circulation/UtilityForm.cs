@@ -17,6 +17,8 @@ using DigitalPlatform.IO;
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Range;
+using DigitalPlatform.Marc;
+using DigitalPlatform.CommonControl;
 
 namespace dp2Circulation
 {
@@ -39,7 +41,15 @@ namespace dp2Circulation
         {
             FillEncodingList(this.comboBox_xmlFile_encoding,
                 false);
+            FillEncodingList(this.comboBox_worToIso_encoding,
+    false);
 
+            this.UiState = this.MainForm.AppInfo.GetString(
+                "utilityform",
+                "ui_state",
+                "");
+
+#if NO
             this.textBox_serverFilePath.Text = this.MainForm.AppInfo.GetString(
                 "utilityform",
                 "server_file_path",
@@ -48,6 +58,7 @@ namespace dp2Circulation
     "utilityform",
     "client_file_path",
     "");
+#endif
 
             FillSystemInfo();
         }
@@ -63,6 +74,7 @@ namespace dp2Circulation
 
         private void UtilityForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+#if NO
             this.MainForm.AppInfo.SetString(
     "utilityform",
     "server_file_path",
@@ -71,6 +83,11 @@ namespace dp2Circulation
     "utilityform",
     "client_file_path",
     this.textBox_clientFilePath.Text);
+#endif
+            this.MainForm.AppInfo.SetString(
+    "utilityform",
+    "ui_state",
+    this.UiState);
         }
 
         private void button_sjhm_getOriginInfo_Click(object sender, EventArgs e)
@@ -1075,6 +1092,242 @@ MessageBoxDefaultButton.Button2);
             this.textBox_systemInfo_mac.Text = StringUtil.MakePathList(SerialCodeForm.GetMacAddress());
         }
 
+        private void button_worToIso_findWorFileName_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog dlg = new OpenFileDialog();
+
+            dlg.Title = "请指定即将被转换的 MARC 工作单文件名";
+            dlg.FileName = this.textBox_worToIso_worFilename.Text;
+
+            dlg.Filter = "MARC 工作单文件 (*.wor;*.txt)|*.wor;*.txt|All files (*.*)|*.*";
+            dlg.RestoreDirectory = true;
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            this.textBox_worToIso_worFilename.Text = dlg.FileName;
+        }
+
+        private void comboBox_worToIso_encoding_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            DisplayFirstWorksheetRecord();
+        }
+
+        private void textBox_worToIso_worFilename_TextChanged(object sender, EventArgs e)
+        {
+            DisplayFirstWorksheetRecord();
+        }
+
+        private void button_worToIso_convert_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            if (string.IsNullOrEmpty(this.textBox_worToIso_worFilename.Text) == true)
+            {
+                strError = "尚未指定工作单文件名";
+                goto ERROR1;
+            }
+
+            Encoding encoding = MarcUtil.GetEncoding(this.comboBox_worToIso_encoding.Text);
+            if (encoding == null)
+                encoding = Encoding.GetEncoding(936);
+
+            Encoding preferredEncoding = Encoding.UTF8;
+
+            OpenMarcFileDlg dlg = new OpenMarcFileDlg();
+            GuiUtil.SetControlFont(dlg, this.Font);
+            dlg.Text = "请指定目标 ISO2709 文件名";
+            dlg.IsOutput = true;
+            dlg.FileName = "";
+            dlg.CrLf = false;
+            dlg.AddG01Visible = false;
+            dlg.RemoveField998Visible = false;
+            //dlg.RemoveField998 = m_mainForm.LastRemoveField998;
+            dlg.EncodingListItems = Global.GetEncodingList(false);
+            dlg.MarcSyntax = "<自动>";    // strPreferedMarcSyntax;
+            dlg.EnableMarcSyntax = false;
+
+            this.MainForm.AppInfo.LinkFormState(dlg, "OpenMarcFileDlg_forOutput_state");
+            dlg.ShowDialog(this);
+            if (dlg.DialogResult != DialogResult.OK)
+                return;
+
+            Encoding targetEncoding = null;
+
+            nRet = Global.GetEncoding(dlg.EncodingName,
+                out targetEncoding,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            bool bExist = File.Exists(dlg.FileName);
+            bool bAppend = false;
+
+            if (bExist == true)
+            {
+                DialogResult result = MessageBox.Show(this,
+        "文件 '" + dlg.FileName + "' 已存在，是否以追加方式写入记录?\r\n\r\n--------------------\r\n注：(是)追加  (否)覆盖  (取消)放弃",
+        "UtilityForm",
+        MessageBoxButtons.YesNoCancel,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button1);
+                if (result == DialogResult.Yes)
+                    bAppend = true;
+
+                if (result == DialogResult.No)
+                    bAppend = false;
+
+                if (result == DialogResult.Cancel)
+                {
+                    strError = "放弃处理...";
+                    goto ERROR1;
+                }
+            }
+
+
+            EnableControls(false);
+
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在转换文件格式 ...");
+            stop.BeginLoop();
+
+            try
+            {
+                using (TextReader reader = new StreamReader(this.textBox_worToIso_worFilename.Text, encoding))
+                using (Stream target = File.Open(dlg.FileName,
+                         FileMode.OpenOrCreate))
+                {
+                    if (bAppend == false)
+                        target.SetLength(0);
+                    else
+                        target.Seek(0, SeekOrigin.End);
+
+                    for (int i = 0; ; i++)
+                    {
+                        stop.SetMessage("正在转换 " + (i + 1).ToString());
+
+                        Application.DoEvents();	// 出让界面控制权
+
+                        if (stop != null && stop.State != 0)
+                        {
+                            strError = "用户中断";
+                            goto ERROR1;
+                        }
+                        string strMARC = "";
+                        // return:
+                        //	-2	MARC格式错
+                        //	-1	出错
+                        //	0	正确
+                        //	1	结束(当前返回的记录有效)
+                        //	2	结束(当前返回的记录无效)
+                        nRet = MarcUtil.ReadWorksheetRecord(reader,
+                out strMARC,
+                out strError);
+                        if (nRet == -1 || nRet == -2)
+                            goto ERROR1;
+                        if (nRet == 2)
+                            break;
+
+                        if (dlg.Mode880 == true && dlg.MarcSyntax == "usmarc")
+                        {
+                            MarcRecord record = new MarcRecord(strMARC);
+                            MarcQuery.To880(record);
+                            strMARC = record.Text;
+                        }
+
+                        byte[] baTarget = null;
+
+                        // 将MARC机内格式转换为ISO2709格式
+                        // parameters:
+                        //      strSourceMARC   [in]机内格式MARC记录。
+                        //      strMarcSyntax   [in]为"unimarc"或"usmarc"
+                        //      targetEncoding  [in]输出ISO2709的编码方式。为UTF8、codepage-936等等
+                        //      baResult    [out]输出的ISO2709记录。编码方式受targetEncoding参数控制。注意，缓冲区末尾不包含0字符。
+                        // return:
+                        //      -1  出错
+                        //      0   成功
+                        nRet = MarcUtil.CvtJineiToISO2709(
+                            strMARC,
+                            dlg.MarcSyntax,
+                            targetEncoding,
+                            out baTarget,
+                            out strError);
+                        if (nRet == -1)
+                            goto ERROR1;
+
+                        target.Write(baTarget, 0,
+                            baTarget.Length);
+
+                        if (dlg.CrLf == true)
+                        {
+                            byte[] baCrLf = targetEncoding.GetBytes("\r\n");
+                            target.Write(baCrLf, 0,
+                                baCrLf.Length);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = "转换过程出现异常: " + ex.Message;
+                goto ERROR1;
+            }
+            finally
+            {
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+
+                EnableControls(true);
+            }
+            MessageBox.Show(this, "转换完成。记录已写入文件 "+dlg.FileName+" 中");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        void DisplayFirstWorksheetRecord()
+        {
+            if (string.IsNullOrEmpty(this.textBox_worToIso_worFilename.Text) == true)
+            {
+                this.textBox_worToIso_preview.Text = "";
+                return;
+            }
+
+            this.textBox_worToIso_preview.Text = MarcUtil.ReaderFirstWorksheetRecord(this.textBox_worToIso_worFilename.Text,
+                this.comboBox_worToIso_encoding.Text);
+        }
+
+        public string UiState
+        {
+            get
+            {
+                List<object> controls = new List<object>();
+                controls.Add(this.tabControl_main);
+
+                controls.Add(this.textBox_serverFilePath);
+                controls.Add(this.textBox_clientFilePath);
+
+
+                controls.Add(this.textBox_worToIso_worFilename);
+                controls.Add(this.comboBox_worToIso_encoding);
+                return GuiState.GetUiState(controls);
+            }
+            set
+            {
+                List<object> controls = new List<object>();
+                controls.Add(this.tabControl_main);
+
+                controls.Add(this.textBox_serverFilePath);
+                controls.Add(this.textBox_clientFilePath);
+
+
+                controls.Add(this.textBox_worToIso_worFilename);
+                controls.Add(this.comboBox_worToIso_encoding);
+                GuiState.SetUiState(controls, value);
+            }
+        }
 
     }
 }

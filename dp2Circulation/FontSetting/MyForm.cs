@@ -183,7 +183,7 @@ namespace dp2Circulation
                 && Floating == false && this.SupressSizeSetting == false)
             {
                 MainForm.AppInfo.SaveMdiChildFormStates(this,
-                "mdi_form_state");
+                    "mdi_form_state");
             }
 
             /*

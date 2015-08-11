@@ -1,8 +1,4 @@
-﻿using DigitalPlatform;
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.Text;
-using Microsoft.AspNet.SignalR.Client.Hubs;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -15,6 +11,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Forms;
+
+using DigitalPlatform;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.Text;
+// using Microsoft.AspNet.SignalR.Client.Hubs;
+
 
 namespace dp2Circulation
 {

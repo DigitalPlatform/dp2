@@ -28,6 +28,7 @@ using DigitalPlatform.Script;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
+using DigitalPlatform.MessageClient;
 
 namespace dp2Circulation
 {

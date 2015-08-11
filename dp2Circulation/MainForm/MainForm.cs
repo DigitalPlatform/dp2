@@ -719,7 +719,7 @@ namespace dp2Circulation
             }
 #endif
             if (this.MessageHub != null)
-                this.MessageHub.Finalize();
+                this.MessageHub.Destroy();
 
             if (m_propertyViewer != null)
                 m_propertyViewer.Close();

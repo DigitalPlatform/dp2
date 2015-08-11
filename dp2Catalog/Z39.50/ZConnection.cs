@@ -723,7 +723,6 @@ namespace dp2Catalog
             bool bError = false;
             try
             {
-
                 if (this.ZChannel.Connected == false
                     || this.ZChannel.HostName != this.TargetInfo.HostName
                     || this.ZChannel.Port != this.TargetInfo.Port)
@@ -740,7 +739,6 @@ namespace dp2Catalog
                         bError = true;
                         return -1;
                     }
-
                 }
                 else
                 {
@@ -804,7 +802,6 @@ namespace dp2Catalog
 
             // 暂时online一下图标
             this.TargetInfo.OnlineServerIcon(true);
-
 
             // Initial
             this.InitialComplete -= new EventHandler(ZConnection_InitialComplete);
@@ -874,7 +871,6 @@ namespace dp2Catalog
                     this.CommandsComplete(this, new EventArgs());
                 return;
             }
-
 
             // 显示检索命中结果
 
@@ -2767,7 +2763,5 @@ namespace dp2Catalog
 
             return 1;
         }
-
     }
-
 }

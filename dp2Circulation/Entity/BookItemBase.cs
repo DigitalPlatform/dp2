@@ -381,9 +381,12 @@ namespace dp2Circulation
         /// </summary>
         public void DeleteFromListView()
         {
-            ListView list = this.ListViewItem.ListView;
-
-            list.Items.Remove(this.ListViewItem);
+            if (this.ListViewItem != null)
+            {
+                ListView list = this.ListViewItem.ListView;
+                if (list != null)
+                    list.Items.Remove(this.ListViewItem);
+            }
         }
 
         /// <summary>

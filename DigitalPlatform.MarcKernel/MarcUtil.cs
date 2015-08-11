@@ -4532,6 +4532,168 @@ namespace DigitalPlatform.Marc
         }
 
         #endregion
+
+        #region 工作单文件、记录相关函数
+
+        // 读出工作单文件的第一个记录的文本内容。注意，文本内容没有进行任何转换，还是工作单格式
+        public static string ReaderFirstWorksheetRecord(string strFileName,
+            string strEncodingName)
+        {
+            try
+            {
+                Encoding encoding = GetEncoding(strEncodingName);
+                if (encoding == null)
+                    encoding = Encoding.GetEncoding(936);
+                StringBuilder text = new StringBuilder();
+                using (TextReader reader = new StreamReader(strFileName, encoding))
+                {
+                    for (int i = 0; ;i++)
+                    {
+                        string line = reader.ReadLine();
+                        if (line == null || i >= 100)
+                            break;
+                        text.Append(line + "\r\n");
+                        if (line == "***")
+                            break;
+                    }
+                }
+
+                return text.ToString();
+            }
+            catch (FileNotFoundException)
+            {
+                return "";
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+        }
+
+        public static Encoding GetEncoding(string strEncodingName)
+        {
+            if (string.IsNullOrEmpty(strEncodingName) == true)
+                return null;
+
+            if (StringUtil.IsNumber(strEncodingName) == true)
+                return Encoding.GetEncoding(Convert.ToInt32(strEncodingName));
+
+            return Encoding.GetEncoding(strEncodingName);
+        }
+
+        // 2015/8/10
+        // 从 MARC 工作单文件中顺次读一条 MARC 记录
+        // return:
+        //	-2	MARC格式错
+        //	-1	出错
+        //	0	正确
+        //	1	结束(当前返回的记录有效)
+        //	2	结束(当前返回的记录无效)
+        public static int ReadWorksheetRecord(TextReader s,
+            out string strMARC,
+            out string strError)
+        {
+            strMARC = "";
+            strError = "";
+
+            int nMaxLines = 1000;
+
+            List<string> lines = new List<string>();
+            try
+            {
+                // TODO: 如果始终没有 *** 行怎么办？要防止内存溢出
+                for (int i = 0; ; i++)
+                {
+                    if (i > nMaxLines)
+                    {
+                        strError = "一个工作单记录内文本行数超过了 " + nMaxLines.ToString() + " 行，可能您操作的不是工作单格式的文件 ...";
+                        return -1;
+                    }
+
+                    string strLine = s.ReadLine();
+                    if (strLine == null)
+                    {
+                        if (lines.Count == 0)
+                            return 2;
+                        break;
+                    }
+
+                    if (strLine == "***")
+                        break;
+
+                    if (IsContinueLine(ref strLine) == false)
+                    {
+                        if (string.IsNullOrEmpty(strLine) == true)
+                            continue;
+                        lines.Add(strLine);
+                    }
+                    else
+                    {
+                        if (string.IsNullOrEmpty(strLine) == true)
+                            continue;
+
+                        if (lines.Count == 0)
+                            lines.Add(strLine);
+                        else
+                            lines[lines.Count - 1] = lines[lines.Count - 1] + strLine;
+                    }
+
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = "读入文件时发生异常: " + ex.Message;
+                return -1;
+            }
+
+            StringBuilder text = new StringBuilder();
+            {
+                int i = 0;
+                foreach (string line in lines)
+                {
+                    string strLine = line;
+                    if (i == 0)
+                    {
+                        // 确保 24 个字符
+                        if (strLine.Length < 24)
+                            strLine = strLine.PadRight(24, ' ');
+                        else if (strLine.Length > 24)
+                            strLine = strLine.Substring(0, 24);
+                        text.Append(strLine);
+                        i++;
+                        continue;
+                    }
+                    text.Append(strLine.Replace('@', (char)31) + new string((char)30, 1));
+                }
+            }
+
+            strMARC = text.ToString();
+            return 0;
+        }
+
+        // 是否为续行？
+        // 续行的特征是前 5 个字符为空格
+        // 如果为续行，则函数返回前会进行处理，去掉前 5 个字符
+        static bool IsContinueLine(ref string strLine)
+        {
+            if (string.IsNullOrEmpty(strLine) == true)
+                return false;
+            if (strLine.Length < 5)
+            {
+                // TODO: 补齐 5 字符?
+                return false;
+            }
+
+            if (strLine.Substring(0, 5) == "     ")
+            {
+                strLine = strLine.Substring(5);
+                return true;
+            }
+
+            return false;
+        }
+
+        #endregion
     }
 
 

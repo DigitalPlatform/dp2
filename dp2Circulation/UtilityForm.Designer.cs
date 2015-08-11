@@ -94,6 +94,14 @@
             this.tabPage_systemInfo = new System.Windows.Forms.TabPage();
             this.textBox_systemInfo_mac = new System.Windows.Forms.TextBox();
             this.label12 = new System.Windows.Forms.Label();
+            this.tabPage_worToIso = new System.Windows.Forms.TabPage();
+            this.button_worToIso_convert = new System.Windows.Forms.Button();
+            this.textBox_worToIso_preview = new System.Windows.Forms.TextBox();
+            this.label14 = new System.Windows.Forms.Label();
+            this.comboBox_worToIso_encoding = new System.Windows.Forms.ComboBox();
+            this.label13 = new System.Windows.Forms.Label();
+            this.textBox_worToIso_worFilename = new System.Windows.Forms.TextBox();
+            this.button_worToIso_findFileName = new System.Windows.Forms.Button();
             this.tabControl_main.SuspendLayout();
             this.tabPage_sjhm.SuspendLayout();
             this.tabPage_xmlEditor.SuspendLayout();
@@ -119,6 +127,7 @@
             this.tabPage_health.SuspendLayout();
             this.tabPage_serverFileSystem.SuspendLayout();
             this.tabPage_systemInfo.SuspendLayout();
+            this.tabPage_worToIso.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl_main
@@ -132,11 +141,12 @@
             this.tabControl_main.Controls.Add(this.tabPage_health);
             this.tabControl_main.Controls.Add(this.tabPage_serverFileSystem);
             this.tabControl_main.Controls.Add(this.tabPage_systemInfo);
+            this.tabControl_main.Controls.Add(this.tabPage_worToIso);
             this.tabControl_main.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl_main.Location = new System.Drawing.Point(0, 0);
             this.tabControl_main.Name = "tabControl_main";
             this.tabControl_main.SelectedIndex = 0;
-            this.tabControl_main.Size = new System.Drawing.Size(406, 264);
+            this.tabControl_main.Size = new System.Drawing.Size(485, 359);
             this.tabControl_main.TabIndex = 0;
             // 
             // tabPage_sjhm
@@ -149,7 +159,7 @@
             this.tabPage_sjhm.Location = new System.Drawing.Point(4, 22);
             this.tabPage_sjhm.Name = "tabPage_sjhm";
             this.tabPage_sjhm.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage_sjhm.Size = new System.Drawing.Size(398, 238);
+            this.tabPage_sjhm.Size = new System.Drawing.Size(477, 333);
             this.tabPage_sjhm.TabIndex = 0;
             this.tabPage_sjhm.Text = "四角号码";
             this.tabPage_sjhm.UseVisualStyleBackColor = true;
@@ -217,7 +227,7 @@
             this.tabPage_xmlEditor.Controls.Add(this.label3);
             this.tabPage_xmlEditor.Location = new System.Drawing.Point(4, 22);
             this.tabPage_xmlEditor.Name = "tabPage_xmlEditor";
-            this.tabPage_xmlEditor.Size = new System.Drawing.Size(398, 238);
+            this.tabPage_xmlEditor.Size = new System.Drawing.Size(477, 333);
             this.tabPage_xmlEditor.TabIndex = 1;
             this.tabPage_xmlEditor.Text = "XML编辑器";
             this.tabPage_xmlEditor.UseVisualStyleBackColor = true;
@@ -313,7 +323,7 @@
             this.tabPage_webCamera.Controls.Add(this.panel_camera_preview);
             this.tabPage_webCamera.Location = new System.Drawing.Point(4, 22);
             this.tabPage_webCamera.Name = "tabPage_webCamera";
-            this.tabPage_webCamera.Size = new System.Drawing.Size(398, 238);
+            this.tabPage_webCamera.Size = new System.Drawing.Size(477, 333);
             this.tabPage_webCamera.TabIndex = 2;
             this.tabPage_webCamera.Text = "摄像头";
             this.tabPage_webCamera.UseVisualStyleBackColor = true;
@@ -369,7 +379,7 @@
             this.tabPage_currency.Location = new System.Drawing.Point(4, 22);
             this.tabPage_currency.Name = "tabPage_currency";
             this.tabPage_currency.Padding = new System.Windows.Forms.Padding(6);
-            this.tabPage_currency.Size = new System.Drawing.Size(398, 238);
+            this.tabPage_currency.Size = new System.Drawing.Size(477, 333);
             this.tabPage_currency.TabIndex = 3;
             this.tabPage_currency.Text = "金额";
             this.tabPage_currency.UseVisualStyleBackColor = true;
@@ -390,8 +400,8 @@
             this.splitContainer_currency.Panel2.Controls.Add(this.button_currency_sum);
             this.splitContainer_currency.Panel2.Controls.Add(this.label6);
             this.splitContainer_currency.Panel2.Controls.Add(this.textBox_currency_target);
-            this.splitContainer_currency.Size = new System.Drawing.Size(386, 226);
-            this.splitContainer_currency.SplitterDistance = 146;
+            this.splitContainer_currency.Size = new System.Drawing.Size(465, 321);
+            this.splitContainer_currency.SplitterDistance = 175;
             this.splitContainer_currency.SplitterWidth = 8;
             this.splitContainer_currency.TabIndex = 4;
             // 
@@ -415,7 +425,7 @@
             this.textBox_currency_source.Multiline = true;
             this.textBox_currency_source.Name = "textBox_currency_source";
             this.textBox_currency_source.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_currency_source.Size = new System.Drawing.Size(144, 208);
+            this.textBox_currency_source.Size = new System.Drawing.Size(173, 303);
             this.textBox_currency_source.TabIndex = 0;
             // 
             // button_currency_sum
@@ -448,7 +458,7 @@
             this.textBox_currency_target.Multiline = true;
             this.textBox_currency_target.Name = "textBox_currency_target";
             this.textBox_currency_target.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_currency_target.Size = new System.Drawing.Size(64, 208);
+            this.textBox_currency_target.Size = new System.Drawing.Size(106, 303);
             this.textBox_currency_target.TabIndex = 2;
             // 
             // tabPage_textLines
@@ -456,7 +466,7 @@
             this.tabPage_textLines.Controls.Add(this.splitContainer_textLines_main);
             this.tabPage_textLines.Location = new System.Drawing.Point(4, 22);
             this.tabPage_textLines.Name = "tabPage_textLines";
-            this.tabPage_textLines.Size = new System.Drawing.Size(398, 238);
+            this.tabPage_textLines.Size = new System.Drawing.Size(477, 333);
             this.tabPage_textLines.TabIndex = 4;
             this.tabPage_textLines.Text = "文本行";
             this.tabPage_textLines.UseVisualStyleBackColor = true;
@@ -477,8 +487,8 @@
             // 
             this.splitContainer_textLines_main.Panel2.Controls.Add(this.tableLayoutPanel_textLines_down);
             this.splitContainer_textLines_main.Panel2.Padding = new System.Windows.Forms.Padding(0, 0, 0, 6);
-            this.splitContainer_textLines_main.Size = new System.Drawing.Size(398, 238);
-            this.splitContainer_textLines_main.SplitterDistance = 121;
+            this.splitContainer_textLines_main.Size = new System.Drawing.Size(477, 333);
+            this.splitContainer_textLines_main.SplitterDistance = 169;
             this.splitContainer_textLines_main.SplitterWidth = 8;
             this.splitContainer_textLines_main.TabIndex = 6;
             // 
@@ -497,8 +507,8 @@
             // 
             this.splitContainer_textLines_up.Panel2.Controls.Add(this.label8);
             this.splitContainer_textLines_up.Panel2.Controls.Add(this.textBox_textLines_source2);
-            this.splitContainer_textLines_up.Size = new System.Drawing.Size(398, 115);
-            this.splitContainer_textLines_up.SplitterDistance = 197;
+            this.splitContainer_textLines_up.Size = new System.Drawing.Size(477, 163);
+            this.splitContainer_textLines_up.SplitterDistance = 236;
             this.splitContainer_textLines_up.SplitterWidth = 8;
             this.splitContainer_textLines_up.TabIndex = 5;
             // 
@@ -522,7 +532,7 @@
             this.textBox_textLines_source1.Multiline = true;
             this.textBox_textLines_source1.Name = "textBox_textLines_source1";
             this.textBox_textLines_source1.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_textLines_source1.Size = new System.Drawing.Size(195, 97);
+            this.textBox_textLines_source1.Size = new System.Drawing.Size(234, 145);
             this.textBox_textLines_source1.TabIndex = 0;
             // 
             // label8
@@ -545,7 +555,7 @@
             this.textBox_textLines_source2.Multiline = true;
             this.textBox_textLines_source2.Name = "textBox_textLines_source2";
             this.textBox_textLines_source2.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_textLines_source2.Size = new System.Drawing.Size(186, 97);
+            this.textBox_textLines_source2.Size = new System.Drawing.Size(218, 145);
             this.textBox_textLines_source2.TabIndex = 2;
             // 
             // tableLayoutPanel_textLines_down
@@ -560,7 +570,7 @@
             this.tableLayoutPanel_textLines_down.RowCount = 2;
             this.tableLayoutPanel_textLines_down.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel_textLines_down.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_textLines_down.Size = new System.Drawing.Size(398, 103);
+            this.tableLayoutPanel_textLines_down.Size = new System.Drawing.Size(477, 150);
             this.tableLayoutPanel_textLines_down.TabIndex = 2;
             // 
             // toolStrip_textLines
@@ -573,7 +583,7 @@
             this.toolStripButton_textLines_sort1removedup});
             this.toolStrip_textLines.Location = new System.Drawing.Point(0, 0);
             this.toolStrip_textLines.Name = "toolStrip_textLines";
-            this.toolStrip_textLines.Size = new System.Drawing.Size(398, 25);
+            this.toolStrip_textLines.Size = new System.Drawing.Size(477, 25);
             this.toolStrip_textLines.TabIndex = 2;
             this.toolStrip_textLines.Text = "toolStrip1";
             // 
@@ -632,7 +642,7 @@
             this.textBox_textLines_target.Multiline = true;
             this.textBox_textLines_target.Name = "textBox_textLines_target";
             this.textBox_textLines_target.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox_textLines_target.Size = new System.Drawing.Size(392, 72);
+            this.textBox_textLines_target.Size = new System.Drawing.Size(471, 119);
             this.textBox_textLines_target.TabIndex = 1;
             // 
             // tabPage_isbn
@@ -642,7 +652,7 @@
             this.tabPage_isbn.Controls.Add(this.textBox_isbn_text);
             this.tabPage_isbn.Location = new System.Drawing.Point(4, 22);
             this.tabPage_isbn.Name = "tabPage_isbn";
-            this.tabPage_isbn.Size = new System.Drawing.Size(398, 238);
+            this.tabPage_isbn.Size = new System.Drawing.Size(477, 333);
             this.tabPage_isbn.TabIndex = 6;
             this.tabPage_isbn.Text = "ISBN";
             this.tabPage_isbn.UseVisualStyleBackColor = true;
@@ -656,9 +666,9 @@
             this.toolStripButton_isbn_to13,
             this.toolStripSeparator2,
             this.toolStripButton_isbn_hyphen});
-            this.toolStrip_isbn.Location = new System.Drawing.Point(0, 213);
+            this.toolStrip_isbn.Location = new System.Drawing.Point(0, 308);
             this.toolStrip_isbn.Name = "toolStrip_isbn";
-            this.toolStrip_isbn.Size = new System.Drawing.Size(398, 25);
+            this.toolStrip_isbn.Size = new System.Drawing.Size(477, 25);
             this.toolStrip_isbn.TabIndex = 4;
             this.toolStrip_isbn.Text = "toolStrip1";
             // 
@@ -731,7 +741,7 @@
             this.tabPage_health.Controls.Add(this.button_health_speedTest);
             this.tabPage_health.Location = new System.Drawing.Point(4, 22);
             this.tabPage_health.Name = "tabPage_health";
-            this.tabPage_health.Size = new System.Drawing.Size(398, 238);
+            this.tabPage_health.Size = new System.Drawing.Size(477, 333);
             this.tabPage_health.TabIndex = 5;
             this.tabPage_health.Text = "系统健康";
             this.tabPage_health.UseVisualStyleBackColor = true;
@@ -770,7 +780,7 @@
             this.tabPage_serverFileSystem.Controls.Add(this.label10);
             this.tabPage_serverFileSystem.Location = new System.Drawing.Point(4, 22);
             this.tabPage_serverFileSystem.Name = "tabPage_serverFileSystem";
-            this.tabPage_serverFileSystem.Size = new System.Drawing.Size(398, 238);
+            this.tabPage_serverFileSystem.Size = new System.Drawing.Size(477, 333);
             this.tabPage_serverFileSystem.TabIndex = 7;
             this.tabPage_serverFileSystem.Text = "上传文件";
             this.tabPage_serverFileSystem.UseVisualStyleBackColor = true;
@@ -848,7 +858,7 @@
             this.tabPage_systemInfo.Controls.Add(this.label12);
             this.tabPage_systemInfo.Location = new System.Drawing.Point(4, 22);
             this.tabPage_systemInfo.Name = "tabPage_systemInfo";
-            this.tabPage_systemInfo.Size = new System.Drawing.Size(398, 238);
+            this.tabPage_systemInfo.Size = new System.Drawing.Size(477, 333);
             this.tabPage_systemInfo.TabIndex = 8;
             this.tabPage_systemInfo.Text = "系统信息";
             this.tabPage_systemInfo.UseVisualStyleBackColor = true;
@@ -872,11 +882,98 @@
             this.label12.TabIndex = 0;
             this.label12.Text = "本机 MAC 地址(&M):";
             // 
+            // tabPage_worToIso
+            // 
+            this.tabPage_worToIso.Controls.Add(this.button_worToIso_convert);
+            this.tabPage_worToIso.Controls.Add(this.textBox_worToIso_preview);
+            this.tabPage_worToIso.Controls.Add(this.label14);
+            this.tabPage_worToIso.Controls.Add(this.comboBox_worToIso_encoding);
+            this.tabPage_worToIso.Controls.Add(this.label13);
+            this.tabPage_worToIso.Controls.Add(this.textBox_worToIso_worFilename);
+            this.tabPage_worToIso.Controls.Add(this.button_worToIso_findFileName);
+            this.tabPage_worToIso.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_worToIso.Name = "tabPage_worToIso";
+            this.tabPage_worToIso.Size = new System.Drawing.Size(477, 333);
+            this.tabPage_worToIso.TabIndex = 9;
+            this.tabPage_worToIso.Text = "工作单 --> ISO2709";
+            this.tabPage_worToIso.UseVisualStyleBackColor = true;
+            // 
+            // button_worToIso_convert
+            // 
+            this.button_worToIso_convert.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.button_worToIso_convert.Location = new System.Drawing.Point(8, 302);
+            this.button_worToIso_convert.Name = "button_worToIso_convert";
+            this.button_worToIso_convert.Size = new System.Drawing.Size(238, 23);
+            this.button_worToIso_convert.TabIndex = 10;
+            this.button_worToIso_convert.Text = "转换为 ISO2709 格式 ...";
+            this.button_worToIso_convert.UseVisualStyleBackColor = true;
+            this.button_worToIso_convert.Click += new System.EventHandler(this.button_worToIso_convert_Click);
+            // 
+            // textBox_worToIso_preview
+            // 
+            this.textBox_worToIso_preview.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_worToIso_preview.Location = new System.Drawing.Point(8, 88);
+            this.textBox_worToIso_preview.Multiline = true;
+            this.textBox_worToIso_preview.Name = "textBox_worToIso_preview";
+            this.textBox_worToIso_preview.ReadOnly = true;
+            this.textBox_worToIso_preview.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox_worToIso_preview.Size = new System.Drawing.Size(461, 198);
+            this.textBox_worToIso_preview.TabIndex = 9;
+            // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.Location = new System.Drawing.Point(6, 60);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(77, 12);
+            this.label14.TabIndex = 7;
+            this.label14.Text = "编码方式(&E):";
+            // 
+            // comboBox_worToIso_encoding
+            // 
+            this.comboBox_worToIso_encoding.Location = new System.Drawing.Point(100, 57);
+            this.comboBox_worToIso_encoding.Name = "comboBox_worToIso_encoding";
+            this.comboBox_worToIso_encoding.Size = new System.Drawing.Size(168, 20);
+            this.comboBox_worToIso_encoding.TabIndex = 8;
+            this.comboBox_worToIso_encoding.Text = "GB2312";
+            this.comboBox_worToIso_encoding.SelectedIndexChanged += new System.EventHandler(this.comboBox_worToIso_encoding_SelectedIndexChanged);
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(6, 15);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(101, 12);
+            this.label13.TabIndex = 5;
+            this.label13.Text = "工作单文件名(&F):";
+            // 
+            // textBox_worToIso_worFilename
+            // 
+            this.textBox_worToIso_worFilename.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_worToIso_worFilename.Location = new System.Drawing.Point(8, 30);
+            this.textBox_worToIso_worFilename.Name = "textBox_worToIso_worFilename";
+            this.textBox_worToIso_worFilename.Size = new System.Drawing.Size(430, 21);
+            this.textBox_worToIso_worFilename.TabIndex = 3;
+            this.textBox_worToIso_worFilename.TextChanged += new System.EventHandler(this.textBox_worToIso_worFilename_TextChanged);
+            // 
+            // button_worToIso_findFileName
+            // 
+            this.button_worToIso_findFileName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_worToIso_findFileName.Location = new System.Drawing.Point(437, 28);
+            this.button_worToIso_findFileName.Name = "button_worToIso_findFileName";
+            this.button_worToIso_findFileName.Size = new System.Drawing.Size(33, 22);
+            this.button_worToIso_findFileName.TabIndex = 4;
+            this.button_worToIso_findFileName.Text = "...";
+            this.button_worToIso_findFileName.Click += new System.EventHandler(this.button_worToIso_findWorFileName_Click);
+            // 
             // UtilityForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(406, 264);
+            this.ClientSize = new System.Drawing.Size(485, 359);
             this.Controls.Add(this.tabControl_main);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "UtilityForm";
@@ -922,6 +1019,8 @@
             this.tabPage_serverFileSystem.PerformLayout();
             this.tabPage_systemInfo.ResumeLayout(false);
             this.tabPage_systemInfo.PerformLayout();
+            this.tabPage_worToIso.ResumeLayout(false);
+            this.tabPage_worToIso.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -993,5 +1092,13 @@
         private System.Windows.Forms.TextBox textBox_systemInfo_mac;
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.ToolStripButton toolStripButton_textLines_and;
+        private System.Windows.Forms.TabPage tabPage_worToIso;
+        private System.Windows.Forms.TextBox textBox_worToIso_worFilename;
+        private System.Windows.Forms.Button button_worToIso_findFileName;
+        private System.Windows.Forms.Label label13;
+        private System.Windows.Forms.Label label14;
+        private System.Windows.Forms.ComboBox comboBox_worToIso_encoding;
+        private System.Windows.Forms.TextBox textBox_worToIso_preview;
+        private System.Windows.Forms.Button button_worToIso_convert;
     }
 }

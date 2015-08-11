@@ -9,11 +9,12 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Forms;
 
-using Microsoft.AspNet.SignalR.Client.Hubs;
+// using Microsoft.AspNet.SignalR.Client.Hubs;
 
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.Text;
+using DigitalPlatform.MessageClient;
 
 namespace dp2Circulation
 {
@@ -21,7 +22,7 @@ namespace dp2Circulation
     /// 负责消息交换的类
     /// 能响应外部发来的检索请求
     /// </summary>
-    public class MessageHub
+    public class MessageHub : MessageConnection
     {
         // 检索响应的事件
         public event SearchResponseEventHandler SearchResponseEvent = null;
@@ -42,6 +43,7 @@ namespace dp2Circulation
 
             this._channelPool.BeforeLogin += new BeforeLoginEventHandle(_channelPool_BeforeLogin);
 
+#if NO
             if (string.IsNullOrEmpty(this.dp2MServerUrl) == false)
             {
                 this.MainForm.BeginInvoke(new Action<string>(ConnectAsync), this.dp2MServerUrl);
@@ -49,36 +51,13 @@ namespace dp2Circulation
 
             _timer.Interval = 1000 * 30;
             _timer.Elapsed += _timer_Elapsed;
+#endif
+            base.Initial();
         }
 
-        void _timer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        public override void Destroy()
         {
-            AddInfoLine("tick connection state = " + this.Connection.State.ToString());
-
-            if (this.Connection.State == Microsoft.AspNet.SignalR.Client.ConnectionState.Disconnected)
-            {
-                AddInfoLine("自动重新连接 ...");
-                this.Connect();
-            }
-        }
-
-        // 确保连接和登录
-        public void Connect()
-        {
-            if (string.IsNullOrEmpty(this.dp2MServerUrl) == false
-                && (this.Connection == null || this.Connection.State == Microsoft.AspNet.SignalR.Client.ConnectionState.Disconnected))
-            {
-                this.MainForm.BeginInvoke(new Action<string>(ConnectAsync), this.dp2MServerUrl);
-            }
-        }
-
-        bool _exiting = false;  // 是否处在正在退出过程
-
-        public void Finalize()
-        {
-            _timer.Stop();
-            _exiting = true;
-            CloseConnection();
+            base.Destroy();
 
             this._channelPool.BeforeLogin -= new BeforeLoginEventHandle(_channelPool_BeforeLogin);
             this._channelPool.Close();
@@ -144,7 +123,7 @@ false);
             return this._channelPool.GetChannel(strServerUrl, strUserName);
         }
 
-        public string dp2MServerUrl
+        public override string dp2MServerUrl
         {
             get
             {
@@ -153,18 +132,12 @@ false);
                     "im_server_url",
                     "http://dp2003.com:8083/dp2MServer");
             }
-        }
-
-        private IHubProxy HubProxy
-        {
-            get;
-            set;
-        }
-
-        private HubConnection Connection
-        {
-            get;
-            set;
+            set
+            {
+                this.MainForm.AppInfo.SetString("config",
+                    "im_server_url",
+                    value);
+            }
         }
 
         #region IE 控件显示
@@ -192,7 +165,6 @@ false);
             Global.WriteHtml(this.webBrowser1,
                 "<html><head>" + strLink + strJs + "</head><body>");
         }
-
 
         delegate void Delegate_AppendHtml(string strText);
         /// <summary>
@@ -222,7 +194,7 @@ false);
         /// </summary>
         /// <param name="strText">要输出的纯文本字符串</param>
         /// <param name="nWarningLevel">警告级别。0 正常文本(白色背景) 1 警告文本(黄色背景) >=2 错误文本(红色背景)</param>
-        public void OutputText(string strText, int nWarningLevel = 0)
+        public override void OutputText(string strText, int nWarningLevel = 0)
         {
             string strClass = "normal";
             if (nWarningLevel == 1)
@@ -232,6 +204,7 @@ false);
             this.AppendHtml("<div class='debug " + strClass + "'>" + HttpUtility.HtmlEncode(strText).Replace("\r\n", "<br/>") + "</div>");
         }
 
+#if NO
         void AddInfoLine(string strContent)
         {
 #if NO
@@ -245,8 +218,9 @@ false);
 #endif
             OutputText(strContent, 0);
         }
+#endif
 
-        void OnAddMessageRecieved(string strName, string strContent)
+        public override void OnAddMessageRecieved(string strName, string strContent)
         {
             if (strName == null)
                 strName = "";
@@ -263,6 +237,7 @@ false);
             AppendHtml(strText);
         }
 
+#if NO
         void AddErrorLine(string strContent)
         {
 #if NO
@@ -276,137 +251,17 @@ false);
 #endif
             OutputText(strContent, 2);
         }
+#endif
 
         #endregion
 
-        private void ConnectAsync(string strServerUrl)
-        {
-            AddInfoLine("正在连接服务器 " + strServerUrl + " ...");
-
-            Connection = new HubConnection(strServerUrl);
-            Connection.Closed += new Action(Connection_Closed);
-            Connection.Reconnecting += Connection_Reconnecting;
-            Connection.Reconnected += Connection_Reconnected;
-            // Connection.Error += Connection_Error;
-
-
-            HubProxy = Connection.CreateHubProxy("MyHub");
-
-
-            HubProxy.On<string, string>("AddMessage",
-                (name, message) =>
-                this.MainForm.Invoke(new Action<string, string>(OnAddMessageRecieved), name, message
-                )
-                );
-
-            HubProxy.On<string,string,string,string,string,string,long>("searchBiblio",
-                (searchID, dbNameList, queryWord, fromList, macthStyle, formatList, maxResults) =>
-                OnSearchBiblioRecieved(
-                searchID,
-                dbNameList,
-                queryWord,
-                fromList,
-                macthStyle,
-                formatList,
-                maxResults)
-                );
-
-            HubProxy.On<string,
-    long,
-    long,
-    IList<BiblioRecord>,
-        string>("responseSearchBiblio", (searchID,
-    resultCount,
-    start,
-    records,
-    errorInfo) =>
- OnSearchResponseRecieved(searchID,
-    resultCount,
-    start,
-    records,
-    errorInfo)
-
-);
-
-
-            Task task = Connection.Start();
-#if NO
-            CancellationTokenSource token = new CancellationTokenSource();
-            if (!task.Wait(60 * 1000, token.Token))
-            {
-                token.Cancel();
-                // labelStatusText.Text = "time out";
-                AddMessageLine("error", "time out");
-                return;
-            }
-#endif
-            while (task.IsCompleted == false)
-            {
-                Application.DoEvents();
-                Thread.Sleep(200);
-            }
-
-            if (task.IsFaulted == true)
-            {
-#if NO
-                if (task.Exception is HttpRequestException)
-                    labelStatusText.Text = "Unable to connect to server: start server bofore connection client.";
-#endif
-                AddErrorLine(GetExceptionText(task.Exception));
-                return;
-            }
-
-
-            AddInfoLine("停止 Timer");
-            _timer.Stop();
-
-            //EnableControls(true);
-            //textBox_input.Focus();
-            AddInfoLine("成功连接到 " + strServerUrl);
-
-            this.MainForm.BeginInvoke(new Action(Login));
-        }
 
         // bool tryingToReconnect = false;
 
-        void Connection_Reconnecting()
-        {
-            // tryingToReconnect = true;
-        }
-
-        void Connection_Reconnected()
-        {
-            // tryingToReconnect = false;
-
-            AddInfoLine("Connection_Reconnected");
-
-            this.Login();
-        }
-
-        System.Timers.Timer _timer = new System.Timers.Timer();
-
-        void Connection_Closed()
-        {
-            if (_exiting == false)
-            {
-                AddInfoLine("开启 Timer");
-                _timer.Start(); 
-            }
-#if NO
-            this.Invoke((Action)(() => panelChat.Visible = false));
-            this.Invoke((Action)(() => buttonSend.Enabled = false));
-            this.Invoke((Action)(() => this.labelStatusText.Text = "You have been disconnected."));
-            this.Invoke((Action)(() => this.panelSignIn.Visible = true));
-#endif
-        }
-        void Connection_Error(Exception obj)
-        {
-            AddErrorLine(obj.ToString());
-        }
 
 
         // 响应 server 发来的消息 SearchBiblio
-        void OnSearchBiblioRecieved(
+        public override void OnSearchBiblioRecieved(
             string searchID,
             string dbNameList,
              string queryWord,
@@ -458,83 +313,6 @@ false);
         macthStyle,
         formatList,
         maxResults));
-        }
-
-        // 调用 server 端 ResponseSearchBiblio
-        public async void Response(
-            string searchID,
-            long resultCount,
-            long start,
-            IList<BiblioRecord> records,
-            string errorInfo)
-        {
-            try
-            {
-                MessageResult result = await HubProxy.Invoke<MessageResult>("ResponseSearchBiblio",
-    searchID,
-    resultCount,
-    start,
-    records,
-    errorInfo);
-                if (result.Value == -1)
-                {
-                    AddErrorLine(result.ErrorInfo);
-                    return;
-                }
-            }
-            catch (Exception ex)
-            {
-                AddErrorLine(ex.Message);
-            }
-
-
-#if NO
-            Task<MessageResult> task = HubProxy.Invoke<MessageResult>("ResponseSearchBiblio",
-searchID,
-resultCount,
-start,
-records,
-errorInfo);
-            task.Wait();
-            if (task.IsFaulted == true)
-            {
-                AddErrorLine(GetExceptionText(task.Exception));
-                return;
-            }
-            if (task.Result.Value == -1)
-            {
-                AddErrorLine(task.Result.ErrorInfo);
-            }
-#endif
-        }
-
-        // 调用 server 端 Login
-        public async void Login(
-            string userName,
-            string password,
-            string libraryUID,
-            string libraryName,
-            string propertyList)
-        {
-            try
-            {
-                MessageResult result = await HubProxy.Invoke<MessageResult>("Login",
-                    userName,
-                    password,
-                    libraryUID,
-                    libraryName,
-                    propertyList);
-                if (result.Value == -1)
-                {
-                    AddErrorLine(result.ErrorInfo);
-                    return;
-                }
-                AddInfoLine("成功登录。属性为 " + propertyList);
-            }
-            catch (Exception ex)
-            {
-                AddErrorLine(ex.Message);
-            }
         }
 
 
@@ -674,7 +452,7 @@ strError);  // 出错信息大概为 not found。
             this.AddInfoLine("search and response end");
         }
 
-        void OnSearchResponseRecieved(string searchID,
+        public override void OnSearchResponseRecieved(string searchID,
             long resultCount,
             long start,
             IList<BiblioRecord> records,
@@ -715,7 +493,7 @@ strError);  // 出错信息大概为 not found。
             }
         }
 
-        public void Login()
+        public override void Login()
         {
 #if NO
             ChatLoginDialog dlg = new ChatLoginDialog();
@@ -731,161 +509,24 @@ strError);  // 出错信息大概为 not found。
 #endif
             Login("",
                 "",
-                this.MainForm.ServerUID,    // 测试用 Guid.NewGuid().ToString(),
+                Guid.NewGuid().ToString(), // this.MainForm.ServerUID,    // 测试用 Guid.NewGuid().ToString(),
                 this.MainForm.LibraryName,
                 this.ShareBiblio ? "biblio_search" : "");
 
         }
 
-        static string GetExceptionText(AggregateException exception)
+
+
+        public override void WaitTaskComplete(Task task)
         {
-            StringBuilder text = new StringBuilder();
-            foreach (Exception ex in exception.InnerExceptions)
+            while (task.IsCompleted == false)
             {
-                text.Append(ex.Message + "\r\n");
-                // text.Append(ex.ToString() + "\r\n");
-            }
-
-            return text.ToString();
-        }
-
-        // 关闭连接，并且不会引起自动重连接
-        public void CloseConnection()
-        {
-            if (this.Connection != null)
-            {
-                Connection.Closed -= new Action(Connection_Closed);
-                /*
-操作类型 crashReport -- 异常报告 
-主题 dp2circulation 
-发送者 xxxxxxx
-媒体类型 text 
-内容 发生未捕获的界面线程异常: 
-Type: System.NullReferenceException
-Message: 未将对象引用设置到对象的实例。
-Stack:
-在 Microsoft.AspNet.SignalR.Client.Connection.Stop(TimeSpan timeout)
-在 dp2Circulation.MessageHub.CloseConnection()
-在 dp2Circulation.MessageHub.Close()
-在 dp2Circulation.MainForm.MainForm_FormClosed(Object sender, FormClosedEventArgs e)
-在 System.Windows.Forms.Form.OnFormClosed(FormClosedEventArgs e)
-在 System.Windows.Forms.Form.WmClose(Message& m)
-在 System.Windows.Forms.Form.WndProc(Message& m)
-在 dp2Circulation.MainForm.WndProc(Message& m)
-在 System.Windows.Forms.Control.ControlNativeWindow.OnMessage(Message& m)
-在 System.Windows.Forms.Control.ControlNativeWindow.WndProc(Message& m)
-在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
-
-
-dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, PublicKeyToken=null
-操作系统：Microsoft Windows NT 5.1.2600 Service Pack 3 
-操作时间 2015/8/7 10:51:56 (Fri, 07 Aug 2015 10:51:56 +0800) 
-前端地址 xxxxx 经由 http://dp2003.com/dp2library 
-
-                 * 
-                 * */
-                try
-                {
-                    this.Connection.Stop(new TimeSpan(0, 0, 5));
-                }
-                catch (System.NullReferenceException)
-                {
-                }
-                this.Connection = null;
+                Application.DoEvents();
+                Thread.Sleep(200);
             }
         }
-
-        // 发起一次书目检索
-        // 发起检索成功后，调主应该用 SearchResponseEvent 事件接收检索结果
-        // return:
-        //      -1  出错
-        //      0   没有检索目标
-        //      1   成功发起检索
-        public int BeginSearchBiblio(
-            string inputSearchID,
-            string dbNameList,
-            string queryWord,
-            string fromList,
-            string macthStyle,
-            string formatList,
-            long maxResults,
-            out string outputSearchID,
-            out string strError)
-        {
-            strError = "";
-            outputSearchID = "";
-
-            try
-            {
-
-                Task<MessageResult> task = HubProxy.Invoke<MessageResult>("RequestSearchBiblio",
-                    inputSearchID,
-                    dbNameList,
-                    queryWord,
-                    fromList,
-                    macthStyle,
-                    formatList,
-                    maxResults);
-
-                while (task.IsCompleted == false)
-                {
-                    Application.DoEvents();
-                    Thread.Sleep(200);
-                }
-
-                if (task.IsFaulted == true)
-                {
-                    // AddErrorLine(GetExceptionText(task.Exception));
-                    strError = GetExceptionText(task.Exception);
-                    return -1;
-                }
-
-                MessageResult result = task.Result;
-                if (result.Value == -1)
-                {
-                    // AddErrorLine(result.ErrorInfo);
-                    strError = result.ErrorInfo;
-                    return -1;
-                }
-                if (result.Value == 0)
-                {
-                    // AddErrorLine(result.ErrorInfo);
-                    strError = result.ErrorInfo;
-                    return 0;
-                }
-                // AddMessageLine("search ID:", result.String);
-                outputSearchID = result.String;
-                return 1;
-            }
-            catch(Exception ex)
-            {
-                strError = ex.Message;
-                return -1;
-            }
-        }
-
     }
 
-    public class MessageResult
-    {
-        public string String { get; set; }  // 字符串类型的返回值
-        public long Value { get; set; }      // 整数类型的返回值
-        public string ErrorInfo { get; set; }   // 出错信息
-    }
-
-    public class BiblioRecord
-    {
-        // 记录路径。这是本地路径，例如 “图书总库/1”
-        public string RecPath { get; set; }
-        // 图书馆 UID
-        public string LibraryUID { get; set; }
-        // 图书馆名
-        public string LibraryName { get; set; }
-
-        public string Format { get; set; }
-        public string Data { get; set; }
-        public string Timestamp { get; set; }
-    }
 
     /// <summary>
     /// 检索响应事件
@@ -906,4 +547,5 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
         public IList<BiblioRecord> Records = null;  // 命中的书目记录集合
         public string ErrorInfo = "";   // 错误信息
     }
+
 }
