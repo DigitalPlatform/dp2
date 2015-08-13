@@ -101,8 +101,15 @@ namespace dp2Circulation
             }
             else
             {
+                string strFormat = "";
+                if (this.m_biblioTable != null)
+                {
+                    BiblioInfo info = this.m_biblioTable[e.DbName] as BiblioInfo;
+                    if (info != null)
+                        strFormat = info.Format;
+                }
                 e.ColumnTitles = new ColumnPropertyCollection();
-                string strColumnTitles = (string)_browseTitleTable[e.DbName];
+                string strColumnTitles = (string)_browseTitleTable[strFormat];
                 List<string> titles = StringUtil.SplitList(strColumnTitles, '\t');
                 foreach(string s in titles)
                 {
@@ -875,6 +882,7 @@ Keys keyData)
         {
             string strError = "";
             int nRet = 0;
+            bool bDisplayClickableError = false;
 
             if (bOutputKeyCount == true
     && bOutputKeyID == true)
@@ -928,6 +936,8 @@ Keys keyData)
                 SortColumns.ClearColumnSortDisplay(this.listView_records.Columns);
                  * */
                 ListViewUtil.ClearSortColumns(this.listView_records);
+
+                this._browseTitleTable.Clear();
             }
 
             this.m_lHitCount = 0;
@@ -1008,7 +1018,17 @@ Keys keyData)
                     // strBrowseStyle = "keyid,id,key,cols";
                 }
 
-                if (this.SearchShareBiblio == true)
+                bool bNeedShareSearch = false;
+                if (this.SearchShareBiblio == true
+    && this.MainForm != null && this.MainForm.MessageHub != null
+    && this.MainForm.MessageHub.ShareBiblio == true
+                    && bOutputKeyCount == false
+                    && bOutputKeyID == false)
+                {
+                    bNeedShareSearch = true;
+                }
+
+                if (bNeedShareSearch == true)
                 {
                     // 开始检索共享书目
                     // return:
@@ -1022,7 +1042,9 @@ Keys keyData)
                         out strError);
                     if (nRet == -1)
                     {
-                        // 显示半透明信息
+                        // 显示错误信息
+                        this.ShowMessage(strError, "red", true);
+                        bDisplayClickableError = true;
                     }
                 }
 
@@ -1231,8 +1253,7 @@ Keys keyData)
                 // MessageBox.Show(this, Convert.ToString(lRet) + " : " + strError);
                 this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条书目记录，已全部装入";
 
-
-                if (this.SearchShareBiblio)
+                if (bNeedShareSearch == true)
                 {
                     // 结束检索共享书目
                     // return:
@@ -1241,14 +1262,30 @@ Keys keyData)
                     nRet = EndSearchShareBiblio(out strError);
                     if (nRet == -1)
                     {
-                        // 显示半透明信息
+                        // 显示错误信息
+                        this.ShowMessage(strError, "red", true);
+                        bDisplayClickableError = true;
+                    }
+                    else
+                    {
+                        if (_searchParam._searchCount > 0)
+                        {
+                            this.ShowMessage("共享书目命中 "+_searchParam._searchCount+" 条", "green");
+                            this._floatingMessage.DelayClear(new TimeSpan(0,0,3));
+#if NO
+                            Application.DoEvents();
+                            // TODO: 延时一段自动删除
+                            Thread.Sleep(1000);
+#endif
+                        }
                     }
                 }
-
-
             }
             finally
             {
+                if (bDisplayClickableError == false
+                    && this._floatingMessage.InDelay() == false)
+                    this.ClearMessage();
                 this.MainForm.MessageHub.SearchResponseEvent -= MessageHub_SearchResponseEvent;
 
                 stop.EndLoop();
@@ -1397,22 +1434,38 @@ out strError);
 
                 string strRecPath = record.RecPath + "@" + (string.IsNullOrEmpty(record.LibraryName) == false ? record.LibraryName : record.LibraryUID);
 
+#if NO
                 string strDbName = ListViewProperty.GetDbName(strRecPath);
                 _browseTitleTable[strDbName] = strColumnTitles;
+#endif
+                _browseTitleTable[strMarcSyntax] = strColumnTitles;
+
+                // 将书目记录放入 m_biblioTable
+                {
+                    BiblioInfo info = new BiblioInfo();
+                    info.OldXml = strXml;
+                    info.RecPath = strRecPath;
+                    info.Timestamp = ByteArray.GetTimeStampByteArray(record.Timestamp);
+                    info.Format = strMarcSyntax;
+                    this.m_biblioTable[strRecPath] = info;
+                }
 
                 List<string> column_list = StringUtil.SplitList(strBrowseText, '\t');
-                string [] cols = new string[column_list.Count];
+                string[] cols = new string[column_list.Count];
                 column_list.CopyTo(cols);
 
-                this.Invoke((Action)(() => { 
-                    ListViewItem item = Global.AppendNewLine(
+                ListViewItem item = null;
+                this.Invoke((Action)(() =>
+                {
+                    item = Global.AppendNewLine(
     this.listView_records,
     strRecPath,
     cols);
                 }
                 ));
 
-                
+                if (item != null)
+                    item.BackColor = Color.LightGreen;
 
 #if NO
                 RegisterBiblioInfo info = new RegisterBiblioInfo();
@@ -1444,10 +1497,12 @@ out strError);
 
         private void listView_records_DoubleClick(object sender, EventArgs e)
         {
+            string strError = "";
+
             if (this.listView_records.SelectedItems.Count == 0)
             {
-                MessageBox.Show(this, "尚未选定要装入实体窗口的事项");
-                return;
+                strError = "尚未选定要装入种册窗的事项";
+                goto ERROR1;
             }
 
             string strPath = this.listView_records.SelectedItems[0].SubItems[0].Text;
@@ -1476,7 +1531,32 @@ out strError);
 
                 Debug.Assert(form != null, "");
 
-                form.LoadRecordOld(strPath, "", true);
+                if (strPath.IndexOf("@") == -1)
+                    form.LoadRecordOld(strPath, "", true);
+                else
+                {
+                    // TODO: 可以允许在 BiblioSearchForm 中被修改过、尚未保存的书目记录装入种册窗进行继续修改
+                    if (this.m_biblioTable == null)
+                    {
+                        strError = "m_biblioTable == null";
+                        goto ERROR1;
+                    }
+
+                    BiblioInfo info = this.m_biblioTable[strPath] as BiblioInfo;
+                    if (info == null)
+                    {
+                        strError = "m_biblioTable 中不存在 key 为 " + strPath + " 的 BiblioInfo 事项";
+                        goto ERROR1;
+                    }
+
+                    int nRet = form.LoadRecord(info,
+                        true,
+                        out strError);
+                    if (nRet != 1)
+                        goto ERROR1;
+
+                }
+
             }
             else
             {
@@ -1497,7 +1577,9 @@ out strError);
 
                 DoSearch(false, false, null);
             }
-
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
 
         void menu_loadToOpenedEntityForm_Click(object sender, EventArgs e)
@@ -2332,6 +2414,11 @@ out strError);
                         goto CONTINUE;
 
                     if (string.IsNullOrEmpty(info.NewXml) == true)
+                        goto CONTINUE;
+
+                    // 暂不处理外来记录的保存
+                    // TODO: 此时警告不能保存?
+                    if (info.RecPath.IndexOf("@") != -1)
                         goto CONTINUE;
 
                     string strOutputPath = "";
@@ -3178,7 +3265,7 @@ MessageBoxDefaultButton.Button1);
             }
             catch (Exception ex)
             {
-                strError = "执行脚本的过程中出现异常: " + ExceptionUtil.GetDebugText(ex);
+                strError = "执行 MarcQuery 脚本的过程中出现异常: " + ExceptionUtil.GetDebugText(ex);
                 goto ERROR1;
             }
             finally
@@ -6888,6 +6975,7 @@ out strError);
             return 1;
         }
 
+        // 根据 ListViewItem 对象得到 BiblioInfo 对象
         int GetBiblioInfo(
             bool bCheckSearching,
             ListViewItem item,
@@ -7448,7 +7536,28 @@ strNewMARC);
         private void ToolStripMenuItem_searchShareBiblio_Click(object sender, EventArgs e)
         {
             if (this.SearchShareBiblio == false)
+            {
+                // 先检查一下当前用户是否允许开放共享书目
+                if (this.MainForm != null && this.MainForm.MessageHub != null
+    && this.MainForm.MessageHub.ShareBiblio == false)
+                {
+                    DialogResult result = MessageBox.Show(this,
+"使用共享书目检索功能须知：为检索网络中共享书目记录，您必须明确同意允许他人检索您所在图书馆的全部书目记录。\r\n\r\n请问您是否允许他人从现在起一直能访问您所在图书馆的书目记录？\r\n\r\n(是: 同意；否：不同意)\r\n\r\n(除了在这里设定相关参数，您还可以稍后用“参数配置”对话框的“消息”属性页来设定是否允许共享书目数据)",
+"BiblioSearchForm",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button1);
+                    if (result == System.Windows.Forms.DialogResult.No)
+                    {
+                        this.ShowMessage("已放弃使用共享网络", "");
+                        this._floatingMessage.DelayClear(new TimeSpan(0, 0, 3));
+                        return;
+                    }
+                    this.MainForm.MessageHub.ShareBiblio = true;
+                }
+
                 this.SearchShareBiblio = true;
+            }
             else
                 this.SearchShareBiblio = false;
 
@@ -7459,8 +7568,16 @@ strNewMARC);
         void UpdateMenu()
         {
             this.ToolStripMenuItem_searchShareBiblio.Checked = this.SearchShareBiblio;
+            if (this.MainForm != null && this.MainForm.MessageHub != null)
+            {
+                if (this.MainForm.MessageHub.ShareBiblio == false)
+                    this.ToolStripMenuItem_searchShareBiblio.Text = "使用共享网络 [暂时被禁用]";
+                else
+                    this.ToolStripMenuItem_searchShareBiblio.Text = "使用共享网络";
+            }
         }
 
+        // TODO: 值变化后要出现延时关闭的 floatingMessage
         public bool SearchShareBiblio
         {
             get
@@ -7475,10 +7592,18 @@ strNewMARC);
             set
             {
                 if (this.MainForm != null && this.MainForm.AppInfo != null)
+                {
                     this.MainForm.AppInfo.SetBoolean(
         "biblio_search_form",
         "search_sharebiblio",
         value);
+                    if (value == true)
+                        this.ShowMessage("使用共享网络", "");
+                    else
+                        this.ShowMessage("不使用共享网络", "");
+
+                    this._floatingMessage.DelayClear(new TimeSpan(0, 0, 3));
+                }
             }
         }
     }
@@ -7501,6 +7626,13 @@ strNewMARC);
         /// 新的记录 XML
         /// </summary>
         public string NewXml = "";
+
+        // 2015/8/12
+        /// <summary>
+        /// 数据格式
+        /// </summary>
+        public string Format = "";
+
         /// <summary>
         /// 时间戳
         /// </summary>

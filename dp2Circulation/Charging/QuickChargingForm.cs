@@ -51,7 +51,7 @@ namespace dp2Circulation
         internal ExternalChannel _summaryChannel = new ExternalChannel();
         internal ExternalChannel _barcodeChannel = new ExternalChannel();
 
-        FloatingMessageForm _floatingMessage = null;
+        // FloatingMessageForm _floatingMessage = null;
 
         PatronCardStyle _cardStyle = new PatronCardStyle();
 
@@ -121,6 +121,7 @@ namespace dp2Circulation
             this._taskList.Container = this;
             this._taskList.BeginThread();
 
+#if NO
             {
                 _floatingMessage = new FloatingMessageForm(this);
                 _floatingMessage.Font = new System.Drawing.Font(this.Font.FontFamily, this.Font.Size * 2, FontStyle.Bold);
@@ -129,8 +130,12 @@ namespace dp2Circulation
                 _floatingMessage.Opacity = 0.7;
                 _floatingMessage.Show(this);
             }
+#endif
+            this._floatingMessage.RectColor = Color.Purple;
 
+#if NO
             this.MainForm.Move += new EventHandler(MainForm_Move);
+#endif
 
             this.toolStripButton_enableHanzi.Checked = this.MainForm.AppInfo.GetBoolean(
                 "quickchargingform",
@@ -151,15 +156,12 @@ namespace dp2Circulation
             }
         }
 
-        void AppendFloatingMessage(string strText)
-        {
-            this._floatingMessage.Text += strText;
-        }
-
+#if NO
         void MainForm_Move(object sender, EventArgs e)
         {
             this._floatingMessage.OnResizeOrMove();
         }
+#endif
 
         void Channel_Idle(object sender, IdleEventArgs e)
         {
@@ -174,8 +176,10 @@ namespace dp2Circulation
 
         private void QuickChargingForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+#if NO
             if (this.MainForm != null)
                 this.MainForm.Move -= new EventHandler(MainForm_Move);
+#endif
 
             this.commander.Destroy();
 
@@ -190,8 +194,10 @@ namespace dp2Circulation
             this._summaryChannel.Close();
             this._barcodeChannel.Close();
 
+#if NO
             if (_floatingMessage != null)
                 _floatingMessage.Close();
+#endif
 
             if (_patronSummaryForm != null)
                 _patronSummaryForm.Close();
@@ -1065,10 +1071,14 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
                 this.BeginInvoke(d, new object[] { bEnter, input_type });
                 return;
             }
-            if (bEnter == true)
-                this.MainForm.EnterPatronIdEdit(input_type);
-            else
-                this.MainForm.LeavePatronIdEdit();
+
+            if (this.MainForm != null)
+            {
+                if (bEnter == true)
+                    this.MainForm.EnterPatronIdEdit(input_type);
+                else
+                    this.MainForm.LeavePatronIdEdit();
+            }
         }
 
         delegate void Delegate_DoAction(FuncState func,
@@ -1853,14 +1863,14 @@ false);
                 string strState = "";
                 if (this._taskList.Stopped == true)
                     strState = "已暂停任务处理。\r\n";
-                this._floatingMessage.Text = strState + "有 " + nWaitingCount.ToString() + " 个任务尚未完成 ...";
+                this.FloatingMessage = strState + "有 " + nWaitingCount.ToString() + " 个任务尚未完成 ...";
             }
             else
             {
                 if (this._taskList.Stopped == true)
-                    this._floatingMessage.Text = "已暂停任务处理。";
+                    this.FloatingMessage = "已暂停任务处理。";
                 else
-                    this._floatingMessage.Text = "";
+                    this.FloatingMessage = "";
             }
 
             // 刷新读者摘要窗口

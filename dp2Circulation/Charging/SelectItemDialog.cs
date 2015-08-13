@@ -28,7 +28,7 @@ namespace dp2Circulation
         /// </summary>
         public DigitalPlatform.StopManager stopManager = new DigitalPlatform.StopManager();
 
-        FloatingMessageForm _floatingMessage = null;
+        // FloatingMessageForm _floatingMessage = null;
 
         /// <summary>
         /// 自动操作唯一事项
@@ -70,12 +70,15 @@ namespace dp2Circulation
         {
             this.MainForm.FillBiblioFromList(this.comboBox_from);
 
+#if NO
             {
                 _floatingMessage = new FloatingMessageForm(this);
                 _floatingMessage.Font = new System.Drawing.Font(this.Font.FontFamily, this.Font.Size * 2, FontStyle.Bold);
                 _floatingMessage.Opacity = 0.7;
                 _floatingMessage.Show(this);
             }
+#endif
+            this._floatingMessage.RectColor = Color.Purple;
 
             stopManager.Initial(this.button_stop,
 (object)this.toolStripStatusLabel1,
@@ -102,8 +105,10 @@ namespace dp2Circulation
 
         private void SelectItemDialog_FormClosed(object sender, FormClosedEventArgs e)
         {
+#if NO
             if (_floatingMessage != null)
                 _floatingMessage.Close();
+#endif
         }
 
         void SetFloatMessage(string strColor,

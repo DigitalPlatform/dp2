@@ -15,6 +15,8 @@ namespace DigitalPlatform.CommonControl
     /// </summary>
     public partial class FloatingMessageForm : Form
     {
+        DateTime _clearTime = new DateTime(0);
+
         // 是否允许感知 Click 清除文字
         public bool Closeable = false;
 
@@ -260,7 +262,10 @@ size.Height);
             {
                 bool bChanged = false;
                 if (base.Text != value)
+                {
                     bChanged = true;
+                    StopDelayClear();  // 文字被主动修改后，延时清除就被取消了
+                }
 
                 base.Text = value;
 
@@ -425,5 +430,36 @@ size.Height);
                 base.WndProc(ref m);
         }
 
+        // 设定延时 Clear 时间长度
+        public void DelayClear(TimeSpan delta)
+        {
+            this._clearTime = DateTime.Now + delta;
+            timer1.Start();
+        }
+
+        public bool InDelay()
+        {
+            if (this._clearTime == new DateTime(0))
+                return false;
+            return true;
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            if (this._clearTime != new DateTime(0)
+                && DateTime.Now > this._clearTime)
+            {
+                base.Text = "";
+                this.Invalidate();
+
+                StopDelayClear();
+            }
+        }
+
+        public void StopDelayClear()
+        {
+            timer1.Stop();
+            this._clearTime = new DateTime(0);
+        }
     }
 }

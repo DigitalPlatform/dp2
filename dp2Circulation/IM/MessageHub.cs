@@ -201,7 +201,7 @@ false);
                 strClass = "warning";
             else if (nWarningLevel >= 2)
                 strClass = "error";
-            this.AppendHtml("<div class='debug " + strClass + "'>" + HttpUtility.HtmlEncode(strText).Replace("\r\n", "<br/>") + "</div>");
+            this.AppendHtml("<div class='debug " + strClass + "'>" + HttpUtility.HtmlEncode(DateTime.Now.ToShortTimeString() + " " + strText).Replace("\r\n", "<br/>") + "</div>");
         }
 
 #if NO
@@ -266,7 +266,7 @@ false);
             string dbNameList,
              string queryWord,
              string fromList,
-             string macthStyle,
+             string matchStyle,
              string formatList,
              long maxResults)
         {
@@ -279,7 +279,7 @@ false);
                     dbNameList,
                     queryWord,
                     fromList,
-                    macthStyle,
+                    matchStyle,
                     formatList,
                     maxResults));
             }
@@ -295,7 +295,7 @@ false);
                     dbNameList,
                     queryWord,
                     fromList,
-                    macthStyle,
+                    matchStyle,
                     formatList,
                     maxResults));
             task.Wait();
@@ -310,7 +310,7 @@ false);
         dbNameList,
         queryWord,
         fromList,
-        macthStyle,
+        matchStyle,
         formatList,
         maxResults));
         }
@@ -323,7 +323,7 @@ false);
             string dbNameList,
             string queryWord,
             string fromList,
-            string macthStyle,
+            string matchStyle,
             string formatList,
             long maxResults)
         {
@@ -341,7 +341,7 @@ false);
                     queryWord,
                     (int)maxResults,
                     fromList,
-                    macthStyle,
+                    matchStyle,
                     "zh",
                     strResultSetName,
                     "", // strSearchStyle
@@ -491,6 +491,24 @@ strError);  // 出错信息大概为 not found。
                     "share_biblio",
                     false);
             }
+            set
+            {
+                if (this.MainForm == null || this.MainForm.AppInfo == null)
+                    return;
+                bool bOldValue = this.MainForm.AppInfo.GetBoolean(
+                    "message",
+                    "share_biblio",
+                    false);
+                if (bOldValue != value)
+                {
+                    this.MainForm.AppInfo.SetBoolean(
+                        "message",
+                        "share_biblio",
+                        value);
+                    if (this.IsConnected)
+                        this.Login();    // 重新登录
+                }
+            }
         }
 
         public override void Login()
@@ -509,12 +527,10 @@ strError);  // 出错信息大概为 not found。
 #endif
             Login("",
                 "",
-                Guid.NewGuid().ToString(), // this.MainForm.ServerUID,    // 测试用 Guid.NewGuid().ToString(),
+                this.MainForm.ServerUID,    // 测试用 Guid.NewGuid().ToString(),
                 this.MainForm.LibraryName,
                 this.ShareBiblio ? "biblio_search" : "");
         }
-
-
 
         public override void WaitTaskComplete(Task task)
         {

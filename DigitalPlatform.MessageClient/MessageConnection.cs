@@ -59,6 +59,14 @@ namespace DigitalPlatform.MessageClient
             }
         }
 
+        public bool IsConnected
+        {
+            get
+            {
+                return this.Connection.State == ConnectionState.Connected;
+            }
+        }
+
         // 确保连接和登录
         public void Connect()
         {
@@ -121,13 +129,13 @@ namespace DigitalPlatform.MessageClient
                 );
 
             HubProxy.On<string, string, string, string, string, string, long>("searchBiblio",
-                (searchID, dbNameList, queryWord, fromList, macthStyle, formatList, maxResults) =>
+                (searchID, dbNameList, queryWord, fromList, matchStyle, formatList, maxResults) =>
                 OnSearchBiblioRecieved(
                 searchID,
                 dbNameList,
                 queryWord,
                 fromList,
-                macthStyle,
+                matchStyle,
                 formatList,
                 maxResults)
                 );
@@ -262,7 +270,7 @@ namespace DigitalPlatform.MessageClient
             string dbNameList,
              string queryWord,
              string fromList,
-             string macthStyle,
+             string matchStyle,
              string formatList,
              long maxResults)
         {
@@ -335,7 +343,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             string dbNameList,
             string queryWord,
             string fromList,
-            string macthStyle,
+            string matchStyle,
             string formatList,
             long maxResults,
             out string outputSearchID,
@@ -352,7 +360,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                     dbNameList,
                     queryWord,
                     fromList,
-                    macthStyle,
+                    matchStyle,
                     formatList,
                     maxResults);
 
@@ -433,7 +441,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             string dbNameList,
             string queryWord,
             string fromList,
-            string macthStyle,
+            string matchStyle,
             string formatList,
             long maxResults,
             out string outputSearchID,
@@ -442,15 +450,21 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
             strError = "";
             outputSearchID = "";
 
+            AddInfoLine("BeginSearchBiblio inputSearchID=" + inputSearchID
+                + "; dbNameList=" + dbNameList
+                + "; queryWord=" + queryWord
+                + "; fromList=" + fromList
+                + "; matchStyle=" + matchStyle
+                + "; formatList=" + formatList 
+                + "; maxResults=" + maxResults);
             try
             {
-
                 Task<MessageResult> task = HubProxy.Invoke<MessageResult>("RequestSearchBiblio",
                     inputSearchID,
                     dbNameList,
                     queryWord,
                     fromList,
-                    macthStyle,
+                    matchStyle,
                     formatList,
                     maxResults);
 
@@ -467,6 +481,9 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                 {
                     // AddErrorLine(GetExceptionText(task.Exception));
                     strError = GetExceptionText(task.Exception);
+                    AddInfoLine("BeginSearchBiblio inputSearchID=" + inputSearchID
+    + "; return error=" + strError + " value=" 
+    + -1);
                     return -1;
                 }
 
@@ -475,21 +492,33 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5697.17821, Culture=neutral, 
                 {
                     // AddErrorLine(result.ErrorInfo);
                     strError = result.ErrorInfo;
+                    AddInfoLine("BeginSearchBiblio inputSearchID=" + inputSearchID
+    + "; return error=" + strError + " value="
+    + -1);
                     return -1;
                 }
                 if (result.Value == 0)
                 {
                     // AddErrorLine(result.ErrorInfo);
                     strError = result.ErrorInfo;
+                    AddInfoLine("BeginSearchBiblio inputSearchID=" + inputSearchID
+   + "; return error=" + strError + " value="
+   + 0);
                     return 0;
                 }
                 // AddMessageLine("search ID:", result.String);
                 outputSearchID = result.String;
+                AddInfoLine("BeginSearchBiblio inputSearchID=" + inputSearchID
++ "; return value="
++ 1);
                 return 1;
             }
             catch (Exception ex)
             {
                 strError = ex.Message;
+                AddInfoLine("BeginSearchBiblio inputSearchID=" + inputSearchID
++ "; return error=" + strError + " value="
++ -1);
                 return -1;
             }
         }

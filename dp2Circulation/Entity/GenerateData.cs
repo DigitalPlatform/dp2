@@ -9,6 +9,9 @@ using System.Windows.Forms;
 using DigitalPlatform;
 using DigitalPlatform.CommonControl;
 using DigitalPlatform.Script;
+using DigitalPlatform.Text;
+using System.IO;
+using DigitalPlatform.IO;
 
 namespace dp2Circulation
 {
@@ -93,6 +96,141 @@ namespace dp2Circulation
             }
         }
 
+        // 从本地获得两个配置文件的内容
+        // return:
+        //      -1  出错
+        //      0   正常返回
+        //      1   配置文件没有找到，但 host 已经初始化
+        int GetCodeFromLocal(
+            string strAutogenDataCfgFilename,
+            out string strCode,
+            out string strRef,
+            out string strError)
+        {
+            strError = "";
+            strCode = "";
+            strRef = "";
+
+            if (File.Exists(strAutogenDataCfgFilename) == false)
+            {
+                IDetailHost host = null;
+
+                if (this.DetailHostType != null)
+                    host = (IDetailHost)DetailHostType.InvokeMember(null,
+                        BindingFlags.DeclaredOnly |
+                        BindingFlags.Public | BindingFlags.NonPublic |
+                        BindingFlags.Instance | BindingFlags.CreateInstance, null, null,
+                        null);
+                else
+                    host = new DetailHost();
+
+                host.Assembly = null;
+                host.Form = this._myForm;
+                host.DetailWindow = this._myForm as IBiblioItemsWindow;
+                this.m_detailHostObj = host;
+
+                m_strAutogenDataCfgFilename = strAutogenDataCfgFilename;
+
+                this.m_autogenDataAssembly = Assembly.GetAssembly(this.GetType());  // 充数
+
+                return 1;
+            }
+
+            Encoding encoding;
+                    // 能自动识别文件内容的编码方式的读入文本文件内容模块
+        // parameters:
+        //      lMaxLength  装入的最大长度。如果超过，则超过的部分不装入。如果为-1，表示不限制装入长度
+        // return:
+        //      -1  出错 strError中有返回值
+        //      0   文件不存在 strError中有返回值
+        //      1   文件存在
+        //      2   读入的内容不是全部
+            int nRet = FileUtil.ReadTextFileContent(strAutogenDataCfgFilename,
+                -1,
+            out strCode,
+            out encoding,
+            out strError);
+            if (nRet != 1)
+                return -1;
+
+            string strCfgFilePath = strAutogenDataCfgFilename + ".ref"; // strBiblioDbName + "/cfgs/" + this.ScriptFileName + ".ref";
+            if (File.Exists(strCfgFilePath) == true)
+            {
+                nRet = FileUtil.ReadTextFileContent(strCfgFilePath,
+        -1,
+    out strRef,
+    out encoding,
+    out strError);
+                if (nRet != 1)
+                    return -1;
+            }
+
+            return 0;
+        }
+
+
+        // 从服务器获得两个配置文件的内容
+        // return:
+        //      -1  出错
+        //      0   正常返回
+        //      1   配置文件没有找到，但 host 已经初始化
+        int GetCode(
+            string strAutogenDataCfgFilename,
+            out string strCode,
+            out string strRef,
+            out string strError)
+        {
+            strError = "";
+            strCode = "";
+            strRef = "";
+
+            byte[] baCfgOutputTimestamp = null;
+            // return:
+            //      -1  error
+            //      0   not found
+            //      1   found
+            int nRet = this._myForm.GetCfgFileContent(strAutogenDataCfgFilename,
+                out strCode,
+                out baCfgOutputTimestamp,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            if (nRet == 0)
+            {
+                IDetailHost host = null;
+
+                if (this.DetailHostType != null)
+                    host = (IDetailHost)DetailHostType.InvokeMember(null,
+                        BindingFlags.DeclaredOnly |
+                        BindingFlags.Public | BindingFlags.NonPublic |
+                        BindingFlags.Instance | BindingFlags.CreateInstance, null, null,
+                        null);
+                else
+                    host = new DetailHost();
+
+                host.Assembly = null;
+                host.Form = this._myForm;
+                host.DetailWindow = this._myForm as IBiblioItemsWindow;
+                this.m_detailHostObj = host;
+
+                m_strAutogenDataCfgFilename = strAutogenDataCfgFilename;
+
+                this.m_autogenDataAssembly = Assembly.GetAssembly(this.GetType());  // 充数
+
+                return 1;
+            }
+
+            string strCfgFilePath = strAutogenDataCfgFilename + ".ref"; // strBiblioDbName + "/cfgs/" + this.ScriptFileName + ".ref";
+            nRet = this._myForm.GetCfgFileContent(strCfgFilePath,
+                out strRef,
+                out baCfgOutputTimestamp,
+                out strError);
+            if (nRet == -1 /*|| nRet == 0*/)    // .ref 文件可以没有
+                return -1;
+
+            return 0;
+        }
+
         // 初始化 dp2circulation_marc_autogen.cs 的 Assembly，并new DetailHost对象
         // return:
         //      -1  error
@@ -110,14 +248,24 @@ namespace dp2Circulation
             if (string.IsNullOrEmpty(strBiblioRecPath) == true)
                 strBiblioRecPath = this.BiblioRecPath;
 #endif
+            string strAutogenDataCfgFilename = "";
 
-            // 库名部分路径
-            string strBiblioDbName = Global.GetDbName(strBiblioRecPath);
+            string strFormat = "";
+            if (StringUtil.HasHead(strBiblioRecPath, "format:") == true)
+            {
+                strFormat = strBiblioRecPath.Substring("format:".Length);
+                strAutogenDataCfgFilename = Path.Combine(this.MainForm.DataDir, strFormat + "_cfgs/" + this.ScriptFileName);
+            }
+            else
+            {
+                // 库名部分路径
+                string strBiblioDbName = Global.GetDbName(strBiblioRecPath);
 
-            if (string.IsNullOrEmpty(strBiblioDbName) == true)
-                return 0;
+                if (string.IsNullOrEmpty(strBiblioDbName) == true)
+                    return 0;
 
-            string strAutogenDataCfgFilename = strBiblioDbName + "/cfgs/" + this.ScriptFileName;
+                strAutogenDataCfgFilename = strBiblioDbName + "/cfgs/" + this.ScriptFileName;
+            }
 
             bool bAssemblyReloaded = false;
 
@@ -134,6 +282,7 @@ namespace dp2Circulation
                     string strCode = "";
                     string strRef = "";
 
+#if NO
                     byte[] baCfgOutputTimestamp = null;
                     // return:
                     //      -1  error
@@ -170,13 +319,35 @@ namespace dp2Circulation
                         return 1;
                     }
 
-                    string strCfgFilePath = strBiblioDbName + "/cfgs/" + this.ScriptFileName + ".ref";
+                    string strCfgFilePath = strAutogenDataCfgFilename + ".ref"; // strBiblioDbName + "/cfgs/" + this.ScriptFileName + ".ref";
                     nRet = this._myForm.GetCfgFileContent(strCfgFilePath,
                         out strRef,
                         out baCfgOutputTimestamp,
                         out strError);
                     if (nRet == -1 /*|| nRet == 0*/)    // .ref 文件可以没有
                         goto ERROR1;
+#endif
+                    if (string.IsNullOrEmpty(strFormat) == false)
+                    {
+                        nRet = GetCodeFromLocal(
+    strAutogenDataCfgFilename,
+out strCode,
+out strRef,
+out strError);
+                    }
+                    else
+                    {
+                        // 从服务器获得两个配置文件的内容
+                        nRet = GetCode(
+                            strAutogenDataCfgFilename,
+                out strCode,
+                out strRef,
+                out strError);
+                    }
+                    if (nRet == -1)
+                        goto ERROR1;
+                    if (nRet == 1)
+                        return 1;
 
                     try
                     {

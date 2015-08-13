@@ -19,6 +19,7 @@ using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.Script;
 using System.Reflection;
 using DigitalPlatform.Marc;
+using DigitalPlatform.CommonControl;
 
 // 2013/3/16 添加 XML 注释
 
@@ -29,6 +30,7 @@ namespace dp2Circulation
     /// </summary>
     public class MyForm : Form, IMdiWindow
     {
+        internal FloatingMessageForm _floatingMessage = null;
 
         /// <summary>
         /// 窗口是否为浮动状态
@@ -147,6 +149,21 @@ namespace dp2Circulation
 
             stop = new DigitalPlatform.Stop();
             stop.Register(MainForm.stopManager, true);	// 和容器关联
+
+            {
+                _floatingMessage = new FloatingMessageForm(this, true);
+                // _floatingMessage.AutoHide = false;
+                _floatingMessage.Font = new System.Drawing.Font(this.Font.FontFamily, this.Font.Size * 2, FontStyle.Bold);
+                _floatingMessage.Opacity = 0.7;
+                _floatingMessage.RectColor = Color.Green;
+                _floatingMessage.Show(this);
+
+                // _floatingMessage.Text = "test";
+                //_floatingMessage.Clicked += _floatingMessage_Clicked;
+                if (this.MainForm != null)
+                    this.MainForm.Move -= new EventHandler(MainForm_Move);
+
+            }
         }
 
 
@@ -189,12 +206,82 @@ namespace dp2Circulation
                     "mdi_form_state");
             }
 
+            if (this.MainForm != null)
+                this.MainForm.Move -= new EventHandler(MainForm_Move);
+
+#if NO
+            if (_floatingMessage != null)
+                _floatingMessage.Close();
+#endif
+            CloseFloatingMessage();
             /*
             // 如果MDI子窗口不是MainForm刚刚准备退出时的状态，恢复它。为了记忆尺寸做准备
             if (this.WindowState != this.MainForm.MdiWindowState)
                 this.WindowState = this.MainForm.MdiWindowState;
              * */
         }
+
+        public void CloseFloatingMessage()
+        {
+            if (_floatingMessage != null)
+            {
+                _floatingMessage.Close();
+                _floatingMessage = null;
+            }
+        }
+
+        void MainForm_Move(object sender, EventArgs e)
+        {
+            if (this._floatingMessage != null)
+                this._floatingMessage.OnResizeOrMove();
+        }
+
+        public void ShowMessage(string strMessage,
+    string strColor = "",
+    bool bClickClose = false)
+        {
+            if (this._floatingMessage == null)
+                return;
+
+            Color color = Color.FromArgb(80, 80, 80);
+
+            if (strColor == "red")          // 出错
+                color = Color.DarkRed;
+            else if (strColor == "yellow")  // 成功，提醒
+                color = Color.DarkGoldenrod;
+            else if (strColor == "green")   // 成功
+                color = Color.Green;
+            else if (strColor == "progress")    // 处理过程
+                color = Color.FromArgb(80, 80, 80);
+
+            this._floatingMessage.SetMessage(strMessage, color, bClickClose);
+        }
+
+        public void ClearMessage()
+        {
+            this._floatingMessage.Text = "";
+        }
+
+        public void AppendFloatingMessage(string strText)
+        {
+            this._floatingMessage.Text += strText;
+        }
+
+        public string FloatingMessage
+        {
+            get
+            {
+                if (this._floatingMessage == null)
+                    return "";
+                return this._floatingMessage.Text;
+            }
+            set
+            {
+                if (this._floatingMessage != null)
+                    this._floatingMessage.Text = value;
+            }
+        }
+
 
         /// <summary>
         /// 通讯通道登录前被触发

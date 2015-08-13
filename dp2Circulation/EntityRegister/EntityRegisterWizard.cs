@@ -39,7 +39,7 @@ namespace dp2Circulation
     {
         GenerateData _genData = null;
 
-        FloatingMessageForm _floatingMessage = null;
+        // FloatingMessageForm _floatingMessage = null;
 
         EntityRegisterBase _base = new EntityRegisterBase();
 
@@ -254,6 +254,7 @@ namespace dp2Circulation
 
             LoadServerXml();
 
+#if NO
             {
                 _floatingMessage = new FloatingMessageForm(this, true);
                 // _floatingMessage.AutoHide = false;
@@ -265,8 +266,11 @@ namespace dp2Circulation
                 // _floatingMessage.Text = "test";
                 //_floatingMessage.Clicked += _floatingMessage_Clicked;
             }
+#endif
 
+#if NO
             this.MainForm.Move += new EventHandler(MainForm_Move);
+#endif
             this.MainForm.Activated += MainForm_Activated;
             this.MainForm.Deactivate += MainForm_Deactivate;
 
@@ -444,10 +448,12 @@ namespace dp2Circulation
         }
 #endif
 
+#if NO
         void MainForm_Move(object sender, EventArgs e)
         {
             this._floatingMessage.OnResizeOrMove();
         }
+#endif
 
         private void EntityRegisterWizard_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -507,7 +513,9 @@ MessageBoxDefaultButton.Button1);
                 this.MainForm.AppInfo.SetString("entityRegisterWizard", "uistate", this.UiState);
 
                 // this.MainForm.MessageFilter -= MainForm_MessageFilter;
+#if NO
                 this.MainForm.Move -= new EventHandler(MainForm_Move);
+#endif
                 this.MainForm.Activated -= MainForm_Activated;
                 this.MainForm.Deactivate -= MainForm_Deactivate;
 
@@ -515,8 +523,10 @@ MessageBoxDefaultButton.Button1);
 
             CloseKeyboardForm();
 
+#if NO
             if (_floatingMessage != null)
                 _floatingMessage.Close();
+#endif
         }
 
         #region IBiblioItemsWindow 接口要求
@@ -704,32 +714,6 @@ MessageBoxDefaultButton.Button1);
         {
             DoSearch(this.textBox_queryWord.Text,
                 this.comboBox_from.Text);
-        }
-
-        void ShowMessage(string strMessage, 
-            string strColor = "",
-            bool bClickClose = false)
-        {
-            if (this._floatingMessage == null)
-                return;
-
-            Color color = Color.FromArgb(80,80,80);
-
-            if (strColor == "red")          // 出错
-                color = Color.DarkRed;
-            else if (strColor == "yellow")  // 成功，提醒
-                color = Color.DarkGoldenrod;
-            else if (strColor == "green")   // 成功
-                color = Color.Green;
-            else if (strColor == "progress")    // 处理过程
-                color = Color.FromArgb(80, 80, 80);
-
-            this._floatingMessage.SetMessage(strMessage, color, bClickClose);
-        }
-
-        void ClearMessage()
-        {
-            this._floatingMessage.Text = "";
         }
 
         public string QueryWord

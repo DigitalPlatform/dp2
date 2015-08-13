@@ -2450,6 +2450,7 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使用中。 (
                     nRedoCount++;
                     if (nRedoCount < 5)
                     {
+                        Application.DoEvents(); // 2015/8/13
                         Thread.Sleep(200);
                         goto REDO;
                     }

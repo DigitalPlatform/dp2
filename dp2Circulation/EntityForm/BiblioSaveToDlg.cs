@@ -26,6 +26,14 @@ namespace dp2Circulation
 
         int m_nManual = 0;  // 如果为0，表示界面手动勾选。否则就是程序内部去改变checked值
 
+        // 过滤书目库列表用的 MARC 格式
+        // 如果为空，则表示不过滤
+        public string MarcSyntax
+        {
+            get;
+            set;
+        }
+
         public BiblioSaveToDlg()
         {
             InitializeComponent();
@@ -57,7 +65,6 @@ namespace dp2Circulation
             {
                 MessageBox.Show(this, "尚未指定记录ID");
             }
-
 
             this.DialogResult = DialogResult.OK;
             this.Close();
@@ -161,6 +168,10 @@ namespace dp2Circulation
             for (int i = 0; i < this.MainForm.BiblioDbProperties.Count; i++)
             {
                 BiblioDbProperty property = this.MainForm.BiblioDbProperties[i];
+                // 只允许特定的 MARC 格式
+                if (string.IsNullOrEmpty(this.MarcSyntax) == false
+                    && property.Syntax != this.MarcSyntax)
+                    continue;
                 this.comboBox_biblioDbName.Items.Add(property.DbName);
             }
         }
@@ -210,7 +221,6 @@ namespace dp2Circulation
             }
             else
             {
-
                 this.m_nManual++;
                 this.checkBox_buildLink.Checked = false;
                 this.m_nManual--;

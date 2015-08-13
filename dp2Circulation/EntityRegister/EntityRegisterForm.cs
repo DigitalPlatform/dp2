@@ -19,7 +19,7 @@ namespace dp2Circulation
 
     public partial class EntityRegisterForm : MyForm
     {
-        FloatingMessageForm _floatingMessage = null;
+        // FloatingMessageForm _floatingMessage = null;
 
         bool _scanMode = false;
 
@@ -97,12 +97,14 @@ namespace dp2Circulation
 
             OpenScanBarcodeForm();
 
+#if NO
             {
                 _floatingMessage = new FloatingMessageForm(this);
                 _floatingMessage.Font = new System.Drawing.Font(this.Font.FontFamily, this.Font.Size * 2, FontStyle.Bold);
                 _floatingMessage.Opacity = 0.7;
                 _floatingMessage.Show(this);
             }
+#endif
         }
 
         void LoadServerXml()
@@ -164,8 +166,10 @@ namespace dp2Circulation
         {
             if (this._scanBarcodeForm != null)
                 this._scanBarcodeForm.Close();
+#if NO
             if (_floatingMessage != null)
                 _floatingMessage.Close();
+#endif
         }
 
         void SetFloatMessage(string strColor,
