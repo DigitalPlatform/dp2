@@ -29,6 +29,7 @@ using DigitalPlatform.GcatClient;
 using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.GcatClient.gcat_new_ws;
 using DigitalPlatform.CommonDialog;
+using DigitalPlatform.MessageClient;
 
 namespace dp2Circulation
 {
@@ -4703,6 +4704,8 @@ true);
         private void button_search_Click(object sender, EventArgs e)
         {
             string strError = "";
+            int nRet = 0;
+            bool bDisplayClickableError = false;
 
             ActivateBrowseWindow(false);
 
@@ -4711,6 +4714,8 @@ true);
             Progress.OnStop += new StopEventHandler(this.DoStop);
             Progress.Initial("正在检索 ...");
             Progress.BeginLoop();
+
+            this.ShowMessage("正在检索 ...");
 
             this.browseWindow.stop = Progress;
 
@@ -4772,6 +4777,33 @@ true);
 
                 string strQueryWord = GetBiblioQueryString();
 
+                bool bNeedShareSearch = false;
+                if (this.SearchShareBiblio == true
+    && this.MainForm != null && this.MainForm.MessageHub != null
+    && this.MainForm.MessageHub.ShareBiblio == true)
+                {
+                    bNeedShareSearch = true;
+                }
+
+                if (bNeedShareSearch == true)
+                {
+                    // 开始检索共享书目
+                    // return:
+                    //      -1  出错
+                    //      0   没有检索目标
+                    //      1   成功启动检索
+                    nRet = BeginSearchShareBiblio(
+                        this.textBox_queryWord.Text,
+                        strFromStyle,
+                        strMatchStyle,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        // 显示错误信息
+                        this.ShowMessage(strError, "red", true);
+                        bDisplayClickableError = true;
+                    }
+                }
 
                 string strQueryXml = "";
                 long lRet = Channel.SearchBiblio(Progress,
@@ -4795,82 +4827,131 @@ true);
 
                 if (lHitCount == 0)
                 {
-                    strError = "从途径 '" + strFromStyle+ "' 检索 '" +strQueryWord + "' 没有命中";
-                    goto ERROR1;
+                    // strError = "从途径 '" + strFromStyle + "' 检索 '" + strQueryWord + "' 没有命中";
+                    // goto ERROR1;
+                }
+                else
+                {
+                    if (lHitCount > 1)
+                        this.ShowBrowseWindow(-1);
+
+                    long lStart = 0;
+                    long lPerCount = Math.Min(50, lHitCount);
+                    DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+
+                    // 装入浏览格式
+                    for (; ; )
+                    {
+                        Application.DoEvents();	// 出让界面控制权
+
+                        if (Progress != null && Progress.State != 0)
+                        {
+                            // MessageBox.Show(this, "用户中断");
+                            break;  // 已经装入的还在
+                        }
+
+                        Progress.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
+
+                        lRet = Channel.GetSearchResult(
+                            Progress,
+                            null,   // strResultSetName
+                            lStart,
+                            lPerCount,
+                            "id,cols",
+                            this.Lang,
+                            out searchresults,
+                            out strError);
+                        if (lRet == -1)
+                        {
+                            if (Progress.State != 0)
+                            {
+                                // MessageBox.Show(this, "用户中断");
+                                break;
+                            }
+
+                            goto ERROR1;
+                        }
+
+                        if (lRet == 0)
+                        {
+                            MessageBox.Show(this, "未命中");
+                            return;
+                        }
+
+                        // 处理浏览结果
+                        for (int i = 0; i < searchresults.Length; i++)
+                        {
+                            Global.AppendNewLine(
+                                this.browseWindow.RecordsList,
+                                searchresults[i].Path,
+                                searchresults[i].Cols);
+                        }
+
+                        lStart += searchresults.Length;
+                        // lCount -= searchresults.Length;
+                        if (lStart >= lHitCount || lPerCount <= 0)
+                            break;
+                    }
+                }
+
+                if (bNeedShareSearch == true)
+                {
+                    this.ShowMessage("等待共享检索响应 ...");
+                    // 结束检索共享书目
+                    // return:
+                    //      -1  出错
+                    //      >=0 命中记录个数
+                    nRet = EndSearchShareBiblio(out strError);
+                    if (nRet == -1)
+                    {
+                        // 显示错误信息
+                        this.ShowMessage(strError, "red", true);
+                        bDisplayClickableError = true;
+                    }
+                    else
+                    {
+#if NO
+                        if (_searchParam._searchCount > 0)
+                        {
+                            this.ShowMessage("共享书目命中 " + _searchParam._searchCount + " 条", "green");
+                            this._floatingMessage.DelayClear(new TimeSpan(0, 0, 3));
+                        }
+#endif
+                    }
+
+                    lHitCount += _searchParam._searchCount;
                 }
 
                 if (lHitCount > 1)
                     this.ShowBrowseWindow(lHitCount);
 
-                long lStart = 0;
-                long lPerCount = Math.Min(50, lHitCount);
-                DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
-
-                // 装入浏览格式
-                for (; ; )
-                {
-                    Application.DoEvents();	// 出让界面控制权
-
-                    if (Progress != null)
-                    {
-                        if (Progress.State != 0)
-                        {
-                            // MessageBox.Show(this, "用户中断");
-                            break;  // 已经装入的还在
-                        }
-                    }
-
-                    Progress.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
-
-                    lRet = Channel.GetSearchResult(
-                        Progress,
-                        null,   // strResultSetName
-                        lStart,
-                        lPerCount,
-                        "id,cols",
-                        this.Lang,
-                        out searchresults,
-                        out strError);
-                    if (lRet == -1)
-                    {
-                        if (Progress.State != 0)
-                        {
-                            // MessageBox.Show(this, "用户中断");
-                            break;
-                        }
-
-                        goto ERROR1;
-                    }
-
-                    if (lRet == 0)
-                    {
-                        MessageBox.Show(this, "未命中");
-                        return;
-                    }
-
-                    // 处理浏览结果
-                    for (int i = 0; i < searchresults.Length; i++)
-                    {
-
-                        Global.AppendNewLine(
-                            this.browseWindow.RecordsList,
-                            searchresults[i].Path,
-                            searchresults[i].Cols);
-                    }
-
-                    lStart += searchresults.Length;
-                    // lCount -= searchresults.Length;
-                    if (lStart >= lHitCount || lPerCount <= 0)
-                        break;
-                }
-
                 if (lHitCount == 1)
                     this.browseWindow.LoadFirstDetail(true);
+                else
+                {
+                    if (lHitCount == 0)
+                    {
+                        this.ShowMessage("未命中", "yellow", true);
+                        bDisplayClickableError = true;
+                    }
+                }
+
+#if NO
+                if (lHitCount == 0)
+                    this.label_message.Text = "未命中";
+                else
+                    this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条书目记录，已全部装入";
+#endif
 
                 // MessageBox.Show(this, Convert.ToString(lRet) + " : " + strError);
             }
             finally
             {
+                if (bDisplayClickableError == false
+    && this._floatingMessage.InDelay() == false)
+                    this.ClearMessage();
+                this.MainForm.MessageHub.SearchResponseEvent -= MessageHub_SearchResponseEvent;
+
                 Progress.EndLoop();
                 Progress.OnStop -= new StopEventHandler(this.DoStop);
                 Progress.Initial("");
@@ -4879,7 +4960,6 @@ true);
                 this.EnableControls(true);
 
                 m_nInSearching--;
-
             }
 
             this.textBox_queryWord.SelectAll();
@@ -4890,10 +4970,7 @@ true);
             this.textBox_itemBarcode.Focus(); 
              * */
             this.SwitchFocus(ITEM_BARCODE);
-
-
             return;
-
         ERROR1:
             CloseBrowseWindow();
             MessageBox.Show(this, strError);
@@ -4905,6 +4982,200 @@ true);
             this.SwitchFocus(BIBLIO_SEARCHTEXT);
         }
 
+        // 开始检索共享书目
+        // return:
+        //      -1  出错
+        //      0   没有检索目标
+        //      1   成功启动检索
+        int BeginSearchShareBiblio(
+            string strQueryWord,
+            string strFromStyle,
+            string strMatchStyle,
+            out string strError)
+        {
+            strError = "";
+
+            this.browseWindow.BrowseTitleTable = this._browseTitleTable;
+
+            string strSearchID = Guid.NewGuid().ToString();
+            _searchParam = new SearchParam();
+            _searchParam._searchID = strSearchID;
+            _searchParam._searchComplete = false;
+            _searchParam._searchCount = 0;
+            this.MainForm.MessageHub.SearchResponseEvent += MessageHub_SearchResponseEvent;
+
+            string strOutputSearchID = "";
+            int nRet = this.MainForm.MessageHub.BeginSearchBiblio(
+                strSearchID,
+                "<全部>",
+strQueryWord,
+strFromStyle,
+strMatchStyle,
+"",
+1000,
+out strOutputSearchID,
+out strError);
+            if (nRet == -1)
+            {
+                // 检索过程结束
+                _searchParam._searchComplete = true;
+                return -1;
+            }
+            if (nRet == 0)
+            {
+                // 检索过程结束
+                _searchParam._searchComplete = true;
+                return 0;
+            }
+
+            return 1;
+        }
+
+        // 结束检索共享书目
+        // return:
+        //      -1  出错
+        //      >=0 命中记录个数
+        int EndSearchShareBiblio(out string strError)
+        {
+            strError = "";
+
+            try
+            {
+                // 装入浏览记录
+                TimeSpan timeout = new TimeSpan(0, 1, 0);
+                DateTime start_time = DateTime.Now;
+                while (_searchParam._searchComplete == false)
+                {
+                    Application.DoEvents();
+                    Thread.Sleep(200);
+                    if (DateTime.Now - start_time > timeout)    // 超时
+                        break;
+                    if (this.Progress != null && this.Progress.State != 0)
+                    {
+                        strError = "用户中断";
+                        return -1;
+                    }
+                }
+
+                return _searchParam._searchCount;
+            }
+            finally
+            {
+                _searchParam._searchID = "";
+            }
+        }
+
+        class SearchParam
+        {
+            public string _searchID = "";
+            public bool _searchComplete = false;
+            public int _searchCount = 0;
+        }
+
+        SearchParam _searchParam = null;
+
+        // 外来数据的浏览列标题的对照表。MARC 格式名 --> 列标题字符串
+        Hashtable _browseTitleTable = new Hashtable();
+
+        void MessageHub_SearchResponseEvent(object sender, SearchResponseEventArgs e)
+        {
+            if (e.SsearchID != _searchParam._searchID)
+                return;
+            if (e.ResultCount == -1 && e.Start == -1)
+            {
+                // 检索过程结束
+                _searchParam._searchComplete = true;
+                return;
+            }
+            string strError = "";
+
+            if (e.ResultCount == -1)
+            {
+                strError = e.ErrorInfo;
+                goto ERROR1;
+            }
+
+            // TODO: 注意来自共享网络的图书馆名不能和 servers.xml 中的名字冲突。另外需要检查，不同的 UID，图书馆名字不能相同，如果发生冲突，则需要给分配 ..1 ..2 这样的编号以示区别
+            // 需要一直保存一个 UID 到图书馆命的对照表在内存备用
+            // TODO: 来自共享网络的记录，图标或 @ 后面的名字应该有明显的形态区别
+            foreach (BiblioRecord record in e.Records)
+            {
+                string strXml = record.Data;
+
+                string strMarcSyntax = "";
+                string strBrowseText = "";
+                string strColumnTitles = "";
+                int nRet = BuildBrowseText(strXml,
+out strBrowseText,
+out strMarcSyntax,
+out strColumnTitles,
+out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+
+                string strRecPath = record.RecPath + "@" + (string.IsNullOrEmpty(record.LibraryName) == false ? record.LibraryName : record.LibraryUID);
+
+#if NO
+                string strDbName = ListViewProperty.GetDbName(strRecPath);
+                _browseTitleTable[strDbName] = strColumnTitles;
+#endif
+                _browseTitleTable[strMarcSyntax] = strColumnTitles;
+
+                // 将书目记录放入 m_biblioTable
+                {
+                    BiblioInfo info = new BiblioInfo();
+                    info.OldXml = strXml;
+                    info.RecPath = strRecPath;
+                    info.Timestamp = ByteArray.GetTimeStampByteArray(record.Timestamp);
+                    info.Format = strMarcSyntax;
+                    this.browseWindow.BiblioTable[strRecPath] = info;
+                }
+
+                List<string> column_list = StringUtil.SplitList(strBrowseText, '\t');
+                string[] cols = new string[column_list.Count];
+                column_list.CopyTo(cols);
+
+                ListViewItem item = null;
+                this.Invoke((Action)(() =>
+                {
+                    item = Global.AppendNewLine(
+    this.browseWindow.RecordsList,
+    strRecPath,
+    cols);
+                }
+                ));
+
+                if (item != null)
+                    item.BackColor = Color.LightGreen;
+
+#if NO
+                RegisterBiblioInfo info = new RegisterBiblioInfo();
+                info.OldXml = strXml;   // strMARC;
+                info.Timestamp = ByteArray.GetTimeStampByteArray(record.Timestamp);
+                info.RecPath = record.RecPath + "@" + (string.IsNullOrEmpty(record.LibraryName) == false ? record.LibraryName : record.LibraryUID);
+                info.MarcSyntax = strMarcSyntax;
+#endif
+                _searchParam._searchCount++;
+            }
+
+            return;
+        ERROR1:
+            // 加入一个文本行
+            {
+                string[] cols = new string[1];
+                cols[0] = strError;
+                this.Invoke((Action)(() =>
+                {
+
+                    ListViewItem item = Global.AppendNewLine(
+        this.browseWindow.RecordsList,
+        "error",
+        cols);
+                }
+    ));
+            }
+        }
+
         void CloseBrowseWindow()
         {
             if (this.browseWindow != null)
@@ -4914,6 +5185,9 @@ true);
             }
         }
 
+        // 显示 浏览小窗口
+        // parameters:
+        //      lHitCount   要显示出来的命中数。如果为 -1，则不显示命中数
         void ShowBrowseWindow(long lHitCount)
         {
             if (this.browseWindow.Visible == false)
@@ -4926,7 +5200,7 @@ true);
                 this.browseWindow.WindowState = FormWindowState.Normal;
 
             if (lHitCount != -1)
-                this.browseWindow.Text = "命中 "+lHitCount.ToString()+" 条种记录。请从中选择一条";
+                this.browseWindow.Text = "命中 "+lHitCount.ToString()+" 条书目记录。请从中选择一条";
         }
 
         void ActivateBrowseWindow(bool bShow)
@@ -4996,6 +5270,23 @@ true);
 
         void browseWindow_OpenDetail(object sender, OpenDetailEventArgs e)
         {
+            int nRet = 0;
+
+            if ((e.Paths == null || e.Paths.Length == 0)
+                && e.BiblioInfos != null && e.BiblioInfos.Count > 0)
+            {
+
+                BiblioInfo info = e.BiblioInfos[0];
+                Debug.Assert(info != null, "");
+                string strError = "";
+                nRet = this.LoadRecord(info,
+                    true,
+                    out strError);
+                if (nRet != 1)
+                    MessageBox.Show(this, strError);
+                return;
+            }
+
             if (e.Paths.Length == 0)
                 return;
 
@@ -5014,7 +5305,7 @@ true);
             }
 
 
-            int nRet = this.LoadRecordOld(strBiblioRecPath, "", true);
+            nRet = this.LoadRecordOld(strBiblioRecPath, "", true);
             // 2009/11/6 
             if (nRet == 2)
             {

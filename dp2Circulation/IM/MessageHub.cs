@@ -527,7 +527,7 @@ strError);  // 出错信息大概为 not found。
 #endif
             Login("",
                 "",
-                this.MainForm.ServerUID,    // 测试用 Guid.NewGuid().ToString(),
+                Guid.NewGuid().ToString(), // this.MainForm.ServerUID,    // 测试用 Guid.NewGuid().ToString(),
                 this.MainForm.LibraryName,
                 this.ShareBiblio ? "biblio_search" : "");
         }

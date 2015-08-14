@@ -1119,6 +1119,35 @@ out string strError)
 
         #endregion
 
+        // TODO: 值变化后要出现延时关闭的 floatingMessage
+        public bool SearchShareBiblio
+        {
+            get
+            {
+                if (this.MainForm != null && this.MainForm.AppInfo != null)
+                    return this.MainForm.AppInfo.GetBoolean(
+        "biblio_search_form",
+        "search_sharebiblio",
+        true);
+                return false;
+            }
+            set
+            {
+                if (this.MainForm != null && this.MainForm.AppInfo != null)
+                {
+                    this.MainForm.AppInfo.SetBoolean(
+        "biblio_search_form",
+        "search_sharebiblio",
+        value);
+                    if (value == true)
+                        this.ShowMessage("使用共享网络", "");
+                    else
+                        this.ShowMessage("不使用共享网络", "");
+
+                    this._floatingMessage.DelayClear(new TimeSpan(0, 0, 3));
+                }
+            }
+        }
 
     }
 }

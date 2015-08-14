@@ -951,6 +951,8 @@ Keys keyData)
             stop.Initial("正在检索 '" + this.textBox_queryWord.Text + "' ...");
             stop.BeginLoop();
 
+            this.ShowMessage("正在检索 '" + this.textBox_queryWord.Text + "' ...");
+
             this.EnableControlsInSearching(false);
             try
             {
@@ -1084,14 +1086,11 @@ Keys keyData)
                 {
                     Application.DoEvents();	// 出让界面控制权
 
-                    if (stop != null)
+                    if (stop != null && stop.State != 0)
                     {
-                        if (stop.State != 0)
-                        {
-                            // MessageBox.Show(this, "用户中断");
-                            this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条书目记录，已装入 " + lStart.ToString() + " 条，用户中断...";
-                            return;
-                        }
+                        // MessageBox.Show(this, "用户中断");
+                        this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条书目记录，已装入 " + lStart.ToString() + " 条，用户中断...";
+                        return;
                     }
 
                     stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
@@ -1100,7 +1099,6 @@ Keys keyData)
 
                     if ((Control.ModifierKeys & Keys.Shift) == Keys.Shift)
                         bTempQuickLoad = true;
-
 
                     string strBrowseStyle = "id,cols";
                     if (bOutputKeyCount == true)
@@ -1124,7 +1122,6 @@ Keys keyData)
                         }
                     }
 
-
                     lRet = Channel.GetSearchResult(
                         stop,
                         null,   // strResultSetName
@@ -1141,120 +1138,120 @@ Keys keyData)
                     }
 
                     if (lRet == 0)
-                    {
-                        MessageBox.Show(this, "未命中");
-                        return;
-                    }
-
-                    this.listView_records.BeginUpdate();
-                    try
-                    {
-                        // 处理浏览结果
-                        for (int i = 0; i < searchresults.Length; i++)
-                        {
-                            ListViewItem item = null;
-
-                            DigitalPlatform.CirculationClient.localhost.Record searchresult = searchresults[i];
-
-                            string[] cols = null;
-                            if (bOutputKeyCount == true)
-                            {
-                                // 输出keys
-                                if (searchresult.Cols == null)
-                                {
-                                    strError = "要使用获取检索点功能，请将 dp2Library 应用服务器和 dp2Kernel 数据库内核升级到最新版本";
-                                    goto ERROR1;
-                                }
-                                cols = new string[(searchresult.Cols == null ? 0 : searchresult.Cols.Length) + 1];
-                                cols[0] = searchresult.Path;
-                                if (cols.Length > 1)
-                                    Array.Copy(searchresult.Cols, 0, cols, 1, cols.Length - 1);
-
-                                if (bPushFillingBrowse == true)
-                                    item = Global.InsertNewLine(
-                                        this.listView_records,
-                                        "",
-                                        cols);
-                                else
-                                    item = Global.AppendNewLine(
-                                        this.listView_records,
-                                        "",
-                                        cols);
-                                item.Tag = query;
-                                goto CONTINUE;
-                            }
-                            else if (bOutputKeyID == true)
-                            {
-
-                                // 输出keys
-                                if (searchresult.Cols == null
-                                    && bTempQuickLoad == false)
-                                {
-                                    strError = "要使用获取检索点功能，请将 dp2Library 应用服务器和 dp2Kernel 数据库内核升级到最新版本";
-                                    goto ERROR1;
-                                }
-
-                                cols = new string[(searchresult.Cols == null ? 0 : searchresult.Cols.Length) + 1];
-                                cols[0] = LibraryChannel.BuildDisplayKeyString(searchresult.Keys);
-                                if (cols.Length > 1)
-                                    Array.Copy(searchresult.Cols, 0, cols, 1, cols.Length - 1);
-                            }
-                            else
-                            {
-                                cols = searchresult.Cols;
-                            }
-
-
-                            if (bPushFillingBrowse == true)
-                            {
-                                if (bTempQuickLoad == true)
-                                    item = Global.InsertNewLine(
-                                        (ListView)this.listView_records,
-                                        searchresult.Path,
-                                        cols);
-                                else
-                                    item = Global.InsertNewLine(
-                                        this.listView_records,
-                                        searchresult.Path,
-                                        cols);
-                            }
-                            else
-                            {
-                                if (bTempQuickLoad == true)
-                                    item = Global.AppendNewLine(
-                                        (ListView)this.listView_records,
-                                        searchresult.Path,
-                                        cols);
-                                else
-                                    item = Global.AppendNewLine(
-                                        this.listView_records,
-                                        searchresult.Path,
-                                        cols);
-                            }
-
-                        CONTINUE:
-                            query.Items.Add(item);
-                        }
-                    }
-                    finally
-                    {
-                        this.listView_records.EndUpdate();
-                    }
-
-                    lStart += searchresults.Length;
-                    // lCount -= searchresults.Length;
-                    if (lStart >= lHitCount || lPerCount <= 0)
                         break;
 
-                    this.m_lLoaded = lStart;
-                    stop.SetProgressValue(lStart);
+                    if (lRet > 0)
+                    {
+                        this.listView_records.BeginUpdate();
+                        try
+                        {
+                            // 处理浏览结果
+                            for (int i = 0; i < searchresults.Length; i++)
+                            {
+                                ListViewItem item = null;
+
+                                DigitalPlatform.CirculationClient.localhost.Record searchresult = searchresults[i];
+
+                                string[] cols = null;
+                                if (bOutputKeyCount == true)
+                                {
+                                    // 输出keys
+                                    if (searchresult.Cols == null)
+                                    {
+                                        strError = "要使用获取检索点功能，请将 dp2Library 应用服务器和 dp2Kernel 数据库内核升级到最新版本";
+                                        goto ERROR1;
+                                    }
+                                    cols = new string[(searchresult.Cols == null ? 0 : searchresult.Cols.Length) + 1];
+                                    cols[0] = searchresult.Path;
+                                    if (cols.Length > 1)
+                                        Array.Copy(searchresult.Cols, 0, cols, 1, cols.Length - 1);
+
+                                    if (bPushFillingBrowse == true)
+                                        item = Global.InsertNewLine(
+                                            this.listView_records,
+                                            "",
+                                            cols);
+                                    else
+                                        item = Global.AppendNewLine(
+                                            this.listView_records,
+                                            "",
+                                            cols);
+                                    item.Tag = query;
+                                    goto CONTINUE;
+                                }
+                                else if (bOutputKeyID == true)
+                                {
+
+                                    // 输出keys
+                                    if (searchresult.Cols == null
+                                        && bTempQuickLoad == false)
+                                    {
+                                        strError = "要使用获取检索点功能，请将 dp2Library 应用服务器和 dp2Kernel 数据库内核升级到最新版本";
+                                        goto ERROR1;
+                                    }
+
+                                    cols = new string[(searchresult.Cols == null ? 0 : searchresult.Cols.Length) + 1];
+                                    cols[0] = LibraryChannel.BuildDisplayKeyString(searchresult.Keys);
+                                    if (cols.Length > 1)
+                                        Array.Copy(searchresult.Cols, 0, cols, 1, cols.Length - 1);
+                                }
+                                else
+                                {
+                                    cols = searchresult.Cols;
+                                }
+
+
+                                if (bPushFillingBrowse == true)
+                                {
+                                    if (bTempQuickLoad == true)
+                                        item = Global.InsertNewLine(
+                                            (ListView)this.listView_records,
+                                            searchresult.Path,
+                                            cols);
+                                    else
+                                        item = Global.InsertNewLine(
+                                            this.listView_records,
+                                            searchresult.Path,
+                                            cols);
+                                }
+                                else
+                                {
+                                    if (bTempQuickLoad == true)
+                                        item = Global.AppendNewLine(
+                                            (ListView)this.listView_records,
+                                            searchresult.Path,
+                                            cols);
+                                    else
+                                        item = Global.AppendNewLine(
+                                            this.listView_records,
+                                            searchresult.Path,
+                                            cols);
+                                }
+
+                            CONTINUE:
+                                query.Items.Add(item);
+                            }
+                        }
+                        finally
+                        {
+                            this.listView_records.EndUpdate();
+                        }
+
+                        lStart += searchresults.Length;
+                        // lCount -= searchresults.Length;
+                        if (lStart >= lHitCount || lPerCount <= 0)
+                            break;
+
+                        this.m_lLoaded = lStart;
+                        stop.SetProgressValue(lStart);
+                    }
                 }
 
                 // MessageBox.Show(this, Convert.ToString(lRet) + " : " + strError);
-                this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条书目记录，已全部装入";
 
                 if (bNeedShareSearch == true)
                 {
+                    this.ShowMessage("等待共享检索响应 ...");
                     // 结束检索共享书目
                     // return:
                     //      -1  出错
@@ -1279,7 +1276,21 @@ Keys keyData)
 #endif
                         }
                     }
+
+                    lHitCount += _searchParam._searchCount;
                 }
+
+                if (lHitCount == 0)
+                {
+                    this.ShowMessage("未命中", "yellow", true);
+                    bDisplayClickableError = true;
+                }
+
+                if (lHitCount == 0)
+                    this.label_message.Text = "未命中";
+                else
+                    this.label_message.Text = "检索共命中 " + lHitCount.ToString() + " 条书目记录，已全部装入";
+
             }
             finally
             {
@@ -1393,7 +1404,7 @@ out strError);
 
         SearchParam _searchParam = null;
 
-        // 外来数据的浏览列标题的对照表。书目库名(包含服务器名部分) --> 列标题字符串
+        // 外来数据的浏览列标题的对照表。MARC 格式名 --> 列标题字符串
         Hashtable _browseTitleTable = new Hashtable();
 
         void MessageHub_SearchResponseEvent(object sender, SearchResponseEventArgs e)
@@ -7577,35 +7588,6 @@ MessageBoxDefaultButton.Button1);
             }
         }
 
-        // TODO: 值变化后要出现延时关闭的 floatingMessage
-        public bool SearchShareBiblio
-        {
-            get
-            {
-                if (this.MainForm != null && this.MainForm.AppInfo != null)
-                    return this.MainForm.AppInfo.GetBoolean(
-        "biblio_search_form",
-        "search_sharebiblio",
-        true);
-                return false;
-            }
-            set
-            {
-                if (this.MainForm != null && this.MainForm.AppInfo != null)
-                {
-                    this.MainForm.AppInfo.SetBoolean(
-        "biblio_search_form",
-        "search_sharebiblio",
-        value);
-                    if (value == true)
-                        this.ShowMessage("使用共享网络", "");
-                    else
-                        this.ShowMessage("不使用共享网络", "");
-
-                    this._floatingMessage.DelayClear(new TimeSpan(0, 0, 3));
-                }
-            }
-        }
     }
 
     // 为一行存储的书目信息

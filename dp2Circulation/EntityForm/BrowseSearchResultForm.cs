@@ -8,6 +8,8 @@ using System.Windows.Forms;
 
 using DigitalPlatform;
 using DigitalPlatform.GUI;
+using System.Collections;
+using DigitalPlatform.Text;
 
 namespace dp2Circulation
 {
@@ -16,6 +18,31 @@ namespace dp2Circulation
     /// </summary>
     internal partial class BrowseSearchResultForm : Form
     {
+        // 2015/8/14
+        Hashtable m_biblioTable = new Hashtable(); // 书目记录路径 --> 书目信息
+
+        public Hashtable BiblioTable
+        {
+            get
+            {
+                return this.m_biblioTable;
+            }
+        }
+
+        // 外来数据的浏览列标题的对照表。MARC 格式名 --> 列标题字符串
+        Hashtable _browseTitleTable = new Hashtable();
+        public Hashtable BrowseTitleTable
+        {
+            get
+            {
+                return this._browseTitleTable;
+            }
+            set
+            {
+                this._browseTitleTable = value;
+            }
+        }
+
         /// <summary>
         /// 框架窗口
         /// </summary>
@@ -37,7 +64,6 @@ namespace dp2Circulation
                 return this.listView_records;
             }
         }
-
 
         public BrowseSearchResultForm()
         {
@@ -61,7 +87,27 @@ namespace dp2Circulation
                 return;
             }
 
-            e.ColumnTitles = this.MainForm.GetBrowseColumnProperties(e.DbName);
+            if (e.DbName.IndexOf("@") == -1)
+                e.ColumnTitles = this.MainForm.GetBrowseColumnProperties(e.DbName);
+            else
+            {
+                string strFormat = "";
+                if (this.m_biblioTable != null)
+                {
+                    BiblioInfo info = this.m_biblioTable[e.DbName] as BiblioInfo;
+                    if (info != null)
+                        strFormat = info.Format;
+                }
+                e.ColumnTitles = new ColumnPropertyCollection();
+                string strColumnTitles = (string)_browseTitleTable[strFormat];
+                List<string> titles = StringUtil.SplitList(strColumnTitles, '\t');
+                foreach (string s in titles)
+                {
+                    ColumnProperty property = new ColumnProperty(s);
+                    e.ColumnTitles.Add(property);
+                }
+            }
+
         }
 
         private void button_OK_Click(object sender, EventArgs e)
@@ -113,7 +159,6 @@ namespace dp2Circulation
 
         }
 
-
         /// <summary>
         /// 在listview最后追加一行
         /// </summary>
@@ -153,22 +198,51 @@ namespace dp2Circulation
             if (this.listView_records.Items.Count == 0)
                 return;
 
-            string[] paths = new string[1];
-            paths[0] = this.listView_records.Items[0].Text;
+            string strError = "";
 
-            OpenDetailEventArgs args = new OpenDetailEventArgs();
-            args.Paths = paths;
-            args.OpenNew = false;
+            string strPath = this.listView_records.Items[0].Text;
+            if (strPath.IndexOf("@") == -1)
+            {
+                string[] paths = new string[1];
+                paths[0] = strPath;
 
-            this.listView_records.Enabled = false;
-            this.OpenDetail(this, args);
-            this.listView_records.Enabled = true;
+                OpenDetailEventArgs args = new OpenDetailEventArgs();
+                args.Paths = paths;
+                args.OpenNew = false;
+
+                this.listView_records.Enabled = false;
+                this.OpenDetail(this, args);
+                this.listView_records.Enabled = true;
+            }
+            else
+            {
+                BiblioInfo info = m_biblioTable[strPath] as BiblioInfo;
+                if (info == null)
+                {
+                    strError = "路径为 '"+strPath+"' 的事项在 m_biblioTable 中没有找到";
+                    goto ERROR1;
+                }
+
+                OpenDetailEventArgs args = new OpenDetailEventArgs();
+                args.Paths = null;
+                args.BiblioInfos = new List<BiblioInfo>();
+                args.BiblioInfos.Add(info);
+                args.OpenNew = false;
+
+                this.listView_records.Enabled = false;
+                this.OpenDetail(this, args);
+                this.listView_records.Enabled = true;
+
+            }
 
             if (bCloseWindow == true)
             {
                 this.DialogResult = DialogResult.OK;
                 this.Close();
             }
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
 
         void OnLoadDetail()
@@ -182,22 +256,43 @@ namespace dp2Circulation
             if (this.stop != null)
                 stop.DoStop();
 
-            string[] paths = new string[this.listView_records.SelectedItems.Count];
+            string strError = "";
+            // string[] paths = new string[this.listView_records.SelectedItems.Count];
+            List<string> path_list = new List<string>();
+            List<BiblioInfo> biblioInfo_list = new List<BiblioInfo>();
             int i = 0;
             foreach (ListViewItem item in this.listView_records.SelectedItems)
             {
-                paths[i++] = item.Text;
+                string strPath = item.Text;
+                if (strPath.IndexOf("@") == -1)
+                    path_list.Add(strPath);
+                else
+                {
+                    BiblioInfo info = m_biblioTable[strPath] as BiblioInfo;
+                    if (info == null)
+                    {
+                        strError = "路径为 '" + strPath + "' 的事项在 m_biblioTable 中没有找到";
+                        goto ERROR1;
+                    }
+                    biblioInfo_list.Add(info);
+                }
+                // paths[i++] = strPath;
             }
 
             OpenDetailEventArgs args = new OpenDetailEventArgs();
+            string[] paths = new string[path_list.Count];
+            path_list.CopyTo(paths);
             args.Paths = paths;
+            args.BiblioInfos = biblioInfo_list;
             args.OpenNew = true;
 
             this.listView_records.Enabled = false;
             this.OpenDetail(this, args);
             this.listView_records.Enabled = true;
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
         }
-
 
         private void listView_records_DoubleClick(object sender, EventArgs e)
         {
@@ -205,7 +300,6 @@ namespace dp2Circulation
             this.Close();
 
             OnLoadDetail();
-
         }
 
         private void listView_records_SelectedIndexChanged(object sender, EventArgs e)
@@ -256,6 +350,11 @@ namespace dp2Circulation
         /// 是否开为新窗口
         /// </summary>
         public bool OpenNew = false;
+
+        /// <summary>
+        /// BiblioInfo 对象的集合
+        /// </summary>
+        public List<BiblioInfo> BiblioInfos = null;    // 如果 Paths 为空，则根据这里打开详细窗 2015/8/14
     }
 
 }
