@@ -9,22 +9,27 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Builders;
 using MongoDB.Bson.Serialization.Attributes;
+using DigitalPlatform.Text;
 
 namespace DigitalPlatform.OPAC.Server
 {
     /// <summary>
     /// 检索日志
     /// </summary>
-    public class SearchLog : List<SearchLogItem>
+    public class SearchLog 
     {
         OpacApplication App = null;
+
+        // 用于缓冲的内存集合结构
+        // TODO: 如果尺寸达到一个极限，则需要强制写入数据库
+        List<SearchLogItem> _searchLogCache = new List<SearchLogItem>();
 
         ReaderWriterLockSlim m_lock = new ReaderWriterLockSlim();
         static int m_nLockTimeout = 5000;	// 5000=5秒
 
         MongoClient m_mongoClient = null;
 
-        string m_strDatabaseName = "dp2opac_searchlog";
+        string m_strSearchLogDatabaseName = "";
 
         public static string BuildLogQueryString(
             string strDbName,
@@ -38,15 +43,15 @@ namespace DigitalPlatform.OPAC.Server
                 + ",m=" + strMatchStyle;
         }
 
-        // 写入数据库的时候， 可以锁定一个范围，后面可以继续膑并发追加记录，这样效率就很高了。
+        // 写入数据库的时候， 可以锁定一个范围，后面可以继续并发追加记录，这样效率就很高了。
         // 只有在删除已经写入数据库的部分记录的瞬间，才需要锁定整个集合
-        public void AddItem(SearchLogItem item)
+        public void AddLogItem(SearchLogItem item)
         {
             if (this.m_lock.TryEnterReadLock(m_nLockTimeout) == false)
                 throw new ApplicationException("锁定尝试中超时");
             try
             {
-                base.Add(item);
+                this._searchLogCache.Add(item);
             }
             finally
             {
@@ -54,7 +59,11 @@ namespace DigitalPlatform.OPAC.Server
             }
         }
 
+        // 初始化 SearchLog 对象
+        // parameters:
+        //      strEnable   启用哪些 log 功能? searchlog,hitcount
         public int Open(OpacApplication app,
+            string strEnable,
             out string strError)
         {
             strError = "";
@@ -67,6 +76,13 @@ namespace DigitalPlatform.OPAC.Server
 
             this.App = app;
 
+            string strPrefix = app.MongoDbInstancePrefix;
+            if (string.IsNullOrEmpty(strPrefix) == false)
+                strPrefix = strPrefix + "_"; 
+
+            m_strSearchLogDatabaseName = strPrefix + "searchlog";
+            m_strHitCountDatabaseName = strPrefix + "hitcount";
+
             try
             {
                 this.m_mongoClient = new MongoClient(app.MongoDbConnStr);
@@ -77,9 +93,43 @@ namespace DigitalPlatform.OPAC.Server
                 return -1;
             }
 
+            var server = m_mongoClient.GetServer();
+
+            if (StringUtil.IsInList("hitcount", strEnable) == true)
+            {
+                var db = server.GetDatabase(this.m_strHitCountDatabaseName);
+
+                _hitCountCollection = db.GetCollection<HitCountItem>("hitcount");
+                if (_hitCountCollection.GetIndexes().Count == 0)
+                    _hitCountCollection.CreateIndex(new IndexKeysBuilder().Ascending("URL"),
+                        IndexOptions.SetUnique(true));
+            }
+
+            if (StringUtil.IsInList("searchlog", strEnable) == true)
+            {
+                var db = server.GetDatabase(this.m_strSearchLogDatabaseName);
+
+                this._searchLogCollection = db.GetCollection<SearchLogItem>("log");
+#if NO
+                if (_searchLogCollection.GetIndexes().Count == 0)
+                    _searchLogCollection.CreateIndex(new IndexKeysBuilder().Ascending("???"),
+                        IndexOptions.SetUnique(true));
+#endif
+            }
             return 0;
         }
 
+        MongoCollection<SearchLogItem> _searchLogCollection = null;
+
+        public MongoCollection<SearchLogItem> SearchLogCollection
+        {
+            get
+            {
+                return this._searchLogCollection;
+            }
+        }
+
+#if NO
         MongoCollection<SearchLogItem> DbItems
         {
             get
@@ -96,11 +146,18 @@ namespace DigitalPlatform.OPAC.Server
                 return db.GetCollection<SearchLogItem>("log");
             }
         }
+#endif
 
         // 将积累的内存对象保存到数据库中
         public int Flush(out string strError)
         {
             strError = "";
+
+            if (this.SearchLogCollection == null)
+            {
+                this._searchLogCache.Clear();
+                return 0;
+            }
 
             try
             {
@@ -111,11 +168,11 @@ namespace DigitalPlatform.OPAC.Server
                     throw new ApplicationException("锁定尝试中超时");
                 try
                 {
-                    if (this.Count == 0)
+                    if (this._searchLogCache.Count == 0)
                         return 0;
 
-                    whole.AddRange(this);
-                    this.Clear();
+                    whole.AddRange(this._searchLogCache);
+                    this._searchLogCache.Clear();
                     // this.RemoveRange(0, nCount);
                 }
                 finally
@@ -127,7 +184,7 @@ namespace DigitalPlatform.OPAC.Server
                     throw new ApplicationException("锁定尝试中超时");
                 try
                 {
-                    MongoCollection<SearchLogItem> db_items = this.DbItems;
+                    MongoCollection<SearchLogItem> db_items = this.SearchLogCollection;
                     MongoInsertOptions options = new MongoInsertOptions() { WriteConcern = WriteConcern.Unacknowledged };
                     foreach (SearchLogItem item in whole)
                     {
@@ -149,6 +206,69 @@ namespace DigitalPlatform.OPAC.Server
                 return -1;
             }
         }
+
+        #region 访问计数
+
+        string m_strHitCountDatabaseName = "";
+        MongoCollection<HitCountItem> _hitCountCollection = null;
+
+        public MongoCollection<HitCountItem> HitCountCollection
+        {
+            get
+            {
+                return this._hitCountCollection;
+            }
+        }
+#if NO
+        MongoCollection<HitCountItem> HitCountItems
+        {
+            get
+            {
+                var client = new MongoClient(this.App.MongoDbConnStr);
+                var server = client.GetServer();
+
+                var db = server.GetDatabase(this.m_strHitCountDatabaseName);
+
+                var result = db.GetCollection<HitCountItem>("hitcount");
+                if (result.GetIndexes().Count == 0)
+                    result.CreateIndex(new IndexKeysBuilder().Ascending("URL"),
+                        IndexOptions.SetUnique(true));
+
+                return result;
+            }
+        }
+#endif
+
+        // 增加一次访问计数
+        public void IncHitCount(string strURL)
+        {
+            MongoCollection<HitCountItem> collection = this.HitCountCollection;
+            if (collection == null)
+                return;
+
+            var query = new QueryDocument("URL", strURL);
+            var update = Update.Inc("HitCount", 1);
+            collection.Update(
+    query,
+    update,
+    UpdateFlags.Upsert);
+        }
+
+        public long GetHitCount(string strURL)
+        {
+            MongoCollection<HitCountItem> collection = this.HitCountCollection;
+            if (collection == null)
+                return -1;
+
+            var query = new QueryDocument("URL", strURL);
+
+            var item = collection.FindOne(query);
+            if (item == null)
+                return 0;
+            return item.HitCount;
+        }
+
+        #endregion
     }
 
     public class SearchLogItem
@@ -164,4 +284,15 @@ namespace DigitalPlatform.OPAC.Server
         public string RecPath { get; set; } // 所获取的记录路径
         public string Format { get; set; }  // 呈现数据的格式
     }
+
+    public class HitCountItem
+    {
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string Id { get; private set; }
+
+        public string URL { get; set; }  // 资源 URL
+        public long HitCount { get; set; }   // 次数
+    }
+
 }

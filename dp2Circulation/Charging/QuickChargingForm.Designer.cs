@@ -58,7 +58,7 @@
             this.textBox_input = new System.Windows.Forms.TextBox();
             this.label_barcode_type = new System.Windows.Forms.Label();
             this.label_input_message = new System.Windows.Forms.Label();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.pictureBox_action = new System.Windows.Forms.PictureBox();
             this.dpTable_tasks = new DigitalPlatform.CommonControl.DpTable();
             this.toolStrip_main = new System.Windows.Forms.ToolStrip();
             this.toolStripLabel_currentPatron = new System.Windows.Forms.ToolStripLabel();
@@ -66,6 +66,7 @@
             this.toolStripButton_enableHanzi = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_upperInput = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton_selectItem = new System.Windows.Forms.ToolStripButton();
+            this.ToolStripMenuItem_inventoryBook = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip_selectFunc.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_main)).BeginInit();
             this.splitContainer_main.Panel1.SuspendLayout();
@@ -73,7 +74,7 @@
             this.splitContainer_main.SuspendLayout();
             this.tableLayoutPanel_right.SuspendLayout();
             this.panel_input.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox_action)).BeginInit();
             this.toolStrip_main.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -99,91 +100,92 @@
             this.toolStripMenuItem_lost,
             this.toolStripMenuItem_verifyLost,
             this.toolStripSeparator4,
-            this.toolStripMenuItem_loadPatronInfo});
+            this.toolStripMenuItem_loadPatronInfo,
+            this.ToolStripMenuItem_inventoryBook});
             this.contextMenuStrip_selectFunc.Name = "contextMenuStrip_selectFunc";
-            this.contextMenuStrip_selectFunc.Size = new System.Drawing.Size(149, 226);
+            this.contextMenuStrip_selectFunc.Size = new System.Drawing.Size(153, 270);
             this.contextMenuStrip_selectFunc.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip_selectFunc_Opening);
             // 
             // toolStripMenuItem_borrow
             // 
             this.toolStripMenuItem_borrow.Name = "toolStripMenuItem_borrow";
-            this.toolStripMenuItem_borrow.Size = new System.Drawing.Size(148, 22);
+            this.toolStripMenuItem_borrow.Size = new System.Drawing.Size(152, 22);
             this.toolStripMenuItem_borrow.Text = "借";
             this.toolStripMenuItem_borrow.Click += new System.EventHandler(this.toolStripMenuItem_borrow_Click);
             // 
             // toolStripMenuItem_continueBorrow
             // 
             this.toolStripMenuItem_continueBorrow.Name = "toolStripMenuItem_continueBorrow";
-            this.toolStripMenuItem_continueBorrow.Size = new System.Drawing.Size(148, 22);
+            this.toolStripMenuItem_continueBorrow.Size = new System.Drawing.Size(152, 22);
             this.toolStripMenuItem_continueBorrow.Text = "同一读者借";
             this.toolStripMenuItem_continueBorrow.Click += new System.EventHandler(this.toolStripMenuItem_continueBorrow_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(145, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
             // 
             // toolStripMenuItem_return
             // 
             this.toolStripMenuItem_return.Name = "toolStripMenuItem_return";
-            this.toolStripMenuItem_return.Size = new System.Drawing.Size(148, 22);
+            this.toolStripMenuItem_return.Size = new System.Drawing.Size(152, 22);
             this.toolStripMenuItem_return.Text = "还";
             this.toolStripMenuItem_return.Click += new System.EventHandler(this.toolStripMenuItem_return_Click);
             // 
             // toolStripMenuItem_verifyReturn
             // 
             this.toolStripMenuItem_verifyReturn.Name = "toolStripMenuItem_verifyReturn";
-            this.toolStripMenuItem_verifyReturn.Size = new System.Drawing.Size(148, 22);
+            this.toolStripMenuItem_verifyReturn.Size = new System.Drawing.Size(152, 22);
             this.toolStripMenuItem_verifyReturn.Text = "验证还";
             this.toolStripMenuItem_verifyReturn.Click += new System.EventHandler(this.toolStripMenuItem_verifyReturn_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(145, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(149, 6);
             // 
             // toolStripMenuItem_renew
             // 
             this.toolStripMenuItem_renew.Name = "toolStripMenuItem_renew";
-            this.toolStripMenuItem_renew.Size = new System.Drawing.Size(148, 22);
+            this.toolStripMenuItem_renew.Size = new System.Drawing.Size(152, 22);
             this.toolStripMenuItem_renew.Text = "续借";
             this.toolStripMenuItem_renew.Click += new System.EventHandler(this.toolStripMenuItem_renew_Click);
             // 
             // toolStripMenuItem_verifyRenew
             // 
             this.toolStripMenuItem_verifyRenew.Name = "toolStripMenuItem_verifyRenew";
-            this.toolStripMenuItem_verifyRenew.Size = new System.Drawing.Size(148, 22);
+            this.toolStripMenuItem_verifyRenew.Size = new System.Drawing.Size(152, 22);
             this.toolStripMenuItem_verifyRenew.Text = "验证续借";
             this.toolStripMenuItem_verifyRenew.Click += new System.EventHandler(this.toolStripMenuItem_verifyRenew_Click);
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(145, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(149, 6);
             // 
             // toolStripMenuItem_lost
             // 
             this.toolStripMenuItem_lost.Name = "toolStripMenuItem_lost";
-            this.toolStripMenuItem_lost.Size = new System.Drawing.Size(148, 22);
+            this.toolStripMenuItem_lost.Size = new System.Drawing.Size(152, 22);
             this.toolStripMenuItem_lost.Text = "丢失";
             this.toolStripMenuItem_lost.Click += new System.EventHandler(this.toolStripMenuItem_lost_Click);
             // 
             // toolStripMenuItem_verifyLost
             // 
             this.toolStripMenuItem_verifyLost.Name = "toolStripMenuItem_verifyLost";
-            this.toolStripMenuItem_verifyLost.Size = new System.Drawing.Size(148, 22);
+            this.toolStripMenuItem_verifyLost.Size = new System.Drawing.Size(152, 22);
             this.toolStripMenuItem_verifyLost.Text = "验证丢失";
             this.toolStripMenuItem_verifyLost.Click += new System.EventHandler(this.toolStripMenuItem_verifyLost_Click);
             // 
             // toolStripSeparator4
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(145, 6);
+            this.toolStripSeparator4.Size = new System.Drawing.Size(149, 6);
             // 
             // toolStripMenuItem_loadPatronInfo
             // 
             this.toolStripMenuItem_loadPatronInfo.Name = "toolStripMenuItem_loadPatronInfo";
-            this.toolStripMenuItem_loadPatronInfo.Size = new System.Drawing.Size(148, 22);
+            this.toolStripMenuItem_loadPatronInfo.Size = new System.Drawing.Size(152, 22);
             this.toolStripMenuItem_loadPatronInfo.Text = "装载读者信息";
             this.toolStripMenuItem_loadPatronInfo.Click += new System.EventHandler(this.toolStripMenuItem_loadPatronInfo_Click);
             // 
@@ -290,7 +292,7 @@
             this.panel_input.Controls.Add(this.textBox_input);
             this.panel_input.Controls.Add(this.label_barcode_type);
             this.panel_input.Controls.Add(this.label_input_message);
-            this.panel_input.Controls.Add(this.pictureBox1);
+            this.panel_input.Controls.Add(this.pictureBox_action);
             this.panel_input.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel_input.Location = new System.Drawing.Point(3, 191);
             this.panel_input.Name = "panel_input";
@@ -343,17 +345,17 @@
             this.label_input_message.Text = "test";
             this.label_input_message.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
-            // pictureBox1
+            // pictureBox_action
             // 
-            this.pictureBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.pictureBox1.ContextMenuStrip = this.contextMenuStrip_selectFunc;
-            this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
-            this.pictureBox1.Location = new System.Drawing.Point(159, 0);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(68, 67);
-            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.pictureBox1.TabIndex = 2;
-            this.pictureBox1.TabStop = false;
+            this.pictureBox_action.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.pictureBox_action.ContextMenuStrip = this.contextMenuStrip_selectFunc;
+            this.pictureBox_action.Location = new System.Drawing.Point(159, 0);
+            this.pictureBox_action.Name = "pictureBox_action";
+            this.pictureBox_action.Size = new System.Drawing.Size(68, 67);
+            this.pictureBox_action.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBox_action.TabIndex = 2;
+            this.pictureBox_action.TabStop = false;
+            this.pictureBox_action.Paint += new System.Windows.Forms.PaintEventHandler(this.pictureBox_action_Paint);
             // 
             // dpTable_tasks
             // 
@@ -456,6 +458,13 @@
             this.toolStripButton_selectItem.Text = "选择册";
             this.toolStripButton_selectItem.Click += new System.EventHandler(this.toolStripButton_selectItem_Click);
             // 
+            // ToolStripMenuItem_inventoryBook
+            // 
+            this.ToolStripMenuItem_inventoryBook.Name = "ToolStripMenuItem_inventoryBook";
+            this.ToolStripMenuItem_inventoryBook.Size = new System.Drawing.Size(152, 22);
+            this.ToolStripMenuItem_inventoryBook.Text = "盘点图书";
+            this.ToolStripMenuItem_inventoryBook.Click += new System.EventHandler(this.ToolStripMenuItem_inventoryBook_Click);
+            // 
             // QuickChargingForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -483,7 +492,7 @@
             this.tableLayoutPanel_right.PerformLayout();
             this.panel_input.ResumeLayout(false);
             this.panel_input.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox_action)).EndInit();
             this.toolStrip_main.ResumeLayout(false);
             this.toolStrip_main.PerformLayout();
             this.ResumeLayout(false);
@@ -499,7 +508,7 @@
         private DigitalPlatform.CommonControl.DpColumn dpColumn_state;
         private DigitalPlatform.CommonControl.DpColumn dpColumn_content;
         private System.Windows.Forms.Panel panel_input;
-        private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.PictureBox pictureBox_action;
         private System.Windows.Forms.TextBox textBox_input;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip_selectFunc;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_borrow;
@@ -528,5 +537,6 @@
         private System.Windows.Forms.ToolStripButton toolStripButton_selectItem;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem_renew;
         private System.Windows.Forms.ToolStripButton toolStripButton_upperInput;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_inventoryBook;
     }
 }

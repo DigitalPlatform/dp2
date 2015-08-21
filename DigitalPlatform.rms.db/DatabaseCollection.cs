@@ -2460,6 +2460,7 @@ namespace DigitalPlatform.rms
             nRet = DatabaseUtil.MergeMetadata(strOriginRecordMetadata,
                 "",
                 lTargetRecordTotalLength,
+                "",
                 out strTargetRecordMetadata,
                 out strError);
             if (nRet == -1)
@@ -4333,6 +4334,7 @@ namespace DigitalPlatform.rms
                 int nRet = DatabaseUtil.MergeMetadata(strOldMetadata,
                     strMetadata,
                     lCurrentLength,
+                    "",
                     out strResultMetadata,
                     out strError);
                 if (nRet == -1)
@@ -4585,7 +4587,6 @@ namespace DigitalPlatform.rms
                         if (StringUtil.IsInList("outputpath", strStyle) == true)
                         {
                             strOutputResPath = strDbName + "/" + strRecordID + "/object/" + strObjectID;
-
                         }
                     }
                     else

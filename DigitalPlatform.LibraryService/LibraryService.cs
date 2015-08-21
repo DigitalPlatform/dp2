@@ -1217,6 +1217,7 @@ namespace dp2Library
         //      strBarcode  读者证条码号。如果前方引导以"@path:"，则表示读者记录路径。在@path引导下，路径后面还可以跟随 "$prev"或"$next"表示方向
         //      strResultTypeList   结果类型数组 xml/html/text/calendar/advancexml/recpaths/summary
         //              其中calendar表示获得读者所关联的日历名；advancexml表示经过运算了的提供了丰富附加信息的xml，例如具有超期和停借期附加信息
+        //              advancexml_borrow_bibliosummary/advancexml_overdue_bibliosummary/advancexml_history_bibliosummary
         // Result.Value -1出错 0没有找到 1找到 >1命中多于1条
         // 权限: 
         //		工作人员或者读者，必须有getreaderinfo权限

@@ -224,7 +224,6 @@ namespace dp2Library
             out string strBiblio,
             out string strBiblioRecPath);
 
-
         // *** 此API已经废止 ***
         [OperationContract(IsInitiating = true, IsTerminating = false)]
         LibraryServerResult SearchItemDup(string strBarcode,

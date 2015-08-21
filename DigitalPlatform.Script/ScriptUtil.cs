@@ -177,6 +177,13 @@ namespace DigitalPlatform.Script
             return strSmallUrl;
         }
 
+        [Flags]
+        public enum BuildObjectHtmlTableStyle
+        {
+            None = 0,
+            HttpUrlHitCount = 0x01, 
+        }
+
         // 创建 OPAC 详细页面中的对象资源显示局部 HTML。这是一个 <table> 片段
         // 前导语 $3
         // 链接文字 $y $f
@@ -185,7 +192,9 @@ namespace DigitalPlatform.Script
         // 对象ID $8
         // 对象尺寸 $s
         // 公开注释 $z
-        public static string BuildObjectHtmlTable(string strMARC, string strRecPath)
+        public static string BuildObjectHtmlTable(string strMARC, 
+            string strRecPath,
+            BuildObjectHtmlTableStyle style = BuildObjectHtmlTableStyle.HttpUrlHitCount)
         {
             // Debug.Assert(false, "");
 
@@ -200,6 +209,7 @@ namespace DigitalPlatform.Script
             text.Append("<table class='object_table'>");
             text.Append("<tr class='column_title'>");
             text.Append("<td>名称</td>");
+            text.Append("<td></td>");
             text.Append("<td>链接</td>");
             text.Append("<td>媒体类型</td>");
             text.Append("<td>尺寸</td>");
@@ -217,9 +227,23 @@ namespace DigitalPlatform.Script
                 string u = field.select("subfield[@name='u']").FirstContent;
                 string strUri = MakeObjectUrl(strRecPath, u);
 
+                string strHitCountImage = "";
                 string strObjectUrl = strUri;
-                if (StringUtil.HasHead(strUri, "http:") == false)
+                if (StringUtil.HasHead(strUri, "http:") == false
+                    && StringUtil.HasHead(strUri, "https:") == false)
+                {
                     strObjectUrl = "./getobject.aspx?uri=" + HttpUtility.UrlEncode(strUri);
+                    strHitCountImage = "<img src='" + strObjectUrl + "&style=hitcount' alt='hitcount'></img>";
+                }
+                else
+                {
+                    // http: 或 https: 的情形
+                    if ((style & BuildObjectHtmlTableStyle.HttpUrlHitCount) != 0)
+                    {
+                        strObjectUrl = "./getobject.aspx?uri=" + HttpUtility.UrlEncode(strUri);
+                        strHitCountImage = "<img src='" + strObjectUrl + "&style=hitcount' alt='hitcount'></img>";
+                    }
+                }
 
                 string y = field.select("subfield[@name='y']").FirstContent;
                 string f = field.select("subfield[@name='f']").FirstContent;
@@ -251,7 +275,8 @@ namespace DigitalPlatform.Script
 
                 text.Append("<tr class='content'>");
                 text.Append("<td>"+HttpUtility.HtmlEncode(s_3 + " " + strType)+"</td>");
-                text.Append("<td>"+urlTemp+"</td>");
+                text.Append("<td style='text-align: right;'>" + strHitCountImage + "</td>");
+                text.Append("<td>" + urlTemp + "</td>");
                 text.Append("<td>"+HttpUtility.HtmlEncode(s_q)+"</td>");
                 text.Append("<td>"+HttpUtility.HtmlEncode(strSize)+"</td>");
                 text.Append("<td>"+HttpUtility.HtmlEncode(s_s)+"</td>");

@@ -94,6 +94,7 @@ namespace DigitalPlatform.OPAC.Server
         public string ManagerPassword = "";
 
         public string MongoDbConnStr = "";
+        public string MongoDbInstancePrefix = ""; // MongoDB 的实例字符串。用于区分不同的 dp2OPAC 实例在同一 MongoDB 实例中创建的数据库名，这个实例名被用作数据库名的前缀字符串
 
         public bool DebugMode = false;
         public HangupReason HangupReason = HangupReason.None;
@@ -434,7 +435,7 @@ namespace DigitalPlatform.OPAC.Server
                 // 应用服务器参数
                 // 元素<libraryServer>
                 // 属性url/username/password
-                XmlNode node = dom.DocumentElement.SelectSingleNode("libraryServer");
+                XmlElement node = dom.DocumentElement.SelectSingleNode("libraryServer") as XmlElement;
                 if (node != null)
                 {
                     app.WsUrl = DomUtil.GetAttr(node, "url");
@@ -465,16 +466,17 @@ namespace DigitalPlatform.OPAC.Server
                 // OPAC服务器
                 // 元素<opacServer>
                 // 属性url
-                node = dom.DocumentElement.SelectSingleNode("//opacServer");
+                node = dom.DocumentElement.SelectSingleNode("//opacServer") as XmlElement;
                 if (node != null)
                 {
                     app.OpacServerUrl = DomUtil.GetAttr(node, "url");
                 }
 
-                node = dom.DocumentElement.SelectSingleNode("mongoDB");
+                node = dom.DocumentElement.SelectSingleNode("mongoDB") as XmlElement;
                 if (node != null)
                 {
                     app.MongoDbConnStr = DomUtil.GetAttr(node, "connectionString");
+                    app.MongoDbInstancePrefix = node.GetAttribute("instancePrefix");
                 }
 
 
@@ -580,13 +582,14 @@ namespace DigitalPlatform.OPAC.Server
                 }
 
                 // searchLog
-                XmlNode nodeSearchLog = this.OpacCfgDom.DocumentElement.SelectSingleNode("searchLog");
+                XmlElement nodeSearchLog = this.OpacCfgDom.DocumentElement.SelectSingleNode("searchLog") as XmlElement;
                 if (nodeSearchLog != null)
                 {
+                    string strEnable = nodeSearchLog.GetAttribute("enable");
                     // TODO: 如果以前已经有这个对象，需要先关闭它
                     // TODO: 如果因为MongoDB启动落后于dp2OPAC怎么办？ 是否需要重试?
                     this.SearchLog = new SearchLog();
-                    nRet = this.SearchLog.Open(this, out strError);
+                    nRet = this.SearchLog.Open(this, strEnable, out strError);
                     if (nRet == -1)
                     {
                         app.WriteErrorLog("启动 SearchLog 时出错：" + strError);
@@ -1778,6 +1781,7 @@ System.Text.Encoding.UTF8))
                 // 属性connectionString
                 writer.WriteStartElement("mongoDB");
                 writer.WriteAttributeString("connectionString", this.MongoDbConnStr);
+                writer.WriteAttributeString("instancePrefix", this.MongoDbInstancePrefix);
                 writer.WriteEndElement();
 
 
@@ -3550,6 +3554,7 @@ out strError);
             LibraryChannel channel,
             string strPath,
             bool bSaveAs,
+            string strStyle,
             out string strError)
         {
             strError = "";
@@ -3568,6 +3573,7 @@ out strError);
                         session.Channel,
                         strPath,
                         bSaveAs,
+                        strStyle,
                         out strError);
                 }
                 finally
@@ -3581,6 +3587,7 @@ out strError);
     channel,
     strPath,
     bSaveAs,
+    strStyle,
     out strError);
             }
         }
@@ -3648,10 +3655,11 @@ out strError);
         //      0   304返回
         //      1   200返回
         public int DownloadObject0(System.Web.UI.Page Page,
-    LibraryChannel channel,
-    string strPath,
-    bool bSaveAs,
-    out string strError)
+            LibraryChannel channel,
+            string strPath,
+            bool bSaveAs,
+            string strStyle,
+            out string strError)
         {
             strError = "";
 
@@ -3685,11 +3693,20 @@ out strError);
                 out strError);
             if (lRet == -1)
             {
+                if (StringUtil.IsInList("hitcount", strStyle))
+                {
+                    OutputImage(Page,
+                        Color.FromArgb(100, Color.Red),
+                        "?");
+                    return 1;
+                }
+
                 if (channel.ErrorCode == ErrorCode.AccessDenied)
                 {
                     // 权限不够
                     return -1;
                 }
+
                 strError = "GetRes() (for metadata) Error : " + strError;
                 return -1;
             }
@@ -3705,6 +3722,55 @@ out strError);
                 strError = "ParseMedaDataXml() Error :" + strError;
                 return -1;
             }
+
+            if (StringUtil.IsInList("hitcount", strStyle))
+            {
+                string strReadCount = (string)values["readCount"];
+                if (string.IsNullOrEmpty(strReadCount) == true)
+                    strReadCount = "?";
+                OutputImage(Page,
+                    Color.FromArgb(200, Color.DarkGreen),
+                    strReadCount);
+                return 1;
+            }
+#if NO
+            RETURN_IMAGE:
+            if (StringUtil.IsInList("hitcount", strStyle))
+            {
+                string strReadCount = (string)values["readCount"];
+                if (string.IsNullOrEmpty(strReadCount) == true)
+                    strReadCount = "?";
+
+                // 文字图片
+                using (MemoryStream image = ArtText.BuildArtText(
+                    strReadCount,
+                    "Microsoft YaHei",
+                    (float)12,
+                                FontStyle.Regular,
+                Color.Black,
+                Color.White,
+                Color.Gray,
+                ArtEffect.None,
+                ImageFormat.Jpeg,
+                100))
+                {
+                    Page.Response.ContentType = "image/jpeg";
+                    Page.Response.AddHeader("Content-Length", image.Length.ToString());
+
+                    Page.Response.AddHeader("Pragma", "no-cache");
+                    Page.Response.AddHeader("Cache-Control", "no-store, no-cache, must-revalidate, post-check=0, pre-check=0");
+                    Page.Response.AddHeader("Expires", "0");
+
+                    // FlushOutput flushdelegate = new FlushOutput(MyFlushOutput);
+
+                    image.Seek(0, SeekOrigin.Begin);
+                    StreamUtil.DumpStream(image, Page.Response.OutputStream/*, flushdelegate*/);
+
+                }
+                Page.Response.Flush();
+                return 1;
+            }
+#endif
 
             string strLastModifyTime = (string)values["lastmodifytime"];
             if (String.IsNullOrEmpty(strLastModifyTime) == false)
@@ -3795,7 +3861,7 @@ Value data: HEX 0x1
                 stop,
                 strPath,
                 Page.Response.OutputStream,
-                "content,data",
+                "content,data,incReadCount",
                 null,	// byte [] input_timestamp,
                 out strMetaData,
                 out baOutputTimeStamp,
@@ -3807,6 +3873,44 @@ Value data: HEX 0x1
                 return -1;
             }
             return 1;
+        }
+
+        public static void OutputImage(Page Page,
+            Color text_color,
+            string strReadCount)
+        {
+            if (string.IsNullOrEmpty(strReadCount) == true)
+                strReadCount = "0";
+
+            // TODO: 探测本机存在那些字体，才使用
+
+            // 文字图片
+            using (MemoryStream image = ArtText.BuildArtText(
+                strReadCount,
+                "Consolas", // "Microsoft YaHei",
+                (float)8,
+                FontStyle.Bold,
+            text_color, // Color.FromArgb(100, Color.Black),
+            Color.Transparent,
+            Color.Gray,
+            ArtEffect.None,
+            ImageFormat.Png,
+            200))
+            {
+                Page.Response.ContentType = "image/png";
+                Page.Response.AddHeader("Content-Length", image.Length.ToString());
+
+                Page.Response.AddHeader("Pragma", "no-cache");
+                Page.Response.AddHeader("Cache-Control", "no-store, no-cache, must-revalidate, post-check=0, pre-check=0");
+                Page.Response.AddHeader("Expires", "0");
+
+                // FlushOutput flushdelegate = new FlushOutput(MyFlushOutput);
+
+                image.Seek(0, SeekOrigin.Begin);
+                StreamUtil.DumpStream(image, Page.Response.OutputStream/*, flushdelegate*/);
+
+            }
+            Page.Response.Flush();
         }
 
         public int CreateChatRoom(string strRoomName,

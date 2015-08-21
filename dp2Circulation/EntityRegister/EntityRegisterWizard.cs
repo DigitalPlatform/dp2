@@ -592,6 +592,7 @@ MessageBoxDefaultButton.Button1);
                     MessageBox.Show(this, strError);
                     return;
                 }
+                this.ShowMessage("配置文件 " + strFileName + " 创建成功", "green", true);
             }
 
             XmlDocument dom = new XmlDocument();
@@ -609,7 +610,6 @@ MessageBoxDefaultButton.Button1);
 
             _base.ServersDom = dom;
 
-            this.ShowMessage("配置文件 " + strFileName + " 创建成功", "green", true);
         }
 
         string _originTitle = "";

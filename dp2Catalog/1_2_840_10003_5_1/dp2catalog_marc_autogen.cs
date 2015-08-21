@@ -6,7 +6,9 @@
 // 3) 2011/8/22 修改AddAuthorNumber()函数，使之具有忽略第一指示符为'A'的7XX字段$a子字段的能力，并会跳过不包含汉字字符的著者字符串继续向后找
 // 4) 2011/8/23 将函数名AddAuthorNumber()修改为AddGcatAuthorNumber()
 // 5) 2011/8/24 增加AddSjhmAuthorNumber()。这只是适用于在905$e中加入著者号
-// 6) 2013/9/17 加拼音能根据 MainForm 的 AutoSelPinyin 参数变化效果
+// 6) 2011/8/29 Copy200gfTo7xxa()和Copy690aTo905d()函数修改，增加了对字段不存在时的判断和警告
+// 7) 2012/1/18 AddZhongcihao()中增加设置服务器名的语句
+// 8) 2013/9/17 加拼音能根据 MainForm 的 AutoSelPinyin 参数变化效果
 
 
 using System;
@@ -457,6 +459,12 @@ public class MyHost : MarcDetailHost
     void Copy200gfTo7xxa(string strFromSubfield, string strToField)
     {
         Field field_200 = this.DetailForm.MarcEditor.Record.Fields.GetOneField("200", 0);
+        if (field_200 == null)
+        {
+            MessageBox.Show(this.DetailForm, "200字段不存在");
+            return;
+        }
+
         SubfieldCollection subfields_200 = field_200.Subfields;
 
         Subfield subfield_f = subfields_200[strFromSubfield];
@@ -479,7 +487,6 @@ public class MyHost : MarcDetailHost
                 field_701 = null;
         }
 
-
         if (field_701 == null)
         {
             field_701 = this.DetailForm.MarcEditor.Record.Fields.GetOneField(strToField, 0);
@@ -488,13 +495,10 @@ public class MyHost : MarcDetailHost
             {
                 field_701 = this.DetailForm.MarcEditor.Record.Fields.Add(strToField, "  ", "", true);
             }
-
         }
-
 
         if (field_701 == null)
             throw (new Exception("error ..."));
-
 
         Subfield subfield_701a = field_701.Subfields["a"];
         if (subfield_701a == null)
@@ -505,7 +509,6 @@ public class MyHost : MarcDetailHost
 
         subfield_701a.Value = strContent;
         field_701.Subfields["a"] = subfield_701a;
-
     }
 
     void AddGcatAuthorNumber()
@@ -696,6 +699,7 @@ public class MyHost : MarcDetailHost
         MessageBox.Show(this.DetailForm, strError);
     }
 
+    // new 
     void AddZhongcihao()
     {
         string strError = "";
@@ -720,8 +724,10 @@ public class MyHost : MarcDetailHost
             dlg.MainForm = this.DetailForm.MainForm;
             dlg.TopMost = true;
             dlg.MyselfBiblioRecPath = this.DetailForm.BiblioRecPath;
+            dlg.LibraryServerName = this.DetailForm.ServerName;
 
             dlg.Show();
+            // dlg.WindowState = FormWindowState.Minimized;
 
             // return:
             //      -1  error
@@ -729,9 +735,9 @@ public class MyHost : MarcDetailHost
             //      1   succeed
             nRet = dlg.GetNumber(
                 ZhongcihaoStyle.Seed,
-                        strClass,
-                        this.DetailForm.BiblioDbName,
-                        out strNumber,
+                strClass,
+                this.DetailForm.BiblioDbName,
+                out strNumber,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -1293,6 +1299,12 @@ public class MyHost : MarcDetailHost
     void Copy690aTo905d(string strFromSubfield, string strToField)
     {
         Field field_690 = this.DetailForm.MarcEditor.Record.Fields.GetOneField("690", 0);
+        if (field_690 == null)
+        {
+            MessageBox.Show(this.DetailForm, "690字段不存在");
+            return;
+        }
+
         SubfieldCollection subfields_690 = field_690.Subfields;
 
         Subfield subfield_a = subfields_690[strFromSubfield];

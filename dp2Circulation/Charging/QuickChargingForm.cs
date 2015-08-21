@@ -17,6 +17,7 @@ using DigitalPlatform.Text;
 using DigitalPlatform.IO;
 using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.Script;
+using System.Drawing.Drawing2D;
 
 namespace dp2Circulation
 {
@@ -222,6 +223,11 @@ namespace dp2Circulation
             e.IsBusy = this.m_webExternalHost_readerInfo.ChannelInUse;
         }
 
+        public void DoEnter()
+        {
+            AsyncDoAction(this.FuncState, GetUpperCase(this.textBox_input.Text));
+        }
+
         /// <summary>
         /// 处理对话框键
         /// </summary>
@@ -233,7 +239,7 @@ namespace dp2Circulation
             if (keyData == Keys.Enter) 
             {
                 // MessageBox.Show(this, "test");
-                AsyncDoAction(this.FuncState, GetUpperCase(this.textBox_input.Text));
+                DoEnter();
                 return true;
             }
 
@@ -1454,6 +1460,11 @@ true,
 false);
         }
 
+        private void ToolStripMenuItem_inventoryBook_Click(object sender, EventArgs e)
+        {
+            this.FuncState = FuncState.InventoryBook;
+        }
+
         #region 各种配置参数
 
         public string DisplayFormat
@@ -1593,6 +1604,7 @@ false);
             {
 
                 this._funcstate = value;
+                this.pictureBox_action.Invalidate();
                 WillLoadReaderInfo = true;
                 this._bScrollBarTouched = false;
 
@@ -1607,6 +1619,7 @@ false);
                 this.toolStripMenuItem_verifyLost.Checked = false;
                 this.toolStripMenuItem_loadPatronInfo.Checked = false;
                 this.toolStripMenuItem_continueBorrow.Checked = false;
+                this.ToolStripMenuItem_inventoryBook.Checked = false;
 
                 if (this.AutoClearTextbox == true)
                 {
@@ -1615,57 +1628,60 @@ false);
 
                 if (_funcstate == FuncState.Borrow)
                 {
-                    this.pictureBox1.Image = this.imageList_func_large.Images[0];
+                    // this.pictureBox_action.Image = this.imageList_func_large.Images[0];
                     this.toolStripMenuItem_borrow.Checked = true;
                 }
-                if (_funcstate == FuncState.ContinueBorrow)
+                else if (_funcstate == FuncState.ContinueBorrow)
                 {
-                    this.pictureBox1.Image = this.imageList_func_large.Images[0];
+                    //this.pictureBox_action.Image = this.imageList_func_large.Images[0];
                     this.toolStripMenuItem_continueBorrow.Checked = true;
                     WillLoadReaderInfo = false;
                 }
-                if (_funcstate == FuncState.Return)
+                else if (_funcstate == FuncState.Return)
                 {
-                    this.pictureBox1.Image = this.imageList_func_large.Images[1];
+                    // this.pictureBox_action.Image = this.imageList_func_large.Images[1];
                     this.toolStripMenuItem_return.Checked = true;
 
                     WillLoadReaderInfo = false;
                 }
-                if (_funcstate == FuncState.VerifyReturn)
+                else if (_funcstate == FuncState.VerifyReturn)
                 {
-                    this.pictureBox1.Image = this.imageList_func_large.Images[1];
+                    // this.pictureBox_action.Image = this.imageList_func_large.Images[1];
                     this.toolStripMenuItem_verifyReturn.Checked = true;
                 }
-                if (_funcstate == FuncState.Renew)
+                else if (_funcstate == FuncState.Renew)
                 {
-                    this.pictureBox1.Image = this.imageList_func_large.Images[2];
+                    // this.pictureBox_action.Image = this.imageList_func_large.Images[2];
                     this.toolStripMenuItem_renew.Checked = true;
 
                     WillLoadReaderInfo = false;
                 }
-                if (_funcstate == FuncState.VerifyRenew)
+                else if (_funcstate == FuncState.VerifyRenew)
                 {
-                    this.pictureBox1.Image = this.imageList_func_large.Images[2];
+                    // this.pictureBox_action.Image = this.imageList_func_large.Images[2];
                     this.toolStripMenuItem_verifyRenew.Checked = true;
                 }
-                if (_funcstate == FuncState.Lost)
+                else if (_funcstate == FuncState.Lost)
                 {
-                    this.pictureBox1.Image = this.imageList_func_large.Images[3];
+                    // this.pictureBox_action.Image = this.imageList_func_large.Images[3];
                     this.toolStripMenuItem_lost.Checked = true;
 
                     WillLoadReaderInfo = false;
                 }
-                if (_funcstate == FuncState.VerifyLost)
+                else if (_funcstate == FuncState.VerifyLost)
                 {
-                    this.pictureBox1.Image = this.imageList_func_large.Images[3];
+                    // this.pictureBox_action.Image = this.imageList_func_large.Images[3];
                     this.toolStripMenuItem_verifyLost.Checked = true;
                 }
-                if (_funcstate == FuncState.LoadPatronInfo)
+                else if (_funcstate == FuncState.LoadPatronInfo)
                 {
-                    this.pictureBox1.Image = this.imageList_func_large.Images[4];
+                    // this.pictureBox_action.Image = this.imageList_func_large.Images[4];
                     this.toolStripMenuItem_loadPatronInfo.Checked = true;
                 }
-
+                else if (_funcstate == FuncState.InventoryBook)
+                {
+                    this.ToolStripMenuItem_inventoryBook.Checked = true;
+                }
                 // SetInputMessage();
             }
         }
@@ -2815,6 +2831,82 @@ e.Height);
                 this.toolStripButton_upperInput.Text = "A";
             else
                 this.toolStripButton_upperInput.Text = "a";
+        }
+
+
+        void RefreshActionPicture()
+        {
+
+
+        }
+
+        private void pictureBox_action_Paint(object sender, PaintEventArgs e)
+        {
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            e.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+
+            string strText = "还";
+
+            if (_funcstate == FuncState.Borrow)
+                strText = "借";
+            else if (_funcstate == FuncState.ContinueBorrow)
+                strText = "借";
+            else if (_funcstate == FuncState.Return)
+                strText = "还";
+            else if (_funcstate == FuncState.VerifyReturn)
+                strText = "还";
+            else if (_funcstate == FuncState.Renew)
+                strText = "续";
+            else if (_funcstate == FuncState.VerifyRenew)
+                strText = "续";
+            else if (_funcstate == FuncState.Lost)
+                strText = "丢";
+            else if (_funcstate == FuncState.VerifyLost)
+                strText = "丢";
+            else if (_funcstate == FuncState.LoadPatronInfo)
+                strText = "人";
+            else if (_funcstate == FuncState.Auto)
+                strText = "自";
+            else if (_funcstate == FuncState.InventoryBook)
+                strText = "盘";
+            else
+                strText = "?";
+
+            using (Font font = new System.Drawing.Font(this.Font.FontFamily, (float)this.pictureBox_action.Size.Height * (float)0.8, FontStyle.Bold, GraphicsUnit.Pixel))
+            {
+                StringFormat format = new StringFormat();   //  (StringFormat)StringFormat.GenericTypographic.Clone();
+                format.FormatFlags |= StringFormatFlags.FitBlackBox;
+                format.Alignment = StringAlignment.Center;
+                format.FormatFlags |= StringFormatFlags.FitBlackBox;
+                SizeF size = e.Graphics.MeasureString(strText,
+                    font,
+                    this.pictureBox_action.Size.Width,
+                    format);
+
+                RectangleF textRect = new RectangleF(
+    (this.pictureBox_action.Size.Width - size.Width) / 2,
+    (this.pictureBox_action.Size.Height - size.Height) / 2,
+    size.Width,
+    size.Height);
+                using (Brush brush = new SolidBrush(Color.Black))
+                {
+                    e.Graphics.DrawString(
+                        strText,
+                        font,
+                        brush,
+                        textRect,
+                        format);
+                }
+            }
+        }
+
+        public Control MainPanel
+        {
+            get
+            {
+                return this.splitContainer_main;
+            }
         }
 
     }

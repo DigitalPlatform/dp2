@@ -50,6 +50,7 @@ namespace dp2Circulation
                 this.MenuItem_chatForm.Visible = false;
                 this.MenuItem_messageForm.Visible = false;
                 this.MenuItem_openReservationListForm.Visible = false;
+                this.MenuItem_inventory.Visible = false;
             }
 
             // 获得MdiClient窗口

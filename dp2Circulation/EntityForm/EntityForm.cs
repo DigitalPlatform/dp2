@@ -7944,7 +7944,7 @@ MessageBoxDefaultButton.Button1);
             if (String.IsNullOrEmpty(this.BiblioRecPath) == true
                 && bRemote == false)
             {
-                e.ErrorInfo = "记录路径为空，无法获得配置文件 '"+e.Path+"'";
+                e.ErrorInfo = "MarcSyntax 为空，并且记录路径为空，无法获得配置文件 '"+e.Path+"'";
                 this.ShowMessage(e.ErrorInfo, "red", true);
                 return;
             }
@@ -7958,7 +7958,7 @@ MessageBoxDefaultButton.Button1);
             }
 
             // 根据 MarcSyntax 取得配置文件
-            if (bRemote)
+            if (bRemote && string.IsNullOrEmpty(this.BiblioRecPath) == true)
             {
                 string strFileName = Path.Combine(this.MainForm.DataDir, this.MarcSyntax + "_cfgs/" + strCfgFileName);
 

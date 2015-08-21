@@ -1639,6 +1639,7 @@ namespace DigitalPlatform.rms
             nRet = DatabaseUtil.MergeMetadata(strOldMetadata,
                 strMetadata,
                 lCurrentLength,
+                "",
                 out strResultMetadata,
                 out strError);
             if (nRet == -1)

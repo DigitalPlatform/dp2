@@ -392,12 +392,12 @@ namespace DigitalPlatform.rms
                 nCount);
         }
 
-
         // 合并元数据信息
         // parameters:
         //		strOldMetadata	旧元数据
         //		strNewMetadata	新元数据
-        //		nLength	长度 -1表示长度未知 -2表示长度不变
+        //		lLength	长度 -1表示长度未知 -2表示长度不变
+        //      strReadCount  读取次数。"" 表示不变(即不修改 readCount 属性内容), "+??"表示增加数量，"-??"表示减少数量，"??"表示直接修改为此数量
         //		strResult	out参数，返回合并后的元数据
         //		strError	out参数，返回出错信息
         // return:
@@ -406,6 +406,7 @@ namespace DigitalPlatform.rms
         public static int MergeMetadata(string strOldMetadata,
             string strNewMetadata,
             long lLength,
+            string strReadCount,
             out string strResult,
             out string strError)
         {
@@ -474,12 +475,48 @@ namespace DigitalPlatform.rms
                 DomUtil.SetAttr(oldRoot, "localpath", strLocalPath);
              * */
 
-            // -1表示长度未知
+            // -1表示长度未知(-1本身要被写进去)
             // -2表示保持不变
             if (lLength != -2)
             {
                 oldRoot.SetAttribute("size", Convert.ToString(lLength));
                 // DomUtil.SetAttr(oldRoot, "size", Convert.ToString(lLength));
+            }
+
+            // 2015/8/18
+            if (string.IsNullOrEmpty(strReadCount) == false)
+            {
+                if (strReadCount[0] == '+' || strReadCount[0] == '-')
+                {
+                    string strValue = strReadCount.Substring(1);
+                    if (StringUtil.IsPureNumber(strValue) == false)
+                    {
+                        strError = "strReadCount 参数值 '"+strReadCount+"' 应该为正负号引导的纯数字";
+                        return -1;
+                    }
+                    long v = 0;
+                    if (long.TryParse(strValue, out v) == false)
+                    {
+                        strError = "strReadCount 参数值 '" + strReadCount + "' 应该为正负号引导的纯数字 ...";
+                        return -1;
+                    }
+                    string strOld = oldRoot.GetAttribute("readCount");
+                    long old = 0;
+                    if (string.IsNullOrEmpty(strOld) == false)
+                        long.TryParse(strOld, out old);
+
+                    oldRoot.SetAttribute("readCount", (old + v).ToString());
+                }
+                else 
+                {
+                    long v = 0;
+                    if (long.TryParse(strReadCount, out v) == false)
+                    {
+                        strError = "strReadCount 参数值 '" + strReadCount + "' 应该为纯数字 ...";
+                        return -1;
+                    }
+                    oldRoot.SetAttribute("readCount", strReadCount);
+                }
             }
 
             // 只有当新的没有传过来最后修改时间，才主动设置为当前时间

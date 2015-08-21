@@ -181,6 +181,7 @@ ref sessioninfo) == false)
             null,
             strPhotoPath,
             false,
+            "",
             out strError);
         if (nRet == -1)
             goto ERROR1;

@@ -245,7 +245,6 @@ namespace dp2Catalog
 
         public ZConnectionCollection Container = null;
 
-
         public IZSearchForm IZSearchForm
         {
             get
@@ -707,7 +706,6 @@ namespace dp2Catalog
 
             // 把检索式界面Disable
             this.EnableControls(false);
-
 
             this.Stop.OnStop += new StopEventHandler(Stop_OnStop);
 
@@ -1802,6 +1800,7 @@ namespace dp2Catalog
             tree.m_RootNode.DumpToFile(strLogFile);
 #endif
             ClearSendRecvCompleteEvent();
+            // TODO: 重复挂接事件怎么办？何时 -= ?
             connection.ZChannel.SendRecvComplete += new EventHandler(ZChannel_search_SendRecvComplete);
             // 发出请求包，接收响应包
             // return:
@@ -2144,6 +2143,7 @@ namespace dp2Catalog
             return -1;
         }
 
+        // TODO: 当 SendRecvComplete 同时挂接了三个函数时，有什么副作用么? 或者说这种减去三个函数的用法是防范性的用法?
         void ClearSendRecvCompleteEvent()
         {
             this.ZChannel.SendRecvComplete -= new EventHandler(ZChannel_initial_SendRecvComplete);

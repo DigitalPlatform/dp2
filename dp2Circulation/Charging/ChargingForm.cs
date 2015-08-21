@@ -3420,6 +3420,10 @@ Keys keyData)
         /// 同一读者继续借
         /// </summary>
         ContinueBorrow = 9, // 同一读者继续借书
+        /// <summary>
+        /// 盘点图书
+        /// </summary>
+        InventoryBook = 10, // 盘点图书 2015/8/16
     }
 
     /*public*/ class BarcodeAndTime

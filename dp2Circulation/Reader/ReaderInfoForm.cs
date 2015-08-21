@@ -5418,10 +5418,15 @@ MessageBoxDefaultButton.Button1);
             DigitalPlatform.CommonControl.PropertyDlg dlg = new DigitalPlatform.CommonControl.PropertyDlg();
             MainForm.SetControlFont(dlg, this.Font, false);
 
+            string strRightsCfgFileName = Path.Combine(this.MainForm.UserDir, "objectrights.xml");
+
+
             dlg.StartPosition = FormStartPosition.CenterScreen;
             dlg.Text = "当前读者的权限";
             dlg.PropertyString = this.readerEditControl1.Rights;
-            dlg.CfgFileName = this.MainForm.DataDir + "\\userrightsdef.xml";
+            dlg.CfgFileName = Path.Combine(this.MainForm.DataDir, "userrightsdef.xml");
+            if (File.Exists(strRightsCfgFileName) == true)
+                dlg.CfgFileName += "," + strRightsCfgFileName;
             dlg.ShowDialog(this);
 
             if (dlg.DialogResult != DialogResult.OK)

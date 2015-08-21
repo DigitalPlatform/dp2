@@ -2104,32 +2104,70 @@ this.splitContainer_queryAndResultInfo,
         bool __ShowQueryResultInfo(ZConnection connection,
             string strText)
         {
-                // 修改treenode节点上的命中数显示
-                ZTargetControl.SetNodeResultCount(connection.TreeNode,
-                    connection.ResultCount);
-
+            // 修改treenode节点上的命中数显示
+            ZTargetControl.SetNodeResultCount(connection.TreeNode,
+                connection.ResultCount);
 
             if (connection == this.GetCurrentZConnection())
             {
-
                 this.textBox_resultInfo.Text = strText;
                 return true;    // 被显示了
             }
 
-
             return false;   // 没有被显示
         }
 
+        /*
+操作类型 crashReport -- 异常报告 
+主题 dp2catalog 
+发送者 xxx 
+媒体类型 text 
+内容 发生未捕获的异常: 
+Type: System.InvalidOperationException
+Message: 在创建窗口句柄之前，不能在控件上调用 Invoke 或 BeginInvoke。
+Stack:
+在 System.Windows.Forms.Control.WaitForWaitHandle(WaitHandle waitHandle)
+在 System.Windows.Forms.Control.MarshaledInvoke(Control caller, Delegate method, Object[] args, Boolean synchronous)
+在 System.Windows.Forms.Control.Invoke(Delegate method, Object[] args)
+在 dp2Catalog.ZSearchForm.ShowQueryResultInfo(ZConnection connection, String strText)
+在 dp2Catalog.ZConnection.ShowQueryResultInfo(String strText)
+在 dp2Catalog.ZConnection.ZConnection_CommandsComplete(Object sender, EventArgs e)
+在 dp2Catalog.ZConnection.ZChannel_ConnectComplete(Object sender, EventArgs e)
+在 DigitalPlatform.Z3950.ZChannel.ConnectCallback(IAsyncResult ar)
+在 System.Net.LazyAsyncResult.Complete(IntPtr userToken)
+在 System.Net.ContextAwareResult.CompleteCallback(Object state)
+在 System.Threading.ExecutionContext.runTryCode(Object userData)
+在 System.Runtime.CompilerServices.RuntimeHelpers.ExecuteCodeWithGuaranteedCleanup(TryCode code, CleanupCode backoutCode, Object userData)
+在 System.Threading.ExecutionContext.RunInternal(ExecutionContext executionContext, ContextCallback callback, Object state)
+在 System.Threading.ExecutionContext.Run(ExecutionContext executionContext, ContextCallback callback, Object state, Boolean ignoreSyncCtx)
+在 System.Threading.ExecutionContext.Run(ExecutionContext executionContext, ContextCallback callback, Object state)
+在 System.Net.ContextAwareResult.Complete(IntPtr userToken)
+在 System.Net.LazyAsyncResult.ProtectedInvokeCallback(Object result, IntPtr userToken)
+在 System.Net.LazyAsyncResult.InvokeCallback(Object result)
+在 System.Net.Sockets.Socket.MultipleAddressConnectCallback(IAsyncResult result)
+在 System.Net.LazyAsyncResult.Complete(IntPtr userToken)
+在 System.Net.ContextAwareResult.Complete(IntPtr userToken)
+在 System.Net.LazyAsyncResult.ProtectedInvokeCallback(Object result, IntPtr userToken)
+在 System.Net.Sockets.BaseOverlappedAsyncResult.CompletionPortCallback(UInt32 errorCode, UInt32 numBytes, NativeOverlapped* nativeOverlapped)
+在 System.Threading._IOCompletionCallback.PerformIOCompletionCallback(UInt32 errorCode, UInt32 numBytes, NativeOverlapped* pOVERLAP)
+
+
+dp2Catalog 版本: dp2Catalog, Version=2.4.5701.40614, Culture=neutral, PublicKeyToken=null
+操作系统：Microsoft Windows NT 6.1.7600.0 
+操作时间 2015/8/20 14:22:46 (Thu, 20 Aug 2015 14:22:46 +0800) 
+前端地址 xxx 经由 http://dp2003.com/dp2library 
+
+         * */
         public bool ShowQueryResultInfo(ZConnection connection,
            string strText)
         {
-            if (this.IsDisposed == true)
+            if (this.IsDisposed == true
+                || this.IsHandleCreated == false)   // 2015/8/21
                 return false;
 
             object[] pList = { connection, strText };
             return (bool)this.Invoke(
                 new ZSearchForm.Delegate_ShowQueryResultInfo(__ShowQueryResultInfo), pList);
-
         }
 
         // 根据不同格式自动创建浏览格式

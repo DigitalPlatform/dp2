@@ -6,6 +6,7 @@ using System.Windows.Forms;
 
 using System.Xml;
 using DigitalPlatform.Xml;
+using System.Collections.Generic;
 
 namespace DigitalPlatform.CommonControl
 {
@@ -19,9 +20,9 @@ namespace DigitalPlatform.CommonControl
 
 		public string PropertyString = "";
 
-		string[] aPropertyName = null;	// 配置中出现过的属性名
+		List<string> _propertyNameList = null;	// 配置中出现过的属性名
 
-		ArrayList aLangName = null;	// 配置中出现过的语言类型
+		List<string> _langNameList = null;	// 配置中出现过的语言类型
 
         ListViewItem tipsItem = null;
 
@@ -275,17 +276,120 @@ namespace DigitalPlatform.CommonControl
 			listView.Columns.Add("说明", 900, HorizontalAlignment.Left);
 		}
 
+        // 装载一个 XML 文件
+        int LoadOneXml(string strFileName,
+            out string strError)
+        {
+            strError = "";
+
+            XmlDocument dom = new XmlDocument();
+
+            try
+            {
+                dom.Load(strFileName);
+            }
+            catch (Exception ex)
+            {
+                strError = ex.Message;
+                return -1;
+            }
+
+            XmlNodeList propertyList = dom.SelectNodes("root/property");
+
+            int i, j;
+            for (i = 0; i < propertyList.Count; i++)
+            {
+                // 找到事项名字
+                string strName = DomUtil.GetAttr(propertyList[i], "name");
+
+                if (strName == "")
+                    continue;
+
+                // 按照语言找到comment字符串
+                XmlNode nodeComment = null;
+
+                if (Lang == "")
+                    nodeComment = propertyList[i].SelectSingleNode("comment");
+                else
+                {
+                    nodeComment = propertyList[i].SelectSingleNode("comment[@lang='" + Lang + "']");
+                    if (nodeComment == null)	// 按照指定的语言找，但是没有找到
+                        nodeComment = propertyList[i].SelectSingleNode("comment");
+                }
+
+                string strComment = "";
+
+                if (nodeComment != null)
+                {
+                    strComment = DomUtil.GetNodeText(nodeComment);
+                }
+
+                ListViewItem item =
+                    new ListViewItem(strName,
+                    0);
+
+                item.SubItems.Add(strComment);
+
+                listView_property.Items.Add(item);
+
+            }
+
+            // 创建语言数组
+            XmlNodeList commentList = dom.SelectNodes("//property/comment");
+
+            _langNameList = new List<string>(); // = new ArrayList();
+
+            for (i = 0; i < propertyList.Count; i++)
+            {
+                // 找到事项名字
+                string strLang = DomUtil.GetAttr(commentList[i], "lang");
+
+                if (strLang == "")
+                    continue;
+
+                bool bFound = false;
+                for (j = 0; j < _langNameList.Count; j++)
+                {
+                    if (strLang == _langNameList[j])
+                    {
+                        bFound = true;
+                        break;
+                    }
+                }
+
+                if (bFound == false)
+                    _langNameList.Add(strLang);
+
+            }
+
+
+            return 0;
+        }
 
 		void LoadXml()
 		{
+            _langNameList = new List<string>();
+            _propertyNameList = new List<string>(); // = new string[listView_property.Items.Count];
 
 			listView_property.Items.Clear();
 
-			string strErrorInfo = "";
+			string strError = "";
 
 			if (CfgFileName == "")
 				return;
 
+            string[] filenames = this.CfgFileName.Split(new char[] {','}, StringSplitOptions.RemoveEmptyEntries);
+
+            foreach(string filename in filenames)
+            {
+                        // 装载一个 XML 文件
+                int nRet = LoadOneXml(filename,
+            out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+            }
+
+#if NO
 			XmlDocument dom = new XmlDocument();
 
 			try 
@@ -338,15 +442,17 @@ namespace DigitalPlatform.CommonControl
 				listView_property.Items.Add(item);	
 
 			}
+#endif
 
 			// 创建字符串数组，便于随时查重
-			aPropertyName = new string[listView_property.Items.Count];
-			for(j=0;j<listView_property.Items.Count;j++) 
+			foreach(ListViewItem item in listView_property.Items) 
 			{
-				aPropertyName[j] = listView_property.Items[j].Text;
+				// _propertyNameList[j] = listView_property.Items[j].Text;
+                _propertyNameList.Add(item.Text);
 			}
 
 
+#if NO
 			// 创建语言数组
 			XmlNodeList commentList = dom.SelectNodes("//property/comment");
 
@@ -374,29 +480,27 @@ namespace DigitalPlatform.CommonControl
 					aLangName.Add(strLang);
 
 			}
+#endif
 
+            return;
+        ERROR1:
+            MessageBox.Show(strError);
+        }
 
-			return;
-			ERROR1:
-				MessageBox.Show(strErrorInfo);
-			return;
-
-		}
-
-		// 是否为已经定义的属性名
-		bool IsDefinedPropertyName(string strName)
-		{
-            if (this.aPropertyName == null)
+        // 是否为已经定义的属性名
+        bool IsDefinedPropertyName(string strName)
+        {
+            if (this._propertyNameList == null)
                 return false;
 
-			for(int i=0;i<aPropertyName.Length;i++) 
-			{
-				if (String.Compare(strName,aPropertyName[i],true) == 0)
-					return true;
-			}
+            foreach (string name in _propertyNameList)
+            {
+                if (String.Compare(strName, name, true) == 0)
+                    return true;
+            }
 
-			return false;
-		}
+            return false;
+        }
 
 		// 获得一个列表中属于当前没有定义的属性名
 		ArrayList GetNoDefinedPropertyNames(string strList)
@@ -641,15 +745,15 @@ namespace DigitalPlatform.CommonControl
 			contextMenu.MenuItems.Add(menuItem);
 
 			// 子菜单
-			for(int i=0;i<aLangName.Count;i++) 
+			for(int i=0;i<_langNameList.Count;i++) 
 			{
 
-				MenuItem menuItemSub = new MenuItem((string)aLangName[i]);
+				MenuItem menuItemSub = new MenuItem(_langNameList[i]);
 				menuItemSub.Click += new System.EventHandler(this.menu_selectLanguage_Click);
 
 				menuItem.MenuItems.Add(menuItemSub);
 
-				if ((string)aLangName[i] == Lang) 
+				if (_langNameList[i] == Lang) 
 				{
 					menuItemSub.Enabled = false;
 					menuItemSub.Checked = true;

@@ -1010,7 +1010,6 @@ namespace dp2Circulation
             this.MenuItem_inventory.Name = "MenuItem_inventory";
             this.MenuItem_inventory.Size = new System.Drawing.Size(152, 22);
             this.MenuItem_inventory.Text = "盘点(&V)";
-            this.MenuItem_inventory.Visible = false;
             this.MenuItem_inventory.Click += new System.EventHandler(this.MenuItem_inventory_Click);
             // 
             // toolStripSeparator17
@@ -1262,7 +1261,7 @@ namespace dp2Circulation
             this.toolButton_print});
             this.toolStrip_main.Location = new System.Drawing.Point(0, 25);
             this.toolStrip_main.Name = "toolStrip_main";
-            this.toolStrip_main.Size = new System.Drawing.Size(621, 31);
+            this.toolStrip_main.Size = new System.Drawing.Size(621, 25);
             this.toolStrip_main.TabIndex = 2;
             this.toolStrip_main.Text = "toolStrip1";
             this.toolStrip_main.DragDrop += new System.Windows.Forms.DragEventHandler(this.toolStrip_main_DragDrop);
@@ -1275,7 +1274,7 @@ namespace dp2Circulation
             this.toolButton_stop.Image = ((System.Drawing.Image)(resources.GetObject("toolButton_stop.Image")));
             this.toolButton_stop.ImageTransparentColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(193)))));
             this.toolButton_stop.Name = "toolButton_stop";
-            this.toolButton_stop.Size = new System.Drawing.Size(28, 28);
+            this.toolButton_stop.Size = new System.Drawing.Size(23, 22);
             this.toolButton_stop.Text = "停止";
             this.toolButton_stop.Click += new System.EventHandler(this.toolButton_stop_Click);
             // 
@@ -1286,7 +1285,7 @@ namespace dp2Circulation
             this.ToolStripMenuItem_stopAll});
             this.toolStripDropDownButton_stopAll.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDropDownButton_stopAll.Name = "toolStripDropDownButton_stopAll";
-            this.toolStripDropDownButton_stopAll.Size = new System.Drawing.Size(13, 28);
+            this.toolStripDropDownButton_stopAll.Size = new System.Drawing.Size(13, 22);
             this.toolStripDropDownButton_stopAll.Text = "停止全部";
             // 
             // ToolStripMenuItem_stopAll
@@ -1300,18 +1299,18 @@ namespace dp2Circulation
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 31);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 25);
             // 
             // toolStripLabel1
             // 
             this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(35, 28);
+            this.toolStripLabel1.Size = new System.Drawing.Size(35, 22);
             this.toolStripLabel1.Text = "条码:";
             // 
             // toolStripTextBox_barcode
             // 
             this.toolStripTextBox_barcode.Name = "toolStripTextBox_barcode";
-            this.toolStripTextBox_barcode.Size = new System.Drawing.Size(100, 31);
+            this.toolStripTextBox_barcode.Size = new System.Drawing.Size(100, 25);
             this.toolStripTextBox_barcode.KeyDown += new System.Windows.Forms.KeyEventHandler(this.toolStripTextBox_barcode_KeyDown);
             // 
             // toolStripButton_loadBarcode
@@ -1319,7 +1318,7 @@ namespace dp2Circulation
             this.toolStripButton_loadBarcode.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton_loadBarcode.Image")));
             this.toolStripButton_loadBarcode.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton_loadBarcode.Name = "toolStripButton_loadBarcode";
-            this.toolStripButton_loadBarcode.Size = new System.Drawing.Size(60, 28);
+            this.toolStripButton_loadBarcode.Size = new System.Drawing.Size(52, 22);
             this.toolStripButton_loadBarcode.Text = "自动";
             this.toolStripButton_loadBarcode.ToolTipText = "装载条码";
             this.toolStripButton_loadBarcode.Click += new System.EventHandler(this.toolStripButton_loadBarcode_Click);
@@ -1334,7 +1333,7 @@ namespace dp2Circulation
             this.ToolStripMenuItem_autoLoadItemOrReader});
             this.toolStripDropDownButton_barcodeLoadStyle.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDropDownButton_barcodeLoadStyle.Name = "toolStripDropDownButton_barcodeLoadStyle";
-            this.toolStripDropDownButton_barcodeLoadStyle.Size = new System.Drawing.Size(13, 28);
+            this.toolStripDropDownButton_barcodeLoadStyle.Size = new System.Drawing.Size(13, 22);
             this.toolStripDropDownButton_barcodeLoadStyle.Text = "装载方式";
             this.toolStripDropDownButton_barcodeLoadStyle.ToolTipText = "装载方式";
             // 
@@ -1370,7 +1369,7 @@ namespace dp2Circulation
             // toolStripSeparator10
             // 
             this.toolStripSeparator10.Name = "toolStripSeparator10";
-            this.toolStripSeparator10.Size = new System.Drawing.Size(6, 31);
+            this.toolStripSeparator10.Size = new System.Drawing.Size(6, 25);
             // 
             // toolButton_refresh
             // 
@@ -1379,14 +1378,14 @@ namespace dp2Circulation
             this.toolButton_refresh.Image = ((System.Drawing.Image)(resources.GetObject("toolButton_refresh.Image")));
             this.toolButton_refresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolButton_refresh.Name = "toolButton_refresh";
-            this.toolButton_refresh.Size = new System.Drawing.Size(28, 28);
+            this.toolButton_refresh.Size = new System.Drawing.Size(23, 22);
             this.toolButton_refresh.Text = "刷新 (F5)";
             this.toolButton_refresh.Click += new System.EventHandler(this.toolButton_refresh_Click);
             // 
             // toolStripSeparator18
             // 
             this.toolStripSeparator18.Name = "toolStripSeparator18";
-            this.toolStripSeparator18.Size = new System.Drawing.Size(6, 31);
+            this.toolStripSeparator18.Size = new System.Drawing.Size(6, 25);
             // 
             // toolButton_borrow
             // 
@@ -1395,7 +1394,7 @@ namespace dp2Circulation
             this.toolButton_borrow.Image = ((System.Drawing.Image)(resources.GetObject("toolButton_borrow.Image")));
             this.toolButton_borrow.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolButton_borrow.Name = "toolButton_borrow";
-            this.toolButton_borrow.Size = new System.Drawing.Size(24, 28);
+            this.toolButton_borrow.Size = new System.Drawing.Size(24, 22);
             this.toolButton_borrow.Text = "借";
             this.toolButton_borrow.Click += new System.EventHandler(this.toolButton_borrow_Click);
             // 
@@ -1406,7 +1405,7 @@ namespace dp2Circulation
             this.toolButton_return.Image = ((System.Drawing.Image)(resources.GetObject("toolButton_return.Image")));
             this.toolButton_return.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolButton_return.Name = "toolButton_return";
-            this.toolButton_return.Size = new System.Drawing.Size(24, 28);
+            this.toolButton_return.Size = new System.Drawing.Size(24, 22);
             this.toolButton_return.Text = "还";
             this.toolButton_return.Click += new System.EventHandler(this.toolButton_return_Click);
             // 
@@ -1417,7 +1416,7 @@ namespace dp2Circulation
             this.toolButton_verifyReturn.Image = ((System.Drawing.Image)(resources.GetObject("toolButton_verifyReturn.Image")));
             this.toolButton_verifyReturn.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolButton_verifyReturn.Name = "toolButton_verifyReturn";
-            this.toolButton_verifyReturn.Size = new System.Drawing.Size(50, 28);
+            this.toolButton_verifyReturn.Size = new System.Drawing.Size(50, 22);
             this.toolButton_verifyReturn.Text = "验证还";
             this.toolButton_verifyReturn.Click += new System.EventHandler(this.toolButton_verifyReturn_Click);
             // 
@@ -1428,7 +1427,7 @@ namespace dp2Circulation
             this.toolButton_renew.Image = ((System.Drawing.Image)(resources.GetObject("toolButton_renew.Image")));
             this.toolButton_renew.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolButton_renew.Name = "toolButton_renew";
-            this.toolButton_renew.Size = new System.Drawing.Size(37, 28);
+            this.toolButton_renew.Size = new System.Drawing.Size(37, 22);
             this.toolButton_renew.Text = "续借";
             this.toolButton_renew.Click += new System.EventHandler(this.toolButton_renew_Click);
             // 
@@ -1439,7 +1438,7 @@ namespace dp2Circulation
             this.toolButton_lost.Image = ((System.Drawing.Image)(resources.GetObject("toolButton_lost.Image")));
             this.toolButton_lost.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolButton_lost.Name = "toolButton_lost";
-            this.toolButton_lost.Size = new System.Drawing.Size(37, 28);
+            this.toolButton_lost.Size = new System.Drawing.Size(37, 22);
             this.toolButton_lost.Text = "丢失";
             this.toolButton_lost.Click += new System.EventHandler(this.toolButton_lost_Click);
             // 
@@ -1450,7 +1449,7 @@ namespace dp2Circulation
             this.toolButton_amerce.Image = ((System.Drawing.Image)(resources.GetObject("toolButton_amerce.Image")));
             this.toolButton_amerce.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolButton_amerce.Name = "toolButton_amerce";
-            this.toolButton_amerce.Size = new System.Drawing.Size(37, 28);
+            this.toolButton_amerce.Size = new System.Drawing.Size(37, 22);
             this.toolButton_amerce.Text = "交费";
             this.toolButton_amerce.Click += new System.EventHandler(this.toolButton_amerce_Click);
             // 
@@ -1461,7 +1460,7 @@ namespace dp2Circulation
             this.toolButton_readerManage.Image = ((System.Drawing.Image)(resources.GetObject("toolButton_readerManage.Image")));
             this.toolButton_readerManage.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolButton_readerManage.Name = "toolButton_readerManage";
-            this.toolButton_readerManage.Size = new System.Drawing.Size(37, 28);
+            this.toolButton_readerManage.Size = new System.Drawing.Size(37, 22);
             this.toolButton_readerManage.Text = "停借";
             this.toolButton_readerManage.Click += new System.EventHandler(this.toolButton_readerManage_Click);
             // 
@@ -1471,7 +1470,7 @@ namespace dp2Circulation
             this.toolButton_print.Image = ((System.Drawing.Image)(resources.GetObject("toolButton_print.Image")));
             this.toolButton_print.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolButton_print.Name = "toolButton_print";
-            this.toolButton_print.Size = new System.Drawing.Size(61, 28);
+            this.toolButton_print.Size = new System.Drawing.Size(53, 22);
             this.toolButton_print.Text = "打印";
             this.toolButton_print.Click += new System.EventHandler(this.toolButton_print_Click);
             // 
@@ -1480,10 +1479,10 @@ namespace dp2Circulation
             this.panel_fixed.Controls.Add(this.tabControl_panelFixed);
             this.panel_fixed.Controls.Add(this.toolStrip_panelFixed);
             this.panel_fixed.Dock = System.Windows.Forms.DockStyle.Right;
-            this.panel_fixed.Location = new System.Drawing.Point(414, 56);
+            this.panel_fixed.Location = new System.Drawing.Point(414, 50);
             this.panel_fixed.Margin = new System.Windows.Forms.Padding(2);
             this.panel_fixed.Name = "panel_fixed";
-            this.panel_fixed.Size = new System.Drawing.Size(207, 250);
+            this.panel_fixed.Size = new System.Drawing.Size(207, 256);
             this.panel_fixed.TabIndex = 5;
             // 
             // tabControl_panelFixed
@@ -1503,7 +1502,7 @@ namespace dp2Circulation
             this.tabControl_panelFixed.Name = "tabControl_panelFixed";
             this.tabControl_panelFixed.Padding = new System.Drawing.Point(0, 0);
             this.tabControl_panelFixed.SelectedIndex = 0;
-            this.tabControl_panelFixed.Size = new System.Drawing.Size(207, 225);
+            this.tabControl_panelFixed.Size = new System.Drawing.Size(207, 231);
             this.tabControl_panelFixed.TabIndex = 1;
             this.tabControl_panelFixed.SelectedIndexChanged += new System.EventHandler(this.tabControl_panelFixed_SelectedIndexChanged);
             this.tabControl_panelFixed.SizeChanged += new System.EventHandler(this.tabControl_panelFixed_SizeChanged);
@@ -1529,7 +1528,7 @@ namespace dp2Circulation
             this.tabPage_history.Location = new System.Drawing.Point(4, 25);
             this.tabPage_history.Margin = new System.Windows.Forms.Padding(0);
             this.tabPage_history.Name = "tabPage_history";
-            this.tabPage_history.Size = new System.Drawing.Size(199, 196);
+            this.tabPage_history.Size = new System.Drawing.Size(199, 202);
             this.tabPage_history.TabIndex = 0;
             this.tabPage_history.Text = "操作历史";
             this.tabPage_history.UseVisualStyleBackColor = true;
@@ -1541,7 +1540,7 @@ namespace dp2Circulation
             this.webBrowser_history.Margin = new System.Windows.Forms.Padding(2);
             this.webBrowser_history.MinimumSize = new System.Drawing.Size(15, 16);
             this.webBrowser_history.Name = "webBrowser_history";
-            this.webBrowser_history.Size = new System.Drawing.Size(199, 196);
+            this.webBrowser_history.Size = new System.Drawing.Size(199, 202);
             this.webBrowser_history.TabIndex = 0;
             // 
             // tabPage_property
@@ -1636,10 +1635,10 @@ namespace dp2Circulation
             // splitter_fixed
             // 
             this.splitter_fixed.Dock = System.Windows.Forms.DockStyle.Right;
-            this.splitter_fixed.Location = new System.Drawing.Point(412, 56);
+            this.splitter_fixed.Location = new System.Drawing.Point(412, 50);
             this.splitter_fixed.Margin = new System.Windows.Forms.Padding(2);
             this.splitter_fixed.Name = "splitter_fixed";
-            this.splitter_fixed.Size = new System.Drawing.Size(2, 250);
+            this.splitter_fixed.Size = new System.Drawing.Size(2, 256);
             this.splitter_fixed.TabIndex = 6;
             this.splitter_fixed.TabStop = false;
             // 

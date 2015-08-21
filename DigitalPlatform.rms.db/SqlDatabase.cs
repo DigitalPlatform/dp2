@@ -6174,8 +6174,6 @@ namespace DigitalPlatform.rms
                             }
                         }
 
-
-
                         // 带资源元数据的情况，要先提出来xml数据的
                         if (StringUtil.IsInList("withresmetadata", strStyle) == true)
                         {
@@ -6691,7 +6689,6 @@ namespace DigitalPlatform.rms
                     connection.Open();
                     try // 连接
                     {
-
                         string strObjectFullID = strRecordID + "_" + strObjectID;
                         // return:
                         //		-1  出错
@@ -6831,9 +6828,10 @@ namespace DigitalPlatform.rms
             if (nRet == -1)
                 return -1;
 
+            long lTotalLength = 0;
+
             if (connection.SqlServerType == SqlServerType.MsSqlServer)
             {
-                long lTotalLength = 0;
                 byte[] textPtr = null;
                 string strDataFieldName = "data";
 
@@ -6889,7 +6887,8 @@ namespace DigitalPlatform.rms
                             outputTimestamp = ByteArray.GetTimeStampByteArray(row_info.NewTimestampString);
                     }
 
-                    if (StringUtil.IsInList("metadata", strStyle) == true)
+                    if (StringUtil.IsInList("metadata", strStyle) == true
+                        || StringUtil.IsInList("incReadCount", strStyle) == true)
                         strMetadata = row_info.Metadata;
                 }
                 else
@@ -6930,13 +6929,16 @@ namespace DigitalPlatform.rms
                         strPartComm += " @dptimestamp=dptimestamp,";
                         strPartComm += " @newdptimestamp=newdptimestamp";
                     }
+
                     // 4.metadata
-                    if (StringUtil.IsInList("metadata", strStyle) == true)
+                    if (StringUtil.IsInList("metadata", strStyle) == true
+                        || StringUtil.IsInList("incReadCount", strStyle) == true)
                     {
                         if (string.IsNullOrEmpty(strPartComm) == false)
                             strPartComm += ",";
                         strPartComm += " @metadata=metadata";
                     }
+                    
                     // 5.range，一定要有，用于判断方向
                     if (string.IsNullOrEmpty(strPartComm) == false)
                         strPartComm += ",";
@@ -6962,7 +6964,6 @@ namespace DigitalPlatform.rms
                             command.Parameters.Add("@id",
                             SqlDbType.NVarChar);
                         idParam.Value = strID;
-
 
                         SqlParameter testidParam =
                                 command.Parameters.Add("@testid",
@@ -7003,7 +7004,6 @@ namespace DigitalPlatform.rms
                             255);
                         newfilename.Direction = ParameterDirection.Output;
 
-
                         // 2.length,一定要返回
                         SqlParameter lengthParam =
                             command.Parameters.Add("@length",
@@ -7032,9 +7032,11 @@ namespace DigitalPlatform.rms
             100);
                             newtimestampParam.Direction = ParameterDirection.Output;
                         }
+                        
                         // 4.metadata
                         SqlParameter metadataParam = null;
-                        if (StringUtil.IsInList("metadata", strStyle) == true)
+                        if (StringUtil.IsInList("metadata", strStyle) == true
+                        || StringUtil.IsInList("incReadCount", strStyle) == true)
                         {
                             metadataParam =
                                 command.Parameters.Add("@metadata",
@@ -7048,7 +7050,6 @@ namespace DigitalPlatform.rms
                                 SqlDbType.NVarChar,
                                 4000);
                         rangeParam.Direction = ParameterDirection.Output;
-
 
                         try
                         {
@@ -7080,7 +7081,6 @@ namespace DigitalPlatform.rms
                             strRange = (string)rangeParam.Value;
 
                         bool bReverse = false;  // 方向标志。如果为false，表示 data 为正式内容，newdata为暂时内容
-
 
                         if (String.IsNullOrEmpty(strRange) == false
         && strRange[0] == '#')
@@ -7121,7 +7121,6 @@ namespace DigitalPlatform.rms
                             strDataFieldName = "data";
                             if (bReverse == true)
                                 strDataFieldName = "newdata";
-
 
                             // 1.textPtr
                             if (StringUtil.IsInList("data", strStyle) == true)
@@ -7175,7 +7174,6 @@ namespace DigitalPlatform.rms
 
                         }
 
-
                         // 3.timestamp
                         if (StringUtil.IsInList("timestamp", strStyle) == true)
                         {
@@ -7213,8 +7211,10 @@ namespace DigitalPlatform.rms
 
                             }
                         }
+                        
                         // 4.metadata
-                        if (StringUtil.IsInList("metadata", strStyle) == true)
+                        if (StringUtil.IsInList("metadata", strStyle) == true
+                        || StringUtil.IsInList("incReadCount", strStyle) == true)
                         {
                             if (metadataParam != null
                                 && (!(metadataParam.Value is System.DBNull)))
@@ -7265,8 +7265,6 @@ namespace DigitalPlatform.rms
                         strObjectFilename = GetObjectFileName(row_info.NewFileName);
                     }
 
-
-
                     FileInfo fi = new FileInfo(strObjectFilename);
                     if (fi.Exists == false)
                     {
@@ -7283,7 +7281,8 @@ namespace DigitalPlatform.rms
                     if (nReadLength == 0)  // 取0长度
                     {
                         destBuffer = new byte[0];
-                        return lTotalLength;    // >= 0
+                        // return lTotalLength;    // >= 0
+                        goto END1;
                     }
 
                     long lOutputLength = 0;
@@ -7306,7 +7305,8 @@ namespace DigitalPlatform.rms
                     if (lTotalLength == 0)  // 总长度为0
                     {
                         destBuffer = new byte[0];
-                        return lTotalLength;
+                        // return lTotalLength;
+                        goto END1;
                     }
 
                     // 从对象文件读取
@@ -7338,7 +7338,8 @@ namespace DigitalPlatform.rms
                             strError = "对象文件 '" + strObjectFilename + "' 不存在";
                             return -100;
                         }
-                        return lTotalLength;
+                        // return lTotalLength;
+                        goto END1;
                     }
 
                     if (textPtr == null)
@@ -7409,14 +7410,11 @@ namespace DigitalPlatform.rms
                     } // end of using command
                 }
 
-                return lTotalLength;
+                // return lTotalLength;
+                goto END1;
             }
             else if (connection.SqlServerType == SqlServerType.SQLite)
             {
-                long lTotalLength = 0;
-                // byte[] textPtr = null;
-                // string strDataFieldName = "data";
-
                 bool bObjectFile = false;
 
                 if (row_info != null)
@@ -7444,7 +7442,8 @@ namespace DigitalPlatform.rms
                             outputTimestamp = ByteArray.GetTimeStampByteArray(row_info.NewTimestampString);
                     }
 
-                    if (StringUtil.IsInList("metadata", strStyle) == true)
+                    if (StringUtil.IsInList("metadata", strStyle) == true
+                        || StringUtil.IsInList("incReadCount", strStyle) == true)
                         strMetadata = row_info.Metadata;
                 }
                 else
@@ -7480,7 +7479,8 @@ namespace DigitalPlatform.rms
                     }
                     // 4.metadata
                     int nMetadataColIndex = -1;
-                    if (StringUtil.IsInList("metadata", strStyle) == true)
+                    if (StringUtil.IsInList("metadata", strStyle) == true
+                        || StringUtil.IsInList("incReadCount", strStyle) == true)
                     {
                         if (string.IsNullOrEmpty(strPartComm) == false)
                             strPartComm += ",";
@@ -7585,7 +7585,8 @@ namespace DigitalPlatform.rms
                                 }
 
                                 // 4.metadata
-                                if (StringUtil.IsInList("metadata", strStyle) == true)
+                                if (StringUtil.IsInList("metadata", strStyle) == true
+                        || StringUtil.IsInList("incReadCount", strStyle) == true)
                                 {
                                     if (nMetadataColIndex != -1 && !dr.IsDBNull(nMetadataColIndex))
                                     {
@@ -7663,7 +7664,8 @@ namespace DigitalPlatform.rms
                     if (nReadLength == 0)  // 取0长度
                     {
                         destBuffer = new byte[0];
-                        return lTotalLength;    // >= 0
+                        // return lTotalLength;    // >= 0
+                        goto END1;
                     }
 
                     long lOutputLength = 0;
@@ -7684,7 +7686,8 @@ namespace DigitalPlatform.rms
                     if (lTotalLength == 0)  // 总长度为0
                     {
                         destBuffer = new byte[0];
-                        return lTotalLength;
+                        // return lTotalLength;
+                        goto END1;
                     }
 
                     // 从对象文件读取
@@ -7716,18 +7719,18 @@ namespace DigitalPlatform.rms
                             strError = "对象文件 '" + strObjectFilename + "' 不存在";
                             return -100;
                         }
-                        return lTotalLength;
+                        // return lTotalLength;
+                        goto END1;
                     }
 
                 }
 
-                return lTotalLength;
+                // return lTotalLength;
+                goto END1;
             }
             else if (connection.SqlServerType == SqlServerType.MySql)
             {
                 // 注： MySql 这里和 SQLite 基本一样
-                long lTotalLength = 0;
-
                 bool bObjectFile = false;
 
                 if (row_info != null)
@@ -7755,7 +7758,8 @@ namespace DigitalPlatform.rms
                             outputTimestamp = ByteArray.GetTimeStampByteArray(row_info.NewTimestampString);
                     }
 
-                    if (StringUtil.IsInList("metadata", strStyle) == true)
+                    if (StringUtil.IsInList("metadata", strStyle) == true
+                        || StringUtil.IsInList("incReadCount", strStyle) == true)
                         strMetadata = row_info.Metadata;
                 }
                 else
@@ -7791,7 +7795,8 @@ namespace DigitalPlatform.rms
                     }
                     // 4.metadata
                     int nMetadataColIndex = -1;
-                    if (StringUtil.IsInList("metadata", strStyle) == true)
+                    if (StringUtil.IsInList("metadata", strStyle) == true
+                        || StringUtil.IsInList("incReadCount", strStyle) == true)
                     {
                         if (string.IsNullOrEmpty(strPartComm) == false)
                             strPartComm += ",";
@@ -7896,7 +7901,8 @@ namespace DigitalPlatform.rms
                                 }
 
                                 // 4.metadata
-                                if (StringUtil.IsInList("metadata", strStyle) == true)
+                                if (StringUtil.IsInList("metadata", strStyle) == true
+                        || StringUtil.IsInList("incReadCount", strStyle) == true)
                                 {
                                     if (nMetadataColIndex != -1 && !dr.IsDBNull(nMetadataColIndex))
                                     {
@@ -7974,7 +7980,8 @@ namespace DigitalPlatform.rms
                     if (nReadLength == 0)  // 取0长度
                     {
                         destBuffer = new byte[0];
-                        return lTotalLength;    // >= 0
+                        // return lTotalLength;    // >= 0
+                        goto END1;
                     }
 
                     long lOutputLength = 0;
@@ -7995,7 +8002,8 @@ namespace DigitalPlatform.rms
                     if (lTotalLength == 0)  // 总长度为0
                     {
                         destBuffer = new byte[0];
-                        return lTotalLength;
+                        // return lTotalLength;
+                        goto END1;
                     }
 
                     // 从对象文件读取
@@ -8027,18 +8035,18 @@ namespace DigitalPlatform.rms
                             strError = "对象文件 '" + strObjectFilename + "' 不存在";
                             return -100;
                         }
-                        return lTotalLength;
+                        // return lTotalLength;
+                        goto END1;
                     }
 
                 }
 
-                return lTotalLength;
+                // return lTotalLength;
+                goto END1;
             }
             else if (connection.SqlServerType == SqlServerType.Oracle)
             {
                 // 注： Oracle 这里和 MySql 基本一样
-                long lTotalLength = 0;
-
                 bool bObjectFile = false;
 
                 if (row_info != null)
@@ -8066,7 +8074,8 @@ namespace DigitalPlatform.rms
                             outputTimestamp = ByteArray.GetTimeStampByteArray(row_info.NewTimestampString);
                     }
 
-                    if (StringUtil.IsInList("metadata", strStyle) == true)
+                    if (StringUtil.IsInList("metadata", strStyle) == true
+                        || StringUtil.IsInList("incReadCount", strStyle) == true)
                         strMetadata = row_info.Metadata;
                 }
                 else
@@ -8102,7 +8111,8 @@ namespace DigitalPlatform.rms
                     }
                     // 4.metadata
                     int nMetadataColIndex = -1;
-                    if (StringUtil.IsInList("metadata", strStyle) == true)
+                    if (StringUtil.IsInList("metadata", strStyle) == true
+                        || StringUtil.IsInList("incReadCount", strStyle) == true)
                     {
                         if (string.IsNullOrEmpty(strPartComm) == false)
                             strPartComm += ",";
@@ -8131,7 +8141,6 @@ namespace DigitalPlatform.rms
                     using (OracleCommand command = new OracleCommand(strCommand,
                         connection.OracleConnection))
                     {
-
                         OracleParameter idParam =
                             command.Parameters.Add(":id",
                             OracleDbType.NVarchar2);
@@ -8207,7 +8216,8 @@ namespace DigitalPlatform.rms
                                 }
 
                                 // 4.metadata
-                                if (StringUtil.IsInList("metadata", strStyle) == true)
+                                if (StringUtil.IsInList("metadata", strStyle) == true
+                        || StringUtil.IsInList("incReadCount", strStyle) == true)
                                 {
                                     if (nMetadataColIndex != -1 && !dr.IsDBNull(nMetadataColIndex))
                                     {
@@ -8286,7 +8296,8 @@ namespace DigitalPlatform.rms
                     if (nReadLength == 0)  // 取0长度
                     {
                         destBuffer = new byte[0];
-                        return lTotalLength;    // >= 0
+                        // return lTotalLength;    // >= 0
+                        goto END1;
                     }
 
                     long lOutputLength = 0;
@@ -8307,7 +8318,8 @@ namespace DigitalPlatform.rms
                     if (lTotalLength == 0)  // 总长度为0
                     {
                         destBuffer = new byte[0];
-                        return lTotalLength;
+                        // return lTotalLength;
+                        goto END1;
                     }
 
                     // 从对象文件读取
@@ -8339,15 +8351,51 @@ namespace DigitalPlatform.rms
                             strError = "对象文件 '" + strObjectFilename + "' 不存在";
                             return -100;
                         }
-                        return lTotalLength;
+                        // return lTotalLength;
+                        goto END1;
                     }
 
                 }
 
-                return lTotalLength;
+                // return lTotalLength;
+                goto END1;
             }
             strError = "未知的 connection 类型 '"+connection.SqlServerType.ToString()+"'";
             return -1;
+        END1:
+            int nBufferLength = 0;
+        if (destBuffer != null)
+            nBufferLength = destBuffer.Length;
+            if (StringUtil.IsInList("incReadCount", strStyle) == true
+                && lStart + nBufferLength >= lTotalLength && lTotalLength != -1)
+            {
+                string strResultMetadata = "";
+                // return:
+                //		-1	出错
+                //		0	成功
+                nRet = DatabaseUtil.MergeMetadata(strMetadata,
+                    "",
+                    -2,
+                    "+1",
+                    out strResultMetadata,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+                // 将 metadata 写入 records 表
+                // parameters:
+                nRet = WriteMetadataColumn(
+            connection,
+            strID,
+            strResultMetadata,
+            out strError);
+                if (nRet == -1)
+                    return -1;
+
+                if (StringUtil.IsInList("metadata", strStyle) == false)
+                    strMetadata = "";
+            }
+
+            return lTotalLength;
         }
 
 #if NO
@@ -8726,7 +8774,6 @@ namespace DigitalPlatform.rms
                                 return -1;
                             }
 
-
                             string strLastValue;
                             nRet = StringUtil.IncreaseNumber(strOldValue,
                                 nNumber,
@@ -8735,13 +8782,13 @@ namespace DigitalPlatform.rms
                             if (nRet == -1)
                                 return -1;
                             /*
-                                                                    string strLastValue;
-                                                                    nRet = Database.AddInteger(strNewValue,
-                                                                        strOldValue,
-                                                                        out strLastValue,
-                                                                        out strError);
-                                                                    if (nRet == -1)
-                                                                        return -1;
+                            string strLastValue;
+                            nRet = Database.AddInteger(strNewValue,
+                                strOldValue,
+                                out strLastValue,
+                                out strError);
+                            if (nRet == -1)
+                                return -1;
                             */
                             newNode.InnerText = strLastValue;
                             strOutputValue = newNode.OuterXml;
@@ -9190,6 +9237,7 @@ namespace DigitalPlatform.rms
                         nRet = DatabaseUtil.MergeMetadata(info.row_info != null ? info.row_info.Metadata : "",
                             info.record.Metadata,
                             info.baContent.Length,
+                            "",
                             out strResultMetadata,
                             out strError);
                         if (nRet == -1)
@@ -9439,6 +9487,7 @@ SqlDbType.NVarChar);
                             nRet = DatabaseUtil.MergeMetadata(info.row_info != null ? info.row_info.Metadata : "",
                                 info.record.Metadata,
                                 info.baContent.Length,
+                                "",
                                 out strResultMetadata,
                                 out strError);
                             if (nRet == -1)
@@ -9648,6 +9697,7 @@ DbType.String);
                             nRet = DatabaseUtil.MergeMetadata(info.row_info != null ? info.row_info.Metadata : "",
                                 info.record.Metadata,
                                 info.baContent.Length,
+                                "",
                                 out strResultMetadata,
                                 out strError);
                             if (nRet == -1)
@@ -9836,6 +9886,7 @@ MySqlDbType.String);
                             nRet = DatabaseUtil.MergeMetadata(info.row_info != null ? info.row_info.Metadata : "",
                                 info.record.Metadata,
                                 info.baContent.Length,
+                                "",
                                 out strResultMetadata,
                                 out strError);
                             if (nRet == -1)
@@ -11077,8 +11128,6 @@ out strError);
 
         }
 
-
-
         // 上次完整写入时的时间戳
         static string GetCompleteTimestamp(RecordRowInfo row_info)
         {
@@ -11739,7 +11788,6 @@ out baPreamble);
                     return -1;
                 }
                 strRecordID = strOutputRecordID;
-
 
                 //**********对记录加写锁***************
                 m_recordLockColl.LockForWrite(strRecordID, m_nTimeOut);
@@ -12402,9 +12450,7 @@ out baPreamble);
                     {
                         // TODO: 转换方式的时候需要处理
                     }
-
                 }
-
             }
 
             // 当strStyle存在 ignorechecktimestamp时，不判断时间戳
@@ -12716,12 +12762,14 @@ out baPreamble);
             string strResultMetadata = "";
             if (bFull == true)
             {
+                bool bIncReaderCount = StringUtil.IsInList("incReaderCount", strStyle);
                 // return:
                 //		-1	出错
                 //		0	成功
                 nRet = DatabaseUtil.MergeMetadata(row_info.Metadata,
                     strMetadata,
                     lCurrentLength,
+                    bIncReaderCount ? "+1" : "",
                     out strResultMetadata,
                     out strError);
                 if (nRet == -1)
@@ -12739,6 +12787,23 @@ out baPreamble);
             else
                 strOutputTimestamp = this.CreateTimestampForDb();
 
+            // 写入 records 表
+            nRet = WriteLine(
+            connection,
+            ref row_info,
+            strID,
+            strOutputTimestamp,
+            strCurrentRange,
+            strResultMetadata,
+            bObjectFile,
+            bFull,
+            bReverse,
+            bNeedInsertRow,
+            "", // strPartList,
+            out strError);
+            if (nRet == -1)
+                return -1;
+#if NO
             string strCommand = "";
             if (bObjectFile == false)
             {
@@ -12837,9 +12902,7 @@ out baPreamble);
 
                     }
                 }
-
             }
-
 
             if (connection.SqlServerType == SqlServerType.MsSqlServer)
             {
@@ -12872,7 +12935,6 @@ out baPreamble);
                     }
 
                     row_info.Range = (string)rangeParam.Value;  // 将反转情况及时兑现
-
 
                     SqlParameter metadataParam =
                         command.Parameters.Add("@metadata",
@@ -12983,7 +13045,6 @@ out baPreamble);
                 using (MySqlCommand command = new MySqlCommand(strCommand,
                     connection.MySqlConnection))
                 {
-
                     MySqlParameter idParam = command.Parameters.Add("@id",
                         MySqlDbType.String);
                     idParam.Value = strID;
@@ -13114,7 +13175,6 @@ out baPreamble);
                         strError = "执行SQL语句发生错误: " + ex.Message + "\r\nSQL 语句: " + strCommand;
                         return -1;
                     }
-
                 } // end of using command
 
             }
@@ -13124,6 +13184,7 @@ out baPreamble);
                 return -1;
             }
 
+#endif
 
             baOutputTimestamp = ByteArray.GetTimeStampByteArray(strOutputTimestamp);    // Encoding.UTF8.GetBytes(strOutputTimestamp);
 
@@ -13168,6 +13229,584 @@ out baPreamble);
             }
 
             // 注：如果是最后一次写入，函数返回时，newdata字段内容被清除
+            return 0;
+        }
+
+        // parameters:
+        //      strPartList 要写入哪些部分？ full 表示全部。range filename newfilename metadata timestamp
+        int WriteLine(
+            Connection connection,
+            ref RecordRowInfo row_info,
+            string strID,
+            string strOutputTimestamp,
+            string strCurrentRange,
+            string strResultMetadata,
+            bool bObjectFile,
+            bool bFull,
+            bool bReverse,
+            bool bNeedInsertRow,
+            string strPartList,
+            out string strError)
+        {
+            strError = "";
+
+            string strCommand = "";
+            if (bObjectFile == false)
+            {
+                string strSetNull = ""; // 设置即将删除的 timestamp 字段内容为空的语句
+                if (bFull == true)
+                {
+                    strSetNull = (bReverse == true ? " newdptimestamp=NULL, newdata=NULL," : " dptimestamp=NULL, data=NULL,");
+                    // 时间戳和data内容都清除
+                }
+
+                strCommand = "use " + this.m_strSqlDbName + "\n"
+                    + " UPDATE records "
+                    + (bReverse == true ? " SET dptimestamp=@dptimestamp," : " SET newdptimestamp=@dptimestamp,")
+                    + strSetNull
+                    + " range=@range,"
+                    + " filename=NULL, newfilename=NULL,"
+                    + " metadata=@metadata "
+                    + " WHERE id=@id";
+            }
+            else
+            {
+                string strSetNull = ""; // 设置即将删除的 timestamp 字段内容为空的语句
+                if (bFull == true)
+                    strSetNull = " newdptimestamp=NULL,";
+
+                if (connection.SqlServerType == SqlServerType.MsSqlServer)
+                {
+                    strCommand = "use " + this.m_strSqlDbName + "\n"
+                         + " UPDATE records "
+                         + (bFull == true ? " SET dptimestamp=@dptimestamp," : " SET newdptimestamp=@dptimestamp,")
+                         + strSetNull
+                         + " range=@range,"
+                         + " metadata=@metadata,"
+                         + (bFull == true ? " filename=@filename, newfilename=NULL," : " newfilename=@filename,")
+                         + " data=NULL, newdata=NULL "
+                         + " WHERE id=@id";
+                    strCommand += " use master " + "\n";
+                }
+                else if (connection.SqlServerType == SqlServerType.SQLite)
+                {
+                    if (bNeedInsertRow == false)
+                    {
+                        strCommand = " UPDATE records "
+                             + (bFull == true ? " SET dptimestamp=@dptimestamp," : " SET newdptimestamp=@dptimestamp,")
+                             + strSetNull
+                             + " range=@range,"
+                             + " metadata=@metadata,"
+                             + (bFull == true ? " filename=@filename, newfilename=NULL " : " newfilename=@filename ")
+                             + " WHERE id=@id";
+                    }
+                    else
+                    {
+                        strCommand = " INSERT INTO records(id, range, metadata, dptimestamp, newdptimestamp, filename, newfilename) "
+                            + (bFull == true ? " VALUES(@id, @range, @metadata, @dptimestamp, NULL, @filename, NULL)"
+                                             : " VALUES(@id, @range, @metadata, NULL, @dptimestamp, NULL, @filename)");
+
+                    }
+                }
+                else if (connection.SqlServerType == SqlServerType.MySql)
+                {
+                    if (bNeedInsertRow == false)
+                    {
+                        strCommand = " UPDATE `" + this.m_strSqlDbName + "`.records "
+                             + (bFull == true ? " SET dptimestamp=@dptimestamp," : " SET newdptimestamp=@dptimestamp,")
+                             + strSetNull
+                             + " `range`=@range,"
+                             + " metadata=@metadata,"
+                             + (bFull == true ? " filename=@filename, newfilename=NULL " : " newfilename=@filename ")
+                             + " WHERE id=@id";
+                    }
+                    else
+                    {
+                        strCommand = " INSERT INTO `" + this.m_strSqlDbName + "`.records (id, `range`, metadata, dptimestamp, newdptimestamp, filename, newfilename) "
+                            + (bFull == true ? " VALUES (@id, @range, @metadata, @dptimestamp, NULL, @filename, NULL)"
+                                             : " VALUES (@id, @range, @metadata, NULL, @dptimestamp, NULL, @filename)");
+
+                    }
+                }
+                else if (connection.SqlServerType == SqlServerType.Oracle)
+                {
+                    if (bNeedInsertRow == false)
+                    {
+                        strCommand = " UPDATE " + this.m_strSqlDbName + "_records "
+                             + (bFull == true ? " SET dptimestamp=:dptimestamp," : " SET newdptimestamp=:dptimestamp,")
+                             + strSetNull
+                             + " range=:range,"
+                             + " metadata=:metadata,"
+                             + (bFull == true ? " filename=:filename, newfilename=NULL " : " newfilename=:filename ")
+                             + " WHERE id=:id";
+                    }
+                    else
+                    {
+                        strCommand = " INSERT INTO " + this.m_strSqlDbName + "_records (id, range, metadata, dptimestamp, newdptimestamp, filename, newfilename) "
+                            + (bFull == true ? " VALUES (:id, :range, :metadata, :dptimestamp, NULL, :filename, NULL)"
+                                             : " VALUES (:id, :range, :metadata, NULL, :dptimestamp, NULL, :filename)");
+
+                    }
+                }
+            }
+
+            if (connection.SqlServerType == SqlServerType.MsSqlServer)
+            {
+                using (SqlCommand command = new SqlCommand(strCommand,
+                    connection.SqlConnection))
+                {
+
+                    SqlParameter idParam = command.Parameters.Add("@id",
+        SqlDbType.NVarChar);
+                    idParam.Value = strID;
+
+                    SqlParameter dptimestampParam =
+                        command.Parameters.Add("@dptimestamp",
+                        SqlDbType.NVarChar,
+                        100);
+                    dptimestampParam.Value = strOutputTimestamp;
+
+                    SqlParameter rangeParam =
+                        command.Parameters.Add("@range",
+                        SqlDbType.NVarChar,
+                        4000);
+                    if (bObjectFile == true)
+                        rangeParam.Value = "#" + strCurrentRange;
+                    else
+                    {
+                        if (bFull == true)
+                            rangeParam.Value = (bReverse == false ? "!" : "") + strCurrentRange;   // 翻转
+                        else
+                            rangeParam.Value = (bReverse == true ? "!" : "") + strCurrentRange;   // 不翻转
+                    }
+
+                    row_info.Range = (string)rangeParam.Value;  // 将反转情况及时兑现
+
+                    SqlParameter metadataParam =
+                        command.Parameters.Add("@metadata",
+                        SqlDbType.NVarChar,
+                        4000);
+                    if (bFull == true)
+                        metadataParam.Value = strResultMetadata;    // 只有当最后一次写入的时候才更新 metadata
+                    else
+                        metadataParam.Value = row_info.Metadata;
+
+                    if (bObjectFile == true)
+                    {
+                        SqlParameter filenameParam =
+                command.Parameters.Add("@filename",
+                SqlDbType.NVarChar,
+                255);
+                        if (bFull == true)
+                            filenameParam.Value = row_info.FileName;
+                        else
+                            filenameParam.Value = row_info.NewFileName;
+                    }
+
+                    int nCount = command.ExecuteNonQuery();
+                    if (nCount == 0)
+                    {
+                        strError = "更新记录号为 '" + strID + "' 的行的 时间戳,range,metadata,(new)filename 失败";
+                        return -1;
+                    }
+                } // end of using command
+            }
+            else if (connection.SqlServerType == SqlServerType.SQLite)
+            {
+                using (SQLiteCommand command = new SQLiteCommand(strCommand,
+                    connection.SQLiteConnection))
+                {
+
+                    SQLiteParameter idParam = command.Parameters.Add("@id",
+                        DbType.String);
+                    idParam.Value = strID;
+
+                    SQLiteParameter dptimestampParam =
+                        command.Parameters.Add("@dptimestamp",
+                        DbType.String,
+                        100);
+                    dptimestampParam.Value = strOutputTimestamp;
+
+                    SQLiteParameter rangeParam =
+                        command.Parameters.Add("@range",
+                        DbType.String,
+                        4000);
+                    if (bObjectFile == true)
+                        rangeParam.Value = "#" + strCurrentRange;
+                    else
+                    {
+                        Debug.Assert(false, "不可能走到这里");
+                        /*
+                        if (bFull == true)
+                            rangeParam.Value = (bReverse == false ? "!" : "") + strCurrentRange;   // 翻转
+                        else
+                            rangeParam.Value = (bReverse == true ? "!" : "") + strCurrentRange;   // 不翻转
+                         * */
+                    }
+
+                    row_info.Range = (string)rangeParam.Value;  // 将反转情况及时兑现
+
+                    SQLiteParameter metadataParam =
+                        command.Parameters.Add("@metadata",
+                        DbType.String,
+                        4000);
+                    if (bFull == true)
+                        metadataParam.Value = strResultMetadata;    // 只有当最后一次写入的时候才更新 metadata
+                    else
+                        metadataParam.Value = row_info.Metadata;
+
+                    if (bObjectFile == true)
+                    {
+                        SQLiteParameter filenameParam =
+                command.Parameters.Add("@filename",
+                DbType.String,
+                255);
+                        if (bFull == true)
+                            filenameParam.Value = row_info.FileName;
+                        else
+                            filenameParam.Value = row_info.NewFileName;
+                    }
+
+                    try
+                    {
+                        int nCount = command.ExecuteNonQuery();
+                        // ????
+                        if (nCount == 0)
+                        {
+                            strError = "更新记录号为 '" + strID + "' 的行的 时间戳,range,metadata,(new)filename 失败";
+                            return -1;
+                        }
+                    }
+                    catch (SQLiteException ex)
+                    {
+                        strError = "执行SQL语句发生错误: " + ex.Message + "\r\nSQL 语句: " + strCommand;
+                        return -1;
+                    }
+                } // end of using command
+            }
+            else if (connection.SqlServerType == SqlServerType.MySql)
+            {
+                // 注： MySql 这里和 SQLite 基本一样
+                using (MySqlCommand command = new MySqlCommand(strCommand,
+                    connection.MySqlConnection))
+                {
+                    MySqlParameter idParam = command.Parameters.Add("@id",
+                        MySqlDbType.String);
+                    idParam.Value = strID;
+
+                    MySqlParameter dptimestampParam =
+                        command.Parameters.Add("@dptimestamp",
+                        MySqlDbType.String,
+                        100);
+                    dptimestampParam.Value = strOutputTimestamp;
+
+                    MySqlParameter rangeParam =
+                        command.Parameters.Add("@range",
+                        MySqlDbType.String,
+                        4000);
+                    if (bObjectFile == true)
+                        rangeParam.Value = "#" + strCurrentRange;
+                    else
+                    {
+                        Debug.Assert(false, "不可能走到这里");
+                    }
+
+                    row_info.Range = (string)rangeParam.Value;  // 将反转情况及时兑现
+
+                    MySqlParameter metadataParam =
+                        command.Parameters.Add("@metadata",
+                        MySqlDbType.String,
+                        4000);
+                    if (bFull == true)
+                        metadataParam.Value = strResultMetadata;    // 只有当最后一次写入的时候才更新 metadata
+                    else
+                        metadataParam.Value = row_info.Metadata;
+
+                    if (bObjectFile == true)
+                    {
+                        MySqlParameter filenameParam =
+                command.Parameters.Add("@filename",
+                MySqlDbType.String,
+                255);
+                        if (bFull == true)
+                            filenameParam.Value = row_info.FileName;
+                        else
+                            filenameParam.Value = row_info.NewFileName;
+                    }
+
+                    try
+                    {
+                        int nCount = command.ExecuteNonQuery();
+                        // ????
+                        if (nCount == 0)
+                        {
+                            strError = "更新记录号为 '" + strID + "' 的行的 时间戳,range,metadata,(new)filename 失败";
+                            return -1;
+                        }
+                    }
+                    catch (MySqlException ex)
+                    {
+                        strError = "执行SQL语句发生错误: " + ex.Message + "\r\nSQL 语句: " + strCommand;
+                        return -1;
+                    }
+                } // end of using command
+
+            }
+            else if (connection.SqlServerType == SqlServerType.Oracle)
+            {
+                // 注： Oracle 这里和 MySql 基本一样
+                using (OracleCommand command = new OracleCommand(strCommand,
+                    connection.OracleConnection))
+                {
+
+                    command.BindByName = true;
+
+                    OracleParameter idParam = command.Parameters.Add(":id",
+                        OracleDbType.NVarchar2);
+                    idParam.Value = strID;
+
+                    OracleParameter dptimestampParam =
+                        command.Parameters.Add(":dptimestamp",
+                        OracleDbType.NVarchar2,
+                        100);
+                    dptimestampParam.Value = strOutputTimestamp;
+
+                    OracleParameter rangeParam =
+                        command.Parameters.Add(":range",
+                        OracleDbType.NVarchar2,
+                        4000);
+                    if (bObjectFile == true)
+                        rangeParam.Value = "#" + strCurrentRange;
+                    else
+                    {
+                        Debug.Assert(false, "不可能走到这里");
+                    }
+
+                    row_info.Range = (string)rangeParam.Value;  // 将反转情况及时兑现
+
+                    OracleParameter metadataParam =
+                        command.Parameters.Add(":metadata",
+                        OracleDbType.NVarchar2,
+                        4000);
+                    if (bFull == true)
+                        metadataParam.Value = strResultMetadata;    // 只有当最后一次写入的时候才更新 metadata
+                    else
+                        metadataParam.Value = row_info.Metadata;
+
+                    if (bObjectFile == true)
+                    {
+                        OracleParameter filenameParam =
+                command.Parameters.Add(":filename",
+                OracleDbType.NVarchar2,
+                255);
+                        if (bFull == true)
+                            filenameParam.Value = row_info.FileName;
+                        else
+                            filenameParam.Value = row_info.NewFileName;
+                    }
+
+                    try
+                    {
+                        int nCount = command.ExecuteNonQuery();
+                        // ????
+                        if (nCount == 0)
+                        {
+                            strError = "更新记录号为 '" + strID + "' 的行的 时间戳,range,metadata,(new)filename 失败";
+                            return -1;
+                        }
+                    }
+                    catch (MySqlException ex)
+                    {
+                        strError = "执行SQL语句发生错误: " + ex.Message + "\r\nSQL 语句: " + strCommand;
+                        return -1;
+                    }
+                } // end of using command
+
+            }
+            else
+            {
+                strError = "未能识别的 SqlServerType '" + connection.SqlServerType.ToString() + "'";
+                return -1;
+            }
+
+            return 0;
+        }
+
+        // 将 metadata 写入 records 表
+        // parameters:
+        int WriteMetadataColumn(
+            Connection connection,
+            // ref RecordRowInfo row_info,
+            string strID,
+            string strResultMetadata,
+            out string strError)
+        {
+            strError = "";
+
+            string strCommand = "";
+
+            {
+
+                if (connection.SqlServerType == SqlServerType.MsSqlServer)
+                {
+                    strCommand = "use " + this.m_strSqlDbName + "\n"
+                         + " UPDATE records SET "
+                         + " metadata=@metadata "
+                         + " WHERE id=@id";
+                    strCommand += " use master " + "\n";
+                }
+                else if (connection.SqlServerType == SqlServerType.SQLite)
+                {
+                        strCommand = " UPDATE records SET "
+                             + " metadata=@metadata "
+                             + " WHERE id=@id";
+                }
+                else if (connection.SqlServerType == SqlServerType.MySql)
+                {
+                        strCommand = " UPDATE `" + this.m_strSqlDbName + "`.records SET "
+                             + " metadata=@metadata "
+                             + " WHERE id=@id";
+                }
+                else if (connection.SqlServerType == SqlServerType.Oracle)
+                {
+                        strCommand = " UPDATE " + this.m_strSqlDbName + "_records SET "
+                             + " metadata=:metadata "
+                             + " WHERE id=:id";
+                }
+            }
+
+            if (connection.SqlServerType == SqlServerType.MsSqlServer)
+            {
+                using (SqlCommand command = new SqlCommand(strCommand,
+                    connection.SqlConnection))
+                {
+
+                    SqlParameter idParam = command.Parameters.Add("@id",
+        SqlDbType.NVarChar);
+                    idParam.Value = strID;
+
+                    SqlParameter metadataParam =
+                        command.Parameters.Add("@metadata",
+                        SqlDbType.NVarChar,
+                        4000);
+                        metadataParam.Value = strResultMetadata;    // 只有当最后一次写入的时候才更新 metadata
+
+                    int nCount = command.ExecuteNonQuery();
+                    if (nCount == 0)
+                    {
+                        strError = "更新记录号为 '" + strID + "' 的行的 时间戳,range,metadata,(new)filename 失败";
+                        return -1;
+                    }
+                } // end of using command
+            }
+            else if (connection.SqlServerType == SqlServerType.SQLite)
+            {
+                using (SQLiteCommand command = new SQLiteCommand(strCommand,
+                    connection.SQLiteConnection))
+                {
+
+                    SQLiteParameter idParam = command.Parameters.Add("@id",
+                        DbType.String);
+                    idParam.Value = strID;
+
+                    SQLiteParameter metadataParam =
+                        command.Parameters.Add("@metadata",
+                        DbType.String,
+                        4000);
+                        metadataParam.Value = strResultMetadata;    // 只有当最后一次写入的时候才更新 metadata
+
+                    try
+                    {
+                        int nCount = command.ExecuteNonQuery();
+                        // ????
+                        if (nCount == 0)
+                        {
+                            strError = "更新记录号为 '" + strID + "' 的行的 时间戳,range,metadata,(new)filename 失败";
+                            return -1;
+                        }
+                    }
+                    catch (SQLiteException ex)
+                    {
+                        strError = "执行SQL语句发生错误: " + ex.Message + "\r\nSQL 语句: " + strCommand;
+                        return -1;
+                    }
+                } // end of using command
+            }
+            else if (connection.SqlServerType == SqlServerType.MySql)
+            {
+                // 注： MySql 这里和 SQLite 基本一样
+                using (MySqlCommand command = new MySqlCommand(strCommand,
+                    connection.MySqlConnection))
+                {
+                    MySqlParameter idParam = command.Parameters.Add("@id",
+                        MySqlDbType.String);
+                    idParam.Value = strID;
+
+                    MySqlParameter metadataParam =
+                        command.Parameters.Add("@metadata",
+                        MySqlDbType.String,
+                        4000);
+                        metadataParam.Value = strResultMetadata;    // 只有当最后一次写入的时候才更新 metadata
+
+                    try
+                    {
+                        int nCount = command.ExecuteNonQuery();
+                        // ????
+                        if (nCount == 0)
+                        {
+                            strError = "更新记录号为 '" + strID + "' 的行的 时间戳,range,metadata,(new)filename 失败";
+                            return -1;
+                        }
+                    }
+                    catch (MySqlException ex)
+                    {
+                        strError = "执行SQL语句发生错误: " + ex.Message + "\r\nSQL 语句: " + strCommand;
+                        return -1;
+                    }
+                } // end of using command
+
+            }
+            else if (connection.SqlServerType == SqlServerType.Oracle)
+            {
+                // 注： Oracle 这里和 MySql 基本一样
+                using (OracleCommand command = new OracleCommand(strCommand,
+                    connection.OracleConnection))
+                {
+                    command.BindByName = true;
+
+                    OracleParameter idParam = command.Parameters.Add(":id",
+                        OracleDbType.NVarchar2);
+                    idParam.Value = strID;
+
+                    OracleParameter metadataParam =
+                        command.Parameters.Add(":metadata",
+                        OracleDbType.NVarchar2,
+                        4000);
+                        metadataParam.Value = strResultMetadata;    // 只有当最后一次写入的时候才更新 metadata
+
+                    try
+                    {
+                        int nCount = command.ExecuteNonQuery();
+                        // ????
+                        if (nCount == 0)
+                        {
+                            strError = "更新记录号为 '" + strID + "' 的行的 时间戳,range,metadata,(new)filename 失败";
+                            return -1;
+                        }
+                    }
+                    catch (MySqlException ex)
+                    {
+                        strError = "执行SQL语句发生错误: " + ex.Message + "\r\nSQL 语句: " + strCommand;
+                        return -1;
+                    }
+                } // end of using command
+            }
+            else
+            {
+                strError = "未能识别的 SqlServerType '" + connection.SqlServerType.ToString() + "'";
+                return -1;
+            }
+
             return 0;
         }
 

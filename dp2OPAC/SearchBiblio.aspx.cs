@@ -240,7 +240,7 @@ ref sessioninfo) == false)
                     log.Time = DateTime.UtcNow;
                     log.HitCount = nRet;
                     log.Format = "searchcount";
-                    app.SearchLog.Add(log);
+                    app.SearchLog.AddLogItem(log);
                 }
 
                 // not found
@@ -528,7 +528,7 @@ ref sessioninfo) == false)
                 log.Time = DateTime.UtcNow;
                 log.HitCount = (int)lRet;
                 log.Format = "searchcount";
-                app.SearchLog.Add(log);
+                app.SearchLog.AddLogItem(log);
             }
 
             // not found

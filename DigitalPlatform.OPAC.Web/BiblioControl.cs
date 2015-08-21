@@ -718,7 +718,7 @@ out strError);
                 log.HitCount = 1;
                 log.Format = "biblio";
                 log.RecPath = this.RecPath;
-                app.SearchLog.Add(log);
+                app.SearchLog.AddLogItem(log);
             }
 
             strBiblioXml = results[0];

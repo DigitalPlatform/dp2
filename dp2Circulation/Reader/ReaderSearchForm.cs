@@ -4942,7 +4942,7 @@ out strFingerprint);
                     long lRet = Channel.GetReaderInfo(
                         stop,
                         strBarcode,
-                        "advancexml,advancexml_borrow_bibliosummary,advancexml_overdue_bibliosummary",
+                        "advancexml,advancexml_borrow_bibliosummary,advancexml_overdue_bibliosummary", // advancexml_history_bibliosummary
                         out results,
                         out strOutputRecPath,
                         out baTimestamp,

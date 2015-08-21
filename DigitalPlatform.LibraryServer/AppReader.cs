@@ -2608,8 +2608,12 @@ strLibraryCode);    // 读者所在的馆代码
 
             if (String.IsNullOrEmpty(strWarning) == true)
             {
+#if NO
                 DomUtil.SetElementText(readerdom.DocumentElement,
                     "warning", null);
+#endif
+                DomUtil.DeleteElement(readerdom.DocumentElement,
+                    "warning");
             }
             else
             {
@@ -2617,18 +2621,41 @@ strLibraryCode);    // 读者所在的馆代码
                     "warning", strWarning);
             }
 
-            // 全部<overdue>元素
-            XmlNodeList overdue_nodes = readerdom.DocumentElement.SelectNodes("overdues/overdue");
-            for (int i = 0; i < overdue_nodes.Count; i++)
+            // 为 borrowHistory/borrow 元素添加书目摘要属性
+            if (StringUtil.IsInList("advancexml_history_bibliosummary", strStyle))
             {
-                XmlNode node = overdue_nodes[i];
+                XmlNodeList history_nodes = readerdom.DocumentElement.SelectNodes("borrowHistory/borrow");
+                foreach (XmlElement borrow in history_nodes)
+                {
+                    string strBarcode = borrow.GetAttribute("barcode");
+                    if (String.IsNullOrEmpty(strBarcode) == true)
+                        continue;
+                    string strConfirmItemRecPath = borrow.GetAttribute("recPath");
+                    string strSummary = "";
+                    string strBiblioRecPath = "";
+                    LibraryServerResult result = this.GetBiblioSummary(
+                        sessioninfo,
+                        channel,
+                        strBarcode,
+                        strConfirmItemRecPath,
+                        null,
+                        out strBiblioRecPath,
+                        out strSummary);
+                    borrow.SetAttribute("summary", strSummary);
+                }
+            }
 
+            // 全部<overdue>元素
+            bool bFillSummary = StringUtil.IsInList("advancexml_overdue_bibliosummary", strStyle);
+            XmlNodeList overdue_nodes = readerdom.DocumentElement.SelectNodes("overdues/overdue");
+            foreach (XmlElement node in overdue_nodes)
+            {
+                // XmlNode node = overdue_nodes[i];
                 string strBarcode = DomUtil.GetAttr(node, "barcode");
                 string strConfirmItemRecPath = DomUtil.GetAttr(node, "recPath");
 
-                if (StringUtil.IsInList("advancexml_overdue_bibliosummary", strStyle) == true)
+                if (bFillSummary == true)
                 {
-
                     if (String.IsNullOrEmpty(strBarcode) == false)
                     {
                         string strSummary = "";
@@ -2644,17 +2671,6 @@ strLibraryCode);    // 读者所在的馆代码
                         if (result.Value == -1)
                         {
                             // strSummary = result.ErrorInfo;
-                        }
-                        else
-                        {
-                            /*
-                            // 截断
-                            if (strSummary.Length > 25)
-                                strSummary = strSummary.Substring(0, 25) + "...";
-
-                            if (strSummary.Length > 12)
-                                strSummary = strSummary.Insert(12, "<br/>");
-                             * */
                         }
 
                         DomUtil.SetAttr(node, "summary", strSummary);
@@ -3290,7 +3306,6 @@ out strError);
             else
                 strRecPath = strOutputPath;
 
-
         SKIP1:
             if (String.IsNullOrEmpty(strResultTypeList) == true)
             {
@@ -3424,7 +3439,9 @@ out strError);
                         results[i] = strOutputPath;
                 }
                 else if (String.Compare(strResultType, "advancexml_borrow_bibliosummary", true) == 0
-                    || String.Compare(strResultType, "advancexml_overdue_bibliosummary", true) == 0)
+                    || String.Compare(strResultType, "advancexml_overdue_bibliosummary", true) == 0
+                    || String.Compare(strResultType, "advancexml_history_bibliosummary", true) == 0
+                    )
                 {
                     // 2011/1/27
                     continue;

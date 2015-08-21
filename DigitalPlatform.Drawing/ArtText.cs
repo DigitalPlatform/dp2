@@ -232,7 +232,8 @@ height);
             }
         }
 
-
+        // parameters:
+        //      nWidth  控制折行的位置
         public static MemoryStream BuildArtText(
             string strText,
             string strFontFace,
@@ -287,6 +288,7 @@ height);
                 //设置高质量,低速度呈现平滑程度 
                 objGraphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
                 objGraphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+                // objGraphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
 
                 StringFormat stringFormat = new StringFormat();
 
@@ -340,7 +342,11 @@ height);
                     256,
                     true);
                  */
-
+                if (imageformat == ImageFormat.Png
+                    && colorBack == Color.Transparent)
+                {
+                    bitmapDest.MakeTransparent(colorBack);
+                }
 
                 if (imageformat == ImageFormat.Gif)
                 {
