@@ -1,7 +1,7 @@
-//#define DEBUG_LOCK_SQLDATABASE
-//#define XML_WRITE_TO_FILE   // ½«³ß´ç·ûºÏÒªÇóµÄXML¼ÇÂ¼Ò²Ğ´Èë¶ÔÏóÎÄ¼ş
-//#define UPDATETEXT_WITHLOG    // ÔÚĞèÒª¿ìÕÕ¸´ÖÆµÄÊ±ºò²ÅÓĞÓÃ
-// #define PARAMETERS  // ModifyKeys() MySql °æ±¾Ê¹ÓÃ²ÎÊıSQLÃüÁî
+ï»¿//#define DEBUG_LOCK_SQLDATABASE
+//#define XML_WRITE_TO_FILE   // å°†å°ºå¯¸ç¬¦åˆè¦æ±‚çš„XMLè®°å½•ä¹Ÿå†™å…¥å¯¹è±¡æ–‡ä»¶
+//#define UPDATETEXT_WITHLOG    // åœ¨éœ€è¦å¿«ç…§å¤åˆ¶çš„æ—¶å€™æ‰æœ‰ç”¨
+// #define PARAMETERS  // ModifyKeys() MySql ç‰ˆæœ¬ä½¿ç”¨å‚æ•°SQLå‘½ä»¤
 
 using System;
 using System.Collections.Generic;
@@ -31,7 +31,7 @@ using DigitalPlatform.IO;
 
 namespace DigitalPlatform.rms
 {
-    // SQL¿âÅÉÉúÀà
+    // SQLåº“æ´¾ç”Ÿç±»
     public class SqlDatabase : Database
     {
         const string KEY_COL_LIST = "(keystring, idstring)";
@@ -72,16 +72,16 @@ namespace DigitalPlatform.rms
         }
 
         static int m_nLongTimeout = 30 * 60; //  
-        // Á¬½Ó×Ö·û´®
-        private string m_strConnStringPooling = "";        // ÆÕÍ¨Á¬½Ó×Ö·û´®£¬pooling = true
-        private string m_strConnString = "";        // ÆÕÍ¨Á¬½Ó×Ö·û´®£¬pooling = false
-        private string m_strLongConnString = "";    // timeout½Ï³¤µÄÁ¬½Ó×Ö·û´®, pooling = false
+        // è¿æ¥å­—ç¬¦ä¸²
+        private string m_strConnStringPooling = "";        // æ™®é€šè¿æ¥å­—ç¬¦ä¸²ï¼Œpooling = true
+        private string m_strConnString = "";        // æ™®é€šè¿æ¥å­—ç¬¦ä¸²ï¼Œpooling = false
+        private string m_strLongConnString = "";    // timeoutè¾ƒé•¿çš„è¿æ¥å­—ç¬¦ä¸², pooling = false
 
-        // SqlÊı¾İ¿âÃû³Æ
+        // Sqlæ•°æ®åº“åç§°
         private string m_strSqlDbName = "";
 
-        private string m_strObjectDir = "";     // ¶ÔÏóÎÄ¼ş´æ´¢Ä¿Â¼
-        private long m_lObjectStartSize = 0x7ffffffe;   // 10 * 1024;    // ´óÓÚµÈÓÚÕâ¸ö³ß´çµÄ¶ÔÏó½«´æ´¢ÔÚ¶ÔÏóÎÄ¼şÖĞ¡£-1±íÊ¾ÓÀÔ¶²»Ê¹ÓÃ¶ÔÏóÄ¿Â¼
+        private string m_strObjectDir = "";     // å¯¹è±¡æ–‡ä»¶å­˜å‚¨ç›®å½•
+        private long m_lObjectStartSize = 0x7ffffffe;   // 10 * 1024;    // å¤§äºç­‰äºè¿™ä¸ªå°ºå¯¸çš„å¯¹è±¡å°†å­˜å‚¨åœ¨å¯¹è±¡æ–‡ä»¶ä¸­ã€‚-1è¡¨ç¤ºæ°¸è¿œä¸ä½¿ç”¨å¯¹è±¡ç›®å½•
 
         public SqlDatabase(DatabaseCollection container)
             : base(container)
@@ -104,75 +104,75 @@ namespace DigitalPlatform.rms
             }
         }
 
-        // ³õÊ¼»¯Êı¾İ¿â¶ÔÏó
+        // åˆå§‹åŒ–æ•°æ®åº“å¯¹è±¡
         // parameters:
-        //      node    Êı¾İ¿âÅäÖÃ½Úµã<database>
-        //      strError    out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //      node    æ•°æ®åº“é…ç½®èŠ‚ç‚¹<database>
+        //      strError    outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //      -1  ³ö´í
-        //      0   ³É¹¦
+        //      -1  å‡ºé”™
+        //      0   æˆåŠŸ
         internal override int Initial(XmlNode node,
             out string strError)
         {
             strError = "";
             int nRet = 0;
-            Debug.Assert(node != null, "Initial()µ÷ÓÃ´íÎó£¬node²ÎÊıÖµ²»ÄÜÎªnull¡£");
+            Debug.Assert(node != null, "Initial()è°ƒç”¨é”™è¯¯ï¼Œnodeå‚æ•°å€¼ä¸èƒ½ä¸ºnullã€‚");
 
-            //****************¶ÔÊı¾İ¿â¼ÓĞ´Ëø**** ÔÚ¹¹ÔìÊ±,¼´²»ÄÜ¶ÁÒ²²»ÄÜĞ´
+            //****************å¯¹æ•°æ®åº“åŠ å†™é”**** åœ¨æ„é€ æ—¶,å³ä¸èƒ½è¯»ä¹Ÿä¸èƒ½å†™
             this.m_db_lock.AcquireWriterLock(m_nTimeOut);
             try
             {
                 this.m_selfNode = node;
 
-                // Ö»ÄÜÔÚÕâ¶ùĞ´ÁË£¬Òª²»¶ÔÏóÎ´³õÊ¼»¯ÄØ¡£
+                // åªèƒ½åœ¨è¿™å„¿å†™äº†ï¼Œè¦ä¸å¯¹è±¡æœªåˆå§‹åŒ–å‘¢ã€‚
 #if DEBUG_LOCK_SQLDATABASE
-				this.container.WriteDebugInfo("Initial()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â¼ÓĞ´Ëø¡£");
+				this.container.WriteDebugInfo("Initial()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“åŠ å†™é”ã€‚");
 #endif
 
-                // ¼ìË÷µã³¤¶È
+                // æ£€ç´¢ç‚¹é•¿åº¦
                 // return:
-                //      -1  ³ö´í
-                //      0   ³É¹¦
-                // Ïß: ²»°²È«
+                //      -1  å‡ºé”™
+                //      0   æˆåŠŸ
+                // çº¿: ä¸å®‰å…¨
                 nRet = this.container.InternalGetKeySize(
                     out this.KeySize,
                     out strError);
                 if (nRet == -1)
                     return -1;
 
-                // ¿âID
+                // åº“ID
                 this.PureID = DomUtil.GetAttr(this.m_selfNode, "id").Trim();
                 if (this.PureID == "")
                 {
-                    strError = "ÅäÖÃÎÄ¼ş²»ºÏ·¨£¬ÔÚnameÎª'" + this.GetCaption("zh-CN") + "'µÄ<database>ÏÂ¼¶Î´¶¨Òå'id'ÊôĞÔ£¬»ò'id'ÊôĞÔÎª¿Õ";
+                    strError = "é…ç½®æ–‡ä»¶ä¸åˆæ³•ï¼Œåœ¨nameä¸º'" + this.GetCaption("zh-CN") + "'çš„<database>ä¸‹çº§æœªå®šä¹‰'id'å±æ€§ï¼Œæˆ–'id'å±æ€§ä¸ºç©º";
                     return -1;
                 }
 
-                // ÊôĞÔ½Úµã
+                // å±æ€§èŠ‚ç‚¹
                 this.PropertyNode = this.m_selfNode.SelectSingleNode("property");
                 if (this.PropertyNode == null)
                 {
-                    strError = "ÅäÖÃÎÄ¼ş²»ºÏ·¨£¬ÔÚnameÎª'" + this.GetCaption("zh-CN") + "'µÄ<database>ÏÂ¼¶Î´¶¨Òå<property>ÔªËØ";
+                    strError = "é…ç½®æ–‡ä»¶ä¸åˆæ³•ï¼Œåœ¨nameä¸º'" + this.GetCaption("zh-CN") + "'çš„<database>ä¸‹çº§æœªå®šä¹‰<property>å…ƒç´ ";
                     return -1;
                 }
 
-                // <sqlserverdb>½Úµã
+                // <sqlserverdb>èŠ‚ç‚¹
                 XmlNode nodeSqlServerDb = this.PropertyNode.SelectSingleNode("sqlserverdb");
                 if (nodeSqlServerDb == null)
                 {
-                    strError = "ÅäÖÃÎÄ¼ş²»ºÏ·¨£¬ÔÚnameÎª'" + this.GetCaption("zh-CN") + "'µÄdatabase/propertyÏÂ¼¶Î´¶¨Òå<sqlserverdb>ÔªËØ";
+                    strError = "é…ç½®æ–‡ä»¶ä¸åˆæ³•ï¼Œåœ¨nameä¸º'" + this.GetCaption("zh-CN") + "'çš„database/propertyä¸‹çº§æœªå®šä¹‰<sqlserverdb>å…ƒç´ ";
                     return -1;
                 }
 
-                // ¼ì²éSqlServer¿âÃû£¬Ö»ÓĞSqlÀàĞÍ¿â²ÅĞèÒª
+                // æ£€æŸ¥SqlServeråº“åï¼Œåªæœ‰Sqlç±»å‹åº“æ‰éœ€è¦
                 this.m_strSqlDbName = DomUtil.GetAttr(nodeSqlServerDb, "name").Trim();
                 if (this.m_strSqlDbName == "")
                 {
-                    strError = "ÅäÖÃÎÄ¼ş²»ºÏ·¨£¬ÔÚnameÎª'" + this.GetCaption("zh-CN") + "'µÄdatabase/property/sqlserverdbµÄ½ÚµãÎ´¶¨Òå'name'ÊôĞÔ£¬»ò'name'ÊôĞÔÖµÎª¿Õ";
+                    strError = "é…ç½®æ–‡ä»¶ä¸åˆæ³•ï¼Œåœ¨nameä¸º'" + this.GetCaption("zh-CN") + "'çš„database/property/sqlserverdbçš„èŠ‚ç‚¹æœªå®šä¹‰'name'å±æ€§ï¼Œæˆ–'name'å±æ€§å€¼ä¸ºç©º";
                     return -1;
                 }
 
-                // <object>½Úµã
+                // <object>èŠ‚ç‚¹
                 XmlNode nodeObject = this.PropertyNode.SelectSingleNode("object");
                 if (nodeObject != null)
                 {
@@ -180,13 +180,13 @@ namespace DigitalPlatform.rms
 
                     if (string.IsNullOrEmpty(this.m_strObjectDir) == false)
                     {
-                        // ¼ì²é¶ÔÏóÎÄ¼şÄ¿Â¼ÊÇ·ñ·ûºÏ¹æÔò
-                        // ²»ÄÜÊ¹ÓÃ¸ùÄ¿Â¼
+                        // æ£€æŸ¥å¯¹è±¡æ–‡ä»¶ç›®å½•æ˜¯å¦ç¬¦åˆè§„åˆ™
+                        // ä¸èƒ½ä½¿ç”¨æ ¹ç›®å½•
                         string strRoot = Directory.GetDirectoryRoot(this.m_strObjectDir);
                         if (PathUtil.IsEqual(strRoot, this.m_strObjectDir) == true)
                         {
-                            strError = "¶ÔÏóÄ¿Â¼¶¨Òå '" + this.m_strObjectDir + "' ²»ºÏ·¨¡£¶ÔÏóÄ¿Â¼²»ÄÜÊÇ¸ùÄ¿Â¼";
-                            // ¸ø´íÎóÈÕÖ¾Ğ´Ò»ÌõĞÅÏ¢
+                            strError = "å¯¹è±¡ç›®å½•å®šä¹‰ '" + this.m_strObjectDir + "' ä¸åˆæ³•ã€‚å¯¹è±¡ç›®å½•ä¸èƒ½æ˜¯æ ¹ç›®å½•";
+                            // ç»™é”™è¯¯æ—¥å¿—å†™ä¸€æ¡ä¿¡æ¯
                             this.container.KernelApplication.WriteErrorLog(strError);
                             return -1;
                         }
@@ -199,7 +199,7 @@ namespace DigitalPlatform.rms
                         out lValue,
                         out strError) == -1)
                     {
-                        strError = "¶ÁÈ¡Êı¾İ¿âµÄ startSize ²ÎÊıÊ±·¢Éú´íÎó£º" + strError;
+                        strError = "è¯»å–æ•°æ®åº“çš„ startSize å‚æ•°æ—¶å‘ç”Ÿé”™è¯¯ï¼š" + strError;
                         return -1;
                     }
 
@@ -208,14 +208,14 @@ namespace DigitalPlatform.rms
 
                 if (this.container.SqlServerType != SqlServerType.MsSqlServer)
                 {
-                    this.m_lObjectStartSize = 0;    // ÔÚ²»ÊÇMS SQL ServerÇé¿öÏÂ£¬ËùÓĞ¶ÔÏó¶¼Ğ´Èë¶ÔÏóÎÄ¼ş
+                    this.m_lObjectStartSize = 0;    // åœ¨ä¸æ˜¯MS SQL Serveræƒ…å†µä¸‹ï¼Œæ‰€æœ‰å¯¹è±¡éƒ½å†™å…¥å¯¹è±¡æ–‡ä»¶
                 }
 
                 if (this.m_lObjectStartSize != -1)
                 {
                     if (string.IsNullOrEmpty(this.m_strObjectDir) == true)
                     {
-                        // ²ÉÓÃÈ±Ê¡ÅäÖÃ
+                        // é‡‡ç”¨ç¼ºçœé…ç½®
                         this.m_strObjectDir = PathUtil.MergePath(this.container.ObjectDir, this.m_strSqlDbName);
                         try
                         {
@@ -223,7 +223,7 @@ namespace DigitalPlatform.rms
                         }
                         catch (Exception ex)
                         {
-                            strError = "´´½¨µ¥¸öÊı¾İ¿âµÄÊı¾İ¶ÔÏóÄ¿Â¼ '" + this.m_strObjectDir + "' Ê±³ö´í: " + ex.Message;
+                            strError = "åˆ›å»ºå•ä¸ªæ•°æ®åº“çš„æ•°æ®å¯¹è±¡ç›®å½• '" + this.m_strObjectDir + "' æ—¶å‡ºé”™: " + ex.Message;
                             return -1;
                         }
                     }
@@ -240,9 +240,9 @@ namespace DigitalPlatform.rms
                 }
 
                 // return:
-                //      -1  ³ö´í
-                //      0   ³É¹¦
-                // Ïß: ²»°²È«µÄ
+                //      -1  å‡ºé”™
+                //      0   æˆåŠŸ
+                // çº¿: ä¸å®‰å…¨çš„
                 nRet = this.InternalGetConnectionString(
                     30,
                     "",
@@ -260,9 +260,9 @@ namespace DigitalPlatform.rms
                 if (nRet == -1)
                     return -1;
 
-                //      -1  ³ö´í
-                //      0   ³É¹¦
-                // Ïß: ²»°²È«µÄ
+                //      -1  å‡ºé”™
+                //      0   æˆåŠŸ
+                // çº¿: ä¸å®‰å…¨çš„
                 nRet = this.InternalGetConnectionString(
                     m_nLongTimeout,
                     "",
@@ -274,9 +274,9 @@ namespace DigitalPlatform.rms
             finally
             {
                 m_db_lock.ReleaseWriterLock();
-                //***********¶ÔÊı¾İ¿â½âĞ´Ëø*************
+                //***********å¯¹æ•°æ®åº“è§£å†™é”*************
 #if DEBUG_LOCK_SQLDATABASE
-				this.container.WriteDebugInfo("Initial()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â½âĞ´Ëø¡£");
+				this.container.WriteDebugInfo("Initial()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“è§£å†™é”ã€‚");
 #endif
             }
 
@@ -318,12 +318,12 @@ namespace DigitalPlatform.rms
 #endif
         }
 
-        // Òì³££º¿ÉÄÜ»áÅ×³öÒì³£
+        // å¼‚å¸¸ï¼šå¯èƒ½ä¼šæŠ›å‡ºå¼‚å¸¸
         internal override void Commit()
         {
             try
             {
-                // ÆÀ¹ÀÊ±¼ä
+                // è¯„ä¼°æ—¶é—´
                 DateTime start_time = DateTime.Now;
 
                 this.CommitInternal();
@@ -379,15 +379,15 @@ namespace DigitalPlatform.rms
             }
         }
 
-        // µÃµ½Á´½Ó×Ö·û´®,Ö»ÓĞ¿âÀàĞÍÎªSqlDatabaseÊ±²ÅÓĞÒâÒå
+        // å¾—åˆ°é“¾æ¥å­—ç¬¦ä¸²,åªæœ‰åº“ç±»å‹ä¸ºSqlDatabaseæ—¶æ‰æœ‰æ„ä¹‰
         // parameters:
-        //      strStyle    ·ç¸ñ¡£pooling Èç¹û²»¾ß±¸£¬Ôò¼ÓÈëpooling = false
-        //      strConnection   out²ÎÊı£¬·µ»ØÁ¬½Ó×Ö·û´®Áª
-        //      strError        out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //      strStyle    é£æ ¼ã€‚pooling å¦‚æœä¸å…·å¤‡ï¼Œåˆ™åŠ å…¥pooling = false
+        //      strConnection   outå‚æ•°ï¼Œè¿”å›è¿æ¥å­—ç¬¦ä¸²è”
+        //      strError        outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //      -1  ³ö´í
-        //      0   ³É¹¦
-        // Ïß: ²»°²È«µÄ
+        //      -1  å‡ºé”™
+        //      0   æˆåŠŸ
+        // çº¿: ä¸å®‰å…¨çš„
         internal int InternalGetConnectionString(
             int nTimeout,
             string strStyle,
@@ -400,7 +400,7 @@ namespace DigitalPlatform.rms
             XmlNode nodeDataSource = this.container.CfgDom.DocumentElement.SelectSingleNode("datasource");
             if (nodeDataSource == null)
             {
-                strError = "·şÎñÆ÷ÅäÖÃÎÄ¼ş²»ºÏ·¨£¬Î´ÔÚ¸ùÔªËØÏÂ¶¨Òå<datasource>ÔªËØ";
+                strError = "æœåŠ¡å™¨é…ç½®æ–‡ä»¶ä¸åˆæ³•ï¼Œæœªåœ¨æ ¹å…ƒç´ ä¸‹å®šä¹‰<datasource>å…ƒç´ ";
                 return -1;
             }
 
@@ -412,7 +412,7 @@ namespace DigitalPlatform.rms
             {
                 if (string.IsNullOrEmpty(this.m_strObjectDir) == true)
                 {
-                    strError = "Êı¾İ¿â '" + this.GetCaption("zh-CN") + "' Ã»ÓĞ¶¨Òå m_strObjectDir Öµ";
+                    strError = "æ•°æ®åº“ '" + this.GetCaption("zh-CN") + "' æ²¡æœ‰å®šä¹‰ m_strObjectDir å€¼";
                     return -1;
                 }
                 strConnection = "Data Source=" + PathUtil.MergePath(this.m_strObjectDir, "sqlite_database.bin")
@@ -426,7 +426,7 @@ namespace DigitalPlatform.rms
             {
                 if (string.IsNullOrEmpty(this.m_strObjectDir) == true)
                 {
-                    strError = "Êı¾İ¿â '" + this.GetCaption("zh-CN") + "' Ã»ÓĞ¶¨Òå m_strObjectDir Öµ";
+                    strError = "æ•°æ®åº“ '" + this.GetCaption("zh-CN") + "' æ²¡æœ‰å®šä¹‰ m_strObjectDir å€¼";
                     return -1;
                 }
                 //  "Data Source=(localdb)\v11.0;Integrated Security=true;AttachDbFileName=C:\MyData\Database1.mdf".
@@ -445,17 +445,17 @@ namespace DigitalPlatform.rms
                     strUserID = DomUtil.GetAttr(nodeDataSource, "userid").Trim();
                     if (strUserID == "")
                     {
-                        strError = "·şÎñÆ÷ÅäÖÃÎÄ¼ş²»ºÏ·¨£¬Î´¸ø¸ùÔªËØÏÂ¼¶µÄ<datasource>¶¨Òå'userid'ÊôĞÔ£¬»ò'userid'ÊôĞÔÖµÎª¿Õ¡£";
+                        strError = "æœåŠ¡å™¨é…ç½®æ–‡ä»¶ä¸åˆæ³•ï¼Œæœªç»™æ ¹å…ƒç´ ä¸‹çº§çš„<datasource>å®šä¹‰'userid'å±æ€§ï¼Œæˆ–'userid'å±æ€§å€¼ä¸ºç©ºã€‚";
                         return -1;
                     }
 
                     strPassword = DomUtil.GetAttr(nodeDataSource, "password").Trim();
                     if (strPassword == "")
                     {
-                        strError = "·şÎñÆ÷ÅäÖÃÎÄ¼ş²»ºÏ·¨£¬Î´¸ø¸ùÔªËØÏÂ¼¶µÄ<datasource>¶¨Òå'password'ÊôĞÔ£¬»ò'password'ÊôĞÔÖµÎª¿Õ¡£";
+                        strError = "æœåŠ¡å™¨é…ç½®æ–‡ä»¶ä¸åˆæ³•ï¼Œæœªç»™æ ¹å…ƒç´ ä¸‹çº§çš„<datasource>å®šä¹‰'password'å±æ€§ï¼Œæˆ–'password'å±æ€§å€¼ä¸ºç©ºã€‚";
                         return -1;
                     }
-                    // password¿ÉÄÜÎª¿Õ
+                    // passwordå¯èƒ½ä¸ºç©º
                     try
                     {
                         strPassword = Cryptography.Decrypt(strPassword,
@@ -463,14 +463,14 @@ namespace DigitalPlatform.rms
                     }
                     catch
                     {
-                        strError = "·şÎñÆ÷ÅäÖÃÎÄ¼ş²»ºÏ·¨£¬¸ùÔªËØÏÂ¼¶µÄ<datasource>¶¨Òå'password'ÊôĞÔÖµ²»ºÏ·¨¡£";
+                        strError = "æœåŠ¡å™¨é…ç½®æ–‡ä»¶ä¸åˆæ³•ï¼Œæ ¹å…ƒç´ ä¸‹çº§çš„<datasource>å®šä¹‰'password'å±æ€§å€¼ä¸åˆæ³•ã€‚";
                         return -1;
                     }
 
                     strConnection = @"Persist Security Info=False;"
-                        + "User ID=" + strUserID + ";"    //ÕÊ»§ºÍÃÜÂë
+                        + "User ID=" + strUserID + ";"    //å¸æˆ·å’Œå¯†ç 
                         + "Password=" + strPassword + ";"
-                        //+ "Integrated Security=SSPI; "      //ĞÅÈÎÁ¬½Ó
+                        //+ "Integrated Security=SSPI; "      //ä¿¡ä»»è¿æ¥
                         + "Data Source=" + this.container.SqlServerName + ";"
                         // http://msdn2.microsoft.com/en-us/library/8xx3tyca(vs.71).aspx
                         + "Connect Timeout=" + nTimeout.ToString() + ";"
@@ -480,14 +480,14 @@ namespace DigitalPlatform.rms
                 else if (strMode == "SSPI") // 2006/3/22
                 {
                     strConnection = @"Persist Security Info=False;"
-                        + "Integrated Security=SSPI; "      //ĞÅÈÎÁ¬½Ó
+                        + "Integrated Security=SSPI; "      //ä¿¡ä»»è¿æ¥
                         + "Data Source=" + this.container.SqlServerName + ";"
-                        + "Connect Timeout=" + nTimeout.ToString() + ";" // 30Ãë
+                        + "Connect Timeout=" + nTimeout.ToString() + ";" // 30ç§’
                         + "charset=utf8;";
                 }
                 else
                 {
-                    strError = "·şÎñÆ÷ÅäÖÃÎÄ¼ş²»ºÏ·¨£¬¸ùÔªËØÏÂ¼¶µÄ<datasource>¶¨ÒåmodeÊôĞÔÖµ'" + strMode + "'²»ºÏ·¨¡£";
+                    strError = "æœåŠ¡å™¨é…ç½®æ–‡ä»¶ä¸åˆæ³•ï¼Œæ ¹å…ƒç´ ä¸‹çº§çš„<datasource>å®šä¹‰modeå±æ€§å€¼'" + strMode + "'ä¸åˆæ³•ã€‚";
                     return -1;
                 }
 
@@ -507,17 +507,17 @@ namespace DigitalPlatform.rms
                     strUserID = DomUtil.GetAttr(nodeDataSource, "userid").Trim();
                     if (strUserID == "")
                     {
-                        strError = "·şÎñÆ÷ÅäÖÃÎÄ¼ş²»ºÏ·¨£¬Î´¸ø¸ùÔªËØÏÂ¼¶µÄ<datasource>¶¨Òå'userid'ÊôĞÔ£¬»ò'userid'ÊôĞÔÖµÎª¿Õ¡£";
+                        strError = "æœåŠ¡å™¨é…ç½®æ–‡ä»¶ä¸åˆæ³•ï¼Œæœªç»™æ ¹å…ƒç´ ä¸‹çº§çš„<datasource>å®šä¹‰'userid'å±æ€§ï¼Œæˆ–'userid'å±æ€§å€¼ä¸ºç©ºã€‚";
                         return -1;
                     }
 
                     strPassword = DomUtil.GetAttr(nodeDataSource, "password").Trim();
                     if (strPassword == "")
                     {
-                        strError = "·şÎñÆ÷ÅäÖÃÎÄ¼ş²»ºÏ·¨£¬Î´¸ø¸ùÔªËØÏÂ¼¶µÄ<datasource>¶¨Òå'password'ÊôĞÔ£¬»ò'password'ÊôĞÔÖµÎª¿Õ¡£";
+                        strError = "æœåŠ¡å™¨é…ç½®æ–‡ä»¶ä¸åˆæ³•ï¼Œæœªç»™æ ¹å…ƒç´ ä¸‹çº§çš„<datasource>å®šä¹‰'password'å±æ€§ï¼Œæˆ–'password'å±æ€§å€¼ä¸ºç©ºã€‚";
                         return -1;
                     }
-                    // password¿ÉÄÜÎª¿Õ
+                    // passwordå¯èƒ½ä¸ºç©º
                     try
                     {
                         strPassword = Cryptography.Decrypt(strPassword,
@@ -525,14 +525,14 @@ namespace DigitalPlatform.rms
                     }
                     catch
                     {
-                        strError = "·şÎñÆ÷ÅäÖÃÎÄ¼ş²»ºÏ·¨£¬¸ùÔªËØÏÂ¼¶µÄ<datasource>¶¨Òå'password'ÊôĞÔÖµ²»ºÏ·¨¡£";
+                        strError = "æœåŠ¡å™¨é…ç½®æ–‡ä»¶ä¸åˆæ³•ï¼Œæ ¹å…ƒç´ ä¸‹çº§çš„<datasource>å®šä¹‰'password'å±æ€§å€¼ä¸åˆæ³•ã€‚";
                         return -1;
                     }
 
                     strConnection = @"Persist Security Info=False;"
-                        + "User ID=" + strUserID + ";"    //ÕÊ»§ºÍÃÜÂë
+                        + "User ID=" + strUserID + ";"    //å¸æˆ·å’Œå¯†ç 
                         + "Password=" + strPassword + ";"
-                        //+ "Integrated Security=SSPI; "      //ĞÅÈÎÁ¬½Ó
+                        //+ "Integrated Security=SSPI; "      //ä¿¡ä»»è¿æ¥
                         + "Data Source=" + this.container.SqlServerName + ";"
                         // http://msdn2.microsoft.com/en-us/library/8xx3tyca(vs.71).aspx
                         + "Connect Timeout=" + nTimeout.ToString() + ";";
@@ -541,17 +541,17 @@ namespace DigitalPlatform.rms
                 else if (strMode == "SSPI") // 2006/3/22
                 {
                     strConnection = @"Persist Security Info=False;"
-                        + "Integrated Security=SSPI; "      //ĞÅÈÎÁ¬½Ó
+                        + "Integrated Security=SSPI; "      //ä¿¡ä»»è¿æ¥
                         + "Data Source=" + this.container.SqlServerName + ";"
-                        + "Connect Timeout=" + nTimeout.ToString() + ";"; // 30Ãë
+                        + "Connect Timeout=" + nTimeout.ToString() + ";"; // 30ç§’
                 }
                 else
                 {
-                    strError = "·şÎñÆ÷ÅäÖÃÎÄ¼ş²»ºÏ·¨£¬¸ùÔªËØÏÂ¼¶µÄ<datasource>¶¨ÒåmodeÊôĞÔÖµ'" + strMode + "'²»ºÏ·¨¡£";
+                    strError = "æœåŠ¡å™¨é…ç½®æ–‡ä»¶ä¸åˆæ³•ï¼Œæ ¹å…ƒç´ ä¸‹çº§çš„<datasource>å®šä¹‰modeå±æ€§å€¼'" + strMode + "'ä¸åˆæ³•ã€‚";
                     return -1;
                 }
 
-                // È«²¿ÓÃpooling
+                // å…¨éƒ¨ç”¨pooling
                 /*
                 if (StringUtil.IsInList("pooling", strStyle) == false)
                     strConnection += "Pooling=false;";
@@ -568,17 +568,17 @@ namespace DigitalPlatform.rms
                 strUserID = DomUtil.GetAttr(nodeDataSource, "userid").Trim();
                 if (strUserID == "")
                 {
-                    strError = "·şÎñÆ÷ÅäÖÃÎÄ¼ş²»ºÏ·¨£¬Î´¸ø¸ùÔªËØÏÂ¼¶µÄ<datasource>¶¨Òå'userid'ÊôĞÔ£¬»ò'userid'ÊôĞÔÖµÎª¿Õ¡£";
+                    strError = "æœåŠ¡å™¨é…ç½®æ–‡ä»¶ä¸åˆæ³•ï¼Œæœªç»™æ ¹å…ƒç´ ä¸‹çº§çš„<datasource>å®šä¹‰'userid'å±æ€§ï¼Œæˆ–'userid'å±æ€§å€¼ä¸ºç©ºã€‚";
                     return -1;
                 }
 
                 strPassword = DomUtil.GetAttr(nodeDataSource, "password").Trim();
                 if (strPassword == "")
                 {
-                    strError = "·şÎñÆ÷ÅäÖÃÎÄ¼ş²»ºÏ·¨£¬Î´¸ø¸ùÔªËØÏÂ¼¶µÄ<datasource>¶¨Òå'password'ÊôĞÔ£¬»ò'password'ÊôĞÔÖµÎª¿Õ¡£";
+                    strError = "æœåŠ¡å™¨é…ç½®æ–‡ä»¶ä¸åˆæ³•ï¼Œæœªç»™æ ¹å…ƒç´ ä¸‹çº§çš„<datasource>å®šä¹‰'password'å±æ€§ï¼Œæˆ–'password'å±æ€§å€¼ä¸ºç©ºã€‚";
                     return -1;
                 }
-                // password¿ÉÄÜÎª¿Õ
+                // passwordå¯èƒ½ä¸ºç©º
                 try
                 {
                     strPassword = Cryptography.Decrypt(strPassword,
@@ -586,14 +586,14 @@ namespace DigitalPlatform.rms
                 }
                 catch
                 {
-                    strError = "·şÎñÆ÷ÅäÖÃÎÄ¼ş²»ºÏ·¨£¬¸ùÔªËØÏÂ¼¶µÄ<datasource>¶¨Òå'password'ÊôĞÔÖµ²»ºÏ·¨¡£";
+                    strError = "æœåŠ¡å™¨é…ç½®æ–‡ä»¶ä¸åˆæ³•ï¼Œæ ¹å…ƒç´ ä¸‹çº§çš„<datasource>å®šä¹‰'password'å±æ€§å€¼ä¸åˆæ³•ã€‚";
                     return -1;
                 }
 
                 strConnection = @"Persist Security Info=False;"
-                    + "User ID=" + strUserID + ";"    //ÕÊ»§ºÍÃÜÂë
+                    + "User ID=" + strUserID + ";"    //å¸æˆ·å’Œå¯†ç 
                     + "Password=" + strPassword + ";"
-                    //+ "Integrated Security=SSPI; "      //ĞÅÈÎÁ¬½Ó
+                    //+ "Integrated Security=SSPI; "      //ä¿¡ä»»è¿æ¥
                     + "Data Source=" + this.container.SqlServerName + ";"
                     // http://msdn2.microsoft.com/en-us/library/8xx3tyca(vs.71).aspx
                     + "Connect Timeout=" + nTimeout.ToString() + ";";
@@ -602,13 +602,13 @@ namespace DigitalPlatform.rms
             else if (strMode == "SSPI") // 2006/3/22
             {
                 strConnection = @"Persist Security Info=False;"
-                    + "Integrated Security=SSPI; "      //ĞÅÈÎÁ¬½Ó
+                    + "Integrated Security=SSPI; "      //ä¿¡ä»»è¿æ¥
                     + "Data Source=" + this.container.SqlServerName + ";"
-                    + "Connect Timeout=" + nTimeout.ToString() + ";"; // 30Ãë
+                    + "Connect Timeout=" + nTimeout.ToString() + ";"; // 30ç§’
             }
             else
             {
-                strError = "·şÎñÆ÷ÅäÖÃÎÄ¼ş²»ºÏ·¨£¬¸ùÔªËØÏÂ¼¶µÄ<datasource>¶¨ÒåmodeÊôĞÔÖµ'" + strMode + "'²»ºÏ·¨¡£";
+                strError = "æœåŠ¡å™¨é…ç½®æ–‡ä»¶ä¸åˆæ³•ï¼Œæ ¹å…ƒç´ ä¸‹çº§çš„<datasource>å®šä¹‰modeå±æ€§å€¼'" + strMode + "'ä¸åˆæ³•ã€‚";
                 return -1;
             }
 
@@ -626,15 +626,15 @@ namespace DigitalPlatform.rms
         }
 
 
-        // µÃµ½Êı¾İÔ´Ãû³Æ£¬¶ÔÓÚSqlÊı¾İ¿â£¬ÔòÊÇSqlÊı¾İ¿âÃû¡£
+        // å¾—åˆ°æ•°æ®æºåç§°ï¼Œå¯¹äºSqlæ•°æ®åº“ï¼Œåˆ™æ˜¯Sqlæ•°æ®åº“åã€‚
         public override string GetSourceName()
         {
             return this.m_strSqlDbName;
         }
 
-        // É¾³ıÒ»¸öÄ¿Â¼ÄÚµÄËùÓĞÎÄ¼şºÍÄ¿Â¼
+        // åˆ é™¤ä¸€ä¸ªç›®å½•å†…çš„æ‰€æœ‰æ–‡ä»¶å’Œç›®å½•
         // parameters:
-        //      strExcludeFileName  ÏëÒª±£ÁôµÄÎÄ¼şÃû£¬È«Â·¾¶
+        //      strExcludeFileName  æƒ³è¦ä¿ç•™çš„æ–‡ä»¶åï¼Œå…¨è·¯å¾„
         static bool ClearDir(string strDir,
             string strExcludeFileName)
         {
@@ -644,19 +644,19 @@ namespace DigitalPlatform.rms
                 if (di.Exists == false)
                     return true;
 
-                // É¾³ıËùÓĞµÄÏÂ¼¶Ä¿Â¼
+                // åˆ é™¤æ‰€æœ‰çš„ä¸‹çº§ç›®å½•
                 DirectoryInfo[] dirs = di.GetDirectories();
                 foreach (DirectoryInfo childDir in dirs)
                 {
                     if (PathUtil.IsChildOrEqual(strExcludeFileName, childDir.FullName) == true)
                     {
-                        ClearDir(childDir.FullName, strExcludeFileName);    // µİ¹é
+                        ClearDir(childDir.FullName, strExcludeFileName);    // é€’å½’
                     }
                     else
                         Directory.Delete(childDir.FullName, true);
                 }
 
-                // É¾³ıËùÓĞÎÄ¼ş
+                // åˆ é™¤æ‰€æœ‰æ–‡ä»¶
                 FileInfo[] fis = di.GetFiles();
                 foreach (FileInfo fi in fis)
                 {
@@ -674,22 +674,22 @@ namespace DigitalPlatform.rms
 #endif
         }
 
-        // ³õÊ¼»¯Êı¾İ¿â£¬×¢ÒâĞéº¯Êı²»ÄÜÎªprivate
+        // åˆå§‹åŒ–æ•°æ®åº“ï¼Œæ³¨æ„è™šå‡½æ•°ä¸èƒ½ä¸ºprivate
         // parameter:
-        //		strError    out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //		strError    outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //		-1  ³ö´í
-        //		0   ³É¹¦
-        // Ïß: °²È«µÄ
-        // ¼ÓĞ´ËøµÄÔ­Òò£¬ĞŞ¸Ä¼ÇÂ¼Î²ºÅ£¬ÁíÍâ¶ÔSQLµÄ²Ù×÷²»±Øµ£ĞÄËø
+        //		-1  å‡ºé”™
+        //		0   æˆåŠŸ
+        // çº¿: å®‰å…¨çš„
+        // åŠ å†™é”çš„åŸå› ï¼Œä¿®æ”¹è®°å½•å°¾å·ï¼Œå¦å¤–å¯¹SQLçš„æ“ä½œä¸å¿…æ‹…å¿ƒé”
         public override int InitialPhysicalDatabase(out string strError)
         {
             strError = "";
 
-            //************¶ÔÊı¾İ¿â¼ÓĞ´Ëø********************
+            //************å¯¹æ•°æ®åº“åŠ å†™é”********************
             m_db_lock.AcquireWriterLock(m_nTimeOut);
 #if DEBUG_LOCK_SQLDATABASE
-			this.container.WriteDebugInfo("Initialize()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â¼ÓĞ´Ëø¡£");
+			this.container.WriteDebugInfo("Initialize()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“åŠ å†™é”ã€‚");
 #endif
 
             try
@@ -704,12 +704,12 @@ namespace DigitalPlatform.rms
                 {
                     SqlConnection connection = new SqlConnection(this.m_strConnString);
                     connection.Open();
-                    try //Á¬½Ó
+                    try //è¿æ¥
                     {
                         string strCommand = "";
 
-                        // 2015/5/17 LocalDB ÒªÇóÏÈÉ¾³ı SQL Êı¾İ¿âÒÔºó²ÅÄÜÉ¾³ı¶ÔÏóÄ¿Â¼£¬ÒòÎªÊı¾İ¿âÎÄ¼şÔÚÕâ¸öÄ¿Â¼ÖĞ
-                        // 1.É¾³ı SQL Êı¾İ¿â
+                        // 2015/5/17 LocalDB è¦æ±‚å…ˆåˆ é™¤ SQL æ•°æ®åº“ä»¥åæ‰èƒ½åˆ é™¤å¯¹è±¡ç›®å½•ï¼Œå› ä¸ºæ•°æ®åº“æ–‡ä»¶åœ¨è¿™ä¸ªç›®å½•ä¸­
+                        // 1.åˆ é™¤ SQL æ•°æ®åº“
                         if (this.IsLocalDB() == true)
                         {
                             strCommand = "use master " + "\n"
@@ -726,9 +726,9 @@ namespace DigitalPlatform.rms
                                 catch (Exception ex)
                                 {
 #if NO
-                                    strError = "É¾³ı SQL ¿â³ö´í.\r\n"
+                                    strError = "åˆ é™¤ SQL åº“å‡ºé”™.\r\n"
                                         + ex.Message + "\r\n"
-                                        + "SQLÃüÁî:\r\n"
+                                        + "SQLå‘½ä»¤:\r\n"
                                         + strCommand;
                                     return -1;
 #endif
@@ -736,7 +736,7 @@ namespace DigitalPlatform.rms
                             }
                         }
 
-                        // 2. É¾³ı¶ÔÏóÄ¿Â¼£¬È»ºóÖØ½¨
+                        // 2. åˆ é™¤å¯¹è±¡ç›®å½•ï¼Œç„¶åé‡å»º
                         try
                         {
                             if (string.IsNullOrEmpty(this.m_strObjectDir) == false)
@@ -747,31 +747,31 @@ namespace DigitalPlatform.rms
                         }
                         catch (Exception ex)
                         {
-                            strError = "Çå³ı Êı¾İ¿â '" + this.GetCaption("zh") + "' µÄ Ô­ÓĞ¶ÔÏóÄ¿Â¼ '" + this.m_strObjectDir + "' Ê±·¢Éú´íÎó£º " + ex.Message;
+                            strError = "æ¸…é™¤ æ•°æ®åº“ '" + this.GetCaption("zh") + "' çš„ åŸæœ‰å¯¹è±¡ç›®å½• '" + this.m_strObjectDir + "' æ—¶å‘ç”Ÿé”™è¯¯ï¼š " + ex.Message;
                             return -1;
                         }
 
 
-                        // 3.½¨¿â
+                        // 3.å»ºåº“
                         strCommand = this.GetCreateDbCmdString(this.container.SqlServerType);
                         using (SqlCommand command = new SqlCommand(strCommand,
                             connection))
                         {
                             try
                             {
-                                command.CommandTimeout = 20 * 60;  // °Ñ³¬Ê±Ê±¼ä·Å´ó 2013/2/10
+                                command.CommandTimeout = 20 * 60;  // æŠŠè¶…æ—¶æ—¶é—´æ”¾å¤§ 2013/2/10
                                 command.ExecuteNonQuery();
                             }
                             catch (Exception ex)
                             {
-                                strError = "½¨¿â³ö´í.\r\n"
+                                strError = "å»ºåº“å‡ºé”™.\r\n"
                                     + ex.Message + "\r\n"
-                                    + "SQLÃüÁî:\r\n"
+                                    + "SQLå‘½ä»¤:\r\n"
                                     + strCommand;
                                 return -1;
                             }
 
-                            // 4.½¨±í
+                            // 4.å»ºè¡¨
                             int nRet = this.GetCreateTablesString(
                                 this.container.SqlServerType,
                                 out strCommand,
@@ -785,14 +785,14 @@ namespace DigitalPlatform.rms
                             }
                             catch (Exception ex)
                             {
-                                strError = "½¨±í³ö´í.\r\n"
+                                strError = "å»ºè¡¨å‡ºé”™.\r\n"
                                     + ex.Message + "\r\n"
-                                    + "SQLÃüÁî:\r\n"
+                                    + "SQLå‘½ä»¤:\r\n"
                                     + strCommand;
                                 return -1;
                             }
 
-                            // 5.½¨Ë÷Òı
+                            // 5.å»ºç´¢å¼•
                             nRet = this.GetCreateIndexString(
                                 "keys,records",
                                 this.container.SqlServerType,
@@ -808,18 +808,18 @@ namespace DigitalPlatform.rms
                             }
                             catch (Exception ex)
                             {
-                                strError = "½¨Ë÷Òı³ö´í.\r\n"
+                                strError = "å»ºç´¢å¼•å‡ºé”™.\r\n"
                                     + ex.Message + "\r\n"
-                                    + "SQLÃüÁî:\r\n"
+                                    + "SQLå‘½ä»¤:\r\n"
                                     + strCommand;
                                 return -1;
                             }
                         } // end of using command
 
-                        // 6.Éè¿â¼ÇÂ¼ÖÖ×ÓÎª0
+                        // 6.è®¾åº“è®°å½•ç§å­ä¸º0
                         this.SetTailNo(0);
                         this.m_bTailNoVerified = true;  // 2011/2/26
-                        this.container.Changed = true;   //ÄÚÈİ¸Ä±ä
+                        this.container.Changed = true;   //å†…å®¹æ”¹å˜
                     }
                     finally
                     {
@@ -827,7 +827,7 @@ namespace DigitalPlatform.rms
                     }
 
 #if NO
-                    // É¾³ı¶ÔÏóÄ¿Â¼£¬È»ºóÖØ½¨
+                    // åˆ é™¤å¯¹è±¡ç›®å½•ï¼Œç„¶åé‡å»º
                     try
                     {
                         if (string.IsNullOrEmpty(this.m_strObjectDir) == false)
@@ -845,7 +845,7 @@ namespace DigitalPlatform.rms
                     }
                     catch (Exception ex)
                     {
-                        strError = "Çå³ı Êı¾İ¿â '" + this.GetCaption("zh") + "' µÄ Ô­ÓĞ¶ÔÏóÄ¿Â¼ '" + this.m_strObjectDir + "' Ê±·¢Éú´íÎó£º " + ex.Message;
+                        strError = "æ¸…é™¤ æ•°æ®åº“ '" + this.GetCaption("zh") + "' çš„ åŸæœ‰å¯¹è±¡ç›®å½• '" + this.m_strObjectDir + "' æ—¶å‘ç”Ÿé”™è¯¯ï¼š " + ex.Message;
                         return -1;
                     }
 #endif
@@ -855,7 +855,7 @@ namespace DigitalPlatform.rms
                     // Commit Transaction
                     this.CloseInternal(false);
 
-                    // É¾³ı¶ÔÏóÄ¿Â¼£¬È»ºóÖØ½¨
+                    // åˆ é™¤å¯¹è±¡ç›®å½•ï¼Œç„¶åé‡å»º
                     try
                     {
                         if (string.IsNullOrEmpty(this.m_strObjectDir) == false)
@@ -867,17 +867,17 @@ namespace DigitalPlatform.rms
                     }
                     catch (Exception ex)
                     {
-                        strError = "Çå³ı Êı¾İ¿â '" + this.GetCaption("zh") + "' µÄ Ô­ÓĞ¶ÔÏóÄ¿Â¼ '" + this.m_strObjectDir + "' Ê±·¢Éú´íÎó£º " + ex.Message;
+                        strError = "æ¸…é™¤ æ•°æ®åº“ '" + this.GetCaption("zh") + "' çš„ åŸæœ‰å¯¹è±¡ç›®å½• '" + this.m_strObjectDir + "' æ—¶å‘ç”Ÿé”™è¯¯ï¼š " + ex.Message;
                         return -1;
                     }
 
                     SQLiteConnection connection = new SQLiteConnection(this.m_strConnString);
                     // connection.Open();
                     Open(connection);
-                    try //Á¬½Ó
+                    try //è¿æ¥
                     {
                         string strCommand = "";
-                        // 2.½¨±í
+                        // 2.å»ºè¡¨
                         int nRet = this.GetCreateTablesString(
                             this.container.SqlServerType,
                             out strCommand,
@@ -893,14 +893,14 @@ namespace DigitalPlatform.rms
                             }
                             catch (Exception ex)
                             {
-                                strError = "½¨±í³ö´í.\r\n"
+                                strError = "å»ºè¡¨å‡ºé”™.\r\n"
                                     + ex.Message + "\r\n"
-                                    + "SQLÃüÁî:\r\n"
+                                    + "SQLå‘½ä»¤:\r\n"
                                     + strCommand;
                                 return -1;
                             }
 
-                            // 3.½¨Ë÷Òı
+                            // 3.å»ºç´¢å¼•
                             nRet = this.GetCreateIndexString(
                                 "keys,records",
                                 this.container.SqlServerType,
@@ -916,18 +916,18 @@ namespace DigitalPlatform.rms
                             }
                             catch (Exception ex)
                             {
-                                strError = "½¨Ë÷Òı³ö´í.\r\n"
+                                strError = "å»ºç´¢å¼•å‡ºé”™.\r\n"
                                     + ex.Message + "\r\n"
-                                    + "SQLÃüÁî:\r\n"
+                                    + "SQLå‘½ä»¤:\r\n"
                                     + strCommand;
                                 return -1;
                             }
                         } // end of using command
 
-                        // 4.Éè¿â¼ÇÂ¼ÖÖ×ÓÎª0
+                        // 4.è®¾åº“è®°å½•ç§å­ä¸º0
                         this.SetTailNo(0);
                         this.m_bTailNoVerified = true;  // 2011/2/26
-                        this.container.Changed = true;   //ÄÚÈİ¸Ä±ä
+                        this.container.Changed = true;   //å†…å®¹æ”¹å˜
                     }
                     finally
                     {
@@ -938,10 +938,10 @@ namespace DigitalPlatform.rms
                 {
                     MySqlConnection connection = new MySqlConnection(this.m_strConnString);
                     connection.Open();
-                    try //Á¬½Ó
+                    try //è¿æ¥
                     {
                         string strCommand = "";
-                        // 1.½¨¿â
+                        // 1.å»ºåº“
                         strCommand = this.GetCreateDbCmdString(this.container.SqlServerType);
                         using (MySqlCommand command = new MySqlCommand(strCommand,
                             connection))
@@ -952,14 +952,14 @@ namespace DigitalPlatform.rms
                             }
                             catch (Exception ex)
                             {
-                                strError = "½¨¿â³ö´í.\r\n"
+                                strError = "å»ºåº“å‡ºé”™.\r\n"
                                     + ex.Message + "\r\n"
-                                    + "SQLÃüÁî:\r\n"
+                                    + "SQLå‘½ä»¤:\r\n"
                                     + strCommand;
                                 return -1;
                             }
 
-                            // 2.½¨±í
+                            // 2.å»ºè¡¨
                             int nRet = this.GetCreateTablesString(
                                 this.container.SqlServerType,
                                 out strCommand,
@@ -973,14 +973,14 @@ namespace DigitalPlatform.rms
                             }
                             catch (Exception ex)
                             {
-                                strError = "½¨±í³ö´í.\r\n"
+                                strError = "å»ºè¡¨å‡ºé”™.\r\n"
                                     + ex.Message + "\r\n"
-                                    + "SQLÃüÁî:\r\n"
+                                    + "SQLå‘½ä»¤:\r\n"
                                     + strCommand;
                                 return -1;
                             }
 
-                            // 3.½¨Ë÷Òı
+                            // 3.å»ºç´¢å¼•
                             nRet = this.GetCreateIndexString(
                                 "keys,records",
                                 this.container.SqlServerType,
@@ -996,25 +996,25 @@ namespace DigitalPlatform.rms
                             }
                             catch (Exception ex)
                             {
-                                strError = "½¨Ë÷Òı³ö´í.\r\n"
+                                strError = "å»ºç´¢å¼•å‡ºé”™.\r\n"
                                     + ex.Message + "\r\n"
-                                    + "SQLÃüÁî:\r\n"
+                                    + "SQLå‘½ä»¤:\r\n"
                                     + strCommand;
                                 return -1;
                             }
                         } // end of using command
 
-                        // 4.Éè¿â¼ÇÂ¼ÖÖ×ÓÎª0
+                        // 4.è®¾åº“è®°å½•ç§å­ä¸º0
                         this.SetTailNo(0);
                         this.m_bTailNoVerified = true;  // 2011/2/26
-                        this.container.Changed = true;   //ÄÚÈİ¸Ä±ä
+                        this.container.Changed = true;   //å†…å®¹æ”¹å˜
                     }
                     finally
                     {
                         connection.Close();
                     }
 
-                    // É¾³ı¶ÔÏóÄ¿Â¼£¬È»ºóÖØ½¨
+                    // åˆ é™¤å¯¹è±¡ç›®å½•ï¼Œç„¶åé‡å»º
                     try
                     {
                         if (string.IsNullOrEmpty(this.m_strObjectDir) == false)
@@ -1025,7 +1025,7 @@ namespace DigitalPlatform.rms
                     }
                     catch (Exception ex)
                     {
-                        strError = "Çå³ı Êı¾İ¿â '" + this.GetCaption("zh") + "' µÄ Ô­ÓĞ¶ÔÏóÄ¿Â¼ '" + this.m_strObjectDir + "' Ê±·¢Éú´íÎó£º " + ex.Message;
+                        strError = "æ¸…é™¤ æ•°æ®åº“ '" + this.GetCaption("zh") + "' çš„ åŸæœ‰å¯¹è±¡ç›®å½• '" + this.m_strObjectDir + "' æ—¶å‘ç”Ÿé”™è¯¯ï¼š " + ex.Message;
                         return -1;
                     }
                 }
@@ -1033,7 +1033,7 @@ namespace DigitalPlatform.rms
                 {
                     OracleConnection connection = new OracleConnection(this.m_strConnString);
                     connection.Open();
-                    try //Á¬½Ó
+                    try //è¿æ¥
                     {
                         string strCommand = "";
 
@@ -1042,7 +1042,7 @@ namespace DigitalPlatform.rms
                         {
 
 #if NO
-                        // 1.½¨¿â
+                        // 1.å»ºåº“
                         strCommand = this.GetCreateDbCmdString(this.container.SqlServerType);
                         command = new OracleCommand(strCommand,
                             connection);
@@ -1052,9 +1052,9 @@ namespace DigitalPlatform.rms
                         }
                         catch (Exception ex)
                         {
-                            strError = "½¨¿â³ö´í.\r\n"
+                            strError = "å»ºåº“å‡ºé”™.\r\n"
                                 + ex.Message + "\r\n"
-                                + "SQLÃüÁî:\r\n"
+                                + "SQLå‘½ä»¤:\r\n"
                                 + strCommand;
                             return -1;
                         }
@@ -1067,7 +1067,7 @@ namespace DigitalPlatform.rms
                             if (nRet == -1)
                                 return -1;
 
-                            // 2.½¨±í
+                            // 2.å»ºè¡¨
                             nRet = this.GetCreateTablesString(
                                 this.container.SqlServerType,
                                 out strCommand,
@@ -1087,15 +1087,15 @@ namespace DigitalPlatform.rms
                                 }
                                 catch (Exception ex)
                                 {
-                                    strError = "½¨±í³ö´í.\r\n"
+                                    strError = "å»ºè¡¨å‡ºé”™.\r\n"
                                         + ex.Message + "\r\n"
-                                        + "SQLÃüÁî:\r\n"
+                                        + "SQLå‘½ä»¤:\r\n"
                                         + strLine;
                                     return -1;
                                 }
                             }
 
-                            // 3.½¨Ë÷Òı
+                            // 3.å»ºç´¢å¼•
                             nRet = this.GetCreateIndexString(
                                 "keys,records",
                                 this.container.SqlServerType,
@@ -1117,9 +1117,9 @@ namespace DigitalPlatform.rms
                                 }
                                 catch (Exception ex)
                                 {
-                                    strError = "½¨Ë÷Òı³ö´í.\r\n"
+                                    strError = "å»ºç´¢å¼•å‡ºé”™.\r\n"
                                         + ex.Message + "\r\n"
-                                        + "SQLÃüÁî:\r\n"
+                                        + "SQLå‘½ä»¤:\r\n"
                                         + strLine;
                                     return -1;
                                 }
@@ -1127,17 +1127,17 @@ namespace DigitalPlatform.rms
 
                         } // end of using command
 
-                        // 4.Éè¿â¼ÇÂ¼ÖÖ×ÓÎª0
+                        // 4.è®¾åº“è®°å½•ç§å­ä¸º0
                         this.SetTailNo(0);
                         this.m_bTailNoVerified = true;  // 2011/2/26
-                        this.container.Changed = true;   //ÄÚÈİ¸Ä±ä
+                        this.container.Changed = true;   //å†…å®¹æ”¹å˜
                     }
                     finally
                     {
                         connection.Close();
                     }
 
-                    // É¾³ı¶ÔÏóÄ¿Â¼£¬È»ºóÖØ½¨
+                    // åˆ é™¤å¯¹è±¡ç›®å½•ï¼Œç„¶åé‡å»º
                     try
                     {
                         if (string.IsNullOrEmpty(this.m_strObjectDir) == false)
@@ -1148,26 +1148,26 @@ namespace DigitalPlatform.rms
                     }
                     catch (Exception ex)
                     {
-                        strError = "Çå³ı Êı¾İ¿â '" + this.GetCaption("zh") + "' µÄ Ô­ÓĞ¶ÔÏóÄ¿Â¼ '" + this.m_strObjectDir + "' Ê±·¢Éú´íÎó£º " + ex.Message;
+                        strError = "æ¸…é™¤ æ•°æ®åº“ '" + this.GetCaption("zh") + "' çš„ åŸæœ‰å¯¹è±¡ç›®å½• '" + this.m_strObjectDir + "' æ—¶å‘ç”Ÿé”™è¯¯ï¼š " + ex.Message;
                         return -1;
                     }
                 }
             }
             finally
             {
-                //*********************¶ÔÊı¾İ¿â½âĞ´Ëø******
+                //*********************å¯¹æ•°æ®åº“è§£å†™é”******
                 m_db_lock.ReleaseWriterLock();
 #if DEBUG_LOCK_SQLDATABASE
-				this.container.WriteDebugInfo("Initialize()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â½âĞ´Ëø¡£");
+				this.container.WriteDebugInfo("Initialize()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“è§£å†™é”ã€‚");
 #endif
             }
             return 0;
         }
 
-        // »ñÈ¡Ò»¸öSQLÊı¾İ¿âÖĞÒÑ¾­´æÔÚµÄrecordsºÍkeys±íÃû
-        // ×¢Òâ£¬±íÃûÒÑ¾­×ª»»ÎªĞ¡Ğ´»òÕß´óĞ´ĞÎÌ¬
+        // è·å–ä¸€ä¸ªSQLæ•°æ®åº“ä¸­å·²ç»å­˜åœ¨çš„recordså’Œkeysè¡¨å
+        // æ³¨æ„ï¼Œè¡¨åå·²ç»è½¬æ¢ä¸ºå°å†™æˆ–è€…å¤§å†™å½¢æ€
         // parameters:
-        //      strStyle    ÒªÌ½²âÄÄĞ©±í¡£keysºÍrecordsµÄ×éºÏ¡£¿ÕÏàµ±ÓÚ"keys,records"
+        //      strStyle    è¦æ¢æµ‹å“ªäº›è¡¨ã€‚keyså’Œrecordsçš„ç»„åˆã€‚ç©ºç›¸å½“äº"keys,records"
         int GetExistTableNames(
             Connection connection,
             out List<string> table_names,
@@ -1205,7 +1205,7 @@ namespace DigitalPlatform.rms
                 }
                 catch (Exception ex)
                 {
-                    strError = "»ñµÃÏÖ´æµÄ±íÃûÊ±³ö´í: " + ex.Message;
+                    strError = "è·å¾—ç°å­˜çš„è¡¨åæ—¶å‡ºé”™: " + ex.Message;
                     return -1;
                 }
             }
@@ -1235,7 +1235,7 @@ namespace DigitalPlatform.rms
                 }
                 catch (Exception ex)
                 {
-                    strError = "»ñµÃÏÖ´æµÄ±íÃûÊ±³ö´í: " + ex.Message;
+                    strError = "è·å¾—ç°å­˜çš„è¡¨åæ—¶å‡ºé”™: " + ex.Message;
                     return -1;
                 }
             }
@@ -1243,9 +1243,9 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
-        // É¾³ıÒ»¸öÊı¾İ¿âÖĞµÄÈ«²¿±í¡£Ä¿Ç°×¨ÓÃÓÚOracle°æ±¾
+        // åˆ é™¤ä¸€ä¸ªæ•°æ®åº“ä¸­çš„å…¨éƒ¨è¡¨ã€‚ç›®å‰ä¸“ç”¨äºOracleç‰ˆæœ¬
         // parameters:
-        //      strStyle    ÒªÉ¾³ıÄÄĞ©±í¡£keysºÍrecordsµÄ×éºÏ¡£¿ÕÏàµ±ÓÚ"keys,records"
+        //      strStyle    è¦åˆ é™¤å“ªäº›è¡¨ã€‚keyså’Œrecordsçš„ç»„åˆã€‚ç©ºç›¸å½“äº"keys,records"
         int DropAllTables(
             OracleConnection connection,
             string strSqlDbName,
@@ -1256,24 +1256,24 @@ namespace DigitalPlatform.rms
 
             List<string> table_names = new List<string>();
 
-            // µÚÒ»²½£¬»ñµÃËùÓĞ±íÃû
+            // ç¬¬ä¸€æ­¥ï¼Œè·å¾—æ‰€æœ‰è¡¨å
             string strCommand = " SELECT table_name FROM user_tables WHERE table_name like '" + strSqlDbName.ToUpper() + "_%'";
 
             if (string.IsNullOrEmpty(strStyle) == true
                 || (StringUtil.IsInList("keys", strStyle) == true && StringUtil.IsInList("records", strStyle) == true)
                 )
             {
-                // É¾³ıÈ«²¿
+                // åˆ é™¤å…¨éƒ¨
                 strCommand = " SELECT table_name FROM user_tables WHERE table_name like '" + strSqlDbName.ToUpper() + "_%'";
             }
             else if (StringUtil.IsInList("keys", strStyle) == true)
             {
-                // Ö»É¾³ıkeys
+                // åªåˆ é™¤keys
                 strCommand = " SELECT table_name FROM user_tables WHERE table_name like '" + strSqlDbName.ToUpper() + "_%' AND table_name <> '" + strSqlDbName.ToUpper() + "_RECORDS' ";
             }
             else if (StringUtil.IsInList("records", strStyle) == true)
             {
-                // Ö»É¾³ırecords
+                // åªåˆ é™¤records
                 strCommand = " SELECT table_name FROM user_tables WHERE table_name == '" + strSqlDbName.ToUpper() + "_RECORDS' ";
             }
 
@@ -1293,7 +1293,7 @@ namespace DigitalPlatform.rms
                     }
                 }
 
-                // µÚ¶ş²½£¬É¾³ıÕâĞ©±í
+                // ç¬¬äºŒæ­¥ï¼Œåˆ é™¤è¿™äº›è¡¨
                 List<string> cmd_lines = new List<string>();
                 foreach (string strTableName in table_names)
                 {
@@ -1311,9 +1311,9 @@ namespace DigitalPlatform.rms
                         }
                         catch (Exception ex)
                         {
-                            strError = "É¾³ıÊı¾İ¿â '" + strSqlDbName + "' µÄËùÓĞ±íÊ±³ö´í£º\r\n"
+                            strError = "åˆ é™¤æ•°æ®åº“ '" + strSqlDbName + "' çš„æ‰€æœ‰è¡¨æ—¶å‡ºé”™ï¼š\r\n"
                                 + ex.Message + "\r\n"
-                                + "SQLÃüÁî:\r\n"
+                                + "SQLå‘½ä»¤:\r\n"
                                 + strLine;
                             return -1;
                         }
@@ -1324,7 +1324,7 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
-        // ¼ì²é³ö´íĞÅÏ¢£¬ÊÇ·ñ±íÊ¾ÁË È«²¿¶¼ÊÇ 3701 errorcode ?
+        // æ£€æŸ¥å‡ºé”™ä¿¡æ¯ï¼Œæ˜¯å¦è¡¨ç¤ºäº† å…¨éƒ¨éƒ½æ˜¯ 3701 errorcode ?
         static bool IsErrorCode3701(SqlException ex)
         {
             if (ex.Errors == null || ex.Errors.Count == 0)
@@ -1338,10 +1338,10 @@ namespace DigitalPlatform.rms
                     return false;
             }
 
-            return true;    // ±íÊ¾È«²¿¶¼ÊÇ 3701 error
+            return true;    // è¡¨ç¤ºå…¨éƒ¨éƒ½æ˜¯ 3701 error
         }
 
-        // ¹ÜÀíkeys±íµÄindex
+        // ç®¡ç†keysè¡¨çš„index
         // parameters:
         //      strAction   delete/create/rebuild/disable/rebuildall/disableall
         public override int ManageKeysIndex(
@@ -1352,21 +1352,21 @@ namespace DigitalPlatform.rms
             int nRet = 0;
 
             // 2013/3/2
-            // ±ØĞëÔÚÃ»ÓĞ¼ÓËøµÄÊ±ºòµ÷ÓÃ
+            // å¿…é¡»åœ¨æ²¡æœ‰åŠ é”çš„æ—¶å€™è°ƒç”¨
             if (this.container.SqlServerType == SqlServerType.SQLite)
                 this.Commit();
 
-            //************¶ÔÊı¾İ¿â¼ÓĞ´Ëø********************
+            //************å¯¹æ•°æ®åº“åŠ å†™é”********************
             m_db_lock.AcquireWriterLock(m_nTimeOut);
 #if DEBUG_LOCK_SQLDATABASE
-			this.container.WriteDebugInfo("Refresh()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â¼ÓĞ´Ëø¡£");
+			this.container.WriteDebugInfo("Refresh()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“åŠ å†™é”ã€‚");
 #endif
             try
             {
                 Connection connection = new Connection(this,
                     this.m_strConnString);
                 connection.Open();
-                try //Á¬½Ó
+                try //è¿æ¥
                 {
                     string strCommand = "";
 
@@ -1404,7 +1404,7 @@ namespace DigitalPlatform.rms
                         {
                             try
                             {
-                                command.CommandTimeout = 20 * 60;  // °Ñ³¬Ê±Ê±¼ä·Å´ó
+                                command.CommandTimeout = 20 * 60;  // æŠŠè¶…æ—¶æ—¶é—´æ”¾å¤§
 
                                 command.ExecuteNonQuery();
                             }
@@ -1416,17 +1416,17 @@ namespace DigitalPlatform.rms
                                 {
                                     return 0;
                                 }
-                                strError = "Ë¢ĞÂ±í¶¨Òå " + strAction + " ³ö´í.\r\n"
+                                strError = "åˆ·æ–°è¡¨å®šä¹‰ " + strAction + " å‡ºé”™.\r\n"
     + ex.Message + "\r\n"
-    + "SQLÃüÁî:\r\n"
+    + "SQLå‘½ä»¤:\r\n"
     + strCommand;
                                 return -1;
                             }
                             catch (Exception ex)
                             {
-                                strError = "Ë¢ĞÂ±í¶¨Òå " + strAction + " ³ö´í.\r\n"
+                                strError = "åˆ·æ–°è¡¨å®šä¹‰ " + strAction + " å‡ºé”™.\r\n"
                                     + ex.Message + "\r\n"
-                                    + "SQLÃüÁî:\r\n"
+                                    + "SQLå‘½ä»¤:\r\n"
                                     + strCommand;
                                 return -1;
                             }
@@ -1442,15 +1442,15 @@ namespace DigitalPlatform.rms
                         {
                             try
                             {
-                                command.CommandTimeout = 20 * 60;  // °Ñ³¬Ê±Ê±¼ä·Å´ó 2008/11/20 
+                                command.CommandTimeout = 20 * 60;  // æŠŠè¶…æ—¶æ—¶é—´æ”¾å¤§ 2008/11/20 
 
                                 command.ExecuteNonQuery();
                             }
                             catch (Exception ex)
                             {
-                                strError = "Ë¢ĞÂ±í¶¨Òå " + strAction + " ³ö´í.\r\n"
+                                strError = "åˆ·æ–°è¡¨å®šä¹‰ " + strAction + " å‡ºé”™.\r\n"
                                     + ex.Message + "\r\n"
-                                    + "SQLÃüÁî:\r\n"
+                                    + "SQLå‘½ä»¤:\r\n"
                                     + strCommand;
                                 return -1;
                             }
@@ -1467,7 +1467,7 @@ namespace DigitalPlatform.rms
                         {
                             try
                             {
-                                command.CommandTimeout = 20 * 60;  // °Ñ³¬Ê±Ê±¼ä·Å´ó 2008/11/20 
+                                command.CommandTimeout = 20 * 60;  // æŠŠè¶…æ—¶æ—¶é—´æ”¾å¤§ 2008/11/20 
 
                                 command.ExecuteNonQuery();
                             }
@@ -1476,17 +1476,17 @@ namespace DigitalPlatform.rms
                                 if (strAction == "delete"
                                 && ex.Number == 1091)
                                     return 0;
-                                strError = "Ë¢ĞÂ±í¶¨Òå " + strAction + " ³ö´í.\r\n"
+                                strError = "åˆ·æ–°è¡¨å®šä¹‰ " + strAction + " å‡ºé”™.\r\n"
                                     + ex.Message + "\r\n"
-                                    + "SQLÃüÁî:\r\n"
+                                    + "SQLå‘½ä»¤:\r\n"
                                     + strCommand;
                                 return -1;
                             }
                             catch (Exception ex)
                             {
-                                strError = "Ë¢ĞÂ±í¶¨Òå " + strAction + " ³ö´í.\r\n"
+                                strError = "åˆ·æ–°è¡¨å®šä¹‰ " + strAction + " å‡ºé”™.\r\n"
                                     + ex.Message + "\r\n"
-                                    + "SQLÃüÁî:\r\n"
+                                    + "SQLå‘½ä»¤:\r\n"
                                     + strCommand;
                                 return -1;
                             }
@@ -1509,7 +1509,7 @@ namespace DigitalPlatform.rms
                                 try
                                 {
                                     command.CommandText = strLine;
-                                    command.CommandTimeout = 20 * 60;  // °Ñ³¬Ê±Ê±¼ä·Å´ó 2008/11/20 
+                                    command.CommandTimeout = 20 * 60;  // æŠŠè¶…æ—¶æ—¶é—´æ”¾å¤§ 2008/11/20 
 
                                     command.ExecuteNonQuery();
                                 }
@@ -1518,17 +1518,17 @@ namespace DigitalPlatform.rms
                                     if (strAction == "delete"
                                     && ex.Number == 1418)
                                         continue;
-                                    strError = "Ë¢ĞÂ±í¶¨Òå " + strAction + " ³ö´í.\r\n"
+                                    strError = "åˆ·æ–°è¡¨å®šä¹‰ " + strAction + " å‡ºé”™.\r\n"
                                         + ex.Message + "\r\n"
-                                        + "SQLÃüÁî:\r\n"
+                                        + "SQLå‘½ä»¤:\r\n"
                                         + strLine;
                                     return -1;
                                 }
                                 catch (Exception ex)
                                 {
-                                    strError = "Ë¢ĞÂ±í¶¨Òå " + strAction + " ³ö´í.\r\n"
+                                    strError = "åˆ·æ–°è¡¨å®šä¹‰ " + strAction + " å‡ºé”™.\r\n"
                                         + ex.Message + "\r\n"
-                                        + "SQLÃüÁî:\r\n"
+                                        + "SQLå‘½ä»¤:\r\n"
                                         + strLine;
                                     return -1;
                                 }
@@ -1544,10 +1544,10 @@ namespace DigitalPlatform.rms
             }
             finally
             {
-                //*********************¶ÔÊı¾İ¿â½âĞ´Ëø******
+                //*********************å¯¹æ•°æ®åº“è§£å†™é”******
                 m_db_lock.ReleaseWriterLock();
 #if DEBUG_LOCK_SQLDATABASE
-				this.container.WriteDebugInfo("Refresh()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â½âĞ´Ëø¡£");
+				this.container.WriteDebugInfo("Refresh()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“è§£å†™é”ã€‚");
 #endif
             }
 
@@ -1556,36 +1556,36 @@ namespace DigitalPlatform.rms
         }
 
         // 2008/11/14
-        // Ë¢ĞÂÏà¹ØSQLÊı¾İ¿âµÄ±í¶¨Òå£¬×¢ÒâĞéº¯Êı²»ÄÜÎªprivate
+        // åˆ·æ–°ç›¸å…³SQLæ•°æ®åº“çš„è¡¨å®šä¹‰ï¼Œæ³¨æ„è™šå‡½æ•°ä¸èƒ½ä¸ºprivate
         // parameters:
-        //      bClearAllKeyTables ÊÇ·ñË³±ãÒªÉ¾³ıËùÓĞkeys±íÖĞµÄÊı¾İ?
-        //		strError    out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //      bClearAllKeyTables æ˜¯å¦é¡ºä¾¿è¦åˆ é™¤æ‰€æœ‰keysè¡¨ä¸­çš„æ•°æ®?
+        //		strError    outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //		-1  ³ö´í
-        //		0   ³É¹¦
-        // Ïß: °²È«µÄ
-        // ¼ÓĞ´ËøµÄÔ­Òò? ĞŞ¸Ä¼ÇÂ¼Î²ºÅÒÑ¾­È¥³ı£¬ËÆºõ¿ÉÒÔ²»¼ÓËø£¿
+        //		-1  å‡ºé”™
+        //		0   æˆåŠŸ
+        // çº¿: å®‰å…¨çš„
+        // åŠ å†™é”çš„åŸå› ? ä¿®æ”¹è®°å½•å°¾å·å·²ç»å»é™¤ï¼Œä¼¼ä¹å¯ä»¥ä¸åŠ é”ï¼Ÿ
         public override int RefreshPhysicalDatabase(
             bool bClearAllKeyTables,
             out string strError)
         {
             strError = "";
 
-            //************¶ÔÊı¾İ¿â¼ÓĞ´Ëø********************
+            //************å¯¹æ•°æ®åº“åŠ å†™é”********************
             m_db_lock.AcquireWriterLock(m_nTimeOut);
 #if DEBUG_LOCK_SQLDATABASE
-			this.container.WriteDebugInfo("Refresh()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â¼ÓĞ´Ëø¡£");
+			this.container.WriteDebugInfo("Refresh()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“åŠ å†™é”ã€‚");
 #endif
             try
             {
                 Connection connection = new Connection(this,
                     this.m_strConnString);
                 connection.Open();
-                try //Á¬½Ó
+                try //è¿æ¥
                 {
                     string strCommand = "";
 
-                    // Ë¢ĞÂ±í¶¨Òå
+                    // åˆ·æ–°è¡¨å®šä¹‰
                     int nRet = this.GetRefreshTablesString(
                         connection.SqlServerType,
                         bClearAllKeyTables,
@@ -1602,15 +1602,15 @@ namespace DigitalPlatform.rms
                         {
                             try
                             {
-                                command.CommandTimeout = 20 * 60;  // °Ñ³¬Ê±Ê±¼ä·Å´ó 2008/11/20 
+                                command.CommandTimeout = 20 * 60;  // æŠŠè¶…æ—¶æ—¶é—´æ”¾å¤§ 2008/11/20 
 
                                 command.ExecuteNonQuery();
                             }
                             catch (Exception ex)
                             {
-                                strError = "Ë¢ĞÂ±í¶¨Òå³ö´í.\r\n"
+                                strError = "åˆ·æ–°è¡¨å®šä¹‰å‡ºé”™.\r\n"
                                     + ex.Message + "\r\n"
-                                    + "SQLÃüÁî:\r\n"
+                                    + "SQLå‘½ä»¤:\r\n"
                                     + strCommand;
                                 return -1;
                             }
@@ -1623,15 +1623,15 @@ namespace DigitalPlatform.rms
                         {
                             try
                             {
-                                command.CommandTimeout = 20 * 60;  // °Ñ³¬Ê±Ê±¼ä·Å´ó 2008/11/20 
+                                command.CommandTimeout = 20 * 60;  // æŠŠè¶…æ—¶æ—¶é—´æ”¾å¤§ 2008/11/20 
 
                                 command.ExecuteNonQuery();
                             }
                             catch (Exception ex)
                             {
-                                strError = "Ë¢ĞÂ±í¶¨Òå³ö´í.\r\n"
+                                strError = "åˆ·æ–°è¡¨å®šä¹‰å‡ºé”™.\r\n"
                                     + ex.Message + "\r\n"
-                                    + "SQLÃüÁî:\r\n"
+                                    + "SQLå‘½ä»¤:\r\n"
                                     + strCommand;
                                 return -1;
                             }
@@ -1643,7 +1643,7 @@ namespace DigitalPlatform.rms
                         {
                             List<string> table_names = null;
 
-                            // »ñÈ¡Ò»¸öSQLÊı¾İ¿âÖĞÒÑ¾­´æÔÚµÄrecordsºÍkeys±íÃû
+                            // è·å–ä¸€ä¸ªSQLæ•°æ®åº“ä¸­å·²ç»å­˜åœ¨çš„recordså’Œkeysè¡¨å
                             nRet = GetExistTableNames(
                                 connection,
                                 out table_names,
@@ -1651,7 +1651,7 @@ namespace DigitalPlatform.rms
                             if (nRet == -1)
                                 return -1;
 
-                            // Ë¢ĞÂ±í¶¨Òå
+                            // åˆ·æ–°è¡¨å®šä¹‰
                             nRet = this.GetRefreshTablesString(
                                 connection.SqlServerType,
                                 bClearAllKeyTables,
@@ -1667,15 +1667,15 @@ namespace DigitalPlatform.rms
                         {
                             try
                             {
-                                command.CommandTimeout = 20 * 60;  // °Ñ³¬Ê±Ê±¼ä·Å´ó 2008/11/20 
+                                command.CommandTimeout = 20 * 60;  // æŠŠè¶…æ—¶æ—¶é—´æ”¾å¤§ 2008/11/20 
 
                                 command.ExecuteNonQuery();
                             }
                             catch (Exception ex)
                             {
-                                strError = "Ë¢ĞÂ±í¶¨Òå³ö´í.\r\n"
+                                strError = "åˆ·æ–°è¡¨å®šä¹‰å‡ºé”™.\r\n"
                                     + ex.Message + "\r\n"
-                                    + "SQLÃüÁî:\r\n"
+                                    + "SQLå‘½ä»¤:\r\n"
                                     + strCommand;
                                 return -1;
                             }
@@ -1697,7 +1697,7 @@ namespace DigitalPlatform.rms
                         {
                             List<string> table_names = null;
 
-                            // »ñÈ¡Ò»¸öSQLÊı¾İ¿âÖĞÒÑ¾­´æÔÚµÄrecordsºÍkeys±íÃû
+                            // è·å–ä¸€ä¸ªSQLæ•°æ®åº“ä¸­å·²ç»å­˜åœ¨çš„recordså’Œkeysè¡¨å
                             nRet = GetExistTableNames(
                                 connection,
                                 out table_names,
@@ -1705,7 +1705,7 @@ namespace DigitalPlatform.rms
                             if (nRet == -1)
                                 return -1;
 
-                            // Ë¢ĞÂ±í¶¨Òå
+                            // åˆ·æ–°è¡¨å®šä¹‰
                             nRet = this.GetRefreshTablesString(
                                 connection.SqlServerType,
                                 bClearAllKeyTables,
@@ -1728,15 +1728,15 @@ namespace DigitalPlatform.rms
                                 try
                                 {
                                     command.CommandText = strLine;
-                                    command.CommandTimeout = 20 * 60;  // °Ñ³¬Ê±Ê±¼ä·Å´ó 2008/11/20 
+                                    command.CommandTimeout = 20 * 60;  // æŠŠè¶…æ—¶æ—¶é—´æ”¾å¤§ 2008/11/20 
 
                                     command.ExecuteNonQuery();
                                 }
                                 catch (Exception ex)
                                 {
-                                    strError = "Ë¢ĞÂ±í¶¨Òå³ö´í.\r\n"
+                                    strError = "åˆ·æ–°è¡¨å®šä¹‰å‡ºé”™.\r\n"
                                         + ex.Message + "\r\n"
-                                        + "SQLÃüÁî:\r\n"
+                                        + "SQLå‘½ä»¤:\r\n"
                                         + strLine;
                                     return -1;
                                 }
@@ -1751,17 +1751,17 @@ namespace DigitalPlatform.rms
             }
             finally
             {
-                //*********************¶ÔÊı¾İ¿â½âĞ´Ëø******
+                //*********************å¯¹æ•°æ®åº“è§£å†™é”******
                 m_db_lock.ReleaseWriterLock();
 #if DEBUG_LOCK_SQLDATABASE
-				this.container.WriteDebugInfo("Refresh()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â½âĞ´Ëø¡£");
+				this.container.WriteDebugInfo("Refresh()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“è§£å†™é”ã€‚");
 #endif
             }
 
             return 0;
         }
 
-        // µ±Ç°ÊÇ·ñÎª MS SQL Server LocalDB?
+        // å½“å‰æ˜¯å¦ä¸º MS SQL Server LocalDB?
         bool IsLocalDB()
         {
             if (this.container.SqlServerName.ToLower().IndexOf("(localdb)") == -1)
@@ -1774,7 +1774,7 @@ namespace DigitalPlatform.rms
             return Path.Combine(this.m_strObjectDir, "database.mdf");
         }
 
-        // µÃµ½½¨¿âÃüÁî×Ö·û´®
+        // å¾—åˆ°å»ºåº“å‘½ä»¤å­—ç¬¦ä¸²
         public string GetCreateDbCmdString(SqlServerType server_type)
         {
             if (server_type == SqlServerType.MsSqlServer)
@@ -1790,7 +1790,7 @@ namespace DigitalPlatform.rms
                     string strDatabaseFileName = GetDatabaseFileName();
                     strCommand += " ON ( name = '" + this.m_strSqlDbName + "', filename = '" + strDatabaseFileName + "')\n";
 
-                    // È·±£×ÓÄ¿Â¼ÒÑ¾­´´½¨
+                    // ç¡®ä¿å­ç›®å½•å·²ç»åˆ›å»º
                     PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strDatabaseFileName));
                 }
 
@@ -1800,7 +1800,7 @@ namespace DigitalPlatform.rms
             }
             else if (server_type == SqlServerType.SQLite)
             {
-                // ×¢: SQLiteÃ»ÓĞ´´½¨Êı¾İ¿âµÄ²½Öè£¬Ö±½Ó´´½¨±í¾Í¿ÉÒÔÁË
+                // æ³¨: SQLiteæ²¡æœ‰åˆ›å»ºæ•°æ®åº“çš„æ­¥éª¤ï¼Œç›´æ¥åˆ›å»ºè¡¨å°±å¯ä»¥äº†
                 return "";
             }
             else if (server_type == SqlServerType.MySql)
@@ -1839,10 +1839,10 @@ namespace DigitalPlatform.rms
             return "";
         }
 
-        // µÃµ½½¨±íÃüÁî×Ö·û´®
+        // å¾—åˆ°å»ºè¡¨å‘½ä»¤å­—ç¬¦ä¸²
         // return
-        //		-1	³ö´í
-        //		0	³É¹¦
+        //		-1	å‡ºé”™
+        //		0	æˆåŠŸ
         private int GetCreateTablesString(
             SqlServerType strSqlServerType,
             out string strCommand,
@@ -1854,7 +1854,7 @@ namespace DigitalPlatform.rms
             #region MS SQL Server
             if (strSqlServerType == SqlServerType.MsSqlServer)
             {
-                // ´´½¨records±í
+                // åˆ›å»ºrecordsè¡¨
                 strCommand = "use " + this.m_strSqlDbName + "\n"
                     + "if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[records]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)" + "\n"
                     + "drop table [dbo].[records]" + "\n"
@@ -1870,7 +1870,7 @@ namespace DigitalPlatform.rms
                     + "[filename] [nvarchar] (255) NULL, \n"
                     + "[newfilename] [nvarchar] (255) NULL\n"
                     + ") ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]" + "\n" + "\n";
-                // UNIQUEÎª2008/3/13ĞÂ¼ÓÈë
+                // UNIQUEä¸º2008/3/13æ–°åŠ å…¥
 
                 KeysCfg keysCfg = null;
                 int nRet = this.GetKeysCfg(out keysCfg,
@@ -1889,7 +1889,7 @@ namespace DigitalPlatform.rms
                         return -1;
 
 
-                    // ½¨¼ìË÷µã±í
+                    // å»ºæ£€ç´¢ç‚¹è¡¨
                     for (int i = 0; i < aTableInfo.Count; i++)
                     {
                         TableInfo tableInfo = aTableInfo[i];
@@ -1899,7 +1899,7 @@ namespace DigitalPlatform.rms
                             "drop table [dbo].[" + tableInfo.SqlTableName + "]" + "\n" +
                             "CREATE TABLE [dbo].[" + tableInfo.SqlTableName + "]" + "\n" +
                             "(" + "\n" +
-                            "[keystring] [nvarchar] (" + Convert.ToString(this.KeySize) + ") Null," + "\n" +         //keystringµÄ³¤¶ÈÓÉÅäÖÃÎÄ¼ş¶¨
+                            "[keystring] [nvarchar] (" + Convert.ToString(this.KeySize) + ") Null," + "\n" +         //keystringçš„é•¿åº¦ç”±é…ç½®æ–‡ä»¶å®š
                             "[fromstring] [nvarchar] (255) NULL ," + "\n" +
                             "[idstring] [nvarchar] (255)  NULL ," + "\n" +
                             "[keystringnum] [bigint] NULL " + "\n" +
@@ -1915,7 +1915,7 @@ namespace DigitalPlatform.rms
             #region SQLite
             else if (strSqlServerType == SqlServerType.SQLite)
             {
-                // ´´½¨records±í
+                // åˆ›å»ºrecordsè¡¨
                 strCommand = "CREATE TABLE records "
                     + "(" + " "
                     + "id nvarchar (255) NULL UNIQUE," + " "
@@ -1944,7 +1944,7 @@ namespace DigitalPlatform.rms
                         return -1;
 
 
-                    // ½¨¼ìË÷µã±í
+                    // å»ºæ£€ç´¢ç‚¹è¡¨
                     for (int i = 0; i < aTableInfo.Count; i++)
                     {
                         TableInfo tableInfo = aTableInfo[i];
@@ -1952,7 +1952,7 @@ namespace DigitalPlatform.rms
                         strCommand += " " +
                             "CREATE TABLE " + tableInfo.SqlTableName + " " +
                             "(" + " " +
-                            "keystring nvarchar (" + Convert.ToString(this.KeySize) + ") NULL," + " " +         //keystringµÄ³¤¶ÈÓÉÅäÖÃÎÄ¼ş¶¨
+                            "keystring nvarchar (" + Convert.ToString(this.KeySize) + ") NULL," + " " +         //keystringçš„é•¿åº¦ç”±é…ç½®æ–‡ä»¶å®š
                             "fromstring nvarchar (255) NULL ," + " " +
                             "idstring nvarchar (255)  NULL ," + " " +
                             "keystringnum bigint NULL " + " " +
@@ -1969,7 +1969,7 @@ namespace DigitalPlatform.rms
             {
                 string strCharset = " CHARACTER SET utf8 "; // COLLATE utf8_bin ";
 
-                // ´´½¨records±í
+                // åˆ›å»ºrecordsè¡¨
                 strCommand = // "use `" + this.m_strSqlDbName + "` ;\n" +
                     "DROP TABLE IF EXISTS `" + this.m_strSqlDbName + "`.records" + " ;\n"
                     + "CREATE TABLE `" + this.m_strSqlDbName + "`.records" + " \n"
@@ -1999,7 +1999,7 @@ namespace DigitalPlatform.rms
                     if (nRet == -1)
                         return -1;
 
-                    // ½¨¼ìË÷µã±í
+                    // å»ºæ£€ç´¢ç‚¹è¡¨
                     for (int i = 0; i < aTableInfo.Count; i++)
                     {
                         TableInfo tableInfo = aTableInfo[i];
@@ -2008,7 +2008,7 @@ namespace DigitalPlatform.rms
                             "DROP TABLE IF EXISTS `" + this.m_strSqlDbName + "`." + tableInfo.SqlTableName + "" + " ;\n" +
                             "CREATE TABLE `" + this.m_strSqlDbName + "`." + tableInfo.SqlTableName + "\n" +
                             "(" + "\n" +
-                            "keystring varchar (" + Convert.ToString(this.KeySize) + ") " + strCharset + " NULL," + "\n" +         //keystringµÄ³¤¶ÈÓÉÅäÖÃÎÄ¼ş¶¨
+                            "keystring varchar (" + Convert.ToString(this.KeySize) + ") " + strCharset + " NULL," + "\n" +         //keystringçš„é•¿åº¦ç”±é…ç½®æ–‡ä»¶å®š
                             "fromstring varchar (255) " + strCharset + " NULL ," + "\n" +
                             "idstring varchar (255) " + strCharset + " NULL ," + "\n" +
                             "keystringnum bigint NULL " + "\n" +
@@ -2022,7 +2022,7 @@ namespace DigitalPlatform.rms
             #region Oracle
             else if (strSqlServerType == SqlServerType.Oracle)
             {
-                // ´´½¨records±í
+                // åˆ›å»ºrecordsè¡¨
                 strCommand = "CREATE TABLE "+this.m_strSqlDbName+"_records " + "\n"
                     + "(" + "\n"
                     + "id nvarchar2 (255) NULL UNIQUE," + "\n"
@@ -2037,7 +2037,7 @@ namespace DigitalPlatform.rms
                 string strTemp = this.m_strSqlDbName + "_" + "_records";
                 if (strTemp.Length > 30)
                 {
-                    strError = "±íÃû×Ö '" + strTemp + "' µÄ×Ö·ûÊı³¬¹ı 30¡£ÇëÊ¹ÓÃ¸ü¶ÌµÄ SQL Êı¾İ¿âÃû¡£";
+                    strError = "è¡¨åå­— '" + strTemp + "' çš„å­—ç¬¦æ•°è¶…è¿‡ 30ã€‚è¯·ä½¿ç”¨æ›´çŸ­çš„ SQL æ•°æ®åº“åã€‚";
                     return -1;
                 }
 
@@ -2056,7 +2056,7 @@ namespace DigitalPlatform.rms
                     if (nRet == -1)
                         return -1;
 
-                    // ½¨¼ìË÷µã±í
+                    // å»ºæ£€ç´¢ç‚¹è¡¨
                     for (int i = 0; i < aTableInfo.Count; i++)
                     {
                         TableInfo tableInfo = aTableInfo[i];
@@ -2064,12 +2064,12 @@ namespace DigitalPlatform.rms
                         if (string.IsNullOrEmpty(strCommand) == false)
                             strCommand += " ; ";
 
-                        // TODO Òª·ÀÖ¹keys±íÃûºÍrecords×²³µ
+                        // TODO è¦é˜²æ­¢keysè¡¨åå’Œrecordsæ’è½¦
 
                         strTemp = this.m_strSqlDbName + "_" + tableInfo.SqlTableName;
                         if (strTemp.Length > 30)
                         {
-                            strError = "±íÃû×Ö '" + strTemp + "' µÄ×Ö·ûÊı³¬¹ı 30¡£ÇëÊ¹ÓÃ¸ü¶ÌµÄ SQL Êı¾İ¿âÃû¡£";
+                            strError = "è¡¨åå­— '" + strTemp + "' çš„å­—ç¬¦æ•°è¶…è¿‡ 30ã€‚è¯·ä½¿ç”¨æ›´çŸ­çš„ SQL æ•°æ®åº“åã€‚";
                             return -1;
                         }
 
@@ -2093,14 +2093,14 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
-        // µÃµ½Ë¢ĞÂ±í¶¨ÒåÃüÁî×Ö·û´®
-        // ¸ù¾İ×îĞÂµÄkeys¶¨Òå£¬Ôö²¹´´½¨ÄÇĞ©Ã»ÓĞ±»´´½¨µÄSQL±í
-        // ×¢£ºÒÑ¾­°üº¬ÁË´´½¨SQLË÷ÒıµÄÓï¾ä
+        // å¾—åˆ°åˆ·æ–°è¡¨å®šä¹‰å‘½ä»¤å­—ç¬¦ä¸²
+        // æ ¹æ®æœ€æ–°çš„keyså®šä¹‰ï¼Œå¢è¡¥åˆ›å»ºé‚£äº›æ²¡æœ‰è¢«åˆ›å»ºçš„SQLè¡¨
+        // æ³¨ï¼šå·²ç»åŒ…å«äº†åˆ›å»ºSQLç´¢å¼•çš„è¯­å¥
         // parameters:
-        //      bClearAllKeyTables ÊÇ·ñË³±ãÒªÉ¾³ıËùÓĞkeys±íÖĞµÄÊı¾İ?
+        //      bClearAllKeyTables æ˜¯å¦é¡ºä¾¿è¦åˆ é™¤æ‰€æœ‰keysè¡¨ä¸­çš„æ•°æ®?
         // return
-        //		-1	³ö´í
-        //		0	³É¹¦
+        //		-1	å‡ºé”™
+        //		0	æˆåŠŸ
         private int GetRefreshTablesString(
             SqlServerType server_type,
             bool bClearAllKeyTables,
@@ -2132,21 +2132,21 @@ namespace DigitalPlatform.rms
                     if (nRet == -1)
                         return -1;
 
-                    // Ôö²¹´´½¨¼ìË÷µã±í
+                    // å¢è¡¥åˆ›å»ºæ£€ç´¢ç‚¹è¡¨
                     for (int i = 0; i < aTableInfo.Count; i++)
                     {
                         TableInfo tableInfo = aTableInfo[i];
 
                         if (bClearAllKeyTables == true)
                         {
-                            // Èç¹û±íÒÑ¾­´æÔÚ£¬¾ÍÏÈdropÔÙ´´½¨
+                            // å¦‚æœè¡¨å·²ç»å­˜åœ¨ï¼Œå°±å…ˆdropå†åˆ›å»º
                             strCommand += "\n" +
                                 "if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[" + tableInfo.SqlTableName + "]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)" + "\n" +
                                 "DROP TABLE [dbo].[" + tableInfo.SqlTableName + "]" + "\n" +
                                 "\n" +
                                 "CREATE TABLE [dbo].[" + tableInfo.SqlTableName + "]" + "\n" +
                                 "(" + "\n" +
-                                "[keystring] [nvarchar] (" + Convert.ToString(this.KeySize) + ") Null," + "\n" +         //keystringµÄ³¤¶ÈÓÉÅäÖÃÎÄ¼ş¶¨
+                                "[keystring] [nvarchar] (" + Convert.ToString(this.KeySize) + ") Null," + "\n" +         //keystringçš„é•¿åº¦ç”±é…ç½®æ–‡ä»¶å®š
                                 "[fromstring] [nvarchar] (255) NULL ," + "\n" +
                                 "[idstring] [nvarchar] (255)  NULL ," + "\n" +
                                 "[keystringnum] [bigint] NULL " + "\n" +
@@ -2162,13 +2162,13 @@ namespace DigitalPlatform.rms
                         }
                         else
                         {
-                            // ±í²»´æÔÚ²Å´´½¨
+                            // è¡¨ä¸å­˜åœ¨æ‰åˆ›å»º
                             strCommand += "\n" +
                                 "if not exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[" + tableInfo.SqlTableName + "]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)" + "\n" +
                                 "BEGIN\n" +
                                 "CREATE TABLE [dbo].[" + tableInfo.SqlTableName + "]" + "\n" +
                                 "(" + "\n" +
-                                "[keystring] [nvarchar] (" + Convert.ToString(this.KeySize) + ") Null," + "\n" +         //keystringµÄ³¤¶ÈÓÉÅäÖÃÎÄ¼ş¶¨
+                                "[keystring] [nvarchar] (" + Convert.ToString(this.KeySize) + ") Null," + "\n" +         //keystringçš„é•¿åº¦ç”±é…ç½®æ–‡ä»¶å®š
                                 "[fromstring] [nvarchar] (255) NULL ," + "\n" +
                                 "[idstring] [nvarchar] (255)  NULL ," + "\n" +
                                 "[keystringnum] [bigint] NULL " + "\n" +
@@ -2204,18 +2204,18 @@ namespace DigitalPlatform.rms
                     if (nRet == -1)
                         return -1;
 
-                    // Ôö²¹´´½¨¼ìË÷µã±í
+                    // å¢è¡¥åˆ›å»ºæ£€ç´¢ç‚¹è¡¨
                     for (int i = 0; i < aTableInfo.Count; i++)
                     {
                         TableInfo tableInfo = aTableInfo[i];
 
                         if (bClearAllKeyTables == true)
                         {
-                            // Èç¹û±íÒÑ¾­´æÔÚ£¬¾ÍÏÈdropÔÙ´´½¨
+                            // å¦‚æœè¡¨å·²ç»å­˜åœ¨ï¼Œå°±å…ˆdropå†åˆ›å»º
                             strCommand += "DROP TABLE if exists " + tableInfo.SqlTableName + " ;\n"
                                 + "CREATE TABLE " + tableInfo.SqlTableName + " \n" +
                                 "(" + "\n" +
-                                "[keystring] [nvarchar] (" + Convert.ToString(this.KeySize) + ") NULL," + "\n" +         //keystringµÄ³¤¶ÈÓÉÅäÖÃÎÄ¼ş¶¨
+                                "[keystring] [nvarchar] (" + Convert.ToString(this.KeySize) + ") NULL," + "\n" +         //keystringçš„é•¿åº¦ç”±é…ç½®æ–‡ä»¶å®š
                                 "[fromstring] [nvarchar] (255) NULL ," + "\n" +
                                 "[idstring] [nvarchar] (255)  NULL ," + "\n" +
                                 "[keystringnum] [bigint] NULL " + "\n" +
@@ -2230,11 +2230,11 @@ namespace DigitalPlatform.rms
                         }
                         else
                         {
-                            // ±í²»´æÔÚ²Å´´½¨
+                            // è¡¨ä¸å­˜åœ¨æ‰åˆ›å»º
                             strCommand += 
                                 "CREATE TABLE if not exists " + tableInfo.SqlTableName + " \n" +
                                 "(" + "\n" +
-                                "[keystring] [nvarchar] (" + Convert.ToString(this.KeySize) + ") NULL," + "\n" +         //keystringµÄ³¤¶ÈÓÉÅäÖÃÎÄ¼ş¶¨
+                                "[keystring] [nvarchar] (" + Convert.ToString(this.KeySize) + ") NULL," + "\n" +         //keystringçš„é•¿åº¦ç”±é…ç½®æ–‡ä»¶å®š
                                 "[fromstring] [nvarchar] (255) NULL ," + "\n" +
                                 "[idstring] [nvarchar] (255)  NULL ," + "\n" +
                                 "[keystringnum] [bigint] NULL " + "\n" +
@@ -2267,19 +2267,19 @@ namespace DigitalPlatform.rms
                     if (nRet == -1)
                         return -1;
 
-                    // Ôö²¹´´½¨¼ìË÷µã±í
+                    // å¢è¡¥åˆ›å»ºæ£€ç´¢ç‚¹è¡¨
                     for (int i = 0; i < aTableInfo.Count; i++)
                     {
                         TableInfo tableInfo = aTableInfo[i];
 
                         if (bClearAllKeyTables == true)
                         {
-                            // Èç¹û±íÒÑ¾­´æÔÚ£¬¾ÍÏÈdropÔÙ´´½¨
+                            // å¦‚æœè¡¨å·²ç»å­˜åœ¨ï¼Œå°±å…ˆdropå†åˆ›å»º
                             strCommand +=
                                 "DROP TABLE if exists `" + tableInfo.SqlTableName + "` ;\n"
                                 + "CREATE TABLE `" + tableInfo.SqlTableName + "` \n" +
                                 "(" + "\n" +
-                                "keystring varchar (" + Convert.ToString(this.KeySize) + ") " + strCharset + " NULL," + "\n" +         //keystringµÄ³¤¶ÈÓÉÅäÖÃÎÄ¼ş¶¨
+                                "keystring varchar (" + Convert.ToString(this.KeySize) + ") " + strCharset + " NULL," + "\n" +         //keystringçš„é•¿åº¦ç”±é…ç½®æ–‡ä»¶å®š
                                 "fromstring varchar (255) " + strCharset + " NULL ," + "\n" +
                                 "idstring varchar (255) " + strCharset + " NULL ," + "\n" +
                                 "keystringnum bigint NULL " + "\n" +
@@ -2298,11 +2298,11 @@ namespace DigitalPlatform.rms
                                 && existing_tablenames.IndexOf(tableInfo.SqlTableName.ToLower()) != -1)
                                 continue;
 
-                            // ±í²»´æÔÚ²Å´´½¨
+                            // è¡¨ä¸å­˜åœ¨æ‰åˆ›å»º
                             strCommand +=
                                 "CREATE TABLE if not exists `" + tableInfo.SqlTableName + "` \n" +
                                 "(" + "\n" +
-                                "keystring varchar (" + Convert.ToString(this.KeySize) + ") " + strCharset + " NULL," + "\n" +         //keystringµÄ³¤¶ÈÓÉÅäÖÃÎÄ¼ş¶¨
+                                "keystring varchar (" + Convert.ToString(this.KeySize) + ") " + strCharset + " NULL," + "\n" +         //keystringçš„é•¿åº¦ç”±é…ç½®æ–‡ä»¶å®š
                                 "fromstring varchar (255) " + strCharset + " NULL ," + "\n" +
                                 "idstring varchar (255) " + strCharset + " NULL ," + "\n" +
                                 "keystringnum bigint NULL " + "\n" +
@@ -2324,7 +2324,7 @@ namespace DigitalPlatform.rms
             {
                 strCommand = "";    //  "use `" + this.m_strSqlDbName + "` ;\n";
 
-                // bClearAllKeyTables==true£¬ĞèÒªÍ¨¹ıÔÚµ÷ÓÃ±¾º¯ÊıÇ°É¾³ıÈ«²¿±íÀ´ÊµÏÖ
+                // bClearAllKeyTables==trueï¼Œéœ€è¦é€šè¿‡åœ¨è°ƒç”¨æœ¬å‡½æ•°å‰åˆ é™¤å…¨éƒ¨è¡¨æ¥å®ç°
 
                 if (keysCfg != null)
                 {
@@ -2335,7 +2335,7 @@ namespace DigitalPlatform.rms
                     if (nRet == -1)
                         return -1;
 
-                    // Ôö²¹´´½¨¼ìË÷µã±í
+                    // å¢è¡¥åˆ›å»ºæ£€ç´¢ç‚¹è¡¨
                     for (int i = 0; i < aTableInfo.Count; i++)
                     {
                         TableInfo tableInfo = aTableInfo[i];
@@ -2348,7 +2348,7 @@ namespace DigitalPlatform.rms
                         strCommand += // "IF NOT EXISTS ( SELECT table_name FROM user_tables WHERE table_name = '" + strTableName + "' ) " + 
                             "CREATE TABLE " + strTableName + " \n" +
                             "(" + "\n" +
-                            "keystring nvarchar2 (" + Convert.ToString(this.KeySize) + ") NULL," + "\n" +         //keystringµÄ³¤¶ÈÓÉÅäÖÃÎÄ¼ş¶¨
+                            "keystring nvarchar2 (" + Convert.ToString(this.KeySize) + ") NULL," + "\n" +         //keystringçš„é•¿åº¦ç”±é…ç½®æ–‡ä»¶å®š
                             "fromstring nvarchar2 (255) NULL ," + "\n" +
                             "idstring nvarchar2 (255)  NULL ," + "\n" +
                             "keystringnum NUMBER(19) NULL " + "\n" +
@@ -2357,7 +2357,7 @@ namespace DigitalPlatform.rms
                         string strTemp = strTableName + "ki";
                         if (strTemp.Length > 30)
                         {
-                            strError = "Ë÷ÒıÃû×Ö '" + strTemp + "' µÄ×Ö·ûÊı³¬¹ı 30¡£ÇëÊ¹ÓÃ¸ü¶ÌµÄ SQL Êı¾İ¿âÃû¡£";
+                            strError = "ç´¢å¼•åå­— '" + strTemp + "' çš„å­—ç¬¦æ•°è¶…è¿‡ 30ã€‚è¯·ä½¿ç”¨æ›´çŸ­çš„ SQL æ•°æ®åº“åã€‚";
                             return -1;
                         }
 
@@ -2376,14 +2376,14 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
-        // ½¨Ë÷ÒıÃüÁî×Ö·û´®
+        // å»ºç´¢å¼•å‘½ä»¤å­—ç¬¦ä¸²
         // parameters:
         //      strIndexTYpeList    keys,records
-        //                          key±íÊ¾´´½¨ keys ±íµÄË÷Òı, records ±íÊ¾´´½¨ records ±íµÄË÷Òı
+        //                          keyè¡¨ç¤ºåˆ›å»º keys è¡¨çš„ç´¢å¼•, records è¡¨ç¤ºåˆ›å»º records è¡¨çš„ç´¢å¼•
         //      strAction   create / rebuild / rebuildall
         // return
-        //		-1	³ö´í
-        //		0	³É¹¦
+        //		-1	å‡ºé”™
+        //		0	æˆåŠŸ
         public int GetCreateIndexString(
             string strIndexTypeList,
             SqlServerType strSqlServerType,
@@ -2575,7 +2575,7 @@ namespace DigitalPlatform.rms
                 strCommand = " CREATE INDEX " + this.m_strSqlDbName + "_records_ii " + "\n"
                     + " ON "+this.m_strSqlDbName+"_records (id) \n";
                  * */
-                // records±íµÄidÁĞÒÑ¾­ÓĞË÷ÒıÁË£¬ÒòÎªËüÊÇUNIQUE
+                // recordsè¡¨çš„idåˆ—å·²ç»æœ‰ç´¢å¼•äº†ï¼Œå› ä¸ºå®ƒæ˜¯UNIQUE
                 strCommand = "";
 
                 if (StringUtil.IsInList("keys", strIndexTypeList) == true)
@@ -2605,7 +2605,7 @@ namespace DigitalPlatform.rms
                             string strTemp = strTableName + "ki";
                             if (strTemp.Length > 30)
                             {
-                                strError = "Ë÷ÒıÃû×Ö '" + strTemp + "' µÄ×Ö·ûÊı³¬¹ı 30¡£ÇëÊ¹ÓÃ¸ü¶ÌµÄ SQL Êı¾İ¿âÃû¡£";
+                                strError = "ç´¢å¼•åå­— '" + strTemp + "' çš„å­—ç¬¦æ•°è¶…è¿‡ 30ã€‚è¯·ä½¿ç”¨æ›´çŸ­çš„ SQL æ•°æ®åº“åã€‚";
                                 return -1;
                             }
 
@@ -2624,12 +2624,12 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
-        // É¾³ıkeysË÷ÒıµÄÃüÁî×Ö·û´®
+        // åˆ é™¤keysç´¢å¼•çš„å‘½ä»¤å­—ç¬¦ä¸²
         // parameters:
         //      strAction   delete / disable / disableall
         // return
-        //		-1	³ö´í
-        //		0	³É¹¦
+        //		-1	å‡ºé”™
+        //		0	æˆåŠŸ
         public int GetDeleteIndexString(
             SqlServerType strSqlServerType,
             string strAction,
@@ -2800,7 +2800,7 @@ namespace DigitalPlatform.rms
                         string strTemp = strTableName + "ki";
                         if (strTemp.Length > 30)
                         {
-                            strError = "Ë÷ÒıÃû×Ö '" + strTemp + "' µÄ×Ö·ûÊı³¬¹ı 30¡£ÇëÊ¹ÓÃ¸ü¶ÌµÄ SQL Êı¾İ¿âÃû¡£";
+                            strError = "ç´¢å¼•åå­— '" + strTemp + "' çš„å­—ç¬¦æ•°è¶…è¿‡ 30ã€‚è¯·ä½¿ç”¨æ›´çŸ­çš„ SQL æ•°æ®åº“åã€‚";
                             return -1;
                         }
 
@@ -2815,31 +2815,31 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
-        // É¾³ıÊı¾İ¿â
+        // åˆ é™¤æ•°æ®åº“
         // return:
-        //      -1  ³ö´í
-        //      0   ³É¹¦
+        //      -1  å‡ºé”™
+        //      0   æˆåŠŸ
         public override int Delete(out string strError)
         {
             strError = "";
 
-            //************¶ÔÊı¾İ¿â¼ÓĞ´Ëø********************
+            //************å¯¹æ•°æ®åº“åŠ å†™é”********************
             this.m_db_lock.AcquireWriterLock(m_nTimeOut);
 #if DEBUG_LOCK_SQLDATABASE
-			this.container.WriteDebugInfo("Delete()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â¼ÓĞ´Ëø¡£");
+			this.container.WriteDebugInfo("Delete()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“åŠ å†™é”ã€‚");
 #endif
-            try //Ëø
+            try //é”
             {
                 string strCommand = "";
 
                 Connection connection = new Connection(this,
                     this.m_strConnString);
                 connection.Open();
-                try //Á¬½Ó
+                try //è¿æ¥
                 {
                     if (connection.SqlServerType == SqlServerType.MsSqlServer)
                     {
-                        // 1.É¾¿âµÄsqlÊı¾İ¿â
+                        // 1.åˆ åº“çš„sqlæ•°æ®åº“
                         strCommand = "use master " + "\n"
                             + " if exists (select * from dbo.sysdatabases where name = N'" + this.m_strSqlDbName + "')" + "\n"
                             + " drop database " + this.m_strSqlDbName + "\n";
@@ -2851,11 +2851,11 @@ namespace DigitalPlatform.rms
                     }
                     else if (connection.SqlServerType == SqlServerType.SQLite)
                     {
-                        // SQLiteÃ»ÓĞDROP TABLEÓï¾ä£¬Ö±½ÓÉ¾³ıÊı¾İ¿âÎÄ¼ş¼´¿É
+                        // SQLiteæ²¡æœ‰DROP TABLEè¯­å¥ï¼Œç›´æ¥åˆ é™¤æ•°æ®åº“æ–‡ä»¶å³å¯
                     }
                     else if (connection.SqlServerType == SqlServerType.MySql)
                     {
-                        // 1.É¾¿âµÄsqlÊı¾İ¿â
+                        // 1.åˆ åº“çš„sqlæ•°æ®åº“
                         strCommand = " DROP DATABASE IF EXISTS `" + this.m_strSqlDbName + "` \n";
                         MySqlCommand command = new MySqlCommand(strCommand,
                             connection.MySqlConnection);
@@ -2864,7 +2864,7 @@ namespace DigitalPlatform.rms
                     }
                     else if (connection.SqlServerType == SqlServerType.Oracle)
                     {
-                        // É¾³ıÈ«²¿±í
+                        // åˆ é™¤å…¨éƒ¨è¡¨
                         int nRet = DropAllTables(
                              connection.OracleConnection,
                              this.m_strSqlDbName,
@@ -2876,40 +2876,40 @@ namespace DigitalPlatform.rms
                 }
                 catch (SqlException sqlEx)
                 {
-                    // Èç¹û²»´æÔÚÎïÀíÊı¾İ¿â£¬Ôò²»±¨´í
+                    // å¦‚æœä¸å­˜åœ¨ç‰©ç†æ•°æ®åº“ï¼Œåˆ™ä¸æŠ¥é”™
 
                     if (!(sqlEx.Errors is SqlErrorCollection))
                     {
-                        strError = "É¾³ısql¿â³ö´í.\r\n"
+                        strError = "åˆ é™¤sqlåº“å‡ºé”™.\r\n"
                            + sqlEx.Message + "\r\n"
-                           + "SQLÃüÁî:\r\n"
+                           + "SQLå‘½ä»¤:\r\n"
                            + strCommand;
                         return -1;
                     }
                 }
                 catch (Exception ex)
                 {
-                    strError = "É¾³ısql¿â³ö´í.\r\n"
+                    strError = "åˆ é™¤sqlåº“å‡ºé”™.\r\n"
                         + ex.Message + "\r\n"
-                        + "SQLÃüÁî:\r\n"
+                        + "SQLå‘½ä»¤:\r\n"
                         + strCommand;
                     return -1;
                 }
-                finally  //Á¬½Ó
+                finally  //è¿æ¥
                 {
                     connection.Close();
                 }
 
-                // É¾³ıÅäÖÃÄ¿Â¼
+                // åˆ é™¤é…ç½®ç›®å½•
                 string strCfgsDir = DatabaseUtil.GetLocalDir(this.container.NodeDbs,
                     this.m_selfNode);
                 if (strCfgsDir != "")
                 {
-                    // Ó¦¶ÔÄ¿Â¼²éÖØ£¬Èç¹ûÓĞÆäËü¿âÊ¹ÓÃÕâ¸öÄ¿Â¼£¬Ôò²»ÄÜÉ¾³ı£¬·µ»ØĞÅÏ¢
+                    // åº”å¯¹ç›®å½•æŸ¥é‡ï¼Œå¦‚æœæœ‰å…¶å®ƒåº“ä½¿ç”¨è¿™ä¸ªç›®å½•ï¼Œåˆ™ä¸èƒ½åˆ é™¤ï¼Œè¿”å›ä¿¡æ¯
                     if (this.container.IsExistCfgsDir(strCfgsDir, this) == true)
                     {
-                        // ¸ø´íÎóÈÕÖ¾Ğ´Ò»ÌõĞÅÏ¢
-                        this.container.KernelApplication.WriteErrorLog("·¢ÏÖ³ıÁË '" + this.GetCaption("zh-CN") + "' ¿âÊ¹ÓÃ '" + strCfgsDir + "' Ä¿Â¼Íâ£¬»¹ÓĞÆäËü¿âµÄÊ¹ÓÃÕâ¸öÄ¿Â¼£¬ËùÒÔ²»ÄÜÔÚÉ¾³ı¿âÊ±É¾³ıÄ¿Â¼");
+                        // ç»™é”™è¯¯æ—¥å¿—å†™ä¸€æ¡ä¿¡æ¯
+                        this.container.KernelApplication.WriteErrorLog("å‘ç°é™¤äº† '" + this.GetCaption("zh-CN") + "' åº“ä½¿ç”¨ '" + strCfgsDir + "' ç›®å½•å¤–ï¼Œè¿˜æœ‰å…¶å®ƒåº“çš„ä½¿ç”¨è¿™ä¸ªç›®å½•ï¼Œæ‰€ä»¥ä¸èƒ½åœ¨åˆ é™¤åº“æ—¶åˆ é™¤ç›®å½•");
                     }
                     else
                     {
@@ -2927,7 +2927,7 @@ namespace DigitalPlatform.rms
                     this.CloseInternal(false);
                 }
 
-                // É¾³ı¶ÔÏóÄ¿Â¼
+                // åˆ é™¤å¯¹è±¡ç›®å½•
                 try
                 {
                     if (string.IsNullOrEmpty(this.m_strObjectDir) == false)
@@ -2937,7 +2937,7 @@ namespace DigitalPlatform.rms
                 }
                 catch (Exception ex)
                 {
-                    strError = "É¾³ıÊı¾İ¿â '" + this.GetCaption("zh") + "' µÄ¶ÔÏóÄ¿Â¼ '" + this.m_strObjectDir + "' Ê±·¢Éú´íÎó£º " + ex.Message;
+                    strError = "åˆ é™¤æ•°æ®åº“ '" + this.GetCaption("zh") + "' çš„å¯¹è±¡ç›®å½• '" + this.m_strObjectDir + "' æ—¶å‘ç”Ÿé”™è¯¯ï¼š " + ex.Message;
                     return -1;
                 }
 
@@ -2945,29 +2945,29 @@ namespace DigitalPlatform.rms
             }
             catch (Exception ex)
             {
-                strError = "É¾³ı'" + this.GetCaption("zh") + "'Êı¾İ¿â³ö´í£¬Ô­Òò:" + ex.Message;
+                strError = "åˆ é™¤'" + this.GetCaption("zh") + "'æ•°æ®åº“å‡ºé”™ï¼ŒåŸå› :" + ex.Message;
                 return -1;
             }
             finally
             {
 
-                //*********************¶ÔÊı¾İ¿â½âĞ´Ëø**********
+                //*********************å¯¹æ•°æ®åº“è§£å†™é”**********
                 m_db_lock.ReleaseWriterLock();
 #if DEBUG_LOCK_SQLDATABASE
-				this.container.WriteDebugInfo("Delete()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â½âĞ´Ëø¡£");
+				this.container.WriteDebugInfo("Delete()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“è§£å†™é”ã€‚");
 #endif
             }
         }
 
-        // °´ID¼ìË÷¼ÇÂ¼
+        // æŒ‰IDæ£€ç´¢è®°å½•
         // parameter:
-        //		searchItem  SearchItem¶ÔÏó£¬°üÀ¨¼ìË÷ĞÅÏ¢ searchItem.IdOrder¾ö¶¨Êä³öµÄË³Ğò
-        //		isConnected Á¬½Ó¶ÔÏóµÄdelegate
-        //		resultSet   ½á¹û¼¯¶ÔÏó,´æ·ÅÃüÖĞ¼ÇÂ¼
+        //		searchItem  SearchItemå¯¹è±¡ï¼ŒåŒ…æ‹¬æ£€ç´¢ä¿¡æ¯ searchItem.IdOrderå†³å®šè¾“å‡ºçš„é¡ºåº
+        //		isConnected è¿æ¥å¯¹è±¡çš„delegate
+        //		resultSet   ç»“æœé›†å¯¹è±¡,å­˜æ”¾å‘½ä¸­è®°å½•
         // return:
-        //		-1  ³ö´í
-        //		0   ³É¹¦
-        // Ïß£º²»°²È«
+        //		-1  å‡ºé”™
+        //		0   æˆåŠŸ
+        // çº¿ï¼šä¸å®‰å…¨
         private int SearchByID(SearchItem searchItem,
             ChannelHandle handle,
             // Delegate_isConnected isConnected,
@@ -2977,17 +2977,17 @@ namespace DigitalPlatform.rms
         {
             strError = "";
 
-            Debug.Assert(searchItem != null, "SearchByID()µ÷ÓÃ´íÎó£¬searchItem²ÎÊıÖµ²»ÄÜÎªnull¡£");
-            // Debug.Assert(isConnected != null, "SearchByID()µ÷ÓÃ´íÎó£¬isConnected²ÎÊıÖµ²»ÄÜÎªnull¡£");
-            Debug.Assert(handle != null, "SearchByID()µ÷ÓÃ´íÎó£¬handle²ÎÊıÖµ²»ÄÜÎªnull¡£");
-            Debug.Assert(resultSet != null, "SearchByID()µ÷ÓÃ´íÎó£¬resultSet²ÎÊıÖµ²»ÄÜÎªnull¡£");
+            Debug.Assert(searchItem != null, "SearchByID()è°ƒç”¨é”™è¯¯ï¼ŒsearchItemå‚æ•°å€¼ä¸èƒ½ä¸ºnullã€‚");
+            // Debug.Assert(isConnected != null, "SearchByID()è°ƒç”¨é”™è¯¯ï¼ŒisConnectedå‚æ•°å€¼ä¸èƒ½ä¸ºnullã€‚");
+            Debug.Assert(handle != null, "SearchByID()è°ƒç”¨é”™è¯¯ï¼Œhandleå‚æ•°å€¼ä¸èƒ½ä¸ºnullã€‚");
+            Debug.Assert(resultSet != null, "SearchByID()è°ƒç”¨é”™è¯¯ï¼ŒresultSetå‚æ•°å€¼ä¸èƒ½ä¸ºnullã€‚");
 
             Debug.Assert(this.container != null, "");
 
             bool bOutputKeyCount = StringUtil.IsInList("keycount", strOutputStyle);
             bool bOutputKeyID = StringUtil.IsInList("keyid", strOutputStyle);
 
-            // SQLite²ÉÓÃ±£ÊØÁ¬½Ó
+            // SQLiteé‡‡ç”¨ä¿å®ˆè¿æ¥
             Connection connection = new Connection(this,
                 this.m_strConnString);
             connection.Open();
@@ -3003,7 +3003,7 @@ namespace DigitalPlatform.rms
                 else if (connection.SqlServerType == SqlServerType.Oracle)
                     strPattern = "'__________'";
                 else
-                    throw new Exception("Î´ÖªµÄ SqlServerType");
+                    throw new Exception("æœªçŸ¥çš„ SqlServerType");
 
                 List<object> aSqlParameter = new List<object>();
                 string strWhere = "";
@@ -3235,7 +3235,7 @@ namespace DigitalPlatform.rms
 
                 string strTop = "";
                 string strLimit = "";
-                if (searchItem.MaxCount != -1)  // Ö»ÃüÖĞÖ¸¶¨µÄÌõÊı
+                if (searchItem.MaxCount != -1)  // åªå‘½ä¸­æŒ‡å®šçš„æ¡æ•°
                 {
                     if (connection.SqlServerType == SqlServerType.MsSqlServer)
                         strTop = " TOP " + Convert.ToString(searchItem.MaxCount) + " ";
@@ -3246,12 +3246,12 @@ namespace DigitalPlatform.rms
                     else if (connection.SqlServerType == SqlServerType.Oracle)
                         strLimit = " WHERE rownum <= " + Convert.ToString(searchItem.MaxCount) + " ";
                     else
-                        throw new Exception("Î´ÖªµÄ SqlServerType");
+                        throw new Exception("æœªçŸ¥çš„ SqlServerType");
                 }
 
                 string strOrderBy = "";
 
-                // OracleÏÂÆÈÊ¹Ê¹ÓÃË³Ğò
+                // Oracleä¸‹è¿«ä½¿ä½¿ç”¨é¡ºåº
                 if (connection.SqlServerType == SqlServerType.Oracle)
                 {
                     if (string.IsNullOrEmpty(searchItem.IdOrder) == true)
@@ -3288,10 +3288,10 @@ namespace DigitalPlatform.rms
                 if (connection.SqlServerType == SqlServerType.MsSqlServer)
                     strCommand += " use master " + "\n";
 
-                // OracleµÄÓï¾ä·Ç³£ÌØÊâ
+                // Oracleçš„è¯­å¥éå¸¸ç‰¹æ®Š
                 if (connection.SqlServerType == SqlServerType.Oracle)
                 {
-                    // TODO Èç¹ûÃ»ÓĞ order by ×Ó¾ä£¬ rownum»¹¿ÉÒÔ¼ò»¯
+                    // TODO å¦‚æœæ²¡æœ‰ order by å­å¥ï¼Œ rownumè¿˜å¯ä»¥ç®€åŒ–
                     if (string.IsNullOrEmpty(strLimit) == false)
                         strCommand = "SELECT * from ( SELECT "
     + " DISTINCT "
@@ -3318,7 +3318,7 @@ namespace DigitalPlatform.rms
                         connection.SqlConnection);
                     try
                     {
-                        command.CommandTimeout = 20 * 60;  // °Ñ¼ìË÷Ê±¼ä±ä´ó
+                        command.CommandTimeout = 20 * 60;  // æŠŠæ£€ç´¢æ—¶é—´å˜å¤§
                         foreach (SqlParameter sqlParameter in aSqlParameter)
                         {
                             command.Parameters.Add(sqlParameter);
@@ -3339,7 +3339,7 @@ namespace DigitalPlatform.rms
                                     catch
                                     {
                                     }
-                                    strError = "ÓÃ»§ÖĞ¶Ï";
+                                    strError = "ç”¨æˆ·ä¸­æ–­";
                                     return -1;
                                 }
                             }
@@ -3369,7 +3369,7 @@ namespace DigitalPlatform.rms
                                     {
                                         if (handle.DoIdle() == false)
                                         {
-                                            strError = "ÓÃ»§ÖĞ¶Ï";
+                                            strError = "ç”¨æˆ·ä¸­æ–­";
                                             return -1;
                                         }
                                     }
@@ -3378,12 +3378,12 @@ namespace DigitalPlatform.rms
                                 string strID = ((string)reader[0]);
                                 if (strID.Length != 10)
                                 {
-                                    strError = "½á¹û¼¯ÖĞ³öÏÖÁË³¤¶È²»ÊÇ10Î»µÄ¼ÇÂ¼ºÅ£¬²»Õı³£";
+                                    strError = "ç»“æœé›†ä¸­å‡ºç°äº†é•¿åº¦ä¸æ˜¯10ä½çš„è®°å½•å·ï¼Œä¸æ­£å¸¸";
                                     return -1;
                                 }
 
 #if NO
-                        string strId = this.FullID + "/" + strID;   //¼ÇÂ¼Â·¾¶¸ñÊ½£º¿âID/¼ÇÂ¼ºÅ
+                        string strId = this.FullID + "/" + strID;   //è®°å½•è·¯å¾„æ ¼å¼ï¼šåº“ID/è®°å½•å·
                         resultSet.Add(new DpRecord(strId));
 #endif
                                 if (bOutputKeyCount == true)
@@ -3395,9 +3395,9 @@ namespace DigitalPlatform.rms
                                 else if (bOutputKeyID == true)
                                 {
                                     // datareader key, id
-                                    // ½á¹û¼¯¸ñÊ½ key, path
+                                    // ç»“æœé›†æ ¼å¼ key, path
                                     string strKey = (string)reader[0];
-                                    string strId = this.FullID + "/" + (string)reader[1]; // ¸ñÊ½Îª£º¿âid/¼ÇÂ¼ºÅ
+                                    string strId = this.FullID + "/" + (string)reader[1]; // æ ¼å¼ä¸ºï¼šåº“id/è®°å½•å·
                                     string strFrom = (string)reader[2];
                                     DpRecord record = new DpRecord(strId);
                                     // new DpRecord(strKey + "," + strId)
@@ -3407,7 +3407,7 @@ namespace DigitalPlatform.rms
                                 else
                                 {
                                     string strId = "";
-                                    strId = this.FullID + "/" + (string)reader[0]; // ¼ÇÂ¼¸ñÊ½Îª£º¿âid/¼ÇÂ¼ºÅ
+                                    strId = this.FullID + "/" + (string)reader[0]; // è®°å½•æ ¼å¼ä¸ºï¼šåº“id/è®°å½•å·
                                     resultSet.Add(new DpRecord(strId));
                                 }
 
@@ -3437,7 +3437,7 @@ namespace DigitalPlatform.rms
                         connection.SQLiteConnection);
                     try
                     {
-                        command.CommandTimeout = 20 * 60;  // °Ñ¼ìË÷Ê±¼ä±ä´ó
+                        command.CommandTimeout = 20 * 60;  // æŠŠæ£€ç´¢æ—¶é—´å˜å¤§
                         foreach (SQLiteParameter sqlParameter in aSqlParameter)
                         {
                             command.Parameters.Add(sqlParameter);
@@ -3454,15 +3454,15 @@ namespace DigitalPlatform.rms
                             bool bRet;
                             while (true)
                             {
-                                if (handle != null)  //Ö»ÊÇ²»ÔÙ¼ìË÷ÁË
+                                if (handle != null)  //åªæ˜¯ä¸å†æ£€ç´¢äº†
                                 {
                                     if (handle.DoIdle() == false)
                                     {
-                                        command = null; // ÕâÀï²»ÒªDispose() ¶ª¸øÏß³Ì task.ThreadMain È¥Dispose()
+                                        command = null; // è¿™é‡Œä¸è¦Dispose() ä¸¢ç»™çº¿ç¨‹ task.ThreadMain å»Dispose()
                                         connection = null;
                                         reader = null;
                                         task.Cancel();
-                                        strError = "ÓÃ»§ÖĞ¶Ï";
+                                        strError = "ç”¨æˆ·ä¸­æ–­";
                                         return -1;
                                     }
                                 }
@@ -3495,7 +3495,7 @@ namespace DigitalPlatform.rms
                                     {
                                         if (handle.DoIdle() == false)
                                         {
-                                            strError = "ÓÃ»§ÖĞ¶Ï";
+                                            strError = "ç”¨æˆ·ä¸­æ–­";
                                             return -1;
                                         }
                                     }
@@ -3504,12 +3504,12 @@ namespace DigitalPlatform.rms
                                 string strID = ((string)reader[0]);
                                 if (strID.Length != 10)
                                 {
-                                    strError = "½á¹û¼¯ÖĞ³öÏÖÁË³¤¶È²»ÊÇ10Î»µÄ¼ÇÂ¼ºÅ£¬²»Õı³£";
+                                    strError = "ç»“æœé›†ä¸­å‡ºç°äº†é•¿åº¦ä¸æ˜¯10ä½çš„è®°å½•å·ï¼Œä¸æ­£å¸¸";
                                     return -1;
                                 }
 
 #if NO
-                        string strId = this.FullID + "/" + strID;   //¼ÇÂ¼Â·¾¶¸ñÊ½£º¿âID/¼ÇÂ¼ºÅ
+                        string strId = this.FullID + "/" + strID;   //è®°å½•è·¯å¾„æ ¼å¼ï¼šåº“ID/è®°å½•å·
                         resultSet.Add(new DpRecord(strId));
 #endif
                                 if (bOutputKeyCount == true)
@@ -3521,9 +3521,9 @@ namespace DigitalPlatform.rms
                                 else if (bOutputKeyID == true)
                                 {
                                     // datareader key, id
-                                    // ½á¹û¼¯¸ñÊ½ key, path
+                                    // ç»“æœé›†æ ¼å¼ key, path
                                     string strKey = (string)reader[0];
-                                    string strId = this.FullID + "/" + (string)reader[1]; // ¸ñÊ½Îª£º¿âid/¼ÇÂ¼ºÅ
+                                    string strId = this.FullID + "/" + (string)reader[1]; // æ ¼å¼ä¸ºï¼šåº“id/è®°å½•å·
                                     string strFrom = (string)reader[2];
                                     DpRecord record = new DpRecord(strId);
                                     // new DpRecord(strKey + "," + strId)
@@ -3533,7 +3533,7 @@ namespace DigitalPlatform.rms
                                 else
                                 {
                                     string strId = "";
-                                    strId = this.FullID + "/" + (string)reader[0]; // ¼ÇÂ¼¸ñÊ½Îª£º¿âid/¼ÇÂ¼ºÅ
+                                    strId = this.FullID + "/" + (string)reader[0]; // è®°å½•æ ¼å¼ä¸ºï¼šåº“id/è®°å½•å·
                                     resultSet.Add(new DpRecord(strId));
                                 }
 
@@ -3562,7 +3562,7 @@ namespace DigitalPlatform.rms
                         connection.MySqlConnection);
                     try
                     {
-                        command.CommandTimeout = 20 * 60;  // °Ñ¼ìË÷Ê±¼ä±ä´ó
+                        command.CommandTimeout = 20 * 60;  // æŠŠæ£€ç´¢æ—¶é—´å˜å¤§
                         foreach (MySqlParameter sqlParameter in aSqlParameter)
                         {
                             command.Parameters.Add(sqlParameter);
@@ -3583,7 +3583,7 @@ namespace DigitalPlatform.rms
                                     catch
                                     {
                                     }
-                                    strError = "ÓÃ»§ÖĞ¶Ï";
+                                    strError = "ç”¨æˆ·ä¸­æ–­";
                                     return -1;
                                 }
                             }
@@ -3613,7 +3613,7 @@ namespace DigitalPlatform.rms
                                     {
                                         if (handle.DoIdle() == false)
                                         {
-                                            strError = "ÓÃ»§ÖĞ¶Ï";
+                                            strError = "ç”¨æˆ·ä¸­æ–­";
                                             return -1;
                                         }
                                     }
@@ -3622,7 +3622,7 @@ namespace DigitalPlatform.rms
                                 string strID = ((string)reader[0]);
                                 if (strID.Length != 10)
                                 {
-                                    strError = "½á¹û¼¯ÖĞ³öÏÖÁË³¤¶È²»ÊÇ10Î»µÄ¼ÇÂ¼ºÅ£¬²»Õı³£";
+                                    strError = "ç»“æœé›†ä¸­å‡ºç°äº†é•¿åº¦ä¸æ˜¯10ä½çš„è®°å½•å·ï¼Œä¸æ­£å¸¸";
                                     return -1;
                                 }
 
@@ -3635,9 +3635,9 @@ namespace DigitalPlatform.rms
                                 else if (bOutputKeyID == true)
                                 {
                                     // datareader key, id
-                                    // ½á¹û¼¯¸ñÊ½ key, path
+                                    // ç»“æœé›†æ ¼å¼ key, path
                                     string strKey = (string)reader[0];
-                                    string strId = this.FullID + "/" + (string)reader[1]; // ¸ñÊ½Îª£º¿âid/¼ÇÂ¼ºÅ
+                                    string strId = this.FullID + "/" + (string)reader[1]; // æ ¼å¼ä¸ºï¼šåº“id/è®°å½•å·
                                     string strFrom = (string)reader[2];
                                     DpRecord record = new DpRecord(strId);
                                     // new DpRecord(strKey + "," + strId)
@@ -3647,7 +3647,7 @@ namespace DigitalPlatform.rms
                                 else
                                 {
                                     string strId = "";
-                                    strId = this.FullID + "/" + (string)reader[0]; // ¼ÇÂ¼¸ñÊ½Îª£º¿âid/¼ÇÂ¼ºÅ
+                                    strId = this.FullID + "/" + (string)reader[0]; // è®°å½•æ ¼å¼ä¸ºï¼šåº“id/è®°å½•å·
                                     resultSet.Add(new DpRecord(strId));
                                 }
 
@@ -3677,7 +3677,7 @@ namespace DigitalPlatform.rms
                     try
                     {
                         command.BindByName = true;
-                        command.CommandTimeout = 20 * 60;  // °Ñ¼ìË÷Ê±¼ä±ä´ó
+                        command.CommandTimeout = 20 * 60;  // æŠŠæ£€ç´¢æ—¶é—´å˜å¤§
                         foreach (OracleParameter sqlParameter in aSqlParameter)
                         {
                             command.Parameters.Add(sqlParameter);
@@ -3694,15 +3694,15 @@ namespace DigitalPlatform.rms
                             bool bRet;
                             while (true)
                             {
-                                if (handle != null)  //Ö»ÊÇ²»ÔÙ¼ìË÷ÁË
+                                if (handle != null)  //åªæ˜¯ä¸å†æ£€ç´¢äº†
                                 {
                                     if (handle.DoIdle() == false)
                                     {
-                                        command = null; // ÕâÀï²»ÒªDispose() ¶ª¸øÏß³Ì task.ThreadMain È¥Dispose()
+                                        command = null; // è¿™é‡Œä¸è¦Dispose() ä¸¢ç»™çº¿ç¨‹ task.ThreadMain å»Dispose()
                                         connection = null;
                                         reader = null;
                                         task.Cancel();
-                                        strError = "ÓÃ»§ÖĞ¶Ï";
+                                        strError = "ç”¨æˆ·ä¸­æ–­";
                                         return -1;
                                     }
                                 }
@@ -3734,7 +3734,7 @@ namespace DigitalPlatform.rms
                                     {
                                         if (handle.DoIdle() == false)
                                         {
-                                            strError = "ÓÃ»§ÖĞ¶Ï";
+                                            strError = "ç”¨æˆ·ä¸­æ–­";
                                             return -1;
                                         }
                                     }
@@ -3743,7 +3743,7 @@ namespace DigitalPlatform.rms
                                 string strID = ((string)reader[0]);
                                 if (strID.Length != 10)
                                 {
-                                    strError = "½á¹û¼¯ÖĞ³öÏÖÁË³¤¶È²»ÊÇ10Î»µÄ¼ÇÂ¼ºÅ£¬²»Õı³£";
+                                    strError = "ç»“æœé›†ä¸­å‡ºç°äº†é•¿åº¦ä¸æ˜¯10ä½çš„è®°å½•å·ï¼Œä¸æ­£å¸¸";
                                     return -1;
                                 }
 
@@ -3756,9 +3756,9 @@ namespace DigitalPlatform.rms
                                 else if (bOutputKeyID == true)
                                 {
                                     // datareader key, id
-                                    // ½á¹û¼¯¸ñÊ½ key, path
+                                    // ç»“æœé›†æ ¼å¼ key, path
                                     string strKey = (string)reader[0];
-                                    string strId = this.FullID + "/" + (string)reader[1]; // ¸ñÊ½Îª£º¿âid/¼ÇÂ¼ºÅ
+                                    string strId = this.FullID + "/" + (string)reader[1]; // æ ¼å¼ä¸ºï¼šåº“id/è®°å½•å·
                                     string strFrom = (string)reader[2];
                                     DpRecord record = new DpRecord(strId);
                                     // new DpRecord(strKey + "," + strId)
@@ -3768,7 +3768,7 @@ namespace DigitalPlatform.rms
                                 else
                                 {
                                     string strId = "";
-                                    strId = this.FullID + "/" + (string)reader[0]; // ¼ÇÂ¼¸ñÊ½Îª£º¿âid/¼ÇÂ¼ºÅ
+                                    strId = this.FullID + "/" + (string)reader[0]; // è®°å½•æ ¼å¼ä¸ºï¼šåº“id/è®°å½•å·
                                     resultSet.Add(new DpRecord(strId));
                                 }
 
@@ -3797,7 +3797,7 @@ namespace DigitalPlatform.rms
 
                 /*
                 if (sqlEx.Errors is SqlErrorCollection)
-                    strError = "Êı¾İ¿â'" + this.GetCaption("zh") + "'ÉĞÎ´³õÊ¼»¯¡£";
+                    strError = "æ•°æ®åº“'" + this.GetCaption("zh") + "'å°šæœªåˆå§‹åŒ–ã€‚";
                 else
                     strError = sqlEx.Message;
                  * */
@@ -3808,7 +3808,7 @@ namespace DigitalPlatform.rms
                 strError = "SearchByID() exception: " + ExceptionUtil.GetDebugText(ex);
                 return -1;
             }
-            finally // Á¬½Ó
+            finally // è¿æ¥
             {
                 if (connection != null)
                     connection.Close();
@@ -3817,7 +3817,7 @@ namespace DigitalPlatform.rms
         }
 
         /*
-<target list="ÖĞÎÄÍ¼ÊéÊµÌå:²áÌõÂëºÅ">
+<target list="ä¸­æ–‡å›¾ä¹¦å®ä½“:å†Œæ¡ç å·">
     <item>
         <word>00000335,00000903</word>
         <match>exact</match>
@@ -3881,22 +3881,22 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
-        // µÃµ½¼ìË÷Ìõ¼ş£¬Ë½ÓĞº¯Êı£¬±»SearchByUnion()º¯Êıµ÷
-        // ¿ÉÄÜ»áÅ×³öµÄÒì³£:NoMatchException(¼ìË÷·½Ê½ÓëÊı¾İÀàĞÍ)
-        // ×¢£º º¯Êı·µ»Øºó£¬strKeyConditionÖĞµÄ '@' ×Ö·û¿ÉÄÜĞèÒªÌæ»»Îª ':' (OracleÇéĞÎ)
+        // å¾—åˆ°æ£€ç´¢æ¡ä»¶ï¼Œç§æœ‰å‡½æ•°ï¼Œè¢«SearchByUnion()å‡½æ•°è°ƒ
+        // å¯èƒ½ä¼šæŠ›å‡ºçš„å¼‚å¸¸:NoMatchException(æ£€ç´¢æ–¹å¼ä¸æ•°æ®ç±»å‹)
+        // æ³¨ï¼š å‡½æ•°è¿”å›åï¼ŒstrKeyConditionä¸­çš„ '@' å­—ç¬¦å¯èƒ½éœ€è¦æ›¿æ¢ä¸º ':' (Oracleæƒ…å½¢)
         // parameters:
-        //      searchItem              SearchItem¶ÔÏó
-        //      nodeConvertQueryString  ×Ö·û´®ĞÍ¼ìË÷´ÊµÄ´¦ÀíĞÅÏ¢½Úµã
-        //      nodeConvertQueryNumber  ÊıÖµĞÍ¼ìË÷´ÊµÄ´¦ÀíĞÅÏ¢½Úµã
-        //      strPostfix              SqlÃüÁî²ÎÊıÃû³Æºó×º£¬ÒÔ±ã¶à¸ö²ÎÊıºÏÔÚÒ»ÆğÊ±Çø·Ö
-        //      aParameter              ²ÎÊıÊı×é
-        //      strKeyCondition         out²ÎÊı£¬·µ»ØSql¼ìË÷Ê½Ìõ¼ş²¿·Ö
-        //      strError                out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //      searchItem              SearchItemå¯¹è±¡
+        //      nodeConvertQueryString  å­—ç¬¦ä¸²å‹æ£€ç´¢è¯çš„å¤„ç†ä¿¡æ¯èŠ‚ç‚¹
+        //      nodeConvertQueryNumber  æ•°å€¼å‹æ£€ç´¢è¯çš„å¤„ç†ä¿¡æ¯èŠ‚ç‚¹
+        //      strPostfix              Sqlå‘½ä»¤å‚æ•°åç§°åç¼€ï¼Œä»¥ä¾¿å¤šä¸ªå‚æ•°åˆåœ¨ä¸€èµ·æ—¶åŒºåˆ†
+        //      aParameter              å‚æ•°æ•°ç»„
+        //      strKeyCondition         outå‚æ•°ï¼Œè¿”å›Sqlæ£€ç´¢å¼æ¡ä»¶éƒ¨åˆ†
+        //      strError                outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //      -1  ³ö´í
-        //      0   ³É¹¦
-        // Ïß£º²»°²È«
-        // ???¸Ãº¯ÊıÅ×³öÒì³£µÄ´¦Àí²»Ì«Ë³
+        //      -1  å‡ºé”™
+        //      0   æˆåŠŸ
+        // çº¿ï¼šä¸å®‰å…¨
+        // ???è¯¥å‡½æ•°æŠ›å‡ºå¼‚å¸¸çš„å¤„ç†ä¸å¤ªé¡º
         private int GetKeyCondition(SearchItem searchItem,
             XmlNode nodeConvertQueryString,
             XmlNode nodeConvertQueryNumber,
@@ -3916,7 +3916,7 @@ namespace DigitalPlatform.rms
                 bSearchNull = true;
             }
 
-            //¼ìË÷ÈıÏîÊÇ·ñÓĞÃ¬¶Ü£¬¸Ãº¯Êı¿ÉÄÜ»áÅ×³öNoMatchExceptionÒì³£
+            //æ£€ç´¢ä¸‰é¡¹æ˜¯å¦æœ‰çŸ›ç›¾ï¼Œè¯¥å‡½æ•°å¯èƒ½ä¼šæŠ›å‡ºNoMatchExceptionå¼‚å¸¸
             QueryUtil.VerifyRelation(ref searchItem.Match,
                 ref searchItem.Relation,
                 ref searchItem.DataType);
@@ -3930,9 +3930,9 @@ namespace DigitalPlatform.rms
                 return -1;
 
 
-            //3.¸ù¾İÊı¾İÀàĞÍ£¬¶Ô¼ìË÷´Ê½øĞĞ¼Ó¹¤
+            //3.æ ¹æ®æ•°æ®ç±»å‹ï¼Œå¯¹æ£€ç´¢è¯è¿›è¡ŒåŠ å·¥
             string strKeyValue = searchItem.Word.Trim();
-            if (searchItem.DataType == "string")    //×Ö·ûÀàĞÍµ÷×Ö·ûµÄÅäÖÃ£¬¶Ô¼ìË÷´Ê½øĞĞ¼Ó¹¤
+            if (searchItem.DataType == "string")    //å­—ç¬¦ç±»å‹è°ƒå­—ç¬¦çš„é…ç½®ï¼Œå¯¹æ£€ç´¢è¯è¿›è¡ŒåŠ å·¥
             {
                 if (nodeConvertQueryString != null && keysCfg != null)
                 {
@@ -3949,13 +3949,13 @@ namespace DigitalPlatform.rms
                     {
                         string[] list = new string[keys.Count];
                         keys.CopyTo(list);
-                        strError = "²»Ö§³Ö°Ñ¼ìË÷´Ê '" + strKeyValue + "' Í¨¹ı'split'ÑùÊ½¼Ó¹¤³É¶à¸ö("+string.Join(",", list)+")";
+                        strError = "ä¸æ”¯æŒæŠŠæ£€ç´¢è¯ '" + strKeyValue + "' é€šè¿‡'split'æ ·å¼åŠ å·¥æˆå¤šä¸ª("+string.Join(",", list)+")";
                         return -1;
                     }
                     strKeyValue = keys[0];
                 }
             }
-            else if (searchItem.DataType == "number"   //Êı×ÖĞÍµ÷Êı×Ö¸ñÊ½µÄÅäÖÃ£¬¶Ô¼ìË÷´Ê½øĞĞ¼Ó¹¤
+            else if (searchItem.DataType == "number"   //æ•°å­—å‹è°ƒæ•°å­—æ ¼å¼çš„é…ç½®ï¼Œå¯¹æ£€ç´¢è¯è¿›è¡ŒåŠ å·¥
                      && (searchItem.Relation != "draw" && searchItem.Relation != "range"))  // 2009/9/26 add
             {
                 if (nodeConvertQueryNumber != null
@@ -3975,15 +3975,15 @@ namespace DigitalPlatform.rms
             }
 
             string strParameterName;
-            //4.¸ù¾İmatchµÄÖµ£¬·Ö±ğµÃµ½²»Í¬µÄ¼ìË÷±í´ïÊ½
+            //4.æ ¹æ®matchçš„å€¼ï¼Œåˆ†åˆ«å¾—åˆ°ä¸åŒçš„æ£€ç´¢è¡¨è¾¾å¼
             if (searchItem.Match == "left"
-                || searchItem.Match == "")  //Èç¹ûstrMatchÎª¿Õ£¬Ôò°´"×ó·½Ò»ÖÂ"
+                || searchItem.Match == "")  //å¦‚æœstrMatchä¸ºç©ºï¼Œåˆ™æŒ‰"å·¦æ–¹ä¸€è‡´"
             {
-                //ÆäÊµÒ»¿ªÊ¼¾ÍÒÑ¾­¼ì²éÁËÈı¶¥ÊÇ·ñÃ¬¶Ü£¬Èç¹ûÓĞÃ¬¶ÜÅ×³öÅ×Òì£¬ÕâÀïÖØ¸´¼ì²éÎŞº¦£¬¸üÑÏ¸ñ
+                //å…¶å®ä¸€å¼€å§‹å°±å·²ç»æ£€æŸ¥äº†ä¸‰é¡¶æ˜¯å¦çŸ›ç›¾ï¼Œå¦‚æœæœ‰çŸ›ç›¾æŠ›å‡ºæŠ›å¼‚ï¼Œè¿™é‡Œé‡å¤æ£€æŸ¥æ— å®³ï¼Œæ›´ä¸¥æ ¼
                 if (searchItem.DataType != "string")
                 {
                     NoMatchException ex =
-                        new NoMatchException("ÔÚÆ¥Åä·½Ê½ÖµÎªleft»ò¿ÕÊ±£¬ÓëÊı¾İÀàĞÍÖµ" + searchItem.DataType + "Ã¬¶Ü£¬Êı¾İÀàĞÍÓ¦¸ÃÎªstring");
+                        new NoMatchException("åœ¨åŒ¹é…æ–¹å¼å€¼ä¸ºleftæˆ–ç©ºæ—¶ï¼Œä¸æ•°æ®ç±»å‹å€¼" + searchItem.DataType + "çŸ›ç›¾ï¼Œæ•°æ®ç±»å‹åº”è¯¥ä¸ºstring");
                     throw (ex);
                 }
                 strParameterName = "@keyValue" + strPostfix;
@@ -4018,10 +4018,10 @@ namespace DigitalPlatform.rms
             }
             else if (searchItem.Match == "middle")
             {
-                //ÆäÊµÒ»¿ªÊ¼¾ÍÒÑ¾­¼ì²éÁËÈı¶¥ÊÇ·ñÃ¬¶Ü£¬Èç¹ûÓĞÃ¬¶ÜÅ×³öÅ×Òì£¬ÕâÀïÖØ¸´¼ì²éÎŞº¦£¬¸üÑÏ¸ñ
+                //å…¶å®ä¸€å¼€å§‹å°±å·²ç»æ£€æŸ¥äº†ä¸‰é¡¶æ˜¯å¦çŸ›ç›¾ï¼Œå¦‚æœæœ‰çŸ›ç›¾æŠ›å‡ºæŠ›å¼‚ï¼Œè¿™é‡Œé‡å¤æ£€æŸ¥æ— å®³ï¼Œæ›´ä¸¥æ ¼
                 if (searchItem.DataType != "string")
                 {
-                    NoMatchException ex = new NoMatchException("ÔÚÆ¥Åä·½Ê½ÖµÎªmiddle»ò¿ÕÊ±£¬ÓëÊı¾İÀàĞÍÖµ" + searchItem.DataType + "Ã¬¶Ü£¬Êı¾İÀàĞÍÓ¦¸ÃÎªstring");
+                    NoMatchException ex = new NoMatchException("åœ¨åŒ¹é…æ–¹å¼å€¼ä¸ºmiddleæˆ–ç©ºæ—¶ï¼Œä¸æ•°æ®ç±»å‹å€¼" + searchItem.DataType + "çŸ›ç›¾ï¼Œæ•°æ®ç±»å‹åº”è¯¥ä¸ºstring");
                     throw (ex);
                 }
                 strParameterName = "@keyValue" + strPostfix;
@@ -4055,10 +4055,10 @@ namespace DigitalPlatform.rms
             }
             else if (searchItem.Match == "right")
             {
-                //ÆäÊµÒ»¿ªÊ¼¾ÍÒÑ¾­¼ì²éÁËÈı¶¥ÊÇ·ñÃ¬¶Ü£¬Èç¹ûÓĞÃ¬¶ÜÅ×³öÅ×Òì£¬ÕâÀïÖØ¸´¼ì²éÎŞº¦£¬¸üÑÏ¸ñ
+                //å…¶å®ä¸€å¼€å§‹å°±å·²ç»æ£€æŸ¥äº†ä¸‰é¡¶æ˜¯å¦çŸ›ç›¾ï¼Œå¦‚æœæœ‰çŸ›ç›¾æŠ›å‡ºæŠ›å¼‚ï¼Œè¿™é‡Œé‡å¤æ£€æŸ¥æ— å®³ï¼Œæ›´ä¸¥æ ¼
                 if (searchItem.DataType != "string")
                 {
-                    NoMatchException ex = new NoMatchException("ÔÚÆ¥Åä·½Ê½ÖµÎªleft»ò¿ÕÊ±£¬ÓëÊı¾İÀàĞÍÖµ" + searchItem.DataType + "Ã¬¶Ü£¬Êı¾İÀàĞÍÓ¦¸ÃÎªstring");
+                    NoMatchException ex = new NoMatchException("åœ¨åŒ¹é…æ–¹å¼å€¼ä¸ºleftæˆ–ç©ºæ—¶ï¼Œä¸æ•°æ®ç±»å‹å€¼" + searchItem.DataType + "çŸ›ç›¾ï¼Œæ•°æ®ç±»å‹åº”è¯¥ä¸ºstring");
                     throw (ex);
                 }
                 strParameterName = "@keyValue" + strPostfix;
@@ -4091,7 +4091,7 @@ namespace DigitalPlatform.rms
                     aSqlParameter.Add(temp);
                 }
             }
-            else if (searchItem.Match == "exact") //ÏÈ¿´match£¬ÔÙ¿´relation,×îºó¿´dataType
+            else if (searchItem.Match == "exact") //å…ˆçœ‹matchï¼Œå†çœ‹relation,æœ€åçœ‹dataType
             {
                 // 2012/11/27
                 if (searchItem.Relation == "list")
@@ -4103,7 +4103,7 @@ namespace DigitalPlatform.rms
                     if (nRet == -1)
                         return -1;
                 }
-                //´Ó´ÊÖĞ¼³È¡,½Ï¸´ÔÓ£¬×¢Òâ
+                //ä»è¯ä¸­æ±²å–,è¾ƒå¤æ‚ï¼Œæ³¨æ„
                 else if (searchItem.Relation == "draw"
                     || searchItem.Relation == "range")
                 {
@@ -4129,7 +4129,7 @@ namespace DigitalPlatform.rms
                             if (nodeConvertQueryString != null
                                 && keysCfg != null)
                             {
-                                // ¼Ó¹¤Ê×
+                                // åŠ å·¥é¦–
                                 List<string> keys = null;
                                 nRet = keysCfg.ConvertKeyWithStringNode(
                                     null,//dataDom
@@ -4141,13 +4141,13 @@ namespace DigitalPlatform.rms
                                     return -1;
                                 if (keys.Count != 1)
                                 {
-                                    strError = "²»Ö§³Ö°Ñ¼ìË÷´ÊÍ¨¹ı'split'ÑùÊ½¼Ó¹¤³É¶à¸ö.";
+                                    strError = "ä¸æ”¯æŒæŠŠæ£€ç´¢è¯é€šè¿‡'split'æ ·å¼åŠ å·¥æˆå¤šä¸ª.";
                                     return -1;
                                 }
                                 strStartText = keys[0];
 
 
-                                // ¼Ó¹¤Î²
+                                // åŠ å·¥å°¾
                                 nRet = keysCfg.ConvertKeyWithStringNode(
                                     null,//dataDom
                                     strEndText,
@@ -4158,7 +4158,7 @@ namespace DigitalPlatform.rms
                                     return -1;
                                 if (keys.Count != 1)
                                 {
-                                    strError = "²»Ö§³Ö°Ñ¼ìË÷´ÊÍ¨¹ı'split'ÑùÊ½¼Ó¹¤³É¶à¸ö.";
+                                    strError = "ä¸æ”¯æŒæŠŠæ£€ç´¢è¯é€šè¿‡'split'æ ·å¼åŠ å·¥æˆå¤šä¸ª.";
                                     return -1;
                                 }
                                 strEndText = keys[0];
@@ -4218,7 +4218,7 @@ namespace DigitalPlatform.rms
                             if (nodeConvertQueryNumber != null
                                 && keysCfg != null)
                             {
-                                // Ê×
+                                // é¦–
                                 string strMyKey;
                                 nRet = keysCfg.ConvertKeyWithNumberNode(
                                     null,
@@ -4230,7 +4230,7 @@ namespace DigitalPlatform.rms
                                     return -1;
                                 strStartText = strMyKey;
 
-                                // Î²
+                                // å°¾
                                 nRet = keysCfg.ConvertKeyWithNumberNode(
                                     null,
                                     strEndText,
@@ -4252,7 +4252,7 @@ namespace DigitalPlatform.rms
                         string strOperator;
                         string strRealText;
 
-                        //Èç¹û´ÊÖĞÃ»ÓĞ°üº¬¹ØÏµ·û£¬Ôò°´=ºÅËã
+                        //å¦‚æœè¯ä¸­æ²¡æœ‰åŒ…å«å…³ç³»ç¬¦ï¼Œåˆ™æŒ‰=å·ç®—
                         StringUtil.GetPartCondition(searchItem.Word,
                             out strOperator,
                             out strRealText);
@@ -4276,7 +4276,7 @@ namespace DigitalPlatform.rms
                                     return -1;
                                 if (keys.Count != 1)
                                 {
-                                    strError = "²»Ö§³Ö°Ñ¼ìË÷´ÊÍ¨¹ı'split'ÑùÊ½¼Ó¹¤³É¶à¸ö.";
+                                    strError = "ä¸æ”¯æŒæŠŠæ£€ç´¢è¯é€šè¿‡'split'æ ·å¼åŠ å·¥æˆå¤šä¸ª.";
                                     return -1;
                                 }
                                 strRealText = keys[0];
@@ -4338,9 +4338,9 @@ namespace DigitalPlatform.rms
                         }
                     }
                 }
-                else   //ÆÕÍ¨µÄ¹ØÏµ²Ù×÷·û
+                else   //æ™®é€šçš„å…³ç³»æ“ä½œç¬¦
                 {
-                    //µ±¹ØÏµ²Ù×÷·ûÎª¿ÕÎª£¬°´µÈÓÚËã
+                    //å½“å…³ç³»æ“ä½œç¬¦ä¸ºç©ºä¸ºï¼ŒæŒ‰ç­‰äºç®—
                     if (searchItem.Relation == "")
                         searchItem.Relation = "=";
                     if (searchItem.Relation == "!=")
@@ -4396,16 +4396,16 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
-        // ¼ìË÷
+        // æ£€ç´¢
         // parameters:
-        //      searchItem  SearchItem¶ÔÏó£¬´æ·Å¼ìË÷´ÊµÈĞÅÏ¢
-        //      isConnected Á¬½Ó¶ÔÏó
-        //      resultSet   ½á¹û¼¯¶ÔÏó£¬´æ·ÅÃüÖĞ¼ÇÂ¼¡£±¾º¯Êı²¢²»ÔÚ¼ìË÷Ç°Çå¿Õ½á¹û¼¯£¬Òò´Ë£¬¶ÔÍ¬Ò»½á¹û¼¯¶ÔÏó¶à´ÎÖ´ĞĞ±¾º¯Êı£¬Ôò¿ÉÒÔ°ÑÃüÖĞ½á¹û×·¼ÓÔÚÒ»Æğ
-        //      strLang     ÓïÑÔ°æ±¾£¬
+        //      searchItem  SearchItemå¯¹è±¡ï¼Œå­˜æ”¾æ£€ç´¢è¯ç­‰ä¿¡æ¯
+        //      isConnected è¿æ¥å¯¹è±¡
+        //      resultSet   ç»“æœé›†å¯¹è±¡ï¼Œå­˜æ”¾å‘½ä¸­è®°å½•ã€‚æœ¬å‡½æ•°å¹¶ä¸åœ¨æ£€ç´¢å‰æ¸…ç©ºç»“æœé›†ï¼Œå› æ­¤ï¼Œå¯¹åŒä¸€ç»“æœé›†å¯¹è±¡å¤šæ¬¡æ‰§è¡Œæœ¬å‡½æ•°ï¼Œåˆ™å¯ä»¥æŠŠå‘½ä¸­ç»“æœè¿½åŠ åœ¨ä¸€èµ·
+        //      strLang     è¯­è¨€ç‰ˆæœ¬ï¼Œ
         // return:
-        //		-1	³ö´í
-        //		0	³É¹¦
-        //      1   ³É¹¦£¬µ«resultsetĞèÒªÔÙĞĞÅÅĞòÒ»´Î
+        //		-1	å‡ºé”™
+        //		0	æˆåŠŸ
+        //      1   æˆåŠŸï¼Œä½†resultsetéœ€è¦å†è¡Œæ’åºä¸€æ¬¡
         internal override int SearchByUnion(
             string strOutputStyle,
             SearchItem searchItem,
@@ -4426,10 +4426,10 @@ namespace DigitalPlatform.rms
 
             DateTime start_time = DateTime.Now;
 
-            //**********¶ÔÊı¾İ¿â¼Ó¶ÁËø**************
+            //**********å¯¹æ•°æ®åº“åŠ è¯»é”**************
             m_db_lock.AcquireReaderLock(m_nTimeOut);
 #if DEBUG_LOCK_SQLDATABASE
-			this.container.WriteDebugInfo("SearchByUnion()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â¼Ó¶ÁËø¡£");
+			this.container.WriteDebugInfo("SearchByUnion()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“åŠ è¯»é”ã€‚");
 #endif
             // 2006/12/18 changed
 
@@ -4444,7 +4444,7 @@ namespace DigitalPlatform.rms
                 if (nRet == -1)
                     return -1;
 
-                // TODO: ***×¢Òâ£ºÈç¹ûÈô¸É¼ìË÷Í¾¾¶ÖĞÓĞÁË__id,ÄÇÃ´¾ÍÖ»ÓĞÕâÒ»¸öÓĞĞ§£¬¶øÆäËûµÄ¾ÍÎŞĞ§ÁË¡£ÕâËÆºõĞèÒª¸Ä½ø¡£2007/9/13
+                // TODO: ***æ³¨æ„ï¼šå¦‚æœè‹¥å¹²æ£€ç´¢é€”å¾„ä¸­æœ‰äº†__id,é‚£ä¹ˆå°±åªæœ‰è¿™ä¸€ä¸ªæœ‰æ•ˆï¼Œè€Œå…¶ä»–çš„å°±æ— æ•ˆäº†ã€‚è¿™ä¼¼ä¹éœ€è¦æ”¹è¿›ã€‚2007/9/13
 
                 if (bHasID == true)
                 {
@@ -4458,7 +4458,7 @@ namespace DigitalPlatform.rms
                         return -1;
                 }
 
-                // ¶Ôsql¿âÀ´Ëµ,Í¨¹ıID¼ìË÷ºó£¬¼ÇÂ¼ÒÑÅÅĞò£¬È¥ÖØ
+                // å¯¹sqlåº“æ¥è¯´,é€šè¿‡IDæ£€ç´¢åï¼Œè®°å½•å·²æ’åºï¼Œå»é‡
                 if (aTableInfo == null || aTableInfo.Count == 0)
                     return 0;
 
@@ -4474,7 +4474,7 @@ namespace DigitalPlatform.rms
 
                 string strCommand = "";
 
-                // SqlÃüÁî²ÎÊıÊı×é
+                // Sqlå‘½ä»¤å‚æ•°æ•°ç»„
                 List<object> aSqlParameter = new List<object>();
 
                 string strColumnList = "";
@@ -4491,7 +4491,7 @@ namespace DigitalPlatform.rms
                 }
                 else
                 {
-                    // µ±bSearchNull==trueµÄÊ±ºò£¬column listÓ¦µ±ºÍbOutputKeysCount == falseÊ±ºòÒ»Ñù
+                    // å½“bSearchNull==trueçš„æ—¶å€™ï¼Œcolumn liståº”å½“å’ŒbOutputKeysCount == falseæ—¶å€™ä¸€æ ·
 
                     string strSelectKeystring = "";
                     if (searchItem.KeyOrder != "")
@@ -4503,12 +4503,12 @@ namespace DigitalPlatform.rms
                     strColumnList = " idstring" + strSelectKeystring + " ";
                 }
 
-                // Ñ­»·Ã¿Ò»¸ö¼ìË÷Í¾¾¶
+                // å¾ªç¯æ¯ä¸€ä¸ªæ£€ç´¢é€”å¾„
                 for (int i = 0; i < aTableInfo.Count; i++)
                 {
                     TableInfo tableInfo = aTableInfo[i];
 
-                    // ²ÎÊıÃûµÄºó×º
+                    // å‚æ•°åçš„åç¼€
                     string strPostfix = Convert.ToString(i);
 
                     string strConditionAboutKey = "";
@@ -4536,13 +4536,13 @@ namespace DigitalPlatform.rms
                         return -1;
                     }
 
-                    // Èç¹ûÏŞÖÆÁËÒ»¸ö×î´óÊı£¬Ôò°´Ã¿¸öÍ¾¾¶¶¼ÊÇÕâ¸ö×î´óÊıËã
+                    // å¦‚æœé™åˆ¶äº†ä¸€ä¸ªæœ€å¤§æ•°ï¼Œåˆ™æŒ‰æ¯ä¸ªé€”å¾„éƒ½æ˜¯è¿™ä¸ªæœ€å¤§æ•°ç®—
                     string strTop = "";
                     string strLimit = "";
 
                     if (bSearchNull == false)
                     {
-                        if (searchItem.MaxCount != -1)  //ÏŞÖÆµÄ×î´óÊı
+                        if (searchItem.MaxCount != -1)  //é™åˆ¶çš„æœ€å¤§æ•°
                         {
                             if (this.container.SqlServerType == SqlServerType.MsSqlServer)
                                 strTop = " TOP " + Convert.ToString(searchItem.MaxCount) + " ";
@@ -4553,7 +4553,7 @@ namespace DigitalPlatform.rms
                             else if (this.container.SqlServerType == SqlServerType.Oracle)
                                 strLimit = " rownum <= " + Convert.ToString(searchItem.MaxCount) + " ";
                             else
-                                throw new Exception("Î´ÖªµÄ SqlServerType");
+                                throw new Exception("æœªçŸ¥çš„ SqlServerType");
                         }
                     }
 
@@ -4581,7 +4581,7 @@ namespace DigitalPlatform.rms
                     }
 
                     string strOneCommand = "";
-                    if (i == 0)// µÚÒ»¸ö±í
+                    if (i == 0)// ç¬¬ä¸€ä¸ªè¡¨
                     {
                         strOneCommand = 
                             " SELECT "
@@ -4607,7 +4607,7 @@ namespace DigitalPlatform.rms
     + strGroupBy;
                             if (string.IsNullOrEmpty(strLimit) == false)
                             {
-                                // ×¢£ºÈç¹ûÒªÔÚÓĞÏŞÖÆÊıµÄÇé¿öÏÂÈ·±£ÃüÖĞ¿¿Ç°µÄÌõÄ¿£¬ĞèÒª²ÉÓÃ select * from ( °ì·¨
+                                // æ³¨ï¼šå¦‚æœè¦åœ¨æœ‰é™åˆ¶æ•°çš„æƒ…å†µä¸‹ç¡®ä¿å‘½ä¸­é å‰çš„æ¡ç›®ï¼Œéœ€è¦é‡‡ç”¨ select * from ( åŠæ³•
                                 if (string.IsNullOrEmpty(strGroupBy) == false)
                                     strOneCommand = " SELECT * FROM ("
                                         + strOneCommand
@@ -4626,7 +4626,7 @@ namespace DigitalPlatform.rms
                         strOneCommand = " union SELECT "
                             + strDistinct
                             + strTop
-                            // + " idstring" + strSelectKeystring + " "  //DISTINCT È¥ÖØ
+                            // + " idstring" + strSelectKeystring + " "  //DISTINCT å»é‡
                             + strColumnList
                             + " FROM " + strTableName + " "
                             + strWhere
@@ -4637,14 +4637,14 @@ namespace DigitalPlatform.rms
                             strOneCommand = " SELECT "
     + strDistinct
     + strTop
-                                // + " idstring" + strSelectKeystring + " "  //DISTINCT È¥ÖØ
+                                // + " idstring" + strSelectKeystring + " "  //DISTINCT å»é‡
     + strColumnList
     + " FROM " + strTableName + " "
     + strWhere
     + strGroupBy;
                             if (string.IsNullOrEmpty(strLimit) == false)
                             {
-                                // ×¢£ºÈç¹ûÒªÔÚÓĞÏŞÖÆÊıµÄÇé¿öÏÂÈ·±£ÃüÖĞ¿¿Ç°µÄÌõÄ¿£¬ĞèÒª²ÉÓÃ select * from ( °ì·¨
+                                // æ³¨ï¼šå¦‚æœè¦åœ¨æœ‰é™åˆ¶æ•°çš„æƒ…å†µä¸‹ç¡®ä¿å‘½ä¸­é å‰çš„æ¡ç›®ï¼Œéœ€è¦é‡‡ç”¨ select * from ( åŠæ³•
                                 if (string.IsNullOrEmpty(strGroupBy) == false)
                                     strOneCommand = " SELECT * FROM ("
                                     + strOneCommand
@@ -4674,7 +4674,7 @@ namespace DigitalPlatform.rms
                     if (strTemp.IndexOf("desc") != -1)
                         resultSet.Asc = -1;
 
-                    // TODO: ¶à¸öselect union, ×ÜµÄĞò¿ÉÄÜÊÇÂÒµÄ
+                    // TODO: å¤šä¸ªselect union, æ€»çš„åºå¯èƒ½æ˜¯ä¹±çš„
                 }
 
                 // 2009/8/5
@@ -4683,7 +4683,7 @@ namespace DigitalPlatform.rms
                     string strTop = "";
                     string strLimit = "";
 
-                    if (searchItem.MaxCount != -1)  //ÏŞÖÆµÄ×î´óÊı
+                    if (searchItem.MaxCount != -1)  //é™åˆ¶çš„æœ€å¤§æ•°
                     {
                         if (this.container.SqlServerType == SqlServerType.MsSqlServer)
                             strTop = " TOP " + Convert.ToString(searchItem.MaxCount) + " ";
@@ -4694,7 +4694,7 @@ namespace DigitalPlatform.rms
                         else if (this.container.SqlServerType == SqlServerType.Oracle)
                             strLimit = " WHERE rownum <= " + Convert.ToString(searchItem.MaxCount) + " ";
                         else
-                            throw new Exception("Î´ÖªµÄ SqlServerType");
+                            throw new Exception("æœªçŸ¥çš„ SqlServerType");
                     }
 
                     string strColumns = " id ";
@@ -4704,7 +4704,7 @@ namespace DigitalPlatform.rms
                         strColumns = " keystring=id, id, fromstring='recid' ";   // fromstring='' 2011/7/24
 
 
-                    // Oracle±È½ÏÌØÊâ
+                    // Oracleæ¯”è¾ƒç‰¹æ®Š
                     if (this.container.SqlServerType == SqlServerType.Oracle)
                     {
                         if (string.IsNullOrEmpty(strLimit) == false)
@@ -4737,7 +4737,7 @@ namespace DigitalPlatform.rms
                         strCommand += " " + strOrderBy;
                     else
                         bNeedSort = true;
-                    // TODO: ÆäËûÊı¾İ¿âÀàĞÍ£¬ÊÇ·ñÔÚÒ»¸öselect * from () ºóÃæ¼Óorder by(Èç¹ûÖ»ÓĞÒ»¸öselectÓï¾äÔò²»Òª¼ÓÍâ¿Ç)£¬»¹ÊÇÔÚÃ¿¸ö¾ßÌåµÄselectÓï¾äÀïÃæ¼Óorder by?
+                    // TODO: å…¶ä»–æ•°æ®åº“ç±»å‹ï¼Œæ˜¯å¦åœ¨ä¸€ä¸ªselect * from () åé¢åŠ order by(å¦‚æœåªæœ‰ä¸€ä¸ªselectè¯­å¥åˆ™ä¸è¦åŠ å¤–å£³)ï¼Œè¿˜æ˜¯åœ¨æ¯ä¸ªå…·ä½“çš„selectè¯­å¥é‡Œé¢åŠ order by?
                 }
 
                 if (this.container.SqlServerType == SqlServerType.MsSqlServer)
@@ -4752,7 +4752,7 @@ namespace DigitalPlatform.rms
 
                 if (aSqlParameter == null)
                 {
-                    strError = "Ò»¸ö²ÎÊıÒ²Ã» ÊÇ²»¿ÉÄÜµÄÇé¿ö";
+                    strError = "ä¸€ä¸ªå‚æ•°ä¹Ÿæ²¡ æ˜¯ä¸å¯èƒ½çš„æƒ…å†µ";
                     return -1;
                 }
 
@@ -4771,7 +4771,7 @@ namespace DigitalPlatform.rms
                             {
                                 command.Parameters.Add(sqlParameter);
                             }
-                            command.CommandTimeout = 20 * 60;  // °Ñ¼ìË÷Ê±¼ä±ä´ó
+                            command.CommandTimeout = 20 * 60;  // æŠŠæ£€ç´¢æ—¶é—´å˜å¤§
 
                             IAsyncResult r = command.BeginExecuteReader(CommandBehavior.CloseConnection);
                             while (true)
@@ -4788,7 +4788,7 @@ namespace DigitalPlatform.rms
                                         catch
                                         {
                                         }
-                                        strError = "ÓÃ»§ÖĞ¶Ï";
+                                        strError = "ç”¨æˆ·ä¸­æ–­";
                                         return -1;
                                     }
                                 }
@@ -4818,7 +4818,7 @@ namespace DigitalPlatform.rms
                                     {
                                         if (handle.DoIdle() == false)
                                         {
-                                            strError = "ÓÃ»§ÖĞ¶Ï";
+                                            strError = "ç”¨æˆ·ä¸­æ–­";
                                             return -1;
                                         }
                                     }
@@ -4833,9 +4833,9 @@ namespace DigitalPlatform.rms
                                     else if (bOutputKeyID == true)
                                     {
                                         // datareader key, id
-                                        // ½á¹û¼¯¸ñÊ½ key, path
+                                        // ç»“æœé›†æ ¼å¼ key, path
                                         string strKey = (string)reader[0];
-                                        string strId = this.FullID + "/" + (string)reader[1]; // ¸ñÊ½Îª£º¿âid/¼ÇÂ¼ºÅ
+                                        string strId = this.FullID + "/" + (string)reader[1]; // æ ¼å¼ä¸ºï¼šåº“id/è®°å½•å·
                                         string strFrom = (string)reader[2];
                                         DpRecord record = new DpRecord(strId);
                                         // new DpRecord(strKey + "," + strId)
@@ -4845,13 +4845,13 @@ namespace DigitalPlatform.rms
                                     else
                                     {
                                         string strId = "";
-                                        strId = this.FullID + "/" + (string)reader[0]; // ¼ÇÂ¼¸ñÊ½Îª£º¿âid/¼ÇÂ¼ºÅ
+                                        strId = this.FullID + "/" + (string)reader[0]; // è®°å½•æ ¼å¼ä¸ºï¼šåº“id/è®°å½•å·
                                         resultSet.Add(new DpRecord(strId));
                                     }
 
                                     nGetedCount++;
 
-                                    // ³¬¹ı×î´óÊıÁË
+                                    // è¶…è¿‡æœ€å¤§æ•°äº†
                                     if (searchItem.MaxCount != -1
                                         && nGetedCount >= searchItem.MaxCount)
                                         break;
@@ -4877,7 +4877,7 @@ namespace DigitalPlatform.rms
 
                         /*
                         if (sqlEx.Errors is SqlErrorCollection)
-                            strError = "Êı¾İ¿â'" + this.GetCaption("zh") + "'ÉĞÎ´³õÊ¼»¯¡£";
+                            strError = "æ•°æ®åº“'" + this.GetCaption("zh") + "'å°šæœªåˆå§‹åŒ–ã€‚";
                         else
                             strError = sqlEx.Message;
                          * */
@@ -4888,7 +4888,7 @@ namespace DigitalPlatform.rms
                         strError = "SearchByUnion() exception: " + ExceptionUtil.GetDebugText(ex);
                         return -1;
                     }
-                    finally // Á¬½Ó
+                    finally // è¿æ¥
                     {
                         if (connection != null)
                         {
@@ -4899,7 +4899,7 @@ namespace DigitalPlatform.rms
                 }
                 else if (this.container.SqlServerType == SqlServerType.SQLite)
                 {
-                    // SQLite ²ÉÓÃ±£ÊØÁ¬½Ó
+                    // SQLite é‡‡ç”¨ä¿å®ˆè¿æ¥
                     SQLiteConnection connection = 
                         new SQLiteConnection(this.m_strConnString/*Pooling*/);
                     // connection.Open();
@@ -4914,16 +4914,16 @@ namespace DigitalPlatform.rms
                             {
                                 command.Parameters.Add(sqlParameter);
                             }
-                            command.CommandTimeout = 20 * 60;  // °Ñ¼ìË÷Ê±¼ä±ä´ó
+                            command.CommandTimeout = 20 * 60;  // æŠŠæ£€ç´¢æ—¶é—´å˜å¤§
                             SQLiteDataReader reader = null;
 
-                            // µ÷ĞÂÏß³Ì´¦Àí
+                            // è°ƒæ–°çº¿ç¨‹å¤„ç†
                             DatabaseCommandTask task = new DatabaseCommandTask(command);
                             try
                             {
                                 if (task == null)
                                 {
-                                    strError = "testÎªnull";
+                                    strError = "testä¸ºnull";
                                     return -1;
                                 }
                                 Thread t1 = new Thread(new ThreadStart(task.ThreadMain));
@@ -4935,20 +4935,20 @@ namespace DigitalPlatform.rms
                                     {
                                         if (handle.DoIdle() == false)
                                         {
-                                            command = null; // ÕâÀï²»ÒªDispose() ¶ª¸øÏß³Ì task.ThreadMain È¥Dispose()
+                                            command = null; // è¿™é‡Œä¸è¦Dispose() ä¸¢ç»™çº¿ç¨‹ task.ThreadMain å»Dispose()
                                             connection = null;
                                             reader = null;
                                             task.Cancel();
-                                            strError = "ÓÃ»§ÖĞ¶Ï";
+                                            strError = "ç”¨æˆ·ä¸­æ–­";
                                             return -1;
                                         }
                                     }
-                                    bRet = task.m_event.WaitOne(100, false);  //1/10Ãë¿´Ò»´Î
+                                    bRet = task.m_event.WaitOne(100, false);  //1/10ç§’çœ‹ä¸€æ¬¡
                                     if (bRet == true)
                                         break;
                                 }
 
-                                // Èç¹ûDataReader==null£¬¿ÉÄÜÊÇSQL¼ìË÷Ê½³ö´íÁË
+                                // å¦‚æœDataReader==nullï¼Œå¯èƒ½æ˜¯SQLæ£€ç´¢å¼å‡ºé”™äº†
                                 // 2007/9/14 
                                 if (task.bError == true)
                                 {
@@ -4972,7 +4972,7 @@ namespace DigitalPlatform.rms
                                     {
                                         if (handle.DoIdle() == false)
                                         {
-                                            strError = "ÓÃ»§ÖĞ¶Ï";
+                                            strError = "ç”¨æˆ·ä¸­æ–­";
                                             return -1;
                                         }
                                     }
@@ -4987,9 +4987,9 @@ namespace DigitalPlatform.rms
                                     else if (bOutputKeyID == true)
                                     {
                                         // datareader key, id
-                                        // ½á¹û¼¯¸ñÊ½ key, path
+                                        // ç»“æœé›†æ ¼å¼ key, path
                                         string strKey = (string)reader[0];
-                                        string strId = this.FullID + "/" + (string)reader[1]; // ¸ñÊ½Îª£º¿âid/¼ÇÂ¼ºÅ
+                                        string strId = this.FullID + "/" + (string)reader[1]; // æ ¼å¼ä¸ºï¼šåº“id/è®°å½•å·
                                         string strFrom = (string)reader[2];
                                         DpRecord record = new DpRecord(strId);
                                         // new DpRecord(strKey + "," + strId)
@@ -4999,13 +4999,13 @@ namespace DigitalPlatform.rms
                                     else
                                     {
                                         string strId = "";
-                                        strId = this.FullID + "/" + (string)reader[0]; // ¼ÇÂ¼¸ñÊ½Îª£º¿âid/¼ÇÂ¼ºÅ
+                                        strId = this.FullID + "/" + (string)reader[0]; // è®°å½•æ ¼å¼ä¸ºï¼šåº“id/è®°å½•å·
                                         resultSet.Add(new DpRecord(strId));
                                     }
 
                                     nGetedCount++;
 
-                                    // ³¬¹ı×î´óÊıÁË
+                                    // è¶…è¿‡æœ€å¤§æ•°äº†
                                     if (searchItem.MaxCount != -1
                                         && nGetedCount >= searchItem.MaxCount)
                                         break;
@@ -5031,7 +5031,7 @@ namespace DigitalPlatform.rms
 
                         /*
                         if (sqlEx.Errors is SqlErrorCollection)
-                            strError = "Êı¾İ¿â'" + this.GetCaption("zh") + "'ÉĞÎ´³õÊ¼»¯¡£";
+                            strError = "æ•°æ®åº“'" + this.GetCaption("zh") + "'å°šæœªåˆå§‹åŒ–ã€‚";
                         else
                             strError = sqlEx.Message;
                          * */
@@ -5042,7 +5042,7 @@ namespace DigitalPlatform.rms
                         strError = "SearchByUnion() exception: " + ExceptionUtil.GetDebugText(ex);
                         return -1;
                     }
-                    finally // Á¬½Ó
+                    finally // è¿æ¥
                     {
                         if (connection != null)
                         {
@@ -5066,7 +5066,7 @@ namespace DigitalPlatform.rms
                             {
                                 command.Parameters.Add(sqlParameter);
                             }
-                            command.CommandTimeout = 20 * 60;  // °Ñ¼ìË÷Ê±¼ä±ä´ó
+                            command.CommandTimeout = 20 * 60;  // æŠŠæ£€ç´¢æ—¶é—´å˜å¤§
                                 
                             IAsyncResult r = command.BeginExecuteReader(CommandBehavior.CloseConnection);
                             while (true)
@@ -5083,7 +5083,7 @@ namespace DigitalPlatform.rms
                                         catch
                                         {
                                         }
-                                        strError = "ÓÃ»§ÖĞ¶Ï";
+                                        strError = "ç”¨æˆ·ä¸­æ–­";
                                         return -1;
                                     }
                                 }
@@ -5117,7 +5117,7 @@ namespace DigitalPlatform.rms
                                     {
                                         if (handle.DoIdle() == false)
                                         {
-                                            strError = "ÓÃ»§ÖĞ¶Ï";
+                                            strError = "ç”¨æˆ·ä¸­æ–­";
                                             return -1;
                                         }
                                     }
@@ -5132,9 +5132,9 @@ namespace DigitalPlatform.rms
                                     else if (bOutputKeyID == true)
                                     {
                                         // datareader key, id
-                                        // ½á¹û¼¯¸ñÊ½ key, path
+                                        // ç»“æœé›†æ ¼å¼ key, path
                                         string strKey = (string)reader[0];
-                                        string strId = this.FullID + "/" + (string)reader[1]; // ¸ñÊ½Îª£º¿âid/¼ÇÂ¼ºÅ
+                                        string strId = this.FullID + "/" + (string)reader[1]; // æ ¼å¼ä¸ºï¼šåº“id/è®°å½•å·
                                         string strFrom = (string)reader[2];
                                         DpRecord record = new DpRecord(strId);
                                         // new DpRecord(strKey + "," + strId)
@@ -5144,13 +5144,13 @@ namespace DigitalPlatform.rms
                                     else
                                     {
                                         string strId = "";
-                                        strId = this.FullID + "/" + (string)reader[0]; // ¼ÇÂ¼¸ñÊ½Îª£º¿âid/¼ÇÂ¼ºÅ
+                                        strId = this.FullID + "/" + (string)reader[0]; // è®°å½•æ ¼å¼ä¸ºï¼šåº“id/è®°å½•å·
                                         resultSet.Add(new DpRecord(strId));
                                     }
 
                                     nGetedCount++;
 
-                                    // ³¬¹ı×î´óÊıÁË
+                                    // è¶…è¿‡æœ€å¤§æ•°äº†
                                     if (searchItem.MaxCount != -1
                                         && nGetedCount >= searchItem.MaxCount)
                                         break;
@@ -5181,7 +5181,7 @@ namespace DigitalPlatform.rms
                         strError = "SearchByUnion() exception: " + ExceptionUtil.GetDebugText(ex);
                         return -1;
                     }
-                    finally // Á¬½Ó
+                    finally // è¿æ¥
                     {
                         if (connection != null)
                         {
@@ -5212,16 +5212,16 @@ namespace DigitalPlatform.rms
                             {
                                 command.Parameters.Add(sqlParameter);
                             }
-                            command.CommandTimeout = 20 * 60;  // °Ñ¼ìË÷Ê±¼ä±ä´ó
+                            command.CommandTimeout = 20 * 60;  // æŠŠæ£€ç´¢æ—¶é—´å˜å¤§
                             OracleDataReader reader = null;
 
-                            // µ÷ĞÂÏß³Ì´¦Àí
+                            // è°ƒæ–°çº¿ç¨‹å¤„ç†
                             DatabaseCommandTask task = new DatabaseCommandTask(command);
                             try
                             {
                                 if (task == null)
                                 {
-                                    strError = "testÎªnull";
+                                    strError = "testä¸ºnull";
                                     return -1;
                                 }
                                 Thread t1 = new Thread(new ThreadStart(task.ThreadMain));
@@ -5233,20 +5233,20 @@ namespace DigitalPlatform.rms
                                     {
                                         if (handle.DoIdle() == false)
                                         {
-                                            command = null; // ÕâÀï²»ÒªDispose() ¶ª¸øÏß³Ì task.ThreadMain È¥Dispose()
+                                            command = null; // è¿™é‡Œä¸è¦Dispose() ä¸¢ç»™çº¿ç¨‹ task.ThreadMain å»Dispose()
                                             connection = null;
                                             reader = null;
                                             task.Cancel();
-                                            strError = "ÓÃ»§ÖĞ¶Ï";
+                                            strError = "ç”¨æˆ·ä¸­æ–­";
                                             return -1;
                                         }
                                     }
-                                    bRet = task.m_event.WaitOne(100, false);  //1/10Ãë¿´Ò»´Î
+                                    bRet = task.m_event.WaitOne(100, false);  //1/10ç§’çœ‹ä¸€æ¬¡
                                     if (bRet == true)
                                         break;
                                 }
 
-                                // Èç¹ûDataReader==null£¬¿ÉÄÜÊÇSQL¼ìË÷Ê½³ö´íÁË
+                                // å¦‚æœDataReader==nullï¼Œå¯èƒ½æ˜¯SQLæ£€ç´¢å¼å‡ºé”™äº†
                                 // 2007/9/14 
                                 if (task.bError == true)
                                 {
@@ -5270,7 +5270,7 @@ namespace DigitalPlatform.rms
                                     {
                                         if (handle.DoIdle() == false)
                                         {
-                                            strError = "ÓÃ»§ÖĞ¶Ï";
+                                            strError = "ç”¨æˆ·ä¸­æ–­";
                                             return -1;
                                         }
                                     }
@@ -5285,9 +5285,9 @@ namespace DigitalPlatform.rms
                                     else if (bOutputKeyID == true)
                                     {
                                         // datareader key, id
-                                        // ½á¹û¼¯¸ñÊ½ key, path
+                                        // ç»“æœé›†æ ¼å¼ key, path
                                         string strKey = (string)reader[0];
-                                        string strId = this.FullID + "/" + (string)reader[1]; // ¸ñÊ½Îª£º¿âid/¼ÇÂ¼ºÅ
+                                        string strId = this.FullID + "/" + (string)reader[1]; // æ ¼å¼ä¸ºï¼šåº“id/è®°å½•å·
                                         string strFrom = (string)reader[2];
                                         DpRecord record = new DpRecord(strId);
                                         // new DpRecord(strKey + "," + strId)
@@ -5297,13 +5297,13 @@ namespace DigitalPlatform.rms
                                     else
                                     {
                                         string strId = "";
-                                        strId = this.FullID + "/" + (string)reader[0]; // ¼ÇÂ¼¸ñÊ½Îª£º¿âid/¼ÇÂ¼ºÅ
+                                        strId = this.FullID + "/" + (string)reader[0]; // è®°å½•æ ¼å¼ä¸ºï¼šåº“id/è®°å½•å·
                                         resultSet.Add(new DpRecord(strId));
                                     }
 
                                     nGetedCount++;
 
-                                    // ³¬¹ı×î´óÊıÁË
+                                    // è¶…è¿‡æœ€å¤§æ•°äº†
                                     if (searchItem.MaxCount != -1
                                         && nGetedCount >= searchItem.MaxCount)
                                         break;
@@ -5335,7 +5335,7 @@ namespace DigitalPlatform.rms
                         strError = "SearchByUnion() exception: " + ExceptionUtil.GetDebugText(ex);
                         return -1;
                     }
-                    finally // Á¬½Ó
+                    finally // è¿æ¥
                     {
                         if (connection != null)
                         {
@@ -5353,16 +5353,16 @@ namespace DigitalPlatform.rms
             finally
             {
 
-                //*****************¶ÔÊı¾İ¿â½â¶ÁËø***************
+                //*****************å¯¹æ•°æ®åº“è§£è¯»é”***************
                 m_db_lock.ReleaseReaderLock();
 #if DEBUG_LOCK_SQLDATABASE
-				this.container.WriteDebugInfo("SearchByUnion()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â½â¶ÁËø¡£");
+				this.container.WriteDebugInfo("SearchByUnion()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“è§£è¯»é”ã€‚");
 #endif
                 
                 // 2006/12/18 changed
 
                 TimeSpan delta = DateTime.Now - start_time;
-                Debug.WriteLine("SearchByUnionºÄÊ± " + delta.ToString());
+                Debug.WriteLine("SearchByUnionè€—æ—¶ " + delta.ToString());
             }
 
             if (bNeedSort == true)
@@ -5395,8 +5395,8 @@ namespace DigitalPlatform.rms
 #endif
         }
 
-        // ¼ì²éÊÇ·ñÒª×Ô¶¯Éı¼¶ SQL Êı¾İ¿â½á¹¹
-        // Îªrecords±íÔö¼ÓnewdptimestampÁĞ
+        // æ£€æŸ¥æ˜¯å¦è¦è‡ªåŠ¨å‡çº§ SQL æ•°æ®åº“ç»“æ„
+        // ä¸ºrecordsè¡¨å¢åŠ newdptimestampåˆ—
         internal override int UpdateStructure(out string strError)
         {
             strError = "";
@@ -5437,9 +5437,9 @@ namespace DigitalPlatform.rms
                     }
                     catch (Exception ex)
                     {
-                        strError = "Ôö¼Ó newdptimestamp ÁĞÊ±³ö´í.\r\n"
+                        strError = "å¢åŠ  newdptimestamp åˆ—æ—¶å‡ºé”™.\r\n"
                             + ex.Message + "\r\n"
-                            + "SQLÃüÁî:\r\n"
+                            + "SQLå‘½ä»¤:\r\n"
                             + strCommand;
                         return -1;
                     }
@@ -5459,7 +5459,7 @@ namespace DigitalPlatform.rms
                     strError = "3: " + ex.Message;
                     return -1;
                 }
-                finally // Á¬½Ó
+                finally // è¿æ¥
                 {
                     connection.Close();
                 }
@@ -5469,20 +5469,20 @@ namespace DigitalPlatform.rms
         }
 
 
-        // ¸ù¾İstrStyle·ç¸ñ,µÃµ½Ïà¾ÍµÄ¼ÇÂ¼ºÅ
-        // prev:Ç°Ò»Ìõ,next:ÏÂÒ»Ìõ,Èç¹ûstrID == ? ÔòprevÎªµÚÒ»Ìõ,nextÎª×îºóÒ»Ìõ
-        // Èç¹û²»°üº¬prevºÍnextÔò²»ÄÜµ÷´Ëº¯Êı
+        // æ ¹æ®strStyleé£æ ¼,å¾—åˆ°ç›¸å°±çš„è®°å½•å·
+        // prev:å‰ä¸€æ¡,next:ä¸‹ä¸€æ¡,å¦‚æœstrID == ? åˆ™prevä¸ºç¬¬ä¸€æ¡,nextä¸ºæœ€åä¸€æ¡
+        // å¦‚æœä¸åŒ…å«prevå’Œnextåˆ™ä¸èƒ½è°ƒæ­¤å‡½æ•°
         // parameter:
-        //		connection	        Á¬½Ó¶ÔÏó
-        //		strCurrentRecordID	µ±Ç°¼ÇÂ¼ID
-        //		strStyle	        ·ç¸ñ
-        //      strOutputRecordID   out²ÎÊı£¬·µ»ØÕÒµ½µÄ¼ÇÂ¼ºÅ
-        //      strError            out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //		connection	        è¿æ¥å¯¹è±¡
+        //		strCurrentRecordID	å½“å‰è®°å½•ID
+        //		strStyle	        é£æ ¼
+        //      strOutputRecordID   outå‚æ•°ï¼Œè¿”å›æ‰¾åˆ°çš„è®°å½•å·
+        //      strError            outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //		-1  ³ö´í
-        //      0   Î´ÕÒµ½
-        //      1   ÕÒµ½
-        // Ïß£º²»°²È«
+        //		-1  å‡ºé”™
+        //      0   æœªæ‰¾åˆ°
+        //      1   æ‰¾åˆ°
+        // çº¿ï¼šä¸å®‰å…¨
         private int GetRecordID(Connection connection,
             string strCurrentRecordID,
             string strStyle,
@@ -5492,13 +5492,13 @@ namespace DigitalPlatform.rms
             strOutputRecordID = "";
             strError = "";
 
-            Debug.Assert(connection != null, "GetRecordID()µ÷ÓÃ´íÎó£¬connection²ÎÊıÖµ²»ÄÜÎªnull¡£");
+            Debug.Assert(connection != null, "GetRecordID()è°ƒç”¨é”™è¯¯ï¼Œconnectionå‚æ•°å€¼ä¸èƒ½ä¸ºnullã€‚");
 
             if ((StringUtil.IsInList("prev", strStyle) == false)
                 && (StringUtil.IsInList("next", strStyle) == false))
             {
-                Debug.Assert(false, "GetRecordID()µ÷ÓÃ´íÎó£¬Èç¹ûstrStyle²ÎÊı²»°üº¬prevÓënextÖµÔò²»Ó¦×ßµ½ÕâÀï¡£");
-                throw new Exception("GetRecordID()µ÷ÓÃ´íÎó£¬Èç¹ûstrStyle²ÎÊı²»°üº¬prevÓënextÖµÔò²»Ó¦×ßµ½ÕâÀï¡£");
+                Debug.Assert(false, "GetRecordID()è°ƒç”¨é”™è¯¯ï¼Œå¦‚æœstrStyleå‚æ•°ä¸åŒ…å«prevä¸nextå€¼åˆ™ä¸åº”èµ°åˆ°è¿™é‡Œã€‚");
+                throw new Exception("GetRecordID()è°ƒç”¨é”™è¯¯ï¼Œå¦‚æœstrStyleå‚æ•°ä¸åŒ…å«prevä¸nextå€¼åˆ™ä¸åº”èµ°åˆ°è¿™é‡Œã€‚");
             }
 
             strCurrentRecordID = DbPath.GetID10(strCurrentRecordID);
@@ -5572,7 +5572,7 @@ namespace DigitalPlatform.rms
                             strOutputRecordID = (string)dr[0];
 
                             TimeSpan delta = DateTime.Now - start_time;
-                            Debug.WriteLine("MS SQL Server »ñµÃÊı¾İ¿â '" + this.GetCaption("zh-CN") + "' µ±Ç°Î²ºÅºÄ·ÑÊ±¼ä " + delta.TotalSeconds.ToString() + " Ãë");
+                            Debug.WriteLine("MS SQL Server è·å¾—æ•°æ®åº“ '" + this.GetCaption("zh-CN") + "' å½“å‰å°¾å·è€—è´¹æ—¶é—´ " + delta.TotalSeconds.ToString() + " ç§’");
 
                             return 1;
                         }
@@ -5651,7 +5651,7 @@ namespace DigitalPlatform.rms
                                 strOutputRecordID = (string)dr[0];
 
                                 TimeSpan delta = DateTime.Now - start_time;
-                                Debug.WriteLine("SQLite »ñµÃÊı¾İ¿â '" + this.GetCaption("zh-CN") + "' µ±Ç°Î²ºÅºÄ·ÑÊ±¼ä " + delta.TotalSeconds.ToString() + " Ãë");
+                                Debug.WriteLine("SQLite è·å¾—æ•°æ®åº“ '" + this.GetCaption("zh-CN") + "' å½“å‰å°¾å·è€—è´¹æ—¶é—´ " + delta.TotalSeconds.ToString() + " ç§’");
 
                                 return 1;
                             }
@@ -5663,7 +5663,7 @@ namespace DigitalPlatform.rms
                     }
                     catch (SQLiteException ex)
                     {
-                        strError = "Ö´ĞĞSQLÓï¾ä·¢Éú´íÎó: " + ex.Message + "\r\nSQL Óï¾ä: " + strCommand;
+                        strError = "æ‰§è¡ŒSQLè¯­å¥å‘ç”Ÿé”™è¯¯: " + ex.Message + "\r\nSQL è¯­å¥: " + strCommand;
                         return -1;
                     }
                 } // end of using command
@@ -5736,7 +5736,7 @@ namespace DigitalPlatform.rms
                             strOutputRecordID = (string)dr[0];
 
                             TimeSpan delta = DateTime.Now - start_time;
-                            Debug.WriteLine("MySQL »ñµÃÊı¾İ¿â '" + this.GetCaption("zh-CN") + "' µ±Ç°Î²ºÅºÄ·ÑÊ±¼ä " + delta.TotalSeconds.ToString() + " Ãë");
+                            Debug.WriteLine("MySQL è·å¾—æ•°æ®åº“ '" + this.GetCaption("zh-CN") + "' å½“å‰å°¾å·è€—è´¹æ—¶é—´ " + delta.TotalSeconds.ToString() + " ç§’");
 
                             return 1;
                         }
@@ -5817,7 +5817,7 @@ namespace DigitalPlatform.rms
                                 strOutputRecordID = (string)dr[0];
 
                                 TimeSpan delta = DateTime.Now - start_time;
-                                Debug.WriteLine("Oracle »ñµÃÊı¾İ¿â '" + this.GetCaption("zh-CN") + "' µ±Ç°Î²ºÅºÄ·ÑÊ±¼ä " + delta.TotalSeconds.ToString() + " Ãë");
+                                Debug.WriteLine("Oracle è·å¾—æ•°æ®åº“ '" + this.GetCaption("zh-CN") + "' å½“å‰å°¾å·è€—è´¹æ—¶é—´ " + delta.TotalSeconds.ToString() + " ç§’");
 
                                 return 1;
                             }
@@ -5833,7 +5833,7 @@ namespace DigitalPlatform.rms
                 {
                     if (ex.Number == 942)
                     {
-                        strError = "SQL±í '" + this.m_strSqlDbName + "_records' ²»´æÔÚ";
+                        strError = "SQLè¡¨ '" + this.m_strSqlDbName + "_records' ä¸å­˜åœ¨";
                         return -1;
                     }
                     throw ex;
@@ -5841,24 +5841,24 @@ namespace DigitalPlatform.rms
             }
             else
             {
-                strError = "Î´ÖªµÄ connection ÀàĞÍ '" + connection.SqlServerType.ToString() + "'";
+                strError = "æœªçŸ¥çš„ connection ç±»å‹ '" + connection.SqlServerType.ToString() + "'";
                 return -1;
             }
         }
 
-        // ¸ù¾İstrStyle·ç¸ñ,µÃµ½Ïà¾ÍµÄ¼ÇÂ¼ºÅ
-        // prev:Ç°Ò»Ìõ,next:ÏÂÒ»Ìõ,Èç¹ûstrID == ? ÔòprevÎªµÚÒ»Ìõ,nextÎª×îºóÒ»Ìõ
-        // Èç¹û²»°üº¬prevºÍnextÔò²»ÄÜµ÷´Ëº¯Êı
+        // æ ¹æ®strStyleé£æ ¼,å¾—åˆ°ç›¸å°±çš„è®°å½•å·
+        // prev:å‰ä¸€æ¡,next:ä¸‹ä¸€æ¡,å¦‚æœstrID == ? åˆ™prevä¸ºç¬¬ä¸€æ¡,nextä¸ºæœ€åä¸€æ¡
+        // å¦‚æœä¸åŒ…å«prevå’Œnextåˆ™ä¸èƒ½è°ƒæ­¤å‡½æ•°
         // parameter:
-        //		strCurrentRecordID	µ±Ç°¼ÇÂ¼ID
-        //		strStyle	        ·ç¸ñ
-        //      strOutputRecordID   out²ÎÊı£¬·µ»ØÕÒµ½µÄ¼ÇÂ¼ºÅ
-        //      strError            out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //		strCurrentRecordID	å½“å‰è®°å½•ID
+        //		strStyle	        é£æ ¼
+        //      strOutputRecordID   outå‚æ•°ï¼Œè¿”å›æ‰¾åˆ°çš„è®°å½•å·
+        //      strError            outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //		-1  ³ö´í
-        //      0   Î´ÕÒµ½
-        //      1   ÕÒµ½
-        // Ïß£º²»°²È«
+        //		-1  å‡ºé”™
+        //      0   æœªæ‰¾åˆ°
+        //      1   æ‰¾åˆ°
+        // çº¿ï¼šä¸å®‰å…¨
         internal override int GetRecordID(string strCurrentRecordID,
             string strStyle,
             out string strOutputRecordID,
@@ -5874,9 +5874,9 @@ namespace DigitalPlatform.rms
             try
             {
                 // return:
-                //		-1  ³ö´í
-                //      0   Î´ÕÒµ½
-                //      1   ÕÒµ½
+                //		-1  å‡ºé”™
+                //      0   æœªæ‰¾åˆ°
+                //      1   æ‰¾åˆ°
                 return this.GetRecordID(connection,
                     strCurrentRecordID,
                     strStyle,
@@ -5896,34 +5896,34 @@ namespace DigitalPlatform.rms
                 strError = "5: " + ex.Message;
                 return -1;
             }
-            finally // Á¬½Ó
+            finally // è¿æ¥
             {
                 connection.Close();
             }
         }
 
-        // °´Ö¸¶¨·¶Î§¶ÁXml
+        // æŒ‰æŒ‡å®šèŒƒå›´è¯»Xml
         // parameter:
-        //		strRecordID			¼ÇÂ¼ID
-        //		strXPath			ÓÃÀ´¶¨Î»½ÚµãµÄxpath
-        //		nStart				´ÓÄ¿±ê¶ÁµÄ¿ªÊ¼Î»ÖÃ
-        //		nLength				³¤¶È -1:¿ªÊ¼µ½½áÊø
-        //		nMaxLength			ÏŞÖÆµÄ×î´ó³¤¶È
-        //		strStyle			·ç¸ñ,data:È¡Êı¾İ prev:Ç°Ò»Ìõ¼ÇÂ¼ next:ºóÒ»Ìõ¼ÇÂ¼
-        //							withresmetadataÊôĞÔ±íÊ¾°Ñ×ÊÔ´µÄÔªÊı¾İÌîµ½bodyÌåÀï£¬
-        //							Í¬Ê±×¢ÒâÊ±¼ä´ÁÊÇÁ½ÕßºÏ²¢ºóµÄÊ±¼ä´Á(×¢:ÏÖÔÚÒÑ¾­²»ÊÇÕâÑù, Ê±¼ä´Á»¥ÏàÊÇ¶ÀÁ¢µÄ)
-        //		destBuffer			out²ÎÊı£¬·µ»Ø×Ö½ÚÊı×é
-        //		strMetadata			out²ÎÊı£¬·µ»ØÔªÊı¾İ
-        //		strOutputResPath	out²ÎÊı£¬·µ»ØÏà¹Ø¼ÇÂ¼µÄÂ·¾¶
-        //		outputTimestamp		out²ÎÊı£¬·µ»ØÊ±¼ä´Á
-        //		strError			out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //		strRecordID			è®°å½•ID
+        //		strXPath			ç”¨æ¥å®šä½èŠ‚ç‚¹çš„xpath
+        //		nStart				ä»ç›®æ ‡è¯»çš„å¼€å§‹ä½ç½®
+        //		nLength				é•¿åº¦ -1:å¼€å§‹åˆ°ç»“æŸ
+        //		nMaxLength			é™åˆ¶çš„æœ€å¤§é•¿åº¦
+        //		strStyle			é£æ ¼,data:å–æ•°æ® prev:å‰ä¸€æ¡è®°å½• next:åä¸€æ¡è®°å½•
+        //							withresmetadataå±æ€§è¡¨ç¤ºæŠŠèµ„æºçš„å…ƒæ•°æ®å¡«åˆ°bodyä½“é‡Œï¼Œ
+        //							åŒæ—¶æ³¨æ„æ—¶é—´æˆ³æ˜¯ä¸¤è€…åˆå¹¶åçš„æ—¶é—´æˆ³(æ³¨:ç°åœ¨å·²ç»ä¸æ˜¯è¿™æ ·, æ—¶é—´æˆ³äº’ç›¸æ˜¯ç‹¬ç«‹çš„)
+        //		destBuffer			outå‚æ•°ï¼Œè¿”å›å­—èŠ‚æ•°ç»„
+        //		strMetadata			outå‚æ•°ï¼Œè¿”å›å…ƒæ•°æ®
+        //		strOutputResPath	outå‚æ•°ï¼Œè¿”å›ç›¸å…³è®°å½•çš„è·¯å¾„
+        //		outputTimestamp		outå‚æ•°ï¼Œè¿”å›æ—¶é—´æˆ³
+        //		strError			outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //		-1  ³ö´í
-        //		-4  Î´ÕÒµ½¼ÇÂ¼
-        //      -10 ¼ÇÂ¼¾Ö²¿Î´ÕÒµ½
-        //		>=0 ×ÊÔ´×Ü³¤¶È
-        //      nAdditionError -50 ÓĞÒ»¸öÒÔÉÏÏÂ¼¶×ÊÔ´¼ÇÂ¼²»´æÔÚ
-        // Ïß: °²È«µÄ
+        //		-1  å‡ºé”™
+        //		-4  æœªæ‰¾åˆ°è®°å½•
+        //      -10 è®°å½•å±€éƒ¨æœªæ‰¾åˆ°
+        //		>=0 èµ„æºæ€»é•¿åº¦
+        //      nAdditionError -50 æœ‰ä¸€ä¸ªä»¥ä¸Šä¸‹çº§èµ„æºè®°å½•ä¸å­˜åœ¨
+        // çº¿: å®‰å…¨çš„
         public override long GetXml(string strRecordID,
             string strXPath,
             long lStart,
@@ -5948,38 +5948,38 @@ namespace DigitalPlatform.rms
             int nRet = 0;
             long lRet = 0;
 
-            int nNotFoundSubRes = 0;    // ÏÂ¼¶Ã»ÓĞÕÒµ½µÄ×ÊÔ´¸öÊı
+            int nNotFoundSubRes = 0;    // ä¸‹çº§æ²¡æœ‰æ‰¾åˆ°çš„èµ„æºä¸ªæ•°
             string strNotFoundSubResIds = "";
 
-            // ¼ì²éID
+            // æ£€æŸ¥ID
             // return:
-            //      -1  ³ö´í
-            //      0   ³É¹¦
+            //      -1  å‡ºé”™
+            //      0   æˆåŠŸ
             nRet = DatabaseUtil.CheckAndGet10RecordID(ref strRecordID,
                 out strError);
             if (nRet == -1)
                 return -1;
 
-            // ½«ÑùÊ½È¥¿Õ°×
+            // å°†æ ·å¼å»ç©ºç™½
             strStyle = strStyle.Trim();
 
 #if SUPER
             if (this.FastMode == true)
             {
-                // ÔÚ¶ÁĞ´²Ù×÷ÖĞ£¬Õû¸ö¿â¶¼»¥ÏàÅÅ³â
+                // åœ¨è¯»å†™æ“ä½œä¸­ï¼Œæ•´ä¸ªåº“éƒ½äº’ç›¸æ’æ–¥
                 m_db_lock.AcquireWriterLock(m_nTimeOut);
 #if DEBUG_LOCK_SQLDATABASE
-			this.container.WriteDebugInfo("GetXml()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â¼ÓĞ´Ëø¡£");
+			this.container.WriteDebugInfo("GetXml()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“åŠ å†™é”ã€‚");
 #endif
             }
             else
             {
 #endif
 
-                //********¸ø¿â¼Ó¶ÁËø**************
+                //********ç»™åº“åŠ è¯»é”**************
                 m_db_lock.AcquireReaderLock(m_nTimeOut);
 #if DEBUG_LOCK_SQLDATABASE
-			this.container.WriteDebugInfo("GetXml()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â¼Ó¶ÁËø¡£");
+			this.container.WriteDebugInfo("GetXml()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“åŠ è¯»é”ã€‚");
 #endif
 
 #if SUPER
@@ -5989,13 +5989,13 @@ namespace DigitalPlatform.rms
             try
             {
 
-                // È¡³öÊµ¼ÊµÄ¼ÇÂ¼ºÅ
+                // å–å‡ºå®é™…çš„è®°å½•å·
                 if (StringUtil.IsInList("prev", strStyle) == true
                     || StringUtil.IsInList("next", strStyle) == true)
                 {
                     string strTempOutputID = "";
 
-                    // TODO: ÕâÀïµÄConnection¿É·ñºÍºóÃæµÄºÏÓÃ
+                    // TODO: è¿™é‡Œçš„Connectionå¯å¦å’Œåé¢çš„åˆç”¨
                     Connection connection = new Connection(this,
                         this.m_strConnString
 #if SUPER
@@ -6008,9 +6008,9 @@ namespace DigitalPlatform.rms
                     try
                     {
                         // return:
-                        //		-1  ³ö´í
-                        //      0   Î´ÕÒµ½
-                        //      1   ÕÒµ½
+                        //		-1  å‡ºé”™
+                        //      0   æœªæ‰¾åˆ°
+                        //      1   æ‰¾åˆ°
                         nRet = this.GetRecordID(connection,
                             strRecordID,
                             strStyle,
@@ -6025,43 +6025,43 @@ namespace DigitalPlatform.rms
                     }
                     if (nRet == 0 || strTempOutputID == "")
                     {
-                        strError = "Î´ÕÒµ½¼ÇÂ¼ID '" + strRecordID + "' µÄ·ç¸ñÎª'" + strStyle + "'µÄ¼ÇÂ¼";
+                        strError = "æœªæ‰¾åˆ°è®°å½•ID '" + strRecordID + "' çš„é£æ ¼ä¸º'" + strStyle + "'çš„è®°å½•";
                         return -4;
                     }
                     strRecordID = strTempOutputID;
 
-                    // ÔÙ´Î¼ì²éÒ»ÏÂ·µ»ØµÄID
+                    // å†æ¬¡æ£€æŸ¥ä¸€ä¸‹è¿”å›çš„ID
                     // return:
-                    //      -1  ³ö´í
-                    //      0   ³É¹¦
+                    //      -1  å‡ºé”™
+                    //      0   æˆåŠŸ
                     nRet = DatabaseUtil.CheckAndGet10RecordID(ref strRecordID,
                         out strError);
                     if (nRet == -1)
                         return -1;
                 }
 
-                // ¸ù¾İ·ç¸ñÒªÇó£¬·µ»Ø×ÊÔ´Â·¾¶
+                // æ ¹æ®é£æ ¼è¦æ±‚ï¼Œè¿”å›èµ„æºè·¯å¾„
                 if (StringUtil.IsInList("outputpath", strStyle) == true)
                 {
                     strOutputRecordID = DbPath.GetCompressedID(strRecordID);
                 }
 
 
-                // ¶ÔÕÊ»§¿â¿ªµÄºóÃÅ£¬ÓÃÓÚ¸üĞÂÕÊ»§,RefreshUserÊÇ»áµ÷WriteXml()ÊÇ¼ÓËøµÄº¯Êı
-                // ²»ÄÜÔÚ¿ªÍ·´ò¿ªÒ»¸öconnection¶ÔÏó
+                // å¯¹å¸æˆ·åº“å¼€çš„åé—¨ï¼Œç”¨äºæ›´æ–°å¸æˆ·,RefreshUseræ˜¯ä¼šè°ƒWriteXml()æ˜¯åŠ é”çš„å‡½æ•°
+                // ä¸èƒ½åœ¨å¼€å¤´æ‰“å¼€ä¸€ä¸ªconnectionå¯¹è±¡
                 if (bCheckAccount == true &&
-                    StringUtil.IsInList("account", this.GetDbType()) == true)   // ×¢Òâ£ºÈç¹û¿âÃ»ÓĞËø¶¨µÄ»°Ó¦µ±ÓÃthis.TypeSafety
+                    StringUtil.IsInList("account", this.GetDbType()) == true)   // æ³¨æ„ï¼šå¦‚æœåº“æ²¡æœ‰é”å®šçš„è¯åº”å½“ç”¨this.TypeSafety
                 {
-                    // Èç¹ûÒª»ñµÃ¼ÇÂ¼ÕıºÃÊÇÕË»§¿â¼ÇÂ¼£¬¶øÇÒÔÚ
-                    // UserCollectionÖĞ£¬ÄÇ¾Í°ÑÏà¹ØµÄUser¼ÇÂ¼
-                    // ±£´æ»ØÊı¾İ¿â£¬ÒÔ±ãÉÔºó´ÓÊı¾İ¿âÖĞÌáÈ¡£¬
-                    // ¶ø²»±Ø´ÓÄÚ´æÖĞÌáÈ¡¡£
+                    // å¦‚æœè¦è·å¾—è®°å½•æ­£å¥½æ˜¯è´¦æˆ·åº“è®°å½•ï¼Œè€Œä¸”åœ¨
+                    // UserCollectionä¸­ï¼Œé‚£å°±æŠŠç›¸å…³çš„Userè®°å½•
+                    // ä¿å­˜å›æ•°æ®åº“ï¼Œä»¥ä¾¿ç¨åä»æ•°æ®åº“ä¸­æå–ï¼Œ
+                    // è€Œä¸å¿…ä»å†…å­˜ä¸­æå–ã€‚
                     string strAccountPath = this.FullID + "/" + strRecordID;
 
                     // return:
-                    //		-1  ³ö´í
-                    //      -4  ¼ÇÂ¼²»´æÔÚ
-                    //		0   ³É¹¦
+                    //		-1  å‡ºé”™
+                    //      -4  è®°å½•ä¸å­˜åœ¨
+                    //		0   æˆåŠŸ
                     nRet = this.container.UserColl.SaveUserIfNeed(
                         strAccountPath,
                         out strError);
@@ -6069,15 +6069,15 @@ namespace DigitalPlatform.rms
                         return nRet;
                 }
 
-                // Ô­À´µÄ¿â¶ÁËøÔÚÕâÀï
+                // åŸæ¥çš„åº“è¯»é”åœ¨è¿™é‡Œ
 
-                //*******************¶Ô¼ÇÂ¼¼Ó¶ÁËø************************
+                //*******************å¯¹è®°å½•åŠ è¯»é”************************
                 m_recordLockColl.LockForRead(strRecordID, m_nTimeOut);
 
 #if DEBUG_LOCK_SQLDATABASE
-				this.container.WriteDebugInfo("GetXml()£¬¶Ô'" + this.GetCaption("zh-CN") + "/" + strRecordID + "'¼ÇÂ¼¼Ó¶ÁËø¡£");
+				this.container.WriteDebugInfo("GetXml()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "/" + strRecordID + "'è®°å½•åŠ è¯»é”ã€‚");
 #endif
-                try //Ëø
+                try //é”
                 {
 
                     Connection connection = new Connection(this,
@@ -6090,20 +6090,20 @@ namespace DigitalPlatform.rms
                     connection.Open();
 
                     /*
-                    // µ÷ÊÔÓÃ
+                    // è°ƒè¯•ç”¨
                     string strConnectionName = connection.GetHashCode().ToString();
                     this.container.WriteErrorLog("getimage use connection '"+strConnectionName+"'");
                      * */
 
-                    try  //Á¬½Ó
+                    try  //è¿æ¥
                     {
                         /*
                          * 
-                         * ×¢:Ö±½ÓÊ¹ÓÃGetImage()º¯Êı£¬Ò²ÄÜ¸ĞÖªµ½¼ÇÂ¼²»´æÔÚ£¬ËùÒÔÃ»ÓĞ±ØÒªÔ¤ÏÈÌ½²âÒ»ÏÂ¼ÇÂ¼ÊÇ·ñ´æÔÚ¡£2012/1/8
+                         * æ³¨:ç›´æ¥ä½¿ç”¨GetImage()å‡½æ•°ï¼Œä¹Ÿèƒ½æ„ŸçŸ¥åˆ°è®°å½•ä¸å­˜åœ¨ï¼Œæ‰€ä»¥æ²¡æœ‰å¿…è¦é¢„å…ˆæ¢æµ‹ä¸€ä¸‹è®°å½•æ˜¯å¦å­˜åœ¨ã€‚2012/1/8
                         // return:
-                        //		-1  ³ö´í
-                        //      0   ²»´æÔÚ
-                        //      1   ´æÔÚ
+                        //		-1  å‡ºé”™
+                        //      0   ä¸å­˜åœ¨
+                        //      1   å­˜åœ¨
                         nRet = this.RecordIsExist(connection,
                             strRecordID,
                             out strError);
@@ -6113,7 +6113,7 @@ namespace DigitalPlatform.rms
 
                         if (nRet == 0)
                         {
-                            strError = "¼ÇÂ¼'" + strRecordID + "'ÔÚ¿âÖĞ²»´æÔÚ";
+                            strError = "è®°å½•'" + strRecordID + "'åœ¨åº“ä¸­ä¸å­˜åœ¨";
                             return -4;
                         }
                          * */
@@ -6129,10 +6129,10 @@ namespace DigitalPlatform.rms
                             || StringUtil.IsInList("withresmetadata", strStyle) == true)
                         {
                             // return:
-                            //		-1  ³ö´í
-                            //		-4  ¼ÇÂ¼²»´æÔÚ
-                            //      -100    ¶ÔÏóÎÄ¼ş²»´æÔÚ
-                            //		>=0 ×ÊÔ´×Ü³¤¶È
+                            //		-1  å‡ºé”™
+                            //		-4  è®°å½•ä¸å­˜åœ¨
+                            //      -100    å¯¹è±¡æ–‡ä»¶ä¸å­˜åœ¨
+                            //		>=0 èµ„æºæ€»é•¿åº¦
                             lRet = this.GetImage(connection,
                                 null,
                                 strRecordID,
@@ -6150,7 +6150,7 @@ namespace DigitalPlatform.rms
 
                             if (baWholeXml == null && string.IsNullOrEmpty(strXPath) == false)
                             {
-                                strError = "ÄúËäÈ»Ê¹ÓÃÁËxpath£¬µ«Î´È¡µÃÊı¾İ£¬¿ÉÒÔÊÇÓÉÓÚstyle·ç¸ñ²»ÕıÈ·£¬µ±Ç°styleµÄÖµÎª '" + strStyle + "'¡£";
+                                strError = "æ‚¨è™½ç„¶ä½¿ç”¨äº†xpathï¼Œä½†æœªå–å¾—æ•°æ®ï¼Œå¯ä»¥æ˜¯ç”±äºstyleé£æ ¼ä¸æ­£ç¡®ï¼Œå½“å‰styleçš„å€¼ä¸º '" + strStyle + "'ã€‚";
                                 return -1;
                             }
 
@@ -6160,7 +6160,7 @@ namespace DigitalPlatform.rms
                             if (strXml != "")
                             {
                                 dom = new XmlDocument();
-                                dom.PreserveWhitespace = true; //ÉèPreserveWhitespaceÎªtrue
+                                dom.PreserveWhitespace = true; //è®¾PreserveWhitespaceä¸ºtrue
 
                                 try
                                 {
@@ -6168,22 +6168,22 @@ namespace DigitalPlatform.rms
                                 }
                                 catch (Exception ex)
                                 {
-                                    strError = "GetXml() ¼ÓÔØÊı¾İµ½dom³ö´í£¬Ô­Òò£º" + ex.Message;
+                                    strError = "GetXml() åŠ è½½æ•°æ®åˆ°domå‡ºé”™ï¼ŒåŸå› ï¼š" + ex.Message;
                                     return -1;
                                 }
                             }
                         }
 
-                        // ´ø×ÊÔ´ÔªÊı¾İµÄÇé¿ö£¬ÒªÏÈÌá³öÀ´xmlÊı¾İµÄ
+                        // å¸¦èµ„æºå…ƒæ•°æ®çš„æƒ…å†µï¼Œè¦å…ˆæå‡ºæ¥xmlæ•°æ®çš„
                         if (StringUtil.IsInList("withresmetadata", strStyle) == true)
                         {
                             /*
-                            // ¿ÉÒÔÓÃÒ»¸ö¼òµ¥µÄº¯Êı°üÒ»ÏÂ
+                            // å¯ä»¥ç”¨ä¸€ä¸ªç®€å•çš„å‡½æ•°åŒ…ä¸€ä¸‹
                             // return:
-                            //		-1  ³ö´í
-                            //		-4  ¼ÇÂ¼²»´æÔÚ
-        //      -100    ¶ÔÏóÎÄ¼ş²»´æÔÚ
-                            //		>=0 ×ÊÔ´×Ü³¤¶È
+                            //		-1  å‡ºé”™
+                            //		-4  è®°å½•ä¸å­˜åœ¨
+        //      -100    å¯¹è±¡æ–‡ä»¶ä¸å­˜åœ¨
+                            //		>=0 èµ„æºæ€»é•¿åº¦
                             lRet = this.GetImage(connection,
                                 strRecordID,
                                 "data",
@@ -6206,7 +6206,7 @@ namespace DigitalPlatform.rms
                             {
                                 /*
                                 dom = new XmlDocument();
-                                dom.PreserveWhitespace = true; //ÉèPreserveWhitespaceÎªtrue
+                                dom.PreserveWhitespace = true; //è®¾PreserveWhitespaceä¸ºtrue
 
                                 try
                                 {
@@ -6214,12 +6214,12 @@ namespace DigitalPlatform.rms
                                 }
                                 catch (Exception ex)
                                 {
-                                    strError = "GetXml() ¼ÓÔØÊı¾İµ½dom³ö´í£¬Ô­Òò£º" + ex.Message;
+                                    strError = "GetXml() åŠ è½½æ•°æ®åˆ°domå‡ºé”™ï¼ŒåŸå› ï¼š" + ex.Message;
                                     return -1;
                                 }
                                 */
 
-                                // ÕÒµ½ËùÓĞµÄdprms:fileÔªËØ
+                                // æ‰¾åˆ°æ‰€æœ‰çš„dprms:fileå…ƒç´ 
                                 XmlNamespaceManager nsmgr = new XmlNamespaceManager(dom.NameTable);
                                 nsmgr.AddNamespace("dprms", DpNs.dprms);
                                 XmlNodeList fileList = dom.DocumentElement.SelectNodes("//dprms:file", nsmgr);
@@ -6235,10 +6235,10 @@ namespace DigitalPlatform.rms
 
                                     string strObjectFullID = strRecordID + "_" + strObjectID;
                                     // return:
-                                    //		-1  ³ö´í
-                                    //		-4  ¼ÇÂ¼²»´æÔÚ
-                                    //      -100    ¶ÔÏóÎÄ¼ş²»´æÔÚ
-                                    //		>=0 ×ÊÔ´×Ü³¤¶È
+                                    //		-1  å‡ºé”™
+                                    //		-4  è®°å½•ä¸å­˜åœ¨
+                                    //      -100    å¯¹è±¡æ–‡ä»¶ä¸å­˜åœ¨
+                                    //		>=0 èµ„æºæ€»é•¿åº¦
                                     lRet = this.GetImage(connection,
                                         null,
                                         strObjectFullID,
@@ -6253,7 +6253,7 @@ namespace DigitalPlatform.rms
                                         out strError);
                                     if (lRet <= -1)
                                     {
-                                        // ×ÊÔ´¼ÇÂ¼²»´æÔÚ
+                                        // èµ„æºè®°å½•ä¸å­˜åœ¨
                                         if (lRet == -4)
                                         {
                                             nNotFoundSubRes++;
@@ -6264,7 +6264,7 @@ namespace DigitalPlatform.rms
                                         }
                                     }
 
-                                    // ½âÎömetadata
+                                    // è§£æmetadata
                                     if (strObjectMetadata != "")
                                     {
                                         Hashtable values = StringUtil.ParseMedaDataXml(strObjectMetadata,
@@ -6290,7 +6290,7 @@ namespace DigitalPlatform.rms
 
                         } // if (StringUtil.IsInList("withresmetadata", strStyle) == true)
 
-                        // Í¨¹ıxpathÕÒÆ¬¶ÏµÄÇé¿ö
+                        // é€šè¿‡xpathæ‰¾ç‰‡æ–­çš„æƒ…å†µ
                         if (strXPath != null && strXPath != "")
                         {
                             if (dom != null)
@@ -6310,14 +6310,14 @@ namespace DigitalPlatform.rms
 
                                 if (strLocateXPath == "")
                                 {
-                                    strError = "xpath±í´ïÊ½ÖĞµÄlocate²ÎÊı²»ÄÜÎª¿ÕÖµ";
+                                    strError = "xpathè¡¨è¾¾å¼ä¸­çš„locateå‚æ•°ä¸èƒ½ä¸ºç©ºå€¼";
                                     return -1;
                                 }
 
                                 XmlNode node = dom.DocumentElement.SelectSingleNode(strLocateXPath);
                                 if (node == null)
                                 {
-                                    strError = "´ÓdomÖĞÎ´ÕÒµ½XPathÎª'" + strLocateXPath + "'µÄ½Úµã";
+                                    strError = "ä»domä¸­æœªæ‰¾åˆ°XPathä¸º'" + strLocateXPath + "'çš„èŠ‚ç‚¹";
                                     return -10;
                                 }
 
@@ -6332,7 +6332,7 @@ namespace DigitalPlatform.rms
                                 }
                                 else
                                 {
-                                    strError = "Í¨¹ıxpath '" + strXPath + "' ÕÒµ½µÄ½ÚµãµÄÀàĞÍ²»Ö§³Ö¡£";
+                                    strError = "é€šè¿‡xpath '" + strXPath + "' æ‰¾åˆ°çš„èŠ‚ç‚¹çš„ç±»å‹ä¸æ”¯æŒã€‚";
                                     return -1;
                                 }
 
@@ -6341,8 +6341,8 @@ namespace DigitalPlatform.rms
 
                                 long lRealLength;
                                 // return:
-                                //		-1  ³ö´í
-                                //		0   ³É¹¦
+                                //		-1  å‡ºé”™
+                                //		0   æˆåŠŸ
                                 nRet = ConvertUtil.GetRealLength(lStart,
                                     nLength,
                                     baOutputText.Length,
@@ -6370,10 +6370,10 @@ namespace DigitalPlatform.rms
 
                         if (dom != null)
                         {
-                            // ´ø×ÊÔ´ÔªÊı¾İµÄÇé¿ö£¬ÒªÏÈÌá³öÀ´xmlÊı¾İµÄ
+                            // å¸¦èµ„æºå…ƒæ•°æ®çš„æƒ…å†µï¼Œè¦å…ˆæå‡ºæ¥xmlæ•°æ®çš„
                             if (StringUtil.IsInList("withresmetadata", strStyle) == true)
                             {
-                                // Ê¹ÓÃXmlTextWriter±£´æ³Éutf8µÄ±àÂë·½Ê½
+                                // ä½¿ç”¨XmlTextWriterä¿å­˜æˆutf8çš„ç¼–ç æ–¹å¼
                                 MemoryStream ms = new MemoryStream();
                                 XmlTextWriter textWriter = new XmlTextWriter(ms, Encoding.UTF8);
                                 dom.Save(textWriter);
@@ -6381,8 +6381,8 @@ namespace DigitalPlatform.rms
 
                                 long lRealLength;
                                 // return:
-                                //		-1  ³ö´í
-                                //		0   ³É¹¦
+                                //		-1  å‡ºé”™
+                                //		0   æˆåŠŸ
                                 nRet = ConvertUtil.GetRealLength(lStart,
                                     nLength,
                                     (int)ms.Length,
@@ -6394,7 +6394,7 @@ namespace DigitalPlatform.rms
 
                                 destBuffer = new byte[lRealLength];
 
-                                // ´øÔªËØµÄĞÅÏ¢ºóµÄ×Ü³¤¶È
+                                // å¸¦å…ƒç´ çš„ä¿¡æ¯åçš„æ€»é•¿åº¦
                                 long nWithMetedataTotalLength = ms.Length;
 
                                 ms.Seek(lStart, SeekOrigin.Begin);
@@ -6405,8 +6405,8 @@ namespace DigitalPlatform.rms
 
                                 if (nNotFoundSubRes > 0)
                                 {
-                                    strError = "¼ÇÂ¼" + strRecordID + "ÖĞidÎª " + strNotFoundSubResIds + " µÄÏÂ¼¶×ÊÔ´¼ÇÂ¼²»´æÔÚ";
-                                    nAdditionError = -50; // ÓĞÒ»¸öÒÔÉÏÏÂ¼¶×ÊÔ´¼ÇÂ¼²»´æÔÚ
+                                    strError = "è®°å½•" + strRecordID + "ä¸­idä¸º " + strNotFoundSubResIds + " çš„ä¸‹çº§èµ„æºè®°å½•ä¸å­˜åœ¨";
+                                    nAdditionError = -50; // æœ‰ä¸€ä¸ªä»¥ä¸Šä¸‹çº§èµ„æºè®°å½•ä¸å­˜åœ¨
                                 }
 
                                 return nWithMetedataTotalLength;
@@ -6415,16 +6415,16 @@ namespace DigitalPlatform.rms
 
                         if (baWholeXml != null)
                         {
-                            strError = "dp2Kernel GetXml()º¯ÊıÖĞ ·¢ÉúÁËÖØ¸´ GetImage() µÄÇé¿ö";
+                            strError = "dp2Kernel GetXml()å‡½æ•°ä¸­ å‘ç”Ÿäº†é‡å¤ GetImage() çš„æƒ…å†µ";
                             return -1;
                         }
 
-                        // ²»Ê¹ÓÃxpathµÄÇé¿ö
+                        // ä¸ä½¿ç”¨xpathçš„æƒ…å†µ
                         // return:
-                        //		-1  ³ö´í
-                        //		-4  ¼ÇÂ¼²»´æÔÚ
-                        //      -100    ¶ÔÏóÎÄ¼ş²»´æÔÚ
-                        //		>=0 ×ÊÔ´×Ü³¤¶È
+                        //		-1  å‡ºé”™
+                        //		-4  è®°å½•ä¸å­˜åœ¨
+                        //      -100    å¯¹è±¡æ–‡ä»¶ä¸å­˜åœ¨
+                        //		>=0 èµ„æºæ€»é•¿åº¦
                         lRet = this.GetImage(connection,
                             null,
                             strRecordID,
@@ -6440,48 +6440,48 @@ namespace DigitalPlatform.rms
 
                         if (lRet >= 0 && nNotFoundSubRes > 1)
                         {
-                            strError = "¼ÇÂ¼ " + strRecordID + " ÖĞ id Îª " + strNotFoundSubResIds + " µÄÏÂ¼¶×ÊÔ´¼ÇÂ¼²»´æÔÚ";
-                            nAdditionError = -50; // ÓĞÒ»¸öÒÔÉÏÏÂ¼¶×ÊÔ´¼ÇÂ¼²»´æÔÚ
+                            strError = "è®°å½• " + strRecordID + " ä¸­ id ä¸º " + strNotFoundSubResIds + " çš„ä¸‹çº§èµ„æºè®°å½•ä¸å­˜åœ¨";
+                            nAdditionError = -50; // æœ‰ä¸€ä¸ªä»¥ä¸Šä¸‹çº§èµ„æºè®°å½•ä¸å­˜åœ¨
                         }
 
                         return lRet;
                     }
                     catch (SqlException sqlEx)
                     {
-                        strError = "È¡¼ÇÂ¼ '" + strRecordID + "' Ê±³ö´í£¬ Ô­Òò: " + GetSqlErrors(sqlEx);
+                        strError = "å–è®°å½• '" + strRecordID + "' æ—¶å‡ºé”™ï¼Œ åŸå› : " + GetSqlErrors(sqlEx);
 
-                        // TODO: Èç¹ûÓöµ½³¬Ê±´íÎó£¬ÊÇ·ñĞèÒªÇ°¶ËÖØÊÔ? ĞèÒª°ÑÕâÖÖ´íÎóÀàĞÍ×¨ÃÅ·Ö±æ³öÀ´
+                        // TODO: å¦‚æœé‡åˆ°è¶…æ—¶é”™è¯¯ï¼Œæ˜¯å¦éœ€è¦å‰ç«¯é‡è¯•? éœ€è¦æŠŠè¿™ç§é”™è¯¯ç±»å‹ä¸“é—¨åˆ†è¾¨å‡ºæ¥
                         /*
                         if (sqlEx.Errors is SqlErrorCollection)
-                            strError = "Êı¾İ¿â'" + this.GetCaption("zh") + "'ÉĞÎ´³õÊ¼»¯¡£";
+                            strError = "æ•°æ®åº“'" + this.GetCaption("zh") + "'å°šæœªåˆå§‹åŒ–ã€‚";
                         else
-                            strError = "È¡¼ÇÂ¼'" + strRecordID + "'³ö´íÁË£¬Ô­Òò:" + sqlEx.Message;
+                            strError = "å–è®°å½•'" + strRecordID + "'å‡ºé”™äº†ï¼ŒåŸå› :" + sqlEx.Message;
                          * */
                         return -1;
                     }
                     catch (Exception ex)
                     {
-                        strError = "È¡¼ÇÂ¼ '" + strRecordID + "' ³ö´íÁË£¬Ô­Òò: " + ex.Message;
+                        strError = "å–è®°å½• '" + strRecordID + "' å‡ºé”™äº†ï¼ŒåŸå› : " + ex.Message;
                         return -1;
                     }
-                    finally //Á¬½Ó
+                    finally //è¿æ¥
                     {
                         connection.Close();
                     }
                 }
-                finally //Ëø
+                finally //é”
                 {
 
-                    //*********¶Ô¼ÇÂ¼½â¶ÁËø******
+                    //*********å¯¹è®°å½•è§£è¯»é”******
                     m_recordLockColl.UnlockForRead(strRecordID);
 #if DEBUG_LOCK_SQLDATABASE
-					this.container.WriteDebugInfo("GetXml()£¬¶Ô'" + this.GetCaption("zh-CN") + "/" + strRecordID + "'¼ÇÂ¼½â¶ÁËø¡£");
+					this.container.WriteDebugInfo("GetXml()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "/" + strRecordID + "'è®°å½•è§£è¯»é”ã€‚");
 #endif
                 }
             }
             catch (Exception ex)
             {
-                strError = "È¡¼ÇÂ¼'" + strRecordID + "'³ö´íÁË£¬Ô­Òò:" + ex.Message;
+                strError = "å–è®°å½•'" + strRecordID + "'å‡ºé”™äº†ï¼ŒåŸå› :" + ex.Message;
                 return -1;
             }
             finally
@@ -6491,16 +6491,16 @@ namespace DigitalPlatform.rms
                 {
                     m_db_lock.ReleaseWriterLock();
 #if DEBUG_LOCK_SQLDATABASE
-				this.container.WriteDebugInfo("GetXml()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â½âĞ´Ëø¡£");
+				this.container.WriteDebugInfo("GetXml()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“è§£å†™é”ã€‚");
 #endif
                 }
                 else
                 {
 #endif
-                    //***********¶ÔÊı¾İ¿â½â¶ÁËø*****************
+                    //***********å¯¹æ•°æ®åº“è§£è¯»é”*****************
                     m_db_lock.ReleaseReaderLock();
 #if DEBUG_LOCK_SQLDATABASE
-				this.container.WriteDebugInfo("GetXml()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â½â¶ÁËø¡£");
+				this.container.WriteDebugInfo("GetXml()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“è§£è¯»é”ã€‚");
 #endif
 
 #if SUPER
@@ -6509,13 +6509,13 @@ namespace DigitalPlatform.rms
             }
         }
 
-        // µÃµ½xmlÊı¾İ
-        // Ïß:°²È«µÄ,¹©Íâ²¿µ÷
+        // å¾—åˆ°xmlæ•°æ®
+        // çº¿:å®‰å…¨çš„,ä¾›å¤–éƒ¨è°ƒ
         // return:
-        //      -1  ³ö´í
-        //      -4  ¼ÇÂ¼²»´æÔÚ
-        //      -100    ¶ÔÏóÎÄ¼ş²»´æÔÚ
-        //      0   ÕıÈ·
+        //      -1  å‡ºé”™
+        //      -4  è®°å½•ä¸å­˜åœ¨
+        //      -100    å¯¹è±¡æ–‡ä»¶ä¸å­˜åœ¨
+        //      0   æ­£ç¡®
         public override int GetXmlData(string strID,
             out string strXml,
             out string strError)
@@ -6528,7 +6528,7 @@ namespace DigitalPlatform.rms
             Connection connection = new Connection(this,
                 this.m_strConnStringPooling
 #if SUPER
-                ,  // ÒòÎªÖĞÍ¾²»»áÖĞ¶Ï£¬ËùÒÔ¿ÉÒÔÊ¹ÓÃpooling
+                ,  // å› ä¸ºä¸­é€”ä¸ä¼šä¸­æ–­ï¼Œæ‰€ä»¥å¯ä»¥ä½¿ç”¨pooling
                 this.container.SqlServerType == SqlServerType.SQLite && this.FastMode == true ? ConnectionStyle.Global : ConnectionStyle.None
 #endif
 );
@@ -6536,10 +6536,10 @@ namespace DigitalPlatform.rms
             try
             {
                 // return:
-                //      -1  ³ö´í
-                //      -4  ¼ÇÂ¼²»´æÔÚ
-                //      -100    ¶ÔÏóÎÄ¼ş²»´æÔÚ
-                //      0   ÕıÈ·
+                //      -1  å‡ºé”™
+                //      -4  è®°å½•ä¸å­˜åœ¨
+                //      -100    å¯¹è±¡æ–‡ä»¶ä¸å­˜åœ¨
+                //      0   æ­£ç¡®
                 return this.GetXmlString(connection,
                     strID,
                     out strXml,
@@ -6552,13 +6552,13 @@ namespace DigitalPlatform.rms
         }
 
 
-        // È¡xmlÊı¾İµ½×Ö·û´®,°ü×°GetXmlData()
-        // Ïß:²»°²È«
+        // å–xmlæ•°æ®åˆ°å­—ç¬¦ä¸²,åŒ…è£…GetXmlData()
+        // çº¿:ä¸å®‰å…¨
         // return:
-        //      -1  ³ö´í
-        //      -4  ¼ÇÂ¼²»´æÔÚ
-        //      -100    ¶ÔÏóÎÄ¼ş²»´æÔÚ
-        //      0   ÕıÈ·
+        //      -1  å‡ºé”™
+        //      -4  è®°å½•ä¸å­˜åœ¨
+        //      -100    å¯¹è±¡æ–‡ä»¶ä¸å­˜åœ¨
+        //      0   æ­£ç¡®
         private int GetXmlString(Connection connection,
             string strID,
             out string strXml,
@@ -6566,10 +6566,10 @@ namespace DigitalPlatform.rms
         {
             byte[] baPreamble;
             // return:
-            //      -1  ³ö´í
-            //      -4  ¼ÇÂ¼²»´æÔÚ
-            //      -100    ¶ÔÏóÎÄ¼ş²»´æÔÚ
-            //      0   ÕıÈ·
+            //      -1  å‡ºé”™
+            //      -4  è®°å½•ä¸å­˜åœ¨
+            //      -100    å¯¹è±¡æ–‡ä»¶ä¸å­˜åœ¨
+            //      0   æ­£ç¡®
             return this.GetXmlData(connection,
                 null,
                 strID,
@@ -6579,16 +6579,16 @@ namespace DigitalPlatform.rms
                 out strError);
         }
 
-        // µÃµ½xml×Ö·û´®,°ü×°GetImage()
-        // Ïß: ²»°²È«
+        // å¾—åˆ°xmlå­—ç¬¦ä¸²,åŒ…è£…GetImage()
+        // çº¿: ä¸å®‰å…¨
         // parameters:
-        //      row_info    Èç¹ûrow_info != null£¬Ôò²»Àí»ástrID²ÎÊıÁË
-        //		strID       ¼ÇÂ¼ID¡£ÓÃÓÚÔÚrowinfo == null µÄÇé¿öÏÂ»ñÈ¡ĞĞĞÅÏ¢
+        //      row_info    å¦‚æœrow_info != nullï¼Œåˆ™ä¸ç†ä¼šstrIDå‚æ•°äº†
+        //		strID       è®°å½•IDã€‚ç”¨äºåœ¨rowinfo == null çš„æƒ…å†µä¸‹è·å–è¡Œä¿¡æ¯
         // return:
-        //      -1  ³ö´í
-        //      -4  ¼ÇÂ¼²»´æÔÚ
-        //      -100    ¶ÔÏóÎÄ¼ş²»´æÔÚ
-        //      0   ÕıÈ·
+        //      -1  å‡ºé”™
+        //      -4  è®°å½•ä¸å­˜åœ¨
+        //      -100    å¯¹è±¡æ–‡ä»¶ä¸å­˜åœ¨
+        //      0   æ­£ç¡®
         private int GetXmlData(Connection connection,
             RecordRowInfo row_info,
             string strID,
@@ -6603,8 +6603,8 @@ namespace DigitalPlatform.rms
             strError = "";
 
             // return:
-            //      -1  ³ö´í
-            //      0   Õı³£
+            //      -1  å‡ºé”™
+            //      0   æ­£å¸¸
             int nRet = this.CheckConnection(connection,
                 out strError);
             if (nRet == -1)
@@ -6614,10 +6614,10 @@ namespace DigitalPlatform.rms
             byte[] outputTimestamp;
             string strMetadata;
             // return:
-            //		-1  ³ö´í
-            //		-4  ¼ÇÂ¼²»´æÔÚ
-            //      -100    ¶ÔÏóÎÄ¼ş²»´æÔÚ
-            //		>=0 ×ÊÔ´×Ü³¤¶È
+            //		-1  å‡ºé”™
+            //		-4  è®°å½•ä¸å­˜åœ¨
+            //      -100    å¯¹è±¡æ–‡ä»¶ä¸å­˜åœ¨
+            //		>=0 èµ„æºæ€»é•¿åº¦
             long lRet = this.GetImage(connection,
                 row_info,
                 strID,
@@ -6639,19 +6639,19 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
-        // °´Ö¸¶¨·¶Î§¶Á×ÊÔ´
+        // æŒ‰æŒ‡å®šèŒƒå›´è¯»èµ„æº
         // parameter:
-        //		strID       ¼ÇÂ¼ID
-        //		nStart      ¿ªÊ¼Î»ÖÃ
-        //		nLength     ³¤¶È -1:¿ªÊ¼µ½½áÊø
-        //		destBuffer  out²ÎÊı£¬·µ»Ø×Ö½ÚÊı×é
-        //		timestamp   out²ÎÊı£¬·µ»ØÊ±¼ä´Á
-        //		strError    out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //		strID       è®°å½•ID
+        //		nStart      å¼€å§‹ä½ç½®
+        //		nLength     é•¿åº¦ -1:å¼€å§‹åˆ°ç»“æŸ
+        //		destBuffer  outå‚æ•°ï¼Œè¿”å›å­—èŠ‚æ•°ç»„
+        //		timestamp   outå‚æ•°ï¼Œè¿”å›æ—¶é—´æˆ³
+        //		strError    outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:
         // return:
-        //		-1  ³ö´í
-        //		-4  ¼ÇÂ¼²»´æÔÚ
-        //		>=0 ×ÊÔ´×Ü³¤¶È
+        //		-1  å‡ºé”™
+        //		-4  è®°å½•ä¸å­˜åœ¨
+        //		>=0 èµ„æºæ€»é•¿åº¦
         public override long GetObject(string strRecordID,
             string strObjectID,
             long lStart,
@@ -6669,32 +6669,32 @@ namespace DigitalPlatform.rms
             strError = "";
 
             strRecordID = DbPath.GetID10(strRecordID);
-            //********¶ÔÊı¾İ¿â¼Ó¶ÁËø**************
+            //********å¯¹æ•°æ®åº“åŠ è¯»é”**************
             m_db_lock.AcquireReaderLock(m_nTimeOut);
 #if DEBUG_LOCK_SQLDATABASE
-			this.container.WriteDebugInfo("GetObject()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â¼Ó¶ÁËø¡£");
+			this.container.WriteDebugInfo("GetObject()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“åŠ è¯»é”ã€‚");
 #endif
             try
             {
-                //*******************¶Ô¼ÇÂ¼¼Ó¶ÁËø************************
+                //*******************å¯¹è®°å½•åŠ è¯»é”************************
                 m_recordLockColl.LockForRead(strRecordID, m_nTimeOut);
 #if DEBUG_LOCK_SQLDATABASE
-				this.container.WriteDebugInfo("GetObject()£¬¶Ô'" + this.GetCaption("zh-CN") + "/" + strRecordID + "'¼ÇÂ¼¼Ó¶ÁËø¡£");
+				this.container.WriteDebugInfo("GetObject()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "/" + strRecordID + "'è®°å½•åŠ è¯»é”ã€‚");
 #endif
-                try  // ¼ÇÂ¼Ëø
+                try  // è®°å½•é”
                 {
 
                     Connection connection = new Connection(this,
                         this.m_strConnString);
                     connection.Open();
-                    try // Á¬½Ó
+                    try // è¿æ¥
                     {
                         string strObjectFullID = strRecordID + "_" + strObjectID;
                         // return:
-                        //		-1  ³ö´í
-                        //		-4  ¼ÇÂ¼²»´æÔÚ
-                        //      -100    ¶ÔÏóÎÄ¼ş²»´æÔÚ
-                        //		>=0 ×ÊÔ´×Ü³¤¶È
+                        //		-1  å‡ºé”™
+                        //		-4  è®°å½•ä¸å­˜åœ¨
+                        //      -100    å¯¹è±¡æ–‡ä»¶ä¸å­˜åœ¨
+                        //		>=0 èµ„æºæ€»é•¿åº¦
                         return this.GetImage(connection,
                             null,
                             strObjectFullID,
@@ -6714,7 +6714,7 @@ namespace DigitalPlatform.rms
 
                         /*
                         if (sqlEx.Errors is SqlErrorCollection)
-                            strError = "Êı¾İ¿â'" + this.GetCaption("zh") + "'ÉĞÎ´³õÊ¼»¯¡£";
+                            strError = "æ•°æ®åº“'" + this.GetCaption("zh") + "'å°šæœªåˆå§‹åŒ–ã€‚";
                         else
                             strError = sqlEx.Message;
                          * */
@@ -6725,32 +6725,32 @@ namespace DigitalPlatform.rms
                         strError = "6: " + ex.Message;
                         return -1;
                     }
-                    finally // Á¬½Ó
+                    finally // è¿æ¥
                     {
                         connection.Close();
                     }
                 }
-                finally // ¼ÇÂ¼Ëø
+                finally // è®°å½•é”
                 {
-                    //*************¶Ô¼ÇÂ¼½â¶ÁËø***********
+                    //*************å¯¹è®°å½•è§£è¯»é”***********
                     m_recordLockColl.UnlockForRead(strRecordID);
 #if DEBUG_LOCK_SQLDATABASE
-					this.container.WriteDebugInfo("GetObject()£¬¶Ô'" + this.GetCaption("zh-CN") + "/" + strRecordID + "'¼ÇÂ¼½â¶ÁËø¡£");
+					this.container.WriteDebugInfo("GetObject()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "/" + strRecordID + "'è®°å½•è§£è¯»é”ã€‚");
 #endif
                 }
             }
-            finally //¿âËø
+            finally //åº“é”
             {
-                //******¶ÔÊı¾İ¿â½â¶ÁËø*********
+                //******å¯¹æ•°æ®åº“è§£è¯»é”*********
                 m_db_lock.ReleaseReaderLock();
 #if DEBUG_LOCK_SQLDATABASE
-				this.container.WriteDebugInfo("GetObject()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â½â¶ÁËø¡£");
+				this.container.WriteDebugInfo("GetObject()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“è§£è¯»é”ã€‚");
 #endif
             }
         }
 
         // 2012/1/21
-        // »ñµÃÒ»¸öÎ¨Ò»µÄ¡¢Á¬ĞøµÄ·¶Î§µÄ³¤¶È
+        // è·å¾—ä¸€ä¸ªå”¯ä¸€çš„ã€è¿ç»­çš„èŒƒå›´çš„é•¿åº¦
         static long GetTotalLength(string strRange,
             out string strError)
         {
@@ -6759,7 +6759,7 @@ namespace DigitalPlatform.rms
             if (string.IsNullOrEmpty(strRange) == true)
                 return 0;
 
-            // ×¼±¸rangelist
+            // å‡†å¤‡rangelist
             RangeList rangeList = null;
             try
             {
@@ -6767,44 +6767,44 @@ namespace DigitalPlatform.rms
             }
             catch (Exception ex)
             {
-                strError = "ÓÃ×Ö·û´® '" + strRange + "' ´´½¨ RangeList Ê±³ö´í: " + ex.Message;
+                strError = "ç”¨å­—ç¬¦ä¸² '" + strRange + "' åˆ›å»º RangeList æ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
             if (rangeList.Count != 1)
             {
-                strError = "·¶Î§×Ö·û´®±ØĞëÊÇÒ»¸öÁ¬ĞøµÄÆğÖ¹µ¥Ôª¡£(µ«ÏÖÔÚÊÇ '"+strRange+"')";
+                strError = "èŒƒå›´å­—ç¬¦ä¸²å¿…é¡»æ˜¯ä¸€ä¸ªè¿ç»­çš„èµ·æ­¢å•å…ƒã€‚(ä½†ç°åœ¨æ˜¯ '"+strRange+"')";
                 return -1;
             }
             if (rangeList[0].lStart != 0)
             {
-                strError = "·¶Î§µÄ¿ªÊ¼±ØĞëÊÇ0¡£(µ«ÏÖÔÚÊÇ '" + strRange + "')";
+                strError = "èŒƒå›´çš„å¼€å§‹å¿…é¡»æ˜¯0ã€‚(ä½†ç°åœ¨æ˜¯ '" + strRange + "')";
                 return -1;
             }
             return rangeList[0].lLength;
         }
 
 
-        // °´Ö¸¶¨·¶Î§¶Á×ÊÔ´
+        // æŒ‰æŒ‡å®šèŒƒå›´è¯»èµ„æº
         // parameter:
-        //      row_info    Èç¹ûrow_info != null£¬Ôò²»Àí»ástrID²ÎÊıÁË
-        //		strID       ¼ÇÂ¼ID¡£ÓÃÓÚÔÚrow_info == nullµÄÇé¿öÏÂ»ñµÃĞĞĞÅÏ¢
-        //      bTempField  ÊÇ·ñĞèÒª´ÓÁÙÊ± data ×Ö¶ÎÖĞÌáÈ¡Êı¾İ? (ÔÚÃ»ÓĞreverseµÄÇé¿öÏÂ£¬ÁÙÊ±data×Ö¶ÎÖ¸ newdata ×Ö¶Î)
-        //		nStart      ¿ªÊ¼Î»ÖÃ
-        //		nLength     ³¤¶È -1:¿ªÊ¼µ½½áÊø
-        //		nMaxLength  ×î´ó³¤¶È,µ±Îª-1Ê±,±íÊ¾²»ÏŞ
-        //		destBuffer  out²ÎÊı£¬·µ»Ø×Ö½ÚÊı×é
-        //		timestamp   out²ÎÊı£¬·µ»ØÊ±¼ä´Á
-        //		strError    out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //      row_info    å¦‚æœrow_info != nullï¼Œåˆ™ä¸ç†ä¼šstrIDå‚æ•°äº†
+        //		strID       è®°å½•IDã€‚ç”¨äºåœ¨row_info == nullçš„æƒ…å†µä¸‹è·å¾—è¡Œä¿¡æ¯
+        //      bTempField  æ˜¯å¦éœ€è¦ä»ä¸´æ—¶ data å­—æ®µä¸­æå–æ•°æ®? (åœ¨æ²¡æœ‰reverseçš„æƒ…å†µä¸‹ï¼Œä¸´æ—¶dataå­—æ®µæŒ‡ newdata å­—æ®µ)
+        //		nStart      å¼€å§‹ä½ç½®
+        //		nLength     é•¿åº¦ -1:å¼€å§‹åˆ°ç»“æŸ
+        //		nMaxLength  æœ€å¤§é•¿åº¦,å½“ä¸º-1æ—¶,è¡¨ç¤ºä¸é™
+        //		destBuffer  outå‚æ•°ï¼Œè¿”å›å­—èŠ‚æ•°ç»„
+        //		timestamp   outå‚æ•°ï¼Œè¿”å›æ—¶é—´æˆ³
+        //		strError    outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //		-1  ³ö´í
-        //		-4  ¼ÇÂ¼²»´æÔÚ
-        //      -100    ¶ÔÏóÎÄ¼ş²»´æÔÚ
-        //		>=0 ×ÊÔ´×Ü³¤¶È
+        //		-1  å‡ºé”™
+        //		-4  è®°å½•ä¸å­˜åœ¨
+        //      -100    å¯¹è±¡æ–‡ä»¶ä¸å­˜åœ¨
+        //		>=0 èµ„æºæ€»é•¿åº¦
         private long GetImage(Connection connection,
             RecordRowInfo row_info,
             string strID,
             // string strImageFieldName,
-            bool bTempField,    // ÊÇ·ñĞèÒª´ÓÁÙÊ± data ×Ö¶ÎÖĞÌáÈ¡Êı¾İ?
+            bool bTempField,    // æ˜¯å¦éœ€è¦ä»ä¸´æ—¶ data å­—æ®µä¸­æå–æ•°æ®?
             long lStart,
             int nReadLength,
             int nMaxLength,
@@ -6819,10 +6819,10 @@ namespace DigitalPlatform.rms
             outputTimestamp = null;
             strError = "";
 
-            // ¼ì²éÁ¬½Ó¶ÔÏó
+            // æ£€æŸ¥è¿æ¥å¯¹è±¡
             // return:
-            //      -1  ³ö´í
-            //      0   Õı³£
+            //      -1  å‡ºé”™
+            //      0   æ­£å¸¸
             int nRet = this.CheckConnection(connection,
                 out strError);
             if (nRet == -1)
@@ -6839,7 +6839,7 @@ namespace DigitalPlatform.rms
 
                 if (row_info != null)
                 {
-                    bool bReverse = false;  // ·½Ïò±êÖ¾¡£Èç¹ûÎªfalse£¬±íÊ¾ data ÎªÕıÊ½ÄÚÈİ£¬newdataÎªÔİÊ±ÄÚÈİ
+                    bool bReverse = false;  // æ–¹å‘æ ‡å¿—ã€‚å¦‚æœä¸ºfalseï¼Œè¡¨ç¤º data ä¸ºæ­£å¼å†…å®¹ï¼Œnewdataä¸ºæš‚æ—¶å†…å®¹
 
                     string strRange = row_info.Range;
 
@@ -6849,7 +6849,7 @@ namespace DigitalPlatform.rms
                         bObjectFile = true;
                         strRange = strRange.Substring(1);
 
-                        lTotalLength = -1;  // ±íÊ¾´ıÈ¡µÃ
+                        lTotalLength = -1;  // è¡¨ç¤ºå¾…å–å¾—
                     }
                     else
                     {
@@ -6893,10 +6893,10 @@ namespace DigitalPlatform.rms
                 }
                 else
                 {
-                    // ĞèÒª¼´Ê±»ñµÃĞĞĞÅÏ¢
+                    // éœ€è¦å³æ—¶è·å¾—è¡Œä¿¡æ¯
                     strID = DbPath.GetID10(strID);
 
-                    // ²¿·ÖÃüÁî×Ö·û´®
+                    // éƒ¨åˆ†å‘½ä»¤å­—ç¬¦ä¸²
                     string strPartComm = "";
 
                     // 1.textPtr
@@ -6909,13 +6909,13 @@ namespace DigitalPlatform.rms
                         strPartComm += " @textPtrNew=TEXTPTR(newdata)";
                     }
 
-                    // filename Ò»¶¨ÒªÓĞ
+                    // filename ä¸€å®šè¦æœ‰
                     if (string.IsNullOrEmpty(strPartComm) == false)
                         strPartComm += ",";
                     strPartComm += " @filename=filename, ";
                     strPartComm += " @newfilename=newfilename";
 
-                    // 2.length,Ò»¶¨ÒªÓĞ
+                    // 2.length,ä¸€å®šè¦æœ‰
                     if (string.IsNullOrEmpty(strPartComm) == false)
                         strPartComm += ",";
                     strPartComm += " @Length=DataLength(data), ";
@@ -6939,7 +6939,7 @@ namespace DigitalPlatform.rms
                         strPartComm += " @metadata=metadata";
                     }
                     
-                    // 5.range£¬Ò»¶¨ÒªÓĞ£¬ÓÃÓÚÅĞ¶Ï·½Ïò
+                    // 5.rangeï¼Œä¸€å®šè¦æœ‰ï¼Œç”¨äºåˆ¤æ–­æ–¹å‘
                     if (string.IsNullOrEmpty(strPartComm) == false)
                         strPartComm += ",";
                     strPartComm += " @range=range";
@@ -6949,7 +6949,7 @@ namespace DigitalPlatform.rms
                     strPartComm += " @testid=id";
 
                     string strCommand = "";
-                    // DataLength()º¯ÊıintÀàĞÍ
+                    // DataLength()å‡½æ•°intç±»å‹
                     strCommand = "use " + this.m_strSqlDbName + " "
                         + " SELECT "
                         + strPartComm + " "
@@ -7004,7 +7004,7 @@ namespace DigitalPlatform.rms
                             255);
                         newfilename.Direction = ParameterDirection.Output;
 
-                        // 2.length,Ò»¶¨Òª·µ»Ø
+                        // 2.length,ä¸€å®šè¦è¿”å›
                         SqlParameter lengthParam =
                             command.Parameters.Add("@length",
                             SqlDbType.Int);
@@ -7044,7 +7044,7 @@ namespace DigitalPlatform.rms
                                 4000);
                             metadataParam.Direction = ParameterDirection.Output;
                         }
-                        // 5.range£¬Ò»¶¨ÒªÓĞ
+                        // 5.rangeï¼Œä¸€å®šè¦æœ‰
                         SqlParameter rangeParam =
                                 command.Parameters.Add("@range",
                                 SqlDbType.NVarChar,
@@ -7053,7 +7053,7 @@ namespace DigitalPlatform.rms
 
                         try
                         {
-                            // Ö´ĞĞÃüÁî
+                            // æ‰§è¡Œå‘½ä»¤
                             nRet = command.ExecuteNonQuery();
                             /*
                 For UPDATE, INSERT, and DELETE statements, the return value is the number of rows affected by the command. For all other types of statements, the return value is -1. If a rollback occurs, the return value is also -1.
@@ -7070,17 +7070,17 @@ namespace DigitalPlatform.rms
                         if (testidParam == null
                             || (testidParam.Value is System.DBNull))
                         {
-                            strError = "¼ÇÂ¼'" + strID + "'ÔÚ¿âÖĞ²»´æÔÚ";
+                            strError = "è®°å½•'" + strID + "'åœ¨åº“ä¸­ä¸å­˜åœ¨";
                             return -4;
                         }
 
-                        // 5.range£¬Ò»¶¨»á·µ»Ø
+                        // 5.rangeï¼Œä¸€å®šä¼šè¿”å›
                         string strRange = "";
                         if (rangeParam != null
                             && (!(rangeParam.Value is System.DBNull)))
                             strRange = (string)rangeParam.Value;
 
-                        bool bReverse = false;  // ·½Ïò±êÖ¾¡£Èç¹ûÎªfalse£¬±íÊ¾ data ÎªÕıÊ½ÄÚÈİ£¬newdataÎªÔİÊ±ÄÚÈİ
+                        bool bReverse = false;  // æ–¹å‘æ ‡å¿—ã€‚å¦‚æœä¸ºfalseï¼Œè¡¨ç¤º data ä¸ºæ­£å¼å†…å®¹ï¼Œnewdataä¸ºæš‚æ—¶å†…å®¹
 
                         if (String.IsNullOrEmpty(strRange) == false
         && strRange[0] == '#')
@@ -7088,7 +7088,7 @@ namespace DigitalPlatform.rms
                             bObjectFile = true;
                             strRange = strRange.Substring(1);
 
-                            lTotalLength = -1;  // ±íÊ¾´ıÈ¡µÃ
+                            lTotalLength = -1;  // è¡¨ç¤ºå¾…å–å¾—
 
                             if (row_info == null)
                                 row_info = new RecordRowInfo();
@@ -7136,7 +7136,7 @@ namespace DigitalPlatform.rms
                                     {
                                         textPtr = null; // 2013/2/15
                                         destBuffer = new byte[0];
-                                        // return 0;  // ÕâÀïÌáÇ°·µ»Ø£¬»áÔì³É timestamp ·µ»ØÎª¿Õ
+                                        // return 0;  // è¿™é‡Œæå‰è¿”å›ï¼Œä¼šé€ æˆ timestamp è¿”å›ä¸ºç©º
                                     }
                                 }
                                 else
@@ -7150,19 +7150,19 @@ namespace DigitalPlatform.rms
                                     {
                                         textPtr = null; // 2013/2/11
                                         destBuffer = new byte[0];
-                                        // return 0;   // ÕâÀïÌáÇ°·µ»Ø£¬»áÔì³É timestamp ·µ»ØÎª¿Õ
+                                        // return 0;   // è¿™é‡Œæå‰è¿”å›ï¼Œä¼šé€ æˆ timestamp è¿”å›ä¸ºç©º
                                     }
                                 }
                             }
 
-                            // 2.length,Ò»¶¨»á·µ»Ø
+                            // 2.length,ä¸€å®šä¼šè¿”å›
                             if (bReverse == false)
                             {
                                 if (lengthParam != null
                                     && (!(lengthParam.Value is System.DBNull)))
                                 {
                                     lTotalLength = (int)lengthParam.Value;
-                                    // TODO: Õâ¾ä»°Ôø¾­Å×³öÒì³££¬ĞèÒª²âÊÔ²¶»ñ 2011/1/7
+                                    // TODO: è¿™å¥è¯æ›¾ç»æŠ›å‡ºå¼‚å¸¸ï¼Œéœ€è¦æµ‹è¯•æ•è· 2011/1/7
                                 }
                             }
                             else
@@ -7230,7 +7230,7 @@ namespace DigitalPlatform.rms
                 {
                     if (string.IsNullOrEmpty(this.m_strObjectDir) == true)
                     {
-                        strError = "Êı¾İ¿âÉĞÎ´ÅäÖÃ¶ÔÏóÎÄ¼şÄ¿Â¼£¬µ«Êı¾İ¼ÇÂ¼ÖĞ³öÏÖÁËÒıÓÃ¶ÔÏóÎÄ¼şµÄÇé¿ö";
+                        strError = "æ•°æ®åº“å°šæœªé…ç½®å¯¹è±¡æ–‡ä»¶ç›®å½•ï¼Œä½†æ•°æ®è®°å½•ä¸­å‡ºç°äº†å¼•ç”¨å¯¹è±¡æ–‡ä»¶çš„æƒ…å†µ";
                         return -1;
                     }
 
@@ -7239,10 +7239,10 @@ namespace DigitalPlatform.rms
                         if (string.IsNullOrEmpty(row_info.FileName) == true)
                         {
                             /*
-                            strError = "ĞĞĞÅÏ¢ÖĞÃ»ÓĞ¶ÔÏóÎÄ¼ş ÕıÊ½ÎÄ¼şÃû";
+                            strError = "è¡Œä¿¡æ¯ä¸­æ²¡æœ‰å¯¹è±¡æ–‡ä»¶ æ­£å¼æ–‡ä»¶å";
                             return -1;
                              * */
-                            // ÉĞÃ»ÓĞÒÑ¾­Íê³ÉµÄ¶ÔÏóÎÄ¼ş
+                            // å°šæ²¡æœ‰å·²ç»å®Œæˆçš„å¯¹è±¡æ–‡ä»¶
                             destBuffer = new byte[0];
                             return 0;
                         }
@@ -7255,7 +7255,7 @@ namespace DigitalPlatform.rms
                     {
                         if (string.IsNullOrEmpty(row_info.NewFileName) == true)
                         {
-                            // ÉĞÃ»ÓĞÁÙÊ±µÄ¶ÔÏóÎÄ¼ş
+                            // å°šæ²¡æœ‰ä¸´æ—¶çš„å¯¹è±¡æ–‡ä»¶
                             destBuffer = new byte[0];
                             return 0;
                         }
@@ -7268,17 +7268,17 @@ namespace DigitalPlatform.rms
                     FileInfo fi = new FileInfo(strObjectFilename);
                     if (fi.Exists == false)
                     {
-                        // TODO: ²»ÒªÖ±½Ó»ã±¨ÎïÀíÎÄ¼şÃû
-                        strError = "¶ÔÏóÎÄ¼ş '" + strObjectFilename + "' ²»´æÔÚ";
+                        // TODO: ä¸è¦ç›´æ¥æ±‡æŠ¥ç‰©ç†æ–‡ä»¶å
+                        strError = "å¯¹è±¡æ–‡ä»¶ '" + strObjectFilename + "' ä¸å­˜åœ¨";
                         return -100;
                     }
                     lTotalLength = fi.Length;
                 }
 
-                // ĞèÒªÌáÈ¡Êı¾İÊ±,²Å»áÈ¡Êı¾İ
+                // éœ€è¦æå–æ•°æ®æ—¶,æ‰ä¼šå–æ•°æ®
                 if (StringUtil.IsInList("data", strStyle) == true)
                 {
-                    if (nReadLength == 0)  // È¡0³¤¶È
+                    if (nReadLength == 0)  // å–0é•¿åº¦
                     {
                         destBuffer = new byte[0];
                         // return lTotalLength;    // >= 0
@@ -7286,10 +7286,10 @@ namespace DigitalPlatform.rms
                     }
 
                     long lOutputLength = 0;
-                    // µÃµ½Êµ¼Ê¶ÁµÄ³¤¶È
+                    // å¾—åˆ°å®é™…è¯»çš„é•¿åº¦
                     // return:
-                    //		-1  ³ö´í
-                    //		0   ³É¹¦
+                    //		-1  å‡ºé”™
+                    //		0   æˆåŠŸ
                     nRet = ConvertUtil.GetRealLength(lStart,
                         nReadLength,
                         lTotalLength,
@@ -7302,14 +7302,14 @@ namespace DigitalPlatform.rms
                     Debug.Assert(lOutputLength < Int32.MaxValue && lOutputLength > Int32.MinValue, "");
 
                     // 2012/1/21
-                    if (lTotalLength == 0)  // ×Ü³¤¶ÈÎª0
+                    if (lTotalLength == 0)  // æ€»é•¿åº¦ä¸º0
                     {
                         destBuffer = new byte[0];
                         // return lTotalLength;
                         goto END1;
                     }
 
-                    // ´Ó¶ÔÏóÎÄ¼ş¶ÁÈ¡
+                    // ä»å¯¹è±¡æ–‡ä»¶è¯»å–
                     if (bObjectFile == true)
                     {
                         Debug.Assert(string.IsNullOrEmpty(strObjectFilename) == false, "");
@@ -7334,8 +7334,8 @@ namespace DigitalPlatform.rms
                         }
                         catch (FileNotFoundException /* ex */)
                         {
-                            // TODO: ²»ÒªÖ±½Ó»ã±¨ÎïÀíÎÄ¼şÃû
-                            strError = "¶ÔÏóÎÄ¼ş '" + strObjectFilename + "' ²»´æÔÚ";
+                            // TODO: ä¸è¦ç›´æ¥æ±‡æŠ¥ç‰©ç†æ–‡ä»¶å
+                            strError = "å¯¹è±¡æ–‡ä»¶ '" + strObjectFilename + "' ä¸å­˜åœ¨";
                             return -100;
                         }
                         // return lTotalLength;
@@ -7344,17 +7344,17 @@ namespace DigitalPlatform.rms
 
                     if (textPtr == null)
                     {
-                        strError = "textPtrÎªnull";
+                        strError = "textPträ¸ºnull";
                         return -1;
                     }
 
-                    // READTEXTÃüÁî:
-                    // text_ptr: ÓĞĞ§ÎÄ±¾Ö¸Õë¡£text_ptr ±ØĞëÊÇ binary(16)¡£
-                    // offset:   ¿ªÊ¼¶ÁÈ¡imageÊı¾İÖ®Ç°Ìø¹ıµÄ×Ö½ÚÊı£¨Ê¹ÓÃ text »ò image Êı¾İÀàĞÍÊ±£©»ò×Ö·ûÊı£¨Ê¹ÓÃ ntext Êı¾İÀàĞÍÊ±£©¡£
-                    //			 Ê¹ÓÃ ntext Êı¾İÀàĞÍÊ±£¬offset ÊÇÔÚ¿ªÊ¼¶ÁÈ¡Êı¾İÇ°Ìø¹ıµÄ×Ö·ûÊı¡£
-                    //			 Ê¹ÓÃ text »ò image Êı¾İÀàĞÍÊ±£¬offset ÊÇÔÚ¿ªÊ¼¶ÁÈ¡Êı¾İÇ°Ìø¹ıµÄ×Ö½ÚÊı¡£
-                    // size:     ÊÇÒª¶ÁÈ¡Êı¾İµÄ×Ö½ÚÊı£¨Ê¹ÓÃ text »ò image Êı¾İÀàĞÍÊ±£©»ò×Ö·ûÊı£¨Ê¹ÓÃ ntext Êı¾İÀàĞÍÊ±£©¡£Èç¹û size ÊÇ 0£¬Ôò±íÊ¾¶ÁÈ¡ÁË 4 KB ×Ö½ÚµÄÊı¾İ¡£
-                    // HOLDLOCK: Ê¹ÎÄ±¾ÖµÒ»Ö±Ëø¶¨µ½ÊÂÎñ½áÊø¡£ÆäËûÓÃ»§¿ÉÒÔ¶ÁÈ¡¸ÃÖµ£¬µ«ÊÇ²»ÄÜ¶ÔÆä½øĞĞĞŞ¸Ä¡£
+                    // READTEXTå‘½ä»¤:
+                    // text_ptr: æœ‰æ•ˆæ–‡æœ¬æŒ‡é’ˆã€‚text_ptr å¿…é¡»æ˜¯ binary(16)ã€‚
+                    // offset:   å¼€å§‹è¯»å–imageæ•°æ®ä¹‹å‰è·³è¿‡çš„å­—èŠ‚æ•°ï¼ˆä½¿ç”¨ text æˆ– image æ•°æ®ç±»å‹æ—¶ï¼‰æˆ–å­—ç¬¦æ•°ï¼ˆä½¿ç”¨ ntext æ•°æ®ç±»å‹æ—¶ï¼‰ã€‚
+                    //			 ä½¿ç”¨ ntext æ•°æ®ç±»å‹æ—¶ï¼Œoffset æ˜¯åœ¨å¼€å§‹è¯»å–æ•°æ®å‰è·³è¿‡çš„å­—ç¬¦æ•°ã€‚
+                    //			 ä½¿ç”¨ text æˆ– image æ•°æ®ç±»å‹æ—¶ï¼Œoffset æ˜¯åœ¨å¼€å§‹è¯»å–æ•°æ®å‰è·³è¿‡çš„å­—èŠ‚æ•°ã€‚
+                    // size:     æ˜¯è¦è¯»å–æ•°æ®çš„å­—èŠ‚æ•°ï¼ˆä½¿ç”¨ text æˆ– image æ•°æ®ç±»å‹æ—¶ï¼‰æˆ–å­—ç¬¦æ•°ï¼ˆä½¿ç”¨ ntext æ•°æ®ç±»å‹æ—¶ï¼‰ã€‚å¦‚æœ size æ˜¯ 0ï¼Œåˆ™è¡¨ç¤ºè¯»å–äº† 4 KB å­—èŠ‚çš„æ•°æ®ã€‚
+                    // HOLDLOCK: ä½¿æ–‡æœ¬å€¼ä¸€ç›´é”å®šåˆ°äº‹åŠ¡ç»“æŸã€‚å…¶ä»–ç”¨æˆ·å¯ä»¥è¯»å–è¯¥å€¼ï¼Œä½†æ˜¯ä¸èƒ½å¯¹å…¶è¿›è¡Œä¿®æ”¹ã€‚
 
                     string strCommand = "use " + this.m_strSqlDbName + " "
                        + " READTEXT records." + strDataFieldName
@@ -7427,7 +7427,7 @@ namespace DigitalPlatform.rms
                         bObjectFile = true;
                         strRange = strRange.Substring(1);
 
-                        lTotalLength = -1;  // ±íÊ¾´ıÈ¡µÃ
+                        lTotalLength = -1;  // è¡¨ç¤ºå¾…å–å¾—
                     }
                     else
                     {
@@ -7448,14 +7448,14 @@ namespace DigitalPlatform.rms
                 }
                 else
                 {
-                    // ĞèÒª¼´Ê±»ñµÃĞĞĞÅÏ¢
+                    // éœ€è¦å³æ—¶è·å¾—è¡Œä¿¡æ¯
                     strID = DbPath.GetID10(strID);
 
-                    // ²¿·ÖÃüÁî×Ö·û´®
+                    // éƒ¨åˆ†å‘½ä»¤å­—ç¬¦ä¸²
                     string strPartComm = "";
                     int nColIndex = 0;
 
-                    // filename Ò»¶¨ÒªÓĞ
+                    // filename ä¸€å®šè¦æœ‰
                     int nFileNameColIndex = -1;
                     int nNewFileNameColIndex = -1;
                     if (string.IsNullOrEmpty(strPartComm) == false)
@@ -7487,7 +7487,7 @@ namespace DigitalPlatform.rms
                         strPartComm += " metadata";
                         nMetadataColIndex = nColIndex++;
                     }
-                    // 5.range£¬Ò»¶¨ÒªÓĞ£¬ÓÃÓÚÅĞ¶Ï·½Ïò
+                    // 5.rangeï¼Œä¸€å®šè¦æœ‰ï¼Œç”¨äºåˆ¤æ–­æ–¹å‘
                     int nRangeColIndex = -1;
                     if (string.IsNullOrEmpty(strPartComm) == false)
                         strPartComm += ",";
@@ -7501,7 +7501,7 @@ namespace DigitalPlatform.rms
                     nIdColIndex = nColIndex++;
 
                     string strCommand = "";
-                    // DataLength()º¯ÊıintÀàĞÍ
+                    // DataLength()å‡½æ•°intç±»å‹
                     strCommand = " SELECT "
                         + strPartComm + " "
                         + " FROM records WHERE id=@id";
@@ -7517,25 +7517,25 @@ namespace DigitalPlatform.rms
 
                         try
                         {
-                            // Ö´ĞĞÃüÁî
+                            // æ‰§è¡Œå‘½ä»¤
                             SQLiteDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult);
                             try
                             {
                                 if (dr == null || dr.HasRows == false)
                                 {
-                                    strError = "¼ÇÂ¼ '" + strID + "' ÔÚ¿âÖĞ²»´æÔÚ";
+                                    strError = "è®°å½• '" + strID + "' åœ¨åº“ä¸­ä¸å­˜åœ¨";
                                     return -4;
                                 }
 
                                 dr.Read();
 
-                                // 5.range£¬Ò»¶¨»á·µ»Ø
+                                // 5.rangeï¼Œä¸€å®šä¼šè¿”å›
                                 string strRange = "";
 
                                 if (!dr.IsDBNull(nRangeColIndex))
                                     strRange = (string)dr[nRangeColIndex];
 
-                                bool bReverse = false;  // ·½Ïò±êÖ¾¡£Èç¹ûÎªfalse£¬±íÊ¾ data ÎªÕıÊ½ÄÚÈİ£¬newdataÎªÔİÊ±ÄÚÈİ
+                                bool bReverse = false;  // æ–¹å‘æ ‡å¿—ã€‚å¦‚æœä¸ºfalseï¼Œè¡¨ç¤º data ä¸ºæ­£å¼å†…å®¹ï¼Œnewdataä¸ºæš‚æ—¶å†…å®¹
 
                                 if (String.IsNullOrEmpty(strRange) == false
                 && strRange[0] == '#')
@@ -7543,7 +7543,7 @@ namespace DigitalPlatform.rms
                                     bObjectFile = true;
                                     strRange = strRange.Substring(1);
 
-                                    lTotalLength = -1;  // ±íÊ¾´ıÈ¡µÃ
+                                    lTotalLength = -1;  // è¡¨ç¤ºå¾…å–å¾—
 
                                     if (row_info == null)
                                         row_info = new RecordRowInfo();
@@ -7613,7 +7613,7 @@ namespace DigitalPlatform.rms
                 {
                     if (string.IsNullOrEmpty(this.m_strObjectDir) == true)
                     {
-                        strError = "Êı¾İ¿âÉĞÎ´ÅäÖÃ¶ÔÏóÎÄ¼şÄ¿Â¼£¬µ«Êı¾İ¼ÇÂ¼ÖĞ³öÏÖÁËÒıÓÃ¶ÔÏóÎÄ¼şµÄÇé¿ö";
+                        strError = "æ•°æ®åº“å°šæœªé…ç½®å¯¹è±¡æ–‡ä»¶ç›®å½•ï¼Œä½†æ•°æ®è®°å½•ä¸­å‡ºç°äº†å¼•ç”¨å¯¹è±¡æ–‡ä»¶çš„æƒ…å†µ";
                         return -1;
                     }
 
@@ -7622,10 +7622,10 @@ namespace DigitalPlatform.rms
                         if (string.IsNullOrEmpty(row_info.FileName) == true)
                         {
                             /*
-                            strError = "ĞĞĞÅÏ¢ÖĞÃ»ÓĞ¶ÔÏóÎÄ¼ş ÕıÊ½ÎÄ¼şÃû";
+                            strError = "è¡Œä¿¡æ¯ä¸­æ²¡æœ‰å¯¹è±¡æ–‡ä»¶ æ­£å¼æ–‡ä»¶å";
                             return -1;
                              * */
-                            // ÉĞÃ»ÓĞÒÑ¾­Íê³ÉµÄ¶ÔÏóÎÄ¼ş
+                            // å°šæ²¡æœ‰å·²ç»å®Œæˆçš„å¯¹è±¡æ–‡ä»¶
                             destBuffer = new byte[0];
                             return 0;
                         }
@@ -7638,7 +7638,7 @@ namespace DigitalPlatform.rms
                     {
                         if (string.IsNullOrEmpty(row_info.NewFileName) == true)
                         {
-                            // ÉĞÃ»ÓĞÁÙÊ±µÄ¶ÔÏóÎÄ¼ş
+                            // å°šæ²¡æœ‰ä¸´æ—¶çš„å¯¹è±¡æ–‡ä»¶
                             destBuffer = new byte[0];
                             return 0;
                         }
@@ -7651,17 +7651,17 @@ namespace DigitalPlatform.rms
                     FileInfo fi = new FileInfo(strObjectFilename);
                     if (fi.Exists == false)
                     {
-                        // TODO: ²»ÒªÖ±½Ó»ã±¨ÎïÀíÎÄ¼şÃû
-                        strError = "¶ÔÏóÎÄ¼ş '" + strObjectFilename + "' ²»´æÔÚ";
+                        // TODO: ä¸è¦ç›´æ¥æ±‡æŠ¥ç‰©ç†æ–‡ä»¶å
+                        strError = "å¯¹è±¡æ–‡ä»¶ '" + strObjectFilename + "' ä¸å­˜åœ¨";
                         return -100;
                     }
                     lTotalLength = fi.Length;
                 }
 
-                // ĞèÒªÌáÈ¡Êı¾İÊ±,²Å»áÈ¡Êı¾İ
+                // éœ€è¦æå–æ•°æ®æ—¶,æ‰ä¼šå–æ•°æ®
                 if (StringUtil.IsInList("data", strStyle) == true)
                 {
-                    if (nReadLength == 0)  // È¡0³¤¶È
+                    if (nReadLength == 0)  // å–0é•¿åº¦
                     {
                         destBuffer = new byte[0];
                         // return lTotalLength;    // >= 0
@@ -7669,10 +7669,10 @@ namespace DigitalPlatform.rms
                     }
 
                     long lOutputLength = 0;
-                    // µÃµ½Êµ¼Ê¶ÁµÄ³¤¶È
+                    // å¾—åˆ°å®é™…è¯»çš„é•¿åº¦
                     // return:
-                    //		-1  ³ö´í
-                    //		0   ³É¹¦
+                    //		-1  å‡ºé”™
+                    //		0   æˆåŠŸ
                     nRet = ConvertUtil.GetRealLength(lStart,
                         nReadLength,
                         lTotalLength,
@@ -7683,14 +7683,14 @@ namespace DigitalPlatform.rms
                         return -1;
 
                     // 2012/1/21
-                    if (lTotalLength == 0)  // ×Ü³¤¶ÈÎª0
+                    if (lTotalLength == 0)  // æ€»é•¿åº¦ä¸º0
                     {
                         destBuffer = new byte[0];
                         // return lTotalLength;
                         goto END1;
                     }
 
-                    // ´Ó¶ÔÏóÎÄ¼ş¶ÁÈ¡
+                    // ä»å¯¹è±¡æ–‡ä»¶è¯»å–
                     if (bObjectFile == true)
                     {
                         Debug.Assert(string.IsNullOrEmpty(strObjectFilename) == false, "");
@@ -7715,8 +7715,8 @@ namespace DigitalPlatform.rms
                         }
                         catch (FileNotFoundException /* ex */)
                         {
-                            // TODO: ²»ÒªÖ±½Ó»ã±¨ÎïÀíÎÄ¼şÃû
-                            strError = "¶ÔÏóÎÄ¼ş '" + strObjectFilename + "' ²»´æÔÚ";
+                            // TODO: ä¸è¦ç›´æ¥æ±‡æŠ¥ç‰©ç†æ–‡ä»¶å
+                            strError = "å¯¹è±¡æ–‡ä»¶ '" + strObjectFilename + "' ä¸å­˜åœ¨";
                             return -100;
                         }
                         // return lTotalLength;
@@ -7730,7 +7730,7 @@ namespace DigitalPlatform.rms
             }
             else if (connection.SqlServerType == SqlServerType.MySql)
             {
-                // ×¢£º MySql ÕâÀïºÍ SQLite »ù±¾Ò»Ñù
+                // æ³¨ï¼š MySql è¿™é‡Œå’Œ SQLite åŸºæœ¬ä¸€æ ·
                 bool bObjectFile = false;
 
                 if (row_info != null)
@@ -7743,7 +7743,7 @@ namespace DigitalPlatform.rms
                         bObjectFile = true;
                         strRange = strRange.Substring(1);
 
-                        lTotalLength = -1;  // ±íÊ¾´ıÈ¡µÃ
+                        lTotalLength = -1;  // è¡¨ç¤ºå¾…å–å¾—
                     }
                     else
                     {
@@ -7764,14 +7764,14 @@ namespace DigitalPlatform.rms
                 }
                 else
                 {
-                    // ĞèÒª¼´Ê±»ñµÃĞĞĞÅÏ¢
+                    // éœ€è¦å³æ—¶è·å¾—è¡Œä¿¡æ¯
                     strID = DbPath.GetID10(strID);
 
-                    // ²¿·ÖÃüÁî×Ö·û´®
+                    // éƒ¨åˆ†å‘½ä»¤å­—ç¬¦ä¸²
                     string strPartComm = "";
                     int nColIndex = 0;
 
-                    // filename Ò»¶¨ÒªÓĞ
+                    // filename ä¸€å®šè¦æœ‰
                     int nFileNameColIndex = -1;
                     int nNewFileNameColIndex = -1;
                     if (string.IsNullOrEmpty(strPartComm) == false)
@@ -7803,7 +7803,7 @@ namespace DigitalPlatform.rms
                         strPartComm += " metadata";
                         nMetadataColIndex = nColIndex++;
                     }
-                    // 5.range£¬Ò»¶¨ÒªÓĞ£¬ÓÃÓÚÅĞ¶Ï·½Ïò
+                    // 5.rangeï¼Œä¸€å®šè¦æœ‰ï¼Œç”¨äºåˆ¤æ–­æ–¹å‘
                     int nRangeColIndex = -1;
                     if (string.IsNullOrEmpty(strPartComm) == false)
                         strPartComm += ",";
@@ -7817,7 +7817,7 @@ namespace DigitalPlatform.rms
                     nIdColIndex = nColIndex++;
 
                     string strCommand = "";
-                    // DataLength()º¯ÊıintÀàĞÍ
+                    // DataLength()å‡½æ•°intç±»å‹
                     strCommand = " SELECT "
                         + strPartComm + " "
                         + " FROM `" + this.m_strSqlDbName + "`.records WHERE id=@id";
@@ -7833,25 +7833,25 @@ namespace DigitalPlatform.rms
 
                         try
                         {
-                            // Ö´ĞĞÃüÁî
+                            // æ‰§è¡Œå‘½ä»¤
                             MySqlDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult);
                             try
                             {
                                 if (dr == null || dr.HasRows == false)
                                 {
-                                    strError = "¼ÇÂ¼ '" + strID + "' ÔÚ¿âÖĞ²»´æÔÚ";
+                                    strError = "è®°å½• '" + strID + "' åœ¨åº“ä¸­ä¸å­˜åœ¨";
                                     return -4;
                                 }
 
                                 dr.Read();
 
-                                // 5.range£¬Ò»¶¨»á·µ»Ø
+                                // 5.rangeï¼Œä¸€å®šä¼šè¿”å›
                                 string strRange = "";
 
                                 if (!dr.IsDBNull(nRangeColIndex))
                                     strRange = (string)dr[nRangeColIndex];
 
-                                bool bReverse = false;  // ·½Ïò±êÖ¾¡£Èç¹ûÎªfalse£¬±íÊ¾ data ÎªÕıÊ½ÄÚÈİ£¬newdataÎªÔİÊ±ÄÚÈİ
+                                bool bReverse = false;  // æ–¹å‘æ ‡å¿—ã€‚å¦‚æœä¸ºfalseï¼Œè¡¨ç¤º data ä¸ºæ­£å¼å†…å®¹ï¼Œnewdataä¸ºæš‚æ—¶å†…å®¹
 
                                 if (String.IsNullOrEmpty(strRange) == false
                 && strRange[0] == '#')
@@ -7859,7 +7859,7 @@ namespace DigitalPlatform.rms
                                     bObjectFile = true;
                                     strRange = strRange.Substring(1);
 
-                                    lTotalLength = -1;  // ±íÊ¾´ıÈ¡µÃ
+                                    lTotalLength = -1;  // è¡¨ç¤ºå¾…å–å¾—
 
                                     if (row_info == null)
                                         row_info = new RecordRowInfo();
@@ -7929,7 +7929,7 @@ namespace DigitalPlatform.rms
                 {
                     if (string.IsNullOrEmpty(this.m_strObjectDir) == true)
                     {
-                        strError = "Êı¾İ¿âÉĞÎ´ÅäÖÃ¶ÔÏóÎÄ¼şÄ¿Â¼£¬µ«Êı¾İ¼ÇÂ¼ÖĞ³öÏÖÁËÒıÓÃ¶ÔÏóÎÄ¼şµÄÇé¿ö";
+                        strError = "æ•°æ®åº“å°šæœªé…ç½®å¯¹è±¡æ–‡ä»¶ç›®å½•ï¼Œä½†æ•°æ®è®°å½•ä¸­å‡ºç°äº†å¼•ç”¨å¯¹è±¡æ–‡ä»¶çš„æƒ…å†µ";
                         return -1;
                     }
 
@@ -7938,10 +7938,10 @@ namespace DigitalPlatform.rms
                         if (string.IsNullOrEmpty(row_info.FileName) == true)
                         {
                             /*
-                            strError = "ĞĞĞÅÏ¢ÖĞÃ»ÓĞ¶ÔÏóÎÄ¼ş ÕıÊ½ÎÄ¼şÃû";
+                            strError = "è¡Œä¿¡æ¯ä¸­æ²¡æœ‰å¯¹è±¡æ–‡ä»¶ æ­£å¼æ–‡ä»¶å";
                             return -1;
                              * */
-                            // ÉĞÃ»ÓĞÒÑ¾­Íê³ÉµÄ¶ÔÏóÎÄ¼ş
+                            // å°šæ²¡æœ‰å·²ç»å®Œæˆçš„å¯¹è±¡æ–‡ä»¶
                             destBuffer = new byte[0];
                             return 0;
                         }
@@ -7954,7 +7954,7 @@ namespace DigitalPlatform.rms
                     {
                         if (string.IsNullOrEmpty(row_info.NewFileName) == true)
                         {
-                            // ÉĞÃ»ÓĞÁÙÊ±µÄ¶ÔÏóÎÄ¼ş
+                            // å°šæ²¡æœ‰ä¸´æ—¶çš„å¯¹è±¡æ–‡ä»¶
                             destBuffer = new byte[0];
                             return 0;
                         }
@@ -7967,17 +7967,17 @@ namespace DigitalPlatform.rms
                     FileInfo fi = new FileInfo(strObjectFilename);
                     if (fi.Exists == false)
                     {
-                        // TODO: ²»ÒªÖ±½Ó»ã±¨ÎïÀíÎÄ¼şÃû
-                        strError = "¶ÔÏóÎÄ¼ş '" + strObjectFilename + "' ²»´æÔÚ";
+                        // TODO: ä¸è¦ç›´æ¥æ±‡æŠ¥ç‰©ç†æ–‡ä»¶å
+                        strError = "å¯¹è±¡æ–‡ä»¶ '" + strObjectFilename + "' ä¸å­˜åœ¨";
                         return -100;
                     }
                     lTotalLength = fi.Length;
                 }
 
-                // ĞèÒªÌáÈ¡Êı¾İÊ±,²Å»áÈ¡Êı¾İ
+                // éœ€è¦æå–æ•°æ®æ—¶,æ‰ä¼šå–æ•°æ®
                 if (StringUtil.IsInList("data", strStyle) == true)
                 {
-                    if (nReadLength == 0)  // È¡0³¤¶È
+                    if (nReadLength == 0)  // å–0é•¿åº¦
                     {
                         destBuffer = new byte[0];
                         // return lTotalLength;    // >= 0
@@ -7985,10 +7985,10 @@ namespace DigitalPlatform.rms
                     }
 
                     long lOutputLength = 0;
-                    // µÃµ½Êµ¼Ê¶ÁµÄ³¤¶È
+                    // å¾—åˆ°å®é™…è¯»çš„é•¿åº¦
                     // return:
-                    //		-1  ³ö´í
-                    //		0   ³É¹¦
+                    //		-1  å‡ºé”™
+                    //		0   æˆåŠŸ
                     nRet = ConvertUtil.GetRealLength(lStart,
                         nReadLength,
                         lTotalLength,
@@ -7999,14 +7999,14 @@ namespace DigitalPlatform.rms
                         return -1;
 
                     // 2012/1/21
-                    if (lTotalLength == 0)  // ×Ü³¤¶ÈÎª0
+                    if (lTotalLength == 0)  // æ€»é•¿åº¦ä¸º0
                     {
                         destBuffer = new byte[0];
                         // return lTotalLength;
                         goto END1;
                     }
 
-                    // ´Ó¶ÔÏóÎÄ¼ş¶ÁÈ¡
+                    // ä»å¯¹è±¡æ–‡ä»¶è¯»å–
                     if (bObjectFile == true)
                     {
                         Debug.Assert(string.IsNullOrEmpty(strObjectFilename) == false, "");
@@ -8031,8 +8031,8 @@ namespace DigitalPlatform.rms
                         }
                         catch (FileNotFoundException /* ex */)
                         {
-                            // TODO: ²»ÒªÖ±½Ó»ã±¨ÎïÀíÎÄ¼şÃû
-                            strError = "¶ÔÏóÎÄ¼ş '" + strObjectFilename + "' ²»´æÔÚ";
+                            // TODO: ä¸è¦ç›´æ¥æ±‡æŠ¥ç‰©ç†æ–‡ä»¶å
+                            strError = "å¯¹è±¡æ–‡ä»¶ '" + strObjectFilename + "' ä¸å­˜åœ¨";
                             return -100;
                         }
                         // return lTotalLength;
@@ -8046,7 +8046,7 @@ namespace DigitalPlatform.rms
             }
             else if (connection.SqlServerType == SqlServerType.Oracle)
             {
-                // ×¢£º Oracle ÕâÀïºÍ MySql »ù±¾Ò»Ñù
+                // æ³¨ï¼š Oracle è¿™é‡Œå’Œ MySql åŸºæœ¬ä¸€æ ·
                 bool bObjectFile = false;
 
                 if (row_info != null)
@@ -8059,7 +8059,7 @@ namespace DigitalPlatform.rms
                         bObjectFile = true;
                         strRange = strRange.Substring(1);
 
-                        lTotalLength = -1;  // ±íÊ¾´ıÈ¡µÃ
+                        lTotalLength = -1;  // è¡¨ç¤ºå¾…å–å¾—
                     }
                     else
                     {
@@ -8080,14 +8080,14 @@ namespace DigitalPlatform.rms
                 }
                 else
                 {
-                    // ĞèÒª¼´Ê±»ñµÃĞĞĞÅÏ¢
+                    // éœ€è¦å³æ—¶è·å¾—è¡Œä¿¡æ¯
                     strID = DbPath.GetID10(strID);
 
-                    // ²¿·ÖÃüÁî×Ö·û´®
+                    // éƒ¨åˆ†å‘½ä»¤å­—ç¬¦ä¸²
                     string strPartComm = "";
                     int nColIndex = 0;
 
-                    // filename Ò»¶¨ÒªÓĞ
+                    // filename ä¸€å®šè¦æœ‰
                     int nFileNameColIndex = -1;
                     int nNewFileNameColIndex = -1;
                     if (string.IsNullOrEmpty(strPartComm) == false)
@@ -8119,7 +8119,7 @@ namespace DigitalPlatform.rms
                         strPartComm += " metadata";
                         nMetadataColIndex = nColIndex++;
                     }
-                    // 5.range£¬Ò»¶¨ÒªÓĞ£¬ÓÃÓÚÅĞ¶Ï·½Ïò
+                    // 5.rangeï¼Œä¸€å®šè¦æœ‰ï¼Œç”¨äºåˆ¤æ–­æ–¹å‘
                     int nRangeColIndex = -1;
                     if (string.IsNullOrEmpty(strPartComm) == false)
                         strPartComm += ",";
@@ -8133,7 +8133,7 @@ namespace DigitalPlatform.rms
                     nIdColIndex = nColIndex++;
 
                     string strCommand = "";
-                    // DataLength()º¯ÊıintÀàĞÍ
+                    // DataLength()å‡½æ•°intç±»å‹
                     strCommand = " SELECT "
                         + strPartComm + " "
                         + " FROM " + this.m_strSqlDbName + "_records WHERE id=:id";
@@ -8148,25 +8148,25 @@ namespace DigitalPlatform.rms
 
                         try
                         {
-                            // Ö´ĞĞÃüÁî
+                            // æ‰§è¡Œå‘½ä»¤
                             OracleDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult);
                             try
                             {
                                 if (dr == null || dr.HasRows == false)
                                 {
-                                    strError = "¼ÇÂ¼ '" + strID + "' ÔÚ¿âÖĞ²»´æÔÚ";
+                                    strError = "è®°å½• '" + strID + "' åœ¨åº“ä¸­ä¸å­˜åœ¨";
                                     return -4;
                                 }
 
                                 dr.Read();
 
-                                // 5.range£¬Ò»¶¨»á·µ»Ø
+                                // 5.rangeï¼Œä¸€å®šä¼šè¿”å›
                                 string strRange = "";
 
                                 if (!dr.IsDBNull(nRangeColIndex))
                                     strRange = (string)dr[nRangeColIndex];
 
-                                bool bReverse = false;  // ·½Ïò±êÖ¾¡£Èç¹ûÎªfalse£¬±íÊ¾ data ÎªÕıÊ½ÄÚÈİ£¬newdataÎªÔİÊ±ÄÚÈİ
+                                bool bReverse = false;  // æ–¹å‘æ ‡å¿—ã€‚å¦‚æœä¸ºfalseï¼Œè¡¨ç¤º data ä¸ºæ­£å¼å†…å®¹ï¼Œnewdataä¸ºæš‚æ—¶å†…å®¹
 
                                 if (String.IsNullOrEmpty(strRange) == false
                 && strRange[0] == '#')
@@ -8174,7 +8174,7 @@ namespace DigitalPlatform.rms
                                     bObjectFile = true;
                                     strRange = strRange.Substring(1);
 
-                                    lTotalLength = -1;  // ±íÊ¾´ıÈ¡µÃ
+                                    lTotalLength = -1;  // è¡¨ç¤ºå¾…å–å¾—
 
                                     if (row_info == null)
                                         row_info = new RecordRowInfo();
@@ -8245,7 +8245,7 @@ namespace DigitalPlatform.rms
                 {
                     if (string.IsNullOrEmpty(this.m_strObjectDir) == true)
                     {
-                        strError = "Êı¾İ¿âÉĞÎ´ÅäÖÃ¶ÔÏóÎÄ¼şÄ¿Â¼£¬µ«Êı¾İ¼ÇÂ¼ÖĞ³öÏÖÁËÒıÓÃ¶ÔÏóÎÄ¼şµÄÇé¿ö";
+                        strError = "æ•°æ®åº“å°šæœªé…ç½®å¯¹è±¡æ–‡ä»¶ç›®å½•ï¼Œä½†æ•°æ®è®°å½•ä¸­å‡ºç°äº†å¼•ç”¨å¯¹è±¡æ–‡ä»¶çš„æƒ…å†µ";
                         return -1;
                     }
 
@@ -8254,10 +8254,10 @@ namespace DigitalPlatform.rms
                         if (string.IsNullOrEmpty(row_info.FileName) == true)
                         {
                             /*
-                            strError = "ĞĞĞÅÏ¢ÖĞÃ»ÓĞ¶ÔÏóÎÄ¼ş ÕıÊ½ÎÄ¼şÃû";
+                            strError = "è¡Œä¿¡æ¯ä¸­æ²¡æœ‰å¯¹è±¡æ–‡ä»¶ æ­£å¼æ–‡ä»¶å";
                             return -1;
                              * */
-                            // ÉĞÃ»ÓĞÒÑ¾­Íê³ÉµÄ¶ÔÏóÎÄ¼ş
+                            // å°šæ²¡æœ‰å·²ç»å®Œæˆçš„å¯¹è±¡æ–‡ä»¶
                             destBuffer = new byte[0];
                             return 0;
                         }
@@ -8270,7 +8270,7 @@ namespace DigitalPlatform.rms
                     {
                         if (string.IsNullOrEmpty(row_info.NewFileName) == true)
                         {
-                            // ÉĞÃ»ÓĞÁÙÊ±µÄ¶ÔÏóÎÄ¼ş
+                            // å°šæ²¡æœ‰ä¸´æ—¶çš„å¯¹è±¡æ–‡ä»¶
                             destBuffer = new byte[0];
                             return 0;
                         }
@@ -8283,17 +8283,17 @@ namespace DigitalPlatform.rms
                     FileInfo fi = new FileInfo(strObjectFilename);
                     if (fi.Exists == false)
                     {
-                        // TODO: ²»ÒªÖ±½Ó»ã±¨ÎïÀíÎÄ¼şÃû
-                        strError = "¶ÔÏóÎÄ¼ş '" + strObjectFilename + "' ²»´æÔÚ";
+                        // TODO: ä¸è¦ç›´æ¥æ±‡æŠ¥ç‰©ç†æ–‡ä»¶å
+                        strError = "å¯¹è±¡æ–‡ä»¶ '" + strObjectFilename + "' ä¸å­˜åœ¨";
                         return -100;
                     }
                     lTotalLength = fi.Length;
                 }
 
-                // ĞèÒªÌáÈ¡Êı¾İÊ±,²Å»áÈ¡Êı¾İ
+                // éœ€è¦æå–æ•°æ®æ—¶,æ‰ä¼šå–æ•°æ®
                 if (StringUtil.IsInList("data", strStyle) == true)
                 {
-                    if (nReadLength == 0)  // È¡0³¤¶È
+                    if (nReadLength == 0)  // å–0é•¿åº¦
                     {
                         destBuffer = new byte[0];
                         // return lTotalLength;    // >= 0
@@ -8301,10 +8301,10 @@ namespace DigitalPlatform.rms
                     }
 
                     long lOutputLength = 0;
-                    // µÃµ½Êµ¼Ê¶ÁµÄ³¤¶È
+                    // å¾—åˆ°å®é™…è¯»çš„é•¿åº¦
                     // return:
-                    //		-1  ³ö´í
-                    //		0   ³É¹¦
+                    //		-1  å‡ºé”™
+                    //		0   æˆåŠŸ
                     nRet = ConvertUtil.GetRealLength(lStart,
                         nReadLength,
                         lTotalLength,
@@ -8315,14 +8315,14 @@ namespace DigitalPlatform.rms
                         return -1;
 
                     // 2012/1/21
-                    if (lTotalLength == 0)  // ×Ü³¤¶ÈÎª0
+                    if (lTotalLength == 0)  // æ€»é•¿åº¦ä¸º0
                     {
                         destBuffer = new byte[0];
                         // return lTotalLength;
                         goto END1;
                     }
 
-                    // ´Ó¶ÔÏóÎÄ¼ş¶ÁÈ¡
+                    // ä»å¯¹è±¡æ–‡ä»¶è¯»å–
                     if (bObjectFile == true)
                     {
                         Debug.Assert(string.IsNullOrEmpty(strObjectFilename) == false, "");
@@ -8347,8 +8347,8 @@ namespace DigitalPlatform.rms
                         }
                         catch (FileNotFoundException /* ex */)
                         {
-                            // TODO: ²»ÒªÖ±½Ó»ã±¨ÎïÀíÎÄ¼şÃû
-                            strError = "¶ÔÏóÎÄ¼ş '" + strObjectFilename + "' ²»´æÔÚ";
+                            // TODO: ä¸è¦ç›´æ¥æ±‡æŠ¥ç‰©ç†æ–‡ä»¶å
+                            strError = "å¯¹è±¡æ–‡ä»¶ '" + strObjectFilename + "' ä¸å­˜åœ¨";
                             return -100;
                         }
                         // return lTotalLength;
@@ -8360,7 +8360,7 @@ namespace DigitalPlatform.rms
                 // return lTotalLength;
                 goto END1;
             }
-            strError = "Î´ÖªµÄ connection ÀàĞÍ '"+connection.SqlServerType.ToString()+"'";
+            strError = "æœªçŸ¥çš„ connection ç±»å‹ '"+connection.SqlServerType.ToString()+"'";
             return -1;
         END1:
             int nBufferLength = 0;
@@ -8371,8 +8371,8 @@ namespace DigitalPlatform.rms
             {
                 string strResultMetadata = "";
                 // return:
-                //		-1	³ö´í
-                //		0	³É¹¦
+                //		-1	å‡ºé”™
+                //		0	æˆåŠŸ
                 nRet = DatabaseUtil.MergeMetadata(strMetadata,
                     "",
                     -2,
@@ -8381,7 +8381,7 @@ namespace DigitalPlatform.rms
                     out strError);
                 if (nRet == -1)
                     return -1;
-                // ½« metadata Ğ´Èë records ±í
+                // å°† metadata å†™å…¥ records è¡¨
                 // parameters:
                 nRet = WriteMetadataColumn(
             connection,
@@ -8399,20 +8399,20 @@ namespace DigitalPlatform.rms
         }
 
 #if NO
-        // °´Ö¸¶¨·¶Î§¶Á×ÊÔ´
-        // GetBytes()°æ±¾¡£ÏÂÔØ´ó³ß´ç¶ÔÏóµÄÊ±ºòËÙ¶È·Ç³£Âı
+        // æŒ‰æŒ‡å®šèŒƒå›´è¯»èµ„æº
+        // GetBytes()ç‰ˆæœ¬ã€‚ä¸‹è½½å¤§å°ºå¯¸å¯¹è±¡çš„æ—¶å€™é€Ÿåº¦éå¸¸æ…¢
         // parameter:
-        //		strID       ¼ÇÂ¼ID
-        //		nStart      ¿ªÊ¼Î»ÖÃ
-        //		nLength     ³¤¶È -1:¿ªÊ¼µ½½áÊø
-        //		nMaxLength  ×î´ó³¤¶È,µ±Îª-1Ê±,±íÊ¾²»ÏŞ
-        //		destBuffer  out²ÎÊı£¬·µ»Ø×Ö½ÚÊı×é
-        //		timestamp   out²ÎÊı£¬·µ»ØÊ±¼ä´Á
-        //		strError    out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //		strID       è®°å½•ID
+        //		nStart      å¼€å§‹ä½ç½®
+        //		nLength     é•¿åº¦ -1:å¼€å§‹åˆ°ç»“æŸ
+        //		nMaxLength  æœ€å¤§é•¿åº¦,å½“ä¸º-1æ—¶,è¡¨ç¤ºä¸é™
+        //		destBuffer  outå‚æ•°ï¼Œè¿”å›å­—èŠ‚æ•°ç»„
+        //		timestamp   outå‚æ•°ï¼Œè¿”å›æ—¶é—´æˆ³
+        //		strError    outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //		-1  ³ö´í
-        //		-4  ¼ÇÂ¼²»´æÔÚ
-        //		>=0 ×ÊÔ´×Ü³¤¶È
+        //		-1  å‡ºé”™
+        //		-4  è®°å½•ä¸å­˜åœ¨
+        //		>=0 èµ„æºæ€»é•¿åº¦
         private long GetImage(SqlConnection connection,
             string strID,
             string strImageFieldName,
@@ -8430,10 +8430,10 @@ namespace DigitalPlatform.rms
             outputTimestamp = null;
             strError = "";
 
-            // ¼ì²éÁ¬½Ó¶ÔÏó
+            // æ£€æŸ¥è¿æ¥å¯¹è±¡
             // return:
-            //      -1  ³ö´í
-            //      0   Õı³£
+            //      -1  å‡ºé”™
+            //      0   æ­£å¸¸
             int nRet = this.CheckConnection(connection,
                 out strError);
             if (nRet == -1)
@@ -8445,7 +8445,7 @@ namespace DigitalPlatform.rms
 
             List<string> cols = new List<string>();
 
-            // data or newdata, Ò»¶¨ÒªÓĞ
+            // data or newdata, ä¸€å®šè¦æœ‰
             cols.Add(strImageFieldName);
 
             // 2.length
@@ -8468,11 +8468,11 @@ namespace DigitalPlatform.rms
 
             cols.Add("id");
 
-            // ²¿·ÖÃüÁî×Ö·û´®
+            // éƒ¨åˆ†å‘½ä»¤å­—ç¬¦ä¸²
             string strPartComm = StringUtil.MakePathList(cols);
 
             string strCommand = "";
-            // DataLength()º¯ÊıintÀàĞÍ
+            // DataLength()å‡½æ•°intç±»å‹
             strCommand = "use " + this.m_strSqlDbName + " "
                 + " SELECT "
                 + strPartComm + " "
@@ -8486,7 +8486,7 @@ namespace DigitalPlatform.rms
             SqlDataReader reader = null;
             try
             {
-                // Ö´ĞĞÃüÁî
+                // æ‰§è¡Œå‘½ä»¤
                 reader = command.ExecuteReader(/*CommandBehavior.SingleResult | */ CommandBehavior.SequentialAccess);
                 /*
     For UPDATE, INSERT, and DELETE statements, the return value is the number of rows affected by the command. For all other types of statements, the return value is -1. If a rollback occurs, the return value is also -1.
@@ -8504,7 +8504,7 @@ namespace DigitalPlatform.rms
             {
                 if (reader == null || reader.HasRows == false)
                 {
-                    strError = "¼ÇÂ¼'" + strID + "'ÔÚ¿âÖĞ²»´æÔÚ";
+                    strError = "è®°å½•'" + strID + "'åœ¨åº“ä¸­ä¸å­˜åœ¨";
                     return -4;
                 }
 
@@ -8514,10 +8514,10 @@ namespace DigitalPlatform.rms
                 lTotalLength = reader.GetBytes(0, 0, null, 0, 0);
 
                 int nOutputLength = 0;
-                // µÃµ½Êµ¼Ê¶ÁµÄ³¤¶È
+                // å¾—åˆ°å®é™…è¯»çš„é•¿åº¦
                 // return:
-                //		-1  ³ö´í
-                //		0   ³É¹¦
+                //		-1  å‡ºé”™
+                //		0   æˆåŠŸ
                 nRet = ConvertUtil.GetRealLength(lStart,
                     nLength1,
                     lTotalLength,
@@ -8568,7 +8568,7 @@ namespace DigitalPlatform.rms
             if (testidParam == null
                 || (testidParam.Value is System.DBNull))
             {
-                strError = "¼ÇÂ¼'" + strID + "'ÔÚ¿âÖĞ²»´æÔÚ";
+                strError = "è®°å½•'" + strID + "'åœ¨åº“ä¸­ä¸å­˜åœ¨";
                 return -4;
             }
              * */
@@ -8578,8 +8578,8 @@ namespace DigitalPlatform.rms
 #endif
 
         // parameters:
-        //      strNewXml   [in]¾Ö²¿XML
-        //                  [out]´´½¨ºÃµÄÈ«²¿XML
+        //      strNewXml   [in]å±€éƒ¨XML
+        //                  [out]åˆ›å»ºå¥½çš„å…¨éƒ¨XML
         int BuildRecordXml(
             string strID,
             string strXPath,
@@ -8599,7 +8599,7 @@ namespace DigitalPlatform.rms
 
             Debug.Assert(string.IsNullOrEmpty(strXPath) == false, "");
 
-            // ĞŞ¸Ä²¿·Ö
+            // ä¿®æ”¹éƒ¨åˆ†
 
                 string strLocateXPath = "";
                 string strCreatePath = "";
@@ -8615,7 +8615,7 @@ namespace DigitalPlatform.rms
                     return -1;
 
                 XmlDocument tempDom = new XmlDocument();
-                tempDom.PreserveWhitespace = true; //ÉèPreserveWhitespaceÎªtrue
+                tempDom.PreserveWhitespace = true; //è®¾PreserveWhitespaceä¸ºtrue
 
                 try
                 {
@@ -8631,18 +8631,18 @@ namespace DigitalPlatform.rms
                 }
                 catch (Exception ex)
                 {
-                    strError = "1 WriteXml() ÔÚ¸ø'" + this.GetCaption("zh-CN") + "'¿âĞ´Èë¼ÇÂ¼'" + strID + "'Ê±£¬×°ÔØ¾É¼ÇÂ¼µ½dom³ö´í,Ô­Òò:" + ex.Message;
+                    strError = "1 WriteXml() åœ¨ç»™'" + this.GetCaption("zh-CN") + "'åº“å†™å…¥è®°å½•'" + strID + "'æ—¶ï¼Œè£…è½½æ—§è®°å½•åˆ°domå‡ºé”™,åŸå› :" + ex.Message;
                     return -1;
                 }
 
 
                 if (strLocateXPath == "")
                 {
-                    strError = "xpath±í´ïÊ½ÖĞµÄlocate²ÎÊı²»ÄÜÎª¿ÕÖµ";
+                    strError = "xpathè¡¨è¾¾å¼ä¸­çš„locateå‚æ•°ä¸èƒ½ä¸ºç©ºå€¼";
                     return -1;
                 }
 
-                // Í¨¹ıstrLocateXPath¶¨Î»µ½Ö¸¶¨µÄ½Úµã
+                // é€šè¿‡strLocateXPathå®šä½åˆ°æŒ‡å®šçš„èŠ‚ç‚¹
                 XmlNode node = null;
                 try
                 {
@@ -8650,7 +8650,7 @@ namespace DigitalPlatform.rms
                 }
                 catch (Exception ex)
                 {
-                    strError = "2 WriteXml() ÔÚ¸ø'" + this.GetCaption("zh-CN") + "'¿âĞ´Èë¼ÇÂ¼'" + strID + "'Ê±£¬XPathÊ½×Ó'" + strXPath + "'Ñ¡ÔñÔªËØÊ±³ö´í,Ô­Òò:" + ex.Message;
+                    strError = "2 WriteXml() åœ¨ç»™'" + this.GetCaption("zh-CN") + "'åº“å†™å…¥è®°å½•'" + strID + "'æ—¶ï¼ŒXPathå¼å­'" + strXPath + "'é€‰æ‹©å…ƒç´ æ—¶å‡ºé”™,åŸå› :" + ex.Message;
                     return -1;
                 }
 
@@ -8658,7 +8658,7 @@ namespace DigitalPlatform.rms
                 {
                     if (strCreatePath == "")
                     {
-                        strError = "¸ø'" + this.GetCaption("zh-CN") + "'¿âĞ´Èë¼ÇÂ¼'" + strID + "'Ê±£¬XPathÊ½×Ó'" + strXPath + "'Ö¸¶¨µÄ½ÚµãÎ´ÕÒµ½¡£´ËÊ±xpath±í´ïÊ½ÖĞµÄcreate²ÎÊı²»ÄÜÎª¿ÕÖµ";
+                        strError = "ç»™'" + this.GetCaption("zh-CN") + "'åº“å†™å…¥è®°å½•'" + strID + "'æ—¶ï¼ŒXPathå¼å­'" + strXPath + "'æŒ‡å®šçš„èŠ‚ç‚¹æœªæ‰¾åˆ°ã€‚æ­¤æ—¶xpathè¡¨è¾¾å¼ä¸­çš„createå‚æ•°ä¸èƒ½ä¸ºç©ºå€¼";
                         return -1;
                     }
 
@@ -8666,7 +8666,7 @@ namespace DigitalPlatform.rms
                         strCreatePath);
                     if (node == null)
                     {
-                        strError = "ÄÚ²¿´íÎó!";
+                        strError = "å†…éƒ¨é”™è¯¯!";
                         return -1;
                     }
 
@@ -8686,7 +8686,7 @@ namespace DigitalPlatform.rms
                         }
                         catch (Exception ex)
                         {
-                            strError = "´«ÈëµÄÄÚÈİ'" + strNewXml + "'²»ÊÇÊı×Ö¸ñÊ½¡£" + ex.Message;
+                            strError = "ä¼ å…¥çš„å†…å®¹'" + strNewXml + "'ä¸æ˜¯æ•°å­—æ ¼å¼ã€‚" + ex.Message;
                             return -1;
                         }
 
@@ -8755,7 +8755,7 @@ namespace DigitalPlatform.rms
                         XmlNode newNode = node.PreviousSibling;
                         if (newNode == null)
                         {
-                            strError = "newNode²»¿ÉÄÜÎªnull";
+                            strError = "newNodeä¸å¯èƒ½ä¸ºnull";
                             return -1;
                         }
 
@@ -8770,7 +8770,7 @@ namespace DigitalPlatform.rms
                             }
                             catch (Exception ex)
                             {
-                                strError = "´«ÈëµÄÄÚÈİ'" + strNewValue + "'²»ÊÇÊı×Ö¸ñÊ½¡£" + ex.Message;
+                                strError = "ä¼ å…¥çš„å†…å®¹'" + strNewValue + "'ä¸æ˜¯æ•°å­—æ ¼å¼ã€‚" + ex.Message;
                                 return -1;
                             }
 
@@ -8830,9 +8830,9 @@ namespace DigitalPlatform.rms
                     lTotalLength = baRealXml.Length;
 
                     // return:
-                    //		-1	Ò»°ãĞÔ´íÎó
-                    //		-2	Ê±¼ä´Á²»Æ¥Åä
-                    //		0	³É¹¦
+                    //		-1	ä¸€èˆ¬æ€§é”™è¯¯
+                    //		-2	æ—¶é—´æˆ³ä¸åŒ¹é…
+                    //		0	æˆåŠŸ
                     nRet = this.WriteSqlRecord(connection,
                         ref row_info,
                         strID,
@@ -8842,7 +8842,7 @@ namespace DigitalPlatform.rms
                         // null,
                         strMetadata,
                         strStyle,
-                        outputTimestamp,   //×¢ÒâÕâ¶ù
+                        outputTimestamp,   //æ³¨æ„è¿™å„¿
                         out outputTimestamp,
                         out bFull,
                         out bSingleFull,
@@ -8853,10 +8853,10 @@ namespace DigitalPlatform.rms
                 return 0;
         }
 
-        // ¸üĞÂ Keys
+        // æ›´æ–° Keys
         // parameters:
-        //      bDeleteKeys         ÊÇ·ñÒªÉ¾³ıÓ¦¸ÃÉ¾³ıµÄ keys
-        //      bDelayCreateKeys    ÊÇ·ñÑÓ³Ù´´½¨ keys
+        //      bDeleteKeys         æ˜¯å¦è¦åˆ é™¤åº”è¯¥åˆ é™¤çš„ keys
+        //      bDelayCreateKeys    æ˜¯å¦å»¶è¿Ÿåˆ›å»º keys
         int UpdateKeysRows(
             // SessionInfo sessioninfo,
             Connection connection,
@@ -8875,8 +8875,8 @@ namespace DigitalPlatform.rms
 
             if (bDeleteKeys == false && bDelayCreateKeys == false)
             {
-                // Èç¹ûÒªÁ¢¼´´´½¨ Keys£¬µ«ÓÖ²»ÊÂÏÈÉ¾³ı ÒÔÇ°µÄ Keys£¬Õâ»áÔì³ÉÖØ¸´ĞĞ
-                strError = "UpdateKeysRows() bDeleteKeys ºÍ bDelayCreateKeys ²»ÄÜÍ¬Ê±Îª false";
+                // å¦‚æœè¦ç«‹å³åˆ›å»º Keysï¼Œä½†åˆä¸äº‹å…ˆåˆ é™¤ ä»¥å‰çš„ Keysï¼Œè¿™ä¼šé€ æˆé‡å¤è¡Œ
+                strError = "UpdateKeysRows() bDeleteKeys å’Œ bDelayCreateKeys ä¸èƒ½åŒæ—¶ä¸º false";
                 return -1;
             }
 
@@ -8911,10 +8911,10 @@ namespace DigitalPlatform.rms
                 {
                     if (info.row_info != null)
                     {
-                        // ¼ÇÒäÕâÌõ¼ÇÂ¼µÄID£¬ºóÃæ»áÍ³Ò»½øĞĞÒ»´ÎË¢ĞÂ¼ìË÷µãµÄ²Ù×÷¡£ÕâÀï¾Í²»±Ø´´½¨¼ìË÷µãÁË
+                        // è®°å¿†è¿™æ¡è®°å½•çš„IDï¼Œåé¢ä¼šç»Ÿä¸€è¿›è¡Œä¸€æ¬¡åˆ·æ–°æ£€ç´¢ç‚¹çš„æ“ä½œã€‚è¿™é‡Œå°±ä¸å¿…åˆ›å»ºæ£€ç´¢ç‚¹äº†
                         if (this.RebuildIDs == null)
                         {
-                            strError = "µ± UpdateKeysRows() ĞèÒªĞ´Èë '" + this.GetCaption("zh-CN") + "' ¿â ID ´æ´¢µÄÊ±ºò£¬·¢ÏÖÆä RebuildIDs Îª¿Õ";
+                            strError = "å½“ UpdateKeysRows() éœ€è¦å†™å…¥ '" + this.GetCaption("zh-CN") + "' åº“ ID å­˜å‚¨çš„æ—¶å€™ï¼Œå‘ç°å…¶ RebuildIDs ä¸ºç©º";
                             return -1;
                         }
                         Debug.Assert(this.RebuildIDs != null, "");
@@ -8924,8 +8924,8 @@ namespace DigitalPlatform.rms
                 }
 
                 // return:
-                //      -1  ³ö´í
-                //      0   ³É¹¦
+                //      -1  å‡ºé”™
+                //      0   æˆåŠŸ
                 nRet = this.MergeKeys(info.ID,
                     strNewXml,
                     strOldXml,
@@ -8938,10 +8938,10 @@ namespace DigitalPlatform.rms
                 if (nRet == -1)
                     return -1;
 
-                // ´¦Àí×ÓÎÄ¼ş
+                // å¤„ç†å­æ–‡ä»¶
                 // return:
-                //      -1  ³ö´í
-                //      0   ³É¹¦
+                //      -1  å‡ºé”™
+                //      0   æˆåŠŸ
                 nRet = this.ModifyFiles(connection,
                     info.ID,
                     newDom,
@@ -8960,16 +8960,16 @@ namespace DigitalPlatform.rms
 
             if (bDelayCreateKeys == false)
             {
-                // Á¢¼´¶ÒÏÖÉ¾³ıºÍ´´½¨
+                // ç«‹å³å…‘ç°åˆ é™¤å’Œåˆ›å»º
 
-                // ´¦Àí¼ìË÷µã
+                // å¤„ç†æ£€ç´¢ç‚¹
                 // return:
-                //      -1  ³ö´í
-                //      0   ³É¹¦
+                //      -1  å‡ºé”™
+                //      0   æˆåŠŸ
                 nRet = this.ModifyKeys(connection,
                     total_newkeys,
                     total_oldkeys,
-                    bDelayCreateKeys,   // bFastMode ½ö½ö¶Ô SQLite Æğ×÷ÓÃ
+                    bDelayCreateKeys,   // bFastMode ä»…ä»…å¯¹ SQLite èµ·ä½œç”¨
                     out strError);
                 if (nRet == -1)
                     return -1;
@@ -8977,8 +8977,8 @@ namespace DigitalPlatform.rms
             }
             else
             {
-                // ÑÓ³Ù´´½¨¼ìË÷µã¡£°ÑĞèÒª´´½¨µÄ¼ìË÷µã´æ´¢ÆğÀ´
-                // ×¢Òâ£¬´ËÖÖÄ£Ê½ÏÂ£¬¶ÔÓÚĞèÒªÉ¾³ıµÄ¼ìË÷µã£¬±¾º¯ÊıÎ´½øĞĞ´¦Àí£¬ĞèÒªµ÷Ö÷Í×ÉÆ´¦Àí
+                // å»¶è¿Ÿåˆ›å»ºæ£€ç´¢ç‚¹ã€‚æŠŠéœ€è¦åˆ›å»ºçš„æ£€ç´¢ç‚¹å­˜å‚¨èµ·æ¥
+                // æ³¨æ„ï¼Œæ­¤ç§æ¨¡å¼ä¸‹ï¼Œå¯¹äºéœ€è¦åˆ é™¤çš„æ£€ç´¢ç‚¹ï¼Œæœ¬å‡½æ•°æœªè¿›è¡Œå¤„ç†ï¼Œéœ€è¦è°ƒä¸»å¦¥å–„å¤„ç†
                 if (this.container.DelayTables == null)
                     this.container.DelayTables = new DelayTableCollection();
                 nRet = this.container.DelayTables.Write(
@@ -8991,14 +8991,14 @@ namespace DigitalPlatform.rms
 
                 if (bDeleteKeys == true)
                 {
-                    // ´¦Àí¼ìË÷µã
+                    // å¤„ç†æ£€ç´¢ç‚¹
                     // return:
-                    //      -1  ³ö´í
-                    //      0   ³É¹¦
+                    //      -1  å‡ºé”™
+                    //      0   æˆåŠŸ
                     nRet = this.ModifyKeys(connection,
                         null,
                         total_oldkeys,
-                        bDelayCreateKeys,   // bFastMode ½ö½ö¶Ô SQLite Æğ×÷ÓÃ
+                        bDelayCreateKeys,   // bFastMode ä»…ä»…å¯¹ SQLite èµ·ä½œç”¨
                         out strError);
                     if (nRet == -1)
                         return -1;
@@ -9008,13 +9008,13 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
-        // ÖØ½¨ Keys
+        // é‡å»º Keys
         // parameters:
-        //      bDeleteKeys         ÊÇ·ñÔÚ´´½¨Ç°É¾³ı¼ÇÂ¼µÄÈ«²¿ keys
-        //      bDelayCreateKeys    ÊÇ·ñÑÓ³Ù´´½¨ keys
+        //      bDeleteKeys         æ˜¯å¦åœ¨åˆ›å»ºå‰åˆ é™¤è®°å½•çš„å…¨éƒ¨ keys
+        //      bDelayCreateKeys    æ˜¯å¦å»¶è¿Ÿåˆ›å»º keys
         // return:
-        //      -1  ³ö´í
-        //      >=0 ·µ»Ø×Ü¹²´¦ÀíµÄ keys ĞĞÊı
+        //      -1  å‡ºé”™
+        //      >=0 è¿”å›æ€»å…±å¤„ç†çš„ keys è¡Œæ•°
         int RebuildKeysRows(
             Connection connection,
             bool bDeleteKeys,
@@ -9030,8 +9030,8 @@ namespace DigitalPlatform.rms
 
             if (bDeleteKeys == false && bDelayCreateKeys == false)
             {
-                // Èç¹ûÒªÁ¢¼´´´½¨ Keys£¬µ«ÓÖ²»ÊÂÏÈÉ¾³ı ÒÔÇ°µÄ Keys£¬Õâ»áÔì³ÉÖØ¸´ĞĞ
-                strError = "RebuildKeysRows() bDeleteKeys ºÍ bDelayCreateKeys ²»ÄÜÍ¬Ê±Îª false";
+                // å¦‚æœè¦ç«‹å³åˆ›å»º Keysï¼Œä½†åˆä¸äº‹å…ˆåˆ é™¤ ä»¥å‰çš„ Keysï¼Œè¿™ä¼šé€ æˆé‡å¤è¡Œ
+                strError = "RebuildKeysRows() bDeleteKeys å’Œ bDelayCreateKeys ä¸èƒ½åŒæ—¶ä¸º false";
                 return -1;
             }
 
@@ -9057,12 +9057,12 @@ namespace DigitalPlatform.rms
                     }
                 }
 
-                // TODO: ÊÇ·ñ¾¯¸æÄÇĞ©ÒòÎª¼ÇÂ¼³ß´çÌ«´ó¶øÎŞ·¨´´½¨¼ìË÷µãµÄ¼ÇÂ¼?
+                // TODO: æ˜¯å¦è­¦å‘Šé‚£äº›å› ä¸ºè®°å½•å°ºå¯¸å¤ªå¤§è€Œæ— æ³•åˆ›å»ºæ£€ç´¢ç‚¹çš„è®°å½•?
 
 
                 // return:
-                //      -1  ³ö´í
-                //      0   ³É¹¦
+                //      -1  å‡ºé”™
+                //      0   æˆåŠŸ
                 nRet = this.MergeKeys(info.ID,
                     "",
                     strOldXml,
@@ -9082,8 +9082,8 @@ namespace DigitalPlatform.rms
 
             if (bDeleteKeys == true)
             {
-                // ÏÈ¸ù¾İ ID ÁĞ±íÉ¾³ıËùÓĞ keys
-                // ×¢Òâ£¬ÔÚÃ»ÓĞÈ«²¿Ô¤ÏÈÉ¾³ıkeys + Bulkcopy µÄÇé¿öÏÂ£¬ÎªÁËÕı³£¼°Ê±É¾³ıÃ¿ÌõXML¼ÇÂ¼µÄ keys £¬ SQL keys ±íÓ¦¸Ã¾ßÓĞ B+ Ê÷Ë÷Òı¡£ËäÈ»´ËÊ±²¢Î´Á¢¼´Ğ´ÈëĞÂµÄ keys£¬µ«É¾³ıÒÔÇ°µÄ keys ĞèÒª B+ Ê÷Ë÷Òı¡£µÈµ½ºóÃæ BulkCopy Ç°£¬¿ÉÒÔ×¨ÃÅÉ¾³ı B+ Ê÷Ë÷Òı£¬È»ºóµÈ BulkCopy ½áÊøºóÖØĞÂ½¨Á¢ B+ Ê÷Ë÷Òı
+                // å…ˆæ ¹æ® ID åˆ—è¡¨åˆ é™¤æ‰€æœ‰ keys
+                // æ³¨æ„ï¼Œåœ¨æ²¡æœ‰å…¨éƒ¨é¢„å…ˆåˆ é™¤keys + Bulkcopy çš„æƒ…å†µä¸‹ï¼Œä¸ºäº†æ­£å¸¸åŠæ—¶åˆ é™¤æ¯æ¡XMLè®°å½•çš„ keys ï¼Œ SQL keys è¡¨åº”è¯¥å…·æœ‰ B+ æ ‘ç´¢å¼•ã€‚è™½ç„¶æ­¤æ—¶å¹¶æœªç«‹å³å†™å…¥æ–°çš„ keysï¼Œä½†åˆ é™¤ä»¥å‰çš„ keys éœ€è¦ B+ æ ‘ç´¢å¼•ã€‚ç­‰åˆ°åé¢ BulkCopy å‰ï¼Œå¯ä»¥ä¸“é—¨åˆ é™¤ B+ æ ‘ç´¢å¼•ï¼Œç„¶åç­‰ BulkCopy ç»“æŸåé‡æ–°å»ºç«‹ B+ æ ‘ç´¢å¼•
                 nRet = this.ForceDeleteKeys(connection,
                     WriteInfo.get_ids(records),
                     out strError);
@@ -9093,10 +9093,10 @@ namespace DigitalPlatform.rms
 
             if (bDelayCreateKeys == false)
             {
-                // ´¦Àí¼ìË÷µã
+                // å¤„ç†æ£€ç´¢ç‚¹
                 // return:
-                //      -1  ³ö´í
-                //      0   ³É¹¦
+                //      -1  å‡ºé”™
+                //      0   æˆåŠŸ
                 nRet = this.ModifyKeys(connection,
                     total_oldkeys,
                     null,
@@ -9108,12 +9108,12 @@ namespace DigitalPlatform.rms
             }
             else
             {
-                // ÑÓ³Ù´´½¨¼ìË÷µã¡£°ÑĞèÒª´´½¨µÄ¼ìË÷µã´æ´¢ÆğÀ´
+                // å»¶è¿Ÿåˆ›å»ºæ£€ç´¢ç‚¹ã€‚æŠŠéœ€è¦åˆ›å»ºçš„æ£€ç´¢ç‚¹å­˜å‚¨èµ·æ¥
                 if (this.container.DelayTables == null)
                     this.container.DelayTables = new DelayTableCollection();
                 // return:
-                //      -1  ³ö´í
-                //      0   ³É¹¦
+                //      -1  å‡ºé”™
+                //      0   æˆåŠŸ
                 nRet = this.container.DelayTables.Write(
                     this.m_strSqlDbName,
                     total_oldkeys,
@@ -9127,11 +9127,11 @@ namespace DigitalPlatform.rms
             // return 0;
         }
 
-        // ´´½¨»òÕß¸üĞÂ SQL ¼ÇÂ¼ĞĞ
-        // µ÷ÓÃºó£¬.record.Metadata ºÍ .record.Timestamp ·¢Éú±ä»¯
-        // ±¾º¯Êı²»»áĞŞ¸Ä .row_info µÄ³ÉÔ±Öµ¡£ÒòÎªºóÃæ´´½¨¼ìË÷µãµÄ½×¶Î£¬»¹ÒªÍ¨¹ı row_info À´ÕÒµ½¾É¼ÇÂ¼µÄĞÅÏ¢¡£µ«ÕâÀïÓĞ¸öÀıÍâ£¬¾ÍÊÇ row_info.NewFileName »á±»ĞŞ¸Ä(¶ÔÓ¦µÄÎÄ¼ş±»É¾³ı)£¬ºóÃæ´´½¨¼ìË÷µãµÄÊ±ºòÒ²ÓÃ²»µ½Õâ¸öĞÅÏ¢£¬ÒòÎª NewFileName Ö»ÊÇ´ú±íÒÔÇ°Ã»ÓĞÉÏÔØÍêÕûµÄÎÄ¼ş
+        // åˆ›å»ºæˆ–è€…æ›´æ–° SQL è®°å½•è¡Œ
+        // è°ƒç”¨åï¼Œ.record.Metadata å’Œ .record.Timestamp å‘ç”Ÿå˜åŒ–
+        // æœ¬å‡½æ•°ä¸ä¼šä¿®æ”¹ .row_info çš„æˆå‘˜å€¼ã€‚å› ä¸ºåé¢åˆ›å»ºæ£€ç´¢ç‚¹çš„é˜¶æ®µï¼Œè¿˜è¦é€šè¿‡ row_info æ¥æ‰¾åˆ°æ—§è®°å½•çš„ä¿¡æ¯ã€‚ä½†è¿™é‡Œæœ‰ä¸ªä¾‹å¤–ï¼Œå°±æ˜¯ row_info.NewFileName ä¼šè¢«ä¿®æ”¹(å¯¹åº”çš„æ–‡ä»¶è¢«åˆ é™¤)ï¼Œåé¢åˆ›å»ºæ£€ç´¢ç‚¹çš„æ—¶å€™ä¹Ÿç”¨ä¸åˆ°è¿™ä¸ªä¿¡æ¯ï¼Œå› ä¸º NewFileName åªæ˜¯ä»£è¡¨ä»¥å‰æ²¡æœ‰ä¸Šè½½å®Œæ•´çš„æ–‡ä»¶
         // parameters:
-        //      results [out] ·µ»ØÒÑ¾­³É¹¦¸üĞÂ»òÕß´´½¨µÄ¼ÇÂ¼
+        //      results [out] è¿”å›å·²ç»æˆåŠŸæ›´æ–°æˆ–è€…åˆ›å»ºçš„è®°å½•
         int UpdateRecordRows(Connection connection,
             List<WriteInfo> records,
             string strStyle,
@@ -9141,17 +9141,17 @@ namespace DigitalPlatform.rms
             strError = "";
             results = new List<WriteInfo>();
 
-            // ¼ì²éÁ¬½Ó¶ÔÏó
+            // æ£€æŸ¥è¿æ¥å¯¹è±¡
             // return:
-            //      -1  ³ö´í
-            //      0   Õı³£
+            //      -1  å‡ºé”™
+            //      0   æ­£å¸¸
             int nRet = this.CheckConnection(connection,
                 out strError);
             if (nRet == -1)
                 return -1;
 
             // 2013/11/23
-            // ÊÇ·ñÒªÖ±½ÓÀûÓÃÊäÈëµÄÊ±¼ä´Á
+            // æ˜¯å¦è¦ç›´æ¥åˆ©ç”¨è¾“å…¥çš„æ—¶é—´æˆ³
             bool bForceTimestamp = StringUtil.IsInList("forcesettimestamp", strStyle);
 
             #region MS SQL Server
@@ -9168,7 +9168,7 @@ namespace DigitalPlatform.rms
                     int i = 0;
                     foreach (WriteInfo info in records)
                     {
-                        // Ìá½»Ò»´Î
+                        // æäº¤ä¸€æ¬¡
                         bool bCommit = false;
                         if (info.row_info == null && nParameters + 5 > 2100 - 1)
                             bCommit = true;
@@ -9184,7 +9184,7 @@ namespace DigitalPlatform.rms
                             int nCount = command.ExecuteNonQuery();
                             if (nCount == 0)
                             {
-                                strError = "´´½¨»ò¸üĞÂ records ĞĞÊ§°Ü";
+                                strError = "åˆ›å»ºæˆ–æ›´æ–° records è¡Œå¤±è´¥";
                                 return -1;
                             }
                             strCommand = "";
@@ -9198,7 +9198,7 @@ namespace DigitalPlatform.rms
                         if (info.record == null)
                         {
                             Debug.Assert(false, "");
-                            strError = "info.record²»ÄÜÎª¿Õ";
+                            strError = "info.recordä¸èƒ½ä¸ºç©º";
                             return -1;
                         }
 
@@ -9210,7 +9210,7 @@ namespace DigitalPlatform.rms
                         string strShortFileName = "";
                         if (bObjectFile == true)
                         {
-                            // ½«»º³åÇøÄÚÈİÒ»´ÎĞÔĞ´Èë¶ÔÏóÎÄ¼ş
+                            // å°†ç¼“å†²åŒºå†…å®¹ä¸€æ¬¡æ€§å†™å…¥å¯¹è±¡æ–‡ä»¶
                             nRet = WriteToObjectFile(
                                 info.ID,
                                 info.baContent,
@@ -9222,18 +9222,18 @@ namespace DigitalPlatform.rms
                             Debug.Assert(string.IsNullOrEmpty(strShortFileName) == false, "");
                         }
 
-                        // É¾³ı²ĞÓàµÄ¾ÉÓĞ¶ÔÏóÎÄ¼ş
+                        // åˆ é™¤æ®‹ä½™çš„æ—§æœ‰å¯¹è±¡æ–‡ä»¶
                         if (info.row_info != null && string.IsNullOrEmpty(info.row_info.NewFileName) == false)
                         {
                             File.Delete(GetObjectFileName(info.row_info.NewFileName));
                             info.row_info.NewFileName = "";
                         }
 
-                        // ´´½¨ metadata
+                        // åˆ›å»º metadata
                         string strResultMetadata = "";
                         // return:
-                        //		-1	³ö´í
-                        //		0	³É¹¦
+                        //		-1	å‡ºé”™
+                        //		0	æˆåŠŸ
                         nRet = DatabaseUtil.MergeMetadata(info.row_info != null ? info.row_info.Metadata : "",
                             info.record.Metadata,
                             info.baContent.Length,
@@ -9245,7 +9245,7 @@ namespace DigitalPlatform.rms
                         info.record.Metadata = strResultMetadata;
 
 
-                        // ´´½¨ timestamp
+                        // åˆ›å»º timestamp
                         string strOutputTimestamp = "";
                         if (bForceTimestamp == true)
                             strOutputTimestamp = ByteArray.GetHexTimeStampString(info.record.Timestamp);
@@ -9256,7 +9256,7 @@ namespace DigitalPlatform.rms
 
                         if (info.row_info == null)
                         {
-                            // ´´½¨ĞÂĞĞ
+                            // åˆ›å»ºæ–°è¡Œ
                             if (bObjectFile == false)
                             {
                                 strCommand +=
@@ -9283,7 +9283,7 @@ SqlDbType.NVarChar);
                                     command.Parameters.Add("@data" + i,
                                     SqlDbType.Binary,
                                     info.baContent.Length);
-                                dataParam.Value = info.baContent;   // ?? ÊÇ·ñÔÊĞí¿Õ?
+                                dataParam.Value = info.baContent;   // ?? æ˜¯å¦å…è®¸ç©º?
                             }
 
                             SqlParameter rangeParam =
@@ -9320,12 +9320,12 @@ SqlDbType.NVarChar);
                         }
                         else
                         {
-                            // ¸üĞÂÒÑÓĞµÄĞĞ
+                            // æ›´æ–°å·²æœ‰çš„è¡Œ
 
-                            // TODO: ÓÉÓÚ±¾´Î¿ÉÒÔÒ»´ÎÉèÖÃºÃ data£¬ËùÒÔ²»±Ø¿¼ÂÇ·½ÏòÎÊÌâ£¬¾ÍÏñµÚÒ»´ÎÉèÖÃÄÇÑùÈ¥ÉèÖÃºÃÁË
+                            // TODO: ç”±äºæœ¬æ¬¡å¯ä»¥ä¸€æ¬¡è®¾ç½®å¥½ dataï¼Œæ‰€ä»¥ä¸å¿…è€ƒè™‘æ–¹å‘é—®é¢˜ï¼Œå°±åƒç¬¬ä¸€æ¬¡è®¾ç½®é‚£æ ·å»è®¾ç½®å¥½äº†
 
 #if NO
-                            bool bReverse = false;  // ·½Ïò±êÖ¾¡£Èç¹ûÎªfalse£¬±íÊ¾ data ÎªÕıÊ½ÄÚÈİ£¬newdataÎªÔİÊ±ÄÚÈİ
+                            bool bReverse = false;  // æ–¹å‘æ ‡å¿—ã€‚å¦‚æœä¸ºfalseï¼Œè¡¨ç¤º data ä¸ºæ­£å¼å†…å®¹ï¼Œnewdataä¸ºæš‚æ—¶å†…å®¹
                             if (String.IsNullOrEmpty(info.row_info.Range) == false
                                 && info.row_info.Range[0] == '!')
                                 bReverse = true;
@@ -9366,7 +9366,7 @@ SqlDbType.NVarChar);
                                     command.Parameters.Add("@data" + i,
                                     SqlDbType.Binary,
                                     info.baContent.Length);
-                                dataParam.Value = info.baContent;   // ?? ÊÇ·ñÔÊĞí¿Õ?
+                                dataParam.Value = info.baContent;   // ?? æ˜¯å¦å…è®¸ç©º?
                             }
 
                             SqlParameter dptimestampParam =
@@ -9386,7 +9386,7 @@ SqlDbType.NVarChar);
                                 rangeParam.Value = strCurrentRange;
                             }
 
-                            // info.row_info.Range = (string)rangeParam.Value;  // ½«·´×ªÇé¿ö¼°Ê±¶ÒÏÖ
+                            // info.row_info.Range = (string)rangeParam.Value;  // å°†åè½¬æƒ…å†µåŠæ—¶å…‘ç°
 
 
                             SqlParameter metadataParam =
@@ -9423,7 +9423,7 @@ SqlDbType.NVarChar);
                         int nCount = command.ExecuteNonQuery();
                         if (nCount == 0)
                         {
-                            strError = "´´½¨»ò¸üĞÂ records ĞĞÊ§°Ü";
+                            strError = "åˆ›å»ºæˆ–æ›´æ–° records è¡Œå¤±è´¥";
                             return -1;
                         }
                         strCommand = "";
@@ -9456,12 +9456,12 @@ SqlDbType.NVarChar);
                             if (info.record == null)
                             {
                                 Debug.Assert(false, "");
-                                strError = "info.record²»ÄÜÎª¿Õ";
+                                strError = "info.recordä¸èƒ½ä¸ºç©º";
                                 return -1;
                             }
 
                             string strShortFileName = "";
-                            // ½«»º³åÇøÄÚÈİÒ»´ÎĞÔĞ´Èë¶ÔÏóÎÄ¼ş
+                            // å°†ç¼“å†²åŒºå†…å®¹ä¸€æ¬¡æ€§å†™å…¥å¯¹è±¡æ–‡ä»¶
                             nRet = WriteToObjectFile(
                                 info.ID,
                                 info.baContent,
@@ -9472,18 +9472,18 @@ SqlDbType.NVarChar);
 
                             Debug.Assert(string.IsNullOrEmpty(strShortFileName) == false, "");
 
-                            // É¾³ı²ĞÓàµÄ¾ÉÓĞ¶ÔÏóÎÄ¼ş
+                            // åˆ é™¤æ®‹ä½™çš„æ—§æœ‰å¯¹è±¡æ–‡ä»¶
                             if (info.row_info != null && string.IsNullOrEmpty(info.row_info.NewFileName) == false)
                             {
                                 File.Delete(GetObjectFileName(info.row_info.NewFileName));
                                 info.row_info.NewFileName = "";
                             }
 
-                            // ´´½¨ metadata
+                            // åˆ›å»º metadata
                             string strResultMetadata = "";
                             // return:
-                            //		-1	³ö´í
-                            //		0	³É¹¦
+                            //		-1	å‡ºé”™
+                            //		0	æˆåŠŸ
                             nRet = DatabaseUtil.MergeMetadata(info.row_info != null ? info.row_info.Metadata : "",
                                 info.record.Metadata,
                                 info.baContent.Length,
@@ -9494,7 +9494,7 @@ SqlDbType.NVarChar);
                                 return -1;
                             info.record.Metadata = strResultMetadata;
 
-                            // ´´½¨ timestamp
+                            // åˆ›å»º timestamp
                             string strOutputTimestamp = "";
                             if (bForceTimestamp == true)
                                 strOutputTimestamp = ByteArray.GetHexTimeStampString(info.record.Timestamp);
@@ -9505,7 +9505,7 @@ SqlDbType.NVarChar);
 
                             if (info.row_info == null)
                             {
-                                // ´´½¨ĞÂĞĞ
+                                // åˆ›å»ºæ–°è¡Œ
                                 strCommand +=
     " INSERT INTO records(id, range, metadata, dptimestamp, filename) "
     + " VALUES(@id" + i + ", @range" + i + ", @metadata" + i + ", @dptimestamp" + i + ", @filename" + i + ")"
@@ -9543,7 +9543,7 @@ DbType.String);
                             }
                             else
                             {
-                                // ¸üĞÂÒÑÓĞµÄĞĞ
+                                // æ›´æ–°å·²æœ‰çš„è¡Œ
                                 strCommand += " UPDATE records "
                                 + " SET dptimestamp=@dptimestamp" + i + ","
                                 + " newdptimestamp=NULL,"
@@ -9584,14 +9584,14 @@ DbType.String);
                             }
 
                             {
-                                // Ìá½»Ò»´Î
+                                // æäº¤ä¸€æ¬¡
                                 Debug.Assert(string.IsNullOrEmpty(strCommand) == false, "");
                                 command.CommandText = strCommand;
 
                                 int nCount = command.ExecuteNonQuery();
                                 if (nCount == 0)
                                 {
-                                    strError = "´´½¨»ò¸üĞÂ records ĞĞÊ§°Ü";
+                                    strError = "åˆ›å»ºæˆ–æ›´æ–° records è¡Œå¤±è´¥";
                                     return -1;
                                 }
                                 strCommand = "";
@@ -9636,7 +9636,7 @@ DbType.String);
                         int i = 0;
                         foreach (WriteInfo info in records)
                         {
-                            // Ìá½»Ò»´Î
+                            // æäº¤ä¸€æ¬¡
                             bool bCommit = false;
                             if (info.row_info == null && nParameters + 5 > 2100 - 1)
                                 bCommit = true;
@@ -9652,7 +9652,7 @@ DbType.String);
                                 int nCount = command.ExecuteNonQuery();
                                 if (nCount == 0)
                                 {
-                                    strError = "´´½¨»ò¸üĞÂ records ĞĞÊ§°Ü";
+                                    strError = "åˆ›å»ºæˆ–æ›´æ–° records è¡Œå¤±è´¥";
                                     return -1;
                                 }
                                 strCommand = "";
@@ -9666,12 +9666,12 @@ DbType.String);
                             if (info.record == null)
                             {
                                 Debug.Assert(false, "");
-                                strError = "info.record²»ÄÜÎª¿Õ";
+                                strError = "info.recordä¸èƒ½ä¸ºç©º";
                                 return -1;
                             }
 
                             string strShortFileName = "";
-                            // ½«»º³åÇøÄÚÈİÒ»´ÎĞÔĞ´Èë¶ÔÏóÎÄ¼ş
+                            // å°†ç¼“å†²åŒºå†…å®¹ä¸€æ¬¡æ€§å†™å…¥å¯¹è±¡æ–‡ä»¶
                             nRet = WriteToObjectFile(
                                 info.ID,
                                 info.baContent,
@@ -9682,18 +9682,18 @@ DbType.String);
 
                             Debug.Assert(string.IsNullOrEmpty(strShortFileName) == false, "");
 
-                            // É¾³ı²ĞÓàµÄ¾ÉÓĞ¶ÔÏóÎÄ¼ş
+                            // åˆ é™¤æ®‹ä½™çš„æ—§æœ‰å¯¹è±¡æ–‡ä»¶
                             if (info.row_info != null && string.IsNullOrEmpty(info.row_info.NewFileName) == false)
                             {
                                 File.Delete(GetObjectFileName(info.row_info.NewFileName));
                                 info.row_info.NewFileName = "";
                             }
 
-                            // ´´½¨ metadata
+                            // åˆ›å»º metadata
                             string strResultMetadata = "";
                             // return:
-                            //		-1	³ö´í
-                            //		0	³É¹¦
+                            //		-1	å‡ºé”™
+                            //		0	æˆåŠŸ
                             nRet = DatabaseUtil.MergeMetadata(info.row_info != null ? info.row_info.Metadata : "",
                                 info.record.Metadata,
                                 info.baContent.Length,
@@ -9704,7 +9704,7 @@ DbType.String);
                                 return -1;
                             info.record.Metadata = strResultMetadata;
 
-                            // ´´½¨ timestamp
+                            // åˆ›å»º timestamp
                             string strOutputTimestamp = "";
                             if (bForceTimestamp == true)
                                 strOutputTimestamp = ByteArray.GetHexTimeStampString(info.record.Timestamp);
@@ -9715,7 +9715,7 @@ DbType.String);
 
                             if (info.row_info == null)
                             {
-                                // ´´½¨ĞÂĞĞ
+                                // åˆ›å»ºæ–°è¡Œ
                                 strCommand +=
     " INSERT INTO `" + this.m_strSqlDbName + "`.records (id, `range`, metadata, dptimestamp, filename) "
     + " VALUES (@id" + i + ", @range" + i + ", @metadata" + i + ", @dptimestamp" + i + ", @filename" + i + ")"
@@ -9754,7 +9754,7 @@ MySqlDbType.String);
                             }
                             else
                             {
-                                // ¸üĞÂÒÑÓĞµÄĞĞ
+                                // æ›´æ–°å·²æœ‰çš„è¡Œ
                                 strCommand += " UPDATE `" + this.m_strSqlDbName + "`.records "
                                 + " SET dptimestamp=@dptimestamp" + i + ","
                                 + " newdptimestamp=NULL,"
@@ -9797,7 +9797,7 @@ MySqlDbType.String);
                             i++;
                         }
 
-                        // ×îºóÌá½»Ò»´Î
+                        // æœ€åæäº¤ä¸€æ¬¡
                         if (string.IsNullOrEmpty(strCommand) == false)
                         {
                             Debug.Assert(string.IsNullOrEmpty(strCommand) == false, "");
@@ -9807,7 +9807,7 @@ MySqlDbType.String);
                             int nCount = command.ExecuteNonQuery();
                             if (nCount == 0)
                             {
-                                strError = "´´½¨»ò¸üĞÂ records ĞĞÊ§°Ü";
+                                strError = "åˆ›å»ºæˆ–æ›´æ–° records è¡Œå¤±è´¥";
                                 return -1;
                             }
                             strCommand = "";
@@ -9854,13 +9854,13 @@ MySqlDbType.String);
                             if (info.record == null)
                             {
                                 Debug.Assert(false, "");
-                                strError = "info.record²»ÄÜÎª¿Õ";
+                                strError = "info.recordä¸èƒ½ä¸ºç©º";
                                 return -1;
                             }
 
 
                             string strShortFileName = "";
-                            // ½«»º³åÇøÄÚÈİÒ»´ÎĞÔĞ´Èë¶ÔÏóÎÄ¼ş
+                            // å°†ç¼“å†²åŒºå†…å®¹ä¸€æ¬¡æ€§å†™å…¥å¯¹è±¡æ–‡ä»¶
                             nRet = WriteToObjectFile(
                                 info.ID,
                                 info.baContent,
@@ -9871,18 +9871,18 @@ MySqlDbType.String);
 
                             Debug.Assert(string.IsNullOrEmpty(strShortFileName) == false, "");
 
-                            // É¾³ı²ĞÓàµÄ¾ÉÓĞ¶ÔÏóÎÄ¼ş
+                            // åˆ é™¤æ®‹ä½™çš„æ—§æœ‰å¯¹è±¡æ–‡ä»¶
                             if (info.row_info != null && string.IsNullOrEmpty(info.row_info.NewFileName) == false)
                             {
                                 File.Delete(GetObjectFileName(info.row_info.NewFileName));
                                 info.row_info.NewFileName = "";
                             }
 
-                            // ´´½¨ metadata
+                            // åˆ›å»º metadata
                             string strResultMetadata = "";
                             // return:
-                            //		-1	³ö´í
-                            //		0	³É¹¦
+                            //		-1	å‡ºé”™
+                            //		0	æˆåŠŸ
                             nRet = DatabaseUtil.MergeMetadata(info.row_info != null ? info.row_info.Metadata : "",
                                 info.record.Metadata,
                                 info.baContent.Length,
@@ -9893,7 +9893,7 @@ MySqlDbType.String);
                                 return -1;
                             info.record.Metadata = strResultMetadata;
 
-                            // ´´½¨ timestamp
+                            // åˆ›å»º timestamp
                             string strOutputTimestamp = "";
                             if (bForceTimestamp == true)
                                 strOutputTimestamp = ByteArray.GetHexTimeStampString(info.record.Timestamp);
@@ -9904,7 +9904,7 @@ MySqlDbType.String);
 
                             if (info.row_info == null)
                             {
-                                // ´´½¨ĞÂĞĞ
+                                // åˆ›å»ºæ–°è¡Œ
                                 strCommand +=
     " INSERT INTO " + this.m_strSqlDbName + "_records (id, range, metadata, dptimestamp, filename) "
     + " VALUES(:id" + i + ", :range" + i + ", :metadata" + i + ", :dptimestamp" + i + ", :filename" + i + ")"
@@ -9942,7 +9942,7 @@ OracleDbType.NVarchar2);
                             }
                             else
                             {
-                                // ¸üĞÂÒÑÓĞµÄĞĞ
+                                // æ›´æ–°å·²æœ‰çš„è¡Œ
                                 strCommand += " UPDATE " + this.m_strSqlDbName + "_records "
                                 + " SET dptimestamp=:dptimestamp" + i + ","
                                 + " newdptimestamp=NULL,"
@@ -9984,14 +9984,14 @@ OracleDbType.NVarchar2);
                             }
 
                             {
-                                // Ìá½»Ò»´Î
+                                // æäº¤ä¸€æ¬¡
                                 Debug.Assert(string.IsNullOrEmpty(strCommand) == false, "");
                                 command.CommandText = strCommand;
 
                                 int nCount = command.ExecuteNonQuery();
                                 if (nCount == 0)
                                 {
-                                    strError = "´´½¨»ò¸üĞÂ records ĞĞÊ§°Ü";
+                                    strError = "åˆ›å»ºæˆ–æ›´æ–° records è¡Œå¤±è´¥";
                                     return -1;
                                 }
                                 strCommand = "";
@@ -10021,7 +10021,7 @@ OracleDbType.NVarchar2);
             return 0;
         }
 
-        // ½«»º³åÇøÄÚÈİÒ»´ÎĞÔĞ´Èë¶ÔÏóÎÄ¼ş
+        // å°†ç¼“å†²åŒºå†…å®¹ä¸€æ¬¡æ€§å†™å…¥å¯¹è±¡æ–‡ä»¶
         int WriteToObjectFile(
             string strID,
             byte[] baContent,
@@ -10034,17 +10034,17 @@ OracleDbType.NVarchar2);
 
             if (string.IsNullOrEmpty(this.m_strObjectDir) == true)
             {
-                strError = "Êı¾İ¿âÉĞÎ´ÅäÖÃ¶ÔÏóÎÄ¼şÄ¿Â¼£¬µ«Ğ´Èë¶ÔÏóÊ±³öÏÖÁËĞèÒªÒıÓÃ¶ÔÏóÎÄ¼şµÄÇé¿ö";
+                strError = "æ•°æ®åº“å°šæœªé…ç½®å¯¹è±¡æ–‡ä»¶ç›®å½•ï¼Œä½†å†™å…¥å¯¹è±¡æ—¶å‡ºç°äº†éœ€è¦å¼•ç”¨å¯¹è±¡æ–‡ä»¶çš„æƒ…å†µ";
                 return -1;
             }
 
             string strFileName = "";
 
             strFileName = BuildObjectFileName(strID, false);
-            strShortFileName = GetShortFileName(strFileName); // ¼ÇÒä
+            strShortFileName = GetShortFileName(strFileName); // è®°å¿†
             if (strShortFileName == null)
             {
-                strError = "¹¹Ôì¶ÌÎÄ¼şÃûÊ±³ö´í¡£¼ÇÂ¼ID '" + strID + "', ¶ÔÏóÎÄ¼şÄ¿Â¼ '" + this.m_strObjectDir + "', ÎïÀíÎÄ¼şÃû '" + strFileName + "'";
+                strError = "æ„é€ çŸ­æ–‡ä»¶åæ—¶å‡ºé”™ã€‚è®°å½•ID '" + strID + "', å¯¹è±¡æ–‡ä»¶ç›®å½• '" + this.m_strObjectDir + "', ç‰©ç†æ–‡ä»¶å '" + strFileName + "'";
                 return -1;
             }
 
@@ -10058,7 +10058,7 @@ FileMode.OpenOrCreate,
 FileAccess.Write,
 FileShare.ReadWrite))
                 {
-                    // µÚÒ»´ÎĞ´ÎÄ¼ş,²¢ÇÒÎÄ¼ş³¤¶È´óÓÚ¶ÔÏó×Ü³¤¶È£¬Ôò½Ø¶ÏÎÄ¼ş
+                    // ç¬¬ä¸€æ¬¡å†™æ–‡ä»¶,å¹¶ä¸”æ–‡ä»¶é•¿åº¦å¤§äºå¯¹è±¡æ€»é•¿åº¦ï¼Œåˆ™æˆªæ–­æ–‡ä»¶
                     if (s.Length > baContent.Length)
                         s.SetLength(0);
 
@@ -10072,7 +10072,7 @@ FileShare.ReadWrite))
             {
                 if (nRedoCount == 0)
                 {
-                    // ´´½¨ÖĞ¼ä×ÓÄ¿Â¼
+                    // åˆ›å»ºä¸­é—´å­ç›®å½•
                     PathUtil.CreateDirIfNeed(PathUtil.PathPart(strFileName));
                     nRedoCount++;
                     goto REDO;
@@ -10081,15 +10081,15 @@ FileShare.ReadWrite))
             }
             catch (Exception ex)
             {
-                strError = "Ğ´ÈëÎÄ¼ş '" + strFileName + "' Ê±·¢Éú´íÎó: " + ex.Message;
+                strError = "å†™å…¥æ–‡ä»¶ '" + strFileName + "' æ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                 return -1;
             }
             return 0;
         }
 
-        // »ñµÃ records±íÖĞ ¶à¸öÒÑ´æÔÚµÄĞĞĞÅÏ¢
+        // è·å¾— recordsè¡¨ä¸­ å¤šä¸ªå·²å­˜åœ¨çš„è¡Œä¿¡æ¯
         // parameters:
-        //      bGetData    ÊÇ·ñĞèÒª»ñµÃ¼ÇÂ¼Ìå?
+        //      bGetData    æ˜¯å¦éœ€è¦è·å¾—è®°å½•ä½“?
         private int GetRowInfos(Connection connection,
             bool bGetData,
             List<string> ids,
@@ -10102,10 +10102,10 @@ FileShare.ReadWrite))
             if (ids.Count == 0)
                 return 0;
 
-            // ¼ì²éÁ¬½Ó¶ÔÏó
+            // æ£€æŸ¥è¿æ¥å¯¹è±¡
             // return:
-            //      -1  ³ö´í
-            //      0   Õı³£
+            //      -1  å‡ºé”™
+            //      0   æ­£å¸¸
             int nRet = this.CheckConnection(connection,
                 out strError);
             if (nRet == -1)
@@ -10118,7 +10118,7 @@ FileShare.ReadWrite))
             {
                 if (StringUtil.IsPureNumber(s) == false)
                 {
-                    strError = "ID '" + s + "' ±ØĞëÊÇ´¿Êı×Ö";
+                    strError = "ID '" + s + "' å¿…é¡»æ˜¯çº¯æ•°å­—";
                     return -1;
                 }
                 if (i != 0)
@@ -10135,8 +10135,8 @@ FileShare.ReadWrite))
             #region MS SQL Server
             if (connection.SqlServerType == SqlServerType.MsSqlServer)
             {
-                // TODO: ¿É·ñÏŞ¶¨³¬¹ıÒ»¶¨³ß´çµÄÊı¾İ¿â¾Í²»Òª·µ»Ø? 
-                // ÆäÊµËÆºõÃ»ÓĞÕâ¸ö±ØÒª£¬ÒòÎª¼´±ãÒª·µ»Ø£¬Ò²ÊÇ SqlReader GetBytes() µÄÊ±ºò²ÅÁÙÊ±È¥ SQL Server È¡µÄ°É
+                // TODO: å¯å¦é™å®šè¶…è¿‡ä¸€å®šå°ºå¯¸çš„æ•°æ®åº“å°±ä¸è¦è¿”å›? 
+                // å…¶å®ä¼¼ä¹æ²¡æœ‰è¿™ä¸ªå¿…è¦ï¼Œå› ä¸ºå³ä¾¿è¦è¿”å›ï¼Œä¹Ÿæ˜¯ SqlReader GetBytes() çš„æ—¶å€™æ‰ä¸´æ—¶å» SQL Server å–çš„å§
                 string strSelect = " SELECT TEXTPTR(data)," // 0
                     + " DataLength(data),"  // 1
                     + " TEXTPTR(newdata),"  // 2
@@ -10166,7 +10166,7 @@ FileShare.ReadWrite))
                     SqlDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult);
                     try
                     {
-                        // Ò»¸ö¼ÇÂ¼Ò²²»´æÔÚ
+                        // ä¸€ä¸ªè®°å½•ä¹Ÿä¸å­˜åœ¨
                         if (dr == null
                             || dr.HasRows == false)
                             return 0;
@@ -10192,7 +10192,7 @@ FileShare.ReadWrite))
 
                             if (dr.IsDBNull(5) == false)
                                 row_info.TimestampString = dr.GetString(5);
-                            // TODO: Èç¹ûÄÜÏÈ±È½ÏÊ±¼ä´Á£¬¼ÙÈç·¢ÉúÁËÊ±¼ä´Á²»Ò»ÖÂµÄÇé¿ö£¬¾Í¿ÉÒÔ±ÜÃâºóÃæ»ñÈ¡ data bytes µÄ¶àÓà¶¯×÷ÁË¡£¿ÉÒÔÓÃ delegate ÊµÏÖ²éÑ¯Ä³¸ö ID ¶ÔÓ¦µÄÌá½»ÉÏÀ´µÄÊ±¼ä´Á
+                            // TODO: å¦‚æœèƒ½å…ˆæ¯”è¾ƒæ—¶é—´æˆ³ï¼Œå‡å¦‚å‘ç”Ÿäº†æ—¶é—´æˆ³ä¸ä¸€è‡´çš„æƒ…å†µï¼Œå°±å¯ä»¥é¿å…åé¢è·å– data bytes çš„å¤šä½™åŠ¨ä½œäº†ã€‚å¯ä»¥ç”¨ delegate å®ç°æŸ¥è¯¢æŸä¸ª ID å¯¹åº”çš„æäº¤ä¸Šæ¥çš„æ—¶é—´æˆ³
 
                             if (dr.IsDBNull(6) == false)
                                 row_info.Metadata = dr.GetString(6);
@@ -10211,18 +10211,18 @@ FileShare.ReadWrite))
 
                             if (bGetData == true)
                             {
-                                // ¶ÔÏóÎÄ¼ş
+                                // å¯¹è±¡æ–‡ä»¶
                                 if (String.IsNullOrEmpty(row_info.Range) == false
 && row_info.Range[0] == '#')
                                 {
                                     nRet = ReadObjectFileContent(row_info,
             out strError);
                                     if (nRet == -1)
-                                        return -1;  // TODO: ÊÇ·ñ¾¡Á¿¶à¶ÁÈëÊı¾İ£¬×îºóÍ³Ò»¾¯¸æ»òÕß±¨´í?
+                                        return -1;  // TODO: æ˜¯å¦å°½é‡å¤šè¯»å…¥æ•°æ®ï¼Œæœ€åç»Ÿä¸€è­¦å‘Šæˆ–è€…æŠ¥é”™?
                                     goto CONTINUE;
                                 }
 
-                                // ÊÇ·ñ¿ÉÒÔ¸ù¾İ·½Ïò±êÖ¾£¬½öÈ¡Íê³ÉÁËµÄ data? ÕâÑù¿ÉÒÔ±ÜÃâÀË·Ñ×ÊÔ´
+                                // æ˜¯å¦å¯ä»¥æ ¹æ®æ–¹å‘æ ‡å¿—ï¼Œä»…å–å®Œæˆäº†çš„ data? è¿™æ ·å¯ä»¥é¿å…æµªè´¹èµ„æº
                                 if (dr.IsDBNull(11) == false && row_info.data_length <= 1024 * 1024)
                                 {
                                     row_info.Data = new byte[row_info.data_length];
@@ -10270,12 +10270,12 @@ FileShare.ReadWrite))
                     SQLiteDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult);
                     try
                     {
-                        // Èç¹û¼ÇÂ¼²»´æÔÚ
+                        // å¦‚æœè®°å½•ä¸å­˜åœ¨
                         if (dr == null
                             || dr.HasRows == false)
                             return 0;
 
-                        // Èç¹û¼ÇÂ¼ÒÑ¾­´æÔÚ
+                        // å¦‚æœè®°å½•å·²ç»å­˜åœ¨
                         while (dr.Read())
                         {
                             RecordRowInfo row_info = new RecordRowInfo();
@@ -10306,7 +10306,7 @@ FileShare.ReadWrite))
                                 nRet = ReadObjectFileContent(row_info,
 out strError);
                                 if (nRet == -1)
-                                    return -1;  // TODO: ÊÇ·ñ¾¡Á¿¶à¶ÁÈëÊı¾İ£¬×îºóÍ³Ò»¾¯¸æ»òÕß±¨´í?
+                                    return -1;  // TODO: æ˜¯å¦å°½é‡å¤šè¯»å…¥æ•°æ®ï¼Œæœ€åç»Ÿä¸€è­¦å‘Šæˆ–è€…æŠ¥é”™?
                             }
 
                             row_infos.Add(row_info);
@@ -10325,7 +10325,7 @@ out strError);
             #region MySql
             else if (connection.SqlServerType == SqlServerType.MySql)
             {
-                // ×¢£º MySql ÕâÀïºÍ SQLite »ù±¾Ò»Ñù
+                // æ³¨ï¼š MySql è¿™é‡Œå’Œ SQLite åŸºæœ¬ä¸€æ ·
                 string strCommand = " SELECT "
                     + " `range`," // 0 
                     + " dptimestamp,"   // 1
@@ -10344,12 +10344,12 @@ out strError);
                     MySqlDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult);
                     try
                     {
-                        // Èç¹û¼ÇÂ¼²»´æÔÚ£¬ĞèÒª´´½¨
+                        // å¦‚æœè®°å½•ä¸å­˜åœ¨ï¼Œéœ€è¦åˆ›å»º
                         if (dr == null
                             || dr.HasRows == false)
                             return 0;
 
-                        // Èç¹û¼ÇÂ¼ÒÑ¾­´æÔÚ
+                        // å¦‚æœè®°å½•å·²ç»å­˜åœ¨
                         while (dr.Read())
                         {
                             RecordRowInfo row_info = new RecordRowInfo();
@@ -10380,7 +10380,7 @@ out strError);
                                 nRet = ReadObjectFileContent(row_info,
     out strError);
                                 if (nRet == -1)
-                                    return -1;  // TODO: ÊÇ·ñ¾¡Á¿¶à¶ÁÈëÊı¾İ£¬×îºóÍ³Ò»¾¯¸æ»òÕß±¨´í?
+                                    return -1;  // TODO: æ˜¯å¦å°½é‡å¤šè¯»å…¥æ•°æ®ï¼Œæœ€åç»Ÿä¸€è­¦å‘Šæˆ–è€…æŠ¥é”™?
                             }
                             row_infos.Add(row_info);
                         }
@@ -10416,12 +10416,12 @@ out strError);
                     OracleDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult);
                     try
                     {
-                        // Èç¹û¼ÇÂ¼²»´æÔÚ
+                        // å¦‚æœè®°å½•ä¸å­˜åœ¨
                         if (dr == null
                             || dr.HasRows == false)
                             return 0;
 
-                        // Èç¹û¼ÇÂ¼ÒÑ¾­´æÔÚ
+                        // å¦‚æœè®°å½•å·²ç»å­˜åœ¨
                         while (dr.Read())
                         {
                             RecordRowInfo row_info = new RecordRowInfo();
@@ -10452,7 +10452,7 @@ out strError);
                                 nRet = ReadObjectFileContent(row_info,
     out strError);
                                 if (nRet == -1)
-                                    return -1;  // TODO: ÊÇ·ñ¾¡Á¿¶à¶ÁÈëÊı¾İ£¬×îºóÍ³Ò»¾¯¸æ»òÕß±¨´í?
+                                    return -1;  // TODO: æ˜¯å¦å°½é‡å¤šè¯»å…¥æ•°æ®ï¼Œæœ€åç»Ÿä¸€è­¦å‘Šæˆ–è€…æŠ¥é”™?
                             }
 
                             row_infos.Add(row_info);
@@ -10493,7 +10493,7 @@ out strError);
                     {
                         if (s.Length > 1024 * 1024)
                         {
-                            return 0;   // ÎÄ¼ş³ß´çÌ«´ó£¬²»ºÏÊÊ·Åµ½ byte [] ÖĞ
+                            return 0;   // æ–‡ä»¶å°ºå¯¸å¤ªå¤§ï¼Œä¸åˆé€‚æ”¾åˆ° byte [] ä¸­
                         }
                         row_info.Data = new byte[s.Length];
                         s.Read(row_info.Data,
@@ -10503,23 +10503,23 @@ out strError);
                 }
                 catch (FileNotFoundException /* ex */)
                 {
-                    // TODO: ²»ÒªÖ±½Ó»ã±¨ÎïÀíÎÄ¼şÃû
-                    strError = "¶ÔÏóÎÄ¼ş '" + strObjectFilename + "' ²»´æÔÚ";
+                    // TODO: ä¸è¦ç›´æ¥æ±‡æŠ¥ç‰©ç†æ–‡ä»¶å
+                    strError = "å¯¹è±¡æ–‡ä»¶ '" + strObjectFilename + "' ä¸å­˜åœ¨";
                     return -1;
                 }
                 catch (Exception ex)
                 {
-                    strError = "¶ÁÈ¡¶ÔÏóÎÄ¼ş '" + strObjectFilename + "' Ê±·¢Éú´íÎó: " + ex.Message;
+                    strError = "è¯»å–å¯¹è±¡æ–‡ä»¶ '" + strObjectFilename + "' æ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                     return -1;
                 }
             }
             return 0;
         }
 
-        // ½« Session ÖĞºÍ±¾Êı¾İ¿âÓĞ¹ØµÄ»º³åÊı¾İ³ÉÅúĞ´Èë SQL Server
+        // å°† Session ä¸­å’Œæœ¬æ•°æ®åº“æœ‰å…³çš„ç¼“å†²æ•°æ®æˆæ‰¹å†™å…¥ SQL Server
         // parameters:
-        //      strAction   "getdelaysize"  ·µ»ØĞèÒªĞ´ÈëµÄĞÅÏ¢ÊıÁ¿
-        //                  ""  ½øĞĞ BulkCopy
+        //      strAction   "getdelaysize"  è¿”å›éœ€è¦å†™å…¥çš„ä¿¡æ¯æ•°é‡
+        //                  ""  è¿›è¡Œ BulkCopy
         public override long BulkCopy(
             // SessionInfo sessioninfo,
             string strAction,
@@ -10532,7 +10532,7 @@ out strError);
                 && this.container.SqlServerType != SqlServerType.MySql
                 && this.container.SqlServerType != SqlServerType.SQLite)
             {
-                strError = "BulkCopy() ²»Ö§³Ö "+this.container.SqlServerType.ToString()+" ÀàĞÍµÄÊı¾İ¿â";
+                strError = "BulkCopy() ä¸æ”¯æŒ "+this.container.SqlServerType.ToString()+" ç±»å‹çš„æ•°æ®åº“";
                 return -1;
             }
 
@@ -10556,11 +10556,11 @@ out strError);
 
             bool bFastMode = false;
 
-            // ±ØĞëÔÚÃ»ÓĞ¼ÓËøµÄÊ±ºòµ÷ÓÃ
+            // å¿…é¡»åœ¨æ²¡æœ‰åŠ é”çš„æ—¶å€™è°ƒç”¨
             if (this.container.SqlServerType == SqlServerType.SQLite)
                 this.Commit();
 
-            //*********¶ÔÊı¾İ¿â¼Ó¶ÁËø*************
+            //*********å¯¹æ•°æ®åº“åŠ è¯»é”*************
             m_db_lock.AcquireReaderLock(m_nTimeOut);
             try
             {
@@ -10579,13 +10579,13 @@ out strError);
                         {
                             var bulkCopy = new SqlBulkCopy(connection.SqlConnection);
                             bulkCopy.DestinationTableName = this.m_strSqlDbName + ".." + table.TableName;
-                            bulkCopy.BulkCopyTimeout = m_nLongTimeout;  // È±Ê¡Îª 30 (Ãë)
-                            bulkCopy.BatchSize = 10000;  // È±Ê¡Îª 0 £¬±íÊ¾È«²¿ÔÚÒ»Åú
-                            // 42 ÍòÌõÊéÄ¿¼ÇÂ¼£¬Èç¹û×÷ÎªÒ»Åú£¬ĞèÒª 4 ·ÖÖÓ£»Èç¹ûÃ¿ 5000 ÌõÒ»Åú£¬ĞèÒª 8 ·ÖÖÓ
+                            bulkCopy.BulkCopyTimeout = m_nLongTimeout;  // ç¼ºçœä¸º 30 (ç§’)
+                            bulkCopy.BatchSize = 10000;  // ç¼ºçœä¸º 0 ï¼Œè¡¨ç¤ºå…¨éƒ¨åœ¨ä¸€æ‰¹
+                            // 42 ä¸‡æ¡ä¹¦ç›®è®°å½•ï¼Œå¦‚æœä½œä¸ºä¸€æ‰¹ï¼Œéœ€è¦ 4 åˆ†é’Ÿï¼›å¦‚æœæ¯ 5000 æ¡ä¸€æ‰¹ï¼Œéœ€è¦ 8 åˆ†é’Ÿ
                             int nRet = table.OpenForRead(table.FileName, out strError);
                             if (nRet == -1)
                                 return -1;
-                            table.LockForRead();    // ÕâÀï¶ÁËø¶¨Õû¸ö¶ÔÏó¡£ÔÚ Read() º¯ÊıÄÇÀï¾Í²»ĞèÒªËø¶¨ÁË
+                            table.LockForRead();    // è¿™é‡Œè¯»é”å®šæ•´ä¸ªå¯¹è±¡ã€‚åœ¨ Read() å‡½æ•°é‚£é‡Œå°±ä¸éœ€è¦é”å®šäº†
                             try
                             {
                                 bulkCopy.WriteToServer(table);
@@ -10598,12 +10598,12 @@ out strError);
                             this.container.DelayTables.Remove(table);
                         }
                         watch.Stop();
-                        this.container.KernelApplication.WriteErrorLog("MS SQL Server BulkCopy ºÄÊ± " + watch.Elapsed.ToString());
+                        this.container.KernelApplication.WriteErrorLog("MS SQL Server BulkCopy è€—æ—¶ " + watch.Elapsed.ToString());
                     }
                     #endregion // MS SQL Server
 
                     #region Oracle
-                    //strError = "Ôİ²»Ö§³Ö";
+                    //strError = "æš‚ä¸æ”¯æŒ";
                     //return -1;
                     if (this.container.SqlServerType == SqlServerType.Oracle)
                     {
@@ -10620,7 +10620,7 @@ out strError);
                             int nRet = table.OpenForRead(table.FileName, out strError);
                             if (nRet == -1)
                                 return -1;
-                            table.LockForRead();    // ÕâÀï¶ÁËø¶¨Õû¸ö¶ÔÏó¡£ÔÚ Read() º¯ÊıÄÇÀï¾Í²»ĞèÒªËø¶¨ÁË
+                            table.LockForRead();    // è¿™é‡Œè¯»é”å®šæ•´ä¸ªå¯¹è±¡ã€‚åœ¨ Read() å‡½æ•°é‚£é‡Œå°±ä¸éœ€è¦é”å®šäº†
                             try
                             {
                                 bulkCopy.WriteToServer(table);
@@ -10633,7 +10633,7 @@ out strError);
                             this.container.DelayTables.Remove(table);
                         }
                         watch.Stop();
-                        this.container.KernelApplication.WriteErrorLog("Oracle BulkCopy ºÄÊ± " + watch.Elapsed.ToString());
+                        this.container.KernelApplication.WriteErrorLog("Oracle BulkCopy è€—æ—¶ " + watch.Elapsed.ToString());
                     }
                     #endregion // Oracle
 
@@ -10650,7 +10650,7 @@ out strError);
                             int nRet = table.OpenForRead(table.FileName, out strError);
                             if (nRet == -1)
                                 return -1;
-                            table.LockForRead();    // ÕâÀï¶ÁËø¶¨Õû¸ö¶ÔÏó¡£ÔÚ Read() º¯ÊıÄÇÀï¾Í²»ĞèÒªËø¶¨ÁË
+                            table.LockForRead();    // è¿™é‡Œè¯»é”å®šæ•´ä¸ªå¯¹è±¡ã€‚åœ¨ Read() å‡½æ•°é‚£é‡Œå°±ä¸éœ€è¦é”å®šäº†
                             try
                             {
                                 bulkCopy.WriteToServer(table);
@@ -10663,7 +10663,7 @@ out strError);
                             this.container.DelayTables.Remove(table);
                         }
                         watch.Stop();
-                        this.container.KernelApplication.WriteErrorLog("MySql BulkCopy ºÄÊ± " + watch.Elapsed.ToString());
+                        this.container.KernelApplication.WriteErrorLog("MySql BulkCopy è€—æ—¶ " + watch.Elapsed.ToString());
                     }
                     #endregion // MySql
 
@@ -10682,7 +10682,7 @@ out strError);
                             int nRet = table.OpenForRead(table.FileName, out strError);
                             if (nRet == -1)
                                 return -1;
-                            table.LockForRead();    // ÕâÀï¶ÁËø¶¨Õû¸ö¶ÔÏó¡£ÔÚ Read() º¯ÊıÄÇÀï¾Í²»ĞèÒªËø¶¨ÁË
+                            table.LockForRead();    // è¿™é‡Œè¯»é”å®šæ•´ä¸ªå¯¹è±¡ã€‚åœ¨ Read() å‡½æ•°é‚£é‡Œå°±ä¸éœ€è¦é”å®šäº†
                             try
                             {
                                 bulkCopy.WriteToServer(table);
@@ -10697,19 +10697,19 @@ out strError);
                         // this.CommitInternal(false);
                         // connection.Commit(false);
                         watch.Stop();
-                        this.container.KernelApplication.WriteErrorLog("SQLite BulkCopy ºÄÊ± " + watch.Elapsed.ToString());
+                        this.container.KernelApplication.WriteErrorLog("SQLite BulkCopy è€—æ—¶ " + watch.Elapsed.ToString());
                     }
                     #endregion // SQLite
 
                 }
                 catch (SqlException sqlEx)
                 {
-                    strError = "3 BulkCopy() ÔÚ¸ø'" + this.GetCaption("zh-CN") + "'¿âĞ´Èë¼ÇÂ¼Ê±³ö´í,Ô­Òò:" + GetSqlErrors(sqlEx);
+                    strError = "3 BulkCopy() åœ¨ç»™'" + this.GetCaption("zh-CN") + "'åº“å†™å…¥è®°å½•æ—¶å‡ºé”™,åŸå› :" + GetSqlErrors(sqlEx);
                     return -1;
                 }
                 catch (Exception ex)
                 {
-                    strError = "4 BulkCopy() ÔÚ¸ø'" + this.GetCaption("zh-CN") + "'¿âĞ´Èë¼ÇÂ¼Ê±³ö´í,Ô­Òò:" + ex.Message;
+                    strError = "4 BulkCopy() åœ¨ç»™'" + this.GetCaption("zh-CN") + "'åº“å†™å…¥è®°å½•æ—¶å‡ºé”™,åŸå› :" + ex.Message;
                     return -1;
                 }
                 finally
@@ -10719,17 +10719,17 @@ out strError);
             }
             finally
             {
-                //********¶ÔÊı¾İ¿â½â¶ÁËø****************
+                //********å¯¹æ•°æ®åº“è§£è¯»é”****************
                 m_db_lock.ReleaseReaderLock();
             }
 
             return 0;
         }
 
-        // Ğ´ÈëÒ»Åú XML ¼ÇÂ¼£»»òÕßË¢ĞÂÒ»Åú¼ÇÂ¼µÄ¼ìË÷µã
+        // å†™å…¥ä¸€æ‰¹ XML è®°å½•ï¼›æˆ–è€…åˆ·æ–°ä¸€æ‰¹è®°å½•çš„æ£€ç´¢ç‚¹
         // return:
-        //      -1  ³ö´í¡£×¢Òâ£¬¼´±ãÃ»ÓĞ·µ»Ø -1£¬µ« outputs Êı×éÖĞÒ²ÓĞ¿ÉÄÜÓĞÔªËØ¾ßÓĞ·µ»ØµÄ´íÎóĞÅÏ¢
-        //      >=0 Èç¹ûÊÇ rebuildkeys£¬Ôò·µ»Ø×Ü¹²´¦ÀíµÄ keys ĞĞÊı
+        //      -1  å‡ºé”™ã€‚æ³¨æ„ï¼Œå³ä¾¿æ²¡æœ‰è¿”å› -1ï¼Œä½† outputs æ•°ç»„ä¸­ä¹Ÿæœ‰å¯èƒ½æœ‰å…ƒç´ å…·æœ‰è¿”å›çš„é”™è¯¯ä¿¡æ¯
+        //      >=0 å¦‚æœæ˜¯ rebuildkeysï¼Œåˆ™è¿”å›æ€»å…±å¤„ç†çš„ keys è¡Œæ•°
         public override int WriteRecords(
             // SessionInfo sessioninfo,
             User oUser,
@@ -10748,11 +10748,11 @@ out strError);
             bool bRebuildKeys = StringUtil.IsInList("rebuildkeys", strStyle);
             bool bDeleteKeys = StringUtil.IsInList("deletekeys", strStyle);
 
-            // ×¢£º rebuildkeys±íÊ¾±¾º¯ÊıµÄÖ÷Òª¹¦ÄÜÊÇÖØ½¨¼ìË÷µã¡£
-            // Èç¹ûºÍ deletekeys ÅäÌ×Ê¹ÓÃ£¬Ôò±íÊ¾¶ÔÃ¿Ìõ¼ÇÂ¼ÖØ½¨µÄµ±Ê±£¬¾ÍÉ¾³ıÁËÒÑ¾­´æÔÚµÄ¾ÉÓĞ¼ìË÷µã
-            // Èç¹û²»ÅäÌ× deletekeys£¬ÄÇÃ´Ó¦µ±ÊÇÔÚÕû¸öÅú´¦ÀíÇ°£¬È«²¿É¾³ı keys ±íÄÚÈİ£¬Ê¹µÃ±¾´ÎÖØ½¨¼ìË÷µã¹ı³ÌÖĞ²»±ØÔÙ¿¼ÂÇÖğÌõÉ¾³ı¾ÉÓĞ¼ìË÷µãÁË£¬Ö»ĞèÒª´´½¨¾ÍĞĞ
-            // Èç¹ûÅäÌ× fastmode Ê¹ÓÃ£¬±íÊ¾ĞèÒª´´½¨µÄ keys ÑÓ³Ù´´½¨£¬×îºó Bulkcopy ½øÈë keys ±í¡£
-            // Èç¹ûÅäÌ×ÁË fastmode£¬²¢ÇÒÃ»ÓĞÔ¤ÏÈÉ¾³ıÈ«²¿ keys£¬ÔòÓ¦µ±±£³Ö keys ±íµÄ B+ Ê÷Ë÷Òı£¬ÕâÑù²ÅÄÜÈÃÖğÌõÉ¾³ı¾ÉÓĞ keys ±äµÃ¿ÉĞĞ¡£²»¹ı£¬ÔÚ Bulkcopy Ç°ÈÔĞèÒª×¢ÒâÉ¾³ı B+ Ê÷Ë÷Òı£¬Íê³ÉºóÖØĞÂ´´½¨
+            // æ³¨ï¼š rebuildkeysè¡¨ç¤ºæœ¬å‡½æ•°çš„ä¸»è¦åŠŸèƒ½æ˜¯é‡å»ºæ£€ç´¢ç‚¹ã€‚
+            // å¦‚æœå’Œ deletekeys é…å¥—ä½¿ç”¨ï¼Œåˆ™è¡¨ç¤ºå¯¹æ¯æ¡è®°å½•é‡å»ºçš„å½“æ—¶ï¼Œå°±åˆ é™¤äº†å·²ç»å­˜åœ¨çš„æ—§æœ‰æ£€ç´¢ç‚¹
+            // å¦‚æœä¸é…å¥— deletekeysï¼Œé‚£ä¹ˆåº”å½“æ˜¯åœ¨æ•´ä¸ªæ‰¹å¤„ç†å‰ï¼Œå…¨éƒ¨åˆ é™¤ keys è¡¨å†…å®¹ï¼Œä½¿å¾—æœ¬æ¬¡é‡å»ºæ£€ç´¢ç‚¹è¿‡ç¨‹ä¸­ä¸å¿…å†è€ƒè™‘é€æ¡åˆ é™¤æ—§æœ‰æ£€ç´¢ç‚¹äº†ï¼Œåªéœ€è¦åˆ›å»ºå°±è¡Œ
+            // å¦‚æœé…å¥— fastmode ä½¿ç”¨ï¼Œè¡¨ç¤ºéœ€è¦åˆ›å»ºçš„ keys å»¶è¿Ÿåˆ›å»ºï¼Œæœ€å Bulkcopy è¿›å…¥ keys è¡¨ã€‚
+            // å¦‚æœé…å¥—äº† fastmodeï¼Œå¹¶ä¸”æ²¡æœ‰é¢„å…ˆåˆ é™¤å…¨éƒ¨ keysï¼Œåˆ™åº”å½“ä¿æŒ keys è¡¨çš„ B+ æ ‘ç´¢å¼•ï¼Œè¿™æ ·æ‰èƒ½è®©é€æ¡åˆ é™¤æ—§æœ‰ keys å˜å¾—å¯è¡Œã€‚ä¸è¿‡ï¼Œåœ¨ Bulkcopy å‰ä»éœ€è¦æ³¨æ„åˆ é™¤ B+ æ ‘ç´¢å¼•ï¼Œå®Œæˆåé‡æ–°åˆ›å»º
 
             List<RecordBody> error_records = new List<RecordBody>();
 
@@ -10760,7 +10760,7 @@ out strError);
 
             foreach (RecordBody record in inputs)
             {
-                string strPath = record.Path;   // °üÀ¨Êı¾İ¿âÃûµÄÂ·¾¶
+                string strPath = record.Path;   // åŒ…æ‹¬æ•°æ®åº“åçš„è·¯å¾„
 
                 string strDbName = StringUtil.GetFirstPartPath(ref strPath);
                 if (strDbName == ".")
@@ -10772,10 +10772,10 @@ out strError);
                 string strXPath = "";
 
                 string strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
-                //***********³ÔµôµÚ2²ã*************
-                // µ½´ËÎªÖ¹£¬strPath²»º¬¼ÇÂ¼ºÅ²ãÁË£¬ÏÂ¼¶·ÖÇé¿öÅĞ¶Ï
+                //***********åƒæ‰ç¬¬2å±‚*************
+                // åˆ°æ­¤ä¸ºæ­¢ï¼ŒstrPathä¸å«è®°å½•å·å±‚äº†ï¼Œä¸‹çº§åˆ†æƒ…å†µåˆ¤æ–­
                 strRecordID = strFirstPart;
-                // Ö»µ½¼ÇÂ¼ºÅ²ãµÄÂ·¾¶
+                // åªåˆ°è®°å½•å·å±‚çš„è·¯å¾„
                 if (strPath == "")
                 {
                     bObject = false;
@@ -10783,19 +10783,19 @@ out strError);
                 else
                 {
                     strFirstPart = StringUtil.GetFirstPartPath(ref strPath);
-                    //***********³ÔµôµÚ2²ã*************
-                    // µ½´ËÎªÖ¹£¬strPath²»º¬object»òxpath²ã strFirstPart¿ÉÄÜÊÇobject »ò xpath
+                    //***********åƒæ‰ç¬¬2å±‚*************
+                    // åˆ°æ­¤ä¸ºæ­¢ï¼ŒstrPathä¸å«objectæˆ–xpathå±‚ strFirstPartå¯èƒ½æ˜¯object æˆ– xpath
 
                     if (strFirstPart != "object"
         && strFirstPart != "xpath")
                     {
-                        record.Result.SetValue("×ÊÔ´Â·¾¶ '" + record.Path + "' ²»ºÏ·¨, µÚ3¼¶±ØĞëÊÇ 'object' »ò 'xpath' ",
+                        record.Result.SetValue("èµ„æºè·¯å¾„ '" + record.Path + "' ä¸åˆæ³•, ç¬¬3çº§å¿…é¡»æ˜¯ 'object' æˆ– 'xpath' ",
                             ErrorCodeValue.PathError); // -7;
                         continue;
                     }
-                    if (string.IsNullOrEmpty(strPath) == true)  //object»òxpathÏÂ¼¶±ØĞëÓĞÖµ
+                    if (string.IsNullOrEmpty(strPath) == true)  //objectæˆ–xpathä¸‹çº§å¿…é¡»æœ‰å€¼
                     {
-                        record.Result.SetValue("×ÊÔ´Â·¾¶ '" + record.Path + "' ²»ºÏ·¨,µ±µÚ3¼¶ÊÇ 'object' »ò 'xpath' Ê±£¬µÚ4¼¶±ØĞëÓĞÄÚÈİ",
+                        record.Result.SetValue("èµ„æºè·¯å¾„ '" + record.Path + "' ä¸åˆæ³•,å½“ç¬¬3çº§æ˜¯ 'object' æˆ– 'xpath' æ—¶ï¼Œç¬¬4çº§å¿…é¡»æœ‰å†…å®¹",
                             ErrorCodeValue.PathError); // -7;
                         continue;
                     }
@@ -10814,7 +10814,7 @@ out strError);
 
                 if (bObject == true)
                 {
-                    record.Result.SetValue("Ä¿Ç°²»ÔÊĞíÓÃ WriteRecords Ğ´Èë¶ÔÏó×ÊÔ´",
+                    record.Result.SetValue("ç›®å‰ä¸å…è®¸ç”¨ WriteRecords å†™å…¥å¯¹è±¡èµ„æº",
                         ErrorCodeValue.CommonError);
                     continue;
                 }
@@ -10824,18 +10824,18 @@ out strError);
 
                 if (bRebuildKeys == true && strRecordID == "-1")
                 {
-                    record.Result.SetValue("²»ÔÊĞíÓÃ²»È·¶¨µÄ¼ÇÂ¼IDÀ´ÖØ½¨¼ìË÷µã (¼ÇÂ¼Â·¾¶Îª '" + record.Path + "')",
+                    record.Result.SetValue("ä¸å…è®¸ç”¨ä¸ç¡®å®šçš„è®°å½•IDæ¥é‡å»ºæ£€ç´¢ç‚¹ (è®°å½•è·¯å¾„ä¸º '" + record.Path + "')",
                         ErrorCodeValue.CommonError);
                     continue;
                 }
 
 
                 bool bPushTailNo = false;
-                // ¶Ô £¿ ´´½¨Î²¼ÇÂ¼ºÅ
+                // å¯¹ ï¼Ÿ åˆ›å»ºå°¾è®°å½•å·
                 strRecordID = this.EnsureID(strRecordID,
-                    out bPushTailNo);  //¼ÓºÃĞ´Ëø
+                    out bPushTailNo);  //åŠ å¥½å†™é”
 
-                // bPushed == true ËµÃ÷Ã»ÓĞ±ØÒª select »ñÈ¡Ô­ÓĞ records ĞĞ
+                // bPushed == true è¯´æ˜æ²¡æœ‰å¿…è¦ select è·å–åŸæœ‰ records è¡Œ
 
                 if (oUser != null)
                 {
@@ -10849,7 +10849,7 @@ out strError);
                             out strExistRights);
                         if (bHasRight == false)
                         {
-                            strError = "ÄúµÄÕÊ»§ÃûÎª'" + oUser.Name + "'£¬¶Ô'" + strTempRecordPath + "'¼ÇÂ¼Ã»ÓĞ'´´½¨(create)'È¨ÏŞ£¬Ä¿Ç°µÄÈ¨ÏŞÖµÎª'" + strExistRights + "'¡£";
+                            strError = "æ‚¨çš„å¸æˆ·åä¸º'" + oUser.Name + "'ï¼Œå¯¹'" + strTempRecordPath + "'è®°å½•æ²¡æœ‰'åˆ›å»º(create)'æƒé™ï¼Œç›®å‰çš„æƒé™å€¼ä¸º'" + strExistRights + "'ã€‚";
                             record.Result.SetValue(strError,
                                 ErrorCodeValue.NotHasEnoughRights);    // return -6;
                             error_records.Add(record);
@@ -10865,7 +10865,7 @@ out strError);
                             out strExistRights);
                         if (bHasRight == false)
                         {
-                            strError = "ÄúµÄÕÊ»§ÃûÎª'" + oUser.Name + "'£¬¶Ô'" + strTempRecordPath + "'¼ÇÂ¼Ã»ÓĞ'¸²¸Ç(overwrite)'È¨ÏŞ£¬Ä¿Ç°µÄÈ¨ÏŞÖµÎª'" + strExistRights + "'¡£";
+                            strError = "æ‚¨çš„å¸æˆ·åä¸º'" + oUser.Name + "'ï¼Œå¯¹'" + strTempRecordPath + "'è®°å½•æ²¡æœ‰'è¦†ç›–(overwrite)'æƒé™ï¼Œç›®å‰çš„æƒé™å€¼ä¸º'" + strExistRights + "'ã€‚";
                             record.Result.SetValue(
                                 strError,
                                 ErrorCodeValue.NotHasEnoughRights,   // return -6;
@@ -10876,7 +10876,7 @@ out strError);
                     }
                 }
 
-                // TODO: rebuild keys ĞèÒªÊ²Ã´È¨ÏŞ ?
+                // TODO: rebuild keys éœ€è¦ä»€ä¹ˆæƒé™ ?
 
                 WriteInfo write_info = new WriteInfo();
                 write_info.record = record;
@@ -10895,20 +10895,20 @@ out strError);
 
             bool bIgnoreCheckTimestamp = StringUtil.IsInList("ignorechecktimestamp", strStyle);
 
-            //*********¶ÔÊı¾İ¿â¼Ó¶ÁËø*************
+            //*********å¯¹æ•°æ®åº“åŠ è¯»é”*************
             m_db_lock.AcquireReaderLock(m_nTimeOut);
 #if DEBUG_LOCK_SQLDATABASE
-			this.container.WriteDebugInfo("WriteRecords()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â¼Ó¶ÁËø¡£");
+			this.container.WriteDebugInfo("WriteRecords()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“åŠ è¯»é”ã€‚");
 #endif
             try
             {
                 List<string> locked_ids = WriteInfo.get_ids(records, true);
-                //**********¶Ô¼ÇÂ¼¼ÓĞ´Ëø***************
+                //**********å¯¹è®°å½•åŠ å†™é”***************
                 this.m_recordLockColl.LockForWrite(ref locked_ids, m_nTimeOut);
 #if DEBUG_LOCK_SQLDATABASE
-				this.container.WriteDebugInfo("WriteRecords()£¬¶Ô'" + this.GetCaption("zh-CN") + "/" + strID + "'¼ÇÂ¼¼ÓĞ´Ëø¡£");
+				this.container.WriteDebugInfo("WriteRecords()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "/" + strID + "'è®°å½•åŠ å†™é”ã€‚");
 #endif
-                try // ¼ÇÂ¼Ëø
+                try // è®°å½•é”
                 {
 
                     Connection connection = GetConnection(
@@ -10917,30 +10917,30 @@ out strError);
                     connection.Open();
                     try
                     {
-                        // select ÒÑ¾­´æÔÚµÄĞĞĞÅÏ¢
+                        // select å·²ç»å­˜åœ¨çš„è¡Œä¿¡æ¯
                         List<RecordRowInfo> row_infos = null;
-                        // »ñµÃ¶à¸öÒÑ´æÔÚµÄĞĞĞÅÏ¢
+                        // è·å¾—å¤šä¸ªå·²å­˜åœ¨çš„è¡Œä¿¡æ¯
                         int nRet = GetRowInfos(connection,
                             bRebuildKeys ? true : !bFastMode,
-                            WriteInfo.get_ids(records),    // ²ÉÓÃ get_existing_ids ´¿×·¼Ó 40 ÍòÌõÊéÄ¿Êı¾İ²Å¼Ó¿ìËÙ¶È1·ÖÖÓ¶øÒÑ
+                            WriteInfo.get_ids(records),    // é‡‡ç”¨ get_existing_ids çº¯è¿½åŠ  40 ä¸‡æ¡ä¹¦ç›®æ•°æ®æ‰åŠ å¿«é€Ÿåº¦1åˆ†é’Ÿè€Œå·²
                             out row_infos,
                             out strError);
                         if (nRet == -1)
                             return -1;
 
-                        // °Ñ row_infos ÖĞµÄÖµ Æ¥Åä id ·Åµ½ infosµÄÊôĞÔrow_infoÖĞ
+                        // æŠŠ row_infos ä¸­çš„å€¼ åŒ¹é… id æ”¾åˆ° infosçš„å±æ€§row_infoä¸­
                         WriteInfo.set_rowinfos(ref records, row_infos);
 
-                        // ½öÖØ½¨¼ìË÷µã
+                        // ä»…é‡å»ºæ£€ç´¢ç‚¹
                         if (bRebuildKeys == true)
                         {
                             if (bFastMode == false && bDeleteKeys == false)
                             {
-                                strError = "WriteRecords() Ö´ĞĞ rebuildkeys ¹¦ÄÜÊ±£¬ Èç¹û style ÖĞ²»°üº¬ fastmode£¬Ôò±ØĞë°üº¬ deletekeys";
+                                strError = "WriteRecords() æ‰§è¡Œ rebuildkeys åŠŸèƒ½æ—¶ï¼Œ å¦‚æœ style ä¸­ä¸åŒ…å« fastmodeï¼Œåˆ™å¿…é¡»åŒ…å« deletekeys";
                                 return -1;
                             }
                             //List<WriteInfo> temp = null;
-                            // ¸üĞÂ Keys
+                            // æ›´æ–° Keys
                             nRet = RebuildKeysRows(
                                 connection,
                                 bDeleteKeys,
@@ -10953,9 +10953,9 @@ out strError);
                             return nRet;
                         }
 
-                        // ×Ô´ËÒÔºó .row_info Îª¿ÕµÄ¾ÍÊÇÒªĞÂ´´½¨µÄĞĞ
+                        // è‡ªæ­¤ä»¥å .row_info ä¸ºç©ºçš„å°±æ˜¯è¦æ–°åˆ›å»ºçš„è¡Œ
 
-                        // ¼ì²éÊ±¼ä´Á
+                        // æ£€æŸ¥æ—¶é—´æˆ³
                         if (bIgnoreCheckTimestamp == false)
                         {
                             for (int i = 0; i < records.Count; i++)
@@ -10970,9 +10970,9 @@ out strError);
                                 if (ByteArray.Compare(info.record.Timestamp,
                                     baExistTimestamp) != 0)
                                 {
-                                    info.record.Timestamp = baExistTimestamp;   // ·µ»Ø¸øÇ°¶Ë£¬ÈÃÇ°¶ËÄÜ¹»µÃÖªµ±Ç°µÄÊ±¼ä´Á
+                                    info.record.Timestamp = baExistTimestamp;   // è¿”å›ç»™å‰ç«¯ï¼Œè®©å‰ç«¯èƒ½å¤Ÿå¾—çŸ¥å½“å‰çš„æ—¶é—´æˆ³
                                     info.record.Result.Value = -1;
-                                    info.record.Result.ErrorString = "Ê±¼ä´Á²»Æ¥Åä";
+                                    info.record.Result.ErrorString = "æ—¶é—´æˆ³ä¸åŒ¹é…";
                                     info.record.Result.ErrorCode = ErrorCodeValue.TimestampMismatch; //   return -2;
 
                                     error_records.Add(info.record);
@@ -10987,7 +10987,7 @@ out strError);
                         List<WriteInfo> results = null;
                         if (records.Count > 0)
                         {
-                            // ´´½¨»òÕß¸üĞÂ SQL ¼ÇÂ¼ĞĞ
+                            // åˆ›å»ºæˆ–è€…æ›´æ–° SQL è®°å½•è¡Œ
                             nRet = UpdateRecordRows(connection,
                                 records,
                                 strStyle,
@@ -10995,7 +10995,7 @@ out strError);
                                 out strError);
                             foreach (WriteInfo info in results)
                             {
-                                string strPath = info.record.Path;   // °üÀ¨Êı¾İ¿âÃûµÄÂ·¾¶
+                                string strPath = info.record.Path;   // åŒ…æ‹¬æ•°æ®åº“åçš„è·¯å¾„
                                 string strDbName = StringUtil.GetFirstPartPath(ref strPath);
                                 if (strDbName == ".")
                                     strDbName = this.GetCaption("zh-CN");
@@ -11009,7 +11009,7 @@ out strError);
                             }
                         }
 
-                        // recordsÖĞ(±¨´íÊ±)Ã»ÓĞÀ´µÃ¼°±»´¦ÀíµÄ²¿·Ö¾Í²»½øÈëÁË
+                        // recordsä¸­(æŠ¥é”™æ—¶)æ²¡æœ‰æ¥å¾—åŠè¢«å¤„ç†çš„éƒ¨åˆ†å°±ä¸è¿›å…¥äº†
                         outputs.AddRange(error_records);
                         if (nRet == -1)
                             return -1;
@@ -11017,11 +11017,11 @@ out strError);
                         if (results != null && results.Count > 0)
                         {
                             //List<WriteInfo> temp = null;
-                            // ¸üĞÂ Keys
+                            // æ›´æ–° Keys
                             nRet = UpdateKeysRows(
                                 // sessioninfo,
                                 connection,
-                                true,   // Ê¼ÖÕÒªÁ¢¼´É¾³ı¾ÉµÄ keys
+                                true,   // å§‹ç»ˆè¦ç«‹å³åˆ é™¤æ—§çš„ keys
                                 bFastMode,
                                 results,
                                 //out temp,
@@ -11032,12 +11032,12 @@ out strError);
                     }
                     catch (SqlException sqlEx)
                     {
-                        strError = "3 WriteRecords() ÔÚ¸ø'" + this.GetCaption("zh-CN") + "'¿âĞ´Èë¼ÇÂ¼ '" + StringUtil.MakePathList(WriteInfo.get_ids(records)) + "' Ê±³ö´í,Ô­Òò:" + GetSqlErrors(sqlEx);
+                        strError = "3 WriteRecords() åœ¨ç»™'" + this.GetCaption("zh-CN") + "'åº“å†™å…¥è®°å½• '" + StringUtil.MakePathList(WriteInfo.get_ids(records)) + "' æ—¶å‡ºé”™,åŸå› :" + GetSqlErrors(sqlEx);
                         return -1;
                     }
                     catch (Exception ex)
                     {
-                        strError = "4 WriteRecords() ÔÚ¸ø'" + this.GetCaption("zh-CN") + "'¿âĞ´Èë¼ÇÂ¼ '" + StringUtil.MakePathList(WriteInfo.get_ids(records)) + "' Ê±³ö´í,Ô­Òò:" + ex.Message;
+                        strError = "4 WriteRecords() åœ¨ç»™'" + this.GetCaption("zh-CN") + "'åº“å†™å…¥è®°å½• '" + StringUtil.MakePathList(WriteInfo.get_ids(records)) + "' æ—¶å‡ºé”™,åŸå› :" + ex.Message;
                         return -1;
                     }
                     finally
@@ -11046,22 +11046,22 @@ out strError);
                     }
 
                 }
-                finally  // ¼ÇÂ¼Ëø
+                finally  // è®°å½•é”
                 {
-                    //******¶Ô¼ÇÂ¼½âĞ´Ëø****************************
+                    //******å¯¹è®°å½•è§£å†™é”****************************
                     m_recordLockColl.UnlockForWrite(locked_ids);
 #if DEBUG_LOCK_SQLDATABASE
-					this.container.WriteDebugInfo("WriteRecords()£¬¶Ô'" + this.GetCaption("zh-CN") + "/" + strID + "'¼ÇÂ¼½âĞ´Ëø¡£");
+					this.container.WriteDebugInfo("WriteRecords()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "/" + strID + "'è®°å½•è§£å†™é”ã€‚");
 #endif
                 }
 
             }
             finally
             {
-                //********¶ÔÊı¾İ¿â½â¶ÁËø****************
+                //********å¯¹æ•°æ®åº“è§£è¯»é”****************
                 m_db_lock.ReleaseReaderLock();
 #if DEBUG_LOCK_SQLDATABASE
-				this.container.WriteDebugInfo("WriteRecords()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â½â¶ÁËø¡£");
+				this.container.WriteDebugInfo("WriteRecords()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“è§£è¯»é”ã€‚");
 #endif
             }
             return 0;
@@ -11070,7 +11070,7 @@ out strError);
         class WriteInfo
         {
             public string ID = "";
-            public bool Pushed = false; // ¼´½«Ğ´ÈëµÄ ID ºÅÂëÊÇ·ñÍÆ¶¯¹ıµ±Ç°Î²ºÅ ? Èç¹ûÍÆ¶¯¹ı(Pushed == true)£¬ËµÃ÷Ã»ÓĞ±ØÒª select »ñµÃ records ±íÖĞµÄÒÑÓĞĞĞ£¬Ò²¾ÍÊÇËµ records ±íÖĞ²»»áÓĞĞĞ
+            public bool Pushed = false; // å³å°†å†™å…¥çš„ ID å·ç æ˜¯å¦æ¨åŠ¨è¿‡å½“å‰å°¾å· ? å¦‚æœæ¨åŠ¨è¿‡(Pushed == true)ï¼Œè¯´æ˜æ²¡æœ‰å¿…è¦ select è·å¾— records è¡¨ä¸­çš„å·²æœ‰è¡Œï¼Œä¹Ÿå°±æ˜¯è¯´ records è¡¨ä¸­ä¸ä¼šæœ‰è¡Œ
             public string XPath = "";
             public RecordRowInfo row_info = null;
             public RecordBody record = null;
@@ -11092,7 +11092,7 @@ out strError);
                 return results;
             }
 
-            // Ìô³öÄÄĞ©¿ÉÄÜ´æÔÚ records ĞĞµÄ id ºÅ£¬ÓÃÓÚ select Ç°×¼±¸ id µÄ¹¤×÷
+            // æŒ‘å‡ºå“ªäº›å¯èƒ½å­˜åœ¨ records è¡Œçš„ id å·ï¼Œç”¨äº select å‰å‡†å¤‡ id çš„å·¥ä½œ
             public static List<string> get_existing_ids(List<WriteInfo> infos)
             {
                 List<string> results = new List<string>();
@@ -11105,7 +11105,7 @@ out strError);
                 return results;
             }
 
-            // °Ñ row_infos ÖĞµÄÖµ Æ¥Åä id ·Åµ½ infos µÄÊôĞÔ row_info ÖĞ
+            // æŠŠ row_infos ä¸­çš„å€¼ åŒ¹é… id æ”¾åˆ° infos çš„å±æ€§ row_info ä¸­
             public static void set_rowinfos(ref List<WriteInfo> infos,
                 List<RecordRowInfo> row_infos)
             {
@@ -11128,7 +11128,7 @@ out strError);
 
         }
 
-        // ÉÏ´ÎÍêÕûĞ´ÈëÊ±µÄÊ±¼ä´Á
+        // ä¸Šæ¬¡å®Œæ•´å†™å…¥æ—¶çš„æ—¶é—´æˆ³
         static string GetCompleteTimestamp(RecordRowInfo row_info)
         {
             string strCurrentRange = row_info.Range;
@@ -11136,15 +11136,15 @@ out strError);
             if (String.IsNullOrEmpty(strCurrentRange) == false
     && strCurrentRange[0] == '!')
             {
-                return row_info.NewTimestampString; // ±¾´ÎµÄÊ±¼ä´Á
+                return row_info.NewTimestampString; // æœ¬æ¬¡çš„æ—¶é—´æˆ³
             }
             else
             {
-                return row_info.TimestampString; // ÉÏ´ÎÍêÕûĞ´ÈëÊ±µÄÊ±¼ä´Á
+                return row_info.TimestampString; // ä¸Šæ¬¡å®Œæ•´å†™å…¥æ—¶çš„æ—¶é—´æˆ³
             }
         }
 
-        // ÉÏ´ÎÍêÕûĞ´ÈëÊ±µÄ¼ÇÂ¼Ìå
+        // ä¸Šæ¬¡å®Œæ•´å†™å…¥æ—¶çš„è®°å½•ä½“
         static byte [] GetCompleteData(RecordRowInfo row_info)
         {
             string strCurrentRange = row_info.Range;
@@ -11156,22 +11156,22 @@ out strError);
                 return row_info.Data;
         }
 
-        // Ğ´xmlÊı¾İ
+        // å†™xmlæ•°æ®
         // parameter:
-        //		strID           ¼ÇÂ¼ID -1:±íÊ¾×·¼ÓÒ»Ìõ¼ÇÂ¼
-        //		strRanges       Ä¿±êµÄÎ»ÖÃ,¶à¸örangeÓÃ¶ººÅ·Ö¸ô
-        //		nTotalLength    ×Ü³¤¶È
-        //		inputTimestamp  ÊäÈëµÄÊ±¼ä´Á
-        //		outputTimestamp ·µ»ØµÄÊ±¼ä´Á
-        //		strOutputID     ·µ»ØµÄ¼ÇÂ¼ID,µ±strID == -1Ê±,µÃµ½Êµ¼ÊµÄID
+        //		strID           è®°å½•ID -1:è¡¨ç¤ºè¿½åŠ ä¸€æ¡è®°å½•
+        //		strRanges       ç›®æ ‡çš„ä½ç½®,å¤šä¸ªrangeç”¨é€—å·åˆ†éš”
+        //		nTotalLength    æ€»é•¿åº¦
+        //		inputTimestamp  è¾“å…¥çš„æ—¶é—´æˆ³
+        //		outputTimestamp è¿”å›çš„æ—¶é—´æˆ³
+        //		strOutputID     è¿”å›çš„è®°å½•ID,å½“strID == -1æ—¶,å¾—åˆ°å®é™…çš„ID
         //		strError        
         // return:
-        //		-1  ³ö´í
-        //		-2  Ê±¼ä´Á²»Æ¥Åä
-        //      -4  ¼ÇÂ¼²»´æÔÚ
-        //      -6  È¨ÏŞ²»¹»
-        //		0   ³É¹¦
-        public override int WriteXml(User oUser,  //null£¬Ôò²»¼ìË÷È¨ÏŞ
+        //		-1  å‡ºé”™
+        //		-2  æ—¶é—´æˆ³ä¸åŒ¹é…
+        //      -4  è®°å½•ä¸å­˜åœ¨
+        //      -6  æƒé™ä¸å¤Ÿ
+        //		0   æˆåŠŸ
+        public override int WriteXml(User oUser,  //nullï¼Œåˆ™ä¸æ£€ç´¢æƒé™
             string strID,
             string strXPath,
             string strRanges,
@@ -11183,7 +11183,7 @@ out strError);
             byte[] inputTimestamp,
             out byte[] outputTimestamp,
             out string strOutputID,
-            out string strOutputValue,   //µ±AddInteger »ò AppendStringÊ± ·µ»ØÖµ×îºóµÄÖµ
+            out string strOutputValue,   //å½“AddInteger æˆ– AppendStringæ—¶ è¿”å›å€¼æœ€åçš„å€¼
             bool bCheckAccount,
             out string strError)
         {
@@ -11202,7 +11202,7 @@ out strError);
 
             bool bPushTailNo = false;
             strID = this.EnsureID(strID,
-                out bPushTailNo);  //¼ÓºÃĞ´Ëø
+                out bPushTailNo);  //åŠ å¥½å†™é”
             if (oUser != null)
             {
                 string strTempRecordPath = this.GetCaption("zh-CN") + "/" + strID;
@@ -11215,7 +11215,7 @@ out strError);
                         out strExistRights);
                     if (bHasRight == false)
                     {
-                        strError = "ÄúµÄÕÊ»§ÃûÎª'" + oUser.Name + "'£¬¶Ô'" + strTempRecordPath + "'¼ÇÂ¼Ã»ÓĞ'´´½¨(create)'È¨ÏŞ£¬Ä¿Ç°µÄÈ¨ÏŞÖµÎª'" + strExistRights + "'¡£";
+                        strError = "æ‚¨çš„å¸æˆ·åä¸º'" + oUser.Name + "'ï¼Œå¯¹'" + strTempRecordPath + "'è®°å½•æ²¡æœ‰'åˆ›å»º(create)'æƒé™ï¼Œç›®å‰çš„æƒé™å€¼ä¸º'" + strExistRights + "'ã€‚";
                         return -6;
                     }
                 }
@@ -11228,7 +11228,7 @@ out strError);
                         out strExistRights);
                     if (bHasRight == false)
                     {
-                        strError = "ÄúµÄÕÊ»§ÃûÎª'" + oUser.Name + "'£¬¶Ô'" + strTempRecordPath + "'¼ÇÂ¼Ã»ÓĞ'¸²¸Ç(overwrite)'È¨ÏŞ£¬Ä¿Ç°µÄÈ¨ÏŞÖµÎª'" + strExistRights + "'¡£";
+                        strError = "æ‚¨çš„å¸æˆ·åä¸º'" + oUser.Name + "'ï¼Œå¯¹'" + strTempRecordPath + "'è®°å½•æ²¡æœ‰'è¦†ç›–(overwrite)'æƒé™ï¼Œç›®å‰çš„æƒé™å€¼ä¸º'" + strExistRights + "'ã€‚";
                         return -6;
                     }
                 }
@@ -11242,12 +11242,12 @@ out strError);
 
             string strDbType = "";
 
-            // ÕâÀï²»ÔÙÒòÎªFastMode¼ÓĞ´Ëø
+            // è¿™é‡Œä¸å†å› ä¸ºFastModeåŠ å†™é”
 
-            //*********¶ÔÊı¾İ¿â¼Ó¶ÁËø*************
+            //*********å¯¹æ•°æ®åº“åŠ è¯»é”*************
             m_db_lock.AcquireReaderLock(m_nTimeOut);
 #if DEBUG_LOCK_SQLDATABASE
-			this.container.WriteDebugInfo("WriteXml()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â¼Ó¶ÁËø¡£");
+			this.container.WriteDebugInfo("WriteXml()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“åŠ è¯»é”ã€‚");
 #endif
 
             try
@@ -11255,12 +11255,12 @@ out strError);
                 strDbType = this.GetDbType();
 
                 strID = DbPath.GetID10(strID);
-                //**********¶Ô¼ÇÂ¼¼ÓĞ´Ëø***************
+                //**********å¯¹è®°å½•åŠ å†™é”***************
                 this.m_recordLockColl.LockForWrite(strID, m_nTimeOut);
 #if DEBUG_LOCK_SQLDATABASE
-				this.container.WriteDebugInfo("WriteXml()£¬¶Ô'" + this.GetCaption("zh-CN") + "/" + strID + "'¼ÇÂ¼¼ÓĞ´Ëø¡£");
+				this.container.WriteDebugInfo("WriteXml()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "/" + strID + "'è®°å½•åŠ å†™é”ã€‚");
 #endif
-                try // ¼ÇÂ¼Ëø
+                try // è®°å½•é”
                 {
                     Connection connection = GetConnection(
                         this.m_strConnString,
@@ -11269,11 +11269,11 @@ out strError);
                     try
                     {
 #if NO
-                            // 1.Èç¹û¼ÇÂ¼²»´æÔÚ,²åÈëÒ»Ìõ×Ö½ÚµÄ¼ÇÂ¼,ÒÔÈ·±£µÃµ½textPtr
+                            // 1.å¦‚æœè®°å½•ä¸å­˜åœ¨,æ’å…¥ä¸€æ¡å­—èŠ‚çš„è®°å½•,ä»¥ç¡®ä¿å¾—åˆ°textPtr
                             // return:
-                            //		-1  ³ö´í
-                            //      0   ²»´æÔÚ
-                            //      1   ´æÔÚ
+                            //		-1  å‡ºé”™
+                            //      0   ä¸å­˜åœ¨
+                            //      1   å­˜åœ¨
                             nRet = this.RecordIsExist(connection,
                                 strID,
                                 out strError);
@@ -11284,11 +11284,11 @@ out strError);
                             if (nRet == 1)
                                 bExist = true;
 
-                            // ĞÂ¼ÇÂ¼Ê±£¬²åÈëÒ»¸ö×Ö½Ú£¬²¢Éú³ÉĞÂÊ±¼ä´Á
+                            // æ–°è®°å½•æ—¶ï¼Œæ’å…¥ä¸€ä¸ªå­—èŠ‚ï¼Œå¹¶ç”Ÿæˆæ–°æ—¶é—´æˆ³
                             if (bExist == false)
                             {
                                 byte[] tempInputTimestamp = inputTimestamp;
-                                // ×¢ÒâĞÂ¼ÇÂ¼µÄÊ±¼ä´Á,ÓÃinputTimestamp±äÁ¿
+                                // æ³¨æ„æ–°è®°å½•çš„æ—¶é—´æˆ³,ç”¨inputTimestampå˜é‡
                                 nRet = this.InsertRecord(connection,
                                     strID,
                                     out inputTimestamp,//tempTimestamp,//
@@ -11298,13 +11298,13 @@ out strError);
                                     return -1;
                             }
 #endif
-                        // ÊÓÇé¿ö´´½¨ĞÂ¼ÇÂ¼£¬·µ»ØĞĞĞÅÏ¢
+                        // è§†æƒ…å†µåˆ›å»ºæ–°è®°å½•ï¼Œè¿”å›è¡Œä¿¡æ¯
                         RecordRowInfo row_info = null;
                         // return:
-                        //		-1  ³ö´í
-                        //      0   Ã»ÓĞ´´½¨ĞÂ¼ÇÂ¼
-                        //      1   ´´½¨ÁËĞÂµÄ¼ÇÂ¼(Ò²¾ÍÒâÎ¶×ÅÔ­ÏÈ¼ÇÂ¼²¢²»´æÔÚ)
-                        //      2   ĞèÒª´´½¨ĞÂµÄ¼ÇÂ¼£¬µ«ÒòÎªÓÅ»¯µÄÔµ¹Ê(ÉÔºóĞèÒª´´½¨)¶øÃ»ÓĞ´´½¨
+                        //		-1  å‡ºé”™
+                        //      0   æ²¡æœ‰åˆ›å»ºæ–°è®°å½•
+                        //      1   åˆ›å»ºäº†æ–°çš„è®°å½•(ä¹Ÿå°±æ„å‘³ç€åŸå…ˆè®°å½•å¹¶ä¸å­˜åœ¨)
+                        //      2   éœ€è¦åˆ›å»ºæ–°çš„è®°å½•ï¼Œä½†å› ä¸ºä¼˜åŒ–çš„ç¼˜æ•…(ç¨åéœ€è¦åˆ›å»º)è€Œæ²¡æœ‰åˆ›å»º
                         nRet = this.CreateNewRecordIfNeed(connection,
                             strID,
                             null,
@@ -11324,16 +11324,16 @@ out strError);
 #if NO
                             byte[] baOldPreamble = new byte[0];
                             string strOldXml = "";
-                            // ·ÖÖ§
+                            // åˆ†æ”¯
                             if (string.IsNullOrEmpty(strXPath) == false)
                             {
                                 if (bExist == true)
                                 {
                                     // return:
-                                    //      -1  ³ö´í
-                                    //      -4  ¼ÇÂ¼²»´æÔÚ
-        //      -100    ¶ÔÏóÎÄ¼ş²»´æÔÚ
-                                    //      0   ÕıÈ·
+                                    //      -1  å‡ºé”™
+                                    //      -4  è®°å½•ä¸å­˜åœ¨
+        //      -100    å¯¹è±¡æ–‡ä»¶ä¸å­˜åœ¨
+                                    //      0   æ­£ç¡®
                                     nRet = this.GetXmlData(
                                         connection,
                                         row_info,
@@ -11350,7 +11350,7 @@ out strError);
                                 string strNewPartXml = DatabaseUtil.ByteArrayToString(baSource,
 out baPreamble);
 
-                                // ¸ù¾İ²ÎÊıÖĞÌá¹©µÄ¾Ö²¿ÄÚÈİ´´½¨³öÍêÕûµÄ¼ÇÂ¼
+                                // æ ¹æ®å‚æ•°ä¸­æä¾›çš„å±€éƒ¨å†…å®¹åˆ›å»ºå‡ºå®Œæ•´çš„è®°å½•
                                 nRet = BuildRecordXml(
                                     strID,
                                     strXPath,
@@ -11368,31 +11368,31 @@ out baPreamble);
                             }
 #endif
 
-                        bool bForceDeleteKeys = false;  // ÊÇ·ñÒªÇ¿ÖÆÉ¾³ıÒÑ¾­´æÔÚµÄkeys
+                        bool bForceDeleteKeys = false;  // æ˜¯å¦è¦å¼ºåˆ¶åˆ é™¤å·²ç»å­˜åœ¨çš„keys
 
                         string strOldXml = "";
                         byte[] baOldPreamble = new byte[0];
 
                         string strExistingRanges = GetPureRangeString(row_info.Range);
 
-                        // ÅĞ¶Ï±¾´ÎÉÏÔØÍê³Éºó£¬ÊÇ·ñ¸²¸ÇÈ«·¶Î§
+                        // åˆ¤æ–­æœ¬æ¬¡ä¸Šè½½å®Œæˆåï¼Œæ˜¯å¦è¦†ç›–å…¨èŒƒå›´
                         bFull = IsFull(
         strExistingRanges,
         lTotalLength,
         strRanges,
         baSource.Length);
-                        // Èç¹ûÔ¤¼Æµ½±¾´ÎĞ´Èë²Ù×÷ºótempÇø»áÍê³É£¬ÔòÌáÇ°È¡³öÒÑ¾­´æÔÚµÄxml×Ö·û´®
+                        // å¦‚æœé¢„è®¡åˆ°æœ¬æ¬¡å†™å…¥æ“ä½œåtempåŒºä¼šå®Œæˆï¼Œåˆ™æå‰å–å‡ºå·²ç»å­˜åœ¨çš„xmlå­—ç¬¦ä¸²
                         if (bFull == true)
                         {
-                            // »ñµÃÒÑ¾­´æÔÚµÄ¼ÇÂ¼µÄXML×Ö·û´®
+                            // è·å¾—å·²ç»å­˜åœ¨çš„è®°å½•çš„XMLå­—ç¬¦ä¸²
                             if (string.IsNullOrEmpty(strOldXml) == true
                                 && bExist == true)
                             {
                                 // return:
-                                //      -1  ³ö´í
-                                //      -4  ¼ÇÂ¼²»´æÔÚ
-                                //      -100    ¶ÔÏóÎÄ¼ş²»´æÔÚ
-                                //      0   ÕıÈ·
+                                //      -1  å‡ºé”™
+                                //      -4  è®°å½•ä¸å­˜åœ¨
+                                //      -100    å¯¹è±¡æ–‡ä»¶ä¸å­˜åœ¨
+                                //      0   æ­£ç¡®
                                 nRet = this.GetXmlData(
                                     connection,
                                     row_info,
@@ -11403,14 +11403,14 @@ out baPreamble);
                                     out strError);
                                 if (nRet == -100)
                                 {
-                                    // ÒªĞ´ÈëÊ±£¬·¢ÏÖ¼´½«±»¸²¸ÇµÄÎ»ÖÃ¶ÔÏóÎÄ¼ş²»´æÔÚ
+                                    // è¦å†™å…¥æ—¶ï¼Œå‘ç°å³å°†è¢«è¦†ç›–çš„ä½ç½®å¯¹è±¡æ–‡ä»¶ä¸å­˜åœ¨
                                     strOldXml = "";
                                     baOldPreamble = new byte[0];
                                     bForceDeleteKeys = true;
                                 }
                                 else
                                 {
-                                    if (nRet <= -1 && nRet != -3)   // ?? -3ÊÇÊ²Ã´Çé¿ö
+                                    if (nRet <= -1 && nRet != -3)   // ?? -3æ˜¯ä»€ä¹ˆæƒ…å†µ
                                         return nRet;
                                 }
                             }
@@ -11420,19 +11420,19 @@ out baPreamble);
                         if (string.IsNullOrEmpty(strXPath) == false
                             && IsSingleFull(strRanges, baSource, lTotalLength) == true)
                         {
-                            // Èç¹ûÒ»´ÎĞÔ¾Í·¢À´ÁËÈ«²¿Êı¾İ, ²¢ÇÒÎªxpath·½Ê½Ğ´Èë£¬ÄÇÃ´
-                            // ĞèÒªÊ¡È¥Õâ´ÎĞ´Èë¼ÇÂ¼µÄ²Ù×÷£¬ÔÚºóÃæÖ±½ÓĞ´Èë¼´¿É
+                            // å¦‚æœä¸€æ¬¡æ€§å°±å‘æ¥äº†å…¨éƒ¨æ•°æ®, å¹¶ä¸”ä¸ºxpathæ–¹å¼å†™å…¥ï¼Œé‚£ä¹ˆ
+                            // éœ€è¦çœå»è¿™æ¬¡å†™å…¥è®°å½•çš„æ“ä½œï¼Œåœ¨åé¢ç›´æ¥å†™å…¥å³å¯
                             Debug.Assert(bFull == true, "");
                             bFull = true;
                             bSingleFull = true;
                         }
                         else
                         {
-                            // Ğ´Êı¾İ
+                            // å†™æ•°æ®
                             // return:
-                            //		-1	Ò»°ãĞÔ´íÎó
-                            //		-2	Ê±¼ä´Á²»Æ¥Åä
-                            //		0	³É¹¦
+                            //		-1	ä¸€èˆ¬æ€§é”™è¯¯
+                            //		-2	æ—¶é—´æˆ³ä¸åŒ¹é…
+                            //		0	æˆåŠŸ
                             nRet = this.WriteSqlRecord(connection,
                                 ref row_info,
                                 bNeedInsertRow,
@@ -11454,18 +11454,18 @@ out baPreamble);
                             nWriteCount++;
                         }
 
-                        // ¼ì²é·¶Î§
+                        // æ£€æŸ¥èŒƒå›´
                         //string strCurrentRange = this.GetRange(connection,
                         //	strID);
-                        if (bFull == true)  //¸²¸ÇÍêÁË
+                        if (bFull == true)  //è¦†ç›–å®Œäº†
                         {
-                            // 1.µÃµ½ĞÂ¾É¼ìË÷µã
+                            // 1.å¾—åˆ°æ–°æ—§æ£€ç´¢ç‚¹
                             byte[] baNewPreamble = new byte[0];
                             string strNewXml = "";
 
                             if (bSingleFull == true)
                             {
-                                // ÓÅ»¯¡£²»±Ø´ÓÊı¾İ¿âÖĞ¶ÁÈ¡ÁË
+                                // ä¼˜åŒ–ã€‚ä¸å¿…ä»æ•°æ®åº“ä¸­è¯»å–äº†
                                 byte[] baPreamble = null;
                                 strNewXml = DatabaseUtil.ByteArrayToString(baSource,
 out baPreamble);
@@ -11473,15 +11473,15 @@ out baPreamble);
                             else
                             {
                                 // return:
-                                //      -1  ³ö´í
-                                //      -4  ¼ÇÂ¼²»´æÔÚ
-                                //      -100    ¶ÔÏóÎÄ¼ş²»´æÔÚ
-                                //      0   ÕıÈ·
+                                //      -1  å‡ºé”™
+                                //      -4  è®°å½•ä¸å­˜åœ¨
+                                //      -100    å¯¹è±¡æ–‡ä»¶ä¸å­˜åœ¨
+                                //      0   æ­£ç¡®
                                 nRet = this.GetXmlData(
                                     connection,
                                     row_info,
                                     strID,
-                                    nWriteCount == 0 ? true : !true,  // "newdata",   // WriteSqlRecord()ÖĞÒÑ¾­µßµ¹¹ıÀ´ÁË
+                                    nWriteCount == 0 ? true : !true,  // "newdata",   // WriteSqlRecord()ä¸­å·²ç»é¢ å€’è¿‡æ¥äº†
                                     out strNewXml,
                                     out baNewPreamble,
                                     out strError);
@@ -11493,7 +11493,7 @@ out baPreamble);
                             ////
                             if (string.IsNullOrEmpty(strXPath) == false)
                             {
-                                // ¸ù¾İ²ÎÊıÖĞÌá¹©µÄ¾Ö²¿ÄÚÈİ´´½¨³öÍêÕûµÄ¼ÇÂ¼
+                                // æ ¹æ®å‚æ•°ä¸­æä¾›çš„å±€éƒ¨å†…å®¹åˆ›å»ºå‡ºå®Œæ•´çš„è®°å½•
                                 nRet = BuildRecordXml(
                                     strID,
                                     strXPath,
@@ -11509,11 +11509,11 @@ out baPreamble);
 
                                 lTotalLength = baSource.Length;
 
-                                // Ğ´Êı¾İ
+                                // å†™æ•°æ®
                                 // return:
-                                //		-1	Ò»°ãĞÔ´íÎó
-                                //		-2	Ê±¼ä´Á²»Æ¥Åä
-                                //		0	³É¹¦
+                                //		-1	ä¸€èˆ¬æ€§é”™è¯¯
+                                //		-2	æ—¶é—´æˆ³ä¸åŒ¹é…
+                                //		0	æˆåŠŸ
                                 nRet = this.WriteSqlRecord(connection,
                                     ref row_info,
                                     bNeedInsertRow,
@@ -11533,8 +11533,8 @@ out baPreamble);
                                     return nRet;
 
                                 nWriteCount++;
-                                // ×¢£ºÕâ´ÎĞ´²Ù×÷ºó£¬Èç¹ûÊÇµÚ¶ş´ÎĞ´²Ù×÷£¬rangeÄÚµÄ±ê¼Ç»áÔÙ´Î·´×ª
-                                // ²»¹ı£¬ºóÃæµÄÄ£¿éÓ¦¸ÃÄÜ¹»×Ô¶¯ÊÊÓ¦
+                                // æ³¨ï¼šè¿™æ¬¡å†™æ“ä½œåï¼Œå¦‚æœæ˜¯ç¬¬äºŒæ¬¡å†™æ“ä½œï¼Œrangeå†…çš„æ ‡è®°ä¼šå†æ¬¡åè½¬
+                                // ä¸è¿‡ï¼Œåé¢çš„æ¨¡å—åº”è¯¥èƒ½å¤Ÿè‡ªåŠ¨é€‚åº”
                             }
 
                             KeyCollection newKeys = null;
@@ -11543,8 +11543,8 @@ out baPreamble);
                             XmlDocument oldDom = null;
 
                             // return:
-                            //      -1  ³ö´í
-                            //      0   ³É¹¦
+                            //      -1  å‡ºé”™
+                            //      0   æˆåŠŸ
                             nRet = this.MergeKeys(strID,
                                 strNewXml,
                                 strOldXml,
@@ -11560,8 +11560,8 @@ out baPreamble);
                             if (bForceDeleteKeys == true)
                             {
                                 // return:
-                                //      -1  ³ö´í
-                                //      0   ³É¹¦
+                                //      -1  å‡ºé”™
+                                //      0   æˆåŠŸ
                                 nRet = this.ForceDeleteKeys(connection,
                                     strID,
                                     out strError);
@@ -11569,10 +11569,10 @@ out baPreamble);
                                     return -1;
                             }
 
-                            // ´¦Àí¼ìË÷µã
+                            // å¤„ç†æ£€ç´¢ç‚¹
                             // return:
-                            //      -1  ³ö´í
-                            //      0   ³É¹¦
+                            //      -1  å‡ºé”™
+                            //      0   æˆåŠŸ
                             nRet = this.ModifyKeys(connection,
                                 newKeys,
                                 oldKeys,
@@ -11581,12 +11581,12 @@ out baPreamble);
                             if (nRet == -1)
                                 return -1;
 
-                            // ×¢£ºÈç¹ûÒòÎª¾ÉµÄXML¶ÔÏóÎÄ¼ş¶ªÊ§£¬Ôì³ÉModifyFiles()È¥´´½¨ÒÑ¾­´æÔÚµÄ¶ÔÏórecordsĞĞ£¬ÄÇÃ´´´½¨×ÔÈ»»á±»ºöÊÓ£¬Ã»ÓĞÊ²Ã´¸±×÷ÓÃ
+                            // æ³¨ï¼šå¦‚æœå› ä¸ºæ—§çš„XMLå¯¹è±¡æ–‡ä»¶ä¸¢å¤±ï¼Œé€ æˆModifyFiles()å»åˆ›å»ºå·²ç»å­˜åœ¨çš„å¯¹è±¡recordsè¡Œï¼Œé‚£ä¹ˆåˆ›å»ºè‡ªç„¶ä¼šè¢«å¿½è§†ï¼Œæ²¡æœ‰ä»€ä¹ˆå‰¯ä½œç”¨
 
-                            // ´¦Àí×ÓÎÄ¼ş
+                            // å¤„ç†å­æ–‡ä»¶
                             // return:
-                            //      -1  ³ö´í
-                            //      0   ³É¹¦
+                            //      -1  å‡ºé”™
+                            //      0   æˆåŠŸ
                             nRet = this.ModifyFiles(connection,
                                 strID,
                                 newDom,
@@ -11598,10 +11598,10 @@ out baPreamble);
 
                             {
 #if NO
-                                    // 4.ÓÃnew¸üĞÂdata
+                                    // 4.ç”¨newæ›´æ–°data
                                     // return:
-                                    //      -1  ³ö´í
-                                    //      >=0   ³É¹¦ ·µ»ØÓ°ÏìµÄ¼ÇÂ¼Êı
+                                    //      -1  å‡ºé”™
+                                    //      >=0   æˆåŠŸ è¿”å›å½±å“çš„è®°å½•æ•°
                                     nRet = this.UpdateDataField(connection,
                                         strID,
                                         out strError);
@@ -11611,17 +11611,17 @@ out baPreamble);
 #endif
 
 #if NO
-                                    // 5.É¾³ınewdata×Ö¶Î
+                                    // 5.åˆ é™¤newdataå­—æ®µ
                                     string strRemoveFieldName = "";
                                     byte [] remove_textptr = null;
                                     long lRemoveLength = 0;
                                     // return:
-                                    //      -1  ¶ÔÏóÎÄ¼ş
-                                    //      0   ÕıÏòimage×Ö¶Î
-                                    //      1   ·´Ïòimage×Ö¶Î
+                                    //      -1  å¯¹è±¡æ–‡ä»¶
+                                    //      0   æ­£å‘imageå­—æ®µ
+                                    //      1   åå‘imageå­—æ®µ
                                     int nReverse = GetReverse(row_info.Range);
 
-                                    // ×¢Òâ×Ô´ÓWriteSqlRecord()ÒÔºó±êÖ¾ÒÑ¾­·´×ª¹ıÀ´ÁË£¬¸ÕºÃ±íÏÖÁËÊµ¼ÊÇé¿ö
+                                    // æ³¨æ„è‡ªä»WriteSqlRecord()ä»¥åæ ‡å¿—å·²ç»åè½¬è¿‡æ¥äº†ï¼Œåˆšå¥½è¡¨ç°äº†å®é™…æƒ…å†µ
                                     if (nReverse == 0)
                                     {
                                         strRemoveFieldName = "newdata";
@@ -11639,8 +11639,8 @@ out baPreamble);
                                         && lRemoveLength > 0 && remove_textptr != null)
                                     {
                                         // return:
-                                        //		-1  ³ö´í
-                                        //		0   ³É¹¦
+                                        //		-1  å‡ºé”™
+                                        //		0   æˆåŠŸ
                                         nRet = this.RemoveImage(connection,
                                             strRemoveFieldName,
                                             remove_textptr,
@@ -11654,20 +11654,20 @@ out baPreamble);
                     }
                     catch (SqlException sqlEx)
                     {
-                        strError = "3 WriteXml() ÔÚ¸ø'" + this.GetCaption("zh-CN") + "'¿âĞ´Èë¼ÇÂ¼'" + strID + "'Ê±³ö´í,Ô­Òò:" + GetSqlErrors(sqlEx);
+                        strError = "3 WriteXml() åœ¨ç»™'" + this.GetCaption("zh-CN") + "'åº“å†™å…¥è®°å½•'" + strID + "'æ—¶å‡ºé”™,åŸå› :" + GetSqlErrors(sqlEx);
 
                         /*
                         if (sqlEx.Errors is SqlErrorCollection)
-                            strError = "Êı¾İ¿â'" + this.GetCaption("zh") + "'ÉĞÎ´³õÊ¼»¯¡£";
+                            strError = "æ•°æ®åº“'" + this.GetCaption("zh") + "'å°šæœªåˆå§‹åŒ–ã€‚";
                         else
-                            strError = "WriteXml() ÔÚ¸ø'" + this.GetCaption("zh-CN") + "'¿âĞ´Èë¼ÇÂ¼'" + strID + "'Ê±³ö´í,Ô­Òò:" + sqlEx.Message;
+                            strError = "WriteXml() åœ¨ç»™'" + this.GetCaption("zh-CN") + "'åº“å†™å…¥è®°å½•'" + strID + "'æ—¶å‡ºé”™,åŸå› :" + sqlEx.Message;
                          * */
 
                         return -1;
                     }
                     catch (Exception ex)
                     {
-                        strError = "4 WriteXml() ÔÚ¸ø'" + this.GetCaption("zh-CN") + "'¿âĞ´Èë¼ÇÂ¼'" + strID + "'Ê±³ö´í,Ô­Òò:" + ex.Message;
+                        strError = "4 WriteXml() åœ¨ç»™'" + this.GetCaption("zh-CN") + "'åº“å†™å…¥è®°å½•'" + strID + "'æ—¶å‡ºé”™,åŸå› :" + ex.Message;
                         return -1;
                     }
                     finally
@@ -11675,27 +11675,27 @@ out baPreamble);
                         connection.Close();
                     }
                 }
-                finally  // ¼ÇÂ¼Ëø
+                finally  // è®°å½•é”
                 {
-                    //******¶Ô¼ÇÂ¼½âĞ´Ëø****************************
+                    //******å¯¹è®°å½•è§£å†™é”****************************
                     m_recordLockColl.UnlockForWrite(strID);
 #if DEBUG_LOCK_SQLDATABASE
-					this.container.WriteDebugInfo("WriteXml()£¬¶Ô'" + this.GetCaption("zh-CN") + "/" + strID + "'¼ÇÂ¼½âĞ´Ëø¡£");
+					this.container.WriteDebugInfo("WriteXml()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "/" + strID + "'è®°å½•è§£å†™é”ã€‚");
 #endif
                 }
             }
             finally
             {
-                //********¶ÔÊı¾İ¿â½â¶ÁËø****************
+                //********å¯¹æ•°æ®åº“è§£è¯»é”****************
                 m_db_lock.ReleaseReaderLock();
 #if DEBUG_LOCK_SQLDATABASE
-				this.container.WriteDebugInfo("WriteXml()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â½â¶ÁËø¡£");
+				this.container.WriteDebugInfo("WriteXml()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“è§£è¯»é”ã€‚");
 #endif
             }
 
 
-            // µ±±¾º¯Êı±»Ã÷ÖªÎªÕË»§¿âµÄĞ´²Ù×÷µ÷ÓÃÊ±, Ò»¶¨ÒªÓÃbCheckAccount==false
-            // À´µ÷ÓÃ£¬·ñÔòÈİÒ×ÒıÆğ²»±ØÒªµÄµİ¹é
+            // å½“æœ¬å‡½æ•°è¢«æ˜çŸ¥ä¸ºè´¦æˆ·åº“çš„å†™æ“ä½œè°ƒç”¨æ—¶, ä¸€å®šè¦ç”¨bCheckAccount==false
+            // æ¥è°ƒç”¨ï¼Œå¦åˆ™å®¹æ˜“å¼•èµ·ä¸å¿…è¦çš„é€’å½’
             if (bFull == true
                 && bCheckAccount == true
                 && StringUtil.IsInList("account", strDbType/*this.TypeSafety*/) == true)
@@ -11718,15 +11718,15 @@ out baPreamble);
         }
 
         // parameters:
-        //      strRecorID   ¼ÇÂ¼ID
-        //      strObjectID  ¶ÔÏóID
-        //      ÆäËü²ÎÊıÍ¬WriteXml,ÎŞstrOutputID²ÎÊı
+        //      strRecorID   è®°å½•ID
+        //      strObjectID  å¯¹è±¡ID
+        //      å…¶å®ƒå‚æ•°åŒWriteXml,æ— strOutputIDå‚æ•°
         // return:
-        //		-1  ³ö´í
-        //		-2  Ê±¼ä´Á²»Æ¥Åä
-        //      -4  ¼ÇÂ¼»ò¶ÔÏó×ÊÔ´²»´æÔÚ
-        //      -6  È¨ÏŞ²»¹»
-        //		0   ³É¹¦
+        //		-1  å‡ºé”™
+        //		-2  æ—¶é—´æˆ³ä¸åŒ¹é…
+        //      -4  è®°å½•æˆ–å¯¹è±¡èµ„æºä¸å­˜åœ¨
+        //      -6  æƒé™ä¸å¤Ÿ
+        //		0   æˆåŠŸ
         public override int WriteObject(User user,
             string strRecordID,
             string strObjectID,
@@ -11758,25 +11758,25 @@ out baPreamble);
                     out strExistRights);
                 if (bHasRight == false)
                 {
-                    strError = "ÄúµÄÕÊ»§ÃûÎª'" + user.Name + "'£¬¶Ô'" + strTempRecordPath + "'¼ÇÂ¼Ã»ÓĞ'¸²¸Ç(overwrite)'È¨ÏŞ£¬Ä¿Ç°µÄÈ¨ÏŞÖµÎª'" + strExistRights + "'¡£";
+                    strError = "æ‚¨çš„å¸æˆ·åä¸º'" + user.Name + "'ï¼Œå¯¹'" + strTempRecordPath + "'è®°å½•æ²¡æœ‰'è¦†ç›–(overwrite)'æƒé™ï¼Œç›®å‰çš„æƒé™å€¼ä¸º'" + strExistRights + "'ã€‚";
                     return -6;
                 }
             }
 
-            // ÕâÀï²»ÔÙÒòÎªFastMode¼ÓĞ´Ëø
+            // è¿™é‡Œä¸å†å› ä¸ºFastModeåŠ å†™é”
 
-            //**********¶ÔÊı¾İ¿â¼Ó¶ÁËø************
+            //**********å¯¹æ•°æ®åº“åŠ è¯»é”************
             m_db_lock.AcquireReaderLock(m_nTimeOut);
 #if DEBUG_LOCK_SQLDATABASE
-			this.container.WriteDebugInfo("WriteObject()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â¼Ó¶ÁËø¡£");
+			this.container.WriteDebugInfo("WriteObject()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“åŠ è¯»é”ã€‚");
 #endif
 
             try
             {
                 string strOutputRecordID = "";
                 // return:
-                //      -1  ³ö´í
-                //      0   ³É¹¦
+                //      -1  å‡ºé”™
+                //      0   æˆåŠŸ
                 nRet = this.CanonicalizeRecordID(strRecordID,
                     out strOutputRecordID,
                     out strError);
@@ -11784,46 +11784,46 @@ out baPreamble);
                     return -1;
                 if (strOutputRecordID == "-1")
                 {
-                    strError = "±£´æ¶ÔÏó×ÊÔ´²»Ö§³Ö¼ÇÂ¼ºÅ²ÎÊıÖµÎª'" + strRecordID + "'¡£";
+                    strError = "ä¿å­˜å¯¹è±¡èµ„æºä¸æ”¯æŒè®°å½•å·å‚æ•°å€¼ä¸º'" + strRecordID + "'ã€‚";
                     return -1;
                 }
                 strRecordID = strOutputRecordID;
 
-                //**********¶Ô¼ÇÂ¼¼ÓĞ´Ëø***************
+                //**********å¯¹è®°å½•åŠ å†™é”***************
                 m_recordLockColl.LockForWrite(strRecordID, m_nTimeOut);
 #if DEBUG_LOCK_SQLDATABASE
-				this.container.WriteDebugInfo("WriteObject()£¬¶Ô'" + this.GetCaption("zh-CN") + "/" + strRecordID + "'¼ÇÂ¼¼ÓĞ´Ëø¡£");
+				this.container.WriteDebugInfo("WriteObject()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "/" + strRecordID + "'è®°å½•åŠ å†™é”ã€‚");
 #endif
-                try // ¼ÇÂ¼Ëø
+                try // è®°å½•é”
                 {
-                    // ´ò¿ªÁ¬½Ó¶ÔÏó
+                    // æ‰“å¼€è¿æ¥å¯¹è±¡
                     Connection connection = GetConnection(
                         this.m_strConnString,
                         this.container.SqlServerType == SqlServerType.SQLite && bFastMode == true ? ConnectionStyle.Global : ConnectionStyle.None);
                     connection.Open();
-                    try // Á¬½Ó
+                    try // è¿æ¥
                     {
-                        // TODO: ÊÇ·ñ¿ÉÒÔ¸Ä½øÎª£¬Èç¹û¶ÔÏóSQL¼ÇÂ¼ĞĞ´æÔÚ£¬¾ÍÖ±½Ó½øĞĞĞ´Èë£¬Ö»ÓĞµ±SQL¼ÇÂ¼ĞĞ²»´æÔÚµÄÊ±ºò²Å¶Ô´ÓÊôµÄXML¼ÇÂ¼½øĞĞ¼ì²é£¬Èç¹û±ØÒª²¹³ä´´½¨SQL¼ÇÂ¼ĞĞ¡£ÕâÑù¿ÉÒÔÌá¸ßÖ´ĞĞËÙ¶È
-                        // TODO: ¿ÉÒÔÔÚlStart == 0 µÄµÚÒ»´ÎµÄÊ±ºò¼ì²é
+                        // TODO: æ˜¯å¦å¯ä»¥æ”¹è¿›ä¸ºï¼Œå¦‚æœå¯¹è±¡SQLè®°å½•è¡Œå­˜åœ¨ï¼Œå°±ç›´æ¥è¿›è¡Œå†™å…¥ï¼Œåªæœ‰å½“SQLè®°å½•è¡Œä¸å­˜åœ¨çš„æ—¶å€™æ‰å¯¹ä»å±çš„XMLè®°å½•è¿›è¡Œæ£€æŸ¥ï¼Œå¦‚æœå¿…è¦è¡¥å……åˆ›å»ºSQLè®°å½•è¡Œã€‚è¿™æ ·å¯ä»¥æé«˜æ‰§è¡Œé€Ÿåº¦
+                        // TODO: å¯ä»¥åœ¨lStart == 0 çš„ç¬¬ä¸€æ¬¡çš„æ—¶å€™æ£€æŸ¥
 #if NO
-                        // 1.ÔÚ¶ÔÓ¦µÄxmlÊı¾İ£¬ÓÃ¶ÔÏóÂ·¾¶ÕÒµ½¶ÔÏóID
+                        // 1.åœ¨å¯¹åº”çš„xmlæ•°æ®ï¼Œç”¨å¯¹è±¡è·¯å¾„æ‰¾åˆ°å¯¹è±¡ID
                         string strXml;
                         // return:
-                        //      -1  ³ö´í
-                        //      -4  ¼ÇÂ¼²»´æÔÚ
-        //      -100    ¶ÔÏóÎÄ¼ş²»´æÔÚ
-                        //      0   ÕıÈ·
+                        //      -1  å‡ºé”™
+                        //      -4  è®°å½•ä¸å­˜åœ¨
+        //      -100    å¯¹è±¡æ–‡ä»¶ä¸å­˜åœ¨
+                        //      0   æ­£ç¡®
                         nRet = this.GetXmlString(connection,
                             strRecordID,
                             out strXml,
                             out strError);
                         if (nRet <= -1)
                         {
-                            strError = "±£´æ'" + strRecordID + "/" + strObjectID + "'×ÊÔ´Ê§°Ü£¬Ô­Òò:" + strError;
+                            strError = "ä¿å­˜'" + strRecordID + "/" + strObjectID + "'èµ„æºå¤±è´¥ï¼ŒåŸå› :" + strError;
                             return nRet;
                         }
                         XmlDocument xmlDom = new XmlDocument();
-                        xmlDom.PreserveWhitespace = true; //ÉèPreserveWhitespaceÎªtrue
+                        xmlDom.PreserveWhitespace = true; //è®¾PreserveWhitespaceä¸ºtrue
 
                         xmlDom.LoadXml(strXml);
 
@@ -11832,7 +11832,7 @@ out baPreamble);
                         XmlNode fileNode = xmlDom.DocumentElement.SelectSingleNode("//dprms:file[@id='" + strObjectID + "']", nsmgr);
                         if (fileNode == null)
                         {
-                            strError = "ÔÚ¼ÇÂ¼ '" + strRecordID + "' µÄxmlÀïÃ»ÓĞÕÒµ½¶ÔÏóID '" + strObjectID + "' ¶ÔÓ¦µÄdprms:file½Úµã";
+                            strError = "åœ¨è®°å½• '" + strRecordID + "' çš„xmlé‡Œæ²¡æœ‰æ‰¾åˆ°å¯¹è±¡ID '" + strObjectID + "' å¯¹åº”çš„dprms:fileèŠ‚ç‚¹";
                             return -1;
                         }
 #endif
@@ -11840,12 +11840,12 @@ out baPreamble);
                         strObjectID = strRecordID + "_" + strObjectID;
 
                         /*
-                        // 2. µ±¼ÇÂ¼Îª¿Õ¼ÇÂ¼Ê±,ÓÃupdate¸ü¸ÄÎÄ±¾Ö¸Õë
+                        // 2. å½“è®°å½•ä¸ºç©ºè®°å½•æ—¶,ç”¨updateæ›´æ”¹æ–‡æœ¬æŒ‡é’ˆ
                         if (this.IsEmptyObject(connection, strObjectID) == true)
                         {
                             // return
-                            //		-1  ³ö´í
-                            //		0   ³É¹¦
+                            //		-1  å‡ºé”™
+                            //		0   æˆåŠŸ
                             nRet = this.UpdateObject(connection,
                                 strObjectID,
                                 out inputTimestamp,
@@ -11856,9 +11856,9 @@ out baPreamble);
                          * */
                         RecordRowInfo row_info = null;
                         // return:
-                        //      -1  ³ö´í
-                        //      0   ¼ÇÂ¼²»´æÔÚ
-                        //      1   ³É¹¦
+                        //      -1  å‡ºé”™
+                        //      0   è®°å½•ä¸å­˜åœ¨
+                        //      1   æˆåŠŸ
                         nRet = GetRowInfo(connection,
     strObjectID,
     out row_info,
@@ -11868,13 +11868,13 @@ out baPreamble);
                         if (nRet == 0)  // 2013/11/21
                             return -4;
 
-                        // 3.°ÑÊı¾İĞ´µ½rangeÖ¸¶¨µÄ·¶Î§
-                        bool bFull = false; // ÊÇ·ñÎª×îºóÍê³ÉµÄÒ»´ÎĞ´Èë²Ù×÷
+                        // 3.æŠŠæ•°æ®å†™åˆ°rangeæŒ‡å®šçš„èŒƒå›´
+                        bool bFull = false; // æ˜¯å¦ä¸ºæœ€åå®Œæˆçš„ä¸€æ¬¡å†™å…¥æ“ä½œ
                         bool bSingleFull = false;
                         // return:
-                        //		-1	Ò»°ãĞÔ´íÎó
-                        //		-2	Ê±¼ä´Á²»Æ¥Åä
-                        //		0	³É¹¦
+                        //		-1	ä¸€èˆ¬æ€§é”™è¯¯
+                        //		-2	æ—¶é—´æˆ³ä¸åŒ¹é…
+                        //		0	æˆåŠŸ
                         nRet = this.WriteSqlRecord(connection,
                             ref row_info,
                             false,
@@ -11894,23 +11894,23 @@ out baPreamble);
                             return nRet;
 
                         //string strCurrentRange = this.GetRange(connection,strObjectID);
-                        if (bFull == true)  //¸²¸ÇÍêÁË
+                        if (bFull == true)  //è¦†ç›–å®Œäº†
                         {
 #if NO111
-                            // 1. ÓÃnewdataÌæ»»data×Ö¶Î
+                            // 1. ç”¨newdataæ›¿æ¢dataå­—æ®µ
                             // return:
-                            //      -1  ³ö´í
-                            //      >=0   ³É¹¦ ·µ»ØÓ°ÏìµÄ¼ÇÂ¼Êı
+                            //      -1  å‡ºé”™
+                            //      >=0   æˆåŠŸ è¿”å›å½±å“çš„è®°å½•æ•°
                             nRet = this.UpdateDataField(connection,
                                 strObjectID,
                                 out strError);
                             if (nRet == -1)
                                 return -1;
 
-                            // 2. É¾³ınewdata×Ö¶Î
+                            // 2. åˆ é™¤newdataå­—æ®µ
                             // return:
-                            //		-1  ³ö´í
-                            //		0   ³É¹¦
+                            //		-1  å‡ºé”™
+                            //		0   æˆåŠŸ
                             nRet = this.DeleteDuoYuImage(connection,
                                 strObjectID,
                                 "newdata",
@@ -11925,7 +11925,7 @@ out baPreamble);
                             byte[] remove_textptr = null;
                             long lRemoveLength = 0;
                             int nReverse = GetReverse(row_info.Range);
-                            // ×¢Òâ×Ô´ÓWriteSqlRecord()ÒÔºó±êÖ¾ÒÑ¾­·´×ª¹ıÀ´ÁË£¬¸ÕºÃ±íÏÖÁËÊµ¼ÊÇé¿ö
+                            // æ³¨æ„è‡ªä»WriteSqlRecord()ä»¥åæ ‡å¿—å·²ç»åè½¬è¿‡æ¥äº†ï¼Œåˆšå¥½è¡¨ç°äº†å®é™…æƒ…å†µ
                             if (nReverse == 0)
                             {
                                 strRemoveFieldName = "newdata";
@@ -11943,8 +11943,8 @@ out baPreamble);
                                 && lRemoveLength > 0 && remove_textptr != null)
                             {
                                 // return:
-                                //		-1  ³ö´í
-                                //		0   ³É¹¦
+                                //		-1  å‡ºé”™
+                                //		0   æˆåŠŸ
                                 nRet = this.RemoveImage(connection,
                                     strRemoveFieldName,
                                     remove_textptr,
@@ -11955,12 +11955,12 @@ out baPreamble);
 #endif
                         }
 
-/* // ²»ÒªÔÚ±£´æ¶ÔÏóºóĞŞ¸Ä¼ÇÂ¼µÄÊ±¼ä´ÁÁË
-                        // ¸ºÔğĞŞ¸ÄÒ»ÏÂ¼ÇÂ¼µÄÊ±¼ä´Á
+/* // ä¸è¦åœ¨ä¿å­˜å¯¹è±¡åä¿®æ”¹è®°å½•çš„æ—¶é—´æˆ³äº†
+                        // è´Ÿè´£ä¿®æ”¹ä¸€ä¸‹è®°å½•çš„æ—¶é—´æˆ³
                         string strNewTimestamp = this.CreateTimestampForDb();
                         // return:
-                        //      -1  ³ö´í
-                        //      >=0   ³É¹¦ ·µ»Ø±»Ó°ÏìµÄ¼ÇÂ¼Êı
+                        //      -1  å‡ºé”™
+                        //      >=0   æˆåŠŸ è¿”å›è¢«å½±å“çš„è®°å½•æ•°
                         nRet = this.SetTimestampForDb(connection,
                             strRecordID,
                             strNewTimestamp,
@@ -11975,7 +11975,7 @@ out baPreamble);
 
                         /*
                         if (sqlEx.Errors is SqlErrorCollection)
-                            strError = "Êı¾İ¿â'" + this.GetCaption("zh") + "'ÉĞÎ´³õÊ¼»¯¡£";
+                            strError = "æ•°æ®åº“'" + this.GetCaption("zh") + "'å°šæœªåˆå§‹åŒ–ã€‚";
                         else
                             strError = sqlEx.Message;
                          * */
@@ -11983,20 +11983,20 @@ out baPreamble);
                     }
                     catch (Exception ex)
                     {
-                        strError = "WriteXml() ÔÚ¸ø'" + this.GetCaption("zh-CN") + "'¿âĞ´Èë×ÊÔ´'" + strObjectID + "'Ê±³ö´í,Ô­Òò:" + ex.Message;
+                        strError = "WriteXml() åœ¨ç»™'" + this.GetCaption("zh-CN") + "'åº“å†™å…¥èµ„æº'" + strObjectID + "'æ—¶å‡ºé”™,åŸå› :" + ex.Message;
                         return -1;
                     }
-                    finally // Á¬½Ó
+                    finally // è¿æ¥
                     {
                         connection.Close();
                     }
                 }
-                finally // ¼ÇÂ¼Ëø
+                finally // è®°å½•é”
                 {
-                    //*********¶Ô¼ÇÂ¼½âĞ´Ëø****************************
+                    //*********å¯¹è®°å½•è§£å†™é”****************************
                     m_recordLockColl.UnlockForWrite(strRecordID);
 #if DEBUG_LOCK_SQLDATABASE
-					this.container.WriteDebugInfo("WriteObject()£¬¶Ô'" + this.GetCaption("zh-CN") + "/" + strRecordID + "'¼ÇÂ¼½âĞ´Ëø¡£");
+					this.container.WriteDebugInfo("WriteObject()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "/" + strRecordID + "'è®°å½•è§£å†™é”ã€‚");
 #endif
 
                 }
@@ -12004,10 +12004,10 @@ out baPreamble);
             finally
             {
 
-                //************¶ÔÊı¾İ¿â½â¶ÁËø************
+                //************å¯¹æ•°æ®åº“è§£è¯»é”************
                 m_db_lock.ReleaseReaderLock();
 #if DEBUG_LOCK_SQLDATABASE
-				this.container.WriteDebugInfo("WriteObject()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â½â¶ÁËø¡£");
+				this.container.WriteDebugInfo("WriteObject()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“è§£è¯»é”ã€‚");
 #endif
             }
 
@@ -12020,7 +12020,7 @@ out baPreamble);
             return 0;
         }
 
-        // »ñµÃ´¿´âµÄ range ×Ö·û´®
+        // è·å¾—çº¯ç²¹çš„ range å­—ç¬¦ä¸²
         static string GetPureRangeString(string strText)
         {
             if (string.IsNullOrEmpty(strText) == false)
@@ -12031,14 +12031,14 @@ out baPreamble);
             return strText;
         }
 
-        // ÅĞ¶Ï±¾´ÎÉÏÔØÍê³Éºó£¬ÊÇ·ñ¸²¸ÇÈ«·¶Î§
+        // åˆ¤æ–­æœ¬æ¬¡ä¸Šè½½å®Œæˆåï¼Œæ˜¯å¦è¦†ç›–å…¨èŒƒå›´
         static bool IsFull(
             string strExistingRanges,
             long lTotalLength,
             string strThisRanges,
             int nThisLength)
         {
-            // ×¼±¸rangelist
+            // å‡†å¤‡rangelist
             RangeList rangeList = null;
             if (string.IsNullOrEmpty(strExistingRanges) == true)
             {
@@ -12052,7 +12052,7 @@ out baPreamble);
                 }
                 catch (Exception ex)
                 {
-                    string strError = "ÓÃ×Ö·û´® '" + strExistingRanges + "' ´´½¨ RangeList Ê±³ö´í: " + ex.Message;
+                    string strError = "ç”¨å­—ç¬¦ä¸² '" + strExistingRanges + "' åˆ›å»º RangeList æ—¶å‡ºé”™: " + ex.Message;
                     throw new Exception(strError);
                 }
 
@@ -12066,10 +12066,10 @@ out baPreamble);
             }
             catch (Exception ex)
             {
-                string strError = "ÓÃ×Ö·û´® '" + strThisRanges + "' ´´½¨ RangeList Ê±³ö´í: " + ex.Message;
+                string strError = "ç”¨å­—ç¬¦ä¸² '" + strThisRanges + "' åˆ›å»º RangeList æ—¶å‡ºé”™: " + ex.Message;
                 throw new Exception(strError);
             }
-            // ×éºÏÁ½¸öRangeList
+            // ç»„åˆä¸¤ä¸ªRangeList
             rangeList.AddRange(thisRangeList);
 
 #if NO
@@ -12086,11 +12086,11 @@ out baPreamble);
                 RangeItem item = (RangeItem)rangeList[0];
 
                 if (item.lLength > lTotalLength)
-                    return false;	// Î¨Ò»Ò»¸öÊÂÏîµÄ³¤¶È¾ÓÈ»³¬¹ı¼ì²âµÄ³¤¶È£¬Í¨³£±íÃ÷ÓĞÊäÈë²ÎÊı´íÎó
+                    return false;	// å”¯ä¸€ä¸€ä¸ªäº‹é¡¹çš„é•¿åº¦å±…ç„¶è¶…è¿‡æ£€æµ‹çš„é•¿åº¦ï¼Œé€šå¸¸è¡¨æ˜æœ‰è¾“å…¥å‚æ•°é”™è¯¯
 
                 if (item.lStart == 0
                     && item.lLength == lTotalLength)
-                    return true;	// ±íÊ¾ÍêÈ«¸²¸Ç
+                    return true;	// è¡¨ç¤ºå®Œå…¨è¦†ç›–
             }
 
             return false;
@@ -12100,7 +12100,7 @@ out baPreamble);
             byte [] baSource,
             long lTotalLength)
         {
-            // ×¼±¸rangelist
+            // å‡†å¤‡rangelist
             RangeList rangeList = null;
             if (string.IsNullOrEmpty(strRanges) == true)
             {
@@ -12118,12 +12118,12 @@ out baPreamble);
                 }
                 catch (Exception ex)
                 {
-                    string strError = "ÓÃ×Ö·û´® '" + strRanges + "' ´´½¨ RangeList Ê±³ö´í: " + ex.Message;
+                    string strError = "ç”¨å­—ç¬¦ä¸² '" + strRanges + "' åˆ›å»º RangeList æ—¶å‡ºé”™: " + ex.Message;
                     throw new Exception(strError);
                 }
             }
 
-            // Ò»´ÎĞÔÈ«Ğ´ÂúµÄÇé¿ö
+            // ä¸€æ¬¡æ€§å…¨å†™æ»¡çš„æƒ…å†µ
             if (rangeList.Count == 1
                 && rangeList[0].lStart == 0
                 && rangeList[0].lLength == lTotalLength)
@@ -12132,29 +12132,29 @@ out baPreamble);
             return false;
         }
 
-        // ¸øsql¿âĞ´Ò»Ìõ¼ÇÂ¼
-        // °ÑbaContent»òstreamContentĞ´µ½image×Ö¶ÎÖĞrangeÖ¸¶¨Ä¿±êÎ»ÖÃ,
-        // ËµÃ÷£ºsqlÖĞµÄ¼ÇÂ¼¿ÉÒÔÊÇXmlÌå¼ÇÂ¼Ò²¿ÉÒÔ¶ÔÏó×ÊÔ´¼ÇÂ¼
-        // Èç¹û±¾´ÎtempÇøĞ´ÈëÍê³É£¬ÔòÇå³ıoldÇø
+        // ç»™sqlåº“å†™ä¸€æ¡è®°å½•
+        // æŠŠbaContentæˆ–streamContentå†™åˆ°imageå­—æ®µä¸­rangeæŒ‡å®šç›®æ ‡ä½ç½®,
+        // è¯´æ˜ï¼šsqlä¸­çš„è®°å½•å¯ä»¥æ˜¯Xmlä½“è®°å½•ä¹Ÿå¯ä»¥å¯¹è±¡èµ„æºè®°å½•
+        // å¦‚æœæœ¬æ¬¡tempåŒºå†™å…¥å®Œæˆï¼Œåˆ™æ¸…é™¤oldåŒº
         // parameters:
-        //		connection	    Á¬½Ó¶ÔÏó	²»ÄÜÎªnull
-        //		strID	        ¼ÇÂ¼ID	²»ÄÜÎªnull»ò¿Õ×Ö·û´®
-        //		strRanges	    Ä¿±ê·¶Î§£¬¶à¸ö·¶Î§ÓÃ¶ººÅ·Ö¸ô
-        //		nTotalLength	¼ÇÂ¼ÄÚÈİ×Ü³¤¶È
-        //						¶ÔÓÚSql ServerÄ¿Ç°Ö»Ö§³Öint£¬ËùÒÔnTotalLengthÉèÎªintÀàĞÍ£¬µ«¶ÔÍâ½Ó¿ÚÊÇlong
-        //		baContent	    ÄÚÈİ×Ö½ÚÊı×é	¿ÉÒÔÎªnull
-        //		streamContent	ÄÚÈİÁ÷	¿ÉÒÔÎªnull
-        //		strStyle	    ·ç¸ñ
-        //					    ignorechecktimestamp	ºöÂÔÊ±¼ä´Á
-        //		baInputTimestamp    ÊäÈëµÄÊ±¼ä´Á	¿ÉÒÔÎªnull
-        //		baOutputTimestamp	out²ÎÊı£¬·µ»ØµÄÊ±¼ä´Á
-        //		bFull	        out²ÎÊı£¬¼ÇÂ¼ÊÇ·ñ±»±¾´ÎĞ´Âú
-        //		strError	    out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //		connection	    è¿æ¥å¯¹è±¡	ä¸èƒ½ä¸ºnull
+        //		strID	        è®°å½•ID	ä¸èƒ½ä¸ºnullæˆ–ç©ºå­—ç¬¦ä¸²
+        //		strRanges	    ç›®æ ‡èŒƒå›´ï¼Œå¤šä¸ªèŒƒå›´ç”¨é€—å·åˆ†éš”
+        //		nTotalLength	è®°å½•å†…å®¹æ€»é•¿åº¦
+        //						å¯¹äºSql Serverç›®å‰åªæ”¯æŒintï¼Œæ‰€ä»¥nTotalLengthè®¾ä¸ºintç±»å‹ï¼Œä½†å¯¹å¤–æ¥å£æ˜¯long
+        //		baContent	    å†…å®¹å­—èŠ‚æ•°ç»„	å¯ä»¥ä¸ºnull
+        //		streamContent	å†…å®¹æµ	å¯ä»¥ä¸ºnull
+        //		strStyle	    é£æ ¼
+        //					    ignorechecktimestamp	å¿½ç•¥æ—¶é—´æˆ³
+        //		baInputTimestamp    è¾“å…¥çš„æ—¶é—´æˆ³	å¯ä»¥ä¸ºnull
+        //		baOutputTimestamp	outå‚æ•°ï¼Œè¿”å›çš„æ—¶é—´æˆ³
+        //		bFull	        outå‚æ•°ï¼Œè®°å½•æ˜¯å¦è¢«æœ¬æ¬¡å†™æ»¡
+        //		strError	    outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //		-1	Ò»°ãĞÔ´íÎó
-        //		-2	Ê±¼ä´Á²»Æ¥Åä
-        //		0	³É¹¦
-        // ËµÃ÷	baContentÓëstreamContentÖĞË­ÓĞÖµ¾ÍËãË­
+        //		-1	ä¸€èˆ¬æ€§é”™è¯¯
+        //		-2	æ—¶é—´æˆ³ä¸åŒ¹é…
+        //		0	æˆåŠŸ
+        // è¯´æ˜	baContentä¸streamContentä¸­è°æœ‰å€¼å°±ç®—è°
         private int WriteSqlRecord(Connection connection,
             ref RecordRowInfo row_info,
             bool bNeedInsertRow,
@@ -12179,45 +12179,45 @@ out baPreamble);
             int nRet = 0;
 
             //-------------------------------------------
-            //¶ÔÊäÈë²ÎÊı×öÀıĞĞ¼ì²é
+            //å¯¹è¾“å…¥å‚æ•°åšä¾‹è¡Œæ£€æŸ¥
             //-------------------------------------------
 
             // return:
-            //      -1  ³ö´í
-            //      0   Õı³£
+            //      -1  å‡ºé”™
+            //      0   æ­£å¸¸
             nRet = this.CheckConnection(connection, out strError);
             if (nRet == -1)
             {
-                strError = "WriteSqlRecord()µ÷ÓÃ´íÎó£¬" + strError;
+                strError = "WriteSqlRecord()è°ƒç”¨é”™è¯¯ï¼Œ" + strError;
                 return -1;
             }
             Debug.Assert(nRet == 0, "");
 
             if (strID == null || strID == "")
             {
-                strError = "WriteSqlRecord()µ÷ÓÃ´íÎó£¬strID²ÎÊı²»ÄÜÎªnull»ò¿Õ×Ö·û´®¡£";
+                strError = "WriteSqlRecord()è°ƒç”¨é”™è¯¯ï¼ŒstrIDå‚æ•°ä¸èƒ½ä¸ºnullæˆ–ç©ºå­—ç¬¦ä¸²ã€‚";
                 return -1;
             }
             if (lTotalLength < 0)
             {
-                strError = "WriteSqlRecord()µ÷ÓÃ´íÎó£¬lTotalLength²ÎÊıÖµ²»ÄÜÎª'" + Convert.ToString(lTotalLength) + "'£¬±ØĞë´óÓÚµÈÓÚ0¡£";
+                strError = "WriteSqlRecord()è°ƒç”¨é”™è¯¯ï¼ŒlTotalLengthå‚æ•°å€¼ä¸èƒ½ä¸º'" + Convert.ToString(lTotalLength) + "'ï¼Œå¿…é¡»å¤§äºç­‰äº0ã€‚";
                 return -1;
             }
             /*
             if (baSource == null && streamSource == null)
             {
-                strError = "WriteSqlRecord()µ÷ÓÃ´íÎó£¬baSource²ÎÊıÓëstreamSource²ÎÊı²»ÄÜÍ¬Ê±Îªnull¡£";
+                strError = "WriteSqlRecord()è°ƒç”¨é”™è¯¯ï¼ŒbaSourceå‚æ•°ä¸streamSourceå‚æ•°ä¸èƒ½åŒæ—¶ä¸ºnullã€‚";
                 return -1;
             }
             if (baSource != null && streamSource != null)
             {
-                strError = "WriteSqlRecord()µ÷ÓÃ´íÎó£¬baSource²ÎÊıÓëstreamSource²ÎÊıÖ»ÄÜÓĞÒ»¸ö±»¸³Öµ¡£";
+                strError = "WriteSqlRecord()è°ƒç”¨é”™è¯¯ï¼ŒbaSourceå‚æ•°ä¸streamSourceå‚æ•°åªèƒ½æœ‰ä¸€ä¸ªè¢«èµ‹å€¼ã€‚";
                 return -1;
             }
              * */
             if (baSource == null)
             {
-                strError = "WriteSqlRecord()µ÷ÓÃ´íÎó£¬baSource²ÎÊı²»ÄÜÎªnull¡£";
+                strError = "WriteSqlRecord()è°ƒç”¨é”™è¯¯ï¼ŒbaSourceå‚æ•°ä¸èƒ½ä¸ºnullã€‚";
                 return -1;
             }
             if (strStyle == null)
@@ -12235,7 +12235,7 @@ out baPreamble);
                 nSourceTotalLength = streamSource.Length;
              * */
 
-            // ×¼±¸rangelist
+            // å‡†å¤‡rangelist
             RangeList rangeList = null;
             if (string.IsNullOrEmpty(strRanges) == true)
             {
@@ -12253,12 +12253,12 @@ out baPreamble);
                 }
                 catch (Exception ex)
                 {
-                    strError = "ÓÃ×Ö·û´® '"+strRanges+"' ´´½¨ RangeList Ê±³ö´í: " + ex.Message;
+                    strError = "ç”¨å­—ç¬¦ä¸² '"+strRanges+"' åˆ›å»º RangeList æ—¶å‡ºé”™: " + ex.Message;
                     return -1;
                 }
             }
 
-            // Ò»´ÎĞÔÈ«Ğ´ÂúµÄÇé¿ö
+            // ä¸€æ¬¡æ€§å…¨å†™æ»¡çš„æƒ…å†µ
             if (rangeList.Count == 1
                 && rangeList[0].lStart == 0
                 && rangeList[0].lLength == lTotalLength)
@@ -12266,7 +12266,7 @@ out baPreamble);
                 bSingleFull = true;
             }
 
-            bool bFirst = false;    // ÊÇ·ñÎªµÚÒ»´ÎĞ´Èë
+            bool bFirst = false;    // æ˜¯å¦ä¸ºç¬¬ä¸€æ¬¡å†™å…¥
             if (rangeList.Count >= 1
     && rangeList[0].lStart == 0)
             {
@@ -12274,11 +12274,11 @@ out baPreamble);
             }
 #if NO
             //-------------------------------------------
-            //¿ªÊ¼×öÊÂÇé
+            //å¼€å§‹åšäº‹æƒ…
             //-------------------------------------------
 
             ////////////////////////////////////////////////////
-            // ¼ì²é¼ÇÂ¼ÊÇ·ñ´æÔÚ,Ê±¼äÊÇ·ñÆ¥Åä,²¢µÃµ½³¤¶È,rangeÓëtextPtr
+            // æ£€æŸ¥è®°å½•æ˜¯å¦å­˜åœ¨,æ—¶é—´æ˜¯å¦åŒ¹é…,å¹¶å¾—åˆ°é•¿åº¦,rangeä¸textPtr
             /////////////////////////////////////////////////////
             string strCommand = "use " + this.m_strSqlDbName + " "
                 + " SELECT TEXTPTR("+strDataFieldName+"),"
@@ -12307,32 +12307,32 @@ out baPreamble);
             SqlDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult);
             try
             {
-                // 1.¼ÇÂ¼²»´æÔÚ±¨´í
+                // 1.è®°å½•ä¸å­˜åœ¨æŠ¥é”™
                 if (dr == null
                     || dr.HasRows == false)
                 {
-                    strError = "¼ÇÂ¼ '" + strID + "' ÔÚ¿âÖĞ²»´æÔÚ£¬Õı³£Çé¿öÏÂ²»Ó¦ÊÇÕâÑù";
+                    strError = "è®°å½• '" + strID + "' åœ¨åº“ä¸­ä¸å­˜åœ¨ï¼Œæ­£å¸¸æƒ…å†µä¸‹ä¸åº”æ˜¯è¿™æ ·";
                     return -1;
                 }
 
                 dr.Read();
 
-                // 2.textPtrÎªnull±¨´í
+                // 2.textPträ¸ºnullæŠ¥é”™
                 if (dr[0] is System.DBNull)
                 {
-                    strError = "TextPtr²»¿ÉÄÜÎªnull";
+                    strError = "TextPträ¸å¯èƒ½ä¸ºnull";
                     return -1;
                 }
                 textPtr = (byte[])dr[0];
 
-                // 3.Ê±¼ä´Á²»¿ÉÄÜÎªnull,Ê±¼ä´Á²»Æ¥Åä±¨´í
+                // 3.æ—¶é—´æˆ³ä¸å¯èƒ½ä¸ºnull,æ—¶é—´æˆ³ä¸åŒ¹é…æŠ¥é”™
                 if ((dr[4] is System.DBNull))
                 {
-                    strError = "Ê±¼ä´Á²»¿ÉÄÜÎªnull";
+                    strError = "æ—¶é—´æˆ³ä¸å¯èƒ½ä¸ºnull";
                     return -1;
                 }
 
-                // µ±strStyle´æÔÚ ignorechecktimestampÊ±£¬²»ÅĞ¶ÏÊ±¼ä´Á
+                // å½“strStyleå­˜åœ¨ ignorechecktimestampæ—¶ï¼Œä¸åˆ¤æ–­æ—¶é—´æˆ³
                 strOutputTimestamp = dr.GetString(3);
                 baOutputTimestamp = ByteArray.GetTimeStampByteArray(strOutputTimestamp);
 
@@ -12341,28 +12341,28 @@ out baPreamble);
                     if (ByteArray.Compare(baInputTimestamp,
                         baOutputTimestamp) != 0)
                     {
-                        strError = "Ê±¼ä´Á²»Æ¥Åä";
+                        strError = "æ—¶é—´æˆ³ä¸åŒ¹é…";
                         return -2;
                     }
                 }
-                // 4.metadataÎªnull±¨´í
+                // 4.metadataä¸ºnullæŠ¥é”™
                 if ((dr[4] is System.DBNull))
                 {
-                    strError = "Metadata²»¿ÉÄÜÎªnull";
+                    strError = "Metadataä¸å¯èƒ½ä¸ºnull";
                     return -1;
                 }
                 strOldMetadata = dr.GetString(4);
 
 
-                // 5.rangeÎªnullµÄ±¨´í
+                // 5.rangeä¸ºnullçš„æŠ¥é”™
                 if ((dr[2] is System.DBNull))
                 {
-                    strError = "range´ËÊ±Ò²²»¿ÉÄÜÎªnull";
+                    strError = "rangeæ­¤æ—¶ä¹Ÿä¸å¯èƒ½ä¸ºnull";
                     return -1;
                 }
                 strCurrentRange = dr.GetString(2);
 
-                // 6.È¡³ö³¤¶È
+                // 6.å–å‡ºé•¿åº¦
                 lCurrentLength = dr.GetInt32(1);
 
 
@@ -12371,8 +12371,8 @@ out baPreamble);
                 // 2008/3/13 
                 if (bRet == true)
                 {
-                    // »¹ÓĞÒ»ĞĞ
-                    strError = "¼ÇÂ¼ '" + strID + "' ÔÚSQL¿â" + this.m_strSqlDbName + "µÄrecords±íÖĞ´æÔÚ¶àÌõ£¬ÕâÊÇÒ»ÖÖ²»Õı³£µÄ×´Ì¬, ÇëÏµÍ³¹ÜÀíÔ±ÀûÓÃSQLÃüÁîÉ¾³ı¶àÓàµÄ¼ÇÂ¼¡£";
+                    // è¿˜æœ‰ä¸€è¡Œ
+                    strError = "è®°å½• '" + strID + "' åœ¨SQLåº“" + this.m_strSqlDbName + "çš„recordsè¡¨ä¸­å­˜åœ¨å¤šæ¡ï¼Œè¿™æ˜¯ä¸€ç§ä¸æ­£å¸¸çš„çŠ¶æ€, è¯·ç³»ç»Ÿç®¡ç†å‘˜åˆ©ç”¨SQLå‘½ä»¤åˆ é™¤å¤šä½™çš„è®°å½•ã€‚";
                     return -1;
                 }
             }
@@ -12384,15 +12384,15 @@ out baPreamble);
             bool bObjectFile = false;
 
             string strCurrentRange = row_info.Range;
-            bool bReverse = false;  // ·½Ïò±êÖ¾¡£Èç¹ûÎªfalse£¬±íÊ¾ data ÎªÕıÊ½ÄÚÈİ£¬newdataÎªÔİÊ±ÄÚÈİ
+            bool bReverse = false;  // æ–¹å‘æ ‡å¿—ã€‚å¦‚æœä¸ºfalseï¼Œè¡¨ç¤º data ä¸ºæ­£å¼å†…å®¹ï¼Œnewdataä¸ºæš‚æ—¶å†…å®¹
 
-            string strDataFieldName = "newdata";    // ÁÙÊ±´æ´¢×Ö¶ÎÃû
-            byte[] textptr = row_info.newdata_textptr;  // Êı¾İÖ¸Õë
-            long lCurrentLength = row_info.newdata_length;  // Êı¾İÌå»ı³¤¶È
-            string strCompleteTimestamp = row_info.TimestampString; // ÉÏ´ÎÍêÕûĞ´ÈëÊ±µÄÊ±¼ä´Á
-            string strCurrentTimestamp = row_info.NewTimestampString; // ±¾´ÎµÄÊ±¼ä´Á
+            string strDataFieldName = "newdata";    // ä¸´æ—¶å­˜å‚¨å­—æ®µå
+            byte[] textptr = row_info.newdata_textptr;  // æ•°æ®æŒ‡é’ˆ
+            long lCurrentLength = row_info.newdata_length;  // æ•°æ®ä½“ç§¯é•¿åº¦
+            string strCompleteTimestamp = row_info.TimestampString; // ä¸Šæ¬¡å®Œæ•´å†™å…¥æ—¶çš„æ—¶é—´æˆ³
+            string strCurrentTimestamp = row_info.NewTimestampString; // æœ¬æ¬¡çš„æ—¶é—´æˆ³
 
-            // ÒÑÓĞÊı¾İµÄÊ±¼ä´Á
+            // å·²æœ‰æ•°æ®çš„æ—¶é—´æˆ³
             if (String.IsNullOrEmpty(strCurrentRange) == false
     && strCurrentRange[0] == '!')
             {
@@ -12402,7 +12402,7 @@ out baPreamble);
 
             if (this.m_lObjectStartSize != -1 && lTotalLength >= this.m_lObjectStartSize
 #if !XML_WRITE_TO_FILE
-                && (strID.Length > 10 || connection.SqlServerType != SqlServerType.MsSqlServer)   // Ğ´Èë¶ÔÏóÎÄ¼şÊÇÖ»Õë¶Ô¶ş½øÖÆ¶ÔÏó£¬¶ø²»Õë¶ÔÆÕÍ¨XML¼ÇÂ¼
+                && (strID.Length > 10 || connection.SqlServerType != SqlServerType.MsSqlServer)   // å†™å…¥å¯¹è±¡æ–‡ä»¶æ˜¯åªé’ˆå¯¹äºŒè¿›åˆ¶å¯¹è±¡ï¼Œè€Œä¸é’ˆå¯¹æ™®é€šXMLè®°å½•
 #endif
                 && String.IsNullOrEmpty(strCurrentRange) == false
                 && strCurrentRange[0] == '#')
@@ -12424,7 +12424,7 @@ out baPreamble);
                 if (strCurrentRange == "!")
                     lCurrentLength = row_info.data_length;
                  * */
-                // Ô­ÏÈÊÇ´æ´¢ÔÚimage×Ö¶ÎÖĞ£¬µ«ÊÇ±¾´ÎÒª¸ÄÎª´æ´¢ÔÚobject fileÖĞ£¬ËùÒÔlCurrentLengthÀí½âÎª0
+                // åŸå…ˆæ˜¯å­˜å‚¨åœ¨imageå­—æ®µä¸­ï¼Œä½†æ˜¯æœ¬æ¬¡è¦æ”¹ä¸ºå­˜å‚¨åœ¨object fileä¸­ï¼Œæ‰€ä»¥lCurrentLengthç†è§£ä¸º0
                 lCurrentLength = 0;
                 strCurrentRange = "";
             }
@@ -12448,15 +12448,15 @@ out baPreamble);
                     strCurrentRange = strCurrentRange.Substring(1);
                     if (string.IsNullOrEmpty(strCurrentRange) == false)
                     {
-                        // TODO: ×ª»»·½Ê½µÄÊ±ºòĞèÒª´¦Àí
+                        // TODO: è½¬æ¢æ–¹å¼çš„æ—¶å€™éœ€è¦å¤„ç†
                     }
                 }
             }
 
-            // µ±strStyle´æÔÚ ignorechecktimestampÊ±£¬²»ÅĞ¶ÏÊ±¼ä´Á
+            // å½“strStyleå­˜åœ¨ ignorechecktimestampæ—¶ï¼Œä¸åˆ¤æ–­æ—¶é—´æˆ³
             if (StringUtil.IsInList("ignorechecktimestamp", strStyle) == false)
             {
-                // Èç¹ûÁÙÊ±ÇøÓĞÄÚÈİ£¬ÔòÒª°ÑÁÙÊ±Ê±¼ä´ÁÓÃÀ´±È½Ï¡£·ñÔò¾Í±È½ÏÍê³ÉÇøµÄÊ±¼ä´Á
+                // å¦‚æœä¸´æ—¶åŒºæœ‰å†…å®¹ï¼Œåˆ™è¦æŠŠä¸´æ—¶æ—¶é—´æˆ³ç”¨æ¥æ¯”è¾ƒã€‚å¦åˆ™å°±æ¯”è¾ƒå®ŒæˆåŒºçš„æ—¶é—´æˆ³
                 if (string.IsNullOrEmpty(strCurrentRange) == false)
                 {
                     // strCurrentTimestamp = strCurrentTimestamp;
@@ -12472,8 +12472,8 @@ out baPreamble);
                     if (ByteArray.Compare(baInputTimestamp,
                         baExistTimestamp) != 0)
                     {
-                        strError = "Ê±¼ä´Á²»Æ¥Åä";
-                        baOutputTimestamp = baExistTimestamp;   // ·µ»Ø¸øÇ°¶Ë£¬ÈÃÇ°¶ËÄÜ¹»µÃÖªµ±Ç°µÄÊ±¼ä´Á
+                        strError = "æ—¶é—´æˆ³ä¸åŒ¹é…";
+                        baOutputTimestamp = baExistTimestamp;   // è¿”å›ç»™å‰ç«¯ï¼Œè®©å‰ç«¯èƒ½å¤Ÿå¾—çŸ¥å½“å‰çš„æ—¶é—´æˆ³
                         return -2;
                     }
                 }
@@ -12481,16 +12481,16 @@ out baPreamble);
 
             bool bDeleted = false;
 
-            // ¸ù¾İrangeĞ´Êı¾İ
-            int nStartOfBuffer = 0;    // »º³åÇøµÄÎ»ÖÃ
+            // æ ¹æ®rangeå†™æ•°æ®
+            int nStartOfBuffer = 0;    // ç¼“å†²åŒºçš„ä½ç½®
             int nState = 0;
             for (int i = 0; i < rangeList.Count; i++)
             {
-                bool bCanDeleteDuoYu = false;  // È±Ê¡²»¿ÉÄÜÉ¾³ı¶àÓàµÄ³¤¶È
+                bool bCanDeleteDuoYu = false;  // ç¼ºçœä¸å¯èƒ½åˆ é™¤å¤šä½™çš„é•¿åº¦
 
                 RangeItem range = (RangeItem)rangeList[i];
-                long lStartOfTarget = range.lStart;     // »Ö¸´µ½image×Ö¶ÎµÄÎ»ÖÃ  
-                int nNeedReadLength = (int)range.lLength;   // ĞèÒª¶Á»º³åÇøµÄ³¤¶È
+                long lStartOfTarget = range.lStart;     // æ¢å¤åˆ°imageå­—æ®µçš„ä½ç½®  
+                int nNeedReadLength = (int)range.lLength;   // éœ€è¦è¯»ç¼“å†²åŒºçš„é•¿åº¦
                 if (rangeList.Count == 1 && nNeedReadLength == 0)
                 {
                     bFull = true;
@@ -12515,7 +12515,7 @@ out baPreamble);
                     strError = "MergeContentRangeString() error 4 : " + strError + " (strThisRange='" + strThisRange + "' strCurrentRange='" + strCurrentRange + "' ) lTotalLength=" + lTotalLength.ToString() + "";
                     return -1;
                 }
-                if (nState == 1)  //·¶Î§ÒÑÂú
+                if (nState == 1)  //èŒƒå›´å·²æ»¡
                 {
                     bFull = true;
                     string strFullEnd = "";
@@ -12523,7 +12523,7 @@ out baPreamble);
                     if (nPosition >= 0)
                         strFullEnd = strNewRange.Substring(nPosition + 1);
 
-                    // µ±Îª·¶Î§µÄ×îºóÒ»´Î,ÇÒ±¾´Î·¶Î§µÄÄ©Î²µÈÓÚ×Ü·¶Î§µÄÄ©Î²,ÇÒ»¹Ã»ÓĞÉ¾³ıÊ±
+                    // å½“ä¸ºèŒƒå›´çš„æœ€åä¸€æ¬¡,ä¸”æœ¬æ¬¡èŒƒå›´çš„æœ«å°¾ç­‰äºæ€»èŒƒå›´çš„æœ«å°¾,ä¸”è¿˜æ²¡æœ‰åˆ é™¤æ—¶
                     if (i == rangeList.Count - 1
                         && (strFullEnd == strThisEnd)
                         && bDeleted == false)
@@ -12536,11 +12536,11 @@ out baPreamble);
 
                 if (bObjectFile == true)
                 {
-                    // Ğ´Èë¶ÔÏóÎÄ¼ş
+                    // å†™å…¥å¯¹è±¡æ–‡ä»¶
 
                     if (string.IsNullOrEmpty(this.m_strObjectDir) == true)
                     {
-                        strError = "Êı¾İ¿âÉĞÎ´ÅäÖÃ¶ÔÏóÎÄ¼şÄ¿Â¼£¬µ«Ğ´Èë¶ÔÏóÊ±³öÏÖÁËĞèÒªÒıÓÃ¶ÔÏóÎÄ¼şµÄÇé¿ö";
+                        strError = "æ•°æ®åº“å°šæœªé…ç½®å¯¹è±¡æ–‡ä»¶ç›®å½•ï¼Œä½†å†™å…¥å¯¹è±¡æ—¶å‡ºç°äº†éœ€è¦å¼•ç”¨å¯¹è±¡æ–‡ä»¶çš„æƒ…å†µ";
                         return -1;
                     }
 
@@ -12548,20 +12548,20 @@ out baPreamble);
                     if (bFirst == true)
                     {
                         strFileName = BuildObjectFileName(strID, true);
-                        row_info.NewFileName = GetShortFileName(strFileName); // ¼ÇÒä
+                        row_info.NewFileName = GetShortFileName(strFileName); // è®°å¿†
                         if (row_info.NewFileName == null)
                         {
-                            strError = "¹¹Ôì¶ÌÎÄ¼şÃûÊ±³ö´í¡£¼ÇÂ¼ID '"+strID+"', ¶ÔÏóÎÄ¼şÄ¿Â¼ '"+this.m_strObjectDir+"', ÎïÀíÎÄ¼şÃû '"+strFileName+"'";
+                            strError = "æ„é€ çŸ­æ–‡ä»¶åæ—¶å‡ºé”™ã€‚è®°å½•ID '"+strID+"', å¯¹è±¡æ–‡ä»¶ç›®å½• '"+this.m_strObjectDir+"', ç‰©ç†æ–‡ä»¶å '"+strFileName+"'";
                             return -1;
                         }
                     }
                     else
                     {
-                        // ÔÚ»¹Ã»ÓĞÎÄ¼şµÄÇé¿öÏÂÒ»ÉÏÀ´¾ÍĞ´Èë²»ÊÇ´Ó0¿ªÊ¼µÄ²¿·Ö
+                        // åœ¨è¿˜æ²¡æœ‰æ–‡ä»¶çš„æƒ…å†µä¸‹ä¸€ä¸Šæ¥å°±å†™å…¥ä¸æ˜¯ä»0å¼€å§‹çš„éƒ¨åˆ†
                         if (string.IsNullOrEmpty(row_info.NewFileName) == true)
                         {
                             strFileName = BuildObjectFileName(strID, true);
-                            row_info.NewFileName = GetShortFileName(strFileName); // ¼ÇÒä
+                            row_info.NewFileName = GetShortFileName(strFileName); // è®°å¿†
                         }
 
                         Debug.Assert(string.IsNullOrEmpty(row_info.NewFileName) == false, "");
@@ -12578,7 +12578,7 @@ out baPreamble);
         FileAccess.Write,
         FileShare.ReadWrite))
                         {
-                            // µÚÒ»´ÎĞ´ÎÄ¼ş,²¢ÇÒÎÄ¼ş³¤¶È´óÓÚ¶ÔÏó×Ü³¤¶È£¬Ôò½Ø¶ÏÎÄ¼ş
+                            // ç¬¬ä¸€æ¬¡å†™æ–‡ä»¶,å¹¶ä¸”æ–‡ä»¶é•¿åº¦å¤§äºå¯¹è±¡æ€»é•¿åº¦ï¼Œåˆ™æˆªæ–­æ–‡ä»¶
                             if (bFirst == true && s.Length > lTotalLength)
                                 s.SetLength(0);
 
@@ -12592,7 +12592,7 @@ out baPreamble);
                     {
                         if (nRedoCount == 0)
                         {
-                            // ´´½¨ÖĞ¼ä×ÓÄ¿Â¼
+                            // åˆ›å»ºä¸­é—´å­ç›®å½•
                             PathUtil.CreateDirIfNeed(PathUtil.PathPart(strFileName));
                             nRedoCount++;
                             goto REDO;
@@ -12601,7 +12601,7 @@ out baPreamble);
                     }
                     catch (Exception ex)
                     {
-                        strError = "Ğ´ÈëÎÄ¼ş '"+strFileName+"' Ê±·¢Éú´íÎó: " + ex.Message;
+                        strError = "å†™å…¥æ–‡ä»¶ '"+strFileName+"' æ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                         return -1;
                     }
 
@@ -12609,15 +12609,15 @@ out baPreamble);
                 }
                 else
                 {
-                    // Ó¦µ±ÒÑ¾­×¼±¸ºÃÁËĞĞ
+                    // åº”å½“å·²ç»å‡†å¤‡å¥½äº†è¡Œ
                     Debug.Assert(bNeedInsertRow == false, "");
 
                     // return:	
-                    //		-1  ³ö´í
-                    //		0   ³É¹¦
+                    //		-1  å‡ºé”™
+                    //		0   æˆåŠŸ
                     nRet = this.WriteImage(connection,
                         ref textptr,
-                        ref lCurrentLength,   // µ±Ç°imageµÄ³¤¶ÈÔÚ²»¶ÏµÄ±ä»¯×Å
+                        ref lCurrentLength,   // å½“å‰imageçš„é•¿åº¦åœ¨ä¸æ–­çš„å˜åŒ–ç€
                         bCanDeleteDuoYu,
                         strID,
                         strDataFieldName,   // "newdata",
@@ -12631,7 +12631,7 @@ out baPreamble);
                     if (nRet == -1)
                         return -1;
 
-                    // ×ª»»´æ´¢·½Ê½Ê±Òª¼°Ê±É¾³ıÔ­ÓĞµÄ¶ÔÏóÎÄ¼ş
+                    // è½¬æ¢å­˜å‚¨æ–¹å¼æ—¶è¦åŠæ—¶åˆ é™¤åŸæœ‰çš„å¯¹è±¡æ–‡ä»¶
                     if (string.IsNullOrEmpty(row_info.FileName) == false)
                     {
                         File.Delete(GetObjectFileName(row_info.FileName));
@@ -12646,7 +12646,7 @@ out baPreamble);
 
                 nStartOfBuffer += nNeedReadLength;
 
-                // textptrÓĞ¿ÉÄÜ±»WriteImage()º¯ÊıĞŞ¸Ä
+                // textptræœ‰å¯èƒ½è¢«WriteImage()å‡½æ•°ä¿®æ”¹
                 if (bReverse == false)
                 {
                     row_info.newdata_textptr = textptr;
@@ -12659,16 +12659,16 @@ out baPreamble);
                 }
             }
 
-            // TODO: ×¢ÒâÕâÀï²»ÒªÓĞ¶àÓàµÄ²Ù×÷£¬×¢ÒâËÙ¶ÈÎÊÌâ
+            // TODO: æ³¨æ„è¿™é‡Œä¸è¦æœ‰å¤šä½™çš„æ“ä½œï¼Œæ³¨æ„é€Ÿåº¦é—®é¢˜
             if (bFull == true)
             {
 #if NO
                 if (bDeleted == false)
                 {
-                    // µ±¼ÇÂ¼¸²¸ÇÂúÊ±£¬É¾³ı¶àÓàµÄÖµ
+                    // å½“è®°å½•è¦†ç›–æ»¡æ—¶ï¼Œåˆ é™¤å¤šä½™çš„å€¼
                     // return:
-                    //		-1  ³ö´í
-                    //		0   ³É¹¦
+                    //		-1  å‡ºé”™
+                    //		0   æˆåŠŸ
                     nRet = this.DeleteDuoYuImage(connection,
                         strID,
                         strDataFieldName,   // "newdata",
@@ -12684,20 +12684,20 @@ out baPreamble);
                 if (bObjectFile == true)
                 {
                     string strDeletedFilename = "";
-                    // ¶ÔÏóÎÄ¼ş¸ÄÃû
+                    // å¯¹è±¡æ–‡ä»¶æ”¹å
                     if (string.IsNullOrEmpty(row_info.FileName) == false)
                     {
                         strDeletedFilename = GetObjectFileName(row_info.FileName);
-                        File.Delete(strDeletedFilename);   // É¾³ıÔ­ÓĞµÄÕıÊ½ÎÄ¼ş
+                        File.Delete(strDeletedFilename);   // åˆ é™¤åŸæœ‰çš„æ­£å¼æ–‡ä»¶
                     }
 
-                    // ÕıÊ½ÎÄ¼şÃûÖØĞÂÃüÃû
-                    string strFileName = BuildObjectFileName(strID, false); // ³¤ÎÄ¼şÃû
-                    row_info.FileName = GetShortFileName(strFileName); // ¶ÌÎÄ¼şÃû
+                    // æ­£å¼æ–‡ä»¶åé‡æ–°å‘½å
+                    string strFileName = BuildObjectFileName(strID, false); // é•¿æ–‡ä»¶å
+                    row_info.FileName = GetShortFileName(strFileName); // çŸ­æ–‡ä»¶å
 
                     if (lTotalLength == 0)
                     {
-                        // ´´½¨Ò»¸ö0bytesµÄÎÄ¼ş
+                        // åˆ›å»ºä¸€ä¸ª0bytesçš„æ–‡ä»¶
                         int nRedoCount = 0;
                     REDO:
                         try
@@ -12715,7 +12715,7 @@ out baPreamble);
                         {
                             if (nRedoCount == 0)
                             {
-                                // ´´½¨ÖĞ¼ä×ÓÄ¿Â¼
+                                // åˆ›å»ºä¸­é—´å­ç›®å½•
                                 PathUtil.CreateDirIfNeed(PathUtil.PathPart(strFileName));
                                 nRedoCount++;
                                 goto REDO;
@@ -12724,7 +12724,7 @@ out baPreamble);
                         }
                         catch (Exception ex)
                         {
-                            strError = "´´½¨0×Ö½ÚµÄÎÄ¼ş '"+strFileName+"' Ê±³ö´í£º" + ex.Message;
+                            strError = "åˆ›å»º0å­—èŠ‚çš„æ–‡ä»¶ '"+strFileName+"' æ—¶å‡ºé”™ï¼š" + ex.Message;
                             return -1;
                         }
                     }
@@ -12734,16 +12734,16 @@ out baPreamble);
                         string strSourceFilename = GetObjectFileName(row_info.NewFileName);
 
                         if (strDeletedFilename != strFileName)
-                            File.Delete(strFileName);   // ·À±¸ĞÔÉ¾³ıÒÑ¾­´æÔÚµÄÄ¿±êÎÄ¼ş¡£TODO: »òÕß³ö´íÒÔºóÔÙÖØÊÔ?
+                            File.Delete(strFileName);   // é˜²å¤‡æ€§åˆ é™¤å·²ç»å­˜åœ¨çš„ç›®æ ‡æ–‡ä»¶ã€‚TODO: æˆ–è€…å‡ºé”™ä»¥åå†é‡è¯•?
 
                         try
                         {
-                            File.Move(strSourceFilename, strFileName);    // ¸ÄÃû
+                            File.Move(strSourceFilename, strFileName);    // æ”¹å
                         }
                         catch (FileNotFoundException /* ex */)
                         {
-                            // Èç¹ûÔ´ÎÄ¼ş²»´æÔÚ
-                            strError = "¶ÔÏóÎÄ¼ş(ÁÙÊ±ÎÄ¼ş) '" + strSourceFilename + "' ²»´æÔÚ...";
+                            // å¦‚æœæºæ–‡ä»¶ä¸å­˜åœ¨
+                            strError = "å¯¹è±¡æ–‡ä»¶(ä¸´æ—¶æ–‡ä»¶) '" + strSourceFilename + "' ä¸å­˜åœ¨...";
                             return -1;
                         }
                     }
@@ -12756,16 +12756,16 @@ out baPreamble);
                 lCurrentLength = -1;
             }
 
-            // ×îºó,¸üĞÂrange,metadata,dptimestamp;
+            // æœ€å,æ›´æ–°range,metadata,dptimestamp;
 
-            // µÃµ½×éºÏºóµÄMetadata;
+            // å¾—åˆ°ç»„åˆåçš„Metadata;
             string strResultMetadata = "";
             if (bFull == true)
             {
                 bool bIncReaderCount = StringUtil.IsInList("incReaderCount", strStyle);
                 // return:
-                //		-1	³ö´í
-                //		0	³É¹¦
+                //		-1	å‡ºé”™
+                //		0	æˆåŠŸ
                 nRet = DatabaseUtil.MergeMetadata(row_info.Metadata,
                     strMetadata,
                     lCurrentLength,
@@ -12777,17 +12777,17 @@ out baPreamble);
             }
 
             // 2013/11/23
-            // ÊÇ·ñÒªÖ±½ÓÀûÓÃÊäÈëµÄÊ±¼ä´Á
+            // æ˜¯å¦è¦ç›´æ¥åˆ©ç”¨è¾“å…¥çš„æ—¶é—´æˆ³
             bool bForceTimestamp = StringUtil.IsInList("forcesettimestamp", strStyle);
 
-            // Éú³ÉĞÂµÄÊ±¼ä´Á,±£´æµ½Êı¾İ¿âÀï
+            // ç”Ÿæˆæ–°çš„æ—¶é—´æˆ³,ä¿å­˜åˆ°æ•°æ®åº“é‡Œ
             string strOutputTimestamp = "";
             if (bForceTimestamp == true)
                 strOutputTimestamp = ByteArray.GetHexTimeStampString(baInputTimestamp);
             else
                 strOutputTimestamp = this.CreateTimestampForDb();
 
-            // Ğ´Èë records ±í
+            // å†™å…¥ records è¡¨
             nRet = WriteLine(
             connection,
             ref row_info,
@@ -12807,11 +12807,11 @@ out baPreamble);
             string strCommand = "";
             if (bObjectFile == false)
             {
-                string strSetNull = ""; // ÉèÖÃ¼´½«É¾³ıµÄ timestamp ×Ö¶ÎÄÚÈİÎª¿ÕµÄÓï¾ä
+                string strSetNull = ""; // è®¾ç½®å³å°†åˆ é™¤çš„ timestamp å­—æ®µå†…å®¹ä¸ºç©ºçš„è¯­å¥
                 if (bFull == true)
                 {
                     strSetNull = (bReverse == true ? " newdptimestamp=NULL, newdata=NULL," : " dptimestamp=NULL, data=NULL,");
-                    // Ê±¼ä´ÁºÍdataÄÚÈİ¶¼Çå³ı
+                    // æ—¶é—´æˆ³å’Œdataå†…å®¹éƒ½æ¸…é™¤
                 }
 
                 strCommand = "use " + this.m_strSqlDbName + "\n"
@@ -12825,7 +12825,7 @@ out baPreamble);
             }
             else
             {
-                string strSetNull = ""; // ÉèÖÃ¼´½«É¾³ıµÄ timestamp ×Ö¶ÎÄÚÈİÎª¿ÕµÄÓï¾ä
+                string strSetNull = ""; // è®¾ç½®å³å°†åˆ é™¤çš„ timestamp å­—æ®µå†…å®¹ä¸ºç©ºçš„è¯­å¥
                 if (bFull == true)
                     strSetNull = " newdptimestamp=NULL,";
 
@@ -12929,19 +12929,19 @@ out baPreamble);
                     else
                     {
                         if (bFull == true)
-                            rangeParam.Value = (bReverse == false ? "!" : "") + strCurrentRange;   // ·­×ª
+                            rangeParam.Value = (bReverse == false ? "!" : "") + strCurrentRange;   // ç¿»è½¬
                         else
-                            rangeParam.Value = (bReverse == true ? "!" : "") + strCurrentRange;   // ²»·­×ª
+                            rangeParam.Value = (bReverse == true ? "!" : "") + strCurrentRange;   // ä¸ç¿»è½¬
                     }
 
-                    row_info.Range = (string)rangeParam.Value;  // ½«·´×ªÇé¿ö¼°Ê±¶ÒÏÖ
+                    row_info.Range = (string)rangeParam.Value;  // å°†åè½¬æƒ…å†µåŠæ—¶å…‘ç°
 
                     SqlParameter metadataParam =
                         command.Parameters.Add("@metadata",
                         SqlDbType.NVarChar,
                         4000);
                     if (bFull == true)
-                        metadataParam.Value = strResultMetadata;    // Ö»ÓĞµ±×îºóÒ»´ÎĞ´ÈëµÄÊ±ºò²Å¸üĞÂ metadata
+                        metadataParam.Value = strResultMetadata;    // åªæœ‰å½“æœ€åä¸€æ¬¡å†™å…¥çš„æ—¶å€™æ‰æ›´æ–° metadata
                     else
                         metadataParam.Value = row_info.Metadata;
 
@@ -12960,7 +12960,7 @@ out baPreamble);
                     int nCount = command.ExecuteNonQuery();
                     if (nCount == 0)
                     {
-                        strError = "¸üĞÂ¼ÇÂ¼ºÅÎª '" + strID + "' µÄĞĞµÄ Ê±¼ä´Á,range,metadata,(new)filename Ê§°Ü";
+                        strError = "æ›´æ–°è®°å½•å·ä¸º '" + strID + "' çš„è¡Œçš„ æ—¶é—´æˆ³,range,metadata,(new)filename å¤±è´¥";
                         return -1;
                     }
                 } // end of using command
@@ -12989,16 +12989,16 @@ out baPreamble);
                         rangeParam.Value = "#" + strCurrentRange;
                     else
                     {
-                        Debug.Assert(false, "²»¿ÉÄÜ×ßµ½ÕâÀï");
+                        Debug.Assert(false, "ä¸å¯èƒ½èµ°åˆ°è¿™é‡Œ");
                         /*
                         if (bFull == true)
-                            rangeParam.Value = (bReverse == false ? "!" : "") + strCurrentRange;   // ·­×ª
+                            rangeParam.Value = (bReverse == false ? "!" : "") + strCurrentRange;   // ç¿»è½¬
                         else
-                            rangeParam.Value = (bReverse == true ? "!" : "") + strCurrentRange;   // ²»·­×ª
+                            rangeParam.Value = (bReverse == true ? "!" : "") + strCurrentRange;   // ä¸ç¿»è½¬
                          * */
                     }
 
-                    row_info.Range = (string)rangeParam.Value;  // ½«·´×ªÇé¿ö¼°Ê±¶ÒÏÖ
+                    row_info.Range = (string)rangeParam.Value;  // å°†åè½¬æƒ…å†µåŠæ—¶å…‘ç°
 
 
                     SQLiteParameter metadataParam =
@@ -13006,7 +13006,7 @@ out baPreamble);
                         DbType.String,
                         4000);
                     if (bFull == true)
-                        metadataParam.Value = strResultMetadata;    // Ö»ÓĞµ±×îºóÒ»´ÎĞ´ÈëµÄÊ±ºò²Å¸üĞÂ metadata
+                        metadataParam.Value = strResultMetadata;    // åªæœ‰å½“æœ€åä¸€æ¬¡å†™å…¥çš„æ—¶å€™æ‰æ›´æ–° metadata
                     else
                         metadataParam.Value = row_info.Metadata;
 
@@ -13028,20 +13028,20 @@ out baPreamble);
                         // ????
                         if (nCount == 0)
                         {
-                            strError = "¸üĞÂ¼ÇÂ¼ºÅÎª '" + strID + "' µÄĞĞµÄ Ê±¼ä´Á,range,metadata,(new)filename Ê§°Ü";
+                            strError = "æ›´æ–°è®°å½•å·ä¸º '" + strID + "' çš„è¡Œçš„ æ—¶é—´æˆ³,range,metadata,(new)filename å¤±è´¥";
                             return -1;
                         }
                     }
                     catch (SQLiteException ex)
                     {
-                        strError = "Ö´ĞĞSQLÓï¾ä·¢Éú´íÎó: " + ex.Message + "\r\nSQL Óï¾ä: " + strCommand;
+                        strError = "æ‰§è¡ŒSQLè¯­å¥å‘ç”Ÿé”™è¯¯: " + ex.Message + "\r\nSQL è¯­å¥: " + strCommand;
                         return -1;
                     }
                 } // end of using command
             }
             else if (connection.SqlServerType == SqlServerType.MySql)
             {
-                // ×¢£º MySql ÕâÀïºÍ SQLite »ù±¾Ò»Ñù
+                // æ³¨ï¼š MySql è¿™é‡Œå’Œ SQLite åŸºæœ¬ä¸€æ ·
                 using (MySqlCommand command = new MySqlCommand(strCommand,
                     connection.MySqlConnection))
                 {
@@ -13063,17 +13063,17 @@ out baPreamble);
                         rangeParam.Value = "#" + strCurrentRange;
                     else
                     {
-                        Debug.Assert(false, "²»¿ÉÄÜ×ßµ½ÕâÀï");
+                        Debug.Assert(false, "ä¸å¯èƒ½èµ°åˆ°è¿™é‡Œ");
                     }
 
-                    row_info.Range = (string)rangeParam.Value;  // ½«·´×ªÇé¿ö¼°Ê±¶ÒÏÖ
+                    row_info.Range = (string)rangeParam.Value;  // å°†åè½¬æƒ…å†µåŠæ—¶å…‘ç°
 
                     MySqlParameter metadataParam =
                         command.Parameters.Add("@metadata",
                         MySqlDbType.String,
                         4000);
                     if (bFull == true)
-                        metadataParam.Value = strResultMetadata;    // Ö»ÓĞµ±×îºóÒ»´ÎĞ´ÈëµÄÊ±ºò²Å¸üĞÂ metadata
+                        metadataParam.Value = strResultMetadata;    // åªæœ‰å½“æœ€åä¸€æ¬¡å†™å…¥çš„æ—¶å€™æ‰æ›´æ–° metadata
                     else
                         metadataParam.Value = row_info.Metadata;
 
@@ -13095,13 +13095,13 @@ out baPreamble);
                         // ????
                         if (nCount == 0)
                         {
-                            strError = "¸üĞÂ¼ÇÂ¼ºÅÎª '" + strID + "' µÄĞĞµÄ Ê±¼ä´Á,range,metadata,(new)filename Ê§°Ü";
+                            strError = "æ›´æ–°è®°å½•å·ä¸º '" + strID + "' çš„è¡Œçš„ æ—¶é—´æˆ³,range,metadata,(new)filename å¤±è´¥";
                             return -1;
                         }
                     }
                     catch (MySqlException ex)
                     {
-                        strError = "Ö´ĞĞSQLÓï¾ä·¢Éú´íÎó: " + ex.Message + "\r\nSQL Óï¾ä: " + strCommand;
+                        strError = "æ‰§è¡ŒSQLè¯­å¥å‘ç”Ÿé”™è¯¯: " + ex.Message + "\r\nSQL è¯­å¥: " + strCommand;
                         return -1;
                     }
                 } // end of using command
@@ -13109,7 +13109,7 @@ out baPreamble);
             }
             else if (connection.SqlServerType == SqlServerType.Oracle)
             {
-                // ×¢£º Oracle ÕâÀïºÍ MySql »ù±¾Ò»Ñù
+                // æ³¨ï¼š Oracle è¿™é‡Œå’Œ MySql åŸºæœ¬ä¸€æ ·
                 using (OracleCommand command = new OracleCommand(strCommand,
                     connection.OracleConnection))
                 {
@@ -13134,17 +13134,17 @@ out baPreamble);
                         rangeParam.Value = "#" + strCurrentRange;
                     else
                     {
-                        Debug.Assert(false, "²»¿ÉÄÜ×ßµ½ÕâÀï");
+                        Debug.Assert(false, "ä¸å¯èƒ½èµ°åˆ°è¿™é‡Œ");
                     }
 
-                    row_info.Range = (string)rangeParam.Value;  // ½«·´×ªÇé¿ö¼°Ê±¶ÒÏÖ
+                    row_info.Range = (string)rangeParam.Value;  // å°†åè½¬æƒ…å†µåŠæ—¶å…‘ç°
 
                     OracleParameter metadataParam =
                         command.Parameters.Add(":metadata",
                         OracleDbType.NVarchar2,
                         4000);
                     if (bFull == true)
-                        metadataParam.Value = strResultMetadata;    // Ö»ÓĞµ±×îºóÒ»´ÎĞ´ÈëµÄÊ±ºò²Å¸üĞÂ metadata
+                        metadataParam.Value = strResultMetadata;    // åªæœ‰å½“æœ€åä¸€æ¬¡å†™å…¥çš„æ—¶å€™æ‰æ›´æ–° metadata
                     else
                         metadataParam.Value = row_info.Metadata;
 
@@ -13166,13 +13166,13 @@ out baPreamble);
                         // ????
                         if (nCount == 0)
                         {
-                            strError = "¸üĞÂ¼ÇÂ¼ºÅÎª '" + strID + "' µÄĞĞµÄ Ê±¼ä´Á,range,metadata,(new)filename Ê§°Ü";
+                            strError = "æ›´æ–°è®°å½•å·ä¸º '" + strID + "' çš„è¡Œçš„ æ—¶é—´æˆ³,range,metadata,(new)filename å¤±è´¥";
                             return -1;
                         }
                     }
                     catch (MySqlException ex)
                     {
-                        strError = "Ö´ĞĞSQLÓï¾ä·¢Éú´íÎó: " + ex.Message + "\r\nSQL Óï¾ä: " + strCommand;
+                        strError = "æ‰§è¡ŒSQLè¯­å¥å‘ç”Ÿé”™è¯¯: " + ex.Message + "\r\nSQL è¯­å¥: " + strCommand;
                         return -1;
                     }
                 } // end of using command
@@ -13180,7 +13180,7 @@ out baPreamble);
             }
             else
             {
-                strError = "Î´ÄÜÊ¶±ğµÄ SqlServerType '"+connection.SqlServerType.ToString()+"'";
+                strError = "æœªèƒ½è¯†åˆ«çš„ SqlServerType '"+connection.SqlServerType.ToString()+"'";
                 return -1;
             }
 
@@ -13188,7 +13188,7 @@ out baPreamble);
 
             baOutputTimestamp = ByteArray.GetTimeStampByteArray(strOutputTimestamp);    // Encoding.UTF8.GetBytes(strOutputTimestamp);
 
-            // ±¾´Î±ä»¯ºóµÄÊ±¼ä´Á
+            // æœ¬æ¬¡å˜åŒ–åçš„æ—¶é—´æˆ³
             if (bObjectFile == true)
             {
                 if (bFull == true)
@@ -13210,7 +13210,7 @@ out baPreamble);
 
                 if (bFull == true)
                 {
-                    // ·´Ó³ÒÑ¾­±»Çå³ı
+                    // åæ˜ å·²ç»è¢«æ¸…é™¤
                     if (bReverse == false)
                     {
                         row_info.TimestampString = "";
@@ -13228,12 +13228,12 @@ out baPreamble);
                 }
             }
 
-            // ×¢£ºÈç¹ûÊÇ×îºóÒ»´ÎĞ´Èë£¬º¯Êı·µ»ØÊ±£¬newdata×Ö¶ÎÄÚÈİ±»Çå³ı
+            // æ³¨ï¼šå¦‚æœæ˜¯æœ€åä¸€æ¬¡å†™å…¥ï¼Œå‡½æ•°è¿”å›æ—¶ï¼Œnewdataå­—æ®µå†…å®¹è¢«æ¸…é™¤
             return 0;
         }
 
         // parameters:
-        //      strPartList ÒªĞ´ÈëÄÄĞ©²¿·Ö£¿ full ±íÊ¾È«²¿¡£range filename newfilename metadata timestamp
+        //      strPartList è¦å†™å…¥å“ªäº›éƒ¨åˆ†ï¼Ÿ full è¡¨ç¤ºå…¨éƒ¨ã€‚range filename newfilename metadata timestamp
         int WriteLine(
             Connection connection,
             ref RecordRowInfo row_info,
@@ -13253,11 +13253,11 @@ out baPreamble);
             string strCommand = "";
             if (bObjectFile == false)
             {
-                string strSetNull = ""; // ÉèÖÃ¼´½«É¾³ıµÄ timestamp ×Ö¶ÎÄÚÈİÎª¿ÕµÄÓï¾ä
+                string strSetNull = ""; // è®¾ç½®å³å°†åˆ é™¤çš„ timestamp å­—æ®µå†…å®¹ä¸ºç©ºçš„è¯­å¥
                 if (bFull == true)
                 {
                     strSetNull = (bReverse == true ? " newdptimestamp=NULL, newdata=NULL," : " dptimestamp=NULL, data=NULL,");
-                    // Ê±¼ä´ÁºÍdataÄÚÈİ¶¼Çå³ı
+                    // æ—¶é—´æˆ³å’Œdataå†…å®¹éƒ½æ¸…é™¤
                 }
 
                 strCommand = "use " + this.m_strSqlDbName + "\n"
@@ -13271,7 +13271,7 @@ out baPreamble);
             }
             else
             {
-                string strSetNull = ""; // ÉèÖÃ¼´½«É¾³ıµÄ timestamp ×Ö¶ÎÄÚÈİÎª¿ÕµÄÓï¾ä
+                string strSetNull = ""; // è®¾ç½®å³å°†åˆ é™¤çš„ timestamp å­—æ®µå†…å®¹ä¸ºç©ºçš„è¯­å¥
                 if (bFull == true)
                     strSetNull = " newdptimestamp=NULL,";
 
@@ -13375,19 +13375,19 @@ out baPreamble);
                     else
                     {
                         if (bFull == true)
-                            rangeParam.Value = (bReverse == false ? "!" : "") + strCurrentRange;   // ·­×ª
+                            rangeParam.Value = (bReverse == false ? "!" : "") + strCurrentRange;   // ç¿»è½¬
                         else
-                            rangeParam.Value = (bReverse == true ? "!" : "") + strCurrentRange;   // ²»·­×ª
+                            rangeParam.Value = (bReverse == true ? "!" : "") + strCurrentRange;   // ä¸ç¿»è½¬
                     }
 
-                    row_info.Range = (string)rangeParam.Value;  // ½«·´×ªÇé¿ö¼°Ê±¶ÒÏÖ
+                    row_info.Range = (string)rangeParam.Value;  // å°†åè½¬æƒ…å†µåŠæ—¶å…‘ç°
 
                     SqlParameter metadataParam =
                         command.Parameters.Add("@metadata",
                         SqlDbType.NVarChar,
                         4000);
                     if (bFull == true)
-                        metadataParam.Value = strResultMetadata;    // Ö»ÓĞµ±×îºóÒ»´ÎĞ´ÈëµÄÊ±ºò²Å¸üĞÂ metadata
+                        metadataParam.Value = strResultMetadata;    // åªæœ‰å½“æœ€åä¸€æ¬¡å†™å…¥çš„æ—¶å€™æ‰æ›´æ–° metadata
                     else
                         metadataParam.Value = row_info.Metadata;
 
@@ -13406,7 +13406,7 @@ out baPreamble);
                     int nCount = command.ExecuteNonQuery();
                     if (nCount == 0)
                     {
-                        strError = "¸üĞÂ¼ÇÂ¼ºÅÎª '" + strID + "' µÄĞĞµÄ Ê±¼ä´Á,range,metadata,(new)filename Ê§°Ü";
+                        strError = "æ›´æ–°è®°å½•å·ä¸º '" + strID + "' çš„è¡Œçš„ æ—¶é—´æˆ³,range,metadata,(new)filename å¤±è´¥";
                         return -1;
                     }
                 } // end of using command
@@ -13435,23 +13435,23 @@ out baPreamble);
                         rangeParam.Value = "#" + strCurrentRange;
                     else
                     {
-                        Debug.Assert(false, "²»¿ÉÄÜ×ßµ½ÕâÀï");
+                        Debug.Assert(false, "ä¸å¯èƒ½èµ°åˆ°è¿™é‡Œ");
                         /*
                         if (bFull == true)
-                            rangeParam.Value = (bReverse == false ? "!" : "") + strCurrentRange;   // ·­×ª
+                            rangeParam.Value = (bReverse == false ? "!" : "") + strCurrentRange;   // ç¿»è½¬
                         else
-                            rangeParam.Value = (bReverse == true ? "!" : "") + strCurrentRange;   // ²»·­×ª
+                            rangeParam.Value = (bReverse == true ? "!" : "") + strCurrentRange;   // ä¸ç¿»è½¬
                          * */
                     }
 
-                    row_info.Range = (string)rangeParam.Value;  // ½«·´×ªÇé¿ö¼°Ê±¶ÒÏÖ
+                    row_info.Range = (string)rangeParam.Value;  // å°†åè½¬æƒ…å†µåŠæ—¶å…‘ç°
 
                     SQLiteParameter metadataParam =
                         command.Parameters.Add("@metadata",
                         DbType.String,
                         4000);
                     if (bFull == true)
-                        metadataParam.Value = strResultMetadata;    // Ö»ÓĞµ±×îºóÒ»´ÎĞ´ÈëµÄÊ±ºò²Å¸üĞÂ metadata
+                        metadataParam.Value = strResultMetadata;    // åªæœ‰å½“æœ€åä¸€æ¬¡å†™å…¥çš„æ—¶å€™æ‰æ›´æ–° metadata
                     else
                         metadataParam.Value = row_info.Metadata;
 
@@ -13473,20 +13473,20 @@ out baPreamble);
                         // ????
                         if (nCount == 0)
                         {
-                            strError = "¸üĞÂ¼ÇÂ¼ºÅÎª '" + strID + "' µÄĞĞµÄ Ê±¼ä´Á,range,metadata,(new)filename Ê§°Ü";
+                            strError = "æ›´æ–°è®°å½•å·ä¸º '" + strID + "' çš„è¡Œçš„ æ—¶é—´æˆ³,range,metadata,(new)filename å¤±è´¥";
                             return -1;
                         }
                     }
                     catch (SQLiteException ex)
                     {
-                        strError = "Ö´ĞĞSQLÓï¾ä·¢Éú´íÎó: " + ex.Message + "\r\nSQL Óï¾ä: " + strCommand;
+                        strError = "æ‰§è¡ŒSQLè¯­å¥å‘ç”Ÿé”™è¯¯: " + ex.Message + "\r\nSQL è¯­å¥: " + strCommand;
                         return -1;
                     }
                 } // end of using command
             }
             else if (connection.SqlServerType == SqlServerType.MySql)
             {
-                // ×¢£º MySql ÕâÀïºÍ SQLite »ù±¾Ò»Ñù
+                // æ³¨ï¼š MySql è¿™é‡Œå’Œ SQLite åŸºæœ¬ä¸€æ ·
                 using (MySqlCommand command = new MySqlCommand(strCommand,
                     connection.MySqlConnection))
                 {
@@ -13508,17 +13508,17 @@ out baPreamble);
                         rangeParam.Value = "#" + strCurrentRange;
                     else
                     {
-                        Debug.Assert(false, "²»¿ÉÄÜ×ßµ½ÕâÀï");
+                        Debug.Assert(false, "ä¸å¯èƒ½èµ°åˆ°è¿™é‡Œ");
                     }
 
-                    row_info.Range = (string)rangeParam.Value;  // ½«·´×ªÇé¿ö¼°Ê±¶ÒÏÖ
+                    row_info.Range = (string)rangeParam.Value;  // å°†åè½¬æƒ…å†µåŠæ—¶å…‘ç°
 
                     MySqlParameter metadataParam =
                         command.Parameters.Add("@metadata",
                         MySqlDbType.String,
                         4000);
                     if (bFull == true)
-                        metadataParam.Value = strResultMetadata;    // Ö»ÓĞµ±×îºóÒ»´ÎĞ´ÈëµÄÊ±ºò²Å¸üĞÂ metadata
+                        metadataParam.Value = strResultMetadata;    // åªæœ‰å½“æœ€åä¸€æ¬¡å†™å…¥çš„æ—¶å€™æ‰æ›´æ–° metadata
                     else
                         metadataParam.Value = row_info.Metadata;
 
@@ -13540,13 +13540,13 @@ out baPreamble);
                         // ????
                         if (nCount == 0)
                         {
-                            strError = "¸üĞÂ¼ÇÂ¼ºÅÎª '" + strID + "' µÄĞĞµÄ Ê±¼ä´Á,range,metadata,(new)filename Ê§°Ü";
+                            strError = "æ›´æ–°è®°å½•å·ä¸º '" + strID + "' çš„è¡Œçš„ æ—¶é—´æˆ³,range,metadata,(new)filename å¤±è´¥";
                             return -1;
                         }
                     }
                     catch (MySqlException ex)
                     {
-                        strError = "Ö´ĞĞSQLÓï¾ä·¢Éú´íÎó: " + ex.Message + "\r\nSQL Óï¾ä: " + strCommand;
+                        strError = "æ‰§è¡ŒSQLè¯­å¥å‘ç”Ÿé”™è¯¯: " + ex.Message + "\r\nSQL è¯­å¥: " + strCommand;
                         return -1;
                     }
                 } // end of using command
@@ -13554,7 +13554,7 @@ out baPreamble);
             }
             else if (connection.SqlServerType == SqlServerType.Oracle)
             {
-                // ×¢£º Oracle ÕâÀïºÍ MySql »ù±¾Ò»Ñù
+                // æ³¨ï¼š Oracle è¿™é‡Œå’Œ MySql åŸºæœ¬ä¸€æ ·
                 using (OracleCommand command = new OracleCommand(strCommand,
                     connection.OracleConnection))
                 {
@@ -13579,17 +13579,17 @@ out baPreamble);
                         rangeParam.Value = "#" + strCurrentRange;
                     else
                     {
-                        Debug.Assert(false, "²»¿ÉÄÜ×ßµ½ÕâÀï");
+                        Debug.Assert(false, "ä¸å¯èƒ½èµ°åˆ°è¿™é‡Œ");
                     }
 
-                    row_info.Range = (string)rangeParam.Value;  // ½«·´×ªÇé¿ö¼°Ê±¶ÒÏÖ
+                    row_info.Range = (string)rangeParam.Value;  // å°†åè½¬æƒ…å†µåŠæ—¶å…‘ç°
 
                     OracleParameter metadataParam =
                         command.Parameters.Add(":metadata",
                         OracleDbType.NVarchar2,
                         4000);
                     if (bFull == true)
-                        metadataParam.Value = strResultMetadata;    // Ö»ÓĞµ±×îºóÒ»´ÎĞ´ÈëµÄÊ±ºò²Å¸üĞÂ metadata
+                        metadataParam.Value = strResultMetadata;    // åªæœ‰å½“æœ€åä¸€æ¬¡å†™å…¥çš„æ—¶å€™æ‰æ›´æ–° metadata
                     else
                         metadataParam.Value = row_info.Metadata;
 
@@ -13611,13 +13611,13 @@ out baPreamble);
                         // ????
                         if (nCount == 0)
                         {
-                            strError = "¸üĞÂ¼ÇÂ¼ºÅÎª '" + strID + "' µÄĞĞµÄ Ê±¼ä´Á,range,metadata,(new)filename Ê§°Ü";
+                            strError = "æ›´æ–°è®°å½•å·ä¸º '" + strID + "' çš„è¡Œçš„ æ—¶é—´æˆ³,range,metadata,(new)filename å¤±è´¥";
                             return -1;
                         }
                     }
                     catch (MySqlException ex)
                     {
-                        strError = "Ö´ĞĞSQLÓï¾ä·¢Éú´íÎó: " + ex.Message + "\r\nSQL Óï¾ä: " + strCommand;
+                        strError = "æ‰§è¡ŒSQLè¯­å¥å‘ç”Ÿé”™è¯¯: " + ex.Message + "\r\nSQL è¯­å¥: " + strCommand;
                         return -1;
                     }
                 } // end of using command
@@ -13625,14 +13625,14 @@ out baPreamble);
             }
             else
             {
-                strError = "Î´ÄÜÊ¶±ğµÄ SqlServerType '" + connection.SqlServerType.ToString() + "'";
+                strError = "æœªèƒ½è¯†åˆ«çš„ SqlServerType '" + connection.SqlServerType.ToString() + "'";
                 return -1;
             }
 
             return 0;
         }
 
-        // ½« metadata Ğ´Èë records ±í
+        // å°† metadata å†™å…¥ records è¡¨
         // parameters:
         int WriteMetadataColumn(
             Connection connection,
@@ -13689,12 +13689,12 @@ out baPreamble);
                         command.Parameters.Add("@metadata",
                         SqlDbType.NVarChar,
                         4000);
-                        metadataParam.Value = strResultMetadata;    // Ö»ÓĞµ±×îºóÒ»´ÎĞ´ÈëµÄÊ±ºò²Å¸üĞÂ metadata
+                        metadataParam.Value = strResultMetadata;    // åªæœ‰å½“æœ€åä¸€æ¬¡å†™å…¥çš„æ—¶å€™æ‰æ›´æ–° metadata
 
                     int nCount = command.ExecuteNonQuery();
                     if (nCount == 0)
                     {
-                        strError = "¸üĞÂ¼ÇÂ¼ºÅÎª '" + strID + "' µÄĞĞµÄ Ê±¼ä´Á,range,metadata,(new)filename Ê§°Ü";
+                        strError = "æ›´æ–°è®°å½•å·ä¸º '" + strID + "' çš„è¡Œçš„ æ—¶é—´æˆ³,range,metadata,(new)filename å¤±è´¥";
                         return -1;
                     }
                 } // end of using command
@@ -13713,7 +13713,7 @@ out baPreamble);
                         command.Parameters.Add("@metadata",
                         DbType.String,
                         4000);
-                        metadataParam.Value = strResultMetadata;    // Ö»ÓĞµ±×îºóÒ»´ÎĞ´ÈëµÄÊ±ºò²Å¸üĞÂ metadata
+                        metadataParam.Value = strResultMetadata;    // åªæœ‰å½“æœ€åä¸€æ¬¡å†™å…¥çš„æ—¶å€™æ‰æ›´æ–° metadata
 
                     try
                     {
@@ -13721,20 +13721,20 @@ out baPreamble);
                         // ????
                         if (nCount == 0)
                         {
-                            strError = "¸üĞÂ¼ÇÂ¼ºÅÎª '" + strID + "' µÄĞĞµÄ Ê±¼ä´Á,range,metadata,(new)filename Ê§°Ü";
+                            strError = "æ›´æ–°è®°å½•å·ä¸º '" + strID + "' çš„è¡Œçš„ æ—¶é—´æˆ³,range,metadata,(new)filename å¤±è´¥";
                             return -1;
                         }
                     }
                     catch (SQLiteException ex)
                     {
-                        strError = "Ö´ĞĞSQLÓï¾ä·¢Éú´íÎó: " + ex.Message + "\r\nSQL Óï¾ä: " + strCommand;
+                        strError = "æ‰§è¡ŒSQLè¯­å¥å‘ç”Ÿé”™è¯¯: " + ex.Message + "\r\nSQL è¯­å¥: " + strCommand;
                         return -1;
                     }
                 } // end of using command
             }
             else if (connection.SqlServerType == SqlServerType.MySql)
             {
-                // ×¢£º MySql ÕâÀïºÍ SQLite »ù±¾Ò»Ñù
+                // æ³¨ï¼š MySql è¿™é‡Œå’Œ SQLite åŸºæœ¬ä¸€æ ·
                 using (MySqlCommand command = new MySqlCommand(strCommand,
                     connection.MySqlConnection))
                 {
@@ -13746,7 +13746,7 @@ out baPreamble);
                         command.Parameters.Add("@metadata",
                         MySqlDbType.String,
                         4000);
-                        metadataParam.Value = strResultMetadata;    // Ö»ÓĞµ±×îºóÒ»´ÎĞ´ÈëµÄÊ±ºò²Å¸üĞÂ metadata
+                        metadataParam.Value = strResultMetadata;    // åªæœ‰å½“æœ€åä¸€æ¬¡å†™å…¥çš„æ—¶å€™æ‰æ›´æ–° metadata
 
                     try
                     {
@@ -13754,13 +13754,13 @@ out baPreamble);
                         // ????
                         if (nCount == 0)
                         {
-                            strError = "¸üĞÂ¼ÇÂ¼ºÅÎª '" + strID + "' µÄĞĞµÄ Ê±¼ä´Á,range,metadata,(new)filename Ê§°Ü";
+                            strError = "æ›´æ–°è®°å½•å·ä¸º '" + strID + "' çš„è¡Œçš„ æ—¶é—´æˆ³,range,metadata,(new)filename å¤±è´¥";
                             return -1;
                         }
                     }
                     catch (MySqlException ex)
                     {
-                        strError = "Ö´ĞĞSQLÓï¾ä·¢Éú´íÎó: " + ex.Message + "\r\nSQL Óï¾ä: " + strCommand;
+                        strError = "æ‰§è¡ŒSQLè¯­å¥å‘ç”Ÿé”™è¯¯: " + ex.Message + "\r\nSQL è¯­å¥: " + strCommand;
                         return -1;
                     }
                 } // end of using command
@@ -13768,7 +13768,7 @@ out baPreamble);
             }
             else if (connection.SqlServerType == SqlServerType.Oracle)
             {
-                // ×¢£º Oracle ÕâÀïºÍ MySql »ù±¾Ò»Ñù
+                // æ³¨ï¼š Oracle è¿™é‡Œå’Œ MySql åŸºæœ¬ä¸€æ ·
                 using (OracleCommand command = new OracleCommand(strCommand,
                     connection.OracleConnection))
                 {
@@ -13782,7 +13782,7 @@ out baPreamble);
                         command.Parameters.Add(":metadata",
                         OracleDbType.NVarchar2,
                         4000);
-                        metadataParam.Value = strResultMetadata;    // Ö»ÓĞµ±×îºóÒ»´ÎĞ´ÈëµÄÊ±ºò²Å¸üĞÂ metadata
+                        metadataParam.Value = strResultMetadata;    // åªæœ‰å½“æœ€åä¸€æ¬¡å†™å…¥çš„æ—¶å€™æ‰æ›´æ–° metadata
 
                     try
                     {
@@ -13790,20 +13790,20 @@ out baPreamble);
                         // ????
                         if (nCount == 0)
                         {
-                            strError = "¸üĞÂ¼ÇÂ¼ºÅÎª '" + strID + "' µÄĞĞµÄ Ê±¼ä´Á,range,metadata,(new)filename Ê§°Ü";
+                            strError = "æ›´æ–°è®°å½•å·ä¸º '" + strID + "' çš„è¡Œçš„ æ—¶é—´æˆ³,range,metadata,(new)filename å¤±è´¥";
                             return -1;
                         }
                     }
                     catch (MySqlException ex)
                     {
-                        strError = "Ö´ĞĞSQLÓï¾ä·¢Éú´íÎó: " + ex.Message + "\r\nSQL Óï¾ä: " + strCommand;
+                        strError = "æ‰§è¡ŒSQLè¯­å¥å‘ç”Ÿé”™è¯¯: " + ex.Message + "\r\nSQL è¯­å¥: " + strCommand;
                         return -1;
                     }
                 } // end of using command
             }
             else
             {
-                strError = "Î´ÄÜÊ¶±ğµÄ SqlServerType '" + connection.SqlServerType.ToString() + "'";
+                strError = "æœªèƒ½è¯†åˆ«çš„ SqlServerType '" + connection.SqlServerType.ToString() + "'";
                 return -1;
             }
 
@@ -13811,9 +13811,9 @@ out baPreamble);
         }
 
         // return:
-        //      -1  ¶ÔÏóÎÄ¼ş
-        //      0   ÕıÏòimage×Ö¶Î
-        //      1   ·´Ïòimage×Ö¶Î
+        //      -1  å¯¹è±¡æ–‡ä»¶
+        //      0   æ­£å‘imageå­—æ®µ
+        //      1   åå‘imageå­—æ®µ
         static int GetReverse(string strCurrentRange)
         {
             if (String.IsNullOrEmpty(strCurrentRange) == false
@@ -13825,35 +13825,35 @@ out baPreamble);
             return 0;
         }
 
-        // Ğ´image×Ö¶ÎµÄÄÚÈİ
-        // ÍâÃæÖ¸¹©Ò»¸ötextprtÖ¸Õë
+        // å†™imageå­—æ®µçš„å†…å®¹
+        // å¤–é¢æŒ‡ä¾›ä¸€ä¸ªtextprtæŒ‡é’ˆ
         // parameter:
-        //		connection  Á¬½Ó¶ÔÏó
-        //		textPtr     imageÖ¸Õë
-        //		nOldLength  Ô­³¤¶È
-        //		nDeleteDuoYu    ÊÇ·ñÉ¾³ı¶àÓà
-        //		strID           ¼ÇÂ¼id
-        //		strImageFieldName   image×Ö¶Î
-        //		nStartOfTarget      Ä¿±êµÄÆğÊ¼Î»ÖÃ
-        //		sourceBuffer    Ô´´ó×Ö½ÚÊı×é
-        //		streamSource    Ô´´óÁ÷
-        //		nStartOfBuffer  Ô´Á÷µÄÆğÊ¼Î»ÖÃ
-        //		nNeedReadLength ĞèÒªĞ´µÄ³¤¶È
-        //		strError        out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //		connection  è¿æ¥å¯¹è±¡
+        //		textPtr     imageæŒ‡é’ˆ
+        //		nOldLength  åŸé•¿åº¦
+        //		nDeleteDuoYu    æ˜¯å¦åˆ é™¤å¤šä½™
+        //		strID           è®°å½•id
+        //		strImageFieldName   imageå­—æ®µ
+        //		nStartOfTarget      ç›®æ ‡çš„èµ·å§‹ä½ç½®
+        //		sourceBuffer    æºå¤§å­—èŠ‚æ•°ç»„
+        //		streamSource    æºå¤§æµ
+        //		nStartOfBuffer  æºæµçš„èµ·å§‹ä½ç½®
+        //		nNeedReadLength éœ€è¦å†™çš„é•¿åº¦
+        //		strError        outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:	
-        //		-1  ³ö´í
-        //		0   ³É¹¦
+        //		-1  å‡ºé”™
+        //		0   æˆåŠŸ
         private int WriteImage(Connection connection,
             ref byte[] textPtr,
-            ref long lCurrentLength,           // Ô­À´µÄ³¤¶È     
+            ref long lCurrentLength,           // åŸæ¥çš„é•¿åº¦     
             bool bDeleteDuoYu,
             string strID,
             string strImageFieldName,
-            long lStartOfTarget,       // Ä¿±êµÄÆğÊ¼Î»ÖÃ
+            long lStartOfTarget,       // ç›®æ ‡çš„èµ·å§‹ä½ç½®
             byte[] baSource,
             // Stream streamSource,
-            int nStartOfSource,     // »º³åÇøµÄÊµ¼ÊÎ»ÖÃ ±ØĞë >=0 
-            int nNeedReadLength,    // ĞèÒª¶Á»º³åÇøµÄ³¤¶È¿ÉÄÜÊÇ-1,±íÊ¾´ÓÔ´Á÷nSourceStartÎ»ÖÃµ½Ä©Î²
+            int nStartOfSource,     // ç¼“å†²åŒºçš„å®é™…ä½ç½® å¿…é¡» >=0 
+            int nNeedReadLength,    // éœ€è¦è¯»ç¼“å†²åŒºçš„é•¿åº¦å¯èƒ½æ˜¯-1,è¡¨ç¤ºä»æºæµnSourceStartä½ç½®åˆ°æœ«å°¾
             long lTotalLength,
             out string strError)
         {
@@ -13861,29 +13861,29 @@ out baPreamble);
             int nRet = 0;
 
             //---------------------------------------
-            //ÀıĞĞ¼ì²éÊäÈë²ÎÊı
+            //ä¾‹è¡Œæ£€æŸ¥è¾“å…¥å‚æ•°
             //-----------------------------------------
             /*
             if (baSource == null && streamSource == null)
             {
-                strError = "WriteImage()µ÷ÓÃ´íÎó£¬baSource²ÎÊıÓëstreamSource²ÎÊı²»ÄÜÍ¬Ê±Îªnull¡£";
+                strError = "WriteImage()è°ƒç”¨é”™è¯¯ï¼ŒbaSourceå‚æ•°ä¸streamSourceå‚æ•°ä¸èƒ½åŒæ—¶ä¸ºnullã€‚";
                 return -1;
             }
             if (baSource != null && streamSource != null)
             {
-                strError = "WriteImage()µ÷ÓÃ´íÎó£¬baSource²ÎÊıÓëstreamSource²ÎÊıÖ»ÄÜÓĞÒ»¸ö±»¸³Öµ¡£";
+                strError = "WriteImage()è°ƒç”¨é”™è¯¯ï¼ŒbaSourceå‚æ•°ä¸streamSourceå‚æ•°åªèƒ½æœ‰ä¸€ä¸ªè¢«èµ‹å€¼ã€‚";
                 return -1;
             }
              * */
             if (baSource == null)
             {
-                strError = "WriteImage()µ÷ÓÃ´íÎó£¬baSource²ÎÊı²»ÄÜÎªnull¡£";
+                strError = "WriteImage()è°ƒç”¨é”™è¯¯ï¼ŒbaSourceå‚æ•°ä¸èƒ½ä¸ºnullã€‚";
                 return -1;
             }
 
             if (connection.SqlServerType != SqlServerType.MsSqlServer)
             {
-                strError = "SqlServerType '"+connection.SqlServerType.ToString()+"' µÄconnection²»ÄÜÓÃÓÚµ÷ÓÃWriteImage()º¯Êı";
+                strError = "SqlServerType '"+connection.SqlServerType.ToString()+"' çš„connectionä¸èƒ½ç”¨äºè°ƒç”¨WriteImage()å‡½æ•°";
                 return -1;
             }
 
@@ -13898,8 +13898,8 @@ out baPreamble);
 
             long lOutputLength = 0;
             // return:
-            //		-1  ³ö´í
-            //		0   ³É¹¦
+            //		-1  å‡ºé”™
+            //		0   æˆåŠŸ
             nRet = ConvertUtil.GetRealLength(nStartOfSource,
                 nNeedReadLength,
                 nSourceTotalLength,
@@ -13911,7 +13911,7 @@ out baPreamble);
 
 
             //---------------------------------------
-            //¿ªÊ¼×öÊÂÇé
+            //å¼€å§‹åšäº‹æƒ…
             //-----------------------------------------
             if (textPtr == null 
                 || lStartOfTarget == 0 && lCurrentLength > lTotalLength)
@@ -13931,11 +13931,11 @@ out baPreamble);
                 SqlDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult);
                 try
                 {
-                    // 1.¼ÇÂ¼²»´æÔÚ±¨´í
+                    // 1.è®°å½•ä¸å­˜åœ¨æŠ¥é”™
                     if (dr == null
                         || dr.HasRows == false)
                     {
-                        strError = "¼ÇÂ¼ '" + strID + "' ÔÚ¿âÖĞ²»´æÔÚ";
+                        strError = "è®°å½• '" + strID + "' åœ¨åº“ä¸­ä¸å­˜åœ¨";
                         return -1;
                     }
 
@@ -13947,12 +13947,12 @@ out baPreamble);
 
                     if (bRet == true)
                     {
-                        // »¹ÓĞÒ»ĞĞ
-                        strError = "¼ÇÂ¼ '" + strID + "' ÔÚSQL¿â" + this.m_strSqlDbName + "µÄrecords±íÖĞ´æÔÚ¶àÌõ£¬ÕâÊÇÒ»ÖÖ²»Õı³£µÄ×´Ì¬, ÇëÏµÍ³¹ÜÀíÔ±ÀûÓÃSQLÃüÁîÉ¾³ı¶àÓàµÄ¼ÇÂ¼¡£";
+                        // è¿˜æœ‰ä¸€è¡Œ
+                        strError = "è®°å½• '" + strID + "' åœ¨SQLåº“" + this.m_strSqlDbName + "çš„recordsè¡¨ä¸­å­˜åœ¨å¤šæ¡ï¼Œè¿™æ˜¯ä¸€ç§ä¸æ­£å¸¸çš„çŠ¶æ€, è¯·ç³»ç»Ÿç®¡ç†å‘˜åˆ©ç”¨SQLå‘½ä»¤åˆ é™¤å¤šä½™çš„è®°å½•ã€‚";
                         return -1;
                     }
 
-                    lCurrentLength = 1; // ±íÊ¾Ğ´³É¹¦ÁËÒ»¸ö 0 ×Ö·û
+                    lCurrentLength = 1; // è¡¨ç¤ºå†™æˆåŠŸäº†ä¸€ä¸ª 0 å­—ç¬¦
                 }
                 finally
                 {
@@ -13963,28 +13963,28 @@ out baPreamble);
             Debug.Assert(textPtr != null, "");
 
             {
-                int chucksize = 32 * 1024;  //Ğ´¿âÊ±Ã¿¿éÎª32K
+                int chucksize = 32 * 1024;  //å†™åº“æ—¶æ¯å—ä¸º32K
 
 
-                // Ö´ĞĞ¸üĞÂ²Ù×÷,Ê¹ÓÃUPDATETEXTÓï¾ä
+                // æ‰§è¡Œæ›´æ–°æ“ä½œ,ä½¿ç”¨UPDATETEXTè¯­å¥
 
-                // UPDATETEXTÃüÁîËµÃ÷:
-                // dest_text_ptr: Ö¸ÏòÒª¸üĞÂµÄimage Êı¾İµÄÎÄ±¾Ö¸ÕëµÄÖµ£¨ÓÉ TEXTPTR º¯Êı·µ»Ø£©±ØĞëÎª binary(16)
-                // insert_offset: ÒÔÁãÎª»ùµÄ¸üĞÂÆğÊ¼Î»ÖÃ,
-                //				  ¶ÔÓÚimage ÁĞ£¬insert_offset ÊÇÔÚ²åÈëĞÂÊı¾İÇ°´ÓÏÖÓĞÁĞµÄÆğµã¿ªÊ¼ÒªÌø¹ıµÄ×Ö½ÚÊı
-                //				  ¿ªÊ¼ÓÚÕâ¸öÒÔÁãÎª»ùµÄÆğÊ¼µãµÄÏÖÓĞ image Êı¾İÏòÓÒÒÆ£¬ÎªĞÂÊı¾İÌÚ³ö¿Õ¼ä¡£
-                //				  ÖµÎª 0 ±íÊ¾½«ĞÂÊı¾İ²åÈëµ½ÏÖÓĞÎ»ÖÃµÄ¿ªÊ¼´¦¡£ÖµÎª NULL Ôò½«ĞÂÊı¾İ×·¼Óµ½ÏÖÓĞÊı¾İÖµÖĞ¡£
-                // delete_length: ÊÇ´Ó insert_offset Î»ÖÃ¿ªÊ¼µÄ¡¢Òª´ÓÏÖÓĞ image ÁĞÖĞÉ¾³ıµÄÊı¾İ³¤¶È¡£
-                //				  delete_length Öµ¶ÔÓÚ text ºÍ image ÁĞÓÃ×Ö½ÚÖ¸¶¨£¬¶ÔÓÚ ntext ÁĞÓÃ×Ö·ûÖ¸¶¨¡£Ã¿¸ö ntext ×Ö·ûÕ¼ÓÃ 2 ¸ö×Ö½Ú¡£
-                //				  ÖµÎª 0 ±íÊ¾²»É¾³ıÊı¾İ¡£ÖµÎª NULL ÔòÉ¾³ıÏÖÓĞ text »ò image ÁĞÖĞ´Ó insert_offset Î»ÖÃ¿ªÊ¼µ½Ä©Î²µÄËùÓĞÊı¾İ¡£
-                // WITH LOG:      ÔÚ Microsoft? SQL Server? 2000 ÖĞ±»ºöÂÔ¡£ÔÚ¸Ã°æ±¾ÖĞ£¬ÈÕÖ¾¼ÇÂ¼ÓÉÊı¾İ¿âµÄÓĞĞ§»Ö¸´Ä£ĞÍ¾ö¶¨¡£
-                // inserted_data: ÊÇÒª²åÈëµ½ÏÖÓĞ text¡¢ntext »ò image ÁĞ insert_offset Î»ÖÃµÄÊı¾İ¡£
-                //				  ÕâÊÇµ¥¸ö char¡¢nchar¡¢varchar¡¢nvarchar¡¢binary¡¢varbinary¡¢text¡¢ntext »ò image Öµ¡£
-                //				  inserted_data ¿ÉÒÔÊÇÎÄ×Ö»ò±äÁ¿¡£
-                // ÈçºÎÊ¹ÓÃUPDATETEXTÃüÁî?
-                // Ìæ»»ÏÖÓĞÊı¾İ:  Ö¸¶¨Ò»¸ö·Ç¿Õ insert_offset Öµ¡¢·ÇÁã delete_length ÖµºÍÒª²åÈëµÄĞÂÊı¾İ¡£
-                // É¾³ıÏÖÓĞÊı¾İ:  Ö¸¶¨Ò»¸ö·Ç¿Õ insert_offset Öµ¡¢·ÇÁã delete_length Öµ¡£²»Ö¸¶¨Òª²åÈëµÄĞÂÊı¾İ¡£
-                // ²åÈëĞÂÊı¾İ:    Ö¸¶¨ insert_offset Öµ¡¢ÎªÁãµÄ delete_length ÖµºÍÒª²åÈëµÄĞÂÊı¾İ¡£
+                // UPDATETEXTå‘½ä»¤è¯´æ˜:
+                // dest_text_ptr: æŒ‡å‘è¦æ›´æ–°çš„image æ•°æ®çš„æ–‡æœ¬æŒ‡é’ˆçš„å€¼ï¼ˆç”± TEXTPTR å‡½æ•°è¿”å›ï¼‰å¿…é¡»ä¸º binary(16)
+                // insert_offset: ä»¥é›¶ä¸ºåŸºçš„æ›´æ–°èµ·å§‹ä½ç½®,
+                //				  å¯¹äºimage åˆ—ï¼Œinsert_offset æ˜¯åœ¨æ’å…¥æ–°æ•°æ®å‰ä»ç°æœ‰åˆ—çš„èµ·ç‚¹å¼€å§‹è¦è·³è¿‡çš„å­—èŠ‚æ•°
+                //				  å¼€å§‹äºè¿™ä¸ªä»¥é›¶ä¸ºåŸºçš„èµ·å§‹ç‚¹çš„ç°æœ‰ image æ•°æ®å‘å³ç§»ï¼Œä¸ºæ–°æ•°æ®è…¾å‡ºç©ºé—´ã€‚
+                //				  å€¼ä¸º 0 è¡¨ç¤ºå°†æ–°æ•°æ®æ’å…¥åˆ°ç°æœ‰ä½ç½®çš„å¼€å§‹å¤„ã€‚å€¼ä¸º NULL åˆ™å°†æ–°æ•°æ®è¿½åŠ åˆ°ç°æœ‰æ•°æ®å€¼ä¸­ã€‚
+                // delete_length: æ˜¯ä» insert_offset ä½ç½®å¼€å§‹çš„ã€è¦ä»ç°æœ‰ image åˆ—ä¸­åˆ é™¤çš„æ•°æ®é•¿åº¦ã€‚
+                //				  delete_length å€¼å¯¹äº text å’Œ image åˆ—ç”¨å­—èŠ‚æŒ‡å®šï¼Œå¯¹äº ntext åˆ—ç”¨å­—ç¬¦æŒ‡å®šã€‚æ¯ä¸ª ntext å­—ç¬¦å ç”¨ 2 ä¸ªå­—èŠ‚ã€‚
+                //				  å€¼ä¸º 0 è¡¨ç¤ºä¸åˆ é™¤æ•°æ®ã€‚å€¼ä¸º NULL åˆ™åˆ é™¤ç°æœ‰ text æˆ– image åˆ—ä¸­ä» insert_offset ä½ç½®å¼€å§‹åˆ°æœ«å°¾çš„æ‰€æœ‰æ•°æ®ã€‚
+                // WITH LOG:      åœ¨ Microsoft? SQL Server? 2000 ä¸­è¢«å¿½ç•¥ã€‚åœ¨è¯¥ç‰ˆæœ¬ä¸­ï¼Œæ—¥å¿—è®°å½•ç”±æ•°æ®åº“çš„æœ‰æ•ˆæ¢å¤æ¨¡å‹å†³å®šã€‚
+                // inserted_data: æ˜¯è¦æ’å…¥åˆ°ç°æœ‰ textã€ntext æˆ– image åˆ— insert_offset ä½ç½®çš„æ•°æ®ã€‚
+                //				  è¿™æ˜¯å•ä¸ª charã€ncharã€varcharã€nvarcharã€binaryã€varbinaryã€textã€ntext æˆ– image å€¼ã€‚
+                //				  inserted_data å¯ä»¥æ˜¯æ–‡å­—æˆ–å˜é‡ã€‚
+                // å¦‚ä½•ä½¿ç”¨UPDATETEXTå‘½ä»¤?
+                // æ›¿æ¢ç°æœ‰æ•°æ®:  æŒ‡å®šä¸€ä¸ªéç©º insert_offset å€¼ã€éé›¶ delete_length å€¼å’Œè¦æ’å…¥çš„æ–°æ•°æ®ã€‚
+                // åˆ é™¤ç°æœ‰æ•°æ®:  æŒ‡å®šä¸€ä¸ªéç©º insert_offset å€¼ã€éé›¶ delete_length å€¼ã€‚ä¸æŒ‡å®šè¦æ’å…¥çš„æ–°æ•°æ®ã€‚
+                // æ’å…¥æ–°æ•°æ®:    æŒ‡å®š insert_offset å€¼ã€ä¸ºé›¶çš„ delete_length å€¼å’Œè¦æ’å…¥çš„æ–°æ•°æ®ã€‚
                 string strCommand = "use " + this.m_strSqlDbName + " "
                     + " UPDATETEXT records." + strImageFieldName
                     + " @dest_text_ptr"
@@ -13993,14 +13993,14 @@ out baPreamble);
 #if UPDATETEXT_WITHLOG
                     + " WITH LOG"
 #endif
-                    + " @inserted_data";   //²»ÄÜ¼ÓwhereÓï¾ä
+                    + " @inserted_data";   //ä¸èƒ½åŠ whereè¯­å¥
 
                 strCommand += " use master " + "\n";
 
                 SqlCommand command = new SqlCommand(strCommand,
                     connection.SqlConnection);
 
-                // ¸ø²ÎÊı¸³Öµ
+                // ç»™å‚æ•°èµ‹å€¼
                 SqlParameter dest_text_ptrParam =
                     command.Parameters.Add("@dest_text_ptr",
                     SqlDbType.Binary,
@@ -14019,23 +14019,23 @@ out baPreamble);
                     SqlDbType.Binary,
                     0);
 
-                long insert_offset = lStartOfTarget; // ²åÈëimage×Ö¶ÎµÄÎ»ÖÃ
-                int nReadStartOfBuffer = nStartOfSource;         // ´ÓÔ´»º³åÇøÖĞµÄ¶ÁµÄÆğÊ¼Î»ÖÃ
-                Byte[] chuckBuffer = null; // ¿é»º³åÇø
-                int nCount = 0;             // Ó°ÏìµÄ¼ÇÂ¼ÌõÊı
+                long insert_offset = lStartOfTarget; // æ’å…¥imageå­—æ®µçš„ä½ç½®
+                int nReadStartOfBuffer = nStartOfSource;         // ä»æºç¼“å†²åŒºä¸­çš„è¯»çš„èµ·å§‹ä½ç½®
+                Byte[] chuckBuffer = null; // å—ç¼“å†²åŒº
+                int nCount = 0;             // å½±å“çš„è®°å½•æ¡æ•°
 
                 dest_text_ptrParam.Value = textPtr;
 
                 while (true)
                 {
-                    // ÒÑ´Ó»º³åÇø¶Á³öµÄ³¤¶È
+                    // å·²ä»ç¼“å†²åŒºè¯»å‡ºçš„é•¿åº¦
                     int nReadedLength = nReadStartOfBuffer - nStartOfSource;
                     if (nReadedLength >= nNeedReadLength)
                         break;
 
-                    // »¹ĞèÒª¶ÁµÄ³¤¶È
+                    // è¿˜éœ€è¦è¯»çš„é•¿åº¦
                     int nContinueLength = nNeedReadLength - nReadedLength;
-                    if (nContinueLength > chucksize)  // ´ÓÔ´Á÷ÖĞ¶ÁµÄ³¤¶È
+                    if (nContinueLength > chucksize)  // ä»æºæµä¸­è¯»çš„é•¿åº¦
                         nContinueLength = chucksize;
 
                     inserted_dataParam.Size = nContinueLength;
@@ -14045,7 +14045,7 @@ out baPreamble);
                     if (baSource != null)
                      * */
                     {
-                        // ¿½µ½Ô´Êı×éµÄÒ»¶Îµ½Ã¿´ÎÓÃÓÚĞ´µÄchuckbuffer
+                        // æ‹·åˆ°æºæ•°ç»„çš„ä¸€æ®µåˆ°æ¯æ¬¡ç”¨äºå†™çš„chuckbuffer
                         Array.Copy(baSource,
                             nReadStartOfBuffer,
                             chuckBuffer,
@@ -14067,17 +14067,17 @@ out baPreamble);
                     insert_offsetParam.Value = insert_offset;
 
 #if NO
-                    // É¾³ı×Ö¶ÎµÄ³¤¶È
+                    // åˆ é™¤å­—æ®µçš„é•¿åº¦
                     long lDeleteLength = 0;
-                    if (bDeleteDuoYu == true)  //×îºóÒ»´Î
+                    if (bDeleteDuoYu == true)  //æœ€åä¸€æ¬¡
                     {
-                        lDeleteLength = lCurrentLength - insert_offset;  // µ±Ç°³¤¶È±íÊ¾imageµÄ³¤¶È
+                        lDeleteLength = lCurrentLength - insert_offset;  // å½“å‰é•¿åº¦è¡¨ç¤ºimageçš„é•¿åº¦
                         if (lDeleteLength < 0)
                             lDeleteLength = 0;
                     }
                     else
                     {
-                        // Ğ´ÈëµÄ³¤¶È³¬¹ıµ±Ç°×î´ó³¤¶ÈÊ±,ÒªÉ¾³ıµÄ³¤¶ÈÎªµ±Ç°³¤¶È-start
+                        // å†™å…¥çš„é•¿åº¦è¶…è¿‡å½“å‰æœ€å¤§é•¿åº¦æ—¶,è¦åˆ é™¤çš„é•¿åº¦ä¸ºå½“å‰é•¿åº¦-start
                         if (insert_offset + chuckBuffer.Length > lCurrentLength)
                         {
                             lDeleteLength = lCurrentLength - insert_offset;
@@ -14091,26 +14091,26 @@ out baPreamble);
                     }
 #endif
 
-                    // null±íÊ¾´Ó²åÈëµãµ½Ä©Î²µÄÔ­À´µÄÄÚÈİÈ«²¿É¾³ı 2013/2/15
+                    // nullè¡¨ç¤ºä»æ’å…¥ç‚¹åˆ°æœ«å°¾çš„åŸæ¥çš„å†…å®¹å…¨éƒ¨åˆ é™¤ 2013/2/15
                     delete_lengthParam.Value = DBNull.Value;   // lDeleteLength;
                     inserted_dataParam.Value = chuckBuffer;
 
                     nCount = command.ExecuteNonQuery();
                     if (nCount == 0)
                     {
-                        strError = "Ã»ÓĞ¸üĞÂµ½¼ÇÂ¼¿é";
+                        strError = "æ²¡æœ‰æ›´æ–°åˆ°è®°å½•å—";
                         return -1;
                     }
 
-                    // Ğ´Èëºó,µ±Ç°³¤¶È·¢ÉúµÄ±ä»¯
+                    // å†™å…¥å,å½“å‰é•¿åº¦å‘ç”Ÿçš„å˜åŒ–
                     // lCurrentLength = lCurrentLength + chuckBuffer.Length - lDeleteLength;
                     lCurrentLength = insert_offset + chuckBuffer.Length;    // 2012/2/15
 
-                    // »º³åÇøµÄÎ»ÖÃ±ä»¯
+                    // ç¼“å†²åŒºçš„ä½ç½®å˜åŒ–
                     nReadStartOfBuffer += chuckBuffer.Length;
 
-                    // Ä¿±êµÄÎ»ÖÃ±ä»¯
-                    insert_offset += chuckBuffer.Length;   //»Ö¸´Ê±Òª»Ö¸´µ½Ô­À´µÄÎ»ÖÃ
+                    // ç›®æ ‡çš„ä½ç½®å˜åŒ–
+                    insert_offset += chuckBuffer.Length;   //æ¢å¤æ—¶è¦æ¢å¤åˆ°åŸæ¥çš„ä½ç½®
 
                     if (chuckBuffer.Length < chucksize)
                         break;
@@ -14121,12 +14121,12 @@ out baPreamble);
         }
 
 
-        // ´Ó³õÊ¼»¯¿âµÄ´úÂëÖĞ¿ÉÒÔµÃµ½Æô·¢£¬Çî¾Ù³öÈ«²¿keys±íÃû
+        // ä»åˆå§‹åŒ–åº“çš„ä»£ç ä¸­å¯ä»¥å¾—åˆ°å¯å‘ï¼Œç©·ä¸¾å‡ºå…¨éƒ¨keysè¡¨å
 
-        // ĞŞ¸Ä¼ìË÷µãkeys
+        // ä¿®æ”¹æ£€ç´¢ç‚¹keys
         // return:
-        //      -1  ³ö´í
-        //      0   ³É¹¦
+        //      -1  å‡ºé”™
+        //      0   æˆåŠŸ
         public int ModifyKeys(Connection connection,
             KeyCollection keysAdd,
             KeyCollection keysDelete,
@@ -14168,15 +14168,15 @@ out baPreamble);
                         int i = 0;
                         int nNameIndex = 0;
 
-                        int nCount = 0; // ÀÛ»ıµÄÉĞÎ´·¢³öµÄÃüÁîĞĞÊı 2008/10/21 
-                        int nExecuted = 0;   // ÒÑ¾­·¢³öÖ´ĞĞµÄÃüÁîĞĞÊı 2008/10/21 
+                        int nCount = 0; // ç´¯ç§¯çš„å°šæœªå‘å‡ºçš„å‘½ä»¤è¡Œæ•° 2008/10/21 
+                        int nExecuted = 0;   // å·²ç»å‘å‡ºæ‰§è¡Œçš„å‘½ä»¤è¡Œæ•° 2008/10/21 
 
-                        int nMaxLinesPerExecute = (2100 / 5) - 1;   // 4¸ö²ÎÊı£¬¼ÓÉÏÒ»¸ösqlÃüÁî×Ö·û´® 2008/10/23 
+                        int nMaxLinesPerExecute = (2100 / 5) - 1;   // 4ä¸ªå‚æ•°ï¼ŒåŠ ä¸Šä¸€ä¸ªsqlå‘½ä»¤å­—ç¬¦ä¸² 2008/10/23 
 
-                        // 2006/12/8 °ÑÉ¾³ıÌáÇ°µ½Ôö¼ÓÒÔÇ°
+                        // 2006/12/8 æŠŠåˆ é™¤æå‰åˆ°å¢åŠ ä»¥å‰
                         if (keysDelete != null)
                         {
-                            // É¾³ıkeys
+                            // åˆ é™¤keys
                             for (i = 0; i < keysDelete.Count; i++)
                             {
                                 KeyItem oneKey = (KeyItem)keysDelete[i];
@@ -14221,16 +14221,16 @@ out baPreamble);
                                     command.CommandText = "use " + this.m_strSqlDbName + " \n"
                                         + strCommand
                                         + " use master " + "\n";
-                                    command.CommandTimeout = 20 * 60;  // °Ñ³¬Ê±Ê±¼ä·Å´ó 2013/2/19
+                                    command.CommandTimeout = 20 * 60;  // æŠŠè¶…æ—¶æ—¶é—´æ”¾å¤§ 2013/2/19
                                     try
                                     {
                                         command.ExecuteNonQuery();
                                     }
                                     catch (Exception ex)
                                     {
-                                        // TODO: Èç¹û³öÏÖ³¬Ê±´í£¬¿ÉÄÜÆäÊµÔÚ SQL Server Ò»¶ËÒÑ¾­ÕıÈ·Ö´ĞĞ£¬¿ÉÒÔ²»¹ËÕâ¸ö´íÎó¼ÌĞøÖ´ĞĞÏÂÈ¥
-                                        // Èç¹û·ÇÒªÖØÊÔ´¦ÀíÕâÖÖÇé¿ö£¬Ôò¿ÉÄÜĞèÒª°ÑÓï¾ä²ğ¿ª³ÉÎªÒ»¸öÒ»¸öµ¥¶ÀµÄ¶¯×÷Óï¾ä£¬È»ºóÖØĞÂ²åÈëºÍÉ¾³ı£¬²åÈëµÄÊ±ºòÓöµ½ÖØ¸´£¬¾Íµ±×÷Õı³£Çé¿ö´¦Àí£¬É¾³ıµÄÊ±ºòÓöµ½ĞĞ²»´æÔÚ£¬Ò²µ±×÷Õı³£´¦Àí
-                                        strError = "´´½¨¼ìË÷µã³ö´í, Æ«ÒÆ " + (nExecuted).ToString() + "£¬¼ÇÂ¼Â·¾¶'" + this.GetCaption("zh-CN") + "/" + strRecordID + "£¬Ô­Òò£º" + ex.Message;
+                                        // TODO: å¦‚æœå‡ºç°è¶…æ—¶é”™ï¼Œå¯èƒ½å…¶å®åœ¨ SQL Server ä¸€ç«¯å·²ç»æ­£ç¡®æ‰§è¡Œï¼Œå¯ä»¥ä¸é¡¾è¿™ä¸ªé”™è¯¯ç»§ç»­æ‰§è¡Œä¸‹å»
+                                        // å¦‚æœéè¦é‡è¯•å¤„ç†è¿™ç§æƒ…å†µï¼Œåˆ™å¯èƒ½éœ€è¦æŠŠè¯­å¥æ‹†å¼€æˆä¸ºä¸€ä¸ªä¸€ä¸ªå•ç‹¬çš„åŠ¨ä½œè¯­å¥ï¼Œç„¶åé‡æ–°æ’å…¥å’Œåˆ é™¤ï¼Œæ’å…¥çš„æ—¶å€™é‡åˆ°é‡å¤ï¼Œå°±å½“ä½œæ­£å¸¸æƒ…å†µå¤„ç†ï¼Œåˆ é™¤çš„æ—¶å€™é‡åˆ°è¡Œä¸å­˜åœ¨ï¼Œä¹Ÿå½“ä½œæ­£å¸¸å¤„ç†
+                                        strError = "åˆ›å»ºæ£€ç´¢ç‚¹å‡ºé”™, åç§» " + (nExecuted).ToString() + "ï¼Œè®°å½•è·¯å¾„'" + this.GetCaption("zh-CN") + "/" + strRecordID + "ï¼ŒåŸå› ï¼š" + ex.Message;
                                         return -1;
                                     }
                                     strCommand.Clear();
@@ -14249,7 +14249,7 @@ out baPreamble);
                         {
                             // nCount = keysAdd.Count;
 
-                            // Ôö¼Ókeys
+                            // å¢åŠ keys
                             for (i = 0; i < keysAdd.Count; i++)
                             {
                                 KeyItem oneKey = (KeyItem)keysAdd[i];
@@ -14265,7 +14265,7 @@ out baPreamble);
                                 string strKeynumParamName = "@keynum" + strIndex;
 
 
-                                //¼Ókeynum
+                                //åŠ keynum
                                 strCommand.Append(" INSERT INTO " + strKeysTableName
                                     + " (keystring,fromstring,idstring,keystringnum) "
                                     + " VALUES (" + strKeyParamName + ","
@@ -14298,14 +14298,14 @@ out baPreamble);
                                     command.CommandText = "use " + this.m_strSqlDbName + " \n"
                                         + strCommand
                                         + " use master " + "\n";
-                                    command.CommandTimeout = 20 * 60;  // °Ñ³¬Ê±Ê±¼ä·Å´ó 2013/2/19
+                                    command.CommandTimeout = 20 * 60;  // æŠŠè¶…æ—¶æ—¶é—´æ”¾å¤§ 2013/2/19
                                     try
                                     {
                                         command.ExecuteNonQuery();
                                     }
                                     catch (Exception ex)
                                     {
-                                        strError = "´´½¨¼ìË÷µã³ö´í,Æ«ÒÆ " + (nExecuted).ToString() + "£¬¼ÇÂ¼Â·¾¶'" + this.GetCaption("zh-CN") + "/" + strRecordID + "£¬Ô­Òò£º" + ex.Message;
+                                        strError = "åˆ›å»ºæ£€ç´¢ç‚¹å‡ºé”™,åç§» " + (nExecuted).ToString() + "ï¼Œè®°å½•è·¯å¾„'" + this.GetCaption("zh-CN") + "/" + strRecordID + "ï¼ŒåŸå› ï¼š" + ex.Message;
                                         return -1;
                                     }
                                     strCommand.Clear();
@@ -14322,20 +14322,20 @@ out baPreamble);
 
 
 
-                        // ×îºó¿ÉÄÜÊ£ÏÂµÄÃüÁî
+                        // æœ€åå¯èƒ½å‰©ä¸‹çš„å‘½ä»¤
                         if (strCommand.Length > 0)
                         {
                             command.CommandText = "use " + this.m_strSqlDbName + " \n"
                                 + strCommand
                                 + " use master " + "\n";
-                            command.CommandTimeout = 20 * 60;  // °Ñ³¬Ê±Ê±¼ä·Å´ó 2013/2/19
+                            command.CommandTimeout = 20 * 60;  // æŠŠè¶…æ—¶æ—¶é—´æ”¾å¤§ 2013/2/19
                             try
                             {
                                 command.ExecuteNonQuery();
                             }
                             catch (Exception ex)
                             {
-                                strError = "´´½¨¼ìË÷µã³ö´í,Æ«ÒÆ " + (nExecuted).ToString() + "£¬¼ÇÂ¼Â·¾¶'" + this.GetCaption("zh-CN") + "/" + strRecordID + "£¬Ô­Òò£º" + ex.Message;
+                                strError = "åˆ›å»ºæ£€ç´¢ç‚¹å‡ºé”™,åç§» " + (nExecuted).ToString() + "ï¼Œè®°å½•è·¯å¾„'" + this.GetCaption("zh-CN") + "/" + strRecordID + "ï¼ŒåŸå› ï¼š" + ex.Message;
                                 return -1;
                             }
 
@@ -14377,12 +14377,12 @@ out baPreamble);
 
                         int i = 0;
                         int nNameIndex = 0;
-                        int nCount = 0; // ÀÛ»ıµÄÉĞÎ´·¢³öµÄÃüÁîĞĞÊı
+                        int nCount = 0; // ç´¯ç§¯çš„å°šæœªå‘å‡ºçš„å‘½ä»¤è¡Œæ•°
 
-                        // °ÑÉ¾³ıÌáÇ°µ½Ôö¼ÓÒÔÇ°
+                        // æŠŠåˆ é™¤æå‰åˆ°å¢åŠ ä»¥å‰
                         if (keysDelete != null)
                         {
-                            // É¾³ıkeys
+                            // åˆ é™¤keys
                             for (i = 0; i < keysDelete.Count; i++)
                             {
                                 KeyItem oneKey = (KeyItem)keysDelete[i];
@@ -14430,7 +14430,7 @@ out baPreamble);
                                 }
                                 catch (Exception ex)
                                 {
-                                    strError = "´´½¨¼ìË÷µã³ö´í, Æ«ÒÆ " + (nCount).ToString() + "£¬¼ÇÂ¼Â·¾¶'" + this.GetCaption("zh-CN") + "/" + strRecordID + "£¬Ô­Òò£º" + ex.Message;
+                                    strError = "åˆ›å»ºæ£€ç´¢ç‚¹å‡ºé”™, åç§» " + (nCount).ToString() + "ï¼Œè®°å½•è·¯å¾„'" + this.GetCaption("zh-CN") + "/" + strRecordID + "ï¼ŒåŸå› ï¼š" + ex.Message;
                                     return -1;
                                 }
                                 strCommand.Clear();
@@ -14445,7 +14445,7 @@ out baPreamble);
                         {
                             // nCount = keysAdd.Count;
 
-                            // Ôö¼Ókeys
+                            // å¢åŠ keys
                             for (i = 0; i < keysAdd.Count; i++)
                             {
                                 KeyItem oneKey = (KeyItem)keysAdd[i];
@@ -14460,7 +14460,7 @@ out baPreamble);
                                 string strIdParamName = "@id" + strIndex;
                                 string strKeynumParamName = "@keynum" + strIndex;
 
-                                //¼Ókeynum
+                                //åŠ keynum
                                 strCommand.Append( " INSERT INTO " + strKeysTableName
                                     + " (keystring,fromstring,idstring,keystringnum) "
                                     + " VALUES (" + strKeyParamName + ","
@@ -14495,7 +14495,7 @@ out baPreamble);
                                 }
                                 catch (Exception ex)
                                 {
-                                    strError = "´´½¨¼ìË÷µã³ö´í,Æ«ÒÆ " + (nCount).ToString() + "£¬¼ÇÂ¼Â·¾¶'" + this.GetCaption("zh-CN") + "/" + strRecordID + "£¬Ô­Òò£º" + ex.Message;
+                                    strError = "åˆ›å»ºæ£€ç´¢ç‚¹å‡ºé”™,åç§» " + (nCount).ToString() + "ï¼Œè®°å½•è·¯å¾„'" + this.GetCaption("zh-CN") + "/" + strRecordID + "ï¼ŒåŸå› ï¼š" + ex.Message;
                                     return -1;
                                 }
                                 strCommand.Clear();
@@ -14536,18 +14536,18 @@ out baPreamble);
                         int nNameIndex = 0;
 #endif
 
-                        int nCount = 0; // ÀÛ»ıµÄÉĞÎ´·¢³öµÄÃüÁîĞĞÊı 
-                        int nExecuted = 0;   // ÒÑ¾­·¢³öÖ´ĞĞµÄÃüÁîĞĞÊı 
+                        int nCount = 0; // ç´¯ç§¯çš„å°šæœªå‘å‡ºçš„å‘½ä»¤è¡Œæ•° 
+                        int nExecuted = 0;   // å·²ç»å‘å‡ºæ‰§è¡Œçš„å‘½ä»¤è¡Œæ•° 
 
 #if PARAMETERS
-                        int nMaxLinesPerExecute = (2100 / 5) - 1;   // 4¸ö²ÎÊı£¬¼ÓÉÏÒ»¸ösqlÃüÁî×Ö·û´®
+                        int nMaxLinesPerExecute = (2100 / 5) - 1;   // 4ä¸ªå‚æ•°ï¼ŒåŠ ä¸Šä¸€ä¸ªsqlå‘½ä»¤å­—ç¬¦ä¸²
 #else
                         int nMaxLinesPerExecute = 5000;
 #endif
 
                         if (keysDelete != null)
                         {
-                            // É¾³ıkeys
+                            // åˆ é™¤keys
                             for (i = 0; i < keysDelete.Count; i++)
                             {
                                 KeyItem oneKey = (KeyItem)keysDelete[i];
@@ -14600,7 +14600,7 @@ out baPreamble);
 
                                 if (nCount >= nMaxLinesPerExecute)
                                 {
-                                    // Ã¿100¸öÃüÁî·¢³öÒ»´Î
+                                    // æ¯100ä¸ªå‘½ä»¤å‘å‡ºä¸€æ¬¡
                                     command.CommandText = "use " + this.m_strSqlDbName + " ;\n"
                                         + strCommand
 #if !PARAMETERS
@@ -14613,7 +14613,7 @@ out baPreamble);
                                     }
                                     catch (Exception ex)
                                     {
-                                        strError = "´´½¨¼ìË÷µã³ö´í, Æ«ÒÆ " + (nExecuted).ToString() + "£¬¼ÇÂ¼Â·¾¶'" + this.GetCaption("zh-CN") + "/" + strRecordID + "£¬Ô­Òò£º" + ex.Message;
+                                        strError = "åˆ›å»ºæ£€ç´¢ç‚¹å‡ºé”™, åç§» " + (nExecuted).ToString() + "ï¼Œè®°å½•è·¯å¾„'" + this.GetCaption("zh-CN") + "/" + strRecordID + "ï¼ŒåŸå› ï¼š" + ex.Message;
                                         return -1;
                                     }
                                     strCommand.Clear();
@@ -14635,7 +14635,7 @@ out baPreamble);
                             string strPrevSqlTableName = "";
 #endif
 
-                            // Ôö¼Ókeys
+                            // å¢åŠ keys
                             for (i = 0; i < keysAdd.Count; i++)
                             {
                                 KeyItem oneKey = (KeyItem)keysAdd[i];
@@ -14651,7 +14651,7 @@ out baPreamble);
                                 string strIdParamName = "@id" + strIndex;
                                 string strKeynumParamName = "@keynum" + strIndex;
 
-                                //¼Ókeynum
+                                //åŠ keynum
                                 strCommand.Append(" INSERT INTO " + strKeysTableName
                                     + " (keystring,fromstring,idstring,keystringnum) "
                                     + " VALUES (" + strKeyParamName + ","
@@ -14705,7 +14705,7 @@ out baPreamble);
 
                                 if (nCount >= nMaxLinesPerExecute)
                                 {
-                                    // Ã¿100¸öÃüÁî·¢³öÒ»´Î
+                                    // æ¯100ä¸ªå‘½ä»¤å‘å‡ºä¸€æ¬¡
                                     command.CommandText = "use " + this.m_strSqlDbName + " ;\n"
                                         + strCommand
 #if !PARAMETERS
@@ -14718,7 +14718,7 @@ out baPreamble);
                                     }
                                     catch (Exception ex)
                                     {
-                                        strError = "´´½¨¼ìË÷µã³ö´í,Æ«ÒÆ " + (nExecuted).ToString() + "£¬¼ÇÂ¼Â·¾¶'" + this.GetCaption("zh-CN") + "/" + strRecordID + "£¬Ô­Òò£º" + ex.Message;
+                                        strError = "åˆ›å»ºæ£€ç´¢ç‚¹å‡ºé”™,åç§» " + (nExecuted).ToString() + "ï¼Œè®°å½•è·¯å¾„'" + this.GetCaption("zh-CN") + "/" + strRecordID + "ï¼ŒåŸå› ï¼š" + ex.Message;
                                         return -1;
                                     }
                                     strCommand.Clear();
@@ -14733,7 +14733,7 @@ out baPreamble);
                             }
                         }
 
-                        // ×îºó¿ÉÄÜÊ£ÏÂµÄÃüÁî
+                        // æœ€åå¯èƒ½å‰©ä¸‹çš„å‘½ä»¤
                         if (strCommand.Length > 0)
                         {
                             command.CommandText = "use " + this.m_strSqlDbName + " ;\n"
@@ -14748,7 +14748,7 @@ out baPreamble);
                             }
                             catch (Exception ex)
                             {
-                                strError = "´´½¨¼ìË÷µã³ö´í,Æ«ÒÆ " + (nExecuted).ToString() + "£¬¼ÇÂ¼Â·¾¶'" + this.GetCaption("zh-CN") + "/" + strRecordID + "£¬Ô­Òò£º" + ex.Message;
+                                strError = "åˆ›å»ºæ£€ç´¢ç‚¹å‡ºé”™,åç§» " + (nExecuted).ToString() + "ï¼Œè®°å½•è·¯å¾„'" + this.GetCaption("zh-CN") + "/" + strRecordID + "ï¼ŒåŸå› ï¼š" + ex.Message;
                                 return -1;
                             }
 
@@ -14789,12 +14789,12 @@ out baPreamble);
 
                         int i = 0;
                         int nNameIndex = 0;
-                        int nCount = 0; // ÀÛ»ıµÄÉĞÎ´·¢³öµÄÃüÁîĞĞÊı
+                        int nCount = 0; // ç´¯ç§¯çš„å°šæœªå‘å‡ºçš„å‘½ä»¤è¡Œæ•°
 
-                        // °ÑÉ¾³ıÌáÇ°µ½Ôö¼ÓÒÔÇ°
+                        // æŠŠåˆ é™¤æå‰åˆ°å¢åŠ ä»¥å‰
                         if (keysDelete != null)
                         {
-                            // É¾³ıkeys
+                            // åˆ é™¤keys
                             for (i = 0; i < keysDelete.Count; i++)
                             {
                                 KeyItem oneKey = (KeyItem)keysDelete[i];
@@ -14842,12 +14842,12 @@ out baPreamble);
                                 }
                                 catch (Exception ex)
                                 {
-                                    strError = "É¾³ı¼ìË÷µã³ö´í, Æ«ÒÆ " + (nCount).ToString() + "£¬¼ÇÂ¼Â·¾¶'" + this.GetCaption("zh-CN") + "/" + strRecordID + "£¬Ô­Òò£º" + ex.Message;
+                                    strError = "åˆ é™¤æ£€ç´¢ç‚¹å‡ºé”™, åç§» " + (nCount).ToString() + "ï¼Œè®°å½•è·¯å¾„'" + this.GetCaption("zh-CN") + "/" + strRecordID + "ï¼ŒåŸå› ï¼š" + ex.Message;
                                     return -1;
                                 }
                                 strCommand.Clear();
 
-                                // Ã¿ĞĞ¶¼·¢³öÃüÁî£¬²»ÀÛ»ı²ÎÊıÖµ
+                                // æ¯è¡Œéƒ½å‘å‡ºå‘½ä»¤ï¼Œä¸ç´¯ç§¯å‚æ•°å€¼
                                 command.Parameters.Clear();
                                 nCount++;
                             }
@@ -14857,7 +14857,7 @@ out baPreamble);
                         {
                             // nCount = keysAdd.Count;
 
-                            // Ôö¼Ókeys
+                            // å¢åŠ keys
                             for (i = 0; i < keysAdd.Count; i++)
                             {
                                 KeyItem oneKey = (KeyItem)keysAdd[i];
@@ -14872,7 +14872,7 @@ out baPreamble);
                                 string strIdParamName = ":id" + strIndex;
                                 string strKeynumParamName = ":keynum" + strIndex;
 
-                                //¼Ókeynum
+                                //åŠ keynum
                                 strCommand.Append(" INSERT INTO " + this.m_strSqlDbName + "_" + strKeysTableName
                                     + " (keystring,fromstring,idstring,keystringnum) "
                                     + " VALUES(" + strKeyParamName + ","
@@ -14907,12 +14907,12 @@ out baPreamble);
                                 }
                                 catch (Exception ex)
                                 {
-                                    strError = "´´½¨¼ìË÷µã³ö´í,Æ«ÒÆ " + (nCount).ToString() + "£¬¼ÇÂ¼Â·¾¶'" + this.GetCaption("zh-CN") + "/" + strRecordID + "£¬Ô­Òò£º" + ex.Message;
+                                    strError = "åˆ›å»ºæ£€ç´¢ç‚¹å‡ºé”™,åç§» " + (nCount).ToString() + "ï¼Œè®°å½•è·¯å¾„'" + this.GetCaption("zh-CN") + "/" + strRecordID + "ï¼ŒåŸå› ï¼š" + ex.Message;
                                     return -1;
                                 }
                                 strCommand.Clear();
 
-                                // Ã¿ĞĞ¶¼·¢³öÃüÁî£¬²»ÀÛ»ı²ÎÊıÖµ
+                                // æ¯è¡Œéƒ½å‘å‡ºå‘½ä»¤ï¼Œä¸ç´¯ç§¯å‚æ•°å€¼
                                 command.Parameters.Clear();
 
                                 nCount++;
@@ -14936,10 +14936,10 @@ out baPreamble);
             return 0;
         }
 
-        // ´¦Àí×ÓÎÄ¼ş
+        // å¤„ç†å­æ–‡ä»¶
         // return:
-        //      -1  ³ö´í
-        //      0   ³É¹¦
+        //      -1  å‡ºé”™
+        //      0   æˆåŠŸ
         public int ModifyFiles(Connection connection,
             string strID,
             XmlDocument newDom,
@@ -14949,7 +14949,7 @@ out baPreamble);
             strError = "";
             strID = DbPath.GetID10(strID);
 
-            // ĞÂÎÄ¼ş
+            // æ–°æ–‡ä»¶
             List<string> new_fileids = new List<string>();
             if (newDom != null)
             {
@@ -14965,7 +14965,7 @@ out baPreamble);
                 }
             }
 
-            // ¾ÉÎÄ¼ş
+            // æ—§æ–‡ä»¶
             List<string> old_fileids = new List<string>();
             if (oldDom != null)
             {
@@ -14984,17 +14984,17 @@ out baPreamble);
             if (new_fileids.Count == 0 && old_fileids.Count == 0)
                 return 0;
 
-            //Êı¾İ±ØĞëÏÈÅÅĞò
+            //æ•°æ®å¿…é¡»å…ˆæ’åº
             //aNewFileID.Sort(new ComparerClass());
             //aOldFileID.Sort(new ComparerClass());
-            new_fileids.Sort();  // TODO: ´óĞ¡Ğ´ÊÇ·ñÃô¸Ğ ?
+            new_fileids.Sort();  // TODO: å¤§å°å†™æ˜¯å¦æ•æ„Ÿ ?
             old_fileids.Sort();
 
             List<string> targetLeft = new List<string>();
             List<string> targetMiddle = null;   //  new List<string>();
             List<string> targetRight = new List<string>();
 
-            //ĞÂ¾ÉÁ½¸öFileÊı×éÅö
+            //æ–°æ—§ä¸¤ä¸ªFileæ•°ç»„ç¢°
             StringUtil.MergeStringList(new_fileids,
                 old_fileids,
                 ref targetLeft,
@@ -15004,7 +15004,7 @@ out baPreamble);
             if (targetLeft.Count == 0 && targetRight.Count == 0)
                 return 0;
 
-            List<string> filenames = new List<string>();    // ¶ÔÏóÎÄ¼şÃûÊı×é (¶ÌÎÄ¼şÃû)
+            List<string> filenames = new List<string>();    // å¯¹è±¡æ–‡ä»¶åæ•°ç»„ (çŸ­æ–‡ä»¶å)
 
             #region MS SQL Server
             if (connection.SqlServerType == SqlServerType.MsSqlServer)
@@ -15015,14 +15015,14 @@ out baPreamble);
                 {
                     int nCount = 0;
 
-                    // TODO: ×¢Òâ¹Ø×¢MS SQL Server ²ÎÊı³¬¹ı 2100 ´íÎó
+                    // TODO: æ³¨æ„å…³æ³¨MS SQL Server å‚æ•°è¶…è¿‡ 2100 é”™è¯¯
 
-                    // É¾³ı¾ÉÎÄ¼ş
+                    // åˆ é™¤æ—§æ–‡ä»¶
                     if (targetRight.Count > 0)
                     {
                         if (this.m_lObjectStartSize != -1)
                         {
-                            // »ñµÃºÍ´¢´æ¾ÉÎÄ¼şÃû
+                            // è·å¾—å’Œå‚¨å­˜æ—§æ–‡ä»¶å
                             string strWhere = "";
                             for (int i = 0; i < targetRight.Count; i++)
                             {
@@ -15030,7 +15030,7 @@ out baPreamble);
                                 string strObjectID = strID + "_" + strPureObjectID;
                                 string strParamIDName = "@id" + Convert.ToString(i);
 
-                                // ×¼±¸ºÃ²ÎÊı
+                                // å‡†å¤‡å¥½å‚æ•°
                                 SqlParameter idParam =
                                     command.Parameters.Add(strParamIDName,
                                     SqlDbType.NVarChar);
@@ -15067,7 +15067,7 @@ out baPreamble);
                             }
                         }
 
-                        // ¹¹ÔìÉ¾³ı¾ÉrecordsĞĞµÄÓï¾ä
+                        // æ„é€ åˆ é™¤æ—§recordsè¡Œçš„è¯­å¥
                         strCommand = "";
                         command.Parameters.Clear();
                         nCount = targetRight.Count;
@@ -15086,10 +15086,10 @@ out baPreamble);
                         }
                     }
 
-                    // ´´½¨ĞÂÎÄ¼ş
+                    // åˆ›å»ºæ–°æ–‡ä»¶
                     if (targetLeft.Count > 0)
                     {
-                        // ¹¹Ôì´´½¨ĞÂrecordsĞĞµÄÓï¾ä
+                        // æ„é€ åˆ›å»ºæ–°recordsè¡Œçš„è¯­å¥
                         for (int i = 0; i < targetLeft.Count; i++)
                         {
                             string strPureObjectID = targetLeft[i];
@@ -15112,7 +15112,7 @@ out baPreamble);
                             + " use master " + "\n";
 
                         command.CommandText = strCommand;
-                        command.CommandTimeout = 30 * 60; // 30·ÖÖÓ
+                        command.CommandTimeout = 30 * 60; // 30åˆ†é’Ÿ
 
                         int nResultCount = 0;
                         try
@@ -15121,13 +15121,13 @@ out baPreamble);
                         }
                         catch (Exception ex)
                         {
-                            strError = "´¦Àí¼ÇÂ¼Â·¾¶Îª'" + this.GetCaption("zh") + "/" + strID + "'µÄ×ÓÎÄ¼ş·¢Éú´íÎó:" + ex.Message + ",sqlÃüÁî:\r\n" + strCommand;
+                            strError = "å¤„ç†è®°å½•è·¯å¾„ä¸º'" + this.GetCaption("zh") + "/" + strID + "'çš„å­æ–‡ä»¶å‘ç”Ÿé”™è¯¯:" + ex.Message + ",sqlå‘½ä»¤:\r\n" + strCommand;
                             return -1;
                         }
 
                         if (nResultCount != targetRight.Count + targetLeft.Count)
                         {
-                            this.container.KernelApplication.WriteErrorLog("Ï£Íû´¦ÀíµÄÎÄ¼şÊı'" + Convert.ToString(targetRight.Count + targetLeft.Count) + "'¸ö£¬Êµ¼ÊÉ¾³ıµÄÎÄ¼şÊı'" + Convert.ToString(nResultCount) + "'¸ö");
+                            this.container.KernelApplication.WriteErrorLog("å¸Œæœ›å¤„ç†çš„æ–‡ä»¶æ•°'" + Convert.ToString(targetRight.Count + targetLeft.Count) + "'ä¸ªï¼Œå®é™…åˆ é™¤çš„æ–‡ä»¶æ•°'" + Convert.ToString(nResultCount) + "'ä¸ª");
                         }
                     }
                 } // enf of using command
@@ -15143,10 +15143,10 @@ out baPreamble);
                 {
 
                     int nCount = 0;
-                    // É¾³ı¾ÉÎÄ¼ş
+                    // åˆ é™¤æ—§æ–‡ä»¶
                     if (targetRight.Count > 0)
                     {
-                        // »ñµÃºÍ´¢´æ¾ÉÎÄ¼şÃû
+                        // è·å¾—å’Œå‚¨å­˜æ—§æ–‡ä»¶å
                         string strWhere = "";
                         for (int i = 0; i < targetRight.Count; i++)
                         {
@@ -15154,7 +15154,7 @@ out baPreamble);
                             string strObjectID = strID + "_" + strPureObjectID;
                             string strParamIDName = "@id" + Convert.ToString(i);
 
-                            // ×¼±¸ºÃ²ÎÊı
+                            // å‡†å¤‡å¥½å‚æ•°
                             SQLiteParameter idParam =
                                 command.Parameters.Add(strParamIDName,
                                 DbType.String);
@@ -15187,7 +15187,7 @@ out baPreamble);
                             command.Parameters.Clear();
                         }
 
-                        // ¹¹ÔìÉ¾³ı¾ÉrecordsĞĞµÄÓï¾ä
+                        // æ„é€ åˆ é™¤æ—§recordsè¡Œçš„è¯­å¥
                         strCommand = "";
                         command.Parameters.Clear();
                         nCount = targetRight.Count;
@@ -15206,7 +15206,7 @@ out baPreamble);
                         }
                     }
 
-                    // ´´½¨ĞÂÎÄ¼ş
+                    // åˆ›å»ºæ–°æ–‡ä»¶
                     if (targetLeft.Count > 0)
                     {
                         for (int i = 0; i < targetLeft.Count; i++)
@@ -15227,7 +15227,7 @@ out baPreamble);
                     if (string.IsNullOrEmpty(strCommand) == false)
                     {
                         command.CommandText = strCommand;
-                        command.CommandTimeout = 30 * 60; // 30·ÖÖÓ
+                        command.CommandTimeout = 30 * 60; // 30åˆ†é’Ÿ
 
                         int nResultCount = 0;
                         try
@@ -15238,24 +15238,24 @@ out baPreamble);
                         {
                             if (ex.ResultCode == SQLiteErrorCode.Constraint)    // ex.ErrorCode 2015/4/19
                             {
-                                // Èç¹ûĞĞÒÑ¾­´æÔÚ£¬ÕıºÃ£¬²»Òª±¨´í
+                                // å¦‚æœè¡Œå·²ç»å­˜åœ¨ï¼Œæ­£å¥½ï¼Œä¸è¦æŠ¥é”™
                                 goto DELETE_OBJECTFILE;
                             }
                             else
                             {
-                                strError = "´¦Àí¼ÇÂ¼Â·¾¶Îª'" + this.GetCaption("zh") + "/" + strID + "'µÄ×ÓÎÄ¼ş·¢Éú´íÎó:" + ex.Message + ",sqlÃüÁî:\r\n" + strCommand;
+                                strError = "å¤„ç†è®°å½•è·¯å¾„ä¸º'" + this.GetCaption("zh") + "/" + strID + "'çš„å­æ–‡ä»¶å‘ç”Ÿé”™è¯¯:" + ex.Message + ",sqlå‘½ä»¤:\r\n" + strCommand;
                                 return -1;
                             }
                         }
                         catch (Exception ex)
                         {
-                            strError = "´¦Àí¼ÇÂ¼Â·¾¶Îª'" + this.GetCaption("zh") + "/" + strID + "'µÄ×ÓÎÄ¼ş·¢Éú´íÎó:" + ex.Message + ",sqlÃüÁî:\r\n" + strCommand;
+                            strError = "å¤„ç†è®°å½•è·¯å¾„ä¸º'" + this.GetCaption("zh") + "/" + strID + "'çš„å­æ–‡ä»¶å‘ç”Ÿé”™è¯¯:" + ex.Message + ",sqlå‘½ä»¤:\r\n" + strCommand;
                             return -1;
                         }
 
                         if (nResultCount != targetRight.Count + targetLeft.Count)
                         {
-                            this.container.KernelApplication.WriteErrorLog("Ï£Íû´¦ÀíµÄÎÄ¼şÊı'" + Convert.ToString(targetRight.Count + targetLeft.Count) + "'¸ö£¬Êµ¼ÊÉ¾³ıµÄÎÄ¼şÊı'" + Convert.ToString(nResultCount) + "'¸ö");
+                            this.container.KernelApplication.WriteErrorLog("å¸Œæœ›å¤„ç†çš„æ–‡ä»¶æ•°'" + Convert.ToString(targetRight.Count + targetLeft.Count) + "'ä¸ªï¼Œå®é™…åˆ é™¤çš„æ–‡ä»¶æ•°'" + Convert.ToString(nResultCount) + "'ä¸ª");
                         }
                     }
                 } // end of using command
@@ -15270,10 +15270,10 @@ out baPreamble);
                     connection.MySqlConnection))
                 {
                     int nCount = 0;
-                    // É¾³ı¾ÉÎÄ¼ş
+                    // åˆ é™¤æ—§æ–‡ä»¶
                     if (targetRight.Count > 0)
                     {
-                        // »ñµÃºÍ´¢´æ¾ÉÎÄ¼şÃû
+                        // è·å¾—å’Œå‚¨å­˜æ—§æ–‡ä»¶å
                         string strWhere = "";
                         for (int i = 0; i < targetRight.Count; i++)
                         {
@@ -15281,7 +15281,7 @@ out baPreamble);
                             string strObjectID = strID + "_" + strPureObjectID;
                             string strParamIDName = "@id" + Convert.ToString(i);
 
-                            // ×¼±¸ºÃ²ÎÊı
+                            // å‡†å¤‡å¥½å‚æ•°
                             MySqlParameter idParam =
                                 command.Parameters.Add(strParamIDName,
                                 MySqlDbType.String);
@@ -15316,7 +15316,7 @@ out baPreamble);
                             command.Parameters.Clear();
                         }
 
-                        // ¹¹ÔìÉ¾³ı¾ÉrecordsĞĞµÄÓï¾ä
+                        // æ„é€ åˆ é™¤æ—§recordsè¡Œçš„è¯­å¥
                         strCommand = "";
                         command.Parameters.Clear();
                         nCount = targetRight.Count;
@@ -15335,7 +15335,7 @@ out baPreamble);
                         }
                     }
 
-                    // ´´½¨ĞÂÎÄ¼ş
+                    // åˆ›å»ºæ–°æ–‡ä»¶
                     if (targetLeft.Count > 0)
                     {
                         for (int i = 0; i < targetLeft.Count; i++)
@@ -15359,7 +15359,7 @@ out baPreamble);
                             + strCommand;
 
                         command.CommandText = strCommand;
-                        command.CommandTimeout = 30 * 60; // 30·ÖÖÓ
+                        command.CommandTimeout = 30 * 60; // 30åˆ†é’Ÿ
 
                         int nResultCount = 0;
                         try
@@ -15370,24 +15370,24 @@ out baPreamble);
                         {
                             if (ex.Number == 1062)
                             {
-                                // Èç¹ûĞĞÒÑ¾­´æÔÚ£¬ÕıºÃ£¬²»Òª±¨´í
+                                // å¦‚æœè¡Œå·²ç»å­˜åœ¨ï¼Œæ­£å¥½ï¼Œä¸è¦æŠ¥é”™
                                 goto DELETE_OBJECTFILE;
                             }
                             else
                             {
-                                strError = "´¦Àí¼ÇÂ¼Â·¾¶Îª'" + this.GetCaption("zh") + "/" + strID + "'µÄ×ÓÎÄ¼ş·¢Éú´íÎó:" + ex.Message + ",sqlÃüÁî:\r\n" + strCommand;
+                                strError = "å¤„ç†è®°å½•è·¯å¾„ä¸º'" + this.GetCaption("zh") + "/" + strID + "'çš„å­æ–‡ä»¶å‘ç”Ÿé”™è¯¯:" + ex.Message + ",sqlå‘½ä»¤:\r\n" + strCommand;
                                 return -1;
                             }
                         }
                         catch (Exception ex)
                         {
-                            strError = "´¦Àí¼ÇÂ¼Â·¾¶Îª'" + this.GetCaption("zh") + "/" + strID + "'µÄ×ÓÎÄ¼ş·¢Éú´íÎó:" + ex.Message + ",sqlÃüÁî:\r\n" + strCommand;
+                            strError = "å¤„ç†è®°å½•è·¯å¾„ä¸º'" + this.GetCaption("zh") + "/" + strID + "'çš„å­æ–‡ä»¶å‘ç”Ÿé”™è¯¯:" + ex.Message + ",sqlå‘½ä»¤:\r\n" + strCommand;
                             return -1;
                         }
 
                         if (nResultCount != targetRight.Count + targetLeft.Count)
                         {
-                            this.container.KernelApplication.WriteErrorLog("Ï£Íû´¦ÀíµÄÎÄ¼şÊı'" + Convert.ToString(targetRight.Count + targetLeft.Count) + "'¸ö£¬Êµ¼ÊÉ¾³ıµÄÎÄ¼şÊı'" + Convert.ToString(nResultCount) + "'¸ö");
+                            this.container.KernelApplication.WriteErrorLog("å¸Œæœ›å¤„ç†çš„æ–‡ä»¶æ•°'" + Convert.ToString(targetRight.Count + targetLeft.Count) + "'ä¸ªï¼Œå®é™…åˆ é™¤çš„æ–‡ä»¶æ•°'" + Convert.ToString(nResultCount) + "'ä¸ª");
                         }
                     }
                 } // end of using command
@@ -15401,7 +15401,7 @@ out baPreamble);
                 using (OracleCommand command = new OracleCommand(strCommand, connection.OracleConnection))
                 {
                     int nCount = 0;
-                    // É¾³ı¾ÉÎÄ¼ş
+                    // åˆ é™¤æ—§æ–‡ä»¶
                     if (targetRight.Count > 0)
                     {
                         nCount = targetRight.Count;
@@ -15412,13 +15412,13 @@ out baPreamble);
                             string strObjectID = strID + "_" + strPureObjectID;
                             string strParamIDName = ":id" + Convert.ToString(i);
 
-                            // ×¼±¸ºÃ²ÎÊı
+                            // å‡†å¤‡å¥½å‚æ•°
                             OracleParameter idParam =
         command.Parameters.Add(strParamIDName,
         OracleDbType.NVarchar2);
                             idParam.Value = strObjectID;
 
-                            // ÁĞ³ö¶ÔÏóÎÄ¼şÃû
+                            // åˆ—å‡ºå¯¹è±¡æ–‡ä»¶å
                             strCommand = " SELECT filename, newfilename FROM " + this.m_strSqlDbName + "_records WHERE id = " + strParamIDName + " \n";
                             command.CommandText = strCommand;
 
@@ -15437,7 +15437,7 @@ out baPreamble);
                                     }
                                 }
                                 else
-                                    goto CONTINUE_1;    // Õâ¸öidµÄrecordsĞĞ²»´æÔÚ
+                                    goto CONTINUE_1;    // è¿™ä¸ªidçš„recordsè¡Œä¸å­˜åœ¨
                             }
                             finally
                             {
@@ -15454,7 +15454,7 @@ out baPreamble);
                             }
                             catch (Exception ex)
                             {
-                                strError = "´¦Àí¼ÇÂ¼Â·¾¶Îª '" + this.GetCaption("zh") + "/" + strID + "' µÄ×ÓÎÄ¼ş·¢Éú´íÎó:" + ex.Message + ",sqlÃüÁî:\r\n" + strCommand;
+                                strError = "å¤„ç†è®°å½•è·¯å¾„ä¸º '" + this.GetCaption("zh") + "/" + strID + "' çš„å­æ–‡ä»¶å‘ç”Ÿé”™è¯¯:" + ex.Message + ",sqlå‘½ä»¤:\r\n" + strCommand;
                                 return -1;
                             }
                         CONTINUE_1:
@@ -15462,7 +15462,7 @@ out baPreamble);
                         }
                     }
 
-                    // ´´½¨ĞÂÎÄ¼ş
+                    // åˆ›å»ºæ–°æ–‡ä»¶
                     if (targetLeft.Count > 0)
                     {
                         for (int i = 0; i < targetLeft.Count; i++)
@@ -15490,18 +15490,18 @@ out baPreamble);
                             {
                                 if (ex.Errors.Count > 0 && ex.Errors[0].Number == 00001)
                                 {
-                                    // Èç¹ûĞĞÒÑ¾­´æÔÚ£¬ÕıºÃ£¬²»Òª±¨´í
+                                    // å¦‚æœè¡Œå·²ç»å­˜åœ¨ï¼Œæ­£å¥½ï¼Œä¸è¦æŠ¥é”™
                                 }
                                 else
                                 {
-                                    strError = "´¦Àí¼ÇÂ¼Â·¾¶Îª '" + this.GetCaption("zh") + "/" + strID + "' µÄ×Ó¼ÇÂ¼Ê±·¢Éú´íÎó:" + ex.Message + ", SQLÃüÁî:\r\n" + strCommand;
+                                    strError = "å¤„ç†è®°å½•è·¯å¾„ä¸º '" + this.GetCaption("zh") + "/" + strID + "' çš„å­è®°å½•æ—¶å‘ç”Ÿé”™è¯¯:" + ex.Message + ", SQLå‘½ä»¤:\r\n" + strCommand;
                                     return -1;
                                 }
                             }
                             catch (Exception ex)
                             {
 
-                                strError = "´¦Àí¼ÇÂ¼Â·¾¶Îª '" + this.GetCaption("zh") + "/" + strID + "' µÄ×Ó¼ÇÂ¼Ê±·¢Éú´íÎó:" + ex.Message + ", SQLÃüÁî:\r\n" + strCommand;
+                                strError = "å¤„ç†è®°å½•è·¯å¾„ä¸º '" + this.GetCaption("zh") + "/" + strID + "' çš„å­è®°å½•æ—¶å‘ç”Ÿé”™è¯¯:" + ex.Message + ", SQLå‘½ä»¤:\r\n" + strCommand;
                                 return -1;
                             }
                             command.Parameters.Clear();
@@ -15512,7 +15512,7 @@ out baPreamble);
             #endregion // Oracle
 
         DELETE_OBJECTFILE:
-            // É¾³ı¶ÔÏóÎÄ¼ş
+            // åˆ é™¤å¯¹è±¡æ–‡ä»¶
             foreach (string strShortFilename in filenames)
             {
                 if (string.IsNullOrEmpty(strShortFilename) == true)
@@ -15526,7 +15526,7 @@ out baPreamble);
                 }
                 catch (Exception ex)
                 {
-                    strError = "É¾³ıÊı¾İ¿â '" + this.GetCaption("zh-CN") + "' ÖĞ IDÎª '" + strID + "' µÄ¶ÔÏóÎÄ¼şÊ±·¢Éú´íÎó: " + ex.Message;
+                    strError = "åˆ é™¤æ•°æ®åº“ '" + this.GetCaption("zh-CN") + "' ä¸­ IDä¸º '" + strID + "' çš„å¯¹è±¡æ–‡ä»¶æ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                     this.container.KernelApplication.WriteErrorLog(strError);
                     return -1;
                 }
@@ -15536,17 +15536,17 @@ out baPreamble);
         }
 
 
-        // ¼ìË÷Á¬½Ó¶ÔÏóÊÇ·ñÕıÈ·
+        // æ£€ç´¢è¿æ¥å¯¹è±¡æ˜¯å¦æ­£ç¡®
         // return:
-        //      -1  ³ö´í
-        //      0   Õı³£
+        //      -1  å‡ºé”™
+        //      0   æ­£å¸¸
         private int CheckConnection(Connection connection,
             out string strError)
         {
             strError = "";
             if (connection == null)
             {
-                strError = "connectionÎªnull";
+                strError = "connectionä¸ºnull";
                 return -1;
             }
             #region MS SQL Server
@@ -15554,12 +15554,12 @@ out baPreamble);
             {
                 if (connection.SqlConnection == null)
                 {
-                    strError = "connection.SqlConnectionÎªnull";
+                    strError = "connection.SqlConnectionä¸ºnull";
                     return -1;
                 }
                 if (connection.SqlConnection.State != ConnectionState.Open)
                 {
-                    strError = "connectionÃ»ÓĞ´ò¿ª";
+                    strError = "connectionæ²¡æœ‰æ‰“å¼€";
                     return -1;
                 }
                 return 0;
@@ -15571,12 +15571,12 @@ out baPreamble);
             {
                 if (connection.SQLiteConnection == null)
                 {
-                    strError = "connection.SQLiteConnectionÎªnull";
+                    strError = "connection.SQLiteConnectionä¸ºnull";
                     return -1;
                 }
                 if (connection.SQLiteConnection.State != ConnectionState.Open)
                 {
-                    strError = "connectionÃ»ÓĞ´ò¿ª";
+                    strError = "connectionæ²¡æœ‰æ‰“å¼€";
                     return -1;
                 }
                 return 0;
@@ -15588,12 +15588,12 @@ out baPreamble);
             {
                 if (connection.MySqlConnection == null)
                 {
-                    strError = "connection.MySqlConnectionÎªnull";
+                    strError = "connection.MySqlConnectionä¸ºnull";
                     return -1;
                 }
                 if (connection.MySqlConnection.State != ConnectionState.Open)
                 {
-                    strError = "connectionÃ»ÓĞ´ò¿ª";
+                    strError = "connectionæ²¡æœ‰æ‰“å¼€";
                     return -1;
                 }
                 return 0;
@@ -15605,13 +15605,13 @@ out baPreamble);
             {
                 if (connection.OracleConnection == null)
                 {
-                    strError = "connection.OracleConnectionÎªnull";
+                    strError = "connection.OracleConnectionä¸ºnull";
                     return -1;
                 }
 
                 if (connection.OracleConnection.State != ConnectionState.Open)
                 {
-                    strError = "connectionÃ»ÓĞ´ò¿ª";
+                    strError = "connectionæ²¡æœ‰æ‰“å¼€";
                     return -1;
                 }
                 return 0;
@@ -15621,7 +15621,7 @@ out baPreamble);
             return 0;
         }
 
-        // µÃµ½·¶Î§
+        // å¾—åˆ°èŒƒå›´
         private string GetRange(SqlConnection connection,
             string strID)
         {
@@ -15655,10 +15655,10 @@ out baPreamble);
 
 
 #if NO
-        // ¸üĞÂ¶ÔÏó, Ê¹image×Ö¶Î»ñµÃÓĞĞ§µÄTextPrtÖ¸Õë
+        // æ›´æ–°å¯¹è±¡, ä½¿imageå­—æ®µè·å¾—æœ‰æ•ˆçš„TextPrtæŒ‡é’ˆ
         // return
-        //		-1  ³ö´í
-        //		0   ³É¹¦
+        //		-1  å‡ºé”™
+        //		0   æˆåŠŸ
         private int UpdateObject(SqlConnection connection,
             string strObjectID,
             out byte[] outputTimestamp,
@@ -15667,10 +15667,10 @@ out baPreamble);
             outputTimestamp = null;
             strError = "";
 
-            // ¼ì²éÁ¬½Ó¶ÔÏó
+            // æ£€æŸ¥è¿æ¥å¯¹è±¡
             // return:
-            //      -1  ³ö´í
-            //      0   Õı³£
+            //      -1  å‡ºé”™
+            //      0   æ­£å¸¸
             int nRet = this.CheckConnection(connection,
                 out strError);
             if (nRet == -1)
@@ -15707,16 +15707,16 @@ out baPreamble);
             int nCount = command.ExecuteNonQuery();
             if (nCount <= 0)
             {
-                strError = "Ã»ÓĞ¸üĞÂ'" + strObjectID + "'¼ÇÂ¼";
+                strError = "æ²¡æœ‰æ›´æ–°'" + strObjectID + "'è®°å½•";
                 return -1;
             }
-            // ·µ»ØµÄÊ±¼ä´Á
+            // è¿”å›çš„æ—¶é—´æˆ³
             outputTimestamp = ByteArray.GetTimeStampByteArray(strOutputTimestamp);//Encoding.UTF8.GetBytes(strOutputTimestamp);
             return 0;
         }
 
 
-        // ÅĞ¶ÏÒ»¸ö¶Ô¶ÔÏó×ÊÔ´·ñÊÇ¿Õ¶ÔÏó
+        // åˆ¤æ–­ä¸€ä¸ªå¯¹å¯¹è±¡èµ„æºå¦æ˜¯ç©ºå¯¹è±¡
         private bool IsEmptyObject(SqlConnection connection,
             string strID)
         {
@@ -15725,15 +15725,15 @@ out baPreamble);
                 strID);
         }
 
-        // ÅĞ¶ÏÒ»¸ö¶Ô¶ÔÏó×ÊÔ´·ñÊÇ¿Õ¶ÔÏó
+        // åˆ¤æ–­ä¸€ä¸ªå¯¹å¯¹è±¡èµ„æºå¦æ˜¯ç©ºå¯¹è±¡
         private bool IsEmptyObject(SqlConnection connection,
             string strImageFieldName,
             string strID)
         {
             string strError = "";
             // return:
-            //      -1  ³ö´í
-            //      0   Õı³£
+            //      -1  å‡ºé”™
+            //      0   æ­£å¸¸
             int nRet = this.CheckConnection(connection,
                 out strError);
             if (nRet == -1)
@@ -15770,7 +15770,7 @@ out baPreamble);
         }
 
 
-        // ²åÈëÒ»ÌõĞÂ¼ÇÂ¼,Ê¹Æä»ñµÃÓĞĞ§µÄtextptr,°ü×°InsertRecord
+        // æ’å…¥ä¸€æ¡æ–°è®°å½•,ä½¿å…¶è·å¾—æœ‰æ•ˆçš„textptr,åŒ…è£…InsertRecord
         private int InsertRecord(SqlConnection connection,
             string strID,
             out byte[] outputTimestamp,
@@ -15784,7 +15784,7 @@ out baPreamble);
                 out strError);
         }
 
-        // ¸ø±íÖĞ²åÈëÒ»Ìõ¼ÇÂ¼
+        // ç»™è¡¨ä¸­æ’å…¥ä¸€æ¡è®°å½•
         private int InsertRecord(SqlConnection connection,
             string strID,
             string strImageFieldName,
@@ -15795,10 +15795,10 @@ out baPreamble);
             outputTimestamp = null;
             strError = "";
 
-            // ¼ì²éÁ¬½Ó¶ÔÏó
+            // æ£€æŸ¥è¿æ¥å¯¹è±¡
             // return:
-            //      -1  ³ö´í
-            //      0   Õı³£
+            //      -1  å‡ºé”™
+            //      0   æ­£å¸¸
             int nRet = this.CheckConnection(connection,
                 out strError);
             if (nRet == -1)
@@ -15850,11 +15850,11 @@ out baPreamble);
             int nCount = command.ExecuteNonQuery();
             if (nCount <= 0)
             {
-                strError = "InsertImage() SQLÃüÁîÖ´ĞĞÓ°ÏìµÄÌõÊıÎª" + Convert.ToString(nCount);
+                strError = "InsertImage() SQLå‘½ä»¤æ‰§è¡Œå½±å“çš„æ¡æ•°ä¸º" + Convert.ToString(nCount);
                 return -1;
             }
 
-            // ·µ»ØµÄÊ±¼ä´Á
+            // è¿”å›çš„æ—¶é—´æˆ³
             outputTimestamp = ByteArray.GetTimeStampByteArray(strOutputTimestamp);//Encoding.UTF8.GetBytes(strOutputTimestamp);
             return 0;
         }
@@ -15862,24 +15862,24 @@ out baPreamble);
 #endif
 
 #if NO
-        // ÓÃnewdata×Ö¶ÎÌæ»»data×Ö¶Î
+        // ç”¨newdataå­—æ®µæ›¿æ¢dataå­—æ®µ
         // parameters:
-        //      connection  SqlConnection¶ÔÏó
-        //      strID       ¼ÇÂ¼id
-        //      strError    out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //      connection  SqlConnectionå¯¹è±¡
+        //      strID       è®°å½•id
+        //      strError    outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //      -1  ³ö´í
-        //      >=0   ³É¹¦ ·µ»ØÓ°ÏìµÄ¼ÇÂ¼Êı
-        // Ïß: ²»°²È«
+        //      -1  å‡ºé”™
+        //      >=0   æˆåŠŸ è¿”å›å½±å“çš„è®°å½•æ•°
+        // çº¿: ä¸å®‰å…¨
         private int UpdateDataField(SqlConnection connection,
             string strID,
             out string strError)
         {
             strError = "";
-            // ¼ì²éÁ¬½Ó¶ÔÏó
+            // æ£€æŸ¥è¿æ¥å¯¹è±¡
             // return:
-            //      -1  ³ö´í
-            //      0   Õı³£
+            //      -1  å‡ºé”™
+            //      0   æ­£å¸¸
             int nRet = this.CheckConnection(connection,
                 out strError);
             if (nRet == -1)
@@ -15903,12 +15903,12 @@ out baPreamble);
 
                 SqlCommand command = new SqlCommand(strCommand,
                     connection);
-                command.CommandTimeout = m_nLongTimeout;  // 30·ÖÖÓ
+                command.CommandTimeout = m_nLongTimeout;  // 30åˆ†é’Ÿ
 
                 int nCount = command.ExecuteNonQuery();
                 if (nCount == -1)
                 {
-                    strError = "Ã»ÓĞÌæ»»µ½¸Ã¼ÇÂ¼'" + strID + "'µÄdata×Ö¶Î";
+                    strError = "æ²¡æœ‰æ›¿æ¢åˆ°è¯¥è®°å½•'" + strID + "'çš„dataå­—æ®µ";
                     return -1;
                 }
 
@@ -15935,7 +15935,7 @@ out baPreamble);
             return fi.Length;
         }
 
-        // »ñµÃ³õ´Î´´½¨µÄ¶ÔÏóÎÄ¼şÃû
+        // è·å¾—åˆæ¬¡åˆ›å»ºçš„å¯¹è±¡æ–‡ä»¶å
         string BuildObjectFileName(string strID,
 bool bTempObject)
         {
@@ -15950,9 +15950,9 @@ bool bTempObject)
                 return PathUtil.MergePath(this.m_strObjectDir, strID.Insert(7, "/"));
         }
 
-        // ¸ù¾İ×Ö¶ÎÄÚÈİ¹¹ÔìÍêÕûµÄ¶ÔÏóÎÄ¼şÃû
+        // æ ¹æ®å­—æ®µå†…å®¹æ„é€ å®Œæ•´çš„å¯¹è±¡æ–‡ä»¶å
         // parameters:
-        //      strShotFileName filename»ònewfilename×Ö¶ÎÖĞ´æ´¢µÄ¶ÌÎÄ¼şÃû¡£¼´£¬¾ßÌåÊı¾İÄ¿Â¼ÏÂµÄ×ÓÄ¿Â¼ºÍÎÄ¼şÃû²¿·Ö
+        //      strShotFileName filenameæˆ–newfilenameå­—æ®µä¸­å­˜å‚¨çš„çŸ­æ–‡ä»¶åã€‚å³ï¼Œå…·ä½“æ•°æ®ç›®å½•ä¸‹çš„å­ç›®å½•å’Œæ–‡ä»¶åéƒ¨åˆ†
         string GetObjectFileName(string strShortFileName)
         {
             if (string.IsNullOrEmpty(this.m_strObjectDir) == true)
@@ -15964,13 +15964,13 @@ bool bTempObject)
             return PathUtil.MergePath(this.m_strObjectDir, strShortFileName);
         }
 
-        // ¹¹Ôì³öÊÊºÏ±£´æÔÚfilenameºÍnewfilename×Ö¶ÎÖĞµÄ¶ÌÎÄ¼şÃû
+        // æ„é€ å‡ºé€‚åˆä¿å­˜åœ¨filenameå’Œnewfilenameå­—æ®µä¸­çš„çŸ­æ–‡ä»¶å
         string GetShortFileName(string strLongFileName)
         {
             if (string.IsNullOrEmpty(this.m_strObjectDir) == true)
                 return null;
 
-            // Õı¹æ»¯Ä¿Â¼Â·¾¶Ãû¡£°ÑËùÓĞ×Ö·û'/'Ìæ»»Îª'\'£¬²¢ÇÒÎªÄ©Î²È·±£ÓĞ×Ö·û'\'
+            // æ­£è§„åŒ–ç›®å½•è·¯å¾„åã€‚æŠŠæ‰€æœ‰å­—ç¬¦'/'æ›¿æ¢ä¸º'\'ï¼Œå¹¶ä¸”ä¸ºæœ«å°¾ç¡®ä¿æœ‰å­—ç¬¦'\'
             string strObjectDir = PathUtil.CanonicalizeDirectoryPath(this.m_strObjectDir);
 
             if (strLongFileName.Length <= strObjectDir.Length)
@@ -15998,17 +15998,17 @@ bool bTempObject)
 
 
 #if NO
-        // TODO: Ò²ÒªÇå³ı¶ÔÓ¦µÄtimestamp×Ö¶Î
-        // É¾³ıimageÈ«²¿ÄÚÈİ
+        // TODO: ä¹Ÿè¦æ¸…é™¤å¯¹åº”çš„timestampå­—æ®µ
+        // åˆ é™¤imageå…¨éƒ¨å†…å®¹
         // parameter:
-        //		connection  Á¬½Ó¶ÔÏó
-        //		strID       ¼ÇÂ¼ID
-        //		strImageFieldName   image×Ö¶ÎÃû
-        //		strError    out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //		connection  è¿æ¥å¯¹è±¡
+        //		strID       è®°å½•ID
+        //		strImageFieldName   imageå­—æ®µå
+        //		strError    outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //		-1  ³ö´í
-        //		0   ³É¹¦
-        // Ïß: ²»°²È«
+        //		-1  å‡ºé”™
+        //		0   æˆåŠŸ
+        // çº¿: ä¸å®‰å…¨
         private int RemoveImage(SqlConnection connection,
             // string strID,
             string strImageFieldName,
@@ -16019,10 +16019,10 @@ bool bTempObject)
 
             Debug.Assert(textptr != null, "");
 
-            // ¼ì²éÁ¬½Ó¶ÔÏó
+            // æ£€æŸ¥è¿æ¥å¯¹è±¡
             // return:
-            //      -1  ³ö´í
-            //      0   Õı³£
+            //      -1  å‡ºé”™
+            //      0   æ­£å¸¸
             int nRet = this.CheckConnection(connection,
                 out strError);
             if (nRet == -1)
@@ -16050,15 +16050,15 @@ bool bTempObject)
 #if UPDATETEXT_WITHLOG
                     + " WITH LOG";
 #endif
-        //+ " @inserted_data";   //²»ÄÜ¼ÓwhereÓï¾ä
+        //+ " @inserted_data";   //ä¸èƒ½åŠ whereè¯­å¥
 
                 strCommand += " use master " + "\n";
 
                 command = new SqlCommand(strCommand,
                     connection);
-                command.CommandTimeout = m_nLongTimeout;  // 30·ÖÖÓ 2011/1/16
+                command.CommandTimeout = m_nLongTimeout;  // 30åˆ†é’Ÿ 2011/1/16
 
-                // ¸ø²ÎÊı¸³Öµ
+                // ç»™å‚æ•°èµ‹å€¼
                 SqlParameter dest_text_ptrParam =
                     command.Parameters.Add("@dest_text_ptr",
                     SqlDbType.Binary,
@@ -16084,17 +16084,17 @@ bool bTempObject)
 #endif
 
 #if NO
-        // É¾³ıimage¶àÓàµÄ²¿·Ö
+        // åˆ é™¤imageå¤šä½™çš„éƒ¨åˆ†
         // parameter:
-        //		connection  Á¬½Ó¶ÔÏó
-        //		strID       ¼ÇÂ¼ID
-        //		strImageFieldName   image×Ö¶ÎÃû
-        //		nStart      ÆğÊ¼Î»ÖÃ
-        //		strError    out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //		connection  è¿æ¥å¯¹è±¡
+        //		strID       è®°å½•ID
+        //		strImageFieldName   imageå­—æ®µå
+        //		nStart      èµ·å§‹ä½ç½®
+        //		strError    outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //		-1  ³ö´í
-        //		0   ³É¹¦
-        // Ïß: ²»°²È«
+        //		-1  å‡ºé”™
+        //		0   æˆåŠŸ
+        // çº¿: ä¸å®‰å…¨
         private int DeleteDuoYuImage(SqlConnection connection,
             string strID,
             string strImageFieldName,
@@ -16103,10 +16103,10 @@ bool bTempObject)
         {
             strError = "";
 
-            // ¼ì²éÁ¬½Ó¶ÔÏó
+            // æ£€æŸ¥è¿æ¥å¯¹è±¡
             // return:
-            //      -1  ³ö´í
-            //      0   Õı³£
+            //      -1  å‡ºé”™
+            //      0   æ­£å¸¸
             int nRet = this.CheckConnection(connection,
                 out strError);
             if (nRet == -1)
@@ -16126,7 +16126,7 @@ bool bTempObject)
                 string strCommand = "";
                 SqlCommand command = null;
 
-                // 1.µÃµ½imageÖ¸Õë ºÍ ³¤¶È
+                // 1.å¾—åˆ°imageæŒ‡é’ˆ å’Œ é•¿åº¦
                 strCommand = "use " + this.m_strSqlDbName + " "
                     + " SELECT @Pointer=TEXTPTR(" + strImageFieldName + "),"
                     + " @Length=DataLength(" + strImageFieldName + ") "
@@ -16137,7 +16137,7 @@ bool bTempObject)
 
                 command = new SqlCommand(strCommand,
                     connection);
-                command.CommandTimeout = m_nLongTimeout;  // 30·ÖÖÓ
+                command.CommandTimeout = m_nLongTimeout;  // 30åˆ†é’Ÿ
 
                 SqlParameter idParam =
                     command.Parameters.Add("@id",
@@ -16158,7 +16158,7 @@ bool bTempObject)
                 command.ExecuteNonQuery();
                 if (PointerOutParam == null)
                 {
-                    strError = "Ã»ÕÒµ½imageÖ¸Õë";
+                    strError = "æ²¡æ‰¾åˆ°imageæŒ‡é’ˆ";
                     return -1;
                 }
 
@@ -16167,7 +16167,7 @@ bool bTempObject)
                     return 0;
 
 
-                // 2.½øĞĞÉ¾³ı
+                // 2.è¿›è¡Œåˆ é™¤
                 strCommand = "use " + this.m_strSqlDbName + " "
                     + " UPDATETEXT records." + strImageFieldName
                     + " @dest_text_ptr"
@@ -16176,15 +16176,15 @@ bool bTempObject)
 #if UPDATETEXT_WITHLOG
                     + " WITH LOG";
 #endif
-        //+ " @inserted_data";   //²»ÄÜ¼ÓwhereÓï¾ä
+        //+ " @inserted_data";   //ä¸èƒ½åŠ whereè¯­å¥
 
                 strCommand += " use master " + "\n";
 
                 command = new SqlCommand(strCommand,
                     connection);
-                command.CommandTimeout = m_nLongTimeout;  // 30·ÖÖÓ 2011/1/16
+                command.CommandTimeout = m_nLongTimeout;  // 30åˆ†é’Ÿ 2011/1/16
 
-                // ¸ø²ÎÊı¸³Öµ
+                // ç»™å‚æ•°èµ‹å€¼
                 SqlParameter dest_text_ptrParam =
                     command.Parameters.Add("@dest_text_ptr",
                     SqlDbType.Binary,
@@ -16210,21 +16210,21 @@ bool bTempObject)
 #endif
 
 #if NO
-        // ¼ì²é¼ÇÂ¼ÔÚ¿âÖĞÊÇ·ñ´æÔÚ
+        // æ£€æŸ¥è®°å½•åœ¨åº“ä¸­æ˜¯å¦å­˜åœ¨
         // return:
-        //		-1  ³ö´í
-        //      0   ²»´æÔÚ
-        //      1   ´æÔÚ
+        //		-1  å‡ºé”™
+        //      0   ä¸å­˜åœ¨
+        //      1   å­˜åœ¨
         private int RecordIsExist(SqlConnection connection,
             string strID,
             out string strError)
         {
             strError = "";
 
-            // ¼ì²éÁ¬½Ó¶ÔÏó
+            // æ£€æŸ¥è¿æ¥å¯¹è±¡
             // return:
-            //      -1  ³ö´í
-            //      0   Õı³£
+            //      -1  å‡ºé”™
+            //      0   æ­£å¸¸
             int nRet = this.CheckConnection(connection,
                 out strError);
             if (nRet == -1)
@@ -16272,12 +16272,12 @@ bool bTempObject)
             public byte[] NewData = null;           // 2013/2/17
         }
 
-        // ¼ì²é¼ÇÂ¼ÔÚ¿âÖĞÊÇ·ñ´æÔÚ£¬Èç¹û´æÔÚÔÚÔò·µ»ØÒ»Ğ©×Ö¶ÎÄÚÈİ£¬Èç¹û²»´æÔÚÔò²åÈëÒ»ÌõĞÂ¼ÇÂ¼
+        // æ£€æŸ¥è®°å½•åœ¨åº“ä¸­æ˜¯å¦å­˜åœ¨ï¼Œå¦‚æœå­˜åœ¨åœ¨åˆ™è¿”å›ä¸€äº›å­—æ®µå†…å®¹ï¼Œå¦‚æœä¸å­˜åœ¨åˆ™æ’å…¥ä¸€æ¡æ–°è®°å½•
         // return:
-        //		-1  ³ö´í
-        //      0   Ã»ÓĞ´´½¨ĞÂ¼ÇÂ¼
-        //      1   ´´½¨ÁËĞÂµÄ¼ÇÂ¼
-        //      2   ĞèÒª´´½¨ĞÂµÄ¼ÇÂ¼£¬µ«ÒòÎªÓÅ»¯µÄÔµ¹Ê(ÉÔºóĞèÒª´´½¨)¶øÃ»ÓĞ´´½¨
+        //		-1  å‡ºé”™
+        //      0   æ²¡æœ‰åˆ›å»ºæ–°è®°å½•
+        //      1   åˆ›å»ºäº†æ–°çš„è®°å½•
+        //      2   éœ€è¦åˆ›å»ºæ–°çš„è®°å½•ï¼Œä½†å› ä¸ºä¼˜åŒ–çš„ç¼˜æ•…(ç¨åéœ€è¦åˆ›å»º)è€Œæ²¡æœ‰åˆ›å»º
         private int CreateNewRecordIfNeed(Connection connection,
             string strID,
             byte [] sourceBuffer,
@@ -16290,14 +16290,14 @@ bool bTempObject)
             // 2013/2/17
             if (StringUtil.IsPureNumber(strID) == false)
             {
-                strError = "ID '"+strID+"' ±ØĞëÊÇ´¿Êı×Ö";
+                strError = "ID '"+strID+"' å¿…é¡»æ˜¯çº¯æ•°å­—";
                 return -1;
             }
 
-            // ¼ì²éÁ¬½Ó¶ÔÏó
+            // æ£€æŸ¥è¿æ¥å¯¹è±¡
             // return:
-            //      -1  ³ö´í
-            //      0   Õı³£
+            //      -1  å‡ºé”™
+            //      0   æ­£å¸¸
             int nRet = this.CheckConnection(connection,
                 out strError);
             if (nRet == -1)
@@ -16386,12 +16386,12 @@ bool bTempObject)
                     SqlDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult);
                     try
                     {
-                        // 1.¼ÇÂ¼²»´æÔÚ±¨´í
+                        // 1.è®°å½•ä¸å­˜åœ¨æŠ¥é”™
                         if (dr == null
                             || dr.HasRows == false)
                         {
-                            // strError = "¼ÇÂ¼ '" + strID + "' ÔÚ¿âÖĞ²»´æÔÚ£¬Õı³£Çé¿öÏÂ²»Ó¦ÊÇÕâÑù";
-                            return 1;   // ÒÑ¾­´´½¨ĞÂ¼ÇÂ¼
+                            // strError = "è®°å½• '" + strID + "' åœ¨åº“ä¸­ä¸å­˜åœ¨ï¼Œæ­£å¸¸æƒ…å†µä¸‹ä¸åº”æ˜¯è¿™æ ·";
+                            return 1;   // å·²ç»åˆ›å»ºæ–°è®°å½•
                         }
 
                         dr.Read();
@@ -16399,10 +16399,10 @@ bool bTempObject)
                         row_info = new RecordRowInfo();
 
                         /*
-                        // 2.textPtrÎªnull±¨´í
+                        // 2.textPträ¸ºnullæŠ¥é”™
                         if (dr[0] is System.DBNull)
                         {
-                            strError = "TextPtr²»¿ÉÄÜÎªnull";
+                            strError = "TextPträ¸å¯èƒ½ä¸ºnull";
                             return -1;
                         }
                          * */
@@ -16441,8 +16441,8 @@ bool bTempObject)
 
                         if (bRet == true)
                         {
-                            // »¹ÓĞÒ»ĞĞ
-                            strError = "¼ÇÂ¼ '" + strID + "' ÔÚSQL¿â" + this.m_strSqlDbName + "µÄrecords±íÖĞ´æÔÚ¶àÌõ£¬ÕâÊÇÒ»ÖÖ²»Õı³£µÄ×´Ì¬, ÇëÏµÍ³¹ÜÀíÔ±ÀûÓÃSQLÃüÁîÉ¾³ı¶àÓàµÄ¼ÇÂ¼¡£";
+                            // è¿˜æœ‰ä¸€è¡Œ
+                            strError = "è®°å½• '" + strID + "' åœ¨SQLåº“" + this.m_strSqlDbName + "çš„recordsè¡¨ä¸­å­˜åœ¨å¤šæ¡ï¼Œè¿™æ˜¯ä¸€ç§ä¸æ­£å¸¸çš„çŠ¶æ€, è¯·ç³»ç»Ÿç®¡ç†å‘˜åˆ©ç”¨SQLå‘½ä»¤åˆ é™¤å¤šä½™çš„è®°å½•ã€‚";
                             return -1;
                         }
                     }
@@ -16473,7 +16473,7 @@ bool bTempObject)
                     SQLiteDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult);
                     try
                     {
-                        // Èç¹û¼ÇÂ¼²»´æÔÚ£¬ĞèÒª´´½¨
+                        // å¦‚æœè®°å½•ä¸å­˜åœ¨ï¼Œéœ€è¦åˆ›å»º
                         if (dr == null
                             || dr.HasRows == false)
                         {
@@ -16488,7 +16488,7 @@ bool bTempObject)
                             // goto DO_CREATE;
                         }
 
-                        // Èç¹û¼ÇÂ¼ÒÑ¾­´æÔÚ
+                        // å¦‚æœè®°å½•å·²ç»å­˜åœ¨
                         dr.Read();
 
                         row_info = new RecordRowInfo();
@@ -16529,8 +16529,8 @@ bool bTempObject)
 
                         if (bRet == true)
                         {
-                            // »¹ÓĞÒ»ĞĞ
-                            strError = "¼ÇÂ¼ '" + strID + "' ÔÚSQL¿â" + this.m_strSqlDbName + "µÄrecords±íÖĞ´æÔÚ¶àÌõ£¬ÕâÊÇÒ»ÖÖ²»Õı³£µÄ×´Ì¬, ÇëÏµÍ³¹ÜÀíÔ±ÀûÓÃSQLÃüÁîÉ¾³ı¶àÓàµÄ¼ÇÂ¼¡£";
+                            // è¿˜æœ‰ä¸€è¡Œ
+                            strError = "è®°å½• '" + strID + "' åœ¨SQLåº“" + this.m_strSqlDbName + "çš„recordsè¡¨ä¸­å­˜åœ¨å¤šæ¡ï¼Œè¿™æ˜¯ä¸€ç§ä¸æ­£å¸¸çš„çŠ¶æ€, è¯·ç³»ç»Ÿç®¡ç†å‘˜åˆ©ç”¨SQLå‘½ä»¤åˆ é™¤å¤šä½™çš„è®°å½•ã€‚";
                             return -1;
                         }
                     }
@@ -16540,7 +16540,7 @@ bool bTempObject)
                     }
                 } // end of using command
 
-                return 0;   // Ã»ÓĞ´´½¨ĞÂ¼ÇÂ¼
+                return 0;   // æ²¡æœ‰åˆ›å»ºæ–°è®°å½•
 
 #if NO
             DO_CREATE:
@@ -16608,7 +16608,7 @@ bool bTempObject)
             }
             else if (connection.SqlServerType == SqlServerType.MySql)
             {
-                // ×¢£º MySql ÕâÀïºÍ SQLite »ù±¾Ò»Ñù
+                // æ³¨ï¼š MySql è¿™é‡Œå’Œ SQLite åŸºæœ¬ä¸€æ ·
                 string strCommand = " SELECT "
                     + " `range`," // 0 4
                     + " dptimestamp,"   // 1 5
@@ -16626,7 +16626,7 @@ bool bTempObject)
                     MySqlDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult);
                     try
                     {
-                        // Èç¹û¼ÇÂ¼²»´æÔÚ£¬ĞèÒª´´½¨
+                        // å¦‚æœè®°å½•ä¸å­˜åœ¨ï¼Œéœ€è¦åˆ›å»º
                         if (dr == null
                             || dr.HasRows == false)
                         {
@@ -16641,7 +16641,7 @@ bool bTempObject)
                             // goto DO_CREATE;
                         }
 
-                        // Èç¹û¼ÇÂ¼ÒÑ¾­´æÔÚ
+                        // å¦‚æœè®°å½•å·²ç»å­˜åœ¨
                         dr.Read();
 
                         row_info = new RecordRowInfo();
@@ -16668,8 +16668,8 @@ bool bTempObject)
 
                         if (bRet == true)
                         {
-                            // »¹ÓĞÒ»ĞĞ
-                            strError = "¼ÇÂ¼ '" + strID + "' ÔÚSQL¿â" + this.m_strSqlDbName + "µÄrecords±íÖĞ´æÔÚ¶àÌõ£¬ÕâÊÇÒ»ÖÖ²»Õı³£µÄ×´Ì¬, ÇëÏµÍ³¹ÜÀíÔ±ÀûÓÃSQLÃüÁîÉ¾³ı¶àÓàµÄ¼ÇÂ¼¡£";
+                            // è¿˜æœ‰ä¸€è¡Œ
+                            strError = "è®°å½• '" + strID + "' åœ¨SQLåº“" + this.m_strSqlDbName + "çš„recordsè¡¨ä¸­å­˜åœ¨å¤šæ¡ï¼Œè¿™æ˜¯ä¸€ç§ä¸æ­£å¸¸çš„çŠ¶æ€, è¯·ç³»ç»Ÿç®¡ç†å‘˜åˆ©ç”¨SQLå‘½ä»¤åˆ é™¤å¤šä½™çš„è®°å½•ã€‚";
                             return -1;
                         }
                     }
@@ -16679,11 +16679,11 @@ bool bTempObject)
                     }
                 } // end of using command
 
-                return 0;   // Ã»ÓĞ´´½¨ĞÂ¼ÇÂ¼
+                return 0;   // æ²¡æœ‰åˆ›å»ºæ–°è®°å½•
             }
             else if (connection.SqlServerType == SqlServerType.Oracle)
             {
-                // ×¢£º MySql ÕâÀïºÍ SQLite »ù±¾Ò»Ñù
+                // æ³¨ï¼š MySql è¿™é‡Œå’Œ SQLite åŸºæœ¬ä¸€æ ·
                 string strCommand = " SELECT "
                     + " range," // 0 4
                     + " dptimestamp,"   // 1 5
@@ -16701,7 +16701,7 @@ bool bTempObject)
                     OracleDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult);
                     try
                     {
-                        // Èç¹û¼ÇÂ¼²»´æÔÚ£¬ĞèÒª´´½¨
+                        // å¦‚æœè®°å½•ä¸å­˜åœ¨ï¼Œéœ€è¦åˆ›å»º
                         if (dr == null
                             || dr.HasRows == false)
                         {
@@ -16716,7 +16716,7 @@ bool bTempObject)
                             // goto DO_CREATE;
                         }
 
-                        // Èç¹û¼ÇÂ¼ÒÑ¾­´æÔÚ
+                        // å¦‚æœè®°å½•å·²ç»å­˜åœ¨
                         dr.Read();
 
                         row_info = new RecordRowInfo();
@@ -16743,8 +16743,8 @@ bool bTempObject)
 
                         if (bRet == true)
                         {
-                            // »¹ÓĞÒ»ĞĞ
-                            strError = "¼ÇÂ¼ '" + strID + "' ÔÚSQL¿â" + this.m_strSqlDbName + "µÄrecords±íÖĞ´æÔÚ¶àÌõ£¬ÕâÊÇÒ»ÖÖ²»Õı³£µÄ×´Ì¬, ÇëÏµÍ³¹ÜÀíÔ±ÀûÓÃSQLÃüÁîÉ¾³ı¶àÓàµÄ¼ÇÂ¼¡£";
+                            // è¿˜æœ‰ä¸€è¡Œ
+                            strError = "è®°å½• '" + strID + "' åœ¨SQLåº“" + this.m_strSqlDbName + "çš„recordsè¡¨ä¸­å­˜åœ¨å¤šæ¡ï¼Œè¿™æ˜¯ä¸€ç§ä¸æ­£å¸¸çš„çŠ¶æ€, è¯·ç³»ç»Ÿç®¡ç†å‘˜åˆ©ç”¨SQLå‘½ä»¤åˆ é™¤å¤šä½™çš„è®°å½•ã€‚";
                             return -1;
                         }
                     }
@@ -16755,15 +16755,15 @@ bool bTempObject)
                     }
                 } // end of using command
 
-                return 0;   // Ã»ÓĞ´´½¨ĞÂ¼ÇÂ¼
+                return 0;   // æ²¡æœ‰åˆ›å»ºæ–°è®°å½•
             }
-            return 0;   // Ã»ÓĞ´´½¨ĞÂ¼ÇÂ¼
+            return 0;   // æ²¡æœ‰åˆ›å»ºæ–°è®°å½•
         }
 
         // return:
-        //      -1  ³ö´í
-        //      0   ¼ÇÂ¼²»´æÔÚ
-        //      1   ³É¹¦
+        //      -1  å‡ºé”™
+        //      0   è®°å½•ä¸å­˜åœ¨
+        //      1   æˆåŠŸ
         private int GetRowInfo(Connection connection,
     string strID,
     out RecordRowInfo row_info,
@@ -16772,10 +16772,10 @@ bool bTempObject)
             strError = "";
             row_info = null;
 
-            // ¼ì²éÁ¬½Ó¶ÔÏó
+            // æ£€æŸ¥è¿æ¥å¯¹è±¡
             // return:
-            //      -1  ³ö´í
-            //      0   Õı³£
+            //      -1  å‡ºé”™
+            //      0   æ­£å¸¸
             int nRet = this.CheckConnection(connection,
                 out strError);
             if (nRet == -1)
@@ -16808,11 +16808,11 @@ bool bTempObject)
                     SqlDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult);
                     try
                     {
-                        // 1.¼ÇÂ¼²»´æÔÚ±¨´í
+                        // 1.è®°å½•ä¸å­˜åœ¨æŠ¥é”™
                         if (dr == null
                             || dr.HasRows == false)
                         {
-                            strError = "¼ÇÂ¼ '" + strID + "' ÔÚ¿âÖĞ²»´æÔÚ";
+                            strError = "è®°å½• '" + strID + "' åœ¨åº“ä¸­ä¸å­˜åœ¨";
                             return 0;
                         }
 
@@ -16821,10 +16821,10 @@ bool bTempObject)
                         row_info = new RecordRowInfo();
 
                         /*
-                        // 2.textPtrÎªnull±¨´í
+                        // 2.textPträ¸ºnullæŠ¥é”™
                         if (dr[0] is System.DBNull)
                         {
-                            strError = "TextPtr²»¿ÉÄÜÎªnull";
+                            strError = "TextPträ¸å¯èƒ½ä¸ºnull";
                             return -1;
                         }
                          * */
@@ -16861,8 +16861,8 @@ bool bTempObject)
 
                         if (bRet == true)
                         {
-                            // »¹ÓĞÒ»ĞĞ
-                            strError = "¼ÇÂ¼ '" + strID + "' ÔÚSQL¿â" + this.m_strSqlDbName + "µÄrecords±íÖĞ´æÔÚ¶àÌõ£¬ÕâÊÇÒ»ÖÖ²»Õı³£µÄ×´Ì¬, ÇëÏµÍ³¹ÜÀíÔ±ÀûÓÃSQLÃüÁîÉ¾³ı¶àÓàµÄ¼ÇÂ¼¡£";
+                            // è¿˜æœ‰ä¸€è¡Œ
+                            strError = "è®°å½• '" + strID + "' åœ¨SQLåº“" + this.m_strSqlDbName + "çš„recordsè¡¨ä¸­å­˜åœ¨å¤šæ¡ï¼Œè¿™æ˜¯ä¸€ç§ä¸æ­£å¸¸çš„çŠ¶æ€, è¯·ç³»ç»Ÿç®¡ç†å‘˜åˆ©ç”¨SQLå‘½ä»¤åˆ é™¤å¤šä½™çš„è®°å½•ã€‚";
                             return -1;
                         }
                     }
@@ -16893,11 +16893,11 @@ bool bTempObject)
                     SQLiteDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult);
                     try
                     {
-                        // 1.¼ÇÂ¼²»´æÔÚ±¨´í
+                        // 1.è®°å½•ä¸å­˜åœ¨æŠ¥é”™
                         if (dr == null
                             || dr.HasRows == false)
                         {
-                            strError = "¼ÇÂ¼ '" + strID + "' ÔÚ¿âÖĞ²»´æÔÚ";
+                            strError = "è®°å½• '" + strID + "' åœ¨åº“ä¸­ä¸å­˜åœ¨";
                             return 0;
                         }
 
@@ -16939,8 +16939,8 @@ bool bTempObject)
 
                         if (bRet == true)
                         {
-                            // »¹ÓĞÒ»ĞĞ
-                            strError = "¼ÇÂ¼ '" + strID + "' ÔÚSQL¿â" + this.m_strSqlDbName + "µÄrecords±íÖĞ´æÔÚ¶àÌõ£¬ÕâÊÇÒ»ÖÖ²»Õı³£µÄ×´Ì¬, ÇëÏµÍ³¹ÜÀíÔ±ÀûÓÃSQLÃüÁîÉ¾³ı¶àÓàµÄ¼ÇÂ¼¡£";
+                            // è¿˜æœ‰ä¸€è¡Œ
+                            strError = "è®°å½• '" + strID + "' åœ¨SQLåº“" + this.m_strSqlDbName + "çš„recordsè¡¨ä¸­å­˜åœ¨å¤šæ¡ï¼Œè¿™æ˜¯ä¸€ç§ä¸æ­£å¸¸çš„çŠ¶æ€, è¯·ç³»ç»Ÿç®¡ç†å‘˜åˆ©ç”¨SQLå‘½ä»¤åˆ é™¤å¤šä½™çš„è®°å½•ã€‚";
                             return -1;
                         }
                     }
@@ -16971,11 +16971,11 @@ bool bTempObject)
                     MySqlDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult);
                     try
                     {
-                        // 1.¼ÇÂ¼²»´æÔÚ±¨´í
+                        // 1.è®°å½•ä¸å­˜åœ¨æŠ¥é”™
                         if (dr == null
                             || dr.HasRows == false)
                         {
-                            strError = "¼ÇÂ¼ '" + strID + "' ÔÚ¿âÖĞ²»´æÔÚ";
+                            strError = "è®°å½• '" + strID + "' åœ¨åº“ä¸­ä¸å­˜åœ¨";
                             return 0;
                         }
 
@@ -17005,8 +17005,8 @@ bool bTempObject)
 
                         if (bRet == true)
                         {
-                            // »¹ÓĞÒ»ĞĞ
-                            strError = "¼ÇÂ¼ '" + strID + "' ÔÚSQL¿â" + this.m_strSqlDbName + "µÄrecords±íÖĞ´æÔÚ¶àÌõ£¬ÕâÊÇÒ»ÖÖ²»Õı³£µÄ×´Ì¬, ÇëÏµÍ³¹ÜÀíÔ±ÀûÓÃSQLÃüÁîÉ¾³ı¶àÓàµÄ¼ÇÂ¼¡£";
+                            // è¿˜æœ‰ä¸€è¡Œ
+                            strError = "è®°å½• '" + strID + "' åœ¨SQLåº“" + this.m_strSqlDbName + "çš„recordsè¡¨ä¸­å­˜åœ¨å¤šæ¡ï¼Œè¿™æ˜¯ä¸€ç§ä¸æ­£å¸¸çš„çŠ¶æ€, è¯·ç³»ç»Ÿç®¡ç†å‘˜åˆ©ç”¨SQLå‘½ä»¤åˆ é™¤å¤šä½™çš„è®°å½•ã€‚";
                             return -1;
                         }
                     }
@@ -17036,11 +17036,11 @@ bool bTempObject)
                     OracleDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult);
                     try
                     {
-                        // 1.¼ÇÂ¼²»´æÔÚ±¨´í
+                        // 1.è®°å½•ä¸å­˜åœ¨æŠ¥é”™
                         if (dr == null
                             || dr.HasRows == false)
                         {
-                            strError = "¼ÇÂ¼ '" + strID + "' ÔÚ¿âÖĞ²»´æÔÚ";
+                            strError = "è®°å½• '" + strID + "' åœ¨åº“ä¸­ä¸å­˜åœ¨";
                             return 0;
                         }
 
@@ -17070,8 +17070,8 @@ bool bTempObject)
 
                         if (bRet == true)
                         {
-                            // »¹ÓĞÒ»ĞĞ
-                            strError = "¼ÇÂ¼ '" + strID + "' ÔÚSQL¿â" + this.m_strSqlDbName + "µÄrecords±íÖĞ´æÔÚ¶àÌõ£¬ÕâÊÇÒ»ÖÖ²»Õı³£µÄ×´Ì¬, ÇëÏµÍ³¹ÜÀíÔ±ÀûÓÃSQLÃüÁîÉ¾³ı¶àÓàµÄ¼ÇÂ¼¡£";
+                            // è¿˜æœ‰ä¸€è¡Œ
+                            strError = "è®°å½• '" + strID + "' åœ¨SQLåº“" + this.m_strSqlDbName + "çš„recordsè¡¨ä¸­å­˜åœ¨å¤šæ¡ï¼Œè¿™æ˜¯ä¸€ç§ä¸æ­£å¸¸çš„çŠ¶æ€, è¯·ç³»ç»Ÿç®¡ç†å‘˜åˆ©ç”¨SQLå‘½ä»¤åˆ é™¤å¤šä½™çš„è®°å½•ã€‚";
                             return -1;
                         }
                     }
@@ -17086,7 +17086,7 @@ bool bTempObject)
             }
             else
             {
-                strError = "Î´ÖªµÄÊı¾İ¿âÀàĞÍ: " + connection.SqlServerType.ToString();
+                strError = "æœªçŸ¥çš„æ•°æ®åº“ç±»å‹: " + connection.SqlServerType.ToString();
                 return -1;
             }
 
@@ -17102,11 +17102,11 @@ bool bTempObject)
 
 #if NO
 
-        // ´Ó¿âÖĞµÃµ½Ò»¸ö¼ÇÂ¼µÄÊ±¼ä´Á
+        // ä»åº“ä¸­å¾—åˆ°ä¸€ä¸ªè®°å½•çš„æ—¶é—´æˆ³
         // return:
-        //		-1  ³ö´í
-        //		-4  Î´ÕÒµ½¼ÇÂ¼
-        //      0   ³É¹¦
+        //		-1  å‡ºé”™
+        //		-4  æœªæ‰¾åˆ°è®°å½•
+        //      0   æˆåŠŸ
         private int GetTimestampFromDb(SqlConnection connection,
             string strID,
             out byte[] outputTimestamp,
@@ -17118,27 +17118,27 @@ bool bTempObject)
 
             string strOutputRecordID = "";
             // return:
-            //      -1  ³ö´í
-            //      0   ³É¹¦
+            //      -1  å‡ºé”™
+            //      0   æˆåŠŸ
             nRet = this.CanonicalizeRecordID(strID,
                 out strOutputRecordID,
                 out strError);
             if (nRet == -1)
             {
-                strError = "GetTimestampFormDb()µ÷ÓÃ´íÎó£¬strID²ÎÊıÖµ '" + strID + "' ²»ºÏ·¨¡£";
+                strError = "GetTimestampFormDb()è°ƒç”¨é”™è¯¯ï¼ŒstrIDå‚æ•°å€¼ '" + strID + "' ä¸åˆæ³•ã€‚";
                 return -1;
             }
             if (strOutputRecordID == "-1")
             {
-                strError = "GetTimestampFormDb()µ÷ÓÃ´íÎó£¬strID²ÎÊıÖµ '" + strID + "' ²»ºÏ·¨¡£";
+                strError = "GetTimestampFormDb()è°ƒç”¨é”™è¯¯ï¼ŒstrIDå‚æ•°å€¼ '" + strID + "' ä¸åˆæ³•ã€‚";
                 return -1;
             }
             strID = strOutputRecordID;
 
 
             // return:
-            //      -1  ³ö´í
-            //      0   Õı³£
+            //      -1  å‡ºé”™
+            //      0   æ­£å¸¸
             nRet = this.CheckConnection(connection,
                 out strError);
             if (nRet == -1)
@@ -17159,12 +17159,12 @@ bool bTempObject)
                 if (dr == null
                     || dr.HasRows == false)
                 {
-                    strError = "GetTimestampFromDb() ·¢ÏÖ¼ÇÂ¼'" + strID + "'ÔÚ¿âÖĞ²»´æÔÚ";
+                    strError = "GetTimestampFromDb() å‘ç°è®°å½•'" + strID + "'åœ¨åº“ä¸­ä¸å­˜åœ¨";
                     return -4;
                 }
                 dr.Read();
 
-                bool bReverse = false;  // strRangeµÚÒ»×Ö·ûÎª'#'£¬Ò²ºÍ bReverse==false Ò»Ñù£¬¶¼ÊÇÊ¹ÓÃ dptimestamp ×Ö¶Î
+                bool bReverse = false;  // strRangeç¬¬ä¸€å­—ç¬¦ä¸º'#'ï¼Œä¹Ÿå’Œ bReverse==false ä¸€æ ·ï¼Œéƒ½æ˜¯ä½¿ç”¨ dptimestamp å­—æ®µ
                 string strRange = "";
                 if (dr.IsDBNull(2) == false)
                     strRange = dr.GetString(2);
@@ -17187,8 +17187,8 @@ bool bTempObject)
                 // 2008/3/13 
                 if (bRet == true)
                 {
-                    // »¹ÓĞÒ»ĞĞ
-                    strError = "¼ÇÂ¼ '" + strID + "' ÔÚSQL¿â" + this.m_strSqlDbName + "µÄrecords±íÖĞ´æÔÚ¶àÌõ£¬ÇëÏµÍ³¹ÜÀíÔ±ÀûÓÃSQLÃüÁîÉ¾³ı¶àÓàµÄ¼ÇÂ¼¡£";
+                    // è¿˜æœ‰ä¸€è¡Œ
+                    strError = "è®°å½• '" + strID + "' åœ¨SQLåº“" + this.m_strSqlDbName + "çš„recordsè¡¨ä¸­å­˜åœ¨å¤šæ¡ï¼Œè¯·ç³»ç»Ÿç®¡ç†å‘˜åˆ©ç”¨SQLå‘½ä»¤åˆ é™¤å¤šä½™çš„è®°å½•ã€‚";
                     return -1;
                 }
 
@@ -17200,14 +17200,14 @@ bool bTempObject)
             return 0;
         }
 
-        // »ñÈ¡¼ÇÂ¼µÄÊ±¼ä´Á
+        // è·å–è®°å½•çš„æ—¶é—´æˆ³
         // parameters0:
-        //      strID   ¼ÇÂ¼id
+        //      strID   è®°å½•id
         //      baOutputTimestamp
         // return:
-        //		-1  ³ö´í
-        //		-4  Î´ÕÒµ½¼ÇÂ¼
-        //      0   ³É¹¦
+        //		-1  å‡ºé”™
+        //		-4  æœªæ‰¾åˆ°è®°å½•
+        //      0   æˆåŠŸ
         public override int GetTimestampFromDb(
             string strID,
             out byte[] baOutputTimestamp,
@@ -17216,15 +17216,15 @@ bool bTempObject)
             baOutputTimestamp = null;
             strError = "";
 
-            // ´ò¿ªÁ¬½Ó¶ÔÏó
+            // æ‰“å¼€è¿æ¥å¯¹è±¡
             SqlConnection connection = new SqlConnection(this.m_strConnString);
             connection.Open();
             try
             {
                 // return:
-                //		-1  ³ö´í
-                //		-4  Î´ÕÒµ½¼ÇÂ¼
-                //      0   ³É¹¦
+                //		-1  å‡ºé”™
+                //		-4  æœªæ‰¾åˆ°è®°å½•
+                //      0   æˆåŠŸ
                 return this.GetTimestampFromDb(connection,
                     strID,
                     out baOutputTimestamp,
@@ -17239,15 +17239,15 @@ bool bTempObject)
 #endif
 
 #if NO
-        // ÉèÖÃÖ¸¶¨¼ÇÂ¼µÄÊ±¼ä´Á
+        // è®¾ç½®æŒ‡å®šè®°å½•çš„æ—¶é—´æˆ³
         // parameters:
-        //      connection  SqlConnection¶ÔÏó
-        //      strID       ¼ÇÂ¼id£¬¿ÉÒÔÊÇ¼ÇÂ¼Ò²¿ÉÒÔÊÇ×ÊÔ´
-        //      strInputTimestamp   ÊäÈëµÄÊ±¼ä´Á
-        //      strError    out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //      connection  SqlConnectionå¯¹è±¡
+        //      strID       è®°å½•idï¼Œå¯ä»¥æ˜¯è®°å½•ä¹Ÿå¯ä»¥æ˜¯èµ„æº
+        //      strInputTimestamp   è¾“å…¥çš„æ—¶é—´æˆ³
+        //      strError    outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //      -1  ³ö´í
-        //      >=0   ³É¹¦ ·µ»Ø±»Ó°ÏìµÄ¼ÇÂ¼Êı
+        //      -1  å‡ºé”™
+        //      >=0   æˆåŠŸ è¿”å›è¢«å½±å“çš„è®°å½•æ•°
         private int SetTimestampForDb(SqlConnection connection,
             string strID,
             string strInputTimestamp,
@@ -17256,8 +17256,8 @@ bool bTempObject)
             strError = "";
 
             // return:
-            //      -1  ³ö´í
-            //      0   Õı³£
+            //      -1  å‡ºé”™
+            //      0   æ­£å¸¸
             int nRet = this.CheckConnection(connection,
                 out strError);
             if (nRet == -1)
@@ -17285,26 +17285,26 @@ bool bTempObject)
             int nCount = command.ExecuteNonQuery();
             if (nCount == 0)
             {
-                strError = "Ã»ÓĞ¸üĞÂµ½¼ÇÂ¼ºÅÎª'" + strID + "'µÄÊ±¼ä´Á";
+                strError = "æ²¡æœ‰æ›´æ–°åˆ°è®°å½•å·ä¸º'" + strID + "'çš„æ—¶é—´æˆ³";
                 return -1;
             }
             return nCount;
         }
 #endif
 
-        // É¾³ı¼ÇÂ¼,°üÀ¨×ÓÎÄ¼ş,¼ìË÷µã,ºÍ±¾¼ÇÂ¼
+        // åˆ é™¤è®°å½•,åŒ…æ‹¬å­æ–‡ä»¶,æ£€ç´¢ç‚¹,å’Œæœ¬è®°å½•
         // parameter:
-        //		strRecordID           ¼ÇÂ¼ID
-        //      strStyle        ¿É°üº¬ fastmode
-        //		inputTimestamp  ÊäÈëµÄÊ±¼ä´Á
-        //		outputTimestamp out²ÎÊı,·µ»ØµÄÊµ¼ÊµÄÊ±¼ä´Á
-        //		strError        out²ÎÊı,·µ»Ø³ö´íĞÅÏ¢
+        //		strRecordID           è®°å½•ID
+        //      strStyle        å¯åŒ…å« fastmode
+        //		inputTimestamp  è¾“å…¥çš„æ—¶é—´æˆ³
+        //		outputTimestamp outå‚æ•°,è¿”å›çš„å®é™…çš„æ—¶é—´æˆ³
+        //		strError        outå‚æ•°,è¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //		-1  Ò»°ãĞÔ´íÎó
-        //		-2  Ê±¼ä´Á²»Æ¥Åä
-        //      -4  Î´ÕÒµ½¼ÇÂ¼
-        //		0   ³É¹¦
-        // Ïß: °²È«
+        //		-1  ä¸€èˆ¬æ€§é”™è¯¯
+        //		-2  æ—¶é—´æˆ³ä¸åŒ¹é…
+        //      -4  æœªæ‰¾åˆ°è®°å½•
+        //		0   æˆåŠŸ
+        // çº¿: å®‰å…¨
         public override int DeleteRecord(
             string strRecordID,
             byte[] baInputTimestamp,
@@ -17323,21 +17323,21 @@ bool bTempObject)
 
             strRecordID = DbPath.GetID10(strRecordID);
 
-            // ÕâÀï²»ÔÙÒòÎªFastMode¼ÓĞ´Ëø
+            // è¿™é‡Œä¸å†å› ä¸ºFastModeåŠ å†™é”
 
-            //********¶ÔÊı¾İ¿â¼Ó¶ÁËø*********************
+            //********å¯¹æ•°æ®åº“åŠ è¯»é”*********************
             m_db_lock.AcquireReaderLock(m_nTimeOut);
 #if DEBUG_LOCK_SQLDATABASE		
-			this.container.WriteDebugInfo("DeleteRecordForce()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â¼Ó¶ÁËø¡£");
+			this.container.WriteDebugInfo("DeleteRecordForce()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“åŠ è¯»é”ã€‚");
 #endif
 
             int nRet = 0;
             try
             {
-                //*********¶Ô¼ÇÂ¼¼ÓĞ´Ëø**********
+                //*********å¯¹è®°å½•åŠ å†™é”**********
                 m_recordLockColl.LockForWrite(strRecordID, m_nTimeOut);
 #if DEBUG_LOCK_SQLDATABASE
-				this.container.WriteDebugInfo("DeleteRecordForce()£¬¶Ô'" + this.GetCaption("zh-CN") + "/" + strID + "'¼ÇÂ¼¼ÓĞ´Ëø¡£");
+				this.container.WriteDebugInfo("DeleteRecordForce()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "/" + strID + "'è®°å½•åŠ å†™é”ã€‚");
 #endif
                 try
                 {
@@ -17349,11 +17349,11 @@ bool bTempObject)
                     {
                         connection.m_nOpenCount += 10;
                         /*
-                        // ±È½ÏÊ±¼ä´Á
+                        // æ¯”è¾ƒæ—¶é—´æˆ³
                         // return:
-                        //		-1  ³ö´í
-                        //		-4  Î´ÕÒµ½¼ÇÂ¼
-                        //      0   ³É¹¦
+                        //		-1  å‡ºé”™
+                        //		-4  æœªæ‰¾åˆ°è®°å½•
+                        //      0   æˆåŠŸ
                         nRet = this.GetTimestampFromDb(connection,
                             strRecordID,
                             out baOutputTimestamp,
@@ -17362,7 +17362,7 @@ bool bTempObject)
                         {
                             if (nRet == -4)
                             {
-                                strError = "É¾³ı¼ÇÂ¼Ê§°Ü£¬Ô­Òò: " + strError;
+                                strError = "åˆ é™¤è®°å½•å¤±è´¥ï¼ŒåŸå› : " + strError;
                                 return nRet;
                             }
                             return nRet;
@@ -17370,22 +17370,22 @@ bool bTempObject)
 
                         if (baOutputTimestamp == null)
                         {
-                            strError = "·şÎñÆ÷È¡³öµÄÊ±¼ä´ÁÎªnull";
+                            strError = "æœåŠ¡å™¨å–å‡ºçš„æ—¶é—´æˆ³ä¸ºnull";
                             return -1;
                         }
 
                         if (ByteArray.Compare(baInputTimestamp,
                             baOutputTimestamp) != 0)
                         {
-                            strError = "Ê±¼ä´Á²»Æ¥Åä";
+                            strError = "æ—¶é—´æˆ³ä¸åŒ¹é…";
                             return -2;
                         }
                          * */
                         RecordRowInfo row_info = null;
                         // return:
-                        //      -1  ³ö´í
-                        //      0   ¼ÇÂ¼²»´æÔÚ
-                        //      1   ³É¹¦
+                        //      -1  å‡ºé”™
+                        //      0   è®°å½•ä¸å­˜åœ¨
+                        //      1   æˆåŠŸ
                         nRet = GetRowInfo(connection,
     strRecordID,
     out row_info,
@@ -17395,10 +17395,10 @@ bool bTempObject)
                         if (nRet == 0)  // 2013/11/21
                             return -4;
 
-                        // ±È½ÏÊ±¼ä´Á
-                        string strCompleteTimestamp = row_info.TimestampString; // ÉÏ´ÎÍêÕûĞ´ÈëÊ±µÄÊ±¼ä´Á
+                        // æ¯”è¾ƒæ—¶é—´æˆ³
+                        string strCompleteTimestamp = row_info.TimestampString; // ä¸Šæ¬¡å®Œæ•´å†™å…¥æ—¶çš„æ—¶é—´æˆ³
 
-                        // ÒÑÓĞÊı¾İµÄÊ±¼ä´Á
+                        // å·²æœ‰æ•°æ®çš„æ—¶é—´æˆ³
                         if (String.IsNullOrEmpty(row_info.Range) == false
                 && row_info.Range[0] == '!')
                             strCompleteTimestamp = row_info.NewTimestampString;
@@ -17408,7 +17408,7 @@ bool bTempObject)
                         if (ByteArray.Compare(baInputTimestamp,
     baOutputTimestamp) != 0)
                         {
-                            strError = "Ê±¼ä´Á²»Æ¥Åä";
+                            strError = "æ—¶é—´æˆ³ä¸åŒ¹é…";
                             return -2;
                         }
 
@@ -17423,10 +17423,10 @@ bool bTempObject)
 
                             string strXml = "";
                             // return:
-                            //      -1  ³ö´í
-                            //      -4  ¼ÇÂ¼²»´æÔÚ
-                            //      -100    ¶ÔÏóÎÄ¼ş²»´æÔÚ
-                            //      0   ÕıÈ·
+                            //      -1  å‡ºé”™
+                            //      -4  è®°å½•ä¸å­˜åœ¨
+                            //      -100    å¯¹è±¡æ–‡ä»¶ä¸å­˜åœ¨
+                            //      0   æ­£ç¡®
                             nRet = this.GetXmlString(connection,
                                 strRecordID,
                                 out strXml,
@@ -17437,11 +17437,11 @@ bool bTempObject)
                                 return nRet;
 
 
-                            // 1.É¾³ı¼ìË÷µã
+                            // 1.åˆ é™¤æ£€ç´¢ç‚¹
 
                             // return:
-                            //      -1  ³ö´í
-                            //      0   ³É¹¦
+                            //      -1  å‡ºé”™
+                            //      0   æˆåŠŸ
                             nRet = this.MergeKeys(strRecordID,
                                 "",
                                 strXml,
@@ -17453,7 +17453,7 @@ bool bTempObject)
                                 out strError);
                             if (nRet == -1)
                             {
-                                strError = "É¾³ıÖĞ¹¹Ôì¼ìË÷µã½×¶Î³ö´í£º " + strError;
+                                strError = "åˆ é™¤ä¸­æ„é€ æ£€ç´¢ç‚¹é˜¶æ®µå‡ºé”™ï¼š " + strError;
                                 return -1;
                             }
                         }
@@ -17461,8 +17461,8 @@ bool bTempObject)
                         if (oldDom != null)
                         {
                             // return:
-                            //      -1  ³ö´í
-                            //      0   ³É¹¦
+                            //      -1  å‡ºé”™
+                            //      0   æˆåŠŸ
                             nRet = this.ModifyKeys(connection,
                                 null,
                                 oldKeys,
@@ -17474,8 +17474,8 @@ bool bTempObject)
                         else
                         {
                             // return:
-                            //      -1  ³ö´í
-                            //      0   ³É¹¦
+                            //      -1  å‡ºé”™
+                            //      0   æˆåŠŸ
                             nRet = this.ForceDeleteKeys(connection,
                                 strRecordID,
                                 out strError);
@@ -17484,12 +17484,12 @@ bool bTempObject)
                         }
 
 #if NO
-                        // 2.É¾³ı×ÓÎÄ¼ş
+                        // 2.åˆ é™¤å­æ–‡ä»¶
                         if (oldDom != null)
                         {
                             // return:
-                            //      -1  ³ö´í
-                            //      0   ³É¹¦
+                            //      -1  å‡ºé”™
+                            //      0   æˆåŠŸ
                             nRet = this.ModifyFiles(connection,
                                 strRecordID,
                                 null,
@@ -17501,10 +17501,10 @@ bool bTempObject)
                         else
                         {
 
-                            // Í¨¹ı¼ÇÂ¼ºÅÖ®¼äµÄ¹ØÏµÇ¿ÖÆÉ¾³ı
+                            // é€šè¿‡è®°å½•å·ä¹‹é—´çš„å…³ç³»å¼ºåˆ¶åˆ é™¤
                             // return:
-                            //      -1  ³ö´í
-                            //      0   ³É¹¦
+                            //      -1  å‡ºé”™
+                            //      0   æˆåŠŸ
                             nRet = this.ForceDeleteFiles(connection,
                                 strRecordID,
                                 out strError);
@@ -17515,12 +17515,12 @@ bool bTempObject)
 
                         if (this.container.SqlServerType == SqlServerType.Oracle)
                         {
-                            // 2.É¾³ı×Ó¼ÇÂ¼
+                            // 2.åˆ é™¤å­è®°å½•
                             if (oldDom != null)
                             {
                                 // return:
-                                //      -1  ³ö´í
-                                //      0   ³É¹¦
+                                //      -1  å‡ºé”™
+                                //      0   æˆåŠŸ
                                 nRet = this.ModifyFiles(connection,
                                     strRecordID,
                                     null,
@@ -17530,10 +17530,10 @@ bool bTempObject)
                                     return -1;
                             }
 
-                            // É¾³ı×Ô¼º,·µ»ØÉ¾³ıµÄ¼ÇÂ¼Êı
+                            // åˆ é™¤è‡ªå·±,è¿”å›åˆ é™¤çš„è®°å½•æ•°
                             // return:
-                            //      -1  ³ö´í
-                            //      >=0   ³É¹¦ ·µ»ØÉ¾³ıµÄ¼ÇÂ¼Êı
+                            //      -1  å‡ºé”™
+                            //      >=0   æˆåŠŸ è¿”å›åˆ é™¤çš„è®°å½•æ•°
                             nRet = DeleteRecordByID(connection,
                                 row_info,
                                 strRecordID,
@@ -17545,17 +17545,17 @@ bool bTempObject)
 
                             if (nRet == 0)
                             {
-                                strError = "É¾³ı¼ÇÂ¼Ê±,´Ó¿âÖĞÃ»ÕÒµ½¼ÇÂ¼ºÅÎª'" + strRecordID + "'µÄ¼ÇÂ¼";
+                                strError = "åˆ é™¤è®°å½•æ—¶,ä»åº“ä¸­æ²¡æ‰¾åˆ°è®°å½•å·ä¸º'" + strRecordID + "'çš„è®°å½•";
                                 return -1;
                             }
                         }
                         else
                         {
 
-                            // 3.É¾³ı×Ô¼º,·µ»ØÉ¾³ıµÄ¼ÇÂ¼Êı
+                            // 3.åˆ é™¤è‡ªå·±,è¿”å›åˆ é™¤çš„è®°å½•æ•°
                             // return:
-                            //      -1  ³ö´í
-                            //      >=0   ³É¹¦ ·µ»ØÉ¾³ıµÄ¼ÇÂ¼Êı
+                            //      -1  å‡ºé”™
+                            //      >=0   æˆåŠŸ è¿”å›åˆ é™¤çš„è®°å½•æ•°
                             nRet = DeleteRecordByID(connection,
                                 row_info,
                                 strRecordID,
@@ -17567,7 +17567,7 @@ bool bTempObject)
 
                             if (nRet == 0)
                             {
-                                strError = "É¾³ı¼ÇÂ¼Ê±,´Ó¿âÖĞÃ»ÕÒµ½¼ÇÂ¼ºÅÎª'" + strRecordID + "'µÄ¼ÇÂ¼";
+                                strError = "åˆ é™¤è®°å½•æ—¶,ä»åº“ä¸­æ²¡æ‰¾åˆ°è®°å½•å·ä¸º'" + strRecordID + "'çš„è®°å½•";
                                 return -1;
                             }
                         }
@@ -17578,7 +17578,7 @@ bool bTempObject)
 
                         /*
                         if (sqlEx.Errors is SqlErrorCollection)
-                            strError = "Êı¾İ¿â'" + this.GetCaption("zh") + "'ÉĞÎ´³õÊ¼»¯¡£";
+                            strError = "æ•°æ®åº“'" + this.GetCaption("zh") + "'å°šæœªåˆå§‹åŒ–ã€‚";
                         else
                             strError = sqlEx.Message;
                          * */
@@ -17586,30 +17586,30 @@ bool bTempObject)
                     }
                     catch (Exception ex)
                     {
-                        strError = "É¾³ı'" + this.GetCaption("zh-CN") + "'¿âÖĞidÎª'" + strRecordID + "'µÄ¼ÇÂ¼Ê±³ö´í,Ô­Òò:" + ex.Message;
+                        strError = "åˆ é™¤'" + this.GetCaption("zh-CN") + "'åº“ä¸­idä¸º'" + strRecordID + "'çš„è®°å½•æ—¶å‡ºé”™,åŸå› :" + ex.Message;
                         return -1;
                     }
-                    finally // Á¬½Ó
+                    finally // è¿æ¥
                     {
                         connection.Close();
                     }
                 }
-                finally // ¼ÇÂ¼Ëø
+                finally // è®°å½•é”
                 {
-                    //**************¶Ô¼ÇÂ¼½âĞ´Ëø**********
+                    //**************å¯¹è®°å½•è§£å†™é”**********
                     m_recordLockColl.UnlockForWrite(strRecordID);
 #if DEBUG_LOCK_SQLDATABASE			
-					this.container.WriteDebugInfo("DeleteRecordForce()£¬¶Ô'" + this.GetCaption("zh-CN") + "/" + strID + "'¼ÇÂ¼½âĞ´Ëø¡£");
+					this.container.WriteDebugInfo("DeleteRecordForce()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "/" + strID + "'è®°å½•è§£å†™é”ã€‚");
 #endif
 
                 }
             }
             finally
             {
-                //***************¶ÔÊı¾İ¿â½â¶ÁËø*****************
+                //***************å¯¹æ•°æ®åº“è§£è¯»é”*****************
                 m_db_lock.ReleaseReaderLock();
 #if DEBUG_LOCK_SQLDATABASE		
-				this.container.WriteDebugInfo("DeleteRecordForce()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â½â¶ÁËø¡£");
+				this.container.WriteDebugInfo("DeleteRecordForce()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“è§£è¯»é”ã€‚");
 #endif
             }
 
@@ -17624,19 +17624,19 @@ bool bTempObject)
         }
 
 
-        // ÖØ½¨¼ÇÂ¼µÄkeys
+        // é‡å»ºè®°å½•çš„keys
         // parameter:
-        //		strRecordID           ¼ÇÂ¼ID
+        //		strRecordID           è®°å½•ID
         //      strStyle    next prev outputpath forcedeleteoldkeys
-        //                  forcedeleteoldkeys ÒªÔÚ´´½¨ĞÂkeysÇ°Ç¿ÖÆÉ¾³ıÒ»ÏÂ¾ÉÓĞµÄkeys? Èç¹ûÎª°üº¬£¬ÔòÇ¿ÖÆÉ¾³ıÔ­ÓĞµÄkeys£»Èç¹ûÎª²»°üº¬£¬ÔòÊÔÌ½×Å´´½¨ĞÂµÄkeys£¬Èç¹ûÓĞ¾ÉµÄkeysºÍĞÂ´òËã´´½¨µÄkeysÖØºÏ£¬ÄÇ¾Í²»ÖØ¸´´´½¨£»Èç¹û¾ÉµÄkeysÓĞ²ĞÓàÃ»ÓĞ±»É¾³ı£¬Ò²²»¹ÜËüÃÇÁË
-        //                          °üº¬ Ò»°ãÓÃÔÚµ¥Ìõ¼ÇÂ¼µÄ´¦Àí£»²»°üº¬ Ò»°ãÓÃÔÚÔ¤ÏÈÉ¾³ıÁËËùÓĞkeys±íµÄÄÚÈİĞĞÒÔºóÔÚÑ­»·ÖØ½¨¿âÖĞÃ¿Ìõ¼ÇÂ¼µÄÅú´¦Àí·½Ê½
-        //		strError        out²ÎÊı,·µ»Ø³ö´íĞÅÏ¢
+        //                  forcedeleteoldkeys è¦åœ¨åˆ›å»ºæ–°keyså‰å¼ºåˆ¶åˆ é™¤ä¸€ä¸‹æ—§æœ‰çš„keys? å¦‚æœä¸ºåŒ…å«ï¼Œåˆ™å¼ºåˆ¶åˆ é™¤åŸæœ‰çš„keysï¼›å¦‚æœä¸ºä¸åŒ…å«ï¼Œåˆ™è¯•æ¢ç€åˆ›å»ºæ–°çš„keysï¼Œå¦‚æœæœ‰æ—§çš„keyså’Œæ–°æ‰“ç®—åˆ›å»ºçš„keysé‡åˆï¼Œé‚£å°±ä¸é‡å¤åˆ›å»ºï¼›å¦‚æœæ—§çš„keysæœ‰æ®‹ä½™æ²¡æœ‰è¢«åˆ é™¤ï¼Œä¹Ÿä¸ç®¡å®ƒä»¬äº†
+        //                          åŒ…å« ä¸€èˆ¬ç”¨åœ¨å•æ¡è®°å½•çš„å¤„ç†ï¼›ä¸åŒ…å« ä¸€èˆ¬ç”¨åœ¨é¢„å…ˆåˆ é™¤äº†æ‰€æœ‰keysè¡¨çš„å†…å®¹è¡Œä»¥ååœ¨å¾ªç¯é‡å»ºåº“ä¸­æ¯æ¡è®°å½•çš„æ‰¹å¤„ç†æ–¹å¼
+        //		strError        outå‚æ•°,è¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //		-1  Ò»°ãĞÔ´íÎó
-        //		-2  Ê±¼ä´Á²»Æ¥Åä
-        //      -4  Î´ÕÒµ½¼ÇÂ¼
-        //		0   ³É¹¦
-        // Ïß: °²È«
+        //		-1  ä¸€èˆ¬æ€§é”™è¯¯
+        //		-2  æ—¶é—´æˆ³ä¸åŒ¹é…
+        //      -4  æœªæ‰¾åˆ°è®°å½•
+        //		0   æˆåŠŸ
+        // çº¿: å®‰å…¨
         public override int RebuildRecordKeys(string strRecordID,
             string strStyle,
             out string strOutputRecordID,
@@ -17652,10 +17652,10 @@ bool bTempObject)
 
             strRecordID = DbPath.GetID10(strRecordID);
 
-            //********¶ÔÊı¾İ¿â¼Ó¶ÁËø*********************
+            //********å¯¹æ•°æ®åº“åŠ è¯»é”*********************
             m_db_lock.AcquireReaderLock(m_nTimeOut);
 #if DEBUG_LOCK_SQLDATABASE		
-			this.container.WriteDebugInfo("RebuildRecordKeys()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â¼Ó¶ÁËø¡£");
+			this.container.WriteDebugInfo("RebuildRecordKeys()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“åŠ è¯»é”ã€‚");
 #endif
             ////
             try // lock database
@@ -17665,27 +17665,27 @@ bool bTempObject)
                 connection.Open();
                 try // connection
                 {
-                    // ¼ì²éID
+                    // æ£€æŸ¥ID
                     // return:
-                    //      -1  ³ö´í
-                    //      0   ³É¹¦
+                    //      -1  å‡ºé”™
+                    //      0   æˆåŠŸ
                     nRet = DatabaseUtil.CheckAndGet10RecordID(ref strRecordID,
                         out strError);
                     if (nRet == -1)
                         return -1;
 
-                    // ½«ÑùÊ½È¥¿Õ°×
+                    // å°†æ ·å¼å»ç©ºç™½
                     strStyle = strStyle.Trim();
 
-                    // È¡³öÊµ¼ÊµÄ¼ÇÂ¼ºÅ
+                    // å–å‡ºå®é™…çš„è®°å½•å·
                     if (StringUtil.IsInList("prev", strStyle) == true
                         || StringUtil.IsInList("next", strStyle) == true)
                     {
                         string strTempOutputID = "";
                         // return:
-                        //		-1  ³ö´í
-                        //      0   Î´ÕÒµ½
-                        //      1   ÕÒµ½
+                        //		-1  å‡ºé”™
+                        //      0   æœªæ‰¾åˆ°
+                        //      1   æ‰¾åˆ°
                         nRet = this.GetRecordID(connection,
                             strRecordID,
                             strStyle,
@@ -17696,42 +17696,42 @@ bool bTempObject)
 
                         if (nRet == 0 || strTempOutputID == "")
                         {
-                            strError = "Î´ÕÒµ½¼ÇÂ¼ID '" + strRecordID + "' µÄ·ç¸ñÎª '" + strStyle + "' µÄ¼ÇÂ¼";
+                            strError = "æœªæ‰¾åˆ°è®°å½•ID '" + strRecordID + "' çš„é£æ ¼ä¸º '" + strStyle + "' çš„è®°å½•";
                             return -4;
                         }
 
                         strRecordID = strTempOutputID;
 
-                        // ÔÙ´Î¼ì²éÒ»ÏÂ·µ»ØµÄID
+                        // å†æ¬¡æ£€æŸ¥ä¸€ä¸‹è¿”å›çš„ID
                         // return:
-                        //      -1  ³ö´í
-                        //      0   ³É¹¦
+                        //      -1  å‡ºé”™
+                        //      0   æˆåŠŸ
                         nRet = DatabaseUtil.CheckAndGet10RecordID(ref strRecordID,
                             out strError);
                         if (nRet == -1)
                             return -1;
                     }
 
-                    // ¸ù¾İ·ç¸ñÒªÇó£¬·µ»Ø×ÊÔ´Â·¾¶
+                    // æ ¹æ®é£æ ¼è¦æ±‚ï¼Œè¿”å›èµ„æºè·¯å¾„
                     if (StringUtil.IsInList("outputpath", strStyle) == true)
                     {
                         strOutputRecordID = DbPath.GetCompressedID(strRecordID);
                     }
 
 
-                    //*********¶Ô¼ÇÂ¼¼ÓĞ´Ëø**********
+                    //*********å¯¹è®°å½•åŠ å†™é”**********
                     m_recordLockColl.LockForWrite(strRecordID, m_nTimeOut);
 #if DEBUG_LOCK_SQLDATABASE
-				this.container.WriteDebugInfo("RebuildRecordKeys()£¬¶Ô'" + this.GetCaption("zh-CN") + "/" + strID + "'¼ÇÂ¼¼ÓĞ´Ëø¡£");
+				this.container.WriteDebugInfo("RebuildRecordKeys()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "/" + strID + "'è®°å½•åŠ å†™é”ã€‚");
 #endif
                     try // lock record
                     {
                         string strXml;
                         // return:
-                        //      -1  ³ö´í
-                        //      -4  ¼ÇÂ¼²»´æÔÚ
-                        //      -100    ¶ÔÏóÎÄ¼ş²»´æÔÚ
-                        //      0   ÕıÈ·
+                        //      -1  å‡ºé”™
+                        //      -4  è®°å½•ä¸å­˜åœ¨
+                        //      -100    å¯¹è±¡æ–‡ä»¶ä¸å­˜åœ¨
+                        //      0   æ­£ç¡®
                         nRet = this.GetXmlString(connection,
                             strRecordID,
                             out strXml,
@@ -17745,11 +17745,11 @@ bool bTempObject)
                         KeyCollection newKeys = null;
                         KeyCollection oldKeys = null;
 
-                        // TODO: ÊÇ·ñ¿ÉÒÔÁ½´Î²Ù×÷ÓÃÒ»¸öcommand×Ö·û´®ÊµÏÖ£¿
+                        // TODO: æ˜¯å¦å¯ä»¥ä¸¤æ¬¡æ“ä½œç”¨ä¸€ä¸ªcommandå­—ç¬¦ä¸²å®ç°ï¼Ÿ
 
                         // return:
-                        //      -1  ³ö´í
-                        //      0   ³É¹¦
+                        //      -1  å‡ºé”™
+                        //      0   æˆåŠŸ
                         nRet = this.MergeKeys(strRecordID,
                             strXml, // newxml
                             "", // oldxml
@@ -17765,8 +17765,8 @@ bool bTempObject)
                         if (StringUtil.IsInList("forcedeleteoldkeys", strStyle) == true)
                         {
                             // return:
-                            //      -1  ³ö´í
-                            //      0   ³É¹¦
+                            //      -1  å‡ºé”™
+                            //      0   æˆåŠŸ
                             nRet = this.ForceDeleteKeys(connection,
                                 strRecordID,
                                 out strError);
@@ -17776,11 +17776,11 @@ bool bTempObject)
 
                         if (newDom != null)
                         {
-                            // TODO: µ±bForceDeleteOldKeysÎªfalseµÄÊ±ºò£¬¿´¿´ÖØ¸´´´½¨keyuÊÇ·ñ»á±¨´í£¿ÔõÑù±ÜÃâ£¿
+                            // TODO: å½“bForceDeleteOldKeysä¸ºfalseçš„æ—¶å€™ï¼Œçœ‹çœ‹é‡å¤åˆ›å»ºkeyuæ˜¯å¦ä¼šæŠ¥é”™ï¼Ÿæ€æ ·é¿å…ï¼Ÿ
 
                             // return:
-                            //      -1  ³ö´í
-                            //      0   ³É¹¦
+                            //      -1  å‡ºé”™
+                            //      0   æˆåŠŸ
                             nRet = this.ModifyKeys(connection,
                                 newKeys,
                                 null,
@@ -17792,12 +17792,12 @@ bool bTempObject)
 
 
                     } // end of lock record
-                finally // ¼ÇÂ¼Ëø
+                finally // è®°å½•é”
                     {
-                        //**************¶Ô¼ÇÂ¼½âĞ´Ëø**********
+                        //**************å¯¹è®°å½•è§£å†™é”**********
                         m_recordLockColl.UnlockForWrite(strRecordID);
 #if DEBUG_LOCK_SQLDATABASE			
-					this.container.WriteDebugInfo("RebuildRecordKeys()£¬¶Ô'" + this.GetCaption("zh-CN") + "/" + strID + "'¼ÇÂ¼½âĞ´Ëø¡£");
+					this.container.WriteDebugInfo("RebuildRecordKeys()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "/" + strID + "'è®°å½•è§£å†™é”ã€‚");
 #endif
                     }
 
@@ -17810,10 +17810,10 @@ bool bTempObject)
                 }
                 catch (Exception ex)
                 {
-                    strError = "ÖØ½¨ '" + this.GetCaption("zh-CN") + "' ¿âÖĞidÎª '" + strRecordID + "' µÄ¼ÇÂ¼µÄÏà¹ØkeysÊ±³ö´í,Ô­Òò:" + ex.Message;
+                    strError = "é‡å»º '" + this.GetCaption("zh-CN") + "' åº“ä¸­idä¸º '" + strRecordID + "' çš„è®°å½•çš„ç›¸å…³keysæ—¶å‡ºé”™,åŸå› :" + ex.Message;
                     return -1;
                 }
-                finally // Á¬½Ó
+                finally // è¿æ¥
                 {
                     connection.Close();
                 }
@@ -17821,10 +17821,10 @@ bool bTempObject)
             } // lock database
             finally
             {
-                //***************¶ÔÊı¾İ¿â½â¶ÁËø*****************
+                //***************å¯¹æ•°æ®åº“è§£è¯»é”*****************
                 m_db_lock.ReleaseReaderLock();
 #if DEBUG_LOCK_SQLDATABASE		
-				this.container.WriteDebugInfo("RebuildRecordKeys()£¬¶Ô'" + this.GetCaption("zh-CN") + "'Êı¾İ¿â½â¶ÁËø¡£");
+				this.container.WriteDebugInfo("RebuildRecordKeys()ï¼Œå¯¹'" + this.GetCaption("zh-CN") + "'æ•°æ®åº“è§£è¯»é”ã€‚");
 #endif
             }
 
@@ -17840,11 +17840,11 @@ bool bTempObject)
 
 #if NO
         // 2011/1/16
-        // É¾³ı×ÓÎÄ¼ş
-        // ºÍModifyFiles()º¯ÊıµÄÇø±ğ£¬ÊÇÓÃlikeËã·¨À´É¾³ıËùÓĞ×Ó¼ÇÂ¼£¬°üÀ¨<dprms:file>ÖĞÃ»ÓĞ¼ÇÔØµÄ×Ó¼ÇÂ¼
+        // åˆ é™¤å­æ–‡ä»¶
+        // å’ŒModifyFiles()å‡½æ•°çš„åŒºåˆ«ï¼Œæ˜¯ç”¨likeç®—æ³•æ¥åˆ é™¤æ‰€æœ‰å­è®°å½•ï¼ŒåŒ…æ‹¬<dprms:file>ä¸­æ²¡æœ‰è®°è½½çš„å­è®°å½•
         // return:
-        //      -1  ³ö´í
-        //      0   ³É¹¦
+        //      -1  å‡ºé”™
+        //      0   æˆåŠŸ
         public int DeleteSubRecords(SqlConnection connection,
             string strID,
             out string strError)
@@ -17870,7 +17870,7 @@ bool bTempObject)
                         + " use master " + "\n";
 
                 command.CommandText = strCommand;
-                command.CommandTimeout = m_nLongTimeout; // 30·ÖÖÓ
+                command.CommandTimeout = m_nLongTimeout; // 30åˆ†é’Ÿ
 
                 int nResultCount = 0;
                 try
@@ -17879,7 +17879,7 @@ bool bTempObject)
                 }
                 catch (Exception ex)
                 {
-                    strError = "É¾³ı¼ÇÂ¼Â·¾¶Îª'" + this.GetCaption("zh") + "/" + strID + "'µÄ×ÓÎÄ¼ş·¢Éú´íÎó:" + ex.Message + ",sqlÃüÁî:\r\n" + strCommand;
+                    strError = "åˆ é™¤è®°å½•è·¯å¾„ä¸º'" + this.GetCaption("zh") + "/" + strID + "'çš„å­æ–‡ä»¶å‘ç”Ÿé”™è¯¯:" + ex.Message + ",sqlå‘½ä»¤:\r\n" + strCommand;
                     return -1;
                 }
                 return 0;
@@ -17891,14 +17891,14 @@ bool bTempObject)
             }
         }
 
-        // ¸ù¾İ¼ÇÂ¼ºÅÖ®¼äµÄ¹ØÏµ(¼ÇÂ¼ºÅ~~¼ÇÂ¼ºÅ_0),Ç¿ÖÆÉ¾³ı×ÊÔ´ÎÄ¼ş
+        // æ ¹æ®è®°å½•å·ä¹‹é—´çš„å…³ç³»(è®°å½•å·~~è®°å½•å·_0),å¼ºåˆ¶åˆ é™¤èµ„æºæ–‡ä»¶
         // parameters:
-        //      connection  SqlConnection¶ÔÏó
-        //      strRecordID ¼ÇÂ¼id  ±ØĞëÊÇ10Î»
-        //      strError    out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //      connection  SqlConnectionå¯¹è±¡
+        //      strRecordID è®°å½•id  å¿…é¡»æ˜¯10ä½
+        //      strError    outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //      -1  ³ö´í
-        //      0   ³É¹¦
+        //      -1  å‡ºé”™
+        //      0   æˆåŠŸ
         private int ForceDeleteFiles(SqlConnection connection,
             string strRecordID,
             out string strError)
@@ -17906,16 +17906,16 @@ bool bTempObject)
             strError = "";
             int nRet = 0;
 
-            // Á¬½ÓÁ¬½Ó
+            // è¿æ¥è¿æ¥
             // return:
-            //      -1  ³ö´í
-            //      0   Õı³£
+            //      -1  å‡ºé”™
+            //      0   æ­£å¸¸
             nRet = this.CheckConnection(connection,
                 out strError);
             if (nRet == -1)
                 return -1;
 
-            Debug.Assert(strRecordID != null && strRecordID.Length == 10, "ForceDeleteFiles()µ÷ÓÃ´íÎó£¬strRecordID²ÎÊıÖµ²»ÄÜÎªnullÇÒ³¤¶È±ØĞëµÈÓÚ10Î»¡£");
+            Debug.Assert(strRecordID != null && strRecordID.Length == 10, "ForceDeleteFiles()è°ƒç”¨é”™è¯¯ï¼ŒstrRecordIDå‚æ•°å€¼ä¸èƒ½ä¸ºnullä¸”é•¿åº¦å¿…é¡»ç­‰äº10ä½ã€‚");
 
             string strCommand = "use " + this.m_strSqlDbName + " "
                 + " DELETE FROM records WHERE id like @id";
@@ -17923,13 +17923,13 @@ bool bTempObject)
 
             SqlCommand command = new SqlCommand(strCommand,
                 connection);
-            command.CommandTimeout = m_nLongTimeout; // 30·ÖÖÓ
+            command.CommandTimeout = m_nLongTimeout; // 30åˆ†é’Ÿ
 
             SqlParameter param = command.Parameters.Add("@id",
                 SqlDbType.NVarChar);
             param.Value = strRecordID + "_%";
 
-            //???Èç¹û´¦ÀíÉ¾³ıÊıÁ¿
+            //???å¦‚æœå¤„ç†åˆ é™¤æ•°é‡
             int nDeletedCount = command.ExecuteNonQuery();
 
             return 0;
@@ -17939,12 +17939,12 @@ bool bTempObject)
 
 #if NOOOOOOOOOOOOOO
         // 2007/4/16
-        // Ç¿ÖÆÉ¾³ıÊôÓÚÒ»¸ö¼ÇÂ¼µÄÈ«²¿¼ìË÷µã¡£²»ĞèÒª¼ìË÷µã¶¨Òå¡£
+        // å¼ºåˆ¶åˆ é™¤å±äºä¸€ä¸ªè®°å½•çš„å…¨éƒ¨æ£€ç´¢ç‚¹ã€‚ä¸éœ€è¦æ£€ç´¢ç‚¹å®šä¹‰ã€‚
         // parameters:
-        //      strRecordID ±ØĞëÎª10Î»µÄÊı×Ö
+        //      strRecordID å¿…é¡»ä¸º10ä½çš„æ•°å­—
         // return:
-        //      -1  ³ö´í
-        //      0   ³É¹¦
+        //      -1  å‡ºé”™
+        //      0   æˆåŠŸ
         public int ForceDeleteKeys(SqlConnection connection,
             string strRecordID,
             out string strError)
@@ -17968,7 +17968,7 @@ bool bTempObject)
 
             SqlCommand command = new SqlCommand("", connection);
 
-            // Ñ­»·È«²¿±í
+            // å¾ªç¯å…¨éƒ¨è¡¨
             for (int i = 0; aTableInfo.Count; i++)
             {
                 TableInfo tableInfo = aTableInfo[i];
@@ -18001,7 +18001,7 @@ bool bTempObject)
             }
             catch (Exception ex)
             {
-                strError = "Ç¿ÖÆ¼ìË÷µã³ö´í,¼ÇÂ¼Â·¾¶'" + this.GetCaption("zh-CN") + "/" + strRecordID + "£¬Ô­Òò£º" + ex.Message;
+                strError = "å¼ºåˆ¶æ£€ç´¢ç‚¹å‡ºé”™,è®°å½•è·¯å¾„'" + this.GetCaption("zh-CN") + "/" + strRecordID + "ï¼ŒåŸå› ï¼š" + ex.Message;
                 return -1;
             }
 
@@ -18009,7 +18009,7 @@ bool bTempObject)
         }
 #endif
 
-        // ¹¹ÔìÓÃÓÚ where idstring in (...) µÄ ID ÁĞ±í×Ö·û´®
+        // æ„é€ ç”¨äº where idstring in (...) çš„ ID åˆ—è¡¨å­—ç¬¦ä¸²
         static int BuildIdString(List<string> ids,
             out string strResult,
             out string strError)
@@ -18023,12 +18023,12 @@ bool bTempObject)
             {
                 if (string.IsNullOrEmpty(s) == true || s.Length != 10)
                 {
-                    strError = "ID×Ö·û´® '" + s + "' ²»ºÏ·¨";
+                    strError = "IDå­—ç¬¦ä¸² '" + s + "' ä¸åˆæ³•";
                     return -1;
                 }
                 if (StringUtil.IsPureNumber(s) == false)
                 {
-                    strError = "ID '" + s + "' ±ØĞëÊÇ´¿Êı×Ö";
+                    strError = "ID '" + s + "' å¿…é¡»æ˜¯çº¯æ•°å­—";
                     return -1;
                 }
                 if (i != 0)
@@ -18041,15 +18041,15 @@ bool bTempObject)
             return 0;
         }
 
-        // Ç¿ÖÆÉ¾³ı¼ÇÂ¼¶ÔÓ¦µÄ¼ìË÷µã,¼ì²éËùÓĞµÄ±í
+        // å¼ºåˆ¶åˆ é™¤è®°å½•å¯¹åº”çš„æ£€ç´¢ç‚¹,æ£€æŸ¥æ‰€æœ‰çš„è¡¨
         // parameters:
-        //      connection  SqlConnectionÁ¬½Ó¶ÔÏó
-        //      ids         ¼ÇÂ¼idÊı×é¡£Ã¿¸ö id Ó¦Îª 10 ×Ö·ûĞÎÌ¬
-        //      strError    out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //      connection  SqlConnectionè¿æ¥å¯¹è±¡
+        //      ids         è®°å½•idæ•°ç»„ã€‚æ¯ä¸ª id åº”ä¸º 10 å­—ç¬¦å½¢æ€
+        //      strError    outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //      -1  ³ö´í
-        //      >=0 ³É¹¦£¬Êı×Ö±íÊ¾Êµ¼ÊÉ¾³ıµÄ¼ìË÷µã¸öÊı
-        // Ïß: ²»°²È«
+        //      -1  å‡ºé”™
+        //      >=0 æˆåŠŸï¼Œæ•°å­—è¡¨ç¤ºå®é™…åˆ é™¤çš„æ£€ç´¢ç‚¹ä¸ªæ•°
+        // çº¿: ä¸å®‰å…¨
         public int ForceDeleteKeys(Connection connection,
             List<string> ids,
             out string strError)
@@ -18058,8 +18058,8 @@ bool bTempObject)
             int nRet = 0;
 
             // return:
-            //      -1  ³ö´í
-            //      0   Õı³£
+            //      -1  å‡ºé”™
+            //      0   æ­£å¸¸
             nRet = this.CheckConnection(connection,
                 out strError);
             if (nRet == -1)
@@ -18067,10 +18067,10 @@ bool bTempObject)
 
             foreach(string strRecordID in ids)
             {
-                Debug.Assert(strRecordID != null && strRecordID.Length == 10, "ForceDeleteKeys()µ÷ÓÃ´íÎó£¬strRecordID²ÎÊıÖµ²»ÄÜÎªnullÇÒ³¤¶È±ØĞëµÈÓÚ10Î»¡£");
+                Debug.Assert(strRecordID != null && strRecordID.Length == 10, "ForceDeleteKeys()è°ƒç”¨é”™è¯¯ï¼ŒstrRecordIDå‚æ•°å€¼ä¸èƒ½ä¸ºnullä¸”é•¿åº¦å¿…é¡»ç­‰äº10ä½ã€‚");
                 if (string.IsNullOrEmpty(strRecordID) == true || strRecordID.Length != 10)
                 {
-                    strError = "ForceDeleteKeys() ID×Ö·û´® '" + strRecordID + "' ²»ºÏ·¨";
+                    strError = "ForceDeleteKeys() IDå­—ç¬¦ä¸² '" + strRecordID + "' ä¸åˆæ³•";
                     return -1;
                 }
             }
@@ -18128,7 +18128,7 @@ bool bTempObject)
                         idParam.Value = strRecordID;
 #endif
 
-                        // ????Èç¹û´¦ÀíÉ¾³ıÊıÁ¿
+                        // ????å¦‚æœå¤„ç†åˆ é™¤æ•°é‡
                         nDeletedCount = command.ExecuteNonQuery();
                     } // end of using command
                 }
@@ -18162,7 +18162,7 @@ bool bTempObject)
                         idParam.Value = strRecordID;
 #endif
 
-                        // ????Èç¹û´¦ÀíÉ¾³ıÊıÁ¿
+                        // ????å¦‚æœå¤„ç†åˆ é™¤æ•°é‡
                         nDeletedCount = command.ExecuteNonQuery();
                     } // end of using command
                 }
@@ -18199,7 +18199,7 @@ bool bTempObject)
                         idParam.Value = strRecordID;
 #endif
 
-                        // ????Èç¹û´¦ÀíÉ¾³ıÊıÁ¿
+                        // ????å¦‚æœå¤„ç†åˆ é™¤æ•°é‡
                         nDeletedCount = command.ExecuteNonQuery();
                     } // end of using command
                 }
@@ -18230,7 +18230,7 @@ bool bTempObject)
                         strCommand = "DELETE FROM " + this.m_strSqlDbName + "_" + tableInfo.SqlTableName
     + " WHERE idstring IN (" + strIdString + ") \r\n";
 
-                        // ????Èç¹û´¦ÀíÉ¾³ıÊıÁ¿
+                        // ????å¦‚æœå¤„ç†åˆ é™¤æ•°é‡
                         command.CommandText = strCommand;
                         nDeletedCount += command.ExecuteNonQuery();
 
@@ -18244,15 +18244,15 @@ bool bTempObject)
             return 0;
         }
 
-        // Ç¿ÖÆÉ¾³ı¼ÇÂ¼¶ÔÓ¦µÄ¼ìË÷µã,¼ì²éËùÓĞµÄ±í
+        // å¼ºåˆ¶åˆ é™¤è®°å½•å¯¹åº”çš„æ£€ç´¢ç‚¹,æ£€æŸ¥æ‰€æœ‰çš„è¡¨
         // parameters:
-        //      connection  SqlConnectionÁ¬½Ó¶ÔÏó
-        //      strRecordID ¼ÇÂ¼id, µ÷Ö®Ç°±ØĞëÉèÎª10×Ö·û
-        //      strError    out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //      connection  SqlConnectionè¿æ¥å¯¹è±¡
+        //      strRecordID è®°å½•id, è°ƒä¹‹å‰å¿…é¡»è®¾ä¸º10å­—ç¬¦
+        //      strError    outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //      -1  ³ö´í
-        //      >=0 ³É¹¦£¬Êı×Ö±íÊ¾Êµ¼ÊÉ¾³ıµÄ¼ìË÷µã¸öÊı
-        // Ïß: ²»°²È«
+        //      -1  å‡ºé”™
+        //      >=0 æˆåŠŸï¼Œæ•°å­—è¡¨ç¤ºå®é™…åˆ é™¤çš„æ£€ç´¢ç‚¹ä¸ªæ•°
+        // çº¿: ä¸å®‰å…¨
         public int ForceDeleteKeys(Connection connection,
             string strRecordID,
             out string strError)
@@ -18261,14 +18261,14 @@ bool bTempObject)
             int nRet = 0;
 
             // return:
-            //      -1  ³ö´í
-            //      0   Õı³£
+            //      -1  å‡ºé”™
+            //      0   æ­£å¸¸
             nRet = this.CheckConnection(connection,
                 out strError);
             if (nRet == -1)
                 return -1;
 
-            Debug.Assert(strRecordID != null && strRecordID.Length == 10, "ForceDeleteKeys()µ÷ÓÃ´íÎó£¬strRecordID²ÎÊıÖµ²»ÄÜÎªnullÇÒ³¤¶È±ØĞëµÈÓÚ10Î»¡£");
+            Debug.Assert(strRecordID != null && strRecordID.Length == 10, "ForceDeleteKeys()è°ƒç”¨é”™è¯¯ï¼ŒstrRecordIDå‚æ•°å€¼ä¸èƒ½ä¸ºnullä¸”é•¿åº¦å¿…é¡»ç­‰äº10ä½ã€‚");
 
             KeysCfg keysCfg = null;
             nRet = this.GetKeysCfg(out keysCfg,
@@ -18314,7 +18314,7 @@ bool bTempObject)
                             SqlDbType.NVarChar);
                         idParam.Value = strRecordID;
 
-                        // ????Èç¹û´¦ÀíÉ¾³ıÊıÁ¿
+                        // ????å¦‚æœå¤„ç†åˆ é™¤æ•°é‡
                         nDeletedCount = command.ExecuteNonQuery();
                     } // end of using command
                 }
@@ -18341,7 +18341,7 @@ bool bTempObject)
                             DbType.String);
                         idParam.Value = strRecordID;
 
-                        // ????Èç¹û´¦ÀíÉ¾³ıÊıÁ¿
+                        // ????å¦‚æœå¤„ç†åˆ é™¤æ•°é‡
                         nDeletedCount = command.ExecuteNonQuery();
                     } // end of using command
                 }
@@ -18371,7 +18371,7 @@ bool bTempObject)
                             MySqlDbType.String);
                         idParam.Value = strRecordID;
 
-                        // ????Èç¹û´¦ÀíÉ¾³ıÊıÁ¿
+                        // ????å¦‚æœå¤„ç†åˆ é™¤æ•°é‡
                         nDeletedCount = command.ExecuteNonQuery();
                     } // end of using command
                 }
@@ -18397,7 +18397,7 @@ bool bTempObject)
                             OracleDbType.NVarchar2);
                         idParam.Value = strRecordID;
 
-                        // ????Èç¹û´¦ÀíÉ¾³ıÊıÁ¿
+                        // ????å¦‚æœå¤„ç†åˆ é™¤æ•°é‡
                         command.CommandText = strCommand;
                         nDeletedCount += command.ExecuteNonQuery();
 
@@ -18411,14 +18411,14 @@ bool bTempObject)
             return 0;
         }
 
-        // ´Ó¿âÖĞÉ¾³ıÖ¸¶¨µÄ¼ÇÂ¼,¿ÉÒÔÊÇ¼ÇÂ¼Ò²¿ÉÒÔÊÇ×ÊÔ´
+        // ä»åº“ä¸­åˆ é™¤æŒ‡å®šçš„è®°å½•,å¯ä»¥æ˜¯è®°å½•ä¹Ÿå¯ä»¥æ˜¯èµ„æº
         // parameters:
-        //      connection  Á¬½Ó¶ÔÏó
-        //      strID       ¼ÇÂ¼id
-        //      strError    out²ÎÊı£¬·µ»Ø³ö´íĞÅÏ¢
+        //      connection  è¿æ¥å¯¹è±¡
+        //      strID       è®°å½•id
+        //      strError    outå‚æ•°ï¼Œè¿”å›å‡ºé”™ä¿¡æ¯
         // return:
-        //      -1  ³ö´í
-        //      >=0   ³É¹¦ ·µ»ØÉ¾³ıµÄ¼ÇÂ¼Êı
+        //      -1  å‡ºé”™
+        //      >=0   æˆåŠŸ è¿”å›åˆ é™¤çš„è®°å½•æ•°
         private int DeleteRecordByID(
             Connection connection,
             RecordRowInfo row_info,
@@ -18429,15 +18429,15 @@ bool bTempObject)
         {
             strError = "";
 
-            Debug.Assert(connection != null, "DeleteRecordById()µ÷ÓÃ´íÎó£¬connection²ÎÊıÖµ²»ÄÜÎªnull¡£");
-            Debug.Assert(strID != null, "DeleteRecordById()µ÷ÓÃ´íÎó£¬strID²ÎÊıÖµ²»ÄÜÎªnull¡£");
-            Debug.Assert(strID.Length >= 10, "DeleteRecordByID()µ÷ÓÃ´íÎó strID²ÎÊıÖµµÄ³¤¶È±ØĞë´óÓÚµÈÓÚ10¡£");
+            Debug.Assert(connection != null, "DeleteRecordById()è°ƒç”¨é”™è¯¯ï¼Œconnectionå‚æ•°å€¼ä¸èƒ½ä¸ºnullã€‚");
+            Debug.Assert(strID != null, "DeleteRecordById()è°ƒç”¨é”™è¯¯ï¼ŒstrIDå‚æ•°å€¼ä¸èƒ½ä¸ºnullã€‚");
+            Debug.Assert(strID.Length >= 10, "DeleteRecordByID()è°ƒç”¨é”™è¯¯ strIDå‚æ•°å€¼çš„é•¿åº¦å¿…é¡»å¤§äºç­‰äº10ã€‚");
 
             int nDeletedCount = 0;
 
             // return:
-            //      -1  ³ö´í
-            //      0   Õı³£
+            //      -1  å‡ºé”™
+            //      0   æ­£å¸¸
             int nRet = this.CheckConnection(connection,
                 out strError);
             if (nRet == -1)
@@ -18465,16 +18465,16 @@ bool bTempObject)
                     {
                         string strCommand = "";
 
-                        // µÚÒ»²½£º»ñµÃ¶ÌÎÄ¼şÃû
+                        // ç¬¬ä¸€æ­¥ï¼šè·å¾—çŸ­æ–‡ä»¶å
                         if (bDeleteObjectFiles == true)
                         {
                             if (row_info != null && bDeleteSubrecord == false)
                             {
-                                // ºóÃæ¿ÉÒÔÍ¨¹ı row_info À´É¾³ı¼ÇÂ¼µÄ¶ÔÏóÎÄ¼ş
+                                // åé¢å¯ä»¥é€šè¿‡ row_info æ¥åˆ é™¤è®°å½•çš„å¯¹è±¡æ–‡ä»¶
                             }
                             else if (bDeleteSubrecord == true)
                             {
-                                // TODO: ĞèÒª»ñµÃÈ«²¿filenameºÍnewfilename×Ö¶ÎÄÚÈİÖµ
+                                // TODO: éœ€è¦è·å¾—å…¨éƒ¨filenameå’Œnewfilenameå­—æ®µå†…å®¹å€¼
                                 Debug.Assert(strID.Length == 10, "");
 
                                 strCommand = "use " + this.m_strSqlDbName + " "
@@ -18482,7 +18482,7 @@ bool bTempObject)
                                 strCommand += " use master " + "\n";
 
                                 command.CommandText = strCommand;
-                                command.CommandTimeout = m_nLongTimeout;// 30·ÖÖÓ
+                                command.CommandTimeout = m_nLongTimeout;// 30åˆ†é’Ÿ
 
                                 SqlParameter param1 = command.Parameters.Add("@id1",
                 SqlDbType.NVarChar);
@@ -18499,7 +18499,7 @@ bool bTempObject)
                                 strCommand += " use master " + "\n";
 
                                 command.CommandText = strCommand;
-                                command.CommandTimeout = m_nLongTimeout;// 30·ÖÖÓ
+                                command.CommandTimeout = m_nLongTimeout;// 30åˆ†é’Ÿ
 
                                 SqlParameter param = command.Parameters.Add("@id",
                 SqlDbType.NVarChar);
@@ -18525,7 +18525,7 @@ bool bTempObject)
                             dr.Close();
                         }
 
-                        // µÚ¶ş²½£ºÉ¾³ıSQLĞĞ
+                        // ç¬¬äºŒæ­¥ï¼šåˆ é™¤SQLè¡Œ
                         if (bDeleteSubrecord == true)
                         {
                             Debug.Assert(strID.Length == 10, "");
@@ -18535,7 +18535,7 @@ bool bTempObject)
                             strCommand += " use master " + "\n";
 
                             command.CommandText = strCommand;
-                            command.CommandTimeout = m_nLongTimeout;// 30·ÖÖÓ
+                            command.CommandTimeout = m_nLongTimeout;// 30åˆ†é’Ÿ
                             command.Parameters.Clear();
 
                             SqlParameter param1 = command.Parameters.Add("@id1",
@@ -18553,7 +18553,7 @@ bool bTempObject)
                             strCommand += " use master " + "\n";
 
                             command.CommandText = strCommand;
-                            command.CommandTimeout = m_nLongTimeout;// 30·ÖÖÓ
+                            command.CommandTimeout = m_nLongTimeout;// 30åˆ†é’Ÿ
                             command.Parameters.Clear();
 
                             SqlParameter param = command.Parameters.Add("@id",
@@ -18564,7 +18564,7 @@ bool bTempObject)
                         nDeletedCount = command.ExecuteNonQuery();
                         if (nDeletedCount != 1)
                         {
-                            this.container.KernelApplication.WriteErrorLog("Ï£ÍûÉ¾³ı" + strID + " '1'Ìõ£¬Êµ¼ÊÉ¾³ı'" + Convert.ToString(nDeletedCount) + "'¸ö");
+                            this.container.KernelApplication.WriteErrorLog("å¸Œæœ›åˆ é™¤" + strID + " '1'æ¡ï¼Œå®é™…åˆ é™¤'" + Convert.ToString(nDeletedCount) + "'ä¸ª");
                         }
                     } // end of using command
                 }
@@ -18581,21 +18581,21 @@ bool bTempObject)
                 {
                     string strCommand = "";
 
-                    // µÚÒ»²½£º»ñµÃ¶ÌÎÄ¼şÃû
+                    // ç¬¬ä¸€æ­¥ï¼šè·å¾—çŸ­æ–‡ä»¶å
                     if (bDeleteObjectFiles == true)
                     {
                         if (row_info != null && bDeleteSubrecord == false)
                         {
-                            // ºóÃæ¿ÉÒÔÍ¨¹ı row_info À´É¾³ı¼ÇÂ¼µÄ¶ÔÏóÎÄ¼ş
+                            // åé¢å¯ä»¥é€šè¿‡ row_info æ¥åˆ é™¤è®°å½•çš„å¯¹è±¡æ–‡ä»¶
                         }
                         else if (bDeleteSubrecord == true)
                         {
-                            // TODO: ĞèÒª»ñµÃÈ«²¿filenameºÍnewfilename×Ö¶ÎÄÚÈİÖµ
+                            // TODO: éœ€è¦è·å¾—å…¨éƒ¨filenameå’Œnewfilenameå­—æ®µå†…å®¹å€¼
                             Debug.Assert(strID.Length == 10, "");
 
                             strCommand = " SELECT filename, newfilename FROM records WHERE id like @id1 OR id = @id2";
                             command.CommandText = strCommand;
-                            command.CommandTimeout = m_nLongTimeout;// 30·ÖÖÓ
+                            command.CommandTimeout = m_nLongTimeout;// 30åˆ†é’Ÿ
 
                             SQLiteParameter param1 = command.Parameters.Add("@id1",
                                 DbType.String);
@@ -18609,7 +18609,7 @@ bool bTempObject)
                         {
                             strCommand = " SELECT filename, newfilename FROM records WHERE id = @id";
                             command.CommandText = strCommand;
-                            command.CommandTimeout = m_nLongTimeout;// 30·ÖÖÓ
+                            command.CommandTimeout = m_nLongTimeout;// 30åˆ†é’Ÿ
 
                             SQLiteParameter param = command.Parameters.Add("@id",
                                 DbType.String);
@@ -18634,14 +18634,14 @@ bool bTempObject)
                         dr.Close();
                     }
 
-                    // µÚ¶ş²½£ºÉ¾³ıSQLĞĞ
+                    // ç¬¬äºŒæ­¥ï¼šåˆ é™¤SQLè¡Œ
                     if (bDeleteSubrecord == true)
                     {
                         Debug.Assert(strID.Length == 10, "");
 
                         strCommand = " DELETE FROM records WHERE id like @id1 OR id = @id2";
                         command.CommandText = strCommand;
-                        command.CommandTimeout = m_nLongTimeout;// 30·ÖÖÓ
+                        command.CommandTimeout = m_nLongTimeout;// 30åˆ†é’Ÿ
                         command.Parameters.Clear();
 
                         SQLiteParameter param1 = command.Parameters.Add("@id1",
@@ -18656,7 +18656,7 @@ bool bTempObject)
                     {
                         strCommand = " DELETE FROM records WHERE id = @id";
                         command.CommandText = strCommand;
-                        command.CommandTimeout = m_nLongTimeout;// 30·ÖÖÓ
+                        command.CommandTimeout = m_nLongTimeout;// 30åˆ†é’Ÿ
                         command.Parameters.Clear();
 
                         SQLiteParameter param = command.Parameters.Add("@id",
@@ -18667,7 +18667,7 @@ bool bTempObject)
                     nDeletedCount = command.ExecuteNonQuery();
                     if (nDeletedCount != 1)
                     {
-                        this.container.KernelApplication.WriteErrorLog("Ï£ÍûÉ¾³ı" + strID + " '1'Ìõ£¬Êµ¼ÊÉ¾³ı'" + Convert.ToString(nDeletedCount) + "'¸ö");
+                        this.container.KernelApplication.WriteErrorLog("å¸Œæœ›åˆ é™¤" + strID + " '1'æ¡ï¼Œå®é™…åˆ é™¤'" + Convert.ToString(nDeletedCount) + "'ä¸ª");
                     }
                 } // end of using command
             }
@@ -18678,21 +18678,21 @@ bool bTempObject)
                 {
                     string strCommand = "";
 
-                    // µÚÒ»²½£º»ñµÃ¶ÌÎÄ¼şÃû
+                    // ç¬¬ä¸€æ­¥ï¼šè·å¾—çŸ­æ–‡ä»¶å
                     if (bDeleteObjectFiles == true)
                     {
                         if (row_info != null && bDeleteSubrecord == false)
                         {
-                            // ºóÃæ¿ÉÒÔÍ¨¹ı row_info À´É¾³ı¼ÇÂ¼µÄ¶ÔÏóÎÄ¼ş
+                            // åé¢å¯ä»¥é€šè¿‡ row_info æ¥åˆ é™¤è®°å½•çš„å¯¹è±¡æ–‡ä»¶
                         }
                         else if (bDeleteSubrecord == true)
                         {
-                            // TODO: ĞèÒª»ñµÃÈ«²¿filenameºÍnewfilename×Ö¶ÎÄÚÈİÖµ
+                            // TODO: éœ€è¦è·å¾—å…¨éƒ¨filenameå’Œnewfilenameå­—æ®µå†…å®¹å€¼
                             Debug.Assert(strID.Length == 10, "");
 
                             strCommand = " SELECT filename, newfilename FROM `" + this.m_strSqlDbName + "`.records WHERE id like @id1 OR id = @id2";
                             command.CommandText = strCommand;
-                            command.CommandTimeout = m_nLongTimeout;// 30·ÖÖÓ
+                            command.CommandTimeout = m_nLongTimeout;// 30åˆ†é’Ÿ
 
                             MySqlParameter param1 = command.Parameters.Add("@id1",
                                 MySqlDbType.String);
@@ -18706,7 +18706,7 @@ bool bTempObject)
                         {
                             strCommand = " SELECT filename, newfilename FROM `" + this.m_strSqlDbName + "`.records WHERE id = @id";
                             command.CommandText = strCommand;
-                            command.CommandTimeout = m_nLongTimeout;// 30·ÖÖÓ
+                            command.CommandTimeout = m_nLongTimeout;// 30åˆ†é’Ÿ
 
                             MySqlParameter param = command.Parameters.Add("@id",
                                 MySqlDbType.String);
@@ -18731,14 +18731,14 @@ bool bTempObject)
                         dr.Close();
                     }
 
-                    // µÚ¶ş²½£ºÉ¾³ıSQLĞĞ
+                    // ç¬¬äºŒæ­¥ï¼šåˆ é™¤SQLè¡Œ
                     if (bDeleteSubrecord == true)
                     {
                         Debug.Assert(strID.Length == 10, "");
 
                         strCommand = " DELETE FROM `" + this.m_strSqlDbName + "`.records WHERE id like @id1 OR id = @id2";
                         command.CommandText = strCommand;
-                        command.CommandTimeout = m_nLongTimeout;// 30·ÖÖÓ
+                        command.CommandTimeout = m_nLongTimeout;// 30åˆ†é’Ÿ
                         command.Parameters.Clear();
 
                         MySqlParameter param1 = command.Parameters.Add("@id1",
@@ -18753,7 +18753,7 @@ bool bTempObject)
                     {
                         strCommand = " DELETE FROM `" + this.m_strSqlDbName + "`.records WHERE id = @id";
                         command.CommandText = strCommand;
-                        command.CommandTimeout = m_nLongTimeout;// 30·ÖÖÓ
+                        command.CommandTimeout = m_nLongTimeout;// 30åˆ†é’Ÿ
                         command.Parameters.Clear();
 
                         MySqlParameter param = command.Parameters.Add("@id",
@@ -18764,7 +18764,7 @@ bool bTempObject)
                     nDeletedCount = command.ExecuteNonQuery();
                     if (nDeletedCount != 1)
                     {
-                        this.container.KernelApplication.WriteErrorLog("Ï£ÍûÉ¾³ı" + strID + " '1'Ìõ£¬Êµ¼ÊÉ¾³ı'" + Convert.ToString(nDeletedCount) + "'¸ö");
+                        this.container.KernelApplication.WriteErrorLog("å¸Œæœ›åˆ é™¤" + strID + " '1'æ¡ï¼Œå®é™…åˆ é™¤'" + Convert.ToString(nDeletedCount) + "'ä¸ª");
                     }
                 } // end of using command
             }
@@ -18776,22 +18776,22 @@ bool bTempObject)
                 {
                     string strCommand = "";
 
-                    // µÚÒ»²½£º»ñµÃ¶ÌÎÄ¼şÃû
+                    // ç¬¬ä¸€æ­¥ï¼šè·å¾—çŸ­æ–‡ä»¶å
                     if (bDeleteObjectFiles == true)
                     {
                         if (row_info != null && bDeleteSubrecord == false)
                         {
-                            // ºóÃæ¿ÉÒÔÍ¨¹ı row_info À´É¾³ı¼ÇÂ¼µÄ¶ÔÏóÎÄ¼ş
+                            // åé¢å¯ä»¥é€šè¿‡ row_info æ¥åˆ é™¤è®°å½•çš„å¯¹è±¡æ–‡ä»¶
                         }
                         else if (bDeleteSubrecord == true)
                         {
-                            // TODO: ĞèÒª»ñµÃÈ«²¿filenameºÍnewfilename×Ö¶ÎÄÚÈİÖµ
+                            // TODO: éœ€è¦è·å¾—å…¨éƒ¨filenameå’Œnewfilenameå­—æ®µå†…å®¹å€¼
                             Debug.Assert(strID.Length == 10, "");
 
                             strCommand = " SELECT filename, newfilename FROM " + this.m_strSqlDbName + "_records WHERE id like :id1 OR id = :id2";
                             command.CommandText = strCommand;
                             command.BindByName = true;
-                            command.CommandTimeout = m_nLongTimeout;// 30·ÖÖÓ
+                            command.CommandTimeout = m_nLongTimeout;// 30åˆ†é’Ÿ
 
                             OracleParameter param1 = command.Parameters.Add(":id1",
                                 OracleDbType.NVarchar2);
@@ -18806,7 +18806,7 @@ bool bTempObject)
                             strCommand = " SELECT filename, newfilename FROM " + this.m_strSqlDbName + "_records WHERE id = :id";
                             command.CommandText = strCommand;
                             command.BindByName = true;
-                            command.CommandTimeout = m_nLongTimeout;// 30·ÖÖÓ
+                            command.CommandTimeout = m_nLongTimeout;// 30åˆ†é’Ÿ
 
                             OracleParameter param = command.Parameters.Add(":id",
                                 OracleDbType.NVarchar2);
@@ -18834,7 +18834,7 @@ bool bTempObject)
                         command.Parameters.Clear();
                     }
 
-                    // µÚ¶ş²½£ºÉ¾³ıSQLĞĞ
+                    // ç¬¬äºŒæ­¥ï¼šåˆ é™¤SQLè¡Œ
                     if (bDeleteSubrecord == true)
                     {
                         Debug.Assert(strID.Length == 10, "");
@@ -18842,7 +18842,7 @@ bool bTempObject)
                         strCommand = " DELETE FROM " + this.m_strSqlDbName + "_records WHERE id like :id1 OR id = :id2";
                         command.CommandText = strCommand;
                         command.BindByName = true;
-                        command.CommandTimeout = m_nLongTimeout;// 30·ÖÖÓ
+                        command.CommandTimeout = m_nLongTimeout;// 30åˆ†é’Ÿ
 
                         OracleParameter param1 = command.Parameters.Add(":id1",
                             OracleDbType.NVarchar2);
@@ -18857,7 +18857,7 @@ bool bTempObject)
                         strCommand = " DELETE FROM " + this.m_strSqlDbName + "_records WHERE id = :id";
                         command.CommandText = strCommand;
                         command.BindByName = true;
-                        command.CommandTimeout = m_nLongTimeout;// 30·ÖÖÓ
+                        command.CommandTimeout = m_nLongTimeout;// 30åˆ†é’Ÿ
 
                         OracleParameter param = command.Parameters.Add(":id",
                             OracleDbType.NVarchar2);
@@ -18868,13 +18868,13 @@ bool bTempObject)
                     nDeletedCount = command.ExecuteNonQuery();
                     if (nDeletedCount != 1)
                     {
-                        this.container.KernelApplication.WriteErrorLog("Ï£ÍûÉ¾³ı" + strID + " '1'Ìõ£¬Êµ¼ÊÉ¾³ı'" + Convert.ToString(nDeletedCount) + "'¸ö");
+                        this.container.KernelApplication.WriteErrorLog("å¸Œæœ›åˆ é™¤" + strID + " '1'æ¡ï¼Œå®é™…åˆ é™¤'" + Convert.ToString(nDeletedCount) + "'ä¸ª");
                     }
                     command.Parameters.Clear();
                 } // end of using command
 
                 /*
-                // µ÷ÊÔ
+                // è°ƒè¯•
                 if (nExecuteCount == 0)
                 {
                     Debug.Assert(false, "");
@@ -18882,7 +18882,7 @@ bool bTempObject)
                  * */
             }
 
-            // µÚÈı²½£ºÉ¾³ı¶ÔÏóÎÄ¼ş
+            // ç¬¬ä¸‰æ­¥ï¼šåˆ é™¤å¯¹è±¡æ–‡ä»¶
             if (this.m_lObjectStartSize != -1)
             {
                 if (row_info != null && bDeleteSubrecord == false)
@@ -18898,7 +18898,7 @@ bool bTempObject)
                     }
                     catch (Exception ex)
                     {
-                        strError = "É¾³ıÊı¾İ¿â '" + this.GetCaption("zh-CN") + "' ÖĞ IDÎª '" + strID + "' µÄ¶ÔÏóÎÄ¼şÊ±·¢Éú´íÎó: " + ex.Message;
+                        strError = "åˆ é™¤æ•°æ®åº“ '" + this.GetCaption("zh-CN") + "' ä¸­ IDä¸º '" + strID + "' çš„å¯¹è±¡æ–‡ä»¶æ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                         this.container.KernelApplication.WriteErrorLog(strError);
                         return -1;
                     }
@@ -18918,7 +18918,7 @@ bool bTempObject)
                         }
                         catch (Exception ex)
                         {
-                            strError = "É¾³ıÊı¾İ¿â '" + this.GetCaption("zh-CN") + "' ÖĞ IDÎª '" + strID + "' µÄ¶ÔÏóÎÄ¼şÊ±·¢Éú´íÎó: " + ex.Message;
+                            strError = "åˆ é™¤æ•°æ®åº“ '" + this.GetCaption("zh-CN") + "' ä¸­ IDä¸º '" + strID + "' çš„å¯¹è±¡æ–‡ä»¶æ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                             this.container.KernelApplication.WriteErrorLog(strError);
                             return -1;
                         }
@@ -18934,7 +18934,7 @@ bool bTempObject)
             string strConnectionString,
             ConnectionStyle style = ConnectionStyle.None)
         {
-            // SQLite ×¨ÓÃ, ¿ìËÙµÄ£¬ È«¾Ö¹²ÓÃµÄ
+            // SQLite ä¸“ç”¨, å¿«é€Ÿçš„ï¼Œ å…¨å±€å…±ç”¨çš„
             if ( ((style & ConnectionStyle.Global) == ConnectionStyle.Global)
                 && this.SQLiteInfo != null) // && this.SQLiteInfo.FastMode == true
             {
@@ -18960,7 +18960,7 @@ bool bTempObject)
         }
     }
 
-    // °ü×°¶àÖÖÀàĞÍµÄConnection
+    // åŒ…è£…å¤šç§ç±»å‹çš„Connection
     public class Connection
     {
         public SqlDatabase SqlDatabase = null;
@@ -18997,7 +18997,7 @@ bool bTempObject)
                 this.m_connection = new SQLiteConnection(strConnectionString);
             else
             {
-                throw new Exception("²»Ö§³ÖµÄÀàĞÍ " + server_type.ToString());
+                throw new Exception("ä¸æ”¯æŒçš„ç±»å‹ " + server_type.ToString());
             }
         }
          * */
@@ -19017,7 +19017,7 @@ bool bTempObject)
             else if (this.SqlServerType == rms.SqlServerType.SQLite)
             {
 #if NO
-                // SQLite ×¨ÓÃ, ¿ìËÙµÄ£¬ È«¾Ö¹²ÓÃµÄ
+                // SQLite ä¸“ç”¨, å¿«é€Ÿçš„ï¼Œ å…¨å±€å…±ç”¨çš„
                 if ((style & ConnectionStyle.Global) == ConnectionStyle.Global)
                 {
                     Debug.Assert(this.SqlDatabase.SQLiteInfo != null, "");
@@ -19038,7 +19038,7 @@ bool bTempObject)
                         }
                         else
                         {
-                            // ¸´ÖÆ³ÉÔ±
+                            // å¤åˆ¶æˆå‘˜
                             this.Clone(this.SqlDatabase.SQLiteInfo.m_connection);
                             if (this.m_nLockTimeout < this.SqlDatabase.m_nTimeOut)
                                 this.m_nLockTimeout = this.SqlDatabase.m_nTimeOut;
@@ -19059,7 +19059,7 @@ bool bTempObject)
                 this.m_connection = new OracleConnection(strConnectionString);
             else
             {
-                throw new Exception("²»Ö§³ÖµÄÀàĞÍ " + this.SqlServerType.ToString());
+                throw new Exception("ä¸æ”¯æŒçš„ç±»å‹ " + this.SqlServerType.ToString());
             }
         }
 
@@ -19106,7 +19106,7 @@ bool bTempObject)
                         this.m_nLockTimeout = this.SqlDatabase.m_nTimeOut;
 
                     if (this.m_lock != null && this.m_lock.TryEnterWriteLock(this.m_nLockTimeout) == false)
-                        throw new ApplicationException("ÎªDatabaseÈ«¾ÖConnection (Open) ¼ÓĞ´ËøÊ±Ê§°Ü¡£Timeout=" + this.m_nLockTimeout.ToString());
+                        throw new ApplicationException("ä¸ºDatabaseå…¨å±€Connection (Open) åŠ å†™é”æ—¶å¤±è´¥ã€‚Timeout=" + this.m_nLockTimeout.ToString());
 
                     this.m_nOpenCount++;
                     if (this.m_nOpenCount > this.m_nThreshold)
@@ -19119,7 +19119,7 @@ bool bTempObject)
                     {
                         this.SQLiteConnectionOpen();
 
-                        Debug.Assert(this.m_trans == null, ""); // ²»ÒªÍü¼ÇÁËÌá½»ÒÔÇ°µÄTransaction ?
+                        Debug.Assert(this.m_trans == null, ""); // ä¸è¦å¿˜è®°äº†æäº¤ä»¥å‰çš„Transaction ?
 
                         this.m_trans = this.SQLiteConnection.BeginTransaction();
                     }
@@ -19172,13 +19172,13 @@ bool bTempObject)
             }
             else
             {
-                throw new Exception("²»Ö§³ÖµÄÀàĞÍ " + this.SqlServerType.ToString());
+                throw new Exception("ä¸æ”¯æŒçš„ç±»å‹ " + this.SqlServerType.ToString());
             }
         }
 
 
         // parameters:
-        //      bAuto   ÊÇ·ñ×Ô¶¯¹Ø±Õ¡£ false±íÊ¾Ç¿ÖÆ¹Ø±Õ
+        //      bAuto   æ˜¯å¦è‡ªåŠ¨å…³é—­ã€‚ falseè¡¨ç¤ºå¼ºåˆ¶å…³é—­
         public void Close(bool bAuto = true)
         {
             if (this.SqlServerType == rms.SqlServerType.MsSqlServer)
@@ -19188,15 +19188,15 @@ bool bTempObject)
             }
             else if (this.SqlServerType == rms.SqlServerType.SQLite)
             {
-                // ĞèÒª¼ÓËø
-                // Ö»ÓĞÇ¿ÖÆ¹Ø±Õ£¬È«¾ÖµÄConnection²ÅÄÜÕæÕı¹Ø±Õ
+                // éœ€è¦åŠ é”
+                // åªæœ‰å¼ºåˆ¶å…³é—­ï¼Œå…¨å±€çš„Connectionæ‰èƒ½çœŸæ­£å…³é—­
                 if (bAuto == false && this.m_bGlobal == true)
                 {
 
 
-                    // Ç¿ÖÆÌá½»
+                    // å¼ºåˆ¶æäº¤
                     if (this.m_lock != null && this.m_lock.TryEnterWriteLock(this.m_nLockTimeout) == false)
-                        throw new ApplicationException("ÎªDatabaseÈ«¾ÖConnection (Commit) ¼ÓĞ´ËøÊ±Ê§°Ü¡£Timeout=" + this.m_nLockTimeout.ToString());
+                        throw new ApplicationException("ä¸ºDatabaseå…¨å±€Connection (Commit) åŠ å†™é”æ—¶å¤±è´¥ã€‚Timeout=" + this.m_nLockTimeout.ToString());
                     try
                     {
                         if (this.m_trans != null)
@@ -19224,8 +19224,8 @@ bool bTempObject)
                         this.m_lock.ExitWriteLock();
                 }
 
-                // ²»¼ÓËøµÄ°æ±¾
-                // ²»ÊÇÈ«¾ÖµÄÃ¿´Î¶¼Òª¹Ø±Õ
+                // ä¸åŠ é”çš„ç‰ˆæœ¬
+                // ä¸æ˜¯å…¨å±€çš„æ¯æ¬¡éƒ½è¦å…³é—­
                 if (this.m_bGlobal == false)
                 {
                     if (this.m_trans != null)
@@ -19257,26 +19257,26 @@ bool bTempObject)
             }
             else
             {
-                throw new Exception("²»Ö§³ÖµÄÀàĞÍ " + this.SqlServerType.ToString());
+                throw new Exception("ä¸æ”¯æŒçš„ç±»å‹ " + this.SqlServerType.ToString());
             }
         }
 
         // parameters:
-        //      bLock   ÊÇ·ñĞèÒª¼ÓËø¡£2013/3/2
+        //      bLock   æ˜¯å¦éœ€è¦åŠ é”ã€‚2013/3/2
         public void Commit(bool bLock = true)
         {
             if (this.SqlServerType == rms.SqlServerType.SQLite)
             {
-                // ĞèÒª¼ÓËø
-                // Ö»ÓĞÇ¿ÖÆ¹Ø±Õ£¬È«¾ÖµÄConnection²ÅÄÜÕæÕı¹Ø±Õ
+                // éœ€è¦åŠ é”
+                // åªæœ‰å¼ºåˆ¶å…³é—­ï¼Œå…¨å±€çš„Connectionæ‰èƒ½çœŸæ­£å…³é—­
                 if (this.m_bGlobal == true)
                 {
 
-                    // Ç¿ÖÆÌá½»
+                    // å¼ºåˆ¶æäº¤
                     if (bLock == true)
                     {
                         if (this.m_lock != null && this.m_lock.TryEnterWriteLock(this.m_nLockTimeout) == false)
-                            throw new ApplicationException("ÎªDatabaseÈ«¾ÖConnection (Commit) ¼ÓĞ´ËøÊ±Ê§°Ü¡£Timeout=" + this.m_nLockTimeout.ToString());
+                            throw new ApplicationException("ä¸ºDatabaseå…¨å±€Connection (Commit) åŠ å†™é”æ—¶å¤±è´¥ã€‚Timeout=" + this.m_nLockTimeout.ToString());
                     }
 
                     try
@@ -19306,8 +19306,8 @@ bool bTempObject)
                     return;
                 }
 
-                // ²»¼ÓËøµÄ°æ±¾
-                // ²»ÊÇÈ«¾ÖµÄ
+                // ä¸åŠ é”çš„ç‰ˆæœ¬
+                // ä¸æ˜¯å…¨å±€çš„
                 if (this.m_bGlobal == false)
                 {
                     if (this.m_trans != null)
@@ -19358,7 +19358,7 @@ bool bTempObject)
 
     public class SQLiteInfo
     {
-        public bool FastMode = false;    // ÊÇ·ñÎª¿ìËÙÄ£Ê½
+        public bool FastMode = false;    // æ˜¯å¦ä¸ºå¿«é€Ÿæ¨¡å¼
         internal Connection m_connection = null;
     }
 

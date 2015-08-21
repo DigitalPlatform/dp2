@@ -326,7 +326,7 @@ namespace DigitalPlatform.Script
         {
             base.Close();
             TriggerMyFormClose();
-            this.ActionTable.Visible = false;   // 2015/8/17
+            this.Table.Visible = false;   // 2015/8/17
         }
 
         private void ActionTable_DoubleClick(object sender, EventArgs e)

@@ -2717,7 +2717,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKeyT
             if (String.IsNullOrEmpty(this.MainForm.LinkedMarcSyntax) == false)
                 dlg.MarcSyntax = this.MainForm.LinkedMarcSyntax;
 
-
+            this.MainForm.AppInfo.LinkFormState(dlg, "OpenMarcFileDlg_state");
             dlg.ShowDialog(this);
             if (dlg.DialogResult != DialogResult.OK)
                 return 0;
@@ -2801,7 +2801,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKeyT
             else if (strMarcSyntax == "usmarc")
             {
                 this.AutoDetectedMarcSyntaxOID = "1.2.840.10003.5.10";   // USMARC
-                this.MarcEditor.Lang = "en";
+                // this.MarcEditor.Lang = "en";
             }
 
             // 装入MARC编辑器

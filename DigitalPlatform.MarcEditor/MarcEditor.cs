@@ -391,10 +391,22 @@ namespace DigitalPlatform.Marc
 
         string m_strMarcDomError = "";
 
+        string _lang = "zh";
+
         /// <summary>
         /// 当前界面语言代码
         /// </summary>
-		public string Lang = "zh";
+		public string Lang
+        {
+            get
+            {
+                return this._lang;
+            }
+            set
+            {
+                this._lang = value;
+            }
+        }
 
 		int nDragCol = -1;	// -1表示当前没有按下鼠标左键。其余值，例如0,1,...，表示鼠标左键按下，数字表示按下拖动的位置
 		int nLastTrackerX = -1;

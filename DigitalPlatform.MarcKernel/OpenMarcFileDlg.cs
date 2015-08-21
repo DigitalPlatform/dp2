@@ -914,7 +914,7 @@ TABLE.marc SPAN.fieldend
         // return:
         //      -1  出错
         //      0   正常
-        /*public*/ static int LoadFirstRecord(string strFileName,
+        /*public*/ static int LoadFirstRecord(string strMarcFileName,
             Encoding encoding,
             out string strMARC,
             out string strError)
@@ -924,9 +924,10 @@ TABLE.marc SPAN.fieldend
 
             try
             {
-                using (Stream stream = File.Open(strFileName,
+                using (Stream stream = File.Open(strMarcFileName,
     FileMode.Open,
-    FileAccess.Read))
+    FileAccess.Read,
+    FileShare.ReadWrite))
                 {
                     // 从ISO2709文件中读入一条MARC记录
                     // return:

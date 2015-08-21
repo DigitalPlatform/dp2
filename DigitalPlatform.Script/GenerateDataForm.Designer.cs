@@ -32,7 +32,7 @@
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripButton_dock = new System.Windows.Forms.ToolStripButton();
             this.tableLayoutPanel_main = new System.Windows.Forms.TableLayoutPanel();
-            this.panel1 = new System.Windows.Forms.Panel();
+            this.panel_action = new System.Windows.Forms.Panel();
             this.button_excute = new System.Windows.Forms.Button();
             this.checkBox_autoRun = new System.Windows.Forms.CheckBox();
             this.ActionTable = new DigitalPlatform.CommonControl.DpTable();
@@ -42,7 +42,7 @@
             this.dpColumn_entry = new DigitalPlatform.CommonControl.DpColumn();
             this.toolStrip1.SuspendLayout();
             this.tableLayoutPanel_main.SuspendLayout();
-            this.panel1.SuspendLayout();
+            this.panel_action.SuspendLayout();
             this.SuspendLayout();
             // 
             // toolStrip1
@@ -70,7 +70,7 @@
             // 
             this.tableLayoutPanel_main.ColumnCount = 1;
             this.tableLayoutPanel_main.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel_main.Controls.Add(this.panel1, 0, 1);
+            this.tableLayoutPanel_main.Controls.Add(this.panel_action, 0, 1);
             this.tableLayoutPanel_main.Controls.Add(this.ActionTable, 0, 0);
             this.tableLayoutPanel_main.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel_main.Location = new System.Drawing.Point(0, 25);
@@ -81,17 +81,17 @@
             this.tableLayoutPanel_main.Size = new System.Drawing.Size(331, 239);
             this.tableLayoutPanel_main.TabIndex = 4;
             // 
-            // panel1
+            // panel_action
             // 
-            this.panel1.AutoSize = true;
-            this.panel1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.panel1.Controls.Add(this.button_excute);
-            this.panel1.Controls.Add(this.checkBox_autoRun);
-            this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel1.Location = new System.Drawing.Point(3, 210);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(325, 26);
-            this.panel1.TabIndex = 5;
+            this.panel_action.AutoSize = true;
+            this.panel_action.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.panel_action.Controls.Add(this.button_excute);
+            this.panel_action.Controls.Add(this.checkBox_autoRun);
+            this.panel_action.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel_action.Location = new System.Drawing.Point(3, 210);
+            this.panel_action.Name = "panel_action";
+            this.panel_action.Size = new System.Drawing.Size(325, 26);
+            this.panel_action.TabIndex = 5;
             // 
             // button_excute
             // 
@@ -157,6 +157,7 @@
             this.dpColumn_name.BackColor = System.Drawing.Color.Transparent;
             this.dpColumn_name.Font = null;
             this.dpColumn_name.ForeColor = System.Drawing.Color.Transparent;
+            this.dpColumn_name.LineAlignment = System.Drawing.StringAlignment.Near;
             this.dpColumn_name.Text = "名称";
             this.dpColumn_name.Width = 148;
             // 
@@ -166,6 +167,7 @@
             this.dpColumn_shortcutKey.BackColor = System.Drawing.Color.Transparent;
             this.dpColumn_shortcutKey.Font = new System.Drawing.Font("微软雅黑", 7.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.dpColumn_shortcutKey.ForeColor = System.Drawing.Color.Transparent;
+            this.dpColumn_shortcutKey.LineAlignment = System.Drawing.StringAlignment.Near;
             this.dpColumn_shortcutKey.Text = "快捷键";
             this.dpColumn_shortcutKey.Width = 45;
             // 
@@ -175,6 +177,7 @@
             this.dpColumn_comment.BackColor = System.Drawing.Color.Transparent;
             this.dpColumn_comment.Font = null;
             this.dpColumn_comment.ForeColor = System.Drawing.Color.Transparent;
+            this.dpColumn_comment.LineAlignment = System.Drawing.StringAlignment.Near;
             this.dpColumn_comment.Text = "说明";
             this.dpColumn_comment.Width = 204;
             // 
@@ -184,6 +187,7 @@
             this.dpColumn_entry.BackColor = System.Drawing.Color.Transparent;
             this.dpColumn_entry.Font = null;
             this.dpColumn_entry.ForeColor = System.Drawing.Color.Transparent;
+            this.dpColumn_entry.LineAlignment = System.Drawing.StringAlignment.Near;
             this.dpColumn_entry.Text = "入口函数";
             this.dpColumn_entry.Width = 150;
             // 
@@ -203,8 +207,8 @@
             this.toolStrip1.PerformLayout();
             this.tableLayoutPanel_main.ResumeLayout(false);
             this.tableLayoutPanel_main.PerformLayout();
-            this.panel1.ResumeLayout(false);
-            this.panel1.PerformLayout();
+            this.panel_action.ResumeLayout(false);
+            this.panel_action.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -221,7 +225,7 @@
         private DigitalPlatform.CommonControl.DpColumn dpColumn_entry;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_main;
         private System.Windows.Forms.CheckBox checkBox_autoRun;
-        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Panel panel_action;
         private System.Windows.Forms.Button button_excute;
     }
 }
