@@ -51,7 +51,7 @@
     <SuiteName>dp2 V2</SuiteName>
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>publish.htm</WebPage>
-    <ApplicationRevision>46</ApplicationRevision>
+    <ApplicationRevision>47</ApplicationRevision>
     <ApplicationVersion>2.4.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -336,6 +336,12 @@
     </Compile>
     <Compile Include="Entity\NewInventoryForm.Designer.cs">
       <DependentUpon>NewInventoryForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Entity\SelectBatchNoDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Entity\SelectBatchNoDialog.Designer.cs">
+      <DependentUpon>SelectBatchNoDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="IM\ChatForm.cs">
       <SubType>Form</SubType>
@@ -1482,6 +1488,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Entity\NewInventoryForm.resx">
       <DependentUpon>NewInventoryForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Entity\SelectBatchNoDialog.resx">
+      <DependentUpon>SelectBatchNoDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="IM\ChatForm.resx">
       <DependentUpon>ChatForm.cs</DependentUpon>

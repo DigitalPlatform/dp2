@@ -11789,17 +11789,26 @@ namespace dp2Library
                     }
                     else if (app.AmerceDbName == strDbName)
                     {
-                        if (bIsReader == true)
+                        DigitalPlatform.LibraryServer.LibraryApplication.ResPathType type = LibraryApplication.GetResPathType(strResPath);
+                        if (type == LibraryApplication.ResPathType.CfgFile)
                         {
+                            // 获取配置文件的请求要被允许
+                            // 2015/8/23 以前这里有个 bug，不允许用本 API 获得违约金库 cfgs 下的配置文件
+                        }
+                        else
+                        {
+                            if (bIsReader == true)
+                            {
+                                result.Value = -1;
+                                result.ErrorInfo = "读者身份不被允许用GetRes()来获得违约金记录";
+                                result.ErrorCode = ErrorCode.SystemError;
+                                return result;
+                            }
                             result.Value = -1;
-                            result.ErrorInfo = "读者身份不被允许用GetRes()来获得违约金记录";
+                            result.ErrorInfo = "不被允许用GetRes()来获得违约金记录";
                             result.ErrorCode = ErrorCode.SystemError;
                             return result;
                         }
-                        result.Value = -1;
-                        result.ErrorInfo = "不被允许用GetRes()来获得违约金记录";
-                        result.ErrorCode = ErrorCode.SystemError;
-                        return result;
                     }
                 }
 

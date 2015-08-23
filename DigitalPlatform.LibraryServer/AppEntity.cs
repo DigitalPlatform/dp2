@@ -2679,7 +2679,7 @@ namespace DigitalPlatform.LibraryServer
                                 XmlDocument domTemp = new XmlDocument();
                                 domTemp.LoadXml(strNewXml);
 
-                                // 检查一个册记录的读者类型是否符合值列表要求
+                                // 检查一个册记录的图书类型是否符合值列表要求
                                 // parameters:
                                 // return:
                                 //      -1  检查过程出错
@@ -3089,7 +3089,7 @@ namespace DigitalPlatform.LibraryServer
             return 1;
         }
 
-        // 检查一个册记录的读者类型是否符合值列表要求
+        // 检查一个册记录的图书类型是否符合值列表要求
         // parameters:
         // return:
         //      -1  检查过程出错

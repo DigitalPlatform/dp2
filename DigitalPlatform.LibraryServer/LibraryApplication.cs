@@ -88,7 +88,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.46 (2015/5/18) 增加 API ListFile()
         //      2.47 (2015/6/13) GetSystemParameter() API 增加了 category=arrived name=dbname
         //      2.48 (2015/6/16) GetVersion() API 增加了 out uid 参数
-        public static string Version = "2.48";
+        //      2.49 (2015/8/23) GetRes() API 允许获得违约金库 cfgs 下的配置文件了。以前版本不允许是因为一个 bug 造成的。GetReaderInfo() API 的 strResultTypeList 参数增加了 advancexml_history_bibliosummary 这种用法
+        public static string Version = "2.49";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -7464,6 +7465,105 @@ namespace DigitalPlatform.LibraryServer
             return -1;
         }
 
+        public string GetInventoryDbName()
+        {
+            XmlNodeList nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("utilDb/database[@type='inventory']");
+            if (nodes.Count == 0)
+                return null;
+            foreach (XmlElement node in nodes)
+            {
+                return node.GetAttribute("name");
+            }
+
+            return null;
+        }
+
+        // 根据馆代码、批次号和册条码号对盘点库进行查重
+        // 本函数只负责查重, 并不获得记录体
+        // return:
+        //      -1  error
+        //      其他    命中记录条数(不超过nMax规定的极限)
+        public int SearchInventoryRecDup(
+            RmsChannel channel,
+            string strLibraryCode,
+            string strBatchNo,
+            string strBarcode,
+            string strRefID,
+            int nMax,
+            out List<string> aPath,
+            out string strError)
+        {
+            strError = "";
+            aPath = null;
+
+            string strInventoryDbName = GetInventoryDbName();
+
+            if (string.IsNullOrEmpty(strInventoryDbName) == true)
+            {
+                strError = "当前尚未配置盘点库，因此无法对盘点库进行查重";
+                return -1;
+            }
+
+            string strKey = "";
+            
+            if (string.IsNullOrEmpty(strBarcode) == false)
+                strKey = strLibraryCode + "|" + strBatchNo + "|" + strBarcode;
+            else
+                strKey = strLibraryCode + "|" + strBatchNo + "|@refID:" + strRefID;
+
+            // 构造检索式
+            string strQueryXml =  "<target list='"
+                    + StringUtil.GetXmlStringSimple(strInventoryDbName + ":" + "查重键")
+                    + "'><item><word>"
+                    + StringUtil.GetXmlStringSimple(strKey)
+                    + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>" + nMax.ToString() + "</maxCount></item><lang>zh</lang></target>";
+
+            Debug.Assert(channel != null, "");
+
+            long lRet = channel.DoSearch(strQueryXml,
+                "default",
+                "", // strOuputStyle
+                out strError);
+            if (lRet == -1)
+            {
+                // TODO: 为了跟踪问题的方便，可以在strError中加上strQueryXml内容
+                strError = "SearchInventoryRecDup() DoSearch() error: " + strError;
+                goto ERROR1;
+            }
+
+            // not found
+            if (lRet == 0)
+            {
+                strError = "查重键 '" + strKey + "' 没有找到";
+                return 0;
+            }
+
+            long lHitCount = lRet;
+
+            lRet = channel.DoGetSearchResult(
+                "default",
+                0,
+                nMax,
+                "zh",
+                null,
+                out aPath,
+                out strError);
+            if (lRet == -1)
+            {
+                strError = "SearchInventoryRecDup() DoGetSearchResult() error: " + strError;
+                goto ERROR1;
+            }
+
+            if (aPath.Count == 0)
+            {
+                strError = "DoGetSearchResult aPath error 和前面已经命中的条件矛盾";
+                goto ERROR1;
+            }
+
+            return (int)lHitCount;
+        ERROR1:
+            return -1;
+        }
 
 
         // 将登录名切割为前缀和名字值两个部分
@@ -13026,6 +13126,7 @@ strLibraryCode);    // 读者所在的馆代码
         RequestError = 111,
         RequestTimeOut = 112,
         TimestampMismatch = 113,
+        Borrowing = 114,    // 图书尚未还回(盘点前需修正此问题)
     }
 
     // API函数结果

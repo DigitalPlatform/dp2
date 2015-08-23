@@ -400,6 +400,11 @@ namespace dp2Circulation
                 dlg.VerifyBorrower = this._taskList.CurrentReaderBarcode;
                 dlg.Text = "请选择要(验证)还回的册";
             }
+            else if (func == dp2Circulation.FuncState.InventoryBook)
+            {
+                dlg.FunctionType = "inventory";
+                dlg.Text = "请选择要盘点的册";
+            }
 
             dlg.AutoOperSingleItem = this.AutoOperSingleItem;
             dlg.AutoSearch = true;
@@ -1158,6 +1163,14 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             return false;
         }
 
+        /// <summary>
+        /// 盘点操作中要用到的批次号
+        /// </summary>
+        public string BatchNo
+        {
+            get;
+            set;
+        }
         // parameters:
         //      strTaskID   任务 ID，用于管理和查询任务状态
         void _doAction(FuncState func,
@@ -1325,6 +1338,12 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             {
                 task.ItemBarcode = strText;
                 task.Action = "return";
+            }
+            else if (func == dp2Circulation.FuncState.InventoryBook)
+            {
+                task.ReaderBarcode = this.BatchNo;
+                task.ItemBarcode = strText;
+                task.Action = "inventory";
             }
             else if (func == dp2Circulation.FuncState.VerifyReturn)
             {
@@ -1681,6 +1700,7 @@ false);
                 else if (_funcstate == FuncState.InventoryBook)
                 {
                     this.ToolStripMenuItem_inventoryBook.Checked = true;
+                    WillLoadReaderInfo = false;
                 }
                 // SetInputMessage();
             }
@@ -3058,7 +3078,8 @@ e.Height);
                         else if (task.Action == "return"
                             || task.Action == "verify_return"
                             || task.Action == "lost"
-                            || task.Action == "verify_lost")
+                            || task.Action == "verify_lost"
+                            || task.Action == "inventory")
                         {
                             Return(task);
                         }
@@ -3620,7 +3641,12 @@ end_time);
             this.Container.DisplayTask("refresh", task);
             this.Container.SetColorList();
 
-            string strOperText = task.ReaderBarcode + " 还 " + task.ItemBarcode;
+            string strOperText = "";
+            
+            if (task.Action == "inventory")
+                strOperText = task.ReaderBarcode + " 盘点 " + task.ItemBarcode;
+            else
+                strOperText = task.ReaderBarcode + " 还 " + task.ItemBarcode;
 
 #if NO
             stop.OnStop += new StopEventHandler(this.DoStop);
@@ -3658,6 +3684,16 @@ end_time);
                     }
                     strAction = "lost";
                 }
+                else if (task.Action == "inventory")
+                {
+                    if (string.IsNullOrEmpty(strReaderBarcode) == true)
+                    {
+                        strError = "尚未设定批次号";
+                        task.ErrorInfo = strError;
+                        goto ERROR1;
+                    }
+                    strAction = "inventory";
+                }
                 else
                 {
                     strReaderBarcode = "";
@@ -3694,8 +3730,6 @@ end_time);
                 }
                 else
                     strReaderFormatList = this.Container.PatronRenderFormat + ",xml" + GetPostFix();
-
-
 
                 string strStyle = "reader";
 
@@ -4161,6 +4195,10 @@ end_time);
             {
                 strText = GetOperText("(验证)续借");
             }
+            else if (this.Action == "inventory")
+            {
+                strText = GetOperText("盘点");
+            }
 
             if (string.IsNullOrEmpty(this.ErrorInfo) == false)
                 strText += "\r\n===\r\n" + this.ErrorInfo;
@@ -4214,7 +4252,8 @@ end_time);
             string strSummary = "";
             if (string.IsNullOrEmpty(this.ItemSummary) == false)
                 strSummary = "\r\n---\r\n" + this.ItemSummary;
-            if (string.IsNullOrEmpty(this.ReaderBarcode) == false)
+            if (string.IsNullOrEmpty(this.ReaderBarcode) == false
+                && strOperName != "盘点")
                 return this.ReaderBarcode + " " + this.ReaderName + " " + strOperName + " " + this.ItemBarcode + strSummary;
             else
                 return strOperName + " " + this.ItemBarcode + strSummary;

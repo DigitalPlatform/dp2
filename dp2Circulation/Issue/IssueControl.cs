@@ -1920,7 +1920,6 @@ namespace dp2Circulation
                 this.SetProcessingState = true;
         }
 
-
         // 装订
         void menu_binding_Click(object sender, EventArgs e)
         {

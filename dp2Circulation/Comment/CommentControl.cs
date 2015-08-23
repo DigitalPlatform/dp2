@@ -454,7 +454,7 @@ namespace dp2Circulation
         /// <summary>
         /// 填充馆代码组合框列表
         /// </summary>
-        /// <param name="strLibraryCodeList">管代码列表</param>
+        /// <param name="strLibraryCodeList">馆代码列表</param>
         public void SetLibraryCodeFilter(string strLibraryCodeList)
         {
             this.comboBox_libraryCodeFilter.Items.Clear();

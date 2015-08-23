@@ -838,7 +838,7 @@ namespace dp2Circulation
         //      -1  出错
         //      0   相关数据库没有配置 parent id 浏览列
         //      1   找到
-        internal int GetBiblioRecPath(ListViewItem item,
+        public virtual int GetBiblioRecPath(ListViewItem item,
             bool bAutoSearch,
             out int nCol,
             out string strBiblioRecPath,

@@ -1398,7 +1398,7 @@ AppInfo.GetString("config",
         //      1   出错，但希望继续后面的操作
         /// <summary>
         /// 获得普通库属性列表，主要是浏览窗栏目标题
-        /// 必须在InitialBiblioDbProperties()和InitialReaderDbProperties()以后调用
+        /// 必须在InitialBiblioDbProperties() GetUtilDbProperties() 和 InitialReaderDbProperties() 以后调用
         /// </summary>
         /// <param name="bPrepareSearch">是否要准备通道</param>
         /// <returns>-1: 出错，不希望继续以后的操作; 0: 成功; 1: 出错，但希望继续后面的操作</returns>
@@ -1424,6 +1424,7 @@ AppInfo.GetString("config",
             {
                 this.NormalDbProperties = new List<NormalDbProperty>();
 
+                List<string> dbnames = new List<string>();
                 // 创建NormalDbProperties数组
                 if (this.BiblioDbProperties != null)
                 {
@@ -1431,42 +1432,57 @@ AppInfo.GetString("config",
                     {
                         BiblioDbProperty biblio = this.BiblioDbProperties[i];
 
-                        NormalDbProperty normal = null;
+                        // NormalDbProperty normal = null;
 
                         if (String.IsNullOrEmpty(biblio.DbName) == false)
                         {
+#if NO
                             normal = new NormalDbProperty();
                             normal.DbName = biblio.DbName;
                             this.NormalDbProperties.Add(normal);
+#endif
+                            dbnames.Add(biblio.DbName);
                         }
 
                         if (String.IsNullOrEmpty(biblio.ItemDbName) == false)
                         {
+#if NO
                             normal = new NormalDbProperty();
                             normal.DbName = biblio.ItemDbName;
                             this.NormalDbProperties.Add(normal);
+#endif
+                            dbnames.Add(biblio.ItemDbName);
                         }
 
                         // 为什么以前要注释掉?
                         if (String.IsNullOrEmpty(biblio.OrderDbName) == false)
                         {
+#if NO
                             normal = new NormalDbProperty();
                             normal.DbName = biblio.OrderDbName;
                             this.NormalDbProperties.Add(normal);
+#endif
+                            dbnames.Add(biblio.OrderDbName);
                         }
 
                         if (String.IsNullOrEmpty(biblio.IssueDbName) == false)
                         {
+#if NO
                             normal = new NormalDbProperty();
                             normal.DbName = biblio.IssueDbName;
                             this.NormalDbProperties.Add(normal);
+#endif
+                            dbnames.Add(biblio.IssueDbName);
                         }
 
                         if (String.IsNullOrEmpty(biblio.CommentDbName) == false)
                         {
+#if NO
                             normal = new NormalDbProperty();
                             normal.DbName = biblio.CommentDbName;
                             this.NormalDbProperties.Add(normal);
+#endif
+                            dbnames.Add(biblio.CommentDbName);
                         }
                     }
                 }
@@ -1480,14 +1496,18 @@ AppInfo.GetString("config",
                         if (String.IsNullOrEmpty(strDbName) == true)
                             continue;
 
+#if NO
                         NormalDbProperty normal = null;
 
                         normal = new NormalDbProperty();
                         normal.DbName = strDbName;
                         this.NormalDbProperties.Add(normal);
+#endif
+                        dbnames.Add(strDbName);
                     }
                 }
 
+#if NO
                 // 2015/6/13
                 if (string.IsNullOrEmpty(this.ArrivedDbName) == false)
                 {
@@ -1496,14 +1516,40 @@ AppInfo.GetString("config",
                     normal.DbName = this.ArrivedDbName;
                     this.NormalDbProperties.Add(normal);
                 }
+#endif
+
+                if (this.UtilDbProperties != null)
+                {
+                    foreach (UtilDbProperty prop in this.UtilDbProperties)
+                    {
+#if NO
+                    NormalDbProperty normal = null;
+                    normal = new NormalDbProperty();
+                    normal.DbName = prop.DbName;
+                    this.NormalDbProperties.Add(normal);
+#endif
+                        // 为了避免因 dp2library 2.48 及以前的版本的一个 bug 引起报错
+                        if (this.ServerVersion <= 2.48 && prop.Type == "amerce")
+                            continue;
+                        dbnames.Add(prop.DbName);
+                    }
+                }
+
+                foreach(string dbname in dbnames)
+                {
+                    NormalDbProperty normal = null;
+                    normal = new NormalDbProperty();
+                    normal.DbName = dbname;
+                    this.NormalDbProperties.Add(normal);
+                }
 
                 if (this.ServerVersion >= 2.23)
                 {
                     // 构造文件名列表
                     List<string> filenames = new List<string>();
-                    for (int i = 0; i < this.NormalDbProperties.Count; i++)
+                    foreach (NormalDbProperty normal in this.NormalDbProperties)
                     {
-                        NormalDbProperty normal = this.NormalDbProperties[i];
+                        // NormalDbProperty normal = this.NormalDbProperties[i];
                         filenames.Add(normal.DbName + "/cfgs/browse");
                     }
 
@@ -1536,9 +1582,9 @@ AppInfo.GetString("config",
                     }
 
                     // 获得配置文件并处理
-                    for (int i = 0; i < this.NormalDbProperties.Count; i++)
+                    foreach (NormalDbProperty normal in this.NormalDbProperties)
                     {
-                        NormalDbProperty normal = this.NormalDbProperties[i];
+                        // NormalDbProperty normal = this.NormalDbProperties[i];
 
                         normal.ColumnProperties = new ColumnPropertyCollection();
 
@@ -1587,9 +1633,9 @@ AppInfo.GetString("config",
                 {
                     // TODO: 是否缓存这些配置文件? 
                     // 获得 browse 配置文件
-                    for (int i = 0; i < this.NormalDbProperties.Count; i++)
+                    foreach (NormalDbProperty normal in  this.NormalDbProperties)
                     {
-                        NormalDbProperty normal = this.NormalDbProperties[i];
+                        // NormalDbProperty normal = this.NormalDbProperties[i];
 
                         normal.ColumnProperties = new ColumnPropertyCollection();
 
@@ -2716,9 +2762,23 @@ AppInfo.GetString("config",
                     if (String.IsNullOrEmpty(strName) == true)
                         continue;
 
+                    if (strType == "biblio" || strType == "reader")
+                        continue;
+
+                    // biblio 和 reader 以外的所有类型都会被当作实用库
+                    /*
+  <database type="arrived" name="预约到书" /> 
+  <database type="amerce" name="违约金" /> 
+  <database type="publisher" name="出版者" /> 
+  <database type="inventory" name="盘点" /> 
+  <database type="message" name="消息" /> 
+                     * */
+
+#if NO
                     if (strType == "zhongcihao"
                         || strType == "publisher"
                         || strType == "dictionary")
+#endif
                     {
                         UtilDbProperty property = new UtilDbProperty();
                         property.DbName = strName;

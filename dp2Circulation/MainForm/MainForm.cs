@@ -5277,6 +5277,7 @@ out strError);
             return 1;
         }
 
+#if NO
         // 
         /// <summary>
         /// 获得ISBN实用库的库名
@@ -5297,6 +5298,28 @@ out strError);
 
             return null;    // not found
         }
+#endif
+        /// <summary>
+        /// 获得一个特定类型的实用库的库名
+        /// </summary>
+        /// <param name="strType">类型</param>
+        /// <returns>实用库的库名</returns>
+        public string GetUtilDbName(string strType)
+        {
+            if (this.UtilDbProperties == null)
+                return null;    // not found
+
+            for (int i = 0; i < this.UtilDbProperties.Count; i++)
+            {
+                UtilDbProperty property = this.UtilDbProperties[i];
+
+                if (property.Type == strType)
+                    return property.DbName;
+            }
+
+            return null;    // not found
+        }
+
 
         // 从ISBN号中取得出版社号部分
         // 本函数可以自动适应有978前缀的新型ISBN号

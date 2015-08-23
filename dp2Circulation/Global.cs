@@ -30,6 +30,20 @@ namespace dp2Circulation
     /// </summary>
     public class Global
     {
+        // 在第一列前面插入一个空白列
+        public static string[] InsertBlankColumn(string[] cols,
+            int nDelta = 1)
+        {
+            string[] results = new string[cols == null ? nDelta : cols.Length + nDelta];
+            for (int i = 0; i < nDelta; i++)
+            {
+                results[i] = "";
+            }
+            if (results.Length > 1)
+                Array.Copy(cols, 0, results, nDelta, results.Length - nDelta);
+            return results;
+        }
+
         public static Control FindFocusedControl(Control control)
         {
             var container = control as IContainerControl;

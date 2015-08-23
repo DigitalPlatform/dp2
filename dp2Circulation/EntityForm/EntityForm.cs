@@ -8823,7 +8823,7 @@ MessageBoxDefaultButton.Button1);
             strError = "";
             str210 = "";
 
-            string strDbName = this.MainForm.GetPublisherUtilDbName();
+            string strDbName = this.MainForm.GetUtilDbName("publisher");
 
             if (String.IsNullOrEmpty(strDbName) == true)
             {
@@ -8880,7 +8880,7 @@ MessageBoxDefaultButton.Button1);
         {
             strError = "";
 
-            string strDbName = this.MainForm.GetPublisherUtilDbName();
+            string strDbName = this.MainForm.GetUtilDbName("publisher");
 
             if (String.IsNullOrEmpty(strDbName) == true)
             {
@@ -8936,7 +8936,7 @@ MessageBoxDefaultButton.Button1);
             strError = "";
             str102 = "";
 
-            string strDbName = this.MainForm.GetPublisherUtilDbName();
+            string strDbName = this.MainForm.GetUtilDbName("publisher");
 
             if (String.IsNullOrEmpty(strDbName) == true)
             {
@@ -8993,7 +8993,7 @@ MessageBoxDefaultButton.Button1);
         {
             strError = "";
 
-            string strDbName = this.MainForm.GetPublisherUtilDbName();
+            string strDbName = this.MainForm.GetUtilDbName("publisher");
 
             if (String.IsNullOrEmpty(strDbName) == true)
             {

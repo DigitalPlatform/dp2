@@ -1207,12 +1207,12 @@ this.dp2QueryControl1.GetSaveString());
                                 item = Global.InsertNewLine(
                                     this.listView_records,
                                     searchresult.Path,
-                                    this.m_bBiblioSummaryColumn == true ? InsertBlankColumn(searchresult.Cols) : searchresult.Cols);
+                                    this.m_bBiblioSummaryColumn == true ? Global.InsertBlankColumn(searchresult.Cols) : searchresult.Cols);
                             else
                                 item = Global.AppendNewLine(
                                     this.listView_records,
                                     searchresult.Path,
-                                    this.m_bBiblioSummaryColumn == true ? InsertBlankColumn(searchresult.Cols) : searchresult.Cols);
+                                    this.m_bBiblioSummaryColumn == true ? Global.InsertBlankColumn(searchresult.Cols) : searchresult.Cols);
                         }
                         else if (bOutputKeyCount == true)
                         {
@@ -1254,7 +1254,7 @@ this.dp2QueryControl1.GetSaveString());
                                 if (cols.Length > 1)
                                     Array.Copy(searchresult.Cols, 0, cols, 1, cols.Length - 1);
 #endif
-                            string[] cols = this.m_bBiblioSummaryColumn == true ? InsertBlankColumn(searchresult.Cols, 2) : searchresult.Cols;
+                            string[] cols = this.m_bBiblioSummaryColumn == true ? Global.InsertBlankColumn(searchresult.Cols, 2) : searchresult.Cols;
                             cols[0] = LibraryChannel.BuildDisplayKeyString(searchresult.Keys);
 
                             if (bPushFillingBrowse == true)
@@ -1330,21 +1330,6 @@ this.dp2QueryControl1.GetSaveString());
         ERROR1:
             return -1;
         }
-
-        // 在第一列前面插入一个空白列
-        static string[] InsertBlankColumn(string [] cols,
-            int nDelta = 1)
-        {
-            string[] results = new string[cols == null ? nDelta : cols.Length + nDelta];
-            for (int i = 0; i < nDelta; i++)
-            {
-                results[i] = "";
-            }
-            if (results.Length > 1)
-                Array.Copy(cols, 0, results, nDelta, results.Length - nDelta);
-            return results;
-        }
-
 
         /// <summary>
         /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
@@ -2203,6 +2188,13 @@ out strError);
                     if (this.listView_records.SelectedItems.Count == 0 || bLooping == true)
                         subMenuItem.Enabled = false;
                     menuItem.MenuItems.Add(subMenuItem);
+
+                    subMenuItem = new MenuItem("模拟盘点 [" + this.listView_records.SelectedItems.Count.ToString() + "] (&R)");
+                    subMenuItem.Click += new System.EventHandler(this.menu_inventory_Click);
+                    if (this.listView_records.SelectedItems.Count == 0 || bLooping == true)
+                        subMenuItem.Enabled = false;
+                    menuItem.MenuItems.Add(subMenuItem);
+
                 }
 
                 if (this.DbType == "order")
@@ -2481,6 +2473,21 @@ out strError);
             MessageBox.Show(this, strError);
         }
 
+        void menu_inventory_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            nRet = DoCirculation("inventory", out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            MessageBox.Show(this, "共处理 " + nRet.ToString() + " 个册记录");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+        
+
         // 进行流通操作
         int DoCirculation(string strAction,
             out string strError)
@@ -2507,6 +2514,8 @@ out strError);
                 strOperName = "借书";
             else if (strAction == "return")
                 strOperName = "还书";
+            else if (strAction == "inventory")
+                strOperName = "盘点";
             else
             {
                 strError = "未知的 strAction 值 '"+strAction+"'";
@@ -2604,6 +2613,23 @@ out strError);
                 else if (strAction == "return")
                 {
                     form.SmartFuncState = FuncState.Return;
+                }
+                else if (strAction == "inventory")
+                {
+                    form.SmartFuncState = FuncState.InventoryBook;
+                    string strBatchNo = InputDlg.GetInput(
+this,
+"批处理" + strOperName,
+"请输入批次号:",
+"",
+this.MainForm.DefaultFont);
+                    if (strBatchNo == null)
+                    {
+                        form.Close();
+                        strError = "用户放弃操作";
+                        return -1;
+                    }
+                    form.BatchNo = strBatchNo;
                 }
 
                 stop.SetProgressRange(0, this.listView_records.SelectedItems.Count);
