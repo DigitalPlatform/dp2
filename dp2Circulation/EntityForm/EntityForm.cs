@@ -2500,8 +2500,11 @@ true);
             if (this.m_commentViewer != null)
                 this.m_commentViewer.Close();
 
+#if NO
             if (this.browseWindow != null)
                 this.browseWindow.Close();
+#endif
+            CloseBrowseWindow();
 
             if (this._genData != null)
             {
@@ -4700,12 +4703,15 @@ true);
             }
         }
 
+        bool _willCloseBrowseWindow = false;    // 是否要在检索结束后自动关闭浏览窗口(一般是因为中途 X 按钮被触发过了)
         // 进行检索
         private void button_search_Click(object sender, EventArgs e)
         {
             string strError = "";
             int nRet = 0;
             bool bDisplayClickableError = false;
+
+            _willCloseBrowseWindow = false;
 
             ActivateBrowseWindow(false);
 
@@ -4962,6 +4968,9 @@ true);
                 m_nInSearching--;
             }
 
+            if (_willCloseBrowseWindow == true)
+                CloseBrowseWindow();
+
             this.textBox_queryWord.SelectAll();
 
             // 焦点切换到条码textbox
@@ -5190,17 +5199,29 @@ out strError);
         //      lHitCount   要显示出来的命中数。如果为 -1，则不显示命中数
         void ShowBrowseWindow(long lHitCount)
         {
-            if (this.browseWindow.Visible == false)
-                this.MainForm.AppInfo.LinkFormState(this.browseWindow, "browseWindow_state");
+#if NO
+            try
+            {
+#endif
+                if (this.browseWindow.Visible == false)
+                    this.MainForm.AppInfo.LinkFormState(this.browseWindow, "browseWindow_state");
 
-            this.browseWindow.Visible = true;
+                this.browseWindow.Visible = true;
 
-            // 2014/7/8
-            if (this.browseWindow.WindowState == FormWindowState.Minimized)
-                this.browseWindow.WindowState = FormWindowState.Normal;
+                // 2014/7/8
+                if (this.browseWindow.WindowState == FormWindowState.Minimized)
+                    this.browseWindow.WindowState = FormWindowState.Normal;
 
-            if (lHitCount != -1)
-                this.browseWindow.Text = "命中 "+lHitCount.ToString()+" 条书目记录。请从中选择一条";
+                if (lHitCount != -1)
+                    this.browseWindow.Text = "命中 " + lHitCount.ToString() + " 条书目记录。请从中选择一条";
+        
+#if NO
+        }
+            catch(System.ObjectDisposedException)
+            {
+
+            }
+#endif
         }
 
         void ActivateBrowseWindow(bool bShow)
@@ -5213,6 +5234,8 @@ out strError);
 
                 this.browseWindow.MainForm = this.MainForm; // 2009/2/17 
                 this.browseWindow.Text = "命中多条种记录。请从中选择一条";
+                this.browseWindow.FormClosing -= browseWindow_FormClosing;
+                this.browseWindow.FormClosing += browseWindow_FormClosing;
                 this.browseWindow.FormClosed -= new FormClosedEventHandler(browseWindow_FormClosed);
                 this.browseWindow.FormClosed += new FormClosedEventHandler(browseWindow_FormClosed);
                 // this.browseWindow.MdiParent = this.MainForm;
@@ -5221,6 +5244,7 @@ out strError);
                     this.MainForm.AppInfo.LinkFormState(this.browseWindow, "browseWindow_state");
                     this.browseWindow.Show();
                 }
+
 
                 this.browseWindow.OpenDetail -= new OpenDetailEventHandler(browseWindow_OpenDetail);
                 this.browseWindow.OpenDetail += new OpenDetailEventHandler(browseWindow_OpenDetail);
@@ -5239,6 +5263,53 @@ out strError);
 
                 this.browseWindow.BringToFront();
                 this.browseWindow.RecordsList.Items.Clear();
+            }
+        }
+
+        /*
+操作类型 crashReport -- 异常报告 
+主题 dp2circulation 
+发送者 xxx 
+媒体类型 text 
+内容 发生未捕获的界面线程异常: 
+Type: System.ObjectDisposedException
+Message: 无法访问已释放的对象。
+对象名:“BrowseSearchResultForm”。
+Stack:
+在 System.Windows.Forms.Control.CreateHandle()
+在 System.Windows.Forms.Form.CreateHandle()
+在 System.Windows.Forms.Control.get_Handle()
+在 System.Windows.Forms.Control.SetVisibleCore(Boolean value)
+在 System.Windows.Forms.Form.SetVisibleCore(Boolean value)
+在 System.Windows.Forms.Control.set_Visible(Boolean value)
+在 dp2Circulation.EntityForm.ShowBrowseWindow(Int64 lHitCount)
+在 dp2Circulation.EntityForm.button_search_Click(Object sender, EventArgs e)
+在 System.Windows.Forms.Control.OnClick(EventArgs e)
+在 System.Windows.Forms.Button.OnClick(EventArgs e)
+在 System.Windows.Forms.Button.OnMouseUp(MouseEventArgs mevent)
+在 System.Windows.Forms.Control.WmMouseUp(Message& m, MouseButtons button, Int32 clicks)
+在 System.Windows.Forms.Control.WndProc(Message& m)
+在 System.Windows.Forms.ButtonBase.WndProc(Message& m)
+在 System.Windows.Forms.Button.WndProc(Message& m)
+在 System.Windows.Forms.Control.ControlNativeWindow.OnMessage(Message& m)
+在 System.Windows.Forms.Control.ControlNativeWindow.WndProc(Message& m)
+在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
+
+
+dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, PublicKeyToken=null
+操作系统：Microsoft Windows NT 5.1.2600 Service Pack 3 
+操作时间 2015/8/24 14:12:46 (Mon, 24 Aug 2015 14:12:46 +0800) 
+前端地址 xxx 经由 http://dp2003.com/dp2library 
+         * */
+        void browseWindow_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (stop.State == 0 && e.CloseReason == CloseReason.UserClosing)    // 0 表示正在处理
+            {
+                // 如果是在检索中途关闭小窗口，则需要先设置 stop 为停止状态，不能直接关闭小窗口
+                stop.DoStop();
+                e.Cancel = true;
+                // 通知检索循环结束后关闭小窗口
+                _willCloseBrowseWindow = true;
             }
         }
 
@@ -9646,9 +9717,9 @@ merge_dlg.UiState);
                 if (IsISBnBarcode(this.textBox_itemBarcode.Text) == true)
                 {
                     // 保存当前册信息
-                        nRet = this.entityControl1.DoSaveItems();
-                        if (nRet == -1)
-                            return; // 放弃进一步操作
+                    nRet = this.entityControl1.DoSaveItems();
+                    if (nRet == -1)
+                        return; // 放弃进一步操作
 
                     // 转而触发新种检索操作
                     this.textBox_queryWord.Text = this.textBox_itemBarcode.Text;

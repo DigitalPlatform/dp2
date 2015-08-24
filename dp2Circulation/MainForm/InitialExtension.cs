@@ -31,6 +31,45 @@ namespace dp2Circulation
         // FormLoad() 中的许多操作应当移动到这里来，以便尽早显示出框架窗口
         void FirstInitial()
         {
+            // 检查 KB????
+            /*
+操作类型 crashReport -- 异常报告 
+主题 dp2circulation 
+发送者 xxx
+媒体类型 text 
+内容 发生未捕获的异常: 
+Type: System.AggregateException
+Message: 未通过等待任务或访问任务的 Exception 属性观察到任务的异常。因此，终结器线程重新引发了未观察到的异常。
+Stack:
+在 System.Threading.Tasks.TaskExceptionHolder.Finalize()
+
+Type: System.IO.FileLoadException
+Message: 未能加载文件或程序集“System.Core, Version=2.0.5.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e, Retargetable=Yes”或它的某一个依赖项。给定程序集名称或基本代码无效。 (异常来自 HRESULT:0x80131047)
+Stack:
+在 DigitalPlatform.MessageClient.MessageConnection.Login(String userName, String password, String libraryUID, String libraryName, String propertyList)
+在 dp2Circulation.MessageHub.Login()
+在 DigitalPlatform.MessageClient.MessageConnection.<>c__DisplayClass5.<ConnectAsync>b__3(Task antecendent)
+在 System.Threading.Tasks.Task.<>c__DisplayClassb.<ContinueWith>b__a(Object obj)
+在 System.Threading.Tasks.Task.InnerInvoke()
+在 System.Threading.Tasks.Task.Execute()
+
+
+dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, PublicKeyToken=null
+操作系统：Microsoft Windows NT 6.0.6001 Service Pack 1 
+操作时间 2015/8/24 16:21:11 (Mon, 24 Aug 2015 16:21:11 +0800) 
+前端地址 xxx 经由 http://dp2003.com/dp2library 
+
+             * */
+            // https://support.microsoft.com/zh-cn/kb/2468871
+            string strKbName = "KB2468871";
+            if (Global.IsKbInstalled(strKbName) == false)
+            {
+                MessageBox.Show(this, "为运行 dp2Circulation， 请先安装 .NET Framework 4 更新 (" + strKbName + ")");
+                System.Diagnostics.Process.Start("iexplore", "https://support.microsoft.com/zh-cn/kb/2468871");
+                Application.Exit();
+                return;
+            }
+
             this.SetBevel(false);
 #if NO
             if (!API.DwmIsCompositionEnabled())

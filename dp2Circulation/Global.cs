@@ -22,6 +22,7 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CirculationClient.localhost;
 using System.Web;
+using Microsoft.Win32;
 
 namespace dp2Circulation
 {
@@ -30,6 +31,23 @@ namespace dp2Circulation
     /// </summary>
     public class Global
     {
+        // parameters:
+        //      strName 例如，"KB2544514"
+        public static bool IsKbInstalled(string strName)
+        {
+            try
+            {
+                using (RegistryKey baseKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32).OpenSubKey(@"SOFTWARE\Microsoft\Updates\Microsoft .NET Framework 4 Extended\" + strName))
+                {
+                    return (string)baseKey.GetValue("ThisVersionInstalled") == "Y";
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         // 在第一列前面插入一个空白列
         public static string[] InsertBlankColumn(string[] cols,
             int nDelta = 1)

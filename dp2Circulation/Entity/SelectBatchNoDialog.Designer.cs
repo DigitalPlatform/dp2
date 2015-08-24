@@ -82,6 +82,7 @@
             this.listView_records.TabIndex = 12;
             this.listView_records.UseCompatibleStateImageBehavior = false;
             this.listView_records.View = System.Windows.Forms.View.Details;
+            this.listView_records.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView_records_ColumnClick);
             // 
             // columnHeader_batchNo
             // 
@@ -140,7 +141,6 @@
             this.Name = "SelectBatchNoDialog";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
-            this.Text = "选择批次号";
             this.Load += new System.EventHandler(this.SelectBatchNoDialog_Load);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();

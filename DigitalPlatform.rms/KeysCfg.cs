@@ -946,7 +946,7 @@ namespace DigitalPlatform.rms
 
             if (this.m_assembly == null)
             {
-                strError = "keys 配置文件 '"+this.CfgFileName+"' 中未定义脚本代码，不能使用脚本函数'" + strFunctionName + "'。";
+                strError = "keys 配置文件 '"+this.CfgFileName+"' 中未定义脚本代码，因此无法使用脚本函数'" + strFunctionName + "'。";
                 return -1;
 
                 //strOutputString = "";

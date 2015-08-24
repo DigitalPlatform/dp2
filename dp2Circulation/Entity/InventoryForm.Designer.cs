@@ -28,14 +28,15 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.tabControl_main = new System.Windows.Forms.TabControl();
             this.tabPage_start = new System.Windows.Forms.TabPage();
             this.tabComboBox_inputBatchNo = new DigitalPlatform.CommonControl.TabComboBox();
             this.label1 = new System.Windows.Forms.Label();
             this.tabPage_scan = new System.Windows.Forms.TabPage();
             this.tabPage_inventoryList = new System.Windows.Forms.TabPage();
-            this.tableLayoutPanel_list = new System.Windows.Forms.TableLayoutPanel();
-            this.listView_inventoryList_records = new DigitalPlatform.GUI.ListViewNF();
+            this.tableLayoutPanel_inventoryList = new System.Windows.Forms.TableLayoutPanel();
+            this.listView_inventoryList_records = new DigitalPlatform.GUI.ListViewQU();
             this.columnHeader_path = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.panel_list_searchPanel = new System.Windows.Forms.Panel();
@@ -44,11 +45,27 @@
             this.textBox_inventoryList_batchNo = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.tabPage_baseList = new System.Windows.Forms.TabPage();
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.listView_baseList_records = new DigitalPlatform.GUI.ListViewQU();
+            this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.button_baseList_getLocations = new System.Windows.Forms.Button();
+            this.button_baseList_search = new System.Windows.Forms.Button();
+            this.textBox_baseList_locations = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.tabPage_statis = new System.Windows.Forms.TabPage();
+            this.button_statis_crossCompute = new System.Windows.Forms.Button();
+            this.timer_qu = new System.Windows.Forms.Timer(this.components);
             this.tabControl_main.SuspendLayout();
             this.tabPage_start.SuspendLayout();
             this.tabPage_inventoryList.SuspendLayout();
-            this.tableLayoutPanel_list.SuspendLayout();
+            this.tableLayoutPanel_inventoryList.SuspendLayout();
             this.panel_list_searchPanel.SuspendLayout();
+            this.tabPage_baseList.SuspendLayout();
+            this.tableLayoutPanel1.SuspendLayout();
+            this.panel1.SuspendLayout();
+            this.tabPage_statis.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl_main
@@ -57,6 +74,7 @@
             this.tabControl_main.Controls.Add(this.tabPage_scan);
             this.tabControl_main.Controls.Add(this.tabPage_inventoryList);
             this.tabControl_main.Controls.Add(this.tabPage_baseList);
+            this.tabControl_main.Controls.Add(this.tabPage_statis);
             this.tabControl_main.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl_main.Location = new System.Drawing.Point(0, 0);
             this.tabControl_main.Name = "tabControl_main";
@@ -110,7 +128,7 @@
             // 
             // tabPage_inventoryList
             // 
-            this.tabPage_inventoryList.Controls.Add(this.tableLayoutPanel_list);
+            this.tabPage_inventoryList.Controls.Add(this.tableLayoutPanel_inventoryList);
             this.tabPage_inventoryList.Location = new System.Drawing.Point(4, 22);
             this.tabPage_inventoryList.Name = "tabPage_inventoryList";
             this.tabPage_inventoryList.Size = new System.Drawing.Size(422, 252);
@@ -118,20 +136,20 @@
             this.tabPage_inventoryList.Text = "盘点集";
             this.tabPage_inventoryList.UseVisualStyleBackColor = true;
             // 
-            // tableLayoutPanel_list
+            // tableLayoutPanel_inventoryList
             // 
-            this.tableLayoutPanel_list.ColumnCount = 1;
-            this.tableLayoutPanel_list.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-            this.tableLayoutPanel_list.Controls.Add(this.listView_inventoryList_records, 0, 1);
-            this.tableLayoutPanel_list.Controls.Add(this.panel_list_searchPanel, 0, 0);
-            this.tableLayoutPanel_list.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel_list.Location = new System.Drawing.Point(0, 0);
-            this.tableLayoutPanel_list.Name = "tableLayoutPanel_list";
-            this.tableLayoutPanel_list.RowCount = 2;
-            this.tableLayoutPanel_list.RowStyles.Add(new System.Windows.Forms.RowStyle());
-            this.tableLayoutPanel_list.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel_list.Size = new System.Drawing.Size(422, 252);
-            this.tableLayoutPanel_list.TabIndex = 12;
+            this.tableLayoutPanel_inventoryList.ColumnCount = 1;
+            this.tableLayoutPanel_inventoryList.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel_inventoryList.Controls.Add(this.listView_inventoryList_records, 0, 1);
+            this.tableLayoutPanel_inventoryList.Controls.Add(this.panel_list_searchPanel, 0, 0);
+            this.tableLayoutPanel_inventoryList.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel_inventoryList.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel_inventoryList.Name = "tableLayoutPanel_inventoryList";
+            this.tableLayoutPanel_inventoryList.RowCount = 2;
+            this.tableLayoutPanel_inventoryList.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel_inventoryList.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel_inventoryList.Size = new System.Drawing.Size(422, 252);
+            this.tableLayoutPanel_inventoryList.TabIndex = 12;
             // 
             // listView_inventoryList_records
             // 
@@ -177,7 +195,7 @@
             // button_inventoryList_getBatchNos
             // 
             this.button_inventoryList_getBatchNos.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_inventoryList_getBatchNos.Location = new System.Drawing.Point(347, 47);
+            this.button_inventoryList_getBatchNos.Location = new System.Drawing.Point(260, 19);
             this.button_inventoryList_getBatchNos.Name = "button_inventoryList_getBatchNos";
             this.button_inventoryList_getBatchNos.Size = new System.Drawing.Size(75, 23);
             this.button_inventoryList_getBatchNos.TabIndex = 3;
@@ -190,7 +208,7 @@
             this.button_inventoryList_search.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.button_inventoryList_search.Location = new System.Drawing.Point(347, 19);
             this.button_inventoryList_search.Name = "button_inventoryList_search";
-            this.button_inventoryList_search.Size = new System.Drawing.Size(75, 23);
+            this.button_inventoryList_search.Size = new System.Drawing.Size(75, 51);
             this.button_inventoryList_search.TabIndex = 2;
             this.button_inventoryList_search.Text = "检索";
             this.button_inventoryList_search.UseVisualStyleBackColor = true;
@@ -205,7 +223,7 @@
             this.textBox_inventoryList_batchNo.Multiline = true;
             this.textBox_inventoryList_batchNo.Name = "textBox_inventoryList_batchNo";
             this.textBox_inventoryList_batchNo.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_inventoryList_batchNo.Size = new System.Drawing.Size(346, 54);
+            this.textBox_inventoryList_batchNo.Size = new System.Drawing.Size(260, 54);
             this.textBox_inventoryList_batchNo.TabIndex = 1;
             // 
             // label2
@@ -219,12 +237,137 @@
             // 
             // tabPage_baseList
             // 
+            this.tabPage_baseList.Controls.Add(this.tableLayoutPanel1);
             this.tabPage_baseList.Location = new System.Drawing.Point(4, 22);
             this.tabPage_baseList.Name = "tabPage_baseList";
             this.tabPage_baseList.Size = new System.Drawing.Size(422, 252);
             this.tabPage_baseList.TabIndex = 3;
             this.tabPage_baseList.Text = "基准集";
             this.tabPage_baseList.UseVisualStyleBackColor = true;
+            // 
+            // tableLayoutPanel1
+            // 
+            this.tableLayoutPanel1.ColumnCount = 1;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel1.Controls.Add(this.listView_baseList_records, 0, 1);
+            this.tableLayoutPanel1.Controls.Add(this.panel1, 0, 0);
+            this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            this.tableLayoutPanel1.RowCount = 2;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(422, 252);
+            this.tableLayoutPanel1.TabIndex = 13;
+            // 
+            // listView_baseList_records
+            // 
+            this.listView_baseList_records.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader1,
+            this.columnHeader2});
+            this.listView_baseList_records.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listView_baseList_records.FullRowSelect = true;
+            this.listView_baseList_records.HideSelection = false;
+            this.listView_baseList_records.Location = new System.Drawing.Point(0, 73);
+            this.listView_baseList_records.Margin = new System.Windows.Forms.Padding(0);
+            this.listView_baseList_records.Name = "listView_baseList_records";
+            this.listView_baseList_records.Size = new System.Drawing.Size(422, 179);
+            this.listView_baseList_records.TabIndex = 11;
+            this.listView_baseList_records.UseCompatibleStateImageBehavior = false;
+            this.listView_baseList_records.View = System.Windows.Forms.View.Details;
+            this.listView_baseList_records.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView_baseList_records_ColumnClick);
+            this.listView_baseList_records.SelectedIndexChanged += new System.EventHandler(this.listView_baseList_records_SelectedIndexChanged);
+            // 
+            // columnHeader1
+            // 
+            this.columnHeader1.Text = "路径";
+            this.columnHeader1.Width = 150;
+            // 
+            // columnHeader2
+            // 
+            this.columnHeader2.Text = "1";
+            this.columnHeader2.Width = 200;
+            // 
+            // panel1
+            // 
+            this.panel1.Controls.Add(this.button_baseList_getLocations);
+            this.panel1.Controls.Add(this.button_baseList_search);
+            this.panel1.Controls.Add(this.textBox_baseList_locations);
+            this.panel1.Controls.Add(this.label3);
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel1.Location = new System.Drawing.Point(0, 0);
+            this.panel1.Margin = new System.Windows.Forms.Padding(0);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(422, 73);
+            this.panel1.TabIndex = 12;
+            // 
+            // button_baseList_getLocations
+            // 
+            this.button_baseList_getLocations.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_baseList_getLocations.Location = new System.Drawing.Point(260, 19);
+            this.button_baseList_getLocations.Name = "button_baseList_getLocations";
+            this.button_baseList_getLocations.Size = new System.Drawing.Size(75, 23);
+            this.button_baseList_getLocations.TabIndex = 3;
+            this.button_baseList_getLocations.Text = "选取馆藏地";
+            this.button_baseList_getLocations.UseVisualStyleBackColor = true;
+            this.button_baseList_getLocations.Click += new System.EventHandler(this.button_baseList_getLocations_Click);
+            // 
+            // button_baseList_search
+            // 
+            this.button_baseList_search.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_baseList_search.Location = new System.Drawing.Point(347, 19);
+            this.button_baseList_search.Name = "button_baseList_search";
+            this.button_baseList_search.Size = new System.Drawing.Size(75, 51);
+            this.button_baseList_search.TabIndex = 2;
+            this.button_baseList_search.Text = "检索";
+            this.button_baseList_search.UseVisualStyleBackColor = true;
+            this.button_baseList_search.Click += new System.EventHandler(this.button_baseList_search_Click);
+            // 
+            // textBox_baseList_locations
+            // 
+            this.textBox_baseList_locations.AcceptsReturn = true;
+            this.textBox_baseList_locations.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_baseList_locations.Location = new System.Drawing.Point(0, 19);
+            this.textBox_baseList_locations.Multiline = true;
+            this.textBox_baseList_locations.Name = "textBox_baseList_locations";
+            this.textBox_baseList_locations.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox_baseList_locations.Size = new System.Drawing.Size(260, 54);
+            this.textBox_baseList_locations.TabIndex = 1;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(-2, 4);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(47, 12);
+            this.label3.TabIndex = 0;
+            this.label3.Text = "馆藏地:";
+            // 
+            // tabPage_statis
+            // 
+            this.tabPage_statis.Controls.Add(this.button_statis_crossCompute);
+            this.tabPage_statis.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_statis.Name = "tabPage_statis";
+            this.tabPage_statis.Size = new System.Drawing.Size(422, 252);
+            this.tabPage_statis.TabIndex = 4;
+            this.tabPage_statis.Text = "统计";
+            this.tabPage_statis.UseVisualStyleBackColor = true;
+            // 
+            // button_statis_crossCompute
+            // 
+            this.button_statis_crossCompute.Location = new System.Drawing.Point(9, 18);
+            this.button_statis_crossCompute.Name = "button_statis_crossCompute";
+            this.button_statis_crossCompute.Size = new System.Drawing.Size(232, 23);
+            this.button_statis_crossCompute.TabIndex = 0;
+            this.button_statis_crossCompute.Text = "交叉运算";
+            this.button_statis_crossCompute.UseVisualStyleBackColor = true;
+            this.button_statis_crossCompute.Click += new System.EventHandler(this.button_statis_crossCompute_Click);
+            // 
+            // timer_qu
+            // 
+            this.timer_qu.Interval = 1000;
+            this.timer_qu.Tick += new System.EventHandler(this.timer_qu_Tick);
             // 
             // InventoryForm
             // 
@@ -243,9 +386,14 @@
             this.tabPage_start.ResumeLayout(false);
             this.tabPage_start.PerformLayout();
             this.tabPage_inventoryList.ResumeLayout(false);
-            this.tableLayoutPanel_list.ResumeLayout(false);
+            this.tableLayoutPanel_inventoryList.ResumeLayout(false);
             this.panel_list_searchPanel.ResumeLayout(false);
             this.panel_list_searchPanel.PerformLayout();
+            this.tabPage_baseList.ResumeLayout(false);
+            this.tableLayoutPanel1.ResumeLayout(false);
+            this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
+            this.tabPage_statis.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -258,15 +406,27 @@
         private System.Windows.Forms.Label label1;
         private DigitalPlatform.CommonControl.TabComboBox tabComboBox_inputBatchNo;
         private System.Windows.Forms.TabPage tabPage_inventoryList;
-        private DigitalPlatform.GUI.ListViewNF listView_inventoryList_records;
+        private DigitalPlatform.GUI.ListViewQU listView_inventoryList_records;
         private System.Windows.Forms.ColumnHeader columnHeader_path;
         private System.Windows.Forms.ColumnHeader columnHeader_1;
-        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_list;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_inventoryList;
         private System.Windows.Forms.Panel panel_list_searchPanel;
         private System.Windows.Forms.Button button_inventoryList_getBatchNos;
         private System.Windows.Forms.Button button_inventoryList_search;
         private System.Windows.Forms.TextBox textBox_inventoryList_batchNo;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TabPage tabPage_baseList;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
+        private DigitalPlatform.GUI.ListViewQU listView_baseList_records;
+        private System.Windows.Forms.ColumnHeader columnHeader1;
+        private System.Windows.Forms.ColumnHeader columnHeader2;
+        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Button button_baseList_getLocations;
+        private System.Windows.Forms.Button button_baseList_search;
+        private System.Windows.Forms.TextBox textBox_baseList_locations;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.TabPage tabPage_statis;
+        private System.Windows.Forms.Button button_statis_crossCompute;
+        private System.Windows.Forms.Timer timer_qu;
     }
 }
