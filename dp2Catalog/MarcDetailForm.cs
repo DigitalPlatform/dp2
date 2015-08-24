@@ -5262,7 +5262,6 @@ out strError1);
                     goto ERROR1;
                 }
 
-
                 strAutogenDataCfgFilename = this.MainForm.DataDir + "\\" + strMarcSyntaxOID.Replace(".", "_") + "\\" + strCfgFileName;
                 strAutogenDataCfgRefFilename = this.MainForm.DataDir + "\\" + strMarcSyntaxOID.Replace(".", "_") + "\\" + strCfgFileName + ".ref";
 
@@ -5277,7 +5276,6 @@ out strError1);
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
-
 
             // dtlp协议的自动创建数据
             if (strProtocol.ToLower() == "dtlp")
@@ -5867,6 +5865,7 @@ e);
 
         void m_genDataViewer_TriggerAction(object sender, TriggerActionArgs e)
         {
+            string strError = "";
             if (this.m_detailHostObj != null)
             {
                 if (this.IsDisposed == true)
@@ -5880,12 +5879,41 @@ e);
                     }
                 }
                 if (String.IsNullOrEmpty(e.EntryName) == false)
-                    this.m_detailHostObj.Invoke(e.EntryName,
-                        e.sender,
-                        e.e);
+                {
+                    try
+                    {
+                        this.m_detailHostObj.Invoke(e.EntryName,
+                            e.sender,
+                            e.e);
+                    }
+                    catch(Exception ex)
+                    {
+                        // 2015/8/24
+                        strError = "MARC记录窗的记录 '"+this.SavePath+"' 在执行创建数据脚本的时候出现异常: " + ExceptionUtil.GetDebugText(ex)
+                            + "\r\n\r\n建议检查此书目记录相关的 dp2catalog_marc_autogen.cs 配置文件，试着刷新相关书目库定义，或者与数字平台的工程师取得联系";
+                        goto ERROR1;
+                    }
+                }
 
                 if (this.m_genDataViewer != null)
                     this.m_genDataViewer.RefreshState();
+            }
+            return;
+        ERROR1:
+            // MessageBox.Show(this, strError);
+            {
+                bool bSendReport = true;
+                DialogResult result = MessageDlg.Show(this,
+        "dp2Catalog 发生异常:\r\n\r\n" + strError,
+        "dp2Catalog 发生异常",
+        MessageBoxButtons.OK,
+        MessageBoxDefaultButton.Button1,
+        ref bSendReport,
+        new string[] { "确定" },
+        "将信息发送给开发者");
+                // 发送异常报告
+                if (bSendReport)
+                    Program.CrashReport(strError);
             }
         }
 

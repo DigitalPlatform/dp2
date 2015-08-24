@@ -150,7 +150,7 @@ namespace dp2Catalog
             return StringUtil.MakePathList(macs);
         }
 
-        static void CrashReport(string strText)
+        public static void CrashReport(string strText)
         {
             // MainForm main_form = Form.ActiveForm as MainForm;
 

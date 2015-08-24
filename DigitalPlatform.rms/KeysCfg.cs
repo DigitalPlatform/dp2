@@ -932,11 +932,11 @@ namespace DigitalPlatform.rms
             string strFunctionName,
             string strInputString,
             // out string strOutputString,
-            out List<string> OutputStrings,
+            out List<string> output_strings,
             out string strError)
         {
             strError = "";
-            OutputStrings = null;
+            output_strings = null;
 
             if (this.m_strAssemblyError != "")
             {
@@ -946,7 +946,7 @@ namespace DigitalPlatform.rms
 
             if (this.m_assembly == null)
             {
-                strError = "未定义脚本代码，不能使用脚本函数'" + strFunctionName + "'。";
+                strError = "keys 配置文件 '"+this.CfgFileName+"' 中未定义脚本代码，不能使用脚本函数'" + strFunctionName + "'。";
                 return -1;
 
                 //strOutputString = "";
@@ -987,13 +987,13 @@ namespace DigitalPlatform.rms
                 return -1;
             }
 
-            OutputStrings = host.ResultStrings;
+            output_strings = host.ResultStrings;
 
-            if (OutputStrings == null)
-                OutputStrings = new List<string>();
+            if (output_strings == null)
+                output_strings = new List<string>();
 
             if (String.IsNullOrEmpty(host.ResultString) == false)
-                OutputStrings.Insert(0, host.ResultString);
+                output_strings.Insert(0, host.ResultString);
 
             return 0;
         }

@@ -444,7 +444,6 @@ namespace dp2Catalog
             if (this.MainForm.TestMode == true)
                 e.Parameters += ",testmode=true";
 
-
             e.SavePasswordLong = true;
             e.LibraryServerUrl = dlg.ServerUrl;
         }

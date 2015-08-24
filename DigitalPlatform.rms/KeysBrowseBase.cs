@@ -23,6 +23,14 @@ namespace DigitalPlatform.rms
 
         public string BinDir = "";
 
+        // 2015/8/24
+        // 配置文件全路径
+        internal string CfgFileName
+        {
+            get;
+            set;
+        }
+
 
         // 初始化KeysBrowseBase对象，把dom准备好，把两个Hashtable准备好
         public virtual int Initial(string strCfgFileName,
@@ -63,6 +71,7 @@ namespace DigitalPlatform.rms
             if (fi.Length == 0)
                 return 0;
 
+            this.CfgFileName = strCfgFileName;
 
             dom = new XmlDocument();
             try
@@ -71,7 +80,7 @@ namespace DigitalPlatform.rms
             }
             catch (Exception ex)
             {
-                strError = "加载配置文件'" + strCfgFileName + "'到dom时出错：" + ex.Message;
+                strError = "加载配置文件 '" + strCfgFileName + "' 到 XMLDOM 时出错：" + ex.Message;
                 return -1;
             }
 
