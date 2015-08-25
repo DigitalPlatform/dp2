@@ -165,9 +165,9 @@ namespace DigitalPlatform.CirculationClient
                 return -1;
             }
 
-            dom.Save(strXmlFileName);
+            if (dom != null)
+                dom.Save(strXmlFileName);
             m_bChanged = false;
-
             return 0;
         }
 

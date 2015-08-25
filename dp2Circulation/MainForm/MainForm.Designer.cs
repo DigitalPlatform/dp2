@@ -226,7 +226,7 @@ namespace dp2Circulation
             this.menuStrip_main.Location = new System.Drawing.Point(0, 0);
             this.menuStrip_main.MdiWindowListItem = this.MenuItem_window;
             this.menuStrip_main.Name = "menuStrip_main";
-            this.menuStrip_main.Size = new System.Drawing.Size(621, 25);
+            this.menuStrip_main.Size = new System.Drawing.Size(596, 25);
             this.menuStrip_main.TabIndex = 0;
             this.menuStrip_main.Text = "menuStrip1";
             // 
@@ -1213,10 +1213,10 @@ namespace dp2Circulation
             this.statusStrip_main.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripProgressBar_main,
             this.toolStripStatusLabel_main});
-            this.statusStrip_main.Location = new System.Drawing.Point(0, 306);
+            this.statusStrip_main.Location = new System.Drawing.Point(0, 387);
             this.statusStrip_main.Name = "statusStrip_main";
             this.statusStrip_main.RenderMode = System.Windows.Forms.ToolStripRenderMode.Professional;
-            this.statusStrip_main.Size = new System.Drawing.Size(621, 22);
+            this.statusStrip_main.Size = new System.Drawing.Size(596, 22);
             this.statusStrip_main.TabIndex = 1;
             this.statusStrip_main.Text = "statusStrip1";
             // 
@@ -1231,7 +1231,7 @@ namespace dp2Circulation
             // toolStripStatusLabel_main
             // 
             this.toolStripStatusLabel_main.Name = "toolStripStatusLabel_main";
-            this.toolStripStatusLabel_main.Size = new System.Drawing.Size(504, 17);
+            this.toolStripStatusLabel_main.Size = new System.Drawing.Size(479, 17);
             this.toolStripStatusLabel_main.Spring = true;
             this.toolStripStatusLabel_main.Text = "欢迎使用 dp2Circulation ...";
             this.toolStripStatusLabel_main.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -1261,7 +1261,7 @@ namespace dp2Circulation
             this.toolButton_print});
             this.toolStrip_main.Location = new System.Drawing.Point(0, 25);
             this.toolStrip_main.Name = "toolStrip_main";
-            this.toolStrip_main.Size = new System.Drawing.Size(621, 25);
+            this.toolStrip_main.Size = new System.Drawing.Size(596, 25);
             this.toolStrip_main.TabIndex = 2;
             this.toolStrip_main.Text = "toolStrip1";
             this.toolStrip_main.DragDrop += new System.Windows.Forms.DragEventHandler(this.toolStrip_main_DragDrop);
@@ -1479,10 +1479,10 @@ namespace dp2Circulation
             this.panel_fixed.Controls.Add(this.tabControl_panelFixed);
             this.panel_fixed.Controls.Add(this.toolStrip_panelFixed);
             this.panel_fixed.Dock = System.Windows.Forms.DockStyle.Right;
-            this.panel_fixed.Location = new System.Drawing.Point(414, 50);
+            this.panel_fixed.Location = new System.Drawing.Point(389, 50);
             this.panel_fixed.Margin = new System.Windows.Forms.Padding(2);
             this.panel_fixed.Name = "panel_fixed";
-            this.panel_fixed.Size = new System.Drawing.Size(207, 256);
+            this.panel_fixed.Size = new System.Drawing.Size(207, 337);
             this.panel_fixed.TabIndex = 5;
             // 
             // tabControl_panelFixed
@@ -1502,7 +1502,7 @@ namespace dp2Circulation
             this.tabControl_panelFixed.Name = "tabControl_panelFixed";
             this.tabControl_panelFixed.Padding = new System.Drawing.Point(0, 0);
             this.tabControl_panelFixed.SelectedIndex = 0;
-            this.tabControl_panelFixed.Size = new System.Drawing.Size(207, 231);
+            this.tabControl_panelFixed.Size = new System.Drawing.Size(207, 312);
             this.tabControl_panelFixed.TabIndex = 1;
             this.tabControl_panelFixed.SelectedIndexChanged += new System.EventHandler(this.tabControl_panelFixed_SelectedIndexChanged);
             this.tabControl_panelFixed.SizeChanged += new System.EventHandler(this.tabControl_panelFixed_SizeChanged);
@@ -1528,7 +1528,7 @@ namespace dp2Circulation
             this.tabPage_history.Location = new System.Drawing.Point(4, 25);
             this.tabPage_history.Margin = new System.Windows.Forms.Padding(0);
             this.tabPage_history.Name = "tabPage_history";
-            this.tabPage_history.Size = new System.Drawing.Size(199, 202);
+            this.tabPage_history.Size = new System.Drawing.Size(199, 283);
             this.tabPage_history.TabIndex = 0;
             this.tabPage_history.Text = "操作历史";
             this.tabPage_history.UseVisualStyleBackColor = true;
@@ -1540,14 +1540,14 @@ namespace dp2Circulation
             this.webBrowser_history.Margin = new System.Windows.Forms.Padding(2);
             this.webBrowser_history.MinimumSize = new System.Drawing.Size(15, 16);
             this.webBrowser_history.Name = "webBrowser_history";
-            this.webBrowser_history.Size = new System.Drawing.Size(199, 202);
+            this.webBrowser_history.Size = new System.Drawing.Size(199, 283);
             this.webBrowser_history.TabIndex = 0;
             // 
             // tabPage_property
             // 
             this.tabPage_property.Location = new System.Drawing.Point(4, 25);
             this.tabPage_property.Name = "tabPage_property";
-            this.tabPage_property.Size = new System.Drawing.Size(199, 196);
+            this.tabPage_property.Size = new System.Drawing.Size(199, 202);
             this.tabPage_property.TabIndex = 1;
             this.tabPage_property.Text = "属性";
             this.tabPage_property.UseVisualStyleBackColor = true;
@@ -1556,7 +1556,7 @@ namespace dp2Circulation
             // 
             this.tabPage_verifyResult.Location = new System.Drawing.Point(4, 25);
             this.tabPage_verifyResult.Name = "tabPage_verifyResult";
-            this.tabPage_verifyResult.Size = new System.Drawing.Size(199, 196);
+            this.tabPage_verifyResult.Size = new System.Drawing.Size(199, 202);
             this.tabPage_verifyResult.TabIndex = 2;
             this.tabPage_verifyResult.Text = "校验结果";
             this.tabPage_verifyResult.UseVisualStyleBackColor = true;
@@ -1565,7 +1565,7 @@ namespace dp2Circulation
             // 
             this.tabPage_generateData.Location = new System.Drawing.Point(4, 25);
             this.tabPage_generateData.Name = "tabPage_generateData";
-            this.tabPage_generateData.Size = new System.Drawing.Size(199, 196);
+            this.tabPage_generateData.Size = new System.Drawing.Size(199, 202);
             this.tabPage_generateData.TabIndex = 3;
             this.tabPage_generateData.Text = "创建数据";
             this.tabPage_generateData.UseVisualStyleBackColor = true;
@@ -1574,7 +1574,7 @@ namespace dp2Circulation
             // 
             this.tabPage_camera.Location = new System.Drawing.Point(4, 25);
             this.tabPage_camera.Name = "tabPage_camera";
-            this.tabPage_camera.Size = new System.Drawing.Size(199, 196);
+            this.tabPage_camera.Size = new System.Drawing.Size(199, 202);
             this.tabPage_camera.TabIndex = 4;
             this.tabPage_camera.Text = "QR 识别";
             this.tabPage_camera.UseVisualStyleBackColor = true;
@@ -1583,7 +1583,7 @@ namespace dp2Circulation
             // 
             this.tabPage_accept.Location = new System.Drawing.Point(4, 25);
             this.tabPage_accept.Name = "tabPage_accept";
-            this.tabPage_accept.Size = new System.Drawing.Size(199, 196);
+            this.tabPage_accept.Size = new System.Drawing.Size(199, 202);
             this.tabPage_accept.TabIndex = 5;
             this.tabPage_accept.Text = "验收";
             this.tabPage_accept.UseVisualStyleBackColor = true;
@@ -1596,7 +1596,7 @@ namespace dp2Circulation
             this.tabPage_share.Location = new System.Drawing.Point(4, 25);
             this.tabPage_share.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage_share.Name = "tabPage_share";
-            this.tabPage_share.Size = new System.Drawing.Size(199, 196);
+            this.tabPage_share.Size = new System.Drawing.Size(199, 202);
             this.tabPage_share.TabIndex = 6;
             this.tabPage_share.Text = "分享";
             this.tabPage_share.UseVisualStyleBackColor = true;
@@ -1607,7 +1607,7 @@ namespace dp2Circulation
             this.webBrowser_messageHub.Location = new System.Drawing.Point(0, 0);
             this.webBrowser_messageHub.MinimumSize = new System.Drawing.Size(20, 20);
             this.webBrowser_messageHub.Name = "webBrowser_messageHub";
-            this.webBrowser_messageHub.Size = new System.Drawing.Size(199, 196);
+            this.webBrowser_messageHub.Size = new System.Drawing.Size(199, 202);
             this.webBrowser_messageHub.TabIndex = 0;
             // 
             // toolStrip_panelFixed
@@ -1635,10 +1635,10 @@ namespace dp2Circulation
             // splitter_fixed
             // 
             this.splitter_fixed.Dock = System.Windows.Forms.DockStyle.Right;
-            this.splitter_fixed.Location = new System.Drawing.Point(412, 50);
+            this.splitter_fixed.Location = new System.Drawing.Point(387, 50);
             this.splitter_fixed.Margin = new System.Windows.Forms.Padding(2);
             this.splitter_fixed.Name = "splitter_fixed";
-            this.splitter_fixed.Size = new System.Drawing.Size(2, 256);
+            this.splitter_fixed.Size = new System.Drawing.Size(2, 337);
             this.splitter_fixed.TabIndex = 6;
             this.splitter_fixed.TabStop = false;
             // 
@@ -1646,7 +1646,7 @@ namespace dp2Circulation
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(621, 328);
+            this.ClientSize = new System.Drawing.Size(596, 409);
             this.Controls.Add(this.splitter_fixed);
             this.Controls.Add(this.panel_fixed);
             this.Controls.Add(this.toolStrip_main);

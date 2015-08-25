@@ -64,10 +64,21 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
             string strKbName = "KB2468871";
             if (Global.IsKbInstalled(strKbName) == false)
             {
-                MessageBox.Show(this, "为运行 dp2Circulation， 请先安装 .NET Framework 4 更新 (" + strKbName + ")");
-                System.Diagnostics.Process.Start("iexplore", "https://support.microsoft.com/zh-cn/kb/2468871");
-                Application.Exit();
-                return;
+                Application.DoEvents();
+
+                DialogResult result = MessageBox.Show(this,
+    "为顺利运行 dp2Circulation， 请先安装 .NET Framework 4 更新 (" + strKbName + ")"
+    + "\r\n\r\n是否继续运行?",
+    "dp2Circulation",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button2);
+                if (result == System.Windows.Forms.DialogResult.No)
+                {
+                    System.Diagnostics.Process.Start("iexplore", "https://support.microsoft.com/zh-cn/kb/2468871");
+                    Application.Exit();
+                    return;
+                }
             }
 
             this.SetBevel(false);

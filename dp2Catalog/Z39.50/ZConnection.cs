@@ -967,6 +967,29 @@ namespace dp2Catalog
             NextBatchThreadBase(nCount);
         }
 
+        /*
+操作类型 crashReport -- 异常报告 
+主题 dp2catalog 
+发送者 xxx 
+媒体类型 text 
+内容 发生未捕获的异常: 
+Type: System.NullReferenceException
+Message: 並未將物件參考設定為物件的執行個體。
+Stack:
+於 dp2Catalog.ZConnection.NextBatchThreadBase(Int32 nCount)
+於 dp2Catalog.ZConnection.NextAllBatchThread()
+於 System.Threading.ThreadHelper.ThreadStart_Context(Object state)
+於 System.Threading.ExecutionContext.Run(ExecutionContext executionContext, ContextCallback callback, Object state, Boolean ignoreSyncCtx)
+於 System.Threading.ExecutionContext.Run(ExecutionContext executionContext, ContextCallback callback, Object state)
+於 System.Threading.ThreadHelper.ThreadStart()
+
+
+dp2Catalog 版本: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyToken=null
+操作系统：Microsoft Windows NT 5.1.2600 Service Pack 3 
+操作时间 2015/8/25 14:00:42 (Tue, 25 Aug 2015 14:00:42 +0800) 
+前端地址 xxx 经由 http://dp2003.com/dp2library 
+
+         * */
         // 线程主函数 基础函数。不能当线程函数用
         public void NextBatchThreadBase(int nCount)
         {
@@ -991,9 +1014,12 @@ namespace dp2Catalog
                 goto ERROR1;
             }
 
-            this.Stop.OnStop += new StopEventHandler(this.Stop_OnStop);
-            this.Stop.SetMessage("从服务器装入记录 ...");
-            this.Stop.BeginLoop();
+            if (this.Stop != null)
+            {
+                this.Stop.OnStop += new StopEventHandler(this.Stop_OnStop);
+                this.Stop.SetMessage("从服务器装入记录 ...");
+                this.Stop.BeginLoop();
+            }
 
             this.EnableControls(false);
 
@@ -1005,10 +1031,17 @@ namespace dp2Catalog
             try
             {
 
+                if (this.TargetInfo == null)
+                {
+                    strError = "this.TargetInfo == null";
+                    goto ERROR1;
+                }
+
                 // string strElementSetName = ZTargetControl.GetLeftValue(this.comboBox_elementSetName.Text);  // this.CurrentTargetInfo.DefaultElementSetName;
                 string strElementSetName = this.DefaultElementSetName;
 
                 if (strElementSetName == "B"
+                    && this.TargetInfo != null
                     && this.TargetInfo.FirstFull == true)
                     strElementSetName = "F";
 
@@ -1050,9 +1083,12 @@ namespace dp2Catalog
             }
             finally
             {
-                this.Stop.EndLoop();
-                this.Stop.OnStop -= new StopEventHandler(this.Stop_OnStop);
-                this.Stop.Initial("");
+                if (this.Stop != null)
+                {
+                    this.Stop.EndLoop();
+                    this.Stop.OnStop -= new StopEventHandler(this.Stop_OnStop);
+                    this.Stop.Initial("");
+                }
 
                 this.EnableControls(true);
             }

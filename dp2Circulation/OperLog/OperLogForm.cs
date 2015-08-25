@@ -26,6 +26,7 @@ using DigitalPlatform.Marc;
 using DigitalPlatform.MarcDom;
 
 using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.CommonControl;
 
 namespace dp2Circulation
 {
@@ -112,6 +113,7 @@ namespace dp2Circulation
 
             this.AcceptButton = this.button_loadFromSingleFile;
 
+#if NO
             this.textBox_logFileName.Text = MainForm.AppInfo.GetString(
                 "operlogform",
                 "logfilename",
@@ -129,6 +131,7 @@ namespace dp2Circulation
                 "operlogform",
                 "repair_verify_foldername",
                 "");
+#endif
 
             this.Channels = new LibraryChannelCollection();
             this.Channels.BeforeLogin -= new BeforeLoginEventHandle(Channels_BeforeLogin);
@@ -139,6 +142,11 @@ namespace dp2Circulation
                 DownPannelVisible = false;
              * */
             DownPannelVisible = false;  // 必须隐藏。因为放开后有 javascript 没有连接 host 等问题
+
+            this.UiState = this.MainForm.AppInfo.GetString(
+"operlog_form",
+"ui_state",
+"");
         }
 
         /// <summary>
@@ -214,6 +222,12 @@ namespace dp2Circulation
 
             ClearAllTempFiles();
 
+            this.MainForm.AppInfo.SetString(
+"operlog_form",
+"ui_state",
+this.UiState);
+
+#if NO
             MainForm.AppInfo.SetString(
                 "operlogform",
                 "logfilename",
@@ -231,6 +245,8 @@ namespace dp2Circulation
                 "operlogform",
                 "repair_verify_foldername",
                 this.textBox_repair_verifyFolderName.Text);
+#endif
+
 #if NO
             MainForm.AppInfo.SaveMdiChildFormStates(this,
     "mdi_form_state");
@@ -6693,6 +6709,32 @@ MessageBoxDefaultButton.Button1);
             return -1;
         }
         #endregion
+
+        public string UiState
+        {
+            get
+            {
+                List<object> controls = new List<object>();
+                controls.Add(this.listView_records);
+                controls.Add(this.textBox_filenames);
+                controls.Add(this.textBox_logFileName);
+                controls.Add(this.textBox_repair_sourceFilename);
+                controls.Add(this.textBox_repair_targetFilename);
+                controls.Add(this.textBox_repair_verifyFolderName);
+                return GuiState.GetUiState(controls);
+            }
+            set
+            {
+                List<object> controls = new List<object>();
+                controls.Add(this.listView_records);
+                controls.Add(this.textBox_filenames);
+                controls.Add(this.textBox_logFileName);
+                controls.Add(this.textBox_repair_sourceFilename);
+                controls.Add(this.textBox_repair_targetFilename);
+                controls.Add(this.textBox_repair_verifyFolderName);
+                GuiState.SetUiState(controls, value);
+            }
+        }
     }
 
     /// <summary>

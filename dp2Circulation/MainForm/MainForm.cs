@@ -730,7 +730,8 @@ namespace dp2Circulation
                 this.qrRecognitionControl1.CurrentCamera); 
             this.qrRecognitionControl1.Catched -= new DigitalPlatform.Drawing.CatchedEventHandler(qrRecognitionControl1_Catched);
 
-            this.MdiClient.ClientSizeChanged -= new EventHandler(MdiClient_ClientSizeChanged);
+            if (this.MdiClient != null)
+                this.MdiClient.ClientSizeChanged -= new EventHandler(MdiClient_ClientSizeChanged);
 
             // this.timer_operHistory.Stop();
 
@@ -753,34 +754,40 @@ namespace dp2Circulation
             }
 
             // cfgcache
-            string strError;
-            int nRet = cfgCache.Save(null, out strError);
-            if (nRet == -1)
-                MessageBox.Show(this, strError);
-
-            // 消除短期保存的密码
-            bool bSavePasswordLong =
-    AppInfo.GetBoolean(
-    "default_account",
-    "savepassword_long",
-    false);
-
-            if (bSavePasswordLong == false)
+            if (cfgCache != null)
             {
-                AppInfo.SetString(
-                    "default_account",
-                    "password",
-                    "");
+                string strError;
+                int nRet = cfgCache.Save(null, out strError);
+                if (nRet == -1)
+                    MessageBox.Show(this, strError);
             }
 
-            if (this.m_bSavePinyinGcatID == false)
-                this.m_strPinyinGcatID = "";
-            this.AppInfo.SetString("entity_form", "gcat_pinyin_api_id", this.m_strPinyinGcatID);
-            this.AppInfo.GetBoolean("entity_form", "gcat_pinyin_api_saveid", this.m_bSavePinyinGcatID);
+            if (this.AppInfo != null)
+            {
+                // 消除短期保存的密码
+                bool bSavePasswordLong =
+        AppInfo.GetBoolean(
+        "default_account",
+        "savepassword_long",
+        false);
 
-            //记住save,保存信息XML文件
-            AppInfo.Save();
-            AppInfo = null;	// 避免后面再用这个对象
+                if (bSavePasswordLong == false)
+                {
+                    AppInfo.SetString(
+                        "default_account",
+                        "password",
+                        "");
+                }
+
+                if (this.m_bSavePinyinGcatID == false)
+                    this.m_strPinyinGcatID = "";
+                this.AppInfo.SetString("entity_form", "gcat_pinyin_api_id", this.m_strPinyinGcatID);
+                this.AppInfo.GetBoolean("entity_form", "gcat_pinyin_api_saveid", this.m_bSavePinyinGcatID);
+
+                //记住save,保存信息XML文件
+                AppInfo.Save();
+                AppInfo = null;	// 避免后面再用这个对象
+            }
 
             if (this.Channel != null)
                 this.Channel.Close();   // TODO: 最好限制一个时间，超过这个时间则Abort()
