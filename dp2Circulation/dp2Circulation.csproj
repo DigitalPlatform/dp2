@@ -343,6 +343,12 @@
     <Compile Include="Entity\SelectBatchNoDialog.Designer.cs">
       <DependentUpon>SelectBatchNoDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="Entity\SelectColumnDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Entity\SelectColumnDialog.Designer.cs">
+      <DependentUpon>SelectColumnDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="IM\ChatForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -1491,6 +1497,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Entity\SelectBatchNoDialog.resx">
       <DependentUpon>SelectBatchNoDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Entity\SelectColumnDialog.resx">
+      <DependentUpon>SelectColumnDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="IM\ChatForm.resx">
       <DependentUpon>ChatForm.cs</DependentUpon>

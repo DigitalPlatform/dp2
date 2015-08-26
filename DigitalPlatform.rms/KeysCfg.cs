@@ -497,6 +497,29 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
+        // 根据 table 的 caption 名字，找到对应的 key/from 值
+        public static string GetFromValue(XmlElement table)
+        {
+            XmlElement key = null;
+            // 看看 table 元素的上级是不是 key
+            if (table.ParentNode.Name == "key")
+                key = table.ParentNode as XmlElement;
+            else
+            {
+                string strTableName = table.GetAttribute("name");
+                key = table.OwnerDocument.DocumentElement.SelectSingleNode("//key[./table[@ref='" + strTableName + "']]") as XmlElement;
+                if (key == null)
+                    return "";
+            }
+
+            {
+                XmlElement from = key.SelectSingleNode("from") as XmlElement;
+                if (from != null)
+                    return from.InnerText.Trim();
+                return "";
+            }
+        }
+
 
         // 创建指定记录的检索点集合
         // parameters:

@@ -1,7 +1,9 @@
-﻿using DigitalPlatform;
+﻿using ClosedXML.Excel;
+using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
 using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.CommonControl;
+using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Text;
 using System;
@@ -11,6 +13,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
@@ -296,6 +299,13 @@ this.UiState);
                 goto ERROR1;
             }
 
+            for (int i = 0; i < batchNo_list.Count; i++)
+            {
+                string batchNo = batchNo_list[i];
+                if (batchNo == "[空]" || batchNo == "[blank]")
+                    batchNo_list[i] = "";
+            }
+
             int nRet = DoSearchInventory(batchNo_list,
                 out strError);
             if (nRet == -1)
@@ -414,7 +424,7 @@ this.UiState);
                 // 获得结果集，装入listview
                 for (; ; )
                 {
-                    // stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
+                    stop.SetMessage("正在装入浏览信息 " + (lStart + 1).ToString() + " - " + (lStart + lPerCount).ToString() + " (命中 " + lHitCount.ToString() + " 条记录) ...");
                     Application.DoEvents();	// 出让界面控制权
 
                     if (stop != null && stop.State != 0)
@@ -866,6 +876,13 @@ this.UiState);
                 goto ERROR1;
             }
 
+            for(int i = 0;i<location_list.Count;i++)
+            {
+                string location = location_list[i];
+                if (location == "[空]" || location == "[blank]")
+                    location_list[i] = "";
+            }
+
             int nRet = DoSearchItems(location_list,
                 out strError);
             if (nRet == -1)
@@ -922,7 +939,7 @@ this.UiState);
 
                     long lHitCount = lRet;
 
-                    stop.SetProgressRange(0, lHitCount);
+                    stop.SetProgressRange(0, lTotalCount + lHitCount);
                     stop.Style = StopStyle.EnableHalfStop;
 
                     long lStart = 0;
@@ -1068,6 +1085,7 @@ null);
             Verified = 0,   // 经过验证存在的册
             Borrowed = 1,   // 外借状态
             Lost = 2,   // 丢失了的册
+            OutOfRange = 3, // 超出基准集范围的册。有可能是被上架上错到了盘点范围的书架上的本应放在其他地点的册
         }
 
         int DoCrossCompute(out string strError)
@@ -1114,6 +1132,13 @@ null);
                     item.BackColor = SystemColors.Window;
                 }
 
+                foreach (ListViewItem item in this.listView_inventoryList_records.Items)
+                {
+                    item.Tag = null;
+                    item.BackColor = SystemColors.Window;
+                }
+
+
                 this.ShowMessage("正在准备 Hashtable ...");
                 Application.DoEvents();
 
@@ -1152,8 +1177,15 @@ null);
                     ListViewItem found = (ListViewItem)recpath_table[strItemRecPath];
                     if (found != null)
                     {
+                        // 事项被验证
                         found.Tag = LineType.Verified;
                         SetLineColor(found, LineType.Verified);
+                    }
+                    else
+                    {
+                        // 事项超出基准集的范围了，设为黄色背景
+                        item.Tag = LineType.OutOfRange;
+                        SetLineColor(item, LineType.OutOfRange);
                     }
                 }
 
@@ -1210,6 +1242,8 @@ null);
                 item.BackColor = Color.LightSkyBlue;
             else if (type == LineType.Lost)
                 item.BackColor = Color.LightCoral;
+            else if (type == LineType.OutOfRange)
+                item.BackColor = Color.Yellow;
         }
 
         ListViewQU _listview = null;
@@ -1238,5 +1272,536 @@ null);
             }
         }
 
+        private void button_statis_outputExcel_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            bool bLaunchExcel = true;
+            this.ClearMessage();
+
+            // 询问文件名
+            SaveFileDialog dlg = new SaveFileDialog();
+
+            dlg.Title = "请指定要输出的 Excel 文件名";
+            dlg.CreatePrompt = false;
+            dlg.OverwritePrompt = true;
+            // dlg.FileName = this.ExportExcelFilename;
+            // dlg.InitialDirectory = Environment.CurrentDirectory;
+            dlg.Filter = "Excel 文件 (*.xlsx)|*.xlsx|All files (*.*)|*.*";
+
+            dlg.RestoreDirectory = true;
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            XLWorkbook doc = null;
+
+            try
+            {
+                doc = new XLWorkbook(XLEventTracking.Disabled);
+                File.Delete(dlg.FileName);
+            }
+            catch (Exception ex)
+            {
+                strError = ex.Message;
+                goto ERROR1;
+            }
+
+            this.ShowMessage("正在创建 Excel 报表");
+
+            stop.Style = StopStyle.EnableHalfStop;
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在创建 Excel 报表 ...");
+            stop.BeginLoop();
+
+            EnableControls(false);
+            this.listView_baseList_records.Enabled = false;
+            this.listView_inventoryList_records.Enabled = false;
+            try
+            {
+                List<string> output_columns = StringUtil.SplitList(this.OutputColumns);
+
+                // return:
+                //      -1  出错
+                //      0   放弃或中断
+                //      1   成功
+                nRet = CreateLostSheet(
+                    stop,
+                    doc,
+                    output_columns,
+                    out strError);
+                if (nRet != 1)
+                    goto ERROR1;
+
+                // return:
+                //      -1  出错
+                //      0   放弃或中断
+                //      1   成功
+                nRet = CreateOutOfRangeSheet(
+                    stop,
+                    doc,
+                    output_columns,
+                    out strError);
+                if (nRet != 1)
+                    goto ERROR1;
+
+                // return:
+                //      -1  出错
+                //      0   放弃或中断
+                //      1   成功
+                nRet = CreateBorrowedSheet(
+                    stop,
+                    doc,
+                    output_columns,
+                    out strError);
+                if (nRet != 1)
+                    goto ERROR1;
+
+                // return:
+                //      -1  出错
+                //      0   放弃或中断
+                //      1   成功
+                nRet = CreateVerifiedSheet(
+                    stop,
+                    doc,
+                    output_columns,
+                    out strError);
+                if (nRet != 1)
+                    goto ERROR1;
+            }
+            finally
+            {
+                EnableControls(true);
+                this.listView_baseList_records.Enabled = true;
+                this.listView_inventoryList_records.Enabled = true;
+
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                stop.HideProgress();
+                stop.Style = StopStyle.None;
+
+                if (doc != null)
+                {
+                    doc.SaveAs(dlg.FileName);
+                    doc.Dispose();
+                }
+
+                if (bLaunchExcel)
+                {
+                    try
+                    {
+                        System.Diagnostics.Process.Start(dlg.FileName);
+                    }
+                    catch
+                    {
+
+                    }
+                }
+
+            }
+
+            this.ShowMessage("创建完成", "green", true);
+            return;
+        ERROR1:
+            // MessageBox.Show(this, strError);
+            this.ShowMessage(strError, "red", true);
+        }
+
+        // return:
+        //      -1  出错
+        //      0   放弃或中断
+        //      1   成功
+        int CreateLostSheet(
+            Stop stop,
+            XLWorkbook doc,
+            List<string> output_columns,
+            out string strError)
+        {
+            strError = "";
+            IXLWorksheet sheet = null;
+            sheet = doc.Worksheets.Add("丢失的册");
+
+            // 为了让标题列文字正确出现，需要确保至少选择了一个行
+            if (this.listView_baseList_records.SelectedItems.Count == 0
+                && this.listView_baseList_records.Items.Count > 0)
+                this.listView_baseList_records.Items[0].Selected = true;
+
+            List<ListViewItem> items = new List<ListViewItem>();
+            foreach(ListViewItem item in this.listView_baseList_records.Items)
+            {
+                if (item.Tag == null)
+                    continue;
+                LineType type = (LineType)item.Tag;
+                if (type == LineType.Lost)
+                    items.Add(item);
+            }
+
+            // return:
+            //      -1  出错
+            //      0   放弃或中断
+            //      1   成功
+            int nRet = ExportToExcel(
+                stop,
+                this.listView_baseList_records,
+                output_columns,
+                items,
+                sheet,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            if (nRet == 0)
+                return 0;
+
+            return 1;
+        }
+
+        // return:
+        //      -1  出错
+        //      0   放弃或中断
+        //      1   成功
+        int CreateVerifiedSheet(
+            Stop stop,
+            XLWorkbook doc,
+            List<string> output_columns,
+            out string strError)
+        {
+            strError = "";
+            IXLWorksheet sheet = null;
+            sheet = doc.Worksheets.Add("验证存在的册");
+
+            // 为了让标题列文字正确出现，需要确保至少选择了一个行
+            if (this.listView_baseList_records.SelectedItems.Count == 0
+                && this.listView_baseList_records.Items.Count > 0)
+                this.listView_baseList_records.Items[0].Selected = true;
+
+            List<ListViewItem> items = new List<ListViewItem>();
+            foreach (ListViewItem item in this.listView_baseList_records.Items)
+            {
+                if (item.Tag == null)
+                    continue;
+                LineType type = (LineType)item.Tag;
+                if (type == LineType.Verified)
+                    items.Add(item);
+            }
+
+            // return:
+            //      -1  出错
+            //      0   放弃或中断
+            //      1   成功
+            int nRet = ExportToExcel(
+                stop,
+                this.listView_baseList_records,
+                output_columns,
+                items,
+                sheet,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            if (nRet == 0)
+                return 0;
+
+            return 1;
+        }
+
+        // return:
+        //      -1  出错
+        //      0   放弃或中断
+        //      1   成功
+        int CreateBorrowedSheet(
+            Stop stop,
+            XLWorkbook doc,
+            List<string> output_columns,
+            out string strError)
+        {
+            strError = "";
+            IXLWorksheet sheet = null;
+            sheet = doc.Worksheets.Add("在借状态的册");
+
+            // 为了让标题列文字正确出现，需要确保至少选择了一个行
+            if (this.listView_baseList_records.SelectedItems.Count == 0
+                && this.listView_baseList_records.Items.Count > 0)
+                this.listView_baseList_records.Items[0].Selected = true;
+
+            List<ListViewItem> items = new List<ListViewItem>();
+            foreach (ListViewItem item in this.listView_baseList_records.Items)
+            {
+                if (item.Tag == null)
+                    continue;
+                LineType type = (LineType)item.Tag;
+                if (type == LineType.Borrowed)
+                    items.Add(item);
+            }
+
+            // return:
+            //      -1  出错
+            //      0   放弃或中断
+            //      1   成功
+            int nRet = ExportToExcel(
+                stop,
+                this.listView_baseList_records,
+                output_columns,
+                items,
+                sheet,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            if (nRet == 0)
+                return 0;
+
+            return 1;
+        }
+
+        // return:
+        //      -1  出错
+        //      0   放弃或中断
+        //      1   成功
+        int CreateOutOfRangeSheet(
+            Stop stop,
+            XLWorkbook doc,
+            List<string> output_columns,
+            out string strError)
+        {
+            strError = "";
+            IXLWorksheet sheet = null;
+            sheet = doc.Worksheets.Add("超出盘点馆藏地范围的册");
+
+            // 为了让标题列文字正确出现，需要确保至少选择了一个行
+            if (this.listView_inventoryList_records.SelectedItems.Count == 0
+                && this.listView_inventoryList_records.Items.Count > 0)
+                this.listView_inventoryList_records.Items[0].Selected = true;
+
+            List<ListViewItem> items = new List<ListViewItem>();
+            foreach (ListViewItem item in this.listView_inventoryList_records.Items)
+            {
+                if (item.Tag == null)
+                    continue;
+                LineType type = (LineType)item.Tag;
+                if (type == LineType.OutOfRange)
+                    items.Add(item);
+            }
+
+            // return:
+            //      -1  出错
+            //      0   放弃或中断
+            //      1   成功
+            int nRet = ExportToExcel(
+                stop,
+                this.listView_inventoryList_records,
+                output_columns,
+                items,
+                sheet,
+                out strError);
+            if (nRet == -1)
+                return -1;
+            if (nRet == 0)
+                return 0;
+
+            return 1;
+        }
+
+        // parameters:
+        //      output_columns    输出列定义。如果为空，表示全部输出。这是一个数字列表，例如 "1,2,3,5"
+        // return:
+        //      -1  出错
+        //      0   放弃或中断
+        //      1   成功
+        public static int ExportToExcel(
+            Stop stop,
+            ListView list,
+            List<string> output_columns,
+            List<ListViewItem> items,
+            IXLWorksheet sheet,
+            out string strError)
+        {
+            strError = "";
+#if NO
+            if (items == null || items.Count == 0)
+            {
+                strError = "items == null || items.Count == 0";
+                return -1;
+            }
+#endif
+
+            // ListView list = items[0].ListView;
+            if (stop != null)
+                stop.SetProgressRange(0, items.Count);
+
+            List<int> indices = new List<int>();
+            if (output_columns == null && output_columns.Count == 0)
+            {
+                int i = 0;
+                foreach (ColumnHeader header in list.Columns)
+                {
+                    indices.Add(i++);
+                }
+            }
+            else
+            {
+                foreach (string s in output_columns)
+                {
+                    int v = 0;
+                    if (Int32.TryParse(s, out v) == false)
+                    {
+                        strError = "output_columns 数组中有非数字的字符串，格式错误";
+                        return -1;
+                    }
+                    indices.Add(v - 1);   // 从 0 开始计数
+                }
+            }
+
+            // 每个列的最大字符数
+            List<int> column_max_chars = new List<int>();
+
+            List<XLAlignmentHorizontalValues> alignments = new List<XLAlignmentHorizontalValues>();
+            //foreach (ColumnHeader header in list.Columns)
+            foreach (int index in indices)
+            {
+                ColumnHeader header = list.Columns[index];
+
+                if (header.TextAlign == HorizontalAlignment.Center)
+                    alignments.Add(XLAlignmentHorizontalValues.Center);
+                else if (header.TextAlign == HorizontalAlignment.Right)
+                    alignments.Add(XLAlignmentHorizontalValues.Right);
+                else
+                    alignments.Add(XLAlignmentHorizontalValues.Left);
+
+                column_max_chars.Add(0);
+            }
+
+            string strFontName = list.Font.FontFamily.Name;
+
+            int nRowIndex = 1;
+            int nColIndex = 1;
+            // foreach (ColumnHeader header in list.Columns)
+            foreach (int index in indices)
+            {
+                ColumnHeader header = list.Columns[index];
+
+                IXLCell cell = sheet.Cell(nRowIndex, nColIndex).SetValue(header.Text);
+                cell.Style.Alignment.WrapText = true;
+                cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                cell.Style.Font.Bold = true;
+                cell.Style.Font.FontName = strFontName;
+                cell.Style.Alignment.Horizontal = alignments[nColIndex - 1];
+                nColIndex++;
+            }
+            nRowIndex++;
+
+            //if (stop != null)
+            //    stop.SetMessage("");
+            foreach (ListViewItem item in items)
+            {
+                Application.DoEvents();
+
+                if (stop != null
+    && stop.State != 0)
+                {
+                    strError = "用户中断";
+                    return 0;
+                }
+
+                // List<CellData> cells = new List<CellData>();
+
+                nColIndex = 1;
+                // foreach (ListViewItem.ListViewSubItem subitem in item.SubItems)
+                foreach (int index in indices)
+                {
+                    string strText = "";
+                    ListViewItem.ListViewSubItem subitem = null;
+                    if (index < item.SubItems.Count)
+                    {
+                        subitem = item.SubItems[index];
+                        strText = subitem.Text;
+                    }
+                    else
+                    {
+                    }
+
+                    // 统计最大字符数
+                    int nChars = column_max_chars[nColIndex - 1];
+                    if (string.IsNullOrEmpty(strText) == false && strText.Length > nChars)
+                    {
+                        column_max_chars[nColIndex - 1] = strText.Length;
+                    }
+                    IXLCell cell = sheet.Cell(nRowIndex, nColIndex).SetValue(strText);
+                    cell.Style.Alignment.WrapText = true;
+                    cell.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                    cell.Style.Font.FontName = strFontName;
+                    cell.Style.Alignment.Horizontal = alignments[nColIndex - 1];
+                    nColIndex++;
+                }
+
+                if (stop != null)
+                    stop.SetProgressValue(nRowIndex - 1);
+
+                nRowIndex++;
+            }
+
+            if (stop != null)
+                stop.SetMessage("正在调整列宽度 ...");
+            Application.DoEvents();
+
+            double char_width = ClosedXmlUtil.GetAverageCharPixelWidth(list);
+
+            // 字符数太多的列不要做 width auto adjust
+            const int MAX_CHARS = 30;   // 60
+            {
+                int i = 0;
+                foreach (IXLColumn column in sheet.Columns())
+                {
+                    int nChars = column_max_chars[i];
+                    if (nChars < MAX_CHARS)
+                        column.AdjustToContents();
+                    else
+                        column.Width = (double)list.Columns[i].Width / char_width;  // Math.Min(MAX_CHARS, nChars);
+                    i++;
+                }
+            }
+
+            return 1;
+        }
+
+        private void button_statis_defOutputColumns_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            if (this.listView_baseList_records.Items.Count == 0)
+            {
+                strError = "基准集列表中必须有至少一行内容，才能对报表栏目进行配置";
+                goto ERROR1;
+            }
+
+            // 确保选中至少一行，这样列标题才能被初始化
+            if (this.listView_baseList_records.SelectedItems.Count == 0)
+                this.listView_baseList_records.Items[0].Selected = true;
+
+            SelectColumnDialog dlg = new SelectColumnDialog();
+            MainForm.SetControlFont(dlg, this.Font, false);
+            dlg.ListView = this.listView_baseList_records;
+            dlg.NumberList = StringUtil.SplitList(this.OutputColumns);
+            this.MainForm.AppInfo.LinkFormState(dlg, "SelectColumnDialog_state");
+            dlg.ShowDialog(this);
+
+            if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                return;
+
+            this.OutputColumns = StringUtil.MakePathList(dlg.NumberList);
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        public string OutputColumns
+        {
+            get
+            {
+                return this.MainForm.AppInfo.GetString("inventory_form", "output_columns", "<all>");
+            }
+            set
+            {
+                this.MainForm.AppInfo.SetString("inventory_form", "output_columns", value);
+            }
+        }
     }
 }

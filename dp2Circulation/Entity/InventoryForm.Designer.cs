@@ -55,8 +55,10 @@
             this.textBox_baseList_locations = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.tabPage_statis = new System.Windows.Forms.TabPage();
+            this.button_statis_outputExcel = new System.Windows.Forms.Button();
             this.button_statis_crossCompute = new System.Windows.Forms.Button();
             this.timer_qu = new System.Windows.Forms.Timer(this.components);
+            this.button_statis_defOutputColumns = new System.Windows.Forms.Button();
             this.tabControl_main.SuspendLayout();
             this.tabPage_start.SuspendLayout();
             this.tabPage_inventoryList.SuspendLayout();
@@ -346,6 +348,8 @@
             // 
             // tabPage_statis
             // 
+            this.tabPage_statis.Controls.Add(this.button_statis_defOutputColumns);
+            this.tabPage_statis.Controls.Add(this.button_statis_outputExcel);
             this.tabPage_statis.Controls.Add(this.button_statis_crossCompute);
             this.tabPage_statis.Location = new System.Drawing.Point(4, 22);
             this.tabPage_statis.Name = "tabPage_statis";
@@ -353,6 +357,16 @@
             this.tabPage_statis.TabIndex = 4;
             this.tabPage_statis.Text = "统计";
             this.tabPage_statis.UseVisualStyleBackColor = true;
+            // 
+            // button_statis_outputExcel
+            // 
+            this.button_statis_outputExcel.Location = new System.Drawing.Point(9, 60);
+            this.button_statis_outputExcel.Name = "button_statis_outputExcel";
+            this.button_statis_outputExcel.Size = new System.Drawing.Size(232, 23);
+            this.button_statis_outputExcel.TabIndex = 1;
+            this.button_statis_outputExcel.Text = "创建 Excel 报表 ...";
+            this.button_statis_outputExcel.UseVisualStyleBackColor = true;
+            this.button_statis_outputExcel.Click += new System.EventHandler(this.button_statis_outputExcel_Click);
             // 
             // button_statis_crossCompute
             // 
@@ -368,6 +382,16 @@
             // 
             this.timer_qu.Interval = 1000;
             this.timer_qu.Tick += new System.EventHandler(this.timer_qu_Tick);
+            // 
+            // button_statis_defOutputColumns
+            // 
+            this.button_statis_defOutputColumns.Location = new System.Drawing.Point(9, 118);
+            this.button_statis_defOutputColumns.Name = "button_statis_defOutputColumns";
+            this.button_statis_defOutputColumns.Size = new System.Drawing.Size(232, 23);
+            this.button_statis_defOutputColumns.TabIndex = 2;
+            this.button_statis_defOutputColumns.Text = "配置 Excel 报表栏目 ...";
+            this.button_statis_defOutputColumns.UseVisualStyleBackColor = true;
+            this.button_statis_defOutputColumns.Click += new System.EventHandler(this.button_statis_defOutputColumns_Click);
             // 
             // InventoryForm
             // 
@@ -428,5 +452,7 @@
         private System.Windows.Forms.TabPage tabPage_statis;
         private System.Windows.Forms.Button button_statis_crossCompute;
         private System.Windows.Forms.Timer timer_qu;
+        private System.Windows.Forms.Button button_statis_outputExcel;
+        private System.Windows.Forms.Button button_statis_defOutputColumns;
     }
 }

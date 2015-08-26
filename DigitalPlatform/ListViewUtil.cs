@@ -83,7 +83,7 @@ namespace DigitalPlatform.GUI
         }
 
         // parameters:
-        //      indices 返回移动涉及到的下表位置。第一个元素是移动前的位置，第二个元素是移动后的位置
+        //      indices 返回移动涉及到的下标位置。第一个元素是移动前的位置，第二个元素是移动后的位置
         public static int MoveItemUpDown(
             ListView list,
             bool bUp,

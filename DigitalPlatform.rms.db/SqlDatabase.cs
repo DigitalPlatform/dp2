@@ -4463,14 +4463,13 @@ namespace DigitalPlatform.rms
                     return 0;
 
                 // 2009/8/5 
-                bool bSearchNull = false;
+                bool bSearchNull = false;   // 是否为空值检索
                 if (searchItem.Match == "exact"
                     && searchItem.Relation == "="
                     && String.IsNullOrEmpty(searchItem.Word) == true)
                 {
                     bSearchNull = true;
                 }
-
 
                 string strCommand = "";
 
@@ -4503,10 +4502,15 @@ namespace DigitalPlatform.rms
                     strColumnList = " idstring" + strSelectKeystring + " ";
                 }
 
+
                 // 循环每一个检索途径
                 for (int i = 0; i < aTableInfo.Count; i++)
                 {
                     TableInfo tableInfo = aTableInfo[i];
+
+                    // 2015/8/25
+                    string strFromValue = "";
+                    strFromValue = KeysCfg.GetFromValue(tableInfo.Node as XmlElement);
 
                     // 参数名的后缀
                     string strPostfix = Convert.ToString(i);
@@ -4623,7 +4627,7 @@ namespace DigitalPlatform.rms
                     }
                     else
                     {
-                        strOneCommand = " union SELECT "
+                        strOneCommand = " SELECT "  // union
                             + strDistinct
                             + strTop
                             // + " idstring" + strSelectKeystring + " "  //DISTINCT 去重
@@ -4658,11 +4662,58 @@ namespace DigitalPlatform.rms
 
                             }
 
-                            strOneCommand = " union " + strOneCommand;
+                            // strOneCommand = " union " + strOneCommand;
                         }
                     }
-                    strCommand += strOneCommand;
+
+                    if (bSearchNull == true)
+                    {
+
+                        string strColumns = " id ";
+                        if (bOutputKeyCount == true)
+                        {
+                            if (bSearchNull == true)
+                                strColumns = " '', count(*) ";  // 2015/8/25
+                            else
+                                strColumns = " keystring='', count(*) ";
+                        }
+                        else if (bOutputKeyID == true)
+                        {
+                            if (bSearchNull == true)
+                            {
+                                // strColumns = " '', id, 'recid' ";  // 2015/8/25 TODO 第三列内容应该根据 tablename 翻译得到
+                                strColumns = " '', id, '"
+                                    + (string.IsNullOrEmpty(strFromValue) == false ? strFromValue : "recid")
+                                    + "' ";// 2015/8/25 
+                            }
+                            else
+                                strColumns = " keystring=id, id, fromstring='recid' ";   // fromstring='' 2011/7/24
+                        }
+
+                        {
+                            strOneCommand = "select "
+        + strColumns // " id "
+        + "from records where id like '__________' and id not in (" + strOneCommand + ") "
+        ; 
+                        }
+
+                    }
+
+                    if (i == 0)
+                        strCommand += strOneCommand;
+                    else
+                        strCommand += " union " + strOneCommand;
+
                 }
+
+
+                /*
+                 * select  '', id, 'barcode' from records where id like '__________' and id not in ( SELECT  DISTINCT  idstring  FROM keys_barcode  union SELECT  DISTINCT  idstring  FROM keys_batchno  union SELECT  DISTINCT  idstring  FROM keys_registerno  union SELECT  DISTINCT  idstring  FROM keys_accessNo  union SELECT  DISTINCT  idstring  FROM keys_location  union SELECT  DISTINCT  idstring  FROM keys_refID  union SELECT  DISTINCT  idstring  FROM keys_locationclass  union SELECT  DISTINCT  idstring  FROM keys_parent  union SELECT  DISTINCT  idstring  FROM keys_state  union SELECT  DISTINCT  idstring  FROM keys_parentlocation ) 
+                 * 应该修改为
+                 * select  '', id, 'barcode' from records where id like '__________' and id not in ( SELECT  DISTINCT  idstring  FROM keys_barcode )
+                 * UNION select  '', id, 'batchno' from records where id like '__________' and id not in ( SELECT  DISTINCT  idstring  FROM keys_batchno )
+                 * */
+
 
                 string strOrderBy = "";
                 if (string.IsNullOrEmpty(searchItem.OrderBy) == false)
@@ -4697,12 +4748,69 @@ namespace DigitalPlatform.rms
                             throw new Exception("未知的 SqlServerType");
                     }
 
+                    // Oracle比较特殊
+                    if (this.container.SqlServerType == SqlServerType.Oracle)
+                    {
+                        if (string.IsNullOrEmpty(strLimit) == false)
+                            strCommand = "SELECT * FROM (" + strCommand + ") "
+    + strOrderBy    // 2012/3/30
+    + strLimit;
+                        else
+                            strCommand = "select * FROM (" + strCommand + ") "
++ strOrderBy    // 2012/3/30
+;
+                    }
+                    else
+                    {
+                        if (string.IsNullOrEmpty(strTop) == false
+                            || string.IsNullOrEmpty(strLimit) == false
+                            || string.IsNullOrEmpty(strOrderBy) == false)
+                        strCommand = "select "
+    + strTop
+    + " * FROM (" + strCommand + ") "
+    + strOrderBy
+    + strLimit;
+                    }
+
+
+#if NO
+                    string strTop = "";
+                    string strLimit = "";
+
+                    if (searchItem.MaxCount != -1)  //限制的最大数
+                    {
+                        if (this.container.SqlServerType == SqlServerType.MsSqlServer)
+                            strTop = " TOP " + Convert.ToString(searchItem.MaxCount) + " ";
+                        else if (this.container.SqlServerType == SqlServerType.SQLite)
+                            strLimit = " LIMIT " + Convert.ToString(searchItem.MaxCount) + " ";
+                        else if (this.container.SqlServerType == SqlServerType.MySql)
+                            strLimit = " LIMIT " + Convert.ToString(searchItem.MaxCount) + " ";
+                        else if (this.container.SqlServerType == SqlServerType.Oracle)
+                            strLimit = " WHERE rownum <= " + Convert.ToString(searchItem.MaxCount) + " ";
+                        else
+                            throw new Exception("未知的 SqlServerType");
+                    }
+
                     string strColumns = " id ";
                     if (bOutputKeyCount == true)
-                        strColumns = " keystring='', count(*) ";
+                    {
+                        if (bSearchNull == true)
+                            strColumns = " '', count(*) ";  // 2015/8/25
+                        else
+                            strColumns = " keystring='', count(*) ";
+                    }
                     else if (bOutputKeyID == true)
-                        strColumns = " keystring=id, id, fromstring='recid' ";   // fromstring='' 2011/7/24
-
+                    {
+                        if (bSearchNull == true)
+                        {
+                            // strColumns = " '', id, 'recid' ";  // 2015/8/25 TODO 第三列内容应该根据 tablename 翻译得到
+                            strColumns = " '', id, '"
+                                +(string.IsNullOrEmpty(strFromValue) == false ? strFromValue: "recid")
+                                +"' ";// 2015/8/25 
+                        }
+                        else
+                            strColumns = " keystring=id, id, fromstring='recid' ";   // fromstring='' 2011/7/24
+                    }
 
                     // Oracle比较特殊
                     if (this.container.SqlServerType == SqlServerType.Oracle)
@@ -4730,6 +4838,7 @@ namespace DigitalPlatform.rms
     + strLimit;
                     }
 
+#endif
                 }
                 else
                 {

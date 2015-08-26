@@ -32,6 +32,12 @@ namespace dp2Circulation
 
         private void button_OK_Click(object sender, EventArgs e)
         {
+            if (this.listView_records.SelectedItems.Count == 0)
+            {
+                MessageBox.Show(this, "尚未选择任何事项");
+                return;
+            }
+
             this.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.Close();
         }
@@ -114,6 +120,8 @@ namespace dp2Circulation
         {
             strError = "";
 
+            long lTotalCount = 0;
+
             this.listView_records.Items.Clear();
 
             // EnableControls(false);
@@ -123,89 +131,102 @@ namespace dp2Circulation
 
             try
             {
-                long lRet = Channel.SearchItem(
-    stop,
-    "<all>",
-    "", // strBatchNo
-    -1,
-    "馆藏地点",
-    "left",
-    "zh",
-    "batchno",   // strResultSetName
-    "", // "desc",
-    "keycount", // strOutputStyle
-    out strError);
-                if (lRet == 0)
+                for (int i = 0; i < 2; i++)
                 {
-                    strError = "not found";
-                    return 0;   // not found
-                }
-                if (lRet == -1)
-                    return -1;
-
-                long lHitCount = lRet;
-
-                long lStart = 0;
-                long lCount = lHitCount;
-                DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
-
-                // 装入浏览格式
-                for (; ; )
-                {
-                    Application.DoEvents();	// 出让界面控制权
-
-                    if (stop != null && stop.State != 0)
-                    {
-                        strError = "用户中断";
-                        return -1;
-                    }
-
-                    lRet = channel.GetSearchResult(
-                        stop,
-                        "batchno",   // strResultSetName
-                        lStart,
-                        lCount,
-                        "keycount",
-                        "zh",
-                        out searchresults,
-                        out strError);
-                    if (lRet == -1)
-                    {
-                        strError = "GetSearchResult() error: " + strError;
-                        return -1;
-                    }
-
+                    long lRet = Channel.SearchItem(
+        stop,
+        "<all>",
+        "", // strBatchNo
+        -1,
+        "馆藏地点",
+        i == 0 ? "left" : "exact",  // 第二次为检索空值
+        "zh",
+        "batchno",   // strResultSetName
+        "", // "desc",
+        "keycount", // strOutputStyle
+        out strError);
                     if (lRet == 0)
                     {
-                        // MessageBox.Show(this, "未命中");
-                        return 0;
+#if NO
+                        strError = "not found";
+                        return 0;   // not found
+#endif 
+                        continue;
                     }
+                    if (lRet == -1)
+                        return -1;
 
-                    // 处理浏览结果
-                    foreach (Record record in searchresults)
+                    long lHitCount = lRet;
+
+                    long lStart = 0;
+                    long lCount = lHitCount;
+                    DigitalPlatform.CirculationClient.localhost.Record[] searchresults = null;
+
+                    // 装入浏览格式
+                    for (; ; )
                     {
-                        if (record.Cols == null)
+                        Application.DoEvents();	// 出让界面控制权
+
+                        if (stop != null && stop.State != 0)
                         {
-                            strError = "请更新应用服务器和数据库内核到最新版本，才能使用列出馆藏地的功能";
+                            strError = "用户中断";
                             return -1;
                         }
 
-                        ListViewItem item = new ListViewItem();
-                        item.Text = record.Path;
-                        ListViewUtil.ChangeItemText(item, 1, record.Cols[0]);
+                        lRet = channel.GetSearchResult(
+                            stop,
+                            "batchno",   // strResultSetName
+                            lStart,
+                            lCount,
+                            "keycount",
+                            "zh",
+                            out searchresults,
+                            out strError);
+                        if (lRet == -1)
+                        {
+                            strError = "GetSearchResult() error: " + strError;
+                            return -1;
+                        }
 
-                        this.listView_records.Items.Add(item);
+                        if (lRet == 0)
+                        {
+                            // MessageBox.Show(this, "未命中");
+                            continue;
+                        }
+
+                        // 处理浏览结果
+                        foreach (Record record in searchresults)
+                        {
+                            if (record.Cols == null)
+                            {
+                                strError = "请更新应用服务器和数据库内核到最新版本，才能使用列出馆藏地的功能";
+                                return -1;
+                            }
+
+                            ListViewItem item = new ListViewItem();
+                            item.Text = string.IsNullOrEmpty(record.Path) == false ? record.Path : "[空]";
+                            ListViewUtil.ChangeItemText(item, 1, record.Cols[0]);
+
+                            this.listView_records.Items.Add(item);
+                        }
+
+                        lStart += searchresults.Length;
+                        lCount -= searchresults.Length;
+
+                        stop.SetMessage("共命中 " + (lTotalCount + lHitCount).ToString() + " 条，已装入 " + (lTotalCount + lStart).ToString() + " 条");
+
+                        if (lStart >= lHitCount || lCount <= 0)
+                            break;
                     }
 
-                    lStart += searchresults.Length;
-                    lCount -= searchresults.Length;
-
-                    stop.SetMessage("共命中 " + lHitCount.ToString() + " 条，已装入 " + lStart.ToString() + " 条");
-
-                    if (lStart >= lHitCount || lCount <= 0)
-                        break;
+                    lTotalCount += lHitCount;
                 }
 
+                if (lTotalCount == 0)
+                {
+                    strError = "not found";
+                    return 0;
+                }
             }
             finally
             {
@@ -241,7 +262,12 @@ namespace dp2Circulation
                         + StringUtil.GetXmlStringSimple(strInventoryDbName + ":" + "批次号")
                         + "'><item><word>"
                         + StringUtil.GetXmlStringSimple("")
-                        + "</word><match>left</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang></target>";
+                        + "</word><match>left</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang>";
+                strQueryXml += "<operator value='OR' />";
+                strQueryXml += "<item><word>"
+        + StringUtil.GetXmlStringSimple("")
+        + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang></target>";
+
                 long lRet = channel.Search(
                     stop,
                     strQueryXml,
@@ -304,7 +330,7 @@ namespace dp2Circulation
                         }
 
                         ListViewItem item = new ListViewItem();
-                        item.Text = record.Path;
+                        item.Text = string.IsNullOrEmpty(record.Path) == false ? record.Path : "[空]";
                         ListViewUtil.ChangeItemText(item, 1, record.Cols[0]);
 
                         this.listView_records.Items.Add(item);

@@ -315,11 +315,12 @@ namespace dp2Kernel
         //      2.55 GetRecords()/GetBrowse()等的 strStyle 新增 format:@coldef:xxx|xxx 功能
         //      2.56 大幅度改进 WriteRecords() 等 API，提高了批处理 I/O 的速度 2013/2/21
         //      2.57 2015/1/21 改进 CopyRecord() API 增加了 strMergeStyle 和 strIdChangeList 参数。允许源和目标的对象都保留在目标记录中
+        //      2.58 2015/8/25 修改空值检索的错误。( keycount 和 keyid 风格之下 不正确的 not in ... union 语句)
         public Result GetVersion()
         {
             Result result = new Result();
             result.Value = 0;
-            result.ErrorString = "2.57";
+            result.ErrorString = "2.58";
             return result;
         }
 
