@@ -1,12 +1,4 @@
-﻿using ClosedXML.Excel;
-using DigitalPlatform;
-using DigitalPlatform.CirculationClient;
-using DigitalPlatform.CirculationClient.localhost;
-using DigitalPlatform.CommonControl;
-using DigitalPlatform.dp2.Statis;
-using DigitalPlatform.GUI;
-using DigitalPlatform.Text;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -17,6 +9,16 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+
+using ClosedXML.Excel;
+
+using DigitalPlatform;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.CirculationClient.localhost;
+using DigitalPlatform.CommonControl;
+using DigitalPlatform.dp2.Statis;
+using DigitalPlatform.GUI;
+using DigitalPlatform.Text;
 
 namespace dp2Circulation
 {
@@ -52,8 +54,8 @@ namespace dp2Circulation
                 this.listView_baseList_records.Tag = prop;
                 // 第一列特殊，记录路径
                 prop.SetSortStyle(0, ColumnSortStyle.RecPath);
-                prop.GetColumnTitles -= new GetColumnTitlesEventHandler(prop_GetColumnTitles2);
-                prop.GetColumnTitles += new GetColumnTitlesEventHandler(prop_GetColumnTitles2);
+                prop.GetColumnTitles -= new GetColumnTitlesEventHandler(prop_GetBaseListColumnTitles);
+                prop.GetColumnTitles += new GetColumnTitlesEventHandler(prop_GetBaseListColumnTitles);
 
                 prop.CompareColumn -= new CompareEventHandler(prop_CompareColumn2);
                 prop.CompareColumn += new CompareEventHandler(prop_CompareColumn2);
@@ -136,8 +138,9 @@ namespace dp2Circulation
                 e.Result = string.Compare(e.String1, e.String2);
         }
 
-        void prop_GetColumnTitles2(object sender, GetColumnTitlesEventArgs e)
+        void prop_GetBaseListColumnTitles(object sender, GetColumnTitlesEventArgs e)
         {
+#if NO
             if (e.DbName == "<blank>")
             {
                 e.ColumnTitles = new ColumnPropertyCollection();
@@ -147,9 +150,9 @@ namespace dp2Circulation
                 e.ListViewProperty.SetSortStyle(2, ColumnSortStyle.RightAlign);
                 return;
             }
-
+#endif
             e.ColumnTitles = new ColumnPropertyCollection();
-            ColumnPropertyCollection temp = this.MainForm.GetBrowseColumnProperties(e.DbName);
+            ColumnPropertyCollection temp = this.MainForm.GetBrowseColumnProperties("[inventory_item]");  // e.DbName
             if (temp != null)
             {
                 if (m_bBiblioSummaryColumn == true)
@@ -157,8 +160,26 @@ namespace dp2Circulation
                 e.ColumnTitles.AddRange(temp);  // 要复制，不要直接使用，因为后面可能会修改。怕影响到原件
             }
 
+#if NO
             if (this.m_bFirstColumnIsKey == true)
                 e.ColumnTitles.Insert(0, "命中的检索点");
+#endif
+            // 右侧补充的列
+            if (this._defs != null)
+            {
+                ColumnPropertyCollection inventory_properties = this.MainForm.GetBrowseColumnProperties(this._defs.InventoryDbName);
+                if (inventory_properties != null)
+                {
+                    foreach (int index in this._defs.source_indices)
+                    {
+                        if (index < inventory_properties.Count)
+                        {
+                            ColumnProperty source_prop = inventory_properties[index];
+                            e.ColumnTitles.Add(source_prop);
+                        }
+                    }
+                }
+            }
         }
 
 
@@ -182,6 +203,22 @@ namespace dp2Circulation
     "inventory_form",
     "ui_state",
     "");
+
+            this.BeginInvoke(new Action(Initial));
+        }
+
+        ColumnDefs _defs = null;
+
+        // 初始化
+        void Initial()
+        {
+            string strError = "";
+            ColumnDefs defs = null;
+            int nRet = PrepareColumnDefs(out defs, out strError);
+            if (nRet == -1)
+                MessageBox.Show(this, strError);
+
+            this._defs = defs;
         }
 
         private void InventoryForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -265,7 +302,8 @@ this.UiState);
         private void button_list_getBatchNos_Click(object sender, EventArgs e)
         {
             string strError = "";
-            string strInventoryDbName = this.MainForm.GetUtilDbName("inventory");
+
+            string strInventoryDbName = this._defs.InventoryDbName;
             if (string.IsNullOrEmpty(strInventoryDbName) == true)
             {
                 strError = "尚未定义盘点库";
@@ -357,7 +395,7 @@ this.UiState);
 
             ClearInventoryListViewItems();
 
-            string strDbName = this.MainForm.GetUtilDbName("inventory");
+            string strDbName = this._defs.InventoryDbName;
             if (string.IsNullOrEmpty(strDbName) == true)
             {
                 strError = "尚未配置盘点库";
@@ -883,7 +921,7 @@ this.UiState);
                     location_list[i] = "";
             }
 
-            int nRet = DoSearchItems(location_list,
+            int nRet = DoSearchBaseItems(location_list,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -893,10 +931,51 @@ this.UiState);
             MessageBox.Show(this, strError);
         }
 
-        int DoSearchItems(List<string> location_list,
+        // return:
+        //      -1  出错
+        //      0   没有找到定义
+        //      1   找到
+        public int GetColumnDefString(out string strResult,
+            out string strError)
+        {
+            strError = "";
+            strResult = "";
+
+            if (this.MainForm.NormalDbProperties == null)
+            {
+                strError = "普通数据库属性尚未初始化";
+                return -1;
+            }
+
+            ColumnPropertyCollection defs = this.MainForm.GetBrowseColumnProperties("[inventory_item]");
+            if (defs == null)
+            {
+                strError = "没有找到 [inventory_item] 的列定义";
+                return 0;
+            }
+
+            StringBuilder text = new StringBuilder();
+            int i = 0;
+            foreach(ColumnProperty prop in defs)
+            {
+                if (i > 0)
+                    text.Append("|");
+                text.Append(prop.XPath);
+                if (string.IsNullOrEmpty(prop.Convert) == false)
+                    text.Append("->" + prop.Convert);
+                i++;
+            }
+
+            strResult = text.ToString();
+            return 1;
+        }
+
+        // 检索基准集合
+        int DoSearchBaseItems(List<string> location_list,
     out string strError)
         {
             strError = "";
+            int nRet = 0;
 
             long lTotalCount = 0;   // 总共命中的记录数
 
@@ -915,6 +994,21 @@ this.UiState);
             this.timer_qu.Start();
             try
             {
+
+#if NO
+                string strColumnDef = "";
+                // return:
+                //      -1  出错
+                //      0   没有找到定义
+                //      1   找到
+                nRet = GetColumnDefString(out strColumnDef,
+            out strError);
+                if (nRet == -1)
+                    return -1;
+#endif
+
+                string strBrowseStyle = "id,cols,format:@coldef:" + this._defs.BrowseColumnDef;
+
                 foreach (string location in location_list)
                 {
                     string strResultSetName = "default";
@@ -963,7 +1057,7 @@ this.UiState);
                             strResultSetName,   // strResultSetName
                             lStart,
                             lPerCount,
-                            "id,cols",   // "id,cols"
+                            strBrowseStyle,   // "id,cols"
                             this.Lang,
                             out searchresults,
                             out strError);
@@ -1007,7 +1101,7 @@ this.UiState);
                             //      -1  出错
                             //      0   用户中断
                             //      1   完成
-                            int nRet = _fillBiblioSummaryColumn(items,
+                            nRet = _fillBiblioSummaryColumn(items,
                                 0,
                                 false,
                                 true,   // false,  // bAutoSearch
@@ -1048,6 +1142,194 @@ this.UiState);
                 EnableControls(true);
             }
         }
+
+        // 获得事项所从属的书目记录的路径
+        // parameters:
+        //      bAutoSearch 当没有 parent id 列的时候，是否自动进行检索以便获得书目记录路径
+        // return:
+        //      -1  出错
+        //      0   相关数据库没有配置 parent id 浏览列
+        //      1   找到
+        public override int GetBiblioRecPath(ListViewItem item,
+            bool bAutoSearch,
+            out int nCol,
+            out string strBiblioRecPath,
+            out string strError)
+        {
+            strError = "";
+            nCol = -1;
+            strBiblioRecPath = "";
+            int nRet = 0;
+
+            // 这是事项记录路径
+            string strRecPath = ListViewUtil.GetItemText(item, 0);
+
+            if (string.IsNullOrEmpty(strRecPath) == true)
+            {
+                strError = "浏览行记录路径列没有内容，无法获得书目记录路径";
+                return -1;
+            }
+
+            // 根据记录路径获得数据库名
+            string strItemDbName = Global.GetDbName(strRecPath);
+            // 根据数据库名获得 parent id 列号
+
+            object o = m_tableSummaryColIndex[strItemDbName];
+            if (o == null)
+            {
+                if (this.MainForm.NormalDbProperties == null)
+                {
+                    strError = "普通数据库属性尚未初始化";
+                    return -1;
+                }
+                ColumnPropertyCollection temp = this.MainForm.GetBrowseColumnProperties("[inventory_item]");
+                if (temp == null)
+                {
+                    strError = "实体库 '" + strItemDbName + "' 没有找到列定义 [inventory_item]";
+                    return -1;
+                }
+
+                nCol = temp.FindColumnByType("parent_id");
+                if (nCol == -1)
+                {
+                    if (bAutoSearch == false)
+                    {
+                        strError = "实体库 " + strItemDbName + " 的浏览格式没有配置 parent id 列";
+                        return 0;   // 这个实体库没有 parent id 列
+                    }
+
+                    // TODO: 这里关于浏览列 type 的判断应该通盘考虑，设计为通用功能，减少对特定库类型的判断依赖
+
+                    string strQueryString = "";
+                    if (this.DbType == "item")
+                    {
+                        Debug.Assert(this.DbType == "item", "");
+
+                        strQueryString = "@path:" + strRecPath;
+                    }
+                    else if (this.DbType == "arrive")
+                    {
+                        int nRefIDCol = temp.FindColumnByType("item_refid");
+                        if (nRefIDCol == -1)
+                        {
+                            strError = "预约到书库 " + strItemDbName + " 的浏览格式没有配置 item_refid 列";
+                            return 0;
+                        }
+
+                        strQueryString = ListViewUtil.GetItemText(item, nRefIDCol + 2);
+
+                        if (string.IsNullOrEmpty(strQueryString) == false)
+                        {
+                            strQueryString = "@refID:" + strQueryString;
+                        }
+                        else
+                        {
+                            int nItemBarcodeCol = temp.FindColumnByType("item_barcode");
+                            if (nRefIDCol == -1)
+                            {
+                                strError = "预约到书库 " + strItemDbName + " 的浏览格式没有配置 item_barcode 列";
+                                return 0;
+                            }
+                            strQueryString = ListViewUtil.GetItemText(item, nItemBarcodeCol + 2);
+                            if (string.IsNullOrEmpty(strQueryString) == true)
+                            {
+                                strError = "册条码号栏为空，无法获得书目记录路径";
+                                return 0;
+                            }
+                        }
+                    }
+
+                    string strItemRecPath = "";
+                    if (string.IsNullOrEmpty(strQueryString) == false)
+                    {
+                        Debug.Assert(this.DbType == "item" || this.DbType == "arrive", "");
+
+                        nRet = SearchTwoRecPathByBarcode(
+                            this.stop,
+                            this.Channel,
+                            strQueryString,    // "@path:" + strRecPath,
+                            out strItemRecPath,
+                            out strBiblioRecPath,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "获得书目记录路径时出错: " + strError;
+                            return -1;
+                        }
+                        else if (nRet == 0)
+                        {
+                            strError = "检索词 '" + strQueryString + "' 没有找到记录";
+                            return -1;
+                        }
+                        else if (nRet > 1) // 命中发生重复
+                        {
+                            strError = "检索词 '" + strQueryString + "' 命中 " + nRet.ToString() + " 条记录，这是一个严重错误";
+                            return -1;
+                        }
+                    }
+                    else
+                    {
+                        nRet = SearchBiblioRecPath(
+                            this.stop,
+                            this.Channel,
+                            this.DbType,
+                            strRecPath,
+                            out strBiblioRecPath,
+                            out strError);
+                    }
+                    if (nRet == -1)
+                    {
+                        strError = "获得书目记录路径时出错: " + strError;
+                        return -1;
+                    }
+                    else if (nRet == 0)
+                    {
+                        strError = "记录路径 '" + strRecPath + "' 没有找到记录";
+                        return -1;
+                    }
+                    else if (nRet > 1) // 命中发生重复
+                    {
+                        strError = "记录路径 '" + strRecPath + "' 命中 " + nRet.ToString() + " 条记录，这是一个严重错误";
+                        return -1;
+                    }
+
+                    return 1;
+                }
+
+                nCol += 2;
+                if (this.m_bFirstColumnIsKey == true)
+                    nCol++; // 2013/11/12
+                m_tableSummaryColIndex[strItemDbName] = nCol;   // 储存起来
+            }
+            else
+                nCol = (int)o;
+
+            Debug.Assert(nCol > 0, "");
+
+            // 获得 parent id
+            string strText = ListViewUtil.GetItemText(item, nCol);
+
+            // 看看是否已经是路径 ?
+            if (strText.IndexOf("/") == -1)
+            {
+                // 获得对应的书目库名
+                strBiblioRecPath = this.MainForm.GetBiblioDbNameFromItemDbName(this.DbType, strItemDbName);
+                if (string.IsNullOrEmpty(strBiblioRecPath) == true)
+                {
+                    strError = this.DbTypeCaption + "类型的数据库名 '" + strItemDbName + "' 没有找到对应的书目库名";
+                    return -1;
+                }
+                strBiblioRecPath = strBiblioRecPath + "/" + strText;
+
+                ListViewUtil.ChangeItemText(item, nCol, strBiblioRecPath);
+            }
+            else
+                strBiblioRecPath = strText;
+
+            return 1;
+        }
+
+
 
         private void listView_baseList_records_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -1105,12 +1387,18 @@ null);
                 return -1;
             }
 
+#if NO
             string strInventoryDbName = this.MainForm.GetUtilDbName("inventory");
             if (string.IsNullOrEmpty(strInventoryDbName) == true)
             {
                 strError = "尚未定义盘点库";
                 return -1;
             }
+#endif
+
+
+
+            string strInventoryDbName = this._defs.InventoryDbName;
 
             EnableControls(false);
             stop.OnStop += new StopEventHandler(this.Channel.DoStop);
@@ -1125,11 +1413,25 @@ null);
                 this.ShowMessage("正在清除标记 ...");
                 Application.DoEvents();
 
+                List<ListViewItem> delete_items = new List<ListViewItem>();
                 // *** 预备，清除以前的标记
                 foreach (ListViewItem item in this.listView_baseList_records.Items)
                 {
+                    if (item.Tag == null)
+                        continue;
+
+                    // 需要删除的 item 
+                    LineType type = (LineType)item.Tag;
+                    if (type == LineType.OutOfRange)
+                        delete_items.Add(item);
+
                     item.Tag = null;
                     item.BackColor = SystemColors.Window;
+                }
+
+                foreach(ListViewItem item in delete_items)
+                {
+                    this.listView_baseList_records.Items.Remove(item);
                 }
 
                 foreach (ListViewItem item in this.listView_inventoryList_records.Items)
@@ -1138,18 +1440,17 @@ null);
                     item.BackColor = SystemColors.Window;
                 }
 
-
                 this.ShowMessage("正在准备 Hashtable ...");
                 Application.DoEvents();
 
                 // *** 第一步，准备好记录路径的 Hashtable
-                Hashtable recpath_table = new Hashtable();
+                Hashtable base_recpath_table = new Hashtable();  // recpath --> ListViewItem
                 foreach(ListViewItem item in this.listView_baseList_records.Items)
                 {
                     string strRecPath = item.Text;
                     Debug.Assert(string.IsNullOrEmpty(strRecPath) == false, "");
                     if (string.IsNullOrEmpty(strRecPath) == false)
-                        recpath_table[strRecPath] = item;
+                        base_recpath_table[strRecPath] = item;
                 }
 
                 this.ShowMessage("正在标记盘点册 ...");
@@ -1166,6 +1467,12 @@ null);
                 }
                 nCol += 2;
 
+                // 确保基准列表的列标题个数足够
+                int nMax = this._defs._base_colmun_defs.Count + 2 + this._defs.source_indices.Count;
+                ListViewUtil.EnsureColumns(this.listView_baseList_records, nMax);
+
+                List<ListViewItem> outofrange_source_items = new List<ListViewItem>();
+                // List<string> outof_range_recpaths = new List<string>();
                 foreach(ListViewItem item in this.listView_inventoryList_records.Items)
                 {
                     string strItemRecPath = ListViewUtil.GetItemText(item, nCol);
@@ -1174,21 +1481,35 @@ null);
                         strError = "发现册记录路径为空的 盘点记录行。操作中断";
                         return -1;
                     }
-                    ListViewItem found = (ListViewItem)recpath_table[strItemRecPath];
+                    ListViewItem found = (ListViewItem)base_recpath_table[strItemRecPath];
                     if (found != null)
                     {
                         // 事项被验证
                         found.Tag = LineType.Verified;
                         SetLineColor(found, LineType.Verified);
+
+                        // 补充列
+                        AppendColumns(this._defs, found, item);
                     }
                     else
                     {
                         // 事项超出基准集的范围了，设为黄色背景
                         item.Tag = LineType.OutOfRange;
                         SetLineColor(item, LineType.OutOfRange);
+                        outofrange_source_items.Add(item);
                     }
                 }
 
+                this.ShowMessage("正在标记超范围册 ...");
+                Application.DoEvents();
+
+                // 将超出范围的册记录添加到基准集中
+                nRet = AddOutOfRangeItemsToBaseList(
+                    this._defs,
+                    outofrange_source_items,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
 
                 this.ShowMessage("正在标记外借和丢失册 ...");
                 Application.DoEvents();
@@ -1233,6 +1554,185 @@ null);
                 EnableControls(true);
             }
         }
+
+
+        class ColumnDefs
+        {
+            public string InventoryDbName = "";
+            public ColumnPropertyCollection _base_colmun_defs = null;
+            public ColumnPropertyCollection _inventory_column_defs = null;
+            public List<int> source_indices = new List<int>();
+
+            public int InventoryItemRecPathColumnIndex = -1;    // "盘点库 的 browse 配置文件中未定义 type 为 item_recpath 的列";
+
+            public string BrowseColumnDef = ""; // 基准集浏览列定义。用于 GetSearchResult()
+        }
+
+        int PrepareColumnDefs(out ColumnDefs defs, out string strError)
+        {
+            defs = null;
+            strError = "";
+
+            defs = new ColumnDefs();
+
+            defs.InventoryDbName = this.MainForm.GetUtilDbName("inventory");
+            if (string.IsNullOrEmpty(defs.InventoryDbName) == true)
+            {
+                strError = "尚未定义盘点库";
+                return -1;
+            }
+
+            {
+                // 获得 册记录路径 的列号
+                ColumnPropertyCollection temp = this.MainForm.GetBrowseColumnProperties(defs.InventoryDbName);
+                defs.InventoryItemRecPathColumnIndex = temp.FindColumnByType("item_recpath");
+                if (defs.InventoryItemRecPathColumnIndex == -1)
+                {
+                    strError = "盘点库 '" + defs.InventoryDbName + "' 的 browse 配置文件中未定义 type 为 item_recpath 的列";
+                    return -1;
+                }
+
+            }
+
+            {
+                defs._base_colmun_defs = this.MainForm.GetBrowseColumnProperties("[inventory_item]");
+                if (defs._base_colmun_defs == null)
+                {
+                    strError = "[inventory_item] 库列定义没有找到";
+                    return -1;
+                }
+            }
+
+            {
+                // 获得 册记录路径 的列号
+                defs._inventory_column_defs = this.MainForm.GetBrowseColumnProperties(defs.InventoryDbName);
+                if (defs._inventory_column_defs == null)
+                {
+                    strError = defs.InventoryDbName + " 库列定义没有找到";
+                    return -1;
+                }
+
+                List<string> types = new List<string>();
+                types.Add("batch_no");
+                types.Add("operator");
+                types.Add("oper_time");
+
+                foreach (string type in types)
+                {
+                    int nCol = defs._inventory_column_defs.FindColumnByType(type);
+                    if (nCol == -1)
+                    {
+                        strError = defs.InventoryDbName + " 库中 type 为 " + type + " 的列定义没有找到";
+                        return -1;
+                    }
+
+                    defs.source_indices.Add(nCol);
+                }
+            }
+
+            {
+                string strColumnDef = "";
+                // return:
+                //      -1  出错
+                //      0   没有找到定义
+                //      1   找到
+                int nRet = GetColumnDefString(out strColumnDef,
+            out strError);
+                if (nRet == -1)
+                    return -1;
+                defs.BrowseColumnDef = strColumnDef;
+            }
+
+            return 0;
+        }
+
+        void AppendColumns(ColumnDefs defs, ListViewItem target, ListViewItem source)
+        {
+            int target_index = defs._base_colmun_defs.Count + 2;
+            foreach (int source_index in defs.source_indices)
+            {
+                string strText = ListViewUtil.GetItemText(source, source_index + 2);
+                ListViewUtil.ChangeItemText(target, target_index ++, strText);
+            }
+        }
+
+        int AddOutOfRangeItemsToBaseList(
+            ColumnDefs defs,
+            List<ListViewItem> outofrange_source_items,
+            // List<string> recpaths,
+            out string strError)
+        {
+            strError = "";
+            int nRet = 0;
+
+            List<ListViewItem> items = new List<ListViewItem>();
+            foreach (ListViewItem source_item in outofrange_source_items)
+            {
+                string strItemRecPath = ListViewUtil.GetItemText(source_item, defs.InventoryItemRecPathColumnIndex + 2);
+                ListViewItem item = new ListViewItem();
+                item.Text = strItemRecPath;
+
+                this.listView_baseList_records.Items.Add(item);
+
+                items.Add(item);
+                // 事项超出基准集的范围了，设为黄色背景
+                item.Tag = LineType.OutOfRange;
+                SetLineColor(item, LineType.OutOfRange);
+
+                AppendColumns(defs, item, source_item);
+
+                // 复制书目摘要列
+                ListViewUtil.ChangeItemText(item, 1, ListViewUtil.GetItemText(source_item, 1));
+            }
+
+
+            string strBrowseStyle = "id,cols,format:@coldef:" + this._defs.BrowseColumnDef;
+
+            // 刷新浏览行
+            nRet = RefreshListViewLines(items,
+                strBrowseStyle,
+                false,
+                false,  // 不清除右侧多出来的列内容
+                out strError);
+            if (nRet == -1)
+                return -1;
+
+#if NO
+            // 刷新书目摘要
+            bool bAccessBiblioSummaryDenied = false;
+            if (bAccessBiblioSummaryDenied == false)
+            {
+                this.DbType = "item";
+                try
+                {
+                    // return:
+                    //      -2  获得书目摘要的权限不够
+                    //      -1  出错
+                    //      0   用户中断
+                    //      1   完成
+                    nRet = _fillBiblioSummaryColumn(items,
+                        0,
+                        false,
+                        true,   // false,  // bAutoSearch
+                        out strError);
+                }
+                finally
+                {
+                    this.DbType = "inventory";
+                }
+                if (nRet == -1)
+                    return -1;
+                if (nRet == -2)
+                    bAccessBiblioSummaryDenied = true;
+
+                if (nRet == 0)
+                    this.ShowMessage("用户中断刷新书目摘要...", "yellow", true);
+            }
+#endif
+
+            return 0;
+        }
+
 
         static void SetLineColor(ListViewItem item, LineType type)
         {
@@ -1568,12 +2068,12 @@ null);
             sheet = doc.Worksheets.Add("超出盘点馆藏地范围的册");
 
             // 为了让标题列文字正确出现，需要确保至少选择了一个行
-            if (this.listView_inventoryList_records.SelectedItems.Count == 0
-                && this.listView_inventoryList_records.Items.Count > 0)
-                this.listView_inventoryList_records.Items[0].Selected = true;
+            if (this.listView_baseList_records.SelectedItems.Count == 0
+                && this.listView_baseList_records.Items.Count > 0)
+                this.listView_baseList_records.Items[0].Selected = true;
 
             List<ListViewItem> items = new List<ListViewItem>();
-            foreach (ListViewItem item in this.listView_inventoryList_records.Items)
+            foreach (ListViewItem item in this.listView_baseList_records.Items)
             {
                 if (item.Tag == null)
                     continue;
@@ -1588,7 +2088,7 @@ null);
             //      1   成功
             int nRet = ExportToExcel(
                 stop,
-                this.listView_inventoryList_records,
+                this.listView_baseList_records,
                 output_columns,
                 items,
                 sheet,

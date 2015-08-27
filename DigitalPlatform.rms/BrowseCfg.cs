@@ -351,7 +351,7 @@ namespace DigitalPlatform.rms
             return strMethod;
         }
 
-        static string ConvertText(List<string> methods, string strText)
+        public static string ConvertText(List<string> methods, string strText)
         {
             if (methods == null || methods.Count == 0)
                 return strText;

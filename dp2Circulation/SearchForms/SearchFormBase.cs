@@ -574,6 +574,8 @@ out strError);
             }
 
             nRet = RefreshListViewLines(items,
+                "",
+                true,
                 true,
                 out strError);
             if (nRet == -1)
@@ -626,7 +628,9 @@ out strError);
             }
 
             nRet = RefreshListViewLines(items,
+                "",
                 true,
+                    true,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
@@ -641,11 +645,15 @@ out strError);
         /// 刷新浏览行
         /// </summary>
         /// <param name="items_param">要刷新的 ListViewItem 集合</param>
+        /// <param name="strFormat">浏览格式。供调用 GetSearchResult() 时 strStyle 参数之用 </param>
         /// <param name="bBeginLoop">是否要调用 stop.BeginLoop() </param>
+        /// <param name="bClearRestColumns">是否清除右侧多余的列内容</param>
         /// <param name="strError">返回出错信息</param>
         /// <returns>-1: 出错; 0: 成功</returns>
         public int RefreshListViewLines(List<ListViewItem> items_param,
+            string strFormat,
             bool bBeginLoop,
+            bool bClearRestColumns,
             out string strError)
         {
             strError = "";
@@ -684,7 +692,10 @@ out strError);
                 loader.Channel = Channel;
                 loader.Stop = stop;
                 loader.RecPaths = recpaths;
-                loader.Format = "id,cols";
+                if (string.IsNullOrEmpty(strFormat) == true)
+                    loader.Format = "id,cols";
+                else
+                    loader.Format = strFormat;
 
                 int i = 0;
                 foreach (DigitalPlatform.CirculationClient.localhost.Record record in loader)
@@ -731,7 +742,7 @@ out strError);
                         // TODO: 是否清除余下的列内容?
                     }
 #endif
-                    RefreshOneLine(item, record.Cols);
+                    RefreshOneLine(item, record.Cols, bClearRestColumns);
 
                     i++;
                 }
@@ -762,7 +773,8 @@ out strError);
         // parameters:
         //      cols    检索结果中的浏览列
         internal virtual void RefreshOneLine(ListViewItem item,
-            string [] cols)
+            string [] cols,
+            bool bClearRestColumns)
         {
             if (cols == null)
             {
@@ -784,11 +796,14 @@ out strError);
                     cols[c]);
                 }
 
-                c++;
-                // 清除余下的列内容
-                for (; c < item.SubItems.Count; c++)
+                if (bClearRestColumns)
                 {
-                    item.SubItems[c].Text = "";
+                    c++;
+                    // 清除余下的列内容
+                    for (; c < item.SubItems.Count; c++)
+                    {
+                        item.SubItems[c].Text = "";
+                    }
                 }
             }
         }
@@ -1221,7 +1236,9 @@ MessageBoxDefaultButton.Button1);
 
             // 2013/10/22
             nRet = RefreshListViewLines(items,
+                "",
                 true,
+                    true,
                 out strError);
             if (nRet == -1)
                 return -1;

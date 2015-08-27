@@ -942,10 +942,25 @@ namespace DigitalPlatform.GUI
         /// </summary>
         public string Type = "";    // 数值类型。排序时有用
 
-        public ColumnProperty(string strTitle, string strType = "")
+        /// <summary>
+        /// XPath
+        /// </summary>
+        public string XPath = "";   // XPath 字符串 2015/8/27
+
+        /// <summary>
+        /// 字符串转换方法
+        /// </summary>
+        public string Convert = ""; // 字符串转换方法 2015/8/27
+
+        public ColumnProperty(string strTitle, 
+            string strType = "",
+            string strXPath = "",
+            string strConvert = "")
         {
             this.Title = strTitle;
             this.Type = strType;
+            this.XPath = strXPath;
+            this.Convert = strConvert;
         }
     }
 
@@ -959,9 +974,12 @@ namespace DigitalPlatform.GUI
         /// </summary>
         /// <param name="strTitle">标题</param>
         /// <param name="strType">类型</param>
-        public void Add(string strTitle, string strType = "")
+        public void Add(string strTitle, 
+            string strType = "", 
+            string strXPath = "",
+            string strConvert = "")
         {
-            ColumnProperty prop = new ColumnProperty(strTitle, strType);
+            ColumnProperty prop = new ColumnProperty(strTitle, strType, strXPath, strConvert);
             base.Add(prop);
         }
 

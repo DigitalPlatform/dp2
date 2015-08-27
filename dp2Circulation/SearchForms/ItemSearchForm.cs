@@ -878,17 +878,17 @@ this.dp2QueryControl1.GetSaveString());
                     }
                 }
 
-                string strBrowseStyle = "id, cols";
+                // string strBrowseStyle = "id, cols";
                 string strOutputStyle = "";
                 if (bOutputKeyCount == true)
                 {
                     strOutputStyle = "keycount";
-                    strBrowseStyle = "keycount";
+                    //strBrowseStyle = "keycount";
                 }
                 else if (bOutputKeyID == true)
                 {
                     strOutputStyle = "keyid";
-                    strBrowseStyle = "keyid,key,id,cols";
+                    //strBrowseStyle = "keyid,key,id,cols";
                 }
 
                 long lRet = 0;
@@ -5063,7 +5063,9 @@ MessageBoxDefaultButton.Button1);
 
                 // 刷新浏览行
                 int nRet = RefreshListViewLines(items,
+                    "",
                     false,
+                    true,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;

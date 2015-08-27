@@ -1326,6 +1326,9 @@
     <Content Include="fingerprint-cache-loading.gif">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="default\inventory_item_browse.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="issue_change_actions.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -2548,7 +2551,7 @@
     <Content Include="settlement.css" />
     <None Include="TestCutter.xml" />
     <None Include="Testing\MarcQuery测试用例.txt" />
-    <Content Include="default_objectrights.xml">
+    <Content Include="default\objectrights.xml">
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

@@ -284,6 +284,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
             Application.AddMessageFilter(filter);
 #endif
 
+#if NO
             // 2015/7/19
             // 复制 datadir default_objectrights.xml --> userdir objectrights.xml
             {
@@ -300,6 +301,66 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
                         File.Copy(strSourceFileName, strTargetFileName, false);
                 }
             }
+#endif
+            CopyDefaultCfgFiles();
+        }
+
+        // 从数据目录 default 子目录复制配置文件到用户目录
+        // 如果用户目录中已经有同名文件存在，则不复制了
+        // 这种做法，是为了让用户可以修改实际使用的配置文件，并且在升级安装的时候，用户目录内的文件不会被安装修改原始的配置文件过程所覆盖
+        // return:
+        //      true    成功
+        //      false   失败。需要立即返回
+        bool CopyDefaultCfgFiles()
+        {
+            string strError = "";
+
+            // 从 数据目录 default 子目录中列举所有文件名
+            string strDefaultDir = Path.Combine(this.DataDir, "default");
+            DirectoryInfo di = new DirectoryInfo(strDefaultDir);
+            if (di.Exists == false)
+            {
+                strError = "配置文件目录 '" + strDefaultDir + "' 不存在，无法进行配置文件初始化操作。\r\n\r\n建议尽量直接从 dp2003.com 以 ClickOnce 方式安装 dp2circulation，以避免绿色安装时复制配置文件不全带来的麻烦";
+                goto ERROR1;
+            }
+
+            // 必须具备的一些配置文件名
+            List<string> filenames = new List<string>();
+            filenames.Add("objectrights.xml");
+            filenames.Add("inventory_item_browse.xml");
+
+            FileInfo[] fis = di.GetFiles("*.*");
+            foreach(FileInfo fi in fis)
+            {
+                if (filenames.IndexOf(fi.Name.ToLower()) != -1)
+                    filenames.Remove(fi.Name.ToLower());
+
+                string strTargetFileName = Path.Combine(this.UserDir, fi.Name);
+                if (File.Exists(strTargetFileName) == false)
+                {
+                    string strSourceFileName = fi.FullName;
+#if DEBUG
+                    if (File.Exists(strSourceFileName) == false)
+                    {
+                        strError = "配置文件 '" + strSourceFileName + "' 不存在，无法复制到用户目录。\r\n\r\n建议尽量直接从 dp2003.com 以 ClickOnce 方式安装 dp2circulation，以避免绿色安装时复制配置文件不全带来的麻烦";
+                        goto ERROR1;
+                    }
+#endif
+
+                    File.Copy(strSourceFileName, strTargetFileName, false);
+                }
+            }
+
+            if (filenames.Count > 0)
+            {
+                strError = "配置文件目录 '"+strDefaultDir+"' 中缺乏以下必备的配置文件: "+StringUtil.MakePathList(filenames)+"。\r\n\r\n建议尽量直接从 dp2003.com 以 ClickOnce 方式安装 dp2circulation，以避免绿色安装时复制配置文件不全带来的麻烦";
+                goto ERROR1;
+            }
+            return true;
+        ERROR1:
+            MessageBox.Show(this, strError);
+            Application.Exit();
+            return false;
         }
 
         // 初始化各种参数
@@ -1585,6 +1646,8 @@ AppInfo.GetString("config",
                     }
                 }
 
+                dbnames.Add("[inventory_item]");
+
                 foreach(string dbname in dbnames)
                 {
                     NormalDbProperty normal = null;
@@ -1599,6 +1662,9 @@ AppInfo.GetString("config",
                     List<string> filenames = new List<string>();
                     foreach (NormalDbProperty normal in this.NormalDbProperties)
                     {
+                        if (string.IsNullOrEmpty(normal.DbName) == false
+                            && normal.DbName[0] == '[')
+                            continue;
                         // NormalDbProperty normal = this.NormalDbProperties[i];
                         filenames.Add(normal.DbName + "/cfgs/browse");
                     }
@@ -1638,36 +1704,52 @@ AppInfo.GetString("config",
 
                         normal.ColumnProperties = new ColumnPropertyCollection();
 
-                        string strFileName = normal.DbName + "/cfgs/browse";
-                        string strTimestamp = (string)table[strFileName];
-
-                        string strContent = "";
-                        byte[] baCfgOutputTimestamp = null;
-                        nRet = GetCfgFile(
-                            Channel,
-                            Stop,
-                            normal.DbName,
-                            "browse",
-                            ByteArray.GetTimeStampByteArray(strTimestamp),
-                            out strContent,
-                            out baCfgOutputTimestamp,
-                            out strError);
-                        if (nRet == -1)
-                            goto ERROR1;
-
                         XmlDocument dom = new XmlDocument();
-                        try
+                        if (normal.DbName == "[inventory_item]")
                         {
-                            dom.LoadXml(strContent);
+                            string strFileName = Path.Combine(this.UserDir, "inventory_item_browse.xml");
+                            try
+                            {
+                                dom.Load(strFileName);
+                            }
+                            catch (Exception ex)
+                            {
+                                strError = "配置文件 " + strFileName + " 装入 XMLDOM 时出错: " + ex.Message;
+                                goto ERROR1;
+                            }
                         }
-                        catch (Exception ex)
+                        else
                         {
-                            strError = "数据库 " + normal.DbName + " 的 browse 配置文件内容装入XMLDOM时出错: " + ex.Message;
-                            goto ERROR1;
+                            string strFileName = normal.DbName + "/cfgs/browse";
+                            string strTimestamp = (string)table[strFileName];
+
+                            string strContent = "";
+                            byte[] baCfgOutputTimestamp = null;
+                            nRet = GetCfgFile(
+                                Channel,
+                                Stop,
+                                normal.DbName,
+                                "browse",
+                                ByteArray.GetTimeStampByteArray(strTimestamp),
+                                out strContent,
+                                out baCfgOutputTimestamp,
+                                out strError);
+                            if (nRet == -1)
+                                goto ERROR1;
+
+                            try
+                            {
+                                dom.LoadXml(strContent);
+                            }
+                            catch (Exception ex)
+                            {
+                                strError = "数据库 " + normal.DbName + " 的 browse 配置文件内容装入XMLDOM时出错: " + ex.Message;
+                                goto ERROR1;
+                            }
                         }
 
                         XmlNodeList nodes = dom.DocumentElement.SelectNodes("//col");
-                        foreach (XmlNode node in nodes)
+                        foreach (XmlElement node in nodes)
                         {
                             string strColumnType = DomUtil.GetAttr(node, "type");
 
@@ -1675,7 +1757,10 @@ AppInfo.GetString("config",
                             string strColumnTitle = dp2ResTree.GetColumnTitle(node,
                                 this.Lang);
 
-                            normal.ColumnProperties.Add(strColumnTitle, strColumnType);
+                            string strXPath = DomUtil.GetElementText(node, "xpath");
+                            string strConvert = node.GetAttribute("convert");
+
+                            normal.ColumnProperties.Add(strColumnTitle, strColumnType, strXPath, strConvert);
                         }
                     }
                 }
@@ -1686,6 +1771,9 @@ AppInfo.GetString("config",
                     foreach (NormalDbProperty normal in  this.NormalDbProperties)
                     {
                         // NormalDbProperty normal = this.NormalDbProperties[i];
+                        if (string.IsNullOrEmpty(normal.DbName) == false
+    && normal.DbName[0] == '[')
+                            continue;
 
                         normal.ColumnProperties = new ColumnPropertyCollection();
 
@@ -1715,7 +1803,7 @@ AppInfo.GetString("config",
                         }
 
                         XmlNodeList nodes = dom.DocumentElement.SelectNodes("//col");
-                        foreach (XmlNode node in nodes)
+                        foreach (XmlElement node in nodes)
                         {
                             string strColumnType = DomUtil.GetAttr(node, "type");
 
@@ -1723,7 +1811,10 @@ AppInfo.GetString("config",
                             string strColumnTitle = dp2ResTree.GetColumnTitle(node,
                                 this.Lang);
 
-                            normal.ColumnProperties.Add(strColumnTitle, strColumnType);
+                            string strXPath = DomUtil.GetElementText(node, "xpath");
+                            string strConvert = node.GetAttribute("convert");
+
+                            normal.ColumnProperties.Add(strColumnTitle, strColumnType, strXPath, strConvert);
                         }
                     }
                 }

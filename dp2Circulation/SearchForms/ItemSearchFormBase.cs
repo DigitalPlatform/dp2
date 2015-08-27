@@ -446,7 +446,9 @@ namespace dp2Circulation
 
                 // 刷新浏览行
                 int nRet = RefreshListViewLines(items,
+                    "",
                     false,
+                    true,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -503,7 +505,8 @@ namespace dp2Circulation
         // parameters:
         //      cols    检索结果中的浏览列
         internal override void RefreshOneLine(ListViewItem item,
-            string[] cols)
+            string[] cols,
+            bool bClearRestColumns)
         {
             if (cols == null)
             {
@@ -530,15 +533,18 @@ namespace dp2Circulation
                         cols[c]);
                 }
 
-                // 清除余下的列内容
-                if (this.m_bBiblioSummaryColumn == false)
-                    c += 1;
-                else
-                    c += 2;
-
-                for (; c < item.SubItems.Count; c++)
+                if (bClearRestColumns)
                 {
-                    item.SubItems[c].Text = "";
+                    // 清除余下的列内容
+                    if (this.m_bBiblioSummaryColumn == false)
+                        c += 1;
+                    else
+                        c += 2;
+
+                    for (; c < item.SubItems.Count; c++)
+                    {
+                        item.SubItems[c].Text = "";
+                    }
                 }
             }
         }

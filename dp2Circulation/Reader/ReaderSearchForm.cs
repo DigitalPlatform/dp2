@@ -1687,7 +1687,9 @@ out strError);
 
                 // 刷新浏览行
                 int nRet = RefreshListViewLines(items,
+                    "",
                     false,
+                    true,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -1977,7 +1979,9 @@ out strError);
                 }
 
                 int nRet = RefreshListViewLines(items,
+                    "",
                     false,
+                    true,
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;

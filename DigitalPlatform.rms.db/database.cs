@@ -1808,7 +1808,10 @@ namespace DigitalPlatform.rms
 
             for (int i = 0; i < xpaths.Length; i++)
             {
-                string strXpath = xpaths[i];
+                string strSegment = xpaths[i];
+                string strXpath = "";
+                string strConvert = "";
+                StringUtil.ParseTwoPart(strSegment, "->", out strXpath, out strConvert);
                 if (string.IsNullOrEmpty(strXpath) == true)
                 {
                     col_array.Add("");  // 空的 XPath 产生空的一列
@@ -1866,6 +1869,12 @@ namespace DigitalPlatform.rms
                 {
                     strError = "XPathExpression的ReturnType为'" + expr.ReturnType.ToString() + "'无效";
                     return -1;
+                }
+
+                if (string.IsNullOrEmpty(strConvert) == false)
+                {
+                    List<string> convert_methods = StringUtil.SplitList(strConvert);
+                    strText = BrowseCfg.ConvertText(convert_methods, strText);
                 }
 
                 // 空内容也要算作一列
