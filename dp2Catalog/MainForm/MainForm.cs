@@ -208,8 +208,7 @@ namespace dp2Catalog
             this.SetMenuItemState();
 
             // cfgcache
-            nRet = cfgCache.Load(this.DataDir
-                + "\\cfgcache.xml",
+            nRet = cfgCache.Load(Path.Combine(this.DataDir, "cfgcache.xml"),
                 out strError);
             if (nRet == -1)
             {
@@ -217,12 +216,11 @@ namespace dp2Catalog
                     MessageBox.Show(strError);
             }
 
-            cfgCache.TempDir = this.DataDir
-                + "\\cfgcache";
+            cfgCache.TempDir = Path.Combine(this.DataDir, "cfgcache");
             cfgCache.InstantSave = true;
 
             // Z39.50 froms
-            nRet = LoadFroms(this.DataDir + "\\bib1use.xml", out strError);
+            nRet = LoadFroms(Path.Combine(this.DataDir, "bib1use.xml"), out strError);
             if (nRet == -1)
                 MessageBox.Show(this, strError);
 
@@ -230,16 +228,16 @@ namespace dp2Catalog
             this.EaccCharsetTable = new CharsetTable();
             try
             {
-                this.EaccCharsetTable.Attach(this.DataDir + "\\eacc_charsettable",
-                    this.DataDir + "\\eacc_charsettable.index");
+                this.EaccCharsetTable.Attach(Path.Combine(this.DataDir, "eacc_charsettable"),
+                    Path.Combine(this.DataDir, "eacc_charsettable.index"));
                 this.EaccCharsetTable.ReadOnly = true;  // 避免Close()的时候删除文件
 
                 this.Marc8Encoding = new Marc8Encoding(this.EaccCharsetTable,
-                    this.DataDir + "\\asciicodetables.xml");
+                    Path.Combine(this.DataDir, "asciicodetables.xml"));
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, "装载EACC码表文件时发生错误: " + ex.Message);
+                MessageBox.Show(this, "装载 EACC 码表文件时发生错误: " + ex.Message);
             }
 
 
@@ -253,8 +251,8 @@ namespace dp2Catalog
             try
             {
 
-                Servers = dp2ServerCollection.Load(this.DataDir
-                    + "\\servers.bin",
+                Servers = dp2ServerCollection.Load(
+                    Path.Combine(this.DataDir, "servers.bin"),
                     true);
                 Servers.ownerForm = this;
             }
@@ -263,8 +261,11 @@ namespace dp2Catalog
                 MessageBox.Show(this, ex.Message);
                 Servers = new dp2ServerCollection();
                 // 设置文件名，以便本次运行结束时覆盖旧文件
-                Servers.FileName = this.DataDir
-                    + "\\servers.bin";
+                Servers.FileName = Path.Combine(this.DataDir, "servers.bin");
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(this, "servers.bin 装载出现异常: " + ex.Message);
             }
 
             this.Servers.ServerChanged += new dp2ServerChangedEventHandle(Servers_ServerChanged);
@@ -1798,8 +1799,8 @@ namespace dp2Catalog
             strError = "";
 
             string strUrl = "http://dp2003.com/dp2Catalog/" + strFileName;
-            string strLocalFileName = this.DataDir + "\\" + strFileName;
-            string strTempFileName = this.DataDir + "\\~temp_download_webfile";
+            string strLocalFileName = Path.Combine(this.DataDir , strFileName);
+            string strTempFileName = Path.Combine(this.DataDir, "~temp_download_webfile");
 
             int nRet = WebFileDownloadDialog.DownloadWebFile(
                 this,
@@ -1850,7 +1851,7 @@ out string strError)
 
             try
             {
-                this.QuickSjhm = new QuickSjhm(this.DataDir + "\\sjhm.xml");
+                this.QuickSjhm = new QuickSjhm(Path.Combine(this.DataDir, "sjhm.xml"));
             }
             catch (FileNotFoundException ex)
             {
@@ -1896,7 +1897,7 @@ out string strError)
 
             try
             {
-                this.QuickPinyin = new QuickPinyin(this.DataDir + "\\pinyin.xml");
+                this.QuickPinyin = new QuickPinyin(Path.Combine(this.DataDir, "pinyin.xml"));
             }
             catch (FileNotFoundException ex)
             {
@@ -1941,7 +1942,7 @@ out string strError)
 
             try
             {
-                this.IsbnSplitter = new IsbnSplitter(this.DataDir + "\\rangemessage.xml");  // "\\isbn.xml"
+                this.IsbnSplitter = new IsbnSplitter(Path.Combine(this.DataDir, "rangemessage.xml"));  // "\\isbn.xml"
             }
             catch (FileNotFoundException ex)
             {
@@ -3751,14 +3752,14 @@ out string strError)
             string strBinDir = Environment.CurrentDirectory;
 
             string[] saAddRef1 = {
-					strBinDir + "\\digitalplatform.marcdom.dll",
-					strBinDir + "\\digitalplatform.marckernel.dll",
-					strBinDir + "\\digitalplatform.marcquery.dll",
-					strBinDir + "\\digitalplatform.dll",
-					strBinDir + "\\digitalplatform.Text.dll",
-					strBinDir + "\\digitalplatform.IO.dll",
-					strBinDir + "\\digitalplatform.Xml.dll",
-					strBinDir + "\\dp2catalog.exe" };
+					Path.Combine(strBinDir , "digitalplatform.marcdom.dll"),
+					Path.Combine(strBinDir , "digitalplatform.marckernel.dll"),
+					Path.Combine(strBinDir , "digitalplatform.marcquery.dll"),
+					Path.Combine(strBinDir , "digitalplatform.dll"),
+					Path.Combine(strBinDir , "digitalplatform.Text.dll"),
+					Path.Combine(strBinDir , "digitalplatform.IO.dll"),
+					Path.Combine(strBinDir , "digitalplatform.Xml.dll"),
+					Path.Combine(strBinDir , "dp2catalog.exe") };
 
             Assembly assembly = null;
             string strWarning = "";

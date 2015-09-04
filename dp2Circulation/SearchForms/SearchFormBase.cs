@@ -841,7 +841,7 @@ out strError);
         // 清除一个事项的修改信息
         // parameters:
         //      bClearBiblioInfo    是否顺便清除事项的 BiblioInfo 信息
-        internal void ClearOneChange(ListViewItem item,
+        public virtual void ClearOneChange(ListViewItem item,
             bool bClearBiblioInfo = false)
         {
             string strRecPath = item.Text;

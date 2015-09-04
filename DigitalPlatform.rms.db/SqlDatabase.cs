@@ -625,7 +625,6 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
-
         // 得到数据源名称，对于Sql数据库，则是Sql数据库名。
         public override string GetSourceName()
         {
@@ -1339,6 +1338,20 @@ namespace DigitalPlatform.rms
             }
 
             return true;    // 表示全部都是 3701 error
+        }
+
+        // 探测是否包含特定的错误码
+        static bool ContainsErrorCode(SqlException ex, int nErrorCode)
+        {
+            if (ex.Errors == null || ex.Errors.Count == 0)
+                return false;
+            foreach (SqlError error in ex.Errors)
+            {
+                if (error.Number == nErrorCode)
+                    return true;
+            }
+
+            return false; 
         }
 
         // 管理keys表的index
@@ -11351,6 +11364,8 @@ out strError);
 
             string strDbType = "";
 
+            bool bDelete = false;   // 是否需要删除刚创建的记录？
+
             // 这里不再因为FastMode加写锁
 
             //*********对数据库加读锁*************
@@ -11429,53 +11444,6 @@ out strError);
                         bool bNeedInsertRow = false;
                         if (nRet == 2)
                             bNeedInsertRow = true;
-
-#if NO
-                            byte[] baOldPreamble = new byte[0];
-                            string strOldXml = "";
-                            // 分支
-                            if (string.IsNullOrEmpty(strXPath) == false)
-                            {
-                                if (bExist == true)
-                                {
-                                    // return:
-                                    //      -1  出错
-                                    //      -4  记录不存在
-        //      -100    对象文件不存在
-                                    //      0   正确
-                                    nRet = this.GetXmlData(
-                                        connection,
-                                        row_info,
-                                        strID,
-                                        false,   // "data",
-                                        out strOldXml,
-                                        out baOldPreamble,
-                                        out strError);
-                                    if (nRet <= -1 && nRet != -3)
-                                        return nRet;
-                                }
-
-                                byte[] baPreamble = null;
-                                string strNewPartXml = DatabaseUtil.ByteArrayToString(baSource,
-out baPreamble);
-
-                                // 根据参数中提供的局部内容创建出完整的记录
-                                nRet = BuildRecordXml(
-                                    strID,
-                                    strXPath,
-                                    strOldXml,
-                                    strNewPartXml,
-                                    baPreamble,
-                                    out baSource,
-                                    out strRanges,
-                                    out strOutputValue,
-                                    out strError);
-                                if (nRet == -1)
-                                    return -1;
-
-                                lTotalLength = baSource.Length;
-                            }
-#endif
 
                         bool bForceDeleteKeys = false;  // 是否要强制删除已经存在的keys
 
@@ -11678,6 +11646,8 @@ out baPreamble);
                                     return -1;
                             }
 
+                            // 调试 ---
+
                             // 处理检索点
                             // return:
                             //      -1  出错
@@ -11688,7 +11658,15 @@ out baPreamble);
                                 bFastMode,
                                 out strError);
                             if (nRet == -1)
+                            {
+                                if (bExist == false)
+                                {
+                                    // 创建 record 行成功，但在创建检索点时出现错误。这样检索点就不正常了。一个办法是标注后，以后重试刷新检点；一个办法是现在立即删除 record 行和所有 keys 行
+                                    bDelete = true;
+                                    goto ERROR2;
+                                }
                                 return -1;
+                            }
 
                             // 注：如果因为旧的XML对象文件丢失，造成ModifyFiles()去创建已经存在的对象records行，那么创建自然会被忽视，没有什么副作用
 
@@ -11703,81 +11681,21 @@ out baPreamble);
                                 out strError);
                             if (nRet == -1)
                                 return -1;
-
-
-                            {
-#if NO
-                                    // 4.用new更新data
-                                    // return:
-                                    //      -1  出错
-                                    //      >=0   成功 返回影响的记录数
-                                    nRet = this.UpdateDataField(connection,
-                                        strID,
-                                        out strError);
-                                    if (nRet == -1)
-                                        return -1;
-
-#endif
-
-#if NO
-                                    // 5.删除newdata字段
-                                    string strRemoveFieldName = "";
-                                    byte [] remove_textptr = null;
-                                    long lRemoveLength = 0;
-                                    // return:
-                                    //      -1  对象文件
-                                    //      0   正向image字段
-                                    //      1   反向image字段
-                                    int nReverse = GetReverse(row_info.Range);
-
-                                    // 注意自从WriteSqlRecord()以后标志已经反转过来了，刚好表现了实际情况
-                                    if (nReverse == 0)
-                                    {
-                                        strRemoveFieldName = "newdata";
-                                        remove_textptr = row_info.newdata_textptr;
-                                        lRemoveLength = row_info.newdata_length;
-                                    }
-                                    else if (nReverse == 1)
-                                    {
-                                        strRemoveFieldName = "data";
-                                        remove_textptr = row_info.data_textptr;
-                                        lRemoveLength = row_info.data_length;
-                                    }
-
-                                    if (nReverse != -1
-                                        && lRemoveLength > 0 && remove_textptr != null)
-                                    {
-                                        // return:
-                                        //		-1  出错
-                                        //		0   成功
-                                        nRet = this.RemoveImage(connection,
-                                            strRemoveFieldName,
-                                            remove_textptr,
-                                            out strError);
-                                        if (nRet == -1)
-                                            return -1;
-                                    }
-#endif
-                            }
                         }
+
+                        bDelete = false;    // 此后走到 ERROR2 不会删除新创建的记录
                     }
                     catch (SqlException sqlEx)
                     {
                         strError = "3 WriteXml() 在给'" + this.GetCaption("zh-CN") + "'库写入记录'" + strID + "'时出错,原因:" + GetSqlErrors(sqlEx);
-
-                        /*
-                        if (sqlEx.Errors is SqlErrorCollection)
-                            strError = "数据库'" + this.GetCaption("zh") + "'尚未初始化。";
-                        else
-                            strError = "WriteXml() 在给'" + this.GetCaption("zh-CN") + "'库写入记录'" + strID + "'时出错,原因:" + sqlEx.Message;
-                         * */
-
-                        return -1;
+                        // return -1;
+                        goto ERROR2;
                     }
                     catch (Exception ex)
                     {
                         strError = "4 WriteXml() 在给'" + this.GetCaption("zh-CN") + "'库写入记录'" + strID + "'时出错,原因:" + ex.Message;
-                        return -1;
+                        // return -1;
+                        goto ERROR2;
                     }
                     finally
                     {
@@ -11802,7 +11720,6 @@ out baPreamble);
 #endif
             }
 
-
             // 当本函数被明知为账户库的写操作调用时, 一定要用bCheckAccount==false
             // 来调用，否则容易引起不必要的递归
             if (bFull == true
@@ -11824,6 +11741,24 @@ out baPreamble);
             }
 
             return 0;
+            ERROR2:
+            if (bDelete == true)
+            {
+                string strError1 = "";
+                byte[] baOutputTimestamp = null;
+                nRet = DeleteRecord(
+                    strID,
+                    null,
+                    "deletekeysbyid,ignorechecktimestamp",
+                    out baOutputTimestamp,
+                    out strError1);
+                if (nRet == -1 ||nRet == -4)
+                    strError += "; 在删除刚创建的记录 '"+strID+"' 时又遇到出错: " + strError1;
+
+                // TODO: 若能把 id 回收，下次重复使用就好了
+            }
+
+            return -1;
         }
 
         // parameters:
@@ -14036,36 +13971,47 @@ out baPreamble);
 
                 SqlCommand command = new SqlCommand(strCommand,
                     connection.SqlConnection);
-
-                SqlDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult);
                 try
                 {
-                    // 1.记录不存在报错
-                    if (dr == null
-                        || dr.HasRows == false)
+                    using (SqlDataReader dr = command.ExecuteReader(CommandBehavior.Default))  // SingleResult
                     {
-                        strError = "记录 '" + strID + "' 在库中不存在";
-                        return -1;
+                        // 1.记录不存在报错
+                        if (dr == null
+                            || dr.HasRows == false)
+                        {
+                            dr.Read();
+                            dr.NextResult();    // 这一句可以触发下一个结果集的异常 2015/9/4
+                            strError = "记录 '" + strID + "' 在库中不存在";
+                            return -1;
+                        }
+
+                        dr.Read();
+
+                        textPtr = (byte[])dr[0];
+
+                        bool bRet = dr.Read();
+
+                        if (bRet == true)
+                        {
+                            // 还有一行
+                            strError = "记录 '" + strID + "' 在SQL库" + this.m_strSqlDbName + "的records表中存在多条，这是一种不正常的状态, 请系统管理员利用SQL命令删除多余的记录。";
+                            return -1;
+                        }
+
+                        lCurrentLength = 1; // 表示写成功了一个 0 字符
                     }
-
-                    dr.Read();
-
-                    textPtr = (byte[])dr[0];
-
-                    bool bRet = dr.Read();
-
-                    if (bRet == true)
-                    {
-                        // 还有一行
-                        strError = "记录 '" + strID + "' 在SQL库" + this.m_strSqlDbName + "的records表中存在多条，这是一种不正常的状态, 请系统管理员利用SQL命令删除多余的记录。";
-                        return -1;
-                    }
-
-                    lCurrentLength = 1; // 表示写成功了一个 0 字符
                 }
-                finally
+                catch (SqlException ex)
                 {
-                    dr.Close();
+                    strError = "更新数据行时出错，记录路径'" + this.GetCaption("zh-CN") + "/" + strID + "，原因：" + ex.Message;
+
+                    // 检查 SQL 错误码
+                    if (ContainsErrorCode(ex, 1105))
+                    {
+                        // 磁盘空间不够的问题。要记入错误日志，以引起管理员注意
+                        this.container.KernelApplication.WriteErrorLog("*** 数据库空间不足错误: " + strError);
+                    }
+                    return -1;
                 }
             }
 
@@ -14073,7 +14019,6 @@ out baPreamble);
 
             {
                 int chucksize = 32 * 1024;  //写库时每块为32K
-
 
                 // 执行更新操作,使用UPDATETEXT语句
 
@@ -14272,13 +14217,13 @@ out baPreamble);
                     // trans = connection.SqlConnection.BeginTransaction();
                     // command.Transaction = trans;
 
+                    int nExecuted = 0;   // 已经发出执行的命令行数 2008/10/21 
                     try
                     {
                         int i = 0;
                         int nNameIndex = 0;
 
                         int nCount = 0; // 累积的尚未发出的命令行数 2008/10/21 
-                        int nExecuted = 0;   // 已经发出执行的命令行数 2008/10/21 
 
                         int nMaxLinesPerExecute = (2100 / 5) - 1;   // 4个参数，加上一个sql命令字符串 2008/10/23 
 
@@ -14331,17 +14276,9 @@ out baPreamble);
                                         + strCommand
                                         + " use master " + "\n";
                                     command.CommandTimeout = 20 * 60;  // 把超时时间放大 2013/2/19
-                                    try
-                                    {
+
                                         command.ExecuteNonQuery();
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        // TODO: 如果出现超时错，可能其实在 SQL Server 一端已经正确执行，可以不顾这个错误继续执行下去
-                                        // 如果非要重试处理这种情况，则可能需要把语句拆开成为一个一个单独的动作语句，然后重新插入和删除，插入的时候遇到重复，就当作正常情况处理，删除的时候遇到行不存在，也当作正常处理
-                                        strError = "创建检索点出错, 偏移 " + (nExecuted).ToString() + "，记录路径'" + this.GetCaption("zh-CN") + "/" + strRecordID + "，原因：" + ex.Message;
-                                        return -1;
-                                    }
+
                                     strCommand.Clear();
                                     nExecuted += nCount;
                                     nCount = 0;
@@ -14372,7 +14309,6 @@ out baPreamble);
                                 string strFromParamName = "@from" + strIndex;
                                 string strIdParamName = "@id" + strIndex;
                                 string strKeynumParamName = "@keynum" + strIndex;
-
 
                                 //加keynum
                                 strCommand.Append(" INSERT INTO " + strKeysTableName
@@ -14408,15 +14344,9 @@ out baPreamble);
                                         + strCommand
                                         + " use master " + "\n";
                                     command.CommandTimeout = 20 * 60;  // 把超时时间放大 2013/2/19
-                                    try
-                                    {
+
                                         command.ExecuteNonQuery();
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        strError = "创建检索点出错,偏移 " + (nExecuted).ToString() + "，记录路径'" + this.GetCaption("zh-CN") + "/" + strRecordID + "，原因：" + ex.Message;
-                                        return -1;
-                                    }
+
                                     strCommand.Clear();
                                     nExecuted += nCount;
                                     nCount = 0;
@@ -14429,8 +14359,6 @@ out baPreamble);
                             }
                         }
 
-
-
                         // 最后可能剩下的命令
                         if (strCommand.Length > 0)
                         {
@@ -14438,15 +14366,8 @@ out baPreamble);
                                 + strCommand
                                 + " use master " + "\n";
                             command.CommandTimeout = 20 * 60;  // 把超时时间放大 2013/2/19
-                            try
-                            {
-                                command.ExecuteNonQuery();
-                            }
-                            catch (Exception ex)
-                            {
-                                strError = "创建检索点出错,偏移 " + (nExecuted).ToString() + "，记录路径'" + this.GetCaption("zh-CN") + "/" + strRecordID + "，原因：" + ex.Message;
-                                return -1;
-                            }
+
+                            command.ExecuteNonQuery();
 
                             strCommand.Clear();
                             nExecuted += nCount;
@@ -14458,6 +14379,26 @@ out baPreamble);
                             trans.Commit();
                             trans = null;
                         }
+                    }
+                    catch (SqlException ex)
+                    {
+                        strError = "创建检索点出错,偏移 " + (nExecuted).ToString() + "，记录路径'" + this.GetCaption("zh-CN") + "/" + strRecordID + "，原因：" + ex.Message;
+
+                        // 检查 SQL 错误码
+                        if (ContainsErrorCode(ex, 1105))
+                        {
+                            // 磁盘空间不够的问题。要记入错误日志，以引起管理员注意
+                            this.container.KernelApplication.WriteErrorLog("*** 数据库空间不足错误: " + strError);
+                        }
+
+                        return -1;
+                    }
+                    catch (Exception ex)
+                    {
+                        // TODO: 如果出现超时错，可能其实在 SQL Server 一端已经正确执行，可以不顾这个错误继续执行下去
+                        // 如果非要重试处理这种情况，则可能需要把语句拆开成为一个一个单独的动作语句，然后重新插入和删除，插入的时候遇到重复，就当作正常情况处理，删除的时候遇到行不存在，也当作正常处理
+                        strError = "创建检索点出错,偏移 " + (nExecuted).ToString() + "，记录路径'" + this.GetCaption("zh-CN") + "/" + strRecordID + "，原因：" + ex.Message;
+                        return -1;
                     }
                     finally
                     {
@@ -16425,23 +16366,23 @@ bool bTempObject)
                     + " filename,"   // 8
                     + " newfilename"   // 9
                     + " FROM records "
-                    + " WHERE id='" + strID + "'\n";
+                    // + " WHERE id='" + strID + "'\n";
+                    + " WHERE id=@id \n";
 
 
-                string strCommand = "use " + this.m_strSqlDbName + " \n"
+                string strCommand = "use " + this.m_strSqlDbName + "; \n"
                     + "SET NOCOUNT OFF\n"
                     + strSelect
                     + "if @@ROWCOUNT = 0\n"
                     + "begin\n"
                     + " INSERT INTO records(id, data, range, metadata, dptimestamp, newdptimestamp) "
-                    + " VALUES(@id, @data, @range, @metadata, @dptimestamp, @newdptimestamp)"
-                    + "end\n";
+                    + " VALUES(@id, @data, @range, @metadata, @dptimestamp, @newdptimestamp) \n"
+                    + " end \n";
                 strCommand += " use master " + "\n";
 
                 using (SqlCommand command = new SqlCommand(strCommand,
                     connection.SqlConnection))
                 {
-
                     if (sourceBuffer == null)
                         sourceBuffer = new byte[] { 0x0 };
 
@@ -16491,73 +16432,85 @@ bool bTempObject)
             100);
                     newdptimestampParam.Value = row_info.NewTimestampString;
 
-
-                    SqlDataReader dr = command.ExecuteReader(CommandBehavior.SingleResult);
                     try
                     {
-                        // 1.记录不存在报错
-                        if (dr == null
-                            || dr.HasRows == false)
+                        using (SqlDataReader dr = command.ExecuteReader(CommandBehavior.Default))
                         {
-                            // strError = "记录 '" + strID + "' 在库中不存在，正常情况下不应是这样";
-                            return 1;   // 已经创建新记录
-                        }
+                            // 1.记录不存在报错
+                            if (dr == null
+                                || dr.HasRows == false)
+                            {
+                                //strError = "记录 '" + strID + "' 在库中不存在或者创建失败，有可能是 SQL 库 "+this.m_strSqlDbName+" 空间已满";
+                                //return -1;
+                                dr.NextResult();    // 这一句可以触发异常
 
-                        dr.Read();
+                                return 1;   // 已经创建新记录
+                            }
 
-                        row_info = new RecordRowInfo();
+                            dr.Read();
 
-                        /*
-                        // 2.textPtr为null报错
-                        if (dr[0] is System.DBNull)
-                        {
-                            strError = "TextPtr不可能为null";
-                            return -1;
-                        }
-                         * */
+                            row_info = new RecordRowInfo();
 
-                        if (dr.IsDBNull(0) == false)
-                            row_info.data_textptr = (byte[])dr[0];
+                            /*
+                            // 2.textPtr为null报错
+                            if (dr[0] is System.DBNull)
+                            {
+                                strError = "TextPtr不可能为null";
+                                return -1;
+                            }
+                             * */
 
-                        if (dr.IsDBNull(1) == false)
-                            row_info.data_length = dr.GetInt32(1);
+                            if (dr.IsDBNull(0) == false)
+                                row_info.data_textptr = (byte[])dr[0];
 
-                        if (dr.IsDBNull(2) == false)
-                            row_info.newdata_textptr = (byte[])dr[2];
+                            if (dr.IsDBNull(1) == false)
+                                row_info.data_length = dr.GetInt32(1);
 
-                        if (dr.IsDBNull(3) == false)
-                            row_info.newdata_length = dr.GetInt32(3);
+                            if (dr.IsDBNull(2) == false)
+                                row_info.newdata_textptr = (byte[])dr[2];
 
-                        if (dr.IsDBNull(4) == false)
-                            row_info.Range = dr.GetString(4);
+                            if (dr.IsDBNull(3) == false)
+                                row_info.newdata_length = dr.GetInt32(3);
 
-                        if (dr.IsDBNull(5) == false)
-                            row_info.TimestampString = dr.GetString(5);
+                            if (dr.IsDBNull(4) == false)
+                                row_info.Range = dr.GetString(4);
 
-                        if (dr.IsDBNull(6) == false)
-                            row_info.Metadata = dr.GetString(6);
+                            if (dr.IsDBNull(5) == false)
+                                row_info.TimestampString = dr.GetString(5);
 
-                        if (dr.IsDBNull(7) == false)
-                            row_info.NewTimestampString = dr.GetString(7);
+                            if (dr.IsDBNull(6) == false)
+                                row_info.Metadata = dr.GetString(6);
 
-                        if (dr.IsDBNull(8) == false)
-                            row_info.FileName = dr.GetString(8);
+                            if (dr.IsDBNull(7) == false)
+                                row_info.NewTimestampString = dr.GetString(7);
 
-                        if (dr.IsDBNull(9) == false)
-                            row_info.NewFileName = dr.GetString(9);
+                            if (dr.IsDBNull(8) == false)
+                                row_info.FileName = dr.GetString(8);
 
-                        bool bRet = dr.Read();
+                            if (dr.IsDBNull(9) == false)
+                                row_info.NewFileName = dr.GetString(9);
 
-                        if (bRet == true)
-                        {
-                            // 还有一行
-                            strError = "记录 '" + strID + "' 在SQL库" + this.m_strSqlDbName + "的records表中存在多条，这是一种不正常的状态, 请系统管理员利用SQL命令删除多余的记录。";
-                            return -1;
+                            bool bRet = dr.Read();
+
+                            if (bRet == true)
+                            {
+                                // 还有一行
+                                strError = "记录 '" + strID + "' 在 SQL 库" + this.m_strSqlDbName + " 的 records 表中存在多条，这是一种不正常的状态, 请系统管理员利用 SQL 命令删除多余的记录。";
+                                return -1;
+                            }
                         }
                     }
-                    finally
+                    catch(SqlException ex)
                     {
-                        dr.Close();
+                        strError = "插入数据行时出错，记录路径'" + this.GetCaption("zh-CN") + "/" + strID + "，原因：" + ex.Message;
+
+                        // 检查 SQL 错误码
+                        if (ContainsErrorCode(ex, 1105))
+                        {
+                            // 磁盘空间不够的问题。要记入错误日志，以引起管理员注意
+                            this.container.KernelApplication.WriteErrorLog("*** 数据库空间不足错误: " + strError);
+                        }
+                        return -1;
                     }
                 } // end of using command
 
@@ -16573,7 +16526,7 @@ bool bTempObject)
                     + " filename,"   // 4 8
                     + " newfilename"   // 5 9
                     + " FROM records "
-                    + " WHERE id='" + strID + "'\n";
+                    + " WHERE id='" + strID + "'\n";    // TODO: 最好改造为 @id
 
                 using (SQLiteCommand command = new SQLiteCommand(strCommand,
                     connection.SQLiteConnection))
@@ -16726,7 +16679,7 @@ bool bTempObject)
                     + " filename,"   // 4 8
                     + " newfilename"   // 5 9
                     + " FROM `" + this.m_strSqlDbName + "`.records "
-                    + " WHERE id='" + strID + "'\n";
+                    + " WHERE id='" + strID + "'\n";    // 最好改造为 @id
 
                 using (MySqlCommand command = new MySqlCommand(strCommand,
                     connection.MySqlConnection))
@@ -16801,7 +16754,7 @@ bool bTempObject)
                     + " filename,"   // 4 8
                     + " newfilename"   // 5 9
                     + " FROM " + this.m_strSqlDbName + "_records "
-                    + " WHERE id='" + strID + "'\n";
+                    + " WHERE id='" + strID + "'\n";    // 最好改造为 @id
 
                 using (OracleCommand command = new OracleCommand(strCommand,
                     connection.OracleConnection))
@@ -17428,7 +17381,12 @@ bool bTempObject)
                 this.FastMode = true;
             bool bFastMode = StringUtil.IsInList("fastmode", strStyle) || this.FastMode;
 
+#if NO
             bool bDeleteKeysByID = false;   //  StringUtil.IsInList("fastmode", strStyle) || this.FastMode;
+#endif
+            bool bDeleteKeysByID = StringUtil.IsInList("deletekeysbyid", strStyle);
+            // 2015/9/4
+            bool bIgnoreCheckTimestamp = StringUtil.IsInList("ignorechecktimestamp", strStyle);
 
             strRecordID = DbPath.GetID10(strRecordID);
 
@@ -17437,7 +17395,7 @@ bool bTempObject)
             //********对数据库加读锁*********************
             m_db_lock.AcquireReaderLock(m_nTimeOut);
 #if DEBUG_LOCK_SQLDATABASE		
-			this.container.WriteDebugInfo("DeleteRecordForce()，对'" + this.GetCaption("zh-CN") + "'数据库加读锁。");
+			this.container.WriteDebugInfo("DeleteRecord()，对'" + this.GetCaption("zh-CN") + "'数据库加读锁。");
 #endif
 
             int nRet = 0;
@@ -17457,39 +17415,7 @@ bool bTempObject)
                     try
                     {
                         connection.m_nOpenCount += 10;
-                        /*
-                        // 比较时间戳
-                        // return:
-                        //		-1  出错
-                        //		-4  未找到记录
-                        //      0   成功
-                        nRet = this.GetTimestampFromDb(connection,
-                            strRecordID,
-                            out baOutputTimestamp,
-                            out strError);
-                        if (nRet <= -1)
-                        {
-                            if (nRet == -4)
-                            {
-                                strError = "删除记录失败，原因: " + strError;
-                                return nRet;
-                            }
-                            return nRet;
-                        }
 
-                        if (baOutputTimestamp == null)
-                        {
-                            strError = "服务器取出的时间戳为null";
-                            return -1;
-                        }
-
-                        if (ByteArray.Compare(baInputTimestamp,
-                            baOutputTimestamp) != 0)
-                        {
-                            strError = "时间戳不匹配";
-                            return -2;
-                        }
-                         * */
                         RecordRowInfo row_info = null;
                         // return:
                         //      -1  出错
@@ -17514,7 +17440,8 @@ bool bTempObject)
 
                         baOutputTimestamp = ByteArray.GetTimeStampByteArray(strCompleteTimestamp);
 
-                        if (ByteArray.Compare(baInputTimestamp,
+                        if (bIgnoreCheckTimestamp == false
+                            && ByteArray.Compare(baInputTimestamp,
     baOutputTimestamp) != 0)
                         {
                             strError = "时间戳不匹配";
@@ -17544,7 +17471,6 @@ bool bTempObject)
                                 strXml = "";
                             else if (nRet <= -1)
                                 return nRet;
-
 
                             // 1.删除检索点
 
@@ -17591,36 +17517,6 @@ bool bTempObject)
                             if (nRet == -1)
                                 return -1;
                         }
-
-#if NO
-                        // 2.删除子文件
-                        if (oldDom != null)
-                        {
-                            // return:
-                            //      -1  出错
-                            //      0   成功
-                            nRet = this.ModifyFiles(connection,
-                                strRecordID,
-                                null,
-                                oldDom,
-                                out strError);
-                            if (nRet == -1)
-                                return -1;
-                        }
-                        else
-                        {
-
-                            // 通过记录号之间的关系强制删除
-                            // return:
-                            //      -1  出错
-                            //      0   成功
-                            nRet = this.ForceDeleteFiles(connection,
-                                strRecordID,
-                                out strError);
-                            if (nRet == -1)
-                                return -1;
-                        }
-#endif
 
                         if (this.container.SqlServerType == SqlServerType.Oracle)
                         {
@@ -17708,7 +17604,7 @@ bool bTempObject)
                     //**************对记录解写锁**********
                     m_recordLockColl.UnlockForWrite(strRecordID);
 #if DEBUG_LOCK_SQLDATABASE			
-					this.container.WriteDebugInfo("DeleteRecordForce()，对'" + this.GetCaption("zh-CN") + "/" + strID + "'记录解写锁。");
+					this.container.WriteDebugInfo("DeleteRecord()，对'" + this.GetCaption("zh-CN") + "/" + strID + "'记录解写锁。");
 #endif
 
                 }

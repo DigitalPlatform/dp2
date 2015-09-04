@@ -1202,7 +1202,11 @@ namespace dp2Catalog
             dlg.StartPosition = FormStartPosition.CenterScreen;
 
             dlg.ActiveProtocol = "dp2library";
+
+            this.MainForm.AppInfo.LinkFormState(dlg, "SaveRecordDlg_state");
+            dlg.UiState = this.MainForm.AppInfo.GetString("DcForm", "SaveRecordDlg_uiState", "");
             dlg.ShowDialog(this);
+            this.MainForm.AppInfo.SetString("DcForm", "SaveRecordDlg_uiState", dlg.UiState);
             if (dlg.DialogResult != DialogResult.OK)
                 return 0;
 

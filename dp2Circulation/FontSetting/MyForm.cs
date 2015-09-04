@@ -32,6 +32,18 @@ namespace dp2Circulation
     {
         internal FloatingMessageForm _floatingMessage = null;
 
+        public FloatingMessageForm FloatingMessageForm
+        {
+            get
+            {
+                return this._floatingMessage;
+            }
+            set
+            {
+                this._floatingMessage = value;
+            }
+        }
+
         /// <summary>
         /// 窗口是否为浮动状态
         /// </summary>
@@ -1149,5 +1161,14 @@ out string strError)
             }
         }
 
+
+        // 获得当前用户能管辖的全部馆代码
+        public List<string> GetOwnerLibraryCodes()
+        {
+            if (Global.IsGlobalUser(this.Channel.LibraryCodeList) == true)
+                return this.MainForm.GetAllLibraryCode();
+
+            return StringUtil.SplitList(this.Channel.LibraryCodeList);
+        }
     }
 }

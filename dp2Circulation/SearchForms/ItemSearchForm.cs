@@ -847,7 +847,6 @@ this.dp2QueryControl1.GetSaveString());
                 m_tableSummaryColIndex.Clear();
             }
 
-
             EnableControls(false);
             this.label_message.Text = "";
 
@@ -979,7 +978,7 @@ this.dp2QueryControl1.GetSaveString());
                         out strError);
                 }
                 else
-                    throw new Exception("未知的DbType '" + this.DbType + "'");
+                    throw new Exception("未知的 DbType '" + this.DbType + "'");
 
                 if (lRet == -1)
                     goto ERROR1;
@@ -1016,7 +1015,7 @@ this.dp2QueryControl1.GetSaveString());
             return 1;
         ERROR1:
             MessageBox.Show(this, strError);
-        return -1;
+            return -1;
         }
 
         #region 预约到书库相关

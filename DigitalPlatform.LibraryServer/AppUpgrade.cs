@@ -67,6 +67,9 @@ namespace DigitalPlatform.LibraryServer
         REDO_CHANGE_READERREC:
 
             // 加读者记录锁
+#if DEBUG_LOCK_READER
+            this.WriteErrorLog("CrossRefBorrowInfo 开始为读者加写锁 '" + strReaderBarcode + "'");
+#endif
             this.ReaderLocks.LockForWrite(strReaderBarcode);
 
             try // 读者记录锁定范围开始
@@ -249,6 +252,9 @@ namespace DigitalPlatform.LibraryServer
             finally
             {
                 this.ReaderLocks.UnlockForWrite(strReaderBarcode);
+#if DEBUG_LOCK_READER
+                this.WriteErrorLog("CrossRefBorrowInfo 结束为读者加写锁 '" + strReaderBarcode + "'");
+#endif
             }
 
             if (String.IsNullOrEmpty(strWarning) == false)

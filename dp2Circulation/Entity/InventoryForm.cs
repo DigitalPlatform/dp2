@@ -19,6 +19,8 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Text;
+using System.Xml;
+using DigitalPlatform.Xml;
 
 namespace dp2Circulation
 {
@@ -192,6 +194,7 @@ namespace dp2Circulation
             this._chargingForm.Hide();  // 有了此句可避免主窗口背后显示一个空对话框窗口
             // this._chargingForm.WindowState = FormWindowState.Minimized;
             this._chargingForm.SmartFuncState = FuncState.InventoryBook;
+            this._chargingForm.FloatingMessageForm = this.FloatingMessageForm;
 #if NO
                         // 输入的ISO2709文件名
             this._openMarcFileDialog.FileName = this.MainForm.AppInfo.GetString(
@@ -199,10 +202,24 @@ namespace dp2Circulation
                 "input_iso2709_filename",
                 "");
 #endif
+            {
+                List<string> librarycodes = GetOwnerLibraryCodes();
+                this.inventoryBatchNoControl_start_batchNo.LibraryCodeList = librarycodes;
+                this.inventoryBatchNoControl_start_batchNo.Text = this.MainForm.AppInfo.GetString("inventory_form", "batch_no", "");
+                if (librarycodes.Count == 1)
+                {
+                    if (this.inventoryBatchNoControl_start_batchNo.LibraryCodeText != librarycodes[0])
+                        this.inventoryBatchNoControl_start_batchNo.Text = librarycodes[0] + "-";
+                    this.inventoryBatchNoControl_start_batchNo.LibaryCodeEanbled = false;
+                }
+            }
             this.UiState = this.MainForm.AppInfo.GetString(
     "inventory_form",
     "ui_state",
     "");
+
+            this._statisInfo = null;
+            this.SetButtonState(null);
 
             this.BeginInvoke(new Action(Initial));
         }
@@ -219,6 +236,7 @@ namespace dp2Circulation
                 MessageBox.Show(this, strError);
 
             this._defs = defs;
+
         }
 
         private void InventoryForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -234,6 +252,8 @@ namespace dp2Circulation
 "inventory_form",
 "ui_state",
 this.UiState);
+            this.MainForm.AppInfo.SetString("inventory_form", "batch_no", this.inventoryBatchNoControl_start_batchNo.Text);
+
         }
 
         /// <summary>
@@ -244,7 +264,9 @@ this.UiState);
         {
             this._chargingForm.MainPanel.Enabled = bEnable;
 
-            this.tabComboBox_inputBatchNo.Enabled = bEnable;
+            this.inventoryBatchNoControl_start_batchNo.Enabled = bEnable;
+            this.textBox_start_locations.Enabled = bEnable;
+            this.button_start_setLocations.Enabled = bEnable;
 
             this.textBox_inventoryList_batchNo.Enabled = bEnable;
             this.button_inventoryList_getBatchNos.Enabled = bEnable;
@@ -254,7 +276,11 @@ this.UiState);
             this.button_baseList_getLocations.Enabled = bEnable;
             this.button_baseList_search.Enabled = bEnable;
 
-            this.button_statis_crossCompute.Enabled = bEnable;
+            this.textBox_operLog_dateRange.Enabled = bEnable;
+            this.button_operLog_load.Enabled = bEnable;
+
+            this.SetButtonState(bEnable == false? null : this._statisInfo,
+                false);   // 只改变 Enabled 状态，不修改按钮文字
 #if NO
             this.button_getProjectName.Enabled = bEnable;
 
@@ -293,11 +319,6 @@ this.UiState);
             return base.ProcessDialogKey(keyData);
         }
 
-        private void tabComboBox_inputBatchNo_TextChanged(object sender, EventArgs e)
-        {
-            if (this._chargingForm != null)
-                this._chargingForm.BatchNo = this.tabComboBox_inputBatchNo.Text;
-        }
 
         private void button_list_getBatchNos_Click(object sender, EventArgs e)
         {
@@ -315,6 +336,7 @@ this.UiState);
             dlg.Channel = this.Channel;
             dlg.Stop = this.stop;
             dlg.InventoryDbName = strInventoryDbName;
+            dlg.LibraryCodeList = GetOwnerLibraryCodes();
             this.MainForm.AppInfo.LinkFormState(dlg, "SelectBatchNoDialog_state");
             dlg.ShowDialog(this);
 
@@ -344,6 +366,9 @@ this.UiState);
                     batchNo_list[i] = "";
             }
 
+            this._statisInfo = null;
+            this.SetButtonState(null);
+
             int nRet = DoSearchInventory(batchNo_list,
                 out strError);
             if (nRet == -1)
@@ -370,7 +395,7 @@ this.UiState);
             //ClearCommentViewer();
         }
 
-        internal void ClearItemListViewItems()
+        internal void ClearBaseListViewItems()
         {
             this.listView_baseList_records.Items.Clear();
 
@@ -382,8 +407,8 @@ this.UiState);
                 this.listView_baseList_records.Columns[i].Text = i.ToString();
             }
 
-            //ClearBiblioTable();
-            //ClearCommentViewer();
+            ClearBiblioTable();
+            ClearCommentViewer();
         }
 
         int DoSearchInventory(List<string> batchNo_list,
@@ -921,6 +946,9 @@ this.UiState);
                     location_list[i] = "";
             }
 
+            this._statisInfo = null;
+            this.SetButtonState(null);
+
             int nRet = DoSearchBaseItems(location_list,
                 out strError);
             if (nRet == -1)
@@ -981,7 +1009,7 @@ this.UiState);
 
             bool bAccessBiblioSummaryDenied = false;
 
-            ClearItemListViewItems();
+            ClearBaseListViewItems();
 
             EnableControls(false);
             stop.OnStop += new StopEventHandler(this.Channel.DoStop);
@@ -1362,14 +1390,19 @@ null);
             // MessageBox.Show(this, strError);
         }
 
+        // 行状态
         enum LineType
         {
-            Verified = 0,   // 经过验证存在的册
-            Borrowed = 1,   // 外借状态
-            Lost = 2,   // 丢失了的册
-            OutOfRange = 3, // 超出基准集范围的册。有可能是被上架上错到了盘点范围的书架上的本应放在其他地点的册
+            Origin = 0, // 原始的，没有经过任何验证的册
+            Verified = 1,   // 经过验证存在的册
+            Borrowed = 2,   // 外借状态
+            Lost = 3,   // 丢失了的册
+            OutOfRange = 4, // 超出基准集范围的册。有可能是被上架上错到了盘点范围的书架上的本应放在其他地点的册
         }
 
+        StatisInfo _statisInfo = new StatisInfo();
+
+        // TODO: 本来就是 丢失 或 注销 状态的册，是否不必给它们加上红色底色? 或者用不同的红色?
         int DoCrossCompute(out string strError)
         {
             strError = "";
@@ -1387,6 +1420,10 @@ null);
                 return -1;
             }
 
+            this._statisInfo = new StatisInfo();
+
+            this._statisInfo.ItemsVerified = this.listView_inventoryList_records.Items.Count;
+            this._statisInfo.ItemsBase = this.listView_baseList_records.Items.Count;
 #if NO
             string strInventoryDbName = this.MainForm.GetUtilDbName("inventory");
             if (string.IsNullOrEmpty(strInventoryDbName) == true)
@@ -1396,9 +1433,28 @@ null);
             }
 #endif
 
-
-
             string strInventoryDbName = this._defs.InventoryDbName;
+
+            int nStateColumnIndex = this._defs._base_colmun_defs.FindColumnByType("item_state");
+            if (nStateColumnIndex == -1)
+            {
+                strError = "基准集列表中 type 为 item_state 的列没有定义 ...";
+                return -1;
+            }
+            int nBorrowerColumnIndex = this._defs._base_colmun_defs.FindColumnByType("borrower");
+            if (nBorrowerColumnIndex == -1)
+            {
+                strError = "基准集列表中 type 为 borrower 的列没有定义 ...";
+                return -1;
+            }
+
+            int nTemp = this._defs.source_types.IndexOf("oper_time");
+            if (nTemp == -1)
+            {
+                strError = "盘点集列表中 type 为 oper_time 的列没有定义 ...";
+                return -1;
+            }
+            int nOpertimeColumnIndex = this._defs._base_colmun_defs.Count + nTemp + 2;
 
             EnableControls(false);
             stop.OnStop += new StopEventHandler(this.Channel.DoStop);
@@ -1417,6 +1473,14 @@ null);
                 // *** 预备，清除以前的标记
                 foreach (ListViewItem item in this.listView_baseList_records.Items)
                 {
+                    string strState = ListViewUtil.GetItemText(item, nStateColumnIndex + 2);
+                    if (string.IsNullOrEmpty(strState) == false
+                        && (strState[0] == '+' || strState[0] == '-'))
+                    {
+                        ListViewUtil.ChangeItemText(item, nStateColumnIndex + 2, strState.Substring(1));
+                        item.Font = this.Font;
+                    }
+
                     if (item.Tag == null)
                         continue;
 
@@ -1440,10 +1504,10 @@ null);
                     item.BackColor = SystemColors.Window;
                 }
 
+                // *** 第一步，准备好记录路径的 Hashtable
                 this.ShowMessage("正在准备 Hashtable ...");
                 Application.DoEvents();
 
-                // *** 第一步，准备好记录路径的 Hashtable
                 Hashtable base_recpath_table = new Hashtable();  // recpath --> ListViewItem
                 foreach(ListViewItem item in this.listView_baseList_records.Items)
                 {
@@ -1453,9 +1517,9 @@ null);
                         base_recpath_table[strRecPath] = item;
                 }
 
+                // *** 第二步，标记盘点过的事项
                 this.ShowMessage("正在标记盘点册 ...");
                 Application.DoEvents();
-                // *** 第二步，标记盘点过的事项
 
                 // 获得 册记录路径 的列号
                 ColumnPropertyCollection temp = this.MainForm.GetBrowseColumnProperties(strInventoryDbName);
@@ -1511,16 +1575,108 @@ null);
                 if (nRet == -1)
                     return -1;
 
+                this._statisInfo.ItemsOutofRange = nRet;
+
+                // *** 第三步，标记操作日志中最后动作为 return 的行，这也是一种类似盘点的验证
+                // 一个册，在盘点动作后时间之后，又发生了借出动作，表明这一册的状态就不是验证过的状态了；
+                // 发生了还回操作表示这是验证过的状态。等于要把盘点动作纳入时间线考察，如果后来被借出代替了就要修改为未验证状态
+                foreach (OperLogData data in _operLogItems)
+                {
+                    ListViewItem found = (ListViewItem)base_recpath_table[data.ItemRecPath];
+                    if (found != null)
+                    {
+                        if (found.Tag != null)
+                        {
+                            LineType type = (LineType)found.Tag;
+                            if (type == LineType.OutOfRange)
+                                continue;
+                        }
+
+                        string strOperTime = ListViewUtil.GetItemText(found, nOpertimeColumnIndex);
+                        if (string.CompareOrdinal(data.OperTime, strOperTime) < 0)
+                            continue;   // 只让时间靠后的发生作用
+
+                        if (data.Action == "return")
+                        {
+                            // 观察它的状态，如果是超范围的册则不做处理
+                            if (found.Tag != null)
+                            {
+                                LineType type = (LineType)found.Tag;
+                                if (type == LineType.OutOfRange
+                                    || type == LineType.Verified)
+                                    continue;
+                            }
+
+                            // 事项被验证
+                            found.Tag = LineType.Verified;
+                            SetLineColor(found, LineType.Verified);
+
+                            // 补充列。补充操作者 操作时间列
+                            AppendExtraColumns(found, data);
+
+                            this._statisInfo.ItemsVerified++;
+                        }
+
+                        if (data.Action == "borrow")
+                        {
+                            if (found.Tag != null)
+                            {
+                                LineType type = (LineType)found.Tag;
+                                // 把已经处于验证状态的行修改为原始状态
+                                if (type == LineType.Verified)
+                                {
+                                    found.Tag = null;   // 表示没有被验证
+                                    SetLineColor(found, LineType.Origin);
+                                    // 补充列。补充操作者 操作时间列
+                                    AppendExtraColumns(found, data);
+
+                                    this._statisInfo.ItemsVerified--;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                this._statisInfo.ItemsNeedRemoveLostState = 0;
+                this._statisInfo.ItemsNeedReturn = 0;
+                // 检查盘点过的册中，状态值 包含 丢失 和 注销 的，给状态值打上特殊标记，以便提醒操作者可以单独处理它们
+                foreach (ListViewItem item in this.listView_baseList_records.Items)
+                {
+                    if (item.Tag == null)
+                        continue;
+
+                    LineType type = (LineType)item.Tag;
+                    if (type == LineType.Verified)
+                    {
+                        string strState = ListViewUtil.GetItemText(item, nStateColumnIndex + 2);
+                        if (StringUtil.IsInList("丢失", strState) == true
+                            || StringUtil.IsInList("注销", strState) == true)
+                        {
+                            item.Font = new Font(this.Font, FontStyle.Bold);
+                            ListViewUtil.ChangeItemText(item, nStateColumnIndex + 2, "-" + strState);
+                            this._statisInfo.ItemsNeedRemoveLostState++;
+                        }
+
+                        string strBorrower = ListViewUtil.GetItemText(item, nBorrowerColumnIndex + 2);
+                        if (string.IsNullOrEmpty(strBorrower) == false)
+                            this._statisInfo.ItemsNeedReturn++;
+                    }
+                }
+
+                // *** 第四步，标记借出状态的行 标记丢失状态的行
                 this.ShowMessage("正在标记外借和丢失册 ...");
                 Application.DoEvents();
 
-                // *** 第三步，标记借出状态的行 标记丢失状态的行
+                this._statisInfo.ItemsBorrowed = 0;
+                this._statisInfo.ItemsLost = 0;
+                this._statisInfo.ItemsNeedAddLostState = 0;
 
                 foreach(ListViewItem item in this.listView_baseList_records.Items)
                 {
                     // 没有验证过的行
                     if (item.Tag == null)
                     {
+#if NO
                         string strBorrower = "";
                         // 观察借阅者列
                         // return:
@@ -1533,14 +1689,64 @@ null);
         out strError);
                         if (nRet == -2 || nRet == -1)
                             return -1;
-                        if (string.IsNullOrEmpty(strBorrower) == false)
-                            item.Tag = LineType.Borrowed;
-                        else
-                            item.Tag = LineType.Lost;
-                        SetLineColor(item, (LineType)item.Tag);
-                    }
+#endif
+                        string strBorrower = ListViewUtil.GetItemText(item, nBorrowerColumnIndex + 2);
 
+                        if (string.IsNullOrEmpty(strBorrower) == false)
+                        {
+                            item.Tag = LineType.Borrowed;
+                            this._statisInfo.ItemsBorrowed++;
+                        }
+                        else
+                        {
+                            item.Tag = LineType.Lost;
+                            this._statisInfo.ItemsLost++;
+                        }
+                        SetLineColor(item, (LineType)item.Tag);
+
+                        // 进一步判断状态，标注那些新丢失的册
+                        if ((LineType)item.Tag == LineType.Lost)
+                        {
+                            string strState = ListViewUtil.GetItemText(item, nStateColumnIndex + 2);
+
+                            if (StringUtil.IsInList("丢失", strState) == false
+    && StringUtil.IsInList("注销", strState) == false
+    && string.IsNullOrEmpty(strBorrower) == true)
+                            {
+                                ListViewUtil.ChangeItemText(item, nStateColumnIndex + 2, "+" + strState);
+                                item.Font = new Font(this.Font, FontStyle.Bold);
+                                this._statisInfo.ItemsNeedAddLostState++;
+                            }
+                        }
+                    }
                 }
+
+                // 微调外借状态
+                // 在盘点期间，最后操作动作为 借 的册，如果先前它曾被盘点验证过，最终也只能算作外借状态的册
+                // TODO: 如果盘点动作也进入操作日志体系的话，则从操作日志是能精确判断动作先后顺序的。因此能确切知道哪个动作在后。而现在的方法，当盘点完成后如果间隔了一段再进行统计，则册的外借状态就可能会失真了 --- 因为后面可能会发生新的借还操作，还可能不被纳入统计(日志时间)范围
+                foreach (OperLogData data in _operLogItems)
+                {
+                    ListViewItem found = (ListViewItem)base_recpath_table[data.ItemRecPath];
+                    if (found != null && data.Action == "borrow")
+                    {
+                        if (found.Tag == null)
+                            continue;
+
+                        string strBorrower = ListViewUtil.GetItemText(found, nBorrowerColumnIndex + 2);
+
+                        LineType type = (LineType)found.Tag;
+                        if (type == LineType.Verified
+                            && string.IsNullOrEmpty(strBorrower) == false)
+                        {
+                            found.Tag = LineType.Borrowed;
+                            SetLineColor(found, (LineType)found.Tag);
+                            this._statisInfo.ItemsBorrowed++;
+                            this._statisInfo.ItemsVerified--;
+                        }
+                    }
+                }
+
+                SetButtonState(this._statisInfo);
 
                 this.ShowMessage("完成", "green", true);
                 return 0;
@@ -1555,17 +1761,87 @@ null);
             }
         }
 
+        // 设置最后一个属性页的几个按钮的状态
+        void SetButtonState(StatisInfo info, bool bSetText = true)
+        {
+            if (info == null)
+            {
+                this.button_statis_crossCompute.Enabled = true;
+
+                this.button_statis_maskItems.Enabled = false;
+                if (bSetText)
+                    this.button_statis_maskItems.Text = "修改册状态";
+
+                this.button_statis_return.Enabled = false;
+                if (bSetText)
+                    this.button_statis_return.Text = "补做还书";
+
+                this.button_statis_outputExcel.Enabled = false;
+                this.button_statis_defOutputColumns.Enabled = false;
+                return;
+            }
+
+            this.button_statis_crossCompute.Enabled = true;
+
+            this.button_statis_maskItems.Enabled = true;
+            if (bSetText)
+                this.button_statis_maskItems.Text = "修改册状态 (+" + info.ItemsNeedAddLostState + ", -" + info.ItemsNeedRemoveLostState + ")";
+
+            this.button_statis_return.Enabled = true;
+            if (bSetText)
+                this.button_statis_return.Text = "补做还书 (" + info.ItemsNeedReturn + ")";
+
+            this.button_statis_outputExcel.Enabled = true;
+            this.button_statis_defOutputColumns.Enabled = true;
+        }
+
+        void AppendExtraColumns(ListViewItem item, OperLogData data)
+        {
+            if (this._defs == null)
+                return;
+
+            int nBatchNoIndex = this._defs.source_types.IndexOf("batch_no");
+            int nOperatorIndex = this._defs.source_types.IndexOf("operator");
+            int nOperTimeIndex = this._defs.source_types.IndexOf("oper_time");
+
+            int target_index = this._defs._base_colmun_defs.Count + 2;
+            if (nBatchNoIndex != -1)
+                ListViewUtil.ChangeItemText(item, target_index + nBatchNoIndex, "#operlog");
+            if (nOperatorIndex != -1)
+                ListViewUtil.ChangeItemText(item, target_index + nOperatorIndex, data.Operator);
+            if (nOperTimeIndex != -1)
+                ListViewUtil.ChangeItemText(item, target_index + nOperTimeIndex, data.OperTime);
+        }
 
         class ColumnDefs
         {
             public string InventoryDbName = "";
             public ColumnPropertyCollection _base_colmun_defs = null;
             public ColumnPropertyCollection _inventory_column_defs = null;
-            public List<int> source_indices = new List<int>();
+
+            public List<int> source_indices = new List<int>();  // 补充列的 index
+            public List<string> source_types = new List<string>();  // 补充列的 type
 
             public int InventoryItemRecPathColumnIndex = -1;    // "盘点库 的 browse 配置文件中未定义 type 为 item_recpath 的列";
 
             public string BrowseColumnDef = ""; // 基准集浏览列定义。用于 GetSearchResult()
+
+#if NO
+            // 通过 type 找到一个补充列的 index
+            public int FindTypeIndex(string type)
+            {
+                if (this.source_types == null)
+                    return -1;
+                Debug.Assert(this.source_types.Count == this.source_indices.Count, "");
+                int i = 0;
+                foreach(string s in this.source_types)
+                {
+                    if (s == type)
+                        return this.source_indices[i];
+                }
+                return -1;  // not found
+            }
+#endif
         }
 
         int PrepareColumnDefs(out ColumnDefs defs, out string strError)
@@ -1627,6 +1903,7 @@ null);
                     }
 
                     defs.source_indices.Add(nCol);
+                    defs.source_types.Add(type);
                 }
             }
 
@@ -1656,6 +1933,9 @@ null);
             }
         }
 
+        // return:
+        //      -1  出错
+        //      其他  超出范围的事项的个数
         int AddOutOfRangeItemsToBaseList(
             ColumnDefs defs,
             List<ListViewItem> outofrange_source_items,
@@ -1664,6 +1944,8 @@ null);
         {
             strError = "";
             int nRet = 0;
+
+            int nCount = 0;
 
             List<ListViewItem> items = new List<ListViewItem>();
             foreach (ListViewItem source_item in outofrange_source_items)
@@ -1683,6 +1965,7 @@ null);
 
                 // 复制书目摘要列
                 ListViewUtil.ChangeItemText(item, 1, ListViewUtil.GetItemText(source_item, 1));
+                nCount++;
             }
 
 
@@ -1730,7 +2013,7 @@ null);
             }
 #endif
 
-            return 0;
+            return nCount;
         }
 
 
@@ -1744,6 +2027,8 @@ null);
                 item.BackColor = Color.LightCoral;
             else if (type == LineType.OutOfRange)
                 item.BackColor = Color.Yellow;
+            else if (type == LineType.Origin)
+                item.BackColor = SystemColors.Window;
         }
 
         ListViewQU _listview = null;
@@ -1761,6 +2046,9 @@ null);
                 List<object> controls = new List<object>();
                 controls.Add(this.listView_inventoryList_records);
                 controls.Add(this.listView_baseList_records);
+                controls.Add(this.textBox_start_locations);
+                controls.Add(this.textBox_baseList_locations);
+                controls.Add(this.textBox_inventoryList_batchNo);
                 return GuiState.GetUiState(controls);
             }
             set
@@ -1768,6 +2056,9 @@ null);
                 List<object> controls = new List<object>();
                 controls.Add(this.listView_inventoryList_records);
                 controls.Add(this.listView_baseList_records);
+                controls.Add(this.textBox_start_locations);
+                controls.Add(this.textBox_baseList_locations);
+                controls.Add(this.textBox_inventoryList_batchNo);
                 GuiState.SetUiState(controls, value);
             }
         }
@@ -2303,5 +2594,1212 @@ null);
                 this.MainForm.AppInfo.SetString("inventory_form", "output_columns", value);
             }
         }
+
+        private void button_operLog_setDateRange_Click(object sender, EventArgs e)
+        {
+            GetOperLogFilenameDlg dlg = new GetOperLogFilenameDlg();
+            MainForm.SetControlFont(dlg, this.Font, false);
+            dlg.Text = "请指定日志起止日期范围";
+            dlg.DateRange = this.textBox_operLog_dateRange.Text;
+            this.MainForm.AppInfo.LinkFormState(dlg, "GetOperLogFilenameDlg_state");
+            dlg.ShowDialog(this);
+            if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                return;
+
+            this.textBox_operLog_dateRange.Text = dlg.DateRange;
+        }
+
+        private void button_operLog_load_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            if (string.IsNullOrEmpty(this.textBox_operLog_dateRange.Text) == true)
+            {
+                strError = "尚未指定日志日期范围";
+                goto ERROR1;
+            }
+
+            this._statisInfo = null;
+            this.SetButtonState(null);
+
+            ClearHtml();
+
+            string strStart = "";
+            string strEnd = "";
+            StringUtil.ParseTwoPart(this.textBox_operLog_dateRange.Text, "-", out strStart, out strEnd);
+
+            string strWarning = "";
+            List<string> dates = null;
+            int nRet = OperLogStatisForm.MakeLogFileNames(strStart,
+                strEnd,
+                false,  // 是否包含扩展名 ".log"
+                out dates,
+                out strWarning,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            nRet = LoadOperLogs(dates,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            FillOperLogHtml();
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        class OperLogData
+        {
+            // 操作时间
+            public string OperTime = "";
+            // 操作者
+            public string Operator = "";
+            // 
+            public string Action = "";
+
+            public string ItemRecPath = "";
+
+            public string ItemBarcode = "";
+
+            public int OperCount = 0;   // 选定的阶段内总共操作过多少次
+        }
+
+        // 存储日志记录。会根据 册记录路径来归并，和同一册记录相关的仅仅保留一个 OperLogData 对象
+        List<OperLogData> _operLogItems = new List<OperLogData>();
+        // 册记录路径 --> OperLogData
+        Hashtable _operLogTable = new Hashtable();
+
+        int LoadOperLogs(List<string> dates,
+            out string strError)
+        {
+            strError = "";
+
+            _operLogItems = new List<OperLogData>();
+            _operLogTable = new Hashtable();
+
+            EnableControls(false);
+            stop.Style = StopStyle.EnableHalfStop;
+            stop.OnStop += new StopEventHandler(this.Channel.DoStop);
+            stop.Initial("正在装载日志记录 ...");
+            stop.BeginLoop();
+            try
+            {
+                ProgressEstimate estimate = new ProgressEstimate();
+
+                OperLogLoader loader = new OperLogLoader();
+                loader.Channel = this.Channel;
+                loader.Stop = this.Progress;
+                loader.estimate = estimate;
+                loader.FileNames = dates;
+                loader.nLevel = 2;  // this.MainForm.OperLogLevel;
+                loader.AutoCache = false;
+                loader.CacheDir = "";
+
+                loader.Prompt -= new MessagePromptEventHandler(loader_Prompt);
+                loader.Prompt += new MessagePromptEventHandler(loader_Prompt);
+
+                foreach (OperLogItem item in loader)
+                {
+                    if (stop != null && stop.State != 0)
+                    {
+                        strError = "用户中断";
+                        return 0;
+                    }
+
+                    if (stop != null)
+                        stop.SetMessage("正在获取 " + item.Date + " " + item.Index.ToString() + " " + estimate.Text + "...");
+
+                    if (string.IsNullOrEmpty(item.Xml) == true)
+                        continue;
+
+
+                    XmlDocument dom = new XmlDocument();
+                    try
+                    {
+                        dom.LoadXml(item.Xml);
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "日志记录 " + item.Date + " " + item.Index.ToString() + " XML 装入 DOM 的时候发生错误: " + ex.Message;
+                        DialogResult result = MessageBox.Show(this,
+    strError + "\r\n\r\n是否跳过此条记录继续处理?",
+    "ReportForm",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button1);
+                        if (result == System.Windows.Forms.DialogResult.No)
+                            return -1;
+
+                        // 记入日志，继续处理
+                        // this.GetErrorInfoForm().WriteHtml(strError + "\r\n");
+                        continue;
+                    }
+
+                    string strOperation = DomUtil.GetElementText(dom.DocumentElement, "operation");
+                    if (strOperation != "borrow" && strOperation != "return")
+                        continue;
+                    string strAction = DomUtil.GetElementText(dom.DocumentElement,
+        "action");
+                    string strOperator = DomUtil.GetElementText(dom.DocumentElement,
+        "operator");
+                    string strOperTime = DomUtil.GetElementText(dom.DocumentElement,
+        "operTime");
+                    string strItemBarcode = DomUtil.GetElementText(dom.DocumentElement,
+"itemBarcode");
+                    string strItemRecPath = "";
+                    XmlNode node = dom.DocumentElement.SelectSingleNode("itemRecord/@recPath");
+                    if (node == null)
+                    {
+                        strError = "缺乏 itemRecord 元素的 recPath 属性";
+                        continue;
+                    }
+                    else
+                        strItemRecPath = node.Value;
+
+                    OperLogData data = (OperLogData)_operLogTable[strItemRecPath];
+                    if (data == null)
+                    {
+                        data = new OperLogData();
+                        data.ItemRecPath = strItemRecPath;
+                        _operLogItems.Add(data);
+                        _operLogTable[strItemRecPath] = data;
+                    }
+
+                    data.ItemBarcode = strItemBarcode;
+                    data.Action = strAction;
+                    data.Operator = strOperator;
+                    data.OperTime = SQLiteUtil.GetLocalTime(strOperTime);
+                    data.OperCount++;
+                }
+
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                strError = "获取日志记录的过程中出现异常: " + ex.Message;
+                return -1;
+            }
+            finally
+            {
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.Channel.DoStop);
+                stop.Initial("");
+                stop.Style = StopStyle.None;
+
+                EnableControls(true);
+            }
+
+        }
+
+        void FillOperLogHtml()
+        {
+            ClearHtml();
+
+            AppendHtml("<table>");
+            AppendHtml("<tr>");
+            AppendHtml("<td>册记录路径</td>");
+            AppendHtml("<td>操作类型</td>");
+            AppendHtml("<td>册条码号</td>");
+            AppendHtml("<td>操作者</td>");
+            AppendHtml("<td>操作时间</td>");
+            AppendHtml("<td>操作次数</td>");
+            AppendHtml("</tr>");
+
+            foreach(OperLogData data in _operLogItems)
+            {
+                AppendHtml("<tr>");
+                AppendHtml("<td>"+data.ItemRecPath+"</td>");
+                AppendHtml("<td>"+data.Action+"</td>");
+                AppendHtml("<td>" + data.ItemBarcode + "</td>");
+                AppendHtml("<td>" + data.Operator + "</td>");
+                AppendHtml("<td>" + data.OperTime + "</td>");
+                AppendHtml("<td>" + data.OperCount.ToString() + "</td>");
+                AppendHtml("</tr>");
+
+            }
+            AppendHtml("</table>");
+        }
+
+        /// <summary>
+        /// 清除已有的 HTML 显示
+        /// </summary>
+        public void ClearHtml()
+        {
+            string strCssUrl = Path.Combine(this.MainForm.DataDir, "default\\inventory.css");
+            string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
+            string strJs = "";
+
+            {
+                HtmlDocument doc = webBrowser1.Document;
+
+                if (doc == null)
+                {
+                    webBrowser1.Navigate("about:blank");
+                    doc = webBrowser1.Document;
+                }
+                doc = doc.OpenNew(true);
+            }
+
+            Global.WriteHtml(this.webBrowser1,
+                "<html><head>" + strLink + strJs + "</head><body>");
+        }
+
+
+        /// <summary>
+        /// 向 IE 控件中追加一段 HTML 内容
+        /// </summary>
+        /// <param name="strText">HTML 内容</param>
+        public void AppendHtml(string strText)
+        {
+            if (this.InvokeRequired)
+            {
+                this.BeginInvoke(new Action<string>(AppendHtml), strText);
+                return;
+            }
+
+            Global.WriteHtml(this.webBrowser1,
+                strText);
+
+            // 因为HTML元素总是没有收尾，其他有些方法可能不奏效
+            this.webBrowser1.Document.Window.ScrollTo(0,
+                this.webBrowser1.Document.Body.ScrollRectangle.Height);
+        }
+
+        void loader_Prompt(object sender, MessagePromptEventArgs e)
+        {
+            // TODO: 不再出现此对话框。不过重试有个次数限制，同一位置失败多次后总要出现对话框才好
+            if (e.Actions == "yes,no,cancel")
+            {
+                DialogResult result = MessageBox.Show(this,
+    e.MessageText + "\r\n\r\n是否重试操作?\r\n\r\n(是: 重试;  否: 跳过本次操作，继续后面的操作; 取消: 停止全部操作)",
+    "ReportForm",
+    MessageBoxButtons.YesNoCancel,
+    MessageBoxIcon.Question,
+    MessageBoxDefaultButton.Button1);
+                if (result == DialogResult.Yes)
+                    e.ResultAction = "yes";
+                else if (result == DialogResult.Cancel)
+                    e.ResultAction = "cancel";
+                else
+                    e.ResultAction = "no";
+            }
+        }
+
+        // 根据盘点结果调整册状态
+        private void button_statis_maskItems_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+
+            // *** 将本次盘点验证存在的册，去除 注销/丢失 状态
+
+            // return:
+            //      -1  出错
+            //      0   放弃操作
+            //      1   操作成功
+            nRet = ModifyState("remove", out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            // *** 将本地盘点没有验证的(并且状态中没有“注销”或“丢失”的)册，加上 注销 状态
+            // return:
+            //      -1  出错
+            //      0   放弃操作
+            //      1   操作成功
+            nRet = ModifyState("add", out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        // 修改册记录的状态
+        // 将本次盘点验证存在的册，去除 注销/丢失 状态；或将没有盘点到的册，打上 注销 标记
+        // parameters:
+        //      strAction   动作。remove/add 之一
+        // return:
+        //      -1  出错
+        //      0   放弃操作
+        //      1   操作成功
+        int ModifyState(
+            string strAction,
+            out string strError)
+        {
+            int nRet = 0;
+
+            if (strAction != "remove" && strAction == "add")
+            {
+                strError = "未知的 strAction 值 '"+strAction+"'";
+                return -1;
+            }
+
+            // TODO: 这几个栏目，作为必备栏目，应该在窗口打开的早期进行验证是否具备，如果不具备要及时警告
+            // 在参考手册中也要说明哪些栏目是必备的，必须配置在 inventory_item_borrow.xml 配置文件中
+            int nStateColumnIndex = this._defs._base_colmun_defs.FindColumnByType("item_state");
+            if (nStateColumnIndex == -1)
+            {
+                strError = "基准集列表中 type 为 item_state 的列没有定义 ...";
+                return -1;
+            }
+            int nBorrowerColumnIndex = this._defs._base_colmun_defs.FindColumnByType("borrower");
+            if (nBorrowerColumnIndex == -1)
+            {
+                strError = "基准集列表中 type 为 borrower 的列没有定义 ...";
+                return -1;
+            }
+
+            List<ListViewItem> items = new List<ListViewItem>();
+            foreach (ListViewItem item in this.listView_baseList_records.Items)
+            {
+                if (item.Tag == null)
+                    continue;
+
+                string strState = ListViewUtil.GetItemText(item, nStateColumnIndex + 2);
+                if (string.IsNullOrEmpty(strState) == false
+                    && (strState[0] == '+' || strState[0] == '-'))
+                    strState = strState.Substring(1);
+
+                string strBorrower = ListViewUtil.GetItemText(item, nBorrowerColumnIndex + 2);
+
+                LineType type = (LineType)item.Tag;
+                if (strAction == "remove" && type == LineType.Verified)
+                {
+
+                    if ((StringUtil.IsInList("丢失", strState) == true
+                        || StringUtil.IsInList("注销", strState) == true)
+                        && string.IsNullOrEmpty(strBorrower) == true)
+                    {
+                        items.Add(item);
+                    }
+                }
+
+                if (strAction == "add" && type == LineType.Lost)
+                {
+                    if (StringUtil.IsInList("丢失", strState) == false
+    && StringUtil.IsInList("注销", strState) == false
+    && string.IsNullOrEmpty(strBorrower) == true)
+                    {
+                        items.Add(item);
+                    }
+                }
+            }
+
+            if (items.Count == 0)
+            {
+                strError = "没有需要操作的事项";
+                return 1;
+            }
+
+            {
+                string strText = "";
+                if (strAction == "remove")
+                    strText = "盘点验证过的册中，有 " + items.Count.ToString() + " 册当前是 “丢失” 或 “注销” 状态。\r\n\r\n是否要去掉这些册的“丢失”或“注销”状态?";
+                if (strAction == "add")
+                    strText = "经盘点推断新丢失 " + items.Count.ToString() + " 册。\r\n\r\n是否要给这些册加上“注销”状态?";
+
+                DialogResult result = MessageBox.Show(this,
+strText,
+"InventoryForm",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button1);
+                if (result == System.Windows.Forms.DialogResult.No)
+                {
+                    strError = "放弃操作";
+                    return 0;
+                }
+            }
+
+            EnableControls(false);
+            stop.Style = StopStyle.EnableHalfStop;
+            stop.OnStop += new StopEventHandler(this.Channel.DoStop);
+            stop.Initial("正在修改册记录状态 ...");
+            stop.BeginLoop();
+            try
+            {
+                stop.SetProgressRange(0, items.Count);
+
+                ListViewPatronLoader loader = new ListViewPatronLoader(this.Channel,
+    stop,
+    items,
+    this.m_biblioTable);
+                loader.DbTypeCaption = "实体库";
+
+                List<ListViewItem> changed_items = new List<ListViewItem>();
+                int i = 0;
+                foreach (LoaderItem item in loader)
+                {
+                    Application.DoEvents();	// 出让界面控制权
+
+                    if (stop != null
+                        && stop.State != 0)
+                    {
+                        strError = "用户中断";
+                        return -1;
+                    }
+
+                    stop.SetProgressValue(i);
+
+                    BiblioInfo info = item.BiblioInfo;
+
+                    Debug.Assert(item.ListViewItem == items[i], "");
+
+                    string strXml = info.NewXml;
+                    if (string.IsNullOrEmpty(strXml) == true)
+                        strXml = info.OldXml;
+
+                    XmlDocument item_dom = new XmlDocument();
+                    try
+                    {
+                        item_dom.LoadXml(strXml);
+                    }
+                    catch (Exception ex)
+                    {
+                        strError = "册记录 '" + info.OldXml + "' XML 装入 XMLDOM 时出错: " + ex.Message;
+                        return -1;
+                    }
+
+                    string strState = DomUtil.GetElementText(item_dom.DocumentElement, "state");
+
+                    if (strAction == "remove")
+                    {
+                        bool bChanged = RemoveStyle(ref strState, "丢失,注销");
+                        if (bChanged == false)
+                            goto CONTINUE;
+
+                        DomUtil.SetElementText(item_dom.DocumentElement, "state", strState);
+                    }
+                    if (strAction == "add")
+                    {
+                        StringUtil.SetInList(ref strState, "注销", true);
+                        DomUtil.SetElementText(item_dom.DocumentElement, "state", strState);
+                    }
+
+                    string strComment = DomUtil.GetElementText(item_dom.DocumentElement, "comment");
+                    if (strAction == "remove")
+                    {
+                        strComment = AppendComment(strComment,
+                            DateTime.Now.ToString() + " 去除丢失或注销状态。");
+                    }
+                    if (strAction == "add")
+                    {
+                        strComment = AppendComment(strComment,
+                            DateTime.Now.ToString() + " 添加注销状态。");
+                    }
+                    DomUtil.SetElementText(item_dom.DocumentElement, "comment", strComment);
+
+                    info.NewXml = item_dom.DocumentElement.OuterXml;
+
+                    byte[] baNewTimestamp = null;
+                    // 保存一条记录
+                    // 保存成功后， info.Timestamp 会被更新
+                    // return:
+                    //      -2  时间戳不匹配
+                    //      -1  出错
+                    //      0   成功
+                    nRet = SaveItemRecord(info.RecPath,
+                    info,
+                    out baNewTimestamp,
+                    out strError);
+                    if (nRet == -1)
+                        return -1;
+                    if (nRet == -2)
+                    {
+                        // TODO: 时间戳不匹配。警告重做?
+                        return -1;
+                    }
+
+                    info.Timestamp = baNewTimestamp;
+
+                    this.m_nChangedCount ++;
+                    AcceptOneChange(item.ListViewItem);
+
+                    // 刷新显示
+                    changed_items.Add(item.ListViewItem);
+
+                CONTINUE:
+                    i++;
+                }
+
+                {
+                    // TODO: 要保护被刷新行原先的背景颜色
+
+                    string strBrowseStyle = "id,cols,format:@coldef:" + this._defs.BrowseColumnDef;
+
+                    // 刷新浏览行
+                    nRet = RefreshListViewLines(changed_items,
+                        strBrowseStyle,
+                        false,
+                        false,  // 不清除右侧多出来的列内容
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
+                }
+
+            }
+            finally
+            {
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.Channel.DoStop);
+                stop.Initial("");
+                stop.Style = StopStyle.None;
+
+                EnableControls(true);
+            }
+
+            if (strAction == "add")
+                this._statisInfo.ItemsNeedAddLostState = 0;
+            else if (strAction == "remove")
+                this._statisInfo.ItemsNeedRemoveLostState = 0;
+            this.SetButtonState(this._statisInfo);
+
+            strError = "";
+            return 1;
+        }
+
+        static string AppendComment(string strComment, string strNewContent)
+        {
+            if (strComment == null)
+                strComment = "";
+            if (string.IsNullOrEmpty(strComment) == false)
+                strComment += "; ";
+            strComment += strNewContent;
+            return strComment;
+        }
+
+        // 从 strText 中移走 strList 中的每个列举值
+        // return:
+        //      true 表示 strText 发生了修改；false 表示strText 没有发生修改
+        public static bool RemoveStyle(ref string strText, string strList)
+        {
+            bool bChanged = false;
+            List<string> list = StringUtil.SplitList(strList);
+            foreach(string value in list)
+            {
+                if (StringUtil.RemoveFromInList(value, true, ref strText) == true)
+                    bChanged = true;
+            }
+
+            return bChanged;
+        }
+
+        // 保存一条记录
+        // 保存成功后， info.Timestamp 会被更新
+        // return:
+        //      -2  时间戳不匹配
+        //      -1  出错
+        //      0   成功
+        int SaveItemRecord(string strRecPath,
+            BiblioInfo info,
+            out byte[] baNewTimestamp,
+            out string strError)
+        {
+            strError = "";
+            baNewTimestamp = null;
+
+            List<EntityInfo> entityArray = new List<EntityInfo>();
+
+            {
+                EntityInfo item_info = new EntityInfo();
+
+                item_info.OldRecPath = strRecPath;
+                item_info.Action = "change";
+                item_info.NewRecPath = strRecPath;
+
+                item_info.NewRecord = info.NewXml;
+                item_info.NewTimestamp = null;
+
+                item_info.OldRecord = info.OldXml;
+                item_info.OldTimestamp = info.Timestamp;
+
+                entityArray.Add(item_info);
+            }
+
+            // 复制到目标
+            EntityInfo[] entities = null;
+            entities = new EntityInfo[entityArray.Count];
+            for (int i = 0; i < entityArray.Count; i++)
+            {
+                entities[i] = entityArray[i];
+            }
+
+            EntityInfo[] errorinfos = null;
+
+            long lRet = 0;
+
+                lRet = this.Channel.SetEntities(
+                     null,   // this.BiblioStatisForm.stop,
+                     "",
+                     entities,
+                     out errorinfos,
+                     out strError);
+
+            if (lRet == -1)
+                return -1;
+
+            // string strWarning = ""; // 警告信息
+
+            if (errorinfos == null)
+                return 0;
+
+            strError = "";
+            for (int i = 0; i < errorinfos.Length; i++)
+            {
+#if NO
+                if (String.IsNullOrEmpty(errorinfos[i].RefID) == true)
+                {
+                    strError = "服务器返回的EntityInfo结构中RefID为空";
+                    return -1;
+                }
+#endif
+                if (i == 0)
+                    baNewTimestamp = errorinfos[i].NewTimestamp;
+
+                // 正常信息处理
+                if (errorinfos[i].ErrorCode == ErrorCodeValue.NoError)
+                    continue;
+
+                strError += errorinfos[i].RefID + "在提交保存过程中发生错误 -- " + errorinfos[i].ErrorInfo + "\r\n";
+            }
+
+            info.Timestamp = baNewTimestamp;
+
+            if (String.IsNullOrEmpty(strError) == false)
+                return -1;
+
+            return 0;
+        }
+
+        private void listView_baseList_records_DoubleClick(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            if (this.listView_baseList_records.SelectedItems.Count == 0)
+            {
+                strError = "尚未在基准列表中选定要操作的事项";
+                goto ERROR1;
+            }
+
+            string strFirstColumn = ListViewUtil.GetItemText(this.listView_baseList_records.SelectedItems[0], 0);
+
+            if (String.IsNullOrEmpty(strFirstColumn) == true)
+            {
+                strError = "第一列没有内容";
+                goto ERROR1;
+            }
+
+            {
+#if NO
+                string strOpenStyle = "new";
+                if (this.LoadToExistWindow == true)
+                    strOpenStyle = "exist";
+#endif
+                string strOpenStyle = "exist";
+
+                // bool bLoadToItemWindow = this.LoadToItemWindow;
+                bool bLoadToItemWindow = false;
+
+                if (bLoadToItemWindow == true)
+                {
+                    LoadRecord("ItemInfoForm",
+                        "recpath",
+                        strOpenStyle);
+                    return;
+                }
+
+                // 装入种册窗/实体窗，用册条码号/记录路径
+                // parameters:
+                //      strTargetFormType   目标窗口类型 "EntityForm" "ItemInfoForm"
+                //      strIdType   标识类型 "barcode" "recpath"
+                //      strOpenType 打开窗口的方式 "new" "exist"
+                LoadRecord("EntityForm",
+                    "recpath",
+                    strOpenStyle);
+            }
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        // 装入种册窗/实体窗，用册条码号/记录路径
+        // parameters:
+        //      strTargetFormType   目标窗口类型 "EntityForm" "ItemInfoForm"
+        //      strIdType   标识类型 "barcode" "recpath"
+        //      strOpenType 打开窗口的方式 "new" "exist"
+        void LoadRecord(string strTargetFormType,
+            string strIdType,
+            string strOpenType)
+        {
+            string strTargetFormName = "种册窗";
+
+            if (strTargetFormType == "ItemInfoForm")
+                strTargetFormName = "实体窗";
+
+            if (this.listView_baseList_records.SelectedItems.Count == 0)
+            {
+                MessageBox.Show(this, "尚未在列表中选定要装入" + strTargetFormName + "的行");
+                return;
+            }
+
+            string strBarcodeOrRecPath = "";
+
+            {
+                Debug.Assert(strIdType == "recpath", "");
+                // recpath
+                strBarcodeOrRecPath = ListViewUtil.GetItemText(this.listView_baseList_records.SelectedItems[0], 0);
+            }
+
+            if (strTargetFormType == "EntityForm")
+            {
+                EntityForm form = null;
+
+                if (strOpenType == "exist")
+                {
+                    form = MainForm.GetTopChildWindow<EntityForm>();
+                    if (form != null)
+                        Global.Activate(form);
+                }
+                else
+                {
+                    Debug.Assert(strOpenType == "new", "");
+                }
+
+                if (form == null)
+                {
+                    form = new EntityForm();
+
+                    form.MdiParent = this.MainForm;
+
+                    form.MainForm = this.MainForm;
+                    form.Show();
+                }
+
+                if (strIdType == "barcode")
+                {
+                    // 装载一个册，连带装入种
+                    // parameters:
+                    //      bAutoSavePrev   是否自动提交保存先前发生过的修改？如果==true，是；如果==false，则要出现MessageBox提示
+                    // return:
+                    //      -1  error
+                    //      0   not found
+                    //      1   found
+                    form.LoadItemByBarcode(strBarcodeOrRecPath, false);
+                }
+                else
+                {
+                    Debug.Assert(strIdType == "recpath", "");
+
+                    // parameters:
+                    //      bAutoSavePrev   是否自动提交保存先前发生过的修改？如果==true，是；如果==false，则要出现MessageBox提示
+                    // return:
+                    //      -1  error
+                    //      0   not found
+                    //      1   found
+                    form.LoadItemByRecPath(strBarcodeOrRecPath, false);
+                }
+            }
+            else
+            {
+                Debug.Assert(strTargetFormType == "ItemInfoForm", "");
+
+                ItemInfoForm form = null;
+
+                if (strOpenType == "exist")
+                {
+                    form = MainForm.GetTopChildWindow<ItemInfoForm>();
+                    if (form != null)
+                        Global.Activate(form);
+                }
+                else
+                {
+                    Debug.Assert(strOpenType == "new", "");
+                }
+
+                if (form == null)
+                {
+                    form = new ItemInfoForm();
+
+                    form.MdiParent = this.MainForm;
+
+                    form.MainForm = this.MainForm;
+                    form.Show();
+                }
+
+                    form.DbType = "item";
+
+                if (strIdType == "barcode")
+                {
+                    Debug.Assert(this.DbType == "item" || this.DbType == "arrive", "");
+                    form.LoadRecord(strBarcodeOrRecPath);
+                }
+                else
+                {
+                    Debug.Assert(strIdType == "recpath", "");
+
+                    form.LoadRecordByRecPath(strBarcodeOrRecPath, "");
+                }
+            }
+        }
+
+        private void button_start_setLocations_Click(object sender, EventArgs e)
+        {
+            SelectBatchNoDialog dlg = new SelectBatchNoDialog();
+            MainForm.SetControlFont(dlg, this.Font, false);
+            dlg.Channel = this.Channel;
+            dlg.Stop = this.stop;
+            dlg.InventoryDbName = "";
+            dlg.LibraryCodeList = GetOwnerLibraryCodes();
+            this.MainForm.AppInfo.LinkFormState(dlg, "SelectBatchNoDialog_location_state");
+            dlg.ShowDialog(this);
+
+            this.textBox_start_locations.Text = StringUtil.MakePathList(dlg.SelectedBatchNo, "\r\n");
+            return;
+        }
+
+        private void inventoryBatchNoControl_start_batchNo_TextChanged(object sender, EventArgs e)
+        {
+            if (this._chargingForm != null)
+                this._chargingForm.BatchNo = this.inventoryBatchNoControl_start_batchNo.Text;
+         }
+
+        private void textBox_start_locations_TextChanged(object sender, EventArgs e)
+        {
+            if (this._chargingForm != null)
+            {
+                List<string> list = StringUtil.SplitList(this.textBox_start_locations.Text.Replace("\r\n", "\n"), '\n');
+                for (int i = 0; i < list.Count; i++)
+                {
+                    string value = list[i];
+                    if (value == "[空]" || value == "[blank]")
+                        list[i] = "";
+                }
+                this._chargingForm.FilterLocations = list;
+            }
+        }
+
+        private void button_statis_return_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            int nRet = 0;
+
+            int nBorrowerColumnIndex = this._defs._base_colmun_defs.FindColumnByType("borrower");
+            if (nBorrowerColumnIndex == -1)
+            {
+                strError = "基准集列表中 type 为 borrower 的列没有定义 ...";
+                goto ERROR1;
+            }
+
+            int nBarcodeColumnIndex = this._defs._base_colmun_defs.FindColumnByType("item_barcode");
+            if (nBarcodeColumnIndex == -1)
+            {
+                strError = "基准集列表中 type 为 item_barcode 的列没有定义 ...";
+                goto ERROR1;
+            }
+
+            int nRefIDColumnIndex = this._defs._base_colmun_defs.FindColumnByType("item_refid");
+            if (nRefIDColumnIndex == -1)
+            {
+                strError = "基准集列表中 type 为 item_refid 的列没有定义 ...";
+                goto ERROR1;
+            }
+
+            // 先初步得到符合条件的行。有可能经过上次处理后，浏览行还没有来得及刷新，因此要预先刷新一次
+            List<ListViewItem> items = new List<ListViewItem>();
+            foreach (ListViewItem item in this.listView_baseList_records.Items)
+            {
+                if (item.Tag == null)
+                    continue;
+
+                LineType type = (LineType)item.Tag;
+                if (type == LineType.Verified)
+                {
+                    string strBorrower = ListViewUtil.GetItemText(item, nBorrowerColumnIndex + 2);
+
+                    if (string.IsNullOrEmpty(strBorrower) == false)
+                        items.Add(item);
+                }
+            }
+
+            if (items.Count == 0)
+            {
+                strError = "当前没有需要操作的事项";
+                goto ERROR1;
+            }
+
+            {
+                string strBrowseStyle = "id,cols,format:@coldef:" + this._defs.BrowseColumnDef;
+
+                // 刷新浏览行
+                nRet = RefreshListViewLines(items,
+                    strBrowseStyle,
+                    false,
+                    false,  // 不清除右侧多出来的列内容
+                    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+            }
+
+            // 刷新后正式处理一次
+            // *** 将本次盘点验证存在的册，其中处于在借状态的，追加一次还书操作。最好注释说明这是因为盘点发现在架而特意补充还书操作的。有个问题就是这样的册如果发生超期，是不是就豁免读者违约金了？因为实际上架时间已经不可考了
+            items.Clear();
+            List<string> barcode_list = new List<string>();
+            foreach (ListViewItem item in this.listView_baseList_records.Items)
+            {
+                if (item.Tag == null)
+                    continue;
+
+                LineType type = (LineType)item.Tag;
+                if (type == LineType.Verified)
+                {
+                    string strBorrower = ListViewUtil.GetItemText(item, nBorrowerColumnIndex + 2);
+
+                    if (string.IsNullOrEmpty(strBorrower) == false)
+                    {
+                        string strBarcode = ListViewUtil.GetItemText(item, nBarcodeColumnIndex + 2);
+                        string strRefID = ListViewUtil.GetItemText(item, nRefIDColumnIndex + 2);
+                        if (string.IsNullOrEmpty(strBarcode) == false)
+                            barcode_list.Add(strBarcode);
+                        else
+                            barcode_list.Add("@refID:" + strRefID);
+
+                        // items.Add(item);
+                    }
+
+                }
+            }
+
+            this._statisInfo.ItemsNeedReturn = barcode_list.Count;
+            this.SetButtonState(this._statisInfo);
+
+            if (barcode_list.Count == 0)
+            {
+                strError = "当前没有需要操作的事项";
+                goto ERROR1;
+            }
+
+            DialogResult result = MessageBox.Show(this,
+"当前有 "+barcode_list.Count+" 条经过盘点验证在架的册记录处于外借状态。\r\n\r\n是否要对这些册立即补做还书操作?",
+"InventoryForm",
+MessageBoxButtons.YesNo,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button1);
+            if (result == System.Windows.Forms.DialogResult.No)
+            {
+                strError = "放弃操作";
+                goto ERROR1;
+            }
+
+            this.tabControl_main.SelectedTab = this.tabPage_scan;
+            this._chargingForm.ClearTaskList(null);
+            nRet = this._chargingForm.DoReturn(barcode_list, out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            // TODO: 有办法等待完成后，再刷新相关行么?
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        // 重载函数和基类函数的区别是，重载函数不会改变 item 的颜色
+        // 清除一个事项的修改信息
+        // parameters:
+        //      bClearBiblioInfo    是否顺便清除事项的 BiblioInfo 信息
+        public override void ClearOneChange(ListViewItem item,
+            bool bClearBiblioInfo = false)
+        {
+            string strRecPath = item.Text;
+            if (string.IsNullOrEmpty(strRecPath) == true)
+                return;
+
+            BiblioInfo info = (BiblioInfo)this.m_biblioTable[strRecPath];
+            if (info == null)
+                return;
+
+            if (String.IsNullOrEmpty(info.NewXml) == false)
+            {
+                info.NewXml = "";
+
+                //item.BackColor = SystemColors.Window;
+                //item.ForeColor = SystemColors.WindowText;
+
+                this.m_nChangedCount--;
+                Debug.Assert(this.m_nChangedCount >= 0, "");
+            }
+
+            if (bClearBiblioInfo == true)
+                this.m_biblioTable.Remove(strRecPath);
+        }
+
+        // 统计运算的结果
+        class StatisInfo
+        {
+            // 需要移走 丢失/注销 状态的已被盘点验证存在的册数量
+            public long ItemsNeedRemoveLostState = 0;
+            // 需要增加 注销 状态的新发现的丢失册数量
+            public long ItemsNeedAddLostState = 0;
+
+            // 需要追加还书操作的，尚处于外借状态的册数量。这些册是经过盘点确认已经存在于书架的
+            public long ItemsNeedReturn = 0;
+
+            // 盘点验证过的总册数
+            public long ItemsVerified = 0;
+            // 基准集总册数
+            public long ItemsBase = 0;
+            // 盘点验证的册中超过基准集的部分册数
+            public long ItemsOutofRange = 0;
+            // 从基准集中排除已验证的册和外借状态的册以后的册数。这里面包括以前已经为丢失和注销状态的册
+            public long ItemsLost = 0;
+            // 基准集中处于外借状态的册数。中间包含已经验证的、但处于外借状态的册数
+            public long ItemsBorrowed = 0;
+        }
+
+        private void listView_inventoryList_records_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Right)
+                return;
+
+            ContextMenu contextMenu = new ContextMenu();
+            MenuItem menuItem = null;
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+
+            menuItem = new MenuItem("全选(&A)");
+            menuItem.Click += new System.EventHandler(this.menu_selectAllInventoryLines_Click);
+            contextMenu.MenuItems.Add(menuItem);
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("从盘点库中删除所选择事项 [" + this.listView_inventoryList_records.SelectedItems.Count.ToString() + "] (&D)");
+            menuItem.Click += new System.EventHandler(this.menu_deleteSelectedInventoryItems_Click);
+            if (this.listView_inventoryList_records.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+            contextMenu.Show(this.listView_inventoryList_records, new Point(e.X, e.Y));	
+        }
+
+        void menu_selectAllInventoryLines_Click(object sender, EventArgs e)
+        {
+            ListViewUtil.SelectAllLines(this.listView_inventoryList_records);
+        }
+
+        void menu_deleteSelectedInventoryItems_Click(object sender, EventArgs e)
+        {
+            DialogResult result = MessageBox.Show(this,
+"确实要从盘点库中删除所选定的 " + this.listView_inventoryList_records.SelectedItems.Count.ToString() + " 个记录?",
+"InventoryForm",
+MessageBoxButtons.OKCancel,
+MessageBoxIcon.Question,
+MessageBoxDefaultButton.Button2);
+            if (result == System.Windows.Forms.DialogResult.Cancel)
+                return;
+
+            List<ListViewItem> items = new List<ListViewItem>();
+            foreach (ListViewItem item in this.listView_inventoryList_records.SelectedItems)
+            {
+                items.Add(item);
+            }
+
+            string strError = "";
+
+            stop.Style = StopStyle.EnableHalfStop;
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在删除盘点记录 ...");
+            stop.BeginLoop();
+
+            this.EnableControls(false);
+            this.listView_inventoryList_records.Enabled = false;
+            try
+            {
+                stop.SetProgressRange(0, items.Count);
+
+                ListViewPatronLoader loader = new ListViewPatronLoader(this.Channel,
+    stop,
+    items,
+    this.m_biblioTable);
+                loader.DbTypeCaption = "盘点";
+
+                int i = 0;
+                foreach (LoaderItem item in loader)
+                {
+                    Application.DoEvents();	// 出让界面控制权
+
+                    if (stop != null
+                        && stop.State != 0)
+                    {
+                        strError = "用户中断";
+                        goto ERROR1;
+                    }
+
+                    stop.SetProgressValue(i);
+
+                    BiblioInfo info = item.BiblioInfo;
+
+                    Debug.Assert(item.ListViewItem == items[i], "");
+                    //string strRecPath = ListViewUtil.GetItemText(item, 0);
+
+#if NO
+                    entity.RefID = "";
+
+                    if (String.IsNullOrEmpty(entity.RefID) == true)
+                        entity.RefID = BookItem.GenRefID();
+#endif
+
+                    stop.SetMessage("正在删除盘点记录 " + info.RecPath);
+
+                    long lRet = 0;
+
+                    string strOutputResPath = "";
+                    byte[] output_timestamp = null;
+                        lRet = Channel.WriteRes(
+                             stop,
+                             info.RecPath,
+                             "",
+                             0,
+                             null,
+                             "",
+                             "delete",
+                             info.Timestamp,
+                             out strOutputResPath,
+                             out output_timestamp,
+                             out strError);
+                    if (lRet == -1)
+                        goto ERROR1;
+
+                    stop.SetProgressValue(i);
+
+                    this.listView_inventoryList_records.Items.Remove(item.ListViewItem);
+                    i++;
+                }
+            }
+            finally
+            {
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                stop.HideProgress();
+                stop.Style = StopStyle.None;
+
+                this.EnableControls(true);
+                this.listView_inventoryList_records.Enabled = true;
+            }
+
+            MessageBox.Show(this, "成功删除盘点记录 " + items.Count + " 条");
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+
     }
 }

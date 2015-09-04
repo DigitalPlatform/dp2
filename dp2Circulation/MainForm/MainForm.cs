@@ -6915,6 +6915,11 @@ out strError);
             form.Show();
 #endif
             // OpenWindow<NewInventoryForm>();
+            if (this.ServerVersion < 2.50)
+            {
+                MessageBox.Show(this, "dp2library 版本 2.50 和以上才能使用 盘点窗");
+                return;
+            }
             OpenWindow<InventoryForm>();
 
         }

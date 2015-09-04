@@ -7,6 +7,7 @@ using System.Text;
 using System.Windows.Forms;
 
 using DigitalPlatform.IO;
+using DigitalPlatform.Text;
 
 // 2013/3/16 添加 XML 注释
 
@@ -142,6 +143,72 @@ namespace dp2Circulation
                 && this.dateControl_start.IsValueNull() == false)
             {
                 VisibleEndControls(true);
+            }
+        }
+
+        public DateTime StartTime
+        {
+            get
+            {
+                return this.dateControl_start.Value;
+            }
+            set
+            {
+                this.dateControl_start.Value = value;
+            }
+        }
+
+        public DateTime EndTime
+        {
+            get
+            {
+                return this.dateControl_end.Value;
+            }
+            set
+            {
+                this.dateControl_end.Value = value;
+            }
+        }
+
+        public string DateRange
+        {
+            get
+            {
+                return DateTimeUtil.DateTimeToString8(this.dateControl_start.Value)
+                    + "-" + DateTimeUtil.DateTimeToString8(this.dateControl_end.Value);
+            }
+            set
+            {
+                string strStart = "";
+                string strEnd = "";
+                StringUtil.ParseTwoPart(value, "-", out strStart, out strEnd);
+                if (string.IsNullOrEmpty(strStart) == false)
+                {
+                    try
+                    {
+                        this.dateControl_start.Value = DateTimeUtil.Long8ToDateTime(strStart);
+                    }
+                    catch
+                    {
+                        this.dateControl_start.Value = DateTime.Now;
+                    }
+                }
+                else
+                    this.dateControl_start.Value = DateTime.Now;
+
+                if (string.IsNullOrEmpty(strEnd) == false)
+                {
+                    try
+                    {
+                        this.dateControl_end.Value = DateTimeUtil.Long8ToDateTime(strEnd);
+                    }
+                    catch
+                    {
+                        this.dateControl_end.Value = DateTime.Now;
+                    }
+                }
+                else
+                    this.dateControl_end.Value = DateTime.Now;
             }
         }
     }

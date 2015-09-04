@@ -7562,7 +7562,7 @@ API: Settlement()
 <ranges>...</ranges> 字节范围
 <totalLength>...</totalLength> 总长度
 <metadata>...</metadata> 此元素的文本即是记录体，但注意为不透明的字符串（HtmlEncoding后的记录字符串）。
-<style>...</style>
+<style>...</style> 当 style 中包含 delete 子串时表示要删除这个资源 
 <operator>test</operator> 
 <operTime>Fri, 08 Dec 2006 10:12:20 GMT</operTime> 
 </root>
@@ -7659,16 +7659,28 @@ domLog.DocumentElement,
                 string strOutputResPath = "";
                 byte[] output_timestamp = null;
 
-                lRet = channel.WriteRes(strResPath,
-    strRanges,
-    lTotalLength,
-    baRecord,
-    strMetadata,
-    strStyle,
-    timestamp,
-    out strOutputResPath,
-    out output_timestamp,
-    out strError);
+                if (StringUtil.IsInList("delete", strStyle) == true)
+                {
+                    // 2015/9/3 增加
+                    lRet = channel.DoDeleteRes(strResPath,
+                        timestamp,
+                        strStyle,
+                        out output_timestamp,
+                        out strError);
+                }
+                else
+                {
+                    lRet = channel.WriteRes(strResPath,
+        strRanges,
+        lTotalLength,
+        baRecord,
+        strMetadata,
+        strStyle,
+        timestamp,
+        out strOutputResPath,
+        out output_timestamp,
+        out strError);
+                }
                 if (lRet == -1)
                 {
                     strError = "WriteRes() '" + strResPath + "' 时发生错误: " + strError;

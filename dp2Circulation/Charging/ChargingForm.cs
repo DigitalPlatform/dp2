@@ -969,7 +969,7 @@ namespace dp2Circulation
 
                 // PathUtil.CreateDirIfNeed(this.MainForm.DataDir + "\\servermapped");
 
-                string strTempFilename = this.MainForm.DataDir + "\\~charging_temp_reader.html";
+                string strTempFilename = Path.Combine(this.MainForm.DataDir, "~charging_temp_reader.html");
                 using (StreamWriter sw = new StreamWriter(strTempFilename, false, Encoding.UTF8))
                 {
                     sw.Write(strText);
@@ -2594,7 +2594,7 @@ dlg.UiState);
 
                         this.MainForm.OperHistory.ReturnAsync(
                             this,
-                            this.FuncState == FuncState.Lost,
+                            strAction,  // this.FuncState == FuncState.Lost,
                             strOutputReaderBarcode, // this.textBox_readerBarcode.Text,
                             this.textBox_itemBarcode.Text,
                             strConfirmItemRecPath,

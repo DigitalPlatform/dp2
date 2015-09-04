@@ -1143,6 +1143,9 @@ namespace DigitalPlatform.LibraryServer
             {
                 // 加读锁
                 // 可以避免拿到读者记录处理中途的临时状态
+#if DEBUG_LOCK_READER
+                this.App.WriteErrorLog("DoChangeCard 开始为读者加读锁 '" + strOldCardNo + "'");
+#endif
                 this.App.ReaderLocks.LockForRead(strOldCardNo);
                 try
                 {
@@ -1164,6 +1167,9 @@ namespace DigitalPlatform.LibraryServer
                 finally
                 {
                     this.App.ReaderLocks.UnlockForRead(strOldCardNo);
+#if DEBUG_LOCK_READER
+                    this.App.WriteErrorLog("DoChangeCard 结束为读者加读锁 '" + strOldCardNo + "'");
+#endif
                 }
 
                 if (nRet == -1)
@@ -1250,6 +1256,9 @@ namespace DigitalPlatform.LibraryServer
 
             // 加读锁
             // 可以避免拿到读者记录处理中途的临时状态
+#if DEBUG_LOCK_READER
+            this.App.WriteErrorLog("DoChangeCard 开始为读者加读锁 '" + strNewBarcode + "'");
+#endif
             this.App.ReaderLocks.LockForRead(strNewBarcode);
 
             try
@@ -1272,6 +1281,9 @@ namespace DigitalPlatform.LibraryServer
             finally
             {
                 this.App.ReaderLocks.UnlockForRead(strNewBarcode);
+#if DEBUG_LOCK_READER
+                this.App.WriteErrorLog("DoChangeCard 结束为读者加读锁 '" + strNewBarcode + "'");
+#endif
             }
 
             if (nRet == -1)
@@ -1411,6 +1423,9 @@ namespace DigitalPlatform.LibraryServer
 
             // 加读锁
             // 可以避免拿到读者记录处理中途的临时状态
+#if DEBUG_LOCK_READER
+            this.App.WriteErrorLog("WriteOneReaderInfo 开始为读者加读锁 '" + strBarcode + "'");
+#endif
             this.App.ReaderLocks.LockForRead(strBarcode);
 
             try
@@ -1433,6 +1448,10 @@ namespace DigitalPlatform.LibraryServer
             finally
             {
                 this.App.ReaderLocks.UnlockForRead(strBarcode);
+#if DEBUG_LOCK_READER
+                this.App.WriteErrorLog("WriteOneReaderInfo 结束为读者加读锁 '" + strBarcode + "'");
+#endif
+
             }
 
             if (nRet == -1)
@@ -1926,6 +1945,9 @@ namespace DigitalPlatform.LibraryServer
 
             // 加读锁
             // 可以避免拿到读者记录处理中途的临时状态
+#if DEBUG_LOCK_READER
+            this.App.WriteErrorLog("UnLossOneReaderInfo 开始为读者加读锁 '" + strBarcode + "'");
+#endif
             this.App.ReaderLocks.LockForRead(strBarcode);
 
             try
@@ -1948,6 +1970,10 @@ namespace DigitalPlatform.LibraryServer
             finally
             {
                 this.App.ReaderLocks.UnlockForRead(strBarcode);
+#if DEBUG_LOCK_READER
+                this.App.WriteErrorLog("UnLossOneReaderInfo 结束为读者加读锁 '" + strBarcode + "'");
+#endif
+
             }
 
             if (nRet == -1)
@@ -2078,6 +2104,9 @@ namespace DigitalPlatform.LibraryServer
 
             // 加读锁
             // 可以避免拿到读者记录处理中途的临时状态
+#if DEBUG_LOCK_READER
+            this.App.WriteErrorLog("LossOneReaderInfo 开始为读者加读锁 '" + strBarcode + "'");
+#endif
             this.App.ReaderLocks.LockForRead(strBarcode);
 
             try
@@ -2100,6 +2129,10 @@ namespace DigitalPlatform.LibraryServer
             finally
             {
                 this.App.ReaderLocks.UnlockForRead(strBarcode);
+#if DEBUG_LOCK_READER
+                this.App.WriteErrorLog("LossOneReaderInfo 结束为读者加读锁 '" + strBarcode + "'");
+#endif
+
             }
 
             if (nRet == -1)

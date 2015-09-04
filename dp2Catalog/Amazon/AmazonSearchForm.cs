@@ -612,8 +612,6 @@ MessageBoxDefaultButton.Button1);
             if (sender != this)
                 return;
 
-
-
             try
             {
                 // 获得splitContainer_main的状态
@@ -1244,7 +1242,7 @@ this.CurrentServer);
             }
 
             XmlDocument doc = new XmlDocument();
-            doc.Load(this.TempFilename);
+            doc.Load(this.TempFilename);    ///
 
             XmlNamespaceManager nsmgr = new XmlNamespaceManager(new NameTable());
             nsmgr.AddNamespace("amazon", NAMESPACE);
@@ -2656,8 +2654,12 @@ value);
                 dlg.RecPath = strLastSavePath;
                 dlg.Text = "请选择目标数据库";
             }
-            dlg.StartPosition = FormStartPosition.CenterScreen;
+            // dlg.StartPosition = FormStartPosition.CenterScreen;
+            this.MainForm.AppInfo.LinkFormState(dlg, "SaveRecordDlg_state");
+            dlg.UiState = this.MainForm.AppInfo.GetString("AmazonSearchForm", "SaveRecordDlg_uiState", "");
             dlg.ShowDialog(this);
+            this.MainForm.AppInfo.SetString("AmazonSearchForm", "SaveRecordDlg_uiState", dlg.UiState);
+
             if (dlg.DialogResult != DialogResult.OK)
                 return;
 

@@ -111,6 +111,16 @@
     <comment lang='chi'>撤回交费</comment>
     <comment lang='eng'>amerce undo</comment>
   </property>
+
+  <property name='inventory'>
+    <comment lang='chi'>盘点</comment>
+    <comment lang='eng'>inventory</comment>
+  </property>
+  <property name='inventorydelete'>
+    <comment lang='chi'>删除盘点记录</comment>
+    <comment lang='eng'>delete inventory record</comment>
+  </property>
+  
   <property name='search'>
     <comment lang='chi'>检索</comment>
     <comment lang='eng'>search</comment>

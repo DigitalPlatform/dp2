@@ -70,6 +70,10 @@ namespace DigitalPlatform.LibraryServer
             List<string> ArriveItemBarcodes = new List<string>();
             
             // 加读者记录锁
+#if DEBUG_LOCK_READER
+            this.WriteErrorLog("Reservation 开始为读者加写锁 '" + strReaderBarcode + "'");
+#endif
+
             this.ReaderLocks.LockForWrite(strReaderBarcode);
 
             try
@@ -564,6 +568,9 @@ namespace DigitalPlatform.LibraryServer
             finally
             {
                 this.ReaderLocks.UnlockForWrite(strReaderBarcode);
+#if DEBUG_LOCK_READER
+                this.WriteErrorLog("Reservation 结束为读者加写锁 '" + strReaderBarcode + "'");
+#endif
             }
 
             return result;
@@ -1148,7 +1155,12 @@ namespace DigitalPlatform.LibraryServer
 
             // 加读者记录锁
             if (bNeedLockReader == true)
+            {
+#if DEBUG_LOCK_READER
+                this.WriteErrorLog("DoReservationNotify 开始为读者加写锁 '" + strReservationReaderBarcode + "'");
+#endif
                 this.ReaderLocks.LockForWrite(strReservationReaderBarcode);
+            }
             try
             {
                 // 读入读者记录
@@ -1338,7 +1350,12 @@ namespace DigitalPlatform.LibraryServer
             finally
             {
                 if (bNeedLockReader == true)
+                {
                     this.ReaderLocks.UnlockForWrite(strReservationReaderBarcode);
+#if DEBUG_LOCK_READER
+                    this.WriteErrorLog("DoReservationNotify 结束为读者加写锁 '" + strReservationReaderBarcode + "'");
+#endif
+                }
             }
 
             string strLibraryCode = "";

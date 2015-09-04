@@ -40,6 +40,7 @@ namespace dp2Circulation
                 this._numberList = null;
             }
 
+            listView_columns_SelectedIndexChanged(this, new EventArgs());
         }
 
         private void button_OK_Click(object sender, EventArgs e)
@@ -195,6 +196,13 @@ namespace dp2Circulation
             {
                 e.Item.Font = new Font(this.Font, FontStyle.Regular);
             }
+        }
+
+        private void listView_columns_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            bool bSelected = this.listView_columns.SelectedItems.Count > 0;
+            this.toolStripButton_move_up.Enabled = bSelected;
+            this.toolStripButton_move_down.Enabled = bSelected;
         }
     }
 }

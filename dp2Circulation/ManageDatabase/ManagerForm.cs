@@ -43,19 +43,9 @@ namespace dp2Circulation
         /// </summary>
         public string AllDatabaseInfoXml = "";
 
+#if NO
         const int WM_INITIAL = API.WM_USER + 201;
         const int WM_LOADSIZE = API.WM_USER + 202;
-
-#if NO
-        public LibraryChannel Channel = new LibraryChannel();
-        public string Lang = "zh";
-
-        /// <summary>
-        /// 框架窗口
-        /// </summary>
-        public MainForm MainForm = null;
-
-        DigitalPlatform.Stop stop = null;
 #endif
 
         string [] type_names = new string[] {
@@ -175,45 +165,113 @@ namespace dp2Circulation
             }
 
 #if NO
-            this.Channel.Url = this.MainForm.LibraryServerUrl;
-
-            this.Channel.BeforeLogin -= new BeforeLoginEventHandle(Channel_BeforeLogin);
-            this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
-
-            stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// 和容器关联
-#endif
-
             API.PostMessage(this.Handle, WM_LOADSIZE, 0, 0);
 
             API.PostMessage(this.Handle, WM_INITIAL, 0, 0);
-        }
-
-        /*public*/
-        void LoadSize()
-        {
-#if NO
-            // 设置窗口尺寸状态
-            MainForm.AppInfo.LoadMdiChildFormStates(this,
-                "mdi_form_state");
 #endif
+            this.BeginInvoke(new Action(Initial));
         }
 
-        /*public*/
-        void SaveSize()
+        void Initial()
         {
+            string strError = "";
+            int nRet = ListAllDatabases(out strError);
+            if (nRet == -1)
+            {
+                MessageBox.Show(this, strError);
+            }
+
+            nRet = ListAllOpacDatabases(out strError);
+            if (nRet == -1)
+            {
+                MessageBox.Show(this, strError);
+            }
+
+            nRet = this.ListAllOpacBrowseFormats(out strError);
+            if (nRet == -1)
+            {
+                MessageBox.Show(this, strError);
+            }
+
+            // 列出所有日历
+            // 需要在 NewListRightsTables() 以前调用
+            nRet = this.ListCalendars(out strError);
+            if (nRet == -1)
+            {
+                MessageBox.Show(this, strError);
+            }
+
 #if NO
-            MainForm.AppInfo.SaveMdiChildFormStates(this,
-                "mdi_form_state");
+                        nRet = this.ListRightsTables(out strError);
+                        if (nRet == -1)
+                        {
+                            MessageBox.Show(this, strError);
+                        }
 #endif
 
-            /*
-            // 如果MDI子窗口不是MainForm刚刚准备退出时的状态，恢复它。为了记忆尺寸做准备
-            if (this.WindowState != this.MainForm.MdiWindowState)
-                this.WindowState = this.MainForm.MdiWindowState;
-             * */
+            nRet = this.NewListRightsTables(out strError);
+            if (nRet == -1)
+            {
+                MessageBox.Show(this, strError);
+            }
+
+            // 在listview中列出所有馆藏地
+            nRet = this.ListAllLocations(out strError);
+            if (nRet == -1)
+            {
+                MessageBox.Show(this, strError);
+            }
+
+            // 列出种次号定义
+            nRet = this.ListZhongcihao(out strError);
+            if (nRet == -1)
+            {
+                MessageBox.Show(this, strError);
+            }
+
+            treeView_zhongcihao_AfterSelect(this, null);
+
+
+            // 列出排架体系定义
+            nRet = this.ListArrangement(out strError);
+            if (nRet == -1)
+            {
+                MessageBox.Show(this, strError);
+            }
+
+            treeView_arrangement_AfterSelect(this, null);
+
+
+            // 列出脚本
+            nRet = this.ListScript(out strError);
+            if (nRet == -1)
+            {
+                MessageBox.Show(this, strError);
+            }
+
+            nRet = this.ListDup(out strError);
+            if (nRet == -1)
+            {
+                MessageBox.Show(this, strError);
+            }
+
+            // 列出值列表
+            nRet = this.ListValueTables(out strError);
+            if (nRet == -1)
+            {
+                MessageBox.Show(this, strError);
+            }
+
+            // 列出中心服务器
+            nRet = this.ListCenter(out strError);
+            if (nRet == -1)
+            {
+                MessageBox.Show(this, strError);
+            }
+
         }
 
+#if NO
         /// <summary>
         /// 缺省窗口过程
         /// </summary>
@@ -222,9 +280,12 @@ namespace dp2Circulation
         {
             switch (m.Msg)
             {
+#if NO
                 case WM_LOADSIZE:
                     LoadSize();
                     return;
+#endif
+#if NO
                 case WM_INITIAL:
                     {
                         string strError = "";
@@ -324,9 +385,11 @@ namespace dp2Circulation
 
                     }
                     return;
+#endif
             }
             base.DefWndProc(ref m);
         }
+#endif
 
         /// <summary>
         /// 内容是否发生过修改
@@ -539,7 +602,7 @@ namespace dp2Circulation
             }
 #endif
 
-            SaveSize();
+            // SaveSize();
         }
 
 #if NO

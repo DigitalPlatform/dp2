@@ -780,6 +780,9 @@ namespace DigitalPlatform.LibraryServer
 
             REDO_MEMO:
             // 加读者记录锁
+#if DEBUG_LOCK_READER
+            this.App.WriteErrorLog("AddReaderOutOfReservationInfo 开始为读者加写锁 '" + strReaderBarcode + "'");
+#endif
             this.App.ReaderLocks.LockForWrite(strReaderBarcode);
 
             try // 读者记录锁定范围开始
@@ -884,6 +887,10 @@ namespace DigitalPlatform.LibraryServer
             finally
             {
                 this.App.ReaderLocks.UnlockForWrite(strReaderBarcode);
+#if DEBUG_LOCK_READER
+                this.App.WriteErrorLog("AddReaderOutOfReservationInfo 结束为读者加写锁 '" + strReaderBarcode + "'");
+#endif
+
             }
 
             return 0;

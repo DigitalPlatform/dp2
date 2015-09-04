@@ -75,7 +75,7 @@
             this.toolStripButton_move_down});
             this.toolStrip1.Location = new System.Drawing.Point(11, 195);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(106, 25);
+            this.toolStrip1.Size = new System.Drawing.Size(75, 25);
             this.toolStrip1.TabIndex = 6;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -119,6 +119,7 @@
             this.listView_columns.UseCompatibleStateImageBehavior = false;
             this.listView_columns.View = System.Windows.Forms.View.Details;
             this.listView_columns.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.listView_columns_ItemChecked);
+            this.listView_columns.SelectedIndexChanged += new System.EventHandler(this.listView_columns_SelectedIndexChanged);
             // 
             // columnHeader_index
             // 

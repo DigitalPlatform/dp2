@@ -141,7 +141,7 @@ namespace dp2Circulation
         }
 
 
-        delegate void Delegate_AppendHtml(string strText);
+        // delegate void Delegate_AppendHtml(string strText);
         /// <summary>
         /// 向 IE 控件中追加一段 HTML 内容
         /// </summary>

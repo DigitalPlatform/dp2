@@ -2155,11 +2155,8 @@ namespace DigitalPlatform.rms
 #endif
             }
 
-
-
             return strID;
         }
-
 
         // 得到一个库的信息
         // parameters:

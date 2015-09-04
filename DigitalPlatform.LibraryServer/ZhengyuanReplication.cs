@@ -732,6 +732,9 @@ namespace DigitalPlatform.LibraryServer
 
             // 加读锁
             // 可以避免拿到读者记录处理中途的临时状态
+#if DEBUG_LOCK_READER
+            this.App.WriteErrorLog("WriteOneReaderInfo 开始为读者加读锁 '" + strBarcode + "'");
+#endif
             this.App.ReaderLocks.LockForRead(strBarcode);
 
             try
@@ -754,6 +757,9 @@ namespace DigitalPlatform.LibraryServer
             finally
             {
                 this.App.ReaderLocks.UnlockForRead(strBarcode);
+#if DEBUG_LOCK_READER
+                this.App.WriteErrorLog("WriteOneReaderInfo 结束为读者加读锁 '" + strBarcode + "'");
+#endif
             }
 
             if (nRet == -1)

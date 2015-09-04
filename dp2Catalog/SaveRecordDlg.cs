@@ -8,6 +8,7 @@ using System.Windows.Forms;
 
 using DigitalPlatform.DTLP;
 using DigitalPlatform.CirculationClient;
+using DigitalPlatform.CommonControl;
 
 namespace dp2Catalog
 {
@@ -564,6 +565,23 @@ namespace dp2Catalog
                 return;
             }
         }
+
+        public string UiState
+        {
+            get
+            {
+                List<object> controls = new List<object>();
+                controls.Add(this.tabControl_main);
+                return GuiState.GetUiState(controls);
+            }
+            set
+            {
+                List<object> controls = new List<object>();
+                controls.Add(this.tabControl_main);
+                GuiState.SetUiState(controls, value);
+            }
+        }
+
     }
 
 

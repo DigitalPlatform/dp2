@@ -117,7 +117,7 @@ namespace dp2Circulation
              * */
 
             ScriptManager.CfgFilePath =
-                this.MainForm.DataDir + "\\biblio_statis_projects.xml";
+                Path.Combine(this.MainForm.DataDir, "biblio_statis_projects.xml");
 
 #if NO
             ScriptManager.applicationInfo = this.MainForm.AppInfo;
@@ -692,7 +692,7 @@ namespace dp2Circulation
             PathUtil.CreateDirIfNeed(strInstanceDir);
              * */
 
-            string strMainCsDllName = PathUtil.MergePath(this.InstanceDir, "\\~biblio_statis_main_" + Convert.ToString(AssemblyVersion++) + ".dll");    // ++
+            string strMainCsDllName = Path.Combine(this.InstanceDir, "~biblio_statis_main_" + Convert.ToString(AssemblyVersion++) + ".dll");    // ++
 
             string strLibPaths = "\"" + this.MainForm.DataDir + "\""
                 + ","
@@ -780,7 +780,7 @@ namespace dp2Circulation
 
             ////////////////////////////
             // 装载marfilter.fltx
-            string strFilterFileName = strProjectLocate + "\\marcfilter.fltx";
+            string strFilterFileName = Path.Combine(strProjectLocate, "marcfilter.fltx");
 
             if (FileUtil.FileExist(strFilterFileName) == true)
             {
@@ -803,7 +803,7 @@ namespace dp2Circulation
                     goto ERROR1;
                 }
 
-                nRet = filter.BuildScriptFile(strProjectLocate + "\\marcfilter.fltx.cs",
+                nRet = filter.BuildScriptFile(Path.Combine(strProjectLocate, "marcfilter.fltx.cs"),
                     out strError);
                 if (nRet == -1)
                     goto ERROR1;
@@ -834,7 +834,7 @@ namespace dp2Circulation
                     saAdditionalRef.Length);
 
 
-                string strfilterCsDllName = strProjectLocate + "\\~marcfilter_" + Convert.ToString(AssemblyVersion++) + ".dll";
+                string strfilterCsDllName = Path.Combine(strProjectLocate, "~marcfilter_" + Convert.ToString(AssemblyVersion++) + ".dll");
 
                 // 创建Project中Script的Assembly
                 nRet = ScriptManager.BuildAssembly(

@@ -3265,8 +3265,12 @@ dp2Catalog °æ±¾: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKeyT
                     dlg.Text = "Áí´æ¼ÇÂ¼";
                 }
 
-                dlg.StartPosition = FormStartPosition.CenterScreen;
+                // dlg.StartPosition = FormStartPosition.CenterScreen;
+                this.MainForm.AppInfo.LinkFormState(dlg, "SaveRecordDlg_state");
+                dlg.UiState = this.MainForm.AppInfo.GetString("MarcDetailForm", "SaveRecordDlg_uiState", "");
                 dlg.ShowDialog(this);
+                this.MainForm.AppInfo.SetString("MarcDetailForm", "SaveRecordDlg_uiState", dlg.UiState);
+
                 if (dlg.DialogResult != DialogResult.OK)
                     return 0;
 

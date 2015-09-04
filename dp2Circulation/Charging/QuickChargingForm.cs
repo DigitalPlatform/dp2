@@ -18,6 +18,8 @@ using DigitalPlatform.IO;
 using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.Script;
 using System.Drawing.Drawing2D;
+using System.Xml;
+using DigitalPlatform.Xml;
 
 namespace dp2Circulation
 {
@@ -1171,6 +1173,16 @@ System.Runtime.InteropServices.COMException (0x800700AA): 请求的资源在使�
             get;
             set;
         }
+
+        /// <summary>
+        /// 盘点操作中用于筛选的馆藏地列表
+        /// </summary>
+        public List<string> FilterLocations
+        {
+            get;
+            set;
+        }
+
         // parameters:
         //      strTaskID   任务 ID，用于管理和查询任务状态
         void _doAction(FuncState func,
@@ -2929,6 +2941,136 @@ e.Height);
             }
         }
 
+        // 从文件导入盘点
+        private void ToolStripMenuItem_inventoryFromFile_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+
+            this.ClearTaskList(null);
+
+            InventoryFromFileDialog dlg = new InventoryFromFileDialog();
+
+            MainForm.SetControlFont(dlg, this.Font, false);
+            dlg.LibraryCodeList = GetOwnerLibraryCodes();
+            dlg.BatchNo = this.BatchNo;
+            this.MainForm.AppInfo.LinkFormState(dlg, "InventoryFromFileDialog_state");
+            dlg.ShowDialog(this);
+            if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                return;
+
+            this.BatchNo = dlg.BatchNo;
+
+            int nRet = DoInventory(dlg.BarcodeFileName, out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        // 根据册条码号文件进行盘点操作
+        // 调用前，要求设置好 BatchNo 和 FilterLocations。其中 FilterLocations 不是必须，如果为空则不对馆藏地进行检查
+        public int DoInventory(string strBarcodeFileName, 
+            out string strError)
+        {
+            strError = "";
+
+            if (string.IsNullOrEmpty(this.BatchNo) == true)
+            {
+                strError = "尚未给 QuickChargingForm 设置好 BatchNo 成员";
+                return -1;
+            }
+
+            this.EnableControls(false);
+            stop.Style = StopStyle.EnableHalfStop;
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在进行盘点操作 ...");
+            stop.BeginLoop();
+
+            this.SmartFuncState = dp2Circulation.FuncState.InventoryBook;
+
+            Encoding encoding = FileUtil.DetectTextFileEncoding(strBarcodeFileName);
+
+            try
+            {
+                using (StreamReader sr = new StreamReader(strBarcodeFileName, Encoding.UTF8))
+                {
+                    while (true)
+                    {
+                        string strLine = sr.ReadLine();
+                        if (strLine == null)
+                            break;
+                        if (string.IsNullOrEmpty(strLine) == true)
+                            continue;
+
+                        this.AsyncDoAction(this.SmartFuncState, strLine);
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                strError = "读取文件 " + strBarcodeFileName + " 失败: " + ex.Message;
+                return -1;
+            }
+            finally
+            {
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                stop.HideProgress();
+                stop.Style = StopStyle.None;
+
+                this.EnableControls(true);
+            }
+
+            return 0;
+        }
+
+        // 根据册条码号列表进行还书操作
+        public int DoReturn(List<string> barcode_list,
+            out string strError)
+        {
+            strError = "";
+
+            this.EnableControls(false);
+            stop.Style = StopStyle.EnableHalfStop;
+            stop.OnStop += new StopEventHandler(this.DoStop);
+            stop.Initial("正在进行还书操作 ...");
+            stop.BeginLoop();
+
+            this.SmartFuncState = dp2Circulation.FuncState.Return;
+
+            try
+            {
+                    foreach (string barcode in barcode_list)
+                    {
+                        if (string.IsNullOrEmpty(barcode) == true)
+                            continue;
+
+                        this.AsyncDoAction(this.SmartFuncState, barcode);
+                    }
+            }
+            catch (Exception ex)
+            {
+                strError = "还书操作中出现异常: " + ex.Message;
+                return -1;
+            }
+            finally
+            {
+                stop.EndLoop();
+                stop.OnStop -= new StopEventHandler(this.DoStop);
+                stop.Initial("");
+                stop.HideProgress();
+                stop.Style = StopStyle.None;
+
+                this.EnableControls(true);
+            }
+
+            return 0;
+        }
+
     }
 
     /// <summary>
@@ -3642,7 +3784,7 @@ end_time);
             this.Container.SetColorList();
 
             string strOperText = "";
-            
+
             if (task.Action == "inventory")
                 strOperText = task.ReaderBarcode + " 盘点 " + task.ItemBarcode;
             else
@@ -3657,109 +3799,117 @@ end_time);
 #endif
             stop.SetMessage(strOperText + " ...");
 
-                string strError = "";
+            string strError = "";
 
-                string strReaderRecord = "";
-                string strConfirmItemRecPath = null;
+            string strReaderRecord = "";
+            string strConfirmItemRecPath = null;
 
-                string strAction = task.Action;
-                string strReaderBarcode = task.ReaderBarcode;
-                if (task.Action == "verify_return")
+            string strAction = task.Action;
+            string strReaderBarcode = task.ReaderBarcode;
+            if (task.Action == "verify_return")
+            {
+                if (string.IsNullOrEmpty(strReaderBarcode) == true)
                 {
-                    if (string.IsNullOrEmpty(strReaderBarcode) == true)
-                    {
-                        strError = "尚未输入读者证条码号";
-                        task.ErrorInfo = strError;
-                        goto ERROR1;
-                    }
-                    strAction = "return";
-                }
-                else if (task.Action == "verify_lost")
-                {
-                    if (string.IsNullOrEmpty(strReaderBarcode) == true)
-                    {
-                        strError = "尚未输入读者证条码号";
-                        task.ErrorInfo = strError;
-                        goto ERROR1;
-                    }
-                    strAction = "lost";
-                }
-                else if (task.Action == "inventory")
-                {
-                    if (string.IsNullOrEmpty(strReaderBarcode) == true)
-                    {
-                        strError = "尚未设定批次号";
-                        task.ErrorInfo = strError;
-                        goto ERROR1;
-                    }
-                    strAction = "inventory";
-                }
-                else
-                {
-                    strReaderBarcode = "";
-                }
-            REDO:
-                string[] aDupPath = null;
-                string[] item_records = null;
-                string[] reader_records = null;
-                string[] biblio_records = null;
-                string strOutputReaderBarcode = "";
-
-                ReturnInfo return_info = null;
-
-                // item返回的格式
-                string strItemReturnFormats = "";
-
-                if (this.Container.MainForm.ChargingNeedReturnItemXml == true)
-                {
-                    if (String.IsNullOrEmpty(strItemReturnFormats) == false)
-                        strItemReturnFormats += ",";
-                    strItemReturnFormats += "xml" + GetPostFix();
-                }
-
-                // biblio返回的格式
-                string strBiblioReturnFormats = "";
-
-                // 读者返回格式
-                string strReaderFormatList = "";
-                bool bName = false; // 是否直接取得读者姓名，而不要获得读者 XML
-                if (this.Container.MainForm.ServerVersion >= 2.24)
-                {
-                    strReaderFormatList = this.Container.PatronRenderFormat + ",summary";
-                    bName = true;
-                }
-                else
-                    strReaderFormatList = this.Container.PatronRenderFormat + ",xml" + GetPostFix();
-
-                string strStyle = "reader";
-
-                if (this.Container.MainForm.ChargingNeedReturnItemXml)
-                    strStyle += ",item";
-
-                //if (this.Container.MainForm.TestMode == true)
-                //    strStyle += ",testmode";
-
-                long lRet = Channel.Return(
-                    stop,
-                    strAction,
-                    strReaderBarcode,
-                    task.ItemBarcode,
-                    strConfirmItemRecPath,
-                    false,
-                    strStyle,   // this.NoBiblioAndItemInfo == false ? "reader,item,biblio" : "reader",
-                    strItemReturnFormats,
-                    out item_records,
-                    strReaderFormatList,    // this.Container.PatronRenderFormat + ",xml" + GetPostFix(), // "html",
-                    out reader_records,
-                    strBiblioReturnFormats,
-                    out biblio_records,
-                    out aDupPath,
-                    out strOutputReaderBarcode,
-                    out return_info,
-                    out strError);
-
-                if (lRet != 0)
+                    strError = "尚未输入读者证条码号";
                     task.ErrorInfo = strError;
+                    goto ERROR1;
+                }
+                strAction = "return";
+            }
+            else if (task.Action == "verify_lost")
+            {
+                if (string.IsNullOrEmpty(strReaderBarcode) == true)
+                {
+                    strError = "尚未输入读者证条码号";
+                    task.ErrorInfo = strError;
+                    goto ERROR1;
+                }
+                strAction = "lost";
+            }
+            else if (task.Action == "inventory")
+            {
+                if (string.IsNullOrEmpty(strReaderBarcode) == true)
+                {
+                    strError = "尚未设定批次号";
+                    task.ErrorInfo = strError;
+                    goto ERROR1;
+                }
+                strAction = "inventory";
+            }
+            else
+            {
+                strReaderBarcode = "";
+            }
+        REDO:
+            string[] aDupPath = null;
+            string[] item_records = null;
+            string[] reader_records = null;
+            string[] biblio_records = null;
+            string strOutputReaderBarcode = "";
+
+            ReturnInfo return_info = null;
+
+            // item返回的格式
+            string strItemReturnFormats = "";
+
+            if (this.Container.MainForm.ChargingNeedReturnItemXml == true)
+            {
+                if (String.IsNullOrEmpty(strItemReturnFormats) == false)
+                    strItemReturnFormats += ",";
+                strItemReturnFormats += "xml" + GetPostFix();
+            }
+
+            // biblio返回的格式
+            string strBiblioReturnFormats = "";
+
+            // 读者返回格式
+            string strReaderFormatList = "";
+            bool bName = false; // 是否直接取得读者姓名，而不要获得读者 XML
+            if (this.Container.MainForm.ServerVersion >= 2.24)
+            {
+                strReaderFormatList = this.Container.PatronRenderFormat + ",summary";
+                bName = true;
+            }
+            else
+                strReaderFormatList = this.Container.PatronRenderFormat + ",xml" + GetPostFix();
+
+            string strStyle = "reader";
+
+            if (this.Container.MainForm.ChargingNeedReturnItemXml)
+                strStyle += ",item";
+
+#if NO
+            if (strAction == "inventory")
+            {
+                strItemReturnFormats = "xml";
+                strStyle += ",item";
+            }
+#endif
+
+            //if (this.Container.MainForm.TestMode == true)
+            //    strStyle += ",testmode";
+
+            long lRet = Channel.Return(
+                stop,
+                strAction,
+                strReaderBarcode,
+                task.ItemBarcode,
+                strConfirmItemRecPath,
+                false,
+                strStyle,   // this.NoBiblioAndItemInfo == false ? "reader,item,biblio" : "reader",
+                strItemReturnFormats,
+                out item_records,
+                strReaderFormatList,    // this.Container.PatronRenderFormat + ",xml" + GetPostFix(), // "html",
+                out reader_records,
+                strBiblioReturnFormats,
+                out biblio_records,
+                out aDupPath,
+                out strOutputReaderBarcode,
+                out return_info,
+                out strError);
+
+            if (lRet != 0)
+                task.ErrorInfo = strError;
 
 #if NO
                 if (return_info != null)
@@ -3768,45 +3918,77 @@ end_time);
                 }
 #endif
 
-                if (reader_records != null && reader_records.Length > 0)
-                    strReaderRecord = reader_records[0];
 
-                // 刷新读者信息
-                if (this.Container.IsCardMode == true)
+            if (reader_records != null && reader_records.Length > 0)
+                strReaderRecord = reader_records[0];
+
+            // 刷新读者信息
+            if (this.Container.IsCardMode == true)
+            {
+                if (String.IsNullOrEmpty(strReaderRecord) == false)
+                    this.Container.SetReaderCardString(strReaderRecord);
+            }
+            else
+            {
+                if (String.IsNullOrEmpty(strReaderRecord) == false)
+                    this.Container.SetReaderHtmlString(ReplaceMacro(strReaderRecord));
+            }
+
+            string strItemXml = "";
+            if ((this.Container.MainForm.ChargingNeedReturnItemXml == true || strAction == "inventory")
+                && item_records != null)
+            {
+                Debug.Assert(item_records != null, "");
+
+                if (item_records.Length > 0)
                 {
-                    if (String.IsNullOrEmpty(strReaderRecord) == false)
-                        this.Container.SetReaderCardString(strReaderRecord);
+                    // xml总是在最后一个
+                    strItemXml = item_records[item_records.Length - 1];
                 }
-                else
+            }
+
+            // 对 return_info.Location 进行观察，看看是否超过要求的范围
+            if (lRet != -1
+                && strAction == "inventory"
+                && Container.FilterLocations != null
+                && Container.FilterLocations.Count > 0)
+            {
+#if NO
+                XmlDocument item_dom = new XmlDocument();
+                try
                 {
-                    if (String.IsNullOrEmpty(strReaderRecord) == false)
-                        this.Container.SetReaderHtmlString(ReplaceMacro(strReaderRecord));
+                    item_dom.LoadXml(strItemXml);
                 }
-
-                string strItemXml = "";
-                if (this.Container.MainForm.ChargingNeedReturnItemXml == true
-                    && item_records != null)
+                catch(Exception ex)
                 {
-                    Debug.Assert(item_records != null, "");
-
-                    if (item_records.Length > 0)
-                    {
-                        // xml总是在最后一个
-                        strItemXml = item_records[item_records.Length - 1];
-                    }
-                }
-
-                if (lRet == -1)
+                    strError = "strItemXml 装入 XMLDOM 时出错: " + ex.Message;
                     goto ERROR1;
-
-                string strReaderSummary = "";
-                if (reader_records != null && reader_records.Length > 1)
-                {
-                    if (bName == false)
-                        strReaderSummary = Global.GetReaderSummary(reader_records[1]);
-                    else
-                        strReaderSummary = reader_records[1];
                 }
+                string strLocation = DomUtil.GetElementText(item_dom.DocumentElement, "location");
+#endif
+                string strLocation = return_info.Location;
+                strLocation = StringUtil.GetPureLocation(strLocation);
+
+                if (Container.FilterLocations.IndexOf(strLocation) == -1)
+                {
+                    lRet = 1;
+                    if (string.IsNullOrEmpty(task.ErrorInfo) == false)
+                        task.ErrorInfo += "; ";
+                    task.ErrorInfo += "册记录中的馆藏地 '" + strLocation + "' 不在当前盘点要求的范围 '" + StringUtil.MakePathList(Container.FilterLocations) + "'。请及时处理";
+                }
+            }
+
+            if (lRet == -1)
+                goto ERROR1;
+
+            string strReaderSummary = "";
+            if (reader_records != null && reader_records.Length > 1)
+            {
+                if (bName == false)
+                    strReaderSummary = Global.GetReaderSummary(reader_records[1]);
+                else
+                    strReaderSummary = reader_records[1];
+            }
 
 #if NO
                 string strBiblioSummary = "";
@@ -3814,72 +3996,72 @@ end_time);
                     strBiblioSummary = biblio_records[1];
 #endif
 
-                task.ReaderName = strReaderSummary;
-                // task.ItemSummary = strBiblioSummary;
-                this.Container.AsynFillItemSummary(task.ItemBarcode,
-                    strConfirmItemRecPath,
-                    task);
+            task.ReaderName = strReaderSummary;
+            // task.ItemSummary = strBiblioSummary;
+            this.Container.AsynFillItemSummary(task.ItemBarcode,
+                strConfirmItemRecPath,
+                task);
 
-                if (string.IsNullOrEmpty(task.ReaderBarcode) == true)
-                    task.ReaderBarcode = strOutputReaderBarcode;
+            if (string.IsNullOrEmpty(task.ReaderBarcode) == true)
+                task.ReaderBarcode = strOutputReaderBarcode;
 
-                DateTime end_time = DateTime.Now;
+            DateTime end_time = DateTime.Now;
 
-                this.Container.MainForm.OperHistory.ReturnAsync(
-                    this.Container,
-                    task.Action == "lost" || task.Action == "verify_lost",
-                    strOutputReaderBarcode, // this.textBox_readerBarcode.Text,
-                    task.ItemBarcode,
-                    strConfirmItemRecPath,
-                    strReaderSummary,
-                    strItemXml,
-                    return_info,
-                    start_time,
-                    end_time);
+            this.Container.MainForm.OperHistory.ReturnAsync(
+                this.Container,
+                strAction,  // task.Action == "lost" || task.Action == "verify_lost",
+                strOutputReaderBarcode, // this.textBox_readerBarcode.Text,
+                task.ItemBarcode,
+                strConfirmItemRecPath,
+                strReaderSummary,
+                strItemXml,
+                return_info,
+                start_time,
+                end_time);
 
-                if (lRet == 1)
-                {
-                    // 黄色状态
-                    task.Color = "yellow";
-                }
-                else
-                {
-                    // 绿色状态
-                    task.Color = "green";
-                }
+            if (lRet == 1)
+            {
+                // 黄色状态
+                task.Color = "yellow";
+            }
+            else
+            {
+                // 绿色状态
+                task.Color = "green";
+            }
 
-                // this.m_strCurrentBarcode = strBarcode;
-                task.State = "finish";
-                // 兑现显示
-                this.Container.DisplayTask("refresh_and_visible", task);
-                this.Container.SetColorList();
+            // this.m_strCurrentBarcode = strBarcode;
+            task.State = "finish";
+            // 兑现显示
+            this.Container.DisplayTask("refresh_and_visible", task);
+            this.Container.SetColorList();
 #if NO
                 if (stop != null && stop.State != 0)
                     return true;
                 return false;
 #endif
-                {
-                    BorrowCompleteEventArgs e1 = new BorrowCompleteEventArgs();
-                    e1.Action = task.Action;
-                    e1.ItemBarcode = task.ItemBarcode;
-                    e1.ReaderBarcode = strOutputReaderBarcode;
-                    this.Container.TriggerBorrowComplete(e1);
-                }
-                return;
+            {
+                BorrowCompleteEventArgs e1 = new BorrowCompleteEventArgs();
+                e1.Action = task.Action;
+                e1.ItemBarcode = task.ItemBarcode;
+                e1.ReaderBarcode = strOutputReaderBarcode;
+                this.Container.TriggerBorrowComplete(e1);
+            }
+            return;
 
-            ERROR1:
-                task.State = "error";
-                task.Color = "red";
-                // this.Container.SetReaderRenderString(strError);
-                // 兑现显示
-                this.Container.DisplayTask("refresh_and_visible", task);
-                this.Container.SetColorList();
+        ERROR1:
+            task.State = "error";
+            task.Color = "red";
+            // this.Container.SetReaderRenderString(strError);
+            // 兑现显示
+            this.Container.DisplayTask("refresh_and_visible", task);
+            this.Container.SetColorList();
 #if NO
                 if (stop != null && stop.State != 0)
                     return true;
                 return false;
 #endif
-                return;
+            return;
 #if NO
             }
             finally

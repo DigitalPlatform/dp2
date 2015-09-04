@@ -260,12 +260,18 @@ namespace DigitalPlatform.CirculationClient
             string strFileName,
             bool bIgnorFileNotFound)
         {
-            Stream stream = null;
             dp2ServerCollection servers = null;
 
             try
             {
-                stream = File.Open(strFileName, FileMode.Open);
+                using(Stream stream = File.Open(strFileName, FileMode.Open, FileAccess.Read, FileShare.Read))
+                {
+                    BinaryFormatter formatter = new BinaryFormatter();
+
+                    servers = (dp2ServerCollection)formatter.Deserialize(stream);
+                    servers.m_strFileName = strFileName;
+                    return servers;
+                }
             }
             catch (FileNotFoundException ex)
             {
@@ -278,16 +284,6 @@ namespace DigitalPlatform.CirculationClient
                 // 让调主有一个新的空对象可用
                 return servers;
             }
-
-
-            BinaryFormatter formatter = new BinaryFormatter();
-
-            servers = (dp2ServerCollection)formatter.Deserialize(stream);
-            stream.Close();
-            servers.m_strFileName = strFileName;
-
-
-            return servers;
         }
 
         // 保存到文件

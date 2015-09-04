@@ -24,6 +24,20 @@ namespace dp2Circulation
             InitializeComponent();
         }
 
+        List<string> _libraryCodeList = new List<string>();
+
+        public List<string> LibraryCodeList
+        {
+            get
+            {
+                return this._libraryCodeList;
+            }
+            set
+            {
+                this._libraryCodeList = value;
+            }
+        }
+
         private void SelectBatchNoDialog_Load(object sender, EventArgs e)
         {
             this.SetTitle();
@@ -203,6 +217,10 @@ namespace dp2Circulation
                                 return -1;
                             }
 
+                            if (this._libraryCodeList.Count > 0 
+                                && MatchLibraryCode(this._libraryCodeList, record.Path) == false)
+                                continue;
+
                             ListViewItem item = new ListViewItem();
                             item.Text = string.IsNullOrEmpty(record.Path) == false ? record.Path : "[空]";
                             ListViewUtil.ChangeItemText(item, 1, record.Cols[0]);
@@ -239,6 +257,26 @@ namespace dp2Circulation
             return 1;
         }
 
+        static bool MatchLibraryCode(string strLibraryCode, string strLocation)
+        {
+            if (Global.IsGlobalUser(strLibraryCode) == true)
+                return true;
+            string strCurrentLibraryCode = Global.GetLibraryCode(strLocation);
+            if (strLibraryCode == strCurrentLibraryCode)
+                return true;
+            return false;
+        }
+
+        static bool MatchLibraryCode(List<string> librarycodes, string strLocation)
+        {
+            foreach(string librarycode in librarycodes)
+            {
+                if (MatchLibraryCode(librarycode, strLocation) == true)
+                    return true;
+            }
+            return false;
+        }
+
         // 检索出盘点库内全部批次号名称
         int SearchAllBatchNo(
             LibraryChannel channel,
@@ -258,6 +296,47 @@ namespace dp2Circulation
             try
             {
                 // 构造检索式
+                StringBuilder text = new StringBuilder();
+
+                text.Append("<target list='"
+                        + StringUtil.GetXmlStringSimple(strInventoryDbName + ":" + "批次号")
+                        + "'>");
+                // 当前是否为全局用户
+                bool bGlobalUser = this._libraryCodeList.Count == 0 || this._libraryCodeList.IndexOf("") != -1;
+                    // 全局用户只认列表中 "" 一个值。这样可以检索出全部批次号，包括各个分馆的
+                if (bGlobalUser == true && this._libraryCodeList.Count != 1)
+                {
+                    this._libraryCodeList.Clear();
+                    this._libraryCodeList.Add("");
+                }
+                int i = 0;
+                foreach (string librarycode in this.LibraryCodeList)
+                {
+                    if (i > 0)
+                        text.Append("<operator value='OR' />");
+
+                    text.Append("<item><word>"
+                        + StringUtil.GetXmlStringSimple(bGlobalUser ? "" : librarycode + "-")
+                        + "</word><match>left</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang>");
+                    i++;
+                }
+
+                if (bGlobalUser == true)
+                {
+                    if (i > 0)
+                        text.Append("<operator value='OR' />");
+
+                    // 针对空批次号的检索。空只能被全局用户可见
+                    text.Append("<item><word>"
+            + StringUtil.GetXmlStringSimple("")
+            + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang>");
+                    i++;
+                }
+
+                text.Append("</target>");
+
+#if NO
+                // 构造检索式
                 string strQueryXml = "<target list='"
                         + StringUtil.GetXmlStringSimple(strInventoryDbName + ":" + "批次号")
                         + "'><item><word>"
@@ -267,10 +346,11 @@ namespace dp2Circulation
                 strQueryXml += "<item><word>"
         + StringUtil.GetXmlStringSimple("")
         + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang></target>";
+#endif
 
                 long lRet = channel.Search(
                     stop,
-                    strQueryXml,
+                    text.ToString(),
                     "batchno",
                     "keycount", // strOutputStyle
                     out strError);
@@ -328,6 +408,8 @@ namespace dp2Circulation
                             strError = "请更新应用服务器和数据库内核到最新版本，才能使用列出批次号的功能";
                             return -1;
                         }
+
+                        // TODO: 数字为 0 的事项是否不要创建?
 
                         ListViewItem item = new ListViewItem();
                         item.Text = string.IsNullOrEmpty(record.Path) == false ? record.Path : "[空]";

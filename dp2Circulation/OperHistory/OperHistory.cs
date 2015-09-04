@@ -742,7 +742,7 @@ namespace dp2Circulation
                          * */
                         // throw new Exception("test error");
                         Return((IChargingForm)call.parameters[0],
-                            (bool)call.parameters[1],
+                            (string)call.parameters[1],
                             (string)call.parameters[2],
                             (string)call.parameters[3],
                             (string)call.parameters[4],
@@ -1182,7 +1182,8 @@ out strError);
         }
 
         internal delegate void Delegate_Return(IChargingForm charging_form,
-            bool bLost,
+            // bool bLost,
+            string strAction,
             string strReaderBarcode,
             string strItemBarcode,
             string strConfirmItemRecPath,
@@ -1193,7 +1194,8 @@ out strError);
             DateTime end_time);
 
         internal void ReturnAsync(IChargingForm charging_form,
-            bool bLost,
+            // bool bLost,
+            string strAction,
             string strReaderBarcode,
             string strItemBarcode,
             string strConfirmItemRecPath,
@@ -1221,7 +1223,8 @@ out strError);
             call.name = "return";
             call.func = new Delegate_Return(Return);
             call.parameters = new object[] { charging_form,
-            bLost,
+            // bLost,
+            strAction,
             strReaderBarcode,
             strItemBarcode,
             strConfirmItemRecPath,
@@ -1237,7 +1240,8 @@ out strError);
 
         internal void Return(
             IChargingForm charging_form,
-            bool bLost,
+            // bool bLost,
+            string strAction,
             string strReaderBarcode,
             string strItemBarcode,
             string strConfirmItemRecPath,
@@ -1253,8 +1257,14 @@ out strError);
             int nRet = 0;
 
             string strOperName = "还";
+#if NO
             if (bLost == true)
                 strOperName = "丢失";
+#endif
+            if (strAction == "lost")
+                strOperName = "丢失";
+            else if (strAction == "inventory")
+                strOperName = "盘点";
 
             string strError = "";
             string strSummary = "";
@@ -1274,7 +1284,9 @@ out strError);
                 strLocation = return_info.Location;
 
             string strItemLink = "<a href='javascript:void(0);' onclick=\"window.external.OpenForm('ItemInfoForm', this.innerText, true);\">" + HttpUtility.HtmlEncode(strItemBarcode) + "</a>";
-            string strReaderLink = "<a href='javascript:void(0);' onclick=\"window.external.OpenForm('ReaderInfoForm', this.innerText, true);\">" + HttpUtility.HtmlEncode(strReaderBarcode) + "</a>";
+            string strReaderLink = "";
+            if (string.IsNullOrEmpty(strReaderBarcode) == false)
+                strReaderLink = "<a href='javascript:void(0);' onclick=\"window.external.OpenForm('ReaderInfoForm', this.innerText, true);\">" + HttpUtility.HtmlEncode(strReaderBarcode) + "</a>";
 
             strText = "<div class='item " + strOperClass + " return'>"
                 + "<div class='time_line'>"
@@ -1282,11 +1294,14 @@ out strError);
                 + " <div class='time_span'>耗时 " + DoubleToString(delta.TotalSeconds) + "秒</div>"
                 + " <div class='clear'></div>"
                 + "</div>"
-                + "<div class='reader_line'>"
+                + (
+                string.IsNullOrEmpty(strReaderLink) == false ?
+                ("<div class='reader_line'>"
                 + " <div class='reader_prefix_text'>读者</div>"
                 + " <div class='reader_barcode'>" + strReaderLink + "</div>"
                 + " <div class='reader_summary'>" + HttpUtility.HtmlEncode(strReaderSummary) + "</div>"
-                + " <div class='clear'></div>"
+                + " <div class='clear'></div>") : ""
+                )
                 + "</div>"
                 + "<div class='opername_line'>"
                 + " <div class='opername'>" + HttpUtility.HtmlEncode(strOperName) + "</div>"

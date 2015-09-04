@@ -1309,16 +1309,14 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
 
         private void MenuItem_print_editCharingPrintCs_Click(object sender, EventArgs e)
         {
-            string strFileName = this.MainForm.DataDir + "\\charging_print.cs";
+            string strFileName = Path.Combine(this.MainForm.DataDir , "charging_print.cs");
             System.Diagnostics.Process.Start("notepad.exe", strFileName);
-
         }
 
         private void MenuItem_print_editCharingPrintCsRef_Click(object sender, EventArgs e)
         {
-            string strFileName = this.MainForm.DataDir + "\\charging_print.cs.ref";
+            string strFileName = Path.Combine(this.MainForm.DataDir, "charging_print.cs.ref");
             System.Diagnostics.Process.Start("notepad.exe", strFileName);
-
         }
 
         // 打印方案管理

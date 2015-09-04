@@ -791,6 +791,9 @@ namespace DigitalPlatform.LibraryServer
             {
                 // 加读者记录锁
                 strLockReaderBarcode = strReaderBarcode;
+#if DEBUG_LOCK_READER
+                this.WriteErrorLog("Borrow 开始为读者加写锁 '" + strReaderBarcode + "'");
+#endif
                 this.ReaderLocks.LockForWrite(strReaderBarcode);
                 bReaderLocked = true;
                 strOutputReaderBarcodeParam = strReaderBarcode;
@@ -1169,14 +1172,15 @@ namespace DigitalPlatform.LibraryServer
                         // *** 如果读者记录在前面没有锁定, 在这里锁定
                         if (bReaderLocked == false)
                         {
-#if NO
-                        // 加读者记录锁
-                        strLockReaderBarcode = strReaderBarcode;
-                        this.ReaderLocks.LockForWrite(strLockReaderBarcode);
-                        bReaderLocked = true;
-                        strOutputReaderBarcodeParam = strReaderBarcode;
-#endif
                             Debug.Assert(string.IsNullOrEmpty(strReaderBarcode) == false, "");
+                            // 2015/9/2
+                            nRedoCount++;
+                            if (nRedoCount > 10)
+                            {
+                                strError = "Borrow() 为锁定读者，试图重试，但发现已经超过 10 次, 只好放弃...";
+                                this.WriteErrorLog(strError);
+                                goto ERROR1;
+                            }
                             goto REDO_BORROW;
                         }
                     }
@@ -1455,13 +1459,17 @@ namespace DigitalPlatform.LibraryServer
                         out strError);
                     if (lRet == -1)
                     {
+                        // 2015/9/2
+                        this.WriteErrorLog("Borrow() 写入读者记录 '" + strOutputReaderRecPath + "' 时出错: " + strError);
+
                         if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
                         {
                             nRedoCount++;
                             if (nRedoCount > 10)
                             {
                                 // text-level: 内部错误
-                                strError = "写回读者记录的时候,遇到时间戳冲突,并因此重试10次,仍失败...";
+                                strError = "Borrow() 写回读者记录的时候,遇到时间戳冲突,并因此重试10次未能成功，只好放弃...";
+                                this.WriteErrorLog(strError);
                                 goto ERROR1;
                             }
                             goto REDO_BORROW;
@@ -1487,6 +1495,9 @@ namespace DigitalPlatform.LibraryServer
                         out strError);
                     if (lRet == -1)
                     {
+                        // 2015/9/2
+                        this.WriteErrorLog("Borrow() 写入册记录 '" + strOutputItemRecPath + "' 时出错: " + strError);
+
                         // 要Undo刚才对读者记录的写入
                         string strError1 = "";
                         lRet = channel.DoSaveTextRes(strOutputReaderRecPath,
@@ -1516,24 +1527,40 @@ namespace DigitalPlatform.LibraryServer
                                 if (nRet == -1)
                                 {
                                     // text-level: 内部错误
-                                    strError = "Undo读者记录 '" + strOutputReaderRecPath + "' (读者证条码号为'" + strReaderBarcode + "') 借阅册条码号 '" + strItemBarcode + "' 的修改时，发生错误，无法Undo: " + strError;
+                                    strError = "Borrow() Undo读者记录 '" + strOutputReaderRecPath + "' (读者证条码号为'" + strReaderBarcode + "') 借阅册条码号 '" + strItemBarcode + "' 的修改时，发生错误，无法Undo: " + strError;
                                     this.WriteErrorLog(strError);
                                     goto ERROR1;
                                 }
 
                                 // 成功
+                                // 2015/9/2 增加下列防止死循环的语句
+                                nRedoCount++;
+                                if (nRedoCount > 10)
+                                {
+                                    strError = "Borrow() Undo 读者记录(1)成功，试图重试 Borrow 时，发现先前重试已经超过 10 次，只好不重试了，做出错返回...";
+                                    this.WriteErrorLog(strError);
+                                    goto ERROR1;
+                                }
                                 goto REDO_BORROW;
                             }
 
                             // 以下为 不是时间戳冲突的其他错误情形
                             // text-level: 内部错误
-                            strError = "Undo读者记录 '" + strOutputReaderRecPath + "' (读者证条码号为'" + strReaderBarcode + "') 借阅册条码号 '" + strItemBarcode + "' 的修改时，发生错误，无法Undo: " + strError;
+                            strError = "Borrow() Undo读者记录 '" + strOutputReaderRecPath + "' (读者证条码号为'" + strReaderBarcode + "') 借阅册条码号 '" + strItemBarcode + "' 的修改时，发生错误，无法Undo: " + strError;
                             // strError = strError + ", 并且Undo写回旧读者记录也失败: " + strError1;
                             this.WriteErrorLog(strError);
                             goto ERROR1;
                         } // end of 初次Undo失败
 
                         // 以下为Undo成功的情形
+                        // 2015/9/2 增加下列防止死循环的语句
+                        nRedoCount++;
+                        if (nRedoCount > 10)
+                        {
+                            strError = "Borrow() Undo 读者记录(2)成功，试图重试 Borrow 时，发现先前重试已经超过 10 次，只好不重试了，做出错返回...";
+                            this.WriteErrorLog(strError);
+                            goto ERROR1;
+                        }
                         goto REDO_BORROW;
 
                     } // end of 写回册记录失败
@@ -1620,7 +1647,13 @@ namespace DigitalPlatform.LibraryServer
             {
                 // this.ReaderLocks.UnlockForWrite(strLockReaderBarcode);
                 if (bReaderLocked == true)
+                {
                     this.ReaderLocks.UnlockForWrite(strLockReaderBarcode);
+#if DEBUG_LOCK_READER
+                    this.WriteErrorLog("Borrow 结束为读者加写锁 '" + strLockReaderBarcode + "'");
+#endif
+
+                }
             }
 
             // 输出数据
@@ -3550,6 +3583,9 @@ namespace DigitalPlatform.LibraryServer
             {
                 // 加读者记录锁
                 strLockReaderBarcode = strReaderBarcodeParam;
+#if DEBUG_LOCK_READER
+                this.WriteErrorLog("Return 开始为读者加写锁 1 '" + strReaderBarcodeParam + "'");
+#endif
                 this.ReaderLocks.LockForWrite(strReaderBarcodeParam);
                 bReaderLocked = true;
                 strOutputReaderBarcodeParam = strReaderBarcode;
@@ -3969,6 +4005,9 @@ namespace DigitalPlatform.LibraryServer
                     {
                         // 加读者记录锁
                         strLockReaderBarcode = strReaderBarcode;
+#if DEBUG_LOCK_READER
+                        this.WriteErrorLog("Return 开始为读者加写锁 2 '" + strLockReaderBarcode + "'");
+#endif
                         this.ReaderLocks.LockForWrite(strLockReaderBarcode);
                         bReaderLocked = true;
                         strOutputReaderBarcodeParam = strReaderBarcode;
@@ -4018,12 +4057,12 @@ namespace DigitalPlatform.LibraryServer
                             if (IsItemRecordSignificantChanged(itemdom,
                                 temp_itemdom) == true)
                             {
-
                                 // 则只好重做
                                 nRedoCount++;
                                 if (nRedoCount > 10)
                                 {
-                                    strError = "册条码号(滞后)加锁后重新提取册记录的时候,遇到时间戳冲突,并因此重试10次,仍失败...";
+                                    strError = "Return() 册条码号(滞后)加锁后重新提取册记录的时候,遇到时间戳冲突,并因此重试超过 10 次未能成功, 只好放弃...";
+                                    this.WriteErrorLog(strError);
                                     goto ERROR1;
                                 }
                                 /*
@@ -4031,6 +4070,9 @@ namespace DigitalPlatform.LibraryServer
                                 if (nRedoCount > 5)
                                     strReaderBarcodeParam = strReaderBarcode;
                                  * */
+#if DEBUG_LOCK_READER
+                                this.WriteErrorLog("Return goto REDO_RETURN 1 nRedoCount=" + nRedoCount + "");
+#endif
                                 goto REDO_RETURN;
                             }
 
@@ -4188,6 +4230,7 @@ namespace DigitalPlatform.LibraryServer
                         strOutputReaderXml = strReaderXml;
                         strBiblioRecID = DomUtil.GetElementText(itemdom.DocumentElement, "parent"); //
 
+                        SetReturnInfo(ref return_info, itemdom);
                         goto END3;
                     }
 
@@ -4480,14 +4523,21 @@ namespace DigitalPlatform.LibraryServer
                         out strError);
                     if (lRet == -1)
                     {
+                        // 2015/9/2
+                        this.WriteErrorLog("Return() 写入读者记录 '" + strOutputReaderRecPath + "' 时出错: " + strError);
+
                         if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
                         {
                             nRedoCount++;
                             if (nRedoCount > 10)
                             {
-                                strError = "写回读者记录的时候,遇到时间戳冲突,并因此重试10次,仍失败...";
+                                strError = "Return() 写回读者记录的时候,遇到时间戳冲突,并因此重试超过 10 次未能成功, 只好放弃重试...";
+                                this.WriteErrorLog(strError);
                                 goto ERROR1;
                             }
+#if DEBUG_LOCK_READER
+                            this.WriteErrorLog("Return goto REDO_RETURN 2 nRedoCount=" + nRedoCount + "");
+#endif
                             goto REDO_RETURN;
                         }
 
@@ -4510,6 +4560,9 @@ namespace DigitalPlatform.LibraryServer
                         out strError);
                     if (lRet == -1)
                     {
+                        // 2015/9/2
+                        this.WriteErrorLog("Return() 写入册记录 '"+strOutputItemRecPath+"' 时出错: " + strError);
+
                         // 要Undo刚才对读者记录的写入
                         string strError1 = "";
                         lRet = channel.DoSaveTextRes(strOutputReaderRecPath,
@@ -4522,6 +4575,9 @@ namespace DigitalPlatform.LibraryServer
                             out strError1);
                         if (lRet == -1)
                         {
+                            // 2015/9/2
+                            this.WriteErrorLog("Return() 写入读者记录 '" + strOutputReaderRecPath + "' 时出错: " + strError);
+
                             if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
                             {
                                 // 读者记录Undo的时候, 发现时间戳冲突了
@@ -4540,24 +4596,46 @@ namespace DigitalPlatform.LibraryServer
                                     out strError);
                                 if (nRet == -1)
                                 {
-                                    strError = "Undo读者记录 '" + strOutputReaderRecPath + "' (读者证条码号为 '" + strReaderBarcode + "' 读者姓名为 '"+strReaderName+"') 还书册条码号 '" + strItemBarcodeParam + "' 的修改时，发生错误，无法Undo: " + strError;
+                                    strError = "Return() Undo读者记录 '" + strOutputReaderRecPath + "' (读者证条码号为 '" + strReaderBarcode + "' 读者姓名为 '"+strReaderName+"') 还书册条码号 '" + strItemBarcodeParam + "' 的修改时，发生错误，无法Undo: " + strError;
                                     this.WriteErrorLog(strError);
                                     goto ERROR1;
                                 }
 
                                 // 成功
+                                // 2015/9/2 增加下列防止死循环的语句
+                                nRedoCount++;
+                                if (nRedoCount > 10)
+                                {
+                                    strError = "Return() Undo 读者记录(1)成功，试图重试 Return 时，发现先前重试已经超过 10 次，只好不重试了，做出错返回...";
+                                    this.WriteErrorLog(strError);
+                                    goto ERROR1;
+                                }
+#if DEBUG_LOCK_READER
+                                this.WriteErrorLog("Return goto REDO_RETURN 3 nRedoCount=" + nRedoCount + "");
+#endif
                                 goto REDO_RETURN;
                             }
 
 
                             // 以下为 不是时间戳冲突的其他错误情形
-                            strError = "Undo读者记录 '" + strOutputReaderRecPath + "' (读者证条码号为 '" + strReaderBarcode + "' 读者姓名为 '"+strReaderName+"') 还书册条码号 '" + strItemBarcodeParam + "' 的修改时，发生错误，无法Undo: " + strError;
+                            strError = "Return() Undo读者记录 '" + strOutputReaderRecPath + "' (读者证条码号为 '" + strReaderBarcode + "' 读者姓名为 '"+strReaderName+"') 还书册条码号 '" + strItemBarcodeParam + "' 的修改时，发生错误，无法Undo: " + strError;
                             // strError = strError + ", 并且Undo写回旧读者记录也失败: " + strError1;
                             this.WriteErrorLog(strError);
                             goto ERROR1;
                         }
 
                         // 以下为Undo成功的情形
+                        // 2015/9/2 增加下列防止死循环的语句
+                        nRedoCount++;
+                        if (nRedoCount > 10)
+                        {
+                            strError = "Return() Undo 读者记录(2)成功，试图重试 Return 时，发现先前重试已经超过 10 次，只好不重试了，做出错返回...";
+                            this.WriteErrorLog(strError);
+                            goto ERROR1;
+                        }
+#if DEBUG_LOCK_READER
+                        this.WriteErrorLog("Return goto REDO_RETURN 4 nRedoCount=" + nRedoCount + "");
+#endif
                         goto REDO_RETURN;
                     }
 
@@ -4749,7 +4827,12 @@ namespace DigitalPlatform.LibraryServer
             finally
             {
                 if (bReaderLocked == true)
+                {
                     this.ReaderLocks.UnlockForWrite(strLockReaderBarcode);
+#if DEBUG_LOCK_READER
+                    this.WriteErrorLog("Return 结束为读者加写锁 '" + strLockReaderBarcode + "'");
+#endif
+                }
             }
 
             // TODO: 将来可以改进为，丢失时发现有人预约，也通知，不过通知的内容是要读者不再等待了。
@@ -5305,7 +5388,10 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             if (nRet >= 1)
             {
-                strError = "馆代码 '" + strLibraryCode + "' 批次号 '" + strBatchNo + "' 册条码号 '" + strItemBarcode + "' 的盘点记录已经存在，无法重复创建 ...";
+                if (string.IsNullOrEmpty(strItemBarcode) == false)
+                    strError = "馆代码 '" + strLibraryCode + "' 批次号 '" + strBatchNo + "' 册条码号 '" + strItemBarcode + "' 的盘点记录已经存在，无法重复创建 ...";
+                else
+                    strError = "馆代码 '" + strLibraryCode + "' 批次号 '" + strBatchNo + "' 参考ID '" + strItemRefID + "' 的盘点记录已经存在，无法重复创建 ...";
                 return -1;
             }
 
@@ -8457,6 +8543,9 @@ out string strError)
 
 
             // 加读者记录锁
+#if DEBUG_LOCK_READER
+            this.WriteErrorLog("UndoOneAmerce 开始为读者加写锁 '" + strReaderBarcode + "'");
+#endif
             this.ReaderLocks.LockForWrite(strReaderBarcode);
 
             try
@@ -8714,6 +8803,10 @@ out string strError)
             finally
             {
                 this.ReaderLocks.UnlockForWrite(strReaderBarcode);
+#if DEBUG_LOCK_READER
+                this.WriteErrorLog("UndoOneAmerce 结束为读者加写锁 '" + strReaderBarcode + "'");
+#endif
+
             }
 
             return 0;
@@ -9040,6 +9133,9 @@ out string strError)
             }
 
             // 加读者记录锁
+#if DEBUG_LOCK_READER
+            this.WriteErrorLog("Amerce 开始为读者加写锁 '" + strReaderBarcode + "'");
+#endif
             this.ReaderLocks.LockForWrite(strReaderBarcode);
 
             try
@@ -9419,6 +9515,9 @@ out string strError)
             finally
             {
                 this.ReaderLocks.UnlockForWrite(strReaderBarcode);
+#if DEBUG_LOCK_READER
+                this.WriteErrorLog("Amerce 结束为读者加写锁 '" + strReaderBarcode + "'");
+#endif
             }
 
             return result;
@@ -12180,6 +12279,23 @@ out string strError)
             return 0;
         }
 
+        // 盘点操作中，设置 ReturnInfo 信息
+        static void SetReturnInfo(ref ReturnInfo return_info, XmlDocument item_dom)
+        {
+#if NO
+            return_info.LatestReturnTime = DateTimeUtil.Rfc1123DateTimeStringEx(timeEnd.ToLocalTime());
+            return_info.BorrowOperator = strBorrowOperator;
+            return_info.ReturnOperator = strReturnOperator;
+            return_info.BorrowTime = strBorrowDate;
+            return_info.Period = strPeriod;
+            return_info.OverdueString = strOverdueString;
+            return_info.BorrowCount = 0;
+#endif
+            return_info.BookType = DomUtil.GetElementText(item_dom.DocumentElement, "bookType");
+            // return_info.Location = StringUtil.GetPureLocation(DomUtil.GetElementText(item_dom.DocumentElement, "location"));
+            return_info.Location = DomUtil.GetElementText(item_dom.DocumentElement, "location");    // 可能会携带 #reservatoin, 部分
+        }
+
         // 还书后对册记录中的预约信息进行检查和处理
         // 算法是：找到第一个没有超期(expireDate)并且state不是arrived的<request>元素，
         // 返回这个元素的reader属性（这就是下一个预约者），并且把这个找到的<request>
@@ -13585,6 +13701,9 @@ strBookPrice);    // 图书价格
             // 加读者记录锁
             try
             {
+#if DEBUG_LOCK_READER
+                this.WriteErrorLog("ClearArrivedInfo 开始为读者加写锁 '" + strReaderBarcode + "'");
+#endif
                 this.ReaderLocks.LockForWrite(strReaderBarcode);
             }
             catch (System.Threading.LockRecursionException)
@@ -13592,6 +13711,10 @@ strBookPrice);    // 图书价格
                 // 2012/5/31
                 // 有可能本函数被DigitalPlatform.LibraryServer.LibraryApplication.Reservation()调用时，已经对读者记录加了锁
                 bDontLock = true;
+#if DEBUG_LOCK_READER
+                this.WriteErrorLog("ClearArrivedInfo 开始为读者加写锁 '" + strReaderBarcode + "' 时遇到抛出 LockRecursionException 异常");
+#endif
+
             }
 
             try
@@ -13752,7 +13875,12 @@ strBookPrice);    // 图书价格
             finally
             {
                 if (bDontLock == false)
+                {
                     this.ReaderLocks.UnlockForWrite(strReaderBarcode);
+#if DEBUG_LOCK_READER
+                    this.WriteErrorLog("ClearArrivedInfo 结束为读者加写锁 '" + strReaderBarcode + "'");
+#endif
+                }
             }
 
             return 1;
@@ -13824,10 +13952,16 @@ strBookPrice);    // 图书价格
             {
 
                 // 加读者记录锁1
+#if DEBUG_LOCK_READER
+                this.WriteErrorLog("DevolveReaderInfo 开始为读者加写锁1 '" + strBarcode1 + "'");
+#endif
                 this.ReaderLocks.LockForWrite(strBarcode1);
                 try // 读者记录锁定1范围开始
                 {
                     // 加读者记录锁2
+#if DEBUG_LOCK_READER
+                    this.WriteErrorLog("DevolveReaderInfo 开始为读者加写锁2 '" + strBarcode2 + "'");
+#endif
                     this.ReaderLocks.LockForWrite(strBarcode2);
                     try // 读者记录锁定2范围开始
                     {
@@ -14141,6 +14275,10 @@ strBookPrice);    // 图书价格
                     finally
                     {
                         this.ReaderLocks.UnlockForWrite(strBarcode2);
+#if DEBUG_LOCK_READER
+                        this.WriteErrorLog("DevolveReaderInfo 结束为读者加写锁2 '" + strBarcode2 + "'");
+#endif
+
                     }
 
 
@@ -14148,6 +14286,10 @@ strBookPrice);    // 图书价格
                 finally
                 {
                     this.ReaderLocks.UnlockForWrite(strBarcode1);
+#if DEBUG_LOCK_READER
+                    this.WriteErrorLog("DevolveReaderInfo 结束为读者加写锁1 '" + strBarcode1 + "'");
+#endif
+
                 }
 
             }
@@ -14653,6 +14795,9 @@ strBookPrice);    // 图书价格
             int nErrorCount = 0;
 
             // 加读者记录锁
+#if DEBUG_LOCK_READER
+            this.WriteErrorLog("CheckReaderBorrowInfo 开始为读者加写锁 '" + strReaderBarcode + "'");
+#endif
             this.ReaderLocks.LockForWrite(strReaderBarcode);
 
             try // 读者记录锁定范围开始
@@ -14826,6 +14971,9 @@ strBookPrice);    // 图书价格
             finally
             {
                 this.ReaderLocks.UnlockForWrite(strReaderBarcode);
+#if DEBUG_LOCK_READER
+                this.WriteErrorLog("CheckReaderBorrowInfo 结束为读者加写锁 '" + strReaderBarcode + "'");
+#endif
             }
 
             if (String.IsNullOrEmpty(strCheckError) == false)
@@ -15017,7 +15165,12 @@ strBookPrice);    // 图书价格
             // 读出读者记录，看看是否有borrows/borrow元素表明有这个册条码号
             // 加读者记录锁
             if (strLockedReaderBarcode != strOutputReaderBarcode)
+            {
+#if DEBUG_LOCK_READER
+                this.WriteErrorLog("CheckItemBorrowInfo 开始为读者加写锁 '" + strOutputReaderBarcode + "'");
+#endif
                 this.ReaderLocks.LockForWrite(strOutputReaderBarcode);
+            }
 
             try // 读者记录锁定范围开始
             {
@@ -15084,7 +15237,13 @@ strBookPrice);    // 图书价格
             finally
             {
                 if (strLockedReaderBarcode != strOutputReaderBarcode)
+                {
                     this.ReaderLocks.UnlockForWrite(strOutputReaderBarcode);
+#if DEBUG_LOCK_READER
+                    this.WriteErrorLog("CheckItemBorrowInfo 结束为读者加写锁 '" + strOutputReaderBarcode + "'");
+#endif
+
+                }
             }
 
         END1:
@@ -15141,6 +15300,9 @@ REDO_REPAIR:
 
 
             // 加读者记录锁
+#if DEBUG_LOCK_READER
+            this.WriteErrorLog("RepairReaderSideError 开始为读者加写锁 '" + strReaderBarcode + "'");
+#endif
             this.ReaderLocks.LockForWrite(strReaderBarcode);
 
             try // 读者记录锁定范围开始
@@ -15428,6 +15590,10 @@ REDO_REPAIR:
             finally
             {
                 this.ReaderLocks.UnlockForWrite(strReaderBarcode);
+#if DEBUG_LOCK_READER
+                this.WriteErrorLog("RepairReaderSideError 结束为读者加写锁 '" + strReaderBarcode + "'");
+#endif
+
             }
 
             return result;
@@ -15470,6 +15636,10 @@ REDO_REPAIR:
         REDO_REPAIR:
 
             // 加读者记录锁
+#if DEBUG_LOCK_READER
+            this.WriteErrorLog("RepairItemSideError 开始为读者加写锁 '" + strReaderBarcode + "'");
+#endif
+
             this.ReaderLocks.LockForWrite(strReaderBarcode);
 
             try // 读者记录锁定范围开始
@@ -15761,6 +15931,10 @@ REDO_REPAIR:
             finally
             {
                 this.ReaderLocks.UnlockForWrite(strReaderBarcode);
+#if DEBUG_LOCK_READER
+                this.WriteErrorLog("RepairItemSideError 结束为读者加写锁 '" + strReaderBarcode + "'");
+#endif
+
             }
 
             return result;
@@ -15827,6 +16001,9 @@ REDO_REPAIR:
             string strLibraryCode = "";
 
             // 加读者记录锁
+#if DEBUG_LOCK_READER
+            this.WriteErrorLog("PassGate 开始为读者加读锁 '" + strReaderBarcode + "'");
+#endif
             this.ReaderLocks.LockForRead(strReaderBarcode);
             try // 读者记录锁定范围开始
             {
@@ -15946,6 +16123,9 @@ REDO_REPAIR:
             finally
             {
                 this.ReaderLocks.UnlockForRead(strReaderBarcode);
+#if DEBUG_LOCK_READER
+                this.WriteErrorLog("PassGate 结束为读者加读锁 '" + strReaderBarcode + "'");
+#endif
             }
 
             if (String.IsNullOrEmpty(strResultTypeList) == true)
@@ -16090,6 +16270,9 @@ REDO_REPAIR:
 
 
             // 加读者记录锁
+#if DEBUG_LOCK_READER
+            this.WriteErrorLog("Foregift 开始为读者加读锁 '" + strReaderBarcode + "'");
+#endif
             this.ReaderLocks.LockForRead(strReaderBarcode);
 
             try // 读者记录锁定范围开始
@@ -16269,6 +16452,10 @@ REDO_REPAIR:
             finally
             {
                 this.ReaderLocks.UnlockForRead(strReaderBarcode);
+#if DEBUG_LOCK_READER
+                this.WriteErrorLog("Foregift 结束为读者加读锁 '" + strReaderBarcode + "'");
+#endif
+
             }
 
             // END1:
@@ -16464,6 +16651,9 @@ REDO_REPAIR:
 
 
             // 加读者记录锁
+#if DEBUG_LOCK_READER
+            this.WriteErrorLog("Hire 开始为读者加读锁 '" + strReaderBarcode + "'");
+#endif
             this.ReaderLocks.LockForRead(strReaderBarcode);
 
             try // 读者记录锁定范围开始
@@ -16643,6 +16833,9 @@ REDO_REPAIR:
             finally
             {
                 this.ReaderLocks.UnlockForRead(strReaderBarcode);
+#if DEBUG_LOCK_READER
+                this.WriteErrorLog("Hire 结束为读者加读锁 '" + strReaderBarcode + "'");
+#endif
             }
 
         // END1:

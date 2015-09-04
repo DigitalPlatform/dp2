@@ -5256,7 +5256,7 @@ strTotalPrice);
 
             filenames = new List<string>();    // 每页一个文件，这个数组存放了所有文件名
 
-            string strFileNamePrefix = this.MainForm.DataDir + "\\~accountbook";
+            string strFileNamePrefix = Path.Combine(this.MainForm.DataDir, "~accountbook");
 
             string strFileName = "";
 

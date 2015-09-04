@@ -231,7 +231,8 @@ strServerUrl);
             catch
             {
             }
-                File.Delete(this.TempFilename);
+            // 这一句移到 try ... catch 以外，是为了观察测试抛出异常的情况。如果测试完成后，需要放回里面去
+            File.Delete(this.TempFilename);
         }
 
         void DeleteTempFile()
@@ -247,7 +248,8 @@ strServerUrl);
                 catch
                 {
                 }
-                    File.Delete(this.TempFilename);
+                // 这一句移到 try ... catch 以外，是为了观察测试抛出异常的情况。如果测试完成后，需要放回里面去
+                File.Delete(this.TempFilename);
                 this.TempFilename = "";
             }
         }

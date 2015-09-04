@@ -3327,8 +3327,11 @@ MessageBoxDefaultButton.Button1);
                 dlg.RecPath = strLastSavePath;
                 dlg.Text = "请选择目标数据库";
             }
-            dlg.StartPosition = FormStartPosition.CenterScreen;
+            // dlg.StartPosition = FormStartPosition.CenterScreen;
+            this.MainForm.AppInfo.LinkFormState(dlg, "SaveRecordDlg_state");
+            dlg.UiState = this.MainForm.AppInfo.GetString("ZBatchSearchForm", "SaveRecordDlg_uiState", "");
             dlg.ShowDialog(this);
+            this.MainForm.AppInfo.SetString("ZBatchSearchForm", "SaveRecordDlg_uiState", dlg.UiState);
             if (dlg.DialogResult != DialogResult.OK)
                 return;
 

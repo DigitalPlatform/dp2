@@ -87,8 +87,6 @@ namespace dp2Catalog
             prop.GetColumnTitles += new GetColumnTitlesEventHandler(prop_GetColumnTitles);
             prop.ParsePath -= new ParsePathEventHandler(prop_ParsePath);
             prop.ParsePath += new ParsePathEventHandler(prop_ParsePath);
-
-
         }
 
         void prop_ParsePath(object sender, ParsePathEventArgs e)
@@ -201,7 +199,8 @@ namespace dp2Catalog
                 else
                 {
                     // 为全部服务器设置 verified 标志
-                    this.MainForm.Servers.SetAllVerified(true);
+                    if (this.MainForm.Servers != null)
+                        this.MainForm.Servers.SetAllVerified(true);
                 }
             }
 #else
@@ -223,7 +222,6 @@ namespace dp2Catalog
             this.MainForm.AppInfo.SaveMdiSize += new EventHandler(AppInfo_SaveMdiSize);
 
             LoadSize();
-
 
             this.Channels = new LibraryChannelCollection();
             this.Channels.BeforeLogin += new BeforeLoginEventHandle(Channels_BeforeLogin);
@@ -290,15 +288,6 @@ namespace dp2Catalog
     "query_lines",
     "^^^");
             this.dp2QueryControl1.Restore(strSaveString);
-            /*
-            for (int i = 0; i < nQueryLineCount; i++)
-            {
-                this.dp2QueryControl1.AddLine();
-            }
-             * */
-
-
-            // API.PostMessage(this.Handle, WM_LOADSIZE, 0, 0);
 
             // 按照上次保存的路径展开resdircontrol树
             string strResDirPath = this.MainForm.AppInfo.GetString(
@@ -7396,8 +7385,12 @@ out string strError)
                 dlg.RecPath = strLastSavePath;
                 dlg.Text = "请选择目标数据库";
             }
-            dlg.StartPosition = FormStartPosition.CenterScreen;
+            // dlg.StartPosition = FormStartPosition.CenterScreen;
+            this.MainForm.AppInfo.LinkFormState(dlg, "SaveRecordDlg_state");
+            dlg.UiState = this.MainForm.AppInfo.GetString("dp2SearchForm", "SaveRecordDlg_uiState", "");
             dlg.ShowDialog(this);
+            this.MainForm.AppInfo.SetString("dp2SearchForm", "SaveRecordDlg_uiState", dlg.UiState);
+
             if (dlg.DialogResult != DialogResult.OK)
                 return;
 

@@ -379,13 +379,5 @@ namespace dp2Circulation
             return 0;
         }
 
-        // 获得当前用户能管辖的全部馆代码
-        List<string> GetOwnerLibraryCodes()
-        {
-            if (Global.IsGlobalUser(this.Channel.LibraryCodeList) == true)
-                return this.MainForm.GetAllLibraryCode();
-
-            return StringUtil.SplitList(this.Channel.LibraryCodeList);
-        }
     }
 }

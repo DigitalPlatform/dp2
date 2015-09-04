@@ -4024,8 +4024,11 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5701.40614, Culture=neutral, PublicKeyT
                 dlg.RecPath = strLastSavePath;
                 dlg.Text = "请选择目标数据库";
             }
-            dlg.StartPosition = FormStartPosition.CenterScreen;
+            //dlg.StartPosition = FormStartPosition.CenterScreen;
+            this.MainForm.AppInfo.LinkFormState(dlg, "SaveRecordDlg_state");
+            dlg.UiState = this.MainForm.AppInfo.GetString("ZSearchForm", "SaveRecordDlg_uiState", "");
             dlg.ShowDialog(this);
+            this.MainForm.AppInfo.SetString("ZSearchForm", "SaveRecordDlg_uiState", dlg.UiState);
             if (dlg.DialogResult != DialogResult.OK)
                 return;
 

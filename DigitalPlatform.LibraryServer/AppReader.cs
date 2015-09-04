@@ -1,3 +1,4 @@
+
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -807,8 +808,12 @@ namespace DigitalPlatform.LibraryServer
 
             // 加读者记录锁
             if (String.IsNullOrEmpty(strLockBarcode) == false)
+            {
+#if DEBUG_LOCK_READER
+                app.WriteErrorLog("SetReaderInfo 开始为读者加写锁 '" + strLockBarcode + "'");
+#endif
                 app.ReaderLocks.LockForWrite(strLockBarcode);
-
+            }
             try
             {
                 // 2014/1/10
@@ -1396,7 +1401,13 @@ strLibraryCode);    // 读者所在的馆代码
             finally
             {
                 if (String.IsNullOrEmpty(strLockBarcode) == false)
+                {
                     app.ReaderLocks.UnlockForWrite(strLockBarcode);
+#if DEBUG_LOCK_READER
+                    app.WriteErrorLog("SetReaderInfo 结束为读者加写锁 '" + strLockBarcode + "'");
+#endif
+
+                }
             }
 
             return result;
@@ -3083,6 +3094,9 @@ strLibraryCode);    // 读者所在的馆代码
 
                 // 加读锁
                 // 可以避免拿到读者记录处理中途的临时状态
+#if DEBUG_LOCK_READER
+                this.WriteErrorLog("GetReaderInfo 开始为读者加读锁 '" + strBarcode + "'");
+#endif
                 this.ReaderLocks.LockForRead(strBarcode);
 
                 try
@@ -3108,6 +3122,9 @@ strLibraryCode);    // 读者所在的馆代码
                 finally
                 {
                     this.ReaderLocks.UnlockForRead(strBarcode);
+#if DEBUG_LOCK_READER
+                    this.WriteErrorLog("GetReaderInfo 结束为读者加读锁 '" + strBarcode + "'");
+#endif
                 }
 
 #if NO
@@ -3727,7 +3744,12 @@ out strError);
 
             // 加读者记录锁
             if (String.IsNullOrEmpty(strLockBarcode) == false)
+            {
+#if DEBUG_LOCK_READER
+                this.WriteErrorLog("MoveReaderInfo 开始为读者加写锁 '" + strLockBarcode + "'");
+#endif
                 this.ReaderLocks.LockForWrite(strLockBarcode);
+            }
             try
             {
                 // 锁定后重新读入一次源读者记录。这是因为担心第一次为了获得证条码号的读取和锁定之间存在可能被其他地方修改了此条记录的可能
@@ -3895,7 +3917,12 @@ out strError);
             finally
             {
                 if (String.IsNullOrEmpty(strLockBarcode) == false)
+                {
                     this.ReaderLocks.UnlockForWrite(strLockBarcode);
+#if DEBUG_LOCK_READER
+                    this.WriteErrorLog("MoveReaderInfo 结束为读者加写锁 '" + strLockBarcode + "'");
+#endif
+                }
             }
 
             XmlDocument domOperLog = new XmlDocument();
@@ -3956,6 +3983,10 @@ out strError);
             barcodes.Add(strReaderBarcode2);
 
             barcodes.Sort();
+
+#if DEBUG_LOCK_READER
+            this.WriteErrorLog("AddFriends 开始为读者加写锁 '" + barcodes[0] + "' 和 '" + barcodes[1] + "'");
+#endif
 
             // 加读者记录锁
             // 排序后加锁，可以防止死锁
@@ -4092,6 +4123,9 @@ out strError);
             {
                 this.ReaderLocks.UnlockForWrite(barcodes[1]);
                 this.ReaderLocks.UnlockForWrite(barcodes[0]);
+#if DEBUG_LOCK_READER
+                this.WriteErrorLog("AddFriends 结束为读者加写锁 '" + barcodes[1] + "' 和 '" + barcodes[0] + "'");
+#endif
             }
 
             return 0;

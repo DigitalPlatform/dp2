@@ -174,6 +174,12 @@ namespace DigitalPlatform.CirculationClient
             strError = "";
             int nRet = 0;
 
+            if (this.Servers == null)
+            {
+                strError = "this.Servers == null";
+                return -1;
+            }
+
             this.Enabled = false;
             this.Update();
             try
@@ -228,7 +234,6 @@ namespace DigitalPlatform.CirculationClient
                     Application.DoEvents();	// 出让界面控制权
 
                     ResPath respath = new ResPath(node);
-
 
                     List<NormalDbProperty> properties = null;
                     // string[] dbnames = null;
@@ -339,17 +344,13 @@ namespace DigitalPlatform.CirculationClient
 
                         children.Add(nodeNew);
                     }
-
                 }
-
             }
             finally
             {
                 this.Enabled = true;
             }
-
             return 0;
-
         ERROR1:
             return -1;
         }

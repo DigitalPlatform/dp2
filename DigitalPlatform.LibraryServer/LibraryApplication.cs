@@ -89,7 +89,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.47 (2015/6/13) GetSystemParameter() API 增加了 category=arrived name=dbname
         //      2.48 (2015/6/16) GetVersion() API 增加了 out uid 参数
         //      2.49 (2015/8/23) GetRes() API 允许获得违约金库 cfgs 下的配置文件了。以前版本不允许是因为一个 bug 造成的。GetReaderInfo() API 的 strResultTypeList 参数增加了 advancexml_history_bibliosummary 这种用法
-        public static string Version = "2.49";
+        //      2.50 (2015/9/3) Return() API 的盘点功能，增加了 为 return_info 中返回信息的功能；WriteRes() 增加了 strStyle "delete" 删除盘点库记录功能(需要权限 inventorydelete)
+        public static string Version = "2.50";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -3363,6 +3364,15 @@ namespace DigitalPlatform.LibraryServer
         public bool IsUtilDbName(string strUtilDbName)
         {
             XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("utilDb/database[@name='"+strUtilDbName+"']");
+            if (node == null)
+                return false;
+
+            return true;
+        }
+
+        public bool IsUtilDbName(string strUtilDbName, string strType)
+        {
+            XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("utilDb/database[@name='" + strUtilDbName + "' and @type='"+strType+"']");
             if (node == null)
                 return false;
 
@@ -10380,6 +10390,9 @@ namespace DigitalPlatform.LibraryServer
             string strError = "";
 
             // 加读者记录锁
+#if DEBUG_LOCK_READER
+            this.WriteErrorLog("ChangeReaderPassword 开始为读者加写锁 '" + strReaderBarcode + "'");
+#endif
             this.ReaderLocks.LockForWrite(strReaderBarcode);
 
             try
@@ -10495,6 +10508,10 @@ namespace DigitalPlatform.LibraryServer
             finally
             {
                 this.ReaderLocks.UnlockForWrite(strReaderBarcode);
+#if DEBUG_LOCK_READER
+                this.WriteErrorLog("ChangeReaderPassword 结束为读者加写锁 '" + strReaderBarcode + "'");
+#endif
+
             }
 
             return result;

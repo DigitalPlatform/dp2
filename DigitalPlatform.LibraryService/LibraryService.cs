@@ -12174,16 +12174,46 @@ namespace dp2Library
                         return result;
                     }
 
-                    long lRet = channel.WriteRes(strResPath,
-                        strRanges,
-                        lTotalLength,
-                        baContent,
-                        strMetadata,
-                        strStyle,
-                        baInputTimestamp,
-                        out strOutputResPath,
-                        out baOutputTimestamp,
-                        out strError);
+                    long lRet = 0;
+                    // 2015/9/3 新增删除资源的功能
+                    if (StringUtil.IsInList("delete", strStyle) == true)
+                    {
+                        string strDbName = ResPath.GetDbName(strResPath);
+                        if (app.IsUtilDbName(strDbName, "inventory") == true)
+                        {
+                            if (StringUtil.IsInList("inventorydelete", sessioninfo.RightsOrigin) == false)
+                            {
+                                result.Value = -1;
+                                result.ErrorInfo = "当前用户缺乏删除盘点库记录 '" + strResPath + "' 所需要的 inventorydelete 权限";
+                                result.ErrorCode = ErrorCode.AccessDenied;
+                                return result;
+                            }
+                            lRet = channel.DoDeleteRes(strResPath,
+                                baInputTimestamp,
+                                out baOutputTimestamp,
+                                out strError);
+                        }
+                        else
+                        {
+                            result.Value = -1;
+                            result.ErrorInfo = "删除资源 '" + strResPath + "' 的权限不够";
+                            result.ErrorCode = ErrorCode.AccessDenied;
+                            return result;
+                        }
+                    }
+                    else
+                    {
+                        lRet = channel.WriteRes(strResPath,
+                            strRanges,
+                            lTotalLength,
+                            baContent,
+                            strMetadata,
+                            strStyle,
+                            baInputTimestamp,
+                            out strOutputResPath,
+                            out baOutputTimestamp,
+                            out strError);
+                    }
                     result.Value = lRet;
                     result.ErrorInfo = strError;
 
@@ -12221,15 +12251,20 @@ namespace dp2Library
                     DomUtil.SetElementText(domOperLog.DocumentElement, "requestResPath",
                         strResPath);
 
-                    Debug.Assert(string.IsNullOrEmpty(strOutputResPath) == false, "");
-                    DomUtil.SetElementText(domOperLog.DocumentElement, "resPath",
-                        strOutputResPath);
-                    DomUtil.SetElementText(domOperLog.DocumentElement, "ranges",
-                        strRanges);
-                    DomUtil.SetElementText(domOperLog.DocumentElement, "totalLength",
-                        lTotalLength.ToString());
-                    DomUtil.SetElementText(domOperLog.DocumentElement, "metadata",
-                        strMetadata);
+                    if (StringUtil.IsInList("delete", strStyle) == false)
+                    {
+                        Debug.Assert(string.IsNullOrEmpty(strOutputResPath) == false, "");
+                        DomUtil.SetElementText(domOperLog.DocumentElement, "resPath",
+                            strOutputResPath);
+
+                        DomUtil.SetElementText(domOperLog.DocumentElement, "ranges",
+                            strRanges);
+                        DomUtil.SetElementText(domOperLog.DocumentElement, "totalLength",
+                            lTotalLength.ToString());
+                        DomUtil.SetElementText(domOperLog.DocumentElement, "metadata",
+                            strMetadata);
+                    }
+
                     DomUtil.SetElementText(domOperLog.DocumentElement, "style",
     strStyle);
 

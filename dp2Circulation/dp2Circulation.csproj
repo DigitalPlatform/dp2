@@ -193,6 +193,12 @@
       <DependentUpon>FloatingMessageForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Charging\IChargingForm.cs" />
+    <Compile Include="Charging\InventoryFromFileDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Charging\InventoryFromFileDialog.Designer.cs">
+      <DependentUpon>InventoryFromFileDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="Charging\PatronSummaryForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -312,6 +318,12 @@
       <DependentUpon>ScanRegisterBarcodeForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Entity\GenerateData.cs" />
+    <Compile Include="Entity\InventoryBatchNoControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Entity\InventoryBatchNoControl.Designer.cs">
+      <DependentUpon>InventoryBatchNoControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="Entity\InventoryForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -1318,6 +1330,9 @@
     <Content Include="comment_change_actions.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="default\inventory.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Docs\deleted.txt" />
     <Content Include="EntityRegister\servers.xml" />
     <Content Include="eula.txt">
@@ -1328,6 +1343,7 @@
     </Content>
     <Content Include="default\inventory_item_browse.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </Content>
     <Content Include="issue_change_actions.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -1429,6 +1445,9 @@
     <EmbeddedResource Include="Charging\FloatingMessageForm.resx">
       <DependentUpon>FloatingMessageForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Charging\InventoryFromFileDialog.resx">
+      <DependentUpon>InventoryFromFileDialog.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Charging\PatronSummaryForm.resx">
       <DependentUpon>PatronSummaryForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -1482,6 +1501,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="EntityRegister\ScanRegisterBarcodeForm.resx">
       <DependentUpon>ScanRegisterBarcodeForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Entity\InventoryBatchNoControl.resx">
+      <DependentUpon>InventoryBatchNoControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Entity\InventoryForm.resx">
       <DependentUpon>InventoryForm.cs</DependentUpon>
@@ -2865,6 +2887,36 @@
       <FileType>File</FileType>
     </PublishFile>
     <PublishFile Include="comment_change_actions.xml">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="default\inventory.css">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="default\inventory_item_browse.xml">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>DataFile</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>File</FileType>
+    </PublishFile>
+    <PublishFile Include="default\objectrights.xml">
       <Visible>False</Visible>
       <Group>
       </Group>

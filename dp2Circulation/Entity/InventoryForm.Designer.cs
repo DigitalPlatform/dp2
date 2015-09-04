@@ -29,9 +29,14 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(InventoryForm));
             this.tabControl_main = new System.Windows.Forms.TabControl();
             this.tabPage_start = new System.Windows.Forms.TabPage();
-            this.tabComboBox_inputBatchNo = new DigitalPlatform.CommonControl.TabComboBox();
+            this.label6 = new System.Windows.Forms.Label();
+            this.button_start_setLocations = new System.Windows.Forms.Button();
+            this.inventoryBatchNoControl_start_batchNo = new dp2Circulation.InventoryBatchNoControl();
+            this.textBox_start_locations = new System.Windows.Forms.TextBox();
+            this.label5 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.tabPage_scan = new System.Windows.Forms.TabPage();
             this.tabPage_inventoryList = new System.Windows.Forms.TabPage();
@@ -54,11 +59,21 @@
             this.button_baseList_search = new System.Windows.Forms.Button();
             this.textBox_baseList_locations = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
+            this.tabPage_operLog = new System.Windows.Forms.TabPage();
+            this.tableLayoutPanel_operLog = new System.Windows.Forms.TableLayoutPanel();
+            this.webBrowser1 = new System.Windows.Forms.WebBrowser();
+            this.panel2 = new System.Windows.Forms.Panel();
+            this.button_operLog_load = new System.Windows.Forms.Button();
+            this.button_operLog_setDateRange = new System.Windows.Forms.Button();
+            this.textBox_operLog_dateRange = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
             this.tabPage_statis = new System.Windows.Forms.TabPage();
+            this.button_statis_maskItems = new System.Windows.Forms.Button();
+            this.button_statis_defOutputColumns = new System.Windows.Forms.Button();
             this.button_statis_outputExcel = new System.Windows.Forms.Button();
             this.button_statis_crossCompute = new System.Windows.Forms.Button();
             this.timer_qu = new System.Windows.Forms.Timer(this.components);
-            this.button_statis_defOutputColumns = new System.Windows.Forms.Button();
+            this.button_statis_return = new System.Windows.Forms.Button();
             this.tabControl_main.SuspendLayout();
             this.tabPage_start.SuspendLayout();
             this.tabPage_inventoryList.SuspendLayout();
@@ -67,6 +82,9 @@
             this.tabPage_baseList.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
+            this.tabPage_operLog.SuspendLayout();
+            this.tableLayoutPanel_operLog.SuspendLayout();
+            this.panel2.SuspendLayout();
             this.tabPage_statis.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -76,6 +94,7 @@
             this.tabControl_main.Controls.Add(this.tabPage_scan);
             this.tabControl_main.Controls.Add(this.tabPage_inventoryList);
             this.tabControl_main.Controls.Add(this.tabPage_baseList);
+            this.tabControl_main.Controls.Add(this.tabPage_operLog);
             this.tabControl_main.Controls.Add(this.tabPage_statis);
             this.tabControl_main.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl_main.Location = new System.Drawing.Point(0, 0);
@@ -86,7 +105,12 @@
             // 
             // tabPage_start
             // 
-            this.tabPage_start.Controls.Add(this.tabComboBox_inputBatchNo);
+            this.tabPage_start.AutoScroll = true;
+            this.tabPage_start.Controls.Add(this.label6);
+            this.tabPage_start.Controls.Add(this.button_start_setLocations);
+            this.tabPage_start.Controls.Add(this.inventoryBatchNoControl_start_batchNo);
+            this.tabPage_start.Controls.Add(this.textBox_start_locations);
+            this.tabPage_start.Controls.Add(this.label5);
             this.tabPage_start.Controls.Add(this.label1);
             this.tabPage_start.Location = new System.Drawing.Point(4, 22);
             this.tabPage_start.Name = "tabPage_start";
@@ -96,27 +120,63 @@
             this.tabPage_start.Text = "开始";
             this.tabPage_start.UseVisualStyleBackColor = true;
             // 
-            // tabComboBox_inputBatchNo
+            // label6
             // 
-            this.tabComboBox_inputBatchNo.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
-            this.tabComboBox_inputBatchNo.FormattingEnabled = true;
-            this.tabComboBox_inputBatchNo.LeftFontStyle = System.Drawing.FontStyle.Bold;
-            this.tabComboBox_inputBatchNo.Location = new System.Drawing.Point(94, 16);
-            this.tabComboBox_inputBatchNo.Margin = new System.Windows.Forms.Padding(2);
-            this.tabComboBox_inputBatchNo.Name = "tabComboBox_inputBatchNo";
-            this.tabComboBox_inputBatchNo.RightFontStyle = System.Drawing.FontStyle.Italic;
-            this.tabComboBox_inputBatchNo.Size = new System.Drawing.Size(140, 22);
-            this.tabComboBox_inputBatchNo.TabIndex = 6;
-            this.tabComboBox_inputBatchNo.TextChanged += new System.EventHandler(this.tabComboBox_inputBatchNo_TextChanged);
+            this.label6.Location = new System.Drawing.Point(9, 157);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(297, 50);
+            this.label6.TabIndex = 11;
+            this.label6.Text = "注：在扫入册条码号盘点过程中，软件会根据上述馆藏地对册记录进行检查，如果发现册记录馆藏地超出上述范围，会用黄色状态进行提醒。";
+            // 
+            // button_start_setLocations
+            // 
+            this.button_start_setLocations.Location = new System.Drawing.Point(312, 96);
+            this.button_start_setLocations.Name = "button_start_setLocations";
+            this.button_start_setLocations.Size = new System.Drawing.Size(45, 23);
+            this.button_start_setLocations.TabIndex = 10;
+            this.button_start_setLocations.Text = "...";
+            this.button_start_setLocations.UseVisualStyleBackColor = true;
+            this.button_start_setLocations.Click += new System.EventHandler(this.button_start_setLocations_Click);
+            // 
+            // inventoryBatchNoControl_start_batchNo
+            // 
+            this.inventoryBatchNoControl_start_batchNo.LibaryCodeEanbled = true;
+            this.inventoryBatchNoControl_start_batchNo.LibraryCodeList = ((System.Collections.Generic.List<string>)(resources.GetObject("inventoryBatchNoControl_start_batchNo.LibraryCodeList")));
+            this.inventoryBatchNoControl_start_batchNo.LibraryCodeText = "";
+            this.inventoryBatchNoControl_start_batchNo.Location = new System.Drawing.Point(9, 34);
+            this.inventoryBatchNoControl_start_batchNo.Name = "inventoryBatchNoControl_start_batchNo";
+            this.inventoryBatchNoControl_start_batchNo.Size = new System.Drawing.Size(348, 27);
+            this.inventoryBatchNoControl_start_batchNo.TabIndex = 9;
+            this.inventoryBatchNoControl_start_batchNo.TextChanged += new System.EventHandler(this.inventoryBatchNoControl_start_batchNo_TextChanged);
+            // 
+            // textBox_start_locations
+            // 
+            this.textBox_start_locations.AcceptsReturn = true;
+            this.textBox_start_locations.Location = new System.Drawing.Point(9, 96);
+            this.textBox_start_locations.Multiline = true;
+            this.textBox_start_locations.Name = "textBox_start_locations";
+            this.textBox_start_locations.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox_start_locations.Size = new System.Drawing.Size(297, 54);
+            this.textBox_start_locations.TabIndex = 8;
+            this.textBox_start_locations.TextChanged += new System.EventHandler(this.textBox_start_locations_TextChanged);
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(7, 81);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(137, 12);
+            this.label5.TabIndex = 7;
+            this.label5.Text = "扫入时所在的馆藏地(&L):";
             // 
             // label1
             // 
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(7, 19);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(65, 12);
+            this.label1.Size = new System.Drawing.Size(137, 12);
             this.label1.TabIndex = 0;
-            this.label1.Text = "批次号(&B):";
+            this.label1.Text = "扫入时所用的批次号(&B):";
             // 
             // tabPage_scan
             // 
@@ -170,6 +230,7 @@
             this.listView_inventoryList_records.View = System.Windows.Forms.View.Details;
             this.listView_inventoryList_records.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView_records_ColumnClick);
             this.listView_inventoryList_records.SelectedIndexChanged += new System.EventHandler(this.listView_records_SelectedIndexChanged);
+            this.listView_inventoryList_records.MouseUp += new System.Windows.Forms.MouseEventHandler(this.listView_inventoryList_records_MouseUp);
             // 
             // columnHeader_path
             // 
@@ -279,6 +340,7 @@
             this.listView_baseList_records.View = System.Windows.Forms.View.Details;
             this.listView_baseList_records.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView_baseList_records_ColumnClick);
             this.listView_baseList_records.SelectedIndexChanged += new System.EventHandler(this.listView_baseList_records_SelectedIndexChanged);
+            this.listView_baseList_records.DoubleClick += new System.EventHandler(this.listView_baseList_records_DoubleClick);
             // 
             // columnHeader1
             // 
@@ -346,8 +408,96 @@
             this.label3.TabIndex = 0;
             this.label3.Text = "馆藏地:";
             // 
+            // tabPage_operLog
+            // 
+            this.tabPage_operLog.Controls.Add(this.tableLayoutPanel_operLog);
+            this.tabPage_operLog.Location = new System.Drawing.Point(4, 22);
+            this.tabPage_operLog.Name = "tabPage_operLog";
+            this.tabPage_operLog.Size = new System.Drawing.Size(422, 252);
+            this.tabPage_operLog.TabIndex = 5;
+            this.tabPage_operLog.Text = "借还日志";
+            this.tabPage_operLog.UseVisualStyleBackColor = true;
+            // 
+            // tableLayoutPanel_operLog
+            // 
+            this.tableLayoutPanel_operLog.ColumnCount = 1;
+            this.tableLayoutPanel_operLog.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel_operLog.Controls.Add(this.webBrowser1, 0, 1);
+            this.tableLayoutPanel_operLog.Controls.Add(this.panel2, 0, 0);
+            this.tableLayoutPanel_operLog.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel_operLog.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel_operLog.Name = "tableLayoutPanel_operLog";
+            this.tableLayoutPanel_operLog.RowCount = 2;
+            this.tableLayoutPanel_operLog.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel_operLog.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel_operLog.Size = new System.Drawing.Size(422, 252);
+            this.tableLayoutPanel_operLog.TabIndex = 0;
+            // 
+            // webBrowser1
+            // 
+            this.webBrowser1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.webBrowser1.Location = new System.Drawing.Point(3, 31);
+            this.webBrowser1.MinimumSize = new System.Drawing.Size(20, 20);
+            this.webBrowser1.Name = "webBrowser1";
+            this.webBrowser1.Size = new System.Drawing.Size(416, 218);
+            this.webBrowser1.TabIndex = 0;
+            // 
+            // panel2
+            // 
+            this.panel2.Controls.Add(this.button_operLog_load);
+            this.panel2.Controls.Add(this.button_operLog_setDateRange);
+            this.panel2.Controls.Add(this.textBox_operLog_dateRange);
+            this.panel2.Controls.Add(this.label4);
+            this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel2.Location = new System.Drawing.Point(3, 3);
+            this.panel2.Name = "panel2";
+            this.panel2.Size = new System.Drawing.Size(416, 22);
+            this.panel2.TabIndex = 1;
+            // 
+            // button_operLog_load
+            // 
+            this.button_operLog_load.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_operLog_load.Location = new System.Drawing.Point(344, 0);
+            this.button_operLog_load.Name = "button_operLog_load";
+            this.button_operLog_load.Size = new System.Drawing.Size(67, 21);
+            this.button_operLog_load.TabIndex = 3;
+            this.button_operLog_load.Text = "装载";
+            this.button_operLog_load.UseVisualStyleBackColor = true;
+            this.button_operLog_load.Click += new System.EventHandler(this.button_operLog_load_Click);
+            // 
+            // button_operLog_setDateRange
+            // 
+            this.button_operLog_setDateRange.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_operLog_setDateRange.Location = new System.Drawing.Point(302, 0);
+            this.button_operLog_setDateRange.Name = "button_operLog_setDateRange";
+            this.button_operLog_setDateRange.Size = new System.Drawing.Size(36, 21);
+            this.button_operLog_setDateRange.TabIndex = 2;
+            this.button_operLog_setDateRange.Text = "...";
+            this.button_operLog_setDateRange.UseVisualStyleBackColor = true;
+            this.button_operLog_setDateRange.Click += new System.EventHandler(this.button_operLog_setDateRange_Click);
+            // 
+            // textBox_operLog_dateRange
+            // 
+            this.textBox_operLog_dateRange.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_operLog_dateRange.Location = new System.Drawing.Point(90, 0);
+            this.textBox_operLog_dateRange.Name = "textBox_operLog_dateRange";
+            this.textBox_operLog_dateRange.Size = new System.Drawing.Size(211, 21);
+            this.textBox_operLog_dateRange.TabIndex = 1;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(0, 4);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(83, 12);
+            this.label4.TabIndex = 0;
+            this.label4.Text = "日志起止范围:";
+            // 
             // tabPage_statis
             // 
+            this.tabPage_statis.Controls.Add(this.button_statis_return);
+            this.tabPage_statis.Controls.Add(this.button_statis_maskItems);
             this.tabPage_statis.Controls.Add(this.button_statis_defOutputColumns);
             this.tabPage_statis.Controls.Add(this.button_statis_outputExcel);
             this.tabPage_statis.Controls.Add(this.button_statis_crossCompute);
@@ -358,9 +508,29 @@
             this.tabPage_statis.Text = "统计";
             this.tabPage_statis.UseVisualStyleBackColor = true;
             // 
+            // button_statis_maskItems
+            // 
+            this.button_statis_maskItems.Location = new System.Drawing.Point(9, 63);
+            this.button_statis_maskItems.Name = "button_statis_maskItems";
+            this.button_statis_maskItems.Size = new System.Drawing.Size(232, 23);
+            this.button_statis_maskItems.TabIndex = 3;
+            this.button_statis_maskItems.Text = "修改册状态";
+            this.button_statis_maskItems.UseVisualStyleBackColor = true;
+            this.button_statis_maskItems.Click += new System.EventHandler(this.button_statis_maskItems_Click);
+            // 
+            // button_statis_defOutputColumns
+            // 
+            this.button_statis_defOutputColumns.Location = new System.Drawing.Point(9, 184);
+            this.button_statis_defOutputColumns.Name = "button_statis_defOutputColumns";
+            this.button_statis_defOutputColumns.Size = new System.Drawing.Size(232, 23);
+            this.button_statis_defOutputColumns.TabIndex = 2;
+            this.button_statis_defOutputColumns.Text = "配置 Excel 报表栏目 ...";
+            this.button_statis_defOutputColumns.UseVisualStyleBackColor = true;
+            this.button_statis_defOutputColumns.Click += new System.EventHandler(this.button_statis_defOutputColumns_Click);
+            // 
             // button_statis_outputExcel
             // 
-            this.button_statis_outputExcel.Location = new System.Drawing.Point(9, 60);
+            this.button_statis_outputExcel.Location = new System.Drawing.Point(9, 155);
             this.button_statis_outputExcel.Name = "button_statis_outputExcel";
             this.button_statis_outputExcel.Size = new System.Drawing.Size(232, 23);
             this.button_statis_outputExcel.TabIndex = 1;
@@ -383,15 +553,15 @@
             this.timer_qu.Interval = 1000;
             this.timer_qu.Tick += new System.EventHandler(this.timer_qu_Tick);
             // 
-            // button_statis_defOutputColumns
+            // button_statis_return
             // 
-            this.button_statis_defOutputColumns.Location = new System.Drawing.Point(9, 118);
-            this.button_statis_defOutputColumns.Name = "button_statis_defOutputColumns";
-            this.button_statis_defOutputColumns.Size = new System.Drawing.Size(232, 23);
-            this.button_statis_defOutputColumns.TabIndex = 2;
-            this.button_statis_defOutputColumns.Text = "配置 Excel 报表栏目 ...";
-            this.button_statis_defOutputColumns.UseVisualStyleBackColor = true;
-            this.button_statis_defOutputColumns.Click += new System.EventHandler(this.button_statis_defOutputColumns_Click);
+            this.button_statis_return.Location = new System.Drawing.Point(9, 107);
+            this.button_statis_return.Name = "button_statis_return";
+            this.button_statis_return.Size = new System.Drawing.Size(232, 23);
+            this.button_statis_return.TabIndex = 4;
+            this.button_statis_return.Text = "补做还书";
+            this.button_statis_return.UseVisualStyleBackColor = true;
+            this.button_statis_return.Click += new System.EventHandler(this.button_statis_return_Click);
             // 
             // InventoryForm
             // 
@@ -417,6 +587,10 @@
             this.tableLayoutPanel1.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
+            this.tabPage_operLog.ResumeLayout(false);
+            this.tableLayoutPanel_operLog.ResumeLayout(false);
+            this.panel2.ResumeLayout(false);
+            this.panel2.PerformLayout();
             this.tabPage_statis.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -428,7 +602,6 @@
         private System.Windows.Forms.TabPage tabPage_start;
         private System.Windows.Forms.TabPage tabPage_scan;
         private System.Windows.Forms.Label label1;
-        private DigitalPlatform.CommonControl.TabComboBox tabComboBox_inputBatchNo;
         private System.Windows.Forms.TabPage tabPage_inventoryList;
         private DigitalPlatform.GUI.ListViewQU listView_inventoryList_records;
         private System.Windows.Forms.ColumnHeader columnHeader_path;
@@ -454,5 +627,20 @@
         private System.Windows.Forms.Timer timer_qu;
         private System.Windows.Forms.Button button_statis_outputExcel;
         private System.Windows.Forms.Button button_statis_defOutputColumns;
+        private System.Windows.Forms.TabPage tabPage_operLog;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel_operLog;
+        private System.Windows.Forms.WebBrowser webBrowser1;
+        private System.Windows.Forms.Panel panel2;
+        private System.Windows.Forms.Button button_operLog_setDateRange;
+        private System.Windows.Forms.TextBox textBox_operLog_dateRange;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Button button_operLog_load;
+        private System.Windows.Forms.Button button_statis_maskItems;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.TextBox textBox_start_locations;
+        private InventoryBatchNoControl inventoryBatchNoControl_start_batchNo;
+        private System.Windows.Forms.Button button_start_setLocations;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Button button_statis_return;
     }
 }

@@ -155,7 +155,8 @@ namespace DigitalPlatform.rms
         //		strErrorInfo    out参数，返回处理信息
         // return:
         //		-1  出错 例如:括号不匹配;找不到某操作符的优先级
-        //		0   成功
+        //      0   可用节点数为 0。等于没有任何可检索的必要
+        //		1   成功
         public int Infix2RPN(XmlNode node,
             out ArrayList output,
             out string strError)
@@ -164,12 +165,12 @@ namespace DigitalPlatform.rms
             output = new ArrayList();
             if (node == null)
             {
-                strError = "node不能为null\r\n";
+                strError = "node 不能为 null\r\n";
                 return -1;
             }
             if (node.ChildNodes.Count == 0)
             {
-                strError = "node的ChildNodes个数为0\r\n";
+                strError = "检索式片段 '" + node.OuterXml + "' 中没有任何检索节点";  // "node 的 ChildNodes 个数为 0\r\n";
                 return 0;
             }
 
@@ -341,7 +342,7 @@ namespace DigitalPlatform.rms
                 output.Add(nodeTemp);
             }
 
-            return 0;
+            return 1;
         }
 
         // 功能: 检查检索单元match,relation,dataType三项的关系
@@ -753,6 +754,10 @@ namespace DigitalPlatform.rms
 
                 //将正常顺序变成逆波兰表序
                 ArrayList rpn;
+                // return:
+                //		-1  出错 例如:括号不匹配;找不到某操作符的优先级
+                //      0   可用节点数为 0。等于没有任何可检索的必要
+                //		1   成功
                 int nRet = Infix2RPN(nodeRoot,
                     out rpn,
                     out strError);
@@ -761,6 +766,8 @@ namespace DigitalPlatform.rms
                     strError = "逆波兰表错误:" + strError;
                     return -1;
                 }
+                if (nRet == 0)
+                    return -1;
 
                 //属于正常情况
                 if (rpn.Count == 0)
