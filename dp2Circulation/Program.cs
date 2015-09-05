@@ -1,4 +1,4 @@
-using DigitalPlatform;
+ï»¿using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
 using System;
 using System.Collections.Generic;
@@ -14,7 +14,7 @@ namespace dp2Circulation
         static bool bExiting = false;
 
         static MainForm _mainForm = null;
-        // ÕâÀïÓÃ _mainForm ´æ´¢´°¿Ú¶ÔÏó£¬²»²ÉÈ¡ Form.ActiveForm »ñÈ¡µÄ·½Ê½¡£Ô­ÒòÈçÏÂ
+        // è¿™é‡Œç”¨ _mainForm å­˜å‚¨çª—å£å¯¹è±¡ï¼Œä¸é‡‡å– Form.ActiveForm è·å–çš„æ–¹å¼ã€‚åŸå› å¦‚ä¸‹
         // http://stackoverflow.com/questions/17117372/form-activeform-occasionally-works
         // Form.ActiveForm occasionally works
 
@@ -47,7 +47,7 @@ namespace dp2Circulation
             return false;
         }
 
-        // ×¼±¸½Ó¹ÜÎ´²¶»ñµÄÒì³£
+        // å‡†å¤‡æ¥ç®¡æœªæ•è·çš„å¼‚å¸¸
         static void PrepareCatchException()
         {
             Application.ThreadException += Application_ThreadException;
@@ -72,7 +72,7 @@ namespace dp2Circulation
             Exception ex = (Exception)e.ExceptionObject;
             // MainForm main_form = Form.ActiveForm as MainForm;
 #if NO
-            string strError = "·¢ÉúÎ´²¶»ñµÄÒì³£: \r\n" + ExceptionUtil.GetDebugText(ex);
+            string strError = "å‘ç”Ÿæœªæ•è·çš„å¼‚å¸¸: \r\n" + ExceptionUtil.GetDebugText(ex);
             if (main_form != null)
                 main_form.WriteErrorLog(strError);
             else
@@ -80,17 +80,17 @@ namespace dp2Circulation
 #endif
             string strError = GetExceptionText(ex, "");
 
-            // TODO: °ÑĞÅÏ¢Ìá¹©¸øÊı×ÖÆ½Ì¨µÄ¿ª·¢ÈËÔ±£¬ÒÔ±ã¾À´í
-            // TODO: ÏÔÊ¾ÎªºìÉ«´°¿Ú£¬±íÊ¾¾¯¸æµÄÒâË¼
+            // TODO: æŠŠä¿¡æ¯æä¾›ç»™æ•°å­—å¹³å°çš„å¼€å‘äººå‘˜ï¼Œä»¥ä¾¿çº é”™
+            // TODO: æ˜¾ç¤ºä¸ºçº¢è‰²çª—å£ï¼Œè¡¨ç¤ºè­¦å‘Šçš„æ„æ€
             bool bSendReport = true;
             DialogResult result = MessageDlg.Show(_mainForm,
-    "dp2Circulation ·¢ÉúÎ´ÖªµÄÒì³£:\r\n\r\n" + strError + "\r\n---\r\n\r\nµã¡°¹Ø±Õ¡±¼´¹Ø±Õ³ÌĞò",
-    "dp2Circulation ·¢ÉúÎ´ÖªµÄÒì³£",
+    "dp2Circulation å‘ç”ŸæœªçŸ¥çš„å¼‚å¸¸:\r\n\r\n" + strError + "\r\n---\r\n\r\nç‚¹â€œå…³é—­â€å³å…³é—­ç¨‹åº",
+    "dp2Circulation å‘ç”ŸæœªçŸ¥çš„å¼‚å¸¸",
     MessageBoxButtons.OK,
     MessageBoxDefaultButton.Button1,
     ref bSendReport,
-    new string[] { "¹Ø±Õ" },
-    "½«ĞÅÏ¢·¢ËÍ¸ø¿ª·¢Õß");
+    new string[] { "å…³é—­" },
+    "å°†ä¿¡æ¯å‘é€ç»™å¼€å‘è€…");
 #if NO
             if (result == DialogResult.Yes)
             {
@@ -99,7 +99,7 @@ namespace dp2Circulation
             }
 #endif
 
-            // ·¢ËÍÒì³£±¨¸æ
+            // å‘é€å¼‚å¸¸æŠ¥å‘Š
             if (bSendReport)
                 CrashReport(strError);
         }
@@ -107,12 +107,12 @@ namespace dp2Circulation
         static string GetExceptionText(Exception ex, string strType)
         {
             // Exception ex = (Exception)e.Exception;
-            string strError = "·¢ÉúÎ´²¶»ñµÄ"+strType+"Òì³£: \r\n" + ExceptionUtil.GetDebugText(ex);
+            string strError = "å‘ç”Ÿæœªæ•è·çš„"+strType+"å¼‚å¸¸: \r\n" + ExceptionUtil.GetDebugText(ex);
             Assembly myAssembly = Assembly.GetAssembly(typeof(Program));
-            strError += "\r\ndp2Circulation °æ±¾: " + myAssembly.FullName;
-            strError += "\r\n²Ù×÷ÏµÍ³£º" + Environment.OSVersion.ToString();
+            strError += "\r\ndp2Circulation ç‰ˆæœ¬: " + myAssembly.FullName;
+            strError += "\r\næ“ä½œç³»ç»Ÿï¼š" + Environment.OSVersion.ToString();
 
-            // TODO: ¸ø³ö²Ù×÷ÏµÍ³µÄÒ»°ãĞÅÏ¢
+            // TODO: ç»™å‡ºæ“ä½œç³»ç»Ÿçš„ä¸€èˆ¬ä¿¡æ¯
 
             // MainForm main_form = Form.ActiveForm as MainForm;
             if (_mainForm != null)
@@ -141,26 +141,26 @@ namespace dp2Circulation
             Exception ex = (Exception)e.Exception;
             // MainForm main_form = Form.ActiveForm as MainForm;
 #if NO
-            string strError = "·¢ÉúÎ´²¶»ñµÄ½çÃæÏß³ÌÒì³£: \r\n" + ExceptionUtil.GetDebugText(ex);
+            string strError = "å‘ç”Ÿæœªæ•è·çš„ç•Œé¢çº¿ç¨‹å¼‚å¸¸: \r\n" + ExceptionUtil.GetDebugText(ex);
             if (main_form != null)
                 main_form.WriteErrorLog(strError);
             else
                 WriteWindowsLog(strError, EventLogEntryType.Error);
 
             Assembly myAssembly = Assembly.GetAssembly(typeof(Program));
-            strError += "\r\n\r\ndp2Circulation °æ±¾:" + myAssembly.FullName;
+            strError += "\r\n\r\ndp2Circulation ç‰ˆæœ¬:" + myAssembly.FullName;
 #endif
-            string strError = GetExceptionText(ex, "½çÃæÏß³Ì");
+            string strError = GetExceptionText(ex, "ç•Œé¢çº¿ç¨‹");
 
             bool bSendReport = true;
             DialogResult result = MessageDlg.Show(_mainForm,
-    "dp2Circulation ·¢ÉúÎ´ÖªµÄÒì³£:\r\n\r\n" + strError + "\r\n---\r\n\r\nÊÇ·ñ¹Ø±Õ³ÌĞò?",
-    "dp2Circulation ·¢ÉúÎ´ÖªµÄÒì³£",
+    "dp2Circulation å‘ç”ŸæœªçŸ¥çš„å¼‚å¸¸:\r\n\r\n" + strError + "\r\n---\r\n\r\næ˜¯å¦å…³é—­ç¨‹åº?",
+    "dp2Circulation å‘ç”ŸæœªçŸ¥çš„å¼‚å¸¸",
     MessageBoxButtons.YesNo,
     MessageBoxDefaultButton.Button2,
     ref bSendReport,
-    new string[] { "¹Ø±Õ", "¼ÌĞø" },
-    "½«ĞÅÏ¢·¢ËÍ¸ø¿ª·¢Õß");
+    new string[] { "å…³é—­", "ç»§ç»­" },
+    "å°†ä¿¡æ¯å‘é€ç»™å¼€å‘è€…");
             {
                 if (bSendReport)
                     CrashReport(strError);
@@ -183,8 +183,8 @@ namespace dp2Circulation
             _messageBar.TopMost = false;
             //_messageBar.BackColor = SystemColors.Info;
             //_messageBar.ForeColor = SystemColors.InfoText;
-            _messageBar.Text = "dp2Circulation ³öÏÖÒì³£";
-            _messageBar.MessageText = "ÕıÔÚÏò dp2003.com ·¢ËÍÒì³£±¨¸æ ...";
+            _messageBar.Text = "dp2Circulation å‡ºç°å¼‚å¸¸";
+            _messageBar.MessageText = "æ­£åœ¨å‘ dp2003.com å‘é€å¼‚å¸¸æŠ¥å‘Š ...";
             _messageBar.StartPosition = FormStartPosition.CenterScreen;
             _messageBar.Show(_mainForm);
             _messageBar.Update();
@@ -196,7 +196,7 @@ namespace dp2Circulation
                 string strSender = "";
                 if (_mainForm != null)
                     strSender = _mainForm.GetCurrentUserName() + "@" + _mainForm.ServerUID;
-                // ±ÀÀ£±¨¸æ
+                // å´©æºƒæŠ¥å‘Š
                 nRet = LibraryChannel.CrashReport(
                     strSender,
                     "dp2circulation",
@@ -205,7 +205,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = "CrashReport() ¹ı³Ì³öÏÖÒì³£: " + ExceptionUtil.GetDebugText(ex);
+                strError = "CrashReport() è¿‡ç¨‹å‡ºç°å¼‚å¸¸: " + ExceptionUtil.GetDebugText(ex);
                 nRet = -1;
             }
             finally
@@ -216,9 +216,9 @@ namespace dp2Circulation
 
             if (nRet == -1)
             {
-                strError = "Ïò dp2003.com ·¢ËÍÒì³£±¨¸æÊ±³ö´í£¬Î´ÄÜ·¢ËÍ³É¹¦¡£ÏêÏ¸Çé¿ö: " + strError;
+                strError = "å‘ dp2003.com å‘é€å¼‚å¸¸æŠ¥å‘Šæ—¶å‡ºé”™ï¼Œæœªèƒ½å‘é€æˆåŠŸã€‚è¯¦ç»†æƒ…å†µ: " + strError;
                 MessageBox.Show(_mainForm, strError);
-                // Ğ´Èë´íÎóÈÕÖ¾
+                // å†™å…¥é”™è¯¯æ—¥å¿—
                 if (_mainForm != null)
                     _mainForm.WriteErrorLog(strError);
                 else
@@ -226,7 +226,7 @@ namespace dp2Circulation
             }
         }
 
-        // Ğ´ÈëWindowsÏµÍ³ÈÕÖ¾
+        // å†™å…¥Windowsç³»ç»Ÿæ—¥å¿—
         public static void WriteWindowsLog(string strText,
             EventLogEntryType type)
         {

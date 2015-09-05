@@ -2473,11 +2473,10 @@ namespace dp2Kernel
             if (result.Value == -1)
                 return result;
 
-
             try
             {
                 // 判断是否是登录状态
-                if (this.sessioninfo.UserName == "")
+                if (string.IsNullOrEmpty(this.sessioninfo.UserName) == true)
                 {
                     result.Value = -1;
                     result.ErrorCode = ErrorCodeValue.NotLogin;
@@ -2487,7 +2486,6 @@ namespace dp2Kernel
 
                 if (PrepareUser(ref result) == -1)
                     return result;
-
 
                 string strError = "";
                 // return:

@@ -660,7 +660,7 @@ namespace DigitalPlatform.rms
         //		user	            帐户对象
         //		logicNames	        LogicNameItem数组
         //		strType	            数据库类型,以逗号分隔，可以是file,accout
-        //		strSqlDbName    	指定的Sql数据库名称,可以为null，系统自动生成一个,，如果数据库为文为文件型数据库，则认作数据源目录的名称
+        //		strSqlDbName    	指定的Sql数据库名称。可以为 null，系统会自动生成一个,，如果数据库为文件型数据库，则认作数据源目录的名称
         //		strKeysDefault  	keys配置信息
         //		strBrowseDefault	browse配置信息
         // return:
@@ -679,13 +679,6 @@ namespace DigitalPlatform.rms
         {
             strError = "";
 
-            /*
-            if (strKeysDefault == null)
-                strKeysDefault = "";
-            if (strBrowseDefault == null)
-                strBrowseDefault = "";
-             * */
-
             if (String.IsNullOrEmpty(strKeysDefault) == false)
             {
                 XmlDocument dom = new XmlDocument();
@@ -699,6 +692,7 @@ namespace DigitalPlatform.rms
                     return -1;
                 }
             }
+            
             if (String.IsNullOrEmpty(strBrowseDefault) == false)
             {
                 XmlDocument dom = new XmlDocument();
@@ -715,6 +709,7 @@ namespace DigitalPlatform.rms
 
             string strEnLoginName = "";
 
+            // TODO: 这一段拼接 XML 字符串的过程最好在 XmlDocument 中完成，以避免XML非法字符问题
             // 可以一个逻辑库名也没有，不出错
             string strLogicNames = "";
             for (int i = 0; i < logicNames.Length; i++)
@@ -805,7 +800,7 @@ namespace DigitalPlatform.rms
                     if (this.SqlServerType == rms.SqlServerType.Oracle
                         && strSqlDbName.Length > 3)
                     {
-                        strError = "所指定的 SQL数据库名 '"+strSqlDbName+"' 不应超过3字符";
+                        strError = "所指定的 SQL 数据库名 '"+strSqlDbName+"' 不应超过3字符";
                         return -1;
                     }
                 }

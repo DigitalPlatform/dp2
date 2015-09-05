@@ -116,9 +116,13 @@ namespace DigitalPlatform.rms
         {
             strError = "";
             int nRet = 0;
+
+            if (node == null)
+                throw new ArgumentException("Initial()调用错误，node参数值不能为null", "node");
+
             Debug.Assert(node != null, "Initial()调用错误，node参数值不能为null。");
 
-            //****************对数据库加写锁**** 在构造时,即不能读也不能写
+            //****************对数据库加写锁**** 在构造时,既不能读也不能写
             this.m_db_lock.AcquireWriterLock(m_nTimeOut);
             try
             {
@@ -144,7 +148,7 @@ namespace DigitalPlatform.rms
                 this.PureID = DomUtil.GetAttr(this.m_selfNode, "id").Trim();
                 if (this.PureID == "")
                 {
-                    strError = "配置文件不合法，在name为'" + this.GetCaption("zh-CN") + "'的<database>下级未定义'id'属性，或'id'属性为空";
+                    strError = "配置文件不合法，在 name 为 '" + this.GetCaption("zh-CN") + "' 的 <database> 元素中未定义 id 属性，或 id 属性值为空";
                     return -1;
                 }
 
@@ -152,7 +156,7 @@ namespace DigitalPlatform.rms
                 this.PropertyNode = this.m_selfNode.SelectSingleNode("property");
                 if (this.PropertyNode == null)
                 {
-                    strError = "配置文件不合法，在name为'" + this.GetCaption("zh-CN") + "'的<database>下级未定义<property>元素";
+                    strError = "配置文件不合法，在 name 为 '" + this.GetCaption("zh-CN") + "' 的 <database> 元素下级未定义 <property> 元素";
                     return -1;
                 }
 
@@ -160,7 +164,7 @@ namespace DigitalPlatform.rms
                 XmlNode nodeSqlServerDb = this.PropertyNode.SelectSingleNode("sqlserverdb");
                 if (nodeSqlServerDb == null)
                 {
-                    strError = "配置文件不合法，在name为'" + this.GetCaption("zh-CN") + "'的database/property下级未定义<sqlserverdb>元素";
+                    strError = "配置文件不合法，在 name 为 '" + this.GetCaption("zh-CN") + "' 的 database/property 下级未定义 <sqlserverdb> 元素";
                     return -1;
                 }
 
@@ -168,7 +172,7 @@ namespace DigitalPlatform.rms
                 this.m_strSqlDbName = DomUtil.GetAttr(nodeSqlServerDb, "name").Trim();
                 if (this.m_strSqlDbName == "")
                 {
-                    strError = "配置文件不合法，在name为'" + this.GetCaption("zh-CN") + "'的database/property/sqlserverdb的节点未定义'name'属性，或'name'属性值为空";
+                    strError = "配置文件不合法，在 name 为'" + this.GetCaption("zh-CN") + "' 的 database/property/sqlserverdb 的节点未定义 name 属性，或 name 属性值为空";
                     return -1;
                 }
 
@@ -816,7 +820,7 @@ namespace DigitalPlatform.rms
                         } // end of using command
 
                         // 6.设库记录种子为0
-                        this.SetTailNo(0);
+                        this.ChangeTailNo(0);
                         this.m_bTailNoVerified = true;  // 2011/2/26
                         this.container.Changed = true;   //内容改变
                     }
@@ -924,7 +928,7 @@ namespace DigitalPlatform.rms
                         } // end of using command
 
                         // 4.设库记录种子为0
-                        this.SetTailNo(0);
+                        this.ChangeTailNo(0);
                         this.m_bTailNoVerified = true;  // 2011/2/26
                         this.container.Changed = true;   //内容改变
                     }
@@ -1004,7 +1008,7 @@ namespace DigitalPlatform.rms
                         } // end of using command
 
                         // 4.设库记录种子为0
-                        this.SetTailNo(0);
+                        this.ChangeTailNo(0);
                         this.m_bTailNoVerified = true;  // 2011/2/26
                         this.container.Changed = true;   //内容改变
                     }
@@ -1127,7 +1131,7 @@ namespace DigitalPlatform.rms
                         } // end of using command
 
                         // 4.设库记录种子为0
-                        this.SetTailNo(0);
+                        this.ChangeTailNo(0);
                         this.m_bTailNoVerified = true;  // 2011/2/26
                         this.container.Changed = true;   //内容改变
                     }
@@ -10954,8 +10958,7 @@ out strError);
 
                 bool bPushTailNo = false;
                 // 对 ？ 创建尾记录号
-                strRecordID = this.EnsureID(strRecordID,
-                    out bPushTailNo);  //加好写锁
+                bPushTailNo = this.EnsureID(ref strRecordID);
 
                 // bPushed == true 说明没有必要 select 获取原有 records 行
 
@@ -11323,8 +11326,7 @@ out strError);
                 strID = "-1";
 
             bool bPushTailNo = false;
-            strID = this.EnsureID(strID,
-                out bPushTailNo);  //加好写锁
+            bPushTailNo = this.EnsureID(ref strID); 
             if (oUser != null)
             {
                 string strTempRecordPath = this.GetCaption("zh-CN") + "/" + strID;
@@ -11440,6 +11442,13 @@ out strError);
                         bool bExist = false;
                         if (nRet == 0)
                             bExist = true;
+
+                        // 2015/9/4
+                        if (bExist == false)
+                        {
+                            // 此后若抛出异常，会自动删除新创建的记录
+                            bDelete = true;
+                        }
 
                         bool bNeedInsertRow = false;
                         if (nRet == 2)
@@ -11741,21 +11750,31 @@ out baPreamble);
             }
 
             return 0;
-            ERROR2:
+        ERROR2:
             if (bDelete == true)
             {
                 string strError1 = "";
                 byte[] baOutputTimestamp = null;
+                // return:
+                //		-1  一般性错误
+                //		-2  时间戳不匹配
+                //      -4  未找到记录
+                //		0   成功
                 nRet = DeleteRecord(
                     strID,
                     null,
                     "deletekeysbyid,ignorechecktimestamp",
                     out baOutputTimestamp,
                     out strError1);
-                if (nRet == -1 ||nRet == -4)
-                    strError += "; 在删除刚创建的记录 '"+strID+"' 时又遇到出错: " + strError1;
+                if (nRet == -1 || nRet == -4)
+                {
+                    strError += "; 在删除刚创建的记录 '" + strID + "' 时又遇到出错: " + strError1;
+                    this.container.KernelApplication.WriteErrorLog("*** Undo 创建记录过程中出错(此数据库检索点需要重建): " + strError);
+                }
 
-                // TODO: 若能把 id 回收，下次重复使用就好了
+                // 尝试把 id 回收，下次重复使用就好了
+                if (nRet == 0 || nRet == -4)
+                    TryRecycleTailNo(strID);
             }
 
             return -1;

@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -20,7 +20,7 @@ using DigitalPlatform.GUI;
 namespace dp2Circulation
 {
     /// <summary>
-    /// Èë¹İµÇ¼Ç´°
+    /// å…¥é¦†ç™»è®°çª—
     /// </summary>
     public partial class PassGateForm : MyForm
     {
@@ -37,17 +37,17 @@ namespace dp2Circulation
 #endif
 
         ReaderWriterLock m_lock = new ReaderWriterLock();
-        static int m_nLockTimeout = 5000;	// 5000=5Ãë
+        static int m_nLockTimeout = 5000;	// 5000=5ç§’
 
         internal Thread threadWorker = null;
         internal AutoResetEvent eventClose = new AutoResetEvent(false);	// true : initial state is signaled 
-        internal AutoResetEvent eventActive = new AutoResetEvent(false);	// ¼¤»îĞÅºÅ
+        internal AutoResetEvent eventActive = new AutoResetEvent(false);	// æ¿€æ´»ä¿¡å·
         internal AutoResetEvent eventFinished = new AutoResetEvent(false);	// true : initial state is signaled 
 
         /// <summary>
-        /// ÂÖÑ¯µÄ¼ä¸ôÊ±¼ä£¬µ¥Î»ÊÇ 1/1000 Ãë¡£È±Ê¡Îª 1 ·ÖÖÓ
+        /// è½®è¯¢çš„é—´éš”æ—¶é—´ï¼Œå•ä½æ˜¯ 1/1000 ç§’ã€‚ç¼ºçœä¸º 1 åˆ†é’Ÿ
         /// </summary>
-        public int PerTime = 1 * 60 * 1000;	// 1·ÖÖÓ?
+        public int PerTime = 1 * 60 * 1000;	// 1åˆ†é’Ÿ?
         internal bool m_bClosed = true;
 
         int m_nTail = 0;
@@ -60,7 +60,7 @@ namespace dp2Circulation
         bool m_bActive = false;
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public PassGateForm()
         {
@@ -81,7 +81,7 @@ namespace dp2Circulation
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
 
             stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// ºÍÈİÆ÷¹ØÁª
+            stop.Register(MainForm.stopManager, true);	// å’Œå®¹å™¨å…³è”
 #endif
 
             // webbrowser
@@ -127,9 +127,9 @@ namespace dp2Circulation
                 this.m_webExternalHost.Destroy();
 
 #if NO
-            if (stop != null) // ÍÑÀë¹ØÁª
+            if (stop != null) // è„±ç¦»å…³è”
             {
-                stop.Unregister();	// ºÍÈİÆ÷¹ØÁª
+                stop.Unregister();	// å’Œå®¹å™¨å…³è”
                 stop = null;
             }
 #endif
@@ -172,14 +172,14 @@ namespace dp2Circulation
             this.listView_list.Items.Clear();
         }
 
-        // Ìá½»¶ÁÕßÖ¤ÌõÂëºÅ
+        // æäº¤è¯»è€…è¯æ¡ç å·
         private void button_passGate_Click(object sender, EventArgs e)
         {
             string strError = "";
 
             if (String.IsNullOrEmpty(this.textBox_readerBarcode.Text) == true)
             {
-                strError = "ÇëÊäÈë¶ÁÕßÖ¤ÌõÂëºÅ";
+                strError = "è¯·è¾“å…¥è¯»è€…è¯æ¡ç å·";
                 goto ERROR1;
             }
 
@@ -203,7 +203,7 @@ namespace dp2Circulation
             item.SubItems.Add("");
             item.SubItems.Add(DateTime.Now.ToString());
 
-            item.ImageIndex = 0;    // ÉĞÎ´Ìî³äÊı¾İ
+            item.ImageIndex = 0;    // å°šæœªå¡«å……æ•°æ®
 
             this.m_lock.AcquireWriterLock(m_nLockTimeout);
             try
@@ -221,7 +221,7 @@ namespace dp2Circulation
 
             item.EnsureVisible();
 
-            this.eventActive.Set(); // ¸æËß¹¤×÷Ïß³Ì
+            this.eventActive.Set(); // å‘Šè¯‰å·¥ä½œçº¿ç¨‹
 
             this.textBox_readerBarcode.SelectAll();
             this.textBox_readerBarcode.Focus();
@@ -232,7 +232,7 @@ namespace dp2Circulation
             this.textBox_readerBarcode.Focus();
         }
 
-        // Æô¶¯¹¤×÷Ïß³Ì
+        // å¯åŠ¨å·¥ä½œçº¿ç¨‹
         /*public*/ void StartWorkerThread()
         {
             this.m_bClosed = false;
@@ -257,7 +257,7 @@ namespace dp2Circulation
             this.m_bClosed = true;
         }
 
-        // ¹¤×÷Ïß³Ì
+        // å·¥ä½œçº¿ç¨‹
         /*public virtual*/ void ThreadMain()
         {
             try
@@ -273,7 +273,7 @@ namespace dp2Circulation
 
                     if (index == WaitHandle.WaitTimeout)
                     {
-                        // ³¬Ê±
+                        // è¶…æ—¶
                         eventActive.Reset();
                         Worker();
                     }
@@ -283,13 +283,13 @@ namespace dp2Circulation
                     }
                     else
                     {
-                        // µÃµ½¼¤»îĞÅºÅ
+                        // å¾—åˆ°æ¿€æ´»ä¿¡å·
                         eventActive.Reset();
                         Worker();
                     }
 
                     /*
-                    // ÊÇ·ñÑ­»·?
+                    // æ˜¯å¦å¾ªç¯?
                     if (this.Loop == false)
                         break;
                      * */
@@ -299,7 +299,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                string strErrorText = "PassGateForm ThreadMain() ³öÏÖÒì³£: " + ExceptionUtil.GetDebugText(ex);
+                string strErrorText = "PassGateForm ThreadMain() å‡ºç°å¼‚å¸¸: " + ExceptionUtil.GetDebugText(ex);
                 this.MainForm.WriteErrorLog(strErrorText);
             }
         }
@@ -358,9 +358,9 @@ namespace dp2Circulation
             this.m_webExternalHost.SetHtmlString(strHtml,
     "passgateform_reader");
         }
-        // listview imageindex 0:ÉĞÎ´³õÊ¼»¯ 1:ÒÑ¾­³õÊ¼»¯ 2:³ö´í
+        // listview imageindex 0:å°šæœªåˆå§‹åŒ– 1:å·²ç»åˆå§‹åŒ– 2:å‡ºé”™
 
-        // ¹¤×÷Ïß³ÌÃ¿Ò»ÂÖÑ­»·µÄÊµÖÊĞÔ¹¤×÷
+        // å·¥ä½œçº¿ç¨‹æ¯ä¸€è½®å¾ªç¯çš„å®è´¨æ€§å·¥ä½œ
         void Worker()
         {
             try
@@ -380,7 +380,7 @@ namespace dp2Circulation
                     string strBarcode = info.ReaderBarcode;
 
                     stop.OnStop += new StopEventHandler(this.DoStop);
-                    stop.Initial("ÕıÔÚ³õÊ¼»¯ä¯ÀÀÆ÷×é¼ş ...");
+                    stop.Initial("æ­£åœ¨åˆå§‹åŒ–æµè§ˆå™¨ç»„ä»¶ ...");
                     stop.BeginLoop();
 
                     string strTypeList = "xml";
@@ -480,7 +480,7 @@ namespace dp2Circulation
             }
             catch(Exception ex)
             {
-                string strErrorText = "PassGateForm Worker() ³öÏÖÒì³£: " + ExceptionUtil.GetDebugText(ex);
+                string strErrorText = "PassGateForm Worker() å‡ºç°å¼‚å¸¸: " + ExceptionUtil.GetDebugText(ex);
                 this.MainForm.WriteErrorLog(strErrorText);
             }
         }
@@ -501,7 +501,7 @@ namespace dp2Circulation
             // API.PostMessage(this.Handle, WM_SETHTML, 0, 0);
             StartSetHtml(strError);
 
-            // ·¢³ö¾¯¸æĞÔµÄÏìÉù
+            // å‘å‡ºè­¦å‘Šæ€§çš„å“å£°
             Console.Beep();
         }
 
@@ -521,7 +521,7 @@ namespace dp2Circulation
             }
             catch (Exception ex)
             {
-                strError = "XML×°ÈëDOMÊ±³ö´í: " + ex.Message;
+                strError = "XMLè£…å…¥DOMæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
@@ -534,9 +534,9 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// È±Ê¡´°¿Ú¹ı³Ì
+        /// ç¼ºçœçª—å£è¿‡ç¨‹
         /// </summary>
-        /// <param name="m">ÏûÏ¢</param>
+        /// <param name="m">æ¶ˆæ¯</param>
         protected override void DefWndProc(ref Message m)
         {
             switch (m.Msg)
@@ -564,7 +564,7 @@ namespace dp2Circulation
         {
 #if NO
             Global.SetHtmlString(this.webBrowser_readerInfo,
-                "(¿Õ°×)");
+                "(ç©ºç™½)");
 #endif
             this.m_webExternalHost.ClearHtmlPage();
         }
@@ -582,7 +582,7 @@ namespace dp2Circulation
                 this.textBox_readerBarcode.PasswordChar = (char)0;
             }
             bool bChecked = this.checkBox_hideBarcode.Checked;
-            // ĞŞ¸ÄlistviewÄÚÈİ
+            // ä¿®æ”¹listviewå†…å®¹
             for (int i = 0; i < this.listView_list.Items.Count; i++)
             {
                 ListViewItem item = this.listView_list.Items[i];
@@ -605,7 +605,7 @@ namespace dp2Circulation
         private void checkBox_hideReaderName_CheckedChanged(object sender, EventArgs e)
         {
             bool bChecked = this.checkBox_hideReaderName.Checked;
-            // ĞŞ¸ÄlistviewÄÚÈİ
+            // ä¿®æ”¹listviewå†…å®¹
             for (int i = 0; i < this.listView_list.Items.Count; i++)
             {
                 ListViewItem item = this.listView_list.Items[i];
@@ -661,8 +661,8 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÁĞ±íÖĞµÄ×î´óĞĞÊı¡£Ã¿µ±µ½´ïÕâ¸öĞĞÊıµÄÊ±ºò£¬ÁĞ±í±»×Ô¶¯Çå¿ÕÒ»´Î¡£
-        /// -1 ±íÊ¾²»ÏŞÖÆ
+        /// åˆ—è¡¨ä¸­çš„æœ€å¤§è¡Œæ•°ã€‚æ¯å½“åˆ°è¾¾è¿™ä¸ªè¡Œæ•°çš„æ—¶å€™ï¼Œåˆ—è¡¨è¢«è‡ªåŠ¨æ¸…ç©ºä¸€æ¬¡ã€‚
+        /// -1 è¡¨ç¤ºä¸é™åˆ¶
         /// </summary>
         public int MaxListItemsCount
         {

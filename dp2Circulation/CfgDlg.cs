@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -16,23 +16,23 @@ using DigitalPlatform.CirculationClient;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ÏµÍ³²ÎÊıÅäÖÃ ¶Ô»°¿ò
+    /// ç³»ç»Ÿå‚æ•°é…ç½® å¯¹è¯æ¡†
     /// </summary>
     internal partial class CfgDlg : Form
     {
         /// <summary>
-        /// ÅäÖÃ²ÎÊı±ä»¯µÄÊÂ¼ş
+        /// é…ç½®å‚æ•°å˜åŒ–çš„äº‹ä»¶
         /// </summary>
         public event ParamChangedEventHandler ParamChanged = null;
 
         public ApplicationInfo ap = null;
 
         /// <summary>
-        /// ¿ò¼Ü´°¿Ú
+        /// æ¡†æ¶çª—å£
         /// </summary>
         public MainForm MainForm = null;
 
-        bool m_bServerCfgChanged = false; // ·şÎñÆ÷ÅäÖÃĞÅÏ¢ĞŞ¸Ä¹ı
+        bool m_bServerCfgChanged = false; // æœåŠ¡å™¨é…ç½®ä¿¡æ¯ä¿®æ”¹è¿‡
 
         public CfgDlg()
         {
@@ -191,32 +191,32 @@ namespace dp2Circulation
                 "auto_switch_reader_barcode",
                 false);
 
-            // ×Ô¶¯Çå³ıÊäÈë¿òÖĞÄÚÈİ
+            // è‡ªåŠ¨æ¸…é™¤è¾“å…¥æ¡†ä¸­å†…å®¹
             // 2008/9/26
             this.checkBox_charging_autoClearTextbox.Checked = ap.GetBoolean(
                 "charging_form",
                 "autoClearTextbox",
                 true);
 
-            // ÆôÓÃ¶ÁÕßÃÜÂëÑéÖ¤
+            // å¯ç”¨è¯»è€…å¯†ç éªŒè¯
             this.checkBox_charging_veifyReaderPassword.Checked = ap.GetBoolean(
                 "charging_form",
                 "verify_reader_password",
                 false);
 
-            // ÀÊ¶Á¶ÁÕßĞÕÃû
+            // æœ—è¯»è¯»è€…å§“å
             this.checkBox_charging_speakNameWhenLoadReaderRecord.Checked = ap.GetBoolean(
                 "charging_form",
                 "speak_reader_name",
                 false);
 
-            // Ö¤ÌõÂëºÅÊäÈë¿òÔÊĞíÊäÈëºº×Ö
+            // è¯æ¡ç å·è¾“å…¥æ¡†å…è®¸è¾“å…¥æ±‰å­—
             this.checkBox_charging_patronBarcodeAllowHanzi.Checked = ap.GetBoolean(
                 "charging_form",
                 "patron_barcode_allow_hanzi",
                 false);
 
-            // ¶ÁÕßĞÅÏ¢ÖĞ²»ÏÔÊ¾½èÔÄÀúÊ·
+            // è¯»è€…ä¿¡æ¯ä¸­ä¸æ˜¾ç¤ºå€Ÿé˜…å†å²
             this.checkBox_charging_noBorrowHistory.Checked = ap.GetBoolean(
                 "charging_form",
                 "no_borrow_history",
@@ -224,31 +224,31 @@ namespace dp2Circulation
             if (this.MainForm.ServerVersion < 2.20)
                 this.checkBox_charging_noBorrowHistory.Enabled = false;
 
-            // ÆôÓÃ ISBN ½èÊé»¹Êé¹¦ÄÜ
+            // å¯ç”¨ ISBN å€Ÿä¹¦è¿˜ä¹¦åŠŸèƒ½
             this.checkBox_charging_isbnBorrow.Checked = ap.GetBoolean(
                 "charging_form",
                 "isbn_borrow",
                 true);
 
-            // ×Ô¶¯²Ù×÷Î¨Ò»ÊÂÏî
+            // è‡ªåŠ¨æ“ä½œå”¯ä¸€äº‹é¡¹
             this.checkBox_charging_autoOperItemDialogSingleItem.Checked = ap.GetBoolean(
                 "charging_form",
                 "auto_oper_single_item",
                 false);
 
-            // *** ¿ì½İ³öÄÉ
+            // *** å¿«æ·å‡ºçº³
 
             this.comboBox_quickCharging_displayFormat.Text =
 ap.GetString("quickcharging_form",
 "display_format",
 "HTML");
 
-            // ÑéÖ¤ÌõÂëºÅ
+            // éªŒè¯æ¡ç å·
             this.checkBox_quickCharging_verifyBarcode.Checked = ap.GetBoolean(
     "quickcharging_form",
     "verify_barcode",
     false);
-            // ¶ÁÕßĞÅÏ¢ÖĞ²»ÏÔÊ¾½èÔÄÀúÊ·
+            // è¯»è€…ä¿¡æ¯ä¸­ä¸æ˜¾ç¤ºå€Ÿé˜…å†å²
             this.checkBox_quickCharging_noBorrowHistory.Checked = ap.GetBoolean(
                 "quickcharging_form",
                 "no_borrow_history",
@@ -256,31 +256,31 @@ ap.GetString("quickcharging_form",
             if (this.MainForm.ServerVersion < 2.20)
                 this.checkBox_quickCharging_noBorrowHistory.Enabled = false;
 
-            // ÀÊ¶Á¶ÁÕßĞÕÃû
+            // æœ—è¯»è¯»è€…å§“å
             this.checkBox_quickCharging_speakNameWhenLoadReaderRecord.Checked = ap.GetBoolean(
                 "quickcharging_form",
                 "speak_reader_name",
                 false);
 
-            // ÀÊ¶ÁÊéÃû
+            // æœ—è¯»ä¹¦å
             this.checkBox_quickCharging_speakBookTitle.Checked = ap.GetBoolean(
                 "quickcharging_form",
                 "speak_book_title",
                 false);
 
-            // ÆôÓÃ ISBN ½èÊé»¹Êé¹¦ÄÜ
+            // å¯ç”¨ ISBN å€Ÿä¹¦è¿˜ä¹¦åŠŸèƒ½
             this.checkBox_quickCharging_isbnBorrow.Checked = ap.GetBoolean(
                 "quickcharging_form",
                 "isbn_borrow",
                 true);
 
-            // ×Ô¶¯²Ù×÷Î¨Ò»ÊÂÏî
+            // è‡ªåŠ¨æ“ä½œå”¯ä¸€äº‹é¡¹
             this.checkBox_quickCharging_autoOperItemDialogSingleItem.Checked = ap.GetBoolean(
                 "quickcharging_form",
                 "auto_oper_single_item",
                 false);
 
-            // *** ÖÖ²á´°
+            // *** ç§å†Œçª—
             this.checkBox_itemManagement_verifyItemBarcode.Checked = ap.GetBoolean(
                 "entity_form",
                 "verify_item_barcode",
@@ -289,7 +289,7 @@ ap.GetString("quickcharging_form",
             this.checkBox_itemManagement_cataloging.Checked = ap.GetBoolean(
                 "entity_form",
                 "cataloging",
-                true);  // 2007/12/2 ĞŞ¸ÄÎª true
+                true);  // 2007/12/2 ä¿®æ”¹ä¸º true
 
             this.checkBox_itemManagement_searchDupWhenSaving.Checked = ap.GetBoolean(
                 "entity_form",
@@ -310,26 +310,26 @@ true);
 "itemQuickInputPanel_visibie",
 true);
 
-            // ¸±±¾ÊéÄ¿¼ÇÂ¼ÏÔÊ¾ÎªÖ»¶Á×´Ì¬
+            // å‰¯æœ¬ä¹¦ç›®è®°å½•æ˜¾ç¤ºä¸ºåªè¯»çŠ¶æ€
             this.checkBox_itemManagement_linkedRecordReadonly.Checked = ap.GetBoolean(
 "entityform",
 "linkedRecordReadonly",
 true);
 
-            // ÏÔÊ¾ÆäËû·Ö¹İµÄ²á¼ÇÂ¼
+            // æ˜¾ç¤ºå…¶ä»–åˆ†é¦†çš„å†Œè®°å½•
             this.checkBox_itemManagement_displayOtherLibraryItem.Checked = ap.GetBoolean(
 "entityform",
 "displayOtherLibraryItem",
 false);
 
-            // ×Ô¶¯ÏŞ¶¨paste½øÈëµÄÍ¼Ïñ¿í¶È
+            // è‡ªåŠ¨é™å®špasteè¿›å…¥çš„å›¾åƒå®½åº¦
             this.textBox_itemManagement_maxPicWidth.Text = this.MainForm.AppInfo.GetString(
     "entityform",
     "paste_pic_maxwidth",
     "-1");
 
             // ui
-            // Í£¿¿
+            // åœé 
             this.comboBox_ui_fixedPanelDock.Text = this.MainForm.panel_fixed.Dock.ToString();
 
             this.checkBox_ui_hideFixedPanel.Checked = ap.GetBoolean(
@@ -343,7 +343,7 @@ false);
     "");
 
             // passgate
-            // Èë¹İµÇ¼Ç
+            // å…¥é¦†ç™»è®°
             this.numericUpDown_passgate_maxListItemsCount.Value = ap.GetInt(
                 "passgate_form",
                 "max_list_items_count",
@@ -454,7 +454,7 @@ false);
                 "push_filling_browse",
                 false);
 
-            // Æ¾Ìõ´òÓ¡
+            // å‡­æ¡æ‰“å°
             this.comboBox_print_prnPort.Text =
                 ap.GetString("charging_print",
                 "prnPort",
@@ -477,13 +477,13 @@ false);
             this.comboBox_amerce_interface.Text =
                 ap.GetString("config",
                 "amerce_interface",
-                "<ÎŞ>");
+                "<æ— >");
 
-            // ½»·Ñ´°²¼¾Ö
+            // äº¤è´¹çª—å¸ƒå±€
             this.comboBox_amerce_layout.Text =
     ap.GetString("amerce_form",
     "layout",
-    "×óÓÒ·Ö²¼");
+    "å·¦å³åˆ†å¸ƒ");
 
 
             // accept
@@ -493,28 +493,28 @@ false);
                 "single_click_load_detail",
                 false);
 
-            // *** ¶Á¿¨Æ÷
+            // *** è¯»å¡å™¨
 
-            // Éí·İÖ¤¶Á¿¨Æ÷URL
+            // èº«ä»½è¯è¯»å¡å™¨URL
             this.textBox_cardReader_idcardReaderUrl.Text =
     ap.GetString("cardreader",
     "idcardReaderUrl",
-    "");  // ³£ÓÃÖµ "ipc://IdcardChannel/IdcardServer"
+    "");  // å¸¸ç”¨å€¼ "ipc://IdcardChannel/IdcardServer"
 
-            // *** Ö¸ÎÆ
+            // *** æŒ‡çº¹
 
-            // Ö¸ÎÆÔÄ¶ÁÆ÷URL
+            // æŒ‡çº¹é˜…è¯»å™¨URL
             this.textBox_fingerprint_readerUrl.Text =
                 ap.GetString("fingerprint",
                 "fingerPrintReaderUrl",
-                "");    // ³£ÓÃÖµ "ipc://FingerprintChannel/FingerprintServer"
+                "");    // å¸¸ç”¨å€¼ "ipc://FingerprintChannel/FingerprintServer"
 
-            // Ö¸ÎÆ´úÀíÕÊ»§ ÓÃ»§Ãû
+            // æŒ‡çº¹ä»£ç†å¸æˆ· ç”¨æˆ·å
             this.textBox_fingerprint_userName.Text =
     ap.GetString("fingerprint",
     "userName",
     ""); 
-            // Ö¸ÎÆ´úÀíÕÊ»§ ÃÜÂë
+            // æŒ‡çº¹ä»£ç†å¸æˆ· å¯†ç 
             {
                 string strPassword = ap.GetString("fingerprint",
                 "password",
@@ -523,86 +523,86 @@ false);
                 this.textBox_fingerprint_password.Text = strPassword;
             }
 
-            // *** ¶ÁÕß
+            // *** è¯»è€…
 
-            // ×Ô¶¯ÖØÊÔ µ±³öÏÖ¶Á¿¨¶Ô»°¿òÊ±
+            // è‡ªåŠ¨é‡è¯• å½“å‡ºç°è¯»å¡å¯¹è¯æ¡†æ—¶
             this.checkBox_patron_autoRetryReaderCard.Checked =
                 ap.GetBoolean(
                 "reader_info_form",
                 "autoretry_readcarddialog",
                 true);
 
-            // ³öÏÖ ÓÃÉí·İÖ¤ºÅÉèÖÃÌõÂëºÅ ¶Ô»°¿ò
+            // å‡ºç° ç”¨èº«ä»½è¯å·è®¾ç½®æ¡ç å· å¯¹è¯æ¡†
             this.checkBox_patron_displaySetReaderBarcodeDialog.Checked =
                 ap.GetBoolean(
                 "reader_info_form",
                 "display_setreaderbarcode_dialog",
                 true);
 
-            // Ğ£ÑéÊäÈëµÄÌõÂëºÅ
+            // æ ¡éªŒè¾“å…¥çš„æ¡ç å·
             this.checkBox_patron_verifyBarcode.Checked = ap.GetBoolean(
     "reader_info_form",
     "verify_barcode",
     false);
 
-            // ÔÚ¶ÁÕß´°·¶Î§ÄÚ×Ô¶¯¹Ø±Õ Éí·İÖ¤¶Á¿¨Æ÷ ¼üÅÌ·ÂÕæ(&S)
+            // åœ¨è¯»è€…çª—èŒƒå›´å†…è‡ªåŠ¨å…³é—­ èº«ä»½è¯è¯»å¡å™¨ é”®ç›˜ä»¿çœŸ(&S)
             this.checkBox_patron_disableIdcardReaderKeyboardSimulation.Checked = ap.GetBoolean(
     "reader_info_form",
     "disable_idcardreader_sendkey",
     true);
 
-            // ÈÕÖ¾
-            // ÏÔÊ¾¶ÁÕß½èÔÄÀúÊ·
+            // æ—¥å¿—
+            // æ˜¾ç¤ºè¯»è€…å€Ÿé˜…å†å²
             this.checkBox_operLog_displayReaderBorrowHistory.Checked =
                 ap.GetBoolean(
                 "operlog_form",
                 "display_reader_borrow_history",
                 true);
-            // ÏÔÊ¾²á½èÔÄÀúÊ·
+            // æ˜¾ç¤ºå†Œå€Ÿé˜…å†å²
             this.checkBox_operLog_displayItemBorrowHistory.Checked =
                 ap.GetBoolean(
                 "operlog_form",
                 "display_item_borrow_history",
                 true);
-            // ×Ô¶¯»º´æÈÕÖ¾ÎÄ¼ş
+            // è‡ªåŠ¨ç¼“å­˜æ—¥å¿—æ–‡ä»¶
             this.checkBox_operLog_autoCache.Checked =
                 ap.GetBoolean(
                 "global",
                 "auto_cache_operlogfile",
                 true);
 
-            // ÈÕÖ¾ÏêÏ¸¼¶±ğ
+            // æ—¥å¿—è¯¦ç»†çº§åˆ«
             this.comboBox_operLog_level.Text =
                 ap.GetString(
                 "operlog_form",
                 "level",
-                "1 -- ¼òÂÔ");
+                "1 -- ç®€ç•¥");
 
-            // È«¾Ö
-            // ä¯ÀÀÆ÷¿Ø¼şÔÊĞí½Å±¾´íÎó¶Ô»°¿ò(&S)
+            // å…¨å±€
+            // æµè§ˆå™¨æ§ä»¶å…è®¸è„šæœ¬é”™è¯¯å¯¹è¯æ¡†(&S)
             this.checkBox_global_displayScriptErrorDialog.Checked =
                 ap.GetBoolean(
                 "global",
                 "display_webbrowsecontrol_scripterror_dialog",
                 false);
 
-            // ¼ÓÆ´ÒôÊ±×Ô¶¯Ñ¡Ôñ¶àÒô×Ö
+            // åŠ æ‹¼éŸ³æ—¶è‡ªåŠ¨é€‰æ‹©å¤šéŸ³å­—
             this.checkBox_global_autoSelPinyin.Checked =
                 ap.GetBoolean(
                 "global",
                 "auto_select_pinyin",
                 false);
 
-            // *** ±êÇ©´òÓ¡
-            // ´ÓºÎ´¦»ñÈ¡Ë÷È¡ºÅ
+            // *** æ ‡ç­¾æ‰“å°
+            // ä»ä½•å¤„è·å–ç´¢å–å·
             this.comboBox_labelPrint_accessNoSource.Text = ap.GetString(
                 "labelprint",
                 "accessNo_source",
-                "´Ó²á¼ÇÂ¼");
+                "ä»å†Œè®°å½•");
 
-            // *** ÏûÏ¢
+            // *** æ¶ˆæ¯
 
-            // ¹²ÏíÊéÄ¿Êı¾İ
+            // å…±äº«ä¹¦ç›®æ•°æ®
             _disableShareBiblioChangedEvent++;
             this.checkBox_message_shareBiblio.Checked = ap.GetBoolean(
                 "message",
@@ -761,7 +761,7 @@ this.checkBox_charging_stopFillingWhenCloseInfoDlg.Checked);
                 "auto_switch_reader_barcode",
                 this.checkBox_charging_autoSwitchReaderBarcode.Checked);
 
-            // ×Ô¶¯Çå³ıÊäÈë¿òÖĞÄÚÈİ
+            // è‡ªåŠ¨æ¸…é™¤è¾“å…¥æ¡†ä¸­å†…å®¹
             // 2008/9/26
             ap.SetBoolean(
                 "charging_form",
@@ -769,85 +769,85 @@ this.checkBox_charging_stopFillingWhenCloseInfoDlg.Checked);
                 this.checkBox_charging_autoClearTextbox.Checked);
 
 
-            // ÆôÓÃ¶ÁÕßÃÜÂëÑéÖ¤
+            // å¯ç”¨è¯»è€…å¯†ç éªŒè¯
             ap.SetBoolean(
                 "charging_form",
                 "verify_reader_password",
                 this.checkBox_charging_veifyReaderPassword.Checked);
 
-            // ÀÊ¶Á¶ÁÕßĞÕÃû
+            // æœ—è¯»è¯»è€…å§“å
             ap.SetBoolean(
     "charging_form",
     "speak_reader_name",
     this.checkBox_charging_speakNameWhenLoadReaderRecord.Checked);
 
-            // Ö¤ÌõÂëºÅÊäÈë¿òÔÊĞíÊäÈëºº×Ö
+            // è¯æ¡ç å·è¾“å…¥æ¡†å…è®¸è¾“å…¥æ±‰å­—
             ap.SetBoolean(
                 "charging_form",
                 "patron_barcode_allow_hanzi",
                 this.checkBox_charging_patronBarcodeAllowHanzi.Checked);
 
-            // ¶ÁÕßĞÅÏ¢ÖĞ²»ÏÔÊ¾½èÔÄÀúÊ·
+            // è¯»è€…ä¿¡æ¯ä¸­ä¸æ˜¾ç¤ºå€Ÿé˜…å†å²
             ap.SetBoolean(
                 "charging_form",
                 "no_borrow_history",
                 this.checkBox_charging_noBorrowHistory.Checked);
 
-            // ÆôÓÃ ISBN ½èÊé»¹Êé¹¦ÄÜ
+            // å¯ç”¨ ISBN å€Ÿä¹¦è¿˜ä¹¦åŠŸèƒ½
              ap.SetBoolean(
                 "charging_form",
                 "isbn_borrow",
                 this.checkBox_charging_isbnBorrow.Checked);
 
-            // ×Ô¶¯²Ù×÷Î¨Ò»ÊÂÏî
+            // è‡ªåŠ¨æ“ä½œå”¯ä¸€äº‹é¡¹
             ap.SetBoolean(
                 "charging_form",
                 "auto_oper_single_item",
                 this.checkBox_charging_autoOperItemDialogSingleItem.Checked);
 
-            // *** ¿ì½İ³öÄÉ
+            // *** å¿«æ·å‡ºçº³
 
             ap.SetString("quickcharging_form",
                 "display_format",
                 this.comboBox_quickCharging_displayFormat.Text);
 
-            // ÑéÖ¤ÌõÂëºÅ
+            // éªŒè¯æ¡ç å·
             ap.SetBoolean(
     "quickcharging_form",
     "verify_barcode",
     this.checkBox_quickCharging_verifyBarcode.Checked);
 
-            // ¶ÁÕßĞÅÏ¢ÖĞ²»ÏÔÊ¾½èÔÄÀúÊ·
+            // è¯»è€…ä¿¡æ¯ä¸­ä¸æ˜¾ç¤ºå€Ÿé˜…å†å²
             ap.SetBoolean(
                 "quickcharging_form",
                 "no_borrow_history",
                 this.checkBox_quickCharging_noBorrowHistory.Checked);
 
-            // ÀÊ¶Á¶ÁÕßĞÕÃû
+            // æœ—è¯»è¯»è€…å§“å
             ap.SetBoolean(
                 "quickcharging_form",
                 "speak_reader_name",
                 this.checkBox_quickCharging_speakNameWhenLoadReaderRecord.Checked);
 
-            // ÀÊ¶ÁÊéÃû
+            // æœ—è¯»ä¹¦å
             ap.SetBoolean(
                 "quickcharging_form",
                 "speak_book_title",
                 this.checkBox_quickCharging_speakBookTitle.Checked);
 
-            // ÆôÓÃ ISBN ½èÊé»¹Êé¹¦ÄÜ
+            // å¯ç”¨ ISBN å€Ÿä¹¦è¿˜ä¹¦åŠŸèƒ½
             ap.SetBoolean(
                 "quickcharging_form",
                 "isbn_borrow",
                 this.checkBox_quickCharging_isbnBorrow.Checked);
 
-            // ×Ô¶¯²Ù×÷Î¨Ò»ÊÂÏî
+            // è‡ªåŠ¨æ“ä½œå”¯ä¸€äº‹é¡¹
             ap.SetBoolean(
                 "quickcharging_form",
                 "auto_oper_single_item",
                 this.checkBox_quickCharging_autoOperItemDialogSingleItem.Checked);
 
-            // *** ÖÖ²á´°
+            // *** ç§å†Œçª—
             ap.SetBoolean(
                 "entity_form",
                 "verify_item_barcode",
@@ -877,19 +877,19 @@ this.checkBox_itemManagement_showQueryPanel.Checked);
 "itemQuickInputPanel_visibie",
 this.checkBox_itemManagement_showItemQuickInputPanel.Checked);
 
-            // ¸±±¾ÊéÄ¿¼ÇÂ¼ÏÔÊ¾ÎªÖ»¶Á×´Ì¬
+            // å‰¯æœ¬ä¹¦ç›®è®°å½•æ˜¾ç¤ºä¸ºåªè¯»çŠ¶æ€
             ap.SetBoolean(
 "entityform",
 "linkedRecordReadonly",
 this.checkBox_itemManagement_linkedRecordReadonly.Checked);
 
-            // ×Ô¶¯ÏŞ¶¨paste½øÈëµÄÍ¼Ïñ¿í¶È
+            // è‡ªåŠ¨é™å®špasteè¿›å…¥çš„å›¾åƒå®½åº¦
             ap.SetString(
     "entityform",
     "paste_pic_maxwidth",
     this.textBox_itemManagement_maxPicWidth.Text);
 
-            // ÏÔÊ¾ÆäËû·Ö¹İµÄ²á¼ÇÂ¼
+            // æ˜¾ç¤ºå…¶ä»–åˆ†é¦†çš„å†Œè®°å½•
             ap.SetBoolean(
 "entityform",
 "displayOtherLibraryItem",
@@ -907,7 +907,7 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
                 this.textBox_ui_defaultFont.Text);
 
             // passgate
-            // Èë¹İµÇ¼Ç
+            // å…¥é¦†ç™»è®°
             ap.SetInt(
                 "passgate_form",
                 "max_list_items_count",
@@ -1021,7 +1021,7 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
                 this.checkBox_search_commentPushFilling.Checked);
 
 
-            // Æ¾Ìõ´òÓ¡
+            // å‡­æ¡æ‰“å°
             ap.SetString("charging_print",
                 "prnPort",
                 this.comboBox_print_prnPort.Text);
@@ -1041,7 +1041,7 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
                 "amerce_interface",
                 this.comboBox_amerce_interface.Text);
 
-            // ½»·Ñ´°²¼¾Ö
+            // äº¤è´¹çª—å¸ƒå±€
             ap.SetString("amerce_form",
     "layout",
     this.comboBox_amerce_layout.Text);
@@ -1052,24 +1052,24 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
                 "single_click_load_detail",
                 this.checkBox_accept_singleClickLoadDetail.Checked);
 
-            // *** ¶Á¿¨Æ÷
+            // *** è¯»å¡å™¨
 
-            // Éí·İÖ¤¶Á¿¨Æ÷URL
+            // èº«ä»½è¯è¯»å¡å™¨URL
             ap.SetString("cardreader",
                 "idcardReaderUrl",
                 this.textBox_cardReader_idcardReaderUrl.Text);
 
-            // ** Ö¸ÎÆ
-            // Ö¸ÎÆÔÄ¶ÁÆ÷URL
+            // ** æŒ‡çº¹
+            // æŒ‡çº¹é˜…è¯»å™¨URL
             ap.SetString("fingerprint",
                 "fingerPrintReaderUrl",
                 this.textBox_fingerprint_readerUrl.Text);
 
-            // Ö¸ÎÆ´úÀíÕÊ»§ ÓÃ»§Ãû
+            // æŒ‡çº¹ä»£ç†å¸æˆ· ç”¨æˆ·å
             ap.SetString("fingerprint",
                 "userName",
                 this.textBox_fingerprint_userName.Text);
-            // Ö¸ÎÆ´úÀíÕÊ»§ ÃÜÂë
+            // æŒ‡çº¹ä»£ç†å¸æˆ· å¯†ç 
             {
                 string strPassword = this.MainForm.EncryptPassword(this.textBox_fingerprint_password.Text);
                 ap.SetString(
@@ -1078,76 +1078,76 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
                     strPassword);
             }
 
-            // *** ¶ÁÕß
-            // ×Ô¶¯ÖØÊÔ µ±³öÏÖ¶Á¿¨¶Ô»°¿òÊ±
+            // *** è¯»è€…
+            // è‡ªåŠ¨é‡è¯• å½“å‡ºç°è¯»å¡å¯¹è¯æ¡†æ—¶
             ap.SetBoolean(
                 "reader_info_form",
                 "autoretry_readcarddialog",
                 this.checkBox_patron_autoRetryReaderCard.Checked);
 
-            // ³öÏÖ ÓÃÉí·İÖ¤ºÅÉèÖÃÌõÂëºÅ ¶Ô»°¿ò
+            // å‡ºç° ç”¨èº«ä»½è¯å·è®¾ç½®æ¡ç å· å¯¹è¯æ¡†
             ap.SetBoolean(
                 "reader_info_form",
                 "display_setreaderbarcode_dialog",
                 this.checkBox_patron_displaySetReaderBarcodeDialog.Checked);
 
-            // Ğ£ÑéÊäÈëµÄÌõÂëºÅ
+            // æ ¡éªŒè¾“å…¥çš„æ¡ç å·
             ap.SetBoolean(
     "reader_info_form",
     "verify_barcode",
     this.checkBox_patron_verifyBarcode.Checked);
 
-            // ÔÚ¶ÁÕß´°·¶Î§ÄÚ×Ô¶¯¹Ø±Õ Éí·İÖ¤¶Á¿¨Æ÷ ¼üÅÌ·ÂÕæ(&S)
+            // åœ¨è¯»è€…çª—èŒƒå›´å†…è‡ªåŠ¨å…³é—­ èº«ä»½è¯è¯»å¡å™¨ é”®ç›˜ä»¿çœŸ(&S)
             ap.GetBoolean(
     "reader_info_form",
     "disable_idcardreader_sendkey",
     this.checkBox_patron_disableIdcardReaderKeyboardSimulation.Checked);
 
-            // ÈÕÖ¾
-            // ÏÔÊ¾¶ÁÕß½èÔÄÀúÊ·
+            // æ—¥å¿—
+            // æ˜¾ç¤ºè¯»è€…å€Ÿé˜…å†å²
             ap.SetBoolean(
                 "operlog_form",
                 "display_reader_borrow_history",
                 this.checkBox_operLog_displayReaderBorrowHistory.Checked);
-            // ÏÔÊ¾²á½èÔÄÀúÊ·
+            // æ˜¾ç¤ºå†Œå€Ÿé˜…å†å²
             ap.SetBoolean(
                 "operlog_form",
                 "display_item_borrow_history",
                 this.checkBox_operLog_displayItemBorrowHistory.Checked);
-            // ×Ô¶¯»º´æÈÕÖ¾ÎÄ¼ş
+            // è‡ªåŠ¨ç¼“å­˜æ—¥å¿—æ–‡ä»¶
             ap.SetBoolean(
                 "global",
                 "auto_cache_operlogfile",
                 this.checkBox_operLog_autoCache.Checked);
-            // ÈÕÖ¾ÏêÏ¸¼¶±ğ
+            // æ—¥å¿—è¯¦ç»†çº§åˆ«
             ap.SetString(
                 "operlog_form",
                 "level",
                 this.comboBox_operLog_level.Text);
 
-            // È«¾Ö
-            // ä¯ÀÀÆ÷¿Ø¼şÔÊĞí½Å±¾´íÎó¶Ô»°¿ò(&S)
+            // å…¨å±€
+            // æµè§ˆå™¨æ§ä»¶å…è®¸è„šæœ¬é”™è¯¯å¯¹è¯æ¡†(&S)
             ap.SetBoolean(
                 "global",
                 "display_webbrowsecontrol_scripterror_dialog",
                 this.checkBox_global_displayScriptErrorDialog.Checked);
 
-            // ¼ÓÆ´ÒôÊ±×Ô¶¯Ñ¡Ôñ¶àÒô×Ö
+            // åŠ æ‹¼éŸ³æ—¶è‡ªåŠ¨é€‰æ‹©å¤šéŸ³å­—
             ap.SetBoolean(
                 "global",
                 "auto_select_pinyin",
                 this.checkBox_global_autoSelPinyin.Checked);
 
-            // *** ±êÇ©´òÓ¡
-            // ´ÓºÎ´¦»ñÈ¡Ë÷È¡ºÅ
+            // *** æ ‡ç­¾æ‰“å°
+            // ä»ä½•å¤„è·å–ç´¢å–å·
             ap.SetString(
                 "labelprint",
                 "accessNo_source",
                 this.comboBox_labelPrint_accessNoSource.Text);
 
-            // *** ÏûÏ¢
+            // *** æ¶ˆæ¯
 
-            // ¹²ÏíÊéÄ¿Êı¾İ
+            // å…±äº«ä¹¦ç›®æ•°æ®
             ap.SetBoolean(
                 "message",
                 "share_biblio",
@@ -1156,7 +1156,7 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
             if (m_bServerCfgChanged == true
                 && this.MainForm != null)
             {
-                // ÖØĞÂ»ñµÃ¸÷ÖÖ¿âÃû¡¢ÁĞ±í
+                // é‡æ–°è·å¾—å„ç§åº“åã€åˆ—è¡¨
                 this.MainForm.StartPrepareNames(false, false);
             }
 
@@ -1177,7 +1177,7 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
             MessageBox.Show(this, "OK");
         }
 
-        // ÖØĞÂ»ñµÃÊéÄ¿¿â(¹«¹²)¼ìË÷Í¾¾¶ÁĞ±í
+        // é‡æ–°è·å¾—ä¹¦ç›®åº“(å…¬å…±)æ£€ç´¢é€”å¾„åˆ—è¡¨
         private void button_reloadBiblioDbFromInfos_Click(object sender, EventArgs e)
         {
             this.Enabled = false;
@@ -1224,7 +1224,7 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
             }
             else
             {
-                // È±Ê¡ÎªÓÒ
+                // ç¼ºçœä¸ºå³
                 this.MainForm.panel_fixed.Dock = DockStyle.Right;
                 this.MainForm.panel_fixed.Size = new Size(this.MainForm.Size.Width / 3,
                     this.MainForm.panel_fixed.Size.Height);
@@ -1258,7 +1258,7 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
                 this.checkBox_defaulAccount_savePasswordShort.Checked = true;
         }
 
-        // ÖØĞÂ»ñµÃÊéÄ¿¿âÃûÁĞ±í
+        // é‡æ–°è·å¾—ä¹¦ç›®åº“ååˆ—è¡¨
         // 2007/5/27 
         private void button_reloadBiblioDbNames_Click(object sender, EventArgs e)
         {
@@ -1282,7 +1282,7 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
             this.Enabled = true;
         }
 
-        // ÖØĞÂ»ñµÃÊµÌå¿âÁĞ±í
+        // é‡æ–°è·å¾—å®ä½“åº“åˆ—è¡¨
         private void button_reloadUtilDbProperties_Click(object sender, EventArgs e)
         {
             this.Enabled = false;
@@ -1319,7 +1319,7 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
             System.Diagnostics.Process.Start("notepad.exe", strFileName);
         }
 
-        // ´òÓ¡·½°¸¹ÜÀí
+        // æ‰“å°æ–¹æ¡ˆç®¡ç†
         private void button_print_projectManage_Click(object sender, EventArgs e)
         {
             this.MainForm.OperHistory.OnProjectManager(this);
@@ -1327,12 +1327,12 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
 
         private void textBox_print_projectName_TextChanged(object sender, EventArgs e)
         {
-            label_print_projectNameMessage.Text = "·½°¸ÃûÉè¶¨ºó£¬ĞèÒªÖØĞÂÆô¶¯dp2circulation³ÌĞò£¬²ÅÄÜ·¢Éú×÷ÓÃ¡£";
+            label_print_projectNameMessage.Text = "æ–¹æ¡ˆåè®¾å®šåï¼Œéœ€è¦é‡æ–°å¯åŠ¨dp2circulationç¨‹åºï¼Œæ‰èƒ½å‘ç”Ÿä½œç”¨ã€‚";
         }
 
         private void button_print_findProject_Click(object sender, EventArgs e)
         {
-            // ³öÏÖ¶Ô»°¿ò£¬Ñ¯ÎÊProjectÃû×Ö
+            // å‡ºç°å¯¹è¯æ¡†ï¼Œè¯¢é—®Projectåå­—
             GetProjectNameDlg dlg = new GetProjectNameDlg();
             MainForm.SetControlFont(dlg, this.Font, false);
 
@@ -1415,8 +1415,8 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
-            PathUtil.CreateDirIfNeed(strCacheDir);  // ÖØĞÂ´´½¨Ä¿Â¼
-            MessageBox.Show(this, "ÈÕÖ¾ÎÄ¼ş±¾µØ»º´æÄ¿Â¼ "+strCacheDir+" ÒÑ¾­±»Çå¿Õ");
+            PathUtil.CreateDirIfNeed(strCacheDir);  // é‡æ–°åˆ›å»ºç›®å½•
+            MessageBox.Show(this, "æ—¥å¿—æ–‡ä»¶æœ¬åœ°ç¼“å­˜ç›®å½• "+strCacheDir+" å·²ç»è¢«æ¸…ç©º");
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -1427,7 +1427,7 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
             string strDefaultValue = "ipc://FingerprintChannel/FingerprintServer";
 
             DialogResult result = MessageBox.Show(this,
-    "È·ÊµÒª½« Ö¸ÎÆÔÄ¶ÁÆ÷½Ó¿ÚURL µÄÖµÉèÖÃÎª³£ÓÃÖµ\r\n \""+strDefaultValue+"\" ? ",
+    "ç¡®å®è¦å°† æŒ‡çº¹é˜…è¯»å™¨æ¥å£URL çš„å€¼è®¾ç½®ä¸ºå¸¸ç”¨å€¼\r\n \""+strDefaultValue+"\" ? ",
     "CfgDlg",
     MessageBoxButtons.YesNo,
     MessageBoxIcon.Question,
@@ -1442,7 +1442,7 @@ this.checkBox_itemManagement_displayOtherLibraryItem.Checked);
         {
             string strDir = this.MainForm.FingerPrintCacheDir;  // PathUtil.MergePath(this.MainForm.DataDir, "fingerprintcache");
             DialogResult result = MessageBox.Show(this,
-"È·ÊµÒªÉ¾³ıÎÄ¼ş¼Ğ " + strDir + " (°üÀ¨ÆäÖĞµÄµÄÈ«²¿ÎÄ¼ş) ? ",
+"ç¡®å®è¦åˆ é™¤æ–‡ä»¶å¤¹ " + strDir + " (åŒ…æ‹¬å…¶ä¸­çš„çš„å…¨éƒ¨æ–‡ä»¶) ? ",
 "CfgDlg",
 MessageBoxButtons.YesNo,
 MessageBoxIcon.Question,
@@ -1457,12 +1457,12 @@ MessageBoxDefaultButton.Button2);
             }
             catch (DirectoryNotFoundException)
             {
-                strError = "±¾´Î²Ù×÷Ç°£¬ÎÄ¼ş¼Ğ '" + strDir + "' ÒÑ¾­±»É¾³ı";
+                strError = "æœ¬æ¬¡æ“ä½œå‰ï¼Œæ–‡ä»¶å¤¹ '" + strDir + "' å·²ç»è¢«åˆ é™¤";
                 goto ERROR1;
             }
             catch (Exception ex)
             {
-                strError = "É¾³ıÎÄ¼ş¼Ğ '" + strDir + "' Ê±³ö´í: " + ex.Message;
+                strError = "åˆ é™¤æ–‡ä»¶å¤¹ '" + strDir + "' æ—¶å‡ºé”™: " + ex.Message;
                 goto ERROR1;
             }
 
@@ -1476,7 +1476,7 @@ MessageBoxDefaultButton.Button2);
             string strDefaultValue = "ipc://IdcardChannel/IdcardServer";
 
             DialogResult result = MessageBox.Show(this,
-    "È·ÊµÒª½« Éí·İÖ¤¶Á¿¨Æ÷½Ó¿ÚURL µÄÖµÉèÖÃÎª³£ÓÃÖµ\r\n \""+strDefaultValue+"\" ? ",
+    "ç¡®å®è¦å°† èº«ä»½è¯è¯»å¡å™¨æ¥å£URL çš„å€¼è®¾ç½®ä¸ºå¸¸ç”¨å€¼\r\n \""+strDefaultValue+"\" ? ",
     "CfgDlg",
     MessageBoxButtons.YesNo,
     MessageBoxIcon.Question,
@@ -1489,7 +1489,7 @@ MessageBoxDefaultButton.Button2);
 
         private void textBox_fingerprint_userName_TextChanged(object sender, EventArgs e)
         {
-            // Èç¹ûÓÃ»§ÃûÎª¿Õ£¬ÔòÃÜÂëÒ²ÒªÎª¿Õ¡£ÒòÎªµ¥¶ÀÓĞÃÜÂë×Ö·û´®ÎŞÓÃ£¬»¹ÈİÒ×ÒıÆğ²Â²â
+            // å¦‚æœç”¨æˆ·åä¸ºç©ºï¼Œåˆ™å¯†ç ä¹Ÿè¦ä¸ºç©ºã€‚å› ä¸ºå•ç‹¬æœ‰å¯†ç å­—ç¬¦ä¸²æ— ç”¨ï¼Œè¿˜å®¹æ˜“å¼•èµ·çŒœæµ‹
             if (this.textBox_fingerprint_userName.Text == "")
                 this.textBox_fingerprint_password.Text = "";
         }
@@ -1535,7 +1535,7 @@ MessageBoxDefaultButton.Button2);
             if (_disableShareBiblioChangedEvent == 0 && this.checkBox_message_shareBiblio.Checked == true)
             {
                 DialogResult result = MessageBox.Show(this,
-    "È·ÊµÒª¹²ÏíÊéÄ¿Êı¾İ?\r\n\r\n¹²ÏíÊéÄ¿Êı¾İ½«ÔÊĞíËûÈË¼ìË÷ºÍ»ñÈ¡ÄúµÄÈ«²¿ÊéÄ¿¼ÇÂ¼¡£Èç¹ûÄú²»Í¬ÒâÊ¹ÓÃÕâ¸ö¹¦ÄÜ£¬Çëµã¡°·ñ¡±",
+    "ç¡®å®è¦å…±äº«ä¹¦ç›®æ•°æ®?\r\n\r\nå…±äº«ä¹¦ç›®æ•°æ®å°†å…è®¸ä»–äººæ£€ç´¢å’Œè·å–æ‚¨çš„å…¨éƒ¨ä¹¦ç›®è®°å½•ã€‚å¦‚æœæ‚¨ä¸åŒæ„ä½¿ç”¨è¿™ä¸ªåŠŸèƒ½ï¼Œè¯·ç‚¹â€œå¦â€",
     "CfgDlg",
     MessageBoxButtons.YesNo,
     MessageBoxIcon.Question,
@@ -1552,30 +1552,30 @@ MessageBoxDefaultButton.Button2);
 
     }
 
-    // µ÷ÓÃÊı¾İ¼Ó¹¤Ä£¿é
+    // è°ƒç”¨æ•°æ®åŠ å·¥æ¨¡å—
     /// <summary>
-    /// ÅäÖÃ²ÎÊı±ä»¯µÄÊÂ¼ş
+    /// é…ç½®å‚æ•°å˜åŒ–çš„äº‹ä»¶
     /// </summary>
-    /// <param name="sender">·¢ËÍÕß</param>
-    /// <param name="e">ÊÂ¼ş²ÎÊı</param>
+    /// <param name="sender">å‘é€è€…</param>
+    /// <param name="e">äº‹ä»¶å‚æ•°</param>
     public delegate void ParamChangedEventHandler(object sender,
         ParamChangedEventArgs e);
 
     /// <summary>
-    /// ÅäÖÃ²ÎÊı±ä»¯ÊÂ¼şµÄ²ÎÊı
+    /// é…ç½®å‚æ•°å˜åŒ–äº‹ä»¶çš„å‚æ•°
     /// </summary>
     public class ParamChangedEventArgs : EventArgs
     {
         /// <summary>
-        /// Ğ¡½Ú±êÌâ
+        /// å°èŠ‚æ ‡é¢˜
         /// </summary>
         public string Section = "";
         /// <summary>
-        /// ÊÂÏî±êÌâ
+        /// äº‹é¡¹æ ‡é¢˜
         /// </summary>
         public string Entry = "";
         /// <summary>
-        /// ²ÎÊıÖµ
+        /// å‚æ•°å€¼
         /// </summary>
         public object Value = null;
     }

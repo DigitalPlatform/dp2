@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -16,7 +16,7 @@ using DigitalPlatform.CirculationClient.localhost;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ĞŞ¸ÄÃÜÂë´°
+    /// ä¿®æ”¹å¯†ç çª—
     /// </summary>
     public partial class ChangePasswordForm : MyForm
     {
@@ -32,7 +32,7 @@ namespace dp2Circulation
         const int WM_FIRST_SETFOCUS = API.WM_USER + 200;
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public ChangePasswordForm()
         {
@@ -53,7 +53,7 @@ namespace dp2Circulation
 
 
             stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// ºÍÈİÆ÷¹ØÁª
+            stop.Register(MainForm.stopManager, true);	// å’Œå®¹å™¨å…³è”
 #endif
 
             bool bReader = this.MainForm.AppInfo.GetBoolean(
@@ -66,7 +66,7 @@ namespace dp2Circulation
             }
             else
             {
-                this.textBox_reader_comment.Text = "ÕâÊÇ¶ÁÕßÎª×Ô¼ºĞŞ¸ÄÃÜÂë¡£";
+                this.textBox_reader_comment.Text = "è¿™æ˜¯è¯»è€…ä¸ºè‡ªå·±ä¿®æ”¹å¯†ç ã€‚";
                 this.tabControl_main.Controls.Remove(this.tabPage_worker);
             }
 
@@ -76,9 +76,9 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// È±Ê¡´°¿Ú¹ı³Ì
+        /// ç¼ºçœçª—å£è¿‡ç¨‹
         /// </summary>
-        /// <param name="m">ÏûÏ¢</param>
+        /// <param name="m">æ¶ˆæ¯</param>
         protected override void DefWndProc(ref Message m)
         {
             switch (m.Msg)
@@ -117,20 +117,20 @@ namespace dp2Circulation
 
             if (this.textBox_reader_barcode.Text == "")
             {
-                MessageBox.Show(this, "ÉĞÎ´ÊäÈë¶ÁÕßÖ¤ÌõÂëºÅ¡£");
+                MessageBox.Show(this, "å°šæœªè¾“å…¥è¯»è€…è¯æ¡ç å·ã€‚");
                 this.textBox_reader_barcode.Focus();
                 return;
             }
 
             if (this.textBox_reader_newPassword.Text != this.textBox_reader_confirmNewPassword.Text)
             {
-                MessageBox.Show(this, "ĞÂÃÜÂë ºÍ È·ÈÏĞÂÃÜÂë²»Ò»ÖÂ¡£ÇëÖØĞÂÊäÈë¡£");
+                MessageBox.Show(this, "æ–°å¯†ç  å’Œ ç¡®è®¤æ–°å¯†ç ä¸ä¸€è‡´ã€‚è¯·é‡æ–°è¾“å…¥ã€‚");
                 this.textBox_reader_newPassword.Focus();
                 return;
             }
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚĞŞ¸Ä¶ÁÕßÃÜÂë ...");
+            stop.Initial("æ­£åœ¨ä¿®æ”¹è¯»è€…å¯†ç  ...");
             stop.BeginLoop();
 
             this.Update();
@@ -163,7 +163,7 @@ namespace dp2Circulation
                 stop.Initial("");
             }
 
-            MessageBox.Show(this, "¶ÁÕßÃÜÂëÒÑ¾­±»³É¹¦ĞŞ¸Ä¡£");
+            MessageBox.Show(this, "è¯»è€…å¯†ç å·²ç»è¢«æˆåŠŸä¿®æ”¹ã€‚");
 
             this.textBox_reader_barcode.SelectAll();
             this.textBox_reader_barcode.Focus();
@@ -171,15 +171,15 @@ namespace dp2Circulation
         ERROR1:
             MessageBox.Show(this, strError);
 
-            // ½¹µãÖØĞÂ¶¨Î»µ½ÃÜÂëÊäÈëÓò
+            // ç„¦ç‚¹é‡æ–°å®šä½åˆ°å¯†ç è¾“å…¥åŸŸ
             this.textBox_reader_oldPassword.Focus();
             this.textBox_reader_oldPassword.SelectAll();
         }
 
         /// <summary>
-        /// ÔÊĞí»òÕß½ûÖ¹½çÃæ¿Ø¼ş¡£ÔÚ³¤²Ù×÷Ç°£¬Ò»°ãĞèÒª½ûÖ¹½çÃæ¿Ø¼ş£»²Ù×÷Íê³ÉºóÔÙÔÊĞí
+        /// å…è®¸æˆ–è€…ç¦æ­¢ç•Œé¢æ§ä»¶ã€‚åœ¨é•¿æ“ä½œå‰ï¼Œä¸€èˆ¬éœ€è¦ç¦æ­¢ç•Œé¢æ§ä»¶ï¼›æ“ä½œå®Œæˆåå†å…è®¸
         /// </summary>
-        /// <param name="bEnable">ÊÇ·ñÔÊĞí½çÃæ¿Ø¼ş¡£true ÎªÔÊĞí£¬ false Îª½ûÖ¹</param>
+        /// <param name="bEnable">æ˜¯å¦å…è®¸ç•Œé¢æ§ä»¶ã€‚true ä¸ºå…è®¸ï¼Œ false ä¸ºç¦æ­¢</param>
         public override void EnableControls(bool bEnable)
         {
             this.button_reader_changePassword.Enabled = bEnable;
@@ -214,20 +214,20 @@ namespace dp2Circulation
 
             if (this.textBox_worker_userName.Text == "")
             {
-                MessageBox.Show(this, "ÉĞÎ´ÊäÈëÓÃ»§Ãû¡£");
+                MessageBox.Show(this, "å°šæœªè¾“å…¥ç”¨æˆ·åã€‚");
                 this.textBox_worker_userName.Focus();
                 return;
             }
 
             if (this.textBox_worker_newPassword.Text != this.textBox_worker_confirmNewPassword.Text)
             {
-                MessageBox.Show(this, "ĞÂÃÜÂë ºÍ È·ÈÏĞÂÃÜÂë²»Ò»ÖÂ¡£ÇëÖØĞÂÊäÈë¡£");
+                MessageBox.Show(this, "æ–°å¯†ç  å’Œ ç¡®è®¤æ–°å¯†ç ä¸ä¸€è‡´ã€‚è¯·é‡æ–°è¾“å…¥ã€‚");
                 this.textBox_worker_newPassword.Focus();
                 return;
             }
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚĞŞ¸Ä¹¤×÷ÈËÔ±ÃÜÂë ...");
+            stop.Initial("æ­£åœ¨ä¿®æ”¹å·¥ä½œäººå‘˜å¯†ç  ...");
             stop.BeginLoop();
 
             this.Update();
@@ -239,7 +239,7 @@ namespace dp2Circulation
             {
                 long lRet = 0;
 
-                // ·ÇÇ¿ÖÆĞŞ¸ÄÃÜÂë£¬¼´±¾ÈËĞŞ¸Ä
+                // éå¼ºåˆ¶ä¿®æ”¹å¯†ç ï¼Œå³æœ¬äººä¿®æ”¹
                 if (this.checkBox_worker_force.Checked == false)
                 {
 
@@ -247,8 +247,8 @@ namespace dp2Circulation
                     {
                         // return:
                         //      -1  error
-                        //      0   µÇÂ¼Î´³É¹¦
-                        //      1   µÇÂ¼³É¹¦
+                        //      0   ç™»å½•æœªæˆåŠŸ
+                        //      1   ç™»å½•æˆåŠŸ
                         lRet = Channel.Login(this.textBox_worker_userName.Text,
                             this.textBox_worker_oldPassword.Text,
                             "type=worker",
@@ -260,7 +260,7 @@ namespace dp2Circulation
 
                         if (lRet == 0)
                         {
-                            strError = "¾ÉÃÜÂë²»ÕıÈ·";
+                            strError = "æ—§å¯†ç ä¸æ­£ç¡®";
                             goto ERROR1;
                         }
                     }
@@ -284,13 +284,13 @@ namespace dp2Circulation
                     }
                 }
 
-                // Ç¿ÖÆĞŞ¸ÄÃÜÂë
+                // å¼ºåˆ¶ä¿®æ”¹å¯†ç 
                 if (this.checkBox_worker_force.Checked == true)
                 {
                     UserInfo info = new UserInfo();
                     info.UserName = this.textBox_worker_userName.Text;
                     info.Password = this.textBox_worker_newPassword.Text;
-                    // µ±actionÎª"resetpassword"Ê±£¬Ôòinfo.ResetPassword×´Ì¬²»Æğ×÷ÓÃ£¬ÎŞÂÛÔõÑù¶¼ÒªĞŞ¸ÄÃÜÂë¡£resetpassword²¢²»ĞŞ¸ÄÆäËûĞÅÏ¢£¬Ò²¾ÍÊÇËµinfoÖĞ³ıÁËPassword/UserNameÒÔÍâÆäËû³ÉÔ±µÄÖµÎŞĞ§¡£
+                    // å½“actionä¸º"resetpassword"æ—¶ï¼Œåˆ™info.ResetPasswordçŠ¶æ€ä¸èµ·ä½œç”¨ï¼Œæ— è®ºæ€æ ·éƒ½è¦ä¿®æ”¹å¯†ç ã€‚resetpasswordå¹¶ä¸ä¿®æ”¹å…¶ä»–ä¿¡æ¯ï¼Œä¹Ÿå°±æ˜¯è¯´infoä¸­é™¤äº†Password/UserNameä»¥å¤–å…¶ä»–æˆå‘˜çš„å€¼æ— æ•ˆã€‚
                     lRet = Channel.SetUser(
                         stop,
                         "resetpassword",
@@ -312,7 +312,7 @@ namespace dp2Circulation
                 stop.Initial("");
             }
 
-            MessageBox.Show(this, "¹¤×÷ÈËÔ± '" + this.textBox_worker_userName.Text + "' ÃÜÂëÒÑ¾­±»³É¹¦ĞŞ¸Ä¡£");
+            MessageBox.Show(this, "å·¥ä½œäººå‘˜ '" + this.textBox_worker_userName.Text + "' å¯†ç å·²ç»è¢«æˆåŠŸä¿®æ”¹ã€‚");
 
             this.textBox_worker_userName.SelectAll();
             this.textBox_worker_userName.Focus();
@@ -320,7 +320,7 @@ namespace dp2Circulation
         ERROR1:
             MessageBox.Show(this, strError);
 
-            // ½¹µãÖØĞÂ¶¨Î»µ½ÃÜÂëÊäÈëÓò
+            // ç„¦ç‚¹é‡æ–°å®šä½åˆ°å¯†ç è¾“å…¥åŸŸ
             this.textBox_worker_oldPassword.Focus();
             this.textBox_worker_oldPassword.SelectAll();
         }

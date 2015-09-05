@@ -1,237 +1,237 @@
-
+﻿
 
 ===
-borrow ����(����)
+borrow 借阅(续借)
 
 API: Borrow()
 
 <root>
-  <operation>borrow</operation> ��������
-  <action>...</action> ���嶯�� ��borrow renew���֡����<action>Ԫ��ȱʡ�����ʾborrow
-  <readerBarcode>R0000002</readerBarcode> ����֤�����
-  <itemBarcode>0000001</itemBarcode>  �������
-  <borrowDate>Fri, 08 Dec 2006 04:17:31 GMT</borrowDate> ��������
-  <borrowPeriod>30day</borrowPeriod> ��������
-  <no>0</no> ���������0Ϊ�״���ͨ���ģ�1��ʼΪ����
-  <operator>test</operator> ������
-  <operTime>Fri, 08 Dec 2006 04:17:31 GMT</operTime> ����ʱ��
-  <confirmItemRecPath>...</confirmItemRecPath> �����ж��õĲ��¼·��
+  <operation>borrow</operation> 操作类型
+  <action>...</action> 具体动作 有borrow renew两种。如果<action>元素缺省，则表示borrow
+  <readerBarcode>R0000002</readerBarcode> 读者证条码号
+  <itemBarcode>0000001</itemBarcode>  册条码号
+  <borrowDate>Fri, 08 Dec 2006 04:17:31 GMT</borrowDate> 借阅日期
+  <borrowPeriod>30day</borrowPeriod> 借阅期限
+  <no>0</no> 续借次数。0为首次普通借阅，1开始为续借
+  <operator>test</operator> 操作者
+  <operTime>Fri, 08 Dec 2006 04:17:31 GMT</operTime> 操作时间
+  <confirmItemRecPath>...</confirmItemRecPath> 辅助判断用的册记录路径
   
-  <readerRecord recPath='...'>...</readerRecord>	���¶��߼�¼
-  <itemRecord recPath='...'>...</itemRecord>	���²��¼
+  <readerRecord recPath='...'>...</readerRecord>	最新读者记录
+  <itemRecord recPath='...'>...</itemRecord>	最新册记录
 </root>
 
 ===
-return ����
+return 还回
 
 API: Return()
 
 <root>
-  <operation>return</operation> ��������
-  <action>...</action> ���嶯�� ��return lost����
-  <itemBarcode>0000001</itemBarcode> �������
-  <readerBarcode>R0000002</readerBarcode> ����֤�����
-  <operator>test</operator> ������
-  <operTime>Fri, 08 Dec 2006 04:17:45 GMT</operTime> ����ʱ��
-  <overdues>...</overdues> ���ڻ�ʧ�����Ϣ ͨ������Ϊһ���ַ�����Ϊһ������<overdue>Ԫ��XML�ı�Ƭ��
+  <operation>return</operation> 操作类型
+  <action>...</action> 具体动作 有return lost两种
+  <itemBarcode>0000001</itemBarcode> 册条码号
+  <readerBarcode>R0000002</readerBarcode> 读者证条码号
+  <operator>test</operator> 操作者
+  <operTime>Fri, 08 Dec 2006 04:17:45 GMT</operTime> 操作时间
+  <overdues>...</overdues> 超期或丢失赔款信息 通常内容为一个字符串，为一个或多个<overdue>元素XML文本片断
   
-  <confirmItemRecPath>...</confirmItemRecPath> �����ж��õĲ��¼·��
+  <confirmItemRecPath>...</confirmItemRecPath> 辅助判断用的册记录路径
   
-  <readerRecord recPath='...'>...</readerRecord>	���¶��߼�¼
-  <itemRecord recPath='...'>...</itemRecord>	���²��¼
-  <lostComment>...</lostComment> ���ڶ�ʧ����ĸ�ע(׷��д����¼<comment>����Ϣ)
+  <readerRecord recPath='...'>...</readerRecord>	最新读者记录
+  <itemRecord recPath='...'>...</itemRecord>	最新册记录
+  <lostComment>...</lostComment> 关于丢失情况的附注(追加写入册记录<comment>的信息)
 </root>
 
 ===
-changeReaderPassword �޸Ķ�������
+changeReaderPassword 修改读者密码
 
 API: ChangeReaderPassword()
 
 <root>
   <operation>changeReaderPassword</operation>
-  <readerBarcode>...</readerBarcode>	����֤�����
+  <readerBarcode>...</readerBarcode>	读者证条码号
   <newPassword>5npAUJ67/y3aOvdC0r+Dj7SeXGE=</newPassword> 
   <operator>test</operator> 
   <operTime>Fri, 08 Dec 2006 09:01:38 GMT</operTime> 
-  <readerRecord recPath='...'>...</readerRecord>	���¶��߼�¼
+  <readerRecord recPath='...'>...</readerRecord>	最新读者记录
   
 </root>
 
-ע������ù�����Ա���ݵ���ChangeReaderPassword() API���򲢲����ԭ�����Ƿ�ƥ�䡣
+注：如果用工作人员身份调用ChangeReaderPassword() API，则并不检查原密码是否匹配。
 
 ===
-setReaderInfo ������Ϣ����
+setReaderInfo 读者信息管理
 
 API: SetReaderInfo()
 
 <root>
-	<operation>setReaderInfo</operation> ��������
-	<action>...</action> ���嶯������new change delete move 4��
-	<record recPath='...'>...</record> �¼�¼
-    <oldRecord recPath='...'>...</oldRecord> �����ǻ���ɾ���ļ�¼ ����Ϊchange/delete/moveʱ�߱���Ԫ��
-	<operator>test</operator> ������
-	<operTime>Fri, 08 Dec 2006 09:01:38 GMT</operTime> ����ʱ��
+	<operation>setReaderInfo</operation> 操作类型
+	<action>...</action> 具体动作。有new change delete move 4种
+	<record recPath='...'>...</record> 新记录
+    <oldRecord recPath='...'>...</oldRecord> 被覆盖或者删除的记录 动作为change/delete/move时具备此元素
+	<operator>test</operator> 操作者
+	<operTime>Fri, 08 Dec 2006 09:01:38 GMT</operTime> 操作时间
 </root>
 
-ע1: new ��ʱ��ֻ��<record>Ԫ�أ�delete��ʱ��ֻ��<oldRecord>Ԫ�أ�change��ʱ�����߶���
-ע2: move ��ʱ��<record>Ԫ�ؿ���û�а�����¼����Ϣ���������¼ֻ���ƶ���û��ͬʱ�����޸� 
+注1: new 的时候只有<record>元素，delete的时候只有<oldRecord>元素，change的时候两者都有
+注2: move 的时候，<record>元素可能没有包含记录体信息，这表明记录只是移动而没有同时发生修改 
 
 ===
-reservation ԤԼ
+reservation 预约
 
 API: Reservation()
 
 <root>
-  <operation>reservation</operation> ��������
-  <action>new</action> ���嶯������new delete merge split
-  <readerBarcode>R0000001</readerBarcode> ����֤�����
-  <itemBarcodeList>0000003</itemBarcodeList> ��������б����ö��ŷָ�
-  <operator>R0000001</operator> ������ ���<operator>��<readerBarcode>����һ�£���ʾΪ����ֱ������ԤԼ��
-  <operTime>Tue, 12 Dec 2006 09:20:12 GMT</operTime> ����ʱ��
+  <operation>reservation</operation> 操作类型
+  <action>new</action> 具体动作。有new delete merge split
+  <readerBarcode>R0000001</readerBarcode> 读者证条码号
+  <itemBarcodeList>0000003</itemBarcodeList> 册条码号列表。用逗号分割
+  <operator>R0000001</operator> 操作者 如果<operator>和<readerBarcode>内容一致，表示为读者直接自行预约。
+  <operTime>Tue, 12 Dec 2006 09:20:12 GMT</operTime> 操作时间
 </root>
 
 ===
 
-amerce ����
+amerce 交费
 
 API: Amerce()
 
 <root>
-  <operation>amerce</operation> ��������
-  <action>amerce</action> ���嶯������amerce undo modifyprice expire
-  <readerBarcode>...</readerBarcode> ����֤�����
-  <!-- <idList>...<idList> ID�б������ż�� �ѷ�ֹ -->
+  <operation>amerce</operation> 操作类型
+  <action>amerce</action> 具体动作。有amerce undo modifyprice expire
+  <readerBarcode>...</readerBarcode> 读者证条码号
+  <!-- <idList>...<idList> ID列表，逗号间隔 已废止 -->
   <amerceItems>
-	<amerceItem id="..." newPrice="..." newComment="..." /> newComment������׷�ӻ��滻ԭ����ע�����ݡ�������׷�ӻ��Ǹ��ǣ�ȡ���ڵ�һ���ַ��Ƿ�Ϊ'>'����'<'��ǰ��Ϊ׷��(��ʱ��һ���ַ�������������)�������һ���ַ�����������֮һ����Ĭ��Ϊ׷��
+	<amerceItem id="..." newPrice="..." newComment="..." /> newComment中内容追加或替换原来的注释内容。到底是追加还是覆盖，取决于第一个字符是否为'>'还是'<'，前者为追加(这时第一个字符不被当作内容)。如果第一个字符不是这两者之一，则默认为追加
 	...
   </amerceItems>
-  <amerceRecord recPath='...'><root><itemBarcode>0000001</itemBarcode><readerBarcode>R0000002</readerBarcode><state>amerced</state><id>632958375041543888-1</id><over>31day</over><borrowDate>Sat, 07 Oct 2006 09:04:28 GMT</borrowDate><borrowPeriod>30day</borrowPeriod><returnDate>Thu, 07 Dec 2006 09:04:27 GMT</returnDate><returnOperator>test</returnOperator></root></amerceRecord> �ڷ�����д������¼�¼��ע��<amerceRecord>Ԫ�ؿ����ظ���<amerceRecord>Ԫ�����������<itemBarcode><readerBarcode><id>�Ⱦ߱����㹻����Ϣ��
-  <operator>test</operator> ������
-  <operTime>Fri, 08 Dec 2006 10:09:36 GMT</operTime> ����ʱ��
+  <amerceRecord recPath='...'><root><itemBarcode>0000001</itemBarcode><readerBarcode>R0000002</readerBarcode><state>amerced</state><id>632958375041543888-1</id><over>31day</over><borrowDate>Sat, 07 Oct 2006 09:04:28 GMT</borrowDate><borrowPeriod>30day</borrowPeriod><returnDate>Thu, 07 Dec 2006 09:04:27 GMT</returnDate><returnOperator>test</returnOperator></root></amerceRecord> 在罚款库中创建的新记录。注意<amerceRecord>元素可以重复。<amerceRecord>元素内容里面的<itemBarcode><readerBarcode><id>等具备了足够的信息。
+  <operator>test</operator> 操作者
+  <operTime>Fri, 08 Dec 2006 10:09:36 GMT</operTime> 操作时间
   
-  <readerRecord recPath='...'>...</readerRecord>	���¶��߼�¼
+  <readerRecord recPath='...'>...</readerRecord>	最新读者记录
 </root>
 
 <root>
   <operation>amerce</operation> 
   <action>undo</action> 
-  <readerBarcode>...</readerBarcode> ����֤�����
-  <!-- <idList>...<idList> ID�б������ż�� �ѷ�ֹ -->
+  <readerBarcode>...</readerBarcode> 读者证条码号
+  <!-- <idList>...<idList> ID列表，逗号间隔 已废止 -->
   <amerceItems>
 	<amerceItem id="..." newPrice="..."/>
 	...
   </amerceItems>
-  <amerceRecord recPath='...'><root><itemBarcode>0000001</itemBarcode><readerBarcode>R0000002</readerBarcode><state>amerced</state><id>632958375041543888-1</id><over>31day</over><borrowDate>Sat, 07 Oct 2006 09:04:28 GMT</borrowDate><borrowPeriod>30day</borrowPeriod><returnDate>Thu, 07 Dec 2006 09:04:27 GMT</returnDate><returnOperator>test</returnOperator></root></amerceRecord> Undo��ȥ���ķ�����¼
+  <amerceRecord recPath='...'><root><itemBarcode>0000001</itemBarcode><readerBarcode>R0000002</readerBarcode><state>amerced</state><id>632958375041543888-1</id><over>31day</over><borrowDate>Sat, 07 Oct 2006 09:04:28 GMT</borrowDate><borrowPeriod>30day</borrowPeriod><returnDate>Thu, 07 Dec 2006 09:04:27 GMT</returnDate><returnOperator>test</returnOperator></root></amerceRecord> Undo所去掉的罚款库记录
   <operator>test</operator> 
   <operTime>Fri, 08 Dec 2006 10:12:20 GMT</operTime> 
   
-  <readerRecord recPath='...'>...</readerRecord>	���¶��߼�¼
+  <readerRecord recPath='...'>...</readerRecord>	最新读者记录
 
 </root>
 
 <root>
   <operation>amerce</operation> 
   <action>modifyprice</action> 
-  <readerBarcode>...</readerBarcode> ����֤�����
+  <readerBarcode>...</readerBarcode> 读者证条码号
   <amerceItems>
-	<amerceItem id="..." newPrice="..." newComment="..."/> newComment������׷�ӻ��滻ԭ����ע�����ݡ�������׷�ӻ��Ǹ��ǣ�ȡ���ڵ�һ���ַ��Ƿ�Ϊ'>'����'<'��ǰ��Ϊ׷��(��ʱ��һ���ַ�������������)�������һ���ַ�����������֮һ����Ĭ��Ϊ׷��
+	<amerceItem id="..." newPrice="..." newComment="..."/> newComment中内容追加或替换原来的注释内容。到底是追加还是覆盖，取决于第一个字符是否为'>'还是'<'，前者为追加(这时第一个字符不被当作内容)。如果第一个字符不是这两者之一，则默认为追加
 	...
   </amerceItems>
-  <!-- modifyprice����ʱ������<amerceRecord>Ԫ�� -->
+  <!-- modifyprice操作时不产生<amerceRecord>元素 -->
   <operator>test</operator> 
   <operTime>Fri, 08 Dec 2006 10:12:20 GMT</operTime> 
   
-  <oldReaderRecord recPath='...'>...</oldReaderRecord>	����ǰ�ɵĶ��߼�¼��<oldReaderRecord>Ԫ����modifyprice����ʱ���е�Ԫ��
-  <readerRecord recPath='...'>...</readerRecord>	���¶��߼�¼
+  <oldReaderRecord recPath='...'>...</oldReaderRecord>	操作前旧的读者记录。<oldReaderRecord>元素是modifyprice操作时特有的元素
+  <readerRecord recPath='...'>...</readerRecord>	最新读者记录
 
 </root>
 
 2007/12/18 new add
 <root>
-  <operation>amerce</operation> ��������
-  <action>expire</action> ��ͣ������
-  <readerBarcode>...</readerBarcode> ����֤�����
-  <expiredOverdues> �Ѿ����ڵ�����<overdue>Ԫ��
+  <operation>amerce</operation> 操作类型
+  <action>expire</action> 以停代金到期
+  <readerBarcode>...</readerBarcode> 读者证条码号
+  <expiredOverdues> 已经到期的若干<overdue>元素
 	<overdue ... />
 	...
   </expiredOverdues>
-  <operator>test</operator> ������ ���Ϊ#readersMonitor����ʾΪ��̨�߳�
-  <operTime>Fri, 08 Dec 2006 10:09:36 GMT</operTime> ����ʱ��
+  <operator>test</operator> 操作者 如果为#readersMonitor，表示为后台线程
+  <operTime>Fri, 08 Dec 2006 10:09:36 GMT</operTime> 操作时间
   
-  <readerRecord recPath='...'>...</readerRecord>	���¶��߼�¼
+  <readerRecord recPath='...'>...</readerRecord>	最新读者记录
 </root>
 
 2008/6/20 new add
 <root>
   <operation>amerce</operation> 
   <action>modifycomment</action> 
-  <readerBarcode>...</readerBarcode> ����֤�����
+  <readerBarcode>...</readerBarcode> 读者证条码号
   <amerceItems>
-	<amerceItem id="..." newComment="..."/> newComment������׷�ӻ��滻ԭ����ע�����ݡ�������׷�ӻ��Ǹ��ǣ�ȡ���ڵ�һ���ַ��Ƿ�Ϊ'>'����'<'��ǰ��Ϊ׷��(��ʱ��һ���ַ�������������)�������һ���ַ�����������֮һ����Ĭ��Ϊ׷��
+	<amerceItem id="..." newComment="..."/> newComment中内容追加或替换原来的注释内容。到底是追加还是覆盖，取决于第一个字符是否为'>'还是'<'，前者为追加(这时第一个字符不被当作内容)。如果第一个字符不是这两者之一，则默认为追加
 	...
   </amerceItems>
-  <!-- modifycomment����ʱ������<amerceRecord>Ԫ�� -->
+  <!-- modifycomment操作时不产生<amerceRecord>元素 -->
   <operator>test</operator> 
   <operTime>Fri, 08 Dec 2006 10:12:20 GMT</operTime> 
   
-  <oldReaderRecord recPath='...'>...</oldReaderRecord>	����ǰ�ɵĶ��߼�¼��<oldReaderRecord>Ԫ����modifycomment����ʱ���е�Ԫ��
-  <readerRecord recPath='...'>...</readerRecord>	���¶��߼�¼
+  <oldReaderRecord recPath='...'>...</oldReaderRecord>	操作前旧的读者记录。<oldReaderRecord>元素是modifycomment操作时特有的元素
+  <readerRecord recPath='...'>...</readerRecord>	最新读者记录
 </root>
 
 
 ===
-devolveReaderInfo ת�ƶ��ߣ��軹�����ڣ���Ϣ
+devolveReaderInfo 转移读者（借还、超期）信息
 
 API: DevolveReaderInfo()
 
 <root>
   <operation>devolveReaderInfo</operation> 
-  <sourceReaderBarcode>...</sourceReaderBarcode> Դ����֤�����
-  <targetReaderBarcode>...</targetReaderBarcode> Ŀ�����֤�����
-  <borrows>...</borrows> �ƶ���ȥ��<borrows>���ݣ��¼�Ϊ<borrow>Ԫ��
-  <overdues>...</overdues> �ƶ���ȥ��<overdue>���ݣ��¼�Ϊ<overdue>Ԫ��
-  <sourceReaderRecord recPath='...'>...</sourceReaderRecord>	����Դ���߼�¼
-  <targetReaderRecord recPath='...'>...</targetReaderRecord>	����Ŀ����߼�¼
-  <changedEntityRecord recPath='...' attahchmentIndex='.'>...</changedEntityRecord> ��ǣ�����ķ������޸ĵ�ʵ���¼����Ԫ�ص��ı����Ǽ�¼�壬��ע��Ϊ��͸�����ַ�����HtmlEncoding��ļ�¼�ַ��������������attachmentIndex���ԣ������ʵ���¼���ڴ�Ԫ���ı��У�������־��¼�ĸ�����
+  <sourceReaderBarcode>...</sourceReaderBarcode> 源读者证条码号
+  <targetReaderBarcode>...</targetReaderBarcode> 目标读者证条码号
+  <borrows>...</borrows> 移动过去的<borrows>内容，下级为<borrow>元素
+  <overdues>...</overdues> 移动过去的<overdue>内容，下级为<overdue>元素
+  <sourceReaderRecord recPath='...'>...</sourceReaderRecord>	最新源读者记录
+  <targetReaderRecord recPath='...'>...</targetReaderRecord>	最新目标读者记录
+  <changedEntityRecord recPath='...' attahchmentIndex='.'>...</changedEntityRecord> 所牵连到的发生了修改的实体记录。此元素的文本即是记录体，但注意为不透明的字符串（HtmlEncoding后的记录字符串）。如果存在attachmentIndex属性，则表明实体记录不在此元素文本中，而在日志记录的附件中
   <operator>test</operator> 
   <operTime>Fri, 08 Dec 2006 10:12:20 GMT</operTime> 
 </root>
 
 ===
-repairBorrowInfo �޸�������Ϣ
+repairBorrowInfo 修复借阅信息
 
 API: RepairBorrowInfo()
 
 <root>
   <operation>repairBorrowInfo</operation> 
-  <action>...</action> ���嶯�� �� repairreaderside repairitemside
+  <action>...</action> 具体动作 有 repairreaderside repairitemside
   <readerBarcode>...</readerBarcode>
   <itemBarcode>...</itemBarcode>
-  <confirmItemRecPath>...</confirmItemRecPath> �����ж��õĲ��¼·��
+  <confirmItemRecPath>...</confirmItemRecPath> 辅助判断用的册记录路径
   <operator>test</operator> 
   <operTime>Fri, 08 Dec 2006 10:12:20 GMT</operTime> 
 </root>
 
 ===
-setBiblioInfo ������Ŀ��Ϣ
+setBiblioInfo 设置书目信息
 
-API: SetBiblioInfo() �� CopyBiblioInfo()
+API: SetBiblioInfo() 和 CopyBiblioInfo()
 
 <root>
   <operation>setBiblioInfo</operation> 
-  <action>...</action> ���嶯�� �� new/change/delete/onlydeletebiblio �� onlycopybiblio/onlymovebiblio/copy/move
-  <record recPath='����ͼ��/3'>...</record> ��¼�� ����Ϊnew/change/ *move* / *copy* ʱ���д�Ԫ��(��deleteʱû�д�Ԫ��)
-  <oldRecord recPath='����ͼ��/3'>...</oldRecord> �����ǡ�ɾ�������ƶ��ļ�¼ ����Ϊchange/ *delete* / *move* / *copy* ʱ�߱���Ԫ��
-  <deletedEntityRecords> ��ɾ����ʵ���¼(����)��ֻ�е�<action>Ϊdeleteʱ�������Ԫ�ء�
-	  <record recPath='����ͼ��ʵ��/100'>...</record> ���Ԫ�ؿ����ظ���ע��Ԫ�����ı�����ĿǰΪ�ա�
+  <action>...</action> 具体动作 有 new/change/delete/onlydeletebiblio 和 onlycopybiblio/onlymovebiblio/copy/move
+  <record recPath='中文图书/3'>...</record> 记录体 动作为new/change/ *move* / *copy* 时具有此元素(即delete时没有此元素)
+  <oldRecord recPath='中文图书/3'>...</oldRecord> 被覆盖、删除或者移动的记录 动作为change/ *delete* / *move* / *copy* 时具备此元素
+  <deletedEntityRecords> 被删除的实体记录(容器)。只有当<action>为delete时才有这个元素。
+	  <record recPath='中文图书实体/100'>...</record> 这个元素可以重复。注意元素内文本内容目前为空。
 	  ...
   </deletedEntityRecords>
-  <copyEntityRecords> �����Ƶ�ʵ���¼(����)��ֻ�е�<action>Ϊ*copy*ʱ�������Ԫ�ء�
-	  <record recPath='����ͼ��ʵ��/100' targetRecPath='����ͼ��ʵ��/110'>...</record> ���Ԫ�ؿ����ظ���ע��Ԫ�����ı�����ĿǰΪ�ա�recPath����ΪԴ��¼·����targetRecPathΪĿ���¼·��
+  <copyEntityRecords> 被复制的实体记录(容器)。只有当<action>为*copy*时才有这个元素。
+	  <record recPath='中文图书实体/100' targetRecPath='中文图书实体/110'>...</record> 这个元素可以重复。注意元素内文本内容目前为空。recPath属性为源记录路径，targetRecPath为目标记录路径
 	  ...
   </copyEntityRecords>
-  <moveEntityRecords> ���ƶ���ʵ���¼(����)��ֻ�е�<action>Ϊ*move*ʱ�������Ԫ�ء�
-	  <record recPath='����ͼ��ʵ��/100' targetRecPath='����ͼ��ʵ��/110'>...</record> ���Ԫ�ؿ����ظ���ע��Ԫ�����ı�����ĿǰΪ�ա�recPath����ΪԴ��¼·����targetRecPathΪĿ���¼·��
+  <moveEntityRecords> 被移动的实体记录(容器)。只有当<action>为*move*时才有这个元素。
+	  <record recPath='中文图书实体/100' targetRecPath='中文图书实体/110'>...</record> 这个元素可以重复。注意元素内文本内容目前为空。recPath属性为源记录路径，targetRecPath为目标记录路径
 	  ...
   </moveEntityRecords>
   <copyOrderRecords /> <moveOrderRecords />
@@ -241,164 +241,164 @@ API: SetBiblioInfo() �� CopyBiblioInfo()
   <operTime>Fri, 08 Dec 2006 10:12:20 GMT</operTime> 
 </root>
 
-�߼��ָ�delete������ʱ�򣬼�����ȫ��������ʵ���¼ɾ����
-���ջָ���ʱ�򣬿��Ը���operlogdomֱ��ɾ����¼��path����Щʵ���¼
+逻辑恢复delete操作的时候，检索出全部下属的实体记录删除。
+快照恢复的时候，可以根据operlogdom直接删除记录了path的那些实体记录
 
 ===
-hire ��������¼
+hire 创建租金记录
 
 API: Hire()
 
 <root>
-  <operation>hire</operation> ��������
-  <action>...</action> ���嶯�� ��hire hirelate����
-  <readerBarcode>R0000002</readerBarcode> ����֤�����
-  <operator>test</operator> ������
-  <operTime>Fri, 08 Dec 2006 04:17:45 GMT</operTime> ����ʱ��
-  <overdues>...</overdues> �����Ϣ ͨ������Ϊһ���ַ�����Ϊһ������<overdue>Ԫ��XML�ı�Ƭ��
-  <readerRecord recPath='...'>...</readerRecord>	���¶��߼�¼
+  <operation>hire</operation> 操作类型
+  <action>...</action> 具体动作 有hire hirelate两种
+  <readerBarcode>R0000002</readerBarcode> 读者证条码号
+  <operator>test</operator> 操作者
+  <operTime>Fri, 08 Dec 2006 04:17:45 GMT</operTime> 操作时间
+  <overdues>...</overdues> 租金信息 通常内容为一个字符串，为一个或多个<overdue>元素XML文本片断
+  <readerRecord recPath='...'>...</readerRecord>	最新读者记录
 </root>
 
 ===
-settlement �������
+settlement 结算费用
 
 API: Settlement()
 
 <root>
-  <operation>settlement</operation> ��������
-  <action>...</action> ���嶯�� ��settlement undosettlement delete 3��
+  <operation>settlement</operation> 操作类型
+  <action>...</action> 具体动作 有settlement undosettlement delete 3种
   <id>1234567-1</id> ID
-  <operator>test</operator> ������
-  <operTime>Fri, 08 Dec 2006 04:17:45 GMT</operTime> ����ʱ��
+  <operator>test</operator> 操作者
+  <operTime>Fri, 08 Dec 2006 04:17:45 GMT</operTime> 操作时间
   
-  <oldAmerceRecord recPath='...'>...</oldAmerceRecord>	��ΥԼ���¼
-  <amerceRecord recPath='...'>...</amerceRecord>	��ΥԼ���¼ delete�����޴�Ԫ��
+  <oldAmerceRecord recPath='...'>...</oldAmerceRecord>	旧违约金记录
+  <amerceRecord recPath='...'>...</amerceRecord>	新违约金记录 delete操作无此元素
 </root>
 
 
 ===
-passgate ��ݵǼ�
+passgate 入馆登记
 
 API: PassGate()
 
 <root>
-  <operation>passgate</operation> ��������
-  <readerBarcode>...</readerBarcode> ����֤�����
-  <gateName>...</gateName> ������
-  <operator>test</operator> ������
-  <operTime>Fri, 08 Dec 2006 04:17:45 GMT</operTime> ����ʱ��
+  <operation>passgate</operation> 操作类型
+  <readerBarcode>...</readerBarcode> 读者证条码号
+  <gateName>...</gateName> 门名字
+  <operator>test</operator> 操作者
+  <operTime>Fri, 08 Dec 2006 04:17:45 GMT</operTime> 操作时间
 </root>
 
 ===
-foregift ����Ѻ���¼
+foregift 创建押金记录
 
 API: Foregift()
 
 <root>
-  <operation>foregift</operation> ��������
-  <action>...</action> ���嶯�� Ŀǰ��foregift return (ע: return����ʱ��overdueԪ�������price���ԣ�����ʹ�ú� %return_foregift_price% ��ʾ��ǰʣ���Ѻ���)
-  <readerBarcode>R0000002</readerBarcode> ����֤�����
-  <operator>test</operator> ������
-  <operTime>Fri, 08 Dec 2006 04:17:45 GMT</operTime> ����ʱ��
-  <overdues>...</overdues> Ѻ����Ϣ ͨ������Ϊһ���ַ�����Ϊһ������<overdue>Ԫ��XML�ı�Ƭ��
-  <readerRecord recPath='...'>...</readerRecord>	���¶��߼�¼
+  <operation>foregift</operation> 操作类型
+  <action>...</action> 具体动作 目前有foregift return (注: return操作时，overdue元素里面的price属性，可以使用宏 %return_foregift_price% 表示当前剩余的押金额)
+  <readerBarcode>R0000002</readerBarcode> 读者证条码号
+  <operator>test</operator> 操作者
+  <operTime>Fri, 08 Dec 2006 04:17:45 GMT</operTime> 操作时间
+  <overdues>...</overdues> 押金信息 通常内容为一个字符串，为一个或多个<overdue>元素XML文本片断
+  <readerRecord recPath='...'>...</readerRecord>	最新读者记录
 </root>
 
 ===
-setEntity ���ò��¼
+setEntity 设置册记录
 
 API: SetEntities
 
 <root>
-  <operation>setEntity</operation> ��������
-  <action>new</action> ���嶯������new change delete move 4��
-  <style>...</style> �����force nocheckdup noeventlog 3��
-  <record recPath='����ͼ��ʵ��/3'><root><parent>2</parent><barcode>0000003</barcode><state>״̬2</state><location>������</location><price></price><bookType>��ѧ�ο�</bookType><registerNo></registerNo><comment>test</comment><mergeComment></mergeComment><batchNo>111</batchNo><borrower></borrower><borrowDate></borrowDate><borrowPeriod></borrowPeriod></root></record> ��¼��
-  <oldRecord recPath='����ͼ��ʵ��/3'>...</oldRecord> �����ǻ���ɾ�����ƶ��ļ�¼ ����Ϊchange��delete��moveʱ�߱���Ԫ��
-  <operator>test</operator> ������
-  <operTime>Fri, 08 Dec 2006 08:41:46 GMT</operTime> ����ʱ��
+  <operation>setEntity</operation> 操作类型
+  <action>new</action> 具体动作。有new change delete move 4种
+  <style>...</style> 风格。有force nocheckdup noeventlog 3种
+  <record recPath='中文图书实体/3'><root><parent>2</parent><barcode>0000003</barcode><state>状态2</state><location>阅览室</location><price></price><bookType>教学参考</bookType><registerNo></registerNo><comment>test</comment><mergeComment></mergeComment><batchNo>111</batchNo><borrower></borrower><borrowDate></borrowDate><borrowPeriod></borrowPeriod></root></record> 记录体
+  <oldRecord recPath='中文图书实体/3'>...</oldRecord> 被覆盖或者删除、移动的记录 动作为change、delete和move时具备此元素
+  <operator>test</operator> 操作者
+  <operTime>Fri, 08 Dec 2006 08:41:46 GMT</operTime> 操作时间
 </root>
 
-ע��1) ��<action>Ϊdeleteʱ��û��<record>Ԫ�ء�Ϊnewʱ��û��<oldRecord>Ԫ�ء�
-	2) <record>�е�����, �漰����ͨ��<borrower><borrowDate><borrowPeriod>��, ����־�ָ��׶�, ��Ӧ����Ч, �⼸������Ӧ���ӵ�ǰλ�ÿ��м�¼��ȡ, ��<record>���������ݺϲ���, ��д�����ݿ�
-	3) һ��SetEntities()API����, ���ܴ���������־��¼��
+注：1) 当<action>为delete时，没有<record>元素。为new时，没有<oldRecord>元素。
+	2) <record>中的内容, 涉及到流通的<borrower><borrowDate><borrowPeriod>等, 在日志恢复阶段, 都应当无效, 这几个内容应当从当前位置库中记录获取, 和<record>中其他内容合并后, 再写入数据库
+	3) 一次SetEntities()API调用, 可能创建多条日志记录。
 	
 ===
-setOrder ���ö�����¼
+setOrder 设置订购记录
 
 API: SetOrders()
 
 <root>
-  <operation>setOrder</operation> ��������
-  <action>new</action> ���嶯������new change delete 3��
-  <style>...</style> �����force nocheckdup noeventlog 3��
-  <record recPath='����ͼ�鶩��/3'><root>...</root></record> ��¼��
-  <oldRecord recPath='����ͼ�鶩��/3'>...</oldRecord> �����ǻ���ɾ���ļ�¼ ����Ϊchange��deleteʱ�߱���Ԫ��
-  <operator>test</operator> ������
-  <operTime>Fri, 08 Dec 2006 08:41:46 GMT</operTime> ����ʱ��
+  <operation>setOrder</operation> 操作类型
+  <action>new</action> 具体动作。有new change delete 3种
+  <style>...</style> 风格。有force nocheckdup noeventlog 3种
+  <record recPath='中文图书订购/3'><root>...</root></record> 记录体
+  <oldRecord recPath='中文图书订购/3'>...</oldRecord> 被覆盖或者删除的记录 动作为change和delete时具备此元素
+  <operator>test</operator> 操作者
+  <operTime>Fri, 08 Dec 2006 08:41:46 GMT</operTime> 操作时间
 </root>
 
-ע��1) ��<action>Ϊdeleteʱ��û��<record>Ԫ�ء�Ϊnewʱ��û��<oldRecord>Ԫ�ء�
-	2) һ��SetOrders()API����, ���ܴ���������־��¼��
+注：1) 当<action>为delete时，没有<record>元素。为new时，没有<oldRecord>元素。
+	2) 一次SetOrders()API调用, 可能创建多条日志记录。
 	
 ===
-setIssue �����ڼ�¼
+setIssue 设置期记录
 
 API: SetIssues()
 
 <root>
-  <operation>setIssue</operation> ��������
-  <action>new</action> ���嶯������new change delete 3��
-  <style>...</style> �����force nocheckdup noeventlog 3��
-  <record recPath='�����ڿ���/3'><root>...</root></record> ��¼��
-  <oldRecord recPath='�����ڿ���/3'>...</oldRecord> �����ǻ���ɾ���ļ�¼ ����Ϊchange��deleteʱ�߱���Ԫ��
-  <operator>test</operator> ������
-  <operTime>Fri, 08 Dec 2006 08:41:46 GMT</operTime> ����ʱ��
+  <operation>setIssue</operation> 操作类型
+  <action>new</action> 具体动作。有new change delete 3种
+  <style>...</style> 风格。有force nocheckdup noeventlog 3种
+  <record recPath='中文期刊期/3'><root>...</root></record> 记录体
+  <oldRecord recPath='中文期刊期/3'>...</oldRecord> 被覆盖或者删除的记录 动作为change和delete时具备此元素
+  <operator>test</operator> 操作者
+  <operTime>Fri, 08 Dec 2006 08:41:46 GMT</operTime> 操作时间
 </root>
 
-ע��1) ��<action>Ϊdeleteʱ��û��<record>Ԫ�ء�Ϊnewʱ��û��<oldRecord>Ԫ�ء�
-	2) һ��SetIssues()API����, ���ܴ���������־��¼��
+注：1) 当<action>为delete时，没有<record>元素。为new时，没有<oldRecord>元素。
+	2) 一次SetIssues()API调用, 可能创建多条日志记录。
 
 ===
-setComment ������ע��¼
+setComment 设置评注记录
 
 API: SetComments()
 
 <root>
-  <operation>setComment</operation> ��������
-  <action>new</action> ���嶯������new change delete 3��
-  <style>...</style> �����force nocheckdup noeventlog 3��
-  <record recPath='����ͼ����ע/3'>...</record> ��¼��
-  <oldRecord recPath='����ͼ����ע/3'>...</oldRecord> �����ǻ���ɾ���ļ�¼ ����Ϊchange��deleteʱ�߱���Ԫ��
-  <operator>test</operator> ������
-  <operTime>Fri, 08 Dec 2006 08:41:46 GMT</operTime> ����ʱ��
+  <operation>setComment</operation> 操作类型
+  <action>new</action> 具体动作。有new change delete 3种
+  <style>...</style> 风格。有force nocheckdup noeventlog 3种
+  <record recPath='中文图书评注/3'>...</record> 记录体
+  <oldRecord recPath='中文图书评注/3'>...</oldRecord> 被覆盖或者删除的记录 动作为change和delete时具备此元素
+  <operator>test</operator> 操作者
+  <operTime>Fri, 08 Dec 2006 08:41:46 GMT</operTime> 操作时间
 </root>
 
-ע��1) ��<action>Ϊdeleteʱ��û��<record>Ԫ�ء�Ϊnewʱ��û��<oldRecord>Ԫ�ء�
- 2) һ��SetComments()API����, ���ܴ���������־��¼��
+注：1) 当<action>为delete时，没有<record>元素。为new时，没有<oldRecord>元素。
+ 2) 一次SetComments()API调用, 可能创建多条日志记录。
 
 ===
-writeRes д�������Դ
+writeRes 写入对象资源
 
 API: WriteRes()
 
 <root>
 <operation>writeRes</operation> 
-<requestResPath>...</requestResPath> ��Դ·��������Ҳ��������API�ǵ�strResPath����ֵ��������·���еļ�¼ID���ְ����ʺţ���ʾҪ׷�Ӵ����µļ�¼
-<resPath>...</resPath> ��Դ·������Դ��ȷ��·����
-<ranges>...</ranges> �ֽڷ�Χ
-<totalLength>...</totalLength> �ܳ���
-<metadata>...</metadata> ��Ԫ�ص��ı����Ǽ�¼�壬��ע��Ϊ��͸�����ַ�����HtmlEncoding��ļ�¼�ַ�������
+<requestResPath>...</requestResPath> 资源路径参数。也就是请求API是的strResPath参数值。可能在路径中的记录ID部分包含问号，表示要追加创建新的记录
+<resPath>...</resPath> 资源路径。资源的确定路径。
+<ranges>...</ranges> 字节范围
+<totalLength>...</totalLength> 总长度
+<metadata>...</metadata> 此元素的文本即是记录体，但注意为不透明的字符串（HtmlEncoding后的记录字符串）。
 <style>...</style>
 <operator>test</operator> 
 <operTime>Fri, 08 Dec 2006 10:12:20 GMT</operTime> 
 </root>
 
-ע����־��¼���ܻ���һ��attachment(����)	
+注：日志记录可能会有一个attachment(附件)	
 
 	
 	998
-$a��Ŀ���κ� 
-$s״̬
-$tĿ���¼·��
-$u����ʱ��
+$a编目批次号 
+$s状态
+$t目标记录路径
+$u创建时间

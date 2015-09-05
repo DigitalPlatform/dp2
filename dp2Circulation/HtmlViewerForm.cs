@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -9,14 +9,14 @@ using System.Windows.Forms;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ²ì¿´ HTML ÏÔÊ¾Ğ§¹ûµÄ´°¿Ú
+    /// å¯Ÿçœ‹ HTML æ˜¾ç¤ºæ•ˆæœçš„çª—å£
     /// </summary>
     public partial class HtmlViewerForm : Form
     {
         string m_strHtmlString = "";
 
         /// <summary>
-        /// µ±Ç° HTML ×Ö·û´®
+        /// å½“å‰ HTML å­—ç¬¦ä¸²
         /// </summary>
         public string HtmlString
         {
@@ -33,7 +33,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public HtmlViewerForm()
         {
@@ -41,9 +41,9 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// Ğ´Èë HTML ×Ö·û´®
+        /// å†™å…¥ HTML å­—ç¬¦ä¸²
         /// </summary>
-        /// <param name="strHtml">HTML ×Ö·û´®</param>
+        /// <param name="strHtml">HTML å­—ç¬¦ä¸²</param>
         public void WriteHtml(string strHtml)
         {
             Global.WriteHtml(this.webBrowser1,

@@ -106,7 +106,6 @@ namespace DigitalPlatform.rms
         {
         }
 
-
         // 检查数据库尾号
         // parameters:
         //      strError    out参数，返回出错信息
@@ -171,15 +170,15 @@ namespace DigitalPlatform.rms
                 //调SetIfGreaten()函数，如果本记录号大于尾号,自动推动尾号为最大
                 //这种情况发生在我们给的记录号超过尾号时
                 bool bPushTailNo = false;
-                this.SetIfGreaten(Convert.ToInt32(strRealTailNo),
-                    false, // isExistReaderLock
-                    out bPushTailNo);
+                bPushTailNo = this.AdjustTailNo(Convert.ToInt32(strRealTailNo),
+                    false);
             }
 
             this.m_bTailNoVerified = true;
 
             return 0;
         }
+
         // 根据strStyle风格,得到相应的记录号
         // prev:前一条,next:下一条,如果strID == ? 则prev为第一条,next为最后一条
         // 如果不包含prev和next则不能调此函数
@@ -720,11 +719,11 @@ namespace DigitalPlatform.rms
             return System.Convert.ToInt32(nodeSeed.InnerText.Trim()); // 2012/2/16
         }
 
-        // set数据库的尾号
+        // 修改数据库的尾号
         // parameter:
         //		 nSeed  传入的尾号数
         // 线: 不安全
-        protected void SetTailNo(int nSeed)  //设为protected是因为在初始化时被访问
+        protected void ChangeTailNo(int nSeed)  //设为protected是因为在初始化时被访问
         {
             XmlNode nodeSeed =
                 this.PropertyNode.SelectSingleNode("seed");
@@ -735,11 +734,48 @@ namespace DigitalPlatform.rms
             this.container.Changed = true;
         }
 
+        // 有条件地减量数据库记忆的尾号
+        // 所谓条件是：strDeletedID 这个号码刚好是当前最尾一个号码
+        internal bool TryRecycleTailNo(string strDeletedID)
+        {
+            if (this.m_bTailNoVerified == false)
+                return false;
+
+            //****************对数据库尾号加写锁***********
+            this.m_TailNolock.AcquireWriterLock(m_nTimeOut);
+#if DEBUG_LOCK
+			this.container.WriteDebugInfo("TryDecreaseTailNo()，对'" + this.GetCaption("zh-CN") + "'数据库尾号加写锁。");
+#endif
+            try
+            {
+                int nNumber = 0;
+                if (Int32.TryParse(strDeletedID, out nNumber) == false)
+                    return false;
+
+                int nTemp = GetTailNo();   //必须采用这种方法，不能直接用Seed++
+                if (nNumber == nTemp)
+                {
+                    ChangeTailNo(nTemp - 1);
+                    return true;
+                }
+
+                return false;
+            }
+            finally
+            {
+                //***************对数据库尾号解写锁************
+                this.m_TailNolock.ReleaseWriterLock();
+#if DEBUG_LOCK
+				this.container.WriteDebugInfo("TryDecreaseTailNo()，对'" + this.GetCaption("zh-CN") + "'数据库尾号解写锁。");
+#endif
+            }
+        }
+
         // 得到记录的ID尾号（先加1再返回）,
         // 线: 安全
         // 加锁原因，加写锁，修改了nodeSeed内容，并始终保持增加，所以此时他处不能再读和写
         // return:
-        //      -1  出错
+        //      -1  出错。原因是当前数据库记忆的尾号尚未经过校验
         //      其他  返回整数ID
         protected int GetNewTailNo()
         {
@@ -755,7 +791,7 @@ namespace DigitalPlatform.rms
 
                 int nTemp = GetTailNo();   //必须采用这种方法，不能直接用Seed++
                 nTemp++;
-                SetTailNo(nTemp);
+                ChangeTailNo(nTemp);
                 return nTemp; //GetTailNo();
             }
             finally
@@ -768,19 +804,20 @@ namespace DigitalPlatform.rms
             }
         }
 
+        // 推动数据库记忆的尾号，如果必要
         // 如果用户手加输入的记录号大于的数据库的尾号，
         // 则要修改尾号，此时将读锁升级为写锁，
         // 修改完后再降级为读锁
         // parameter:
         //		nID         传入ID
-        //		isExistReaderLock   是否已存在读锁
-        //      bPushTailNo 是否发生了推动尾号的情况
+        //		isExistReaderLock   是否已存在读锁。若已经存在则本函数就不加锁了
         // 线: 安全的
-        protected void SetIfGreaten(int nID,
-            bool isExistReaderLock,
-            out bool bPushTailNo)
+        // return:
+        //      是否发生了推动尾号的情况
+        protected bool AdjustTailNo(int nID,
+            bool isExistReaderLock)
         {
-            bPushTailNo = false;
+            bool bTailNoChanged = false;
 
             if (isExistReaderLock == false)
             {
@@ -805,7 +842,7 @@ namespace DigitalPlatform.rms
                     // 2006/12/8 注释掉
                     // 写日志
                     // this.container.WriteErrorLog("发现数据库'" + this.GetCaption("zh-CN") + "'的实际尾号'" + Convert.ToString(nID) + "'大于保存的尾号'" + Convert.ToString(nSavedNo) + "'，推动尾号。");
-                    bPushTailNo = true;
+                    bTailNoChanged = true;
 
                     //*********上升读锁为写锁************
                     LockCookie lc = m_TailNolock.UpgradeToWriterLock(m_nTimeOut);
@@ -814,7 +851,7 @@ namespace DigitalPlatform.rms
 #endif
                     try
                     {
-                        SetTailNo(nID);
+                        ChangeTailNo(nID);
                     }
                     finally
                     {
@@ -825,6 +862,8 @@ namespace DigitalPlatform.rms
 #endif
                     }
                 }
+
+                return bTailNoChanged;
             }
             finally
             {
@@ -2107,11 +2146,16 @@ namespace DigitalPlatform.rms
         }
 
 
-        // 确保ID
-        public string EnsureID(string strID,
-            out bool bPushTailNo)
+        // 获得可用的 ID，并推动系统记载的尾号
+        // parameters:
+        //      strID   输入的 ID 如果为 "-1"，表示希望系统根据当前库记忆的尾号给出一个可用的 ID。
+        // exceptions:
+        //      Exception   数据库尾号未经过校验；发生的新尾号不合法
+        public bool EnsureID(ref string strID)
         {
-            bPushTailNo = false;
+            // bool bTailNoChanged = false;    // 数据库记忆的尾号是否发生了变化?
+            if (this.m_bTailNoVerified == false)
+                throw (new Exception("数据库 '" + this.GetCaption("zh") + "' 因其尾号尚未经过校验，无法进行写入操作"));
 
             if (strID == "-1") // 追加记录,GetNewTailNo()是安全的
             {
@@ -2119,10 +2163,9 @@ namespace DigitalPlatform.rms
                 if (strID == "-1")
                     throw (new Exception("数据库 '" + this.GetCaption("zh") + "' 因其尾号尚未经过校验，无法进行追加新记录的写入操作"));
 
-                bPushTailNo = true;
-                return DbPath.GetID10(strID);
+                strID = DbPath.GetID10(strID);
+                return true;
             }
-
 
             //*******对数据库加读锁**********************
             m_TailNolock.AcquireUpgradeableReaderLock(m_nTimeOut);
@@ -2134,17 +2177,13 @@ namespace DigitalPlatform.rms
                 strID = DbPath.GetID10(strID);
                 if (StringUtil.RegexCompare(@"\B[0123456789]+", strID) == false)
                 {
-                    throw (new Exception("记录号:'" + strID + "'不合法！"));
+                    throw (new Exception("记录号 '" + strID + "' 不合法"));
                 }
 
-                if (this.m_bTailNoVerified == false)
-                    throw (new Exception("数据库 '"+this.GetCaption("zh")+"' 因其尾号尚未经过校验，无法进行写入操作"));
-
-                //调SetIfGreaten()函数，如果本记录号大于尾号,自动推动尾号为最大
-                //这种情况发生在我们给的记录号超过尾号时
-                SetIfGreaten(Convert.ToInt32(strID),
-                    true,
-                    out bPushTailNo);
+                // 调SetIfGreaten()函数，如果本记录号大于尾号,自动推动尾号为最大
+                // 这种情况发生在我们给的记录号超过尾号时
+                return AdjustTailNo(Convert.ToInt32(strID),
+                    true);
             }
             finally
             {
@@ -2154,8 +2193,6 @@ namespace DigitalPlatform.rms
 				this.container.WriteDebugInfo("EnsureID()，对'" + this.GetCaption("zh-CN") + "'数据库解读锁。");
 #endif
             }
-
-            return strID;
         }
 
         // 得到一个库的信息
@@ -2371,7 +2408,6 @@ namespace DigitalPlatform.rms
             return 0;
         }
 
-
         // 设置数据库的基本信息
         // parameters:
         //		logicNames	        LogicNameItem数组，用新的逻辑库名数组替换原来的逻辑库名数组
@@ -2472,12 +2508,10 @@ namespace DigitalPlatform.rms
                 if (nRet == -1)
                     return -1;
 
-
                 // 目前不支持修改strType,strSqlDbName
 
                 if (strKeysText != null)  // 2008/4/30
                 {
-
                     string strKeysFileName = "";//this.GetFixedCfgFileName("keys");
                     string strDbName = this.GetCaption("zh");
 
@@ -2543,9 +2577,7 @@ namespace DigitalPlatform.rms
 
                     // 把缓冲清空
                     this.m_keysCfg = null;
-
                 }
-
 
                 if (strBrowseText != null)  // 2008/4/30
                 {
@@ -2615,9 +2647,7 @@ namespace DigitalPlatform.rms
                     // this.m_browseCfg = null;
                     // this.m_bHasBrowse = true; // 缺省值
                     this.browse_table.Clear();
-
                 }
-
 
                 return 0;
             }

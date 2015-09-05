@@ -1,21 +1,22 @@
-using System;
+ï»¿using System;
 using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
 using System.Reflection;
+
 using DigitalPlatform;
 using DigitalPlatform.Text;
 
 namespace dp2Circulation
 {
 	/// <summary>
-	/// °æÈ¨ ¶Ô»°¿ò
+	/// ç‰ˆæƒ å¯¹è¯æ¡†
 	/// </summary>
 	internal class CopyrightDlg : System.Windows.Forms.Form
 	{
         /// <summary>
-        /// ¿ò¼Ü´°¿Ú
+        /// æ¡†æ¶çª—å£
         /// </summary>
         public MainForm MainForm = null;
 
@@ -77,12 +78,12 @@ namespace dp2Circulation
             // 
             this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.label1.Font = new System.Drawing.Font("Î¢ÈíÑÅºÚ", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label1.Font = new System.Drawing.Font("å¾®è½¯é›…é»‘", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label1.Location = new System.Drawing.Point(10, 24);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(461, 17);
             this.label1.TabIndex = 0;
-            this.label1.Text = "dp2ÄÚÎñ/Á÷Í¨ dp2Circulation V2.4";
+            this.label1.Text = "dp2å†…åŠ¡/æµé€š dp2Circulation V2.4";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // label_copyright
@@ -93,7 +94,7 @@ namespace dp2Circulation
             this.label_copyright.Name = "label_copyright";
             this.label_copyright.Size = new System.Drawing.Size(461, 42);
             this.label_copyright.TabIndex = 1;
-            this.label_copyright.Text = "(C) °æÈ¨ËùÓĞ 2006-2015 Êı×ÖÆ½Ì¨(±±¾©)Èí¼şÓĞÏŞÔğÈÎ¹«Ë¾\r\nDigital Platform (Beijing) Software Corp. Lt" +
+            this.label_copyright.Text = "(C) ç‰ˆæƒæ‰€æœ‰ 2006-2015 æ•°å­—å¹³å°(åŒ—äº¬)è½¯ä»¶æœ‰é™è´£ä»»å…¬å¸\r\nDigital Platform (Beijing) Software Corp. Lt" +
     "d.";
             this.label_copyright.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
@@ -118,7 +119,7 @@ namespace dp2Circulation
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(96, 23);
             this.button_OK.TabIndex = 3;
-            this.button_OK.Text = "È·¶¨";
+            this.button_OK.Text = "ç¡®å®š";
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
             // textBox_environment
@@ -154,7 +155,7 @@ namespace dp2Circulation
             this.MinimizeBox = false;
             this.Name = "CopyrightDlg";
             this.ShowInTaskbar = false;
-            this.Text = "°æÈ¨ Copyright";
+            this.Text = "ç‰ˆæƒ Copyright";
             this.Load += new System.EventHandler(this.CopyrightDlg_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -190,13 +191,13 @@ namespace dp2Circulation
 
 		private void CopyrightDlg_Load(object sender, System.EventArgs e)
 		{
-			label_copyright.Text = "(C) °æÈ¨ËùÓĞ 2006-2015 Êı×ÖÆ½Ì¨(±±¾©)Èí¼şÓĞÏŞÔğÈÎ¹«Ë¾\r\nDigital Platform (Beijing) Software Corp. Ltd.";
+			label_copyright.Text = "(C) ç‰ˆæƒæ‰€æœ‰ 2006-2015 æ•°å­—å¹³å°(åŒ—äº¬)è½¯ä»¶æœ‰é™è´£ä»»å…¬å¸\r\nDigital Platform (Beijing) Software Corp. Ltd.";
 
 			Assembly myAssembly = Assembly.GetAssembly(this.GetType());
-			textBox_environment.Text = "°æ±¾ºÍ»·¾³:\r\n±¾»ú .NET Framework °æ±¾: " + myAssembly.ImageRuntimeVersion
-				+ "\r\n±¾Èí¼ş: " + myAssembly.FullName
-                + "\r\nµ±Ç°Á¬½ÓµÄ dp2Library (Î»ÓÚ "+this.MainForm.LibraryServerUrl+"): " + this.MainForm.ServerVersion.ToString() + " UID:" + this.MainForm.ServerUID
-                + "\r\n\r\n±¾»ú MAC µØÖ·: " + StringUtil.MakePathList(SerialCodeForm.GetMacAddress());
+			textBox_environment.Text = "ç‰ˆæœ¬å’Œç¯å¢ƒ:\r\næœ¬æœº .NET Framework ç‰ˆæœ¬: " + myAssembly.ImageRuntimeVersion
+				+ "\r\næœ¬è½¯ä»¶: " + myAssembly.FullName
+                + "\r\nå½“å‰è¿æ¥çš„ dp2Library (ä½äº "+this.MainForm.LibraryServerUrl+"): " + this.MainForm.ServerVersion.ToString() + " UID:" + this.MainForm.ServerUID
+                + "\r\n\r\næœ¬æœº MAC åœ°å€: " + StringUtil.MakePathList(SerialCodeForm.GetMacAddress());
 			 
 			/*
 			for(int i = 0; i<100; i++) 

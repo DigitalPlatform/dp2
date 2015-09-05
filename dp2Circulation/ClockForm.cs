@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -15,33 +15,33 @@ using DigitalPlatform.Xml;
 namespace dp2Circulation
 {
     /// <summary>
-    /// Ê±ÖÓ´°
+    /// æ—¶é’Ÿçª—
     /// </summary>
     public partial class ClockForm : Form
     {
         /// <summary>
-        /// Í¨Ñ¶Í¨µÀ
+        /// é€šè®¯é€šé“
         /// </summary>
         public LibraryChannel Channel = new LibraryChannel();
         // public ApplicationInfo ap = null;
         /// <summary>
-        /// µ±Ç°½çÃæÓïÑÔ
+        /// å½“å‰ç•Œé¢è¯­è¨€
         /// </summary>
         public string Lang = "zh";
 
         /// <summary>
-        /// ¿ò¼Ü´°¿Ú
+        /// æ¡†æ¶çª—å£
         /// </summary>
         public MainForm MainForm = null;
 
         DigitalPlatform.Stop stop = null;
 
-        int m_nIn = 0;  // ÕıÔÚºÍ·şÎñÆ÷´ò½»µÀµÄ²ãÊı
+        int m_nIn = 0;  // æ­£åœ¨å’ŒæœåŠ¡å™¨æ‰“äº¤é“çš„å±‚æ•°
 
         const int WM_PREPARE = API.WM_USER + 200;
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public ClockForm()
         {
@@ -66,7 +66,7 @@ namespace dp2Circulation
             this.Channel.AfterLogin += new AfterLoginEventHandle(Channel_AfterLogin);
 
             stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// ºÍÈİÆ÷¹ØÁª
+            stop.Register(MainForm.stopManager, true);	// å’Œå®¹å™¨å…³è”
 
             API.PostMessage(this.Handle, WM_PREPARE, 0, 0);
             this.timer1.Start();
@@ -87,7 +87,7 @@ namespace dp2Circulation
             string strError = "";
 
             DialogResult result = MessageBox.Show(this,
-"È·ÊµÒª°Ñ·şÎñÆ÷Ê±ÖÓÉèÖÃÎª '" + this.TimeStringForDisplay + "' ?\r\n\r\n¾¯¸æ£ºÈç¹û·şÎñÆ÷Ê±¼äÉèÖÃµÃ²»ÕıÈ·£¬»á¶ÔºÜ¶àÁ÷Í¨²Ù×÷²úÉú²»ÀûÓ°Ïì",
+"ç¡®å®è¦æŠŠæœåŠ¡å™¨æ—¶é’Ÿè®¾ç½®ä¸º '" + this.TimeStringForDisplay + "' ?\r\n\r\nè­¦å‘Šï¼šå¦‚æœæœåŠ¡å™¨æ—¶é—´è®¾ç½®å¾—ä¸æ­£ç¡®ï¼Œä¼šå¯¹å¾ˆå¤šæµé€šæ“ä½œäº§ç”Ÿä¸åˆ©å½±å“",
 "ClockForm",
 MessageBoxButtons.YesNo,
 MessageBoxIcon.Question,
@@ -96,7 +96,7 @@ MessageBoxDefaultButton.Button2);
                 return;
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚÉèÖÃ·şÎñÆ÷µ±Ç°Ê±ÖÓÎª "+this.RFC1123TimeString+" ...");
+            stop.Initial("æ­£åœ¨è®¾ç½®æœåŠ¡å™¨å½“å‰æ—¶é’Ÿä¸º "+this.RFC1123TimeString+" ...");
             stop.BeginLoop();
 
             this.EnableControls(false);
@@ -107,8 +107,8 @@ MessageBoxDefaultButton.Button2);
             {
                 if (value > 1)
                 {
-                    strError = "Í¨µÀÕıÔÚ±»ÁíÒ»²Ù×÷Ê¹ÓÃ£¬µ±Ç°²Ù×÷±»·ÅÆú";
-                    goto ERROR1;   // ·ÀÖ¹ÖØÈë
+                    strError = "é€šé“æ­£åœ¨è¢«å¦ä¸€æ“ä½œä½¿ç”¨ï¼Œå½“å‰æ“ä½œè¢«æ”¾å¼ƒ";
+                    goto ERROR1;   // é˜²æ­¢é‡å…¥
                 }
 
                 long lRet = Channel.SetClock(
@@ -130,7 +130,7 @@ MessageBoxDefaultButton.Button2);
                 stop.Initial("");
             }
 
-            MessageBox.Show(this, "Ê±ÖÓÉèÖÃ³É¹¦");
+            MessageBox.Show(this, "æ—¶é’Ÿè®¾ç½®æˆåŠŸ");
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -143,7 +143,7 @@ MessageBoxDefaultButton.Button2);
             strError = "";
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ»ñµÃ·şÎñÆ÷µ±Ç°Ê±ÖÓ ...");
+            stop.Initial("æ­£åœ¨è·å¾—æœåŠ¡å™¨å½“å‰æ—¶é’Ÿ ...");
             stop.BeginLoop();
 
             if (bChangeEnableState == true)
@@ -153,7 +153,7 @@ MessageBoxDefaultButton.Button2);
             try
             {
                 if (value > 1)
-                    return 0;   // ·ÀÖ¹ÖØÈë
+                    return 0;   // é˜²æ­¢é‡å…¥
 
                 string strTime = "";
                 long lRet = Channel.GetClock(
@@ -200,7 +200,7 @@ MessageBoxDefaultButton.Button2);
             string strError = "";
 
             DialogResult result = MessageBox.Show(this,
-"È·ÊµÒª°Ñ·şÎñÆ÷Ê±ÖÓ¸´Ô­ÎªºÍ·şÎñÆ÷Ó²¼şÊ±ÖÓÒ»ÖÂ?\r\n\r\n¾¯¸æ£ºÈç¹û·şÎñÆ÷Ê±ÖÓÉèÖÃµÃ²»ÕıÈ·£¬»á¶ÔºÜ¶àÁ÷Í¨²Ù×÷²úÉú²»ÀûÓ°Ïì",
+"ç¡®å®è¦æŠŠæœåŠ¡å™¨æ—¶é’Ÿå¤åŸä¸ºå’ŒæœåŠ¡å™¨ç¡¬ä»¶æ—¶é’Ÿä¸€è‡´?\r\n\r\nè­¦å‘Šï¼šå¦‚æœæœåŠ¡å™¨æ—¶é’Ÿè®¾ç½®å¾—ä¸æ­£ç¡®ï¼Œä¼šå¯¹å¾ˆå¤šæµé€šæ“ä½œäº§ç”Ÿä¸åˆ©å½±å“",
 "ClockForm",
 MessageBoxButtons.YesNo,
 MessageBoxIcon.Question,
@@ -210,7 +210,7 @@ MessageBoxDefaultButton.Button2);
 
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ½«·şÎñÆ÷Ê±ÖÓ¸´Ô­ÎªÓ²¼şÊ±ÖÓ ...");
+            stop.Initial("æ­£åœ¨å°†æœåŠ¡å™¨æ—¶é’Ÿå¤åŸä¸ºç¡¬ä»¶æ—¶é’Ÿ ...");
             stop.BeginLoop();
 
             this.EnableControls(false);
@@ -221,8 +221,8 @@ MessageBoxDefaultButton.Button2);
             {
                 if (value > 1)
                 {
-                    strError = "Í¨µÀÕıÔÚ±»ÁíÒ»²Ù×÷Ê¹ÓÃ£¬µ±Ç°²Ù×÷±»·ÅÆú";
-                    goto ERROR1;   // ·ÀÖ¹ÖØÈë
+                    strError = "é€šé“æ­£åœ¨è¢«å¦ä¸€æ“ä½œä½¿ç”¨ï¼Œå½“å‰æ“ä½œè¢«æ”¾å¼ƒ";
+                    goto ERROR1;   // é˜²æ­¢é‡å…¥
                 }
 
                 long lRet = Channel.SetClock(
@@ -244,9 +244,9 @@ MessageBoxDefaultButton.Button2);
                 stop.Initial("");
             }
 
-            MessageBox.Show(this, "·şÎñÆ÷Ê±ÖÓ¸´Ô­³É¹¦");
+            MessageBox.Show(this, "æœåŠ¡å™¨æ—¶é’Ÿå¤åŸæˆåŠŸ");
 
-            // TODO: ¸´Ô­ºó£¬ÖØĞÂ»ñµÃÒ»ÏÂ£¬ÒÔ±ãÈÃ²Ù×÷Õß¿´µ½Ğ§¹û
+            // TODO: å¤åŸåï¼Œé‡æ–°è·å¾—ä¸€ä¸‹ï¼Œä»¥ä¾¿è®©æ“ä½œè€…çœ‹åˆ°æ•ˆæœ
             button_get_Click(sender, e);
             return;
         ERROR1:
@@ -254,9 +254,9 @@ MessageBoxDefaultButton.Button2);
             return;
         }
 
-        // ×¢Òâ£¬ÊÇGMTÊ±¼ä
+        // æ³¨æ„ï¼Œæ˜¯GMTæ—¶é—´
         /// <summary>
-        /// ±íÊ¾µ±Ç°Ê±¼äµÄ RFC1123 ÊÂ¼ş×Ö·û´®
+        /// è¡¨ç¤ºå½“å‰æ—¶é—´çš„ RFC1123 äº‹ä»¶å­—ç¬¦ä¸²
         /// </summary>
         public string RFC1123TimeString
         {
@@ -279,7 +279,7 @@ MessageBoxDefaultButton.Button2);
                 }
                 catch
                 {
-                    MessageBox.Show(this, "Ê±¼ä×Ö·û´® " +value+ "¸ñÊ½²»ºÏ·¨" );
+                    MessageBox.Show(this, "æ—¶é—´å­—ç¬¦ä¸² " +value+ "æ ¼å¼ä¸åˆæ³•" );
                     return;
                 }
 
@@ -305,9 +305,9 @@ MessageBoxDefaultButton.Button2);
 
         private void ClockForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            if (stop != null) // ÍÑÀë¹ØÁª
+            if (stop != null) // è„±ç¦»å…³è”
             {
-                stop.Unregister();	// ºÍÈİÆ÷¹ØÁª
+                stop.Unregister();	// å’Œå®¹å™¨å…³è”
                 stop = null;
             }
         }
@@ -331,12 +331,12 @@ MessageBoxDefaultButton.Button2);
         {
             if (this.checkBox_autoGetServerTime.Checked == true)
             {
-                // ÔÚËæÊ±¶¼Ë¢ĞÂµÄÇé¿öÏÂ£¬ĞŞ¸ÄÊ±¼ä×Ö·û´®µÄ²Ù×÷±äµÃÀ§ÄÑ£¬Ö»ºÃ½ûÖ¹
+                // åœ¨éšæ—¶éƒ½åˆ·æ–°çš„æƒ…å†µä¸‹ï¼Œä¿®æ”¹æ—¶é—´å­—ç¬¦ä¸²çš„æ“ä½œå˜å¾—å›°éš¾ï¼Œåªå¥½ç¦æ­¢
                 this.dateTimePicker1.Enabled = false;
                 this.button_set.Enabled = false;
                 this.button_reset.Enabled = false;
 
-                // ¸Ä±äÎªtrue×´Ì¬ºó£¬Á¢¼´»ñµÃÒ»´Î
+                // æ”¹å˜ä¸ºtrueçŠ¶æ€åï¼Œç«‹å³è·å¾—ä¸€æ¬¡
                 string strError = "";
 
                 GetServerTime(false,
@@ -351,9 +351,9 @@ MessageBoxDefaultButton.Button2);
         }
 
         /// <summary>
-        /// ÔÊĞí»òÕß½ûÖ¹½çÃæ¿Ø¼ş¡£ÔÚ³¤²Ù×÷Ç°£¬Ò»°ãĞèÒª½ûÖ¹½çÃæ¿Ø¼ş£»²Ù×÷Íê³ÉºóÔÙÔÊĞí
+        /// å…è®¸æˆ–è€…ç¦æ­¢ç•Œé¢æ§ä»¶ã€‚åœ¨é•¿æ“ä½œå‰ï¼Œä¸€èˆ¬éœ€è¦ç¦æ­¢ç•Œé¢æ§ä»¶ï¼›æ“ä½œå®Œæˆåå†å…è®¸
         /// </summary>
-        /// <param name="bEnable">ÊÇ·ñÔÊĞí½çÃæ¿Ø¼ş¡£true ÎªÔÊĞí£¬ false Îª½ûÖ¹</param>
+        /// <param name="bEnable">æ˜¯å¦å…è®¸ç•Œé¢æ§ä»¶ã€‚true ä¸ºå…è®¸ï¼Œ false ä¸ºç¦æ­¢</param>
         public void EnableControls(bool bEnable)
         {
             if (this.checkBox_autoGetServerTime.Checked == false)
@@ -381,14 +381,14 @@ MessageBoxDefaultButton.Button2);
         {
             string strError = "";
 
-            // Ë¢ĞÂ·şÎñÆ÷Ê±¼äÏÔÊ¾
+            // åˆ·æ–°æœåŠ¡å™¨æ—¶é—´æ˜¾ç¤º
             if (this.checkBox_autoGetServerTime.Checked == true)
             {
                 GetServerTime(false,
                     out strError);
             }
 
-            // Ë¢ĞÂ±¾µØÊ±¼äÏÔÊ¾
+            // åˆ·æ–°æœ¬åœ°æ—¶é—´æ˜¾ç¤º
             DateTime now = DateTime.Now;
             this.textBox_localTime.Text = now.ToString("yyyy-MM-dd HH:mm:ss");
         }
@@ -397,9 +397,9 @@ MessageBoxDefaultButton.Button2);
         {
             if (stop != null)
             {
-                if (stop.State == 0)    // 0 ±íÊ¾ÕıÔÚ´¦Àí
+                if (stop.State == 0)    // 0 è¡¨ç¤ºæ­£åœ¨å¤„ç†
                 {
-                    MessageBox.Show(this, "ÇëÔÚ¹Ø±Õ´°¿ÚÇ°Í£Ö¹ÕıÔÚ½øĞĞµÄ³¤Ê±²Ù×÷¡£");
+                    MessageBox.Show(this, "è¯·åœ¨å…³é—­çª—å£å‰åœæ­¢æ­£åœ¨è¿›è¡Œçš„é•¿æ—¶æ“ä½œã€‚");
                     e.Cancel = true;
                     return;
                 }
@@ -410,9 +410,9 @@ MessageBoxDefaultButton.Button2);
         }
 
         /// <summary>
-        /// È±Ê¡´°¿Ú¹ı³Ì
+        /// ç¼ºçœçª—å£è¿‡ç¨‹
         /// </summary>
-        /// <param name="m">ÏûÏ¢</param>
+        /// <param name="m">æ¶ˆæ¯</param>
         protected override void DefWndProc(ref Message m)
         {
             switch (m.Msg)
@@ -421,11 +421,11 @@ MessageBoxDefaultButton.Button2);
                     {
                         string strError = "";
 
-                        // ´°¿Ú´ò¿ªºó£¬µÚÒ»´Î»ñµÃ·şÎñÆ÷Ê±¼äÏÔÊ¾
+                        // çª—å£æ‰“å¼€åï¼Œç¬¬ä¸€æ¬¡è·å¾—æœåŠ¡å™¨æ—¶é—´æ˜¾ç¤º
                         GetServerTime(true, // changed
                             out strError);
 
-                        // µÚÒ»´ÎË¢ĞÂ±¾µØÊ±¼äÏÔÊ¾
+                        // ç¬¬ä¸€æ¬¡åˆ·æ–°æœ¬åœ°æ—¶é—´æ˜¾ç¤º
                         DateTime now = DateTime.Now;
                         this.textBox_localTime.Text = now.ToString("yyyy-MM-dd HH:mm:ss");
 

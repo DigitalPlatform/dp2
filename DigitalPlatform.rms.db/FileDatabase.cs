@@ -165,7 +165,7 @@ namespace DigitalPlatform.rms
                 }
 
                 // 3.设种子值
-                this.SetTailNo(0);
+                this.ChangeTailNo(0);
                 this.m_bTailNoVerified = true;  // 2011/2/26
                 this.container.Changed = true;
             }
@@ -822,8 +822,7 @@ namespace DigitalPlatform.rms
 
             // 确保ID,并且给返回值赋值
             bool bPushTailNo = false;
-            strID = this.EnsureID(strID,
-                out bPushTailNo);
+            bPushTailNo = this.EnsureID(ref strID);
             if (oUser != null)
             {
                 string strTempRecordPath = this.GetCaption("zh-CN") + "/" + strID;

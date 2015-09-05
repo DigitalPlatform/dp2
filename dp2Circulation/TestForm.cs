@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -39,7 +39,7 @@ namespace dp2Circulation
     internal partial class TestForm : Form
     {
         /// <summary>
-        /// ¿ò¼Ü´°¿Ú
+        /// æ¡†æ¶çª—å£
         /// </summary>
         public MainForm MainForm = null;
 
@@ -123,7 +123,7 @@ namespace dp2Circulation
     this.UiState);
         }
 
-        // ¿ÉÔö¼ÓÏÔÊ¾´ÅÅÌ¿Õ¼äµÄ¹¦ÄÜ
+        // å¯å¢åŠ æ˜¾ç¤ºç£ç›˜ç©ºé—´çš„åŠŸèƒ½
         private void button_diskSpace_writeTempFile_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -132,13 +132,13 @@ namespace dp2Circulation
 
             if (this.textBox_diskSpace_size.Text == "")
             {
-                strError = "ÉĞÎ´Ö¸¶¨ÁÙÊ±ÎÄ¼ş³ß´ç";
+                strError = "å°šæœªæŒ‡å®šä¸´æ—¶æ–‡ä»¶å°ºå¯¸";
                 goto ERROR1;
             }
 
             if (this.textBox_diskSpace_tempFileName.Text == "")
             {
-                strError = "ÉĞÎ´Ö¸¶¨ÁÙÊ±ÎÄ¼şÃû";
+                strError = "å°šæœªæŒ‡å®šä¸´æ—¶æ–‡ä»¶å";
                 goto ERROR1;
             }
 
@@ -162,11 +162,11 @@ namespace dp2Circulation
                 lSize = lSize * 1024;
             else if (strUnit == "")
             {
-                // lSize ²»±ä
+                // lSize ä¸å˜
             }
             else
             {
-                strError = "Î´ÖªµÄ³ß´çµ¥Î» '" + strUnit + "'";
+                strError = "æœªçŸ¥çš„å°ºå¯¸å•ä½ '" + strUnit + "'";
                 goto ERROR1;
             }
 
@@ -183,22 +183,22 @@ namespace dp2Circulation
                 {
                     if (strPrefix == "+")
                     {
-                        strText = "ÎÄ¼ş³ß´ç´Ó " + s.Length.ToString() + " À©´ó " + lSize.ToString() + "£¬µ½ " + (lSize + s.Length).ToString() + "¡£";
+                        strText = "æ–‡ä»¶å°ºå¯¸ä» " + s.Length.ToString() + " æ‰©å¤§ " + lSize.ToString() + "ï¼Œåˆ° " + (lSize + s.Length).ToString() + "ã€‚";
                         s.SetLength(lSize + s.Length);
                     }
                     else if (strPrefix == "-")
                     {
-                        strText = "ÎÄ¼ş³ß´ç´Ó " + s.Length.ToString() + " ËõĞ¡ " + lSize.ToString() + "£¬µ½ " + (s.Length - lSize).ToString() + "¡£";
+                        strText = "æ–‡ä»¶å°ºå¯¸ä» " + s.Length.ToString() + " ç¼©å° " + lSize.ToString() + "ï¼Œåˆ° " + (s.Length - lSize).ToString() + "ã€‚";
                         s.SetLength(Math.Max(s.Length - lSize, 0));
                     }
                     else if (strPrefix == "")
                     {
-                        strText = "ÉèÖÃÎÄ¼ş³ß´çÎª " + lSize.ToString() + " ¡£";
+                        strText = "è®¾ç½®æ–‡ä»¶å°ºå¯¸ä¸º " + lSize.ToString() + " ã€‚";
                         s.SetLength(lSize);
                     }
                     else
                     {
-                        strError = "Î´ÖªµÄÇ°×º '" + strPrefix + "'";
+                        strError = "æœªçŸ¥çš„å‰ç¼€ '" + strPrefix + "'";
                         goto ERROR1;
                     }
                 }
@@ -227,7 +227,7 @@ namespace dp2Circulation
 
             if (this.textBox_diskSpace_tempFileName.Text == "")
             {
-                strError = "ÉĞÎ´Ö¸¶¨ÁÙÊ±ÎÄ¼şÃû";
+                strError = "å°šæœªæŒ‡å®šä¸´æ—¶æ–‡ä»¶å";
                 goto ERROR1;
             }
             EnableControls(false);
@@ -248,9 +248,9 @@ namespace dp2Circulation
 
         }
 
-        // ½âÎö³ß´ç×Ö·û´®
-        // ³ß´ç×Ö·û´®µÄ¸ñÊ½Îª£ºÇ°×º + Êı×Ö + µ¥Î»
-        // ÆäÖĞ£¬Ç°×ºÎª + »ò - , µ¥Î»Îª M»ò K
+        // è§£æå°ºå¯¸å­—ç¬¦ä¸²
+        // å°ºå¯¸å­—ç¬¦ä¸²çš„æ ¼å¼ä¸ºï¼šå‰ç¼€ + æ•°å­— + å•ä½
+        // å…¶ä¸­ï¼Œå‰ç¼€ä¸º + æˆ– - , å•ä½ä¸º Mæˆ– K
         static int ParseSizeText(string strSize,
             out long lSize,
             out string strPrefix,
@@ -306,7 +306,7 @@ namespace dp2Circulation
             {
                 DriveInfo info = new DriveInfo(strDriver);
 
-                this.textBox_diskSpace_freeSpace.Text = strDriver + "Ê£Óà¿Õ¼ä: " + info.AvailableFreeSpace.ToString();
+                this.textBox_diskSpace_freeSpace.Text = strDriver + "å‰©ä½™ç©ºé—´: " + info.AvailableFreeSpace.ToString();
             }
             catch
             {
@@ -314,20 +314,20 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÔÊĞí»òÕß½ûÖ¹½çÃæ¿Ø¼ş¡£ÔÚ³¤²Ù×÷Ç°£¬Ò»°ãĞèÒª½ûÖ¹½çÃæ¿Ø¼ş£»²Ù×÷Íê³ÉºóÔÙÔÊĞí
+        /// å…è®¸æˆ–è€…ç¦æ­¢ç•Œé¢æ§ä»¶ã€‚åœ¨é•¿æ“ä½œå‰ï¼Œä¸€èˆ¬éœ€è¦ç¦æ­¢ç•Œé¢æ§ä»¶ï¼›æ“ä½œå®Œæˆåå†å…è®¸
         /// </summary>
-        /// <param name="bEnable">ÊÇ·ñÔÊĞí½çÃæ¿Ø¼ş¡£true ÎªÔÊĞí£¬ false Îª½ûÖ¹</param>
+        /// <param name="bEnable">æ˜¯å¦å…è®¸ç•Œé¢æ§ä»¶ã€‚true ä¸ºå…è®¸ï¼Œ false ä¸ºç¦æ­¢</param>
         public void EnableControls(bool bEnable)
         {
             this.tabControl_main.Enabled = bEnable;
         }
 
-            // ´´½¨ÊÂ¼şÈÕÖ¾Ä¿Â¼
+            // åˆ›å»ºäº‹ä»¶æ—¥å¿—ç›®å½•
         private void button_createEventLogDir_Click(object sender, EventArgs e)
         {
             if (this.textBox_evenLogDirName.Text == "")
             {
-                MessageBox.Show(this, "ÉĞÎ´Ö¸¶¨ÈÕÖ¾Ä¿Â¼Ãû");
+                MessageBox.Show(this, "å°šæœªæŒ‡å®šæ—¥å¿—ç›®å½•å");
                 return;
             }
 
@@ -340,7 +340,7 @@ namespace dp2Circulation
 
             EventLog Log = new EventLog();
             Log.Source = this.textBox_evenLogDirName.Text;
-            Log.WriteEntry(this.textBox_evenLogDirName.Text + "Ä¿Â¼´´½¨³É¹¦¡£", 
+            Log.WriteEntry(this.textBox_evenLogDirName.Text + "ç›®å½•åˆ›å»ºæˆåŠŸã€‚", 
                 EventLogEntryType.Information);
 
             MessageBox.Show(this, "OK");
@@ -420,7 +420,7 @@ namespace dp2Circulation
             this.textBox_locationEditControl_locationString.Text = this.locationEditControl1.Value;
         }
 
-        // ½«XMLÆ¬¶ÎÉèÖÃ¸ø¿Ø¼ş
+        // å°†XMLç‰‡æ®µè®¾ç½®ç»™æ§ä»¶
         private void button_captionEditControl_set_Click(object sender, EventArgs e)
         {
             try
@@ -433,7 +433,7 @@ namespace dp2Circulation
             }
         }
 
-        // ´Ó¿Ø¼şÖĞ»ñµÃXMLÆ¬¶Î
+        // ä»æ§ä»¶ä¸­è·å¾—XMLç‰‡æ®µ
         private void button_captionEditControl_get_Click(object sender, EventArgs e)
         {
             try
@@ -471,7 +471,7 @@ namespace dp2Circulation
 
         }
 
-        // FromEditControlµÄcaptions²¿·ÖÊÇ·ñÓĞµ¥¶ÀµÄ±êÌâÌõ?
+        // FromEditControlçš„captionséƒ¨åˆ†æ˜¯å¦æœ‰å•ç‹¬çš„æ ‡é¢˜æ¡?
         private void checkBox_fromEditControl_hasCaptionsTitleLine_CheckedChanged(object sender, EventArgs e)
         {
             this.fromEditControl1.HasCaptionsTitleLine = this.checkBox_fromEditControl_hasCaptionsTitleLine.Checked;
@@ -577,7 +577,7 @@ namespace dp2Circulation
         private void button_font_htmlInputDialog_Click(object sender, EventArgs e)
         {
             HtmlInputDialog dlg = new HtmlInputDialog();
-            dlg.Text = "Ö¸¶¨Í³¼ÆÌØĞÔ";
+            dlg.Text = "æŒ‡å®šç»Ÿè®¡ç‰¹æ€§";
             dlg.Url = "f:\\temp\\input.html";
             dlg.Size = new Size(700, 500);
             dlg.ShowDialog(this);
@@ -615,7 +615,7 @@ namespace dp2Circulation
             string strTarget = "";
             this.textBox_marcFormat_targetXml.Text = "";
 
-            // ½«»úÄÚÊ¹ÓÃµÄmarcxml¸ñÊ½×ª»¯Îªmarcxchange¸ñÊ½
+            // å°†æœºå†…ä½¿ç”¨çš„marcxmlæ ¼å¼è½¬åŒ–ä¸ºmarcxchangeæ ¼å¼
             int nRet = MarcUtil.MarcXmlToXChange(this.textBox_marcFormat_sourceXml.Text,
                 null,
             out strTarget,
@@ -729,10 +729,10 @@ namespace dp2Circulation
         {
             OpenFileDialog dlg = new OpenFileDialog();
 
-            dlg.Title = "ÇëÖ¸¶¨Òª´ò¿ªµÄXMLÎÄ¼şÃû";
+            dlg.Title = "è¯·æŒ‡å®šè¦æ‰“å¼€çš„XMLæ–‡ä»¶å";
             dlg.FileName = this.textBox_xml_xmlFilename.Text;
             // dlg.InitialDirectory = 
-            dlg.Filter = "XMLÎÄ¼ş (*.xml)|*.xml|All files (*.*)|*.*";
+            dlg.Filter = "XMLæ–‡ä»¶ (*.xml)|*.xml|All files (*.*)|*.*";
             dlg.RestoreDirectory = true;
 
             if (dlg.ShowDialog() != DialogResult.OK)
@@ -869,10 +869,10 @@ namespace dp2Circulation
 
             OpenFileDialog dlg = new OpenFileDialog();
 
-            dlg.Title = "ÇëÖ¸¶¨Òª´ò¿ªµÄÎÄ±¾ÎÄ¼şÃû";
+            dlg.Title = "è¯·æŒ‡å®šè¦æ‰“å¼€çš„æ–‡æœ¬æ–‡ä»¶å";
             dlg.FileName = "";
             // dlg.InitialDirectory = 
-            dlg.Filter = "ÎÄ±¾ÎÄ¼ş (*.txt)|*.txt|All files (*.*)|*.*";
+            dlg.Filter = "æ–‡æœ¬æ–‡ä»¶ (*.txt)|*.txt|All files (*.*)|*.*";
             dlg.RestoreDirectory = true;
 
             if (dlg.ShowDialog() != DialogResult.OK)
@@ -883,12 +883,12 @@ namespace dp2Circulation
 
             SaveFileDialog save_dlg = new SaveFileDialog();
 
-            save_dlg.Title = "ÇëÖ¸¶¨Òª´´½¨µÄXMLÎÄ¼şÃû";
+            save_dlg.Title = "è¯·æŒ‡å®šè¦åˆ›å»ºçš„XMLæ–‡ä»¶å";
             save_dlg.CreatePrompt = false;
             save_dlg.OverwritePrompt = false;
             save_dlg.FileName = "";
             // dlg.InitialDirectory = Environment.CurrentDirectory;
-            save_dlg.Filter = "XMLÎÄ¼ş (*.xml)|*.xml|All files (*.*)|*.*";
+            save_dlg.Filter = "XMLæ–‡ä»¶ (*.xml)|*.xml|All files (*.*)|*.*";
 
             save_dlg.RestoreDirectory = true;
 
@@ -1009,7 +1009,7 @@ namespace dp2Circulation
             MessageBox.Show(this, strError);
         }
 
-        // .InnerTextºÍXPath text()ÄÄ¸ö¿ì ?
+        // .InnerTextå’ŒXPath text()å“ªä¸ªå¿« ?
         private void button_test_innerTextAndXPath_Click(object sender, EventArgs e)
         {
             XmlDocument dom = new XmlDocument();
@@ -1036,7 +1036,7 @@ namespace dp2Circulation
 
             TimeSpan delta2 = DateTime.Now - start_time;
 
-            MessageBox.Show(this, ".InnertText ºÄ·ÑÊ±¼ä "+delta1.ToString()+"£¬ GetNodeText() ºÄ·ÑÊ±¼ä" + delta2.ToString());
+            MessageBox.Show(this, ".InnertText è€—è´¹æ—¶é—´ "+delta1.ToString()+"ï¼Œ GetNodeText() è€—è´¹æ—¶é—´" + delta2.ToString());
         }
 
         public static string GetNodeText(XmlNode node)
@@ -1062,15 +1062,15 @@ namespace dp2Circulation
             bool bHideMessageBox = false;
             /*
             DialogResult result = MessageDialog.Show(this,
-    "ÊÇ·ñÒªÉı¼¶Í³¼Æ·½°¸ ?",
+    "æ˜¯å¦è¦å‡çº§ç»Ÿè®¡æ–¹æ¡ˆ ?",
     MessageBoxButtons.YesNoCancel,
     MessageBoxDefaultButton.Button2,
-    "ÒÔºó²»ÔÙÌáÊ¾£¬°´±¾´ÎµÄÑ¡Ôñ´¦Àí",
+    "ä»¥åä¸å†æç¤ºï¼ŒæŒ‰æœ¬æ¬¡çš„é€‰æ‹©å¤„ç†",
     ref bHideMessageBox);
              * */
             DialogResult result = MessageDialog.Show(this,
-"ÊÇ·ñÒªÉı¼¶Í³¼Æ·½°¸ ?",
-"ÒÔºó²»ÔÙÌáÊ¾£¬°´±¾´ÎµÄÑ¡Ôñ´¦Àí",
+"æ˜¯å¦è¦å‡çº§ç»Ÿè®¡æ–¹æ¡ˆ ?",
+"ä»¥åä¸å†æç¤ºï¼ŒæŒ‰æœ¬æ¬¡çš„é€‰æ‹©å¤„ç†",
 ref bHideMessageBox);
 
             MessageBox.Show(this, "result=" + result.ToString() + ", bHideMessageBox=" + bHideMessageBox.ToString());
@@ -1327,9 +1327,9 @@ ref bHideMessageBox);
         {
             OpenFileDialog dlg = new OpenFileDialog();
 
-            dlg.Title = "ÇëÖ¸¶¨Òª´ò¿ªµÄ¼ÇÂ¼Â·¾¶ÎÄ¼şÃû";
+            dlg.Title = "è¯·æŒ‡å®šè¦æ‰“å¼€çš„è®°å½•è·¯å¾„æ–‡ä»¶å";
             // dlg.FileName = this.RecPathFilePath;
-            dlg.Filter = "¼ÇÂ¼Â·¾¶ÎÄ¼ş (*.txt)|*.txt|All files (*.*)|*.*";
+            dlg.Filter = "è®°å½•è·¯å¾„æ–‡ä»¶ (*.txt)|*.txt|All files (*.*)|*.*";
             dlg.RestoreDirectory = true;
 
             if (dlg.ShowDialog() != DialogResult.OK)
@@ -1358,11 +1358,11 @@ ref bHideMessageBox);
         {
 
             _stop = new DigitalPlatform.Stop();
-            _stop.Register(this.MainForm.stopManager, true);	// ºÍÈİÆ÷¹ØÁª
+            _stop.Register(this.MainForm.stopManager, true);	// å’Œå®¹å™¨å…³è”
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Style = StopStyle.EnableHalfStop;
-            _stop.Initial("ÕıÔÚ²âÊÔºÄ·ÑÍ¨µÀ ...");
+            _stop.Initial("æ­£åœ¨æµ‹è¯•è€—è´¹é€šé“ ...");
             _stop.BeginLoop();
 
             this.button_test_channelAttack.Enabled = false;
@@ -1409,9 +1409,9 @@ ref bHideMessageBox);
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
 
-                if (_stop != null) // ÍÑÀë¹ØÁª
+                if (_stop != null) // è„±ç¦»å…³è”
                 {
-                    _stop.Unregister();	// ºÍÈİÆ÷¹ØÁª
+                    _stop.Unregister();	// å’Œå®¹å™¨å…³è”
                     _stop = null;
                 }
             }
@@ -1420,7 +1420,7 @@ ref bHideMessageBox);
         private void button_patronCardControl_setData_Click(object sender, EventArgs e)
         {
             this.patronCardControl1.Xml = @"<root>
-<name>Ãû×Ö</name>
+<name>åå­—</name>
 <barcode>123456789</barcode>
 <department>adf adf ads fasdf asdf </department>
 </root>";
@@ -1435,9 +1435,9 @@ ref bHideMessageBox);
         {
             OpenFileDialog dlg = new OpenFileDialog();
 
-            dlg.Title = "ÇëÖ¸¶¨ÒªÉÏ´«µÄÎÄ¼ş";
+            dlg.Title = "è¯·æŒ‡å®šè¦ä¸Šä¼ çš„æ–‡ä»¶";
             dlg.FileName = this.textBox_clientFilePath.Text;
-            dlg.Filter = "ËùÓĞÎÄ¼ş All files (*.*)|*.*";
+            dlg.Filter = "æ‰€æœ‰æ–‡ä»¶ All files (*.*)|*.*";
             dlg.RestoreDirectory = true;
 
             if (dlg.ShowDialog() != DialogResult.OK)
@@ -1453,9 +1453,9 @@ ref bHideMessageBox);
             {
                 string strError = "";
 
-                // ÉÏ´«ÎÄ¼ş
-                // ×Ô¶¯´´½¨ËùĞèµÄÄ¿Â¼
-                // ²»»áÅ×³öÒì³£
+                // ä¸Šä¼ æ–‡ä»¶
+                // è‡ªåŠ¨åˆ›å»ºæ‰€éœ€çš„ç›®å½•
+                // ä¸ä¼šæŠ›å‡ºå¼‚å¸¸
                 int nRet = FtpUploadDialog.SafeUploadFile(ref this._dirTable,
                         this.textBox_clientFilePath.Text,
                         "ftp://localhost",
@@ -1537,7 +1537,7 @@ ref bHideMessageBox);
                 }
                 catch (Exception ex)
                 {
-                    e.ErrorInfo = "ÅäÖÃÎÄ¼ş '" + strFileName + "' ×°ÈëXMLDUMÊ±³ö´í: " + ex.Message;
+                    e.ErrorInfo = "é…ç½®æ–‡ä»¶ '" + strFileName + "' è£…å…¥XMLDUMæ—¶å‡ºé”™: " + ex.Message;
                     return;
                 }
                 e.XmlDocument = dom;
@@ -1559,7 +1559,7 @@ ref bHideMessageBox);
             // this.entityRegisterControl1.SetMarc(this.textBox_marcTemplate_marc.Text);
 
             string strError = "";
-            // Ìí¼ÓÒ»¸öĞÂµÄ²á¶ÔÏó
+            // æ·»åŠ ä¸€ä¸ªæ–°çš„å†Œå¯¹è±¡
             int nRet = this.entityRegisterControl1.NewEntity(
                 "0000001",
                 out strError);
@@ -1582,7 +1582,7 @@ ref bHideMessageBox);
 "");
             //dlg.QueryWord = "7-02-003343-1";
             //dlg.From = "isbn";
-            // TODO: ±£´æ´°¿ÚÄÚµÄ³ß´ç×´Ì¬
+            // TODO: ä¿å­˜çª—å£å†…çš„å°ºå¯¸çŠ¶æ€
             this.MainForm.AppInfo.LinkFormState(dlg, "TestForm_AmazonSearchForm_state");
 
             dlg.ShowDialog(this);
@@ -1596,14 +1596,14 @@ dlg.UiState);
 
         }
 
-        // ¼ì²é dp2libraryXE ÊÇ·ñÒÑ¾­°²×°
+        // æ£€æŸ¥ dp2libraryXE æ˜¯å¦å·²ç»å®‰è£…
         private void MenuItem_group1_detectDp2libraryXEInstalled_Click(object sender, EventArgs e)
         {
 
         }
 
         // parameters:
-        //      strApplicationName  "DigitalPlatform/dp2 V2/dp2ÄÚÎñ V2"
+        //      strApplicationName  "DigitalPlatform/dp2 V2/dp2å†…åŠ¡ V2"
         public static bool IsProductInstalled(string strApplicationName)
         {
             // string publisherName = "Publisher Name";
@@ -1615,7 +1615,7 @@ dlg.UiState);
         }
 
         // parameters:
-        //      strApplicationName  "DigitalPlatform/dp2 V2/dp2ÄÚÎñ V2"
+        //      strApplicationName  "DigitalPlatform/dp2 V2/dp2å†…åŠ¡ V2"
         public static string GetShortcutFilePath(string strApplicationName)
         {
             // string publisherName = "Publisher Name";
@@ -1650,11 +1650,11 @@ dlg.UiState);
 
 
             _stop = new DigitalPlatform.Stop();
-            _stop.Register(this.MainForm.stopManager, true);	// ºÍÈİÆ÷¹ØÁª
+            _stop.Register(this.MainForm.stopManager, true);	// å’Œå®¹å™¨å…³è”
 
             _stop.OnStop += new StopEventHandler(this.DoStop);
             _stop.Style = StopStyle.EnableHalfStop;
-            _stop.Initial("ÕıÔÚÊÔÌ½ÃÜÂë ...");
+            _stop.Initial("æ­£åœ¨è¯•æ¢å¯†ç  ...");
             _stop.BeginLoop();
 
             this.button_test_loginAttack.Enabled = false;
@@ -1704,9 +1704,9 @@ dlg.UiState);
                 _stop.OnStop -= new StopEventHandler(this.DoStop);
                 _stop.Initial("");
 
-                if (_stop != null) // ÍÑÀë¹ØÁª
+                if (_stop != null) // è„±ç¦»å…³è”
                 {
-                    _stop.Unregister();	// ºÍÈİÆ÷¹ØÁª
+                    _stop.Unregister();	// å’Œå®¹å™¨å…³è”
                     _stop = null;
                 }
             }

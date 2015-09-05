@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -17,13 +17,13 @@ using DigitalPlatform.CirculationClient.localhost;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ÈÕÀú´°¡£¹ÜÀíÍ¼Êé¹İ¿ª¹İÈÕÀú
+    /// æ—¥å†çª—ã€‚ç®¡ç†å›¾ä¹¦é¦†å¼€é¦†æ—¥å†
     /// </summary>
     public partial class CalendarForm : MyForm
     {
 #if NO
         /// <summary>
-        /// ¿ò¼Ü´°¿Ú
+        /// æ¡†æ¶çª—å£
         /// </summary>
         public MainForm MainForm = null;
 
@@ -39,7 +39,7 @@ namespace dp2Circulation
         const int WM_DROPDOWN = API.WM_USER + 201;
 
         /// <summary>
-        /// µ±Ç°ÈÕÀúÃû
+        /// å½“å‰æ—¥å†å
         /// </summary>
         public string CurrentCalendarName
         {
@@ -50,13 +50,13 @@ namespace dp2Circulation
             set
             {
                 this.m_strCurrentCalendarName = value;
-                // Ë¢ĞÂ´°¿Ú±êÌâ
-                this.Text = "ÈÕÀú: " + this.m_strCurrentCalendarName;
+                // åˆ·æ–°çª—å£æ ‡é¢˜
+                this.Text = "æ—¥å†: " + this.m_strCurrentCalendarName;
             }
         }
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public CalendarForm()
         {
@@ -79,7 +79,7 @@ namespace dp2Circulation
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
 
             stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// ºÍÈİÆ÷¹ØÁª
+            stop.Register(MainForm.stopManager, true);	// å’Œå®¹å™¨å…³è”
 #endif
 
             this.comboBox_calendarName.Text = MainForm.AppInfo.GetString(
@@ -95,9 +95,9 @@ namespace dp2Circulation
 #if NO
             if (stop != null)
             {
-                if (stop.State == 0)    // 0 ±íÊ¾ÕıÔÚ´¦Àí
+                if (stop.State == 0)    // 0 è¡¨ç¤ºæ­£åœ¨å¤„ç†
                 {
-                    MessageBox.Show(this, "ÇëÔÚ¹Ø±Õ´°¿ÚÇ°Í£Ö¹ÕıÔÚ½øĞĞµÄ³¤Ê±²Ù×÷¡£");
+                    MessageBox.Show(this, "è¯·åœ¨å…³é—­çª—å£å‰åœæ­¢æ­£åœ¨è¿›è¡Œçš„é•¿æ—¶æ“ä½œã€‚");
                     e.Cancel = true;
                     return;
                 }
@@ -107,9 +107,9 @@ namespace dp2Circulation
 
             if (this.calenderControl1.Changed == true)
             {
-                // ¾¯¸æÉĞÎ´±£´æ
+                // è­¦å‘Šå°šæœªä¿å­˜
                 DialogResult result = MessageBox.Show(this,
-    "µ±Ç°ÓĞĞÅÏ¢±»ĞŞ¸ÄºóÉĞÎ´±£´æ¡£Èô´ËÊ±¹Ø±Õ´°¿Ú£¬ÏÖÓĞÎ´±£´æĞÅÏ¢½«¶ªÊ§¡£\r\n\r\nÈ·ÊµÒª¹Ø±Õ´°¿Ú? ",
+    "å½“å‰æœ‰ä¿¡æ¯è¢«ä¿®æ”¹åå°šæœªä¿å­˜ã€‚è‹¥æ­¤æ—¶å…³é—­çª—å£ï¼Œç°æœ‰æœªä¿å­˜ä¿¡æ¯å°†ä¸¢å¤±ã€‚\r\n\r\nç¡®å®è¦å…³é—­çª—å£? ",
     "CalendarForm",
     MessageBoxButtons.YesNo,
     MessageBoxIcon.Question,
@@ -135,7 +135,7 @@ namespace dp2Circulation
 
         }
 
-        // ×°ÈëÈ«²¿ÈÕÀúÃû
+        // è£…å…¥å…¨éƒ¨æ—¥å†å
         int FillCalendarNames(out string strError)
         {
             this.comboBox_calendarName.Items.Clear();
@@ -143,7 +143,7 @@ namespace dp2Circulation
             EnableControls(false, true);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ»ñµÃÈ«²¿ÈÕÀúÃû ...");
+            stop.Initial("æ­£åœ¨è·å¾—å…¨éƒ¨æ—¥å†å ...");
             stop.BeginLoop();
 
             this.Update();
@@ -203,11 +203,11 @@ namespace dp2Circulation
             return -1;
         }
 
-        // »ñµÃÈÕÀúÄÚÈİ
+        // è·å¾—æ—¥å†å†…å®¹
         // return:
-        //      -1  ³ö´í
-        //      0   Ã»ÓĞÕÒµ½
-        //      1   ÕÒµ½
+        //      -1  å‡ºé”™
+        //      0   æ²¡æœ‰æ‰¾åˆ°
+        //      1   æ‰¾åˆ°
         int GetCalendarContent(string strName,
             out string strRange,
             out string strContent,
@@ -222,7 +222,7 @@ namespace dp2Circulation
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ»ñµÃÈÕÀú '"+strName+"' µÄÄÚÈİ ...");
+            stop.Initial("æ­£åœ¨è·å¾—æ—¥å† '"+strName+"' çš„å†…å®¹ ...");
             stop.BeginLoop();
 
             this.Update();
@@ -244,13 +244,13 @@ namespace dp2Circulation
                     goto ERROR1;
                 if (lRet == 0)
                 {
-                    strError = "ÈÕÀú '" + strName + "' ²»´æÔÚ¡£";
+                    strError = "æ—¥å† '" + strName + "' ä¸å­˜åœ¨ã€‚";
                     return 0;   // not found
                 }
 
                 if (lRet > 1)
                 {
-                    strError = "Ãû×ÖÎª '" + strName + "' µÄÈÕÀú¾ÓÈ»ÓĞ " + lRet.ToString() + " ¸ö¡£ÇëÏµÍ³¹ÜÀíÔ±ĞŞ¸Ä´Ë´íÎó¡£";
+                    strError = "åå­—ä¸º '" + strName + "' çš„æ—¥å†å±…ç„¶æœ‰ " + lRet.ToString() + " ä¸ªã€‚è¯·ç³»ç»Ÿç®¡ç†å‘˜ä¿®æ”¹æ­¤é”™è¯¯ã€‚";
                     return -1;
                 }
 
@@ -275,10 +275,10 @@ namespace dp2Circulation
             return -1;
         }
 
-        // ±£´æ¡¢´´½¨¡¢É¾³ıÈÕÀú
+        // ä¿å­˜ã€åˆ›å»ºã€åˆ é™¤æ—¥å†
         // return:
-        //      -1  ³ö´í
-        //      0   ³É¹¦
+        //      -1  å‡ºé”™
+        //      0   æˆåŠŸ
         int SetCalendarContent(
             string strAction,
             string strName,
@@ -292,7 +292,7 @@ namespace dp2Circulation
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ¶ÔÈÕÀú '" + strName + "' ½øĞĞ "+strAction+" ²Ù×÷ ...");
+            stop.Initial("æ­£åœ¨å¯¹æ—¥å† '" + strName + "' è¿›è¡Œ "+strAction+" æ“ä½œ ...");
             stop.BeginLoop();
 
             this.Update();
@@ -300,7 +300,7 @@ namespace dp2Circulation
 
             try
             {
-                CalenderInfo¡¡info = new CalenderInfo();
+                CalenderInfoã€€info = new CalenderInfo();
                 info.Name = strName;
                 info.Range = strRange;
                 info.Comment = strComment;
@@ -341,16 +341,16 @@ namespace dp2Circulation
 
             if (this.calenderControl1.Changed == true)
             {
-                // ¾¯¸æÉĞÎ´±£´æ
+                // è­¦å‘Šå°šæœªä¿å­˜
                 DialogResult result = MessageBox.Show(this,
-    "µ±Ç°ÓĞĞÅÏ¢±»ĞŞ¸ÄºóÉĞÎ´±£´æ¡£Èô´ËÊ±×°ÔØĞÂµÄÊı¾İ£¬ÏÖÓĞÎ´±£´æĞÅÏ¢½«¶ªÊ§¡£\r\n\r\nÈ·ÊµÒª¼ÌĞø×°ÔØ? ",
+    "å½“å‰æœ‰ä¿¡æ¯è¢«ä¿®æ”¹åå°šæœªä¿å­˜ã€‚è‹¥æ­¤æ—¶è£…è½½æ–°çš„æ•°æ®ï¼Œç°æœ‰æœªä¿å­˜ä¿¡æ¯å°†ä¸¢å¤±ã€‚\r\n\r\nç¡®å®è¦ç»§ç»­è£…è½½? ",
     "CalendarForm",
     MessageBoxButtons.YesNo,
     MessageBoxIcon.Question,
     MessageBoxDefaultButton.Button2);
                 if (result != DialogResult.Yes)
                 {
-                    return 0;   // ·ÅÆú
+                    return 0;   // æ”¾å¼ƒ
                 }
             }
 
@@ -362,9 +362,9 @@ namespace dp2Circulation
             this.calenderControl1.Clear();
 
             // return:
-            //      -1  ³ö´í
-            //      0   Ã»ÓĞÕÒµ½
-            //      1   ÕÒµ½
+            //      -1  å‡ºé”™
+            //      0   æ²¡æœ‰æ‰¾åˆ°
+            //      1   æ‰¾åˆ°
             int nRet = GetCalendarContent(strName,
                 out strRange,
                 out strContent,
@@ -388,12 +388,12 @@ namespace dp2Circulation
                 goto ERROR1;
 
             this.button_delete.Enabled = true;
-            this.CurrentCalendarName = strName;   // ±£´æµ±Ç°ÈÕÀúÃû×Ö
+            this.CurrentCalendarName = strName;   // ä¿å­˜å½“å‰æ—¥å†åå­—
             this.calenderControl1.Changed = false;
-            return 1;   // Õı³£×°Èë
+            return 1;   // æ­£å¸¸è£…å…¥
         ERROR1:
             MessageBox.Show(this, strError);
-            return -1;  // ³ö´í
+            return -1;  // å‡ºé”™
         }
 
         private void comboBox_calendarName_DropDown(object sender, EventArgs e)
@@ -418,9 +418,9 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÔÊĞí»òÕß½ûÖ¹½çÃæ¿Ø¼ş¡£ÔÚ³¤²Ù×÷Ç°£¬Ò»°ãĞèÒª½ûÖ¹½çÃæ¿Ø¼ş£»²Ù×÷Íê³ÉºóÔÙÔÊĞí
+        /// å…è®¸æˆ–è€…ç¦æ­¢ç•Œé¢æ§ä»¶ã€‚åœ¨é•¿æ“ä½œå‰ï¼Œä¸€èˆ¬éœ€è¦ç¦æ­¢ç•Œé¢æ§ä»¶ï¼›æ“ä½œå®Œæˆåå†å…è®¸
         /// </summary>
-        /// <param name="bEnable">ÊÇ·ñÔÊĞí½çÃæ¿Ø¼ş¡£true ÎªÔÊĞí£¬ false Îª½ûÖ¹</param>
+        /// <param name="bEnable">æ˜¯å¦å…è®¸ç•Œé¢æ§ä»¶ã€‚true ä¸ºå…è®¸ï¼Œ false ä¸ºç¦æ­¢</param>
         public override void EnableControls(bool bEnable)
         {
             EnableControls(bEnable, false);
@@ -451,9 +451,9 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// È±Ê¡´°¿Ú¹ı³Ì
+        /// ç¼ºçœçª—å£è¿‡ç¨‹
         /// </summary>
-        /// <param name="m">ÏûÏ¢</param>
+        /// <param name="m">æ¶ˆæ¯</param>
         protected override void DefWndProc(ref Message m)
         {
             switch (m.Msg)
@@ -468,11 +468,11 @@ namespace dp2Circulation
                     {
                         if (this.comboBox_calendarName.Text != "")
                         {
-                            // ĞèÒªÒ»¸öµØ·½¼ÇÒä¸Ä»»Ç°µÄÃû×Ö£¬²¢ÔÚ·ÅÆú×°ÈëĞÂµÄºó£¬»Ö¸´¾ÉÃû×Ö¡£
+                            // éœ€è¦ä¸€ä¸ªåœ°æ–¹è®°å¿†æ”¹æ¢å‰çš„åå­—ï¼Œå¹¶åœ¨æ”¾å¼ƒè£…å…¥æ–°çš„åï¼Œæ¢å¤æ—§åå­—ã€‚
 
                             int nRet = LoadCalendar(this.comboBox_calendarName.Text);
 
-                            // »Ö¸´Ô­À´µÄÃû×Ö
+                            // æ¢å¤åŸæ¥çš„åå­—
                             if (nRet == -1 || nRet == 0)
                                 this.comboBox_calendarName.Text = this.CurrentCalendarName;
                         }
@@ -512,10 +512,10 @@ namespace dp2Circulation
 
             this.textBox_timeRange.Text = this.calenderControl1.GetRangeString();
 
-            // ´´½¨µ½·şÎñÆ÷
+            // åˆ›å»ºåˆ°æœåŠ¡å™¨
             // return:
-            //      -1  ³ö´í
-            //      0   ³É¹¦
+            //      -1  å‡ºé”™
+            //      0   æˆåŠŸ
             nRet = SetCalendarContent(
                 "new",
                 this.comboBox_calendarName.Text,
@@ -530,10 +530,10 @@ namespace dp2Circulation
             this.calenderControl1.Changed = false;
             this.button_save.Enabled = false;
 
-            this.comboBox_calendarName.Items.Clear();   // ´ÙÊ¹ÖØĞÂ»ñÈ¡
+            this.comboBox_calendarName.Items.Clear();   // ä¿ƒä½¿é‡æ–°è·å–
 
 
-            MessageBox.Show(this, "´´½¨³É¹¦");
+            MessageBox.Show(this, "åˆ›å»ºæˆåŠŸ");
             return;
 
         ERROR1:
@@ -553,10 +553,10 @@ namespace dp2Circulation
 
             this.textBox_timeRange.Text = this.calenderControl1.GetRangeString();
 
-            // ±£´æµ½·şÎñÆ÷
+            // ä¿å­˜åˆ°æœåŠ¡å™¨
             // return:
-            //      -1  ³ö´í
-            //      0   ³É¹¦
+            //      -1  å‡ºé”™
+            //      0   æˆåŠŸ
             nRet = SetCalendarContent(
                 "change",
                 this.comboBox_calendarName.Text,
@@ -569,7 +569,7 @@ namespace dp2Circulation
 
             this.calenderControl1.Changed = false;
             this.button_save.Enabled = false;
-            MessageBox.Show(this, "±£´æ³É¹¦");
+            MessageBox.Show(this, "ä¿å­˜æˆåŠŸ");
             return;
 
         ERROR1:
@@ -582,13 +582,13 @@ namespace dp2Circulation
             this.button_delete.Enabled = true;
         }
 
-        // É¾³ı
+        // åˆ é™¤
         private void button_delete_Click(object sender, EventArgs e)
         {
             string strError = "";
 
             DialogResult result = MessageBox.Show(this,
-"È·ÊµÒªÉ¾³ıÈÕÀú '"+this.comboBox_calendarName.Text+"' ? ",
+"ç¡®å®è¦åˆ é™¤æ—¥å† '"+this.comboBox_calendarName.Text+"' ? ",
 "CalendarForm",
 MessageBoxButtons.YesNo,
 MessageBoxIcon.Question,
@@ -596,10 +596,10 @@ MessageBoxDefaultButton.Button2);
             if (result != DialogResult.Yes)
                 return;
 
-            // ´Ó·şÎñÆ÷É¾³ı
+            // ä»æœåŠ¡å™¨åˆ é™¤
             // return:
-            //      -1  ³ö´í
-            //      0   ³É¹¦
+            //      -1  å‡ºé”™
+            //      0   æˆåŠŸ
             int nRet = SetCalendarContent(
                 "delete",
                 this.comboBox_calendarName.Text,
@@ -614,9 +614,9 @@ MessageBoxDefaultButton.Button2);
             this.button_save.Enabled = true;
             this.button_delete.Enabled = false;
 
-            this.comboBox_calendarName.Items.Clear();   // ´ÙÊ¹ÖØĞÂ»ñÈ¡
+            this.comboBox_calendarName.Items.Clear();   // ä¿ƒä½¿é‡æ–°è·å–
 
-            MessageBox.Show(this, "É¾³ı³É¹¦");
+            MessageBox.Show(this, "åˆ é™¤æˆåŠŸ");
             return;
 
         ERROR1:
@@ -634,7 +634,7 @@ MessageBoxDefaultButton.Button2);
  
     }
 
-    // ÈÕÀúÃûÅÅĞòÆ÷
+    // æ—¥å†åæ’åºå™¨
     /*public*/ class CalencarNameComparer : IComparer<string>
     {
         int IComparer<string>.Compare(string x, string y)
@@ -653,12 +653,12 @@ MessageBoxDefaultButton.Button2);
         out strLibraryCode2,
         out strPureName2);
 
-            // ¹İ´úÂë²¿·Ö¶¼Îª¿Õ£¬¾Í±È½Ï´¿Ãû×Ö²¿·Ö
+            // é¦†ä»£ç éƒ¨åˆ†éƒ½ä¸ºç©ºï¼Œå°±æ¯”è¾ƒçº¯åå­—éƒ¨åˆ†
             if (string.IsNullOrEmpty(strLibraryCode1) == true
                 && string.IsNullOrEmpty(strLibraryCode2) == true)
                 return string.Compare(strPureName1, strPureName2);
 
-            // ¹İ´úÂë²¿·Ö×ãÒÔÇø±ğ
+            // é¦†ä»£ç éƒ¨åˆ†è¶³ä»¥åŒºåˆ«
             if (string.IsNullOrEmpty(strLibraryCode1) == true
                 && string.IsNullOrEmpty(strLibraryCode2) == false)
                 return -1;
@@ -667,7 +667,7 @@ MessageBoxDefaultButton.Button2);
                 && string.IsNullOrEmpty(strLibraryCode2) == true)
                 return 1;
 
-            // È«×Ö·û´®±È½Ï
+            // å…¨å­—ç¬¦ä¸²æ¯”è¾ƒ
             return string.Compare(x, y);
         }
     }

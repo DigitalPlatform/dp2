@@ -68,12 +68,13 @@
             this.textBox_operLog_dateRange = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.tabPage_statis = new System.Windows.Forms.TabPage();
+            this.button_statis_return = new System.Windows.Forms.Button();
             this.button_statis_maskItems = new System.Windows.Forms.Button();
             this.button_statis_defOutputColumns = new System.Windows.Forms.Button();
             this.button_statis_outputExcel = new System.Windows.Forms.Button();
             this.button_statis_crossCompute = new System.Windows.Forms.Button();
             this.timer_qu = new System.Windows.Forms.Timer(this.components);
-            this.button_statis_return = new System.Windows.Forms.Button();
+            this.button_start_restoreCfgs = new System.Windows.Forms.Button();
             this.tabControl_main.SuspendLayout();
             this.tabPage_start.SuspendLayout();
             this.tabPage_inventoryList.SuspendLayout();
@@ -106,6 +107,7 @@
             // tabPage_start
             // 
             this.tabPage_start.AutoScroll = true;
+            this.tabPage_start.Controls.Add(this.button_start_restoreCfgs);
             this.tabPage_start.Controls.Add(this.label6);
             this.tabPage_start.Controls.Add(this.button_start_setLocations);
             this.tabPage_start.Controls.Add(this.inventoryBatchNoControl_start_batchNo);
@@ -508,6 +510,16 @@
             this.tabPage_statis.Text = "统计";
             this.tabPage_statis.UseVisualStyleBackColor = true;
             // 
+            // button_statis_return
+            // 
+            this.button_statis_return.Location = new System.Drawing.Point(9, 107);
+            this.button_statis_return.Name = "button_statis_return";
+            this.button_statis_return.Size = new System.Drawing.Size(232, 23);
+            this.button_statis_return.TabIndex = 4;
+            this.button_statis_return.Text = "补做还书";
+            this.button_statis_return.UseVisualStyleBackColor = true;
+            this.button_statis_return.Click += new System.EventHandler(this.button_statis_return_Click);
+            // 
             // button_statis_maskItems
             // 
             this.button_statis_maskItems.Location = new System.Drawing.Point(9, 63);
@@ -553,15 +565,14 @@
             this.timer_qu.Interval = 1000;
             this.timer_qu.Tick += new System.EventHandler(this.timer_qu_Tick);
             // 
-            // button_statis_return
+            // button_start_restoreCfgs
             // 
-            this.button_statis_return.Location = new System.Drawing.Point(9, 107);
-            this.button_statis_return.Name = "button_statis_return";
-            this.button_statis_return.Size = new System.Drawing.Size(232, 23);
-            this.button_statis_return.TabIndex = 4;
-            this.button_statis_return.Text = "补做还书";
-            this.button_statis_return.UseVisualStyleBackColor = true;
-            this.button_statis_return.Click += new System.EventHandler(this.button_statis_return_Click);
+            this.button_start_restoreCfgs.Location = new System.Drawing.Point(9, 211);
+            this.button_start_restoreCfgs.Name = "button_start_restoreCfgs";
+            this.button_start_restoreCfgs.Size = new System.Drawing.Size(196, 23);
+            this.button_start_restoreCfgs.TabIndex = 12;
+            this.button_start_restoreCfgs.Text = "恢复配置文件出厂设置";
+            this.button_start_restoreCfgs.UseVisualStyleBackColor = true;
             // 
             // InventoryForm
             // 
@@ -642,5 +653,6 @@
         private System.Windows.Forms.Button button_start_setLocations;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Button button_statis_return;
+        private System.Windows.Forms.Button button_start_restoreCfgs;
     }
 }

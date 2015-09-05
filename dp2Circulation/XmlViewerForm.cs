@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -10,12 +10,12 @@ using System.IO;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ÓÃÓÚ²é¿´ XML ÄÚÈİµÄ´°¿Ú
+    /// ç”¨äºæŸ¥çœ‹ XML å†…å®¹çš„çª—å£
     /// </summary>
     public partial class XmlViewerForm : Form
     {
         /// <summary>
-        /// ¿ò¼Ü´°¿Ú
+        /// æ¡†æ¶çª—å£
         /// </summary>
         public MainForm MainForm = null;
 
@@ -24,7 +24,7 @@ namespace dp2Circulation
         // string m_strTempFileName = "";
 
         /// <summary>
-        /// XML ×Ö·û´®
+        /// XML å­—ç¬¦ä¸²
         /// </summary>
         public string XmlString
         {
@@ -42,7 +42,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public XmlViewerForm()
         {

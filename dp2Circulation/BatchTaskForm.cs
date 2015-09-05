@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -19,33 +19,33 @@ namespace dp2Circulation
 {
     /*
      * 2011/2/23
-ÏÂÁĞÅú´¦ÀíÈÎÎñ±»·ÏÖ¹ÁË£º
-¸ú×ÙDTLPÊı¾İ¿â
-´´½¨»º´æ
+ä¸‹åˆ—æ‰¹å¤„ç†ä»»åŠ¡è¢«åºŸæ­¢äº†ï¼š
+è·Ÿè¸ªDTLPæ•°æ®åº“
+åˆ›å»ºç¼“å­˜
      * */
     /// <summary>
-    /// Åú´¦ÀíÈÎÎñ´°
+    /// æ‰¹å¤„ç†ä»»åŠ¡çª—
     /// </summary>
     public partial class BatchTaskForm : MyForm
     {
         int m_nInRefresh = 0;
 
         internal ReaderWriterLock m_lock = new ReaderWriterLock();
-        internal static int m_nLockTimeout = 5000;	// 5000=5Ãë
+        internal static int m_nLockTimeout = 5000;	// 5000=5ç§’
 
 #if NO
         public LibraryChannel Channel = new LibraryChannel();
         public string Lang = "zh";
 
         /// <summary>
-        /// ¿ò¼Ü´°¿Ú
+        /// æ¡†æ¶çª—å£
         /// </summary>
         public MainForm MainForm = null;
 
         DigitalPlatform.Stop stop = null;
 #endif
 
-        string MonitorTaskName = "";    // Òª¼à¿ØµÄÈÎÎñÃû
+        string MonitorTaskName = "";    // è¦ç›‘æ§çš„ä»»åŠ¡å
 
         Decoder ResultTextDecoder = Encoding.UTF8.GetDecoder();
         long CurResultOffs = 0;
@@ -57,7 +57,7 @@ namespace dp2Circulation
         MessageStyle m_messageStyle = MessageStyle.Progress | MessageStyle.Result;
 
         /// <summary>
-        /// ÏûÏ¢·ç¸ñ
+        /// æ¶ˆæ¯é£æ ¼
         /// </summary>
         public MessageStyle MessageStyle
         {
@@ -72,7 +72,7 @@ namespace dp2Circulation
                 this.ToolStripMenuItem_progress.Checked = false;
                 this.ToolStripMenuItem_result.Checked = false;
 
-                this.label_progress.Text = "";  // Ã¿´Î±ä¶¯£¬¶¼Çå³ı½ø¶ÈÏÔÊ¾ĞĞ
+                this.label_progress.Text = "";  // æ¯æ¬¡å˜åŠ¨ï¼Œéƒ½æ¸…é™¤è¿›åº¦æ˜¾ç¤ºè¡Œ
 
                 if ((this.m_messageStyle & MessageStyle.Progress) != 0)
                     this.ToolStripMenuItem_progress.Checked = true;
@@ -83,7 +83,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public BatchTaskForm()
         {
@@ -105,7 +105,7 @@ namespace dp2Circulation
             this.Channel.BeforeLogin += new BeforeLoginEventHandle(Channel_BeforeLogin);
 
             stop = new DigitalPlatform.Stop();
-            stop.Register(MainForm.stopManager, true);	// ºÍÈİÆ÷¹ØÁª
+            stop.Register(MainForm.stopManager, true);	// å’Œå®¹å™¨å…³è”
 #endif
 
             this.comboBox_taskName.Text = MainForm.AppInfo.GetString(
@@ -116,7 +116,7 @@ namespace dp2Circulation
             this.webBrowser_info.DocumentCompleted += new WebBrowserDocumentCompletedEventHandler(webBrowser_info_DocumentCompleted);
 
 
-            // Ê¹µÃ²Ëµ¥ÏÔÊ¾ÕıÈ·
+            // ä½¿å¾—èœå•æ˜¾ç¤ºæ­£ç¡®
             this.MessageStyle = this.MessageStyle;
 
             // 
@@ -129,16 +129,16 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// È±Ê¡´°¿Ú¹ı³Ì
+        /// ç¼ºçœçª—å£è¿‡ç¨‹
         /// </summary>
-        /// <param name="m">ÏûÏ¢</param>
+        /// <param name="m">æ¶ˆæ¯</param>
         protected override void DefWndProc(ref Message m)
         {
             switch (m.Msg)
             {
                 case WM_INITIAL:
                     {
-                        stop.SetMessage("ÕıÔÚ³õÊ¼»¯ä¯ÀÀÆ÷¿Ø¼ş...");
+                        stop.SetMessage("æ­£åœ¨åˆå§‹åŒ–æµè§ˆå™¨æ§ä»¶...");
                         this.Update();
                         this.MainForm.Update();
 
@@ -193,7 +193,7 @@ namespace dp2Circulation
             if (nRet == -1)
                 MessageBox.Show(this, strError);
             else
-                MessageBox.Show(this, "ÈÎÎñ '" +this.comboBox_taskName.Text+ "' ÒÑ³É¹¦Æô¶¯");
+                MessageBox.Show(this, "ä»»åŠ¡ '" +this.comboBox_taskName.Text+ "' å·²æˆåŠŸå¯åŠ¨");
 
         }
 
@@ -205,12 +205,12 @@ namespace dp2Circulation
             if (nRet == -1)
                 MessageBox.Show(this, strError);
             else
-                MessageBox.Show(this, "ÈÎÎñ '" + this.comboBox_taskName.Text + "' ÒÑÍ£Ö¹");
+                MessageBox.Show(this, "ä»»åŠ¡ '" + this.comboBox_taskName.Text + "' å·²åœæ­¢");
 
         }
 
 #if NO
-        // *** ÒÑ¾­É¾³ı
+        // *** å·²ç»åˆ é™¤
         private void checkBox_monitoring_CheckedChanged(object sender, EventArgs e)
         {
             if (this.comboBox_taskName.Text == "")
@@ -222,7 +222,7 @@ namespace dp2Circulation
         }
 #endif
 
-        // Æô¶¯»òÍ£Ö¹¼à¿ØÒ»¸öÈÎÎñ
+        // å¯åŠ¨æˆ–åœæ­¢ç›‘æ§ä¸€ä¸ªä»»åŠ¡
         void StartMonitor(string strTaskName,
             bool bStart)
         {
@@ -231,7 +231,7 @@ namespace dp2Circulation
 
             this.MonitorTaskName = strTaskName;
 
-            // ÖØĞÂ´´½¨½âÂëÆ÷£¨ÒÔ±ãÇå³ı²ĞÁôµÄĞÅÏ¢£©
+            // é‡æ–°åˆ›å»ºè§£ç å™¨ï¼ˆä»¥ä¾¿æ¸…é™¤æ®‹ç•™çš„ä¿¡æ¯ï¼‰
             this.ResultTextDecoder = Encoding.UTF8.GetDecoder();
             this.CurResultOffs = 0;
 
@@ -245,14 +245,14 @@ namespace dp2Circulation
             }
         }
 
-        // Æô¶¯Åú´¦ÀíÈÎÎñ
+        // å¯åŠ¨æ‰¹å¤„ç†ä»»åŠ¡
         int StartBatchTask(string strTaskName,
             out string strError)
         {
             strError = "";
 
             BatchTaskStartInfo startinfo = new BatchTaskStartInfo();
-            if (strTaskName == "ÈÕÖ¾»Ö¸´")
+            if (strTaskName == "æ—¥å¿—æ¢å¤")
             {
                 StartLogRecoverDlg dlg = new StartLogRecoverDlg();
                 MainForm.SetControlFont(dlg, this.Font, false);
@@ -260,11 +260,11 @@ namespace dp2Circulation
                 dlg.ShowDialog(this);
                 if (dlg.DialogResult != DialogResult.OK)
                 {
-                    strError = "ÓÃ»§·ÅÆúÆô¶¯";
+                    strError = "ç”¨æˆ·æ”¾å¼ƒå¯åŠ¨";
                     return -1;
                 }
             }
-            else if (strTaskName == "dp2Library Í¬²½")
+            else if (strTaskName == "dp2Library åŒæ­¥")
             {
                 StartReplicationDlg dlg = new StartReplicationDlg();
                 MainForm.SetControlFont(dlg, this.Font, false);
@@ -272,11 +272,11 @@ namespace dp2Circulation
                 dlg.ShowDialog(this);
                 if (dlg.DialogResult != DialogResult.OK)
                 {
-                    strError = "ÓÃ»§·ÅÆúÆô¶¯";
+                    strError = "ç”¨æˆ·æ”¾å¼ƒå¯åŠ¨";
                     return -1;
                 }
             }
-            else if (strTaskName == "ÖØ½¨¼ìË÷µã")
+            else if (strTaskName == "é‡å»ºæ£€ç´¢ç‚¹")
             {
                 StartRebuildKeysDlg dlg = new StartRebuildKeysDlg();
                 MainForm.SetControlFont(dlg, this.Font, false);
@@ -284,11 +284,11 @@ namespace dp2Circulation
                 dlg.ShowDialog(this);
                 if (dlg.DialogResult != DialogResult.OK)
                 {
-                    strError = "ÓÃ»§·ÅÆúÆô¶¯";
+                    strError = "ç”¨æˆ·æ”¾å¼ƒå¯åŠ¨";
                     return -1;
                 }
             }
-            else if (strTaskName == "Ô¤Ô¼µ½Êé¹ÜÀí")
+            else if (strTaskName == "é¢„çº¦åˆ°ä¹¦ç®¡ç†")
             {
                 StartArriveMonitorDlg dlg = new StartArriveMonitorDlg();
                 MainForm.SetControlFont(dlg, this.Font, false);
@@ -296,12 +296,12 @@ namespace dp2Circulation
                 dlg.ShowDialog(this);
                 if (dlg.DialogResult != DialogResult.OK)
                 {
-                    strError = "ÓÃ»§·ÅÆúÆô¶¯";
+                    strError = "ç”¨æˆ·æ”¾å¼ƒå¯åŠ¨";
                     return -1;
                 }
             }
             /*
-        else if (strTaskName == "¸ú×ÙDTLPÊı¾İ¿â")
+        else if (strTaskName == "è·Ÿè¸ªDTLPæ•°æ®åº“")
         {
             StartTraceDtlpDlg dlg = new StartTraceDtlpDlg();
         MainForm.SetControlFont(dlg, this.Font, false);
@@ -309,12 +309,12 @@ namespace dp2Circulation
             dlg.ShowDialog(this);
             if (dlg.DialogResult != DialogResult.OK)
             {
-                strError = "ÓÃ»§·ÅÆúÆô¶¯";
+                strError = "ç”¨æˆ·æ”¾å¼ƒå¯åŠ¨";
                 return -1;
             }
         }
              * */
-            else if (strTaskName == "ÕıÔªÒ»¿¨Í¨¶ÁÕßĞÅÏ¢Í¬²½")
+            else if (strTaskName == "æ­£å…ƒä¸€å¡é€šè¯»è€…ä¿¡æ¯åŒæ­¥")
             {
                 StartZhengyuanReplicationDlg dlg = new StartZhengyuanReplicationDlg();
                 MainForm.SetControlFont(dlg, this.Font, false);
@@ -322,38 +322,38 @@ namespace dp2Circulation
                 dlg.ShowDialog(this);
                 if (dlg.DialogResult != DialogResult.OK)
                 {
-                    strError = "ÓÃ»§·ÅÆúÆô¶¯";
+                    strError = "ç”¨æˆ·æ”¾å¼ƒå¯åŠ¨";
                     return -1;
                 }
             }
-            else if (strTaskName == "µÏ¿ÆÔ¶ÍûÒ»¿¨Í¨¶ÁÕßĞÅÏ¢Í¬²½")
+            else if (strTaskName == "è¿ªç§‘è¿œæœ›ä¸€å¡é€šè¯»è€…ä¿¡æ¯åŒæ­¥")
             {
                 StartDkywReplicationDlg dlg = new StartDkywReplicationDlg();
                 MainForm.SetControlFont(dlg, this.Font, false);
-                startinfo.Start = "!breakpoint";    // Ò»¿ªÊ¼¾ÍÓĞÊÊµ±µÄÈ±Ê¡Öµ£¬±ÜÃâ´ÓÍ·¿ªÊ¼¸ú×Ù
+                startinfo.Start = "!breakpoint";    // ä¸€å¼€å§‹å°±æœ‰é€‚å½“çš„ç¼ºçœå€¼ï¼Œé¿å…ä»å¤´å¼€å§‹è·Ÿè¸ª
                 dlg.StartInfo = startinfo;
                 dlg.ShowDialog(this);
                 if (dlg.DialogResult != DialogResult.OK)
                 {
-                    strError = "ÓÃ»§·ÅÆúÆô¶¯";
+                    strError = "ç”¨æˆ·æ”¾å¼ƒå¯åŠ¨";
                     return -1;
                 }
             }
-            else if (strTaskName == "¶ÁÕßĞÅÏ¢Í¬²½")
+            else if (strTaskName == "è¯»è€…ä¿¡æ¯åŒæ­¥")
             {
 #if NO
                 StartPatronReplicationDlg dlg = new StartPatronReplicationDlg();
                 MainForm.SetControlFont(dlg, this.Font, false);
-                startinfo.Start = "!breakpoint";    // Ò»¿ªÊ¼¾ÍÓĞÊÊµ±µÄÈ±Ê¡Öµ£¬±ÜÃâ´ÓÍ·¿ªÊ¼¸ú×Ù
+                startinfo.Start = "!breakpoint";    // ä¸€å¼€å§‹å°±æœ‰é€‚å½“çš„ç¼ºçœå€¼ï¼Œé¿å…ä»å¤´å¼€å§‹è·Ÿè¸ª
                 dlg.StartInfo = startinfo;
                 dlg.ShowDialog(this);
                 if (dlg.DialogResult != DialogResult.OK)
                 {
-                    strError = "ÓÃ»§·ÅÆúÆô¶¯";
+                    strError = "ç”¨æˆ·æ”¾å¼ƒå¯åŠ¨";
                     return -1;
                 }
 #endif
-                startinfo.Start = "activate";   // ±íÊ¾Á¢¼´Æô¶¯£¬ºöÂÔ·şÎñÆ÷Ô­ÓĞ¶¨Ê±Æô¶¯²ÎÊı
+                startinfo.Start = "activate";   // è¡¨ç¤ºç«‹å³å¯åŠ¨ï¼Œå¿½ç•¥æœåŠ¡å™¨åŸæœ‰å®šæ—¶å¯åŠ¨å‚æ•°
             }
 
             this.m_lock.AcquireWriterLock(m_nLockTimeout);
@@ -363,9 +363,9 @@ namespace dp2Circulation
                 EnableControls(false);
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("ÕıÔÚ"
-                    + "Æô¶¯"
-                    + "ÈÎÎñ '" + strTaskName + "' ...");
+                stop.Initial("æ­£åœ¨"
+                    + "å¯åŠ¨"
+                    + "ä»»åŠ¡ '" + strTaskName + "' ...");
                 stop.BeginLoop();
 
                 this.Update();
@@ -379,9 +379,9 @@ namespace dp2Circulation
                     BatchTaskInfo resultInfo = null;
 
                     // return:
-                    //      -1  ³ö´í
-                    //      0   Æô¶¯³É¹¦
-                    //      1   µ÷ÓÃÇ°ÈÎÎñÒÑ¾­´¦ÓÚÖ´ĞĞ×´Ì¬£¬±¾´Îµ÷ÓÃ¼¤»îÁËÕâ¸öÈÎÎñ
+                    //      -1  å‡ºé”™
+                    //      0   å¯åŠ¨æˆåŠŸ
+                    //      1   è°ƒç”¨å‰ä»»åŠ¡å·²ç»å¤„äºæ‰§è¡ŒçŠ¶æ€ï¼Œæœ¬æ¬¡è°ƒç”¨æ¿€æ´»äº†è¿™ä¸ªä»»åŠ¡
                     long lRet = Channel.BatchTask(
                         stop,
                         strTaskName,
@@ -420,7 +420,7 @@ namespace dp2Circulation
             }
         }
 
-        // Í£Ö¹Åú´¦ÀíÈÎÎñ
+        // åœæ­¢æ‰¹å¤„ç†ä»»åŠ¡
         int StopBatchTask(string strTaskName,
             out string strError)
         {
@@ -434,9 +434,9 @@ namespace dp2Circulation
                 EnableControls(false);
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("ÕıÔÚ"
-                    + "Í£Ö¹"
-                    + "ÈÎÎñ '" + strTaskName + "' ...");
+                stop.Initial("æ­£åœ¨"
+                    + "åœæ­¢"
+                    + "ä»»åŠ¡ '" + strTaskName + "' ...");
                 stop.BeginLoop();
 
                 this.Update();
@@ -482,7 +482,7 @@ namespace dp2Circulation
             }
         }
 
-        // Æô¶¯Åú´¦ÀíÈÎÎñ
+        // å¯åŠ¨æ‰¹å¤„ç†ä»»åŠ¡
         int ContinueAllBatchTask(out string strError)
         {
             strError = "";
@@ -495,7 +495,7 @@ namespace dp2Circulation
                 EnableControls(false);
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("ÕıÔÚ¼ÌĞøÈ«²¿Åú´¦ÀíÈÎÎñ ...");
+                stop.Initial("æ­£åœ¨ç»§ç»­å…¨éƒ¨æ‰¹å¤„ç†ä»»åŠ¡ ...");
                 stop.BeginLoop();
 
                 this.Update();
@@ -546,7 +546,7 @@ namespace dp2Circulation
             }
         }
 
-        // ÔİÍ£Åú´¦ÀíÈÎÎñ
+        // æš‚åœæ‰¹å¤„ç†ä»»åŠ¡
         int PauseAllBatchTask(out string strError)
         {
             strError = "";
@@ -559,7 +559,7 @@ namespace dp2Circulation
                 EnableControls(false);
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("ÕıÔÚÔİÍ£È«²¿Åú´¦ÀíÈÎÎñ ...");
+                stop.Initial("æ­£åœ¨æš‚åœå…¨éƒ¨æ‰¹å¤„ç†ä»»åŠ¡ ...");
                 stop.BeginLoop();
 
                 this.Update();
@@ -626,9 +626,9 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÔÊĞí»òÕß½ûÖ¹½çÃæ¿Ø¼ş¡£ÔÚ³¤²Ù×÷Ç°£¬Ò»°ãĞèÒª½ûÖ¹½çÃæ¿Ø¼ş£»²Ù×÷Íê³ÉºóÔÙÔÊĞí
+        /// å…è®¸æˆ–è€…ç¦æ­¢ç•Œé¢æ§ä»¶ã€‚åœ¨é•¿æ“ä½œå‰ï¼Œä¸€èˆ¬éœ€è¦ç¦æ­¢ç•Œé¢æ§ä»¶ï¼›æ“ä½œå®Œæˆåå†å…è®¸
         /// </summary>
-        /// <param name="bEnable">ÊÇ·ñÔÊĞí½çÃæ¿Ø¼ş¡£true ÎªÔÊĞí£¬ false Îª½ûÖ¹</param>
+        /// <param name="bEnable">æ˜¯å¦å…è®¸ç•Œé¢æ§ä»¶ã€‚true ä¸ºå…è®¸ï¼Œ false ä¸ºç¦æ­¢</param>
         public override void EnableControls(bool bEnable)
         {
             this.comboBox_taskName.Enabled = bEnable;
@@ -697,12 +697,12 @@ namespace dp2Circulation
 this.webBrowser_info.Document.Body.ScrollRectangle.Height);
         }
 
-        // *** ÒÑ¾­É¾³ı
+        // *** å·²ç»åˆ é™¤
         private void button_refresh_Click(object sender, EventArgs e)
         {
             if (m_nInRefresh > 0)
             {
-                MessageBox.Show(this, "ÕıÔÚË¢ĞÂÖĞ");
+                MessageBox.Show(this, "æ­£åœ¨åˆ·æ–°ä¸­");
                 return;
             }
 
@@ -721,18 +721,18 @@ this.webBrowser_info.Document.Body.ScrollRectangle.Height);
                 string strError = "";
 
                 stop.OnStop += new StopEventHandler(this.DoStop);
-                stop.Initial("ÕıÔÚ»ñÈ¡ÈÎÎñ '" + MonitorTaskName + "' µÄ×îĞÂĞÅÏ¢ ...");
+                stop.Initial("æ­£åœ¨è·å–ä»»åŠ¡ '" + MonitorTaskName + "' çš„æœ€æ–°ä¿¡æ¯ ...");
                 stop.BeginLoop();
 
                 try
                 {
 
-                    for (int i=0;i<10;i++)  // ×î¶àÑ­»·»ñÈ¡10´Î
+                    for (int i=0;i<10;i++)  // æœ€å¤šå¾ªç¯è·å–10æ¬¡
                     {
                         Application.DoEvents();
                         if (stop != null && stop.State != 0)
                         {
-                            strError = "ÓÃ»§ÖĞ¶Ï";
+                            strError = "ç”¨æˆ·ä¸­æ–­";
                             goto ERROR1;
                         }
 
@@ -746,13 +746,13 @@ this.webBrowser_info.Document.Body.ScrollRectangle.Height);
                         else
                         {
                             param.MaxResultBytes = 4096;
-                            if (i >= 5)  // Èç¹û·¢ÏÖÉĞÎ´À´µÃ¼°»ñÈ¡µÄÄÚÈİÌ«¶à£¬¾Í¼°Ê±À©´ó¡°´°¿Ú¡±³ß´ç
+                            if (i >= 5)  // å¦‚æœå‘ç°å°šæœªæ¥å¾—åŠè·å–çš„å†…å®¹å¤ªå¤šï¼Œå°±åŠæ—¶æ‰©å¤§â€œçª—å£â€å°ºå¯¸
                                 param.MaxResultBytes = 100 * 1024;
                         }
 
                         param.ResultOffset = this.CurResultOffs;
 
-                        stop.SetMessage("ÕıÔÚ»ñÈ¡ÈÎÎñ '" + MonitorTaskName + "' µÄ×îĞÂĞÅÏ¢ (µÚ "+(i+1).ToString()+" Åú ¹²10Åú)...");
+                        stop.SetMessage("æ­£åœ¨è·å–ä»»åŠ¡ '" + MonitorTaskName + "' çš„æœ€æ–°ä¿¡æ¯ (ç¬¬ "+(i+1).ToString()+" æ‰¹ å…±10æ‰¹)...");
 
                         long lRet = Channel.BatchTask(
                             stop,
@@ -778,7 +778,7 @@ this.webBrowser_info.Document.Body.ScrollRectangle.Height);
 
                         if ((this.MessageStyle & MessageStyle.Result) == 0)
                         {
-                            // Ã»ÓĞ±ØÒªÏÔÊ¾ÀÛ»ı
+                            // æ²¡æœ‰å¿…è¦æ˜¾ç¤ºç´¯ç§¯
                             break;
                         }
 
@@ -786,32 +786,32 @@ this.webBrowser_info.Document.Body.ScrollRectangle.Height);
                             this.CurResultVersion = resultInfo.ResultVersion;
                         else if (this.CurResultVersion != resultInfo.ResultVersion)
                         {
-                            // ËµÃ÷·şÎñÆ÷¶ËresultÎÄ¼şÆäÊµÒÑ¾­¸ü»»
+                            // è¯´æ˜æœåŠ¡å™¨ç«¯resultæ–‡ä»¶å…¶å®å·²ç»æ›´æ¢
                             this.CurResultOffs = 0; // rewind
                             Global.WriteHtml(this.webBrowser_info,
-                                "***ĞÂÄÚÈİ version=" + resultInfo.ResultVersion.ToString() + " ***\r\n");
+                                "***æ–°å†…å®¹ version=" + resultInfo.ResultVersion.ToString() + " ***\r\n");
                             ScrollToEnd();
                             goto COINTINU1;
                         }
 
                         if (resultInfo.ResultTotalLength < param.ResultOffset)
                         {
-                            // ËµÃ÷·şÎñÆ÷¶ËresultÎÄ¼şÆäÊµÒÑ¾­¸ü»»
+                            // è¯´æ˜æœåŠ¡å™¨ç«¯resultæ–‡ä»¶å…¶å®å·²ç»æ›´æ¢
                             this.CurResultOffs = 0; // rewind
                             Global.WriteHtml(this.webBrowser_info,
-                                "***ĞÂÄÚÈİ***\r\n");
+                                "***æ–°å†…å®¹***\r\n");
                             ScrollToEnd();
                             goto COINTINU1;
                         }
                         else
                         {
-                            // ´æ´¢ÓÃÒÔÏÂ´Î
+                            // å­˜å‚¨ç”¨ä»¥ä¸‹æ¬¡
                             this.CurResultOffs = resultInfo.ResultOffset;
                         }
 
                     COINTINU1:
 
-                        // Èç¹û±¾´Î²¢Ã»ÓĞ¡°´¥µ×¡±£¬ĞèÒªÁ¢¼´Ñ­»·»ñÈ¡ĞÂµÄĞÅÏ¢¡£µ«ÊÇÑ­»·ÓĞÒ»¸ö×î´ó´ÎÊı£¬ÒÔÓ¦¶Ô·şÎñÆ÷·è¿ñ·¢ÉúĞÅÏ¢µÄÇéĞÎ¡£
+                        // å¦‚æœæœ¬æ¬¡å¹¶æ²¡æœ‰â€œè§¦åº•â€ï¼Œéœ€è¦ç«‹å³å¾ªç¯è·å–æ–°çš„ä¿¡æ¯ã€‚ä½†æ˜¯å¾ªç¯æœ‰ä¸€ä¸ªæœ€å¤§æ¬¡æ•°ï¼Œä»¥åº”å¯¹æœåŠ¡å™¨ç–¯ç‹‚å‘ç”Ÿä¿¡æ¯çš„æƒ…å½¢ã€‚
                         if (resultInfo.ResultOffset >= resultInfo.ResultTotalLength)
                             break;
                     }
@@ -838,20 +838,20 @@ this.webBrowser_info.Document.Body.ScrollRectangle.Height);
             }
         }
 
-        // *** ÒÑ¾­É¾³ı
+        // *** å·²ç»åˆ é™¤
         private void button_clear_Click(object sender, EventArgs e)
         {
             ClearWebBrowser(this.webBrowser_info, false);
         }
 
-        // *** ÒÑ¾­É¾³ı
+        // *** å·²ç»åˆ é™¤
         private void button_rewind_Click(object sender, EventArgs e)
         {
             ClearWebBrowser(this.webBrowser_info, true);
         }
 
         // parameters:
-        //      bRewind ÊÇ·ñË³±ã°ÑÖ¸Õë²¦Ïò´ÓÍ·¿ªÊ¼»ñÈ¡
+        //      bRewind æ˜¯å¦é¡ºä¾¿æŠŠæŒ‡é’ˆæ‹¨å‘ä»å¤´å¼€å§‹è·å–
         void ClearWebBrowser(WebBrowser webBrowser,
             bool bRewind)
         {
@@ -866,7 +866,7 @@ this.webBrowser_info.Document.Body.ScrollRectangle.Height);
             doc = doc.OpenNew(true);
             doc.Write("<pre>");
             if (bRewind == true)
-                this.CurResultOffs = 0; // ´ÓÍ·¿ªÊ¼»ñÈ¡?
+                this.CurResultOffs = 0; // ä»å¤´å¼€å§‹è·å–?
         }
 
         private void BatchTaskForm_Activated(object sender, EventArgs e)
@@ -895,19 +895,19 @@ this.webBrowser_info.Document.Body.ScrollRectangle.Height);
 
         }
 
-        // Ë¢ĞÂ
+        // åˆ·æ–°
         private void toolStripButton_refresh_Click(object sender, EventArgs e)
         {
             if (m_nInRefresh > 0)
             {
-                MessageBox.Show(this, "ÕıÔÚË¢ĞÂÖĞ");
+                MessageBox.Show(this, "æ­£åœ¨åˆ·æ–°ä¸­");
                 return;
             }
 
             DoRefresh();
         }
 
-        // Ò»Ö±ÏÔÊ¾½ø¶È
+        // ä¸€ç›´æ˜¾ç¤ºè¿›åº¦
         private void toolStripButton_monitoring_CheckedChanged(object sender, EventArgs e)
         {
             if (this.comboBox_taskName.Text == "")
@@ -917,19 +917,19 @@ this.webBrowser_info.Document.Body.ScrollRectangle.Height);
                 this.toolStripButton_monitoring.Checked);
         }
 
-        // ´ÓÍ·ÖØĞÂ»ñÈ¡
+        // ä»å¤´é‡æ–°è·å–
         private void toolStripButton_rewind_Click(object sender, EventArgs e)
         {
             ClearWebBrowser(this.webBrowser_info, true);
         }
 
-        // Çå³ı
+        // æ¸…é™¤
         private void toolStripButton_clear_Click(object sender, EventArgs e)
         {
             ClearWebBrowser(this.webBrowser_info, false);
         }
 
-        // ÔİÍ£
+        // æš‚åœ
         private void toolStripButton_pauseAll_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -937,11 +937,11 @@ this.webBrowser_info.Document.Body.ScrollRectangle.Height);
             if (nRet == -1)
                 MessageBox.Show(this, strError);
             else
-                MessageBox.Show(this, "ÔİÍ£È«²¿Åú´¦ÀíÈÎÎñ³É¹¦");
+                MessageBox.Show(this, "æš‚åœå…¨éƒ¨æ‰¹å¤„ç†ä»»åŠ¡æˆåŠŸ");
 
         }
 
-        // ¼ÌĞø
+        // ç»§ç»­
         private void toolStripButton_continue_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -949,26 +949,26 @@ this.webBrowser_info.Document.Body.ScrollRectangle.Height);
             if (nRet == -1)
                 MessageBox.Show(this, strError);
             else
-                MessageBox.Show(this, "¼ÌĞøÈ«²¿Åú´¦ÀíÈÎÎñ³É¹¦");
+                MessageBox.Show(this, "ç»§ç»­å…¨éƒ¨æ‰¹å¤„ç†ä»»åŠ¡æˆåŠŸ");
         }
 
 
     }
 
     /// <summary>
-    /// ÏûÏ¢·ç¸ñ
+    /// æ¶ˆæ¯é£æ ¼
     /// </summary>
     [Flags]
     public enum MessageStyle
     {
         /// <summary>
-        /// ÀÛ»ıÄÚÈİ
+        /// ç´¯ç§¯å†…å®¹
         /// </summary>
-        Result = 0x01,  // ÀÛ»ıÄÚÈİ
+        Result = 0x01,  // ç´¯ç§¯å†…å®¹
 
         /// <summary>
-        /// ½ø¶È
+        /// è¿›åº¦
         /// </summary>
-        Progress = 0x02,    // ½ø¶È
+        Progress = 0x02,    // è¿›åº¦
     }
 }

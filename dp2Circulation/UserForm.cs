@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -19,7 +19,7 @@ using DigitalPlatform.CirculationClient.localhost;
 namespace dp2Circulation
 {
     /// <summary>
-    /// ÓÃ»§´°
+    /// ç”¨æˆ·çª—
     /// </summary>
     public partial class UserForm : MyForm
     {
@@ -33,7 +33,7 @@ namespace dp2Circulation
 
         const int WM_PREPARE = API.WM_USER + 200;
 
-        int m_nCurrentItemIndex = -1;   // µ±Ç°Ñ¡¶¨ºó³öÏÖÔÚ±à¼­´°ÖĞµÄlistviewÊÂÏîÏÂ±ê
+        int m_nCurrentItemIndex = -1;   // å½“å‰é€‰å®šåå‡ºç°åœ¨ç¼–è¾‘çª—ä¸­çš„listviewäº‹é¡¹ä¸‹æ ‡
 
         bool m_bEditChanged = false;
 
@@ -55,7 +55,7 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ¹¹Ôìº¯Êı
+        /// æ„é€ å‡½æ•°
         /// </summary>
         public UserForm()
         {
@@ -79,9 +79,9 @@ namespace dp2Circulation
 
             if (nChangedCount > 0)
             {
-                // ¾¯¸æÉĞÎ´±£´æ
+                // è­¦å‘Šå°šæœªä¿å­˜
                 DialogResult result = MessageBox.Show(this,
-    "µ±Ç°ÓĞ "+nChangedCount.ToString()+" ¸öÓÃ»§ĞÅÏ¢ĞŞ¸ÄºóÉĞÎ´±£´æ¡£Èô´ËÊ±¹Ø±Õ´°¿Ú£¬ÏÖÓĞÎ´±£´æĞÅÏ¢½«¶ªÊ§¡£\r\n\r\nÈ·ÊµÒª¹Ø±Õ´°¿Ú? ",
+    "å½“å‰æœ‰ "+nChangedCount.ToString()+" ä¸ªç”¨æˆ·ä¿¡æ¯ä¿®æ”¹åå°šæœªä¿å­˜ã€‚è‹¥æ­¤æ—¶å…³é—­çª—å£ï¼Œç°æœ‰æœªä¿å­˜ä¿¡æ¯å°†ä¸¢å¤±ã€‚\r\n\r\nç¡®å®è¦å…³é—­çª—å£? ",
     "UserForm",
     MessageBoxButtons.YesNo,
     MessageBoxIcon.Question,
@@ -101,7 +101,7 @@ namespace dp2Circulation
 
         void SaveSize()
         {
-            // ±£´æsplitContainer_mainµÄ×´Ì¬
+            // ä¿å­˜splitContainer_mainçš„çŠ¶æ€
             this.MainForm.SaveSplitterPos(
                 this.splitContainer_main,
                 "userform_state",
@@ -118,7 +118,7 @@ namespace dp2Circulation
         {
             try
             {
-                // »ñµÃsplitContainer_mainµÄ×´Ì¬
+                // è·å¾—splitContainer_mainçš„çŠ¶æ€
                 if (this.MainForm != null)
                 {
                     this.MainForm.LoadSplitterPos(
@@ -143,7 +143,7 @@ namespace dp2Circulation
             }
         }
 
-        // ÓĞ¶àÉÙĞĞÔø±»ĞŞ¸Ä¹ı(¶øÎ´±£´æ)?
+        // æœ‰å¤šå°‘è¡Œæ›¾è¢«ä¿®æ”¹è¿‡(è€Œæœªä¿å­˜)?
         int GetChangedCount()
         {
             int nResult = 0;
@@ -158,9 +158,9 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// È±Ê¡´°¿Ú¹ı³Ì
+        /// ç¼ºçœçª—å£è¿‡ç¨‹
         /// </summary>
-        /// <param name="m">ÏûÏ¢</param>
+        /// <param name="m">æ¶ˆæ¯</param>
         protected override void DefWndProc(ref Message m)
         {
             switch (m.Msg)
@@ -168,9 +168,9 @@ namespace dp2Circulation
                 case WM_PREPARE:
                     {
                         LoadSize();
-                        // ×°ÔØÈ«²¿ÓÃ»§ĞÅÏ¢
+                        // è£…è½½å…¨éƒ¨ç”¨æˆ·ä¿¡æ¯
 
-                        // È»ºóĞí¿É½çÃæ
+                        // ç„¶åè®¸å¯ç•Œé¢
                         EnableControls(true);
                         return;
                     }
@@ -180,9 +180,9 @@ namespace dp2Circulation
         }
 
         /// <summary>
-        /// ÔÊĞí»òÕß½ûÖ¹½çÃæ¿Ø¼ş¡£ÔÚ³¤²Ù×÷Ç°£¬Ò»°ãĞèÒª½ûÖ¹½çÃæ¿Ø¼ş£»²Ù×÷Íê³ÉºóÔÙÔÊĞí
+        /// å…è®¸æˆ–è€…ç¦æ­¢ç•Œé¢æ§ä»¶ã€‚åœ¨é•¿æ“ä½œå‰ï¼Œä¸€èˆ¬éœ€è¦ç¦æ­¢ç•Œé¢æ§ä»¶ï¼›æ“ä½œå®Œæˆåå†å…è®¸
         /// </summary>
-        /// <param name="bEnable">ÊÇ·ñÔÊĞí½çÃæ¿Ø¼ş¡£true ÎªÔÊĞí£¬ false Îª½ûÖ¹</param>
+        /// <param name="bEnable">æ˜¯å¦å…è®¸ç•Œé¢æ§ä»¶ã€‚true ä¸ºå…è®¸ï¼Œ false ä¸ºç¦æ­¢</param>
         public override void EnableControls(bool bEnable)
         {
             this.textBox_userName.Enabled = bEnable;
@@ -242,11 +242,11 @@ namespace dp2Circulation
             this.textBox_comment.Text = "";
         }
 
-        // ÁĞ³öËùÓĞÓÃ»§
+        // åˆ—å‡ºæ‰€æœ‰ç”¨æˆ·
         // return:
-        //      -1  ³ö´í
-        //      0   Ã»ÓĞÕÒµ½
-        //      1   ÕÒµ½
+        //      -1  å‡ºé”™
+        //      0   æ²¡æœ‰æ‰¾åˆ°
+        //      1   æ‰¾åˆ°
         int ListAllUsers(out string strError)
         {
             strError = "";
@@ -258,7 +258,7 @@ namespace dp2Circulation
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ»ñµÃÈ«²¿ÓÃ»§ĞÅÏ¢ ...");
+            stop.Initial("æ­£åœ¨è·å¾—å…¨éƒ¨ç”¨æˆ·ä¿¡æ¯ ...");
             stop.BeginLoop();
 
             this.Update();
@@ -282,7 +282,7 @@ namespace dp2Circulation
                         goto ERROR1;
                     if (lRet == 0)
                     {
-                        strError = "²»´æÔÚÓÃ»§ĞÅÏ¢¡£";
+                        strError = "ä¸å­˜åœ¨ç”¨æˆ·ä¿¡æ¯ã€‚";
                         return 0;   // not found
                     }
 
@@ -381,9 +381,9 @@ namespace dp2Circulation
 
             if (nChangedCount > 0)
             {
-                // ¾¯¸æÉĞÎ´±£´æ
+                // è­¦å‘Šå°šæœªä¿å­˜
                 DialogResult result = MessageBox.Show(this,
-    "µ±Ç°ÓĞ " + nChangedCount.ToString() + " ¸öÓÃ»§ĞÅÏ¢ĞŞ¸ÄºóÉĞÎ´±£´æ¡£Èô´ËÊ±ÖØĞÂÁĞÈ«²¿ÓÃĞÅÏ¢£¬ÏÖÓĞÎ´±£´æĞÅÏ¢½«¶ªÊ§¡£\r\n\r\nÈ·ÊµÒªÖØĞÂÁĞÈ«²¿ÓÃ»§ĞÅÏ¢? ",
+    "å½“å‰æœ‰ " + nChangedCount.ToString() + " ä¸ªç”¨æˆ·ä¿¡æ¯ä¿®æ”¹åå°šæœªä¿å­˜ã€‚è‹¥æ­¤æ—¶é‡æ–°åˆ—å…¨éƒ¨ç”¨ä¿¡æ¯ï¼Œç°æœ‰æœªä¿å­˜ä¿¡æ¯å°†ä¸¢å¤±ã€‚\r\n\r\nç¡®å®è¦é‡æ–°åˆ—å…¨éƒ¨ç”¨æˆ·ä¿¡æ¯? ",
     "UserForm",
     MessageBoxButtons.YesNo,
     MessageBoxIcon.Question,
@@ -403,7 +403,7 @@ namespace dp2Circulation
             MessageBox.Show(this, strError);
         }
 
-        // °ÑeditÖĞµÄÄÚÈİ»Ö¸´µ½listviewitemÖĞ
+        // æŠŠeditä¸­çš„å†…å®¹æ¢å¤åˆ°listviewitemä¸­
         void StoreEditToListViewItem()
         {
             if (this.m_nCurrentItemIndex == -1)
@@ -418,12 +418,12 @@ namespace dp2Circulation
             item_info.UserInfo.Comment = this.textBox_comment.Text;
             item_info.Changed = this.EditChanged;
 
-            // ĞŞ¸ÄÏÔÊ¾µÄÎÄ±¾ºÍÑÕÉ«
+            // ä¿®æ”¹æ˜¾ç¤ºçš„æ–‡æœ¬å’Œé¢œè‰²
             SetListViewItemValue(item_info,
                 this.listView_users.Items[this.m_nCurrentItemIndex]);
         }
 
-        // °ÑlistviewitemÖĞµÄÄÚÈİÉèÖÃµ½editÖĞ
+        // æŠŠlistviewitemä¸­çš„å†…å®¹è®¾ç½®åˆ°editä¸­
         void SetListViewItemToEdit(int index)
         {
             if (index == -1)
@@ -450,7 +450,7 @@ namespace dp2Circulation
             this.textBox_comment.Text = info.Comment;
 
 
-            // ¹ÊÒâÔì³ÉÁ½¸öÃÜÂë²»Ò»Ñù£¬·ÀÖ¹ÎŞÒâÖĞÖØÉèÁËÃÜÂë
+            // æ•…æ„é€ æˆä¸¤ä¸ªå¯†ç ä¸ä¸€æ ·ï¼Œé˜²æ­¢æ— æ„ä¸­é‡è®¾äº†å¯†ç 
             this.textBox_password.Text = "1";
             this.textBox_confirmPassword.Text = "2";
 
@@ -461,7 +461,7 @@ namespace dp2Circulation
             else
                 this.button_delete.Enabled = true;
 
-            // Ã¿´Î¶¼ÒªÈËÎªOnÕâ¸öcheckbox£¬²ÅÄÜĞŞ¸ÄÃÜÂë
+            // æ¯æ¬¡éƒ½è¦äººä¸ºOnè¿™ä¸ªcheckboxï¼Œæ‰èƒ½ä¿®æ”¹å¯†ç 
             this.checkBox_changePassword.Checked = false;
             this.checkBox_changePassword_CheckedChanged(this, null);
 
@@ -485,7 +485,7 @@ namespace dp2Circulation
 
             this.EditChanged = false;
 
-            // Ã¿´Î¶¼ÒªÈËÎªOnÕâ¸öcheckbox£¬²ÅÄÜĞŞ¸ÄÃÜÂë
+            // æ¯æ¬¡éƒ½è¦äººä¸ºOnè¿™ä¸ªcheckboxï¼Œæ‰èƒ½ä¿®æ”¹å¯†ç 
             this.checkBox_changePassword.Checked = false;
             this.checkBox_changePassword_CheckedChanged(this, null);
 
@@ -506,13 +506,13 @@ namespace dp2Circulation
         }
 
 
-        // ÖØÉèÃÜÂë
+        // é‡è®¾å¯†ç 
         private void button_resetPassword_Click(object sender, EventArgs e)
         {
             string strError = "";
             if (this.textBox_password.Text != this.textBox_confirmPassword.Text)
             {
-                strError = "ÃÜÂë ºÍ ÔÙ´ÎÊäÈëÃÜÂë ²»Ò»ÖÂ¡£";
+                strError = "å¯†ç  å’Œ å†æ¬¡è¾“å…¥å¯†ç  ä¸ä¸€è‡´ã€‚";
                 goto ERROR1;
             }
 
@@ -523,17 +523,17 @@ namespace dp2Circulation
             if (nRet == -1)
                 goto ERROR1;
 
-            // ÕâÀï²»ÊÇºÜÂúÒâ¡£Ó¦µ±Çø·ÖÃÜÂëÇøºÍÆÕÍ¨ĞÅÏ¢ÇøµÄchanged±êÖ¾¡£
+            // è¿™é‡Œä¸æ˜¯å¾ˆæ»¡æ„ã€‚åº”å½“åŒºåˆ†å¯†ç åŒºå’Œæ™®é€šä¿¡æ¯åŒºçš„changedæ ‡å¿—ã€‚
             this.EditChanged = false;
 
-            MessageBox.Show(this, "ÃÜÂëÖØÉèÍê³É");
+            MessageBox.Show(this, "å¯†ç é‡è®¾å®Œæˆ");
             return;
         ERROR1:
             MessageBox.Show(this, strError);
 
         }
 
-        // ÖØÉèÃÜÂë
+        // é‡è®¾å¯†ç 
         int ResetPassword(
             string strUserName,
             string strNewPassword,
@@ -544,7 +544,7 @@ namespace dp2Circulation
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚÖØÉèÓÃ»§ÃÜÂë ...");
+            stop.Initial("æ­£åœ¨é‡è®¾ç”¨æˆ·å¯†ç  ...");
             stop.BeginLoop();
 
             this.Update();
@@ -556,7 +556,7 @@ namespace dp2Circulation
 
                 info.UserName = strUserName;
                 info.Password = strNewPassword;
-                info.SetPassword = true;    // Ã»ÓĞ±ØÒª
+                info.SetPassword = true;    // æ²¡æœ‰å¿…è¦
 
                 long lRet = Channel.SetUser(
                     stop,
@@ -580,7 +580,7 @@ namespace dp2Circulation
             return -1;
         }
 
-        // ±£´æÓÃ»§ĞÅÏ¢
+        // ä¿å­˜ç”¨æˆ·ä¿¡æ¯
         int SaveUserInfo(
             UserInfo info,
             out string strError)
@@ -590,7 +590,7 @@ namespace dp2Circulation
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ±£´æÓÃ»§ĞÅÏ¢ ...");
+            stop.Initial("æ­£åœ¨ä¿å­˜ç”¨æˆ·ä¿¡æ¯ ...");
             stop.BeginLoop();
 
             this.Update();
@@ -620,7 +620,7 @@ namespace dp2Circulation
             return -1;
         }
 
-        // ±£´æÓÃ»§ĞÅÏ¢
+        // ä¿å­˜ç”¨æˆ·ä¿¡æ¯
         int CreateUserInfo(
             UserInfo info,
             out string strError)
@@ -630,7 +630,7 @@ namespace dp2Circulation
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ´´½¨ÓÃ»§ĞÅÏ¢ ...");
+            stop.Initial("æ­£åœ¨åˆ›å»ºç”¨æˆ·ä¿¡æ¯ ...");
             stop.BeginLoop();
 
             this.Update();
@@ -660,7 +660,7 @@ namespace dp2Circulation
             return -1;
         }
 
-        // É¾³ıÓÃ»§ĞÅÏ¢
+        // åˆ é™¤ç”¨æˆ·ä¿¡æ¯
         int DeleteUserInfo(
             string strUserName,
             out string strError)
@@ -670,7 +670,7 @@ namespace dp2Circulation
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚÉ¾³ıÓÃ»§ĞÅÏ¢ ...");
+            stop.Initial("æ­£åœ¨åˆ é™¤ç”¨æˆ·ä¿¡æ¯ ...");
             stop.BeginLoop();
 
             this.Update();
@@ -703,14 +703,14 @@ namespace dp2Circulation
             return -1;
         }
 
-        // ±à¼­È¨ÏŞ
+        // ç¼–è¾‘æƒé™
         private void button_editUserRights_Click(object sender, EventArgs e)
         {
             DigitalPlatform.CommonControl.PropertyDlg dlg = new DigitalPlatform.CommonControl.PropertyDlg();
             MainForm.SetControlFont(dlg, this.Font, false);
 
             dlg.StartPosition = FormStartPosition.CenterScreen;
-            dlg.Text = "ÓÃ»§ '" + this.textBox_userName.Text + "' µÄÈ¨ÏŞ";
+            dlg.Text = "ç”¨æˆ· '" + this.textBox_userName.Text + "' çš„æƒé™";
             dlg.PropertyString = this.textBox_userRights.Text;
             dlg.CfgFileName = this.MainForm.DataDir + "\\userrightsdef.xml";
             dlg.ShowDialog(this);
@@ -721,7 +721,7 @@ namespace dp2Circulation
             this.textBox_userRights.Text = dlg.PropertyString;
         }
 
-        // ±£´æÓÃ»§ĞÅÏ¢
+        // ä¿å­˜ç”¨æˆ·ä¿¡æ¯
         private void button_save_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -729,7 +729,7 @@ namespace dp2Circulation
 
             if (this.textBox_userName.Text == "")
             {
-                strError = "ÓÃ»§Ãû²»ÄÜÎª¿Õ";
+                strError = "ç”¨æˆ·åä¸èƒ½ä¸ºç©º";
                 goto ERROR1;
             }
 
@@ -746,7 +746,7 @@ namespace dp2Circulation
             {
                 if (this.textBox_confirmPassword.Text != this.textBox_password.Text)
                 {
-                    strError = "ÃÜÂë ºÍ ÔÙ´ÎÊäÈëÃÜÂë ²»Ò»ÖÂ¡£";
+                    strError = "å¯†ç  å’Œ å†æ¬¡è¾“å…¥å¯†ç  ä¸ä¸€è‡´ã€‚";
                     goto ERROR1;
                 }
                 info.SetPassword = true;
@@ -755,7 +755,7 @@ namespace dp2Circulation
             else
                 info.SetPassword = false;
 
-            // ±£´æÓÃ»§ĞÅÏ¢
+            // ä¿å­˜ç”¨æˆ·ä¿¡æ¯
             nRet = SaveUserInfo(
                 info,
                 out strError);
@@ -763,7 +763,7 @@ namespace dp2Circulation
                 goto ERROR1;
 
             this.EditChanged = false;
-            MessageBox.Show(this, "ÓÃ»§ĞÅÏ¢±£´æ³É¹¦");
+            MessageBox.Show(this, "ç”¨æˆ·ä¿¡æ¯ä¿å­˜æˆåŠŸ");
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -775,7 +775,7 @@ namespace dp2Circulation
             bool m_bChanged = false;
 
             /// <summary>
-            /// ÄÚÈİÊÇ·ñ·¢Éú¹ıĞŞ¸Ä
+            /// å†…å®¹æ˜¯å¦å‘ç”Ÿè¿‡ä¿®æ”¹
             /// </summary>
             public bool Changed
             {
@@ -833,13 +833,13 @@ namespace dp2Circulation
 
             if (this.textBox_userName.Text == "")
             {
-                strError = "ÓÃ»§Ãû²»ÄÜÎª¿Õ";
+                strError = "ç”¨æˆ·åä¸èƒ½ä¸ºç©º";
                 goto ERROR1;
             }
 
-            // ¾¯¸æ
+            // è­¦å‘Š
             DialogResult result = MessageBox.Show(this,
-                "È·ÊµÒªÉ¾³ıÓÃ»§ " + this.textBox_userName.Text,
+                "ç¡®å®è¦åˆ é™¤ç”¨æˆ· " + this.textBox_userName.Text,
                 "UserForm",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question,
@@ -847,16 +847,16 @@ namespace dp2Circulation
             if (result == DialogResult.No)
                 return;
 
-            // É¾³ıÓÃ»§ĞÅÏ¢
+            // åˆ é™¤ç”¨æˆ·ä¿¡æ¯
             nRet = DeleteUserInfo(
                 this.textBox_userName.Text,
                 out strError);
             if (nRet == -1)
                 goto ERROR1;
 
-            MessageBox.Show(this, "ÓÃ»§ĞÅÏ¢É¾³ı³É¹¦");
+            MessageBox.Show(this, "ç”¨æˆ·ä¿¡æ¯åˆ é™¤æˆåŠŸ");
 
-            // ´ÓlistviewÖĞÉ¾³ı
+            // ä»listviewä¸­åˆ é™¤
             if (this.listView_users.SelectedItems.Count > 0
                 && ListViewUtil.GetItemText(this.listView_users.SelectedItems[0], COLUMN_USERNAME) == this.textBox_userName.Text)
             {
@@ -885,13 +885,13 @@ namespace dp2Circulation
             }
         }
 
-        // ´´½¨ĞÂÓÃ»§
+        // åˆ›å»ºæ–°ç”¨æˆ·
         private void button_create_Click(object sender, EventArgs e)
         {
             string strError = "";
             int nRet = 0;
 
-            // Ë¢ĞÂÄ£°å£¬×¼±¸ÊäÈëĞÅÏ¢
+            // åˆ·æ–°æ¨¡æ¿ï¼Œå‡†å¤‡è¾“å…¥ä¿¡æ¯
             if (Control.ModifierKeys == Keys.Control)
             {
                 for (int i = 0; i < this.listView_users.Items.Count; i++)
@@ -903,7 +903,7 @@ namespace dp2Circulation
 
             if (this.textBox_userName.Text == "")
             {
-                strError = "ÓÃ»§Ãû²»ÄÜÎª¿Õ";
+                strError = "ç”¨æˆ·åä¸èƒ½ä¸ºç©º";
                 goto ERROR1;
             }
 
@@ -920,7 +920,7 @@ namespace dp2Circulation
             {
                 if (this.textBox_confirmPassword.Text != this.textBox_password.Text)
                 {
-                    strError = "ÃÜÂë ºÍ ÔÙ´ÎÊäÈëÃÜÂë ²»Ò»ÖÂ¡£";
+                    strError = "å¯†ç  å’Œ å†æ¬¡è¾“å…¥å¯†ç  ä¸ä¸€è‡´ã€‚";
                     goto ERROR1;
                 }
                 info.SetPassword = true;
@@ -929,7 +929,7 @@ namespace dp2Circulation
             else
                 info.SetPassword = false;
 
-            // ±£´æÓÃ»§ĞÅÏ¢
+            // ä¿å­˜ç”¨æˆ·ä¿¡æ¯
             nRet = CreateUserInfo(
                 info,
                 out strError);
@@ -938,7 +938,7 @@ namespace dp2Circulation
 
             this.EditChanged = false;
 
-            // ¼ÓÈëlistview
+            // åŠ å…¥listview
             ListViewItem item = new ListViewItem();
             ItemInfo item_info = new ItemInfo();
             info.SetPassword = false;
@@ -951,7 +951,7 @@ namespace dp2Circulation
 
             this.listView_users.Items.Add(item);
 
-            MessageBox.Show(this, "ÓÃ»§ '" + info.UserName + "' ´´½¨³É¹¦");
+            MessageBox.Show(this, "ç”¨æˆ· '" + info.UserName + "' åˆ›å»ºæˆåŠŸ");
             return;
         ERROR1:
             MessageBox.Show(this, strError);
@@ -974,7 +974,7 @@ namespace dp2Circulation
             this.SortColumns.SetFirstColumn(nClickColumn,
                 this.listView_users.Columns);
 
-            // ÅÅĞò
+            // æ’åº
             this.listView_users.ListViewItemSorter = new SortColumnsComparer(this.SortColumns);
 
             this.listView_users.ListViewItemSorter = null;
@@ -994,11 +994,11 @@ namespace dp2Circulation
             {
                 List<string> librarycodes = null;
                 string strError = "";
-                // ÁĞ³öËùÓĞ¹İ´úÂë
+                // åˆ—å‡ºæ‰€æœ‰é¦†ä»£ç 
                 // return:
-                //      -1  ³ö´í
-                //      0   Ã»ÓĞÕÒµ½
-                //      1   ÕÒµ½
+                //      -1  å‡ºé”™
+                //      0   æ²¡æœ‰æ‰¾åˆ°
+                //      1   æ‰¾åˆ°
                 int nRet = GetLibraryCodes(
                 out librarycodes,
                 out strError);
@@ -1012,11 +1012,11 @@ namespace dp2Circulation
             }
         }
 
-        // ÁĞ³öËùÓĞ¹İ´úÂë
+        // åˆ—å‡ºæ‰€æœ‰é¦†ä»£ç 
         // return:
-        //      -1  ³ö´í
-        //      0   Ã»ÓĞÕÒµ½
-        //      1   ÕÒµ½
+        //      -1  å‡ºé”™
+        //      0   æ²¡æœ‰æ‰¾åˆ°
+        //      1   æ‰¾åˆ°
         int GetLibraryCodes(
             out List<string> librarycodes,
             out string strError)
@@ -1027,7 +1027,7 @@ namespace dp2Circulation
             EnableControls(false);
 
             stop.OnStop += new StopEventHandler(this.DoStop);
-            stop.Initial("ÕıÔÚ»ñµÃÈ«²¿¹İ´úÂë ...");
+            stop.Initial("æ­£åœ¨è·å¾—å…¨éƒ¨é¦†ä»£ç  ...");
             stop.BeginLoop();
 
             try
@@ -1040,7 +1040,7 @@ namespace dp2Circulation
                     out strError);
                 if (lRet == -1)
                 {
-                    strError = "»ñµÃ¹İ´úÂëÊ±·¢Éú´íÎó£º" + strError;
+                    strError = "è·å¾—é¦†ä»£ç æ—¶å‘ç”Ÿé”™è¯¯ï¼š" + strError;
                     return -1;
                 }
 
@@ -1072,7 +1072,7 @@ namespace dp2Circulation
 
         void ResetTextBoxHeight()
         {
-            // ·ÀÖ¹ÖØÈë
+            // é˜²æ­¢é‡å…¥
             if (_inReset > 0)
                 return;
             _inReset++;

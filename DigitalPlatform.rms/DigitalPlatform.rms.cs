@@ -414,29 +414,20 @@ namespace DigitalPlatform.rms
 		}
 
 
-		//公共静态函数，给ID前方填充0
-		//strID传入的ID参数
-		//返回值: string类型，返回填充0后的ID
+		// 确保 ID 字符串为 10 位数字形态
 		public static string GetID10(string strID)
 		{
-/*
-			if (strID.Length < 10)
-			{
-				string strAdd = new string('0',10-strID.Length);
-				return strAdd + strID;
-			}
-			return strID;	
-*/
-			return strID.PadLeft(10,'0');	
+			return strID.PadLeft(10, '0');	
 		}
 
-		//公共IdCompressed属性，返回不带0的记录ID
-		//通过一个循环，当第一个字母为0时，去掉首位的0
+		// 获得去掉了前方 '0' 的短号码 ID 字符串
 		public string CompressedID
 		{
 			get
 			{
-				return m_strID.TrimStart(new char[]{'0'});
+                return GetCompressedID(m_strID);
+
+				// return m_strID.TrimStart(new char[]{'0'});
 /*
 				string strTemp = m_strID;
 				while(strTemp.Substring(0,1) == "0")
@@ -459,9 +450,7 @@ namespace DigitalPlatform.rms
 			return strID;
 */			
 		}
-
-	}//end of class DbPath
-
+	}
 
     public class LogicNameItem
     {
@@ -469,6 +458,5 @@ namespace DigitalPlatform.rms
         public string Lang = "";
         [DataMember]
         public string Value = "";
-
     }
 }
