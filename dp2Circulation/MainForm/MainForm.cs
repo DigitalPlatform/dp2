@@ -6921,7 +6921,6 @@ out strError);
                 return;
             }
             OpenWindow<InventoryForm>();
-
         }
 
         private void tabControl_panelFixed_SizeChanged(object sender, EventArgs e)
@@ -7792,6 +7791,9 @@ Keys keyData)
         // 写入日志文件。每天创建一个单独的日志文件
         public void WriteErrorLog(string strText)
         {
+            if (string.IsNullOrEmpty(this.UserLogDir) == true)
+                throw new ArgumentException("this.UserLogDir 不应为空");
+
             FileUtil.WriteErrorLog(
                 this.UserLogDir,
                 this.UserLogDir,

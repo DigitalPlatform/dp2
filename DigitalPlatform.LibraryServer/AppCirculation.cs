@@ -651,6 +651,7 @@ namespace DigitalPlatform.LibraryServer
             borrow_info = new BorrowInfo();
 
             DateTime start_time = DateTime.Now;
+            string strOperLogUID = "";
 
             LibraryServerResult result = new LibraryServerResult();
 
@@ -1592,6 +1593,8 @@ namespace DigitalPlatform.LibraryServer
 
                     nRet = this.OperLog.WriteOperLog(domOperLog,
                         sessioninfo.ClientAddress,
+                        start_time,
+                        out strOperLogUID,
                         out strError);
                     if (nRet == -1)
                     {
@@ -1630,7 +1633,6 @@ namespace DigitalPlatform.LibraryServer
 
                     WriteTimeUsed(start_time_write_statis, "Borrow()中写统计指标 耗时 ");
 
-
                     strOutputItemXml = itemdom.OuterXml;
                     strOutputReaderXml = readerdom.OuterXml;
                     strBiblioRecID = DomUtil.GetElementText(itemdom.DocumentElement, "parent"); //
@@ -1658,6 +1660,8 @@ namespace DigitalPlatform.LibraryServer
 
             // 输出数据
             // 把输出数据部分放在读者锁以外范围，是为了尽量减少锁定的时间，提高并发运行效率
+
+            DateTime output_start_time = DateTime.Now;
 
             if (String.IsNullOrEmpty(strOutputReaderXml) == false
                 && StringUtil.IsInList("reader", strStyle) == true)
@@ -1770,8 +1774,6 @@ namespace DigitalPlatform.LibraryServer
                             strError);
                         goto ERROR1;
                     }
-
-
                 } // end of for
 
                 WriteTimeUsed(start_time_1, "Borrow()中转换xml记录 耗时 ");
@@ -1975,7 +1977,6 @@ namespace DigitalPlatform.LibraryServer
                                     strError);
                                 goto ERROR1;
                             }
-
                         }
                         else
                             strBiblio = "";
@@ -2047,6 +2048,18 @@ namespace DigitalPlatform.LibraryServer
                 } // end of for
             }
 
+            // 如果创建输出数据的时间超过一秒，则需要计入操作日志
+            if (DateTime.Now - output_start_time > new TimeSpan(0,0,1))
+            {
+                WriteLongTimeOperLog(
+                    sessioninfo,
+                    strAction,
+                    output_start_time, 
+                    "output 阶段耗时超过 1 秒",
+                    strOperLogUID,
+                    out strError);
+            }
+
             WriteTimeUsed(start_time, "Borrow() 耗时 ");
             return result;
         ERROR1:
@@ -2054,6 +2067,40 @@ namespace DigitalPlatform.LibraryServer
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
             return result;
+        }
+
+        // 写入长时操作日志
+        int WriteLongTimeOperLog(
+            SessionInfo sessioninfo,
+            string strAction,
+            DateTime start_time, 
+            string strComment,
+            string strLinkUID,
+            out string strError)
+        {
+            strError = "";
+
+            XmlDocument domOperLog = new XmlDocument();
+            domOperLog.LoadXml("<root />");
+            DomUtil.SetElementText(domOperLog.DocumentElement,
+                "operation",
+                "memo");
+            DomUtil.SetElementText(domOperLog.DocumentElement, "action", strAction);
+            DomUtil.SetElementText(domOperLog.DocumentElement,
+    "linkUID",
+    strLinkUID);
+            DomUtil.SetElementText(domOperLog.DocumentElement,
+                "comment", 
+                strComment);
+            string strOutputUID = "";
+            int nRet = this.OperLog.WriteOperLog(domOperLog,
+    sessioninfo.ClientAddress,
+    start_time,
+    out strOutputUID,
+    out strError);
+            if (nRet == -1)
+                return -1;
+            return 0;
         }
 
         LibraryServerResult GetReaderRecord(
@@ -3444,6 +3491,7 @@ namespace DigitalPlatform.LibraryServer
             string strError = "";
 
             DateTime start_time = DateTime.Now;
+            string strOperLogUID = "";
 
             LibraryServerResult result = new LibraryServerResult();
 
@@ -4682,6 +4730,8 @@ namespace DigitalPlatform.LibraryServer
 
                     nRet = this.OperLog.WriteOperLog(domOperLog,
                         sessioninfo.ClientAddress,
+                        start_time,
+                        out strOperLogUID,
                         out strError);
                     if (nRet == -1)
                     {
@@ -4881,8 +4931,12 @@ namespace DigitalPlatform.LibraryServer
             }
 
             END3:
+
+
             // 输出数据
             // 把输出数据部分放在读者锁以外范围，是为了尽量减少锁定的时间，提高并发运行效率
+            DateTime output_start_time = DateTime.Now;
+
             if (String.IsNullOrEmpty(strOutputReaderXml) == false
                 && StringUtil.IsInList("reader", strStyle) == true)
             {
@@ -5240,6 +5294,18 @@ namespace DigitalPlatform.LibraryServer
                 result.ErrorInfo = strInventoryWarning;
                 result.ErrorCode = ErrorCode.Borrowing;
                 result.Value = 1;
+            }
+
+            // 如果创建输出数据的时间超过一秒，则需要计入操作日志
+            if (DateTime.Now - output_start_time > new TimeSpan(0, 0, 1))
+            {
+                WriteLongTimeOperLog(
+                    sessioninfo,
+                    strAction,
+                    output_start_time,
+                    "output 阶段耗时超过 1 秒",
+                    strOperLogUID,
+                    out strError);
             }
 
             // result.Value值在前面可能被设置成1

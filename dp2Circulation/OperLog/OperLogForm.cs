@@ -58,7 +58,8 @@ namespace dp2Circulation
         const int COLUMN_OPERATION = 3;
         const int COLUMN_OPERATOR = 4;
         const int COLUMN_OPERTIME = 5;
-        const int COLUMN_ATTACHMENT = 6;
+        const int COLUMN_SECONDS = 6;
+        const int COLUMN_ATTACHMENT = 7;
 
         bool StoreInTempFile = false;
 
@@ -464,6 +465,8 @@ this.UiState);
                 nRet = GetBorrowString(dom, out strHtml, out strError);
             else if (strOperation == "return")
                 nRet = GetReturnString(dom, out strHtml, out strError);
+            else if (strOperation == "memo")
+                nRet = GetMemoString(dom, out strHtml, out strError);
             else if (strOperation == "changeReaderPassword")
                 nRet = GetChangeReaderPasswordString(dom, out strHtml, out strError);
             else if (strOperation == "setReaderInfo")
@@ -661,6 +664,14 @@ this.UiState);
             return e.Summary;
         }
 
+        static string GetTimeString(XmlDocument dom)
+        {
+            XmlElement time = dom.DocumentElement.SelectSingleNode("time") as XmlElement;
+            if (time == null)
+                return "";
+            return time.GetAttribute("seconds") + " 秒; " + time.GetAttribute("start") + " - " + time.GetAttribute("end");
+        }
+
         // Borrow
         int GetBorrowString(XmlDocument dom,
     out string strHtml,
@@ -716,6 +727,7 @@ this.UiState);
                     return -1;
             }
 
+            string strUID = DomUtil.GetElementText(dom.DocumentElement, "uid");
             string strOperator = DomUtil.GetElementText(dom.DocumentElement, "operator");
             string strOperTime = GetRfc1123DisplayString(
                 DomUtil.GetElementText(dom.DocumentElement, "operTime"));
@@ -740,9 +752,11 @@ this.UiState);
                 BuildHtmlEncodedLine("册记录", strItemRecPath, strItemRecordHtml) +
                 BuildHtmlEncodedLine("读者记录", strReaderRecPath, strReaderRecordHtml) +
 
+                BuildHtmlLine("UID", strUID) +
                 BuildHtmlLine("操作者", strOperator) +
                 BuildHtmlLine("操作时间", strOperTime) +
                 BuildClientAddressLine(dom) +
+                BuildHtmlLine("基本耗时", GetTimeString(dom)) +
                 "</table>";
 
             return 0;
@@ -803,6 +817,7 @@ this.UiState);
     DomUtil.GetElementText(dom.DocumentElement, "overdues"));
             string strLostComment = DomUtil.GetElementText(dom.DocumentElement, "lostComment");
 
+            string strUID = DomUtil.GetElementText(dom.DocumentElement, "uid");
             string strOperator = DomUtil.GetElementText(dom.DocumentElement, "operator");
             string strOperTime = GetRfc1123DisplayString(
                 DomUtil.GetElementText(dom.DocumentElement, "operTime"));
@@ -827,9 +842,49 @@ this.UiState);
                 BuildHtmlEncodedLine("册记录", strItemRecPath, strItemRecordHtml) +
                 BuildHtmlEncodedLine("读者记录", strReaderRecPath, strReaderRecordHtml) +
 
+                BuildHtmlLine("UID", strUID) +
                 BuildHtmlLine("操作者", strOperator) +
                 BuildHtmlLine("操作时间", strOperTime) +
                 BuildClientAddressLine(dom) +
+                BuildHtmlLine("基本耗时", GetTimeString(dom)) +
+                "</table>";
+
+            return 0;
+        }
+
+        // Memo
+        int GetMemoString(XmlDocument dom,
+    out string strHtml,
+    out string strError)
+        {
+            strHtml = "";
+            strError = "";
+
+            string strOperation = DomUtil.GetElementText(dom.DocumentElement, "operation");
+            string strAction = DomUtil.GetElementText(dom.DocumentElement, "action");
+
+            string strLinkUID = DomUtil.GetElementText(dom.DocumentElement, "linkUID");
+            string strComment = DomUtil.GetElementText(dom.DocumentElement, "comment");
+
+            string strOperator = DomUtil.GetElementText(dom.DocumentElement, "operator");
+            string strOperTime = GetRfc1123DisplayString(
+                DomUtil.GetElementText(dom.DocumentElement, "operTime"));
+
+            //string strItemBarcodeLink = "<a href='javascript:void(0);' onclick=\"window.external.OpenForm('ItemInfoForm', this.innerText, true);\">" + strItemBarcode + "</a>";
+            //string strReaderBarcodeLink = "<a href='javascript:void(0);' onclick=\"window.external.OpenForm('ReaderInfoForm', this.innerText, true);\">" + strReaderBarcode + "</a>";
+
+            strHtml =
+                "<table class='operlog'>" +
+                BuildHtmlLine("操作类型", strOperation + " -- 注记") +
+                BuildHtmlLine("动作", strAction) +
+                BuildHtmlLine("注释", strComment) +
+
+                BuildHtmlLine("连接UID", strLinkUID) +
+
+                BuildHtmlLine("操作者", strOperator) +
+                BuildHtmlLine("操作时间", strOperTime) +
+                BuildClientAddressLine(dom) +
+                BuildHtmlLine("基本耗时", GetTimeString(dom)) +
                 "</table>";
 
             return 0;
@@ -3392,18 +3447,43 @@ FileShare.ReadWrite))
 
             strOperTime = DateTimeUtil.Rfc1123DateTimeStringToLocal(strOperTime, "s");  // Sortable date/time pattern; conforms to ISO 8601
 
+            XmlElement time = dom.DocumentElement.SelectSingleNode("time") as XmlElement;
+            string strSeconds = "";
+            if (time != null)
+            {
+                strSeconds = time.GetAttribute("seconds");
+            }
+
+            if (librarycode_node == null)
+                strLibraryCode = "<无>";
+            ListViewUtil.ChangeItemText(item, COLUMN_LIBRARYCODE, strLibraryCode);
+#if NO
             if (librarycode_node == null)
                 item.SubItems.Add("<无>");
             else
                 item.SubItems.Add(strLibraryCode);
-            item.SubItems.Add(strOperation + (string.IsNullOrEmpty(strAction) == false ? " / " + strAction : ""));
-            item.SubItems.Add(strOperator);
-            item.SubItems.Add(strOperTime);
+#endif
 
+            ListViewUtil.ChangeItemText(item, COLUMN_OPERATION, strOperation + (string.IsNullOrEmpty(strAction) == false ? " / " + strAction : ""));
+            // item.SubItems.Add(strOperation + (string.IsNullOrEmpty(strAction) == false ? " / " + strAction : ""));
+
+            ListViewUtil.ChangeItemText(item, COLUMN_OPERATOR, strOperator);
+            // item.SubItems.Add(strOperator);
+
+            ListViewUtil.ChangeItemText(item, COLUMN_OPERTIME, strOperTime);
+            // item.SubItems.Add(strOperTime);
+
+            ListViewUtil.ChangeItemText(item, COLUMN_SECONDS, strSeconds);
+
+            ListViewUtil.ChangeItemText(item, COLUMN_ATTACHMENT, lAttachmentTotalLength > 0 ? lAttachmentTotalLength.ToString() : "");
+#if NO
             if (lAttachmentTotalLength > 0)
                 item.SubItems.Add(lAttachmentTotalLength.ToString());
             else
                 item.SubItems.Add("");
+#endif
+            if (strOperation == "memo")
+                item.BackColor = Color.LightGreen;
 
             return 0;
         }
@@ -3543,7 +3623,8 @@ FileShare.ReadWrite))
                 info.InCacheFile = bInCacheFile;
             }
             ListViewItem item = new ListViewItem(strLogFileName, 0);
-            item.SubItems.Add(lIndex.ToString());  // 序号从0开始计数
+            ListViewUtil.ChangeItemText(item, COLUMN_INDEX, lIndex.ToString());
+            // item.SubItems.Add(lIndex.ToString());  // 序号从0开始计数
             this.listView_records.Items.Add(item);
             item.Tag = info;
 

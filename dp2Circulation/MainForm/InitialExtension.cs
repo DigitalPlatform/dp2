@@ -26,60 +26,58 @@ namespace dp2Circulation
     /// </summary>
     public partial class MainForm
     {
+        bool DetectIE()
+        {
+#if NO
+            try
+            {
+                System.Diagnostics.Process.Start("iexplore", "https://support.microsoft.com/zh-cn/kb/2468871");
+            }
+            catch (System.ComponentModel.Win32Exception)
+            {
+                // 可能是 ie 没有安装?
+                return false;
+            }
+
+            return true;
+#endif
+            ProcessStartInfo startinfo = new ProcessStartInfo();
+            startinfo.FileName = "iexplore";
+            startinfo.Arguments = "https://support.microsoft.com/zh-cn/kb/2468871";
+            {
+                startinfo.UseShellExecute = false;
+                // startinfo.CreateNoWindow = true;
+            }
+
+            Process process = new Process();
+            process.StartInfo = startinfo;
+            process.EnableRaisingEvents = true;
+
+            try
+            {
+                process.Start();
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         // 程序启动时候需要执行的初始化操作
         // 这些操作只需要执行一次。也就是说，和登录和连接的服务器无关。如果有关，则要放在 InitialProperties() 中
         // FormLoad() 中的许多操作应当移动到这里来，以便尽早显示出框架窗口
         void FirstInitial()
         {
-            // 检查 KB????
-            /*
-操作类型 crashReport -- 异常报告 
-主题 dp2circulation 
-发送者 xxx
-媒体类型 text 
-内容 发生未捕获的异常: 
-Type: System.AggregateException
-Message: 未通过等待任务或访问任务的 Exception 属性观察到任务的异常。因此，终结器线程重新引发了未观察到的异常。
-Stack:
-在 System.Threading.Tasks.TaskExceptionHolder.Finalize()
-
-Type: System.IO.FileLoadException
-Message: 未能加载文件或程序集“System.Core, Version=2.0.5.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e, Retargetable=Yes”或它的某一个依赖项。给定程序集名称或基本代码无效。 (异常来自 HRESULT:0x80131047)
-Stack:
-在 DigitalPlatform.MessageClient.MessageConnection.Login(String userName, String password, String libraryUID, String libraryName, String propertyList)
-在 dp2Circulation.MessageHub.Login()
-在 DigitalPlatform.MessageClient.MessageConnection.<>c__DisplayClass5.<ConnectAsync>b__3(Task antecendent)
-在 System.Threading.Tasks.Task.<>c__DisplayClassb.<ContinueWith>b__a(Object obj)
-在 System.Threading.Tasks.Task.InnerInvoke()
-在 System.Threading.Tasks.Task.Execute()
-
-
-dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, PublicKeyToken=null
-操作系统：Microsoft Windows NT 6.0.6001 Service Pack 1 
-操作时间 2015/8/24 16:21:11 (Mon, 24 Aug 2015 16:21:11 +0800) 
-前端地址 xxx 经由 http://dp2003.com/dp2library 
-
-             * */
-            // https://support.microsoft.com/zh-cn/kb/2468871
-            string strKbName = "KB2468871";
-            if (Global.IsKbInstalled(strKbName) == false)
+#if NO
+            if (DetectIE() == false)
             {
-                Application.DoEvents();
-
-                DialogResult result = MessageBox.Show(this,
-    "为顺利运行 dp2Circulation， 请先安装 .NET Framework 4 更新 (" + strKbName + ")"
-    + "\r\n\r\n是否继续运行?",
-    "dp2Circulation",
-    MessageBoxButtons.YesNo,
-    MessageBoxIcon.Question,
-    MessageBoxDefaultButton.Button2);
-                if (result == System.Windows.Forms.DialogResult.No)
-                {
-                    System.Diagnostics.Process.Start("iexplore", "https://support.microsoft.com/zh-cn/kb/2468871");
-                    Application.Exit();
-                    return;
-                }
+                MessageBox.Show(this, "IE 浏览器故障，无法启动 dp2circulation。请联系数字平台");
+                Application.Exit();
+                return;
             }
+#endif
 
             this.SetBevel(false);
 #if NO
@@ -100,7 +98,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
                 this.MenuItem_chatForm.Visible = false;
                 this.MenuItem_messageForm.Visible = false;
                 this.MenuItem_openReservationListForm.Visible = false;
-                this.MenuItem_inventory.Visible = false;
+                // this.MenuItem_inventory.Visible = false;
             }
 
             // 获得MdiClient窗口
@@ -145,6 +143,68 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
                 // 2015/7/8
                 this.UserLogDir = Path.Combine(this.UserDir, "log");
                 PathUtil.CreateDirIfNeed(this.UserLogDir);
+
+                // 启动时在日志中记载当前 dp2circulation 版本号
+                this.WriteErrorLog(Assembly.GetAssembly(this.GetType()).FullName);
+                
+                // 检查 KB????
+                /*
+    操作类型 crashReport -- 异常报告 
+    主题 dp2circulation 
+    发送者 xxx
+    媒体类型 text 
+    内容 发生未捕获的异常: 
+    Type: System.AggregateException
+    Message: 未通过等待任务或访问任务的 Exception 属性观察到任务的异常。因此，终结器线程重新引发了未观察到的异常。
+    Stack:
+    在 System.Threading.Tasks.TaskExceptionHolder.Finalize()
+
+    Type: System.IO.FileLoadException
+    Message: 未能加载文件或程序集“System.Core, Version=2.0.5.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e, Retargetable=Yes”或它的某一个依赖项。给定程序集名称或基本代码无效。 (异常来自 HRESULT:0x80131047)
+    Stack:
+    在 DigitalPlatform.MessageClient.MessageConnection.Login(String userName, String password, String libraryUID, String libraryName, String propertyList)
+    在 dp2Circulation.MessageHub.Login()
+    在 DigitalPlatform.MessageClient.MessageConnection.<>c__DisplayClass5.<ConnectAsync>b__3(Task antecendent)
+    在 System.Threading.Tasks.Task.<>c__DisplayClassb.<ContinueWith>b__a(Object obj)
+    在 System.Threading.Tasks.Task.InnerInvoke()
+    在 System.Threading.Tasks.Task.Execute()
+
+
+    dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, PublicKeyToken=null
+    操作系统：Microsoft Windows NT 6.0.6001 Service Pack 1 
+    操作时间 2015/8/24 16:21:11 (Mon, 24 Aug 2015 16:21:11 +0800) 
+    前端地址 xxx 经由 http://dp2003.com/dp2library 
+
+                 * */
+                // https://support.microsoft.com/zh-cn/kb/2468871
+                string strKbName = "KB2468871";
+                if (Global.IsKbInstalled(strKbName) == false)
+                {
+                    Application.DoEvents();
+
+                    this.WriteErrorLog("dp2circulation 启动时，发现本机尚未安装 .NET Framework 4 更新 KB2468871");
+
+                    DialogResult result = MessageBox.Show(this,
+        "为顺利运行 dp2Circulation， 请先安装 .NET Framework 4 更新 (" + strKbName + ")"
+        + "\r\n\r\n是否继续运行?",
+        "dp2Circulation",
+        MessageBoxButtons.YesNo,
+        MessageBoxIcon.Question,
+        MessageBoxDefaultButton.Button2);
+                    if (result == System.Windows.Forms.DialogResult.No)
+                    {
+                        try
+                        {
+                            System.Diagnostics.Process.Start("iexplore", "https://support.microsoft.com/zh-cn/kb/2468871");
+                        }
+                        catch (System.ComponentModel.Win32Exception)
+                        {
+                            // 可能是 ie 没有安装?
+                        }
+                        Application.Exit();
+                        return;
+                    }
+                }
 
                 // 删除一些以前的目录
                 string strDir = PathUtil.MergePath(this.DataDir, "operlogcache");
@@ -302,7 +362,12 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
                 }
             }
 #endif
-            CopyDefaultCfgFiles();
+            if (CopyDefaultCfgFiles() == false)
+            {
+                Application.Exit();
+                return;
+            }
+
         }
 
         // 从数据目录 default 子目录复制配置文件到用户目录
@@ -328,6 +393,7 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
             List<string> filenames = new List<string>();
             filenames.Add("objectrights.xml");
             filenames.Add("inventory_item_browse.xml");
+            filenames.Add("inventory.css");
 
             FileInfo[] fis = di.GetFiles("*.*");
             foreach(FileInfo fi in fis)
@@ -359,8 +425,37 @@ dp2Circulation 版本: dp2Circulation, Version=2.4.5712.38964, Culture=neutral, 
             return true;
         ERROR1:
             MessageBox.Show(this, strError);
-            Application.Exit();
             return false;
+        }
+
+        // 复制选定的部分配置文件到用户目录。会覆盖用户目录中已经存在的文件。此功能就是恢复出厂设置的功能
+        public int CopyDefaultCfgFiles(List<string> filenames,
+            out string strError)
+        {
+            strError = "";
+
+            string strDefaultDir = Path.Combine(this.DataDir, "default");
+            DirectoryInfo di = new DirectoryInfo(strDefaultDir);
+            if (di.Exists == false)
+            {
+                strError = "配置文件目录 '" + strDefaultDir + "' 不存在";
+                return -1;
+            }
+
+            foreach (string filename in filenames)
+            {
+                string strSourceFileName = Path.Combine(strDefaultDir, filename);
+                string strTargetFileName = Path.Combine(this.UserDir, filename);
+                if (File.Exists(strSourceFileName) == false)
+                {
+                    strError = "源文件 '" + strSourceFileName + "' 不存在";
+                    return -1;
+                }
+
+                File.Copy(strSourceFileName, strTargetFileName, true);
+            }
+
+            return 0;
         }
 
         // 初始化各种参数

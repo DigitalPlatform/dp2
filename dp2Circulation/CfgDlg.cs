@@ -280,6 +280,12 @@ ap.GetString("quickcharging_form",
                 "auto_oper_single_item",
                 false);
 
+            // 日志记载操作耗时
+            this.checkBox_quickCharging_logOperTime.Checked = ap.GetBoolean(
+                "quickcharging_form",
+                "log_opertime",
+                true);
+
             // *** 种册窗
             this.checkBox_itemManagement_verifyItemBarcode.Checked = ap.GetBoolean(
                 "entity_form",
@@ -846,6 +852,12 @@ this.checkBox_charging_stopFillingWhenCloseInfoDlg.Checked);
                 "quickcharging_form",
                 "auto_oper_single_item",
                 this.checkBox_quickCharging_autoOperItemDialogSingleItem.Checked);
+
+            // 日志记载操作耗时
+            ap.SetBoolean(
+                "quickcharging_form",
+                "log_opertime",
+                this.checkBox_quickCharging_logOperTime.Checked);
 
             // *** 种册窗
             ap.SetBoolean(

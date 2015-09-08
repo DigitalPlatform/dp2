@@ -198,12 +198,13 @@ namespace dp2Circulation
             this.comboBox_labelPrint_accessNoSource = new System.Windows.Forms.ComboBox();
             this.label28 = new System.Windows.Forms.Label();
             this.tabPage_message = new System.Windows.Forms.TabPage();
+            this.textBox_server_dp2MServerUrl = new System.Windows.Forms.TextBox();
+            this.label29 = new System.Windows.Forms.Label();
             this.label_comment = new System.Windows.Forms.Label();
             this.checkBox_message_shareBiblio = new System.Windows.Forms.CheckBox();
             this.button_OK = new System.Windows.Forms.Button();
             this.button_Cancel = new System.Windows.Forms.Button();
-            this.textBox_server_dp2MServerUrl = new System.Windows.Forms.TextBox();
-            this.label29 = new System.Windows.Forms.Label();
+            this.checkBox_quickCharging_logOperTime = new System.Windows.Forms.CheckBox();
             this.tabControl_main.SuspendLayout();
             this.tabPage_server.SuspendLayout();
             this.toolStrip_server.SuspendLayout();
@@ -851,6 +852,7 @@ namespace dp2Circulation
             // tabPage_quickCharging
             // 
             this.tabPage_quickCharging.AutoScroll = true;
+            this.tabPage_quickCharging.Controls.Add(this.checkBox_quickCharging_logOperTime);
             this.tabPage_quickCharging.Controls.Add(this.checkBox_quickCharging_isbnBorrow);
             this.tabPage_quickCharging.Controls.Add(this.groupBox_quickCharging_selectItemDialog);
             this.tabPage_quickCharging.Controls.Add(this.comboBox_quickCharging_displayFormat);
@@ -2150,7 +2152,7 @@ namespace dp2Circulation
             this.groupBox7.Controls.Add(this.textBox_fingerprint_readerUrl);
             this.groupBox7.Location = new System.Drawing.Point(3, 14);
             this.groupBox7.Name = "groupBox7";
-            this.groupBox7.Size = new System.Drawing.Size(365, 84);
+            this.groupBox7.Size = new System.Drawing.Size(348, 84);
             this.groupBox7.TabIndex = 0;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = " 指纹阅读器接口 URL ";
@@ -2158,7 +2160,7 @@ namespace dp2Circulation
             // button_fingerprint_setDefaultValue
             // 
             this.button_fingerprint_setDefaultValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(254, 47);
+            this.button_fingerprint_setDefaultValue.Location = new System.Drawing.Point(237, 47);
             this.button_fingerprint_setDefaultValue.Name = "button_fingerprint_setDefaultValue";
             this.button_fingerprint_setDefaultValue.Size = new System.Drawing.Size(105, 23);
             this.button_fingerprint_setDefaultValue.TabIndex = 1;
@@ -2172,7 +2174,7 @@ namespace dp2Circulation
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox_fingerprint_readerUrl.Location = new System.Drawing.Point(6, 20);
             this.textBox_fingerprint_readerUrl.Name = "textBox_fingerprint_readerUrl";
-            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(353, 21);
+            this.textBox_fingerprint_readerUrl.Size = new System.Drawing.Size(336, 21);
             this.textBox_fingerprint_readerUrl.TabIndex = 0;
             // 
             // button_fingerprint_clearLocalCacheFiles
@@ -2232,6 +2234,24 @@ namespace dp2Circulation
             this.tabPage_message.Text = "消息";
             this.tabPage_message.UseVisualStyleBackColor = true;
             // 
+            // textBox_server_dp2MServerUrl
+            // 
+            this.textBox_server_dp2MServerUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBox_server_dp2MServerUrl.Location = new System.Drawing.Point(11, 123);
+            this.textBox_server_dp2MServerUrl.Name = "textBox_server_dp2MServerUrl";
+            this.textBox_server_dp2MServerUrl.Size = new System.Drawing.Size(470, 21);
+            this.textBox_server_dp2MServerUrl.TabIndex = 18;
+            // 
+            // label29
+            // 
+            this.label29.AutoSize = true;
+            this.label29.Location = new System.Drawing.Point(9, 107);
+            this.label29.Name = "label29";
+            this.label29.Size = new System.Drawing.Size(137, 12);
+            this.label29.TabIndex = 17;
+            this.label29.Text = "dp2MServer 服务器 URL:";
+            // 
             // label_comment
             // 
             this.label_comment.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
@@ -2277,23 +2297,16 @@ namespace dp2Circulation
             this.button_Cancel.UseVisualStyleBackColor = true;
             this.button_Cancel.Click += new System.EventHandler(this.button_Cancel_Click);
             // 
-            // textBox_server_dp2MServerUrl
+            // checkBox_quickCharging_logOperTime
             // 
-            this.textBox_server_dp2MServerUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_server_dp2MServerUrl.Location = new System.Drawing.Point(11, 123);
-            this.textBox_server_dp2MServerUrl.Name = "textBox_server_dp2MServerUrl";
-            this.textBox_server_dp2MServerUrl.Size = new System.Drawing.Size(470, 21);
-            this.textBox_server_dp2MServerUrl.TabIndex = 18;
-            // 
-            // label29
-            // 
-            this.label29.AutoSize = true;
-            this.label29.Location = new System.Drawing.Point(9, 107);
-            this.label29.Name = "label29";
-            this.label29.Size = new System.Drawing.Size(137, 12);
-            this.label29.TabIndex = 17;
-            this.label29.Text = "dp2MServer 服务器 URL:";
+            this.checkBox_quickCharging_logOperTime.AutoSize = true;
+            this.checkBox_quickCharging_logOperTime.Location = new System.Drawing.Point(12, 305);
+            this.checkBox_quickCharging_logOperTime.Margin = new System.Windows.Forms.Padding(2);
+            this.checkBox_quickCharging_logOperTime.Name = "checkBox_quickCharging_logOperTime";
+            this.checkBox_quickCharging_logOperTime.Size = new System.Drawing.Size(162, 16);
+            this.checkBox_quickCharging_logOperTime.TabIndex = 21;
+            this.checkBox_quickCharging_logOperTime.Text = "在日志中记载操作耗时(&L)";
+            this.checkBox_quickCharging_logOperTime.UseVisualStyleBackColor = true;
             // 
             // CfgDlg
             // 
@@ -2564,5 +2577,6 @@ namespace dp2Circulation
         public System.Windows.Forms.CheckBox checkBox_message_shareBiblio;
         private System.Windows.Forms.TextBox textBox_server_dp2MServerUrl;
         private System.Windows.Forms.Label label29;
+        private System.Windows.Forms.CheckBox checkBox_quickCharging_logOperTime;
     }
 }

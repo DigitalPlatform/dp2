@@ -1078,11 +1078,26 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
-        // 写入一条操作日志
+        // 包装后的版本
         public int WriteOperLog(XmlDocument dom,
             string strClientAddress,
             out string strError)
         {
+            string strRefID = "";
+            return WriteOperLog(dom, strClientAddress, new DateTime(0), out strRefID, out strError);
+        }
+
+        // 写入一条操作日志
+        // parameters:
+        //      start_time  操作开始的时间。本函数会用它算出整个操作耗费的时间。如果 ticks == 0，表示不使用这个值
+        public int WriteOperLog(XmlDocument dom,
+            string strClientAddress,
+            DateTime start_time,
+            out string strRefID,
+            out string strError)
+        {
+            strRefID = "";
+
             // 2013/11/20
             if (this._bSmallFileMode == false
                 && this.m_streamSpare == null)
@@ -1101,6 +1116,20 @@ namespace DigitalPlatform.LibraryServer
             WriteClientAddress(dom, strClientAddress);
             // 1.01 (2014/3/8) 修改了 operation=amerce;action=expire 记录中元素名 oldReeaderRecord 为 oldReaderRecord
             DomUtil.SetElementText(dom.DocumentElement, "version", "1.01");
+
+            if (start_time != new DateTime(0))
+            {
+                XmlElement time = dom.CreateElement("time");
+                dom.DocumentElement.AppendChild(time);
+                DateTime now = DateTime.Now;
+                time.SetAttribute("start", start_time.ToString("s"));
+                time.SetAttribute("end", now.ToString("s"));
+                time.SetAttribute("seconds", (now - start_time).TotalSeconds.ToString());
+
+                // 日志记录的唯一 ID
+                strRefID = Guid.NewGuid().ToString();
+                DomUtil.SetElementText(dom.DocumentElement, "uid", strRefID);
+            }
 
             int nRet = WriteEnventLog(dom.OuterXml,
                 null,

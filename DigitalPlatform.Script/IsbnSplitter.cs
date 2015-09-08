@@ -151,8 +151,16 @@ namespace DigitalPlatform.Script
                 strError = "ISBN字符串内容为空";
                 return -1;
             }
+            
+            // 2015/9/7
+            string strISBN = strISBNParam.Trim();
+            if (string.IsNullOrEmpty(strISBN) == true)
+            {
+                strError = "ISBN字符串内容为空(1)";
+                return -1;
+            }
 
-            string strISBN = strISBNParam.Replace("-", "");
+            strISBN = strISBNParam.Replace("-", "").Replace(" ","");
             if (string.IsNullOrEmpty(strISBN) == true)
             {
                 strError = "ISBN字符串内容为空";
@@ -161,7 +169,7 @@ namespace DigitalPlatform.Script
 
             if (strISBN.Length != 10 && strISBN.Length != 13)
             {
-                strError = "ISBN字符串的长度既不是10位也不是13位";
+                strError = "(除字符'-'和空格外)ISBN字符串的长度既不是10位也不是13位";
                 return 1;
             }
 
@@ -185,6 +193,7 @@ namespace DigitalPlatform.Script
 
             if (strISBN.Length == 13)
             {
+                //
                 char c = GetIsbn13VerifyChar(strISBN);
                 if (c != strISBN[12])
                 {

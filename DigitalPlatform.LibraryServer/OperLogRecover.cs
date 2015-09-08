@@ -571,6 +571,10 @@ namespace DigitalPlatform.LibraryServer
             {
                 // 只读 2015/7/16
             }
+            else if (strOperation == "memo")
+            {
+                // 注记 2015/9/8
+            }
             else
             {
                 strError = "不能识别的日志操作类型 '" + strOperation + "'";

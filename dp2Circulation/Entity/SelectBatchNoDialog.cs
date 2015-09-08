@@ -221,6 +221,10 @@ namespace dp2Circulation
                                 && MatchLibraryCode(this._libraryCodeList, record.Path) == false)
                                 continue;
 
+                            // 跳过数字为 0 的事项
+                            if (record.Cols.Length > 0 && record.Cols[0] == "0")
+                                continue;
+
                             ListViewItem item = new ListViewItem();
                             item.Text = string.IsNullOrEmpty(record.Path) == false ? record.Path : "[空]";
                             ListViewUtil.ChangeItemText(item, 1, record.Cols[0]);
@@ -409,7 +413,9 @@ namespace dp2Circulation
                             return -1;
                         }
 
-                        // TODO: 数字为 0 的事项是否不要创建?
+                        // 跳过数字为 0 的事项
+                        if (record.Cols.Length > 0 && record.Cols[0] == "0")
+                            continue;
 
                         ListViewItem item = new ListViewItem();
                         item.Text = string.IsNullOrEmpty(record.Path) == false ? record.Path : "[空]";

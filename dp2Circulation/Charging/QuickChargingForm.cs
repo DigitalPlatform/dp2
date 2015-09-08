@@ -322,7 +322,7 @@ namespace dp2Circulation
                 return -1;
             // TODO: 保存窗口内的尺寸状态
             this.MainForm.AppInfo.LinkFormState(dlg, "QuickChargingForm_SelectPatronDialog_state");
-            dlg.ShowDialog(this);
+            dlg.ShowDialog(this.SafeWindow);
             this.MainForm.AppInfo.UnlinkFormState(dlg);
 
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
@@ -430,7 +430,7 @@ namespace dp2Circulation
                 dlg.Location = this.MainForm.PointToScreen(this.MainForm.panel_fixed.Location);
             }
 
-            dlg.ShowDialog(this);
+            dlg.ShowDialog(this.SafeWindow);
 
             if (string.IsNullOrEmpty(strUiState) == false
                 || this.MainForm.PanelFixedVisible == true)
@@ -498,6 +498,11 @@ dlg.UiState);
             }
         }
 
+        internal void WriteErrorLog(string strText)
+        {
+            if (this.LogOperTime)
+                this.MainForm.WriteErrorLog(strText);
+        }
         /// <summary>
         /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
         /// </summary>
@@ -1497,6 +1502,29 @@ false);
         }
 
         #region 各种配置参数
+
+        // 加快响应的记忆变量
+        int _nLogOperTime = 0;  // 0 尚未初始化; -1 false; 1 true
+        // 日志记载操作耗时
+        public bool LogOperTime
+        {
+            get
+            {
+                if (_nLogOperTime == 0)
+                {
+                    bool bRet = this.MainForm.AppInfo.GetBoolean(
+                        "quickcharging_form",
+                        "log_opertime",
+                        true);
+                    if (bRet == true)
+                        _nLogOperTime = 1;
+                    else
+                        _nLogOperTime = -1;
+                }
+
+                return _nLogOperTime == 1;
+            }
+        }
 
         public string DisplayFormat
         {
@@ -2954,7 +2982,7 @@ e.Height);
             dlg.LibraryCodeList = GetOwnerLibraryCodes();
             dlg.BatchNo = this.BatchNo;
             this.MainForm.AppInfo.LinkFormState(dlg, "InventoryFromFileDialog_state");
-            dlg.ShowDialog(this);
+            dlg.ShowDialog(this.SafeWindow);
             if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                 return;
 
@@ -3624,6 +3652,7 @@ e.Height);
 
             //if (this.Container.MainForm.TestMode == true)
             //    strStyle += ",testmode";
+            DateTime api_start_time = DateTime.Now;
 
             long lRet = Channel.Borrow(
 stop,
@@ -3645,6 +3674,8 @@ out strOutputReaderBarcode,
 out borrow_info,
 out strError);
             task.ErrorInfo = strError;
+
+            LogOperTime("borrow", api_start_time, strOperText);
 
             if (reader_records != null && reader_records.Length > 0)
                 strReaderRecord = reader_records[0];
@@ -3773,6 +3804,16 @@ end_time);
 
         }
 
+        void LogOperTime(string strAPI, DateTime start_time, string strDesc)
+        {
+            StringBuilder text = new StringBuilder();
+            TimeSpan delta = DateTime.Now - start_time;
+            if (delta.TotalSeconds > 2)
+                text.Append("*** ");
+            text.Append(" API " + strAPI + " 耗时 " + delta.TotalSeconds.ToString() + " 秒 " + strDesc);
+            this.Container.WriteErrorLog(text.ToString());
+        }
+
         // 还书
         void Return(ChargingTask task)
         {
@@ -3889,6 +3930,8 @@ end_time);
             //if (this.Container.MainForm.TestMode == true)
             //    strStyle += ",testmode";
 
+            DateTime api_start_time = DateTime.Now;
+
             long lRet = Channel.Return(
                 stop,
                 strAction,
@@ -3917,7 +3960,7 @@ end_time);
                     strLocation = StringUtil.GetPureLocation(return_info.Location);
                 }
 #endif
-
+            LogOperTime("return", api_start_time, strOperText);
 
             if (reader_records != null && reader_records.Length > 0)
                 strReaderRecord = reader_records[0];

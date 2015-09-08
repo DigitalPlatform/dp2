@@ -1495,11 +1495,11 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
-            double base_version = 2.57;
+            double base_version = 2.59;
 
             if (value < base_version)
             {
-                strError = "当前 dp2Library 版本需要和 dp2Kernel " + base_version + " 以上版本配套使用。请立即升级 dp2Kernel 到最新版本。";
+                strError = "当前 dp2Library 版本需要和 dp2Kernel " + base_version + " 以上版本配套使用(然而当前 dp2Kernel 版本号为 "+value+")。请立即升级 dp2Kernel 到最新版本。";
                 return -1;
             }
 

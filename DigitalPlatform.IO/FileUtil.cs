@@ -116,7 +116,7 @@ namespace DigitalPlatform.IO
             {
                 DateTime now = DateTime.Now;
                 // 每天一个日志文件
-                string strFilename = PathUtil.MergePath(strLogDir, strPrefix + DateTimeUtil.DateTimeToString8(now) + strPostfix);
+                string strFilename = Path.Combine(strLogDir, strPrefix + DateTimeUtil.DateTimeToString8(now) + strPostfix);
                 string strTime = now.ToString();
                 StreamUtil.WriteText(strFilename,
                     strTime + " " + strText + "\r\n");

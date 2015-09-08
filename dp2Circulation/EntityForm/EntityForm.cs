@@ -5206,6 +5206,7 @@ out strError);
                 if (this.browseWindow.Visible == false)
                     this.MainForm.AppInfo.LinkFormState(this.browseWindow, "browseWindow_state");
 
+            // 再观察一段 2015/9/8
                 this.browseWindow.Visible = true;
 
                 // 2014/7/8

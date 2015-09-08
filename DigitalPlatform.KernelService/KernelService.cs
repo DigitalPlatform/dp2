@@ -321,7 +321,7 @@ namespace dp2Kernel
         {
             Result result = new Result();
             result.Value = 0;
-            result.ErrorString = "2.58";
+            result.ErrorString = "2.59";
             return result;
         }
 

@@ -45,6 +45,19 @@ namespace dp2Circulation
         }
 
         /// <summary>
+        /// 供 ShowDialog(?) 使用的窗口对象
+        /// </summary>
+        public IWin32Window SafeWindow
+        {
+            get
+            {
+                if (this.Visible == false)
+                    return this.MainForm;
+                return this;
+            }
+        }
+
+        /// <summary>
         /// 窗口是否为浮动状态
         /// </summary>
         public virtual bool Floating

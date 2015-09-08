@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Xml;
 
 using ClosedXML.Excel;
 
@@ -19,7 +20,6 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.dp2.Statis;
 using DigitalPlatform.GUI;
 using DigitalPlatform.Text;
-using System.Xml;
 using DigitalPlatform.Xml;
 
 namespace dp2Circulation
@@ -894,21 +894,21 @@ this.UiState);
 
 
         // TODO: 如果被调用太密集，可在需要的时候解挂事件
-        private void listView_records_SelectedIndexChanged(object sender, EventArgs e)
+        private void listView_inventoryList_SelectedIndexChanged(object sender, EventArgs e)
         {
             ListViewUtil.OnSeletedIndexChanged(this.listView_inventoryList_records,
     0,
     null);
         }
 
-        private void listView_records_ColumnClick(object sender, ColumnClickEventArgs e)
+        private void listView_inventoryList_ColumnClick(object sender, ColumnClickEventArgs e)
         {
             ListViewUtil.OnColumnClick(this.listView_inventoryList_records, e);
         }
 
         private void button_baseList_getLocations_Click(object sender, EventArgs e)
         {
-            string strError = "";
+            // string strError = "";
 
             SelectBatchNoDialog dlg = new SelectBatchNoDialog();
             MainForm.SetControlFont(dlg, this.Font, false);
@@ -1637,32 +1637,6 @@ null);
                     }
                 }
 
-                this._statisInfo.ItemsNeedRemoveLostState = 0;
-                this._statisInfo.ItemsNeedReturn = 0;
-                // 检查盘点过的册中，状态值 包含 丢失 和 注销 的，给状态值打上特殊标记，以便提醒操作者可以单独处理它们
-                foreach (ListViewItem item in this.listView_baseList_records.Items)
-                {
-                    if (item.Tag == null)
-                        continue;
-
-                    LineType type = (LineType)item.Tag;
-                    if (type == LineType.Verified)
-                    {
-                        string strState = ListViewUtil.GetItemText(item, nStateColumnIndex + 2);
-                        if (StringUtil.IsInList("丢失", strState) == true
-                            || StringUtil.IsInList("注销", strState) == true)
-                        {
-                            item.Font = new Font(this.Font, FontStyle.Bold);
-                            ListViewUtil.ChangeItemText(item, nStateColumnIndex + 2, "-" + strState);
-                            this._statisInfo.ItemsNeedRemoveLostState++;
-                        }
-
-                        string strBorrower = ListViewUtil.GetItemText(item, nBorrowerColumnIndex + 2);
-                        if (string.IsNullOrEmpty(strBorrower) == false)
-                            this._statisInfo.ItemsNeedReturn++;
-                    }
-                }
-
                 // *** 第四步，标记借出状态的行 标记丢失状态的行
                 this.ShowMessage("正在标记外借和丢失册 ...");
                 Application.DoEvents();
@@ -1743,6 +1717,32 @@ null);
                             this._statisInfo.ItemsBorrowed++;
                             this._statisInfo.ItemsVerified--;
                         }
+                    }
+                }
+
+                this._statisInfo.ItemsNeedRemoveLostState = 0;
+                this._statisInfo.ItemsNeedReturn = 0;
+                // 检查盘点过的册中，状态值 包含 丢失 和 注销 的，给状态值打上特殊标记，以便提醒操作者可以单独处理它们
+                foreach (ListViewItem item in this.listView_baseList_records.Items)
+                {
+                    if (item.Tag == null)
+                        continue;
+
+                    LineType type = (LineType)item.Tag;
+                    if (type == LineType.Verified)
+                    {
+                        string strState = ListViewUtil.GetItemText(item, nStateColumnIndex + 2);
+                        if (StringUtil.IsInList("丢失", strState) == true
+                            || StringUtil.IsInList("注销", strState) == true)
+                        {
+                            item.Font = new Font(this.Font, FontStyle.Bold);
+                            ListViewUtil.ChangeItemText(item, nStateColumnIndex + 2, "-" + strState);
+                            this._statisInfo.ItemsNeedRemoveLostState++;
+                        }
+
+                        string strBorrower = ListViewUtil.GetItemText(item, nBorrowerColumnIndex + 2);
+                        if (string.IsNullOrEmpty(strBorrower) == false)
+                            this._statisInfo.ItemsNeedReturn++;
                     }
                 }
 
@@ -2931,7 +2931,7 @@ null);
         {
             int nRet = 0;
 
-            if (strAction != "remove" && strAction == "add")
+            if (strAction != "remove" && strAction != "add")
             {
                 strError = "未知的 strAction 值 '"+strAction+"'";
                 return -1;
@@ -3536,7 +3536,7 @@ MessageBoxDefaultButton.Button1);
                 // 刷新浏览行
                 nRet = RefreshListViewLines(items,
                     strBrowseStyle,
-                    false,
+                    true,   // bBeginLoop
                     false,  // 不清除右侧多出来的列内容
                     out strError);
                 if (nRet == -1)
@@ -3690,7 +3690,9 @@ MessageBoxDefaultButton.Button1);
 
         void menu_selectAllInventoryLines_Click(object sender, EventArgs e)
         {
+            this.listView_inventoryList_records.SelectedIndexChanged -= new System.EventHandler(this.listView_inventoryList_SelectedIndexChanged);
             ListViewUtil.SelectAllLines(this.listView_inventoryList_records);
+            this.listView_inventoryList_records.SelectedIndexChanged += new System.EventHandler(this.listView_inventoryList_SelectedIndexChanged);
         }
 
         void menu_deleteSelectedInventoryItems_Click(object sender, EventArgs e)
@@ -3800,6 +3802,128 @@ MessageBoxDefaultButton.Button2);
             MessageBox.Show(this, strError);
         }
 
+        private void button_start_restoreCfgs_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            List<string> filenames = new List<string>();
+            filenames.Add("inventory_item_browse.xml");
+            filenames.Add("inventory.css");
 
+            int nRet = this.MainForm.CopyDefaultCfgFiles(filenames,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            this.ShowMessage("操作完成", "green", true);
+            return;
+        ERROR1:
+            this.ShowMessage(strError, "red", true);
+        }
+
+        private void listView_baseList_records_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Right)
+                return;
+
+            ContextMenu contextMenu = new ContextMenu();
+            MenuItem menuItem = null;
+
+            menuItem = new MenuItem("全选(&A)");
+            menuItem.Click += new System.EventHandler(this.menu_selectAllBaseListLines_Click);
+            contextMenu.MenuItems.Add(menuItem);
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("装入实体查询窗 [" + this.listView_baseList_records.SelectedItems.Count.ToString() + "] (&D)");
+            menuItem.Click += new System.EventHandler(this.menu_loadSelectedBaseListItemsToItemSearchForm_Click);
+            if (this.listView_baseList_records.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("刷新 [" + this.listView_baseList_records.SelectedItems.Count.ToString() + "] (&D)");
+            menuItem.Click += new System.EventHandler(this.menu_refreshSelectedBaseListItems_Click);
+            if (this.listView_baseList_records.SelectedItems.Count == 0)
+                menuItem.Enabled = false;
+            contextMenu.MenuItems.Add(menuItem);
+
+            contextMenu.Show(this.listView_baseList_records, new Point(e.X, e.Y));	
+
+        }
+
+        void menu_selectAllBaseListLines_Click(object sender, EventArgs e)
+        {
+            this.listView_baseList_records.SelectedIndexChanged -= new System.EventHandler(this.listView_baseList_records_SelectedIndexChanged);
+            ListViewUtil.SelectAllLines(this.listView_baseList_records);
+            this.listView_baseList_records.SelectedIndexChanged += new System.EventHandler(this.listView_baseList_records_SelectedIndexChanged);
+        }
+
+        void menu_loadSelectedBaseListItemsToItemSearchForm_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            if (this.listView_baseList_records.SelectedItems.Count == 0)
+            {
+                strError = "尚未选定要装入实体查询窗的事项";
+                goto ERROR1;
+            }
+
+            string strTempFileName = this.MainForm.GetTempFileName("baselist");
+            try
+            {
+                using (StreamWriter sw = new StreamWriter(strTempFileName, false, Encoding.UTF8))
+                {
+                    foreach (ListViewItem item in this.listView_baseList_records.SelectedItems)
+                    {
+                        sw.WriteLine(item.Text);
+                    }
+                }
+                ItemSearchForm form = this.MainForm.OpenItemSearchForm("item");
+                // form.Activate();
+                int nRet = form.ImportFromRecPathFile(strTempFileName,
+    out strError);
+                if (nRet == -1)
+                    goto ERROR1;
+            }
+            finally
+            {
+                File.Delete(strTempFileName);
+            }
+
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
+
+        void menu_refreshSelectedBaseListItems_Click(object sender, EventArgs e)
+        {
+            string strError = "";
+            if (this.listView_baseList_records.SelectedItems.Count == 0)
+            {
+                strError = "尚未选定要刷新的事项";
+                goto ERROR1;
+            }
+            List<ListViewItem> items = new List<ListViewItem>();
+            foreach (ListViewItem item in this.listView_baseList_records.SelectedItems)
+            {
+                items.Add(item);
+            }
+            string strBrowseStyle = "id,cols,format:@coldef:" + this._defs.BrowseColumnDef;
+
+            // 刷新浏览行
+            int nRet = RefreshListViewLines(items,
+                strBrowseStyle,
+                true,
+                false,  // 不清除右侧多出来的列内容
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
+        }
     }
 }

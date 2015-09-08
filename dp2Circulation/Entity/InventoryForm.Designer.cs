@@ -32,6 +32,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(InventoryForm));
             this.tabControl_main = new System.Windows.Forms.TabControl();
             this.tabPage_start = new System.Windows.Forms.TabPage();
+            this.button_start_restoreCfgs = new System.Windows.Forms.Button();
             this.label6 = new System.Windows.Forms.Label();
             this.button_start_setLocations = new System.Windows.Forms.Button();
             this.inventoryBatchNoControl_start_batchNo = new dp2Circulation.InventoryBatchNoControl();
@@ -74,7 +75,6 @@
             this.button_statis_outputExcel = new System.Windows.Forms.Button();
             this.button_statis_crossCompute = new System.Windows.Forms.Button();
             this.timer_qu = new System.Windows.Forms.Timer(this.components);
-            this.button_start_restoreCfgs = new System.Windows.Forms.Button();
             this.tabControl_main.SuspendLayout();
             this.tabPage_start.SuspendLayout();
             this.tabPage_inventoryList.SuspendLayout();
@@ -121,6 +121,16 @@
             this.tabPage_start.TabIndex = 0;
             this.tabPage_start.Text = "开始";
             this.tabPage_start.UseVisualStyleBackColor = true;
+            // 
+            // button_start_restoreCfgs
+            // 
+            this.button_start_restoreCfgs.Location = new System.Drawing.Point(9, 211);
+            this.button_start_restoreCfgs.Name = "button_start_restoreCfgs";
+            this.button_start_restoreCfgs.Size = new System.Drawing.Size(196, 23);
+            this.button_start_restoreCfgs.TabIndex = 12;
+            this.button_start_restoreCfgs.Text = "恢复配置文件出厂设置";
+            this.button_start_restoreCfgs.UseVisualStyleBackColor = true;
+            this.button_start_restoreCfgs.Click += new System.EventHandler(this.button_start_restoreCfgs_Click);
             // 
             // label6
             // 
@@ -230,8 +240,8 @@
             this.listView_inventoryList_records.TabIndex = 11;
             this.listView_inventoryList_records.UseCompatibleStateImageBehavior = false;
             this.listView_inventoryList_records.View = System.Windows.Forms.View.Details;
-            this.listView_inventoryList_records.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView_records_ColumnClick);
-            this.listView_inventoryList_records.SelectedIndexChanged += new System.EventHandler(this.listView_records_SelectedIndexChanged);
+            this.listView_inventoryList_records.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView_inventoryList_ColumnClick);
+            this.listView_inventoryList_records.SelectedIndexChanged += new System.EventHandler(this.listView_inventoryList_SelectedIndexChanged);
             this.listView_inventoryList_records.MouseUp += new System.Windows.Forms.MouseEventHandler(this.listView_inventoryList_records_MouseUp);
             // 
             // columnHeader_path
@@ -260,11 +270,11 @@
             // button_inventoryList_getBatchNos
             // 
             this.button_inventoryList_getBatchNos.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_inventoryList_getBatchNos.Location = new System.Drawing.Point(260, 19);
+            this.button_inventoryList_getBatchNos.Location = new System.Drawing.Point(290, 19);
             this.button_inventoryList_getBatchNos.Name = "button_inventoryList_getBatchNos";
-            this.button_inventoryList_getBatchNos.Size = new System.Drawing.Size(75, 23);
+            this.button_inventoryList_getBatchNos.Size = new System.Drawing.Size(44, 23);
             this.button_inventoryList_getBatchNos.TabIndex = 3;
-            this.button_inventoryList_getBatchNos.Text = "选取批次号";
+            this.button_inventoryList_getBatchNos.Text = "...";
             this.button_inventoryList_getBatchNos.UseVisualStyleBackColor = true;
             this.button_inventoryList_getBatchNos.Click += new System.EventHandler(this.button_list_getBatchNos_Click);
             // 
@@ -288,7 +298,7 @@
             this.textBox_inventoryList_batchNo.Multiline = true;
             this.textBox_inventoryList_batchNo.Name = "textBox_inventoryList_batchNo";
             this.textBox_inventoryList_batchNo.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_inventoryList_batchNo.Size = new System.Drawing.Size(260, 54);
+            this.textBox_inventoryList_batchNo.Size = new System.Drawing.Size(289, 54);
             this.textBox_inventoryList_batchNo.TabIndex = 1;
             // 
             // label2
@@ -343,6 +353,7 @@
             this.listView_baseList_records.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.listView_baseList_records_ColumnClick);
             this.listView_baseList_records.SelectedIndexChanged += new System.EventHandler(this.listView_baseList_records_SelectedIndexChanged);
             this.listView_baseList_records.DoubleClick += new System.EventHandler(this.listView_baseList_records_DoubleClick);
+            this.listView_baseList_records.MouseUp += new System.Windows.Forms.MouseEventHandler(this.listView_baseList_records_MouseUp);
             // 
             // columnHeader1
             // 
@@ -370,11 +381,11 @@
             // button_baseList_getLocations
             // 
             this.button_baseList_getLocations.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_baseList_getLocations.Location = new System.Drawing.Point(260, 19);
+            this.button_baseList_getLocations.Location = new System.Drawing.Point(291, 19);
             this.button_baseList_getLocations.Name = "button_baseList_getLocations";
-            this.button_baseList_getLocations.Size = new System.Drawing.Size(75, 23);
+            this.button_baseList_getLocations.Size = new System.Drawing.Size(44, 23);
             this.button_baseList_getLocations.TabIndex = 3;
-            this.button_baseList_getLocations.Text = "选取馆藏地";
+            this.button_baseList_getLocations.Text = "...";
             this.button_baseList_getLocations.UseVisualStyleBackColor = true;
             this.button_baseList_getLocations.Click += new System.EventHandler(this.button_baseList_getLocations_Click);
             // 
@@ -398,7 +409,7 @@
             this.textBox_baseList_locations.Multiline = true;
             this.textBox_baseList_locations.Name = "textBox_baseList_locations";
             this.textBox_baseList_locations.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBox_baseList_locations.Size = new System.Drawing.Size(260, 54);
+            this.textBox_baseList_locations.Size = new System.Drawing.Size(289, 54);
             this.textBox_baseList_locations.TabIndex = 1;
             // 
             // label3
@@ -564,15 +575,6 @@
             // 
             this.timer_qu.Interval = 1000;
             this.timer_qu.Tick += new System.EventHandler(this.timer_qu_Tick);
-            // 
-            // button_start_restoreCfgs
-            // 
-            this.button_start_restoreCfgs.Location = new System.Drawing.Point(9, 211);
-            this.button_start_restoreCfgs.Name = "button_start_restoreCfgs";
-            this.button_start_restoreCfgs.Size = new System.Drawing.Size(196, 23);
-            this.button_start_restoreCfgs.TabIndex = 12;
-            this.button_start_restoreCfgs.Text = "恢复配置文件出厂设置";
-            this.button_start_restoreCfgs.UseVisualStyleBackColor = true;
             // 
             // InventoryForm
             // 

@@ -74,6 +74,7 @@ namespace dp2Circulation
             this.button_repair_findSourceFilename = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.textBox_repair_sourceFilename = new System.Windows.Forms.TextBox();
+            this.columnHeader_seconds = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer_logRecords)).BeginInit();
             this.splitContainer_logRecords.Panel1.SuspendLayout();
             this.splitContainer_logRecords.Panel2.SuspendLayout();
@@ -139,6 +140,7 @@ namespace dp2Circulation
             this.columnHeader_operType,
             this.columnHeader_operator,
             this.columnHeader_operTime,
+            this.columnHeader_seconds,
             this.columnHeader_attachment});
             this.listView_records.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listView_records.FullRowSelect = true;
@@ -607,6 +609,11 @@ namespace dp2Circulation
             this.textBox_repair_sourceFilename.Size = new System.Drawing.Size(183, 21);
             this.textBox_repair_sourceFilename.TabIndex = 4;
             // 
+            // columnHeader_seconds
+            // 
+            this.columnHeader_seconds.Text = "ºÄÊ±(Ãë)";
+            this.columnHeader_seconds.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            // 
             // OperLogForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -692,5 +699,6 @@ namespace dp2Circulation
         private System.Windows.Forms.Panel panel_record;
         private System.Windows.Forms.ToolStrip toolStrip_panelFixed;
         private System.Windows.Forms.ToolStripButton toolStripButton_closeDownPanel;
+        private System.Windows.Forms.ColumnHeader columnHeader_seconds;
     }
 }
