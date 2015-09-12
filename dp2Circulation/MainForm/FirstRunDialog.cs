@@ -566,8 +566,5 @@ MessageBoxDefaultButton.Button1);
                     this.radioButton_licenseMode_standard.Checked = true;
             }
         }
-
     }
-
-
 }

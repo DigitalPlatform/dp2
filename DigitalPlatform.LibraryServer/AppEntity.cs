@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -10,7 +10,7 @@ using System.Threading;
 using System.Diagnostics;
 using System.Runtime.Serialization;
 
-using DigitalPlatform;	// StopÀà
+using DigitalPlatform;	// Stopç±»
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
@@ -26,11 +26,11 @@ using DigitalPlatform.rms.Client.rmsws_localhost;
 namespace DigitalPlatform.LibraryServer
 {
     /// <summary>
-    /// ±¾²¿·ÖÊÇµä²ØÒµÎñ(²á)Ïà¹ØµÄ´úÂë
+    /// æœ¬éƒ¨åˆ†æ˜¯å…¸è—ä¸šåŠ¡(å†Œ)ç›¸å…³çš„ä»£ç 
     /// </summary>
     public partial class LibraryApplication
     {
-        // Òªº¦ÔªËØÃûÁĞ±í
+        // è¦å®³å…ƒç´ ååˆ—è¡¨
         static string[] core_entity_element_names = new string[] {
                 "parent",
                 "barcode",
@@ -38,7 +38,7 @@ namespace DigitalPlatform.LibraryServer
                 "publishTime",   // 2007/10/24 
                 "location",
                 "seller",   // 2007/10/24 
-                "source",   // 2008/2/15  ¾­·ÑÀ´Ô´
+                "source",   // 2008/2/15  ç»è´¹æ¥æº
                 "price",
                 "bookType",
                 "registerNo",
@@ -51,11 +51,11 @@ namespace DigitalPlatform.LibraryServer
                 "intact",   // 2009/10/11 
                 "binding",  // 2009/10/11 
                 "operations", // 2009/10/24 
-                "bindingCost",  // 2012/6/1 ×°¶©·Ñ
+                "bindingCost",  // 2012/6/1 è£…è®¢è´¹
             };
 
-        // <DoEntityOperChange()µÄÏÂ¼¶º¯Êı>
-        // ºÏ²¢ĞÂ¾É¼ÇÂ¼
+        // <DoEntityOperChange()çš„ä¸‹çº§å‡½æ•°>
+        // åˆå¹¶æ–°æ—§è®°å½•
         static int MergeTwoEntityXml(XmlDocument domExist,
             XmlDocument domNew,
             out string strMergedXml,
@@ -64,10 +64,10 @@ namespace DigitalPlatform.LibraryServer
             strMergedXml = "";
             strError = "";
 
-            // Ëã·¨µÄÒªµãÊÇ, °Ñ"ĞÂ¼ÇÂ¼"ÖĞµÄÒªº¦×Ö¶Î, ¸²¸Çµ½"ÒÑ´æÔÚ¼ÇÂ¼"ÖĞ
+            // ç®—æ³•çš„è¦ç‚¹æ˜¯, æŠŠ"æ–°è®°å½•"ä¸­çš„è¦å®³å­—æ®µ, è¦†ç›–åˆ°"å·²å­˜åœ¨è®°å½•"ä¸­
 
             /*
-            // Òªº¦ÔªËØÃûÁĞ±í
+            // è¦å®³å…ƒç´ ååˆ—è¡¨
             string[] element_names = new string[] {
                 "parent",
                 "barcode",
@@ -104,11 +104,11 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
-        // <DoEntityOperChange()µÄÏÂ¼¶º¯Êı>
-        // ±È½ÏÁ½¸ö¼ÇÂ¼, ¿´¿´ºÍ²áµÇÂ¼ÓĞ¹ØµÄ×Ö¶ÎÊÇ·ñ·¢ÉúÁË±ä»¯
+        // <DoEntityOperChange()çš„ä¸‹çº§å‡½æ•°>
+        // æ¯”è¾ƒä¸¤ä¸ªè®°å½•, çœ‹çœ‹å’Œå†Œç™»å½•æœ‰å…³çš„å­—æ®µæ˜¯å¦å‘ç”Ÿäº†å˜åŒ–
         // return:
-        //      0   Ã»ÓĞ±ä»¯
-        //      1   ÓĞ±ä»¯
+        //      0   æ²¡æœ‰å˜åŒ–
+        //      1   æœ‰å˜åŒ–
         static int IsRegisterInfoChanged(XmlDocument dom1,
             XmlDocument dom2)
         {
@@ -120,7 +120,7 @@ namespace DigitalPlatform.LibraryServer
                 string strText2 = DomUtil.GetElementText(dom2.DocumentElement,
                     core_entity_element_names[i]);
                  * */
-                // 2009/10/24 changed ÒòÎª<operator>ÔªËØÄÚ¿ÉÄÜÓĞÄÚÇ¶µÄXML´úÂë
+                // 2009/10/24 changed å› ä¸º<operator>å…ƒç´ å†…å¯èƒ½æœ‰å†…åµŒçš„XMLä»£ç 
                 string strText1 = DomUtil.GetElementOuterXml(dom1.DocumentElement,
                     core_entity_element_names[i]);
                 string strText2 = DomUtil.GetElementOuterXml(dom2.DocumentElement,
@@ -134,15 +134,15 @@ namespace DigitalPlatform.LibraryServer
         }
 
 
-        // ×´Ì¬×Ö·û´®ÖĞÊÇ·ñ°üº¬¡°¼Ó¹¤ÖĞ¡±£¿
+        // çŠ¶æ€å­—ç¬¦ä¸²ä¸­æ˜¯å¦åŒ…å«â€œåŠ å·¥ä¸­â€ï¼Ÿ
         public static bool IncludeStateProcessing(string strStateString)
         {
-            if (StringUtil.IsInList("¼Ó¹¤ÖĞ", strStateString) == true)
+            if (StringUtil.IsInList("åŠ å·¥ä¸­", strStateString) == true)
                 return true;
             return false;
         }
 
-        // Èç¹û·µ»ØÖµ²»ÊÇ0£¬¾ÍÖĞ¶ÏÑ­»·²¢·µ»Ø
+        // å¦‚æœè¿”å›å€¼ä¸æ˜¯0ï¼Œå°±ä¸­æ–­å¾ªç¯å¹¶è¿”å›
         public delegate int Delegate_checkRecord(string strRecPath,
             XmlDocument dom,
             byte [] baTimestamp,
@@ -150,15 +150,15 @@ namespace DigitalPlatform.LibraryServer
             out string strError);
 
 
-        // ¼ìË÷ÊéÄ¿¼ÇÂ¼ÏÂÊôµÄÊµÌå¼ÇÂ¼£¬·µ»ØÉÙÁ¿±ØÒªµÄĞÅÏ¢£¬¿ÉÒÔÌá¹©ºóÃæÊµ×öÉ¾³ıÊ±Ê¹ÓÃ
+        // æ£€ç´¢ä¹¦ç›®è®°å½•ä¸‹å±çš„å®ä½“è®°å½•ï¼Œè¿”å›å°‘é‡å¿…è¦çš„ä¿¡æ¯ï¼Œå¯ä»¥æä¾›åé¢å®åšåˆ é™¤æ—¶ä½¿ç”¨
         // parameters:
         //      strStyle    check_borrow_info,count_borrow_info,return_record_xml
-        //                  µ±°üº¬ check_borrow_info Ê±£¬·¢ÏÖµÚÒ»¸öÁ÷Í¨ĞÅÏ¢£¬±¾º¯Êı¾ÍÁ¢¼´·µ»Ø-1
-        //                  µ±°üº¬ count_borrow_info Ê±£¬º¯ÊıÒªÍ³¼ÆÈ«²¿Á÷Í¨ĞÅÏ¢µÄ¸öÊı
+        //                  å½“åŒ…å« check_borrow_info æ—¶ï¼Œå‘ç°ç¬¬ä¸€ä¸ªæµé€šä¿¡æ¯ï¼Œæœ¬å‡½æ•°å°±ç«‹å³è¿”å›-1
+        //                  å½“åŒ…å« count_borrow_info æ—¶ï¼Œå‡½æ•°è¦ç»Ÿè®¡å…¨éƒ¨æµé€šä¿¡æ¯çš„ä¸ªæ•°
         // return:
         //      -2  not exist entity dbname
         //      -1  error
-        //      >=0 º¬ÓĞÁ÷Í¨ĞÅÏ¢µÄÊµÌå¼ÇÂ¼¸öÊı, µ±strStyle°üº¬count_borrow_infoÊ±¡£
+        //      >=0 å«æœ‰æµé€šä¿¡æ¯çš„å®ä½“è®°å½•ä¸ªæ•°, å½“strStyleåŒ…å«count_borrow_infoæ—¶ã€‚
         public int SearchChildEntities(RmsChannel channel,
             string strBiblioRecPath,
             string strStyle,
@@ -182,14 +182,14 @@ namespace DigitalPlatform.LibraryServer
             if (bCheckBorrowInfo == true
                 && bCountBorrowInfo == true)
             {
-                strError = "strStyleÖĞcheck_borrow_infoºÍcount_borrow_info²»ÄÜÍ¬Ê±¾ß±¸";
+                strError = "strStyleä¸­check_borrow_infoå’Œcount_borrow_infoä¸èƒ½åŒæ—¶å…·å¤‡";
                 return -1;
             }
 
             string strBiblioDbName = ResPath.GetDbName(strBiblioRecPath);
             string strBiblioRecId = ResPath.GetRecordId(strBiblioRecPath);
 
-            // »ñµÃÊéÄ¿¿â¶ÔÓ¦µÄÊµÌå¿âÃû
+            // è·å¾—ä¹¦ç›®åº“å¯¹åº”çš„å®ä½“åº“å
             string strItemDbName = "";
             nRet = this.GetItemDbName(strBiblioDbName,
                  out strItemDbName,
@@ -202,10 +202,10 @@ namespace DigitalPlatform.LibraryServer
                 return 0;
 
 
-            // ¼ìË÷ÊµÌå¿âÖĞÈ«²¿´ÓÊôÓÚÌØ¶¨idµÄ¼ÇÂ¼
+            // æ£€ç´¢å®ä½“åº“ä¸­å…¨éƒ¨ä»å±äºç‰¹å®šidçš„è®°å½•
 
             string strQueryXml = "<target list='"
-                + StringUtil.GetXmlStringSimple(strItemDbName + ":" + "¸¸¼ÇÂ¼")       // 2007/9/14 
+                + StringUtil.GetXmlStringSimple(strItemDbName + ":" + "çˆ¶è®°å½•")       // 2007/9/14 
                 + "'><item><word>"
                 + strBiblioRecId
                 + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>" + "zh" + "</lang></target>";
@@ -219,13 +219,13 @@ namespace DigitalPlatform.LibraryServer
 
             if (lRet == 0)
             {
-                strError = "Ã»ÓĞÕÒµ½ÊôÓÚÊéÄ¿¼ÇÂ¼ '" + strBiblioRecPath + "' µÄÈÎºÎÊµÌå¼ÇÂ¼";
+                strError = "æ²¡æœ‰æ‰¾åˆ°å±äºä¹¦ç›®è®°å½• '" + strBiblioRecPath + "' çš„ä»»ä½•å®ä½“è®°å½•";
                 return 0;
             }
 
             lHitCount = lRet;
 
-            // ½ö·µ»ØÃüÖĞÌõÊı
+            // ä»…è¿”å›å‘½ä¸­æ¡æ•°
             if (bOnlyGetCount == true)
                 return 0;
 
@@ -233,7 +233,7 @@ namespace DigitalPlatform.LibraryServer
 
             if (nResultCount > 10000)
             {
-                strError = "ÃüÖĞ²á¼ÇÂ¼Êı " + nResultCount.ToString() + " ³¬¹ı 10000, ÔİÊ±²»Ö§³ÖÕë¶ÔËüÃÇµÄÉ¾³ı²Ù×÷";
+                strError = "å‘½ä¸­å†Œè®°å½•æ•° " + nResultCount.ToString() + " è¶…è¿‡ 10000, æš‚æ—¶ä¸æ”¯æŒé’ˆå¯¹å®ƒä»¬çš„åˆ é™¤æ“ä½œ";
                 goto ERROR1;
             }
 
@@ -261,7 +261,7 @@ namespace DigitalPlatform.LibraryServer
                     goto ERROR1;
                 }
 
-                // »ñµÃÃ¿Ìõ¼ÇÂ¼
+                // è·å¾—æ¯æ¡è®°å½•
                 for (int i = 0; i < aPath.Count; i++)
                 {
                     string strMetaData = "";
@@ -293,7 +293,7 @@ namespace DigitalPlatform.LibraryServer
                         if (channel.ErrorCode == ChannelErrorCode.NotFound)
                             continue;
 
-                        strError = "»ñÈ¡ÊµÌå¼ÇÂ¼ '" + aPath[i] + "' Ê±·¢Éú´íÎó: " + strError;
+                        strError = "è·å–å®ä½“è®°å½• '" + aPath[i] + "' æ—¶å‘ç”Ÿé”™è¯¯: " + strError;
                         goto ERROR1;
                         // goto CONTINUE;
                     }
@@ -307,8 +307,8 @@ namespace DigitalPlatform.LibraryServer
                         || bCountBorrowInfo == true
                         || procCheckRecord != null)
                     {
-                        // ¼ì²éÊÇ·ñÓĞ½èÔÄĞÅÏ¢
-                        // °Ñ¼ÇÂ¼×°ÈëDOM
+                        // æ£€æŸ¥æ˜¯å¦æœ‰å€Ÿé˜…ä¿¡æ¯
+                        // æŠŠè®°å½•è£…å…¥DOM
                         XmlDocument domExist = new XmlDocument();
 
                         try
@@ -317,7 +317,7 @@ namespace DigitalPlatform.LibraryServer
                         }
                         catch (Exception ex)
                         {
-                            strError = "ÊµÌå¼ÇÂ¼ '" + aPath[i] + "' ×°ÔØ½øÈëDOMÊ±·¢Éú´íÎó: " + ex.Message;
+                            strError = "å®ä½“è®°å½• '" + aPath[i] + "' è£…è½½è¿›å…¥DOMæ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                             goto ERROR1;
                         }
 
@@ -335,9 +335,9 @@ namespace DigitalPlatform.LibraryServer
                         entityinfo.ItemBarcode = DomUtil.GetElementText(domExist.DocumentElement,
                             "barcode");
 
-                        // TODO: ÔÚÈÕÖ¾»Ö¸´½×¶Îµ÷ÓÃ±¾º¯ÊıÊ±£¬ÊÇ·ñ»¹ÓĞ±ØÒª¼ì²éÊÇ·ñ¾ßÓĞÁ÷Í¨ĞÅÏ¢£¿ËÆºõÕâÊ±Ó¦Ç¿ÖÆÉ¾³ıÎªºÃ
+                        // TODO: åœ¨æ—¥å¿—æ¢å¤é˜¶æ®µè°ƒç”¨æœ¬å‡½æ•°æ—¶ï¼Œæ˜¯å¦è¿˜æœ‰å¿…è¦æ£€æŸ¥æ˜¯å¦å…·æœ‰æµé€šä¿¡æ¯ï¼Ÿä¼¼ä¹è¿™æ—¶åº”å¼ºåˆ¶åˆ é™¤ä¸ºå¥½
 
-                        // ¹Û²ìÒÑ¾­´æÔÚµÄ¼ÇÂ¼ÊÇ·ñÓĞÁ÷Í¨ĞÅÏ¢
+                        // è§‚å¯Ÿå·²ç»å­˜åœ¨çš„è®°å½•æ˜¯å¦æœ‰æµé€šä¿¡æ¯
                         string strDetail = "";
                         bool bHasCirculationInfo = IsEntityHasCirculationInfo(domExist, out strDetail);
 
@@ -346,7 +346,7 @@ namespace DigitalPlatform.LibraryServer
                         {
                             if (bCheckBorrowInfo == true)
                             {
-                                strError = "ÄâÉ¾³ıµÄ²á¼ÇÂ¼ '" + entityinfo.RecPath + "' ÖĞ°üº¬ÓĞÁ÷Í¨ĞÅÏ¢(" + strDetail + ")(´ËÖÖÇé¿ö¿ÉÄÜ²»ÏŞÓÚÕâÒ»Ìõ)£¬²»ÄÜÉ¾³ı¡£Òò´ËÈ«²¿É¾³ı²Ù×÷¾ù±»·ÅÆú¡£";
+                                strError = "æ‹Ÿåˆ é™¤çš„å†Œè®°å½• '" + entityinfo.RecPath + "' ä¸­åŒ…å«æœ‰æµé€šä¿¡æ¯(" + strDetail + ")(æ­¤ç§æƒ…å†µå¯èƒ½ä¸é™äºè¿™ä¸€æ¡)ï¼Œä¸èƒ½åˆ é™¤ã€‚å› æ­¤å…¨éƒ¨åˆ é™¤æ“ä½œå‡è¢«æ”¾å¼ƒã€‚";
                                 goto ERROR1;
                             }
                             if (bCountBorrowInfo == true)
@@ -369,7 +369,7 @@ namespace DigitalPlatform.LibraryServer
         }
 
 #if NO
-        // »ñµÃÊéÄ¿¼ÇÂ¼ÏÂÊôµÄÊµÌå¼ÇÂ¼£¬·µ»ØÉÙÁ¿±ØÒªµÄĞÅÏ¢£¬¿ÉÒÔÌá¹©ºóÃæÊµ×öÉ¾³ıÊ±Ê¹ÓÃ
+        // è·å¾—ä¹¦ç›®è®°å½•ä¸‹å±çš„å®ä½“è®°å½•ï¼Œè¿”å›å°‘é‡å¿…è¦çš„ä¿¡æ¯ï¼Œå¯ä»¥æä¾›åé¢å®åšåˆ é™¤æ—¶ä½¿ç”¨
         // parameters:
         //      strStyle    return_record_xml
         // return:
@@ -388,7 +388,7 @@ namespace DigitalPlatform.LibraryServer
 
             bool bReturnRecordXml = StringUtil.IsInList("return_record_xml", strStyle);
 
-            // »ñµÃÃ¿Ìõ¼ÇÂ¼
+            // è·å¾—æ¯æ¡è®°å½•
             for (int i = 0; i < aPath.Count; i++)
             {
                 string strMetaData = "";
@@ -407,9 +407,9 @@ namespace DigitalPlatform.LibraryServer
                 if (lRet == -1)
                 {
                     if (channel.ErrorCode == ChannelErrorCode.NotFound)
-                        continue;   // ÊÇ·ñ±¨´í?
+                        continue;   // æ˜¯å¦æŠ¥é”™?
 
-                    strError = "»ñÈ¡ÏÂ¼¶¼ÇÂ¼ '" + aPath[i] + "' Ê±·¢Éú´íÎó: " + strError;
+                    strError = "è·å–ä¸‹çº§è®°å½• '" + aPath[i] + "' æ—¶å‘ç”Ÿé”™è¯¯: " + strError;
                     goto ERROR1;
                     // goto CONTINUE;
                 }
@@ -422,8 +422,8 @@ namespace DigitalPlatform.LibraryServer
                     if (bCheckBorrowInfo == true
                         || bCountBorrowInfo == true)
                     {
-                        // ¼ì²éÊÇ·ñÓĞ½èÔÄĞÅÏ¢
-                        // °Ñ¼ÇÂ¼×°ÈëDOM
+                        // æ£€æŸ¥æ˜¯å¦æœ‰å€Ÿé˜…ä¿¡æ¯
+                        // æŠŠè®°å½•è£…å…¥DOM
                         XmlDocument domExist = new XmlDocument();
 
                         try
@@ -432,16 +432,16 @@ namespace DigitalPlatform.LibraryServer
                         }
                         catch (Exception ex)
                         {
-                            strError = "ÊµÌå¼ÇÂ¼ '" + aPath[i] + "' ×°ÔØ½øÈëDOMÊ±·¢Éú´íÎó: " + ex.Message;
+                            strError = "å®ä½“è®°å½• '" + aPath[i] + "' è£…è½½è¿›å…¥DOMæ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                             goto ERROR1;
                         }
 
                         entityinfo.ItemBarcode = DomUtil.GetElementText(domExist.DocumentElement,
                             "barcode");
 
-                        // TODO: ÔÚÈÕÖ¾»Ö¸´½×¶Îµ÷ÓÃ±¾º¯ÊıÊ±£¬ÊÇ·ñ»¹ÓĞ±ØÒª¼ì²éÊÇ·ñ¾ßÓĞÁ÷Í¨ĞÅÏ¢£¿ËÆºõÕâÊ±Ó¦Ç¿ÖÆÉ¾³ıÎªºÃ
+                        // TODO: åœ¨æ—¥å¿—æ¢å¤é˜¶æ®µè°ƒç”¨æœ¬å‡½æ•°æ—¶ï¼Œæ˜¯å¦è¿˜æœ‰å¿…è¦æ£€æŸ¥æ˜¯å¦å…·æœ‰æµé€šä¿¡æ¯ï¼Ÿä¼¼ä¹è¿™æ—¶åº”å¼ºåˆ¶åˆ é™¤ä¸ºå¥½
 
-                        // ¹Û²ìÒÑ¾­´æÔÚµÄ¼ÇÂ¼ÊÇ·ñÓĞÁ÷Í¨ĞÅÏ¢
+                        // è§‚å¯Ÿå·²ç»å­˜åœ¨çš„è®°å½•æ˜¯å¦æœ‰æµé€šä¿¡æ¯
                         string strDetail = "";
                         bool bHasCirculationInfo = IsEntityHasCirculationInfo(domExist, out strDetail);
 
@@ -450,7 +450,7 @@ namespace DigitalPlatform.LibraryServer
                         {
                             if (bCheckBorrowInfo == true)
                             {
-                                strError = "ÄâÉ¾³ıµÄ²á¼ÇÂ¼ '" + entityinfo.RecPath + "' ÖĞ°üº¬ÓĞÁ÷Í¨ĞÅÏ¢(" + strDetail + ")(´ËÖÖÇé¿ö¿ÉÄÜ²»ÏŞÓÚÕâÒ»Ìõ)£¬²»ÄÜÉ¾³ı¡£Òò´ËÈ«²¿É¾³ı²Ù×÷¾ù±»·ÅÆú¡£";
+                                strError = "æ‹Ÿåˆ é™¤çš„å†Œè®°å½• '" + entityinfo.RecPath + "' ä¸­åŒ…å«æœ‰æµé€šä¿¡æ¯(" + strDetail + ")(æ­¤ç§æƒ…å†µå¯èƒ½ä¸é™äºè¿™ä¸€æ¡)ï¼Œä¸èƒ½åˆ é™¤ã€‚å› æ­¤å…¨éƒ¨åˆ é™¤æ“ä½œå‡è¢«æ”¾å¼ƒã€‚";
                                 goto ERROR1;
                             }
                             if (bCountBorrowInfo == true)
@@ -469,13 +469,13 @@ namespace DigitalPlatform.LibraryServer
         }
 #endif
 
-        // ¸´ÖÆÊôÓÚÍ¬Ò»ÊéÄ¿¼ÇÂ¼µÄÈ«²¿ÊµÌå¼ÇÂ¼
+        // å¤åˆ¶å±äºåŒä¸€ä¹¦ç›®è®°å½•çš„å…¨éƒ¨å®ä½“è®°å½•
         // parameters:
         //      strAction   copy / move
         // return:
-        //      -2  Ä¿±êÊµÌå¿â²»´æÔÚ£¬ÎŞ·¨½øĞĞ¸´ÖÆ»òÕßÉ¾³ı
+        //      -2  ç›®æ ‡å®ä½“åº“ä¸å­˜åœ¨ï¼Œæ— æ³•è¿›è¡Œå¤åˆ¶æˆ–è€…åˆ é™¤
         //      -1  error
-        //      >=0  Êµ¼Ê¸´ÖÆ»òÕßÒÆ¶¯µÄÊµÌå¼ÇÂ¼Êı
+        //      >=0  å®é™…å¤åˆ¶æˆ–è€…ç§»åŠ¨çš„å®ä½“è®°å½•æ•°
         public int CopyBiblioChildEntities(RmsChannel channel,
             string strAction,
             List<DeleteEntityInfo> entityinfos,
@@ -498,25 +498,25 @@ namespace DigitalPlatform.LibraryServer
                 domOperLog.DocumentElement.AppendChild(root);
             }
 
-            // »ñµÃÄ¿±êÊéÄ¿¿âÏÂÊôµÄÊµÌå¿âÃû
+            // è·å¾—ç›®æ ‡ä¹¦ç›®åº“ä¸‹å±çš„å®ä½“åº“å
             string strTargetItemDbName = "";
             string strTargetBiblioDbName = ResPath.GetDbName(strTargetBiblioRecPath);
             // return:
-            //      -1  ³ö´í
-            //      0   Ã»ÓĞÕÒµ½
-            //      1   ÕÒµ½
+            //      -1  å‡ºé”™
+            //      0   æ²¡æœ‰æ‰¾åˆ°
+            //      1   æ‰¾åˆ°
             int nRet = this.GetItemDbName(strTargetBiblioDbName,
                 out strTargetItemDbName,
                 out strError);
             if (nRet == 0 || string.IsNullOrEmpty(strTargetItemDbName) == true)
             {
-                return -2;   // Ä¿±êÊµÌå¿â²»´æÔÚ
+                return -2;   // ç›®æ ‡å®ä½“åº“ä¸å­˜åœ¨
             }
 
             string strParentID = ResPath.GetRecordId(strTargetBiblioRecPath);
             if (string.IsNullOrEmpty(strParentID) == true)
             {
-                strError = "Ä¿±êÊéÄ¿¼ÇÂ¼Â·¾¶ '"+strTargetBiblioRecPath+"' ²»ÕıÈ·£¬ÎŞ·¨»ñµÃ¼ÇÂ¼ºÅ";
+                strError = "ç›®æ ‡ä¹¦ç›®è®°å½•è·¯å¾„ '"+strTargetBiblioRecPath+"' ä¸æ­£ç¡®ï¼Œæ— æ³•è·å¾—è®°å½•å·";
                 return -1;
             }
 
@@ -532,7 +532,7 @@ namespace DigitalPlatform.LibraryServer
                 byte[] output_timestamp = null;
                 string strOutputRecPath = "";
 
-                string strNewBarcode = "";  // ¸´ÖÆÖĞĞŞ¸ÄºóµÄ²áÌõÂëºÅ
+                string strNewBarcode = "";  // å¤åˆ¶ä¸­ä¿®æ”¹åçš„å†Œæ¡ç å·
 
                 this.EntityLocks.LockForWrite(info.ItemBarcode);
                 try
@@ -544,17 +544,17 @@ namespace DigitalPlatform.LibraryServer
                     }
                     catch (Exception ex)
                     {
-                        strError = "¼ÇÂ¼ '" + info.RecPath + "' ×°ÈëXMLDOM·¢Éú´íÎó: " + ex.Message;
+                        strError = "è®°å½• '" + info.RecPath + "' è£…å…¥XMLDOMå‘ç”Ÿé”™è¯¯: " + ex.Message;
                         goto ERROR1;
                     }
                     DomUtil.SetElementText(dom.DocumentElement,
                         "parent",
                         strParentID);
 
-                    // ¸´ÖÆµÄÇé¿ö£¬Òª±ÜÃâ³öÏÖ²Ù×÷ºóµÄÌõÂëºÅÖØ¸´ÏÖÏó
+                    // å¤åˆ¶çš„æƒ…å†µï¼Œè¦é¿å…å‡ºç°æ“ä½œåçš„æ¡ç å·é‡å¤ç°è±¡
                     if (strAction == "copy")
                     {
-                        // ĞŞ¸Ä²áÌõÂëºÅ£¬±ÜÃâ·¢ÉúÌõÂëºÅÖØ¸´
+                        // ä¿®æ”¹å†Œæ¡ç å·ï¼Œé¿å…å‘ç”Ÿæ¡ç å·é‡å¤
                         string strOldItemBarcode = DomUtil.GetElementText(dom.DocumentElement,
                             "barcode");
                         if (String.IsNullOrEmpty(strOldItemBarcode) == false)
@@ -565,16 +565,16 @@ namespace DigitalPlatform.LibraryServer
                                 strNewBarcode);
                         }
 
-                        // *** ºóÃæÕâ¼¸¸öÇå³ı¶¯×÷Òª×÷Îª¹æÔò³öÏÖ
+                        // *** åé¢è¿™å‡ ä¸ªæ¸…é™¤åŠ¨ä½œè¦ä½œä¸ºè§„åˆ™å‡ºç°
 
-                        // Çå³ı refid
+                        // æ¸…é™¤ refid
                         DomUtil.SetElementText(dom.DocumentElement,
                             "refID",
                             null);
 
 
-                        // °Ñ½èÕßÇå³ı
-                        // (Ô´ÊµÌå¼ÇÂ¼ÖĞÈç¹ûÓĞ½èÔÄĞÅÏ¢£¬ÔÚÆÕÍ¨½çÃæÉÏÊÇÎŞ·¨É¾³ı´Ë¼ÇÂ¼µÄ¡£Ö»ÄÜÓÃ³öÄÉ´°Õı¹æ½øĞĞ¹é»¹£¬È»ºó²ÅÄÜÉ¾³ı)
+                        // æŠŠå€Ÿè€…æ¸…é™¤
+                        // (æºå®ä½“è®°å½•ä¸­å¦‚æœæœ‰å€Ÿé˜…ä¿¡æ¯ï¼Œåœ¨æ™®é€šç•Œé¢ä¸Šæ˜¯æ— æ³•åˆ é™¤æ­¤è®°å½•çš„ã€‚åªèƒ½ç”¨å‡ºçº³çª—æ­£è§„è¿›è¡Œå½’è¿˜ï¼Œç„¶åæ‰èƒ½åˆ é™¤)
                         {
                             DomUtil.SetElementText(dom.DocumentElement,
                                 "borrower",
@@ -588,7 +588,7 @@ namespace DigitalPlatform.LibraryServer
                         }
                     }
 
-                    // TODO: ¿ÉÒÔË³±ãÈ·ÈÏÓĞÃ»ÓĞ¶ÔÏó×ÊÔ´¡£Èç¹ûÃ»ÓĞ£¬¾ÍÊ¡ÂÔCopyRecord²Ù×÷
+                    // TODO: å¯ä»¥é¡ºä¾¿ç¡®è®¤æœ‰æ²¡æœ‰å¯¹è±¡èµ„æºã€‚å¦‚æœæ²¡æœ‰ï¼Œå°±çœç•¥CopyRecordæ“ä½œ
 
                     long lRet = channel.DoCopyRecord(info.RecPath,
                          strTargetItemDbName + "/?",
@@ -600,13 +600,13 @@ namespace DigitalPlatform.LibraryServer
                     {
                         if (channel.ErrorCode == ChannelErrorCode.NotFound)
                             continue;
-                        strError = "¸´ÖÆÊµÌå¼ÇÂ¼ '" + info.RecPath + "' Ê±·¢Éú´íÎó: " + strError;
+                        strError = "å¤åˆ¶å®ä½“è®°å½• '" + info.RecPath + "' æ—¶å‘ç”Ÿé”™è¯¯: " + strError;
                         goto ERROR1;
                     }
 
 
 
-                    // ĞŞ¸Äxml¼ÇÂ¼¡£<parent>ÔªËØ·¢ÉúÁË±ä»¯
+                    // ä¿®æ”¹xmlè®°å½•ã€‚<parent>å…ƒç´ å‘ç”Ÿäº†å˜åŒ–
                     byte[] baOutputTimestamp = null;
                     string strOutputRecPath1 = "";
                     lRet = channel.DoSaveTextRes(strOutputRecPath,
@@ -631,7 +631,7 @@ namespace DigitalPlatform.LibraryServer
                     this.EntityLocks.UnlockForWrite(info.ItemBarcode);
                 }
 
-                // Ôö²¹µ½ÈÕÖ¾DOMÖĞ
+                // å¢è¡¥åˆ°æ—¥å¿—DOMä¸­
                 if (domOperLog != null)
                 {
                     Debug.Assert(root != null, "");
@@ -653,7 +653,7 @@ namespace DigitalPlatform.LibraryServer
 
             return nOperCount;
         ERROR1:
-            // UndoÒÑ¾­½øĞĞ¹ıµÄ²Ù×÷
+            // Undoå·²ç»è¿›è¡Œè¿‡çš„æ“ä½œ
             if (strAction == "copy")
             {
                 string strWarning = "";
@@ -683,7 +683,7 @@ namespace DigitalPlatform.LibraryServer
 
                 }
                 if (string.IsNullOrEmpty(strWarning) == false)
-                    strError = strError + "¡£ÔÚUndo¹ı³ÌÖĞ£¬ÓÖÓöµ½³ö´í: " + strWarning;
+                    strError = strError + "ã€‚åœ¨Undoè¿‡ç¨‹ä¸­ï¼Œåˆé‡åˆ°å‡ºé”™: " + strWarning;
             }
             else if (strAction == "move")
             {
@@ -693,7 +693,7 @@ namespace DigitalPlatform.LibraryServer
                     byte[] output_timestamp = null;
                     string strOutputRecPath = "";
                     string strTempError = "";
-                    // TODO: Èç¹ûÈ·ÈÏÃ»ÓĞ¶ÔÏó£¬¾Í¿ÉÒÔÊ¡ÂÔÕâÒ»²½
+                    // TODO: å¦‚æœç¡®è®¤æ²¡æœ‰å¯¹è±¡ï¼Œå°±å¯ä»¥çœç•¥è¿™ä¸€æ­¥
                     long lRet = channel.DoCopyRecord(newrecordpaths[i],
          oldrecordpaths[i],
          true,   // bDeleteSourceRecord
@@ -705,7 +705,7 @@ namespace DigitalPlatform.LibraryServer
                         strWarning += strTempError + ";";
                     }
 
-                    // ĞŞ¸Äxml¼ÇÂ¼¡£<parent>ÔªËØ·¢ÉúÁË±ä»¯
+                    // ä¿®æ”¹xmlè®°å½•ã€‚<parent>å…ƒç´ å‘ç”Ÿäº†å˜åŒ–
                     byte[] baOutputTimestamp = null;
                     string strOutputRecPath1 = "";
                     lRet = channel.DoSaveTextRes(oldrecordpaths[i],
@@ -722,17 +722,17 @@ namespace DigitalPlatform.LibraryServer
                     }
                 }
                 if (string.IsNullOrEmpty(strWarning) == false)
-                    strError = strError + "¡£ÔÚUndo¹ı³ÌÖĞ£¬ÓÖÓöµ½³ö´í: " + strWarning;
+                    strError = strError + "ã€‚åœ¨Undoè¿‡ç¨‹ä¸­ï¼Œåˆé‡åˆ°å‡ºé”™: " + strWarning;
             }
             return -1;
         }
 
-        // ¸´ÖÆÊôÓÚÍ¬Ò»ÊéÄ¿¼ÇÂ¼µÄÈ«²¿ÊµÌå¼ÇÂ¼
+        // å¤åˆ¶å±äºåŒä¸€ä¹¦ç›®è®°å½•çš„å…¨éƒ¨å®ä½“è®°å½•
         // parameters:
         //      strAction   copy / move
         // return:
         //      -1  error
-        //      >=0  Êµ¼Ê¸´ÖÆ»òÕßÒÆ¶¯µÄÊµÌå¼ÇÂ¼Êı
+        //      >=0  å®é™…å¤åˆ¶æˆ–è€…ç§»åŠ¨çš„å®ä½“è®°å½•æ•°
         public int CopyBiblioChildRecords(RmsChannel channel,
             string strAction,
             List<DeleteEntityInfo> entityinfos,
@@ -757,7 +757,7 @@ namespace DigitalPlatform.LibraryServer
             string strParentID = ResPath.GetRecordId(strTargetBiblioRecPath);
             if (string.IsNullOrEmpty(strParentID) == true)
             {
-                strError = "Ä¿±êÊéÄ¿¼ÇÂ¼Â·¾¶ '" + strTargetBiblioRecPath + "' ²»ÕıÈ·£¬ÎŞ·¨»ñµÃ¼ÇÂ¼ºÅ";
+                strError = "ç›®æ ‡ä¹¦ç›®è®°å½•è·¯å¾„ '" + strTargetBiblioRecPath + "' ä¸æ­£ç¡®ï¼Œæ— æ³•è·å¾—è®°å½•å·";
                 return -1;
             }
 
@@ -786,17 +786,17 @@ namespace DigitalPlatform.LibraryServer
                     }
                     catch (Exception ex)
                     {
-                        strError = "¼ÇÂ¼ '" + info.RecPath + "' ×°ÈëXMLDOM·¢Éú´íÎó: " + ex.Message;
+                        strError = "è®°å½• '" + info.RecPath + "' è£…å…¥XMLDOMå‘ç”Ÿé”™è¯¯: " + ex.Message;
                         goto ERROR1;
                     }
                     DomUtil.SetElementText(dom.DocumentElement,
                         "parent",
                         strParentID);
 
-                    // ¸´ÖÆµÄÇé¿ö£¬Òª±ÜÃâ³öÏÖ²Ù×÷ºóµÄÌõÂëºÅÖØ¸´ÏÖÏó
+                    // å¤åˆ¶çš„æƒ…å†µï¼Œè¦é¿å…å‡ºç°æ“ä½œåçš„æ¡ç å·é‡å¤ç°è±¡
                     if (strAction == "copy")
                     {
-                        // ĞŞ¸Ä²áÌõÂëºÅ£¬±ÜÃâ·¢ÉúÌõÂëºÅÖØ¸´
+                        // ä¿®æ”¹å†Œæ¡ç å·ï¼Œé¿å…å‘ç”Ÿæ¡ç å·é‡å¤
                         string strOldItemBarcode = DomUtil.GetElementText(dom.DocumentElement,
                             "barcode");
                         if (String.IsNullOrEmpty(strOldItemBarcode) == false)
@@ -814,8 +814,8 @@ namespace DigitalPlatform.LibraryServer
                             "refID",
                             null);
 
-                        // °Ñ½èÕßÇå³ı
-                        // (Ô´ÊµÌå¼ÇÂ¼ÖĞÈç¹ûÓĞ½èÔÄĞÅÏ¢£¬ÔÚÆÕÍ¨½çÃæÉÏÊÇÎŞ·¨É¾³ı´Ë¼ÇÂ¼µÄ¡£Ö»ÄÜÓÃ³öÄÉ´°Õı¹æ½øĞĞ¹é»¹£¬È»ºó²ÅÄÜÉ¾³ı)
+                        // æŠŠå€Ÿè€…æ¸…é™¤
+                        // (æºå®ä½“è®°å½•ä¸­å¦‚æœæœ‰å€Ÿé˜…ä¿¡æ¯ï¼Œåœ¨æ™®é€šç•Œé¢ä¸Šæ˜¯æ— æ³•åˆ é™¤æ­¤è®°å½•çš„ã€‚åªèƒ½ç”¨å‡ºçº³çª—æ­£è§„è¿›è¡Œå½’è¿˜ï¼Œç„¶åæ‰èƒ½åˆ é™¤)
                         {
                             DomUtil.SetElementText(dom.DocumentElement,
                                 "borrower",
@@ -829,7 +829,7 @@ namespace DigitalPlatform.LibraryServer
                         }
                     }
 
-                    // TODO: ¿ÉÒÔË³±ãÈ·ÈÏÓĞÃ»ÓĞ¶ÔÏó×ÊÔ´¡£Èç¹ûÃ»ÓĞ£¬¾ÍÊ¡ÂÔCopyRecord²Ù×÷
+                    // TODO: å¯ä»¥é¡ºä¾¿ç¡®è®¤æœ‰æ²¡æœ‰å¯¹è±¡èµ„æºã€‚å¦‚æœæ²¡æœ‰ï¼Œå°±çœç•¥CopyRecordæ“ä½œ
 
                     long lRet = channel.DoCopyRecord(info.RecPath,
                          strTargetRecPath,
@@ -841,13 +841,13 @@ namespace DigitalPlatform.LibraryServer
                     {
                         if (channel.ErrorCode == ChannelErrorCode.NotFound)
                             continue;
-                        strError = "¸´ÖÆÊµÌå¼ÇÂ¼ '" + info.RecPath + "' Ê±·¢Éú´íÎó: " + strError;
+                        strError = "å¤åˆ¶å®ä½“è®°å½• '" + info.RecPath + "' æ—¶å‘ç”Ÿé”™è¯¯: " + strError;
                         goto ERROR1;
                     }
 
 
 
-                    // ĞŞ¸Äxml¼ÇÂ¼¡£<parent>ÔªËØ·¢ÉúÁË±ä»¯
+                    // ä¿®æ”¹xmlè®°å½•ã€‚<parent>å…ƒç´ å‘ç”Ÿäº†å˜åŒ–
                     byte[] baOutputTimestamp = null;
                     string strOutputRecPath1 = "";
                     lRet = channel.DoSaveTextRes(strOutputRecPath,
@@ -877,16 +877,16 @@ namespace DigitalPlatform.LibraryServer
 
             return nOperCount;
         ERROR1:
-            // ²»ÒªUndo
+            // ä¸è¦Undo
             return -1;
         }
 
-        // É¾³ıÊôÓÚÍ¬Ò»ÊéÄ¿¼ÇÂ¼µÄÈ«²¿ÊµÌå¼ÇÂ¼
-        // ÕâÊÇĞèÒªÌá¹©EntityInfoÊı×éµÄ°æ±¾
+        // åˆ é™¤å±äºåŒä¸€ä¹¦ç›®è®°å½•çš„å…¨éƒ¨å®ä½“è®°å½•
+        // è¿™æ˜¯éœ€è¦æä¾›EntityInfoæ•°ç»„çš„ç‰ˆæœ¬
         // return:
         //      -1  error
-        //      0   Ã»ÓĞÕÒµ½ÊôÓÚÊéÄ¿¼ÇÂ¼µÄÈÎºÎÊµÌå¼ÇÂ¼£¬Òò´ËÒ²¾ÍÎŞ´ÓÉ¾³ı
-        //      >0  Êµ¼ÊÉ¾³ıµÄÊµÌå¼ÇÂ¼Êı
+        //      0   æ²¡æœ‰æ‰¾åˆ°å±äºä¹¦ç›®è®°å½•çš„ä»»ä½•å®ä½“è®°å½•ï¼Œå› æ­¤ä¹Ÿå°±æ— ä»åˆ é™¤
+        //      >0  å®é™…åˆ é™¤çš„å®ä½“è®°å½•æ•°
         public int DeleteBiblioChildEntities(RmsChannel channel,
             List<DeleteEntityInfo> entityinfos,
             XmlDocument domOperLog,
@@ -907,7 +907,7 @@ namespace DigitalPlatform.LibraryServer
                 domOperLog.DocumentElement.AppendChild(root);
             }
 
-            // ÕæÕıÊµĞĞÉ¾³ı
+            // çœŸæ­£å®è¡Œåˆ é™¤
             for (int i = 0; i < entityinfos.Count; i++)
             {
                 DeleteEntityInfo info = entityinfos[i];
@@ -930,19 +930,19 @@ namespace DigitalPlatform.LibraryServer
                         if (channel.ErrorCode == ChannelErrorCode.NotFound)
                             continue;
 
-                        // Èç¹û²»ÖØÊÔ£¬ÈÃÊ±¼ä´Á³ö´í±©Â¶³öÀ´¡£
-                        // Èç¹ûÒªÖØÊÔ£¬Ò²µÃ¼ÓÉÏÖØĞÂ¶ÁÈë²á¼ÇÂ¼²¢ÅĞ¶ÏÖØĞÂÅĞ¶ÏÎŞ½è»¹ĞÅÏ¢²ÅÄÜÉ¾³ı
+                        // å¦‚æœä¸é‡è¯•ï¼Œè®©æ—¶é—´æˆ³å‡ºé”™æš´éœ²å‡ºæ¥ã€‚
+                        // å¦‚æœè¦é‡è¯•ï¼Œä¹Ÿå¾—åŠ ä¸Šé‡æ–°è¯»å…¥å†Œè®°å½•å¹¶åˆ¤æ–­é‡æ–°åˆ¤æ–­æ— å€Ÿè¿˜ä¿¡æ¯æ‰èƒ½åˆ é™¤
 
                         if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
                         {
                             if (nRedoCount > 10)
                             {
-                                strError = "ÖØÊÔÁË10´Î»¹²»ĞĞ¡£É¾³ıÊµÌå¼ÇÂ¼ '" + info.RecPath + "' Ê±·¢Éú´íÎó: " + strError;
+                                strError = "é‡è¯•äº†10æ¬¡è¿˜ä¸è¡Œã€‚åˆ é™¤å®ä½“è®°å½• '" + info.RecPath + "' æ—¶å‘ç”Ÿé”™è¯¯: " + strError;
                                 goto ERROR1;
                             }
                             nRedoCount++;
 
-                            // ÖØĞÂ¶ÁÈë¼ÇÂ¼
+                            // é‡æ–°è¯»å…¥è®°å½•
                             string strMetaData = "";
                             string strXml = "";
                             string strOutputPath = "";
@@ -959,13 +959,13 @@ namespace DigitalPlatform.LibraryServer
                                 if (channel.ErrorCode == ChannelErrorCode.NotFound)
                                     continue;
 
-                                strError = "ÔÚÉ¾³ıÊµÌå¼ÇÂ¼ '" + info.RecPath + "' Ê±·¢ÉúÊ±¼ä´Á³åÍ»£¬ÓÚÊÇ×Ô¶¯ÖØĞÂ»ñÈ¡¼ÇÂ¼£¬µ«ÓÖ·¢Éú´íÎó: " + strError_1;
+                                strError = "åœ¨åˆ é™¤å®ä½“è®°å½• '" + info.RecPath + "' æ—¶å‘ç”Ÿæ—¶é—´æˆ³å†²çªï¼Œäºæ˜¯è‡ªåŠ¨é‡æ–°è·å–è®°å½•ï¼Œä½†åˆå‘ç”Ÿé”™è¯¯: " + strError_1;
                                 goto ERROR1;
                                 // goto CONTINUE;
                             }
 
-                            // ¼ì²éÊÇ·ñÓĞ½èÔÄĞÅÏ¢
-                            // °Ñ¼ÇÂ¼×°ÈëDOM
+                            // æ£€æŸ¥æ˜¯å¦æœ‰å€Ÿé˜…ä¿¡æ¯
+                            // æŠŠè®°å½•è£…å…¥DOM
                             XmlDocument domExist = new XmlDocument();
 
                             try
@@ -974,20 +974,20 @@ namespace DigitalPlatform.LibraryServer
                             }
                             catch (Exception ex)
                             {
-                                strError = "ÊµÌå¼ÇÂ¼ '"+info.RecPath+"' XML×°ÔØ½øÈëDOMÊ±·¢Éú´íÎó: " + ex.Message;
+                                strError = "å®ä½“è®°å½• '"+info.RecPath+"' XMLè£…è½½è¿›å…¥DOMæ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                                 goto ERROR1;
                             }
 
                             info.ItemBarcode = DomUtil.GetElementText(domExist.DocumentElement,
                                 "barcode");
 
-                            // ¹Û²ìÒÑ¾­´æÔÚµÄ¼ÇÂ¼ÊÇ·ñÓĞÁ÷Í¨ĞÅÏ¢
+                            // è§‚å¯Ÿå·²ç»å­˜åœ¨çš„è®°å½•æ˜¯å¦æœ‰æµé€šä¿¡æ¯
                             string strDetail = "";
                             bool bHasCirculationInfo = IsEntityHasCirculationInfo(domExist,
                                 out strDetail);
                             if (bHasCirculationInfo == true)
                             {
-                                strError = "ÄâÉ¾³ıµÄ²á¼ÇÂ¼ '" + info.RecPath + "' ÖĞ°üº¬ÓĞÁ÷Í¨ĞÅÏ¢("+strDetail+")(´ËÖÖÇé¿ö¿ÉÄÜ²»ÏŞÓÚÕâÒ»Ìõ)£¬²»ÄÜÉ¾³ı¡£";
+                                strError = "æ‹Ÿåˆ é™¤çš„å†Œè®°å½• '" + info.RecPath + "' ä¸­åŒ…å«æœ‰æµé€šä¿¡æ¯("+strDetail+")(æ­¤ç§æƒ…å†µå¯èƒ½ä¸é™äºè¿™ä¸€æ¡)ï¼Œä¸èƒ½åˆ é™¤ã€‚";
                                 goto ERROR1;
                             }
 
@@ -996,7 +996,7 @@ namespace DigitalPlatform.LibraryServer
                             goto REDO_DELETE;
                         }
 
-                        strError = "É¾³ıÊµÌå¼ÇÂ¼ '" + info.RecPath + "' Ê±·¢Éú´íÎó: " + strError;
+                        strError = "åˆ é™¤å®ä½“è®°å½• '" + info.RecPath + "' æ—¶å‘ç”Ÿé”™è¯¯: " + strError;
                         goto ERROR1;
                     }
                 }
@@ -1005,7 +1005,7 @@ namespace DigitalPlatform.LibraryServer
                     this.EntityLocks.UnlockForWrite(info.ItemBarcode);
                 }
 
-                // Ôö²¹µ½ÈÕÖ¾DOMÖĞ
+                // å¢è¡¥åˆ°æ—¥å¿—DOMä¸­
                 if (domOperLog != null)
                 {
                     Debug.Assert(root != null, "");
@@ -1025,12 +1025,12 @@ namespace DigitalPlatform.LibraryServer
             return -1;
         }
 
-        // É¾³ıÊôÓÚÍ¬Ò»ÊéÄ¿¼ÇÂ¼µÄÈ«²¿ÊµÌå¼ÇÂ¼¡£×¢Òâ£¬²»¼ì²éÏÂÊô²á¼ÇÂ¼µÄÂ·Í¨ĞÅÏ¢
-        // ÕâÊÇ¼ìË÷ºÍÉ¾³ıÒ»´Î½øĞĞµÄ°æ±¾
+        // åˆ é™¤å±äºåŒä¸€ä¹¦ç›®è®°å½•çš„å…¨éƒ¨å®ä½“è®°å½•ã€‚æ³¨æ„ï¼Œä¸æ£€æŸ¥ä¸‹å±å†Œè®°å½•çš„è·¯é€šä¿¡æ¯
+        // è¿™æ˜¯æ£€ç´¢å’Œåˆ é™¤ä¸€æ¬¡è¿›è¡Œçš„ç‰ˆæœ¬
         // return:
         //      -1  error
-        //      0   Ã»ÓĞÕÒµ½ÊôÓÚÊéÄ¿¼ÇÂ¼µÄÈÎºÎÊµÌå¼ÇÂ¼£¬Òò´ËÒ²¾ÍÎŞ´ÓÉ¾³ı
-        //      >0  Êµ¼ÊÉ¾³ıµÄÊµÌå¼ÇÂ¼Êı
+        //      0   æ²¡æœ‰æ‰¾åˆ°å±äºä¹¦ç›®è®°å½•çš„ä»»ä½•å®ä½“è®°å½•ï¼Œå› æ­¤ä¹Ÿå°±æ— ä»åˆ é™¤
+        //      >0  å®é™…åˆ é™¤çš„å®ä½“è®°å½•æ•°
         public int DeleteBiblioChildEntities(RmsChannel channel,
             string strBiblioRecPath,
             XmlDocument domOperLog,
@@ -1043,7 +1043,7 @@ namespace DigitalPlatform.LibraryServer
             // return:
             //      -2  not exist entity dbname
             //      -1  error
-            //      >=0 º¬ÓĞÁ÷Í¨ĞÅÏ¢µÄÊµÌå¼ÇÂ¼¸öÊı
+            //      >=0 å«æœ‰æµé€šä¿¡æ¯çš„å®ä½“è®°å½•ä¸ªæ•°
             int nRet = SearchChildEntities(channel,
                 strBiblioRecPath,
                 "",   // "check_borrow_info",    // 2011/4/24
@@ -1074,11 +1074,11 @@ namespace DigitalPlatform.LibraryServer
         }
 
 #if NOOOOOOOOOOOOOOOOOOO
-        // É¾³ıÊôÓÚÍ¬Ò»ÊéÄ¿¼ÇÂ¼µÄÈ«²¿ÊµÌå¼ÇÂ¼
+        // åˆ é™¤å±äºåŒä¸€ä¹¦ç›®è®°å½•çš„å…¨éƒ¨å®ä½“è®°å½•
         // return:
         //      -1  error
-        //      0   Ã»ÓĞÕÒµ½ÊôÓÚÊéÄ¿¼ÇÂ¼µÄÈÎºÎÊµÌå¼ÇÂ¼£¬Òò´ËÒ²¾ÍÎŞ´ÓÉ¾³ı
-        //      >0  Êµ¼ÊÉ¾³ıµÄÊµÌå¼ÇÂ¼Êı
+        //      0   æ²¡æœ‰æ‰¾åˆ°å±äºä¹¦ç›®è®°å½•çš„ä»»ä½•å®ä½“è®°å½•ï¼Œå› æ­¤ä¹Ÿå°±æ— ä»åˆ é™¤
+        //      >0  å®é™…åˆ é™¤çš„å®ä½“è®°å½•æ•°
         public int DeleteBiblioChildEntities(RmsChannelCollection Channels,
             string strBiblioRecPath,
             XmlDocument domOperLog,
@@ -1091,7 +1091,7 @@ namespace DigitalPlatform.LibraryServer
             string strBiblioDbName = ResPath.GetDbName(strBiblioRecPath);
             string strBiblioRecId = ResPath.GetRecordId(strBiblioRecPath);
 
-            // »ñµÃÊéÄ¿¿â¶ÔÓ¦µÄÊµÌå¿âÃû
+            // è·å¾—ä¹¦ç›®åº“å¯¹åº”çš„å®ä½“åº“å
             string strItemDbName = "";
             nRet = this.GetItemDbName(strBiblioDbName,
                  out strItemDbName,
@@ -1106,9 +1106,9 @@ namespace DigitalPlatform.LibraryServer
                 goto ERROR1;
             }
 
-            // ¼ìË÷ÊµÌå¿âÖĞÈ«²¿´ÓÊôÓÚÌØ¶¨idµÄ¼ÇÂ¼
+            // æ£€ç´¢å®ä½“åº“ä¸­å…¨éƒ¨ä»å±äºç‰¹å®šidçš„è®°å½•
 
-            string strQueryXml = "<target list='" + strItemDbName + ":" + "¸¸¼ÇÂ¼" + "'><item><word>"
+            string strQueryXml = "<target list='" + strItemDbName + ":" + "çˆ¶è®°å½•" + "'><item><word>"
                 + strBiblioRecId
                 + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>" + "zh" + "</lang></target>";
 
@@ -1120,7 +1120,7 @@ namespace DigitalPlatform.LibraryServer
 
             if (lRet == 0)
             {
-                strError = "Ã»ÓĞÕÒµ½ÊôÓÚÊéÄ¿¼ÇÂ¼ '" + strBiblioRecPath + "' µÄÈÎºÎÊµÌå¼ÇÂ¼";
+                strError = "æ²¡æœ‰æ‰¾åˆ°å±äºä¹¦ç›®è®°å½• '" + strBiblioRecPath + "' çš„ä»»ä½•å®ä½“è®°å½•";
                 return 0;
             }
 
@@ -1128,7 +1128,7 @@ namespace DigitalPlatform.LibraryServer
 
             if (nResultCount > 500)
             {
-                strError = "ÃüÖĞ²á¼ÇÂ¼Êı " + nResultCount.ToString() + " ³¬¹ı 500, ÔİÊ±²»Ö§³ÖÕë¶ÔËüÃÇµÄÉ¾³ı²Ù×÷";
+                strError = "å‘½ä¸­å†Œè®°å½•æ•° " + nResultCount.ToString() + " è¶…è¿‡ 500, æš‚æ—¶ä¸æ”¯æŒé’ˆå¯¹å®ƒä»¬çš„åˆ é™¤æ“ä½œ";
                 goto ERROR1;
             }
 
@@ -1156,7 +1156,7 @@ namespace DigitalPlatform.LibraryServer
                     goto ERROR1;
                 }
 
-                // »ñµÃÃ¿Ìõ¼ÇÂ¼
+                // è·å¾—æ¯æ¡è®°å½•
                 for (int i = 0; i < aPath.Count; i++)
                 {
                     string strMetaData = "";
@@ -1188,7 +1188,7 @@ namespace DigitalPlatform.LibraryServer
                         if (channel.ErrorCode == ChannelErrorCode.NotFound)
                             continue;
 
-                        strError = "»ñÈ¡ÊµÌå¼ÇÂ¼ '" + aPath[i] + "' Ê±·¢Éú´íÎó: " + strError;
+                        strError = "è·å–å®ä½“è®°å½• '" + aPath[i] + "' æ—¶å‘ç”Ÿé”™è¯¯: " + strError;
                         goto ERROR1;
                         // goto CONTINUE;
                     }
@@ -1201,8 +1201,8 @@ namespace DigitalPlatform.LibraryServer
                     entityinfo.NewTimestamp = null;
                     entityinfo.Action = "";
                      * */
-                    // ¼ì²éÊÇ·ñÓĞ½èÔÄĞÅÏ¢
-                    // °Ñ¼ÇÂ¼×°ÈëDOM
+                    // æ£€æŸ¥æ˜¯å¦æœ‰å€Ÿé˜…ä¿¡æ¯
+                    // æŠŠè®°å½•è£…å…¥DOM
                     XmlDocument domExist = new XmlDocument();
 
                     try
@@ -1211,14 +1211,14 @@ namespace DigitalPlatform.LibraryServer
                     }
                     catch (Exception ex)
                     {
-                        strError = "strXml×°ÔØ½øÈëDOMÊ±·¢Éú´íÎó: " + ex.Message;
+                        strError = "strXmlè£…è½½è¿›å…¥DOMæ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                         goto ERROR1;
                     }
 
-                    // ¹Û²ìÒÑ¾­´æÔÚµÄ¼ÇÂ¼ÊÇ·ñÓĞÁ÷Í¨ĞÅÏ¢
+                    // è§‚å¯Ÿå·²ç»å­˜åœ¨çš„è®°å½•æ˜¯å¦æœ‰æµé€šä¿¡æ¯
                     if (IsEntityHasCirculationInfo(domExist) == true)
                     {
-                        strError = "ÄâÉ¾³ıµÄ²á¼ÇÂ¼ '" + entityinfo.RecPath + "' ÖĞ°üº¬ÓĞÁ÷Í¨ĞÅÏ¢(´ËÖÖÇé¿ö¿ÉÄÜ²»ÏŞÓÚÕâÒ»Ìõ)£¬²»ÄÜÉ¾³ı¡£";
+                        strError = "æ‹Ÿåˆ é™¤çš„å†Œè®°å½• '" + entityinfo.RecPath + "' ä¸­åŒ…å«æœ‰æµé€šä¿¡æ¯(æ­¤ç§æƒ…å†µå¯èƒ½ä¸é™äºè¿™ä¸€æ¡)ï¼Œä¸èƒ½åˆ é™¤ã€‚";
                         goto ERROR1;
                     }
 
@@ -1242,7 +1242,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
 
-            // ÕæÕıÊµĞĞÉ¾³ı
+            // çœŸæ­£å®è¡Œåˆ é™¤
             for (int i = 0; i < entityinfos.Count; i++)
             {
                 EntityInfo info = entityinfos[i];
@@ -1263,7 +1263,7 @@ namespace DigitalPlatform.LibraryServer
                     {
                         if (nRedoCount > 10)
                         {
-                            strError = "ÖØÊÔÁË10´Î»¹²»ĞĞ¡£É¾³ıÊµÌå¼ÇÂ¼ '" + info.RecPath + "' Ê±·¢Éú´íÎó: " + strError;
+                            strError = "é‡è¯•äº†10æ¬¡è¿˜ä¸è¡Œã€‚åˆ é™¤å®ä½“è®°å½• '" + info.RecPath + "' æ—¶å‘ç”Ÿé”™è¯¯: " + strError;
                             goto ERROR1;
                         }
                         nRedoCount++;
@@ -1271,11 +1271,11 @@ namespace DigitalPlatform.LibraryServer
                         goto REDO_DELETE;
                     }
 
-                    strError = "É¾³ıÊµÌå¼ÇÂ¼ '" + info.RecPath + "' Ê±·¢Éú´íÎó: " + strError;
+                    strError = "åˆ é™¤å®ä½“è®°å½• '" + info.RecPath + "' æ—¶å‘ç”Ÿé”™è¯¯: " + strError;
                     goto ERROR1;
                 }
 
-                // Ôö²¹µ½ÈÕÖ¾DOMÖĞ
+                // å¢è¡¥åˆ°æ—¥å¿—DOMä¸­
                 if (domOperLog != null)
                 {
                     Debug.Assert(root != null, "");
@@ -1296,7 +1296,7 @@ namespace DigitalPlatform.LibraryServer
         }
 #endif
 
-        // °ü×°ºóµÄ°æ±¾£¬¼æÈİÒÔÇ°µÄ½Å±¾µ÷ÓÃ
+        // åŒ…è£…åçš„ç‰ˆæœ¬ï¼Œå…¼å®¹ä»¥å‰çš„è„šæœ¬è°ƒç”¨
         public LibraryServerResult GetEntities(
     SessionInfo sessioninfo,
     string strBiblioRecPath,
@@ -1314,8 +1314,8 @@ namespace DigitalPlatform.LibraryServer
     out entities);
         }
 
-        // ´Óstyle×Ö·û´®ÖĞµÃµ½ librarycode:XXXX×Ó´®
-        // ×¢Òâ£¬Èç¹ûxxxxÖĞÊÇ¶à¸ö¹İ´úÂë£¬Òª±í´ïÎª "code1|code2"ÕâÑùµÄĞÎÌ¬¡£±¾º¯ÊıÄÜ×Ô¶¯°Ñ'|'Ìæ»»Îª','
+        // ä»styleå­—ç¬¦ä¸²ä¸­å¾—åˆ° librarycode:XXXXå­ä¸²
+        // æ³¨æ„ï¼Œå¦‚æœxxxxä¸­æ˜¯å¤šä¸ªé¦†ä»£ç ï¼Œè¦è¡¨è¾¾ä¸º "code1|code2"è¿™æ ·çš„å½¢æ€ã€‚æœ¬å‡½æ•°èƒ½è‡ªåŠ¨æŠŠ'|'æ›¿æ¢ä¸º','
         static string GetLibraryCodeParam(string strStyle)
         {
             string[] parts = strStyle.Split(new char[] { ',' });
@@ -1330,18 +1330,18 @@ namespace DigitalPlatform.LibraryServer
         }
 
 
-        // »ñµÃ²áĞÅÏ¢
+        // è·å¾—å†Œä¿¡æ¯
         // parameters:
-        //      strBiblioRecPath    ÊéÄ¿¼ÇÂ¼Â·¾¶£¬½ö°üº¬¿âÃûºÍid²¿·Ö¡£Èç¹ûÓÃ @path-list: Òıµ¼£¬±íÊ¾ÕâÀïÊÇ¸ù¾İ¸ø³öµÄ²á¼ÇÂ¼Â·¾¶À´»ñÈ¡²á¼ÇÂ¼
-        //      lStart  ·µ»Ø´ÓµÚ¼¸¸ö¿ªÊ¼    2009/6/7 add
-        //      lCount  ×Ü¹²·µ»Ø¼¸¸ö¡£0ºÍ-1¶¼±íÊ¾È«²¿·µ»Ø(0ÊÇÎªÁË¼æÈİ¾ÉAPI)
-        //      entityinfos ·µ»ØµÄÊµÌåĞÅÏ¢Êı×é
-        //      strStyle    "opac" °ÑÊµÌå¼ÇÂ¼°´ÕÕOPACÒªÇó½øĞĞ¼Ó¹¤£¬Ôö²¹Ò»Ğ©ÔªËØ
-        //                  "onlygetpath"   ½ö·µ»ØÃ¿¸öÂ·¾¶
-        //                  "getfirstxml"   ÊÇ¶ÔonlygetpathµÄ²¹³ä£¬½ö»ñµÃµÚÒ»¸öÔªËØµÄXML¼ÇÂ¼£¬ÆäÓàµÄÒÀÈ»Ö»·µ»ØÂ·¾¶
-        // È¨ÏŞ£ºĞèÒªÓĞgetentitiesÈ¨ÏŞ
+        //      strBiblioRecPath    ä¹¦ç›®è®°å½•è·¯å¾„ï¼Œä»…åŒ…å«åº“åå’Œidéƒ¨åˆ†ã€‚å¦‚æœç”¨ @path-list: å¼•å¯¼ï¼Œè¡¨ç¤ºè¿™é‡Œæ˜¯æ ¹æ®ç»™å‡ºçš„å†Œè®°å½•è·¯å¾„æ¥è·å–å†Œè®°å½•
+        //      lStart  è¿”å›ä»ç¬¬å‡ ä¸ªå¼€å§‹    2009/6/7 add
+        //      lCount  æ€»å…±è¿”å›å‡ ä¸ªã€‚0å’Œ-1éƒ½è¡¨ç¤ºå…¨éƒ¨è¿”å›(0æ˜¯ä¸ºäº†å…¼å®¹æ—§API)
+        //      entityinfos è¿”å›çš„å®ä½“ä¿¡æ¯æ•°ç»„
+        //      strStyle    "opac" æŠŠå®ä½“è®°å½•æŒ‰ç…§OPACè¦æ±‚è¿›è¡ŒåŠ å·¥ï¼Œå¢è¡¥ä¸€äº›å…ƒç´ 
+        //                  "onlygetpath"   ä»…è¿”å›æ¯ä¸ªè·¯å¾„
+        //                  "getfirstxml"   æ˜¯å¯¹onlygetpathçš„è¡¥å……ï¼Œä»…è·å¾—ç¬¬ä¸€ä¸ªå…ƒç´ çš„XMLè®°å½•ï¼Œå…¶ä½™çš„ä¾ç„¶åªè¿”å›è·¯å¾„
+        // æƒé™ï¼šéœ€è¦æœ‰getentitiesæƒé™
         // return:
-        //      Result.Value    -1³ö´í 0Ã»ÓĞÕÒµ½ ÆäËû ×ÜµÄÊµÌå¼ÇÂ¼µÄ¸öÊı(±¾´Î·µ»ØµÄ£¬¿ÉÒÔÍ¨¹ıentities.CountµÃµ½)
+        //      Result.Value    -1å‡ºé”™ 0æ²¡æœ‰æ‰¾åˆ° å…¶ä»– æ€»çš„å®ä½“è®°å½•çš„ä¸ªæ•°(æœ¬æ¬¡è¿”å›çš„ï¼Œå¯ä»¥é€šè¿‡entities.Countå¾—åˆ°)
         public LibraryServerResult GetEntities(
             SessionInfo sessioninfo,
             string strBiblioRecPath,
@@ -1355,35 +1355,35 @@ namespace DigitalPlatform.LibraryServer
 
             LibraryServerResult result = new LibraryServerResult();
 
-            // È¨ÏŞ×Ö·û´®
+            // æƒé™å­—ç¬¦ä¸²
             if (StringUtil.IsInList("getentities", sessioninfo.RightsOrigin) == false
                 && StringUtil.IsInList("getiteminfo", sessioninfo.RightsOrigin) == false
                 && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
             {
                 result.Value = -1;
-                result.ErrorInfo = "»ñµÃ²áĞÅÏ¢ ²Ù×÷±»¾Ü¾ø¡£²»¾ß±¸order¡¢getiteminfo»ògetentitiesÈ¨ÏŞ¡£";
+                result.ErrorInfo = "è·å¾—å†Œä¿¡æ¯ æ“ä½œè¢«æ‹’ç»ã€‚ä¸å…·å¤‡orderã€getiteminfoæˆ–getentitiesæƒé™ã€‚";
                 result.ErrorCode = ErrorCode.AccessDenied;
                 return result;
             }
 
-            // ¹æ·¶»¯²ÎÊıÖµ
+            // è§„èŒƒåŒ–å‚æ•°å€¼
             if (lCount == 0)
                 lCount = -1;
 
             int nRet = 0;
             string strError = "";
 
-            // ÓĞÒÔÏÂ¼¸ÖÖÇé¿ö
-            // È«¾ÖÓÃ»§£¬²»¹ıÂË
-            //      Ê²Ã´¶¼²»ÓÃÌØÒâÖ¸¶¨
-            // ·Ö¹İÓÃ»§£¬»ñµÃÈ«²¿·Ö¹İ
-            //      styleÖĞÒª°üº¬ getotherlibraryitem
-            // ·Ö¹İÓÃ»§£¬Ö»»ñµÃ×Ô¼º¹ÜÏ½µÄ·Ö¹İ
-            //      Ê²Ã´¶¼²»ÓÃÌØÒâÖ¸¶¨
-            // È«¾ÖÓÃ»§£¬Ö»·µ»ØÖ¸¶¨µÄ·Ö¹İ
-            //      styleÖĞÒª°üº¬ librarycode:xxxx
-            // ·Ö¹İÓÃ»§£¬Ö»·µ»ØÖ¸¶¨µÄ·Ö¹İ¡£×¢Òâ£¬Õâ²»Ò»¶¨ÊÇÖ¸·Ö¹İÓÃ»§¹ÜÏ½µÄ·Ö¹İ
-            //      styleÖĞÒª°üº¬ librarycode:xxxx
+            // æœ‰ä»¥ä¸‹å‡ ç§æƒ…å†µ
+            // å…¨å±€ç”¨æˆ·ï¼Œä¸è¿‡æ»¤
+            //      ä»€ä¹ˆéƒ½ä¸ç”¨ç‰¹æ„æŒ‡å®š
+            // åˆ†é¦†ç”¨æˆ·ï¼Œè·å¾—å…¨éƒ¨åˆ†é¦†
+            //      styleä¸­è¦åŒ…å« getotherlibraryitem
+            // åˆ†é¦†ç”¨æˆ·ï¼Œåªè·å¾—è‡ªå·±ç®¡è¾–çš„åˆ†é¦†
+            //      ä»€ä¹ˆéƒ½ä¸ç”¨ç‰¹æ„æŒ‡å®š
+            // å…¨å±€ç”¨æˆ·ï¼Œåªè¿”å›æŒ‡å®šçš„åˆ†é¦†
+            //      styleä¸­è¦åŒ…å« librarycode:xxxx
+            // åˆ†é¦†ç”¨æˆ·ï¼Œåªè¿”å›æŒ‡å®šçš„åˆ†é¦†ã€‚æ³¨æ„ï¼Œè¿™ä¸ä¸€å®šæ˜¯æŒ‡åˆ†é¦†ç”¨æˆ·ç®¡è¾–çš„åˆ†é¦†
+            //      styleä¸­è¦åŒ…å« librarycode:xxxx
 
             string strLibraryCodeParam = GetLibraryCodeParam(strStyle);
             if (sessioninfo.GlobalUser == false && string.IsNullOrEmpty(strLibraryCodeParam) == true)
@@ -1398,7 +1398,7 @@ namespace DigitalPlatform.LibraryServer
             string strBiblioDbName = ResPath.GetDbName(strBiblioRecPath);
             string strBiblioRecId = ResPath.GetRecordId(strBiblioRecPath);
 
-            // »ñµÃÊéÄ¿¿â¶ÔÓ¦µÄÊµÌå¿âÃû
+            // è·å¾—ä¹¦ç›®åº“å¯¹åº”çš„å®ä½“åº“å
             string strItemDbName = "";
             nRet = this.GetItemDbName(strBiblioDbName,
                  out strItemDbName,
@@ -1409,7 +1409,7 @@ namespace DigitalPlatform.LibraryServer
             if (String.IsNullOrEmpty(strItemDbName) == true)
             {
                 result.Value = -1;
-                result.ErrorInfo = "ÊéÄ¿¿â '"+strBiblioDbName+"' Î´¶¨ÒåÏÂÊôµÄÊµÌå¿â";
+                result.ErrorInfo = "ä¹¦ç›®åº“ '"+strBiblioDbName+"' æœªå®šä¹‰ä¸‹å±çš„å®ä½“åº“";
                 result.ErrorCode = ErrorCode.ItemDbNotDef;
                 return result;
             }
@@ -1421,7 +1421,7 @@ namespace DigitalPlatform.LibraryServer
                 goto ERROR1;
             }
 
-            // ¼ìË÷ÊµÌå¿âÖĞÈ«²¿´ÓÊôÓÚÌØ¶¨idµÄ¼ÇÂ¼
+            // æ£€ç´¢å®ä½“åº“ä¸­å…¨éƒ¨ä»å±äºç‰¹å®šidçš„è®°å½•
 
             string strQueryXml = "";
 
@@ -1429,19 +1429,19 @@ namespace DigitalPlatform.LibraryServer
                 || bGetOtherLibraryItem == true)
             {
                 strQueryXml = "<target list='"
-                     + StringUtil.GetXmlStringSimple(strItemDbName + ":" + "¸¸¼ÇÂ¼")       // 2007/9/14 
+                     + StringUtil.GetXmlStringSimple(strItemDbName + ":" + "çˆ¶è®°å½•")       // 2007/9/14 
                      + "'><item><word>"
                      + strBiblioRecId
                      + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>" + "zh" + "</lang></target>";
             }
             else
             {
-                // ½ö½öÈ¡µÃµ±Ç°ÓÃ»§¹ÜÏ½µÄ·Ö¹İµÄ²á¼ÇÂ¼
+                // ä»…ä»…å–å¾—å½“å‰ç”¨æˆ·ç®¡è¾–çš„åˆ†é¦†çš„å†Œè®°å½•
                 List<string> codes = StringUtil.SplitList(strLibraryCodeParam); // sessioninfo.LibraryCodeList
                 foreach (string strCode in codes)
                 {
                     string strOneQueryXml = "<target list='"
-         + StringUtil.GetXmlStringSimple(strItemDbName + ":" + "¸¸¼ÇÂ¼+¹İ²ØµØµã")
+         + StringUtil.GetXmlStringSimple(strItemDbName + ":" + "çˆ¶è®°å½•+é¦†è—åœ°ç‚¹")
          + "'><item><word>"
          + StringUtil.GetXmlStringSimple(strBiblioRecId + "|" + strCode + "/")
          +"</word><match>left</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>" + "zh" + "</lang></target>";
@@ -1469,7 +1469,7 @@ namespace DigitalPlatform.LibraryServer
             if (lRet == 0)
             {
                 result.Value = 0;
-                result.ErrorInfo = "Ã»ÓĞÕÒµ½";
+                result.ErrorInfo = "æ²¡æœ‰æ‰¾åˆ°";
                 return result;
             }
 
@@ -1480,23 +1480,23 @@ namespace DigitalPlatform.LibraryServer
             if (lCount == -1)
                 lCount = nResultCount - (int)lStart;
 
-            // lStartÊÇ·ñÔ½½ç
+            // lStartæ˜¯å¦è¶Šç•Œ
             if (lStart >= (long)nResultCount)
             {
-                strError = "lStart²ÎÊıÖµ " + lStart.ToString() + " ³¬¹ıÁËÃüÖĞ½á¹û¼¯µÄÎ²²¿¡£ÃüÖĞ½á¹ûÊıÁ¿Îª " + nResultCount.ToString();
+                strError = "lStartå‚æ•°å€¼ " + lStart.ToString() + " è¶…è¿‡äº†å‘½ä¸­ç»“æœé›†çš„å°¾éƒ¨ã€‚å‘½ä¸­ç»“æœæ•°é‡ä¸º " + nResultCount.ToString();
                 goto ERROR1;
             }
 
             // 2010/12/16
-            // ĞŞÕılCount
+            // ä¿®æ­£lCount
             if (lStart + lCount > (long)nResultCount)
             {
-                // strError = "lStart²ÎÊıÖµ " + lStart.ToString() + " ºÍlCount²ÎÊıÖµ " + lCount.ToString() + " Ö®ºÍ´óÓÚÃüÖĞ½á¹ûÊıÁ¿ " + nResultCount.ToString();
+                // strError = "lStartå‚æ•°å€¼ " + lStart.ToString() + " å’ŒlCountå‚æ•°å€¼ " + lCount.ToString() + " ä¹‹å’Œå¤§äºå‘½ä¸­ç»“æœæ•°é‡ " + nResultCount.ToString();
                 // goto ERROR1;
                 lCount = (long)nResultCount - lStart;
             }
 
-            // ÊÇ·ñ³¬¹ıÃ¿Åú×î´óÖµ
+            // æ˜¯å¦è¶…è¿‡æ¯æ‰¹æœ€å¤§å€¼
             if (lCount > MAXPERBATCH)
                 lCount = MAXPERBATCH;
 
@@ -1509,7 +1509,7 @@ namespace DigitalPlatform.LibraryServer
             /*
             if (nResultCount > 10000)
             {
-                strError = "ÃüÖĞ²á¼ÇÂ¼Êı " + nResultCount.ToString() + " ³¬¹ı 10000, ÔİÊ±²»Ö§³Ö";
+                strError = "å‘½ä¸­å†Œè®°å½•æ•° " + nResultCount.ToString() + " è¶…è¿‡ 10000, æš‚æ—¶ä¸æ”¯æŒ";
                 goto ERROR1;
             }*/
 
@@ -1540,7 +1540,7 @@ namespace DigitalPlatform.LibraryServer
                 bool bOnlyGetPath = StringUtil.IsInList("onlygetpath", strStyle);
                 bool bGetFirstXml = StringUtil.IsInList("getfirstxml", strStyle);
 
-                // »ñµÃÃ¿Ìõ¼ÇÂ¼
+                // è·å¾—æ¯æ¡è®°å½•
                 for (int i = 0; i < aPath.Count; i++)
                 {
                     EntityInfo entityinfo = new EntityInfo();
@@ -1585,8 +1585,8 @@ namespace DigitalPlatform.LibraryServer
 
                     XmlDocument itemdom = null;
 
-                    // ĞŞ¸Ä<borrower>
-                    if (sessioninfo.GlobalUser == false) // ·Ö¹İÓÃ»§±ØĞëÒª¹ıÂË£¬ÒòÎªÒªĞŞ¸Ä<borrower>
+                    // ä¿®æ”¹<borrower>
+                    if (sessioninfo.GlobalUser == false) // åˆ†é¦†ç”¨æˆ·å¿…é¡»è¦è¿‡æ»¤ï¼Œå› ä¸ºè¦ä¿®æ”¹<borrower>
                     {
                         nRet = LibraryApplication.LoadToDom(strXml,
                             out itemdom,
@@ -1596,11 +1596,11 @@ namespace DigitalPlatform.LibraryServer
 
                         {
                             string strLibraryCode = "";
-                            // ¼ì²éÒ»¸ö²á¼ÇÂ¼µÄ¹İ²ØµØµãÊÇ·ñ·ûºÏµ±Ç°ÓÃ»§¹ÜÏ½µÄ¹İ´úÂëÁĞ±íÒªÇó
+                            // æ£€æŸ¥ä¸€ä¸ªå†Œè®°å½•çš„é¦†è—åœ°ç‚¹æ˜¯å¦ç¬¦åˆå½“å‰ç”¨æˆ·ç®¡è¾–çš„é¦†ä»£ç åˆ—è¡¨è¦æ±‚
                             // return:
-                            //      -1  ¼ì²é¹ı³Ì³ö´í
-                            //      0   ·ûºÏÒªÇó
-                            //      1   ²»·ûºÏÒªÇó
+                            //      -1  æ£€æŸ¥è¿‡ç¨‹å‡ºé”™
+                            //      0   ç¬¦åˆè¦æ±‚
+                            //      1   ä¸ç¬¦åˆè¦æ±‚
                             nRet = CheckItemLibraryCode(itemdom,
                                         sessioninfo.LibraryCodeList,
                                         out strLibraryCode,
@@ -1610,7 +1610,7 @@ namespace DigitalPlatform.LibraryServer
 
                             if (nRet == 1)
                             {
-                                // °Ñ½èÔÄÈËµÄÖ¤ÌõÂëºÅ¸²¸Ç
+                                // æŠŠå€Ÿé˜…äººçš„è¯æ¡ç å·è¦†ç›–
                                 string strBorrower = DomUtil.GetElementText(itemdom.DocumentElement,
                                     "borrower");
                                 if (string.IsNullOrEmpty(strBorrower) == false)
@@ -1621,7 +1621,7 @@ namespace DigitalPlatform.LibraryServer
                         }
                     }
 
-                    // °ÑÊµÌå¼ÇÂ¼°´ÕÕOPACÒªÇó½øĞĞ¼Ó¹¤£¬Ôö²¹Ò»Ğ©ÔªËØ
+                    // æŠŠå®ä½“è®°å½•æŒ‰ç…§OPACè¦æ±‚è¿›è¡ŒåŠ å·¥ï¼Œå¢è¡¥ä¸€äº›å…ƒç´ 
                     if (StringUtil.IsInList("opac", strStyle) == true)
                     {
                         if (itemdom == null)
@@ -1662,12 +1662,12 @@ namespace DigitalPlatform.LibraryServer
                 if (entityinfos.Count >= lCount)
                     break;
 
-                // ĞŞÕınPerCount
+                // ä¿®æ­£nPerCount
                 if (entityinfos.Count + nPerCount > lCount)
                     nPerCount = (int)lCount - entityinfos.Count;
             }
 
-            // ¹Ò½Óµ½½á¹ûÖĞ
+            // æŒ‚æ¥åˆ°ç»“æœä¸­
             entities = new EntityInfo[entityinfos.Count];
             for (int i = 0; i < entityinfos.Count; i++)
             {
@@ -1683,9 +1683,9 @@ namespace DigitalPlatform.LibraryServer
             return result;
         }
 
-        // ¸ø²á¼ÇÂ¼ÄÚÔö¼ÓOPACĞÅÏ¢
+        // ç»™å†Œè®°å½•å†…å¢åŠ OPACä¿¡æ¯
         // parameters:
-        //      strLibraryCode  ¶ÁÕß¼ÇÂ¼Ëù´ÓÊôµÄ¶ÁÕß¿âµÄ¹İ´úÂë
+        //      strLibraryCode  è¯»è€…è®°å½•æ‰€ä»å±çš„è¯»è€…åº“çš„é¦†ä»£ç 
         int AddOpacInfos(
             SessionInfo sessioninfo,
             string strLang,
@@ -1698,11 +1698,11 @@ namespace DigitalPlatform.LibraryServer
             string strBarcode = DomUtil.GetElementText(item_dom.DocumentElement, "barcode");
             string strState = DomUtil.GetElementText(item_dom.DocumentElement, "state");
 
-            // <borrowerRecPath>ÊÇ2012/9/8ÒÔºóÎªÊµÌå¼ÇÂ¼ĞÂÔöµÄÒ»¸öÔªËØ£¬ÄÚÈİÊÇ½èÕß¶ÁÕß¼ÇÂ¼µÄÂ·¾¶
+            // <borrowerRecPath>æ˜¯2012/9/8ä»¥åä¸ºå®ä½“è®°å½•æ–°å¢çš„ä¸€ä¸ªå…ƒç´ ï¼Œå†…å®¹æ˜¯å€Ÿè€…è¯»è€…è®°å½•çš„è·¯å¾„
             string strBorrowerRecPath = DomUtil.GetElementText(item_dom.DocumentElement, "borrowerRecPath");
 
 
-            string strBorrowerLibraryCode = ""; // µ±Ç°²áµÄ½èÔÄÕßËùÔÚµÄ¹İ´úÂë
+            string strBorrowerLibraryCode = ""; // å½“å‰å†Œçš„å€Ÿé˜…è€…æ‰€åœ¨çš„é¦†ä»£ç 
             if (string.IsNullOrEmpty(strBorrowerRecPath) == false)
             {
                 nRet = this.GetLibraryCode(strBorrowerRecPath,
@@ -1712,20 +1712,20 @@ namespace DigitalPlatform.LibraryServer
                 if (nRet == -1)
                     goto ERROR1;
                  * */
-                // TODO: ÈçºÎ±¨´í?
+                // TODO: å¦‚ä½•æŠ¥é”™?
             }
 
 
-            // ¹İ²ØµØµã
+            // é¦†è—åœ°ç‚¹
             string strLocation = DomUtil.GetElementText(item_dom.DocumentElement, "location");
-            // È¥µô#reservation²¿·Ö
+            // å»æ‰#reservationéƒ¨åˆ†
             strLocation = StringUtil.GetPureLocationString(strLocation);
 
-            // ¼ì²é²áËùÊôµÄ¹İ²ØµØµãÊÇ·ñºÏ¶ÁÕßËùÔÚµÄ¹İ²ØµØµãÎÇºÏ
+            // æ£€æŸ¥å†Œæ‰€å±çš„é¦†è—åœ°ç‚¹æ˜¯å¦åˆè¯»è€…æ‰€åœ¨çš„é¦†è—åœ°ç‚¹å»åˆ
             string strPureLocationName = "";
-            string strItemLibraryCode = ""; // µ±Ç°²áËùÔÚµÄ¹İ´úÂë
+            string strItemLibraryCode = ""; // å½“å‰å†Œæ‰€åœ¨çš„é¦†ä»£ç 
 
-            // ½âÎö
+            // è§£æ
             ParseCalendarName(strLocation,
         out strItemLibraryCode,
         out strPureLocationName);
@@ -1733,12 +1733,12 @@ namespace DigitalPlatform.LibraryServer
             bool bResultValue = false;
             string strMessageText = "";
 
-            // Ö´ĞĞ½Å±¾º¯ÊıItemCanBorrow
+            // æ‰§è¡Œè„šæœ¬å‡½æ•°ItemCanBorrow
             // parameters:
             // return:
             //      -2  not found script
-            //      -1  ³ö´í
-            //      0   ³É¹¦
+            //      -1  å‡ºé”™
+            //      0   æˆåŠŸ
             nRet = this.DoItemCanBorrowScriptFunction(
                 false,
                 sessioninfo.Account,
@@ -1753,35 +1753,35 @@ namespace DigitalPlatform.LibraryServer
 
             if (nRet == -2)
             {
-                // ¸ù¾İ×´Ì¬ÊÇ·ñÎª¿Õ, ÉèÖÃcheckbox×´Ì¬
+                // æ ¹æ®çŠ¶æ€æ˜¯å¦ä¸ºç©º, è®¾ç½®checkboxçŠ¶æ€
                 if (string.IsNullOrEmpty(strState) == false)
                 {
-                    string strText = "´Ë²áÒò×´Ì¬Îª " + strState + " ¶ø²»ÄÜÍâ½è¡£";
+                    string strText = "æ­¤å†Œå› çŠ¶æ€ä¸º " + strState + " è€Œä¸èƒ½å¤–å€Ÿã€‚";
                     XmlNode node = DomUtil.SetElementText(item_dom.DocumentElement,
                         "canBorrow", strText);
                     DomUtil.SetAttr(node, "canBorrow", "false");
                 }
                 else
                 {
-                    // ×¢£ºÈ«¾ÖÓÃ»§¾Íµ±Ã¿¸ö·Ö¹İ¶¼¿É½è¡£µ«OPAC items ½çÃæÉÏÊµ¼ÊÉÏÒªµ½ÊäÈë¶ÁÕßÖ¤¼şÌõÂëºÅÌá½»Ô¤Ô¼ºó²ÅÖªµÀĞ§¹û
+                    // æ³¨ï¼šå…¨å±€ç”¨æˆ·å°±å½“æ¯ä¸ªåˆ†é¦†éƒ½å¯å€Ÿã€‚ä½†OPAC items ç•Œé¢ä¸Šå®é™…ä¸Šè¦åˆ°è¾“å…¥è¯»è€…è¯ä»¶æ¡ç å·æäº¤é¢„çº¦åæ‰çŸ¥é“æ•ˆæœ
                     if (sessioninfo.GlobalUser == false
                         && StringUtil.IsInList(strItemLibraryCode, sessioninfo.LibraryCodeList) == false)
                     {
-                        string strText = "´Ë²áÒòÊôÆäËû·Ö¹İ " + strItemLibraryCode + " ¶ø²»ÄÜ½èÔÄ¡£";
+                        string strText = "æ­¤å†Œå› å±å…¶ä»–åˆ†é¦† " + strItemLibraryCode + " è€Œä¸èƒ½å€Ÿé˜…ã€‚";
                         XmlNode node = DomUtil.SetElementText(item_dom.DocumentElement,
                             "canBorrow", strText);
                         DomUtil.SetAttr(node, "canBorrow", "false");
                     }
                     else
                     {
-                        // ¸ù¾İ¹İ²ØµØµãÊÇ·ñÔÊĞí½èÔÄ, ÉèÖÃcheckbox×´Ì¬
-                        // ¸öÈËÊéÕ«²»ÔÚ library.xml ÖĞ¶¨Òå
+                        // æ ¹æ®é¦†è—åœ°ç‚¹æ˜¯å¦å…è®¸å€Ÿé˜…, è®¾ç½®checkboxçŠ¶æ€
+                        // ä¸ªäººä¹¦æ–‹ä¸åœ¨ library.xml ä¸­å®šä¹‰
                         if (IsPersonalLibraryRoom(strPureLocationName) == false)    // 2015/6/14
                         {
                             List<string> locations = this.GetLocationTypes(strItemLibraryCode, true);
                             if (locations.IndexOf(strPureLocationName) == -1)
                             {
-                                string strText = "´Ë²áÒòÊô¹İ²ØµØµã " + strLocation + " ¶ø²»ÄÜÍâ½è¡£";
+                                string strText = "æ­¤å†Œå› å±é¦†è—åœ°ç‚¹ " + strLocation + " è€Œä¸èƒ½å¤–å€Ÿã€‚";
                                 XmlNode node = DomUtil.SetElementText(item_dom.DocumentElement,
                                     "canBorrow", strText);
                                 DomUtil.SetAttr(node, "canBorrow", "false");
@@ -1789,12 +1789,12 @@ namespace DigitalPlatform.LibraryServer
                         }
 #if NO
                         // 2015/6/14
-                        // Í¬Ò»·Ö¹İÇé¿öÏÂ£¬¸ù¾İ¹İ²ØµØµãÊÇ·ñÔÊĞí½èÔÄ, ÉèÖÃcheckbox×´Ì¬
-                        // ¸öÈËÊéÕ«²»ÔÚ library.xml ÖĞ¶¨Òå¡£Òò´ËÕâÀï²ÉÓÃ¹Û²ì²»ÄÜ¶¨ÒåµÄµØµãµÄ·½·¨£¬Ö»Òª²»ÔÚÕâ¸ö²»ÔÊĞí½èÔÄµÄµØµãÁĞ±íÖĞ£¬¾ÍËãÔÊĞí
+                        // åŒä¸€åˆ†é¦†æƒ…å†µä¸‹ï¼Œæ ¹æ®é¦†è—åœ°ç‚¹æ˜¯å¦å…è®¸å€Ÿé˜…, è®¾ç½®checkboxçŠ¶æ€
+                        // ä¸ªäººä¹¦æ–‹ä¸åœ¨ library.xml ä¸­å®šä¹‰ã€‚å› æ­¤è¿™é‡Œé‡‡ç”¨è§‚å¯Ÿä¸èƒ½å®šä¹‰çš„åœ°ç‚¹çš„æ–¹æ³•ï¼Œåªè¦ä¸åœ¨è¿™ä¸ªä¸å…è®¸å€Ÿé˜…çš„åœ°ç‚¹åˆ—è¡¨ä¸­ï¼Œå°±ç®—å…è®¸
                         List<string> locations = this.GetCantBorrowLocationTypes(strItemLibraryCode);
                         if (locations.IndexOf(strPureLocationName) != -1)
                         {
-                            string strText = "´Ë²áÒòÊô¹İ²ØµØµã " + strLocation + " ¶ø²»ÄÜÍâ½è¡£";
+                            string strText = "æ­¤å†Œå› å±é¦†è—åœ°ç‚¹ " + strLocation + " è€Œä¸èƒ½å¤–å€Ÿã€‚";
                             XmlNode node = DomUtil.SetElementText(item_dom.DocumentElement,
                                 "canBorrow", strText);
                             DomUtil.SetAttr(node, "canBorrow", "false");
@@ -1819,18 +1819,18 @@ namespace DigitalPlatform.LibraryServer
     "stateMessage", strMessageText);
             }
 
-            // ×´Ì¬
+            // çŠ¶æ€
             // string strState = DomUtil.GetElementText(dom.DocumentElement, "state");
 
 
 
-            // ½èÕßÌõÂë
+            // å€Ÿè€…æ¡ç 
             //string strBorrower = DomUtil.GetElementText(dom.DocumentElement, "borrower");
 
-            // Ğø½è´Î
+            // ç»­å€Ÿæ¬¡
             //string strNo = DomUtil.GetElementText(dom.DocumentElement, "no");
 
-            // ½èÔÄÈÕÆÚ
+            // å€Ÿé˜…æ—¥æœŸ
             string strBorrowDate = DomUtil.GetElementText(item_dom.DocumentElement, "borrowDate");
             string strTime = strBorrowDate;
             if (String.IsNullOrEmpty(strTime) == false)
@@ -1841,34 +1841,34 @@ namespace DigitalPlatform.LibraryServer
                 }
                 catch
                 {
-                    strTime = "Ê±¼ä¸ñÊ½´íÎó -- " + strTime;
+                    strTime = "æ—¶é—´æ ¼å¼é”™è¯¯ -- " + strTime;
                 }
             }
 
             string strClass = "";
 
-            // <borrowerReaderType>ÊÇ2009/9/18ÒÔºóÎªÊµÌå¼ÇÂ¼ĞÂÔöµÄÒ»¸öÔªËØ£¬ÊÇ´Ó¶ÁÕß¼ÇÂ¼ÖĞ<readerType>ÖĞ¸´ÖÆ¹ıÀ´µÄ
+            // <borrowerReaderType>æ˜¯2009/9/18ä»¥åä¸ºå®ä½“è®°å½•æ–°å¢çš„ä¸€ä¸ªå…ƒç´ ï¼Œæ˜¯ä»è¯»è€…è®°å½•ä¸­<readerType>ä¸­å¤åˆ¶è¿‡æ¥çš„
             string strBorrowerReaderType = DomUtil.GetElementText(item_dom.DocumentElement, "borrowerReaderType");
 
-            // ½èÔÄÆÚÏŞ
+            // å€Ÿé˜…æœŸé™
             string strPeriod = DomUtil.GetElementText(item_dom.DocumentElement, "borrowPeriod");
 
-            string strOverDue = ""; // ³¬ÆÚÇé¿ö×Ö·û´®¡£ÒÑ¾­±»¹æ·¶¹ı£¬²»³¬ÆÚµÄÊ±ºòÕâ¸ö×Ö·û´®Îª¿ÕÖµ
-            string strOriginOverdue = "";   // ³¬ÆÚÇé¿ö×Ö·û´®£¬Ã»ÓĞ¼Ó¹¤¹ı£¬Èç¹ûÊÇ²»³¬ÆÚµÄÊ±ºò£¬Ôò»áËµ»¹ÓĞ¶àÉÙÌìµ½ÆÚ
+            string strOverDue = ""; // è¶…æœŸæƒ…å†µå­—ç¬¦ä¸²ã€‚å·²ç»è¢«è§„èŒƒè¿‡ï¼Œä¸è¶…æœŸçš„æ—¶å€™è¿™ä¸ªå­—ç¬¦ä¸²ä¸ºç©ºå€¼
+            string strOriginOverdue = "";   // è¶…æœŸæƒ…å†µå­—ç¬¦ä¸²ï¼Œæ²¡æœ‰åŠ å·¥è¿‡ï¼Œå¦‚æœæ˜¯ä¸è¶…æœŸçš„æ—¶å€™ï¼Œåˆ™ä¼šè¯´è¿˜æœ‰å¤šå°‘å¤©åˆ°æœŸ
             long lOver = 0;
             string strPeriodUnit = "";
 
             if (String.IsNullOrEmpty(strBorrowDate) == false)
             {
-                // »ñµÃÈÕÀú
+                // è·å¾—æ—¥å†
                 Calendar calendar = null;
 
                 if (String.IsNullOrEmpty(strBorrowerReaderType) == false)
                 {
                     // return:
-                    //      -1  ³ö´í
-                    //      0   Ã»ÓĞÕÒµ½ÈÕÀú
-                    //      1   ÕÒµ½ÈÕÀú
+                    //      -1  å‡ºé”™
+                    //      0   æ²¡æœ‰æ‰¾åˆ°æ—¥å†
+                    //      1   æ‰¾åˆ°æ—¥å†
                     nRet = this.GetReaderCalendar(strBorrowerReaderType,
                         strBorrowerLibraryCode,
                         out calendar,
@@ -1879,12 +1879,12 @@ namespace DigitalPlatform.LibraryServer
                     }
                 }
 
-                // ¼ì²é³¬ÆÚÇé¿ö¡£
+                // æ£€æŸ¥è¶…æœŸæƒ…å†µã€‚
                 // return:
-                //      -1  Êı¾İ¸ñÊ½´íÎó
-                //      0   Ã»ÓĞ·¢ÏÖ³¬ÆÚ
-                //      1   ·¢ÏÖ³¬ÆÚ   strErrorÖĞÓĞÌáÊ¾ĞÅÏ¢
-                //      2   ÒÑ¾­ÔÚ¿íÏŞÆÚÄÚ£¬ºÜÈİÒ×³¬ÆÚ 2009/3/13 
+                //      -1  æ•°æ®æ ¼å¼é”™è¯¯
+                //      0   æ²¡æœ‰å‘ç°è¶…æœŸ
+                //      1   å‘ç°è¶…æœŸ   strErrorä¸­æœ‰æç¤ºä¿¡æ¯
+                //      2   å·²ç»åœ¨å®½é™æœŸå†…ï¼Œå¾ˆå®¹æ˜“è¶…æœŸ 2009/3/13 
                 nRet = this.CheckPeriod(
                     calendar,   // 2009/9/18 changed
                     strBorrowDate,
@@ -1896,16 +1896,16 @@ namespace DigitalPlatform.LibraryServer
                 strOriginOverdue = strError;
 
                 if (nRet == -1)
-                    strOverDue = strError;  // ´íÎóĞÅÏ¢
+                    strOverDue = strError;  // é”™è¯¯ä¿¡æ¯
 
                 if (nRet == 1)
-                    strOverDue = this.GetString("ÒÑ³¬ÆÚ");
+                    strOverDue = this.GetString("å·²è¶…æœŸ");
                 else if (nRet == 2) // 2009/9/18 
-                    strOverDue = this.GetString("ÒÑÔÚ¿íÏŞÆÚÄÚ£¬¼´½«µ½ÆÚ");
+                    strOverDue = this.GetString("å·²åœ¨å®½é™æœŸå†…ï¼Œå³å°†åˆ°æœŸ");
 
                 /*
                 if (nRet == 1 || nRet == 0)
-                    strOverDue = strError;	// "ÒÑ³¬ÆÚ";
+                    strOverDue = strError;	// "å·²è¶…æœŸ";
                  * */
                 if (nRet == 1)
                     strClass = "over";
@@ -1917,7 +1917,7 @@ namespace DigitalPlatform.LibraryServer
                 // strPeriod = this.GetDisplayTimePeriodStringEx(strPeriod);
 
 
-                // ³¬ÆÚÇé¿ö
+                // è¶…æœŸæƒ…å†µ
                 {
                     XmlNode node = DomUtil.SetElementText(item_dom.DocumentElement,
                         "overdueInfo", strOverDue);
@@ -1938,13 +1938,13 @@ namespace DigitalPlatform.LibraryServer
         }
 
 
-        // ÉèÖÃ/±£´æ²áĞÅÏ¢
+        // è®¾ç½®/ä¿å­˜å†Œä¿¡æ¯
         // parameters:
-        //      strBiblioRecPath    ÊéÄ¿¼ÇÂ¼Â·¾¶£¬½ö°üº¬¿âÃûºÍid²¿·Ö¡£¿âÃû¿ÉÒÔÓÃÀ´È·¶¨ÊéÄ¿¿â£¬id¿ÉÒÔ±»ÊµÌå¼ÇÂ¼ÓÃÀ´ÉèÖÃ<parent>ÔªËØÄÚÈİ¡£ÁíÍâÊéÄ¿¿âÃûºÍEntityInfoÖĞµÄNewRecPathĞÎ³ÉÓ³ÕÕ¹ØÏµ£¬ĞèÒª¼ì²éËüÃÇÊÇ·ñÕıÈ·¶ÔÓ¦
-        //      entityinfos ÒªÌá½»µÄµÄÊµÌåĞÅÏ¢Êı×é
-        // È¨ÏŞ£ºĞèÒªÓĞsetentitiesÈ¨ÏŞ
-        // TODO: Ğ´Èë²á¿âÖĞµÄ¼ÇÂ¼, »¹È±·¦<operator>ºÍ<operTime>×Ö¶Î
-        // TODO: ĞèÒª¼ì²é²á¼ÇÂ¼µÄ<parent>ÔªËØÄÚÈİÊÇ·ñºÏ·¨¡£²»ÄÜÎªÎÊºÅ
+        //      strBiblioRecPath    ä¹¦ç›®è®°å½•è·¯å¾„ï¼Œä»…åŒ…å«åº“åå’Œidéƒ¨åˆ†ã€‚åº“åå¯ä»¥ç”¨æ¥ç¡®å®šä¹¦ç›®åº“ï¼Œidå¯ä»¥è¢«å®ä½“è®°å½•ç”¨æ¥è®¾ç½®<parent>å…ƒç´ å†…å®¹ã€‚å¦å¤–ä¹¦ç›®åº“åå’ŒEntityInfoä¸­çš„NewRecPathå½¢æˆæ˜ ç…§å…³ç³»ï¼Œéœ€è¦æ£€æŸ¥å®ƒä»¬æ˜¯å¦æ­£ç¡®å¯¹åº”
+        //      entityinfos è¦æäº¤çš„çš„å®ä½“ä¿¡æ¯æ•°ç»„
+        // æƒé™ï¼šéœ€è¦æœ‰setentitiesæƒé™
+        // TODO: å†™å…¥å†Œåº“ä¸­çš„è®°å½•, è¿˜ç¼ºä¹<operator>å’Œ<operTime>å­—æ®µ
+        // TODO: éœ€è¦æ£€æŸ¥å†Œè®°å½•çš„<parent>å…ƒç´ å†…å®¹æ˜¯å¦åˆæ³•ã€‚ä¸èƒ½ä¸ºé—®å·
         public LibraryServerResult SetEntities(
             SessionInfo sessioninfo,
             string strBiblioRecPath,
@@ -1955,18 +1955,18 @@ namespace DigitalPlatform.LibraryServer
 
             LibraryServerResult result = new LibraryServerResult();
 
-            // È¨ÏŞ×Ö·û´®
+            // æƒé™å­—ç¬¦ä¸²
             if (StringUtil.IsInList("setentities", sessioninfo.RightsOrigin) == false
                 && StringUtil.IsInList("setiteminfo", sessioninfo.RightsOrigin) == false
                 && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == false)
             {
                 result.Value = -1;
-                result.ErrorInfo = "±£´æ²áĞÅÏ¢ ²Ù×÷±»¾Ü¾ø¡£²»¾ß±¸order¡¢setiteminfo»òsetentitiesÈ¨ÏŞ¡£";
+                result.ErrorInfo = "ä¿å­˜å†Œä¿¡æ¯ æ“ä½œè¢«æ‹’ç»ã€‚ä¸å…·å¤‡orderã€setiteminfoæˆ–setentitiesæƒé™ã€‚";
                 result.ErrorCode = ErrorCode.AccessDenied;
                 return result;
             }
 
-            // ¸öÈËÊéÕ«Ãû
+            // ä¸ªäººä¹¦æ–‹å
             string strPersonalLibrary = "";
             if (sessioninfo.UserType == "reader"
                 && sessioninfo.Account != null)
@@ -1975,7 +1975,7 @@ namespace DigitalPlatform.LibraryServer
                 if (string.IsNullOrEmpty(strPersonalLibrary) == true)
                 {
                     result.Value = -1;
-                    result.ErrorInfo = "±£´æ²áĞÅÏ¢ ²Ù×÷±»¾Ü¾ø¡£¶ÁÕßÉí·İ²»¾ß±¸¸öÈËÊéÕ«È¨ÏŞ";
+                    result.ErrorInfo = "ä¿å­˜å†Œä¿¡æ¯ æ“ä½œè¢«æ‹’ç»ã€‚è¯»è€…èº«ä»½ä¸å…·å¤‡ä¸ªäººä¹¦æ–‹æƒé™";
                     result.ErrorCode = ErrorCode.AccessDenied;
                     return result;
                 }
@@ -1988,7 +1988,7 @@ namespace DigitalPlatform.LibraryServer
             string strBiblioDbName = ResPath.GetDbName(strBiblioRecPath);
             string strBiblioRecId = ResPath.GetRecordId(strBiblioRecPath);
 
-            // »ñµÃÊéÄ¿¿â¶ÔÓ¦µÄÊµÌå¿âÃû
+            // è·å¾—ä¹¦ç›®åº“å¯¹åº”çš„å®ä½“åº“å
             string strItemDbName = "";
             nRet = this.GetItemDbName(strBiblioDbName,
                  out strItemDbName,
@@ -1996,11 +1996,11 @@ namespace DigitalPlatform.LibraryServer
             if (nRet == -1)
                 goto ERROR1;
 
-            // ¼ì²éÊµÌå¿âÃû 2014/9/5
+            // æ£€æŸ¥å®ä½“åº“å 2014/9/5
             if (string.IsNullOrEmpty(strBiblioDbName) == false 
                 && string.IsNullOrEmpty(strItemDbName) == true)
             {
-                strError = "ÊéÄ¿¿â '" + strBiblioDbName + "' ²»¾ß±¸ÏÂÊôµÄÊµÌå¿â£¬ÉèÖÃÊµÌå¼ÇÂ¼µÄ²Ù×÷Ê§°Ü";
+                strError = "ä¹¦ç›®åº“ '" + strBiblioDbName + "' ä¸å…·å¤‡ä¸‹å±çš„å®ä½“åº“ï¼Œè®¾ç½®å®ä½“è®°å½•çš„æ“ä½œå¤±è´¥";
                 goto ERROR1;
             }
 
@@ -2022,11 +2022,11 @@ namespace DigitalPlatform.LibraryServer
 
                 string strAction = info.Action;
 
-                bool bForce = false;    // ÊÇ·ñÎªÇ¿ÖÆ²Ù×÷(Ç¿ÖÆ²Ù×÷²»È¥³ıÔ´¼ÇÂ¼ÖĞµÄÁ÷Í¨ĞÅÏ¢×Ö¶ÎÄÚÈİ)
-                bool bNoCheckDup = false;   // ÊÇ·ñÎª²»²éÖØ?
-                bool bNoEventLog = false;   // ÊÇ·ñÎª²»¼ÇÈëÊÂ¼şÈÕÖ¾?
-                bool bNoOperations = false; // ÊÇ·ñÎª²»Òª¸²¸Ç<operations>ÄÚÈİ
-                bool bSimulate = StringUtil.IsInList("simulate", info.Style);     // ÊÇ·ñÎªÄ£Äâ²Ù×÷? 2015/6/9
+                bool bForce = false;    // æ˜¯å¦ä¸ºå¼ºåˆ¶æ“ä½œ(å¼ºåˆ¶æ“ä½œä¸å»é™¤æºè®°å½•ä¸­çš„æµé€šä¿¡æ¯å­—æ®µå†…å®¹)
+                bool bNoCheckDup = false;   // æ˜¯å¦ä¸ºä¸æŸ¥é‡?
+                bool bNoEventLog = false;   // æ˜¯å¦ä¸ºä¸è®°å…¥äº‹ä»¶æ—¥å¿—?
+                bool bNoOperations = false; // æ˜¯å¦ä¸ºä¸è¦è¦†ç›–<operations>å†…å®¹
+                bool bSimulate = StringUtil.IsInList("simulate", info.Style);     // æ˜¯å¦ä¸ºæ¨¡æ‹Ÿæ“ä½œ? 2015/6/9
 
                 string strStyle = info.Style;
 
@@ -2036,13 +2036,13 @@ namespace DigitalPlatform.LibraryServer
                 {
                     bForce = true;
 
-                    // ½«strActionÄÚÈİĞŞ¸ÄÎª²»´øÓĞforceÇ°×º²¿·Ö
+                    // å°†strActionå†…å®¹ä¿®æ”¹ä¸ºä¸å¸¦æœ‰forceå‰ç¼€éƒ¨åˆ†
                     info.Action = info.Action.Remove(0, "force".Length);
 
                     if (StringUtil.IsInList("restore", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "ĞŞ¸Ä²áĞÅÏ¢µÄ" + strAction + "²Ù×÷±»¾Ü¾ø¡£²»¾ß±¸restoreÈ¨ÏŞ¡£";
+                        result.ErrorInfo = "ä¿®æ”¹å†Œä¿¡æ¯çš„" + strAction + "æ“ä½œè¢«æ‹’ç»ã€‚ä¸å…·å¤‡restoreæƒé™ã€‚";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -2051,12 +2051,12 @@ namespace DigitalPlatform.LibraryServer
                     if (sessioninfo.GlobalUser == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "ĞŞ¸Ä²áĞÅÏ¢µÄ" + strAction + "²Ù×÷±»¾Ü¾ø¡£Ö»ÓĞÈ«¾ÖÓÃ»§²¢¾ß±¸restoreÈ¨ÏŞ²ÅÄÜ½øĞĞÕâÑùµÄ²Ù×÷¡£";
+                        result.ErrorInfo = "ä¿®æ”¹å†Œä¿¡æ¯çš„" + strAction + "æ“ä½œè¢«æ‹’ç»ã€‚åªæœ‰å…¨å±€ç”¨æˆ·å¹¶å…·å¤‡restoreæƒé™æ‰èƒ½è¿›è¡Œè¿™æ ·çš„æ“ä½œã€‚";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
 
-                    // ¼Ó¹¤style×Ö·û´®£¬±ãÓÚĞ´ÈëÈÕÖ¾
+                    // åŠ å·¥styleå­—ç¬¦ä¸²ï¼Œä¾¿äºå†™å…¥æ—¥å¿—
                     if (StringUtil.IsInList("force", strStyle) == true)
                         StringUtil.SetInList(ref strStyle, "force", true);
 
@@ -2069,7 +2069,7 @@ namespace DigitalPlatform.LibraryServer
                     if (StringUtil.IsInList("restore", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "´øÓĞ·ç¸ñ 'force' µÄĞŞ¸Ä²áĞÅÏ¢µÄ" + strAction + "²Ù×÷±»¾Ü¾ø¡£²»¾ß±¸restoreÈ¨ÏŞ¡£";
+                        result.ErrorInfo = "å¸¦æœ‰é£æ ¼ 'force' çš„ä¿®æ”¹å†Œä¿¡æ¯çš„" + strAction + "æ“ä½œè¢«æ‹’ç»ã€‚ä¸å…·å¤‡restoreæƒé™ã€‚";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -2078,7 +2078,7 @@ namespace DigitalPlatform.LibraryServer
                     if (sessioninfo.GlobalUser == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "ĞŞ¸Ä²áĞÅÏ¢µÄ" + strAction + "²Ù×÷±»¾Ü¾ø¡£Ö»ÓĞÈ«¾ÖÓÃ»§²¢¾ß±¸restoreÈ¨ÏŞ²ÅÄÜ½øĞĞÕâÑùµÄ²Ù×÷¡£";
+                        result.ErrorInfo = "ä¿®æ”¹å†Œä¿¡æ¯çš„" + strAction + "æ“ä½œè¢«æ‹’ç»ã€‚åªæœ‰å…¨å±€ç”¨æˆ·å¹¶å…·å¤‡restoreæƒé™æ‰èƒ½è¿›è¡Œè¿™æ ·çš„æ“ä½œã€‚";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -2105,7 +2105,7 @@ namespace DigitalPlatform.LibraryServer
                     if (StringUtil.IsInList("restore", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "´øÓĞ·ç¸ñ 'nocheckdup' µÄĞŞ¸Ä²áĞÅÏ¢µÄ" + strAction + "²Ù×÷±»¾Ü¾ø¡£²»¾ß±¸restoreÈ¨ÏŞ¡£";
+                        result.ErrorInfo = "å¸¦æœ‰é£æ ¼ 'nocheckdup' çš„ä¿®æ”¹å†Œä¿¡æ¯çš„" + strAction + "æ“ä½œè¢«æ‹’ç»ã€‚ä¸å…·å¤‡restoreæƒé™ã€‚";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -2114,7 +2114,7 @@ namespace DigitalPlatform.LibraryServer
                     if (sessioninfo.GlobalUser == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "´øÓĞ·ç¸ñ 'nocheckdup' µÄĞŞ¸Ä²áĞÅÏ¢µÄ" + strAction + "²Ù×÷±»¾Ü¾ø¡£Ö»ÓĞÈ«¾ÖÓÃ»§²¢¾ß±¸restoreÈ¨ÏŞ²ÅÄÜ½øĞĞÕâÑùµÄ²Ù×÷¡£";
+                        result.ErrorInfo = "å¸¦æœ‰é£æ ¼ 'nocheckdup' çš„ä¿®æ”¹å†Œä¿¡æ¯çš„" + strAction + "æ“ä½œè¢«æ‹’ç»ã€‚åªæœ‰å…¨å±€ç”¨æˆ·å¹¶å…·å¤‡restoreæƒé™æ‰èƒ½è¿›è¡Œè¿™æ ·çš„æ“ä½œã€‚";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -2125,7 +2125,7 @@ namespace DigitalPlatform.LibraryServer
                     if (StringUtil.IsInList("restore", sessioninfo.RightsOrigin) == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "´øÓĞ·ç¸ñ 'noeventlog' µÄĞŞ¸Ä²áĞÅÏ¢µÄ" + strAction + "²Ù×÷±»¾Ü¾ø¡£²»¾ß±¸restoreÈ¨ÏŞ¡£";
+                        result.ErrorInfo = "å¸¦æœ‰é£æ ¼ 'noeventlog' çš„ä¿®æ”¹å†Œä¿¡æ¯çš„" + strAction + "æ“ä½œè¢«æ‹’ç»ã€‚ä¸å…·å¤‡restoreæƒé™ã€‚";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
@@ -2133,61 +2133,61 @@ namespace DigitalPlatform.LibraryServer
                     if (sessioninfo.GlobalUser == false)
                     {
                         result.Value = -1;
-                        result.ErrorInfo = "´øÓĞ·ç¸ñ 'noeventlog' µÄĞŞ¸Ä²áĞÅÏ¢µÄ" + strAction + "²Ù×÷±»¾Ü¾ø¡£Ö»ÓĞÈ«¾ÖÓÃ»§²¢¾ß±¸restoreÈ¨ÏŞ²ÅÄÜ½øĞĞÕâÑùµÄ²Ù×÷¡£";
+                        result.ErrorInfo = "å¸¦æœ‰é£æ ¼ 'noeventlog' çš„ä¿®æ”¹å†Œä¿¡æ¯çš„" + strAction + "æ“ä½œè¢«æ‹’ç»ã€‚åªæœ‰å…¨å±€ç”¨æˆ·å¹¶å…·å¤‡restoreæƒé™æ‰èƒ½è¿›è¡Œè¿™æ ·çš„æ“ä½œã€‚";
                         result.ErrorCode = ErrorCode.AccessDenied;
                         return result;
                     }
                 }
 
-                // ¶ÔinfoÄÚµÄ²ÎÊı½øĞĞ¼ì²é¡£
+                // å¯¹infoå†…çš„å‚æ•°è¿›è¡Œæ£€æŸ¥ã€‚
                 strError = "";
 
                 // 2008/2/17 
-                if (entityinfos.Length > 1  // 2013/9/26 Ö»ÓĞÒ»¸ö¼ÇÂ¼µÄÊ±ºò£¬²»±ØÒÀ¿¿ refid ¶¨Î»·µ»ØĞÅÏ¢£¬Òò¶øÒ²¾Í²»ĞèÒªÃ÷ÏÔ¸ø³öÕâ¸ö RefID ³ÉÔ±ÁË
+                if (entityinfos.Length > 1  // 2013/9/26 åªæœ‰ä¸€ä¸ªè®°å½•çš„æ—¶å€™ï¼Œä¸å¿…ä¾é  refid å®šä½è¿”å›ä¿¡æ¯ï¼Œå› è€Œä¹Ÿå°±ä¸éœ€è¦æ˜æ˜¾ç»™å‡ºè¿™ä¸ª RefID æˆå‘˜äº†
                     && String.IsNullOrEmpty(info.RefID) == true)
                 {
-                    strError = "info.RefID Ã»ÓĞ¸ø³ö";
+                    strError = "info.RefID æ²¡æœ‰ç»™å‡º";
                 }
 
                 if (info.NewRecPath != null
                     && info.NewRecPath.IndexOf(",") != -1)
                 {
-                    strError = "info.NewRecPath Öµ '" + info.NewRecPath + "' ÖĞ²»ÄÜ°üº¬¶ººÅ";
+                    strError = "info.NewRecPath å€¼ '" + info.NewRecPath + "' ä¸­ä¸èƒ½åŒ…å«é€—å·";
                 }
                 else if (info.OldRecPath != null
                     && info.OldRecPath.IndexOf(",") != -1)
                 {
-                    strError = "info.OldRecPath Öµ '" + info.OldRecPath + "' ÖĞ²»ÄÜ°üº¬¶ººÅ";
+                    strError = "info.OldRecPath å€¼ '" + info.OldRecPath + "' ä¸­ä¸èƒ½åŒ…å«é€—å·";
                 }
 
-                // µ±²Ù×÷Îª"delete"Ê±£¬ÊÇ·ñ¿ÉÒÔÔÊĞíÖ»ÉèÖÃOldRecPath£¬¶ø²»±ØÉèÖÃNewRecPath
-                // Èç¹ûÁ½¸ö¶¼ÉèÖÃ£¬ÔòÒªÇóÉèÖÃÎªÒ»ÖÂµÄ¡£
+                // å½“æ“ä½œä¸º"delete"æ—¶ï¼Œæ˜¯å¦å¯ä»¥å…è®¸åªè®¾ç½®OldRecPathï¼Œè€Œä¸å¿…è®¾ç½®NewRecPath
+                // å¦‚æœä¸¤ä¸ªéƒ½è®¾ç½®ï¼Œåˆ™è¦æ±‚è®¾ç½®ä¸ºä¸€è‡´çš„ã€‚
                 // 2007/11/12 
                 if (info.Action == "delete")
                 {
                     if (String.IsNullOrEmpty(info.NewRecord) == false)
                     {
-                        strError = "strActionÖµÎªdeleteÊ±, info.NewRecord²ÎÊı±ØĞëÎª¿Õ";
+                        strError = "strActionå€¼ä¸ºdeleteæ—¶, info.NewRecordå‚æ•°å¿…é¡»ä¸ºç©º";
                     }
                     else if (info.NewTimestamp != null)
                     {
-                        strError = "strActionÖµÎªdeleteÊ±, info.NewTimestamp²ÎÊı±ØĞëÎª¿Õ";
+                        strError = "strActionå€¼ä¸ºdeleteæ—¶, info.NewTimestampå‚æ•°å¿…é¡»ä¸ºç©º";
                     }
                         // 2008/6/24 
                     else if (String.IsNullOrEmpty(info.NewRecPath) == false)
                     {
                         if (info.NewRecPath != info.OldRecPath)
                         {
-                            strError = "strActionÖµÎªdeleteÊ±, Èç¹ûinfo.NewRecPath²»¿Õ£¬ÔòÆäÄÚÈİ±ØĞëºÍinfo.OldRecPathÒ»ÖÂ¡£(info.NewRecPath='" + info.NewRecPath + "' info.OldRecPath='" + info.OldRecPath + "')";
+                            strError = "strActionå€¼ä¸ºdeleteæ—¶, å¦‚æœinfo.NewRecPathä¸ç©ºï¼Œåˆ™å…¶å†…å®¹å¿…é¡»å’Œinfo.OldRecPathä¸€è‡´ã€‚(info.NewRecPath='" + info.NewRecPath + "' info.OldRecPath='" + info.OldRecPath + "')";
                         }
                     }
                 }
                 else
                 {
-                    // ·ÇdeleteÇé¿ö info.NewRecordÔò±ØĞë²»Îª¿Õ
+                    // édeleteæƒ…å†µ info.NewRecordåˆ™å¿…é¡»ä¸ä¸ºç©º
                     if (String.IsNullOrEmpty(info.NewRecord) == true)
                     {
-                        strError = "strActionÖµÎª" + info.Action + "Ê±, info.NewRecord²ÎÊı²»ÄÜÎª¿Õ";
+                        strError = "strActionå€¼ä¸º" + info.Action + "æ—¶, info.NewRecordå‚æ•°ä¸èƒ½ä¸ºç©º";
                     }
                 }
 
@@ -2195,11 +2195,11 @@ namespace DigitalPlatform.LibraryServer
                 {
                     if (String.IsNullOrEmpty(info.OldRecord) == false)
                     {
-                        strError = "strActionÖµÎªnewÊ±, info.OldRecord²ÎÊı±ØĞëÎª¿Õ";
+                        strError = "strActionå€¼ä¸ºnewæ—¶, info.OldRecordå‚æ•°å¿…é¡»ä¸ºç©º";
                     }
                     else if (info.OldTimestamp != null)
                     {
-                        strError = "strActionÖµÎªnewÊ±, info.OldTimestamp²ÎÊı±ØĞëÎª¿Õ";
+                        strError = "strActionå€¼ä¸ºnewæ—¶, info.OldTimestampå‚æ•°å¿…é¡»ä¸ºç©º";
                     }
                 }
 
@@ -2212,7 +2212,7 @@ namespace DigitalPlatform.LibraryServer
                     continue;
                 }
 
-                // ¼ì²éÂ·¾¶ÖĞµÄ¿âÃû²¿·Ö
+                // æ£€æŸ¥è·¯å¾„ä¸­çš„åº“åéƒ¨åˆ†
                 if (String.IsNullOrEmpty(info.NewRecPath) == false)
                 {
                     strError = "";
@@ -2221,34 +2221,34 @@ namespace DigitalPlatform.LibraryServer
 
                     if (String.IsNullOrEmpty(strDbName) == true)
                     {
-                        strError = "NewRecPathÖĞÊı¾İ¿âÃû²»Ó¦Îª¿Õ";
+                        strError = "NewRecPathä¸­æ•°æ®åº“åä¸åº”ä¸ºç©º";
                     }
 
-                    if (string.IsNullOrEmpty(strItemDbName) == false    // ÓĞ¿ÉÄÜÇ°Ãæ strBiblioRecPath Îª¿Õ£¬Ôò strItemDbName Ò²Îª¿Õ
+                    if (string.IsNullOrEmpty(strItemDbName) == false    // æœ‰å¯èƒ½å‰é¢ strBiblioRecPath ä¸ºç©ºï¼Œåˆ™ strItemDbName ä¹Ÿä¸ºç©º
                         && strDbName != strItemDbName)
                     {
-                        // ¼ì²âÊÇ·ñÎªÆäËûÓïÑÔµÄµÈÍ¬¿âÃû
+                        // æ£€æµ‹æ˜¯å¦ä¸ºå…¶ä»–è¯­è¨€çš„ç­‰åŒåº“å
                         // parameters:
-                        //      strDbName   Òª¼ì²âµÄÊı¾İ¿âÃû
-                        //      strNeutralDbName    ÒÑÖªµÄÖĞÁ¢ÓïÑÔÊı¾İ¿âÃû
+                        //      strDbName   è¦æ£€æµ‹çš„æ•°æ®åº“å
+                        //      strNeutralDbName    å·²çŸ¥çš„ä¸­ç«‹è¯­è¨€æ•°æ®åº“å
                         if (this.IsOtherLangName(strDbName,
                             strItemDbName) == false)
                         {
                             if (strAction == "copy" || strAction == "move")
                             {
-                                // ÔÙ¿´strDbNameÊÇ·ñÖÁÉÙÊÇÒ»¸öÊµÌå¿â
+                                // å†çœ‹strDbNameæ˜¯å¦è‡³å°‘æ˜¯ä¸€ä¸ªå®ä½“åº“
                                 if (this.IsItemDbName(strDbName) == false)
-                                    strError = "RecPathÖĞÊı¾İ¿âÃû '" + strDbName + "' ²»ÕıÈ·£¬Ó¦ÎªÊµÌå¿âÃû";
+                                    strError = "RecPathä¸­æ•°æ®åº“å '" + strDbName + "' ä¸æ­£ç¡®ï¼Œåº”ä¸ºå®ä½“åº“å";
                             }
                             else
-                                strError = "RecPathÖĞÊı¾İ¿âÃû '" + strDbName + "' ²»ÕıÈ·£¬Ó¦Îª '" + strItemDbName + "'¡£(ÒòÎªÊéÄ¿¿âÃûÎª '" + strBiblioDbName + "'£¬Æä¶ÔÓ¦µÄÊµÌå¿âÃûÓ¦Îª '" + strItemDbName + "' )";
+                                strError = "RecPathä¸­æ•°æ®åº“å '" + strDbName + "' ä¸æ­£ç¡®ï¼Œåº”ä¸º '" + strItemDbName + "'ã€‚(å› ä¸ºä¹¦ç›®åº“åä¸º '" + strBiblioDbName + "'ï¼Œå…¶å¯¹åº”çš„å®ä½“åº“ååº”ä¸º '" + strItemDbName + "' )";
                         }
                     }
                     else if (string.IsNullOrEmpty(strItemDbName) == true)   // 2013/9/26
                     {
-                        // Òª¼ì²é¿´¿´ strDbName ÊÇ·ñÎªÒ»¸öÊµÌå¿âÃû
+                        // è¦æ£€æŸ¥çœ‹çœ‹ strDbName æ˜¯å¦ä¸ºä¸€ä¸ªå®ä½“åº“å
                         if (this.IsItemDbName(strDbName) == false)
-                            strError = "RecPathÖĞÊı¾İ¿âÃû '" + strDbName + "' ²»ÕıÈ·£¬Ó¦ÎªÊµÌå¿âÃû";
+                            strError = "RecPathä¸­æ•°æ®åº“å '" + strDbName + "' ä¸æ­£ç¡®ï¼Œåº”ä¸ºå®ä½“åº“å";
                     }
 
                     if (strError != "")
@@ -2261,11 +2261,11 @@ namespace DigitalPlatform.LibraryServer
                     }
                 }
 
-                // °Ñ(Ç°¶Ë·¢¹ıÀ´µÄ)¾É¼ÇÂ¼×°ÔØµ½DOM
+                // æŠŠ(å‰ç«¯å‘è¿‡æ¥çš„)æ—§è®°å½•è£…è½½åˆ°DOM
                 XmlDocument domOldRec = new XmlDocument();
                 try
                 {
-                    // ÓÃstrOldRecordµÄÄ¿µÄÊÇ²»Ïë¸Ä±äinfo.OldRecordÄÚÈİ, ÒòÎªºóÕß¿ÉÄÜ±»¸´ÖÆµ½Êä³öĞÅÏ¢ÖĞ
+                    // ç”¨strOldRecordçš„ç›®çš„æ˜¯ä¸æƒ³æ”¹å˜info.OldRecordå†…å®¹, å› ä¸ºåè€…å¯èƒ½è¢«å¤åˆ¶åˆ°è¾“å‡ºä¿¡æ¯ä¸­
                     string strOldRecord = info.OldRecord;
                     if (String.IsNullOrEmpty(strOldRecord) == true)
                         strOldRecord = "<root />";
@@ -2274,7 +2274,7 @@ namespace DigitalPlatform.LibraryServer
                 }
                 catch (Exception ex)
                 {
-                    strError = "info.OldRecord XML¼ÇÂ¼×°ÔØµ½DOMÊ±³ö´í: " + ex.Message;
+                    strError = "info.OldRecord XMLè®°å½•è£…è½½åˆ°DOMæ—¶å‡ºé”™: " + ex.Message;
 
                     EntityInfo error = new EntityInfo(info);
                     error.ErrorInfo = strError;
@@ -2283,11 +2283,11 @@ namespace DigitalPlatform.LibraryServer
                     continue;
                 }
 
-                // °ÑÒª±£´æµÄĞÂ¼ÇÂ¼×°ÔØµ½ DOM
+                // æŠŠè¦ä¿å­˜çš„æ–°è®°å½•è£…è½½åˆ° DOM
                 XmlDocument domNewRec = new XmlDocument();
                 try
                 {
-                    // ÓÃstrNewRecordµÄÄ¿µÄÊÇ²»Ïë¸Ä±äinfo.NewRecordÄÚÈİ, ÒòÎªºóÕß¿ÉÄÜ±»¸´ÖÆµ½Êä³öĞÅÏ¢ÖĞ
+                    // ç”¨strNewRecordçš„ç›®çš„æ˜¯ä¸æƒ³æ”¹å˜info.NewRecordå†…å®¹, å› ä¸ºåè€…å¯èƒ½è¢«å¤åˆ¶åˆ°è¾“å‡ºä¿¡æ¯ä¸­
                     string strNewRecord = info.NewRecord;
 
                     if (String.IsNullOrEmpty(strNewRecord) == true)
@@ -2297,7 +2297,7 @@ namespace DigitalPlatform.LibraryServer
                 }
                 catch (Exception ex)
                 {
-                    strError = "info.NewRecord XML¼ÇÂ¼×°ÔØµ½DOMÊ±³ö´í: " + ex.Message;
+                    strError = "info.NewRecord XMLè®°å½•è£…è½½åˆ°DOMæ—¶å‡ºé”™: " + ex.Message;
 
                     EntityInfo error = new EntityInfo(info);
                     error.ErrorInfo = strError;
@@ -2309,27 +2309,27 @@ namespace DigitalPlatform.LibraryServer
                 string strOldBarcode = "";
                 string strNewBarcode = "";
 
-                // ¶Ô²áÌõÂëºÅ¼ÓËø?
-                // TODO: ÒÔºó¿ÉÒÔÍ³Ò»¸ÄÎª¶Ô refid ¼ÓËø
+                // å¯¹å†Œæ¡ç å·åŠ é”?
+                // TODO: ä»¥åå¯ä»¥ç»Ÿä¸€æ”¹ä¸ºå¯¹ refid åŠ é”
                 string strLockBarcode = "";
 
                 try
                 {
-                    // ÃüÁînewºÍchangeµÄ¹²ÓĞ²¿·Ö -- ÌõÂëºÅ²éÖØ, Ò²ĞèÒª¼ÓËø
-                    // deleteÔòĞèÒª¼ÓËø
+                    // å‘½ä»¤newå’Œchangeçš„å…±æœ‰éƒ¨åˆ† -- æ¡ç å·æŸ¥é‡, ä¹Ÿéœ€è¦åŠ é”
+                    // deleteåˆ™éœ€è¦åŠ é”
                     if (info.Action == "new"
                         || info.Action == "change"
                         || info.Action == "delete"
                         || info.Action == "move")
                     {
 
-                        // ½ö½öÓÃÀ´»ñÈ¡Ò»ÏÂĞÂÌõÂëºÅ
-                        // ¿´¿´ĞÂ¾É²áÌõÂëºÅÊÇ·ñÓĞ²îÒì
-                        // ¶ÔEntityInfoÖĞµÄOldRecordºÍNewRecordÖĞ°üº¬µÄÌõÂëºÅ½øĞĞ±È½Ï, ¿´¿´ÊÇ·ñ·¢ÉúÁË±ä»¯(½ø¶ø¾ÍĞèÒª²éÖØ)
+                        // ä»…ä»…ç”¨æ¥è·å–ä¸€ä¸‹æ–°æ¡ç å·
+                        // çœ‹çœ‹æ–°æ—§å†Œæ¡ç å·æ˜¯å¦æœ‰å·®å¼‚
+                        // å¯¹EntityInfoä¸­çš„OldRecordå’ŒNewRecordä¸­åŒ…å«çš„æ¡ç å·è¿›è¡Œæ¯”è¾ƒ, çœ‹çœ‹æ˜¯å¦å‘ç”Ÿäº†å˜åŒ–(è¿›è€Œå°±éœ€è¦æŸ¥é‡)
                         // return:
-                        //      -1  ³ö´í
-                        //      0   ÏàµÈ
-                        //      1   ²»ÏàµÈ
+                        //      -1  å‡ºé”™
+                        //      0   ç›¸ç­‰
+                        //      1   ä¸ç›¸ç­‰
                         nRet = CompareTwoBarcode(domOldRec,
                             domNewRec,
                             out strOldBarcode,
@@ -2347,32 +2347,32 @@ namespace DigitalPlatform.LibraryServer
                             strLockBarcode = strNewBarcode;
                         else if (info.Action == "delete")
                         {
-                            // Ë³±ã½øĞĞÒ»Ğ©¼ì²é
+                            // é¡ºä¾¿è¿›è¡Œä¸€äº›æ£€æŸ¥
                             if (String.IsNullOrEmpty(strNewBarcode) == false)
                             {
-                                strError = "Ã»ÓĞ±ØÒªÔÚdelete²Ù×÷µÄEntityInfoÖĞ, °üº¬NewRecordÄÚÈİ...¡£Ïà·´£¬×¢ÒâÒ»¶¨ÒªÔÚOldRecordÖĞ°üº¬¼´½«É¾³ıµÄÔ­¼ÇÂ¼";
+                                strError = "æ²¡æœ‰å¿…è¦åœ¨deleteæ“ä½œçš„EntityInfoä¸­, åŒ…å«NewRecordå†…å®¹...ã€‚ç›¸åï¼Œæ³¨æ„ä¸€å®šè¦åœ¨OldRecordä¸­åŒ…å«å³å°†åˆ é™¤çš„åŸè®°å½•";
                                 goto ERROR1;
                             }
                             strLockBarcode = strOldBarcode;
                         }
 
 
-                        // ¼ÓËø
+                        // åŠ é”
                         if (String.IsNullOrEmpty(strLockBarcode) == false)
                             this.EntityLocks.LockForWrite(strLockBarcode);
 
 #if NO
                         // 2014/1/10
-                        // ¼ì²é¿ÕÌõÂëºÅ
+                        // æ£€æŸ¥ç©ºæ¡ç å·
                         if ((info.Action == "new"
         || info.Action == "change"
-        || info.Action == "move")       // delete²Ù×÷²»¼ì²é
+        || info.Action == "move")       // deleteæ“ä½œä¸æ£€æŸ¥
     && String.IsNullOrEmpty(strNewBarcode) == true)
                         {
                             if (this.AcceptBlankItemBarcode == false)
                             {
                                 EntityInfo error = new EntityInfo(info);
-                                error.ErrorInfo = "²áÌõÂëºÅ²»ÄÜÎª¿Õ";
+                                error.ErrorInfo = "å†Œæ¡ç å·ä¸èƒ½ä¸ºç©º";
                                 error.ErrorCode = ErrorCodeValue.CommonError;
                                 ErrorInfos.Add(error);
                                 continue;
@@ -2381,7 +2381,7 @@ namespace DigitalPlatform.LibraryServer
 #endif
                         if ((info.Action == "new"
                                 || info.Action == "change"
-                                || info.Action == "move")       // delete²Ù×÷²»Ğ£Ñé¼ÇÂ¼
+                                || info.Action == "move")       // deleteæ“ä½œä¸æ ¡éªŒè®°å½•
                             && bNoCheckDup == false
                             && bSimulate == false)
                         {
@@ -2400,18 +2400,18 @@ namespace DigitalPlatform.LibraryServer
                             }
                         }
 
-                        // ½øĞĞ²áÌõÂëºÅ²éÖØ
-                        // TODO: ²éÖØµÄÊ±ºòÒª×¢Òâ£¬Èç¹û²Ù×÷ÀàĞÍÎª¡°move¡±£¬Ôò¿ÉÒÔÔÊĞí²é³öºÍinfo.OldRecPathÖØµÄ£¬ÒòÎªËü¼´½«±»É¾³ı
-                        if (/*nRet == 1   // ĞÂ¾ÉÌõÂëºÅ²»µÈ£¬²Å²éÖØ¡£ÕâÑù¿ÉÒÔÌá¸ßÔËĞĞĞ§ÂÊ¡£BUG!!! Õâ¸ö×ö·¨²»¿É¿¿£¬ÒòÎªÇ°¶Ë·¢À´µÄoldrecord²»¿ÉĞÅÈÎ
+                        // è¿›è¡Œå†Œæ¡ç å·æŸ¥é‡
+                        // TODO: æŸ¥é‡çš„æ—¶å€™è¦æ³¨æ„ï¼Œå¦‚æœæ“ä½œç±»å‹ä¸ºâ€œmoveâ€ï¼Œåˆ™å¯ä»¥å…è®¸æŸ¥å‡ºå’Œinfo.OldRecPathé‡çš„ï¼Œå› ä¸ºå®ƒå³å°†è¢«åˆ é™¤
+                        if (/*nRet == 1   // æ–°æ—§æ¡ç å·ä¸ç­‰ï¼Œæ‰æŸ¥é‡ã€‚è¿™æ ·å¯ä»¥æé«˜è¿è¡Œæ•ˆç‡ã€‚BUG!!! è¿™ä¸ªåšæ³•ä¸å¯é ï¼Œå› ä¸ºå‰ç«¯å‘æ¥çš„oldrecordä¸å¯ä¿¡ä»»
                             &&*/ (info.Action == "new"
                                 || info.Action == "change"
-                                || info.Action == "move")       // delete²Ù×÷²»²éÖØ
+                                || info.Action == "move")       // deleteæ“ä½œä¸æŸ¥é‡
                             && String.IsNullOrEmpty(strNewBarcode) == false
                             && bNoCheckDup == false    // 2008/10/6 
                             && bSimulate == false)
                         {
 #if NO
-                            // ÑéÖ¤ÌõÂëºÅ
+                            // éªŒè¯æ¡ç å·
                             if (this.VerifyBarcode == true)
                             {
                                 // return:
@@ -2422,8 +2422,8 @@ namespace DigitalPlatform.LibraryServer
 
                                 // return:
                                 //      -2  not found script
-                                //      -1  ³ö´í
-                                //      0   ³É¹¦
+                                //      -1  å‡ºé”™
+                                //      0   æˆåŠŸ
                                 nRet = this.DoVerifyBarcodeScriptFunction(
                                     sessioninfo.LibraryCodeList,
                                     strNewBarcode,
@@ -2432,15 +2432,15 @@ namespace DigitalPlatform.LibraryServer
                                 if (nRet == -2 || nRet == -1 || nResultValue != 2)
                                 {
                                     if (nRet == -2)
-                                        strError = "library.xml ÖĞÃ»ÓĞÅäÖÃÌõÂëºÅÑéÖ¤º¯Êı£¬ÎŞ·¨½øĞĞÌõÂëºÅÑéÖ¤";
+                                        strError = "library.xml ä¸­æ²¡æœ‰é…ç½®æ¡ç å·éªŒè¯å‡½æ•°ï¼Œæ— æ³•è¿›è¡Œæ¡ç å·éªŒè¯";
                                     else if (nRet == -1)
                                     {
-                                        strError = "ÑéÖ¤²áÌõÂëºÅµÄ¹ı³ÌÖĞ³ö´í"
+                                        strError = "éªŒè¯å†Œæ¡ç å·çš„è¿‡ç¨‹ä¸­å‡ºé”™"
                                            + (string.IsNullOrEmpty(strError) == true ? "" : ": " + strError);
                                     }
                                     else if (nResultValue != 2)
                                     {
-                                        strError = "ÌõÂëºÅ '" + strNewBarcode + "' ¾­ÑéÖ¤·¢ÏÖ²»ÊÇÒ»¸öºÏ·¨µÄ²áÌõÂëºÅ"
+                                        strError = "æ¡ç å· '" + strNewBarcode + "' ç»éªŒè¯å‘ç°ä¸æ˜¯ä¸€ä¸ªåˆæ³•çš„å†Œæ¡ç å·"
                                            + (string.IsNullOrEmpty(strError) == true ? "" : "(" + strError + ")");
                                     }
 
@@ -2456,11 +2456,11 @@ namespace DigitalPlatform.LibraryServer
 
 
                             List<string> aPath = null;
-                            // ¸ù¾İ²áÌõÂëºÅ¶ÔÊµÌå¿â½øĞĞ²éÖØ
-                            // ±¾º¯ÊıÖ»¸ºÔğ²éÖØ, ²¢²»»ñµÃ¼ÇÂ¼Ìå
+                            // æ ¹æ®å†Œæ¡ç å·å¯¹å®ä½“åº“è¿›è¡ŒæŸ¥é‡
+                            // æœ¬å‡½æ•°åªè´Ÿè´£æŸ¥é‡, å¹¶ä¸è·å¾—è®°å½•ä½“
                             // return:
                             //      -1  error
-                            //      ÆäËû    ÃüÖĞ¼ÇÂ¼ÌõÊı(²»³¬¹ınMax¹æ¶¨µÄ¼«ÏŞ)
+                            //      å…¶ä»–    å‘½ä¸­è®°å½•æ¡æ•°(ä¸è¶…è¿‡nMaxè§„å®šçš„æé™)
                             nRet = SearchItemRecDup(
                                 // sessioninfo.Channels,
                                 channel,
@@ -2476,36 +2476,36 @@ namespace DigitalPlatform.LibraryServer
                             {
                                 bDup = false;
                             }
-                            else if (nRet == 1) // ÃüÖĞÒ»Ìõ
+                            else if (nRet == 1) // å‘½ä¸­ä¸€æ¡
                             {
                                 Debug.Assert(aPath.Count == 1, "");
 
                                 if (info.Action == "new")
                                 {
-                                    if (aPath[0] == info.NewRecPath) // ÕıºÃÊÇ×Ô¼º
+                                    if (aPath[0] == info.NewRecPath) // æ­£å¥½æ˜¯è‡ªå·±
                                         bDup = false;
                                     else
-                                        bDup = true;// ±ğµÄ¼ÇÂ¼ÖĞÒÑ¾­Ê¹ÓÃÁËÕâ¸öÌõÂëºÅ
+                                        bDup = true;// åˆ«çš„è®°å½•ä¸­å·²ç»ä½¿ç”¨äº†è¿™ä¸ªæ¡ç å·
 
                                 }
                                 else if (info.Action == "change")
                                 {
-                                    Debug.Assert(info.NewRecPath == info.OldRecPath, "µ±²Ù×÷ÀàĞÍÎªchangeÊ±£¬info.NewRecPathÓ¦µ±ºÍinfo.OldRecPathÏàÍ¬");
-                                    if (aPath[0] == info.OldRecPath) // ÕıºÃÊÇ×Ô¼º
+                                    Debug.Assert(info.NewRecPath == info.OldRecPath, "å½“æ“ä½œç±»å‹ä¸ºchangeæ—¶ï¼Œinfo.NewRecPathåº”å½“å’Œinfo.OldRecPathç›¸åŒ");
+                                    if (aPath[0] == info.OldRecPath) // æ­£å¥½æ˜¯è‡ªå·±
                                         bDup = false;
                                     else
-                                        bDup = true;// ±ğµÄ¼ÇÂ¼ÖĞÒÑ¾­Ê¹ÓÃÁËÕâ¸öÌõÂëºÅ
+                                        bDup = true;// åˆ«çš„è®°å½•ä¸­å·²ç»ä½¿ç”¨äº†è¿™ä¸ªæ¡ç å·
                                 }
                                 else if (info.Action == "move")
                                 {
-                                    if (aPath[0] == info.OldRecPath) // ÕıºÃÊÇÔ´¼ÇÂ¼
+                                    if (aPath[0] == info.OldRecPath) // æ­£å¥½æ˜¯æºè®°å½•
                                         bDup = false;
                                     else
-                                        bDup = true;// ±ğµÄ¼ÇÂ¼ÖĞÒÑ¾­Ê¹ÓÃÁËÕâ¸öÌõÂëºÅ
+                                        bDup = true;// åˆ«çš„è®°å½•ä¸­å·²ç»ä½¿ç”¨äº†è¿™ä¸ªæ¡ç å·
                                 }
                                 else
                                 {
-                                    Debug.Assert(false, "ÕâÀï²»¿ÉÄÜ³öÏÖµÄinfo.ActionÖµ '" + info.Action + "'");
+                                    Debug.Assert(false, "è¿™é‡Œä¸å¯èƒ½å‡ºç°çš„info.Actionå€¼ '" + info.Action + "'");
                                 }
 
 
@@ -2515,11 +2515,11 @@ namespace DigitalPlatform.LibraryServer
                                 Debug.Assert(nRet > 1, "");
                                 bDup = true;
 
-                                // ÒòÎªmove²Ù×÷²»ÔÊĞíÄ¿±êÎ»ÖÃ´æÔÚ¼ÇÂ¼£¬ËùÒÔÕâÀï¾Í²»ÔÙ·ÑÁ¦¿¼ÂÇÁË
-                                // Èç¹û½«À´move²Ù×÷ÔÊĞíÄ¿±êÎ»ÖÃ´æÔÚ¼ÇÂ¼£¬ÔòÕâÀïĞèÒªÅĞ¶Ï£ºÎŞÂÛÔ´»¹ÊÇÄ¿±êÎ»ÖÃ·¢ÏÖÌõÂëºÅÖØ£¬¶¼²»ËãÖØ¡£
+                                // å› ä¸ºmoveæ“ä½œä¸å…è®¸ç›®æ ‡ä½ç½®å­˜åœ¨è®°å½•ï¼Œæ‰€ä»¥è¿™é‡Œå°±ä¸å†è´¹åŠ›è€ƒè™‘äº†
+                                // å¦‚æœå°†æ¥moveæ“ä½œå…è®¸ç›®æ ‡ä½ç½®å­˜åœ¨è®°å½•ï¼Œåˆ™è¿™é‡Œéœ€è¦åˆ¤æ–­ï¼šæ— è®ºæºè¿˜æ˜¯ç›®æ ‡ä½ç½®å‘ç°æ¡ç å·é‡ï¼Œéƒ½ä¸ç®—é‡ã€‚
                             }
 
-                            // ±¨´í
+                            // æŠ¥é”™
                             if (bDup == true)
                             {
                                 /*
@@ -2528,7 +2528,7 @@ namespace DigitalPlatform.LibraryServer
                                  * */
 
                                 EntityInfo error = new EntityInfo(info);
-                                error.ErrorInfo = "ÌõÂëºÅ '" + strNewBarcode + "' ÒÑ¾­±»ÏÂÁĞ²á¼ÇÂ¼Ê¹ÓÃÁË: " + StringUtil.MakePathList(aPath)/*String.Join(",", pathlist)*/;
+                                error.ErrorInfo = "æ¡ç å· '" + strNewBarcode + "' å·²ç»è¢«ä¸‹åˆ—å†Œè®°å½•ä½¿ç”¨äº†: " + StringUtil.MakePathList(aPath)/*String.Join(",", pathlist)*/;
                                 error.ErrorCode = ErrorCodeValue.CommonError;
                                 ErrorInfos.Add(error);
                                 continue;
@@ -2536,16 +2536,16 @@ namespace DigitalPlatform.LibraryServer
                         }
                     }
 
-                    // ×¼±¸ÈÕÖ¾DOM
+                    // å‡†å¤‡æ—¥å¿—DOM
                     XmlDocument domOperLog = new XmlDocument();
                     domOperLog.LoadXml("<root />");
                     DomUtil.SetElementText(domOperLog.DocumentElement, "operation", "setEntity");
 
-                    // ¶ÒÏÖÒ»¸öÃüÁî
+                    // å…‘ç°ä¸€ä¸ªå‘½ä»¤
                     if (info.Action == "new")
                     {
-                        // ¼ì²éĞÂ¼ÇÂ¼µÄÂ·¾¶ÖĞµÄid²¿·ÖÊÇ·ñÕıÈ·
-                        // ¿âÃû²¿·Ö£¬Ç°ÃæÒÑ¾­Í³Ò»¼ì²é¹ıÁË
+                        // æ£€æŸ¥æ–°è®°å½•çš„è·¯å¾„ä¸­çš„idéƒ¨åˆ†æ˜¯å¦æ­£ç¡®
+                        // åº“åéƒ¨åˆ†ï¼Œå‰é¢å·²ç»ç»Ÿä¸€æ£€æŸ¥è¿‡äº†
                         strError = "";
 
                         if (String.IsNullOrEmpty(info.NewRecPath) == true)
@@ -2557,7 +2557,7 @@ namespace DigitalPlatform.LibraryServer
                             string strID = ResPath.GetRecordId(info.NewRecPath);
                             if (String.IsNullOrEmpty(strID) == true)
                             {
-                                strError = "RecPathÖĞid²¿·ÖÓ¦µ±Îª'?'";
+                                strError = "RecPathä¸­idéƒ¨åˆ†åº”å½“ä¸º'?'";
                             }
 
                             if (strError != "")
@@ -2570,10 +2570,10 @@ namespace DigitalPlatform.LibraryServer
                             }
                         }
 
-                        // ¹¹Ôì³öÊÊºÏ±£´æµÄĞÂ²á¼ÇÂ¼
-                        // Ö÷ÒªÊÇÎªÁË°Ñ´ı¼Ó¹¤µÄ¼ÇÂ¼ÖĞ£¬¿ÉÄÜ³öÏÖµÄÊôÓÚ¡°Á÷Í¨ĞÅÏ¢¡±µÄ×Ö¶ÎÈ¥³ı£¬±ÜÃâ³öÏÖ°²È«ĞÔÎÊÌâ
-                        // TODO: Èç¹ûstrNewXmlÖĞ³öÏÖÁËÁ÷Í¨×Ö¶Î£¬ÊÇ·ñĞèÒª¾¯¸æÇ°¶Ë£¬ÉõÖÁÖ±½Ó±¨´í£¿ÒòÎªÕâÑù¿ÉÒÔÒıÆğÇ°¶ËµÄ×¢Òâ£¬±ÜÃâÇ°¶ËÒÔÎª×Ô¼ºÍ¨¹ıĞÂ´´½¨ÊµÌå¼ÇÂ¼¼Ó½è»¹ĞÅÏ¢¡°³É¹¦¡±ÁË¡£
-                        // µ±È»Õâ¸ö¾¯¸æÈÎÎñ£¬Ò²¿ÉÒÔÖ÷ÒªÓÉÇ°¶Ë×Ô¼º³Ğµ££¬×îºÃ
+                        // æ„é€ å‡ºé€‚åˆä¿å­˜çš„æ–°å†Œè®°å½•
+                        // ä¸»è¦æ˜¯ä¸ºäº†æŠŠå¾…åŠ å·¥çš„è®°å½•ä¸­ï¼Œå¯èƒ½å‡ºç°çš„å±äºâ€œæµé€šä¿¡æ¯â€çš„å­—æ®µå»é™¤ï¼Œé¿å…å‡ºç°å®‰å…¨æ€§é—®é¢˜
+                        // TODO: å¦‚æœstrNewXmlä¸­å‡ºç°äº†æµé€šå­—æ®µï¼Œæ˜¯å¦éœ€è¦è­¦å‘Šå‰ç«¯ï¼Œç”šè‡³ç›´æ¥æŠ¥é”™ï¼Ÿå› ä¸ºè¿™æ ·å¯ä»¥å¼•èµ·å‰ç«¯çš„æ³¨æ„ï¼Œé¿å…å‰ç«¯ä»¥ä¸ºè‡ªå·±é€šè¿‡æ–°åˆ›å»ºå®ä½“è®°å½•åŠ å€Ÿè¿˜ä¿¡æ¯â€œæˆåŠŸâ€äº†ã€‚
+                        // å½“ç„¶è¿™ä¸ªè­¦å‘Šä»»åŠ¡ï¼Œä¹Ÿå¯ä»¥ä¸»è¦ç”±å‰ç«¯è‡ªå·±æ‰¿æ‹…ï¼Œæœ€å¥½
                         string strNewXml = "";
                         if (bForce == false)
                         {
@@ -2594,7 +2594,7 @@ namespace DigitalPlatform.LibraryServer
                             temp.LoadXml(strNewXml);
                             if (bForce == false && bNoOperations == false)
                             {
-                                // ×¢ÒâÇ¿ÖÆ´´½¨¼ÇÂ¼µÄÊ±ºò£¬²»Òª¸²¸Ç<operations>ÀïÃæµÄÄÚÈİ
+                                // æ³¨æ„å¼ºåˆ¶åˆ›å»ºè®°å½•çš„æ—¶å€™ï¼Œä¸è¦è¦†ç›–<operations>é‡Œé¢çš„å†…å®¹
                                 nRet = SetOperation(
                                     ref temp,
                                     "create",
@@ -2620,20 +2620,20 @@ namespace DigitalPlatform.LibraryServer
 
                         if (bSimulate)
                         {
-                            domOperLog = null;  // ±íÊ¾²»±ØĞ´ÈëÈÕÖ¾
+                            domOperLog = null;  // è¡¨ç¤ºä¸å¿…å†™å…¥æ—¥å¿—
                         }
                         else
                         {
                             string strLibraryCode = "";
 
-                            // ×¢Òâ£º¼´±ãÊÇÈ«¾ÖÓÃ»§£¬Ò²ÒªÓÃº¯Êı CheckItemLibraryCode() »ñµÃ¹İ´úÂë
+                            // æ³¨æ„ï¼šå³ä¾¿æ˜¯å…¨å±€ç”¨æˆ·ï¼Œä¹Ÿè¦ç”¨å‡½æ•° CheckItemLibraryCode() è·å¾—é¦†ä»£ç 
 
-                            // ·Ö¹İÓÃ»§Ö»ÄÜ±£´æ¹İ²ØµØµãÎª×Ô¼º¹ÜÏ½·¶Î§µÄ²á¼ÇÂ¼
-                            // ¼ì²éÒ»¸ö²á¼ÇÂ¼µÄ¹İ²ØµØµãÊÇ·ñ·ûºÏ¹İ´úÂëÁĞ±íÒªÇó
+                            // åˆ†é¦†ç”¨æˆ·åªèƒ½ä¿å­˜é¦†è—åœ°ç‚¹ä¸ºè‡ªå·±ç®¡è¾–èŒƒå›´çš„å†Œè®°å½•
+                            // æ£€æŸ¥ä¸€ä¸ªå†Œè®°å½•çš„é¦†è—åœ°ç‚¹æ˜¯å¦ç¬¦åˆé¦†ä»£ç åˆ—è¡¨è¦æ±‚
                             // return:
-                            //      -1  ¼ì²é¹ı³Ì³ö´í
-                            //      0   ·ûºÏÒªÇó
-                            //      1   ²»·ûºÏÒªÇó
+                            //      -1  æ£€æŸ¥è¿‡ç¨‹å‡ºé”™
+                            //      0   ç¬¦åˆè¦æ±‚
+                            //      1   ä¸ç¬¦åˆè¦æ±‚
                             nRet = CheckItemLibraryCode(strNewXml,
                                 sessioninfo,
                                 // sessioninfo.LibraryCodeList,
@@ -2642,10 +2642,10 @@ namespace DigitalPlatform.LibraryServer
                             if (nRet == -1)
                             {
                                 EntityInfo error = new EntityInfo(info);
-                                error.ErrorInfo = "¼ì²é·Ö¹İ´úÂëÊ±³ö´í: " + strError;
+                                error.ErrorInfo = "æ£€æŸ¥åˆ†é¦†ä»£ç æ—¶å‡ºé”™: " + strError;
                                 error.ErrorCode = ErrorCodeValue.CommonError;
                                 ErrorInfos.Add(error);
-                                domOperLog = null;  // ±íÊ¾²»±ØĞ´ÈëÈÕÖ¾
+                                domOperLog = null;  // è¡¨ç¤ºä¸å¿…å†™å…¥æ—¥å¿—
                                 continue;
                             }
                             if (sessioninfo.GlobalUser == false
@@ -2656,12 +2656,12 @@ namespace DigitalPlatform.LibraryServer
                                     EntityInfo error = new EntityInfo(info);
                                     /*
                                     if (nRet == -1)
-                                        error.ErrorInfo = "¼ì²é·Ö¹İ´úÂëÊ±³ö´í: " + strError;
+                                        error.ErrorInfo = "æ£€æŸ¥åˆ†é¦†ä»£ç æ—¶å‡ºé”™: " + strError;
                                     else */
-                                    error.ErrorInfo = "¼´½«´´½¨µÄ²á¼ÇÂ¼ÄÚÈİÖĞµÄ¹İ²ØµØµã²»·ûºÏÒªÇó: " + strError;
+                                    error.ErrorInfo = "å³å°†åˆ›å»ºçš„å†Œè®°å½•å†…å®¹ä¸­çš„é¦†è—åœ°ç‚¹ä¸ç¬¦åˆè¦æ±‚: " + strError;
                                     error.ErrorCode = ErrorCodeValue.CommonError;
                                     ErrorInfos.Add(error);
-                                    domOperLog = null;  // ±íÊ¾²»±ØĞ´ÈëÈÕÖ¾
+                                    domOperLog = null;  // è¡¨ç¤ºä¸å¿…å†™å…¥æ—¥å¿—
                                     continue;
                                 }
                             }
@@ -2672,29 +2672,29 @@ namespace DigitalPlatform.LibraryServer
                                 string strEntityDbName = ResPath.GetDbName(info.NewRecPath);
                                 if (String.IsNullOrEmpty(strEntityDbName) == true)
                                 {
-                                    strError = "´ÓÂ·¾¶ '" + info.NewRecPath + "' ÖĞ»ñµÃÊı¾İ¿âÃûÊ±Ê§°Ü";
+                                    strError = "ä»è·¯å¾„ '" + info.NewRecPath + "' ä¸­è·å¾—æ•°æ®åº“åæ—¶å¤±è´¥";
                                     goto ERROR1;
                                 }
 
                                 XmlDocument domTemp = new XmlDocument();
                                 domTemp.LoadXml(strNewXml);
 
-                                // ¼ì²éÒ»¸ö²á¼ÇÂ¼µÄÍ¼ÊéÀàĞÍÊÇ·ñ·ûºÏÖµÁĞ±íÒªÇó
+                                // æ£€æŸ¥ä¸€ä¸ªå†Œè®°å½•çš„å›¾ä¹¦ç±»å‹æ˜¯å¦ç¬¦åˆå€¼åˆ—è¡¨è¦æ±‚
                                 // parameters:
                                 // return:
-                                //      -1  ¼ì²é¹ı³Ì³ö´í
-                                //      0   ·ûºÏÒªÇó
-                                //      1   ²»·ûºÏÒªÇó
+                                //      -1  æ£€æŸ¥è¿‡ç¨‹å‡ºé”™
+                                //      0   ç¬¦åˆè¦æ±‚
+                                //      1   ä¸ç¬¦åˆè¦æ±‚
                                 nRet = CheckItemBookType(domTemp,
                                     strEntityDbName,
                                     out strError);
                                 if (nRet == -1 || nRet == 1)
                                 {
                                     EntityInfo error = new EntityInfo(info);
-                                    error.ErrorInfo = "¼´½«´´½¨µÄ²á¼ÇÂ¼ÄÚÈİÖĞµÄÍ¼ÊéÀàĞÍ²»·ûºÏÒªÇó: " + strError;
+                                    error.ErrorInfo = "å³å°†åˆ›å»ºçš„å†Œè®°å½•å†…å®¹ä¸­çš„å›¾ä¹¦ç±»å‹ä¸ç¬¦åˆè¦æ±‚: " + strError;
                                     error.ErrorCode = ErrorCodeValue.CommonError;
                                     ErrorInfos.Add(error);
-                                    domOperLog = null;  // ±íÊ¾²»±ØĞ´ÈëÈÕÖ¾
+                                    domOperLog = null;  // è¡¨ç¤ºä¸å¿…å†™å…¥æ—¥å¿—
                                     continue;
                                 }
                             }
@@ -2712,37 +2712,37 @@ namespace DigitalPlatform.LibraryServer
                             {
                                 EntityInfo error = new EntityInfo(info);
                                 error.NewTimestamp = output_timestamp;
-                                error.ErrorInfo = "±£´æĞÂ¼ÇÂ¼µÄ²Ù×÷·¢Éú´íÎó:" + strError;
+                                error.ErrorInfo = "ä¿å­˜æ–°è®°å½•çš„æ“ä½œå‘ç”Ÿé”™è¯¯:" + strError;
                                 error.ErrorCode = channel.OriginErrorCode;
                                 ErrorInfos.Add(error);
 
-                                domOperLog = null;  // ±íÊ¾²»±ØĞ´ÈëÈÕÖ¾
+                                domOperLog = null;  // è¡¨ç¤ºä¸å¿…å†™å…¥æ—¥å¿—
                             }
-                            else // ³É¹¦
+                            else // æˆåŠŸ
                             {
                                 DomUtil.SetElementText(domOperLog.DocumentElement,
     "libraryCode",
-    strLibraryCode);    // ²áËùÔÚµÄ¹İ´úÂë
+    strLibraryCode);    // å†Œæ‰€åœ¨çš„é¦†ä»£ç 
 
                                 DomUtil.SetElementText(domOperLog.DocumentElement, "action", "new");
                                 if (String.IsNullOrEmpty(strStyle) == false)
                                     DomUtil.SetElementText(domOperLog.DocumentElement, "style", strStyle);
 
-                                // ²»´´½¨<oldRecord>ÔªËØ
+                                // ä¸åˆ›å»º<oldRecord>å…ƒç´ 
 
                                 XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
                                     "record", strNewXml);
                                 DomUtil.SetAttr(node, "recPath", strOutputPath);
 
-                                // ĞÂ¼ÇÂ¼±£´æ³É¹¦£¬ĞèÒª·µ»ØĞÅÏ¢ÔªËØ¡£ÒòÎªĞèÒª·µ»ØĞÂµÄÊ±¼ä´ÁºÍÊµ¼Ê±£´æµÄ¼ÇÂ¼Â·¾¶
+                                // æ–°è®°å½•ä¿å­˜æˆåŠŸï¼Œéœ€è¦è¿”å›ä¿¡æ¯å…ƒç´ ã€‚å› ä¸ºéœ€è¦è¿”å›æ–°çš„æ—¶é—´æˆ³å’Œå®é™…ä¿å­˜çš„è®°å½•è·¯å¾„
 
                                 EntityInfo error = new EntityInfo(info);
                                 error.NewRecPath = strOutputPath;
 
-                                error.NewRecord = strNewXml;    // ËùÕæÕı±£´æµÄ¼ÇÂ¼£¬¿ÉÄÜÉÔÓĞ±ä»¯, Òò´ËĞèÒª·µ»Ø¸øÇ°¶Ë
+                                error.NewRecord = strNewXml;    // æ‰€çœŸæ­£ä¿å­˜çš„è®°å½•ï¼Œå¯èƒ½ç¨æœ‰å˜åŒ–, å› æ­¤éœ€è¦è¿”å›ç»™å‰ç«¯
                                 error.NewTimestamp = output_timestamp;
 
-                                error.ErrorInfo = "±£´æĞÂ¼ÇÂ¼µÄ²Ù×÷³É¹¦¡£NewTimeStampÖĞ·µ»ØÁËĞÂµÄÊ±¼ä´Á, RecPathÖĞ·µ»ØÁËÊµ¼Ê´æÈëµÄ¼ÇÂ¼Â·¾¶¡£";
+                                error.ErrorInfo = "ä¿å­˜æ–°è®°å½•çš„æ“ä½œæˆåŠŸã€‚NewTimeStampä¸­è¿”å›äº†æ–°çš„æ—¶é—´æˆ³, RecPathä¸­è¿”å›äº†å®é™…å­˜å…¥çš„è®°å½•è·¯å¾„ã€‚";
                                 error.ErrorCode = ErrorCodeValue.NoError;
                                 ErrorInfos.Add(error);
                             }
@@ -2752,12 +2752,12 @@ namespace DigitalPlatform.LibraryServer
                     {
                         if (bSimulate == true)
                         {
-                            // ¼ì²éÈ¨ÏŞ?
-                            domOperLog = null;  // ±íÊ¾²»±ØĞ´ÈëÈÕÖ¾
+                            // æ£€æŸ¥æƒé™?
+                            domOperLog = null;  // è¡¨ç¤ºä¸å¿…å†™å…¥æ—¥å¿—
                         }
                         else
                         {
-                            // Ö´ĞĞSetEntities APIÖĞµÄ"change"²Ù×÷
+                            // æ‰§è¡ŒSetEntities APIä¸­çš„"change"æ“ä½œ
                             nRet = DoEntityOperChange(
                                 bForce,
                                 strStyle,
@@ -2768,8 +2768,8 @@ namespace DigitalPlatform.LibraryServer
                                 ref ErrorInfos);
                             if (nRet == -1)
                             {
-                                // Ê§°Ü
-                                domOperLog = null;  // ±íÊ¾²»±ØĞ´ÈëÈÕÖ¾
+                                // å¤±è´¥
+                                domOperLog = null;  // è¡¨ç¤ºä¸å¿…å†™å…¥æ—¥å¿—
                             }
                         }
                     }
@@ -2777,12 +2777,12 @@ namespace DigitalPlatform.LibraryServer
                     {
                         if (bSimulate == true)
                         {
-                            // ¼ì²éÈ¨ÏŞ?
-                            domOperLog = null;  // ±íÊ¾²»±ØĞ´ÈëÈÕÖ¾
+                            // æ£€æŸ¥æƒé™?
+                            domOperLog = null;  // è¡¨ç¤ºä¸å¿…å†™å…¥æ—¥å¿—
                         }
                         else
                         {
-                            // Ö´ĞĞSetEntities APIÖĞµÄ"move"²Ù×÷
+                            // æ‰§è¡ŒSetEntities APIä¸­çš„"move"æ“ä½œ
                             nRet = DoEntityOperMove(
                                 strStyle,
                                 sessioninfo,
@@ -2792,8 +2792,8 @@ namespace DigitalPlatform.LibraryServer
                                 ref ErrorInfos);
                             if (nRet == -1)
                             {
-                                // Ê§°Ü
-                                domOperLog = null;  // ±íÊ¾²»±ØĞ´ÈëÈÕÖ¾
+                                // å¤±è´¥
+                                domOperLog = null;  // è¡¨ç¤ºä¸å¿…å†™å…¥æ—¥å¿—
                             }
                         }
                     }
@@ -2801,12 +2801,12 @@ namespace DigitalPlatform.LibraryServer
                     {
                         if (bSimulate == true)
                         {
-                            // ¼ì²éÈ¨ÏŞ?
-                            domOperLog = null;  // ±íÊ¾²»±ØĞ´ÈëÈÕÖ¾
+                            // æ£€æŸ¥æƒé™?
+                            domOperLog = null;  // è¡¨ç¤ºä¸å¿…å†™å…¥æ—¥å¿—
                         }
                         else
                         {
-                            // É¾³ı²á¼ÇÂ¼µÄ²Ù×÷
+                            // åˆ é™¤å†Œè®°å½•çš„æ“ä½œ
                             nRet = DoEntityOperDelete(
                                 sessioninfo,
                                 bForce,
@@ -2820,36 +2820,36 @@ namespace DigitalPlatform.LibraryServer
                                 ref ErrorInfos);
                             if (nRet == -1)
                             {
-                                // Ê§°Ü
-                                domOperLog = null;  // ±íÊ¾²»±ØĞ´ÈëÈÕÖ¾
+                                // å¤±è´¥
+                                domOperLog = null;  // è¡¨ç¤ºä¸å¿…å†™å…¥æ—¥å¿—
                             }
                         }
                     }
                     else
                     {
-                        // ²»Ö§³ÖµÄÃüÁî
+                        // ä¸æ”¯æŒçš„å‘½ä»¤
                         EntityInfo error = new EntityInfo(info);
-                        error.ErrorInfo = "²»Ö§³ÖµÄ²Ù×÷ÃüÁî '" + info.Action + "'";
+                        error.ErrorInfo = "ä¸æ”¯æŒçš„æ“ä½œå‘½ä»¤ '" + info.Action + "'";
                         error.ErrorCode = ErrorCodeValue.CommonError;
                         ErrorInfos.Add(error);
                     }
 
-                    // Ğ´ÈëÈÕÖ¾
+                    // å†™å…¥æ—¥å¿—
                     if (domOperLog != null
                         && bNoEventLog == false)    // 2008/10/6 
                     {
                         string strOperTime = this.Clock.GetClock();
                         DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
-                            sessioninfo.UserID);   // ²Ù×÷Õß
+                            sessioninfo.UserID);   // æ“ä½œè€…
                         DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
-                            strOperTime);   // ²Ù×÷Ê±¼ä
+                            strOperTime);   // æ“ä½œæ—¶é—´
 
                         nRet = this.OperLog.WriteOperLog(domOperLog,
                             sessioninfo.ClientAddress,
                             out strError);
                         if (nRet == -1)
                         {
-                            strError = "SetEntities() API Ğ´ÈëÈÕÖ¾Ê±·¢Éú´íÎó: " + strError;
+                            strError = "SetEntities() API å†™å…¥æ—¥å¿—æ—¶å‘ç”Ÿé”™è¯¯: " + strError;
                             goto ERROR1;
                         }
                     }
@@ -2861,30 +2861,30 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
 
-            // ¸´ÖÆµ½½á¹ûÖĞ
+            // å¤åˆ¶åˆ°ç»“æœä¸­
             errorinfos = new EntityInfo[ErrorInfos.Count];
             for (int i = 0; i < ErrorInfos.Count; i++)
             {
                 errorinfos[i] = ErrorInfos[i];
             }
 
-            result.Value = ErrorInfos.Count;  // ·µ»ØĞÅÏ¢µÄÊıÁ¿
+            result.Value = ErrorInfos.Count;  // è¿”å›ä¿¡æ¯çš„æ•°é‡
             return result;
         ERROR1:
-            // ÕâÀïµÄ±¨´í£¬ÊÇ±È½ÏÑÏÖØµÄ´íÎó¡£Èç¹ûÊÇÊı×éÖĞ²¿·ÖµÄÇëÇó·¢ÉúµÄ´íÎó£¬Ôò²»ÔÚÕâÀï±¨´í£¬¶øÊÇÍ¨¹ı·µ»Ø´íÎóĞÅÏ¢Êı×éµÄ·½Ê½À´±íÏÖ
+            // è¿™é‡Œçš„æŠ¥é”™ï¼Œæ˜¯æ¯”è¾ƒä¸¥é‡çš„é”™è¯¯ã€‚å¦‚æœæ˜¯æ•°ç»„ä¸­éƒ¨åˆ†çš„è¯·æ±‚å‘ç”Ÿçš„é”™è¯¯ï¼Œåˆ™ä¸åœ¨è¿™é‡ŒæŠ¥é”™ï¼Œè€Œæ˜¯é€šè¿‡è¿”å›é”™è¯¯ä¿¡æ¯æ•°ç»„çš„æ–¹å¼æ¥è¡¨ç°
             result.Value = -1;
             result.ErrorInfo = strError;
             result.ErrorCode = ErrorCode.SystemError;
             return result;
         }
 
-        #region SetEntities() ÏÂ¼¶º¯Êı
+        #region SetEntities() ä¸‹çº§å‡½æ•°
 
-        // °ü×°ºó°æ±¾
+        // åŒ…è£…åç‰ˆæœ¬
         // return:
-        //      -1  ¼ì²é¹ı³Ì³ö´í
-        //      0   ·ûºÏÒªÇó
-        //      1   ²»·ûºÏÒªÇó
+        //      -1  æ£€æŸ¥è¿‡ç¨‹å‡ºé”™
+        //      0   ç¬¦åˆè¦æ±‚
+        //      1   ä¸ç¬¦åˆè¦æ±‚
         int CheckItemLibraryCode(string strXml,
             string strLibraryCodeList,
             out string strError)
@@ -2896,11 +2896,11 @@ namespace DigitalPlatform.LibraryServer
                 out strError);
         }
 
-        // ²»µ«¼ì²é¹¤×÷ÈËÔ±Éí·İ£¬Ò²¼ì²é¶ÁÕßÉí·İ
+        // ä¸ä½†æ£€æŸ¥å·¥ä½œäººå‘˜èº«ä»½ï¼Œä¹Ÿæ£€æŸ¥è¯»è€…èº«ä»½
         // return:
-        //      -1  ¼ì²é¹ı³Ì³ö´í
-        //      0   ·ûºÏÒªÇó
-        //      1   ²»·ûºÏÒªÇó
+        //      -1  æ£€æŸ¥è¿‡ç¨‹å‡ºé”™
+        //      0   ç¬¦åˆè¦æ±‚
+        //      1   ä¸ç¬¦åˆè¦æ±‚
         int CheckItemLibraryCode(string strXml,
             SessionInfo sessioninfo,
             out string strLibraryCode,
@@ -2916,7 +2916,7 @@ namespace DigitalPlatform.LibraryServer
                     strPersonalLibrary = sessioninfo.Account.PersonalLibrary;
                 if (string.IsNullOrEmpty(strPersonalLibrary) == true)
                 {
-                    strError = "¶ÁÕßÉí·İÇÒ²»¾ß±¸¸öÈËÊéÕ«¶¨Òå";
+                    strError = "è¯»è€…èº«ä»½ä¸”ä¸å…·å¤‡ä¸ªäººä¹¦æ–‹å®šä¹‰";
                     return 1;
                 }
 
@@ -2931,14 +2931,14 @@ namespace DigitalPlatform.LibraryServer
             return CheckItemLibraryCode(strXml, strLibraryCodeList, out strLibraryCode, out strError);
         }
 
-        // ¼ì²éÒ»¸ö²á¼ÇÂ¼µÄ¹İ²ØµØµãÊÇ·ñ·ûºÏ¹İ´úÂëÁĞ±íÒªÇó
+        // æ£€æŸ¥ä¸€ä¸ªå†Œè®°å½•çš„é¦†è—åœ°ç‚¹æ˜¯å¦ç¬¦åˆé¦†ä»£ç åˆ—è¡¨è¦æ±‚
         // parameters:
-        //      strLibraryCodeList  µ±Ç°ÓÃ»§¹ÜÏ½µÄ¹İ´úÂëÁĞ±í
-        //      strLibraryCode  [out]²á¼ÇÂ¼ÖĞµÄ¹İ´úÂë
+        //      strLibraryCodeList  å½“å‰ç”¨æˆ·ç®¡è¾–çš„é¦†ä»£ç åˆ—è¡¨
+        //      strLibraryCode  [out]å†Œè®°å½•ä¸­çš„é¦†ä»£ç 
         // return:
-        //      -1  ¼ì²é¹ı³Ì³ö´í
-        //      0   ·ûºÏÒªÇó
-        //      1   ²»·ûºÏÒªÇó
+        //      -1  æ£€æŸ¥è¿‡ç¨‹å‡ºé”™
+        //      0   ç¬¦åˆè¦æ±‚
+        //      1   ä¸ç¬¦åˆè¦æ±‚
         int CheckItemLibraryCode(string strXml,
             string strLibraryCodeList,
             out string strLibraryCode,
@@ -2959,7 +2959,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "²á¼ÇÂ¼XML×°ÈëXMLDOMÊ±¼ä³ö´í: " + ex.Message;
+                strError = "å†Œè®°å½•XMLè£…å…¥XMLDOMæ—¶é—´å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
@@ -2969,11 +2969,11 @@ namespace DigitalPlatform.LibraryServer
                 out strError);
         }
 
-        // °ü×°ºó°æ±¾
+        // åŒ…è£…åç‰ˆæœ¬
         // return:
-        //      -1  ¼ì²é¹ı³Ì³ö´í
-        //      0   ·ûºÏÒªÇó
-        //      1   ²»·ûºÏÒªÇó
+        //      -1  æ£€æŸ¥è¿‡ç¨‹å‡ºé”™
+        //      0   ç¬¦åˆè¦æ±‚
+        //      1   ä¸ç¬¦åˆè¦æ±‚
         int CheckItemLibraryCode(XmlDocument dom,
             string strLibraryCodeList,
             out string strError)
@@ -2985,11 +2985,11 @@ namespace DigitalPlatform.LibraryServer
                 out strError);
         }
 
-        // ²»µ«¼ì²é¹¤×÷ÈËÔ±Éí·İ£¬Ò²¼ì²é¶ÁÕßÉí·İ
+        // ä¸ä½†æ£€æŸ¥å·¥ä½œäººå‘˜èº«ä»½ï¼Œä¹Ÿæ£€æŸ¥è¯»è€…èº«ä»½
         // return:
-        //      -1  ¼ì²é¹ı³Ì³ö´í
-        //      0   ·ûºÏÒªÇó
-        //      1   ²»·ûºÏÒªÇó
+        //      -1  æ£€æŸ¥è¿‡ç¨‹å‡ºé”™
+        //      0   ç¬¦åˆè¦æ±‚
+        //      1   ä¸ç¬¦åˆè¦æ±‚
         int CheckItemLibraryCode(XmlDocument dom,
             SessionInfo sessioninfo,
             out string strLibraryCode,
@@ -3005,7 +3005,7 @@ namespace DigitalPlatform.LibraryServer
                     strPersonalLibrary = sessioninfo.Account.PersonalLibrary;
                 if (string.IsNullOrEmpty(strPersonalLibrary) == true)
                 {
-                    strError = "¶ÁÕßÉí·İÇÒ²»¾ß±¸¸öÈËÊéÕ«¶¨Òå";
+                    strError = "è¯»è€…èº«ä»½ä¸”ä¸å…·å¤‡ä¸ªäººä¹¦æ–‹å®šä¹‰";
                     return 1;
                 }
 
@@ -3017,14 +3017,14 @@ namespace DigitalPlatform.LibraryServer
             return CheckItemLibraryCode(dom, strLibraryCodeList, out strLibraryCode, out strError);
         }
 
-        // ¼ì²éÒ»¸ö²á¼ÇÂ¼µÄ¹İ²ØµØµãÊÇ·ñ·ûºÏ¹İ´úÂëÁĞ±íÒªÇó
+        // æ£€æŸ¥ä¸€ä¸ªå†Œè®°å½•çš„é¦†è—åœ°ç‚¹æ˜¯å¦ç¬¦åˆé¦†ä»£ç åˆ—è¡¨è¦æ±‚
         // parameters:
-        //      strLibraryCodeList  µ±Ç°ÓÃ»§¹ÜÏ½µÄ¹İ´úÂëÁĞ±í
-        //      strLibraryCode  [out]²á¼ÇÂ¼ÖĞµÄ¹İ´úÂë
+        //      strLibraryCodeList  å½“å‰ç”¨æˆ·ç®¡è¾–çš„é¦†ä»£ç åˆ—è¡¨
+        //      strLibraryCode  [out]å†Œè®°å½•ä¸­çš„é¦†ä»£ç 
         // return:
-        //      -1  ¼ì²é¹ı³Ì³ö´í
-        //      0   ·ûºÏÒªÇó
-        //      1   ²»·ûºÏÒªÇó
+        //      -1  æ£€æŸ¥è¿‡ç¨‹å‡ºé”™
+        //      0   ç¬¦åˆè¦æ±‚
+        //      1   ä¸ç¬¦åˆè¦æ±‚
         public int CheckItemLibraryCode(XmlDocument dom,
             string strLibraryCodeList,
             out string strLibraryCode,
@@ -3036,7 +3036,7 @@ namespace DigitalPlatform.LibraryServer
             string strLocation = DomUtil.GetElementText(dom.DocumentElement,
                 "location");
 #if NO
-            // È¥µô #xxx, ²¿·Ö
+            // å»æ‰ #xxx, éƒ¨åˆ†
             if (strLocation.IndexOf("#") != -1)
             {
                 string[] parts = strLocation.Split(new char[] { ',' });
@@ -3057,22 +3057,22 @@ namespace DigitalPlatform.LibraryServer
 #endif
             strLocation = StringUtil.GetPureLocationString(strLocation);
 
-            // ÏÈÊÔÌ½Ò»ÏÂ£¬¹İ²ØµØµã×Ö·û´®ÊÇ·ñºÍ strLibraryCodeList ÍêÈ«Ò»ÖÂ¡£
-            // ÕâÖÖ¼ì²âÖ÷ÒªÊÇÎªÁË´¦Àí strLibraryCodeList ´«À´ "Î÷³Ç·Ö¹İ/¼¯ÏÍÕ«" ÕâÑùµÄ¸öÈËÊéÕ«È«Â·¾¶µÄÇé¿ö
+            // å…ˆè¯•æ¢ä¸€ä¸‹ï¼Œé¦†è—åœ°ç‚¹å­—ç¬¦ä¸²æ˜¯å¦å’Œ strLibraryCodeList å®Œå…¨ä¸€è‡´ã€‚
+            // è¿™ç§æ£€æµ‹ä¸»è¦æ˜¯ä¸ºäº†å¤„ç† strLibraryCodeList ä¼ æ¥ "è¥¿åŸåˆ†é¦†/é›†è´¤æ–‹" è¿™æ ·çš„ä¸ªäººä¹¦æ–‹å…¨è·¯å¾„çš„æƒ…å†µ
             if (strLocation == strLibraryCodeList)
             {
-                // ÔÚ¹ÜÏ½·¶Î§ÄÚ
+                // åœ¨ç®¡è¾–èŒƒå›´å†…
                 return 0;
             }
 
             string strPureName = "";
 
-            // ½«¹İ²ØµØµã×Ö·û´®·Ö½âÎª ¹İ´úÂë+µØµãÃû Á½¸ö²¿·Ö
+            // å°†é¦†è—åœ°ç‚¹å­—ç¬¦ä¸²åˆ†è§£ä¸º é¦†ä»£ç +åœ°ç‚¹å ä¸¤ä¸ªéƒ¨åˆ†
             ParseCalendarName(strLocation,
         out strLibraryCode,
         out strPureName);
 
-            // ¼´±ãÊÇÈ«¾ÖÓÃ»§£¬Ò²Òªµ½µÃµ½¹İ´úÂëºóº¯Êı²ÅÄÜ·µ»Ø
+            // å³ä¾¿æ˜¯å…¨å±€ç”¨æˆ·ï¼Œä¹Ÿè¦åˆ°å¾—åˆ°é¦†ä»£ç åå‡½æ•°æ‰èƒ½è¿”å›
             if (SessionInfo.IsGlobalUser(strLibraryCodeList) == true)
                 return 0;
 
@@ -3081,20 +3081,20 @@ namespace DigitalPlatform.LibraryServer
 
             if (StringUtil.IsInList(strLibraryCode, strLibraryCodeList) == true)
             {
-                // ÔÚ¹ÜÏ½·¶Î§ÄÚ
+                // åœ¨ç®¡è¾–èŒƒå›´å†…
                 return 0;
             }
         NOTMATCH:
-            strError = "¹İ²ØµØµã '" + strLocation + "' ²»ÔÚ '" + strLibraryCodeList + "' ¹ÜÏ½·¶Î§ÄÚ";
+            strError = "é¦†è—åœ°ç‚¹ '" + strLocation + "' ä¸åœ¨ '" + strLibraryCodeList + "' ç®¡è¾–èŒƒå›´å†…";
             return 1;
         }
 
-        // ¼ì²éÒ»¸ö²á¼ÇÂ¼µÄÍ¼ÊéÀàĞÍÊÇ·ñ·ûºÏÖµÁĞ±íÒªÇó
+        // æ£€æŸ¥ä¸€ä¸ªå†Œè®°å½•çš„å›¾ä¹¦ç±»å‹æ˜¯å¦ç¬¦åˆå€¼åˆ—è¡¨è¦æ±‚
         // parameters:
         // return:
-        //      -1  ¼ì²é¹ı³Ì³ö´í
-        //      0   ·ûºÏÒªÇó
-        //      1   ²»·ûºÏÒªÇó
+        //      -1  æ£€æŸ¥è¿‡ç¨‹å‡ºé”™
+        //      0   ç¬¦åˆè¦æ±‚
+        //      1   ä¸ç¬¦åˆè¦æ±‚
         public int CheckItemBookType(XmlDocument dom,
             string strItemDbName,
             out string strError)
@@ -3108,28 +3108,28 @@ namespace DigitalPlatform.LibraryServer
             strLocation = StringUtil.GetPureLocationString(strLocation);
 
             string strPureName = "";
-            // ½âÎöÈÕÀúÃû
+            // è§£ææ—¥å†å
             ParseCalendarName(strLocation,
         out strLibraryCode,
         out strPureName);
 
             List<string> values = null;
 
-            // ÊÔÌ½ ÊéÄ¿¿âÃû
+            // è¯•æ¢ ä¹¦ç›®åº“å
 
             string strBiblioDbName = "";
-            // ¸ù¾İÊµÌå¿âÃû, ÕÒµ½¶ÔÓ¦µÄÊéÄ¿¿âÃû
-            // ×¢Òâ£¬·µ»Ø1µÄÊ±ºò£¬strBiblioDbNameÒ²ÓĞ¿ÉÄÜÎª¿Õ
+            // æ ¹æ®å®ä½“åº“å, æ‰¾åˆ°å¯¹åº”çš„ä¹¦ç›®åº“å
+            // æ³¨æ„ï¼Œè¿”å›1çš„æ—¶å€™ï¼ŒstrBiblioDbNameä¹Ÿæœ‰å¯èƒ½ä¸ºç©º
             // return:
-            //      -1  ³ö´í
-            //      0   Ã»ÓĞÕÒµ½
-            //      1   ÕÒµ½
+            //      -1  å‡ºé”™
+            //      0   æ²¡æœ‰æ‰¾åˆ°
+            //      1   æ‰¾åˆ°
             nRet = GetBiblioDbNameByItemDbName(strItemDbName,
             out strBiblioDbName,
             out strError);
             if (nRet == 0 || nRet == -1)
             {
-                strError = "¸ù¾İÊµÌå¿âÃû '" + strItemDbName + "' ÖĞ»ñµÃÊéÄ¿¿âÃûÊ±Ê§°Ü";
+                strError = "æ ¹æ®å®ä½“åº“å '" + strItemDbName + "' ä¸­è·å¾—ä¹¦ç›®åº“åæ—¶å¤±è´¥";
                 return -1;
             }
 
@@ -3140,13 +3140,13 @@ namespace DigitalPlatform.LibraryServer
             if (values.Count > 0)
                 goto FOUND;
 
-            // ÊÔÌ½ ÊµÌå¿âÃû
+            // è¯•æ¢ å®ä½“åº“å
 
-            // »ñµÃÒ»¸öÍ¼Êé¹İ´úÂëÏÂµÄÖµÁĞ±í
+            // è·å¾—ä¸€ä¸ªå›¾ä¹¦é¦†ä»£ç ä¸‹çš„å€¼åˆ—è¡¨
             // parameters:
-            //      strLibraryCode  ¹İ´úÂë
-            //      strTableName    ±íÃû¡£Èç¹ûÎª¿Õ£¬±íÊ¾ÈÎÒâname²ÎÊıÖµ¾ùÆ¥Åä
-            //      strDbName   Êı¾İ¿âÃû¡£Èç¹ûÎª¿Õ£¬±íÊ¾ÈÎÒâdbname²ÎÊıÖµ¾ùÆ¥Åä¡£
+            //      strLibraryCode  é¦†ä»£ç 
+            //      strTableName    è¡¨åã€‚å¦‚æœä¸ºç©ºï¼Œè¡¨ç¤ºä»»æ„nameå‚æ•°å€¼å‡åŒ¹é…
+            //      strDbName   æ•°æ®åº“åã€‚å¦‚æœä¸ºç©ºï¼Œè¡¨ç¤ºä»»æ„dbnameå‚æ•°å€¼å‡åŒ¹é…ã€‚
             values = GetOneLibraryValueTable(
                 strLibraryCode,
                 "bookType",
@@ -3155,7 +3155,7 @@ namespace DigitalPlatform.LibraryServer
                 goto FOUND;
 
 
-            // ÊÔÌ½²»Ê¹ÓÃÊı¾İ¿âÃû
+            // è¯•æ¢ä¸ä½¿ç”¨æ•°æ®åº“å
 
             values = GetOneLibraryValueTable(
     strLibraryCode,
@@ -3164,7 +3164,7 @@ namespace DigitalPlatform.LibraryServer
             if (values.Count > 0)
                 goto FOUND;
 
-            return 0;   // ÒòÎªÃ»ÓĞÖµÁĞ±í£¬Ê²Ã´Öµ¶¼¿ÉÒÔ
+            return 0;   // å› ä¸ºæ²¡æœ‰å€¼åˆ—è¡¨ï¼Œä»€ä¹ˆå€¼éƒ½å¯ä»¥
 
             FOUND:
             string strBookType = DomUtil.GetElementText(dom.DocumentElement,
@@ -3174,7 +3174,7 @@ namespace DigitalPlatform.LibraryServer
                 return 0;
 
             GetPureValue(ref values);
-            strError = "Í¼ÊéÀàĞÍ '"+strBookType+"' ²»ÊÇºÏ·¨µÄÖµ¡£Ó¦Îª '"+StringUtil.MakePathList(values)+"' Ö®Ò»";
+            strError = "å›¾ä¹¦ç±»å‹ '"+strBookType+"' ä¸æ˜¯åˆæ³•çš„å€¼ã€‚åº”ä¸º '"+StringUtil.MakePathList(values)+"' ä¹‹ä¸€";
             return 1;
         }
 
@@ -3230,10 +3230,10 @@ namespace DigitalPlatform.LibraryServer
 #endif
 
         /// <summary>
-        /// ¹ıÂËµô×îÍâÃæµÄ {} ×Ö·û
+        /// è¿‡æ»¤æ‰æœ€å¤–é¢çš„ {} å­—ç¬¦
         /// </summary>
-        /// <param name="strText">´ı¹ıÂËµÄ×Ö·û´®</param>
-        /// <returns>¹ıÂËºóµÄ×Ö·û´®</returns>
+        /// <param name="strText">å¾…è¿‡æ»¤çš„å­—ç¬¦ä¸²</param>
+        /// <returns>è¿‡æ»¤åçš„å­—ç¬¦ä¸²</returns>
         static string GetPureSeletedValue(string strText)
         {
             for (; ; )
@@ -3251,15 +3251,15 @@ namespace DigitalPlatform.LibraryServer
         }
 
         /*
-         * ±»CompareTwoBarcodeËùÌæ´ú
-        // ¶ÔEntityInfoÖĞµÄOldRecordºÍNewRecordÖĞ°üº¬µÄÌõÂëºÅ½øĞĞ±È½Ï, ¿´¿´ÊÇ·ñ·¢ÉúÁË±ä»¯(½ø¶ø¾ÍĞèÒª²éÖØ)
+         * è¢«CompareTwoBarcodeæ‰€æ›¿ä»£
+        // å¯¹EntityInfoä¸­çš„OldRecordå’ŒNewRecordä¸­åŒ…å«çš„æ¡ç å·è¿›è¡Œæ¯”è¾ƒ, çœ‹çœ‹æ˜¯å¦å‘ç”Ÿäº†å˜åŒ–(è¿›è€Œå°±éœ€è¦æŸ¥é‡)
         // parameters:
-        //      strOldBarcode   Ë³±ã·µ»Ø¾É¼ÇÂ¼ÖĞµÄÌõÂëºÅ
-        //      strNewBarcode   Ë³±ã·µ»ØĞÂ¼ÇÂ¼ÖĞµÄÌõÂëºÅ
+        //      strOldBarcode   é¡ºä¾¿è¿”å›æ—§è®°å½•ä¸­çš„æ¡ç å·
+        //      strNewBarcode   é¡ºä¾¿è¿”å›æ–°è®°å½•ä¸­çš„æ¡ç å·
         // return:
-        //      -1  ³ö´í
-        //      0   ÏàµÈ
-        //      1   ²»ÏàµÈ
+        //      -1  å‡ºé”™
+        //      0   ç›¸ç­‰
+        //      1   ä¸ç›¸ç­‰
         static int CompareEntityBarcode(EntityInfo info,
             out string strOldBarcode,
             out string strNewBarcode,
@@ -3279,7 +3279,7 @@ namespace DigitalPlatform.LibraryServer
                 }
                 catch (Exception ex)
                 {
-                    strError = "×°ÔØinfo.OldRecordµ½DOMÊ±·¢Éú´íÎó: " + ex.Message;
+                    strError = "è£…è½½info.OldRecordåˆ°DOMæ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                     return -1;
                 }
 
@@ -3295,7 +3295,7 @@ namespace DigitalPlatform.LibraryServer
                 }
                 catch (Exception ex)
                 {
-                    strError = "×°ÔØinfo.NewRecordµ½DOMÊ±·¢Éú´íÎó: " + ex.Message;
+                    strError = "è£…è½½info.NewRecordåˆ°DOMæ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                     return -1;
                 }
 
@@ -3303,14 +3303,14 @@ namespace DigitalPlatform.LibraryServer
             }
 
             if (strOldBarcode != strNewBarcode)
-                return 1;   // ²»ÏàµÈ
+                return 1;   // ä¸ç›¸ç­‰
 
-            return 0;   // ÏàµÈ
+            return 0;   // ç›¸ç­‰
         }
          */
 
-        // ¹¹Ôì³öÊÊºÏ±£´æµÄĞÂ²á¼ÇÂ¼
-        // Ö÷ÒªÊÇÎªÁË°Ñ´ı¼Ó¹¤µÄ¼ÇÂ¼ÖĞ£¬¿ÉÄÜ³öÏÖµÄÊôÓÚ¡°Á÷Í¨ĞÅÏ¢¡±µÄ×Ö¶ÎÈ¥³ı£¬±ÜÃâ³öÏÖ°²È«ĞÔÎÊÌâ
+        // æ„é€ å‡ºé€‚åˆä¿å­˜çš„æ–°å†Œè®°å½•
+        // ä¸»è¦æ˜¯ä¸ºäº†æŠŠå¾…åŠ å·¥çš„è®°å½•ä¸­ï¼Œå¯èƒ½å‡ºç°çš„å±äºâ€œæµé€šä¿¡æ¯â€çš„å­—æ®µå»é™¤ï¼Œé¿å…å‡ºç°å®‰å…¨æ€§é—®é¢˜
         static int BuildNewEntityRecord(string strOriginXml,
             out string strXml,
             out string strError)
@@ -3326,11 +3326,11 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "×°ÔØstrOriginXmlµ½DOMÊ±³ö´í: " + ex.Message;
+                strError = "è£…è½½strOriginXmlåˆ°DOMæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
-            // Á÷Í¨ÔªËØÃûÁĞ±í
+            // æµé€šå…ƒç´ ååˆ—è¡¨
             string[] element_names = new string[] {
                 "borrower",
                 "borrowDate",
@@ -3349,7 +3349,7 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
-        // É¾³ı²á¼ÇÂ¼µÄ²Ù×÷
+        // åˆ é™¤å†Œè®°å½•çš„æ“ä½œ
         int DoEntityOperDelete(
             SessionInfo sessioninfo,
             bool bForce,
@@ -3357,7 +3357,7 @@ namespace DigitalPlatform.LibraryServer
             RmsChannel channel,
             EntityInfo info,
             string strOldBarcode,
-            string strNewBarcode,   // TODO: ±¾²ÎÊıÊÇ·ñ¿ÉÒÔ·Ï³ı?
+            string strNewBarcode,   // TODO: æœ¬å‚æ•°æ˜¯å¦å¯ä»¥åºŸé™¤?
             XmlDocument domOldRec,
             ref XmlDocument domOperLog,
             ref List<EntityInfo> ErrorInfos)
@@ -3373,7 +3373,7 @@ namespace DigitalPlatform.LibraryServer
             {
                 if (info.NewRecPath != info.OldRecPath)
                 {
-                    strError = "actionÎªdeleteÊ±, Èç¹ûinfo.NewRecPath²»¿Õ£¬ÔòÆäÄÚÈİ±ØĞëºÍinfo.OldRecPathÒ»ÖÂ¡£(info.NewRecPath='" + info.NewRecPath + "' info.OldRecPath='" + info.OldRecPath + "')";
+                    strError = "actionä¸ºdeleteæ—¶, å¦‚æœinfo.NewRecPathä¸ç©ºï¼Œåˆ™å…¶å†…å®¹å¿…é¡»å’Œinfo.OldRecPathä¸€è‡´ã€‚(info.NewRecPath='" + info.NewRecPath + "' info.OldRecPath='" + info.OldRecPath + "')";
                     return -1;
                 }
             }
@@ -3383,21 +3383,21 @@ namespace DigitalPlatform.LibraryServer
             }
 
 
-            // Èç¹û¼ÇÂ¼Â·¾¶Îª¿Õ, ÔòÏÈ»ñµÃ¼ÇÂ¼Â·¾¶
+            // å¦‚æœè®°å½•è·¯å¾„ä¸ºç©º, åˆ™å…ˆè·å¾—è®°å½•è·¯å¾„
             if (String.IsNullOrEmpty(info.NewRecPath) == true)
             {
                 List<string> aPath = null;
 
                 if (String.IsNullOrEmpty(strOldBarcode) == true)
                 {
-                    strError = "info.OldRecordÖĞµÄ<barcode>ÔªËØÖĞµÄ²áÌõÂëºÅ£¬ºÍinfo.RecPath²ÎÊıÖµ£¬²»ÄÜÍ¬Ê±Îª¿Õ¡£";
+                    strError = "info.OldRecordä¸­çš„<barcode>å…ƒç´ ä¸­çš„å†Œæ¡ç å·ï¼Œå’Œinfo.RecPathå‚æ•°å€¼ï¼Œä¸èƒ½åŒæ—¶ä¸ºç©ºã€‚";
                     goto ERROR1;
                 }
 
-                // ±¾º¯ÊıÖ»¸ºÔğ²éÖØ, ²¢²»»ñµÃ¼ÇÂ¼Ìå
+                // æœ¬å‡½æ•°åªè´Ÿè´£æŸ¥é‡, å¹¶ä¸è·å¾—è®°å½•ä½“
                 // return:
                 //      -1  error
-                //      ÆäËû    ÃüÖĞ¼ÇÂ¼ÌõÊı(²»³¬¹ınMax¹æ¶¨µÄ¼«ÏŞ)
+                //      å…¶ä»–    å‘½ä¸­è®°å½•æ¡æ•°(ä¸è¶…è¿‡nMaxè§„å®šçš„æé™)
                 nRet = this.SearchItemRecDup(
                     // sessioninfo.Channels,
                     channel,
@@ -3407,14 +3407,14 @@ namespace DigitalPlatform.LibraryServer
                     out strError);
                 if (nRet == -1)
                 {
-                    strError = "É¾³ı²Ù×÷ÖĞÌõÂëºÅ²éÖØ½×¶Î·¢Éú´íÎó:" + strError;
+                    strError = "åˆ é™¤æ“ä½œä¸­æ¡ç å·æŸ¥é‡é˜¶æ®µå‘ç”Ÿé”™è¯¯:" + strError;
                     goto ERROR1;
                 }
 
                 if (nRet == 0)
                 {
                     error = new EntityInfo(info);
-                    error.ErrorInfo = "²áÌõÂëºÅÎª '" + strOldBarcode + "' µÄ²á¼ÇÂ¼ÒÑ²»´æÔÚ";
+                    error.ErrorInfo = "å†Œæ¡ç å·ä¸º '" + strOldBarcode + "' çš„å†Œè®°å½•å·²ä¸å­˜åœ¨";
                     error.ErrorCode = ErrorCodeValue.NotFound;
                     ErrorInfos.Add(error);
                     return -1;
@@ -3427,20 +3427,20 @@ namespace DigitalPlatform.LibraryServer
                     aPath.CopyTo(pathlist);
                      * */
 
-                    // ÔÚÉ¾³ı²Ù×÷ÖĞ£¬Óöµ½ÖØ¸´µÄÊÇºÜÆ½³£µÄÊÂÇé¡£Ö»Òª
-                    // info.OldRecPathÄÜ¹»ÇåÎúµØÖ¸³öÒªÉ¾³ıµÄÄÇÒ»Ìõ£¬¾Í¿ÉÒÔÖ´ĞĞÉ¾³ı
+                    // åœ¨åˆ é™¤æ“ä½œä¸­ï¼Œé‡åˆ°é‡å¤çš„æ˜¯å¾ˆå¹³å¸¸çš„äº‹æƒ…ã€‚åªè¦
+                    // info.OldRecPathèƒ½å¤Ÿæ¸…æ™°åœ°æŒ‡å‡ºè¦åˆ é™¤çš„é‚£ä¸€æ¡ï¼Œå°±å¯ä»¥æ‰§è¡Œåˆ é™¤
                     if (String.IsNullOrEmpty(info.OldRecPath) == false)
                     {
                         if (aPath.IndexOf(info.OldRecPath) == -1)
                         {
-                            strError = "ÌõÂëºÅ '" + strOldBarcode + "' ÒÑ¾­±»ÏÂÁĞ¶àÌõ²á¼ÇÂ¼Ê¹ÓÃÁË: " + StringUtil.MakePathList(aPath)/*String.Join(",", pathlist)*/ + "'£¬µ«²¢²»°üÀ¨info.OldRecPathËùÖ¸µÄÂ·¾¶ '" + info.OldRecPath + "'¡£É¾³ı²Ù×÷Ê§°Ü¡£";
+                            strError = "æ¡ç å· '" + strOldBarcode + "' å·²ç»è¢«ä¸‹åˆ—å¤šæ¡å†Œè®°å½•ä½¿ç”¨äº†: " + StringUtil.MakePathList(aPath)/*String.Join(",", pathlist)*/ + "'ï¼Œä½†å¹¶ä¸åŒ…æ‹¬info.OldRecPathæ‰€æŒ‡çš„è·¯å¾„ '" + info.OldRecPath + "'ã€‚åˆ é™¤æ“ä½œå¤±è´¥ã€‚";
                             goto ERROR1;
                         }
                         info.NewRecPath = info.OldRecPath;
                     }
                     else
                     {
-                        strError = "ÌõÂëºÅ '" + strOldBarcode + "' ÒÑ¾­±»ÏÂÁĞ¶àÌõ²á¼ÇÂ¼Ê¹ÓÃÁË: " + StringUtil.MakePathList(aPath)/*String.Join(",", pathlist)*/ + "'£¬ÔÚÃ»ÓĞÖ¸¶¨info.OldRecPathµÄÇé¿öÏÂ£¬ÎŞ·¨¶¨Î»ºÍÉ¾³ı¡£";
+                        strError = "æ¡ç å· '" + strOldBarcode + "' å·²ç»è¢«ä¸‹åˆ—å¤šæ¡å†Œè®°å½•ä½¿ç”¨äº†: " + StringUtil.MakePathList(aPath)/*String.Join(",", pathlist)*/ + "'ï¼Œåœ¨æ²¡æœ‰æŒ‡å®šinfo.OldRecPathçš„æƒ…å†µä¸‹ï¼Œæ— æ³•å®šä½å’Œåˆ é™¤ã€‚";
                         goto ERROR1;
                     }
                 }
@@ -3463,7 +3463,7 @@ namespace DigitalPlatform.LibraryServer
 
         REDOLOAD:
 
-            // ÏÈ¶Á³öÊı¾İ¿âÖĞ´ËÎ»ÖÃµÄÒÑÓĞ¼ÇÂ¼
+            // å…ˆè¯»å‡ºæ•°æ®åº“ä¸­æ­¤ä½ç½®çš„å·²æœ‰è®°å½•
             lRet = channel.GetRes(info.NewRecPath,
                 out strExistingXml,
                 out strMetaData,
@@ -3475,7 +3475,7 @@ namespace DigitalPlatform.LibraryServer
                 if (channel.ErrorCode == ChannelErrorCode.NotFound)
                 {
                     error = new EntityInfo(info);
-                    error.ErrorInfo = "²áÌõÂëºÅÎª '" + strOldBarcode + "' µÄ²á¼ÇÂ¼ '" + info.NewRecPath + "' ÒÑ²»´æÔÚ";
+                    error.ErrorInfo = "å†Œæ¡ç å·ä¸º '" + strOldBarcode + "' çš„å†Œè®°å½• '" + info.NewRecPath + "' å·²ä¸å­˜åœ¨";
                     error.ErrorCode = channel.OriginErrorCode;
                     ErrorInfos.Add(error);
                     return -1;
@@ -3483,14 +3483,14 @@ namespace DigitalPlatform.LibraryServer
                 else
                 {
                     error = new EntityInfo(info);
-                    error.ErrorInfo = "É¾³ı²Ù×÷·¢Éú´íÎó, ÔÚ¶ÁÈëÔ­ÓĞ¼ÇÂ¼ '" + info.NewRecPath + "' ½×¶Î:" + strError;
+                    error.ErrorInfo = "åˆ é™¤æ“ä½œå‘ç”Ÿé”™è¯¯, åœ¨è¯»å…¥åŸæœ‰è®°å½• '" + info.NewRecPath + "' é˜¶æ®µ:" + strError;
                     error.ErrorCode = channel.OriginErrorCode;
                     ErrorInfos.Add(error);
                     return -1;
                 }
             }
 
-            // °Ñ¼ÇÂ¼×°ÈëDOM
+            // æŠŠè®°å½•è£…å…¥DOM
             XmlDocument domExist = new XmlDocument();
 
             try
@@ -3499,17 +3499,17 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "strExistXml×°ÔØ½øÈëDOMÊ±·¢Éú´íÎó: " + ex.Message;
+                strError = "strExistXmlè£…è½½è¿›å…¥DOMæ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                 goto ERROR1;
             }
 
-            // ¹Û²ìÒÑ¾­´æÔÚµÄ¼ÇÂ¼ÖĞ£¬²áÌõÂëºÅÊÇ·ñºÍstrOldBarcodeÒ»ÖÂ
+            // è§‚å¯Ÿå·²ç»å­˜åœ¨çš„è®°å½•ä¸­ï¼Œå†Œæ¡ç å·æ˜¯å¦å’ŒstrOldBarcodeä¸€è‡´
             if (String.IsNullOrEmpty(strOldBarcode) == false)
             {
                 string strExistingBarcode = DomUtil.GetElementText(domExist.DocumentElement, "barcode");
                 if (strExistingBarcode != strOldBarcode)
                 {
-                    strError = "Â·¾¶Îª '" + info.NewRecPath + "' µÄ²á¼ÇÂ¼ÖĞ<barcode>ÔªËØÖĞµÄ²áÌõÂëºÅ '" + strExistingBarcode + "' ºÍstrOldXmlÖĞ<barcode>ÔªËØÖĞµÄ²áÌõÂëºÅ '" + strOldBarcode + "' ²»Ò»ÖÂ¡£¾Ü¾øÉ¾³ı(Èç¹ûÔÊĞíÉ¾³ı£¬Ôò»áÔì³É²»¾­ÒâÉ¾³ıÁË±ğµÄ²á¼ÇÂ¼µÄÎ£ÏÕ)¡£";
+                    strError = "è·¯å¾„ä¸º '" + info.NewRecPath + "' çš„å†Œè®°å½•ä¸­<barcode>å…ƒç´ ä¸­çš„å†Œæ¡ç å· '" + strExistingBarcode + "' å’ŒstrOldXmlä¸­<barcode>å…ƒç´ ä¸­çš„å†Œæ¡ç å· '" + strOldBarcode + "' ä¸ä¸€è‡´ã€‚æ‹’ç»åˆ é™¤(å¦‚æœå…è®¸åˆ é™¤ï¼Œåˆ™ä¼šé€ æˆä¸ç»æ„åˆ é™¤äº†åˆ«çš„å†Œè®°å½•çš„å±é™©)ã€‚";
                     goto ERROR1;
                 }
             }
@@ -3517,20 +3517,20 @@ namespace DigitalPlatform.LibraryServer
 
             if (bForce == false)
             {
-                // ¹Û²ìÒÑ¾­´æÔÚµÄ¼ÇÂ¼ÊÇ·ñÓĞÁ÷Í¨ĞÅÏ¢
+                // è§‚å¯Ÿå·²ç»å­˜åœ¨çš„è®°å½•æ˜¯å¦æœ‰æµé€šä¿¡æ¯
                 string strDetail = "";
                 bool bHasCirculationInfo = IsEntityHasCirculationInfo(domExist,
                     out strDetail);
 
                 if (bHasCirculationInfo == true)
                 {
-                    strError = "ÄâÉ¾³ıµÄ²á¼ÇÂ¼ '" + info.NewRecPath + "' ÖĞ°üº¬ÓĞÁ÷Í¨ĞÅÏ¢(" + strDetail + ")£¬²»ÄÜÉ¾³ı¡£";
+                    strError = "æ‹Ÿåˆ é™¤çš„å†Œè®°å½• '" + info.NewRecPath + "' ä¸­åŒ…å«æœ‰æµé€šä¿¡æ¯(" + strDetail + ")ï¼Œä¸èƒ½åˆ é™¤ã€‚";
                     goto ERROR1;
                 }
             }
 
-            // ±È½ÏÊ±¼ä´Á
-            // ¹Û²ìÊ±¼ä´ÁÊÇ·ñ·¢Éú±ä»¯
+            // æ¯”è¾ƒæ—¶é—´æˆ³
+            // è§‚å¯Ÿæ—¶é—´æˆ³æ˜¯å¦å‘ç”Ÿå˜åŒ–
             nRet = ByteArray.Compare(info.OldTimestamp, exist_timestamp);
             if (nRet != 0)
             {
@@ -3538,28 +3538,28 @@ namespace DigitalPlatform.LibraryServer
                 if (bForce == true)
                 {
                     error = new EntityInfo(info);
-                    error.NewTimestamp = exist_timestamp;   // ÈÃÇ°¶ËÖªµÀ¿âÖĞ¼ÇÂ¼Êµ¼ÊÉÏ·¢Éú¹ı±ä»¯
-                    error.ErrorInfo = "Êı¾İ¿âÖĞ¼´½«É¾³ıµÄ²á¼ÇÂ¼ÒÑ¾­·¢ÉúÁË±ä»¯£¬ÇëÖØĞÂ×°ÔØ¡¢×ĞÏ¸ºË¶ÔºóÔÙĞĞÉ¾³ı¡£";
+                    error.NewTimestamp = exist_timestamp;   // è®©å‰ç«¯çŸ¥é“åº“ä¸­è®°å½•å®é™…ä¸Šå‘ç”Ÿè¿‡å˜åŒ–
+                    error.ErrorInfo = "æ•°æ®åº“ä¸­å³å°†åˆ é™¤çš„å†Œè®°å½•å·²ç»å‘ç”Ÿäº†å˜åŒ–ï¼Œè¯·é‡æ–°è£…è½½ã€ä»”ç»†æ ¸å¯¹åå†è¡Œåˆ é™¤ã€‚";
                     error.ErrorCode = ErrorCodeValue.TimestampMismatch;
                     ErrorInfos.Add(error);
                     return -1;
                 }
 
-                // Èç¹ûÇ°¶Ë¸ø³öÁË¾É¼ÇÂ¼£¬¾ÍÓĞºÍ¿âÖĞ¼ÇÂ¼½øĞĞ±È½ÏµÄ»ù´¡
+                // å¦‚æœå‰ç«¯ç»™å‡ºäº†æ—§è®°å½•ï¼Œå°±æœ‰å’Œåº“ä¸­è®°å½•è¿›è¡Œæ¯”è¾ƒçš„åŸºç¡€
                 if (String.IsNullOrEmpty(info.OldRecord) == false)
                 {
-                    // ±È½ÏÁ½¸ö¼ÇÂ¼, ¿´¿´ºÍ²áÒªº¦ĞÅÏ¢ÓĞ¹ØµÄ×Ö¶ÎÊÇ·ñ·¢ÉúÁË±ä»¯
+                    // æ¯”è¾ƒä¸¤ä¸ªè®°å½•, çœ‹çœ‹å’Œå†Œè¦å®³ä¿¡æ¯æœ‰å…³çš„å­—æ®µæ˜¯å¦å‘ç”Ÿäº†å˜åŒ–
                     // return:
-                    //      0   Ã»ÓĞ±ä»¯
-                    //      1   ÓĞ±ä»¯
+                    //      0   æ²¡æœ‰å˜åŒ–
+                    //      1   æœ‰å˜åŒ–
                     nRet = IsRegisterInfoChanged(domExist,
                         domOldRec);
                     if (nRet == 1)
                     {
 
                         error = new EntityInfo(info);
-                        error.NewTimestamp = exist_timestamp;   // ÈÃÇ°¶ËÖªµÀ¿âÖĞ¼ÇÂ¼Êµ¼ÊÉÏ·¢Éú¹ı±ä»¯
-                        error.ErrorInfo = "Êı¾İ¿âÖĞ¼´½«É¾³ıµÄ²á¼ÇÂ¼ÒÑ¾­·¢ÉúÁË±ä»¯£¬ÇëÖØĞÂ×°ÔØ¡¢×ĞÏ¸ºË¶ÔºóÔÙĞĞÉ¾³ı¡£";
+                        error.NewTimestamp = exist_timestamp;   // è®©å‰ç«¯çŸ¥é“åº“ä¸­è®°å½•å®é™…ä¸Šå‘ç”Ÿè¿‡å˜åŒ–
+                        error.ErrorInfo = "æ•°æ®åº“ä¸­å³å°†åˆ é™¤çš„å†Œè®°å½•å·²ç»å‘ç”Ÿäº†å˜åŒ–ï¼Œè¯·é‡æ–°è£…è½½ã€ä»”ç»†æ ¸å¯¹åå†è¡Œåˆ é™¤ã€‚";
                         error.ErrorCode = ErrorCodeValue.TimestampMismatch;
                         ErrorInfos.Add(error);
                         return -1;
@@ -3570,7 +3570,7 @@ namespace DigitalPlatform.LibraryServer
                 info.NewTimestamp = exist_timestamp;
             }
 
-            // Ö»ÓĞorderÈ¨ÏŞµÄÇé¿ö
+            // åªæœ‰orderæƒé™çš„æƒ…å†µ
             if (StringUtil.IsInList("setiteminfo", sessioninfo.RightsOrigin) == false
                 && StringUtil.IsInList("setentities", sessioninfo.RightsOrigin) == false
                 && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == true)
@@ -3579,49 +3579,49 @@ namespace DigitalPlatform.LibraryServer
                 string strEntityDbName = ResPath.GetDbName(info.NewRecPath);
                 if (String.IsNullOrEmpty(strEntityDbName) == true)
                 {
-                    strError = "´ÓÂ·¾¶ '" + info.NewRecPath + "' ÖĞ»ñµÃÊı¾İ¿âÃûÊ±Ê§°Ü";
+                    strError = "ä»è·¯å¾„ '" + info.NewRecPath + "' ä¸­è·å¾—æ•°æ®åº“åæ—¶å¤±è´¥";
                     goto ERROR1;
                 }
 
                 string strBiblioDbName = "";
 
-                // ¸ù¾İÊµÌå¿âÃû, ÕÒµ½¶ÔÓ¦µÄÊéÄ¿¿âÃû
-                // ×¢Òâ£¬·µ»Ø1µÄÊ±ºò£¬strBiblioDbNameÒ²ÓĞ¿ÉÄÜÎª¿Õ
+                // æ ¹æ®å®ä½“åº“å, æ‰¾åˆ°å¯¹åº”çš„ä¹¦ç›®åº“å
+                // æ³¨æ„ï¼Œè¿”å›1çš„æ—¶å€™ï¼ŒstrBiblioDbNameä¹Ÿæœ‰å¯èƒ½ä¸ºç©º
                 // return:
-                //      -1  ³ö´í
-                //      0   Ã»ÓĞÕÒµ½
-                //      1   ÕÒµ½
+                //      -1  å‡ºé”™
+                //      0   æ²¡æœ‰æ‰¾åˆ°
+                //      1   æ‰¾åˆ°
                 nRet = GetBiblioDbNameByItemDbName(strEntityDbName,
                 out strBiblioDbName,
                 out strError);
                 if (nRet == 0 || nRet == -1)
                 {
-                    strError = "¸ù¾İÊµÌå¿âÃû '" + strEntityDbName + "' ÖĞ»ñµÃÊéÄ¿¿âÃûÊ±Ê§°Ü";
+                    strError = "æ ¹æ®å®ä½“åº“å '" + strEntityDbName + "' ä¸­è·å¾—ä¹¦ç›®åº“åæ—¶å¤±è´¥";
                     goto ERROR1;
                 }
 
                 // BUG !!! string strBiblioDbName = ResPath.GetDbName(info.NewRecPath);
 
-                // ·Ç¹¤×÷¿â
+                // éå·¥ä½œåº“
                 if (IsOrderWorkBiblioDb(strBiblioDbName) == false)
                 {
-                    // ·Ç¹¤×÷¿â¡£ÒªÇó<state>°üº¬¡°¼Ó¹¤ÖĞ¡±
+                    // éå·¥ä½œåº“ã€‚è¦æ±‚<state>åŒ…å«â€œåŠ å·¥ä¸­â€
                     string strState = DomUtil.GetElementText(domExist.DocumentElement,
                         "state");
                     if (IncludeStateProcessing(strState) == false)
                     {
-                        strError = "µ±Ç°ÕÊ»§Ö»ÓĞorderÈ¨ÏŞ¶øÃ»ÓĞsetiteminfo(»òsetentities)È¨ÏŞ£¬²»ÄÜÓÃdelete¹¦ÄÜÉ¾³ı´ÓÊôÓÚ·Ç¹¤×÷¿âµÄ¡¢×´Ì¬²»°üº¬¡°¼Ó¹¤ÖĞ¡±µÄÊµÌå¼ÇÂ¼ '" + info.NewRecPath + "'";
-                        goto ERROR1;    // TODO: ÈçºÎ·µ»ØAccessDenied´íÎóÂëÄØ?
+                        strError = "å½“å‰å¸æˆ·åªæœ‰orderæƒé™è€Œæ²¡æœ‰setiteminfo(æˆ–setentities)æƒé™ï¼Œä¸èƒ½ç”¨deleteåŠŸèƒ½åˆ é™¤ä»å±äºéå·¥ä½œåº“çš„ã€çŠ¶æ€ä¸åŒ…å«â€œåŠ å·¥ä¸­â€çš„å®ä½“è®°å½• '" + info.NewRecPath + "'";
+                        goto ERROR1;    // TODO: å¦‚ä½•è¿”å›AccessDeniedé”™è¯¯ç å‘¢?
                     }
                 }
             }
 
             string strLibraryCode = "";
-            // ¼ì²éÒ»¸ö²á¼ÇÂ¼µÄ¹İ²ØµØµãÊÇ·ñ·ûºÏ¹İ´úÂëÁĞ±íÒªÇó
+            // æ£€æŸ¥ä¸€ä¸ªå†Œè®°å½•çš„é¦†è—åœ°ç‚¹æ˜¯å¦ç¬¦åˆé¦†ä»£ç åˆ—è¡¨è¦æ±‚
             // return:
-            //      -1  ¼ì²é¹ı³Ì³ö´í
-            //      0   ·ûºÏÒªÇó
-            //      1   ²»·ûºÏÒªÇó
+            //      -1  æ£€æŸ¥è¿‡ç¨‹å‡ºé”™
+            //      0   ç¬¦åˆè¦æ±‚
+            //      1   ä¸ç¬¦åˆè¦æ±‚
             nRet = CheckItemLibraryCode(domExist,
                 sessioninfo,
                         // sessioninfo.LibraryCodeList,
@@ -3632,12 +3632,12 @@ namespace DigitalPlatform.LibraryServer
 
 
 
-            // ¼ì²é¾É¼ÇÂ¼ÊÇ·ñÊôÓÚ¹ÜÏ½·¶Î§
+            // æ£€æŸ¥æ—§è®°å½•æ˜¯å¦å±äºç®¡è¾–èŒƒå›´
             if (sessioninfo.GlobalUser == false)
             {
                 if (nRet != 0)
                 {
-                    strError = "¼´½«±»É¾³ıµÄ²á¼ÇÂ¼ '" + info.NewRecPath + "' Æä¹İ²ØµØµã²»·ûºÏÒªÇó: " + strError;
+                    strError = "å³å°†è¢«åˆ é™¤çš„å†Œè®°å½• '" + info.NewRecPath + "' å…¶é¦†è—åœ°ç‚¹ä¸ç¬¦åˆè¦æ±‚: " + strError;
                     goto ERROR1;
                 }
             }
@@ -3654,41 +3654,41 @@ namespace DigitalPlatform.LibraryServer
                 {
                     if (nRedoCount > 10)
                     {
-                        strError = "·´¸´É¾³ı¾ùÓöµ½Ê±¼ä´Á³åÍ», ³¬¹ı10´ÎÖØÊÔÈÔÈ»Ê§°Ü";
+                        strError = "åå¤åˆ é™¤å‡é‡åˆ°æ—¶é—´æˆ³å†²çª, è¶…è¿‡10æ¬¡é‡è¯•ä»ç„¶å¤±è´¥";
                         goto ERROR1;
                     }
-                    // ·¢ÏÖÊ±¼ä´Á²»Æ¥Åä
-                    // ÖØ¸´½øĞĞÌáÈ¡ÒÑ´æÔÚ¼ÇÂ¼\±È½ÏµÄ¹ı³Ì
+                    // å‘ç°æ—¶é—´æˆ³ä¸åŒ¹é…
+                    // é‡å¤è¿›è¡Œæå–å·²å­˜åœ¨è®°å½•\æ¯”è¾ƒçš„è¿‡ç¨‹
                     nRedoCount++;
                     goto REDOLOAD;
                 }
 
                 error = new EntityInfo(info);
                 error.NewTimestamp = output_timestamp;
-                error.ErrorInfo = "É¾³ı²Ù×÷·¢Éú´íÎó:" + strError;
+                error.ErrorInfo = "åˆ é™¤æ“ä½œå‘ç”Ÿé”™è¯¯:" + strError;
                 error.ErrorCode = channel.OriginErrorCode;
                 ErrorInfos.Add(error);
                 return -1;
             }
             else
             {
-                // ³É¹¦
+                // æˆåŠŸ
                 DomUtil.SetElementText(domOperLog.DocumentElement,
     "libraryCode",
-    strLibraryCode);    // ²áËùÔÚµÄ¹İ´úÂë
+    strLibraryCode);    // å†Œæ‰€åœ¨çš„é¦†ä»£ç 
 
                 DomUtil.SetElementText(domOperLog.DocumentElement, "action", "delete");
                 if (String.IsNullOrEmpty(strStyle) == false)
                     DomUtil.SetElementText(domOperLog.DocumentElement, "style", strStyle);
 
-                // ²»´´½¨<record>ÔªËØ
+                // ä¸åˆ›å»º<record>å…ƒç´ 
 
                 XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
                     "oldRecord", strExistingXml);
                 DomUtil.SetAttr(node, "recPath", info.NewRecPath);
 
 
-                // Èç¹ûÉ¾³ı³É¹¦£¬Ôò²»±ØÒªÔÚÊı×éÖĞ·µ»Ø±íÊ¾³É¹¦µÄĞÅÏ¢ÔªËØÁË
+                // å¦‚æœåˆ é™¤æˆåŠŸï¼Œåˆ™ä¸å¿…è¦åœ¨æ•°ç»„ä¸­è¿”å›è¡¨ç¤ºæˆåŠŸçš„ä¿¡æ¯å…ƒç´ äº†
             }
 
             return 0;
@@ -3700,13 +3700,13 @@ namespace DigitalPlatform.LibraryServer
             return -1;
         }
 
-        // TODO: Èç¹ûÍâ²¿Ã»ÓĞ½øĞĞ²éÖØ£¬ÕâÀïĞèÒª¼ì²éÊı¾İ¿âÖĞÒÑ¾­´æÔÚµÄ¼ÇÂ¼µÄÌõÂëºÅºÍ¼´½«±£´æµÄÊÇ·ñ·¢Éú±ä»¯£¬·¢Éú±ä»¯ÔòĞèÒª×·¼Ó²éÖØ
-        // Ö´ĞĞSetEntities APIÖĞµÄ"change"²Ù×÷
-        // 1) ²Ù×÷³É¹¦ºó, NewRecordÖĞÓĞÊµ¼Ê±£´æµÄĞÂ¼ÇÂ¼£¬NewTimeStampÎªĞÂµÄÊ±¼ä´Á
-        // 2) Èç¹û·µ»ØTimeStampMismatch´í£¬ÔòOldRecordÖĞÓĞ¿âÖĞ·¢Éú±ä»¯ºóµÄ¡°Ô­¼ÇÂ¼¡±£¬OldTimeStampÊÇÆäÊ±¼ä´Á
+        // TODO: å¦‚æœå¤–éƒ¨æ²¡æœ‰è¿›è¡ŒæŸ¥é‡ï¼Œè¿™é‡Œéœ€è¦æ£€æŸ¥æ•°æ®åº“ä¸­å·²ç»å­˜åœ¨çš„è®°å½•çš„æ¡ç å·å’Œå³å°†ä¿å­˜çš„æ˜¯å¦å‘ç”Ÿå˜åŒ–ï¼Œå‘ç”Ÿå˜åŒ–åˆ™éœ€è¦è¿½åŠ æŸ¥é‡
+        // æ‰§è¡ŒSetEntities APIä¸­çš„"change"æ“ä½œ
+        // 1) æ“ä½œæˆåŠŸå, NewRecordä¸­æœ‰å®é™…ä¿å­˜çš„æ–°è®°å½•ï¼ŒNewTimeStampä¸ºæ–°çš„æ—¶é—´æˆ³
+        // 2) å¦‚æœè¿”å›TimeStampMismatché”™ï¼Œåˆ™OldRecordä¸­æœ‰åº“ä¸­å‘ç”Ÿå˜åŒ–åçš„â€œåŸè®°å½•â€ï¼ŒOldTimeStampæ˜¯å…¶æ—¶é—´æˆ³
         // return:
-        //      -1  ³ö´í
-        //      0   ³É¹¦
+        //      -1  å‡ºé”™
+        //      0   æˆåŠŸ
         int DoEntityOperChange(
             bool bForce,
             string strStyle,
@@ -3718,17 +3718,17 @@ namespace DigitalPlatform.LibraryServer
         {
             int nRedoCount = 0;
             EntityInfo error = null;
-            bool bExist = true;    // info.RecPathËùÖ¸µÄ¼ÇÂ¼ÊÇ·ñ´æÔÚ?
+            bool bExist = true;    // info.RecPathæ‰€æŒ‡çš„è®°å½•æ˜¯å¦å­˜åœ¨?
 
             int nRet = 0;
             long lRet = 0;
 
             string strError = "";
 
-            // ¼ì²éÒ»ÏÂÂ·¾¶
+            // æ£€æŸ¥ä¸€ä¸‹è·¯å¾„
             if (String.IsNullOrEmpty(info.NewRecPath) == true)
             {
-                strError = "info.NewRecPathÖĞµÄÂ·¾¶²»ÄÜÎª¿Õ";
+                strError = "info.NewRecPathä¸­çš„è·¯å¾„ä¸èƒ½ä¸ºç©º";
                 goto ERROR1;
             }
 
@@ -3736,22 +3736,22 @@ namespace DigitalPlatform.LibraryServer
 
             if (strTargetRecId == "?")
             {
-                strError = "info.NewRecPathÂ·¾¶ '" + strTargetRecId + "' ÖĞ¼ÇÂ¼ID²¿·Ö²»ÄÜÎª'?'";
+                strError = "info.NewRecPathè·¯å¾„ '" + strTargetRecId + "' ä¸­è®°å½•IDéƒ¨åˆ†ä¸èƒ½ä¸º'?'";
                 goto ERROR1;
             }
             if (String.IsNullOrEmpty(strTargetRecId) == true)
             {
-                strError = "info.NewRecPathÂ·¾¶ '" + strTargetRecId + "' ÖĞ¼ÇÂ¼ID²¿·Ö²»ÄÜÎª¿Õ";
+                strError = "info.NewRecPathè·¯å¾„ '" + strTargetRecId + "' ä¸­è®°å½•IDéƒ¨åˆ†ä¸èƒ½ä¸ºç©º";
                 goto ERROR1;
             }
 
             if (info.OldRecPath != info.NewRecPath)
             {
-                strError = "µ±actionÎª\"change\"Ê±£¬info.NewRecordPathÂ·¾¶ '" + info.NewRecPath + "' ºÍinfo.OldRecPath '" +info.OldRecPath+ "' ±ØĞëÏàÍ¬";
+                strError = "å½“actionä¸º\"change\"æ—¶ï¼Œinfo.NewRecordPathè·¯å¾„ '" + info.NewRecPath + "' å’Œinfo.OldRecPath '" +info.OldRecPath+ "' å¿…é¡»ç›¸åŒ";
                 goto ERROR1;
             }
 
-            bool bNoOperations = false; // ÊÇ·ñÎª²»Òª¸²¸Ç<operations>ÄÚÈİ
+            bool bNoOperations = false; // æ˜¯å¦ä¸ºä¸è¦è¦†ç›–<operations>å†…å®¹
             if (StringUtil.IsInList("nooperations", strStyle) == true)
             {
                 bNoOperations = true;
@@ -3763,7 +3763,7 @@ namespace DigitalPlatform.LibraryServer
             string strMetaData = "";
 
 
-            // ÏÈ¶Á³öÊı¾İ¿âÖĞ¼´½«¸²¸ÇÎ»ÖÃµÄÒÑÓĞ¼ÇÂ¼
+            // å…ˆè¯»å‡ºæ•°æ®åº“ä¸­å³å°†è¦†ç›–ä½ç½®çš„å·²æœ‰è®°å½•
 
         REDOLOAD:
 
@@ -3777,7 +3777,7 @@ namespace DigitalPlatform.LibraryServer
             {
                 if (channel.ErrorCode == ChannelErrorCode.NotFound)
                 {
-                    // Èç¹û¼ÇÂ¼²»´æÔÚ, Ôò¹¹ÔìÒ»Ìõ¿ÕµÄ¼ÇÂ¼
+                    // å¦‚æœè®°å½•ä¸å­˜åœ¨, åˆ™æ„é€ ä¸€æ¡ç©ºçš„è®°å½•
                     bExist = false;
                     strExistXml = "<root />";
                     exist_timestamp = null;
@@ -3786,7 +3786,7 @@ namespace DigitalPlatform.LibraryServer
                 else
                 {
                     error = new EntityInfo(info);
-                    error.ErrorInfo = "±£´æ²Ù×÷·¢Éú´íÎó, ÔÚ¶ÁÈëÔ­ÓĞ¼ÇÂ¼½×¶Î:" + strError;
+                    error.ErrorInfo = "ä¿å­˜æ“ä½œå‘ç”Ÿé”™è¯¯, åœ¨è¯»å…¥åŸæœ‰è®°å½•é˜¶æ®µ:" + strError;
                     error.ErrorCode = channel.OriginErrorCode;
                     ErrorInfos.Add(error);
                     return -1;
@@ -3794,7 +3794,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
 
-            // °ÑÁ½¸ö¼ÇÂ¼×°ÈëDOM
+            // æŠŠä¸¤ä¸ªè®°å½•è£…å…¥DOM
 
             XmlDocument domExist = new XmlDocument();
             XmlDocument domNew = new XmlDocument();
@@ -3805,7 +3805,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "strExistXml×°ÔØ½øÈëDOMÊ±·¢Éú´íÎó: " + ex.Message;
+                strError = "strExistXmlè£…è½½è¿›å…¥DOMæ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                 goto ERROR1;
             }
 
@@ -3815,7 +3815,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "info.NewRecord×°ÔØ½øÈëDOMÊ±·¢Éú´íÎó: " + ex.Message;
+                strError = "info.NewRecordè£…è½½è¿›å…¥DOMæ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                 goto ERROR1;
             }
 
@@ -3823,7 +3823,7 @@ namespace DigitalPlatform.LibraryServer
 
             if (bExist == true)
             {
-                // Ö»ÓĞorderÈ¨ÏŞµÄÇé¿ö
+                // åªæœ‰orderæƒé™çš„æƒ…å†µ
                 if (StringUtil.IsInList("setiteminfo", sessioninfo.RightsOrigin) == false
                     && StringUtil.IsInList("setentities", sessioninfo.RightsOrigin) == false
                     && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == true)
@@ -3832,47 +3832,47 @@ namespace DigitalPlatform.LibraryServer
                     string strEntityDbName = ResPath.GetDbName(info.OldRecPath);
                     if (String.IsNullOrEmpty(strEntityDbName) == true)
                     {
-                        strError = "´ÓÂ·¾¶ '" + info.OldRecPath + "' ÖĞ»ñµÃÊı¾İ¿âÃûÊ±Ê§°Ü";
+                        strError = "ä»è·¯å¾„ '" + info.OldRecPath + "' ä¸­è·å¾—æ•°æ®åº“åæ—¶å¤±è´¥";
                         goto ERROR1;
                     }
 
                     string strBiblioDbName = "";
 
-                    // ¸ù¾İÊµÌå¿âÃû, ÕÒµ½¶ÔÓ¦µÄÊéÄ¿¿âÃû
-                    // ×¢Òâ£¬·µ»Ø1µÄÊ±ºò£¬strBiblioDbNameÒ²ÓĞ¿ÉÄÜÎª¿Õ
+                    // æ ¹æ®å®ä½“åº“å, æ‰¾åˆ°å¯¹åº”çš„ä¹¦ç›®åº“å
+                    // æ³¨æ„ï¼Œè¿”å›1çš„æ—¶å€™ï¼ŒstrBiblioDbNameä¹Ÿæœ‰å¯èƒ½ä¸ºç©º
                     // return:
-                    //      -1  ³ö´í
-                    //      0   Ã»ÓĞÕÒµ½
-                    //      1   ÕÒµ½
+                    //      -1  å‡ºé”™
+                    //      0   æ²¡æœ‰æ‰¾åˆ°
+                    //      1   æ‰¾åˆ°
                     nRet = GetBiblioDbNameByItemDbName(strEntityDbName,
                     out strBiblioDbName,
                     out strError);
                     if (nRet == 0 || nRet == -1)
                     {
-                        strError = "¸ù¾İÊµÌå¿âÃû '" + strEntityDbName + "' ÖĞ»ñµÃÊéÄ¿¿âÃûÊ±Ê§°Ü";
+                        strError = "æ ¹æ®å®ä½“åº“å '" + strEntityDbName + "' ä¸­è·å¾—ä¹¦ç›®åº“åæ—¶å¤±è´¥";
                         goto ERROR1;
                     }
                     // BUG !!! string strBiblioDbName = ResPath.GetDbName(info.OldRecPath);
 
-                    // ·Ç¹¤×÷¿â
+                    // éå·¥ä½œåº“
                     if (IsOrderWorkBiblioDb(strBiblioDbName) == false)
                     {
-                        // ·Ç¹¤×÷¿â¡£ÒªÇó<state>°üº¬¡°¼Ó¹¤ÖĞ¡±
+                        // éå·¥ä½œåº“ã€‚è¦æ±‚<state>åŒ…å«â€œåŠ å·¥ä¸­â€
                         string strState = DomUtil.GetElementText(domExist.DocumentElement,
                             "state");
                         if (IncludeStateProcessing(strState) == false)
                         {
-                            strError = "µ±Ç°ÕÊ»§Ö»ÓĞorderÈ¨ÏŞ¶øÃ»ÓĞsetiteminfo(»òsetentities)È¨ÏŞ£¬²»ÄÜÓÃchange¹¦ÄÜĞŞ¸Ä´ÓÊôÓÚ·Ç¹¤×÷¿âµÄ¡¢×´Ì¬²»°üº¬¡°¼Ó¹¤ÖĞ¡±µÄÊµÌå¼ÇÂ¼ '" + info.OldRecPath + "'";
+                            strError = "å½“å‰å¸æˆ·åªæœ‰orderæƒé™è€Œæ²¡æœ‰setiteminfo(æˆ–setentities)æƒé™ï¼Œä¸èƒ½ç”¨changeåŠŸèƒ½ä¿®æ”¹ä»å±äºéå·¥ä½œåº“çš„ã€çŠ¶æ€ä¸åŒ…å«â€œåŠ å·¥ä¸­â€çš„å®ä½“è®°å½• '" + info.OldRecPath + "'";
                             goto ERROR1;
                         }
                     }
                 }
 
-                // ¼ì²éÒ»¸ö²á¼ÇÂ¼µÄ¹İ²ØµØµãÊÇ·ñ·ûºÏ¹İ´úÂëÁĞ±íÒªÇó
+                // æ£€æŸ¥ä¸€ä¸ªå†Œè®°å½•çš„é¦†è—åœ°ç‚¹æ˜¯å¦ç¬¦åˆé¦†ä»£ç åˆ—è¡¨è¦æ±‚
                 // return:
-                //      -1  ¼ì²é¹ı³Ì³ö´í
-                //      0   ·ûºÏÒªÇó
-                //      1   ²»·ûºÏÒªÇó
+                //      -1  æ£€æŸ¥è¿‡ç¨‹å‡ºé”™
+                //      0   ç¬¦åˆè¦æ±‚
+                //      1   ä¸ç¬¦åˆè¦æ±‚
                 nRet = CheckItemLibraryCode(domExist,
                     sessioninfo,
                             // sessioninfo.LibraryCodeList,
@@ -3881,13 +3881,13 @@ namespace DigitalPlatform.LibraryServer
                 if (nRet == -1)
                     goto ERROR1;
 
-                // ¼ì²é¾É¼ÇÂ¼ÊÇ·ñÊôÓÚ¹ÜÏ½·¶Î§
+                // æ£€æŸ¥æ—§è®°å½•æ˜¯å¦å±äºç®¡è¾–èŒƒå›´
                 if (sessioninfo.GlobalUser == false
                     || sessioninfo.UserType == "reader")
                 {
                     if (nRet != 0)
                     {
-                        strError = "¼´½«±»ĞŞ¸ÄµÄ²á¼ÇÂ¼ '" + info.NewRecPath + "' Æä¹İ²ØµØµã²»·ûºÏÒªÇó: " + strError;
+                        strError = "å³å°†è¢«ä¿®æ”¹çš„å†Œè®°å½• '" + info.NewRecPath + "' å…¶é¦†è—åœ°ç‚¹ä¸ç¬¦åˆè¦æ±‚: " + strError;
                         goto ERROR1;
                     }
                 }
@@ -3898,11 +3898,11 @@ namespace DigitalPlatform.LibraryServer
 
             if (bExist == true) // 2009/3/9 
             {
-                // ±È½ÏĞÂ¾É¼ÇÂ¼µÄÌõÂëºÅÊÇ·ñÓĞ¸Ä±ä
+                // æ¯”è¾ƒæ–°æ—§è®°å½•çš„æ¡ç å·æ˜¯å¦æœ‰æ”¹å˜
                 // return:
-                //      -1  ³ö´í
-                //      0   ÏàµÈ
-                //      1   ²»ÏàµÈ
+                //      -1  å‡ºé”™
+                //      0   ç›¸ç­‰
+                //      1   ä¸ç›¸ç­‰
                 nRet = CompareTwoBarcode(domExist,
                     domNew,
                     out strOldBarcode,
@@ -3911,23 +3911,23 @@ namespace DigitalPlatform.LibraryServer
                 if (nRet == -1)
                     goto ERROR1;
 
-                bool bHasCirculationInfo = false;   // ²á¼ÇÂ¼ÀïÃæÊÇ·ñÓĞÁ÷Í¨ĞÅÏ¢
-                // bool bDetectCiculationInfo = false; // ÊÇ·ñÒÑ¾­Ì½²â¹ı²á¼ÇÂ¼ÖĞµÄÁ÷Í¨ĞÅÏ¢
-                string strDetailInfo = "";  // ¹ØÓÚ²á¼ÇÂ¼ÀïÃæÊÇ·ñÓĞÁ÷Í¨ĞÅÏ¢µÄÏêÏ¸ÌáÊ¾ÎÄ×Ö
-                // ¹Û²ìÒÑ¾­´æÔÚµÄ¼ÇÂ¼ÊÇ·ñÓĞÁ÷Í¨ĞÅÏ¢
+                bool bHasCirculationInfo = false;   // å†Œè®°å½•é‡Œé¢æ˜¯å¦æœ‰æµé€šä¿¡æ¯
+                // bool bDetectCiculationInfo = false; // æ˜¯å¦å·²ç»æ¢æµ‹è¿‡å†Œè®°å½•ä¸­çš„æµé€šä¿¡æ¯
+                string strDetailInfo = "";  // å…³äºå†Œè®°å½•é‡Œé¢æ˜¯å¦æœ‰æµé€šä¿¡æ¯çš„è¯¦ç»†æç¤ºæ–‡å­—
+                // è§‚å¯Ÿå·²ç»å­˜åœ¨çš„è®°å½•æ˜¯å¦æœ‰æµé€šä¿¡æ¯
                 bHasCirculationInfo = IsEntityHasCirculationInfo(domExist,
                     out strDetailInfo);
                 // bDetectCiculationInfo = true;
 
 
-                if (nRet == 1)  // ²áÌõÂëºÅÓĞ¸Ä±ä
+                if (nRet == 1)  // å†Œæ¡ç å·æœ‰æ”¹å˜
                 {
                     if (bHasCirculationInfo == true
                         && bForce == false)
                     {
-                        // TODO: ¿É·ñÔö¼ÓÔÊĞíÍ¬Ê±ĞŞ¸ÄËù¹ØÁªµÄÒÑ½èÔÄ¶ÁÕß¼ÇÂ¼ĞŞ¸ÄÄÜÁ¦?
-                        // ÖµµÃ×¢ÒâµÄÊÇÈçºÎ¼ÇÂ¼½ø²Ù×÷ÈÕÖ¾£¬½«À´ÈçºÎ½øĞĞrecoverµÄÎÊÌâ
-                        strError = "ĞŞ¸Ä²Ù×÷±»¾Ü¾ø¡£Òò²á¼ÇÂ¼ '" + info.NewRecPath + "' ÖĞ°üº¬ÓĞÁ÷Í¨ĞÅÏ¢(" + strDetailInfo + ")£¬ËùÒÔĞŞ¸ÄËüÊ±²áÌõÂëºÅÔªËØÄÚÈİ²»ÄÜ¸Ä±ä¡£(µ±Ç°²áÌõÂëºÅ '" + strOldBarcode + "'£¬ÊÔÍ¼ĞŞ¸ÄÎªÌõÂëºÅ '" + strNewBarcode + "')";
+                        // TODO: å¯å¦å¢åŠ å…è®¸åŒæ—¶ä¿®æ”¹æ‰€å…³è”çš„å·²å€Ÿé˜…è¯»è€…è®°å½•ä¿®æ”¹èƒ½åŠ›?
+                        // å€¼å¾—æ³¨æ„çš„æ˜¯å¦‚ä½•è®°å½•è¿›æ“ä½œæ—¥å¿—ï¼Œå°†æ¥å¦‚ä½•è¿›è¡Œrecoverçš„é—®é¢˜
+                        strError = "ä¿®æ”¹æ“ä½œè¢«æ‹’ç»ã€‚å› å†Œè®°å½• '" + info.NewRecPath + "' ä¸­åŒ…å«æœ‰æµé€šä¿¡æ¯(" + strDetailInfo + ")ï¼Œæ‰€ä»¥ä¿®æ”¹å®ƒæ—¶å†Œæ¡ç å·å…ƒç´ å†…å®¹ä¸èƒ½æ”¹å˜ã€‚(å½“å‰å†Œæ¡ç å· '" + strOldBarcode + "'ï¼Œè¯•å›¾ä¿®æ”¹ä¸ºæ¡ç å· '" + strNewBarcode + "')";
                         goto ERROR1;
                     }
                 }
@@ -3936,11 +3936,11 @@ namespace DigitalPlatform.LibraryServer
                 {
                     string strOldLocation = "";
                     string strNewLocation = "";
-                    // ±È½ÏĞÂ¾É¼ÇÂ¼ÖĞµÄ¹İ²ØµØµãÊÇ·ñÓĞ¸Ä±ä
+                    // æ¯”è¾ƒæ–°æ—§è®°å½•ä¸­çš„é¦†è—åœ°ç‚¹æ˜¯å¦æœ‰æ”¹å˜
                     // return:
-                    //      -1  ³ö´í
-                    //      0   ÏàµÈ
-                    //      1   ²»ÏàµÈ
+                    //      -1  å‡ºé”™
+                    //      0   ç›¸ç­‰
+                    //      1   ä¸ç›¸ç­‰
                     nRet = CompareTwoField(
                         "location",
                         domExist,
@@ -3950,29 +3950,29 @@ namespace DigitalPlatform.LibraryServer
                         out strError);
                     if (nRet == -1)
                         goto ERROR1;
-                    if (nRet == 1)  // ÓĞ¸Ä±ä
+                    if (nRet == 1)  // æœ‰æ”¹å˜
                     {
                         if (bForce == false)
                         {
-                            // ÖµµÃ×¢ÒâµÄÊÇÈçºÎ¼ÇÂ¼½ø²Ù×÷ÈÕÖ¾£¬½«À´ÈçºÎ½øĞĞrecoverµÄÎÊÌâ
-                            strError = "ĞŞ¸Ä²Ù×÷±»¾Ü¾ø¡£Òò²á¼ÇÂ¼ '" + info.NewRecPath + "' ÖĞ°üº¬ÓĞÁ÷Í¨ĞÅÏ¢(" + strDetailInfo + ")£¬ËùÒÔĞŞ¸ÄËüÊ±¹İ²ØµØµãÔªËØÄÚÈİ²»ÄÜ¸Ä±ä¡£(µ±Ç°¹İ²ØµØµã '" + strOldLocation + "'£¬ÊÔÍ¼ĞŞ¸ÄÎªµØµã '" + strNewLocation + "')";
+                            // å€¼å¾—æ³¨æ„çš„æ˜¯å¦‚ä½•è®°å½•è¿›æ“ä½œæ—¥å¿—ï¼Œå°†æ¥å¦‚ä½•è¿›è¡Œrecoverçš„é—®é¢˜
+                            strError = "ä¿®æ”¹æ“ä½œè¢«æ‹’ç»ã€‚å› å†Œè®°å½• '" + info.NewRecPath + "' ä¸­åŒ…å«æœ‰æµé€šä¿¡æ¯(" + strDetailInfo + ")ï¼Œæ‰€ä»¥ä¿®æ”¹å®ƒæ—¶é¦†è—åœ°ç‚¹å…ƒç´ å†…å®¹ä¸èƒ½æ”¹å˜ã€‚(å½“å‰é¦†è—åœ°ç‚¹ '" + strOldLocation + "'ï¼Œè¯•å›¾ä¿®æ”¹ä¸ºåœ°ç‚¹ '" + strNewLocation + "')";
                             goto ERROR1;
                         }
                     }
                 }
 
-                // ±È½ÏĞÂ¾É¼ÇÂ¼µÄ×´Ì¬ÊÇ·ñÓĞ¸Ä±ä£¬Èç¹û´ÓÆäËû×´Ì¬ĞŞ¸ÄÎª¡°×¢Ïú¡±×´Ì¬£¬ÔòÓ¦ÒıÆğ×¢Òâ£¬ºóÃæÒª½øĞĞ±ØÒªµÄ¼ì²é
+                // æ¯”è¾ƒæ–°æ—§è®°å½•çš„çŠ¶æ€æ˜¯å¦æœ‰æ”¹å˜ï¼Œå¦‚æœä»å…¶ä»–çŠ¶æ€ä¿®æ”¹ä¸ºâ€œæ³¨é”€â€çŠ¶æ€ï¼Œåˆ™åº”å¼•èµ·æ³¨æ„ï¼Œåé¢è¦è¿›è¡Œå¿…è¦çš„æ£€æŸ¥
 
                 string strOldState = "";
                 string strNewState = "";
 
                 // parameters:
-                //      strOldState   Ë³±ã·µ»Ø¾É¼ÇÂ¼ÖĞµÄ×´Ì¬×Ö·û´®
-                //      strNewState   Ë³±ã·µ»ØĞÂ¼ÇÂ¼ÖĞµÄ×´Ì¬×Ö·û´®
+                //      strOldState   é¡ºä¾¿è¿”å›æ—§è®°å½•ä¸­çš„çŠ¶æ€å­—ç¬¦ä¸²
+                //      strNewState   é¡ºä¾¿è¿”å›æ–°è®°å½•ä¸­çš„çŠ¶æ€å­—ç¬¦ä¸²
                 // return:
-                //      -1  ³ö´í
-                //      0   ÏàµÈ
-                //      1   ²»ÏàµÈ
+                //      -1  å‡ºé”™
+                //      0   ç›¸ç­‰
+                //      1   ä¸ç›¸ç­‰
                 nRet = CompareTwoState(domExist,
                     domNew,
                     out strOldState,
@@ -3983,12 +3983,12 @@ namespace DigitalPlatform.LibraryServer
 
                 if (nRet == 1)
                 {
-                    if ((strOldState != "×¢Ïú" && strOldState != "¶ªÊ§")
-                        && (strNewState == "×¢Ïú" || strNewState == "¶ªÊ§")
+                    if ((strOldState != "æ³¨é”€" && strOldState != "ä¸¢å¤±")
+                        && (strNewState == "æ³¨é”€" || strNewState == "ä¸¢å¤±")
                         && bForce == false)
                     {
 #if NO
-                        // ¹Û²ìÒÑ¾­´æÔÚµÄ¼ÇÂ¼ÊÇ·ñÓĞÁ÷Í¨ĞÅÏ¢
+                        // è§‚å¯Ÿå·²ç»å­˜åœ¨çš„è®°å½•æ˜¯å¦æœ‰æµé€šä¿¡æ¯
                         if (bDetectCiculationInfo == false)
                         {
                             bHasCirculationInfo = IsEntityHasCirculationInfo(domExist,
@@ -4000,23 +4000,23 @@ namespace DigitalPlatform.LibraryServer
                         if (bHasCirculationInfo == true)
                         {
                             // Debug.Assert(bDetectCiculationInfo == true, "");
-                            strError = "×¢Ïú(»ò¶ªÊ§)²Ù×÷±»¾Ü¾ø¡£ÒòÄâ±»×¢ÏúµÄ²á¼ÇÂ¼ '" + info.NewRecPath + "' ÖĞ°üº¬ÓĞÁ÷Í¨ĞÅÏ¢(" + strDetailInfo + ")¡£(µ±Ç°²á×´Ì¬ '" + strOldState + "', ÊÔÍ¼ĞŞ¸ÄÎªĞÂ×´Ì¬ '" + strNewState + "')";
+                            strError = "æ³¨é”€(æˆ–ä¸¢å¤±)æ“ä½œè¢«æ‹’ç»ã€‚å› æ‹Ÿè¢«æ³¨é”€çš„å†Œè®°å½• '" + info.NewRecPath + "' ä¸­åŒ…å«æœ‰æµé€šä¿¡æ¯(" + strDetailInfo + ")ã€‚(å½“å‰å†ŒçŠ¶æ€ '" + strOldState + "', è¯•å›¾ä¿®æ”¹ä¸ºæ–°çŠ¶æ€ '" + strNewState + "')";
                             goto ERROR1;
                         }
                     }
 
-                    // Èç¹ûĞÂ¼ÇÂ¼×´Ì¬Ã»ÓĞ°üº¬¡°¼Ó¹¤ÖĞ¡±(¶ø¾É¼ÇÂ¼×´Ì¬°üº¬ÁË¡°¼Ó¹¤ÖĞ¡±)£¬Òª½øĞĞÔ¤Ô¼¼ì²é
+                    // å¦‚æœæ–°è®°å½•çŠ¶æ€æ²¡æœ‰åŒ…å«â€œåŠ å·¥ä¸­â€(è€Œæ—§è®°å½•çŠ¶æ€åŒ…å«äº†â€œåŠ å·¥ä¸­â€)ï¼Œè¦è¿›è¡Œé¢„çº¦æ£€æŸ¥
                     if (bHasCirculationInfo == false
                         && IncludeStateProcessing(strOldState) == true && IncludeStateProcessing(strNewState) == false)
                     {
                         string strReservationReaderBarcode = "";
 
-                        // ²ì¿´±¾²áÔ¤Ô¼Çé¿ö, ²¢½øĞĞ³õ²½´¦Àí
-                        // TODO: Èç¹ûÎª×¢Ïú´¦Àí£¬ĞèÒªÍ¨ÖªµÈ´ıÕß£¬ÊéÒÑ¾­×¢ÏúÁË£¬²»ÓÃÔÙµÈ´ı
+                        // å¯Ÿçœ‹æœ¬å†Œé¢„çº¦æƒ…å†µ, å¹¶è¿›è¡Œåˆæ­¥å¤„ç†
+                        // TODO: å¦‚æœä¸ºæ³¨é”€å¤„ç†ï¼Œéœ€è¦é€šçŸ¥ç­‰å¾…è€…ï¼Œä¹¦å·²ç»æ³¨é”€äº†ï¼Œä¸ç”¨å†ç­‰å¾…
                         // return:
                         //      -1  error
-                        //      0   Ã»ÓĞĞŞ¸Ä
-                        //      1   ½øĞĞ¹ıĞŞ¸Ä
+                        //      0   æ²¡æœ‰ä¿®æ”¹
+                        //      1   è¿›è¡Œè¿‡ä¿®æ”¹
                         nRet = DoItemReturnReservationCheck(
                             false,
                             ref domNew,
@@ -4024,55 +4024,56 @@ namespace DigitalPlatform.LibraryServer
                             out strError);
                         if (nRet == -1)
                         {
-                            this.WriteErrorLog("SetEntities()ĞŞ¸Ä²á¼ÇÂ¼ " + info.OldRecPath + " µÄ²Ù×÷ÖĞ£¬¼ì²éÔ¤Ô¼¶ÓÁĞµÄ²Ù×÷Ê§°Ü(µ«ÊÇĞŞ¸Ä²á¼ÇÂ¼µÄ²Ù×÷²»Ò»¶¨Ê§°Ü)¡£´íÎóÃèÊö: " + strError);
+                            this.WriteErrorLog("SetEntities()ä¿®æ”¹å†Œè®°å½• " + info.OldRecPath + " çš„æ“ä½œä¸­ï¼Œæ£€æŸ¥é¢„çº¦é˜Ÿåˆ—çš„æ“ä½œå¤±è´¥(ä½†æ˜¯ä¿®æ”¹å†Œè®°å½•çš„æ“ä½œä¸ä¸€å®šå¤±è´¥)ã€‚é”™è¯¯æè¿°: " + strError);
                             goto ERROR1;
                         }
 
                         if (String.IsNullOrEmpty(strReservationReaderBarcode) == false)
                         {
-                            List<string> DeletedNotifyRecPaths = null;  // ±»É¾³ıµÄÍ¨Öª¼ÇÂ¼¡£²»ÓÃ¡£
-                            // Í¨ÖªÔ¤Ô¼µ½ÊéµÄ²Ù×÷
-                            // ³öÓÚ¶Ô¶ÁÕß¿â¼ÓËø·½ÃæµÄ±ãÀû¿¼ÂÇ, µ¥¶À×öÁË´Ëº¯Êı
+                            List<string> DeletedNotifyRecPaths = null;  // è¢«åˆ é™¤çš„é€šçŸ¥è®°å½•ã€‚ä¸ç”¨ã€‚
+                            // é€šçŸ¥é¢„çº¦åˆ°ä¹¦çš„æ“ä½œ
+                            // å‡ºäºå¯¹è¯»è€…åº“åŠ é”æ–¹é¢çš„ä¾¿åˆ©è€ƒè™‘, å•ç‹¬åšäº†æ­¤å‡½æ•°
                             // return:
                             //      -1  error
-                            //      0   Ã»ÓĞÕÒµ½<request>ÔªËØ
+                            //      0   æ²¡æœ‰æ‰¾åˆ°<request>å…ƒç´ 
                             nRet = DoReservationNotify(
-                                channel.Container,
+                                // channel.Container,
+                                channel,
                                 strReservationReaderBarcode,
-                                true,   // ĞèÒªº¯ÊıÄÚ¼ÓËø
+                                true,   // éœ€è¦å‡½æ•°å†…åŠ é”
                                 strNewBarcode,
-                                false,  // ²»ÔÚ´ó¼Ü
-                                false,  // ²»ĞèÒªÔÙĞŞ¸Äµ±Ç°²á¼ÇÂ¼£¬ÒòÎªÇ°ÃæÒÑ¾­ĞŞ¸Ä¹ıÁË
+                                false,  // ä¸åœ¨å¤§æ¶
+                                false,  // ä¸éœ€è¦å†ä¿®æ”¹å½“å‰å†Œè®°å½•ï¼Œå› ä¸ºå‰é¢å·²ç»ä¿®æ”¹è¿‡äº†
                                 out DeletedNotifyRecPaths,
                                 out strError);
                             if (nRet == -1)
                             {
-                                this.WriteErrorLog("SetEntities()ĞŞ¸Ä²á¼ÇÂ¼ " + info.OldRecPath + " µÄ²Ù×÷ÖĞ£¬¼ì²éÔ¤Ô¼¶ÓÁĞµÄ²Ù×÷²Ù×÷ÒÑ¾­³É¹¦, µ«ÊÇÔ¤Ô¼µ½ÊéÍ¨Öª¹¦ÄÜÊ§°Ü, Ô­Òò: " + strError);
+                                this.WriteErrorLog("SetEntities()ä¿®æ”¹å†Œè®°å½• " + info.OldRecPath + " çš„æ“ä½œä¸­ï¼Œæ£€æŸ¥é¢„çº¦é˜Ÿåˆ—çš„æ“ä½œæ“ä½œå·²ç»æˆåŠŸ, ä½†æ˜¯é¢„çº¦åˆ°ä¹¦é€šçŸ¥åŠŸèƒ½å¤±è´¥, åŸå› : " + strError);
                             }
 
                             /*
                             if (this.Statis != null)
                             this.Statis.IncreaseEntryValue(
                                 strLibraryCode,
-                                "³öÄÉ",
-                                "Ô¤Ô¼µ½Êé²á",
+                                "å‡ºçº³",
+                                "é¢„çº¦åˆ°ä¹¦å†Œ",
                                 1);
                              * */
                         }
 
                     }
-                    // endif Èç¹ûĞÂ¼ÇÂ¼×´Ì¬Ã»ÓĞ°üº¬¡°¼Ó¹¤ÖĞ¡±...
+                    // endif å¦‚æœæ–°è®°å½•çŠ¶æ€æ²¡æœ‰åŒ…å«â€œåŠ å·¥ä¸­â€...
 
                 }
             }
 
-            // ¹Û²ìÊ±¼ä´ÁÊÇ·ñ·¢Éú±ä»¯
+            // è§‚å¯Ÿæ—¶é—´æˆ³æ˜¯å¦å‘ç”Ÿå˜åŒ–
             nRet = ByteArray.Compare(info.OldTimestamp, exist_timestamp);
             if (nRet != 0)
             {
-                // Ê±¼ä´Á²»ÏàµÈÁË
-                // ĞèÒª°Ñinfo.OldRecordºÍstrExistXml½øĞĞ±È½Ï£¬¿´¿´ºÍ²áµÇÂ¼ÓĞ¹ØµÄÔªËØ£¨Òªº¦ÔªËØ£©ÖµÊÇ·ñ·¢ÉúÁË±ä»¯¡£
-                // Èç¹ûÕâĞ©Òªº¦ÔªËØ²¢Î´·¢Éú±ä»¯£¬¾Í¼ÌĞø½øĞĞºÏ²¢¡¢¸²¸Ç±£´æ²Ù×÷
+                // æ—¶é—´æˆ³ä¸ç›¸ç­‰äº†
+                // éœ€è¦æŠŠinfo.OldRecordå’ŒstrExistXmlè¿›è¡Œæ¯”è¾ƒï¼Œçœ‹çœ‹å’Œå†Œç™»å½•æœ‰å…³çš„å…ƒç´ ï¼ˆè¦å®³å…ƒç´ ï¼‰å€¼æ˜¯å¦å‘ç”Ÿäº†å˜åŒ–ã€‚
+                // å¦‚æœè¿™äº›è¦å®³å…ƒç´ å¹¶æœªå‘ç”Ÿå˜åŒ–ï¼Œå°±ç»§ç»­è¿›è¡Œåˆå¹¶ã€è¦†ç›–ä¿å­˜æ“ä½œ
 
                 XmlDocument domOld = new XmlDocument();
 
@@ -4082,16 +4083,16 @@ namespace DigitalPlatform.LibraryServer
                 }
                 catch (Exception ex)
                 {
-                    strError = "info.OldRecord×°ÔØ½øÈëDOMÊ±·¢Éú´íÎó: " + ex.Message;
+                    strError = "info.OldRecordè£…è½½è¿›å…¥DOMæ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                     goto ERROR1;
                 }
 
                 if (bForce == false)
                 {
-                    // ±È½ÏÁ½¸ö¼ÇÂ¼, ¿´¿´ºÍ²áµÇÂ¼ÓĞ¹ØµÄ×Ö¶ÎÊÇ·ñ·¢ÉúÁË±ä»¯
+                    // æ¯”è¾ƒä¸¤ä¸ªè®°å½•, çœ‹çœ‹å’Œå†Œç™»å½•æœ‰å…³çš„å­—æ®µæ˜¯å¦å‘ç”Ÿäº†å˜åŒ–
                     // return:
-                    //      0   Ã»ÓĞ±ä»¯
-                    //      1   ÓĞ±ä»¯
+                    //      0   æ²¡æœ‰å˜åŒ–
+                    //      1   æœ‰å˜åŒ–
                     nRet = IsRegisterInfoChanged(domOld,
                         domExist);
                 }
@@ -4099,24 +4100,24 @@ namespace DigitalPlatform.LibraryServer
                 if (nRet == 1 || bForce == true) // 2008/5/29 changed
                 {
                     error = new EntityInfo(info);
-                    // ´íÎóĞÅÏ¢ÖĞ, ·µ»ØÁËĞŞ¸Ä¹ıµÄÔ­¼ÇÂ¼ºÍĞÂÊ±¼ä´Á
+                    // é”™è¯¯ä¿¡æ¯ä¸­, è¿”å›äº†ä¿®æ”¹è¿‡çš„åŸè®°å½•å’Œæ–°æ—¶é—´æˆ³
                     error.OldRecord = strExistXml;
                     error.OldTimestamp = exist_timestamp;
 
                     if (bExist == false)
-                        error.ErrorInfo = "±£´æ²Ù×÷·¢Éú´íÎó: Êı¾İ¿âÖĞµÄÔ­¼ÇÂ¼ (Â·¾¶Îª'" + info.OldRecPath + "') ÒÑ±»É¾³ı¡£";
+                        error.ErrorInfo = "ä¿å­˜æ“ä½œå‘ç”Ÿé”™è¯¯: æ•°æ®åº“ä¸­çš„åŸè®°å½• (è·¯å¾„ä¸º'" + info.OldRecPath + "') å·²è¢«åˆ é™¤ã€‚";
                     else
-                        error.ErrorInfo = "±£´æ²Ù×÷·¢Éú´íÎó: Êı¾İ¿âÖĞµÄÔ­¼ÇÂ¼ (Â·¾¶Îª'" + info.OldRecPath + "') ÒÑ·¢Éú¹ıĞŞ¸Ä";
+                        error.ErrorInfo = "ä¿å­˜æ“ä½œå‘ç”Ÿé”™è¯¯: æ•°æ®åº“ä¸­çš„åŸè®°å½• (è·¯å¾„ä¸º'" + info.OldRecPath + "') å·²å‘ç”Ÿè¿‡ä¿®æ”¹";
                     error.ErrorCode = ErrorCodeValue.TimestampMismatch;
                     ErrorInfos.Add(error);
                     return -1;
                 }
 
-                // exist_timestamp´ËÊ±ÒÑ¾­·´Ó³ÁË¿âÖĞ±»ĞŞ¸ÄºóµÄ¼ÇÂ¼µÄÊ±¼ä´Á
+                // exist_timestampæ­¤æ—¶å·²ç»åæ˜ äº†åº“ä¸­è¢«ä¿®æ”¹åçš„è®°å½•çš„æ—¶é—´æˆ³
             }
 
 
-            // ºÏ²¢ĞÂ¾É¼ÇÂ¼
+            // åˆå¹¶æ–°æ—§è®°å½•
             string strNewXml = "";
             if (bForce == false)
             {
@@ -4149,11 +4150,11 @@ namespace DigitalPlatform.LibraryServer
             }
 
             string strTargetLibraryCode = "";
-            // ¼ì²éÒ»¸ö²á¼ÇÂ¼µÄ¹İ²ØµØµãÊÇ·ñ·ûºÏ¹İ´úÂëÁĞ±íÒªÇó
+            // æ£€æŸ¥ä¸€ä¸ªå†Œè®°å½•çš„é¦†è—åœ°ç‚¹æ˜¯å¦ç¬¦åˆé¦†ä»£ç åˆ—è¡¨è¦æ±‚
             // return:
-            //      -1  ¼ì²é¹ı³Ì³ö´í
-            //      0   ·ûºÏÒªÇó
-            //      1   ²»·ûºÏÒªÇó
+            //      -1  æ£€æŸ¥è¿‡ç¨‹å‡ºé”™
+            //      0   ç¬¦åˆè¦æ±‚
+            //      1   ä¸ç¬¦åˆè¦æ±‚
             nRet = CheckItemLibraryCode(strNewXml,
                 sessioninfo,
                         // sessioninfo.LibraryCodeList,
@@ -4168,19 +4169,19 @@ namespace DigitalPlatform.LibraryServer
                 string strEntityDbName = ResPath.GetDbName(info.NewRecPath);
                 if (String.IsNullOrEmpty(strEntityDbName) == true)
                 {
-                    strError = "´ÓÂ·¾¶ '" + info.NewRecPath + "' ÖĞ»ñµÃÊı¾İ¿âÃûÊ±Ê§°Ü";
+                    strError = "ä»è·¯å¾„ '" + info.NewRecPath + "' ä¸­è·å¾—æ•°æ®åº“åæ—¶å¤±è´¥";
                     goto ERROR1;
                 }
 
                 XmlDocument domTemp = new XmlDocument();
                 domTemp.LoadXml(strNewXml);
 
-                // ¼ì²éÒ»¸ö²á¼ÇÂ¼µÄ¶ÁÕßÀàĞÍÊÇ·ñ·ûºÏÖµÁĞ±íÒªÇó
+                // æ£€æŸ¥ä¸€ä¸ªå†Œè®°å½•çš„è¯»è€…ç±»å‹æ˜¯å¦ç¬¦åˆå€¼åˆ—è¡¨è¦æ±‚
                 // parameters:
                 // return:
-                //      -1  ¼ì²é¹ı³Ì³ö´í
-                //      0   ·ûºÏÒªÇó
-                //      1   ²»·ûºÏÒªÇó
+                //      -1  æ£€æŸ¥è¿‡ç¨‹å‡ºé”™
+                //      0   ç¬¦åˆè¦æ±‚
+                //      1   ä¸ç¬¦åˆè¦æ±‚
                 nRet = CheckItemBookType(domTemp,
                     strEntityDbName,
                     out strError);
@@ -4188,18 +4189,18 @@ namespace DigitalPlatform.LibraryServer
                     goto ERROR1;
             }
 
-            // ¼ì²éĞÂ¼ÇÂ¼ÊÇ·ñÊôÓÚ¹ÜÏ½·¶Î§
+            // æ£€æŸ¥æ–°è®°å½•æ˜¯å¦å±äºç®¡è¾–èŒƒå›´
             if (sessioninfo.GlobalUser == false
                 || sessioninfo.UserType == "reader")
             {
                 if (nRet != 0)
                 {
-                    strError = "²á¼ÇÂ¼ĞÂÄÚÈİÖĞµÄ¹İ²ØµØµã²»·ûºÏÒªÇó: " + strError;
+                    strError = "å†Œè®°å½•æ–°å†…å®¹ä¸­çš„é¦†è—åœ°ç‚¹ä¸ç¬¦åˆè¦æ±‚: " + strError;
                     goto ERROR1;
                 }
             }
 
-            // ±£´æĞÂ¼ÇÂ¼
+            // ä¿å­˜æ–°è®°å½•
             byte[] output_timestamp = null;
             lRet = channel.DoSaveTextRes(info.NewRecPath,
     strNewXml,
@@ -4216,47 +4217,47 @@ namespace DigitalPlatform.LibraryServer
                 {
                     if (nRedoCount > 10)
                     {
-                        strError = "·´¸´±£´æ¾ùÓöµ½Ê±¼ä´Á³åÍ», ³¬¹ı10´ÎÖØÊÔÈÔÈ»Ê§°Ü";
+                        strError = "åå¤ä¿å­˜å‡é‡åˆ°æ—¶é—´æˆ³å†²çª, è¶…è¿‡10æ¬¡é‡è¯•ä»ç„¶å¤±è´¥";
                         goto ERROR1;
                     }
-                    // ·¢ÏÖÊ±¼ä´Á²»Æ¥Åä
-                    // ÖØ¸´½øĞĞÌáÈ¡ÒÑ´æÔÚ¼ÇÂ¼\±È½ÏµÄ¹ı³Ì
+                    // å‘ç°æ—¶é—´æˆ³ä¸åŒ¹é…
+                    // é‡å¤è¿›è¡Œæå–å·²å­˜åœ¨è®°å½•\æ¯”è¾ƒçš„è¿‡ç¨‹
                     nRedoCount++;
                     goto REDOLOAD;
                 }
 
                 error = new EntityInfo(info);
-                error.ErrorInfo = "±£´æ²Ù×÷·¢Éú´íÎó:" + strError;
+                error.ErrorInfo = "ä¿å­˜æ“ä½œå‘ç”Ÿé”™è¯¯:" + strError;
                 error.ErrorCode = channel.OriginErrorCode;
                 ErrorInfos.Add(error);
                 return -1;
             }
-            else // ³É¹¦
+            else // æˆåŠŸ
             {
                 DomUtil.SetElementText(domOperLog.DocumentElement,
     "libraryCode",
-    strSourceLibraryCode + "," + strTargetLibraryCode);    // ²áËùÔÚµÄ¹İ´úÂë
+    strSourceLibraryCode + "," + strTargetLibraryCode);    // å†Œæ‰€åœ¨çš„é¦†ä»£ç 
 
                 DomUtil.SetElementText(domOperLog.DocumentElement, "action", "change");
                 if (String.IsNullOrEmpty(strStyle) == false)
                     DomUtil.SetElementText(domOperLog.DocumentElement, "style", strStyle);
 
-                // ĞÂ¼ÇÂ¼
+                // æ–°è®°å½•
                 XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
                     "record", strNewXml);
                 DomUtil.SetAttr(node, "recPath", info.NewRecPath);
 
-                // ¾É¼ÇÂ¼
+                // æ—§è®°å½•
                 node = DomUtil.SetElementText(domOperLog.DocumentElement,
                     "oldRecord", strExistXml);
                 DomUtil.SetAttr(node, "recPath", info.OldRecPath);
 
-                // ±£´æ³É¹¦£¬ĞèÒª·µ»ØĞÅÏ¢ÔªËØ¡£ÒòÎªĞèÒª·µ»ØĞÂµÄÊ±¼ä´Á
+                // ä¿å­˜æˆåŠŸï¼Œéœ€è¦è¿”å›ä¿¡æ¯å…ƒç´ ã€‚å› ä¸ºéœ€è¦è¿”å›æ–°çš„æ—¶é—´æˆ³
                 error = new EntityInfo(info);
                 error.NewTimestamp = output_timestamp;
                 error.NewRecord = strNewXml;
 
-                error.ErrorInfo = "±£´æ²Ù×÷³É¹¦¡£NewTimeStampÖĞ·µ»ØÁËĞÂµÄÊ±¼ä´Á£¬NewRecordÖĞ·µ»ØÁËÊµ¼Ê±£´æµÄĞÂ¼ÇÂ¼(¿ÉÄÜºÍÌá½»µÄĞÂ¼ÇÂ¼ÉÔÓĞ²îÒì)¡£";
+                error.ErrorInfo = "ä¿å­˜æ“ä½œæˆåŠŸã€‚NewTimeStampä¸­è¿”å›äº†æ–°çš„æ—¶é—´æˆ³ï¼ŒNewRecordä¸­è¿”å›äº†å®é™…ä¿å­˜çš„æ–°è®°å½•(å¯èƒ½å’Œæäº¤çš„æ–°è®°å½•ç¨æœ‰å·®å¼‚)ã€‚";
                 error.ErrorCode = ErrorCodeValue.NoError;
                 ErrorInfos.Add(error);
             }
@@ -4271,7 +4272,7 @@ namespace DigitalPlatform.LibraryServer
             return -1;
         }
 
-        // Çå³ıÔ­ÓĞµÄ²Ù×÷¼ÇÔØ
+        // æ¸…é™¤åŸæœ‰çš„æ“ä½œè®°è½½
         public int ClearOperation(
             ref string strXml,
             out string strError)
@@ -4285,11 +4286,11 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "XML×Ö·û´®×°ÈëDOMÊ±·¢Éú´íÎó: " + ex.Message;
+                strError = "XMLå­—ç¬¦ä¸²è£…å…¥DOMæ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                 return -1;
             }
 
-            // TODO: Èç¹û¸ùÔªËØ¾ÍÊÇ<operations>ÄØ£¿
+            // TODO: å¦‚æœæ ¹å…ƒç´ å°±æ˜¯<operations>å‘¢ï¼Ÿ
             for (; ; )
             {
                 XmlNode nodeOperations = dom.DocumentElement.SelectSingleNode("operations");
@@ -4303,10 +4304,10 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
-        // ÉèÖÃ»òÕßË¢ĞÂÒ»¸ö²Ù×÷¼ÇÔØ
+        // è®¾ç½®æˆ–è€…åˆ·æ–°ä¸€ä¸ªæ“ä½œè®°è½½
         // parameters:
-        //      bAppend ÊÇ·ñÒÔ×·¼ÓµÄ·½Ê½¼ÓÈëĞÂµÄ²Ù×÷ĞÅÏ¢.Èç¹û==false£¬±íÊ¾Ìæ´úÒ»¸öÍ¬strOperNameµÄÔ­ÓĞ½Úµã
-        //      nMaxCount   <operation>ÔªËØµÄ×î´óÊıÄ¿.Èç¹û³¬¹ıÕâ¸öÊıÄ¿£¬Ôò×Ô¶¯Çå³ı´ÓµÚ¶ş¸ö¿ªÊ¼µÄÈô¸É¸öÔªËØ¡£µÚÒ»¸öÔªËØÍ¨³£ÊÇcreate²Ù×÷µÄĞÅÏ¢£¬¹ÊÌØÒâ±£Áô
+        //      bAppend æ˜¯å¦ä»¥è¿½åŠ çš„æ–¹å¼åŠ å…¥æ–°çš„æ“ä½œä¿¡æ¯.å¦‚æœ==falseï¼Œè¡¨ç¤ºæ›¿ä»£ä¸€ä¸ªåŒstrOperNameçš„åŸæœ‰èŠ‚ç‚¹
+        //      nMaxCount   <operation>å…ƒç´ çš„æœ€å¤§æ•°ç›®.å¦‚æœè¶…è¿‡è¿™ä¸ªæ•°ç›®ï¼Œåˆ™è‡ªåŠ¨æ¸…é™¤ä»ç¬¬äºŒä¸ªå¼€å§‹çš„è‹¥å¹²ä¸ªå…ƒç´ ã€‚ç¬¬ä¸€ä¸ªå…ƒç´ é€šå¸¸æ˜¯createæ“ä½œçš„ä¿¡æ¯ï¼Œæ•…ç‰¹æ„ä¿ç•™
         public int SetOperation(
             ref string strXml,
             string strOperName,
@@ -4325,7 +4326,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "XML×Ö·û´®×°ÈëDOMÊ±·¢Éú´íÎó: "+ ex.Message;
+                strError = "XMLå­—ç¬¦ä¸²è£…å…¥DOMæ—¶å‘ç”Ÿé”™è¯¯: "+ ex.Message;
                 return -1;
             }
 
@@ -4345,7 +4346,7 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 2011/11/30
-        // °ü×°ºó°æ±¾£¬×ÜÊÇÌæ´ú
+        // åŒ…è£…åç‰ˆæœ¬ï¼Œæ€»æ˜¯æ›¿ä»£
         public int SetOperation(
     ref XmlDocument dom,
     string strOperName,
@@ -4363,10 +4364,10 @@ namespace DigitalPlatform.LibraryServer
     out strError);
         }
 
-        // ÉèÖÃ»òÕßË¢ĞÂÒ»¸ö²Ù×÷¼ÇÔØ
+        // è®¾ç½®æˆ–è€…åˆ·æ–°ä¸€ä¸ªæ“ä½œè®°è½½
         // parameters:
-        //      bAppend ÊÇ·ñÒÔ×·¼ÓµÄ·½Ê½¼ÓÈëĞÂµÄ²Ù×÷ĞÅÏ¢.Èç¹û==false£¬±íÊ¾Ìæ´úÒ»¸öÍ¬strOperNameµÄÔ­ÓĞ½Úµã
-        //      nMaxCount   <operation>ÔªËØµÄ×î´óÊıÄ¿.Èç¹û³¬¹ıÕâ¸öÊıÄ¿£¬Ôò×Ô¶¯Çå³ı´ÓµÚ¶ş¸ö¿ªÊ¼µÄÈô¸É¸öÔªËØ¡£µÚÒ»¸öÔªËØÍ¨³£ÊÇcreate²Ù×÷µÄĞÅÏ¢£¬¹ÊÌØÒâ±£Áô
+        //      bAppend æ˜¯å¦ä»¥è¿½åŠ çš„æ–¹å¼åŠ å…¥æ–°çš„æ“ä½œä¿¡æ¯.å¦‚æœ==falseï¼Œè¡¨ç¤ºæ›¿ä»£ä¸€ä¸ªåŒstrOperNameçš„åŸæœ‰èŠ‚ç‚¹
+        //      nMaxCount   <operation>å…ƒç´ çš„æœ€å¤§æ•°ç›®.å¦‚æœè¶…è¿‡è¿™ä¸ªæ•°ç›®ï¼Œåˆ™è‡ªåŠ¨æ¸…é™¤ä»ç¬¬äºŒä¸ªå¼€å§‹çš„è‹¥å¹²ä¸ªå…ƒç´ ã€‚ç¬¬ä¸€ä¸ªå…ƒç´ é€šå¸¸æ˜¯createæ“ä½œçš„ä¿¡æ¯ï¼Œæ•…ç‰¹æ„ä¿ç•™
         public int SetOperation(
             ref XmlDocument dom,
             string strOperName,
@@ -4406,7 +4407,7 @@ namespace DigitalPlatform.LibraryServer
             if (String.IsNullOrEmpty(strComment) == false)
                 DomUtil.SetAttr(node, "comment", strComment);
 
-            // É¾³ı³¬³önMaxCount¸öÊıµÄ<operation>ÔªËØ
+            // åˆ é™¤è¶…å‡ºnMaxCountä¸ªæ•°çš„<operation>å…ƒç´ 
             XmlNodeList nodes = nodeOperations.SelectNodes("operation");
             if (nodes.Count > nMaxCount)
             {
@@ -4422,12 +4423,12 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
-        // Ö´ĞĞSetEntities APIÖĞµÄ"move"²Ù×÷
-        // 1) ²Ù×÷³É¹¦ºó, NewRecordÖĞÓĞÊµ¼Ê±£´æµÄĞÂ¼ÇÂ¼£¬NewTimeStampÎªĞÂµÄÊ±¼ä´Á
-        // 2) Èç¹û·µ»ØTimeStampMismatch´í£¬ÔòOldRecordÖĞÓĞ¿âÖĞ·¢Éú±ä»¯ºóµÄ¡°Ô­¼ÇÂ¼¡±£¬OldTimeStampÊÇÆäÊ±¼ä´Á
+        // æ‰§è¡ŒSetEntities APIä¸­çš„"move"æ“ä½œ
+        // 1) æ“ä½œæˆåŠŸå, NewRecordä¸­æœ‰å®é™…ä¿å­˜çš„æ–°è®°å½•ï¼ŒNewTimeStampä¸ºæ–°çš„æ—¶é—´æˆ³
+        // 2) å¦‚æœè¿”å›TimeStampMismatché”™ï¼Œåˆ™OldRecordä¸­æœ‰åº“ä¸­å‘ç”Ÿå˜åŒ–åçš„â€œåŸè®°å½•â€ï¼ŒOldTimeStampæ˜¯å…¶æ—¶é—´æˆ³
         // return:
-        //      -1  ³ö´í
-        //      0   ³É¹¦
+        //      -1  å‡ºé”™
+        //      0   æˆåŠŸ
         int DoEntityOperMove(
             string strStyle,
             SessionInfo sessioninfo,
@@ -4438,25 +4439,25 @@ namespace DigitalPlatform.LibraryServer
         {
             // int nRedoCount = 0;
             EntityInfo error = null;
-            bool bExist = true;    // info.RecPathËùÖ¸µÄ¼ÇÂ¼ÊÇ·ñ´æÔÚ?
+            bool bExist = true;    // info.RecPathæ‰€æŒ‡çš„è®°å½•æ˜¯å¦å­˜åœ¨?
 
             int nRet = 0;
             long lRet = 0;
 
             string strError = "";
 
-            // ¼ì²éÂ·¾¶
+            // æ£€æŸ¥è·¯å¾„
             if (info.OldRecPath == info.NewRecPath)
             {
-                strError = "µ±actionÎª\"move\"Ê±£¬info.NewRecordPathÂ·¾¶ '" + info.NewRecPath + "' ºÍinfo.OldRecPath '" + info.OldRecPath + "' ±ØĞë²»ÏàÍ¬";
+                strError = "å½“actionä¸º\"move\"æ—¶ï¼Œinfo.NewRecordPathè·¯å¾„ '" + info.NewRecPath + "' å’Œinfo.OldRecPath '" + info.OldRecPath + "' å¿…é¡»ä¸ç›¸åŒ";
                 goto ERROR1;
             }
 
-            // ¼ì²é¼´½«¸²¸ÇµÄÄ¿±êÎ»ÖÃÊÇ²»ÊÇÓĞ¼ÇÂ¼£¬Èç¹ûÓĞ£¬Ôò²»ÔÊĞí½øĞĞmove²Ù×÷¡£
-            // Èç¹ûÒª½øĞĞ´ø¸²¸ÇÄ¿±êÎ»ÖÃ¼ÇÂ¼¹¦ÄÜµÄmove²Ù×÷£¬Ç°¶Ë¿ÉÒÔÏÈÖ´ĞĞÒ»¸ödelete²Ù×÷£¬È»ºóÔÙÖ´ĞĞmove²Ù×÷¡£
-            // ÕâÑù¹æ¶¨£¬ÊÇÎªÁË±ÜÃâ¹ıÓÚ¸´ÔÓµÄÅĞ¶ÏÂß¼­£¬Ò²±ãÓÚÇ°¶Ë²Ù×÷ÕßÇå³ş²Ù×÷µÄºó¹û¡£
-            // ÒòÎªÈç¹ûÔÊĞímove´øÓĞ¸²¸ÇÄ¿±ê¼ÇÂ¼¹¦ÄÜ£¬Ôò±»¸²¸ÇµÄ¼ÇÂ¼µÄÔ¤É¾³ı²Ù×÷£¬µÈÓÚ½øĞĞÁËÒ»´Î×¢Ïú£¬µ«Õâ¸öĞ§ÓÃ²»Ã÷ÏÔ£¬¶ÔÇ°¶Ë²Ù×÷ÈËÔ±×¼È·ÅĞ¶ÏÊÂÌ¬²¢¶Ôºó¹û¸ºÔğ(¶øÇÒ¿ÉÄÜÕâÖÖ×¢ÏúĞèÒª¶îÍâµÄ²Ù×÷È¨ÏŞ)£¬²»Àû
-            bool bAppendStyle = false;  // Ä¿±êÂ·¾¶ÊÇ·ñÎª×·¼ÓĞÎÌ¬£¿
+            // æ£€æŸ¥å³å°†è¦†ç›–çš„ç›®æ ‡ä½ç½®æ˜¯ä¸æ˜¯æœ‰è®°å½•ï¼Œå¦‚æœæœ‰ï¼Œåˆ™ä¸å…è®¸è¿›è¡Œmoveæ“ä½œã€‚
+            // å¦‚æœè¦è¿›è¡Œå¸¦è¦†ç›–ç›®æ ‡ä½ç½®è®°å½•åŠŸèƒ½çš„moveæ“ä½œï¼Œå‰ç«¯å¯ä»¥å…ˆæ‰§è¡Œä¸€ä¸ªdeleteæ“ä½œï¼Œç„¶åå†æ‰§è¡Œmoveæ“ä½œã€‚
+            // è¿™æ ·è§„å®šï¼Œæ˜¯ä¸ºäº†é¿å…è¿‡äºå¤æ‚çš„åˆ¤æ–­é€»è¾‘ï¼Œä¹Ÿä¾¿äºå‰ç«¯æ“ä½œè€…æ¸…æ¥šæ“ä½œçš„åæœã€‚
+            // å› ä¸ºå¦‚æœå…è®¸moveå¸¦æœ‰è¦†ç›–ç›®æ ‡è®°å½•åŠŸèƒ½ï¼Œåˆ™è¢«è¦†ç›–çš„è®°å½•çš„é¢„åˆ é™¤æ“ä½œï¼Œç­‰äºè¿›è¡Œäº†ä¸€æ¬¡æ³¨é”€ï¼Œä½†è¿™ä¸ªæ•ˆç”¨ä¸æ˜æ˜¾ï¼Œå¯¹å‰ç«¯æ“ä½œäººå‘˜å‡†ç¡®åˆ¤æ–­äº‹æ€å¹¶å¯¹åæœè´Ÿè´£(è€Œä¸”å¯èƒ½è¿™ç§æ³¨é”€éœ€è¦é¢å¤–çš„æ“ä½œæƒé™)ï¼Œä¸åˆ©
+            bool bAppendStyle = false;  // ç›®æ ‡è·¯å¾„æ˜¯å¦ä¸ºè¿½åŠ å½¢æ€ï¼Ÿ
             string strTargetRecId = ResPath.GetRecordId(info.NewRecPath);
 
             if (strTargetRecId == "?" || String.IsNullOrEmpty(strTargetRecId) == true)
@@ -4471,7 +4472,7 @@ namespace DigitalPlatform.LibraryServer
                 string strExistTargetXml = "";
                 byte[] exist_target_timestamp = null;
 
-                // »ñÈ¡¸²¸ÇÄ¿±êÎ»ÖÃµÄÏÖÓĞ¼ÇÂ¼
+                // è·å–è¦†ç›–ç›®æ ‡ä½ç½®çš„ç°æœ‰è®°å½•
                 lRet = channel.GetRes(info.NewRecPath,
                     out strExistTargetXml,
                     out strMetaData,
@@ -4482,7 +4483,7 @@ namespace DigitalPlatform.LibraryServer
                 {
                     if (channel.ErrorCode == ChannelErrorCode.NotFound)
                     {
-                        // Èç¹û¼ÇÂ¼²»´æÔÚ, ËµÃ÷²»»áÔì³É¸²¸ÇÌ¬ÊÆ
+                        // å¦‚æœè®°å½•ä¸å­˜åœ¨, è¯´æ˜ä¸ä¼šé€ æˆè¦†ç›–æ€åŠ¿
                         /*
                         strExistSourceXml = "<root />";
                         exist_source_timestamp = null;
@@ -4492,7 +4493,7 @@ namespace DigitalPlatform.LibraryServer
                     else
                     {
                         error = new EntityInfo(info);
-                        error.ErrorInfo = "ÒÆ¶¯²Ù×÷·¢Éú´íÎó, ÔÚ¶ÁÈë¼´½«¸²¸ÇµÄÄ¿±êÎ»ÖÃ '" + info.NewRecPath + "' Ô­ÓĞ¼ÇÂ¼½×¶Î:" + strError;
+                        error.ErrorInfo = "ç§»åŠ¨æ“ä½œå‘ç”Ÿé”™è¯¯, åœ¨è¯»å…¥å³å°†è¦†ç›–çš„ç›®æ ‡ä½ç½® '" + info.NewRecPath + "' åŸæœ‰è®°å½•é˜¶æ®µ:" + strError;
                         error.ErrorCode = channel.OriginErrorCode;
                         ErrorInfos.Add(error);
                         return -1;
@@ -4500,8 +4501,8 @@ namespace DigitalPlatform.LibraryServer
                 }
                 else
                 {
-                    // Èç¹û¼ÇÂ¼´æÔÚ£¬ÔòÄ¿Ç°²»ÔÊĞíÕâÑùµÄ²Ù×÷
-                    strError = "ÒÆ¶¯(move)²Ù×÷±»¾Ü¾ø¡£ÒòÎªÔÚ¼´½«¸²¸ÇµÄÄ¿±êÎ»ÖÃ '" + info.NewRecPath + "' ÒÑ¾­´æÔÚ²á¼ÇÂ¼¡£ÇëÏÈÉ¾³ı(delete)ÕâÌõ¼ÇÂ¼£¬ÔÙ½øĞĞÒÆ¶¯(move)²Ù×÷";
+                    // å¦‚æœè®°å½•å­˜åœ¨ï¼Œåˆ™ç›®å‰ä¸å…è®¸è¿™æ ·çš„æ“ä½œ
+                    strError = "ç§»åŠ¨(move)æ“ä½œè¢«æ‹’ç»ã€‚å› ä¸ºåœ¨å³å°†è¦†ç›–çš„ç›®æ ‡ä½ç½® '" + info.NewRecPath + "' å·²ç»å­˜åœ¨å†Œè®°å½•ã€‚è¯·å…ˆåˆ é™¤(delete)è¿™æ¡è®°å½•ï¼Œå†è¿›è¡Œç§»åŠ¨(move)æ“ä½œ";
                     goto ERROR1;
                 }
             }
@@ -4510,7 +4511,7 @@ namespace DigitalPlatform.LibraryServer
             string strExistSourceXml = "";
             byte[] exist_source_timestamp = null;
 
-            // ÏÈ¶Á³öÊı¾İ¿âÖĞÔ´Î»ÖÃµÄÒÑÓĞ¼ÇÂ¼
+            // å…ˆè¯»å‡ºæ•°æ®åº“ä¸­æºä½ç½®çš„å·²æœ‰è®°å½•
             // REDOLOAD:
 
             lRet = channel.GetRes(info.OldRecPath,
@@ -4524,27 +4525,27 @@ namespace DigitalPlatform.LibraryServer
                 if (channel.ErrorCode == ChannelErrorCode.NotFound)
                 {
                     /*
-                    // Èç¹û¼ÇÂ¼²»´æÔÚ, Ôò¹¹ÔìÒ»Ìõ¿ÕµÄ¼ÇÂ¼
+                    // å¦‚æœè®°å½•ä¸å­˜åœ¨, åˆ™æ„é€ ä¸€æ¡ç©ºçš„è®°å½•
                     bExist = false;
                     strExistSourceXml = "<root />";
                     exist_source_timestamp = null;
                     strOutputPath = info.NewRecPath;
                      * */
-                    // ÕâÖÖÇé¿öÈç¹û·Å¿í£¬»áÓĞÑÏÖØµÄ¸±×÷ÓÃ£¬ËùÒÔ²»ÈÃ·Å¿í
-                    strError = "ÒÆ¶¯(move)²Ù×÷µÄÔ´¼ÇÂ¼ '" + info.OldRecPath + "' ÔÚÊı¾İ¿âÖĞ²»´æÔÚ£¬ËùÒÔÎŞ·¨½øĞĞÒÆ¶¯²Ù×÷¡£";
+                    // è¿™ç§æƒ…å†µå¦‚æœæ”¾å®½ï¼Œä¼šæœ‰ä¸¥é‡çš„å‰¯ä½œç”¨ï¼Œæ‰€ä»¥ä¸è®©æ”¾å®½
+                    strError = "ç§»åŠ¨(move)æ“ä½œçš„æºè®°å½• '" + info.OldRecPath + "' åœ¨æ•°æ®åº“ä¸­ä¸å­˜åœ¨ï¼Œæ‰€ä»¥æ— æ³•è¿›è¡Œç§»åŠ¨æ“ä½œã€‚";
                     goto ERROR1;
                 }
                 else
                 {
                     error = new EntityInfo(info);
-                    error.ErrorInfo = "ÒÆ¶¯(move)²Ù×÷·¢Éú´íÎó, ÔÚ¶ÁÈë¿âÖĞÔ­ÓĞÔ´¼ÇÂ¼(Â·¾¶ÔÚinfo.OldRecPath) '" + info.OldRecPath + "' ½×¶Î:" + strError;
+                    error.ErrorInfo = "ç§»åŠ¨(move)æ“ä½œå‘ç”Ÿé”™è¯¯, åœ¨è¯»å…¥åº“ä¸­åŸæœ‰æºè®°å½•(è·¯å¾„åœ¨info.OldRecPath) '" + info.OldRecPath + "' é˜¶æ®µ:" + strError;
                     error.ErrorCode = channel.OriginErrorCode;
                     ErrorInfos.Add(error);
                     return -1;
                 }
             }
 
-            // °ÑÁ½¸ö¼ÇÂ¼×°ÈëDOM
+            // æŠŠä¸¤ä¸ªè®°å½•è£…å…¥DOM
 
             XmlDocument domSourceExist = new XmlDocument();
             XmlDocument domNew = new XmlDocument();
@@ -4555,7 +4556,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "strExistXml×°ÔØ½øÈëDOMÊ±·¢Éú´íÎó: " + ex.Message;
+                strError = "strExistXmlè£…è½½è¿›å…¥DOMæ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                 goto ERROR1;
             }
 
@@ -4565,18 +4566,18 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "info.NewRecord×°ÔØ½øÈëDOMÊ±·¢Éú´íÎó: " + ex.Message;
+                strError = "info.NewRecordè£…è½½è¿›å…¥DOMæ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                 goto ERROR1;
             }
 
 
-            // ¹Û²ìÊ±¼ä´ÁÊÇ·ñ·¢Éú±ä»¯
+            // è§‚å¯Ÿæ—¶é—´æˆ³æ˜¯å¦å‘ç”Ÿå˜åŒ–
             nRet = ByteArray.Compare(info.OldTimestamp, exist_source_timestamp);
             if (nRet != 0)
             {
-                // Ê±¼ä´Á²»ÏàµÈÁË
-                // ĞèÒª°Ñinfo.OldRecordºÍstrExistXml½øĞĞ±È½Ï£¬¿´¿´ºÍ²áµÇÂ¼ÓĞ¹ØµÄÔªËØ£¨Òªº¦ÔªËØ£©ÖµÊÇ·ñ·¢ÉúÁË±ä»¯¡£
-                // Èç¹ûÕâĞ©Òªº¦ÔªËØ²¢Î´·¢Éú±ä»¯£¬¾Í¼ÌĞø½øĞĞºÏ²¢¡¢¸²¸Ç±£´æ²Ù×÷
+                // æ—¶é—´æˆ³ä¸ç›¸ç­‰äº†
+                // éœ€è¦æŠŠinfo.OldRecordå’ŒstrExistXmlè¿›è¡Œæ¯”è¾ƒï¼Œçœ‹çœ‹å’Œå†Œç™»å½•æœ‰å…³çš„å…ƒç´ ï¼ˆè¦å®³å…ƒç´ ï¼‰å€¼æ˜¯å¦å‘ç”Ÿäº†å˜åŒ–ã€‚
+                // å¦‚æœè¿™äº›è¦å®³å…ƒç´ å¹¶æœªå‘ç”Ÿå˜åŒ–ï¼Œå°±ç»§ç»­è¿›è¡Œåˆå¹¶ã€è¦†ç›–ä¿å­˜æ“ä½œ
 
                 XmlDocument domOld = new XmlDocument();
 
@@ -4586,41 +4587,41 @@ namespace DigitalPlatform.LibraryServer
                 }
                 catch (Exception ex)
                 {
-                    strError = "info.OldRecord×°ÔØ½øÈëDOMÊ±·¢Éú´íÎó: " + ex.Message;
+                    strError = "info.OldRecordè£…è½½è¿›å…¥DOMæ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                     goto ERROR1;
                 }
 
-                // ±È½ÏÁ½¸ö¼ÇÂ¼, ¿´¿´ºÍ²áµÇÂ¼ÓĞ¹ØµÄ×Ö¶ÎÊÇ·ñ·¢ÉúÁË±ä»¯
+                // æ¯”è¾ƒä¸¤ä¸ªè®°å½•, çœ‹çœ‹å’Œå†Œç™»å½•æœ‰å…³çš„å­—æ®µæ˜¯å¦å‘ç”Ÿäº†å˜åŒ–
                 // return:
-                //      0   Ã»ÓĞ±ä»¯
-                //      1   ÓĞ±ä»¯
+                //      0   æ²¡æœ‰å˜åŒ–
+                //      1   æœ‰å˜åŒ–
                 nRet = IsRegisterInfoChanged(domOld,
                     domSourceExist);
                 if (nRet == 1)
                 {
                     error = new EntityInfo(info);
-                    // ´íÎóĞÅÏ¢ÖĞ, ·µ»ØÁËĞŞ¸Ä¹ıµÄÔ­¼ÇÂ¼ºÍĞÂÊ±¼ä´Á
+                    // é”™è¯¯ä¿¡æ¯ä¸­, è¿”å›äº†ä¿®æ”¹è¿‡çš„åŸè®°å½•å’Œæ–°æ—¶é—´æˆ³
                     error.OldRecord = strExistSourceXml;
                     error.OldTimestamp = exist_source_timestamp;
 
                     if (bExist == false)
-                        error.ErrorInfo = "ÒÆ¶¯²Ù×÷·¢Éú´íÎó: Êı¾İ¿âÖĞµÄÔ­¼ÇÂ¼ (Â·¾¶Îª'" + info.OldRecPath + "') ÒÑ±»É¾³ı¡£";
+                        error.ErrorInfo = "ç§»åŠ¨æ“ä½œå‘ç”Ÿé”™è¯¯: æ•°æ®åº“ä¸­çš„åŸè®°å½• (è·¯å¾„ä¸º'" + info.OldRecPath + "') å·²è¢«åˆ é™¤ã€‚";
                     else
-                        error.ErrorInfo = "ÒÆ¶¯²Ù×÷·¢Éú´íÎó: Êı¾İ¿âÖĞµÄÔ­¼ÇÂ¼ (Â·¾¶Îª'" + info.OldRecPath + "') ÒÑ·¢Éú¹ıĞŞ¸Ä";
+                        error.ErrorInfo = "ç§»åŠ¨æ“ä½œå‘ç”Ÿé”™è¯¯: æ•°æ®åº“ä¸­çš„åŸè®°å½• (è·¯å¾„ä¸º'" + info.OldRecPath + "') å·²å‘ç”Ÿè¿‡ä¿®æ”¹";
                     error.ErrorCode = ErrorCodeValue.TimestampMismatch;
                     ErrorInfos.Add(error);
                     return -1;
                 }
 
-                // exist_source_timestamp´ËÊ±ÒÑ¾­·´Ó³ÁË¿âÖĞ±»ĞŞ¸ÄºóµÄ¼ÇÂ¼µÄÊ±¼ä´Á
+                // exist_source_timestampæ­¤æ—¶å·²ç»åæ˜ äº†åº“ä¸­è¢«ä¿®æ”¹åçš„è®°å½•çš„æ—¶é—´æˆ³
             }
 
             string strSourceLibraryCode = "";
-            // ¼ì²éÒ»¸ö²á¼ÇÂ¼µÄ¹İ²ØµØµãÊÇ·ñ·ûºÏ¹İ´úÂëÁĞ±íÒªÇó
+            // æ£€æŸ¥ä¸€ä¸ªå†Œè®°å½•çš„é¦†è—åœ°ç‚¹æ˜¯å¦ç¬¦åˆé¦†ä»£ç åˆ—è¡¨è¦æ±‚
             // return:
-            //      -1  ¼ì²é¹ı³Ì³ö´í
-            //      0   ·ûºÏÒªÇó
-            //      1   ²»·ûºÏÒªÇó
+            //      -1  æ£€æŸ¥è¿‡ç¨‹å‡ºé”™
+            //      0   ç¬¦åˆè¦æ±‚
+            //      1   ä¸ç¬¦åˆè¦æ±‚
             nRet = CheckItemLibraryCode(domSourceExist,
                 sessioninfo,
                         // sessioninfo.LibraryCodeList,
@@ -4630,18 +4631,18 @@ namespace DigitalPlatform.LibraryServer
                 goto ERROR1;
 
 
-            // ¼ì²é¾É¼ÇÂ¼ÊÇ·ñÊôÓÚ¹ÜÏ½·¶Î§
+            // æ£€æŸ¥æ—§è®°å½•æ˜¯å¦å±äºç®¡è¾–èŒƒå›´
             if (sessioninfo.GlobalUser == false
                 || sessioninfo.UserType == "reader")
             {
                 if (nRet != 0)
                 {
-                    strError = "¼´½«±»ÒÆ¶¯µÄ²á¼ÇÂ¼Æä¹İ²ØµØµã²»·ûºÏÒªÇó: " + strError;
+                    strError = "å³å°†è¢«ç§»åŠ¨çš„å†Œè®°å½•å…¶é¦†è—åœ°ç‚¹ä¸ç¬¦åˆè¦æ±‚: " + strError;
                     goto ERROR1;
                 }
             }
 
-            bool bNoOperations = false; // ÊÇ·ñÎª²»Òª¸²¸Ç<operations>ÄÚÈİ
+            bool bNoOperations = false; // æ˜¯å¦ä¸ºä¸è¦è¦†ç›–<operations>å†…å®¹
             if (StringUtil.IsInList("nooperations", strStyle) == true)
             {
                 bNoOperations = true;
@@ -4662,7 +4663,7 @@ namespace DigitalPlatform.LibraryServer
             }
 
 
-            // ºÏ²¢ĞÂ¾É¼ÇÂ¼
+            // åˆå¹¶æ–°æ—§è®°å½•
             string strNewXml = "";
             nRet = MergeTwoEntityXml(domSourceExist,
                 domNew,
@@ -4672,7 +4673,7 @@ namespace DigitalPlatform.LibraryServer
                 goto ERROR1;
 
 
-            // Ö»ÓĞorderÈ¨ÏŞµÄÇé¿ö
+            // åªæœ‰orderæƒé™çš„æƒ…å†µ
             if (StringUtil.IsInList("setiteminfo", sessioninfo.RightsOrigin) == false
                 && StringUtil.IsInList("setentities", sessioninfo.RightsOrigin) == false
                 && StringUtil.IsInList("order", sessioninfo.RightsOrigin) == true)
@@ -4681,48 +4682,48 @@ namespace DigitalPlatform.LibraryServer
                 string strEntityDbName = ResPath.GetDbName(info.OldRecPath);
                 if (String.IsNullOrEmpty(strEntityDbName) == true)
                 {
-                    strError = "´ÓÂ·¾¶ '" + info.OldRecPath + "' ÖĞ»ñµÃÊı¾İ¿âÃûÊ±Ê§°Ü";
+                    strError = "ä»è·¯å¾„ '" + info.OldRecPath + "' ä¸­è·å¾—æ•°æ®åº“åæ—¶å¤±è´¥";
                     goto ERROR1;
                 }
 
                 string strBiblioDbName = "";
 
-                // ¸ù¾İÊµÌå¿âÃû, ÕÒµ½¶ÔÓ¦µÄÊéÄ¿¿âÃû
-                // ×¢Òâ£¬·µ»Ø1µÄÊ±ºò£¬strBiblioDbNameÒ²ÓĞ¿ÉÄÜÎª¿Õ
+                // æ ¹æ®å®ä½“åº“å, æ‰¾åˆ°å¯¹åº”çš„ä¹¦ç›®åº“å
+                // æ³¨æ„ï¼Œè¿”å›1çš„æ—¶å€™ï¼ŒstrBiblioDbNameä¹Ÿæœ‰å¯èƒ½ä¸ºç©º
                 // return:
-                //      -1  ³ö´í
-                //      0   Ã»ÓĞÕÒµ½
-                //      1   ÕÒµ½
+                //      -1  å‡ºé”™
+                //      0   æ²¡æœ‰æ‰¾åˆ°
+                //      1   æ‰¾åˆ°
                 nRet = GetBiblioDbNameByItemDbName(strEntityDbName,
                 out strBiblioDbName,
                 out strError);
                 if (nRet == 0 || nRet == -1)
                 {
-                    strError = "¸ù¾İÊµÌå¿âÃû '" + strEntityDbName + "' ÖĞ»ñµÃÊéÄ¿¿âÃûÊ±Ê§°Ü";
+                    strError = "æ ¹æ®å®ä½“åº“å '" + strEntityDbName + "' ä¸­è·å¾—ä¹¦ç›®åº“åæ—¶å¤±è´¥";
                     goto ERROR1;
                 }
 
-                // ·Ç¹¤×÷¿â
+                // éå·¥ä½œåº“
                 if (IsOrderWorkBiblioDb(strBiblioDbName) == false)
                 {
-                    // ·Ç¹¤×÷¿â¡£ÒªÇó<state>°üº¬¡°¼Ó¹¤ÖĞ¡±
+                    // éå·¥ä½œåº“ã€‚è¦æ±‚<state>åŒ…å«â€œåŠ å·¥ä¸­â€
                     string strState = DomUtil.GetElementText(domSourceExist.DocumentElement,
                         "state");
                     if (IncludeStateProcessing(strState) == false)
                     {
-                        strError = "µ±Ç°ÕÊ»§Ö»ÓĞorderÈ¨ÏŞ¶øÃ»ÓĞsetiteminfo(»òsetentities)È¨ÏŞ£¬²»ÄÜÓÃmove¹¦ÄÜÉ¾³ı´ÓÊôÓÚ·Ç¹¤×÷¿âµÄ¡¢×´Ì¬²»°üº¬¡°¼Ó¹¤ÖĞ¡±µÄÊµÌå¼ÇÂ¼ '" + info.OldRecPath + "'";
+                        strError = "å½“å‰å¸æˆ·åªæœ‰orderæƒé™è€Œæ²¡æœ‰setiteminfo(æˆ–setentities)æƒé™ï¼Œä¸èƒ½ç”¨moveåŠŸèƒ½åˆ é™¤ä»å±äºéå·¥ä½œåº“çš„ã€çŠ¶æ€ä¸åŒ…å«â€œåŠ å·¥ä¸­â€çš„å®ä½“è®°å½• '" + info.OldRecPath + "'";
                         goto ERROR1;
                     }
                 }
 
-                // TODO: Èç¹ûÔ­ÑùÒÆ¶¯£¬Ä¿±ê¼ÇÂ¼²¢²»±»ĞŞ¸Ä£¬ËÆºõÒ²¸ÃÔÊĞí?
+                // TODO: å¦‚æœåŸæ ·ç§»åŠ¨ï¼Œç›®æ ‡è®°å½•å¹¶ä¸è¢«ä¿®æ”¹ï¼Œä¼¼ä¹ä¹Ÿè¯¥å…è®¸?
             }
 
-            // ÒÆ¶¯¼ÇÂ¼
+            // ç§»åŠ¨è®°å½•
             byte[] output_timestamp = null;
 
-            // TODO: Copyºó»¹ÒªĞ´Ò»´Î£¿ÒòÎªCopy²¢²»Ğ´ÈëĞÂ¼ÇÂ¼¡£(×¢£ºCopy/MoveÓĞÊ±ºò»á¿ç¿â£¬ÕâÑù¼ÇÂ¼ÖĞ<parent>ĞèÒª¸Ä±ä)
-            // ÆäÊµCopyµÄÒâÒåÔÚÓÚ´ø×ß×ÊÔ´¡£·ñÔò»¹²»ÈçÓÃSave+Delete
+            // TODO: Copyåè¿˜è¦å†™ä¸€æ¬¡ï¼Ÿå› ä¸ºCopyå¹¶ä¸å†™å…¥æ–°è®°å½•ã€‚(æ³¨ï¼šCopy/Moveæœ‰æ—¶å€™ä¼šè·¨åº“ï¼Œè¿™æ ·è®°å½•ä¸­<parent>éœ€è¦æ”¹å˜)
+            // å…¶å®Copyçš„æ„ä¹‰åœ¨äºå¸¦èµ°èµ„æºã€‚å¦åˆ™è¿˜ä¸å¦‚ç”¨Save+Delete
             lRet = channel.DoCopyRecord(info.OldRecPath,
                 info.NewRecPath,
                 true,   // bDeleteSourceRecord
@@ -4736,11 +4737,11 @@ namespace DigitalPlatform.LibraryServer
             }
 
             string strTargetLibraryCode = "";
-            // ¼ì²éÒ»¸ö²á¼ÇÂ¼µÄ¹İ²ØµØµãÊÇ·ñ·ûºÏ¹İ´úÂëÁĞ±íÒªÇó
+            // æ£€æŸ¥ä¸€ä¸ªå†Œè®°å½•çš„é¦†è—åœ°ç‚¹æ˜¯å¦ç¬¦åˆé¦†ä»£ç åˆ—è¡¨è¦æ±‚
             // return:
-            //      -1  ¼ì²é¹ı³Ì³ö´í
-            //      0   ·ûºÏÒªÇó
-            //      1   ²»·ûºÏÒªÇó
+            //      -1  æ£€æŸ¥è¿‡ç¨‹å‡ºé”™
+            //      0   ç¬¦åˆè¦æ±‚
+            //      1   ä¸ç¬¦åˆè¦æ±‚
             nRet = CheckItemLibraryCode(strNewXml,
                 sessioninfo,
                         // sessioninfo.LibraryCodeList,
@@ -4755,19 +4756,19 @@ namespace DigitalPlatform.LibraryServer
                 string strEntityDbName = ResPath.GetDbName(info.NewRecPath);
                 if (String.IsNullOrEmpty(strEntityDbName) == true)
                 {
-                    strError = "´ÓÂ·¾¶ '" + info.NewRecPath + "' ÖĞ»ñµÃÊı¾İ¿âÃûÊ±Ê§°Ü";
+                    strError = "ä»è·¯å¾„ '" + info.NewRecPath + "' ä¸­è·å¾—æ•°æ®åº“åæ—¶å¤±è´¥";
                     goto ERROR1;
                 }
 
                 XmlDocument domTemp = new XmlDocument();
                 domTemp.LoadXml(strNewXml);
 
-                // ¼ì²éÒ»¸ö²á¼ÇÂ¼µÄ¶ÁÕßÀàĞÍÊÇ·ñ·ûºÏÖµÁĞ±íÒªÇó
+                // æ£€æŸ¥ä¸€ä¸ªå†Œè®°å½•çš„è¯»è€…ç±»å‹æ˜¯å¦ç¬¦åˆå€¼åˆ—è¡¨è¦æ±‚
                 // parameters:
                 // return:
-                //      -1  ¼ì²é¹ı³Ì³ö´í
-                //      0   ·ûºÏÒªÇó
-                //      1   ²»·ûºÏÒªÇó
+                //      -1  æ£€æŸ¥è¿‡ç¨‹å‡ºé”™
+                //      0   ç¬¦åˆè¦æ±‚
+                //      1   ä¸ç¬¦åˆè¦æ±‚
                 nRet = CheckItemBookType(domTemp,
                     strEntityDbName,
                     out strError);
@@ -4776,13 +4777,13 @@ namespace DigitalPlatform.LibraryServer
             }
 
 
-            // ¼ì²éĞÂ¼ÇÂ¼ÊÇ·ñÊôÓÚ¹ÜÏ½·¶Î§
+            // æ£€æŸ¥æ–°è®°å½•æ˜¯å¦å±äºç®¡è¾–èŒƒå›´
             if (sessioninfo.GlobalUser == false
                 || sessioninfo.UserType == "reader")
             {
                 if (nRet != 0)
                 {
-                    strError = "²á¼ÇÂ¼ĞÂÄÚÈİÖĞµÄ¹İ²ØµØµã²»·ûºÏÒªÇó: " + strError;
+                    strError = "å†Œè®°å½•æ–°å†…å®¹ä¸­çš„é¦†è—åœ°ç‚¹ä¸ç¬¦åˆè¦æ±‚: " + strError;
                     goto ERROR1;
                 }
             }
@@ -4800,15 +4801,15 @@ namespace DigitalPlatform.LibraryServer
                 out strError);
             if (lRet == -1)
             {
-                strError = "WriteEntities()API move²Ù×÷ÖĞ£¬ÊµÌå¼ÇÂ¼ '" + info.OldRecPath + "' ÒÑ¾­±»³É¹¦ÒÆ¶¯µ½ '" + strTargetPath + "' £¬µ«ÔÚĞ´ÈëĞÂÄÚÈİÊ±·¢Éú´íÎó: " + strError;
+                strError = "WriteEntities()API moveæ“ä½œä¸­ï¼Œå®ä½“è®°å½• '" + info.OldRecPath + "' å·²ç»è¢«æˆåŠŸç§»åŠ¨åˆ° '" + strTargetPath + "' ï¼Œä½†åœ¨å†™å…¥æ–°å†…å®¹æ—¶å‘ç”Ÿé”™è¯¯: " + strError;
 
                 if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
                 {
-                    // ²»½øĞĞ·´¸´´¦Àí¡£
-                    // ÒòÎªÔ´ÒÑ¾­ÒÆ¶¯£¬Çé¿öºÜ¸´ÔÓ
+                    // ä¸è¿›è¡Œåå¤å¤„ç†ã€‚
+                    // å› ä¸ºæºå·²ç»ç§»åŠ¨ï¼Œæƒ…å†µå¾ˆå¤æ‚
                 }
 
-                // ½ö½öĞ´Èë´íÎóÈÕÖ¾¼´¿É¡£Ã»ÓĞUndo
+                // ä»…ä»…å†™å…¥é”™è¯¯æ—¥å¿—å³å¯ã€‚æ²¡æœ‰Undo
                 this.WriteErrorLog(strError);
 
                 /*
@@ -4816,50 +4817,50 @@ namespace DigitalPlatform.LibraryServer
                 {
                     if (nRedoCount > 10)
                     {
-                        strError = "·´¸´±£´æ(DoCopyRecord())¾ùÓöµ½Ê±¼ä´Á³åÍ», ³¬¹ı10´ÎÖØÊÔÈÔÈ»Ê§°Ü";
+                        strError = "åå¤ä¿å­˜(DoCopyRecord())å‡é‡åˆ°æ—¶é—´æˆ³å†²çª, è¶…è¿‡10æ¬¡é‡è¯•ä»ç„¶å¤±è´¥";
                         goto ERROR1;
                     }
-                    // ·¢ÏÖÊ±¼ä´Á²»Æ¥Åä
-                    // ÖØ¸´½øĞĞÌáÈ¡ÒÑ´æÔÚ¼ÇÂ¼\±È½ÏµÄ¹ı³Ì
+                    // å‘ç°æ—¶é—´æˆ³ä¸åŒ¹é…
+                    // é‡å¤è¿›è¡Œæå–å·²å­˜åœ¨è®°å½•\æ¯”è¾ƒçš„è¿‡ç¨‹
                     nRedoCount++;
                     goto REDOLOAD;
                 }*/
 
 
                 error = new EntityInfo(info);
-                error.ErrorInfo = "ÒÆ¶¯²Ù×÷·¢Éú´íÎó:" + strError;
+                error.ErrorInfo = "ç§»åŠ¨æ“ä½œå‘ç”Ÿé”™è¯¯:" + strError;
                 error.ErrorCode = channel.OriginErrorCode;
                 ErrorInfos.Add(error);
                 return -1;
             }
-            else // ³É¹¦
+            else // æˆåŠŸ
             {
-                info.NewRecPath = strOutputPath;    // ¶ÒÏÖ±£´æµÄÎ»ÖÃ£¬ÒòÎª¿ÉÄÜÓĞ×·¼ÓĞÎÊ½µÄÂ·¾¶
+                info.NewRecPath = strOutputPath;    // å…‘ç°ä¿å­˜çš„ä½ç½®ï¼Œå› ä¸ºå¯èƒ½æœ‰è¿½åŠ å½¢å¼çš„è·¯å¾„
 
                 DomUtil.SetElementText(domOperLog.DocumentElement,
     "libraryCode",
-    strSourceLibraryCode + "," + strTargetLibraryCode);    // ²áËùÔÚµÄ¹İ´úÂë
+    strSourceLibraryCode + "," + strTargetLibraryCode);    // å†Œæ‰€åœ¨çš„é¦†ä»£ç 
 
                 DomUtil.SetElementText(domOperLog.DocumentElement, "action", "move");
                 if (String.IsNullOrEmpty(strStyle) == false)
                     DomUtil.SetElementText(domOperLog.DocumentElement, "style", strStyle);
 
-                // ĞÂ¼ÇÂ¼
+                // æ–°è®°å½•
                 XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
                     "record", strNewXml);
                 DomUtil.SetAttr(node, "recPath", info.NewRecPath);
 
-                // ¾É¼ÇÂ¼
+                // æ—§è®°å½•
                 node = DomUtil.SetElementText(domOperLog.DocumentElement,
                     "oldRecord", strExistSourceXml);
                 DomUtil.SetAttr(node, "recPath", info.OldRecPath);
 
-                // ±£´æ³É¹¦£¬ĞèÒª·µ»ØĞÅÏ¢ÔªËØ¡£ÒòÎªĞèÒª·µ»ØĞÂµÄÊ±¼ä´Á
+                // ä¿å­˜æˆåŠŸï¼Œéœ€è¦è¿”å›ä¿¡æ¯å…ƒç´ ã€‚å› ä¸ºéœ€è¦è¿”å›æ–°çš„æ—¶é—´æˆ³
                 error = new EntityInfo(info);
                 error.NewTimestamp = output_timestamp;
                 error.NewRecord = strNewXml;
 
-                error.ErrorInfo = "ÒÆ¶¯²Ù×÷³É¹¦¡£NewRecPathÖĞ·µ»ØÁËÊµ¼Ê±£´æµÄÂ·¾¶, NewTimeStampÖĞ·µ»ØÁËĞÂµÄÊ±¼ä´Á£¬NewRecordÖĞ·µ»ØÁËÊµ¼Ê±£´æµÄĞÂ¼ÇÂ¼(¿ÉÄÜºÍÌá½»µÄÔ´¼ÇÂ¼ÉÔÓĞ²îÒì)¡£";
+                error.ErrorInfo = "ç§»åŠ¨æ“ä½œæˆåŠŸã€‚NewRecPathä¸­è¿”å›äº†å®é™…ä¿å­˜çš„è·¯å¾„, NewTimeStampä¸­è¿”å›äº†æ–°çš„æ—¶é—´æˆ³ï¼ŒNewRecordä¸­è¿”å›äº†å®é™…ä¿å­˜çš„æ–°è®°å½•(å¯èƒ½å’Œæäº¤çš„æºè®°å½•ç¨æœ‰å·®å¼‚)ã€‚";
                 error.ErrorCode = ErrorCodeValue.NoError;
                 ErrorInfos.Add(error);
             }
@@ -4874,9 +4875,9 @@ namespace DigitalPlatform.LibraryServer
             return -1;
         }
 
-        // Ì½²â²á¼ÇÂ¼ÖĞÊÇ·ñº¬ÓĞÁ÷Í¨ĞÅÏ¢?
+        // æ¢æµ‹å†Œè®°å½•ä¸­æ˜¯å¦å«æœ‰æµé€šä¿¡æ¯?
         // parameters:
-        //      strDetail   Êä³öÏêÏ¸ÃèÊöĞÅÏ¢
+        //      strDetail   è¾“å‡ºè¯¦ç»†æè¿°ä¿¡æ¯
         static bool IsEntityHasCirculationInfo(XmlDocument dom,
             out string strDetail)
         {
@@ -4885,15 +4886,15 @@ namespace DigitalPlatform.LibraryServer
 
             if (String.IsNullOrEmpty(strBorrower) == true)
                 return false;
-            strDetail = "±»¶ÁÕß " + strBorrower + " ½èÔÄ";
+            strDetail = "è¢«è¯»è€… " + strBorrower + " å€Ÿé˜…";
             return true;
         }
 
         #endregion
 
 #if NO
-        // ¸ù¾İ²áÌõÂëºÅÁĞ±í£¬µÃµ½¼ÇÂ¼Â·¾¶ÁĞ±í
-        // Èç¹ûÓĞÌõÂëºÅÃ»ÓĞÃüÖĞ¼ÇÂ¼£¬ÔòÏàÓ¦Î»ÖÃ·µ»Ø¿Õ×Ö·û´®£»Èç¹ûÓĞÌõÂëºÅÃüÖĞ¶àÌõ¼ÇÂ¼£¬ÔòÏàÓ¦Î»ÖÃ·µ»Ø×Ö·û'!'¿ªÍ·µÄ±¨´íĞÅÏ¢
+        // æ ¹æ®å†Œæ¡ç å·åˆ—è¡¨ï¼Œå¾—åˆ°è®°å½•è·¯å¾„åˆ—è¡¨
+        // å¦‚æœæœ‰æ¡ç å·æ²¡æœ‰å‘½ä¸­è®°å½•ï¼Œåˆ™ç›¸åº”ä½ç½®è¿”å›ç©ºå­—ç¬¦ä¸²ï¼›å¦‚æœæœ‰æ¡ç å·å‘½ä¸­å¤šæ¡è®°å½•ï¼Œåˆ™ç›¸åº”ä½ç½®è¿”å›å­—ç¬¦'!'å¼€å¤´çš„æŠ¥é”™ä¿¡æ¯
         public int GetItemRecPathList(
             RmsChannelCollection channels,
             string strBarcodeList,
@@ -4921,8 +4922,8 @@ namespace DigitalPlatform.LibraryServer
                 // return:
                 //      -1  error
                 //      0   not found
-                //      1   ÃüÖĞ1Ìõ
-                //      >1  ÃüÖĞ¶àÓÚ1Ìõ
+                //      1   å‘½ä¸­1æ¡
+                //      >1  å‘½ä¸­å¤šäº1æ¡
                 int nRet = this.GetItemRec(
                     channels,
                     strBarcode,
@@ -4942,13 +4943,13 @@ namespace DigitalPlatform.LibraryServer
 
                 if (nRet > 1)
                 {
-                    results.Add("!²áÌõÂëºÅ '' ²»Î¨Ò»¡£ÃüÖĞ¼ÇÂ¼ "+nRet.ToString()+" Ìõ");
+                    results.Add("!å†Œæ¡ç å· '' ä¸å”¯ä¸€ã€‚å‘½ä¸­è®°å½• "+nRet.ToString()+" æ¡");
                     continue;
                 }
 
                 if (aPath == null || aPath.Count == 0)
                 {
-                    strError = "aPath³ö´í";
+                    strError = "aPathå‡ºé”™";
                     return -1;
                 }
                 results.Add(aPath[0]);
@@ -4974,10 +4975,11 @@ namespace DigitalPlatform.LibraryServer
             return -1;
         }
 
-        // ¸ù¾İ²áÌõÂëºÅÁĞ±í£¬µÃµ½¼ÇÂ¼Â·¾¶ÁĞ±í
-        // Èç¹ûÓĞÌõÂëºÅÃ»ÓĞÃüÖĞ¼ÇÂ¼£¬ÔòÏàÓ¦Î»ÖÃ·µ»Ø¿Õ×Ö·û´®£»Èç¹ûÓĞÌõÂëºÅÃüÖĞ¶àÌõ¼ÇÂ¼£¬ÔòÏàÓ¦Î»ÖÃ·µ»Ø×Ö·û'!'¿ªÍ·µÄ±¨´íĞÅÏ¢
+        // æ ¹æ®å†Œæ¡ç å·åˆ—è¡¨ï¼Œå¾—åˆ°è®°å½•è·¯å¾„åˆ—è¡¨
+        // å¦‚æœæœ‰æ¡ç å·æ²¡æœ‰å‘½ä¸­è®°å½•ï¼Œåˆ™ç›¸åº”ä½ç½®è¿”å›ç©ºå­—ç¬¦ä¸²ï¼›å¦‚æœæœ‰æ¡ç å·å‘½ä¸­å¤šæ¡è®°å½•ï¼Œåˆ™ç›¸åº”ä½ç½®è¿”å›å­—ç¬¦'!'å¼€å¤´çš„æŠ¥é”™ä¿¡æ¯
         public int GetItemRecPathList(
-            RmsChannelCollection channels,
+            // RmsChannelCollection channels,
+            RmsChannel channel,
             string strDbType,
             string strFrom,
             string strWordList,
@@ -4991,7 +4993,7 @@ namespace DigitalPlatform.LibraryServer
 
             string[] words = strWordList.Split(new char[] { ',' });
 
-            // ÕûÀíÊı×é
+            // æ•´ç†æ•°ç»„
             List<string> word_list = new List<string>();
             foreach (string word in words)
             {
@@ -5004,20 +5006,20 @@ namespace DigitalPlatform.LibraryServer
                 word_list.Add(strWord);
             }
 
-            int nMaxCount = Math.Max(word_list.Count * 3, 1000);    // ÖÁÉÙÎª 1000
+            int nMaxCount = Math.Max(word_list.Count * 3, 1000);    // è‡³å°‘ä¸º 1000
             List<Record> records = null;
 
             // return:
-            //      -1  ³ö´í
-            //      0   Ò»¸öÒ²Ã»ÓĞÃüÖĞ
-            //      >0  ÃüÖĞµÄ×Ü¸öÊı¡£×¢Òâ£¬Õâ²»Ò»¶¨ÊÇresultsÖĞ·µ»ØµÄÔªËØ¸öÊı¡£resultsÖĞ·µ»ØµÄ¸öÊı»¹ÒªÊÜµ½nMaxµÄÏŞÖÆ£¬²»Ò»¶¨µÈÓÚÈ«²¿ÃüÖĞ¸öÊı
+            //      -1  å‡ºé”™
+            //      0   ä¸€ä¸ªä¹Ÿæ²¡æœ‰å‘½ä¸­
+            //      >0  å‘½ä¸­çš„æ€»ä¸ªæ•°ã€‚æ³¨æ„ï¼Œè¿™ä¸ä¸€å®šæ˜¯resultsä¸­è¿”å›çš„å…ƒç´ ä¸ªæ•°ã€‚resultsä¸­è¿”å›çš„ä¸ªæ•°è¿˜è¦å—åˆ°nMaxçš„é™åˆ¶ï¼Œä¸ä¸€å®šç­‰äºå…¨éƒ¨å‘½ä¸­ä¸ªæ•°
             nRet = this.GetItemRec(
-    channels,
+    channel,
     strDbType,
     strWordList,
     strFrom,
     nMaxCount,
-    "keyid,id,key",    // Òª·µ»Økey£¬ÕâÑù²ÅÖªµÀÊÇ·ñ·¢ÉúÁËÌõÂëºÅÖØ¸´
+    "keyid,id,key",    // è¦è¿”å›keyï¼Œè¿™æ ·æ‰çŸ¥é“æ˜¯å¦å‘ç”Ÿäº†æ¡ç å·é‡å¤
     out records,
     out strError);
             if (nRet == -1)
@@ -5031,7 +5033,7 @@ namespace DigitalPlatform.LibraryServer
                 results.Add("");
             }
 
-            // °´ÕÕkey¹é²¢?
+            // æŒ‰ç…§keyå½’å¹¶?
             foreach (Record record in records)
             {
                 if (record.Keys == null || record.Keys.Length == 0)
@@ -5045,13 +5047,13 @@ namespace DigitalPlatform.LibraryServer
                 int nIndex = IndexOf(word_list, strKey, bIgnoreCase);
                 if (nIndex == -1)
                 {
-                    strError = "ºÜÆæ¹Ö³öÏÖÁË key '" + strKey + "' ÔÚwordlist '" + strWordList + "' ÖĞÃ»ÓĞÆ¥ÅäµÄÏî";
+                    strError = "å¾ˆå¥‡æ€ªå‡ºç°äº† key '" + strKey + "' åœ¨wordlist '" + strWordList + "' ä¸­æ²¡æœ‰åŒ¹é…çš„é¡¹";
                     return -1;
                 }
 
-                // ÊÇ·ñ·¢ÉúÁËÃüÖĞ¼ìË÷´ÊÖØ¸´?
+                // æ˜¯å¦å‘ç”Ÿäº†å‘½ä¸­æ£€ç´¢è¯é‡å¤?
                 if (string.IsNullOrEmpty(results[nIndex]) == false)
-                    results[nIndex] = "!" + strFrom + " '" + strKey + "' ¼ìË÷ÃüÖĞ²»Î¨Ò»";
+                    results[nIndex] = "!" + strFrom + " '" + strKey + "' æ£€ç´¢å‘½ä¸­ä¸å”¯ä¸€";
                 else
                 {
                     Debug.Assert(string.IsNullOrEmpty(record.Path) == false, "");
@@ -5061,8 +5063,8 @@ namespace DigitalPlatform.LibraryServer
 
 #if TESTING
             ///
-            records = new List<Record>();   // ²âÊÔÓÃ
-            int nHitCount = 0;  // ²âÊÔÓÃ
+            records = new List<Record>();   // æµ‹è¯•ç”¨
+            int nHitCount = 0;  // æµ‹è¯•ç”¨
             List<string> results = new List<string>();
             for (int i = 0; i < word_list.Count; i++)
             {
@@ -5073,10 +5075,10 @@ namespace DigitalPlatform.LibraryServer
 
             if (nHitCount > records.Count)
             {
-                // ÃüÖĞµÄÈ«²¿¼ÇÂ¼Ã»ÓĞÈ¡Íê£¬ÕâÑù¾Í¿ÉÄÜ·¢ÉúÓĞµÄ²áÌõÂëÊµ¼ÊÉÏÃüÖĞÁËµ«Ã»ÓĞÀ´µÃ¼°¶ÁÈëµÄÇé¿ö
-                // ²âÊÔµÄÊ±ºò×¢ÒâÒªÖÆÔìÕâÖÖÇé¿ö½øĞĞ²âÊÔ
+                // å‘½ä¸­çš„å…¨éƒ¨è®°å½•æ²¡æœ‰å–å®Œï¼Œè¿™æ ·å°±å¯èƒ½å‘ç”Ÿæœ‰çš„å†Œæ¡ç å®é™…ä¸Šå‘½ä¸­äº†ä½†æ²¡æœ‰æ¥å¾—åŠè¯»å…¥çš„æƒ…å†µ
+                // æµ‹è¯•çš„æ—¶å€™æ³¨æ„è¦åˆ¶é€ è¿™ç§æƒ…å†µè¿›è¡Œæµ‹è¯•
 
-                // ½«Ã»ÓĞÃüÖĞµÄ¼ìË÷´ÊÔÙ´Î×éÖ¯¼ìË÷
+                // å°†æ²¡æœ‰å‘½ä¸­çš„æ£€ç´¢è¯å†æ¬¡ç»„ç»‡æ£€ç´¢
                 List<string> temp_words = new List<string>();
                 for (int i = 0; i < results.Count; i++)
                 {
@@ -5085,9 +5087,9 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 if (temp_words.Count == 0)
-                    goto END1;  // Ä¿Ç°ÒÑÃ»ÓĞÎ´ÃüÖĞµÄ¼ìË÷´Ê£¬ËùÒÔ²»ÓÃÔÙ½øĞĞ¼ìË÷ÁË¡£ÕâÖÖÇé¿ö¿ÉÄÜÊÇ×îºóÒ»¸öÌõÂëºÅÖØ¸´ÃüÖĞÌ«¶àÔì³ÉµÄ
+                    goto END1;  // ç›®å‰å·²æ²¡æœ‰æœªå‘½ä¸­çš„æ£€ç´¢è¯ï¼Œæ‰€ä»¥ä¸ç”¨å†è¿›è¡Œæ£€ç´¢äº†ã€‚è¿™ç§æƒ…å†µå¯èƒ½æ˜¯æœ€åä¸€ä¸ªæ¡ç å·é‡å¤å‘½ä¸­å¤ªå¤šé€ æˆçš„
 
-                // ¶ÔÕâĞ©¼ìË÷´Ê¸ÄÎªÒ»¸öÒ»¸ö¼ìË÷
+                // å¯¹è¿™äº›æ£€ç´¢è¯æ”¹ä¸ºä¸€ä¸ªä¸€ä¸ªæ£€ç´¢
                 List<string> temp_results = new List<string>();
                 foreach (string temp_word in temp_words)
                 {
@@ -5097,10 +5099,10 @@ namespace DigitalPlatform.LibraryServer
                     // return:
                     //      -1  error
                     //      0   not found
-                    //      1   ÃüÖĞ1Ìõ
-                    //      >1  ÃüÖĞ¶àÓÚ1Ìõ
+                    //      1   å‘½ä¸­1æ¡
+                    //      >1  å‘½ä¸­å¤šäº1æ¡
                     nRet = this.GetOneItemRec(
-                        channels,
+                        channel,
                         strDbType,
                         temp_word,
                         strFrom,
@@ -5113,9 +5115,9 @@ namespace DigitalPlatform.LibraryServer
                     if (nRet == -1)
                         return -1;
                     if (nRet == 0)
-                        temp_results.Add("");   // Ã»ÓĞÃüÖĞ
+                        temp_results.Add("");   // æ²¡æœ‰å‘½ä¸­
                     else if (nRet > 1)
-                        temp_results.Add("!" + strFrom + " '" + temp_word + "' ¼ìË÷ÃüÖĞ²»Î¨Ò»");
+                        temp_results.Add("!" + strFrom + " '" + temp_word + "' æ£€ç´¢å‘½ä¸­ä¸å”¯ä¸€");
                     else
                     {
                         Debug.Assert(nRet == 1, "");
@@ -5128,10 +5130,10 @@ namespace DigitalPlatform.LibraryServer
                     }
                 }
 
-                // ²åÈëµ±Ç°½á¹ûÖĞ
+                // æ’å…¥å½“å‰ç»“æœä¸­
                 if (temp_results.Count != temp_words.Count)
                 {
-                    strError = "GetOneItemRec() Ñ­»··µ»ØµÄ½á¹ûÊıÄ¿ºÍ¼ìË÷´Ê¸öÊı²»·ûºÏ";
+                    strError = "GetOneItemRec() å¾ªç¯è¿”å›çš„ç»“æœæ•°ç›®å’Œæ£€ç´¢è¯ä¸ªæ•°ä¸ç¬¦åˆ";
                     return -1;
                 }
 
@@ -5143,7 +5145,7 @@ namespace DigitalPlatform.LibraryServer
                     int nPos = IndexOf(word_list, word, bIgnoreCase);
                     if (nRet == -1)
                     {
-                        strError = "ºÜÆæ¹Ö³öÏÖÁË temp_word '" + word + "' ÔÚwordlist '" + strWordList + "' ÖĞÃ»ÓĞÆ¥ÅäµÄÏî";
+                        strError = "å¾ˆå¥‡æ€ªå‡ºç°äº† temp_word '" + word + "' åœ¨wordlist '" + strWordList + "' ä¸­æ²¡æœ‰åŒ¹é…çš„é¡¹";
                         return -1;
                     }
 
@@ -5160,48 +5162,48 @@ namespace DigitalPlatform.LibraryServer
     }
 
 
-    // ÊµÌåĞÅÏ¢
+    // å®ä½“ä¿¡æ¯
     public class DeleteEntityInfo
     {
-        public string RecPath = ""; // ¼ÇÂ¼Â·¾¶
+        public string RecPath = ""; // è®°å½•è·¯å¾„
 
-        public string OldRecord = "";   // ¾É¼ÇÂ¼
-        public byte[] OldTimestamp = null;  // ¾É¼ÇÂ¼¶ÔÓ¦µÄÊ±¼ä´Á
+        public string OldRecord = "";   // æ—§è®°å½•
+        public byte[] OldTimestamp = null;  // æ—§è®°å½•å¯¹åº”çš„æ—¶é—´æˆ³
 
-        public string ItemBarcode = ""; // ²áÌõÂëºÅ
+        public string ItemBarcode = ""; // å†Œæ¡ç å·
     }
 
-    // ÊµÌåĞÅÏ¢
+    // å®ä½“ä¿¡æ¯
     [DataContract(Namespace = "http://dp2003.com/dp2library/")]
     public class EntityInfo
     {
         [DataMember]
-        public string RefID = "";  // 2008/2/17  Ç°¶Ë·¢³öSet...ÇëÇóÊ±¸ø³öµÄÊ¶±ğid£¬·şÎñÆ÷°üº¬ÔÚÏìÓ¦ÖĞ£¬±ãÓÚÇ°¶ËÔÚÏìÓ¦ºó¼ÌĞø´¦Àí
+        public string RefID = "";  // 2008/2/17  å‰ç«¯å‘å‡ºSet...è¯·æ±‚æ—¶ç»™å‡ºçš„è¯†åˆ«idï¼ŒæœåŠ¡å™¨åŒ…å«åœ¨å“åº”ä¸­ï¼Œä¾¿äºå‰ç«¯åœ¨å“åº”åç»§ç»­å¤„ç†
 
         [DataMember]
-        public string OldRecPath = "";  // Ô­¼ÇÂ¼Â·¾¶ 2007/6/2 
+        public string OldRecPath = "";  // åŸè®°å½•è·¯å¾„ 2007/6/2 
         [DataMember]
-        public string OldRecord = "";   // ¾É¼ÇÂ¼
+        public string OldRecord = "";   // æ—§è®°å½•
         [DataMember]
-        public byte[] OldTimestamp = null;  // ¾É¼ÇÂ¼¶ÔÓ¦µÄÊ±¼ä´Á
+        public byte[] OldTimestamp = null;  // æ—§è®°å½•å¯¹åº”çš„æ—¶é—´æˆ³
 
         [DataMember]
-        public string NewRecPath = ""; // ĞÂ¼ÇÂ¼Â·¾¶
+        public string NewRecPath = ""; // æ–°è®°å½•è·¯å¾„
         [DataMember]
-        public string NewRecord = "";   // ĞÂ¼ÇÂ¼
+        public string NewRecord = "";   // æ–°è®°å½•
         [DataMember]
-        public byte[] NewTimestamp = null;  // ĞÂ¼ÇÂ¼¶ÔÓ¦µÄÊ±¼ä´Á
+        public byte[] NewTimestamp = null;  // æ–°è®°å½•å¯¹åº”çš„æ—¶é—´æˆ³
 
         [DataMember]
-        public string Action = "";   // ÒªÖ´ĞĞµÄ²Ù×÷(getÊ±´ËÏîÎŞÓÃ) ÖµÎªnew change delete move 4ÖÖÖ®Ò»¡£changeÒªÇóOldRecPathºÍNewRecPathÒ»Ñù¡£move²»ÒªÇóÁ½ÕßÒ»Ñù¡£°Ñmove²Ù×÷µ¥ÁĞ³öÀ´£¬Ö÷ÒªÊÇÎªÁËÈÕÖ¾Í³¼ÆµÄ±ãÀû¡£
+        public string Action = "";   // è¦æ‰§è¡Œçš„æ“ä½œ(getæ—¶æ­¤é¡¹æ— ç”¨) å€¼ä¸ºnew change delete move 4ç§ä¹‹ä¸€ã€‚changeè¦æ±‚OldRecPathå’ŒNewRecPathä¸€æ ·ã€‚moveä¸è¦æ±‚ä¸¤è€…ä¸€æ ·ã€‚æŠŠmoveæ“ä½œå•åˆ—å‡ºæ¥ï¼Œä¸»è¦æ˜¯ä¸ºäº†æ—¥å¿—ç»Ÿè®¡çš„ä¾¿åˆ©ã€‚
 
         [DataMember]
-        public string Style = "";   // 2008/10/6  ·ç¸ñ¡£³£ÓÃ×÷¸½¼ÓµÄÌØĞÔ²ÎÊı¡£ÀıÈç: nocheckdup,noeventlog,force
+        public string Style = "";   // 2008/10/6  é£æ ¼ã€‚å¸¸ç”¨ä½œé™„åŠ çš„ç‰¹æ€§å‚æ•°ã€‚ä¾‹å¦‚: nocheckdup,noeventlog,force
 
         [DataMember]
-        public string ErrorInfo = "";   // ³ö´íĞÅÏ¢
+        public string ErrorInfo = "";   // å‡ºé”™ä¿¡æ¯
         [DataMember]
-        public ErrorCodeValue ErrorCode = ErrorCodeValue.NoError;   // ³ö´íÂë£¨±íÊ¾ÊôÓÚºÎÖÖÀàĞÍµÄ´íÎó£©
+        public ErrorCodeValue ErrorCode = ErrorCodeValue.NoError;   // å‡ºé”™ç ï¼ˆè¡¨ç¤ºå±äºä½•ç§ç±»å‹çš„é”™è¯¯ï¼‰
 
         public EntityInfo(EntityInfo info)
         {

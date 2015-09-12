@@ -3575,6 +3575,9 @@ e.Height);
         {
             DateTime start_time = DateTime.Now;
 
+            List<DateTime> times = new List<DateTime>();
+            times.Add(start_time);
+
             task.State = "begin";
             task.Color = "purple";  //  "light";
             this.Container.DisplayTask("refresh", task);
@@ -3652,7 +3655,7 @@ e.Height);
 
             //if (this.Container.MainForm.TestMode == true)
             //    strStyle += ",testmode";
-            DateTime api_start_time = DateTime.Now;
+            times.Add(DateTime.Now);
 
             long lRet = Channel.Borrow(
 stop,
@@ -3675,7 +3678,7 @@ out borrow_info,
 out strError);
             task.ErrorInfo = strError;
 
-            LogOperTime("borrow", api_start_time, strOperText);
+            times.Add(DateTime.Now);
 
             if (reader_records != null && reader_records.Length > 0)
                 strReaderRecord = reader_records[0];
@@ -3777,6 +3780,10 @@ end_time);
                 e1.ReaderBarcode = strOutputReaderBarcode;
                 this.Container.TriggerBorrowComplete(e1);
             }
+
+            times.Add(DateTime.Now);
+            LogOperTime("borrow", times, strOperText);
+
             return;
         ERROR1:
             task.State = "error";
@@ -3804,13 +3811,19 @@ end_time);
 
         }
 
-        void LogOperTime(string strAPI, DateTime start_time, string strDesc)
+        // parameters:
+        //      times   时间值数组。依次是 总开始时间, API 开始时间, API 结束时间, 总结束时间
+        void LogOperTime(string strAPI, List<DateTime> times, string strDesc)
         {
+            Debug.Assert(times.Count == 4, "");
+
             StringBuilder text = new StringBuilder();
-            TimeSpan delta = DateTime.Now - start_time;
-            if (delta.TotalSeconds > 2)
+            TimeSpan total_delta = times[3] - times[0];
+            TimeSpan api_delta = times[2] - times[1];
+            if (api_delta.TotalSeconds > 2)
                 text.Append("*** ");
-            text.Append(" API " + strAPI + " 耗时 " + delta.TotalSeconds.ToString() + " 秒 " + strDesc);
+            text.Append("API " + strAPI + " 耗时 " + api_delta.TotalSeconds.ToString() + " 秒  " + strDesc+ " (" + times[1].ToLongTimeString() + "-" + times[2].ToLongTimeString() + "); "
+                + " 总耗时 " + total_delta.TotalSeconds.ToString() + " 秒(" + times[0].ToLongTimeString() + "-" + times[3].ToLongTimeString() + ") ");
             this.Container.WriteErrorLog(text.ToString());
         }
 
@@ -3818,6 +3831,9 @@ end_time);
         void Return(ChargingTask task)
         {
             DateTime start_time = DateTime.Now;
+
+            List<DateTime> times = new List<DateTime>();
+            times.Add(start_time);
 
             task.State = "begin";
             task.Color = "purple";  //  "light";
@@ -3930,7 +3946,7 @@ end_time);
             //if (this.Container.MainForm.TestMode == true)
             //    strStyle += ",testmode";
 
-            DateTime api_start_time = DateTime.Now;
+            times.Add(DateTime.Now);
 
             long lRet = Channel.Return(
                 stop,
@@ -3960,7 +3976,7 @@ end_time);
                     strLocation = StringUtil.GetPureLocation(return_info.Location);
                 }
 #endif
-            LogOperTime("return", api_start_time, strOperText);
+            times.Add(DateTime.Now);
 
             if (reader_records != null && reader_records.Length > 0)
                 strReaderRecord = reader_records[0];
@@ -4090,6 +4106,10 @@ end_time);
                 e1.ReaderBarcode = strOutputReaderBarcode;
                 this.Container.TriggerBorrowComplete(e1);
             }
+
+            times.Add(DateTime.Now);
+            LogOperTime("return", times, strOperText);
+
             return;
 
         ERROR1:

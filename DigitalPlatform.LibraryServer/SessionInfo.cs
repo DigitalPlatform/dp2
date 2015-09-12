@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -22,7 +22,7 @@ namespace DigitalPlatform.LibraryServer
     public class SessionInfo
     {
 #if NO
-        public int LoginErrorCount = 0; // ×î½üÁ¬ĞøÃÜÂë´íÎóµÄ´ÎÊı
+        public int LoginErrorCount = 0; // æœ€è¿‘è¿ç»­å¯†ç é”™è¯¯çš„æ¬¡æ•°
 #endif
 
         public const int DEFAULT_MAX_CLIENTS = 5;
@@ -38,7 +38,7 @@ namespace DigitalPlatform.LibraryServer
         }
 
         /// <summary>
-        /// ÊÇ·ñÎªÆÀ¹ÀÄ£Ê½
+        /// æ˜¯å¦ä¸ºè¯„ä¼°æ¨¡å¼
         /// </summary>
         public bool TestMode
         {
@@ -46,29 +46,29 @@ namespace DigitalPlatform.LibraryServer
             set;
         }
 
-        public string ClientIP = "";  // Ç°¶Ë IP µØÖ·
-        public string Via = ""; // ¾­ÓÉÊ²Ã´Ğ­Òé
-        public string SessionID = "";   // Session Î¨Ò»µÄ ID
+        public string ClientIP = "";  // å‰ç«¯ IP åœ°å€
+        public string Via = ""; // ç»ç”±ä»€ä¹ˆåè®®
+        public string SessionID = "";   // Session å”¯ä¸€çš„ ID
 
-        public bool NeedAutoClean = true;   // ÊÇ·ñĞèÒª×Ô¶¯Çå³ı
+        public bool NeedAutoClean = true;   // æ˜¯å¦éœ€è¦è‡ªåŠ¨æ¸…é™¤
         public long CallCount = 0;
 
         public SessionTime SessionTime = null;
 
         public string Lang = "";
 
-        // ¸Õ²Å×ö¹ıµÄ×î½üÒ»´ÎAmerceµÄIDÁĞ±í
+        // åˆšæ‰åšè¿‡çš„æœ€è¿‘ä¸€æ¬¡Amerceçš„IDåˆ—è¡¨
         public List<string> AmerceIds = null;
         public string AmerceReaderBarcode = "";
 
-        // TODO: Ëù´´½¨µÄÁÙÊ±ÎÄ¼şÒªÔÚ¹æ¶¨µÄÄ¿Â¼ÖĞ
-        // TODO: ¹Û²ìËüÊÇ·ñÊÍ·Å
+        // TODO: æ‰€åˆ›å»ºçš„ä¸´æ—¶æ–‡ä»¶è¦åœ¨è§„å®šçš„ç›®å½•ä¸­
+        // TODO: è§‚å¯Ÿå®ƒæ˜¯å¦é‡Šæ”¾
         public DupResultSet DupResultSet = null;
 
         public LibraryApplication App = null;
         public RmsChannelCollection Channels = new RmsChannelCollection();
 
-        private string m_strTempDir = "";	// ÁÙÊ±ÎÄ¼şÄ¿Â¼ 2008/3/31
+        private string m_strTempDir = "";	// ä¸´æ—¶æ–‡ä»¶ç›®å½• 2008/3/31
 
 
         //public string UserName = "";
@@ -182,7 +182,7 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
-        // ÊÇ·ñÎªÈ«¾ÖÓÃ»§? ËùÎ½È«¾ÖÓÃ»§¾ÍÊÇ¹ÜÏ½ËùÓĞ¹İ´úÂëµÄÓÃ»§
+        // æ˜¯å¦ä¸ºå…¨å±€ç”¨æˆ·? æ‰€è°“å…¨å±€ç”¨æˆ·å°±æ˜¯ç®¡è¾–æ‰€æœ‰é¦†ä»£ç çš„ç”¨æˆ·
         public bool GlobalUser
         {
             get
@@ -214,7 +214,7 @@ namespace DigitalPlatform.LibraryServer
         }
 
         /// <summary>
-        /// ÓÃÓÚÈÕÖ¾¼ÇÔØµÄÇ°¶ËµØÖ·£¬°üÀ¨ IP ºÍ Via Á½¸ö²¿·Ö
+        /// ç”¨äºæ—¥å¿—è®°è½½çš„å‰ç«¯åœ°å€ï¼ŒåŒ…æ‹¬ IP å’Œ Via ä¸¤ä¸ªéƒ¨åˆ†
         /// </summary>
         public string ClientAddress
         {
@@ -248,7 +248,7 @@ namespace DigitalPlatform.LibraryServer
         {
             Debug.Assert(this.m_strTempDir != "", "");
 
-            PathUtil.CreateDirIfNeed(this.m_strTempDir);	// È·±£Ä¿Â¼´´½¨
+            PathUtil.CreateDirIfNeed(this.m_strTempDir);	// ç¡®ä¿ç›®å½•åˆ›å»º
             return this.m_strTempDir;
         }
 
@@ -289,10 +289,10 @@ namespace DigitalPlatform.LibraryServer
             e.Result = 1;
         }
 
-        // µÇÂ¼
-        // TODO: ¶àÎÄÖÖÌáÊ¾
+        // ç™»å½•
+        // TODO: å¤šæ–‡ç§æç¤º
         // parameters:
-        //      strPassword Èç¹ûÎªnull£¬±íÊ¾²»ÑéÖ¤ÃÜÂë¡£Òò´ËĞèÒª¸ñÍâ×¢Òâ£¬¼´±ãÊÇ¿ÕÃÜÂë£¬Èç¹ûÒªÑéÖ¤Ò²ĞèÒªÊ¹ÓÃ""
+        //      strPassword å¦‚æœä¸ºnullï¼Œè¡¨ç¤ºä¸éªŒè¯å¯†ç ã€‚å› æ­¤éœ€è¦æ ¼å¤–æ³¨æ„ï¼Œå³ä¾¿æ˜¯ç©ºå¯†ç ï¼Œå¦‚æœè¦éªŒè¯ä¹Ÿéœ€è¦ä½¿ç”¨""
         // return:
         //      -1  error
         //      0   user not found, or password error
@@ -301,7 +301,7 @@ namespace DigitalPlatform.LibraryServer
             string strUserID,
             string strPassword,
             string strLocation,
-            bool bPublicError,  // ÊÇ·ñÄ£ºıÓÃ»§ÃûºÍÃÜÂë²»Æ¥ÅäÌáÊ¾?
+            bool bPublicError,  // æ˜¯å¦æ¨¡ç³Šç”¨æˆ·åå’Œå¯†ç ä¸åŒ¹é…æç¤º?
             string strClientIP,
             string strGetToken,
             out string strRights,
@@ -328,7 +328,7 @@ namespace DigitalPlatform.LibraryServer
             if (nRet == 0)
             {
                 if (bPublicError == true)
-                    strError = this.App.GetString("ÕÊ»§²»´æÔÚ»òÃÜÂë²»ÕıÈ·");
+                    strError = this.App.GetString("å¸æˆ·ä¸å­˜åœ¨æˆ–å¯†ç ä¸æ­£ç¡®");
                 return 0;
             }
 
@@ -344,13 +344,13 @@ namespace DigitalPlatform.LibraryServer
                     }
                     catch
                     {
-                        strError = "ÄÚ²¿´íÎó";
+                        strError = "å†…éƒ¨é”™è¯¯";
                         return -1;
                     }
                     // return:
-                    //      -1  ³ö´í
-                    //      0   ÑéÖ¤²»Æ¥Åä
-                    //      1   ÑéÖ¤Æ¥Åä
+                    //      -1  å‡ºé”™
+                    //      0   éªŒè¯ä¸åŒ¹é…
+                    //      1   éªŒè¯åŒ¹é…
                     nRet = LibraryApplication.VerifyToken(
                         strClientIP,
                         strToken,
@@ -360,13 +360,13 @@ namespace DigitalPlatform.LibraryServer
                         return nRet;
                 }
 #if NO
-                // ÒÔÇ°µÄ×ö·¨
+                // ä»¥å‰çš„åšæ³•
                 else if (strPassword != account.Password)
                 {
                     if (bPublicError == true)
-                        strError = this.App.GetString("ÕÊ»§²»´æÔÚ»òÃÜÂë²»ÕıÈ·");
+                        strError = this.App.GetString("å¸æˆ·ä¸å­˜åœ¨æˆ–å¯†ç ä¸æ­£ç¡®");
                     else
-                        strError = this.App.GetString("ÃÜÂë²»ÕıÈ·");
+                        strError = this.App.GetString("å¯†ç ä¸æ­£ç¡®");
                     return 0;
                 }
 #endif
@@ -381,9 +381,9 @@ namespace DigitalPlatform.LibraryServer
                     if (nRet == 0)
                     {
                         if (bPublicError == true)
-                            strError = this.App.GetString("ÕÊ»§²»´æÔÚ»òÃÜÂë²»ÕıÈ·");
+                            strError = this.App.GetString("å¸æˆ·ä¸å­˜åœ¨æˆ–å¯†ç ä¸æ­£ç¡®");
                         else
-                            strError = this.App.GetString("ÃÜÂë²»ÕıÈ·");
+                            strError = this.App.GetString("å¯†ç ä¸æ­£ç¡®");
                         return 0;
                     }
                 }
@@ -406,7 +406,7 @@ namespace DigitalPlatform.LibraryServer
                 }
                 catch
                 {
-                    strError = "ÄÚ²¿´íÎó";
+                    strError = "å†…éƒ¨é”™è¯¯";
                     return -1;
                 }
                 string strToken = "";
@@ -425,7 +425,7 @@ namespace DigitalPlatform.LibraryServer
         }
 
         /*
-		// »ñµÃÈ±Ê¡ÕÊ»§ĞÅÏ¢
+		// è·å¾—ç¼ºçœå¸æˆ·ä¿¡æ¯
 		// return:
 		//		2	already login succeed
 		//		1	dialog return OK
@@ -436,7 +436,7 @@ namespace DigitalPlatform.LibraryServer
 			string strUrl,
 			string strPath,
 			LoginStyle loginStyle,
-			out IWin32Window owner,	// Èç¹ûĞèÒª³öÏÖ¶Ô»°¿ò£¬ÕâÀï·µ»Ø¶Ô»°¿òµÄËŞÖ÷Form
+			out IWin32Window owner,	// å¦‚æœéœ€è¦å‡ºç°å¯¹è¯æ¡†ï¼Œè¿™é‡Œè¿”å›å¯¹è¯æ¡†çš„å®¿ä¸»Form
 			out string strUserName,
 			out string strPassword)
 		{
@@ -451,7 +451,7 @@ namespace DigitalPlatform.LibraryServer
          */
 
 #if NO
-        // ¼ìË÷³ö²áÊı¾İ
+        // æ£€ç´¢å‡ºå†Œæ•°æ®
         public int SearchItems(
             LibraryApplication app,
             string strItemDbName,
@@ -462,7 +462,7 @@ namespace DigitalPlatform.LibraryServer
             string strXml = "";
 
             string strQueryXml = "<target list='"
-                + StringUtil.GetXmlStringSimple(strItemDbName + ":" + "¸¸¼ÇÂ¼")       // 2007/9/14
+                + StringUtil.GetXmlStringSimple(strItemDbName + ":" + "çˆ¶è®°å½•")       // 2007/9/14
                 + "'><item><word>"
                 + strBiblioRecId
                 + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang></target>";
@@ -484,7 +484,7 @@ namespace DigitalPlatform.LibraryServer
             // not found
             if (lRet == 0)
             {
-                strError = "Ã»ÓĞÕÒµ½";
+                strError = "æ²¡æœ‰æ‰¾åˆ°";
                 return 0;
             }
 
@@ -542,11 +542,11 @@ namespace DigitalPlatform.LibraryServer
 #endif
 
 #if NO
-        // ¼ìË÷³ö²áÊı¾İ
-        // ´øÓĞÆ«ÒÆÁ¿µÄ°æ±¾
+        // æ£€ç´¢å‡ºå†Œæ•°æ®
+        // å¸¦æœ‰åç§»é‡çš„ç‰ˆæœ¬
         // 2009/6/9
         // return:
-        //      ÃüÖĞµÄÈ«²¿½á¹ûÊıÁ¿¡£
+        //      å‘½ä¸­çš„å…¨éƒ¨ç»“æœæ•°é‡ã€‚
         public int SearchItems(
             LibraryApplication app,
             string strItemDbName,
@@ -559,7 +559,7 @@ namespace DigitalPlatform.LibraryServer
             string strXml = "";
 
             string strQueryXml = "<target list='"
-                + StringUtil.GetXmlStringSimple(strItemDbName + ":" + "¸¸¼ÇÂ¼")       // 2007/9/14
+                + StringUtil.GetXmlStringSimple(strItemDbName + ":" + "çˆ¶è®°å½•")       // 2007/9/14
                 + "'><item><order>DESC</order><word>"
                 + strBiblioRecId
                 + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang></target>";
@@ -581,7 +581,7 @@ namespace DigitalPlatform.LibraryServer
             // not found
             if (lRet == 0)
             {
-                strError = "Ã»ÓĞÕÒµ½";
+                strError = "æ²¡æœ‰æ‰¾åˆ°";
                 return 0;
             }
 
@@ -639,9 +639,9 @@ namespace DigitalPlatform.LibraryServer
 #endif
 
 #if NO
-        // ¼ìË÷³öÆÀ×¢Êı¾İ
+        // æ£€ç´¢å‡ºè¯„æ³¨æ•°æ®
         // return:
-        //      ÃüÖĞµÄÈ«²¿½á¹ûÊıÁ¿¡£
+        //      å‘½ä¸­çš„å…¨éƒ¨ç»“æœæ•°é‡ã€‚
         public long SearchComments(
             LibraryApplication app,
             string strCommentDbName,
@@ -652,7 +652,7 @@ namespace DigitalPlatform.LibraryServer
             // string strXml = "";
 
             string strQueryXml = "<target list='"
-                + StringUtil.GetXmlStringSimple(strCommentDbName + ":" + "¸¸¼ÇÂ¼")       // 2007/9/14
+                + StringUtil.GetXmlStringSimple(strCommentDbName + ":" + "çˆ¶è®°å½•")       // 2007/9/14
                 + "'><item><order>DESC</order><word>"
                 + strBiblioRecId
                 + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang></target>";
@@ -674,7 +674,7 @@ namespace DigitalPlatform.LibraryServer
             // not found
             if (lRet == 0)
             {
-                strError = "Ã»ÓĞÕÒµ½";
+                strError = "æ²¡æœ‰æ‰¾åˆ°";
                 return 0;
             }
 
@@ -683,7 +683,7 @@ namespace DigitalPlatform.LibraryServer
 #endif
 
 #if NO
-        // »ñµÃÒ»¶¨·¶Î§µÄ¼ìË÷ÃüÖĞ½á¹û
+        // è·å¾—ä¸€å®šèŒƒå›´çš„æ£€ç´¢å‘½ä¸­ç»“æœ
         // return:
         public int GetCommentsSearchResult(
             LibraryApplication app,
@@ -776,11 +776,11 @@ namespace DigitalPlatform.LibraryServer
             return -1;
         }
 
-        // ¸ù¾İÌØĞÔµÄÆÀ×¢¼ÇÂ¼Â·¾¶£¬»ñµÃÒ»¶¨·¶Î§µÄ¼ìË÷ÃüÖĞ½á¹û
+        // æ ¹æ®ç‰¹æ€§çš„è¯„æ³¨è®°å½•è·¯å¾„ï¼Œè·å¾—ä¸€å®šèŒƒå›´çš„æ£€ç´¢å‘½ä¸­ç»“æœ
         // return:
-        //      -1  ³ö´í
-        //      0   Ã»ÓĞÕÒµ½
-        //      1   ÕÒµ½
+        //      -1  å‡ºé”™
+        //      0   æ²¡æœ‰æ‰¾åˆ°
+        //      1   æ‰¾åˆ°
         public int GetCommentsSearchResult(
             LibraryApplication app,
             int nPerCount,
@@ -899,12 +899,12 @@ namespace DigitalPlatform.LibraryServer
                     }
                 }
 
-                return 1;   // ÕÒµ½
+                return 1;   // æ‰¾åˆ°
             }
 
             nStart = -1;
-            strError = "Â·¾¶Îª '"+strCommentRecPath+"' µÄ¼ÇÂ¼ÔÚ½á¹û¼¯ÖĞÃ»ÓĞÕÒµ½";
-            return 0;   // Ã»ÓĞÕÒµ½
+            strError = "è·¯å¾„ä¸º '"+strCommentRecPath+"' çš„è®°å½•åœ¨ç»“æœé›†ä¸­æ²¡æœ‰æ‰¾åˆ°";
+            return 0;   // æ²¡æœ‰æ‰¾åˆ°
         ERROR1:
             return -1;
         }
@@ -913,7 +913,7 @@ namespace DigitalPlatform.LibraryServer
 
 #if NO
     /// <summary>
-    /// ²áĞÅÏ¢µ½À´ÊÂ¼ş
+    /// å†Œä¿¡æ¯åˆ°æ¥äº‹ä»¶
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
@@ -921,22 +921,22 @@ namespace DigitalPlatform.LibraryServer
 ItemLoadEventArgs e);
 
     /// <summary>
-    /// ²áĞÅÏ¢µ½À´ÊÂ¼şµÄ²ÎÊı
+    /// å†Œä¿¡æ¯åˆ°æ¥äº‹ä»¶çš„å‚æ•°
     /// </summary>
     public class ItemLoadEventArgs : EventArgs
     {
         /// <summary>
-        /// ¼ÇÂ¼È«Â·¾¶¡£
+        /// è®°å½•å…¨è·¯å¾„ã€‚
         /// </summary>
         public string Path = "";
 
-        public int Index = -1;  // ÔÚÈô¸É²á¼ÇÂ¼ÖĞµÄË³Ğò,´Ó0¿ªÊ¼¼ÆÊı
+        public int Index = -1;  // åœ¨è‹¥å¹²å†Œè®°å½•ä¸­çš„é¡ºåº,ä»0å¼€å§‹è®¡æ•°
 
-        public int Count = 0;   // ²á×ÜÊı ±¾´ÎIndexÉæ¼°µÄ·¶Î§
+        public int Count = 0;   // å†Œæ€»æ•° æœ¬æ¬¡Indexæ¶‰åŠçš„èŒƒå›´
 
-        public int TotalCount = 0;  // ¼ìË÷ÃüÖĞµÄ×ÜÊÂÏîÊı// 2010/11/9
+        public int TotalCount = 0;  // æ£€ç´¢å‘½ä¸­çš„æ€»äº‹é¡¹æ•°// 2010/11/9
 
-        public string Xml = ""; // ¼ÇÂ¼
+        public string Xml = ""; // è®°å½•
 
         public byte[] Timestamp = null; // 2010/11/8
     }
@@ -945,7 +945,7 @@ ItemLoadEventArgs e);
 SetStartEventArgs e);
 
     /// <summary>
-    /// ²áĞÅÏ¢µ½À´ÊÂ¼şµÄ²ÎÊı
+    /// å†Œä¿¡æ¯åˆ°æ¥äº‹ä»¶çš„å‚æ•°
     /// </summary>
     public class SetStartEventArgs : EventArgs
     {
@@ -958,29 +958,29 @@ SetStartEventArgs e);
         public DateTime CreateTime = DateTime.Now;
         public DateTime LastUsedTime = DateTime.Now;
         // public string SessionID = "";
-        // TODO: ÊÇ·ñµÇÂ¼¹ı£¬Ò²¾ö¶¨ÁËÍ¨µÀµÄ¿ÕÏĞÉú´æÊ±¼ä
+        // TODO: æ˜¯å¦ç™»å½•è¿‡ï¼Œä¹Ÿå†³å®šäº†é€šé“çš„ç©ºé—²ç”Ÿå­˜æ—¶é—´
     }
 
     /// <summary>
-    /// SessionInfo ´æ´¢½á¹¹
-    /// SessionTable ±¾ÉíÊÇ¸ö Hashtable£¬ÒÔ Session ID ×Ö·û´® --> SessionInfo ·½Ê½´æ´¢ÁËËùÓĞ SessionInfo
+    /// SessionInfo å­˜å‚¨ç»“æ„
+    /// SessionTable æœ¬èº«æ˜¯ä¸ª Hashtableï¼Œä»¥ Session ID å­—ç¬¦ä¸² --> SessionInfo æ–¹å¼å­˜å‚¨äº†æ‰€æœ‰ SessionInfo
     /// </summary>
     public class SessionTable : Hashtable
     {
         ReaderWriterLockSlim m_lock = new ReaderWriterLockSlim();
-        static int m_nLockTimeout = 5000;	// 5000=5Ãë
+        static int m_nLockTimeout = 5000;	// 5000=5ç§’
 
         int _nMaxCount = 10000;
 
         /// <summary>
-        /// ×î¶àÔÊĞí·ÃÎÊ dp2Library µÄÇ°¶Ë»úÆ÷ÊıÁ¿
+        /// æœ€å¤šå…è®¸è®¿é—® dp2Library çš„å‰ç«¯æœºå™¨æ•°é‡
         /// </summary>
-        public int MaxClients = SessionInfo.DEFAULT_MAX_CLIENTS; // -1 ±íÊ¾²»ÏŞÖÆ (0 ±íÊ¾³ıÁË localhost ÆäËûÒ»¸Å²»ĞíÁ¬½Ó)
+        public int MaxClients = SessionInfo.DEFAULT_MAX_CLIENTS; // -1 è¡¨ç¤ºä¸é™åˆ¶ (0 è¡¨ç¤ºé™¤äº† localhost å…¶ä»–ä¸€æ¦‚ä¸è®¸è¿æ¥)
 
-        Hashtable _ipTable = new Hashtable();   // IP -- Session ÊıÁ¿ ¶ÔÕÕ±í
+        Hashtable _ipTable = new Hashtable();   // IP -- Session æ•°é‡ å¯¹ç…§è¡¨
 
 #if NO
-        Hashtable _ipNullTable = new Hashtable();   // IP -- (Ã»ÓĞSessionµÄ)Channel ÊıÁ¿ ¶ÔÕÕ±í
+        Hashtable _ipNullTable = new Hashtable();   // IP -- (æ²¡æœ‰Sessionçš„)Channel æ•°é‡ å¯¹ç…§è¡¨
 
         public void IncNullIpCount(string strIP, int nDelta)
         {
@@ -999,7 +999,7 @@ SetStartEventArgs e);
             return;
 
             if (this.m_lock.TryEnterWriteLock(m_nLockTimeout) == false)
-                throw new ApplicationException("Ëø¶¨³¢ÊÔÖĞ³¬Ê±");
+                throw new ApplicationException("é”å®šå°è¯•ä¸­è¶…æ—¶");
             try
             {
                 _incIpCount(strIP, nDelta);
@@ -1021,7 +1021,7 @@ SetStartEventArgs e);
                 return;
 
             if (this.m_lock.TryEnterReadLock(m_nLockTimeout) == false)
-                throw new ApplicationException("Ëø¶¨³¢ÊÔÖĞ³¬Ê±");
+                throw new ApplicationException("é”å®šå°è¯•ä¸­è¶…æ—¶");
             try
             {
                 if (this.ContainsKey(strSessionID) == true)
@@ -1033,10 +1033,10 @@ SetStartEventArgs e);
             }
 
             if (this.Count > _nMaxCount)
-                throw new ApplicationException("Session ÊıÁ¿³¬¹ı " + _nMaxCount.ToString());
+                throw new ApplicationException("Session æ•°é‡è¶…è¿‡ " + _nMaxCount.ToString());
 
             if (this.m_lock.TryEnterWriteLock(m_nLockTimeout) == false)
-                throw new ApplicationException("Ëø¶¨³¢ÊÔÖĞ³¬Ê±");
+                throw new ApplicationException("é”å®šå°è¯•ä¸­è¶…æ—¶");
             try
             {
                 this[strSessionID] = null;
@@ -1056,7 +1056,7 @@ SetStartEventArgs e);
             SessionInfo sessioninfo = null;
 
             if (this.m_lock.TryEnterWriteLock(m_nLockTimeout) == false)
-                throw new ApplicationException("Ëø¶¨³¢ÊÔÖĞ³¬Ê±");
+                throw new ApplicationException("é”å®šå°è¯•ä¸­è¶…æ—¶");
             try
             {
                 // this.Remove(sessioninfo.SessionTime.SessionID);
@@ -1084,7 +1084,7 @@ SetStartEventArgs e);
             SessionInfo sessioninfo = null;
 
             if (this.m_lock.TryEnterReadLock(m_nLockTimeout) == false)
-                throw new ApplicationException("Ëø¶¨³¢ÊÔÖĞ³¬Ê±");
+                throw new ApplicationException("é”å®šå°è¯•ä¸­è¶…æ—¶");
             try
             {
                 sessioninfo = (SessionInfo)this[strSessionID];
@@ -1114,7 +1114,7 @@ SetStartEventArgs e);
             }
 
             if (this.Count > _nMaxCount)
-                throw new ApplicationException("Session ÊıÁ¿³¬¹ı " + _nMaxCount.ToString());
+                throw new ApplicationException("Session æ•°é‡è¶…è¿‡ " + _nMaxCount.ToString());
 
             sessioninfo = new SessionInfo(app, strSessionID, strIP, strVia);
             sessioninfo.SessionTime = new SessionTime();
@@ -1123,7 +1123,7 @@ SetStartEventArgs e);
 #endif
 
             if (this.m_lock.TryEnterWriteLock(m_nLockTimeout) == false)
-                throw new ApplicationException("Ëø¶¨³¢ÊÔÖĞ³¬Ê±");
+                throw new ApplicationException("é”å®šå°è¯•ä¸­è¶…æ—¶");
             try
             {
                 long v = _incIpCount(strIP, 1);
@@ -1135,12 +1135,12 @@ SetStartEventArgs e);
 
                 if (v >= nMax)
                 {
-                    // ×¢Òâ Session ÊÇ·ñ Dispose() ?
+                    // æ³¨æ„ Session æ˜¯å¦ Dispose() ?
                     _incIpCount(strIP, -1);
-                    throw new OutofSessionException("Session ×ÊÔ´²»×ã£¬³¬¹ıÅä¶î " + this.MaxSessionsPerIp.ToString());
+                    throw new OutofSessionException("Session èµ„æºä¸è¶³ï¼Œè¶…è¿‡é…é¢ " + this.MaxSessionsPerIp.ToString());
                 }
 
-                // Ã»ÓĞ³¬¹ıÅä¶îµÄ²Å¼ÓÈë
+                // æ²¡æœ‰è¶…è¿‡é…é¢çš„æ‰åŠ å…¥
                 this[strSessionID] = sessioninfo;
 
                 return sessioninfo;
@@ -1156,7 +1156,7 @@ SetStartEventArgs e);
             List<string> remove_keys = new List<string>();
 
             if (this.m_lock.TryEnterReadLock(m_nLockTimeout) == false)
-                throw new ApplicationException("Ëø¶¨³¢ÊÔÖĞ³¬Ê±");
+                throw new ApplicationException("é”å®šå°è¯•ä¸­è¶…æ—¶");
             try
             {
                 foreach (string key in this.Keys)
@@ -1168,7 +1168,7 @@ SetStartEventArgs e);
 
                     if (info.ClientIP == strClientIP)
                     {
-                        remove_keys.Add(key);   // ÕâÀï²»ÄÜÉ¾³ı£¬ÒòÎª foreach »¹ÒªÓÃÃ¶¾ÙÆ÷
+                        remove_keys.Add(key);   // è¿™é‡Œä¸èƒ½åˆ é™¤ï¼Œå› ä¸º foreach è¿˜è¦ç”¨æšä¸¾å™¨
                     }
                 }
             }
@@ -1178,12 +1178,12 @@ SetStartEventArgs e);
             }
 
             if (remove_keys.Count == 0)
-                return 0;   // Ã»ÓĞÕÒµ½
+                return 0;   // æ²¡æœ‰æ‰¾åˆ°
 
             int nCount = 0;
             List<SessionInfo> delete_sessions = new List<SessionInfo>();
             if (this.m_lock.TryEnterWriteLock(m_nLockTimeout) == false)
-                throw new ApplicationException("Ëø¶¨³¢ÊÔÖĞ³¬Ê±");
+                throw new ApplicationException("é”å®šå°è¯•ä¸­è¶…æ—¶");
             try
             {
                 foreach (string key in remove_keys)
@@ -1194,7 +1194,7 @@ SetStartEventArgs e);
 
                     // DeleteSession(sessioninfo, false);
 
-                    // ºÍ sessionid µÄ hashtable ÍÑÀë¹ØÏµ
+                    // å’Œ sessionid çš„ hashtable è„±ç¦»å…³ç³»
                     this.Remove(key);
 
                     delete_sessions.Add(sessioninfo);
@@ -1213,7 +1213,7 @@ SetStartEventArgs e);
                 this.m_lock.ExitWriteLock();
             }
 
-            // °Ñ CloseSession ·ÅÔÚËø¶¨·¶Î§ÍâÃæ£¬Ö÷ÒªÊÇÏë¾¡Á¿¼õÉÙËø¶¨µÄÊ±¼ä
+            // æŠŠ CloseSession æ”¾åœ¨é”å®šèŒƒå›´å¤–é¢ï¼Œä¸»è¦æ˜¯æƒ³å°½é‡å‡å°‘é”å®šçš„æ—¶é—´
             foreach (SessionInfo info in delete_sessions)
             {
                 info.CloseSession();
@@ -1226,7 +1226,7 @@ SetStartEventArgs e);
             SessionInfo sessioninfo = null;
 
             if (this.m_lock.TryEnterReadLock(m_nLockTimeout) == false)
-                throw new ApplicationException("Ëø¶¨³¢ÊÔÖĞ³¬Ê±");
+                throw new ApplicationException("é”å®šå°è¯•ä¸­è¶…æ—¶");
             try
             {
                 sessioninfo = (SessionInfo)this[strSessionID];
@@ -1237,7 +1237,7 @@ SetStartEventArgs e);
             }
 
             if (sessioninfo == null)
-                return false;   // Ã»ÓĞÕÒµ½
+                return false;   // æ²¡æœ‰æ‰¾åˆ°
 
             DeleteSession(sessioninfo);
 
@@ -1249,7 +1249,7 @@ SetStartEventArgs e);
             List<string> remove_keys = new List<string>();
 
             if (this.m_lock.TryEnterReadLock(m_nLockTimeout) == false)
-                throw new ApplicationException("Ëø¶¨³¢ÊÔÖĞ³¬Ê±");
+                throw new ApplicationException("é”å®šå°è¯•ä¸­è¶…æ—¶");
             try
             {
                 foreach (string key in this.Keys)
@@ -1264,7 +1264,7 @@ SetStartEventArgs e);
 
                     if (info.Account.Barcode == strReaderBarcode
                         && info.Account.Barcode == info.Account.UserID)
-                        remove_keys.Add(key);   // ÕâÀï²»ÄÜÉ¾³ı£¬ÒòÎª foreach »¹ÒªÓÃÃ¶¾ÙÆ÷
+                        remove_keys.Add(key);   // è¿™é‡Œä¸èƒ½åˆ é™¤ï¼Œå› ä¸º foreach è¿˜è¦ç”¨æšä¸¾å™¨
                 }
             }
             finally
@@ -1273,12 +1273,12 @@ SetStartEventArgs e);
             }
 
             if (remove_keys.Count == 0)
-                return 0;   // Ã»ÓĞÕÒµ½
+                return 0;   // æ²¡æœ‰æ‰¾åˆ°
 
             int nCount = 0;
             List<SessionInfo> delete_sessions = new List<SessionInfo>();
             if (this.m_lock.TryEnterWriteLock(m_nLockTimeout) == false)
-                throw new ApplicationException("Ëø¶¨³¢ÊÔÖĞ³¬Ê±");
+                throw new ApplicationException("é”å®šå°è¯•ä¸­è¶…æ—¶");
             try
             {
                 foreach (string key in remove_keys)
@@ -1287,7 +1287,7 @@ SetStartEventArgs e);
                     if (sessioninfo == null)
                         continue;
 
-                    // ºÍ sessionid µÄ hashtable ÍÑÀë¹ØÏµ
+                    // å’Œ sessionid çš„ hashtable è„±ç¦»å…³ç³»
                     this.Remove(key);
 
                     delete_sessions.Add(sessioninfo);
@@ -1306,7 +1306,7 @@ SetStartEventArgs e);
                 this.m_lock.ExitWriteLock();
             }
 
-            // °Ñ CloseSession ·ÅÔÚËø¶¨·¶Î§ÍâÃæ£¬Ö÷ÒªÊÇÏë¾¡Á¿¼õÉÙËø¶¨µÄÊ±¼ä
+            // æŠŠ CloseSession æ”¾åœ¨é”å®šèŒƒå›´å¤–é¢ï¼Œä¸»è¦æ˜¯æƒ³å°½é‡å‡å°‘é”å®šçš„æ—¶é—´
             foreach (SessionInfo info in delete_sessions)
             {
                 info.CloseSession();
@@ -1324,7 +1324,7 @@ SetStartEventArgs e);
             if (bLock == true)
             {
                 if (this.m_lock.TryEnterWriteLock(m_nLockTimeout) == false)
-                    throw new ApplicationException("Ëø¶¨³¢ÊÔÖĞ³¬Ê±");
+                    throw new ApplicationException("é”å®šå°è¯•ä¸­è¶…æ—¶");
             }
             try
             {
@@ -1333,7 +1333,7 @@ SetStartEventArgs e);
                 if (string.IsNullOrEmpty(sessioninfo.ClientIP) == false)
                 {
                     _incIpCount(sessioninfo.ClientIP, -1);
-                    sessioninfo.ClientIP = "";   // ±ÜÃâºóÃæ¶à´Îµ÷ÓÃÊ±ÖØ¸´¼õÈ¥ ip ¼ÆÊı
+                    sessioninfo.ClientIP = "";   // é¿å…åé¢å¤šæ¬¡è°ƒç”¨æ—¶é‡å¤å‡å» ip è®¡æ•°
                 }
             }
             finally
@@ -1360,9 +1360,9 @@ SetStartEventArgs e);
         {
             List<string> remove_keys = new List<string>();
 
-            // ¶ÁËø¶¨²¢²»×è°­Ò»°ãĞÔ·ÃÎÊ
+            // è¯»é”å®šå¹¶ä¸é˜»ç¢ä¸€èˆ¬æ€§è®¿é—®
             if (this.m_lock.TryEnterReadLock(m_nLockTimeout) == false)
-                throw new ApplicationException("Ëø¶¨³¢ÊÔÖĞ³¬Ê±");
+                throw new ApplicationException("é”å®šå°è¯•ä¸­è¶…æ—¶");
             try
             {
                 foreach (string key in this.Keys)
@@ -1383,7 +1383,7 @@ SetStartEventArgs e);
 
                     if ((DateTime.Now - info.SessionTime.LastUsedTime) >= delta)
                     {
-                        remove_keys.Add(key);   // ÕâÀï²»ÄÜÉ¾³ı£¬ÒòÎª foreach »¹ÒªÓÃÃ¶¾ÙÆ÷
+                        remove_keys.Add(key);   // è¿™é‡Œä¸èƒ½åˆ é™¤ï¼Œå› ä¸º foreach è¿˜è¦ç”¨æšä¸¾å™¨
                     }
                 }
             }
@@ -1395,19 +1395,19 @@ SetStartEventArgs e);
             if (remove_keys.Count == 0)
                 return;
 
-            // ÒòÎªÒªÉ¾³ıÄ³Ğ©ÔªËØ£¬ËùÒÔÓÃĞ´Ëø¶¨
+            // å› ä¸ºè¦åˆ é™¤æŸäº›å…ƒç´ ï¼Œæ‰€ä»¥ç”¨å†™é”å®š
             List<SessionInfo> delete_sessions = new List<SessionInfo>();
             if (this.m_lock.TryEnterWriteLock(m_nLockTimeout) == false)
-                throw new ApplicationException("Ëø¶¨³¢ÊÔÖĞ³¬Ê±");
+                throw new ApplicationException("é”å®šå°è¯•ä¸­è¶…æ—¶");
             try
             {            // 2013.11.1
                 foreach (string key in remove_keys)
                 {
                     SessionInfo info = (SessionInfo)this[key];
                     if (info == null)
-                        continue;   // sessionid Ã»ÓĞÕÒµ½¶ÔÓ¦µÄ Session ¶ÔÏó
+                        continue;   // sessionid æ²¡æœ‰æ‰¾åˆ°å¯¹åº”çš„ Session å¯¹è±¡
 
-                    // ºÍ sessionid µÄ hashtable ÍÑÀë¹ØÏµ
+                    // å’Œ sessionid çš„ hashtable è„±ç¦»å…³ç³»
                     this.Remove(key);
 
                     delete_sessions.Add(info);
@@ -1424,18 +1424,18 @@ SetStartEventArgs e);
                 this.m_lock.ExitWriteLock();
             }
 
-            // °Ñ CloseSession ·ÅÔÚËø¶¨·¶Î§ÍâÃæ£¬Ö÷ÒªÊÇÏë¾¡Á¿¼õÉÙËø¶¨µÄÊ±¼ä
+            // æŠŠ CloseSession æ”¾åœ¨é”å®šèŒƒå›´å¤–é¢ï¼Œä¸»è¦æ˜¯æƒ³å°½é‡å‡å°‘é”å®šçš„æ—¶é—´
             foreach (SessionInfo info in delete_sessions)
             {
                 info.CloseSession();
             }
         }
 
-        // Èç¹û IP ÊÂÏî×ÜÊı³¬¹ıÏŞ¶î£¬»áÅ×³öÒì³£
+        // å¦‚æœ IP äº‹é¡¹æ€»æ•°è¶…è¿‡é™é¢ï¼Œä¼šæŠ›å‡ºå¼‚å¸¸
         public long IncIpCount(string strIP, int nDelta)
         {
             if (this.m_lock.TryEnterWriteLock(m_nLockTimeout) == false)
-                throw new ApplicationException("Ëø¶¨³¢ÊÔÖĞ³¬Ê±");
+                throw new ApplicationException("é”å®šå°è¯•ä¸­è¶…æ—¶");
             try
             {
                 return _incIpCount(strIP, nDelta);
@@ -1453,10 +1453,10 @@ SetStartEventArgs e);
             return false;
         }
 
-        // ÔöÁ¿ IP Í³¼ÆÊı×Ö
-        // Èç¹û IP ÊÂÏî×ÜÊı³¬¹ıÏŞ¶î£¬»áÅ×³öÒì³£
+        // å¢é‡ IP ç»Ÿè®¡æ•°å­—
+        // å¦‚æœ IP äº‹é¡¹æ€»æ•°è¶…è¿‡é™é¢ï¼Œä¼šæŠ›å‡ºå¼‚å¸¸
         // parameters:
-        //      strIP   Ç°¶Ë»úÆ÷µÄ IP µØÖ·¡£»¹ÓÃÓÚ¸¨ÖúÅĞ¶ÏÊÇ·ñ³¬¹ı MaxClients¡£localhost ÊÇ²»¼ÆËãÔÚÄÚµÄ
+        //      strIP   å‰ç«¯æœºå™¨çš„ IP åœ°å€ã€‚è¿˜ç”¨äºè¾…åŠ©åˆ¤æ–­æ˜¯å¦è¶…è¿‡ MaxClientsã€‚localhost æ˜¯ä¸è®¡ç®—åœ¨å†…çš„
         long _incIpCount(string strIP, int nDelta)
         {
             // this.MaxClients = 0;    // test
@@ -1468,32 +1468,32 @@ SetStartEventArgs e);
             {
                 if (this.Count > _nMaxCount
                     && v + nDelta != 0)
-                    throw new OutofSessionException("IP ÌõÄ¿ÊıÁ¿³¬¹ı " + _nMaxCount.ToString());
+                    throw new OutofSessionException("IP æ¡ç›®æ•°é‡è¶…è¿‡ " + _nMaxCount.ToString());
 
-                // ÅĞ¶ÏÇ°¶Ë»úÆ÷Ì¨ÊıÊÇ·ñ³¬¹ıÏŞÖÆÊı¶î 2014/8/23
+                // åˆ¤æ–­å‰ç«¯æœºå™¨å°æ•°æ˜¯å¦è¶…è¿‡é™åˆ¶æ•°é¢ 2014/8/23
                 if (this.MaxClients != -1
                     && IsLocalhost(strIP) == false
                     && this.GetClientIpAmount() >= this.MaxClients
                     && v + nDelta != 0)
-                    throw new OutofClientsException("Ç°¶Ë»úÆ÷ÊıÁ¿ÒÑ¾­´ïµ½ " + this.GetClientIpAmount().ToString() + " ¸ö ( ÏÖÓĞIP: " + StringUtil.MakePathList(GetIpList(), ", ") + " ÊÔÍ¼ÉêÇëµÄIP: " + strIP + ")¡£ÇëÏÈÊÍ·Å³öÍ¨µÀÈ»ºóÖØĞÂ·ÃÎÊ");
+                    throw new OutofClientsException("å‰ç«¯æœºå™¨æ•°é‡å·²ç»è¾¾åˆ° " + this.GetClientIpAmount().ToString() + " ä¸ª ( ç°æœ‰IP: " + StringUtil.MakePathList(GetIpList(), ", ") + " è¯•å›¾ç”³è¯·çš„IP: " + strIP + ")ã€‚è¯·å…ˆé‡Šæ”¾å‡ºé€šé“ç„¶åé‡æ–°è®¿é—®");
 
             }
 
             if (v + nDelta == 0)
-                this._ipTable.Remove(strIP); // ¼°Ê±ÒÆ×ß¼ÆÊıÆ÷Îª 0 µÄÌõÄ¿£¬±ÜÃâ hashtable ³ß´çÌ«´ó
+                this._ipTable.Remove(strIP); // åŠæ—¶ç§»èµ°è®¡æ•°å™¨ä¸º 0 çš„æ¡ç›®ï¼Œé¿å… hashtable å°ºå¯¸å¤ªå¤§
             else
                 this._ipTable[strIP] = v + nDelta;
 
-            return v;   // ·µ»ØÔöÁ¿Ç°µÄÊı×Ö
+            return v;   // è¿”å›å¢é‡å‰çš„æ•°å­—
         }
 
-        // »ñµÃµ±Ç°³ıÁË localhost ÒÔÍâµÄ IP ×ÜÊı
+        // è·å¾—å½“å‰é™¤äº† localhost ä»¥å¤–çš„ IP æ€»æ•°
         int GetClientIpAmount()
         {
             if (this._ipTable.Count == 0)
                 return 0;
 
-            // ÅÅ³ı localhost
+            // æ’é™¤ localhost
             int nDelta = 0;
             if (this._ipTable.ContainsKey("::1") == true)
                 nDelta -= 1;
@@ -1505,14 +1505,14 @@ SetStartEventArgs e);
             return this._ipTable.Count + nDelta;
         }
 
-        // »ñµÃµ±Ç°ÕıÔÚÊ¹ÓÃµÄ IP ÁĞ±í£¬Îª±¨´íÏÔÊ¾ÓÃÍ¾¡£ÆäÖĞ localhost »á±ê³ö (Î´¼ÆÈë)
+        // è·å¾—å½“å‰æ­£åœ¨ä½¿ç”¨çš„ IP åˆ—è¡¨ï¼Œä¸ºæŠ¥é”™æ˜¾ç¤ºç”¨é€”ã€‚å…¶ä¸­ localhost ä¼šæ ‡å‡º (æœªè®¡å…¥)
         List<string> GetIpList()
         {
             List<string> results = new List<string>();
             foreach (string ip in this._ipTable.Keys)
             {
                 if (IsLocalhost(ip) == true)
-                    results.Add("localhost(Î´¼ÆÈë)");
+                    results.Add("localhost(æœªè®¡å…¥)");
                 else
                     results.Add(ip);
             }
@@ -1520,7 +1520,7 @@ SetStartEventArgs e);
             return results;
         }
 
-        // ¸ù¾İ ip µØÖ·¾Û¼¯ÆäËü×Ö¶ÎĞÅÏ¢
+        // æ ¹æ® ip åœ°å€èšé›†å…¶å®ƒå­—æ®µä¿¡æ¯
         void GatherFields(ref List<ChannelInfo> infos)
         {
             List<string> ips = new List<string>();
@@ -1553,7 +1553,7 @@ SetStartEventArgs e);
         {
             int IComparer<ChannelInfo>.Compare(ChannelInfo x, ChannelInfo y)
             {
-                // Èç¹ûÈ¨ÖµÏàÍ¬£¬ÔòÒÀ¾İĞòºÅ¡£ĞòºÅĞ¡µÄ¸ü¿¿Ç°
+                // å¦‚æœæƒå€¼ç›¸åŒï¼Œåˆ™ä¾æ®åºå·ã€‚åºå·å°çš„æ›´é å‰
                 return string.Compare(x.ClientIP, y.ClientIP);
             }
         }
@@ -1566,7 +1566,7 @@ SetStartEventArgs e);
 
 #if NO
             if (this.m_lock.TryEnterReadLock(m_nLockTimeout) == false)
-                throw new ApplicationException("Ëø¶¨³¢ÊÔÖĞ³¬Ê±");
+                throw new ApplicationException("é”å®šå°è¯•ä¸­è¶…æ—¶");
             try
             {
 #endif
@@ -1600,7 +1600,7 @@ SetStartEventArgs e);
             }
 #endif
 
-            // °´ÕÕ IP µØÖ·ÅÅĞò
+            // æŒ‰ç…§ IP åœ°å€æ’åº
             infos.Sort(new ChannelInfoComparer());
 
             List<string> usernames = new List<string>();
@@ -1612,7 +1612,7 @@ SetStartEventArgs e);
             {
                 if (current != null && info.ClientIP != current.ClientIP)
                 {
-                    // Êä³öÒ»¸ö½á¹û
+                    // è¾“å‡ºä¸€ä¸ªç»“æœ
                     ChannelInfo result = new ChannelInfo();
                     result.ClientIP = current.ClientIP;
 
@@ -1649,7 +1649,7 @@ SetStartEventArgs e);
 
             if (current != null && usernames.Count > 0)
             {
-                // ×îºóÊä³öÒ»´Î
+                // æœ€åè¾“å‡ºä¸€æ¬¡
                 ChannelInfo result = new ChannelInfo();
                 result.ClientIP = current.ClientIP;
 
@@ -1671,7 +1671,7 @@ SetStartEventArgs e);
             return results;
         }
 
-        // ÁĞ³öÖ¸¶¨µÄÍ¨µÀĞÅÏ¢
+        // åˆ—å‡ºæŒ‡å®šçš„é€šé“ä¿¡æ¯
         public int ListChannels(
             string strClientIP,
             string strUserName,
@@ -1683,11 +1683,11 @@ SetStartEventArgs e);
             infos = new List<ChannelInfo>();
 
             if (this.m_lock.TryEnterReadLock(m_nLockTimeout) == false)
-                throw new ApplicationException("Ëø¶¨³¢ÊÔÖĞ³¬Ê±");
+                throw new ApplicationException("é”å®šå°è¯•ä¸­è¶…æ—¶");
             try
             {
-                // °´ÕÕ IP µØÖ·¾Û¼¯
-                // strClientIP ²ÎÊı¿ÉÓÃÓÚÉ¸Ñ¡
+                // æŒ‰ç…§ IP åœ°å€èšé›†
+                // strClientIP å‚æ•°å¯ç”¨äºç­›é€‰
                 if (strStyle == "ip-count")
                 {
 
@@ -1702,19 +1702,19 @@ SetStartEventArgs e);
 
                         ChannelInfo info = new ChannelInfo();
                         info.ClientIP = ip;
-                        // TODO: UserName ¿ÉÒÔÀÛ»ıËùÓĞÓÃ¹ıµÄ
+                        // TODO: UserName å¯ä»¥ç´¯ç§¯æ‰€æœ‰ç”¨è¿‡çš„
                         info.Count = (long)this._ipTable[ip];
 
                         infos.Add(info);
                     }
 
-                    // ¸ù¾İ ip µØÖ·¾Û¼¯ÆäËü×Ö¶ÎĞÅÏ¢
+                    // æ ¹æ® ip åœ°å€èšé›†å…¶å®ƒå­—æ®µä¿¡æ¯
                     if (infos.Count > 0)
                         GatherFields(ref infos);
 
 
 #if NO
-                    // ÁĞ³öÃ»ÓĞ·ÖÅä Session µÄÍ¨µÀÊıÁ¿
+                    // åˆ—å‡ºæ²¡æœ‰åˆ†é… Session çš„é€šé“æ•°é‡
                     foreach (string ip in this._ipNullTable.Keys)
                     {
                         if (string.IsNullOrEmpty(strClientIP) == true
@@ -1726,7 +1726,7 @@ SetStartEventArgs e);
                         ChannelInfo info = new ChannelInfo();
                         info.ClientIP = ip;
                         info.Location = "<null>";
-                        // TODO: UserName ¿ÉÒÔÀÛ»ıËùÓĞÓÃ¹ıµÄ
+                        // TODO: UserName å¯ä»¥ç´¯ç§¯æ‰€æœ‰ç”¨è¿‡çš„
                         info.Count = (long)this._ipNullTable[ip];
 
                         infos.Add(info);
@@ -1736,8 +1736,8 @@ SetStartEventArgs e);
                     return 0;
                 }
 
-                // È«²¿ÁĞ³ö
-                // strClientIP strUserName ²ÎÊı¿ÉÓÃÓÚÉ¸Ñ¡
+                // å…¨éƒ¨åˆ—å‡º
+                // strClientIP strUserName å‚æ•°å¯ç”¨äºç­›é€‰
                 if (string.IsNullOrEmpty(strStyle) == true)
                 {
                     foreach (string sessionid in this.Keys)
@@ -1797,7 +1797,7 @@ SetStartEventArgs e);
     }
 
     /// <summary>
-    /// Session ×ÊÔ´²»×ãÒì³£
+    /// Session èµ„æºä¸è¶³å¼‚å¸¸
     /// </summary>
     public class OutofSessionException : Exception
     {
@@ -1808,7 +1808,7 @@ SetStartEventArgs e);
     }
 
     /// <summary>
-    /// ³¬¹ı¹æ¶¨Ç°¶Ë»úÆ÷Ì¨ÊıÒì³£
+    /// è¶…è¿‡è§„å®šå‰ç«¯æœºå™¨å°æ•°å¼‚å¸¸
     /// </summary>
     public class OutofClientsException : Exception
     {
@@ -1819,33 +1819,33 @@ SetStartEventArgs e);
     }
 
     /// <summary>
-    /// Í¨Ñ¶Í¨µÀĞÅÏ¢
+    /// é€šè®¯é€šé“ä¿¡æ¯
     /// </summary>
     [DataContract(Namespace = "http://dp2003.com/dp2library/")]
     public class ChannelInfo
     {
         [DataMember]
-        public string SessionID = "";    // Session id£¬ Session Î¨Ò»µÄ±êÊ¶
+        public string SessionID = "";    // Session idï¼Œ Session å”¯ä¸€çš„æ ‡è¯†
 
         [DataMember]
-        public string UserName = "";    // ÓÃ»§Ãû
+        public string UserName = "";    // ç”¨æˆ·å
 
         [DataMember]
-        public string ClientIP = "";    // Ç°¶Ë IP
+        public string ClientIP = "";    // å‰ç«¯ IP
 
         [DataMember]
-        public string Via = "";  // ¾­ÓÉÊ²Ã´Ğ­Òé
+        public string Via = "";  // ç»ç”±ä»€ä¹ˆåè®®
 
         [DataMember]
-        public long Count = 0;    // ´ËÏîÊıÄ¿
+        public long Count = 0;    // æ­¤é¡¹æ•°ç›®
 
         [DataMember]
-        public string LibraryCode = ""; // Í¼Êé¹İ´úÂë
+        public string LibraryCode = ""; // å›¾ä¹¦é¦†ä»£ç 
 
         [DataMember]
-        public string Location = "";    // Ç°¶ËµØµã×¢ÊÍ
+        public string Location = "";    // å‰ç«¯åœ°ç‚¹æ³¨é‡Š
 
         [DataMember]
-        public long CallCount = 0;    // Í¨µÀÆù½ñ±»µ÷ÓÃµÄ´ÎÊı
+        public long CallCount = 0;    // é€šé“è¿„ä»Šè¢«è°ƒç”¨çš„æ¬¡æ•°
     }
 }

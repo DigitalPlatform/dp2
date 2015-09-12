@@ -542,6 +542,21 @@ namespace dp2Circulation
             }
         }
 
+        /// <summary>
+        /// 参考ID
+        /// </summary>
+        public string RefID
+        {
+            get
+            {
+                return this.textBox_refID.Text;
+            }
+            set
+            {
+                this.textBox_refID.Text = value;
+            }
+        }
+
         #endregion
 
         /// <summary>
@@ -630,51 +645,6 @@ namespace dp2Circulation
             return time.ToLocalTime();
         }
 
-#if NO
-        internal override void ResetColor()
-        {
-            Color color = this.tableLayoutPanel_main.BackColor;
-
-            this.label_barcode_color.BackColor = color;
-            this.label_cardNumber_color.BackColor = color;
-            this.label_readerType_color.BackColor = color;
-            this.label_state_color.BackColor = color;
-            this.label_comment_color.BackColor = color;
-
-            this.label_createDate_color.BackColor = color;
-            this.label_expireDate_color.BackColor = color;
-            this.label_dateOfBirth_color.BackColor = color;
-
-            this.label_hireExpireDate_color.BackColor = color;
-            this.label_hirePeriod_color.BackColor = color;
-            this.label_foregift_color.BackColor = color;
-
-            this.label_name_color.BackColor = color;
-            this.label_namePinyin_color.BackColor = color;
-
-            this.label_gender_color.BackColor = color;
-
-            this.label_idCardNumber_color.BackColor = color;
-
-            this.label_department_color.BackColor = color;
-
-            this.label_post_color.BackColor = color;
-
-            this.label_address_color.BackColor = color;
-
-            this.label_tel_color.BackColor = color;
-
-            this.label_email_color.BackColor = color;
-
-            this.label_rights_color.BackColor = color;
-
-            this.label_personalLibrary_color.BackColor = color;
-            this.label_access_color.BackColor = color;
-            this.label_friends_color.BackColor = color;
-
-            this.label_recPath_color.BackColor = color;
-        }
-#endif
         // parameters:
         //      time    是本地时间
         /// <summary>
@@ -699,128 +669,6 @@ namespace dp2Circulation
             return strValue;
         }
 
-#if NO
-        /// <summary>
-        /// 设置数据
-        /// </summary>
-        /// <param name="strXml">读者记录 XML</param>
-        /// <param name="strRecPath">读者记录路径</param>
-        /// <param name="timestamp">时间戳</param>
-        /// <param name="strError">返回出错信息</param>
-        /// <returns>-1: 出错; 0: 成功</returns>
-        public int SetData(string strXml,
-            string strRecPath,
-            byte[] timestamp,
-            out string strError)
-        {
-            strError = "";
-
-            this.OldRecord = strXml;
-            this.Timestamp = timestamp;
-
-            this.RecordDom = new XmlDocument();
-
-            try
-            {
-                this.RecordDom.LoadXml(strXml);
-            }
-            catch (Exception ex)
-            {
-                strError = "XML数据装载到DOM时出错" + ex.Message;
-                return -1;
-            }
-
-            this.Initializing = true;
-
-            try
-            {
-                // this.Clear();    // 这样似乎全面一些？清除那些没有指明的字段，特别是将来新增在ReaderInfoControl中的新字段内容
-
-                this.Barcode = DomUtil.GetElementText(this.RecordDom.DocumentElement,
-                    "barcode");
-                this.CardNumber = DomUtil.GetElementText(this.RecordDom.DocumentElement,
-                    "cardNumber");
-
-                this.State = DomUtil.GetElementText(this.RecordDom.DocumentElement,
-                    "state");
-
-                this.Comment = DomUtil.GetElementText(this.RecordDom.DocumentElement,
-                    "comment");
-
-
-                this.ReaderType = DomUtil.GetElementText(this.RecordDom.DocumentElement,
-                    "readerType");
-
-                this.CreateDate = DomUtil.GetElementText(this.RecordDom.DocumentElement,
-                    "createDate");
-
-                this.ExpireDate = DomUtil.GetElementText(this.RecordDom.DocumentElement,
-                    "expireDate");
-
-                // 2007/6/15
-                // 租金
-                XmlNode nodeHire = this.RecordDom.DocumentElement.SelectSingleNode("hire");
-                if (nodeHire != null)
-                {
-                    this.HireExpireDate = DomUtil.GetAttr(nodeHire, "expireDate");
-                    this.HirePeriod = DomUtil.GetAttr(nodeHire, "period");
-                }
-                else
-                {
-                    this.HireExpireDate = "";
-                    this.HirePeriod = "";
-                }
-
-                // 2008/11/11
-                // 押金
-                this.Foregift = DomUtil.GetElementText(this.RecordDom.DocumentElement,
-                    "foregift");
-
-                this.NameString = DomUtil.GetElementText(this.RecordDom.DocumentElement,
-                    "name");
-
-                this.Gender = DomUtil.GetElementText(this.RecordDom.DocumentElement,
-                    "gender");
-
-                this.DateOfBirth = DomUtil.GetElementText(this.RecordDom.DocumentElement,
-                    "dateOfBirth");
-                if (string.IsNullOrEmpty(this.DateOfBirth) == true)
-                {
-                    // 兼容旧习惯
-                    this.DateOfBirth = DomUtil.GetElementText(this.RecordDom.DocumentElement,
-                        "birthday");
-                }
-
-                this.IdCardNumber = DomUtil.GetElementText(this.RecordDom.DocumentElement,
-                    "idCardNumber");
-
-                this.Department = DomUtil.GetElementText(this.RecordDom.DocumentElement,
-                    "department");
-
-                this.Post = DomUtil.GetElementText(this.RecordDom.DocumentElement,
-                    "post");
-
-                this.Address = DomUtil.GetElementText(this.RecordDom.DocumentElement,
-                    "address");
-
-                this.Tel = DomUtil.GetElementText(this.RecordDom.DocumentElement,
-                    "tel");
-
-                this.Email = DomUtil.GetElementText(this.RecordDom.DocumentElement,
-                    "email");
-
-                this.RecPath = strRecPath;
-            }
-            finally
-            {
-                this.Initializing = false;
-            }
-
-            this.Changed = false;
-
-            return 0;
-        }
-#endif
         internal override void DomToMember(string strRecPath)
         {
             this.Barcode = DomUtil.GetElementText(this.RecordDom.DocumentElement,
@@ -833,7 +681,6 @@ namespace dp2Circulation
 
             this.Comment = DomUtil.GetElementText(this.RecordDom.DocumentElement,
                 "comment");
-
 
             this.ReaderType = DomUtil.GetElementText(this.RecordDom.DocumentElement,
                 "readerType");
@@ -907,6 +754,9 @@ namespace dp2Circulation
                 "access"); 
             this.Friends = DomUtil.GetElementText(this.RecordDom.DocumentElement,
                 "friends");
+            this.RefID = DomUtil.GetElementText(this.RecordDom.DocumentElement,
+                "refID");
+
             this.RecPath = strRecPath;
         }
 
@@ -965,6 +815,7 @@ namespace dp2Circulation
                 this.Access = "";
 
                 this.Friends = "";
+                this.RefID = "";
 
                 this.ResetColor();
             }
@@ -1004,7 +855,6 @@ namespace dp2Circulation
             XmlNode root = this.RecordDom.DocumentElement.SelectSingleNode("outofReservations");
             if (root == null)
                 return false;
-
 
             // 累计次数
             string strCount = DomUtil.GetAttr(root, "count");
@@ -1109,6 +959,9 @@ namespace dp2Circulation
                 "access", this.Access);
             DomUtil.SetElementText(this.RecordDom.DocumentElement,
                 "friends", this.Friends);
+            DomUtil.SetElementText(this.RecordDom.DocumentElement,
+    "refID", this.RefID);
+
         }
 
         /// <summary>
@@ -1243,6 +1096,7 @@ namespace dp2Circulation
                 this.textBox_friends.ReadOnly = true;
 
                 this.textBox_recPath.ReadOnly = true;
+                this.textBox_refID.ReadOnly = true;
                 return;
             }
 
@@ -1277,10 +1131,12 @@ namespace dp2Circulation
             this.textBox_friends.ReadOnly = false;
 
             this.textBox_recPath.ReadOnly = false;
+            this.textBox_refID.ReadOnly = false;
 
             if (strStyle == "librarian")
             {
                 this.textBox_recPath.ReadOnly = true;
+                this.textBox_refID.ReadOnly = true;
 
                 // 2007/6/15
                 this.dateControl_hireExpireDate.Enabled = false;
@@ -1304,6 +1160,7 @@ namespace dp2Circulation
                 this.comboBox_hirePeriod.Enabled = false;
 
                 this.textBox_recPath.ReadOnly = true;
+                this.textBox_refID.ReadOnly = true;
             }
             else if (strStyle == "clear")
             {
@@ -1397,6 +1254,9 @@ namespace dp2Circulation
 
             if (this.RecPath != refControl.RecPath)
                 this.label_recPath_color.BackColor = this.ColorDifference;
+
+            if (this.RefID != refControl.RefID)
+                this.label_refID_color.BackColor = this.ColorDifference;
         }
 
 #if NO
@@ -1625,14 +1485,6 @@ namespace dp2Circulation
             this.comboBox_readerType.Items.Clear();
             this.comboBox_state.Items.Clear();
             this.comboBox_hirePeriod.Items.Clear();
-
-#if NO
-            if (m_bInInitial == false)
-            {
-                this.label_recPath_color.BackColor = this.ColorChanged;
-                this.Changed = true;
-            }
-#endif
         }
 
         private void ReaderEditControl_Load(object sender, EventArgs e)
@@ -1860,11 +1712,6 @@ namespace dp2Circulation
                 this.EditRights(this, new EventArgs());
             }
         }
-
-
-
-
-
     }
 // 
     /// <summary>

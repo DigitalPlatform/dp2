@@ -61,7 +61,10 @@
     <comment lang='chi'>仅修改读者信息中的状态和注释</comment>
     <comment lang='eng'>only change reader state and comment</comment>
   </property>
-
+  <property name='changereaderbarcode'>
+    <comment lang='chi'>强制修改读者信息中的证条码号</comment>
+    <comment lang='eng'>force change reader barcode</comment>
+  </property>
   <property name='listbibliodbfroms'>
     <comment lang='chi'>列出书目库检索途径 -- 即将废止</comment>
     <comment lang='eng'>list biblio db froms</comment>

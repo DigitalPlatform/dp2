@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Xml;
@@ -10,12 +10,12 @@ using DigitalPlatform.Text;
 
 namespace DigitalPlatform.LibraryServer
 {
-    // ÄÚºËÊı¾İ¿âĞÅÏ¢Êı×é
+    // å†…æ ¸æ•°æ®åº“ä¿¡æ¯æ•°ç»„
     public class KernelDbInfoCollection : List<KernelDbInfo>
     {
         // return:
-        //      -1  ³ö´í
-        //      0   ³É¹¦
+        //      -1  å‡ºé”™
+        //      0   æˆåŠŸ
         public int Initial(RmsChannelCollection Channels,
             string strServerUrl,
             string strLang,
@@ -28,7 +28,7 @@ namespace DigitalPlatform.LibraryServer
 
             RmsChannel channel = Channels.GetChannel(strServerUrl);
 
-            // ÁĞ³öËùÓĞÊı¾İ¿â
+            // åˆ—å‡ºæ‰€æœ‰æ•°æ®åº“
             root_dir_results = null;
 
             long lRet = channel.DoDir("",
@@ -39,7 +39,7 @@ namespace DigitalPlatform.LibraryServer
             if (lRet == -1)
                 return -1;
 
-            // Õë¶ÔÊı¾İ¿âµÄÑ­»·
+            // é’ˆå¯¹æ•°æ®åº“çš„å¾ªç¯
             for (int i = 0; i < root_dir_results.Length; i++)
             {
                 ResInfoItem info = root_dir_results[i];
@@ -68,7 +68,7 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
-        // ¸ù¾İÊı¾İ¿âÃûÕÒµ½Ò»¸öKernelDbInfoÊı¾İ¿â¶ÔÏó
+        // æ ¹æ®æ•°æ®åº“åæ‰¾åˆ°ä¸€ä¸ªKernelDbInfoæ•°æ®åº“å¯¹è±¡
         // return:
         //      null   not found
         //      others  found
@@ -84,13 +84,13 @@ namespace DigitalPlatform.LibraryServer
             return null;
         }
 
-        // ´ÓÌØ¶¨µÄÊı¾İ¿âÖĞ, Æ¥Åä³öÂú×ãÌØ¶¨·ç¸ñÁĞ±íµÄfromÁĞ±í
+        // ä»ç‰¹å®šçš„æ•°æ®åº“ä¸­, åŒ¹é…å‡ºæ»¡è¶³ç‰¹å®šé£æ ¼åˆ—è¡¨çš„fromåˆ—è¡¨
         // parameters:
-        //      strFromStyle    from styleµÄÁĞ±í, ÒÔ¶ººÅ·Ö¸î¡£
-        //                      Èç¹ûÎª¿Õ£¬±íÊ¾È«²¿Í¾¾¶(2007/9/13)
+        //      strFromStyle    from styleçš„åˆ—è¡¨, ä»¥é€—å·åˆ†å‰²ã€‚
+        //                      å¦‚æœä¸ºç©ºï¼Œè¡¨ç¤ºå…¨éƒ¨é€”å¾„(2007/9/13)
         // return:
-        //      null    Ã»ÓĞÕÒµ½
-        //      ÒÔ¶ººÅ·Ö¸îµÄfromÃûÁĞ±í
+        //      null    æ²¡æœ‰æ‰¾åˆ°
+        //      ä»¥é€—å·åˆ†å‰²çš„fromååˆ—è¡¨
         public string BuildCaptionListByStyleList(string strDbName,
             string strFromStyles,
             string strLang)
@@ -104,7 +104,7 @@ namespace DigitalPlatform.LibraryServer
 
             // 2007/9/13
             if (String.IsNullOrEmpty(strFromStyles) == true
-                || strFromStyles == "<È«²¿>" || strFromStyles.ToLower() == "<all>")
+                || strFromStyles == "<å…¨éƒ¨>" || strFromStyles.ToLower() == "<all>")
             {
                 return "<all>";
                 // strFromStyles = "<all>";
@@ -112,7 +112,7 @@ namespace DigitalPlatform.LibraryServer
 
             List<string> results = new List<string>();
 
-            // ²ğ·Ö³öµ¥¶ÀµÄstyle×Ö·û´®
+            // æ‹†åˆ†å‡ºå•ç‹¬çš„styleå­—ç¬¦ä¸²
             string[] styles = strFromStyles.Split(new char[] {','});
 
             for (int i = 0; i < styles.Length; i++)
@@ -122,31 +122,31 @@ namespace DigitalPlatform.LibraryServer
                     continue;
 
                 // 2012/5/16
-                // ºöÂÔ _time/_freetime,_rfc1123time/_utimeµÈ±íÊ¾¼ìË÷ÌØĞÔµÄstyle
+                // å¿½ç•¥ _time/_freetime,_rfc1123time/_utimeç­‰è¡¨ç¤ºæ£€ç´¢ç‰¹æ€§çš„style
                 if (StringUtil.HasHead(strStyle, "_") == true
-                    && StringUtil.HasHead(strStyle, "__") == false) // µ«ÊÇ __ Òıµ¼µÄÒª²ÎÓëÆ¥Åä
+                    && StringUtil.HasHead(strStyle, "__") == false) // ä½†æ˜¯ __ å¼•å¯¼çš„è¦å‚ä¸åŒ¹é…
                     continue;
 
-                // ±éÀúµ±Ç°Êı¾İ¿âµÄËùÓĞformµÄstyles
+                // éå†å½“å‰æ•°æ®åº“çš„æ‰€æœ‰formçš„styles
                 for (int j = 0; j < db.Froms.Count; j++)
                 {
                     string strStyles = db.Froms[j].Styles;
 
                     if (StringUtil.IsInList(strStyle, strStyles) == true
-                        || strStyle == "<all>") // 2007/9/13 // ×¢£ººóÀ´·¢ÏÖÄÚºË±¾À´¾ÍÖ§³Ö<all>µÄfromºó£¬ÕâÀï¾ÍÃ»ÓĞ±ØÒªÁË£¬µ«ÊÇ´úÂëÈÔ±£Áô
+                        || strStyle == "<all>") // 2007/9/13 // æ³¨ï¼šåæ¥å‘ç°å†…æ ¸æœ¬æ¥å°±æ”¯æŒ<all>çš„fromåï¼Œè¿™é‡Œå°±æ²¡æœ‰å¿…è¦äº†ï¼Œä½†æ˜¯ä»£ç ä»ä¿ç•™
                     {
                         Caption tempCaption = db.Froms[j].GetCaption(strLang);
                         if (tempCaption == null)
                         {
-                            // ·À·¶Ã»ÓĞÕÒµ½µÄÇéĞÎ
-                            tempCaption = db.Froms[j].GetCaption(null); // »ñµÃÖĞÁ¢ÓïÑÔµÄcaption
+                            // é˜²èŒƒæ²¡æœ‰æ‰¾åˆ°çš„æƒ…å½¢
+                            tempCaption = db.Froms[j].GetCaption(null); // è·å¾—ä¸­ç«‹è¯­è¨€çš„caption
                             if (tempCaption == null)
                             {
-                                throw new Exception("Êı¾İ¿â '" + db.Captions[0].Value + "' ÖĞÃ»ÓĞÕÒµ½ÏÂ±êÎª " + j.ToString() + " µÄFromÊÂÏîµÄÈÎºÎCaption");
+                                throw new Exception("æ•°æ®åº“ '" + db.Captions[0].Value + "' ä¸­æ²¡æœ‰æ‰¾åˆ°ä¸‹æ ‡ä¸º " + j.ToString() + " çš„Fromäº‹é¡¹çš„ä»»ä½•Caption");
                             }
                         }
 
-                        // È«²¿Â·¾¶Çé¿öÏÂ£¬Òª²»°üº¬"__id"Í¾¾¶
+                        // å…¨éƒ¨è·¯å¾„æƒ…å†µä¸‹ï¼Œè¦ä¸åŒ…å«"__id"é€”å¾„
                         if (strStyle == "<all>"
                             && tempCaption.Value == "__id")
                             continue;
@@ -169,15 +169,15 @@ namespace DigitalPlatform.LibraryServer
             return StringUtil.MakePathList(results);
         }
 
-        // ¸ù¾İstyleÖµÈ¥ÖØ
-        // Ã»ÓĞstyleÖµµÄfromÊÂÏîÒª¶ªÆú
+        // æ ¹æ®styleå€¼å»é‡
+        // æ²¡æœ‰styleå€¼çš„fromäº‹é¡¹è¦ä¸¢å¼ƒ
         public static void RemoveDupByStyle(ref List<From> target)
         {
             for (int i = 0; i < target.Count; i++)
             {
                 From from1 = target[i];
 
-                // °ÑstylesÎª¿ÕµÄÊÂÏî¶ªÆú
+                // æŠŠstylesä¸ºç©ºçš„äº‹é¡¹ä¸¢å¼ƒ
                 if (String.IsNullOrEmpty(from1.Styles) == true)
                 {
                     target.RemoveAt(i);
@@ -198,7 +198,7 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
-        // ¸ù¾İcaptionÈ¥ÖØ(°´ÕÕÌØ¶¨ÓïÖÖcaptionÀ´È¥ÖØ)
+        // æ ¹æ®captionå»é‡(æŒ‰ç…§ç‰¹å®šè¯­ç§captionæ¥å»é‡)
         public static void RemoveDupByCaption(ref List<From> target,
             string strLang = "zh")
         {
@@ -210,7 +210,7 @@ namespace DigitalPlatform.LibraryServer
                 From from1 = target[i];
 
                 List<Caption> captions1 = from1.GetCaptions(strLang);
-                // °Ñcaption(ÌØ¶¨ÓïÖÖ)Îª¿ÕµÄÊÂÏî¶ªÆú
+                // æŠŠcaption(ç‰¹å®šè¯­ç§)ä¸ºç©ºçš„äº‹é¡¹ä¸¢å¼ƒ
                 if (captions1 == null || captions1.Count == 0)
                 {
                     target.RemoveAt(i);
@@ -232,7 +232,7 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
-        // ÅĞ¶ÏÁ½¸öcaptionºÍ¼¯ÖĞÊÇ·ñÓĞ¹²Í¬µÄÖµ
+        // åˆ¤æ–­ä¸¤ä¸ªcaptionå’Œé›†ä¸­æ˜¯å¦æœ‰å…±åŒçš„å€¼
         static bool IsSame(List<Caption> captions1, List<Caption> captions2)
         {
             foreach (Caption caption1 in captions1)
@@ -248,7 +248,7 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 2014/8/29
-        // »ñµÃÒ»¸ö from µÄ stylelist
+        // è·å¾—ä¸€ä¸ª from çš„ stylelist
         public string GetFromStyles(string strDbName,
     string strFrom,
     string strLang)
@@ -258,17 +258,17 @@ namespace DigitalPlatform.LibraryServer
             if (db == null)
                 return null;
 
-            // ±éÀúµ±Ç°Êı¾İ¿âµÄËùÓĞform
+            // éå†å½“å‰æ•°æ®åº“çš„æ‰€æœ‰form
             foreach (From from in db.Froms)
             {
-                // ×¢: Í¬Ò»¸öÓïÑÔ´úÂëµÄ caption£¬Ò²¿ÉÄÜÓĞ²»Ö¹Ò»¸ö
+                // æ³¨: åŒä¸€ä¸ªè¯­è¨€ä»£ç çš„ captionï¼Œä¹Ÿå¯èƒ½æœ‰ä¸æ­¢ä¸€ä¸ª
                 List<Caption> captions = from.GetCaptions(strLang);
                 if (captions == null || captions.Count == 0)
                 {
-                    // ·À·¶Ã»ÓĞÕÒµ½µÄÇéĞÎ
-                    Caption tempCaption = from.GetCaption(null); // »ñµÃÖĞÁ¢ÓïÑÔµÄcaption
+                    // é˜²èŒƒæ²¡æœ‰æ‰¾åˆ°çš„æƒ…å½¢
+                    Caption tempCaption = from.GetCaption(null); // è·å¾—ä¸­ç«‹è¯­è¨€çš„caption
                     if (tempCaption == null)
-                        throw new Exception("Êı¾İ¿â '" + db.Captions[0].Value + "' ÖĞÃ»ÓĞÕÒµ½FromÊÂÏî " + from.ToString() + " µÄÈÎºÎCaption");
+                        throw new Exception("æ•°æ®åº“ '" + db.Captions[0].Value + "' ä¸­æ²¡æœ‰æ‰¾åˆ°Fromäº‹é¡¹ " + from.ToString() + " çš„ä»»ä½•Caption");
 
                     captions.Add(tempCaption);
                 }
@@ -282,11 +282,11 @@ namespace DigitalPlatform.LibraryServer
                 Caption tempCaption = from.GetCaption(strLang);
                 if (tempCaption == null)
                 {
-                    // ·À·¶Ã»ÓĞÕÒµ½µÄÇéĞÎ
-                    tempCaption = from.GetCaption(null); // »ñµÃÖĞÁ¢ÓïÑÔµÄcaption
+                    // é˜²èŒƒæ²¡æœ‰æ‰¾åˆ°çš„æƒ…å½¢
+                    tempCaption = from.GetCaption(null); // è·å¾—ä¸­ç«‹è¯­è¨€çš„caption
                     if (tempCaption == null)
                     {
-                        throw new Exception("Êı¾İ¿â '" + db.Captions[0].Value + "' ÖĞÃ»ÓĞÕÒµ½FromÊÂÏî "+from.ToString()+" µÄÈÎºÎCaption");
+                        throw new Exception("æ•°æ®åº“ '" + db.Captions[0].Value + "' ä¸­æ²¡æœ‰æ‰¾åˆ°Fromäº‹é¡¹ "+from.ToString()+" çš„ä»»ä½•Caption");
                     }
                 }
 
@@ -300,17 +300,17 @@ namespace DigitalPlatform.LibraryServer
     }
 
 
-    // ÃèÊöÁËÄÚºËÊı¾İ¿âµÄ±ØÒªĞÅÏ¢
+    // æè¿°äº†å†…æ ¸æ•°æ®åº“çš„å¿…è¦ä¿¡æ¯
     public class KernelDbInfo
     {
-        // ºÍÓïÑÔÓĞ¹ØµÄÃû³Æ
+        // å’Œè¯­è¨€æœ‰å…³çš„åç§°
         public List<Caption> Captions = null;
 
         public List<From> Froms = null;
 
         public ResInfoItem[] db_dir_result = null;
 
-        // ´Ódb_dir_resultÊı×éÕÒµ½Õë¶ÔÌØ¶¨Êı¾İ¿âÃûµÄÊÂÏî
+        // ä»db_dir_resultæ•°ç»„æ‰¾åˆ°é’ˆå¯¹ç‰¹å®šæ•°æ®åº“åçš„äº‹é¡¹
         public static ResInfoItem GetDbItem(
     ResInfoItem[] root_dir_results,
     string strDbName)
@@ -330,7 +330,7 @@ namespace DigitalPlatform.LibraryServer
             return null;
         }
 
-        // ÕÒµ½Ò»¸öcaptionÖµ(²»ÂÛÓïÑÔÀàĞÍ)
+        // æ‰¾åˆ°ä¸€ä¸ªcaptionå€¼(ä¸è®ºè¯­è¨€ç±»å‹)
         public bool MatchCaption(string strCaption)
         {
             if (this.Captions == null)
@@ -387,10 +387,10 @@ namespace DigitalPlatform.LibraryServer
                 {
                     if (String.IsNullOrEmpty(info.Name) == true)
                     {
-                        strError = "³öÏÖÁËÒ»¸öResInfoItemÊÂÏî£¬NamesºÍName¾ùÎª¿Õ£¬ÕâÊÇ²»ºÏ·¨µÄ";
+                        strError = "å‡ºç°äº†ä¸€ä¸ªResInfoItemäº‹é¡¹ï¼ŒNameså’ŒNameå‡ä¸ºç©ºï¼Œè¿™æ˜¯ä¸åˆæ³•çš„";
                         return -1;
                     }
-                    // ¼ÓÈëÒ»¸öÓïÑÔÖĞÁ¢µÄÃû×Ö
+                    // åŠ å…¥ä¸€ä¸ªè¯­è¨€ä¸­ç«‹çš„åå­—
                     from.Captions = new List<Caption>();
                     from.Captions.Add(new Caption(null, info.Name));
                 }
@@ -404,7 +404,7 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
-        // ¸ù¾İ´Ó·şÎñÆ÷»ñµÃµÄÃû³ÆÊı×é£¬¹¹ÔìÎª±¾Àà¿ÉÒÔÊ¹ÓÃµÄList<Caption>ÀàĞÍ
+        // æ ¹æ®ä»æœåŠ¡å™¨è·å¾—çš„åç§°æ•°ç»„ï¼Œæ„é€ ä¸ºæœ¬ç±»å¯ä»¥ä½¿ç”¨çš„List<Caption>ç±»å‹
         public static int BuildCaptions(string[] names,
             out List<Caption> captions,
             out string strError)
@@ -429,7 +429,7 @@ namespace DigitalPlatform.LibraryServer
                 {
                     strLang = strName;
                     strValue = "";
-                    strError = "³öÏÖ´íÎóµÄÊÂÏî '" + strName + "'£¬ÖĞ¼äÈ±·¦Ã°ºÅ ";
+                    strError = "å‡ºç°é”™è¯¯çš„äº‹é¡¹ '" + strName + "'ï¼Œä¸­é—´ç¼ºä¹å†’å· ";
                     return -1;
                 }
 
@@ -444,7 +444,7 @@ namespace DigitalPlatform.LibraryServer
     }
 
 
-    // Ò»¸ö´øÓĞÓïÖÖ±êÖ¾µÄÃû³Æ
+    // ä¸€ä¸ªå¸¦æœ‰è¯­ç§æ ‡å¿—çš„åç§°
     public class Caption
     {
         public string Lang = "";
@@ -462,11 +462,11 @@ namespace DigitalPlatform.LibraryServer
     {
         public List<Caption> Captions = null;
 
-        // ·ç¸ñ
+        // é£æ ¼
         public string Styles = "";
 
         // 2012/2/8
-        // ·µ»Ø×ó¶ËÆ¥Åä»òÕßÍêÈ«Æ¥ÅäµÄËùÓĞCaption
+        // è¿”å›å·¦ç«¯åŒ¹é…æˆ–è€…å®Œå…¨åŒ¹é…çš„æ‰€æœ‰Caption
         public List<Caption> GetCaptions(string strLang)
         {
             List<Caption> results = new List<Caption>();
@@ -474,7 +474,7 @@ namespace DigitalPlatform.LibraryServer
             {
                 Caption caption = this.Captions[i];
 
-                if (String.IsNullOrEmpty(strLang) == true)  // Èç¹û¸ø³öµÄÓïÑÔÎªÎ´Öª, ÔòÖ±½Ó·µ»ØµÚÒ»¸öcaption
+                if (String.IsNullOrEmpty(strLang) == true)  // å¦‚æœç»™å‡ºçš„è¯­è¨€ä¸ºæœªçŸ¥, åˆ™ç›´æ¥è¿”å›ç¬¬ä¸€ä¸ªcaption
                 {
                     results.Add(caption);
                     return results;
@@ -482,8 +482,8 @@ namespace DigitalPlatform.LibraryServer
 
                 int nRet = CompareLang(caption.Lang, strLang);
 
-                if (nRet == 2 // Æ¥ÅäµÃ2·Ö
-                    || String.IsNullOrEmpty(caption.Lang) == true)  // »òÕßÎªÖĞÁ¢ÓïÑÔ
+                if (nRet == 2 // åŒ¹é…å¾—2åˆ†
+                    || String.IsNullOrEmpty(caption.Lang) == true)  // æˆ–è€…ä¸ºä¸­ç«‹è¯­è¨€
                     results.Add(caption);
                 else if (nRet == 1)
                     results.Add(caption);
@@ -495,33 +495,33 @@ namespace DigitalPlatform.LibraryServer
 
         public Caption GetCaption(string strLang)
         {
-            Caption OneCaption = null;  // Æ¥ÅäÖĞ½ö½öµÃ1·ÖµÄµÚÒ»¸ö¶ÔÏó
+            Caption OneCaption = null;  // åŒ¹é…ä¸­ä»…ä»…å¾—1åˆ†çš„ç¬¬ä¸€ä¸ªå¯¹è±¡
             for (int i = 0; i < this.Captions.Count; i++)
             {
                 Caption caption = this.Captions[i];
 
-                if (String.IsNullOrEmpty(strLang) == true)  // Èç¹û¸ø³öµÄÓïÑÔÎªÎ´Öª, ÔòÖ±½Ó·µ»ØµÚÒ»¸öcaption
+                if (String.IsNullOrEmpty(strLang) == true)  // å¦‚æœç»™å‡ºçš„è¯­è¨€ä¸ºæœªçŸ¥, åˆ™ç›´æ¥è¿”å›ç¬¬ä¸€ä¸ªcaption
                     return caption;
 
                 int nRet = CompareLang(caption.Lang, strLang);
 
-                if (nRet == 2 // Æ¥ÅäµÃ2·Ö
-                    || String.IsNullOrEmpty(caption.Lang) == true)  // »òÕßÎªÖĞÁ¢ÓïÑÔ
+                if (nRet == 2 // åŒ¹é…å¾—2åˆ†
+                    || String.IsNullOrEmpty(caption.Lang) == true)  // æˆ–è€…ä¸ºä¸­ç«‹è¯­è¨€
                     return caption;
 
                 if (nRet == 1 && OneCaption == null)
                     OneCaption = caption;
             }
 
-            return OneCaption;  // Èç¹ûÓĞ1·ÖÆ¥ÅäµÄ»°
+            return OneCaption;  // å¦‚æœæœ‰1åˆ†åŒ¹é…çš„è¯
         }
 
-        // ±È½ÏÁ½¸öÓïÑÔ´úÂë
-        // ËùÎ½ÓïÑÔ´úÂë, ÊÇÀàËÆ"zh-cn"ÕâÑùµÄ×Ö·û´®¡£ºóÃæ¿ÉÒÔÊ¡ÂÔ¡£
+        // æ¯”è¾ƒä¸¤ä¸ªè¯­è¨€ä»£ç 
+        // æ‰€è°“è¯­è¨€ä»£ç , æ˜¯ç±»ä¼¼"zh-cn"è¿™æ ·çš„å­—ç¬¦ä¸²ã€‚åé¢å¯ä»¥çœç•¥ã€‚
         // return:
-        //      0   ²»Æ¥Åä
-        //      1   ×ó¶ÎÆ¥Åä£¬µ«ÊÇÓÒ¶Î²»Æ¥Åä
-        //      2   Á½¶Î¾ùÆ¥Åä
+        //      0   ä¸åŒ¹é…
+        //      1   å·¦æ®µåŒ¹é…ï¼Œä½†æ˜¯å³æ®µä¸åŒ¹é…
+        //      2   ä¸¤æ®µå‡åŒ¹é…
         static int CompareLang(string strRequest,
             string strValue)
         {

@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -7,17 +7,17 @@ using DigitalPlatform.IO;
 
 namespace DigitalPlatform.LibraryServer
 {
-    // ²Ù×÷ÀàĞÍ
-    // ¿ÉÒÔÌáÊ¾´´½¨Ò³ÃæµÄÏ¸½Ú
+    // æ“ä½œç±»å‹
+    // å¯ä»¥æç¤ºåˆ›å»ºé¡µé¢çš„ç»†èŠ‚
     public enum OperType
     {
-        None = 0,   // ¼È²»ÊÇ½èÊéÒ²²»ÊÇ»¹Êé
-        Borrow = 1, // ½èÊé
-        Return = 2, // »¹Êé
+        None = 0,   // æ—¢ä¸æ˜¯å€Ÿä¹¦ä¹Ÿä¸æ˜¯è¿˜ä¹¦
+        Borrow = 1, // å€Ÿä¹¦
+        Return = 2, // è¿˜ä¹¦
     }
 
     /// <summary>
-    /// dp2libraryÖĞµ÷ÓÃC#½Å±¾Ê±, ÓÃÓÚ×ª»»¶ÁÕßĞÅÏ¢xml->htmlµÄ½Å±¾ÀàµÄ»ùÀà
+    /// dp2libraryä¸­è°ƒç”¨C#è„šæœ¬æ—¶, ç”¨äºè½¬æ¢è¯»è€…ä¿¡æ¯xml->htmlçš„è„šæœ¬ç±»çš„åŸºç±»
     /// </summary>
     public class ReaderConverter
     {
@@ -25,13 +25,13 @@ namespace DigitalPlatform.LibraryServer
         public SessionInfo SessionInfo = null;
 
         public string[] BorrowedItemBarcodes = null;
-        public string CurrentItemBarcode = "";  // µ±Ç°ÕıÔÚ²Ù×÷µÄÌõÂëºÅ
+        public string CurrentItemBarcode = "";  // å½“å‰æ­£åœ¨æ“ä½œçš„æ¡ç å·
         public OperType OperType = OperType.None;
-        public string RecPath = ""; // ¶ÁÕß¼ÇÂ¼Â·¾¶
+        public string RecPath = ""; // è¯»è€…è®°å½•è·¯å¾„
 
-        public string LibraryCode = ""; // ¶ÁÕß¼ÇÂ¼Ëù´ÓÊôµÄ¶ÁÕß¿âµÄÍ¼Êé¹İ´úÂë 2012/9/8
+        public string LibraryCode = ""; // è¯»è€…è®°å½•æ‰€ä»å±çš„è¯»è€…åº“çš„å›¾ä¹¦é¦†ä»£ç  2012/9/8
 
-        public string Formats = ""; // ×Ó¸ñÊ½¡£Îª¶ººÅ¼ä¸ôµÄ×Ö·û´®ÁĞ±í 2013/12/4
+        public string Formats = ""; // å­æ ¼å¼ã€‚ä¸ºé€—å·é—´éš”çš„å­—ç¬¦ä¸²åˆ—è¡¨ 2013/12/4
 
         public static string LocalTime(string strRfc1123Time)
         {
@@ -43,7 +43,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception /*ex*/)    // 2008/10/28
             {
-                return "Ê±¼ä×Ö·û´® '" + strRfc1123Time + "' ¸ñÊ½´íÎó£¬²»ÊÇºÏ·¨µÄRFC1123¸ñÊ½";
+                return "æ—¶é—´å­—ç¬¦ä¸² '" + strRfc1123Time + "' æ ¼å¼é”™è¯¯ï¼Œä¸æ˜¯åˆæ³•çš„RFC1123æ ¼å¼";
             }
         }
 
@@ -58,11 +58,11 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception /*ex*/)    // 2008/10/28
             {
-                return "ÈÕÆÚ×Ö·û´® '" + strRfc1123Time + "' ¸ñÊ½´íÎó£¬²»ÊÇºÏ·¨µÄRFC1123¸ñÊ½";
+                return "æ—¥æœŸå­—ç¬¦ä¸² '" + strRfc1123Time + "' æ ¼å¼é”™è¯¯ï¼Œä¸æ˜¯åˆæ³•çš„RFC1123æ ¼å¼";
             }
         }
 
-        // »ñµÃÁ÷Í¨²ÎÊı
+        // è·å¾—æµé€šå‚æ•°
         public string GetParam(string strReaderType,
             string strBookType,
             string strParamName)
@@ -83,7 +83,7 @@ namespace DigitalPlatform.LibraryServer
                 return strError;
 
             // 2014/1/28
-            // ÕâÊÇ¶ÁÕßÌØÓĞµÄ²ÎÊı£¬ÒªÇó±ØĞë·µ»ØÖµÔÚ 3 ºÍÒÔÉÏ
+            // è¿™æ˜¯è¯»è€…ç‰¹æœ‰çš„å‚æ•°ï¼Œè¦æ±‚å¿…é¡»è¿”å›å€¼åœ¨ 3 å’Œä»¥ä¸Š
             if (string.IsNullOrEmpty(strBookType) == true && nRet < 3)
                 return strError;
             if (string.IsNullOrEmpty(strBookType) == false && nRet < 4)
@@ -92,7 +92,7 @@ namespace DigitalPlatform.LibraryServer
             return strParamValue;
         }
 
-        // ÊµÓÃº¯Êı£º¿´¿´Ò»¸öÌõÂëºÅÊÇ·ñÎª×î½üÒÑ¾­½èÔÄ¹ıµÄ²áÌõÂëºÅ
+        // å®ç”¨å‡½æ•°ï¼šçœ‹çœ‹ä¸€ä¸ªæ¡ç å·æ˜¯å¦ä¸ºæœ€è¿‘å·²ç»å€Ÿé˜…è¿‡çš„å†Œæ¡ç å·
         public bool IsRecentBorrowedItem(string strBarcode)
         {
             if (BorrowedItemBarcodes == null)

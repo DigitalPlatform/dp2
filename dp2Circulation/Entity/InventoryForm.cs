@@ -233,10 +233,14 @@ namespace dp2Circulation
             ColumnDefs defs = null;
             int nRet = PrepareColumnDefs(out defs, out strError);
             if (nRet == -1)
-                MessageBox.Show(this, strError);
+            {
+                this.ShowMessage(strError, "red", true);
+                this.tabControl_main.Enabled = false;
+                this._defs = null;
+                return;
+            }
 
             this._defs = defs;
-
         }
 
         private void InventoryForm_FormClosing(object sender, FormClosingEventArgs e)

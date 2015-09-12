@@ -97,11 +97,19 @@ namespace DigitalPlatform.LibraryServer
                 return 1;
             }
 
+            RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
             string strRemotePath = strDbName + "/cfgs/browse";
             string strLocalPath = "";
 
             int nRet = this.CfgsMap.MapFileToLocal(
-                sessioninfo.Channels,
+                // sessioninfo.Channels,
+                channel,
                 strRemotePath,
                 out strLocalPath,
                 out strError);
@@ -111,11 +119,8 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             }
 
-
             if (nRet == 0)
-            {
                 return 0;
-            }
 
             XmlDocument dom = new XmlDocument();
             try

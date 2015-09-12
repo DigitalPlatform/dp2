@@ -529,28 +529,6 @@ namespace dp2Circulation
                 button.Visible = bVisible;
         }
 
-#if NO
-        void SetSimpleMode(bool bSimple)
-        {
-            SetLineVisible(this.checkedComboBox_state, !bSimple);
-            SetLineVisible(this.textBox_publishTime, !bSimple);
-            SetLineVisible(this.comboBox_source, !bSimple);
-            SetLineVisible(this.comboBox_seller, !bSimple);
-            SetLineVisible(this.textBox_registerNo, !bSimple);
-            SetLineVisible(this.textBox_comment, !bSimple);
-            SetLineVisible(this.textBox_mergeComment, !bSimple);
-            SetLineVisible(this.textBox_borrower, !bSimple);
-            SetLineVisible(this.textBox_borrowDate, !bSimple);
-            SetLineVisible(this.textBox_borrowPeriod, !bSimple);
-            SetLineVisible(this.textBox_intact, !bSimple);
-            SetLineVisible(this.textBox_bindingCost, !bSimple);
-            SetLineVisible(this.textBox_binding, !bSimple);
-            SetLineVisible(this.textBox_operations, !bSimple);
-            SetLineVisible(this.textBox_recPath, !bSimple);
-            SetLineVisible(this.textBox_refID, !bSimple);
-        }
-#endif
-
         System.Windows.Forms.Label label_errorInfo = null;
 
         // 错误信息文字
@@ -826,7 +804,7 @@ namespace dp2Circulation
 #endif
 
                     if (strMode == "full" || controls.IndexOf(control) != -1)
-                     {
+                    {
                         // 显示
                         if (this.Visible == false || control.Visible == false)
                         {
@@ -851,18 +829,27 @@ namespace dp2Circulation
                 this.EnableUpdate();
             }
 
-                // 修正卷滚范围。不然的话，如果把焦点放在 ConboBox 上滚动滚轮，内容区域会跑到上面去下不来
-                if (strMode == "simple_register")
-                {
-                    this.button_getAccessNo.Visible = false;
+            // 修正卷滚范围。不然的话，如果把焦点放在 ConboBox 上滚动滚轮，内容区域会跑到上面去下不来
+            if (strMode == "simple_register")
+            {
+                this.button_getAccessNo.Visible = false;
 
-                    this.tableLayoutPanel_main.PerformLayout();
+#if NO
+                this.tableLayoutPanel_main.PerformLayout();
 
-                    int nHeight = this.textBox_refID.Location.Y + this.textBox_refID.Height;
-                    this.tableLayoutPanel_main.AutoScrollMinSize = new Size(this.tableLayoutPanel_main.AutoScrollMinSize.Width, nHeight);
-                }
+                int nHeight = this.textBox_refID.Location.Y + this.textBox_refID.Height;
+                this.tableLayoutPanel_main.AutoScrollMinSize = new Size(this.tableLayoutPanel_main.AutoScrollMinSize.Width, nHeight);
+#endif
+                AdjustScrollSize();
+            }
+        }
 
+        public void AdjustScrollSize()
+        {
+            this.tableLayoutPanel_main.PerformLayout();
 
+            int nHeight = this.textBox_refID.Location.Y + this.textBox_refID.Height;
+            this.tableLayoutPanel_main.AutoScrollMinSize = new Size(this.tableLayoutPanel_main.AutoScrollMinSize.Width, nHeight);
         }
 
         /// <summary>
@@ -1139,6 +1126,8 @@ namespace dp2Circulation
             this.RefID = DomUtil.GetElementText(this.RecordDom.DocumentElement, "refID");
 
             this.RecPath = strRecPath;
+
+            AdjustScrollSize();
         }
 
         /// <summary>

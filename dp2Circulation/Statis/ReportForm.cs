@@ -7625,7 +7625,8 @@ out string strError)
 
             ItemLine line = new ItemLine();
 
-            line.Full = false;
+            // line.Full = false;
+            line.Level = 1;
             line.ItemBarcode = strItemBarcode;
             line.Borrower = "";
             line.BorrowTime = "";
@@ -7720,7 +7721,8 @@ out string strError)
 
             ItemLine line = new ItemLine();
 
-            line.Full = false;
+            // line.Full = false;
+            line.Level = 1;
             line.ItemBarcode = strItemBarcode;
             line.Borrower = strReaderBarcode;
             line.BorrowTime = strBorrowDate;
@@ -7747,6 +7749,7 @@ out string strError)
 	<action>...</action> 具体动作。有new change delete move 4种
 	<record recPath='...'>...</record> 新记录
     <oldRecord recPath='...'>...</oldRecord> 被覆盖或者删除的记录 动作为change和delete时具备此元素
+    <changedEntityRecord itemBarcode='...' recPath='...' oldBorrower='...' newBorrower='...' /> 若干个元素。表示连带发生修改的册记录
 	<operator>test</operator> 操作者
 	<operTime>Fri, 08 Dec 2006 09:01:38 GMT</operTime> 操作时间
 </root>
@@ -7818,6 +7821,28 @@ out string strError)
                     return -1;
                 }
 
+                // 2015/9/11
+                XmlNodeList nodes = domLog.DocumentElement.SelectNodes("changedEntityRecord");
+                foreach (XmlElement item in nodes)
+                {
+                    string strItemBarcode = item.GetAttribute("itemBarcode");
+                    string strItemRecPath = item.GetAttribute("recPath");
+                    string strOldReaderBarcode = item.GetAttribute("oldBorrower");
+                    string strNewReaderBarcode = item.GetAttribute("newBorrower");
+
+                    nRet = TraceChangeBorrower(
+                        connection,
+                        strItemBarcode,
+                        strItemRecPath,
+                        strNewReaderBarcode,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "修改册记录 '" + strItemRecPath + "' 的 borrower 字段时发生错误: " + strError;
+                        return -1;
+                    }
+                }
+
                 if (strAction == "move")
                 {
                     // 兑现缓存
@@ -7870,6 +7895,44 @@ out strError);
                 return -1;
             }
 
+            return 0;
+        }
+
+        public int TraceChangeBorrower(
+            SQLiteConnection connection,
+            string strItemBarcode,
+            string strItemRecPath,
+            string strNewBorrower,
+            out string strError)
+        {
+            strError = "";
+
+            long lRet = 0;
+            int nRet = 0;
+
+            if (String.IsNullOrEmpty(strItemBarcode) == true)
+            {
+                strError = "strItemBarcode 参数不应为空";
+                return -1;
+            }
+
+            ItemLine line = new ItemLine();
+
+            // line.Full = false;
+            line.Level = 2;
+            line.ItemBarcode = strItemBarcode;
+            line.Borrower = strNewBorrower;
+            line.ItemRecPath = strItemRecPath;
+
+            this._updateItems.Add(line);
+            if (this._updateItems.Count >= 100)
+            {
+                nRet = CommitUpdateItems(
+                    connection,
+                    out strError);
+                if (nRet == -1)
+                    return -1;
+            }
             return 0;
         }
 

@@ -4217,7 +4217,6 @@ true);
         /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
         public override void EnableControls(bool bEnable)
         {
-
             this.textBox_queryWord.Enabled = bEnable;
 
             if (this.ItemsPageVisible == false)

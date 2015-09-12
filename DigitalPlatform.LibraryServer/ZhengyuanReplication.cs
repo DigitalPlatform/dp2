@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Xml;
@@ -10,12 +10,12 @@ using System.Globalization;
 
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
-
+using DigitalPlatform.rms.Client;
 
 namespace DigitalPlatform.LibraryServer
 {
     /// <summary>
-    /// ÕıÔªÒ»¿¨Í¨¶ÁÕßĞÅÏ¢Í¬²½ Åú´¦ÀíÈÎÎñ
+    /// æ­£å…ƒä¸€å¡é€šè¯»è€…ä¿¡æ¯åŒæ­¥ æ‰¹å¤„ç†ä»»åŠ¡
     /// </summary>
     public class ZhengyuanReplication : BatchTask
     {
@@ -23,7 +23,7 @@ namespace DigitalPlatform.LibraryServer
         bool DownloadCancelled = false;
         Exception DownloadException = null;
 
-        // ¹¹Ôìº¯Êı
+        // æ„é€ å‡½æ•°
         public ZhengyuanReplication(LibraryApplication app, 
             string strName)
             : base(app, strName)
@@ -35,11 +35,11 @@ namespace DigitalPlatform.LibraryServer
         {
             get
             {
-                return "ÕıÔªÒ»¿¨Í¨¶ÁÕßĞÅÏ¢Í¬²½";
+                return "æ­£å…ƒä¸€å¡é€šè¯»è€…ä¿¡æ¯åŒæ­¥";
             }
         }
 
-        // ½âÎö ¿ªÊ¼ ²ÎÊı
+        // è§£æ å¼€å§‹ å‚æ•°
         static int ParseZhengyuanReplicationStart(string strStart,
             out string strError)
         {
@@ -48,13 +48,13 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
-        // ½âÎöÍ¨ÓÃÆô¶¯²ÎÊı
-        // ¸ñÊ½
+        // è§£æé€šç”¨å¯åŠ¨å‚æ•°
+        // æ ¼å¼
         /*
          * <root dump='...' clearFirst='...' loop='...'/>
-         * dumpÈ±Ê¡Îªfalse
-         * clearFirstÈ±Ê¡Îªfalse
-         * loopÈ±Ê¡Îªtrue
+         * dumpç¼ºçœä¸ºfalse
+         * clearFirstç¼ºçœä¸ºfalse
+         * loopç¼ºçœä¸ºtrue
          * 
          * */
         public static int ParseZhengyuanReplicationParam(string strParam,
@@ -83,7 +83,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "strParam²ÎÊı×°ÈëXML DOMÊ±³ö´í: " + ex.Message;
+                strError = "strParamå‚æ•°è£…å…¥XML DOMæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
@@ -122,7 +122,7 @@ namespace DigitalPlatform.LibraryServer
                 bAutoDumpDay = false;
 
 
-            // È±Ê¡Îªtrue
+            // ç¼ºçœä¸ºtrue
             string strLoop = DomUtil.GetAttr(dom.DocumentElement,
     "loop");
             if (strLoop.ToLower() == "no"
@@ -162,9 +162,9 @@ namespace DigitalPlatform.LibraryServer
             return dom.OuterXml;
         }
 
-        // ±¾ÂÖÊÇ²»ÊÇ·êÉÏÁËÃ¿ÈÕÆô¶¯Ê±¼ä(ÒÔºó)?
+        // æœ¬è½®æ˜¯ä¸æ˜¯é€¢ä¸Šäº†æ¯æ—¥å¯åŠ¨æ—¶é—´(ä»¥å)?
         // parameters:
-        //      strLastTime ×îºóÒ»´ÎÖ´ĞĞ¹ıµÄÊ±¼ä RFC1123¸ñÊ½
+        //      strLastTime æœ€åä¸€æ¬¡æ‰§è¡Œè¿‡çš„æ—¶é—´ RFC1123æ ¼å¼
         int IsNowAfterPerDayStart(
             string strLastTime,
             out bool bRet,
@@ -212,15 +212,15 @@ namespace DigitalPlatform.LibraryServer
             catch
             {
                 bRet = false;
-                strError = "Ê±¼äÖµ " + strStartTime + " ¸ñÊ½²»ÕıÈ·¡£Ó¦Îª hh:mm";
-                return -1;   // ¸ñÊ½²»ÕıÈ·
+                strError = "æ—¶é—´å€¼ " + strStartTime + " æ ¼å¼ä¸æ­£ç¡®ã€‚åº”ä¸º hh:mm";
+                return -1;   // æ ¼å¼ä¸æ­£ç¡®
             }
 
 
 
             DateTime now1 = DateTime.Now;
 
-            // ¹Û²ì±¾ÈÕÊÇ·ñÒÑ¾­×ö¹ıÁË
+            // è§‚å¯Ÿæœ¬æ—¥æ˜¯å¦å·²ç»åšè¿‡äº†
             if (String.IsNullOrEmpty(strLastTime) == false)
             {
                 try
@@ -231,14 +231,14 @@ namespace DigitalPlatform.LibraryServer
                         && lasttime.Month == now1.Month
                         && lasttime.Day == now1.Day)
                     {
-                        bRet = false;   // ½ñÌìÒÑ¾­×ö¹ıÁË
+                        bRet = false;   // ä»Šå¤©å·²ç»åšè¿‡äº†
                         return 0;
                     }
                 }
                 catch
                 {
                     bRet = false;
-                    strError = "strLastTime " + strLastTime + " ¸ñÊ½´íÎó";
+                    strError = "strLastTime " + strLastTime + " æ ¼å¼é”™è¯¯";
                     return -1;
                 }
             }
@@ -261,7 +261,7 @@ namespace DigitalPlatform.LibraryServer
 
         public override void Worker()
         {
-            // ÏµÍ³¹ÒÆğµÄÊ±ºò£¬²»ÔËĞĞ±¾Ïß³Ì
+            // ç³»ç»ŸæŒ‚èµ·çš„æ—¶å€™ï¼Œä¸è¿è¡Œæœ¬çº¿ç¨‹
             // 2007/12/18
             if (this.App.HangupReason == HangupReason.LogRecover)
                 return;
@@ -273,17 +273,17 @@ namespace DigitalPlatform.LibraryServer
 
             BatchTaskStartInfo startinfo = this.StartInfo;
             if (startinfo == null)
-                startinfo = new BatchTaskStartInfo();   // °´ÕÕÈ±Ê¡ÖµÀ´
+                startinfo = new BatchTaskStartInfo();   // æŒ‰ç…§ç¼ºçœå€¼æ¥
 
             int nRet = ParseZhengyuanReplicationStart(startinfo.Start,
                 out strError);
             if (nRet == -1)
             {
-                this.AppendResultText("Æô¶¯Ê§°Ü: " + strError + "\r\n");
+                this.AppendResultText("å¯åŠ¨å¤±è´¥: " + strError + "\r\n");
                 return;
             }
 
-            // Í¨ÓÃÆô¶¯²ÎÊı
+            // é€šç”¨å¯åŠ¨å‚æ•°
             bool bForceDumpAll = false;
             bool bForceDumpDay = false;
             bool bAutoDumpDay = false;
@@ -298,7 +298,7 @@ namespace DigitalPlatform.LibraryServer
                 out strError);
             if (nRet == -1)
             {
-                this.AppendResultText("Æô¶¯Ê§°Ü: " + strError + "\r\n");
+                this.AppendResultText("å¯åŠ¨å¤±è´¥: " + strError + "\r\n");
                 return;
             }
 
@@ -306,62 +306,62 @@ namespace DigitalPlatform.LibraryServer
 
             if (bClearFirst == true)
             {
-                // É¾³ı¶ÁÕß¿âÖĞËùÓĞÃ»ÓĞ½èÔÄĞÅÏ¢µÄ¶ÁÕßĞÅÏ¢£¿
+                // åˆ é™¤è¯»è€…åº“ä¸­æ‰€æœ‰æ²¡æœ‰å€Ÿé˜…ä¿¡æ¯çš„è¯»è€…ä¿¡æ¯ï¼Ÿ
             }
 
             if (bForceDumpAll == true)
             {
-                // ¸üĞÂ¿¨»§ĞÅÏ¢ÍêÕû±í(AccountsCompleteInfo_yyyymmdd.xml)
+                // æ›´æ–°å¡æˆ·ä¿¡æ¯å®Œæ•´è¡¨(AccountsCompleteInfo_yyyymmdd.xml)
                 string strDataFileName = "AccountsCompleteInfo_" + GetCurrentDate() + ".xml";
                 string strLocalFilePath = PathUtil.MergePath(this.App.ZhengyuanDir, strDataFileName);
 
                 try
                 {
                     // return:
-                    //      -1  ³ö´í
-                    //      0   Õı³£½áÊø
-                    //      1   ±»ÓÃ»§ÖĞ¶Ï
+                    //      -1  å‡ºé”™
+                    //      0   æ­£å¸¸ç»“æŸ
+                    //      1   è¢«ç”¨æˆ·ä¸­æ–­
                     nRet = DownloadDataFile(strDataFileName,
                         strLocalFilePath,
                         out strError);
                     if (nRet == -1)
                     {
-                        string strErrorText = "ÏÂÔØÊı¾İÎÄ¼ş" + strDataFileName + "Ê§°Ü: " + strError;
+                        string strErrorText = "ä¸‹è½½æ•°æ®æ–‡ä»¶" + strDataFileName + "å¤±è´¥: " + strError;
                         this.AppendResultText(strErrorText + "\r\n");
                         this.App.WriteErrorLog(strErrorText);
                         return;
                     }
                     if (nRet == 1)
                     {
-                        this.AppendResultText("ÏÂÔØÊı¾İÎÄ¼ş"+strDataFileName+"±»ÖĞ¶Ï\r\n");
+                        this.AppendResultText("ä¸‹è½½æ•°æ®æ–‡ä»¶"+strDataFileName+"è¢«ä¸­æ–­\r\n");
                         this.Loop = false;
                         return;
                     }
 
-                    // °ÑÊı¾İÎÄ¼şĞ´ÈëÓĞÓ³Éä¹ØÏµµÄ¶ÁÕß¿â
-                    this.AppendResultText("Í¬²½Êı¾İÎÄ¼ş " + strDataFileName + " ¿ªÊ¼\r\n");
+                    // æŠŠæ•°æ®æ–‡ä»¶å†™å…¥æœ‰æ˜ å°„å…³ç³»çš„è¯»è€…åº“
+                    this.AppendResultText("åŒæ­¥æ•°æ®æ–‡ä»¶ " + strDataFileName + " å¼€å§‹\r\n");
 
                     // return:
                     //      -1  error
                     //      0   succeed
-                    //      1   ÖĞ¶Ï
+                    //      1   ä¸­æ–­
                     nRet = WriteToReaderDb(strLocalFilePath,
                         out strError);
                     if (nRet == -1)
                     {
-                        string strErrorText = "ÎÄ¼ş " + strDataFileName + " Ğ´Èë¶ÁÕß¿â: " + strError;
+                        string strErrorText = "æ–‡ä»¶ " + strDataFileName + " å†™å…¥è¯»è€…åº“: " + strError;
                         this.AppendResultText(strErrorText + "\r\n");
                         this.App.WriteErrorLog(strErrorText);
                         return;
                     }
                     else if (nRet == 1)
                     {
-                        this.AppendResultText("Í¬²½Êı¾İÎÄ¼ş " + strDataFileName + "±»ÖĞ¶Ï\r\n");
+                        this.AppendResultText("åŒæ­¥æ•°æ®æ–‡ä»¶ " + strDataFileName + "è¢«ä¸­æ–­\r\n");
                         return;
                     }
                     else
                     {
-                        this.AppendResultText("Í¬²½Êı¾İÎÄ¼ş " + strDataFileName + "Íê³É\r\n");
+                        this.AppendResultText("åŒæ­¥æ•°æ®æ–‡ä»¶ " + strDataFileName + "å®Œæˆ\r\n");
 
                         bForceDumpAll = false;
                         startinfo.Param = MakeZhengyuanReplicationParam(
@@ -376,7 +376,7 @@ namespace DigitalPlatform.LibraryServer
                 }
                 finally
                 {
-                    // É¾³ıÓÃ¹ıµÄÊı¾İÎÄ¼ş? »¹ÊÇ±£ÁôÓÃ×÷µ÷ÊÔ¹Û²ì?
+                    // åˆ é™¤ç”¨è¿‡çš„æ•°æ®æ–‡ä»¶? è¿˜æ˜¯ä¿ç•™ç”¨ä½œè°ƒè¯•è§‚å¯Ÿ?
                     File.Delete(strLocalFilePath);
                 }
             }
@@ -389,12 +389,12 @@ namespace DigitalPlatform.LibraryServer
 
                 if (bForceDumpDay == false)
                 {
-                    Debug.Assert(bAutoDumpDay == true, ""); // ¶şÕß±ØÓĞÒ»¸ö==true
+                    Debug.Assert(bAutoDumpDay == true, ""); // äºŒè€…å¿…æœ‰ä¸€ä¸ª==true
                     nRet = ReadLastTime(out strLastTime,
                         out strError);
                     if (nRet == -1)
                     {
-                        string strErrorText = "´ÓÎÄ¼şÖĞ»ñÈ¡Ã¿ÈÕÆô¶¯Ê±¼äÊ±·¢Éú´íÎó: " + strError;
+                        string strErrorText = "ä»æ–‡ä»¶ä¸­è·å–æ¯æ—¥å¯åŠ¨æ—¶é—´æ—¶å‘ç”Ÿé”™è¯¯: " + strError;
                         this.AppendResultText(strErrorText + "\r\n");
                         this.App.WriteErrorLog(strErrorText);
                         return;
@@ -408,72 +408,72 @@ namespace DigitalPlatform.LibraryServer
                         out strError);
                     if (nRet == -1)
                     {
-                        string strErrorText = "»ñÈ¡Ã¿ÈÕÆô¶¯Ê±¼äÊ±·¢Éú´íÎó: " + strError;
+                        string strErrorText = "è·å–æ¯æ—¥å¯åŠ¨æ—¶é—´æ—¶å‘ç”Ÿé”™è¯¯: " + strError;
                         this.AppendResultText(strErrorText + "\r\n");
                         this.App.WriteErrorLog(strErrorText);
                         return;
                     }
 
                     if (bRet == false)
-                        return; // »¹Ã»ÓĞµ½Ã¿ÈÕÊ±¼ä
+                        return; // è¿˜æ²¡æœ‰åˆ°æ¯æ—¥æ—¶é—´
                 }
 
 
-                // ¸üĞÂ¿¨»§ĞÅÏ¢»ù±¾(Ã¿ÈÕ)±í(AccountsCompleteInfo_yyyymmdd.xml)
+                // æ›´æ–°å¡æˆ·ä¿¡æ¯åŸºæœ¬(æ¯æ—¥)è¡¨(AccountsCompleteInfo_yyyymmdd.xml)
                 string strDataFileName = "AccountsBasicInfo_" + GetCurrentDate() + ".xml";
                 string strLocalFilePath = PathUtil.MergePath(this.App.ZhengyuanDir, strDataFileName);
 
                 try
                 {
                     // return:
-                    //      -1  ³ö´í
-                    //      0   Õı³£½áÊø
-                    //      1   ±»ÓÃ»§ÖĞ¶Ï
+                    //      -1  å‡ºé”™
+                    //      0   æ­£å¸¸ç»“æŸ
+                    //      1   è¢«ç”¨æˆ·ä¸­æ–­
                     nRet = DownloadDataFile(strDataFileName,
                         strLocalFilePath,
                         out strError);
                     if (nRet == -1)
                     {
-                        string strErrorText = "ÏÂÔØÊı¾İÎÄ¼ş" + strDataFileName + "Ê§°Ü: " + strError;
+                        string strErrorText = "ä¸‹è½½æ•°æ®æ–‡ä»¶" + strDataFileName + "å¤±è´¥: " + strError;
                         this.AppendResultText(strErrorText + "\r\n");
                         this.App.WriteErrorLog(strErrorText);
                         return;
                     }
                     if (nRet == 1)
                     {
-                        this.AppendResultText("ÏÂÔØÊı¾İÎÄ¼ş" + strDataFileName + "±»ÖĞ¶Ï\r\n");
+                        this.AppendResultText("ä¸‹è½½æ•°æ®æ–‡ä»¶" + strDataFileName + "è¢«ä¸­æ–­\r\n");
                         this.Loop = false;
                         return;
                     }
 
-                    // °ÑÊı¾İÎÄ¼şĞ´ÈëÓĞÓ³Éä¹ØÏµµÄ¶ÁÕß¿â
-                    this.AppendResultText("Í¬²½Êı¾İÎÄ¼ş " + strDataFileName + " ¿ªÊ¼\r\n");
+                    // æŠŠæ•°æ®æ–‡ä»¶å†™å…¥æœ‰æ˜ å°„å…³ç³»çš„è¯»è€…åº“
+                    this.AppendResultText("åŒæ­¥æ•°æ®æ–‡ä»¶ " + strDataFileName + " å¼€å§‹\r\n");
 
                     // return:
                     //      -1  error
                     //      0   succeed
-                    //      1   ÖĞ¶Ï
+                    //      1   ä¸­æ–­
                     nRet = WriteToReaderDb(strLocalFilePath,
                         out strError);
                     if (nRet == -1)
                     {
-                        string strErrorText = "ÎÄ¼ş " + strDataFileName + " Ğ´Èë¶ÁÕß¿â: " + strError;
+                        string strErrorText = "æ–‡ä»¶ " + strDataFileName + " å†™å…¥è¯»è€…åº“: " + strError;
                         this.AppendResultText(strErrorText + "\r\n");
                         this.App.WriteErrorLog(strErrorText);
                         return;
                     }
                     else if (nRet == 1)
                     {
-                        this.AppendResultText("Í¬²½Êı¾İÎÄ¼ş " + strDataFileName + "±»ÖĞ¶Ï\r\n");
+                        this.AppendResultText("åŒæ­¥æ•°æ®æ–‡ä»¶ " + strDataFileName + "è¢«ä¸­æ–­\r\n");
                         return;
                     }
                     else
                     {
-                        this.AppendResultText("Í¬²½Êı¾İÎÄ¼ş " + strDataFileName + "Íê³É\r\n");
+                        this.AppendResultText("åŒæ­¥æ•°æ®æ–‡ä»¶ " + strDataFileName + "å®Œæˆ\r\n");
 
                         Debug.Assert(this.App != null, "");
 
-                        // Ğ´ÈëÎÄ¼ş£¬¼ÇÒäÒÑ¾­×ö¹ıµÄµ±ÈÕÊ±¼ä
+                        // å†™å…¥æ–‡ä»¶ï¼Œè®°å¿†å·²ç»åšè¿‡çš„å½“æ—¥æ—¶é—´
                         strLastTime = DateTimeUtil.Rfc1123DateTimeStringEx(this.App.Clock.UtcNow.ToLocalTime()); // 2007/12/17 changed // DateTime.UtcNow
                         WriteLastTime(strLastTime);
 
@@ -494,14 +494,14 @@ namespace DigitalPlatform.LibraryServer
                 }
                 finally
                 {
-                    // É¾³ıÓÃ¹ıµÄÊı¾İÎÄ¼ş? »¹ÊÇ±£ÁôÓÃ×÷µ÷ÊÔ¹Û²ì?
+                    // åˆ é™¤ç”¨è¿‡çš„æ•°æ®æ–‡ä»¶? è¿˜æ˜¯ä¿ç•™ç”¨ä½œè°ƒè¯•è§‚å¯Ÿ?
                     File.Delete(strLocalFilePath);
                 }
             }
 
         }
 
-        // ¶ÁÈ¡ÉÏ´Î×îºó´¦ÀíµÄÊ±¼ä
+        // è¯»å–ä¸Šæ¬¡æœ€åå¤„ç†çš„æ—¶é—´
         int ReadLastTime(out string strLastTime,
             out string strError)
         {
@@ -527,7 +527,7 @@ namespace DigitalPlatform.LibraryServer
             }
             try
             {
-                strLastTime = sr.ReadLine();  // ¶ÁÈëÊ±¼äĞĞ
+                strLastTime = sr.ReadLine();  // è¯»å…¥æ—¶é—´è¡Œ
             }
             finally
             {
@@ -537,24 +537,24 @@ namespace DigitalPlatform.LibraryServer
             return 1;
         }
 
-        // Ğ´Èë¶Ïµã¼ÇÒäÎÄ¼ş
+        // å†™å…¥æ–­ç‚¹è®°å¿†æ–‡ä»¶
         public void WriteLastTime(string strLastTime)
         {
             string strFileName = PathUtil.MergePath(this.App.ZhengyuanDir, "lasttime.txt");
 
-            // É¾³ıÔ­À´µÄÎÄ¼ş
+            // åˆ é™¤åŸæ¥çš„æ–‡ä»¶
             File.Delete(strFileName);
 
-            // Ğ´ÈëĞÂÄÚÈİ
+            // å†™å…¥æ–°å†…å®¹
             StreamUtil.WriteText(strFileName,
                 strLastTime);
         }
 
-        // ½«¸üĞÂ¿¨»§ĞÅÏ¢ÍêÕû±í(AccountsCompleteInfo_yyyymmdd.xml)Ğ´Èë¶ÁÕß¿â
+        // å°†æ›´æ–°å¡æˆ·ä¿¡æ¯å®Œæ•´è¡¨(AccountsCompleteInfo_yyyymmdd.xml)å†™å…¥è¯»è€…åº“
         // return:
         //      -1  error
         //      0   succeed
-        //      1   ÖĞ¶Ï
+        //      1   ä¸­æ–­
         int WriteToReaderDb(string strLocalFilePath,
             out string strError)
         {
@@ -565,14 +565,14 @@ namespace DigitalPlatform.LibraryServer
 
             if (node == null)
             {
-                strError = "ÉĞÎ´ÅäÖÃ<zhangyuan><replication>²ÎÊı";
+                strError = "å°šæœªé…ç½®<zhangyuan><replication>å‚æ•°";
                 return -1;
             }
 
             string strMapDbName = DomUtil.GetAttr(node, "mapDbName");
             if (String.IsNullOrEmpty(strMapDbName) == true)
             {
-                strError = "ÉĞÎ´ÅäÖÃ<zhangyuan/replication>ÔªËØµÄmapDbNameÊôĞÔ";
+                strError = "å°šæœªé…ç½®<zhangyuan/replication>å…ƒç´ çš„mapDbNameå±æ€§";
                 return -1;
             }
 
@@ -590,10 +590,10 @@ namespace DigitalPlatform.LibraryServer
 
                 bool bRet = false;
 
-                // ÁÙÊ±µÄSessionInfo¶ÔÏó
+                // ä¸´æ—¶çš„SessionInfoå¯¹è±¡
                 SessionInfo sessioninfo = new SessionInfo(this.App);
 
-                // Ä£ÄâÒ»¸öÕË»§
+                // æ¨¡æ‹Ÿä¸€ä¸ªè´¦æˆ·
                 Account account = new Account();
                 account.LoginName = "replication";
                 account.Password = "";
@@ -608,7 +608,7 @@ namespace DigitalPlatform.LibraryServer
 
                 sessioninfo.Account = account;
 
-                // ÕÒµ½¸ù
+                // æ‰¾åˆ°æ ¹
                 while (true)
                 {
                     try
@@ -617,13 +617,13 @@ namespace DigitalPlatform.LibraryServer
                     }
                     catch (Exception ex)
                     {
-                        strError = "¶ÁXMLÎÄ¼ş·¢Éú´íÎó: " + ex.Message;
+                        strError = "è¯»XMLæ–‡ä»¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                         return -1;
                     }
 
                     if (bRet == false)
                     {
-                        strError = "Ã»ÓĞ¸ùÔªËØ";
+                        strError = "æ²¡æœ‰æ ¹å…ƒç´ ";
                         return -1;
                     }
                     if (reader.NodeType == XmlNodeType.Element)
@@ -637,13 +637,13 @@ namespace DigitalPlatform.LibraryServer
 
 
                     bool bEnd = false;
-                    // µÚ¶ş¼¶ÔªËØ
+                    // ç¬¬äºŒçº§å…ƒç´ 
                     while (true)
                     {
                         bRet = reader.Read();
                         if (bRet == false)
                         {
-                            bEnd = true;  // ½áÊø
+                            bEnd = true;  // ç»“æŸ
                             break;
                         }
                         if (reader.NodeType == XmlNodeType.Element)
@@ -653,15 +653,15 @@ namespace DigitalPlatform.LibraryServer
                     if (bEnd == true)
                         break;
 
-                    this.AppendResultText("´¦Àí " + (i + 1).ToString() + "\r\n");
+                    this.AppendResultText("å¤„ç† " + (i + 1).ToString() + "\r\n");
 
-                    // ¼ÇÂ¼Ìå
+                    // è®°å½•ä½“
                     string strXml = reader.ReadOuterXml();
 
                     // return:
                     //      -1  error
-                    //      0   ÒÑ¾­Ğ´Èë
-                    //      1   Ã»ÓĞ±ØÒªĞ´Èë
+                    //      0   å·²ç»å†™å…¥
+                    //      1   æ²¡æœ‰å¿…è¦å†™å…¥
                     nRet = WriteOneReaderInfo(
                         sessioninfo,
                         strMapDbName,
@@ -680,11 +680,11 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
-        // Ğ´ÈëÒ»ÌõÊı¾İ
+        // å†™å…¥ä¸€æ¡æ•°æ®
         // return:
         //      -1  error
-        //      0   ÒÑ¾­Ğ´Èë
-        //      1   Ã»ÓĞ±ØÒªĞ´Èë
+        //      0   å·²ç»å†™å…¥
+        //      1   æ²¡æœ‰å¿…è¦å†™å…¥
         int WriteOneReaderInfo(
             SessionInfo sessioninfo,
             string strReaderDbName,
@@ -701,13 +701,13 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "´ÓÕıÔªÊı¾İÖĞ¶Á³öµÄXMLÆ¬¶Î×°ÈëDOMÊ§°Ü: " + ex.Message;
+                strError = "ä»æ­£å…ƒæ•°æ®ä¸­è¯»å‡ºçš„XMLç‰‡æ®µè£…å…¥DOMå¤±è´¥: " + ex.Message;
                 return -1;
             }
 
             // AccType
-            // ¿¨»§ÀàĞÍ
-            // 1ÕıÊ½¿¨,2 ÁÙÊ±¿¨
+            // å¡æˆ·ç±»å‹
+            // 1æ­£å¼å¡,2 ä¸´æ—¶å¡
             string strAccType = DomUtil.GetElementText(zhengyuandom.DocumentElement,
                 "ACCTYPE");
             if (strAccType != "1")
@@ -719,7 +719,7 @@ namespace DigitalPlatform.LibraryServer
                 "ACCNUM");
             if (String.IsNullOrEmpty(strBarcode) == true)
             {
-                strError = "È±·¦<ACCNUM>ÔªËØ";
+                strError = "ç¼ºä¹<ACCNUM>å…ƒç´ ";
                 return -1;
             }
 
@@ -730,23 +730,32 @@ namespace DigitalPlatform.LibraryServer
             string strOutputPath = "";
             byte[] baTimestamp = null;
 
-            // ¼Ó¶ÁËø
-            // ¿ÉÒÔ±ÜÃâÄÃµ½¶ÁÕß¼ÇÂ¼´¦ÀíÖĞÍ¾µÄÁÙÊ±×´Ì¬
+            // åŠ è¯»é”
+            // å¯ä»¥é¿å…æ‹¿åˆ°è¯»è€…è®°å½•å¤„ç†ä¸­é€”çš„ä¸´æ—¶çŠ¶æ€
 #if DEBUG_LOCK_READER
-            this.App.WriteErrorLog("WriteOneReaderInfo ¿ªÊ¼Îª¶ÁÕß¼Ó¶ÁËø '" + strBarcode + "'");
+            this.App.WriteErrorLog("WriteOneReaderInfo å¼€å§‹ä¸ºè¯»è€…åŠ è¯»é” '" + strBarcode + "'");
 #endif
             this.App.ReaderLocks.LockForRead(strBarcode);
 
             try
             {
-                // »ñµÃ¶ÁÕß¼ÇÂ¼
+
+                RmsChannel channel = this.RmsChannels.GetChannel(this.App.WsUrl);
+                if (channel == null)
+                {
+                    strError = "get channel error";
+                    return -1;
+                }
+
+                // è·å¾—è¯»è€…è®°å½•
                 // return:
                 //      -1  error
                 //      0   not found
-                //      1   ÃüÖĞ1Ìõ
-                //      >1  ÃüÖĞ¶àÓÚ1Ìõ
+                //      1   å‘½ä¸­1æ¡
+                //      >1  å‘½ä¸­å¤šäº1æ¡
                 nRet = this.App.GetReaderRecXml(
-                    this.RmsChannels, // sessioninfo.Channels,
+                    // this.RmsChannels, // sessioninfo.Channels,
+                    channel,
                     strBarcode,
                     out strReaderXml,
                     out strOutputPath,
@@ -758,7 +767,7 @@ namespace DigitalPlatform.LibraryServer
             {
                 this.App.ReaderLocks.UnlockForRead(strBarcode);
 #if DEBUG_LOCK_READER
-                this.App.WriteErrorLog("WriteOneReaderInfo ½áÊøÎª¶ÁÕß¼Ó¶ÁËø '" + strBarcode + "'");
+                this.App.WriteErrorLog("WriteOneReaderInfo ç»“æŸä¸ºè¯»è€…åŠ è¯»é” '" + strBarcode + "'");
 #endif
             }
 
@@ -766,18 +775,18 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
             if (nRet > 1)
             {
-                strError = "ÌõÂëºÅ " + strBarcode + "ÔÚ¶ÁÕß¿âÈºÖĞ¼ìË÷ÃüÖĞ " + nRet.ToString() + " Ìõ£¬Çë¾¡¿ì¸üÕı´Ë´íÎó¡£";
+                strError = "æ¡ç å· " + strBarcode + "åœ¨è¯»è€…åº“ç¾¤ä¸­æ£€ç´¢å‘½ä¸­ " + nRet.ToString() + " æ¡ï¼Œè¯·å°½å¿«æ›´æ­£æ­¤é”™è¯¯ã€‚";
                 return -1;
             }
 
             string strAction = "";
             string strRecPath = "";
 
-            string strNewXml = "";  // ĞŞ¸ÄºóµÄ¼ÇÂ¼
+            string strNewXml = "";  // ä¿®æ”¹åçš„è®°å½•
 
             if (nRet == 0)
             {
-                // Ã»ÓĞÃüÖĞ£¬´´½¨ĞÂ¼ÇÂ¼
+                // æ²¡æœ‰å‘½ä¸­ï¼Œåˆ›å»ºæ–°è®°å½•
                 strAction = "new";
                 strRecPath = strReaderDbName + "/?";
                 strReaderXml = "";  // 2009/7/17 changed // "<root />";
@@ -785,7 +794,7 @@ namespace DigitalPlatform.LibraryServer
             else
             {
                 Debug.Assert(nRet == 1, "");
-                // ÃüÖĞ£¬ĞŞ¸Äºó¸²¸ÇÔ­¼ÇÂ¼
+                // å‘½ä¸­ï¼Œä¿®æ”¹åè¦†ç›–åŸè®°å½•
 
                 strAction = "change";
                 strRecPath = strOutputPath;
@@ -798,7 +807,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "¶ÁÕßXML¼ÇÂ¼×°ÈëDOM·¢Éú´íÎó: " + ex.Message;
+                strError = "è¯»è€…XMLè®°å½•è£…å…¥DOMå‘ç”Ÿé”™è¯¯: " + ex.Message;
                 return -1;
             }
 
@@ -808,13 +817,13 @@ namespace DigitalPlatform.LibraryServer
             if (nRet == -1)
                 return -1;
 
-            if (nRet == 1)  // Ã»ÓĞ±ØÒªĞ´Èë
+            if (nRet == 1)  // æ²¡æœ‰å¿…è¦å†™å…¥
             {
                 Debug.Assert(strAction == "change", "");
                 return 1;
             }
 
-            if (nRet == 2) // Ã»ÓĞ±ØÒªĞ´Èë
+            if (nRet == 2) // æ²¡æœ‰å¿…è¦å†™å…¥
             {
                 return 1;
             }
@@ -847,7 +856,7 @@ namespace DigitalPlatform.LibraryServer
 
 
 
-            return 0;   // Õı³£Ğ´ÈëÁË
+            return 0;   // æ­£å¸¸å†™å…¥äº†
         }
 
         /*
@@ -860,10 +869,10 @@ out string strError)
 
             strOrigin = strOrigin.Replace("-", "");
 
-            // ¸ñÊ½Îª 20060625£¬ ĞèÒª×ª»»Îªrfc
+            // æ ¼å¼ä¸º 20060625ï¼Œ éœ€è¦è½¬æ¢ä¸ºrfc
             if (strOrigin.Length != 8)
             {
-                strError = "Ô´ÈÕÆÚ×Ö·û´® '" + strOrigin + "' ¸ñÊ½²»ÕıÈ·£¬Ó¦Îª8×Ö·û";
+                strError = "æºæ—¥æœŸå­—ç¬¦ä¸² '" + strOrigin + "' æ ¼å¼ä¸æ­£ç¡®ï¼Œåº”ä¸º8å­—ç¬¦";
                 return -1;
             }
 
@@ -877,7 +886,7 @@ out string strError)
             }
             catch
             {
-                strError = "ÈÕÆÚ×Ö·û´® '" + strOrigin + "' ×Ö·û´®×ª»»ÎªDateTime¶ÔÏóÊ±³ö´í";
+                strError = "æ—¥æœŸå­—ç¬¦ä¸² '" + strOrigin + "' å­—ç¬¦ä¸²è½¬æ¢ä¸ºDateTimeå¯¹è±¡æ—¶å‡ºé”™";
                 return -1;
             }
 
@@ -889,12 +898,12 @@ out string strError)
         }
          * */
 
-        // ¸ù¾İÕıÔªÊı¾İĞŞ¸Ä»òÕß´´½¨¼ÇÂ¼
+        // æ ¹æ®æ­£å…ƒæ•°æ®ä¿®æ”¹æˆ–è€…åˆ›å»ºè®°å½•
         // return:
         //      -1  error
-        //      0   Õı³£
-        //      1   À´×ÔÕıÔªµÄĞÅÏ¢readerdomÖĞÒÑ¾­ÓĞÁË£¬ºÍzhengyuandomÖĞ¼´½«Ğ´ÈëµÄÒ»Ä£Ò»Ñù
-        //      2   Ã»ÓĞ±ØÒªĞ´ÈëµÄĞÅÏ¢
+        //      0   æ­£å¸¸
+        //      1   æ¥è‡ªæ­£å…ƒçš„ä¿¡æ¯readerdomä¸­å·²ç»æœ‰äº†ï¼Œå’Œzhengyuandomä¸­å³å°†å†™å…¥çš„ä¸€æ¨¡ä¸€æ ·
+        //      2   æ²¡æœ‰å¿…è¦å†™å…¥çš„ä¿¡æ¯
         int ModifyReaderRecord(ref XmlDocument readerdom,
             XmlDocument zhengyuandom,
             out string strError)
@@ -912,30 +921,30 @@ out string strError)
         <ACCTYPE>1</ACCTYPE>
         <PERCODE>a001</PERCODE>
         <AREANUM>1</AREANUM>
-        <ACCNAME>¿¨»§00100</ACCNAME>
+        <ACCNAME>å¡æˆ·00100</ACCNAME>
         <DEPNUM>2</DEPNUM>
-        <DEPNAME>ÈËÎÄÑ§Ôº</DEPNAME>
+        <DEPNAME>äººæ–‡å­¦é™¢</DEPNAME>
         <CLSNUM>2</CLSNUM>
-        <CLSNAME>¼Æ»®Íâ±¾¿Æ</CLSNAME>
+        <CLSNAME>è®¡åˆ’å¤–æœ¬ç§‘</CLSNAME>
         <ACCSEX>0 </ACCSEX>
         <POSTDATE>2005-08-15</POSTDATE>
         <LOSTDATE>2009-08-14</LOSTDATE>
     </Person>
              * */
 
-            // ¿´¿´À´×ÔÕıÔªµÄĞÅÏ¢ºÍ¼ÇÂ¼ÖĞÔ­ÓĞµÄÕıÔªĞÅÏ¢ÊÇ·ñÒ»Ñù£¬
-            // Èç¹ûÒ»Ñù¾Í²»±Ø±£´æÁË¡£
+            // çœ‹çœ‹æ¥è‡ªæ­£å…ƒçš„ä¿¡æ¯å’Œè®°å½•ä¸­åŸæœ‰çš„æ­£å…ƒä¿¡æ¯æ˜¯å¦ä¸€æ ·ï¼Œ
+            // å¦‚æœä¸€æ ·å°±ä¸å¿…ä¿å­˜äº†ã€‚
 
             XmlNode oldnode = readerdom.DocumentElement.SelectSingleNode("zhengyuan");
             if (oldnode != null)
             {
                 if (oldnode.InnerXml == zhengyuandom.InnerXml)
-                    return 1;   // À´×ÔÕıÔªµÄĞÅÏ¢ÒÑ¾­ÓĞÁË£¬ºÍ¼´½«Ğ´ÈëµÄÒ»Ä£Ò»Ñù
+                    return 1;   // æ¥è‡ªæ­£å…ƒçš„ä¿¡æ¯å·²ç»æœ‰äº†ï¼Œå’Œå³å°†å†™å…¥çš„ä¸€æ¨¡ä¸€æ ·
             }
 
             // AccType
-            // ¿¨»§ÀàĞÍ
-            // 1ÕıÊ½¿¨,2 ÁÙÊ±¿¨
+            // å¡æˆ·ç±»å‹
+            // 1æ­£å¼å¡,2 ä¸´æ—¶å¡
             string strAccType = DomUtil.GetElementText(zhengyuandom.DocumentElement,
                 "ACCTYPE");
             if (strAccType != "1")
@@ -944,11 +953,11 @@ out string strError)
             }
 
 
-            // ACCNUM ÕÊºÅ
+            // ACCNUM å¸å·
             string strBarcode = DomUtil.GetElementText(zhengyuandom.DocumentElement,
                 "ACCNUM");
 
-            // È·±£Îª10Î»
+            // ç¡®ä¿ä¸º10ä½
             strBarcode = strBarcode.PadLeft(10, '0');
 
             DomUtil.SetElementText(readerdom.DocumentElement,
@@ -957,11 +966,11 @@ out string strError)
 
 
             // AccStatus
-            // ¿¨»§×´Ì¬
-            // 0:ÒÑ³·»§,1:ÓĞĞ§¿¨,2:¹ÒÊ§¿¨,3:¶³½á¿¨,4:Ô¤³·»§
+            // å¡æˆ·çŠ¶æ€
+            // 0:å·²æ’¤æˆ·,1:æœ‰æ•ˆå¡,2:æŒ‚å¤±å¡,3:å†»ç»“å¡,4:é¢„æ’¤æˆ·
             string strAccStatus = DomUtil.GetElementText(zhengyuandom.DocumentElement,
                 "ACCSTATUS");
-            // ĞŞ¸Ä¶ÁÕß×´Ì¬
+            // ä¿®æ”¹è¯»è€…çŠ¶æ€
             if (strAccStatus != "1")
             {
                 string strState = GetAccStatusString(strAccStatus);
@@ -973,14 +982,14 @@ out string strError)
             {
                 DomUtil.SetElementText(readerdom.DocumentElement,
                     "state",
-                    "");    // Õı³£×´Ì¬
+                    "");    // æ­£å¸¸çŠ¶æ€
             }
 
 
 
             // AccName
-            // ¿¨»§ĞÕÃû
-            // 8¸öºº×Ö
+            // å¡æˆ·å§“å
+            // 8ä¸ªæ±‰å­—
             string strAccName = DomUtil.GetElementText(zhengyuandom.DocumentElement,
                 "ACCNAME");
             DomUtil.SetElementText(readerdom.DocumentElement,
@@ -989,7 +998,7 @@ out string strError)
 
 
             // DepName
-            // ²¿ÃÅÃû³Æ
+            // éƒ¨é—¨åç§°
             string strDepName = DomUtil.GetElementText(zhengyuandom.DocumentElement,
                 "DEPNAME");
             DomUtil.SetElementText(readerdom.DocumentElement,
@@ -997,8 +1006,8 @@ out string strError)
                 strDepName);
 
             // AccSex
-            // ¿¨»§ĞÔ±ğ
-            // ÄĞ/Å®/""
+            // å¡æˆ·æ€§åˆ«
+            // ç”·/å¥³/""
             string strAccSex = DomUtil.GetElementText(zhengyuandom.DocumentElement,
                 "ACCSEX");
             DomUtil.SetElementText(readerdom.DocumentElement,
@@ -1006,7 +1015,7 @@ out string strError)
                 strAccSex);
 
             // mobileCode
-            // ÊÖ»úºÅÂë
+            // æ‰‹æœºå·ç 
             string strMobileCode = DomUtil.GetElementText(zhengyuandom.DocumentElement,
                 "MOBILECODE");
             DomUtil.SetElementText(readerdom.DocumentElement,
@@ -1014,7 +1023,7 @@ out string strError)
                 strMobileCode);
 
             // EMail
-            // emailµØÖ·
+            // emailåœ°å€
             string strEmail = DomUtil.GetElementText(zhengyuandom.DocumentElement,
                 "EMAIL");
             DomUtil.SetElementText(readerdom.DocumentElement,
@@ -1024,19 +1033,19 @@ out string strError)
             string strRfcTime = "";
 
             // PostDate
-            // Åä¿¨ÈÕÆÚ
+            // é…å¡æ—¥æœŸ
             string strPostDate = DomUtil.GetElementText(zhengyuandom.DocumentElement,
                 "POSTDATE");
 
             if (String.IsNullOrEmpty(strPostDate) == false)
             {
-                //  8Î»ÈÕÆÚ¸ñÊ½×ª»»ÎªGMTÊ±¼ä
+                //  8ä½æ—¥æœŸæ ¼å¼è½¬æ¢ä¸ºGMTæ—¶é—´
                 nRet = DateTimeUtil.Date8toRfc1123(strPostDate,
                     out strRfcTime,
                     out strError);
                 if (nRet == -1)
                 {
-                    strError = "<POSTDATE>ÖĞµÄÈÕÆÚÖµ '" + strPostDate + "' ¸ñÊ½²»ÕıÈ·: " + strError;
+                    strError = "<POSTDATE>ä¸­çš„æ—¥æœŸå€¼ '" + strPostDate + "' æ ¼å¼ä¸æ­£ç¡®: " + strError;
                     return -1;
                 }
             }
@@ -1049,19 +1058,19 @@ out string strError)
                 strRfcTime);
 
             // LostDate
-            // Ê§Ğ§ÈÕÆÚ
+            // å¤±æ•ˆæ—¥æœŸ
             string strLostDate = DomUtil.GetElementText(zhengyuandom.DocumentElement,
                 "LOSTDATE");
 
             if (String.IsNullOrEmpty(strLostDate) == false)
             {
-                //  8Î»ÈÕÆÚ¸ñÊ½×ª»»ÎªGMTÊ±¼ä
+                //  8ä½æ—¥æœŸæ ¼å¼è½¬æ¢ä¸ºGMTæ—¶é—´
                 nRet = DateTimeUtil.Date8toRfc1123(strLostDate,
                     out strRfcTime,
                     out strError);
                 if (nRet == -1)
                 {
-                    strError = "<LOSTDATE>ÖĞµÄÈÕÆÚÖµ '" + strLostDate + "' ¸ñÊ½²»ÕıÈ·: " + strError;
+                    strError = "<LOSTDATE>ä¸­çš„æ—¥æœŸå€¼ '" + strLostDate + "' æ ¼å¼ä¸æ­£ç¡®: " + strError;
                     return -1;
                 }
             }
@@ -1076,18 +1085,18 @@ out string strError)
 
 
             // BirthDay
-            // ÉúÈÕ
+            // ç”Ÿæ—¥
             string strBirthDay = DomUtil.GetElementText(zhengyuandom.DocumentElement,
                 "BIRTHDAY");
             if (String.IsNullOrEmpty(strBirthDay) == false)
             {
-                //  8Î»ÈÕÆÚ¸ñÊ½×ª»»ÎªGMTÊ±¼ä
+                //  8ä½æ—¥æœŸæ ¼å¼è½¬æ¢ä¸ºGMTæ—¶é—´
                 nRet = DateTimeUtil.Date8toRfc1123(strBirthDay,
                     out strRfcTime,
                     out strError);
                 if (nRet == -1)
                 {
-                    strError = "<BIRTHDAY>ÖĞµÄÈÕÆÚÖµ '" + strBirthDay + "' ¸ñÊ½²»ÕıÈ·: " + strError;
+                    strError = "<BIRTHDAY>ä¸­çš„æ—¥æœŸå€¼ '" + strBirthDay + "' æ ¼å¼ä¸æ­£ç¡®: " + strError;
                     return -1;
                 }
             }
@@ -1105,13 +1114,13 @@ out string strError)
 
             if (oldnode == null)
             {
-                // È«²¿±£´æÕıÔªµÄÊı¾İ
+                // å…¨éƒ¨ä¿å­˜æ­£å…ƒçš„æ•°æ®
                 oldnode = readerdom.CreateElement("zhengyuan");
                 readerdom.DocumentElement.AppendChild(oldnode);
             }
 
             oldnode.InnerXml = zhengyuandom.DocumentElement.InnerXml;
-            DomUtil.SetAttr(oldnode, "lastModified", DateTime.Now.ToString());  // ¼ÇÔØ×îºóĞŞ¸ÄÊ±¼ä
+            DomUtil.SetAttr(oldnode, "lastModified", DateTime.Now.ToString());  // è®°è½½æœ€åä¿®æ”¹æ—¶é—´
 
             return 0;
         }
@@ -1119,16 +1128,16 @@ out string strError)
         static string GetAccStatusString(string strAccStatus)
         {
             if (strAccStatus == "0")
-                return "ÒÑ³·»§";
+                return "å·²æ’¤æˆ·";
             if (strAccStatus == "1")
-                return "ÓĞĞ§¿¨";
+                return "æœ‰æ•ˆå¡";
             if (strAccStatus == "2")
-                return "¹ÒÊ§¿¨";
+                return "æŒ‚å¤±å¡";
             if (strAccStatus == "3")
-                return "¶³½á¿¨";
+                return "å†»ç»“å¡";
             if (strAccStatus == "4")
-                return "Ô¤³·»§";
-            return strAccStatus;    // ²»ÊÇÔ¤¶¨ÒåµÄÖµ
+                return "é¢„æ’¤æˆ·";
+            return strAccStatus;    // ä¸æ˜¯é¢„å®šä¹‰çš„å€¼
         }
 
         static string GetCurrentDate()
@@ -1140,7 +1149,7 @@ out string strError)
             + now.Day.ToString().PadLeft(2, '0');
         }
 
-        // »ñµÃÊı¾İÖĞĞÄÅäÖÃ²ÎÊı
+        // è·å¾—æ•°æ®ä¸­å¿ƒé…ç½®å‚æ•°
         int GetDataCenterParam(
             out string strServerUrl,
             out string strUserName,
@@ -1156,7 +1165,7 @@ out string strError)
 
             if (node == null)
             {
-                strError = "ÉĞÎ´ÅäÖÃ<zhangyuan/dataCenter>ÔªËØ";
+                strError = "å°šæœªé…ç½®<zhangyuan/dataCenter>å…ƒç´ ";
                 return -1;
             }
 
@@ -1167,14 +1176,14 @@ out string strError)
             return 0;
         }
 
-        // ÏÂÔØÊı¾İÎÄ¼ş
+        // ä¸‹è½½æ•°æ®æ–‡ä»¶
         // parameters:
-        //      strDataFileName Êı¾İÎÄ¼şÃû¡£´¿´âµÄÎÄ¼şÃû¡£
-        //      strLocalFilePath    ±¾µØÎÄ¼şÃû
+        //      strDataFileName æ•°æ®æ–‡ä»¶åã€‚çº¯ç²¹çš„æ–‡ä»¶åã€‚
+        //      strLocalFilePath    æœ¬åœ°æ–‡ä»¶å
         // return:
-        //      -1  ³ö´í
-        //      0   Õı³£½áÊø
-        //      1   ±»ÓÃ»§ÖĞ¶Ï
+        //      -1  å‡ºé”™
+        //      0   æ­£å¸¸ç»“æŸ
+        //      1   è¢«ç”¨æˆ·ä¸­æ–­
         int DownloadDataFile(string strDataFileName,
             string strLocalFilePath,
             out string strError)
@@ -1185,7 +1194,7 @@ out string strError)
             string strUserName = "";
             string strPassword = "";
 
-            // »ñµÃÊı¾İÖĞĞÄÅäÖÃ²ÎÊı
+            // è·å¾—æ•°æ®ä¸­å¿ƒé…ç½®å‚æ•°
             int nRet = GetDataCenterParam(
                 out strServerUrl,
                 out strUserName,
@@ -1229,11 +1238,11 @@ out string strError)
             }
             catch (WebException ex)
             {
-                strError = "ÏÂÔØÊı¾İÎÄ¼ş " + strPath+ " Ê§°Ü: " + ex.ToString();
+                strError = "ä¸‹è½½æ•°æ®æ–‡ä»¶ " + strPath+ " å¤±è´¥: " + ex.ToString();
                 return -1;
             }
 
-            // µÈ´ıÏÂÔØ½áÊø
+            // ç­‰å¾…ä¸‹è½½ç»“æŸ
 
             WaitHandle[] events = new WaitHandle[2];
 
@@ -1247,26 +1256,26 @@ out string strError)
                     request.CancelAsync();
                 }
 
-                int index = WaitHandle.WaitAny(events, 1000, false);    // Ã¿Ãë³¬Ê±Ò»´Î
+                int index = WaitHandle.WaitAny(events, 1000, false);    // æ¯ç§’è¶…æ—¶ä¸€æ¬¡
 
                 if (index == WaitHandle.WaitTimeout)
                 {
-                    // ³¬Ê±
+                    // è¶…æ—¶
                 }
                 else if (index == 0)
                 {
-                    strError = "ÏÂÔØ±»¹Ø±ÕĞÅºÅÌáÇ°ÖĞ¶Ï";
+                    strError = "ä¸‹è½½è¢«å…³é—­ä¿¡å·æå‰ä¸­æ–­";
                     return -1;
                 }
                 else
                 {
-                    // µÃµ½½áÊøĞÅºÅ
+                    // å¾—åˆ°ç»“æŸä¿¡å·
                     break;
                 }
             }
 
             if (this.DownloadCancelled == true)
-                return 1;   // ±»ÓÃ»§ÖĞ¶Ï
+                return 1;   // è¢«ç”¨æˆ·ä¸­æ–­
 
             if (this.DownloadException != null)
             {
@@ -1293,7 +1302,7 @@ out string strError)
         void request_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
         {
             if ((e.BytesReceived % 1024*100) == 0)
-                this.AppendResultText("ÒÑÏÂÔØ: " + e.BytesReceived + "\r\n");
+                this.AppendResultText("å·²ä¸‹è½½: " + e.BytesReceived + "\r\n");
         }
 
         void request_DownloadFileCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e)

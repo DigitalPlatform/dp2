@@ -833,16 +833,7 @@ namespace DigitalPlatform.Marc
                     this.MarcEditor.AfterDocumentChanged(ScrollBarMember.Both,
                         iRect);
                 }
-
-                /*
-                strText = strText.Replace(Record.SUBFLD, Record.KERNEL_SUBFLD);
-                DigitalPlatform.Marc.MarcEditor.TextToClipboard(strText);
-                this.Paste();
-                 */
-
-
             }
-
         }
 
         private void Menu_Delete(System.Object sender, System.EventArgs e)

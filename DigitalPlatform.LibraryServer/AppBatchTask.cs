@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -10,7 +10,7 @@ using System.Threading;
 using System.Diagnostics;
 using System.Runtime.Serialization;
 
-using DigitalPlatform;	// StopÀà
+using DigitalPlatform;	// Stopç±»
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
@@ -26,11 +26,11 @@ using DigitalPlatform.rms.Client.rmsws_localhost;
 namespace DigitalPlatform.LibraryServer
 {
     /// <summary>
-    /// ±¾²¿·ÖÊÇºÍÅú´¦ÀíÈÎÎñÏà¹ØµÄ´úÂë
+    /// æœ¬éƒ¨åˆ†æ˜¯å’Œæ‰¹å¤„ç†ä»»åŠ¡ç›¸å…³çš„ä»£ç 
     /// </summary>
     public partial class LibraryApplication
     {
-        // ´Ó¶Ïµã¼ÇÒäÎÄ¼şÖĞ¶Á³öĞÅÏ¢
+        // ä»æ–­ç‚¹è®°å¿†æ–‡ä»¶ä¸­è¯»å‡ºä¿¡æ¯
         // return:
         //      -1  error
         //      0   file not found
@@ -61,8 +61,8 @@ namespace DigitalPlatform.LibraryServer
             }
             try
             {
-                sr.ReadLine();  // ¶ÁÈëÊ±¼äĞĞ
-                strText = sr.ReadToEnd();// ¶ÁÈëÆäÓà
+                sr.ReadLine();  // è¯»å…¥æ—¶é—´è¡Œ
+                strText = sr.ReadToEnd();// è¯»å…¥å…¶ä½™
             }
             finally
             {
@@ -72,16 +72,16 @@ namespace DigitalPlatform.LibraryServer
             return 1;
         }
 
-        // Ğ´Èë¶Ïµã¼ÇÒäÎÄ¼ş
+        // å†™å…¥æ–­ç‚¹è®°å¿†æ–‡ä»¶
         // parameters:
-        //      strTaskName ÈÎÎñÃû¡£ÔÊĞí³öÏÖ¿Õ¸ñ×Ö·û
+        //      strTaskName ä»»åŠ¡åã€‚å…è®¸å‡ºç°ç©ºæ ¼å­—ç¬¦
         public void WriteBatchTaskBreakPointFile(string strTaskName,
             string strText)
         {
             string strFileName = this.LogDir + "\\" + strTaskName.Replace(" ", "_") + ".breakpoint";
             string strTime = DateTime.Now.ToString();
 
-            // É¾³ıÔ­À´µÄÎÄ¼ş
+            // åˆ é™¤åŸæ¥çš„æ–‡ä»¶
             try
             {
                 File.Delete(strFileName);
@@ -90,14 +90,14 @@ namespace DigitalPlatform.LibraryServer
             {
             }
 
-            // Ğ´ÈëĞÂÄÚÈİ
+            // å†™å…¥æ–°å†…å®¹
             StreamUtil.WriteText(strFileName,
                 strTime + "\r\n");
             StreamUtil.WriteText(strFileName,
                 strText);
         }
 
-        // É¾³ı¶ÏµãÎÄ¼ş
+        // åˆ é™¤æ–­ç‚¹æ–‡ä»¶
         public void RemoveBatchTaskBreakPointFile(string strTaskName)
         {
             string strFileName = this.LogDir + "\\" + strTaskName.Replace(" ", "_") + ".breakpoint";
@@ -119,8 +119,8 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
-        // »ñµÃÈÎÎñµ±Ç°ĞÅÏ¢
-        // ¶àÏß³Ì£º°²È«
+        // è·å¾—ä»»åŠ¡å½“å‰ä¿¡æ¯
+        // å¤šçº¿ç¨‹ï¼šå®‰å…¨
         public BatchTaskInfo GetTaskInfo(string strText)
         {
             BatchTaskInfo info = new BatchTaskInfo();
@@ -136,11 +136,11 @@ namespace DigitalPlatform.LibraryServer
             return info;
         }
 
-        // °´ÕÕÃüÁîÆô¶¯Ò»¸öÅú´¦ÀíÈÎÎñ(²»ÊÇ×Ô¶¯Æô¶¯)
+        // æŒ‰ç…§å‘½ä»¤å¯åŠ¨ä¸€ä¸ªæ‰¹å¤„ç†ä»»åŠ¡(ä¸æ˜¯è‡ªåŠ¨å¯åŠ¨)
         // return:
-        //      -1  ³ö´í
-        //      0   Æô¶¯³É¹¦
-        //      1   µ÷ÓÃÇ°ÈÎÎñÒÑ¾­´¦ÓÚÖ´ĞĞ×´Ì¬£¬±¾´Îµ÷ÓÃ¼¤»îÁËÕâ¸öÈÎÎñ
+        //      -1  å‡ºé”™
+        //      0   å¯åŠ¨æˆåŠŸ
+        //      1   è°ƒç”¨å‰ä»»åŠ¡å·²ç»å¤„äºæ‰§è¡ŒçŠ¶æ€ï¼Œæœ¬æ¬¡è°ƒç”¨æ¿€æ´»äº†è¿™ä¸ªä»»åŠ¡
         public int StartBatchTask(string strName,
             BatchTaskInfo param,
             out BatchTaskInfo info,
@@ -159,54 +159,54 @@ namespace DigitalPlatform.LibraryServer
                     current_task.Activate();
                 }
 
-                info = GetTaskInfo("È«²¿Åú´¦ÀíÈÎÎñÒÑ¾­½â³ıÔİÍ£");
+                info = GetTaskInfo("å…¨éƒ¨æ‰¹å¤„ç†ä»»åŠ¡å·²ç»è§£é™¤æš‚åœ");
                 return 1;
             }
 
             // 2007/12/18
             if (this.HangupReason == HangupReason.LogRecover)
             {
-                strError = "µ±Ç°ÏµÍ³Õı´¦ÔÚLogRecover¹ÒÆğ×´Ì¬£¬ÎŞ·¨Æô¶¯ĞÂµÄÅú´¦ÀíÈÎÎñ";
+                strError = "å½“å‰ç³»ç»Ÿæ­£å¤„åœ¨LogRecoveræŒ‚èµ·çŠ¶æ€ï¼Œæ— æ³•å¯åŠ¨æ–°çš„æ‰¹å¤„ç†ä»»åŠ¡";
                 return -1;
             }
 
             // 2012/2/4
             if (this.PauseBatchTask == true)
             {
-                strError = "µ±Ç°ËùÓĞÅú´¦ÀíÈÎÎñ¾ù´¦ÔÚÔİÍ£×´Ì¬£¬ÎŞ·¨Æô¶¯ĞÂµÄÅú´¦ÀíÈÎÎñ";
+                strError = "å½“å‰æ‰€æœ‰æ‰¹å¤„ç†ä»»åŠ¡å‡å¤„åœ¨æš‚åœçŠ¶æ€ï¼Œæ— æ³•å¯åŠ¨æ–°çš„æ‰¹å¤„ç†ä»»åŠ¡";
                 return -1;
             }
 
             BatchTask task = this.BatchTasks.GetBatchTask(strName);
 
-            // ´´½¨ĞÂµÄÈÎÎñ
+            // åˆ›å»ºæ–°çš„ä»»åŠ¡
             if (task == null)
             {
-                if (strName == "Ô¤Ô¼µ½Êé¹ÜÀí")
+                if (strName == "é¢„çº¦åˆ°ä¹¦ç®¡ç†")
                     task = new ArriveMonitor(this, strName);
-                else if (strName == "ÈÕÖ¾»Ö¸´")
+                else if (strName == "æ—¥å¿—æ¢å¤")
                     task = new OperLogRecover(this, strName);
-                else if (strName == "dp2Library Í¬²½")
+                else if (strName == "dp2Library åŒæ­¥")
                     task = new LibraryReplication(this, strName);
-                else if (strName == "ÖØ½¨¼ìË÷µã")
+                else if (strName == "é‡å»ºæ£€ç´¢ç‚¹")
                     task = new RebuildKeys(this, strName);
                 /*
-            else if (strName == "¸ú×ÙDTLPÊı¾İ¿â")
+            else if (strName == "è·Ÿè¸ªDTLPæ•°æ®åº“")
                 task = new TraceDTLP(this, strName);
                  * */
-                else if (strName == "ÕıÔªÒ»¿¨Í¨¶ÁÕßĞÅÏ¢Í¬²½")
+                else if (strName == "æ­£å…ƒä¸€å¡é€šè¯»è€…ä¿¡æ¯åŒæ­¥")
                     task = new ZhengyuanReplication(this, strName);
-                else if (strName == "µÏ¿ÆÔ¶ÍûÒ»¿¨Í¨¶ÁÕßĞÅÏ¢Í¬²½")
+                else if (strName == "è¿ªç§‘è¿œæœ›ä¸€å¡é€šè¯»è€…ä¿¡æ¯åŒæ­¥")
                     task = new DkywReplication(this, strName);
-                else if (strName == "¶ÁÕßĞÅÏ¢Í¬²½")
+                else if (strName == "è¯»è€…ä¿¡æ¯åŒæ­¥")
                     task = new PatronReplication(this, strName);
-                else if (strName == "³¬ÆÚÍ¨Öª")
+                else if (strName == "è¶…æœŸé€šçŸ¥")
                     task = new ReadersMonitor(this, strName);
-                else if (strName == "ÏûÏ¢¼à¿Ø")
+                else if (strName == "æ¶ˆæ¯ç›‘æ§")
                     task = new MessageMonitor(this, strName);
                 else
                 {
-                    strError = "ÏµÍ³²»ÄÜÊ¶±ğÈÎÎñÃû '" + strName + "'";
+                    strError = "ç³»ç»Ÿä¸èƒ½è¯†åˆ«ä»»åŠ¡å '" + strName + "'";
                     return -1;
                 }
 
@@ -227,42 +227,42 @@ namespace DigitalPlatform.LibraryServer
 
                 if (bOldStoppedValue == false)
                 {
-                    if (strName == "ÖØ½¨¼ìË÷µã")
+                    if (strName == "é‡å»ºæ£€ç´¢ç‚¹")
                     {
                         task.StartInfos.Add(param.StartInfo);
 
-                        task.AppendResultText("ĞÂÈÎÎñÒÑ¼ÓÈëµÈ´ı¶ÓÁĞ£º\r\n---\r\n" + RebuildKeys.GetSummary(param.StartInfo) + "\r\n---\r\n\r\n");
+                        task.AppendResultText("æ–°ä»»åŠ¡å·²åŠ å…¥ç­‰å¾…é˜Ÿåˆ—ï¼š\r\n---\r\n" + RebuildKeys.GetSummary(param.StartInfo) + "\r\n---\r\n\r\n");
                     }
 
                     else
                     {
-                        // ¾¡Á¿²ÉÓÃÇ°¶Ë·¢À´µÄ²ÎÊı½øĞĞÔËĞĞ
+                        // å°½é‡é‡‡ç”¨å‰ç«¯å‘æ¥çš„å‚æ•°è¿›è¡Œè¿è¡Œ
                         task.StartInfo = param.StartInfo;
                     }
 
-                    // ¼¤»î 2007/10/10
+                    // æ¿€æ´» 2007/10/10
                     task.eventActive.Set();
-                    task.ManualStart = true;    // ±íÊ¾ÎªÃüÁîÆô¶¯
+                    task.ManualStart = true;    // è¡¨ç¤ºä¸ºå‘½ä»¤å¯åŠ¨
 
-                    strError = "ÈÎÎñ " + task.Name + " ÒÑ¾­ÔÚÔËĞĞÖĞ£¬²»ÄÜÖØ¸´Æô¶¯¡£±¾´Î²Ù×÷¼¤»îÁËÕâ¸öÈÎÎñ¡£";
+                    strError = "ä»»åŠ¡ " + task.Name + " å·²ç»åœ¨è¿è¡Œä¸­ï¼Œä¸èƒ½é‡å¤å¯åŠ¨ã€‚æœ¬æ¬¡æ“ä½œæ¿€æ´»äº†è¿™ä¸ªä»»åŠ¡ã€‚";
                     return 1;
                 }
             }
 
-            // Ö´ĞĞÈÕÖ¾»Ö¸´ÈÎÎñÇ°£¬ĞèÒªÏÈÖĞ¶ÏÕıÔÚÖ´ĞĞµÄÆäËûÈÎºÎÈÎÎñ
-            // TODO: ÈÕÖ¾»Ö¸´ ÈÎÎñ½áÊøºó£¬Ô­ÏÈÖĞ¶ÏµÄÄÇĞ©ÈÎÎñ²¢²»»á×Ô¶¯È¥Æô¶¯¡£ĞèÒªÏµÍ³¹ÜÀíÔ±ÊÖ¶¯ÖØĞÂÆô¶¯Ò»´ÎApplication
-            if (strName == "ÈÕÖ¾»Ö¸´")
+            // æ‰§è¡Œæ—¥å¿—æ¢å¤ä»»åŠ¡å‰ï¼Œéœ€è¦å…ˆä¸­æ–­æ­£åœ¨æ‰§è¡Œçš„å…¶ä»–ä»»ä½•ä»»åŠ¡
+            // TODO: æ—¥å¿—æ¢å¤ ä»»åŠ¡ç»“æŸåï¼ŒåŸå…ˆä¸­æ–­çš„é‚£äº›ä»»åŠ¡å¹¶ä¸ä¼šè‡ªåŠ¨å»å¯åŠ¨ã€‚éœ€è¦ç³»ç»Ÿç®¡ç†å‘˜æ‰‹åŠ¨é‡æ–°å¯åŠ¨ä¸€æ¬¡Application
+            if (strName == "æ—¥å¿—æ¢å¤")
             {
                 StopAllBatchTasks();
             }
 
-            task.ManualStart = true;    // ±íÊ¾ÎªÃüÁîÆô¶¯
+            task.ManualStart = true;    // è¡¨ç¤ºä¸ºå‘½ä»¤å¯åŠ¨
             task.StartInfo = param.StartInfo;
-            task.ClearProgressFile();   // Çå³ı½ø¶ÈÎÄ¼şÄÚÈİ
+            task.ClearProgressFile();   // æ¸…é™¤è¿›åº¦æ–‡ä»¶å†…å®¹
             task.StartWorkerThread();
 
             /*
-            // ¼¤»î 2007/10/10
+            // æ¿€æ´» 2007/10/10
             task.eventActive.Set();
              * */
 
@@ -283,16 +283,16 @@ namespace DigitalPlatform.LibraryServer
             if (strName == "!pause")
             {
                 this.PauseBatchTask = true;
-                info = GetTaskInfo("È«²¿Åú´¦ÀíÈÎÎñÒÑ¾­±»ÔİÍ£");
+                info = GetTaskInfo("å…¨éƒ¨æ‰¹å¤„ç†ä»»åŠ¡å·²ç»è¢«æš‚åœ");
                 return 1;
             }
 
             BatchTask task = this.BatchTasks.GetBatchTask(strName);
 
-            // ÈÎÎñ±¾À´¾Í²»´æÔÚ
+            // ä»»åŠ¡æœ¬æ¥å°±ä¸å­˜åœ¨
             if (task == null)
             {
-                strError = "ÈÎÎñ '" + strName + "' ²»´æÔÚ";
+                strError = "ä»»åŠ¡ '" + strName + "' ä¸å­˜åœ¨";
                 return -1;
             }
 
@@ -314,10 +314,10 @@ namespace DigitalPlatform.LibraryServer
 
             BatchTask task = this.BatchTasks.GetBatchTask(strName);
 
-            // ÈÎÎñ±¾À´¾Í²»´æÔÚ
+            // ä»»åŠ¡æœ¬æ¥å°±ä¸å­˜åœ¨
             if (task == null)
             {
-                strError = "ÈÎÎñ '" + strName + "' ²»´æÔÚ";
+                strError = "ä»»åŠ¡ '" + strName + "' ä¸å­˜åœ¨";
                 return -1;
             }
 
@@ -331,17 +331,17 @@ namespace DigitalPlatform.LibraryServer
     [DataContract(Namespace = "http://dp2003.com/dp2library/")]
     public class BatchTaskStartInfo
     {
-        // Æô¶¯¡¢Í£Ö¹Ò»°ã²ÎÊı
+        // å¯åŠ¨ã€åœæ­¢ä¸€èˆ¬å‚æ•°
         [DataMember]
-        public string Param = "";   // ¸ñÊ½Ò»°ãÎªXML
+        public string Param = "";   // æ ¼å¼ä¸€èˆ¬ä¸ºXML
 
-        // ×¨ÃÅ²ÎÊı
+        // ä¸“é—¨å‚æ•°
         [DataMember]
-        public string BreakPoint = ""; // ¶Ïµã  ¸ñÊ½Îª ĞòºÅ@ÎÄ¼şÃû
+        public string BreakPoint = ""; // æ–­ç‚¹  æ ¼å¼ä¸º åºå·@æ–‡ä»¶å
         [DataMember]
-        public string Start = ""; // Æğµã  ¸ñÊ½Îª ĞòºÅ@ÎÄ¼şÃû
+        public string Start = ""; // èµ·ç‚¹  æ ¼å¼ä¸º åºå·@æ–‡ä»¶å
         [DataMember]
-        public string Count = ""; // ¸öÊı ´¿Êı×Ö
+        public string Count = ""; // ä¸ªæ•° çº¯æ•°å­—
 
         public override string ToString()
         {
@@ -370,36 +370,36 @@ namespace DigitalPlatform.LibraryServer
         }
     }
 
-    // Åú´¦ÀíÈÎÎñĞÅÏ¢
+    // æ‰¹å¤„ç†ä»»åŠ¡ä¿¡æ¯
     [DataContract(Namespace = "http://dp2003.com/dp2library/")]
     public class BatchTaskInfo
     {
-        // Ãû×Ö
+        // åå­—
         [DataMember]
         public string Name = "";
 
-        // ×´Ì¬
+        // çŠ¶æ€
         [DataMember]
         public string State = "";
 
-        // µ±Ç°½ø¶È
+        // å½“å‰è¿›åº¦
         [DataMember]
         public string ProgressText = "";
 
-        // Êä³ö½á¹û
+        // è¾“å‡ºç»“æœ
         [DataMember]
         public int MaxResultBytes = 0;
         [DataMember]
         public byte[] ResultText = null;
         [DataMember]
-        public long ResultOffset = 0;   // ±¾´Î»ñµÃµ½ResultText´ïµÄÄ©Î²µã
+        public long ResultOffset = 0;   // æœ¬æ¬¡è·å¾—åˆ°ResultTextè¾¾çš„æœ«å°¾ç‚¹
         [DataMember]
-        public long ResultTotalLength = 0;  // Õû¸ö½á¹ûÎÄ¼şµÄ³¤¶È
+        public long ResultTotalLength = 0;  // æ•´ä¸ªç»“æœæ–‡ä»¶çš„é•¿åº¦
 
         [DataMember]
         public BatchTaskStartInfo StartInfo = null;
 
         [DataMember]
-        public long ResultVersion = 0;  // ĞÅÏ¢ÎÄ¼ş°æ±¾
+        public long ResultVersion = 0;  // ä¿¡æ¯æ–‡ä»¶ç‰ˆæœ¬
     }
 }

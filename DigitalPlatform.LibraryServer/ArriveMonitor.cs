@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
@@ -15,8 +15,8 @@ using System.Collections;
 
 namespace DigitalPlatform.LibraryServer
 {
-    /// Ô¤Ô¼µ½Êé¼à¿ØÈÎÎñ
-    /// ¼ö¹ºµ½ÊéÍ¨ÖªÒ²ÔÚÕâÀï½øĞĞ
+    /// é¢„çº¦åˆ°ä¹¦ç›‘æ§ä»»åŠ¡
+    /// èè´­åˆ°ä¹¦é€šçŸ¥ä¹Ÿåœ¨è¿™é‡Œè¿›è¡Œ
     public class ArriveMonitor : BatchTask
     {
 
@@ -31,11 +31,11 @@ namespace DigitalPlatform.LibraryServer
         {
             get
             {
-                return "Ô¤Ô¼µ½Êé¹ÜÀí";
+                return "é¢„çº¦åˆ°ä¹¦ç®¡ç†";
             }
         }
 
-        // ¹¹Ôì¶Ïµã×Ö·û´®
+        // æ„é€ æ–­ç‚¹å­—ç¬¦ä¸²
         static string MakeBreakPointString(
             string strRecordID)
         {
@@ -51,10 +51,10 @@ namespace DigitalPlatform.LibraryServer
             return dom.OuterXml;
         }
 
-        // ½âÎö ¿ªÊ¼ ²ÎÊı
+        // è§£æ å¼€å§‹ å‚æ•°
         // parameters:
-        //      strStart    Æô¶¯×Ö·û´®¡£¸ñÊ½ÎªXML
-        //                  Èç¹û×Ô¶¯×Ö·û´®Îª"!breakpoint"£¬±íÊ¾´Ó·şÎñÆ÷¼ÇÒäµÄ¶ÏµãĞÅÏ¢¿ªÊ¼
+        //      strStart    å¯åŠ¨å­—ç¬¦ä¸²ã€‚æ ¼å¼ä¸ºXML
+        //                  å¦‚æœè‡ªåŠ¨å­—ç¬¦ä¸²ä¸º"!breakpoint"ï¼Œè¡¨ç¤ºä»æœåŠ¡å™¨è®°å¿†çš„æ–­ç‚¹ä¿¡æ¯å¼€å§‹
         int ParseArriveMonitorStart(string strStart,
             out string strRecordID,
             out string strError)
@@ -66,7 +66,7 @@ namespace DigitalPlatform.LibraryServer
 
             if (String.IsNullOrEmpty(strStart) == true)
             {
-                // strError = "Æô¶¯²ÎÊı²»ÄÜÎª¿Õ";
+                // strError = "å¯åŠ¨å‚æ•°ä¸èƒ½ä¸ºç©º";
                 // return -1;
                 strRecordID = "1";
                 return 0;
@@ -74,7 +74,7 @@ namespace DigitalPlatform.LibraryServer
 
             if (strStart == "!breakpoint")
             {
-                // ´Ó¶Ïµã¼ÇÒäÎÄ¼şÖĞ¶Á³öĞÅÏ¢
+                // ä»æ–­ç‚¹è®°å¿†æ–‡ä»¶ä¸­è¯»å‡ºä¿¡æ¯
                 // return:
                 //      -1  error
                 //      0   file not found
@@ -85,20 +85,20 @@ namespace DigitalPlatform.LibraryServer
                     out strError);
                 if (nRet == -1)
                 {
-                    strError = "ReadBatchTaskBreakPointFileÊ±³ö´í£º" + strError;
+                    strError = "ReadBatchTaskBreakPointFileæ—¶å‡ºé”™ï¼š" + strError;
                     this.App.WriteErrorLog(strError);
                     return -1;
                 }
 
-                // Èç¹ûnRet == 0£¬±íÊ¾Ã»ÓĞ¶ÏµãÎÄ¼ş´æÔÚ£¬Ò²¾ÍÃ»ÓĞ±ØÒªµÄ²ÎÊıÀ´Æô¶¯Õâ¸öÈÎÎñ
+                // å¦‚æœnRet == 0ï¼Œè¡¨ç¤ºæ²¡æœ‰æ–­ç‚¹æ–‡ä»¶å­˜åœ¨ï¼Œä¹Ÿå°±æ²¡æœ‰å¿…è¦çš„å‚æ•°æ¥å¯åŠ¨è¿™ä¸ªä»»åŠ¡
                 if (nRet == 0)
                 {
-                    strError = "µ±Ç°·şÎñÆ÷Ã»ÓĞ·¢ÏÖ "+this.DefaultName+" ¶ÏµãĞÅÏ¢£¬ÎŞ·¨Æô¶¯ÈÎÎñ";
+                    strError = "å½“å‰æœåŠ¡å™¨æ²¡æœ‰å‘ç° "+this.DefaultName+" æ–­ç‚¹ä¿¡æ¯ï¼Œæ— æ³•å¯åŠ¨ä»»åŠ¡";
                     return -1;
                 }
 
                 Debug.Assert(nRet == 1, "");
-                this.AppendResultText("·şÎñÆ÷¼ÇÒäµÄ "+this.DefaultName+" ÉÏ´Î¶Ïµã×Ö·û´®Îª: "
+                this.AppendResultText("æœåŠ¡å™¨è®°å¿†çš„ "+this.DefaultName+" ä¸Šæ¬¡æ–­ç‚¹å­—ç¬¦ä¸²ä¸º: "
                     + HttpUtility.HtmlEncode(strStart)
                     + "\r\n");
 
@@ -111,7 +111,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "×°ÔØXML×Ö·û´®½øÈëDOMÊ±·¢Éú´íÎó: " + ex.Message;
+                strError = "è£…è½½XMLå­—ç¬¦ä¸²è¿›å…¥DOMæ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                 return -1;
             }
 
@@ -138,11 +138,11 @@ namespace DigitalPlatform.LibraryServer
         }
 
 
-        // ½âÎöÍ¨ÓÃÆô¶¯²ÎÊı
-        // ¸ñÊ½
+        // è§£æé€šç”¨å¯åŠ¨å‚æ•°
+        // æ ¼å¼
         /*
          * <root loop='...'/>
-         * loopÈ±Ê¡Îªtrue
+         * loopç¼ºçœä¸ºtrue
          * 
          * */
         public static int ParseArriveMonitorParam(string strParam,
@@ -163,11 +163,11 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "strParam²ÎÊı×°ÈëXML DOMÊ±³ö´í: " + ex.Message;
+                strError = "strParamå‚æ•°è£…å…¥XML DOMæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
-            // È±Ê¡Îªtrue
+            // ç¼ºçœä¸ºtrue
             string strLoop = DomUtil.GetAttr(dom.DocumentElement,
     "loop");
             if (strLoop.ToLower() == "no"
@@ -179,10 +179,10 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
-        // Ò»´Î²Ù×÷Ñ­»·
+        // ä¸€æ¬¡æ“ä½œå¾ªç¯
         public override void Worker()
         {
-            // ÏµÍ³¹ÒÆğµÄÊ±ºò£¬²»ÔËĞĞ±¾Ïß³Ì
+            // ç³»ç»ŸæŒ‚èµ·çš„æ—¶å€™ï¼Œä¸è¿è¡Œæœ¬çº¿ç¨‹
             // 2007/12/18 
             if (this.App.HangupReason == HangupReason.LogRecover)
                 return;
@@ -196,7 +196,7 @@ namespace DigitalPlatform.LibraryServer
             int nRet = 0;
 
             /*
-            // ´úÎªË¢ĞÂ
+            // ä»£ä¸ºåˆ·æ–°
             if (this.App.Statis != null)
             {
                 this.App.Statis.Flush();
@@ -210,16 +210,16 @@ namespace DigitalPlatform.LibraryServer
 
             BatchTaskStartInfo startinfo = this.StartInfo;
             if (startinfo == null)
-                startinfo = new BatchTaskStartInfo();   // °´ÕÕÈ±Ê¡ÖµÀ´
+                startinfo = new BatchTaskStartInfo();   // æŒ‰ç…§ç¼ºçœå€¼æ¥
 
-            // Í¨ÓÃÆô¶¯²ÎÊı
+            // é€šç”¨å¯åŠ¨å‚æ•°
             bool bLoop = true;
             nRet = ParseArriveMonitorParam(startinfo.Param,
                 out bLoop,
                 out strError);
             if (nRet == -1)
             {
-                this.AppendResultText("Æô¶¯Ê§°Ü: " + strError + "\r\n");
+                this.AppendResultText("å¯åŠ¨å¤±è´¥: " + strError + "\r\n");
                 return;
             }
 
@@ -231,7 +231,7 @@ namespace DigitalPlatform.LibraryServer
                 out strError);
             if (nRet == -1)
             {
-                this.AppendResultText("Æô¶¯Ê§°Ü: " + strError + "\r\n");
+                this.AppendResultText("å¯åŠ¨å¤±è´¥: " + strError + "\r\n");
                 this.Loop = false;
                 return;
             }
@@ -239,7 +239,7 @@ namespace DigitalPlatform.LibraryServer
             ////
 
             //
-            bool bPerDayStart = false;  // ÊÇ·ñÎªÃ¿ÈÕÒ»´ÎÆô¶¯Ä£Ê½
+            bool bPerDayStart = false;  // æ˜¯å¦ä¸ºæ¯æ—¥ä¸€æ¬¡å¯åŠ¨æ¨¡å¼
             string strMonitorName = "arriveMonitor";
             {
                 string strLastTime = "";
@@ -250,21 +250,21 @@ namespace DigitalPlatform.LibraryServer
                     out strError);
                 if (nRet == -1)
                 {
-                    string strErrorText = "´ÓÎÄ¼şÖĞ»ñÈ¡ " + strMonitorName + " Ã¿ÈÕÆô¶¯Ê±¼äÊ±·¢Éú´íÎó: " + strError;
+                    string strErrorText = "ä»æ–‡ä»¶ä¸­è·å– " + strMonitorName + " æ¯æ—¥å¯åŠ¨æ—¶é—´æ—¶å‘ç”Ÿé”™è¯¯: " + strError;
                     this.AppendResultText(strErrorText + "\r\n");
                     this.App.WriteErrorLog(strErrorText);
                     return;
                 }
 
                 string strStartTimeDef = "";
-                //      bRet    ÊÇ·ñµ½ÁËÃ¿ÈÕÆô¶¯Ê±¼ä
+                //      bRet    æ˜¯å¦åˆ°äº†æ¯æ—¥å¯åŠ¨æ—¶é—´
                 bool bRet = false;
                 string strOldLastTime = strLastTime;
 
                 // return:
                 //      -1  error
-                //      0   Ã»ÓĞÕÒµ½startTimeÅäÖÃ²ÎÊı
-                //      1   ÕÒµ½ÁËstartTimeÅäÖÃ²ÎÊı
+                //      0   æ²¡æœ‰æ‰¾åˆ°startTimeé…ç½®å‚æ•°
+                //      1   æ‰¾åˆ°äº†startTimeé…ç½®å‚æ•°
                 nRet = IsNowAfterPerDayStart(
                     strMonitorName,
                     ref strLastTime,
@@ -273,13 +273,13 @@ namespace DigitalPlatform.LibraryServer
                     out strError);
                 if (nRet == -1)
                 {
-                    string strErrorText = "»ñÈ¡ " + strMonitorName + " Ã¿ÈÕÆô¶¯Ê±¼äÊ±·¢Éú´íÎó: " + strError;
+                    string strErrorText = "è·å– " + strMonitorName + " æ¯æ—¥å¯åŠ¨æ—¶é—´æ—¶å‘ç”Ÿé”™è¯¯: " + strError;
                     this.AppendResultText(strErrorText + "\r\n");
                     this.App.WriteErrorLog(strErrorText);
                     return;
                 }
 
-                // Èç¹ûnRet == 0£¬±íÊ¾Ã»ÓĞÅäÖÃÏà¹Ø²ÎÊı£¬Ôò¼æÈİÔ­À´µÄÏ°¹ß£¬Ã¿´Î¶¼×÷
+                // å¦‚æœnRet == 0ï¼Œè¡¨ç¤ºæ²¡æœ‰é…ç½®ç›¸å…³å‚æ•°ï¼Œåˆ™å…¼å®¹åŸæ¥çš„ä¹ æƒ¯ï¼Œæ¯æ¬¡éƒ½ä½œ
                 if (nRet == 0)
                 {
 
@@ -289,26 +289,26 @@ namespace DigitalPlatform.LibraryServer
                     if (bRet == false)
                     {
                         if (this.ManualStart == true)
-                            this.AppendResultText("ÒÑÊÔÌ½Æô¶¯ÈÎÎñ '" + this.Name + "'£¬µ«ÒòÃ»ÓĞµ½Ã¿ÈÕÆô¶¯Ê±¼ä " + strStartTimeDef + " ¶øÎ´ÄÜÆô¶¯¡£(ÉÏ´ÎÈÎÎñ´¦Àí½áÊøÊ±¼äÎª " + DateTimeUtil.LocalTime(strLastTime) + ")\r\n");
+                            this.AppendResultText("å·²è¯•æ¢å¯åŠ¨ä»»åŠ¡ '" + this.Name + "'ï¼Œä½†å› æ²¡æœ‰åˆ°æ¯æ—¥å¯åŠ¨æ—¶é—´ " + strStartTimeDef + " è€Œæœªèƒ½å¯åŠ¨ã€‚(ä¸Šæ¬¡ä»»åŠ¡å¤„ç†ç»“æŸæ—¶é—´ä¸º " + DateTimeUtil.LocalTime(strLastTime) + ")\r\n");
 
                         // 2014/3/31
                         if (string.IsNullOrEmpty(strOldLastTime) == true
                             && string.IsNullOrEmpty(strLastTime) == false)
                         {
-                            this.AppendResultText("Ê·ÉÏÊ×´ÎÆô¶¯´ËÈÎÎñ¡£ÒÑ°Ñµ±Ç°Ê±¼äµ±×÷ÉÏ´ÎÈÎÎñ´¦Àí½áÊøÊ±¼ä " + DateTimeUtil.LocalTime(strLastTime) + " Ğ´ÈëÁË¶Ïµã¼ÇÒäÎÄ¼ş\r\n");
+                            this.AppendResultText("å²ä¸Šé¦–æ¬¡å¯åŠ¨æ­¤ä»»åŠ¡ã€‚å·²æŠŠå½“å‰æ—¶é—´å½“ä½œä¸Šæ¬¡ä»»åŠ¡å¤„ç†ç»“æŸæ—¶é—´ " + DateTimeUtil.LocalTime(strLastTime) + " å†™å…¥äº†æ–­ç‚¹è®°å¿†æ–‡ä»¶\r\n");
                             WriteLastTime(strMonitorName, strLastTime);
                         }
 
-                        return; // »¹Ã»ÓĞµ½Ã¿ÈÕÊ±¼ä
+                        return; // è¿˜æ²¡æœ‰åˆ°æ¯æ—¥æ—¶é—´
                     }
 
                     bPerDayStart = true;
                 }
 
-                this.App.WriteErrorLog((bPerDayStart == true ? "(¶¨Ê±)" : "(²»¶¨Ê±)") + strMonitorName + " Æô¶¯¡£");
+                this.App.WriteErrorLog((bPerDayStart == true ? "(å®šæ—¶)" : "(ä¸å®šæ—¶)") + strMonitorName + " å¯åŠ¨ã€‚");
             }
 
-            this.AppendResultText("¿ªÊ¼ĞÂÒ»ÂÖÑ­»·\r\n");
+            this.AppendResultText("å¼€å§‹æ–°ä¸€è½®å¾ªç¯\r\n");
 
             RmsChannel channel = this.RmsChannels.GetChannel(this.App.WsUrl);
 
@@ -318,7 +318,7 @@ namespace DigitalPlatform.LibraryServer
             for (; ; nRecCount ++)
             {
 #if NO
-                // ÏµÍ³¹ÒÆğµÄÊ±ºò£¬²»ÔËĞĞ±¾Ïß³Ì
+                // ç³»ç»ŸæŒ‚èµ·çš„æ—¶å€™ï¼Œä¸è¿è¡Œæœ¬çº¿ç¨‹
                 // 2008/2/4
                 if (this.App.HangupReason == HangupReason.LogRecover)
                     break;
@@ -346,12 +346,12 @@ namespace DigitalPlatform.LibraryServer
 
                 // 
                 this.SetProgressText((nRecCount + 1).ToString() + " " + strPath);
-                this.AppendResultText("ÕıÔÚ´¦Àí " + (nRecCount + 1).ToString() + " " + strPath + "\r\n");
+                this.AppendResultText("æ­£åœ¨å¤„ç† " + (nRecCount + 1).ToString() + " " + strPath + "\r\n");
 
-                // »ñµÃ×ÊÔ´
+                // è·å¾—èµ„æº
                 // return:
-                //		-1	³ö´í¡£¾ßÌå³ö´íÔ­ÒòÔÚthis.ErrorCodeÖĞ¡£this.ErrorInfoÖĞÓĞ³ö´íĞÅÏ¢¡£
-                //		0	³É¹¦
+                //		-1	å‡ºé”™ã€‚å…·ä½“å‡ºé”™åŸå› åœ¨this.ErrorCodeä¸­ã€‚this.ErrorInfoä¸­æœ‰å‡ºé”™ä¿¡æ¯ã€‚
+                //		0	æˆåŠŸ
                 long lRet = channel.GetRes(strPath,
                     strStyle,
                     out strXmlBody,
@@ -365,7 +365,7 @@ namespace DigitalPlatform.LibraryServer
                     {
                         if (bFirst == true)
                         {
-                            // µÚÒ»ÌõÃ»ÓĞÕÒµ½, µ«ÊÇÒªÇ¿ÖÆÑ­»·½øĞĞ
+                            // ç¬¬ä¸€æ¡æ²¡æœ‰æ‰¾åˆ°, ä½†æ˜¯è¦å¼ºåˆ¶å¾ªç¯è¿›è¡Œ
                             bFirst = false;
                             goto CONTINUE;
                         }
@@ -373,11 +373,11 @@ namespace DigitalPlatform.LibraryServer
                         {
                             if (bFirst == true)
                             {
-                                strError = "¼ÇÂ¼ " + strID + " ²»´æÔÚ¡£´¦Àí½áÊø¡£";
+                                strError = "è®°å½• " + strID + " ä¸å­˜åœ¨ã€‚å¤„ç†ç»“æŸã€‚";
                             }
                             else
                             {
-                                strError = "¼ÇÂ¼ " + strID + " ÊÇ×îÄ©Ò»Ìõ¼ÇÂ¼¡£´¦Àí½áÊø¡£";
+                                strError = "è®°å½• " + strID + " æ˜¯æœ€æœ«ä¸€æ¡è®°å½•ã€‚å¤„ç†ç»“æŸã€‚";
                             }
                             break;
                         }
@@ -386,7 +386,7 @@ namespace DigitalPlatform.LibraryServer
                     else if (channel.ErrorCode == ChannelErrorCode.EmptyRecord)
                     {
                         bFirst = false;
-                        // °Ñid½âÎö³öÀ´
+                        // æŠŠidè§£æå‡ºæ¥
                         strID = ResPath.GetRecordId(strOutputPath);
                         goto CONTINUE;
                     }
@@ -407,10 +407,10 @@ namespace DigitalPlatform.LibraryServer
 
                 bFirst = false;
 
-                // °Ñid½âÎö³öÀ´
+                // æŠŠidè§£æå‡ºæ¥
                 strID = ResPath.GetRecordId(strOutputPath);
 
-                // ´¦Àí
+                // å¤„ç†
                 nRet = DoOneRecord(
                     // calendar,
                     strOutputPath,
@@ -425,16 +425,16 @@ namespace DigitalPlatform.LibraryServer
 
             } // end of for
 
-            this.AppendResultText("Ñ­»·½áÊø¡£¹²´¦Àí " + nRecCount.ToString() + " Ìõ¼ÇÂ¼¡£\r\n");
+            this.AppendResultText("å¾ªç¯ç»“æŸã€‚å…±å¤„ç† " + nRecCount.ToString() + " æ¡è®°å½•ã€‚\r\n");
 
             {
                 Debug.Assert(this.App != null);
 
-                // Ğ´ÈëÎÄ¼ş£¬¼ÇÒäÒÑ¾­×ö¹ıµÄµ±ÈÕÊ±¼ä
+                // å†™å…¥æ–‡ä»¶ï¼Œè®°å¿†å·²ç»åšè¿‡çš„å½“æ—¥æ—¶é—´
                 string strLastTime = DateTimeUtil.Rfc1123DateTimeStringEx(this.App.Clock.UtcNow.ToLocalTime()); // 2007/12/17 changed // DateTime.UtcNow // 2012/5/27
                 WriteLastTime(strMonitorName,
                     strLastTime);
-                string strErrorText = (bPerDayStart == true ? "(¶¨Ê±)" : "(²»¶¨Ê±)") + strMonitorName + "½áÊø¡£¹²´¦Àí¼ÇÂ¼ " + nRecCount.ToString() + " ¸ö¡£";
+                string strErrorText = (bPerDayStart == true ? "(å®šæ—¶)" : "(ä¸å®šæ—¶)") + strMonitorName + "ç»“æŸã€‚å…±å¤„ç†è®°å½• " + nRecCount.ToString() + " ä¸ªã€‚";
                 this.App.WriteErrorLog(strErrorText);
 
             }
@@ -447,11 +447,11 @@ namespace DigitalPlatform.LibraryServer
             return;
         }
 
-        // ÅĞ¶ÏÊÇ·ñ³¬¹ı±£ÁôÆÚÏŞ
+        // åˆ¤æ–­æ˜¯å¦è¶…è¿‡ä¿ç•™æœŸé™
         // return:
         //      -1  error
-        //      0   Ã»ÓĞ³¬¹ı
-        //      1   ÒÑ¾­³¬¹ı
+        //      0   æ²¡æœ‰è¶…è¿‡
+        //      1   å·²ç»è¶…è¿‡
         int CheckeOutOfReservation(
             Calendar calendar,
             XmlDocument queue_rec_dom,
@@ -462,7 +462,7 @@ namespace DigitalPlatform.LibraryServer
             string strState = DomUtil.GetElementText(queue_rec_dom.DocumentElement,
     "state");
 
-            // ¶ÔÍ¨ÖªÍê³ÉºóµÄ¼ÇÂ¼, Ñ­»·ÖĞ²»±Ø´¦Àí
+            // å¯¹é€šçŸ¥å®Œæˆåçš„è®°å½•, å¾ªç¯ä¸­ä¸å¿…å¤„ç†
             if (StringUtil.IsInList("outof", strState) == true)
                 return 0;
 
@@ -477,7 +477,7 @@ namespace DigitalPlatform.LibraryServer
              * */
 
 
-            // ½âÎöÆÚÏŞÖµ
+            // è§£ææœŸé™å€¼
             string strPeriodUnit = "";
             long lPeriodValue = 0;
 
@@ -488,7 +488,7 @@ namespace DigitalPlatform.LibraryServer
                 out strError);
             if (nRet == -1)
             {
-                strError = "Ô¤Ô¼±£ÁôÆÚÏŞ Öµ '" + this.App.ArrivedReserveTimeSpan + "' ¸ñÊ½´íÎó: " + strError;
+                strError = "é¢„çº¦ä¿ç•™æœŸé™ å€¼ '" + this.App.ArrivedReserveTimeSpan + "' æ ¼å¼é”™è¯¯: " + strError;
                 return -1;
             }
 
@@ -501,7 +501,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch
             {
-                strError = "Í¨ÖªÈÕÆÚÖµ '" + strNotifyDate + "' ¸ñÊ½´íÎó";
+                strError = "é€šçŸ¥æ—¥æœŸå€¼ '" + strNotifyDate + "' æ ¼å¼é”™è¯¯";
                 return -1;
             }
 
@@ -517,13 +517,13 @@ namespace DigitalPlatform.LibraryServer
                 out strError);
             if (nRet == -1)
             {
-                strError = "¼ÆËã±£ÁôÆÚ¹ı³Ì·¢Éú´íÎó: " + strError;
+                strError = "è®¡ç®—ä¿ç•™æœŸè¿‡ç¨‹å‘ç”Ÿé”™è¯¯: " + strError;
                 return -1;
             }
 
             DateTime now = this.App.Clock.UtcNow;  //  DateTime.UtcNow;
 
-            // Õı¹æ»¯Ê±¼ä
+            // æ­£è§„åŒ–æ—¶é—´
             nRet = LibraryApplication.RoundTime(strPeriodUnit,
                 ref now,
                 out strError);
@@ -548,11 +548,11 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
-        // »ñµÃ¶ÁÕßÀàĞÍ
+        // è·å¾—è¯»è€…ç±»å‹
         // return:
-        //      -1  ³ö´í
-        //      0   Ã»ÓĞÕÒµ½¶ÁÕß¼ÇÂ¼
-        //      1   ÕÒµ½
+        //      -1  å‡ºé”™
+        //      0   æ²¡æœ‰æ‰¾åˆ°è¯»è€…è®°å½•
+        //      1   æ‰¾åˆ°
         int GetReaderType(string strReaderBarcode,
             out string strReaderType,
             out string strError)
@@ -562,17 +562,25 @@ namespace DigitalPlatform.LibraryServer
 
             if (string.IsNullOrEmpty(strReaderBarcode) == true)
             {
-                strError = "strReaderBarcode ²»ÄÜÎª¿Õ";
+                strError = "strReaderBarcode ä¸èƒ½ä¸ºç©º";
                 return -1;
             }
 
-            // ¶ÁÈë¶ÁÕß¼ÇÂ¼
+            RmsChannel channel = this.RmsChannels.GetChannel(this.App.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
+            // è¯»å…¥è¯»è€…è®°å½•
             string strReaderXml = "";
             string strOutputReaderRecPath = "";
             byte[] reader_timestamp = null;
 
             int nRet = this.App.GetReaderRecXml(
-                this.RmsChannels,
+                // this.RmsChannels,
+                channel,
                 strReaderBarcode,
                 out strReaderXml,
                 out strOutputReaderRecPath,
@@ -580,12 +588,12 @@ namespace DigitalPlatform.LibraryServer
                 out strError);
             if (nRet == 0)
             {
-                strError = "¶ÁÕßÖ¤ÌõÂëºÅ '" + strReaderBarcode + "' ²»´æÔÚ";
+                strError = "è¯»è€…è¯æ¡ç å· '" + strReaderBarcode + "' ä¸å­˜åœ¨";
                 return 0;
             }
             if (nRet == -1)
             {
-                strError = "¶ÁÈë¶ÁÕß¼ÇÂ¼Ê±·¢Éú´íÎó: " + strError;
+                strError = "è¯»å…¥è¯»è€…è®°å½•æ—¶å‘ç”Ÿé”™è¯¯: " + strError;
                 return -1;
             }
 
@@ -595,7 +603,7 @@ namespace DigitalPlatform.LibraryServer
                 out strError);
             if (nRet == -1)
             {
-                strError = "×°ÔØ¶ÁÕß¼ÇÂ¼½øÈëXML DOMÊ±·¢Éú´íÎó: " + strError;
+                strError = "è£…è½½è¯»è€…è®°å½•è¿›å…¥XML DOMæ—¶å‘ç”Ÿé”™è¯¯: " + strError;
                 return -1;
             }
 
@@ -605,12 +613,12 @@ namespace DigitalPlatform.LibraryServer
 
         // string m_strCalendarLibraryCode = null;
 
-        // ÈÕÀú¶ÔÏóµÄ cache¡£ ¹İ´úÂë + | + ¶ÁÕßÀàĞÍ --> ÈÕÀú¶ÔÏó
+        // æ—¥å†å¯¹è±¡çš„ cacheã€‚ é¦†ä»£ç  + | + è¯»è€…ç±»å‹ --> æ—¥å†å¯¹è±¡
         Hashtable _calendarTable = new Hashtable();
 
-        // ´¦ÀíÒ»Ìõ¼ÇÂ¼
+        // å¤„ç†ä¸€æ¡è®°å½•
         // parameters:
-        //      strQueueRecPath Ô¤Ô¼µ½Êé¶ÓÁĞ¼ÇÂ¼µÄÂ·¾¶
+        //      strQueueRecPath é¢„çº¦åˆ°ä¹¦é˜Ÿåˆ—è®°å½•çš„è·¯å¾„
         int DoOneRecord(
             // Calendar calendar,
             string strQueueRecPath,
@@ -628,31 +636,31 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "×°ÔØ¶ÔÁĞ¼ÇÂ¼XMLµ½DOM³ö´í: " + ex.Message;
+                strError = "è£…è½½å¯¹åˆ—è®°å½•XMLåˆ°DOMå‡ºé”™: " + ex.Message;
                 return -1;
             }
 
             string strState = DomUtil.GetElementText(dom.DocumentElement,
                 "state");
 
-            // ¶ÔÍ¨ÖªÍê³ÉºóµÄ¼ÇÂ¼, Ñ­»·ÖĞ²»±Ø´¦Àí
+            // å¯¹é€šçŸ¥å®Œæˆåçš„è®°å½•, å¾ªç¯ä¸­ä¸å¿…å¤„ç†
             if (StringUtil.IsInList("outof", strState) == true)
                 return 0;
 
-            // TODO: ¶ÁÕßµÄ¹İ´úÂë
+            // TODO: è¯»è€…çš„é¦†ä»£ç 
             string strLibraryCode = DomUtil.GetElementText(dom.DocumentElement,
     "libraryCode");
             string strReaderBarcode = DomUtil.GetElementText(dom.DocumentElement,
     "readerBarcode");
 
             // 2015/5/20
-            // Í¨¹ı¶ÁÕßÖ¤ÌõÂëºÅ»ñµÃ¶ÁÕßÀàĞÍ
+            // é€šè¿‡è¯»è€…è¯æ¡ç å·è·å¾—è¯»è€…ç±»å‹
             string strReaderType = "";
-            // »ñµÃ¶ÁÕßÀàĞÍ
+            // è·å¾—è¯»è€…ç±»å‹
             // return:
-            //      -1  ³ö´í
-            //      0   Ã»ÓĞÕÒµ½¶ÁÕß¼ÇÂ¼
-            //      1   ÕÒµ½
+            //      -1  å‡ºé”™
+            //      0   æ²¡æœ‰æ‰¾åˆ°è¯»è€…è®°å½•
+            //      1   æ‰¾åˆ°
             nRet = GetReaderType(strReaderBarcode,
         out strReaderType,
         out strError);
@@ -664,9 +672,9 @@ namespace DigitalPlatform.LibraryServer
             if (calendar == null)
             {
                 // return:
-                //      -1  ³ö´í
-                //      0   Ã»ÓĞÕÒµ½ÈÕÀú
-                //      1   ÕÒµ½ÈÕÀú
+                //      -1  å‡ºé”™
+                //      0   æ²¡æœ‰æ‰¾åˆ°æ—¥å†
+                //      1   æ‰¾åˆ°æ—¥å†
                 nRet = this.App.GetReaderCalendar(strReaderType,
                     strLibraryCode,
                     out calendar,
@@ -685,9 +693,9 @@ namespace DigitalPlatform.LibraryServer
                 )
             {
                 // return:
-                //      -1  ³ö´í
-                //      0   Ã»ÓĞÕÒµ½ÈÕÀú
-                //      1   ÕÒµ½ÈÕÀú
+                //      -1  å‡ºé”™
+                //      0   æ²¡æœ‰æ‰¾åˆ°æ—¥å†
+                //      1   æ‰¾åˆ°æ—¥å†
                 nRet = this.App.GetReaderCalendar(null,
                     strLibraryCode,
                     out m_calendar,
@@ -704,11 +712,11 @@ namespace DigitalPlatform.LibraryServer
             }
 #endif
 
-            // ÅĞ¶ÏÊÇ·ñ³¬¹ı±£ÁôÆÚÏŞ
+            // åˆ¤æ–­æ˜¯å¦è¶…è¿‡ä¿ç•™æœŸé™
             // return:
             //      -1  error
-            //      0   Ã»ÓĞ³¬¹ı
-            //      1   ÒÑ¾­³¬¹ı
+            //      0   æ²¡æœ‰è¶…è¿‡
+            //      1   å·²ç»è¶…è¿‡
             nRet = CheckeOutOfReservation(
                     calendar,
                     dom,
@@ -716,16 +724,24 @@ namespace DigitalPlatform.LibraryServer
             if (nRet == -1)
                 return -1;
 
+            RmsChannel channel = this.RmsChannels.GetChannel(this.App.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
             if (nRet == 1)
             {
                 string strItemBarcode = DomUtil.GetElementText(dom.DocumentElement,
                     "itemBarcode");
 
-                // Í¨Öªµ±Ç°¶ÁÕß£¬Ëû³¬¹ıÁËÈ¡ÊéµÄ±£ÁôÆÚÏŞ
+                // é€šçŸ¥å½“å‰è¯»è€…ï¼Œä»–è¶…è¿‡äº†å–ä¹¦çš„ä¿ç•™æœŸé™
                 string strNotifyDate = DomUtil.GetElementText(dom.DocumentElement,
                     "notifyDate");
                 nRet = AddReaderOutOfReservationInfo(
-                        this.RmsChannels,
+                        // this.RmsChannels,
+                        channel,
                         strReaderBarcode,
                         strItemBarcode,
                         strNotifyDate,
@@ -735,9 +751,10 @@ namespace DigitalPlatform.LibraryServer
                     this.App.WriteErrorLog("AddReaderOutOfReservationInfo() error: " + strError);
                 }
 
-                // ÒÑ¾­³¬¹ı±£ÁôÆÚÏŞ£¬ÒªÍ¨ÖªÏÂÒ»Î»Ô¤Ô¼Õß
+                // å·²ç»è¶…è¿‡ä¿ç•™æœŸé™ï¼Œè¦é€šçŸ¥ä¸‹ä¸€ä½é¢„çº¦è€…
                 nRet = this.App.DoNotifyNext(
-                        this.RmsChannels,
+                        // this.RmsChannels,
+                        channel,
                         strQueueRecPath,
                         dom,
                         baQueueRecTimeStamp,
@@ -747,8 +764,8 @@ namespace DigitalPlatform.LibraryServer
 
                 if (nRet == 1)
                 {
-                    // ĞèÒª¹é¼Ü
-                    // ²á¼ÇÂ¼ÖĞ<location>ĞèÒªÈ¥µô#reservation£¬Ïà¹Ø<request>ÔªËØÒ²ĞèÒªÉ¾³ı
+                    // éœ€è¦å½’æ¶
+                    // å†Œè®°å½•ä¸­<location>éœ€è¦å»æ‰#reservationï¼Œç›¸å…³<request>å…ƒç´ ä¹Ÿéœ€è¦åˆ é™¤
 
                     nRet = RemoveEntityReservationInfo(strItemBarcode,
                         strReaderBarcode,
@@ -764,9 +781,10 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
-        // ¸ø¶ÁÕß¼ÇÂ¼Àï¼ÓÉÏÔ¤Ô¼µ½Êéºó³¬ÆÚ²»È¡µÄ×´Ì¬
+        // ç»™è¯»è€…è®°å½•é‡ŒåŠ ä¸Šé¢„çº¦åˆ°ä¹¦åè¶…æœŸä¸å–çš„çŠ¶æ€
         int AddReaderOutOfReservationInfo(
-            RmsChannelCollection channels,
+            // RmsChannelCollection channels,
+            RmsChannel channel,
             string strReaderBarcode,
             string strItemBarcode,
             string strNotifyDate,
@@ -779,21 +797,22 @@ namespace DigitalPlatform.LibraryServer
             int nRedoCount = 0;
 
             REDO_MEMO:
-            // ¼Ó¶ÁÕß¼ÇÂ¼Ëø
+            // åŠ è¯»è€…è®°å½•é”
 #if DEBUG_LOCK_READER
-            this.App.WriteErrorLog("AddReaderOutOfReservationInfo ¿ªÊ¼Îª¶ÁÕß¼ÓĞ´Ëø '" + strReaderBarcode + "'");
+            this.App.WriteErrorLog("AddReaderOutOfReservationInfo å¼€å§‹ä¸ºè¯»è€…åŠ å†™é” '" + strReaderBarcode + "'");
 #endif
             this.App.ReaderLocks.LockForWrite(strReaderBarcode);
 
-            try // ¶ÁÕß¼ÇÂ¼Ëø¶¨·¶Î§¿ªÊ¼
+            try // è¯»è€…è®°å½•é”å®šèŒƒå›´å¼€å§‹
             {
 
-                // ¶ÁÈë¶ÁÕß¼ÇÂ¼
+                // è¯»å…¥è¯»è€…è®°å½•
                 string strReaderXml = "";
                 string strOutputReaderRecPath = "";
                 byte[] reader_timestamp = null;
                 nRet = this.App.GetReaderRecXml(
-                    channels,
+                    // channels,
+                    channel,
                     strReaderBarcode,
                     out strReaderXml,
                     out strOutputReaderRecPath,
@@ -801,12 +820,12 @@ namespace DigitalPlatform.LibraryServer
                     out strError);
                 if (nRet == 0)
                 {
-                    strError = "¶ÁÕßÖ¤ÌõÂëºÅ '" + strReaderBarcode + "' ²»´æÔÚ";
+                    strError = "è¯»è€…è¯æ¡ç å· '" + strReaderBarcode + "' ä¸å­˜åœ¨";
                     return -1;
                 }
                 if (nRet == -1)
                 {
-                    strError = "¶ÁÈë¶ÁÕß¼ÇÂ¼Ê±·¢Éú´íÎó: " + strError;
+                    strError = "è¯»å…¥è¯»è€…è®°å½•æ—¶å‘ç”Ÿé”™è¯¯: " + strError;
                     return -1;
                 }
 
@@ -816,7 +835,7 @@ namespace DigitalPlatform.LibraryServer
                     out strError);
                 if (nRet == -1)
                 {
-                    strError = "×°ÔØ¶ÁÕß¼ÇÂ¼½øÈëXML DOMÊ±·¢Éú´íÎó: " + strError;
+                    strError = "è£…è½½è¯»è€…è®°å½•è¿›å…¥XML DOMæ—¶å‘ç”Ÿé”™è¯¯: " + strError;
                     return -1;
                 }
 
@@ -827,7 +846,7 @@ namespace DigitalPlatform.LibraryServer
                     readerdom.DocumentElement.AppendChild(root);
                 }
 
-                // ÀÛ¼Æ´ÎÊı
+                // ç´¯è®¡æ¬¡æ•°
                 string strCount = DomUtil.GetAttr(root, "count");
                 if (String.IsNullOrEmpty(strCount) == true)
                     strCount = "0";
@@ -842,7 +861,7 @@ namespace DigitalPlatform.LibraryServer
                 nCount++;
                 DomUtil.SetAttr(root, "count", nCount.ToString());
 
-                // ×·¼Ó<request>ÔªËØ
+                // è¿½åŠ <request>å…ƒç´ 
                 XmlNode request = readerdom.CreateElement("request");
                 root.AppendChild(request);
                 DomUtil.SetAttr(request, "itemBarcode", strItemBarcode);
@@ -851,14 +870,16 @@ namespace DigitalPlatform.LibraryServer
                 byte[] output_timestamp = null;
                 string strOutputPath = "";
 
+#if NO
                 RmsChannel channel = channels.GetChannel(this.App.WsUrl);
                 if (channel == null)
                 {
                     strError = "get channel error";
                     return -1;
                 }
+#endif
 
-                // Ğ´»Ø¶ÁÕß¼ÇÂ¼
+                // å†™å›è¯»è€…è®°å½•
                 lRet = channel.DoSaveTextRes(strOutputReaderRecPath,
                     readerdom.OuterXml,
                     false,
@@ -874,31 +895,28 @@ namespace DigitalPlatform.LibraryServer
                         nRedoCount++;
                         if (nRedoCount > 10)
                         {
-                            strError = "Ğ´»Ø¶ÁÕß¼ÇÂ¼µÄÊ±ºò,Óöµ½Ê±¼ä´Á³åÍ»,²¢Òò´ËÖØÊÔ10´Î,ÈÔÊ§°Ü...";
+                            strError = "å†™å›è¯»è€…è®°å½•çš„æ—¶å€™,é‡åˆ°æ—¶é—´æˆ³å†²çª,å¹¶å› æ­¤é‡è¯•10æ¬¡,ä»å¤±è´¥...";
                             return -1;
                         }
                         goto REDO_MEMO;
                     }
                     return -1;
                 }
-
-
-            } // ¶ÁÕß¼ÇÂ¼Ëø¶¨·¶Î§½áÊø
+            } // è¯»è€…è®°å½•é”å®šèŒƒå›´ç»“æŸ
             finally
             {
                 this.App.ReaderLocks.UnlockForWrite(strReaderBarcode);
 #if DEBUG_LOCK_READER
-                this.App.WriteErrorLog("AddReaderOutOfReservationInfo ½áÊøÎª¶ÁÕß¼ÓĞ´Ëø '" + strReaderBarcode + "'");
+                this.App.WriteErrorLog("AddReaderOutOfReservationInfo ç»“æŸä¸ºè¯»è€…åŠ å†™é” '" + strReaderBarcode + "'");
 #endif
-
             }
 
             return 0;
         }
 
-        // È¥³ı²á¼ÇÂ¼ÖĞ¹ıÊ±µÄÔ¤Ô¼ĞÅÏ¢
-        // ²á¼ÇÂ¼ÖĞ<location>ĞèÒªÈ¥µô#reservation£¬Ïà¹Ø<request>ÔªËØÒ²ĞèÒªÉ¾³ı
-        // Ëø¶¨£º±¾º¯Êı¶ÔEntityLocks¼ÓÁËËø¶¨
+        // å»é™¤å†Œè®°å½•ä¸­è¿‡æ—¶çš„é¢„çº¦ä¿¡æ¯
+        // å†Œè®°å½•ä¸­<location>éœ€è¦å»æ‰#reservationï¼Œç›¸å…³<request>å…ƒç´ ä¹Ÿéœ€è¦åˆ é™¤
+        // é”å®šï¼šæœ¬å‡½æ•°å¯¹EntityLocksåŠ äº†é”å®š
         int RemoveEntityReservationInfo(string strItemBarcode,
             string strReaderBarcode,
             out string strError)
@@ -908,21 +926,29 @@ namespace DigitalPlatform.LibraryServer
 
             if (String.IsNullOrEmpty(strItemBarcode) == true)
             {
-                strError = "²áÌõÂëºÅ²»ÄÜÎª¿Õ¡£";
+                strError = "å†Œæ¡ç å·ä¸èƒ½ä¸ºç©ºã€‚";
                 return -1;
             }
             if (String.IsNullOrEmpty(strReaderBarcode) == true)
             {
-                strError = "¶ÁÕßÖ¤ÌõÂëºÅ²»ÄÜÎª¿Õ¡£";
+                strError = "è¯»è€…è¯æ¡ç å·ä¸èƒ½ä¸ºç©ºã€‚";
                 return -1;
             }
 
-            // ¼Ó²á¼ÇÂ¼Ëø
+            RmsChannel channel = this.RmsChannels.GetChannel(this.App.WsUrl);
+            if (channel == null)
+            {
+                // text-level: å†…éƒ¨é”™è¯¯
+                strError = "get channel error";
+                return -1;
+            }
+
+            // åŠ å†Œè®°å½•é”
             this.App.EntityLocks.LockForWrite(strItemBarcode);
 
-            try // ²á¼ÇÂ¼Ëø¶¨·¶Î§¿ªÊ¼
+            try // å†Œè®°å½•é”å®šèŒƒå›´å¼€å§‹
             {
-                // ´Ó²áÌõÂëºÅ»ñµÃ²á¼ÇÂ¼
+                // ä»å†Œæ¡ç å·è·å¾—å†Œè®°å½•
 
                 int nRedoCount = 0;
 
@@ -932,14 +958,15 @@ namespace DigitalPlatform.LibraryServer
                 byte[] item_timestamp = null;
                 string strOutputItemRecPath = "";
 
-                // »ñµÃ²á¼ÇÂ¼
+                // è·å¾—å†Œè®°å½•
                 // return:
                 //      -1  error
                 //      0   not found
-                //      1   ÃüÖĞ1Ìõ
-                //      >1  ÃüÖĞ¶àÓÚ1Ìõ
+                //      1   å‘½ä¸­1æ¡
+                //      >1  å‘½ä¸­å¤šäº1æ¡
                 nRet = this.App.GetItemRecXml(
-                    this.RmsChannels,
+                    // this.RmsChannels,
+                    channel,
                     strItemBarcode,
                     out strItemXml,
                     100,
@@ -948,18 +975,18 @@ namespace DigitalPlatform.LibraryServer
                     out strError);
                 if (nRet == 0)
                 {
-                    strError = "²áÌõÂëºÅ '" + strItemBarcode + "' ²»´æÔÚ";
+                    strError = "å†Œæ¡ç å· '" + strItemBarcode + "' ä¸å­˜åœ¨";
                     return -1;
                 }
                 if (nRet == -1)
                 {
-                    strError = "¶ÁÈë²á¼ÇÂ¼Ê±·¢Éú´íÎó: " + strError;
+                    strError = "è¯»å…¥å†Œè®°å½•æ—¶å‘ç”Ÿé”™è¯¯: " + strError;
                     return -1;
                 }
 
                 if (aPath.Count > 1)
                 {
-                    strError = "²áÌõÂëºÅÎª '" + strItemBarcode + "' µÄ²á¼ÇÂ¼ÓĞ " + aPath.Count.ToString() + " Ìõ£¬ÎŞ·¨½øĞĞĞŞ¸Ä²á¼ÇÂ¼µÄ²Ù×÷¡£";
+                    strError = "å†Œæ¡ç å·ä¸º '" + strItemBarcode + "' çš„å†Œè®°å½•æœ‰ " + aPath.Count.ToString() + " æ¡ï¼Œæ— æ³•è¿›è¡Œä¿®æ”¹å†Œè®°å½•çš„æ“ä½œã€‚";
                     return -1;
                 }
                 else
@@ -980,13 +1007,13 @@ namespace DigitalPlatform.LibraryServer
                     out strError);
                 if (nRet == -1)
                 {
-                    strError = "×°ÔØ²á¼ÇÂ¼½øÈëXML DOMÊ±·¢Éú´íÎó: " + strError;
+                    strError = "è£…è½½å†Œè®°å½•è¿›å…¥XML DOMæ—¶å‘ç”Ÿé”™è¯¯: " + strError;
                     return -1;
                 }
 
-                // ĞŞ¸Ä²á¼ÇÂ¼
+                // ä¿®æ”¹å†Œè®°å½•
 
-                // ²á¼ÇÂ¼ÖĞ<location>ĞèÒªÈ¥µô#reservation£¬Ïà¹Ø<request>ÔªËØÒ²ĞèÒªÉ¾³ı
+                // å†Œè®°å½•ä¸­<location>éœ€è¦å»æ‰#reservationï¼Œç›¸å…³<request>å…ƒç´ ä¹Ÿéœ€è¦åˆ é™¤
                 string strLocation = DomUtil.GetElementText(itemdom.DocumentElement,
                     "location");
                 // StringUtil.RemoveFromInList("#reservation", true, ref strLocation);
@@ -1000,10 +1027,11 @@ namespace DigitalPlatform.LibraryServer
                     nodeRequest.ParentNode.RemoveChild(nodeRequest);
                 }
 
+#if NO
                 RmsChannel channel = this.RmsChannels.GetChannel(this.App.WsUrl);
+#endif
 
-
-                // Ğ´»Ø²á¼ÇÂ¼
+                // å†™å›å†Œè®°å½•
                 byte[] output_timestamp = null;
                 string strOutputPath = "";
                 long lRet = channel.DoSaveTextRes(strOutputItemRecPath,
@@ -1021,27 +1049,21 @@ namespace DigitalPlatform.LibraryServer
                         nRedoCount++;
                         if (nRedoCount > 10)
                         {
-                            strError = "Ğ´»Ø²á¼ÇÂ¼µÄÊ±ºò,Óöµ½Ê±¼ä´Á³åÍ»,²¢Òò´ËÖØÊÔ10´Î,ÈÔÊ§°Ü...";
+                            strError = "å†™å›å†Œè®°å½•çš„æ—¶å€™,é‡åˆ°æ—¶é—´æˆ³å†²çª,å¹¶å› æ­¤é‡è¯•10æ¬¡,ä»å¤±è´¥...";
                             return -1;
                         }
                         goto REDO_CHANGE;
                     }
                 }
 
-            } // ²á¼ÇÂ¼Ëø¶¨·¶Î§½áÊø
+            } // å†Œè®°å½•é”å®šèŒƒå›´ç»“æŸ
             finally
             {
-                // ½â²á¼ÇÂ¼Ëø
+                // è§£å†Œè®°å½•é”
                 this.App.EntityLocks.UnlockForWrite(strItemBarcode);
             }
 
-
             return 0;
         }
-
-
-
-
-
     }
 }

@@ -22,43 +22,11 @@ namespace dp2Circulation
     public partial class EntityEditForm : EntityEditFormBase
         // ItemEditFormBase<BookItem, BookItemCollection>
     {
-        /*
-        // 创建索取号
-        public event GenerateDataEventHandler GenerateAccessNo = null;
-         * */
-
         // Ctrl+A自动创建数据
         /// <summary>
         /// 自动创建数据
         /// </summary>
         public event GenerateDataEventHandler GenerateData = null;
-
-#if NO
-        /// <summary>
-        /// 最开始时的 BookItem 对象
-        /// </summary>
-        public BookItem StartBookItem = null;   // 最开始时的对象
-
-        /// <summary>
-        /// 当前 BookItem 对象
-        /// </summary>
-        public BookItem BookItem = null;
-
-        /// <summary>
-        /// BookItem 集合
-        /// </summary>
-        public BookItemCollection BookItems = null;
-
-        /// <summary>
-        /// 框架窗口
-        /// </summary>
-        public MainForm MainForm = null;
-
-        /// <summary>
-        /// 关联的 EntityControl 对象
-        /// </summary>
-        public EntityControl EntityControl = null;
-#endif
 
         /// <summary>
         /// 构造函数
@@ -83,7 +51,6 @@ namespace dp2Circulation
             _textBox_message = this.textBox_message;
             _splitContainer_main = this.splitContainer_main;
             _tableLayoutPanel_main = this.tableLayoutPanel_main;
-
         }
 
         /// <summary>
@@ -124,33 +91,6 @@ namespace dp2Circulation
             }
         }
 
-#if NO
-        // 为编辑目的的初始化
-        // parameters:
-        //      bookitems   容器。用于UndoMaskDelete
-        /// <summary>
-        /// 为编辑而初始化
-        /// </summary>
-        /// <param name="bookitem">要编辑的 BookItem 对象</param>
-        /// <param name="bookitems">所从属的 BookItem 集合。用于前后翻动编辑</param>
-        /// <param name="strError">返回出错信息</param>
-        /// <returns>-1: 出错; 0: 成功</returns>
-        public int InitialForEdit(
-            BookItem bookitem,
-            BookItemCollection bookitems,
-            out string strError)
-        {
-            strError = "";
-
-            this.BookItem = bookitem;
-            this.BookItems = bookitems;
-
-            this.StartBookItem = bookitem;
-
-            return 0;
-        }
-#endif
-
         /// <summary>
         /// 获取索取号事项集合
         /// </summary>
@@ -183,49 +123,9 @@ namespace dp2Circulation
 
             return callnumber_items;
         }
-
-
+        
         private void EntityEditForm_Load(object sender, EventArgs e)
         {
-#if NO
-            if (this.MainForm != null)
-            {
-                MainForm.SetControlFont(this, this.MainForm.DefaultFont);
-            }
-
-            LoadBookItem(this.BookItem);
-            EnablePrevNextRecordButtons();
-
-            // 参考记录
-            if (this.BookItem != null
-                && this.BookItem.Error != null)
-            {
-
-                this.splitContainer_main.Panel1Collapsed = false;
-
-                string strError = "";
-                int nRet = FillExisting(out strError);
-                if (nRet == -1)
-                    MessageBox.Show(this, strError);
-
-
-                this.entityEditControl_existing.SetReadOnly(ReadOnlyStyle.All);
-
-                // 突出差异内容
-                this.entityEditControl_editing.HighlightDifferences(this.entityEditControl_existing);
-
-            }
-            else
-            {
-                this.tableLayoutPanel_main.RowStyles[0].Height = 0F;
-                this.textBox_message.Visible = false;
-
-                this.label_editing.Visible = false;
-                this.splitContainer_main.Panel1Collapsed = true;
-                this.entityEditControl_existing.Enabled = false;
-            }
-#endif
-
             this.entityEditControl_editing.GetAccessNoButton.Click -= new EventHandler(button_getAccessNo_Click);
             this.entityEditControl_editing.GetAccessNoButton.Click += new EventHandler(button_getAccessNo_Click);
 
@@ -297,154 +197,12 @@ namespace dp2Circulation
                 e1.FocusedControl = sender; // sender为最原始的子控件
                 this.GenerateData(this, e1);
             }
-
-
-            /*
-            if (this.GenerateAccessNo != null)
-            {
-                GenerateDataEventArgs e1 = new GenerateDataEventArgs();
-                e1.FocusedControl = this.entityEditControl_editing.textBox_accessNo;
-                this.GenerateAccessNo(this, e1);
-            }*/
-
         }
-
-#if NO
-        void LoadBookItem(BookItem bookitem)
-        {
-            if (bookitem != null)
-            {
-                string strError = "";
-                int nRet = FillEditing(bookitem, out strError);
-                if (nRet == -1)
-                {
-                    MessageBox.Show(this, "LoadBookItem() 发生错误: " + strError);
-                    return;
-                }
-            }
-            if (bookitem != null
-                && bookitem.ItemDisplayState == ItemDisplayState.Deleted)
-            {
-                // 已经标记删除的事项, 不能进行修改。但是可以观察
-                this.entityEditControl_editing.SetReadOnly(ReadOnlyStyle.All);
-                this.checkBox_autoSearchDup.Enabled = false;
-
-                this.button_editing_undoMaskDelete.Enabled = true;
-                this.button_editing_undoMaskDelete.Visible = true;
-            }
-            else
-            {
-                this.entityEditControl_editing.SetReadOnly(ReadOnlyStyle.Librarian);
-
-                this.button_editing_undoMaskDelete.Enabled = false;
-                this.button_editing_undoMaskDelete.Visible = false;
-            }
-
-            this.entityEditControl_editing.GetValueTable -= new GetValueTableEventHandler(entityEditControl1_GetValueTable);
-            this.entityEditControl_editing.GetValueTable += new GetValueTableEventHandler(entityEditControl1_GetValueTable);
-
-            this.BookItem = bookitem;
-
-            SetOkButtonState();
-        }
-
-        void SetOkButtonState()
-        {
-            if (this.BookItem != this.StartBookItem)
-            {
-                this.button_OK.Enabled = entityEditControl_editing.Changed;
-            }
-            else
-            {
-                this.button_OK.Enabled = true;
-                // this.button_Cancel.Text = "取消";
-            }
-        }
-
-        void entityEditControl1_GetValueTable(object sender, GetValueTableEventArgs e)
-        {
-            string strError = "";
-            string[] values = null;
-            int nRet = MainForm.GetValueTable(e.TableName,
-                e.DbName,
-                out values,
-                out strError);
-            if (nRet == -1)
-                MessageBox.Show(this, strError);
-            e.values = values;
-        }
-#endif
 
         private void EntityEditForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-#if NO
-            this.entityEditControl_editing.GetValueTable -= new GetValueTableEventHandler(entityEditControl1_GetValueTable);
-#endif
         }
 
-#if NO
-        // 结束一个事项的编辑
-        // return:
-        //      -1  出错
-        //      0   没有必要做restore
-        //      1   做了restore
-        int FinishOneBookItem(out string strError)
-        {
-            strError = "";
-            int nRet = 0;
-
-            if (entityEditControl_editing.Changed == false)
-                return 0;
-
-            string strBarcode = this.entityEditControl_editing.Barcode;
-
-            // 检查册条码号形式是否合法
-            if (String.IsNullOrEmpty(strBarcode) == false   // 2009/2/23 
-                && this.EntityControl != null
-                && this.EntityControl.NeedVerifyItemBarcode == true)
-            {
-                // 形式校验条码号
-                // return:
-                //      -2  服务器没有配置校验方法，无法校验
-                //      -1  error
-                //      0   不是合法的条码号
-                //      1   是合法的读者证条码号
-                //      2   是合法的册条码号
-                nRet = this.EntityControl.DoVerifyBarcode(
-                    strBarcode,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-
-                // 输入的条码格式不合法
-                if (nRet == 0)
-                {
-                    strError = "您输入的条码 " + strBarcode + " 格式不正确("+strError+")。请重新输入。";
-                    goto ERROR1;
-                }
-
-                // 实际输入的是读者证条码号
-                if (nRet == 1)
-                {
-                    strError = "您输入的条码号 " + strBarcode + " 是读者证条码号。请输入册条码号。";
-                    goto ERROR1;
-                }
-
-                // 对于服务器没有配置校验功能，但是前端发出了校验要求的情况，警告一下
-                if (nRet == -2)
-                    MessageBox.Show(this, "警告：前端册管理窗开启了校验条码功能，但是服务器端缺乏相应的脚本函数，无法校验条码。\r\n\r\n若要避免出现此警告对话框，请关闭前端册管理窗校验功能");
-
-            }
-
-            nRet = Restore(out strError);
-            if (nRet == -1)
-                goto ERROR1;
-
-            return nRet;
-        ERROR1:
-            return -1;
-        }
-#endif
         EntityControl EntityControl
         {
             get
@@ -578,84 +336,7 @@ namespace dp2Circulation
 
         private void button_OK_Click(object sender, EventArgs e)
         {
-#if NO
-            string strError = "";
-            int nRet = 0;
-
-
-            /*
-            string strBarcode = this.entityEditControl_editing.Barcode;
-
-            // 检查册条码号形式是否合法
-            if (this.EntityForm != null
-                && this.EntityForm.NeedVerifyItemBarcode == true)
-            {
-                // 形式校验条码号
-                // return:
-                //      -2  服务器没有配置校验方法，无法校验
-                //      -1  error
-                //      0   不是合法的条码号
-                //      1   是合法的读者证条码号
-                //      2   是合法的册条码号
-                nRet = this.EntityForm.VerifyBarcode(
-                    strBarcode,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-
-                // 输入的条码格式不合法
-                if (nRet == 0)
-                {
-                    strError = "您输入的条码 " + strBarcode + " 格式不正确。请重新输入。";
-                    goto ERROR1;
-                }
-
-                // 实际输入的是读者证条码
-                if (nRet == 1)
-                {
-                    strError = "您输入的条码号 " + strBarcode + " 是读者证条码号。请输入册条码号。";
-                    goto ERROR1;
-                }
-
-                // 对于服务器没有配置校验功能，但是前端发出了校验要求的情况，警告一下
-                if (nRet == -2)
-                    MessageBox.Show(this, "警告：前端册管理窗开启了校验条码功能，但是服务器端缺乏相应的脚本函数，无法校验条码。\r\n\r\n若要避免出现此警告对话框，请关闭前端册管理窗校验功能");
-
-            }
-
-            nRet = Restore(out strError);
-            if (nRet == -1)
-            {
-                MessageBox.Show(this, strError);
-                return;
-            }
-             * */
-            nRet = this.FinishOneBookItem(out strError);
-            if (nRet == -1)
-                goto ERROR1;
-
-            // TODO: 提交保存后timestamp不匹配时出现的对话框，应当禁止prev/next按钮
-
-            // 针对有报错信息的情况
-            if (this.BookItem != null
-                && this.BookItem.Error != null
-                && this.BookItem.Error.ErrorCode == DigitalPlatform.CirculationClient.localhost.ErrorCodeValue.TimestampMismatch)
-            {
-                this.BookItem.OldRecord = this.BookItem.Error.OldRecord;
-                this.BookItem.Timestamp = this.BookItem.Error.OldTimestamp;
-            }
-
-            this.BookItem.Error = null; // 结束报错状态
-            // this.BookItem.RefreshListView();    //  刷新显示
-
-            this.DialogResult = DialogResult.OK;
-            this.Close();
-            return;
-        ERROR1:
-            MessageBox.Show(this, strError);
-#endif
             OnButton_OK_Click(sender, e);
-
         }
 
         private void button_Cancel_Click(object sender, EventArgs e)
@@ -663,133 +344,6 @@ namespace dp2Circulation
             this.DialogResult = DialogResult.Cancel;
             this.Close();
         }
-
-#if NO
-        // 填充编辑界面数据
-        int FillEditing(BookItem bookitem,
-            out string strError)
-        {
-            strError = "";
-
-            if (bookitem == null)
-            {
-                strError = "bookitem参数值为空";
-                return -1;
-            }
-
-            string strXml = "";
-            int nRet = bookitem.BuildRecord(out strXml,
-                out strError);
-            if (nRet == -1)
-                return -1;
-
-            nRet = this.entityEditControl_editing.SetData(strXml,
-                bookitem.RecPath,
-                bookitem.Timestamp,
-                out strError);
-            if (nRet == -1)
-                return -1;
-
-
-            return 0;
-        }
-
-        // 填充参考编辑界面数据
-        int FillExisting(out string strError)
-        {
-            strError = "";
-
-            if (this.BookItem == null)
-            {
-                strError = "BookItem为空";
-                return -1;
-            }
-
-            if (this.BookItem.Error == null)
-            {
-                strError = "BookItem.Error为空";
-                return -1;
-            }
-
-            this.textBox_message.Text = this.BookItem.ErrorInfo;
-
-            int nRet = this.entityEditControl_existing.SetData(this.BookItem.Error.OldRecord,
-                this.BookItem.Error.OldRecPath, // NewRecPath
-                this.BookItem.Error.OldTimestamp,
-                out strError);
-            if (nRet == -1)
-                return -1;
-
-            return 0;
-        }
-
-        // 从界面中更新bookitem中的数据
-        // return:
-        //      -1  error
-        //      0   没有必要更新
-        //      1   已经更新
-        int Restore(out string strError)
-        {
-            strError = "";
-            int nRet = 0;
-
-            if (entityEditControl_editing.Changed == false)
-                return 0;
-
-            if (this.BookItem == null)
-            {
-                strError = "BookItem为空";
-                return -1;
-            }
-
-
-            // TODO: 是否当这个checkbox为false的时候，至少也要检查本种之类的重复情形？
-            // 如果这里不检查，可否在提交保存的时候，先查完本种之类的重复，才真正向服务器提交?
-            if (this.checkBox_autoSearchDup.Checked == true
-                && this.EntityControl != null
-                && String.IsNullOrEmpty(this.entityEditControl_editing.Barcode) == false)   // 2008/11/3 不检查空的条码号是否重复
-            {
-                // Debug.Assert(false, "");
-                // 条码查重
-                // return:
-                //      -1  出错
-                //      0   不重复
-                //      1   重复
-                nRet = this.EntityControl.CheckBarcodeDup(
-                    this.entityEditControl_editing.Barcode,
-                    this.BookItem,
-                    true,   // bCheckCurrentList,
-                    true,   // bCheckDb,
-                    out strError);
-                if (nRet == -1)
-                    return -1;
-                if (nRet == 1)
-                    return -1;   // 重复
-            }
-
-            // 获得编辑后的数据
-            try
-            {
-                this.BookItem.RecordDom = this.entityEditControl_editing.DataDom;
-            }
-            catch (Exception ex)
-            {
-                strError = "获得数据时出错: " + ex.Message;
-                return -1;
-            }
-
-            this.BookItem.Changed = true;
-            if (this.BookItem.ItemDisplayState != ItemDisplayState.New)
-            {
-                this.BookItem.ItemDisplayState = ItemDisplayState.Changed;
-                // 这意味着Deleted状态也会被修改为Changed
-            }
-
-            this.BookItem.RefreshListView();
-
-            return 1;
-        }
-#endif
 
         internal override int RestoreVerify(out string strError)
         {
@@ -823,23 +377,6 @@ namespace dp2Circulation
             return 0;
         }
 
-#if NO
-        /// <summary>
-        /// 是否自动查重
-        /// </summary>
-        public bool AutoSearchDup
-        {
-            get
-            {
-                return this.checkBox_autoSearchDup.Checked;
-            }
-            set
-            {
-                this.checkBox_autoSearchDup.Checked = value;
-            }
-        }
-#endif
-
         private void EntityEditForm_Activated(object sender, EventArgs e)
         {
             // this.MainForm.stopManager.Active(this.stop);
@@ -861,110 +398,6 @@ namespace dp2Circulation
             }
         }
 
-        /*
-        void LoadPrevOrNextBookItem(bool bPrev)
-        {
-            string strError = "";
-
-            if (this.EntityForm == null)
-            {
-                strError = "没有容器";
-                goto ERROR1;
-            }
-
-            int nIndex = this.EntityForm.IndexOfVisibleBookItems(this.BookItem);
-            if (nIndex == -1)
-            {
-                // 居然在容器中没有找到
-                strError = "BookItem事项居然在容器中没有找到。";
-                Debug.Assert(false, strError);
-                goto ERROR1;
-            }
-
-            if (bPrev == true)
-                nIndex--;
-            else
-                nIndex++;
-
-            if (nIndex <= -1)
-            {
-                strError = "到头";
-                goto ERROR1;
-            }
-
-            if (nIndex >= this.EntityForm.CountOfVisibleBookItems())
-            {
-                strError = "到尾";
-                goto ERROR1;
-            }
-
-            // 保存当前事项
-            int nRet = FinishOneBookItem(out strError);
-            if (nRet == -1)
-                goto ERROR1;
-
-            BookItem new_bookitem = this.EntityForm.GetAtVisibleBookItems(nIndex);
-            LoadBookItem(new_bookitem);
-
-            // 在listview中滚动到可见范围
-            new_bookitem.HilightListViewItem();
-            this.Text = "册信息";
-            return;
-        ERROR1:
-            MessageBox.Show(this, strError);
-        }
-         * */
-
-#if NO
-        void LoadPrevOrNextBookItem(bool bPrev)
-        {
-            string strError = "";
-
-            BookItem new_bookitem = GetPrevOrNextBookItem(bPrev,
-                out strError);
-            if (new_bookitem == null)
-                goto ERROR1;
-
-            // 保存当前事项
-            int nRet = FinishOneBookItem(out strError);
-            if (nRet == -1)
-                goto ERROR1;
-
-            LoadBookItem(new_bookitem);
-
-            // 在listview中滚动到可见范围
-            new_bookitem.HilightListViewItem(true);
-            this.Text = "册信息";
-            return;
-        ERROR1:
-            AutoCloseMessageBox.Show(this, strError, 2000);
-            // MessageBox.Show(this, strError);
-        }
-
-        /// <summary>
-        /// 允许或者禁止界面控件。在长操作前，一般需要禁止界面控件；操作完成后再允许
-        /// </summary>
-        /// <param name="bEnable">是否允许界面控件。true 为允许， false 为禁止</param>
-        public void EnableControls(bool bEnable)
-        {
-            this.button_Cancel.Enabled = bEnable;
-
-            if (bEnable == true)
-                SetOkButtonState();
-            else
-                this.button_OK.Enabled = false;
-
-
-            if (bEnable == false)
-            {
-                this.button_editing_nextRecord.Enabled = bEnable;
-                this.button_editing_prevRecord.Enabled = bEnable;
-            }
-            else
-                this.EnablePrevNextRecordButtons();
-        }
-#endif
-
         private void button_editing_prevRecord_Click(object sender, EventArgs e)
         {
             this.EnableControls(false);
@@ -984,56 +417,6 @@ namespace dp2Circulation
 
             this.EnableControls(true);
         }
-
-#if NO
-        // 根据当前bookitem事项在容器中的位置，设置PrevRecord和NextRecord按钮的Enabled状态
-        void EnablePrevNextRecordButtons()
-        {
-            // 有参考记录的情况
-            if (this.BookItem != null
-                && this.BookItem.Error != null)
-            {
-                goto DISABLE_TWO_BUTTON;
-            }
-
-
-            if (this.EntityControl == null)
-            {
-                // 因为没有容器，所以无法prev/next，于是就diable
-                goto DISABLE_TWO_BUTTON;
-            }
-
-            int nIndex = 0;
-
-            nIndex = this.EntityControl.IndexOfVisibleItems(this.BookItem);
-
-            if (nIndex == -1)
-            {
-                // 居然在容器中没有找到
-                // Debug.Assert(false, "BookItem事项居然在容器中没有找到。");
-                goto DISABLE_TWO_BUTTON;
-            }
-
-            this.button_editing_prevRecord.Enabled = true;
-            this.button_editing_nextRecord.Enabled = true;
-
-            if (nIndex == 0)
-            {
-                this.button_editing_prevRecord.Enabled = false;
-            }
-
-            if (nIndex >= this.EntityControl.CountOfVisibleItems() - 1)
-            {
-                this.button_editing_nextRecord.Enabled = false;
-            }
-
-            return;
-        DISABLE_TWO_BUTTON:
-            this.button_editing_prevRecord.Enabled = false;
-            this.button_editing_nextRecord.Enabled = false;
-            return;
-        }
-#endif
 
         private void entityEditControl_editing_ContentChanged(object sender, ContentChangedEventArgs e)
         {
@@ -1176,8 +559,6 @@ namespace dp2Circulation
                     this.entityEditControl_editing.Operations =
                         DoAction(strAction, bookitem.Operations);
                     break;
-
-
                 case "Price":
                     this.entityEditControl_editing.Price = 
                         DoAction(strAction, bookitem.Price); 
@@ -1249,73 +630,10 @@ namespace dp2Circulation
 
         }
 
-#if NO
-        BookItem GetPrevOrNextBookItem(bool bPrev,
-            out string strError)
-        {
-            strError = "";
-
-            if (this.EntityControl == null)
-            {
-                strError = "没有容器";
-                goto ERROR1;
-            }
-
-            int nIndex = this.EntityControl.IndexOfVisibleItems(this.BookItem);
-            if (nIndex == -1)
-            {
-                // 居然在容器中没有找到
-                strError = "BookItem事项居然在容器中没有找到。";
-                Debug.Assert(false, strError);
-                goto ERROR1;
-            }
-
-            if (bPrev == true)
-                nIndex--;
-            else
-                nIndex++;
-
-            if (nIndex <= -1)
-            {
-                strError = "到头";
-                goto ERROR1;
-            }
-
-            if (nIndex >= this.EntityControl.CountOfVisibleItems())
-            {
-                strError = "到尾";
-                goto ERROR1;
-            }
-
-            return this.EntityControl.GetVisibleItemAt(nIndex);
-        ERROR1:
-            return null;
-        }
-#endif
-
         private void entityEditControl_editing_ControlKeyPress(object sender, ControlKeyPressEventArgs e)
         {
 
         }
-
-#if NO
-        // 获取值列表时作为线索的数据库名
-        /// <summary>
-        /// 书目库名。获取值列表时作为线索的数据库名
-        /// </summary>
-        public string BiblioDbName
-        {
-            get
-            {
-                return this.entityEditControl_editing.BiblioDbName;
-            }
-            set
-            {
-                this.entityEditControl_editing.BiblioDbName = value;
-                this.entityEditControl_existing.BiblioDbName = value;
-            }
-        }
-#endif
     }
 
     /// <summary>

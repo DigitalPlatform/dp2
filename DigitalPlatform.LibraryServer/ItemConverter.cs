@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Web.UI;
@@ -8,7 +8,7 @@ using DigitalPlatform.IO;
 namespace DigitalPlatform.LibraryServer
 {
     /// <summary>
-    /// dp2libraryÖĞµ÷ÓÃC#½Å±¾Ê±, ÓÃÓÚ×ª»»²áĞÅÏ¢xml->htmlµÄ½Å±¾ÀàµÄ»ùÀà
+    /// dp2libraryä¸­è°ƒç”¨C#è„šæœ¬æ—¶, ç”¨äºè½¬æ¢å†Œä¿¡æ¯xml->htmlçš„è„šæœ¬ç±»çš„åŸºç±»
     /// </summary>
     public class ItemConverter
     {
@@ -47,7 +47,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception /*ex*/)    // 2008/10/28
             {
-                return "Ê±¼ä×Ö·û´® '" + strRfc1123Time + "' ¸ñÊ½´íÎó£¬²»ÊÇºÏ·¨µÄRFC1123¸ñÊ½";
+                return "æ—¶é—´å­—ç¬¦ä¸² '" + strRfc1123Time + "' æ ¼å¼é”™è¯¯ï¼Œä¸æ˜¯åˆæ³•çš„RFC1123æ ¼å¼";
             }
 
         }
@@ -60,7 +60,7 @@ namespace DigitalPlatform.LibraryServer
             return DateTimeUtil.Rfc1123DateTimeStringToLocal(strRfc1123Time, "yyyy-MM-dd");
         }*/
 
-        // ½«RFC1123Ê±¼ä×Ö·û´®×ª»»Îª±¾µØÒ»°ãÈÕÆÚ×Ö·û´®
+        // å°†RFC1123æ—¶é—´å­—ç¬¦ä¸²è½¬æ¢ä¸ºæœ¬åœ°ä¸€èˆ¬æ—¥æœŸå­—ç¬¦ä¸²
         public static string LocalDate(string strRfc1123Time)
         {
             try
@@ -72,7 +72,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception /*ex*/)    // 2008/10/28
             {
-                return "ÈÕÆÚ×Ö·û´® '" + strRfc1123Time + "' ¸ñÊ½´íÎó£¬²»ÊÇºÏ·¨µÄRFC1123¸ñÊ½";
+                return "æ—¥æœŸå­—ç¬¦ä¸² '" + strRfc1123Time + "' æ ¼å¼é”™è¯¯ï¼Œä¸æ˜¯åˆæ³•çš„RFC1123æ ¼å¼";
             }
         }
     }

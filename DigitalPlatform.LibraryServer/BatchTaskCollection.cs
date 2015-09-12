@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
@@ -7,9 +7,9 @@ namespace DigitalPlatform.LibraryServer
 {
     public class BatchTaskCollection : List<BatchTask>
     {
-        // Êı×éËø
+        // æ•°ç»„é”
         internal ReaderWriterLock m_lock = new ReaderWriterLock();
-        internal static int m_nLockTimeout = 5000;	// 5000=5Ãë
+        internal static int m_nLockTimeout = 5000;	// 5000=5ç§’
 
 
         public new void Clear()
@@ -28,16 +28,16 @@ namespace DigitalPlatform.LibraryServer
             base.Clear();
         }
 
-        // ¸ù¾İÈÎÎñÃû»ñµÃÒ»¸öÈÎÎñ¶ÔÏó
-        // °ü×°°æ±¾
-        // Ëø¶¨°²È«°æ±¾
-        // ¶àÏß³Ì£º°²È«
+        // æ ¹æ®ä»»åŠ¡åè·å¾—ä¸€ä¸ªä»»åŠ¡å¯¹è±¡
+        // åŒ…è£…ç‰ˆæœ¬
+        // é”å®šå®‰å…¨ç‰ˆæœ¬
+        // å¤šçº¿ç¨‹ï¼šå®‰å…¨
         public BatchTask GetBatchTask(string strName)
         {
             return GetBatchTask(strName, true);
         }
 
-        // ÄÚ²¿°æ±¾
+        // å†…éƒ¨ç‰ˆæœ¬
         internal BatchTask GetBatchTask(string strName,
             bool bLock)
         {
@@ -63,14 +63,14 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
-        // ¼ÓÈëÒ»¸öÈÎÎñ¶ÔÏóµ½ÈİÆ÷
-        // ¶àÏß³Ì£º°²È«
+        // åŠ å…¥ä¸€ä¸ªä»»åŠ¡å¯¹è±¡åˆ°å®¹å™¨
+        // å¤šçº¿ç¨‹ï¼šå®‰å…¨
         public new void Add(BatchTask task)
         {
             this.m_lock.AcquireWriterLock(m_nLockTimeout);
 
             if (GetBatchTask(task.Name, false) != null)
-                throw new Exception("ÈÎÎñ '" + task.Name + "' ±»ÖØ¸´¼ÓÈëÈİÆ÷¡£");
+                throw new Exception("ä»»åŠ¡ '" + task.Name + "' è¢«é‡å¤åŠ å…¥å®¹å™¨ã€‚");
 
             try
             {

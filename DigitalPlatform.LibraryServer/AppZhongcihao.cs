@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -16,26 +16,26 @@ using DigitalPlatform.rms.Client.rmsws_localhost;
 namespace DigitalPlatform.LibraryServer
 {
     /// <summary>
-    /// ±¾²¿·ÖÊÇºÍÖÖ´ÎºÅ¹¦ÄÜÏà¹ØµÄ´úÂë
+    /// æœ¬éƒ¨åˆ†æ˜¯å’Œç§æ¬¡å·åŠŸèƒ½ç›¸å…³çš„ä»£ç 
     /// </summary>
     public partial class LibraryApplication
     {
-        // Í¨¹ıÖÖ´ÎºÅ×éÃû»ñµÃÖÖ´ÎºÅ¿âÃû
+        // é€šè¿‡ç§æ¬¡å·ç»„åè·å¾—ç§æ¬¡å·åº“å
         // parameters:
-        //      strZhongcihaoGroupName  @Òıµ¼ÖÖ´ÎºÅ¿âÃû !Òıµ¼ÏßË÷ÊéÄ¿¿âÃû ·ñÔò¾ÍÊÇ ÖÖ´ÎºÅ×éÃû
+        //      strZhongcihaoGroupName  @å¼•å¯¼ç§æ¬¡å·åº“å !å¼•å¯¼çº¿ç´¢ä¹¦ç›®åº“å å¦åˆ™å°±æ˜¯ ç§æ¬¡å·ç»„å
         string GetZhongcihaoDbName(string strZhongcihaoGroupName)
         {
             if (String.IsNullOrEmpty(strZhongcihaoGroupName) == true)
                 return null;
 
             // 2012/11/8
-            // @Òıµ¼ÖÖ´ÎºÅ¿âÃû
+            // @å¼•å¯¼ç§æ¬¡å·åº“å
             if (strZhongcihaoGroupName[0] == '@')
             {
                 return strZhongcihaoGroupName.Substring(1);
             }
 
-            // !Òıµ¼ÏßË÷ÊéÄ¿¿âÃû
+            // !å¼•å¯¼çº¿ç´¢ä¹¦ç›®åº“å
             if (strZhongcihaoGroupName[0] == '!')
             {
                 string strTemp = GetZhongcihaoGroupName(strZhongcihaoGroupName.Substring(1));
@@ -43,7 +43,7 @@ namespace DigitalPlatform.LibraryServer
                 if (strTemp == null)
                 {
                     /*
-                    strError = "ÊéÄ¿¿âÃû " + strZhongcihaoGroupName.Substring(1) + " Ã»ÓĞÕÒµ½¶ÔÓ¦µÄÖÖ´ÎºÅ×éÃû";
+                    strError = "ä¹¦ç›®åº“å " + strZhongcihaoGroupName.Substring(1) + " æ²¡æœ‰æ‰¾åˆ°å¯¹åº”çš„ç§æ¬¡å·ç»„å";
                     goto ERROR1;
                      * */
                     return null;
@@ -51,7 +51,7 @@ namespace DigitalPlatform.LibraryServer
                 strZhongcihaoGroupName = strTemp;
             }
 
-            // ·ñÔò¾ÍÊÇ ÖÖ´ÎºÅ×éÃû
+            // å¦åˆ™å°±æ˜¯ ç§æ¬¡å·ç»„å
             XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//zhongcihao/group[@name='"+strZhongcihaoGroupName+"']");
             if (node == null)
                 return null;
@@ -59,13 +59,14 @@ namespace DigitalPlatform.LibraryServer
             return DomUtil.GetAttr(node, "zhongcihaodb");
         }
 
-        // ¼ìË÷Î²ºÅ¼ÇÂ¼µÄÂ·¾¶ºÍ¼ÇÂ¼Ìå
+        // æ£€ç´¢å°¾å·è®°å½•çš„è·¯å¾„å’Œè®°å½•ä½“
         // return:
-        //      -1  error(×¢£º¼ìË÷ÃüÖĞ¶àÌõÇé¿ö±»µ±×÷´íÎó·µ»Ø)
+        //      -1  error(æ³¨ï¼šæ£€ç´¢å‘½ä¸­å¤šæ¡æƒ…å†µè¢«å½“ä½œé”™è¯¯è¿”å›)
         //      0   not found
         //      1   found
         public int SearchTailNumberPathAndRecord(
-            RmsChannelCollection Channels,
+            // RmsChannelCollection Channels,
+            RmsChannel channel,
             string strZhongcihaoGroupName,
             string strClass,
             out string strPath,
@@ -80,13 +81,13 @@ namespace DigitalPlatform.LibraryServer
 
             if (strClass == "")
             {
-                strError = "ÉĞÎ´Ö¸¶¨·ÖÀàºÅ";
+                strError = "å°šæœªæŒ‡å®šåˆ†ç±»å·";
                 return -1;
             }
 
             if (strZhongcihaoGroupName == "")
             {
-                strError = "ÉĞÎ´Ö¸¶¨ÖÖ´ÎºÅ×éÃû";
+                strError = "å°šæœªæŒ‡å®šç§æ¬¡å·ç»„å";
                 return -1;
             }
 
@@ -94,26 +95,27 @@ namespace DigitalPlatform.LibraryServer
             string strZhongcihaoDbName = GetZhongcihaoDbName(strZhongcihaoGroupName);
             if (String.IsNullOrEmpty(strZhongcihaoDbName) == true)
             {
-                strError = "ÎŞ·¨Í¨¹ıÖÖ´ÎºÅ×éÃû '" + strZhongcihaoGroupName + "' »ñµÃÖÖ´ÎºÅ¿âÃû";
+                strError = "æ— æ³•é€šè¿‡ç§æ¬¡å·ç»„å '" + strZhongcihaoGroupName + "' è·å¾—ç§æ¬¡å·åº“å";
                 return -1;
             }
 
             string strQueryXml = "<target list='"
-                + StringUtil.GetXmlStringSimple(strZhongcihaoDbName + ":" + "·ÖÀàºÅ")       // 2007/9/14 
+                + StringUtil.GetXmlStringSimple(strZhongcihaoDbName + ":" + "åˆ†ç±»å·")       // 2007/9/14 
                 + "'><item><word>"
                 + StringUtil.GetXmlStringSimple(strClass)
                 + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang></target>";
 
             List<string> aPath = null;
-            // »ñµÃÍ¨ÓÃ¼ÇÂ¼
-            // ±¾º¯Êı¿É»ñµÃ³¬¹ı1ÌõÒÔÉÏµÄÂ·¾¶
+            // è·å¾—é€šç”¨è®°å½•
+            // æœ¬å‡½æ•°å¯è·å¾—è¶…è¿‡1æ¡ä»¥ä¸Šçš„è·¯å¾„
             // return:
             //      -1  error
             //      0   not found
-            //      1   ÃüÖĞ1Ìõ
-            //      >1  ÃüÖĞ¶àÓÚ1Ìõ
+            //      1   å‘½ä¸­1æ¡
+            //      >1  å‘½ä¸­å¤šäº1æ¡
             int nRet = GetRecXml(
-                Channels,
+                // Channels,
+                channel,
                 strQueryXml,
                 out strXml,
                 2,
@@ -122,17 +124,17 @@ namespace DigitalPlatform.LibraryServer
                 out strError);
             if (nRet == -1)
             {
-                strError = "¼ìË÷¿â " + strZhongcihaoDbName + " Ê±³ö´í: " + strError;
+                strError = "æ£€ç´¢åº“ " + strZhongcihaoDbName + " æ—¶å‡ºé”™: " + strError;
                 return -1;
             }
             if (nRet == 0)
             {
-                return 0;	// Ã»ÓĞÕÒµ½
+                return 0;	// æ²¡æœ‰æ‰¾åˆ°
             }
 
             if (nRet > 1)
             {
-                strError = "ÒÔ·ÖÀàºÅ'" + strClass + "'¼ìË÷¿â " + strZhongcihaoDbName + " Ê±ÃüÖĞ " + Convert.ToString(nRet) + " Ìõ£¬ÎŞ·¨È¡µÃÎ²ºÅ¡£ÇëĞŞ¸Ä¿â '" + strZhongcihaoDbName + "' ÖĞÏàÓ¦¼ÇÂ¼£¬È·±£Í¬Ò»ÀàÄ¿Ö»ÓĞÒ»Ìõ¶ÔÓ¦µÄ¼ÇÂ¼¡£";
+                strError = "ä»¥åˆ†ç±»å·'" + strClass + "'æ£€ç´¢åº“ " + strZhongcihaoDbName + " æ—¶å‘½ä¸­ " + Convert.ToString(nRet) + " æ¡ï¼Œæ— æ³•å–å¾—å°¾å·ã€‚è¯·ä¿®æ”¹åº“ '" + strZhongcihaoDbName + "' ä¸­ç›¸åº”è®°å½•ï¼Œç¡®ä¿åŒä¸€ç±»ç›®åªæœ‰ä¸€æ¡å¯¹åº”çš„è®°å½•ã€‚";
                 return -1;
             }
 
@@ -142,7 +144,7 @@ namespace DigitalPlatform.LibraryServer
             return 1;
         }
 
-        // »ñµÃÖÖ´ÎºÅÎ²ºÅ
+        // è·å¾—ç§æ¬¡å·å°¾å·
         public LibraryServerResult GetZhongcihaoTailNumber(
             SessionInfo sessioninfo,
             string strZhongcihaoGroupName,
@@ -157,20 +159,28 @@ namespace DigitalPlatform.LibraryServer
 
             if (String.IsNullOrEmpty(strZhongcihaoGroupName) == true)
             {
-                strError = "ÖÖ´ÎºÅ×éÃû²ÎÊıÖµ²»ÄÜÎª¿Õ";
+                strError = "ç§æ¬¡å·ç»„åå‚æ•°å€¼ä¸èƒ½ä¸ºç©º";
+                goto ERROR1;
+            }
+
+            RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
                 goto ERROR1;
             }
 
             string strPath = "";
             string strXml = "";
             byte[] timestamp = null;
-            // ¼ìË÷Î²ºÅ¼ÇÂ¼µÄÂ·¾¶ºÍ¼ÇÂ¼Ìå
+            // æ£€ç´¢å°¾å·è®°å½•çš„è·¯å¾„å’Œè®°å½•ä½“
             // return:
             //      -1  error
             //      0   not found
             //      1   found
             int nRet = SearchTailNumberPathAndRecord(
-                sessioninfo.Channels,
+                // sessioninfo.Channels,
+                channel,
                 strZhongcihaoGroupName,
                 strClass,
                 out strPath,
@@ -195,7 +205,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "Î²ºÅ¼ÇÂ¼ '" + strPath + "' XML×°ÈëDOMÊ±·¢Éú´íÎó: " + ex.Message;
+                strError = "å°¾å·è®°å½• '" + strPath + "' XMLè£…å…¥DOMæ—¶å‘ç”Ÿé”™è¯¯: " + ex.Message;
                 goto ERROR1;
             }
 
@@ -210,7 +220,7 @@ namespace DigitalPlatform.LibraryServer
             return result;
         }
 
-        // ÉèÖÃÖÖ´ÎºÅÎ²ºÅ
+        // è®¾ç½®ç§æ¬¡å·å°¾å·
         public LibraryServerResult SetZhongcihaoTailNumber(
             SessionInfo sessioninfo,
             string strAction,
@@ -225,16 +235,24 @@ namespace DigitalPlatform.LibraryServer
 
             LibraryServerResult result = new LibraryServerResult();
 
+            RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                goto ERROR1;
+            }
+
             string strPath = "";
             string strXml = "";
             byte[] timestamp = null;
-            // ¼ìË÷Î²ºÅ¼ÇÂ¼µÄÂ·¾¶ºÍ¼ÇÂ¼Ìå
+            // æ£€ç´¢å°¾å·è®°å½•çš„è·¯å¾„å’Œè®°å½•ä½“
             // return:
             //      -1  error
             //      0   not found
             //      1   found
             int nRet = SearchTailNumberPathAndRecord(
-                sessioninfo.Channels,
+                // sessioninfo.Channels,
+                channel,
                 strZhongcihaoGroupName,
                 strClass,
                 out strPath,
@@ -244,26 +262,10 @@ namespace DigitalPlatform.LibraryServer
             if (nRet == -1)
                 goto ERROR1;
 
-            /*
-            if (nRet == 0)
-            {
-            }
-
-            XmlDocument dom = new XmlDocument();
-            try
-            {
-                dom.LoadXml(strXml);
-            }
-            catch (Exception ex)
-            {
-                strError = "Î²ºÅ¼ÇÂ¼ '" + strPath + "' XML×°ÈëDOMÊ±·¢Éú´íÎó: " + ex.Message;
-                goto ERROR1;
-            }*/
-
             string strZhongcihaoDbName = GetZhongcihaoDbName(strZhongcihaoGroupName);
             if (String.IsNullOrEmpty(strZhongcihaoDbName) == true)
             {
-                strError = "ÎŞ·¨Í¨¹ıÖÖ´ÎºÅ×éÃû '" + strZhongcihaoGroupName + "' »ñµÃÖÖ´ÎºÅ¿âÃû";
+                strError = "æ— æ³•é€šè¿‡ç§æ¬¡å·ç»„å '" + strZhongcihaoGroupName + "' è·å¾—ç§æ¬¡å·åº“å";
                 goto ERROR1;
             }
 
@@ -271,12 +273,14 @@ namespace DigitalPlatform.LibraryServer
             bool bNewRecord = false;
             long lRet = 0;
 
+#if NO
             RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
             if (channel == null)
             {
                 strError = "get channel error";
                 goto ERROR1;
             }
+#endif
 
             byte[] output_timestamp = null;
             string strOutputPath = "";
@@ -286,7 +290,7 @@ namespace DigitalPlatform.LibraryServer
 
                 if (nRet == 0)
                 {
-                    // ĞÂ´´½¨¼ÇÂ¼
+                    // æ–°åˆ›å»ºè®°å½•
                     strPath = strZhongcihaoDbName + "/?";
                     strXml = "<r c='" + strClass + "' v='" + strTestNumber + "'/>";
 
@@ -311,7 +315,7 @@ namespace DigitalPlatform.LibraryServer
                     out strError);
                 if (lRet == -1)
                 {
-                    strError = "±£´æÎ²ºÅ¼ÇÂ¼Ê±³ö´í: " + strError;
+                    strError = "ä¿å­˜å°¾å·è®°å½•æ—¶å‡ºé”™: " + strError;
                     goto ERROR1;
                 }
 
@@ -332,7 +336,7 @@ namespace DigitalPlatform.LibraryServer
 
                 if (nRet == 0)
                 {
-                    // ĞÂ´´½¨¼ÇÂ¼
+                    // æ–°åˆ›å»ºè®°å½•
                     strPath = strZhongcihaoDbName + "/?";
                     strXml = "<r c='" + strClass + "' v='" + strDefaultNumber + "'/>";
 
@@ -364,7 +368,7 @@ namespace DigitalPlatform.LibraryServer
                     out strError);
                 if (lRet == -1)
                 {
-                    strError = "±£´æÎ²ºÅ¼ÇÂ¼Ê±³ö´í: " + strError;
+                    strError = "ä¿å­˜å°¾å·è®°å½•æ—¶å‡ºé”™: " + strError;
                     goto ERROR1;
                 }
 
@@ -389,10 +393,10 @@ namespace DigitalPlatform.LibraryServer
                 }
                 else
                 {
-                    // ¸²¸Ç¼ÇÂ¼
+                    // è¦†ç›–è®°å½•
                     if (String.IsNullOrEmpty(strPath) == true)
                     {
-                        strError = "¼ÇÂ¼´æÔÚÊ±strPath¾ÓÈ»Îª¿Õ";
+                        strError = "è®°å½•å­˜åœ¨æ—¶strPathå±…ç„¶ä¸ºç©º";
                         goto ERROR1;
                     }
 
@@ -412,22 +416,22 @@ namespace DigitalPlatform.LibraryServer
                 {
                     if (channel.ErrorCode == ChannelErrorCode.TimestampMismatch)
                     {
-                        strError = "Î²ºÅ¼ÇÂ¼Ê±¼ä´Á²»Æ¥Åä£¬ËµÃ÷¿ÉÄÜ±»ËûÈËĞŞ¸Ä¹ı¡£ÏêÏ¸Ô­Òò: " + strError;
+                        strError = "å°¾å·è®°å½•æ—¶é—´æˆ³ä¸åŒ¹é…ï¼Œè¯´æ˜å¯èƒ½è¢«ä»–äººä¿®æ”¹è¿‡ã€‚è¯¦ç»†åŸå› : " + strError;
                         goto ERROR1;
                     }
 
-                    strError = "±£´æÎ²ºÅ¼ÇÂ¼Ê±³ö´í: " + strError;
+                    strError = "ä¿å­˜å°¾å·è®°å½•æ—¶å‡ºé”™: " + strError;
                     goto ERROR1;
                 }
 
             }
             else
             {
-                strError = "ÎŞ·¨Ê¶±ğµÄstrAction²ÎÊıÖµ '" + strAction + "'";
+                strError = "æ— æ³•è¯†åˆ«çš„strActionå‚æ•°å€¼ '" + strAction + "'";
                 goto ERROR1;
             }
 
-            END1:
+        END1:
             result.Value = 1;
             return result;
         ERROR1:
@@ -437,9 +441,7 @@ namespace DigitalPlatform.LibraryServer
             return result;
         }
 
-
-
-        // Í¨¹ıÊéÄ¿¿âÃûµÃµ½ÖÖ´ÎºÅgroupÃû
+        // é€šè¿‡ä¹¦ç›®åº“åå¾—åˆ°ç§æ¬¡å·groupå
         string GetZhongcihaoGroupName(string strBiblioDbName)
         {
             XmlNode node = this.LibraryCfgDom.DocumentElement.SelectSingleNode("//zhongcihao/group[./database[@name='"+strBiblioDbName+"']]");
@@ -492,7 +494,7 @@ namespace DigitalPlatform.LibraryServer
 
             if (String.IsNullOrEmpty(strZhongcihaoGroupName) == true)
             {
-                strError = "strZhongcihaoGroupName²ÎÊıÖµ²»ÄÜÎª¿Õ";
+                strError = "strZhongcihaoGroupNameå‚æ•°å€¼ä¸èƒ½ä¸ºç©º";
                 goto ERROR1;
             }
 
@@ -502,7 +504,7 @@ namespace DigitalPlatform.LibraryServer
 
                 if (strTemp == null)
                 {
-                    strError = "ÊéÄ¿¿âÃû " + strZhongcihaoGroupName.Substring(1) + " Ã»ÓĞÕÒµ½¶ÔÓ¦µÄÖÖ´ÎºÅ×éÃû";
+                    strError = "ä¹¦ç›®åº“å " + strZhongcihaoGroupName.Substring(1) + " æ²¡æœ‰æ‰¾åˆ°å¯¹åº”çš„ç§æ¬¡å·ç»„å";
                     goto ERROR1;
                 }
                 strZhongcihaoGroupName = strTemp;
@@ -526,7 +528,7 @@ XmlNamespaceManager mngr = null;
 
 if (nodeNsTable != null)
 {
-    // ×¼±¸Ãû×Ö¿Õ¼ä»·¾³
+    // å‡†å¤‡åå­—ç©ºé—´ç¯å¢ƒ
     nRet = PrepareNs(
         nodeNsTable,
         out mngr,
@@ -535,11 +537,11 @@ if (nodeNsTable != null)
         goto ERROR1;
 }
 
-// ¹¹ÔìÊı¾İ¿â¶¨ÒåºÍ¿âÃûµÄ¶ÔÕÕ±í
+// æ„é€ æ•°æ®åº“å®šä¹‰å’Œåº“åçš„å¯¹ç…§è¡¨
 XmlNodeList nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("//zhongcihao/group[@name='" + strZhongcihaoGroupName + "']/database");
 if (nodes.Count == 0)
 {
-    strError = "library.xmlÖĞÉĞÎ´ÅäÖÃÓĞ¹Ø '" + strZhongcihaoGroupName + "'µÄ<zhongcihao>/<group>/<database>Ïà¹Ø²ÎÊı";
+    strError = "library.xmlä¸­å°šæœªé…ç½®æœ‰å…³ '" + strZhongcihaoGroupName + "'çš„<zhongcihao>/<group>/<database>ç›¸å…³å‚æ•°";
     goto ERROR1;
 }
 
@@ -640,7 +642,7 @@ for (int i = 0; i < nodes.Count; i++)
 
                     string[] cols = (string[])aRecord[j];
 
-                    result_item.Cols = cols;   // styleÖĞ²»°üº¬id
+                    result_item.Cols = cols;   // styleä¸­ä¸åŒ…å«id
                     j++;
                     if (j >= pathlist.Count)
                         break;
@@ -678,7 +680,7 @@ for (int i = 0; i < nodes.Count; i++)
 
             if (String.IsNullOrEmpty(strZhongcihaoGroupName) == true)
             {
-                strError = "strZhongcihaoGroupName²ÎÊıÖµ²»ÄÜÎª¿Õ";
+                strError = "strZhongcihaoGroupNameå‚æ•°å€¼ä¸èƒ½ä¸ºç©º";
                 goto ERROR1;
             }
 
@@ -688,7 +690,7 @@ for (int i = 0; i < nodes.Count; i++)
 
                 if (strTemp == null)
                 {
-                    strError = "ÊéÄ¿¿âÃû " + strZhongcihaoGroupName.Substring(1) + " Ã»ÓĞÕÒµ½¶ÔÓ¦µÄÖÖ´ÎºÅ×éÃû";
+                    strError = "ä¹¦ç›®åº“å " + strZhongcihaoGroupName.Substring(1) + " æ²¡æœ‰æ‰¾åˆ°å¯¹åº”çš„ç§æ¬¡å·ç»„å";
                     goto ERROR1;
                 }
                 strZhongcihaoGroupName = strTemp;
@@ -710,7 +712,7 @@ for (int i = 0; i < nodes.Count; i++)
 
             if (nodeNsTable != null)
             {
-                // ×¼±¸Ãû×Ö¿Õ¼ä»·¾³
+                // å‡†å¤‡åå­—ç©ºé—´ç¯å¢ƒ
                 nRet = PrepareNs(
                     nodeNsTable,
                     out mngr,
@@ -719,11 +721,11 @@ for (int i = 0; i < nodes.Count; i++)
                     goto ERROR1;
             }
 
-            // ¹¹ÔìÊı¾İ¿â¶¨ÒåºÍ¿âÃûµÄ¶ÔÕÕ±í
+            // æ„é€ æ•°æ®åº“å®šä¹‰å’Œåº“åçš„å¯¹ç…§è¡¨
             XmlNodeList nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("//zhongcihao/group[@name='" + strZhongcihaoGroupName + "']/database");
             if (nodes.Count == 0)
             {
-                strError = "library.xmlÖĞÉĞÎ´ÅäÖÃÓĞ¹Ø '" + strZhongcihaoGroupName + "'µÄ<zhongcihao>/<group>/<database>Ïà¹Ø²ÎÊı";
+                strError = "library.xmlä¸­å°šæœªé…ç½®æœ‰å…³ '" + strZhongcihaoGroupName + "'çš„<zhongcihao>/<group>/<database>ç›¸å…³å‚æ•°";
                 goto ERROR1;
             }
 
@@ -770,7 +772,7 @@ for (int i = 0; i < nodes.Count; i++)
                 item.Path = origin_searchresults[i].Path;
                 searchresults[i] = item;
 
-                // ¼ÌĞøÌî³äÆäÓà³ÉÔ±
+                // ç»§ç»­å¡«å……å…¶ä½™æˆå‘˜
                 string strXml = "";
                 string strMetaData = "";
                 byte[] timestamp = null;
@@ -784,7 +786,7 @@ for (int i = 0; i < nodes.Count; i++)
                     out strError);
                 if (lRet == -1)
                 {
-                    item.Zhongcihao = "»ñÈ¡¼ÇÂ¼ '" + item.Path + "' ³ö´í: " + strError;
+                    item.Zhongcihao = "è·å–è®°å½• '" + item.Path + "' å‡ºé”™: " + strError;
                     continue;
                 }
 
@@ -793,7 +795,7 @@ for (int i = 0; i < nodes.Count; i++)
                 DbZhongcihaoProperty prop = (DbZhongcihaoProperty)db_prop_table[strDbName];
                 if (prop == null)
                 {
-                    item.Zhongcihao = "Êı¾İ¿âÃû '" + strDbName + "' ²»ÔÚ¶¨ÒåµÄÖÖ´ÎºÅÌØĞÔ(<zhongcihao>/<group>/<database>)ÖĞ";
+                    item.Zhongcihao = "æ•°æ®åº“å '" + strDbName + "' ä¸åœ¨å®šä¹‰çš„ç§æ¬¡å·ç‰¹æ€§(<zhongcihao>/<group>/<database>)ä¸­";
                     continue;
                 }
 
@@ -832,11 +834,11 @@ for (int i = 0; i < nodes.Count; i++)
         }
 
         /// <summary>
-        /// ×¼±¸Ãû×Ö¿Õ¼ä»·¾³
+        /// å‡†å¤‡åå­—ç©ºé—´ç¯å¢ƒ
         /// </summary>
-        /// <param name="nodeNsTable">nstable½Úµã</param>
-        /// <param name="mngr">·µ»ØÃû×Ö¿Õ¼ä¹ÜÀíÆ÷¶ÔÏó</param>
-        /// <param name="strError">·µ»Ø³ö´íĞÅÏ¢</param>
+        /// <param name="nodeNsTable">nstableèŠ‚ç‚¹</param>
+        /// <param name="mngr">è¿”å›åå­—ç©ºé—´ç®¡ç†å™¨å¯¹è±¡</param>
+        /// <param name="strError">è¿”å›å‡ºé”™ä¿¡æ¯</param>
         /// <returns>0</returns>
         static int PrepareNs(
             XmlNode nodeNsTable,
@@ -880,7 +882,7 @@ for (int i = 0; i < nodes.Count; i++)
             }
             catch (Exception ex)
             {
-                strError = "XML×°ÈëDOMÊ±³ö´í: " + ex.Message;
+                strError = "XMLè£…å…¥DOMæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
@@ -918,7 +920,7 @@ for (int i = 0; i < nodes.Count; i++)
         }
 #endif
 
-        // ¼ìË÷Í¬Àà¼ÇÂ¼
+        // æ£€ç´¢åŒç±»è®°å½•
         public LibraryServerResult SearchUsedZhongcihao(
             SessionInfo sessioninfo,
             string strZhongcihaoGroupName,
@@ -934,7 +936,7 @@ for (int i = 0; i < nodes.Count; i++)
 
             if (String.IsNullOrEmpty(strZhongcihaoGroupName) == true)
             {
-                strError = "strZhongcihaoGroupName²ÎÊıÖµ²»ÄÜÎª¿Õ";
+                strError = "strZhongcihaoGroupNameå‚æ•°å€¼ä¸èƒ½ä¸ºç©º";
                 goto ERROR1;
             }
 
@@ -944,7 +946,7 @@ for (int i = 0; i < nodes.Count; i++)
 
                 if (strTemp == null)
                 {
-                    strError = "ÊéÄ¿¿âÃû " + strZhongcihaoGroupName.Substring(1) + " Ã»ÓĞÕÒµ½¶ÔÓ¦µÄÖÖ´ÎºÅ×éÃû";
+                    strError = "ä¹¦ç›®åº“å " + strZhongcihaoGroupName.Substring(1) + " æ²¡æœ‰æ‰¾åˆ°å¯¹åº”çš„ç§æ¬¡å·ç»„å";
                     goto ERROR1;
                 }
                 strZhongcihaoGroupName = strTemp;
@@ -954,11 +956,11 @@ for (int i = 0; i < nodes.Count; i++)
             XmlNodeList nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("//zhongcihao/group[@name='" + strZhongcihaoGroupName + "']/database");
             if (nodes.Count == 0)
             {
-                strError = "library.xmlÖĞÉĞÎ´ÅäÖÃÓĞ¹Ø '" + strZhongcihaoGroupName + "'µÄ<zhongcihao>/<group>/<database>Ïà¹Ø²ÎÊı";
+                strError = "library.xmlä¸­å°šæœªé…ç½®æœ‰å…³ '" + strZhongcihaoGroupName + "'çš„<zhongcihao>/<group>/<database>ç›¸å…³å‚æ•°";
                 goto ERROR1;
             }
 
-            // ¹¹Ôì¼ìË÷Ê½
+            // æ„é€ æ£€ç´¢å¼
             for (int i = 0; i < nodes.Count; i++)
             {
                 XmlNode node = nodes[i];
@@ -966,7 +968,7 @@ for (int i = 0; i < nodes.Count; i++)
 
                 if (string.IsNullOrEmpty(strDbName) == true)
                 {
-                    strError = "<database>ÔªËØ±ØĞëÓĞ·Ç¿ÕµÄnameÊôĞÔÖµ";
+                    strError = "<database>å…ƒç´ å¿…é¡»æœ‰éç©ºçš„nameå±æ€§å€¼";
                     goto ERROR1;
                 }
 
@@ -979,7 +981,7 @@ for (int i = 0; i < nodes.Count; i++)
                 }
 
                 strQueryXml += "<target list='"
-                    + StringUtil.GetXmlStringSimple(strDbName + ":" + "Ë÷È¡ºÅ")       // 2007/9/14
+                    + StringUtil.GetXmlStringSimple(strDbName + ":" + "ç´¢å–å·")       // 2007/9/14
                     + "'><item><word>"
                     + StringUtil.GetXmlStringSimple(strClass) + "/"
                     + "</word><match>left</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang></target>";
@@ -1023,7 +1025,7 @@ for (int i = 0; i < nodes.Count; i++)
 
 
 #if OLD
-        // ¼ìË÷Í¬Àà¼ÇÂ¼
+        // æ£€ç´¢åŒç±»è®°å½•
         public LibraryServerResult SearchUsedZhongcihao(
             SessionInfo sessioninfo,
             string strZhongcihaoGroupName,
@@ -1039,7 +1041,7 @@ for (int i = 0; i < nodes.Count; i++)
 
             if (String.IsNullOrEmpty(strZhongcihaoGroupName) == true)
             {
-                strError = "strZhongcihaoGroupName²ÎÊıÖµ²»ÄÜÎª¿Õ";
+                strError = "strZhongcihaoGroupNameå‚æ•°å€¼ä¸èƒ½ä¸ºç©º";
                 goto ERROR1;
             }
 
@@ -1049,7 +1051,7 @@ for (int i = 0; i < nodes.Count; i++)
 
                 if (strTemp == null)
                 {
-                    strError = "ÊéÄ¿¿âÃû " + strZhongcihaoGroupName.Substring(1) + " Ã»ÓĞÕÒµ½¶ÔÓ¦µÄÖÖ´ÎºÅ×éÃû";
+                    strError = "ä¹¦ç›®åº“å " + strZhongcihaoGroupName.Substring(1) + " æ²¡æœ‰æ‰¾åˆ°å¯¹åº”çš„ç§æ¬¡å·ç»„å";
                     goto ERROR1;
                 }
                 strZhongcihaoGroupName = strTemp;
@@ -1059,11 +1061,11 @@ for (int i = 0; i < nodes.Count; i++)
             XmlNodeList nodes = this.LibraryCfgDom.DocumentElement.SelectNodes("//zhongcihao/group[@name='" + strZhongcihaoGroupName + "']/database");
             if (nodes.Count == 0)
             {
-                strError = "library.xmlÖĞÉĞÎ´ÅäÖÃÓĞ¹Ø '"+strZhongcihaoGroupName+"'µÄ<zhongcihao>/<group>/<database>Ïà¹Ø²ÎÊı";
+                strError = "library.xmlä¸­å°šæœªé…ç½®æœ‰å…³ '"+strZhongcihaoGroupName+"'çš„<zhongcihao>/<group>/<database>ç›¸å…³å‚æ•°";
                 goto ERROR1;
             }
 
-            // ¹¹Ôì¼ìË÷Ê½
+            // æ„é€ æ£€ç´¢å¼
             for (int i = 0; i < nodes.Count; i++)
             {
                 XmlNode node = nodes[i];
@@ -1125,19 +1127,19 @@ for (int i = 0; i < nodes.Count; i++)
 
     }
 
-    // ÖÖ´ÎºÅ¼ìË÷ÃüÖĞ½á¹ûµÄÒ»ĞĞ
+    // ç§æ¬¡å·æ£€ç´¢å‘½ä¸­ç»“æœçš„ä¸€è¡Œ
     [DataContract(Namespace = "http://dp2003.com/dp2library/")]
     public class ZhongcihaoSearchResult
     {
         [DataMember]
-        public string Path = "";    // ¼ÇÂ¼Â·¾¶
+        public string Path = "";    // è®°å½•è·¯å¾„
         [DataMember]
-        public string Zhongcihao = "";  // Í¬ÀàÊéÇø·ÖºÅ
+        public string Zhongcihao = "";  // åŒç±»ä¹¦åŒºåˆ†å·
         [DataMember]
-        public string[] Cols = null;    // ÆäÓàµÄÁĞ¡£Ò»°ãÎªÌâÃû¡¢×÷Õß£¬»òÕßÊéÄ¿ÕªÒª
+        public string[] Cols = null;    // å…¶ä½™çš„åˆ—ã€‚ä¸€èˆ¬ä¸ºé¢˜åã€ä½œè€…ï¼Œæˆ–è€…ä¹¦ç›®æ‘˜è¦
     }
 
-    // Êı¾İ¿âµÄÓĞ¹ØÖÖ´ÎºÅµÄÌØĞÔ
+    // æ•°æ®åº“çš„æœ‰å…³ç§æ¬¡å·çš„ç‰¹æ€§
     [DataContract(Namespace = "http://dp2003.com/dp2library/")]
     public class DbZhongcihaoProperty
     {

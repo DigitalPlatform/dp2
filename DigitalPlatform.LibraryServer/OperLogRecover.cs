@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -11,11 +11,11 @@ using DigitalPlatform.Xml;
 namespace DigitalPlatform.LibraryServer
 {
     /// <summary>
-    /// ÈÕÖ¾»Ö¸´ Åú´¦ÀíÈÎÎñ
+    /// æ—¥å¿—æ¢å¤ æ‰¹å¤„ç†ä»»åŠ¡
     /// </summary>
     public class OperLogRecover : BatchTask
     {
-        // ÈÕÖ¾»Ö¸´¼¶±ğ
+        // æ—¥å¿—æ¢å¤çº§åˆ«
         public RecoverLevel RecoverLevel = RecoverLevel.Snapshot;
 
         public OperLogRecover(LibraryApplication app,
@@ -29,11 +29,11 @@ namespace DigitalPlatform.LibraryServer
         {
             get
             {
-                return "ÈÕÖ¾»Ö¸´";
+                return "æ—¥å¿—æ¢å¤";
             }
         }
 
-        // ÊÇ·ñÓ¦¸ÃÍ£Ö¹´¦Àí£¬ÓÃÓÚÈÕÖ¾»Ö¸´ÈÎÎñ
+        // æ˜¯å¦åº”è¯¥åœæ­¢å¤„ç†ï¼Œç”¨äºæ—¥å¿—æ¢å¤ä»»åŠ¡
         public override bool Stopped
         {
             get
@@ -42,7 +42,7 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
-        // ½âÎö ¿ªÊ¼ ²ÎÊı
+        // è§£æ å¼€å§‹ å‚æ•°
         static int ParseLogRecorverStart(string strStart,
             out long index,
             out string strFileName,
@@ -64,7 +64,7 @@ namespace DigitalPlatform.LibraryServer
                 }
                 catch (Exception)
                 {
-                    strError = "Æô¶¯²ÎÊı '" + strStart + "' ¸ñÊ½´íÎó£º" + "Èç¹ûÃ»ÓĞ@£¬ÔòÓ¦Îª´¿Êı×Ö¡£";
+                    strError = "å¯åŠ¨å‚æ•° '" + strStart + "' æ ¼å¼é”™è¯¯ï¼š" + "å¦‚æœæ²¡æœ‰@ï¼Œåˆ™åº”ä¸ºçº¯æ•°å­—ã€‚";
                     return -1;
                 }
                 return 0;
@@ -76,14 +76,14 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception)
             {
-                strError = "Æô¶¯²ÎÊı '" + strStart + "' ¸ñÊ½´íÎó£º'" + strStart.Substring(0, nRet).Trim() + "' ²¿·ÖÓ¦µ±Îª´¿Êı×Ö¡£";
+                strError = "å¯åŠ¨å‚æ•° '" + strStart + "' æ ¼å¼é”™è¯¯ï¼š'" + strStart.Substring(0, nRet).Trim() + "' éƒ¨åˆ†åº”å½“ä¸ºçº¯æ•°å­—ã€‚";
                 return -1;
             }
 
 
             strFileName = strStart.Substring(nRet + 1).Trim();
 
-            // Èç¹ûÎÄ¼şÃûÃ»ÓĞÀ©Õ¹Ãû£¬×Ô¶¯¼ÓÉÏ
+            // å¦‚æœæ–‡ä»¶åæ²¡æœ‰æ‰©å±•åï¼Œè‡ªåŠ¨åŠ ä¸Š
             if (String.IsNullOrEmpty(strFileName) == false)
             {
                 nRet = strFileName.ToLower().LastIndexOf(".log");
@@ -94,12 +94,12 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
-        // ½âÎöÍ¨ÓÃÆô¶¯²ÎÊı
-        // ¸ñÊ½
+        // è§£æé€šç”¨å¯åŠ¨å‚æ•°
+        // æ ¼å¼
         /*
          * <root recoverLevel='...' clearFirst='...'/>
-         * recoverLevelÈ±Ê¡ÎªSnapshot
-         * clearFirstÈ±Ê¡Îªfalse
+         * recoverLevelç¼ºçœä¸ºSnapshot
+         * clearFirstç¼ºçœä¸ºfalse
          * 
          * 
          * */
@@ -123,14 +123,14 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "strParam²ÎÊı×°ÈëXML DOMÊ±³ö´í: " + ex.Message;
+                strError = "strParamå‚æ•°è£…å…¥XML DOMæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
             /*
-            Logic = 0,  // Âß¼­²Ù×÷
-            LogicAndSnapshot = 1,   // Âß¼­²Ù×÷£¬ÈôÊ§°ÜÔò×ªÓÃ¿ìÕÕ»Ö¸´
-            Snapshot = 3,   // £¨ÍêÈ«µÄ£©¿ìÕÕ
+            Logic = 0,  // é€»è¾‘æ“ä½œ
+            LogicAndSnapshot = 1,   // é€»è¾‘æ“ä½œï¼Œè‹¥å¤±è´¥åˆ™è½¬ç”¨å¿«ç…§æ¢å¤
+            Snapshot = 3,   // ï¼ˆå®Œå…¨çš„ï¼‰å¿«ç…§
             Robust = 4,
              * */
 
@@ -148,10 +148,10 @@ namespace DigitalPlatform.LibraryServer
         }
 
 
-        // Ò»´Î²Ù×÷Ñ­»·
+        // ä¸€æ¬¡æ“ä½œå¾ªç¯
         public override void Worker()
         {
-            // °ÑÏµÍ³¹ÒÆğ
+            // æŠŠç³»ç»ŸæŒ‚èµ·
             this.App.HangupReason = HangupReason.LogRecover;
 
             try
@@ -161,17 +161,17 @@ namespace DigitalPlatform.LibraryServer
 
                 BatchTaskStartInfo startinfo = this.StartInfo;
                 if (startinfo == null)
-                    startinfo = new BatchTaskStartInfo();   // °´ÕÕÈ±Ê¡ÖµÀ´
+                    startinfo = new BatchTaskStartInfo();   // æŒ‰ç…§ç¼ºçœå€¼æ¥
 
-                long lStartIndex = 0;// ¿ªÊ¼Î»ÖÃ
-                string strStartFileName = "";// ¿ªÊ¼ÎÄ¼şÃû
+                long lStartIndex = 0;// å¼€å§‹ä½ç½®
+                string strStartFileName = "";// å¼€å§‹æ–‡ä»¶å
                 int nRet = ParseLogRecorverStart(startinfo.Start,
                     out lStartIndex,
                     out strStartFileName,
                     out strError);
                 if (nRet == -1)
                 {
-                    this.AppendResultText("Æô¶¯Ê§°Ü: " + strError + "\r\n");
+                    this.AppendResultText("å¯åŠ¨å¤±è´¥: " + strError + "\r\n");
                     return;
                 }
 
@@ -184,7 +184,7 @@ namespace DigitalPlatform.LibraryServer
                     out strError);
                 if (nRet == -1)
                 {
-                    this.AppendResultText("Æô¶¯Ê§°Ü: " + strError + "\r\n");
+                    this.AppendResultText("å¯åŠ¨å¤±è´¥: " + strError + "\r\n");
                     return;
                 }
 
@@ -197,11 +197,11 @@ namespace DigitalPlatform.LibraryServer
                 }
                 catch (Exception ex)
                 {
-                    this.AppendResultText("Æô¶¯Ê§°Ü: Æô¶¯²ÎÊıParamÖĞµÄrecoverLevelÃ¶¾ÙÖµ '" + strRecoverLevel + "' ´íÎó: " + ex.Message + "\r\n");
+                    this.AppendResultText("å¯åŠ¨å¤±è´¥: å¯åŠ¨å‚æ•°Paramä¸­çš„recoverLevelæšä¸¾å€¼ '" + strRecoverLevel + "' é”™è¯¯: " + ex.Message + "\r\n");
                     return;
                 }
 
-                this.App.WriteErrorLog("ÈÕÖ¾»Ö¸´ ÈÎÎñÆô¶¯¡£");
+                this.App.WriteErrorLog("æ—¥å¿—æ¢å¤ ä»»åŠ¡å¯åŠ¨ã€‚");
 
                 if (bClearFirst == true)
                 {
@@ -209,7 +209,7 @@ namespace DigitalPlatform.LibraryServer
                         out strError);
                     if (nRet == -1)
                     {
-                        this.AppendResultText("Çå³ıÈ«²¿Êı¾İ¿â¼ÇÂ¼Ê±·¢Éú´íÎó: " + strError + "\r\n");
+                        this.AppendResultText("æ¸…é™¤å…¨éƒ¨æ•°æ®åº“è®°å½•æ—¶å‘ç”Ÿé”™è¯¯: " + strError + "\r\n");
                         return;
                     }
                 }
@@ -217,17 +217,17 @@ namespace DigitalPlatform.LibraryServer
                 bool bStart = false;
                 if (String.IsNullOrEmpty(strStartFileName) == true)
                 {
-                    // ×öËùÓĞÎÄ¼ş
+                    // åšæ‰€æœ‰æ–‡ä»¶
                     bStart = true;
                 }
 
 
-                // ÁĞ³öËùÓĞÈÕÖ¾ÎÄ¼ş
+                // åˆ—å‡ºæ‰€æœ‰æ—¥å¿—æ–‡ä»¶
                 DirectoryInfo di = new DirectoryInfo(this.App.OperLog.Directory);
 
                 FileInfo[] fis = di.GetFiles("*.log");
 
-                // BUG!!! ÒÔÇ°È±·¦ÅÅĞò¡£2008/2/1
+                // BUG!!! ä»¥å‰ç¼ºä¹æ’åºã€‚2008/2/1
                 Array.Sort(fis, new FileInfoCompare());
 
 
@@ -238,12 +238,12 @@ namespace DigitalPlatform.LibraryServer
 
                     string strFileName = fis[i].Name;
 
-                    this.AppendResultText("¼ì²éÎÄ¼ş " + strFileName + "\r\n");
+                    this.AppendResultText("æ£€æŸ¥æ–‡ä»¶ " + strFileName + "\r\n");
 
                     if (bStart == false)
                     {
-                        // ´ÓÌØ¶¨ÎÄ¼ş¿ªÊ¼×ö
-                        if (strStartFileName == strFileName)
+                        // ä»ç‰¹å®šæ–‡ä»¶å¼€å§‹åš
+                        if (string.CompareOrdinal(strStartFileName, strFileName) <= 0)  // 2015/9/12 ä»ç­‰å·ä¿®æ”¹ä¸º Compare
                         {
                             bStart = true;
                             if (lStartIndex < 0)
@@ -259,14 +259,14 @@ namespace DigitalPlatform.LibraryServer
                             out strError);
                         if (nRet == -1)
                             goto ERROR1;
-                        lStartIndex = 0;    // µÚÒ»¸öÎÄ¼şÒÔºóµÄÎÄ¼ş¾ÍÈ«×öÁË
+                        lStartIndex = 0;    // ç¬¬ä¸€ä¸ªæ–‡ä»¶ä»¥åçš„æ–‡ä»¶å°±å…¨åšäº†
                     }
 
                 }
 
-                this.AppendResultText("Ñ­»·½áÊø\r\n");
+                this.AppendResultText("å¾ªç¯ç»“æŸ\r\n");
                 
-                this.App.WriteErrorLog("ÈÕÖ¾»Ö¸´ ÈÎÎñ½áÊø¡£");
+                this.App.WriteErrorLog("æ—¥å¿—æ¢å¤ ä»»åŠ¡ç»“æŸã€‚");
 
                 return;
 
@@ -290,10 +290,10 @@ namespace DigitalPlatform.LibraryServer
 
         }
 
-        // ´¦ÀíÒ»¸öÈÕÖ¾ÎÄ¼şµÄ»Ö¸´ÈÎÎñ
+        // å¤„ç†ä¸€ä¸ªæ—¥å¿—æ–‡ä»¶çš„æ¢å¤ä»»åŠ¡
         // parameters:
-        //      strFileName ´¿ÎÄ¼şÃû
-        //      lStartIndex ¿ªÊ¼µÄ¼ÇÂ¼£¨´Ó0¿ªÊ¼¼ÆÊı£©
+        //      strFileName çº¯æ–‡ä»¶å
+        //      lStartIndex å¼€å§‹çš„è®°å½•ï¼ˆä»0å¼€å§‹è®¡æ•°ï¼‰
         // return:
         //      -1  error
         //      0   file not found
@@ -304,7 +304,7 @@ namespace DigitalPlatform.LibraryServer
         {
             strError = "";
 
-            this.AppendResultText("×öÎÄ¼ş "+strFileName+"\r\n");
+            this.AppendResultText("åšæ–‡ä»¶ "+strFileName+"\r\n");
 
             Debug.Assert(this.App != null, "");
             string strTempFileName = this.App.GetTempFileName("logrecover");    // Path.GetTempFileName();
@@ -325,7 +325,7 @@ namespace DigitalPlatform.LibraryServer
                     if (lIndex != 0)
                         lHint = lHintNext;
 
-                    SetProgressText(strFileName + " ¼ÇÂ¼" + (lIndex + 1).ToString());
+                    SetProgressText(strFileName + " è®°å½•" + (lIndex + 1).ToString());
 
                     Stream attachment = File.Create(strTempFileName);
 
@@ -335,16 +335,16 @@ namespace DigitalPlatform.LibraryServer
 
 
                         long lAttachmentLength = 0;
-                        // »ñµÃÒ»¸öÈÕÖ¾¼ÇÂ¼
+                        // è·å¾—ä¸€ä¸ªæ—¥å¿—è®°å½•
                         // parameters:
-                        //      strFileName ´¿ÎÄ¼şÃû,²»º¬Â·¾¶²¿·Ö
-                        //      lHint   ¼ÇÂ¼Î»ÖÃ°µÊ¾ĞÔ²ÎÊı¡£ÕâÊÇÒ»¸öÖ»ÓĞ·şÎñÆ÷²ÅÄÜÃ÷°×º¬ÒåµÄÖµ£¬¶ÔÓÚÇ°¶ËÀ´ËµÊÇ²»Í¸Ã÷µÄ¡£
-                        //              Ä¿Ç°µÄº¬ÒåÊÇ¼ÇÂ¼ÆğÊ¼Î»ÖÃ¡£
+                        //      strFileName çº¯æ–‡ä»¶å,ä¸å«è·¯å¾„éƒ¨åˆ†
+                        //      lHint   è®°å½•ä½ç½®æš—ç¤ºæ€§å‚æ•°ã€‚è¿™æ˜¯ä¸€ä¸ªåªæœ‰æœåŠ¡å™¨æ‰èƒ½æ˜ç™½å«ä¹‰çš„å€¼ï¼Œå¯¹äºå‰ç«¯æ¥è¯´æ˜¯ä¸é€æ˜çš„ã€‚
+                        //              ç›®å‰çš„å«ä¹‰æ˜¯è®°å½•èµ·å§‹ä½ç½®ã€‚
                         // return:
                         //      -1  error
                         //      0   file not found
                         //      1   succeed
-                        //      2   ³¬¹ı·¶Î§
+                        //      2   è¶…è¿‡èŒƒå›´
                         int nRet = this.App.OperLog.GetOperLog(
                             "*",
                             strFileName,
@@ -362,19 +362,19 @@ namespace DigitalPlatform.LibraryServer
                             return 0;
                         if (nRet == 2)
                         {
-                            // ×îºóÒ»Ìõ²¹³äÌáÊ¾Ò»ÏÂ
+                            // æœ€åä¸€æ¡è¡¥å……æç¤ºä¸€ä¸‹
                             if (((lIndex-1) % 100) != 0)
-                                this.AppendResultText("×öÈÕÖ¾¼ÇÂ¼ " + strFileName + " " + (lIndex).ToString() + "\r\n");
+                                this.AppendResultText("åšæ—¥å¿—è®°å½• " + strFileName + " " + (lIndex).ToString() + "\r\n");
                             break;
                         }
 
-                        // ´¦ÀíÒ»¸öÈÕÖ¾¼ÇÂ¼
+                        // å¤„ç†ä¸€ä¸ªæ—¥å¿—è®°å½•
 
                         if ((lIndex % 100) == 0)
-                            this.AppendResultText("×öÈÕÖ¾¼ÇÂ¼ " + strFileName + " " + (lIndex + 1).ToString() + "\r\n");
+                            this.AppendResultText("åšæ—¥å¿—è®°å½• " + strFileName + " " + (lIndex + 1).ToString() + "\r\n");
 
                         /*
-                        // ²âÊÔÊ±ºòÔÚÕâÀï°²ÅÅÌø¹ı
+                        // æµ‹è¯•æ—¶å€™åœ¨è¿™é‡Œå®‰æ’è·³è¿‡
                         if (lIndex == 1 || lIndex == 2)
                             continue;
  * */
@@ -384,10 +384,10 @@ namespace DigitalPlatform.LibraryServer
                             out strError);
                         if (nRet == -1)
                         {
-                            this.AppendResultText("·¢Éú´íÎó£º" + strError + "\r\n");
+                            this.AppendResultText("å‘ç”Ÿé”™è¯¯ï¼š" + strError + "\r\n");
                             // 2007/6/25
-                            // Èç¹ûÎª´¿Âß¼­»Ö¸´£¬Óöµ½´íÎó¾ÍÍ£ÏÂÀ´¡£Õâ±ãÓÚ½øĞĞ²âÊÔ¡£
-                            // Èô²»ÏëÍ£ÏÂÀ´£¬¿ÉÒÔÑ¡Ôñ¡°Âß¼­+¿ìÕÕ¡±ĞÍ
+                            // å¦‚æœä¸ºçº¯é€»è¾‘æ¢å¤ï¼Œé‡åˆ°é”™è¯¯å°±åœä¸‹æ¥ã€‚è¿™ä¾¿äºè¿›è¡Œæµ‹è¯•ã€‚
+                            // è‹¥ä¸æƒ³åœä¸‹æ¥ï¼Œå¯ä»¥é€‰æ‹©â€œé€»è¾‘+å¿«ç…§â€å‹
                             if (this.RecoverLevel == RecoverLevel.Logic)
                                 return -1;
                         }
@@ -406,7 +406,7 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
-        // Ö´ĞĞÒ»¸öÈÕÖ¾¼ÇÂ¼µÄ»Ö¸´¶¯×÷
+        // æ‰§è¡Œä¸€ä¸ªæ—¥å¿—è®°å½•çš„æ¢å¤åŠ¨ä½œ
         int DoOperLogRecord(string strXml,
             Stream attachment,
             out string strError)
@@ -421,7 +421,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "ÈÕÖ¾¼ÇÂ¼×°ÔØµ½DOMÊ±³ö´í: " + ex.Message;
+                strError = "æ—¥å¿—è®°å½•è£…è½½åˆ°DOMæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
@@ -553,31 +553,31 @@ namespace DigitalPlatform.LibraryServer
             }
             else if (strOperation == "reservation")
             {
-                // ÔİÎ´ÊµÏÖ
+                // æš‚æœªå®ç°
             }
             else if (strOperation == "setUser")
             {
-                // ÔİÎ´ÊµÏÖ
+                // æš‚æœªå®ç°
             }
             else if (strOperation == "passgate")
             {
-                // Ö»¶Á
+                // åªè¯»
             }
             else if (strOperation == "getRes")
             {
-                // Ö»¶Á 2015/7/14
+                // åªè¯» 2015/7/14
             }
             else if (strOperation == "crashReport")
             {
-                // Ö»¶Á 2015/7/16
+                // åªè¯» 2015/7/16
             }
             else if (strOperation == "memo")
             {
-                // ×¢¼Ç 2015/9/8
+                // æ³¨è®° 2015/9/8
             }
             else
             {
-                strError = "²»ÄÜÊ¶±ğµÄÈÕÖ¾²Ù×÷ÀàĞÍ '" + strOperation + "'";
+                strError = "ä¸èƒ½è¯†åˆ«çš„æ—¥å¿—æ“ä½œç±»å‹ '" + strOperation + "'";
                 return -1;
             }
 

@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
@@ -14,14 +14,14 @@ using DigitalPlatform.rms.Client;
 namespace DigitalPlatform.LibraryServer
 {
     /// <summary>
-    /// ±¾²¿·ÖÊÇºÍ ÊµÓÃ¿â ¹¦ÄÜÏà¹ØµÄ´úÂë
+    /// æœ¬éƒ¨åˆ†æ˜¯å’Œ å®ç”¨åº“ åŠŸèƒ½ç›¸å…³çš„ä»£ç 
     /// </summary>
     public partial class LibraryApplication
     {
-        // ÉèÖÃÊµÓÃ¿âĞÅÏ¢
-        //      strRootElementName  ¸ùÔªËØÃû¡£Èç¹ûÎª¿Õ£¬ÏµÍ³×Ô»áÓÃ<r>×÷Îª¸ùÔªËØ
-        //      strKeyAttrName  keyÊôĞÔÃû¡£Èç¹ûÎª¿Õ£¬ÏµÍ³×Ô¶¯»áÓÃk
-        //      strValueAttrName    valueÊôĞÔÃû¡£Èç¹ûÎª¿Õ£¬ÏµÍ³×Ô¶¯»áÓÃv
+        // è®¾ç½®å®ç”¨åº“ä¿¡æ¯
+        //      strRootElementName  æ ¹å…ƒç´ åã€‚å¦‚æœä¸ºç©ºï¼Œç³»ç»Ÿè‡ªä¼šç”¨<r>ä½œä¸ºæ ¹å…ƒç´ 
+        //      strKeyAttrName  keyå±æ€§åã€‚å¦‚æœä¸ºç©ºï¼Œç³»ç»Ÿè‡ªåŠ¨ä¼šç”¨k
+        //      strValueAttrName    valueå±æ€§åã€‚å¦‚æœä¸ºç©ºï¼Œç³»ç»Ÿè‡ªåŠ¨ä¼šç”¨v
 
         public LibraryServerResult SetUtilInfo(
             SessionInfo sessioninfo,
@@ -46,7 +46,7 @@ namespace DigitalPlatform.LibraryServer
             bool bRedo = false;
 
             if (String.IsNullOrEmpty(strRootElementName) == true)
-                strRootElementName = "r";   // ×î¼òµ¥µÄÈ±Ê¡Ä£Ê½
+                strRootElementName = "r";   // æœ€ç®€å•çš„ç¼ºçœæ¨¡å¼
 
             if (String.IsNullOrEmpty(strKeyAttrName) == true)
                 strKeyAttrName = "k";
@@ -54,64 +54,73 @@ namespace DigitalPlatform.LibraryServer
             if (String.IsNullOrEmpty(strValueAttrName) == true)
                 strValueAttrName = "v";
 
-                // ¼ìË÷ÊµÓÃ¿â¼ÇÂ¼µÄÂ·¾¶ºÍ¼ÇÂ¼Ìå
-                // return:
-                //      -1  error(×¢£º¼ìË÷ÃüÖĞ¶àÌõÇé¿ö±»µ±×÷´íÎó·µ»Ø)
-                //      0   not found
-                //      1   found
-                nRet = SearchUtilPathAndRecord(
-                    sessioninfo.Channels,
-                    strDbName,
-                    strKey,
-                    strFrom,
-                    out strPath,
-                    out strXml,
-                    out timestamp,
-                    out strError);
-                if (nRet == -1)
-                    goto ERROR1;
-
-                // Èç¹û¶¯×÷ÎªÖ±½ÓÉèÖÃÕû¸ö¼ÇÂ¼
-                if (strAction == "setrecord")
-                {
-                    if (nRet == 0)
-                    {
-                        strPath = strDbName + "/?";
-                    }
-
-                    strXml = strValue;
-                }
-                else
-                {
-                    // ¸ù¾İÈô¸ÉĞÅÏ¢¹¹Ôì³ö¼ÇÂ¼
-                    if (nRet == 0)
-                    {
-                        strPath = strDbName + "/?";
-
-                        // strXml = "<" + strRootElementName + " " + strKeyAttrName + "='" + strKey + "' " + strValueAttrName + "='" + strValue + "'/>";
-
-                        // 2011/12/11
-                        XmlDocument dom = new XmlDocument();
-                        dom.LoadXml("<" + strRootElementName + "/>");
-                        DomUtil.SetAttr(dom.DocumentElement, strKeyAttrName, strKey);
-                        DomUtil.SetAttr(dom.DocumentElement, strValueAttrName, strValue);
-                        strXml = dom.DocumentElement.OuterXml;
-                    }
-                    else
-                    {
-                        string strPartXml = "/xpath/<locate>@" + strValueAttrName + "</locate><create>@" + strValueAttrName + "</create>";
-                        strPath += strPartXml;
-                        strXml = strValue;
-                    }
-                }
-
-
             RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
             if (channel == null)
             {
                 strError = "get channel error";
                 goto ERROR1;
             }
+
+            // æ£€ç´¢å®ç”¨åº“è®°å½•çš„è·¯å¾„å’Œè®°å½•ä½“
+            // return:
+            //      -1  error(æ³¨ï¼šæ£€ç´¢å‘½ä¸­å¤šæ¡æƒ…å†µè¢«å½“ä½œé”™è¯¯è¿”å›)
+            //      0   not found
+            //      1   found
+            nRet = SearchUtilPathAndRecord(
+                // sessioninfo.Channels,
+                channel,
+                strDbName,
+                strKey,
+                strFrom,
+                out strPath,
+                out strXml,
+                out timestamp,
+                out strError);
+            if (nRet == -1)
+                goto ERROR1;
+
+            // å¦‚æœåŠ¨ä½œä¸ºç›´æ¥è®¾ç½®æ•´ä¸ªè®°å½•
+            if (strAction == "setrecord")
+            {
+                if (nRet == 0)
+                {
+                    strPath = strDbName + "/?";
+                }
+
+                strXml = strValue;
+            }
+            else
+            {
+                // æ ¹æ®è‹¥å¹²ä¿¡æ¯æ„é€ å‡ºè®°å½•
+                if (nRet == 0)
+                {
+                    strPath = strDbName + "/?";
+
+                    // strXml = "<" + strRootElementName + " " + strKeyAttrName + "='" + strKey + "' " + strValueAttrName + "='" + strValue + "'/>";
+
+                    // 2011/12/11
+                    XmlDocument dom = new XmlDocument();
+                    dom.LoadXml("<" + strRootElementName + "/>");
+                    DomUtil.SetAttr(dom.DocumentElement, strKeyAttrName, strKey);
+                    DomUtil.SetAttr(dom.DocumentElement, strValueAttrName, strValue);
+                    strXml = dom.DocumentElement.OuterXml;
+                }
+                else
+                {
+                    string strPartXml = "/xpath/<locate>@" + strValueAttrName + "</locate><create>@" + strValueAttrName + "</create>";
+                    strPath += strPartXml;
+                    strXml = strValue;
+                }
+            }
+
+#if NO
+            RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                goto ERROR1;
+            }
+#endif
 
             byte[] baOutputTimeStamp = null;
             string strOutputPath = "";
@@ -141,7 +150,6 @@ namespace DigitalPlatform.LibraryServer
                 goto ERROR1;
             }
 
-
             result.Value = 1;
             return result;
         ERROR1:
@@ -151,8 +159,7 @@ namespace DigitalPlatform.LibraryServer
             return result;
         }
 
-
-        // »ñµÃÊµÓÃ¿âĞÅÏ¢
+        // è·å¾—å®ç”¨åº“ä¿¡æ¯
         public LibraryServerResult GetUtilInfo(
             SessionInfo sessioninfo,
             string strAction,
@@ -177,25 +184,25 @@ namespace DigitalPlatform.LibraryServer
                 strValueAttrName = "v";
 
 
-            /*
             RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
             if (channel == null)
             {
                 strError = "get channel error";
                 goto ERROR1;
-            }*/
+            }
 
             string strPath = "";
             string strXml = "";
             byte[] timestamp = null;
 
-            // ¼ìË÷ÊµÓÃ¿â¼ÇÂ¼µÄÂ·¾¶ºÍ¼ÇÂ¼Ìå
+            // æ£€ç´¢å®ç”¨åº“è®°å½•çš„è·¯å¾„å’Œè®°å½•ä½“
             // return:
-            //      -1  error(×¢£º¼ìË÷ÃüÖĞ¶àÌõÇé¿ö±»µ±×÷´íÎó·µ»Ø)
+            //      -1  error(æ³¨ï¼šæ£€ç´¢å‘½ä¸­å¤šæ¡æƒ…å†µè¢«å½“ä½œé”™è¯¯è¿”å›)
             //      0   not found
             //      1   found
             nRet = SearchUtilPathAndRecord(
-                sessioninfo.Channels,
+                // sessioninfo.Channels,
+                channel,
                 strDbName,
                 strKey,
                 strFrom,
@@ -208,12 +215,12 @@ namespace DigitalPlatform.LibraryServer
             if (nRet == 0)
             {
                 result.ErrorCode = ErrorCode.NotFound;
-                result.ErrorInfo = "¿âÃûÎª '"+strDbName+"' Í¾¾¶Îª '"+strFrom+"' ¼üÖµÎª '" + strKey + "' µÄ¼ÇÂ¼Ã»ÓĞÕÒµ½";
+                result.ErrorInfo = "åº“åä¸º '"+strDbName+"' é€”å¾„ä¸º '"+strFrom+"' é”®å€¼ä¸º '" + strKey + "' çš„è®°å½•æ²¡æœ‰æ‰¾åˆ°";
                 result.Value = 0;
                 return result;
             }
 
-            // Èç¹û¶¯×÷Îª»ñµÃÕû¸ö¼ÇÂ¼
+            // å¦‚æœåŠ¨ä½œä¸ºè·å¾—æ•´ä¸ªè®°å½•
             if (strAction == "getrecord")
             {
                 strValue = strXml;
@@ -229,7 +236,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "×°ÔØÂ·¾¶Îª'" + strPath + "'µÄxml¼ÇÂ¼Ê±³ö´í: " + ex.Message;
+                strError = "è£…è½½è·¯å¾„ä¸º'" + strPath + "'çš„xmlè®°å½•æ—¶å‡ºé”™: " + ex.Message;
                 goto ERROR1;
             }
 
@@ -244,14 +251,14 @@ namespace DigitalPlatform.LibraryServer
             return result;
         }
 
-
-        // ¼ìË÷ÊµÓÃ¿â¼ÇÂ¼µÄÂ·¾¶ºÍ¼ÇÂ¼Ìå
+        // æ£€ç´¢å®ç”¨åº“è®°å½•çš„è·¯å¾„å’Œè®°å½•ä½“
         // return:
-        //      -1  error(×¢£º¼ìË÷ÃüÖĞ¶àÌõÇé¿ö±»µ±×÷´íÎó·µ»Ø)
+        //      -1  error(æ³¨ï¼šæ£€ç´¢å‘½ä¸­å¤šæ¡æƒ…å†µè¢«å½“ä½œé”™è¯¯è¿”å›)
         //      0   not found
         //      1   found
         public int SearchUtilPathAndRecord(
-            RmsChannelCollection Channels,
+            // RmsChannelCollection Channels,
+            RmsChannel channel,
             string strDbName,
             string strKey,
             string strFrom,
@@ -267,7 +274,7 @@ namespace DigitalPlatform.LibraryServer
 
             if (String.IsNullOrEmpty(strDbName) == true)
             {
-                strError = "ÉĞÎ´Ö¸¶¨¿âÃû";
+                strError = "å°šæœªæŒ‡å®šåº“å";
                 return -1;
             }
 
@@ -278,15 +285,16 @@ namespace DigitalPlatform.LibraryServer
                 + "</word><match>exact</match><relation>=</relation><dataType>string</dataType><maxCount>-1</maxCount></item><lang>zh</lang></target>";
 
             List<string> aPath = null;
-            // »ñµÃÍ¨ÓÃ¼ÇÂ¼
-            // ±¾º¯Êı¿É»ñµÃ³¬¹ı1ÌõÒÔÉÏµÄÂ·¾¶
+            // è·å¾—é€šç”¨è®°å½•
+            // æœ¬å‡½æ•°å¯è·å¾—è¶…è¿‡1æ¡ä»¥ä¸Šçš„è·¯å¾„
             // return:
             //      -1  error
             //      0   not found
-            //      1   ÃüÖĞ1Ìõ
-            //      >1  ÃüÖĞ¶àÓÚ1Ìõ
+            //      1   å‘½ä¸­1æ¡
+            //      >1  å‘½ä¸­å¤šäº1æ¡
             int nRet = GetRecXml(
-                Channels,
+                // Channels,
+                channel,
                 strQueryXml,
                 out strXml,
                 2,
@@ -295,18 +303,18 @@ namespace DigitalPlatform.LibraryServer
                 out strError);
             if (nRet == -1)
             {
-                strError = "¼ìË÷¿â " + strDbName + " Ê±³ö´í: " + strError;
+                strError = "æ£€ç´¢åº“ " + strDbName + " æ—¶å‡ºé”™: " + strError;
                 return -1;
             }
             if (nRet == 0)
             {
-                return 0;	// Ã»ÓĞÕÒµ½
+                return 0;	// æ²¡æœ‰æ‰¾åˆ°
             }
 
             /*
             if (nRet > 1)
             {
-                strError = "ÒÔ¼ìË÷¼ü '" + strKey + "' ¼ìË÷¿â " + strDbName + " Ê±ÃüÖĞ " + Convert.ToString(nRet) + " Ìõ£¬ÊôÓÚ²»Õı³£Çé¿ö¡£ÇëĞŞ¸Ä¿â '" + strDbName + "' ÖĞÏàÓ¦¼ÇÂ¼£¬È·±£Í¬Ò»¼üÖµÖ»ÓĞÒ»Ìõ¶ÔÓ¦µÄ¼ÇÂ¼¡£";
+                strError = "ä»¥æ£€ç´¢é”® '" + strKey + "' æ£€ç´¢åº“ " + strDbName + " æ—¶å‘½ä¸­ " + Convert.ToString(nRet) + " æ¡ï¼Œå±äºä¸æ­£å¸¸æƒ…å†µã€‚è¯·ä¿®æ”¹åº“ '" + strDbName + "' ä¸­ç›¸åº”è®°å½•ï¼Œç¡®ä¿åŒä¸€é”®å€¼åªæœ‰ä¸€æ¡å¯¹åº”çš„è®°å½•ã€‚";
                 return -1;
             }
              * */

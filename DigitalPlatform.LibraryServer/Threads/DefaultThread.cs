@@ -1,12 +1,12 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace DigitalPlatform.LibraryServer
 {
     /// <summary>
-    /// ×÷¹ÜÀíµÄ»ù±¾Ïß³Ì
-    /// ¶¼ÊÇÒ»Ğ©ĞèÒª½Ï¶ÌÊ±¼ä¾Í¿ÉÒÔ´¦ÀíµÄĞ¡ÈÎÎñ
+    /// ä½œç®¡ç†çš„åŸºæœ¬çº¿ç¨‹
+    /// éƒ½æ˜¯ä¸€äº›éœ€è¦è¾ƒçŸ­æ—¶é—´å°±å¯ä»¥å¤„ç†çš„å°ä»»åŠ¡
     /// </summary>
     public class DefaultThread : BatchTask
     {
@@ -15,40 +15,40 @@ namespace DigitalPlatform.LibraryServer
             : base(app, strName)
         {
             this.Loop = true;
-            this.PerTime = 5 * 60 * 1000;	// 5·ÖÖÓ
+            this.PerTime = 5 * 60 * 1000;	// 5åˆ†é’Ÿ
         }
 
         public override string DefaultName
         {
             get
             {
-                return "¹ÜÀíÏß³Ì";
+                return "ç®¡ç†çº¿ç¨‹";
             }
         }
 
         DateTime m_lastRetryTime = DateTime.Now;
-        int m_nRetryAfterMinutes = 5;   // Ã¿¼ä¸ô¶àÉÙ·ÖÖÓÒÔºóÖØÊÔÒ»´Î
+        int m_nRetryAfterMinutes = 5;   // æ¯é—´éš”å¤šå°‘åˆ†é’Ÿä»¥åé‡è¯•ä¸€æ¬¡
 
-        // Ò»´Î²Ù×÷Ñ­»·
+        // ä¸€æ¬¡æ“ä½œå¾ªç¯
         public override void Worker()
         {
 
-            // ÇåÀí Garden
+            // æ¸…ç† Garden
             try
             {
-                // TODO: µ± hashtable ÒÑ¾­ÂúÁËµÄÊ±ºò£¬ĞèÒªËõ¶Ì´æ»îÊ±¼ä
+                // TODO: å½“ hashtable å·²ç»æ»¡äº†çš„æ—¶å€™ï¼Œéœ€è¦ç¼©çŸ­å­˜æ´»æ—¶é—´
                 if (this.App.Garden.IsFull == true)
-                    this.App.Garden.CleanPersons(new TimeSpan(0, 5, 0), this.App.Statis);    // 5·ÖÖÓ ½ô¼±Çé¿öÏÂ REST SessionµÄ×î³¤´æ»îÊ±¼ä
+                    this.App.Garden.CleanPersons(new TimeSpan(0, 5, 0), this.App.Statis);    // 5åˆ†é’Ÿ ç´§æ€¥æƒ…å†µä¸‹ REST Sessionçš„æœ€é•¿å­˜æ´»æ—¶é—´
                 else
-                    this.App.Garden.CleanPersons(new TimeSpan(0, 20, 0), this.App.Statis);    // 20·ÖÖÓ REST SessionµÄ×î³¤´æ»îÊ±¼ä
+                    this.App.Garden.CleanPersons(new TimeSpan(0, 20, 0), this.App.Statis);    // 20åˆ†é’Ÿ REST Sessionçš„æœ€é•¿å­˜æ´»æ—¶é—´
             }
             catch (Exception ex)
             {
-                string strErrorText = "DefaultTreadÖĞ CleanPersons() ³öÏÖÒì³£: " + ExceptionUtil.GetDebugText(ex);
+                string strErrorText = "DefaultTreadä¸­ CleanPersons() å‡ºç°å¼‚å¸¸: " + ExceptionUtil.GetDebugText(ex);
                 this.App.WriteErrorLog(strErrorText);
             }
 
-            // ´úÎªË¢ĞÂStatis
+            // ä»£ä¸ºåˆ·æ–°Statis
             if (this.App.Statis != null)
             {
                 try
@@ -57,29 +57,29 @@ namespace DigitalPlatform.LibraryServer
                 }
                 catch (Exception ex)
                 {
-                    string strErrorText = "DefaultTreadÖĞ this.App.Statis.Flush() ³öÏÖÒì³£: " + ExceptionUtil.GetDebugText(ex);
+                    string strErrorText = "DefaultTreadä¸­ this.App.Statis.Flush() å‡ºç°å¼‚å¸¸: " + ExceptionUtil.GetDebugText(ex);
                     this.App.WriteErrorLog(strErrorText);
                 }
             }
 
-            // ¼°Ê±±£´ælibrary.xmlµÄ±ä»¯
+            // åŠæ—¶ä¿å­˜library.xmlçš„å˜åŒ–
             if (this.App.Changed == true)
             {
                 this.App.Flush();
             }
 
-            // ÇåÀíSessions
+            // æ¸…ç†Sessions
             try
             {
-                // TODO: µ± hashtable ÒÑ¾­ÂúÁËµÄÊ±ºò£¬ĞèÒªËõ¶Ì´æ»îÊ±¼ä
+                // TODO: å½“ hashtable å·²ç»æ»¡äº†çš„æ—¶å€™ï¼Œéœ€è¦ç¼©çŸ­å­˜æ´»æ—¶é—´
                 if (this.App.SessionTable.IsFull == true)
-                    this.App.SessionTable.CleanSessions(new TimeSpan(0, 5, 0));    // 5·ÖÖÓ ½ô¼±Çé¿öÏÂ REST SessionµÄ×î³¤´æ»îÊ±¼ä
+                    this.App.SessionTable.CleanSessions(new TimeSpan(0, 5, 0));    // 5åˆ†é’Ÿ ç´§æ€¥æƒ…å†µä¸‹ REST Sessionçš„æœ€é•¿å­˜æ´»æ—¶é—´
                 else
-                    this.App.SessionTable.CleanSessions(new TimeSpan(0, 20, 0));    // 20·ÖÖÓ REST SessionµÄ×î³¤´æ»îÊ±¼ä
+                    this.App.SessionTable.CleanSessions(new TimeSpan(0, 20, 0));    // 20åˆ†é’Ÿ REST Sessionçš„æœ€é•¿å­˜æ´»æ—¶é—´
             }
             catch (Exception ex)
             {
-                string strErrorText = "DefaultTreadÖĞ CleanSessions() ³öÏÖÒì³£: " + ExceptionUtil.GetDebugText(ex);
+                string strErrorText = "DefaultTreadä¸­ CleanSessions() å‡ºç°å¼‚å¸¸: " + ExceptionUtil.GetDebugText(ex);
                 this.App.WriteErrorLog(strErrorText);
             }
 
@@ -95,11 +95,11 @@ namespace DigitalPlatform.LibraryServer
             out strError);
                     if (nRet == -1)
                     {
-                        this.App.WriteErrorLog("ERR003 ³õÊ¼»¯kdbsÊ§°Ü: " + strError);
+                        this.App.WriteErrorLog("ERR003 åˆå§‹åŒ–kdbså¤±è´¥: " + strError);
                     }
                     else
                     {
-                        // ¼ì²é dpKernel °æ±¾ºÅ
+                        // æ£€æŸ¥ dpKernel ç‰ˆæœ¬å·
                         nRet = this.App.CheckKernelVersion(this.RmsChannels,
                             out strError);
                         if (nRet == -1)
@@ -108,7 +108,7 @@ namespace DigitalPlatform.LibraryServer
                 }
                 catch (Exception ex)
                 {
-                    string strErrorText = "DefaultTreadÖĞ InitialKdbs() ³öÏÖÒì³£: " + ExceptionUtil.GetDebugText(ex);
+                    string strErrorText = "DefaultTreadä¸­ InitialKdbs() å‡ºç°å¼‚å¸¸: " + ExceptionUtil.GetDebugText(ex);
                     this.App.WriteErrorLog(strErrorText);
                 }
             }
@@ -123,12 +123,12 @@ namespace DigitalPlatform.LibraryServer
                         out strError);
                     if (nRet == -1)
                     {
-                        this.App.WriteErrorLog("ERR004 ³õÊ¼»¯vdbsÊ§°Ü: " + strError);
+                        this.App.WriteErrorLog("ERR004 åˆå§‹åŒ–vdbså¤±è´¥: " + strError);
                     }
                 }
                 catch (Exception ex)
                 {
-                    string strErrorText = "DefaultTreadÖĞ InitialVdbs() ³öÏÖÒì³£: " + ExceptionUtil.GetDebugText(ex);
+                    string strErrorText = "DefaultTreadä¸­ InitialVdbs() å‡ºç°å¼‚å¸¸: " + ExceptionUtil.GetDebugText(ex);
                     this.App.WriteErrorLog(strErrorText);
                 }
             }
@@ -143,11 +143,11 @@ namespace DigitalPlatform.LibraryServer
             {
                 try
                 {
-                    this.App.OperLog.Cache.Shrink(new TimeSpan(0, 1, 0));    // Ò»·ÖÖÓ
+                    this.App.OperLog.Cache.Shrink(new TimeSpan(0, 1, 0));    // ä¸€åˆ†é’Ÿ
                 }
                 catch (Exception ex)
                 {
-                    string strErrorText = "DefaultTreadÖĞ Ñ¹Ëõ OperLog.Cache ³öÏÖÒì³£: " + ExceptionUtil.GetDebugText(ex);
+                    string strErrorText = "DefaultTreadä¸­ å‹ç¼© OperLog.Cache å‡ºç°å¼‚å¸¸: " + ExceptionUtil.GetDebugText(ex);
                     this.App.WriteErrorLog(strErrorText);
                 }
             }

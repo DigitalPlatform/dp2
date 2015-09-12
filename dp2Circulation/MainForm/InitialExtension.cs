@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
 using System.Xml;
+using System.ServiceProcess;
 
 using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
@@ -237,8 +238,16 @@ namespace dp2Circulation
                 string strCssUrl = PathUtil.MergePath(this.DataDir, "background.css");
                 string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
 
-                Global.WriteHtml(m_backgroundForm.WebBrowser,
-                    "<html><head>" + strLink + "</head><body>");
+                try
+                {
+                    Global.WriteHtml(m_backgroundForm.WebBrowser,
+                        "<html><head>" + strLink + "</head><body>");
+                }
+                catch(Exception ex)
+                {
+                    MessageBox.Show(this, "dp2circulation 所需的 IE 浏览器控件出现异常: " + ExceptionUtil.GetDebugText(ex));
+                    Application.Exit();
+                }
             }
 
             // 设置窗口尺寸状态
@@ -370,6 +379,40 @@ namespace dp2Circulation
 
         }
 
+
+        bool Detect360()
+        {
+            ServiceController[] devices = ServiceController.GetDevices();
+
+            // 先检测驱动
+            foreach (ServiceController controller in devices)
+            {
+                if (controller.DisplayName.StartsWith("360netmon") 
+                    || controller.DisplayName.StartsWith("360SelfProtection"))
+                    return true;
+            }
+
+            // 再检测系统进程
+            System.Diagnostics.Process[] process_list = System.Diagnostics.Process.GetProcesses();
+
+            foreach (Process process in process_list)
+            {
+                string ModuleName = "";
+                try
+                {
+                    ModuleName = process.MainModule.ModuleName;
+                }
+                catch (Exception ex)
+                {
+                    continue;
+                }
+                if (ModuleName.StartsWith("360tray.exe"))
+                    return true;
+            }
+
+            return false;
+        }
+
         // 从数据目录 default 子目录复制配置文件到用户目录
         // 如果用户目录中已经有同名文件存在，则不复制了
         // 这种做法，是为了让用户可以修改实际使用的配置文件，并且在升级安装的时候，用户目录内的文件不会被安装修改原始的配置文件过程所覆盖
@@ -494,13 +537,36 @@ namespace dp2Circulation
 
                     bool bFirstDialog = false;
 
-                    // 如果必要，首先出现配置画面，便于配置dp2libraryws的URL
+                    // 如果必要，首先出现配置画面，便于配置 dp2library 的 URL
                     string strLibraryServerUrl = this.AppInfo.GetString(
                         "config",
                         "circulation_server_url",
                         "");
                     if (String.IsNullOrEmpty(strLibraryServerUrl) == true)
                     {
+                        // http://stackoverflow.com/questions/860459/determine-os-using-environment-osversion
+                        // 判断当前操作系统版本
+                        if (Environment.OSVersion.Version.Major == 5)
+                        {
+#if NO
+                            if (Environment.OSVersion.Version.Minor == 1)
+                            {
+                                // XP
+                            }
+                            else if (Environment.OSVersion.Version.Minor == 2)
+                            {
+                                // Server 2003.  XP 64-bit will also fall in here.
+                            }
+#endif
+                            MessageBox.Show(this, "dp2Circulation 不支持 Windows XP / Windows Server 2003 操作系统版本。请在 Windows Vista 及以上版本安装运行");
+                                Application.Exit();
+                                return false;
+                        }
+                        else if (Environment.OSVersion.Version.Major >= 6)
+                        {
+                            // Vista on up
+                        }
+
                         FirstRunDialog first_dialog = new FirstRunDialog();
                         MainForm.SetControlFont(first_dialog, this.DefaultFont);
                         first_dialog.MainForm = this;
@@ -525,7 +591,14 @@ namespace dp2Circulation
                             this.AppInfo.Save();
                         }
                     }
-
+                    else
+                    {
+                        // 以前已经安装的情况
+                        if (Environment.OSVersion.Version.Major == 5)
+                        {
+                            MessageBox.Show(this, "尊敬的用户，dp2Circulation 在 2015 年 12 月 31 日以后将不再支持 Windows XP / Windows Server 2003 操作系统版本。请尽快升级您的 Windows 操作系统到 Vista 及以上版本。祝工作顺利。\r\n\r\n数字平台敬上");
+                        }
+                    }
 #if NO
                     // 检查序列号。这里的暂时不要求各种产品功能
                     // DateTime start_day = new DateTime(2014, 10, 15);    // 2014/10/15 以后强制启用序列号功能
@@ -708,8 +781,51 @@ AppInfo.GetString("config",
                 Stop.Register(stopManager, true);	// 和容器关联
                 Stop.SetMessage("正在删除以前遗留的临时文件...");
 
-                DeleteAllTempFiles(this.DataDir);
-                DeleteAllTempFiles(this.UserTempDir);
+                /*
+Type: System.UnauthorizedAccessException
+Message: Access to the path 'D:\System Volume Information\' is denied.
+Stack:
+   at System.IO.__Error.WinIOError(Int32 errorCode, String maybeFullPath)
+   at System.IO.FileSystemEnumerableIterator`1.CommonInit()
+   at System.IO.FileSystemEnumerableIterator`1..ctor(String path, String
+originalUserPath, String searchPattern, SearchOption searchOption,
+SearchResultHandler`1 resultHandler)
+   at System.IO.DirectoryInfo.InternalGetFiles(String searchPattern,
+SearchOption searchOption)
+   at System.IO.DirectoryInfo.GetFiles()
+   at dp2Circulation.MainForm.DeleteAllTempFiles(String strDataDir)
+   at dp2Circulation.MainForm.DeleteAllTempFiles(String strDataDir)
+   at dp2Circulation.MainForm.InitialProperties(Boolean bFullInitial,
+Boolean bRestoreLastOpenedWindow)
+ 
+ 
+dp2Circulation 版本: dp2Circulation, Version=2.4.5715.19592,
+Culture=neutral, PublicKeyToken=null
+操作系统：Microsoft Windows NT 5.1.2600 Service Pack 3
+                 * * */
+                try
+                {
+                    DeleteAllTempFiles(this.DataDir);
+                }
+                catch (System.UnauthorizedAccessException ex)
+                {
+                    MessageBox.Show(this, "在试图删除数据目录 '"+this.DataDir+"' 内临时文件时出错: " + ex.Message
+                        + "\r\n\r\n既然您把软件安装到这个目录或者试图从这里运行软件，就该给当前 Windows 用户赋予针对这个目录的列目录和删除文件的权限");
+                    Application.Exit();
+                    return false;
+                }
+                
+                try
+                {
+                    DeleteAllTempFiles(this.UserTempDir);
+                }
+                catch (System.UnauthorizedAccessException ex)
+                {
+                    MessageBox.Show(this, "在试图删除用户临时目录 '" + this.UserTempDir + "' 内临时文件时出错: " + ex.Message
+                        + "\r\n\r\n应给当前 Windows 用户赋予针对这个目录的列目录和删除文件的权限");
+                    Application.Exit();
+                    return false;
+                }
 
                 Stop.SetMessage("正在复制报表配置文件...");
                 // 拷贝目录

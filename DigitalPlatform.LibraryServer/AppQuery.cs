@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -10,7 +10,7 @@ using System.Threading;
 using System.Diagnostics;
 using System.Net.Mail;
 
-using DigitalPlatform;	// StopÀà
+using DigitalPlatform;	// Stopç±»
 using DigitalPlatform.rms.Client;
 using DigitalPlatform.Xml;
 using DigitalPlatform.IO;
@@ -26,15 +26,15 @@ using DigitalPlatform.rms.Client.rmsws_localhost;
 namespace DigitalPlatform.LibraryServer
 {
     /// <summary>
-    /// ±¾²¿·ÖÊÇºÍXML¼ìË÷Ê½¼Ó¹¤Ïà¹ØµÄ´úÂë
+    /// æœ¬éƒ¨åˆ†æ˜¯å’ŒXMLæ£€ç´¢å¼åŠ å·¥ç›¸å…³çš„ä»£ç 
     /// </summary>
     public partial class LibraryApplication
     {
-        // ¼ì²é¼ìË÷Ê½ÄÚÓĞÃ»ÓĞ³¬Ô½¹æ¶¨¶ÁÕß¼ìË÷µÄÊı¾İ¿â
+        // æ£€æŸ¥æ£€ç´¢å¼å†…æœ‰æ²¡æœ‰è¶…è¶Šè§„å®šè¯»è€…æ£€ç´¢çš„æ•°æ®åº“
         // return:
         //      -1  error
-        //      0   Ã»ÓĞ³¬Ô½ÒªÇó
-        //      1   ³¬Ô½ÁËÒªÇó
+        //      0   æ²¡æœ‰è¶…è¶Šè¦æ±‚
+        //      1   è¶…è¶Šäº†è¦æ±‚
         public int CheckReaderOnlyXmlQuery(string strSourceQueryXml,
             out string strError)
         {
@@ -45,7 +45,7 @@ namespace DigitalPlatform.LibraryServer
             if (this.vdbs == null)
             {
                 this.ActivateManagerThreadForLoad();
-                strError = "app.vdbs == null¡£¹ÊÕÏÔ­ÒòÇë¼ì²édp2LibraryÈÕÖ¾";
+                strError = "app.vdbs == nullã€‚æ•…éšœåŸå› è¯·æ£€æŸ¥dp2Libraryæ—¥å¿—";
                 return -1;
             }
 
@@ -59,11 +59,11 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "XML¼ìË÷Ê½×°ÈëXMLDOMÊ±³ö´í: " + ex.Message;
+                strError = "XMLæ£€ç´¢å¼è£…å…¥XMLDOMæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
-            // ±éÀúËùÓĞ<target>ÔªËØ
+            // éå†æ‰€æœ‰<target>å…ƒç´ 
             XmlNodeList nodes = dom.DocumentElement.SelectNodes("//target");
             for (int i = 0; i < nodes.Count; i++)
             {
@@ -81,7 +81,7 @@ namespace DigitalPlatform.LibraryServer
                 {
                     Db db = dbs[j];
 
-                    // ÔÊĞíÔ¤Ô¼µ½Êé¿â 2015/6/14
+                    // å…è®¸é¢„çº¦åˆ°ä¹¦åº“ 2015/6/14
                     if (db.DbName == this.ArrivedDbName)
                         continue;
 
@@ -90,7 +90,7 @@ namespace DigitalPlatform.LibraryServer
                         out strBiblioDbName);
                     if (String.IsNullOrEmpty(strDbType) == true)
                     {
-                        strError = "Êı¾İ¿â '"+db.DbName+"' ³¬³öÁË¶ÁÕß¿É¼ìË÷µÄÊı¾İ¿â·¶Î§";
+                        strError = "æ•°æ®åº“ '"+db.DbName+"' è¶…å‡ºäº†è¯»è€…å¯æ£€ç´¢çš„æ•°æ®åº“èŒƒå›´";
                         return 1;
                     }
                 }
@@ -100,11 +100,11 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
-        // ¼ì²é¼ìË÷Ê½ÄÚÓĞÃ»ÓĞ³¬Ô½µ±Ç°ÓÃ»§¹ÜÏ½µÄ¶ÁÕß¿â·¶Î§µÄ¶ÁÕß¿â
+        // æ£€æŸ¥æ£€ç´¢å¼å†…æœ‰æ²¡æœ‰è¶…è¶Šå½“å‰ç”¨æˆ·ç®¡è¾–çš„è¯»è€…åº“èŒƒå›´çš„è¯»è€…åº“
         // return:
         //      -1  error
-        //      0   Ã»ÓĞ³¬Ô½ÒªÇó
-        //      1   ³¬Ô½ÁËÒªÇó
+        //      0   æ²¡æœ‰è¶…è¶Šè¦æ±‚
+        //      1   è¶…è¶Šäº†è¦æ±‚
         public int CheckReaderDbXmlQuery(string strSourceQueryXml,
             string strLibraryCodeList,
             out string strError)
@@ -116,7 +116,7 @@ namespace DigitalPlatform.LibraryServer
             if (this.vdbs == null)
             {
                 this.ActivateManagerThreadForLoad();
-                strError = "app.vdbs == null¡£¹ÊÕÏÔ­ÒòÇë¼ì²édp2LibraryÈÕÖ¾";
+                strError = "app.vdbs == nullã€‚æ•…éšœåŸå› è¯·æ£€æŸ¥dp2Libraryæ—¥å¿—";
                 return -1;
             }
 
@@ -130,11 +130,11 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "XML¼ìË÷Ê½×°ÈëXMLDOMÊ±³ö´í: " + ex.Message;
+                strError = "XMLæ£€ç´¢å¼è£…å…¥XMLDOMæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
-            // ±éÀúËùÓĞ<target>ÔªËØ
+            // éå†æ‰€æœ‰<target>å…ƒç´ 
             XmlNodeList nodes = dom.DocumentElement.SelectNodes("//target");
             for (int i = 0; i < nodes.Count; i++)
             {
@@ -152,7 +152,7 @@ namespace DigitalPlatform.LibraryServer
                 {
                     Db db = dbs[j];
 
-                    // ĞèÒªÏŞÖÆ¼ìË÷¶ÁÕß¿âÎªµ±Ç°¹ÜÏ½µÄ·¶Î§
+                    // éœ€è¦é™åˆ¶æ£€ç´¢è¯»è€…åº“ä¸ºå½“å‰ç®¡è¾–çš„èŒƒå›´
                     {
                         string strLibraryCode = "";
                         bool bReaderDbInCirculation = true;
@@ -160,12 +160,12 @@ namespace DigitalPlatform.LibraryServer
                             out bReaderDbInCirculation,
                             out strLibraryCode) == true)
                         {
-                            // ¼ì²éµ±Ç°²Ù×÷ÕßÊÇ·ñ¹ÜÏ½Õâ¸ö¶ÁÕß¿â
-                            // ¹Û²ìÒ»¸ö¶ÁÕß¼ÇÂ¼Â·¾¶£¬¿´¿´ÊÇ²»ÊÇÔÚµ±Ç°ÓÃ»§¹ÜÏ½µÄ¶ÁÕß¿â·¶Î§ÄÚ?
+                            // æ£€æŸ¥å½“å‰æ“ä½œè€…æ˜¯å¦ç®¡è¾–è¿™ä¸ªè¯»è€…åº“
+                            // è§‚å¯Ÿä¸€ä¸ªè¯»è€…è®°å½•è·¯å¾„ï¼Œçœ‹çœ‹æ˜¯ä¸æ˜¯åœ¨å½“å‰ç”¨æˆ·ç®¡è¾–çš„è¯»è€…åº“èŒƒå›´å†…?
                             if (this.IsCurrentChangeableReaderPath(db.DbName + "/?",
                                 strLibraryCodeList) == false)
                             {
-                                strError = "¶ÁÕß¿â '" + db.DbName + "' ²»ÔÚµ±Ç°ÓÃ»§¹ÜÏ½·¶Î§ÄÚ";
+                                strError = "è¯»è€…åº“ '" + db.DbName + "' ä¸åœ¨å½“å‰ç”¨æˆ·ç®¡è¾–èŒƒå›´å†…";
                                 return 1;
                             }
                         }
@@ -176,11 +176,11 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
-        // ½«°üº¬ĞéÄâ¿âÒªÇóµÄXML¼ìË÷Ê½±ä»»ÎªÄÚºËÄÜ¹»Àí½âµÄÊµÔÚ¿âXML¼ìË÷Ê½
+        // å°†åŒ…å«è™šæ‹Ÿåº“è¦æ±‚çš„XMLæ£€ç´¢å¼å˜æ¢ä¸ºå†…æ ¸èƒ½å¤Ÿç†è§£çš„å®åœ¨åº“XMLæ£€ç´¢å¼
         // return:
         //      -1  error
-        //      0   Ã»ÓĞ·¢Éú±ä»¯
-        //      1   ·¢ÉúÁË±ä»¯
+        //      0   æ²¡æœ‰å‘ç”Ÿå˜åŒ–
+        //      1   å‘ç”Ÿäº†å˜åŒ–
         public int KernelizeXmlQuery(string strSourceQueryXml,
             out string strTargetQueryXml,
             out string strError)
@@ -198,13 +198,13 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                strError = "XML¼ìË÷Ê½×°ÈëXMLDOMÊ±³ö´í: " + ex.Message;
+                strError = "XMLæ£€ç´¢å¼è£…å…¥XMLDOMæ—¶å‡ºé”™: " + ex.Message;
                 return -1;
             }
 
             bool bChanged = false;
 
-            // ±éÀúËùÓĞ<target>ÔªËØ
+            // éå†æ‰€æœ‰<target>å…ƒç´ 
 
             XmlNodeList nodes = dom.DocumentElement.SelectNodes("//target");
             for (int i = 0; i < nodes.Count; i++)
@@ -216,12 +216,12 @@ namespace DigitalPlatform.LibraryServer
                     continue;
 
                 string strOutputList = "";
-                        // ±ä»»list²ÎÊıÖµ£¬½«ÆäÖĞµÄĞéÄâ¿â£¨Á¬´øÍ¾¾¶£©±ä»»ÎªÎïÀí¿âºÍÍ¾¾¶
+                        // å˜æ¢listå‚æ•°å€¼ï¼Œå°†å…¶ä¸­çš„è™šæ‹Ÿåº“ï¼ˆè¿å¸¦é€”å¾„ï¼‰å˜æ¢ä¸ºç‰©ç†åº“å’Œé€”å¾„
         // parameters:
         // return:
         //      -1  error
-        //      0   Ã»ÓĞ·¢Éú±ä»¯
-        //      1   ·¢ÉúÁË±ä»¯
+        //      0   æ²¡æœ‰å‘ç”Ÿå˜åŒ–
+        //      1   å‘ç”Ÿäº†å˜åŒ–
                 nRet = ConvertList(strList,
                     out strOutputList,
                     out strError);
@@ -244,12 +244,12 @@ namespace DigitalPlatform.LibraryServer
             return 1;
         }
 
-        // ±ä»»list²ÎÊıÖµ£¬½«ÆäÖĞµÄĞéÄâ¿â£¨Á¬´øÍ¾¾¶£©±ä»»ÎªÎïÀí¿âºÍÍ¾¾¶
+        // å˜æ¢listå‚æ•°å€¼ï¼Œå°†å…¶ä¸­çš„è™šæ‹Ÿåº“ï¼ˆè¿å¸¦é€”å¾„ï¼‰å˜æ¢ä¸ºç‰©ç†åº“å’Œé€”å¾„
         // parameters:
         // return:
         //      -1  error
-        //      0   Ã»ÓĞ·¢Éú±ä»¯
-        //      1   ·¢ÉúÁË±ä»¯
+        //      0   æ²¡æœ‰å‘ç”Ÿå˜åŒ–
+        //      1   å‘ç”Ÿäº†å˜åŒ–
         int ConvertList(string strSourceList,
             out string strTargetList,
             out string strError)
@@ -273,13 +273,13 @@ namespace DigitalPlatform.LibraryServer
 
                 VirtualDatabase vdb = this.vdbs[db.DbName];
 
-                if (vdb == null)  // ²»ÊÇĞéÄâ¿â
+                if (vdb == null)  // ä¸æ˜¯è™šæ‹Ÿåº“
                 {
                     target_dbs.Add(db);
                     continue; 
                 }
 
-                if (vdb.IsVirtual == false)  // ²»ÊÇĞéÄâ¿â
+                if (vdb.IsVirtual == false)  // ä¸æ˜¯è™šæ‹Ÿåº“
                 {
                     target_dbs.Add(db);
                     continue; 
@@ -287,10 +287,10 @@ namespace DigitalPlatform.LibraryServer
 
                 bChanged = true;
 
-                // Ò»¸öDb¶ÔÏó¿ÉÄÜÑİ»¯Îª¶à¸öDb¶ÔÏó
+                // ä¸€ä¸ªDbå¯¹è±¡å¯èƒ½æ¼”åŒ–ä¸ºå¤šä¸ªDbå¯¹è±¡
                 List<Db> multi_dbs = new List<Db>();
 
-                // »ñµÃÏÂÊôµÄËùÓĞÕæÊµÊı¾İ¿âÃû
+                // è·å¾—ä¸‹å±çš„æ‰€æœ‰çœŸå®æ•°æ®åº“å
                 List<string> real_dbnames = vdb.GetRealDbNames();
                 for (int j = 0; j < real_dbnames.Count; j++)
                 {
@@ -300,10 +300,10 @@ namespace DigitalPlatform.LibraryServer
                     List<string> real_froms = new List<string>();
                     for(int k=0;k<db.Froms.Count;k++)
                     {
-                        // ĞéÄâµÄÂ·¾¶Ãû
+                        // è™šæ‹Ÿçš„è·¯å¾„å
                         string strVirtualFromName = db.Froms[k];
 
-                        // ÊµÔÚµÄÂ·¾¶Ãû
+                        // å®åœ¨çš„è·¯å¾„å
                         string strRealFroms = vdb.GetRealFromName(
                             this.vdbs.db_dir_results,
                             target_db.DbName,
@@ -357,7 +357,7 @@ namespace DigitalPlatform.LibraryServer
                 if (String.IsNullOrEmpty(strSegment) == true)
                     continue;
 
-                // ½âÎö³öÊı¾İ¿âÃû
+                // è§£æå‡ºæ•°æ®åº“å
                 string strDbName = "";
                 int nRet = strSegment.IndexOf(':');
                 if (nRet == -1)

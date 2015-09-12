@@ -1,11 +1,11 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace DigitalPlatform.LibraryServer
 {
     /// <summary>
-    /// dp2libraryÖÐµ÷ÓÃC#½Å±¾Ê±, ÓÃÓÚ×ª»»Ò»°ã¼ÇÂ¼ÐÅÏ¢xml->htmlµÄ½Å±¾ÀàµÄ»ùÀà
+    /// dp2libraryä¸­è°ƒç”¨C#è„šæœ¬æ—¶, ç”¨äºŽè½¬æ¢ä¸€èˆ¬è®°å½•ä¿¡æ¯xml->htmlçš„è„šæœ¬ç±»çš„åŸºç±»
     /// </summary>
     public class RecordConverter
     {

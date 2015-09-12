@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -11,12 +11,12 @@ namespace DigitalPlatform.LibraryServer
     public class Clock
     {
         public ReaderWriterLock m_lock = new ReaderWriterLock();
-        public static int m_nLockTimeout = 5000;	// 5000=5Ãë
+        public static int m_nLockTimeout = 5000;	// 5000=5ç§’
 
-        TimeSpan clockdelta = new TimeSpan(0);  // Âß¼­ÉÏµÄÒ»¸ö¡°Á÷Í¨Ê±ÖÓ¡±ºÍµ±Ç°·şÎñÆ÷»úÆ÷Ê±ÖÓµÄ²î¶î
+        TimeSpan clockdelta = new TimeSpan(0);  // é€»è¾‘ä¸Šçš„ä¸€ä¸ªâ€œæµé€šæ—¶é’Ÿâ€å’Œå½“å‰æœåŠ¡å™¨æœºå™¨æ—¶é’Ÿçš„å·®é¢
 
 
-        // ºÍ±¾»úÊ±ÖÓµÄÆ«ÒÆTicksÁ¿
+        // å’Œæœ¬æœºæ—¶é’Ÿçš„åç§»Ticksé‡
         public long Delta
         {
             get
@@ -29,10 +29,10 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
-        // ÉèÖÃÁ÷Í¨Ê±ÖÓ
-        // Íâ²¿Ê¹ÓÃ
+        // è®¾ç½®æµé€šæ—¶é’Ÿ
+        // å¤–éƒ¨ä½¿ç”¨
         // paramters:
-        //      strTime RFC1123¸ñÊ½
+        //      strTime RFC1123æ ¼å¼
         public int SetClock(string strTime,
             out string strError)
         {
@@ -43,7 +43,7 @@ namespace DigitalPlatform.LibraryServer
                 this.m_lock.AcquireWriterLock(m_nLockTimeout);
                 try
                 {
-                    // Ïû³ı²îÒì
+                    // æ¶ˆé™¤å·®å¼‚
                     this.clockdelta = new TimeSpan(0);
                 }
                 finally
@@ -61,7 +61,7 @@ namespace DigitalPlatform.LibraryServer
             }
             catch
             {
-                strError = "ÈÕÆÚÊ±¼ä×Ö·û´® '" + strTime + "' ¸ñÊ½´íÎó¡£Ó¦·ûºÏRFC1123¸ñÊ½ÒªÇó¡£";
+                strError = "æ—¥æœŸæ—¶é—´å­—ç¬¦ä¸² '" + strTime + "' æ ¼å¼é”™è¯¯ã€‚åº”ç¬¦åˆRFC1123æ ¼å¼è¦æ±‚ã€‚";
                 return -1;
             }
 
@@ -78,8 +78,8 @@ namespace DigitalPlatform.LibraryServer
             return 0;
         }
 
-        // »ñµÃÁ÷Í¨Ê±ÖÓ RFC1123¸ñÊ½ ÓĞÊ±ÇøĞÅÏ¢
-        // Íâ²¿Ê¹ÓÃ
+        // è·å¾—æµé€šæ—¶é’Ÿ RFC1123æ ¼å¼ æœ‰æ—¶åŒºä¿¡æ¯
+        // å¤–éƒ¨ä½¿ç”¨
         public string GetClock()
         {
             DateTime time;

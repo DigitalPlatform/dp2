@@ -17,7 +17,7 @@ namespace DigitalPlatform.CirculationClient
     /// </summary>
     public class CfgCache
     {
-        XmlDocument dom = null;
+        XmlDocument _dom = null;
 
         string m_strXmlFileName = "";	// 存储缓冲对照信息的xml文件
 
@@ -95,18 +95,18 @@ namespace DigitalPlatform.CirculationClient
             out string strError)
         {
             strError = "";
-            dom = new XmlDocument();
+            _dom = new XmlDocument();
 
             m_strXmlFileName = strXmlFileName;	// 出错后也需要
 
             try
             {
-                dom.Load(strXmlFileName);
+                _dom.Load(strXmlFileName);
             }
             catch (Exception ex)
             {
                 strError = ex.Message;
-                dom.LoadXml("<root/>");	// 虽然返回出错,但是dom是正确初始化了的
+                _dom.LoadXml("<root/>");	// 虽然返回出错,但是dom是正确初始化了的
                 return -1;
             }
 
@@ -119,9 +119,9 @@ namespace DigitalPlatform.CirculationClient
         {
             double value = 0;
 
-            if (dom.DocumentElement != null)
+            if (_dom.DocumentElement != null)
             {
-                string strVersion = dom.DocumentElement.GetAttribute("version");
+                string strVersion = _dom.DocumentElement.GetAttribute("version");
                 if (string.IsNullOrEmpty(strVersion) == false)
                 {
                     // 检查最低版本号
@@ -131,9 +131,9 @@ namespace DigitalPlatform.CirculationClient
             }
 
             // 升级到 2
-            if (value < 2 && dom.DocumentElement != null)
+            if (value < 2 && _dom.DocumentElement != null)
             {
-                dom.DocumentElement.SetAttribute("version", "2");
+                _dom.DocumentElement.SetAttribute("version", "2");
                 m_bChanged = true;
 
                 this.ClearCfgCache();
@@ -165,29 +165,37 @@ namespace DigitalPlatform.CirculationClient
                 return -1;
             }
 
-            if (dom != null)
-                dom.Save(strXmlFileName);
+            if (_dom != null)
+                _dom.Save(strXmlFileName);
             m_bChanged = false;
             return 0;
         }
 
         // 查找配置文件网络路径所对应的本地文件
         // return:
+        //      -1  error
         //		0	not found
         //		1	found
         public int FindLocalFile(string strCfgPath,
             out string strLocalName,
             out string strTimeStamp)
         {
+            // 2015/9/9
+            if (_dom == null || _dom.DocumentElement == null)
+            {
+                strLocalName = "";
+                strTimeStamp = "";
+                return -1;
+            }
+
             strCfgPath = strCfgPath.ToLower();	// 导致大小写不敏感
 
-            XmlNode node = dom.DocumentElement.SelectSingleNode("cfg[@path='" + strCfgPath + "']");
+            XmlNode node = _dom.DocumentElement.SelectSingleNode("cfg[@path='" + strCfgPath + "']");
 
             if (node == null)
             {
                 strLocalName = "";
                 strTimeStamp = "";
-
                 return 0;	// not found
             }
 
@@ -208,12 +216,11 @@ namespace DigitalPlatform.CirculationClient
             return 1;
 
         DELETE:
-
             strLocalName = "";
             strTimeStamp = "";
 
             // 删除这个信息不完整的节点
-            dom.DocumentElement.RemoveChild(node);
+            _dom.DocumentElement.RemoveChild(node);
             m_bChanged = true;
             AutoSave();
             return 0;	// not found
@@ -225,7 +232,7 @@ namespace DigitalPlatform.CirculationClient
         {
             strCfgPath = strCfgPath.ToLower();	// 导致大小写不敏感
 
-            XmlNode node = dom.DocumentElement.SelectSingleNode("cfg[@path='" + strCfgPath + "']");
+            XmlNode node = _dom.DocumentElement.SelectSingleNode("cfg[@path='" + strCfgPath + "']");
 
             if (node != null)
             {
@@ -235,12 +242,12 @@ namespace DigitalPlatform.CirculationClient
             }
             else
             {
-                node = dom.CreateElement("cfg");
+                node = _dom.CreateElement("cfg");
                 DomUtil.SetAttr(node, "path", strCfgPath);
                 strLocalName = NewTempFileName();
                 DomUtil.SetAttr(node, "localname", strLocalName);
 
-                node = dom.DocumentElement.AppendChild(node);
+                node = _dom.DocumentElement.AppendChild(node);
                 m_bChanged = true;
                 AutoSave();
             }
@@ -259,7 +266,7 @@ namespace DigitalPlatform.CirculationClient
 
             strCfgPath = strCfgPath.ToLower();	// 导致大小写不敏感
 
-            XmlNode node = dom.DocumentElement.SelectSingleNode("cfg[@path='" + strCfgPath + "']");
+            XmlNode node = _dom.DocumentElement.SelectSingleNode("cfg[@path='" + strCfgPath + "']");
 
             if (node == null)
             {
@@ -276,7 +283,7 @@ namespace DigitalPlatform.CirculationClient
         // 清除全部节点
         public void ClearCfgCache()
         {
-            XmlNodeList nodes = dom.DocumentElement.SelectNodes("cfg");
+            XmlNodeList nodes = _dom.DocumentElement.SelectNodes("cfg");
 
             for (int i = 0; i < nodes.Count; i++)
             {
@@ -299,7 +306,7 @@ namespace DigitalPlatform.CirculationClient
             // 删除所有<cfg>节点
             for (int i = 0; i < nodes.Count; i++)
             {
-                dom.DocumentElement.RemoveChild(nodes[i]);
+                _dom.DocumentElement.RemoveChild(nodes[i]);
             }
             m_bChanged = true;
             AutoSave();
@@ -320,7 +327,7 @@ namespace DigitalPlatform.CirculationClient
 
             strCfgPath = strCfgPath.ToLower();	// 导致大小写不敏感
 
-            XmlNode node = dom.DocumentElement.SelectSingleNode("cfg[@path='" + strCfgPath + "']");
+            XmlNode node = _dom.DocumentElement.SelectSingleNode("cfg[@path='" + strCfgPath + "']");
 
             if (node == null)
             {
@@ -336,7 +343,7 @@ namespace DigitalPlatform.CirculationClient
                 File.Delete(strLocalName);
             }
 
-            dom.DocumentElement.RemoveChild(node);
+            _dom.DocumentElement.RemoveChild(node);
 
             m_bChanged = true;
             AutoSave();

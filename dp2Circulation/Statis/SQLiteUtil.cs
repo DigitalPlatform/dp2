@@ -1077,11 +1077,8 @@ this.Operator);
             SQLiteUtil.SetParameter(command,
 "@opertime" + i,
 this.OperTime);
-
-
         }
     }
-
 
     // 订购操作 每行
     class OrderOperLogLine : ItemOperLogLine
@@ -2159,7 +2156,12 @@ line.ReaderBarcode);
         public string Unit = "";
 
         // 2014/5/29
-        public bool Full = true;    // 是否包含了全部字段信息。 == true 表示全部; == false 表示只包含了 borrower 等字段信息
+        // public bool Full = true;    // 是否包含了全部字段信息。 == true 表示全部; == false 表示只包含了 borrower 等字段信息
+        public int Level = 0;   // 包含了何种字段信息？ 
+        // 0 全部字段;
+        // 1 brrower borrowtime borrowperiod returningtime itemrecpath 字段; 
+        // 2 borrower itemrecpath 字段
+        
         public string Borrower = "";
         public string BorrowTime = "";
         public string BorrowPeriod = "";
@@ -2187,6 +2189,11 @@ line.ReaderBarcode);
                 "borrowtime",
                 "borrowperiod",
                 "returningtime",
+                                      };
+        static string[] borrower_fields = {
+                // "itemrecpath",
+                "itembarcode",
+                "borrower",
                                       };
 
         // 创建册记录表
@@ -2251,11 +2258,11 @@ line.ReaderBarcode);
         }
 
         static int BuildInsertOrReplaceCommand(
-    string strTableName,
-    List<string> all_fields,
-    int param_index,
+            string strTableName,
+            List<string> all_fields,
+            int param_index,
             ref StringBuilder text,
-    out string strError)
+            out string strError)
         {
             strError = "";
 
@@ -2426,8 +2433,9 @@ connection))
                     }
 #endif
 
-                    if (line.Full == true)
+                    if (line.Level == 0)
                     {
+                        // 替换全部字段
                         nRet = BuildInsertOrReplaceCommand(
     "item",
     new List<string>(all_fields),
@@ -2437,12 +2445,29 @@ connection))
                         if (nRet == -1)
                             return -1;
                     }
-                    else
+                    else if (line.Level == 1)
                     {
+                        // 替换部分字段
                         nRet = BuildInsertOrReplaceCommand(
             "item",
             "itembarcode",
             new List<string>(borrow_fields),
+            new List<string>(all_fields),
+            i,
+            ref text,
+            out strError);
+                        if (nRet == -1)
+                            return -1;
+
+                        Debug.Assert(string.IsNullOrEmpty(line.ItemBarcode) == false, "ItemBarcode 不能为空");
+                    }
+                    else if (line.Level == 2)
+                    {
+                        // 替换部分字段
+                        nRet = BuildInsertOrReplaceCommand(
+            "item",
+            "itembarcode",
+            new List<string>(borrower_fields),
             new List<string>(all_fields),
             i,
             ref text,

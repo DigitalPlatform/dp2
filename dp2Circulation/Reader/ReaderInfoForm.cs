@@ -45,13 +45,14 @@ namespace dp2Circulation
         const int WM_HIRE = API.WM_USER + 204;
         const int WM_SAVETO = API.WM_USER + 205;
         const int WM_SAVE_RECORD = API.WM_USER + 206;
-        const int WM_FOREGIFT = API.WM_USER + 207;
-        const int WM_RETURN_FOREGIFT = API.WM_USER + 208;
-        const int WM_SET_FOCUS = API.WM_USER + 209;
+        const int WM_SAVE_RECORD_BARCODE = API.WM_USER + 207;
+        const int WM_FOREGIFT = API.WM_USER + 208;
+        const int WM_RETURN_FOREGIFT = API.WM_USER + 209;
+        const int WM_SET_FOCUS = API.WM_USER + 210;
 
         WebExternalHost m_webExternalHost = new WebExternalHost();
 
-        string m_strSetAction = "new";
+        string m_strSetAction = "new";  // new / change 之一
 
 #if NO
         public LibraryChannel Channel = new LibraryChannel();
@@ -1675,7 +1676,10 @@ strNewDefault);
             this.m_webExternalHost.StopPrevious();
             this.webBrowser_readerInfo.Stop();
 
-            this.commander.AddMessage(WM_SAVE_RECORD);
+            if (Control.ModifierKeys == Keys.Control)
+                this.commander.AddMessage(WM_SAVE_RECORD_BARCODE);  // 能在读者尚有外借信息的情况下强行修改证条码号
+            else
+                this.commander.AddMessage(WM_SAVE_RECORD);
         }
 
 #if NO
@@ -1752,7 +1756,7 @@ strNewDefault);
         /// <summary>
         /// 保存记录
         /// </summary>
-        /// <param name="strStyle">风格。为 displaysuccess/verifybarcode 之一或者组合</param>
+        /// <param name="strStyle">风格。为 displaysuccess/verifybarcode/changereaderbarcode 之一或者组合。缺省值为 displaysuccess,verifybarcode</param>
         /// <returns>-1: 出错; 0: 放弃; 1: 成功</returns>
         public int SaveRecord(string strStyle = "displaysuccess,verifybarcode")
         {
@@ -1853,12 +1857,24 @@ strNewDefault);
                 string strSavedXml = "";
                 string strSavedPath = "";
 
+                bool bChangeReaderBarcode = StringUtil.IsInList("changereaderbarcode", strStyle);
+                string strAction = this.m_strSetAction;
+                if (strAction == "change" && bChangeReaderBarcode)
+                {
+                    if (this.MainForm.ServerVersion < 2.51)
+                    {
+                        strError = "需要 dp2library 版本在 2.51 以上才能实现强制修改册条码号的功能。当前 dp2library 版本为 " + this.MainForm.ServerVersion;
+                        goto ERROR1;
+                    }
+                    strAction = "changereaderbarcode";
+                }
+
                 // 调试
                 // MessageBox.Show(this, "1 this.m_strSetAction='"+this.m_strSetAction+"'");
 
                 long lRet = Channel.SetReaderInfo(
                     stop,
-                    this.m_strSetAction,
+                    strAction,  // this.m_strSetAction,
                     strTargetRecPath,
                     strNewXml,
                     // 2007/11/5 changed
@@ -2134,47 +2150,17 @@ strSavedXml);
             if (this.binaryResControl1 != null
                 && bIncludeFileID == true)  // 2008/12/3
             {
-#if NO
-                List<string> ids = this.binaryResControl1.GetIds();
-                List<string> usages = this.binaryResControl1.GetUsages();
-
-                Debug.Assert(ids.Count == usages.Count, "");
-
-                for (int i = 0; i < ids.Count; i++)
-                {
-                    string strID = ids[i];
-                    if (String.IsNullOrEmpty(strID) == true)
-                        continue;
-
-                    string strUsage = usages[i];
-
-                    XmlNode node = null;
-
-                    node = dom.DocumentElement.SelectSingleNode("//dprms:file[@id='" + strID + "']", nsmgr);
-                    if (node == null)
-                    {
-                        node = dom.CreateElement("dprms",
-                             "file",
-                             DpNs.dprms);
-                        dom.DocumentElement.AppendChild(node);
-                    }
-                    else
-                    {
-                        DomUtil.SetAttr(node, "usage", null);
-                    }
-
-                    DomUtil.SetAttr(node, "id", strID);
-                    if (string.IsNullOrEmpty(strUsage) == false)
-                        DomUtil.SetAttr(node, "usage", strUsage);
-
-                }
-#endif
                 // 在 XmlDocument 对象中添加 <file> 元素。新元素加入在根之下
                 nRet = this.binaryResControl1.AddFileFragments(ref dom,
             out strError);
                 if (nRet == -1)
                     return -1;
             }
+
+            // 如果没有 refID 元素，需要给添加一个
+            string strRefID = DomUtil.GetElementText(dom.DocumentElement, "refID");
+            if (string.IsNullOrEmpty(strRefID) == true)
+                DomUtil.SetElementText(dom.DocumentElement, "refID", Guid.NewGuid().ToString());
 
             strXml = dom.OuterXml;
             return 0;
@@ -3503,7 +3489,7 @@ MessageBoxDefaultButton.Button2);
                             this.commander,
                             m.Msg) == true)
                         {
-                            this.SaveRecord();
+                            this.SaveRecord("displaysuccess,verifybarcode");
                         }
                     }
                     finally
@@ -3511,6 +3497,23 @@ MessageBoxDefaultButton.Button2);
                         EnableToolStrip(true);
                     }
                     return;
+                case WM_SAVE_RECORD_BARCODE:
+                    EnableToolStrip(false);
+                    try
+                    {
+                        if (this.m_webExternalHost.CanCallNew(
+                            this.commander,
+                            m.Msg) == true)
+                        {
+                            this.SaveRecord("displaysuccess,verifybarcode,changereaderbarcode");
+                        }
+                    }
+                    finally
+                    {
+                        EnableToolStrip(true);
+                    }
+                    return;
+
             }
             base.DefWndProc(ref m);
         }

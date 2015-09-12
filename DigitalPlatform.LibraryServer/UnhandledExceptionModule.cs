@@ -1,4 +1,4 @@
-using System;
+锘縰sing System;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -10,7 +10,7 @@ using System.Web;
 namespace DigitalPlatform.LibraryServer
 {
     /// <summary>
-    /// 负责处理未俘获的异常
+    /// 璐熻矗澶勭悊鏈繕鑾风殑寮傚父
     /// </summary>
     public class UnhandledExceptionModule : IHttpModule
     {

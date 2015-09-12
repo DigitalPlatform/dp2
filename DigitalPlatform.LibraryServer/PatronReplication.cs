@@ -835,6 +835,13 @@ idElementName="barcode"
                 return -1;
             }
 
+            RmsChannel channel = this.RmsChannels.GetChannel(this.App.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
             Stream file = null;
 
             try
@@ -946,7 +953,8 @@ idElementName="barcode"
                     //      1   命中1条
                     //      >1  命中多于1条
                     nRet = this.App.GetReaderRecXmlByFrom(
-                        this.RmsChannels,
+                        // this.RmsChannels,
+                        channel,
                         null,   // this.PatronDbName,
                         strID,
                         this.From,
@@ -1119,6 +1127,13 @@ out kernel_errorcode);
 
             SessionInfo sessioninfo = GetTempSessionInfo();
 
+            RmsChannel channel = this.RmsChannels.GetChannel(this.App.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
             for (int i = 0; i < ids.Count; i++)
             {
                 Thread.Sleep(1);    // 避免处理太繁忙
@@ -1163,7 +1178,8 @@ out kernel_errorcode);
                 //      1   命中1条
                 //      >1  命中多于1条
                 nRet = this.App.GetReaderRecXmlByFrom(
-                    this.RmsChannels,
+                    // this.RmsChannels,
+                    channel,
                     this.PatronDbName,
                     strID,
                     this.From,

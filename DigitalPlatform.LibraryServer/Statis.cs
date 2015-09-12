@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
@@ -13,23 +13,23 @@ using DigitalPlatform.IO;
 namespace DigitalPlatform.LibraryServer
 {
     /// <summary>
-    /// Í³¼Æ¶ÔÏó¡£¸ºÔğÄÚ´æ»º³åÍ³¼ÆĞÅÏ¢
+    /// ç»Ÿè®¡å¯¹è±¡ã€‚è´Ÿè´£å†…å­˜ç¼“å†²ç»Ÿè®¡ä¿¡æ¯
     /// </summary>
     public class Statis
     {
         public LibraryApplication App = null;
 
-        // µ±ÈÕÍ³¼Æ¼ÇÂ¼µÄÄÚ´æDOM
+        // å½“æ—¥ç»Ÿè®¡è®°å½•çš„å†…å­˜DOM
         public XmlDocument TodayDom = new XmlDocument();
-        // µ±Ç°DOMËù¶ÔÓ¦µÄÈÕÆÚ
+        // å½“å‰DOMæ‰€å¯¹åº”çš„æ—¥æœŸ
         public string CurrentDate = "";
 
         int m_nUnsavedCount = 0;
 
         internal ReaderWriterLock m_lock = new ReaderWriterLock();
-        internal static int m_nLockTimeout = 5000;	// 5000=5Ãë
+        internal static int m_nLockTimeout = 5000;	// 5000=5ç§’
 
-        // ¿´¿´ÕâÒ»ÌìÊÇ·ñ´æÔÚ¶ÔÓ¦µÄÍ³¼ÆÎÄ¼ş
+        // çœ‹çœ‹è¿™ä¸€å¤©æ˜¯å¦å­˜åœ¨å¯¹åº”çš„ç»Ÿè®¡æ–‡ä»¶
         public bool ExistStatisFile(DateTime date)
         {
             string strFilename = this.App.StatisDir + "\\" + DateTimeUtil.DateTimeToString8(date) + ".xml";
@@ -112,24 +112,24 @@ namespace DigitalPlatform.LibraryServer
             catch(FileNotFoundException)
             {
                 this.TodayDom.LoadXml("<root />");
-                // ÉèÖÃÆğÊ¼Ê±¼ä
+                // è®¾ç½®èµ·å§‹æ—¶é—´
                 DomUtil.SetElementText(this.TodayDom.DocumentElement,
                     "startTime", DateTime.Now.ToString());
-                // ÉèÖÃ½áÊøÊ±¼ä
+                // è®¾ç½®ç»“æŸæ—¶é—´
                 DomUtil.SetElementText(this.TodayDom.DocumentElement,
                     "endTime", DateTime.Now.ToString());
             }
             catch(Exception ex) // 2013/5/11
             {
                 this.TodayDom.LoadXml("<root />");
-                // ÉèÖÃÆğÊ¼Ê±¼ä
+                // è®¾ç½®èµ·å§‹æ—¶é—´
                 DomUtil.SetElementText(this.TodayDom.DocumentElement,
                     "startTime", DateTime.Now.ToString());
-                // ÉèÖÃ½áÊøÊ±¼ä
+                // è®¾ç½®ç»“æŸæ—¶é—´
                 DomUtil.SetElementText(this.TodayDom.DocumentElement,
                     "endTime", DateTime.Now.ToString());
 
-                string strErrorText = "Statis::LoadCurrentFile() ³öÏÖÒì³£: " + ExceptionUtil.GetDebugText(ex);
+                string strErrorText = "Statis::LoadCurrentFile() å‡ºç°å¼‚å¸¸: " + ExceptionUtil.GetDebugText(ex);
                 DomUtil.SetElementText(this.TodayDom.DocumentElement,
                     "error", DateTime.Now.ToString() + " " + strErrorText);
                 if (this.App != null)
@@ -155,7 +155,7 @@ namespace DigitalPlatform.LibraryServer
             m_nUnsavedCount++;
         }
 
-        // ÔÚÖ¸¶¨µÄ<category>ÔªËØÏÂĞ´Èë<item>ÔªËØ
+        // åœ¨æŒ‡å®šçš„<category>å…ƒç´ ä¸‹å†™å…¥<item>å…ƒç´ 
         double WriteItem(XmlNode nodeCategory,
             string strName,
             double fValue)
@@ -189,12 +189,12 @@ namespace DigitalPlatform.LibraryServer
             return fNewValue;
         }
 
-        // ÔÚÍ³¼ÆÎÄ¼şÖĞĞ´ÈëÒ»¸öÖµ
-        // ÔÚ¸ùÏÂĞ´Èë<category>£¬È»ºóÔÚ<library>ÏÂĞ´Èë<category>
+        // åœ¨ç»Ÿè®¡æ–‡ä»¶ä¸­å†™å…¥ä¸€ä¸ªå€¼
+        // åœ¨æ ¹ä¸‹å†™å…¥<category>ï¼Œç„¶ååœ¨<library>ä¸‹å†™å…¥<category>
         // parameters:
-        //      strLibraryCode  Èç¹ûÎª¿Õ£¬ÔòÖ»ÔÚ¸ùÏÂĞ´Èë<category>£»Èç¹ûÎª·Ç¿Õ£¬Ôò»¹ÒªÔÚ<library>ÔªËØÏÂĞ´Èë<category>
+        //      strLibraryCode  å¦‚æœä¸ºç©ºï¼Œåˆ™åªåœ¨æ ¹ä¸‹å†™å…¥<category>ï¼›å¦‚æœä¸ºéç©ºï¼Œåˆ™è¿˜è¦åœ¨<library>å…ƒç´ ä¸‹å†™å…¥<category>
         // return:
-        //      Èç¹ûstrLibraryCodeÎª¿Õ£¬Ôò·µ»ØÎ¨Ò»ÀÛ¼ÓÖµ£»Èç¹ûstrLibraryCodeÎª·Ç¿Õ£¬Ôò·µ»Ø<library>ÔªËØÏÂµÄ<category>ÖĞµÄÀÛ¼ÓÖµ
+        //      å¦‚æœstrLibraryCodeä¸ºç©ºï¼Œåˆ™è¿”å›å”¯ä¸€ç´¯åŠ å€¼ï¼›å¦‚æœstrLibraryCodeä¸ºéç©ºï¼Œåˆ™è¿”å›<library>å…ƒç´ ä¸‹çš„<category>ä¸­çš„ç´¯åŠ å€¼
         public double IncreaseEntryValue(
             string strLibraryCode,
             string strCategory,
@@ -219,11 +219,11 @@ namespace DigitalPlatform.LibraryServer
                 {
                     SaveDom(true);
                     this.CurrentDate = GetCurrentDate();
-                    this.TodayDom.LoadXml("<root />");  // Çå³ıÔ­À´µÄÄÚÈİ
-                    // ÉèÖÃÆğÊ¼Ê±¼ä
+                    this.TodayDom.LoadXml("<root />");  // æ¸…é™¤åŸæ¥çš„å†…å®¹
+                    // è®¾ç½®èµ·å§‹æ—¶é—´
                     DomUtil.SetElementText(this.TodayDom.DocumentElement,
                         "startTime", DateTime.Now.ToString());
-                    // ÉèÖÃ½áÊøÊ±¼ä
+                    // è®¾ç½®ç»“æŸæ—¶é—´
                     DomUtil.SetElementText(this.TodayDom.DocumentElement,
                         "endTime", DateTime.Now.ToString());
                 }
@@ -239,7 +239,7 @@ namespace DigitalPlatform.LibraryServer
                     DomUtil.SetAttr(nodeCategory, "name", strCategory);
                 }
 
-                // ÔÚÖ¸¶¨µÄ<category>ÔªËØÏÂĞ´Èë<item>ÔªËØ
+                // åœ¨æŒ‡å®šçš„<category>å…ƒç´ ä¸‹å†™å…¥<item>å…ƒç´ 
                 double fNewValue = WriteItem(nodeCategory,
                     strName,
                     fValue);
@@ -294,13 +294,13 @@ namespace DigitalPlatform.LibraryServer
                         DomUtil.SetAttr(nodeCategory, "name", strCategory);
                     }
 
-                    // ÔÚÖ¸¶¨µÄ<category>ÔªËØÏÂĞ´Èë<item>ÔªËØ
+                    // åœ¨æŒ‡å®šçš„<category>å…ƒç´ ä¸‹å†™å…¥<item>å…ƒç´ 
                     fNewValue = WriteItem(nodeCategory,
                         strName,
                         fValue);
                 }
 
-                // ÉèÖÃ½áÊøÊ±¼ä
+                // è®¾ç½®ç»“æŸæ—¶é—´
                 DomUtil.SetElementText(this.TodayDom.DocumentElement,
                     "endTime", DateTime.Now.ToString());
 
@@ -328,7 +328,7 @@ namespace DigitalPlatform.LibraryServer
             return (int)fNewValue;
         }
 
-        // Òì³££º¿ÉÄÜ»áÅ×³öÒì³£
+        // å¼‚å¸¸ï¼šå¯èƒ½ä¼šæŠ›å‡ºå¼‚å¸¸
         public void Flush()
         {
             this.m_lock.AcquireWriterLock(m_nLockTimeout);
@@ -351,63 +351,63 @@ namespace DigitalPlatform.LibraryServer
     }
 
     /*
-     * Ä¿Ç°ÓÃµ½µÄÍ³¼ÆÖ¸±êÃû³Æ¡£²»°üÀ¨¶¯Ì¬µÄÃû³Æ¡£
+     * ç›®å‰ç”¨åˆ°çš„ç»Ÿè®¡æŒ‡æ ‡åç§°ã€‚ä¸åŒ…æ‹¬åŠ¨æ€çš„åç§°ã€‚
      * 
-³öÄÉ
-	½èÊéÓö²áÌõÂëºÅÖØ¸´´ÎÊı
-	¶ÁÕßÊı
-	½è²á
-	»¹ÊéÓö²áÌõÂëºÅÖØ¸´´ÎÊı
-	»¹ÊéÓö²áÌõÂëºÅÖØ¸´²¢ÎŞ¶ÁÕßÖ¤ÌõÂëºÅ¸¨ÖúÅĞ¶Ï´ÎÊı
-	½èÊéÓö²áÌõÂëºÅÖØ¸´²¢¶ÁÕßÖ¤ÌõÂëºÅÒ²ÎŞ·¨È¥ÖØ´ÎÊı
-	½èÊéÓö²áÌõÂëºÅÖØ¸´µ«¸ù¾İ¶ÁÕßÖ¤ÌõÂëºÅ³É¹¦È¥ÖØ´ÎÊı
-	¶ÁÕßÊı
-	»¹²á
-	ÉùÃ÷¶ªÊ§
-	»¹³¬ÆÚ²á
-	Ô¤Ô¼µ½Êé²á
-	ÒÔÍ£´ú½ğÊÂÏîÆô¶¯
-	ÒÔÍ£´ú½ğÊÂÏîµ½ÆÚ
-	µ±ÈÕÄÚÁ¢¼´»¹²á
-	Ô¤Ô¼´Î
-	Ô¤Ô¼µ½Êé²á
-Î¥Ô¼½ğ
-	È¡Ïû´Î
-	È¡ÏûÔª
-	ĞŞ¸Ä´Î
-	¸ø¸¶´Î
-	¸ø¸¶Ôª
-Î¥Ô¼½ğÖ®×¢ÊÍ
-	ĞŞ¸Ä´Î
-ĞŞ¸´½èÔÄĞÅÏ¢
-	¶ÁÕß²à´ÎÊı
-	ÊµÌå²à´ÎÊı
-Èë¹İÈË´Î
-	ËùÓĞÃÅÖ®×ÜÁ¿
-Ñº½ğ
-	´´½¨½»·ÑÇëÇó´Î
-×â½ğ
-	´´½¨½»·ÑÇëÇó´Î
-ĞŞ¸Ä¶ÁÕßĞÅÏ¢
-	´´½¨ĞÂ¼ÇÂ¼Êı
-	ĞŞ¸Ä¼ÇÂ¼Êı
-	É¾³ı¼ÇÂ¼Êı
-ĞŞ¸Ä¶ÁÕßĞÅÏ¢Ö®×´Ì¬
+å‡ºçº³
+	å€Ÿä¹¦é‡å†Œæ¡ç å·é‡å¤æ¬¡æ•°
+	è¯»è€…æ•°
+	å€Ÿå†Œ
+	è¿˜ä¹¦é‡å†Œæ¡ç å·é‡å¤æ¬¡æ•°
+	è¿˜ä¹¦é‡å†Œæ¡ç å·é‡å¤å¹¶æ— è¯»è€…è¯æ¡ç å·è¾…åŠ©åˆ¤æ–­æ¬¡æ•°
+	å€Ÿä¹¦é‡å†Œæ¡ç å·é‡å¤å¹¶è¯»è€…è¯æ¡ç å·ä¹Ÿæ— æ³•å»é‡æ¬¡æ•°
+	å€Ÿä¹¦é‡å†Œæ¡ç å·é‡å¤ä½†æ ¹æ®è¯»è€…è¯æ¡ç å·æˆåŠŸå»é‡æ¬¡æ•°
+	è¯»è€…æ•°
+	è¿˜å†Œ
+	å£°æ˜ä¸¢å¤±
+	è¿˜è¶…æœŸå†Œ
+	é¢„çº¦åˆ°ä¹¦å†Œ
+	ä»¥åœä»£é‡‘äº‹é¡¹å¯åŠ¨
+	ä»¥åœä»£é‡‘äº‹é¡¹åˆ°æœŸ
+	å½“æ—¥å†…ç«‹å³è¿˜å†Œ
+	é¢„çº¦æ¬¡
+	é¢„çº¦åˆ°ä¹¦å†Œ
+è¿çº¦é‡‘
+	å–æ¶ˆæ¬¡
+	å–æ¶ˆå…ƒ
+	ä¿®æ”¹æ¬¡
+	ç»™ä»˜æ¬¡
+	ç»™ä»˜å…ƒ
+è¿çº¦é‡‘ä¹‹æ³¨é‡Š
+	ä¿®æ”¹æ¬¡
+ä¿®å¤å€Ÿé˜…ä¿¡æ¯
+	è¯»è€…ä¾§æ¬¡æ•°
+	å®ä½“ä¾§æ¬¡æ•°
+å…¥é¦†äººæ¬¡
+	æ‰€æœ‰é—¨ä¹‹æ€»é‡
+æŠ¼é‡‘
+	åˆ›å»ºäº¤è´¹è¯·æ±‚æ¬¡
+ç§Ÿé‡‘
+	åˆ›å»ºäº¤è´¹è¯·æ±‚æ¬¡
+ä¿®æ”¹è¯»è€…ä¿¡æ¯
+	åˆ›å»ºæ–°è®°å½•æ•°
+	ä¿®æ”¹è®°å½•æ•°
+	åˆ é™¤è®°å½•æ•°
+ä¿®æ”¹è¯»è€…ä¿¡æ¯ä¹‹çŠ¶æ€
 	
-ĞŞ¸Ä¶ÁÕßĞÅÏ¢Ö®Ñº½ğ
-	´ÎÊı
-ÏûÏ¢¼à¿Ø
-	É¾³ı¹ıÆÚÏûÏ¢ÌõÊı
-³¬ÆÚÍ¨Öª
-	dpmail³¬ÆÚÍ¨ÖªÈËÊı
-	email³¬ÆÚÍ¨ÖªÈËÊı
-¸ú×ÙDTLP
-	³õÊ¼»¯Êı¾İ¿â´ÎÊı
-	¸²¸Ç¼ÇÂ¼ÌõÊı
-	É¾³ı¼ÇÂ¼ÌõÊı
-»ñÈ¡¶ÔÏó
-    ´Î
-    ³ß´ç
+ä¿®æ”¹è¯»è€…ä¿¡æ¯ä¹‹æŠ¼é‡‘
+	æ¬¡æ•°
+æ¶ˆæ¯ç›‘æ§
+	åˆ é™¤è¿‡æœŸæ¶ˆæ¯æ¡æ•°
+è¶…æœŸé€šçŸ¥
+	dpmailè¶…æœŸé€šçŸ¥äººæ•°
+	emailè¶…æœŸé€šçŸ¥äººæ•°
+è·Ÿè¸ªDTLP
+	åˆå§‹åŒ–æ•°æ®åº“æ¬¡æ•°
+	è¦†ç›–è®°å½•æ¡æ•°
+	åˆ é™¤è®°å½•æ¡æ•°
+è·å–å¯¹è±¡
+    æ¬¡
+    å°ºå¯¸
      * * */
 
 }

@@ -1292,8 +1292,6 @@ namespace dp2Circulation
                 Activate();
         }
 
-
-
         public void Clear()
         {
             this.m_lock.AcquireWriterLock(m_nLockTimeout);
@@ -1309,14 +1307,18 @@ namespace dp2Circulation
                 this.m_lock.ReleaseWriterLock();
             }
 
-            _doingCalls.Clear();
+            //    _doingCalls.Clear();
+            _stopDoingCalls = true;
         }
 
-        List<AsyncCall> _doingCalls = new List<AsyncCall>();
+        bool _stopDoingCalls = false;
 
         // 工作线程每一轮循环的实质性工作
         public override void Worker()
         {
+            _stopDoingCalls = false;
+            List<AsyncCall> doingCalls = new List<AsyncCall>();
+
             this.m_lock.AcquireWriterLock(m_nLockTimeout);
             try
             {
@@ -1329,7 +1331,7 @@ namespace dp2Circulation
 
                     AsyncCall call = this.m_calls[i];
 
-                    _doingCalls.Add(call);
+                    doingCalls.Add(call);
                 }
 
                 this.m_calls.Clear();
@@ -1342,14 +1344,17 @@ namespace dp2Circulation
 
             try
             {
-                for (int i = 0;i < _doingCalls.Count;i++)
+                foreach (AsyncCall call in doingCalls)
                 {
-                    AsyncCall call = _doingCalls[i];
+                    if (_stopDoingCalls == true)
+                        return;
 
                     if (this.Stopped == true)
                         return;
                     if (this.IsInLoop == false)
                         return;
+                    
+                    // AsyncCall call = doingCalls[i];
 
                     this._doEvents = false; // 只要调用过一次异步功能，从此就不出让控制权
 
@@ -1365,8 +1370,9 @@ namespace dp2Circulation
                         {
                             strResult = ex.Message;
                             // 2014/9/9
-                            DoOutputDebugInfo("异常：" + ex.Message);
-                            goto CONTINUE;
+                            DoOutputDebugInfo("AsyncGetObjectFilePath 异常：" + ExceptionUtil.GetDebugText(ex));
+                            // goto CONTINUE;
+                            continue;
                         }
 
                         // this.WebBrowser.Document.InvokeScript((string)call.InputParameters[2], new object[] { (object)call.InputParameters[3], (object)strResult });
@@ -1391,13 +1397,15 @@ namespace dp2Circulation
                             new object[] { (object)call.InputParameters[2], (object)strResult });
                     }
 
-                    CONTINUE:
-                    _doingCalls.RemoveAt(0);
+#if NO
+                CONTINUE:
+                    doingCalls.RemoveAt(0);
                     i--;
+#endif
                 }
                 //     _doingCalls.Clear();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 /*
                 if (this.m_bStopThread == false)
@@ -1405,7 +1413,7 @@ namespace dp2Circulation
                  * */
                 // 2014/9/9
                 // 要在一个控制台输出这些异常信息，帮助诊断
-                DoOutputDebugInfo("异常：" + ex.Message);
+                DoOutputDebugInfo("WebExternalHost 异常：" + ExceptionUtil.GetDebugText(ex));
             }
         }
 

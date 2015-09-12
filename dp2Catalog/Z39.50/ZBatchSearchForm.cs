@@ -2977,6 +2977,39 @@ MessageBoxDefaultButton.Button1);
             MainForm.toolButton_loadFullRecord.Enabled = false;
         }
 
+        /*
+操作类型 crashReport -- 异常报告 
+主题 dp2catalog 
+发送者 xxx
+媒体类型 text 
+内容 发生未捕获的界面线程异常: 
+Type: System.InvalidOperationException
+Message: 文件 C:\Documents and Settings\Administrator\桌面\ 是无效的文件名。
+Stack:
+在 System.Windows.Forms.OpenFileDialog.RunFileDialog(OPENFILENAME_I ofn)
+在 System.Windows.Forms.FileDialog.RunDialogOld(IntPtr hWndOwner)
+在 System.Windows.Forms.FileDialog.RunDialog(IntPtr hWndOwner)
+在 System.Windows.Forms.CommonDialog.ShowDialog(IWin32Window owner)
+在 System.Windows.Forms.CommonDialog.ShowDialog()
+在 dp2Catalog.ZBatchSearchForm.button_queryLines_load_Click(Object sender, EventArgs e)
+在 System.Windows.Forms.Control.OnClick(EventArgs e)
+在 System.Windows.Forms.Button.OnClick(EventArgs e)
+在 System.Windows.Forms.Button.OnMouseUp(MouseEventArgs mevent)
+在 System.Windows.Forms.Control.WmMouseUp(Message& m, MouseButtons button, Int32 clicks)
+在 System.Windows.Forms.Control.WndProc(Message& m)
+在 System.Windows.Forms.ButtonBase.WndProc(Message& m)
+在 System.Windows.Forms.Button.WndProc(Message& m)
+在 System.Windows.Forms.Control.ControlNativeWindow.OnMessage(Message& m)
+在 System.Windows.Forms.Control.ControlNativeWindow.WndProc(Message& m)
+在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
+
+
+dp2Catalog 版本: dp2Catalog, Version=2.4.5724.41026, Culture=neutral, PublicKeyToken=null
+操作系统：Microsoft Windows NT 5.1.2600 Service Pack 3 
+操作时间 2015/9/10 7:46:22 (Thu, 10 Sep 2015 07:46:22 +0800) 
+前端地址 xxx 经由 http://dp2003.com/dp2library 
+ 
+         * */
         private void button_queryLines_load_Click(object sender, EventArgs e)
         {
             bool bRedo = false;
@@ -2993,8 +3026,16 @@ MessageBoxDefaultButton.Button1);
                 dlg.Filter = "检索词文件 (*.txt)|*.txt|All files (*.*)|*.*";
                 dlg.RestoreDirectory = true;
 
-                if (dlg.ShowDialog() != DialogResult.OK)
+                try
+                {
+                    if (dlg.ShowDialog() != DialogResult.OK)
+                        return;
+                }
+                catch(Exception ex)
+                {
+                    MessageBox.Show(this, ex.Message);
                     return;
+                }
 
                 this.textBox_queryLines_filename.Text = dlg.FileName;
             }

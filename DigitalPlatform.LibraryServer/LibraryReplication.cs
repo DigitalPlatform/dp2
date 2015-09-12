@@ -1531,7 +1531,9 @@ namespace DigitalPlatform.LibraryServer
                         //      -1  error
                         //      0   没有找到属于书目记录的任何实体记录，因此也就无从删除
                         //      >0  实际删除的实体记录数
-                        nRet = this.App.OrderItemDatabase.DeleteBiblioChildItems(Channels,
+                        nRet = this.App.OrderItemDatabase.DeleteBiblioChildItems(
+                            // Channels,
+                            channel,
                             strRecPath,
                             null,
                             out strError);
@@ -1545,7 +1547,9 @@ namespace DigitalPlatform.LibraryServer
                         //      -1  error
                         //      0   没有找到属于书目记录的任何实体记录，因此也就无从删除
                         //      >0  实际删除的实体记录数
-                        nRet = this.App.IssueItemDatabase.DeleteBiblioChildItems(Channels,
+                        nRet = this.App.IssueItemDatabase.DeleteBiblioChildItems(
+                            // Channels,
+                            channel,
                             strRecPath,
                             null,
                             out strError);

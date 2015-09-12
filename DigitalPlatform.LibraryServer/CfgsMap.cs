@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.IO;
@@ -9,23 +9,23 @@ using DigitalPlatform.rms.Client;
 namespace DigitalPlatform.LibraryServer
 {
     /// <summary>
-    /// Ó³ÉäÄÚºËÅäÖÃÎÄ¼şµ½±¾µØ
+    /// æ˜ å°„å†…æ ¸é…ç½®æ–‡ä»¶åˆ°æœ¬åœ°
     /// </summary>
     public class CfgsMap
     {
         public string RootDir = "";
 
-        public string ServerUrl = "";
+        // public string ServerUrl = "";
 
         RecordLockCollection locks = new RecordLockCollection();
 
-        public CfgsMap(string strRootDir,
-            string strServerUrl)
+        public CfgsMap(string strRootDir/*,
+            string strServerUrl*/)
         {
             this.RootDir = strRootDir;
             PathUtil.CreateDirIfNeed(this.RootDir);
 
-            this.ServerUrl = strServerUrl;
+            // this.ServerUrl = strServerUrl;
 
         }
 
@@ -42,13 +42,14 @@ namespace DigitalPlatform.LibraryServer
             PathUtil.CreateDirIfNeed(this.RootDir);
         }
 
-        // ½«ÄÚºËÍøÂçÅäÖÃÎÄ¼şÓ³Éäµ½±¾µØ
+        // å°†å†…æ ¸ç½‘ç»œé…ç½®æ–‡ä»¶æ˜ å°„åˆ°æœ¬åœ°
         // return:
-        //      -1  ³ö´í
-        //      0   ²»´æÔÚ
-        //      1   ÕÒµ½
+        //      -1  å‡ºé”™
+        //      0   ä¸å­˜åœ¨
+        //      1   æ‰¾åˆ°
         public int MapFileToLocal(
-            RmsChannelCollection Channels,
+            // RmsChannelCollection Channels,
+            RmsChannel channel,
             string strPath,
             out string strLocalPath,
             out string strError)
@@ -58,12 +59,12 @@ namespace DigitalPlatform.LibraryServer
 
             strLocalPath = this.RootDir + "/" + strPath;
 
-            // È·±£Ä¿Â¼´æÔÚ
+            // ç¡®ä¿ç›®å½•å­˜åœ¨
             PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strLocalPath));
 
             this.locks.LockForRead(strLocalPath);
             try {
-                // ¿´¿´ÎïÀíÎÄ¼şÊÇ·ñ´æÔÚ
+                // çœ‹çœ‹ç‰©ç†æ–‡ä»¶æ˜¯å¦å­˜åœ¨
                 FileInfo fi = new FileInfo(strLocalPath);
                 if (fi.Exists == true) {
                     if (fi.Length == 0)
@@ -76,19 +77,20 @@ namespace DigitalPlatform.LibraryServer
                 this.locks.UnlockForRead(strLocalPath);
             }
 
-            // È·±£Ä¿Â¼´æÔÚ
+            // ç¡®ä¿ç›®å½•å­˜åœ¨
             PathUtil.CreateDirIfNeed(Path.GetDirectoryName(strLocalPath));
-
 
             this.locks.LockForWrite(strLocalPath);
             try
             {
+#if NO
                 RmsChannel channel = Channels.GetChannel(this.ServerUrl);
                 if (channel == null)
                 {
                     strError = "GetChannel error";
                     return -1;
                 }
+#endif
 
                 string strMetaData = "";
                 byte[] baOutputTimestamp = null;
@@ -105,7 +107,7 @@ namespace DigitalPlatform.LibraryServer
                 {
                     if (channel.ErrorCode == ChannelErrorCode.NotFound)
                     {
-                        // ÎªÁË±ÜÃâÒÔºóÔÙ´Î´ÓÍøÂç»ñÈ¡ºÄ·ÑÊ±¼ä, ĞèÒªÔÚ±¾µØĞ´Ò»¸ö0×Ö½ÚµÄÎÄ¼ş
+                        // ä¸ºäº†é¿å…ä»¥åå†æ¬¡ä»ç½‘ç»œè·å–è€—è´¹æ—¶é—´, éœ€è¦åœ¨æœ¬åœ°å†™ä¸€ä¸ª0å­—èŠ‚çš„æ–‡ä»¶
                         FileStream fs = File.Create(strLocalPath);
                         fs.Close();
                         return 0;

@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
@@ -14,25 +14,25 @@ using DigitalPlatform.Text;
 
 namespace DigitalPlatform.LibraryServer
 {
-    // Åú´¦ÀíÈÎÎñ
+    // æ‰¹å¤„ç†ä»»åŠ¡
     public class BatchTask
     {
-        public bool ManualStart = false;    // ±¾ÂÖÊÇ·ñÎªÊÖ¶¯Æô¶¯£¿
+        public bool ManualStart = false;    // æœ¬è½®æ˜¯å¦ä¸ºæ‰‹åŠ¨å¯åŠ¨ï¼Ÿ
 
         public bool Loop = false;
-        int m_nPrevLoop = -1;   // 3Ì¬ -1:ÉĞÎ´³õÊ¼»¯ 0:false 1:true
+        int m_nPrevLoop = -1;   // 3æ€ -1:å°šæœªåˆå§‹åŒ– 0:false 1:true
 
-        // Æô¶¯²ÎÊı
+        // å¯åŠ¨å‚æ•°
         public BatchTaskStartInfo StartInfo = null;
 
-        // ÆäËûÆô¶¯²ÎÊı
-        // µ±ÈÎÎñÕıÔÚÖ´ĞĞµÄÊ±ºò£¬×·¼ÓÆäËû²ÎÊı£¬¿ÉÒÔÈÃÈÎÎñ¼ÌĞøÏòºóÖ´ĞĞ
+        // å…¶ä»–å¯åŠ¨å‚æ•°
+        // å½“ä»»åŠ¡æ­£åœ¨æ‰§è¡Œçš„æ—¶å€™ï¼Œè¿½åŠ å…¶ä»–å‚æ•°ï¼Œå¯ä»¥è®©ä»»åŠ¡ç»§ç»­å‘åæ‰§è¡Œ
         public List<BatchTaskStartInfo> StartInfos = new List<BatchTaskStartInfo>();
 
-        // ÈÎÎñÃû
+        // ä»»åŠ¡å
         public string Name = "";
 
-        // ½ø¶ÈÎÄ¼ş
+        // è¿›åº¦æ–‡ä»¶
         Stream m_stream = null;
         public string ProgressFileName = "";
         public long ProgressFileVersion = 0;
@@ -47,21 +47,21 @@ namespace DigitalPlatform.LibraryServer
         internal RmsChannelCollection RmsChannels = new RmsChannelCollection();
 
         internal ReaderWriterLock m_lock = new ReaderWriterLock();
-        internal static int m_nLockTimeout = 5000;	// 5000=5Ãë
+        internal static int m_nLockTimeout = 5000;	// 5000=5ç§’
 
         internal Thread threadWorker = null;
         internal AutoResetEvent eventClose = new AutoResetEvent(false);	// true : initial state is signaled 
-        internal AutoResetEvent eventActive = new AutoResetEvent(false);	// ¼¤»îĞÅºÅ
+        internal AutoResetEvent eventActive = new AutoResetEvent(false);	// æ¿€æ´»ä¿¡å·
         internal AutoResetEvent eventFinished = new AutoResetEvent(false);	// true : initial state is signaled 
 
-        public int PerTime = 60 * 60 * 1000;	// 1Ğ¡Ê±
+        public int PerTime = 60 * 60 * 1000;	// 1å°æ—¶
 
         public void Activate()
         {
             eventActive.Set();
         }
 
-        // ÊÇ·ñ¸ÃÍ£Ö¹´¦Àí£¬ÓÃÓÚÈÕÖ¾»Ö¸´ÒÔÍâµÄÆäËüÈÎÎñ
+        // æ˜¯å¦è¯¥åœæ­¢å¤„ç†ï¼Œç”¨äºæ—¥å¿—æ¢å¤ä»¥å¤–çš„å…¶å®ƒä»»åŠ¡
         public virtual bool Stopped
         {
             get
@@ -74,7 +74,7 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
-        // ¶ÁÈ¡ÉÏ´Î×îºó´¦ÀíµÄÊ±¼ä
+        // è¯»å–ä¸Šæ¬¡æœ€åå¤„ç†çš„æ—¶é—´
         public int ReadLastTime(
             string strMonitorName,
             out string strLastTime,
@@ -102,7 +102,7 @@ namespace DigitalPlatform.LibraryServer
             }
             try
             {
-                strLastTime = sr.ReadLine();  // ¶ÁÈëÊ±¼äĞĞ
+                strLastTime = sr.ReadLine();  // è¯»å…¥æ—¶é—´è¡Œ
             }
             finally
             {
@@ -112,30 +112,30 @@ namespace DigitalPlatform.LibraryServer
             return 1;
         }
 
-        // Ğ´Èë¶Ïµã¼ÇÒäÎÄ¼ş
+        // å†™å…¥æ–­ç‚¹è®°å¿†æ–‡ä»¶
         public void WriteLastTime(string strMonitorName,
             string strLastTime)
         {
             string strFileName = PathUtil.MergePath(this.App.LogDir, strMonitorName + "_lasttime.txt");
 
-            // É¾³ıÔ­À´µÄÎÄ¼ş
+            // åˆ é™¤åŸæ¥çš„æ–‡ä»¶
             File.Delete(strFileName);
 
-            // Ğ´ÈëĞÂÄÚÈİ
+            // å†™å…¥æ–°å†…å®¹
             StreamUtil.WriteText(strFileName,
                 strLastTime);
         }
 
-        // ±¾ÂÖÊÇ²»ÊÇ·êÉÏÁËÃ¿ÈÕÆô¶¯Ê±¼ä(ÒÔºó)?
-        // TODO: Èç¹ûÉÏ´Î¼ÇÔØµÄÊ±¼ä£¬´ó´ó³¬¹ıµ±Ç°ÈÕÆÚ£¬ÔòÒ»Ö±»áÆÁ±ÎÆô¶¯¡£ÊÇ·ñ¿ÉÒÔÔÚÕâÖÖÇé¿öÏÂÇ¿ÖÆÆô¶¯£¬ÒÔ±ã´ïµ½´ÙÊ¹¸²¸ÇÉÏ´Î²Ù×÷Ê±¼äµÄÄ¿µÄ£¿
+        // æœ¬è½®æ˜¯ä¸æ˜¯é€¢ä¸Šäº†æ¯æ—¥å¯åŠ¨æ—¶é—´(ä»¥å)?
+        // TODO: å¦‚æœä¸Šæ¬¡è®°è½½çš„æ—¶é—´ï¼Œå¤§å¤§è¶…è¿‡å½“å‰æ—¥æœŸï¼Œåˆ™ä¸€ç›´ä¼šå±è”½å¯åŠ¨ã€‚æ˜¯å¦å¯ä»¥åœ¨è¿™ç§æƒ…å†µä¸‹å¼ºåˆ¶å¯åŠ¨ï¼Œä»¥ä¾¿è¾¾åˆ°ä¿ƒä½¿è¦†ç›–ä¸Šæ¬¡æ“ä½œæ—¶é—´çš„ç›®çš„ï¼Ÿ
         // parameters:
-        //      strLastTime ×îºóÒ»´ÎÖ´ĞĞ¹ıµÄÊ±¼ä RFC1123¸ñÊ½
-        //      strStartTimeDef ·µ»Ø¶¨ÒåµÄÃ¿ÈÕÆô¶¯Ê±¼ä
-        //      bRet    ÊÇ·ñµ½ÁËÃ¿ÈÕÆô¶¯Ê±¼ä
+        //      strLastTime æœ€åä¸€æ¬¡æ‰§è¡Œè¿‡çš„æ—¶é—´ RFC1123æ ¼å¼
+        //      strStartTimeDef è¿”å›å®šä¹‰çš„æ¯æ—¥å¯åŠ¨æ—¶é—´
+        //      bRet    æ˜¯å¦åˆ°äº†æ¯æ—¥å¯åŠ¨æ—¶é—´
         // return:
         //      -1  error
-        //      0   Ã»ÓĞÕÒµ½startTimeÅäÖÃ²ÎÊı
-        //      1   ÕÒµ½ÁËstartTimeÅäÖÃ²ÎÊı
+        //      0   æ²¡æœ‰æ‰¾åˆ°startTimeé…ç½®å‚æ•°
+        //      1   æ‰¾åˆ°äº†startTimeé…ç½®å‚æ•°
         public int IsNowAfterPerDayStart(
             string strMonitorName,
             ref string strLastTime,
@@ -187,14 +187,14 @@ namespace DigitalPlatform.LibraryServer
             catch
             {
                 bRet = false;
-                strError = "Ê±¼äÖµ " + strStartTime + " ¸ñÊ½²»ÕıÈ·¡£Ó¦Îª hh:mm";
-                return -1;   // ¸ñÊ½²»ÕıÈ·
+                strError = "æ—¶é—´å€¼ " + strStartTime + " æ ¼å¼ä¸æ­£ç¡®ã€‚åº”ä¸º hh:mm";
+                return -1;   // æ ¼å¼ä¸æ­£ç¡®
             }
 
-            // µ±Ç°Ê±¼ä
+            // å½“å‰æ—¶é—´
             DateTime now1 = DateTime.Now;
 
-            // ¹Û²ì±¾ÈÕÊÇ·ñÒÑ¾­×ö¹ıÁË
+            // è§‚å¯Ÿæœ¬æ—¥æ˜¯å¦å·²ç»åšè¿‡äº†
             if (String.IsNullOrEmpty(strLastTime) == false)
             {
                 DateTime lasttime;
@@ -207,7 +207,7 @@ namespace DigitalPlatform.LibraryServer
                         && lasttime.Month == now1.Month
                         && lasttime.Day == now1.Day)
                     {
-                        bRet = false;   // ½ñÌìÒÑ¾­×ö¹ıÁË
+                        bRet = false;   // ä»Šå¤©å·²ç»åšè¿‡äº†
                         return 1;
                     }
 
@@ -215,14 +215,14 @@ namespace DigitalPlatform.LibraryServer
                 catch
                 {
                     bRet = false;
-                    strError = "strLastTime " + strLastTime + " ¸ñÊ½´íÎó";
+                    strError = "strLastTime " + strLastTime + " æ ¼å¼é”™è¯¯";
                     return -1;
                 }
 
                 // 2014/3/22
                 TimeSpan delta = new DateTime(now1.Year, now1.Month, now1.Day)
                     - new DateTime(lasttime.Year, lasttime.Month, lasttime.Day);
-                // ÉÏ´Î×ö¹ıµÄÒÑ¾­ÊÇ×òÌìÒÔÇ°
+                // ä¸Šæ¬¡åšè¿‡çš„å·²ç»æ˜¯æ˜¨å¤©ä»¥å‰
                 if (delta.TotalDays > 1)
                 {
                     bRet = true;
@@ -231,12 +231,12 @@ namespace DigitalPlatform.LibraryServer
             }
             else
             {
-                // strLastTime Îª¿Õ
-                // °Ñµ±Ç°Ê±¼ä×÷ÎªÉÏ´Î´¦ÀíµÄÊ±¼ä¡£ÕâÑù¿ÉÒÔ±ÜÃâÒÔºóÓÀÔ¶ÂÖ²»µ½´¦ÀíÊ±¼ä
+                // strLastTime ä¸ºç©º
+                // æŠŠå½“å‰æ—¶é—´ä½œä¸ºä¸Šæ¬¡å¤„ç†çš„æ—¶é—´ã€‚è¿™æ ·å¯ä»¥é¿å…ä»¥åæ°¸è¿œè½®ä¸åˆ°å¤„ç†æ—¶é—´
                 strLastTime = DateTimeUtil.Rfc1123DateTimeStringEx(this.App.Clock.UtcNow.ToLocalTime());
             }
 
-            // ½ñÌìµÄ¶¨µãÊ±¿Ì
+            // ä»Šå¤©çš„å®šç‚¹æ—¶åˆ»
             DateTime now2 = new DateTime(now1.Year,
                 now1.Month,
                 now1.Day,
@@ -269,7 +269,7 @@ namespace DigitalPlatform.LibraryServer
             this.ProgressFileName = this.App.GetTempFileName("batch_progress"); //  Path.GetTempFileName();
             try
             {
-                // Èç¹ûÎÄ¼ş´æÔÚ£¬¾Í´ò¿ª£¬Èç¹ûÎÄ¼ş²»´æÔÚ£¬¾Í´´½¨Ò»¸öĞÂµÄ
+                // å¦‚æœæ–‡ä»¶å­˜åœ¨ï¼Œå°±æ‰“å¼€ï¼Œå¦‚æœæ–‡ä»¶ä¸å­˜åœ¨ï¼Œå°±åˆ›å»ºä¸€ä¸ªæ–°çš„
                 m_stream = File.Open(
     this.ProgressFileName,
     FileMode.OpenOrCreate,
@@ -279,14 +279,14 @@ namespace DigitalPlatform.LibraryServer
             }
             catch (Exception ex)
             {
-                string strError = "´ò¿ª»ò´´½¨ÎÄ¼ş '" + this.ProgressFileName + "' ·¢Éú´íÎó: " + ex.Message;
+                string strError = "æ‰“å¼€æˆ–åˆ›å»ºæ–‡ä»¶ '" + this.ProgressFileName + "' å‘ç”Ÿé”™è¯¯: " + ex.Message;
                 throw new Exception(strError);
             }
 
             m_stream.Seek(0, SeekOrigin.End);
         }
 
-        // Çå³ı½ø¶ÈÎÄ¼şÄÚÈİ
+        // æ¸…é™¤è¿›åº¦æ–‡ä»¶å†…å®¹
         public void ClearProgressFile()
         {
             if (String.IsNullOrEmpty(this.ProgressFileName) == false)
@@ -304,7 +304,7 @@ namespace DigitalPlatform.LibraryServer
         {
             get
             {
-                throw new Exception("DefaltNameÉĞÎ´ÊµÏÖ");
+                throw new Exception("DefaltNameå°šæœªå®ç°");
             }
         }
 
@@ -334,7 +334,7 @@ namespace DigitalPlatform.LibraryServer
             e.Result = 1;
         }
 
-        // Æô¶¯¹¤×÷Ïß³Ì
+        // å¯åŠ¨å·¥ä½œçº¿ç¨‹
         public void StartWorkerThread()
         {
             if (this.threadWorker != null
@@ -356,14 +356,14 @@ namespace DigitalPlatform.LibraryServer
             // Thread.Sleep(1);
 
             if (this.m_nPrevLoop != -1)
-                this.Loop = this.m_nPrevLoop == 1 ? true : false;   // »Ö¸´ÉÏÒ»´ÎµÄLoopÖµ
+                this.Loop = this.m_nPrevLoop == 1 ? true : false;   // æ¢å¤ä¸Šä¸€æ¬¡çš„Loopå€¼
             try
             {
                 this.threadWorker.Start();
             }
             catch (Exception ex)
             {
-                string strErrorText = "StartWorkerThread()³öÏÖÒì³£: " + ExceptionUtil.GetDebugText(ex);
+                string strErrorText = "StartWorkerThread()å‡ºç°å¼‚å¸¸: " + ExceptionUtil.GetDebugText(ex);
                 this.App.WriteErrorLog(strErrorText);
 
                 try
@@ -376,7 +376,7 @@ namespace DigitalPlatform.LibraryServer
 
                 try
                 {
-                    // ¶ªÆúÔ­À´µÄÏß³Ì¡£ÖØĞÂ´´½¨Ò»¸öÏß³Ì
+                    // ä¸¢å¼ƒåŸæ¥çš„çº¿ç¨‹ã€‚é‡æ–°åˆ›å»ºä¸€ä¸ªçº¿ç¨‹
                     this.threadWorker =
                         new Thread(new ThreadStart(this.ThreadMain));
                     this.threadWorker.Start();
@@ -387,7 +387,7 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
-        // Æô¶¯²¢¼¤»î¹¤×÷Ïß³Ì
+        // å¯åŠ¨å¹¶æ¿€æ´»å·¥ä½œçº¿ç¨‹
         public void ActivateWorkerThread()
         {
             if (this.threadWorker != null
@@ -414,7 +414,7 @@ namespace DigitalPlatform.LibraryServer
                 }
                 catch (Exception ex)
                 {
-                    string strErrorText = "ActivateWorkerThread()³öÏÖÒì³£: " + ExceptionUtil.GetDebugText(ex);
+                    string strErrorText = "ActivateWorkerThread()å‡ºç°å¼‚å¸¸: " + ExceptionUtil.GetDebugText(ex);
                     this.App.WriteErrorLog(strErrorText);
                 }
             }
@@ -445,12 +445,12 @@ namespace DigitalPlatform.LibraryServer
             this.eventClose.Set();
             this.m_bClosed = true;
 
-            this.m_nPrevLoop = this.Loop == true ? 1: 0;   // ¼ÇÒäÇ°Ò»´ÎµÄLoopÖµ
-            this.Loop = false;  // ·ÀÖ¹¹ıÒ»»á¼ÌĞøÑ­»·
+            this.m_nPrevLoop = this.Loop == true ? 1: 0;   // è®°å¿†å‰ä¸€æ¬¡çš„Loopå€¼
+            this.Loop = false;  // é˜²æ­¢è¿‡ä¸€ä¼šç»§ç»­å¾ªç¯
         }
 
-        // ÉèÖÃ½ø¶ÈÎÄ±¾
-        // ¶àÏß³Ì£º°²È«
+        // è®¾ç½®è¿›åº¦æ–‡æœ¬
+        // å¤šçº¿ç¨‹ï¼šå®‰å…¨
         internal void SetProgressText(string strText)
         {
             this.m_lock.AcquireWriterLock(m_nLockTimeout);
@@ -466,22 +466,22 @@ namespace DigitalPlatform.LibraryServer
 
         }
 
-        // ×·¼Ó½á¹ûÎÄ±¾
-        // °ü×°°æ±¾
+        // è¿½åŠ ç»“æœæ–‡æœ¬
+        // åŒ…è£…ç‰ˆæœ¬
         internal void AppendResultText(string strText)
         {
             AppendResultText(true, strText);
         }
 
-        // ×·¼Ó½á¹ûÎÄ±¾
-        // °ü×°°æ±¾
+        // è¿½åŠ ç»“æœæ–‡æœ¬
+        // åŒ…è£…ç‰ˆæœ¬
         internal void AppendResultTextNoTime(string strText)
         {
             AppendResultText(false, strText);
         }
 
-        // ×·¼Ó½á¹ûÎÄ±¾
-        // ¶àÏß³Ì£º°²È«
+        // è¿½åŠ ç»“æœæ–‡æœ¬
+        // å¤šçº¿ç¨‹ï¼šå®‰å…¨
         internal void AppendResultText(bool bDisplayTime,
             string strText)
         {
@@ -506,8 +506,8 @@ namespace DigitalPlatform.LibraryServer
             }
         }
 
-        // »ñµÃÈÎÎñµ±Ç°ĞÅÏ¢
-        // ¶àÏß³Ì£º°²È«
+        // è·å¾—ä»»åŠ¡å½“å‰ä¿¡æ¯
+        // å¤šçº¿ç¨‹ï¼šå®‰å…¨
         public BatchTaskInfo GetCurrentInfo(long lResultStart,
             int nMaxResultBytes)
         {
@@ -518,12 +518,12 @@ namespace DigitalPlatform.LibraryServer
                 BatchTaskInfo info = new BatchTaskInfo();
                 info.Name = this.Name;
                 if (this.m_bClosed == false)
-                    info.State = "ÔËĞĞÖĞ";
+                    info.State = "è¿è¡Œä¸­";
                 else
-                    info.State = "Í£Ö¹";
+                    info.State = "åœæ­¢";
 
                 if (this.App.PauseBatchTask == true)
-                    info.ProgressText = "[×¢Òâ£ºÈ«²¿Åú´¦ÀíÈÎÎñÒÑ¾­±»ÔİÍ£] " + this.ProgressText;
+                    info.ProgressText = "[æ³¨æ„ï¼šå…¨éƒ¨æ‰¹å¤„ç†ä»»åŠ¡å·²ç»è¢«æš‚åœ] " + this.ProgressText;
                 else
                     info.ProgressText = this.ProgressText;
 
@@ -549,10 +549,10 @@ namespace DigitalPlatform.LibraryServer
 
         }
 
-        // »ñµÃÊä³ö½á¹ûÎÄ±¾
+        // è·å¾—è¾“å‡ºç»“æœæ–‡æœ¬
         // parameters:
-        //      lEndOffset  ±¾´Î»ñÈ¡µÄÄ©Î²Æ«ÒÆ
-        //      lTotalLength    ·µ»ØÁ÷µÄ×î´ó³¤¶È
+        //      lEndOffset  æœ¬æ¬¡è·å–çš„æœ«å°¾åç§»
+        //      lTotalLength    è¿”å›æµçš„æœ€å¤§é•¿åº¦
         public void GetResultText(long lStart,
             int nMaxBytes,
             out byte[] baResult,
@@ -585,14 +585,14 @@ namespace DigitalPlatform.LibraryServer
             }
             finally
             {
-                // Ö¸Õë»Øµ½ÎÄ¼şÄ©Î²
+                // æŒ‡é’ˆå›åˆ°æ–‡ä»¶æœ«å°¾
                 this.m_stream.Seek(0, SeekOrigin.End);
             }
 
             return;
         }
 
-        // ¹¤×÷Ïß³Ì
+        // å·¥ä½œçº¿ç¨‹
         public virtual void ThreadMain()
         {
             try
@@ -612,20 +612,20 @@ namespace DigitalPlatform.LibraryServer
                     catch (System.Threading.ThreadAbortException /*ex*/)
                     {
                         /*
-                        // µ÷ÊÔÓÃ
-                        LibraryApplication.WriteWindowsLog("BatchTask·ı»ñÁËThreadAbortExceptionÒì³£", EventLogEntryType.Information);
+                        // è°ƒè¯•ç”¨
+                        LibraryApplication.WriteWindowsLog("BatchTaskä¿˜è·äº†ThreadAbortExceptionå¼‚å¸¸", EventLogEntryType.Information);
                          * */
-                        this.App.Save(null, false);    // ´¥·¢±£´æ
-                        this.App.WriteErrorLog("¸Õ²ÅÊÇThreadAbortException´¥·¢ÁËÅäÖÃÎÄ¼ş±£´æ");
+                        this.App.Save(null, false);    // è§¦å‘ä¿å­˜
+                        this.App.WriteErrorLog("åˆšæ‰æ˜¯ThreadAbortExceptionè§¦å‘äº†é…ç½®æ–‡ä»¶ä¿å­˜");
                         break;
                     }
 
                     if (index == WaitHandle.WaitTimeout)
                     {
-                        // ³¬Ê±
+                        // è¶…æ—¶
                         eventActive.Reset();
                         Worker();
-                        eventActive.Reset();    // 2013/11/23 Ö»ÈÃ¶Â×¡µÄÊ±ºò·¢»Ó×÷ÓÃ
+                        eventActive.Reset();    // 2013/11/23 åªè®©å µä½çš„æ—¶å€™å‘æŒ¥ä½œç”¨
 
                     }
                     else if (index == 0)
@@ -634,21 +634,21 @@ namespace DigitalPlatform.LibraryServer
                     }
                     else
                     {
-                        // µÃµ½¼¤»îĞÅºÅ
+                        // å¾—åˆ°æ¿€æ´»ä¿¡å·
                         eventActive.Reset();
                         Worker();
-                        eventActive.Reset();    // 2013/11/23 Ö»ÈÃ¶Â×¡µÄÊ±ºò·¢»Ó×÷ÓÃ
+                        eventActive.Reset();    // 2013/11/23 åªè®©å µä½çš„æ—¶å€™å‘æŒ¥ä½œç”¨
                     }
 
-                    // ÊÇ·ñÑ­»·?
+                    // æ˜¯å¦å¾ªç¯?
                     if (this.Loop == false)
                         break;
                 }
-                this.ManualStart = false;   // Õâ¸ö±äÁ¿Ö»ÔÚÒ»ÂÖ´¦ÀíÖĞ¹ÜÓÃ
+                this.ManualStart = false;   // è¿™ä¸ªå˜é‡åªåœ¨ä¸€è½®å¤„ç†ä¸­ç®¡ç”¨
             }
             catch (Exception ex)
             {
-                string strErrorText = "BatchTask¹¤×÷Ïß³Ì³öÏÖÒì³£: " + ExceptionUtil.GetDebugText(ex);
+                string strErrorText = "BatchTaskå·¥ä½œçº¿ç¨‹å‡ºç°å¼‚å¸¸: " + ExceptionUtil.GetDebugText(ex);
                 try
                 {
                     this.App.WriteErrorLog(strErrorText);
@@ -660,16 +660,16 @@ namespace DigitalPlatform.LibraryServer
             }
             finally
             {
-                // 2009/7/16 ÒÆ¶¯µ½ÕâÀï
+                // 2009/7/16 ç§»åŠ¨åˆ°è¿™é‡Œ
                 eventFinished.Set();
 
-                // 2009/7/16 ĞÂÔö
+                // 2009/7/16 æ–°å¢
                 this.m_bClosed = true;
             }
 
         }
 
-        // ¹¤×÷Ïß³ÌÃ¿Ò»ÂÖÑ­»·µÄÊµÖÊĞÔ¹¤×÷
+        // å·¥ä½œçº¿ç¨‹æ¯ä¸€è½®å¾ªç¯çš„å®è´¨æ€§å·¥ä½œ
         public virtual void Worker()
         {
 

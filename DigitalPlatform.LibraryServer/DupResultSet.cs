@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
@@ -25,7 +25,7 @@ namespace DigitalPlatform.LibraryServer
         }
     }*/
 
-    // ĞĞ¶ÔÏó
+    // è¡Œå¯¹è±¡
     public class DupLineItem : Item
     {
         int m_nLength = 0;
@@ -88,12 +88,12 @@ namespace DigitalPlatform.LibraryServer
                 byte[] baKey = Encoding.UTF8.GetBytes(this.m_strLineKey);
                 int nKeyBytes = baKey.Length;
 
-                // ³õÊ¼»¯¶ş½øÖÆÄÚÈİ
+                // åˆå§‹åŒ–äºŒè¿›åˆ¶å†…å®¹
                 MemoryStream s = new MemoryStream();
                 BinaryFormatter formatter = new BinaryFormatter();
                 formatter.Serialize(s, m_line);
 
-                this.Length = (int)s.Length + 4 + nKeyBytes;	// ËãÉÏÁËlengthËùÕ¼bytes
+                this.Length = (int)s.Length + 4 + nKeyBytes;	// ç®—ä¸Šäº†lengthæ‰€å bytes
 
                 m_buffer = new byte[(int)s.Length];
                 s.Seek(0, SeekOrigin.Begin);
@@ -118,24 +118,24 @@ namespace DigitalPlatform.LibraryServer
         public override void ReadData(Stream stream)
         {
             if (this.Length == 0)
-                throw new Exception("lengthÉĞÎ´³õÊ¼»¯");
+                throw new Exception("lengthå°šæœªåˆå§‹åŒ–");
 
-            // ¶ÁÈëWeight
+            // è¯»å…¥Weight
             byte[] weightbuffer = new byte[4];
             stream.Read(weightbuffer, 0, 4);
             this.Weight = BitConverter.ToInt32(weightbuffer, 0);
 
-            // ¶ÁÈëThreshold
+            // è¯»å…¥Threshold
             byte[] shresholdbuffer = new byte[4];
             stream.Read(shresholdbuffer, 0, 4);
             this.Threshold = BitConverter.ToInt32(shresholdbuffer, 0);
 
-            // ¶ÁÈëpath length
+            // è¯»å…¥path length
             byte[] lengthbuffer = new byte[4];
             stream.Read(lengthbuffer, 0, 4);
             int nPathLength = BitConverter.ToInt32(lengthbuffer, 0);
 
-            // ¶ÁÈëpath content
+            // è¯»å…¥path content
             if (nPathLength > 0)
             {
                 byte[] pathbuffer = new byte[nPathLength];
@@ -151,24 +151,24 @@ namespace DigitalPlatform.LibraryServer
         public override void ReadCompareData(Stream stream)
         {
             if (this.Length == 0)
-                throw new Exception("lengthÉĞÎ´³õÊ¼»¯");
+                throw new Exception("lengthå°šæœªåˆå§‹åŒ–");
 
-            // ¶ÁÈëWeight
+            // è¯»å…¥Weight
             byte[] weightbuffer = new byte[4];
             stream.Read(weightbuffer, 0, 4);
             this.Weight = BitConverter.ToInt32(weightbuffer, 0);
 
-            // ¶ÁÈëThreshold
+            // è¯»å…¥Threshold
             byte[] shresholdbuffer = new byte[4];
             stream.Read(shresholdbuffer, 0, 4);
             this.Threshold = BitConverter.ToInt32(shresholdbuffer, 0);
 
-            // ¶ÁÈëpath length
+            // è¯»å…¥path length
             byte[] lengthbuffer = new byte[4];
             stream.Read(lengthbuffer, 0, 4);
             int nPathLength = BitConverter.ToInt32(lengthbuffer, 0);
 
-            // ¶ÁÈëpath content
+            // è¯»å…¥path content
             if (nPathLength > 0)
             {
                 byte[] pathbuffer = new byte[nPathLength];
@@ -187,43 +187,43 @@ namespace DigitalPlatform.LibraryServer
 
             if (m_buffer == null)
             {
-                throw (new Exception("m_bufferÉĞÎ´³õÊ¼»¯"));
+                throw (new Exception("m_bufferå°šæœªåˆå§‹åŒ–"));
             }
 
-            // Ğ´ÈëLength¸öbytesµÄÄÚÈİ
+            // å†™å…¥Lengthä¸ªbytesçš„å†…å®¹
             stream.Write(m_buffer, 0, this.Length);
         }
 
-        // ÊµÏÖIComparable½Ó¿ÚµÄCompareTo()·½·¨,
+        // å®ç°IComparableæ¥å£çš„CompareTo()æ–¹æ³•,
         // obj: An object to compare with this instance
-        // ·µ»ØÖµ A 32-bit signed integer that indicates the relative order of the comparands. The return value has these meanings:
+        // è¿”å›å€¼ A 32-bit signed integer that indicates the relative order of the comparands. The return value has these meanings:
         // Less than zero: This instance is less than obj.
         // Zero: This instance is equal to obj.
         // Greater than zero: This instance is greater than obj.
-        // Òì³£: ArgumentException,obj is not the same type as this instance.
+        // å¼‚å¸¸: ArgumentException,obj is not the same type as this instance.
         public override int CompareTo(object obj)
         {
             DupLineItem item = (DupLineItem)obj;
 
-            // Ğ¡ÔÚÇ°
+            // å°åœ¨å‰
             return String.Compare(this.Path, item.Path);
         }
 
-        // °´ÕÕÈ¨ÖµÅÅĞò
+        // æŒ‰ç…§æƒå€¼æ’åº
         public int CompareWeightTo(object obj)
         {
             DupLineItem item = (DupLineItem)obj;
 
             int delta = this.Weight - item.Weight;
             if (delta != 0)
-                return -1*delta;    // ´óÔÚÇ°
+                return -1*delta;    // å¤§åœ¨å‰
 
-            // ÈçÈ¨ÖµÏàÍ¬£¬ÔÙ°´ÕÕÂ·¾¶ÅÅĞò
-            // Ğ¡ÔÚÇ°
+            // å¦‚æƒå€¼ç›¸åŒï¼Œå†æŒ‰ç…§è·¯å¾„æ’åº
+            // å°åœ¨å‰
             return String.Compare(this.Path, item.Path);
         }
 
-        // °´ÕÕ²î¶îÅÅĞò¡£ËùÎ½²î¶î¾ÍÊÇÈ¨ÖµºÍãĞÖµµÄ²î¶î
+        // æŒ‰ç…§å·®é¢æ’åºã€‚æ‰€è°“å·®é¢å°±æ˜¯æƒå€¼å’Œé˜ˆå€¼çš„å·®é¢
         public int CompareOverThresholdTo(object obj)
         {
             DupLineItem item = (DupLineItem)obj;
@@ -233,21 +233,21 @@ namespace DigitalPlatform.LibraryServer
 
             int delta = over1 - over2;
             if (delta != 0)
-                return -1*delta;    // ´óÔÚÇ°
+                return -1*delta;    // å¤§åœ¨å‰
 
-            // Èç²î¶îÏàÍ¬£¬ÔÙ°´ÕÕÂ·¾¶ÅÅĞò
-            // Ğ¡ÔÚÇ°
+            // å¦‚å·®é¢ç›¸åŒï¼Œå†æŒ‰ç…§è·¯å¾„æ’åº
+            // å°åœ¨å‰
             return String.Compare(this.Path, item.Path);
         }
     }
 
     /// <summary>
-    /// ÓÃÓÚ²éÖØµÄ½á¹û¼¯ÎÄ¼ş¶ÔÏó
-    /// Ö÷ÒªÌØÕ÷ÊÇ£¬Ã¿¸öÊÂÏî¶¼°üº¬Ò»¸öÈ¨ÖµÕûÊı×Ö¶Î
+    /// ç”¨äºæŸ¥é‡çš„ç»“æœé›†æ–‡ä»¶å¯¹è±¡
+    /// ä¸»è¦ç‰¹å¾æ˜¯ï¼Œæ¯ä¸ªäº‹é¡¹éƒ½åŒ…å«ä¸€ä¸ªæƒå€¼æ•´æ•°å­—æ®µ
     /// </summary>
     public class DupResultSet : ItemFileBase
     {
-        // ÅÅĞò·ç¸ñ
+        // æ’åºé£æ ¼
         public DupResultSetSortStyle SortStyle = DupResultSetSortStyle.Path;
 
 
@@ -267,7 +267,7 @@ namespace DigitalPlatform.LibraryServer
             return "";
         }
 
-        // Ê¹µÃ¿ÉÒÔ°´ÕÕ¶àÖÖ·ç¸ñÅÅĞò
+        // ä½¿å¾—å¯ä»¥æŒ‰ç…§å¤šç§é£æ ¼æ’åº
         public override int Compare(long lPtr1, long lPtr2)
         {
             if (lPtr1 < 0 && lPtr2 < 0)
@@ -295,19 +295,19 @@ namespace DigitalPlatform.LibraryServer
         }
 
 
-        // ¹¦ÄÜ: ºÏ²¢Á½¸öÊı×é
+        // åŠŸèƒ½: åˆå¹¶ä¸¤ä¸ªæ•°ç»„
         // parameters:
-        //		strStyle	ÔËËã·ç¸ñ OR , AND , SUB
-        //		sourceLeft	Ô´×ó±ß½á¹û¼¯
-        //		sourceRight	Ô´ÓÒ±ß½á¹û¼¯
-        //		targetLeft	Ä¿±ê×ó±ß½á¹û¼¯
-        //		targetMiddle	Ä¿±êÖĞ¼ä½á¹û¼¯
-        //		targetRight	Ä¿±êÓÒ±ß½á¹û¼¯
-        //		bOutputDebugInfo	ÊÇ·ñÊä³ö´¦ÀíĞÅÏ¢
-        //		strDebugInfo	´¦ÀíĞÅÏ¢
+        //		strStyle	è¿ç®—é£æ ¼ OR , AND , SUB
+        //		sourceLeft	æºå·¦è¾¹ç»“æœé›†
+        //		sourceRight	æºå³è¾¹ç»“æœé›†
+        //		targetLeft	ç›®æ ‡å·¦è¾¹ç»“æœé›†
+        //		targetMiddle	ç›®æ ‡ä¸­é—´ç»“æœé›†
+        //		targetRight	ç›®æ ‡å³è¾¹ç»“æœé›†
+        //		bOutputDebugInfo	æ˜¯å¦è¾“å‡ºå¤„ç†ä¿¡æ¯
+        //		strDebugInfo	å¤„ç†ä¿¡æ¯
         // return
-        //		-1	³ö´í
-        //		0	³É¹¦
+        //		-1	å‡ºé”™
+        //		0	æˆåŠŸ
         public static int Merge(string strStyle,
             DupResultSet sourceLeft,
             DupResultSet sourceRight,
@@ -323,27 +323,27 @@ namespace DigitalPlatform.LibraryServer
 
             if (sourceLeft.m_streamSmall == null)
             {
-                throw new Exception("sourceLeft½á¹û¼¯¶ÔÏóÎ´½¨Ë÷Òı");
+                throw new Exception("sourceLeftç»“æœé›†å¯¹è±¡æœªå»ºç´¢å¼•");
             }
 
             if (sourceRight.m_streamSmall == null)
             {
-                throw new Exception("sourceRight½á¹û¼¯¶ÔÏóÎ´½¨Ë÷Òı");
+                throw new Exception("sourceRightç»“æœé›†å¯¹è±¡æœªå»ºç´¢å¼•");
             }
 
 
             if (bOutputDebugInfo == true)
             {
-                strDebugInfo += "strStyleÖµ:" + strStyle + "<br/>";
-                strDebugInfo += "sourceLeft½á¹û¼¯:" + sourceLeft.Dump() + "<br/>";
-                strDebugInfo += "sourceRight½á¹û¼¯:" + sourceRight.Dump() + "<br/>";
+                strDebugInfo += "strStyleå€¼:" + strStyle + "<br/>";
+                strDebugInfo += "sourceLeftç»“æœé›†:" + sourceLeft.Dump() + "<br/>";
+                strDebugInfo += "sourceRightç»“æœé›†:" + sourceRight.Dump() + "<br/>";
             }
 
             if (String.Compare(strStyle, "OR", true) == 0)
             {
                 if (targetLeft != null || targetRight != null)
                 {
-                    Exception ex = new Exception("DpResultSetManager::Merge()ÖĞÊÇ²»ÊÇ²ÎÊıÓÃ´íÁË?µ±strStyle²ÎÊıÖµÎª\"OR\"Ê±£¬targetLeft²ÎÊıºÍtargetRightÎŞĞ§£¬ÖµÓ¦Îªnull");
+                    Exception ex = new Exception("DpResultSetManager::Merge()ä¸­æ˜¯ä¸æ˜¯å‚æ•°ç”¨é”™äº†?å½“strStyleå‚æ•°å€¼ä¸º\"OR\"æ—¶ï¼ŒtargetLeftå‚æ•°å’ŒtargetRightæ— æ•ˆï¼Œå€¼åº”ä¸ºnull");
                     throw (ex);
                 }
             }
@@ -361,7 +361,7 @@ namespace DigitalPlatform.LibraryServer
                 {
                     if (bOutputDebugInfo == true)
                     {
-                        strDebugInfo += "i´óÓÚµÈÓÚsourceLeftµÄ¸öÊı£¬½«i¸ÄÎª-1<br/>";
+                        strDebugInfo += "iå¤§äºç­‰äºsourceLeftçš„ä¸ªæ•°ï¼Œå°†iæ”¹ä¸º-1<br/>";
                     }
                     i = -1;
                 }
@@ -372,12 +372,12 @@ namespace DigitalPlatform.LibraryServer
                         dpRecordLeft = (DupLineItem)sourceLeft[i];
                         if (bOutputDebugInfo == true)
                         {
-                            strDebugInfo += "È¡³ösourceLeft¼¯ºÏÖĞµÚ" + Convert.ToString(i) + "¸öÔªËØ£¬PathÎª" + dpRecordLeft.Path + "<br/>";
+                            strDebugInfo += "å–å‡ºsourceLefté›†åˆä¸­ç¬¬" + Convert.ToString(i) + "ä¸ªå…ƒç´ ï¼ŒPathä¸º" + dpRecordLeft.Path + "<br/>";
                         }
                     }
                     catch (Exception e)
                     {
-                        Exception ex = new Exception("È¡SourceLeft¼¯ºÏ³ö´í£ºi=" + Convert.ToString(i) + "----Count=" + Convert.ToString(sourceLeft.Count) + ", internel error :" + e.Message + "<br/>");
+                        Exception ex = new Exception("å–SourceLefté›†åˆå‡ºé”™ï¼ši=" + Convert.ToString(i) + "----Count=" + Convert.ToString(sourceLeft.Count) + ", internel error :" + e.Message + "<br/>");
                         throw (ex);
                     }
                 }
@@ -385,7 +385,7 @@ namespace DigitalPlatform.LibraryServer
                 {
                     if (bOutputDebugInfo == true)
                     {
-                        strDebugInfo += "j´óÓÚµÈÓÚsourceRightµÄ¸öÊı£¬½«j¸ÄÎª-1<br/>";
+                        strDebugInfo += "jå¤§äºç­‰äºsourceRightçš„ä¸ªæ•°ï¼Œå°†jæ”¹ä¸º-1<br/>";
                     }
                     j = -1;
                 }
@@ -396,7 +396,7 @@ namespace DigitalPlatform.LibraryServer
                         dpRecordRight = (DupLineItem)sourceRight[j];
                         if (bOutputDebugInfo == true)
                         {
-                            strDebugInfo += "È¡³ösourceRight¼¯ºÏÖĞµÚ" + Convert.ToString(j) + "¸öÔªËØ£¬PathÎª" + dpRecordRight.Path + "<br/>";
+                            strDebugInfo += "å–å‡ºsourceRighté›†åˆä¸­ç¬¬" + Convert.ToString(j) + "ä¸ªå…ƒç´ ï¼ŒPathä¸º" + dpRecordRight.Path + "<br/>";
                         }
                     }
                     catch
@@ -409,7 +409,7 @@ namespace DigitalPlatform.LibraryServer
                 {
                     if (bOutputDebugInfo == true)
                     {
-                        strDebugInfo += "i,j¶¼µÈÓÚ-1Ìø³ö<br/>";
+                        strDebugInfo += "i,jéƒ½ç­‰äº-1è·³å‡º<br/>";
                     }
                     break;
                 }
@@ -418,7 +418,7 @@ namespace DigitalPlatform.LibraryServer
                 {
                     if (bOutputDebugInfo == true)
                     {
-                        strDebugInfo += "dpRecordLeftÎªnull£¬ÉèretµÈÓÚ1<br/>";
+                        strDebugInfo += "dpRecordLeftä¸ºnullï¼Œè®¾retç­‰äº1<br/>";
                     }
                     ret = 1;
                 }
@@ -426,16 +426,16 @@ namespace DigitalPlatform.LibraryServer
                 {
                     if (bOutputDebugInfo == true)
                     {
-                        strDebugInfo += "dpRecordRightÎªnull£¬ÉèretµÈÓÚ-1<br/>";
+                        strDebugInfo += "dpRecordRightä¸ºnullï¼Œè®¾retç­‰äº-1<br/>";
                     }
                     ret = -1;
                 }
                 else
                 {
-                    ret = dpRecordLeft.CompareTo(dpRecordRight);  //MyCompareTo(oldOneKey); //¸ÄCompareTO
+                    ret = dpRecordLeft.CompareTo(dpRecordRight);  //MyCompareTo(oldOneKey); //æ”¹CompareTO
                     if (bOutputDebugInfo == true)
                     {
-                        strDebugInfo += "dpRecordLeftÓëdpRecordRight¾ù²»Îªnull£¬±È½ÏÁ½Ìõ¼ÇÂ¼µÃµ½retµÈÓÚ" + Convert.ToString(ret) + "<br/>";
+                        strDebugInfo += "dpRecordLeftä¸dpRecordRightå‡ä¸ä¸ºnullï¼Œæ¯”è¾ƒä¸¤æ¡è®°å½•å¾—åˆ°retç­‰äº" + Convert.ToString(ret) + "<br/>";
                     }
                 }
 
@@ -445,7 +445,7 @@ namespace DigitalPlatform.LibraryServer
                 {
                     if (ret == 0)
                     {
-                        // ×óÓÒÈÎÒâÈ¡Ò»¸ö¾Í¿ÉÒÔ£¬µ«ÊÇÒª¼ÓÉÏÈ¨Öµ 2007/7/2
+                        // å·¦å³ä»»æ„å–ä¸€ä¸ªå°±å¯ä»¥ï¼Œä½†æ˜¯è¦åŠ ä¸Šæƒå€¼ 2007/7/2
                         dpRecordLeft.Weight += dpRecordRight.Weight;
 
                         targetMiddle.Add(dpRecordLeft);
@@ -469,10 +469,10 @@ namespace DigitalPlatform.LibraryServer
                 {
                     if (bOutputDebugInfo == true)
                     {
-                        strDebugInfo += "retµÈÓÚ0,¼Óµ½targetMiddleÀïÃæ<br/>";
+                        strDebugInfo += "retç­‰äº0,åŠ åˆ°targetMiddleé‡Œé¢<br/>";
                     }
 
-                    // ×óÓÒÈÎÒâÈ¡Ò»¸ö¾Í¿ÉÒÔ£¬µ«ÊÇÒª¼ÓÉÏÈ¨Öµ 2007/7/2
+                    // å·¦å³ä»»æ„å–ä¸€ä¸ªå°±å¯ä»¥ï¼Œä½†æ˜¯è¦åŠ ä¸Šæƒå€¼ 2007/7/2
                     dpRecordLeft.Weight += dpRecordRight.Weight;
 
                     targetMiddle.Add(dpRecordLeft);
@@ -484,7 +484,7 @@ namespace DigitalPlatform.LibraryServer
                 {
                     if (bOutputDebugInfo == true)
                     {
-                        strDebugInfo += "retĞ¡ÓÚ0,¼Óµ½targetLeftÀïÃæ<br/>";
+                        strDebugInfo += "retå°äº0,åŠ åˆ°targetLefté‡Œé¢<br/>";
                     }
 
                     if (targetLeft != null && dpRecordLeft != null)
@@ -496,7 +496,7 @@ namespace DigitalPlatform.LibraryServer
                 {
                     if (bOutputDebugInfo == true)
                     {
-                        strDebugInfo += "ret´óÓÚ0,¼Óµ½targetRightÀïÃæ<br/>";
+                        strDebugInfo += "retå¤§äº0,åŠ åˆ°targetRighté‡Œé¢<br/>";
                     }
 
                     if (targetRight != null && dpRecordRight != null)
@@ -511,8 +511,8 @@ namespace DigitalPlatform.LibraryServer
 
     public enum DupResultSetSortStyle
     {
-        Path = 0,   // °´ÕÕÂ·¾¶ÅÅĞò
-        Weight = 1, // °´ÕÕÈ¨ÖµÅÅĞò¡£Èç¹ûÈ¨ÖµÏàÍ¬£¬Ôò°´Â·¾¶ÅÅĞò
-        OverThreshold = 2,  // °´ÕÕÈ¨ÖµºÍãĞÖµµÄ²î¶îÀ´ÅÅĞò¡£Èç¹ûÕâ¸ö²î¶îÏàÍ¬£¬Ôò°´Â·¾¶ÅÅĞò
+        Path = 0,   // æŒ‰ç…§è·¯å¾„æ’åº
+        Weight = 1, // æŒ‰ç…§æƒå€¼æ’åºã€‚å¦‚æœæƒå€¼ç›¸åŒï¼Œåˆ™æŒ‰è·¯å¾„æ’åº
+        OverThreshold = 2,  // æŒ‰ç…§æƒå€¼å’Œé˜ˆå€¼çš„å·®é¢æ¥æ’åºã€‚å¦‚æœè¿™ä¸ªå·®é¢ç›¸åŒï¼Œåˆ™æŒ‰è·¯å¾„æ’åº
     }
 }

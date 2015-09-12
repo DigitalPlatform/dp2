@@ -265,12 +265,20 @@ namespace DigitalPlatform.LibraryServer
                 strReaderBarcode = strTemp;
             }
 
+            RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
             // 读入读者记录
             string strReaderXml = "";
             byte[] reader_timestamp = null;
             string strOutputReaderRecPath = "";
             int nRet = this.GetReaderRecXml(
-                sessioninfo.Channels,
+                // sessioninfo.Channels,
+                channel,
                 strReaderBarcode,
                 out strReaderXml,
                 out strOutputReaderRecPath,
@@ -928,7 +936,8 @@ namespace DigitalPlatform.LibraryServer
                         //      1   命中1条
                         //      >1  命中多于1条
                         nRet = this.GetItemRecXml(
-                            sessioninfo.Channels,
+                            // sessioninfo.Channels,
+                            channel,
                             strItemBarcode,
                             out strItemXml,
                             100,
@@ -2124,10 +2133,18 @@ namespace DigitalPlatform.LibraryServer
 
                 DateTime start_time_read_reader = DateTime.Now;
 
+                RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+                if (channel == null)
+                {
+                    strError = "get channel error";
+                    goto ERROR1;
+                }
+
                 // 读入读者记录
                 string strReaderXml = "";
                 nRet = this.GetReaderRecXml(
-                    sessioninfo.Channels,
+                    // sessioninfo.Channels,
+                    channel,
                     strReaderBarcode,
                     out strReaderXml,
                     out strOutputReaderRecPath,
@@ -2155,7 +2172,8 @@ namespace DigitalPlatform.LibraryServer
                         //      1   命中1条
                         //      >1  命中多于1条
                         nRet = this.GetReaderRecXmlByFrom(
-                            sessioninfo.Channels,
+                            // sessioninfo.Channels,
+                            channel,
                             strIdcardNumber,
                             "身份证号",
                             out strReaderXml,
@@ -2195,7 +2213,8 @@ namespace DigitalPlatform.LibraryServer
                         foreach (string strFrom in this.PatronAdditionalFroms)
                         {
                             nRet = this.GetReaderRecXmlByFrom(
-                                sessioninfo.Channels,
+                                // sessioninfo.Channels,
+                                channel,
                                 null,
                                 strReaderBarcode,
                                 strFrom,
@@ -3405,13 +3424,21 @@ namespace DigitalPlatform.LibraryServer
             strReaderName = "";
             int nRet = 0;
 
+            RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
             // 读入读者记录
             string strReaderXml = "";
             byte[] reader_timestamp = null;
             string strOutputReaderRecPath = "";
 
             nRet = this.GetReaderRecXml(
-                sessioninfo.Channels,
+                // sessioninfo.Channels,
+                channel,
                 strReaderBarcode,
                 out strReaderXml,
                 out strOutputReaderRecPath,
@@ -3620,6 +3647,13 @@ namespace DigitalPlatform.LibraryServer
                 }
             }
 
+            RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                goto ERROR1;
+            }
+
             int nRedoCount = 0;
 
         REDO_RETURN:
@@ -3653,13 +3687,6 @@ namespace DigitalPlatform.LibraryServer
 
                 string strItemXml = "";
                 byte[] item_timestamp = null;
-
-                RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
-                if (channel == null)
-                {
-                    strError = "get channel error";
-                    goto ERROR1;
-                }
 
                 // *** 获得册记录 ***
                 bool bItemBarcodeDup = false;   // 是否发生册条码号重复情况
@@ -3722,7 +3749,8 @@ namespace DigitalPlatform.LibraryServer
                         //      1   命中1条
                         //      >1  命中多于1条
                         nRet = this.GetItemRecXml(
-                            sessioninfo.Channels,
+                            // sessioninfo.Channels,
+                            channel,
                             strItemBarcodeParam,
                             out strItemXml,
                             100,
@@ -4145,7 +4173,8 @@ namespace DigitalPlatform.LibraryServer
                     if (string.IsNullOrEmpty(strReaderBarcode) == false)
                     {
                         nRet = this.GetReaderRecXml(
-                            sessioninfo.Channels,
+                            // sessioninfo.Channels,
+                            channel,
                             strReaderBarcode,
                             out strReaderXml,
                             out strOutputReaderRecPath,
@@ -4166,7 +4195,8 @@ namespace DigitalPlatform.LibraryServer
                                 //      1   命中1条
                                 //      >1  命中多于1条
                                 nRet = this.GetReaderRecXmlByFrom(
-                                    sessioninfo.Channels,
+                                    // sessioninfo.Channels,
+                                    channel,
                                     strIdcardNumber,
                                     "身份证号",
                                     out strReaderXml,
@@ -4206,7 +4236,8 @@ namespace DigitalPlatform.LibraryServer
                                 foreach (string strFrom in this.PatronAdditionalFroms)
                                 {
                                     nRet = this.GetReaderRecXmlByFrom(
-                                        sessioninfo.Channels,
+                                        // sessioninfo.Channels,
+                                        channel,
                                         null,
                                         strReaderBarcode,
                                         strFrom,
@@ -4896,7 +4927,8 @@ namespace DigitalPlatform.LibraryServer
                 //      -1  error
                 //      0   没有找到<request>元素
                 nRet = DoReservationNotify(
-                    sessioninfo.Channels,
+                    // sessioninfo.Channels,
+                    channel,
                     strReservationReaderBarcode,
                     true,   // 需要函数内加锁
                     strItemBarcodeParam,
@@ -5154,6 +5186,7 @@ namespace DigitalPlatform.LibraryServer
                     || StringUtil.IsInList("xml", strBiblioFormatList) == true
                     || StringUtil.IsInList("text", strBiblioFormatList) == true)
                 {
+#if NO
                     RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
                     if (channel == null)
                     {
@@ -5161,6 +5194,7 @@ namespace DigitalPlatform.LibraryServer
                         strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
                         goto ERROR1;
                     }
+#endif
 
                     string strMetaData = "";
                     byte[] timestamp = null;
@@ -8622,7 +8656,8 @@ out string strError)
                 byte[] reader_timestamp = null;
 
                 nRet = this.GetReaderRecXml(
-                    sessioninfo.Channels,
+                    // sessioninfo.Channels,
+                    channel,
                     strReaderBarcode,
                     out strReaderXml,
                     out strOutputReaderRecPath,
@@ -8739,8 +8774,6 @@ out string strError)
                         }
                     }
                 }
-
-
 
                 if (bReaderDomChanged == true)
                 {
@@ -9101,6 +9134,13 @@ out string strError)
             int nRet = 0;
             string strError = "";
 
+            RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                goto ERROR1;
+            }
+
             if (String.Compare(strFunction, "amerce", true) != 0
                 && String.Compare(strFunction, "undo", true) != 0
                 && String.Compare(strFunction, "modifyprice", true) != 0
@@ -9211,7 +9251,8 @@ out string strError)
                 string strOutputReaderRecPath = "";
                 byte[] reader_timestamp = null;
                 nRet = this.GetReaderRecXml(
-                    sessioninfo.Channels,
+                    // sessioninfo.Channels,
+                    channel,
                     strReaderBarcode,
                     out strReaderXml,
                     out strOutputReaderRecPath,
@@ -9405,7 +9446,8 @@ out string strError)
                 //      AmerceRecordXmls    需要写入的新记录的数组
                 //      CreatedNewPaths 已经创建的新记录的路径数组。可以用于Undo(删除刚刚创建的新记录)
                 nRet = CreateAmerceRecords(
-                    sessioninfo.Channels,
+                    // sessioninfo.Channels,
+                    channel,
                     AmerceRecordXmls,
                     out CreatedNewPaths,
                     out strError);
@@ -9444,12 +9486,14 @@ out string strError)
                 byte[] output_timestamp = null;
                 string strOutputPath = "";
 
+#if NO
                 RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
                 if (channel == null)
                 {
                     strError = "get channel error";
                     goto ERROR1;
                 }
+#endif
                 long lRet = 0;
 
                 if (bReaderDomChanged == true)
@@ -9542,16 +9586,13 @@ out string strError)
                                     }
                                 }
                             }
-
                         } // end of for
-
                     }
 
                     // 最新的读者记录
                     XmlNode node = DomUtil.SetElementText(domOperLog.DocumentElement,
         "readerRecord", strReaderXml);
                     DomUtil.SetAttr(node, "recPath", strOutputReaderRecPath);
-
 
                     string strOperTime = this.Clock.GetClock();
                     DomUtil.SetElementText(domOperLog.DocumentElement, "operator",
@@ -9900,7 +9941,8 @@ out string strError)
         //      AmerceRecordXmls    需要写入的新记录的数组
         //      CreatedNewPaths 已经创建的新记录的路径数组。可以用于Undo(删除刚刚创建的新记录)
         int CreateAmerceRecords(
-            RmsChannelCollection channels,
+            // RmsChannelCollection channels,
+            RmsChannel channel,
             List<string> AmerceRecordXmls,
             out List<string> CreatedNewPaths,
             out string strError)
@@ -9915,12 +9957,14 @@ out string strError)
                 return -1;
             }
 
+#if NO
             RmsChannel channel = channels.GetChannel(this.WsUrl);
             if (channel == null)
             {
                 strError = "get channel error";
                 return -1;
             }
+#endif
 
             for (int i = 0; i < AmerceRecordXmls.Count; i++)
             {
@@ -12742,6 +12786,13 @@ out string strError)
                 return -1;
             }
 
+            RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                return -1;
+            }
+
             XmlNodeList nodesReservationRequest = itemdom.DocumentElement.SelectNodes("reservations/request");
 
             // 续借处理
@@ -12807,7 +12858,8 @@ out string strError)
             //      1   命中1条
             //      >1  命中多于1条
             nRet = GetArrivedQueueRecXml(
-                sessioninfo.Channels,
+                // sessioninfo.Channels,
+                channel,
                 strItemBarcodeParam,    // strItemBarcode
                 out strNotifyXml,
                 out timestamp,
@@ -12835,7 +12887,7 @@ out string strError)
                 return -1;
             }
 
-            RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+            // RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
 
             string strState = DomUtil.GetElementText(notifydom.DocumentElement,
                 "state");
@@ -13738,7 +13790,8 @@ strBookPrice);    // 图书价格
         //      bMaskLocationReservation    不要给册记录<location>打上#reservation标记
         //      strReservationReaderBarcode 返回下一个预约读者的证条码号
         public int ClearArrivedInfo(
-            RmsChannelCollection channels,
+            // RmsChannelCollection channels,
+            RmsChannel channel,
             string strReaderBarcode,
             string strItemBarcode,
             bool bDontMaskLocationReservation,
@@ -13754,6 +13807,7 @@ strBookPrice);    // 图书价格
             int nRet = 0;
             strReservationReaderBarcode = "";
 
+#if NO
             RmsChannel channel = null;
             channel = channels.GetChannel(this.WsUrl);
             if (channel == null)
@@ -13761,6 +13815,7 @@ strBookPrice);    // 图书价格
                 strError = "get channel error";
                 return -1;
             }
+#endif
 
             bool bDontLock = false;
 
@@ -13790,7 +13845,8 @@ strBookPrice);    // 图书价格
                 string strReaderXml = "";
                 string strOutputReaderRecPath = "";
                 nRet = this.GetReaderRecXml(
-                    channels,
+                    // channels,
+                    channel,
                     strReaderBarcode,
                     out strReaderXml,
                     out strOutputReaderRecPath,
@@ -13815,7 +13871,6 @@ strBookPrice);    // 图书价格
                     strError = "装载读者记录进入XML DOM时发生错误: " + strError;
                     return -1;
                 }
-
 
                 // 从当前读者记录中删除有关字段
                 XmlNodeList nodes = readerdom.DocumentElement.SelectNodes("reservations/request");
@@ -13998,6 +14053,12 @@ strBookPrice);    // 图书价格
                 goto ERROR1;
             }
 
+            RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                goto ERROR1;
+            }
 
             // 对源和目标两个证条码号加锁，读入两个读者记录
             // 加锁有先后有技巧：先加条码号较小的锁定。否则容易造成死锁
@@ -14037,7 +14098,8 @@ strBookPrice);    // 图书价格
                         string strSourceOutputReaderRecPath = "";
                         byte[] source_reader_timestamp = null;
                         nRet = this.GetReaderRecXml(
-                            sessioninfo.Channels,
+                            // sessioninfo.Channels,
+                            channel,
                             strSourceReaderBarcode,
                             out strSourceReaderXml,
                             out strSourceOutputReaderRecPath,
@@ -14094,7 +14156,8 @@ strBookPrice);    // 图书价格
                         string strTargetOutputReaderRecPath = "";
                         byte[] target_reader_timestamp = null;
                         nRet = this.GetReaderRecXml(
-                            sessioninfo.Channels,
+                            // sessioninfo.Channels,
+                            channel,
                             strTargetReaderBarcode,
                             out strTargetReaderXml,
                             out strTargetOutputReaderRecPath,
@@ -14184,7 +14247,8 @@ strBookPrice);    // 图书价格
                             //      0   not found brrowinfo
                             //      1   found and moved
                             nRet = DevolveBorrowInfo(
-                                sessioninfo.Channels,
+                                // sessioninfo.Channels,
+                                channel,
                                 strSourceReaderBarcode,
                                 strTargetReaderBarcode,
                                 strOperTimeString,
@@ -14224,14 +14288,14 @@ strBookPrice);    // 图书价格
                                 return result;
                             }
 
-
+#if NO
                             RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
                             if (channel == null)
                             {
                                 strError = "get channel error";
                                 goto ERROR1;
                             }
-
+#endif
 
                             // 保存两条读者记录
                             // 写回读者记录
@@ -14241,8 +14305,6 @@ strBookPrice);    // 图书价格
                             int nRedoCount = 0;
 
                             // 应当先保存target读者记录。因为如果此后中断，还原的可能性要大一些
-
-
 
                         // REDO_WRITE_TARGET:
                             lRet = channel.DoSaveTextRes(strTargetOutputReaderRecPath,
@@ -14344,10 +14406,7 @@ strBookPrice);    // 图书价格
 #if DEBUG_LOCK_READER
                         this.WriteErrorLog("DevolveReaderInfo 结束为读者加写锁2 '" + strBarcode2 + "'");
 #endif
-
                     }
-
-
                 }// 读者记录锁定1范围结束
                 finally
                 {
@@ -14355,7 +14414,6 @@ strBookPrice);    // 图书价格
 #if DEBUG_LOCK_READER
                     this.WriteErrorLog("DevolveReaderInfo 结束为读者加写锁1 '" + strBarcode1 + "'");
 #endif
-
                 }
 
             }
@@ -14385,7 +14443,8 @@ strBookPrice);    // 图书价格
         //      0   not found brrowinfo
         //      1   found and moved
         int DevolveBorrowInfo(
-            RmsChannelCollection Channels,
+            // RmsChannelCollection Channels,
+            RmsChannel channel,
             string strSourceReaderBarcode,
             string strTargetReaderBarcode,
             string strOperTimeString,
@@ -14407,7 +14466,6 @@ strBookPrice);    // 图书价格
             XmlNodeList nodesSourceBorrow = nodeSourceBorrows.SelectNodes("borrow");
             if (nodesSourceBorrow.Count == 0)
                 return 0;
-
 
             XmlNode nodeTargetBorrows = target_dom.DocumentElement.SelectSingleNode("borrows");
             if (nodeTargetBorrows == null)
@@ -14444,7 +14502,6 @@ strBookPrice);    // 图书价格
                 // 增加一个注释元素
                 DomUtil.SetAttr(target, "devolveComment", "从读者 " + strSourceReaderBarcode + " 转移而来，操作时间 " + strOperTimeString);
 
-
                 string strEntityBarcode = DomUtil.GetAttr(source, "barcode");
 
                 if (String.IsNullOrEmpty(strEntityBarcode) == true)
@@ -14456,7 +14513,8 @@ strBookPrice);    // 图书价格
                 //      0   entitybarcode not found
                 //      1   found and changed
                 nRet = ChangeEntityBorrower(
-                    Channels,
+                    // Channels,
+                    channel,
                     strEntityBarcode,
                     strSourceReaderBarcode,
                     strTargetReaderBarcode,
@@ -14471,7 +14529,6 @@ strBookPrice);    // 图书价格
                 {
                     // 暂时不理会
                 }
-
             }
 
             // 源记录中根下创建一个注释元素
@@ -14493,8 +14550,6 @@ strBookPrice);    // 图书价格
 
             // 删除源记录中的<borrows/borrow>元素
             nodeSourceBorrows.InnerXml = "";
-
-
             return 1;
         }
 
@@ -14544,8 +14599,6 @@ strBookPrice);    // 图书价格
 
                 // 增加一个注释元素
                 DomUtil.SetAttr(target, "devolveComment", "从读者 " +strSourceReaderBarcode+ " 转移而来，操作时间 " + strOperTimeString);
-
-
             }
 
             // 源记录中根下创建一个注释元素
@@ -14570,7 +14623,6 @@ strBookPrice);    // 图书价格
 
             // 删除源记录中的<overdues/overdue>元素
             nodeSourceOverdues.InnerXml = "";
-
             return 1;
         }
 
@@ -14584,7 +14636,8 @@ strBookPrice);    // 图书价格
         //      0   entitybarcode not found
         //      1   found and changed
         int ChangeEntityBorrower(
-            RmsChannelCollection Channels,
+            // RmsChannelCollection Channels,
+            RmsChannel channel,
             string strEntityBarcode,
             string strOldReaderBarcode,
             string strNewReaderBarcode,
@@ -14603,7 +14656,6 @@ strBookPrice);    // 图书价格
 
             try // 册记录锁定范围开始
             {
-
                 // 从册条码号获得册记录
                 byte[] item_timestamp = null;
                 List<string> aPath = null;
@@ -14611,7 +14663,7 @@ strBookPrice);    // 图书价格
                 string strOutputItemRecPath = "";
 
                 int nRedoCount = 0;
-                REDO:
+            REDO:
 
                 // 获得册记录
                 // return:
@@ -14620,7 +14672,8 @@ strBookPrice);    // 图书价格
                 //      1   命中1条
                 //      >1  命中多于1条
                 nRet = this.GetItemRecXml(
-                    Channels,
+                    // Channels,
+                    channel,
                     strEntityBarcode,
                     out strItemXml,
                     100,
@@ -14638,7 +14691,7 @@ strBookPrice);    // 图书价格
                     goto ERROR1;
                 }
 
-                RmsChannel channel = null;
+                // RmsChannel channel = null;
 
                 if (aPath.Count > 1)
                 {
@@ -14667,12 +14720,14 @@ strBookPrice);    // 图书价格
                         goto ERROR1;
                     }
 
+#if NO
                     channel = Channels.GetChannel(this.WsUrl);
                     if (channel == null)
                     {
                         strError = "get channel error";
                         goto ERROR1;
                     }
+#endif
 
                     // 从若干重复条码号的册记录中，选出其中符合当前读者证条码号的
                     // return:
@@ -14759,6 +14814,7 @@ strBookPrice);    // 图书价格
                     "本册原为读者 " + strOldReaderBarcode + " 所借阅，后于 "
                     +strOperTimeString+" 被转移到读者 "+strNewReaderBarcode+" 名下");
 
+#if NO
                 if (channel == null)
                 {
                     channel = Channels.GetChannel(this.WsUrl);
@@ -14768,6 +14824,7 @@ strBookPrice);    // 图书价格
                         goto ERROR1;
                     }
                 }
+#endif
 
                 // 保存实体记录
                 byte[] output_timestamp = null;
@@ -14803,7 +14860,6 @@ strBookPrice);    // 图书价格
                     if (attachment == null)
                     {
                         // 实体记录完全保存到日志记录中
-
                         nodeLogRecord.InnerText = itemdom.OuterXml;
                     }
                     else
@@ -14821,7 +14877,6 @@ strBookPrice);    // 图书价格
                         nAttachmentIndex ++;
                     }
                 }
-
             }
             finally
             {
@@ -14843,7 +14898,8 @@ strBookPrice);    // 图书价格
         //      0   检查无错。
         //      1   检查发现有错。
         public LibraryServerResult CheckReaderBorrowInfo(
-            RmsChannelCollection Channels,
+            // RmsChannelCollection Channels,
+            RmsChannel channel,
             string strReaderBarcode,
             int nStart,
             int nCount,
@@ -14873,7 +14929,8 @@ strBookPrice);    // 图书价格
                 string strOutputReaderRecPath = "";
                 byte[] reader_timestamp = null;
                 nRet = this.GetReaderRecXml(
-                    Channels,
+                    // Channels,
+                    channel,
                     strReaderBarcode,
                     out strReaderXml,
                     out strOutputReaderRecPath,
@@ -14929,7 +14986,6 @@ strBookPrice);    // 图书价格
                     if (nProcessedBorrowItems >= 10)
                         break;
 
-
                     XmlNode node = nodesBorrow[i];
 
                     string strItemBarcode = DomUtil.GetAttr(node, "barcode");
@@ -14941,7 +14997,8 @@ strBookPrice);    // 图书价格
                     string[] aDupPath = null;
                    // 检查一个实体记录的借还信息是否异常。
                     LibraryServerResult result_1 = CheckItemBorrowInfo(
-                        Channels,
+                        // Channels,
+                        channel,
                         strReaderBarcode,
                         readerdom,
                         strOutputReaderRecPath,
@@ -14960,7 +15017,8 @@ strBookPrice);    // 图书价格
                                 string[] aDupPathTemp = null;
                                 string strOutputReaderBarcode = "";
                                 LibraryServerResult result_2 = CheckItemBorrowInfo(
-                                    Channels,
+                                    // Channels,
+                                    channel,
                                     strReaderBarcode,
                                     readerdom,
                                     strOutputReaderRecPath,
@@ -15067,7 +15125,8 @@ strBookPrice);    // 图书价格
         //      0   实体记录中没有借阅信息，或者检查发现无错。
         //      1   检查发现有错。
         public LibraryServerResult CheckItemBorrowInfo(
-            RmsChannelCollection Channels,
+            // RmsChannelCollection Channels,
+            RmsChannel channel,
             string strLockedReaderBarcode,
             XmlDocument exist_readerdom,
             string strExistReaderRecPath,
@@ -15095,17 +15154,17 @@ strBookPrice);    // 图书价格
                 }
             }
 
-
-
             string strOutputItemRecPath = "";
             byte[] item_timestamp = null;
 
+#if NO
             RmsChannel channel = Channels.GetChannel(this.WsUrl);
             if (channel == null)
             {
                 strError = "get channel error";
                 goto ERROR1;
             }
+#endif
 
             string strItemXml = "";
 
@@ -15153,7 +15212,8 @@ strBookPrice);    // 图书价格
                 //      1   命中1条
                 //      >1  命中多于1条
                 nRet = this.GetItemRecXml(
-                    Channels,
+                    // Channels,
+                    channel,
                     strItemBarcode,
                     out strItemXml,
                     100,
@@ -15250,7 +15310,8 @@ strBookPrice);    // 图书价格
                 if (exist_readerdom == null)
                 {
                     nRet = this.GetReaderRecXml(
-                        Channels,
+                        // Channels,
+                        channel,
                         strOutputReaderBarcode,
                         out strReaderXml,
                         out strOutputReaderRecPath,
@@ -15297,8 +15358,6 @@ strBookPrice);    // 图书价格
                 }
 
                 Debug.Assert(nodesBorrow.Count == 1, "");
-
-
             }
             finally
             {
@@ -15308,7 +15367,6 @@ strBookPrice);    // 图书价格
 #if DEBUG_LOCK_READER
                     this.WriteErrorLog("CheckItemBorrowInfo 结束为读者加写锁 '" + strOutputReaderBarcode + "'");
 #endif
-
                 }
             }
 
@@ -15363,7 +15421,12 @@ REDO_REPAIR:
             string strOutputReaderXml = "";
             string strOutputItemXml = "";
      * */
-
+            RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                goto ERROR1;
+            }
 
             // 加读者记录锁
 #if DEBUG_LOCK_READER
@@ -15378,7 +15441,8 @@ REDO_REPAIR:
                 string strOutputReaderRecPath = "";
                 byte[] reader_timestamp = null;
                 nRet = this.GetReaderRecXml(
-                    sessioninfo.Channels,
+                    // sessioninfo.Channels,
+                    channel,
                     strReaderBarcode,
                     out strReaderXml,
                     out strOutputReaderRecPath,
@@ -15436,12 +15500,14 @@ REDO_REPAIR:
                 string strItemXml = "";
                 string strOutputItemRecPath = "";
 
+#if NO
                 RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
                 if (channel == null)
                 {
                     strError = "get channel error";
                     goto ERROR1;
                 }
+#endif
 
                 // 加册记录锁
                 this.EntityLocks.LockForWrite(strItemBarcode);
@@ -15487,7 +15553,8 @@ REDO_REPAIR:
                         //      1   命中1条
                         //      >1  命中多于1条
                         nRet = this.GetItemRecXml(
-                            sessioninfo.Channels,
+                            // sessioninfo.Channels,
+                            channel,
                             strItemBarcode,
                             out strItemXml,
                             100,
@@ -15534,7 +15601,6 @@ REDO_REPAIR:
                                 strOutputItemRecPath = aPath[0];
                             }
                         }
-
                     }
 
                     XmlDocument itemdom = null;
@@ -15659,7 +15725,6 @@ REDO_REPAIR:
 #if DEBUG_LOCK_READER
                 this.WriteErrorLog("RepairReaderSideError 结束为读者加写锁 '" + strReaderBarcode + "'");
 #endif
-
             }
 
             return result;
@@ -15699,6 +15764,13 @@ REDO_REPAIR:
                 strError = "册条码号不能为空。";
                 goto ERROR1;
             }
+
+            RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                goto ERROR1;
+            }
         REDO_REPAIR:
 
             // 加读者记录锁
@@ -15715,7 +15787,8 @@ REDO_REPAIR:
                 string strOutputReaderRecPath = "";
                 byte[] reader_timestamp = null;
                 nRet = this.GetReaderRecXml(
-                    sessioninfo.Channels,
+                    // sessioninfo.Channels,
+                    channel,
                     strReaderBarcode,
                     out strReaderXml,
                     out strOutputReaderRecPath,
@@ -15772,12 +15845,14 @@ REDO_REPAIR:
                 string strItemXml = "";
                 string strOutputItemRecPath = "";
 
+#if NO
                 RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
                 if (channel == null)
                 {
                     strError = "get channel error";
                     goto ERROR1;
                 }
+#endif
 
                 // 加册记录锁
                 this.EntityLocks.LockForWrite(strItemBarcode);
@@ -15823,7 +15898,8 @@ REDO_REPAIR:
                         //      1   命中1条
                         //      >1  命中多于1条
                         nRet = this.GetItemRecXml(
-                            sessioninfo.Channels,
+                            // sessioninfo.Channels,
+                            channel,
                             strItemBarcode,
                             out strItemXml,
                             100,
@@ -15852,11 +15928,9 @@ REDO_REPAIR:
                             aDupPath = new string[aPath.Count];
                             aPath.CopyTo(aDupPath);
                             return result;
-
                         }
                         else
                         {
-
                             Debug.Assert(nRet == 1, "");
                             Debug.Assert(aPath.Count == 1, "");
 
@@ -15865,7 +15939,6 @@ REDO_REPAIR:
                                 strOutputItemRecPath = aPath[0];
                             }
                         }
-
                     }
 
                     XmlDocument itemdom = null;
@@ -15900,7 +15973,6 @@ REDO_REPAIR:
                     {
                         strError = "修复操作被拒绝。您所请求要修复的册记录中，并没有指明借阅者是读者 "+strReaderBarcode+"。";
                         goto ERROR1;
-
                     }
 
                     // 看看读者记录中是否有指回链条。
@@ -15912,7 +15984,6 @@ REDO_REPAIR:
                             strError = "修复操作被拒绝。您所请求要修复的链，本是一条完整正确的链。可直接进行普通还书操作。";
                             goto ERROR1;
                         }
-
                     }
 
                 // DELETE_CHAIN:
@@ -15985,7 +16056,6 @@ REDO_REPAIR:
                         "实体侧次数",
                         1);
 
-
                 } // 册记录锁定范围结束
                 finally
                 {
@@ -16000,7 +16070,6 @@ REDO_REPAIR:
 #if DEBUG_LOCK_READER
                 this.WriteErrorLog("RepairItemSideError 结束为读者加写锁 '" + strReaderBarcode + "'");
 #endif
-
             }
 
             return result;
@@ -16062,6 +16131,13 @@ REDO_REPAIR:
                 }
             }
 
+            RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                goto ERROR1;
+            }
+
             string strReaderXml = "";
             string strOutputReaderRecPath = "";
             string strLibraryCode = "";
@@ -16077,7 +16153,8 @@ REDO_REPAIR:
                 // 读入读者记录
                 byte[] reader_timestamp = null;
                 nRet = this.GetReaderRecXml(
-                    sessioninfo.Channels,
+                    // sessioninfo.Channels,
+                    channel,
                     strReaderBarcode,
                     out strReaderXml,
                     out strOutputReaderRecPath,
@@ -16330,6 +16407,13 @@ REDO_REPAIR:
                 goto ERROR1;
             }
 
+            RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                goto ERROR1;
+            }
+
 
             int nRedoCount = 0; // 因为时间戳冲突, 重试的次数
         REDO_FOREGIFT:
@@ -16348,7 +16432,8 @@ REDO_REPAIR:
                 string strOutputReaderRecPath = "";
                 byte[] reader_timestamp = null;
                 nRet = this.GetReaderRecXml(
-                    sessioninfo.Channels,
+                    // sessioninfo.Channels,
+                    channel,
                     strReaderBarcode,
                     out strReaderXml,
                     out strOutputReaderRecPath,
@@ -16425,7 +16510,7 @@ REDO_REPAIR:
                 if (nRet == -1)
                     goto ERROR1;
 
-
+#if NO
                 // ***
                 RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
                 if (channel == null)
@@ -16433,6 +16518,7 @@ REDO_REPAIR:
                     strError = "get channel error";
                     goto ERROR1;
                 }
+#endif
 
                 byte[] output_timestamp = null;
                 string strOutputPath = "";
@@ -16521,7 +16607,6 @@ REDO_REPAIR:
 #if DEBUG_LOCK_READER
                 this.WriteErrorLog("Foregift 结束为读者加读锁 '" + strReaderBarcode + "'");
 #endif
-
             }
 
             // END1:
@@ -16711,6 +16796,12 @@ REDO_REPAIR:
                 }
             }
 
+            RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                goto ERROR1;
+            }
 
             int nRedoCount = 0; // 因为时间戳冲突, 重试的次数
         REDO_HIRE:
@@ -16729,7 +16820,8 @@ REDO_REPAIR:
                 string strOutputReaderRecPath = "";
                 byte[] reader_timestamp = null;
                 nRet = this.GetReaderRecXml(
-                    sessioninfo.Channels,
+                    // sessioninfo.Channels,
+                    channel,
                     strReaderBarcode,
                     out strReaderXml,
                     out strOutputReaderRecPath,
@@ -16806,7 +16898,7 @@ REDO_REPAIR:
                 if (nRet == -1)
                     goto ERROR1;
 
-
+#if NO
                 // ***
                 RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
                 if (channel == null)
@@ -16814,6 +16906,7 @@ REDO_REPAIR:
                     strError = "get channel error";
                     goto ERROR1;
                 }
+#endif
 
                 byte[] output_timestamp = null;
                 string strOutputPath = "";

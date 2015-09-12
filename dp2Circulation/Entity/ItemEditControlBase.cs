@@ -299,7 +299,6 @@ namespace dp2Circulation
             }
 
             this.Changed = false;
-
             return 0;
         }
 

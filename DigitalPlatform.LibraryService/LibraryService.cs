@@ -1059,6 +1059,15 @@ namespace dp2Library
                     }
                 }
 
+                RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
+                if (channel == null)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "get channel error";
+                    result.ErrorCode = ErrorCode.SystemError;
+                    return result;
+                }
+
                 string strXml = "";
                 string strError = "";
                 string strOutputPath = "";
@@ -1070,7 +1079,7 @@ namespace dp2Library
                 //      1   命中1条
                 //      >1  命中多于1条
                 int nRet = app.GetReaderRecXml(
-                    sessioninfo.Channels,
+                    channel,    // sessioninfo.Channels,
                     strReaderBarcode,
                     out strXml,
                     out strOutputPath,
@@ -1887,6 +1896,15 @@ namespace dp2Library
 
             try
             {
+                RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
+                if (channel == null)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "get channel error";
+                    result.ErrorCode = ErrorCode.SystemError;
+                    return result;
+                }
+
                 string strXml = "";
                 string strError = "";
                 string strOutputPath = "";
@@ -1898,7 +1916,7 @@ namespace dp2Library
                 //      1   命中1条
                 //      >1  命中多于1条
                 int nRet = app.GetReaderRecXml(
-                    sessioninfo.Channels,
+                    channel,    // sessioninfo.Channels,
                     strReaderBarcode,
                     out strXml,
                     out strOutputPath,
@@ -3975,8 +3993,15 @@ namespace dp2Library
                 if (StringUtil.HasHead(strBarcode, "@barcode-list:") == true
                     && strResultType == "get-path-list")
                 {
+                    RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
+                    if (channel == null)
+                    {
+                        strError = "channel == null";
+                        goto ERROR1;
+                    }
                     nRet = app.GetItemRecPathList(
-                        sessioninfo.Channels,
+                        // sessioninfo.Channels,
+                        channel,
                         strItemDbType,  // "item",
                         "册条码",
                         strBarcode.Substring("@barcode-list:".Length),
@@ -4002,9 +4027,15 @@ namespace dp2Library
                         strError = "@refid-list 功能只能针对 item 类型的库";
                         goto ERROR1;
                     }
-
+                    RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
+                    if (channel == null)
+                    {
+                        strError = "channel == null";
+                        goto ERROR1;
+                    }
                     nRet = app.GetItemRecPathList(
-                        sessioninfo.Channels,
+                        // sessioninfo.Channels,
+                        channel,
                         strItemDbType,  // "item",
                         strFrom,    // "参考ID",  // "册条码号"?
                         strBarcode.Substring("@refid-list:".Length),
@@ -4033,8 +4064,15 @@ namespace dp2Library
                         goto ERROR1;
                     }
 
+                    RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
+                    if (channel == null)
+                    {
+                        strError = "channel == null";
+                        goto ERROR1;
+                    }
                     nRet = app.GetItemRecPathList(
-                        sessioninfo.Channels,
+                        // sessioninfo.Channels,
+                        channel,
                         strItemDbType,  // "item",
                         strFrom,    // "册参考ID",
                         strBarcode.Substring("@item-refid-list:".Length),
@@ -5044,6 +5082,13 @@ namespace dp2Library
                 return -1;
             }
 
+            RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                goto ERROR1;
+            }
+
             // 前端提供临时记录
             if (strRefID[0] == '<')
             {
@@ -5168,13 +5213,6 @@ namespace dp2Library
                     string strMetaData = "";
                     string strTempOutputPath = "";
 
-                    RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
-                    if (channel == null)
-                    {
-                        strError = "get channel error";
-                        goto ERROR1;
-                    }
-
                     string strStyle = "content,data,metadata,timestamp,outputpath";
 
                     // 为了便于处理对象资源
@@ -5283,7 +5321,8 @@ namespace dp2Library
                     //      1   命中1条
                     //      >1  命中多于1条
                     nRet = app.GetItemRecXml(
-                            sessioninfo.Channels,
+                            // sessioninfo.Channels,
+                            channel,
                             // strDbType == "item" ? strRefID : "@refid:" + strRefID,
                             strRefID,
                             "withresmetadata",
@@ -5306,7 +5345,8 @@ namespace dp2Library
                         goto ERROR1;
 
                     nRet = itemDatabase.GetItemRecXml(
-                            sessioninfo.Channels,
+                            // sessioninfo.Channels,
+                            channel,
                             locateParam,
                             "withresmetadata",
                             out strXml,
@@ -5463,8 +5503,15 @@ namespace dp2Library
                 if (StringUtil.HasHead(strRefID, "@item-refid-list:") == true
                     && strResultType == "get-path-list")
                 {
+                    RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
+                    if (channel == null)
+                    {
+                        strError = "channel == null";
+                        goto ERROR1;
+                    }
                     nRet = app.GetItemRecPathList(
-                        sessioninfo.Channels,
+                        // sessioninfo.Channels,
+                        channel,
                         "issue",
                         "册参考ID",
                         strRefID.Substring("@item-refid-list:".Length),
@@ -6487,8 +6534,15 @@ namespace dp2Library
                 if (StringUtil.HasHead(strRefID, "@item-refid-list:") == true
                     && strResultType == "get-path-list")
                 {
+                    RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
+                    if (channel == null)
+                    {
+                        strError = "channel == null";
+                        goto ERROR1;
+                    }
                     nRet = app.GetItemRecPathList(
-                        sessioninfo.Channels,
+                        // sessioninfo.Channels,
+                        channel,
                         "order",
                         "册参考ID",
                         strRefID.Substring("@item-refid-list:".Length),
@@ -10752,11 +10806,21 @@ namespace dp2Library
                     }
                 }
 
+                RmsChannel channel = sessioninfo.Channels.GetChannel(app.WsUrl);
+                if (channel == null)
+                {
+                    result.Value = -1;
+                    result.ErrorInfo = "get channel error";
+                    result.ErrorCode = ErrorCode.SystemError;
+                    return result;
+                }
+
                 // 2008/8/3 
                 if (strAction == "upgradefromdt1000_crossref")
                 {
                     return app.CrossRefBorrowInfo(
-                        sessioninfo.Channels,
+                        // sessioninfo.Channels,
+                        channel,
                         strReaderBarcode,
                         nStart,
                         nCount,
@@ -10772,7 +10836,8 @@ namespace dp2Library
                     //      0   检查无错。
                     //      1   检查发现有错。
                     return app.CheckReaderBorrowInfo(
-                        sessioninfo.Channels,
+                        // sessioninfo.Channels,
+                        channel,
                         strReaderBarcode,
                         nStart,
                         nCount,
@@ -10793,7 +10858,8 @@ namespace dp2Library
                     //      0   实体记录中没有借阅信息，或者检查发现无错。
                     //      1   检查发现有错。
                     return app.CheckItemBorrowInfo(
-                        sessioninfo.Channels,
+                        // sessioninfo.Channels,
+                        channel,
                         null,   // string strLockedReaderBarcode,
                         null,   // XmlDocument exist_readerdom,
                         null,   // string strExistReaderRecPath,

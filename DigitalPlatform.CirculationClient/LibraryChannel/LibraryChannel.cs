@@ -6741,9 +6741,18 @@ out strError);
             }
 
             // 从cache中得到timestamp
+            // return:
+            //      -1  error
+            //		0	not found
+            //		1	found
             int nRet = cache.FindLocalFile(strFullPath,
                 out strLocalName,
                 out strTimeStamp);
+            if (nRet == -1)
+            {
+                strError = "CfgCache 尚未初始化";
+                return -1;
+            }
             if (nRet == 1)
             {
                 Debug.Assert(strLocalName != "", "FindLocalFile()返回的strLocalName为空");
@@ -6877,9 +6886,21 @@ out strError);
 
 
             // 从cache中得到timestamp
+            // return:
+            //      -1  error
+            //		0	not found
+            //		1	found
             int nRet = cache.FindLocalFile(strFullPath,
                 out strLocalName,
                 out strTimeStamp);
+            if (nRet == -1)
+            {
+                strOutputResPath = "";
+                strMetaData = "";
+                baOutputTimeStamp = null;
+                strError = "CfgCache 尚未初始化";
+                return -1;
+            }
             if (nRet == 1)
             {
                 Debug.Assert(strLocalName != "", "FindLocalFile()返回的strLocalName为空");
