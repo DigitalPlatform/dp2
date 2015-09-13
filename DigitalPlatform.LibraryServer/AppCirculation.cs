@@ -14077,7 +14077,6 @@ strBookPrice);    // 图书价格
 
             try
             {
-
                 // 加读者记录锁1
 #if DEBUG_LOCK_READER
                 this.WriteErrorLog("DevolveReaderInfo 开始为读者加写锁1 '" + strBarcode1 + "'");
@@ -14239,8 +14238,6 @@ strBookPrice);    // 图书价格
 
                         try // 在此范围内，需注意最后删除临时文件
                         {
-
-
                             // 移动借阅信息 -- <borrows>元素内容
                             // return:
                             //      -1  error

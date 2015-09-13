@@ -64,6 +64,8 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Design" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.ServiceProcess" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
   </ItemGroup>
@@ -89,6 +91,9 @@
     <Compile Include="CheckedComboBox.Designer.cs">
       <DependentUpon>CheckedComboBox.cs</DependentUpon>
     </Compile>
+    <Content Include="wuapi.txt">
+      <SubType>Form</SubType>
+    </Content>
     <Compile Include="Commander.cs" />
     <Compile Include="ControlExtentions.cs" />
     <Compile Include="DateControl.cs">
@@ -288,6 +293,12 @@
     <Compile Include="WebFileDownloadDialog.Designer.cs">
       <DependentUpon>WebFileDownloadDialog.cs</DependentUpon>
     </Compile>
+    <Compile Include="WindowsUpdateDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WindowsUpdateDialog.Designer.cs">
+      <DependentUpon>WindowsUpdateDialog.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DigitalPlatform.IO\DigitalPlatform.IO.csproj">
@@ -428,6 +439,9 @@
     <EmbeddedResource Include="WebFileDownloadDialog.resx">
       <DependentUpon>WebFileDownloadDialog.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="WindowsUpdateDialog.resx">
+      <DependentUpon>WindowsUpdateDialog.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -445,6 +459,17 @@
       <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="WUApiLib">
+      <Guid>{B596CC9F-56E5-419E-A622-E01BB457431E}</Guid>
+      <VersionMajor>2</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

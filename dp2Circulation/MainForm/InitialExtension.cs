@@ -19,6 +19,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform.Script;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
+using DigitalPlatform.CommonControl;
 
 namespace dp2Circulation
 {
@@ -185,6 +186,7 @@ namespace dp2Circulation
 
                     this.WriteErrorLog("dp2circulation 启动时，发现本机尚未安装 .NET Framework 4 更新 KB2468871");
 
+#if NO
                     DialogResult result = MessageBox.Show(this,
         "为顺利运行 dp2Circulation， 请先安装 .NET Framework 4 更新 (" + strKbName + ")"
         + "\r\n\r\n是否继续运行?",
@@ -202,6 +204,26 @@ namespace dp2Circulation
                         {
                             // 可能是 ie 没有安装?
                         }
+                        Application.Exit();
+                        return;
+                    }
+#endif
+                    MessageBox.Show(this, "为顺利运行 dp2Circulation， 请先安装 .NET Framework 4 更新 (" + strKbName + ")");
+                    if (Control.ModifierKeys != Keys.Control)
+                    {
+#if NO
+                        try
+                        {
+                            System.Diagnostics.Process.Start("iexplore", "https://support.microsoft.com/zh-cn/kb/2468871");
+                        }
+                        catch (System.ComponentModel.Win32Exception)
+                        {
+                            // 可能是 ie 没有安装?
+                        }
+#endif
+                        WindowsUpdateDialog dlg = new WindowsUpdateDialog();
+                        MainForm.SetControlFont(dlg, this.DefaultFont);
+                        dlg.ShowDialog(this);
                         Application.Exit();
                         return;
                     }

@@ -1717,5 +1717,11 @@ dlg.UiState);
         {
             throw new Exception("test throw exception");
         }
+
+        private void button_openWindowsUpdateDialog_Click(object sender, EventArgs e)
+        {
+            WindowsUpdateDialog dlg = new WindowsUpdateDialog();
+            dlg.ShowDialog(this);
+        }
     }
 }

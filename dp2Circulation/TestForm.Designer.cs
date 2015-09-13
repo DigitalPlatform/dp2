@@ -28,7 +28,7 @@ namespace dp2Circulation
         /// </summary>
         private void InitializeComponent()
         {
-            DigitalPlatform.CirculationClient.PatronCardStyle patronCardStyle2 = new DigitalPlatform.CirculationClient.PatronCardStyle();
+            DigitalPlatform.CirculationClient.PatronCardStyle patronCardStyle1 = new DigitalPlatform.CirculationClient.PatronCardStyle();
             this.tabControl_main = new System.Windows.Forms.TabControl();
             this.tabPage_diskSpace = new System.Windows.Forms.TabPage();
             this.button_test = new System.Windows.Forms.Button();
@@ -42,6 +42,7 @@ namespace dp2Circulation
             this.textBox_diskSpace_tempFileName = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.tabPage_windowsEventLog = new System.Windows.Forms.TabPage();
+            this.button_testThrow = new System.Windows.Forms.Button();
             this.button_testExceptionMessage = new System.Windows.Forms.Button();
             this.button_createEventLogDir = new System.Windows.Forms.Button();
             this.textBox_evenLogDirName = new System.Windows.Forms.TextBox();
@@ -202,7 +203,7 @@ namespace dp2Circulation
             this.tabPage_test = new System.Windows.Forms.TabPage();
             this.button_testGetMergeStyleDialog = new System.Windows.Forms.Button();
             this.button_test_detectInstallation = new System.Windows.Forms.Button();
-            this.button_testThrow = new System.Windows.Forms.Button();
+            this.button_openWindowsUpdateDialog = new System.Windows.Forms.Button();
             this.tabControl_main.SuspendLayout();
             this.tabPage_diskSpace.SuspendLayout();
             this.tabPage_windowsEventLog.SuspendLayout();
@@ -420,6 +421,17 @@ namespace dp2Circulation
             this.tabPage_windowsEventLog.TabIndex = 1;
             this.tabPage_windowsEventLog.Text = "Windows»’÷æ";
             this.tabPage_windowsEventLog.UseVisualStyleBackColor = true;
+            // 
+            // button_testThrow
+            // 
+            this.button_testThrow.Location = new System.Drawing.Point(8, 127);
+            this.button_testThrow.Margin = new System.Windows.Forms.Padding(2);
+            this.button_testThrow.Name = "button_testThrow";
+            this.button_testThrow.Size = new System.Drawing.Size(176, 22);
+            this.button_testThrow.TabIndex = 4;
+            this.button_testThrow.Text = "Test throw Exception ";
+            this.button_testThrow.UseVisualStyleBackColor = true;
+            this.button_testThrow.Click += new System.EventHandler(this.button_testThrow_Click);
             // 
             // button_testExceptionMessage
             // 
@@ -1913,7 +1925,7 @@ namespace dp2Circulation
             | System.Windows.Forms.AnchorStyles.Right)));
             this.patronCardControl1.Location = new System.Drawing.Point(4, 45);
             this.patronCardControl1.Name = "patronCardControl1";
-            this.patronCardControl1.PatronCardStyle = patronCardStyle2;
+            this.patronCardControl1.PatronCardStyle = patronCardStyle1;
             this.patronCardControl1.Size = new System.Drawing.Size(156, 119);
             this.patronCardControl1.TabIndex = 0;
             this.patronCardControl1.Text = "patronCardControl1";
@@ -2185,6 +2197,7 @@ namespace dp2Circulation
             // 
             // tabPage_test
             // 
+            this.tabPage_test.Controls.Add(this.button_openWindowsUpdateDialog);
             this.tabPage_test.Controls.Add(this.button_testGetMergeStyleDialog);
             this.tabPage_test.Controls.Add(this.button_test_detectInstallation);
             this.tabPage_test.Location = new System.Drawing.Point(4, 22);
@@ -2214,16 +2227,15 @@ namespace dp2Circulation
             this.button_test_detectInstallation.UseVisualStyleBackColor = true;
             this.button_test_detectInstallation.Click += new System.EventHandler(this.button_test_detectInstallation_Click);
             // 
-            // button_testThrow
+            // button_openWindowsUpdateDialog
             // 
-            this.button_testThrow.Location = new System.Drawing.Point(8, 127);
-            this.button_testThrow.Margin = new System.Windows.Forms.Padding(2);
-            this.button_testThrow.Name = "button_testThrow";
-            this.button_testThrow.Size = new System.Drawing.Size(176, 22);
-            this.button_testThrow.TabIndex = 4;
-            this.button_testThrow.Text = "Test throw Exception ";
-            this.button_testThrow.UseVisualStyleBackColor = true;
-            this.button_testThrow.Click += new System.EventHandler(this.button_testThrow_Click);
+            this.button_openWindowsUpdateDialog.Location = new System.Drawing.Point(4, 84);
+            this.button_openWindowsUpdateDialog.Name = "button_openWindowsUpdateDialog";
+            this.button_openWindowsUpdateDialog.Size = new System.Drawing.Size(220, 23);
+            this.button_openWindowsUpdateDialog.TabIndex = 2;
+            this.button_openWindowsUpdateDialog.Text = "Windows Update Dialog";
+            this.button_openWindowsUpdateDialog.UseVisualStyleBackColor = true;
+            this.button_openWindowsUpdateDialog.Click += new System.EventHandler(this.button_openWindowsUpdateDialog_Click);
             // 
             // TestForm
             // 
@@ -2467,5 +2479,6 @@ namespace dp2Circulation
         private System.Windows.Forms.Button button_testGetMergeStyleDialog;
         private System.Windows.Forms.Button button_test_loginAttack;
         private System.Windows.Forms.Button button_testThrow;
+        private System.Windows.Forms.Button button_openWindowsUpdateDialog;
     }
 }

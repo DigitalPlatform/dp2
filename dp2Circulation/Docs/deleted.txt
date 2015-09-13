@@ -6667,3 +6667,76 @@ function GetSummary() {
         }
 
 #endif
+
+
+~~~~~~~~~~~~~
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+using WUApiLib;
+
+namespace DigitalPlatform
+{
+    /// <summary>
+    /// 调用 Windows Update
+    /// </summary>
+    public class WindowsUpdateUtil
+    {
+        // return:
+        //      -1  出错
+        //      >=0 安装的 update 个数
+        public int InstallAllUpdates(out string strError)
+        {
+            strError = "";
+
+            UpdateSession uSession = new UpdateSession();
+            // UpdateSessionClass uSession = new UpdateSessionClass();
+            IUpdateSearcher uSearcher = uSession.CreateUpdateSearcher();
+            ISearchResult uResult = uSearcher.Search("IsInstalled=0 and Type='Software'");
+
+            if (uResult.Updates.Count == 0)
+                return 0;
+
+            // All the updates found will be now populated into the uResult collection object, which can be accessed using the below foreach loop
+            foreach (IUpdate update in uResult.Updates)
+            {
+                Console.WriteLine(update.Title);
+            }
+
+            // download them
+            UpdateDownloader downloader = uSession.CreateUpdateDownloader();
+            downloader.Updates = uResult.Updates;
+            downloader.Download();
+
+            // select them
+            UpdateCollection updatesToInstall = new UpdateCollection();
+            foreach (IUpdate update in uResult.Updates)
+            {
+                if (update.IsDownloaded)
+                    updatesToInstall.Add(update);
+            }
+
+            IUpdateInstaller installer = uSession.CreateUpdateInstaller();
+ installer.Updates = updatesToInstall;
+
+ IInstallationResult installationRes = installer.Install();
+
+            // display result
+ for (int i = 0; i < updatesToInstall.Count; i++)
+ {
+     if (installationRes.GetUpdateResult(i).HResult == 0)
+     {
+         Console.WriteLine("Installed : " + updatesToInstall[i].Title);
+     }
+     else
+     {
+         Console.WriteLine("Failed : " + updatesToInstall[i].Title);
+     }
+ }
+
+            return 0;
+        }
+    }
+}
