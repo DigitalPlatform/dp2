@@ -79,7 +79,7 @@ namespace DigitalPlatform.CommonControl
     }
 
 
-    public class TemplateLine
+    public class TemplateLine // TODO: IDisposeable
     {
         public MarcTemplateControl Container = null;
 
@@ -98,7 +98,6 @@ namespace DigitalPlatform.CommonControl
 
         public TemplateLine(MarcTemplateControl container)
         {
-
             this.Container = container;
             int nTopBlank = (int)this.Container.Font.GetHeight() + 2;
 

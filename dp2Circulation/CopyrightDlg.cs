@@ -115,7 +115,7 @@ namespace dp2Circulation
             // 
             this.button_OK.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.button_OK.AutoSize = true;
-            this.button_OK.Location = new System.Drawing.Point(192, 271);
+            this.button_OK.Location = new System.Drawing.Point(192, 330);
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(96, 23);
             this.button_OK.TabIndex = 3;
@@ -134,7 +134,7 @@ namespace dp2Circulation
             this.textBox_environment.Multiline = true;
             this.textBox_environment.Name = "textBox_environment";
             this.textBox_environment.ReadOnly = true;
-            this.textBox_environment.Size = new System.Drawing.Size(461, 122);
+            this.textBox_environment.Size = new System.Drawing.Size(461, 181);
             this.textBox_environment.TabIndex = 6;
             this.textBox_environment.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
@@ -143,7 +143,7 @@ namespace dp2Circulation
             this.AcceptButton = this.button_OK;
             this.AutoScaleBaseSize = new System.Drawing.Size(6, 14);
             this.BackColor = System.Drawing.SystemColors.Window;
-            this.ClientSize = new System.Drawing.Size(481, 302);
+            this.ClientSize = new System.Drawing.Size(481, 361);
             this.Controls.Add(this.textBox_environment);
             this.Controls.Add(this.button_OK);
             this.Controls.Add(this.linkLabel1);
@@ -194,10 +194,11 @@ namespace dp2Circulation
 			label_copyright.Text = "(C) 版权所有 2006-2015 数字平台(北京)软件有限责任公司\r\nDigital Platform (Beijing) Software Corp. Ltd.";
 
 			Assembly myAssembly = Assembly.GetAssembly(this.GetType());
-			textBox_environment.Text = "版本和环境:\r\n本机 .NET Framework 版本: " + myAssembly.ImageRuntimeVersion
-				+ "\r\n本软件: " + myAssembly.FullName
-                + "\r\n当前连接的 dp2Library (位于 "+this.MainForm.LibraryServerUrl+"): " + this.MainForm.ServerVersion.ToString() + " UID:" + this.MainForm.ServerUID
-                + "\r\n\r\n本机 MAC 地址: " + StringUtil.MakePathList(SerialCodeForm.GetMacAddress());
+            textBox_environment.Text = "版本和环境:\r\n本机 .NET Framework 版本: " + myAssembly.ImageRuntimeVersion
+                + "\r\n本软件: " + myAssembly.FullName
+                + "\r\n当前连接的 dp2Library (位于 " + this.MainForm.LibraryServerUrl + "): " + this.MainForm.ServerVersion.ToString() + " UID:" + this.MainForm.ServerUID
+                + "\r\n\r\n本机 MAC 地址: " + StringUtil.MakePathList(SerialCodeForm.GetMacAddress())
+                + "\r\n是否安装 KB2468871: " + Global.IsKbInstalled("KB2468871");
 			 
 			/*
 			for(int i = 0; i<100; i++) 

@@ -762,6 +762,13 @@ out strError);
                     try
                     {
                         // 有两个参数的成员函数
+                        /* TODO: 也可以用 GetMember 先探索看看函数是否存在
+                        MemberInfo [] infos = classType.GetMember(strFuncName,
+                            BindingFlags.DeclaredOnly |
+                            BindingFlags.Public | BindingFlags.NonPublic |
+                            BindingFlags.Instance | BindingFlags.InvokeMethod);
+                         * */
+
                         classType.InvokeMember(strFuncName,
                             BindingFlags.DeclaredOnly |
                             BindingFlags.Public | BindingFlags.NonPublic |

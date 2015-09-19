@@ -5422,7 +5422,11 @@ MessageBoxDefaultButton.Button2);
              * */
 
             OriginItemData data = (OriginItemData)item.Tag;
-
+            if (data == null)
+            {
+                strError = "item.Tag == null";
+                return -1;
+            }
             Debug.Assert(data != null, "");
 
             string strItemXml = data.Xml;
@@ -5966,6 +5970,8 @@ MessageBoxDefaultButton.Button2);
             {
                 item = this.listView_in.Items[i];
                 OriginItemData data = (OriginItemData)item.Tag;
+                if (data == null)
+                    continue;
                 if (data.RefID == strRefID)
                     return data;
             }
@@ -5981,6 +5987,8 @@ MessageBoxDefaultButton.Button2);
             for (int i = 0; i < items.Count; i++)
             {
                 OriginItemData data = (OriginItemData)items[i].Tag;
+                if (data == null)   // 2015/9/15
+                    continue;
                 if (data.Changed == true)
                     nCount ++;
             }
@@ -6286,8 +6294,10 @@ MessageBoxDefaultButton.Button2);
             int nRet = 0;
 
             // 设置timestamp/xml
+#if DEBUG
             OriginItemData data = (OriginItemData)item.Tag;
             Debug.Assert(data != null, "");
+#endif
 
             if (strPubType == "连续出版物")
             {

@@ -278,7 +278,7 @@ namespace dp2Catalog
             ComboBox = 2,
         }
 
-        class Item
+        class Item : IDisposable
         {
             public AmazonSearchParametersControl Container = null;
 
@@ -291,6 +291,69 @@ namespace dp2Catalog
             public TextBox textBox = null;
 
             public TabComboBox comboBox = null;
+
+            void DisposeChildControls()
+            {
+                if (label != null)
+                {
+                    label.Dispose();
+                    label = null;
+                }
+                if (textBox != null)
+                {
+                    textBox.Dispose();
+                    textBox = null;
+                }
+                if (comboBox != null)
+                {
+                    comboBox.Dispose();
+                    comboBox = null;
+                }
+                Container = null;
+            }
+
+            #region 释放资源
+
+            ~Item()
+            {
+                Dispose(false);
+            }
+
+            private bool disposed = false;
+            public void Dispose()
+            {
+                Dispose(true);
+                // Take yourself off the Finalization queue 
+                // to prevent finalization code for this object
+                // from executing a second time.
+                GC.SuppressFinalize(this);
+            }
+
+            protected virtual void Dispose(bool disposing)
+            {
+                if (!this.disposed)
+                {
+                    if (disposing)
+                    {
+                        // release managed resources if any
+                        // AddEvents(false);
+                        DisposeChildControls();
+                    }
+
+                    // release unmanaged resource
+
+                    // Note that this is not thread safe.
+                    // Another thread could start disposing the object
+                    // after the managed resources are disposed,
+                    // but before the disposed flag is set to true.
+                    // If thread safety is necessary, it must be
+                    // implemented by the client.
+                }
+                disposed = true;
+            }
+
+            #endregion
+
 
             public Item(AmazonSearchParametersControl container,
                 ItemType itemType)

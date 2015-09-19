@@ -13823,7 +13823,7 @@ out strError);
                 {
                     // 合并时间范围内的多个XML文件
                     nRet = app.MergeXmlFiles(
-                        sessioninfo.LibraryCodeList,
+                        "", // sessioninfo.LibraryCodeList,
                         ref this.m_nStop,
                         strDateRangeString,
                         strStyle,

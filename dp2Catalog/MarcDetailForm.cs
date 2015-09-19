@@ -1606,6 +1606,9 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
         {
             string strError = "";
 
+            if (searchform == null)
+                throw new ArgumentException("searchform 参数不应为 null", "searchform");
+
             this.stop.BeginLoop();  // 在这里启用 stop，可以防止在装载的中途 Form 被关闭、造成 MarcEditor 设置 MARC 字符串过程抛出异常
             this.EnableControls(false);
             try
@@ -2731,6 +2734,9 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
             string strError = "";
 
             this.linkMarcFile = new LinkMarcFile();
+            // return:
+            //      -1  error
+            //      0   succeed
             int nRet = this.linkMarcFile.Open(dlg.FileName,
                 out strError);
             if (nRet == -1)
@@ -3324,8 +3330,6 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5698.23777, Culture=neutral, PublicKe
 
                     strPath = strOutPath;
                      * */
-
-
                     string strOutputPath = "";
                     byte[] baOutputTimestamp = null;
                     nRet = dtlp_searchform.SaveMarcRecord(
@@ -3620,7 +3624,6 @@ out strError1);
 
                     this.MarcEditor.ClearMarcDefDom();
                     this.MarcEditor.RefreshNameCaption();
-
 
                     // 是否刷新MARC记录？
                     // MessageBox.Show(this, "保存成功");

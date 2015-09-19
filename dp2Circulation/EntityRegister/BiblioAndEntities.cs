@@ -378,6 +378,8 @@ MessageBoxDefaultButton.Button2);
                         AddPlusEvents(control as PlusButton, false);
                     else if (control is EntityEditControl)
                         AddEditEvents(control as EntityEditControl, false);
+
+                    control.Dispose();  // 2015/9/16
                 }
                 this.flowLayoutPanel1.Controls.Clear();
             }
@@ -391,6 +393,8 @@ MessageBoxDefaultButton.Button2);
                         AddPlusEvents(control as PlusButton, false);
                     else if (control is EntityEditControl)
                         AddEditEvents(control as EntityEditControl, false);
+
+                    control.Dispose();  // 2015/9/16
                 }
             }
 
@@ -1252,6 +1256,7 @@ MessageBoxDefaultButton.Button2);
             }
             this.flowLayoutPanel1.Controls.Remove(edit);
             AddEditEvents(edit, false);
+            edit.Dispose(); // 2015/9/16
 
             // 把删除后顶替被删除对象位置的 Control，滚入可见范围
             if (index < this.flowLayoutPanel1.Controls.Count)

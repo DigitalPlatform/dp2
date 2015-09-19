@@ -93,6 +93,7 @@ namespace dp2Catalog
             Assembly myAssembly = Assembly.GetAssembly(typeof(Program));
             strError += "\r\ndp2Catalog 版本: " + myAssembly.FullName;
             strError += "\r\n操作系统：" + Environment.OSVersion.ToString();
+            strError += "\r\n本机 MAC 地址: " + StringUtil.MakePathList(SerialCodeForm.GetMacAddress());
 
             // TODO: 给出操作系统的一般信息
 

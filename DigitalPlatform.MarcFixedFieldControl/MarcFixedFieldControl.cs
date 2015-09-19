@@ -999,9 +999,42 @@ namespace DigitalPlatform.Marc
         }
 
 
-		// 当在ValueList列表中双击某项时把值回到对应的地方
+        /*
+操作类型 crashReport -- 异常报告 
+主题 dp2catalog 
+发送者 xxx
+媒体类型 text 
+内容 发生未捕获的界面线程异常: 
+Type: System.ArgumentOutOfRangeException
+Message: InvalidArgument=“0”的值对于“index”无效。
+参数名: index
+Stack:
+在 System.Windows.Forms.ListView.SelectedListViewItemCollection.get_Item(Int32 index)
+在 DigitalPlatform.Marc.MarcFixedFieldControl.ValueList_DoubleClick(Object sender, EventArgs e)
+在 System.Windows.Forms.Control.OnDoubleClick(EventArgs e)
+在 System.Windows.Forms.ListView.WndProc(Message& m)
+在 System.Windows.Forms.Control.ControlNativeWindow.OnMessage(Message& m)
+在 System.Windows.Forms.Control.ControlNativeWindow.WndProc(Message& m)
+在 System.Windows.Forms.NativeWindow.Callback(IntPtr hWnd, Int32 msg, IntPtr wparam, IntPtr lparam)
+
+
+dp2Catalog 版本: dp2Catalog, Version=2.4.5714.24078, Culture=neutral, PublicKeyToken=null
+操作系统：Microsoft Windows NT 5.1.2600 Service Pack 3 
+操作时间 2015/9/17 16:38:54 (Thu, 17 Sep 2015 16:38:54 +0800) 
+前端地址 xxx 经由 http://dp2003.com/dp2library 
+
+         * */
+        // 当在ValueList列表中双击某项时把值回到对应的地方
 		private void ValueList_DoubleClick(object sender, System.EventArgs e)
 		{
+            string strError = "";
+
+            if (this.listView_values.SelectedItems.Count == 0)
+            {
+                strError = "尚未选择事项";
+                goto ERROR1;
+            }
+
 			ListViewItem item = this.listView_values.SelectedItems[0];
 
             // 配置文件中可以使用 '_' 代替空格
@@ -1010,8 +1043,8 @@ namespace DigitalPlatform.Marc
 
             if (string.IsNullOrEmpty(strValue) == true)
             {
-                MessageBox.Show(this, "值为空。请定义一个值字符串");
-                return;
+                strError = "值为空。请定义一个值字符串";
+                goto ERROR1;
             }
 
 			TemplateLine line = (TemplateLine)this.templateRoot.Lines[this.nCurLine];
@@ -1023,9 +1056,8 @@ namespace DigitalPlatform.Marc
 			// 得到正确的插入符位置
 			if (line.TextBox_value.MaxLength % strValue.Length != 0)
 			{
-				// Debug.Assert(false,"值必须是配置值的倍数");
-                MessageBox.Show(this, "值字符数必须是配置值的整倍数");  // 2009/9/21 add
-				return;
+                strError = "值字符数必须是配置值的整倍数";  // 2009/9/21 add
+				goto ERROR1;
 			}
 
 			string strTempValue = line.m_strValue;
@@ -1043,6 +1075,9 @@ namespace DigitalPlatform.Marc
 
 			line.TextBox_value.Focus();
             line.TextBox_value.NextLineIfNeed();
+            return;
+        ERROR1:
+            MessageBox.Show(this, strError);
 		}
 		
 		// 得到字段的值

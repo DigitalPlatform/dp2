@@ -1979,7 +1979,7 @@ true);
             //      0   not found
             //      1   found
             nRet = MacroUtil.GetFromLocalMacroTable(
-                PathUtil.MergePath(this.MainForm.DataDir, "marceditor_macrotable.xml"),
+                Path.Combine(this.MainForm.DataDir, "marceditor_macrotable.xml"),
                 strName,
                 e.Simulate,
                 out strValue,

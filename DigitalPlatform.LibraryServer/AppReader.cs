@@ -31,7 +31,7 @@ namespace DigitalPlatform.LibraryServer
     public partial class LibraryApplication
     {
         // 读者记录中 要害元素名列表
-        static string[] reader_element_names = new string[] {
+        static string[] _reader_element_names = new string[] {
                 "barcode",
                 "state",
                 "readerType",
@@ -66,7 +66,7 @@ namespace DigitalPlatform.LibraryServer
             };
 
         // 读者记录中 读者自己能修改的元素名列表
-        static string[] selfchangeable_reader_element_names = new string[] {
+        static string[] _selfchangeable_reader_element_names = new string[] {
                 "displayName",  // 显示名
                 "preference",   // 个性化参数
             };
@@ -240,7 +240,7 @@ namespace DigitalPlatform.LibraryServer
         // <DoReaderChange()的下级函数>
         // 合并新旧记录
         static int MergeTwoReaderXml(
-            string [] reader_element_names,
+            string [] element_names,
             string strAction,
             XmlDocument domExist,
             XmlDocument domNew,
@@ -283,9 +283,9 @@ namespace DigitalPlatform.LibraryServer
 
                 // 算法的要点是, 把"新记录"中的要害字段, 覆盖到"已存在记录"中
 
-                for (int i = 0; i < reader_element_names.Length; i++)
+                for (int i = 0; i < element_names.Length; i++)
                 {
-                    string strElementName = reader_element_names[i];
+                    string strElementName = element_names[i];
                     // <foregift>元素内容不让SetReaderInfo() API的change action修改
                     if (strElementName == "foregift")
                         continue;
@@ -505,11 +505,11 @@ namespace DigitalPlatform.LibraryServer
         //      0   没有变化
         //      1   有变化
         static int IsReaderInfoChanged(
-            string [] reader_element_names,
+            string [] element_names,
             XmlDocument dom1,
             XmlDocument dom2)
         {
-            for (int i = 0; i < reader_element_names.Length; i++)
+            for (int i = 0; i < element_names.Length; i++)
             {
                 /*
                 string strText1 = DomUtil.GetElementText(dom1.DocumentElement,
@@ -519,9 +519,9 @@ namespace DigitalPlatform.LibraryServer
                  * */
                 // 2006/11/29 changed
                 string strText1 = DomUtil.GetElementOuterXml(dom1.DocumentElement,
-                    reader_element_names[i]);
+                    element_names[i]);
                 string strText2 = DomUtil.GetElementOuterXml(dom2.DocumentElement,
-                    reader_element_names[i]);
+                    element_names[i]);
 
 
                 if (strText1 != strText2)
@@ -530,7 +530,6 @@ namespace DigitalPlatform.LibraryServer
 
             return 0;
         }
-
 
         // 修改读者记录
         // TODO: 是否要提供条码号重的情况下强制写入的功能？
@@ -575,7 +574,7 @@ namespace DigitalPlatform.LibraryServer
             strSavedRecPath = "";
             baNewTimestamp = null;
 
-            string[] element_names = reader_element_names;
+            string[] element_names = StringUtil.Append(_reader_element_names, this.PatronAdditionalFields.ToArray());
 
             LibraryServerResult result = new LibraryServerResult();
 
@@ -786,7 +785,7 @@ namespace DigitalPlatform.LibraryServer
                     return result;
                 }
 
-                element_names = selfchangeable_reader_element_names;
+                element_names = _selfchangeable_reader_element_names;
             }
 
             bool bBarcodeChanged = false;

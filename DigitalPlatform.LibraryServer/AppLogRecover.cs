@@ -4876,7 +4876,7 @@ strElementName);
         {
             strError = "";
 
-            string[] element_names = reader_element_names;
+            string[] element_names = _reader_element_names;
 
             RecoverLevel level = level_param;
 

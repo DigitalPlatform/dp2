@@ -703,21 +703,43 @@ namespace dp2Circulation
         }
 #endif
 
+        void TryReportPromptLines()
+        {
+            string strText = Program.GetPromptStringLines();
+            if (string.IsNullOrEmpty(strText) == true)
+                return;
+
+            strText += "\r\n\r\n===\r\n" + PackageEventLog.GetEnvironmentDescription().Replace("\t", "    ");
+
+            int nRet = 0;
+            string strError = "";
+            try
+            {
+                // 发送报告
+                nRet = LibraryChannel.CrashReport(
+                    this.GetCurrentUserName() + "@" + this.ServerUID,
+                    "dp2circulation 强制退出前的提示",
+                    strText,
+                    out strError);
+            }
+            catch (Exception ex)
+            {
+                strError = "CrashReport() (退出前的提示) 过程出现异常: " + ExceptionUtil.GetDebugText(ex);
+                this.WriteErrorLog(strError);
+            }
+
+            Program.ClearPromptStringLines();   // 防止以后再次重复发送
+        }
+
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-#if NO
-            if (this._acceptForm != null)
+            if (Program.IsDevelopMode() == false)
             {
-                try
-                {
-                    this._acceptForm.Close();
-                    this._acceptForm = null;
-                }
-                catch
-                {
-                }
+                // PackageEventLog.EnvironmentReport(this);
+                // Debug.WriteLine("EnvironmentReport");
+                TryReportPromptLines();
             }
-#endif
+
             if (this.MessageHub != null)
                 this.MessageHub.Destroy();
 
@@ -759,7 +781,11 @@ namespace dp2Circulation
                 string strError;
                 int nRet = cfgCache.Save(null, out strError);
                 if (nRet == -1)
-                    MessageBox.Show(this, strError);
+                {
+                    if (string.IsNullOrEmpty(this.UserLogDir) == false)
+                        this.WriteErrorLog(strError);
+                    // MessageBox.Show(this, strError);
+                }
             }
 
             if (this.AppInfo != null)
@@ -1372,8 +1398,6 @@ namespace dp2Circulation
                 bOldShareBiblio = this.MessageHub.ShareBiblio;
                 strOldDp2MserverUrl = this.MessageHub.dp2MServerUrl;
             }
-
-            
 
             CfgDlg dlg = new CfgDlg();
 
@@ -2361,8 +2385,7 @@ namespace dp2Circulation
                     && this.ServerVersion != 0)
                 {
                     string strError = "具有失效序列号参数的 dp2Circulation 需要和 dp2Library " + base_version + " 或以上版本配套使用 (而当前 dp2Library 版本号为 " + this.ServerVersion.ToString() + " )。\r\n\r\n请升级 dp2Library 到最新版本，然后重新启动 dp2Circulation。\r\n\r\n点“确定”按钮退出";
-                    MessageBox.Show(strError);
-                    Application.Exit();
+                    Program.PromptAndExit(this, strError);
                     return;
                 }
                 _expireVersionChecked = true;
@@ -2477,8 +2500,7 @@ namespace dp2Circulation
                 if (nRet == -1)
                 {
                     channel.Close();
-                    MessageBox.Show(this, "dp2Circulation 需要先设置序列号才能使用");
-                    Application.Exit();
+                    Program.PromptAndExit(this, "dp2Circulation 需要先设置序列号才能使用");
                     return;
                 }
             }
@@ -7369,7 +7391,8 @@ Keys keyData)
                 strSerialCode = this.AppInfo.GetString("sn", "sn", "");
                 if (string.IsNullOrEmpty(strSerialCode) == true)
                 {
-                    Application.Exit();
+                    // Application.Exit();
+                    Program.PromptAndExit(null, "放弃设置序列号");
                     return;
                 }
 

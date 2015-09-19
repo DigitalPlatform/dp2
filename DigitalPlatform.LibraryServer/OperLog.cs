@@ -1116,6 +1116,7 @@ namespace DigitalPlatform.LibraryServer
             WriteClientAddress(dom, strClientAddress);
             // 1.01 (2014/3/8) 修改了 operation=amerce;action=expire 记录中元素名 oldReeaderRecord 为 oldReaderRecord
             // 1.02 (2015/9/8) 日志中增加了 time 元素 linkUID 和 uid 元素
+            // 1.03 (2015/9/13) SetReaderInfo 中增加了 changedEntityRecord 元素 
             DomUtil.SetElementText(dom.DocumentElement, "version", "1.02");
 
             if (start_time != new DateTime(0))
@@ -1125,7 +1126,7 @@ namespace DigitalPlatform.LibraryServer
                 DateTime now = DateTime.Now;
                 time.SetAttribute("start", start_time.ToString("s"));
                 time.SetAttribute("end", now.ToString("s"));
-                time.SetAttribute("seconds", (now - start_time).TotalSeconds.ToString());
+                time.SetAttribute("seconds", (now - start_time).TotalSeconds.ToString("F3"));
 
                 // 日志记录的唯一 ID
                 strRefID = Guid.NewGuid().ToString();
@@ -1139,8 +1140,6 @@ namespace DigitalPlatform.LibraryServer
                 return -1;
 
             // ReOpen();          
-
-
             return 0;
         }
 

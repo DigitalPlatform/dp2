@@ -41,9 +41,16 @@ namespace DigitalPlatform.CommonControl
 
         #region console
 
+        // 线程安全
         public void ShowProgressMessage(string strID,
             string strText)
         {
+            if (this.webBrowser1.InvokeRequired)
+            {
+                this.webBrowser1.Invoke(new Action<string, string>(ShowProgressMessage), strID, strText);
+                return;
+            }
+
             if (webBrowser1.Document == null)
                 return;
 
@@ -123,7 +130,6 @@ namespace DigitalPlatform.CommonControl
             doc.Write(strHtml);
         }
 
-
         void AppendSectionTitle(string strText)
         {
             AppendCrLn();
@@ -189,7 +195,10 @@ namespace DigitalPlatform.CommonControl
 
             int nRet = EnableServices(out strError);
             if (nRet == -1)
+            {
+                strError = "开启 Windows Update 服务失败:" + strError + "\r\n请使用 Windows 控制面板的“Windows 更新”功能，安装全部更新...";
                 goto ERROR1;
+            }
 
             BeginSearchUpdate();
             return;
@@ -202,20 +211,17 @@ namespace DigitalPlatform.CommonControl
         int EnableServices(out string strError)
         {
             strError = "";
-            // Get Services Collection...
-            ServiceController[] serviceController;
-            serviceController = ServiceController.GetServices();
+            ServiceController[] controllers = ServiceController.GetServices();
 
-            // Loop through and check for a particular Service...
-            foreach (ServiceController scTemp in serviceController)
+            foreach (ServiceController controller in controllers)
             {
-                switch (scTemp.DisplayName)
+                switch (controller.DisplayName)
                 {
                     case "Windows Update":
-                        RestartService(scTemp.DisplayName, 5000);
+                        RestartService(controller.DisplayName, 5000);
                         break;
                     case "Automatic Updates":
-                        RestartService(scTemp.DisplayName, 5000);
+                        RestartService(controller.DisplayName, 5000);
                         break;
                     default:
                         break;
@@ -226,7 +232,15 @@ namespace DigitalPlatform.CommonControl
             IAutomaticUpdates iAutomaticUpdates = new AutomaticUpdates();
             if (!iAutomaticUpdates.ServiceEnabled)
             {
-                iAutomaticUpdates.EnableService();
+                try
+                {
+                    iAutomaticUpdates.EnableService();
+                }
+                catch(System.InvalidCastException ex)
+                {
+                    strError = ex.Message;
+                    return -1;
+                }
             }
 
             return 0;
@@ -240,6 +254,7 @@ namespace DigitalPlatform.CommonControl
                 int millisec1 = Environment.TickCount;
                 TimeSpan timeout = TimeSpan.FromMilliseconds(timeoutMilliseconds);
 
+                // 如果不是 Administrator 身份，会抛出异常
                 serviceController.Stop();
                 serviceController.WaitForStatus(ServiceControllerStatus.Stopped, timeout);
 
@@ -250,9 +265,9 @@ namespace DigitalPlatform.CommonControl
                 serviceController.Start();
                 serviceController.WaitForStatus(ServiceControllerStatus.Running, timeout);
             }
-            catch
+            catch(Exception ex)
             {
-                // ...
+
             }
         }
 
@@ -270,7 +285,7 @@ namespace DigitalPlatform.CommonControl
             // Only Check Online..
             _updateSearcher.Online = true;
 
-            this.AppendString("正在搜索更新，请耐心等候 ...\r\n");
+            this.AppendString("正在搜索更新，请耐心等候 ...\r\n(如果您这台电脑是安装 Windows 操作系统后第一次更新，可能会在这一步耗费较长时间，请一定耐心等待)");
             // Begin Asynchronous IUpdateSearcher...
             _searchJob = _updateSearcher.BeginSearch("IsInstalled=0 AND IsPresent=0", 
                 new SearchCompleteFunc(this), 
@@ -360,9 +375,13 @@ MessageBoxDefaultButton.Button2);
         void DownloadComplete()
         {
             _downloadResult = _updateDownloader.EndDownload(_downloadJob);
-            if (_downloadResult.ResultCode == OperationResultCode.orcSucceeded)
+            if (_downloadResult.ResultCode == OperationResultCode.orcSucceeded
+                || _downloadResult.ResultCode == OperationResultCode.orcSucceededWithErrors)
             {
-                this.AppendString("下载完成。\r\n");
+                if (_downloadResult.ResultCode == OperationResultCode.orcSucceeded)
+                    this.AppendString("下载完成。\r\n");
+                else
+                    this.AppendString("下载部分完成，部分出错。\r\n");
 
 #if NO
                 DialogResult result = MessageBox.Show(this,
@@ -395,8 +414,23 @@ MessageBoxDefaultButton.Button2);
 
         void BeginInstallation()
         {
+            UpdateCollection installCollection = new UpdateCollection();
+            foreach(IUpdate update in this._updateCollection)
+            {
+                if (update.IsDownloaded)
+                    installCollection.Add(update);
+            }
+
+            if (installCollection.Count == 0)
+            {
+                this.AppendString("下载完成，没有可供安装的更新。操作结束。\r\n");
+                OnAllComplete();
+                return;
+            }
+
+
             _updateInstaller = _updateSession.CreateUpdateInstaller() as IUpdateInstaller;
-            _updateInstaller.Updates = this._updateCollection;
+            _updateInstaller.Updates = installCollection;   // this._updateCollection;
 
             // TODO: 不但要安装本次下载的，也要安装以前下载了但没有安装的
 
@@ -443,8 +477,14 @@ MessageBoxDefaultButton.Button2);
         bool _running = false;
 
         // 全部结束后设置好按钮状态
+        // 线程安全
         void OnAllComplete()
         {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new Action(OnAllComplete));
+                return;
+            }
             this.button_begin.Enabled = true;
             this.button_close.Text = "关闭";
 
@@ -596,8 +636,8 @@ MessageBoxDefaultButton.Button2);
                  + e.Progress.CurrentUpdateIndex
                  + " / "
                  + iInstallationJob.Updates.Count
-                 + " - "
-                 + e.Progress.CurrentUpdatePercentComplete + "% Complete");
+                 + " - 已完成 "
+                 + e.Progress.CurrentUpdatePercentComplete + "%");
             }
         }
 

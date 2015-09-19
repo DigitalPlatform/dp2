@@ -149,6 +149,7 @@ namespace dp2Circulation
                 // 启动时在日志中记载当前 dp2circulation 版本号
                 this.WriteErrorLog(Assembly.GetAssembly(this.GetType()).FullName);
                 
+#if NO
                 // 检查 KB????
                 /*
     操作类型 crashReport -- 异常报告 
@@ -224,10 +225,13 @@ namespace dp2Circulation
                         WindowsUpdateDialog dlg = new WindowsUpdateDialog();
                         MainForm.SetControlFont(dlg, this.DefaultFont);
                         dlg.ShowDialog(this);
-                        Application.Exit();
+                        // Application.Exit();
+                        Program.PromptAndExit(this, "Windows 更新后退出");
                         return;
                     }
                 }
+
+#endif
 
                 // 删除一些以前的目录
                 string strDir = PathUtil.MergePath(this.DataDir, "operlogcache");
@@ -267,8 +271,9 @@ namespace dp2Circulation
                 }
                 catch(Exception ex)
                 {
-                    MessageBox.Show(this, "dp2circulation 所需的 IE 浏览器控件出现异常: " + ExceptionUtil.GetDebugText(ex));
-                    Application.Exit();
+                    //MessageBox.Show(this, "dp2circulation 所需的 IE 浏览器控件出现异常: " + ExceptionUtil.GetDebugText(ex));
+                    //Application.Exit();
+                    Program.PromptAndExit(this, "dp2circulation 所需的 IE 浏览器控件出现异常: " + ExceptionUtil.GetDebugText(ex));
                 }
             }
 
@@ -393,15 +398,215 @@ namespace dp2Circulation
                 }
             }
 #endif
-            if (CopyDefaultCfgFiles() == false)
+            if (CopyDefaultCfgFiles(out strError) == false)
             {
-                Application.Exit();
+                // Application.Exit();
+                Program.PromptAndExit(this, strError);
                 return;
             }
 
         }
 
+        /*
+信息创建时间:*2015-9-15 15:48:56
+当前操作系统信息:*Microsoft Windows NT 5.1.2600 Service Pack 3
+当前操作系统版本号:*5.1.2600.196608
+本机 MAC 地址:*00192145CC58
+是否安装了 KB2468871:*True
+系统进程:
+--- Devices:
+1) 360Safe Anti Hacker Service
+2) 360Box mini-filter driver
+3) 360Safe Camera Filter Service
+4) 360netmon
+5) 360qpesv driver
+6) 360reskit driver
+7) 360SelfProtection
+8) Abiosdsk
+9) Microsoft ACPI Driver
+10) Microsoft ACPIEC Driver
+11) Microsoft Kernel Acoustic Echo Canceller
+12) AFD
+13) Ambfilt
+14) asc3350p
+15) RAS Asynchronous Media Driver
+16) 标准 IDE/ESDI 硬盘控制器
+17) Atdisk
+18) ATM ARP Client Protocol
+19) 音频存根驱动程序
+20) BAPIDRV
+21) Beep
+22) cbidf2k
+23) cd20xrnt
+24) Cdaudio
+25) Cdfs
+26) CD-ROM Driver
+27) Changer
+28) 磁盘驱动器
+29) dmboot
+30) Logical Disk Manager Driver
+31) dmload
+32) Microsoft Kernel DLS Syntheiszer
+33) Microsoft Kernel DRM Audio Descrambler
+34) DsArk
+35) EfiSystemMon
+36) exFat
+37) Fastfat
+38) Fdc
+39) Fips
+40) Flpydisk
+41) FltMgr
+42) FsVga
+43) Volume Manager Driver
+44) Generic Packet Classifier
+45) Microsoft 用于 High Definition Audio 的 UAA 总线驱动程序
+46) Microsoft HID Class Driver
+47) HookPort
+48) HTTP
+49) HUAWEISERSP
+50) i2omgmt
+51) i8042 键盘和 PS/2 鼠标端口驱动程序
+52) CD 烧制筛选驱动器
+53) Service for Realtek HD Audio (WDM)
+54) Intel Processor Driver
+55) IPv6 Windows Firewall Driver
+56) IP Traffic Filter Driver
+57) IP in IP Tunnel Driver
+58) IP Network Address Translator
+59) IPSEC driver
+60) IR Enumerator Service
+61) PnP ISA/EISA Bus Driver
+62) Keyboard Class Driver
+63) Keyboard HID Driver
+64) Microsoft Kernel Wave Audio Mixer
+65) KSecDD
+66) lbrtfdc
+67) mnmdd
+68) Modem
+69) Monfilt
+70) Mouse Class Driver
+71) Mouse HID Driver
+72) MountMgr
+73) WebDav Client Redirector
+74) MRxSmb
+75) Msfs
+76) Microsoft Streaming Service Proxy
+77) Microsoft Streaming Clock Proxy
+78) Microsoft Streaming Quality Manager Proxy
+79) Microsoft System Management BIOS Driver
+80) Mup
+81) NDIS System Driver
+82) Remote Access NDIS TAPI Driver
+83) NDIS 用户模式 I/O 协议
+84) Remote Access NDIS WAN Driver
+85) NDIS Proxy
+86) NetBIOS Interface
+87) NetBios over Tcpip
+88) Npfs
+89) Ntfs
+90) Null
+91) IPX Traffic Filter Driver
+92) IPX Traffic Forwarder Driver
+93) Parallel port driver
+94) PartMgr
+95) ParVdm
+96) PCI Bus Driver
+97) PCIDump
+98) PCIIde
+99) Pcmcia
+100) PDCOMP
+101) PDFRAME
+102) PDRELI
+103) PDRFRAME
+104) perc2hib
+105) WAN Miniport (PPTP)
+106) 处理器驱动程序
+107) QoS Packet Scheduler
+108) Direct Parallel Link Driver
+109) QQFrmMgr
+110) QQProtect
+111) Quantum DeepScanner Servers
+112) qutmipc
+113) Remote Access Auto Connection Driver
+114) WAN Miniport (L2TP)
+115) 远程访问 PPPOE 驱动程序
+116) Direct Parallel
+117) Rdbss
+118) RDPCDD
+119) Terminal Server Device Redirector Driver
+120) RDPWD
+121) Digital CD Audio Playback Filter Driver
+122) Realtek 10/100/1000 PCI NIC Family NDIS XP Driver
+123) Realtek RTL8139(A/B/C)-based PCI Fast Ethernet Adapter NT Driver
+124) Realtek 10/100/1000 PCI-E NIC Family NDIS XP Driver
+125) Secdrv
+126) Serenum Filter Driver
+127) Serial port driver
+128) Sfloppy
+129) Simbad
+130) SiS315
+131) SiS AGP winXP Filter
+132) SiSide
+133) SiSkp
+134) Microsoft Kernel Audio Splitter
+135) System Restore Filter Driver
+136) Srv
+137) Software Bus Driver
+138) Microsoft Kernel GS Wavetable Synthesizer
+139) Microsoft Kernel System Audio Device
+140) TCP/IP Protocol Driver
+141) TDPIPE
+142) TDTCP
+143) Terminal Device Driver
+144) Udfs
+145) Microcode Update Driver
+146) Microsoft USB Generic Parent Driver
+147) Microsoft USB 2.0 Enhanced Host Controller Miniport Driver
+148) USB2 Enabled Hub
+149) Microsoft USB Open Host Controller Miniport Driver
+150) Microsoft USB PRINTER Class
+151) USB 大容量存储设备
+152) Microsoft USB Universal Host Controller Miniport Driver
+153) VgaSave
+154) VolSnap
+155) Remote Access IP ARP Driver
+156) Kernel Mode Driver Frameworks service
+157) WDICA
+158) Microsoft WINMM WDM Audio Compatibility Driver
+159) Android USB Driver
+160) WpdUsb
+161) Windows Driver Foundation - User-mode Driver Framework Platform Driver
+162) WUDFRd
+--- System process:
+1) winlogon.exe
+2) zstatus.exe
+3) Explorer.EXE
+4) dfsvc.exe
+5) httpd.exe
+6) smss.exe
+7) httpd.exe
+8) svchost.exe
+9) DhMachineSvc.exe
+10) DhPluginMgr.exe
+11) csrss.exe
+12) lsass.exe
+13) alg.exe
+14) services.exe
+15) svchost.exe
+16) zhudongfangyu.exe
+17) svchost.exe
+18) 360Tray.exe
+19) svchost.exe
+20) CAJSHost.exe
+21) ctfmon.exe
+22) svchost.exe
+23) spoolsv.exe
+24) svchost.exe
+25) conime.exe
+26) SoftMgrLite.exe
+27) dp2Circulation.exe
 
+         * */
         bool Detect360()
         {
             ServiceController[] devices = ServiceController.GetDevices();
@@ -409,8 +614,8 @@ namespace dp2Circulation
             // 先检测驱动
             foreach (ServiceController controller in devices)
             {
-                if (controller.DisplayName.StartsWith("360netmon") 
-                    || controller.DisplayName.StartsWith("360SelfProtection"))
+                if (controller.DisplayName.StartsWith("360netmon", StringComparison.OrdinalIgnoreCase)
+                    || controller.DisplayName.StartsWith("360SelfProtection", StringComparison.OrdinalIgnoreCase))
                     return true;
             }
 
@@ -428,7 +633,8 @@ namespace dp2Circulation
                 {
                     continue;
                 }
-                if (ModuleName.StartsWith("360tray.exe"))
+                if (ModuleName.StartsWith("360Tray.exe", StringComparison.OrdinalIgnoreCase)
+                    || ModuleName.StartsWith("zhudongfangyu.exe", StringComparison.OrdinalIgnoreCase))
                     return true;
             }
 
@@ -441,9 +647,9 @@ namespace dp2Circulation
         // return:
         //      true    成功
         //      false   失败。需要立即返回
-        bool CopyDefaultCfgFiles()
+        bool CopyDefaultCfgFiles(out string strError)
         {
-            string strError = "";
+            strError = "";
 
             // 从 数据目录 default 子目录中列举所有文件名
             string strDefaultDir = Path.Combine(this.DataDir, "default");
@@ -489,7 +695,7 @@ namespace dp2Circulation
             }
             return true;
         ERROR1:
-            MessageBox.Show(this, strError);
+            // MessageBox.Show(this, strError);
             return false;
         }
 
@@ -581,8 +787,12 @@ namespace dp2Circulation
                             }
 #endif
                             MessageBox.Show(this, "dp2Circulation 不支持 Windows XP / Windows Server 2003 操作系统版本。请在 Windows Vista 及以上版本安装运行");
-                                Application.Exit();
+                            if (Control.ModifierKeys != Keys.Control)
+                            {
+                                // Application.Exit();
+                                Program.PromptAndExit((IWin32Window)null, "dp2Circulation 不支持 Windows XP / Windows Server 2003 操作系统版本。请在 Windows Vista 及以上版本安装运行");
                                 return false;
+                            }
                         }
                         else if (Environment.OSVersion.Version.Major >= 6)
                         {
@@ -595,7 +805,8 @@ namespace dp2Circulation
                         first_dialog.StartPosition = FormStartPosition.CenterScreen;
                         if (first_dialog.ShowDialog(this) == System.Windows.Forms.DialogResult.Cancel)
                         {
-                            Application.Exit();
+                            // Application.Exit();
+                            Program.PromptAndExit(null, "取消首次设置");
                             return false;
                         }
                         bFirstDialog = true;
@@ -694,10 +905,20 @@ AppInfo.GetString("config",
                         {
                             // 检查dp2Library版本号
                             // return:
-                            //      -1  error
+                            //      -2  出现严重错误，希望退出 Application
+                            //      -1  一般错误
                             //      0   dp2Library的版本号过低。警告信息在strError中
                             //      1   dp2Library版本号符合要求
                             nRet = CheckVersion(false, out strError);
+                            if (nRet == -2)
+                            {
+                                if (string.IsNullOrEmpty(strError) == false)
+                                    MessageBox.Show(this, strError);
+                                // Application.Exit();
+                                Program.PromptAndExit(null,
+                                    string.IsNullOrEmpty(strError) == false ? strError : "CheckVersion Fail...");
+                                return false;
+                            }
                             if (nRet == -1)
                             {
                                 MessageBox.Show(this, strError);
@@ -831,9 +1052,13 @@ Culture=neutral, PublicKeyToken=null
                 }
                 catch (System.UnauthorizedAccessException ex)
                 {
+#if NO
                     MessageBox.Show(this, "在试图删除数据目录 '"+this.DataDir+"' 内临时文件时出错: " + ex.Message
                         + "\r\n\r\n既然您把软件安装到这个目录或者试图从这里运行软件，就该给当前 Windows 用户赋予针对这个目录的列目录和删除文件的权限");
                     Application.Exit();
+#endif
+                    Program.PromptAndExit(this, "在试图删除数据目录 '"+this.DataDir+"' 内临时文件时出错: " + ex.Message
+                        + "\r\n\r\n既然您把软件安装到这个目录或者试图从这里运行软件，就该给当前 Windows 用户赋予针对这个目录的列目录和删除文件的权限");
                     return false;
                 }
                 
@@ -843,9 +1068,13 @@ Culture=neutral, PublicKeyToken=null
                 }
                 catch (System.UnauthorizedAccessException ex)
                 {
+#if NO
                     MessageBox.Show(this, "在试图删除用户临时目录 '" + this.UserTempDir + "' 内临时文件时出错: " + ex.Message
                         + "\r\n\r\n应给当前 Windows 用户赋予针对这个目录的列目录和删除文件的权限");
                     Application.Exit();
+#endif
+                    Program.PromptAndExit(this, "在试图删除用户临时目录 '" + this.UserTempDir + "' 内临时文件时出错: " + ex.Message
+                        + "\r\n\r\n应给当前 Windows 用户赋予针对这个目录的列目录和删除文件的权限");
                     return false;
                 }
 
@@ -883,11 +1112,21 @@ Culture=neutral, PublicKeyToken=null
 
                 }
 
-                // if (Program.IsDevelopMode() == true)
+                if (Global.IsKbInstalled("KB2468871") == true)
                 {
                     // 初始化 MessageHub
                     this.MessageHub = new MessageHub();
                     this.MessageHub.Initial(this, this.webBrowser_messageHub);
+                }
+                else
+                {
+                    // 在 webBrowser 中显示警告信息
+                    string strCssUrl = Path.Combine(this.DataDir, "history.css");
+                    string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
+                    Global.SetHtmlString(this.webBrowser_messageHub,
+                        "<html><head>" + strLink + "</head><body>" + "<p>需要安装 Windows 更新 KB2468871 以后才能使用消息相关功能</p>", 
+                        this.DataDir,
+                        "error");
                 }
 
             }
@@ -1005,7 +1244,8 @@ Culture=neutral, PublicKeyToken=null
         public string ServerUID { get; set; }
 
         // return:
-        //      -1  error
+        //      -2  出现严重错误，希望退出 Application
+        //      -1  一般错误
         //      0   dp2Library的版本号过低。警告信息在strError中
         //      1   dp2Library版本号符合要求
         /// <summary>
@@ -1038,6 +1278,11 @@ Culture=neutral, PublicKeyToken=null
             {
                 string strVersion = "";
                 string strUID = "";
+
+#if NO
+                strError = "测试退出";
+                return -2;
+#endif
 
                 long lRet = Channel.GetVersion(Stop,
     out strVersion,
@@ -1086,9 +1331,7 @@ Culture=neutral, PublicKeyToken=null
                     // return 0;
                     strError = "当前 dp2Circulation 版本必须和 dp2Library " + base_version + " 或以上版本配套使用 (而当前 dp2Library 版本号为 " + strVersion + " )。\r\n\r\n请立即升级 dp2Library 到最新版本。";
                     this.AppInfo.Save();
-                    MessageBox.Show(this, strError);
-                    Application.Exit();
-                    return -1;
+                    return -2;
                 }
 
 #if SN
@@ -1105,14 +1348,14 @@ Culture=neutral, PublicKeyToken=null
     MessageBoxDefaultButton.Button1);
                     if (result == System.Windows.Forms.DialogResult.No)
                     {
-                        Application.Exit();
-                        return -1;
+                        strError = "";
+                        return -2;
                     }
                     else
                     {
                         MenuItem_resetSerialCode_Click(this, new EventArgs());
-                        Application.Exit();
-                        return -1;
+                        strError = "重设序列号后退出";
+                        return -2;
                     }
                 }
 #endif

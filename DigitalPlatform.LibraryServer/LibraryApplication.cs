@@ -91,7 +91,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.49 (2015/8/23) GetRes() API 允许获得违约金库 cfgs 下的配置文件了。以前版本不允许是因为一个 bug 造成的。GetReaderInfo() API 的 strResultTypeList 参数增加了 advancexml_history_bibliosummary 这种用法
         //      2.50 (2015/9/3) Return() API 的盘点功能，增加了 为 return_info 中返回信息的功能；WriteRes() 增加了 strStyle "delete" 删除盘点库记录功能(需要权限 inventorydelete)
         //      2.51 (2015/9/10) SetReaderInfo() API 增加了一个新的 strAction 值 changereaderbarcode，允许在读者尚有借阅信息的情况下正确修改证件条码号
-        public static string Version = "2.51";
+        //      2.52 (2015/9/17) SetReaderInfo() API 允许使用用户定义的扩充字段。扩充字段在 library.xml 的 circulation 元素 patronAdditionalFields 属性中定义
+        public static string Version = "2.52";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()
@@ -327,8 +328,13 @@ namespace DigitalPlatform.LibraryServer
 
         // 2013/5/24
         // 用于出纳操作的辅助性的检索途径
+        // 不要试图在运行中途修改它。它不会回写到 library.xml 中
         public List<string> PatronAdditionalFroms = new List<string>();
 
+        // 2015/9/17
+        // 读者记录中的扩展字段
+        // 不要试图在运行中途修改它。它不会回写到 library.xml 中
+        public List<string> PatronAdditionalFields = new List<string>();
 
         // 构造函数
         public LibraryApplication()
@@ -692,10 +698,20 @@ namespace DigitalPlatform.LibraryServer
                 node = dom.DocumentElement.SelectSingleNode("circulation");
                 if (node != null)
                 {
-                    string strList = DomUtil.GetAttr(node, "patronAdditionalFroms");
-                    if (string.IsNullOrEmpty(strList) == false)
                     {
-                        this.PatronAdditionalFroms = StringUtil.SplitList(strList);
+                        string strList = DomUtil.GetAttr(node, "patronAdditionalFroms");
+                        if (string.IsNullOrEmpty(strList) == false)
+                        {
+                            this.PatronAdditionalFroms = StringUtil.SplitList(strList);
+                        }
+                    }
+
+                    {
+                        string strList = DomUtil.GetAttr(node, "patronAdditionalFields");
+                        if (string.IsNullOrEmpty(strList) == false)
+                        {
+                            this.PatronAdditionalFields = StringUtil.SplitList(strList);
+                        }
                     }
 
                     int v = 0;

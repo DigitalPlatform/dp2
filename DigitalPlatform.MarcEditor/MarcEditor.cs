@@ -1083,7 +1083,11 @@ namespace DigitalPlatform.Marc
 		{
             // 2009/11/20
             if (this.curEdit != null)
+            {
                 this.Controls.Remove(this.curEdit);
+                this.curEdit.Dispose(); // 2015/9/16
+                this.curEdit = null;
+            }
 
             this.curEdit = new MyEdit();
 
@@ -1099,17 +1103,6 @@ namespace DigitalPlatform.Marc
                 curEdit.ReadOnly = this.ReadOnly;
 
 			this.Controls.Add(curEdit);
-
-            /*
-            if (this.FixedSizeFont == null)
-                this.FixedSizeFont = CreateFixedSizeFont();
-
-            if (this.CaptionFont == null)
-                this.CaptionFont = CreateCaptionFont();
-             * */
-
-			// m_bEditInitialized = true;
-
 		}
 
 		// 为SetEditPos()编写的私有函数
@@ -1378,7 +1371,6 @@ namespace DigitalPlatform.Marc
 			if (m_bEditInitialized == false) 
 				InitialEditControl();
              * */
-
 
 			if (this.m_nFocusCol == 1 || this.m_nFocusCol == 2)
 				this.curEdit.Overwrite = true;
@@ -3047,12 +3039,6 @@ END1:
                 if (this.curEdit != null)
                 {
                     this.curEdit.ContentIsNull = true;
-                    /*
-                    if (this.curEdit.Focused == true)
-                        bEditFocused = true;
-                    this.Controls.Remove(this.curEdit);
-                    this.curEdit = null;
-                     * */
                 }
             }
 

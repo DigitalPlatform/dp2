@@ -1,5 +1,6 @@
 ﻿using DigitalPlatform;
 using DigitalPlatform.CirculationClient;
+using DigitalPlatform.Text;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -31,6 +32,29 @@ namespace dp2Circulation
             Application.SetCompatibleTextRenderingDefault(false);
             _mainForm = new MainForm();
             Application.Run(_mainForm);
+        }
+
+        static List<string> _promptStrings = new List<string>();
+        public static void MemoPromptString(string strText)
+        {
+            _promptStrings.Add(strText);
+        }
+
+        public static string GetPromptStringLines()
+        {
+            return StringUtil.MakePathList(_promptStrings, "\r\n\r\n");
+        }
+        public static void ClearPromptStringLines()
+        {
+            _promptStrings.Clear();
+        }
+
+        public static void PromptAndExit(IWin32Window owner, string strText)
+        {
+            if (owner != null)
+                MessageBox.Show(owner, strText);
+            Program.MemoPromptString(strText);
+            Application.Exit();
         }
 
         public static bool IsDevelopMode()
@@ -111,6 +135,7 @@ namespace dp2Circulation
             Assembly myAssembly = Assembly.GetAssembly(typeof(Program));
             strError += "\r\ndp2Circulation 版本: " + myAssembly.FullName;
             strError += "\r\n操作系统：" + Environment.OSVersion.ToString();
+            strError += "\r\n本机 MAC 地址: " + StringUtil.MakePathList(SerialCodeForm.GetMacAddress());
 
             // TODO: 给出操作系统的一般信息
 

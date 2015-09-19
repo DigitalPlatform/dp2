@@ -1297,7 +1297,8 @@ Keys keyData)
                 if (bDisplayClickableError == false
                     && this._floatingMessage.InDelay() == false)
                     this.ClearMessage();
-                this.MainForm.MessageHub.SearchResponseEvent -= MessageHub_SearchResponseEvent;
+                if (this.MainForm.MessageHub != null)
+                    this.MainForm.MessageHub.SearchResponseEvent -= MessageHub_SearchResponseEvent;
 
                 stop.EndLoop();
                 stop.OnStop -= new StopEventHandler(this.DoStop);
@@ -1325,6 +1326,12 @@ Keys keyData)
             out string strError)
         {
             strError = "";
+
+            if (this.MainForm.MessageHub == null)
+            {
+                strError = "MessageHub is null";
+                return -1;
+            }
 
             string strSearchID = Guid.NewGuid().ToString();
             _searchParam = new SearchParam();

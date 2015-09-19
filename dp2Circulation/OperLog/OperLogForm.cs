@@ -828,7 +828,7 @@ this.UiState);
             strHtml = 
                 "<table class='operlog'>" +
                 BuildHtmlLine("馆代码", strLibraryCode) +
-                BuildHtmlLine("操作类型", strOperation + " -- 还书(声明丢失)") +
+                BuildHtmlLine("操作类型", strOperation + " -- 还书") +
                 BuildHtmlLine("动作", strAction + " -- " + GetActionName(strOperation, strAction)) +
                 BuildHtmlEncodedLine("读者证条码号", BuildReaderBarcodeLink(strReaderBarcode)) +
                 BuildHtmlPendingLine("(读者摘要)", BuildPendingReaderSummary(strReaderBarcode)) +

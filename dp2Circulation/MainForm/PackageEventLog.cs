@@ -1,10 +1,14 @@
-﻿using DigitalPlatform.IO;
+﻿using DigitalPlatform;
+using DigitalPlatform.CirculationClient;
+using DigitalPlatform.IO;
+using DigitalPlatform.Text;
 using Ionic.Zip;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.ServiceProcess;
 using System.Text;
 
 namespace dp2Circulation
@@ -211,7 +215,7 @@ namespace dp2Circulation
         }
 
         // 获得环境描述字符串
-        static string GetEnvironmentDescription()
+        public static string GetEnvironmentDescription()
         {
             string strError = "";
 
@@ -219,9 +223,113 @@ namespace dp2Circulation
             text.Append("信息创建时间:\t" + DateTime.Now.ToString() + "\r\n");
             text.Append("当前操作系统信息:\t" + Environment.OSVersion.ToString() + "\r\n");
             text.Append("当前操作系统版本号:\t" + Environment.OSVersion.Version.ToString() + "\r\n");
+            List<string> macs = SerialCodeForm.GetMacAddress();
+            text.Append("本机 MAC 地址:\t" + StringUtil.MakePathList(macs) + "\r\n");
+            // https://support.microsoft.com/zh-cn/kb/2468871
+            // "KB2468871" 关系到 SignalR 运行是否会出现装载 System.Core 失败的故障
+            text.Append("是否安装了 KB2468871:\t" + Global.IsKbInstalled("KB2468871") + "\r\n");
+            text.Append("系统进程:\r\n" + ListSystemProcess());
 
             return text.ToString();
         }
+
+        static string ListSystemProcess()
+        {
+            StringBuilder text = new StringBuilder();
+
+            // 驱动
+            {
+                ServiceController[] devices = ServiceController.GetDevices();
+                text.Append("--- Devices:\r\n");
+                int i = 0;
+                foreach (ServiceController controller in devices)
+                {
+                    text.Append((i + 1).ToString() + ") " + controller.DisplayName + "\r\n");
+                    i++;
+                }
+            }
+
+            // 系统进程
+            {
+                System.Diagnostics.Process[] process_list = System.Diagnostics.Process.GetProcesses();
+                text.Append("--- System process:\r\n");
+                int i = 0;
+                foreach (Process process in process_list)
+                {
+                    string ModuleName = "";
+                    try
+                    {
+                        ModuleName = process.MainModule.ModuleName;
+                    }
+                    catch (Exception ex)
+                    {
+                        continue;
+                    }
+                    text.Append((i + 1).ToString() + ") " + ModuleName + "\r\n");
+                    i++;
+                }
+            }
+
+            return text.ToString();
+        }
+
+        // 2015/9/15
+        public static void EnvironmentReport(MainForm mainForm)
+        {
+#if NO
+            MessageBar _messageBar = null;
+
+            _messageBar = new MessageBar();
+            _messageBar.TopMost = false;
+            //_messageBar.BackColor = SystemColors.Info;
+            //_messageBar.ForeColor = SystemColors.InfoText;
+            _messageBar.Text = "dp2Circulation 出现异常";
+            _messageBar.MessageText = "正在向 dp2003.com 发送异常报告 ...";
+            _messageBar.StartPosition = FormStartPosition.CenterScreen;
+            _messageBar.Show(_mainForm);
+            _messageBar.Update();
+#endif
+            int nRet = 0;
+            string strError = "";
+            try
+            {
+                string strSender = "";
+                if (mainForm != null)
+                    strSender = mainForm.GetCurrentUserName() + "@" + mainForm.ServerUID;
+                // 崩溃报告
+                nRet = LibraryChannel.CrashReport(
+                    strSender,
+                    "dp2circulation 环境报告",
+                    GetEnvironmentDescription().Replace("\t", "    "),
+                    out strError);
+            }
+            catch (Exception ex)
+            {
+                strError = "CrashReport() 过程出现异常: " + ExceptionUtil.GetDebugText(ex);
+                nRet = -1;
+            }
+            finally
+            {
+#if NO
+                _messageBar.Close();
+                _messageBar = null;
+#endif
+            }
+
+#if NO
+            if (nRet == -1)
+            {
+                strError = "向 dp2003.com 发送异常报告时出错，未能发送成功。详细情况: " + strError;
+                MessageBox.Show(_mainForm, strError);
+                // 写入错误日志
+                if (_mainForm != null)
+                    _mainForm.WriteErrorLog(strError);
+                else
+                    WriteWindowsLog(strError, EventLogEntryType.Error);
+            }
+#endif
+        }
+
 
         // 创建 Windows 存储事件日志的文件
         static int MakeWindowsLogFile(EventLog log,

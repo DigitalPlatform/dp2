@@ -3931,8 +3931,6 @@ nHeight);
                             this.m_innerControl.Width = this.GetWidth();
                     }
                 }
-
-
             }
         }
 

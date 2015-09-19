@@ -573,6 +573,9 @@ namespace DigitalPlatform
         string Safe_SetToolStripStatusLabelText(ToolStripStatusLabel label,
             string strText)
         {
+            if (label.Owner == null)
+                return "";
+
             if (label.Owner.InvokeRequired)
             {
                 Delegate_SetToolStripStatusLabelText d = new Delegate_SetToolStripStatusLabelText(SetToolStripStatusLabelText);
@@ -774,6 +777,9 @@ namespace DigitalPlatform
             long lEnd,
             long lValue)
         {
+            if (progressbar.Owner == null)
+                return;
+
             if (progressbar.Owner.InvokeRequired)
             {
                 Delegate_SetToolStrupProgressBar d = new Delegate_SetToolStrupProgressBar(SetProgressBar);

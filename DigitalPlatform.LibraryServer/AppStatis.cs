@@ -456,6 +456,8 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 合并时间范围内的多个XML文件
+        // parameters:
+        //      strLibraryCodeList  馆代码列表。用来筛选 XML 文件中的分馆节点。如果想获得所有分馆的统计信息，那就需要用 "" 作为参数值
         public int MergeXmlFiles(
             string strLibraryCodeList,
             ref int nStop,

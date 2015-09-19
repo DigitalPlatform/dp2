@@ -2747,10 +2747,36 @@ e.Height);
 
         PatronSummaryForm _patronSummaryForm = null;
 
+        /*
+操作类型 crashReport -- 异常报告 
+主题 dp2circulation 
+发送者 xxx 
+媒体类型 text 
+内容 发生未捕获的界面线程异常: 
+Type: System.ObjectDisposedException
+Message: 无法访问已释放的对象。
+对象名:“PatronSummaryForm”。
+Stack:
+在 System.Windows.Forms.Control.CreateHandle()
+在 System.Windows.Forms.Form.CreateHandle()
+在 System.Windows.Forms.Control.get_Handle()
+在 System.Windows.Forms.Form.Show(IWin32Window owner)
+在 dp2Circulation.QuickChargingForm.DisplayReaderSummary(ChargingTask exclude_task, String strText)
+
+
+dp2Circulation 版本: dp2Circulation, Version=2.4.5735.664, Culture=neutral, PublicKeyToken=null
+操作系统：Microsoft Windows NT 6.1.7601 Service Pack 1 
+操作时间 2015/9/14 16:37:15 (Mon, 14 Sep 2015 16:37:15 +0800) 
+前端地址 xxx 经由 http://dp2003.com/dp2library 
+
+         * */
         delegate void Delegate_DisplayReaderSummary(ChargingTask exclude_task, string strText);
         internal void DisplayReaderSummary(ChargingTask exclude_task,
             string strText)
         {
+            if (this.IsDisposed)
+                return;
+
             if (this.InvokeRequired)
             {
                 Delegate_DisplayReaderSummary d = new Delegate_DisplayReaderSummary(DisplayReaderSummary);
@@ -2777,6 +2803,8 @@ e.Height);
             if (_patronSummaryForm.Visible == false)
             {
                 this.MainForm.AppInfo.LinkFormState(this._patronSummaryForm, "_patronSummaryForm_state");
+                if (_patronSummaryForm.IsDisposed)
+                    return;
                 _patronSummaryForm.Show(this);
             }
             else

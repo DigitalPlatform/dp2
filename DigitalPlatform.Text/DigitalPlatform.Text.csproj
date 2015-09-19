@@ -160,6 +160,7 @@
     <Compile Include="PriceUtil.cs" />
     <Compile Include="QuickList.cs" />
     <Compile Include="SectionPropertyString.cs" />
+    <Compile Include="StringUtil.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
