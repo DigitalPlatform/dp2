@@ -73,6 +73,7 @@ namespace dp2Circulation
             if (nRet == -1)
                 MessageBox.Show(this, strError);
 
+            listView_actions_SelectedIndexChanged(this, new EventArgs());
 #if NO
             if (this.CfgDom != null)
             {
@@ -253,14 +254,13 @@ namespace dp2Circulation
             ContextMenu contextMenu = new ContextMenu();
             MenuItem menuItem = null;
 
-            menuItem = new MenuItem("修改(&M)");
+            menuItem = new MenuItem("修改 (&M)");
             menuItem.Click += new System.EventHandler(this.menu_modify_Click);
             if (this.listView_actions.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-
-            menuItem = new MenuItem("新增(&N)");
+            menuItem = new MenuItem("新增 (&N)");
             menuItem.Click += new System.EventHandler(this.menu_new_Click);
             contextMenu.MenuItems.Add(menuItem);
 
@@ -269,7 +269,7 @@ namespace dp2Circulation
             contextMenu.MenuItems.Add(menuItem);
 
 
-            menuItem = new MenuItem("全选(&A)");
+            menuItem = new MenuItem("全选 (&A)");
             menuItem.Click += new System.EventHandler(this.menu_selectAll_Click);
             contextMenu.MenuItems.Add(menuItem);
 
@@ -277,13 +277,37 @@ namespace dp2Circulation
             menuItem = new MenuItem("-");
             contextMenu.MenuItems.Add(menuItem);
 
-            menuItem = new MenuItem("删除(&D)");
+            menuItem = new MenuItem("删除 (&D)");
             menuItem.Click += new System.EventHandler(this.menu_delete_Click);
             if (this.listView_actions.SelectedItems.Count == 0)
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
+            // ---
+            menuItem = new MenuItem("-");
+            contextMenu.MenuItems.Add(menuItem);
+
+            menuItem = new MenuItem("宏定义 (&M) ...");
+            menuItem.Click += new System.EventHandler(this.menu_macroDef_Click);
+            contextMenu.MenuItems.Add(menuItem);
+
+
             contextMenu.Show(this.listView_actions, new Point(e.X, e.Y));	
+        }
+
+        // 宏定义
+        void menu_macroDef_Click(object sender, EventArgs e)
+        {
+            MacroTableDialog dlg = new MacroTableDialog();
+            MainForm.SetControlFont(dlg, this.Font, false);
+            dlg.XmlFileName = Path.Combine(this.MainForm.UserDir, this.DbType + "_macrotable.xml");
+
+            this.MainForm.AppInfo.LinkFormState(dlg, this.DbType + "_MacroTableDialog_state");
+            dlg.ShowDialog(this);
+            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                return;
+
         }
 
         // 获得当前 ListView 中(和外面)已经用过的字段名
@@ -423,7 +447,7 @@ namespace dp2Circulation
             int index = -1;
 
             if (this.listView_actions.SelectedIndices.Count > 0)
-                index = this.listView_actions.SelectedIndices[0];
+                index = this.listView_actions.SelectedIndices[0] + 1;
             else
                 index = this.listView_actions.Items.Count;  // 追加
 
@@ -549,6 +573,35 @@ namespace dp2Circulation
         private void listView_actions_DoubleClick(object sender, EventArgs e)
         {
             menu_modify_Click(sender, e);
+        }
+
+        private void toolStripButton_new_Click(object sender, EventArgs e)
+        {
+            menu_new_Click(sender, e);
+        }
+
+        private void toolStripButton_modify_Click(object sender, EventArgs e)
+        {
+            menu_modify_Click(sender, e);
+        }
+
+        private void toolStripButton_delete_Click(object sender, EventArgs e)
+        {
+            menu_delete_Click(sender, e);
+        }
+
+        private void listView_actions_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (this.listView_actions.SelectedItems.Count > 0)
+            {
+                this.toolStripButton_delete.Enabled = true;
+                this.toolStripButton_modify.Enabled = true;
+            }
+            else
+            {
+                this.toolStripButton_delete.Enabled = false;
+                this.toolStripButton_modify.Enabled = false;
+            }
         }
     }
 
