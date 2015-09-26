@@ -67,13 +67,6 @@ namespace dp2Circulation
                 this.checkedComboBox_stateRemove.Enabled = false;
             }
 
-#if NO
-            if (strText == "<不改变>")
-                this.Changed = false;
-            else
-                this.Changed = true;
-#endif
-
             if (this.ActionChanged != null)
             {
                 this.ActionChanged(this, e);

@@ -2460,7 +2460,7 @@ namespace dp2Circulation
 
         // 2015/7/28 
         // 能处理异常的 Navigate
-        static void Navigate(WebBrowser webBrowser, string urlString)
+        internal static void Navigate(WebBrowser webBrowser, string urlString)
         {
             int nRedoCount = 0;
         REDO:

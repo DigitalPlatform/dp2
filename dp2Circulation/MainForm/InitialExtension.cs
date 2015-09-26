@@ -20,6 +20,8 @@ using DigitalPlatform.Script;
 using DigitalPlatform.Text;
 using DigitalPlatform.Xml;
 using DigitalPlatform.CommonControl;
+using System.ComponentModel;
+using System.Web;
 
 namespace dp2Circulation
 {
@@ -28,6 +30,134 @@ namespace dp2Circulation
     /// </summary>
     public partial class MainForm
     {
+        #region 自动更新
+
+        private void UpdateApplication()
+        {
+            if (ApplicationDeployment.IsNetworkDeployed)
+            {
+                this.DisplayBackgroundText("开始自动更新\r\n");
+                ApplicationDeployment ad = ApplicationDeployment.CurrentDeployment;
+                ad.CheckForUpdateCompleted += new CheckForUpdateCompletedEventHandler(ad_CheckForUpdateCompleted);
+                ad.CheckForUpdateProgressChanged += new DeploymentProgressChangedEventHandler(ad_CheckForUpdateProgressChanged);
+
+                ad.CheckForUpdateAsync();
+            }
+        }
+
+        void ad_CheckForUpdateProgressChanged(object sender, DeploymentProgressChangedEventArgs e)
+        {
+            // downloadStatus.Text = String.Format("Downloading: {0}. {1:D}K of {2:D}K downloaded.", GetProgressString(e.State), e.BytesCompleted / 1024, e.BytesTotal / 1024);
+                this.ShowBackgroundProgress("progress_1",
+                String.Format("Downloading: {0}. {1:D}K of {2:D}K downloaded.", GetProgressString(e.State), e.BytesCompleted / 1024, e.BytesTotal / 1024)
+                );
+        }
+
+        string GetProgressString(DeploymentProgressState state)
+        {
+            if (state == DeploymentProgressState.DownloadingApplicationFiles)
+            {
+                return "application files";
+            }
+            else if (state == DeploymentProgressState.DownloadingApplicationInformation)
+            {
+                return "application manifest";
+            }
+            else
+            {
+                return "deployment manifest";
+            }
+        }
+
+        void ad_CheckForUpdateCompleted(object sender, CheckForUpdateCompletedEventArgs e)
+        {
+            if (e.Error != null)
+            {
+                this.DisplayBackgroundText("ERROR: Could not retrieve new version of the application. Reason: \n" + e.Error.Message + "\nPlease report this error to the system administrator.");
+                return;
+            }
+            else if (e.Cancelled == true)
+            {
+                this.DisplayBackgroundText("The update was cancelled.");
+                return;
+            }
+
+            // Ask the user if they would like to update the application now.
+            if (e.UpdateAvailable)
+            {
+#if NO
+                sizeOfUpdate = e.UpdateSizeBytes;
+
+                if (!e.IsUpdateRequired)
+                {
+                    DialogResult dr = MessageBox.Show("An update is available. Would you like to update the application now?\n\nEstimated Download Time: ", "Update Available", MessageBoxButtons.OKCancel);
+                    if (DialogResult.OK == dr)
+                    {
+                        BeginUpdate();
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("A mandatory update is available for your application. We will install the update now, after which we will save all of your in-progress data and restart your application.");
+                    BeginUpdate();
+                }
+#endif
+                BeginUpdate();
+            }
+            else
+            {
+                this.DisplayBackgroundText("当前没有更新的版本\r\n");
+            }
+        }
+
+        private void BeginUpdate()
+        {
+            ApplicationDeployment ad = ApplicationDeployment.CurrentDeployment;
+            ad.UpdateCompleted += new AsyncCompletedEventHandler(ad_UpdateCompleted);
+
+            // Indicate progress in the application's status bar.
+            ad.UpdateProgressChanged += new DeploymentProgressChangedEventHandler(ad_UpdateProgressChanged);
+
+            ad.UpdateAsync();
+        }
+
+        void ad_UpdateProgressChanged(object sender, DeploymentProgressChangedEventArgs e)
+        {
+            String progressText = String.Format("{0:D}K out of {1:D}K downloaded - {2:D}% complete", e.BytesCompleted / 1024, e.BytesTotal / 1024, e.ProgressPercentage);
+            // downloadStatus.Text = progressText;
+            this.ShowBackgroundProgress("progress",
+                progressText);
+        }
+
+        void ad_UpdateCompleted(object sender, AsyncCompletedEventArgs e)
+        {
+            if (e.Cancelled)
+            {
+                this.DisplayBackgroundText("The update of the application's latest version was cancelled.");
+                return;
+            }
+            else if (e.Error != null)
+            {
+                this.DisplayBackgroundText("ERROR: Could not install the latest version of the application. Reason: \n" + e.Error.Message + "\nPlease report this error to the system administrator.");
+                return;
+            }
+
+#if NO
+            DialogResult dr = MessageBox.Show(this,
+                "dp2Circulation 已经在后台更新。是否重启 dp2Circulation? (If you do not restart now, the new version will not take effect until after you quit and launch the application again.)",
+                "Restart Application", 
+                MessageBoxButtons.OKCancel);
+            if (DialogResult.OK == dr)
+            {
+                Application.Restart();
+            }
+#endif
+            this.DisplayBackgroundText("dp2circulation 已经在后台更新。重启可使用新版本 ...\r\n");
+        }
+
+
+        #endregion
+
         bool DetectIE()
         {
 #if NO
@@ -103,6 +233,7 @@ namespace dp2Circulation
                 // this.MenuItem_inventory.Visible = false;
             }
 
+#if NO
             // 获得MdiClient窗口
             {
                 Type t = typeof(Form);
@@ -114,6 +245,7 @@ namespace dp2Circulation
                 m_backgroundForm.MdiParent = this;
                 m_backgroundForm.Show();
             }
+#endif
 
             if (ApplicationDeployment.IsNetworkDeployed == true)
             {
@@ -128,6 +260,8 @@ namespace dp2Circulation
                 // 2015/8/5
                 this.DataDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             }
+
+            OpenBackgroundForm();
 
             string strError = "";
             int nRet = 0;
@@ -260,6 +394,7 @@ namespace dp2Circulation
                 }
             }
 
+#if NO
             {
                 string strCssUrl = PathUtil.MergePath(this.DataDir, "background.css");
                 string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
@@ -276,6 +411,7 @@ namespace dp2Circulation
                     Program.PromptAndExit(this, "dp2circulation 所需的 IE 浏览器控件出现异常: " + ExceptionUtil.GetDebugText(ex));
                 }
             }
+#endif
 
             // 设置窗口尺寸状态
             if (AppInfo != null)
@@ -301,8 +437,10 @@ namespace dp2Circulation
             stopManager.Initial(this.toolButton_stop,
                 (object)this.toolStripStatusLabel_main,
                 (object)this.toolStripProgressBar_main);
-            stopManager.OnDisplayMessage += new DisplayMessageEventHandler(stopManager_OnDisplayMessage);
+            // stopManager.OnDisplayMessage += new DisplayMessageEventHandler(stopManager_OnDisplayMessage);
             this.SetMenuItemState();
+
+            LinkStopToBackgroundForm(true);
 
             // cfgcache
             nRet = cfgCache.Load(Path.Combine(this.DataDir, "cfgcache.xml"),
@@ -407,6 +545,122 @@ namespace dp2Circulation
 
         }
 
+        #region Background Form
+
+        void OpenBackgroundForm()
+        {
+            if (this.m_backgroundForm != null)
+                return;
+
+            // 获得MdiClient窗口
+            {
+                Type t = typeof(Form);
+                PropertyInfo pi = t.GetProperty("MdiClient", BindingFlags.Instance | BindingFlags.NonPublic);
+                this.MdiClient = (MdiClient)pi.GetValue(this, null);
+                this.MdiClient.SizeChanged += new EventHandler(MdiClient_SizeChanged);
+
+                m_backgroundForm = new BackgroundForm();
+                m_backgroundForm.MdiParent = this;
+                m_backgroundForm.Show();
+            }
+
+            ClearBackground();
+        }
+
+        void ClearBackground()
+        {
+            Debug.Assert(string.IsNullOrEmpty(this.DataDir) == false, "");
+            {
+                string strCssUrl = PathUtil.MergePath(this.DataDir, "background.css");
+                string strLink = "<link href='" + strCssUrl + "' type='text/css' rel='stylesheet' />";
+
+                try
+                {
+
+                    HtmlDocument doc = m_backgroundForm.WebBrowser.Document;
+
+                    if (doc == null)
+                    {
+                        // webBrowser.Navigate("about:blank");
+                        Global.Navigate(m_backgroundForm.WebBrowser, "about:blank");
+                        doc = m_backgroundForm.WebBrowser.Document;
+                    }
+
+                    doc = doc.OpenNew(true);
+
+                    Global.WriteHtml(m_backgroundForm.WebBrowser,
+                        "<html><head>" + strLink + "</head><body>");
+                }
+                catch (Exception ex)
+                {
+                    //MessageBox.Show(this, "dp2circulation 所需的 IE 浏览器控件出现异常: " + ExceptionUtil.GetDebugText(ex));
+                    //Application.Exit();
+                    Program.PromptAndExit(this, "dp2circulation 所需的 IE 浏览器控件出现异常: " + ExceptionUtil.GetDebugText(ex));
+                }
+            }
+        }
+
+        void LinkStopToBackgroundForm(bool bLink)
+        {
+            if (this.stopManager == null)
+                return;
+
+            Debug.Assert(stopManager != null, "");
+
+            if (bLink)
+                this.stopManager.OnDisplayMessage += new DisplayMessageEventHandler(stopManager_OnDisplayMessage);
+            else
+                this.stopManager.OnDisplayMessage -= new DisplayMessageEventHandler(stopManager_OnDisplayMessage);
+        }
+
+        void MdiClient_SizeChanged(object sender, EventArgs e)
+        {
+            m_backgroundForm.Size = new System.Drawing.Size(this.MdiClient.ClientSize.Width, this.MdiClient.ClientSize.Height);
+        }
+
+        void CloseBackgroundForm()
+        {
+            if (this.m_backgroundForm != null)
+            {
+                // TODO: 最好有个淡出的功能
+                this.MdiClient.SizeChanged -= new EventHandler(MdiClient_SizeChanged);
+                this.m_backgroundForm.Close();
+                this.m_backgroundForm = null;
+            }
+        }
+
+        void ShowBackgroundProgress(string strID, string strText)
+        {
+            if (this.m_backgroundForm != null)
+                this.m_backgroundForm.ShowProgressMessage(strID, strText);
+        }
+
+        void DisplayBackgroundText(string strText)
+        {
+            if (m_backgroundForm != null)
+            {
+                if (m_backgroundForm.InvokeRequired)
+                {
+                    m_backgroundForm.Invoke(new Action<string>(DisplayBackgroundText), strText);
+                    return;
+                }
+                m_backgroundForm.AppendHtml(HttpUtility.HtmlEncode(strText) + "<br/>");
+            }
+        }
+
+        void stopManager_OnDisplayMessage(object sender, DisplayMessageEventArgs e)
+        {
+            if (m_backgroundForm != null)
+            {
+                if (e.Message != m_strPrevMessageText)
+                {
+                    m_backgroundForm.AppendHtml(HttpUtility.HtmlEncode(e.Message) + "<br/>");
+                    m_strPrevMessageText = e.Message;
+                }
+            }
+        }
+
+        #endregion
         /*
 信息创建时间:*2015-9-15 15:48:56
 当前操作系统信息:*Microsoft Windows NT 5.1.2600 Service Pack 3
@@ -1129,6 +1383,10 @@ Culture=neutral, PublicKeyToken=null
                         "error");
                 }
 
+                // 启动自动更新。m_backgroundForm 延迟关闭。但取消和 stop 的关联
+
+                ClearBackground();
+                UpdateApplication();    // 自动探测更新 dp2circulation
             }
             finally
             {
@@ -1139,14 +1397,18 @@ Culture=neutral, PublicKeyToken=null
                     EnableControls(true);
                 }
 
+#if NO
                 if (this.m_backgroundForm != null)
                 {
                     // TODO: 最好有个淡出的功能
-                    this.stopManager.OnDisplayMessage += new DisplayMessageEventHandler(stopManager_OnDisplayMessage);
-                    this.MdiClient.SizeChanged -= new EventHandler(MdiClient_SizeChanged);
-                    this.m_backgroundForm.Close();
-                    this.m_backgroundForm = null;
+                    this.stopManager.OnDisplayMessage -= new DisplayMessageEventHandler(stopManager_OnDisplayMessage);
+                    //this.MdiClient.SizeChanged -= new EventHandler(MdiClient_SizeChanged);
+                    //this.m_backgroundForm.Close();
+                    //this.m_backgroundForm = null;
                 }
+#endif
+                // CloseBackgroundForm();
+                LinkStopToBackgroundForm(false);
             }
 
             if (bRestoreLastOpenedWindow == true)

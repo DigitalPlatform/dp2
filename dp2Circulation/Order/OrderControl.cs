@@ -963,6 +963,7 @@ namespace dp2Circulation
         }
 
         // 进行验收
+        // TODO: 中途不让关闭 EntityForm
         void DoAccept()
         {
             string strError = "";
@@ -1070,10 +1071,8 @@ namespace dp2Circulation
 
             MainForm.AppInfo.UnlinkFormState(dlg);
 
-
             if (dlg.DialogResult != DialogResult.OK)
                 return;
-
 
             bool bOldChanged = this.Items.Changed;
 
@@ -1211,7 +1210,6 @@ namespace dp2Circulation
 
             // TODO: 还要注意删除listview中某些元素，学DoDesignOrder
 
-
             if (this.GenerateEntity != null)
             {
                 string strTargetRecPath = "";
@@ -1250,8 +1248,6 @@ namespace dp2Circulation
                                 goto ERROR1;
                         }
                     }
-
-
                 }
 
                 if (nRet == 0)
@@ -1269,7 +1265,6 @@ namespace dp2Circulation
             }
 #endif
             TriggerContentChanged(bOldChanged, true);
-
             return;
 
         ERROR1:

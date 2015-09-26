@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <root>
-  <action element="state" type="" list="readerState">
+  <action element="state" type="" list="readerState" additional="combine">
     <caption lang="zh">状态</caption>
   </action>
   <action element="readerType" type="" list="readerType">
@@ -9,7 +9,7 @@
   <action element="barcode" type="">
     <caption lang="zh">证条码号</caption>
   </action>
-  <action element="cardNumber" type="">
+  <action element="cardNumber" type="" additional="combine">
     <caption lang="zh">证号</caption>
   </action>
   <action element="createDate" type="rfc1123">
@@ -56,5 +56,8 @@
   </action>
   <action element="email" type="">
     <caption lang="zh">Email地址</caption>
+  </action>
+  <action element="rights" type="" list="readerRights" additional="combine">
+    <caption lang="zh">权限</caption>
   </action>
 </root>

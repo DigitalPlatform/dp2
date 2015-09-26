@@ -658,6 +658,7 @@ namespace DigitalPlatform.LibraryServer
             strOutputReaderBarcodeParam = "";
             borrow_info = new BorrowInfo();
 
+            List<string> time_lines = new List<string>();
             DateTime start_time = DateTime.Now;
             string strOperLogUID = "";
 
@@ -821,6 +822,7 @@ namespace DigitalPlatform.LibraryServer
                     LibraryServerResult result1 = GetReaderRecord(
                 sessioninfo,
                 strActionName,
+                time_lines,
                 ref strReaderBarcode,
                 ref strIdcardNumber,
                 ref strLibraryCode,
@@ -1095,7 +1097,10 @@ namespace DigitalPlatform.LibraryServer
                         goto ERROR1;
                     }
 
-                    WriteTimeUsed(start_time_read_item, "Borrow()中读取册记录 耗时 ");
+                    WriteTimeUsed(
+                        time_lines,
+                        start_time_read_item, 
+                        "Borrow() 中读取册记录 耗时 ");
 
                     DateTime start_time_process = DateTime.Now;
 
@@ -1447,16 +1452,15 @@ namespace DigitalPlatform.LibraryServer
                         goto ERROR1;
 
 
-                    WriteTimeUsed(start_time_process, "Borrow()中进行各种数据处理 耗时 ");
-
+                    WriteTimeUsed(
+                        time_lines,
+                        start_time_process,
+                        "Borrow() 中进行各种数据处理 耗时 ");
 
                     DateTime start_time_write_reader = DateTime.Now;
                     // 原来输出xml或xml的语句在此
 
-
                     // 写回读者、册记录
-                    // byte[] timestamp = null;
-
 
                     // 写回读者记录
                     lRet = channel.DoSaveTextRes(strOutputReaderRecPath,
@@ -1487,7 +1491,10 @@ namespace DigitalPlatform.LibraryServer
                         goto ERROR1;
                     }
 
-                    WriteTimeUsed(start_time_write_reader, "Borrow()中写回读者记录 耗时 ");
+                    WriteTimeUsed(
+                        time_lines,
+                        start_time_write_reader,
+                        "Borrow() 中写回读者记录 耗时 ");
 
                     DateTime start_time_write_item = DateTime.Now;
 
@@ -1575,7 +1582,10 @@ namespace DigitalPlatform.LibraryServer
 
                     } // end of 写回册记录失败
 
-                    WriteTimeUsed(start_time_write_item, "Borrow()中写回册记录 耗时 ");
+                    WriteTimeUsed(
+                        time_lines,
+                        start_time_write_item,
+                        "Borrow() 中写回册记录 耗时 ");
 
                     DateTime start_time_write_operlog = DateTime.Now;
 
@@ -1611,7 +1621,10 @@ namespace DigitalPlatform.LibraryServer
                         goto ERROR1;
                     }
 
-                    WriteTimeUsed(start_time_write_operlog, "Borrow()中写操作日志 耗时 ");
+                    WriteTimeUsed(
+                        time_lines,
+                        start_time_write_operlog, 
+                        "Borrow() 中写操作日志 耗时 ");
 
                     DateTime start_time_write_statis = DateTime.Now;
 
@@ -1640,7 +1653,10 @@ namespace DigitalPlatform.LibraryServer
                         "借册",
                         1);
 
-                    WriteTimeUsed(start_time_write_statis, "Borrow()中写统计指标 耗时 ");
+                    WriteTimeUsed(
+                        time_lines,
+                        start_time_write_statis,
+                        "Borrow() 中写统计指标 耗时 ");
 
                     strOutputItemXml = itemdom.OuterXml;
                     strOutputReaderXml = readerdom.OuterXml;
@@ -1785,12 +1801,17 @@ namespace DigitalPlatform.LibraryServer
                     }
                 } // end of for
 
-                WriteTimeUsed(start_time_1, "Borrow()中转换xml记录 耗时 ");
+                WriteTimeUsed(
+                    time_lines,
+                    start_time_1,
+                    "Borrow() 中返回读者记录(" + strReaderFormatList + ") 耗时 ");
             }
 
             if (String.IsNullOrEmpty(strOutputItemXml) == false
                 && StringUtil.IsInList("item", strStyle) == true)
             {
+                DateTime start_time_1 = DateTime.Now;
+
                 string[] item_formats = strItemFormatList.Split(new char[] { ',' });
                 item_records = new string[item_formats.Length];
 
@@ -1866,11 +1887,18 @@ namespace DigitalPlatform.LibraryServer
                         goto ERROR1;
                     }
                 } // end of for
+                
+                WriteTimeUsed(
+    time_lines,
+    start_time_1,
+    "Borrow() 中返回册记录(" + strItemFormatList + ") 耗时 ");
             }
 
             // 2008/5/9
             if (StringUtil.IsInList("biblio", strStyle) == true)
             {
+                DateTime start_time_1 = DateTime.Now;
+
                 if (String.IsNullOrEmpty(strBiblioRecID) == true)
                 {
                     strError = "册记录XML中<parent>元素缺乏或者值为空, 因此无法定位种记录ID";
@@ -2055,6 +2083,28 @@ namespace DigitalPlatform.LibraryServer
                         goto ERROR1;
                     }
                 } // end of for
+
+                WriteTimeUsed(
+time_lines,
+start_time_1,
+"Borrow() 中返回书目记录(" + strBiblioFormatList + ") 耗时 ");
+
+            }
+
+            WriteTimeUsed(
+    time_lines,
+    start_time,
+    "Borrow() 耗时 ");
+            // 如果整个时间超过一秒，则需要计入操作日志
+            if (DateTime.Now - start_time > new TimeSpan(0, 0, 1))
+            {
+                WriteLongTimeOperLog(
+                    sessioninfo,
+                    strAction,
+                    start_time,
+                    "整个操作耗时超过 1 秒。详情:" + StringUtil.MakePathList(time_lines, ";"),
+                    strOperLogUID,
+                    out strError);
             }
 
             // 如果创建输出数据的时间超过一秒，则需要计入操作日志
@@ -2069,7 +2119,6 @@ namespace DigitalPlatform.LibraryServer
                     out strError);
             }
 
-            WriteTimeUsed(start_time, "Borrow() 耗时 ");
             return result;
         ERROR1:
             result.Value = -1;
@@ -2115,6 +2164,7 @@ namespace DigitalPlatform.LibraryServer
         LibraryServerResult GetReaderRecord(
             SessionInfo sessioninfo,
             string strActionName,
+            List<string> time_lines,
             ref string strReaderBarcode,    // 2015/1/4 加上 ref
             ref string strIdcardNumber,
             ref string strLibraryCode,
@@ -2131,51 +2181,93 @@ namespace DigitalPlatform.LibraryServer
             readerdom = null;
             reader_timestamp = null;
 
-                DateTime start_time_read_reader = DateTime.Now;
+            DateTime start_time_read_reader = DateTime.Now;
 
-                RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
-                if (channel == null)
-                {
-                    strError = "get channel error";
-                    goto ERROR1;
-                }
+            RmsChannel channel = sessioninfo.Channels.GetChannel(this.WsUrl);
+            if (channel == null)
+            {
+                strError = "get channel error";
+                goto ERROR1;
+            }
 
-                // 读入读者记录
-                string strReaderXml = "";
-                nRet = this.GetReaderRecXml(
-                    // sessioninfo.Channels,
-                    channel,
-                    strReaderBarcode,
-                    out strReaderXml,
-                    out strOutputReaderRecPath,
-                    out reader_timestamp,
-                    out strError);
-                if (nRet == -1)
-                {
-                    // text-level: 内部错误
-                    strError = "读入读者记录时发生错误: " + strError;
-                    goto ERROR1;
-                }
+            // 读入读者记录
+            string strReaderXml = "";
+            nRet = this.GetReaderRecXml(
+                // sessioninfo.Channels,
+                channel,
+                strReaderBarcode,
+                out strReaderXml,
+                out strOutputReaderRecPath,
+                out reader_timestamp,
+                out strError);
+            if (nRet == -1)
+            {
+                // text-level: 内部错误
+                strError = "读入读者记录时发生错误: " + strError;
+                goto ERROR1;
+            }
 
-                if (nRet == 0)
+            if (nRet == 0)
+            {
+                // 如果是身份证号，则试探检索“身份证号”途径
+                if (StringUtil.IsIdcardNumber(strReaderBarcode) == true)
                 {
-                    // 如果是身份证号，则试探检索“身份证号”途径
-                    if (StringUtil.IsIdcardNumber(strReaderBarcode) == true)
+                    strIdcardNumber = strReaderBarcode;
+                    strReaderBarcode = ""; // 迫使函数返回后，重新获得 reader barcode
+
+                    // 通过特定检索途径获得读者记录
+                    // return:
+                    //      -1  error
+                    //      0   not found
+                    //      1   命中1条
+                    //      >1  命中多于1条
+                    nRet = this.GetReaderRecXmlByFrom(
+                        // sessioninfo.Channels,
+                        channel,
+                        strIdcardNumber,
+                        "身份证号",
+                        out strReaderXml,
+                        out strOutputReaderRecPath,
+                        out reader_timestamp,
+                        out strError);
+                    if (nRet == -1)
                     {
-                        strIdcardNumber = strReaderBarcode;
-                        strReaderBarcode = ""; // 迫使函数返回后，重新获得 reader barcode
-
-                        // 通过特定检索途径获得读者记录
-                        // return:
-                        //      -1  error
-                        //      0   not found
-                        //      1   命中1条
-                        //      >1  命中多于1条
+                        // text-level: 内部错误
+                        strError = "用身份证号 '" + strIdcardNumber + "' 读入读者记录时发生错误: " + strError;
+                        goto ERROR1;
+                    }
+                    if (nRet == 0)
+                    {
+                        result.Value = -1;
+                        // text-level: 用户提示
+                        result.ErrorInfo = string.Format(this.GetString("身份证号s不存在"),   // "身份证号 '{0}' 不存在"
+                            strIdcardNumber);
+                        result.ErrorCode = ErrorCode.IdcardNumberNotFound;
+                        return result;
+                    }
+                    if (nRet > 1)
+                    {
+                        // text-level: 用户提示
+                        result.Value = -1;
+                        result.ErrorInfo = "用身份证号 '" + strIdcardNumber + "' 检索读者记录命中 " + nRet.ToString() + " 条，因此无法用身份证号来进行借还操作。请改用证条码号来进行借还操作。";
+                        result.ErrorCode = ErrorCode.IdcardNumberDup;
+                        return result;
+                    }
+                    Debug.Assert(nRet == 1, "");
+                    goto SKIP0;
+                }
+                else
+                {
+                    // 2013/5/24
+                    // 如果需要，从读者证号等辅助途径进行检索
+                    foreach (string strFrom in this.PatronAdditionalFroms)
+                    {
                         nRet = this.GetReaderRecXmlByFrom(
                             // sessioninfo.Channels,
                             channel,
-                            strIdcardNumber,
-                            "身份证号",
+                            null,
+                            strReaderBarcode,
+                            strFrom,
                             out strReaderXml,
                             out strOutputReaderRecPath,
                             out reader_timestamp,
@@ -2183,162 +2275,122 @@ namespace DigitalPlatform.LibraryServer
                         if (nRet == -1)
                         {
                             // text-level: 内部错误
-                            strError = "用身份证号 '" + strIdcardNumber + "' 读入读者记录时发生错误: " + strError;
+                            strError = "用" + strFrom + " '" + strReaderBarcode + "' 读入读者记录时发生错误: " + strError;
                             goto ERROR1;
                         }
                         if (nRet == 0)
-                        {
-                            result.Value = -1;
-                            // text-level: 用户提示
-                            result.ErrorInfo = string.Format(this.GetString("身份证号s不存在"),   // "身份证号 '{0}' 不存在"
-                                strIdcardNumber);
-                            result.ErrorCode = ErrorCode.IdcardNumberNotFound;
-                            return result;
-                        }
+                            continue;
                         if (nRet > 1)
                         {
                             // text-level: 用户提示
                             result.Value = -1;
-                            result.ErrorInfo = "用身份证号 '" + strIdcardNumber + "' 检索读者记录命中 " + nRet.ToString() + " 条，因此无法用身份证号来进行借还操作。请改用证条码号来进行借还操作。";
+                            result.ErrorInfo = "用" + strFrom + " '" + strReaderBarcode + "' 检索读者记录命中 " + nRet.ToString() + " 条，因此无法用" + strFrom + "来进行借还操作。请改用证条码号来进行借还操作。";
                             result.ErrorCode = ErrorCode.IdcardNumberDup;
                             return result;
                         }
-                        Debug.Assert(nRet == 1, "");
-                        goto SKIP0;
-                    }
-                    else
-                    {
-                        // 2013/5/24
-                        // 如果需要，从读者证号等辅助途径进行检索
-                        foreach (string strFrom in this.PatronAdditionalFroms)
-                        {
-                            nRet = this.GetReaderRecXmlByFrom(
-                                // sessioninfo.Channels,
-                                channel,
-                                null,
-                                strReaderBarcode,
-                                strFrom,
-                                out strReaderXml,
-                                out strOutputReaderRecPath,
-                                out reader_timestamp,
-                                out strError);
-                            if (nRet == -1)
-                            {
-                                // text-level: 内部错误
-                                strError = "用" + strFrom + " '" + strReaderBarcode + "' 读入读者记录时发生错误: " + strError;
-                                goto ERROR1;
-                            }
-                            if (nRet == 0)
-                                continue;
-                            if (nRet > 1)
-                            {
-                                // text-level: 用户提示
-                                result.Value = -1;
-                                result.ErrorInfo = "用" + strFrom + " '" + strReaderBarcode + "' 检索读者记录命中 " + nRet.ToString() + " 条，因此无法用"+strFrom+"来进行借还操作。请改用证条码号来进行借还操作。";
-                                result.ErrorCode = ErrorCode.IdcardNumberDup;
-                                return result;
-                            }
 
-                            strReaderBarcode = "";
+                        strReaderBarcode = "";
 
 #if NO
                             result.ErrorInfo = strError;
                             result.Value = nRet;
 #endif
-                            goto SKIP0;
-                        }
-                    }
-
-                    result.Value = -1;
-                    // text-level: 用户提示
-                    result.ErrorInfo = string.Format(this.GetString("读者证条码号s不存在"),   // "读者证条码号 '{0}' 不存在"
-                        strReaderBarcode);
-                    // "读者证条码号 '" + strReaderBarcode + "' 不存在";
-                    result.ErrorCode = ErrorCode.ReaderBarcodeNotFound;
-                    return result;
-                }
-
-                // 2008/6/17
-                if (nRet > 1)
-                {
-                    // text-level: 内部错误
-                    strError = "读入读者记录时，发现读者证条码号 '" + strReaderBarcode + "' 命中 " + nRet.ToString() + " 条，这是一个严重错误，请系统管理员尽快处理。";
-                    goto ERROR1;
-                }
-
-            SKIP0:
-
-                // 看看读者记录所从属的数据库，是否在参与流通的读者库之列
-                // 2008/6/4
-                if (String.IsNullOrEmpty(strOutputReaderRecPath) == false)
-                {
-                    if (this.TestMode == true || sessioninfo.TestMode == true)
-                    {
-                        // 检查评估模式
-                        // return:
-                        //      -1  检查过程出错
-                        //      0   可以通过
-                        //      1   不允许通过
-                        nRet = CheckTestModePath(strOutputReaderRecPath,
-                            out strError);
-                        if (nRet != 0)
-                        {
-                            strError = strActionName + "操作被拒绝: " + strError;
-                            goto ERROR1;
-                        }
-                    }
-
-                    string strReaderDbName = ResPath.GetDbName(strOutputReaderRecPath);
-                    bool bReaderDbInCirculation = true;
-                    if (this.IsReaderDbName(strReaderDbName,
-                        out bReaderDbInCirculation,
-                        out strLibraryCode) == false)
-                    {
-                        // text-level: 内部错误
-                        strError = "读者记录路径 '" + strOutputReaderRecPath + "' 中的数据库名 '" + strReaderDbName + "' 居然不在定义的读者库之列。";
-                        goto ERROR1;
-                    }
-
-                    if (bReaderDbInCirculation == false)
-                    {
-                        // text-level: 用户提示
-                        strError = string.Format(this.GetString("借书操作被拒绝。读者证条码号s所在的读者记录s因其数据库s属于未参与流通的读者库"),  // "借书操作被拒绝。读者证条码号 '{0}' 所在的读者记录 '{1}' 因其数据库 '{2}' 属于未参与流通的读者库"
-                            strReaderBarcode,
-                            strOutputReaderRecPath,
-                            strReaderDbName);
-
-                        // "借书操作被拒绝。读者证条码号 '" + strReaderBarcode + "' 所在的读者记录 '" +strOutputReaderRecPath + "' 因其数据库 '" +strReaderDbName+ "' 属于未参与流通的读者库";
-                        goto ERROR1;
-                    }
-                    // 检查当前操作者是否管辖这个读者库
-                    // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内?
-                    if (this.IsCurrentChangeableReaderPath(strOutputReaderRecPath,
-            sessioninfo.LibraryCodeList) == false)
-                    {
-                        strError = "读者记录路径 '" + strOutputReaderRecPath + "' 的读者库不在当前用户管辖范围内";
-                        goto ERROR1;
+                        goto SKIP0;
                     }
                 }
 
-
-                nRet = LibraryApplication.LoadToDom(strReaderXml,
-                    out readerdom,
-                    out strError);
-                if (nRet == -1)
-                {
-                    // text-level: 内部错误
-                    strError = "装载读者记录进入XML DOM时发生错误: " + strError;
-                    goto ERROR1;
-                }
-
-                WriteTimeUsed(start_time_read_reader, "Borrow()中读取读者记录 耗时 ");
-
-                return result;
-            ERROR1:
                 result.Value = -1;
-                result.ErrorInfo = strError;
-                result.ErrorCode = ErrorCode.SystemError;
+                // text-level: 用户提示
+                result.ErrorInfo = string.Format(this.GetString("读者证条码号s不存在"),   // "读者证条码号 '{0}' 不存在"
+                    strReaderBarcode);
+                // "读者证条码号 '" + strReaderBarcode + "' 不存在";
+                result.ErrorCode = ErrorCode.ReaderBarcodeNotFound;
                 return result;
+            }
+
+            // 2008/6/17
+            if (nRet > 1)
+            {
+                // text-level: 内部错误
+                strError = "读入读者记录时，发现读者证条码号 '" + strReaderBarcode + "' 命中 " + nRet.ToString() + " 条，这是一个严重错误，请系统管理员尽快处理。";
+                goto ERROR1;
+            }
+
+        SKIP0:
+
+            // 看看读者记录所从属的数据库，是否在参与流通的读者库之列
+            // 2008/6/4
+            if (String.IsNullOrEmpty(strOutputReaderRecPath) == false)
+            {
+                if (this.TestMode == true || sessioninfo.TestMode == true)
+                {
+                    // 检查评估模式
+                    // return:
+                    //      -1  检查过程出错
+                    //      0   可以通过
+                    //      1   不允许通过
+                    nRet = CheckTestModePath(strOutputReaderRecPath,
+                        out strError);
+                    if (nRet != 0)
+                    {
+                        strError = strActionName + "操作被拒绝: " + strError;
+                        goto ERROR1;
+                    }
+                }
+
+                string strReaderDbName = ResPath.GetDbName(strOutputReaderRecPath);
+                bool bReaderDbInCirculation = true;
+                if (this.IsReaderDbName(strReaderDbName,
+                    out bReaderDbInCirculation,
+                    out strLibraryCode) == false)
+                {
+                    // text-level: 内部错误
+                    strError = "读者记录路径 '" + strOutputReaderRecPath + "' 中的数据库名 '" + strReaderDbName + "' 居然不在定义的读者库之列。";
+                    goto ERROR1;
+                }
+
+                if (bReaderDbInCirculation == false)
+                {
+                    // text-level: 用户提示
+                    strError = string.Format(this.GetString("借书操作被拒绝。读者证条码号s所在的读者记录s因其数据库s属于未参与流通的读者库"),  // "借书操作被拒绝。读者证条码号 '{0}' 所在的读者记录 '{1}' 因其数据库 '{2}' 属于未参与流通的读者库"
+                        strReaderBarcode,
+                        strOutputReaderRecPath,
+                        strReaderDbName);
+
+                    // "借书操作被拒绝。读者证条码号 '" + strReaderBarcode + "' 所在的读者记录 '" +strOutputReaderRecPath + "' 因其数据库 '" +strReaderDbName+ "' 属于未参与流通的读者库";
+                    goto ERROR1;
+                }
+                // 检查当前操作者是否管辖这个读者库
+                // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内?
+                if (this.IsCurrentChangeableReaderPath(strOutputReaderRecPath,
+        sessioninfo.LibraryCodeList) == false)
+                {
+                    strError = "读者记录路径 '" + strOutputReaderRecPath + "' 的读者库不在当前用户管辖范围内";
+                    goto ERROR1;
+                }
+            }
+
+
+            nRet = LibraryApplication.LoadToDom(strReaderXml,
+                out readerdom,
+                out strError);
+            if (nRet == -1)
+            {
+                // text-level: 内部错误
+                strError = "装载读者记录进入XML DOM时发生错误: " + strError;
+                goto ERROR1;
+            }
+
+            WriteTimeUsed(
+                time_lines,
+                start_time_read_reader,
+                "Borrow() 中读取读者记录 耗时 ");
+            return result;
+        ERROR1:
+            result.Value = -1;
+            result.ErrorInfo = strError;
+            result.ErrorCode = ErrorCode.SystemError;
+            return result;
         }
 
         // 读者记录中 允许用于读者范围过滤的元素名列表
@@ -2598,14 +2650,20 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 在调试文件中写入耗费时间信息
-        void WriteTimeUsed(DateTime start_time,
+        void WriteTimeUsed(
+            List<string> lines,
+            DateTime start_time,
             string strPrefix)
         {
+#if NO
             if (this.DebugMode == false)
                 return;
             TimeSpan delta = DateTime.Now - start_time;
             string strTiming = strPrefix + " " + delta.ToString();
             this.WriteDebugInfo(strTiming);
+#endif
+            TimeSpan delta = DateTime.Now - start_time;
+            lines.Add(strPrefix + " " + delta.TotalSeconds.ToString("F3"));
         }
 
         #region Borrow()下级函数
@@ -3517,6 +3575,7 @@ namespace DigitalPlatform.LibraryServer
 
             string strError = "";
 
+            List<string> time_lines = new List<string>();
             DateTime start_time = DateTime.Now;
             string strOperLogUID = "";
 
@@ -3702,7 +3761,10 @@ namespace DigitalPlatform.LibraryServer
 
                 try // 册记录锁定范围开始
                 {
-                    WriteTimeUsed(start_time, "Return()中前期检查和锁定 耗时 ");
+                    WriteTimeUsed(
+                        time_lines,
+                        start_time, 
+                        "Return() 中前期检查和锁定 耗时 ");
 
                     DateTime start_time_read_item = DateTime.Now;
 
@@ -3980,7 +4042,10 @@ namespace DigitalPlatform.LibraryServer
                         goto ERROR1;
                     }
 
-                    WriteTimeUsed(start_time_read_item, "Return()中读取册记录 耗时 ");
+                    WriteTimeUsed(
+                        time_lines,
+                        start_time_read_item, 
+                        "Return() 中读取册记录 耗时 ");
 
                     DateTime start_time_lock = DateTime.Now;
 
@@ -4162,7 +4227,10 @@ namespace DigitalPlatform.LibraryServer
                         // 如果时间戳没有发生过改变，则不必刷新任何参数
                     }
 
-                    WriteTimeUsed(start_time_lock, "Return()中补充锁定 耗时 ");
+                    WriteTimeUsed(
+                        time_lines,
+                        start_time_lock, 
+                        "Return() 中补充锁定 耗时 ");
 
                     // 读入读者记录
                     DateTime start_time_read_reader = DateTime.Now;
@@ -4368,7 +4436,10 @@ namespace DigitalPlatform.LibraryServer
                         strError = "装载读者记录进入XML DOM时发生错误: " + strError;
                         goto ERROR1;
                     }
-                    WriteTimeUsed(start_time_read_reader, "Return()中读取读者记录 耗时 ");
+                    WriteTimeUsed(
+                        time_lines,
+                        start_time_read_reader, 
+                        "Return() 中读取读者记录 耗时 ");
 
                     // string strReaderDbName = ResPath.GetDbName(strOutputReaderRecPath);
 
@@ -4538,8 +4609,10 @@ namespace DigitalPlatform.LibraryServer
                     DomUtil.SetElementText(domOperLog.DocumentElement, "operTime",
                         strOperTime);
 
-                    WriteTimeUsed(start_time_process, "Return()中进行各种数据处理 耗时 ");
-
+                    WriteTimeUsed(
+                        time_lines,
+                        start_time_process, 
+                        "Return() 中进行各种数据处理 耗时 ");
 
                     // 原来创建输出xml或html格式的代码在此
 
@@ -4566,16 +4639,10 @@ namespace DigitalPlatform.LibraryServer
                             "location");
                     }
 
-
-                    WriteTimeUsed(start_time_reservation_check, "Return()中进行预约检查 耗时 ");
-
-                    /*
-                    bool bFoundReservation = false; // 是否本次还书的为已预约之册
-
-                    if (nRet == 1)
-                        bFoundReservation = true;
-                     * */
-
+                    WriteTimeUsed(
+                        time_lines,
+                        start_time_reservation_check, 
+                        "Return() 中进行预约检查 耗时 ");
 
                     // 写回读者、册记录
                     // byte[] timestamp = null;
@@ -4625,7 +4692,10 @@ namespace DigitalPlatform.LibraryServer
 
                     reader_timestamp = output_timestamp;
 
-                    WriteTimeUsed(start_time_write_reader, "Return()中写回读者记录 耗时 ");
+                    WriteTimeUsed(
+                        time_lines,
+                        start_time_write_reader, 
+                        "Return() 中写回读者记录 耗时 ");
 
                     DateTime start_time_write_item = DateTime.Now;
 
@@ -4718,7 +4788,10 @@ namespace DigitalPlatform.LibraryServer
                         goto REDO_RETURN;
                     }
 
-                    WriteTimeUsed(start_time_write_item, "Return()中写回册记录 耗时 ");
+                    WriteTimeUsed(
+                        time_lines,
+                        start_time_write_item, 
+                        "Return() 中写回册记录 耗时 ");
 
                     DateTime start_time_write_operlog = DateTime.Now;
 
@@ -4770,10 +4843,12 @@ namespace DigitalPlatform.LibraryServer
                         goto ERROR1;
                     }
 
-                    WriteTimeUsed(start_time_write_operlog, "Return()中写操作日志 耗时 ");
+                    WriteTimeUsed(
+                        time_lines,
+                        start_time_write_operlog,
+                        "Return() 中写操作日志 耗时 ");
 
                     DateTime start_time_write_statis = DateTime.Now;
-
 
                     // 写入统计指标
 #if NO
@@ -4805,7 +4880,10 @@ namespace DigitalPlatform.LibraryServer
                             "声明丢失",
                             1);
                     }
-                    WriteTimeUsed(start_time_write_statis, "Return()中写统计指标 耗时 ");
+                    WriteTimeUsed(
+                        time_lines,
+                        start_time_write_statis, 
+                        "Return() 中写统计指标 耗时 ");
 
                     result.ErrorInfo = strActionName + "操作成功。" + result.ErrorInfo;  // 2013/11/13
 
@@ -4872,7 +4950,10 @@ namespace DigitalPlatform.LibraryServer
                                 out strReservationReaderName,
                                 out strError);
 
-                            WriteTimeUsed(start_time_getname, "Return()中获得预约者的姓名 耗时 ");
+                            WriteTimeUsed(
+                                time_lines,
+                                start_time_getname,
+                                "Return() 中获得预约者的姓名 耗时 ");
                         }
 
                         if (String.IsNullOrEmpty(result.ErrorInfo) == false)
@@ -4920,6 +5001,8 @@ namespace DigitalPlatform.LibraryServer
             if (String.IsNullOrEmpty(strReservationReaderBarcode) == false
                 && strAction != "lost")
             {
+                DateTime start_time_1 = DateTime.Now;
+
                 List<string> DeletedNotifyRecPaths = null;  // 被删除的通知记录。不用。
                 // 通知预约到书的操作
                 // 出于对读者库加锁方面的便利考虑, 单独做了此函数
@@ -4941,14 +5024,11 @@ namespace DigitalPlatform.LibraryServer
                     strError = "还书操作已经成功, 但是预约到书通知功能失败, 原因: " + strError;
                     goto ERROR1;
                 }
-                /*
-                            if (this.Statis != null)
-                this.Statis.IncreaseEntryValue(strLibraryCode,
-                    "出纳",
-                    "预约到书册",
-                    1);
-                 * */
 
+                WriteTimeUsed(
+time_lines,
+start_time_1,
+"Return() 中预约到书通知 耗时 ");
 
                 /* 前面已经通知过了
                 result.Value = 1;
@@ -4972,109 +5052,118 @@ namespace DigitalPlatform.LibraryServer
             if (String.IsNullOrEmpty(strOutputReaderXml) == false
                 && StringUtil.IsInList("reader", strStyle) == true)
             {
-                    string[] reader_formats = strReaderFormatList.Split(new char[] {','});
-                    reader_records = new string[reader_formats.Length];
+                DateTime start_time_1 = DateTime.Now;
 
-                    for (int i = 0; i < reader_formats.Length; i++)
+                string[] reader_formats = strReaderFormatList.Split(new char[] { ',' });
+                reader_records = new string[reader_formats.Length];
+
+                for (int i = 0; i < reader_formats.Length; i++)
+                {
+                    string strReaderFormat = reader_formats[i];
+
+                    // 将读者记录数据从XML格式转换为HTML格式
+                    // if (String.Compare(strReaderFormat, "html", true) == 0)
+                    if (IsResultType(strReaderFormat, "html") == true)
                     {
-                        string strReaderFormat = reader_formats[i];
-
-                        // 将读者记录数据从XML格式转换为HTML格式
-                        // if (String.Compare(strReaderFormat, "html", true) == 0)
-                        if (IsResultType(strReaderFormat, "html") == true)
+                        string strReaderRecord = "";
+                        nRet = this.ConvertReaderXmlToHtml(
+                            sessioninfo,
+                            this.CfgDir + "\\readerxml2html.cs",
+                            this.CfgDir + "\\readerxml2html.cs.ref",
+                            strLibraryCode,
+                            strOutputReaderXml,
+                            strOutputReaderRecPath, // 2009/10/18
+                            OperType.Return,
+                            null,
+                            strItemBarcodeParam,
+                            strReaderFormat,
+                            out strReaderRecord,
+                            out strError);
+                        if (nRet == -1)
                         {
-                            string strReaderRecord = "";
-                            nRet = this.ConvertReaderXmlToHtml(
-                                sessioninfo,
-                                this.CfgDir + "\\readerxml2html.cs",
-                                this.CfgDir + "\\readerxml2html.cs.ref",
-                                strLibraryCode,
-                                strOutputReaderXml,
-                                strOutputReaderRecPath, // 2009/10/18
-                                OperType.Return,
-                                null,
-                                strItemBarcodeParam,
-                                strReaderFormat,
-                                out strReaderRecord,
-                                out strError);
-                            if (nRet == -1)
-                            {
-                                strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
-                                goto ERROR1;
-                            }
-                            reader_records[i] = strReaderRecord;
-                        }
-                        // 将读者记录数据从XML格式转换为text格式
-                        // else if (String.Compare(strReaderFormat, "text", true) == 0)
-                        else if (IsResultType(strReaderFormat, "text") == true)
-                        {
-                            string strReaderRecord = "";
-                            nRet = this.ConvertReaderXmlToHtml(
-                                sessioninfo,
-                                this.CfgDir + "\\readerxml2text.cs",
-                                this.CfgDir + "\\readerxml2text.cs.ref",
-                                strLibraryCode,
-                                strOutputReaderXml,
-                                strOutputReaderRecPath, // 2009/10/18
-                                OperType.Return,
-                                null,
-                                strItemBarcodeParam,
-                                strReaderFormat,
-                                out strReaderRecord,
-                                out strError);
-                            if (nRet == -1)
-                            {
-                                strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
-                                goto ERROR1;
-                            }
-                            reader_records[i] = strReaderRecord;
-                        }
-                        // else if (String.Compare(strReaderFormat, "xml", true) == 0)
-                        else if (IsResultType(strReaderFormat, "xml") == true)
-                        {
-                            // reader_records[i] = strOutputReaderXml;
-                            string strResultXml = "";
-                            nRet = GetItemXml(strOutputReaderXml,
-                strReaderFormat,
-                out strResultXml,
-                out strError);
-                            if (nRet == -1)
-                            {
-                                strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
-                                goto ERROR1;
-                            }
-                            reader_records[i] = strResultXml;
-                        }
-                        else if (IsResultType(strReaderFormat, "summary") == true)
-                        {
-                            // 2013/12/15
-                            XmlDocument dom = new XmlDocument();
-                            try
-                            {
-                                dom.LoadXml(strOutputReaderXml);
-                            }
-                            catch (Exception ex)
-                            {
-                                strError = "读者 XML 装入 DOM 出错: " + ex.Message;
-                                strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
-                                goto ERROR1;
-                            }
-                            reader_records[i] = DomUtil.GetElementText(dom.DocumentElement, "name");
-                        }
-                        else
-                        {
-                            strError = "strReaderFormatList参数出现了不支持的数据格式类型 '" + strReaderFormat + "'";
                             strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
                             goto ERROR1;
                         }
-                    } // end of for
-                
+                        reader_records[i] = strReaderRecord;
+                    }
+                    // 将读者记录数据从XML格式转换为text格式
+                    // else if (String.Compare(strReaderFormat, "text", true) == 0)
+                    else if (IsResultType(strReaderFormat, "text") == true)
+                    {
+                        string strReaderRecord = "";
+                        nRet = this.ConvertReaderXmlToHtml(
+                            sessioninfo,
+                            this.CfgDir + "\\readerxml2text.cs",
+                            this.CfgDir + "\\readerxml2text.cs.ref",
+                            strLibraryCode,
+                            strOutputReaderXml,
+                            strOutputReaderRecPath, // 2009/10/18
+                            OperType.Return,
+                            null,
+                            strItemBarcodeParam,
+                            strReaderFormat,
+                            out strReaderRecord,
+                            out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
+                            goto ERROR1;
+                        }
+                        reader_records[i] = strReaderRecord;
+                    }
+                    // else if (String.Compare(strReaderFormat, "xml", true) == 0)
+                    else if (IsResultType(strReaderFormat, "xml") == true)
+                    {
+                        // reader_records[i] = strOutputReaderXml;
+                        string strResultXml = "";
+                        nRet = GetItemXml(strOutputReaderXml,
+            strReaderFormat,
+            out strResultXml,
+            out strError);
+                        if (nRet == -1)
+                        {
+                            strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
+                            goto ERROR1;
+                        }
+                        reader_records[i] = strResultXml;
+                    }
+                    else if (IsResultType(strReaderFormat, "summary") == true)
+                    {
+                        // 2013/12/15
+                        XmlDocument dom = new XmlDocument();
+                        try
+                        {
+                            dom.LoadXml(strOutputReaderXml);
+                        }
+                        catch (Exception ex)
+                        {
+                            strError = "读者 XML 装入 DOM 出错: " + ex.Message;
+                            strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
+                            goto ERROR1;
+                        }
+                        reader_records[i] = DomUtil.GetElementText(dom.DocumentElement, "name");
+                    }
+                    else
+                    {
+                        strError = "strReaderFormatList参数出现了不支持的数据格式类型 '" + strReaderFormat + "'";
+                        strError = "虽然出现了下列错误，但是还书操作已经成功: " + strError;
+                        goto ERROR1;
+                    }
+                } // end of for
+
+                WriteTimeUsed(
+    time_lines,
+    start_time_1,
+    "Return() 中返回读者记录(" + strReaderFormatList + ") 耗时 ");
+
             } // end if
 
             // 2008/5/9
             if (String.IsNullOrEmpty(strOutputItemXml) == false
                 && StringUtil.IsInList("item", strStyle) == true)
             {
+                DateTime start_time_1 = DateTime.Now;
+
                 string[] item_formats = strItemFormatList.Split(new char[] { ',' });
                 item_records = new string[item_formats.Length];
 
@@ -5143,11 +5232,19 @@ namespace DigitalPlatform.LibraryServer
                         goto ERROR1;
                     }
                 } // end of for
+
+                WriteTimeUsed(
+time_lines,
+start_time_1,
+"Return() 中返回册记录(" + strItemFormatList + ") 耗时 ");
+
             }
 
             // 2008/5/9
             if (StringUtil.IsInList("biblio", strStyle) == true)
             {
+                DateTime start_time_1 = DateTime.Now;
+
                 if (String.IsNullOrEmpty(strBiblioRecID) == true)
                 {
                     strError = "册记录XML中<parent>元素缺乏或者值为空, 因此无法定位种记录ID";
@@ -5318,10 +5415,29 @@ namespace DigitalPlatform.LibraryServer
                         goto ERROR1;
                     }
                 } // end of for
+
+                WriteTimeUsed(
+time_lines,
+start_time_1,
+"Return() 中返回书目记录(" + strBiblioFormatList + ") 耗时 ");
             }
 
 
-            this.WriteTimeUsed(start_time, "Return() 耗时 ");
+            this.WriteTimeUsed(
+                time_lines,
+                start_time,
+                "Return() 耗时 ");
+            // 如果整个时间超过一秒，则需要计入操作日志
+            if (DateTime.Now - start_time > new TimeSpan(0, 0, 1))
+            {
+                WriteLongTimeOperLog(
+                    sessioninfo,
+                    strAction,
+                    start_time,
+                    "整个操作耗时超过 1 秒。详情:" + StringUtil.MakePathList(time_lines, ";"),
+                    strOperLogUID,
+                    out strError);
+            }
 
             if (string.IsNullOrEmpty(strInventoryWarning) == false)
             {

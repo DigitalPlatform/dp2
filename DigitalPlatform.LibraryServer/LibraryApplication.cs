@@ -92,7 +92,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.50 (2015/9/3) Return() API 的盘点功能，增加了 为 return_info 中返回信息的功能；WriteRes() 增加了 strStyle "delete" 删除盘点库记录功能(需要权限 inventorydelete)
         //      2.51 (2015/9/10) SetReaderInfo() API 增加了一个新的 strAction 值 changereaderbarcode，允许在读者尚有借阅信息的情况下正确修改证件条码号
         //      2.52 (2015/9/17) SetReaderInfo() API 允许使用用户定义的扩充字段。扩充字段在 library.xml 的 circulation 元素 patronAdditionalFields 属性中定义
-        public static string Version = "2.52";
+        //      2.53 (2015/9/26) Borrow() 和 Return() 增加了对总操作时间超过一秒的情况 memo 日志记录的功能。
+        public static string Version = "2.53";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()

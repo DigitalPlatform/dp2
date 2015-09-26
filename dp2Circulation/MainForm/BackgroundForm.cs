@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Web;
 using System.Windows.Forms;
 
 namespace dp2Circulation
@@ -36,6 +37,29 @@ namespace dp2Circulation
             // 因为HTML元素总是没有收尾，其他有些方法可能不奏效
             this.WebBrowser.Document.Window.ScrollTo(0,
     this.WebBrowser.Document.Body.ScrollRectangle.Height);
+        }
+
+        // 线程安全
+        public void ShowProgressMessage(string strID,
+            string strText)
+        {
+            if (this.webBrowser1.InvokeRequired)
+            {
+                this.webBrowser1.Invoke(new Action<string, string>(ShowProgressMessage), strID, strText);
+                return;
+            }
+
+            if (webBrowser1.Document == null)
+                return;
+
+            HtmlElement obj = this.webBrowser1.Document.GetElementById(strID);
+            if (obj != null)
+            {
+                obj.InnerText = strText;
+                return;
+            }
+
+            AppendHtml("<div id='" + strID + "'>" + HttpUtility.HtmlEncode(strText) + "</div>");
         }
     }
 }

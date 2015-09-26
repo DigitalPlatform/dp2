@@ -12,6 +12,7 @@ using DigitalPlatform.CommonControl;
 using DigitalPlatform.IO;
 using DigitalPlatform;
 using System.Diagnostics;
+using DigitalPlatform.Text;
 
 namespace dp2Circulation
 {
@@ -20,6 +21,13 @@ namespace dp2Circulation
     /// </summary>
     internal partial class OneActionDialog : Form
     {
+#if NO
+        /// <summary>
+        /// 增、减 List DropDown 事件
+        /// </summary>
+        public event EventHandler AddOrRemoveListDropDown = null;
+#endif
+
         /// <summary>
         /// 当前界面语言代码
         /// </summary>
@@ -95,7 +103,30 @@ namespace dp2Circulation
             }
 
             SetMenu(this._actionCfg);
+
             this.comboBox_fieldValue.Items.Clear();
+            if (StringUtil.IsInList("combine", this._actionCfg.Additional) == true)
+            {
+                this.comboBox_fieldValue.Items.Add("<不改变>");
+                this.comboBox_fieldValue.Items.Add("<增、减>");
+                this.label_add.Visible = true;
+                this.checkedComboBox_stateAdd.Visible = true;
+                this.label_remove.Visible = true;
+                this.checkedComboBox_stateRemove.Visible = true;
+            }
+            else
+            {
+                if (this.comboBox_fieldValue.Text.Length > 0
+                    && this.comboBox_fieldValue.Text[0] == '<')
+                    this.comboBox_fieldValue.Text = "";
+
+                this.label_add.Visible = false;
+                this.checkedComboBox_stateAdd.Text = "";
+                this.checkedComboBox_stateAdd.Visible = false;
+                this.label_remove.Visible = false;
+                this.checkedComboBox_stateRemove.Text = "";
+                this.checkedComboBox_stateRemove.Visible = false;
+            }
         }
 
         // 根据 type 属性值设置 RFC 1123 等菜单
@@ -158,6 +189,8 @@ namespace dp2Circulation
             }
 
             OnFieldNameChanged();
+
+            comboBox_fieldValue_TextChanged(this, new EventArgs());
         }
 
         internal static string Unquote(string strText)
@@ -303,6 +336,7 @@ namespace dp2Circulation
             cfg.Element = DomUtil.GetAttr(cfg_node, "element");
             cfg.Type = DomUtil.GetAttr(cfg_node, "type");
             cfg.List = DomUtil.GetAttr(cfg_node, "list");
+            cfg.Additional = DomUtil.GetAttr(cfg_node, "additional");
 
             return 1;
         }
@@ -378,15 +412,54 @@ namespace dp2Circulation
         }
 
 #if NO
-        private void ToolStripMenuItem_rfc1123Single_Click(object sender, EventArgs e)
-        {
-        }
+        string _additional = "";
 
-        private void comboBox_fieldName_TextChanged(object sender, EventArgs e)
+        public string Additional
         {
-
+            get
+            {
+                return this._additional;
+            }
+            set
+            {
+                this._additional = value;
+            }
         }
 #endif
+
+        public string FieldValueAdd
+        {
+            get
+            {
+                return this.checkedComboBox_stateAdd.Text;
+            }
+            set
+            {
+                this.checkedComboBox_stateAdd.Text = value;
+            }
+        }
+
+        public string FieldValueRemove
+        {
+            get
+            {
+                return this.checkedComboBox_stateRemove.Text;
+            }
+            set
+            {
+                this.checkedComboBox_stateRemove.Text = value;
+            }
+        }
+
+        public string Additional
+        {
+            get
+            {
+                if (this._actionCfg == null)
+                    return "";
+                return this._actionCfg.Additional;
+            }
+        }
 
         private void button_OK_Click(object sender, EventArgs e)
         {
@@ -524,7 +597,134 @@ namespace dp2Circulation
             if (this._actionCfg != null
                 && string.IsNullOrEmpty(this._actionCfg.List) == false)
                 Global.FilterValueList(this, (Control)sender);
+
+            string strText = this.comboBox_fieldValue.Text;
+
+            if (strText == "<增、减>")
+            {
+                this.checkedComboBox_stateAdd.Enabled = true;
+                this.checkedComboBox_stateRemove.Enabled = true;
+            }
+            else
+            {
+                this.checkedComboBox_stateAdd.Text = "";
+                this.checkedComboBox_stateAdd.Enabled = false;
+
+                this.checkedComboBox_stateRemove.Text = "";
+                this.checkedComboBox_stateRemove.Enabled = false;
+            }
+
+#if NO
+            if (this.ActionChanged != null)
+            {
+                this.ActionChanged(this, e);
+            }
+#endif
+        }
+
+        private void checkedComboBox_stateAdd_DropDown(object sender, EventArgs e)
+        {
+#if NO
+            if (this.AddOrRemoveListDropDown != null)
+            {
+                this.AddOrRemoveListDropDown(this.checkedComboBox_stateAdd, e);
+            }
+#endif
+            var combobox = sender as DigitalPlatform.CommonControl.CheckedComboBox;
+
+            if (combobox.Items.Count > 0)
+                return;
+
+            FillStateDropDown(combobox);
+        }
+
+        private void checkedComboBox_stateRemove_DropDown(object sender, EventArgs e)
+        {
+#if NO
+            if (this.AddOrRemoveListDropDown != null)
+            {
+                this.AddOrRemoveListDropDown(this.checkedComboBox_stateRemove, e);
+            }
+#endif
+            var combobox = sender as DigitalPlatform.CommonControl.CheckedComboBox;
+
+            if (combobox.Items.Count > 0)
+                return;
+
+            FillStateDropDown(combobox);
+        }
+
+        void FillStateDropDown(CheckedComboBox combobox)
+        {
+            // 防止重入
+            if (this.m_nInDropDown > 0)
+                return;
+
+            string strTableName = "";
+#if NO
+            if (_stateActionCfg != null)
+                strTableName = _stateActionCfg.List;
+#endif
+
+            Cursor oldCursor = this.Cursor;
+            this.Cursor = Cursors.WaitCursor;
+            this.m_nInDropDown++;
+            try
+            {
+                if (combobox.Items.Count <= 0
+                    && this.GetValueTable != null)
+                {
+                    GetValueTableEventArgs e1 = new GetValueTableEventArgs();
+                    e1.DbName = this.RefDbName;
+                    e1.TableName = this._actionCfg.List;
+
+#if NO
+                    if (this.DbType == "patron")
+                        e1.TableName = "readerState";
+                    else if (this.DbType == "item")
+                        e1.TableName = "state";
+                    else
+                        e1.TableName = this.DbType + "State";
+#endif
+
+                    this.GetValueTable(this, e1);
+
+                    if (e1.values != null)
+                    {
+                        if (e1.TableName == "readerState" && e1.values.Length == 0)
+                        {
+                            e1.values = StringUtil.SplitList("注销,停借,挂失").ToArray();
+                        }
+                        for (int i = 0; i < e1.values.Length; i++)
+                        {
+                            combobox.Items.Add(e1.values[i]);
+                        }
+                    }
+                    else
+                    {
+                        // combobox.Items.Add("{not found}");
+                    }
+                }
+            }
+            finally
+            {
+                this.Cursor = oldCursor;
+                this.m_nInDropDown--;
+            }
+        }
+
+
+        private void checkedComboBox_stateAdd_TextChanged(object sender, EventArgs e)
+        {
+            Global.FilterValueList(this, (Control)sender);
+        }
+
+        private void checkedComboBox_stateRemove_TextChanged(object sender, EventArgs e)
+        {
+            Global.FilterValueList(this, (Control)sender);
         }
 
     }
+
+
 }

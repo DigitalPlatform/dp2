@@ -40,6 +40,10 @@
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.comboBox_fieldValue = new System.Windows.Forms.ComboBox();
+            this.checkedComboBox_stateRemove = new DigitalPlatform.CommonControl.CheckedComboBox();
+            this.label_remove = new System.Windows.Forms.Label();
+            this.checkedComboBox_stateAdd = new DigitalPlatform.CommonControl.CheckedComboBox();
+            this.label_add = new System.Windows.Forms.Label();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -110,7 +114,7 @@
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.button_Cancel.Location = new System.Drawing.Point(264, 108);
+            this.button_Cancel.Location = new System.Drawing.Point(264, 150);
             this.button_Cancel.Margin = new System.Windows.Forms.Padding(2);
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(75, 23);
@@ -122,7 +126,7 @@
             // button_OK
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_OK.Location = new System.Drawing.Point(185, 108);
+            this.button_OK.Location = new System.Drawing.Point(185, 150);
             this.button_OK.Margin = new System.Windows.Forms.Padding(2);
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(75, 23);
@@ -164,13 +168,67 @@
             this.comboBox_fieldValue.SizeChanged += new System.EventHandler(this.comboBox_fieldValue_SizeChanged);
             this.comboBox_fieldValue.TextChanged += new System.EventHandler(this.comboBox_fieldValue_TextChanged);
             // 
+            // checkedComboBox_stateRemove
+            // 
+            this.checkedComboBox_stateRemove.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.checkedComboBox_stateRemove.BackColor = System.Drawing.SystemColors.Window;
+            this.checkedComboBox_stateRemove.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.checkedComboBox_stateRemove.Location = new System.Drawing.Point(185, 81);
+            this.checkedComboBox_stateRemove.Margin = new System.Windows.Forms.Padding(0);
+            this.checkedComboBox_stateRemove.Name = "checkedComboBox_stateRemove";
+            this.checkedComboBox_stateRemove.Padding = new System.Windows.Forms.Padding(4);
+            this.checkedComboBox_stateRemove.Size = new System.Drawing.Size(152, 22);
+            this.checkedComboBox_stateRemove.TabIndex = 17;
+            this.checkedComboBox_stateRemove.DropDown += new System.EventHandler(this.checkedComboBox_stateRemove_DropDown);
+            this.checkedComboBox_stateRemove.TextChanged += new System.EventHandler(this.checkedComboBox_stateRemove_TextChanged);
+            // 
+            // label_remove
+            // 
+            this.label_remove.AutoSize = true;
+            this.label_remove.Location = new System.Drawing.Point(121, 83);
+            this.label_remove.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label_remove.Name = "label_remove";
+            this.label_remove.Size = new System.Drawing.Size(41, 12);
+            this.label_remove.TabIndex = 16;
+            this.label_remove.Text = "减(&R):";
+            // 
+            // checkedComboBox_stateAdd
+            // 
+            this.checkedComboBox_stateAdd.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.checkedComboBox_stateAdd.BackColor = System.Drawing.SystemColors.Window;
+            this.checkedComboBox_stateAdd.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.checkedComboBox_stateAdd.Location = new System.Drawing.Point(185, 59);
+            this.checkedComboBox_stateAdd.Margin = new System.Windows.Forms.Padding(0);
+            this.checkedComboBox_stateAdd.Name = "checkedComboBox_stateAdd";
+            this.checkedComboBox_stateAdd.Padding = new System.Windows.Forms.Padding(4);
+            this.checkedComboBox_stateAdd.Size = new System.Drawing.Size(152, 22);
+            this.checkedComboBox_stateAdd.TabIndex = 15;
+            this.checkedComboBox_stateAdd.DropDown += new System.EventHandler(this.checkedComboBox_stateAdd_DropDown);
+            this.checkedComboBox_stateAdd.TextChanged += new System.EventHandler(this.checkedComboBox_stateAdd_TextChanged);
+            // 
+            // label_add
+            // 
+            this.label_add.AutoSize = true;
+            this.label_add.Location = new System.Drawing.Point(121, 61);
+            this.label_add.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label_add.Name = "label_add";
+            this.label_add.Size = new System.Drawing.Size(41, 12);
+            this.label_add.TabIndex = 14;
+            this.label_add.Text = "增(&A):";
+            // 
             // OneActionDialog
             // 
             this.AcceptButton = this.button_OK;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
-            this.ClientSize = new System.Drawing.Size(350, 142);
+            this.ClientSize = new System.Drawing.Size(350, 184);
+            this.Controls.Add(this.checkedComboBox_stateRemove);
+            this.Controls.Add(this.label_remove);
+            this.Controls.Add(this.checkedComboBox_stateAdd);
+            this.Controls.Add(this.label_add);
             this.Controls.Add(this.comboBox_fieldValue);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
@@ -204,5 +262,9 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ComboBox comboBox_fieldValue;
+        private DigitalPlatform.CommonControl.CheckedComboBox checkedComboBox_stateRemove;
+        private System.Windows.Forms.Label label_remove;
+        private DigitalPlatform.CommonControl.CheckedComboBox checkedComboBox_stateAdd;
+        private System.Windows.Forms.Label label_add;
     }
 }

@@ -866,6 +866,13 @@ this.UiState);
             string strLinkUID = DomUtil.GetElementText(dom.DocumentElement, "linkUID");
             string strComment = DomUtil.GetElementText(dom.DocumentElement, "comment");
 
+            List<string> comments = StringUtil.SplitList(strComment, ';');
+            StringBuilder encoded_comment = new StringBuilder();
+            foreach(string comment in comments)
+            {
+                encoded_comment.Append(HttpUtility.HtmlEncode(comment) + "<br/>");
+            }
+
             string strOperator = DomUtil.GetElementText(dom.DocumentElement, "operator");
             string strOperTime = GetRfc1123DisplayString(
                 DomUtil.GetElementText(dom.DocumentElement, "operTime"));
@@ -877,7 +884,7 @@ this.UiState);
                 "<table class='operlog'>" +
                 BuildHtmlLine("操作类型", strOperation + " -- 注记") +
                 BuildHtmlLine("动作", strAction) +
-                BuildHtmlLine("注释", strComment) +
+                BuildHtmlEncodedLine("注释", encoded_comment.ToString()) +
 
                 BuildHtmlLine("连接UID", strLinkUID) +
 
@@ -3449,9 +3456,11 @@ FileShare.ReadWrite))
 
             XmlElement time = dom.DocumentElement.SelectSingleNode("time") as XmlElement;
             string strSeconds = "";
+            double seconds = 0;
             if (time != null)
             {
                 strSeconds = time.GetAttribute("seconds");
+                double.TryParse(strSeconds, out seconds);
             }
 
             if (librarycode_node == null)
@@ -3484,7 +3493,11 @@ FileShare.ReadWrite))
 #endif
             if (strOperation == "memo")
                 item.BackColor = Color.LightGreen;
-
+            else
+            {
+                if (seconds >= 1)
+                    item.BackColor = Color.Red;
+            }
             return 0;
         }
 

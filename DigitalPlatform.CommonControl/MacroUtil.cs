@@ -222,7 +222,6 @@ namespace DigitalPlatform.CommonControl
                 {
                     strResult += strPart;
                 }
-
             }
 
             return 1;
@@ -277,6 +276,91 @@ namespace DigitalPlatform.CommonControl
                 nCurPos = nRet;
                 return strResult;
             }
+        }
+
+        // return:
+        //      -1  出错。错误信息在 strError 中
+        //      0   不能处理的宏
+        //      1   成功处理，返回结果在 strValue 中
+        public delegate int delegate_parseOneMacro(bool bSimulate,
+            string strText,
+            out string strValue,
+            out string strError);
+
+        // 解析宏
+        public static int Parse(
+            bool bSimulate,
+            string strMacro,
+            delegate_parseOneMacro procParseMacro,
+            out string strResult,
+            out string strError)
+        {
+            strError = "";
+
+            int nCurPos = 0;
+            string strPart = "";
+
+            strResult = "";
+
+            for (; ; )
+            {
+                try
+                {
+                    strPart = NextMacro(strMacro, ref nCurPos);
+                }
+                catch (Exception ex)
+                {
+                    strError = ex.Message;
+                    return -1;
+                }
+                if (strPart == "")
+                    break;
+
+                if (strPart[0] == '%')
+                {
+                    string strValue = "";
+                    // return:
+                    //      -1  出错。错误信息在 strError 中
+                    //      0   不能处理的宏
+                    //      1   成功处理，返回结果在 strValue 中
+                    int nRet = procParseMacro(bSimulate, strPart, out strValue, out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "解析宏'" + strPart + "' 时发生错误: '" + strError + "'";
+                        return -1;
+                    }
+
+                    if (nRet == 0)
+                    {
+                        // 不能处理的宏
+                        strResult += strPart;
+                        continue;
+                    }
+
+                    strResult += strValue;
+                }
+                else
+                {
+                    strResult += strPart;
+                }
+            }
+
+            return 1;
+        }
+
+        public static string Unquote(string strValue)
+        {
+            if (string.IsNullOrEmpty(strValue) == true)
+                return "";
+
+            if (strValue[0] == '%')
+                strValue = strValue.Substring(1);
+            if (strValue.Length == 0)
+                return "";
+            if (strValue[strValue.Length - 1] == '%')
+                return strValue.Substring(0, strValue.Length - 1);
+
+            return strValue;
         }
     }
 

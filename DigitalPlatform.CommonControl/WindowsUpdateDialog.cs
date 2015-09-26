@@ -271,9 +271,20 @@ namespace DigitalPlatform.CommonControl
             }
         }
 
+        void Cancel()
+        {
+            if (_searchJob != null)
+                _searchJob.RequestAbort();
+            if (_downloadJob != null)
+                _downloadJob.RequestAbort();
+
+            if (_installationJob != null)
+                _installationJob.RequestAbort();
+        }
+
         UpdateSession _updateSession;
         IUpdateSearcher _updateSearcher;
-        ISearchJob _searchJob;
+        ISearchJob _searchJob = null;
         UpdateCollection _updateCollection;
         ISearchResult _updateSearchResult;
 
@@ -285,7 +296,7 @@ namespace DigitalPlatform.CommonControl
             // Only Check Online..
             _updateSearcher.Online = true;
 
-            this.AppendString("正在搜索更新，请耐心等候 ...\r\n(如果您这台电脑是安装 Windows 操作系统后第一次更新，可能会在这一步耗费较长时间，请一定耐心等待)");
+            this.AppendString("正在搜索更新，请耐心等候 ...\r\n(如果您这台电脑是安装 Windows 操作系统后第一次更新，可能会在这一步耗费较长时间，请一定耐心等待)\r\n");
             // Begin Asynchronous IUpdateSearcher...
             _searchJob = _updateSearcher.BeginSearch("IsInstalled=0 AND IsPresent=0", 
                 new SearchCompleteFunc(this), 
@@ -300,6 +311,8 @@ namespace DigitalPlatform.CommonControl
             // Declare a new UpdateCollection and populate the result...
             _updateCollection = new UpdateCollection();
             _updateSearchResult = _updateSearcher.EndSearch(_searchJob);
+
+            _searchJob = null;
 
             //Count = NewUpdatesSearchResult.Updates.Count;
             //formRef.Invoke(formRef.sendNotification);
@@ -317,18 +330,22 @@ namespace DigitalPlatform.CommonControl
                 _updateCollection.Add(iUpdate);
             }
 
-            {
-                int i = 0;
-                foreach (IUpdate update in _updateSearchResult.Updates)
-                {
-                    this.AppendString((i + 1).ToString() + ") " + update.Title + "\r\n");
-                    // textBox1.AppendText(update.Title + Environment.NewLine);
-                    i++;
-                }
-            }
+
 
             if (_updateSearchResult.Updates.Count > 0)
             {
+                {
+                    this.AppendString("\r\n发现 " + _updateSearchResult.Updates.Count + " 个更新:\r\n");
+
+                    int i = 0;
+                    foreach (IUpdate update in _updateSearchResult.Updates)
+                    {
+                        this.AppendString((i + 1).ToString() + ") " + update.Title + "\r\n");
+                        // textBox1.AppendText(update.Title + Environment.NewLine);
+                        i++;
+                    }
+                    this.AppendString("\r\n");
+                }
 #if NO
                 DialogResult result = MessageBox.Show(this,
 "要下载这 " + _updateSearchResult.Updates.Count + " 个更新么?",
@@ -354,7 +371,7 @@ MessageBoxDefaultButton.Button2);
         }
 
         IUpdateDownloader _updateDownloader;
-        IDownloadJob _downloadJob;
+        IDownloadJob _downloadJob = null;
         IDownloadResult _downloadResult;
 
         void BeginDownloadUpdate()
@@ -375,9 +392,14 @@ MessageBoxDefaultButton.Button2);
         void DownloadComplete()
         {
             _downloadResult = _updateDownloader.EndDownload(_downloadJob);
+
+            _downloadJob = null;
+
             if (_downloadResult.ResultCode == OperationResultCode.orcSucceeded
                 || _downloadResult.ResultCode == OperationResultCode.orcSucceededWithErrors)
             {
+                this.ShowProgressMessage("progress_download", "");
+
                 if (_downloadResult.ResultCode == OperationResultCode.orcSucceeded)
                     this.AppendString("下载完成。\r\n");
                 else
@@ -409,7 +431,7 @@ MessageBoxDefaultButton.Button2);
 
         //
         IUpdateInstaller _updateInstaller;
-        IInstallationJob _installationJob;
+        IInstallationJob _installationJob = null;
         IInstallationResult _installationResult;
 
         void BeginInstallation()
@@ -423,11 +445,12 @@ MessageBoxDefaultButton.Button2);
 
             if (installCollection.Count == 0)
             {
-                this.AppendString("下载完成，没有可供安装的更新。操作结束。\r\n");
+                this.AppendString("下载完成，但没有可供安装的更新。操作结束。\r\n");
                 OnAllComplete();
                 return;
             }
 
+            this.AppendString("开始安装更新 ...\r\n");
 
             _updateInstaller = _updateSession.CreateUpdateInstaller() as IUpdateInstaller;
             _updateInstaller.Updates = installCollection;   // this._updateCollection;
@@ -454,8 +477,13 @@ MessageBoxDefaultButton.Button2);
     }
              * */
             _installationResult = _updateInstaller.EndInstall(_installationJob);
+
+            _installationJob = null;
+
             if (_installationResult.ResultCode == OperationResultCode.orcSucceeded)
             {
+                this.ShowProgressMessage("progress_install", "");
+
                 this.AppendString("安装完成。\r\n");
             }
             else
@@ -563,7 +591,7 @@ MessageBoxDefaultButton.Button2);
                 downloaded = decimal.Round(downloaded, 2);
                 toDownloaded = decimal.Round(toDownloaded, 2);
 
-                form1.ShowProgressMessage("progress_1",
+                form1.ShowProgressMessage("progress_download",
                     "下载进度: "
                  + e.Progress.CurrentUpdateIndex
                  + "/"
@@ -631,7 +659,7 @@ MessageBoxDefaultButton.Button2);
             public void Invoke(IInstallationJob iInstallationJob, IInstallationProgressChangedCallbackArgs e)
             {
                 form1.ShowProgressMessage(
-                    "progress_2",
+                    "progress_install",
                     "安装进度: "
                  + e.Progress.CurrentUpdateIndex
                  + " / "
@@ -719,6 +747,8 @@ MessageBoxDefaultButton.Button2);
                     return;
                 }
             }
+
+            this.Cancel();
         }
     }
 }

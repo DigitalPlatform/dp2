@@ -422,22 +422,7 @@ namespace dp2Circulation
 
         string m_strPrevMessageText = "";
 
-        void stopManager_OnDisplayMessage(object sender, DisplayMessageEventArgs e)
-        {
-            if (m_backgroundForm != null)
-            {
-                if (e.Message != m_strPrevMessageText)
-                {
-                    m_backgroundForm.AppendHtml(HttpUtility.HtmlEncode(e.Message) + "<br/>");
-                    m_strPrevMessageText = e.Message;
-                }
-            }
-        }
 
-        void MdiClient_SizeChanged(object sender, EventArgs e)
-        {
-            m_backgroundForm.Size = new System.Drawing.Size(this.MdiClient.ClientSize.Width, this.MdiClient.ClientSize.Height);
-        }
 
         void SetFirstDefaultFont()
         {
@@ -7905,6 +7890,11 @@ Keys keyData)
         private void MenuItem_chatForm_Click(object sender, EventArgs e)
         {
             OpenWindow<ChatForm>();
+        }
+
+        private void menuItem_updateDp2circulation_Click(object sender, EventArgs e)
+        {
+            UpdateApplication();
         }
     }
 

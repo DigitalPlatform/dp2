@@ -29,24 +29,15 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ChangeItemActionDialog));
-            this.label_state = new System.Windows.Forms.Label();
             this.button_Cancel = new System.Windows.Forms.Button();
             this.button_OK = new System.Windows.Forms.Button();
-            this.label3 = new System.Windows.Forms.Label();
-            this.changeStateActionControl1 = new dp2Circulation.ChangeStateActionControl();
             this.listView_actions = new System.Windows.Forms.ListView();
             this.columnHeader_fieldName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader_fieldValue = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_add = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_remove = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader_additional = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.SuspendLayout();
-            // 
-            // label_state
-            // 
-            this.label_state.BackColor = System.Drawing.SystemColors.Control;
-            this.label_state.Location = new System.Drawing.Point(114, 12);
-            this.label_state.Margin = new System.Windows.Forms.Padding(0);
-            this.label_state.Name = "label_state";
-            this.label_state.Size = new System.Drawing.Size(10, 72);
-            this.label_state.TabIndex = 18;
             // 
             // button_Cancel
             // 
@@ -73,30 +64,6 @@
             this.button_OK.UseVisualStyleBackColor = true;
             this.button_OK.Click += new System.EventHandler(this.button_OK_Click);
             // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(11, 9);
-            this.label3.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(53, 12);
-            this.label3.TabIndex = 15;
-            this.label3.Text = "状态(&S):";
-            // 
-            // changeStateActionControl1
-            // 
-            this.changeStateActionControl1.ActionString = "<不改变>";
-            this.changeStateActionControl1.AddString = "";
-            this.changeStateActionControl1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.changeStateActionControl1.Location = new System.Drawing.Point(127, 12);
-            this.changeStateActionControl1.Name = "changeStateActionControl1";
-            this.changeStateActionControl1.RemoveString = "";
-            this.changeStateActionControl1.Size = new System.Drawing.Size(212, 72);
-            this.changeStateActionControl1.TabIndex = 19;
-            this.changeStateActionControl1.AddOrRemoveListDropDown += new System.EventHandler(this.changeStateActionControl1_AddOrRemoveListDropDown);
-            this.changeStateActionControl1.ActionChanged += new System.EventHandler(this.changeStateActionControl1_ActionChanged);
-            // 
             // listView_actions
             // 
             this.listView_actions.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -104,7 +71,10 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.listView_actions.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.columnHeader_fieldName,
-            this.columnHeader_fieldValue});
+            this.columnHeader_fieldValue,
+            this.columnHeader_add,
+            this.columnHeader_remove,
+            this.columnHeader_additional});
             this.listView_actions.FullRowSelect = true;
             this.listView_actions.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
             this.listView_actions.HideSelection = false;
@@ -124,8 +94,22 @@
             // 
             // columnHeader_fieldValue
             // 
-            this.columnHeader_fieldValue.Text = "值";
-            this.columnHeader_fieldValue.Width = 200;
+            this.columnHeader_fieldValue.Text = "新值";
+            this.columnHeader_fieldValue.Width = 100;
+            // 
+            // columnHeader_add
+            // 
+            this.columnHeader_add.Text = "加";
+            this.columnHeader_add.Width = 100;
+            // 
+            // columnHeader_remove
+            // 
+            this.columnHeader_remove.Text = "减";
+            this.columnHeader_remove.Width = 100;
+            // 
+            // columnHeader_additional
+            // 
+            this.columnHeader_additional.Text = "附加定义";
             // 
             // ChangeItemActionDialog
             // 
@@ -135,30 +119,26 @@
             this.CancelButton = this.button_Cancel;
             this.ClientSize = new System.Drawing.Size(350, 303);
             this.Controls.Add(this.listView_actions);
-            this.Controls.Add(this.changeStateActionControl1);
-            this.Controls.Add(this.label_state);
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);
-            this.Controls.Add(this.label3);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "ChangeItemActionDialog";
             this.ShowInTaskbar = false;
             this.Text = "动作参数";
             this.Load += new System.EventHandler(this.ChangeItemActionDialog_Load);
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
         #endregion
 
-        private System.Windows.Forms.Label label_state;
         private System.Windows.Forms.Button button_Cancel;
         private System.Windows.Forms.Button button_OK;
-        private System.Windows.Forms.Label label3;
-        private ChangeStateActionControl changeStateActionControl1;
         private System.Windows.Forms.ListView listView_actions;
         private System.Windows.Forms.ColumnHeader columnHeader_fieldName;
         private System.Windows.Forms.ColumnHeader columnHeader_fieldValue;
+        private System.Windows.Forms.ColumnHeader columnHeader_additional;
+        private System.Windows.Forms.ColumnHeader columnHeader_add;
+        private System.Windows.Forms.ColumnHeader columnHeader_remove;
     }
 }

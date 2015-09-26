@@ -15,6 +15,7 @@ using DigitalPlatform.GUI;
 using DigitalPlatform.CirculationClient.localhost;
 using DigitalPlatform.Xml;
 using DigitalPlatform.Text;
+using System.IO;
 
 namespace dp2Circulation
 {
@@ -1324,7 +1325,6 @@ MessageBoxDefaultButton.Button1);
                 return -1;
             }
 
-
             List<OneAction> actions = null;
             XmlDocument cfg_dom = null;
 
@@ -1461,20 +1461,20 @@ MessageBoxDefaultButton.Button1);
                     string strDebugInfo = "";
 
 
-                        // 修改一个订购记录 XmlDocument
-                        // return:
-                        //      -1  出错
-                        //      0   没有实质性修改
-                        //      1   发生了修改
-                        nRet = ModifyItemRecord(
-                            cfg_dom,
-                            actions,
-                            ref dom,
-                            now,
-                            out strDebugInfo,
-                            out strError);
-                        if (nRet == -1)
-                            return -1;
+                    // 修改一个订购记录 XmlDocument
+                    // return:
+                    //      -1  出错
+                    //      0   没有实质性修改
+                    //      1   发生了修改
+                    nRet = ModifyItemRecord(
+                        cfg_dom,
+                        actions,
+                        ref dom,
+                        now,
+                        out strDebugInfo,
+                        out strError);
+                    if (nRet == -1)
+                        return -1;
 
                     this.MainForm.OperHistory.AppendHtml("<div class='debug normal'>" + HttpUtility.HtmlEncode(strDebugInfo).Replace("\r\n", "<br/>") + "</div>");
 
@@ -1531,7 +1531,7 @@ MessageBoxDefaultButton.Button1);
             e.values = values;
         }
 
-        // 修改一个订购记录 XmlDocument
+        // 修改一个事项记录 XmlDocument
         // return:
         //      -1  出错
         //      0   没有实质性修改
@@ -1583,6 +1583,33 @@ MessageBoxDefaultButton.Button1);
                         return -1;
                 }
 
+                // 将值字符串中的宏替换
+                string strFieldValue = action.FieldValue;
+                if (strFieldValue.IndexOf("%") != -1)
+                {
+                    this._macroFileName = Path.Combine(this.MainForm.UserDir, this.DbType + "_macrotable.xml");
+                    if (File.Exists(this._macroFileName) == false)
+                    {
+                        strError = "宏定义文件 '" + this._macroFileName + "' 不存在，无法进行宏替换";
+                        return -1;
+                    }
+                    string strResult = "";
+                    // 解析宏
+                    nRet = MacroUtil.Parse(
+                        false,
+                        strFieldValue,
+                        ParseOneMacro,
+                        out strResult,
+                        out strError);
+                    if (nRet == -1)
+                    {
+                        strError = "替换字符串 '"+strFieldValue+"' 中的宏时出错: " + strError;
+                        return -1;
+                    }
+
+                    strFieldValue = strResult;
+                }
+
                 if (string.IsNullOrEmpty(action.Action) == true)
                 {
                     // 替换内容
@@ -1591,7 +1618,7 @@ MessageBoxDefaultButton.Button1);
                     {
                         ChangeField(ref dom,
     strElementName,
-    action.FieldValue,
+    strFieldValue,  // action.FieldValue,
     ref debug,
     ref bChanged);
                     }
@@ -1604,7 +1631,7 @@ MessageBoxDefaultButton.Button1);
                         ChangeField(ref dom,
 strElement,
 strAttrName,
-    action.FieldValue,
+    strFieldValue,  // action.FieldValue,
 ref debug,
 ref bChanged);
                     }
@@ -1620,12 +1647,16 @@ ref bChanged);
                     if (action.Action == "add")
                     {
                         if (String.IsNullOrEmpty(action.FieldValue) == false)
-                            StringUtil.SetInList(ref strState, action.FieldValue, true);
+                            StringUtil.SetInList(ref strState,
+                                strFieldValue,  // action.FieldValue, 
+                                true);
                     }
                     if (action.Action == "remove")
                     {
                         if (String.IsNullOrEmpty(action.FieldValue) == false)
-                            StringUtil.SetInList(ref strState, action.FieldValue, false);
+                            StringUtil.SetInList(ref strState,
+                                strFieldValue,  // action.FieldValue, 
+                                false);
                     }
 
                     if (strOldState != strState)
@@ -1646,6 +1677,41 @@ ref bChanged);
                 return 1;
 
             return 0;
+        }
+
+        string _macroFileName = "";
+        // return:
+        //      -1  出错。错误信息在 strError 中
+        //      0   不能处理的宏
+        //      1   成功处理，返回结果在 strValue 中
+        int ParseOneMacro(bool bSimulate,
+            string strName,
+            out string strValue,
+            out string strError)
+        {
+            strError = "";
+
+            strName = MacroUtil.Unquote(strName);  // 去掉百分号
+
+            strValue = "";
+            // 从marceditor_macrotable.xml文件中解析宏
+            // return:
+            //      -1  error
+            //      0   not found
+            //      1   found
+            int nRet = MacroUtil.GetFromLocalMacroTable(
+                _macroFileName, // Path.Combine(this.MainForm.DataDir, "marceditor_macrotable.xml"),
+                strName,
+                bSimulate,
+                out strValue,
+                out strError);
+            if (nRet == -1)
+            {
+                return -1;
+            }
+            if (nRet == 0)
+                return 0;
+            return 1;
         }
 
         // 解析 element@attr

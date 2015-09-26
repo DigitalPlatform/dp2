@@ -11317,6 +11317,10 @@ out strError);
             strOutputID = "";
             strError = "";
 
+            List<string> time_lines = new List<string>();
+            DateTime start_time = DateTime.Now;
+            DateTime start_time_out = new DateTime(0);  // 跳出 try 范围的开始时间
+
             if (StringUtil.IsInList("fastmode", strStyle) == true)
                 this.FastMode = true;
 
@@ -11329,6 +11333,8 @@ out strError);
             bPushTailNo = this.EnsureID(ref strID); 
             if (oUser != null)
             {
+                DateTime start_time_1 = DateTime.Now;
+
                 string strTempRecordPath = this.GetCaption("zh-CN") + "/" + strID;
                 if (bPushTailNo == true)
                 {
@@ -11356,6 +11362,11 @@ out strError);
                         return -6;
                     }
                 }
+
+                WriteTimeUsed(
+    time_lines,
+    start_time_1,
+    "处理账户 耗时 ");
             }
 
             strOutputID = DbPath.GetCompressedID(strID);
@@ -11388,12 +11399,20 @@ out strError);
 #endif
                 try // 记录锁
                 {
+                    DateTime start_time_open = DateTime.Now;
+
                     Connection connection = GetConnection(
                         this.m_strConnString,
                         this.container.SqlServerType == SqlServerType.SQLite && bFastMode == true ? ConnectionStyle.Global : ConnectionStyle.None);
                     connection.Open();
                     try
                     {
+
+                        WriteTimeUsed(
+time_lines,
+start_time_open,
+"Open Connection 耗时 ");
+
 #if NO
                             // 1.如果记录不存在,插入一条字节的记录,以确保得到textPtr
                             // return:
@@ -11474,6 +11493,8 @@ out strError);
                             if (string.IsNullOrEmpty(strOldXml) == true
                                 && bExist == true)
                             {
+                                DateTime start_time_getxmldata = DateTime.Now;
+
                                 // return:
                                 //      -1  出错
                                 //      -4  记录不存在
@@ -11499,6 +11520,11 @@ out strError);
                                     if (nRet <= -1 && nRet != -3)   // ?? -3是什么情况
                                         return nRet;
                                 }
+
+                                WriteTimeUsed(
+time_lines,
+start_time_getxmldata,
+"GetXmlData 耗时 ");
                             }
                         }
 
@@ -11514,6 +11540,8 @@ out strError);
                         }
                         else
                         {
+                            DateTime start_time_writesqlrecord = DateTime.Now;
+
                             // 写数据
                             // return:
                             //		-1	一般性错误
@@ -11538,6 +11566,11 @@ out strError);
                                 return nRet;
 
                             nWriteCount++;
+
+                            WriteTimeUsed(
+time_lines,
+start_time_writesqlrecord,
+"WriteSqlRecord 耗时 ");
                         }
 
                         // 检查范围
@@ -11558,6 +11591,8 @@ out baPreamble);
                             }
                             else
                             {
+                                DateTime start_time_getxmldata = DateTime.Now;
+
                                 // return:
                                 //      -1  出错
                                 //      -4  记录不存在
@@ -11573,12 +11608,19 @@ out baPreamble);
                                     out strError);
                                 if (nRet == -1)
                                     return -1;
+
+                                WriteTimeUsed(
+time_lines,
+start_time_getxmldata,
+"GetXmlData 2 耗时 ");
                             }
 
                             ////
                             ////
                             if (string.IsNullOrEmpty(strXPath) == false)
                             {
+                                DateTime start_time_writesqlrecord = DateTime.Now;
+
                                 // 根据参数中提供的局部内容创建出完整的记录
                                 nRet = BuildRecordXml(
                                     strID,
@@ -11621,12 +11663,19 @@ out baPreamble);
                                 nWriteCount++;
                                 // 注：这次写操作后，如果是第二次写操作，range内的标记会再次反转
                                 // 不过，后面的模块应该能够自动适应
+
+                                WriteTimeUsed(
+time_lines,
+start_time_writesqlrecord,
+"WriteSqlRecord 2 耗时 ");
                             }
 
                             KeyCollection newKeys = null;
                             KeyCollection oldKeys = null;
                             XmlDocument newDom = null;
                             XmlDocument oldDom = null;
+
+                            DateTime start_time_mergekeys = DateTime.Now;
 
                             // return:
                             //      -1  出错
@@ -11643,6 +11692,11 @@ out baPreamble);
                             if (nRet == -1)
                                 return -1;
 
+                            WriteTimeUsed(
+time_lines,
+start_time_mergekeys,
+"MergeKeys 耗时 ");
+
                             if (bForceDeleteKeys == true)
                             {
                                 // return:
@@ -11656,6 +11710,8 @@ out baPreamble);
                             }
 
                             // 调试 ---
+
+                            DateTime start_time_modifykeys = DateTime.Now;
 
                             // 处理检索点
                             // return:
@@ -11677,7 +11733,14 @@ out baPreamble);
                                 return -1;
                             }
 
+                            WriteTimeUsed(
+time_lines,
+start_time_modifykeys,
+"ModifyKeys 耗时 ");
+
                             // 注：如果因为旧的XML对象文件丢失，造成ModifyFiles()去创建已经存在的对象records行，那么创建自然会被忽视，没有什么副作用
+
+                            DateTime start_time_modifyfile = DateTime.Now;
 
                             // 处理子文件
                             // return:
@@ -11690,9 +11753,16 @@ out baPreamble);
                                 out strError);
                             if (nRet == -1)
                                 return -1;
+
+                            WriteTimeUsed(
+time_lines,
+start_time_modifyfile,
+"ModifyFiles 耗时 ");
                         }
 
                         bDelete = false;    // 此后走到 ERROR2 不会删除新创建的记录
+
+                        start_time_out = DateTime.Now;
                     }
                     catch (SqlException sqlEx)
                     {
@@ -11729,6 +11799,11 @@ out baPreamble);
 #endif
             }
 
+            WriteTimeUsed(
+time_lines,
+start_time_out,
+"Close Connection 等的耗时 ");
+
             // 当本函数被明知为账户库的写操作调用时, 一定要用bCheckAccount==false
             // 来调用，否则容易引起不必要的递归
             if (bFull == true
@@ -11744,11 +11819,30 @@ out baPreamble);
                 if (StringUtil.IsInList("fastmode", strStyle) == false
                     && this.FastMode == true)
                 {
+                    DateTime start_time_1 = DateTime.Now;
+
                     // this.FastMode = false;
                     this.Commit();
+
+                    WriteTimeUsed(
+time_lines,
+start_time_1,
+"FastMode Commit 耗时 ");
                 }
             }
 
+            if (DateTime.Now - start_time > new TimeSpan(0, 0, 1))
+            {
+                WriteTimeUsed(
+time_lines,
+start_time,
+"WriteXml 总耗时 ");
+                this.container.KernelApplication.WriteErrorLog(
+                    "--- 写入 XML 记录的时间超过 1 秒。详情: \r\n" 
+                    + "记录路径: " + this.GetCaption("zh-CN") + "/" + strID + "\r\n"
+                    + StringUtil.MakePathList(time_lines, ";\r\n")
+                    + "\r\n");
+            }
             return 0;
         ERROR2:
             if (bDelete == true)
@@ -11778,6 +11872,15 @@ out baPreamble);
             }
 
             return -1;
+        }
+
+        static void WriteTimeUsed(
+    List<string> lines,
+    DateTime start_time,
+    string strPrefix)
+        {
+            TimeSpan delta = DateTime.Now - start_time;
+            lines.Add(strPrefix + " " + delta.TotalSeconds.ToString("F3"));
         }
 
         // parameters:

@@ -2752,7 +2752,7 @@ dp2Catalog 版本: dp2Catalog, Version=2.4.5701.40614, Culture=neutral, PublicKe
                 EnableQueryControl(false);
 
                 this.Update();
-                this.m_mainForm.Update();
+                // this.m_mainForm.Update();
 
                 try
                 {

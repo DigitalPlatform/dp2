@@ -4955,7 +4955,9 @@ true);
                 if (bDisplayClickableError == false
     && this._floatingMessage.InDelay() == false)
                     this.ClearMessage();
-                this.MainForm.MessageHub.SearchResponseEvent -= MessageHub_SearchResponseEvent;
+
+                if (this.MainForm.MessageHub != null)
+                    this.MainForm.MessageHub.SearchResponseEvent -= MessageHub_SearchResponseEvent;
 
                 Progress.EndLoop();
                 Progress.OnStop -= new StopEventHandler(this.DoStop);

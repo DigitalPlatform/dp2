@@ -317,11 +317,12 @@ namespace dp2Kernel
         //      2.57 2015/1/21 改进 CopyRecord() API 增加了 strMergeStyle 和 strIdChangeList 参数。允许源和目标的对象都保留在目标记录中
         //      2.58 2015/8/25 修改空值检索的错误。( keycount 和 keyid 风格之下 不正确的 not in ... union 语句)
         //      2.59 2015/8/27 GetRecords()/GetBrowse()等 API 中 strStyle 的 format:@coldef:xxx|xxx 格式，其中 xxx 除了原先 xpath 用法外，还可以使用 xpath->convert 格式。
+        //      2.60 2015/9/26 WriteXml() 对整个操作超过一秒的情况，会将时间构成详情写入错误日志
         public Result GetVersion()
         {
             Result result = new Result();
             result.Value = 0;
-            result.ErrorString = "2.59";
+            result.ErrorString = "2.60";
             return result;
         }
 

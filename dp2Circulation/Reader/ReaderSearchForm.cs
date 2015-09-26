@@ -671,6 +671,8 @@ out strError);
             return 1;
         }
 
+        bool _forceSave = false;
+
         // return:
         //      -2  时间戳不匹配
         //      -1  出错
@@ -691,7 +693,7 @@ out strError);
             // string strSavedPath = "";
             long lRet = Channel.SetReaderInfo(
 stop,
-"change",
+_forceSave ? "changereaderbarcode" : "change",
 strRecPath,
 info.NewXml,
 info.OldXml,
@@ -710,7 +712,6 @@ out strError);
             }
 
             info.Timestamp = baNewTimestamp;    // 2013/10/17
-
             return 0;
         }
 
@@ -1390,6 +1391,15 @@ out strError);
                 if (this.listView_records.SelectedItems.Count == 0)
                     subMenuItem.Enabled = false;
                 menuItem.MenuItems.Add(subMenuItem);
+
+                // ---
+                subMenuItem = new MenuItem("-");
+                menuItem.MenuItems.Add(subMenuItem);
+
+                subMenuItem = new MenuItem("宏定义 (&M)");
+                subMenuItem.Click += new System.EventHandler(this.menu_macroDef_Click);
+                menuItem.MenuItems.Add(subMenuItem);
+
             }
 
 #if NO
@@ -1455,6 +1465,20 @@ out strError);
             contextMenu.MenuItems.Add(menuItem);
 
             contextMenu.Show(this.listView_records, new Point(e.X, e.Y));		
+        }
+
+        // 修改宏定义
+        void menu_macroDef_Click(object sender, EventArgs e)
+        {
+            MacroTableDialog dlg = new MacroTableDialog();
+            MainForm.SetControlFont(dlg, this.Font, false);
+            dlg.XmlFileName = Path.Combine(this.MainForm.UserDir, "patron_macrotable.xml");
+
+            this.MainForm.AppInfo.LinkFormState(dlg, "readersearchform_MacroTableDialog_state");
+            dlg.ShowDialog(this);
+            this.MainForm.AppInfo.UnlinkFormState(dlg);
+            if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
+                return;
         }
 
         // 刷新所选择的行。也就是重新从数据库中装载浏览列
@@ -4697,68 +4721,14 @@ out strFingerprint);
         // 保存选定事项的修改
         void menu_saveSelectedChangedRecords_Click(object sender, EventArgs e)
         {
-#if NO
-            // TODO: 确实要?
-
-            if (this.m_nChangedCount == 0)
-            {
-                MessageBox.Show(this, "当前没有任何修改过的事项需要保存");
-                return;
-            }
-
-            string strError = "";
-
-            List<ListViewItem> items = new List<ListViewItem>();
-            foreach (ListViewItem item in this.listView_records.SelectedItems)
-            {
-                items.Add(item);
-            }
-
-            int nRet = SaveChangedRecords(items,
-                out strError);
-            if (nRet == -1)
-                goto ERROR1;
-
-            strError = "处理完成。\r\n\r\n" + strError;
-            MessageBox.Show(this, strError);
-            return;
-        ERROR1:
-            MessageBox.Show(this, strError);
-#endif
+            this._forceSave = Control.ModifierKeys == Keys.Control;
             SaveSelectedChangedRecords();
         }
 
         // 保存全部修改事项
         void menu_saveAllChangedRecords_Click(object sender, EventArgs e)
         {
-#if NO
-            // TODO: 确实要?
-
-            if (this.m_nChangedCount == 0)
-            {
-                MessageBox.Show(this, "当前没有任何修改过的事项需要保存");
-                return;
-            }
-
-            string strError = "";
-
-            List<ListViewItem> items = new List<ListViewItem>();
-            foreach (ListViewItem item in this.listView_records.Items)
-            {
-                items.Add(item);
-            }
-
-            int nRet = SaveChangedRecords(items,
-                out strError);
-            if (nRet == -1)
-                goto ERROR1;
-
-            strError = "处理完成。\r\n\r\n" + strError;
-            MessageBox.Show(this, strError);
-            return;
-        ERROR1:
-            MessageBox.Show(this, strError);
-#endif
+            this._forceSave = Control.ModifierKeys == Keys.Control;
             SaveAllChangedRecords();
         }
 

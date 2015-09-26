@@ -156,6 +156,7 @@ namespace dp2Circulation
             this.MenuItem_utility = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator20 = new System.Windows.Forms.ToolStripSeparator();
             this.menuItem_packageErrorLog = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuItem_updateDp2circulation = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator31 = new System.Windows.Forms.ToolStripSeparator();
             this.MenuItem_copyright = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip_main = new System.Windows.Forms.StatusStrip();
@@ -1126,6 +1127,7 @@ namespace dp2Circulation
             this.MenuItem_utility,
             this.toolStripSeparator20,
             this.menuItem_packageErrorLog,
+            this.menuItem_updateDp2circulation,
             this.toolStripSeparator31,
             this.MenuItem_copyright});
             this.MenuItem_help.Name = "MenuItem_help";
@@ -1135,76 +1137,84 @@ namespace dp2Circulation
             // MenuItem_configuration
             // 
             this.MenuItem_configuration.Name = "MenuItem_configuration";
-            this.MenuItem_configuration.Size = new System.Drawing.Size(177, 22);
+            this.MenuItem_configuration.Size = new System.Drawing.Size(188, 22);
             this.MenuItem_configuration.Text = "参数配置(&C)...";
             this.MenuItem_configuration.Click += new System.EventHandler(this.MenuItem_configuration_Click);
             // 
             // toolStripSeparator15
             // 
             this.toolStripSeparator15.Name = "toolStripSeparator15";
-            this.toolStripSeparator15.Size = new System.Drawing.Size(174, 6);
+            this.toolStripSeparator15.Size = new System.Drawing.Size(185, 6);
             // 
             // MenuItem_openUserFolder
             // 
             this.MenuItem_openUserFolder.Name = "MenuItem_openUserFolder";
-            this.MenuItem_openUserFolder.Size = new System.Drawing.Size(177, 22);
+            this.MenuItem_openUserFolder.Size = new System.Drawing.Size(188, 22);
             this.MenuItem_openUserFolder.Text = "打开用户文件夹(&U)";
             this.MenuItem_openUserFolder.Click += new System.EventHandler(this.MenuItem_openUserFolder_Click);
             // 
             // MenuItem_openDataFolder
             // 
             this.MenuItem_openDataFolder.Name = "MenuItem_openDataFolder";
-            this.MenuItem_openDataFolder.Size = new System.Drawing.Size(177, 22);
+            this.MenuItem_openDataFolder.Size = new System.Drawing.Size(188, 22);
             this.MenuItem_openDataFolder.Text = "打开数据文件夹(&D)";
             this.MenuItem_openDataFolder.Click += new System.EventHandler(this.MenuItem_openDataFolder_Click);
             // 
             // MenuItem_openProgramFolder
             // 
             this.MenuItem_openProgramFolder.Name = "MenuItem_openProgramFolder";
-            this.MenuItem_openProgramFolder.Size = new System.Drawing.Size(177, 22);
+            this.MenuItem_openProgramFolder.Size = new System.Drawing.Size(188, 22);
             this.MenuItem_openProgramFolder.Text = "打开程序文件夹(&P)";
             this.MenuItem_openProgramFolder.Click += new System.EventHandler(this.MenuItem_openProgramFolder_Click);
             // 
             // toolStripSeparator11
             // 
             this.toolStripSeparator11.Name = "toolStripSeparator11";
-            this.toolStripSeparator11.Size = new System.Drawing.Size(174, 6);
+            this.toolStripSeparator11.Size = new System.Drawing.Size(185, 6);
             // 
             // MenuItem_resetSerialCode
             // 
             this.MenuItem_resetSerialCode.Name = "MenuItem_resetSerialCode";
-            this.MenuItem_resetSerialCode.Size = new System.Drawing.Size(177, 22);
+            this.MenuItem_resetSerialCode.Size = new System.Drawing.Size(188, 22);
             this.MenuItem_resetSerialCode.Text = "设置序列号(&R) ...";
             this.MenuItem_resetSerialCode.Click += new System.EventHandler(this.MenuItem_resetSerialCode_Click);
             // 
             // MenuItem_utility
             // 
             this.MenuItem_utility.Name = "MenuItem_utility";
-            this.MenuItem_utility.Size = new System.Drawing.Size(177, 22);
+            this.MenuItem_utility.Size = new System.Drawing.Size(188, 22);
             this.MenuItem_utility.Text = "实用工具(&U)...";
             this.MenuItem_utility.Click += new System.EventHandler(this.MenuItem_utility_Click);
             // 
             // toolStripSeparator20
             // 
             this.toolStripSeparator20.Name = "toolStripSeparator20";
-            this.toolStripSeparator20.Size = new System.Drawing.Size(174, 6);
+            this.toolStripSeparator20.Size = new System.Drawing.Size(185, 6);
             // 
             // menuItem_packageErrorLog
             // 
             this.menuItem_packageErrorLog.Name = "menuItem_packageErrorLog";
-            this.menuItem_packageErrorLog.Size = new System.Drawing.Size(177, 22);
+            this.menuItem_packageErrorLog.Size = new System.Drawing.Size(188, 22);
             this.menuItem_packageErrorLog.Text = "打包错误日志(&L)...";
             this.menuItem_packageErrorLog.Click += new System.EventHandler(this.menuItem_packageErrorLog_Click);
+            // 
+            // menuItem_updateDp2circulation
+            // 
+            this.menuItem_updateDp2circulation.Name = "menuItem_updateDp2circulation";
+            this.menuItem_updateDp2circulation.Size = new System.Drawing.Size(188, 22);
+            this.menuItem_updateDp2circulation.Text = "更新 dp2Circulation";
+            this.menuItem_updateDp2circulation.Visible = false;
+            this.menuItem_updateDp2circulation.Click += new System.EventHandler(this.menuItem_updateDp2circulation_Click);
             // 
             // toolStripSeparator31
             // 
             this.toolStripSeparator31.Name = "toolStripSeparator31";
-            this.toolStripSeparator31.Size = new System.Drawing.Size(174, 6);
+            this.toolStripSeparator31.Size = new System.Drawing.Size(185, 6);
             // 
             // MenuItem_copyright
             // 
             this.MenuItem_copyright.Name = "MenuItem_copyright";
-            this.MenuItem_copyright.Size = new System.Drawing.Size(177, 22);
+            this.MenuItem_copyright.Size = new System.Drawing.Size(188, 22);
             this.MenuItem_copyright.Text = "版权(&C)...";
             this.MenuItem_copyright.Click += new System.EventHandler(this.MenuItem_copyright_Click);
             // 
@@ -1547,7 +1557,7 @@ namespace dp2Circulation
             // 
             this.tabPage_property.Location = new System.Drawing.Point(4, 25);
             this.tabPage_property.Name = "tabPage_property";
-            this.tabPage_property.Size = new System.Drawing.Size(199, 202);
+            this.tabPage_property.Size = new System.Drawing.Size(199, 283);
             this.tabPage_property.TabIndex = 1;
             this.tabPage_property.Text = "属性";
             this.tabPage_property.UseVisualStyleBackColor = true;
@@ -1556,7 +1566,7 @@ namespace dp2Circulation
             // 
             this.tabPage_verifyResult.Location = new System.Drawing.Point(4, 25);
             this.tabPage_verifyResult.Name = "tabPage_verifyResult";
-            this.tabPage_verifyResult.Size = new System.Drawing.Size(199, 202);
+            this.tabPage_verifyResult.Size = new System.Drawing.Size(199, 283);
             this.tabPage_verifyResult.TabIndex = 2;
             this.tabPage_verifyResult.Text = "校验结果";
             this.tabPage_verifyResult.UseVisualStyleBackColor = true;
@@ -1565,7 +1575,7 @@ namespace dp2Circulation
             // 
             this.tabPage_generateData.Location = new System.Drawing.Point(4, 25);
             this.tabPage_generateData.Name = "tabPage_generateData";
-            this.tabPage_generateData.Size = new System.Drawing.Size(199, 202);
+            this.tabPage_generateData.Size = new System.Drawing.Size(199, 283);
             this.tabPage_generateData.TabIndex = 3;
             this.tabPage_generateData.Text = "创建数据";
             this.tabPage_generateData.UseVisualStyleBackColor = true;
@@ -1574,7 +1584,7 @@ namespace dp2Circulation
             // 
             this.tabPage_camera.Location = new System.Drawing.Point(4, 25);
             this.tabPage_camera.Name = "tabPage_camera";
-            this.tabPage_camera.Size = new System.Drawing.Size(199, 202);
+            this.tabPage_camera.Size = new System.Drawing.Size(199, 283);
             this.tabPage_camera.TabIndex = 4;
             this.tabPage_camera.Text = "QR 识别";
             this.tabPage_camera.UseVisualStyleBackColor = true;
@@ -1583,7 +1593,7 @@ namespace dp2Circulation
             // 
             this.tabPage_accept.Location = new System.Drawing.Point(4, 25);
             this.tabPage_accept.Name = "tabPage_accept";
-            this.tabPage_accept.Size = new System.Drawing.Size(199, 202);
+            this.tabPage_accept.Size = new System.Drawing.Size(199, 283);
             this.tabPage_accept.TabIndex = 5;
             this.tabPage_accept.Text = "验收";
             this.tabPage_accept.UseVisualStyleBackColor = true;
@@ -1596,7 +1606,7 @@ namespace dp2Circulation
             this.tabPage_share.Location = new System.Drawing.Point(4, 25);
             this.tabPage_share.Margin = new System.Windows.Forms.Padding(2);
             this.tabPage_share.Name = "tabPage_share";
-            this.tabPage_share.Size = new System.Drawing.Size(199, 202);
+            this.tabPage_share.Size = new System.Drawing.Size(199, 283);
             this.tabPage_share.TabIndex = 6;
             this.tabPage_share.Text = "分享";
             this.tabPage_share.UseVisualStyleBackColor = true;
@@ -1607,7 +1617,7 @@ namespace dp2Circulation
             this.webBrowser_messageHub.Location = new System.Drawing.Point(0, 0);
             this.webBrowser_messageHub.MinimumSize = new System.Drawing.Size(20, 20);
             this.webBrowser_messageHub.Name = "webBrowser_messageHub";
-            this.webBrowser_messageHub.Size = new System.Drawing.Size(199, 202);
+            this.webBrowser_messageHub.Size = new System.Drawing.Size(199, 283);
             this.webBrowser_messageHub.TabIndex = 0;
             // 
             // toolStrip_panelFixed
@@ -1857,6 +1867,7 @@ namespace dp2Circulation
         private System.Windows.Forms.ToolStripMenuItem MenuItem_chatForm;
         private System.Windows.Forms.TabPage tabPage_share;
         private System.Windows.Forms.WebBrowser webBrowser_messageHub;
+        private System.Windows.Forms.ToolStripMenuItem menuItem_updateDp2circulation;
     }
 }
 

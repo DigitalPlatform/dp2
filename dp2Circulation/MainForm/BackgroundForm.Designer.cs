@@ -48,7 +48,7 @@
             this.Controls.Add(this.webBrowser1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "BackgroundForm";
-            this.Text = "BackgroundForm";
+            this.Text = "背景窗";
             this.ResumeLayout(false);
 
         }

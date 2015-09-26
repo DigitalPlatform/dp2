@@ -1637,7 +1637,6 @@ strElementName);
                 string strReaderBarcode = DomUtil.GetElementText(domLog.DocumentElement,
                     "readerBarcode");
 
-
                 // 读入册记录
                 string strConfirmItemRecPath = DomUtil.GetElementText(domLog.DocumentElement,
                     "confirmItemRecPath");
@@ -2003,6 +2002,8 @@ strElementName);
         {
             strError = "";
 
+            // TODO: 关注读者库 “所借册条码号” 检索途径是否存在。必须存在才行
+
             List<string> aReaderPath = null;
 
             string strTempReaderXml = "";
@@ -2051,6 +2052,13 @@ strElementName);
                     }
 #endif
 
+                    // 从若干读者记录中，清除特定的所借事项。相当于针对读者记录执行了还书操作
+                    // parameters:
+                    //      strBorrowItemBarcode    要清除的册记录条码号
+                    //      aPath   读者记录路径集合
+                    // return:
+                    //      -1  出错
+                    //      0   成功
                     nRet = ClearBorrowItem(
                         channel,
                         strItemBarcode,
@@ -2071,24 +2079,27 @@ strElementName);
 
         // 从若干读者记录中，清除特定的所借事项。相当于针对读者记录执行了还书操作
         // parameters:
+        //      strBorrowItemBarcode    要清除的册记录条码号
+        //      aPath   读者记录路径集合
         // return:
         //      -1  出错
+        //      0   成功
         static int ClearBorrowItem(
             RmsChannel channel,
             string strBorrowItemBarcode,
-            List<string> aPath,
+            List<string> reader_paths,
             out string strError)
         {
             strError = "";
 
-            for (int i = 0; i < aPath.Count; i++)
+            for (int i = 0; i < reader_paths.Count; i++)
             {
                 string strXml = "";
                 string strMetaData = "";
                 string strOutputPath = "";
                 byte[] timestamp = null;
 
-                string strPath = aPath[i];
+                string strPath = reader_paths[i];
 
                 long lRet = channel.GetRes(strPath,
                     out strXml,

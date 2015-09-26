@@ -38,7 +38,7 @@ namespace dp2Circulation
 
         public XmlDocument CfgDom = null;
 
-        OneActionCfg _stateActionCfg = null;   // 当前 <state> 字段对应的配置参数
+        // OneActionCfg _stateActionCfg = null;   // 当前 <state> 字段对应的配置参数
 
         public ChangeItemActionDialog()
         {
@@ -47,6 +47,7 @@ namespace dp2Circulation
 
         private void ChangeItemActionDialog_Load(object sender, EventArgs e)
         {
+#if NO
             // state
             this.changeStateActionControl1.ActionString = this.MainForm.AppInfo.GetString(
                 "change_"+this.DbType+"_param",
@@ -61,17 +62,6 @@ namespace dp2Circulation
                 "change_" + this.DbType + "_param",
                 "state_remove",
                 "");
-
-#if NO
-            // 其它字段
-            this.comboBox_fieldName.Text = this.MainForm.AppInfo.GetString(
-                "change_" + this.DbType + "_param",
-"field_name",
-"<不使用>");
-            this.textBox_fieldValue.Text = this.MainForm.AppInfo.GetString(
-                "change_" + this.DbType + "_param",
-"field_value",
-"");
 #endif
 
             // 恢复 listview 中的内容
@@ -114,6 +104,7 @@ namespace dp2Circulation
                 return -1;
             }
 
+#if NO
             OneActionCfg cfg = null;
 
             // 根据语言相关的 caption 值或者 <> {} 形态的 element 名， 获取 <action> 配置参数
@@ -130,11 +121,11 @@ namespace dp2Circulation
                 throw new Exception(strError);
 
             this._stateActionCfg = cfg;
-
-
+#endif
             return 0;
         }
 
+#if NO
         private void changeStateActionControl1_AddOrRemoveListDropDown(object sender, EventArgs e)
         {
             var combobox = sender as DigitalPlatform.CommonControl.CheckedComboBox;
@@ -147,7 +138,6 @@ namespace dp2Circulation
 
         int m_nInDropDown = 0;
 
-
         void FillStateDropDown(CheckedComboBox combobox)
         {
             // 防止重入
@@ -155,8 +145,10 @@ namespace dp2Circulation
                 return;
 
             string strTableName = "";
+#if NO
             if (_stateActionCfg != null)
                 strTableName = _stateActionCfg.List;
+#endif
 
             Cursor oldCursor = this.Cursor;
             this.Cursor = Cursors.WaitCursor;
@@ -201,7 +193,7 @@ namespace dp2Circulation
             }
         }
 
-
+#endif
         private void button_OK_Click(object sender, EventArgs e)
         {
             string strError = "";
@@ -212,6 +204,7 @@ namespace dp2Circulation
                 goto ERROR1;
             }
 
+#if NO
             // state
             this.MainForm.AppInfo.SetString(
                 "change_" + this.DbType + "_param",
@@ -227,17 +220,6 @@ namespace dp2Circulation
                 "change_" + this.DbType + "_param",
                 "state_remove",
                 this.changeStateActionControl1.RemoveString );
-
-#if NO
-            // 其它字段
-            this.MainForm.AppInfo.SetString(
-                "change_" + this.DbType + "_param",
-"field_name",
-this.comboBox_fieldName.Text);
-            this.MainForm.AppInfo.SetString(
-                "change_" + this.DbType + "_param",
-"field_value",
-this.textBox_fieldValue.Text);
 #endif
 
             this.DialogResult = System.Windows.Forms.DialogResult.OK;
@@ -253,52 +235,13 @@ this.textBox_fieldValue.Text);
             this.Close();
         }
 
+#if NO
         private void changeStateActionControl1_ActionChanged(object sender, EventArgs e)
         {
             if (this.changeStateActionControl1.IsActionChange == false)
                 this.label_state.BackColor = this.BackColor;
             else
                 this.label_state.BackColor = Color.Green;
-        }
-
-#if NO
-        private void comboBox_fieldName_TextChanged(object sender, EventArgs e)
-        {
-            if (this.comboBox_fieldName.Text == "<不使用>")
-            {
-                this.textBox_fieldValue.Text = "";
-                this.textBox_fieldValue.Enabled = false;
-
-                this.label_fieldName.BackColor = this.BackColor;
-            }
-            else
-            {
-                this.textBox_fieldValue.Enabled = true;
-
-                this.label_fieldName.BackColor = Color.Green;
-            }
-        }
-
-        private void ToolStripMenuItem_rfc1123Single_Click(object sender, EventArgs e)
-        {
-            GetTimeDialog dlg = new GetTimeDialog();
-            dlg.RangeMode = false;
-            try
-            {
-                dlg.Rfc1123String = this.textBox_fieldValue.Text;
-            }
-            catch
-            {
-                this.textBox_fieldValue.Text = "";
-            }
-            this.MainForm.AppInfo.LinkFormState(dlg, "Change"+this.DbType+"ActionDialog_gettimedialog");
-            dlg.ShowDialog(this);
-            this.MainForm.AppInfo.UnlinkFormState(dlg);
-
-            if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
-                return;
-
-            this.textBox_fieldValue.Text = dlg.Rfc1123String;
         }
 #endif
 
@@ -340,12 +283,11 @@ this.textBox_fieldValue.Text);
                 menuItem.Enabled = false;
             contextMenu.MenuItems.Add(menuItem);
 
-
             contextMenu.Show(this.listView_actions, new Point(e.X, e.Y));	
         }
 
         // 获得当前 ListView 中(和外面)已经用过的字段名
-        List<string> GetUsedFieldNames(string strStyle = "state,listview")
+        List<string> GetUsedFieldNames(string strStyle = "listview")    // state,listview
         {
             List<string> results = new List<string>();
 
@@ -353,14 +295,6 @@ this.textBox_fieldValue.Text);
             {
                 results.Add("{state}");
             }
-
-#if NO
-            if (StringUtil.IsInList("other", strStyle) == true)
-            {
-                if (this.comboBox_fieldName.Text != "<不使用>")
-                    results.Add(this.comboBox_fieldName.Text);
-            }
-#endif
 
             if (StringUtil.IsInList("listview", strStyle) == true)
             {
@@ -378,7 +312,7 @@ this.textBox_fieldValue.Text);
         {
             List<OneAction> results = new List<OneAction>();
 
-
+#if NO
             if (this.changeStateActionControl1.ActionString == "<不改变>")
             {
             }
@@ -408,24 +342,55 @@ this.textBox_fieldValue.Text);
                 action.FieldValue = this.changeStateActionControl1.ActionString;
                 results.Add(action);
             }
-
-#if NO
-            if (this.comboBox_fieldName.Text != "<不使用>")
-            {
-                OneAction action = new OneAction();
-                action.FieldName = this.comboBox_fieldName.Text;
-                action.FieldValue = this.textBox_fieldValue.Text;
-                results.Add(action);
-            }
 #endif
 
             foreach (ListViewItem item in this.listView_actions.Items)
             {
+#if NO
                 OneAction action = new OneAction();
                 action.FieldName = ListViewUtil.GetItemText(item, 0);
                 action.FieldValue = ListViewUtil.GetItemText(item, 1);
+                action.Additional = ListViewUtil.GetItemText(item, 2);
 
                 results.Add(action);
+#endif
+                string strFieldName = ListViewUtil.GetItemText(item, 0);
+
+                string strFieldValue = ListViewUtil.GetItemText(item, 1);
+                string strAdd = ListViewUtil.GetItemText(item, 2);
+                string strRemove = ListViewUtil.GetItemText(item, 3);
+                string strAdditional = ListViewUtil.GetItemText(item, 4);
+
+                if (strFieldValue == "<不改变>")
+                {
+                }
+                else if (strFieldValue == "<增、减>")
+                {
+                    if (string.IsNullOrEmpty(strAdd) == false)
+                    {
+                        OneAction action = new OneAction();
+                        action.FieldName = strFieldName;
+                        action.Action = "add";
+                        action.FieldValue = strAdd;
+                        results.Add(action);
+                    }
+                    if (string.IsNullOrEmpty(strRemove) == false)
+                    {
+                        OneAction action = new OneAction();
+                        action.FieldName = strFieldName;
+                        action.Action = "remove";
+                        action.FieldValue = strRemove;
+                        results.Add(action);
+                    }
+                }
+                else
+                {
+                    OneAction action = new OneAction();
+                    action.FieldName = strFieldName;
+                    action.FieldValue = strFieldValue;
+                    results.Add(action);
+                }
+
             }
 
             return results;
@@ -447,6 +412,7 @@ this.textBox_fieldValue.Text);
             dlg.CfgDom = this.CfgDom;
             dlg.UsedFieldNames = GetUsedFieldNames();
             dlg.RefDbName = this.RefDbName;
+            // dlg.AddOrRemoveListDropDown += dlg_AddOrRemoveListDropDown;
             dlg.GetValueTable -= new GetValueTableEventHandler(dlg_GetValueTable);
             dlg.GetValueTable += new GetValueTableEventHandler(dlg_GetValueTable);
             dlg.StartPosition = FormStartPosition.CenterScreen;
@@ -464,10 +430,25 @@ this.textBox_fieldValue.Text);
             ListViewItem item = new ListViewItem();
             ListViewUtil.ChangeItemText(item, 0, dlg.FieldName);
             ListViewUtil.ChangeItemText(item, 1, dlg.FieldValue);
+            ListViewUtil.ChangeItemText(item, 2, dlg.FieldValueAdd); 
+            ListViewUtil.ChangeItemText(item, 3, dlg.FieldValueRemove);
+            ListViewUtil.ChangeItemText(item, 4, dlg.Additional);
 
             this.listView_actions.Items.Insert(index, item);
             ListViewUtil.SelectLine(item, true);
         }
+
+#if NO
+        void dlg_AddOrRemoveListDropDown(object sender, EventArgs e)
+        {
+            var combobox = sender as DigitalPlatform.CommonControl.CheckedComboBox;
+
+            if (combobox.Items.Count > 0)
+                return;
+
+            FillStateDropDown(combobox);
+        }
+#endif
 
         void menu_selectAll_Click(object sender, EventArgs e)
         {
@@ -496,8 +477,13 @@ this.textBox_fieldValue.Text);
             dlg.UsedFieldNames = used_fieldnames;
             dlg.FieldName = ListViewUtil.GetItemText(item, 0);
             dlg.FieldValue = ListViewUtil.GetItemText(item, 1);
+            dlg.FieldValueAdd = ListViewUtil.GetItemText(item, 2);
+            dlg.FieldValueRemove = ListViewUtil.GetItemText(item, 3);
+
+            // dlg.Additional = ListViewUtil.GetItemText(item, 4);
 
             dlg.RefDbName = this.RefDbName;
+            // dlg.AddOrRemoveListDropDown += dlg_AddOrRemoveListDropDown;
             dlg.GetValueTable -= new GetValueTableEventHandler(dlg_GetValueTable);
             dlg.GetValueTable += new GetValueTableEventHandler(dlg_GetValueTable);
             dlg.StartPosition = FormStartPosition.CenterScreen;
@@ -508,6 +494,9 @@ this.textBox_fieldValue.Text);
 
             ListViewUtil.ChangeItemText(item, 0, dlg.FieldName);
             ListViewUtil.ChangeItemText(item, 1, dlg.FieldValue);
+            ListViewUtil.ChangeItemText(item, 2, dlg.FieldValueAdd);
+            ListViewUtil.ChangeItemText(item, 3, dlg.FieldValueRemove);
+            ListViewUtil.ChangeItemText(item, 4, dlg.Additional);
 
             ListViewUtil.SelectLine(item, true);
             return;
@@ -568,7 +557,7 @@ this.textBox_fieldValue.Text);
         public string FieldName = "";
         public string FieldValue = "";
         public string Action = "";  // 如果为空，表示替换为；如果为 add / remove，表示增减部分
-
+        public string Additional = "";  // 附加的特性参数
     }
 
     // 一个 <action> 配置事项
@@ -588,5 +577,10 @@ this.textBox_fieldValue.Text);
         /// list 属性值。表示从服务器获取 list 时的 name 参数
         /// </summary>
         public string List = "";
+
+        /// <summary>
+        /// 附加的信息
+        /// </summary>
+        public string Additional = "";
     }
 }
