@@ -3,7 +3,12 @@ using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
+using System.Collections.Generic;
+
+using Newtonsoft.Json;
+
 using DigitalPlatform.GUI;
+using DigitalPlatform.CommonControl;
 
 namespace DigitalPlatform.CirculationClient
 {
@@ -20,7 +25,6 @@ namespace DigitalPlatform.CirculationClient
 		private System.Windows.Forms.Label label_userName;
 		private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button button_OK;
-        private TextBox textBox_serverAddr;
 		public System.Windows.Forms.TextBox textBox_comment;
         public TextBox textBox_location;
         private Label label4;
@@ -41,7 +45,8 @@ namespace DigitalPlatform.CirculationClient
         private ToolStripButton toolStripButton_server_setHongnibaServer;
         private ToolStripSeparator toolStripSeparator1;
 
-        public bool SetDefaultMode = false; // 是否为 设置缺省帐户 状态？ 第一次进入程序时候是这个状态，其他登录失败后重新输入以便登录的时候不是这个状态
+        public bool SetDefaultMode = false;
+        private ComboBox comboBox_serverAddr; // 是否为 设置缺省帐户 状态？ 第一次进入程序时候是这个状态，其他登录失败后重新输入以便登录的时候不是这个状态
 
         public bool SupervisorMode = false; // 是否为 supervisor 模式。也就是管理员模式。在这个模式下， 无法修改 URL ，无法选择读者类型，不出现 红泥巴数字平台服务器按钮
 
@@ -82,7 +87,6 @@ namespace DigitalPlatform.CirculationClient
             this.checkBox_savePasswordShort = new System.Windows.Forms.CheckBox();
             this.textBox_password = new System.Windows.Forms.TextBox();
             this.textBox_userName = new System.Windows.Forms.TextBox();
-            this.textBox_serverAddr = new System.Windows.Forms.TextBox();
             this.button_cancel = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
             this.label_userName = new System.Windows.Forms.Label();
@@ -97,6 +101,7 @@ namespace DigitalPlatform.CirculationClient
             this.toolStripButton_server_setXeServer = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripButton_server_setHongnibaServer = new System.Windows.Forms.ToolStripButton();
+            this.comboBox_serverAddr = new System.Windows.Forms.ComboBox();
             this.toolStrip_server.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -140,20 +145,6 @@ namespace DigitalPlatform.CirculationClient
             this.textBox_userName.Size = new System.Drawing.Size(156, 21);
             this.textBox_userName.TabIndex = 3;
             this.textBox_userName.Click += new System.EventHandler(this.controls_Click);
-            // 
-            // textBox_serverAddr
-            // 
-            this.textBox_serverAddr.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.textBox_serverAddr.BackColor = System.Drawing.SystemColors.ControlLight;
-            this.textBox_serverAddr.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.textBox_serverAddr.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.textBox_serverAddr.ImeMode = System.Windows.Forms.ImeMode.Off;
-            this.textBox_serverAddr.Location = new System.Drawing.Point(12, 164);
-            this.textBox_serverAddr.Name = "textBox_serverAddr";
-            this.textBox_serverAddr.Size = new System.Drawing.Size(414, 21);
-            this.textBox_serverAddr.TabIndex = 2;
-            this.textBox_serverAddr.Click += new System.EventHandler(this.controls_Click);
             // 
             // button_cancel
             // 
@@ -323,6 +314,21 @@ namespace DigitalPlatform.CirculationClient
             this.toolStripButton_server_setHongnibaServer.ToolTipText = "设为红泥巴.数字平台服务器";
             this.toolStripButton_server_setHongnibaServer.Click += new System.EventHandler(this.toolStripButton_server_setHongnibaServer_Click);
             // 
+            // comboBox_serverAddr
+            // 
+            this.comboBox_serverAddr.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.comboBox_serverAddr.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.comboBox_serverAddr.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.comboBox_serverAddr.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.comboBox_serverAddr.FormattingEnabled = true;
+            this.comboBox_serverAddr.Location = new System.Drawing.Point(12, 164);
+            this.comboBox_serverAddr.Name = "comboBox_serverAddr";
+            this.comboBox_serverAddr.Size = new System.Drawing.Size(414, 20);
+            this.comboBox_serverAddr.TabIndex = 27;
+            this.comboBox_serverAddr.SelectedIndexChanged += new System.EventHandler(this.comboBox_serverAddr_SelectedIndexChanged);
+            this.comboBox_serverAddr.Click += new System.EventHandler(this.controls_Click);
+            // 
             // CirculationLoginDlg
             // 
             this.AcceptButton = this.button_OK;
@@ -330,6 +336,7 @@ namespace DigitalPlatform.CirculationClient
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlDark;
             this.ClientSize = new System.Drawing.Size(438, 376);
+            this.Controls.Add(this.comboBox_serverAddr);
             this.Controls.Add(this.checkBox_savePasswordLong);
             this.Controls.Add(this.checkBox_isReader);
             this.Controls.Add(this.textBox_location);
@@ -338,7 +345,6 @@ namespace DigitalPlatform.CirculationClient
             this.Controls.Add(this.checkBox_savePasswordShort);
             this.Controls.Add(this.textBox_password);
             this.Controls.Add(this.textBox_userName);
-            this.Controls.Add(this.textBox_serverAddr);
             this.Controls.Add(this.button_cancel);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label_userName);
@@ -358,10 +364,25 @@ namespace DigitalPlatform.CirculationClient
 		}
 		#endregion
 
+        bool _serverAddrEnabled = true;
+        public bool ServerAddrEnabled
+        {
+            get
+            {
+                return _serverAddrEnabled;
+            }
+            set
+            {
+                _serverAddrEnabled = value;
+                this.comboBox_serverAddr.Enabled = value;
+            }
+        }
+
 		private void button_OK_Click(object sender, System.EventArgs e)
 		{
-			if (textBox_serverAddr.Text == "" 
-				&& textBox_serverAddr.Enabled == true)
+            if (comboBox_serverAddr.Text == "" 
+				// && textBox_serverAddr.Enabled == true
+                && this.ServerAddrEnabled == true)
 			{
 				MessageBox.Show(this, "尚未输入服务器地址");
 				return;
@@ -371,6 +392,8 @@ namespace DigitalPlatform.CirculationClient
 				MessageBox.Show(this, "尚未输入用户名");
 				return;
 			}
+
+            this.SavePannel();
 
 			this.DialogResult = DialogResult.OK;
 			this.Close();
@@ -391,7 +414,7 @@ namespace DigitalPlatform.CirculationClient
             {
                 this.checkBox_isReader.Visible = false;
                 this.toolStrip_server.Visible = false;
-                this.textBox_serverAddr.ReadOnly = true;
+                this.comboBox_serverAddr.Enabled = false;   // readonly
             }
 
             API.PostMessage(this.Handle, WM_MOVE_FOCUS, 0, 0);
@@ -463,11 +486,11 @@ namespace DigitalPlatform.CirculationClient
         {
             get
             {
-                return this.textBox_serverAddr.Text;
+                return this.comboBox_serverAddr.Text;
             }
             set
             {
-                this.textBox_serverAddr.Text = value;
+                this.comboBox_serverAddr.Text = value;
             }
         }
 
@@ -644,10 +667,10 @@ Keys keyData)
 
         private void toolStripButton_server_setHongnibaServer_Click(object sender, EventArgs e)
         {
-            if (this.textBox_serverAddr.Text != ServerDlg.HnbUrl)
+            if (this.comboBox_serverAddr.Text != ServerDlg.HnbUrl)
             {
                 // this.textBox_serverName.Text = "红泥巴.数字平台服务器";
-                this.textBox_serverAddr.Text = ServerDlg.HnbUrl;
+                this.comboBox_serverAddr.Text = ServerDlg.HnbUrl;
 
                 this.textBox_userName.Text = "";
                 this.textBox_password.Text = "";
@@ -658,10 +681,10 @@ Keys keyData)
 
         private void toolStripButton_server_setXeServer_Click(object sender, EventArgs e)
         {
-            if (this.textBox_serverAddr.Text != dp2LibraryXEServerUrl)
+            if (this.comboBox_serverAddr.Text != dp2LibraryXEServerUrl)
             {
                 // this.textBox_serverName.Text = "单机版服务器";
-                this.textBox_serverAddr.Text = dp2LibraryXEServerUrl;
+                this.comboBox_serverAddr.Text = dp2LibraryXEServerUrl;
 
                 this.textBox_userName.Text = "supervisor";
                 this.textBox_password.Text = "";
@@ -685,6 +708,127 @@ Keys keyData)
                 this.toolStrip_server.BackColor = this.BackColor;
             }
         }
+
+        private void comboBox_serverAddr_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        List<OneUrl> _urlList = new List<OneUrl>();
+
+        public string UsedList
+        {
+            get
+            {
+                return JsonConvert.SerializeObject(_urlList);
+            }
+            set
+            {
+                this._urlList = JsonConvert.DeserializeObject<List<OneUrl>>(value);
+                if (this._urlList == null)
+                    this._urlList = new List<OneUrl>();
+
+                FillList(this._urlList);
+            }
+        }
+
+        // 填充组合框。组合框内显示 URL 列表
+        void FillList(List<OneUrl> urlList)
+        {
+            this.comboBox_serverAddr.Items.Clear();
+            foreach(OneUrl url in urlList)
+            {
+                this.comboBox_serverAddr.Items.Add(url.Url);
+            }
+        }
+
+        // 将一个 URL 相关的数据设定到面板
+        void SetPanel(string strURL)
+        {
+            // 清除面板
+            this.ClearPanel();
+
+            OneUrl url = FindUrl(strURL);
+            if (url == null)
+                return;
+
+            this.comboBox_serverAddr.Text = url.Url;
+            this.UiState = url.UiState;
+        }
+
+        // 将当前面板数据保存起来
+        void SavePannel()
+        {
+            if (string.IsNullOrEmpty(this.comboBox_serverAddr.Text) == true)
+                return;
+
+            OneUrl url = FindUrl(this.comboBox_serverAddr.Text);
+            if (url == null)
+            {
+                url = new OneUrl();
+                url.Url = this.comboBox_serverAddr.Text;
+                this._urlList.Add(url);
+            }
+
+            url.UiState = this.UiState;
+
+            // TODO: 是否更新组合框列表显示?
+        }
+
+        void ClearPanel()
+        {
+            this.comboBox_serverAddr.Text = "";
+            this.textBox_userName.Text = "";
+            this.textBox_password.Text = "";
+            this.checkBox_isReader.Checked = false;
+            this.checkBox_savePasswordLong.Checked = false;
+            this.checkBox_savePasswordShort.Checked = false;
+        }
+
+        public string UiState
+        {
+            get
+            {
+                List<object> controls = new List<object>();
+                controls.Add(this.textBox_userName);
+                controls.Add(this.checkBox_isReader);
+                SavePassword save = new SavePassword(this.textBox_password, this.checkBox_savePasswordLong);
+                controls.Add(save);
+                controls.Add(this.checkBox_savePasswordShort);
+                return GuiState.GetUiState(controls);
+            }
+            set
+            {
+                List<object> controls = new List<object>();
+                controls.Add(this.textBox_userName);
+                controls.Add(this.checkBox_isReader);
+                SavePassword save = new SavePassword(this.textBox_password, this.checkBox_savePasswordLong);
+                controls.Add(save);
+                controls.Add(this.checkBox_savePasswordShort);
+                GuiState.SetUiState(controls, value);
+            }
+        }
+
+        OneUrl FindUrl(string strURL)
+        {
+            foreach(OneUrl url in this._urlList)
+            {
+                if (url.Url == strURL)
+                    return url;
+            }
+
+            return null;
+        }
+
+        private void comboBox_serverAddr_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            SetPanel(this.comboBox_serverAddr.Text);
+        }
 	}
 
+    class OneUrl
+    {
+        public string Url = "";
+        public string UiState = "";
+    }
 }

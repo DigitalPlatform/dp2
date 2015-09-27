@@ -4501,6 +4501,10 @@ namespace dp2Circulation
             CirculationLoginDlg dlg = new CirculationLoginDlg();
             MainForm.SetControlFont(dlg, this.DefaultFont);
 
+            dlg.UsedList = AppInfo.GetString("login",
+        "used_list",
+        "");
+
             if (String.IsNullOrEmpty(strServerUrl) == true)
             {
                 dlg.ServerUrl =
@@ -4578,6 +4582,10 @@ namespace dp2Circulation
             {
                 return null;
             }
+
+            AppInfo.SetString("login",
+"used_list",
+dlg.UsedList);
 
             // 如果是即将访问 dp2libraryXE 单机版，这里要启动它
             if (string.Compare(dlg.ServerUrl, CirculationLoginDlg.dp2LibraryXEServerUrl, true) == 0)
