@@ -1342,9 +1342,21 @@ MessageBoxDefaultButton.Button1);
                 dlg.GetValueTable -= new GetValueTableEventHandler(dlg_GetValueTable);
                 dlg.GetValueTable += new GetValueTableEventHandler(dlg_GetValueTable);
 
+                dlg.UiState = this.MainForm.AppInfo.GetString(
+this.DbType + "search_form",
+"ChangeItemActionDialog_uiState",
+"");
+
                 this.MainForm.AppInfo.LinkFormState(dlg, this.DbType + "searchform_quickchangedialog_state");
                 dlg.ShowDialog(this);
                 this.MainForm.AppInfo.UnlinkFormState(dlg);
+
+
+                this.MainForm.AppInfo.SetString(
+this.DbType + "search_form",
+"ChangeItemActionDialog_uiState",
+dlg.UiState);
+
 
                 if (dlg.DialogResult == System.Windows.Forms.DialogResult.Cancel)
                     return 0;   // 放弃

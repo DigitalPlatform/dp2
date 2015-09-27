@@ -13,6 +13,7 @@ using DigitalPlatform.IO;
 using DigitalPlatform;
 using System.Diagnostics;
 using DigitalPlatform.Text;
+using System.IO;
 
 namespace dp2Circulation
 {
@@ -135,16 +136,19 @@ namespace dp2Circulation
             if (cfg == null)
             {
                 this.ToolStripMenuItem_rfc1123Single.Enabled = true;
+                this.ToolStripMenuItem_readerRights.Enabled = true;
                 return;
             }
+
             if (cfg.Type == "rfc1123")
-            {
                 this.ToolStripMenuItem_rfc1123Single.Enabled = true;
-            }
             else
-            {
                 this.ToolStripMenuItem_rfc1123Single.Enabled = false;
-            }
+
+            if (StringUtil.IsInList("readerRights", cfg.List) == true)
+                this.ToolStripMenuItem_readerRights.Enabled = true;
+            else
+                this.ToolStripMenuItem_readerRights.Enabled = false;
         }
 
         // 校验数据的正确性
@@ -635,6 +639,12 @@ namespace dp2Circulation
             if (combobox.Items.Count > 0)
                 return;
 
+            if (StringUtil.IsInList("readerRights", this._actionCfg.List) == true)
+            {
+                OpenRightsDialog(combobox);
+                return;
+            }
+
             FillStateDropDown(combobox);
         }
 
@@ -651,7 +661,50 @@ namespace dp2Circulation
             if (combobox.Items.Count > 0)
                 return;
 
+            if (StringUtil.IsInList("readerRights", this._actionCfg.List) == true)
+            {
+                OpenRightsDialog(combobox);
+                return;
+            }
+
             FillStateDropDown(combobox);
+        }
+
+        public string UserDir
+        {
+            get;
+            set;
+        }
+
+        public string DataDir
+        {
+            get;
+            set;
+        }
+
+        void OpenRightsDialog(Control combobox)
+        {
+            DigitalPlatform.CommonControl.PropertyDlg dlg = new DigitalPlatform.CommonControl.PropertyDlg();
+            MainForm.SetControlFont(dlg, this.Font, false);
+
+            string strRightsCfgFileName = Path.Combine(this.UserDir, "objectrights.xml");
+
+            string strInput = combobox.Text;
+            StringUtil.RemoveFromInList("<增、减>", true, ref strInput);
+            StringUtil.RemoveFromInList("<不改变>", true, ref strInput);
+
+            dlg.StartPosition = FormStartPosition.CenterScreen;
+            dlg.Text = "读者权限";
+            dlg.PropertyString = strInput;
+            dlg.CfgFileName = Path.Combine(this.DataDir, "userrightsdef.xml");
+            if (File.Exists(strRightsCfgFileName) == true)
+                dlg.CfgFileName += "," + strRightsCfgFileName;
+            dlg.ShowDialog(this);
+
+            if (dlg.DialogResult != DialogResult.OK)
+                return;
+
+            combobox.Text = dlg.PropertyString;
         }
 
         void FillStateDropDown(CheckedComboBox combobox)
@@ -722,6 +775,11 @@ namespace dp2Circulation
         private void checkedComboBox_stateRemove_TextChanged(object sender, EventArgs e)
         {
             Global.FilterValueList(this, (Control)sender);
+        }
+
+        private void ToolStripMenuItem_readerRights_Click(object sender, EventArgs e)
+        {
+            OpenRightsDialog(this.comboBox_fieldValue);
         }
 
     }

@@ -44,6 +44,7 @@
             this.label_remove = new System.Windows.Forms.Label();
             this.checkedComboBox_stateAdd = new DigitalPlatform.CommonControl.CheckedComboBox();
             this.label_add = new System.Windows.Forms.Label();
+            this.ToolStripMenuItem_readerRights = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -79,10 +80,10 @@
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripDropDownButton_inputTimeString});
             this.toolStrip1.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
-            this.toolStrip1.Location = new System.Drawing.Point(309, 36);
+            this.toolStrip1.Location = new System.Drawing.Point(278, 36);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.toolStrip1.Size = new System.Drawing.Size(30, 23);
+            this.toolStrip1.Size = new System.Drawing.Size(61, 23);
             this.toolStrip1.TabIndex = 5;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -91,7 +92,8 @@
             this.toolStripDropDownButton_inputTimeString.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
             this.toolStripDropDownButton_inputTimeString.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ToolStripMenuItem_rfc1123Single,
-            this.toolStripSeparator1});
+            this.toolStripSeparator1,
+            this.ToolStripMenuItem_readerRights});
             this.toolStripDropDownButton_inputTimeString.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton_inputTimeString.Image")));
             this.toolStripDropDownButton_inputTimeString.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripDropDownButton_inputTimeString.Name = "toolStripDropDownButton_inputTimeString";
@@ -218,6 +220,13 @@
             this.label_add.TabIndex = 14;
             this.label_add.Text = "增(&A):";
             // 
+            // ToolStripMenuItem_readerRights
+            // 
+            this.ToolStripMenuItem_readerRights.Name = "ToolStripMenuItem_readerRights";
+            this.ToolStripMenuItem_readerRights.Size = new System.Drawing.Size(171, 22);
+            this.ToolStripMenuItem_readerRights.Text = "读者权限值...";
+            this.ToolStripMenuItem_readerRights.Click += new System.EventHandler(this.ToolStripMenuItem_readerRights_Click);
+            // 
             // OneActionDialog
             // 
             this.AcceptButton = this.button_OK;
@@ -266,5 +275,6 @@
         private System.Windows.Forms.Label label_remove;
         private DigitalPlatform.CommonControl.CheckedComboBox checkedComboBox_stateAdd;
         private System.Windows.Forms.Label label_add;
+        private System.Windows.Forms.ToolStripMenuItem ToolStripMenuItem_readerRights;
     }
 }

@@ -106,7 +106,7 @@
             // 
             // columnHeader_add
             // 
-            this.columnHeader_add.Text = "加";
+            this.columnHeader_add.Text = "增";
             this.columnHeader_add.Width = 100;
             // 
             // columnHeader_remove

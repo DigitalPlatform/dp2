@@ -433,6 +433,8 @@ namespace dp2Circulation
             OneActionDialog dlg = new OneActionDialog();
 
             MainForm.SetControlFont(dlg, this.Font, false);
+            dlg.UserDir = this.MainForm.UserDir;
+            dlg.DataDir = this.MainForm.DataDir;
             dlg.CfgDom = this.CfgDom;
             dlg.UsedFieldNames = GetUsedFieldNames();
             dlg.RefDbName = this.RefDbName;
@@ -497,6 +499,8 @@ namespace dp2Circulation
             OneActionDialog dlg = new OneActionDialog();
 
             MainForm.SetControlFont(dlg, this.Font, false);
+            dlg.UserDir = this.MainForm.UserDir;
+            dlg.DataDir = this.MainForm.DataDir;
             dlg.CfgDom = this.CfgDom;
             dlg.UsedFieldNames = used_fieldnames;
             dlg.FieldName = ListViewUtil.GetItemText(item, 0);
@@ -603,6 +607,23 @@ namespace dp2Circulation
                 this.toolStripButton_modify.Enabled = false;
             }
         }
+
+        public string UiState
+        {
+            get
+            {
+                List<object> controls = new List<object>();
+                controls.Add(this.listView_actions);
+                return GuiState.GetUiState(controls);
+            }
+            set
+            {
+                List<object> controls = new List<object>();
+                controls.Add(this.listView_actions);
+                GuiState.SetUiState(controls, value);
+            }
+        }
+
     }
 
     internal class OneAction
