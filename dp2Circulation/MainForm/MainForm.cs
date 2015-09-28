@@ -667,26 +667,8 @@ namespace dp2Circulation
                 }
             }
 
-#if NO
-            // 记忆关闭时MDI窗口的Maximized状态
-            if (this.ActiveMdiChild != null)
-                this.MdiWindowState = this.ActiveMdiChild.WindowState;
-#endif
+            CancelUpdateApplication();
         }
-
-#if NO
-        void DisableChildTopMost()
-        {
-            foreach (Control form in this.Controls)
-            {
-                if (form.TopMost == true)
-                {
-                    form.TopMost = false;
-                    form.WindowState = FormWindowState.Minimized;
-                }
-            }
-        }
-#endif
 
         void TryReportPromptLines()
         {
@@ -731,11 +713,13 @@ namespace dp2Circulation
             if (m_propertyViewer != null)
                 m_propertyViewer.Close();
 
-             AppInfo.SetString(
-                "mainform",
-                "current_camera",
-                this.qrRecognitionControl1.CurrentCamera); 
-            this.qrRecognitionControl1.Catched -= new DigitalPlatform.Drawing.CatchedEventHandler(qrRecognitionControl1_Catched);
+            if (AppInfo != null)
+                AppInfo.SetString(
+                   "mainform",
+                   "current_camera",
+                   this.qrRecognitionControl1.CurrentCamera);
+            if (this.qrRecognitionControl1 != null)
+                this.qrRecognitionControl1.Catched -= new DigitalPlatform.Drawing.CatchedEventHandler(qrRecognitionControl1_Catched);
 
             if (this.MdiClient != null)
                 this.MdiClient.ClientSizeChanged -= new EventHandler(MdiClient_ClientSizeChanged);
@@ -4626,7 +4610,6 @@ dlg.UsedList);
                 "config",
                 "circulation_server_url",
                 dlg.ServerUrl);
-
 
             return dlg;
         }

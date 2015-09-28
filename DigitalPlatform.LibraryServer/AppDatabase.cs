@@ -2290,6 +2290,7 @@ namespace DigitalPlatform.LibraryServer
             string strExclude = "";
 
             bool bAutoRebuildKeys = false;  // 2014/11/26
+            bool bRecoverModeKeys = false;  // 2015/9/28
 
             if (String.IsNullOrEmpty(strDatabaseInfo) == false)
             {
@@ -2309,6 +2310,7 @@ namespace DigitalPlatform.LibraryServer
                     strInclude = DomUtil.GetAttr(style_node, "include");
                     strExclude = DomUtil.GetAttr(style_node, "exclude");
                     bAutoRebuildKeys = DomUtil.GetBooleanParam(style_node, "autoRebuildKeys", false);
+                    bRecoverModeKeys = DomUtil.GetBooleanParam(style_node, "recoverModeKeys", false);
                 }
             }
 
@@ -2363,6 +2365,7 @@ namespace DigitalPlatform.LibraryServer
                         strName,
                         strInclude,
                         strExclude,
+                        bRecoverModeKeys,
                         out strError);
                     if (nRet == -1)
                     {
@@ -2383,6 +2386,7 @@ namespace DigitalPlatform.LibraryServer
                             strEntityDbName,
                             strInclude,
                             strExclude,
+                        bRecoverModeKeys,
                             out strError);
                         if (nRet == -1)
                         {
@@ -2404,6 +2408,7 @@ namespace DigitalPlatform.LibraryServer
                             strOrderDbName,
                             strInclude,
                             strExclude,
+                        bRecoverModeKeys,
                             out strError);
                         if (nRet == -1)
                         {
@@ -2424,6 +2429,7 @@ namespace DigitalPlatform.LibraryServer
                             strIssueDbName,
                             strInclude,
                             strExclude,
+                        bRecoverModeKeys,
                             out strError);
                         if (nRet == -1)
                         {
@@ -2445,6 +2451,7 @@ namespace DigitalPlatform.LibraryServer
                             strCommentDbName,
                             strInclude,
                             strExclude,
+                        bRecoverModeKeys,
                             out strError);
                         if (nRet == -1)
                         {
@@ -2483,6 +2490,7 @@ namespace DigitalPlatform.LibraryServer
                         strName,
                         strInclude,
                         strExclude,
+                        bRecoverModeKeys,
                         out strError);
                     if (nRet == -1)
                     {
@@ -2519,6 +2527,7 @@ namespace DigitalPlatform.LibraryServer
                         strName,
                         strInclude,
                         strExclude,
+                        bRecoverModeKeys,
                         out strError);
                     if (nRet == -1)
                     {
@@ -2556,6 +2565,7 @@ namespace DigitalPlatform.LibraryServer
                         strName,
                         strInclude,
                         strExclude,
+                        bRecoverModeKeys,
                         out strError);
                     if (nRet == -1)
                     {
@@ -2593,6 +2603,7 @@ namespace DigitalPlatform.LibraryServer
                         strName,
                         strInclude,
                         strExclude,
+                        bRecoverModeKeys,
                         out strError);
                     if (nRet == -1)
                     {
@@ -2638,6 +2649,7 @@ namespace DigitalPlatform.LibraryServer
                         strName,
                         strInclude,
                         strExclude,
+                        bRecoverModeKeys,
                         out strError);
                     if (nRet == -1)
                     {
@@ -2666,6 +2678,7 @@ namespace DigitalPlatform.LibraryServer
                         strName,
                         strInclude,
                         strExclude,
+                        bRecoverModeKeys,
                         out strError);
                     if (nRet == -1)
                     {
@@ -2693,6 +2706,7 @@ namespace DigitalPlatform.LibraryServer
                         strName,
                         strInclude,
                         strExclude,
+                        bRecoverModeKeys,
                         out strError);
                     if (nRet == -1)
                     {
@@ -2721,6 +2735,7 @@ namespace DigitalPlatform.LibraryServer
                         strName,
                         strInclude,
                         strExclude,
+                        bRecoverModeKeys,
                         out strError);
                     if (nRet == -1)
                     {
@@ -2749,6 +2764,7 @@ namespace DigitalPlatform.LibraryServer
                         strName,
                         strInclude,
                         strExclude,
+                        bRecoverModeKeys,
                         out strError);
                     if (nRet == -1)
                     {
@@ -2786,6 +2802,7 @@ namespace DigitalPlatform.LibraryServer
                         strName,
                         strInclude,
                         strExclude,
+                        bRecoverModeKeys,
                         out strError);
                     if (nRet == -1)
                     {
@@ -4560,6 +4577,8 @@ namespace DigitalPlatform.LibraryServer
         }
 
         // 根据数据库模板的定义，刷新一个已经存在的数据库的定义
+        // parameters:
+        //      bRecoverModeKeys    是否采用 keys_recover 来刷新 keys 配置文件
         // return:
         //      -1
         //      0   keys定义没有更新
@@ -4569,6 +4588,7 @@ namespace DigitalPlatform.LibraryServer
             string strDatabaseName,
             string strIncludeFilenames,
             string strExcludeFilenames,
+            bool bRecoverModeKeys,
             out string strError)
         {
             strError = "";
@@ -4608,8 +4628,14 @@ namespace DigitalPlatform.LibraryServer
                         continue;
                 }
 
-
                 string strFullPath = fis[i].FullName;
+
+                if (bRecoverModeKeys == true && strName == "keys")
+                {
+                    string strFullPathRecover = Path.Combine(Path.GetDirectoryName(strFullPath), "keys_recover");
+                    if (File.Exists(strFullPathRecover) == true)
+                        strFullPath = strFullPathRecover;
+                }
 
                 nRet = ConvertGb2312TextfileToUtf8(strFullPath,
                     out strError);
@@ -4628,11 +4654,9 @@ namespace DigitalPlatform.LibraryServer
 
                 new_stream.Seek(0, SeekOrigin.Begin);
 
-
                 try
                 {
                     string strPath = strDatabaseName + "/cfgs/" + strName;
-
 
                     // 获取已有的配置文件对象
                     byte[] timestamp = null;

@@ -169,6 +169,8 @@ public class MyKeysHost : KeysHost
     <caption lang="zh-CN">电话</caption>
     <caption lang="en">Telephone</caption>
   </table>
+  
+  <!-- 平时不需要这个检索点，有了它反而会拖慢流通操作的速度
   <key>
     <xpath>*/borrows/borrow/@barcode</xpath>
     <from>borrowitem</from>
@@ -179,6 +181,8 @@ public class MyKeysHost : KeysHost
     <caption lang="zh-CN">所借册条码</caption>
     <caption lang="en">Borrow item barcode</caption>
   </table>
+  -->
+  
   <key>
     <xpath>*/expireDate</xpath>
     <from>expireDate</from>

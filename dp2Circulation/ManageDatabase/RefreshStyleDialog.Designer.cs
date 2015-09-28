@@ -39,6 +39,7 @@ namespace dp2Circulation
             this.button_Cancel = new System.Windows.Forms.Button();
             this.button_OK = new System.Windows.Forms.Button();
             this.checkBox_autoRebuildKeys = new System.Windows.Forms.CheckBox();
+            this.checkBox_recoverState = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -148,7 +149,7 @@ namespace dp2Circulation
             // 
             this.button_Cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.button_Cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.button_Cancel.Location = new System.Drawing.Point(224, 275);
+            this.button_Cancel.Location = new System.Drawing.Point(224, 296);
             this.button_Cancel.Margin = new System.Windows.Forms.Padding(2);
             this.button_Cancel.Name = "button_Cancel";
             this.button_Cancel.Size = new System.Drawing.Size(56, 22);
@@ -160,7 +161,7 @@ namespace dp2Circulation
             // button_OK
             // 
             this.button_OK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button_OK.Location = new System.Drawing.Point(164, 275);
+            this.button_OK.Location = new System.Drawing.Point(164, 296);
             this.button_OK.Margin = new System.Windows.Forms.Padding(2);
             this.button_OK.Name = "button_OK";
             this.button_OK.Size = new System.Drawing.Size(56, 22);
@@ -180,13 +181,25 @@ namespace dp2Circulation
             this.checkBox_autoRebuildKeys.UseVisualStyleBackColor = true;
             this.checkBox_autoRebuildKeys.Visible = false;
             // 
+            // checkBox_recoverState
+            // 
+            this.checkBox_recoverState.AutoSize = true;
+            this.checkBox_recoverState.Location = new System.Drawing.Point(10, 265);
+            this.checkBox_recoverState.Name = "checkBox_recoverState";
+            this.checkBox_recoverState.Size = new System.Drawing.Size(156, 16);
+            this.checkBox_recoverState.TabIndex = 23;
+            this.checkBox_recoverState.Text = "keys 使用日志恢复版(&R)";
+            this.checkBox_recoverState.UseVisualStyleBackColor = true;
+            this.checkBox_recoverState.Visible = false;
+            // 
             // RefreshStyleDialog
             // 
             this.AcceptButton = this.button_OK;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.button_Cancel;
-            this.ClientSize = new System.Drawing.Size(290, 307);
+            this.ClientSize = new System.Drawing.Size(290, 328);
+            this.Controls.Add(this.checkBox_recoverState);
             this.Controls.Add(this.checkBox_autoRebuildKeys);
             this.Controls.Add(this.button_Cancel);
             this.Controls.Add(this.button_OK);
@@ -216,5 +229,6 @@ namespace dp2Circulation
         private System.Windows.Forms.Button button_Cancel;
         private System.Windows.Forms.Button button_OK;
         private System.Windows.Forms.CheckBox checkBox_autoRebuildKeys;
+        private System.Windows.Forms.CheckBox checkBox_recoverState;
     }
 }

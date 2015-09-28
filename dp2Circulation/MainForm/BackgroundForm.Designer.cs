@@ -47,8 +47,15 @@
             this.ClientSize = new System.Drawing.Size(492, 264);
             this.Controls.Add(this.webBrowser1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
             this.Name = "BackgroundForm";
+            this.ShowIcon = false;
+            this.ShowInTaskbar = false;
             this.Text = "背景窗";
+            this.Activated += new System.EventHandler(this.BackgroundForm_Activated);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.BackgroundForm_FormClosing);
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.BackgroundForm_FormClosed);
             this.ResumeLayout(false);
 
         }

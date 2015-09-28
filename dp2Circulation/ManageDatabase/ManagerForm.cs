@@ -759,8 +759,11 @@ namespace dp2Circulation
 
 
                 ListViewItem item = new ListViewItem(strName, 0);
-                item.SubItems.Add(strTypeName);
-                item.SubItems.Add(strShuoming);
+                //item.SubItems.Add(strTypeName);
+                //item.SubItems.Add(strShuoming);
+                ListViewUtil.ChangeItemText(item, DATABASE_COLUMN_TYPENAME, strTypeName);
+                ListViewUtil.ChangeItemText(item, DATABASE_COLUMN_SHUOMING, strShuoming);
+
                 item.Tag = node.OuterXml;   // 记载XML定义片断
 
                 this.listView_databases.Items.Add(item);
@@ -768,6 +771,9 @@ namespace dp2Circulation
 
             return 0;
         }
+
+        const int DATABASE_COLUMN_TYPENAME = 1;
+        const int DATABASE_COLUMN_SHUOMING = 2;
 
         // 确定一个数据库是不是书目库类型?
         bool IsDatabaseBiblioType(string strDatabaseName)
@@ -778,7 +784,7 @@ namespace dp2Circulation
                 string strName = item.Text;
                 if (strName == strDatabaseName)
                 {
-                    string strTypeName = ListViewUtil.GetItemText(item, 1);
+                    string strTypeName = ListViewUtil.GetItemText(item, DATABASE_COLUMN_TYPENAME);
                     string strTypeString = GetTypeString(strTypeName);
 
                     if (strTypeString == "biblio")
@@ -1293,7 +1299,7 @@ namespace dp2Circulation
                 goto ERROR1;
             }
             ListViewItem item = this.listView_databases.SelectedItems[0];
-            string strTypeName = ListViewUtil.GetItemText(item, 1);
+            string strTypeName = ListViewUtil.GetItemText(item, DATABASE_COLUMN_TYPENAME);
             string strName = item.Text;
 
             string strType = GetTypeString(strTypeName);
@@ -1443,7 +1449,7 @@ namespace dp2Circulation
                 goto ERROR1;
             }
             ListViewItem item = this.listView_databases.SelectedItems[0];
-            string strTypeName = ListViewUtil.GetItemText(item, 1);
+            string strTypeName = ListViewUtil.GetItemText(item, DATABASE_COLUMN_TYPENAME);
             string strName = item.Text;
 
             string strType = GetTypeString(strTypeName);
@@ -1629,9 +1635,8 @@ namespace dp2Circulation
             if (this.listView_databases.SelectedItems.Count > 0)
             {
                 strName = this.listView_databases.SelectedItems[0].Text;
-                strType = ListViewUtil.GetItemText(this.listView_databases.SelectedItems[0], 1);
+                strType = ListViewUtil.GetItemText(this.listView_databases.SelectedItems[0], DATABASE_COLUMN_TYPENAME);
             }
-
 
             // 修改数据库
             {
@@ -2069,6 +2074,15 @@ namespace dp2Circulation
             }
              * */
 
+            // 观察里面是否有至少一个读者库
+            bool bHasReaderDatabase = false;
+            foreach (ListViewItem item in this.listView_databases.SelectedItems)
+            {
+                string strTypeName = ListViewUtil.GetItemText(item, DATABASE_COLUMN_TYPENAME);
+                string strTypeString = GetTypeString(strTypeName);
+                if (strTypeString == "reader")
+                    bHasReaderDatabase = true;
+            }
             // 对话框警告
             DialogResult result = MessageBox.Show(this,
                 "确实要刷新数据库 " + strDbNameList + " 的定义?\r\n\r\n说明：1) 数据库被刷新定义后，根据情况可能需要进行刷新数据库内记录的检索点的操作(否则现有记录的检索点可能会不全)。\r\n      2) 如果刷新的是(大)书目库的定义，则(大)书目库从属的实体库、订购库、期库也会一并被刷新定义。",
@@ -2087,6 +2101,9 @@ namespace dp2Circulation
             {
                 style_dlg.AutoRebuildKeysVisible = true;
             }
+
+            if (this.MainForm.ServerVersion >= 2.54)
+                style_dlg.RecoverStateVisible = bHasReaderDatabase;
 
             style_dlg.StartPosition = FormStartPosition.CenterScreen;
             style_dlg.ShowDialog(this);
@@ -2136,6 +2153,11 @@ namespace dp2Circulation
                      "exclude", style_dlg.ExcludeFilenames);
                 DomUtil.SetAttr(style_dom.DocumentElement,
                     "autoRebuildKeys", style_dlg.AutoRebuildKeys == true ? "true" : "false");
+
+                // 2015/9/28
+                DomUtil.SetAttr(style_dom.DocumentElement,
+                    "recoverModeKeys", style_dlg.RecoverState == true ? "true" : "false");
+
 
                 string strKeysChangedDbpaths = "";
 

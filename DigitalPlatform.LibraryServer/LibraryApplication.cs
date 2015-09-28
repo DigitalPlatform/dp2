@@ -93,7 +93,8 @@ namespace DigitalPlatform.LibraryServer
         //      2.51 (2015/9/10) SetReaderInfo() API 增加了一个新的 strAction 值 changereaderbarcode，允许在读者尚有借阅信息的情况下正确修改证件条码号
         //      2.52 (2015/9/17) SetReaderInfo() API 允许使用用户定义的扩充字段。扩充字段在 library.xml 的 circulation 元素 patronAdditionalFields 属性中定义
         //      2.53 (2015/9/26) Borrow() 和 Return() 增加了对总操作时间超过一秒的情况 memo 日志记录的功能。
-        public static string Version = "2.53";
+        //      2.54 (2015/9/28) ManageDatabase() 中刷新检索点定义功能，增加了对读者库选择刷新 keys 为普通状态和适合日志恢复状态的功能
+        public static string Version = "2.54";
 #if NO
         int m_nRefCount = 0;
         public int AddRef()

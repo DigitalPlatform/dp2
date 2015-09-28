@@ -61,5 +61,21 @@ namespace dp2Circulation
 
             AppendHtml("<div id='" + strID + "'>" + HttpUtility.HtmlEncode(strText) + "</div>");
         }
+
+        private void BackgroundForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+
+        }
+
+        private void BackgroundForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (e.CloseReason == CloseReason.UserClosing)   // 2014/8/13
+                e.Cancel = true;
+        }
+
+        private void BackgroundForm_Activated(object sender, EventArgs e)
+        {
+            this.SendToBack();
+        }
     }
 }

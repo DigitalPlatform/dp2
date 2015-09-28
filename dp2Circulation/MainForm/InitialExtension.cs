@@ -32,25 +32,48 @@ namespace dp2Circulation
     {
         #region 自动更新
 
+        enum UpdateState
+        {
+            None = 0,
+            CheckForUpdate = 1,
+            Update = 2,
+            Finish = 3,
+        }
+
+        UpdateState _updateState = UpdateState.None;
+
+        void CancelUpdateApplication()
+        {
+            if (ApplicationDeployment.IsNetworkDeployed)
+            {
+                ApplicationDeployment deployment = ApplicationDeployment.CurrentDeployment;
+                if (_updateState == UpdateState.CheckForUpdate)
+                    deployment.CheckForUpdateAsyncCancel();
+                else if (_updateState == UpdateState.Update)
+                    deployment.UpdateAsyncCancel();
+            }
+        }
+
         private void UpdateApplication()
         {
             if (ApplicationDeployment.IsNetworkDeployed)
             {
                 this.DisplayBackgroundText("开始自动更新\r\n");
-                ApplicationDeployment ad = ApplicationDeployment.CurrentDeployment;
-                ad.CheckForUpdateCompleted += new CheckForUpdateCompletedEventHandler(ad_CheckForUpdateCompleted);
-                ad.CheckForUpdateProgressChanged += new DeploymentProgressChangedEventHandler(ad_CheckForUpdateProgressChanged);
+                ApplicationDeployment deployment = ApplicationDeployment.CurrentDeployment;
+                deployment.CheckForUpdateCompleted += new CheckForUpdateCompletedEventHandler(ad_CheckForUpdateCompleted);
+                deployment.CheckForUpdateProgressChanged += new DeploymentProgressChangedEventHandler(ad_CheckForUpdateProgressChanged);
 
-                ad.CheckForUpdateAsync();
+                _updateState = UpdateState.CheckForUpdate;
+                deployment.CheckForUpdateAsync();
             }
         }
 
         void ad_CheckForUpdateProgressChanged(object sender, DeploymentProgressChangedEventArgs e)
         {
             // downloadStatus.Text = String.Format("Downloading: {0}. {1:D}K of {2:D}K downloaded.", GetProgressString(e.State), e.BytesCompleted / 1024, e.BytesTotal / 1024);
-                this.ShowBackgroundProgress("progress_1",
-                String.Format("Downloading: {0}. {1:D}K of {2:D}K downloaded.", GetProgressString(e.State), e.BytesCompleted / 1024, e.BytesTotal / 1024)
-                );
+            this.ShowBackgroundProgress("progress_1",
+            String.Format("Downloading: {0}. {1:D}K of {2:D}K downloaded.", GetProgressString(e.State), e.BytesCompleted / 1024, e.BytesTotal / 1024)
+            );
         }
 
         string GetProgressString(DeploymentProgressState state)
@@ -112,13 +135,14 @@ namespace dp2Circulation
 
         private void BeginUpdate()
         {
-            ApplicationDeployment ad = ApplicationDeployment.CurrentDeployment;
-            ad.UpdateCompleted += new AsyncCompletedEventHandler(ad_UpdateCompleted);
+            ApplicationDeployment deployment = ApplicationDeployment.CurrentDeployment;
+            deployment.UpdateCompleted += new AsyncCompletedEventHandler(ad_UpdateCompleted);
 
             // Indicate progress in the application's status bar.
-            ad.UpdateProgressChanged += new DeploymentProgressChangedEventHandler(ad_UpdateProgressChanged);
+            deployment.UpdateProgressChanged += new DeploymentProgressChangedEventHandler(ad_UpdateProgressChanged);
 
-            ad.UpdateAsync();
+            _updateState = UpdateState.Update;
+            deployment.UpdateAsync();
         }
 
         void ad_UpdateProgressChanged(object sender, DeploymentProgressChangedEventArgs e)
@@ -131,6 +155,8 @@ namespace dp2Circulation
 
         void ad_UpdateCompleted(object sender, AsyncCompletedEventArgs e)
         {
+            _updateState = UpdateState.Finish;
+
             if (e.Cancelled)
             {
                 this.DisplayBackgroundText("The update of the application's latest version was cancelled.");
@@ -144,7 +170,7 @@ namespace dp2Circulation
 
 #if NO
             DialogResult dr = MessageBox.Show(this,
-                "dp2Circulation 已经在后台更新。是否重启 dp2Circulation? (If you do not restart now, the new version will not take effect until after you quit and launch the application again.)",
+                "dp2Circulation 已经成功更新。是否重启 dp2Circulation? (If you do not restart now, the new version will not take effect until after you quit and launch the application again.)",
                 "Restart Application", 
                 MessageBoxButtons.OKCancel);
             if (DialogResult.OK == dr)
@@ -152,9 +178,8 @@ namespace dp2Circulation
                 Application.Restart();
             }
 #endif
-            this.DisplayBackgroundText("dp2circulation 已经在后台更新。重启可使用新版本 ...\r\n");
+            this.DisplayBackgroundText("dp2circulation 已经成功更新。重启可立即使用新版本。\r\n");
         }
-
 
         #endregion
 
@@ -458,24 +483,28 @@ namespace dp2Circulation
             // 清除以前残余的文件
             cfgCache.Upgrade();
 
-            // 消除上次程序意外终止时遗留的短期保存密码
-            bool bSavePasswordLong =
-    AppInfo.GetBoolean(
-    "default_account",
-    "savepassword_long",
-    false);
-
-            if (bSavePasswordLong == false)
+            if (this.AppInfo != null)
             {
-                AppInfo.SetString(
-                    "default_account",
-                    "password",
-                    "");
+                // 消除上次程序意外终止时遗留的短期保存密码
+                bool bSavePasswordLong =
+        AppInfo.GetBoolean(
+        "default_account",
+        "savepassword_long",
+        false);
+
+                if (bSavePasswordLong == false)
+                {
+                    AppInfo.SetString(
+                        "default_account",
+                        "password",
+                        "");
+                }
             }
 
             StartPrepareNames(true, true);
 
-            this.MdiClient.ClientSizeChanged += new EventHandler(MdiClient_ClientSizeChanged);
+            if (this.MdiClient != null)
+                this.MdiClient.ClientSizeChanged += new EventHandler(MdiClient_ClientSizeChanged);
 
             // GuiUtil.RegisterIE9DocMode();
 
@@ -501,12 +530,15 @@ namespace dp2Circulation
             }
             #endregion
 
-            this.qrRecognitionControl1.Catched += new DigitalPlatform.Drawing.CatchedEventHandler(qrRecognitionControl1_Catched);
-            this.qrRecognitionControl1.CurrentCamera = AppInfo.GetString(
-                "mainform",
-                "current_camera",
-                "");
-            this.qrRecognitionControl1.EndCatch();  // 一开始的时候并不打开摄像头 2013/5/25
+            if (this.qrRecognitionControl1 != null)
+            {
+                this.qrRecognitionControl1.Catched += new DigitalPlatform.Drawing.CatchedEventHandler(qrRecognitionControl1_Catched);
+                this.qrRecognitionControl1.CurrentCamera = AppInfo.GetString(
+                    "mainform",
+                    "current_camera",
+                    "");
+                this.qrRecognitionControl1.EndCatch();  // 一开始的时候并不打开摄像头 2013/5/25
+            }
 
             this.m_strPinyinGcatID = this.AppInfo.GetString("entity_form", "gcat_pinyin_api_id", "");
             this.m_bSavePinyinGcatID = this.AppInfo.GetBoolean("entity_form", "gcat_pinyin_api_saveid", false);

@@ -73,5 +73,33 @@ namespace dp2Circulation
                 this.checkBox_autoRebuildKeys.Checked = value;
             }
         }
+
+        bool _recoverStateVisible = false;
+
+        // “将 keys 按日志恢复要求刷新” checkbox 是否为可见状态?
+        public bool RecoverStateVisible
+        {
+            get
+            {
+                return this._recoverStateVisible;
+            }
+            set
+            {
+                this._recoverStateVisible = value;
+                this.checkBox_recoverState.Visible = value;
+            }
+        }
+
+        public bool RecoverState
+        {
+            get
+            {
+                return this.checkBox_recoverState.Checked;
+            }
+            set
+            {
+                this.checkBox_recoverState.Checked = value;
+            }
+        }
     }
 }
