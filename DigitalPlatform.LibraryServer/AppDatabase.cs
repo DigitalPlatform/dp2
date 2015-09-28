@@ -4612,6 +4612,10 @@ namespace DigitalPlatform.LibraryServer
                 if (FileUtil.IsBackupFile(strName) == true)
                     continue;
 
+                // 2015/9/28
+                if (strName.ToLower() == "keys_recover")
+                    continue;
+
                 /*
                 if (strName.ToLower() == "keys"
                     || strName.ToLower() == "browse")
