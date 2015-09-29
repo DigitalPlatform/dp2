@@ -4916,6 +4916,55 @@ namespace DigitalPlatform.LibraryServer
         }
 #endif
 
+        // 2015/9/29
+        // 尝试从读者库获得记录。先按照分馆所属读者库尝试检索，若未能命中，再扩大到全部读者库
+        // 注: 本函数返回 1，不一定等于所有读者库中只命中了这一条。有可能还有其他重复的记录没有检索在内
+        public int TryGetReaderRecXml(
+            RmsChannel channel,
+            string strBarcode,
+            string strLibraryCodeList,
+            out string strXml,
+            out string strOutputPath,
+            out byte[] timestamp,
+            out string strError)
+        {
+            strOutputPath = "";
+            List<string> recpaths = null;
+            int nRet = GetReaderRecXml(
+            channel,
+            strBarcode,
+            1,
+            strLibraryCodeList,
+            out recpaths,
+            out strXml,
+            out timestamp,
+            out strError);
+            if (recpaths != null && recpaths.Count > 0)
+                strOutputPath = recpaths[0];
+            if (nRet == -1 || nRet > 0 
+                || string.IsNullOrEmpty(strLibraryCodeList) == true
+                || this.ReaderDbs.Count == 1)
+                return nRet;
+
+            Debug.Assert(nRet == 0, "");
+
+            // 再尝试检索全部读者库一次
+            nRet = GetReaderRecXml(
+                // channels,
+channel,
+strBarcode,
+1,
+"",
+out recpaths,
+out strXml,
+out timestamp,
+out strError);
+            if (recpaths != null && recpaths.Count > 0)
+                strOutputPath = recpaths[0];
+
+            return nRet;
+        }
+
         // 2013/5/23
         // 包装以后的版本
         public int GetReaderRecXml(
@@ -4986,7 +5035,6 @@ namespace DigitalPlatform.LibraryServer
                 out strError);
             if (nRet == -1)
                 return -1;
-
 
             // 构造检索式
             string strQueryXml = "";
@@ -5096,7 +5144,7 @@ namespace DigitalPlatform.LibraryServer
 
                 if (recpaths.Count == 0)
                 {
-                    strError = "DoGetSearchResult aPath error";
+                    strError = "DoGetSearchResult recpaths error";
                     goto ERROR1;
                 }
             }
@@ -6926,6 +6974,71 @@ namespace DigitalPlatform.LibraryServer
 
             return null;    // 没有出错
         }
+
+        // 检查全部读者库的检索途径，看是否满足都有“所借册条码号”这个检索途径的这个条件
+        // return:
+        //      -1  出错
+        //      0   不满足
+        //      1   满足
+        public int DetectReaderDbFroms(
+    out string strError)
+        {
+            strError = "";
+
+            strError = EnsureKdbs(false);
+            if (strError != null)
+                return -1;
+
+            // 获得全部读者库名
+            List<string> dbnames =  this.GetCurrentReaderDbNameList("");
+
+            StringUtil.RemoveDupNoSort(ref dbnames);
+
+            if (dbnames.Count == 0)
+            {
+                strError = "当前系统中没有定义此类数据库，所以无法获知其检索途径信息";
+                return 0;
+            }
+
+            foreach (string strDbName in dbnames)
+            {
+                if (String.IsNullOrEmpty(strDbName) == true)
+                    continue;
+
+                KernelDbInfo db = this.kdbs.FindDb(strDbName);
+
+                if (db == null)
+                {
+                    strError = "kdbs中没有关于读者库 '" + strDbName + "' 的信息";
+                    return -1;
+                }
+
+                bool bFound = false;
+                foreach(From from in db.Froms)
+                {
+                    if (StringUtil.IsInList("borrowitem", from.Styles) == true)
+                    {
+                        bFound = true;
+                        break;
+                    } 
+#if NO
+                    Caption caption = from.GetCaption("zh");
+                    if (caption != null
+                        && (caption.Value == "所借册条码号" || caption.Value == "所借册条码"))
+                    {
+                        bFound = true;
+                        break;
+                    }
+#endif
+                }
+
+                if (bFound == false)
+                    return 0;
+            }
+
+            return 1;
+        }
+
 
         // 列出某类数据库的检索途径信息
         // parameters:

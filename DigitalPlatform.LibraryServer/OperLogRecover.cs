@@ -156,7 +156,6 @@ namespace DigitalPlatform.LibraryServer
 
             try
             {
-
                 string strError = "";
 
                 BatchTaskStartInfo startinfo = this.StartInfo;
@@ -202,6 +201,30 @@ namespace DigitalPlatform.LibraryServer
                 }
 
                 this.App.WriteErrorLog("日志恢复 任务启动。");
+
+                // 当为容错恢复级别时，检查当前全部读者库的检索点是否符合要求
+                if (this.RecoverLevel == LibraryServer.RecoverLevel.Robust)
+                {
+                    // 检查全部读者库的检索途径，看是否满足都有“所借册条码号”这个检索途径的这个条件
+                    // return:
+                    //      -1  出错
+                    //      0   不满足
+                    //      1   满足
+                    nRet = this.App.DetectReaderDbFroms(out strError);
+                    if (nRet == -1)
+                    {
+                        this.AppendResultText("检查读者库检索点时发生错误: " + strError + "\r\n");
+                        return;
+                    }
+                    if (nRet == 0)
+                    {
+                        this.AppendResultText("在容错恢复级别下，当前读者库中有部分或全部读者库缺乏“所借册条码号”检索点，无法进行日志恢复。请按照日志恢复要求，刷新所有读者库的检索点配置，然后再进行日志恢复\r\n");
+                        return;
+                    }
+                }
+
+                // TODO: 检查当前是否有 重建检索点 的后台任务正在运行，或者还有没有运行完的部分。
+                // 要求重建检索点的任务运行完以后才能执行日志恢复任务
 
                 if (bClearFirst == true)
                 {

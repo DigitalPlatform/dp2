@@ -713,13 +713,15 @@ namespace dp2Circulation
             if (m_propertyViewer != null)
                 m_propertyViewer.Close();
 
-            if (AppInfo != null)
-                AppInfo.SetString(
-                   "mainform",
-                   "current_camera",
-                   this.qrRecognitionControl1.CurrentCamera);
             if (this.qrRecognitionControl1 != null)
+            {
+                if (AppInfo != null)
+                    AppInfo.SetString(
+                       "mainform",
+                       "current_camera",
+                       this.qrRecognitionControl1.CurrentCamera);
                 this.qrRecognitionControl1.Catched -= new DigitalPlatform.Drawing.CatchedEventHandler(qrRecognitionControl1_Catched);
+            }
 
             if (this.MdiClient != null)
                 this.MdiClient.ClientSizeChanged -= new EventHandler(MdiClient_ClientSizeChanged);
@@ -881,7 +883,8 @@ namespace dp2Circulation
         /// </summary>
         void RefreshCameraDevList()
         {
-            this.qrRecognitionControl1.RefreshDevList();
+            if (this.qrRecognitionControl1 != null)
+                this.qrRecognitionControl1.RefreshDevList();
         }
 
         /// <summary>
@@ -6861,7 +6864,8 @@ out strError);
             }
             else if (this.tabControl_panelFixed.SelectedTab == this.tabPage_camera)
             {
-                this.qrRecognitionControl1.CurrentCamera = "";
+                if (this.qrRecognitionControl1 != null)
+                    this.qrRecognitionControl1.CurrentCamera = "";
             }
         }
 

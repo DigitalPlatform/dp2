@@ -3453,7 +3453,7 @@ strLibraryCode);    // 读者所在的馆代码
 
                 try
                 {
-
+#if NO
                     // return:
                     //      -1  error
                     //      0   not found
@@ -3470,7 +3470,23 @@ strLibraryCode);    // 读者所在的馆代码
                         // out strOutputPath,
                         out baTimestamp,
                         out strError);
+                   if (nRet > 0)
+                        strOutputPath = recpaths[0];
 
+#endif
+                    // return:
+                    //      -1  error
+                    //      0   not found
+                    //      1   命中1条
+                    //      >1  命中多于1条
+                    nRet = this.TryGetReaderRecXml(
+                        channel,
+                        strBarcode,
+                        sessioninfo.LibraryCodeList,
+                        out strXml,
+                        out strOutputPath,
+                        out baTimestamp,
+                        out strError);
                 }
                 finally
                 {
@@ -3493,8 +3509,6 @@ strLibraryCode);    // 读者所在的馆代码
                 }
 #endif
 
-                if (nRet > 0)
-                    strOutputPath = recpaths[0];
 
                 if (nRet == 0)
                 {
@@ -3563,8 +3577,6 @@ strLibraryCode);    // 读者所在的馆代码
                             result.ErrorCode = ErrorCode.IdcardNumberNotFound;
                             return result;
                         }
-
-
 
                         if (nRet > 0)
                             strOutputPath = recpaths[0];
@@ -3642,7 +3654,6 @@ out strError);
                     return result;
                 }
 
-
                 // 观察一个读者记录路径，看看是不是在当前用户管辖的读者库范围内?
                 if (this.IsCurrentChangeableReaderPath(strOutputPath,
                     sessioninfo.LibraryCodeList) == false)
@@ -3650,7 +3661,6 @@ out strError);
                     strError = "读者记录路径 '" + strOutputPath + "' 的读者库不在当前用户管辖范围内";
                     goto ERROR1;
                 }
-
 
                 /*
                  * 不必明显报错，前端从返回值已经可以看出有重

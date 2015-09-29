@@ -186,9 +186,9 @@ namespace dp2Circulation
             this.checkBox_recoverState.AutoSize = true;
             this.checkBox_recoverState.Location = new System.Drawing.Point(10, 265);
             this.checkBox_recoverState.Name = "checkBox_recoverState";
-            this.checkBox_recoverState.Size = new System.Drawing.Size(156, 16);
+            this.checkBox_recoverState.Size = new System.Drawing.Size(180, 16);
             this.checkBox_recoverState.TabIndex = 23;
-            this.checkBox_recoverState.Text = "keys 使用日志恢复版(&R)";
+            this.checkBox_recoverState.Text = "keys 使用容错日志恢复版(&R)";
             this.checkBox_recoverState.UseVisualStyleBackColor = true;
             this.checkBox_recoverState.Visible = false;
             // 

@@ -2074,7 +2074,7 @@ namespace dp2Circulation
             }
              * */
 
-            // 观察里面是否有至少一个读者库
+            // 观察里面是否有至少一个读者库。目前只对读者库有区分 keys 版本的必要
             bool bHasReaderDatabase = false;
             foreach (ListViewItem item in this.listView_databases.SelectedItems)
             {
@@ -2098,9 +2098,7 @@ namespace dp2Circulation
 
             // 2.38
             if (this.MainForm.ServerVersion >= 2.38)
-            {
                 style_dlg.AutoRebuildKeysVisible = true;
-            }
 
             if (this.MainForm.ServerVersion >= 2.54)
                 style_dlg.RecoverStateVisible = bHasReaderDatabase;
@@ -2157,7 +2155,6 @@ namespace dp2Circulation
                 // 2015/9/28
                 DomUtil.SetAttr(style_dom.DocumentElement,
                     "recoverModeKeys", style_dlg.RecoverState == true ? "true" : "false");
-
 
                 string strKeysChangedDbpaths = "";
 

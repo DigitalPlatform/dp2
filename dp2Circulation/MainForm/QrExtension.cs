@@ -21,20 +21,23 @@ namespace dp2Circulation
         internal void EnterPatronIdEdit(InputType inputtype)
         {
             m_inputType = inputtype;
-            this.qrRecognitionControl1.StartCatch();
+            if (this.qrRecognitionControl1 != null)
+                this.qrRecognitionControl1.StartCatch();
         }
 
         // 当输入焦点离开 读者标识 编辑区 的时候触发
         internal void LeavePatronIdEdit()
         {
-            this.qrRecognitionControl1.EndCatch();
+            if (this.qrRecognitionControl1 != null)
+                this.qrRecognitionControl1.EndCatch();
             // m_bDisableCamera = false;
         }
 
         // 清除防止重复的缓存条码号
         public void ClearQrLastText()
         {
-            this.qrRecognitionControl1.LastText = "";
+            if (this.qrRecognitionControl1 != null)
+                this.qrRecognitionControl1.LastText = "";
         }
 
         bool m_bDisableCamera = false;
@@ -46,7 +49,8 @@ namespace dp2Circulation
         public void DisableCamera()
         {
             //    _cameraName = this.qrRecognitionControl1.CurrentCamera;
-            if (this.qrRecognitionControl1.InCatch == true)
+            if (this.qrRecognitionControl1 != null
+                && this.qrRecognitionControl1.InCatch == true)
             {
                 this.qrRecognitionControl1.EndCatch();
                 this.m_bDisableCamera = true;
@@ -61,7 +65,8 @@ namespace dp2Circulation
         public void EnableCamera()
         {
             //    this.qrRecognitionControl1.CurrentCamera = _cameraName;
-            if (m_bDisableCamera == true)
+            if (this.qrRecognitionControl1 != null
+                && m_bDisableCamera == true)
             {
                 this.qrRecognitionControl1.StartCatch();
                 this.m_bDisableCamera = false;

@@ -2192,10 +2192,11 @@ start_time_1,
 
             // 读入读者记录
             string strReaderXml = "";
-            nRet = this.GetReaderRecXml(
+            nRet = this.TryGetReaderRecXml(
                 // sessioninfo.Channels,
                 channel,
                 strReaderBarcode,
+                sessioninfo.LibraryCodeList,    // TODO: 对个人书斋情况要测试一下
                 out strReaderXml,
                 out strOutputReaderRecPath,
                 out reader_timestamp,
@@ -4240,10 +4241,11 @@ start_time_1,
 
                     if (string.IsNullOrEmpty(strReaderBarcode) == false)
                     {
-                        nRet = this.GetReaderRecXml(
+                        nRet = this.TryGetReaderRecXml(
                             // sessioninfo.Channels,
                             channel,
                             strReaderBarcode,
+                            sessioninfo.LibraryCodeList,    // TODO: 测试个人书斋情况
                             out strReaderXml,
                             out strOutputReaderRecPath,
                             out reader_timestamp,

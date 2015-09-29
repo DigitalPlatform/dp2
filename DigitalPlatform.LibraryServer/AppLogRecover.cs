@@ -1339,7 +1339,6 @@ strElementName);
                 string strReaderBarcode = DomUtil.GetElementText(domLog.DocumentElement,
                     "readerBarcode");
 
-
                 // 读入册记录
                 string strConfirmItemRecPath = DomUtil.GetElementText(domLog.DocumentElement,
                     "confirmItemRecPath");
@@ -1407,7 +1406,6 @@ strElementName);
 
                     if (aPath.Count > 1)
                     {
-
                         if (string.IsNullOrEmpty(strReaderBarcode) == true)
                         {
                             // 发生重条码号的时候，又没有读者证条码号辅助判断
@@ -1598,7 +1596,6 @@ strElementName);
                 byte[] output_timestamp = null;
                 string strOutputPath = "";
 
-
                 // 写回读者记录
                 lRet = channel.DoSaveTextRes(strOutputReaderRecPath,
                     readerdom.OuterXml,
@@ -1624,7 +1621,6 @@ strElementName);
                     goto ERROR1;
 
             }
-
 
             // 容错恢复
             if (level == RecoverLevel.Robust)
@@ -1803,7 +1799,6 @@ strElementName);
                     }
                     else
                     {
-
                         Debug.Assert(nRet == 1, "");
                         Debug.Assert(aPath.Count == 1, "");
 
@@ -1813,7 +1808,6 @@ strElementName);
                         }
                     }
                 }
-
 
                 ////
 
@@ -1826,7 +1820,6 @@ strElementName);
                     strError = "装载册记录进入XML DOM时发生错误: " + strError;
                     goto ERROR1;
                 }
-
 
                 ///
                 if (String.IsNullOrEmpty(strReaderBarcode) == true)
@@ -1841,7 +1834,6 @@ strElementName);
                             strError = "在不知道读者证条码号的情况下，册记录中的<borrower>元素值为空。无法进行还书操作。";
                             return -1;
                         }
-
                     }
                     else
                     {
@@ -1908,7 +1900,6 @@ strElementName);
                     return -1;
                 }
 
-
                 // 修改读者记录
                 // 修改册记录
                 nRet = ReturnChangeReaderAndItemRecord(
@@ -1941,15 +1932,9 @@ strElementName);
                     }
                 }
 
-
-                ////
-
-
-
                 // 写回读者、册记录
                 byte[] output_timestamp = null;
                 string strOutputPath = "";
-
 
                 // 写回读者记录
                 lRet = channel.DoSaveTextRes(strOutputReaderRecPath,
@@ -1974,10 +1959,7 @@ strElementName);
                     out strError);
                 if (lRet == -1)
                     return -1;
-
             }
-
-
 
             return 0;
         ERROR1:

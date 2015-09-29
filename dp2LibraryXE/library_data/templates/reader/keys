@@ -176,7 +176,7 @@ public class MyKeysHost : KeysHost
     <from>borrowitem</from>
     <table ref="borrowitem" />
   </key>
-  <table name="borrowitem" id="8">
+  <table name="borrowitem" id="8" type="borrowitem">
     <caption lang="zh-CN">所借册条码号</caption>
     <caption lang="zh-CN">所借册条码</caption>
     <caption lang="en">Borrow item barcode</caption>
